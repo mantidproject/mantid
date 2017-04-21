@@ -6,8 +6,7 @@
 #include <algorithm>
 #include <sstream>
 #include <stdexcept>
-#include <boost/math/special_functions/fpclassify.hpp>
-#include <math.h>
+#include <cmath>
 
 namespace Mantid {
 
@@ -589,7 +588,7 @@ static const size_t NUM_ATOMS = 371;
 bool NeutronAtomEqualsWithNaN(const double left, const double right) {
   if (left == right)
     return true;
-  if ((boost::math::isnan)(left) && (boost::math::isnan)(right))
+  if ((std::isnan)(left) && (std::isnan)(right))
     return true;
   return false;
 }

@@ -1,5 +1,6 @@
-﻿# pylint: disable=too-many-arguments,unused-variable
+# pylint: disable=too-many-arguments,unused-variable
 
+from __future__ import (absolute_import, division, print_function)
 from mantid.simpleapi import *
 from os.path import join
 import cry_utils
@@ -19,7 +20,7 @@ def focus_all(EXPR_FILE, samplelistTexte, scale=0, NoVabs=False, NoSAC=False, Ef
         scale = float(EXPR_FILE.scale)
     # === Norm boolean flag used to Optionally correct to a Vana ===
     if Norm:
-        print 'Existing Vana Status:' + EXPR_FILE.ExistV
+        print('Existing Vana Status:' + EXPR_FILE.ExistV)
         # SAC/EFF corrections loads the Vana
         load_sac_eff(EXPR_FILE, NoSAC=NoSAC, Eff=Eff)
         if EXPR_FILE.ExistV == "load":
@@ -29,7 +30,7 @@ def focus_all(EXPR_FILE, samplelistTexte, scale=0, NoVabs=False, NoSAC=False, Ef
                 LoadNexusProcessed(Filename=vanfil, OutputWorkspace="Vanadium-" + str(i))
                 # CORRECT
         elif EXPR_FILE.ExistV == "no" and EXPR_FILE.VGrpfocus == "van":
-            print "was here?"
+            print("was here?")
             cry_vana.create_vana(EXPR_FILE, NoAbs=NoVabs, write_existingv=Write_ExtV)
     else:
         load_sac_eff(EXPR_FILE, NoSAC=True)
@@ -38,10 +39,10 @@ def focus_all(EXPR_FILE, samplelistTexte, scale=0, NoVabs=False, NoSAC=False, Ef
     # to loop over
     isfirst = True
     for sample2Add in sampleSumLists:
-        print '--------------------------'
-        print '         Start focus here        '
-        print '--------------------------'
-        print " ---> " + focus_one(EXPR_FILE, sample2Add, scale, Norm, isfirst, NoAbs=NoVabs)
+        print('--------------------------')
+        print('         Start focus here        ')
+        print('--------------------------')
+        print(" ---> " + focus_one(EXPR_FILE, sample2Add, scale, Norm, isfirst, NoAbs=NoVabs))
         isfirst = False
     #
     # changed by WAK 8/3/2011:delete workspaces
@@ -60,17 +61,17 @@ def load_sac_eff(EXPR_FILE, NoSAC=False, Eff=True):
     EXPR_FILE.Path2VanGrpFile = newCalFile
     if NoSAC:
         CreateSingleValuedWorkspace(OutputWorkspace="Corr", DataValue=str(1))
-        print " => No SAC/Eff applied "
+        print(" => No SAC/Eff applied ")
         return
     else:
         # First try to load the vana (this won't crash if no vana run  is set)....
         (dum, uampstotal) = cry_sample.get_data_sum(EXPR_FILE.VanFile, "Vanadium", EXPR_FILE)
         uampstotal = mtd["Vanadium"].getRun().getProtonCharge()
         if uampstotal < 1e-6:
-            print " => Van NOT found : No SAC/eff correction will be applied"
+            print(" => Van NOT found : No SAC/eff correction will be applied")
             CreateSingleValuedWorkspace(OutputWorkspace="Corr", DataValue=str(1))
         else:
-            print ' => Pre-calculate SAC from Vana '
+            print(' => Pre-calculate SAC from Vana ')
             Integration(InputWorkspace="Vanadium", OutputWorkspace="VanadiumSum")
             # Modified test equal to Zero the 17/10/2012
             MaskDetectorsIf(InputWorkspace="VanadiumSum", InputCalFile=EXPR_FILE.Path2GrpFile,
@@ -85,9 +86,9 @@ def load_sac_eff(EXPR_FILE, NoSAC=False, Eff=True):
                 mtd.remove("SAC")
             if Eff:
                 Divide(LHSWorkspace="Vanadium", RHSWorkspace="Corr", OutputWorkspace="Eff")
-                print ' => Pre-calculate Efficiency correction from Vana '
+                print(' => Pre-calculate Efficiency correction from Vana ')
                 ConvertUnits(InputWorkspace="Eff", OutputWorkspace="Eff", Target="Wavelength")
-                Integration(InputWorkspace="Eff", OutputWorkspace="Eff", \
+                Integration(InputWorkspace="Eff", OutputWorkspace="Eff",
                             RangeLower=EXPR_FILE.LowerLambda, RangeUpper=EXPR_FILE.UpperLambda)
                 Multiply(LHSWorkspace="Corr", RHSWorkspace="Eff", OutputWorkspace="Corr")
                 #				if EXPR_FILE.instr=="polaris":
@@ -124,16 +125,16 @@ def focus_one(EXPR_FILE, sampleAdd, scale, Norm, isfirst=False, NoAbs=False):
     Divide(LHSWorkspace="sample", RHSWorkspace="Corr", OutputWorkspace="sample")
     cry_load.scale_wspc("sample", scale)
     if EXPR_FILE.CorrectSampleAbs == "yes":
-        if EXPR_FILE.SampleAbsCorrected == False:
-            cry_utils.correct_abs(InputWkspc="sample", outputWkspc="SampleTrans", \
-                                  TheCylinderSampleHeight=EXPR_FILE.SampleHeight, \
-                                  TheCylinderSampleRadius=EXPR_FILE.SampleRadius, \
-                                  TheAttenuationXSection=EXPR_FILE.SampleAttenuationXSection, \
-                                  TheScatteringXSection=EXPR_FILE.SampleScatteringXSection, \
-                                  TheSampleNumberDensity=EXPR_FILE.SampleNumberDensity, \
-                                  TheNumberOfSlices=EXPR_FILE.SampleNumberOfSlices, \
-                                  TheNumberOfAnnuli=EXPR_FILE.SampleNumberOfAnnuli, \
-                                  TheNumberOfWavelengthPoints=EXPR_FILE.SampleNumberOfWavelengthPoints, \
+        if not EXPR_FILE.SampleAbsCorrected:
+            cry_utils.correct_abs(InputWkspc="sample", outputWkspc="SampleTrans",
+                                  TheCylinderSampleHeight=EXPR_FILE.SampleHeight,
+                                  TheCylinderSampleRadius=EXPR_FILE.SampleRadius,
+                                  TheAttenuationXSection=EXPR_FILE.SampleAttenuationXSection,
+                                  TheScatteringXSection=EXPR_FILE.SampleScatteringXSection,
+                                  TheSampleNumberDensity=EXPR_FILE.SampleNumberDensity,
+                                  TheNumberOfSlices=EXPR_FILE.SampleNumberOfSlices,
+                                  TheNumberOfAnnuli=EXPR_FILE.SampleNumberOfAnnuli,
+                                  TheNumberOfWavelengthPoints=EXPR_FILE.SampleNumberOfWavelengthPoints,
                                   TheExpMethod=EXPR_FILE.SampleExpMethod)
             EXPR_FILE.SampleAbsCorrected = True
         else:
@@ -175,7 +176,7 @@ def focus_one(EXPR_FILE, sampleAdd, scale, Norm, isfirst=False, NoAbs=False):
 
 
 def divide_samp_vana(EXPR_FILE, Norm):
-    print " => SAMPLE FOCUSED"
+    print(" => SAMPLE FOCUSED")
     if not EXPR_FILE.dataRangeSet:
         cry_load.sets_drange("sample", EXPR_FILE)
     cry_load.split_bank("sample", EXPR_FILE.bankList, Del=False)

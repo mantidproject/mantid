@@ -1,8 +1,9 @@
-﻿#pylint: disable=too-many-lines
+#pylint: disable=too-many-lines
 #pylint: disable=invalid-name
 """ File contains collection of Descriptors used to define complex
     properties in NonIDF_Properties and PropertyManager classes
 """
+from __future__ import (absolute_import, division, print_function)
 import os
 import numpy as np
 import math
@@ -17,6 +18,7 @@ from mantid import api,geometry,config
 import Direct.ReductionHelpers as prop_helpers
 #pylint: disable=unused-import
 import Direct.CommonFunctions as common
+import collections
 
 
 #-----------------------------------------------------------------------------------------
@@ -25,10 +27,12 @@ import Direct.CommonFunctions as common
 #-----------------------------------------------------------------------------------------
 class PropDescriptor(object):
     """Class provides common custom interface for property descriptors """
+
     def dependencies(self):
         """Returns the list of other properties names, this property depends on"""
         return []
 #pylint: disable=unused-argument
+
     def validate(self,instance, owner):
         """Interface to validate property descriptor,
            provided to check properties interaction before long run
@@ -43,10 +47,13 @@ class PropDescriptor(object):
 #-----------------------------------------------------------------------------------------
 #-----------------------------------------------------------------------------------------
 #-----------------------------------------------------------------------------------------
+
+
 class SumRuns(PropDescriptor):
     """Boolean property specifies if list of files provided as input for sample_run property
        should be summed.
     """
+
     def __init__(self,sample_run_prop):
         # internal reference to sample run property
         self._sample_run = sample_run_prop
@@ -54,11 +61,13 @@ class SumRuns(PropDescriptor):
         #
         self._sum_runs = False
     #
+
     def __get__(self,instance,holder_class):
         if instance is None:
             return self
         return self._sum_runs
     #
+
     def __set__(self,instance,value):
         old_value = self._sum_runs
         if isinstance(value,bool):
@@ -74,13 +83,15 @@ class SumRuns(PropDescriptor):
         if old_value != self._sum_runs:
             self._sample_run.notify_sum_runs_changed(old_value,self._sum_runs)
 #--------------------------------------------------------------------------------------------------------------------
+
+
 class AvrgAccuracy(PropDescriptor):
     """Property-helper to round-of data nicely to provide consistent binning
        in auto-ei mode.
     """
+
     def __init__(self):
         self._accuracy = 2
-
 
     def __get__(self,instance,owner=None):
         """ return current number of significant digits"""
@@ -88,6 +99,7 @@ class AvrgAccuracy(PropDescriptor):
             return self
         else:
             return self._accuracy
+
     def __set__(self,instance,value):
         """ Set up incident energy or range of energies in various formats
             or define autoEi"""
@@ -95,6 +107,7 @@ class AvrgAccuracy(PropDescriptor):
         if val < 1:
             raise ValueError("Averaging accuracy can be only a positive number >= 1")
         self._accuracy = val
+
     def roundoff(self,value):
         """Round specified sequence for specified number of significant digits"""
         if isinstance(value,Iterable):
@@ -103,6 +116,13 @@ class AvrgAccuracy(PropDescriptor):
             vallist = [value]
         rez = []
         lim = 10**(self._accuracy-1)
+
+        def out(a,b,mult):
+            if mult>1:
+                return a<b
+            else:
+                return false
+
         for val in vallist:
             if abs(val) > lim:
                 rez.append(round(val,0))
@@ -112,14 +132,9 @@ class AvrgAccuracy(PropDescriptor):
             else:
                 mult = 1
 
-            def out(a,b):
-                if mult>1:
-                    return a<b
-                else:
-                    return false
             tv = abs(val)
             fin_mult  = 1
-            while out(tv,lim):
+            while out(tv,lim,mult):
                 fin_mult*=mult
                 tv      *= mult
             fin_rez = math.copysign(round(tv,0)/fin_mult,val)
@@ -140,6 +155,7 @@ class IncidentEnergy(PropDescriptor):
        Set it up to single value (e.g. prop_man.incident_energy=10) to treat energy_bins
        as absolute energy values.
     """
+
     def __init__(self):
         self._incident_energy = 0
         self._num_energies = 1
@@ -148,7 +164,6 @@ class IncidentEnergy(PropDescriptor):
         self._use_autoEi = False
         self._autoEiRunNumber = None
         self._autoEiCalculated = False
-
 
     def __get__(self,instance,owner=None):
         """ return  incident energy or list of incident energies """
@@ -159,10 +174,11 @@ class IncidentEnergy(PropDescriptor):
         else:
             return self._incident_energy
 #pylint: disable=too-many-branches
+
     def __set__(self,instance,value):
         """ Set up incident energy or range of energies in various formats
             or define autoEi"""
-        if value != None:
+        if value is not None:
             if isinstance(value,str):
                 # Check autoEi
                 if value.lower() == 'auto':
@@ -180,7 +196,7 @@ class IncidentEnergy(PropDescriptor):
                 else:
                     if value.find('[') > -1:
                         energy_list = True
-                        value = value.translate(None, '[]').strip()
+                        value = value.replace('[','').replace(']','').strip()
                     else:
                         energy_list = False
                     en_list = str.split(value,',')
@@ -222,10 +238,12 @@ class IncidentEnergy(PropDescriptor):
         if not ok:
             raise KeyError(message)
     #
+
     def autoEi_mode(self):
         """Return true if energies should be calculated in autoEi mode"""
         return self._use_autoEi
     #
+
     def multirep_mode(self):
         """ return true if energy is defined as list of energies or multirep m and false otherwise """
         if isinstance(self._incident_energy,list) or self._use_autoEi:
@@ -233,6 +251,7 @@ class IncidentEnergy(PropDescriptor):
         else:
             return False
     #
+
     def getAllEiList(self):
         """Return incident energy(ies) range, defined by the property"""
         if isinstance(self._incident_energy,list):
@@ -243,6 +262,7 @@ class IncidentEnergy(PropDescriptor):
             else:
                 return [self._incident_energy]
     #
+
     def get_current(self):
         """ Return current energy out of range of energies"""
         if isinstance(self._incident_energy,list):
@@ -251,6 +271,7 @@ class IncidentEnergy(PropDescriptor):
         else:
             return self._incident_energy
     #
+
     def next(self):
         if isinstance(self._incident_energy,list):
             self._cur_iter_en +=1
@@ -277,6 +298,7 @@ class IncidentEnergy(PropDescriptor):
         else:
             self._cur_iter_en = 0
     #
+
     def set_auto_Ei(self,monitor_ws,instance,ei_mon_spec=None):
         """Calculate autoEi and set it as input for iterations over energy"""
         if not self._use_autoEi:
@@ -288,16 +310,16 @@ class IncidentEnergy(PropDescriptor):
         self._autoEiCalculated = False
         if ei_mon_spec is None:
             ei_mon_spec = instance.ei_mon_spectra
-        guess_ei_ws = GetAllEi(Workspace=monitor_ws,Monitor1SpecID = ei_mon_spec[0],\
+        guess_ei_ws = GetAllEi(Workspace=monitor_ws,Monitor1SpecID = ei_mon_spec[0],
                                Monitor2SpecID = ei_mon_spec[1])
         guessEi  = guess_ei_ws.readX(0)
         fin_ei = []
         for ei in guessEi:
             try:
-                ei_ref,_,_,_=GetEi(InputWorkspace=monitor_ws,\
+                ei_ref,_,_,_=GetEi(InputWorkspace=monitor_ws,
                                    Monitor1Spec=ei_mon_spec[0], Monitor2Spec=ei_mon_spec[1], EnergyEstimate=ei)
                 fin_ei.append(ei_ref)
-#pylint: disable=broad-except
+#pylint: disable=bare-except
             except:
                 instance.log("Can not refine guess energy {0:f}. Ignoring it.".format(ei),'warning')
         if len(fin_ei) == 0:
@@ -310,7 +332,6 @@ class IncidentEnergy(PropDescriptor):
         self._cur_iter_en = 0
         # Clear dataservice from unnecessary workspace
         DeleteWorkspace(guess_ei_ws)
-
 
     def validate(self,instance,owner=None):
        #
@@ -330,6 +351,8 @@ class IncidentEnergy(PropDescriptor):
         return (True,0,'')
 # end IncidentEnergy
 #-----------------------------------------------------------------------------------------
+
+
 class EnergyBins(PropDescriptor):
     """Energy binning, expected in final converted to energy transfer workspace.
 
@@ -343,6 +366,7 @@ class EnergyBins(PropDescriptor):
        The list of energies can contain only single value.
        (e.g. prop_man.incident_energy=[100])/
     """
+
     def __init__(self,IncidentEnergyProp,AccuracyProp):
         self._incident_energy = IncidentEnergyProp
         self._averager = AccuracyProp
@@ -356,11 +380,10 @@ class EnergyBins(PropDescriptor):
             return self
         return self._energy_bins
 
-
     def __set__(self,instance,values):
-        if values != None:
+        if values is not None:
             if isinstance(values,str):
-                values = values.translate(None, '[]').strip()
+                values = values.replace('[','').replace(']','').strip()
                 lst = values.split(',')
                 self.__set__(instance,lst)
                 return
@@ -388,9 +411,9 @@ class EnergyBins(PropDescriptor):
                     rez = self._calc_relative_range(ei)
                 else:
                     if instance:
-                        instance.log("*** WARNING! Got energy_bins specified as absolute values in multirep mode.\n"\
-                                "             Will normalize these values by max value and treat as relative values ",\
-                                "warning")
+                        instance.log("*** WARNING! Got energy_bins specified as absolute values in multirep mode.\n"
+                                     "             Will normalize these values by max value and treat as relative values ",
+                                     "warning")
                     mult = self._range / self._energy_bins[2]
                     rez = self._calc_relative_range(ei,mult)
                 if self._incident_energy.autoEi_mode():
@@ -403,9 +426,9 @@ class EnergyBins(PropDescriptor):
                 return self._energy_bins
             else:
                 if instance:
-                    instance.log("*** WARNING! Requested maximum binning range exceeds incident energy!\n"\
-                           "             Will normalize binning range by max value and treat as relative range",\
-                                "warning")
+                    instance.log("*** WARNING! Requested maximum binning range exceeds incident energy!\n"
+                                 "             Will normalize binning range by max value and treat as relative range",
+                                 "warning")
                     mult = self._range / self._energy_bins[2]
                     ei = self._incident_energy.get_current()
                     return self._calc_relative_range(ei,mult)
@@ -428,8 +451,8 @@ class EnergyBins(PropDescriptor):
         ebin = instance.energy_bins
         if isinstance(ei,list) or owner.incident_energy.autoEi_mode(): # ebin expected to be relative
             if ebin[2] > 1:
-                return(False,1,"Binning for multiple energy range should be relative to incident energy. Got ebin_max={0} > 1\n" + \
-                             "Energy range will be normalized and treated as relative range")
+                return(False,1,"Binning for multiple energy range should be relative to incident energy. Got ebin_max={0} > 1\n" +
+                       "Energy range will be normalized and treated as relative range")
         else:
             if not owner.incident_energy.autoEi_mode() and ebin[2] > ei:
                 return (False,2,'Max rebin range {0:f} exceeds incident energy {1:f}'.format(ebin[2],en))
@@ -438,6 +461,8 @@ class EnergyBins(PropDescriptor):
 
 #end EnergyBins
 #-----------------------------------------------------------------------------------------
+
+
 class SaveFileName(PropDescriptor):
     """Property defines default file name to save result.
 
@@ -445,44 +470,54 @@ class SaveFileName(PropDescriptor):
       other properties values, but user can assign its own name, which will be
       used instead.
     """
+
     def __init__(self,Name=None):
         self._file_name = Name
         self._custom_print = None
-    def __get__(self,instance,owner=None):
 
+    def __get__(self,instance,owner=None):
+        # getter functional interface.
         if instance is None:
             return self
-        if not self._custom_print is None:
-            return self._custom_print()
 
+        # if custom file name provided, use it
         if self._file_name:
             return self._file_name
-        else:
-            if instance.instr_name:
-                name = instance.short_inst_name
-            else:
-                name = '_EMPTY'
 
-            sr = owner.sample_run.run_number()
-            if not sr:
-                sr = 0
-            try:
-                ei = owner.incident_energy.get_current()
-                name +='{0:0<5}Ei{1:<4.2f}meV'.format(sr,ei)
-                if instance.sum_runs:
-                    name +='sum'
-                if owner.monovan_run.run_number():
-                    name +='_Abs'
-                name = name.replace('.','d')
+        # if custom function to generate file name is proivede, use this function
+        if self._custom_print is not None:
+            return self._custom_print()
+
+        # user provided nothing.
+        # calculate default target file name from
+        # instrument, energy and run number.
+        if instance.instr_name:
+            name = instance.short_inst_name
+        else:
+            name = '_EMPTY'
+
+        sr = owner.sample_run.run_number()
+        if not sr:
+            sr = 0
+        try:
+            ei = owner.incident_energy.get_current()
+            name +='{0:0<5}Ei{1:_<4.2f}meV'.format(sr,ei)
+            if instance.sum_runs:
+                name +='sum'
+            if owner.monovan_run.run_number():
+                name +='_Abs'
+            name = name.replace('.','d')
 #pylint: disable=bare-except
-            except:
-                name = None
+        except:
+            name = None
         return name
 
     def __set__(self,instance,value):
 
         if value is None:
             self._file_name = None
+        elif isinstance(value, collections.Callable):
+            self._custom_print = value
         else:
             self._file_name = str(value)
 
@@ -490,12 +525,16 @@ class SaveFileName(PropDescriptor):
         self._custom_print = routine
 #end SaveFileName
 #-----------------------------------------------------------------------------------------
+
+
 class InstrumentDependentProp(PropDescriptor):
     """Generic property describing some aspects of instrument (e.g. name, short name etc),
        which are undefined if no instrument is defined.
     """
+
     def __init__(self,prop_name):
         self._prop_name = prop_name
+
     def __get__(self,instance,owner=None):
 
         if instance is None:
@@ -505,16 +544,21 @@ class InstrumentDependentProp(PropDescriptor):
             raise KeyError("Attempt to use uninitialized property manager")
         else:
             return getattr(instance,self._prop_name)
+
     def __set__(self,instance,values):
         raise AttributeError("Property {0} can not be assigned. It defined by instrument".format(self._prop_name))
 #end InstrumentDependentProp
 #-----------------------------------------------------------------------------------------
+
+
 class VanadiumRMM(PropDescriptor):
     """Defines constant static rmm for vanadium."""
+
     def __get__(self,instance,owner=None):
         """ return rmm for vanadium """
 
         return 50.9415
+
     def __set__(self,instance,value):
         raise AttributeError("Can not change vanadium rmm")
 #end VanadiumRMM
@@ -526,6 +570,8 @@ class VanadiumRMM(PropDescriptor):
 # Descriptors, providing overloads for some complex properties in
 # PropertyManager
 #-----------------------------------------------------------------------------------------
+
+
 class mon2NormalizationEnergyRange(PropDescriptor):
     """Energy range to integrate signal on monitor 2 when normalized by this monitor.
 
@@ -536,10 +582,10 @@ class mon2NormalizationEnergyRange(PropDescriptor):
        To find the actual integration ranges one should convert these values into TOF (or
        convert monitor signal to energy).
     """
+
     def __init__(self):
         # default range
         self._relative_range = [0.8,1.2]
-
 
     def __get__(self,instance,owner):
         """ Return actual energy range from internal relative range and incident energy """
@@ -556,9 +602,10 @@ class mon2NormalizationEnergyRange(PropDescriptor):
             val = self._parce_string2list(val)
             self.__set__(instance,val)
         else:
-            raise KeyError('mon2_norm_energy_range needs to be initialized by two values.\n'\
-                          'Trying to assign value {0} of unknown type {1}'.format(val,type(val)))
+            raise KeyError('mon2_norm_energy_range needs to be initialized by two values.\n'
+                           'Trying to assign value {0} of unknown type {1}'.format(val,type(val)))
     #
+
     def _check_range(self,val,instance):
         """ method to check if list of values acceptable as ranges """
 
@@ -574,6 +621,7 @@ class mon2NormalizationEnergyRange(PropDescriptor):
 
         return self._relative_range
     #
+
     def _parce_string2list(self,val):
         """ method splits input string containing comma into list of strings"""
         value = val.strip('[]()')
@@ -598,7 +646,6 @@ class mon2NormalizationEnergyRange(PropDescriptor):
             else:
                 result = (False,1,message)
 
-
         val2 = float(en_range[1])
         if val2 < 1.1 or val2 > 1.9:
             message = "Upper mon2_norm_energy_range describes upper limit of energy to integrate neutron signal after the chopper.\n"\
@@ -614,8 +661,11 @@ class mon2NormalizationEnergyRange(PropDescriptor):
         return result
 
 #-----------------------------------------------------------------------------------------
+
+
 class PropertyFromRange(PropDescriptor):
     """Generic descriptor for property, which can have one value from a list of values."""
+
     def __init__(self,availible_values,default_value):
         self._availible_values = availible_values
         self.__set__(None,default_value)
@@ -634,6 +684,8 @@ class PropertyFromRange(PropDescriptor):
             raise KeyError(' Property can not have value {0}'.format(val))
 
 #-----------------------------------------------------------------------------------------
+
+
 class DetCalFile(PropDescriptor):
     """Provide a source of the detector calibration information.
 
@@ -641,6 +693,7 @@ class DetCalFile(PropDescriptor):
        or a run number, corresponding to a file to be loaded as a
        workspace.
     """
+
     def __init__(self):
         self._det_cal_file = None
         self._calibrated_by_run = False
@@ -676,8 +729,6 @@ class DetCalFile(PropDescriptor):
                 return
             val = intVal
 
-
-
         if isinstance(val,int):
           #if val in instance.all_run_numbers: TODO: retrieve workspace from
           #run numbers
@@ -701,6 +752,7 @@ class DetCalFile(PropDescriptor):
         """ reports if the detector calibration is in a run-file or separate file(workspace)"""
         return self._calibrated_by_run
 #pylint: disable=unused-argument
+
     def find_file(self,instance,**kwargs):
         """ Method to find file, correspondent to
             current _det_cal_file file hint
@@ -727,6 +779,7 @@ class DetCalFile(PropDescriptor):
             file_hint = inst_short_name+str(dcf_val).zfill(zero_padding)
             try:
                 file_name = FileFinder.findRuns(file_hint)[0]
+#pylint: disable=bare-except
             except:
                 return (False,"Can not find run file corresponding to run N: {0}".format(file_hint))
             self._det_cal_file = file_name
@@ -746,14 +799,17 @@ class DetCalFile(PropDescriptor):
         return (True,file_name)
 #end DetCalFile
 #-----------------------------------------------------------------------------------------
+
+
 class MapMaskFile(PropDescriptor):
     """common method to wrap around an auxiliary file name"""
+
     def __init__(self,prop_name,file_ext,doc_string=None):
         self._file_name = None
         self._file_ext = file_ext
         self._prop_name = prop_name
 
-        if not doc_string is None:
+        if doc_string is not None:
             self.__doc__ = doc_string
 
     def __get__(self,instance,class_type=None):
@@ -763,13 +819,14 @@ class MapMaskFile(PropDescriptor):
         return self._file_name
 
     def __set__(self,instance,value):
-        if not value is None:
+        if value is not None:
 #pylint: disable=unused-variable
             fileName, fileExtension = os.path.splitext(value)
             if not fileExtension:
                 value = value + self._file_ext
         self._file_name = value
 #pylint: disable=unused-argument
+
     def find_file(self,instance,**kwargs):
         """ Method to find file, correspondent to
            current MapMaskFile file hint
@@ -786,6 +843,8 @@ class MapMaskFile(PropDescriptor):
 #end MapMaskFile
 
 #-----------------------------------------------------------------------------------------
+
+
 class HardMaskPlus(prop_helpers.ComplexProperty):
     """Sets diagnostics algorithm to use hard mask file
        together with all other diagnostics routines.
@@ -795,8 +854,10 @@ class HardMaskPlus(prop_helpers.ComplexProperty):
        so that both hard mask file and the diagnostics procedures are used to identify
        and exclude failing detectors.
     """
+
     def __init__(self):
         prop_helpers.ComplexProperty.__init__(self,['use_hard_mask_only','run_diagnostics'])
+
     def __get__(self,instance,class_type=None):
         if instance is None:
             return self
@@ -804,7 +865,7 @@ class HardMaskPlus(prop_helpers.ComplexProperty):
         return instance.hard_mask_file
 
     def __set__(self,instance,value):
-        if value != None:
+        if value is not None:
 #pylint: disable=unused-variable
             fileName, fileExtension = os.path.splitext(value)
             if not fileExtension:
@@ -821,6 +882,8 @@ class HardMaskPlus(prop_helpers.ComplexProperty):
             pass
 
 #-----------------------------------------------------------------------------------------
+
+
 class HardMaskOnly(prop_helpers.ComplexProperty):
     """Sets diagnostics algorithm to use hard mask file and to disable all other diagnostics.
 
@@ -828,6 +891,7 @@ class HardMaskOnly(prop_helpers.ComplexProperty):
        to the file name provided and use_hard_mask_only property to True, so that
        only hard mask file provided is used to exclude failing detectors.
     """
+
     def __init__(self):
         prop_helpers.ComplexProperty.__init__(self,['use_hard_mask_only','run_diagnostics'])
 
@@ -836,6 +900,7 @@ class HardMaskOnly(prop_helpers.ComplexProperty):
             return self
 
         return prop_helpers.gen_getter(instance.__dict__,'use_hard_mask_only')
+
     def __set__(self,instance,value):
         if value is None:
             use_hard_mask_only = False
@@ -870,6 +935,8 @@ class HardMaskOnly(prop_helpers.ComplexProperty):
             pass
 #end HardMaskOnly
 #-----------------------------------------------------------------------------------------
+
+
 class MonovanIntegrationRange(prop_helpers.ComplexProperty):
     """Integration range for monochromatic vanadium.
 
@@ -891,6 +958,7 @@ class MonovanIntegrationRange(prop_helpers.ComplexProperty):
        actual range is calculated according to the expression:
        integration_range = [monovan_lo_value,monovan_hi_value].
     """
+
     def __init__(self,DepType=None):
         if DepType:
             self._rel_range = False
@@ -941,8 +1009,8 @@ class MonovanIntegrationRange(prop_helpers.ComplexProperty):
                     result.append(int(val))
                 value = result
             if len(value) != 2:
-                raise KeyError("monovan_integr_range has to be list of two values, "\
-                    "defining min/max values of integration range or None to use relative to incident energy limits")
+                raise KeyError("monovan_integr_range has to be list of two values, "
+                               "defining min/max values of integration range or None to use relative to incident energy limits")
             prop_helpers.ComplexProperty.__set__(self,tDict,value)
 
     def validate(self,instance, owner):
@@ -956,10 +1024,11 @@ class MonovanIntegrationRange(prop_helpers.ComplexProperty):
         if the_range[0] >= the_range[1]:
             return (False,2,'monovan integration range limits = [{0}:{1}] are wrong'.format(the_range[0],the_range[1]))
         if the_range[0] < -100 * ei or the_range[0] > 100 * ei:
-            return (False,1,'monovan integration is suspiciously wide: [{0}:{1}]. This may be incorrect'\
-                            .format(the_range[0],the_range[1]))
+            return (False,1,'monovan integration is suspiciously wide: [{0}:{1}]. This may be incorrect'
+                    .format(the_range[0],the_range[1]))
         return (True,0,'')
 #end MonovanIntegrationRange
+
 
 class EiMonSpectra(prop_helpers.ComplexProperty):
     """Property defines list of spectra, used to calculate incident energy.
@@ -967,6 +1036,7 @@ class EiMonSpectra(prop_helpers.ComplexProperty):
        or two spectra lists to sum and obtain workspace with two combined spectra
        for GetEi algorithm to work.
     """
+
     def __init__(self):
         """ Ei mon spectra is defined as function of two other complex properties"""
         prop_helpers.ComplexProperty.__init__(self,['ei-mon1-spec','ei-mon2-spec'])
@@ -989,7 +1059,6 @@ class EiMonSpectra(prop_helpers.ComplexProperty):
             monitors[index]=self._process_monitors_spectra(mon_val)
         return (monitors[0],monitors[1])
 
-
     def __set__(self,instance,value):
         if value is None: # Do nothing
             return
@@ -1000,7 +1069,7 @@ class EiMonSpectra(prop_helpers.ComplexProperty):
             tDict = instance.__dict__
 
         if isinstance(value,str):
-            val =  value.translate(None,'[]').strip()
+            val =  value.replace('[','').replace(']','').strip()
             if val.find(':')>-1:
                 val = val.split(':')
             else:
@@ -1009,7 +1078,7 @@ class EiMonSpectra(prop_helpers.ComplexProperty):
             val = value
         #end if
         if len(val) != 2:
-            raise KeyError("ei_mon_spectra may be either tuple defining two spectra "\
+            raise KeyError("ei_mon_spectra may be either tuple defining two spectra "
                            "lists or string, which can be transformed to such lists. Got {0}"
                            .format(value))
 
@@ -1064,6 +1133,8 @@ class EiMonSpectra(prop_helpers.ComplexProperty):
 #        return (True,0,'')
 
 #-----------------------------------------------------------------------------------------
+
+
 class SpectraToMonitorsList(PropDescriptor):
     """Define list of spectra, with detectors used as monitors to estimate incident energy
        in a direct scattering experiment.
@@ -1074,9 +1145,9 @@ class SpectraToMonitorsList(PropDescriptor):
 
        Written to work with old IDF too, where this property is absent and property defaults to empty list.
    """
+
     def __init__(self):
         self._spectra_to_monitors_list = None
-
 
     def __get__(self,instance,owner=None):
         if instance is None:
@@ -1115,6 +1186,8 @@ class SpectraToMonitorsList(PropDescriptor):
 #end SpectraToMonitorsList
 
 #-----------------------------------------------------------------------------------------
+
+
 class SaveFormat(PropDescriptor):
     """The format to save reduced results using internal save procedure.
 
@@ -1125,6 +1198,7 @@ class SaveFormat(PropDescriptor):
     """
    # formats available for saving the data
     save_formats = ['spe','nxspe','nxs']
+
     def __init__(self):
         self._save_format = set()
 
@@ -1153,7 +1227,7 @@ class SaveFormat(PropDescriptor):
             else:
                 value = subformats[0]
 
-                if not value in SaveFormat.save_formats:
+                if value not in SaveFormat.save_formats:
                     instance.log("Trying to set saving in unknown format: \"" + str(value) + "\" No saving will occur for this format")
                     return
         else:
@@ -1163,8 +1237,8 @@ class SaveFormat(PropDescriptor):
                     self.__set__(instance,val)
                 return
             except:
-                raise KeyError(' Attempting to set unknown saving format {0} of type {1}. Allowed values can be spe, nxspe or nxs'\
-                   .format(value,type(value)))
+                raise KeyError(' Attempting to set unknown saving format {0} of type {1}. Allowed values can be spe, nxspe or nxs'
+                               .format(value,type(value)))
         #end if different types
         self._save_format.add(value)
 
@@ -1178,6 +1252,8 @@ class SaveFormat(PropDescriptor):
 #end SaveFormat
 
 #-----------------------------------------------------------------------------------------
+
+
 class DiagSpectra(PropDescriptor):
     """Provide groups of spectra where each group used in diagnostics separately.
        Final mask is calculated as sum of spectra, failing diagnostics in each group.
@@ -1187,6 +1263,7 @@ class DiagSpectra(PropDescriptor):
 
        if set to None or not set, all spectra are used in diagnostics together.
     """
+
     def __init__(self):
         self._diag_spectra = None
 
@@ -1222,12 +1299,15 @@ class DiagSpectra(PropDescriptor):
 #end class DiagSpectra
 
 #-----------------------------------------------------------------------------------------
+
+
 class BackbgroundTestRange(PropDescriptor):
     """The TOF range used in diagnostics to reject high background spectra.
 
        Usually it is the same range as the TOF range used to remove
        background (usually in powders) though it may be set up separately.
     """
+
     def __init__(self):
         self._background_test_range = None
 
@@ -1265,6 +1345,8 @@ class BackbgroundTestRange(PropDescriptor):
 #end BackbgroundTestRange
 
 #-----------------------------------------------------------------------------------------
+
+
 class MultirepTOFSpectraList(PropDescriptor):
     """Specify list of spectra numbers used to calculate
        TOF range corresponding to the particular energy range.
@@ -1272,6 +1354,7 @@ class MultirepTOFSpectraList(PropDescriptor):
        Usually it is list of two numbers, specifying spectra with detectors placed
        closest and furthest from the sample.
     """
+
     def __init__(self):
         self._spectra_list = None
 
@@ -1297,6 +1380,8 @@ class MultirepTOFSpectraList(PropDescriptor):
             rez = [int(value)]
         self._spectra_list = rez
 #end MultirepTOFSpectraList
+
+
 class MonoCorrectionFactor(PropDescriptor):
     """Provide correction factor to convert
        experimental scattering cross-section into absolute
@@ -1312,6 +1397,7 @@ class MonoCorrectionFactor(PropDescriptor):
           This value is cashed at first run and reapplied if
           no changes to the values it depends on were identified.
     """
+
     def __init__(self,ei_prop,monovan_run_prop):
         self._cor_factor = None
         self._mono_run_number = None
@@ -1332,6 +1418,7 @@ class MonoCorrectionFactor(PropDescriptor):
 #pylint: disable=protected-access
             self._mono_run_prop._in_cash = False # enable monovan run validation if any
     #
+
     def set_val_to_cash(self,instance,value):
         """ """
         mono_int_range = instance.monovan_integr_range
@@ -1362,7 +1449,7 @@ class MonoCorrectionFactor(PropDescriptor):
     def _build_cash_val_id(self,mono_int_range):
         ei = self._ei_prop.get_current()
         cash_id = "Ei={0:0>9.4e}:Int({1:0>9.4e}:{2:0>9.5e}):Run{3}".\
-           format(ei,mono_int_range[0],mono_int_range[1],self._mono_run_number)
+            format(ei,mono_int_range[0],mono_int_range[1],self._mono_run_number)
         return cash_id
 
     def validate(self,instance, owner=None):
@@ -1374,6 +1461,7 @@ class MonoCorrectionFactor(PropDescriptor):
         return (True,0,'')
 #end MonoCorrectionFactor
 
+
 class MotorLogName(PropDescriptor):
     """The list of possible log names, with logs containing information
        on rotation of crystal.
@@ -1382,6 +1470,7 @@ class MotorLogName(PropDescriptor):
        property to identify crystal rotation (psi in Horace) and
        to write this psi value into nxspe file.
     """
+
     def __init__(self):
         self._log_names = []
 
@@ -1402,13 +1491,16 @@ class MotorLogName(PropDescriptor):
         self._log_names = val_list
 #end MotorLogName
 
+
 class MotorOffset(PropDescriptor):
     """Initial value used to identify crystal rotation angle according to the formula:
        psi=motor_offset+wccr.timeAverageValue() where wccr is the log describing
        crystal rotation. See motor_log_name property for its description.
     """
+
     def __init__(self):
         self._offset = None
+
     def __get__(self,instance,owner=None):
         if instance is None:
             return self
@@ -1423,6 +1515,7 @@ class MotorOffset(PropDescriptor):
             self._offset = float(value)
 #end MotorOffset
 
+
 class RotationAngle(PropDescriptor):
     """Property used to identify rotation angle
        psi=motor_offset+wccr.timeAverageValue().
@@ -1432,6 +1525,7 @@ class RotationAngle(PropDescriptor):
        property value. If set explicitly to some value,
        the value specified is used and stored in NXSPE files.
     """
+
     def __init__(self,MotorLogNamesClass,Motor_Offset):
         self._mot_offset = Motor_Offset
         self._motor_log = MotorLogNamesClass

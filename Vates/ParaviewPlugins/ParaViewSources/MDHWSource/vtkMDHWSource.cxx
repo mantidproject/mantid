@@ -20,7 +20,6 @@
 #include "MantidVatesAPI/vtkMDHistoLineFactory.h"
 #include "MantidVatesAPI/vtkMD0DFactory.h"
 #include "MantidVatesAPI/FilteringUpdateProgressAction.h"
-#include "MantidVatesAPI/IgnoreZerosThresholdRange.h"
 
 using namespace Mantid::VATES;
 
@@ -80,38 +79,6 @@ int vtkMDHWSource::GetSpecialCoordinates() {
 }
 
 /**
- * Gets the minimum value of the data associated with the 
- * workspace.
- * @return The minimum value of the workspace data.
- */
-double vtkMDHWSource::GetMinValue() {
-  if (nullptr == m_presenter) {
-    return 0.0;
-  }
-  try {
-    return m_presenter->getMinValue();
-  } catch (std::runtime_error &) {
-    return 0.0;
-  }
-}
-
-/**
- * Gets the maximum value of the data associated with the 
- * workspace.
- * @return The maximum value of the workspace data.
- */
-double vtkMDHWSource::GetMaxValue() {
-  if (nullptr == m_presenter) {
-    return 0.0;
-  }
-  try {
-    return m_presenter->getMaxValue();
-  } catch (std::runtime_error &) {
-    return 0.0;
-  }
-}
-
-/**
  * Gets the (first) instrument which is associated with the workspace.
  * @return The name of the instrument.
  */
@@ -154,22 +121,20 @@ int vtkMDHWSource::RequestData(vtkInformation *, vtkInformationVector **, vtkInf
     FilterUpdateProgressAction<vtkMDHWSource> loadingProgressUpdate(this, "Loading...");
     FilterUpdateProgressAction<vtkMDHWSource> drawingProgressUpdate(this, "Drawing...");
 
-    ThresholdRange_scptr thresholdRange =
-        boost::make_shared<IgnoreZerosThresholdRange>();
-
     /*
     Will attempt to handle drawing in 4D case and then in 3D case if that fails, and so on down to 1D
     */
     auto factory =
         Mantid::Kernel::make_unique<vtkMDHistoHex4DFactory<TimeToTimeStep>>(
-            thresholdRange, m_normalizationOption, m_time);
+            m_normalizationOption, m_time);
 
-    factory->setSuccessor(Mantid::Kernel::make_unique<vtkMDHistoHexFactory>(
-                              thresholdRange, m_normalizationOption))
+    factory
+        ->setSuccessor(Mantid::Kernel::make_unique<vtkMDHistoHexFactory>(
+            m_normalizationOption))
         .setSuccessor(Mantid::Kernel::make_unique<vtkMDHistoQuadFactory>(
-            thresholdRange, m_normalizationOption))
+            m_normalizationOption))
         .setSuccessor(Mantid::Kernel::make_unique<vtkMDHistoLineFactory>(
-            thresholdRange, m_normalizationOption))
+            m_normalizationOption))
         .setSuccessor(Mantid::Kernel::make_unique<vtkMD0DFactory>());
 
     auto product = m_presenter->execute(factory.get(), loadingProgressUpdate,
@@ -181,7 +146,8 @@ int vtkMDHWSource::RequestData(vtkInformation *, vtkInformationVector **, vtkInf
     try
     {
       auto workspaceProvider = Mantid::Kernel::make_unique<ADSWorkspaceProvider<Mantid::API::IMDWorkspace>>();
-      m_presenter->makeNonOrthogonal(output, std::move(workspaceProvider));
+      m_presenter->makeNonOrthogonal(output, std::move(workspaceProvider),
+                                     &drawingProgressUpdate);
     }
     catch (std::invalid_argument &e)
     {
@@ -291,8 +257,8 @@ Setter for the algorithm progress.
 */
 void vtkMDHWSource::updateAlgorithmProgress(double progress, const std::string& message)
 {
-  this->SetProgress(progress);
   this->SetProgressText(message.c_str());
+  this->UpdateProgress(progress);
 }
 
 /*

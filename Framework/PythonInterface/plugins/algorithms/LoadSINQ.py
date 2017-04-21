@@ -19,6 +19,7 @@ import os.path
 #------------------------- where files live at SINQ
 datapath='/afs/psi.ch/project/sinqdata'
 
+
 class LoadSINQ(PythonAlgorithm):
 
     def category(self):

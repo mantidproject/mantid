@@ -1,10 +1,8 @@
-#include <algorithm>
-#include <fstream>
-#include <sstream>
+#include "MantidDataHandling/SaveDetectorsGrouping.h"
 
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/ISpectrum.h"
-#include "MantidDataHandling/SaveDetectorsGrouping.h"
+#include "MantidAPI/Run.h"
 #include "MantidKernel/System.h"
 
 #include <Poco/DOM/AutoPtr.h>
@@ -12,21 +10,11 @@
 #include <Poco/DOM/DOMWriter.h>
 #include <Poco/DOM/Element.h>
 #include <Poco/DOM/Text.h>
-
-#ifdef _MSC_VER
-// Disable a flood of warnings from Poco about inheriting from
-// std::basic_istream
-// See
-// http://connect.microsoft.com/VisualStudio/feedback/details/733720/inheriting-from-std-fstream-produces-c4250-warning
-#pragma warning(push)
-#pragma warning(disable : 4250)
-#endif
-
 #include <Poco/XML/XMLWriter.h>
 
-#ifdef _MSC_VER
-#pragma warning(pop)
-#endif
+#include <algorithm>
+#include <fstream>
+#include <sstream>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -52,7 +40,7 @@ void SaveDetectorsGrouping::init() {
 void SaveDetectorsGrouping::exec() {
 
   // 1. Get Input
-  std::string xmlfilename = this->getProperty("OutputFile");
+  const std::string xmlfilename = this->getProperty("OutputFile");
   mGroupWS = this->getProperty("InputWorkspace");
 
   // 2. Create Map(group ID, workspace-index vector)
@@ -78,9 +66,9 @@ void SaveDetectorsGrouping::createGroupDetectorIDMap(
   // 1. Create map
   for (size_t iws = 0; iws < mGroupWS->getNumberHistograms(); iws++) {
     // a) Group ID
-    int groupid = static_cast<int>(mGroupWS->dataY(iws)[0]);
+    int groupid = static_cast<int>(mGroupWS->y(iws)[0]);
 
-    // b) Exist? Yes --> get hanlder on vector.  No --> create vector and
+    // b) Exist? Yes --> get handler on vector.  No --> create vector and
     auto it = groupwkspmap.find(groupid);
     if (it == groupwkspmap.end()) {
       std::vector<detid_t> tempvector;
@@ -88,8 +76,8 @@ void SaveDetectorsGrouping::createGroupDetectorIDMap(
     }
     it = groupwkspmap.find(groupid);
     if (it == groupwkspmap.end()) {
-      g_log.error() << "Impossible situation! \n";
-      throw std::invalid_argument("Cannot Happen!");
+      throw std::invalid_argument(
+          "Could not find group ID the after creating it in the map.");
     }
 
     // c) Convert workspace ID to detector ID
@@ -114,7 +102,7 @@ void SaveDetectorsGrouping::convertToDetectorsRanges(
   for (auto &groupdetids : groupdetidsmap) {
 
     // a) Get handler of group ID and detector Id vector
-    int groupid = groupdetids.first;
+    const int groupid = groupdetids.first;
     sort(groupdetids.second.begin(), groupdetids.second.end());
 
     g_log.debug() << "Group " << groupid << "  has "
@@ -153,8 +141,8 @@ void SaveDetectorsGrouping::printToXML(
     std::string xmlfilename) {
 
   // 1. Get Instrument information
-  Geometry::Instrument_const_sptr instrument = mGroupWS->getInstrument();
-  std::string name = instrument->getName();
+  const auto &instrument = mGroupWS->getInstrument();
+  const std::string name = instrument->getName();
   g_log.debug() << "Instrument " << name << '\n';
 
   // 2. Start document (XML)
@@ -165,16 +153,16 @@ void SaveDetectorsGrouping::printToXML(
 
   // Set description if was specified by user
   if (mGroupWS->run().hasProperty("Description")) {
-    std::string description =
+    const std::string description =
         mGroupWS->run().getProperty("Description")->value();
     pRoot->setAttribute("description", description);
   }
 
   // 3. Append Groups
-  for (auto &groupdetidrange : groupdetidrangemap) {
+  for (const auto &groupdetidrange : groupdetidrangemap) {
 
     // a) Group Node
-    int groupid = groupdetidrange.first;
+    const int groupid = groupdetidrange.first;
     std::stringstream sid;
     sid << groupid;
 
@@ -183,7 +171,7 @@ void SaveDetectorsGrouping::printToXML(
     // Set name if was specified by user
     std::string groupNameProp = "GroupName_" + sid.str();
     if (mGroupWS->run().hasProperty(groupNameProp)) {
-      std::string groupName =
+      const std::string groupName =
           mGroupWS->run().getProperty(groupNameProp)->value();
       pChildGroup->setAttribute("name", groupName);
     }
@@ -220,7 +208,7 @@ void SaveDetectorsGrouping::printToXML(
                     << groupdetidrange.second[i * 2 + 1] << '\n';
     } // FOREACH Detectors Range Set
 
-    std::string textvalue = ss.str();
+    const std::string textvalue = ss.str();
 
     g_log.debug() << "Detector IDs Node: " << textvalue << '\n';
 

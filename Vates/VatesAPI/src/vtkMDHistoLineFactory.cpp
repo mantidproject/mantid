@@ -13,7 +13,6 @@
 #include "MantidKernel/ReadLock.h"
 #include "MantidKernel/Logger.h"
 
-using Mantid::API::IMDWorkspace;
 using Mantid::DataObjects::MDHistoWorkspace;
 using Mantid::API::NullCoordTransform;
 
@@ -26,10 +25,8 @@ namespace Mantid {
 namespace VATES {
 
 vtkMDHistoLineFactory::vtkMDHistoLineFactory(
-    ThresholdRange_scptr thresholdRange,
     const VisualNormalization normaliztionOption)
-    : m_normalizationOption(normaliztionOption),
-      m_thresholdRange(thresholdRange) {}
+    : m_normalizationOption(normaliztionOption) {}
 
 /**
 Assigment operator
@@ -40,7 +37,6 @@ vtkMDHistoLineFactory &vtkMDHistoLineFactory::
 operator=(const vtkMDHistoLineFactory &other) {
   if (this != &other) {
     this->m_normalizationOption = other.m_normalizationOption;
-    this->m_thresholdRange = other.m_thresholdRange;
     this->m_workspace = other.m_workspace;
   }
   return *this;
@@ -53,7 +49,6 @@ Copy Constructor
 vtkMDHistoLineFactory::vtkMDHistoLineFactory(
     const vtkMDHistoLineFactory &other) {
   this->m_normalizationOption = other.m_normalizationOption;
-  this->m_thresholdRange = other.m_thresholdRange;
   this->m_workspace = other.m_workspace;
 }
 
@@ -114,8 +109,7 @@ vtkMDHistoLineFactory::create(ProgressAction &progressUpdating) const {
       float signalScalar =
           static_cast<float>(m_workspace->getSignalNormalizedAt(i));
 
-      if (!std::isfinite(signalScalar) ||
-          !m_thresholdRange->inRange(signalScalar)) {
+      if (!std::isfinite(signalScalar)) {
         // Flagged so that topological and scalar data is not applied.
         unstructPoint.isSparse = true;
       } else {
@@ -165,16 +159,12 @@ vtkMDHistoLineFactory::create(ProgressAction &progressUpdating) const {
 }
 
 void vtkMDHistoLineFactory::initialize(
-    Mantid::API::Workspace_sptr wspace_sptr) {
+    const Mantid::API::Workspace_sptr &wspace_sptr) {
   m_workspace = this->doInitialize<MDHistoWorkspace, 1>(wspace_sptr);
-
-  // Setup range values according to whatever strategy object has been injected.
-  m_thresholdRange->setWorkspace(wspace_sptr);
-  m_thresholdRange->calculate();
 }
 
 void vtkMDHistoLineFactory::validate() const {
-  if (NULL == m_workspace.get()) {
+  if (!m_workspace) {
     throw std::runtime_error("IMDWorkspace is null");
   }
 }

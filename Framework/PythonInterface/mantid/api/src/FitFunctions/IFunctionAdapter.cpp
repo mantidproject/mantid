@@ -95,21 +95,26 @@ void IFunctionAdapter::declareAttribute(const std::string &name,
 
 /**
  * Get the value of the named attribute as a Python object
- * @param name :: The name of the new attribute
+ * @param self :: A reference to a function object that has the attribute.
+ * @param name :: The name of the new attribute.
  * @returns The value of the attribute
  */
-PyObject *IFunctionAdapter::getAttributeValue(const std::string &name) {
-  auto attr = IFunction::getAttribute(name);
-  return getAttributeValue(attr);
+PyObject *IFunctionAdapter::getAttributeValue(IFunction &self,
+                                              const std::string &name) {
+  auto attr = self.getAttribute(name);
+  return getAttributeValue(self, attr);
 }
 
 /**
  * Get the value of the given attribute as a Python object
+ * @param self :: A reference to a function object that has the attribute.
  * @param attr An attribute object
  * @returns The value of the attribute
  */
 PyObject *
-IFunctionAdapter::getAttributeValue(const API::IFunction::Attribute &attr) {
+IFunctionAdapter::getAttributeValue(IFunction &self,
+                                    const API::IFunction::Attribute &attr) {
+  UNUSED_ARG(self);
   std::string type = attr.type();
   PyObject *result(nullptr);
   if (type == "int")
@@ -135,7 +140,7 @@ IFunctionAdapter::getAttributeValue(const API::IFunction::Attribute &attr) {
 void IFunctionAdapter::setAttribute(const std::string &attName,
                                     const Attribute &attr) {
   try {
-    object value = object(handle<>(getAttributeValue(attr)));
+    object value = object(handle<>(getAttributeValue(*this, attr)));
     callMethod<void, std::string, object>(getSelf(), "setAttributeValue",
                                           attName, value);
   } catch (UndefinedAttributeError &) {

@@ -3,6 +3,7 @@
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/LiveListenerFactory.h"
 #include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/ConfigService.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidKernel/ListValidator.h"
@@ -32,21 +33,35 @@ void LiveDataAlgorithm::initProps() {
   auto &instrInfo =
       Kernel::ConfigService::Instance().getFacility().instruments();
   for (const auto &instrument : instrInfo) {
-    if (!instrument.liveDataAddress().empty()) {
+    if (instrument.hasLiveListenerInfo()) {
       instruments.push_back(instrument.name());
     }
   }
-#ifndef NDEBUG
-  // Debug builds only: Add all the listeners by hand for development testing
-  // purposes
-  std::vector<std::string> listeners =
-      Mantid::API::LiveListenerFactory::Instance().getKeys();
-  instruments.insert(instruments.end(), listeners.begin(), listeners.end());
-#endif
+
+  // All available listener class names
+  auto listeners = LiveListenerFactory::Instance().getKeys();
+  listeners.push_back(""); // Allow not specifying a listener too
+
   declareProperty(Kernel::make_unique<PropertyWithValue<std::string>>(
                       "Instrument", "",
                       boost::make_shared<StringListValidator>(instruments)),
                   "Name of the instrument to monitor.");
+
+  declareProperty(make_unique<PropertyWithValue<std::string>>("Connection", "",
+                                                              Direction::Input),
+                  "Selects the listener connection entry to use. "
+                  "Default connection will be used if not specified");
+
+  declareProperty(
+      Kernel::make_unique<PropertyWithValue<std::string>>(
+          "Listener", "", boost::make_shared<StringListValidator>(listeners)),
+      "Name of the listener class to use. "
+      "If specified, overrides class specified by Connection.");
+
+  declareProperty(make_unique<PropertyWithValue<std::string>>("Address", "",
+                                                              Direction::Input),
+                  "Address for the listener to connect to. "
+                  "If specified, overrides address specified by Connection.");
 
   declareProperty(make_unique<PropertyWithValue<std::string>>("StartTime", "",
                                                               Direction::Input),
@@ -170,26 +185,64 @@ bool LiveDataAlgorithm::hasPostProcessing() const {
 }
 
 //----------------------------------------------------------------------------------------------
-/** Return or create the ILiveListener for this algorithm.
+/**
+ * Return or create the ILiveListener for this algorithm.
  *
  * If the ILiveListener has not already been created, it creates it using
  * the properties on the algorithm. It then starts the listener
- * by calling the ILiveListener->start(StartTime) method.
+ * by calling the ILiveListener->start(StartTime) method if start is true.
  *
- * @return ILiveListener_sptr
+ * @param start Whether to start data acquisition right away
+ * @return Shared pointer to interface of this algorithm's LiveListener.
  */
-ILiveListener_sptr LiveDataAlgorithm::getLiveListener() {
+ILiveListener_sptr LiveDataAlgorithm::getLiveListener(bool start) {
   if (m_listener)
     return m_listener;
 
-  // Not stored? Need to create it
-  std::string inst = this->getPropertyValue("Instrument");
-  m_listener = LiveListenerFactory::Instance().create(inst, true, this);
+  // Create a new listener
+  m_listener = createLiveListener(start);
 
   // Start at the given date/time
-  m_listener->start(this->getStartTime());
+  if (start)
+    m_listener->start(this->getStartTime());
 
   return m_listener;
+}
+
+/**
+ * Creates a new instance of a LiveListener based on current values of this
+ * algorithm's properties, respecting Facilities.xml defaults as well as any
+ * provided properties to override them.
+ *
+ * The created LiveListener is not stored or cached as this algorithm's
+ * LiveListener. This is useful for creating temporary instances.
+ *
+ * @param connect Whether the created LiveListener should attempt to connect
+ *                immediately after creation.
+ * @return Shared pointer to interface of created LiveListener instance.
+ */
+ILiveListener_sptr LiveDataAlgorithm::createLiveListener(bool connect) {
+  // Get the LiveListenerInfo from Facilities.xml
+  std::string inst_name = this->getPropertyValue("Instrument");
+  std::string conn_name = this->getPropertyValue("Connection");
+
+  const auto &inst = ConfigService::Instance().getInstrument(inst_name);
+  const auto &conn = inst.liveListenerInfo(conn_name);
+
+  // See if listener and/or address override has been specified
+  std::string listener = this->getPropertyValue("Listener");
+  if (listener.empty())
+    listener = conn.listener();
+
+  std::string address = this->getPropertyValue("Address");
+  if (address.empty())
+    address = conn.address();
+
+  // Construct new LiveListenerInfo with overrides, if given
+  LiveListenerInfo info(listener, address);
+
+  // Create and return
+  return LiveListenerFactory::Instance().create(info, connect, this);
 }
 
 //----------------------------------------------------------------------------------------------
@@ -291,9 +344,7 @@ std::map<std::string, std::string> LiveDataAlgorithm::validateInputs() {
   if (m_listener) {
     eventListener = m_listener->buffersEvents();
   } else {
-    eventListener = LiveListenerFactory::Instance()
-                        .create(instrument, false)
-                        ->buffersEvents();
+    eventListener = createLiveListener()->buffersEvents();
   }
   if (!eventListener && getPropertyValue("AccumulationMethod") == "Add") {
     out["AccumulationMethod"] =

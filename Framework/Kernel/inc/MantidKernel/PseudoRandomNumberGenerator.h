@@ -53,6 +53,15 @@ public:
   virtual int nextInt(int start, int end) = 0;
   /// Generates the next point
   void generateNextPoint() override;
+  // Interface to boost distribution generators
+  /// Result (output) value type.
+  typedef double result_type;
+  /// Return the minimum value of the range
+  virtual double min() const = 0;
+  /// Return the maximum value of the range
+  virtual double max() const = 0;
+  /// Return next random value
+  double operator()() { return nextValue(); }
 
 private:
   DISABLE_COPY_AND_ASSIGN(PseudoRandomNumberGenerator)

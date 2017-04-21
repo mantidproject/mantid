@@ -23,7 +23,7 @@ std::string getUnit(Projection &p, size_t nd) {
   return (p.getUnit(nd) == RLU ? "r" : "a");
 }
 
-void setUnit(Projection &p, size_t nd, std::string unit) {
+void setUnit(Projection &p, size_t nd, const std::string &unit) {
   if (unit == "r")
     p.setUnit(nd, RLU);
   else if (unit == "a")

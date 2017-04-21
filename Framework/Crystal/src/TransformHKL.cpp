@@ -6,6 +6,7 @@
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/ArrayLengthValidator.h"
 #include "MantidCrystal/SelectCellWithForm.h"
+#include "MantidAPI/Sample.h"
 
 namespace Mantid {
 namespace Crystal {
@@ -17,15 +18,12 @@ using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
 
-//--------------------------------------------------------------------------
-
 const std::string TransformHKL::name() const { return "TransformHKL"; }
 
 int TransformHKL::version() const { return 1; }
 
 const std::string TransformHKL::category() const { return "Crystal\\Peaks"; }
 
-//--------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void TransformHKL::init() {
@@ -63,7 +61,6 @@ void TransformHKL::init() {
                         "Gets set with the average HKL indexing error.");
 }
 
-//--------------------------------------------------------------------------
 /** Execute the algorithm.
  */
 void TransformHKL::exec() {

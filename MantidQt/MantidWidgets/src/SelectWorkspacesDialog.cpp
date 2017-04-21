@@ -65,7 +65,7 @@ SelectWorkspacesDialog::SelectWorkspacesDialog(
   for (VecWorkspaces::const_iterator it = workspaces.begin();
        it != workspaces.end(); ++it) {
     // if(useFilter && ADS::
-    tmp << QString::fromStdString((*it)->name());
+    tmp << QString::fromStdString((*it)->getName());
   }
 
   m_wsList->addItems(tmp);

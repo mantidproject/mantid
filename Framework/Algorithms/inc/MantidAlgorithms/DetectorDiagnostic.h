@@ -85,8 +85,8 @@ protected:
   /// workspace contains
   /// integrated counts
   std::vector<double>
-  calculateMedian(API::MatrixWorkspace_sptr input, bool excludeZeroes,
-                  std::vector<std::vector<size_t>> indexmap);
+  calculateMedian(const API::MatrixWorkspace &input, bool excludeZeroes,
+                  const std::vector<std::vector<size_t>> &indexmap);
   /// Convert to a distribution
   API::MatrixWorkspace_sptr convertToRate(API::MatrixWorkspace_sptr workspace);
   /// method to check which spectra should be grouped when calculating the
@@ -94,7 +94,7 @@ protected:
   std::vector<std::vector<size_t>> makeMap(API::MatrixWorkspace_sptr countsWS);
   /// method to create the map with all spectra
   std::vector<std::vector<size_t>>
-  makeInstrumentMap(API::MatrixWorkspace_sptr countsWS);
+  makeInstrumentMap(const API::MatrixWorkspace &countsWS);
 
   /** @name Progress reporting */
   //@{

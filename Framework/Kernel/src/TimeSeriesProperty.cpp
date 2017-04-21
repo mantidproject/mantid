@@ -71,7 +71,7 @@ TimeSeriesProperty<TYPE>::getDerivative() const {
                              "property with less then two values");
   }
 
-  this->sort();
+  this->sortIfNecessary();
   auto it = this->m_values.begin();
   int64_t t0 = it->time().totalNanoseconds();
   TYPE v0 = it->value();
@@ -162,7 +162,7 @@ operator+=(Property const *right) {
 template <typename TYPE>
 bool TimeSeriesProperty<TYPE>::
 operator==(const TimeSeriesProperty<TYPE> &right) const {
-  sort();
+  sortIfNecessary();
 
   if (this->name() != right.name()) // should this be done?
   {
@@ -173,18 +173,17 @@ operator==(const TimeSeriesProperty<TYPE> &right) const {
     return false;
   }
 
-  { // so vectors can go out of scope
-    std::vector<DateAndTime> lhsTimes = this->timesAsVector();
-    std::vector<DateAndTime> rhsTimes = right.timesAsVector();
+  if (this->realSize() != right.realSize()) {
+    return false;
+  } else {
+    const std::vector<DateAndTime> lhsTimes = this->timesAsVector();
+    const std::vector<DateAndTime> rhsTimes = right.timesAsVector();
     if (!std::equal(lhsTimes.begin(), lhsTimes.end(), rhsTimes.begin())) {
       return false;
     }
-  }
 
-  {
-    // so vectors can go out of scope
-    std::vector<TYPE> lhsValues = this->valuesAsVector();
-    std::vector<TYPE> rhsValues = right.valuesAsVector();
+    const std::vector<TYPE> lhsValues = this->valuesAsVector();
+    const std::vector<TYPE> rhsValues = right.valuesAsVector();
     if (!std::equal(lhsValues.begin(), lhsValues.end(), rhsValues.begin())) {
       return false;
     }
@@ -261,7 +260,7 @@ template <typename TYPE>
 void TimeSeriesProperty<TYPE>::filterByTime(const Kernel::DateAndTime &start,
                                             const Kernel::DateAndTime &stop) {
   // 0. Sort
-  sort();
+  sortIfNecessary();
 
   // 1. Do nothing for single (constant) value
   if (m_values.size() <= 1)
@@ -319,7 +318,7 @@ template <typename TYPE>
 void TimeSeriesProperty<TYPE>::filterByTimes(
     const std::vector<SplittingInterval> &splittervec) {
   // 1. Sort
-  sort();
+  sortIfNecessary();
 
   // 2. Return for single value
   if (m_values.size() <= 1) {
@@ -406,7 +405,7 @@ void TimeSeriesProperty<TYPE>::splitByTime(
     std::vector<SplittingInterval> &splitter, std::vector<Property *> outputs,
     bool isPeriodic) const {
   // 0. Sort if necessary
-  sort();
+  sortIfNecessary();
 
   if (outputs.empty())
     return;
@@ -522,6 +521,152 @@ void TimeSeriesProperty<TYPE>::splitByTime(
   }
 }
 
+/// Split this TimeSeriresProperty by a vector of time with N entries,
+/// and by the target workspace index defined by target_vec
+/// Requirements:
+/// 1. vector outputs must be defined before this method is called;
+template <typename TYPE>
+void TimeSeriesProperty<TYPE>::splitByTimeVector(
+    std::vector<DateAndTime> &splitter_time_vec, std::vector<int> &target_vec,
+    std::vector<TimeSeriesProperty *> outputs) {
+  // check inputs
+  if (splitter_time_vec.size() != target_vec.size() + 1)
+    throw std::runtime_error("Input time vector's size does not match taget "
+                             "workspace index vector's size.");
+  // return if the output vector TimeSeriesProperties is not defined
+  if (outputs.empty())
+    return;
+
+  // sort if necessary
+  sortIfNecessary();
+
+  // work on m_values, m_size, and m_time
+  std::vector<Kernel::DateAndTime> tsp_time_vec = this->timesAsVector();
+
+  // go over both filter time vector and time series property time vector
+  size_t index_splitter = 0;
+  size_t index_tsp_time = 0;
+
+  DateAndTime tsp_time = tsp_time_vec[index_tsp_time];
+  DateAndTime split_start_time = splitter_time_vec[index_splitter];
+  DateAndTime split_stop_time = splitter_time_vec[index_splitter + 1];
+
+  // move splitter index such that the first entry of TSP is before the stop
+  // time of a splitter
+  bool continue_search = true;
+  bool no_entry_in_range = false;
+
+  std::vector<DateAndTime>::iterator splitter_iter;
+  splitter_iter = std::lower_bound(splitter_time_vec.begin(),
+                                   splitter_time_vec.end(), tsp_time);
+  if (splitter_iter == splitter_time_vec.begin()) {
+    // do nothing as the first TimeSeriesProperty entry's time is before any
+    // splitters
+    ;
+  } else if (splitter_iter == splitter_time_vec.end()) {
+    // already search to the last splitter which is still earlier than first TSP
+    // entry
+    no_entry_in_range = true;
+  } else {
+    // calculate the splitter's index (now we check the stop time)
+    index_splitter = splitter_iter - splitter_time_vec.begin() - 1;
+    split_start_time = splitter_time_vec[index_splitter];
+    split_stop_time = splitter_time_vec[index_splitter + 1];
+  }
+
+  g_log.debug() << "TSP entry: " << index_tsp_time
+                << ", Splitter index = " << index_splitter << "\n";
+
+  // move along the entries to find the entry inside the current splitter
+  if (!no_entry_in_range) {
+    std::vector<DateAndTime>::iterator tsp_time_iter;
+    tsp_time_iter = std::lower_bound(tsp_time_vec.begin(), tsp_time_vec.end(),
+                                     split_start_time);
+    if (tsp_time_iter == tsp_time_vec.end()) {
+      // the first splitter's start time is LATER than the last TSP entry, then
+      // there won't be any
+      // TSP entry to be split into any target splitter.
+      no_entry_in_range = true;
+    } else {
+      // first splitter start time is between tsp_time_iter and the one before
+      // it.
+      // so the index for tsp_time_iter is the first TSP entry in the splitter
+      index_tsp_time = tsp_time_iter - tsp_time_vec.begin();
+      tsp_time = *tsp_time_iter; // tsp_time_vec[index_splitter];
+    }
+  }
+
+  g_log.debug() << "TSP entry: " << index_tsp_time
+                << ", Splitter index = " << index_splitter << "\n";
+
+  // now it is the time to put TSP's entries to corresponding
+  continue_search = !no_entry_in_range;
+  while (continue_search) {
+    // get the first entry index
+    if (index_tsp_time > 0)
+      --index_tsp_time;
+
+    int target = target_vec[index_splitter];
+
+    g_log.debug() << "Target = " << target
+                  << " with splitter index = " << index_splitter << "\n"
+                  << "\t"
+                  << "Time index = " << index_tsp_time << "\n\n";
+
+    bool continue_add = true;
+    while (continue_add) {
+      // add current entry
+      g_log.debug() << "Add entry " << index_tsp_time << " to target " << target
+                    << "\n";
+      if (outputs[target]->size() == 0 ||
+          outputs[target]->lastTime() < tsp_time) {
+        // avoid to add duplicate entry
+        outputs[target]->addValue(m_values[index_tsp_time].time(),
+                                  m_values[index_tsp_time].value());
+      }
+
+      // advance to next entry
+      ++index_tsp_time;
+
+      g_log.debug() << "\tEntry time " << tsp_time_vec[index_tsp_time]
+                    << ", stop time " << split_stop_time << "\n";
+
+      if (index_tsp_time == tsp_time_vec.size()) {
+        // last entry. quit all loops
+        continue_add = false;
+        continue_search = false;
+      } else if (tsp_time_vec[index_tsp_time] > split_stop_time) {
+        // next entry is out of this splitter: add the next one and quit
+        if (outputs[target]->lastTime() < m_values[index_tsp_time].time()) {
+          // avoid the duplicate cases occured in fast frequency issue
+          outputs[target]->addValue(m_values[index_tsp_time].time(),
+                                    m_values[index_tsp_time].value());
+        }
+        // FIXME - in future, need to find out WHETHER there is way to skip the
+        // rest without going through the whole sequence
+        continue_add = false;
+        // reset time entry as the next splitter will add
+        // --index_tsp_time;
+      } else {
+        // advance to next time
+        tsp_time = tsp_time_vec[index_tsp_time];
+      }
+    } // END-WHILE continue add
+
+    // make splitters to advance to next
+    ++index_splitter;
+    if (index_splitter == splitter_time_vec.size() - 1) {
+      // already last splitters
+      continue_search = false;
+    } else {
+      split_start_time = split_stop_time;
+      split_stop_time = splitter_time_vec[index_splitter + 1];
+    }
+  } // END-OF-WHILE
+
+  return;
+}
+
 // The makeFilterByValue & expandFilterToRange methods generate a bunch of
 // warnings when the template type is the wider integer types
 // (when it's being assigned back to a double such as in a call to minValue or
@@ -581,7 +726,7 @@ void TimeSeriesProperty<TYPE>::makeFilterByValue(
     return;
 
   // 1. Sort
-  sort();
+  sortIfNecessary();
 
   // 2. Do the rest
   bool lastGood(false);
@@ -726,8 +871,7 @@ double TimeSeriesProperty<TYPE>::averageValueInFilter(
     return static_cast<double>(m_values.front().value());
   }
 
-  // Sort, if necessary.
-  sort();
+  sortIfNecessary();
 
   double numerator(0.0), totalTime(0.0);
   // Loop through the filter ranges
@@ -764,8 +908,7 @@ template <typename TYPE>
 double TimeSeriesProperty<TYPE>::timeAverageValue() const {
   double retVal = 0.0;
   try {
-    TimeSplitterType filter;
-    filter.emplace_back(this->firstTime(), this->lastTime());
+    const auto &filter = getSplittingIntervals();
     retVal = this->averageValueInFilter(filter);
   } catch (std::exception &) {
     // just return nan
@@ -803,7 +946,7 @@ template <typename TYPE>
 std::map<DateAndTime, TYPE>
 TimeSeriesProperty<TYPE>::valueAsCorrectMap() const {
   // 1. Sort if necessary
-  sort();
+  sortIfNecessary();
 
   // 2. Data Strcture
   std::map<DateAndTime, TYPE> asMap;
@@ -822,7 +965,7 @@ TimeSeriesProperty<TYPE>::valueAsCorrectMap() const {
  */
 template <typename TYPE>
 std::vector<TYPE> TimeSeriesProperty<TYPE>::valuesAsVector() const {
-  sort();
+  sortIfNecessary();
 
   std::vector<TYPE> out;
   out.reserve(m_values.size());
@@ -859,7 +1002,7 @@ TimeSeriesProperty<TYPE>::valueAsMultiMap() const {
  */
 template <typename TYPE>
 std::vector<DateAndTime> TimeSeriesProperty<TYPE>::timesAsVector() const {
-  sort();
+  sortIfNecessary();
 
   std::vector<DateAndTime> out;
   out.reserve(m_values.size());
@@ -878,7 +1021,7 @@ std::vector<DateAndTime> TimeSeriesProperty<TYPE>::timesAsVector() const {
 template <typename TYPE>
 std::vector<double> TimeSeriesProperty<TYPE>::timesAsVectorSeconds() const {
   // 1. Sort if necessary
-  sort();
+  sortIfNecessary();
 
   // 2. Output data structure
   std::vector<double> out;
@@ -996,7 +1139,7 @@ DateAndTime TimeSeriesProperty<TYPE>::lastTime() const {
     throw std::runtime_error(error);
   }
 
-  sort();
+  sortIfNecessary();
 
   return m_values.rbegin()->time();
 }
@@ -1012,7 +1155,7 @@ template <typename TYPE> TYPE TimeSeriesProperty<TYPE>::firstValue() const {
     throw std::runtime_error(error);
   }
 
-  sort();
+  sortIfNecessary();
 
   return m_values[0].value();
 }
@@ -1029,7 +1172,7 @@ DateAndTime TimeSeriesProperty<TYPE>::firstTime() const {
     throw std::runtime_error(error);
   }
 
-  sort();
+  sortIfNecessary();
 
   return m_values[0].time();
 }
@@ -1046,7 +1189,7 @@ template <typename TYPE> TYPE TimeSeriesProperty<TYPE>::lastValue() const {
     throw std::runtime_error(error);
   }
 
-  sort();
+  sortIfNecessary();
 
   return m_values.rbegin()->value();
 }
@@ -1080,7 +1223,7 @@ template <typename TYPE> int TimeSeriesProperty<TYPE>::realSize() const {
  * @return time series property as a string
  */
 template <typename TYPE> std::string TimeSeriesProperty<TYPE>::value() const {
-  sort();
+  sortIfNecessary();
 
   std::stringstream ins;
   for (size_t i = 0; i < m_values.size(); i++) {
@@ -1104,7 +1247,7 @@ template <typename TYPE> std::string TimeSeriesProperty<TYPE>::value() const {
  */
 template <typename TYPE>
 std::vector<std::string> TimeSeriesProperty<TYPE>::time_tValue() const {
-  sort();
+  sortIfNecessary();
 
   std::vector<std::string> values;
   values.reserve(m_values.size());
@@ -1128,7 +1271,7 @@ std::vector<std::string> TimeSeriesProperty<TYPE>::time_tValue() const {
 template <typename TYPE>
 std::map<DateAndTime, TYPE> TimeSeriesProperty<TYPE>::valueAsMap() const {
   // 1. Sort if necessary
-  sort();
+  sortIfNecessary();
 
   // 2. Build map
 
@@ -1187,7 +1330,8 @@ template <typename TYPE> void TimeSeriesProperty<TYPE>::clear() {
  *  The last value is the last entry in the m_values vector - no sorting is
  *  done or checked for to ensure that the last value is the most recent in
  * time.
- *  It is up to the client to call sort() first if this is a requirement.
+ *  It is up to the client to call sortIfNecessary() first if this is a
+ * requirement.
  */
 template <typename TYPE> void TimeSeriesProperty<TYPE>::clearOutdated() {
   if (realSize() > 1) {
@@ -1271,7 +1415,7 @@ TYPE TimeSeriesProperty<TYPE>::getSingleValue(const DateAndTime &t) const {
   }
 
   // 1. Get sorted
-  sort();
+  sortIfNecessary();
 
   // 2.
   TYPE value;
@@ -1320,7 +1464,7 @@ TYPE TimeSeriesProperty<TYPE>::getSingleValue(const DateAndTime &t,
   }
 
   // 1. Get sorted
-  sort();
+  sortIfNecessary();
 
   // 2.
   TYPE value;
@@ -1376,7 +1520,7 @@ TimeInterval TimeSeriesProperty<TYPE>::nthInterval(int n) const {
   }
 
   // 1. Sort
-  sort();
+  sortIfNecessary();
 
   // 2. Calculate time interval
 
@@ -1495,7 +1639,7 @@ template <typename TYPE> TYPE TimeSeriesProperty<TYPE>::nthValue(int n) const {
   }
 
   // 2. Sort and apply filter
-  sort();
+  sortIfNecessary();
 
   if (m_filter.empty()) {
     // 3. Situation 1:  No filter
@@ -1541,7 +1685,7 @@ template <typename TYPE> TYPE TimeSeriesProperty<TYPE>::nthValue(int n) const {
  */
 template <typename TYPE>
 Kernel::DateAndTime TimeSeriesProperty<TYPE>::nthTime(int n) const {
-  sort();
+  sortIfNecessary();
 
   if (m_values.empty()) {
     const std::string error("nthTime(): TimeSeriesProperty '" + name() +
@@ -1687,8 +1831,8 @@ template <typename TYPE> std::string TimeSeriesProperty<TYPE>::isValid() const {
 }
 
 /*
- * Not implemented in this class
- * @throw Exception::NotImplementedError Not yet implemented
+ * A TimeSeriesProperty never has a default, so return empty string
+ * @returns Empty string as no defaults can be provided
  */
 template <typename TYPE>
 std::string TimeSeriesProperty<TYPE>::getDefault() const {
@@ -1705,20 +1849,26 @@ template <typename TYPE> bool TimeSeriesProperty<TYPE>::isDefault() const {
 /**
  * Return a TimeSeriesPropertyStatistics struct containing the
  * statistics of this TimeSeriesProperty object.
+ *
+ * N.B. This method DOES take filtering into account
  */
 template <typename TYPE>
 TimeSeriesPropertyStatistics TimeSeriesProperty<TYPE>::getStatistics() const {
   TimeSeriesPropertyStatistics out;
   Mantid::Kernel::Statistics raw_stats =
-      Mantid::Kernel::getStatistics(this->valuesAsVector());
+      Mantid::Kernel::getStatistics(this->filteredValuesAsVector());
   out.mean = raw_stats.mean;
   out.standard_deviation = raw_stats.standard_deviation;
   out.median = raw_stats.median;
   out.minimum = raw_stats.minimum;
   out.maximum = raw_stats.maximum;
   if (this->size() > 0) {
-    out.duration =
-        DateAndTime::secondsFromDuration(this->lastTime() - this->firstTime());
+    const auto &intervals = this->getSplittingIntervals();
+    double duration_sec = 0.0;
+    for (const auto &interval : intervals) {
+      duration_sec += interval.duration();
+    }
+    out.duration = duration_sec;
   } else {
     out.duration = std::numeric_limits<double>::quiet_NaN();
   }
@@ -1732,7 +1882,7 @@ TimeSeriesPropertyStatistics TimeSeriesProperty<TYPE>::getStatistics() const {
  */
 template <typename TYPE> void TimeSeriesProperty<TYPE>::eliminateDuplicates() {
   // 1. Sort if necessary
-  sort();
+  sortIfNecessary();
 
   // 2. Detect and Remove Duplicated
   size_t numremoved = 0;
@@ -1786,9 +1936,11 @@ std::string TimeSeriesProperty<TYPE>::toString() const {
 
 //----------------------------------------------------------------------------------
 /*
- * Sort vector mP and set the flag
+ * Sort vector mP and set the flag. Only sorts if the values are not already
+ * sorted.
  */
-template <typename TYPE> void TimeSeriesProperty<TYPE>::sort() const {
+template <typename TYPE>
+void TimeSeriesProperty<TYPE>::sortIfNecessary() const {
   if (m_propSortedFlag == TimeSeriesSortStatus::TSUNKNOWN) {
     bool sorted = is_sorted(m_values.begin(), m_values.end());
     if (sorted)
@@ -1818,7 +1970,7 @@ int TimeSeriesProperty<TYPE>::findIndex(Kernel::DateAndTime t) const {
     return 0;
 
   // 1. Sort
-  sort();
+  sortIfNecessary();
 
   // 2. Extreme value
   if (t <= m_values[0].time()) {
@@ -1868,7 +2020,7 @@ int TimeSeriesProperty<TYPE>::upperBound(Kernel::DateAndTime t, int istart,
   }
 
   // 2. Sort
-  sort();
+  sortIfNecessary();
 
   // 3. Construct the pair for comparison and do lower_bound()
   TimeValueUnit<TYPE> temppair(t, m_values[0].value());
@@ -2138,6 +2290,167 @@ void TimeSeriesProperty<TYPE>::saveProperty(::NeXus::File *file) {
   file->closeData();
   saveTimeVector(file);
   file->closeGroup();
+}
+/** Calculate constant step histogram of the time series data.
+* @param tMin    -- minimal time to include in histogram
+* @param tMax    -- maximal time to constrain the histogram data
+* @param counts  -- vector of output histogrammed data.
+*   On input, the size of the vector defines the number of points in the
+*   histogram.
+*   On output, adds all property elements belonging to the time interval
+*  [tMin+n*dT;tMin+(n+1)*dT]
+*  to the initial values of each n-th element of the counts vector,
+*  where dT = (tMax-tMin)/counts.size()  */
+template <typename TYPE>
+void TimeSeriesProperty<TYPE>::histogramData(
+    const Kernel::DateAndTime &tMin, const Kernel::DateAndTime &tMax,
+    std::vector<double> &counts) const {
+
+  size_t nPoints = counts.size();
+  if (nPoints == 0)
+    return; // nothing to do
+
+  double t0 = static_cast<double>(tMin.totalNanoseconds());
+  double t1 = static_cast<double>(tMax.totalNanoseconds());
+  if (t0 > t1)
+    throw std::invalid_argument(
+        "invalid arguments for histogramData; tMax<tMin");
+
+  double dt = (t1 - t0) / static_cast<double>(nPoints);
+
+  for (auto &ev : m_values) {
+    double time = static_cast<double>(ev.time().totalNanoseconds());
+    if (time < t0 || time >= t1)
+      continue;
+    size_t ind = static_cast<size_t>((time - t0) / dt);
+    counts[ind] += static_cast<double>(ev.value());
+  }
+}
+
+template <>
+void TimeSeriesProperty<std::string>::histogramData(
+    const Kernel::DateAndTime &tMin, const Kernel::DateAndTime &tMax,
+    std::vector<double> &counts) const {
+  UNUSED_ARG(tMin);
+  UNUSED_ARG(tMax);
+  UNUSED_ARG(counts);
+  throw std::runtime_error("histogramData is not implememnted for time series "
+                           "properties containing strings");
+}
+
+/**
+ * Get a vector of values taking the filter into account.
+ * Values will be excluded if their times lie in a region where the filter is
+ * false.
+ * @returns :: Vector of included values only
+ */
+template <typename TYPE>
+std::vector<TYPE> TimeSeriesProperty<TYPE>::filteredValuesAsVector() const {
+  if (m_filter.empty()) {
+    return this->valuesAsVector(); // no filtering to do
+  }
+
+  std::vector<TYPE> filteredValues;
+
+  if (!m_filterApplied) {
+    applyFilter();
+  }
+
+  sortIfNecessary();
+
+  const auto &valueMap = valueAsCorrectMap();
+  for (const auto &entry : valueMap) {
+    if (isTimeFiltered(entry.first)) {
+      filteredValues.push_back(entry.second);
+    }
+  }
+
+  return filteredValues;
+}
+
+/**
+ * Find out if the given time is included in the filtered data
+ * i.e. it does not lie in an excluded region
+ * @param time :: [input] Time to check
+ * @returns :: True if time is in an included region, false if the filter
+ * excludes it.
+ */
+template <typename TYPE>
+bool TimeSeriesProperty<TYPE>::isTimeFiltered(
+    const Kernel::DateAndTime &time) const {
+  if (m_filter.empty()) {
+    return false; // no filter
+  }
+
+  if (!m_filterApplied) {
+    applyFilter();
+  }
+
+  // Find which range it lives in
+  auto filterEntry = std::lower_bound(
+      m_filter.begin(), m_filter.end(), time,
+      [](const std::pair<Kernel::DateAndTime, bool> &filterEntry,
+         const Kernel::DateAndTime &t) { return filterEntry.first < t; });
+
+  if (filterEntry != m_filter.begin()) {
+    --filterEntry; // get the latest time BEFORE the given time
+  }
+  return filterEntry->second;
+}
+
+/**
+ * Get a list of the splitting intervals, if filtering is enabled.
+ * Otherwise the interval is just first time - last time.
+ * @returns :: Vector of splitting intervals
+ */
+template <typename TYPE>
+std::vector<SplittingInterval>
+TimeSeriesProperty<TYPE>::getSplittingIntervals() const {
+  std::vector<SplittingInterval> intervals;
+  // Case where there is no filter
+  if (m_filter.empty()) {
+    intervals.emplace_back(firstTime(), lastTime());
+    return intervals;
+  }
+
+  if (!m_filterApplied) {
+    applyFilter();
+  }
+
+  // (local reference to use in lambda)
+  const auto &localFilter = m_filter;
+  /// Count along to find the next time in the filter for which value is 'val'
+  const auto findNext = [&localFilter](size_t &index, const bool val) {
+    for (; index < localFilter.size(); ++index) {
+      const auto &entry = localFilter[index];
+      if (entry.second == val) {
+        return entry.first;
+      }
+    }
+    return localFilter.back().first;
+  };
+
+  // Look through filter to find start/stop pairs
+  size_t index = 0;
+  while (index < m_filter.size()) {
+    DateAndTime start, stop;
+    // cppcheck-suppress knownConditionTrueFalse
+    if (index == 0) {
+      if (m_filter[0].second) {
+        start = m_filter[0].first;
+      } else {
+        start = firstTime();
+      }
+    } else {
+      start = findNext(index, true);
+    }
+    stop = findNext(index, false);
+    if (stop != start) { // avoid empty ranges
+      intervals.emplace_back(start, stop);
+    }
+  }
+
+  return intervals;
 }
 
 /// @cond

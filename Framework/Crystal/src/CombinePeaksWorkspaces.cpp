@@ -2,6 +2,7 @@
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
+#include "MantidAPI/Sample.h"
 
 namespace Mantid {
 namespace Crystal {

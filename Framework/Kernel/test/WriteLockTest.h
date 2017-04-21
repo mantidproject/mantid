@@ -13,12 +13,15 @@ class MockDataItem : public DataItem {
 public:
   const std::string id() const override { return "MockDataItem"; }
   /// The name of the object
-  const std::string name() const override { return "Noone"; }
+  const std::string &getName() const override { return m_name; }
   /// Can this object be accessed from multiple threads safely
   bool threadSafe() const override { return true; }
   /// Serializes the object to a string
   const std::string toString() const override { return "Nothing"; }
   friend class WriteLockTest;
+
+private:
+  std::string m_name{"Noone"};
 };
 
 class WriteLockTest : public CxxTest::TestSuite {

@@ -144,4 +144,30 @@ public:
   void test_TOFRange() { do_test_TOFRange(TOF); }
 };
 
+class MaskPeaksWorkspaceTestPerformance : public CxxTest::TestSuite {
+public:
+  void setUp() override {
+    EventWorkspace_sptr inputWS = Mantid::DataObjects::MDEventsTestHelper::
+        createDiffractionEventWorkspace(1000, 10000, 16000);
+    AnalysisDataService::Instance().addOrReplace(inputWSName, inputWS);
+
+    PeaksWorkspace_sptr peaksWS(new PeaksWorkspace());
+    Mantid::DataObjects::Peak PeakObj(inputWS->getInstrument(), 1000, 100.);
+    peaksWS->addPeak(PeakObj);
+
+    mpwAlg.initialize();
+    mpwAlg.setProperty("InputWorkspace", inputWS);
+    mpwAlg.setProperty("InPeaksWorkspace", peaksWS);
+  }
+
+  void testPerformance() { mpwAlg.execute(); }
+
+  void tearDown() override {
+    AnalysisDataService::Instance().remove(inputWSName);
+  }
+
+private:
+  MaskPeaksWorkspace mpwAlg;
+  std::string inputWSName = "inputWS";
+};
 #endif /* MANTID_DATAHANDLING_MaskPeaksWorkspaceTEST_H_ */

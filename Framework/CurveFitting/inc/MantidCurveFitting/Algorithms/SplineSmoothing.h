@@ -4,6 +4,7 @@
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/WorkspaceGroup_fwd.h"
 #include "MantidCurveFitting/Functions/BSpline.h"
 
 namespace Mantid {
@@ -47,7 +48,7 @@ public:
   const std::string category() const override;
   /// Summary of algorithms purpose
   const std::string summary() const override {
-    return "Smoothes a set of spectra using a cubic spline. Optionally, this "
+    return "Smooths a set of spectra using a cubic spline. Optionally, this "
            "algorithm can also calculate derivatives up to order 2 as a side "
            "product";
   }
@@ -56,42 +57,38 @@ private:
   /// number of smoothing points to start with
   const int M_START_SMOOTH_POINTS;
 
-  // Overriden methods
+  // Overridden methods
   void init() override;
   void exec() override;
 
   /// smooth a single spectrum of the workspace
-  void smoothSpectrum(int index);
+  void smoothSpectrum(const int index);
 
   /// calculate derivatives for a single spectrum
-  void calculateSpectrumDerivatives(int index, int order);
+  void calculateSpectrumDerivatives(const int index, const int order);
 
   /// setup an output workspace using meta data from inws and taking a number of
   /// spectra
   API::MatrixWorkspace_sptr
-  setupOutputWorkspace(API::MatrixWorkspace_const_sptr inws, int size) const;
+  setupOutputWorkspace(const API::MatrixWorkspace_sptr &inws,
+                       const int size) const;
 
-  /// convert a binned workspace to point data. Uses mean of the bins as point
-  API::MatrixWorkspace_sptr
-  convertBinnedData(API::MatrixWorkspace_sptr workspace);
-
-  /// set the points used in the spline for smoothing
-  void setSmoothingPoint(const int index, const double xpoint,
-                         const double ypoint) const;
+  /// Handle converting point data back to histograms
+  void convertToHistogram();
 
   /// choose points to define a spline and smooth the data
-  void selectSmoothingPoints(API::MatrixWorkspace_const_sptr inputWorkspace,
-                             size_t row);
+  void selectSmoothingPoints(const API::MatrixWorkspace &inputWorkspace,
+                             const size_t row);
 
   /// calculate the spline based on the smoothing points chosen
-  void calculateSmoothing(API::MatrixWorkspace_const_sptr inputWorkspace,
-                          API::MatrixWorkspace_sptr outputWorkspace,
-                          size_t row) const;
+  void calculateSmoothing(const API::MatrixWorkspace &inputWorkspace,
+                          API::MatrixWorkspace &outputWorkspace,
+                          const size_t row) const;
 
   /// calculate the derivatives for a set of points on the spline
-  void calculateDerivatives(API::MatrixWorkspace_const_sptr inputWorkspace,
-                            API::MatrixWorkspace_sptr outputWorkspace,
-                            int order, size_t row) const;
+  void calculateDerivatives(const API::MatrixWorkspace &inputWorkspace,
+                            API::MatrixWorkspace &outputWorkspace,
+                            const int order, const size_t row) const;
 
   /// add a set of smoothing points to the spline
   void addSmoothingPoints(const std::set<int> &points, const double *xs,
@@ -104,6 +101,11 @@ private:
 
   /// Use an existing fit function to tidy smoothing
   void performAdditionalFitting(API::MatrixWorkspace_sptr ws, const int row);
+
+  /// Converts histogram data to point data later processing
+  /// convert a binned workspace to point data. Uses mean of the bins as point
+  API::MatrixWorkspace_sptr
+  convertBinnedData(API::MatrixWorkspace_sptr workspace);
 
   /// CubicSpline member used to perform smoothing
   boost::shared_ptr<Functions::BSpline> m_cspline;

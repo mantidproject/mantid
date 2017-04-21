@@ -1,18 +1,12 @@
 #ifndef MANTID_API_ALGORITHMHASPROPERTY_H_
 #define MANTID_API_ALGORITHMHASPROPERTY_H_
 
-//------------------------------------------------------------------------------
-// Includes
-//------------------------------------------------------------------------------
 #include "MantidAPI/DllConfig.h"
 #include "MantidKernel/TypedValidator.h"
 
 namespace Mantid {
 namespace API {
 
-//------------------------------------------------------------------------------
-// Forward declaration
-//------------------------------------------------------------------------------
 class IAlgorithm;
 
 /**
@@ -46,25 +40,11 @@ class IAlgorithm;
 class MANTID_API_DLL AlgorithmHasProperty
     : public Kernel::TypedValidator<boost::shared_ptr<IAlgorithm>> {
 public:
-  /// Constructor
   AlgorithmHasProperty(const std::string &propName);
-  /**
-   * Get a string representation of the type
-   * @returns A string containing the validator type
-   */
-  inline std::string getType() const { return "AlgorithmHasProperty"; }
-  /// Make a copy of the present type of validator
-  inline Kernel::IValidator_sptr clone() const override {
-    return boost::make_shared<AlgorithmHasProperty>(*this);
-  }
+  std::string getType() const;
+  Kernel::IValidator_sptr clone() const override;
 
 protected:
-  /**
-   * Checks the value based on the validator's rules
-   * @param value :: The input algorithm to check
-   * @returns An error message to display to users or an empty string on no
-   * error
-   */
   std::string
   checkValidity(const boost::shared_ptr<IAlgorithm> &value) const override;
 

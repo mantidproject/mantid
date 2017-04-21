@@ -12,11 +12,13 @@
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorAppendGroupCommand.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorAppendRowCommand.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorClearSelectedCommand.h"
+#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorCollapseGroupsCommand.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorCopySelectedCommand.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorCutSelectedCommand.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorDeleteGroupCommand.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorDeleteRowCommand.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorExpandCommand.h"
+#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorExpandGroupsCommand.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorExportTableCommand.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorGroupRowsCommand.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorImportTableCommand.h"
@@ -134,7 +136,7 @@ public:
 
     auto comm = manager.publishCommands();
 
-    TS_ASSERT_EQUALS(comm.size(), 27);
+    TS_ASSERT_EQUALS(comm.size(), 29);
     TS_ASSERT(dynamic_cast<DataProcessorOpenTableCommand *>(comm[0].get()));
     TS_ASSERT(dynamic_cast<DataProcessorNewTableCommand *>(comm[1].get()));
     TS_ASSERT(dynamic_cast<DataProcessorSaveTableCommand *>(comm[2].get()));
@@ -147,23 +149,26 @@ public:
     TS_ASSERT(dynamic_cast<DataProcessorSeparatorCommand *>(comm[9].get()));
     TS_ASSERT(dynamic_cast<DataProcessorProcessCommand *>(comm[10].get()));
     TS_ASSERT(dynamic_cast<DataProcessorExpandCommand *>(comm[11].get()));
-    TS_ASSERT(dynamic_cast<DataProcessorSeparatorCommand *>(comm[12].get()));
-    TS_ASSERT(dynamic_cast<DataProcessorPlotRowCommand *>(comm[13].get()));
-    TS_ASSERT(dynamic_cast<DataProcessorPlotGroupCommand *>(comm[14].get()));
-    TS_ASSERT(dynamic_cast<DataProcessorSeparatorCommand *>(comm[15].get()));
-    TS_ASSERT(dynamic_cast<DataProcessorAppendRowCommand *>(comm[16].get()));
-    TS_ASSERT(dynamic_cast<DataProcessorAppendGroupCommand *>(comm[17].get()));
-    TS_ASSERT(dynamic_cast<DataProcessorSeparatorCommand *>(comm[18].get()));
-    TS_ASSERT(dynamic_cast<DataProcessorGroupRowsCommand *>(comm[19].get()));
-    TS_ASSERT(dynamic_cast<DataProcessorCopySelectedCommand *>(comm[20].get()));
-    TS_ASSERT(dynamic_cast<DataProcessorCutSelectedCommand *>(comm[21].get()));
+    TS_ASSERT(dynamic_cast<DataProcessorExpandGroupsCommand *>(comm[12].get()));
     TS_ASSERT(
-        dynamic_cast<DataProcessorPasteSelectedCommand *>(comm[22].get()));
+        dynamic_cast<DataProcessorCollapseGroupsCommand *>(comm[13].get()));
+    TS_ASSERT(dynamic_cast<DataProcessorSeparatorCommand *>(comm[14].get()));
+    TS_ASSERT(dynamic_cast<DataProcessorPlotRowCommand *>(comm[15].get()));
+    TS_ASSERT(dynamic_cast<DataProcessorPlotGroupCommand *>(comm[16].get()));
+    TS_ASSERT(dynamic_cast<DataProcessorSeparatorCommand *>(comm[17].get()));
+    TS_ASSERT(dynamic_cast<DataProcessorAppendRowCommand *>(comm[18].get()));
+    TS_ASSERT(dynamic_cast<DataProcessorAppendGroupCommand *>(comm[19].get()));
+    TS_ASSERT(dynamic_cast<DataProcessorSeparatorCommand *>(comm[20].get()));
+    TS_ASSERT(dynamic_cast<DataProcessorGroupRowsCommand *>(comm[21].get()));
+    TS_ASSERT(dynamic_cast<DataProcessorCopySelectedCommand *>(comm[22].get()));
+    TS_ASSERT(dynamic_cast<DataProcessorCutSelectedCommand *>(comm[23].get()));
     TS_ASSERT(
-        dynamic_cast<DataProcessorClearSelectedCommand *>(comm[23].get()));
-    TS_ASSERT(dynamic_cast<DataProcessorSeparatorCommand *>(comm[24].get()));
-    TS_ASSERT(dynamic_cast<DataProcessorDeleteRowCommand *>(comm[25].get()));
-    TS_ASSERT(dynamic_cast<DataProcessorDeleteGroupCommand *>(comm[26].get()));
+        dynamic_cast<DataProcessorPasteSelectedCommand *>(comm[24].get()));
+    TS_ASSERT(
+        dynamic_cast<DataProcessorClearSelectedCommand *>(comm[25].get()));
+    TS_ASSERT(dynamic_cast<DataProcessorSeparatorCommand *>(comm[26].get()));
+    TS_ASSERT(dynamic_cast<DataProcessorDeleteRowCommand *>(comm[27].get()));
+    TS_ASSERT(dynamic_cast<DataProcessorDeleteGroupCommand *>(comm[28].get()));
   }
 
   void test_append_row() {
@@ -319,6 +324,31 @@ public:
     TS_ASSERT_EQUALS(data[1][1], fourthRow);
   }
 
+  void test_new_table_clears_model() {
+    NiceMock<MockDataProcessorPresenter> presenter;
+    auto table = reflTable();
+    auto whitelist = reflWhitelist();
+    DataProcessorTwoLevelTreeManager manager(&presenter, whitelist);
+
+    TS_ASSERT_THROWS_NOTHING(manager.newTable(table, whitelist));
+    TS_ASSERT_EQUALS(manager.getTableWorkspace()->rowCount(), 4);
+
+    TS_ASSERT_THROWS_NOTHING(manager.newTable(whitelist));
+    auto ws = manager.getTableWorkspace();
+    TS_ASSERT_EQUALS(ws->rowCount(), 1);
+    TS_ASSERT_EQUALS(ws->columnCount(), whitelist.size() + 1);
+    // But the row should be empty
+    TS_ASSERT_EQUALS(ws->String(0, 0), std::string());
+    TS_ASSERT_EQUALS(ws->String(0, 1), std::string());
+    TS_ASSERT_EQUALS(ws->String(0, 2), std::string());
+    TS_ASSERT_EQUALS(ws->String(0, 3), std::string());
+    TS_ASSERT_EQUALS(ws->String(0, 4), std::string());
+    TS_ASSERT_EQUALS(ws->String(0, 5), std::string());
+    TS_ASSERT_EQUALS(ws->String(0, 6), std::string());
+    TS_ASSERT_EQUALS(ws->String(0, 7), std::string());
+    TS_ASSERT_EQUALS(ws->String(0, 8), std::string());
+  }
+
   void test_transfer_fails_no_group() {
     NiceMock<MockDataProcessorPresenter> presenter;
     DataProcessorTwoLevelTreeManager manager(&presenter, reflWhitelist());
@@ -395,21 +425,21 @@ public:
     auto data = manager.selectedData(false);
     TS_ASSERT(Mock::VerifyAndClearExpectations(&presenter));
 
-    TS_ASSERT_EQUALS(data.size(), 3);
-    std::vector<std::string> secondRow = {
+    TS_ASSERT_EQUALS(data.size(), 2);
+    std::vector<std::string> firstRow = {
         "12345", "0.5",  "20000", "0.1",
         "0.2",   "0.04", "5",     "CorrectDetectorPositions=1"};
-    std::vector<std::string> thirdRow = {
+    std::vector<std::string> secondRow = {
         "12346", "0.6",  "20001", "0.1",
         "0.2",   "0.04", "4",     "CorrectDetectorPositions=0"};
-    std::vector<std::string> fourthRow = {"12347", "0.7",  "20003", "0.3",
-                                          "0.4",   "0.01", "3",     ""};
-    std::vector<std::string> fifthRow = {"12348", "0.8",  "20004", "0.4",
-                                         "0.5",   "0.02", "2",     ""};
-    TS_ASSERT_EQUALS(data[1][0], secondRow);
-    TS_ASSERT_EQUALS(data[1][1], thirdRow);
-    TS_ASSERT_EQUALS(data[2][0], fourthRow);
-    TS_ASSERT_EQUALS(data[2][1], fifthRow);
+    std::vector<std::string> thirdRow = {"12347", "0.7",  "20003", "0.3",
+                                         "0.4",   "0.01", "3",     ""};
+    std::vector<std::string> fourthRow = {"12348", "0.8",  "20004", "0.4",
+                                          "0.5",   "0.02", "2",     ""};
+    TS_ASSERT_EQUALS(data[0][0], firstRow);
+    TS_ASSERT_EQUALS(data[0][1], secondRow);
+    TS_ASSERT_EQUALS(data[1][0], thirdRow);
+    TS_ASSERT_EQUALS(data[1][1], fourthRow);
   }
 
   void test_update() {

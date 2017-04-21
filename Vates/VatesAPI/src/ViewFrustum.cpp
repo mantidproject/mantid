@@ -17,9 +17,11 @@ namespace VATES {
  * @param farPlane The far plane.
  * @param nearPlane The near plane.
  */
-ViewFrustum::ViewFrustum(const LeftPlane leftPlane, const RightPlane rightPlane,
-                         const BottomPlane bottomPlane, const TopPlane topPlane,
-                         const FarPlane farPlane, const NearPlane nearPlane)
+ViewFrustum::ViewFrustum(const LeftPlane &leftPlane,
+                         const RightPlane &rightPlane,
+                         const BottomPlane &bottomPlane,
+                         const TopPlane &topPlane, const FarPlane &farPlane,
+                         const NearPlane &nearPlane)
     : m_leftPlane(leftPlane), m_rightPlane(rightPlane), m_topPlane(topPlane),
       m_bottomPlane(bottomPlane), m_farPlane(farPlane), m_nearPlane(nearPlane) {
 }

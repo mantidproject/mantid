@@ -6,6 +6,7 @@
 #include "MantidDataHandling/SetSampleMaterial.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/Sample.h"
 #include "MantidKernel/Material.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"

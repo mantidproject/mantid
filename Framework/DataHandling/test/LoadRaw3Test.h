@@ -3,6 +3,7 @@
 
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/DetectorInfo.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
@@ -11,6 +12,8 @@
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidKernel/Unit.h"
+#include <boost/lexical_cast.hpp>
 #include <cxxtest/TestSuite.h>
 
 using namespace Mantid;
@@ -105,13 +108,13 @@ public:
     TS_ASSERT_EQUALS(samplepos->getName(), "nickel-holder");
     TS_ASSERT_DELTA(samplepos->getPos().Z(), 0.0, 0.01);
 
-    boost::shared_ptr<const Mantid::Geometry::Detector> ptrDet103 =
-        boost::dynamic_pointer_cast<const Mantid::Geometry::Detector>(
-            i->getDetector(103));
-    TS_ASSERT_EQUALS(ptrDet103->getID(), 103);
-    TS_ASSERT_EQUALS(ptrDet103->getName(), "pixel");
-    TS_ASSERT_DELTA(ptrDet103->getPos().X(), 0.4013, 0.01);
-    TS_ASSERT_DELTA(ptrDet103->getPos().Z(), 2.4470, 0.01);
+    const auto &detectorInfo = output2D->detectorInfo();
+    const auto detIndex = detectorInfo.indexOf(103);
+    const auto &det103 = detectorInfo.detector(detIndex);
+    TS_ASSERT_EQUALS(det103.getID(), 103);
+    TS_ASSERT_EQUALS(det103.getName(), "pixel");
+    TS_ASSERT_DELTA(detectorInfo.position(detIndex).X(), 0.4013, 0.01);
+    TS_ASSERT_DELTA(detectorInfo.position(detIndex).Z(), 2.4470, 0.01);
 
     //----------------------------------------------------------------------
     // Test code copied from LoadLogTest to check Child Algorithm is running
@@ -426,11 +429,11 @@ public:
     Workspace2D_sptr output2D =
         boost::dynamic_pointer_cast<Workspace2D>(output);
 
-    boost::shared_ptr<const Instrument> i = output2D->getInstrument();
-    Mantid::Geometry::IDetector_const_sptr ptrDet = i->getDetector(60);
-    TS_ASSERT_EQUALS(ptrDet->getID(), 60);
+    const auto &detectorInfo = output2D->detectorInfo();
+    const auto &detector = detectorInfo.detector(detectorInfo.indexOf(60));
+    TS_ASSERT_EQUALS(detector.getID(), 60);
 
-    Mantid::Geometry::ParameterMap &pmap = output2D->instrumentParameters();
+    const auto &pmap = output2D->constInstrumentParameters();
     TS_ASSERT_EQUALS(static_cast<int>(pmap.size()), 160);
     AnalysisDataService::Instance().remove("parameterIDF");
   }
@@ -537,13 +540,14 @@ public:
     TS_ASSERT_EQUALS(samplepos->getName(), "nickel-holder");
     TS_ASSERT_DELTA(samplepos->getPos().Z(), 0.0, 0.01);
 
-    boost::shared_ptr<const Mantid::Geometry::Detector> ptrDet103 =
-        boost::dynamic_pointer_cast<const Mantid::Geometry::Detector>(
-            i->getDetector(103));
-    TS_ASSERT_EQUALS(ptrDet103->getID(), 103);
-    TS_ASSERT_EQUALS(ptrDet103->getName(), "pixel");
-    TS_ASSERT_DELTA(ptrDet103->getPos().X(), 0.4013, 0.01);
-    TS_ASSERT_DELTA(ptrDet103->getPos().Z(), 2.4470, 0.01);
+    const auto &detectorInfo = output2D->detectorInfo();
+    const auto detectorIndex = detectorInfo.indexOf(103);
+    const auto &detector103 = detectorInfo.detector(detectorIndex);
+
+    TS_ASSERT_EQUALS(detector103.getID(), 103);
+    TS_ASSERT_EQUALS(detector103.getName(), "pixel");
+    TS_ASSERT_DELTA(detectorInfo.position(detectorIndex).X(), 0.4013, 0.01);
+    TS_ASSERT_DELTA(detectorInfo.position(detectorIndex).Z(), 2.4470, 0.01);
 
     ////----------------------------------------------------------------------
     // Test code copied from LoadLogTest to check Child Algorithm is running
@@ -1153,8 +1157,8 @@ private:
     PropertyWithValue<int> *current_period_property =
         dynamic_cast<PropertyWithValue<int> *>(prop);
     TS_ASSERT(current_period_property != NULL);
-    int actual_period;
-    Kernel::toValue<int>(current_period_property->value(), actual_period);
+    int actual_period =
+        boost::lexical_cast<int>(current_period_property->value());
     TS_ASSERT_EQUALS(expected_period, actual_period);
     // Check the period n property.
     std::stringstream stream;

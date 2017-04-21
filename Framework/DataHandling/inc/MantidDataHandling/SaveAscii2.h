@@ -6,7 +6,6 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
-#include "MantidAPI/SpectraDetectorTypes.h"
 
 namespace Mantid {
 namespace DataHandling {
@@ -59,18 +58,8 @@ private:
   void init() override;
   /// Overwrites Algorithm method
   void exec() override;
-  /**writes a spectra to the file using a workspace ID
-  @param spectraIndex :: an integer relating to a workspace ID
-  @param file :: the file writer object
-  */
-  void writeSpectra(const int &spectraIndex, std::ofstream &file);
-  /**writes a spectra to the file using an iterator
-  @param spectraItr :: a set<int> iterator pointing to a set of workspace IDs to
-  be saved
-  @param file :: the file writer object
-  */
-  void writeSpectra(const std::set<int>::const_iterator &spectraItr,
-                    std::ofstream &file);
+  /// Writes a spectrum to the file using a workspace index
+  void writeSpectrum(const int &wsIndex, std::ofstream &file);
   std::vector<std::string> stringListToVector(std::string &inputString);
   void populateQMetaData();
   void populateSpectrumNumberMetaData();
@@ -87,12 +76,10 @@ private:
   std::string m_sep;
   bool m_writeDX;
   bool m_writeID;
-  bool m_isHistogram;
   bool m_isCommonBins;
   API::MatrixWorkspace_const_sptr m_ws;
   std::vector<std::string> m_metaData;
   std::map<std::string, std::vector<std::string>> m_metaDataMap;
-  spec2index_map m_specToIndexMap;
 };
 } // namespace DataHandling
 } // namespace Mantid

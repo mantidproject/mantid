@@ -1,4 +1,5 @@
-﻿#pylint: disable=invalid-name
+#pylint: disable=invalid-name
+from __future__ import (absolute_import, division, print_function)
 from Direct.PropertiesDescriptors import *
 from Direct.RunDescriptor import RunDescriptor,RunDescriptorDependent
 
@@ -16,12 +17,11 @@ class NonIDF_Properties(object):
     # logging levels available for user
 #pylint: disable=unnecessary-lambda
     log_options = \
-        { "error" :       (1,lambda (msg):   logger.error(msg)),
-          "warning" :     (2,lambda (msg):   logger.warning(msg)),
-          "notice" :      (3,lambda (msg):   logger.notice(msg)),
-          "information" : (4,lambda (msg):   logger.information(msg)),
-          "debug" :       (5,lambda (msg):   logger.debug(msg))}
-
+        { "error" :       (1,lambda msg:   logger.error(msg)),
+          "warning" :     (2,lambda msg:   logger.warning(msg)),
+          "notice" :      (3,lambda msg:   logger.notice(msg)),
+          "information" : (4,lambda msg:   logger.information(msg)),
+          "debug" :       (5,lambda msg:   logger.debug(msg))}
 
     def __init__(self,Instrument,run_workspace=None):
         """ initialize main properties, defined by the class
@@ -29,7 +29,7 @@ class NonIDF_Properties(object):
                        deployed in reduction
         """
         #
-        if not run_workspace is None:
+        if run_workspace is not None:
             object.__setattr__(self,'sample_run',run_workspace)
 
         # Helper properties, defining logging options
@@ -67,7 +67,7 @@ class NonIDF_Properties(object):
         else:
         # TODO: reconcile this with Mantid.
             if lev <= self._current_log_level:
-                print msg
+                print(msg)
     #-----------------------------------------------------------------------------
     # Complex properties with personal descriptors
     #-----------------------------------------------------------------------------
@@ -108,9 +108,11 @@ class NonIDF_Properties(object):
     #
     _tmp_run     = RunDescriptor("_TMP","Property used for storing intermediate run data during reduction.")
     #-----------------------------------------------------------------------------------
+
     def getDefaultParameterValue(self,par_name):
         """method to get default parameter value, specified in IDF"""
         return prop_helpers.get_default_parameter(self.instrument,par_name)
+
     @property
     def instrument(self):
         if self._pInstrument is None:
@@ -120,15 +122,18 @@ class NonIDF_Properties(object):
     #
     #-----------------------------------------------------------------------------------
     #TODO: do something about it
+
     @property
     def print_diag_results(self):
         """ property-sink used in diagnostics """
         return True
+
     @print_diag_results.setter
     def print_diag_results(self,value):
         pass
     #-----------------------------------------------------------------------------------
     # -----------------------------------------------------------------------------
+
     @property
     def cashe_sum_ws(self):
         """Used together with sum_runs property. If True, a workspace
@@ -136,11 +141,13 @@ class NonIDF_Properties(object):
            and used later to add more runs to it
       """
         return self._cashe_sum_ws
+
     @cashe_sum_ws.setter
     def cashe_sum_ws(self,val):
 #pylint: disable=attribute-defined-outside-init
         self._cashe_sum_ws = bool(val)
     # -----------------------------------------------------------------------------
+
     @property
     def log_to_mantid(self):
         """Property specify if high level log should be printed to stdout or added to common Mantid log"""
@@ -150,6 +157,7 @@ class NonIDF_Properties(object):
     def log_to_mantid(self,val):
         object.__setattr__(self,'_log_to_mantid',bool(val))
     # -----------------------------------------------------------------------------
+
     @property
     def mapmask_ref_ws(self):
         """Property provides reference workspace for LoadMask and GroupWorkspace algorithms
@@ -186,7 +194,6 @@ class NonIDF_Properties(object):
                     facility_ = config.getFacility('TEST_LIVE')
                 #end
 
-
             elif isinstance(Instrument,str): # instrument name defined
                 new_name,full_name,facility_ = prop_helpers.check_instrument_name(None,Instrument)
                 #idf_dir = config.getString('instrumentDefinitgeton.directory')
@@ -206,5 +213,3 @@ class NonIDF_Properties(object):
 
 if __name__ == "__main__":
     pass
-
-

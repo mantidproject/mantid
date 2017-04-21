@@ -1,8 +1,8 @@
 #include "MantidVatesAPI/vtkPeakMarkerFactory.h"
 #include "MantidVatesAPI/ProgressAction.h"
-#include <boost/math/special_functions/fpclassify.hpp>
 #include "MantidAPI/Workspace.h"
 #include "MantidAPI/IPeaksWorkspace.h"
+#include "MantidAPI/Run.h"
 #include "MantidGeometry/Crystal/PeakShape.h"
 #include "MantidDataObjects/PeakShapeSpherical.h"
 #include "MantidKernel/V3D.h"
@@ -41,7 +41,8 @@ void vtkPeakMarkerFactory::initialize(Mantid::API::Workspace_sptr workspace) {
 
   try {
     m_peakRadius =
-        atof(m_workspace->run().getProperty("PeakRadius")->value().c_str());
+        std::stod(m_workspace->run().getProperty("PeakRadius")->value());
+
   } catch (Mantid::Kernel::Exception::NotFoundError &) {
   }
 }

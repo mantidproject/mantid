@@ -35,6 +35,8 @@ public:
   void set(size_t iY, size_t iP, double value) override { M[iP][iY] = value; }
 
   double get(size_t iY, size_t iP) override { return M[iP][iY]; }
+
+  void zero() override { M.zeroMatrix(); }
 };
 
 class PeakHKLErrorsTest : public CxxTest::TestSuite {

@@ -3,20 +3,17 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidDataHandling/LoadEmptyInstrument.h"
-#include "MantidAPI/WorkspaceFactory.h"
-#include "MantidGeometry/Instrument.h"
-#include "MantidDataObjects/Workspace2D.h"
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidKernel/Exception.h"
-#include "MantidAPI/FrameworkManager.h"
-#include "MantidAPI/Workspace.h"
-#include "MantidAPI/Algorithm.h"
+#include "MantidAPI/DetectorInfo.h"
+#include "MantidAPI/SpectrumInfo.h"
+#include "MantidDataHandling/LoadEmptyInstrument.h"
+#include "MantidDataObjects/EventWorkspace.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Component.h"
 #include "MantidGeometry/Instrument/FitParameter.h"
-#include <vector>
-#include "MantidDataObjects/EventWorkspace.h"
+#include "MantidKernel/Exception.h"
 #include "MantidTestHelpers/ScopedFileHelper.h"
+#include <vector>
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -155,7 +152,7 @@ public:
     ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName);
 
     // get parameter map
-    ParameterMap &paramMap = ws->instrumentParameters();
+    const auto &paramMap = ws->constInstrumentParameters();
 
     // check that parameter have been read into the instrument parameter map
     std::vector<V3D> ret1 = paramMap.getV3D("monitors", "pos");
@@ -164,33 +161,34 @@ public:
     TS_ASSERT_DELTA(ret1[0].Z(), 0.0, 0.0001);
 
     // get detector corresponding to workspace index 0
-    IDetector_const_sptr det = ws->getDetector(0);
+    const auto &spectrumInfo = ws->spectrumInfo();
+    const auto &det = spectrumInfo.detector(0);
 
-    TS_ASSERT_EQUALS(det->getID(), 1001);
-    TS_ASSERT_EQUALS(det->getName(), "upstream_monitor_det");
-    TS_ASSERT_DELTA(det->getPos().X(), 10.0, 0.0001);
-    TS_ASSERT_DELTA(det->getPos().Y(), 0.0, 0.0001);
-    TS_ASSERT_DELTA(det->getPos().Z(), 0.0, 0.0001);
+    TS_ASSERT_EQUALS(det.getID(), 1001);
+    TS_ASSERT_EQUALS(det.getName(), "upstream_monitor_det");
+    TS_ASSERT_DELTA(spectrumInfo.position(0).X(), 10.0, 0.0001);
+    TS_ASSERT_DELTA(spectrumInfo.position(0).Y(), 0.0, 0.0001);
+    TS_ASSERT_DELTA(spectrumInfo.position(0).Z(), 0.0, 0.0001);
 
-    Parameter_sptr param = paramMap.get(&(*det), "boevs2");
+    Parameter_sptr param = paramMap.get(&det, "boevs2");
     TS_ASSERT_DELTA(param->value<double>(), 16.0, 0.0001);
 
-    param = paramMap.get(&(*det), "boevs3");
+    param = paramMap.get(&det, "boevs3");
     TS_ASSERT_DELTA(param->value<double>(), 32.0, 0.0001);
 
-    param = paramMap.get(&(*det), "boevs");
+    param = paramMap.get(&det, "boevs");
     TS_ASSERT(param == NULL);
 
-    param = paramMap.getRecursive(&(*det), "boevs", "double");
+    param = paramMap.getRecursive(&det, "boevs", "double");
     TS_ASSERT_DELTA(param->value<double>(), 8.0, 0.0001);
 
-    param = paramMap.getRecursive(&(*det), "fiddo", "fitting");
+    param = paramMap.getRecursive(&det, "fiddo", "fitting");
     const FitParameter &fitParam = param->value<FitParameter>();
     TS_ASSERT_DELTA(fitParam.getValue(), 84.0, 0.0001);
     TS_ASSERT(fitParam.getTie().compare("") == 0);
     TS_ASSERT(fitParam.getFunction().compare("somefunction") == 0);
 
-    param = paramMap.getRecursive(&(*det), "toplevel", "fitting");
+    param = paramMap.getRecursive(&det, "toplevel", "fitting");
     const FitParameter &fitParam1 = param->value<FitParameter>();
     TS_ASSERT_DELTA(fitParam1.getValue(), 100.0, 0.0001);
     TS_ASSERT(fitParam1.getTie().compare("") == 0);
@@ -198,7 +196,7 @@ public:
     TS_ASSERT(fitParam1.getConstraint().compare("80 < toplevel < 120") == 0);
     TS_ASSERT(!fitParam1.getLookUpTable().containData());
 
-    param = paramMap.getRecursive(&(*det), "toplevel2", "fitting");
+    param = paramMap.getRecursive(&det, "toplevel2", "fitting");
     const FitParameter &fitParam2 = param->value<FitParameter>();
     TS_ASSERT_DELTA(fitParam2.getValue(0), -48.5, 0.0001);
     TS_ASSERT_DELTA(fitParam2.getValue(5), 1120.0, 0.0001);
@@ -212,7 +210,7 @@ public:
     TS_ASSERT(fitParam2.getLookUpTable().getYUnit()->unitID().compare(
                   "dSpacing") == 0);
 
-    param = paramMap.getRecursive(&(*det), "formula", "fitting");
+    param = paramMap.getRecursive(&det, "formula", "fitting");
     const FitParameter &fitParam3 = param->value<FitParameter>();
     TS_ASSERT_DELTA(fitParam3.getValue(0), 100.0, 0.0001);
     TS_ASSERT_DELTA(fitParam3.getValue(5), 175.0, 0.0001);
@@ -224,7 +222,7 @@ public:
     TS_ASSERT(fitParam3.getFormulaUnit().compare("TOF") == 0);
     TS_ASSERT(fitParam3.getResultUnit().compare("dSpacing") == 0);
 
-    param = paramMap.getRecursive(&(*det), "percentage", "fitting");
+    param = paramMap.getRecursive(&det, "percentage", "fitting");
     const FitParameter &fitParam4 = param->value<FitParameter>();
     TS_ASSERT_DELTA(fitParam4.getValue(), 250.0, 0.0001);
     TS_ASSERT(fitParam4.getTie().compare("") == 0);
@@ -250,16 +248,18 @@ public:
     dummy = paramMap.getDouble("nickel-holder", "fjols");
     TS_ASSERT_DELTA(dummy[0], 200.0, 0.0001);
 
-    boost::shared_ptr<const Instrument> i = ws->getInstrument();
-    boost::shared_ptr<const IDetector> ptrDet = i->getDetector(1008);
-    TS_ASSERT_EQUALS(ptrDet->getID(), 1008);
-    TS_ASSERT_EQUALS(ptrDet->getName(), "combined translation6");
-    param = paramMap.get(&(*ptrDet), "fjols");
+    const auto &detectorInfo = ws->detectorInfo();
+
+    const auto &ptrDet = detectorInfo.detector(detectorInfo.indexOf(1008));
+    TS_ASSERT_EQUALS(ptrDet.getID(), 1008);
+    TS_ASSERT_EQUALS(ptrDet.getName(), "combined translation6");
+    param = paramMap.get(&ptrDet, "fjols");
     TS_ASSERT_DELTA(param->value<double>(), 20.0, 0.0001);
-    param = paramMap.get(&(*ptrDet), "nedtur");
+    param = paramMap.get(&ptrDet, "nedtur");
     TS_ASSERT_DELTA(param->value<double>(), 77.0, 0.0001);
 
     // test that can hold of "string" parameter in two ways
+    boost::shared_ptr<const Instrument> i = ws->getInstrument();
     boost::shared_ptr<const IComponent> ptrNickelHolder =
         i->getComponentByName("nickel-holder");
     std::string dummyString =
@@ -270,128 +270,128 @@ public:
     TS_ASSERT(dummyStringVec[0].compare("boevs") == 0);
 
     // check if combined translation works
-    ptrDet = i->getDetector(1003);
-    TS_ASSERT_EQUALS(ptrDet->getName(), "combined translation");
-    TS_ASSERT_EQUALS(ptrDet->getID(), 1003);
-    TS_ASSERT_DELTA(ptrDet->getPos().X(), 12.0, 0.0001);
-    TS_ASSERT_DELTA(ptrDet->getPos().Y(), 0.0, 0.0001);
-    TS_ASSERT_DELTA(ptrDet->getPos().Z(), 0.0, 0.0001);
+    const auto &ptrDet1003 = detectorInfo.detector(detectorInfo.indexOf(1003));
+    TS_ASSERT_EQUALS(ptrDet1003.getName(), "combined translation");
+    TS_ASSERT_EQUALS(ptrDet1003.getID(), 1003);
+    TS_ASSERT_DELTA(ptrDet1003.getPos().X(), 12.0, 0.0001);
+    TS_ASSERT_DELTA(ptrDet1003.getPos().Y(), 0.0, 0.0001);
+    TS_ASSERT_DELTA(ptrDet1003.getPos().Z(), 0.0, 0.0001);
 
-    boost::shared_ptr<const IDetector> ptrDet1 = i->getDetector(1004);
-    TS_ASSERT_EQUALS(ptrDet1->getName(), "combined translation2");
-    TS_ASSERT_EQUALS(ptrDet1->getID(), 1004);
-    TS_ASSERT_DELTA(ptrDet1->getRelativePos().X(), 10.0, 0.0001);
-    TS_ASSERT_DELTA(ptrDet1->getPos().Y(), -8.0, 0.0001);
-    TS_ASSERT_DELTA(ptrDet1->getPos().Z(), 3.0, 0.0001);
+    const auto &ptrDet1004 = detectorInfo.detector(detectorInfo.indexOf(1004));
+    TS_ASSERT_EQUALS(ptrDet1004.getName(), "combined translation2");
+    TS_ASSERT_EQUALS(ptrDet1004.getID(), 1004);
+    TS_ASSERT_DELTA(ptrDet1004.getRelativePos().X(), 10.0, 0.0001);
+    TS_ASSERT_DELTA(ptrDet1004.getPos().Y(), -8.0, 0.0001);
+    TS_ASSERT_DELTA(ptrDet1004.getPos().Z(), 3.0, 0.0001);
 
-    ptrDet1 = i->getDetector(1005);
-    TS_ASSERT_EQUALS(ptrDet1->getName(), "combined translation3");
-    TS_ASSERT_EQUALS(ptrDet1->getID(), 1005);
-    TS_ASSERT_DELTA(ptrDet1->getPos().X(), 12.0, 0.0001);
-    TS_ASSERT_DELTA(ptrDet1->getPos().Y(), 0.0, 0.0001);
-    TS_ASSERT_DELTA(ptrDet1->getPos().Z(), 0.0, 0.0001);
+    const auto &ptrDet1005 = detectorInfo.detector(detectorInfo.indexOf(1005));
+    TS_ASSERT_EQUALS(ptrDet1005.getName(), "combined translation3");
+    TS_ASSERT_EQUALS(ptrDet1005.getID(), 1005);
+    TS_ASSERT_DELTA(ptrDet1005.getPos().X(), 12.0, 0.0001);
+    TS_ASSERT_DELTA(ptrDet1005.getPos().Y(), 0.0, 0.0001);
+    TS_ASSERT_DELTA(ptrDet1005.getPos().Z(), 0.0, 0.0001);
 
-    ptrDet1 = i->getDetector(1006);
-    TS_ASSERT_EQUALS(ptrDet1->getName(), "combined translation4");
-    TS_ASSERT_EQUALS(ptrDet1->getID(), 1006);
-    TS_ASSERT_DELTA(ptrDet1->getPos().X(), 20.0, 0.0001);
-    TS_ASSERT_DELTA(ptrDet1->getPos().Y(), -8.0, 0.0001);
-    TS_ASSERT_DELTA(ptrDet1->getPos().Z(), 0.0, 0.0001);
+    const auto &ptrDet1006 = detectorInfo.detector(detectorInfo.indexOf(1006));
+    TS_ASSERT_EQUALS(ptrDet1006.getName(), "combined translation4");
+    TS_ASSERT_EQUALS(ptrDet1006.getID(), 1006);
+    TS_ASSERT_DELTA(ptrDet1006.getPos().X(), 20.0, 0.0001);
+    TS_ASSERT_DELTA(ptrDet1006.getPos().Y(), -8.0, 0.0001);
+    TS_ASSERT_DELTA(ptrDet1006.getPos().Z(), 0.0, 0.0001);
 
-    ptrDet1 = i->getDetector(1007);
-    TS_ASSERT_EQUALS(ptrDet1->getName(), "combined translation5");
-    TS_ASSERT_EQUALS(ptrDet1->getID(), 1007);
-    TS_ASSERT_DELTA(ptrDet1->getPos().X(), 12.0, 0.0001);
-    TS_ASSERT_DELTA(ptrDet1->getPos().Y(), 0.0, 0.0001);
-    TS_ASSERT_DELTA(ptrDet1->getPos().Z(), 0.0, 0.0001);
+    const auto &ptrDet1007 = detectorInfo.detector(detectorInfo.indexOf(1007));
+    TS_ASSERT_EQUALS(ptrDet1007.getName(), "combined translation5");
+    TS_ASSERT_EQUALS(ptrDet1007.getID(), 1007);
+    TS_ASSERT_DELTA(ptrDet1007.getPos().X(), 12.0, 0.0001);
+    TS_ASSERT_DELTA(ptrDet1007.getPos().Y(), 0.0, 0.0001);
+    TS_ASSERT_DELTA(ptrDet1007.getPos().Z(), 0.0, 0.0001);
 
-    ptrDet1 = i->getDetector(1008);
-    TS_ASSERT_EQUALS(ptrDet1->getName(), "combined translation6");
-    TS_ASSERT_EQUALS(ptrDet1->getID(), 1008);
-    TS_ASSERT_DELTA(ptrDet1->getPos().X(), 12.0, 0.0001);
-    TS_ASSERT_DELTA(ptrDet1->getPos().Y(), 0.0, 0.0001);
-    TS_ASSERT_DELTA(ptrDet1->getPos().Z(), 0.0, 0.0001);
+    const auto &ptrDet1008 = detectorInfo.detector(detectorInfo.indexOf(1008));
+    TS_ASSERT_EQUALS(ptrDet1008.getName(), "combined translation6");
+    TS_ASSERT_EQUALS(ptrDet1008.getID(), 1008);
+    TS_ASSERT_DELTA(ptrDet1008.getPos().X(), 12.0, 0.0001);
+    TS_ASSERT_DELTA(ptrDet1008.getPos().Y(), 0.0, 0.0001);
+    TS_ASSERT_DELTA(ptrDet1008.getPos().Z(), 0.0, 0.0001);
 
-    ptrDet1 = i->getDetector(1009);
-    TS_ASSERT_EQUALS(ptrDet1->getName(), "combined translation7");
-    TS_ASSERT_EQUALS(ptrDet1->getID(), 1009);
-    TS_ASSERT_DELTA(ptrDet1->getPos().X(), 11.0, 0.0001);
-    TS_ASSERT_DELTA(ptrDet1->getPos().Y(), 8.0, 0.0001);
-    TS_ASSERT_DELTA(ptrDet1->getPos().Z(), 0.0, 0.0001);
+    const auto &ptrDet1009 = detectorInfo.detector(detectorInfo.indexOf(1009));
+    TS_ASSERT_EQUALS(ptrDet1009.getName(), "combined translation7");
+    TS_ASSERT_EQUALS(ptrDet1009.getID(), 1009);
+    TS_ASSERT_DELTA(ptrDet1009.getPos().X(), 11.0, 0.0001);
+    TS_ASSERT_DELTA(ptrDet1009.getPos().Y(), 8.0, 0.0001);
+    TS_ASSERT_DELTA(ptrDet1009.getPos().Z(), 0.0, 0.0001);
 
-    ptrDet1 = i->getDetector(1010);
-    TS_ASSERT_EQUALS(ptrDet1->getName(), "combined translation8");
-    TS_ASSERT_DELTA(ptrDet1->getPos().X(), 11.0, 0.0001);
-    TS_ASSERT_DELTA(ptrDet1->getPos().Y(), 0.0, 0.0001);
-    TS_ASSERT_DELTA(ptrDet1->getPos().Z(), 8.0, 0.0001);
+    const auto &ptrDet1010 = detectorInfo.detector(detectorInfo.indexOf(1010));
+    TS_ASSERT_EQUALS(ptrDet1010.getName(), "combined translation8");
+    TS_ASSERT_DELTA(ptrDet1010.getPos().X(), 11.0, 0.0001);
+    TS_ASSERT_DELTA(ptrDet1010.getPos().Y(), 0.0, 0.0001);
+    TS_ASSERT_DELTA(ptrDet1010.getPos().Z(), 8.0, 0.0001);
 
-    ptrDet1 = i->getDetector(1011);
-    TS_ASSERT_EQUALS(ptrDet1->getName(), "combined translation9");
-    TS_ASSERT_DELTA(ptrDet1->getPos().X(), 11.0, 0.0001);
-    TS_ASSERT_DELTA(ptrDet1->getPos().Y(), 0.0, 0.0001);
-    TS_ASSERT_DELTA(ptrDet1->getPos().Z(), -8.0, 0.0001);
+    const auto &ptrDet1011 = detectorInfo.detector(detectorInfo.indexOf(1011));
+    TS_ASSERT_EQUALS(ptrDet1011.getName(), "combined translation9");
+    TS_ASSERT_DELTA(ptrDet1011.getPos().X(), 11.0, 0.0001);
+    TS_ASSERT_DELTA(ptrDet1011.getPos().Y(), 0.0, 0.0001);
+    TS_ASSERT_DELTA(ptrDet1011.getPos().Z(), -8.0, 0.0001);
 
-    ptrDet1 = i->getDetector(1012);
-    TS_ASSERT_EQUALS(ptrDet1->getName(), "combined translation10");
-    TS_ASSERT_DELTA(ptrDet1->getPos().X(), 11.0, 0.0001);
-    TS_ASSERT_DELTA(ptrDet1->getPos().Y(), 8.0, 0.0001);
-    TS_ASSERT_DELTA(ptrDet1->getPos().Z(), 0.0, 0.0001);
+    const auto &ptrDet1012 = detectorInfo.detector(detectorInfo.indexOf(1012));
+    TS_ASSERT_EQUALS(ptrDet1012.getName(), "combined translation10");
+    TS_ASSERT_DELTA(ptrDet1012.getPos().X(), 11.0, 0.0001);
+    TS_ASSERT_DELTA(ptrDet1012.getPos().Y(), 8.0, 0.0001);
+    TS_ASSERT_DELTA(ptrDet1012.getPos().Z(), 0.0, 0.0001);
 
-    ptrDet1 = i->getDetector(1013);
-    TS_ASSERT_EQUALS(ptrDet1->getName(), "combined translation11");
-    TS_ASSERT_DELTA(ptrDet1->getPos().X(), 11.0, 0.0001);
-    TS_ASSERT_DELTA(ptrDet1->getPos().Y(), -8.0, 0.0001);
-    TS_ASSERT_DELTA(ptrDet1->getPos().Z(), 0.0, 0.0001);
+    const auto &ptrDet1013 = detectorInfo.detector(detectorInfo.indexOf(1013));
+    TS_ASSERT_EQUALS(ptrDet1013.getName(), "combined translation11");
+    TS_ASSERT_DELTA(ptrDet1013.getPos().X(), 11.0, 0.0001);
+    TS_ASSERT_DELTA(ptrDet1013.getPos().Y(), -8.0, 0.0001);
+    TS_ASSERT_DELTA(ptrDet1013.getPos().Z(), 0.0, 0.0001);
 
     // test parameter rotation
-    ptrDet1 = i->getDetector(1200);
-    TS_ASSERT_EQUALS(ptrDet1->getName(), "param rot-test");
-    TS_ASSERT_EQUALS(ptrDet1->getID(), 1200);
-    TS_ASSERT_DELTA(ptrDet1->getPos().X(), 10.5, 0.0001);
-    TS_ASSERT_DELTA(ptrDet1->getPos().Y(), 0.0, 0.0001);
-    TS_ASSERT_DELTA(ptrDet1->getPos().Z(), -0.866, 0.0001);
+    const auto &ptrDet1200 = detectorInfo.detector(detectorInfo.indexOf(1200));
+    TS_ASSERT_EQUALS(ptrDet1200.getName(), "param rot-test");
+    TS_ASSERT_EQUALS(ptrDet1200.getID(), 1200);
+    TS_ASSERT_DELTA(ptrDet1200.getPos().X(), 10.5, 0.0001);
+    TS_ASSERT_DELTA(ptrDet1200.getPos().Y(), 0.0, 0.0001);
+    TS_ASSERT_DELTA(ptrDet1200.getPos().Z(), -0.866, 0.0001);
 
-    ptrDet1 = i->getDetector(1201);
-    TS_ASSERT_EQUALS(ptrDet1->getName(), "param rot-test");
-    TS_ASSERT_EQUALS(ptrDet1->getID(), 1201);
-    TS_ASSERT_DELTA(ptrDet1->getPos().X(), 10.5, 0.0001);
-    TS_ASSERT_DELTA(ptrDet1->getPos().Y(), 0.0, 0.0001);
-    TS_ASSERT_DELTA(ptrDet1->getPos().Z(), -0.866, 0.0001);
+    const auto &ptrDet1201 = detectorInfo.detector(detectorInfo.indexOf(1201));
+    TS_ASSERT_EQUALS(ptrDet1201.getName(), "param rot-test");
+    TS_ASSERT_EQUALS(ptrDet1201.getID(), 1201);
+    TS_ASSERT_DELTA(ptrDet1201.getPos().X(), 10.5, 0.0001);
+    TS_ASSERT_DELTA(ptrDet1201.getPos().Y(), 0.0, 0.0001);
+    TS_ASSERT_DELTA(ptrDet1201.getPos().Z(), -0.866, 0.0001);
 
-    ptrDet1 = i->getDetector(1202);
-    TS_ASSERT_EQUALS(ptrDet1->getName(), "param rot-test");
-    TS_ASSERT_EQUALS(ptrDet1->getID(), 1202);
-    TS_ASSERT_DELTA(ptrDet1->getPos().X(), 10, 0.0001);
-    TS_ASSERT_DELTA(ptrDet1->getPos().Y(), 1.0, 0.0001);
-    TS_ASSERT_DELTA(ptrDet1->getPos().Z(), 0, 0.0001);
+    const auto &ptrDet1202 = detectorInfo.detector(detectorInfo.indexOf(1202));
+    TS_ASSERT_EQUALS(ptrDet1202.getName(), "param rot-test");
+    TS_ASSERT_EQUALS(ptrDet1202.getID(), 1202);
+    TS_ASSERT_DELTA(ptrDet1202.getPos().X(), 10, 0.0001);
+    TS_ASSERT_DELTA(ptrDet1202.getPos().Y(), 1.0, 0.0001);
+    TS_ASSERT_DELTA(ptrDet1202.getPos().Z(), 0, 0.0001);
 
-    ptrDet1 = i->getDetector(1203);
-    TS_ASSERT_EQUALS(ptrDet1->getName(), "param rot-test");
-    TS_ASSERT_EQUALS(ptrDet1->getID(), 1203);
-    TS_ASSERT_DELTA(ptrDet1->getPos().X(), 10, 0.0001);
-    TS_ASSERT_DELTA(ptrDet1->getPos().Y(), 1.0, 0.0001);
-    TS_ASSERT_DELTA(ptrDet1->getPos().Z(), 0, 0.0001);
+    const auto &ptrDet1203 = detectorInfo.detector(detectorInfo.indexOf(1203));
+    TS_ASSERT_EQUALS(ptrDet1203.getName(), "param rot-test");
+    TS_ASSERT_EQUALS(ptrDet1203.getID(), 1203);
+    TS_ASSERT_DELTA(ptrDet1203.getPos().X(), 10, 0.0001);
+    TS_ASSERT_DELTA(ptrDet1203.getPos().Y(), 1.0, 0.0001);
+    TS_ASSERT_DELTA(ptrDet1203.getPos().Z(), 0, 0.0001);
 
-    ptrDet1 = i->getDetector(1204);
-    TS_ASSERT_EQUALS(ptrDet1->getName(), "param rot-test");
-    TS_ASSERT_EQUALS(ptrDet1->getID(), 1204);
-    TS_ASSERT_DELTA(ptrDet1->getPos().X(), 10, 0.0001);
-    TS_ASSERT_DELTA(ptrDet1->getPos().Y(), 1.0, 0.0001);
-    TS_ASSERT_DELTA(ptrDet1->getPos().Z(), 0, 0.0001);
+    const auto &ptrDet1204 = detectorInfo.detector(detectorInfo.indexOf(1204));
+    TS_ASSERT_EQUALS(ptrDet1204.getName(), "param rot-test");
+    TS_ASSERT_EQUALS(ptrDet1204.getID(), 1204);
+    TS_ASSERT_DELTA(ptrDet1204.getPos().X(), 10, 0.0001);
+    TS_ASSERT_DELTA(ptrDet1204.getPos().Y(), 1.0, 0.0001);
+    TS_ASSERT_DELTA(ptrDet1204.getPos().Z(), 0, 0.0001);
 
-    ptrDet1 = i->getDetector(1205);
-    TS_ASSERT_EQUALS(ptrDet1->getName(), "param rot-test");
-    TS_ASSERT_EQUALS(ptrDet1->getID(), 1205);
-    TS_ASSERT_DELTA(ptrDet1->getPos().X(), 10, 0.0001);
-    TS_ASSERT_DELTA(ptrDet1->getPos().Y(), 1.0, 0.0001);
-    TS_ASSERT_DELTA(ptrDet1->getPos().Z(), 0, 0.0001);
+    const auto &ptrDet1205 = detectorInfo.detector(detectorInfo.indexOf(1205));
+    TS_ASSERT_EQUALS(ptrDet1205.getName(), "param rot-test");
+    TS_ASSERT_EQUALS(ptrDet1205.getID(), 1205);
+    TS_ASSERT_DELTA(ptrDet1205.getPos().X(), 10, 0.0001);
+    TS_ASSERT_DELTA(ptrDet1205.getPos().Y(), 1.0, 0.0001);
+    TS_ASSERT_DELTA(ptrDet1205.getPos().Z(), 0, 0.0001);
 
-    ptrDet1 = i->getDetector(1206);
-    TS_ASSERT_EQUALS(ptrDet1->getName(), "param rot-test");
-    TS_ASSERT_EQUALS(ptrDet1->getID(), 1206);
-    TS_ASSERT_DELTA(ptrDet1->getPos().X(), 10, 0.0001);
-    TS_ASSERT_DELTA(ptrDet1->getPos().Y(), 0.0, 0.0001);
-    TS_ASSERT_DELTA(ptrDet1->getPos().Z(), 1, 0.0001);
+    const auto &ptrDet1206 = detectorInfo.detector(detectorInfo.indexOf(1206));
+    TS_ASSERT_EQUALS(ptrDet1206.getName(), "param rot-test");
+    TS_ASSERT_EQUALS(ptrDet1206.getID(), 1206);
+    TS_ASSERT_DELTA(ptrDet1206.getPos().X(), 10, 0.0001);
+    TS_ASSERT_DELTA(ptrDet1206.getPos().Y(), 0.0, 0.0001);
+    TS_ASSERT_DELTA(ptrDet1206.getPos().Z(), 1, 0.0001);
 
     // testing r-position, t-position and p-position parameters
     boost::shared_ptr<const IComponent> ptrRTP_Test =
@@ -439,98 +439,99 @@ public:
 
     boost::shared_ptr<const Instrument> i = ws->getInstrument();
 
+    const auto &detectorInfo = ws->detectorInfo();
+
     // check if combined translation works
-    boost::shared_ptr<const IDetector> ptrDet1 = i->getDetector(1001);
-    TS_ASSERT_EQUALS(ptrDet1->getName(), "combined translationA");
-    TS_ASSERT_DELTA(ptrDet1->getPos().X(), 0.0, 0.0001);
-    TS_ASSERT_DELTA(ptrDet1->getPos().Y(), 0.0, 0.0001);
-    TS_ASSERT_DELTA(ptrDet1->getPos().Z(), 10.0, 0.0001);
+    const auto &ptrDet1001 = detectorInfo.detector(detectorInfo.indexOf(1001));
+    TS_ASSERT_EQUALS(ptrDet1001.getName(), "combined translationA");
+    TS_ASSERT_DELTA(ptrDet1001.getPos().X(), 0.0, 0.0001);
+    TS_ASSERT_DELTA(ptrDet1001.getPos().Y(), 0.0, 0.0001);
+    TS_ASSERT_DELTA(ptrDet1001.getPos().Z(), 10.0, 0.0001);
 
-    ptrDet1 = i->getDetector(1002);
-    TS_ASSERT_EQUALS(ptrDet1->getName(), "combined translationB");
-    TS_ASSERT_DELTA(ptrDet1->getPos().X(), 20.0, 0.0001);
-    TS_ASSERT_DELTA(ptrDet1->getPos().Y(), 0.0, 0.0001);
-    TS_ASSERT_DELTA(ptrDet1->getPos().Z(), 0.0, 0.0001);
+    const auto &ptrDet1002 = detectorInfo.detector(detectorInfo.indexOf(1002));
+    TS_ASSERT_EQUALS(ptrDet1002.getName(), "combined translationB");
+    TS_ASSERT_DELTA(ptrDet1002.getPos().X(), 20.0, 0.0001);
+    TS_ASSERT_DELTA(ptrDet1002.getPos().Y(), 0.0, 0.0001);
+    TS_ASSERT_DELTA(ptrDet1002.getPos().Z(), 0.0, 0.0001);
 
-    ptrDet1 = i->getDetector(1003);
-    TS_ASSERT_EQUALS(ptrDet1->getName(), "combined translation");
-    TS_ASSERT_EQUALS(ptrDet1->getID(), 1003);
-    TS_ASSERT_DELTA(ptrDet1->getPos().X(), 20.0, 0.0001);
-    TS_ASSERT_DELTA(ptrDet1->getPos().Y(), 0.0, 0.0001);
-    TS_ASSERT_DELTA(ptrDet1->getPos().Z(), 0.0, 0.0001);
+    const auto &ptrDet1003 = detectorInfo.detector(detectorInfo.indexOf(1003));
+    TS_ASSERT_EQUALS(ptrDet1003.getName(), "combined translation");
+    TS_ASSERT_EQUALS(ptrDet1003.getID(), 1003);
+    TS_ASSERT_DELTA(ptrDet1003.getPos().X(), 20.0, 0.0001);
+    TS_ASSERT_DELTA(ptrDet1003.getPos().Y(), 0.0, 0.0001);
+    TS_ASSERT_DELTA(ptrDet1003.getPos().Z(), 0.0, 0.0001);
 
-    ptrDet1 = i->getDetector(1004);
-    TS_ASSERT_EQUALS(ptrDet1->getName(), "combined translation2");
-    TS_ASSERT_EQUALS(ptrDet1->getID(), 1004);
-    TS_ASSERT_DELTA(ptrDet1->getPos().X(), 25.0, 0.0001);
-    TS_ASSERT_DELTA(ptrDet1->getPos().Y(), 0.0, 0.0001);
-    TS_ASSERT_DELTA(ptrDet1->getPos().Z(), 0.0, 0.0001);
+    const auto &ptrDet1004 = detectorInfo.detector(detectorInfo.indexOf(1004));
+    TS_ASSERT_EQUALS(ptrDet1004.getName(), "combined translation2");
+    TS_ASSERT_EQUALS(ptrDet1004.getID(), 1004);
+    TS_ASSERT_DELTA(ptrDet1004.getPos().X(), 25.0, 0.0001);
+    TS_ASSERT_DELTA(ptrDet1004.getPos().Y(), 0.0, 0.0001);
+    TS_ASSERT_DELTA(ptrDet1004.getPos().Z(), 0.0, 0.0001);
 
-    ptrDet1 = i->getDetector(1005);
-    TS_ASSERT_EQUALS(ptrDet1->getName(), "combined translation3");
-    TS_ASSERT_EQUALS(ptrDet1->getID(), 1005);
-    TS_ASSERT_DELTA(ptrDet1->getPos().X(), 0.0, 0.0001);
-    TS_ASSERT_DELTA(ptrDet1->getPos().Y(), 0.0, 0.0001);
-    TS_ASSERT_DELTA(ptrDet1->getPos().Z(), 28.0, 0.0001);
+    const auto &ptrDet1005 = detectorInfo.detector(detectorInfo.indexOf(1005));
+    TS_ASSERT_EQUALS(ptrDet1005.getName(), "combined translation3");
+    TS_ASSERT_EQUALS(ptrDet1005.getID(), 1005);
+    TS_ASSERT_DELTA(ptrDet1005.getPos().X(), 0.0, 0.0001);
+    TS_ASSERT_DELTA(ptrDet1005.getPos().Y(), 0.0, 0.0001);
+    TS_ASSERT_DELTA(ptrDet1005.getPos().Z(), 28.0, 0.0001);
 
-    ptrDet1 = i->getDetector(1006);
-    TS_ASSERT_EQUALS(ptrDet1->getName(), "combined translation4");
-    TS_ASSERT_EQUALS(ptrDet1->getID(), 1006);
-    TS_ASSERT_DELTA(ptrDet1->getPos().X(), 0.0, 0.0001);
-    TS_ASSERT_DELTA(ptrDet1->getPos().Y(), 0.0, 0.0001);
-    TS_ASSERT_DELTA(ptrDet1->getPos().Z(), 28.0, 0.0001);
+    const auto &ptrDet1006 = detectorInfo.detector(detectorInfo.indexOf(1006));
+    TS_ASSERT_EQUALS(ptrDet1006.getName(), "combined translation4");
+    TS_ASSERT_EQUALS(ptrDet1006.getID(), 1006);
+    TS_ASSERT_DELTA(ptrDet1006.getPos().X(), 0.0, 0.0001);
+    TS_ASSERT_DELTA(ptrDet1006.getPos().Y(), 0.0, 0.0001);
+    TS_ASSERT_DELTA(ptrDet1006.getPos().Z(), 28.0, 0.0001);
 
-    ptrDet1 = i->getDetector(1007);
-    TS_ASSERT_EQUALS(ptrDet1->getName(), "combined translation5");
-    TS_ASSERT_EQUALS(ptrDet1->getID(), 1007);
-    TS_ASSERT_DELTA(ptrDet1->getPos().X(), 0.0, 0.0001);
-    TS_ASSERT_DELTA(ptrDet1->getPos().Y(), 0.0, 0.0001);
-    TS_ASSERT_DELTA(ptrDet1->getPos().Z(), 28.0, 0.0001);
+    const auto &ptrDet1007 = detectorInfo.detector(detectorInfo.indexOf(1007));
+    TS_ASSERT_EQUALS(ptrDet1007.getName(), "combined translation5");
+    TS_ASSERT_EQUALS(ptrDet1007.getID(), 1007);
+    TS_ASSERT_DELTA(ptrDet1007.getPos().X(), 0.0, 0.0001);
+    TS_ASSERT_DELTA(ptrDet1007.getPos().Y(), 0.0, 0.0001);
+    TS_ASSERT_DELTA(ptrDet1007.getPos().Z(), 28.0, 0.0001);
 
-    ptrDet1 = i->getDetector(1008);
-    TS_ASSERT_EQUALS(ptrDet1->getName(), "combined translation6");
-    TS_ASSERT_EQUALS(ptrDet1->getID(), 1008);
-    TS_ASSERT_DELTA(ptrDet1->getPos().X(), 0.0, 0.0001);
-    TS_ASSERT_DELTA(ptrDet1->getPos().Y(), 0.0, 0.0001);
-    TS_ASSERT_DELTA(ptrDet1->getPos().Z(), 28.0, 0.0001);
+    const auto &ptrDet1008 = detectorInfo.detector(detectorInfo.indexOf(1008));
+    TS_ASSERT_EQUALS(ptrDet1008.getName(), "combined translation6");
+    TS_ASSERT_EQUALS(ptrDet1008.getID(), 1008);
+    TS_ASSERT_DELTA(ptrDet1008.getPos().X(), 0.0, 0.0001);
+    TS_ASSERT_DELTA(ptrDet1008.getPos().Y(), 0.0, 0.0001);
+    TS_ASSERT_DELTA(ptrDet1008.getPos().Z(), 28.0, 0.0001);
 
-    ptrDet1 = i->getDetector(1009);
-    TS_ASSERT_EQUALS(ptrDet1->getName(), "combined translation7");
-    TS_ASSERT_EQUALS(ptrDet1->getID(), 1009);
-    TS_ASSERT_DELTA(ptrDet1->getPos().X(), 0.0, 0.0001);
-    TS_ASSERT_DELTA(ptrDet1->getPos().Y(), 0.0, 0.0001);
-    TS_ASSERT_DELTA(ptrDet1->getPos().Z(), 19.0, 0.0001);
+    const auto &ptrDet1009 = detectorInfo.detector(detectorInfo.indexOf(1009));
+    TS_ASSERT_EQUALS(ptrDet1009.getName(), "combined translation7");
+    TS_ASSERT_EQUALS(ptrDet1009.getID(), 1009);
+    TS_ASSERT_DELTA(ptrDet1009.getPos().X(), 0.0, 0.0001);
+    TS_ASSERT_DELTA(ptrDet1009.getPos().Y(), 0.0, 0.0001);
+    TS_ASSERT_DELTA(ptrDet1009.getPos().Z(), 19.0, 0.0001);
 
-    ptrDet1 = i->getDetector(1010);
-    TS_ASSERT_EQUALS(ptrDet1->getName(), "combined translation8");
-    TS_ASSERT_DELTA(ptrDet1->getPos().X(), 11.0, 0.0001);
-    TS_ASSERT_DELTA(ptrDet1->getPos().Y(), 0.0, 0.0001);
-    TS_ASSERT_DELTA(ptrDet1->getPos().Z(), 8.0, 0.0001);
+    const auto &ptrDet1010 = detectorInfo.detector(detectorInfo.indexOf(1010));
+    TS_ASSERT_EQUALS(ptrDet1010.getName(), "combined translation8");
+    TS_ASSERT_DELTA(ptrDet1010.getPos().X(), 11.0, 0.0001);
+    TS_ASSERT_DELTA(ptrDet1010.getPos().Y(), 0.0, 0.0001);
+    TS_ASSERT_DELTA(ptrDet1010.getPos().Z(), 8.0, 0.0001);
 
-    ptrDet1 = i->getDetector(1011);
-    TS_ASSERT_EQUALS(ptrDet1->getName(), "combined translation9");
-    TS_ASSERT_DELTA(ptrDet1->getPos().X(), 11.0, 0.0001);
-    TS_ASSERT_DELTA(ptrDet1->getPos().Y(), 0.0, 0.0001);
-    TS_ASSERT_DELTA(ptrDet1->getPos().Z(), -8.0, 0.0001);
+    const auto &ptrDet1011 = detectorInfo.detector(detectorInfo.indexOf(1011));
+    TS_ASSERT_EQUALS(ptrDet1011.getName(), "combined translation9");
+    TS_ASSERT_DELTA(ptrDet1011.getPos().X(), 11.0, 0.0001);
+    TS_ASSERT_DELTA(ptrDet1011.getPos().Y(), 0.0, 0.0001);
+    TS_ASSERT_DELTA(ptrDet1011.getPos().Z(), -8.0, 0.0001);
 
-    ptrDet1 = i->getDetector(1012);
-    TS_ASSERT_EQUALS(ptrDet1->getName(), "combined translation10");
-    TS_ASSERT_DELTA(ptrDet1->getPos().X(), 11.0, 0.0001);
-    TS_ASSERT_DELTA(ptrDet1->getPos().Y(), 8.0, 0.0001);
-    TS_ASSERT_DELTA(ptrDet1->getPos().Z(), 0.0, 0.0001);
+    const auto &ptrDet1012 = detectorInfo.detector(detectorInfo.indexOf(1012));
+    TS_ASSERT_EQUALS(ptrDet1012.getName(), "combined translation10");
+    TS_ASSERT_DELTA(ptrDet1012.getPos().X(), 11.0, 0.0001);
+    TS_ASSERT_DELTA(ptrDet1012.getPos().Y(), 8.0, 0.0001);
+    TS_ASSERT_DELTA(ptrDet1012.getPos().Z(), 0.0, 0.0001);
 
-    ptrDet1 = i->getDetector(1013);
-    TS_ASSERT_EQUALS(ptrDet1->getName(), "combined translation11");
-    TS_ASSERT_DELTA(ptrDet1->getPos().X(), 11.0, 0.0001);
-    TS_ASSERT_DELTA(ptrDet1->getPos().Y(), -8.0, 0.0001);
-    TS_ASSERT_DELTA(ptrDet1->getPos().Z(), 0.0, 0.0001);
+    const auto &ptrDet1013 = detectorInfo.detector(detectorInfo.indexOf(1013));
+    TS_ASSERT_EQUALS(ptrDet1013.getName(), "combined translation11");
+    TS_ASSERT_DELTA(ptrDet1013.getPos().X(), 11.0, 0.0001);
+    TS_ASSERT_DELTA(ptrDet1013.getPos().Y(), -8.0, 0.0001);
+    TS_ASSERT_DELTA(ptrDet1013.getPos().Z(), 0.0, 0.0001);
 
     AnalysisDataService::Instance().remove(wsName);
   }
 
-  // also test that when loading in instrument a 2nd time that parameters
-  // defined
-  // in instrument gets loaded as well
+  // also test that when loading an instrument a 2nd time that parameters
+  // defined in instrument gets loaded as well
   void testToscaParameterTags() {
     LoadEmptyInstrument loader;
 
@@ -548,15 +549,16 @@ public:
     ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName);
 
     // get parameter map
-    ParameterMap &paramMap = ws->instrumentParameters();
+    const auto &paramMap = ws->constInstrumentParameters();
 
     // get detector corresponding to workspace index 0
-    IDetector_const_sptr det = ws->getDetector(69);
+    const auto &spectrumInfo = ws->spectrumInfo();
+    const auto &det = spectrumInfo.detector(69);
 
-    TS_ASSERT_EQUALS(det->getID(), 78);
-    TS_ASSERT_EQUALS(det->getName(), "Detector #70");
+    TS_ASSERT_EQUALS(det.getID(), 78);
+    TS_ASSERT_EQUALS(det.getName(), "Detector #70");
 
-    Parameter_sptr param = paramMap.get(&(*det), "Efixed");
+    Parameter_sptr param = paramMap.get(&det, "Efixed");
     TS_ASSERT_DELTA(param->value<double>(), 4.00000, 0.0001);
 
     AnalysisDataService::Instance().remove(wsName);
@@ -576,22 +578,21 @@ public:
 
     ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName);
 
-    ParameterMap &paramMap2 = ws->instrumentParameters();
+    const auto &spectrumInfoAfter = ws->spectrumInfo();
+    const auto &detAfter = spectrumInfoAfter.detector(69);
 
-    det = ws->getDetector(69);
+    TS_ASSERT_EQUALS(detAfter.getID(), 78);
+    TS_ASSERT_EQUALS(detAfter.getName(), "Detector #70");
 
-    TS_ASSERT_EQUALS(det->getID(), 78);
-    TS_ASSERT_EQUALS(det->getName(), "Detector #70");
-
-    param = paramMap2.get(&(*det), "Efixed");
+    const auto &paramMap2 = ws->constInstrumentParameters();
+    param = paramMap2.get(&detAfter, "Efixed");
     TS_ASSERT_DELTA(param->value<double>(), 4.00000, 0.0001);
 
     AnalysisDataService::Instance().remove(wsName);
   }
 
-  // also test that when loading in instrument a 2nd time that parameters
-  // defined
-  // in instrument gets loaded as well
+  // also test that when loading an instrument a 2nd time that parameters
+  // defined in instrument gets loaded as well
   void testHRPDParameterTags() {
     LoadEmptyInstrument loader;
 
@@ -609,12 +610,12 @@ public:
     ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName);
 
     // get parameter map
-    ParameterMap &paramMap = ws->instrumentParameters();
+    const auto &paramMap = ws->constInstrumentParameters();
 
-    boost::shared_ptr<const Instrument> i = ws->getInstrument();
-    boost::shared_ptr<const IDetector> det =
-        i->getDetector(1100); // should be a detector from bank_bsk
-    Parameter_sptr param = paramMap.getRecursive(&(*det), "S", "fitting");
+    const auto &detectorInfo = ws->detectorInfo();
+    const auto &det = detectorInfo.detector(
+        detectorInfo.indexOf(1100)); // should be a detector from bank_bsk
+    Parameter_sptr param = paramMap.getRecursive(&det, "S", "fitting");
     const FitParameter &fitParam1 = param->value<FitParameter>();
     TS_ASSERT_DELTA(fitParam1.getValue(1.0), 11.8159, 0.0001);
     TS_ASSERT(fitParam1.getFunction().compare("BackToBackExponential") == 0);
@@ -635,11 +636,12 @@ public:
     ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName2);
 
     // get parameter map
-    ParameterMap &paramMap2 = ws->instrumentParameters();
+    const auto &paramMap2 = ws->constInstrumentParameters();
 
-    i = ws->getInstrument();
-    det = i->getDetector(1100); // should be a detector from bank_bsk
-    param = paramMap2.getRecursive(&(*det), "S", "fitting");
+    const auto &detectorInfoAfter = ws->detectorInfo();
+    const auto &detAfter = detectorInfoAfter.detector(
+        detectorInfoAfter.indexOf(1100)); // should be a detector from bank_bsk
+    param = paramMap2.getRecursive(&detAfter, "S", "fitting");
     const FitParameter &fitParam2 = param->value<FitParameter>();
     TS_ASSERT_DELTA(fitParam2.getValue(1.0), 11.8159, 0.0001);
     TS_ASSERT(fitParam2.getFunction().compare("BackToBackExponential") == 0);
@@ -665,26 +667,25 @@ public:
     ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName);
 
     // get parameter map
-    ParameterMap &paramMap = ws->instrumentParameters();
+    const auto &paramMap = ws->constInstrumentParameters();
 
-    IDetector_const_sptr det = ws->getDetector(101);
-    TS_ASSERT_EQUALS(det->getID(), 102046);
-    TS_ASSERT_EQUALS(det->getName(), "Det45");
-    Parameter_sptr param = paramMap.getRecursive(&(*det), "Alpha0", "fitting");
+    const auto &spectrumInfo = ws->spectrumInfo();
+    const auto &det = spectrumInfo.detector(101);
+    TS_ASSERT_EQUALS(det.getID(), 102046);
+    TS_ASSERT_EQUALS(det.getName(), "Det45");
+    Parameter_sptr param = paramMap.getRecursive(&det, "Alpha0", "fitting");
     const FitParameter &fitParam = param->value<FitParameter>();
     TS_ASSERT_DELTA(fitParam.getValue(0.0), 0.734079, 0.0001);
 
-    IDetector_const_sptr det1 = ws->getDetector(501);
-    TS_ASSERT_EQUALS(det1->getID(), 211001);
-    Parameter_sptr param1 =
-        paramMap.getRecursive(&(*det1), "Alpha0", "fitting");
+    const auto &det1 = spectrumInfo.detector(501);
+    TS_ASSERT_EQUALS(det1.getID(), 211001);
+    Parameter_sptr param1 = paramMap.getRecursive(&det1, "Alpha0", "fitting");
     const FitParameter &fitParam1 = param1->value<FitParameter>();
     TS_ASSERT_DELTA(fitParam1.getValue(0.0), 0.734079, 0.0001);
 
-    IDetector_const_sptr det2 = ws->getDetector(341);
-    TS_ASSERT_EQUALS(det2->getID(), 201001);
-    Parameter_sptr param2 =
-        paramMap.getRecursive(&(*det2), "Alpha0", "fitting");
+    const auto &det2 = spectrumInfo.detector(341);
+    TS_ASSERT_EQUALS(det2.getID(), 201001);
+    Parameter_sptr param2 = paramMap.getRecursive(&det2, "Alpha0", "fitting");
     const FitParameter &fitParam2 = param2->value<FitParameter>();
     TS_ASSERT_DELTA(fitParam2.getValue(0.0), 0.734079, 0.0001);
     // TS_ASSERT( fitParam2.getTie().compare("Alpha0=0.734079") == 0 );
@@ -725,57 +726,57 @@ public:
     }
 
     // get parameter map
-    ParameterMap &paramMap = ws->instrumentParameters();
+    const auto &paramMap = ws->constInstrumentParameters();
 
     TS_ASSERT_EQUALS(ws->getNumberHistograms(), 4);
     if (ws->getNumberHistograms() < 4)
       return;
 
-    IDetector_const_sptr det = ws->getDetector(1);
-    TS_ASSERT_EQUALS(det->getID(), 1);
-    TS_ASSERT_EQUALS(det->getName(), "pixel");
-    Parameter_sptr param = paramMap.get(&(*det), "tube_pressure");
+    const auto &spectrumInfo = ws->spectrumInfo();
+    const auto &det = spectrumInfo.detector(1);
+    TS_ASSERT_EQUALS(det.getID(), 1);
+    TS_ASSERT_EQUALS(det.getName(), "pixel");
+    Parameter_sptr param = paramMap.get(&det, "tube_pressure");
     TS_ASSERT_DELTA(param->value<double>(), 10.0, 0.0001);
-    param = paramMap.get(&(*det), "tube_thickness");
+    param = paramMap.get(&det, "tube_thickness");
     TS_ASSERT_DELTA(param->value<double>(), 0.0008, 0.0001);
-    param = paramMap.get(&(*det), "tube_temperature");
+    param = paramMap.get(&det, "tube_temperature");
     TS_ASSERT_DELTA(param->value<double>(), 290.0, 0.0001);
 
     // same tests as above but using getNumberParameter()
-    TS_ASSERT_DELTA((det->getNumberParameter("tube_pressure"))[0], 10.0,
+    TS_ASSERT_DELTA((det.getNumberParameter("tube_pressure"))[0], 10.0, 0.0001);
+    TS_ASSERT_DELTA((det.getNumberParameter("tube_thickness"))[0], 0.0008,
                     0.0001);
-    TS_ASSERT_DELTA((det->getNumberParameter("tube_thickness"))[0], 0.0008,
+    TS_ASSERT_DELTA((det.getNumberParameter("tube_temperature"))[0], 290.0,
                     0.0001);
-    TS_ASSERT_DELTA((det->getNumberParameter("tube_temperature"))[0], 290.0,
+    const auto &det2 = spectrumInfo.detector(2);
+    TS_ASSERT_DELTA((det2.getNumberParameter("tube_pressure"))[0], 10.0,
                     0.0001);
-    det = ws->getDetector(2);
-    TS_ASSERT_DELTA((det->getNumberParameter("tube_pressure"))[0], 10.0,
+    TS_ASSERT_DELTA((det2.getNumberParameter("tube_thickness"))[0], 0.0008,
                     0.0001);
-    TS_ASSERT_DELTA((det->getNumberParameter("tube_thickness"))[0], 0.0008,
+    TS_ASSERT_DELTA((det2.getNumberParameter("tube_temperature"))[0], 290.0,
                     0.0001);
-    TS_ASSERT_DELTA((det->getNumberParameter("tube_temperature"))[0], 290.0,
+    const auto &det3 = spectrumInfo.detector(3);
+    TS_ASSERT_DELTA((det3.getNumberParameter("tube_pressure"))[0], 10.0,
                     0.0001);
-    det = ws->getDetector(3);
-    TS_ASSERT_DELTA((det->getNumberParameter("tube_pressure"))[0], 10.0,
+    TS_ASSERT_DELTA((det3.getNumberParameter("tube_thickness"))[0], 0.0008,
                     0.0001);
-    TS_ASSERT_DELTA((det->getNumberParameter("tube_thickness"))[0], 0.0008,
-                    0.0001);
-    TS_ASSERT_DELTA((det->getNumberParameter("tube_temperature"))[0], 290.0,
+    TS_ASSERT_DELTA((det3.getNumberParameter("tube_temperature"))[0], 290.0,
                     0.0001);
 
     // demonstrate recursive look-up: tube_pressure2 defined in 'dummy' but
     // accessed from 'pixel'
-    det = ws->getDetector(1);
-    TS_ASSERT_DELTA((det->getNumberParameter("tube_pressure2"))[0], 35.0,
+    const auto &det1 = spectrumInfo.detector(1);
+    TS_ASSERT_DELTA((det1.getNumberParameter("tube_pressure2"))[0], 35.0,
                     0.0001);
 
     // Alternative way of doing a recursive look-up
-    param = paramMap.getRecursive(&(*det), "tube_pressure2");
+    param = paramMap.getRecursive(&det1, "tube_pressure2");
     TS_ASSERT_DELTA(param->value<double>(), 35.0, 0.0001);
 
     // And finally demonstrate that the get() method does not perform recursive
     // look-up
-    param = paramMap.get(&(*det), "tube_pressure2");
+    param = paramMap.get(&det1, "tube_pressure2");
     TS_ASSERT(param == NULL);
 
     AnalysisDataService::Instance().remove(wsName);
@@ -797,8 +798,9 @@ public:
     MatrixWorkspace_sptr ws;
     ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName);
 
-    IDetector_const_sptr det = ws->getDetector(1);
-    TS_ASSERT_EQUALS((det->getNumberParameter("number-of-x-pixels"))[0], 192);
+    const auto &spectrumInfo = ws->spectrumInfo();
+    const auto &det = spectrumInfo.detector(1);
+    TS_ASSERT_EQUALS((det.getNumberParameter("number-of-x-pixels"))[0], 192);
 
     Instrument_const_sptr inst = ws->getInstrument();
     TS_ASSERT_EQUALS((inst->getNumberParameter("number-of-x-pixels")).size(),
@@ -823,41 +825,36 @@ public:
     MatrixWorkspace_sptr ws;
     ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName);
 
-    // get parameter map
-    boost::shared_ptr<const Instrument> i = ws->getInstrument();
-
     double pixelLength = 0.0051;
     double bankLength = 192 * pixelLength;
 
     double startX = -bankLength / 2 + pixelLength / 2;
     double startY = -bankLength / 2 + pixelLength / 2;
 
+    const auto &detectorInfo = ws->detectorInfo();
     for (int iy = 0; iy <= 191; iy++) {
       for (int ix = 0; ix <= 191; ix++) {
-        boost::shared_ptr<const IDetector> ptrDet1 =
-            i->getDetector(1000000 + iy * 1000 + ix);
-        TS_ASSERT_DELTA(ptrDet1->getPos().X(), startX + pixelLength * ix,
-                        0.0000001);
-        TS_ASSERT_DELTA(ptrDet1->getPos().Y(), startY + pixelLength * iy,
-                        0.0000001);
-        TS_ASSERT_DELTA(ptrDet1->getPos().Z(), 23.281, 0.0000001);
+        size_t index = detectorInfo.indexOf(1000000 + iy * 1000 + ix);
+        TS_ASSERT_DELTA(detectorInfo.position(index).X(),
+                        startX + pixelLength * ix, 0.0000001);
+        TS_ASSERT_DELTA(detectorInfo.position(index).Y(),
+                        startY + pixelLength * iy, 0.0000001);
+        TS_ASSERT_DELTA(detectorInfo.position(index).Z(), 23.281, 0.0000001);
       }
 
       for (int ix = 0; ix <= 191; ix++) {
-        boost::shared_ptr<const IDetector> ptrDet1 =
-            i->getDetector(2000000 + iy * 1000 + ix);
-        TS_ASSERT_DELTA(ptrDet1->getPos().X(), startX + pixelLength * ix + 1.1,
-                        0.0000001);
-        TS_ASSERT_DELTA(ptrDet1->getPos().Y(), startY + pixelLength * iy,
-                        0.0000001);
-        TS_ASSERT_DELTA(ptrDet1->getPos().Z(), 23.281, 0.0000001);
+        size_t index = detectorInfo.indexOf(2000000 + iy * 1000 + ix);
+        TS_ASSERT_DELTA(detectorInfo.position(index).X(),
+                        startX + pixelLength * ix + 1.1, 0.0000001);
+        TS_ASSERT_DELTA(detectorInfo.position(index).Y(),
+                        startY + pixelLength * iy, 0.0000001);
+        TS_ASSERT_DELTA(detectorInfo.position(index).Z(), 23.281, 0.0000001);
       }
     }
 
     // check for solid angle also
-    const V3D samplePos = i->getSample()->getPos();
-    boost::shared_ptr<const IDetector> det = i->getDetector(1000000);
-    const double solidAngle = det->solidAngle(samplePos);
+    const auto &det = detectorInfo.detector(detectorInfo.indexOf(1000000));
+    const double solidAngle = det.solidAngle(detectorInfo.samplePosition());
     TS_ASSERT_DELTA(10E5 * solidAngle, 6.23454, 0.00001);
 
     AnalysisDataService::Instance().remove(wsName);

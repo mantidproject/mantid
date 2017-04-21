@@ -1,5 +1,5 @@
 #pylint: disable=invalid-name
-from PyQt4 import QtGui, uic, QtCore
+from PyQt4 import QtGui, QtCore
 from functools import partial
 from reduction_gui.widgets.base_widget import BaseWidget
 from reduction_gui.reduction.inelastic.dgs_sample_data_setup_script import SampleSetupScript
@@ -14,6 +14,7 @@ try:
     IS_IN_MANTIDPLOT = True
 except:
     pass
+
 
 class SampleSetupWidget(BaseWidget):
     """
@@ -89,10 +90,10 @@ class SampleSetupWidget(BaseWidget):
         self._content.horizontalLayout.removeWidget(self._content.sample_edit)
         self._content.horizontalLayout.removeWidget(self._content.sample_browse)
         spacer = self._content.horizontalLayout.takeAt(0)
-        self._content.sample_edit = mantidqtpython.MantidQt.MantidWidgets.MWRunFiles()
+        self._content.sample_edit = mantidqtpython.MantidQt.API.MWRunFiles()
         # Unfortunately, can only use live if default instrument = gui-set instrument
         if self._instrument_name == config.getInstrument().name():
-            self._content.sample_edit.setProperty("liveButton","ShowIfCanConnect")
+            self._content.sample_edit.setProperty("liveButton","Show")
         self._content.sample_edit.setProperty("multipleFiles",True)
         self._content.sample_edit.setProperty("algorithmAndProperty","Load|Filename")
         self._content.sample_edit.setProperty("label",labeltext)
@@ -148,10 +149,10 @@ class SampleSetupWidget(BaseWidget):
             self._content.grouping_edit.setText(fname)
 
     def _savedir_browse(self):
-        save_dir = QtGui.QFileDialog.getExistingDirectory(self, "Output Directory - Choose a directory",\
-                                                            os.path.expanduser('~'),\
-                                                            QtGui.QFileDialog.ShowDirsOnly\
-                                                            | QtGui.QFileDialog.DontResolveSymlinks)
+        save_dir = QtGui.QFileDialog.getExistingDirectory(self, "Output Directory - Choose a directory",
+                                                          os.path.expanduser('~'),
+                                                          QtGui.QFileDialog.ShowDirsOnly
+                                                          | QtGui.QFileDialog.DontResolveSymlinks)
         if save_dir:
             self._content.savedir_edit.setText(save_dir)
 

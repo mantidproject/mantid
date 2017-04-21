@@ -1,16 +1,11 @@
 #pylint: disable=invalid-name
-from PyQt4 import QtGui, uic, QtCore
-import reduction_gui.widgets.util as util
+from PyQt4 import QtGui, QtCore
 import math
-import os
-import time
-import sys
-from functools import partial
 from reduction_gui.reduction.reflectometer.refl_data_script import DataSets as REFLDataSets
 from reduction_gui.reduction.reflectometer.refl_data_series import DataSeries
-from reduction_gui.settings.application_settings import GeneralSettings
 from base_ref_reduction import BaseRefWidget
 import ui.reflectometer.ui_data_refl_simple
+
 
 class DataReflWidget(BaseRefWidget):
     """
@@ -148,9 +143,8 @@ class DataReflWidget(BaseRefWidget):
                                   for i in range(self._summary.incident_medium_combobox.count())]
         m.incident_medium_index_selected = self._summary.incident_medium_combobox.currentIndex()
 
-
-        m.data_x_range = [int(self._summary.x_min_edit.text()),\
-                     int(self._summary.x_max_edit.text())]
+        m.data_x_range = [int(self._summary.x_min_edit.text()),
+                          int(self._summary.x_max_edit.text())]
         m.data_x_range_flag = self._summary.data_low_res_range_switch.isChecked()
 
         m.norm_x_range = [int(self._summary.norm_x_min_edit.text()),
@@ -211,5 +205,3 @@ class DataReflWidget(BaseRefWidget):
         self._summary.dq0_unit.setEnabled(is_checked)
         self._summary.dq_over_q_label.setEnabled(is_checked)
         self._summary.dq_over_q.setEnabled(is_checked)
-
-

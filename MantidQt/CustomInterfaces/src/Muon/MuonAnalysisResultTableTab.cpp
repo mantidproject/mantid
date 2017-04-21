@@ -1,31 +1,34 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidQtCustomInterfaces/Muon/MuonAnalysisResultTableTab.h"
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 
-#include "MantidQtMantidWidgets/MuonSequentialFitDialog.h"
+#include "MantidQtMantidWidgets/MuonFitPropertyBrowser.h"
 #include "MantidQtAPI/HelpWindow.h"
 #include "MantidQtAPI/UserSubWindow.h"
 #include "MantidQtCustomInterfaces/Muon/MuonAnalysisHelper.h"
+#include "MantidQtCustomInterfaces/Muon/MuonAnalysisResultTableCreator.h"
+#include "MantidQtCustomInterfaces/Muon/MuonSequentialFitDialog.h"
 
 #include <boost/shared_ptr.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 
+#include <QFileInfo>
 #include <QLineEdit>
-#include <QFileDialog>
 #include <QHash>
 #include <QMessageBox>
 
 #include <algorithm>
 
-//-----------------------------------------------------------------------------
+namespace {
+const std::string RUNNING_LOG_NAME = "running";
+}
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -42,8 +45,8 @@ const QString MuonAnalysisResultTableTab::RUN_NUMBER_LOG("run_number");
 const QString MuonAnalysisResultTableTab::RUN_START_LOG("run_start");
 const QString MuonAnalysisResultTableTab::RUN_END_LOG("run_end");
 const QStringList MuonAnalysisResultTableTab::NON_TIMESERIES_LOGS{
-    MuonAnalysisResultTableTab::RUN_NUMBER_LOG, RUN_START_LOG, RUN_END_LOG,
-    "sample_temp", "sample_magn_field"};
+    MuonAnalysisResultTableTab::RUN_NUMBER_LOG, "group", "period",
+    RUN_START_LOG, RUN_END_LOG, "sample_temp", "sample_magn_field"};
 
 /**
 * Constructor
@@ -67,14 +70,18 @@ MuonAnalysisResultTableTab::MuonAnalysisResultTableTab(Ui::MuonAnalysis &uiForm)
   connect(m_uiForm.createTableBtn, SIGNAL(clicked()), this,
           SLOT(onCreateTableClicked()));
 
-  // Enable label combox-box only when sequential fit type selected
+  // Enable relevant label combo-box only when matching fit type selected
   connect(m_uiForm.sequentialFit, SIGNAL(toggled(bool)), m_uiForm.fitLabelCombo,
           SLOT(setEnabled(bool)));
+  connect(m_uiForm.simultaneousFit, SIGNAL(toggled(bool)),
+          m_uiForm.cmbFitLabelSimultaneous, SLOT(setEnabled(bool)));
 
-  // Re-populate tables when fit type or seq. fit label is changed
+  // Re-populate tables when fit type or seq./sim. fit label is changed
   connect(m_uiForm.fitType, SIGNAL(buttonClicked(QAbstractButton *)), this,
           SLOT(populateTables()));
   connect(m_uiForm.fitLabelCombo, SIGNAL(activated(int)), this,
+          SLOT(populateTables()));
+  connect(m_uiForm.cmbFitLabelSimultaneous, SIGNAL(activated(int)), this,
           SLOT(populateTables()));
 }
 
@@ -214,19 +221,30 @@ QStringList MuonAnalysisResultTableTab::getFittedWorkspaces() {
     return getIndividualFitWorkspaces();
   } else if (m_uiForm.fitType->checkedButton() == m_uiForm.sequentialFit) {
     QString selectedLabel = m_uiForm.fitLabelCombo->currentText();
-
-    return getSequentialFitWorkspaces(selectedLabel);
+    return getMultipleFitWorkspaces(selectedLabel, true);
+  } else if (m_uiForm.fitType->checkedButton() == m_uiForm.simultaneousFit) {
+    return getMultipleFitWorkspaces(
+        m_uiForm.cmbFitLabelSimultaneous->currentText(), false);
+  } else if (m_uiForm.fitType->checkedButton() == m_uiForm.multipleSimFits) {
+    // all simultaneously fitted workspaces
+    QStringList wsList;
+    for (int i = 0; i < m_uiForm.cmbFitLabelSimultaneous->count(); ++i) {
+      const auto names = getMultipleFitWorkspaces(
+          m_uiForm.cmbFitLabelSimultaneous->itemText(i), false);
+      wsList.append(names);
+    }
+    return wsList;
   } else {
-    throw std::runtime_error("Uknown fit type option");
+    throw std::runtime_error("Unknown fit type option");
   }
 }
 
 /**
- * Returns a list of labels user has made sequential fits for.
- * @return List of labels
+ * Returns a list of labels user has made sequential and simultaneous fits for.
+ * @return Pair of lists of labels: <sequential, simultaneous>
  */
-QStringList MuonAnalysisResultTableTab::getSequentialFitLabels() {
-  QStringList labels;
+std::pair<QStringList, QStringList> MuonAnalysisResultTableTab::getFitLabels() {
+  QStringList seqLabels, simLabels;
 
   std::map<std::string, Workspace_sptr> items =
       AnalysisDataService::Instance().topLevelItems();
@@ -235,29 +253,41 @@ QStringList MuonAnalysisResultTableTab::getSequentialFitLabels() {
     if (it->second->id() != "WorkspaceGroup")
       continue;
 
-    if (it->first.find(MuonSequentialFitDialog::SEQUENTIAL_PREFIX) != 0)
+    if (it->first.find(MuonSequentialFitDialog::SEQUENTIAL_PREFIX) == 0) {
+      std::string label =
+          it->first.substr(MuonSequentialFitDialog::SEQUENTIAL_PREFIX.size());
+      seqLabels << QString::fromStdString(label);
+    } else if (it->first.find(MuonFitPropertyBrowser::SIMULTANEOUS_PREFIX) ==
+               0) {
+      std::string label =
+          it->first.substr(MuonFitPropertyBrowser::SIMULTANEOUS_PREFIX.size());
+      simLabels << QString::fromStdString(label);
+    } else {
       continue;
-
-    std::string label =
-        it->first.substr(MuonSequentialFitDialog::SEQUENTIAL_PREFIX.size());
-
-    labels << QString::fromStdString(label);
+    }
   }
 
-  return labels;
+  return std::make_pair(seqLabels, simLabels);
 }
 
 /**
- * Returns a list of sequentially fitted workspaces names.
- * @param label :: Label to return sequential fits for
+ * Returns a list of sequentially/simultaneously fitted workspaces names.
+ * @param label :: Label to return sequential/simultaneous fits for
+ * @param sequential :: true for sequential, false for simultaneous
  * @return List of workspace base names
  */
 QStringList
-MuonAnalysisResultTableTab::getSequentialFitWorkspaces(const QString &label) {
+MuonAnalysisResultTableTab::getMultipleFitWorkspaces(const QString &label,
+                                                     bool sequential) {
   const AnalysisDataServiceImpl &ads = AnalysisDataService::Instance();
 
-  std::string groupName =
-      MuonSequentialFitDialog::SEQUENTIAL_PREFIX + label.toStdString();
+  const std::string groupName = [&label, &sequential]() {
+    if (sequential) {
+      return MuonSequentialFitDialog::SEQUENTIAL_PREFIX + label.toStdString();
+    } else {
+      return MuonFitPropertyBrowser::SIMULTANEOUS_PREFIX + label.toStdString();
+    }
+  }();
 
   WorkspaceGroup_sptr group;
 
@@ -300,6 +330,11 @@ QStringList MuonAnalysisResultTableTab::getIndividualFitWorkspaces() {
     // Ignore sequential fit results
     if (boost::starts_with(*it, MuonSequentialFitDialog::SEQUENTIAL_PREFIX))
       continue;
+
+    // Ignore simultaneous fit results
+    if (boost::starts_with(*it, MuonFitPropertyBrowser::SIMULTANEOUS_PREFIX)) {
+      continue;
+    }
 
     workspaces << QString::fromStdString(wsBaseName(*it));
   }
@@ -348,17 +383,46 @@ bool MuonAnalysisResultTableTab::isFittedWs(const std::string &wsName) {
 }
 
 /**
- * Refresh the label list and re-populate the tables.
+ * Refresh the label lists and re-populate the tables.
  */
 void MuonAnalysisResultTableTab::refresh() {
   m_uiForm.individualFit->setChecked(true);
 
-  QStringList labels = getSequentialFitLabels();
+  const auto &labels = getFitLabels();
 
   m_uiForm.fitLabelCombo->clear();
-  m_uiForm.fitLabelCombo->addItems(labels);
+  m_uiForm.fitLabelCombo->addItems(labels.first);
+  m_uiForm.cmbFitLabelSimultaneous->clear();
+  m_uiForm.cmbFitLabelSimultaneous->addItems(labels.second);
+
+  // Find width of widest string in a list
+  const auto &font = this->fontMetrics();
+  const auto maxWidth = [&font](const QStringList &strings) {
+    const QString extraSpace = "   "; // to make sure string will fit
+    int maximum = 0;
+    for (const auto &string : strings) {
+      const auto &width = font.boundingRect(string + extraSpace).width();
+      if (width > maximum) {
+        maximum = width;
+      }
+    }
+    return maximum;
+  };
+
+  // Expand the width of the drop-down (not the combobox itself) to fit the
+  // longest string
+  const auto &seqSize = maxWidth(labels.first);
+  m_uiForm.fitLabelCombo->view()->setMinimumWidth(seqSize);
+  m_uiForm.fitLabelCombo->view()->setTextElideMode(Qt::ElideNone);
+  const auto &simSize = maxWidth(labels.second);
+  m_uiForm.cmbFitLabelSimultaneous->view()->setMinimumWidth(simSize);
+  m_uiForm.cmbFitLabelSimultaneous->view()->setTextElideMode(Qt::ElideNone);
 
   m_uiForm.sequentialFit->setEnabled(m_uiForm.fitLabelCombo->count() != 0);
+  m_uiForm.simultaneousFit->setEnabled(
+      m_uiForm.cmbFitLabelSimultaneous->count() > 0);
+  m_uiForm.multipleSimFits->setEnabled(
+      m_uiForm.cmbFitLabelSimultaneous->count() > 0);
 
   populateTables();
 }
@@ -380,7 +444,24 @@ void MuonAnalysisResultTableTab::populateTables() {
   if (!fittedWsList.isEmpty()) {
     // Populate the individual log values and fittings into their respective
     // tables.
-    populateFittings(fittedWsList);
+    if (m_uiForm.fitType->checkedButton() == m_uiForm.multipleSimFits) {
+      // Simultaneous fits: use labels
+      auto wsFromName = [](const QString &qs) {
+        const auto &wsGroup = retrieveWSChecked<WorkspaceGroup>(
+            MuonFitPropertyBrowser::SIMULTANEOUS_PREFIX + qs.toStdString());
+        return boost::dynamic_pointer_cast<Workspace>(wsGroup);
+      };
+      populateFittings(getFitLabels().second, wsFromName);
+    } else {
+      // Use fitted workspace names
+      auto wsFromName = [](const QString &qs) {
+        const auto &tab = retrieveWSChecked<ITableWorkspace>(qs.toStdString() +
+                                                             PARAMS_POSTFIX);
+        return boost::dynamic_pointer_cast<Workspace>(tab);
+      };
+      populateFittings(fittedWsList, wsFromName);
+    }
+
     populateLogsAndValues(fittedWsList);
 
     // Make sure all fittings are selected by default.
@@ -420,40 +501,33 @@ void MuonAnalysisResultTableTab::populateLogsAndValues(
     // Get log information
     std::string wsName = fittedWsList[i].toStdString();
     auto ws = retrieveWSChecked<ExperimentInfo>(wsName + WORKSPACE_POSTFIX);
-
-    Mantid::Kernel::DateAndTime start = ws->run().startTime();
-    Mantid::Kernel::DateAndTime end = ws->run().endTime();
-
     const std::vector<Property *> &logData = ws->run().getLogData();
+    const TimeSeriesProperty<bool> *runningLog = nullptr;
+    Property *runLog = nullptr;
+    const bool foundRunning = ws->run().hasProperty(RUNNING_LOG_NAME);
+    if (foundRunning) {
+      runLog = ws->run().getLogData(RUNNING_LOG_NAME);
+      runningLog = dynamic_cast<TimeSeriesProperty<bool> *>(runLog);
 
-    for (const auto prop : logData) {
+    } else {
+      Mantid::Kernel::Logger g_log("MuonAnalysisResultTableTab");
+      g_log.warning(
+          "No running log found. Filtering will not be applied to the data.\n");
+    }
+    for (const auto &prop : logData) {
       // Check if is a timeseries log
-      if (TimeSeriesProperty<double> *tspd =
+      if (TimeSeriesProperty<double> *log =
               dynamic_cast<TimeSeriesProperty<double> *>(prop)) {
-        QString logFile(QFileInfo(prop->name().c_str()).fileName());
 
-        double value(0.0);
-        int count(0);
-
-        Mantid::Kernel::DateAndTime logTime;
-
-        // iterate through all logs entries of a specific log
-        for (int k(0); k < tspd->size(); k++) {
-          // Get the log time for the specific entry
-          logTime = tspd->nthTime(k);
-
-          // If the entry was made during the run times
-          if ((logTime >= start) && (logTime <= end)) {
-            // add it to a total and increment the count (will be used to make
-            // average entry value during a run)
-            value += tspd->nthValue(k);
-            count++;
-          }
+        auto mylog = log->clone();
+        if (foundRunning) {
+          mylog->filterWith(runningLog);
         }
-
-        if (count != 0) {
-          // Find average
-          wsLogValues[logFile] = value / count;
+        QString logFile(QFileInfo(prop->name().c_str()).fileName());
+        auto time_ave = mylog->timeAverageValue(); // get the time average
+        if (time_ave != 0) {
+          // Return average
+          wsLogValues[logFile] = time_ave;
         }
       } else // Should be a non-timeseries one
       {
@@ -569,16 +643,19 @@ bool MuonAnalysisResultTableTab::logNameLessThan(const QString &logName1,
 }
 
 /**
-* Populates the items (fitted workspaces) into their table.
-*
-* @param fittedWsList :: a workspace list containing ONLY the workspaces that
-* have parameter
-*                        tables associated with it.
-*/
+ * Populates fittings table with given workspace/label names.
+ * Can be used for workspace names that have associated param tables, or for
+ * simultaneous fit labels, just by passing in a different function.
+ *
+ * @param names :: [input] list of workspace names OR label names
+ * @param wsFromName :: [input] Function for getting workspaces from the given
+ * names
+ */
 void MuonAnalysisResultTableTab::populateFittings(
-    const QStringList &fittedWsList) {
-  // Add number of rows  for the amount of fittings.
-  m_uiForm.fittingResultsTable->setRowCount(fittedWsList.size());
+    const QStringList &names,
+    std::function<Workspace_sptr(const QString &)> wsFromName) {
+  // Add number of rows for the amount of fittings.
+  m_uiForm.fittingResultsTable->setRowCount(names.size());
 
   // Add check boxes for the include column on fitting table, and make text
   // uneditable.
@@ -590,99 +667,30 @@ void MuonAnalysisResultTableTab::populateFittings(
     }
   }
 
-  // Get colors, 0=Black, 1=Red, 2=Green, 3=Blue, 4=Orange, 5=Purple. (If there
-  // are more than this then use black as default.)
-  QMap<int, int> colors = getWorkspaceColors(fittedWsList);
+  // Get workspace names using the provided function
+  std::vector<Workspace_sptr> workspaces;
+  for (const auto &name : names) {
+    workspaces.push_back(wsFromName(name));
+  }
+
+  // Get colors for names in table
+  const auto colors = MuonAnalysisHelper::getWorkspaceColors(workspaces);
   for (int row = 0; row < m_uiForm.fittingResultsTable->rowCount(); row++) {
     // Fill values and delete previous old ones.
-    if (row < fittedWsList.size()) {
-      QTableWidgetItem *item = new QTableWidgetItem(fittedWsList[row]);
-      const int color(colors.find(row).value());
-      switch (color) {
-      case (1):
-        item->setTextColor("red");
-        break;
-      case (2):
-        item->setTextColor("green");
-        break;
-      case (3):
-        item->setTextColor("blue");
-        break;
-      case (4):
-        item->setTextColor("orange");
-        break;
-      case (5):
-        item->setTextColor("purple");
-        break;
-      default:
-        item->setTextColor("black");
-      }
+    if (row < names.size()) {
+      QTableWidgetItem *item = new QTableWidgetItem(names[row]);
+      item->setTextColor(colors.value(row));
       m_uiForm.fittingResultsTable->setItem(row, 0, item);
     } else
-      m_uiForm.fittingResultsTable->setItem(row, 0, NULL);
+      m_uiForm.fittingResultsTable->setItem(row, 0, nullptr);
   }
-}
-
-/**
-* Get the colors corresponding to their position in the workspace list.
-*
-* @param wsList :: List of all workspaces with fitted parameters.
-* @return colors :: List of colors (as numbers) with the key being position in
-* wsList.
-*/
-QMap<int, int>
-MuonAnalysisResultTableTab::getWorkspaceColors(const QStringList &wsList) {
-  QMap<int, int> colors; // position, color
-  int posCount(0);
-  int colorCount(0);
-
-  while (wsList.size() != posCount) {
-    // If a color has already been chosen for the current workspace then skip
-    if (!colors.contains(posCount)) {
-      std::vector<std::string> firstParams;
-      // Find the first parameter table and use this as a comparison for all the
-      // other tables.
-      auto paramWs = retrieveWSChecked<ITableWorkspace>(
-          wsList[posCount].toStdString() + PARAMS_POSTFIX);
-
-      Mantid::API::TableRow paramRow = paramWs->getFirstRow();
-      do {
-        std::string key;
-        paramRow >> key;
-        firstParams.push_back(key);
-      } while (paramRow.next());
-
-      colors.insert(posCount, colorCount);
-
-      // Compare to all the other parameters. +1 don't compare with self.
-      for (int i = (posCount + 1); i < wsList.size(); ++i) {
-        if (!colors.contains(i)) {
-          std::vector<std::string> nextParams;
-          auto paramWs = retrieveWSChecked<ITableWorkspace>(
-              wsList[i].toStdString() + PARAMS_POSTFIX);
-
-          Mantid::API::TableRow paramRow = paramWs->getFirstRow();
-          do {
-            std::string key;
-            paramRow >> key;
-            nextParams.push_back(key);
-          } while (paramRow.next());
-
-          if (firstParams == nextParams) {
-            colors.insert(i, colorCount);
-          }
-        }
-      }
-      colorCount++;
-    }
-    posCount++;
-  }
-  return colors;
 }
 
 void MuonAnalysisResultTableTab::onCreateTableClicked() {
   try {
-    createTable();
+    const bool multipleFits =
+        m_uiForm.fitType->checkedButton() == m_uiForm.multipleSimFits;
+    createTable(multipleFits);
   } catch (Exception::NotFoundError &e) {
     std::ostringstream errorMsg;
     errorMsg << "Workspace required to create a table was not found:\n\n"
@@ -703,8 +711,10 @@ void MuonAnalysisResultTableTab::onCreateTableClicked() {
 
 /**
 * Creates the table using the information selected by the user in the tables
+* @param multipleFits :: [input] Whether table is for multiple fits or one
+* single fit
 */
-void MuonAnalysisResultTableTab::createTable() {
+void MuonAnalysisResultTableTab::createTable(bool multipleFits) {
   if (m_logValues.size() == 0) {
     QMessageBox::information(this, "Mantid - Muon Analysis",
                              "No workspace found with suitable fitting.");
@@ -712,210 +722,49 @@ void MuonAnalysisResultTableTab::createTable() {
   }
 
   // Get the user selection
-  QStringList wsSelected = getSelectedWs();
+  QStringList wsSelected = getSelectedItemsToFit();
   QStringList logsSelected = getSelectedLogs();
 
-  if ((wsSelected.size() == 0) || logsSelected.size() == 0) {
-    QMessageBox::information(this, "Mantid - Muon Analysis",
-                             "Please select options from both tables.");
+  MuonAnalysisResultTableCreator creator(wsSelected, logsSelected, &m_logValues,
+                                         multipleFits);
+  ITableWorkspace_sptr table;
+  try {
+    table = creator.createTable();
+  } catch (const std::runtime_error &err) {
+    QMessageBox::information(this, "Mantid - Muon Analysis", err.what());
     return;
   }
+  const std::string &tableName = getFileName();
 
-  // Check workspaces have same parameters
-  if (haveSameParameters(wsSelected)) {
-    // Create the results table
-    Mantid::API::ITableWorkspace_sptr table =
-        Mantid::API::WorkspaceFactory::Instance().createTable("TableWorkspace");
+  // Save the table to the ADS
+  Mantid::API::AnalysisDataService::Instance().addOrReplace(tableName, table);
 
-    // Add columns for log values
-    foreach (QString log, logsSelected) {
-      std::string columnTypeName;
-      int columnPlotType;
+  // Python code to show a table on the screen
+  std::stringstream code;
+  code << "found = False\n"
+       << "for w in windows():\n"
+       << "  if w.windowLabel() == '" << tableName << "':\n"
+       << "    found = True; w.show(); w.setFocus()\n"
+       << "if not found:\n"
+       << "  importTableWorkspace('" << tableName << "', True)\n";
 
-      // We use values of the first workspace to determine the type of the
-      // column to add. It seems reasonable to assume
-      // that log values with the same name will have same types.
-      QString typeName = m_logValues[wsSelected.first()][log].typeName();
-      if (typeName == "double") {
-        columnTypeName = "double";
-        columnPlotType = 1;
-      } else if (typeName == "QString") {
-        columnTypeName = "str";
-        columnPlotType = 6;
-      } else
-        throw std::runtime_error(
-            "Couldn't find appropriate column type for value with type " +
-            typeName.toStdString());
-
-      Column_sptr newColumn =
-          table->addColumn(columnTypeName, log.toStdString());
-      newColumn->setPlotType(columnPlotType);
-      newColumn->setReadOnly(false);
-    }
-
-    // Cache the start time of the first run
-    int64_t firstStart_ns(0);
-    if (const auto &firstWS =
-            Mantid::API::AnalysisDataService::Instance()
-                .retrieveWS<ExperimentInfo>(wsSelected.first().toStdString() +
-                                            WORKSPACE_POSTFIX)) {
-      firstStart_ns = firstWS->run().startTime().totalNanoseconds();
-    }
-
-    // Get param information
-    QMap<QString, QMap<QString, double>> wsParamsList;
-    QStringList paramsToDisplay;
-    for (int i = 0; i < wsSelected.size(); ++i) {
-      QMap<QString, double> paramsList;
-      auto paramWs = retrieveWSChecked<ITableWorkspace>(
-          wsSelected[i].toStdString() + PARAMS_POSTFIX);
-
-      Mantid::API::TableRow paramRow = paramWs->getFirstRow();
-
-      // Loop over all rows and get values and errors.
-      do {
-        std::string key;
-        double value;
-        double error;
-        paramRow >> key >> value >> error;
-        if (i == 0) {
-          Column_sptr newValCol = table->addColumn("double", key);
-          newValCol->setPlotType(2);
-          newValCol->setReadOnly(false);
-
-          Column_sptr newErrorCol = table->addColumn("double", key + "Error");
-          newErrorCol->setPlotType(5);
-          newErrorCol->setReadOnly(false);
-
-          paramsToDisplay.append(QString::fromStdString(key));
-          paramsToDisplay.append(QString::fromStdString(key) + "Error");
-        }
-        paramsList[QString::fromStdString(key)] = value;
-        paramsList[QString::fromStdString(key) + "Error"] = error;
-      } while (paramRow.next());
-
-      wsParamsList[wsSelected[i]] = paramsList;
-    }
-
-    // Add data to table
-    for (const auto &wsName : wsSelected) {
-      Mantid::API::TableRow row = table->appendRow();
-
-      // Get log values for this row
-      const auto &logValues = m_logValues[wsName];
-
-      // Write log values in each column
-      for (int i = 0; i < logsSelected.size(); ++i) {
-        Mantid::API::Column_sptr col = table->getColumn(i);
-        const QVariant &v = logValues[logsSelected[i]];
-
-        if (col->isType<double>()) {
-          if (logsSelected[i].endsWith(" (s)")) {
-            // Convert relative to first start time
-            double seconds = v.toDouble();
-            const double firstStart_sec =
-                static_cast<double>(firstStart_ns) * 1.e-9;
-            row << seconds - firstStart_sec;
-          } else {
-            row << v.toDouble();
-          }
-        } else if (col->isType<std::string>()) {
-          row << v.toString().toStdString();
-        } else {
-          throw std::runtime_error(
-              "Log value with name '" + logsSelected[i].toStdString() +
-              "' in '" + wsName.toStdString() + "' has unexpected type.");
-        }
-      }
-
-      // Add param values (params same for all workspaces)
-      QMap<QString, double> paramsList = wsParamsList[wsName];
-      for (const auto &paramName : paramsToDisplay) {
-        row << paramsList[paramName];
-      }
-    }
-
-    std::string tableName = getFileName();
-
-    // Save the table to the ADS
-    Mantid::API::AnalysisDataService::Instance().addOrReplace(tableName, table);
-
-    // Python code to show a table on the screen
-    std::stringstream code;
-    code << "found = False\n"
-         << "for w in windows():\n"
-         << "  if w.windowLabel() == '" << tableName << "':\n"
-         << "    found = True; w.show(); w.setFocus()\n"
-         << "if not found:\n"
-         << "  importTableWorkspace('" << tableName << "', True)\n";
-
-    emit runPythonCode(QString::fromStdString(code.str()), false);
-  } else {
-    QMessageBox::information(
-        this, "Mantid - Muon Analysis",
-        "Please pick workspaces with the same fitted parameters");
-  }
+  emit runPythonCode(QString::fromStdString(code.str()), false);
 }
 
 /**
-* See if the workspaces selected have the same parameters.
-*
-* @param wsList :: A list of workspaces with fitted parameters.
-* @return bool :: Whether or not the wsList given share the same fitting
-* parameters.
-*/
-bool MuonAnalysisResultTableTab::haveSameParameters(const QStringList &wsList) {
-  std::vector<std::string> firstParams;
-
-  // Find the first parameter table and use this as a comparison for all the
-  // other tables.
-  auto paramWs = retrieveWSChecked<ITableWorkspace>(wsList[0].toStdString() +
-                                                    PARAMS_POSTFIX);
-
-  Mantid::API::TableRow paramRow = paramWs->getFirstRow();
-  do {
-    std::string key;
-    paramRow >> key;
-    firstParams.push_back(key);
-  } while (paramRow.next());
-
-  // Compare to all the other parameters.
-  for (int i = 1; i < wsList.size(); ++i) {
-    std::vector<std::string> nextParams;
-    auto paramWs = retrieveWSChecked<ITableWorkspace>(wsList[i].toStdString() +
-                                                      PARAMS_POSTFIX);
-
-    Mantid::API::TableRow paramRow = paramWs->getFirstRow();
-    do {
-      std::string key;
-      paramRow >> key;
-      nextParams.push_back(key);
-    } while (paramRow.next());
-
-    if (!(firstParams == nextParams))
-      return false;
-  }
-  return true;
-}
-
-/**
-* Get the user selected workspaces with _parameters files associated with it
-*
-* @return wsSelected :: A vector of QString's containing the workspace that are
-* selected.
-*/
-QStringList MuonAnalysisResultTableTab::getSelectedWs() {
-  QStringList wsSelected;
-  for (int i = 0; i < m_logValues.size(); i++) {
-    QCheckBox *includeCell = static_cast<QCheckBox *>(
+ * Get the user selected workspaces OR labels from the table
+ * @return :: list of selected workspaces/labels
+ */
+QStringList MuonAnalysisResultTableTab::getSelectedItemsToFit() {
+  QStringList items;
+  for (int i = 0; i < m_uiForm.fittingResultsTable->rowCount(); ++i) {
+    const auto includeCell = static_cast<QCheckBox *>(
         m_uiForm.fittingResultsTable->cellWidget(i, 1));
     if (includeCell->isChecked()) {
-      QTableWidgetItem *wsName = static_cast<QTableWidgetItem *>(
-          m_uiForm.fittingResultsTable->item(i, 0));
-      wsSelected.push_back(wsName->text());
+      items.push_back(m_uiForm.fittingResultsTable->item(i, 0)->text());
     }
   }
-  return wsSelected;
+  return items;
 }
 
 /**

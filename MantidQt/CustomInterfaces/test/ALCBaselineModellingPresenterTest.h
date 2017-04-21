@@ -10,6 +10,7 @@
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidHistogramData/LinearGenerator.h"
 #include "MantidKernel/WarningSuppressions.h"
 
 #include "MantidQtCustomInterfaces/Muon/ALCBaselineModellingPresenter.h"
@@ -18,6 +19,10 @@ using namespace Mantid::API;
 using namespace MantidQt::CustomInterfaces;
 using namespace testing;
 using boost::scoped_ptr;
+using Mantid::HistogramData::Points;
+using Mantid::HistogramData::Counts;
+using Mantid::HistogramData::CountStandardDeviations;
+using Mantid::HistogramData::LinearGenerator;
 
 GCC_DIAG_OFF_SUGGEST_OVERRIDE
 
@@ -133,11 +138,9 @@ public:
     MatrixWorkspace_sptr ws =
         WorkspaceFactory::Instance().create("Workspace2D", 1, size, size);
 
-    for (size_t i = 0; i < size; ++i) {
-      ws->dataX(0)[i] = static_cast<double>(i + 1);
-      ws->dataY(0)[i] = ws->dataX(0)[i] + deltaY;
-      ws->dataE(0)[i] = 1;
-    }
+    ws->setHistogram(0, Points(size, LinearGenerator(1, 1)),
+                     Counts(size, LinearGenerator(1 + deltaY, 1)),
+                     CountStandardDeviations(size, 1));
 
     return ws;
   }

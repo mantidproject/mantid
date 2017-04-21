@@ -8,6 +8,7 @@ import stresstesting
 import mantid
 import re
 
+
 class SphinxWarnings(stresstesting.MantidStressTest):
     def __init__(self):
         stresstesting.MantidStressTest.__init__(self)

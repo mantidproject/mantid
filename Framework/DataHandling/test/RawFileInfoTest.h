@@ -3,6 +3,7 @@
 
 #include <cxxtest/TestSuite.h>
 #include "MantidDataHandling/RawFileInfo.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/ITableWorkspace.h"
 
 using namespace Mantid::DataHandling;
@@ -20,9 +21,11 @@ public:
 
   void testGetRunParameters() { runTest(true); }
 
+  void testGetSampleParameters() { runTest(false, true); }
+
 private:
   // Check the parameters are correct
-  void runTest(bool tableToExist) {
+  void runTest(bool tableToExist, bool getSampleParameters = false) {
     RawFileInfo alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT_EQUALS(alg.isInitialized(), true);
@@ -31,6 +34,10 @@ private:
     alg.setPropertyValue("Filename", m_filetotest);
     if (tableToExist) {
       alg.setPropertyValue("GetRunParameters", "1");
+    }
+
+    if (getSampleParameters) {
+      alg.setPropertyValue("GetSampleParameters", "1");
     }
 
     TS_ASSERT_THROWS_NOTHING(alg.execute());
@@ -81,6 +88,39 @@ private:
 
       // Tidy up
       Mantid::API::AnalysisDataService::Instance().remove("Raw_RPB");
+    }
+
+    if (getSampleParameters) {
+      Mantid::API::Workspace_sptr workspace =
+          Mantid::API::AnalysisDataService::Instance().retrieve("Raw_SPB");
+      TS_ASSERT(workspace.get());
+
+      Mantid::API::ITableWorkspace_sptr sample_table =
+          boost::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(workspace);
+      TS_ASSERT(sample_table.get());
+
+      // Sample type
+      int e_type = sample_table->getRef<int>("e_type", 0);
+      TS_ASSERT_EQUALS(e_type, 1);
+
+      // Sample geometry
+      int e_geom = sample_table->getRef<int>("e_geom", 0);
+      TS_ASSERT_EQUALS(e_geom, 3);
+
+      // Sample thickness
+      double e_thick = sample_table->getRef<double>("e_thick", 0);
+      TS_ASSERT_EQUALS(e_thick, 2.);
+
+      // Sample height
+      double e_height = sample_table->getRef<double>("e_height", 0);
+      TS_ASSERT_EQUALS(e_height, 8.);
+
+      // Sample width
+      double e_width = sample_table->getRef<double>("e_width", 0);
+      TS_ASSERT_EQUALS(e_width, 8.);
+
+      // Tidy up
+      Mantid::API::AnalysisDataService::Instance().remove("Raw_SPB");
     }
   }
 

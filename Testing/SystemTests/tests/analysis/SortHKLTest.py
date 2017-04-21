@@ -22,6 +22,7 @@ class SortHKLTest(stresstesting.MantidStressTest):
     [1] SORTAV: ftp://ftp.hwi.buffalo.edu/pub/Blessing/Drear/sortav.use
         (and references therein).
     '''
+
     def runTest(self):
         self._ws = CreateSimulationWorkspace(Instrument='TOPAZ',
                                              BinParams='0,10000,20000',
@@ -62,7 +63,7 @@ class SortHKLTest(stresstesting.MantidStressTest):
             # Mantid functions don't seem to like unicode so the dict is re-written
             ub_parameters.update(
                 dict(
-                    [(str(x), y if type(y) == float else str(y))
+                    [(str(x), y if isinstance(y, float) else str(y))
                      for x, y in raw_ub_parameters.iteritems()]
                 ))
 
@@ -90,7 +91,6 @@ class SortHKLTest(stresstesting.MantidStressTest):
         sorted_hkls, chi2, statistics = SortHKL(InputWorkspace=reflections,
                                                 PointGroup=point_group_name,
                                                 LatticeCentering=centering_name)
-
 
         return statistics.row(0), sorted_hkls
 
@@ -131,7 +131,7 @@ class SortHKLTest(stresstesting.MantidStressTest):
         unique_map = dict()
         for peak in peaks:
             unique = point_group.getReflectionFamily(peak.getHKL())
-            if not unique in unique_map:
+            if unique not in unique_map:
                 unique_map[unique] = [peak]
             else:
                 unique_map[unique].append(peak)
@@ -143,4 +143,3 @@ class SortHKLTest(stresstesting.MantidStressTest):
                 for peak in equivalents[1:]:
                     self.assertEquals(peak.getIntensity(), reference_peak.getIntensity())
                     self.assertEquals(peak.getSigmaIntensity(), reference_peak.getSigmaIntensity())
-

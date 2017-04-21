@@ -24,7 +24,7 @@ bool isValidGeneratorString(const std::string &generatorString) {
   for (auto &generatorString : generatorStrings) {
     try {
       SymmetryOperationSymbolParser::parseIdentifier(generatorString);
-    } catch (Kernel::Exception::ParseError) {
+    } catch (const Kernel::Exception::ParseError &) {
       return false;
     }
   }

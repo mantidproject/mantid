@@ -48,6 +48,8 @@ public:
 private:
   void init() override;
   void exec() override;
+  Mantid::API::MatrixWorkspace_sptr
+  correctDetectors(Mantid::API::MatrixWorkspace_sptr inputWs, double theta);
 };
 
 } // namespace MDAlgorithms

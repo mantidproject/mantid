@@ -1,15 +1,17 @@
-﻿#pylint: disable=invalid-name,no-init
+#pylint: disable=invalid-name,no-init
 #pylint: disable=too-many-public-methods
 """
 Check that file manipulation works fine
 """
 
+from __future__ import (absolute_import, division, print_function)
 import unittest
 import stresstesting
 from mantid.simpleapi import *
 import SANSUtility as su
 import os
 from ISISCommandInterface import *
+
 
 def get_full_path_SANS_system_test(filename):
     '''
@@ -31,6 +33,7 @@ def get_full_path_SANS_system_test(filename):
             return True, full_path
     return False, ""
 
+
 class SANSFileCheckingTest(unittest.TestCase):
     def _do_test(self, file_name, expected_time):
         exists, full_path =  get_full_path_SANS_system_test(file_name)
@@ -38,7 +41,7 @@ class SANSFileCheckingTest(unittest.TestCase):
             measurement_time = su.get_measurement_time_from_file(full_path)
             self.assertEqual(measurement_time, expected_time)
         else:
-            print "Missing data files. Path to system test data needs to be set."
+            print("Missing data files. Path to system test data needs to be set.")
             self.assertTrue(False)
 
     def test_that_sans2D_nexus_file_with_date_is_evaluated_correctly(self):
@@ -58,7 +61,6 @@ class SANSFileCheckingTest(unittest.TestCase):
         file_name = 'LOQ74014.nxs'
         expected_time = '2012-10-22T11:14:54'
         self._do_test(file_name, expected_time)
-
 
     def test_that_SANS2D_RAW_file_with_date_is_evaluated_correctly(self):
         file_name = 'SANS2D00005546.raw'
@@ -87,7 +89,7 @@ class SANSMatchIDFInReducerAndWorkspaceTest(unittest.TestCase):
             measurement_time = su.get_measurement_time_from_file(full_path)
             idf_path_workspace = ExperimentInfo.getInstrumentFilename(instrument_name, measurement_time)
         else:
-            print "Missing data files. Path to system test data needs to be set."
+            print("Missing data files. Path to system test data needs to be set.")
             self.assertTrue(False)
         return idf_path_workspace
 
@@ -230,4 +232,3 @@ class SANSSwitchIDFTestRunner(stresstesting.MantidStressTest):
 
     def validate(self):
         return self._success
-

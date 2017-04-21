@@ -6,6 +6,7 @@
 #include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
+#include "MantidKernel/Strings.h"
 #include "MantidKernel/UsageService.h"
 #include "MantidKernel/VMD.h"
 #include "MantidQtAPI/AlgorithmRunner.h"
@@ -244,7 +245,7 @@ void LineViewer::updateStartEnd() {
     m_endText[d]->setText(QString::number(m_end[d]));
     m_thicknessText[d]->setText(QString::number(m_thickness[d]));
   }
-  ui.textPlaneWidth->setText(QString::number(m_planeWidth));
+  ui.textPlaneWidth->setText(QString::number(m_planeWidth * 2.));
 
   // Now show the width
   this->updateBinWidth();
@@ -298,7 +299,7 @@ void LineViewer::readTextboxes() {
     allOk = allOk && ok;
   }
   // Now the planar width
-  double tempPlaneWidth = ui.textPlaneWidth->text().toDouble(&ok);
+  double tempPlaneWidth = ui.textPlaneWidth->text().toDouble(&ok) * 0.5;
   allOk = allOk && ok;
 
   // Only continue if all values typed were valid numbers.
@@ -512,8 +513,8 @@ LineViewer::applyMDWorkspace(Mantid::API::IMDWorkspace_sptr ws) {
       // Set the basis vector with the width *2 and 1 bin
       alg->setPropertyValue("BasisVector" + dim,
                             dim + ",units," + basis.toString(","));
-      OutputExtents.push_back(-m_thickness[d]);
-      OutputExtents.push_back(+m_thickness[d]);
+      OutputExtents.push_back(-0.5 * m_thickness[d]);
+      OutputExtents.push_back(+0.5 * m_thickness[d]);
       OutputBins.push_back(1);
 
       propNum++;
@@ -949,7 +950,7 @@ void LineViewer::setThickness(double width) {
 /** Set the thickness to integrate in a particular dimension.
  *
  * Integration is performed perpendicular to the XY plane,
- * from -thickness below to +thickness above the center.
+ * from -0.5 * thickness below to +0.5 * thickness above the center.
  *
  * Use setPlanarWidth() to set the width along the XY plane.
  *
@@ -970,7 +971,7 @@ void LineViewer::setThickness(int dim, double width) {
 /** Set the thickness to integrate in a particular dimension.
  *
  * Integration is performed perpendicular to the XY plane,
- * from -thickness below to +thickness above the center.
+ * from -0.5 * thickness below to +0.5 * thickness above the center.
  *
  * Use setPlanarWidth() to set the width along the XY plane.
  *
@@ -1160,7 +1161,7 @@ std::string LineViewer::saveToProject() const {
   if (!m_sliceWS)
     return "";
 
-  tsv.writeLine("SliceWorkspace") << m_sliceWS->name();
+  tsv.writeLine("SliceWorkspace") << m_sliceWS->getName();
   tsv.writeLine("XDim") << m_freeDimX;
   tsv.writeLine("YDim") << m_freeDimY;
   tsv.writeLine("AllFreeDims") << m_allDimsFree;

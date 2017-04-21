@@ -146,6 +146,14 @@ public:
     TS_ASSERT_THROWS(ArrayProperty<double> dd("dd", "aa,bb"), std::bad_cast)
   }
 
+  void testConstructorByString_long() {
+    ArrayProperty<long> prop("long", "0:2,5");
+    TS_ASSERT_EQUALS(prop.operator()()[0], 0);
+    TS_ASSERT_EQUALS(prop.operator()()[1], 1);
+    TS_ASSERT_EQUALS(prop.operator()()[2], 2);
+    TS_ASSERT_EQUALS(prop.operator()()[3], 5);
+  }
+
   void testCopyConstructor() {
     ArrayProperty<int> i = *iProp;
     TS_ASSERT(!i.name().compare("intProp"))

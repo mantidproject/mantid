@@ -1,13 +1,18 @@
 #include "MantidDataHandling/PDLoadCharacterizations.h"
 #include "MantidAPI/FileProperty.h"
+#include "MantidAPI/MultipleFileProperty.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/Property.h"
 #include "MantidKernel/Strings.h"
+#include "MantidKernel/StringTokenizer.h"
 #include <boost/algorithm/string.hpp>
+#include <boost/regex.hpp>
 #include <fstream>
+#include <set>
+#include <iostream>
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -26,6 +31,61 @@ static const std::string ZERO("0.");
 static const std::string EXP_INI_VAN_KEY("Vana");
 static const std::string EXP_INI_EMPTY_KEY("VanaBg");
 static const std::string EXP_INI_CAN_KEY("MTc");
+// in the filenames vector, each index has a unique location
+static const int F_INDEX_V0 = 0;
+static const int F_INDEX_V1 = 1;
+static const int F_INDEX_EXPINI = 2;
+static const int F_INDEX_SIZE = 3;
+/// matches the header line for the columns in the version=1 style file
+const boost::regex V1_TABLE_REG_EXP{"^freq.*\\s+w.*l.*\\s+"
+                                    "van\\s+van_back\\s+"
+                                    "mt_env\\s+mt_instr(.+)"};
+const boost::regex VERSION_REG_EXP{"^version=([0-9]+)"};
+
+/**
+ * Use the files to determine if there is any "extra" columns that need to be
+ * added to the output TableWorkspace.
+ */
+std::vector<std::string>
+extra_columns(const std::vector<std::string> &filenames) {
+  // only version1 files generate extra columns
+  if (filenames[F_INDEX_V1].empty())
+    return std::vector<std::string>();
+
+  std::set<std::string> columnSet;
+
+  // parse the version1 file
+  std::ifstream file(filenames[F_INDEX_V1].c_str());
+  if (!file) {
+    throw Exception::FileError("Unable to open file", filenames[F_INDEX_V1]);
+  }
+
+  for (std::string line = Strings::getLine(file); !file.eof();
+       Strings::getLine(file, line)) {
+    boost::smatch result;
+    // all instances of table headers
+    if (boost::regex_search(line, result, V1_TABLE_REG_EXP)) {
+      if (result.size() == 2) {
+        line = Strings::strip(result[1]);
+        Kernel::StringTokenizer tokenizer(
+            line, " ", Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
+        for (const auto &token : tokenizer) {
+          columnSet.insert(token);
+        }
+      }
+    }
+    // TODO need to get the "extras" line
+  }
+  file.close();
+
+  // convert the result to a sorted vector
+  std::vector<std::string> columnnames;
+  std::copy(columnSet.begin(), columnSet.end(),
+            std::back_inserter(columnnames));
+  std::sort(columnnames.begin(), columnnames.end());
+
+  return columnnames;
+}
 }
 
 //----------------------------------------------------------------------------------------------
@@ -46,9 +106,9 @@ const std::string PDLoadCharacterizations::category() const {
 /** Initialize the algorithm's properties.
  */
 void PDLoadCharacterizations::init() {
-  declareProperty(
-      make_unique<FileProperty>("Filename", "", FileProperty::Load, ".txt"),
-      "Characterizations file");
+  const auto exts = std::vector<std::string>({".txt"});
+  declareProperty(Kernel::make_unique<MultipleFileProperty>("Filename", exts),
+                  "Characterizations file");
   declareProperty(make_unique<FileProperty>("ExpIniFilename", "",
                                             FileProperty::OptionalLoad, "ini"),
                   "(Optional) exp.ini file used at NOMAD");
@@ -86,46 +146,105 @@ void PDLoadCharacterizations::init() {
 /** Execute the algorithm.
  */
 void PDLoadCharacterizations::exec() {
-  // open the file for reading
-  std::string filename = this->getProperty("Filename");
-  std::ifstream file(filename.c_str());
-  if (!file) {
-    throw Exception::FileError("Unable to open file", filename);
-  }
+  auto filenames = this->getFilenames();
+  const std::vector<std::string> canColumnNames = extra_columns(filenames);
 
-  // read the first line and decide what to do
-  std::string firstLine = Strings::getLine(file);
-  if (firstLine.substr(0, IPARM_KEY.size()) == IPARM_KEY) {
-    firstLine = Strings::strip(firstLine.substr(IPARM_KEY.size()));
-    this->setProperty("IParmFilename", firstLine);
-    this->readFocusInfo(file);
-  } else {
-    // things expect the L1 to be zero if it isn't set
-    this->setProperty("PrimaryFlightPath", 0.);
-  }
-
-  // now the rest of the file
   // setup the default table workspace for the characterization runs
   ITableWorkspace_sptr wksp = WorkspaceFactory::Instance().createTable();
   wksp->addColumn("double", "frequency");
   wksp->addColumn("double", "wavelength");
   wksp->addColumn("int", "bank");
   wksp->addColumn("str", "vanadium");
+  wksp->addColumn("str", "vanadium_background");
   wksp->addColumn("str", "container");
-  wksp->addColumn("str", "empty");
+  wksp->addColumn("str", "empty_environment");
+  wksp->addColumn("str", "empty_instrument");
   wksp->addColumn("str", "d_min"); // b/c it is an array for NOMAD
   wksp->addColumn("str", "d_max"); // b/c it is an array for NOMAD
   wksp->addColumn("double", "tof_min");
   wksp->addColumn("double", "tof_max");
-  this->readCharInfo(file, wksp);
+  wksp->addColumn("double", "wavelength_min");
+  wksp->addColumn("double", "wavelength_max");
+  for (const auto &name : canColumnNames) {
+    wksp->addColumn("str", name); // all will be strings
+  }
+
+  // first file is assumed to be version 0
+  this->readVersion0(filenames[F_INDEX_V0], wksp);
+
+  // optional second file has container dependent information
+  this->readVersion1(filenames[F_INDEX_V1], wksp);
+
+  // optional exp.ini file for NOMAD
+  this->readExpIni(filenames[F_INDEX_EXPINI], wksp);
+
+  this->setProperty("OutputWorkspace", wksp);
+}
+
+int getVersion(const std::string &filename) {
+  std::ifstream file(filename.c_str());
+  if (!file) {
+    throw Exception::FileError("Unable to open file", filename);
+  }
+  // first line must be version string
+  std::string line = Strings::getLine(file);
+
+  boost::smatch result;
+  if (boost::regex_search(line, result, VERSION_REG_EXP) &&
+      result.size() == 2) {
+    return boost::lexical_cast<int>(result[1]);
+  }
+  file.close();
+
+  // otherwise it is a version=0
+  return 0;
+}
+
+/**
+ * This ignores the traditional interpretation of
+ * Mantid::API::MultipleFileProperty
+ * and flattens the array into a simple list of filenames.
+ */
+std::vector<std::string> PDLoadCharacterizations::getFilenames() {
+  // get the values from the "Filename" property
+  std::vector<std::string> filenamesFromPropertyUnraveld;
+  std::vector<std::vector<std::string>> filenamesFromProperty =
+      this->getProperty("Filename");
+  for (const auto &outer : filenamesFromProperty) {
+    filenamesFromPropertyUnraveld.insert(filenamesFromPropertyUnraveld.end(),
+                                         outer.cbegin(), outer.cend());
+  }
+  // error check that something sensible was supplied
+  if (filenamesFromPropertyUnraveld.size() > 2) {
+    throw std::runtime_error("Can only specify up to 2 characterization files");
+  }
+
+  // sort out which file is which
+  int v0_index = -1;
+  int v1_index = -1;
+  for (size_t i = 0; i < filenamesFromPropertyUnraveld.size(); ++i) {
+    const int version = getVersion(filenamesFromPropertyUnraveld[i]);
+    g_log.debug() << "Found version " << version << " in \""
+                  << filenamesFromPropertyUnraveld[i] << "\"\n";
+    if (version == 0)
+      v0_index = static_cast<int>(i);
+    else if (version == 1)
+      v1_index = static_cast<int>(i);
+  }
+
+  // fill the output array
+  std::vector<std::string> filenames(F_INDEX_SIZE);
+  if (v0_index >= 0)
+    filenames[F_INDEX_V0] = filenamesFromPropertyUnraveld[v0_index];
+  if (v1_index >= 0)
+    filenames[F_INDEX_V1] = filenamesFromPropertyUnraveld[v1_index];
 
   // optional exp.ini file for NOMAD
   std::string iniFilename = this->getProperty("ExpIniFilename");
   if (!iniFilename.empty()) {
-    this->readExpIni(iniFilename, wksp);
+    filenames[F_INDEX_EXPINI] = iniFilename;
   }
-
-  this->setProperty("OutputWorkspace", wksp);
+  return filenames;
 }
 
 /**
@@ -144,7 +263,7 @@ void PDLoadCharacterizations::readFocusInfo(std::ifstream &file) {
 
   // parse the file
   for (std::string line = Strings::getLine(file); !file.eof();
-       line = Strings::getLine(file)) {
+       Strings::getLine(file, line)) {
     line = Strings::strip(line);
     // skip empty lines and "comments"
     if (line.empty())
@@ -192,11 +311,12 @@ void PDLoadCharacterizations::readCharInfo(std::ifstream &file,
   if (file.eof())
     return;
 
+  const size_t num_of_columns = wksp->columnCount();
+
   // parse the file
   for (std::string line = Strings::getLine(file); !file.eof();
-       line = Strings::getLine(file)) {
+       Strings::getLine(file, line)) {
     line = Strings::strip(line);
-
     // skip empty lines and "comments"
     if (line.empty())
       continue;
@@ -207,7 +327,7 @@ void PDLoadCharacterizations::readCharInfo(std::ifstream &file,
     std::vector<std::string> splitted;
     boost::split(splitted, line, boost::is_any_of("\t "),
                  boost::token_compress_on);
-    while (splitted.size() < 10)
+    while (splitted.size() < 12)
       splitted.push_back(ZERO); // extra values default to zero
 
     // add the row
@@ -216,13 +336,182 @@ void PDLoadCharacterizations::readCharInfo(std::ifstream &file,
     row << boost::lexical_cast<double>(splitted[1]);  // wavelength
     row << boost::lexical_cast<int32_t>(splitted[2]); // bank
     row << splitted[3];                               // vanadium
+    row << splitted[5];                               // vanadium_background
     row << splitted[4];                               // container
-    row << splitted[5];                               // empty
+    row << "0";                                       // empty_environment
+    row << "0";                                       // empty_instrument
     row << splitted[6];                               // d_min
     row << splitted[7];                               // d_max
     row << boost::lexical_cast<double>(splitted[8]);  // tof_min
     row << boost::lexical_cast<double>(splitted[9]);  // tof_max
+    row << boost::lexical_cast<double>(splitted[10]); // wavelength_min
+    row << boost::lexical_cast<double>(splitted[11]); // wavelength_max
+
+    // pad all extras with empty string - the 14 required columns have
+    // already been added to the row
+    for (size_t i = 14; i < num_of_columns; ++i) {
+      row << "0";
+    }
   }
+}
+
+void PDLoadCharacterizations::readVersion0(const std::string &filename,
+                                           API::ITableWorkspace_sptr &wksp) {
+  // don't bother if there isn't a filename
+  if (filename.empty())
+    return;
+
+  std::ifstream file(filename.c_str());
+  if (!file) {
+    throw Exception::FileError("Unable to open file", filename);
+  }
+
+  // read the first line and decide what to do
+  std::string firstLine = Strings::getLine(file);
+  if (firstLine.substr(0, IPARM_KEY.size()) == IPARM_KEY) {
+    firstLine = Strings::strip(firstLine.substr(IPARM_KEY.size()));
+    this->setProperty("IParmFilename", firstLine);
+    this->readFocusInfo(file);
+  } else {
+    // things expect the L1 to be zero if it isn't set
+    this->setProperty("PrimaryFlightPath", 0.);
+  }
+
+  // now the rest of the file
+  this->readCharInfo(file, wksp);
+
+  file.close();
+}
+
+bool closeEnough(const double left, const double right) {
+  // the same value
+  const double diff = fabs(left - right);
+  if (diff == 0.)
+    return true;
+
+  // same within 5%
+  const double relativeDiff = diff * 2 / (left + right);
+  return relativeDiff < .05;
+}
+
+int findRow(API::ITableWorkspace_sptr &wksp,
+            const std::vector<std::string> &values) {
+  const double frequency = boost::lexical_cast<double>(values[0]);
+  const double wavelength = boost::lexical_cast<double>(values[1]);
+
+  // find the correct row
+  const size_t numRows = wksp->rowCount();
+  for (size_t i = 0; i < numRows; ++i) {
+    const double frequencyRow = wksp->getRef<double>("frequency", i);
+    const double wavelengthRow = wksp->getRef<double>("wavelength", i);
+    if (closeEnough(frequency, frequencyRow) &&
+        closeEnough(wavelength, wavelengthRow)) {
+      return static_cast<int>(i);
+    }
+  }
+  // fall through behavior is -1
+  return -1;
+}
+
+void updateRow(API::ITableWorkspace_sptr &wksp, const size_t rowNum,
+               const std::vector<std::string> &names,
+               const std::vector<std::string> &values) {
+  wksp->getRef<std::string>("vanadium", rowNum) = values[2];
+  wksp->getRef<std::string>("vanadium_background", rowNum) = values[3];
+  wksp->getRef<std::string>("empty_environment", rowNum) = values[4];
+  wksp->getRef<std::string>("empty_instrument", rowNum) = values[5];
+  for (size_t i = 0; i < names.size(); ++i) {
+    const auto name = names[i];
+    wksp->getRef<std::string>(name, rowNum) = values[i + 6];
+  }
+}
+
+void PDLoadCharacterizations::readVersion1(const std::string &filename,
+                                           API::ITableWorkspace_sptr &wksp) {
+  // don't bother if there isn't a filename
+  if (filename.empty())
+    return;
+
+  g_log.information() << "Opening \"" << filename << "\" as a version 1 file\n";
+  std::ifstream file(filename.c_str());
+  if (!file) {
+    throw Exception::FileError("Unable to open file", filename);
+  }
+
+  // first line must be version string
+  std::string line = Strings::getLine(file);
+  boost::smatch result;
+  if (boost::regex_search(line, result, VERSION_REG_EXP) &&
+      result.size() == 2) {
+    g_log.debug() << "Found version " << result[1] << "\n";
+  } else {
+    file.close();
+    throw std::runtime_error("file must have \"version=1\" as the first line");
+  }
+
+  // store the names of the columns in order
+  std::vector<std::string> columnNames;
+  for (Strings::getLine(file, line); !file.eof();
+       Strings::getLine(file, line)) {
+    if (line.empty())
+      continue;
+    if (line.substr(0, 1) == "#")
+      continue;
+
+    boost::smatch result;
+    // all instances of table headers
+    if (boost::regex_search(line, result, V1_TABLE_REG_EXP)) {
+      if (result.size() == 2) {
+        line = Strings::strip(result[1]);
+        Kernel::StringTokenizer tokenizer(
+            line, " ", Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
+        for (const auto &token : tokenizer) {
+          columnNames.push_back(token);
+        }
+      }
+    } else {
+      if (columnNames.empty()) // should never happen
+        throw std::runtime_error("file missing column names");
+
+      line = Strings::strip(line);
+      Kernel::StringTokenizer tokenizer(
+          line, " ", Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
+      std::vector<std::string> valuesAsStr;
+      for (const auto &token : tokenizer) {
+        valuesAsStr.push_back(token);
+      }
+
+      const int row = findRow(wksp, valuesAsStr);
+
+      if (row >= 0) {
+        updateRow(wksp, static_cast<size_t>(row), columnNames, valuesAsStr);
+      } else {
+        // add the row
+        API::TableRow row = wksp->appendRow();
+        row << boost::lexical_cast<double>(valuesAsStr[0]); // frequency
+        row << boost::lexical_cast<double>(valuesAsStr[1]); // wavelength
+        row << boost::lexical_cast<int32_t>(1);             // bank
+        row << valuesAsStr[2];                              // vanadium
+        row << valuesAsStr[3]; // vanadium_background
+        row << "0";            // container
+        row << valuesAsStr[4]; // empty_environment
+        row << valuesAsStr[5]; // empty_instrument
+        row << "0";            // d_min
+        row << "0";            // d_max
+        row << 0.;             // tof_min
+        row << 0.;             // tof_max
+        row << 0.;             // wavelength_min
+        row << 0.;             // wavelength_max
+        // insert all the extras
+        for (size_t i = 6; i < valuesAsStr.size(); ++i) {
+          row << valuesAsStr[i];
+        }
+      }
+    }
+    // TODO need to get the extras line
+  }
+
+  file.close();
 }
 
 /**
@@ -232,6 +521,11 @@ void PDLoadCharacterizations::readCharInfo(std::ifstream &file,
  */
 void PDLoadCharacterizations::readExpIni(const std::string &filename,
                                          API::ITableWorkspace_sptr &wksp) {
+  // don't bother if there isn't a filename
+  if (filename.empty())
+    return;
+
+  std::cout << "readExpIni(" << filename << ")" << std::endl;
   if (wksp->rowCount() == 0)
     throw std::runtime_error("Characterizations file does not have any "
                              "characterizations information");
@@ -243,7 +537,7 @@ void PDLoadCharacterizations::readExpIni(const std::string &filename,
 
   // parse the file
   for (std::string line = Strings::getLine(file); !file.eof();
-       line = Strings::getLine(file)) {
+       Strings::getLine(file, line)) {
     line = Strings::strip(line);
     // skip empty lines and "comments"
     if (line.empty())
@@ -262,9 +556,9 @@ void PDLoadCharacterizations::readExpIni(const std::string &filename,
     if (splitted[0] == EXP_INI_VAN_KEY) {
       wksp->getRef<std::string>("vanadium", 0) = splitted[1];
     } else if (splitted[0] == EXP_INI_EMPTY_KEY) {
-      wksp->getRef<std::string>("container", 0) = splitted[1];
+      wksp->getRef<std::string>("vanadium_background", 0) = splitted[1];
     } else if (splitted[0] == EXP_INI_CAN_KEY) {
-      wksp->getRef<std::string>("empty", 0) = splitted[1];
+      wksp->getRef<std::string>("container", 0) = splitted[1];
     }
   }
 }

@@ -178,7 +178,7 @@ void ConvertAxisByFormula::exec() {
     if ((isRaggedBins) || (isGeometryRequired)) {
       // ragged bins or geometry used - we have to calculate for every spectra
       size_t numberOfSpectra_i = outputWs->getNumberHistograms();
-      const auto &spectrumInfo = outputWs->spectrumInfo();
+      auto &spectrumInfo = outputWs->mutableSpectrumInfo();
 
       size_t failedDetectorCount = 0;
       Progress prog(this, 0.6, 1.0, numberOfSpectra_i);
@@ -192,7 +192,8 @@ void ConvertAxisByFormula::exec() {
         // both handled the same way
         {
           // could not find the geometry info for this spectra
-          outputWs->maskWorkspaceIndex(i);
+          outputWs->getSpectrum(i).clearData();
+          spectrumInfo.setMasked(i, true);
           failedDetectorCount++;
         }
         prog.report();
@@ -214,7 +215,7 @@ void ConvertAxisByFormula::exec() {
           outputWs->getNumberHistograms()); // cast to make openmp happy
       auto xVals = outputWs->refX(0);
       Progress prog(this, 0.6, 1.0, numberOfSpectra_i);
-      PARALLEL_FOR1(outputWs)
+      PARALLEL_FOR_IF(Kernel::threadSafe(*outputWs))
       for (int64_t j = 1; j < numberOfSpectra_i; ++j) {
         PARALLEL_START_INTERUPT_REGION
         outputWs->setX(j, xVals);

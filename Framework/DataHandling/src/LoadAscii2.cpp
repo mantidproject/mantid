@@ -1,12 +1,11 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidDataHandling/LoadAscii2.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/RegisterFileLoader.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidHistogramData/HistogramMath.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ListValidator.h"
 #include <MantidKernel/StringTokenizer.h>
@@ -201,12 +200,12 @@ void LoadAscii2::writeToWorkspace(API::MatrixWorkspace_sptr &localWorkspace,
   }
 
   for (size_t i = 0; i < numSpectra; ++i) {
-    localWorkspace->dataX(i) = m_spectra[i].readX();
-    localWorkspace->dataY(i) = m_spectra[i].readY();
+    localWorkspace->setSharedX(i, m_spectra[i].sharedX());
+    localWorkspace->setSharedY(i, m_spectra[i].sharedY());
     // if E or DX are ommitted they're implicitly initalised as 0
     if (m_baseCols == 4 || m_baseCols == 3) {
       // E in file
-      localWorkspace->dataE(i) = m_spectra[i].readE();
+      localWorkspace->setSharedE(i, m_spectra[i].sharedE());
     }
     // DX could be NULL
     localWorkspace->setSharedDx(i, m_spectra[i].sharedDx());
@@ -422,7 +421,7 @@ void LoadAscii2::processHeader(std::ifstream &file) {
 }
 
 /**
-* Check if the file has been found to inconsistantly include spectra IDs
+* Check if the file has been found to inconsistently include spectra IDs
 * @param[in] columns : the columns of values in the current line of data
 */
 void LoadAscii2::addToCurrentSpectra(std::list<std::string> &columns) {
@@ -430,29 +429,34 @@ void LoadAscii2::addToCurrentSpectra(std::list<std::string> &columns) {
   m_spectraStart = false;
   fillInputValues(values, columns);
   // add X and Y
-  m_curSpectra->dataX().push_back(values[0]);
-  m_curSpectra->dataY().push_back(values[1]);
+  auto histo = m_curSpectra->histogram();
+  histo.resize(histo.size() + 1);
+
+  histo.mutableX().back() = values[0];
+  histo.mutableY().back() = values[1];
+
   // check for E and DX
   switch (m_baseCols) {
   // if only 2 columns X and Y in file, E = 0 is implicit when constructing
   // workspace, omit DX
   case 3: {
     // E in file, include it, omit DX
-    m_curSpectra->dataE().push_back(values[2]);
+    histo.mutableE().back() = values[2];
     break;
   }
   case 4: {
     // E and DX in file, include both
-    m_curSpectra->dataE().push_back(values[2]);
+    histo.mutableE().back() = values[2];
     m_curDx.push_back(values[3]);
     break;
   }
   }
+  m_curSpectra->setHistogram(histo);
   m_curBins++;
 }
 
 /**
-* Check if the file has been found to incosistantly include spectra IDs
+* Check if the file has been found to inconsistently include spectra IDs
 * @param[in] cols : the number of columns in the current line of data
 */
 void LoadAscii2::checkLineColumns(const size_t &cols) const {
@@ -501,11 +505,12 @@ void LoadAscii2::newSpectra() {
     if (m_curSpectra) {
       size_t specSize = m_curSpectra->size();
       if (specSize > 0 && specSize == m_lastBins) {
-        if (m_curSpectra->readX().size() == m_curDx.size())
+        if (m_curSpectra->x().size() == m_curDx.size())
           m_curSpectra->setPointStandardDeviations(std::move(m_curDx));
         m_spectra.push_back(*m_curSpectra);
       }
       delete m_curSpectra;
+      m_curSpectra = nullptr;
     }
 
     m_curSpectra =
@@ -523,15 +528,15 @@ void LoadAscii2::newSpectra() {
 * @return True if the line should be skipped
 */
 bool LoadAscii2::skipLine(const std::string &line, bool header) const {
-  // Comments are skipped, Empty actually means somehting and shouldn't be
+  // Comments are skipped, Empty actually means something and shouldn't be
   // skipped
   // just checking the comment's first character should be ok as comment
-  // cahracters can't be numeric at all, so they can't really be confused
+  // characters can't be numeric at all, so they can't really be confused
   return ((line.empty() && header) || line.at(0) == m_comment.at(0));
 }
 
 /**
-* Return true if the line doesn't start wiht a valid character.
+* Return true if the line doesn't start with a valid character.
 * @param[in] line :: The line to be checked
 * @return :: True if the line doesn't start with a valid character.
 */

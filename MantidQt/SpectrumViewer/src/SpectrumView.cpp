@@ -113,7 +113,7 @@ void SpectrumView::renderWorkspace(
   if (isFirstPlot) {
     m_ui->imageTabs->setTabText(
         m_ui->imageTabs->indexOf(m_ui->imageTabs->currentWidget()),
-        QString::fromStdString(wksp->name()));
+        QString::fromStdString(wksp->getName()));
     m_hGraph = boost::make_shared<GraphDisplay>(m_ui->h_graphPlot,
                                                 m_ui->h_graph_table, false);
     m_vGraph = boost::make_shared<GraphDisplay>(m_ui->v_graphPlot,
@@ -124,7 +124,8 @@ void SpectrumView::renderWorkspace(
     auto layout = new QHBoxLayout();
     layout->addWidget(spectrumPlot);
     widget->setLayout(layout);
-    tab = m_ui->imageTabs->addTab(widget, QString::fromStdString(wksp->name()));
+    tab = m_ui->imageTabs->addTab(widget,
+                                  QString::fromStdString(wksp->getName()));
     m_ui->imageTabs->setTabsClosable(true);
   }
 
@@ -366,7 +367,7 @@ std::string SpectrumView::saveToProject(ApplicationWindow *app) {
 
   spec.writeLine("Workspaces");
   for (auto source : m_dataSource) {
-    spec << source->getWorkspace()->name();
+    spec << source->getWorkspace()->getName();
   }
 
   int index = m_ui->imageTabs->currentIndex();
@@ -387,6 +388,20 @@ std::string SpectrumView::saveToProject(ApplicationWindow *app) {
   tsv.writeSection("spectrumviewer", spec.outputLines());
   return tsv.outputLines();
 }
+
+std::string SpectrumView::getWindowName() {
+  return this->windowTitle().toStdString();
+}
+
+std::vector<std::string> SpectrumView::getWorkspaceNames() {
+  std::vector<std::string> names;
+  for (auto source : m_dataSource) {
+    names.push_back(source->getWorkspace()->getName());
+  }
+  return names;
+}
+
+std::string SpectrumView::getWindowType() { return "SpectrumView"; }
 
 void SpectrumView::changeTracking(bool on) {
   if (m_spectrumDisplay.isEmpty()) {

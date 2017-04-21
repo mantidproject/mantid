@@ -4,7 +4,8 @@ from __future__ import (absolute_import, division, print_function)
 from mantid.simpleapi import *
 from mantid.kernel import *
 from mantid.api import *
-from mantid import logger
+from six import PY3
+
 
 class SelectNexusFilesByMetadata(PythonAlgorithm):
 
@@ -19,7 +20,6 @@ class SelectNexusFilesByMetadata(PythonAlgorithm):
     def validateInputs(self):
         issues = dict()
         criteria = self.getPropertyValue('NexusCriteria')
-
         # at least one nexus entry should be specified
         dollars = criteria.count('$')
         if dollars % 2 != 0 or dollars < 2:
@@ -58,53 +58,70 @@ class SelectNexusFilesByMetadata(PythonAlgorithm):
         except ImportError:
             raise RuntimeError('This algorithm requires h5py package. See https://pypi.python.org/pypi/h5py')
 
-        outputfiles = []
-        # for the purpose here + is meaningless, so they will be silently replaced with ,
-        for run in self.getPropertyValue('FileList').replace('+', ',').split(','):
-            with h5py.File(run,'r') as nexusfile:
-                toeval = ''
-                item = None # for pylint
-                for i, item in enumerate(self._criteria_splitted):
-                    if i % 2 == 1: # at odd indices will always be the nexus entry names
-                        try:
-                            # try to get the entry from the file
-                            entry = nexusfile.get(item)
+        outputfiles = ''
+        # first split by ,
+        for runs in self.getPropertyValue('FileList').split(','):
 
-                            if len(entry.shape) > 1 or len(entry) > 1:
-                                self.log().warning('Nexus entry %s has more than one dimension or more than one element'
-                                                   'in file %s. Skipping the file.' % (item,run))
-                                toeval = '0'
-                                break
+            filestosum = ''
+            # then split each by +
+            for run in runs.split('+'):
 
-                            # replace entry name by it's value
-                            value = entry[0]
+                with h5py.File(run, 'r') as nexusfile:
+                    if self.checkCriteria(run, nexusfile):
+                        filestosum += run + '+'
 
-                            if str(value.dtype).startswith('|S'):
-                                # string value, need to quote for eval
-                                toeval += '\"'+ value + '\"'
-                            else:
-                                toeval += str(value)
+            if filestosum:
+                # trim the last +
+                filestosum = filestosum[:-1]
+                outputfiles += filestosum + ','
 
-                        except (TypeError,AttributeError):
-                            self.log().warning('Nexus entry %s does not exist in file %s. Skipping the file.' % (item,run))
-                            toeval = '0'
-                            break
-                    else:
-                        # keep other portions intact
-                        toeval += item
-                self.log().debug('Expression to be evaluated for file %s :\n %s' % (run, toeval))
-                try:
-                    if eval(toeval):
-                        outputfiles.append(run)
-                except (NameError,ValueError,SyntaxError):
-                    # even if syntax is validated, eval can still throw, since
-                    # the nexus entry value itself can be spurious for a given file
-                    self.log().warning('Invalid value for the nexus entry %s in file %s. Skipping the file.' % (item, run))
-
-        if not outputfiles:
+        # trim the last ,
+        if outputfiles:
+            outputfiles = outputfiles[:-1]
+        else:
             self.log().notice('No files where found to satisfy the criteria, check the FileList and/or NexusCriteria')
 
-        self.setPropertyValue('Result',','.join(outputfiles))
+        self.setPropertyValue('Result',outputfiles)
+
+    def checkCriteria(self, run, nexusfile):
+        toeval = ''
+        item = None  # for pylint
+        for i, item in enumerate(self._criteria_splitted):
+            if i % 2 == 1:  # at odd indices will always be the nexus entry names
+                try:
+                    # try to get the entry from the file
+                    entry = nexusfile.get(item)
+
+                    if len(entry.shape) > 1 or len(entry) > 1:
+                        self.log().warning('Nexus entry %s has more than one dimension or more than one element'
+                                           'in file %s. Skipping the file.' % (item, run))
+                        return False
+
+                    # replace entry name by it's value
+                    value = entry[0]
+
+                    if str(value.dtype).startswith('|S'):
+                        # string value, need to quote for eval
+                        if PY3:
+                            value = value.decode()
+                        toeval += '\"' + value + '\"'
+                    else:
+                        toeval += str(value)
+
+                except (TypeError, AttributeError):
+                    self.log().warning('Nexus entry %s does not exist in file %s. Skipping the file.' % (item, run))
+                    return False
+            else:
+                # keep other portions intact
+                toeval += item
+        self.log().debug('Expression to be evaluated for file %s :\n %s' % (run, toeval))
+        try:
+            return eval(toeval)
+        except (NameError, ValueError, SyntaxError):
+            # even if syntax is validated, eval can still throw, since
+            # the nexus entry value itself can be spurious for a given file
+            self.log().warning('Invalid value for the nexus entry %s in file %s. Skipping the file.' % (item, run))
+            return False
 
 # Register algorithm with Mantid
 AlgorithmFactory.subscribe(SelectNexusFilesByMetadata)

@@ -9,6 +9,8 @@ import os
 from six.moves import range
 
 #pylint: disable=too-many-instance-attributes
+
+
 class ExportExperimentLog(PythonAlgorithm):
 
     """ Algorithm to export experiment log
@@ -45,12 +47,12 @@ class ExportExperimentLog(PythonAlgorithm):
         wsprop = MatrixWorkspaceProperty("InputWorkspace", "", Direction.Input)
         self.declareProperty(wsprop, "Input workspace containing the sample log information. ")
 
-        self.declareProperty(FileProperty("OutputFilename","", FileAction.Save, ['.txt, .csv']),\
-            "Output file of the experiment log.")
+        self.declareProperty(FileProperty("OutputFilename","", FileAction.Save, ['.txt, .csv']),
+                             "Output file of the experiment log.")
 
         filemodes = ["append", "fastappend", "new"]
-        self.declareProperty("FileMode", "append", mantid.kernel.StringListValidator(filemodes),\
-            "Optional to create a new file or append to an existing file.")
+        self.declareProperty("FileMode", "append", mantid.kernel.StringListValidator(filemodes),
+                             "Optional to create a new file or append to an existing file.")
 
         lognameprop = StringArrayProperty("SampleLogNames", values=[], direction=Direction.Input)
         self.declareProperty(lognameprop, "Sample log names.")
@@ -63,7 +65,7 @@ class ExportExperimentLog(PythonAlgorithm):
 
         fileformates = ["tab", "comma (csv)"]
         des = "Output file format.  'tab' format will insert a tab between 2 adjacent values; 'comma' will put a , instead. " + \
-                "With this option, the posfix of the output file is .csv automatically. "
+            "With this option, the posfix of the output file is .csv automatically. "
         self.declareProperty("FileFormat", "tab", mantid.kernel.StringListValidator(fileformates), des)
 
         self.declareProperty("OrderByTitle", "", "Log file will be ordered by the value of this title from low to high.")
@@ -73,12 +75,11 @@ class ExportExperimentLog(PythonAlgorithm):
         self.declareProperty(overrideprop, "List of paired strings as log title and value to override values from workspace.")
 
         # Time zone
-        timezones = ["UTC", "America/New_York", "Asia/Shanghai", "Australia/Sydney", "Europe/London", "GMT+0",\
-            "Europe/Paris", "Europe/Copenhagen"]
+        timezones = ["UTC", "America/New_York", "Asia/Shanghai", "Australia/Sydney", "Europe/London", "GMT+0",
+                     "Europe/Paris", "Europe/Copenhagen"]
         self.declareProperty("TimeZone", "America/New_York", StringListValidator(timezones))
 
         return
-
 
     def PyExec(self):
         """ Main execution body
@@ -272,7 +273,6 @@ class ExportExperimentLog(PythonAlgorithm):
 
         return same
 
-
     def _startNewFile(self):
         """ Start a new file is user wants and save the older one to a different name
         """
@@ -292,7 +292,6 @@ class ExportExperimentLog(PythonAlgorithm):
         self._filemode = "new"
 
         return
-
 
     def _appendExpLog(self, logvaluedict):
         """ Append experiment log values to log file
@@ -380,7 +379,9 @@ class ExportExperimentLog(PythonAlgorithm):
         # ENDFOR
 
         # Check needs to re-order
-        if list(linedict.keys()) != sorted(linedict.keys()):
+        # This test does not work with python 3, you can not assume the order of a dictionary
+        # if list(linedict.keys()) != sorted(linedict.keys()):
+        if True: # temporary hack to get it working with python 3, always write a new file!
             # Re-write file
             wbuf = ""
 
@@ -421,7 +422,7 @@ class ExportExperimentLog(PythonAlgorithm):
                 wbuf = wbuf[0:-1]
 
             # Remove unsupported character which may cause importing error of GNUMERIC
-            wbuf = wbuf.translate(None, chr(0))
+            wbuf = wbuf.replace(chr(0),"")
 
             # Re-write file
             ofile = open(self._logfilename, "w")
@@ -432,12 +433,10 @@ class ExportExperimentLog(PythonAlgorithm):
 
         return
 
-
     def _reorderExistingFile(self):
         """ Re-order the columns of the existing experimental log file
         """
         raise RuntimeError("Too complicated")
-
 
     #pylint: disable=too-many-branches
     def _getSampleLogsValue(self):
@@ -498,7 +497,6 @@ class ExportExperimentLog(PythonAlgorithm):
         # ENDFOR
 
         return valuedict
-
 
     def _convertLocalTimeString(self, utctimestr, addtimezone=True):
         """ Convert a UTC time in string to the local time in string

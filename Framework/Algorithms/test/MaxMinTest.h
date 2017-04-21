@@ -1,6 +1,7 @@
 #ifndef MAXMINTEST_H_
 #define MAXMINTEST_H_
 
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAlgorithms/CreateWorkspace.h"
 #include "MantidAlgorithms/Max.h"

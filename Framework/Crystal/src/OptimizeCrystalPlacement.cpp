@@ -7,11 +7,15 @@
  */
 #include "MantidCrystal/OptimizeCrystalPlacement.h"
 
+#include "MantidAPI/Run.h"
+#include "MantidAPI/Sample.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidCrystal/CalibrationHelpers.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidGeometry/Crystal/IPeak.h"
 #include "MantidGeometry/Crystal/IndexingUtils.h"
+#include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidCrystal/PeakHKLErrors.h"
 #include "MantidCrystal/SCDCalibratePanels.h"
 
@@ -34,9 +38,12 @@ DECLARE_ALGORITHM(OptimizeCrystalPlacement)
 
 class OrEnabledWhenProperties : public Kernel::IPropertySettings {
 public:
-  OrEnabledWhenProperties(std::string prop1Name, ePropertyCriterion prop1Crit,
-                          std::string prop1Value, std::string prop2Name,
-                          ePropertyCriterion prop2Crit, std::string prop2Value)
+  OrEnabledWhenProperties(const std::string &prop1Name,
+                          ePropertyCriterion prop1Crit,
+                          const std::string &prop1Value,
+                          const std::string &prop2Name,
+                          ePropertyCriterion prop2Crit,
+                          const std::string &prop2Value)
       : IPropertySettings(), propName1(prop1Name), propName2(prop2Name),
         Criteria1(prop1Crit), Criteria2(prop2Crit), value1(prop1Value),
         value2(prop2Value)
@@ -142,16 +149,16 @@ void OptimizeCrystalPlacement::init() {
  *
  */
 void OptimizeCrystalPlacement::exec() {
-  PeaksWorkspace_sptr Peaks = getProperty("PeaksWorkspace");
-  PeaksWorkspace_sptr OutPeaks = getProperty("ModifiedPeaksWorkspace");
+  PeaksWorkspace_sptr peaks = getProperty("PeaksWorkspace");
+  PeaksWorkspace_sptr outPeaks = getProperty("ModifiedPeaksWorkspace");
 
-  if (Peaks != OutPeaks) {
-    OutPeaks = Peaks->clone();
+  if (peaks != outPeaks) {
+    outPeaks = peaks->clone();
   }
 
   std::vector<int> NOoptimizeRuns = getProperty("KeepGoniometerFixedfor");
 
-  const DblMatrix X = Peaks->sample().getOrientedLattice().getUB();
+  const DblMatrix X = peaks->sample().getOrientedLattice().getUB();
   Matrix<double> UBinv(X);
   UBinv.Invert();
 
@@ -166,8 +173,8 @@ void OptimizeCrystalPlacement::exec() {
   int nPeaksUsed = 0;
   double HKLintOffsetMax = getProperty("MaxIndexingError");
   double HKLMax = getProperty("MaxHKLPeaks2Use");
-  for (int i = 0; i < Peaks->getNumberPeaks(); i++) {
-    IPeak &peak = Peaks->getPeak(i);
+  for (int i = 0; i < peaks->getNumberPeaks(); i++) {
+    IPeak &peak = peaks->getPeak(i);
     int runNum = peak.getRunNumber();
     auto it = RunNumList.begin();
     for (; it != RunNumList.end() && *it != runNum; ++it) {
@@ -211,7 +218,7 @@ void OptimizeCrystalPlacement::exec() {
     throw std::invalid_argument("Error in UB too large. 0 peaks indexed ");
   }
 
-  int N = 3 * nPeaksUsed; // Peaks->getNumberPeaks();
+  int N = 3 * nPeaksUsed; // peaks->getNumberPeaks();
   auto mwkspc = createWorkspace<Workspace2D>(1, N, N);
   mwkspc->setPoints(0, xRef);
   mwkspc->setCounts(0, N, 0.0);
@@ -250,7 +257,7 @@ void OptimizeCrystalPlacement::exec() {
     message += "will be 'changed'";
     g_log.notice(message);
   }
-  if (OptRunNums.size() > 0 && !omitRuns)
+  if (!OptRunNums.empty() && !omitRuns)
     FuncArg += ",OptRuns=" + OptRunNums;
 
   //------------- Add initial parameter values to FuncArg -----------
@@ -290,7 +297,7 @@ void OptimizeCrystalPlacement::exec() {
     }
   }
 
-  Instrument_const_sptr instr = Peaks->getPeak(0).getInstrument();
+  Instrument_const_sptr instr = peaks->getPeak(0).getInstrument();
   V3D sampPos = instr->getSample()->getPos();
 
   oss << ",SampleXOffset=" << sampPos.X() << ",SampleYOffset=" << sampPos.Y()
@@ -414,33 +421,12 @@ void OptimizeCrystalPlacement::exec() {
   setProperty("FitInfoTable", RRes);
 
   //----------- update instrument -------------------------
-
-  IPeak &peak = Peaks->getPeak(0);
-  boost::shared_ptr<const Instrument> OldInstrument = peak.getInstrument();
-  boost::shared_ptr<const ParameterMap> pmap_old =
-      OldInstrument->getParameterMap();
-  auto pmap_new = boost::make_shared<ParameterMap>();
-
-  PeakHKLErrors::cLone(pmap_new, OldInstrument, pmap_old);
-
-  double L0 = peak.getL1();
   V3D newSampPos(Results["SampleXOffset"], Results["SampleYOffset"],
                  Results["SampleZOffset"]);
 
-  boost::shared_ptr<const Instrument> Inst = OldInstrument;
-
-  if (OldInstrument->isParametrized())
-    Inst = OldInstrument->baseInstrument();
-
-  auto NewInstrument = boost::make_shared<Geometry::Instrument>(Inst, pmap_new);
-
-  SCDCalibratePanels::FixUpSourceParameterMap(NewInstrument, L0, newSampPos,
-                                              pmap_old);
-
-  for (int i = 0; i < OutPeaks->getNumberPeaks(); i++)
-    OutPeaks->getPeak(i).setInstrument(NewInstrument);
-
-  OutPeaks->setInstrument(NewInstrument);
+  auto &detectorInfo = outPeaks->mutableDetectorInfo();
+  CalibrationHelpers::adjustUpSampleAndSourcePositions(
+      *peaks->getInstrument(), detectorInfo.l1(), newSampPos, detectorInfo);
 
   Matrix<double> GonTilt =
       PeakHKLErrors::RotationMatrixAboutRegAxis(Results["GonRotx"], 'x') *
@@ -452,12 +438,12 @@ void OptimizeCrystalPlacement::exec() {
   std::string OptRun2 = "/" + OptRunNums + "/";
 
   int nIndexed = 0;
-  UBinv = OutPeaks->sample().getOrientedLattice().getUB();
+  UBinv = outPeaks->sample().getOrientedLattice().getUB();
   UBinv.Invert();
   UBinv /= (2 * M_PI);
-  for (int i = 0; i < OutPeaks->getNumberPeaks(); ++i) {
+  for (int i = 0; i < outPeaks->getNumberPeaks(); ++i) {
 
-    int RunNum = OutPeaks->getPeak(i).getRunNumber();
+    int RunNum = outPeaks->getPeak(i).getRunNumber();
     std::string RunNumStr = std::to_string(RunNum);
     Matrix<double> GonMatrix;
     if (RunNum == prevRunNum ||
@@ -479,12 +465,12 @@ void OptimizeCrystalPlacement::exec() {
       GonMatrix = GonTilt * uniGonio.getR();
       MapRunNum2GonMat[RunNum] = GonMatrix;
     } else {
-      GonMatrix = GonTilt * OutPeaks->getPeak(i).getGoniometerMatrix();
+      GonMatrix = GonTilt * outPeaks->getPeak(i).getGoniometerMatrix();
       MapRunNum2GonMat[RunNum] = GonMatrix;
     }
 
-    OutPeaks->getPeak(i).setGoniometerMatrix(GonMatrix);
-    V3D hkl = UBinv * OutPeaks->getPeak(i).getQSampleFrame();
+    outPeaks->getPeak(i).setGoniometerMatrix(GonMatrix);
+    V3D hkl = UBinv * outPeaks->getPeak(i).getQSampleFrame();
     if (Geometry::IndexingUtils::ValidIndex(hkl, HKLintOffsetMax))
       nIndexed++;
 
@@ -494,12 +480,12 @@ void OptimizeCrystalPlacement::exec() {
   if (MapRunNum2GonMat.size() == 1) // Only one RunNumber in this PeaksWorkspace
   {
     Matrix<double> GonMatrix =
-        MapRunNum2GonMat[OutPeaks->getPeak(0).getRunNumber()];
+        MapRunNum2GonMat[outPeaks->getPeak(0).getRunNumber()];
     Geometry::Goniometer Gon(GonMatrix);
-    OutPeaks->mutableRun().setGoniometer(Gon, false);
+    outPeaks->mutableRun().setGoniometer(Gon, false);
   }
 
-  setProperty("ModifiedPeaksWorkspace", OutPeaks);
+  setProperty("ModifiedPeaksWorkspace", outPeaks);
   setProperty("nIndexed", nIndexed);
   g_log.notice() << "Number indexed after optimization= " << nIndexed
                  << " at tolerance = " << HKLintOffsetMax << '\n';

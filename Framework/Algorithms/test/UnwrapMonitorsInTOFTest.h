@@ -7,6 +7,7 @@
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/SpectrumInfo.h"
 
 using Mantid::Algorithms::UnwrapMonitorsInTOF;
 
@@ -232,9 +233,9 @@ private:
         intialWorkspace);
 
     // Set the monitor bins to the expected values
+    const auto &spectrumInfo = workspace->spectrumInfo();
     for (size_t index = 0; index < numberOfHistograms; ++index) {
-      auto detector = workspace->getDetector(index);
-      if (detector->isMonitor()) {
+      if (spectrumInfo.isMonitor(index)) {
         auto histogram = workspace->histogram(index);
         Mantid::HistogramData::Counts counts{2, 2, 2, 2, 2, 1, 1, 1, 1, 1};
         auto binEdges = histogram.binEdges();

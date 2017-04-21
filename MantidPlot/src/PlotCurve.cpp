@@ -66,9 +66,9 @@ QString PlotCurve::saveCurveLayout() {
   int style = g->curveType(index);
   QString s = "<Style>" + QString::number(style) + "</Style>\n";
 
-  if (style == Graph::Spline)
+  if (style == GraphOptions::Spline)
     s += "<LineStyle>5</LineStyle>\n";
-  else if (style == Graph::VerticalSteps)
+  else if (style == GraphOptions::VerticalSteps)
     s += "<LineStyle>6</LineStyle>\n";
   else
     s += "<LineStyle>" + QString::number(this->style()) + "</LineStyle>\n";
@@ -473,7 +473,7 @@ void DataCurve::loadData() {
   QStringList xLabels, yLabels; // store text labels
 
   //  int xAxis = QwtPlot::xBottom;
-  //  if (d_type == Graph::HorizontalBars)
+  //  if (d_type == GraphOptions::HorizontalBars)
   //    xAxis = QwtPlot::yLeft;
 
   QTime time0;
@@ -547,7 +547,7 @@ void DataCurve::loadData() {
     remove();
     return;
   } else {
-    if (d_type == Graph::HorizontalBars) {
+    if (d_type == GraphOptions::HorizontalBars) {
       setData(Y.data(), X.data(), size);
       foreach (DataCurve *c, d_error_bars)
         c->setData(Y.data(), X.data(), size);
@@ -558,7 +558,7 @@ void DataCurve::loadData() {
     }
 
     if (xColType == Table::Text) {
-      if (d_type == Graph::HorizontalBars)
+      if (d_type == GraphOptions::HorizontalBars)
         g->setLabelsTextFormat(QwtPlot::yLeft, ScaleDraw::Text, d_x_column,
                                xLabels);
       else
@@ -566,7 +566,7 @@ void DataCurve::loadData() {
                                xLabels);
     } else if (xColType == Table::Time || xColType == Table::Date) {
       int axis = QwtPlot::xBottom;
-      if (d_type == Graph::HorizontalBars)
+      if (d_type == GraphOptions::HorizontalBars)
         axis = QwtPlot::yLeft;
       ScaleDraw *old_sd = static_cast<ScaleDraw *>(plot->axisScaleDraw(axis));
       ScaleDraw *sd = new ScaleDraw(plot, old_sd);
@@ -646,8 +646,8 @@ int DataCurve::tableRow(int point) const {
     for (int i = d_start_row; i <= d_end_row; i++) {
       QDate d = QDate::fromString(d_table->text(i, xcol), format);
       if (d.isValid()) {
-        if (d_type == Graph::HorizontalBars && date0.daysTo(d) == y(point) &&
-            d_table->cell(i, ycol) == x(point))
+        if (d_type == GraphOptions::HorizontalBars &&
+            date0.daysTo(d) == y(point) && d_table->cell(i, ycol) == x(point))
           return i;
         else if (date0.daysTo(d) == x(point) &&
                  d_table->cell(i, ycol) == y(point))
@@ -660,8 +660,8 @@ int DataCurve::tableRow(int point) const {
     for (int i = d_start_row; i <= d_end_row; i++) {
       QTime t = QTime::fromString(d_table->text(i, xcol), format);
       if (t.isValid()) {
-        if (d_type == Graph::HorizontalBars && t0.msecsTo(t) == y(point) &&
-            d_table->cell(i, ycol) == x(point))
+        if (d_type == GraphOptions::HorizontalBars &&
+            t0.msecsTo(t) == y(point) && d_table->cell(i, ycol) == x(point))
           return i;
         if (t0.msecsTo(t) == x(point) && d_table->cell(i, ycol) == y(point))
           return i;
@@ -910,8 +910,8 @@ QString DataCurve::saveToString() {
   if (d_skip_symbols > 1)
     s += "<SkipPoints>" + QString::number(d_skip_symbols) + "</SkipPoints>\n";
 
-  if (d_labels_list.isEmpty() || type() == Graph::Function ||
-      type() == Graph::Box)
+  if (d_labels_list.isEmpty() || type() == GraphOptions::Function ||
+      type() == GraphOptions::Box)
     return s;
 
   s = "<CurveLabels>\n";
@@ -999,10 +999,11 @@ void DataCurve::setLabelsSelected(bool on) {
 bool DataCurve::validCurveType() const {
   int style = type();
 
-  return !(style == Graph::Function || style == Graph::Box ||
-           style == Graph::Pie || style == Graph::ErrorBars ||
-           style == Graph::ColorMap || style == Graph::GrayScale ||
-           style == Graph::Contour || style == Graph::ImagePlot);
+  return !(style == GraphOptions::Function || style == GraphOptions::Box ||
+           style == GraphOptions::Pie || style == GraphOptions::ErrorBars ||
+           style == GraphOptions::ColorMap ||
+           style == GraphOptions::GrayScale || style == GraphOptions::Contour ||
+           style == GraphOptions::ImagePlot);
 }
 
 void DataCurve::moveLabels(const QPoint &pos) {

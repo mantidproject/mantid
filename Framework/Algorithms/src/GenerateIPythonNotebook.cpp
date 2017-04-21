@@ -5,6 +5,7 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AlgorithmHistory.h"
 #include "MantidAPI/NotebookBuilder.h"
+#include "MantidAPI/Workspace.h"
 
 #include <fstream>
 
@@ -21,9 +22,6 @@ namespace Algorithms {
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(GenerateIPythonNotebook)
 
-//----------------------------------------------------------------------------------------------
-
-//----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
 */
 void GenerateIPythonNotebook::init() {
@@ -61,7 +59,6 @@ void GenerateIPythonNotebook::init() {
       "When to specify which algorithm version was used by Mantid.");
 }
 
-//----------------------------------------------------------------------------------------------
 /** Execute the algorithm.
 */
 void GenerateIPythonNotebook::exec() {

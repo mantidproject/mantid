@@ -27,16 +27,16 @@
  *                                                                         *
  ***************************************************************************/
 #include "Filter.h"
-#include "LegendWidget.h"
 #include "ColorBox.h"
-#include "Table.h"
 #include "FunctionCurve.h"
-#include "PlotCurve.h"
+#include "LegendWidget.h"
 #include "MultiLayer.h"
+#include "PlotCurve.h"
+#include "Table.h"
 
 #include <QApplication>
-#include <QMessageBox>
 #include <QLocale>
+#include <QMessageBox>
 
 #include <gsl/gsl_sort.h>
 
@@ -359,7 +359,7 @@ QwtPlotCurve *Filter::addResultCurve(double *x, double *y) {
     if (!d_output_graph)
       d_output_graph = createOutputGraph()->activeGraph();
 
-    d_output_graph->insertPlotItem(c, Graph::Line);
+    d_output_graph->insertPlotItem(c, GraphOptions::Line);
     d_output_graph->updatePlot();
   }
   return dynamic_cast<QwtPlotCurve *>(c);

@@ -13,7 +13,7 @@ class QwtWorkspaceBinDataTest : public CxxTest::TestSuite {
 
 public:
   void setUp() override {
-    ws = WorkspaceCreationHelper::Create2DWorkspace(3, 4);
+    ws = WorkspaceCreationHelper::create2DWorkspace(3, 4);
     auto *ax1 = new Mantid::API::NumericAxis(3);
     ws->replaceAxis(1, ax1);
     for (size_t i = 0; i < 3; i++) {

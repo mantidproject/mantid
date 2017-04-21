@@ -6,7 +6,7 @@
 # We base the ideal tube on one tube of this door.
 #
 import tube
-reload(tube)
+reload(tube) # noqa
 from tube_spec import TubeSpec
 import tube_calib #from tube_calib import constructIdealTubeFromRealTube
 from tube_calib_fit_params import TubeCalibFitParams

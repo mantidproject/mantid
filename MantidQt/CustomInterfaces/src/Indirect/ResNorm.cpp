@@ -1,8 +1,9 @@
 #include "MantidQtCustomInterfaces/Indirect/ResNorm.h"
 
-#include "MantidQtCustomInterfaces/UserInputValidator.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/WorkspaceGroup.h"
+#include "MantidQtCustomInterfaces/UserInputValidator.h"
 
 using namespace Mantid::API;
 
@@ -46,6 +47,8 @@ ResNorm::ResNorm(QWidget *parent) : IndirectBayesTab(parent), m_previewSpec(0) {
   // Post Plot and Save
   connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveClicked()));
   connect(m_uiForm.pbPlot, SIGNAL(clicked()), this, SLOT(plotClicked()));
+  connect(m_uiForm.pbPlotCurrent, SIGNAL(clicked()), this,
+          SLOT(plotCurrentPreview()));
 }
 
 void ResNorm::setup() {}
@@ -282,27 +285,56 @@ void ResNorm::previewSpecChanged(int value) {
             fitParamsName);
     if (fitWorkspaces && fitParams) {
       Column_const_sptr scaleFactors = fitParams->getColumn("Scaling");
-      std::string fitWsName(fitWorkspaces->getItem(m_previewSpec)->name());
+      std::string fitWsName(fitWorkspaces->getItem(m_previewSpec)->getName());
       MatrixWorkspace_const_sptr fitWs =
           AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
               fitWsName);
 
       MatrixWorkspace_sptr fit = WorkspaceFactory::Instance().create(fitWs, 1);
-      fit->setX(0, fitWs->refX(1));
-      fit->dataY(0) = fitWs->readY(1);
-      fit->dataE(0) = fitWs->readE(1);
+      fit->setSharedX(0, fitWs->sharedX(1));
+      fit->setSharedY(0, fitWs->sharedY(1));
+      fit->setSharedE(0, fitWs->sharedE(1));
 
       for (size_t i = 0; i < fit->blocksize(); i++)
-        fit->dataY(0)[i] /= scaleFactors->cell<double>(m_previewSpec);
+        fit->mutableY(0)[i] /= scaleFactors->cell<double>(m_previewSpec);
 
       m_uiForm.ppPlot->addSpectrum("Fit", fit, 0, Qt::red);
+
+      AnalysisDataService::Instance().addOrReplace(
+          "__" + fitWsGroupName + "_scaled", fit);
     }
   }
 }
 
 /**
-* Handles saving when button is clicked
-*/
+ * Plot the current spectrum in the miniplot
+ */
+
+void ResNorm::plotCurrentPreview() {
+
+  QStringList plotWorkspaces;
+  std::vector<int> plotIndices;
+
+  if (m_uiForm.ppPlot->hasCurve("Vanadium")) {
+    plotWorkspaces << m_uiForm.dsVanadium->getCurrentDataName();
+    plotIndices.push_back(m_previewSpec);
+  }
+  if (m_uiForm.ppPlot->hasCurve("Resolution")) {
+    plotWorkspaces << m_uiForm.dsResolution->getCurrentDataName();
+    plotIndices.push_back(0);
+  }
+  if (m_uiForm.ppPlot->hasCurve("Fit")) {
+    std::string fitWsGroupName(m_pythonExportWsName + "_Fit_Workspaces");
+
+    plotWorkspaces << QString::fromStdString("__" + fitWsGroupName + "_scaled");
+    plotIndices.push_back(0);
+  }
+  plotMultipleSpectra(plotWorkspaces, plotIndices);
+}
+
+/**
+ * Handles saving when button is clicked
+ */
 
 void ResNorm::saveClicked() {
 
@@ -319,8 +351,8 @@ void ResNorm::saveClicked() {
 }
 
 /**
-* Handles plotting when button is clicked
-*/
+ * Handles plotting when button is clicked
+ */
 
 void ResNorm::plotClicked() {
   WorkspaceGroup_sptr fitWorkspaces =
@@ -330,8 +362,8 @@ void ResNorm::plotClicked() {
   QString fitWsName("");
 
   if (fitWorkspaces)
-    fitWsName =
-        QString::fromStdString(fitWorkspaces->getItem(m_previewSpec)->name());
+    fitWsName = QString::fromStdString(
+        fitWorkspaces->getItem(m_previewSpec)->getName());
 
   QString plotOptions(m_uiForm.cbPlot->currentText());
   if (plotOptions == "Intensity" || plotOptions == "All")

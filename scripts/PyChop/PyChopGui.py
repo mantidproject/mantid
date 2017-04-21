@@ -2,11 +2,13 @@
 # pylint: disable=line-too-long, invalid-name, unused-argument, unused-import, multiple-statements
 # pylint: disable=attribute-defined-outside-init, protected-access, super-on-old-class, redefined-outer-name
 # pylint: disable=too-many-statements, too-many-instance-attributes, too-many-locals, too-many-branches
+# pylint: disable=too-many-public-methods
 
 """
 This module contains a class to create a graphical user interface for PyChop.
 """
 
+from __future__ import (absolute_import, division, print_function)
 import sys
 import re
 import numpy as np
@@ -16,6 +18,7 @@ from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt4agg import NavigationToolbar2QT as NavigationToolbar
 from matplotlib.figure import Figure
 from matplotlib.widgets import Slider
+
 
 class PyChopGui(QtGui.QMainWindow):
     """
@@ -49,6 +52,7 @@ class PyChopGui(QtGui.QMainWindow):
             self.widgets['PulseRemoverCombo']['Label'].show()
             for fq in range(10, 301, 10):
                 self.widgets['FrequencyCombo']['Combo'].addItem(str(fq))
+            for fq in range(10, 151, 10):
                 self.widgets['PulseRemoverCombo']['Combo'].addItem(str(fq))
         else:
             self.widgets['PulseRemoverCombo']['Combo'].hide()
@@ -146,6 +150,8 @@ class PyChopGui(QtGui.QMainWindow):
             self.calculate()
             self.plot_res()
             self.plot_frame()
+            if self.instSciAct.isChecked():
+                self.update_script()
         except ValueError as err:
             msg = QtGui.QMessageBox()
             msg.setText(str(err))
@@ -183,16 +189,19 @@ class PyChopGui(QtGui.QMainWindow):
             Eis = self.engine.getAllowedEi()
             inst = self.engine.instname
             freq = self.engine.getFrequency()
-            if hasattr(freq, '__len__'): freq = freq[0]
+            if hasattr(freq, '__len__'):
+                freq = freq[0]
             self.resaxes.hold(True)
             for ie, Ei in enumerate(Eis):
                 # For LET ignore reps above 40 meV in energy as there is no flux there.
-                if 'LET' in inst and Ei>40:
-                    continue
+                # Similarly for MERLIN below 7 meV
+                #if ('LET' in inst and Ei > 30) or ('MERLIN' in inst and Ei < 7):
+                #    continue
                 en = np.linspace(0, 0.95*Ei, 200)
                 line, = self.resaxes.plot(en, self.res[ie])
                 line.set_label('%s_%3.2fmeV_%dHz_Flux=%fn/cm2/s' % (inst, Ei, freq, self.flux[ie]))
-                if Ei > self.xlim: self.xlim = Ei
+                if Ei > self.xlim:
+                    self.xlim = Ei
             self.resaxes.hold(False)
         else:
             en = np.linspace(0, 0.95*self.engine.getEi(), 200)
@@ -201,9 +210,11 @@ class PyChopGui(QtGui.QMainWindow):
             chopper = self.engine.getChopper()
             ei = self.engine.getEi()
             freq = self.engine.getFrequency()
-            if hasattr(freq, '__len__'): freq = freq[-1]
+            if hasattr(freq, '__len__'):
+                freq = freq[-1]
             line.set_label('%s_%s_%3.2fmeV_%dHz_Flux=%fn/cm2/s' % (inst, chopper, ei, freq, self.flux))
-            if ei > self.xlim: self.xlim = ei
+            if ei > self.xlim:
+                self.xlim = ei
         self.resaxes.set_xlim([0, self.xlim])
         lg = self.resaxes.legend()
         lg.draggable()
@@ -219,7 +230,8 @@ class PyChopGui(QtGui.QMainWindow):
         chop = self.engine.getChopper()
         freq = self.engine.getFrequency()
         overplot = self.widgets['HoldCheck'].isChecked()
-        if hasattr(freq, '__len__'): freq = freq[-1]
+        if hasattr(freq, '__len__'):
+            freq = freq[-1]
         update = kwargs['update'] if 'update' in kwargs.keys() else False
         # Do not recalculate if all relevant parameters still the same.
         _, labels = self.flxaxes2.get_legend_handles_labels()
@@ -350,7 +362,10 @@ class PyChopGui(QtGui.QMainWindow):
         """
         Callback function for the "Instrument Scientist Mode" menu option
         """
-        if self.instSciAct.isChecked() and 'MERLIN' in self.engine.instname and 'G' in self.engine.getChopper():
+        if 'LET' in self.engine.instname:
+            self.widgets['Chopper2Phase']['Edit'].show()   # Widget should show all the time for LET.
+            self.widgets['Chopper2Phase']['Label'].show()
+        elif self.instSciAct.isChecked() and 'MERLIN' in self.engine.instname and 'G' in self.engine.getChopper():
             self.widgets['Chopper2Phase']['Edit'].show()
             self.widgets['Chopper2Phase']['Label'].show()
             self.widgets['Chopper2Phase']['Edit'].setText('1500')
@@ -358,6 +373,12 @@ class PyChopGui(QtGui.QMainWindow):
         else:
             self.widgets['Chopper2Phase']['Edit'].hide()
             self.widgets['Chopper2Phase']['Label'].hide()
+        if self.instSciAct.isChecked():
+            self.tabs.insertTab(self.scrtabID, self.scrtab, 'ScriptOutput')
+            self.scrtab.show()
+        else:
+            self.tabs.removeTab(self.scrtabID)
+            self.scrtab.hide()
 
     def plot_frame(self):
         """
@@ -388,7 +409,8 @@ class PyChopGui(QtGui.QMainWindow):
             eis = obj.getAllowedEi()
             enmr = np.linspace(0, 0.95, 10)
             resmr = obj.getMultiRepResolution(enmr)
-            if not hasattr(resmr, '__len__'): resmr = [[resmr]]
+            if not hasattr(resmr, '__len__'):
+                resmr = [[resmr]]
             txt = '# ------------------------------------------------------------- #\n'
             txt += '# Resolution calculation for LET %s\n' % (chtyp)
             txt += '#   with the resolution chopper at %3i Hz,\n' % (freqs[-1])
@@ -478,7 +500,35 @@ class PyChopGui(QtGui.QMainWindow):
         fid.write(self.genText())
         fid.close()
 
+    def update_script(self):
+        """
+        Updates the text window with information about the previous calculation.
+        """
+        if self.widgets['MultiRepCheck'].isChecked():
+            out = self.engine.getMultiWidths()
+            new_str = '\n'
+            for ie, ee in enumerate(out['Eis']):
+                res = out['Energy'][ie]
+                percent = res / ee * 100
+                chop_width = out['Chopper'][ie]
+                mod_width = out['Moderator'][ie]
+                new_str += 'Ei is %6.2f meV, resolution is %6.2f ueV, percentage resolution is %6.3f\n' % (ee, res * 1000, percent)
+                new_str += 'FWHM at detectors from chopper and moderator are %6.2f us, %6.2f us\n' % (chop_width, mod_width)
+        else:
+            ei =  self.engine.getEi()
+            out = self.engine.getWidths()
+            res = out['Energy']
+            percent = res / ei * 100
+            chop_width = out['Chopper']
+            mod_width = out['Moderator']
+            new_str = '\nEi is %6.2f meV, resolution is %6.2f ueV, percentage resolution is %6.3f\n' % (ei, res * 1000, percent)
+            new_str += 'FWHM at detectors from chopper and moderator are %6.2f us, %6.2f us\n' % (chop_width, mod_width)
+        self.scredt.append(new_str)
+
     def onHelp(self):
+        """
+        Shows the help page
+        """
         try:
             from pymantidplot.proxies import showCustomInterfaceHelp
             showCustomInterfaceHelp("PyChop")
@@ -657,12 +707,23 @@ class PyChopGui(QtGui.QMainWindow):
         self.reptabbox.addWidget(self.repfig_controls)
         self.reptab.setLayout(self.reptabbox)
 
+        self.scrtab = QtGui.QWidget(self.tabs)
+        self.scredt = QtGui.QTextEdit()
+        self.scrcls = QtGui.QPushButton("Clear")
+        self.scrcls.clicked.connect(lambda: self.scredt.clear())
+        self.scrbox = QtGui.QVBoxLayout()
+        self.scrbox.addWidget(self.scredt)
+        self.scrbox.addWidget(self.scrcls)
+        self.scrtab.setLayout(self.scrbox)
+        self.scrtab.hide()
+
         self.tabs.addTab(self.restab, 'Resolution')
         self.tabs.addTab(self.flxtab, 'Flux-Ei')
         self.tabs.addTab(self.frqtab, 'Flux-Freq')
         self.tabs.addTab(self.reptab, 'Time-Distance')
         self.tdtabID = 3
         self.tabs.setTabEnabled(self.tdtabID, False)
+        self.scrtabID = 4
         self.rightPanel.addWidget(self.tabs)
 
         self.menuOptions = QtGui.QMenu('Options')
@@ -694,6 +755,7 @@ class PyChopGui(QtGui.QMainWindow):
         self.xlim = 0
         self.isFramePlotted = 0
 
+
 def show():
     """
     Create a Qt window in Python, or interactively in IPython with Qt GUI
@@ -720,6 +782,6 @@ if __name__ == '__main__':
     window = PyChopGui()
     window.show()
     try: # check if started from within mantidplot
-        import mantidplot
+        import mantidplot # noqa
     except ImportError:
         sys.exit(app.exec_())

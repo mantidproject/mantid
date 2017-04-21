@@ -6,6 +6,8 @@ are configured to find the Vesuvio data
 """
 
 from __future__ import (absolute_import, division, print_function)
+from six import iteritems
+
 from mantid.api import AlgorithmManager
 
 import numpy as np
@@ -106,7 +108,7 @@ class VesuvioPreFitTest(unittest.TestCase):
         alg.initialize()
         alg.setChild(True)
         alg.setProperty("OutputWorkspace", "__unused")
-        for key, value in kwargs.iteritems():
+        for key, value in iteritems(kwargs):
             alg.setProperty(key, value)
         return alg
 

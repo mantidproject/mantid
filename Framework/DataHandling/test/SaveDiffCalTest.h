@@ -4,6 +4,7 @@
 #include <cxxtest/TestSuite.h>
 #include <Poco/File.h>
 
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidDataHandling/SaveDiffCal.h"
 #include "MantidDataObjects/MaskWorkspace.h"
@@ -50,7 +51,8 @@ public:
 
   MaskWorkspace_sptr createMasking(Instrument_sptr instr) {
     MaskWorkspace_sptr maskWS = boost::make_shared<MaskWorkspace>(instr);
-    maskWS->maskWorkspaceIndex(0);
+    maskWS->getSpectrum(0).clearData();
+    maskWS->mutableSpectrumInfo().setMasked(0, true);
     return maskWS;
   }
 

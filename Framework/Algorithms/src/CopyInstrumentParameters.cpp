@@ -1,10 +1,9 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAlgorithms/CopyInstrumentParameters.h"
+#include "MantidAPI/DetectorInfo.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
 
+#include <algorithm>
 #include <iostream>
 
 namespace Mantid {
@@ -44,9 +43,6 @@ void CopyInstrumentParameters::exec() {
   // Retrieve and validate the input properties
   this->checkProperties();
 
-  // Get parameters
-  Geometry::ParameterMap &givParams = m_givingWorkspace->instrumentParameters();
-
   if (m_different_instrument_sp) {
     Instrument_const_sptr inst1 = m_givingWorkspace->getInstrument();
     Instrument_const_sptr inst2 = m_receivingWorkspace->getInstrument();
@@ -55,9 +51,11 @@ void CopyInstrumentParameters::exec() {
 
     Geometry::ParameterMap targMap;
 
-    auto it = givParams.begin();
-    for (; it != givParams.end(); it++) {
-      IComponent *oldComponent = it->first;
+    // Get legacy ParameterMap, i.e., including masking, positions, rotations
+    // stored in map (instead of DetectorInfo).
+    const auto &givParams = inst1->makeLegacyParameterMap();
+    for (const auto &item : *givParams) {
+      IComponent *oldComponent = item.first;
 
       const Geometry::IComponent *targComp = nullptr;
 
@@ -89,17 +87,24 @@ void CopyInstrumentParameters::exec() {
       // create shared pointer to independent copy of original parameter. Would
       // be easy and nice to have cow_pointer instead of shared_ptr in the
       // parameter map.
-      auto param = Parameter_sptr(it->second->clone());
+      auto param = Parameter_sptr(item.second->clone());
       // add new parameter to the maps for existing target component
       targMap.add(targComp, param);
     }
 
-    // changed parameters
-    m_receivingWorkspace->swapInstrumentParameters(targMap);
-
+    // Clear old parameters. We also want to clear fields stored in DetectorInfo
+    // (masking, positions, rotations). By setting the base instrument (which
+    // does not include a ParameterMap or DetectorInfo) we make use of the
+    // mechanism in ExperimentInfo that builds a clean DetectorInfo from the
+    // instrument being set.
+    m_receivingWorkspace->setInstrument(inst2->baseInstrument());
+    // ExperimentInfo::readParameterMap deals with extracting legacy information
+    // from ParameterMap.
+    m_receivingWorkspace->readParameterMap(targMap.asString());
   } else {
-    // unchanged Copy parameters
-    m_receivingWorkspace->replaceInstrumentParameters(givParams);
+    // Same base instrument, copying the instrument is equivalent to copying the
+    // parameters in the ParameterMap and the DetectorInfo.
+    m_receivingWorkspace->setInstrument(m_givingWorkspace->getInstrument());
   }
 }
 

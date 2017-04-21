@@ -7,7 +7,6 @@
 #include "MantidVatesAPI/MetadataJsonManager.h"
 #include "MantidVatesAPI/MetadataToFieldData.h"
 #include "MantidVatesAPI/VatesConfigurations.h"
-#include "MantidVatesAPI/NoThresholdRange.h"
 #include "MantidVatesAPI/vtkDataSetToScaledDataSet.h"
 #include "MantidVatesAPI/vtkMDHexFactory.h"
 #include "MockObjects.h"
@@ -35,8 +34,7 @@ private:
     FakeProgressAction progressUpdate;
     MDEventWorkspace3Lean::sptr ws =
         MDEventsTestHelper::makeMDEW<3>(8, -10.0, 10.0, 1);
-    vtkMDHexFactory factory(ThresholdRange_scptr(new NoThresholdRange),
-                            VolumeNormalization);
+    vtkMDHexFactory factory(VolumeNormalization);
     factory.initialize(ws);
     auto product = factory.create(progressUpdate);
     auto data = vtkUnstructuredGrid::SafeDownCast(product.Get());

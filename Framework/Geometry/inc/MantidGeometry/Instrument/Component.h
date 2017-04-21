@@ -1,30 +1,19 @@
 #ifndef MANTID_GEOMETRY_Component_H_
 #define MANTID_GEOMETRY_Component_H_
 
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
+
 #include <string>
-#include <sstream>
 #include <typeinfo>
 #include <vector>
-#include <Poco/SAX/Attributes.h>
-#ifdef _MSC_VER
-// Disable a flood of warnings from Poco about inheriting from
-// std::basic_istream
-// See
-// http://connect.microsoft.com/VisualStudio/feedback/details/733720/inheriting-from-std-fstream-produces-c4250-warning
-#pragma warning(push)
-#pragma warning(disable : 4250)
-#endif
 
-#include <Poco/XML/XMLWriter.h>
-
-#ifdef _MSC_VER
-#pragma warning(pop)
-#endif
+namespace Poco {
+namespace XML {
+class Attributes;
+class XMLWriter;
+}
+}
 
 namespace Mantid {
 namespace Kernel {
@@ -142,17 +131,17 @@ public:
   void rotate(double, const Kernel::V3D &) override;
 
   //! Get the position relative to the parent IComponent (absolute if no parent)
-  const Kernel::V3D getRelativePos() const override;
+  Kernel::V3D getRelativePos() const override;
 
   //! Get the position of the IComponent. Tree structure is traverse through the
   // parent chain
   Kernel::V3D getPos() const override;
 
   //! Get the relative Orientation
-  const Kernel::Quat &getRelativeRot() const override;
+  Kernel::Quat getRelativeRot() const override;
 
   //! Get the absolute orientation of the IComponent
-  const Kernel::Quat getRotation() const override;
+  Kernel::Quat getRotation() const override;
 
   //! Get the distance to another IComponent
   double getDistance(const IComponent &) const override;
@@ -312,6 +301,9 @@ public:
   virtual void appendXML(std::ostream &xmlStream) const;
 
   bool isParametrized() const override;
+
+  virtual void
+  registerContents(class ComponentVisitor &componentVisitor) const override;
 
 protected:
   /// Parent component in the tree

@@ -56,6 +56,8 @@ protected:
   double getEX(size_t i) const override;
 
 private:
+  void copyData(const MantidQwtIMDWorkspaceData &data);
+
   void cacheLinePlot();
   void calculateMinMax();
   void choosePlotAxis();

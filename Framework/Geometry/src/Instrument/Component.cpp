@@ -1,6 +1,8 @@
 #include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/Instrument/ParComponentFactory.h"
 #include "MantidGeometry/Instrument/Component.h"
+#include "MantidGeometry/Instrument/ComponentVisitor.h"
+#include "MantidGeometry/Objects/BoundingBox.h"
 #include "MantidKernel/Exception.h"
 
 #include <Poco/XML/XMLWriter.h>
@@ -285,7 +287,7 @@ void Component::rotate(double angle, const V3D &axis) {
 /** Gets the position relative to the parent
 * @returns A vector of the relative position
 */
-const V3D Component::getRelativePos() const {
+V3D Component::getRelativePos() const {
   if (m_map) {
     if (m_map->contains(m_base, "pos")) {
       return m_map->get(m_base, "pos")->value<V3D>();
@@ -353,7 +355,7 @@ V3D Component::getPos() const {
 /** Gets the rotation relative to the parent
 * @returns A quaternion of the relative rotation
 */
-const Quat &Component::getRelativeRot() const {
+Quat Component::getRelativeRot() const {
   if (m_map) {
     if (m_map->contains(m_base, "rot")) {
       return m_map->get(m_base, "rot")->value<Quat>();
@@ -366,7 +368,7 @@ const Quat &Component::getRelativeRot() const {
 /** Returns the absolute rotation of the Component
 *  @return A quaternion representing the total rotation
 */
-const Quat Component::getRotation() const {
+Quat Component::getRotation() const {
   if (m_map) {
     // Avoid instantiation of the parent's parameterized object if possible
     const IComponent *baseParent = m_base->m_parent;
@@ -640,6 +642,13 @@ void Component::setDescription(const std::string &descr) {
                                                  "not implemented for "
                                                  "non-Parametrized Component)");
 }
+
+void Component::registerContents(
+    class ComponentVisitor &componentVisitor) const {
+
+  componentVisitor.registerGenericComponent(*this);
+}
+
 } // Namespace Geometry
 
 } // Namespace Mantid

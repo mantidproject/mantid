@@ -30,9 +30,11 @@ public:
     const std::string measurementType = "t";
     const double angle = 0.1;
     const std::string run = "123";
+    const std::string title = "title";
 
     MeasurementItem measurement(measurementId, measurementSubId,
-                                measurementLabel, measurementType, angle, run);
+                                measurementLabel, measurementType, angle, run,
+                                title);
 
     TS_ASSERT(measurement.isUseable());
     TS_ASSERT_EQUALS(measurementId, measurement.id());
@@ -46,7 +48,7 @@ public:
   void test_invalid_construction_when_measurementId_empty() {
 
     MeasurementItem measurement("", "measurementSubId", "measurementLabel",
-                                "measurementType", 0.1, "111");
+                                "measurementType", 0.1, "111", "title");
 
     TS_ASSERT(!measurement.isUseable());
   }
@@ -54,7 +56,7 @@ public:
   void test_invalid_construction_when_measurementSubId_empty() {
 
     MeasurementItem measurement("measurementId", "", "measurementLabel",
-                                "measurementType", 0.1, "111");
+                                "measurementType", 0.1, "111", "title");
 
     TS_ASSERT(!measurement.isUseable());
   }
@@ -62,16 +64,24 @@ public:
   void test_valid_construction_when_label_empty() {
 
     MeasurementItem measurement("measurementId", "measurementSubId", "",
-                                "measurementType", 0.1, "111");
+                                "measurementType", 0.1, "111", "title");
 
     TSM_ASSERT("Empty labels are not terminal", measurement.isUseable());
   }
 
   void test_valid_construction_when_type_empty() {
     MeasurementItem measurement("measurementId", "measurementSubId",
-                                "measurementLabel", "", 0.1, "111");
+                                "measurementLabel", "", 0.1, "111", "title");
 
     TSM_ASSERT("Empty type info is not terminal", measurement.isUseable());
+  }
+
+  void test_valid_construction_when_title_empty() {
+    MeasurementItem measurement("measurementId", "measurementSubId",
+                                "measurementLabel", "measurementType", 0.1,
+                                "111", "");
+
+    TSM_ASSERT("Empty run title is not terminal", measurement.isUseable());
   }
 };
 

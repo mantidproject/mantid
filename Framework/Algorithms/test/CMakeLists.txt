@@ -25,7 +25,7 @@ if ( CXXTEST_FOUND )
   set ( PLUSMINUSTEST_CLASS MinusTest )
   set ( PLUSMINUSTEST_DO_PLUS false )
   configure_file ( PlusMinusTest.in.h      ${CMAKE_CURRENT_SOURCE_DIR}/MinusTest.h)
-  
+
   # Make the rest of the tests
   include_directories ( ../../CurveFitting/inc ../../DataHandling/inc ../../Nexus/inc ../../TestHelpers/inc )
   # This variable is used within the cxxtest_add_test macro to build these helper classes into the test executable.
@@ -39,18 +39,20 @@ if ( CXXTEST_FOUND )
                         ../../TestHelpers/src/ScopedFileHelper.cpp
                         )
   cxxtest_add_test ( AlgorithmsTest ${TEST_FILES} )
-  target_link_libraries ( AlgorithmsTest LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} 
+  target_link_libraries ( AlgorithmsTest LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME}
             Algorithms
             API
             DataHandling
             DataObjects
             Geometry
             HistogramData
+            Indexing
             Kernel
             Nexus
             ${Boost_LIBRARIES}
             ${POCO_LIBRARIES}
-            ${GMOCK_LIBRARIES} )
+            ${GMOCK_LIBRARIES}
+            ${GTEST_LIBRARIES} )
   add_dependencies ( AlgorithmsTest Crystal CurveFitting )
   add_dependencies ( FrameworkTests AlgorithmsTest )
   # Test data
@@ -64,4 +66,3 @@ endif ()
 if (PYUNITTEST_FOUND)
   pyunittest_add_test( ${CMAKE_CURRENT_SOURCE_DIR} AlgorithmsPythonTest ${TEST_PY_FILES} )
 endif ()
-

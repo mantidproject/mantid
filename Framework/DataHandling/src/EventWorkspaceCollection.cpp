@@ -4,6 +4,7 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/Run.h"
+#include "MantidAPI/Sample.h"
 #include "MantidAPI/WorkspaceFactory.h"
 
 #include <vector>
@@ -40,13 +41,11 @@ void copyLogs(const EventWorkspace_sptr &from, EventWorkspace_sptr &to) {
 }
 }
 
-//----------------------------------------------------------------------------------------------
 /** Constructor
  */
 EventWorkspaceCollection::EventWorkspaceCollection()
     : m_WsVec(1, createEmptyEventWorkspace()) {}
 
-//-----------------------------------------------------------------------------
 /**
 * Create a blank event workspace
 * @returns A shared pointer to a new empty EventWorkspace object
@@ -227,7 +226,7 @@ size_t EventWorkspaceCollection::getNumberEvents() const {
 void EventWorkspaceCollection::resizeTo(const size_t size) {
   for (auto &ws : m_WsVec) {
     auto tmp = createWorkspace<DataObjects::EventWorkspace>(size, 2, 1);
-    WorkspaceFactory::Instance().initializeFromParent(ws, tmp, true);
+    WorkspaceFactory::Instance().initializeFromParent(*ws, *tmp, true);
     ws = std::move(tmp);
     for (size_t i = 0; i < ws->getNumberHistograms(); ++i)
       ws->getSpectrum(i).setSpectrumNo(static_cast<specnum_t>(i + 1));

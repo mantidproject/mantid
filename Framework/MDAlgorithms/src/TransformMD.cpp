@@ -2,6 +2,7 @@
 #include "MantidKernel/System.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidDataObjects/MDHistoWorkspace.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidDataObjects/MDEventWorkspace.h"
 #include "MantidDataObjects/MDEventFactory.h"

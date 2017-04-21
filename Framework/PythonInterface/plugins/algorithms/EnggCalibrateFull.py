@@ -6,6 +6,7 @@ from mantid.kernel import *
 from mantid.api import *
 import EnggUtils
 
+
 class EnggCalibrateFull(PythonAlgorithm):
     INDICES_PROP_NAME = 'SpectrumNumbers'
 
@@ -21,7 +22,6 @@ class EnggCalibrateFull(PythonAlgorithm):
     def PyInit(self):
         self.declareProperty(MatrixWorkspaceProperty("Workspace", "", Direction.InOut),
                              "Workspace with the calibration run to use. The calibration will be applied on it.")
-
 
         self.declareProperty(MatrixWorkspaceProperty("VanadiumWorkspace", "", Direction.Input,
                                                      PropertyMode.Optional),
@@ -47,7 +47,7 @@ class EnggCalibrateFull(PythonAlgorithm):
         self.setPropertyGroup('VanIntegrationWorkspace', vana_grp)
         self.setPropertyGroup('VanCurvesWorkspace', vana_grp)
 
-        self.declareProperty(ITableWorkspaceProperty("OutDetPosTable", "", Direction.Output),\
+        self.declareProperty(ITableWorkspaceProperty("OutDetPosTable", "", Direction.Output),
                              doc="A table with the detector IDs and calibrated detector positions and "
                              "additional calibration information. The table includes: the old positions "
                              "in V3D format (3D vector with x, y, z values), the new positions in V3D, the "
@@ -107,7 +107,6 @@ class EnggCalibrateFull(PythonAlgorithm):
         peaks_grp = 'Peaks to fit'
         self.setPropertyGroup('ExpectedPeaks', peaks_grp)
         self.setPropertyGroup('ExpectedPeaksFromFile', peaks_grp)
-
 
     def PyExec(self):
 
@@ -214,7 +213,7 @@ class EnggCalibrateFull(PythonAlgorithm):
 
         @returns the peaks parameters in a table as produced by the algorithm
         EnggFitPeaks
-    	"""
+        """
         alg = self.createChildAlgorithm('EnggFitPeaks')
         alg.setProperty('InputWorkspace', ws)
         alg.setProperty('WorkspaceIndex', wsIndex) # There should be only one index anyway
@@ -343,7 +342,7 @@ class EnggCalibrateFull(PythonAlgorithm):
         Returns a detector position which corresponds to the newDifc value.
 
         The two_theta and phi of the detector are preserved, L2 is changed.
-    	"""
+        """
         # This is how det_L2 would be calculated
         # det_L2 = det.getDistance(ws.getInstrument().getSample())
         det_two_theta = ws.detectorTwoTheta(det)
@@ -378,7 +377,7 @@ class EnggCalibrateFull(PythonAlgorithm):
         Returns a cartesian 3D vector for the given spherical coordinates.
 
         Borrowed from V3D::spherical (C++).
-    	"""
+        """
         z = R * math.cos(polar)
         ct = R * math.sin(polar)
         x = ct * math.cos(azimuth)

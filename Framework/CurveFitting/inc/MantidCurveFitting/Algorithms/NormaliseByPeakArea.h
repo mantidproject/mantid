@@ -3,8 +3,15 @@
 
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidKernel/cow_ptr.h"
 
 namespace Mantid {
+
+namespace HistogramData {
+class HistogramY;
+class HistogramE;
+}
+
 namespace CurveFitting {
 namespace Algorithms {
 
@@ -65,8 +72,9 @@ private:
   void normaliseTOFData(const double area, const size_t index);
   /// Stores/accumulates the results
   void saveToOutput(const API::MatrixWorkspace_sptr &accumWS,
-                    const std::vector<double> &yValues,
-                    const std::vector<double> &eValues, const size_t index);
+                    const Kernel::cow_ptr<HistogramData::HistogramY> &yValues,
+                    const Kernel::cow_ptr<HistogramData::HistogramE> &eValues,
+                    const size_t index);
   /// Symmetrises the data in yspace about the origin
   void symmetriseYSpace();
 

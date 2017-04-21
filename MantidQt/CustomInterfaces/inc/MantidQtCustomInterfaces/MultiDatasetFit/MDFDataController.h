@@ -45,10 +45,6 @@ public:
   int getNumberOfSpectra() const;
   void checkSpectra();
   std::pair<double, double> getFittingRange(int i) const;
-  std::vector<std::string> getWorkspaceLogNames(int i) const;
-  double getLogValue(const QString &logName,
-                     const Mantid::Kernel::Math::StatisticType &function,
-                     int i) const;
 
 signals:
   void dataTableUpdated();

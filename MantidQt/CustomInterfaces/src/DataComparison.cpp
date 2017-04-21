@@ -1,11 +1,9 @@
-//----------------------
-// Includes
-//----------------------
 #include "MantidQtCustomInterfaces/DataComparison.h"
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidQtAPI/QwtWorkspaceSpectrumData.h"
+#include "MantidAPI/WorkspaceGroup.h"
 
 namespace {
 Mantid::Kernel::Logger g_log("DataComparison");
@@ -140,18 +138,18 @@ void DataComparison::addDataItem(Workspace_const_sptr ws) {
   MatrixWorkspace_const_sptr matrixWs =
       boost::dynamic_pointer_cast<const MatrixWorkspace>(ws);
   if (!matrixWs) {
-    g_log.error() << "Workspace " << ws->name() << "is of incorrect type!\n";
+    g_log.error() << "Workspace " << ws->getName() << "is of incorrect type!\n";
     return;
   }
 
   // Check that the workspace does not already exist in the comparison
   if (containsWorkspace(matrixWs)) {
-    g_log.information() << "Workspace " << matrixWs->name()
+    g_log.information() << "Workspace " << matrixWs->getName()
                         << " already shown in comparison.\n";
     return;
   }
 
-  std::string wsName = matrixWs->name();
+  std::string wsName = matrixWs->getName();
 
   // Append a new row to the data table
   int currentRows = m_uiForm.twCurrentData->rowCount();
@@ -209,7 +207,7 @@ void DataComparison::addDataItem(Workspace_const_sptr ws) {
  * @param ws Pointer to the workspace
  */
 bool DataComparison::containsWorkspace(MatrixWorkspace_const_sptr ws) {
-  QString testWsName = QString::fromStdString(ws->name());
+  QString testWsName = QString::fromStdString(ws->getName());
 
   int numRows = m_uiForm.twCurrentData->rowCount();
   for (int row = 0; row < numRows; row++) {

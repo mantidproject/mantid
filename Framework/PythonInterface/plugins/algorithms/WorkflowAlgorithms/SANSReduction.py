@@ -1,9 +1,13 @@
 #pylint: disable=no-init,invalid-name
+from __future__ import (absolute_import, division, print_function)
+
 import mantid.simpleapi as api
 from mantid.api import *
 from mantid.kernel import *
 from reduction_workflow.find_data import find_data
 import os
+
+
 class SANSReduction(PythonAlgorithm):
     def category(self):
         return 'Workflow\\SANS\\UsesPropertyManager'
@@ -37,9 +41,9 @@ class SANSReduction(PythonAlgorithm):
         alg = Algorithm.fromString(p.valueAsStr)
 
         if AnalysisDataService.doesExist(filename) \
-            and AnalysisDataService.retrieve(filename).__class__.__name__.find('EventWorkspace')>=0 \
-            and not AnalysisDataService.retrieve(filename).getRun().hasProperty("event_ws") \
-            and not AnalysisDataService.retrieve(filename).getRun().hasProperty("sample_detector_distance"):
+                and AnalysisDataService.retrieve(filename).__class__.__name__.find('EventWorkspace')>=0 \
+                and not AnalysisDataService.retrieve(filename).getRun().hasProperty("event_ws") \
+                and not AnalysisDataService.retrieve(filename).getRun().hasProperty("sample_detector_distance"):
             alg.setProperty("InputWorkspace", filename)
         else:
             alg.setProperty('Filename', filename)
@@ -60,12 +64,12 @@ class SANSReduction(PythonAlgorithm):
         else:
             property_manager.existsProperty('InstrumentName')
         output_str = ''
-        if type(data_file) == str:
+        if isinstance(data_file, str):
             if AnalysisDataService.doesExist(data_file):
                 data_file = [data_file]
             else:
                 data_file = find_data(data_file, instrument=instrument, allow_multiple=True)
-        if type(data_file) == list:
+        if isinstance(data_file, list):
             for i in range(len(data_file)):
                 if i == 0:
                     output_str += self._load_data(data_file[i], workspace, property_manager, property_manager_name)
@@ -131,9 +135,9 @@ class SANSReduction(PythonAlgorithm):
             alg.setProperty("OutputWorkspace", output_ws)
 
             if alg.existsProperty("BeamCenterX") \
-                and alg.existsProperty("BeamCenterY") \
-                and beam_center_x is not None \
-                and beam_center_y is not None:
+                    and alg.existsProperty("BeamCenterY") \
+                    and beam_center_x is not None \
+                    and beam_center_y is not None:
                 alg.setProperty("BeamCenterX", beam_center_x)
                 alg.setProperty("BeamCenterY", beam_center_y)
 
@@ -161,8 +165,8 @@ class SANSReduction(PythonAlgorithm):
         if "BackgroundFiles" in property_list:
             background = property_manager.getProperty("BackgroundFiles").value
             background_ws = "__background_%s" % output_ws
-            msg = self._multiple_load(background, background_ws,\
-                                property_manager, property_manager_name)
+            msg = self._multiple_load(background, background_ws,
+                                      property_manager, property_manager_name)
             bck_msg = "Loaded background %s\n" % background
             bck_msg += msg
 
@@ -190,9 +194,9 @@ class SANSReduction(PythonAlgorithm):
                 alg.setProperty("OutputWorkspace", '__'+background_ws+"_reduced")
 
                 if alg.existsProperty("BeamCenterX") \
-                    and alg.existsProperty("BeamCenterY") \
-                    and trans_beam_center_x is not None \
-                    and trans_beam_center_y is not None:
+                        and alg.existsProperty("BeamCenterY") \
+                        and trans_beam_center_x is not None \
+                        and trans_beam_center_y is not None:
                     alg.setProperty("BeamCenterX", trans_beam_center_x)
                     alg.setProperty("BeamCenterY", trans_beam_center_y)
 
@@ -224,9 +228,9 @@ class SANSReduction(PythonAlgorithm):
                                  WorkspaceToMatch=output_ws,
                                  OutputWorkspace=background_ws+'_rebin',
                                  PreserveEvents=True)
-            api.Minus(LHSWorkspace=output_ws,\
-                         RHSWorkspace=background_ws+'_rebin',\
-                         OutputWorkspace=output_ws)
+            api.Minus(LHSWorkspace=output_ws,
+                      RHSWorkspace=background_ws+'_rebin',
+                      OutputWorkspace=output_ws)
 
             bck_msg = bck_msg.replace('\n','\n   |')
             output_msg += "Background subtracted [%s]\n   %s\n" % (background_ws, bck_msg)
@@ -274,7 +278,7 @@ class SANSReduction(PythonAlgorithm):
             if os.path.isdir(output_dir):
                 # Check whether we were in frame-skipping mode
                 if iq_output is not None \
-                and not AnalysisDataService.doesExist(iq_output):
+                        and not AnalysisDataService.doesExist(iq_output):
                     for i in [1, 2]:
                         iq_frame = iq_output.replace('_Iq', '_frame%s_Iq' % i)
                         iqxy_frame = None
@@ -333,9 +337,9 @@ class SANSReduction(PythonAlgorithm):
             alg.setProperty("OutputWorkspace", workspace)
 
             if alg.existsProperty("BeamCenterX") \
-                and alg.existsProperty("BeamCenterY") \
-                and beam_center_x is not None \
-                and beam_center_y is not None:
+                    and alg.existsProperty("BeamCenterY") \
+                    and beam_center_x is not None \
+                    and beam_center_y is not None:
                 alg.setProperty("BeamCenterX", beam_center_x)
                 alg.setProperty("BeamCenterY", beam_center_y)
 

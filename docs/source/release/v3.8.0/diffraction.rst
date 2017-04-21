@@ -32,7 +32,7 @@ Single Crystal Diffraction
 
 - Some improvements were done for creating peaks from python. :ref:`CreatePeaksWorkspace <algm-CreatePeaksWorkspace>`
   copies the goniometer from the input MatrixWorkspace to PeaksWorkspace. createPeak for PeaksWorkspace copies goniometer
-  from PeaksWorkspace to peak. setGoniometer for a peak can be done from python and setQLabFrame and setQSampleFrame works
+  from PeaksWorkspace to peak. setGoniometer for a peak can be done from python and setQLabFrame and setQSampleFrame work
   correctly now with one argument.
 
 - :ref:`SCDCalibratePanels <algm-SCDCalibratePanels>` has been rewritten to calibrate the position and rotations of
@@ -91,8 +91,7 @@ Powder Diffraction
   ``CalibrationFile``. The documentation for this algorithm has been
   greatly expanded as well.
 
-- :ref:`PDFFourierTransformSNSPowderReduction
-  <algm-PDFFourierTransformSNSPowderReduction>` has been modified to
+- :ref:`PDFFourierTransform <algm-PDFFourierTransform>` has been modified to
   look at the signal as well when looking at the ``Q``-range to use
   for the transform.
 

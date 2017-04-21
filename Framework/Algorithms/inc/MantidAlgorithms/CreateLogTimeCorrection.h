@@ -6,8 +6,12 @@
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidGeometry/Instrument.h"
+#include <vector>
 
 namespace Mantid {
+namespace API {
+class DetectorInfo;
+}
 namespace Algorithms {
 
 /** CreateLogTimeCorrection : Create correction file and workspace to correct
@@ -60,24 +64,24 @@ private:
   /// Implement abstract Algorithm methods
   void exec() override;
 
-  /// Get instrument geometry setup including L2 for each detector and L1
-  void getInstrumentSetup();
+  /// Log geometry information
+  void
+  logGeometryInformation(const Mantid::API::DetectorInfo &detectorInfo) const;
 
   /// Calculate the log time correction for each pixel, i.e., correcton from
   /// event time at detector to time at sample
-  void calculateCorrection();
+  std::vector<double>
+  calculateCorrections(const Mantid::API::DetectorInfo &detectorInfo) const;
 
   /// Write L2 map and correction map to a TableWorkspace
-  DataObjects::TableWorkspace_sptr generateCorrectionTable();
+  DataObjects::TableWorkspace_sptr
+  generateCorrectionTable(const Mantid::API::DetectorInfo &detectorInfo,
+                          const std::vector<double> &corrections) const;
 
   /// Write correction map to a text file
-  void writeCorrectionToFile(std::string filename);
-
-  API::MatrixWorkspace_sptr m_dataWS;
-  Geometry::Instrument_const_sptr m_instrument;
-  std::map<int, double> m_l2map;
-  std::map<int, double> m_correctionMap;
-  double m_L1 = 0.0;
+  void writeCorrectionToFile(const std::string filename,
+                             const Mantid::API::DetectorInfo &detectorInfo,
+                             const std::vector<double> &corrections) const;
 };
 
 } // namespace Algorithms

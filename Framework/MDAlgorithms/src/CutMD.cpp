@@ -3,6 +3,8 @@
 #include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/Projection.h"
+#include "MantidAPI/Run.h"
+#include "MantidAPI/Sample.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/ListValidator.h"
@@ -444,7 +446,9 @@ void CutMD::exec() {
         vecStr = boost::algorithm::join(vec, ", ");
       }
 
-      const std::string value = label + ", " + unit + ", " + vecStr;
+      const std::string value =
+          std::string(label).append(", ").append(unit).append(", ").append(
+              vecStr);
       cutAlg->setProperty("BasisVector" + std::to_string(i), value);
     }
 

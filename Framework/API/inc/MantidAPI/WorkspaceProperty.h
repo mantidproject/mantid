@@ -1,15 +1,9 @@
 #ifndef MANTID_API_WORKSPACEPROPERTY_H_
 #define MANTID_API_WORKSPACEPROPERTY_H_
 
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidAPI/IWorkspaceProperty.h"
-#include "MantidAPI/AnalysisDataService.h"
 #include "MantidKernel/Logger.h"
-#include "MantidKernel/Exception.h"
-#include "MantidAPI/WorkspaceGroup.h"
 
 #include <string>
 
@@ -19,6 +13,7 @@ namespace API {
 // Forward decaration
 // -------------------------------------------------------------------------
 class MatrixWorkspace;
+class WorkspaceGroup;
 
 /// Enumeration for a mandatory/optional property
 struct PropertyMode {
@@ -77,430 +72,70 @@ class WorkspaceProperty
     : public Kernel::PropertyWithValue<boost::shared_ptr<TYPE>>,
       public IWorkspaceProperty {
 public:
-  /** Constructor.
-  *  Sets the property and workspace names but initializes the workspace pointer
-  * to null.
-  *  @param name :: The name to assign to the property
-  *  @param wsName :: The name of the workspace
-  *  @param direction :: Whether this is a Direction::Input, Direction::Output
-  * or Direction::InOut (Input & Output) workspace
-  *  @param validator :: The (optional) validator to use for this property
-  *  @throw std::out_of_range if the direction argument is not a member of the
-  * Direction enum (i.e. 0-2)
-  */
   explicit WorkspaceProperty(
       const std::string &name, const std::string &wsName,
       const unsigned int direction,
       Kernel::IValidator_sptr validator =
-          Kernel::IValidator_sptr(new Kernel::NullValidator))
-      : Kernel::PropertyWithValue<boost::shared_ptr<TYPE>>(
-            name, boost::shared_ptr<TYPE>(), validator, direction),
-        m_workspaceName(wsName), m_initialWSName(wsName),
-        m_optional(PropertyMode::Mandatory), m_locking(LockMode::Lock) {}
+          Kernel::IValidator_sptr(new Kernel::NullValidator));
 
-  /** Constructor.
-  *  Sets the property and workspace names but initialises the workspace pointer
-  * to null.
-  *  @param name :: The name to assign to the property
-  *  @param wsName :: The name of the workspace
-  *  @param direction :: Whether this is a Direction::Input, Direction::Output
-  * or Direction::InOut (Input & Output) workspace
-  *  @param optional :: If true then the property is optional
-  *  @param validator :: The (optional) validator to use for this property
-  *  @throw std::out_of_range if the direction argument is not a member of the
-  * Direction enum (i.e. 0-2)
-  */
   explicit WorkspaceProperty(
       const std::string &name, const std::string &wsName,
       const unsigned int direction, const PropertyMode::Type optional,
       Kernel::IValidator_sptr validator =
-          Kernel::IValidator_sptr(new Kernel::NullValidator))
-      : Kernel::PropertyWithValue<boost::shared_ptr<TYPE>>(
-            name, boost::shared_ptr<TYPE>(), validator, direction),
-        m_workspaceName(wsName), m_initialWSName(wsName), m_optional(optional),
-        m_locking(LockMode::Lock) {}
+          Kernel::IValidator_sptr(new Kernel::NullValidator));
 
-  /** Constructor.
-  *  Sets the property and workspace names but initialises the workspace pointer
-  * to null.
-  *  @param name :: The name to assign to the property
-  *  @param wsName :: The name of the workspace
-  *  @param direction :: Whether this is a Direction::Input, Direction::Output
-  * or Direction::InOut (Input & Output) workspace
-  *  @param optional :: A boolean indicating whether the property is mandatory
-  * or not. Only matters
-  *                     for input properties
-  *  @param locking :: A boolean indicating whether the workspace should read or
-  *                    write-locked when an algorithm begins. Default=true.
-  *  @param validator :: The (optional) validator to use for this property
-  *  @throw std::out_of_range if the direction argument is not a member of the
-  * Direction enum (i.e. 0-2)
-  */
   explicit WorkspaceProperty(
       const std::string &name, const std::string &wsName,
       const unsigned int direction, const PropertyMode::Type optional,
       const LockMode::Type locking,
       Kernel::IValidator_sptr validator =
-          Kernel::IValidator_sptr(new Kernel::NullValidator))
-      : Kernel::PropertyWithValue<boost::shared_ptr<TYPE>>(
-            name, boost::shared_ptr<TYPE>(), validator, direction),
-        m_workspaceName(wsName), m_initialWSName(wsName), m_optional(optional),
-        m_locking(locking) {}
+          Kernel::IValidator_sptr(new Kernel::NullValidator));
 
-  /// Copy constructor, the default name stored in the new object is the same as
-  /// the default name from the original object
-  WorkspaceProperty(const WorkspaceProperty &right)
-      : Kernel::PropertyWithValue<boost::shared_ptr<TYPE>>(right),
-        m_workspaceName(right.m_workspaceName),
-        m_initialWSName(right.m_initialWSName), m_optional(right.m_optional),
-        m_locking(right.m_locking) {}
+  WorkspaceProperty(const WorkspaceProperty &right);
 
-  /// Copy assignment operator. Only copies the value (i.e. the pointer to the
-  /// workspace)
-  WorkspaceProperty &operator=(const WorkspaceProperty &right) {
-    if (&right == this)
-      return *this;
-    Kernel::PropertyWithValue<boost::shared_ptr<TYPE>>::operator=(right);
-    return *this;
-  }
+  WorkspaceProperty &operator=(const WorkspaceProperty &right);
 
-  /** Bring in the PropertyWithValue assignment operator explicitly (avoids
-   * VSC++ warning)
-   * @param value :: The value to set to
-   * @return assigned PropertyWithValue
-   */
   boost::shared_ptr<TYPE> &
-  operator=(const boost::shared_ptr<TYPE> &value) override {
-    std::string wsName = value->name();
-    if (this->direction() == Kernel::Direction::Input && !wsName.empty()) {
-      m_workspaceName = wsName;
-    }
-    return Kernel::PropertyWithValue<boost::shared_ptr<TYPE>>::operator=(value);
-  }
+  operator=(const boost::shared_ptr<TYPE> &value) override;
 
-  //--------------------------------------------------------------------------------------
-  /// Add the value of another property
-  WorkspaceProperty &operator+=(Kernel::Property const *) override {
-    throw Kernel::Exception::NotImplementedError(
-        "+= operator is not implemented for WorkspaceProperty.");
-    return *this;
-  }
+  WorkspaceProperty &operator+=(Kernel::Property const *) override;
 
-  /// 'Virtual copy constructor'
-  WorkspaceProperty<TYPE> *clone() const override {
-    return new WorkspaceProperty<TYPE>(*this);
-  }
+  WorkspaceProperty<TYPE> *clone() const override;
 
-  /** Get the name of the workspace
-  *  @return The workspace's name
-  */
-  std::string value() const override { return m_workspaceName; }
+  std::string value() const override;
 
-  /** Get the value the property was initialised with -its default value
-  *  @return The default value
-  */
-  std::string getDefault() const override { return m_initialWSName; }
+  std::string getDefault() const override;
 
-  /** Set the name of the workspace.
-  *  Also tries to retrieve it from the AnalysisDataService.
-  *  @param value :: The new name for the workspace
-  *  @return
-  */
-  std::string setValue(const std::string &value) override {
-    m_workspaceName = value;
-    if (Kernel::PropertyWithValue<boost::shared_ptr<TYPE>>::autoTrim()) {
-      boost::trim(m_workspaceName);
-    }
-    // Try and get the workspace from the ADS, but don't worry if we can't
-    try {
-      Kernel::PropertyWithValue<boost::shared_ptr<TYPE>>::m_value =
-          AnalysisDataService::Instance().retrieveWS<TYPE>(m_workspaceName);
-    } catch (Kernel::Exception::NotFoundError &) {
-      // Set to null property if not found
-      this->clear();
-      // the workspace name is not reset here, however.
-    }
+  std::string setValue(const std::string &value) override;
 
-    return isValid();
-  }
-
-  /** Set a value from a data item
-   *  @param value :: A shared pointer to a DataItem. If it is of the correct
-   *  type it will set validated, if not the property's value will be cleared.
-   *  @return
-   */
   std::string
-  setDataItem(const boost::shared_ptr<Kernel::DataItem> value) override {
-    boost::shared_ptr<TYPE> typed = boost::dynamic_pointer_cast<TYPE>(value);
-    if (typed) {
-      std::string wsName = typed->name();
-      if (this->direction() == Kernel::Direction::Input && !wsName.empty()) {
-        m_workspaceName = wsName;
-      }
-      Kernel::PropertyWithValue<boost::shared_ptr<TYPE>>::m_value = typed;
-    } else {
-      this->clear();
-    }
-    return isValid();
-  }
+  setDataItem(const boost::shared_ptr<Kernel::DataItem> value) override;
 
-  /** Checks whether the entered workspace is valid.
-  *  To be valid, in addition to satisfying the conditions of any validators,
-  *  an output property must not have an empty name and an input one must point
-  * to
-  *  a workspace of the correct type.
-  *  @returns A user level description of the problem or "" if it is valid.
-  */
-  std::string isValid() const override {
-    // start with the no error condition
-    std::string error;
+  std::string isValid() const override;
 
-    // If an output workspace it must have a name, although it might not exist
-    // in the ADS yet
-    if (this->direction() == Kernel::Direction::Output) {
-      return isValidOutputWs();
-    }
+  bool isDefault() const override;
 
-    // If an input (or inout) workspace, must point to something, although it
-    // doesn't have to have a name
-    // unless it's optional
-    if (this->direction() == Kernel::Direction::Input ||
-        this->direction() == Kernel::Direction::InOut) {
-      // Workspace groups will not have a value since they are not of type TYPE
-      if (!Kernel::PropertyWithValue<boost::shared_ptr<TYPE>>::m_value) {
-        Mantid::API::Workspace_sptr wksp;
-        // if the workspace name is empty then there is no point asking the ADS
-        if (m_workspaceName.empty())
-          return isOptionalWs();
+  bool isOptional() const override;
+  bool isLocking() const override;
 
-        try {
-          wksp = AnalysisDataService::Instance().retrieve(m_workspaceName);
-        } catch (Kernel::Exception::NotFoundError &) {
-          // Check to see if the workspace is not logged with the ADS because it
-          // is optional.
-          return isOptionalWs();
-        }
+  std::vector<std::string> allowedValues() const override;
 
-        // At this point we have a valid pointer to a Workspace so we need to
-        // test whether it is a group
-        if (boost::dynamic_pointer_cast<Mantid::API::WorkspaceGroup>(wksp)) {
-          return isValidGroup(
-              boost::dynamic_pointer_cast<Mantid::API::WorkspaceGroup>(wksp));
-        } else {
-          error = "Workspace " + this->value() + " is not of the correct type";
-        }
-        return error;
-      }
-    }
-    // Call superclass method to access any attached validators (which do their
-    // own logging)
-    return Kernel::PropertyWithValue<boost::shared_ptr<TYPE>>::isValid();
-  }
+  const Kernel::PropertyHistory createHistory() const override;
 
-  /** Indicates if the object is still pointing to the same workspace, using the
-  * workspace name
-  *  @return true if the value is the same as the initial value or false
-  * otherwise
-  */
-  bool isDefault() const override { return m_initialWSName == m_workspaceName; }
+  bool store() override;
 
-  /** Is the workspace property optional
-   * @return true if the workspace can be blank   */
-  bool isOptional() const override {
-    return (m_optional == PropertyMode::Optional);
-  }
-  /** Does the workspace need to be locked before starting an algorithm?
-   * @return true (default) if the workspace will be locked */
-  bool isLocking() const override { return (m_locking == LockMode::Lock); }
-
-  /** Returns the current contents of the AnalysisDataService for input
-   * workspaces.
-   *  For output workspaces, an empty set is returned
-   *  @return set of objects in AnalysisDataService
-   */
-  std::vector<std::string> allowedValues() const override {
-    if (this->direction() == Kernel::Direction::Input ||
-        this->direction() == Kernel::Direction::InOut) {
-      // If an input workspace, get the list of workspaces currently in the ADS
-      auto vals = AnalysisDataService::Instance().getObjectNames(
-          Mantid::Kernel::DataServiceSort::Sorted);
-      if (isOptional()) // Insert an empty option
-      {
-        vals.push_back("");
-      }
-      // Copy-construct a temporary workspace property to test the validity of
-      // each workspace
-      WorkspaceProperty<TYPE> tester(*this);
-
-      // Remove any workspace that's not valid for this algorithm
-      auto eraseIter = remove_if(vals.begin(), vals.end(),
-                                 [&tester](const std::string &wsName) {
-                                   return !tester.setValue(wsName).empty();
-                                 });
-      // Erase everything past returned iterator afterwards for readability
-      vals.erase(eraseIter, vals.end());
-      return vals;
-    } else {
-      // For output workspaces, just return an empty set
-      return std::vector<std::string>();
-    }
-  }
-
-  /// Create a history record
-  /// @return A populated PropertyHistory for this class
-  const Kernel::PropertyHistory createHistory() const override {
-    std::string wsName = m_workspaceName;
-    bool isdefault = this->isDefault();
-
-    if ((wsName.empty() || this->hasTemporaryValue()) && this->operator()()) {
-      // give the property a temporary name in the history
-      std::ostringstream os;
-      os << "__TMP" << this->operator()().get();
-      wsName = os.str();
-      isdefault = false;
-    }
-    return Kernel::PropertyHistory(this->name(), wsName, this->type(),
-                                   isdefault, this->direction());
-  }
-
-  /** If this is an output workspace, store it into the AnalysisDataService
-  *  @return True if the workspace is an output workspace and has been stored
-  *  @throw std::runtime_error if unable to store the workspace successfully
-  */
-  bool store() override {
-    bool result = false;
-    if (!this->operator()() && isOptional())
-      return result;
-    if (this->direction()) // Output or InOut
-    {
-      // Check that workspace exists
-      if (!this->operator()())
-        throw std::runtime_error(
-            "WorkspaceProperty doesn't point to a workspace");
-      // Note use of addOrReplace rather than add
-      API::AnalysisDataService::Instance().addOrReplace(m_workspaceName,
-                                                        this->operator()());
-      result = true;
-    }
-    // always clear the internal pointer after storing
-    clear();
-
-    return result;
-  }
-
-  Workspace_sptr getWorkspace() const override { return this->operator()(); }
+  Workspace_sptr getWorkspace() const override;
 
 private:
-  /** Checks whether the entered workspace group is valid.
-  *  To be valid *all* members of the group have to be valid.
-  *  @param wsGroup :: the WorkspaceGroup of which to check the validity
-  *  @returns A user level description of the problem or "" if it is valid.
-  */
-  std::string isValidGroup(boost::shared_ptr<WorkspaceGroup> wsGroup) const {
-    g_log.debug() << " Input WorkspaceGroup found \n";
+  std::string isValidGroup(boost::shared_ptr<WorkspaceGroup> wsGroup) const;
 
-    std::vector<std::string> wsGroupNames = wsGroup->getNames();
-    std::string error;
+  std::string isValidOutputWs() const;
 
-    // Cycle through each workspace in the group ...
-    for (const auto &memberWsName : wsGroupNames) {
-      boost::shared_ptr<Workspace> memberWs =
-          AnalysisDataService::Instance().retrieve(memberWsName);
+  std::string isOptionalWs() const;
 
-      // Table Workspaces are ignored
-      if ("TableWorkspace" == memberWs->id()) {
-        error = "Workspace " + memberWsName + " is of type TableWorkspace and "
-                                              "will therefore be ignored as "
-                                              "part of the GroupedWorkspace.";
+  void clear() override;
 
-        g_log.debug() << error << '\n';
-      } else {
-        // ... and if it is a workspace of incorrect type, exclude the group by
-        // returning an error.
-        if (!boost::dynamic_pointer_cast<TYPE>(memberWs)) {
-          error = "Workspace " + memberWsName + " is not of type " +
-                  Kernel::PropertyWithValue<boost::shared_ptr<TYPE>>::type() +
-                  ".";
-
-          g_log.debug() << error << '\n';
-
-          return error;
-        }
-        // If it is of the correct type, it may still be invalid. Check.
-        else {
-          Mantid::API::WorkspaceProperty<TYPE> memberWsProperty(*this);
-          std::string memberError = memberWsProperty.setValue(memberWsName);
-          if (!memberError.empty())
-            return memberError; // Since if this member is invalid, then the
-                                // whole group is invalid.
-        }
-      }
-    }
-
-    return ""; // Since all members of the group are valid.
-  }
-
-  /** Checks whether the entered output workspace is valid.
-  *  To be valid the only thing it needs is a name that is allowed by the ADS,
-  * @see AnalysisDataServiceImpl
-  *  @returns A user level description of the problem or "" if it is valid.
-  */
-  std::string isValidOutputWs() const {
-    std::string error;
-    const std::string value = this->value();
-    if (!value.empty()) {
-      // Will the ADS accept it
-      error = AnalysisDataService::Instance().isValid(value);
-    } else {
-      if (isOptional())
-        error = ""; // Optional ones don't need a name
-      else
-        error = "Enter a name for the Output workspace";
-    }
-    return error;
-  }
-
-  /** Checks whether the entered workspace (that by this point we've found is
-  * not in the ADS)
-  *  is actually an optional workspace and so still valid.
-  *  @returns A user level description of the problem or "" if it is valid.
-  */
-  std::string isOptionalWs() const {
-    std::string error;
-
-    if (m_workspaceName.empty()) {
-      if (isOptional()) {
-        error = "";
-      } else {
-        error = "Enter a name for the Input/InOut workspace";
-      }
-    } else {
-      error = "Workspace \"" + this->value() +
-              "\" was not found in the Analysis Data Service";
-    }
-
-    return error;
-  }
-
-  /// Reset the pointer to the workspace
-  void clear() override {
-    Kernel::PropertyWithValue<boost::shared_ptr<TYPE>>::m_value =
-        boost::shared_ptr<TYPE>();
-  }
-
-  /** Attempts to retreive the data from the ADS
-  *  if the data is not foung the internal pointer is set to null.
-  */
-  void retrieveWorkspaceFromADS() {
-    // Try and get the workspace from the ADS, but don't worry if we can't
-    try {
-      Kernel::PropertyWithValue<boost::shared_ptr<TYPE>>::m_value =
-          AnalysisDataService::Instance().retrieveWS<TYPE>(m_workspaceName);
-    } catch (Kernel::Exception::NotFoundError &) {
-      // Set to null property if not found
-      this->clear();
-    }
-  }
+  void retrieveWorkspaceFromADS();
 
   /// The name of the workspace (as used by the AnalysisDataService)
   std::string m_workspaceName;

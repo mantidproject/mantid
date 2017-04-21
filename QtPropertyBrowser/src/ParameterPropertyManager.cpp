@@ -88,6 +88,16 @@ void ParameterPropertyManager::clearError(QtProperty* property)
 }
 
 /**
+ * Clears errors of all the properties, if they are set.
+ */
+void ParameterPropertyManager::clearErrors() {
+  const auto properties = m_errors.keys();
+  for (const auto prop : properties) {
+    clearError(prop);
+  }
+}
+
+/**
  * Sets errors enabled state. Updates all the properties as well to show/hide errors.
  * @param enabled :: New errors enabled state
  */

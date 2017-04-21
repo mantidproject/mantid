@@ -14,5 +14,9 @@ set ( TEST_PY_FILES
   SimpleAPIRenameWorkspaceTest.py  
 )
 
+if ( MAKE_VATES )
+ list  ( APPEND TEST_PY_FILES PVPythonTest.py )
+endif ()
+
 # Prefix for test=PythonInterface
 pyunittest_add_test ( ${CMAKE_CURRENT_SOURCE_DIR} PythonInterface ${TEST_PY_FILES} )

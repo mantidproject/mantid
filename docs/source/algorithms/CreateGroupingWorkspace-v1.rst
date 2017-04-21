@@ -29,6 +29,10 @@ the detectors for the given component will be grouped into the number
 of groups specified, detectors will be left ungrouped in the event that
 the number of detectors does not divide equally into the number of groups.
 
+GroupDetectorsBy has a new option, 2_4Grouping, to create one group of 4 
+columns of SNAP detectors and another with the remaining 2 columns. This 
+grouping is used frequently in their reduction.
+
 Usage
 -----
 

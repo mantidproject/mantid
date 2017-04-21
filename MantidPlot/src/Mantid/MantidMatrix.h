@@ -9,29 +9,29 @@
 #include "MantidMatrixModel.h"
 #include "MantidMatrixTabExtension.h"
 
-#include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/FrameworkManager.h"
-#include "MantidAPI/MatrixWorkspace_fwd.h"
-#include "MantidQtAPI/WorkspaceObserver.h"
 #include "../ContourLinesEditor.h"
 #include "../Graph.h"
 #include "../MdiSubWindow.h"
 #include "../UserFunction.h"
+#include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidQtAPI/WorkspaceObserver.h"
 
 #include <Poco/NObserver.h>
 
-#include <QHeaderView>
-#include <QTableView>
-#include <QPrinter>
-#include <QMessageBox>
 #include <QAction>
-#include <QVector>
-#include <QThread>
+#include <QHeaderView>
 #include <QMap>
+#include <QMessageBox>
 #include <QPointer>
+#include <QPrinter>
+#include <QTableView>
+#include <QThread>
+#include <QVector>
 
-#include <qwt_double_rect.h>
 #include <qwt_color_map.h>
+#include <qwt_double_rect.h>
 
 class QLabel;
 class QStackedWidget;
@@ -108,6 +108,9 @@ public:
     return m_table_viewE->selectionModel();
   }
 
+  /// Get the window type as a string
+  std::string getWindowType() override { return "Workspace"; }
+
   int numRows() const { return m_rows; }
   int numCols() const { return m_cols; }
   double dataX(int row, int col) const;
@@ -126,7 +129,7 @@ public:
   Graph3D *plotGraph3D(int style);
 
   // Creates a MultiLayer graph and plots this MantidMatrix as a Spectrogram
-  MultiLayer *plotGraph2D(Graph::CurveType type);
+  MultiLayer *plotGraph2D(GraphOptions::CurveType type);
 
   void setBinGraph(MultiLayer *ml, Table *t = 0);
 
@@ -157,12 +160,14 @@ public:
   loadFromProject(const std::string &lines, ApplicationWindow *app,
                   const int fileVersion);
   std::string saveToProject(ApplicationWindow *app) override;
+  /// Returns a list of workspace names that are used by this window
+  std::vector<std::string> getWorkspaceNames() override;
 
   /// returns the workspace name
   const std::string &getWorkspaceName();
 
   Spectrogram *plotSpectrogram(Graph *plot, ApplicationWindow *app,
-                               Graph::CurveType type, bool project,
+                               GraphOptions::CurveType type, bool project,
                                const ProjectData *const prjdata);
   /// Add a multilayer as a dependent mdi sub-window. This method is addeed to
   /// fix a crash (ticket #5732).

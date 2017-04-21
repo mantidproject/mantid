@@ -27,10 +27,8 @@ namespace Mantid {
 namespace VATES {
 /// Constructor
 vtkMDQuadFactory::vtkMDQuadFactory(
-    ThresholdRange_scptr thresholdRange,
     const VisualNormalization normalizationOption)
-    : m_thresholdRange(thresholdRange),
-      m_normalizationOption(normalizationOption) {}
+    : m_normalizationOption(normalizationOption) {}
 
 /// Destructor
 vtkMDQuadFactory::~vtkMDQuadFactory() {}
@@ -94,7 +92,7 @@ vtkMDQuadFactory::create(ProgressAction &progressUpdating) const {
     vtkNew<vtkIdList> quadPointList;
     quadPointList->SetNumberOfIds(4);
 
-    Mantid::API::CoordTransform const *transform = NULL;
+    Mantid::API::CoordTransform const *transform = nullptr;
     if (m_useTransform) {
       transform = imdws->getTransformToOriginal();
     }
@@ -110,7 +108,7 @@ vtkMDQuadFactory::create(ProgressAction &progressUpdating) const {
       progressUpdating.eventRaised(progressFactor * double(iBox));
 
       Mantid::signal_t signal = it->getNormalizedSignal();
-      if (std::isfinite(signal) && m_thresholdRange->inRange(signal)) {
+      if (std::isfinite(signal)) {
         useBox[iBox] = true;
         signals->InsertNextValue(static_cast<float>(signal));
 
@@ -169,7 +167,7 @@ vtkMDQuadFactory::create(ProgressAction &progressUpdating) const {
 }
 
 /// Initalize with a target workspace.
-void vtkMDQuadFactory::initialize(Mantid::API::Workspace_sptr ws) {
+void vtkMDQuadFactory::initialize(const Mantid::API::Workspace_sptr &ws) {
   m_workspace = doInitialize<IMDEventWorkspace, 2>(ws);
 }
 
@@ -180,7 +178,7 @@ std::string vtkMDQuadFactory::getFactoryTypeName() const {
 
 /// Template Method pattern to validate the factory before use.
 void vtkMDQuadFactory::validate() const {
-  if (NULL == m_workspace.get()) {
+  if (!m_workspace) {
     throw std::runtime_error(
         "vtkMDQuadFactory has no workspace to run against");
   }

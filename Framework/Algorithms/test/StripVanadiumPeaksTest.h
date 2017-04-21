@@ -12,7 +12,6 @@
 using namespace Mantid::API;
 using namespace Mantid::Kernel::VectorHelper;
 using Mantid::Algorithms::StripVanadiumPeaks;
-using Mantid::MantidVec;
 
 class StripVanadiumPeaksTest : public CxxTest::TestSuite {
 public:
@@ -56,14 +55,14 @@ public:
         outputWSName);
 
     // Get a spectrum
-    MantidVec X = output->dataX(2);
-    MantidVec Y = output->dataX(2);
+    const auto &X = output->x(2);
+    const auto &Y = output->y(2);
 
     // Check the height at a couple of peak position
     int bin;
-    bin = getBinIndex(X, 0.8113);
+    bin = getBinIndex(X.rawData(), 0.8113);
     TS_ASSERT_LESS_THAN(Y[bin], 11407);
-    bin = getBinIndex(X, 0.8758);
+    bin = getBinIndex(X.rawData(), 0.8758);
     TS_ASSERT_LESS_THAN(Y[bin], 10850);
 
     AnalysisDataService::Instance().remove(outputWSName);

@@ -46,6 +46,33 @@ namespace {
 // anonymous namespace for some utility functions
 /// static Logger object
 Logger g_log("InternetHelper");
+
+/// Flag to protect SSL initialization
+std::once_flag SSL_INIT_FLAG;
+
+/**
+ * Perform initialization of SSL context. Implementation
+ * designed to be called by std::call_once
+ */
+void doSSLInit() {
+  // initialize ssl
+  Poco::SharedPtr<InvalidCertificateHandler> certificateHandler =
+      new AcceptCertificateHandler(true);
+  // Currently do not use any means of authentication. This should be updated
+  // IDS has signed certificate.
+  const Context::Ptr context =
+      new Context(Context::CLIENT_USE, "", "", "", Context::VERIFY_NONE);
+  // Create a singleton for holding the default context.
+  // e.g. any future requests to publish are made to this certificate and
+  // context.
+  SSLManager::instance().initializeClient(nullptr, certificateHandler, context);
+}
+
+/**
+ * Entry function to initialize SSL context for the process. It ensures the
+ * initialization only happens once per process.
+ */
+void initializeSSL() { std::call_once(SSL_INIT_FLAG, doSSLInit); }
 }
 
 //----------------------------------------------------------------------------------------------
@@ -240,18 +267,7 @@ int InternetHelper::sendHTTPSRequest(const std::string &url,
 
   Poco::URI uri(url);
   try {
-    // initialize ssl
-    Poco::SharedPtr<InvalidCertificateHandler> certificateHandler =
-        new AcceptCertificateHandler(true);
-    // Currently do not use any means of authentication. This should be updated
-    // IDS has signed certificate.
-    const Context::Ptr context =
-        new Context(Context::CLIENT_USE, "", "", "", Context::VERIFY_NONE);
-    // Create a singleton for holding the default context.
-    // e.g. any future requests to publish are made to this certificate and
-    // context.
-    SSLManager::instance().initializeClient(nullptr, certificateHandler,
-                                            context);
+    initializeSSL();
     // Create the session
     HTTPSClientSession session(uri.getHost(),
                                static_cast<Poco::UInt16>(uri.getPort()));

@@ -1,11 +1,12 @@
 #include "MantidLiveData/FakeEventDataListener.h"
-#include "MantidLiveData/Exception.h"
 #include "MantidAPI/LiveListenerFactory.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidKernel/MersenneTwister.h"
 #include "MantidKernel/ConfigService.h"
-#include "MantidKernel/WriteLock.h"
 #include "MantidKernel/DateAndTime.h"
+#include "MantidKernel/MersenneTwister.h"
+#include "MantidKernel/WriteLock.h"
+#include "MantidLiveData/Exception.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -16,7 +17,7 @@ DECLARE_LISTENER(FakeEventDataListener)
 
 /// Constructor
 FakeEventDataListener::FakeEventDataListener()
-    : ILiveListener(), m_buffer(), m_rand(new Kernel::MersenneTwister(5489)),
+    : LiveListener(), m_buffer(), m_rand(new Kernel::MersenneTwister(5489)),
       m_timer(), m_callbackloop(1), m_numExtractDataCalls(0), m_runNumber(1) {
   if (!ConfigService::Instance().getValue("fakeeventdatalistener.datarate",
                                           m_datarate))

@@ -1,11 +1,11 @@
-#include <fstream>
 #include <Poco/File.h>
+#include <fstream>
 
+#include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/AlgorithmManager.h"
-#include "MantidAPI/AnalysisDataService.h"
 
 // Need this define to avoid a conflict in Visual Studio 2010
 #if (_MSC_VER == 1600) // This is MSVS2010
@@ -302,8 +302,8 @@ mxArray *ixbcreateclassarray(const char *class_name, int *n) {
   */
 int CreateFrameworkManager(int nlhs, mxArray *plhs[], int nrhs,
                            const mxArray *prhs[]) {
-  mwSize dims[2] = {1, 1};
   try {
+    mwSize dims[2] = {1, 1};
     FrameworkManagerImpl &fmgr = FrameworkManager::Instance();
     plhs[0] = mxCreateNumericArray(2, dims, mxUINT64_CLASS, mxREAL);
     uint64_t *data = (uint64_t *)mxGetData(plhs[0]);
@@ -489,37 +489,37 @@ static mxArray *WorkspaceGetFieldHelper(MatrixWorkspace_sptr wksptr, char field,
   switch (field) {
   // remove iSpec
   case 'x': {
-    mwSize dims[2] = {static_cast<mwSize>(wksptr->dataX(0).size()),
+    mwSize dims[2] = {static_cast<mwSize>(wksptr->x(0).size()),
                       static_cast<mwSize>(nHist)};
     mptr = mxCreateNumericArray(2, dims, mxDOUBLE_CLASS, mxREAL);
     char *start_of_pr = (char *)mxGetData(mptr);
     for (int i = 0; i < wksptr->getNumberHistograms(); i++) {
-      size_t byteSize = wksptr->dataX(i).size() * sizeof(double);
-      memcpy(start_of_pr, &(wksptr->dataX(i).front()), byteSize);
+      size_t byteSize = wksptr->x(i).size() * sizeof(double);
+      memcpy(start_of_pr, &(wksptr->x(i).front()), byteSize);
       start_of_pr += byteSize;
     }
   } break;
 
   case 'y': {
-    mwSize dims[2] = {static_cast<mwSize>(wksptr->dataY(0).size()),
+    mwSize dims[2] = {static_cast<mwSize>(wksptr->y(0).size()),
                       static_cast<mwSize>(nHist)};
     mptr = mxCreateNumericArray(2, dims, mxDOUBLE_CLASS, mxREAL);
     char *start_of_pr = (char *)mxGetData(mptr);
     for (int i = 0; i < wksptr->getNumberHistograms(); i++) {
-      size_t byteSize = wksptr->dataY(i).size() * sizeof(double);
-      memcpy(start_of_pr, &(wksptr->dataY(i).front()), byteSize);
+      size_t byteSize = wksptr->y(i).size() * sizeof(double);
+      memcpy(start_of_pr, &(wksptr->y(i).front()), byteSize);
       start_of_pr += byteSize;
     }
   } break;
 
   case 'e': {
-    mwSize dims[2] = {static_cast<mwSize>(wksptr->dataE(0).size()),
+    mwSize dims[2] = {static_cast<mwSize>(wksptr->e(0).size()),
                       static_cast<mwSize>(nHist)};
     mptr = mxCreateNumericArray(2, dims, mxDOUBLE_CLASS, mxREAL);
     char *start_of_pr = (char *)mxGetData(mptr);
     for (int i = 0; i < wksptr->getNumberHistograms(); i++) {
-      size_t byteSize = wksptr->dataE(i).size() * sizeof(double);
-      memcpy(start_of_pr, &(wksptr->dataE(i).front()), byteSize);
+      size_t byteSize = wksptr->e(i).size() * sizeof(double);
+      memcpy(start_of_pr, &(wksptr->e(i).front()), byteSize);
       start_of_pr += byteSize;
     }
   } break;

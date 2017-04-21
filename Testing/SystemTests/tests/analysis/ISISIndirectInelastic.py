@@ -76,6 +76,7 @@ from mantid.simpleapi import *
 # For debugging only.
 from mantid.api import FileFinder
 
+
 class ISISIndirectInelasticBase(stresstesting.MantidStressTest):
     '''
     A common base class for the ISISIndirectInelastic* base classes.
@@ -97,9 +98,9 @@ class ISISIndirectInelasticBase(stresstesting.MantidStressTest):
         num_ref_files = len(self.get_reference_files())
         num_results = len(self.result_names)
 
-        if type(self.get_reference_files()) != list:
+        if not isinstance(self.get_reference_files(), list):
             raise RuntimeError("The reference file(s) should be in a list")
-        if type(self.result_names) != list:
+        if not isinstance(self.result_names, list):
             raise RuntimeError("The result workspace(s) should be in a list")
         if num_ref_files != num_results:
             raise RuntimeError("The number of result workspaces (%d) does not match"
@@ -149,6 +150,7 @@ class ISISIndirectInelasticBase(stresstesting.MantidStressTest):
 
 #==============================================================================
 
+
 class ISISIndirectInelasticReduction(ISISIndirectInelasticBase):
     '''A base class for the ISIS indirect inelastic reduction tests
 
@@ -188,19 +190,20 @@ class ISISIndirectInelasticReduction(ISISIndirectInelasticBase):
 
     def _validate_properties(self):
         '''Check the object properties are in an expected state to continue'''
-        if type(self.instr_name) != str:
+        if not isinstance(self.instr_name, str):
             raise RuntimeError("instr_name property should be a string")
-        if type(self.detector_range) != list and len(self.detector_range) != 2:
+        if not isinstance(self.detector_range, list) and len(self.detector_range) != 2:
             raise RuntimeError("detector_range should be a list of exactly 2 "
                                "values")
-        if type(self.data_files) != list:
+        if not isinstance(self.data_files, list):
             raise RuntimeError("data_file property should be a string")
-        if self.rebin_string is not None and type(self.rebin_string) != str:
+        if self.rebin_string is not None and not isinstance(self.rebin_string, str):
             raise RuntimeError("rebin_string property should be a string")
-        if self.sum_files is not None and type(self.sum_files) != bool:
+        if self.sum_files is not None and not isinstance(self.sum_files, bool):
             raise RuntimeError("sum_files property should be a bool")
 
 #------------------------- TOSCA tests ----------------------------------------
+
 
 class TOSCAReduction(ISISIndirectInelasticReduction):
 
@@ -213,6 +216,7 @@ class TOSCAReduction(ISISIndirectInelasticReduction):
 
     def get_reference_files(self):
         return ["II.TOSCAReductionFromFile.nxs"]
+
 
 class TOSCAMultiFileReduction(ISISIndirectInelasticReduction):
 
@@ -227,6 +231,7 @@ class TOSCAMultiFileReduction(ISISIndirectInelasticReduction):
         #note that the same run for single reduction is used.
         #as they should be the same
         return ['II.TOSCAReductionFromFile.nxs', 'II.TOSCAMultiFileReduction1.nxs', 'II.TOSCAMultiFileReduction2.nxs']
+
 
 class TOSCAMultiFileSummedReduction(ISISIndirectInelasticReduction):
 
@@ -243,6 +248,7 @@ class TOSCAMultiFileSummedReduction(ISISIndirectInelasticReduction):
 
 #------------------------- OSIRIS tests ---------------------------------------
 
+
 class OSIRISReduction(ISISIndirectInelasticReduction):
 
     def __init__(self):
@@ -254,6 +260,7 @@ class OSIRISReduction(ISISIndirectInelasticReduction):
 
     def get_reference_files(self):
         return ["II.OSIRISReductionFromFile.nxs"]
+
 
 class OSIRISMultiFileReduction(ISISIndirectInelasticReduction):
 
@@ -269,6 +276,7 @@ class OSIRISMultiFileReduction(ISISIndirectInelasticReduction):
         #as they should be the same
         return ['II.OSIRISReductionFromFile.nxs','II.OSIRISMultiFileReduction1.nxs']
 
+
 class OSIRISMultiFileSummedReduction(ISISIndirectInelasticReduction):
 
     def __init__(self):
@@ -283,6 +291,7 @@ class OSIRISMultiFileSummedReduction(ISISIndirectInelasticReduction):
         return ['II.OSIRISMultiFileSummedReduction.nxs']
 
 #------------------------- IRIS tests -----------------------------------------
+
 
 class IRISReduction(ISISIndirectInelasticReduction):
 
@@ -327,6 +336,7 @@ class IRISMultiFileSummedReduction(ISISIndirectInelasticReduction):
 
 #==============================================================================
 
+
 class ISISIndirectInelasticCalibration(ISISIndirectInelasticBase):
     '''A base class for the ISIS indirect inelastic calibration tests
 
@@ -358,16 +368,17 @@ class ISISIndirectInelasticCalibration(ISISIndirectInelasticBase):
     def _validate_properties(self):
         '''Check the object properties are in an expected state to continue'''
 
-        if type(self.data_file) != str:
+        if not isinstance(self.data_file, str):
             raise RuntimeError("data_file property should be a string")
-        if type(self.detector_range) != list and len(self.detector_range) != 2:
+        if not isinstance(self.detector_range, list) and len(self.detector_range) != 2:
             raise RuntimeError("detector_range should be a list of exactly 2 values")
-        if type(self.peak) != list and len(self.peak) != 2:
+        if not isinstance(self.peak, list) and len(self.peak) != 2:
             raise RuntimeError("peak should be a list of exactly 2 values")
-        if type(self.back) != list and len(self.back) != 2:
+        if not isinstance(self.back, list) and len(self.back) != 2:
             raise RuntimeError("back should be a list of exactly 2 values")
 
 #------------------------- OSIRIS tests ---------------------------------------
+
 
 class OSIRISCalibration(ISISIndirectInelasticCalibration):
 
@@ -383,6 +394,7 @@ class OSIRISCalibration(ISISIndirectInelasticCalibration):
 
 #------------------------- IRIS tests ---------------------------------------
 
+
 class IRISCalibration(ISISIndirectInelasticCalibration):
 
     def __init__(self):
@@ -396,6 +408,7 @@ class IRISCalibration(ISISIndirectInelasticCalibration):
         return ["II.IRISCalibration.nxs"]
 
 #==============================================================================
+
 
 class ISISIndirectInelasticResolution(ISISIndirectInelasticBase):
     '''A base class for the ISIS indirect inelastic resolution tests
@@ -432,23 +445,24 @@ class ISISIndirectInelasticResolution(ISISIndirectInelasticBase):
     def _validate_properties(self):
         '''Check the object properties are in an expected state to continue'''
 
-        if type(self.instrument) != str:
+        if not isinstance(self.instrument, str):
             raise RuntimeError("instrument property should be a string")
-        if type(self.analyser) != str:
+        if not isinstance(self.analyser, str):
             raise RuntimeError("analyser property should be a string")
-        if type(self.reflection) != str:
+        if not isinstance(self.reflection, str):
             raise RuntimeError("reflection property should be a string")
-        if type(self.detector_range) != list and len(self.detector_range) != 2:
+        if not isinstance(self.detector_range, list) and len(self.detector_range) != 2:
             raise RuntimeError("detector_range should be a list of exactly 2 values")
-        if type(self.background) != list and len(self.background) != 2:
+        if not isinstance(self.background, list) and len(self.background) != 2:
             raise RuntimeError("background should be a list of exactly 2 values")
-        if type(self.rebin_params) != str:
+        if not isinstance(self.rebin_params, str):
             raise RuntimeError("rebin_params property should be a string")
         # Have this as just one file for now.
-        if type(self.files) != list and len(self.files) != 1:
+        if not isinstance(self.files, list) and len(self.files) != 1:
             raise RuntimeError("files should be a list of exactly 1 value")
 
 #------------------------- OSIRIS tests ---------------------------------------
+
 
 class OSIRISResolution(ISISIndirectInelasticResolution):
 
@@ -467,6 +481,7 @@ class OSIRISResolution(ISISIndirectInelasticResolution):
 
 #------------------------- IRIS tests -----------------------------------------
 
+
 class IRISResolution(ISISIndirectInelasticResolution):
 
     def __init__(self):
@@ -483,6 +498,7 @@ class IRISResolution(ISISIndirectInelasticResolution):
         return ["II.IRISResolution.nxs"]
 
 #==============================================================================
+
 
 class ISISIndirectInelasticDiagnostics(ISISIndirectInelasticBase):
     '''A base class for the ISIS indirect inelastic diagnostic tests
@@ -516,16 +532,17 @@ class ISISIndirectInelasticDiagnostics(ISISIndirectInelasticBase):
     def _validate_properties(self):
         '''Check the object properties are in an expected state to continue'''
 
-        if type(self.rawfiles) != list and len(self.rawfiles) != 1:
+        if not isinstance(self.rawfiles, list) and len(self.rawfiles) != 1:
             raise RuntimeError("rawfiles should be a list of exactly 1 value")
-        if type(self.peak) != list and len(self.peak) != 2:
+        if not isinstance(self.peak, list) and len(self.peak) != 2:
             raise RuntimeError("peak should be a list of exactly 2 values")
-        if type(self.spectra) != list and len(self.spectra) != 2:
+        if not isinstance(self.spectra, list) and len(self.spectra) != 2:
             raise RuntimeError("spectra should be a list of exactly 2 values")
-        if type(self.suffix) != str:
+        if not isinstance(self.suffix, str):
             raise RuntimeError("suffix property should be a string")
 
 #------------------------- IRIS tests -----------------------------------------
+
 
 class IRISDiagnostics(ISISIndirectInelasticDiagnostics):
 
@@ -542,6 +559,7 @@ class IRISDiagnostics(ISISIndirectInelasticDiagnostics):
 
 #------------------------- OSIRIS tests ---------------------------------------
 
+
 class OSIRISDiagnostics(ISISIndirectInelasticDiagnostics):
 
     def __init__(self):
@@ -556,6 +574,7 @@ class OSIRISDiagnostics(ISISIndirectInelasticDiagnostics):
         return ["II.OSIRISDiagnostics.nxs"]
 
 #==============================================================================
+
 
 class ISISIndirectInelasticMoments(ISISIndirectInelasticBase):
     '''A base class for the ISIS indirect inelastic TransformToIqt/TransformToIqtFit tests
@@ -572,7 +591,7 @@ class ISISIndirectInelasticMoments(ISISIndirectInelasticBase):
         LoadNexus(self.input_workspace,
                   OutputWorkspace=self.input_workspace)
 
-        SofQWMoments(Sample=self.input_workspace, EnergyMin=self.e_min,
+        SofQWMoments(InputWorkspace=self.input_workspace, EnergyMin=self.e_min,
                      EnergyMax=self.e_max, Scale=self.scale,
                      OutputWorkspace=self.input_workspace + '_Moments')
 
@@ -581,16 +600,17 @@ class ISISIndirectInelasticMoments(ISISIndirectInelasticBase):
     def _validate_properties(self):
         '''Check the object properties are in an expected state to continue'''
 
-        if type(self.input_workspace) != str:
+        if not isinstance(self.input_workspace, str):
             raise RuntimeError("Input workspace should be a string.")
-        if type(self.e_min) != float:
+        if not isinstance(self.e_min, float):
             raise RuntimeError("Energy min should be a float")
-        if type(self.e_max) != float:
+        if not isinstance(self.e_max, float):
             raise RuntimeError("Energy max should be a float")
-        if type(self.scale) != float:
+        if not isinstance(self.scale, float):
             raise RuntimeError("Scale should be a float")
 
 #------------------------- OSIRIS tests ---------------------------------------
+
 
 class OSIRISMoments(ISISIndirectInelasticMoments):
 
@@ -606,6 +626,7 @@ class OSIRISMoments(ISISIndirectInelasticMoments):
 
 #------------------------- IRIS tests -----------------------------------------
 
+
 class IRISMoments(ISISIndirectInelasticMoments):
 
     def __init__(self):
@@ -619,6 +640,7 @@ class IRISMoments(ISISIndirectInelasticMoments):
         return ['II.IRISMoments.nxs']
 
 #==============================================================================
+
 
 class ISISIndirectInelasticElwinAndMSDFit(ISISIndirectInelasticBase):
     '''A base class for the ISIS indirect inelastic Elwin/MSD Fit tests
@@ -673,16 +695,17 @@ class ISISIndirectInelasticElwinAndMSDFit(ISISIndirectInelasticBase):
     def _validate_properties(self):
         """Check the object properties are in an expected state to continue"""
 
-        if type(self.files) != list or len(self.files) != 2:
+        if not isinstance(self.files, list) or len(self.files) != 2:
             raise RuntimeError("files should be a list of exactly 2 strings")
-        if type(self.eRange) != list or len(self.eRange) != 2:
+        if not isinstance(self.eRange, list) or len(self.eRange) != 2:
             raise RuntimeError("eRange should be a list of exactly 2 values")
-        if type(self.startX) != float:
+        if not isinstance(self.startX, float):
             raise RuntimeError("startX should be a float")
-        if type(self.endX) != float:
+        if not isinstance(self.endX, float):
             raise RuntimeError("endX should be a float")
 
 #------------------------- OSIRIS tests ---------------------------------------
+
 
 class OSIRISElwinAndMSDFit(ISISIndirectInelasticElwinAndMSDFit):
 
@@ -701,6 +724,7 @@ class OSIRISElwinAndMSDFit(ISISIndirectInelasticElwinAndMSDFit):
 
 #------------------------- IRIS tests -----------------------------------------
 
+
 class IRISElwinAndMSDFit(ISISIndirectInelasticElwinAndMSDFit):
 
     def __init__(self):
@@ -717,6 +741,7 @@ class IRISElwinAndMSDFit(ISISIndirectInelasticElwinAndMSDFit):
                 'II.IRISMSDFit.nxs']
 
 #==============================================================================
+
 
 class ISISIndirectInelasticIqtAndIqtFit(ISISIndirectInelasticBase):
     '''
@@ -753,8 +778,8 @@ class ISISIndirectInelasticIqtAndIqtFit(ISISIndirectInelasticBase):
                                                            self.endx, 0,
                                                            self.spec_max)
 
-        self.result_names = [iqt_ws.getName(),
-                             iqtfitSeq_ws.getName()]
+        self.result_names = [iqt_ws.name(),
+                             iqtfitSeq_ws.name()]
 
         # Remove workspaces from Mantid
         for sample in self.samples:
@@ -766,26 +791,27 @@ class ISISIndirectInelasticIqtAndIqtFit(ISISIndirectInelasticBase):
     def _validate_properties(self):
         """Check the object properties are in an expected state to continue"""
 
-        if type(self.samples) != list:
+        if not isinstance(self.samples, list):
             raise RuntimeError("Samples should be a list of strings.")
-        if type(self.resolution) != str:
+        if not isinstance(self.resolution, str):
             raise RuntimeError("Resolution should be a string.")
-        if type(self.e_min) != float:
+        if not isinstance(self.e_min, float):
             raise RuntimeError("e_min should be a float")
-        if type(self.e_max) != float:
+        if not isinstance(self.e_max, float):
             raise RuntimeError("e_max should be a float")
-        if type(self.num_bins) != int:
+        if not isinstance(self.num_bins, int):
             raise RuntimeError("num_bins should be an int")
-        if type(self.func) != str:
+        if not isinstance(self.func, str):
             raise RuntimeError("Function should be a string.")
-        if type(self.ftype) != str:
+        if not isinstance(self.ftype, str):
             raise RuntimeError("Function type should be a string.")
-        if type(self.startx) != float:
+        if not isinstance(self.startx, float):
             raise RuntimeError("startx should be a float")
-        if type(self.endx) != float:
+        if not isinstance(self.endx, float):
             raise RuntimeError("endx should be a float")
 
 #------------------------- OSIRIS tests ---------------------------------------
+
 
 class OSIRISIqtAndIqtFit(ISISIndirectInelasticIqtAndIqtFit):
 
@@ -800,18 +826,21 @@ class OSIRISIqtAndIqtFit(ISISIndirectInelasticIqtAndIqtFit):
         self.num_bins = 4
 
         # Iqt Seq Fit
-        self.func = r'name=LinearBackground,A0=0,A1=0,ties=(A1=0);name=UserFunction,Formula=Intensity*exp(-(x/Tau)),'\
-                     'Intensity=0.304185,Tau=100;ties=(f1.Intensity=1-f0.A0)'
+        self.func = r'composite=CompositeFunction,NumDeriv=1;name=LinearBackground,A0=0,A1=0,ties=(A1=0);'\
+                    'name=UserFunction,Formula=Intensity*exp(-(x/Tau)),'\
+                    'Intensity=0.304185,Tau=100;ties=(f1.Intensity=1-f0.A0)'
         self.ftype = '1E_s'
         self.spec_max = 41
-        self.startx = 0.022861
+        self.startx = 0.0
         self.endx = 0.118877
 
     def get_reference_files(self):
+        self.tolerance = 1e-4
         return ['II.OSIRISFury.nxs',
                 'II.OSIRISFuryFitSeq.nxs']
 
 #------------------------- IRIS tests -----------------------------------------
+
 
 class IRISIqtAndIqtFit(ISISIndirectInelasticIqtAndIqtFit):
 
@@ -826,18 +855,21 @@ class IRISIqtAndIqtFit(ISISIndirectInelasticIqtAndIqtFit):
         self.num_bins = 4
 
         # Iqt Seq Fit
-        self.func = r'name=LinearBackground,A0=0,A1=0,ties=(A1=0);name=UserFunction,Formula=Intensity*exp(-(x/Tau)),'\
-                     'Intensity=0.355286,Tau=100;ties=(f1.Intensity=1-f0.A0)'
+        self.func = r'composite=CompositeFunction,NumDeriv=1;name=LinearBackground,A0=0,A1=0,ties=(A1=0);'\
+                    'name=UserFunction,Formula=Intensity*exp(-(x/Tau)),'\
+                    'Intensity=0.355286,Tau=100;ties=(f1.Intensity=1-f0.A0)'
         self.ftype = '1E_s'
         self.spec_max = 50
-        self.startx = 0.013717
+        self.startx = 0.0
         self.endx = 0.169171
 
     def get_reference_files(self):
+        self.tolerance = 1e-4
         return ['II.IRISFury.nxs',
                 'II.IRISFuryFitSeq.nxs']
 
 #==============================================================================
+
 
 class ISISIndirectInelasticIqtAndIqtFitMulti(ISISIndirectInelasticBase):
     '''A base class for the ISIS indirect inelastic Iqt/IqtFit tests
@@ -866,7 +898,7 @@ class ISISIndirectInelasticIqtAndIqtFitMulti(ISISIndirectInelasticBase):
                                    DryRun=False)
 
         # Test IqtFitMultiple
-        iqtfitSeq_ws, params, fit_group = IqtFitMultiple(iqt_ws.getName(),
+        iqtfitSeq_ws, params, fit_group = IqtFitMultiple(iqt_ws.name(),
                                                          self.func,
                                                          self.ftype,
                                                          self.startx,
@@ -874,8 +906,8 @@ class ISISIndirectInelasticIqtAndIqtFitMulti(ISISIndirectInelasticBase):
                                                          self.spec_min,
                                                          self.spec_max)
 
-        self.result_names = [iqt_ws.getName(),
-                             iqtfitSeq_ws.getName()]
+        self.result_names = [iqt_ws.name(),
+                             iqtfitSeq_ws.name()]
 
         #remove workspaces from mantid
         for sample in self.samples:
@@ -887,26 +919,27 @@ class ISISIndirectInelasticIqtAndIqtFitMulti(ISISIndirectInelasticBase):
     def _validate_properties(self):
         """Check the object properties are in an expected state to continue"""
 
-        if type(self.samples) != list:
+        if not isinstance(self.samples, list):
             raise RuntimeError("Samples should be a list of strings.")
-        if type(self.resolution) != str:
+        if not isinstance(self.resolution, str):
             raise RuntimeError("Resolution should be a string.")
-        if type(self.e_min) != float:
+        if not isinstance(self.e_min, float):
             raise RuntimeError("e_min should be a float")
-        if type(self.e_max) != float:
+        if not isinstance(self.e_max, float):
             raise RuntimeError("e_max should be a float")
-        if type(self.num_bins) != int:
+        if not isinstance(self.num_bins, int):
             raise RuntimeError("num_bins should be an int")
-        if type(self.func) != str:
+        if not isinstance(self.func, str):
             raise RuntimeError("Function should be a string.")
-        if type(self.ftype) != str:
+        if not isinstance(self.ftype, str):
             raise RuntimeError("Function type should be a string.")
-        if type(self.startx) != float:
+        if not isinstance(self.startx, float):
             raise RuntimeError("startx should be a float")
-        if type(self.endx) != float:
+        if not isinstance(self.endx, float):
             raise RuntimeError("endx should be a float")
 
 #------------------------- OSIRIS tests ---------------------------------------
+
 
 class OSIRISIqtAndIqtFitMulti(ISISIndirectInelasticIqtAndIqtFitMulti):
 
@@ -921,9 +954,9 @@ class OSIRISIqtAndIqtFitMulti(ISISIndirectInelasticIqtAndIqtFitMulti):
         self.num_bins = 4
 
         # Iqt Fit
-        self.func = r'name=LinearBackground,A0=0.213439,A1=0,ties=(A1=0);name=UserFunction,'\
-                    'Formula=Intensity*exp(-(x/Tau)^Beta),Intensity=0.786561,Tau=0.0247894,'\
-                    'Beta=1;ties=(f1.Intensity=1-f0.A0)'
+        self.func = r'name=LinearBackground,A0=0.213439,A1=0,ties=(A1=0);name=StretchExp,'\
+                    'Height=0.786561,Lifetime=0.0247894,'\
+                    'Stretching=1;ties=(f1.Height=1-f0.A0)'
         self.ftype = '1E_s'
         self.startx = 0.0
         self.endx = 0.12
@@ -931,10 +964,12 @@ class OSIRISIqtAndIqtFitMulti(ISISIndirectInelasticIqtAndIqtFitMulti):
         self.spec_max = 41
 
     def get_reference_files(self):
+        self.tolerance = 1e-3
         return ['II.OSIRISIqt.nxs',
                 'II.OSIRISIqtFitMulti.nxs']
 
 #------------------------- IRIS tests -----------------------------------------
+
 
 class IRISIqtAndIqtFitMulti(ISISIndirectInelasticIqtAndIqtFitMulti):
 
@@ -951,17 +986,19 @@ class IRISIqtAndIqtFitMulti(ISISIndirectInelasticIqtAndIqtFitMulti):
         self.spec_max = 50
 
         # Iqt Fit
-        self.func = r'name=LinearBackground,A0=0.584488,A1=0,ties=(A1=0);name=UserFunction,Formula=Intensity*exp( -(x/Tau)^Beta),'\
-                     'Intensity=0.415512,Tau=4.848013e-14,Beta=0.022653;ties=(f1.Intensity=1-f0.A0)'
+        self.func = r'name=LinearBackground,A0=0.584488,A1=0,ties=(A1=0);name=StretchExp,'\
+            'Height=0.415512,Stretching=0.022653;ties=(f1.Height=1-f0.A0,f1.Lifetime=0.05)'
         self.ftype = '1S_s'
         self.startx = 0.0
         self.endx = 0.156250
 
     def get_reference_files(self):
+        self.tolerance = 1e-4
         return ['II.IRISFury.nxs',
                 'II.IRISFuryFitMulti.nxs']
 
 #==============================================================================
+
 
 class ISISIndirectInelasticConvFit(ISISIndirectInelasticBase):
     '''A base class for the ISIS indirect inelastic ConvFit tests
@@ -987,31 +1024,33 @@ class ISISIndirectInelasticConvFit(ISISIndirectInelasticBase):
             BackgroundType=self.bg,
             SpecMin=self.spectra_min,
             SpecMax=self.spectra_max,
+            PeakRadius=5,
             OutputWorkspace='result')
 
     def _validate_properties(self):
         '''Check the object properties are in an expected state to continue'''
 
-        if type(self.sample) != str:
+        if not isinstance(self.sample, str):
             raise RuntimeError("Sample should be a string.")
-        if type(self.resolution) != str:
+        if not isinstance(self.resolution, str):
             raise RuntimeError("Resolution should be a string.")
-        if type(self.func) != str:
+        if not isinstance(self.func, str):
             raise RuntimeError("Function should be a string.")
-        if type(self.bg) != str:
+        if not isinstance(self.bg, str):
             raise RuntimeError("Background type should be a string.")
-        if type(self.startx) != float:
+        if not isinstance(self.startx, float):
             raise RuntimeError("startx should be a float")
-        if type(self.endx) != float:
+        if not isinstance(self.endx, float):
             raise RuntimeError("endx should be a float")
-        if type(self.spectra_min) != int:
+        if not isinstance(self.spectra_min, int):
             raise RuntimeError("Min spectrum should be a int")
-        if type(self.spectra_max) != int:
+        if not isinstance(self.spectra_max, int):
             raise RuntimeError("Max spectrum should be a int")
-        if type(self.ties) != bool:
+        if not isinstance(self.ties, bool):
             raise RuntimeError("ties should be a boolean.")
 
 #------------------------- OSIRIS tests ---------------------------------------
+
 
 class OSIRISConvFit(ISISIndirectInelasticConvFit):
 
@@ -1021,7 +1060,8 @@ class OSIRISConvFit(ISISIndirectInelasticConvFit):
         self.resolution = FileFinder.getFullPath('osi97935_graphite002_res.nxs')
         #ConvFit fit function
         self.func = 'name=LinearBackground,A0=0,A1=0;(composite=Convolution,FixResolution=true,NumDeriv=true;'\
-                    'name=Resolution,Workspace=\"%s\";name=Lorentzian,Amplitude=2,PeakCentre=0,FWHM=0.05)' % self.resolution
+                    'name=Resolution,Workspace=\"%s\";name=Lorentzian,Amplitude=2,FWHM=0.002,ties=(PeakCentre=0)'\
+                    ',constraints=(FWHM>0.002))' % self.resolution
         self.startx = -0.2
         self.endx = 0.2
         self.bg = 'Fit Linear'
@@ -1032,9 +1072,11 @@ class OSIRISConvFit(ISISIndirectInelasticConvFit):
         self.result_names = ['osi97935_graphite002_conv_1LFitL_s0_to_41_Result']
 
     def get_reference_files(self):
+        self.tolerance = 0.3
         return ['II.OSIRISConvFitSeq.nxs']
 
 #------------------------- IRIS tests -----------------------------------------
+
 
 class IRISConvFit(ISISIndirectInelasticConvFit):
 
@@ -1043,9 +1085,11 @@ class IRISConvFit(ISISIndirectInelasticConvFit):
         self.sample = 'irs53664_graphite002_red.nxs'
         self.resolution = FileFinder.getFullPath('irs53664_graphite002_res.nxs')
         #ConvFit fit function
-        self.func = 'name=LinearBackground,A0=0.060623,A1=0.001343;(composite=Convolution,FixResolution=true,NumDeriv=true;'\
-                    'name=Resolution,Workspace=\"%s\";name=Lorentzian,Amplitude=1.033150,PeakCentre=-0.000841,FWHM=0.001576)'\
-                    % (self.resolution)
+        self.func = 'name=LinearBackground,A0=0.060623,A1=0.001343;' \
+                    '(composite=Convolution,FixResolution=true,NumDeriv=true;' \
+                    'name=Resolution,Workspace="%s";name=Lorentzian,Amplitude=1.033150,FWHM=0.001576,'\
+                    'ties=(PeakCentre=0.0),constraints=(FWHM>0.001))' % self.resolution
+
         self.startx = -0.2
         self.endx = 0.2
         self.bg = 'Fit Linear'
@@ -1056,10 +1100,12 @@ class IRISConvFit(ISISIndirectInelasticConvFit):
         self.result_names = ['irs53664_graphite002_conv_1LFitL_s0_to_50_Result']
 
     def get_reference_files(self):
+        self.tolerance = 0.2
         return ['II.IRISConvFitSeq.nxs']
 
 #==============================================================================
 # Transmission Monitor Test
+
 
 class ISISIndirectInelasticTransmissionMonitor(ISISIndirectInelasticBase):
     # Mark as an abstract class
@@ -1078,12 +1124,13 @@ class ISISIndirectInelasticTransmissionMonitor(ISISIndirectInelasticBase):
     def _validate_properties(self):
         '''Check the object properties are in an expected state to continue'''
 
-        if type(self.sample) != str:
+        if not isinstance(self.sample, str):
             raise RuntimeError("Sample should be a string.")
-        if type(self.can) != str:
+        if not isinstance(self.can, str):
             raise RuntimeError("Can should be a string.")
 
 #------------------------- IRIS tests -----------------------------------------
+
 
 class IRISTransmissionMonitor(ISISIndirectInelasticTransmissionMonitor):
 

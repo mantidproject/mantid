@@ -11,11 +11,11 @@ class UnitConversionTest(unittest.TestCase):
         src_value = 1.5
         dest_unit = "Momentum"
 
-        l1 = l2 = twoTheta = efixed = 0.0
+        l1 = l2 = theta = efixed = 0.0
         emode = DeltaEModeType.Indirect;
         expected = 2.0*math.pi/src_value
 
-        result = UnitConversion.run(src_unit, dest_unit, src_value, l1, l2, twoTheta, emode, efixed)
+        result = UnitConversion.run(src_unit, dest_unit, src_value, l1, l2, theta, emode, efixed)
         self.assertAlmostEqual(result, expected, 12)
 
 if __name__ == '__main__':

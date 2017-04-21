@@ -4,6 +4,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
@@ -430,17 +431,17 @@ private:
 
     // Ensure that both have the same Y data
     auto readDataY =
-        [](MatrixWorkspace_sptr ws, size_t index) { return ws->dataY(index); };
+        [](MatrixWorkspace_sptr ws, size_t index) { return ws->y(index); };
     do_assert_data(transIn, transOut, readDataY);
 
     // Ensure that both have the same E data
     auto readDataE =
-        [](MatrixWorkspace_sptr ws, size_t index) { return ws->dataE(index); };
+        [](MatrixWorkspace_sptr ws, size_t index) { return ws->e(index); };
     do_assert_data(transIn, transOut, readDataE);
 
     // Ensure that both have the same X data
     auto readDataX =
-        [](MatrixWorkspace_sptr ws, size_t index) { return ws->dataX(index); };
+        [](MatrixWorkspace_sptr ws, size_t index) { return ws->x(index); };
     do_assert_data(transIn, transOut, readDataX);
   }
 
@@ -460,17 +461,17 @@ private:
 
     // Ensure that both have the same Y data
     auto readDataY =
-        [](MatrixWorkspace_sptr ws, size_t index) { return ws->dataY(index); };
+        [](MatrixWorkspace_sptr ws, size_t index) { return ws->y(index); };
     do_assert_data(wsIn, wsOut, readDataY);
 
     // Ensure that both have the same E data
     auto readDataE =
-        [](MatrixWorkspace_sptr ws, size_t index) { return ws->dataE(index); };
+        [](MatrixWorkspace_sptr ws, size_t index) { return ws->e(index); };
     do_assert_data(wsIn, wsOut, readDataE);
 
     // Ensure that both have the same X data
     auto readDataX =
-        [](MatrixWorkspace_sptr ws, size_t index) { return ws->dataX(index); };
+        [](MatrixWorkspace_sptr ws, size_t index) { return ws->x(index); };
     do_assert_data(wsIn, wsOut, readDataX);
 
     // If applicable, ensure that both have the same Xdev data
@@ -496,4 +497,97 @@ private:
   }
 };
 
+class LoadNXcanSASTestPerformance : public CxxTest::TestSuite {
+public:
+  static LoadNXcanSASTestPerformance *createSuite() {
+    return new LoadNXcanSASTestPerformance();
+  }
+
+  static void destroySuite(LoadNXcanSASTestPerformance *suite) { delete suite; }
+
+  LoadNXcanSASTestPerformance() {
+    setup_1D();
+    setup_2D();
+  }
+
+  ~LoadNXcanSASTestPerformance() {
+    AnalysisDataService::Instance().clear();
+    removeFile(parameters1D.filename);
+    removeFile(parameters2D.filename);
+  }
+
+  void test_execute_1D() { alg1D.execute(); }
+
+  void test_execute_2D() { alg2D.execute(); }
+
+private:
+  LoadNXcanSAS alg1D;
+  LoadNXcanSAS alg2D;
+  NXcanSASTestParameters parameters1D;
+  NXcanSASTestParameters parameters2D;
+
+  void save_no_assert(MatrixWorkspace_sptr ws,
+                      NXcanSASTestParameters &parameters) {
+    auto saveAlg = AlgorithmManager::Instance().createUnmanaged("SaveNXcanSAS");
+    saveAlg->initialize();
+    saveAlg->setProperty("Filename", parameters.filename);
+    saveAlg->setProperty("InputWorkspace", ws);
+    saveAlg->setProperty("RadiationSource", parameters.radiationSource);
+    if (!parameters.detectors.empty()) {
+      std::string detectorsAsString =
+          concatenateStringVector(parameters.detectors);
+      saveAlg->setProperty("DetectorNames", detectorsAsString);
+    }
+
+    saveAlg->execute();
+  }
+
+  void setup_1D() {
+    removeFile(parameters1D.filename);
+    parameters1D.detectors.push_back("front-detector");
+    parameters1D.detectors.push_back("rear-detector");
+    parameters1D.invalidDetectors = false;
+    parameters1D.hasDx = true;
+
+    auto ws = provide1DWorkspace(parameters1D);
+    setXValuesOn1DWorkspaceWithPointData(ws, parameters1D.xmin,
+                                         parameters1D.xmax);
+    parameters1D.idf = getIDFfromWorkspace(ws);
+
+    save_no_assert(ws, parameters1D);
+
+    const std::string outWsName = "loadNXcanSASTestOutputWorkspace";
+
+    alg1D.initialize();
+    alg1D.setPropertyValue("Filename", parameters1D.filename);
+
+    alg1D.setProperty("LoadTransmission", true);
+
+    alg1D.setPropertyValue("OutputWorkspace", outWsName);
+  }
+
+  void setup_2D() {
+    removeFile(parameters2D.filename);
+
+    parameters2D.detectors.push_back("front-detector");
+    parameters2D.detectors.push_back("rear-detector");
+    parameters2D.invalidDetectors = false;
+
+    parameters2D.is2dData = true;
+
+    auto ws = provide2DWorkspace(parameters2D);
+    set2DValues(ws);
+    const std::string outWsName = "loadNXcanSASTestOutputWorkspace";
+    parameters2D.idf = getIDFfromWorkspace(ws);
+
+    save_no_assert(ws, parameters2D);
+
+    alg2D.initialize();
+    alg2D.setPropertyValue("Filename", parameters2D.filename);
+
+    alg2D.setProperty("LoadTransmission", true);
+
+    alg2D.setPropertyValue("OutputWorkspace", outWsName);
+  }
+};
 #endif /* MANTID_DATAHANDLING_LOADNXCANSASTEST_H_ */

@@ -1,19 +1,22 @@
-#include "globals.h"
+#include "ProjectSerialiser.h"
 #include "ApplicationWindow.h"
 #include "Graph3D.h"
 #include "Matrix.h"
 #include "Note.h"
-#include "ProjectSerialiser.h"
 #include "ScriptingWindow.h"
 #include "TableStatistics.h"
 #include "WindowFactory.h"
+#include "globals.h"
 
 #include "Mantid/InstrumentWidget/InstrumentWindow.h"
-#include "Mantid/MantidUI.h"
 #include "Mantid/MantidMatrixFunction.h"
+#include "Mantid/MantidUI.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/WorkspaceGroup.h"
+#include "MantidKernel/Logger.h"
 #include "MantidKernel/MantidVersion.h"
 #include "MantidQtAPI/PlotAxis.h"
+#include "MantidQtAPI/VatesViewerInterface.h"
 #include "MantidQtSliceViewer/SliceViewerWindow.h"
 #include "MantidQtSpectrumViewer/SpectrumView.h"
 
@@ -22,6 +25,12 @@
 
 using namespace Mantid::API;
 using namespace MantidQt::API;
+using Mantid::Kernel::Logger;
+
+namespace {
+/// static logger
+Logger g_log("ProjectSerialiser");
+}
 
 // This C function is defined in the third party C lib minigzip.c
 extern "C" {
@@ -29,7 +38,24 @@ void file_compress(const char *file, const char *mode);
 }
 
 ProjectSerialiser::ProjectSerialiser(ApplicationWindow *window)
-    : window(window), m_windowCount(0) {}
+    : window(window), m_currentFolder(nullptr), m_windowCount(0),
+      m_saveAll(true) {}
+
+ProjectSerialiser::ProjectSerialiser(ApplicationWindow *window, Folder *folder)
+    : window(window), m_currentFolder(folder), m_windowCount(0),
+      m_saveAll(true) {}
+
+void ProjectSerialiser::save(const QString &projectName,
+                             const std::vector<std::string> &wsNames,
+                             const std::vector<std::string> &windowNames,
+                             bool compress) {
+  m_windowNames = windowNames;
+  m_workspaceNames = wsNames;
+  window->projectname = projectName;
+  QFileInfo fileInfo(projectName);
+  window->workingDir = fileInfo.absoluteDir().absolutePath();
+  save(projectName, compress, false);
+}
 
 /**
  * Save the current state of the application as a Mantid project file
@@ -38,9 +64,10 @@ ProjectSerialiser::ProjectSerialiser(ApplicationWindow *window)
  * @param projectName :: the name of the project to write to
  * @param compress :: whether to compress the project (default false)
  */
-void ProjectSerialiser::save(Folder *folder, const QString &projectName,
-                             bool compress) {
+void ProjectSerialiser::save(const QString &projectName, bool compress,
+                             bool saveAll) {
   m_windowCount = 0;
+  m_saveAll = saveAll;
   QFile fileHandle(projectName);
 
   // attempt to backup project files and check we can write
@@ -49,7 +76,14 @@ void ProjectSerialiser::save(Folder *folder, const QString &projectName,
     return;
   }
 
-  QString text = serialiseProjectState(folder);
+  if (!m_currentFolder)
+    m_currentFolder = window->currentFolder();
+
+  // update any listening progress bars
+  emit setProgressBarRange(0, static_cast<int>(m_workspaceNames.size()));
+  emit setProgressBarValue(0);
+
+  QString text = serialiseProjectState(m_currentFolder);
   saveProjectFile(&fileHandle, projectName, text, compress);
 }
 
@@ -67,6 +101,9 @@ void ProjectSerialiser::load(std::string lines, const int fileVersion,
   // folder
   // This is a legacy edgecase because folders are written
   // <folder>\tsettings\tgo\there
+  g_log.notice() << "Reading Mantid Project: "
+                 << window->projectname.toStdString() << "\n";
+
   if (!isTopLevel && lines.size() > 0) {
     std::vector<std::string> lineVec;
     boost::split(lineVec, lines, boost::is_any_of("\n"));
@@ -103,6 +140,9 @@ void ProjectSerialiser::load(std::string lines, const int fileVersion,
     window->d_current_folder = window->projectFolder();
   else
     window->d_current_folder = parent;
+
+  g_log.notice() << "Finished Loading Project: "
+                 << window->projectname.toStdString() << "\n";
 }
 
 /**
@@ -358,6 +398,8 @@ QString ProjectSerialiser::saveFolderSubWindows(Folder *folder) {
   for (auto &w : windows) {
     MantidQt::API::IProjectSerialisable *ips =
         dynamic_cast<MantidQt::API::IProjectSerialisable *>(w);
+    if (!m_saveAll && !contains(m_windowNames, w->getWindowName()))
+      continue;
 
     if (ips) {
       text += QString::fromUtf8(ips->saveToProject(window).c_str());
@@ -400,6 +442,7 @@ QString ProjectSerialiser::saveWorkspaces() {
   wsNames = "<mantidworkspaces>\n";
   wsNames += "WorkspaceNames";
 
+  int count = 0;
   auto workspaceItems = AnalysisDataService::Instance().getObjectNames();
   for (auto &itemIter : workspaceItems) {
     QString wsName = QString::fromStdString(itemIter);
@@ -416,18 +459,30 @@ QString ProjectSerialiser::saveWorkspaces() {
       wsNames += wsName;
       std::vector<std::string> secondLevelItems = group->getNames();
       for (size_t j = 0; j < secondLevelItems.size(); j++) {
+
+        // check whether the user wants to save this workspace
+        if (!m_saveAll && !contains(m_workspaceNames, secondLevelItems[j]))
+          continue;
+
         wsNames += ",";
         wsNames += QString::fromStdString(secondLevelItems[j]);
         std::string fileName(workingDir + "//" + secondLevelItems[j] + ".nxs");
         window->mantidUI->savedatainNexusFormat(fileName, secondLevelItems[j]);
       }
     } else {
+      // check whether the user wants to save this workspace
+      if (!m_saveAll && !contains(m_workspaceNames, wsName.toStdString()))
+        continue;
+
       wsNames += "\t";
       wsNames += wsName;
 
       std::string fileName(workingDir + "//" + wsName.toStdString() + ".nxs");
       window->mantidUI->savedatainNexusFormat(fileName, wsName.toStdString());
     }
+
+    // update listening progress bars
+    emit setProgressBarValue(++count);
   }
   wsNames += "\n</mantidworkspaces>\n";
   return wsNames;
@@ -444,12 +499,15 @@ QString ProjectSerialiser::saveAdditionalWindows() {
   QString output;
   for (auto win : window->getSerialisableWindows()) {
     auto serialisableWindow = dynamic_cast<IProjectSerialisable *>(win);
-    if (!serialisableWindow)
+    if (!serialisableWindow ||
+        (!m_saveAll &&
+         !contains(m_windowNames, serialisableWindow->getWindowName())))
       continue;
 
     auto lines = serialisableWindow->saveToProject(window);
     output += QString::fromStdString(lines);
   }
+
   return output;
 }
 
@@ -697,4 +755,53 @@ void ProjectSerialiser::loadAdditionalWindows(const std::string &lines,
       window->addSerialisableWindow(dynamic_cast<QObject *>(win));
     }
   }
+
+  if (tsv.selectSection("vsi")) {
+    std::string vatesLines;
+    tsv >> vatesLines;
+
+    auto win = dynamic_cast<VatesViewerInterface *>(
+        VatesViewerInterface::loadFromProject(vatesLines, window, fileVersion));
+    auto subWindow = setupQMdiSubWindow();
+    subWindow->setWidget(win);
+
+    window->connect(window, SIGNAL(shutting_down()), win, SLOT(shutdown()));
+    win->connect(win, SIGNAL(requestClose()), subWindow, SLOT(close()));
+    win->setParent(subWindow);
+
+    QRect geometry;
+    TSVSerialiser tsv2(vatesLines);
+    tsv2.selectLine("geometry");
+    tsv2 >> geometry;
+    subWindow->setGeometry(geometry);
+    subWindow->widget()->show();
+
+    window->mantidUI->setVatesSubWindow(subWindow);
+    window->addSerialisableWindow(dynamic_cast<QObject *>(win));
+  }
+}
+
+/**
+ * Create a new QMdiSubWindow which will become the parent of the Vates window.
+ *
+ * @return  a new handle to a QMdiSubWindow instance
+ */
+QMdiSubWindow *ProjectSerialiser::setupQMdiSubWindow() const {
+  auto subWindow = new QMdiSubWindow();
+
+  QIcon icon;
+  auto iconName =
+      QString::fromUtf8(":/VatesSimpleGuiViewWidgets/icons/pvIcon.png");
+  icon.addFile(iconName, QSize(), QIcon::Normal, QIcon::Off);
+
+  subWindow->setAttribute(Qt::WA_DeleteOnClose, false);
+  subWindow->setWindowIcon(icon);
+  subWindow->setWindowTitle("Vates Simple Interface");
+  window->connect(window, SIGNAL(shutting_down()), subWindow, SLOT(close()));
+  return subWindow;
+}
+
+bool ProjectSerialiser::contains(const std::vector<std::string> &vec,
+                                 const std::string &value) {
+  return std::find(vec.cbegin(), vec.cend(), value) != vec.cend();
 }

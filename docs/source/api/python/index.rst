@@ -16,13 +16,11 @@ Reference
    mantid <mantid/index>
    mantidplot <mantidplot/index>
 
-Changes between version 1.0 and 2.0 of the API are described :ref:`here <pythonapi-changes>`.
-
 
 .. toctree::
    :hidden:
 
-   changes
+   changes <changes>
 
 Matplotlib-like plotting interface
 ----------------------------------

@@ -6,6 +6,7 @@ from mantid.api import *
 
 import os
 
+
 def do_cleanup():
     absfile = FileFinder.getFullPath("EQSANS_1466_event_reduction.log")
     if os.path.exists(absfile):
@@ -13,11 +14,13 @@ def do_cleanup():
         print "cleaned"
     return True
 
+
 class EQSANSSolid(stresstesting.MantidStressTest):
     """
         Analysis Tests for EQSANS
         Testing that the I(Q) output of is correct
     """
+
     def cleanup(self):
         do_cleanup()
         return True
@@ -55,11 +58,13 @@ class EQSANSSolid(stresstesting.MantidStressTest):
 
         return "EQSANS_1466_event_Iq", 'EQSANSSolid.nxs'
 
+
 class EQSANSSolidEvent(EQSANSSolid):
     """
         Analysis Tests for EQSANS
         Testing that the I(Q) output of is correct
     """
+
     def cleanup(self):
         do_cleanup()
         return True

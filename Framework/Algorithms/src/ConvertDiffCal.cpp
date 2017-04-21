@@ -1,9 +1,12 @@
 #include "MantidAlgorithms/ConvertDiffCal.h"
 #include "MantidAPI/IAlgorithm.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidDataObjects/OffsetsWorkspace.h"
 #include "MantidDataObjects/TableWorkspace.h"
+#include "MantidKernel/PhysicalConstants.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/IComponent.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -94,26 +97,18 @@ double getOffset(OffsetsWorkspace_const_sptr offsetsWS, const detid_t detid) {
 /**
  * @param offsetsWS
  * @param index
+ * @param spectrumInfo
  * @return The offset adjusted value of DIFC
  */
-double calculateDIFC(OffsetsWorkspace_const_sptr offsetsWS,
-                     const size_t index) {
-  Instrument_const_sptr instrument = offsetsWS->getInstrument();
-
+double calculateDIFC(OffsetsWorkspace_const_sptr offsetsWS, const size_t index,
+                     const Mantid::API::SpectrumInfo &spectrumInfo) {
   const detid_t detid = getDetID(offsetsWS, index);
   const double offset = getOffset(offsetsWS, detid);
-
-  double l1;
-  Kernel::V3D beamline, samplePos;
-  double beamline_norm;
-  instrument->getInstrumentParameters(l1, beamline, beamline_norm, samplePos);
-
-  Geometry::IDetector_const_sptr detector = instrument->getDetector(detid);
-
   // the factor returned is what is needed to convert TOF->d-spacing
   // the table is supposed to be filled with DIFC which goes the other way
-  const double factor = Instrument::calcConversion(l1, beamline, beamline_norm,
-                                                   samplePos, detector, offset);
+  const double factor = Mantid::Geometry::Conversion::tofToDSpacingFactor(
+      spectrumInfo.l1(), spectrumInfo.l2(index), spectrumInfo.twoTheta(index),
+      offset);
   return 1. / factor;
 }
 
@@ -134,10 +129,11 @@ void ConvertDiffCal::exec() {
   const size_t numberOfSpectra = offsetsWS->getNumberHistograms();
   Progress progress(this, 0.0, 1.0, numberOfSpectra);
 
+  const Mantid::API::SpectrumInfo &spectrumInfo = offsetsWS->spectrumInfo();
   for (size_t i = 0; i < numberOfSpectra; ++i) {
     API::TableRow newrow = configWksp->appendRow();
     newrow << static_cast<int>(getDetID(offsetsWS, i));
-    newrow << calculateDIFC(offsetsWS, i);
+    newrow << calculateDIFC(offsetsWS, i, spectrumInfo);
     newrow << 0.; // difa
     newrow << 0.; // tzero
 

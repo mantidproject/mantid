@@ -79,7 +79,7 @@ MantidQwtIMDWorkspaceData::MantidQwtIMDWorkspaceData(
 MantidQwtIMDWorkspaceData::MantidQwtIMDWorkspaceData(
     const MantidQwtIMDWorkspaceData &data)
     : MantidQwtWorkspaceData(data) {
-  this->operator=(data);
+  copyData(data);
 }
 
 //-----------------------------------------------------------------------------
@@ -89,23 +89,7 @@ MantidQwtIMDWorkspaceData::MantidQwtIMDWorkspaceData(
  */
 MantidQwtIMDWorkspaceData &MantidQwtIMDWorkspaceData::
 operator=(const MantidQwtIMDWorkspaceData &data) {
-  if (this != &data) {
-    static_cast<MantidQwtWorkspaceData &>(*this) = data;
-    m_workspace = data.m_workspace;
-    m_preview = data.m_preview;
-    m_start = data.m_start;
-    m_end = data.m_end;
-    m_dir = data.m_dir;
-    m_normalization = data.m_normalization;
-    m_isDistribution = data.m_isDistribution;
-    m_originalWorkspace = data.m_originalWorkspace;
-    m_transform = NULL;
-    m_plotAxis = data.m_plotAxis;
-    m_currentPlotAxis = data.m_currentPlotAxis;
-    if (data.m_transform)
-      m_transform = data.m_transform->clone();
-    this->cacheLinePlot();
-  }
+  copyData(data);
   return *this;
 }
 
@@ -130,6 +114,33 @@ MantidQwtIMDWorkspaceData *MantidQwtIMDWorkspaceData::copy(
   out->m_currentPlotAxis = this->m_currentPlotAxis;
   out->setPreviewMode(m_preview);
   return out;
+}
+
+/**
+  * Handles copying member variables for the copy constructor and
+  * assignment operator
+  *
+  * @param data The pointer to the object to copy from
+  */
+void MantidQwtIMDWorkspaceData::copyData(
+    const MantidQwtIMDWorkspaceData &data) {
+  if (this != &data) {
+    static_cast<MantidQwtWorkspaceData &>(*this) = data;
+    m_workspace = data.m_workspace;
+    m_preview = data.m_preview;
+    m_start = data.m_start;
+    m_end = data.m_end;
+    m_dir = data.m_dir;
+    m_normalization = data.m_normalization;
+    m_isDistribution = data.m_isDistribution;
+    m_originalWorkspace = data.m_originalWorkspace;
+    m_plotAxis = data.m_plotAxis;
+    m_currentPlotAxis = data.m_currentPlotAxis;
+    m_transform = nullptr;
+    if (data.m_transform)
+      m_transform = data.m_transform->clone();
+    this->cacheLinePlot();
+  }
 }
 
 //-----------------------------------------------------------------------------

@@ -3,6 +3,7 @@
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Progress.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidDataHandling/H5Util.h"
 #include "MantidDataHandling/LoadCalFile.h"
@@ -10,6 +11,7 @@
 #include "MantidDataObjects/MaskWorkspace.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidKernel/Diffraction.h"
 
 #include <cmath>
 #include <H5Cpp.h>
@@ -35,8 +37,6 @@ using namespace H5;
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(LoadDiffCal)
 
-//----------------------------------------------------------------------------------------------
-
 /// Algorithms name for identification. @see Algorithm::name
 const std::string LoadDiffCal::name() const { return "LoadDiffCal"; }
 
@@ -53,7 +53,6 @@ const std::string LoadDiffCal::summary() const {
   return "Loads a calibration file for powder diffraction";
 }
 
-//----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void LoadDiffCal::init() {
@@ -232,37 +231,6 @@ void LoadDiffCal::makeMaskWorkspace(const std::vector<int32_t> &detids,
   setMaskWSProperty(this, m_workspaceName, wksp);
 }
 
-namespace { // anonymous namespace
-
-double calcTofMin(const double difc, const double difa, const double tzero,
-                  const double tofmin) {
-  if (difa == 0.) {
-    if (tzero != 0.) {
-      // check for negative d-spacing
-      return std::max<double>(-1. * tzero, tofmin);
-    }
-  } else if (difa > 0) {
-    // check for imaginary part in quadratic equation
-    return std::max<double>(tzero - .25 * difc * difc / difa, tofmin);
-  }
-
-  // everything else is fine so just return supplied tofmin
-  return tofmin;
-}
-
-double calcTofMax(const double difc, const double difa, const double tzero,
-                  const double tofmax) {
-  if (difa < 0.) {
-    // check for imaginary part in quadratic equation
-    return std::min<double>(tzero - .25 * difc * difc / difa, tofmax);
-  }
-
-  // everything else is fine so just return supplied tofmax
-  return tofmax;
-}
-
-} // end of anonymous namespace
-
 void LoadDiffCal::makeCalWorkspace(const std::vector<int32_t> &detids,
                                    const std::vector<double> &difc,
                                    const std::vector<double> &difa,
@@ -317,14 +285,16 @@ void LoadDiffCal::makeCalWorkspace(const std::vector<int32_t> &detids,
       newrow << offsets[i];
 
     // calculate tof range for information
-    const double tofMinRow = calcTofMin(difc[i], difa[i], tzero[i], tofMin);
+    const double tofMinRow =
+        Kernel::Diffraction::calcTofMin(difc[i], difa[i], tzero[i], tofMin);
     std::stringstream msg;
     if (tofMinRow != tofMin) {
       msg << "TofMin shifted from " << tofMin << " to " << tofMinRow << " ";
     }
     newrow << tofMinRow;
     if (useTofMax) {
-      const double tofMaxRow = calcTofMax(difc[i], difa[i], tzero[i], tofMax);
+      const double tofMaxRow =
+          Kernel::Diffraction::calcTofMax(difc[i], difa[i], tzero[i], tofMax);
       newrow << tofMaxRow;
 
       if (tofMaxRow != tofMax) {

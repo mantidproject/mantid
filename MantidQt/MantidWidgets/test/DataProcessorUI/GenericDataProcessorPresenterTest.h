@@ -7,6 +7,7 @@
 
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/TableRow.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorMockObjects.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/GenericDataProcessorPresenter.h"
@@ -31,8 +32,8 @@ private:
     whitelist.addElement("Angle", "ThetaIn", "");
     whitelist.addElement("Transmission Run(s)", "FirstTransmissionRun", "",
                          true, "TRANS_");
-    whitelist.addElement("Q min", "MomentumTransferMinimum", "");
-    whitelist.addElement("Q max", "MomentumTransferMaximum", "");
+    whitelist.addElement("Q min", "MomentumTransferMin", "");
+    whitelist.addElement("Q max", "MomentumTransferMax", "");
     whitelist.addElement("dQ/Q", "MomentumTransferStep", "");
     whitelist.addElement("Scale", "ScaleFactor", "");
     return whitelist;
@@ -58,7 +59,7 @@ private:
 
     return DataProcessorProcessingAlgorithm(
         "ReflectometryReductionOneAuto",
-        std::vector<std::string>{"IvsQ_", "IvsLam_"},
+        std::vector<std::string>{"IvsQ_binned_", "IvsQ_", "IvsLam_"},
         std::set<std::string>{"ThetaIn", "ThetaOut", "InputWorkspace",
                               "OutputWorkspace", "OutputWorkspaceWavelength",
                               "FirstTransmissionRun", "SecondTransmissionRun"});
@@ -118,6 +119,21 @@ private:
     AnalysisDataService::Instance().addOrReplace(wsName, tinyWS);
   }
 
+  void createMultiPeriodTOFWorkspace(const std::string &wsName,
+                                     const std::string &runNumber = "") {
+
+    createTOFWorkspace(wsName + "_1", runNumber);
+    createTOFWorkspace(wsName + "_2", runNumber);
+
+    WorkspaceGroup_sptr group = boost::make_shared<WorkspaceGroup>();
+    group->addWorkspace(
+        AnalysisDataService::Instance().retrieve(wsName + "_1"));
+    group->addWorkspace(
+        AnalysisDataService::Instance().retrieve(wsName + "_2"));
+
+    AnalysisDataService::Instance().addOrReplace(wsName, group);
+  }
+
   ITableWorkspace_sptr
   createPrefilledWorkspace(const std::string &wsName,
                            const DataProcessorWhiteList &whitelist) {
@@ -131,8 +147,7 @@ private:
         << "1.6"
         << "0.04"
         << "1"
-
-        << "";
+        << "ProcessingInstructions='0'";
     row = ws->appendRow();
     row << "0"
         << "12346"
@@ -142,7 +157,7 @@ private:
         << "2.9"
         << "0.04"
         << "1"
-        << "";
+        << "ProcessingInstructions='0'";
     row = ws->appendRow();
     row << "1"
         << "24681"
@@ -437,6 +452,11 @@ public:
     presenter.notify(DataProcessorPresenter::SaveAsFlag);
 
     TS_ASSERT(AnalysisDataService::Instance().doesExist("Workspace"));
+    ITableWorkspace_sptr ws =
+        AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(
+            "Workspace");
+    TS_ASSERT_EQUALS(ws->rowCount(), 4);
+    TS_ASSERT_EQUALS(ws->columnCount(), 9);
 
     AnalysisDataService::Instance().remove("TestWorkspace");
     AnalysisDataService::Instance().remove("Workspace");
@@ -1021,6 +1041,12 @@ public:
     EXPECT_CALL(mockDataProcessorView, getSelectedParents())
         .Times(1)
         .WillRepeatedly(Return(grouplist));
+    EXPECT_CALL(mockMainPresenter, getPreprocessingValues())
+        .Times(2)
+        .WillRepeatedly(Return(std::map<std::string, std::string>()));
+    EXPECT_CALL(mockMainPresenter, getPreprocessingProperties())
+        .Times(2)
+        .WillRepeatedly(Return(std::map<std::string, std::set<std::string>>()));
     EXPECT_CALL(mockMainPresenter, getPreprocessingOptions())
         .Times(2)
         .WillRepeatedly(Return(std::map<std::string, std::string>()));
@@ -1038,9 +1064,13 @@ public:
     presenter.notify(DataProcessorPresenter::ProcessFlag);
 
     // Check output workspaces were created as expected
+    TS_ASSERT(
+        AnalysisDataService::Instance().doesExist("IvsQ_binned_TOF_12345"));
     TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsQ_TOF_12345"));
     TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsLam_TOF_12345"));
     TS_ASSERT(AnalysisDataService::Instance().doesExist("TOF_12345"));
+    TS_ASSERT(
+        AnalysisDataService::Instance().doesExist("IvsQ_binned_TOF_12346"));
     TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsQ_TOF_12346"));
     TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsLam_TOF_12346"));
     TS_ASSERT(AnalysisDataService::Instance().doesExist("TOF_12346"));
@@ -1049,9 +1079,11 @@ public:
 
     // Tidy up
     AnalysisDataService::Instance().remove("TestWorkspace");
+    AnalysisDataService::Instance().remove("IvsQ_binned_TOF_12345");
     AnalysisDataService::Instance().remove("IvsQ_TOF_12345");
     AnalysisDataService::Instance().remove("IvsLam_TOF_12345");
     AnalysisDataService::Instance().remove("TOF_12345");
+    AnalysisDataService::Instance().remove("IvsQ_binned_TOF_12346");
     AnalysisDataService::Instance().remove("IvsQ_TOF_12346");
     AnalysisDataService::Instance().remove("IvsLam_TOF_12346");
     AnalysisDataService::Instance().remove("TOF_12346");
@@ -1073,7 +1105,7 @@ public:
 
     auto ws =
         createPrefilledWorkspace("TestWorkspace", presenter.getWhiteList());
-    ws->String(0, QMinCol) = "";
+    ws->String(0, ThetaCol) = "";
     ws->String(1, ScaleCol) = "";
     EXPECT_CALL(mockDataProcessorView, getWorkspaceToOpen())
         .Times(1)
@@ -1096,6 +1128,12 @@ public:
     EXPECT_CALL(mockDataProcessorView, getSelectedParents())
         .Times(1)
         .WillRepeatedly(Return(grouplist));
+    EXPECT_CALL(mockMainPresenter, getPreprocessingValues())
+        .Times(2)
+        .WillRepeatedly(Return(std::map<std::string, std::string>()));
+    EXPECT_CALL(mockMainPresenter, getPreprocessingProperties())
+        .Times(2)
+        .WillRepeatedly(Return(std::map<std::string, std::set<std::string>>()));
     EXPECT_CALL(mockMainPresenter, getPreprocessingOptions())
         .Times(2)
         .WillRepeatedly(Return(std::map<std::string, std::string>()));
@@ -1118,13 +1156,17 @@ public:
     TS_ASSERT_EQUALS(ws->rowCount(), 4);
     TS_ASSERT_EQUALS(ws->String(0, RunCol), "12345");
     TS_ASSERT_EQUALS(ws->String(1, RunCol), "12346");
-    TS_ASSERT(ws->String(0, QMinCol) != "");
+    TS_ASSERT(ws->String(0, ThetaCol) != "");
     TS_ASSERT(ws->String(1, ScaleCol) != "");
 
     // Check output workspaces were created as expected
+    TS_ASSERT(
+        AnalysisDataService::Instance().doesExist("IvsQ_binned_TOF_12345"));
     TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsQ_TOF_12345"));
     TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsLam_TOF_12345"));
     TS_ASSERT(AnalysisDataService::Instance().doesExist("TOF_12345"));
+    TS_ASSERT(
+        AnalysisDataService::Instance().doesExist("IvsQ_binned_TOF_12346"));
     TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsQ_TOF_12346"));
     TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsLam_TOF_12346"));
     TS_ASSERT(AnalysisDataService::Instance().doesExist("TOF_12346"));
@@ -1133,13 +1175,107 @@ public:
 
     // Tidy up
     AnalysisDataService::Instance().remove("TestWorkspace");
+    AnalysisDataService::Instance().remove("IvsQ_binned_TOF_12345");
     AnalysisDataService::Instance().remove("IvsQ_TOF_12345");
     AnalysisDataService::Instance().remove("IvsLam_TOF_12345");
     AnalysisDataService::Instance().remove("TOF_12345");
+    AnalysisDataService::Instance().remove("IvsQ_binned_TOF_12346");
     AnalysisDataService::Instance().remove("IvsQ_TOF_12346");
     AnalysisDataService::Instance().remove("IvsLam_TOF_12346");
     AnalysisDataService::Instance().remove("TOF_12346");
     AnalysisDataService::Instance().remove("IvsQ_TOF_12345_TOF_12346");
+
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
+  }
+
+  void testTreeUpdatedAfterProcessMultiPeriod() {
+    NiceMock<MockDataProcessorView> mockDataProcessorView;
+    NiceMock<MockProgressableView> mockProgress;
+    NiceMock<MockMainPresenter> mockMainPresenter;
+    GenericDataProcessorPresenter presenter(
+        createReflectometryWhiteList(), createReflectometryPreprocessMap(),
+        createReflectometryProcessor(), createReflectometryPostprocessor());
+    presenter.acceptViews(&mockDataProcessorView, &mockProgress);
+    presenter.accept(&mockMainPresenter);
+
+    auto ws =
+        createPrefilledWorkspace("TestWorkspace", presenter.getWhiteList());
+    ws->String(0, ThetaCol) = "";
+    ws->String(0, ScaleCol) = "";
+    ws->String(1, ThetaCol) = "";
+    ws->String(1, ScaleCol) = "";
+    EXPECT_CALL(mockDataProcessorView, getWorkspaceToOpen())
+        .Times(1)
+        .WillRepeatedly(Return("TestWorkspace"));
+    presenter.notify(DataProcessorPresenter::OpenTableFlag);
+
+    std::set<int> grouplist;
+    grouplist.insert(0);
+
+    createMultiPeriodTOFWorkspace("TOF_12345", "12345");
+    createMultiPeriodTOFWorkspace("TOF_12346", "12346");
+
+    // We should not receive any errors
+    EXPECT_CALL(mockMainPresenter, giveUserCritical(_, _)).Times(0);
+
+    // The user hits the "process" button with the first group selected
+    EXPECT_CALL(mockDataProcessorView, getSelectedChildren())
+        .Times(1)
+        .WillRepeatedly(Return(std::map<int, std::set<int>>()));
+    EXPECT_CALL(mockDataProcessorView, getSelectedParents())
+        .Times(1)
+        .WillRepeatedly(Return(grouplist));
+    EXPECT_CALL(mockMainPresenter, getPreprocessingValues())
+        .Times(2)
+        .WillRepeatedly(Return(std::map<std::string, std::string>()));
+    EXPECT_CALL(mockMainPresenter, getPreprocessingProperties())
+        .Times(2)
+        .WillRepeatedly(Return(std::map<std::string, std::set<std::string>>()));
+    EXPECT_CALL(mockMainPresenter, getPreprocessingOptions())
+        .Times(2)
+        .WillRepeatedly(Return(std::map<std::string, std::string>()));
+    EXPECT_CALL(mockMainPresenter, getProcessingOptions())
+        .Times(2)
+        .WillRepeatedly(Return(""));
+    EXPECT_CALL(mockMainPresenter, getPostprocessingOptions())
+        .Times(1)
+        .WillOnce(Return("Params = \"0.1\""));
+    EXPECT_CALL(mockDataProcessorView, getEnableNotebook())
+        .Times(1)
+        .WillRepeatedly(Return(false));
+    EXPECT_CALL(mockDataProcessorView, requestNotebookPath()).Times(0);
+
+    presenter.notify(DataProcessorPresenter::ProcessFlag);
+    presenter.notify(DataProcessorPresenter::SaveFlag);
+
+    ws = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(
+        "TestWorkspace");
+    TS_ASSERT_EQUALS(ws->rowCount(), 4);
+    TS_ASSERT_EQUALS(ws->String(0, RunCol), "12345");
+    TS_ASSERT_EQUALS(ws->String(0, ThetaCol), "22.5");
+    TS_ASSERT_EQUALS(ws->String(0, ScaleCol), "1");
+    TS_ASSERT_EQUALS(ws->String(1, RunCol), "12346");
+    TS_ASSERT_EQUALS(ws->String(1, ThetaCol), "22.5");
+    TS_ASSERT_EQUALS(ws->String(1, ScaleCol), "1");
+
+    // Check output workspaces were created as expected
+    // Check output workspaces were created as expected
+    TS_ASSERT(
+        AnalysisDataService::Instance().doesExist("IvsQ_binned_TOF_12345"));
+    TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsQ_TOF_12345"));
+    TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsLam_TOF_12345"));
+    TS_ASSERT(AnalysisDataService::Instance().doesExist("TOF_12345"));
+    TS_ASSERT(
+        AnalysisDataService::Instance().doesExist("IvsQ_binned_TOF_12346"));
+    TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsQ_TOF_12346"));
+    TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsLam_TOF_12346"));
+    TS_ASSERT(AnalysisDataService::Instance().doesExist("TOF_12346"));
+    TS_ASSERT(
+        AnalysisDataService::Instance().doesExist("IvsQ_TOF_12345_TOF_12346"));
+
+    // Tidy up
+    AnalysisDataService::Instance().clear();
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
@@ -1182,6 +1318,12 @@ public:
         .Times(1)
         .WillRepeatedly(Return(std::set<int>()));
     EXPECT_CALL(mockMainPresenter, askUserYesNo(_, _)).Times(0);
+    EXPECT_CALL(mockMainPresenter, getPreprocessingValues())
+        .Times(2)
+        .WillRepeatedly(Return(std::map<std::string, std::string>()));
+    EXPECT_CALL(mockMainPresenter, getPreprocessingProperties())
+        .Times(2)
+        .WillRepeatedly(Return(std::map<std::string, std::set<std::string>>()));
     EXPECT_CALL(mockMainPresenter, getPreprocessingOptions())
         .Times(2)
         .WillRepeatedly(Return(std::map<std::string, std::string>()));
@@ -1199,9 +1341,13 @@ public:
     presenter.notify(DataProcessorPresenter::ProcessFlag);
 
     // Check output workspaces were created as expected
+    TS_ASSERT(
+        AnalysisDataService::Instance().doesExist("IvsQ_binned_TOF_12345"));
     TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsQ_TOF_12345"));
     TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsLam_TOF_12345"));
     TS_ASSERT(AnalysisDataService::Instance().doesExist("TOF_12345"));
+    TS_ASSERT(
+        AnalysisDataService::Instance().doesExist("IvsQ_binned_TOF_12346"));
     TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsQ_TOF_12346"));
     TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsLam_TOF_12346"));
     TS_ASSERT(AnalysisDataService::Instance().doesExist("TOF_12346"));
@@ -1210,9 +1356,11 @@ public:
 
     // Tidy up
     AnalysisDataService::Instance().remove("TestWorkspace");
+    AnalysisDataService::Instance().remove("IvsQ_binned_TOF_12345");
     AnalysisDataService::Instance().remove("IvsQ_TOF_12345");
     AnalysisDataService::Instance().remove("IvsLam_TOF_12345");
     AnalysisDataService::Instance().remove("TOF_12345");
+    AnalysisDataService::Instance().remove("IvsQ_binned_TOF_12346");
     AnalysisDataService::Instance().remove("IvsQ_TOF_12346");
     AnalysisDataService::Instance().remove("IvsLam_TOF_12346");
     AnalysisDataService::Instance().remove("TOF_12346");
@@ -1223,6 +1371,7 @@ public:
   }
 
   void testProcessWithNotebook() {
+
     NiceMock<MockDataProcessorView> mockDataProcessorView;
     NiceMock<MockProgressableView> mockProgress;
     NiceMock<MockMainPresenter> mockMainPresenter;
@@ -1254,6 +1403,12 @@ public:
     EXPECT_CALL(mockDataProcessorView, getSelectedParents())
         .Times(1)
         .WillRepeatedly(Return(grouplist));
+    EXPECT_CALL(mockMainPresenter, getPreprocessingValues())
+        .Times(2)
+        .WillRepeatedly(Return(std::map<std::string, std::string>()));
+    EXPECT_CALL(mockMainPresenter, getPreprocessingProperties())
+        .Times(2)
+        .WillRepeatedly(Return(std::map<std::string, std::set<std::string>>()));
     EXPECT_CALL(mockMainPresenter, getPreprocessingOptions())
         .Times(2)
         .WillRepeatedly(Return(std::map<std::string, std::string>()));
@@ -1271,9 +1426,11 @@ public:
 
     // Tidy up
     AnalysisDataService::Instance().remove("TestWorkspace");
+    AnalysisDataService::Instance().remove("IvsQ_binned_TOF_12345");
     AnalysisDataService::Instance().remove("IvsQ_TOF_12345");
     AnalysisDataService::Instance().remove("IvsLam_TOF_12345");
     AnalysisDataService::Instance().remove("TOF_12345");
+    AnalysisDataService::Instance().remove("IvsQ_binned_TOF_12346");
     AnalysisDataService::Instance().remove("IvsQ_TOF_12346");
     AnalysisDataService::Instance().remove("IvsLam_TOF_12346");
     AnalysisDataService::Instance().remove("TOF_12346");
@@ -1283,10 +1440,60 @@ public:
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
   }
 
+  void testExpandAllGroups() {
+    NiceMock<MockDataProcessorView> mockDataProcessorView;
+    NiceMock<MockProgressableView> mockProgress;
+    NiceMock<MockMainPresenter> mockMainPresenter;
+    GenericDataProcessorPresenter presenter(
+        createReflectometryWhiteList(), createReflectometryPreprocessMap(),
+        createReflectometryProcessor(), createReflectometryPostprocessor());
+    presenter.acceptViews(&mockDataProcessorView, &mockProgress);
+    presenter.accept(&mockMainPresenter);
+
+    createPrefilledWorkspace("TestWorkspace", presenter.getWhiteList());
+    EXPECT_CALL(mockDataProcessorView, getWorkspaceToOpen())
+        .Times(1)
+        .WillRepeatedly(Return("TestWorkspace"));
+    presenter.notify(DataProcessorPresenter::OpenTableFlag);
+
+    // We should not receive any errors
+    EXPECT_CALL(mockMainPresenter, giveUserCritical(_, _)).Times(0);
+
+    // The user hits the 'Expand All' button
+    EXPECT_CALL(mockDataProcessorView, expandAll()).Times(1);
+
+    presenter.notify(DataProcessorPresenter::ExpandAllGroupsFlag);
+  }
+
+  void testCollapseAllGroups() {
+    NiceMock<MockDataProcessorView> mockDataProcessorView;
+    NiceMock<MockProgressableView> mockProgress;
+    NiceMock<MockMainPresenter> mockMainPresenter;
+    GenericDataProcessorPresenter presenter(
+        createReflectometryWhiteList(), createReflectometryPreprocessMap(),
+        createReflectometryProcessor(), createReflectometryPostprocessor());
+    presenter.acceptViews(&mockDataProcessorView, &mockProgress);
+    presenter.accept(&mockMainPresenter);
+
+    createPrefilledWorkspace("TestWorkspace", presenter.getWhiteList());
+    EXPECT_CALL(mockDataProcessorView, getWorkspaceToOpen())
+        .Times(1)
+        .WillRepeatedly(Return("TestWorkspace"));
+    presenter.notify(DataProcessorPresenter::OpenTableFlag);
+
+    // We should not receive any errors
+    EXPECT_CALL(mockMainPresenter, giveUserCritical(_, _)).Times(0);
+
+    // The user hits the 'Expand All' button
+    EXPECT_CALL(mockDataProcessorView, collapseAll()).Times(1);
+
+    presenter.notify(DataProcessorPresenter::CollapseAllGroupsFlag);
+  }
+
   /*
-   * Test processing workspaces with non-standard names, with
-   * and without run_number information in the sample log.
-   */
+  * Test processing workspaces with non-standard names, with
+  * and without run_number information in the sample log.
+  */
   void testProcessCustomNames() {
 
     NiceMock<MockDataProcessorView> mockDataProcessorView;
@@ -1307,8 +1514,8 @@ public:
         << "0.1"
         << "1.6"
         << "0.04"
-
-        << "1";
+        << "1"
+        << "ProcessingInstructions='0'";
     row = ws->appendRow();
     row << "1"
         << "dataB"
@@ -1317,8 +1524,8 @@ public:
         << "1.4"
         << "2.9"
         << "0.04"
-
-        << "1";
+        << "1"
+        << "ProcessingInstructions='0'";
 
     createTOFWorkspace("dataA");
     createTOFWorkspace("dataB");
@@ -1341,6 +1548,12 @@ public:
     EXPECT_CALL(mockDataProcessorView, getSelectedParents())
         .Times(1)
         .WillRepeatedly(Return(grouplist));
+    EXPECT_CALL(mockMainPresenter, getPreprocessingValues())
+        .Times(2)
+        .WillRepeatedly(Return(std::map<std::string, std::string>()));
+    EXPECT_CALL(mockMainPresenter, getPreprocessingProperties())
+        .Times(2)
+        .WillRepeatedly(Return(std::map<std::string, std::set<std::string>>()));
     EXPECT_CALL(mockMainPresenter, getPreprocessingOptions())
         .Times(2)
         .WillRepeatedly(Return(std::map<std::string, std::string>()));
@@ -1354,6 +1567,10 @@ public:
     presenter.notify(DataProcessorPresenter::ProcessFlag);
 
     // Check output workspaces were created as expected
+    TS_ASSERT(
+        AnalysisDataService::Instance().doesExist("IvsQ_binned_TOF_dataA"));
+    TS_ASSERT(
+        AnalysisDataService::Instance().doesExist("IvsQ_binned_TOF_dataB"));
     TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsQ_TOF_dataA"));
     TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsQ_TOF_dataB"));
     TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsLam_TOF_dataA"));
@@ -1365,6 +1582,8 @@ public:
     AnalysisDataService::Instance().remove("TestWorkspace");
     AnalysisDataService::Instance().remove("dataA");
     AnalysisDataService::Instance().remove("dataB");
+    AnalysisDataService::Instance().remove("IvsQ_binned_TOF_dataA");
+    AnalysisDataService::Instance().remove("IvsQ_binned_TOF_dataB");
     AnalysisDataService::Instance().remove("IvsQ_TOF_dataA");
     AnalysisDataService::Instance().remove("IvsQ_TOF_dataB");
     AnalysisDataService::Instance().remove("IvsLam_TOF_dataA");
@@ -2188,7 +2407,8 @@ public:
     std::map<int, std::set<int>> rowlist;
     rowlist[0].insert(1);
 
-    const std::string expected = "0\t12346\t1.5\t\t1.4\t2.9\t0.04\t1\t";
+    const std::string expected =
+        "0\t12346\t1.5\t\t1.4\t2.9\t0.04\t1\tProcessingInstructions='0'";
 
     // The user hits "copy selected" with the second and third rows selected
     EXPECT_CALL(mockDataProcessorView, setClipboard(expected));
@@ -2244,10 +2464,11 @@ public:
     rowlist[1].insert(0);
     rowlist[1].insert(1);
 
-    const std::string expected = "0\t12345\t0.5\t\t0.1\t1.6\t0.04\t1\t\n"
-                                 "0\t12346\t1.5\t\t1.4\t2.9\t0.04\t1\t\n"
-                                 "1\t24681\t0.5\t\t0.1\t1.6\t0.04\t1\t\n"
-                                 "1\t24682\t1.5\t\t1.4\t2.9\t0.04\t1\t";
+    const std::string expected =
+        "0\t12345\t0.5\t\t0.1\t1.6\t0.04\t1\tProcessingInstructions='0'\n"
+        "0\t12346\t1.5\t\t1.4\t2.9\t0.04\t1\tProcessingInstructions='0'\n"
+        "1\t24681\t0.5\t\t0.1\t1.6\t0.04\t1\t\n"
+        "1\t24682\t1.5\t\t1.4\t2.9\t0.04\t1\t";
 
     // The user hits "copy selected" with the second and third rows selected
     EXPECT_CALL(mockDataProcessorView, setClipboard(expected));
@@ -2279,7 +2500,8 @@ public:
     std::map<int, std::set<int>> rowlist;
     rowlist[0].insert(1);
 
-    const std::string expected = "0\t12346\t1.5\t\t1.4\t2.9\t0.04\t1\t";
+    const std::string expected =
+        "0\t12346\t1.5\t\t1.4\t2.9\t0.04\t1\tProcessingInstructions='0'";
 
     // The user hits "copy selected" with the second and third rows selected
     EXPECT_CALL(mockDataProcessorView, setClipboard(expected));
@@ -2324,9 +2546,10 @@ public:
     rowlist[0].insert(1);
     rowlist[1].insert(0);
 
-    const std::string expected = "0\t12345\t0.5\t\t0.1\t1.6\t0.04\t1\t\n"
-                                 "0\t12346\t1.5\t\t1.4\t2.9\t0.04\t1\t\n"
-                                 "1\t24681\t0.5\t\t0.1\t1.6\t0.04\t1\t";
+    const std::string expected =
+        "0\t12345\t0.5\t\t0.1\t1.6\t0.04\t1\tProcessingInstructions='0'\n"
+        "0\t12346\t1.5\t\t1.4\t2.9\t0.04\t1\tProcessingInstructions='0'\n"
+        "1\t24681\t0.5\t\t0.1\t1.6\t0.04\t1\t";
 
     // The user hits "copy selected" with the second and third rows selected
     EXPECT_CALL(mockDataProcessorView, setClipboard(expected));
@@ -2613,6 +2836,30 @@ public:
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
   }
 
+  void testPasteToNonexistentGroup() {
+    NiceMock<MockDataProcessorView> mockDataProcessorView;
+    NiceMock<MockProgressableView> mockProgress;
+    NiceMock<MockMainPresenter> mockMainPresenter;
+    GenericDataProcessorPresenter presenter(
+        createReflectometryWhiteList(), createReflectometryPreprocessMap(),
+        createReflectometryProcessor(), createReflectometryPostprocessor());
+    presenter.acceptViews(&mockDataProcessorView, &mockProgress);
+    presenter.accept(&mockMainPresenter);
+
+    // Empty clipboard
+    EXPECT_CALL(mockDataProcessorView, getClipboard())
+        .Times(1)
+        .WillRepeatedly(Return("1\t123\t0.5\t456\t1.2\t3.4\t3.14\t5\tabc"));
+    EXPECT_CALL(mockDataProcessorView, getSelectedChildren())
+        .Times(1)
+        .WillOnce(Return(std::map<int, std::set<int>>()));
+    TS_ASSERT_THROWS_NOTHING(
+        presenter.notify(DataProcessorPresenter::PasteSelectedFlag));
+
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
+  }
+
   void testImportTable() {
     NiceMock<MockDataProcessorView> mockDataProcessorView;
     NiceMock<MockProgressableView> mockProgress;
@@ -2651,6 +2898,7 @@ public:
   }
 
   void testPlotRowWarn() {
+
     NiceMock<MockDataProcessorView> mockDataProcessorView;
     MockProgressableView mockProgress;
     NiceMock<MockMainPresenter> mockMainPresenter;
@@ -2690,6 +2938,7 @@ public:
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
   }
+
   void testPlotEmptyRow() {
     NiceMock<MockDataProcessorView> mockDataProcessorView;
     MockProgressableView mockProgress;
@@ -2981,6 +3230,12 @@ public:
     EXPECT_CALL(mockDataProcessorView, getSelectedParents())
         .Times(1)
         .WillRepeatedly(Return(grouplist));
+    EXPECT_CALL(mockMainPresenter, getPreprocessingValues())
+        .Times(2)
+        .WillRepeatedly(Return(std::map<std::string, std::string>()));
+    EXPECT_CALL(mockMainPresenter, getPreprocessingProperties())
+        .Times(2)
+        .WillRepeatedly(Return(std::map<std::string, std::set<std::string>>()));
     EXPECT_CALL(mockMainPresenter, getPreprocessingOptions()).Times(0);
     EXPECT_CALL(mockMainPresenter, getProcessingOptions())
         .Times(2)
@@ -3034,8 +3289,8 @@ public:
         .Times(1)
         .WillRepeatedly(Return("TestWorkspace"));
     presenter.notify(DataProcessorPresenter::OpenTableFlag);
-    createTOFWorkspace("IvsQ_TOF_12345", "12345");
-    createTOFWorkspace("IvsQ_TOF_12346", "12346");
+    createTOFWorkspace("IvsQ_binned_TOF_12345", "12345");
+    createTOFWorkspace("IvsQ_binned_TOF_12346", "12346");
 
     std::map<int, std::set<int>> rowlist;
     rowlist[0].insert(0);
@@ -3053,18 +3308,17 @@ public:
 
     std::string pythonCode =
         "base_graph = None\nbase_graph = "
-        "plotSpectrum(\"IvsQ_TOF_12345\", 0, True, window = "
-        "base_graph)\nbase_graph = plotSpectrum(\"IvsQ_TOF_12346\", 0, "
-        "True, window = "
-        "base_graph)\nbase_graph.activeLayer().logLogAxes()\n";
+        "plotSpectrum(\"IvsQ_binned_TOF_12345\", 0, True, window = "
+        "base_graph)\nbase_graph = plotSpectrum(\"IvsQ_binned_TOF_12346\", 0, "
+        "True, window = base_graph)\nbase_graph.activeLayer().logLogAxes()\n";
 
     EXPECT_CALL(mockMainPresenter, runPythonAlgorithm(pythonCode)).Times(1);
     presenter.notify(DataProcessorPresenter::PlotRowFlag);
 
     // Tidy up
     AnalysisDataService::Instance().remove("TestWorkspace");
-    AnalysisDataService::Instance().remove("IvsQ_TOF_12345");
-    AnalysisDataService::Instance().remove("IvsQ_TOF_12346");
+    AnalysisDataService::Instance().remove("IvsQ_binned_TOF_12345");
+    AnalysisDataService::Instance().remove("IvsQ_binned_TOF_12346");
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
@@ -3141,6 +3395,100 @@ public:
     TS_ASSERT_THROWS(presenter.getPostprocessedWorkspaceName(
                          std::map<int, std::vector<std::string>>()),
                      std::runtime_error);
+  }
+
+  void testPostprocessMap() {
+    NiceMock<MockDataProcessorView> mockDataProcessorView;
+    NiceMock<MockProgressableView> mockProgress;
+    NiceMock<MockMainPresenter> mockMainPresenter;
+
+    std::map<std::string, std::string> postprocesssMap = {{"dQ/Q", "Params"}};
+    GenericDataProcessorPresenter presenter(
+        createReflectometryWhiteList(), createReflectometryPreprocessMap(),
+        createReflectometryProcessor(), createReflectometryPostprocessor(),
+        postprocesssMap);
+    presenter.acceptViews(&mockDataProcessorView, &mockProgress);
+    presenter.accept(&mockMainPresenter);
+
+    // Open a table
+    createPrefilledWorkspace("TestWorkspace", presenter.getWhiteList());
+    EXPECT_CALL(mockDataProcessorView, getWorkspaceToOpen())
+        .Times(1)
+        .WillRepeatedly(Return("TestWorkspace"));
+    presenter.notify(DataProcessorPresenter::OpenTableFlag);
+
+    createTOFWorkspace("12345", "12345");
+    createTOFWorkspace("12346", "12346");
+
+    std::set<int> grouplist;
+    grouplist.insert(0);
+
+    // We should not receive any errors
+    EXPECT_CALL(mockMainPresenter, giveUserCritical(_, _)).Times(0);
+
+    // The user hits the "process" button with the first group selected
+    EXPECT_CALL(mockDataProcessorView, getSelectedChildren())
+        .Times(1)
+        .WillRepeatedly(Return(std::map<int, std::set<int>>()));
+    EXPECT_CALL(mockDataProcessorView, getSelectedParents())
+        .Times(1)
+        .WillRepeatedly(Return(grouplist));
+    EXPECT_CALL(mockMainPresenter, getPreprocessingValues())
+        .Times(2)
+        .WillRepeatedly(Return(std::map<std::string, std::string>()));
+    EXPECT_CALL(mockMainPresenter, getPreprocessingProperties())
+        .Times(2)
+        .WillRepeatedly(Return(std::map<std::string, std::set<std::string>>()));
+    EXPECT_CALL(mockMainPresenter, getPreprocessingOptions())
+        .Times(2)
+        .WillRepeatedly(Return(std::map<std::string, std::string>()));
+    EXPECT_CALL(mockMainPresenter, getProcessingOptions())
+        .Times(2)
+        .WillRepeatedly(Return(""));
+    EXPECT_CALL(mockMainPresenter, getPostprocessingOptions())
+        .Times(1)
+        .WillOnce(Return("Params='-0.10'"));
+    EXPECT_CALL(mockDataProcessorView, getEnableNotebook())
+        .Times(1)
+        .WillRepeatedly(Return(false));
+    EXPECT_CALL(mockDataProcessorView, requestNotebookPath()).Times(0);
+
+    presenter.notify(DataProcessorPresenter::ProcessFlag);
+
+    // Check output workspace was stitched with params = '-0.04'
+    TS_ASSERT(
+        AnalysisDataService::Instance().doesExist("IvsQ_TOF_12345_TOF_12346"));
+
+    MatrixWorkspace_sptr out =
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+            "IvsQ_TOF_12345_TOF_12346");
+    TSM_ASSERT_DELTA(
+        "Logarithmic rebinning should have been applied, with param 0.04",
+        out->x(0)[0], 0.100, 1e-5);
+    TSM_ASSERT_DELTA(
+        "Logarithmic rebinning should have been applied, with param 0.04",
+        out->x(0)[1], 0.104, 1e-5);
+    TSM_ASSERT_DELTA(
+        "Logarithmic rebinning should have been applied, with param 0.04",
+        out->x(0)[2], 0.10816, 1e-5);
+    TSM_ASSERT_DELTA(
+        "Logarithmic rebinning should have been applied, with param 0.04",
+        out->x(0)[3], 0.11248, 1e-5);
+
+    // Tidy up
+    AnalysisDataService::Instance().remove("TestWorkspace");
+    AnalysisDataService::Instance().remove("IvsQ_binned_TOF_12345");
+    AnalysisDataService::Instance().remove("IvsQ_TOF_12345");
+    AnalysisDataService::Instance().remove("IvsLam_TOF_12345");
+    AnalysisDataService::Instance().remove("12345");
+    AnalysisDataService::Instance().remove("IvsQ_binned_TOF_12346");
+    AnalysisDataService::Instance().remove("IvsQ_TOF_12346");
+    AnalysisDataService::Instance().remove("IvsLam_TOF_12346");
+    AnalysisDataService::Instance().remove("12346");
+    AnalysisDataService::Instance().remove("IvsQ_TOF_12345_TOF_12346");
+
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
   }
 };
 

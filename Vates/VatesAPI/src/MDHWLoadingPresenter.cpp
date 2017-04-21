@@ -5,6 +5,7 @@
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
 
+#include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidGeometry/MDGeometry/NullImplicitFunction.h"
 #include "MantidVatesAPI/VatesKnowledgeSerializer.h"
@@ -18,10 +19,16 @@
 #include "MantidVatesAPI/Common.h"
 
 #include <boost/scoped_ptr.hpp>
+#include <boost/algorithm/string/case_conv.hpp>
+#include <boost/algorithm/string/trim.hpp>
 
 #include <vtkPVChangeOfBasisHelper.h>
 #include <vtkFieldData.h>
 #include <vtkDataSet.h>
+
+namespace {
+Mantid::Kernel::Logger g_log("MDHWLoadingPresenter");
+}
 
 namespace Mantid {
 namespace VATES {
@@ -216,10 +223,9 @@ void MDHWLoadingPresenter::appendMetadata(vtkDataSet *visualDataSet,
 
   // Add metadata to dataset.
   MetadataToFieldData convert;
-  convert(outputFD.GetPointer(), xmlString,
-          XMLDefinitions::metaDataId().c_str());
+  convert(outputFD.GetPointer(), xmlString, XMLDefinitions::metaDataId());
   convert(outputFD.GetPointer(), jsonString,
-          m_vatesConfigurations->getMetadataIdJson().c_str());
+          m_vatesConfigurations->getMetadataIdJson());
   visualDataSet->SetFieldData(outputFD.GetPointer());
 }
 
@@ -292,22 +298,6 @@ std::string MDHWLoadingPresenter::getTimeStepLabel() const {
  */
 const std::string &MDHWLoadingPresenter::getInstrument() {
   return m_metadataJsonManager->getInstrument();
-}
-
-/**
-  * Getter for the minimum value;
-  * @return The minimum value of the data set.
-  */
-double MDHWLoadingPresenter::getMinValue() {
-  return m_metadataJsonManager->getMinValue();
-}
-
-/**
- * Getter for the maximum value;
- * @return The maximum value of the data set.
- */
-double MDHWLoadingPresenter::getMaxValue() {
-  return m_metadataJsonManager->getMaxValue();
 }
 }
 }

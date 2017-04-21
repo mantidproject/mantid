@@ -1,8 +1,11 @@
-﻿#pylint: disable=no-init,invalid-name,too-many-locals,too-many-branches
+#pylint: disable=no-init,invalid-name,too-many-locals,too-many-branches
+from __future__ import (absolute_import, division, print_function)
+
 from mantid.simpleapi import *
 from mantid.kernel import *
 from mantid.api import *
 import numpy as np
+
 
 class SANSDarkRunBackgroundCorrection(PythonAlgorithm):
     def category(self):
@@ -40,11 +43,11 @@ class SANSDarkRunBackgroundCorrection(PythonAlgorithm):
                              "List of selected detector IDs of monitors to which the "
                              "correction should be applied. If empty, all monitors will "
                              "be corrected, if ApplyToMonitors has been selected.")
+
     def PyExec(self):
         # Get the workspaces
         workspace = self.getProperty("InputWorkspace").value
         dark_run = self.getProperty("DarkRun").value
-        dummy_output_ws_name = self.getPropertyValue("OutputWorkspace")
 
         # Provide progress reporting
         progress = Progress(self, 0, 1, 4)
@@ -256,6 +259,7 @@ class DarkRunMonitorAndDetectorRemover(object):
     This class can set detecors or monitors to 0. Either all monitors can be seletected or only
     a single one.
     '''
+
     def __init__(self):
         super(DarkRunMonitorAndDetectorRemover, self).__init__()
 
@@ -290,9 +294,10 @@ class DarkRunMonitorAndDetectorRemover(object):
         # pylint: disable=bare-except
         try:
             num_histograms = dark_run.getNumberHistograms()
+            spectrumInfo = dark_run.spectrumInfo()
             for index in range(0, num_histograms):
-                det = dark_run.getDetector(index)
-                if det.isMonitor():
+                if spectrumInfo.isMonitor(index):
+                    det = dark_run.getDetector(index)
                     det_id_list.append(det.getID())
                     monitor_list.append(index)
         except:
@@ -373,7 +378,7 @@ class DarkRunMonitorAndDetectorRemover(object):
         '''
         det_id_list = []
         if len(monitor_list) != 0:
-            det_id_list = zip(*monitor_list)[1]
+            det_id_list = list(zip(*monitor_list))[1]
 
         selected_monitors = []
         if len(monitor_selection) > 0:
@@ -415,6 +420,7 @@ class DarkRunMonitorAndDetectorRemover(object):
             counter += 1
         return dark_run
     #pylint: disable=too-many-arguments
+
     def _set_only_selected_monitors(self, dark_run, list_dataY, list_dataE,
                                     monitor_list, selected_monitors):
         '''

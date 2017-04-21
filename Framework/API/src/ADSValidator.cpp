@@ -2,6 +2,8 @@
 #include "MantidKernel/TypedValidator.h"
 #include "MantidKernel/StringTokenizer.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include <boost/make_shared.hpp>
+#include <sstream>
 
 namespace Mantid {
 namespace API {
@@ -39,7 +41,7 @@ void ADSValidator::setOptional(const bool setOptional) {
 */
 std::string
 ADSValidator::checkValidity(const std::vector<std::string> &value) const {
-  if (!m_isOptional && (value.size() == 0))
+  if (!m_isOptional && value.empty())
     return "Select a value";
   if (!m_AllowMultiSelection && (value.size() > 1)) {
     return "Only one workspace was expected.";

@@ -33,6 +33,7 @@ PyObject *getCategories(IFunction &self) {
 
   return registered;
 }
+
 // -- Set property overloads --
 // setProperty(index,value,explicit)
 typedef void (IFunction::*setParameterType1)(size_t, const double &value, bool);
@@ -116,7 +117,7 @@ void export_IFunction() {
            "Declare an attribute with an initial value")
 
       .def("getAttributeValue",
-           (PyObject * (IFunctionAdapter::*)(const std::string &)) &
+           (PyObject * (*)(IFunction &, const std::string &))
                IFunctionAdapter::getAttributeValue,
            (arg("self"), arg("name")),
            "Return the value of the named attribute")

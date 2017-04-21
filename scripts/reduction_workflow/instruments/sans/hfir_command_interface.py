@@ -25,6 +25,7 @@ def BIOSANS():
     SolidAngle()
     AzimuthalAverage()
 
+
 def GPSANS():
     Clear()
     ReductionSingleton().set_instrument("GPSANS",
@@ -34,10 +35,12 @@ def GPSANS():
     SolidAngle()
     AzimuthalAverage()
 
+
 def DataPath(path):
     ReductionSingleton().set_data_path(path)
     ReductionSingleton().set_output_path(path)
     ReductionSingleton().reduction_properties["OutputDirectory"] = path
+
 
 def DirectBeamCenter(datafile):
     datafile = find_data(
@@ -46,6 +49,7 @@ def DirectBeamCenter(datafile):
     ReductionSingleton().reduction_properties[
         "BeamCenterMethod"] = "DirectBeam"
     ReductionSingleton().reduction_properties["BeamCenterFile"] = datafile
+
 
 def ScatteringBeamCenter(datafile, beam_radius=3.0):
     datafile = find_data(
@@ -56,6 +60,7 @@ def ScatteringBeamCenter(datafile, beam_radius=3.0):
     ReductionSingleton().reduction_properties["BeamRadius"] = beam_radius
     ReductionSingleton().reduction_properties["BeamCenterFile"] = datafile
 
+
 def SetBeamCenter(x, y):
     ReductionSingleton().reduction_properties["BeamCenterMethod"] = "Value"
     ReductionSingleton().reduction_properties["BeamCenterX"] = x
@@ -65,8 +70,10 @@ def SetBeamCenter(x, y):
 def TimeNormalization():
     ReductionSingleton().reduction_properties["Normalisation"] = "Timer"
 
+
 def MonitorNormalization():
     ReductionSingleton().reduction_properties["Normalisation"] = "Monitor"
+
 
 def NoNormalization():
     ReductionSingleton().reduction_properties["Normalisation"] = "None"
@@ -490,9 +497,10 @@ def NoSaveIq():
         del ReductionSingleton().reduction_properties["ProcessInfo"]
 
 
-def IQxQy(nbins=100):
+def IQxQy(nbins=100, log_binning=False):
     ReductionSingleton().reduction_properties["Do2DReduction"] = True
     ReductionSingleton().reduction_properties["IQ2DNumberOfBins"] = nbins
+    ReductionSingleton().reduction_properties["IQxQyLogBinning"] = log_binning
 
 
 def NoIQxQy():
@@ -618,6 +626,7 @@ def Stitch(data_list=None, q_min=None, q_max=None, output_workspace=None,
         output_workspace=output_workspace,
         scale=scale,
         save_output=save_output)
+
 
 def beam_center_gravitational_drop(beam_center_file, sdd=1.13):
     '''

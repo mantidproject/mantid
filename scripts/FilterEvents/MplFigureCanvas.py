@@ -1,15 +1,16 @@
 #pylint: disable=invalid-name
+from __future__ import (absolute_import, division, print_function)
 from PyQt4 import QtGui
 
-import matplotlib
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
-from matplotlib.backends.backend_qt4agg import NavigationToolbar2QT as NavigationToolbar
 from matplotlib.figure import Figure
+
 
 class MplFigureCanvas(FigureCanvas):
     """  A customized Qt widget for matplotlib figure.
     It can be used to replace GraphicsView of QtGui
     """
+
     def __init__(self, parent):
         """  Initialization
         """
@@ -22,8 +23,8 @@ class MplFigureCanvas(FigureCanvas):
         self.setParent(parent)
 
         # Set size policy to be able to expanding and resizable with frame
-        FigureCanvas.setSizePolicy(self, QtGui.QSizePolicy.Expanding,\
-                QtGui.QSizePolicy.Expanding)
+        FigureCanvas.setSizePolicy(self, QtGui.QSizePolicy.Expanding,
+                                   QtGui.QSizePolicy.Expanding)
 
         FigureCanvas.updateGeometry(self)
 

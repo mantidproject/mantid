@@ -1,10 +1,27 @@
 # pylint: disable=invalid-name
-"""
+import numpy
+import os
+import re
+
+from mantid.kernel import V3D
+from mantid.api import (MatrixWorkspace, ITableWorkspace)
+from mantid.simpleapi import (mtd, CreateEmptyTableWorkspace, DeleteWorkspace,
+                              FindPeaks, config)
+from tube_spec import TubeSpec
+from ideal_tube import IdealTube
+from tube_calib_fit_params import TubeCalibFitParams
+from tube_calib import getCalibration, getCalibratedPixelPositions, getPoints
+
+# Need to avoid flake8 warning but we can't do that with this
+# buried directly in the string
+CALIBRATE_SIGNATURE = "ws, tubeSet, knownPositions, funcForm, [fitPar, margin, rangeList, calibTable, plotTube, excludeShorTubes, overridePeaks, fitPolyn, outputPeak]" # noqa
+
+__doc__ = _MODULE_DOC="""
 =========================
 Definition of Calibration
 =========================
 
-.. autofunction:: tube.calibrate(ws, tubeSet, knownPositions, funcForm, [fitPar, margin, rangeList, calibTable, plotTube, excludeShorTubes, overridePeaks, fitPolyn, outputPeak])
+.. autofunction:: calibrate({0})
 
 =========
 Use Cases
@@ -48,19 +65,7 @@ Other Useful Methods
 
 .. autofunction:: tube.readCalibrationFile
 
-"""
-
-import numpy
-import os
-import re
-
-from mantid.kernel import V3D
-from mantid.api import (MatrixWorkspace, ITableWorkspace)
-from mantid.simpleapi import (mtd, CreateEmptyTableWorkspace, DeleteWorkspace, config)
-from tube_spec import TubeSpec
-from ideal_tube import IdealTube
-from tube_calib_fit_params import TubeCalibFitParams
-from tube_calib import getCalibration
+""".format(CALIBRATE_SIGNATURE)
 
 
 def calibrate(ws, tubeSet, knownPositions, funcForm, **kwargs):
@@ -383,7 +388,6 @@ def calibrate(ws, tubeSet, knownPositions, funcForm, **kwargs):
                   "that arguments are case sensitive" % key
             raise RuntimeError(msg)
 
-
     # check parameter ws: if it was given as string, transform it in
     # mantid object
     if isinstance(ws, str):
@@ -440,7 +444,7 @@ def calibrate(ws, tubeSet, knownPositions, funcForm, **kwargs):
     # not given, it will create a FITPAR 'guessing' the centre positions,
     # and allowing the find peaks calibration methods to adjust the parameter
     # for the peaks automatically
-    if kwargs.has_key(FITPAR):
+    if FITPAR in kwargs:
         fitPar = kwargs[FITPAR]
         # fitPar must be a TubeCalibFitParams
         if not isinstance(fitPar, TubeCalibFitParams):
@@ -467,9 +471,8 @@ def calibrate(ws, tubeSet, knownPositions, funcForm, **kwargs):
         # guess positions given by centre_pixel
         fitPar.setAutomatic(True)
 
-
     # check the MARGIN paramter (optional)
-    if kwargs.has_key(MARGIN):
+    if MARGIN in kwargs:
         try:
             margin = float(kwargs[MARGIN])
         except:
@@ -477,7 +480,7 @@ def calibrate(ws, tubeSet, knownPositions, funcForm, **kwargs):
         fitPar.setMargin(margin)
 
     # deal with RANGELIST parameter
-    if kwargs.has_key(RANGELIST):
+    if RANGELIST in kwargs:
         rangeList = kwargs[RANGELIST]
         if isinstance(rangeList, int):
             rangeList = [rangeList]
@@ -491,7 +494,7 @@ def calibrate(ws, tubeSet, knownPositions, funcForm, **kwargs):
         rangeList = range(tubeSet.getNumTubes())
 
     # check if the user passed the option calibTable
-    if kwargs.has_key(CALIBTABLE):
+    if CALIBTABLE in kwargs:
         calibTable = kwargs[CALIBTABLE]
         # ensure the correct type is passed
         # if a string was passed, transform it in mantid object
@@ -517,9 +520,8 @@ def calibrate(ws, tubeSet, knownPositions, funcForm, **kwargs):
         # "Detector Position" column required by ApplyCalibration
         calibTable.addColumn(type="V3D", name="Detector Position")
 
-
     # deal with plotTube option
-    if kwargs.has_key(PLOTTUBE):
+    if PLOTTUBE in kwargs:
         plotTube = kwargs[PLOTTUBE]
         if isinstance(plotTube, int):
             plotTube = [plotTube]
@@ -531,7 +533,7 @@ def calibrate(ws, tubeSet, knownPositions, funcForm, **kwargs):
         plotTube = []
 
     # deal with minimun tubes sizes
-    if kwargs.has_key(EXCLUDESHORT):
+    if EXCLUDESHORT in kwargs:
         excludeShortTubes = kwargs[EXCLUDESHORT]
         try:
             excludeShortTubes = float(excludeShortTubes)
@@ -543,7 +545,7 @@ def calibrate(ws, tubeSet, knownPositions, funcForm, **kwargs):
         excludeShortTubes = 0.0
 
     # deal with OVERRIDEPEAKS parameters
-    if kwargs.has_key(OVERRIDEPEAKS):
+    if OVERRIDEPEAKS in kwargs:
         overridePeaks = kwargs[OVERRIDEPEAKS]
         try:
             nPeaks = len(idealTube.getArray())
@@ -564,9 +566,8 @@ def calibrate(ws, tubeSet, knownPositions, funcForm, **kwargs):
     else:
         overridePeaks = dict()
 
-
     # deal with FITPOLIN parameter
-    if kwargs.has_key(FITPOLIN):
+    if FITPOLIN in kwargs:
         polinFit = kwargs[FITPOLIN]
         if polinFit not in [1, 2, 3]:
             raise RuntimeError(
@@ -577,7 +578,7 @@ def calibrate(ws, tubeSet, knownPositions, funcForm, **kwargs):
 
     # deal with OUTPUT PEAK
     deletePeakTableAfter = False
-    if kwargs.has_key(OUTPUTPEAK):
+    if OUTPUTPEAK in kwargs:
         outputPeak = kwargs[OUTPUTPEAK]
     else:
         outputPeak = False
@@ -595,7 +596,7 @@ def calibrate(ws, tubeSet, knownPositions, funcForm, **kwargs):
         for i in range(len(idealTube.getArray())):
             outputPeak.addColumn(type='float', name='Peak%d' % (i + 1))
 
-    getCalibration(ws, tubeSet, calibTable, fitPar, idealTube, outputPeak, \
+    getCalibration(ws, tubeSet, calibTable, fitPar, idealTube, outputPeak,
                    overridePeaks, excludeShortTubes, plotTube, rangeList, polinFit)
 
     if deletePeakTableAfter:
@@ -753,3 +754,104 @@ def readCalibrationFile(table_name, in_path):
             }
 
             calibTable.addRow(nextRow)
+
+
+def findBadPeakFits(peaksTable, threshold=10):
+    """ Find peaks whose fit values fall outside of a given tolerance
+    of the mean peak centers across all tubes.
+
+    Tubes are defined as have a bad fit if the absolute difference
+    between the fitted peak centers for a specific tube and the
+    mean of the fitted peak centers for all tubes differ more than
+    the threshold parameter.
+
+    @param peakTable: the table containing fitted peak centers
+    @param threshold: the tolerance on the difference from the mean value
+    @return A list of expected peak positions and a list of indicies of tubes
+    to correct
+    """
+    n = len(peaksTable)
+    num_peaks = peaksTable.columnCount()-1
+    column_names = ['Peak%d'%(i) for i in range(1, num_peaks+1)]
+    data = numpy.zeros((n, num_peaks))
+    for i, row in enumerate(peaksTable):
+        data_row = [row[name] for name in column_names]
+        data[i,:] = data_row
+
+    # data now has all the peaks positions for each tube
+    # the mean value is the expected value for the peak position for each tube
+    expected_peak_pos = numpy.mean(data,axis=0)
+
+    #calculate how far from the expected position each peak position is
+    distance_from_expected =  numpy.abs(data - expected_peak_pos)
+    check = numpy.where(distance_from_expected > threshold)[0]
+    problematic_tubes = list(set(check))
+    return expected_peak_pos, problematic_tubes
+
+
+def cleanUpFit():
+    """Clean up workspaces created by calibration fitting """
+    for ws_name in ('TubePlot', 'RefittedPeaks', 'PolyFittingWorkspace',
+                    'QF_NormalisedCovarianceMatrix', 'QF_Parameters',
+                    'QF_Workspace'):
+        try:
+            DeleteWorkspace(ws_name)
+        except:
+            pass
+
+
+def correctMisalignedTubes(ws, calibrationTable, peaksTable, spec, idealTube,
+                           fitPar, threshold=10):
+    """ Correct misaligned tubes due to poor fitting results
+    during the first round of calibration.
+
+    Misaligned tubes are first identified according to a tolerance
+    applied to the absolute difference between the fitted tube
+    positions and the mean across all tubes.
+
+    The FindPeaks algorithm is then used to find a better fit
+    with the ideal tube positions as starting parameters
+    for the peak centers.
+
+    From the refitted peaks the positions of the detectors in the
+    tube are recalculated.
+
+    @param ws: the workspace to get the tube geometry from
+    @param calibrationTable: the calibration table ouput from running
+    calibration
+    @param peaksTable: the table containing the fitted peak centers from
+    calibration
+    @param spec: the tube spec for the instrument
+    @param idealTube: the ideal tube for the instrument
+    @param fitPar: the fitting parameters for calibration
+    @param threshold: tolerance defining is a peak is outside of the acceptable
+    range
+    @return table of corrected detector positions
+    """
+    table_name = calibrationTable.name() + 'Corrected'
+    corrections_table = CreateEmptyTableWorkspace(OutputWorkspace=table_name)
+    corrections_table.addColumn('int', "Detector ID")
+    corrections_table.addColumn('V3D', "Detector Position")
+
+    mean_peaks, bad_tubes = findBadPeakFits(peaksTable, threshold)
+
+    for index in bad_tubes:
+        print "Refitting tube %s" % spec.getTubeName(index)
+        tube_dets, _ = spec.getTube(index)
+        getPoints(ws, idealTube.getFunctionalForms(), fitPar, tube_dets)
+        tube_ws = mtd['TubePlot']
+        fit_ws = FindPeaks(InputWorkspace=tube_ws, WorkspaceIndex=0,
+                           PeakPositions=fitPar.getPeaks(),
+                           PeaksList='RefittedPeaks')
+        centers = [row['centre'] for row in fit_ws]
+        detIDList, detPosList = \
+            getCalibratedPixelPositions(ws, centers, idealTube.getArray(),
+                                        tube_dets)
+
+        for id, pos in zip(detIDList, detPosList):
+            corrections_table.addRow({'Detector ID': id,
+                                      'Detector Position': V3D(*pos)})
+
+        cleanUpFit()
+
+    return corrections_table

@@ -1,15 +1,16 @@
-#pylint: disable=attribute-defined-outside-init,undefined-loop-variable,too-many-arguments,too-many-branches,too-many-instance-attributes,old-style-class,global-variable-not-assigned
+#pylint: disable=attribute-defined-outside-init,undefined-loop-variable,too-many-arguments,too-many-branches,
+#pylint: disable=too-many-instance-attributes,old-style-class,global-variable-not-assigned
 
-from mantid.simpleapi import *
+from __future__ import (absolute_import, division, print_function)
 import cry_utils
 import re
 import os.path
 from os.path import abspath, join, dirname
 
 ANALYSIS_DIR = ''
-#print '--------------------- '
-#print 'Using the B:\\MantidPowderFocus\\\scripts2\\CRY_ini.py scripts... '
-#print '--------------------- '
+#print('--------------------- ')
+#print('Using the B:\\MantidPowderFocus\\\scripts2\\CRY_ini.py scripts... ')
+#print('--------------------- ')
 
 
 class Files:
@@ -23,9 +24,9 @@ class Files:
             self.InsDir = join(dirname(abspath(__file__)), instr)
         else:
             self.InsDir = join(inputInstDir, instr)
-        print '--------------------- '
-        print 'INSTRUMENT DIRECTORY: ' + self.InsDir
-        print '--------------------- '
+        print('--------------------- ')
+        print('INSTRUMENT DIRECTORY: ' + self.InsDir)
+        print('--------------------- ')
         self.RawDir = RawDir
         self.user = ""
         self.basefile = instr[0:3]
@@ -126,8 +127,8 @@ class Files:
         # Check existence of preference file
         os.chdir(self.LstPrefDir)
 
-        print 'look for file --->'
-        print self.LstPrefDir + self.LstPreffil
+        print('look for file --->')
+        print(self.LstPrefDir + self.LstPreffil)
         prefFilePath = join(self.LstPrefDir, self.LstPreffil)
         fexist = os.path.exists(prefFilePath)
         if not fexist:
@@ -136,7 +137,7 @@ class Files:
             raise RuntimeError(msg)
         else:
             msg = "Preference file :" + self.LstPreffil + " FOUND in the directory :" + self.LstPrefDir + "\n"
-        print msg
+        print(msg)
 
         # Read preference file: default, read_prefline-label ALWAYS REQUIRED in pref-file
         # Read preference file: optional params read with updatePrefVal
@@ -225,7 +226,7 @@ class Files:
         if self.saveXYEtof or self.saveXYEd:
             bankList = self.read_prefline("BankList")
             self.bankList = cry_utils.get_list_int(bankList)
-        print "Done"
+        print("Done")
         if Verbose:
             self.tell()
         return ierr
@@ -253,7 +254,7 @@ class Files:
             else:
                 msg = msg + "All the corrected vanadium file " + self.CorrVanFile + "-i.nxs exists and will be used \n"
                 self.ExistV = "load"
-                print 'got Here!!!'
+                print('got Here!!!')
         else:
             if self.ExistV == "over":
                 msg = msg + "A corrected Van file will be created with base name " + self.CorrVanFile + " overriding \
@@ -275,7 +276,7 @@ class Files:
             msg = msg + "NumberOfAnnuli          = " + self.VNumberOfAnnuli + "\n"
             msg = msg + "NumberOfWavelengthPoints= " + self.VNumberOfWavelengthPoints + "\n"
             msg = msg + "ExpMethod               = " + self.VExpMethod
-        print 'after Lookup: ' + self.ExistV
+        print('after Lookup: ' + self.ExistV)
         #
         if self.VanPeakRemove == "interpol" or self.VanPeakRemove == "spline":
             fexist = os.path.exists(self.InsDir + "/" + self.VanPeakFile)
@@ -288,19 +289,19 @@ class Files:
                 for line in fvan:
                     p_lst = re.compile("bank")
                     m_lst = p_lst.search(line)
-                    if m_lst != None:
+                    if m_lst is not None:
                         self.VanPeakList.append([])
                         b_int = b_int + 1
                         continue
                     numbers = line.rstrip().split()
                     self.VanPeakList[b_int].append([float(numbers[0]), float(numbers[1])])
-                print "Vana Peaks will be removed by interpolation in ranges given in"
-                print self.InsDir + "/" + self.VanPeakFile + '\n'
+                print("Vana Peaks will be removed by interpolation in ranges given in")
+                print(self.InsDir + "/" + self.VanPeakFile + '\n')
                 fvan.close()
         else:
             self.VanPeakWdt = self.updatePrefVal("VanPeakWdt", self.VanPeakWdt)
             self.VanPeakTol = self.updatePrefVal("VanPeakTol", self.VanPeakTol)
-        print msg
+        print(msg)
 
     def setCommonRawDir(self, RawDir=""):
         if RawDir != "":
@@ -341,7 +342,7 @@ class Files:
             pattern2match = label + '[ ]*(.*)'
             p_lst = re.compile(pattern2match)
             m_lst = p_lst.match(line)
-            if m_lst != None:
+            if m_lst is not None:
                 found = True
                 break
         fin.close()
@@ -351,8 +352,8 @@ class Files:
             if optional:
                 return ""
             else:
-                print "Severe Warning: Field " + label + " required in pref file"
-                print "PROGRAM MIGHT CRASH!..."
+                print("Severe Warning: Field " + label + " required in pref file")
+                print("PROGRAM MIGHT CRASH!...")
                 return ""
 
     def write_prefline(self, label, value):
@@ -363,7 +364,7 @@ class Files:
             pattern2match = '(' + label + '[ ]+)'
             p_lst = re.compile(pattern2match)
             m_lst = p_lst.match(line)
-            if m_lst != None:
+            if m_lst is not None:
                 line = m_lst.group() + value + "\n"
             fileline.append(line)
         fin.close()
@@ -449,7 +450,7 @@ class Files:
             msg = msg + "  Bining                " + self.Bining[i] + "\n"
         for i in self.bankList:
             msg = msg + "bankUsed                " + str(i) + "\n"
-        print msg
+        print(msg)
 
 
 if __name__ == '__main__':

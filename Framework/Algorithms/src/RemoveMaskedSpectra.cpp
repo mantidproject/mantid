@@ -91,7 +91,7 @@ void RemoveMaskedSpectra::makeIndexList(
   auto mask = dynamic_cast<const DataObjects::MaskWorkspace *>(maskedWorkspace);
   if (mask) {
     for (size_t i = 0; i < mask->getNumberHistograms(); ++i) {
-      if (mask->readY(i)[0] == 0.0) {
+      if (mask->y(i)[0] == 0.0) {
         indices.push_back(static_cast<size_t>(i));
       }
     }

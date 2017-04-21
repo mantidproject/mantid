@@ -14,8 +14,8 @@
 #include "MantidAPI/IMDIterator.h"
 #include <boost/scoped_array.hpp>
 #include <boost/make_shared.hpp>
-#include <boost/math/special_functions/fpclassify.hpp>
 #include <boost/optional.hpp>
+#include <cmath>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
@@ -611,7 +611,7 @@ IMDWorkspace::LinePlot MDHistoWorkspace::getLinePoints(
         auto normalizer = getNormalizationFactor(normalize, linearIndex);
         // And add the normalized signal/error to the list too
         auto signal = this->getSignalAt(linearIndex) * normalizer;
-        if (boost::math::isinf(signal)) {
+        if (std::isinf(signal)) {
           // The plotting library (qwt) doesn't like infs.
           signal = std::numeric_limits<signal_t>::quiet_NaN();
         }
@@ -632,7 +632,7 @@ IMDWorkspace::LinePlot MDHistoWorkspace::getLinePoints(
     } // for each unique boundary
 
     // If all bins were masked
-    if (line.x.size() == 0) {
+    if (line.x.empty()) {
       this->makeSinglePointWithNaN(line.x, line.y, line.e);
     }
   }

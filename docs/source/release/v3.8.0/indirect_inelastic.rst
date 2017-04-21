@@ -56,7 +56,8 @@ Simulations
 Density Of States
 ~~~~~~~~~~~~~~~~~
 
-- :ref:`SimulatedDensityOfStates <algm-SimulatedDensityOfStates>` now allows for the parsing of isotopes from the *.phonon or *.castep file in the form 'element:isotope'
+- :ref:`SimulatedDensityOfStates <algm-SimulatedDensityOfStates>` now allows for the parsing of isotopes from the \*.phonon or \*.castep file in the form 'element:isotope'
+
 - Allow for the loading of separate indexes for each element via the Output Format combo box in the interface.
 
 Load nMoldyn
@@ -67,15 +68,17 @@ Load nMoldyn
 Correlations
 ~~~~~~~~~~~~
 
-- New algorithms :ref:`VelocityCrossCorrelations <algm-VelocityCrossCorrelations>` and :ref:`VelocityAutoCorrelations <VelocityAutoCorrelations>`
-- New algorithms :ref:`AngularAutoCorrelationsSingleAxis <AngularAutoCorrelationsSingleAxis>` and :ref:`AngularAutoCorrelationsTwoAxes <AngularAutoCorrelationsTwoAxes>`
+- New algorithms :ref:`VelocityCrossCorrelations <algm-VelocityCrossCorrelations>` and :ref:`VelocityAutoCorrelations <algm-VelocityAutoCorrelations>`
+- New algorithms :ref:`AngularAutoCorrelationsSingleAxis <algm-AngularAutoCorrelationsSingleAxis>` and :ref:`AngularAutoCorrelationsTwoAxes <algm-AngularAutoCorrelationsTwoAxes>`
 
 VESUVIO
 #######
 
-- Add the functionality for ties between internal parameters within each mass profile. This allows for the creation of a BivariateGaussian profile from the MultivariateGaussian profile
+- Add the functionality for ties between internal parameters within each mass profile. This allows for the creation of a BivariateGaussian profile from the MultivariateGaussian profile.
   Ties can be added within the defintion of the mass profile with the following:
-    flags['masses'] = [{'value':1.0079, 'function': 'MultivariateGaussian', 'SigmaX': 5, 'SigmaY': 5, 'SigmaZ': 5, 'ties': 'SigmaX=SigmaY'}]
+
+  *flags['masses'] = [{'value':1.0079, 'function': 'MultivariateGaussian', 'SigmaX': 5, 'SigmaY': 5, 'SigmaZ': 5, 'ties': 'SigmaX=SigmaY'}]*
+
   The above will tie SigmaX to SigmaY for this MultivariateGaussian in the driver script
 
 Improvements

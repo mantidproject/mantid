@@ -1,6 +1,7 @@
 #include "MantidWorkflowAlgorithms/DgsReduction.h"
 
 #include "MantidAPI/FileProperty.h"
+#include "MantidAPI/Run.h"
 #include "MantidKernel/PropertyManagerDataService.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
@@ -27,7 +28,6 @@ namespace WorkflowAlgorithms {
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(DgsReduction)
 
-//----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string DgsReduction::name() const { return "DgsReduction"; }
 
@@ -39,9 +39,6 @@ const std::string DgsReduction::category() const {
   return "Workflow\\Inelastic";
 }
 
-//----------------------------------------------------------------------------------------------
-
-//----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void DgsReduction::init() {

@@ -61,10 +61,6 @@ void export_FacilityInfo() {
            return_value_policy<copy_const_reference>(),
            "Returns the instrument with the given name")
 
-      .def("liveListener", &FacilityInfo::liveListener, arg("self"),
-           return_value_policy<copy_const_reference>(),
-           "Returns the name of the default live listener")
-
       .def("computeResources", &FacilityInfo::computeResources, arg("self"),
            "Returns a vector of the available compute resources");
 }

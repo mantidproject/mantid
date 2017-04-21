@@ -30,35 +30,35 @@
  *                                                                         *
  ***************************************************************************/
 #include "Table.h"
-#include "SortDialog.h"
-#include "ImportASCIIDialog.h"
-#include "muParserScript.h"
 #include "ApplicationWindow.h"
-#include "pixmaps.h"
+#include "ImportASCIIDialog.h"
 #include "MantidQtAPI/TSVSerialiser.h"
+#include "SortDialog.h"
+#include "muParserScript.h"
+#include <MantidQtAPI/pixmaps.h>
 
-#include <QContextMenuEvent>
-#include <QMessageBox>
-#include <QDateTime>
-#include <QTextStream>
-#include <QClipboard>
 #include <QApplication>
-#include <QPainter>
+#include <QClipboard>
+#include <QContextMenuEvent>
+#include <QDateTime>
 #include <QEvent>
-#include <QLayout>
-#include <QPrintDialog>
-#include <QLocale>
-#include <QShortcut>
-#include <QProgressDialog>
 #include <QFile>
 #include <QHeaderView>
+#include <QLayout>
+#include <QLocale>
+#include <QMessageBox>
 #include <QModelIndex>
+#include <QPainter>
+#include <QPrintDialog>
+#include <QProgressDialog>
+#include <QShortcut>
+#include <QTextStream>
 
 #include <QVector>
 
-#include <gsl/gsl_vector.h>
 #include <gsl/gsl_sort.h>
 #include <gsl/gsl_sort_vector.h>
+#include <gsl/gsl_vector.h>
 
 #include <boost/algorithm/string.hpp>
 
@@ -70,6 +70,7 @@
 DECLARE_WINDOW(Table)
 
 using namespace Mantid;
+using namespace MantidQt::API;
 
 Table::Table(ScriptingEnv *env, int rows, int cols, const QString &label,
              QWidget *parent, const QString &name, Qt::WFlags f)
@@ -3175,6 +3176,8 @@ Table::loadFromProject(const std::string &lines, ApplicationWindow *app,
   return table;
 }
 
+std::vector<std::string> Table::getWorkspaceNames() { return {}; }
+
 std::string Table::saveTableMetadata() {
   MantidQt::API::TSVSerialiser tsv;
   tsv.writeLine("header");
@@ -3252,6 +3255,25 @@ void Table::recordSelection() {
     setSelectedCol(-1);
   }
 }
+
+/**
+ * Set the text alignment of the given cell
+ * @param row :: [input] Row of the cell
+ * @param col :: [input] Column of the cell
+ * @param alignment :: [input] Alignment flags to give the cell
+ */
+void Table::setTextAlignment(int row, int col,
+                             QFlags<Qt::AlignmentFlag> alignment) {
+  auto *cell = d_table->item(row, col);
+  if (cell) {
+    cell->setTextAlignment(alignment);
+  }
+}
+
+/**
+ * Resizes column widths to their contents
+ */
+void Table::resizeColumnsToContents() { d_table->resizeColumnsToContents(); }
 
 /*****************************************************************************
  *

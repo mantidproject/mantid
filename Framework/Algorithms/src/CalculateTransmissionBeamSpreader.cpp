@@ -4,6 +4,7 @@
 #include "MantidAlgorithms/CalculateTransmissionBeamSpreader.h"
 #include "MantidAPI/CommonBinsValidator.h"
 #include "MantidAPI/HistogramValidator.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceOpOverloads.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
@@ -101,9 +102,9 @@ void CalculateTransmissionBeamSpreader::exec() {
         "The input workspaces do not come from the same instrument");
   }
   // Check that the two inputs have matching binning
-  if (!WorkspaceHelpers::matchingBins(sample_spreaderWS, direct_spreaderWS) ||
-      !WorkspaceHelpers::matchingBins(sample_spreaderWS, sample_scatterWS) ||
-      !WorkspaceHelpers::matchingBins(sample_spreaderWS, direct_scatterWS)) {
+  if (!WorkspaceHelpers::matchingBins(*sample_spreaderWS, *direct_spreaderWS) ||
+      !WorkspaceHelpers::matchingBins(*sample_spreaderWS, *sample_scatterWS) ||
+      !WorkspaceHelpers::matchingBins(*sample_spreaderWS, *direct_scatterWS)) {
     g_log.error("Input workspaces do not have matching binning");
     throw std::invalid_argument(
         "Input workspaces do not have matching binning");
@@ -244,7 +245,7 @@ API::MatrixWorkspace_sptr
 CalculateTransmissionBeamSpreader::extractSpectrum(API::MatrixWorkspace_sptr WS,
                                                    const size_t index) {
   // Check that given spectra are monitors
-  if (!WS->getDetector(index)->isMonitor()) {
+  if (!WS->spectrumInfo().isMonitor(index)) {
     g_log.information(
         "The Incident Beam Monitor UDET provided is not marked as a monitor");
   }

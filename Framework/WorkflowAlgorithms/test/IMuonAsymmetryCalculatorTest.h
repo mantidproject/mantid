@@ -620,7 +620,7 @@ private:
   * X values are 1 2 3 for all the histograms.
   */
   MatrixWorkspace_sptr createWorkspace(double delta = 0.0) {
-    MatrixWorkspace_sptr ws = WorkspaceCreationHelper::Create2DWorkspace(3, 3);
+    MatrixWorkspace_sptr ws = WorkspaceCreationHelper::create2DWorkspace(3, 3);
 
     for (size_t i = 0; i < ws->getNumberHistograms(); i++) {
       for (size_t j = 0; j < ws->blocksize(); j++) {

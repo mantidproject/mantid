@@ -14,7 +14,6 @@
 #include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Instrument.h"
-#include "MantidGeometry/Instrument/NearestNeighbours.h"
 
 // STL
 #include <vector>

@@ -1,9 +1,7 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidWorkflowAlgorithms/SANSBeamFinder.h"
 #include "MantidWorkflowAlgorithms/EQSANSInstrument.h"
 #include "MantidWorkflowAlgorithms/HFIRInstrument.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/AlgorithmProperty.h"
 #include "MantidKernel/PropertyManagerDataService.h"
@@ -65,7 +63,7 @@ SANSBeamFinder::loadBeamFinderFile(const std::string &beamCenterFile) {
   if (m_reductionManager->existsProperty(entryName)) {
     finderWS = m_reductionManager->getProperty(entryName);
     m_output_message +=
-        "   |Using existing workspace: " + finderWS->name() + '\n';
+        "   |Using existing workspace: " + finderWS->getName() + '\n';
   } else {
     // Load the dark current if we don't have it already
     std::string finderWSName = "__beam_finder_" + path.getBaseName();

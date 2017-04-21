@@ -37,6 +37,7 @@ class LRScalingFactors(PythonAlgorithm):
 
     """
     tolerance=0.
+
     def category(self):
         return "Reflectometry\\SNS"
 
@@ -139,10 +140,10 @@ class LRScalingFactors(PythonAlgorithm):
 
             # Matching slits with the previous run signals a reference run
             if i > 0 and previous_slits is not None \
-                and abs(previous_slits[0] - s1h) < self.tolerance \
-                and abs(previous_slits[1] - s1w) < self.tolerance \
-                and abs(previous_slits[2] - s2h) < self.tolerance \
-                and abs(previous_slits[3] - s2w) < self.tolerance:
+                    and abs(previous_slits[0] - s1h) < self.tolerance \
+                    and abs(previous_slits[1] - s1w) < self.tolerance \
+                    and abs(previous_slits[2] - s2h) < self.tolerance \
+                    and abs(previous_slits[3] - s2w) < self.tolerance:
                 is_reference = True
 
             previous_slits = [s1h, s1w, s2h, s2w]

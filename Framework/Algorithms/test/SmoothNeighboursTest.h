@@ -1,16 +1,8 @@
-#ifndef SmoothNeighboursTEST_H_
-#define SmoothNeighboursTEST_H_
+#ifndef SMOOTHNEIGHBOURSTEST_H_
+#define SMOOTHNEIGHBOURSTEST_H_
 
-#include "MantidAlgorithms/CheckWorkspacesMatch.h"
 #include "MantidAlgorithms/SmoothNeighbours.h"
 #include "MantidAPI/FrameworkManager.h"
-#include "MantidDataHandling/LoadInstrument.h"
-#include "MantidDataObjects/EventWorkspace.h"
-#include "MantidDataObjects/PeaksWorkspace.h"
-#include "MantidGeometry/Instrument/INearestNeighboursFactory.h"
-#include "MantidKernel/System.h"
-#include "MantidKernel/Timer.h"
-#include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 #include <cxxtest/TestSuite.h>
@@ -19,7 +11,6 @@ using namespace Mantid;
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
-using namespace Mantid::DataHandling;
 using namespace Mantid::Algorithms;
 
 class SmoothNeighboursTest : public CxxTest::TestSuite {
@@ -51,22 +42,22 @@ public:
     // Some basic checks
     TSM_ASSERT_EQUALS("Wrong number of histograms", inWS->getNumberHistograms(),
                       outWS->getNumberHistograms());
-    TSM_ASSERT_EQUALS("Wrong number of bins", inWS->readX(0).size(),
-                      outWS->readX(0).size());
+    TSM_ASSERT_EQUALS("Wrong number of bins", inWS->x(0).size(),
+                      outWS->x(0).size());
 
     // Compare the workspaces
     for (size_t wi = 0; wi < inWS->getNumberHistograms(); wi++) {
-      for (size_t j = 0; j < inWS->readX(0).size(); j++) {
-        TS_ASSERT_DELTA(inWS->readX(wi)[j], outWS->readX(wi)[j], 1e-5);
+      for (size_t j = 0; j < inWS->x(0).size(); j++) {
+        TS_ASSERT_DELTA(inWS->x(wi)[j], outWS->x(wi)[j], 1e-5);
       }
       // Y is the same
-      for (size_t j = 0; j < inWS->readY(0).size(); j++) {
-        TS_ASSERT_DELTA(inWS->readY(wi)[j], outWS->readY(wi)[j], 1e-5);
+      for (size_t j = 0; j < inWS->y(0).size(); j++) {
+        TS_ASSERT_DELTA(inWS->y(wi)[j], outWS->y(wi)[j], 1e-5);
       }
       // Error has decreased due to adding step (improved statistics)
       // Therefore the output WS has lower errors than input:
-      for (size_t j = 0; j < inWS->readE(0).size(); j++) {
-        TS_ASSERT_LESS_THAN(outWS->readE(wi)[j], inWS->readE(wi)[j]);
+      for (size_t j = 0; j < inWS->e(0).size(); j++) {
+        TS_ASSERT_LESS_THAN(outWS->e(wi)[j], inWS->e(wi)[j]);
       }
       auto inDetIDs = inWS->getSpectrum(wi).getDetectorIDs();
       auto outDetIDs = outWS->getSpectrum(wi).getDetectorIDs();
@@ -148,15 +139,15 @@ public:
       return;
 
     // Compare to expected values
-    TS_ASSERT_DELTA(ws->readY(0)[0], expectedY[0], 1e-4);
-    TS_ASSERT_DELTA(ws->readY(1)[0], expectedY[1], 1e-4);
-    TS_ASSERT_DELTA(ws->readY(2)[0], expectedY[2], 1e-4);
-    TS_ASSERT_DELTA(ws->readY(3)[0], expectedY[3], 1e-4);
-    TS_ASSERT_DELTA(ws->readY(4)[0], expectedY[4], 1e-4);
-    TS_ASSERT_DELTA(ws->readY(5)[0], expectedY[5], 1e-4);
-    TS_ASSERT_DELTA(ws->readY(6)[0], expectedY[6], 1e-4);
-    TS_ASSERT_DELTA(ws->readY(7)[0], expectedY[7], 1e-4);
-    TS_ASSERT_DELTA(ws->readY(8)[0], expectedY[8], 1e-4);
+    TS_ASSERT_DELTA(ws->y(0)[0], expectedY[0], 1e-4);
+    TS_ASSERT_DELTA(ws->y(1)[0], expectedY[1], 1e-4);
+    TS_ASSERT_DELTA(ws->y(2)[0], expectedY[2], 1e-4);
+    TS_ASSERT_DELTA(ws->y(3)[0], expectedY[3], 1e-4);
+    TS_ASSERT_DELTA(ws->y(4)[0], expectedY[4], 1e-4);
+    TS_ASSERT_DELTA(ws->y(5)[0], expectedY[5], 1e-4);
+    TS_ASSERT_DELTA(ws->y(6)[0], expectedY[6], 1e-4);
+    TS_ASSERT_DELTA(ws->y(7)[0], expectedY[7], 1e-4);
+    TS_ASSERT_DELTA(ws->y(8)[0], expectedY[8], 1e-4);
 
     AnalysisDataService::Instance().remove("testEW");
   }
@@ -231,15 +222,15 @@ public:
       return;
 
     // Compare to expected values
-    TS_ASSERT_DELTA(ws->readY(0)[0], expectedY[0], 1e-4);
-    TS_ASSERT_DELTA(ws->readY(1)[0], expectedY[1], 1e-4);
-    TS_ASSERT_DELTA(ws->readY(2)[0], expectedY[2], 1e-4);
-    TS_ASSERT_DELTA(ws->readY(3)[0], expectedY[3], 1e-4);
-    TS_ASSERT_DELTA(ws->readY(4)[0], expectedY[4], 1e-4);
-    TS_ASSERT_DELTA(ws->readY(5)[0], expectedY[5], 1e-4);
-    TS_ASSERT_DELTA(ws->readY(6)[0], expectedY[6], 1e-4);
-    TS_ASSERT_DELTA(ws->readY(7)[0], expectedY[7], 1e-4);
-    TS_ASSERT_DELTA(ws->readY(8)[0], expectedY[8], 1e-4);
+    TS_ASSERT_DELTA(ws->y(0)[0], expectedY[0], 1e-4);
+    TS_ASSERT_DELTA(ws->y(1)[0], expectedY[1], 1e-4);
+    TS_ASSERT_DELTA(ws->y(2)[0], expectedY[2], 1e-4);
+    TS_ASSERT_DELTA(ws->y(3)[0], expectedY[3], 1e-4);
+    TS_ASSERT_DELTA(ws->y(4)[0], expectedY[4], 1e-4);
+    TS_ASSERT_DELTA(ws->y(5)[0], expectedY[5], 1e-4);
+    TS_ASSERT_DELTA(ws->y(6)[0], expectedY[6], 1e-4);
+    TS_ASSERT_DELTA(ws->y(7)[0], expectedY[7], 1e-4);
+    TS_ASSERT_DELTA(ws->y(8)[0], expectedY[8], 1e-4);
 
     AnalysisDataService::Instance().remove("testEW");
   }
@@ -432,4 +423,43 @@ public:
   }
 };
 
-#endif /*SmoothNeighboursTEST_H_*/
+class SmoothNeighboursTestPerformance : public CxxTest::TestSuite {
+public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static SmoothNeighboursTestPerformance *createSuite() {
+    return new SmoothNeighboursTestPerformance();
+  }
+  static void destroySuite(SmoothNeighboursTestPerformance *suite) {
+    AnalysisDataService::Instance().clear();
+    delete suite;
+  }
+  SmoothNeighboursTestPerformance() { FrameworkManager::Instance(); }
+
+  void setUp() override {
+    inWS =
+        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(500, 10);
+  }
+
+  void testNeighboursAndFlatWeighting() {
+    // Test with number of neighbours and flat weighting
+
+    SmoothNeighbours alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    TS_ASSERT(alg.isInitialized());
+    alg.setProperty("InputWorkspace", inWS);
+    alg.setProperty("OutputWorkspace", "testMW");
+    alg.setProperty("PreserveEvents", false);
+    alg.setProperty("WeightedSum", "Flat");
+    alg.setProperty("NumberOfNeighbours", 200);
+    alg.setProperty("IgnoreMaskedDetectors", true);
+    alg.setProperty("Radius", 10.0);
+    alg.setProperty("RadiusUnits", "NumberOfPixels");
+    alg.execute();
+  }
+
+private:
+  MatrixWorkspace_sptr inWS;
+};
+
+#endif /*SMOOTHNEIGHBOURSTEST_H_*/

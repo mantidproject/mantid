@@ -3,6 +3,8 @@ import stresstesting
 import mantid.simpleapi as ms
 
 #====================================================================================================
+
+
 class IN10SiliconTest(stresstesting.MantidStressTest):
 
     def runTest(self):
@@ -24,6 +26,8 @@ class IN10SiliconTest(stresstesting.MantidStressTest):
         return 'IN10_P3OT_350K_silicon111_red', 'ISISIndirectLoadAscii_IN10SiliconTest.nxs'
 
 #====================================================================================================
+
+
 class IN13CaFTest(stresstesting.MantidStressTest):
 
     def runTest(self):
@@ -56,7 +60,7 @@ class IN13CaFTest(stresstesting.MantidStressTest):
     # function to check two workspaces match
     # Used when the result of a test produces more than a single workspace
     def checkWorkspacesMatch(self, ws1, ws2):
-        checker = ms.AlgorithmManager.create("CheckWorkspacesMatch")
+        checker = ms.AlgorithmManager.create("CompareWorkspaces")
         checker.setLogging(True)
         checker.setPropertyValue("Workspace1", ws1)
         checker.setPropertyValue("Workspace2", ws2)
@@ -65,7 +69,7 @@ class IN13CaFTest(stresstesting.MantidStressTest):
 
         checker.execute()
 
-        if checker.getPropertyValue("Result") != 'Success!':
+        if not checker.getProperty("Result"):
             print self.__class__.__name__
             ms.SaveNexus(InputWorkspace=ws2,Filename=self.__class__.__name__+'-mismatch.nxs')
             return False
@@ -94,4 +98,3 @@ class IN16SiliconTest(stresstesting.MantidStressTest):
         self.disableChecking.append("SpectraMap")
         self.disableChecking.append("Instrument")
         return 'IN16_65722_silicon111_red', 'ISISIndirectLoadAscii_IN16SiliconTest.nxs'
-

@@ -4,6 +4,7 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/ConfigService.h"
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidKernel/InternetHelper.h"
 #include "MantidKernel/ListValidator.h"
@@ -21,6 +22,8 @@
 #include <Poco/DOM/NodeList.h>
 #include <Poco/Net/HTTPRequest.h>
 #include <Poco/StreamCopier.h>
+
+#include <boost/algorithm/string/replace.hpp>
 
 namespace Mantid {
 namespace RemoteAlgorithms {
@@ -1348,12 +1351,11 @@ void SCARFTomoReconstruction::getOneJobFile(const std::string &jobId,
       {"Content-Type", "application/xml"},
       {"Cookie", token},
       {"Accept", m_acceptType}};
-  std::string body = remotePath;
   int code;
   std::stringstream ss;
   try {
-    code = doSendRequestGetResponse(httpsURL, ss, headers,
-                                    Poco::Net::HTTPRequest::HTTP_GET, body);
+    code = doSendRequestGetResponse(
+        httpsURL, ss, headers, Poco::Net::HTTPRequest::HTTP_GET, remotePath);
   } catch (Kernel::Exception::InternetError &ie) {
     throw std::runtime_error(
         "Error while sending HTTP request to download a file: " +

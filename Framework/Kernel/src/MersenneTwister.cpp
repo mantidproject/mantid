@@ -7,6 +7,8 @@
 #include <boost/random/uniform_real.hpp>
 #include <boost/random/variate_generator.hpp>
 
+#include <Poco/Timestamp.h>
+
 namespace Mantid {
 namespace Kernel {
 
@@ -20,6 +22,20 @@ namespace Kernel {
  */
 MersenneTwister::MersenneTwister(const size_t seedValue)
     : MersenneTwister(seedValue, 0.0, 1.0) {}
+
+/**
+ * Construct the generator time stamp for the initial seed.
+ * The range is set to [0.0, 1.0]
+ */
+MersenneTwister::MersenneTwister() : MersenneTwister(0.0, 1.0) {}
+
+/**
+ * Constructor taking a range
+ * @param start :: The minimum value a generated number should take
+ * @param end :: The maximum value a generated number should take
+ */
+MersenneTwister::MersenneTwister(const double start, const double end)
+    : MersenneTwister(Poco::Timestamp().epochMicroseconds(), start, end) {}
 
 /**
  * Constructor taking a seed value and a range

@@ -9,6 +9,7 @@ class LiquidsReflectometryReductionWithBackgroundPreciseTest(stresstesting.Manti
         This test checks that the new liquids reflectometer reduction code
         always produces the same results.
     """
+
     def runTest(self):
         #TODO: The reduction algorithm should not require an absolute path
         scaling_factor_file = FileFinder.getFullPath("directBeamDatabaseFall2014_IPTS_11601_2.cfg")
@@ -44,6 +45,7 @@ class LiquidsReflectometryReductionWithBackgroundPreciseTest(stresstesting.Manti
         self.disableChecking.append('SpectraMap')
         self.disableChecking.append('Axes')
         return "reflectivity_precise_119816", 'LiquidsReflectometryReductionTestWithBackground.nxs'
+
 
 class NoNormalizationTest(stresstesting.MantidStressTest):
     def runTest(self):
@@ -81,6 +83,7 @@ class NoNormalizationTest(stresstesting.MantidStressTest):
         self.disableChecking.append('SpectraMap')
         self.disableChecking.append('Axes')
         return "reflectivity_119816", 'REFL_NoNormalizationTest.nxs'
+
 
 class TOFRangeOFFTest(stresstesting.MantidStressTest):
     def runTest(self):
@@ -162,6 +165,7 @@ class NoBackgroundTest(stresstesting.MantidStressTest):
 
 class TOFMismatchTest(stresstesting.MantidStressTest):
     correct_exception_caught = False
+
     def runTest(self):
         #TODO: The reduction algorithm should not require an absolute path
         scaling_factor_file = FileFinder.getFullPath("directBeamDatabaseFall2014_IPTS_11601_2.cfg")
@@ -202,6 +206,7 @@ class TOFMismatchTest(stresstesting.MantidStressTest):
 
 class BadDataTOFRangeTest(stresstesting.MantidStressTest):
     correct_exception_caught = False
+
     def runTest(self):
         #TODO: The reduction algorithm should not require an absolute path
         scaling_factor_file = FileFinder.getFullPath("directBeamDatabaseFall2014_IPTS_11601_2.cfg")
@@ -242,6 +247,7 @@ class BadDataTOFRangeTest(stresstesting.MantidStressTest):
 
 class BadPeakSelectionTest(stresstesting.MantidStressTest):
     correct_exception_caught = False
+
     def runTest(self):
         #TODO: The reduction algorithm should not require an absolute path
         scaling_factor_file = FileFinder.getFullPath("directBeamDatabaseFall2014_IPTS_11601_2.cfg")
@@ -277,5 +283,3 @@ class BadPeakSelectionTest(stresstesting.MantidStressTest):
 
     def validate(self):
         return self.correct_exception_caught
-
-

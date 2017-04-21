@@ -1,4 +1,6 @@
+#include "MantidKernel/Logger.h"
 #include "MantidKernel/MultiFileValidator.h"
+#include <boost/make_shared.hpp>
 
 namespace Mantid {
 namespace Kernel {
@@ -21,11 +23,12 @@ MultiFileValidator::MultiFileValidator(const MultiFileValidator &mfv)
 
 /** Constructor
  *  @param extensions :: The permitted file extensions (e.g. .RAW)
+ *  @param testFilesExist :: If to check if files exist
  */
 MultiFileValidator::MultiFileValidator(
-    const std::vector<std::string> &extensions)
+    const std::vector<std::string> &extensions, bool testFilesExist)
     : TypedValidator<std::vector<std::vector<std::string>>>(),
-      m_fileValidator(extensions, true) {}
+      m_fileValidator(extensions, testFilesExist) {}
 
 /// Returns the set of valid values
 std::vector<std::string> MultiFileValidator::allowedValues() const {
@@ -63,7 +66,7 @@ std::string MultiFileValidator::checkValidity(
           accumulatedErrors =
               "Could not validate the following file(s): " + valueIt;
         else
-          accumulatedErrors = accumulatedErrors + ", " + valueIt;
+          accumulatedErrors.append(", ").append(valueIt);
       }
     }
   }

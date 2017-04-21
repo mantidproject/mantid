@@ -2,6 +2,7 @@
 #include "MantidVatesAPI/MDLoadingView.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/IMDEventWorkspace.h"
+#include "MantidGeometry/MDGeometry/IMDDimension.h"
 
 #include "MantidGeometry/MDGeometry/NullImplicitFunction.h"
 #include "MantidVatesAPI/VatesKnowledgeSerializer.h"
@@ -16,6 +17,10 @@
 #include <boost/algorithm/string.hpp>
 #include <vtkFieldData.h>
 #include <vtkDataSet.h>
+
+namespace {
+Mantid::Kernel::Logger g_log("MDEWLoadingPresenter");
+}
 
 namespace Mantid {
 namespace VATES {
@@ -152,10 +157,9 @@ void MDEWLoadingPresenter::appendMetadata(vtkDataSet *visualDataSet,
 
   // Add metadata to dataset.
   MetadataToFieldData convert;
-  convert(outputFD.GetPointer(), xmlString,
-          XMLDefinitions::metaDataId().c_str());
+  convert(outputFD.GetPointer(), xmlString, XMLDefinitions::metaDataId());
   convert(outputFD.GetPointer(), jsonString,
-          m_vatesConfigurations->getMetadataIdJson().c_str());
+          m_vatesConfigurations->getMetadataIdJson());
   visualDataSet->SetFieldData(outputFD.GetPointer());
 }
 
@@ -230,22 +234,6 @@ std::string MDEWLoadingPresenter::getTimeStepLabel() const {
  */
 const std::string &MDEWLoadingPresenter::getInstrument() {
   return m_metadataJsonManager->getInstrument();
-}
-
-/**
-* Getter for the minimum value;
-* @return The minimum value of the data set.
-*/
-double MDEWLoadingPresenter::getMinValue() {
-  return m_metadataJsonManager->getMinValue();
-}
-
-/**
- * Getter for the maximum value;
- * @return The maximum value of the data set.
- */
-double MDEWLoadingPresenter::getMaxValue() {
-  return m_metadataJsonManager->getMaxValue();
 }
 }
 }

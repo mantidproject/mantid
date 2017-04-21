@@ -5,6 +5,13 @@ Reflectometry Changes
 .. contents:: Table of Contents
    :local:
 
+Instrument & IDF
+----------------
+
+- New CRISP filename format, full name + 8 digits, is now recognised
+- POLREF IDF has been updated
+- OFFSPEC IDF has been updated
+
 ReflectometryReductionOne
 -------------------------
 
@@ -21,7 +28,6 @@ CreateTransmissionWorkspace
 - A workflow diagram has been added to the documentation.
 - The rebinning in wavelength has been removed
 
-
 ISIS Reflectometry (Polref)
 ###########################
 
@@ -29,8 +35,6 @@ ISIS Reflectometry (Polref)
 - Global settings have been moved to a separate tab ("Settings")
 - Transfer progress bar no longer gives impression of running when clicked if no runs are selected
 - Updated instrument definition files.
-
-ISIS Reflectometry
-##################
+- Files are now loaded into the interface using LoadISISNexus
 
 `Full list of changes on github <http://github.com/mantidproject/mantid/pulls?q=is%3Apr+milestone%3A%22Release+3.8%22+is%3Amerged+label%3A%22Component%3A+Reflectometry%22>`__

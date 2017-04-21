@@ -1,0 +1,46 @@
+digraph ReflectometryReductionOne {
+  label = "\n"
+  $global_style
+
+  subgraph params {
+    $param_style
+    inputWorkspace    [label="InputWorkspace"]
+	trans             [label="FirstTransmissionRun"]
+    IvsLam_0          [label="OutputWorkspaceWavelength"]
+    IvsLam_1          [label="OutputWorkspaceWavelength"]
+	IvsLam_temp       [label="OutputWorkspaceWavelength"]
+    IvsQ_0            [label="OutputWorkspace"]
+    IvsQ_1            [label="OutputWorkspace"]
+	IvsQ_temp         [label="OutputWorkspace"]
+  }
+
+  subgraph algorithms {
+    $algorithm_style
+    reflRedOne_0 [label="ReflectometryReductionOne", group=g1]
+    reflRedOne_1 [label="ReflectometryReductionOne", group=g2]
+    groupIvsQ    [label="GroupWorkspaces", group=g1]
+    groupIvsLam  [label="GroupWorkspaces", group=g2]
+  }
+
+  subgraph decisions {
+    $decision_style
+  }
+
+  inputWorkspace -> reflRedOne_0      [label="[0]"]
+  trans          -> reflRedOne_0      [label="[0]"]
+  inputWorkspace -> reflRedOne_1      [label="[1]"]
+  trans          -> reflRedOne_1      [label="[1]"]
+  reflRedOne_0   -> IvsLam_0
+  reflRedOne_0   -> IvsQ_0
+  reflRedOne_1   -> IvsLam_1
+  reflRedOne_1   -> IvsQ_1
+
+  IvsQ_0         -> groupIvsQ
+  IvsQ_1         -> groupIvsQ
+  groupIvsQ      -> IvsQ_temp
+
+  IvsLam_0       -> groupIvsLam
+  IvsLam_1       -> groupIvsLam
+  groupIvsLam    -> IvsLam_temp
+
+}

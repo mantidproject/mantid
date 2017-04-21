@@ -9,6 +9,7 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/ICompAssembly.h"
 #include "MantidGeometry/IDTypes.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/SpectraAxis.h"
 
 #include <Poco/DOM/Document.h>
@@ -229,7 +230,7 @@ void LoadDetectorsGroupingFile::setByComponents() {
           auto itx = indexmap.find(detid);
           if (itx != indexmap.end()) {
             size_t wsindex = itx->second;
-            m_groupWS->dataY(wsindex)[0] = componentMap.first;
+            m_groupWS->mutableY(wsindex)[0] = componentMap.first;
           } else {
             g_log.error() << "Pixel w/ ID = " << detid
                           << " Cannot Be Located\n";
@@ -279,7 +280,7 @@ void LoadDetectorsGroupingFile::setByDetectors() {
 
       if (itx != indexmap.end()) {
         size_t wsindex = itx->second;
-        m_groupWS->dataY(wsindex)[0] = detectorMap.first;
+        m_groupWS->mutableY(wsindex)[0] = detectorMap.first;
       } else {
         g_log.error() << "Pixel w/ ID = " << detid << " Cannot Be Located\n";
       }
@@ -318,7 +319,7 @@ void LoadDetectorsGroupingFile::setBySpectrumNos() {
                         << m_groupWS->getNumberHistograms() << '\n';
         } else {
           // Finally set the group workspace
-          m_groupWS->dataY(wsindex)[0] = groupid;
+          m_groupWS->mutableY(wsindex)[0] = groupid;
         } // IF-ELSE: ws index out of range
       }   // IF-ELSE: spectrum No has an entry
     }     // FOR: each spectrum No
@@ -470,7 +471,7 @@ void LoadGroupXMLFile::parseXML() {
       if (autogroupid) {
         curgroupid++;
       } else {
-        curgroupid = atoi(idstr.c_str());
+        curgroupid = std::stoi(idstr);
       }
 
       // b) Set in map
@@ -510,9 +511,9 @@ void LoadGroupXMLFile::parseXML() {
         std::string val_value =
             this->getAttributeValueByName(pNode, "val", valfound);
         std::string finalvalue;
-        if (valfound && value.size() > 0)
-          finalvalue = value + ", " + val_value;
-        else if (value.size() == 0)
+        if (valfound && !value.empty())
+          finalvalue.append(value).append(", ").append(val_value);
+        else if (value.empty())
           finalvalue = val_value;
         else
           finalvalue = value;
@@ -533,9 +534,9 @@ void LoadGroupXMLFile::parseXML() {
         std::string val_value =
             this->getAttributeValueByName(pNode, "val", valfound);
         std::string finalvalue;
-        if (valfound && value.size() > 0)
-          finalvalue = value + ", " + val_value;
-        else if (value.size() == 0)
+        if (valfound && !value.empty())
+          finalvalue.append(value).append(", ").append(val_value);
+        else if (value.empty())
           finalvalue = val_value;
         else
           finalvalue = value;
@@ -558,9 +559,9 @@ void LoadGroupXMLFile::parseXML() {
         std::string val_value =
             this->getAttributeValueByName(pNode, "val", valfound);
         std::string finalvalue;
-        if (valfound && value.size() > 0)
-          finalvalue = value + ", " + val_value;
-        else if (value.size() == 0)
+        if (valfound && !value.empty())
+          finalvalue.append(value).append(", ").append(val_value);
+        else if (value.empty())
           finalvalue = val_value;
         else
           finalvalue = value;

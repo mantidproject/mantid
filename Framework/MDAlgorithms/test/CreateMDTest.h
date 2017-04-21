@@ -61,7 +61,7 @@ public:
   }
 
   void test_psi_right_size() {
-    auto sample_ws = WorkspaceCreationHelper::Create2DWorkspace(1, 1);
+    auto sample_ws = WorkspaceCreationHelper::create2DWorkspace(1, 1);
     Mantid::API::AnalysisDataService::Instance().add("__CreateMDTest_sample",
                                                      sample_ws);
 
@@ -87,7 +87,7 @@ public:
   }
 
   void test_gl_right_size() {
-    auto sample_ws = WorkspaceCreationHelper::Create2DWorkspace(1, 1);
+    auto sample_ws = WorkspaceCreationHelper::create2DWorkspace(1, 1);
     Mantid::API::AnalysisDataService::Instance().add("__CreateMDTest_sample",
                                                      sample_ws);
 
@@ -113,7 +113,7 @@ public:
   }
 
   void test_gs_right_size() {
-    auto sample_ws = WorkspaceCreationHelper::Create2DWorkspace(1, 1);
+    auto sample_ws = WorkspaceCreationHelper::create2DWorkspace(1, 1);
     Mantid::API::AnalysisDataService::Instance().add("__CreateMDTest_sample",
                                                      sample_ws);
 

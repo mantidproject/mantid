@@ -39,11 +39,27 @@ DataSelector::DataSelector(QWidget *parent)
 DataSelector::~DataSelector() {}
 
 /**
+* Return whether empty input is allowed
+* @return :: Flag if is optional
+*/
+bool DataSelector::isOptional() const { return m_isOptional; }
+
+/**
+* Sets if the text field is optional
+* @param optional :: Set the optional status of the text field
+*/
+void DataSelector::isOptional(bool optional) {
+  m_isOptional = optional;
+  m_uiForm.rfFileInput->isOptional(optional);
+  m_uiForm.wsWorkspaceInput->setOptional(optional);
+}
+
+/**
  * Handle signals when files are found or the user manually clicks load.
  */
 void DataSelector::handleFileInput() {
   // Get filename and check it's not empty
-  QString filename = m_uiForm.rfFileInput->getFirstFilename();
+  QString filename = m_uiForm.rfFileInput->getUserInput().toString();
 
   if (filename.isEmpty()) {
     return;
@@ -101,7 +117,8 @@ bool DataSelector::isValid() {
       if (!AnalysisDataService::Instance().doesExist(wsName.toStdString())) {
         // attempt to reload if we can
         // don't use algorithm runner because we need to know instantly.
-        const QString filepath = m_uiForm.rfFileInput->getFirstFilename();
+        const QString filepath =
+            m_uiForm.rfFileInput->getUserInput().toString();
         const Algorithm_sptr loadAlg =
             AlgorithmManager::Instance().createUnmanaged("Load");
         loadAlg->initialize();
@@ -156,8 +173,7 @@ QString DataSelector::getProblem() const {
  */
 void DataSelector::autoLoadFile(const QString &filepath) {
   using namespace Mantid::API;
-  QFileInfo qfio(filepath);
-  QString baseName = qfio.completeBaseName();
+  QString baseName = getWsNameFromFiles();
 
   // create instance of load algorithm
   const Algorithm_sptr loadAlg =
@@ -176,12 +192,9 @@ void DataSelector::autoLoadFile(const QString &filepath) {
  */
 void DataSelector::handleAutoLoadComplete(bool error) {
   if (!error) {
-    QString filename(this->getFullFilePath());
-    QFileInfo qfio(filename);
-    QString baseName = qfio.completeBaseName();
 
     // emit that we got a valid workspace/file to work with
-    emit dataReady(baseName);
+    emit dataReady(getWsNameFromFiles());
   } else {
     m_uiForm.rfFileInput->setFileProblem(
         "Could not load file. See log for details.");
@@ -231,16 +244,36 @@ void DataSelector::handleViewChanged(int index) {
  * @return The full file path
  */
 QString DataSelector::getFullFilePath() const {
-  return m_uiForm.rfFileInput->getFirstFilename();
+  return m_uiForm.rfFileInput->getUserInput().toString();
+}
+
+/**
+ * Gets the workspace name that is created after loading the files
+ *
+ * @return The workspace name that is created after loading the files
+ */
+QString DataSelector::getWsNameFromFiles() const {
+  QString filepath = DataSelector::getFullFilePath();
+  QFileInfo qfio(filepath);
+  QString baseName = qfio.completeBaseName();
+
+  // make up a name for the group workspace, if multiple files are specified
+  if (m_uiForm.rfFileInput->allowMultipleFiles() && filepath.count(",") > 0) {
+    baseName += "_group";
+  }
+
+  return baseName;
 }
 
 /**
  * Gets the name of item selected in the DataSelector.
  *
- * This will either return the base name of the filepath or
- * the currently selected item in the workspace selector depending
- * on what view is available. If there is no valid input the method returns
- * an empty string.
+ * This will return the currently selected item in the workspace selector,
+ * if the workspace view is active.
+ * If the file view is active, it will return the basename of the file.
+ * If multiple files are allowed, and auto-loading is off, it will return the
+ * full user input.
+ * If there is no valid input the method returns an empty string.
  *
  * @return The name of the current data item
  */
@@ -253,8 +286,13 @@ QString DataSelector::getCurrentDataName() const {
   case 0:
     // the file selector is visible
     if (m_uiForm.rfFileInput->isValid()) {
-      QFileInfo qfio(m_uiForm.rfFileInput->getFirstFilename());
-      filename = qfio.completeBaseName();
+      if (m_uiForm.rfFileInput->allowMultipleFiles() && !m_autoLoad) {
+        // if multiple files are allowed, auto-loading is not on, return the
+        // full user input
+        filename = getFullFilePath();
+      } else {
+        filename = getWsNameFromFiles();
+      }
     }
     break;
   case 1:
@@ -271,7 +309,7 @@ QString DataSelector::getCurrentDataName() const {
  *
  * @return Whether the widget will auto load
  */
-bool DataSelector::willAutoLoad() { return m_autoLoad; }
+bool DataSelector::willAutoLoad() const { return m_autoLoad; }
 
 /**
  * Sets whether the widget will attempt to auto load files.
@@ -285,7 +323,9 @@ void DataSelector::setAutoLoad(bool load) { m_autoLoad = load; }
  *
  * @return The text on the load button
  */
-QString DataSelector::getLoadBtnText() { return m_uiForm.pbLoadFile->text(); }
+QString DataSelector::getLoadBtnText() const {
+  return m_uiForm.pbLoadFile->text();
+}
 
 /**
  * Sets the text shown on the load button.
@@ -294,42 +334,6 @@ QString DataSelector::getLoadBtnText() { return m_uiForm.pbLoadFile->text(); }
  */
 void DataSelector::setLoadBtnText(const QString &text) {
   m_uiForm.pbLoadFile->setText(text);
-}
-
-/**
- * Gets the suffixes allowed by the workspace selector
- *
- * @return List of suffixes allowed by the workspace selector
- */
-QStringList DataSelector::getWSSuffixes() {
-  return m_uiForm.wsWorkspaceInput->getSuffixes();
-}
-
-/**
- * Sets the suffixes allowed by the workspace selector
- *
- * @param suffixes :: List of suffixes allowed by the workspace selector
- */
-void DataSelector::setWSSuffixes(const QStringList &suffixes) {
-  m_uiForm.wsWorkspaceInput->setSuffixes(suffixes);
-}
-
-/**
- * Gets the suffixes allowed by the file browser
- *
- * @return List of suffixes allowed by the file browser
- */
-QStringList DataSelector::getFBSuffixes() {
-  return m_uiForm.rfFileInput->getFileExtensions();
-}
-
-/**
- * Sets the suffixes allowed by the file browser
- *
- * @param suffixes :: List of suffixes allowed by the file browser
- */
-void DataSelector::setFBSuffixes(const QStringList &suffixes) {
-  m_uiForm.rfFileInput->setFileExtensions(suffixes);
 }
 
 /**
@@ -365,34 +369,6 @@ void DataSelector::setShowLoad(bool load) {
   m_uiForm.pbLoadFile->setEnabled(load);
   m_uiForm.pbLoadFile->setVisible(load);
   m_showLoad = load;
-}
-
-/**
- * Gets the instrument currently set by the override property.
- *
- * If no override is set then the instrument set by default instrument
- * configurtion
- * option will be used and this function returns an empty string.
- *
- * @return Name of instrument, empty if not set
- */
-QString DataSelector::getInstrumentOverride() {
-  return m_uiForm.rfFileInput->getInstrumentOverride();
-}
-
-/**
- * Sets an instrument to fix the widget to.
- *
- * If an instrument name is geven then the widget will only look for files for
- * that
- * instrument, providing na empty string will remove this restriction and will
- * search
- * using the default instrument.
- *
- * @param instName Name of instrument, empty to disable override
- */
-void DataSelector::setInstrumentOverride(const QString &instName) {
-  m_uiForm.rfFileInput->setInstrumentOverride(instName);
 }
 
 /**

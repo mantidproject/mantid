@@ -4,6 +4,8 @@
 #include "MantidMDAlgorithms/Quantification/Models/MullerAnsatz.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MDFittingTestHelpers.h"
+#include "MantidAPI/Run.h"
+#include "MantidAPI/Sample.h"
 
 #include <cxxtest/TestSuite.h>
 

@@ -1,10 +1,10 @@
-
 #include "MantidQtCustomInterfaces/Reflectometry/ReflNexusMeasurementItemSource.h"
 #include <Poco/File.h>
 #include <Poco/Exception.h>
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/Workspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include <iostream>
@@ -18,12 +18,10 @@ using namespace Mantid::Kernel;
 namespace MantidQt {
 namespace CustomInterfaces {
 
-//----------------------------------------------------------------------------------------------
 /** Constructor
  */
 ReflNexusMeasurementItemSource::ReflNexusMeasurementItemSource() {}
 
-//----------------------------------------------------------------------------------------------
 /** Destructor
  */
 ReflNexusMeasurementItemSource::~ReflNexusMeasurementItemSource() {}
@@ -79,6 +77,12 @@ ReflNexusMeasurementItemSource::obtain(const std::string &definedPath,
         runNumber = match[0];
       }
     }
+    std::string runTitle;
+    try {
+      runTitle = run.getPropertyValueAsType<std::string>("run_title");
+    } catch (Exception::NotFoundError &) {
+      // OK, runTitle will be empty
+    }
 
     double theta = -1.0;
     try {
@@ -92,7 +96,7 @@ ReflNexusMeasurementItemSource::obtain(const std::string &definedPath,
 
     return MeasurementItem(measurementItemId, measurementItemSubId,
                            measurementItemLabel, measurementItemType, theta,
-                           runNumber);
+                           runNumber, runTitle);
 
   } catch (std::invalid_argument &ex) {
     std::stringstream buffer;

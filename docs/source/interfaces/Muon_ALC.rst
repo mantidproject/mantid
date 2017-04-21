@@ -64,14 +64,14 @@ operations hiding the complexity of the underlying algorithms.
 Global Options
 --------------
 
-Gloabl options are options visible and accesible from any step in the
+Global options are options visible and accessible from any step in the
 interface. Currently, there are two buttons that can be used at any point during the analysis.
 
 Export Results
 ~~~~~~~~~~~~~~
 
 The 'Export results...' button allows the user to export intermediate results at any step. When clicked,
-it propmts the user to enter a label for the workspace group that will gather the ALC results. This
+it prompts the user to enter a label for the workspace group that will gather the ALC results. This
 label is defaulted to 'ALCResults'. In the DataLoading step, data are exported in a workspace named
 <Label>_Loaded_Data, which contains a single spectrum. In the BaselineModelling step, data and model
 are exported in a set of three workspaces: a workspace named <Label>_Baseline_Workspace, which contains
@@ -99,7 +99,7 @@ Import Results
 ~~~~~~~~~~~~~~
 
 The 'Import results...' button allows the user to load previously analysed data, ideally saved using
-'Export results...'. When clicked, it propmts the user to enter a label for the workspace group from which
+'Export results...'. When clicked, it prompts the user to enter a label for the workspace group from which
 data will be imported, which is defaulted to 'ALCResults'. The interface then searches for a workspace
 corresponding to the
 interface's step from which it was called. This means that if the user is currently in the

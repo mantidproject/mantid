@@ -1,14 +1,12 @@
 #ifndef MANTID_ALGORITHMS_MERGERUNS_H_
 #define MANTID_ALGORITHMS_MERGERUNS_H_
 
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include <list>
 #include <vector>
 #include <boost/shared_ptr.hpp>
 #include <MantidAPI/MatrixWorkspace.h>
 #include "MantidAPI/MultiPeriodGroupAlgorithm.h"
+#include "MantidAPI/WorkspaceHistory.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidKernel/System.h"
 #include <boost/shared_ptr.hpp>
@@ -68,6 +66,13 @@ namespace Algorithms {
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
+namespace MergeRunsOptions {
+const std::string SKIP_BEHAVIOUR = "Skip File";
+const std::string STOP_BEHAVIOUR = "Stop";
+const std::string REBIN_BEHAVIOUR = "Rebin";
+const std::string FAIL_BEHAVIOUR = "Fail";
+}
+
 class DLLExport MergeRuns : public API::MultiPeriodGroupAlgorithm {
 public:
   /// Algorithm's name for identification overriding a virtual method
@@ -161,7 +166,7 @@ private:
   /// Addition tables for event workspaces
   std::vector<AdditionTable> m_tables;
   /// Total number of histograms in the output workspace
-  size_t m_outputSize;
+  size_t m_outputSize = 0;
 };
 
 } // namespace Algorithm

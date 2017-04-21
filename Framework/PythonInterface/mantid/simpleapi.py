@@ -1,4 +1,4 @@
-﻿"""
+"""
     This module defines a simple function-style API for running Mantid
     algorithms. Each algorithm within Mantid is mapped to a Python
     function of the same name with the parameters of the algorithm becoming
@@ -24,6 +24,7 @@ from __future__ import (absolute_import, division,
 
 import os
 from six import iteritems
+from collections import OrderedDict, namedtuple
 
 from . import api as _api
 from . import kernel as _kernel
@@ -38,7 +39,7 @@ from .api._aliases import *
 
 #------------------------ Specialized function calls --------------------------
 # List of specialized algorithms
-__SPECIALIZED_FUNCTIONS__ = ["Load", "CutMD", "RenameWorkspace"]
+__SPECIALIZED_FUNCTIONS__ = ["Load", "StartLiveData", "CutMD", "RenameWorkspace"]
 # List of specialized algorithms
 __MDCOORD_FUNCTIONS__ = ["PeakIntensityVsRadius", "CentroidPeaksMD","IntegratePeaksMD"]
 # The "magic" keyword to enable/disable logging
@@ -214,6 +215,66 @@ def LoadDialog(*args, **kwargs):
     set_properties_dialog(algm,**arguments)
     algm.execute()
     return algm
+
+#------------------------------------------------------------------------------
+
+def StartLiveData(*args, **kwargs):
+    """
+    StartLiveData dynamically adds the properties of the specific LiveListener
+    that is used to itself, to allow usage such as the following:
+
+        StartLiveData(Instrument='ISIS_Histogram', ...
+                      PeriodList=[1,3], SpectraList=[2,4,6])
+
+    Where PeriodList and SpectraList are properties of the ISISHistoDataListener
+    rather than of StartLiveData. For StartLiveData to know those are valid
+    properties, however, it first needs to know what the Instrument is.
+
+    This is a similar situation as in the Load algorithm, where the Filename
+    must be provided before other properties become available, and so it is
+    solved here in the same way.
+    """
+    instrument, = _get_mandatory_args('StartLiveData', ["Instrument"], *args, **kwargs)
+
+    # Create and execute
+    (_startProgress, _endProgress, kwargs) = extract_progress_kwargs(kwargs)
+    algm = _create_algorithm_object('StartLiveData',
+                                    startProgress=_startProgress,
+                                    endProgress=_endProgress)
+    _set_logging_option(algm, kwargs)
+    try:
+        algm.setProperty('Instrument', instrument) # Must be set first
+    except ValueError as ve:
+        raise ValueError('Problem when setting Instrument. This is the detailed error '
+                         'description: ' + str(ve))
+
+    # Remove from keywords so it is not set twice
+    try:
+        del kwargs['Instrument']
+    except KeyError:
+        pass
+
+    # LHS Handling currently unsupported for StartLiveData
+    lhs = _kernel.funcinspect.lhs_info()
+    if lhs[0] > 0:  # Number of terms on the lhs
+        raise RuntimeError("Assigning the output of StartLiveData is currently "
+                           "unsupported due to limitations of the simpleapi. "
+                           "Please call StartLiveData without assigning it to "
+                           "to anything.")
+
+    lhs_args = _get_args_from_lhs(lhs, algm)
+    final_keywords = _merge_keywords_with_lhs(kwargs, lhs_args)
+
+    # Check for any properties that aren't known and warn they will not be used
+    for key in list(final_keywords.keys()):
+        if key not in algm:
+            logger.warning("You've passed a property (%s) to StartLiveData() that doesn't apply to this Instrument." % key)
+            del final_keywords[key]
+
+    set_properties(algm, **final_keywords)
+    algm.execute()
+
+    return _gather_returns("StartLiveData", lhs, algm)
 
 #---------------------------- Fit ---------------------------------------------
 
@@ -506,8 +567,12 @@ def _get_function_spec(func):
     :param func: A Python function object
     """
     import inspect
+    import six
     try:
-        argspec = inspect.getargspec(func)
+        if six.PY3:
+            argspec = inspect.getfullargspec(func)
+        else:
+            argspec = inspect.getargspec(func)
     except TypeError:
         return ''
     # Algorithm functions have varargs set not args
@@ -702,7 +767,7 @@ def _merge_keywords_with_lhs(keywords, lhs_args):
     final_keywords.update(keywords)
     return final_keywords
 
-def _gather_returns(func_name, lhs, algm_obj, ignore_regex=[]):
+def _gather_returns(func_name, lhs, algm_obj, ignore_regex=None):
     """Gather the return values and ensure they are in the
        correct order as defined by the output properties and
        return them as a tuple. If their is a single return
@@ -713,6 +778,8 @@ def _gather_returns(func_name, lhs, algm_obj, ignore_regex=[]):
        :param algm_obj: An executed algorithm object.
        :param ignore_regex: A list of strings containing regex expressions to match against property names that will be ignored & not returned.
     """
+    if ignore_regex is None: ignore_regex = []
+
     import re
     def ignore_property(name, ignore_regex):
         for regex in ignore_regex:
@@ -727,7 +794,7 @@ def _gather_returns(func_name, lhs, algm_obj, ignore_regex=[]):
     for index, expr in enumerate(ignore_regex):
         ignore_regex[index] = re.compile(expr)
 
-    retvals = []
+    retvals = OrderedDict()
     for name in algm_obj.outputProperties():
         if ignore_property(name, ignore_regex):
             continue
@@ -739,14 +806,14 @@ def _gather_returns(func_name, lhs, algm_obj, ignore_regex=[]):
         if _is_workspace_property(prop):
             value_str = prop.valueAsStr
             try:
-                retvals.append(_api.AnalysisDataService[value_str])
+                retvals[name]=_api.AnalysisDataService[value_str]
             except KeyError:
                 if not prop.isOptional():
                     raise RuntimeError("Internal error. Output workspace property '%s' on algorithm '%s' has not been stored correctly."
                                        "Please contact development team." % (name,  algm_obj.name()))
         else:
             if hasattr(prop, 'value'):
-                retvals.append(prop.value)
+                retvals[name]=prop.value
             else:
                 raise RuntimeError('Internal error. Unknown property type encountered. "%s" on algorithm "%s" is not understood by '
                        'Python. Please contact development team' % (name, algm_obj.name()))
@@ -759,10 +826,13 @@ def _gather_returns(func_name, lhs, algm_obj, ignore_regex=[]):
         # Let's not have the more cryptic unpacking error raised
         raise RuntimeError("%s is trying to return %d output(s) but you have provided %d variable(s). "
                            "These numbers must match." % (func_name, nvals, nlhs))
-    if nvals > 1:
-        return tuple(retvals) # Create a tuple
-    elif nvals == 1:
-        return retvals[0]
+    if nvals > 0:
+        ret_type=namedtuple(func_name+"_returns",retvals.keys())
+        ret_value=ret_type(**retvals)
+        if nvals==1:
+            return ret_value[0]
+        else:
+            return ret_value
     else:
         return None
 
@@ -781,32 +851,15 @@ def _set_logging_option(algm_obj, kwargs):
 
 def set_properties(alg_object, *args, **kwargs):
     """
-        Set all of the properties of the algorithm
+        Set all of the properties of the algorithm. There is no guarantee of
+        the order the properties will be set
         :param alg_object: An initialised algorithm object
         :param *args: Positional arguments
         :param **kwargs: Keyword arguments
     """
-    if len(args) > 0:
-        mandatory_props = alg_object.mandatoryProperties()
-        # Remove any already in kwargs
-        for key in kwargs.keys():
-            try:
-                mandatory_props.remove(key)
-            except ValueError:
-                pass
-        # If have any left
-        if len(mandatory_props) > 0:
-            # Now pair up the properties & arguments
-            for (key, arg) in zip(mandatory_props[:len(args)], args):
-                kwargs[key] = arg
-        else:
-            raise RuntimeError("Positional argument(s) provided but none are required. Check function call.")
-
-    # Set the properties of the algorithm.
-    for key in kwargs.keys():
-        value = kwargs[key]
+    def do_set_property(name, value):
         if value is None:
-            continue
+            return
         # The correct parent/child relationship is not quite set up yet: #5157
         # ChildAlgorithms in Python are marked as children but their output is in the
         # ADS meaning we cannot just set DataItem properties by value. At the moment
@@ -815,6 +868,21 @@ def set_properties(alg_object, *args, **kwargs):
             alg_object.setPropertyValue(key, value.name())
         else:
             alg_object.setProperty(key, value)
+    # end
+    if len(args) > 0:
+        mandatory_props = alg_object.mandatoryProperties()
+    else:
+        mandatory_props = []
+    if len(kwargs) > 0:
+        for (key, value) in iteritems(kwargs):
+            do_set_property(key, value)
+            try:
+                mandatory_props.remove(key)
+            except ValueError:
+                pass
+    if len(args) > 0:
+        for (key, value) in zip(mandatory_props[:len(args)], args):
+            do_set_property(key, value)
 
 
 def _create_algorithm_function(name, version, algm_object):

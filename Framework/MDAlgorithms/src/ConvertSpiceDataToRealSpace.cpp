@@ -1,9 +1,9 @@
 #include "MantidMDAlgorithms/ConvertSpiceDataToRealSpace.h"
 
 #include "MantidAPI/WorkspaceProperty.h"
-#include "MantidAPI/FileProperty.h"
-#include "MantidAPI/IMDIterator.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/Run.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/MDEventFactory.h"
 #include "MantidDataObjects/MDEventInserter.h"
@@ -13,12 +13,9 @@
 #include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/MDGeometry/GeneralFrame.h"
-#include "MantidGeometry/MDGeometry/IMDDimension.h"
-#include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 
-#include <boost/algorithm/string/predicate.hpp>
 #include <Poco/TemporaryFile.h>
 
 namespace Mantid {
@@ -32,7 +29,6 @@ using namespace Mantid::DataObjects;
 
 DECLARE_ALGORITHM(ConvertSpiceDataToRealSpace)
 
-//------------------------------------------------------------------------------------------------
 /** Init
  */
 void ConvertSpiceDataToRealSpace::init() {
@@ -90,7 +86,6 @@ void ConvertSpiceDataToRealSpace::init() {
       "Name of a table workspace containing the detectors' efficiency.");
 }
 
-//------------------------------------------------------------------------------------------------
 /** Exec
  */
 void ConvertSpiceDataToRealSpace::exec() {
@@ -102,9 +97,8 @@ void ConvertSpiceDataToRealSpace::exec() {
   DataObjects::TableWorkspace_sptr detEffTableWS =
       getProperty("DetectorEfficiencyTableWorkspace");
   std::map<detid_t, double> detEffMap; // map for detector efficiency
-  if (detEffTableWS) {
+  if (detEffTableWS)
     detEffMap = parseDetectorEfficiencyTable(detEffTableWS);
-  }
 
   // Check whether parent workspace has run start: order (1) parent ws, (2) user
   // given (3) nothing
@@ -139,11 +133,10 @@ void ConvertSpiceDataToRealSpace::exec() {
     }
   }
 
-  if (!hasrunstartset) {
+  if (!hasrunstartset)
     g_log.warning("Run-start time is not defined either in "
                   "input parent workspace or given by user. 1990-01-01 "
                   "00:00:01 is used");
-  }
 
   // Convert table workspace to a list of 2D workspaces
   std::map<std::string, std::vector<double>> logvecmap;
@@ -160,11 +153,9 @@ void ConvertSpiceDataToRealSpace::exec() {
   std::vector<MatrixWorkspace_sptr> vec_ws2d = convertToMatrixWorkspace(
       dataTableWS, parentWS, runstart, logvecmap, vectimes);
 
-  // Apply detector e(fficiency
-  if (!detEffMap.empty()) {
-    correctByDetectorEfficiency(vec_ws2d,
-                                detEffMap); // std::vector<MatrixWorkspace_sptr>
-  }
+  // Apply detector efficiency
+  if (!detEffMap.empty())
+    correctByDetectorEfficiency(vec_ws2d, detEffMap);
 
   // check range for x/y/z
   m_numBins.resize(3);
@@ -335,21 +326,13 @@ MatrixWorkspace_sptr ConvertSpiceDataToRealSpace::loadRunToMatrixWS(
   tempws = instloader->getProperty("Workspace");
 
   // Import data
-  std::vector<double> pos(3);
+  const auto &specInfo = tempws->spectrumInfo();
   for (size_t i = 0; i < m_numSpec; ++i) {
-    // get detector
-    Geometry::IDetector_const_sptr tmpdet = tempws->getDetector(i);
-    pos[0] = tmpdet->getPos().X();
-    pos[1] = tmpdet->getPos().Y();
-    pos[2] = tmpdet->getPos().Z();
-    tempws->dataX(i)[0] = pos[0];
-    tempws->dataX(i)[0] = pos[0] + 0.01;
+    const auto &pos = specInfo.position(i);
+    tempws->mutableX(i)[0] = pos[0] + 0.01;
     double yvalue = tablews->cell<double>(irow, anodelist[i].second);
-    tempws->dataY(i)[0] = yvalue;
-    if (yvalue >= 1)
-      tempws->dataE(i)[0] = sqrt(yvalue);
-    else
-      tempws->dataE(i)[0] = 1;
+    tempws->mutableY(i)[0] = yvalue;
+    tempws->mutableE(i)[0] = std::max(sqrt(yvalue), 1.0);
     // update X-range, Y-range and Z-range
     for (size_t d = 0; d < 3; ++d) {
       if (pos[d] < m_extentMins[d])
@@ -390,7 +373,7 @@ void ConvertSpiceDataToRealSpace::readTableInfo(
       // anode
       std::vector<std::string> terms;
       boost::split(terms, colname, boost::is_any_of(anodelogprefix));
-      size_t anodeid = static_cast<size_t>(atoi(terms.back().c_str()));
+      size_t anodeid = static_cast<size_t>(std::stoi(terms.back()));
       anodelist.emplace_back(anodeid, icol);
     } else {
       samplenameindexmap.emplace(colname, icol);
@@ -509,7 +492,7 @@ void ConvertSpiceDataToRealSpace::appendSampleLogs(
       ExperimentInfo_sptr tmpei = mdws->getExperimentInfo(i);
       // check run number matches
       int runnumber =
-          atoi(tmpei->run().getProperty("run_number")->value().c_str());
+          std::stoi(tmpei->run().getProperty("run_number")->value());
       if (runnumber != static_cast<int>(vecrunno[i]))
         throw std::runtime_error("Run number does not match to Pt. value.");
       // add property
@@ -542,8 +525,7 @@ void ConvertSpiceDataToRealSpace::addExperimentInfos(
     Geometry::Instrument_const_sptr tmp_inst = ws2d->getInstrument();
     tmp_expinfo->setInstrument(tmp_inst);
 
-    int runnumber =
-        atoi(ws2d->run().getProperty("run_number")->value().c_str());
+    int runnumber = std::stoi(ws2d->run().getProperty("run_number")->value());
     tmp_expinfo->mutableRun().addProperty(
         new PropertyWithValue<int>("run_number", runnumber));
 
@@ -591,7 +573,6 @@ IMDEventWorkspace_sptr ConvertSpiceDataToRealSpace::createDataMDWorkspace(
   for (size_t i = 0; i < m_nDimensions; ++i) {
     std::string id = vec_ID[i];
     std::string name = vec_name[i];
-    // int nbins = 100;
 
     for (size_t d = 0; d < 3; ++d)
       g_log.debug() << "Direction " << d << ", Range = " << m_extentMins[d]
@@ -611,30 +592,25 @@ IMDEventWorkspace_sptr ConvertSpiceDataToRealSpace::createDataMDWorkspace(
       MDEW_MDEVENT_3);
 
   for (const auto &thisWorkspace : vec_ws2d) {
-    short unsigned int runnumber = static_cast<short unsigned int>(
-        atoi(thisWorkspace->run().getProperty("run_number")->value().c_str()));
+    uint16_t runnumber = static_cast<uint16_t>(
+        std::stoi(thisWorkspace->run().getProperty("run_number")->value()));
 
     detid_t detindex = 0;
 
     size_t nHist = thisWorkspace->getNumberHistograms();
+    const auto &specInfo = thisWorkspace->spectrumInfo();
     for (std::size_t i = 0; i < nHist; ++i) {
-      // For each spectrum/detector
-      Geometry::IDetector_const_sptr det = thisWorkspace->getDetector(i);
-      const MantidVec &vecsignal = thisWorkspace->readY(i);
-      const MantidVec &vecerror = thisWorkspace->readE(i);
+      const auto &vecsignal = thisWorkspace->y(i);
+      const auto &vecerror = thisWorkspace->e(i);
       float signal = static_cast<float>(vecsignal[0]);
       float error = static_cast<float>(vecerror[0]);
-      detid_t detid = det->getID() + detindex;
-      Kernel::V3D detPos = det->getPos();
-      double x = detPos.X();
-      double y = detPos.Y();
-      double z = detPos.Z();
-      std::vector<Mantid::coord_t> data(3);
-      data[0] = static_cast<float>(x);
-      data[1] = static_cast<float>(y);
-      data[2] = static_cast<float>(z);
-      inserter.insertMDEvent(signal, error * error, runnumber, detid,
-                             data.data());
+      detid_t detid = specInfo.detector(i).getID() + detindex;
+      const auto &detPos = specInfo.position(i);
+      Mantid::coord_t data[3];
+      data[0] = static_cast<float>(detPos.X());
+      data[1] = static_cast<float>(detPos.Y());
+      data[2] = static_cast<float>(detPos.Z());
+      inserter.insertMDEvent(signal, error * error, runnumber, detid, data);
     } // ENDFOR(spectrum)
   }   // ENDFOR (workspace)
 
@@ -693,7 +669,7 @@ IMDEventWorkspace_sptr ConvertSpiceDataToRealSpace::createMonitorMDWorkspace(
   for (size_t iws = 0; iws < vec_ws2d.size(); ++iws) {
     API::MatrixWorkspace_sptr thisWorkspace = vec_ws2d[iws];
     short unsigned int runnumber = static_cast<short unsigned int>(
-        atoi(thisWorkspace->run().getProperty("run_number")->value().c_str()));
+        std::stoi(thisWorkspace->run().getProperty("run_number")->value()));
 
     detid_t detindex = 0;
     float signal = static_cast<float>(vecmonitor[iws]);
@@ -702,20 +678,16 @@ IMDEventWorkspace_sptr ConvertSpiceDataToRealSpace::createMonitorMDWorkspace(
       error = std::sqrt(signal);
 
     size_t nHist = thisWorkspace->getNumberHistograms();
+    const auto &specInfo = thisWorkspace->spectrumInfo();
     for (std::size_t i = 0; i < nHist; ++i) {
       // For each spectrum/detector
-      Geometry::IDetector_const_sptr det = thisWorkspace->getDetector(i);
-      detid_t detid = det->getID() + detindex;
-      Kernel::V3D detPos = det->getPos();
-      double x = detPos.X();
-      double y = detPos.Y();
-      double z = detPos.Z();
-      std::vector<Mantid::coord_t> data(3);
-      data[0] = static_cast<float>(x);
-      data[1] = static_cast<float>(y);
-      data[2] = static_cast<float>(z);
-      inserter.insertMDEvent(signal, error * error, runnumber, detid,
-                             data.data());
+      detid_t detid = specInfo.detector(i).getID() + detindex;
+      const auto &detPos = specInfo.position(i);
+      Mantid::coord_t data[3];
+      data[0] = static_cast<float>(detPos.X());
+      data[1] = static_cast<float>(detPos.Y());
+      data[2] = static_cast<float>(detPos.Z());
+      inserter.insertMDEvent(signal, error * error, runnumber, detid, data);
     } // ENDFOR(spectrum)
   }   // ENDFOR (workspace)
 
@@ -763,12 +735,13 @@ void ConvertSpiceDataToRealSpace::correctByDetectorEfficiency(
   std::map<detid_t, double>::const_iterator detiter;
   for (it = vec_ws2d.begin(); it != vec_ws2d.end(); ++it) {
     MatrixWorkspace_sptr ws = *it;
+    const auto &specInfo = ws->spectrumInfo();
     size_t numspec = ws->getNumberHistograms();
     for (size_t iws = 0; iws < numspec; ++iws) {
-      detid_t detid = ws->getDetector(iws)->getID();
+      detid_t detid = specInfo.detector(iws).getID();
       detiter = detEffMap.find(detid);
       if (detiter != detEffMap.end())
-        ws->dataY(iws)[0] /= detiter->second;
+        ws->mutableY(iws)[0] /= detiter->second;
     }
   }
 }

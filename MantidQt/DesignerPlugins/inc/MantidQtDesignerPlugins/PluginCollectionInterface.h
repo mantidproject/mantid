@@ -7,7 +7,7 @@
 #include "MantidQtMantidWidgets/DataSelector.h"
 #include "MantidQtDesignerPlugins/DesignerPlugin.h"
 #include "MantidQtMantidWidgets/ScriptEditor.h"
-#include "MantidQtMantidWidgets/MWRunFiles.h"
+#include "MantidQtAPI/MWRunFiles.h"
 #include "MantidQtMantidWidgets/FitPropertyBrowser.h"
 #include "MantidQtMantidWidgets/MuonFitPropertyBrowser.h"
 #include "MantidQtMantidWidgets/InstrumentSelector.h"
@@ -22,6 +22,7 @@
 #include "MantidQtMantidWidgets/MessageDisplay.h"
 #include "MantidQtMantidWidgets/PreviewPlot.h"
 #include "MantidQtMantidWidgets/DisplayCurveFit.h"
+#include "MantidQtMantidWidgets/MuonFitDataSelector.h"
 #include "MantidQtMantidWidgets/LogValueSelector.h"
 
 /**
@@ -96,7 +97,7 @@ DECLARE_WIDGET_PLUGIN(AlgorithmSelectorWidgetPlugin,
 DECLARE_WIDGET_PLUGIN(ScriptEditorPlugin, ScriptEditor,
                       "Widget for editing python script");
 
-DECLARE_WIDGET_PLUGIN(FileFinderPlugin, MantidQt::MantidWidgets::MWRunFiles,
+DECLARE_WIDGET_PLUGIN(FileFinderPlugin, MantidQt::API::MWRunFiles,
                       "Searches for the given files within the paths defined "
                       "by\nMantid's datasearch.directories property");
 
@@ -154,6 +155,10 @@ DECLARE_WIDGET_PLUGIN(PreviewPlotPlugin, MantidQt::MantidWidgets::PreviewPlot,
 DECLARE_WIDGET_PLUGIN(DisplayCurveFitPlugin,
                       MantidQt::MantidWidgets::DisplayCurveFit,
                       "Curve plots for workspace spectra");
+
+DECLARE_WIDGET_PLUGIN(MuonFitDataSelectorPlugin,
+                      MantidQt::MantidWidgets::MuonFitDataSelector,
+                      "Data selection for muon fits");
 
 DECLARE_WIDGET_PLUGIN(LogValueSelectorPlugin,
                       MantidQt::MantidWidgets::LogValueSelector,

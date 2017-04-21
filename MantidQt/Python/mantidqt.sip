@@ -84,6 +84,33 @@ namespace GraphOptions
   enum ScaleType {Linear, Log10};
 
   enum Axis{Left, Right, Bottom, Top};
+
+  enum CurveType {
+  Line,
+  Scatter,
+  LineSymbols,
+  VerticalBars,
+  Area,
+  Pie,
+  VerticalDropLines,
+  Spline,
+  HorizontalSteps,
+  Histogram,
+  HorizontalBars,
+  VectXYXY,
+  ErrorBars,
+  Box,
+  VectXYAM,
+  VerticalSteps,
+  ColorMap,
+  GrayScale,
+  ColorMapContour,
+  Contour,
+  Function,
+  ImagePlot,
+  User
+};
+
 };
 
 namespace Mantid
@@ -151,15 +178,29 @@ public:
   void showCustomInterfaceHelp(const QString &name);
 };
 
+class MantidDesktopServices
+{
+%TypeHeaderCode
+#include "MantidQtAPI/MantidDesktopServices.h"
+%End
+public:
+  static bool openUrl(const QUrl &url);
+  static void setUrlHandler(const QString &scheme, QObject *receiver,
+                            const char *method);
+  static void unsetUrlHandler(const QString &scheme);
+  static QString storageLocation(QDesktopServices::StandardLocation type);
+  static QString displayName(QDesktopServices::StandardLocation type);
 };
 
-namespace MantidWidgets
+};
+
+namespace API
 {
 
 class MWRunFiles : QWidget
 {
 %TypeHeaderCode
-#include "MantidQtMantidWidgets/MWRunFiles.h"
+#include "MantidQtAPI/MWRunFiles.h"
 %End
 public:
 void setLabelMinWidth(const int);
@@ -354,7 +395,7 @@ void LineViewer::setThickness(int dim, double width)
     Set the thickness to integrate in a particular dimension.
 
     Integration is performed perpendicular to the XY plane,
-    from -thickness below to +thickness above the center.
+    from -0.5 * thickness below to +0.5 * thickness above the center.
 
     Use setPlanarWidth() to set the width along the XY plane.
 
@@ -374,7 +415,7 @@ void LineViewer::setThickness(const QString & dim, double width)
     Set the thickness to integrate in a particular dimension.
 
     Integration is performed perpendicular to the XY plane,
-    from -thickness below to +thickness above the center.
+    from -0.5 * thickness below to +0.5 * thickness above the center.
 
     Use setPlanarWidth() to set the width along the XY plane.
 
@@ -1162,7 +1203,7 @@ Mantid::API::MDNormalization SliceViewer::getNormalization()
 void SliceViewer::setColorBarAutoScale(bool autoscale)
 ------------------------------------------------------
     Set autoscaling for the color scale on or off
-	
+
 	Args:
 	    autoscale :: on/off status for autoscaling
 
@@ -1315,6 +1356,7 @@ MantidQt::SliceViewer::SliceViewer* WidgetFactory::createSliceViewer(const QStri
 
 
 private:
+  WidgetFactory(const MantidQt::Factory::WidgetFactory&);
   WidgetFactory();
 %Docstring
 WidgetFactory::WidgetFactory()
@@ -1610,7 +1652,7 @@ public:
                      SPHERICAL_X, SPHERICAL_Y, SPHERICAL_Z,
                      RENDERMODE_SIZE };
   enum Tab { RENDER, PICK, MASK, TREE };
-  
+
   InstrumentWidget(const QString &wsName, QWidget *parent = nullptr,
 				bool resetGeometry = true, bool autoscaling = true,
 				double scaleMin = 0.0, double scaleMax = 0.0,
@@ -1884,6 +1926,3 @@ private:
 
 };//end namespace MantidWidgets
 };//end namespace MantidQt
-
-
-

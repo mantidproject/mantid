@@ -52,9 +52,10 @@ public:
   void declareAttribute(const std::string &name,
                         const boost::python::object &defaultValue);
   /// Get a named attribute value
-  PyObject *getAttributeValue(const std::string &name);
+  static PyObject *getAttributeValue(IFunction &self, const std::string &name);
   /// Returns the attribute's value as a Python object
-  PyObject *getAttributeValue(const API::IFunction::Attribute &attr);
+  static PyObject *getAttributeValue(IFunction &self,
+                                     const API::IFunction::Attribute &attr);
   /// Called by the framework when an attribute has been set
   void setAttribute(const std::string &attName,
                     const API::IFunction::Attribute &attr) override;

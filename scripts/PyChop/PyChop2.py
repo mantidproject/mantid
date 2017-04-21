@@ -5,8 +5,10 @@ This module contains the PyChop2 class which allows calculation of the resolutio
 direct geometry time-of-flight inelastic neutron spectrometers.
 """
 
+from __future__ import (absolute_import, division, print_function)
 from .ISISFermi import ISISFermi
 from .ISISDisk import ISISDisk
+
 
 class PyChop2:
     """
@@ -119,6 +121,12 @@ class PyChop2:
         """
         return self.object.getResFlux(*args)
 
+    def getWidths(self, *args):
+        """
+        ! Returns the individual time widths that go into the calculated energy widths as a dict
+        """
+        return self.object.getWidths(*args)
+
     def __getMultiRepObject(self):
         """
         Private method to obtain multi-rep information
@@ -151,6 +159,12 @@ class PyChop2:
         ! For instruments which support multi-rep mode, returns the flux for each rep
         """
         return self.__getMultiRepObject().getMultiRepFlux(*args)
+
+    def getMultiWidths(self, *args):
+        """
+        ! Returns the individual time widths that go into the calculated energy widths as a dict
+        """
+        return self.__getMultiRepObject().getMultiWidths(*args)
 
     def plotMultiRepFrame(self, *args):
         """
@@ -185,7 +199,7 @@ class PyChop2:
         ! The results are returned as tuple: (resolution, flux)
         """
         if len(args) > 0:
-            if type(args[0]) is not str:
+            if not isinstance(args[0], str):
                 raise ValueError('The first argument must be the instrument name')
             instname = args[0].upper()
         elif 'inst' in kwargs.keys():
@@ -200,15 +214,17 @@ class PyChop2:
             for ind in range(1, lna):
                 argdict[argname[ind]] = args[ind]
             for ind in kwargs.keys():
-                if ind in argname: argdict[ind] = kwargs[ind]
+                if ind in argname:
+                    argdict[ind] = kwargs[ind]
             for ind in range(1, 4):
                 if argname[ind] not in argdict:
                     raise RuntimeError('Parameter ''%s'' must be specified' % (argname[ind]))
             obj.setChopper(argdict['chtyp'], argdict['freq'])
             obj.setEi(argdict['ei'])
         else:
-            if 'variant' in kwargs.keys(): argdict['variant'] = kwargs['variant']
-            if len(args) > 1 and type(args[1]) is str:
+            if 'variant' in kwargs.keys():
+                argdict['variant'] = kwargs['variant']
+            if len(args) > 1 and isinstance(args[1], str):
                 argname = ['inst', 'variant', 'freq', 'ei', 'etrans']
             else:
                 argname = ['inst', 'freq', 'ei', 'etrans']
@@ -216,7 +232,8 @@ class PyChop2:
             for ind in range(1, lna):
                 argdict[argname[ind]] = args[ind]
             for ind in kwargs.keys():
-                if ind in argname: argdict[ind] = kwargs[ind]
+                if ind in argname:
+                    argdict[ind] = kwargs[ind]
             if 'variant' in argdict.keys():
                 obj.setChopper(argdict['variant'])
             if 'freq' not in argdict.keys() or 'ei' not in argdict.keys():

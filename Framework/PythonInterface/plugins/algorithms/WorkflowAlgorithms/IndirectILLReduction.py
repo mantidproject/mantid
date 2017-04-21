@@ -1,4 +1,6 @@
 #pylint: disable=no-init,invalid-name
+from __future__ import (absolute_import, division, print_function)
+
 from mantid.simpleapi import *
 from mantid.kernel import StringListValidator, Direction
 from mantid.api import DataProcessorAlgorithm, PropertyMode, AlgorithmFactory, \
@@ -9,6 +11,8 @@ import numpy as np
 import os.path
 
 #pylint: disable=too-many-instance-attributes
+
+
 class IndirectILLReduction(DataProcessorAlgorithm):
 
     _raw_workspace = None
@@ -29,12 +33,12 @@ class IndirectILLReduction(DataProcessorAlgorithm):
     def category(self):
         return "Workflow\\MIDAS;Inelastic\\Reduction"
 
-
     def summary(self):
-        return 'Performs an energy transfer reduction for ILL indirect inelastic data.'
-
+        return 'Performs an energy transfer reduction for ILL indirect inelastic data.' \
+               'This algorithm is deprecated (20-Nov-2016). Use IndirectILLReductionQENS instead.'
 
     def PyInit(self):
+
         # Input options
         self.declareProperty(FileProperty('Run', '',
                                           action=FileAction.Load,
@@ -88,7 +92,6 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         self.declareProperty(name='Plot', defaultValue=False,
                              doc='Whether to plot the output workspace.')
 
-
     def validateInputs(self):
         issues = dict()
 
@@ -106,8 +109,10 @@ class IndirectILLReduction(DataProcessorAlgorithm):
 
         return issues
 
-
     def PyExec(self):
+        self.log().error('This algorithm is deprecated (20-Nov-2016). '
+                         'Use IndirectILLReductionQENS instead.')
+
         self.log().information('IndirectILLreduction')
 
         run_path = self.getPropertyValue('Run')
@@ -122,7 +127,7 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         self._save = self.getProperty('Save').value
         self._plot = self.getProperty('Plot').value
 
-        LoadILLIndirect(FileName=run_path, OutputWorkspace=self._raw_workspace)
+        LoadILLIndirect(FileName=run_path, OutputWorkspace=self._raw_workspace, Version=1)
 
         instrument = mtd[self._raw_workspace].getInstrument()
         self._instrument_name = instrument.getName()
@@ -165,7 +170,6 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         if self._use_mirror_mode:
             self.setPropertyValue('LeftWorkspace', self._red_left_workspace)
             self.setPropertyValue('RightWorkspace', self._red_right_workspace)
-
 
     def _reduction(self):
         """
@@ -214,7 +218,6 @@ class IndirectILLReduction(DataProcessorAlgorithm):
             output_workspaces = [self._red_workspace]
 
         return output_workspaces
-
 
     def _run_mirror_mode(self, monitor_ws, grouped_ws):
         """
@@ -288,7 +291,6 @@ class IndirectILLReduction(DataProcessorAlgorithm):
 
         return [self._red_left_workspace, self._red_right_workspace, self._red_workspace]
 
-
     def _calculate_energy(self, monitor_ws, grouped_ws, red_ws):
         """
         Convert the input run to energy transfer
@@ -345,7 +347,6 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         DeleteWorkspace(grouped_ws)
         DeleteWorkspace(monitor_ws)
 
-
     def _monitor_range(self, monitor_ws):
         """
         Get sensible values for the min and max cropping range
@@ -363,7 +364,6 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         logger.information('Cropping range %f to %f' % (x[imin], x[imax]))
 
         return x[imin], x[imax]
-
 
     def _energy_range(self, ws):
         """

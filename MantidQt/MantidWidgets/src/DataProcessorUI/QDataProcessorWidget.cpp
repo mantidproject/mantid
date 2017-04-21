@@ -1,5 +1,4 @@
 #include "MantidQtMantidWidgets/DataProcessorUI/QDataProcessorWidget.h"
-#include "MantidQtAPI/FileDialogHandler.h"
 #include "MantidQtAPI/MantidWidget.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorCommandAdapter.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorPresenter.h"
@@ -184,9 +183,9 @@ std::string QDataProcessorWidget::requestNotebookPath() {
 
   // We won't use QFileDialog directly here as using the NativeDialog option
   // causes problems on MacOS.
-  QString qfilename = API::FileDialogHandler::getSaveFileName(
+  QString qfilename = QFileDialog::getSaveFileName(
       this, "Save notebook file", QDir::currentPath(),
-      "IPython Notebook files (*.ipynb);;All files (*.*)",
+      "IPython Notebook files (*.ipynb);;All files (*)",
       new QString("IPython Notebook files (*.ipynb)"));
 
   // There is a Qt bug (QTBUG-27186) which means the filename returned
@@ -204,6 +203,16 @@ std::string QDataProcessorWidget::requestNotebookPath() {
 
   return filename;
 }
+
+/**
+Expand all currently closed groups
+*/
+void QDataProcessorWidget::expandAll() { ui.viewTable->expandAll(); }
+
+/**
+Collapse all currently expanded groups
+*/
+void QDataProcessorWidget::collapseAll() { ui.viewTable->collapseAll(); }
 
 /**
 Save settings

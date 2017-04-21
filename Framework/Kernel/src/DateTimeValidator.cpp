@@ -1,8 +1,6 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidKernel/DateTimeValidator.h"
 #include "MantidKernel/DateAndTime.h"
+#include <boost/make_shared.hpp>
 
 namespace Mantid {
 namespace Kernel {

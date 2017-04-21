@@ -1,10 +1,12 @@
 #include <QDialogButtonBox>
 #include <QUrl>
-#include <QDesktopServices>
 #include "MantidQtSliceViewer/PeaksViewerOverlayDialog.h"
+#include "MantidQtAPI/MantidDesktopServices.h"
 #include "ui_PeaksViewerOverlayDialog.h"
 
 namespace MantidQt {
+using API::MantidDesktopServices;
+
 namespace SliceViewer {
 /**
  * Calculate the conversion factor from slider position to fractional occupancy.
@@ -157,7 +159,7 @@ void PeaksViewerOverlayDialog::reject() {
  */
 void PeaksViewerOverlayDialog::onHelp() {
   QString helpPage = "PeaksViewer#Preference_Options";
-  QDesktopServices::openUrl(
+  MantidDesktopServices::openUrl(
       QUrl(QString("http://www.mantidproject.org/") + helpPage));
 }
 }

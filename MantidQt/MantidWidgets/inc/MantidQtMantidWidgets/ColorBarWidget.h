@@ -1,12 +1,12 @@
 #ifndef MANTID_MANTIDWIDGETS_COLORBARWIDGET_H_
 #define MANTID_MANTIDWIDGETS_COLORBARWIDGET_H_
 
-#include <QtGui/QWidget>
-#include "ui_ColorBarWidget.h"
-#include <qwt_scale_widget.h>
 #include "MantidQtAPI/MantidColorMap.h"
-#include <QtGui>
 #include "MantidQtMantidWidgets/WidgetDllOption.h"
+#include "ui_ColorBarWidget.h"
+#include <QtGui/QWidget>
+#include <QtGui>
+#include <qwt_scale_widget.h>
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -49,7 +49,8 @@ public:
   enum CheckboxStrategy {
     ADD_AUTOSCALE_CURRENT_SLICE = 0,
     ADD_AUTOSCALE_ON_LOAD = 1,
-    ADD_AUTOSCALE_BOTH = 2
+    ADD_AUTOSCALE_BOTH = 2,
+    ADD_AUTOSCALE_NONE = 3
   };
 
   void updateColorMap();

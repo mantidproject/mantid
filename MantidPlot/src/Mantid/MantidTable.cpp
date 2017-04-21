@@ -133,6 +133,8 @@ void MantidTable::fillTable() {
     // Print out the data in each row of this column
     for (int j = 0; j < static_cast<int>(m_ws->rowCount()); j++) {
       std::ostringstream ostr;
+      std::locale systemLocale("");
+      ostr.imbue(systemLocale);
       // Avoid losing precision for numeric data
       if (c->type() == "double") {
         ostr.precision(std::numeric_limits<double>::max_digits10);
@@ -199,6 +201,8 @@ void MantidTable::fillTableTransposed() {
     // Print out the data in each row of this column
     for (int j = 0; j < static_cast<int>(m_ws->rowCount()); ++j) {
       std::ostringstream ostr;
+      const std::locale systemLocale("");
+      ostr.imbue(systemLocale);
       // Avoid losing precision for numeric data
       if (c->type() == "double") {
         ostr.precision(std::numeric_limits<double>::max_digits10);
@@ -285,15 +289,19 @@ void MantidTable::cellEdited(int row, int col) {
     oldText.remove(QRegExp("\\s"));
   }
 
-  std::string text = oldText.toStdString();
+  const std::string text = oldText.toStdString();
 
   // Have the column convert the text to a value internally
   int index = row;
-  c->read(index, text);
+  std::istringstream textStream(text);
+  const std::locale systemLocale("");
+  textStream.imbue(systemLocale);
+  c->read(index, textStream);
 
   // Set the table view to be the same text after editing.
   // That way, if the string was stupid, it will be reset to the old value.
   std::ostringstream s;
+  s.imbue(systemLocale);
   // Avoid losing precision for numeric data
   if (c->type() == "double") {
     s.precision(std::numeric_limits<double>::max_digits10);

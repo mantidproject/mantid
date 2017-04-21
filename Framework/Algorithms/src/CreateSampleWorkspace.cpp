@@ -4,9 +4,11 @@
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/FunctionDomain1D.h"
 #include "MantidAPI/FunctionProperty.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
@@ -14,6 +16,8 @@
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/MersenneTwister.h"
+#include "MantidIndexing/IndexInfo.h"
+#include "MantidTypes/SpectrumDefinition.h"
 
 #include <cmath>
 #include <ctime>
@@ -26,28 +30,22 @@ using namespace Kernel;
 using namespace API;
 using namespace Geometry;
 using namespace DataObjects;
+using namespace HistogramData;
+using namespace Indexing;
 using Mantid::MantidVec;
 using Mantid::MantidVecPtr;
-using HistogramData::BinEdges;
-using HistogramData::Counts;
-using HistogramData::CountVariances;
-using HistogramData::CountStandardDeviations;
-using HistogramData::LinearGenerator;
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(CreateSampleWorkspace)
 
-//----------------------------------------------------------------------------------------------
 /** Constructor
  */
 CreateSampleWorkspace::CreateSampleWorkspace() : m_randGen(nullptr) {}
 
-//----------------------------------------------------------------------------------------------
 /** Destructor
  */
 CreateSampleWorkspace::~CreateSampleWorkspace() { delete m_randGen; }
 
-//----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string CreateSampleWorkspace::name() const {
   return "CreateSampleWorkspace";
@@ -61,7 +59,6 @@ const std::string CreateSampleWorkspace::category() const {
   return "Utility\\Workspaces";
 }
 
-//----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void CreateSampleWorkspace::init() {
@@ -228,12 +225,10 @@ void CreateSampleWorkspace::exec() {
   MatrixWorkspace_sptr ws;
   if (wsType == "Event") {
     ws = createEventWorkspace(numPixels, numBins, numMonitors, numEvents, xMin,
-                              binWidth, bankPixelWidth * bankPixelWidth, inst,
-                              functionString, isRandom);
+                              binWidth, inst, functionString, isRandom);
   } else {
     ws = createHistogramWorkspace(numPixels, numBins, numMonitors, xMin,
-                                  binWidth, bankPixelWidth * bankPixelWidth,
-                                  inst, functionString, isRandom);
+                                  binWidth, inst, functionString, isRandom);
   }
   // add chopper
   this->addChopperParameters(ws);
@@ -298,50 +293,41 @@ void CreateSampleWorkspace::addChopperParameters(
  */
 MatrixWorkspace_sptr CreateSampleWorkspace::createHistogramWorkspace(
     int numPixels, int numBins, int numMonitors, double x0, double binDelta,
-    int start_at_pixelID, Geometry::Instrument_sptr inst,
-    const std::string &functionString, bool isRandom) {
+    Geometry::Instrument_sptr inst, const std::string &functionString,
+    bool isRandom) {
   BinEdges x(numBins + 1, LinearGenerator(x0, binDelta));
 
   std::vector<double> xValues(cbegin(x), cend(x) - 1);
   Counts y(evalFunction(functionString, xValues, isRandom ? 1 : 0));
-  CountStandardDeviations e(CountVariances(y.cbegin(), y.cend()));
 
-  auto retVal = createWorkspace<Workspace2D>(numPixels + numMonitors,
-                                             numBins + 1, numBins);
-  retVal->setInstrument(inst);
+  std::vector<SpectrumDefinition> specDefs(numPixels + numMonitors);
+  for (int wi = 0; wi < numMonitors + numPixels; wi++)
+    specDefs[wi].add(wi < numMonitors ? numPixels + wi : wi - numMonitors);
+  Indexing::IndexInfo indexInfo(numPixels + numMonitors);
+  indexInfo.setSpectrumDefinitions(std::move(specDefs));
 
-  for (int wi = 0; wi < numMonitors + numPixels; wi++) {
-    detid_t detNumber = wi < numMonitors ? start_at_pixelID + numPixels + wi
-                                         : start_at_pixelID + wi - numMonitors;
-    retVal->setBinEdges(wi, x);
-    retVal->setCounts(wi, y);
-    retVal->setCountStandardDeviations(wi, e);
-    retVal->getSpectrum(wi).setDetectorID(detNumber);
-    retVal->getSpectrum(wi).setSpectrumNo(specnum_t(wi + 1));
-  }
-
-  return retVal;
+  return create<Workspace2D>(inst, indexInfo, Histogram(x, y));
 }
 
 /** Create event workspace
  */
 EventWorkspace_sptr CreateSampleWorkspace::createEventWorkspace(
     int numPixels, int numBins, int numMonitors, int numEvents, double x0,
-    double binDelta, int start_at_pixelID, Geometry::Instrument_sptr inst,
+    double binDelta, Geometry::Instrument_sptr inst,
     const std::string &functionString, bool isRandom) {
   DateAndTime run_start("2010-01-01T00:00:00");
 
+  std::vector<SpectrumDefinition> specDefs(numPixels + numMonitors);
+  for (int wi = 0; wi < numMonitors + numPixels; wi++)
+    specDefs[wi].add(wi < numMonitors ? numPixels + wi : wi - numMonitors);
+  Indexing::IndexInfo indexInfo(numPixels + numMonitors);
+  indexInfo.setSpectrumDefinitions(std::move(specDefs));
+
   // add one to the number of bins as this is histogram
   int numXBins = numBins + 1;
-
-  auto retVal = boost::make_shared<EventWorkspace>();
-  retVal->initialize(numPixels + numMonitors, 1, 1);
-
-  retVal->setInstrument(inst);
-
-  // Set all the histograms at once.
   BinEdges x(numXBins, LinearGenerator(x0, binDelta));
-  retVal->setAllX(x);
+
+  auto retVal = create<EventWorkspace>(inst, indexInfo, x);
 
   std::vector<double> xValues(x.cbegin(), x.cend() - 1);
   std::vector<double> yValues =
@@ -361,13 +347,6 @@ EventWorkspace_sptr CreateSampleWorkspace::createEventWorkspace(
   const double hourInSeconds = 60 * 60;
   for (int wi = 0; wi < numPixels + numMonitors; wi++) {
     EventList &el = retVal->getSpectrum(workspaceIndex);
-    el.setSpectrumNo(wi + 1);
-    detid_t detNumber = wi < numMonitors ? start_at_pixelID + numPixels + wi
-                                         : start_at_pixelID + wi - numMonitors;
-    el.setDetectorID(detNumber);
-
-    // for each bin
-
     for (int i = 0; i < numBins; ++i) {
       // create randomised events within the bin to match the number required -
       // calculated in yValues earlier
@@ -381,7 +360,7 @@ EventWorkspace_sptr CreateSampleWorkspace::createEventWorkspace(
     workspaceIndex++;
   }
 
-  return retVal;
+  return std::move(retVal);
 }
 //----------------------------------------------------------------------------------------------
 /**

@@ -9,6 +9,7 @@ from reduction_gui.widgets.toftof.toftof_setup       import TOFTOFSetupWidget
 
 #-------------------------------------------------------------------------------
 
+
 class TOFTOFInterface(InstrumentInterface):
     ''' The interface for TOFTOF reduction. '''
 

@@ -5,6 +5,7 @@
 
 #include "MantidAlgorithms/ImggTomographicReconstruction.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidKernel/Exception.h"
 
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
@@ -63,7 +64,7 @@ public:
 
   void test_exec_fails_wrong_workspace() {
     API::MatrixWorkspace_sptr a =
-        WorkspaceCreationHelper::CreateWorkspaceSingleValue(3);
+        WorkspaceCreationHelper::createWorkspaceSingleValue(3);
 
     ImggTomographicReconstruction alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
@@ -74,7 +75,7 @@ public:
     TS_ASSERT(!alg.isExecuted());
 
     API::MatrixWorkspace_sptr wsSingle =
-        WorkspaceCreationHelper::Create2DWorkspace(10, 10);
+        WorkspaceCreationHelper::create2DWorkspace(10, 10);
 
     ImggTomographicReconstruction algTwo;
     TS_ASSERT_THROWS_NOTHING(algTwo.initialize());
@@ -88,7 +89,7 @@ public:
   void test_exec_fails_single_proj() {
     const std::string projectionsGrpName("only_one_projection");
     API::WorkspaceGroup_sptr projectionsGrp =
-        WorkspaceCreationHelper::CreateWorkspaceGroup(1, 4, 4,
+        WorkspaceCreationHelper::createWorkspaceGroup(1, 4, 4,
                                                       projectionsGrpName);
 
     ImggTomographicReconstruction alg;
@@ -107,7 +108,7 @@ public:
   void test_exec_fails_wrong_center() {
     const std::string projectionsGrpName("only_two_small_projections");
     API::WorkspaceGroup_sptr projectionsGrp =
-        WorkspaceCreationHelper::CreateWorkspaceGroup(2, 4, 4,
+        WorkspaceCreationHelper::createWorkspaceGroup(2, 4, 4,
                                                       projectionsGrpName);
 
     ImggTomographicReconstruction alg;
@@ -130,7 +131,7 @@ public:
     int xsize = 16;
     int numProj = 4;
     API::WorkspaceGroup_sptr projectionsGrp =
-        WorkspaceCreationHelper::CreateWorkspaceGroup(numProj, ysize, xsize,
+        WorkspaceCreationHelper::createWorkspaceGroup(numProj, ysize, xsize,
                                                       projectionsGrpName);
 
     for (size_t proj = 0; proj < static_cast<size_t>(proj); ++proj) {
@@ -197,7 +198,7 @@ public:
     int xsize = 8;
     int numProj = 2;
     API::WorkspaceGroup_sptr projectionsGrp =
-        WorkspaceCreationHelper::CreateWorkspaceGroup(numProj, ysize, xsize,
+        WorkspaceCreationHelper::createWorkspaceGroup(numProj, ysize, xsize,
                                                       projectionsGrpName);
 
     for (size_t proj = 0; proj < static_cast<size_t>(proj); ++proj) {

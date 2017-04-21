@@ -8,6 +8,9 @@
 #include "MantidDataHandling/LoadEmptyInstrument.h"
 #include "MantidDataHandling/GenerateGroupingPowder.h"
 #include "MantidDataHandling/LoadDetectorsGroupingFile.h"
+#include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/DetectorInfo.h"
+#include "MantidGeometry/Crystal/AngleUnits.h"
 
 using namespace Mantid;
 using namespace Mantid::DataHandling;
@@ -62,6 +65,7 @@ public:
     std::size_t nDet;
     pf >> nDet;
     TS_ASSERT_EQUALS(nDet, 14);
+    const auto &detectorInfo = ws->detectorInfo();
     for (std::size_t i = 0; i < nDet; ++i) {
       double r, th, phi, dx, dy, tth;
       detid_t detID;
@@ -71,8 +75,8 @@ public:
       TS_ASSERT_EQUALS(phi, 0);
       TS_ASSERT_DELTA(dx, r * step * Geometry::deg2rad, 0.01);
       TS_ASSERT_EQUALS(dy, 0.01);
-      auto det = ws->getInstrument()->getDetector(detID);
-      tth = ws->detectorTwoTheta(*det) * Geometry::rad2deg;
+      tth = detectorInfo.twoTheta(detectorInfo.indexOf(detID)) *
+            Geometry::rad2deg;
       TS_ASSERT_LESS_THAN(tth, static_cast<double>(i + 1) * step);
       TS_ASSERT_LESS_THAN(static_cast<double>(i) * step, tth);
     }

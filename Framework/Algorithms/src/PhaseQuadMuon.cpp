@@ -1,12 +1,10 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAlgorithms/PhaseQuadMuon.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/MatrixWorkspaceValidator.h"
 #include "MantidKernel/PhysicalConstants.h"
+#include "MantidKernel/Unit.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -123,9 +121,9 @@ PhaseQuadMuon::getExponentialDecay(const API::MatrixWorkspace_sptr &ws) {
 
   for (size_t h = 0; h < ws->getNumberHistograms(); h++) {
 
-    const auto &X = ws->getSpectrum(h).readX();
-    const auto &Y = ws->getSpectrum(h).readY();
-    const auto &E = ws->getSpectrum(h).readE();
+    const auto &X = ws->getSpectrum(h).x();
+    const auto &Y = ws->getSpectrum(h).y();
+    const auto &E = ws->getSpectrum(h).e();
 
     double s, sx, sy;
     s = sx = sy = 0;
@@ -216,20 +214,31 @@ PhaseQuadMuon::squash(const API::MatrixWorkspace_sptr &ws,
   }
 
   // First X value
-  double X0 = ws->readX(0).front();
+  double X0 = ws->x(0).front();
+
+  // Create and populate output workspace
+  API::MatrixWorkspace_sptr ows = API::WorkspaceFactory::Instance().create(
+      "Workspace2D", 2, npoints + 1, npoints);
+
+  // X
+  ows->setSharedX(0, ws->sharedX(0));
+  ows->setSharedX(1, ws->sharedX(0));
 
   // Phase quadrature
-  std::vector<double> realY(npoints, 0), imagY(npoints, 0);
-  std::vector<double> realE(npoints, 0), imagE(npoints, 0);
+  auto &realY = ows->mutableY(0);
+  auto &imagY = ows->mutableY(1);
+  auto &realE = ows->mutableE(0);
+  auto &imagE = ows->mutableE(1);
+
   for (size_t i = 0; i < npoints; i++) {
     for (size_t h = 0; h < nspec; h++) {
 
       // (X,Y,E) with exponential decay removed
-      double X = ws->readX(h)[i];
-      double Y = ws->readY(h)[i] - n0[h] * exp(-(X - X0) / muLife);
-      double E = (ws->readY(h)[i] > poissonLimit)
-                     ? ws->readE(h)[i]
-                     : sqrt(n0[h] * exp(-(X - X0) / muLife));
+      const double X = ws->x(h)[i];
+      const double Y = ws->y(h)[i] - n0[h] * exp(-(X - X0) / muLife);
+      const double E = (ws->y(h)[i] > poissonLimit)
+                           ? ws->e(h)[i]
+                           : sqrt(n0[h] * exp(-(X - X0) / muLife));
 
       realY[i] += aj[h] * Y;
       imagY[i] += bj[h] * Y;
@@ -240,25 +249,14 @@ PhaseQuadMuon::squash(const API::MatrixWorkspace_sptr &ws,
     imagE[i] = sqrt(imagE[i]);
 
     // Regain exponential decay
-    double X = ws->getSpectrum(0).readX()[i];
-    double e = exp(-(X - X0) / muLife);
+    const double X = ws->getSpectrum(0).x()[i];
+    const double e = exp(-(X - X0) / muLife);
     realY[i] /= e;
     imagY[i] /= e;
     realE[i] /= e;
     imagE[i] /= e;
   }
 
-  // Populate output workspace
-  API::MatrixWorkspace_sptr ows = API::WorkspaceFactory::Instance().create(
-      "Workspace2D", 2, npoints + 1, npoints);
-  ows->dataY(0).assign(realY.begin(), realY.end());
-  ows->dataE(0).assign(realE.begin(), realE.end());
-  ows->dataY(1).assign(imagY.begin(), imagY.end());
-  ows->dataE(1).assign(imagE.begin(), imagE.end());
-  // X
-  MantidVec x = ws->readX(0);
-  ows->dataX(0).assign(x.begin(), x.end());
-  ows->dataX(1).assign(x.begin(), x.end());
   return ows;
 }
 }

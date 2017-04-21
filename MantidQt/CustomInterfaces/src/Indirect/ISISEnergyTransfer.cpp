@@ -1,11 +1,10 @@
 #include "MantidQtCustomInterfaces/Indirect/ISISEnergyTransfer.h"
 
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidGeometry/IDTypes.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidQtCustomInterfaces/UserInputValidator.h"
 
 #include <QFileInfo>
-#include <QInputDialog>
 
 using namespace Mantid::API;
 using MantidQt::API::BatchAlgorithmRunner;
@@ -167,8 +166,8 @@ bool ISISEnergyTransfer::validate() {
     if (m_uiForm.ckBackgroundRemoval->isChecked()) {
       MatrixWorkspace_sptr tempWs =
           AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(name);
-      const double minBack = tempWs->readX(0)[0];
-      const double maxBack = tempWs->readX(0)[tempWs->blocksize()];
+      const double minBack = tempWs->x(0)[0];
+      const double maxBack = tempWs->x(0)[tempWs->blocksize()];
 
       if (m_uiForm.spBackgroundStart->value() < minBack) {
         uiv.addErrorMessage("The Start of Background Removal is less than the "
@@ -556,8 +555,8 @@ void ISISEnergyTransfer::plotRaw() {
   if (m_uiForm.ckBackgroundRemoval->isChecked()) {
     MatrixWorkspace_sptr tempWs =
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(name);
-    const double minBack = tempWs->readX(0)[0];
-    const double maxBack = tempWs->readX(0)[tempWs->blocksize()];
+    const double minBack = tempWs->x(0)[0];
+    const double maxBack = tempWs->x(0)[tempWs->blocksize()];
 
     if (startBack < minBack) {
       emit showMessageBox("The Start of Background Removal is less than the "

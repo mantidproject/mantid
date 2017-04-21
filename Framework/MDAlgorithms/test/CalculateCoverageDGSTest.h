@@ -1,6 +1,8 @@
 #ifndef MANTID_MDALGORITHMS_CALCULATECOVERAGEDGSTEST_H_
 #define MANTID_MDALGORITHMS_CALCULATECOVERAGEDGSTEST_H_
 
+#include "MantidAPI/DetectorInfo.h"
+#include "MantidAPI/Sample.h"
 #include "MantidDataObjects/MDHistoWorkspace.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidGeometry/Instrument.h"
@@ -43,7 +45,7 @@ public:
     std::string outWSName("CalculateCoverageDGSTest_OutputWS"),
         inputWSName("CalculateCoverageDGSTest_InputWS");
     MatrixWorkspace_sptr inputWorkspace =
-        WorkspaceCreationHelper::Create2DWorkspace(1, 1);
+        WorkspaceCreationHelper::create2DWorkspace(1, 1);
     std::vector<V3D> detectorPositions{{1, 1, 1}};
     V3D sampPos(0., 0., 0.), sourcePos(0, 0, -1.);
     WorkspaceCreationHelper::createInstrumentForWorkspaceWithDistances(
@@ -97,25 +99,24 @@ public:
                (Mantid::PhysicalConstants::h * Mantid::PhysicalConstants::h);
     DblMatrix inverserubw(3, 3, true);
     inverserubw /= M_PI;
-    double phi = inputWorkspace->getInstrument()->getDetector(0)->getPhi();
-    double twoTheta =
-        inputWorkspace->getInstrument()->getDetector(0)->getTwoTheta(
-            sampPos, sourcePos * (-1.));
+    const auto &detectorInfo = inputWorkspace->detectorInfo();
+    const auto detectorIndex = detectorInfo.indexOf(0);
+    const double phi = detectorInfo.detector(detectorIndex).getPhi();
+    const double twoTheta = detectorInfo.twoTheta(detectorIndex);
     for (dE = -0.99; dE < 0.99; dE += 0.05) {
       ki = std::sqrt(energyToK * Ei);
       kf = std::sqrt(energyToK * (Ei - dE));
       V3D q(-kf * sin(twoTheta) * cos(phi), -kf * sin(twoTheta) * sin(phi),
             ki - kf * cos(twoTheta));
       q = inverserubw * q;
-      double h = q.X(), k = q.Y(), l = q.Z();
-      double signal;
+      const double h = q.X(), k = q.Y(), l = q.Z();
       std::vector<Mantid::coord_t> pos(4);
       pos[0] = static_cast<Mantid::coord_t>(h);
       pos[1] = static_cast<Mantid::coord_t>(k);
       pos[2] = static_cast<Mantid::coord_t>(l);
       pos[3] = static_cast<Mantid::coord_t>(dE);
       size_t index = out->getLinearIndexAtCoord(pos.data());
-      signal = out->getSignalAt(index);
+      double signal = out->getSignalAt(index);
       TS_ASSERT_EQUALS(signal, 1);
       pos[0] = 0.5f;
       index = out->getLinearIndexAtCoord(pos.data());

@@ -23,8 +23,8 @@ vtkStandardNewMacro(vtkPeaksFilter)
 using namespace Mantid::VATES;
 
 vtkPeaksFilter::vtkPeaksFilter()
-    : m_radiusNoShape(0.5), m_minValue(0.1), m_maxValue(0.1),
-      m_coordinateSystem(0), m_radiusType(Mantid::Geometry::PeakShape::Radius),
+    : m_radiusNoShape(0.5), m_coordinateSystem(0),
+      m_radiusType(Mantid::Geometry::PeakShape::Radius),
       m_metadataJsonManager(new MetadataJsonManager()),
       m_vatesConfigurations(new VatesConfigurations()) {
   this->SetNumberOfInputPorts(1);
@@ -54,8 +54,6 @@ int vtkPeaksFilter::RequestData(vtkInformation*, vtkInformationVector **inputVec
     std::string jsonString = fieldDataToMetadata(fieldData, m_vatesConfigurations->getMetadataIdJson());
     m_metadataJsonManager->readInSerializedJson(jsonString);
 
-    m_minValue = m_metadataJsonManager->getMinValue();
-    m_maxValue = m_metadataJsonManager->getMaxValue();
     m_instrument = m_metadataJsonManager->getInstrument();
     m_coordinateSystem = m_metadataJsonManager->getSpecialCoordinates();
   }
@@ -91,9 +89,6 @@ int vtkPeaksFilter::RequestInformation(vtkInformation*, vtkInformationVector** i
 
     std::string jsonString = fieldDataToMetadata(fieldData, m_vatesConfigurations->getMetadataIdJson());
     m_metadataJsonManager->readInSerializedJson(jsonString);
-
-    m_minValue = m_metadataJsonManager->getMinValue();
-    m_maxValue = m_metadataJsonManager->getMaxValue();
     m_instrument = m_metadataJsonManager->getInstrument();
     m_coordinateSystem = m_metadataJsonManager->getSpecialCoordinates();
   }
@@ -172,26 +167,6 @@ vtkPeaksFilter::getPeaksWorkspaces(
     }
   }
   return peaksWorkspaces;
-}
-
-/**
- * Gets the minimum value of the data associated with the 
- * workspace.
- * @returns The minimum value of the workspace data.
- */
-double vtkPeaksFilter::GetMinValue()
-{
-  return m_minValue;
-}
-
-/**
- * Gets the maximum value of the data associated with the 
- * workspace.
- * @returns The maximum value of the workspace data.
- */
-double vtkPeaksFilter::GetMaxValue(){
-
-   return m_maxValue;
 }
 
 /**

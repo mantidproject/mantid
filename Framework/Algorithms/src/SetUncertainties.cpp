@@ -1,8 +1,6 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAlgorithms/SetUncertainties.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Instrument.h"
@@ -76,23 +74,6 @@ void SetUncertainties::init() {
                   "How to reset the uncertainties");
 }
 
-namespace {
-inline bool isMasked(MatrixWorkspace_const_sptr wksp, const size_t index) {
-  if (!bool(wksp->getInstrument()))
-    return false;
-
-  try {
-    const auto det = wksp->getDetector(index);
-    if (bool(det))
-      return det->isMasked();
-  } catch (Kernel::Exception::NotFoundError &e) {
-    UNUSED_ARG(e);
-  }
-
-  return false;
-}
-} // anonymous namespace
-
 void SetUncertainties::exec() {
   MatrixWorkspace_const_sptr inputWorkspace = getProperty("InputWorkspace");
   std::string errorType = getProperty("SetError");
@@ -108,33 +89,34 @@ void SetUncertainties::exec() {
       WorkspaceFactory::Instance().create(inputWorkspace);
 
   // ...but not the data, so do that here.
+  const auto &spectrumInfo = inputWorkspace->spectrumInfo();
   const size_t numHists = inputWorkspace->getNumberHistograms();
   Progress prog(this, 0.0, 1.0, numHists);
 
-  PARALLEL_FOR2(inputWorkspace, outputWorkspace)
+  PARALLEL_FOR_IF(Kernel::threadSafe(*inputWorkspace, *outputWorkspace))
   for (int64_t i = 0; i < int64_t(numHists); ++i) {
     PARALLEL_START_INTERUPT_REGION
 
     // copy the X/Y
-    outputWorkspace->setX(i, inputWorkspace->refX(i));
-    outputWorkspace->dataY(i) = inputWorkspace->readY(i);
+    outputWorkspace->setSharedX(i, inputWorkspace->sharedX(i));
+    outputWorkspace->setSharedY(i, inputWorkspace->sharedY(i));
     // copy the E or set to zero depending on the mode
     if (errorType.compare(ONE_IF_ZERO) == 0) {
-      outputWorkspace->dataE(i) = inputWorkspace->readE(i);
+      outputWorkspace->setSharedE(i, inputWorkspace->sharedE(i));
     } else {
-      outputWorkspace->dataE(i) =
-          std::vector<double>(inputWorkspace->readE(i).size(), 0.);
+      outputWorkspace->mutableE(i) = 0.0;
     }
 
     // ZERO mode doesn't calculate anything further
-    if ((!zeroError) && (!isMasked(inputWorkspace, i))) {
-      MantidVec &E = outputWorkspace->dataE(i);
+    if ((!zeroError) &&
+        (!(spectrumInfo.hasDetectors(i) && spectrumInfo.isMasked(i)))) {
+      auto &E = outputWorkspace->mutableE(i);
       if (takeSqrt) {
-        const MantidVec &Y = outputWorkspace->readY(i);
+        const auto &Y = outputWorkspace->y(i);
         std::transform(Y.begin(), Y.end(), E.begin(),
                        sqrterror(resetOne ? 1. : 0.));
       } else {
-        std::for_each(E.begin(), E.end(), resetzeroerror(1.));
+        std::transform(E.begin(), E.end(), E.begin(), resetzeroerror(1.));
       }
     }
 

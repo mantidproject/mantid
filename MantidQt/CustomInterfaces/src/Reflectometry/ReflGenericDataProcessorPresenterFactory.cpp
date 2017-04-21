@@ -9,7 +9,7 @@ using namespace MantidQt::MantidWidgets;
 /**
 * Creates a Reflectometry Data Processor Presenter
 */
-std::unique_ptr<GenericDataProcessorPresenter>
+std::unique_ptr<ReflDataProcessorPresenter>
 ReflGenericDataProcessorPresenterFactory::create() {
 
   // The whitelist, elements will appear in order in the table
@@ -42,14 +42,14 @@ ReflGenericDataProcessorPresenterFactory::create() {
       "/><i>optional</i><br />To specify two transmission runs, separate "
       "them with a '+'. If left blank, the sample runs will be normalised "
       "by monitor only.<br /><br /><b>Example:</b> <samp>1234+12345</samp>");
-  whitelist.addElement("Q min", "MomentumTransferMinimum",
+  whitelist.addElement("Q min", "MomentumTransferMin",
                        "<b>Minimum value of Q to be used</b><br "
                        "/><i>optional</i><br />Unit: &#197;<sup>-1</sup><br "
                        "/>Data with a value of Q lower than this will be "
                        "discarded. If left blank, this is set to the lowest "
                        "Q value found. This is useful for discarding noisy "
                        "data. <br /><br /><b>Example:</b> <samp>0.1</samp>");
-  whitelist.addElement("Q max", "MomentumTransferMaximum",
+  whitelist.addElement("Q max", "MomentumTransferMax",
                        "<b>Maximum value of Q to be used</b><br "
                        "/><i>optional</i><br />Unit: &#197;<sup>-1</sup><br "
                        "/>Data with a value of Q higher than this will be "
@@ -72,13 +72,14 @@ ReflGenericDataProcessorPresenterFactory::create() {
       /*The name of the algorithm */
       "ReflectometryReductionOneAuto",
       /*Prefixes to the output workspaces*/
-      std::vector<std::string>{"IvsQ_", "IvsLam_"},
+      std::vector<std::string>{"IvsQ_binned_", "IvsQ_", "IvsLam_"},
       /*The blacklist*/
-      std::set<std::string>{
-          "ThetaIn", "ThetaOut", "InputWorkspace", "OutputWorkspace",
-          "OutputWorkspaceWavelength", "FirstTransmissionRun",
-          "SecondTransmissionRun", "MomentumTransferMinimum",
-          "MomentumTransferMaximum", "MomentumTransferStep", "ScaleFactor"});
+      std::set<std::string>{"ThetaIn", "ThetaOut", "InputWorkspace",
+                            "OutputWorkspace", "OutputWorkspaceBinned",
+                            "OutputWorkspaceWavelength", "FirstTransmissionRun",
+                            "SecondTransmissionRun", "MomentumTransferMin",
+                            "MomentumTransferMax", "MomentumTransferStep",
+                            "ScaleFactor"});
 
   // Pre-processing instructions as a map:
   // Keys are the column names
@@ -102,8 +103,15 @@ ReflGenericDataProcessorPresenterFactory::create() {
       "Stitch1DMany", "IvsQ_",
       std::set<std::string>{"InputWorkspaces", "OutputWorkspace"});
 
-  return Mantid::Kernel::make_unique<GenericDataProcessorPresenter>(
-      whitelist, preprocessMap, processor, postprocessor);
+  // Post-processing instructions linking column names to properties of the
+  // post-processing algorithm
+  // Key is column name
+  // Value is property name of the post-processing algorithm
+  std::map<std::string, std::string> postprocessMap = {{"dQ/Q", "Params"}};
+
+  return Mantid::Kernel::make_unique<ReflDataProcessorPresenter>(
+      whitelist, preprocessMap, processor, postprocessor, postprocessMap,
+      "LoadISISNexus");
 }
 }
 }

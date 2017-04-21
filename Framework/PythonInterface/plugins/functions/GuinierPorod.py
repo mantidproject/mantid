@@ -28,12 +28,14 @@ import math
 import numpy as np
 from mantid.api import IFunction1D, FunctionFactory
 
+
 class GuinierPorod(IFunction1D):
     """
         Provide a Guinier-Porod model for SANS.
 
         See Hammouda, J. Appl. Cryst. (2010) 43, 716-719
     """
+
     def category(self):
         return "SANS"
 
@@ -100,7 +102,6 @@ class GuinierPorod(IFunction1D):
             result += math.log(Rg) + math.log(2.0) + 1.0
             return result * math.pow(qval,-m) * math.pow(Rg,s-m) * math.exp((s-m)/2.0) * math.pow((m-s)*n/2.0,(m-s)/2.0)
 
-
     def _first_derivative_m(self, qval):
         """
             Compute the first derivative dI/dM
@@ -139,8 +140,8 @@ class GuinierPorod(IFunction1D):
         if qval < q1:
             return -2.0*Rg*math.pow(qval,-s)*math.exp(-qrg/n)*qval*qval/n
         else:
-            return math.pow(qval,-m)*math.exp((s-m)/2.0)*math.pow(((m-s)*n/2.0),\
-                ((m-s)/2.0))*(s-m)*math.pow(Rg,(s-m-1))
+            return math.pow(qval,-m)*math.exp((s-m)/2.0)*math.pow(((m-s)*n/2.0),
+                                                                  ((m-s)/2.0))*(s-m)*math.pow(Rg,(s-m-1))
 
     def function1D(self, xvals):
         """

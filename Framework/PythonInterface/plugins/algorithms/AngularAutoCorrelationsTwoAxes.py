@@ -1,4 +1,5 @@
 # pylint: disable=too-many-branches,too-many-locals, invalid-name
+from __future__ import (absolute_import, division, print_function)
 from mantid.simpleapi import *
 from mantid.kernel import *
 from mantid.api import *
@@ -7,6 +8,7 @@ from scipy.io import netcdf
 import numpy as np
 import re
 import time
+
 
 class AngularAutoCorrelationsTwoAxes(PythonAlgorithm):
 
@@ -37,13 +39,12 @@ class AngularAutoCorrelationsTwoAxes(PythonAlgorithm):
         file_name=self.getPropertyValue("InputFile")
 
         # Get the user-specified species
-        type1=self.getPropertyValue("SpeciesOne")
-        type2=self.getPropertyValue("SpeciesTwo")
-        type3=self.getPropertyValue("SpeciesThree")
+        types=[self.getPropertyValue("SpeciesOne").lower(),
+               self.getPropertyValue("SpeciesTwo").lower(),
+               self.getPropertyValue("SpeciesThree").lower()]
 
         # Load trajectory file
         trajectory=netcdf.netcdf_file(file_name,mode="r")
-
 
         logger.information("Loading particle id's, molecule id's and coordinate array...")
         start_time=time.time()
@@ -54,7 +55,7 @@ class AngularAutoCorrelationsTwoAxes(PythonAlgorithm):
         # Convert description object to string via for loop. The original object has strange formatting
         particleID = ''
         for i in description:
-            particleID += i
+            particleID += i.decode('UTF-8')
 
         # Extract particle id's from string using regular expressions
         p_atoms=re.findall(r"A\('[a-z]+\d+',\d+", particleID)
@@ -81,12 +82,9 @@ class AngularAutoCorrelationsTwoAxes(PythonAlgorithm):
             atoms_to_species[key]=str(element)
 
         # Check wether user-specified species present in the trajectory file
-        if type1.lower() not in elements:
-            raise RuntimeError('Species one not found in the trajectory file. Please try again...')
-        if type2.lower() not in elements:
-            raise RuntimeError('Species two not found in the trajectory file. Please try again...')
-        if type3.lower() not in elements:
-            raise RuntimeError('Species three not found in the trajectory file. Please try again...')
+        for i in range(3):
+            if types[i] not in elements:
+                raise RuntimeError('Species '+['one','two','three'][i]+' not found in the trajectory file. Please try again...')
 
         # Initialise lists in the species_to_particles dictionary
         for j in elements:
@@ -134,7 +132,6 @@ class AngularAutoCorrelationsTwoAxes(PythonAlgorithm):
 
         logger.information(str(time.time()-start_time) + " s")
 
-
         logger.information("Transforming coordinates...")
         start_time=time.time()
 
@@ -162,7 +159,6 @@ class AngularAutoCorrelationsTwoAxes(PythonAlgorithm):
 
         logger.information(str(time.time()-start_time) + " s")
 
-
         logger.information("Calculating orientation vectors...")
         start_time=time.time()
 
@@ -178,11 +174,11 @@ class AngularAutoCorrelationsTwoAxes(PythonAlgorithm):
             species_two=[]
             species_three=[]
             for j in temp:
-                if atoms_to_species[j]==type1.lower():
+                if atoms_to_species[j]==types[0]:
                     species_one.append(j)
-                if atoms_to_species[j]==type2.lower():
+                if atoms_to_species[j]==types[1]:
                     species_two.append(j)
-                if atoms_to_species[j]==type3.lower():
+                if atoms_to_species[j]==types[2]:
                     species_three.append(j)
             # Find the average positions of species one and two
             sum_position_species_one=np.zeros((n_timesteps,n_dimensions))
@@ -250,7 +246,6 @@ class AngularAutoCorrelationsTwoAxes(PythonAlgorithm):
 
         logger.information(str(time.time()-start_time) + " s")
 
-
         logger.information("Calculating angular auto-correlations...")
         start_time=time.time()
 
@@ -269,7 +264,6 @@ class AngularAutoCorrelationsTwoAxes(PythonAlgorithm):
         R_avg_axis2=1.0*R_avg_axis2/n_molecules
 
         logger.information(str(time.time()-start_time)+" s")
-
 
         # Initialise & populate the output_ws workspace
         nrows=2
@@ -299,12 +293,11 @@ class AngularAutoCorrelationsTwoAxes(PythonAlgorithm):
                                      DataE=evals,NSpec=nrows,VerticalAxisUnit="Text",VerticalAxisValues=["FT Axis 1","FT Axis 2"])
         self.setProperty("OutputWorkspaceFT",FT_output_ws)
 
-
     def auto_correlation(self, vector):
         # Returns angular auto-correlation of a normalised time-dependent 3-vector
         num=np.shape(vector)[0]
         norm=np.arange(np.ceil(num/2.0),num+1)
-        norm=np.append(norm,(np.arange(num/2+1,num)[::-1]))
+        norm=np.append(norm,(np.arange(int(num/2)+1,num)[::-1]))
 
         # x dimension
         autoCorr=np.divide(np.correlate(vector[:,0],vector[:,0],"same"),norm)
@@ -315,10 +308,9 @@ class AngularAutoCorrelationsTwoAxes(PythonAlgorithm):
 
         return autoCorr
 
-
     def fold_correlation(self,omega):
         # Folds an array with symmetrical values into half by averaging values around the centre
-        right_half=omega[len(omega)/2:]
+        right_half=omega[int(len(omega))//2:]
         left_half=omega[:int(np.ceil(len(omega)/2.0))][::-1]
 
         return (left_half+right_half)/2.0

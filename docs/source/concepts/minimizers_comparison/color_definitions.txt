@@ -6,19 +6,13 @@
 .. role:: ranking-low-5
 
 
-.. .. This is for the ranking/gradient colors in the table cells
+.. .. This is for the ranking/gradient colors in the table cells. The function changes the class
+      of the parents of the text/numbers that go in some table cells (as span elements), so that the cells themselves
+      (parents) are assigned a certain style class (background color)
+
 .. raw:: html
 
-         <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
-         <script>
-           $(document).ready(function() {
-             $('.ranking-top-1').parent().addClass('ranking-top-1-parent');
-             $('.ranking-top-2').parent().addClass('ranking-top-2-parent');
-             $('.ranking-med-3').parent().addClass('ranking-med-3-parent');
-             $('.ranking-low-4').parent().addClass('ranking-low-4-parent');
-             $('.ranking-low-5').parent().addClass('ranking-low-5-parent');
-           });
-         </script>
+         <script type="text/javascript" src="../_static/color_ranking_definitions.js"></script>
          <style>
            .ranking-top-1-parent {background-color:#fef0d9;}
            .ranking-top-2-parent {background-color:#fdcc8a;}

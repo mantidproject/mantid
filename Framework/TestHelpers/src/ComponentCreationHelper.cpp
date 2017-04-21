@@ -14,6 +14,7 @@
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/DateAndTime.h"
+#include "MantidKernel/make_unique.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidGeometry/Instrument/CompAssembly.h"
 #include "MantidGeometry/Instrument/ObjComponent.h"
@@ -174,7 +175,7 @@ createDetectorGroupWith5CylindricalDetectors() {
     groupMembers[i] = det;
   }
 
-  return boost::make_shared<DetectorGroup>(groupMembers, false);
+  return boost::make_shared<DetectorGroup>(groupMembers);
 }
 
 //----------------------------------------------------------------------------------------------
@@ -197,18 +198,13 @@ createDetectorGroupWithNCylindricalDetectorsWithGaps(unsigned int nDet,
     groupMembers[i] = det;
   }
 
-  return boost::make_shared<DetectorGroup>(groupMembers, false);
+  return boost::make_shared<DetectorGroup>(groupMembers);
 }
 
-//----------------------------------------------------------------------------------------------
-/**
- * Create a group of detectors arranged in a ring;
- */
-boost::shared_ptr<DetectorGroup>
-createRingOfCylindricalDetectors(const double R_min, const double R_max,
-                                 const double z0) {
-
-  std::vector<boost::shared_ptr<const IDetector>> groupMembers;
+std::vector<std::unique_ptr<IDetector>>
+createVectorOfCylindricalDetectors(const double R_min, const double R_max,
+                                   const double z0) {
+  std::vector<std::unique_ptr<IDetector>> allDetectors;
   // One object
   double R0 = 0.5;
   double h = 1.5;
@@ -231,37 +227,36 @@ createRingOfCylindricalDetectors(const double R_min, const double R_max,
       if (Rsq >= Rmin2 && Rsq < Rmax2) {
         std::ostringstream os;
         os << "d" << ic;
-        auto det =
-            boost::make_shared<Detector>(os.str(), ic + 1, detShape, nullptr);
+        auto det = Mantid::Kernel::make_unique<Detector>(os.str(), ic + 1,
+                                                         detShape, nullptr);
         det->setPos(x, y, z0);
-        groupMembers.push_back(det);
+        allDetectors.emplace_back(std::move(det));
       }
 
       ic++;
     }
   }
-  return boost::make_shared<DetectorGroup>(groupMembers, false);
+  return allDetectors;
 }
 
 //----------------------------------------------------------------------------------------------
 /**
- * Create a group of two monitors
+ * Create a group of detectors arranged in a ring;
  */
-boost::shared_ptr<DetectorGroup> createGroupOfTwoMonitors() {
-  const int ndets(2);
-  std::vector<boost::shared_ptr<const IDetector>> groupMembers(ndets);
-  for (int i = 0; i < ndets; ++i) {
-    std::ostringstream os;
-    os << "m" << i;
-    auto det = boost::make_shared<Detector>(os.str(), i + 1, nullptr);
-    det->setPos(static_cast<double>(i + 1), 2.0, 2.0);
-    det->markAsMonitor();
-    groupMembers[i] = det;
+boost::shared_ptr<DetectorGroup>
+createRingOfCylindricalDetectors(const double R_min, const double R_max,
+                                 const double z0) {
+
+  auto vecOfDetectors = createVectorOfCylindricalDetectors(R_min, R_max, z0);
+  std::vector<boost::shared_ptr<const IDetector>> groupMembers;
+  groupMembers.reserve(vecOfDetectors.size());
+  for (auto &det : vecOfDetectors) {
+    groupMembers.push_back(boost::shared_ptr<const IDetector>(std::move(det)));
   }
-  return boost::make_shared<DetectorGroup>(groupMembers, false);
+
+  return boost::make_shared<DetectorGroup>(groupMembers);
 }
 
-//----------------------------------------------------------------------------------------------
 Instrument_sptr createTestInstrumentCylindrical(
     int num_banks, const Mantid::Kernel::V3D &sourcePos,
     const Mantid::Kernel::V3D &samplePos, const double cylRadius,
@@ -286,7 +281,7 @@ Instrument_sptr createTestInstrumentCylindrical(
     for (int i = -1; i < 2; ++i) {
       for (int j = -1; j < 2; ++j) {
         std::ostringstream lexer;
-        lexer << "pixel-(" << j << "," << i << ")";
+        lexer << "pixel-(" << j << ";" << i << ")";
         Detector *physicalPixel =
             new Detector(lexer.str(), pixelID, pixelShape, bank);
         const double xpos = j * (cylRadius * 2.0);

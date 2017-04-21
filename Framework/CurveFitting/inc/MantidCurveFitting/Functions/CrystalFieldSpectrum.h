@@ -36,9 +36,14 @@ public:
   std::string name() const override { return "CrystalFieldSpectrum"; }
   const std::string category() const override { return "General"; }
   void buildTargetFunction() const override;
+  std::string asString() const override;
 
 protected:
   void updateTargetFunction() const override;
+
+private:
+  /// Number of fitted peaks in the spectrum.
+  mutable size_t m_nPeaks;
 };
 
 } // namespace Functions

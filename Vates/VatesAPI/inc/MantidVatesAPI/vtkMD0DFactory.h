@@ -5,7 +5,6 @@
 #include "MantidVatesAPI/vtkDataSetFactory.h"
 #include "MantidAPI/IMDWorkspace.h"
 #include "vtkUnstructuredGrid.h"
-#include "MantidVatesAPI/ThresholdRange.h"
 
 namespace Mantid {
 namespace VATES {
@@ -45,7 +44,7 @@ public:
   vtkSmartPointer<vtkDataSet>
   create(ProgressAction &progressUpdating) const override;
 
-  void initialize(Mantid::API::Workspace_sptr) override;
+  void initialize(const Mantid::API::Workspace_sptr &workspace) override;
 
   std::string getFactoryTypeName() const override { return "vtkMD0DFactory"; }
 

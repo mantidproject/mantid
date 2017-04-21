@@ -9,6 +9,7 @@
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidKernel/PhysicalConstants.h"
 
 #include <fstream>
 
@@ -24,7 +25,6 @@ namespace Crystal {
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(LoadIsawSpectrum)
 
-//----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void LoadIsawSpectrum::init() {
@@ -39,7 +39,6 @@ void LoadIsawSpectrum::init() {
   getInstrument3WaysInit(this);
 }
 
-//----------------------------------------------------------------------------------------------
 /** Execute the algorithm.
  */
 void LoadIsawSpectrum::exec() {
@@ -139,9 +138,9 @@ void LoadIsawSpectrum::exec() {
       for (int k = 0; k < detList[i]->ypixels(); k++)
         outSpec.addDetectorID(
             static_cast<detid_t>(detList[i]->getDetectorIDAtXY(j, k)));
-    MantidVec &outY = outSpec.dataY();
-    MantidVec &outE = outSpec.dataE();
-    MantidVec &outX = outSpec.dataX();
+    auto &outX = outSpec.mutableX();
+    auto &outY = outSpec.mutableY();
+    auto &outE = outSpec.mutableE();
     // This is the scattered beam direction
     V3D dir = detList[i]->getPos() - samplePos;
 

@@ -6,7 +6,6 @@
 #include "MantidAlgorithms/AverageLogData.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include <boost/math/special_functions/fpclassify.hpp>
 
 using Mantid::Algorithms::AverageLogData;
 
@@ -102,8 +101,8 @@ public:
     // check average
     const double av = alg.getProperty("Average"),
                  err = alg.getProperty("Error");
-    TS_ASSERT(boost::math::isnan(av));
-    TS_ASSERT(boost::math::isnan(err));
+    TS_ASSERT(std::isnan(av));
+    TS_ASSERT(std::isnan(err));
 
     // Remove workspace from the data service.*/
     Mantid::API::AnalysisDataService::Instance().remove(inputWS);
@@ -114,7 +113,7 @@ private:
   void makeWS(double shift) {
     inputWS = "AverageLogDataTestWS";
     Mantid::DataObjects::Workspace2D_sptr w =
-        WorkspaceCreationHelper::Create2DWorkspace(1, 1);
+        WorkspaceCreationHelper::create2DWorkspace(1, 1);
     Mantid::Kernel::DateAndTime run_start("2010-01-01T00:00:00");
     Mantid::Kernel::TimeSeriesProperty<double> *pc, *p1;
     pc = new Mantid::Kernel::TimeSeriesProperty<double>("proton_charge");

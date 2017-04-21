@@ -3,6 +3,7 @@ import stresstesting
 from mantid import *
 from mantid.simpleapi import *
 
+
 class REFLReduction(stresstesting.MantidStressTest):
     def runTest(self):
         #TODO: The reduction algorithm should not require an absolute path

@@ -1,9 +1,6 @@
 #ifndef MANTID_KERNEL_REBINPARAMSVALIDATOR_H_
 #define MANTID_KERNEL_REBINPARAMSVALIDATOR_H_
 
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidKernel/TypedValidator.h"
 #include <vector>
 
@@ -39,9 +36,7 @@ class MANTID_KERNEL_DLL RebinParamsValidator
     : public TypedValidator<std::vector<double>> {
 public:
   RebinParamsValidator(bool allowEmpty = false);
-  IValidator_sptr clone() const override {
-    return boost::make_shared<RebinParamsValidator>(*this);
-  }
+  IValidator_sptr clone() const override;
 
 private:
   std::string checkValidity(const std::vector<double> &value) const override;

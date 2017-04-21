@@ -2,6 +2,7 @@
 import stresstesting
 from mantid.simpleapi import *
 
+
 class PolrefExample(stresstesting.MantidStressTest):
     ''' Sample script from Tim Charlton. Described as Mantid version of quick:lam
 

@@ -2,6 +2,7 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/make_unique.h"
@@ -9,6 +10,7 @@
 #include "MantidKernel/StringTokenizer.h"
 
 #include <fstream>
+#include <iomanip>
 
 #include <Poco/File.h>
 #include <Poco/DirectoryIterator.h>
@@ -512,8 +514,11 @@ ImggAggregateWavelengths::rangesFromStringProperty(
                       Mantid::Kernel::StringTokenizer::TOK_TRIM);
     if (2 != minMaxTokens.count()) {
       throw std::invalid_argument(
-          "Could not parse a minimum and maximum value separated by '" + sep +
-          "' from the string: " + str);
+          std::string(
+              "Could not parse a minimum and maximum value separated by '")
+              .append(sep)
+              .append("' from the string: ")
+              .append(str));
     }
 
     try {
@@ -558,7 +563,7 @@ ImggAggregateWavelengths::findInputSubdirs(const Poco::Path &path) {
 
     // there is at least one image file: take just the first level directory
     if (it->isFile()) {
-      const std::string name = it.name();
+      const std::string &name = it.name();
       const std::string extShort = name.substr(name.size() - 3);
       const std::string extLong = name.substr(name.size() - 4);
 
@@ -690,7 +695,7 @@ ImggAggregateWavelengths::buildOutputSubdirNamesFromUniformBands(
   std::vector<std::string> outputSubdirs;
   // get number of available images from first effective subdirectory
   std::vector<Poco::Path> images;
-  for (size_t idx = 0; idx < inputSubDirs.size() && 0 == images.size(); ++idx) {
+  for (size_t idx = 0; idx < inputSubDirs.size() && images.empty(); ++idx) {
     images = findInputImages(inputSubDirs[idx]);
   }
   auto outRanges = splitSizeIntoRanges(images.size(), bands);
@@ -741,10 +746,10 @@ bool ImggAggregateWavelengths::isSupportedExtension(
   const std::vector<std::string> formatExtensionsShort{"fit"};
   const std::vector<std::string> formatExtensionsLong{"fits"};
 
-  bool found = (formatExtensionsShort.end() !=
+  bool found = (formatExtensionsShort.cend() !=
                 std::find(formatExtensionsShort.cbegin(),
                           formatExtensionsShort.cend(), extShort)) ||
-               (formatExtensionsLong.end() !=
+               (formatExtensionsLong.cend() !=
                 std::find(formatExtensionsLong.cbegin(),
                           formatExtensionsLong.cend(), extLong));
   return found;
@@ -778,10 +783,7 @@ void ImggAggregateWavelengths::aggImage(API::MatrixWorkspace_sptr accum,
   }
 
   for (size_t row = 0; row < sizeY; row++) {
-    auto &dataY = accum->dataY(row);
-    const auto &dataYIn = toAdd->readY(row);
-    std::transform(dataY.begin(), dataY.end(), dataYIn.cbegin(), dataY.begin(),
-                   std::plus<double>());
+    accum->mutableY(row) += toAdd->y(row);
   }
 }
 

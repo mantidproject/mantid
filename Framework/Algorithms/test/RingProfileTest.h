@@ -110,7 +110,7 @@ public:
    */
   static MatrixWorkspace_sptr create_2d_workspace() {
     MatrixWorkspace_sptr goodWS =
-        WorkspaceCreationHelper::Create2DWorkspaceBinned(5, 5, -0.3, 0.12);
+        WorkspaceCreationHelper::create2DWorkspaceBinned(5, 5, -0.3, 0.12);
     NumericAxis *yAxis = new NumericAxis(5);
 
     for (int i = 0; i < 5; ++i) {
@@ -349,21 +349,6 @@ public:
     goodWS->dataY(11)[0] = goodWS->dataY(15)[0] = goodWS->dataY(21)[0] = 3;
     // 4 values
     goodWS->dataY(17)[0] = goodWS->dataY(19)[0] = goodWS->dataY(23)[0] = 4;
-
-    /*
-    using Mantid::Kernel::V3D;
-    V3D origin(0.016, 0.016, 0);
-    V3D diff ;
-    double r,t,p;
-    for (int i = 0; i<25; i++){
-      auto det = goodWS->getDetector(i);
-      diff = det->getPos()- origin;
-      diff.getSpherical(r,t,p);
-      std::cout << "ind " << i << " -> theta = " << t << " phi = " << p << " r =
-    " << r << '\n';
-    }
-    throw std::runtime_error("stop");
-     */
 
     return goodWS;
   }

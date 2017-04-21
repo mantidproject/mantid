@@ -62,21 +62,19 @@ private:
   void init() override;
   /// Overwrites Algorithm method
   void exec() override;
-  /// returns true if the value is NaN
-  bool checkIfNan(const double &value) const;
-  /// returns true if the value if + or - infinity
-  bool checkIfInfinite(const double &value) const;
   /// print the appropriate value to file
   void outputval(double val, std::ofstream &file, bool leadingSep = true);
   /// write the top of the file
   virtual std::vector<double> header(std::ofstream &file);
 
 protected:
-  /// Return the separator character
-  virtual char sep() { return '\t'; }
   /// write the main content of the data
   virtual void data(std::ofstream &file, const std::vector<double> &XData,
                     bool exportDeltaQ = true);
+  /// Retrieves the separator property
+  virtual void appendSeparatorProperty();
+  /// The separator character
+  char m_sep;
   double m_qres = 0.0;
   size_t m_xlength = 0;
 

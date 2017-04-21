@@ -1,8 +1,10 @@
 #include "MantidCrystal/OptimizeLatticeForCellType.h"
 #include "MantidCrystal/GSLFunctions.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IPeakFunction.h"
+#include "MantidAPI/Sample.h"
 #include "MantidKernel/VectorHelper.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/BoundedValidator.h"
@@ -24,7 +26,6 @@ using namespace API;
 using std::size_t;
 using namespace DataObjects;
 
-//-----------------------------------------------------------------------------------------
 /** Initialisation method. Declares properties to be used in algorithm.
  */
 void OptimizeLatticeForCellType::init() {
@@ -61,7 +62,6 @@ void OptimizeLatticeForCellType::init() {
   gsl_set_error_handler_off();
 }
 
-//-----------------------------------------------------------------------------------------
 /** Executes the algorithm
  *
  *  @throw Exception::FileError If the grouping file cannot be opened or read

@@ -1,6 +1,7 @@
 #include "MantidQtCustomInterfaces/Indirect/IndirectMoments.h"
 
 #include "MantidQtCustomInterfaces/UserInputValidator.h"
+#include "MantidAPI/WorkspaceGroup.h"
 
 #include <QDoubleValidator>
 #include <QFileInfo>
@@ -73,7 +74,7 @@ void IndirectMoments::run() {
   IAlgorithm_sptr momentsAlg =
       AlgorithmManager::Instance().create("SofQWMoments", -1);
   momentsAlg->initialize();
-  momentsAlg->setProperty("Sample", workspaceName.toStdString());
+  momentsAlg->setProperty("InputWorkspace", workspaceName.toStdString());
   momentsAlg->setProperty("EnergyMin", eMin);
   momentsAlg->setProperty("EnergyMax", eMax);
   momentsAlg->setProperty("OutputWorkspace", outputWorkspaceName);
@@ -82,9 +83,9 @@ void IndirectMoments::run() {
     momentsAlg->setProperty("Scale", scale);
 
   // Set the workspace name for Python script export
-  m_pythonExportWsName = outputWorkspaceName + "_M0";
+  m_pythonExportWsName = outputWorkspaceName;
 
-  // Execute algorithm on seperate thread
+  // Execute algorithm on separate thread
   runAlgorithm(momentsAlg);
 }
 
@@ -119,11 +120,10 @@ void IndirectMoments::handleSampleInputReady(const QString &filename) {
   QPair<double, double> range = m_uiForm.ppRawPlot->getCurveRange("Raw");
 
   auto xRangeSelector = m_uiForm.ppRawPlot->getRangeSelector("XRange");
-  setRangeSelector(xRangeSelector, m_properties["EMin"], m_properties["EMax"],
-                   range);
   setPlotPropertyRange(xRangeSelector, m_properties["EMin"],
                        m_properties["EMax"], range);
-
+  setRangeSelector(xRangeSelector, m_properties["EMin"], m_properties["EMax"],
+                   range);
   connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
           SLOT(updateProperties(QtProperty *, double)));
 }
@@ -142,7 +142,7 @@ void IndirectMoments::rangeChanged(double min, double max) {
 /**
  * Handles when properties in the property manager are updated.
  *
- * Performs validation and uodated preview plot.
+ * Performs validation and updated preview plot.
  *
  * @param prop :: The property being updated
  * @param val :: The new value for the property
@@ -178,22 +178,21 @@ void IndirectMoments::momentsAlgComplete(bool error) {
   QString outputName = workspaceName.left(workspaceName.length() - 4);
   std::string outputWorkspaceName = outputName.toStdString() + "_Moments";
 
-  WorkspaceGroup_sptr resultWsGroup =
-      AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
+  MatrixWorkspace_sptr outputWorkspace =
+      AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
           outputWorkspaceName);
-  std::vector<std::string> resultWsNames = resultWsGroup->getNames();
 
-  if (resultWsNames.size() < 4)
+  if (outputWorkspace->getNumberHistograms() < 5)
     return;
 
   // Plot each spectrum
   m_uiForm.ppMomentsPreview->clear();
   m_uiForm.ppMomentsPreview->addSpectrum(
-      "M0", QString::fromStdString(resultWsNames[0]), 0, Qt::green);
+      "M0", QString::fromStdString(outputWorkspaceName), 0, Qt::green);
   m_uiForm.ppMomentsPreview->addSpectrum(
-      "M1", QString::fromStdString(resultWsNames[2]), 0, Qt::black);
+      "M1", QString::fromStdString(outputWorkspaceName), 1, Qt::black);
   m_uiForm.ppMomentsPreview->addSpectrum(
-      "M2", QString::fromStdString(resultWsNames[3]), 0, Qt::red);
+      "M2", QString::fromStdString(outputWorkspaceName), 2, Qt::red);
   m_uiForm.ppMomentsPreview->resizeX();
 
   // Enable plot and save buttons
@@ -208,8 +207,7 @@ void IndirectMoments::plotClicked() {
   QString outputWs =
       getWorkspaceBasename(m_uiForm.dsInput->getCurrentDataName()) + "_Moments";
   if (checkADSForPlotSaveWorkspace(outputWs.toStdString(), true)) {
-    plotSpectrum(outputWs + "_M0");
-    plotSpectrum({outputWs + "_M0", outputWs + "_M2"});
+    plotSpectra(outputWs, {0, 2, 4});
   }
 }
 

@@ -1,4 +1,5 @@
 #include "MantidAPI/MDGeometry.h"
+#include "MantidAPI/Workspace.h"
 #include "MantidPythonInterface/kernel/Policies/RemoveConst.h"
 #include "MantidPythonInterface/kernel/Policies/VectorToNumpy.h"
 #include <boost/python/class.hpp>
@@ -7,7 +8,6 @@
 #include <boost/python/return_value_policy.hpp>
 
 using Mantid::API::MDGeometry;
-using Mantid::Geometry::IMDDimension_const_sptr;
 using Mantid::PythonInterface::Policies::RemoveConstSharedPtr;
 using Mantid::PythonInterface::Policies::VectorToNumpy;
 using namespace boost::python;

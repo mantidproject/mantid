@@ -5,6 +5,7 @@
 #include "MantidDataObjects/MDEventWorkspace.h"
 #include "MantidMDAlgorithms/FakeMDEventData.h"
 #include "MantidMDAlgorithms/BinMD.h"
+#include "MantidAPI/Run.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 

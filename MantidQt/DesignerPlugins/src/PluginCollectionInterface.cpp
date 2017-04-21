@@ -29,6 +29,7 @@ PluginCollectionInterface::PluginCollectionInterface(QObject *parent)
   m_widgets.append(new MessageDisplayPlugin(this));
   m_widgets.append(new PreviewPlotPlugin(this));
   m_widgets.append(new DisplayCurveFitPlugin(this));
+  m_widgets.append(new MuonFitDataSelectorPlugin(this));
   m_widgets.append(new LogValueSelectorPlugin(this));
 }
 

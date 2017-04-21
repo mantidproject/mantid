@@ -1,1 +1,1 @@
-LD_LIBRARY_PATH=/opt/mantidnightly/lib/paraview-5.0
+LD_LIBRARY_PATH=/opt/mantidnightly/lib/paraview-5.3

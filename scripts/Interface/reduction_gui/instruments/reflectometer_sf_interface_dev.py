@@ -3,6 +3,7 @@ from interface import InstrumentInterface
 from reduction_gui.widgets.reflectometer.refl_sf_calculator import DataReflSFCalculatorWidget
 from reduction_gui.reduction.reflectometer.refl_sf_calculator import REFLSFCalculatorScripter
 
+
 class REFLSFInterface(InstrumentInterface):
     """
         Defines the widgets for REF_L reduction

@@ -2,10 +2,8 @@
 ################################################################################
 # Event Filtering (and advanced) Setup Widget
 ################################################################################
-from PyQt4 import QtGui, uic, QtCore
-from functools import partial
+from PyQt4 import QtGui, QtCore
 from reduction_gui.widgets.base_widget import BaseWidget
-import reduction_gui.widgets.util as util
 
 from reduction_gui.reduction.diffraction.diffraction_filter_setup_script import FilterSetupScript
 import ui.diffraction.ui_diffraction_filter_setup
@@ -19,6 +17,7 @@ try:
     IS_IN_MANTIDPLOT = True
 except:
     pass
+
 
 class FilterSetupWidget(BaseWidget):
     """ Widget that presents event filters setup
@@ -39,6 +38,7 @@ class FilterSetupWidget(BaseWidget):
         class FilterSetFrame(QtGui.QFrame, ui.diffraction.ui_diffraction_filter_setup.Ui_Frame):
             """ Define class linked to UI Frame
             """
+
             def __init__(self, parent=None):
                 QtGui.QFrame.__init__(self, parent)
                 self.setupUi(self)
@@ -114,26 +114,26 @@ class FilterSetupWidget(BaseWidget):
         # Default states
 
         # Connections from action/event to function to handle
-        self.connect(self._content.timefilter_checkBox, QtCore.SIGNAL("stateChanged(int)"),\
-                self._filterbytime_statechanged)
+        self.connect(self._content.timefilter_checkBox, QtCore.SIGNAL("stateChanged(int)"),
+                     self._filterbytime_statechanged)
 
-        self.connect(self._content.logvaluefilter_checkBox, QtCore.SIGNAL("stateChanged(int)"),\
-                self._filterbylogvalue_statechanged)
+        self.connect(self._content.logvaluefilter_checkBox, QtCore.SIGNAL("stateChanged(int)"),
+                     self._filterbylogvalue_statechanged)
 
-        self.connect(self._content.load_button, QtCore.SIGNAL("clicked()"),\
-                self._run_number_changed)
+        self.connect(self._content.load_button, QtCore.SIGNAL("clicked()"),
+                     self._run_number_changed)
 
         # self.connect(self._content.run_number_edit, QtCore.SIGNAL("textChanged(QString)"), self._run_number_changed)
         self.connect(self._content.run_number_edit, QtCore.SIGNAL("returnPressed()"), self._run_number_changed)
 
-        self.connect(self._content.plot_log_button, QtCore.SIGNAL("clicked()"),\
-                self._plot_log_clicked)
+        self.connect(self._content.plot_log_button, QtCore.SIGNAL("clicked()"),
+                     self._plot_log_clicked)
 
-        self.connect(self._content.syn_logname_button, QtCore.SIGNAL("clicked()"),\
-                self._sync_logname_clicked)
+        self.connect(self._content.syn_logname_button, QtCore.SIGNAL("clicked()"),
+                     self._sync_logname_clicked)
 
-        self.connect(self._content.help_button, QtCore.SIGNAL("clicked()"),\
-                self._show_help)
+        self.connect(self._content.help_button, QtCore.SIGNAL("clicked()"),
+                     self._show_help)
 
         # Validated widgets
         # self._connect_validated_lineedit(self._content.sample_edit)
@@ -193,7 +193,8 @@ class FilterSetupWidget(BaseWidget):
                 self._content.valuechange_combo.setCurrentIndex(index)
             else:
                 self._content.valuechange_combo.setCurrentIndex(0)
-                print "Input value of filter log value by changing direction '%s' is not allowed." % (state.filterlogvaluebychangingdirection)
+                print "Input value of filter log value by changing direction '%s' is not allowed." % \
+                    (state.filterlogvaluebychangingdirection)
         else:
             # Default
             self._content.valuechange_combo.setCurrentIndex(0)
@@ -217,7 +218,6 @@ class FilterSetupWidget(BaseWidget):
         """
 
         return
-
 
     def get_state(self):
         """ Returns a FilterSetupScript with the state of Filter_Setup_Interface
@@ -262,7 +262,6 @@ class FilterSetupWidget(BaseWidget):
         """ Handling event if run number is changed... If it is a valid run number,
         the load the meta data
         """
-        from datetime import datetime
 
         # 1. Form the file
         newrunnumberstr = self._content.run_number_edit.text()
@@ -280,8 +279,8 @@ class FilterSetupWidget(BaseWidget):
 
         # 3. Update the log name combo box
         if metaws is None:
-            self._content.info_text_browser.setText(\
-                    str("Error! Failed to load data file %s.  Current working directory is %s. " % (eventnxsname, os.getcwd())))
+            self._content.info_text_browser.setText(
+                str("Error! Failed to load data file %s.  Current working directory is %s. " % (eventnxsname, os.getcwd())))
         else:
             self._metaws = metaws
 
@@ -334,19 +333,19 @@ class FilterSetupWidget(BaseWidget):
         # Get property
         run = self._metaws.getRun()
         try:
-            logproperty = run.getProperty(str(logname))
+            run.getProperty(str(logname))
         except RuntimeError:
             # Unable to plot
-            msg3 = str("Error! Workspace %s does not contain log %s. " % (str(self._metaws),\
-                logname))
+            msg3 = str("Error! Workspace %s does not contain log %s. " % (str(self._metaws),
+                                                                          logname))
             self._content.info_text_browser.setText(str(msg1+msg3))
             return
 
         # Construct workspace
-        output = api.ExportTimeSeriesLog(InputWorkspace = str(self._metaws),\
-                OutputWorkspace = str(logname),\
-                LogName = str(logname),\
-                IsEventWorkspace = False)
+        output = api.ExportTimeSeriesLog(InputWorkspace = str(self._metaws),
+                                         OutputWorkspace = str(logname),
+                                         LogName = str(logname),
+                                         IsEventWorkspace = False)
         #api.DeleteWorkspace(Workspace="PercentStat")
 
         try:
@@ -442,8 +441,8 @@ class FilterSetupWidget(BaseWidget):
             maxwidget.setText("%-f" % float(xmax))
             return
 
-        self.logvalue_vs_time_distribution(workspace=ws,\
-                callback=call_back)
+        self.logvalue_vs_time_distribution(workspace=ws,
+                                           callback=call_back)
 
         return
 
@@ -454,8 +453,8 @@ class FilterSetupWidget(BaseWidget):
         xmax = workspace.dataX(0)[-1]
         if callback is not None:
             from LargeScaleStructures import data_stitching
-            data_stitching.RangeSelector.connect([workspace], callback,\
-                                             xmin=xmin, xmax=xmax)
+            data_stitching.RangeSelector.connect([workspace], callback,
+                                                 xmin=xmin, xmax=xmax)
 
         return
 

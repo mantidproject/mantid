@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>661</width>
-    <height>462</height>
+    <height>575</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -16,10 +16,23 @@
   <layout class="QVBoxLayout" name="layoutAbsF2P">
    <item>
     <widget class="QGroupBox" name="gbInput">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
      <property name="title">
       <string>Input</string>
      </property>
      <layout class="QGridLayout" name="gridLayout_11">
+      <item row="0" column="0">
+       <widget class="QLabel" name="lbInputType">
+        <property name="text">
+         <string>Sample:</string>
+        </property>
+       </widget>
+      </item>
       <item row="1" column="1">
        <widget class="MantidQt::MantidWidgets::DataSelector" name="dsContainer" native="true">
         <property name="enabled">
@@ -47,6 +60,9 @@
          </stringlist>
         </property>
         <property name="showLoad" stdset="0">
+         <bool>false</bool>
+        </property>
+        <property name="ShowGroups" stdset="0">
          <bool>false</bool>
         </property>
        </widget>
@@ -84,14 +100,135 @@
         <property name="showLoad" stdset="0">
          <bool>false</bool>
         </property>
-       </widget>
-      </item>
-      <item row="0" column="0">
-       <widget class="QLabel" name="lbInputType">
-        <property name="text">
-         <string>Sample:</string>
+        <property name="ShowGroups" stdset="0">
+         <bool>false</bool>
         </property>
        </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QGroupBox" name="corrDetails">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="toolTip">
+      <string>Correction computation details. By default will be set automatically from the instrument parameters of the input workspace. Modify to override.</string>
+     </property>
+     <property name="title">
+      <string>Correction Details </string>
+     </property>
+     <layout class="QVBoxLayout" name="verticalLayout">
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout_4">
+        <item>
+         <widget class="QLabel" name="labelEmode">
+          <property name="text">
+           <string>Emode</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QComboBox" name="cbEmode">
+          <property name="toolTip">
+           <string>Choose the energy transfer mode. </string>
+          </property>
+          <item>
+           <property name="text">
+            <string>Indirect</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Direct</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Elastic</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Efixed</string>
+           </property>
+          </item>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="label">
+          <property name="text">
+           <string>Efixed</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QDoubleSpinBox" name="doubleEfixed">
+          <property name="enabled">
+           <bool>true</bool>
+          </property>
+          <property name="toolTip">
+           <string>Efixed value in mev. </string>
+          </property>
+          <property name="suffix">
+           <string> meV</string>
+          </property>
+          <property name="decimals">
+           <number>3</number>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="lbNwave">
+          <property name="text">
+           <string>Number Wavelengths</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QSpinBox" name="spNwave">
+          <property name="toolTip">
+           <string>Number of wavelength points to calculate the corrections for.</string>
+          </property>
+          <property name="minimum">
+           <number>1</number>
+          </property>
+          <property name="value">
+           <number>10</number>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QCheckBox" name="cbInterpolate">
+          <property name="toolTip">
+           <string>Interpolate the corrections as a function of wavelength.</string>
+          </property>
+          <property name="text">
+           <string>Interpolate</string>
+          </property>
+          <property name="checked">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <spacer name="horizontalSpacer_2">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>40</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+       </layout>
       </item>
      </layout>
     </widget>
@@ -243,6 +380,9 @@
           </property>
           <item row="5" column="3">
            <widget class="QDoubleSpinBox" name="spCylBeamWidth">
+            <property name="suffix">
+             <string> cm</string>
+            </property>
             <property name="decimals">
              <number>3</number>
             </property>
@@ -267,6 +407,9 @@
           </item>
           <item row="5" column="1">
            <widget class="QDoubleSpinBox" name="spCylBeamHeight">
+            <property name="suffix">
+             <string> cm</string>
+            </property>
             <property name="decimals">
              <number>3</number>
             </property>
@@ -304,6 +447,9 @@
           </item>
           <item row="0" column="1">
            <widget class="QDoubleSpinBox" name="spCylSampleOuterRadius">
+            <property name="suffix">
+             <string> cm</string>
+            </property>
             <property name="decimals">
              <number>3</number>
             </property>
@@ -319,6 +465,9 @@
            <widget class="QDoubleSpinBox" name="spCylCanOuterRadius">
             <property name="enabled">
              <bool>false</bool>
+            </property>
+            <property name="suffix">
+             <string> cm</string>
             </property>
             <property name="decimals">
              <number>3</number>
@@ -350,6 +499,9 @@
           </property>
           <item row="5" column="3">
            <widget class="QDoubleSpinBox" name="spAnnBeamWidth">
+            <property name="suffix">
+             <string> cm</string>
+            </property>
             <property name="decimals">
              <number>3</number>
             </property>
@@ -374,6 +526,9 @@
           </item>
           <item row="5" column="1">
            <widget class="QDoubleSpinBox" name="spAnnBeamHeight">
+            <property name="suffix">
+             <string> cm</string>
+            </property>
             <property name="decimals">
              <number>3</number>
             </property>
@@ -417,6 +572,9 @@
             <property name="enabled">
              <bool>false</bool>
             </property>
+            <property name="suffix">
+             <string> cm</string>
+            </property>
             <property name="decimals">
              <number>3</number>
             </property>
@@ -430,6 +588,9 @@
           </item>
           <item row="0" column="3">
            <widget class="QDoubleSpinBox" name="spAnnSampleOuterRadius">
+            <property name="suffix">
+             <string> cm</string>
+            </property>
             <property name="decimals">
              <number>3</number>
             </property>
@@ -457,6 +618,9 @@
           </item>
           <item row="0" column="1">
            <widget class="QDoubleSpinBox" name="spAnnSampleInnerRadius">
+            <property name="suffix">
+             <string> cm</string>
+            </property>
             <property name="decimals">
              <number>3</number>
             </property>
@@ -488,7 +652,10 @@
      </property>
      <layout class="QGridLayout" name="gridLayout">
       <item row="0" column="1">
-       <widget class="QDoubleSpinBox" name="spSampleNumberDensity">
+       <widget class="QDoubleSpinBox" name="spSampleDensity">
+        <property name="suffix">
+         <string> g/cm3</string>
+        </property>
         <property name="maximum">
          <double>9999.989999999999782</double>
         </property>
@@ -498,10 +665,17 @@
        </widget>
       </item>
       <item row="0" column="0">
-       <widget class="QLabel" name="lbSampleNumberDensity">
-        <property name="text">
-         <string>Number Density:</string>
-        </property>
+       <widget class="QComboBox" name="cbSampleDensity">
+        <item>
+         <property name="text">
+          <string>Mass Density</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Number Density</string>
+         </property>
+        </item>
        </widget>
       </item>
       <item row="0" column="2">
@@ -556,10 +730,17 @@
      </property>
      <layout class="QGridLayout" name="gridLayout_3">
       <item row="0" column="0">
-       <widget class="QLabel" name="lbCanNumberDensity">
-        <property name="text">
-         <string>Number Density:</string>
-        </property>
+       <widget class="QComboBox" name="cbCanDensity">
+        <item>
+         <property name="text">
+          <string>Mass Density</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Number Density</string>
+         </property>
+        </item>
        </widget>
       </item>
       <item row="0" column="3">
@@ -573,7 +754,10 @@
        </widget>
       </item>
       <item row="0" column="1">
-       <widget class="QDoubleSpinBox" name="spCanNumberDensity">
+       <widget class="QDoubleSpinBox" name="spCanDensity">
+        <property name="suffix">
+         <string> g/cm3</string>
+        </property>
         <property name="maximum">
          <double>9999.989999999999782</double>
         </property>
@@ -709,9 +893,7 @@
   <tabstop>spAnnBeamHeight</tabstop>
   <tabstop>spAnnBeamWidth</tabstop>
   <tabstop>spAnnStepSize</tabstop>
-  <tabstop>spSampleNumberDensity</tabstop>
   <tabstop>leSampleChemicalFormula</tabstop>
-  <tabstop>spCanNumberDensity</tabstop>
   <tabstop>leCanChemicalFormula</tabstop>
   <tabstop>cbPlotOutput</tabstop>
   <tabstop>pbSave</tabstop>

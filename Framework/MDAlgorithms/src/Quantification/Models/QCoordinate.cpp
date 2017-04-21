@@ -1,5 +1,6 @@
-// Includes
 #include "MantidMDAlgorithms/Quantification/Models/QCoordinate.h"
+#include "MantidAPI/Run.h"
+#include "MantidAPI/Sample.h"
 #include <cmath>
 
 namespace Mantid {

@@ -3,6 +3,7 @@
 
 #include "MantidKernel/System.h"
 #include "MantidAPI/DataProcessorAlgorithm.h"
+#include "MantidAPI/WorkspaceGroup_fwd.h"
 #include "MantidDataObjects/TableWorkspace.h"
 
 namespace Mantid {

@@ -1,9 +1,11 @@
-#pylint: disable=too-many-arguments
+#pylint: disable=too-many-arguments,redefined-builtin
 """Holds classes that define the mass profiles.
-
 This is all essentially about parsing the user input and putting it into a form
 the Mantid fitting algorithm will understand
 """
+from __future__ import (absolute_import, division, print_function)
+from six import iteritems
+
 import ast
 import collections
 import re
@@ -13,6 +15,7 @@ from mantid import logger
 # --------------------------------------------------------------------------------
 # Mass profile base class
 # --------------------------------------------------------------------------------
+
 
 class MassProfile(object):
 
@@ -110,6 +113,7 @@ class MassProfile(object):
 # Gaussian profile
 # --------------------------------------------------------------------------------
 
+
 class GaussianMassProfile(MassProfile):
 
     cfunction = "GaussianComptonProfile"
@@ -176,6 +180,7 @@ class GaussianMassProfile(MassProfile):
 # --------------------------------------------------------------------------------
 # MultivariateGaussian profile
 # --------------------------------------------------------------------------------
+
 
 class MultivariateGaussianMassProfile(MassProfile):
 
@@ -248,9 +253,9 @@ class MultivariateGaussianMassProfile(MassProfile):
         :param param_prefix: An optional prefix for the parameter name
         """
         constraints = "{0}Intensity > 0.0,".format(param_prefix) \
-                    + "{0}SigmaX > 0.0,".format(param_prefix) \
-                    + "{0}SigmaY > 0.0,".format(param_prefix) \
-                    + "{0}SigmaZ > 0.0".format(param_prefix)
+            + "{0}SigmaX > 0.0,".format(param_prefix) \
+            + "{0}SigmaY > 0.0,".format(param_prefix) \
+            + "{0}SigmaZ > 0.0".format(param_prefix)
         return constraints
 
     def create_ties_str(self, param_prefix=""):
@@ -260,6 +265,7 @@ class MultivariateGaussianMassProfile(MassProfile):
 # --------------------------------------------------------------------------------
 # GramCharlier profile
 # --------------------------------------------------------------------------------
+
 
 class GramCharlierMassProfile(MassProfile):
 
@@ -293,7 +299,7 @@ class GramCharlierMassProfile(MassProfile):
         for key, parser in key_names:
             try:
                 parsed_values.append(parser(func_str, key))
-            except ValueError, exc:
+            except ValueError as exc:
                 raise TypeError(str(exc))
 
         params = {
@@ -356,7 +362,7 @@ class GramCharlierMassProfile(MassProfile):
             if self.fsecoeff is not None:
                 fitting_str += "FSECoeff={0}".format(self.fsecoeff)
             if self.hermite_coeff_vals is not None:
-                for i, coeff in self.hermite_coeff_vals.items():
+                for i, coeff in list(self.hermite_coeff_vals.items()):
                     if coeff > 0:
                         fitting_str += ",C_{0}={1:f}".format(i, coeff)
 
@@ -414,9 +420,9 @@ def create_from_str(func_str, mass):
     for cls in known_types:
         try:
             return cls.from_str(func_str, mass)
-        except TypeError, exc:
+        except TypeError as exc:
             errors[str(cls)] = str(exc)
 
     # if we get here we were unable to parse anything acceptable
-    msgs = ["{0}: {1}".format(name, error) for name, error in errors.iteritems()]
+    msgs = ["{0}: {1}".format(name, error) for name, error in iteritems(errors)]
     raise ValueError("\n".join(msgs))

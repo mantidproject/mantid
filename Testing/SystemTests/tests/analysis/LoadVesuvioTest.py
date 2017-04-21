@@ -1,13 +1,14 @@
 #pylint: disable=invalid-name,no-init,too-many-public-methods,too-many-arguments
 import stresstesting
 
-from mantid.api import MatrixWorkspace, mtd
+from mantid.api import FileFinder, MatrixWorkspace, mtd
 import mantid.simpleapi as ms
 
 import math
 import unittest
 
 DIFF_PLACES = 12
+
 
 class VesuvioTests(unittest.TestCase):
 
@@ -19,7 +20,6 @@ class VesuvioTests(unittest.TestCase):
         monitor_name = self.ws_name + '_monitors'
         if monitor_name in mtd:
             mtd.remove(monitor_name)
-
 
     #==================== Test spectrum list validation ============================
 
@@ -44,9 +44,26 @@ class VesuvioTests(unittest.TestCase):
         # check workspace created
         self.assertTrue(mtd.doesExist(self.ws_name))
 
-
     #================== Success cases ================================
 
+    def test_filename_accepts_full_filepath(self):
+        diff_mode = "FoilOut"
+        rawfile = FileFinder.getFullPath("EVS14188.raw")
+        self._run_load(rawfile, "3", diff_mode)
+        self.assertTrue(mtd.doesExist('evs_raw'))
+        self.assertEquals(mtd['evs_raw'].getNumberHistograms(), 1)
+
+    def test_filename_accepts_filename_no_path(self):
+        diff_mode = "FoilOut"
+        self._run_load("EVS14188.raw", "3", diff_mode)
+        self.assertTrue(mtd.doesExist('evs_raw'))
+        self.assertEquals(mtd['evs_raw'].getNumberHistograms(), 1)
+
+    def test_filename_accepts_run_and_ext(self):
+        diff_mode = "FoilOut"
+        self._run_load("14188.raw", "3", diff_mode)
+        self.assertTrue(mtd.doesExist('evs_raw'))
+        self.assertEquals(mtd['evs_raw'].getNumberHistograms(), 1)
 
     def test_load_with_back_scattering_spectra_produces_correct_workspace_using_double_difference(self):
         diff_mode = "DoubleDifference"
@@ -253,7 +270,6 @@ class VesuvioTests(unittest.TestCase):
 
         self._verify_spectra_numbering(evs_raw.getSpectrum(0), 3,
                                        range(2101,2114))
-
 
     def test_sumspectra_with_multiple_groups_gives_number_output_spectra_as_input_groups_with_foil_in(self):
         self._run_load("14188", "3-15;30-50", "FoilIn", "IP0005.dat", sum_runs=True)

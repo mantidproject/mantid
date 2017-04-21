@@ -1,6 +1,7 @@
 #include "MantidQtCustomInterfaces/Indirect/IndirectMolDyn.h"
 
 #include "MantidQtCustomInterfaces/UserInputValidator.h"
+#include "MantidAPI/WorkspaceGroup.h"
 
 #include <QFileInfo>
 #include <QString>

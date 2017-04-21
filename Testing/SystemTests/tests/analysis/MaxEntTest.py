@@ -1,6 +1,7 @@
-﻿#pylint: disable=no-init,attribute-defined-outside-init
+#pylint: disable=no-init,attribute-defined-outside-init
 import stresstesting
 from mantid.simpleapi import *
+
 
 class MaxEntTest(stresstesting.MantidStressTest):
     '''Tests the MaxEnt algorithm on a MUSR workspace'''

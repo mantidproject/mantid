@@ -14,6 +14,8 @@ Overview
 Provides correction routines for quasielastic, inelastic and diffraction
 reductions.
 
+These interfaces do not support GroupWorkspace as input.
+
 Action Buttons
 ~~~~~~~~~~~~~~
 
@@ -71,6 +73,30 @@ Plot Output
 Save Result
   If enabled the result will be saved as a NeXus file in the default save
   directory.
+
+Correction Details
+~~~~~~~~~~~~~~~~~~
+
+These options will be automatically preset to the default values read from the sample workspace, whenever possible.
+They can be overridden manually.
+
+Emode
+  The energy transfer mode. All the options except *Efixed* require the input workspaces to be in wavelength.
+  In *Efixed* mode, correction will be computed only for a single wavelength point defined by ` Efixed` value.
+  All the options except *Elastic* require the Efixed value to be set correctly.
+  For flat plate, all the options except *Efixed*, are equivalent.
+  In brief, use *Indirect* for QENS, *Efixed* for FWS and diffraction.
+  *Efixed* can be used for QENS also, if the energy transfer can be neglected compared to the incident energy.
+  See :ref:`CylinderPaalmanPingsCorrections <algm-CylinderPaalmanPingsCorrection>` for the details.
+
+Efixed
+  The value of the incident (indirect) or final (direct) energy in `mev`. Specified in the instrument parameter file.
+
+NumberWavelength
+  Number of wavelength points to compute the corrections for. Ignored for *Efixed*.
+
+Interpolate
+  Whether or not to interpolate the corrections as a function of wavelength. Ignored for *Efixed*.
 
 Shape Details
 ~~~~~~~~~~~~~
@@ -258,8 +284,14 @@ Use Container
 Shape
   Select the shape of the sample (see specific geometry options below).
 
-Number Density
-  Number density for either the sample or container.
+Number Wavelengths
+  Number of wavelengths for calculation
+
+Events
+  Number of neutron events
+
+Mass Density/Number Density
+  Mass density or Number Density for either the sample or container.
 
 Chemical Formula
   Chemical formula for either the sample or container in the format expected by
@@ -277,10 +309,10 @@ Keep Correction Factors
   be created, this will have the suffix *_Factors*.
 
 Plot Result
-  If checked the corrected workspace and correction factors will be plotted.
+  If clicked the corrected workspace and correction factors will be plotted.
 
 Save Result
-  If checked the corrected workspace and (if *Keep Correction Factors* is
+  If Clicked the corrected workspace and (if *Keep Correction Factors* is
   checked) the correction factor workspace will be saved as a NeXus file in the
   default save directory.
 
@@ -302,15 +334,14 @@ Sample Height
 Sample Thickness
   Thickness of the sample in :math:`cm`.
 
+Sample Angle
+  Angle of the sample to the beam in radians.
+
 Container Front Thickness
   Thickness of the front of the container in :math:`cm`.
 
 Container Back Thickness
   Thickness of the back of the container in :math:`cm`.
-
-Element Size
-  Size of the square "chunks" to divide the frontal area of the sample into to
-  calculate corrections in :math:`cm`.
 
 Annulus
 ~~~~~~~
@@ -333,8 +364,8 @@ Container Inner Radius
 Container Outer Radius
   Radius of the outer wall of the container in :math:`cm`.
 
-Neutron Events
-  Number of events to use in the Monte Carlo simulation.
+Sample Height
+  Height of the sample in :math:`cm`.
 
 Cylinder
 ~~~~~~~~
@@ -351,10 +382,10 @@ Sample Radius
 Container Radius
   Radius of the outer wall of the container in :math:`cm`.
 
-Neutron Events
-  Number of events to use in the Monte Carlo simulation.
-  
-  
+Sample Height
+  Height of the sample in :math:`cm`.
+
+
 Container Subtraction
 ---------------------
 

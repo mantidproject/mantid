@@ -8,16 +8,18 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
+class IReflEventTabPresenter;
 class IReflMainWindowPresenter;
 class IReflRunsTabPresenter;
 class IReflSettingsTabPresenter;
+class IReflSaveTabPresenter;
 
 /** @class ReflMainWindowView
 
 ReflMainWindowView is the concrete main window view implementing the
 functionality defined by the interface IReflMainWindowView
 
-Copyright &copy; 2011-14 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
 National Laboratory & European Spallation Source
 
 This file is part of Mantid.
@@ -46,7 +48,7 @@ public:
   /// Destructor
   ~QtReflMainWindowView() override;
   /// Name of the interface
-  static std::string name() { return "ISIS Reflectometry (Polref)"; }
+  static std::string name() { return "ISIS Reflectometry"; }
   /// This interface's categories.
   static QString categoryInfo() { return "Reflectometry"; }
 
@@ -68,8 +70,12 @@ private:
   void initLayout() override;
   /// Creates the 'Runs' tab
   IReflRunsTabPresenter *createRunsTab();
+  /// Creates the 'Event Handling' tab
+  IReflEventTabPresenter *createEventTab();
   /// Creates the 'Settings' tab
   IReflSettingsTabPresenter *createSettingsTab();
+  /// Creates the 'Save ASCII' tab
+  IReflSaveTabPresenter *createSaveTab();
 
   /// Interface definition with widgets for the main interface window
   Ui::RelMainWindowWidget m_ui;

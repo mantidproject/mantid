@@ -1,9 +1,7 @@
-//----------------------------------
-// Includes
-//----------------------------------
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/IWorkspaceProperty.h"
 #include "MantidKernel/DateAndTime.h"
+#include "MantidKernel/IPropertySettings.h"
 #include "MantidKernel/Logger.h"
 
 #include "MantidQtAPI/AlgorithmDialog.h"

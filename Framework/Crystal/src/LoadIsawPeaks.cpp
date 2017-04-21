@@ -1,11 +1,16 @@
 #include "MantidCrystal/LoadIsawPeaks.h"
 #include "MantidCrystal/SCDCalibratePanels.h"
+#include "MantidAPI/DetectorInfo.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/RegisterFileLoader.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidCrystal/CalibrationHelpers.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
+#include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidKernel/OptionalBool.h"
+#include "MantidKernel/Strings.h"
 #include "MantidKernel/Unit.h"
 
 using Mantid::Kernel::Strings::readToEndOfLine;
@@ -22,7 +27,6 @@ using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
 
-//----------------------------------------------------------------------------------------------
 /**
  * Determine the confidence with which this algorithm can load a given file
  * @param descriptor A descriptor for the file
@@ -105,137 +109,6 @@ void LoadIsawPeaks::exec() {
   this->checkNumberPeaks(ws, getPropertyValue("Filename"));
 }
 
-//----------------------------------------------------------------------------------------------
-std::string
-LoadIsawPeaks::ApplyCalibInfo(std::ifstream &in, std::string startChar,
-                              Geometry::Instrument_const_sptr instr_old,
-                              Geometry::Instrument_const_sptr instr,
-                              double &T0) {
-  ParameterMap_sptr parMap1 = instr_old->getParameterMap();
-
-  ParameterMap_sptr parMap = instr->getParameterMap();
-
-  while (in.good() && (startChar.size() < 1 || startChar != "7")) {
-    readToEndOfLine(in, true);
-    startChar = getWord(in, false);
-  }
-  if (!(in.good())) {
-    throw std::invalid_argument("Peaks file has no time shift and L0 info");
-  }
-  std::string L1s = getWord(in, false);
-  std::string T0s = getWord(in, false);
-  if (L1s.length() < 1 || T0s.length() < 1) {
-    g_log.error() << "Missing L1 or Time offset\n";
-    throw std::invalid_argument("Missing L1 or Time offset");
-  }
-
-  try {
-    std::istringstream iss(L1s + " " + T0s, std::istringstream::in);
-    double L1;
-    iss >> L1;
-    iss >> T0;
-    V3D sampPos = instr->getSample()->getPos();
-    SCDCalibratePanels::FixUpSourceParameterMap(instr, L1 / 100, sampPos,
-                                                parMap1);
-  } catch (...) {
-    g_log.error() << "Invalid L1 or Time offset\n";
-    throw std::invalid_argument("Invalid L1 or Time offset");
-  }
-
-  readToEndOfLine(in, true);
-  startChar = getWord(in, false);
-  while (in.good() && (startChar.size() < 1 || startChar != "5")) {
-    readToEndOfLine(in, true);
-    startChar = getWord(in, false);
-  }
-
-  if (!(in.good())) {
-    g_log.error() << "Peaks file has no detector panel info\n";
-    throw std::invalid_argument("Peaks file has no detector panel info");
-  }
-
-  while (startChar == "5") {
-
-    std::string line;
-    for (int i = 0; i < 16; i++) {
-      std::string s = getWord(in, false);
-      if (s.size() < 1) {
-        g_log.error() << "Not enough info to describe panel \n";
-        throw std::length_error("Not enough info to describe panel ");
-      }
-      line += " " + s;
-      ;
-    }
-
-    readToEndOfLine(in, true);
-    startChar = getWord(in, false); // blank lines ?? and # lines ignore
-
-    std::istringstream iss(line, std::istringstream::in);
-    int bankNum;
-    double width, height, Centx, Centy, Centz, Basex, Basey, Basez, Upx, Upy,
-        Upz;
-    try {
-      int nrows, ncols;
-      double depth, detD;
-      iss >> bankNum >> nrows >> ncols >> width >> height >> depth >> detD >>
-          Centx >> Centy >> Centz >> Basex >> Basey >> Basez >> Upx >> Upy >>
-          Upz;
-    } catch (...) {
-
-      g_log.error() << "incorrect type of data for panel \n";
-      throw std::length_error("incorrect type of data for panel ");
-    }
-
-    std::string SbankNum = std::to_string(bankNum);
-    std::string bankName = "bank";
-    if (instr->getName() == "WISH") {
-      if (bankNum < 10)
-        bankName = "WISHpanel0";
-      else
-        bankName = "WISHpanel";
-    }
-    bankName += SbankNum;
-    boost::shared_ptr<const Geometry::IComponent> bank =
-        getCachedBankByName(bankName, instr_old);
-
-    if (!bank) {
-      g_log.error() << "There is no bank " << bankName
-                    << " in the instrument\n";
-      throw std::length_error("There is no bank " + bankName +
-                              " in the instrument");
-    }
-
-    V3D dPos = V3D(Centx, Centy, Centz) / 100.0 - bank->getPos();
-    V3D Base(Basex, Basey, Basez), Up(Upx, Upy, Upz);
-    V3D ToSamp = Base.cross_prod(Up);
-    Base.normalize();
-    Up.normalize();
-    ToSamp.normalize();
-    Quat thisRot(Base, Up, ToSamp);
-    Quat bankRot(bank->getRotation());
-    bankRot.inverse();
-    Quat dRot = thisRot * bankRot;
-
-    boost::shared_ptr<const Geometry::RectangularDetector> bankR =
-        boost::dynamic_pointer_cast<const Geometry::RectangularDetector>(bank);
-
-    if (!bankR)
-      return startChar;
-
-    double DetWScale = 1, DetHtScale = 1;
-    if (bank) {
-      DetWScale = width / bankR->xsize() / 100;
-      DetHtScale = height / bankR->ysize() / 100;
-    }
-    std::vector<std::string> bankNames;
-    bankNames.push_back(bankName);
-
-    SCDCalibratePanels::FixUpBankParameterMap(
-        bankNames, instr, dPos, dRot, DetWScale, DetHtScale, parMap1, false);
-  }
-  return startChar;
-}
-
 //-----------------------------------------------------------------------------------------------
 /** Reads the header of a .peaks file
  * @param outWS :: the workspace in which to place the information
@@ -294,17 +167,19 @@ std::string LoadIsawPeaks::readHeader(PeaksWorkspace_sptr outWS,
   // Populate the instrument parameters in this workspace - this works around a
   // bug
   tempWS->populateInstrumentParameters();
-  Geometry::Instrument_const_sptr instr_old = tempWS->getInstrument();
-  auto instr = instr_old;
-  /*auto map = boost::make_shared<ParameterMap>();
-  auto instr = boost::make_shared<const Geometry::Instrument>(
-      instr_old->baseInstrument(), map);*/
-
-  std::string s = ApplyCalibInfo(in, "", instr_old, instr, T0);
+  Geometry::Instrument_const_sptr instr = tempWS->getInstrument();
   outWS->setInstrument(instr);
+
+  IAlgorithm_sptr applyCal = createChildAlgorithm("LoadIsawDetCal");
+  applyCal->initialize();
+  applyCal->setProperty("InputWorkspace", outWS);
+  applyCal->setProperty("Filename", getPropertyValue("Filename"));
+  applyCal->executeAsChildAlg();
+  T0 = applyCal->getProperty("TimeOffset");
 
   // Now skip all lines on L1, detector banks, etc. until we get to a block of
   // peaks. They start with 0.
+  std::string s;
   while (s != "0" && in.good()) {
     readToEndOfLine(in, true);
     s = getWord(in, false);
@@ -365,26 +240,26 @@ DataObjects::Peak LoadIsawPeaks::readPeak(PeaksWorkspace_sptr outWS,
   if (s.compare("3") != 0)
     throw std::runtime_error("Empty peak line encountered.");
 
-  seqNum = atoi(getWord(in, false).c_str());
+  seqNum = std::stoi(getWord(in, false));
 
-  h = strtod(getWord(in, false).c_str(), nullptr);
-  k = strtod(getWord(in, false).c_str(), nullptr);
-  l = strtod(getWord(in, false).c_str(), nullptr);
+  h = std::stod(getWord(in, false), nullptr);
+  k = std::stod(getWord(in, false), nullptr);
+  l = std::stod(getWord(in, false), nullptr);
 
-  col = strtod(getWord(in, false).c_str(), nullptr);
-  row = strtod(getWord(in, false).c_str(), nullptr);
-  strtod(getWord(in, false).c_str(), nullptr); // chan
-  strtod(getWord(in, false).c_str(), nullptr); // L2
-  strtod(getWord(in, false).c_str(), nullptr); // ScatAng
+  col = std::stod(getWord(in, false), nullptr);
+  row = std::stod(getWord(in, false), nullptr);
+  UNUSED_ARG(std::stod(getWord(in, false), nullptr)); // chan
+  UNUSED_ARG(std::stod(getWord(in, false), nullptr)); // L2
+  UNUSED_ARG(std::stod(getWord(in, false), nullptr)); // ScatAng
 
-  strtod(getWord(in, false).c_str(), nullptr); // Az
-  wl = strtod(getWord(in, false).c_str(), nullptr);
-  strtod(getWord(in, false).c_str(), nullptr); // D
-  IPK = strtod(getWord(in, false).c_str(), nullptr);
+  UNUSED_ARG(std::stod(getWord(in, false), nullptr)); // Az
+  wl = std::stod(getWord(in, false), nullptr);
+  UNUSED_ARG(std::stod(getWord(in, false), nullptr)); // D
+  IPK = std::stod(getWord(in, false), nullptr);
 
-  Inti = strtod(getWord(in, false).c_str(), nullptr);
-  SigI = strtod(getWord(in, false).c_str(), nullptr);
-  static_cast<void>(atoi(getWord(in, false).c_str())); // iReflag
+  Inti = std::stod(getWord(in, false), nullptr);
+  SigI = std::stod(getWord(in, false), nullptr);
+  UNUSED_ARG(std::stoi(getWord(in, false))); // iReflag
 
   // Finish the line and get the first word of next line
   readToEndOfLine(in, true);
@@ -477,13 +352,13 @@ std::string LoadIsawPeaks::readPeakBlockHeader(std::string lastStr,
   if (s.compare(std::string("1")) != 0)
     return s;
 
-  run = atoi(getWord(in, false).c_str());
-  detName = atoi(getWord(in, false).c_str());
-  chi = strtod(getWord(in, false).c_str(), nullptr);
-  phi = strtod(getWord(in, false).c_str(), nullptr);
+  run = std::stoi(getWord(in, false));
+  detName = std::stoi(getWord(in, false));
+  chi = std::stod(getWord(in, false), nullptr);
+  phi = std::stod(getWord(in, false), nullptr);
 
-  omega = strtod(getWord(in, false).c_str(), nullptr);
-  monCount = strtod(getWord(in, false).c_str(), nullptr);
+  omega = std::stod(getWord(in, false), nullptr);
+  monCount = std::stod(getWord(in, false), nullptr);
   readToEndOfLine(in, true);
 
   return getWord(in, false);
@@ -565,7 +440,7 @@ void LoadIsawPeaks::appendFile(PeaksWorkspace_sptr outWS,
       Peak peak = readPeak(outWS, s, in, seqNum, bankName, qSign);
 
       // Get the calculated goniometer matrix
-      Matrix<double> gonMat = uniGonio.getR();
+      const Matrix<double> &gonMat = uniGonio.getR();
 
       peak.setGoniometerMatrix(gonMat);
       peak.setRunNumber(run);
@@ -581,8 +456,9 @@ void LoadIsawPeaks::appendFile(PeaksWorkspace_sptr outWS,
       // Add the peak to workspace
       outWS->addPeak(peak);
     } catch (std::runtime_error &e) {
-      g_log.warning() << "Error reading peak SEQN " << seqNum << " : "
-                      << e.what() << '\n';
+      g_log.error() << "Error reading peak SEQN " << seqNum << " : " << e.what()
+                    << '\n';
+      throw std::runtime_error("Corrupted input file. ");
     }
 
     prog.report(in.tellg());

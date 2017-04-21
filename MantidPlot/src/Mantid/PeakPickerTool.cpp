@@ -1,26 +1,26 @@
 #include "PeakPickerTool.h"
+#include "../FunctionCurve.h"
 #include "MantidMatrixCurve.h"
-#include "MantidUI.h"
 #include "MantidQtMantidWidgets/FitPropertyBrowser.h"
 #include "MantidQtMantidWidgets/MuonFitPropertyBrowser.h"
-#include "../FunctionCurve.h"
 #include "MantidQtMantidWidgets/PropertyHandler.h"
+#include "MantidUI.h"
 
 #include "MantidAPI/CompositeFunction.h"
-#include "MantidAPI/IPeakFunction.h"
 #include "MantidAPI/FunctionFactory.h"
+#include "MantidAPI/IPeakFunction.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Logger.h"
 
 #include "qwt_painter.h"
-#include <QPainter>
-#include <QList>
-#include <QToolBar>
 #include <QAction>
-#include <QMenu>
-#include <QMouseEvent>
 #include <QInputDialog>
+#include <QList>
+#include <QMenu>
 #include <QMessageBox>
+#include <QMouseEvent>
+#include <QPainter>
+#include <QToolBar>
 
 namespace {
 /// static logger
@@ -520,7 +520,11 @@ void PeakPickerTool::functionRemoved() { d_graph->plotWidget()->replot(); }
 void PeakPickerTool::algorithmFinished(const QString &out) {
   // Remove old curves first, unless this is muon data
   // (muon scientists want to keep old fits until cleared manually)
-  if (!isMuonData()) {
+  if (isMuonData()) {
+    if (out.endsWith("_Workspaces")) {
+      return; // Simultaneous fit, don't plot results
+    }
+  } else {
     removeFitCurves();
   }
 
@@ -528,7 +532,7 @@ void PeakPickerTool::algorithmFinished(const QString &out) {
   // and change to line.
   auto *curve =
       new MantidMatrixCurve("", out, graph(), 1, MantidMatrixCurve::Spectrum,
-                            false, m_shouldBeNormalised, Graph::Line);
+                            false, m_shouldBeNormalised, GraphOptions::Line);
   m_curveNames.append(curve->title().text());
   if (m_fitPropertyBrowser->plotDiff()) {
     curve =
@@ -557,6 +561,13 @@ void PeakPickerTool::algorithmFinished(const QString &out) {
   }
 
   graph()->replot();
+
+  // New curve(s) inserted: Y scale may have changed.
+  // If we need to keep left/right Y in sync, do so now.
+  if (graph()->hasSynchronizedScaleDivisions()) {
+    graph()->updateSecondaryAxis(QwtPlot::Axis::yRight);
+    graph()->replot();
+  }
 }
 
 /**
@@ -643,7 +654,8 @@ void PeakPickerTool::replot(MantidQt::MantidWidgets::PropertyHandler *h) const {
       // fc->loadData();
       auto ws = boost::dynamic_pointer_cast<const Mantid::API::MatrixWorkspace>(
           m_fitPropertyBrowser->getWorkspace());
-      fc->loadMantidData(ws, m_fitPropertyBrowser->workspaceIndex());
+      fc->loadMantidData(ws, m_fitPropertyBrowser->workspaceIndex(),
+                         m_fitPropertyBrowser->getPeakRadius());
     }
   }
 }
@@ -875,7 +887,8 @@ void PeakPickerTool::plotFitFunction(
                    m_fitPropertyBrowser->endX());
       auto ws = boost::dynamic_pointer_cast<const Mantid::API::MatrixWorkspace>(
           m_fitPropertyBrowser->getWorkspace());
-      fc->loadMantidData(ws, m_fitPropertyBrowser->workspaceIndex());
+      fc->loadMantidData(ws, m_fitPropertyBrowser->workspaceIndex(),
+                         m_fitPropertyBrowser->getPeakRadius());
       // Graph now owns m_curve. Use m_curve->removeMe() to remove (and delete)
       // from Graph
       d_graph->insertCurve(fc);

@@ -1,6 +1,7 @@
 #include "MantidVatesAPI/vtkDataSetFactory.h"
 #include "MantidVatesAPI/ProgressAction.h"
 #include <stdexcept>
+#include <utility>
 
 namespace Mantid {
 namespace VATES {
@@ -51,7 +52,7 @@ Convenience function. Creates an output visualisation data set in one-shot.
 vtkSmartPointer<vtkDataSet>
 vtkDataSetFactory::oneStepCreate(Mantid::API::Workspace_sptr ws,
                                  ProgressAction &progressUpdater) {
-  this->initialize(ws);
+  this->initialize(std::move(ws));
   return this->create(progressUpdater);
 }
 

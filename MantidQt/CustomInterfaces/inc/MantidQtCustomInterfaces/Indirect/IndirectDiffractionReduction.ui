@@ -122,7 +122,7 @@
         </widget>
        </item>
        <item row="5" column="1" colspan="2">
-        <widget class="MantidQt::MantidWidgets::MWRunFiles" name="rfCanFiles" native="true">
+        <widget class="MantidQt::API::MWRunFiles" name="rfCanFiles" native="true">
          <property name="enabled">
           <bool>false</bool>
          </property>
@@ -135,7 +135,7 @@
         </widget>
        </item>
        <item row="0" column="0" colspan="3">
-        <widget class="MantidQt::MantidWidgets::MWRunFiles" name="rfSampleFiles" native="true">
+        <widget class="MantidQt::API::MWRunFiles" name="rfSampleFiles" native="true">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
            <horstretch>0</horstretch>
@@ -199,7 +199,7 @@
             <number>6</number>
            </property>
            <item row="4" column="0" colspan="2">
-            <widget class="MantidQt::MantidWidgets::MWRunFiles" name="rfVanadiumFile" native="true">
+            <widget class="MantidQt::API::MWRunFiles" name="rfVanadiumFile" native="true">
              <property name="enabled">
               <bool>true</bool>
              </property>
@@ -241,7 +241,7 @@
             </widget>
            </item>
            <item row="3" column="0" colspan="2">
-            <widget class="MantidQt::MantidWidgets::MWRunFiles" name="rfCalFile" native="true">
+            <widget class="MantidQt::API::MWRunFiles" name="rfCalFile" native="true">
              <property name="minimumSize">
               <size>
                <width>0</width>
@@ -279,11 +279,46 @@
           <property name="title">
            <string>Calibration</string>
           </property>
-          <layout class="QGridLayout" name="gridLayout_5">
-           <property name="margin">
-            <number>6</number>
-           </property>
+          <layout class="QGridLayout" name="gridLayout_3">
+           <item row="1" column="0">
+            <widget class="MantidQt::API::MWRunFiles" name="rfVanFile_only" native="true">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>41</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="findRunFiles" stdset="0">
+              <bool>true</bool>
+             </property>
+             <property name="label" stdset="0">
+              <string>Vanadium File</string>
+             </property>
+             <property name="multipleFiles" stdset="0">
+              <bool>true</bool>
+             </property>
+             <property name="optional" stdset="0">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
            <item row="0" column="0">
+            <widget class="QCheckBox" name="ckUseVanadium">
+             <property name="minimumSize">
+              <size>
+               <width>0</width>
+               <height>22</height>
+              </size>
+             </property>
+             <property name="text">
+              <string>Use Vanadium File</string>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="0">
             <widget class="QCheckBox" name="ckUseCalib">
              <property name="minimumSize">
               <size>
@@ -296,8 +331,8 @@
              </property>
             </widget>
            </item>
-           <item row="1" column="0" colspan="2">
-            <widget class="MantidQt::MantidWidgets::MWRunFiles" name="rfCalFile_only" native="true">
+           <item row="3" column="0">
+            <widget class="MantidQt::API::MWRunFiles" name="rfCalFile_only" native="true">
              <property name="enabled">
               <bool>false</bool>
              </property>
@@ -325,6 +360,10 @@
             </widget>
            </item>
           </layout>
+          <zorder>ckUseCalib</zorder>
+          <zorder>rfCalFile_only</zorder>
+          <zorder>rfVanFile_only</zorder>
+          <zorder>ckUseVanadium</zorder>
          </widget>
         </item>
         <item>
@@ -534,11 +573,11 @@
          <property name="enabled">
           <bool>false</bool>
          </property>
-          <item>
-            <property name="text">
-              <string>Spectra</string>
-            </property>
-          </item>
+         <item>
+          <property name="text">
+           <string>Spectra</string>
+          </property>
+         </item>
         </widget>
        </item>
        <item>
@@ -680,9 +719,9 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>MantidQt::MantidWidgets::MWRunFiles</class>
+   <class>MantidQt::API::MWRunFiles</class>
    <extends>QWidget</extends>
-   <header>MantidQtMantidWidgets/MWRunFiles.h</header>
+   <header>MantidQtAPI/MWRunFiles.h</header>
   </customwidget>
   <customwidget>
    <class>MantidQt::MantidWidgets::IndirectInstrumentConfig</class>
@@ -741,12 +780,12 @@
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>90</x>
-     <y>174</y>
+     <x>106</x>
+     <y>193</y>
     </hint>
     <hint type="destinationlabel">
-     <x>371</x>
-     <y>174</y>
+     <x>483</x>
+     <y>193</y>
     </hint>
    </hints>
   </connection>
@@ -757,12 +796,12 @@
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>54</x>
-     <y>168</y>
+     <x>70</x>
+     <y>193</y>
     </hint>
     <hint type="destinationlabel">
-     <x>55</x>
-     <y>184</y>
+     <x>71</x>
+     <y>217</y>
     </hint>
    </hints>
   </connection>
@@ -773,12 +812,12 @@
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>20</x>
-     <y>20</y>
+     <x>39</x>
+     <y>316</y>
     </hint>
     <hint type="destinationlabel">
-     <x>20</x>
-     <y>20</y>
+     <x>39</x>
+     <y>325</y>
     </hint>
    </hints>
   </connection>
@@ -789,12 +828,28 @@
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>141</x>
-     <y>194</y>
+     <x>157</x>
+     <y>217</y>
     </hint>
     <hint type="destinationlabel">
-     <x>199</x>
-     <y>194</y>
+     <x>325</x>
+     <y>219</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ckUseVanadium</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>rfVanFile_only</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>249</x>
+     <y>268</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>249</x>
+     <y>287</y>
     </hint>
    </hints>
   </connection>

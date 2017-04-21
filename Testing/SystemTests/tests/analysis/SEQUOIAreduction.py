@@ -11,6 +11,7 @@ import numpy as np
 import mantid
 from mantid.simpleapi import *
 
+
 class DirectInelaticSNSTest(stresstesting.MantidStressTest):
     _nxspe_filename=""
     customDataDir=""
@@ -43,7 +44,6 @@ class DirectInelaticSNSTest(stresstesting.MantidStressTest):
         shutil.copyfile(filename,os.path.join(self.customDataDir,'SEQ_12384_event.nxs'))
         shutil.copyfile(filename,os.path.join(self.customDataDir,'SEQ_12385_event.nxs'))
         self.topbottom()
-
 
     #Routines from SNS scripts
     def createanglelist(self,ws,angmin,angmax,angstep):
@@ -141,11 +141,9 @@ class DirectInelaticSNSTest(stresstesting.MantidStressTest):
         else:
             LoadNexus(Filename=os.path.join(self.customDataDir,"van.nx5"),OutputWorkspace="VAN")
 
-
     #functions from stresstesting
     def requiredFiles(self):
         return ['SEQ_12384_event.nxs']
-
 
     def cleanup(self):
         for ws in ['IWS', 'OWST', 'VAN', 'monitor_ws']:
@@ -188,7 +186,7 @@ class DirectInelaticSNSTest(stresstesting.MantidStressTest):
                     LoadNexusMonitors(Filename=f,OutputWorkspace="monitor_ws_temp")
                     Plus(LHSWorkspace="IWS",RHSWorkspace="IWS_temp",OutputWorkspace="IWS")
                     Plus(LHSWorkspace="monitor_ws",RHSWorkspace="monitor_ws_temp",OutputWorkspace="monitor_ws")
-			        #cleanup
+                                #cleanup
                     DeleteWorkspace("IWS_temp")
                     DeleteWorkspace("monitor_ws_temp")
             w=mtd["IWS"]
@@ -208,7 +206,7 @@ class DirectInelaticSNSTest(stresstesting.MantidStressTest):
                 MaskDetectors(Workspace="OWST",MaskedWorkspace="VAN")
             if do_powder:
                 if i==0:
-                    dummy_mapping=self.createanglelist("OWST",anglemin,anglemax,anglestep)
+                    self.createanglelist("OWST",anglemin,anglemax,anglestep)
                 GroupDetectors( InputWorkspace="OWST",OutputWorkspace="OWST",
                                 MapFile=os.path.join(self.customDataDir,"group.map"),Behaviour="Sum")
                 SolidAngle(InputWorkspace="OWST",OutputWorkspace="sa")
@@ -265,4 +263,3 @@ class DirectInelaticSNSTest(stresstesting.MantidStressTest):
         self.disableChecking.append('SpectraMap')
         self.disableChecking.append('Instrument')
         return "OWST",'SEQUOIAReduction.nxs'
-

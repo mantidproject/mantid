@@ -88,6 +88,7 @@ _translations = {
     'Federico M Pouzols'      : 'Pouzols, Federico M',
     'FedeMPouzols'            : 'Pouzols, Federico M',
     'Federico Montesino Pouzols': 'Pouzols, Federico M',
+    'Fede'                    : 'Pouzols, Federico M',
     'Anton Piccardo-Selg'     : 'Piccardo-Selg, Anton',
     'Lottie Greenwood'        : 'Greenwood, Lottie',
     'Dan Nixon'               : 'Nixon, Dan',
@@ -124,7 +125,25 @@ _translations = {
     'Tom Perkins'             : 'Perkins, Tom',
     'Jan Burle'               : 'Burle, Jan',
     'Duc Le'                  : 'Le, Duc',
-    'David Fairbrother'       : 'Fairbrother, David'
+    'David Fairbrother'       : 'Fairbrother, David',
+    'DavidFair'               : 'Fairbrother, David',
+    'Eltayeb Ahmed'           : 'Ahmed, Eltayeb',
+    'Dimitar Tasev'           : 'Tasev, Dimitar',
+    'Dimitar Borislavov Tasev': 'Tasev, Dimitar',
+    'Antti Soininen'          : 'Soininen, Antti',
+    'Antti Soininnen'         : 'Soininen, Antti',
+    'Pranav Bahuguna'         : 'Bahuguna, Pranav',
+    'Louise McCann'           : 'McCann, Louise',
+    'louisemccann'            : 'McCann, Louise',
+    'Gagik Vardanyan'         : 'Vardanyan, Gagik',
+    'Verena Reimund'          : 'Reimund, Verena',
+    'reimundILL'              : 'Reimund, Verena',
+    'Krzysztof Dymkowski'     : 'Dymkowski, Krzysztof',
+    'dymkowsk'                : 'Dymkowski, Krzysztof',
+    'Gemma Guest'             : 'Guest, Gemma',
+    'Anthony Lim'             : 'Lim, Anthony',
+    'AnthonyLim23'            : 'Lim, Anthony',
+    'CipPruteanu'             : 'Ciprian Pruteanu'
 }
 
 # Used to ensure a Git author does not appear in any of the DOIs.  This is NOT
@@ -160,6 +179,7 @@ whitelist = [
     'Granroth, Garrett'
 ]
 
+
 def run_from_script_dir(func):
     '''Decorator that changes the working directory to the directory of this
     script for the duration of the decorated function.  Basically it means we
@@ -175,11 +195,13 @@ def run_from_script_dir(func):
 
     return change_dir_wrapper
 
+
 @run_from_script_dir
 def _get_all_git_tags():
     '''Returns a list of all the tags in the tree.
     '''
     return subprocess.check_output(['git', 'tag']).replace('"', '').split('\n')
+
 
 def _clean_up_author_list(author_list):
     '''Apply translations and blacklist, and get rid of duplicates.
@@ -194,8 +216,8 @@ def _clean_up_author_list(author_list):
     untranslated = set(ifilterfalse(_translations.keys().__contains__, result))
     if untranslated:
         raise Exception(
-            'No translation exists for the following Git author(s): \n' + \
-            '\n'.join(untranslated) + '\n' + \
+            'No translation exists for the following Git author(s): \n' +
+            '\n'.join(untranslated) + '\n' +
             'Please edit the translations table accordingly.')
 
     # Translate all remaining names.
@@ -207,6 +229,7 @@ def _clean_up_author_list(author_list):
 
     # Return the unique list of translated names.
     return sorted(set(result))
+
 
 @run_from_script_dir
 def _authors_from_tag_info(tag_info):
@@ -224,6 +247,7 @@ def _authors_from_tag_info(tag_info):
     authors = subprocess.check_output(args).replace('"', '').split('\n')
     return _clean_up_author_list(authors)
 
+
 def find_tag(version_str):
     '''Return the Git tag, if it actually exists, for a given version".
     '''
@@ -233,14 +257,16 @@ def find_tag(version_str):
     else:
         raise RuntimeError("Cannot find expected git tag '{0}'".format(tag_title))
 
+
 def get_previous_tag(tag):
     '''Given an existing git tag, will return the tag that is found before it.
     '''
     all_tags = _get_all_git_tags()
-    if not tag in all_tags:
+    if tag not in all_tags:
         return None
 
     return all_tags[all_tags.index(tag) - 1]
+
 
 def get_major_minor_patch(version_str):
     '''Return the major, minor & patch revision numbers as integers
@@ -249,6 +275,7 @@ def get_major_minor_patch(version_str):
     if len(version_components) != 3:
         raise RuntimeError("Invalid format for version string. Expected X.Y.Z")
     return map(int, version_components)
+
 
 def get_shortened_version_string(version_str):
     '''We use the convention whereby the patch number is ignored if it is zero,
@@ -259,6 +286,7 @@ def get_shortened_version_string(version_str):
         return '{0}.{1}'.format(major, minor)
     else:
         return '{0}.{1}.{2}'.format(major, minor, patch)
+
 
 def get_version_from_git_tag(tag):
     '''Given a tag from Git, extract the major, minor and patch version
@@ -277,11 +305,13 @@ def get_version_from_git_tag(tag):
             "Unable to parse version information from \"" + tag + "\"")
     return '{0}.{1}.{2}'.format(a, b, c)
 
+
 def authors_up_to_git_tag(tag):
     '''Get a list of all authors who have made a commit, up to and including
     the given tag.
     '''
     return _authors_from_tag_info(tag)
+
 
 def authors_under_git_tag(tag):
     '''Get a list of all authors who have made a commit, up to and including

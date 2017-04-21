@@ -3,6 +3,7 @@
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidKernel/PropertyManager.h"
 #include "MantidKernel/PropertyManagerProperty.h"
 
 namespace {

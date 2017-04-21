@@ -2,6 +2,8 @@
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/SpectrumInfo.h"
+#include "MantidAPI/Run.h"
 #include "MantidDataHandling/LoadCalFile.h"
 #include "MantidDataObjects/GroupingWorkspace.h"
 #include "MantidDataObjects/MaskWorkspace.h"
@@ -21,7 +23,6 @@ namespace DataHandling {
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(LoadCalFile)
 
-//----------------------------------------------------------------------------------------------
 /** For use by getInstrument3Ways, initializes the properties
  * @param alg :: algorithm to which to add the properties.
  * */
@@ -63,7 +64,6 @@ bool LoadCalFile::instrumentIsSpecified(API::Algorithm *alg) {
   return !InstrumentFilename.empty();
 }
 
-//----------------------------------------------------------------------------------------------
 /** Get a pointer to an instrument in one of 3 ways: InputWorkspace,
  * InstrumentName, InstrumentFilename
  * @param alg :: algorithm from which to get the property values.
@@ -260,6 +260,9 @@ void LoadCalFile::readCalFile(const std::string &calFileName,
   int n, udet, select, group;
   double n_d, udet_d, offset, select_d, group_d;
 
+  SpectrumInfo *maskSpectrumInfo{nullptr};
+  if (maskWS)
+    maskSpectrumInfo = &maskWS->mutableSpectrumInfo();
   std::string str;
   while (getline(grFile, str)) {
     if (str.empty() || str[0] == '#')
@@ -310,11 +313,12 @@ void LoadCalFile::readCalFile(const std::string &calFileName,
 
         if (select <= 0) {
           // Not selected, then mask this detector
-          maskWS->maskWorkspaceIndex(wi);
-          maskWS->dataY(wi)[0] = 1.0;
+          maskWS->getSpectrum(wi).clearData();
+          maskSpectrumInfo->setMasked(wi, true);
+          maskWS->mutableY(wi)[0] = 1.0;
         } else {
           // Selected, set the value to be 0
-          maskWS->dataY(wi)[0] = 0.0;
+          maskWS->mutableY(wi)[0] = 0.0;
           if (!hasUnmasked)
             hasUnmasked = true;
         }

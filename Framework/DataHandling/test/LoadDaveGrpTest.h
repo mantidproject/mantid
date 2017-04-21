@@ -5,7 +5,9 @@
 #include "MantidDataHandling/LoadDaveGrp.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidKernel/Unit.h"
 
 using namespace Mantid::API;
 using namespace Mantid::DataHandling;
@@ -37,12 +39,12 @@ public:
         boost::dynamic_pointer_cast<MatrixWorkspace>(output);
     if (outputWS) {
       TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 28);
-      TS_ASSERT_EQUALS(outputWS->readX(0).size(), 60);
-      TS_ASSERT_DELTA(outputWS->readX(0)[0], 0.655, 1e-6);
+      TS_ASSERT_EQUALS(outputWS->x(0).size(), 60);
+      TS_ASSERT_DELTA(outputWS->x(0)[0], 0.655, 1e-6);
       TS_ASSERT_EQUALS((*(outputWS->getAxis(1)))(1), 0.625);
-      TS_ASSERT_DELTA(outputWS->readY(0)[1], 0.000106102311091, 1e-6);
-      TS_ASSERT_DELTA(outputWS->readY(11)[59], 0.0116074689604, 1e-6);
-      TS_ASSERT_DELTA(outputWS->readE(27)[7], 0.0187950781228, 1e-6);
+      TS_ASSERT_DELTA(outputWS->y(0)[1], 0.000106102311091, 1e-6);
+      TS_ASSERT_DELTA(outputWS->y(11)[59], 0.0116074689604, 1e-6);
+      TS_ASSERT_DELTA(outputWS->e(27)[7], 0.0187950781228, 1e-6);
 
       TS_ASSERT_EQUALS(outputWS->getAxis(0)->unit()->unitID(), "DeltaE");
       TS_ASSERT_EQUALS(outputWS->getAxis(1)->unit()->unitID(),
@@ -84,8 +86,8 @@ public:
         boost::dynamic_pointer_cast<MatrixWorkspace>(output);
     if (outputWS) {
       TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 28);
-      TS_ASSERT_EQUALS(outputWS->readX(0).size(), 61);
-      TS_ASSERT_EQUALS(outputWS->readY(0).size(), 60);
+      TS_ASSERT_EQUALS(outputWS->x(0).size(), 61);
+      TS_ASSERT_EQUALS(outputWS->y(0).size(), 60);
       dataStore.remove(outputWSName);
     }
   }

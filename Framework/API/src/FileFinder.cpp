@@ -134,9 +134,8 @@ std::string FileFinderImpl::getFullPath(const std::string &filename,
     if (fName.find("*") != std::string::npos) {
 #endif
       Poco::Path path(searchPath, fName);
-      Poco::Path pathPattern(path);
       std::set<std::string> files;
-      Kernel::Glob::glob(pathPattern, files, m_globOption);
+      Kernel::Glob::glob(path, files, m_globOption);
       if (!files.empty()) {
         Poco::File matchPath(*files.begin());
         if (ignoreDirs && matchPath.isDirectory()) {
