@@ -9,8 +9,12 @@
 #include "pqActiveObjects.h"
 #include "pqApplicationCore.h"
 #include "pqServerManagerModel.h"
+#include "vtkCommand.h"
+#include "vtkSMDoubleVectorProperty.h"
+#include "vtkSMProperty.h"
 #include "vtkSMPropertyHelper.h"
 #include "vtkSMTransferFunctionProxy.h"
+#include "vtkSMViewProxy.h"
 
 namespace Mantid {
 // static logger
@@ -73,6 +77,44 @@ void VisibleAxesColor::setScalarBarColor(pqRenderView *view) {
   pqServer *server = pqActiveObjects::instance().activeServer();
   pqServerManagerModel *smModel =
       pqApplicationCore::instance()->getServerManagerModel();
+
+  const QList<pqPipelineSource *> sources =
+      smModel->findItems<pqPipelineSource *>(server);
+  // For all sources
+  for (pqPipelineSource *source : sources) {
+    const QList<pqDataRepresentation *> reps = source->getRepresentations(view);
+    // For all representations
+    for (pqDataRepresentation *rep : reps) {
+      vtkSMProxy *ScalarBarProxy =
+          vtkSMTransferFunctionProxy::FindScalarBarRepresentation(
+              rep->getLookupTableProxy(), view->getProxy());
+      safeSetProperty(ScalarBarProxy, {"TitleColor", "LabelColor"}, color);
+    }
+  }
+}
+
+void VisibleAxesColor::observe(pqRenderView *view) {
+  view->getViewProxy()
+      ->GetProperty("Background")
+      ->AddObserver(vtkCommand::ModifiedEvent, this,
+                    &VisibleAxesColor::backgroundColorChangeCallback);
+}
+
+void VisibleAxesColor::backgroundColorChangeCallback(vtkObject *caller,
+                                                     unsigned long, void *) {
+  vtkSMDoubleVectorProperty *background =
+      vtkSMDoubleVectorProperty::SafeDownCast(caller);
+  int numberOfElements = background->GetNumberOfElements();
+  double *elements = background->GetElements();
+  std::vector<double> backgroundColor(elements, elements + numberOfElements);
+
+  auto color = getContrastingColor(backgroundColor);
+
+  // Update for all sources and all reps
+  pqServer *server = pqActiveObjects::instance().activeServer();
+  pqServerManagerModel *smModel =
+      pqApplicationCore::instance()->getServerManagerModel();
+  pqView *view = pqActiveObjects::instance().activeView();
 
   const QList<pqPipelineSource *> sources =
       smModel->findItems<pqPipelineSource *>(server);

@@ -41,8 +41,10 @@ public:
   void setOrientationAxesLabelColor(pqRenderView *view);
   void setGridAxesColor(pqRenderView *view);
   void setScalarBarColor(pqRenderView *view);
+  void observe(pqRenderView *view);
 
 private:
+  void backgroundColorChangeCallback(vtkObject *caller, unsigned long, void *);
 };
 }
 }

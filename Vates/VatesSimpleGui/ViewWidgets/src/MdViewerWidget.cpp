@@ -693,6 +693,7 @@ void MdViewerWidget::renderWorkspace(QString workspaceName, int workspaceType,
   //             after the window is started again.
   if (this->currentView->getNumSources() == 0) {
     this->setColorForBackground();
+    this->setVisibleAxesColors();
     this->setColorMap();
 
     if (VatesViewerInterface::PEAKS != workspaceType) {
@@ -1139,6 +1140,7 @@ std::string MdViewerWidget::getWindowType() { return "VSIWindow"; }
 void MdViewerWidget::renderAndFinalSetup() {
   Mantid::VATES::ColorScaleLockGuard colorScaleLockGuard(&m_colorScaleLock);
   this->setColorForBackground();
+  this->setVisibleAxesColors();
   this->currentView->render();
   this->setColorMap();
   this->currentView->setColorsForView(this->ui.colorSelectionWidget);
@@ -1237,7 +1239,7 @@ void MdViewerWidget::switchViews(ModeControlWidget::Views v) {
   restoreViewState(this->currentView, v);
   this->currentView->setColorsForView(this->ui.colorSelectionWidget);
   this->setColorForBackground();
-  this->currentView->setVisibleAxesColors(this->useCurrentColorSettings);
+  this->setVisibleAxesColors();
 
   this->currentView->checkViewOnSwitch();
   this->updateAppState();
