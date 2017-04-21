@@ -52,7 +52,11 @@ Instrument::Instrument(const boost::shared_ptr<const Instrument> instr,
       m_map_nonconst(map), m_ValidFrom(instr->m_ValidFrom),
       m_ValidTo(instr->m_ValidTo), m_referenceFrame(new ReferenceFrame),
       m_detectorInfo(instr->m_detectorInfo),
-      m_componentInfo(instr->m_componentInfo) {
+      m_componentInfo(instr->m_componentInfo),
+      m_componentIdToIndexMap(instr->m_componentIdToIndexMap),
+      m_detIdToIndexMap(instr->m_detIdToIndexMap)
+
+{
   m_map_nonconst->setInstrument(m_instr.get());
 }
 
@@ -72,8 +76,9 @@ Instrument::Instrument(const Instrument &instr)
       m_ValidFrom(instr.m_ValidFrom), m_ValidTo(instr.m_ValidTo),
       m_referenceFrame(instr.m_referenceFrame),
       m_detectorInfo(instr.m_detectorInfo),
-      m_componentInfo(instr.m_componentInfo)
-
+      m_componentInfo(instr.m_componentInfo),
+      m_componentIdToIndexMap(instr.m_componentIdToIndexMap),
+      m_detIdToIndexMap(instr.m_detIdToIndexMap)
 {
   // Now we need to fill the detector, source and sample caches with pointers
   // into the new instrument

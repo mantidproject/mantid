@@ -11,6 +11,23 @@
 namespace Mantid {
 namespace API {
 
+/**
+ * Defined conversion from ID to index for detectors
+ * @param detIds : Detector IDs to build the indexes for
+ * @return shared_ptr to const map of detector ID -> detector index.
+ */
+boost::shared_ptr<const std::unordered_map<detid_t, size_t>> makeDetIdToIndexMap(const std::vector<detid_t>& detIds){
+
+  const size_t nDetIds = detIds.size();
+  auto detIdToIndex =
+      boost::make_shared<std::unordered_map<detid_t, size_t>>();
+  detIdToIndex->reserve(nDetIds);
+  for (size_t i = 0; i < nDetIds; ++i) {
+    (*detIdToIndex)[detIds[i]] = i;
+  }
+  return detIdToIndex;
+}
+
 /** Construct DetectorInfo based on an Instrument.
  *
  * The Instrument reference `instrument` must be the parameterized instrument
@@ -33,14 +50,7 @@ DetectorInfo::DetectorInfo(
                                 "not contain an instrument!");
 
   m_detectorIDs = instrument->getDetectorIDs(false /* do not skip monitors */);
-  const size_t nDetIds = m_detectorIDs.size();
-  auto tmpDetIdToIndex =
-      boost::make_shared<std::unordered_map<detid_t, size_t>>();
-  tmpDetIdToIndex->reserve(nDetIds);
-  for (size_t i = 0; i < nDetIds; ++i) {
-    (*tmpDetIdToIndex)[m_detectorIDs[i]] = i;
-  }
-  m_detIDToIndex = std::move(tmpDetIdToIndex);
+  m_detIDToIndex = makeDetIdToIndexMap(m_detectorIDs);
 }
 
 /** Construct DetectorInfo based on an Instrument.
@@ -59,11 +69,13 @@ DetectorInfo::DetectorInfo(
     boost::shared_ptr<const std::unordered_map<detid_t, size_t>>
         detIdToIndexMap)
     : m_detectorInfo(detectorInfo), m_pmap(pmap), m_instrument(instrument),
-      m_detIDToIndex(std::move(detIdToIndexMap)),
+      m_detIDToIndex(detIdToIndexMap),
       m_lastDetector(PARALLEL_GET_MAX_THREADS),
       m_lastAssemblyDetectorIndices(PARALLEL_GET_MAX_THREADS),
       m_lastIndex(PARALLEL_GET_MAX_THREADS, -1) {
 
+        detIdToIndexMap->size();
+        auto temp = detIdToIndexMap;
   // Note: This does not seem possible currently (the instrument objects is
   // always allocated, even if it is empty), so this will not fail.
   if (!m_instrument)
