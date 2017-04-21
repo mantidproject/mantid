@@ -252,7 +252,7 @@ public:
    *  (2) Count events in each output including "-1", the excluded/unselected
    *events
    */
-  void test_FilterWOCorrection2() {
+  void Ntest_FilterWOCorrection2() {
     // Create EventWorkspace and SplittersWorkspace
     int64_t runstart_i64 = 20000000000;
     int64_t pulsedt = 100 * 1000 * 1000;
@@ -335,7 +335,7 @@ public:
   //----------------------------------------------------------------------------------------------
   /**  Filter test with TOF correction
     */
-  void test_FilterWithCustumizedCorrection() {
+  void Ntest_FilterWithCustumizedCorrection() {
     // 1. Create EventWorkspace and SplittersWorkspace
     int64_t runstart_i64 = 20000000000;
     int64_t pulsedt = 100 * 1000 * 1000;
@@ -419,7 +419,7 @@ public:
   //----------------------------------------------------------------------------------------------
   /** Test filtering with correction of direct geometry
     */
-  void test_FilterElasticCorrection() {
+  void Ntest_FilterElasticCorrection() {
     EventWorkspace_sptr ws = createEventWorkspaceElastic(0, 1000000);
     AnalysisDataService::Instance().addOrReplace("MockElasticEventWS", ws);
     TS_ASSERT_EQUALS(ws->getNumberEvents(), 10000);
@@ -477,7 +477,7 @@ public:
   //----------------------------------------------------------------------------------------------
   /** Test filtering with correction of direct geometry
     */
-  void test_FilterDGCorrection() {
+  void Ntest_FilterDGCorrection() {
     EventWorkspace_sptr ws = createEventWorkspaceDirect(0, 1000000);
     AnalysisDataService::Instance().addOrReplace("MockDirectEventWS", ws);
 
@@ -528,7 +528,7 @@ public:
   //----------------------------------------------------------------------------------------------
   /** Test filtering with correction to indirect geometry inelastic instrument
     */
-  void test_FilterIndirectGeometryCorrection() {
+  void Ntest_FilterIndirectGeometryCorrection() {
     // Create workspaces for filtering
     EventWorkspace_sptr ws = createEventWorkspaceInDirect(0, 1000000);
     AnalysisDataService::Instance().addOrReplace("MockIndirectEventWS", ws);
@@ -613,7 +613,7 @@ public:
         979: 3: 2.65e+08  -  3.65e+08: 2
         979: 4: 3.65e+08  -  4.65e+08: 2
    */
-  void test_FilterRelativeTime() {
+  void Ntest_FilterRelativeTime() {
     // Create EventWorkspace and SplittersWorkspace
     int64_t runstart_i64 = 20000000000;
     int64_t pulsedt = 100 * 1000 * 1000;
@@ -802,7 +802,7 @@ public:
    *  (2) Count events in each output including "-1", the excluded/unselected
    * events
    */
-  void test_tableSplitter() {
+  void Ntest_tableSplitter() {
     // Create EventWorkspace and SplittersWorkspace
     int64_t runstart_i64 = 20000000000;
     int64_t pulsedt = 100 * 1000 * 1000;

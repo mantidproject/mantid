@@ -194,6 +194,8 @@ void FilterEvents::exec() {
   std::vector<Kernel::TimeSeriesProperty<bool> *> bool_tsp_vector;
   copyNoneSplitLogs(int_tsp_vector, dbl_tsp_vector, bool_tsp_vector);
 
+  g_log.warning("logs are copied");
+
   // Optionall import corrections
   m_progress = 0.20;
   progress(m_progress, "Importing TOF corrections. ");
@@ -320,9 +322,16 @@ void FilterEvents::splitTimeSeriesLogs(const std::vector<TimeSeriesProperty<int>
       // split log
       std::vector<TimeSeriesProperty<int> *> child_vectors;
       if (m_useSplittersWorkspace)
-        int_tsp_vector[i]->split(m_vecSplitterTime, child_vectors);
+      {
+          ;
+          // TODO/NOW - consider to call splitLog
+        //   int_tsp_vector[i]->split(m_vecSplitterTime, child_vectors);
+      }
       else
-        int_tsp_vector[i]->split(m_vecSplitterGroup, child_vectors);
+      {
+          ;
+        //  int_tsp_vector[i]->split(m_vecSplitterGroup, child_vectors);
+      }
       // assign to output workspaces
       for (auto ws_iter = m_outputWorkspacesMap.begin(); ws_iter != m_outputWorkspacesMap.end(); ++ws_iter)
         ws_iter->second->mutableRun().addProperty(child_vectors.front());
@@ -870,17 +879,22 @@ boost::shared_ptr<DataObjects::EventWorkspace> FilterEvents::createEventWorkspac
   // create an EventWorkspac
   boost::shared_ptr<EventWorkspace> child = boost::make_shared<EventWorkspace>();
   boost::shared_ptr<EventWorkspace> parent = m_eventWS;
+  g_log.information("1");
+  child->init(parent->getNumberHistograms(), 2, 1);
+  g_log.information() << "Child workspace is initialized\n";
 
   // clone title, comment
   child->setTitle(parent->getTitle());
   child->setComment(parent->getComment());
   // clone instrument, This call also copies the SHARED POINTER to the parameter map
+  g_log.information("Child workspace is set with title and comment");
   child->setInstrument(parent->getInstrument());
   // This call will (should) perform a COPY of the parameter map.
   child->instrumentParameters();
 
   // sample and no run!
-  // child->mutableSample() = parent->mutableSample(); // parent->m_sample;
+  child->m_sample = parent->m_sample;
+
   // child.m_run = parent.m_run;
 
   // set the Y unit and etc.
@@ -929,6 +943,8 @@ boost::shared_ptr<DataObjects::EventWorkspace> FilterEvents::createEventWorkspac
  */
 void FilterEvents::createOutputWorkspaces() {
 
+    g_log.warning("Start!");
+
   // Convert information workspace to map
   std::map<int, std::string> infomap;
   if (m_hasInfoWS) {
@@ -970,6 +986,7 @@ void FilterEvents::createOutputWorkspaces() {
     }
 
     // create an output workspace without any sample log
+    g_log.warning("make it!");
     boost::shared_ptr<EventWorkspace> optws = createEventWorkspaceNoLog();
     m_outputWorkspacesMap.emplace(wsgroup, optws);
 
@@ -1489,38 +1506,40 @@ void FilterEvents::filterEventsBySplitters(double progressamount) {
   double numws = static_cast<double>(m_outputWorkspacesMap.size());
   double outwsindex = 0.;
 
+
   // split sample logs from original workspace to new one
-  for (auto &ws : m_outputWorkspacesMap) {
-    int wsindex = ws.first;
-    DataObjects::EventWorkspace_sptr opws = ws.second;
+  // TODO/NOW - not supposed to skip the next one
+//  for (auto &ws : m_outputWorkspacesMap) {
+//    int wsindex = ws.first;
+//    DataObjects::EventWorkspace_sptr opws = ws.second;
 
-    // Generate a list of splitters for current output workspace
-    Kernel::TimeSplitterType splitters = generateSplitters(wsindex);
+//    // Generate a list of splitters for current output workspace
+//    Kernel::TimeSplitterType splitters = generateSplitters(wsindex);
 
-    g_log.debug() << "[FilterEvents D1215]: Output workspace Index " << wsindex
-                  << ": Name = " << opws->getName()
-                  << "; Number of splitters = " << splitters.size() << ".\n";
+//    g_log.debug() << "[FilterEvents D1215]: Output workspace Index " << wsindex
+//                  << ": Name = " << opws->getName()
+//                  << "; Number of splitters = " << splitters.size() << ".\n";
 
-    // Skip output workspace has ZERO splitters
-    if (splitters.empty()) {
-      g_log.warning() << "[FilterEvents] Workspace " << opws->getName()
-                      << " Indexed @ " << wsindex
-                      << " won't have logs splitted due to zero splitter size. "
-                      << ".\n";
-      continue;
-    }
+//    // Skip output workspace has ZERO splitters
+//    if (splitters.empty()) {
+//      g_log.warning() << "[FilterEvents] Workspace " << opws->getName()
+//                      << " Indexed @ " << wsindex
+//                      << " won't have logs splitted due to zero splitter size. "
+//                      << ".\n";
+//      continue;
+//    }
 
-    // Split log
-    // FIXME-TODO: SHALL WE MOVE THIS PART OUTSIDE OF THIS METHOD?
-    size_t numlogs = lognames.size();
-    for (size_t ilog = 0; ilog < numlogs; ++ilog) {
-      this->splitLog(opws, lognames[ilog], splitters);
-    }
-    opws->mutableRun().integrateProtonCharge();
+//    // Split log
+//    // FIXME-TODO: SHALL WE MOVE THIS PART OUTSIDE OF THIS METHOD?
+//    size_t numlogs = lognames.size();
+//    for (size_t ilog = 0; ilog < numlogs; ++ilog) {
+//      this->splitLog(opws, lognames[ilog], splitters);
+//    }
+//    opws->mutableRun().integrateProtonCharge();
 
-    progress(0.1 + progressamount + outwsindex / numws * 0.2, "Splitting logs");
-    outwsindex += 1.;
-  }
+//    progress(0.1 + progressamount + outwsindex / numws * 0.2, "Splitting logs");
+//    outwsindex += 1.;
+//  }
 }
 
 /** Split events by splitters represented by vector
@@ -1739,7 +1758,10 @@ Kernel::TimeSplitterType FilterEvents::generateSplitters(int wsindex) {
   return splitters;
 }
 
-/** Split a log by splitters
+//---------------------------------------------------------------------------
+/** Split an individual sample log of type TimeSeriesProperty
+ *  by TimSplitterType (in the case of SplittersWorkspace is used)
+ *  And the results
  */
 void FilterEvents::splitLog(EventWorkspace_sptr eventws, std::string logname,
                             TimeSplitterType &splitters) {

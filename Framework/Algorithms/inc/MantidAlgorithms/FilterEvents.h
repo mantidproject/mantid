@@ -74,6 +74,8 @@ public:
   }
 
 private:
+    friend struct Mantid::Kernel::CreateUsingNew<FilterEvents>;
+
   // Implement abstract Algorithm methods
   void init() override;
   // Implement abstract Algorithm methods
