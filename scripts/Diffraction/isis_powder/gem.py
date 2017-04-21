@@ -53,14 +53,14 @@ class Gem(AbstractInst):
                                                      multiple_scattering=self._inst_settings.multiple_scattering)
 
     def _crop_banks_to_user_tof(self, focused_banks):
-        return common.crop_banks_in_tof(focused_banks, self._inst_settings.focused_cropping_values)
+        return common.crop_banks_using_crop_list(focused_banks, self._inst_settings.focused_cropping_values)
 
     def _crop_raw_to_expected_tof_range(self, ws_to_crop):
         raw_cropping_values = self._inst_settings.raw_tof_cropping_values
         return common.crop_in_tof(ws_to_crop, raw_cropping_values[0], raw_cropping_values[1])
 
     def _crop_van_to_expected_tof_range(self, van_ws_to_crop):
-        return common.crop_banks_in_tof(van_ws_to_crop, self._inst_settings.vanadium_cropping_values)
+        return common.crop_banks_using_crop_list(van_ws_to_crop, self._inst_settings.vanadium_cropping_values)
 
     def _get_sample_empty(self):
         sample_empty = self._inst_settings.sample_empty

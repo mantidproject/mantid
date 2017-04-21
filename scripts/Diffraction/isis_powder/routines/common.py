@@ -22,9 +22,9 @@ def cal_map_dictionary_key_helper(dictionary, key, append_to_error_message=None)
     return dictionary_key_helper(dictionary=dictionary, key=key, throws=True, exception_msg=err_message)
 
 
-def crop_banks_in_tof(bank_list, crop_values_list):
+def crop_banks_using_crop_list(bank_list, crop_values_list):
     """
-    Crops the each bank by the specified tuple values from a list of tuples in TOF. The number
+    Crops each bank by the specified tuple values from a list of tuples in TOF. The number
     of tuples must match the number of banks to crop. A list of [(100,200), (150,250)] would crop
     bank 1 to the values 100, 200 and bank 2 to 150 and 250 in TOF.
     :param bank_list: The list of workspaces each containing one bank of data to crop
@@ -32,11 +32,12 @@ def crop_banks_in_tof(bank_list, crop_values_list):
     :return: A list of cropped workspaces
     """
     if not isinstance(crop_values_list, list):
-        if isinstance(bank_list, list):
-            raise ValueError("The cropping values were not in a list type")
-        else:
-            raise RuntimeError("Attempting to use list based cropping on a single workspace not in a list")
+        raise ValueError("The cropping values were not in a list type")
+    elif not isinstance(bank_list, list):
+        # This error is probably internal as we control the bank lists
+        raise RuntimeError("Attempting to use list based cropping on a single workspace not in a list")
 
+    # Finally check the number of elements are equal
     if len(bank_list) != len(crop_values_list):
         raise RuntimeError("The number of TOF cropping values does not match the number of banks for this instrument")
 
@@ -156,7 +157,10 @@ def get_first_run_number(run_number_string):
     :return: The first run for the user input of runs
     """
     run_numbers = generate_run_numbers(run_number_string=run_number_string)
-    return run_numbers[0]
+    if isinstance(run_numbers, list):
+        run_numbers = run_numbers[0]
+
+    return run_numbers
 
 
 def get_monitor_ws(ws_to_process, run_number_string, instrument):
@@ -170,8 +174,8 @@ def get_monitor_ws(ws_to_process, run_number_string, instrument):
     :param instrument: The instrument to query for the monitor position
     :return: The extracted monitor as a workspace
     """
-    number_list = generate_run_numbers(run_number_string)
-    monitor_spectra = instrument._get_monitor_spectra_index(number_list[0])
+    first_run_number = get_first_run_number(run_number_string)
+    monitor_spectra = instrument._get_monitor_spectra_index(first_run_number)
     load_monitor_ws = mantid.ExtractSingleSpectrum(InputWorkspace=ws_to_process, WorkspaceIndex=monitor_spectra)
     return load_monitor_ws
 
@@ -221,7 +225,7 @@ def load_current_normalised_ws_list(run_number_string, instrument, input_batchin
     run_information = instrument._get_run_details(run_number_string=run_number_string)
     raw_ws_list = _load_raw_files(run_number_string=run_number_string, instrument=instrument)
 
-    if input_batching.lower() == INPUT_BATCHING.Summed.lower() and len(raw_ws_list) > 1:
+    if input_batching == INPUT_BATCHING.Summed and len(raw_ws_list) > 1:
         summed_ws = _sum_ws_range(ws_list=raw_ws_list)
         remove_intermediate_workspace(raw_ws_list)
         raw_ws_list = [summed_ws]
@@ -424,4 +428,4 @@ def _run_number_generator(processed_string):
         number_generator = kernel.IntArrayProperty('array_generator', processed_string)
         return number_generator.value.tolist()
     except RuntimeError:
-        raise RuntimeError("Could not generate run numbers from this input: " + processed_string)
+        raise ValueError("Could not generate run numbers from this input: " + processed_string)
