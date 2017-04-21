@@ -3,7 +3,6 @@
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/MatrixWorkspace.h"
 
-
 MantidMatrixFunction::MantidMatrixFunction(MantidMatrix &matrix)
     : m_outside(0) {
 
@@ -75,7 +74,7 @@ double MantidMatrixFunction::operator()(double x, double y) {
     return m_workspace->y(i)[j];
   } else {
     return m_outside;
-    }
+  }
 }
 
 double MantidMatrixFunction::getMinPositiveValue() const {
@@ -162,15 +161,19 @@ MantidMatrixFunction::getHistogramX(int row) const {
  * Y:       6      6       16        6         6
  * X: 2000    4000    8000    12000     16000     20000
  *
- * The algorithm will determine that the index of X which is closest to 6500 is 2,
- * but the Y index with the correct data is 1 (since the value should be 6 not 16)
+ * The algorithm will determine that the index of X which is closest to 6500 is
+ *2,
+ * but the Y index with the correct data is 1 (since the value should be 6 not
+ *16)
  *
  * 2. Point Data:
  * Y:   6      6       16        6         6
  * X: 2000    4000    8000    12000     16000
  *
- * The algorithm will determine that the index of X which is closest to 6500 is 2,
- * and the Y index with the correct data is 2 as well since there is a one-to-one
+ * The algorithm will determine that the index of X which is closest to 6500 is
+ *2,
+ * and the Y index with the correct data is 2 as well since there is a
+ *one-to-one
  * mapping between the indices of Y and X.
  *
  * @param row: the workspace index to search in
@@ -182,11 +185,12 @@ size_t MantidMatrixFunction::indexX(size_t row, double xValue) const {
   const auto &X = m_workspace->x(row);
   const auto n = X.size();
 
-  auto provideIndexForPointData = [&X](size_t start, size_t stop, double xValue, double midValue) {
-    if (fabs(X[stop] - xValue) < fabs(midValue - xValue))
-      return stop;
-    return start;
-  };
+  auto provideIndexForPointData =
+      [&X](size_t start, size_t stop, double xValue, double midValue) {
+        if (fabs(X[stop] - xValue) < fabs(midValue - xValue))
+          return stop;
+        return start;
+      };
 
   if (n == 0 || xValue < X[0] || xValue > X[n - 1]) {
     return std::numeric_limits<size_t>::max();
