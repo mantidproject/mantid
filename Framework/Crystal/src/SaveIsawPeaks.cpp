@@ -9,8 +9,6 @@
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/Utils.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidAPI/DetectorInfo.h"
-#include "MantidGeometry/IDetector.h"
 #include <fstream>
 #include <Poco/File.h>
 #include <boost/algorithm/string/trim.hpp>
@@ -79,12 +77,8 @@ void SaveIsawPeaks::exec() {
   std::vector<IComponent_const_sptr> comps;
   inst->getChildren(comps, true);
 
-  const auto &detectorInfo = ws->detectorInfo();
   for (auto &comp : comps) {
     std::string bankName = comp->getName();
-    const IDetector det = dynamic_cast<const IDetector>(comp);
-    auto detID = det->getID();
-    if (detectorInfo.isMasked(detID)) continue;
     boost::trim(bankName);
     boost::erase_all(bankName, bankPart);
     int bank = 0;
