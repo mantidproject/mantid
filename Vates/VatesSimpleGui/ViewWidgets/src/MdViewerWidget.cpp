@@ -714,7 +714,7 @@ void MdViewerWidget::renderWorkspace(QString workspaceName, int workspaceType,
     this->useCurrentColorSettings = true;
   }
 
-  QString sourcePlugin = "";
+  QString sourcePlugin;
   if (VatesViewerInterface::PEAKS == workspaceType) {
     sourcePlugin = "Peaks Source";
   } else if (VatesViewerInterface::MDHW == workspaceType) {
@@ -1159,7 +1159,8 @@ void MdViewerWidget::setColorForBackground() {
 }
 
 void MdViewerWidget::setVisibleAxesColors() {
-  this->currentView->setVisibleAxesColors(this->useCurrentColorSettings);
+  this->currentView->setVisibleAxesColors(
+      mdSettings.getUserSettingAutoColorAxes());
 }
 
 /**

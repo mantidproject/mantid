@@ -24,15 +24,6 @@ namespace Vates {
 namespace SimpleGui {
 
 namespace {
-std::array<double, 3> getContrastingColor(const std::vector<double> &color) {
-  double criteria =
-      1. - (0.299 * color[0] + 0.587 * color[1] + 0.114 * color[2]);
-
-  if (criteria < 0.5)
-    return {{0., 0., 0.}};
-  else
-    return {{1., 1., 1.}};
-}
 
 void safeSetProperty(vtkSMProxy *gridAxis,
                      std::initializer_list<const char *> pnames,
@@ -49,19 +40,37 @@ void safeSetProperty(vtkSMProxy *gridAxis,
   }
 }
 
-std::vector<double> getBackgroundColor(pqRenderView *view) {
+std::array<double, 3> getContrastingColor(const std::vector<double> &color) {
+  double criteria =
+      1. - (0.299 * color[0] + 0.587 * color[1] + 0.114 * color[2]);
+
+  if (criteria < 0.5)
+    return {{0., 0., 0.}};
+  else
+    return {{1., 1., 1.}};
+}
+
+std::vector<double> getBackgroundColor(pqView *view) {
   vtkSMProperty *prop = view->getProxy()->GetProperty("Background");
   return vtkSMPropertyHelper(prop).GetDoubleArray();
 }
 }
 
-void VisibleAxesColor::setOrientationAxesLabelColor(pqRenderView *view) {
+void VisibleAxesColor::setAndObserveAxesColor(pqView *view) {
   auto color = getContrastingColor(getBackgroundColor(view));
+  this->setOrientationAxesLabelColor(view, color);
+  this->setGridAxesColor(view, color);
+  this->setScalarBarColor(view, color);
+  this->observe(view);
+}
+
+void VisibleAxesColor::setOrientationAxesLabelColor(
+    pqView *view, const std::array<double, 3> &color) {
   safeSetProperty(view->getProxy(), {"OrientationAxesLabelColor"}, color);
 }
 
-void VisibleAxesColor::setGridAxesColor(pqRenderView *view) {
-  auto color = getContrastingColor(getBackgroundColor(view));
+void VisibleAxesColor::setGridAxesColor(pqView *view,
+                                        const std::array<double, 3> &color) {
   vtkSMProxy *gridAxes3DActor =
       vtkSMPropertyHelper(view->getProxy(), "AxesGrid", true).GetAsProxy();
   safeSetProperty(gridAxes3DActor,
@@ -70,9 +79,8 @@ void VisibleAxesColor::setGridAxesColor(pqRenderView *view) {
                   color);
 }
 
-void VisibleAxesColor::setScalarBarColor(pqRenderView *view) {
-  auto color = getContrastingColor(getBackgroundColor(view));
-
+void VisibleAxesColor::setScalarBarColor(pqView *view,
+                                         const std::array<double, 3> &color) {
   // Update for all sources and all reps
   pqServer *server = pqActiveObjects::instance().activeServer();
   pqServerManagerModel *smModel =
@@ -93,7 +101,7 @@ void VisibleAxesColor::setScalarBarColor(pqRenderView *view) {
   }
 }
 
-void VisibleAxesColor::observe(pqRenderView *view) {
+void VisibleAxesColor::observe(pqView *view) {
   view->getViewProxy()
       ->GetProperty("Background")
       ->AddObserver(vtkCommand::ModifiedEvent, this,
@@ -112,33 +120,9 @@ void VisibleAxesColor::backgroundColorChangeCallback(vtkObject *caller,
 
   pqView *view = pqActiveObjects::instance().activeView();
 
-  safeSetProperty(view->getProxy(), {"OrientationAxesLabelColor"}, color);
-
-  vtkSMProxy *gridAxes3DActor =
-      vtkSMPropertyHelper(view->getProxy(), "AxesGrid", true).GetAsProxy();
-  safeSetProperty(gridAxes3DActor,
-                  {"XTitleColor", "YTitleColor", "ZTitleColor", "XLabelColor",
-                   "YLabelColor", "ZLabelColor", "GridColor"},
-                  color);
-
-  // Update for all sources and all reps
-  pqServer *server = pqActiveObjects::instance().activeServer();
-  pqServerManagerModel *smModel =
-      pqApplicationCore::instance()->getServerManagerModel();
-
-  const QList<pqPipelineSource *> sources =
-      smModel->findItems<pqPipelineSource *>(server);
-  // For all sources
-  for (pqPipelineSource *source : sources) {
-    const QList<pqDataRepresentation *> reps = source->getRepresentations(view);
-    // For all representations
-    for (pqDataRepresentation *rep : reps) {
-      vtkSMProxy *ScalarBarProxy =
-          vtkSMTransferFunctionProxy::FindScalarBarRepresentation(
-              rep->getLookupTableProxy(), view->getProxy());
-      safeSetProperty(ScalarBarProxy, {"TitleColor", "LabelColor"}, color);
-    }
-  }
+  this->setOrientationAxesLabelColor(view, color);
+  this->setGridAxesColor(view, color);
+  this->setScalarBarColor(view, color);
 }
 
 } // SimpleGui

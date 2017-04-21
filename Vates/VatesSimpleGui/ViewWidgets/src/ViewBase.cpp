@@ -734,14 +734,10 @@ void ViewBase::setColorForBackground(bool useCurrentColorSettings) {
  * tracker for changes of the background color by the user.
  * @param useCurrentColorSettings If the view was switched or created.
  */
-void ViewBase::setVisibleAxesColors(bool useCurrentColorSettings) {
-  // TODO keep user color settings?
-  // TODO utilize parameter useCurrentColorSettings
-  (void)useCurrentColorSettings;
-  this->m_visibleAxesColor.setOrientationAxesLabelColor(this->getView());
-  this->m_visibleAxesColor.setGridAxesColor(this->getView());
-  this->m_visibleAxesColor.setScalarBarColor(this->getView());
-  this->m_visibleAxesColor.observe(this->getView());
+void ViewBase::setVisibleAxesColors(bool AutoScale) {
+  if (AutoScale) {
+    this->m_visibleAxesColor.setAndObserveAxesColor(this->getView());
+  }
 }
 
 /**

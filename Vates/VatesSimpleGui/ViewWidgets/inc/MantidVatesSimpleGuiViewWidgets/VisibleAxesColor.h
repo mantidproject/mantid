@@ -38,10 +38,12 @@ public:
    * Set the Rgb values for the color of the view's orientation axes Label.
    * @param view The view which has its color set.
    */
-  void setOrientationAxesLabelColor(pqRenderView *view);
-  void setGridAxesColor(pqRenderView *view);
-  void setScalarBarColor(pqRenderView *view);
-  void observe(pqRenderView *view);
+  void setAndObserveAxesColor(pqView *view);
+  void setOrientationAxesLabelColor(pqView *view,
+                                    const std::array<double, 3> &color);
+  void setGridAxesColor(pqView *view, const std::array<double, 3> &color);
+  void setScalarBarColor(pqView *view, const std::array<double, 3> &color);
+  void observe(pqView *view);
 
 private:
   void backgroundColorChangeCallback(vtkObject *caller, unsigned long, void *);
