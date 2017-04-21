@@ -1224,12 +1224,22 @@ std::map<std::string, std::string> GroupDetectors2::validateInputs() {
 
   boost::regex re(
       "^\\s*[0-9]+\\s*$|^(\\s*,*[0-9]+(\\s*(,|:|\\+|\\-)\\s*)*[0-9]*)*$");
-  auto groups = Kernel::StringTokenizer(pattern, ",", IGNORE_SPACES);
-  for (const auto &groupStr : groups) {
+
+  try {
     if (!pattern.empty() && !boost::regex_match(groupStr, re)) {
       errors["GroupingPattern"] =
           "GroupingPattern is not well formed: " + pattern;
       break;
+    }
+  } catch (boost::exception &) {
+    //If the pattern is too large, split on comma and evaluate each piece.
+    auto groups = Kernel::StringTokenizer(pattern, ",", IGNORE_SPACES);
+    for (const auto &groupStr : groups) {
+      if (!pattern.empty() && !boost::regex_match(groupStr, re)) {
+        errors["GroupingPattern"] =
+            "GroupingPattern is not well formed: " + pattern;
+        break;
+      }
     }
   }
 
