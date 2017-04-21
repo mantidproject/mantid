@@ -20,7 +20,6 @@ public:
     alg.setProperty("InputWorkspace", workspace);
     alg.setProperty("Filename", "test_file_name");
     alg.setProperty("Normalization", "AutoSelect");
-    alg.setProperty("ThresholdRange", "IgnoreZerosThresholdRange");
     alg.setProperty("RecursionDepth", 5);
     alg.setProperty("CompressorType", "NONE");
 
@@ -45,7 +44,6 @@ public:
     alg.setProperty("InputWorkspace", workspace);
     alg.setProperty("Filename", "test_file_name");
     alg.setProperty("Normalization", "AutoSelect");
-    alg.setProperty("ThresholdRange", "IgnoreZerosThresholdRange");
     alg.setProperty("RecursionDepth", 5);
     alg.setProperty("CompressorType", "NONE");
 
@@ -75,7 +73,6 @@ public:
     alg.setProperty("InputWorkspace", workspace);
     alg.setProperty("Filename", fullFilename);
     alg.setProperty("Normalization", "AutoSelect");
-    alg.setProperty("ThresholdRange", "IgnoreZerosThresholdRange");
     alg.setProperty("RecursionDepth", 5);
     alg.setProperty("CompressorType", "NONE");
 

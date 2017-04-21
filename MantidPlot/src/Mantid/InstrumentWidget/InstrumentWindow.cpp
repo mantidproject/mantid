@@ -99,6 +99,14 @@ MantidQt::API::IProjectSerialisable *InstrumentWindow::loadFromProject(
   return nullptr;
 }
 
+std::vector<std::string> InstrumentWindow::getWorkspaceNames() {
+  return {m_instrumentWidget->getWorkspaceNameStdString()};
+}
+
+std::string InstrumentWindow::getWindowName() {
+  return m_instrumentWidget->windowTitle().toStdString();
+}
+
 /**
  * Save the state of the instrument window to a Mantid project file
  * @param app :: handle to the current application window instance

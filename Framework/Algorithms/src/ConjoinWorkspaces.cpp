@@ -1,9 +1,8 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAlgorithms/ConjoinWorkspaces.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/CommonBinsValidator.h"
 #include "MantidAPI/SpectraAxis.h"
+#include "MantidAPI/WorkspaceHistory.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -60,7 +59,7 @@ void ConjoinWorkspaces::exec() {
     // overlap
     // make sure we should bother checking
     if (this->getProperty("CheckOverlapping")) {
-      this->checkForOverlap(event_ws1, event_ws2, false);
+      this->checkForOverlap(*event_ws1, *event_ws2, false);
       m_overlapChecked = true;
     }
 
@@ -76,14 +75,14 @@ void ConjoinWorkspaces::exec() {
   }
 
   // Check that the input workspaces meet the requirements for this algorithm
-  this->validateInputs(ws1, ws2);
+  this->validateInputs(*ws1, *ws2);
 
   if (this->getProperty("CheckOverlapping")) {
-    this->checkForOverlap(ws1, ws2, true);
+    this->checkForOverlap(*ws1, *ws2, true);
     m_overlapChecked = true;
   }
 
-  MatrixWorkspace_sptr output = execWS2D(ws1, ws2);
+  MatrixWorkspace_sptr output = execWS2D(*ws1, *ws2);
   // Copy the history from the original workspace
   output->history().addHistory(ws1->getHistory());
 
@@ -102,16 +101,16 @@ void ConjoinWorkspaces::exec() {
  * (non-sensical for event workspaces)
  *  @throw std::invalid_argument If there is some overlap
  */
-void ConjoinWorkspaces::checkForOverlap(API::MatrixWorkspace_const_sptr ws1,
-                                        API::MatrixWorkspace_const_sptr ws2,
+void ConjoinWorkspaces::checkForOverlap(const MatrixWorkspace &ws1,
+                                        const MatrixWorkspace &ws2,
                                         bool checkSpectra) const {
   // Loop through the first workspace adding all the spectrum numbers & UDETS to
   // a set
   std::set<specnum_t> spectra;
   std::set<detid_t> detectors;
-  const size_t &nhist1 = ws1->getNumberHistograms();
+  const size_t &nhist1 = ws1.getNumberHistograms();
   for (size_t i = 0; i < nhist1; ++i) {
-    const auto &spec = ws1->getSpectrum(i);
+    const auto &spec = ws1.getSpectrum(i);
     const specnum_t spectrum = spec.getSpectrumNo();
     spectra.insert(spectrum);
     const auto &dets = spec.getDetectorIDs();
@@ -122,9 +121,9 @@ void ConjoinWorkspaces::checkForOverlap(API::MatrixWorkspace_const_sptr ws1,
 
   // Now go throught the spectrum numbers & UDETS in the 2nd workspace, making
   // sure that there's no overlap
-  const size_t &nhist2 = ws2->getNumberHistograms();
+  const size_t &nhist2 = ws2.getNumberHistograms();
   for (size_t j = 0; j < nhist2; ++j) {
-    const auto &spec = ws2->getSpectrum(j);
+    const auto &spec = ws2.getSpectrum(j);
     const specnum_t spectrum = spec.getSpectrumNo();
     if (checkSpectra) {
       if (spectrum > 0 && spectra.find(spectrum) != spectra.end()) {
@@ -155,9 +154,9 @@ void ConjoinWorkspaces::checkForOverlap(API::MatrixWorkspace_const_sptr ws1,
  * @param ws2 The second workspace supplied to the algorithm.
  * @param output The workspace that is going to be returned by the algorithm.
  */
-void ConjoinWorkspaces::fixSpectrumNumbers(API::MatrixWorkspace_const_sptr ws1,
-                                           API::MatrixWorkspace_const_sptr ws2,
-                                           API::MatrixWorkspace_sptr output) {
+void ConjoinWorkspaces::fixSpectrumNumbers(const MatrixWorkspace &ws1,
+                                           const MatrixWorkspace &ws2,
+                                           MatrixWorkspace &output) {
   bool needsFix(false);
 
   if (this->getProperty("CheckOverlapping")) {
@@ -178,7 +177,7 @@ void ConjoinWorkspaces::fixSpectrumNumbers(API::MatrixWorkspace_const_sptr ws1,
   specnum_t max;
   getMinMax(output, min, max);
   if (max - min >= static_cast<specnum_t>(
-                       output->getNumberHistograms())) // nothing to do then
+                       output.getNumberHistograms())) // nothing to do then
     return;
 
   // information for remapping the spectra numbers
@@ -188,11 +187,11 @@ void ConjoinWorkspaces::fixSpectrumNumbers(API::MatrixWorkspace_const_sptr ws1,
 
   // change the axis by adding the maximum existing spectrum number to the
   // current value
-  for (size_t i = ws1->getNumberHistograms(); i < output->getNumberHistograms();
+  for (size_t i = ws1.getNumberHistograms(); i < output.getNumberHistograms();
        i++) {
     specnum_t origid;
-    origid = output->getSpectrum(i).getSpectrumNo();
-    output->getSpectrum(i).setSpectrumNo(origid + ws1max);
+    origid = output.getSpectrum(i).getSpectrumNo();
+    output.getSpectrum(i).setSpectrumNo(origid + ws1max);
   }
 }
 

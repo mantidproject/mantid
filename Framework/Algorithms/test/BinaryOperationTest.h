@@ -7,6 +7,7 @@
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidAlgorithms/BinaryOperation.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
@@ -68,17 +69,17 @@ public:
   void testcheckSizeCompatibility1D1D() {
     // Register the workspace in the data service
     Workspace2D_sptr work_in1 =
-        WorkspaceCreationHelper::create1DWorkspaceFib(10);
+        WorkspaceCreationHelper::create1DWorkspaceFib(10, true);
     Workspace2D_sptr work_in2 =
-        WorkspaceCreationHelper::create1DWorkspaceFib(20);
+        WorkspaceCreationHelper::create1DWorkspaceFib(20, true);
     Workspace2D_sptr work_in3 =
-        WorkspaceCreationHelper::create1DWorkspaceFib(10);
+        WorkspaceCreationHelper::create1DWorkspaceFib(10, true);
     Workspace2D_sptr work_in4 =
-        WorkspaceCreationHelper::create1DWorkspaceFib(5);
+        WorkspaceCreationHelper::create1DWorkspaceFib(5, true);
     Workspace2D_sptr work_in5 =
-        WorkspaceCreationHelper::create1DWorkspaceFib(3);
+        WorkspaceCreationHelper::create1DWorkspaceFib(3, true);
     Workspace2D_sptr work_in6 =
-        WorkspaceCreationHelper::create1DWorkspaceFib(1);
+        WorkspaceCreationHelper::create1DWorkspaceFib(1, true);
     BinaryOpHelper helper;
     TS_ASSERT(!helper.checkSizeCompatibility(work_in1, work_in2).empty());
     TS_ASSERT(helper.checkSizeCompatibility(work_in1, work_in3).empty());
@@ -89,18 +90,19 @@ public:
 
   void testcheckSizeCompatibility2D1D() {
     // Register the workspace in the data service
+    const bool isHistogram(true);
     Workspace2D_sptr work_in1 =
-        WorkspaceCreationHelper::create2DWorkspace123(10, 10);
+        WorkspaceCreationHelper::create2DWorkspace123(10, 10, isHistogram);
     Workspace2D_sptr work_in2 =
-        WorkspaceCreationHelper::create1DWorkspaceFib(20);
+        WorkspaceCreationHelper::create1DWorkspaceFib(20, true);
     Workspace2D_sptr work_in3 =
-        WorkspaceCreationHelper::create1DWorkspaceFib(10);
+        WorkspaceCreationHelper::create1DWorkspaceFib(10, true);
     Workspace2D_sptr work_in4 =
-        WorkspaceCreationHelper::create1DWorkspaceFib(5);
+        WorkspaceCreationHelper::create1DWorkspaceFib(5, true);
     Workspace2D_sptr work_in5 =
-        WorkspaceCreationHelper::create1DWorkspaceFib(3);
+        WorkspaceCreationHelper::create1DWorkspaceFib(3, true);
     Workspace2D_sptr work_in6 =
-        WorkspaceCreationHelper::create1DWorkspaceFib(1);
+        WorkspaceCreationHelper::create1DWorkspaceFib(1, true);
     MatrixWorkspace_sptr work_inEvent1 =
         WorkspaceCreationHelper::createEventWorkspace(10, 1);
     // will not pass x array does not match
@@ -174,18 +176,14 @@ public:
     TS_ASSERT(output);
 
     for (int i = 0; i < nHist; ++i) {
-      IDetector_const_sptr det;
-      try {
-        det = output->getDetector(i);
-      } catch (Mantid::Kernel::Exception::NotFoundError &) {
-      }
+      auto &spectrumInfo = output->spectrumInfo();
 
-      TSM_ASSERT("Detector was found", det);
-      if (det) {
+      TSM_ASSERT("Detector was not found", spectrumInfo.hasDetectors(i));
+      if (spectrumInfo.hasDetectors(i)) {
         if (masking.count(i) == 0) {
-          TS_ASSERT_EQUALS(det->isMasked(), false);
+          TS_ASSERT_EQUALS(spectrumInfo.isMasked(i), false);
         } else {
-          TS_ASSERT_EQUALS(det->isMasked(), true);
+          TS_ASSERT_EQUALS(spectrumInfo.isMasked(i), true);
         }
       }
     }

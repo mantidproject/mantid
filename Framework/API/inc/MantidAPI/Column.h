@@ -91,6 +91,12 @@ public:
     UNUSED_ARG(index);
   }
 
+  /// Read in from stream and set the value at the given index
+  virtual void read(const size_t index, std::istream &in) {
+    UNUSED_ARG(index)
+    UNUSED_ARG(in)
+  }
+
   /// Specialized type check
   virtual bool isBool() const = 0;
 

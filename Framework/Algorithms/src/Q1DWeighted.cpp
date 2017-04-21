@@ -17,6 +17,8 @@
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/VectorHelper.h"
 
+constexpr double deg2rad = M_PI / 180.0;
+
 namespace Mantid {
 namespace Algorithms {
 
@@ -333,7 +335,7 @@ void Q1DWeighted::exec() {
   }
   // set the output property
   std::string outputWSGroupName = getPropertyValue("WedgeWorkspace");
-  if (outputWSGroupName.size() == 0) {
+  if (outputWSGroupName.empty()) {
     std::string outputWSName = getPropertyValue("OutputWorkspace");
     outputWSGroupName = outputWSName + "_wedges";
     setPropertyValue("WedgeWorkspace", outputWSGroupName);

@@ -10,6 +10,7 @@
 ################################################################################
 import csv
 import random
+import os
 
 from fourcircle_utility import *
 from peakprocesshelper import PeakProcessRecord
@@ -24,8 +25,9 @@ from mantid.kernel import V3D
 
 DebugMode = True
 
-DET_X_SIZE = 256
-DET_Y_SIZE = 256
+# TODO - changed without configuration
+DET_X_SIZE = 512
+DET_Y_SIZE = 512
 
 MAX_SCAN_NUMBER = 100000
 
@@ -55,6 +57,16 @@ class CWSCDReductionControl(object):
 
         # Some set up
         self._expNumber = None
+
+        # instrument default constants
+        self._defaultDetectorSampleDistance = None
+        # geometry of pixel
+        self._defaultPixelSizeX = None
+        self._defaultPixelSizeY = None
+        # user-defined wave length
+        self._userWavelengthDict = dict()
+        # default peak center
+        self._defaultDetectorCenter = None
 
         # Container for MDEventWorkspace for each Pt.
         self._myMDWsList = list()
@@ -92,6 +104,8 @@ class CWSCDReductionControl(object):
 
         # A dictionary to manage all loaded and processed MDEventWorkspaces
         # self._expDataDict = {}
+        self._detSampleDistanceDict = dict()
+        self._detCenterDict = dict()
 
         # register startup
         mantid.UsageService.registerFeatureUsage("Interface","4-Circle Reduction",False)
@@ -182,56 +196,8 @@ class CWSCDReductionControl(object):
         sin_theta = q * wavelength/(4*math.pi)
         theta = math.asin(sin_theta)
         corrected_intensity = peak_intensity * math.sin(2*theta) * step_omega
-        print '[DB] Lorentz correction: I * sin(2*theta) * delta(omega) = %.5f * sin(2*%.5f) * %.5f =' \
-              ' %.5f; q = %.5f.' % (peak_intensity, theta*180/math.pi, step_omega, corrected_intensity, q)
 
         return corrected_intensity
-
-    # def calculate_peak_center(self, exp_number, scan_number, pt_numbers=None):
-    #     """
-    #     Calculate center of peak by weighting the peak centers of multiple Pt (slice from 3D peak)
-    #     :param exp_number:
-    #     :param scan_number:
-    #     :param pt_numbers:
-    #     :return: 2-tuple: boolean, peak center (3-tuple of float)
-    #     """
-    #     # Check & set pt. numbers
-    #     assert isinstance(exp_number, int), 'Experiment number %s must be an integer but not %s.' \
-    #                                         '' % (str(exp_number), str(type(exp_number)))
-    #     assert isinstance(scan_number, int), 'Scan number %s must be an integer but not %s.' \
-    #                                          '' % (str(scan_number), str(type(scan_number)))
-    #     if pt_numbers is None:
-    #         status, pt_number_list = self.get_pt_numbers(exp_number, scan_number)
-    #         assert status
-    #     else:
-    #         pt_number_list = pt_numbers
-    #     assert isinstance(pt_number_list, list) and len(pt_number_list) > 0
-    #
-    #     # Check whether the MDEventWorkspace used to find peaks exists
-    #     if self.has_merged_data(exp_number, scan_number, pt_number_list):
-    #         pass
-    #     else:
-    #         return False, 'Exp %d Scan %d: data must be merged already.' % (exp_number, scan_number)
-    #
-    #     # Find peak in Q-space
-    #     merged_ws_name = get_merged_md_name(self._instrumentName, exp_number, scan_number, pt_number_list)
-    #     peak_ws_name = get_peak_ws_name(exp_number, scan_number, pt_number_list)
-    #     mantidsimple.FindPeaksMD(InputWorkspace=merged_ws_name,
-    #                              MaxPeaks=10,
-    #                              PeakDistanceThreshold=5.,
-    #                              DensityThresholdFactor=0.1,
-    #                              OutputWorkspace=peak_ws_name)
-    #     assert AnalysisDataService.doesExist(peak_ws_name), 'Output PeaksWorkspace %s cannot be found.' \
-    #                                                         '' % peak_ws_name
-    #
-    #     # calculate the peaks with weight
-    #     process_record = PeakProcessRecord(exp_number, scan_number, peak_ws_name)
-    #     process_record.calculate_peak_center()
-    #     peak_center = process_record.get_peak_centre()
-    #     # set the merged peak information to data structure
-    #     self._myPeakInfoDict[(exp_number, scan_number)] = process_record
-    #
-    #     return True, peak_center
 
     def find_peak(self, exp_number, scan_number, pt_number_list=None):
         """ Find 1 peak in sample Q space for UB matrix
@@ -501,7 +467,11 @@ class CWSCDReductionControl(object):
         if pt_number is None:
             # no pt number, then check SPICE file
             spice_file_name = get_spice_file_name(self._instrumentName, exp_number, scan_number)
-            file_name = os.path.join(self._dataDir, spice_file_name)
+            try:
+                file_name = os.path.join(self._dataDir, spice_file_name)
+            except AttributeError:
+                raise AttributeError('Unable to create SPICE file name from directory %s and file name %s.'
+                                     '' % (self._dataDir, spice_file_name))
         else:
             # pt number given, then check
             xml_file_name = get_det_xml_file_name(self._instrumentName, exp_number, scan_number,
@@ -548,14 +518,18 @@ class CWSCDReductionControl(object):
 
         return self._myUBMatrixDict[exp_number]
 
-    @staticmethod
-    def get_wave_length(exp_number, scan_number_list):
+    def get_wave_length(self, exp_number, scan_number_list):
         """
         Get the wavelength.
         Exception: RuntimeError if there are more than 1 wavelength found with all given scan numbers
+        :param exp_number:
         :param scan_number_list:
         :return:
         """
+        # check whether there is use wave length
+        if exp_number in self._userWavelengthDict:
+            return self._userWavelengthDict[exp_number]
+
         # get the SPICE workspace
         wave_length_set = set()
 
@@ -656,7 +630,6 @@ class CWSCDReductionControl(object):
 
         # get ub matrix
         ub_matrix = self.get_ub_matrix(exp_number)
-        print '[DB...BAT] UB matrix is of type ', type(ub_matrix)
 
         for scan_number in scan_number_list:
             peak_dict = dict()
@@ -777,12 +750,13 @@ class CWSCDReductionControl(object):
         raw_ws = self.get_raw_data_workspace(exp_no, scan_no, pt_no)
         if raw_ws is None:
             return False, 'Raw data for Exp %d Scan %d Pt %d is not loaded.' % (exp_no, scan_no, pt_no)
+        print '[DB...BAT] Raw workspace size: ', raw_ws.getNumberHistograms()
 
         # Convert to numpy array
         array2d = numpy.ndarray(shape=(DET_X_SIZE, DET_Y_SIZE), dtype='float')
         for i in xrange(DET_X_SIZE):
             for j in xrange(DET_Y_SIZE):
-                array2d[i][j] = raw_ws.readY(i * DET_X_SIZE + j)[0]
+                array2d[i][j] = raw_ws.readY(j * DET_X_SIZE + i)[0]
 
         # Flip the 2D array to look detector from sample
         array2d = numpy.flipud(array2d)
@@ -1305,7 +1279,7 @@ class CWSCDReductionControl(object):
             final_peak_center[i] = sum_peak_center[i] * (1./sum_bin_counts)
         #final_peak_center = sum_peak_center * (1./sum_bin_counts)
 
-        print 'Avg peak center = ', final_peak_center, 'Total counts = ', sum_bin_counts
+        print '[INFO] Avg peak center = ', final_peak_center, 'Total counts = ', sum_bin_counts
 
         # Integrate peaks
         total_intensity = 0.
@@ -1434,7 +1408,6 @@ class CWSCDReductionControl(object):
         # Default for exp_no
         if exp_no is None:
             exp_no = self._expNumber
-        print '[DB...BAD] Load Spice Scan File Exp Number = %d, Stored Exp. Number = %d' % (exp_no, self._expNumber)
 
         # Check whether the workspace has been loaded
         assert isinstance(exp_no, int)
@@ -1502,17 +1475,23 @@ class CWSCDReductionControl(object):
 
         # load SPICE Pt.  detector file
         pt_ws_name = get_raw_data_workspace_name(exp_no, scan_no, pt_no)
+        # new_idf_name = '/home/wzz/Projects/HB3A/NewDetector/HB3A_ND_Definition.xml'
+        new_idf_name = '/SNS/users/wzz/Projects/HB3A/HB3A_ND_Definition.xml'
+        if os.path.exists(new_idf_name) is False:
+            raise RuntimeError('Instrument file {0} cannot be found!'.format(new_idf_name))
         try:
             mantidsimple.LoadSpiceXML2DDet(Filename=xml_file_name,
                                            OutputWorkspace=pt_ws_name,
-                                           DetectorGeometry='256,256',
+                                           # FIXME - Need UI input
+                                           DetectorGeometry='512,512',
+                                           InstrumentFilename=new_idf_name,
                                            SpiceTableWorkspace=spice_table_name,
                                            PtNumber=pt_no)
         except RuntimeError as run_err:
             return False, str(run_err)
 
         # Add data storage
-        assert AnalysisDataService.doesExist(pt_ws_name)
+        assert AnalysisDataService.doesExist(pt_ws_name), 'blabla'
         raw_matrix_ws = AnalysisDataService.retrieve(pt_ws_name)
         self._add_raw_workspace(exp_no, scan_no, pt_no, raw_matrix_ws)
 
@@ -1540,9 +1519,27 @@ class CWSCDReductionControl(object):
         # get the workspace
         ws_name_list = ''
         for i_ws, ws_name in enumerate(scan_md_ws_list):
+            # build the input MDWorkspace list
             if i_ws != 0:
                 ws_name_list += ', '
             ws_name_list += ws_name
+
+            # rebin the MDEventWorkspace to make all MDEventWorkspace have same MDGrid
+            md_ws = AnalysisDataService.retrieve(ws_name)
+            frame = md_ws.getDimension(0).getMDFrame().name()
+
+            if frame == 'HKL':
+                mantidsimple.SliceMD(InputWorkspace=ws_name,
+                                     AlignedDim0='H,-10,10,1',
+                                     AlignedDim1='K,-10,10,1',
+                                     AlignedDim2='L,-10,10,1',
+                                     OutputWorkspace=ws_name)
+            else:
+                mantidsimple.SliceMD(InputWorkspace=ws_name,
+                                     AlignedDim0='Q_sample_x,-10,10,1',
+                                     AlignedDim1='Q_sample_y,-10,10,1',
+                                     AlignedDim2='Q_sample_z,-10,10,1',
+                                     OutputWorkspace=ws_name)
         # END-FOR
 
         # merge
@@ -1675,6 +1672,9 @@ class CWSCDReductionControl(object):
             # - construct a configuration with 1 scan and multiple Pts.
             scan_info_table_name = get_merge_pt_info_ws_name(exp_no, scan_no)
             try:
+                # collect HB3A exp info only need corrected detector position to build virtual instrument.
+                # so it is not necessary to specify the detector center now as virtual instrument
+                # is abandoned due to speed issue.
                 mantidsimple.CollectHB3AExperimentInfo(ExperimentNumber=exp_no,
                                                        ScanList='%d' % scan_no,
                                                        PtLists=pt_list_str,
@@ -1692,10 +1692,44 @@ class CWSCDReductionControl(object):
 
             # create MD workspace in Q-sample
             try:
-                mantidsimple.ConvertCWSDExpToMomentum(InputWorkspace=scan_info_table_name,
-                                                      CreateVirtualInstrument=False,
-                                                      OutputWorkspace=out_q_name,
-                                                      Directory=self._dataDir)
+                # set up the basic algorithm parameters
+                alg_args = dict()
+                alg_args['InputWorkspace'] = scan_info_table_name
+                alg_args['CreateVirtualInstrument'] = False
+                alg_args['OutputWorkspace'] = out_q_name
+                alg_args['Directory'] = self._dataDir
+
+                # Add Detector Center and Detector Distance!!!  - Trace up how to calculate shifts!
+                # calculate the sample-detector distance shift if it is defined
+                if exp_no in self._detSampleDistanceDict:
+                    alg_args['DetectorSampleDistanceShift'] = self._detSampleDistanceDict[exp_no] - \
+                                                              self._defaultDetectorSampleDistance
+                # calculate the shift of detector center
+                if exp_no in self._detCenterDict:
+                    user_center_row, user_center_col = self._detCenterDict[exp_no]
+                    delta_row = user_center_row - self._defaultDetectorCenter[0]
+                    delta_col = user_center_col - self._defaultDetectorCenter[1]
+                    # use LoadSpiceXML2DDet's unit test as a template
+                    shift_x = float(delta_col) * self._defaultPixelSizeX
+                    shift_y = float(delta_row) * self._defaultPixelSizeY * -1.
+                    # set to argument
+                    alg_args['DetectorCenterXShift'] = shift_x
+                    alg_args['DetectorCenterYShift'] = shift_y
+
+                # set up the user-defined wave length
+                if exp_no in self._userWavelengthDict:
+                    alg_args['UserDefinedWavelength'] = self._userWavelengthDict[exp_no]
+
+                # TODO/FIXME/NOW - Should get a flexible way to define IDF or no IDF
+                # new_idf_name = '/home/wzz/Projects/HB3A/NewDetector/HB3A_ND_Definition.xml'
+                new_idf_name = '/SNS/users/wzz/Projects/HB3A/HB3A_ND_Definition.xml'
+                if os.path.exists(new_idf_name) is False:
+                    raise RuntimeError('Instrument file {0} cannot be found!'.format(new_idf_name))
+                alg_args['InstrumentFilename'] = new_idf_name
+
+                # call:
+                mantidsimple.ConvertCWSDExpToMomentum(**alg_args)
+
                 self._myMDWsList.append(out_q_name)
             except RuntimeError as e:
                 err_msg += 'Unable to convert scan %d data to Q-sample MDEvents due to %s' % (scan_no, str(e))
@@ -1777,6 +1811,74 @@ class CWSCDReductionControl(object):
 
         return
 
+    def set_detector_center(self, exp_number, center_row, center_col, default=False):
+        """
+        Set detector center
+        :param exp_number:
+        :param center_row:
+        :param center_col:
+        :param default:
+        :return:
+        """
+        # check
+        assert isinstance(exp_number, int) and exp_number > 0, 'Experiment number must be integer'
+        assert center_row is None or (isinstance(center_row, int) and center_row >= 0), \
+            'Center row number must either None or non-negative integer.'
+        assert center_col is None or (isinstance(center_col, int) and center_col >= 0), \
+            'Center column number must be either Noe or non-negative integer.'
+
+        if default:
+            self._defaultDetectorCenter = (center_row, center_col)
+        else:
+            self._detCenterDict[exp_number] = (center_row, center_col)
+
+        return
+
+    def set_detector_sample_distance(self, exp_number, sample_det_distance):
+        """
+        set instrument's detector - sample distance
+        :param exp_number:
+        :param sample_det_distance:
+        :return:
+        """
+        # check
+        assert isinstance(exp_number, int) and exp_number > 0, 'Experiment number must be integer'
+        assert isinstance(sample_det_distance, float) and sample_det_distance > 0, \
+            'Sample - detector distance must be a positive float.'
+
+        # set
+        self._detSampleDistanceDict[exp_number] = sample_det_distance
+
+        return
+
+    def set_default_detector_sample_distance(self, default_det_sample_distance):
+        """
+        set default detector-sample distance
+        :param default_det_sample_distance:
+        :return:
+        """
+        assert isinstance(default_det_sample_distance, float) and default_det_sample_distance > 0,\
+            'Wrong %s' % str(default_det_sample_distance)
+
+        self._defaultDetectorSampleDistance = default_det_sample_distance
+
+        return
+
+    def set_default_pixel_size(self, pixel_x_size, pixel_y_size):
+        """
+        set default pixel size
+        :param pixel_x_size:
+        :param pixel_y_size:
+        :return:
+        """
+        assert isinstance(pixel_x_size, float) and pixel_x_size > 0, 'Pixel size-X %s is bad!' % str(pixel_x_size)
+        assert isinstance(pixel_y_size, float) and pixel_y_size > 0, 'Pixel size-Y %s is bad!' % str(pixel_y_size)
+
+        self._defaultPixelSizeX = pixel_x_size
+        self._defaultPixelSizeY = pixel_y_size
+
+        return
+
     def set_server_url(self, server_url, check_link=True):
         """
         Set URL for server to download the data
@@ -1847,8 +1949,8 @@ class CWSCDReductionControl(object):
             except OSError as os_err:
                 return False, str(os_err)
 
-        # Check whether the target is writable
-        if os.access(local_dir, os.W_OK) is False:
+        # Check whether the target is writable: if and only if the data directory is not from data server
+        if not local_dir.startswith('/HFIR/HB3A/') and os.access(local_dir, os.W_OK) is False:
             return False, 'Specified local data directory %s is not writable.' % local_dir
 
         # Successful
@@ -1873,6 +1975,23 @@ class CWSCDReductionControl(object):
 
         # Set up
         self._myUBMatrixDict[exp_number] = ub_matrix
+
+        return
+
+    def set_user_wave_length(self, exp_number, wave_length):
+        """
+        set the user wave length for future operation
+        :param exp_number:
+        :param wave_length:
+        :return:
+        """
+        assert isinstance(exp_number, int)
+        assert isinstance(wave_length, float) and wave_length > 0, 'Wave length %s must be a positive float but ' \
+                                                                   'not %s.' % (str(wave_length), type(wave_length))
+
+        self._userWavelengthDict[exp_number] = wave_length
+
+        return
 
     def set_working_directory(self, work_dir):
         """
@@ -2390,9 +2509,8 @@ class CWSCDReductionControl(object):
                 try:
                     mantidsimple.DownloadFile(Address=spice_file_url, Filename=spice_file_name)
                 except RuntimeError as download_error:
-                    print 'Unable to download scan %d from %s due to %s.' % (scan_number,
-                                                                             spice_file_url,
-                                                                             str(download_error))
+                    print '[ERROR] Unable to download scan %d from %s due to %s.' % (scan_number,spice_file_url,
+                                                                                     str(download_error))
                     break
             else:
                 spice_file_name = get_spice_file_name(self._instrumentName, exp_number, scan_number)
@@ -2460,7 +2578,6 @@ class CWSCDReductionControl(object):
                                       q_range, max_tsample])
 
             except RuntimeError as e:
-                print e
                 return False, None, str(e)
             except ValueError as e:
                 # Unable to import a SPICE file without necessary information
@@ -2468,7 +2585,7 @@ class CWSCDReductionControl(object):
         # END-FOR (scan_number)
 
         if error_message != '':
-            print 'Error!\n%s' % error_message
+            print '[Error]\n%s' % error_message
 
         self._scanSummaryList = scan_sum_list
 

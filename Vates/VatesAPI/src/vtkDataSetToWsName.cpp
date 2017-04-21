@@ -26,7 +26,7 @@ Constructor
 */
 vtkDataSetToWsName::vtkDataSetToWsName(vtkDataSet *dataSet)
     : m_dataset(dataSet) {
-  if (m_dataset == NULL) {
+  if (!m_dataset) {
     throw std::runtime_error(
         "Tried to construct vtkDataSetToWsName with NULL vtkDataSet");
   }
@@ -47,7 +47,7 @@ std::string vtkDataSetToWsName::execute() {
   Poco::XML::Element *pRootElem = pDoc->documentElement();
   Poco::XML::Element *wsNameElem = pRootElem->getChildElement(
       MDGeometryXMLDefinitions::workspaceNameElementName());
-  if (wsNameElem == NULL) {
+  if (!wsNameElem) {
     throw std::runtime_error(
         "The element containing the workspace name must be present.");
   }
@@ -55,6 +55,6 @@ std::string vtkDataSetToWsName::execute() {
 }
 
 /// Destructor.
-vtkDataSetToWsName::~vtkDataSetToWsName() {}
+vtkDataSetToWsName::~vtkDataSetToWsName() = default;
 }
 }

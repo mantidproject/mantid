@@ -150,7 +150,7 @@ void UnwrapSNS::exec() {
     } else {
       const double Ld = L1 + spectrumInfo.l2(workspaceIndex);
       // fix the x-axis
-      MantidVec timeBins;
+      std::vector<double> timeBins;
       size_t pivot = this->unwrapX(m_inputWS->x(workspaceIndex), timeBins, Ld);
       outputWS->setBinEdges(workspaceIndex, std::move(timeBins));
 
@@ -212,7 +212,7 @@ void UnwrapSNS::execEvent() {
     if (spectrumInfo.hasDetectors(workspaceIndex))
       Ld = L1 + spectrumInfo.l2(workspaceIndex);
 
-    MantidVec time_bins;
+    std::vector<double> time_bins;
     if (outW->x(0).size() > 2) {
       this->unwrapX(m_inputWS->x(workspaceIndex), time_bins, Ld);
       outW->setBinEdges(workspaceIndex, std::move(time_bins));
@@ -220,7 +220,7 @@ void UnwrapSNS::execEvent() {
       outW->setSharedX(workspaceIndex, m_inputWS->sharedX(workspaceIndex));
     }
     if (numEvents > 0) {
-      MantidVec times(numEvents);
+      std::vector<double> times(numEvents);
       outW->getSpectrum(workspaceIndex).getTofs(times);
       double filterVal = m_Tmin * Ld / m_LRef;
       for (size_t j = 0; j < numEvents; j++) {
@@ -239,11 +239,11 @@ void UnwrapSNS::execEvent() {
 }
 
 int UnwrapSNS::unwrapX(const Mantid::HistogramData::HistogramX &datain,
-                       MantidVec &dataout, const double &Ld) {
-  MantidVec tempX_L; // lower half - to be frame wrapped
+                       std::vector<double> &dataout, const double &Ld) {
+  std::vector<double> tempX_L; // lower half - to be frame wrapped
   tempX_L.reserve(m_XSize);
   tempX_L.clear();
-  MantidVec tempX_U; // upper half - to not be frame wrapped
+  std::vector<double> tempX_U; // upper half - to not be frame wrapped
   tempX_U.reserve(m_XSize);
   tempX_U.clear();
 

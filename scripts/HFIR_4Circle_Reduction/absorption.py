@@ -273,8 +273,6 @@ def calculate_b_matrix(lattice):
     b_matrix[2, 1] = 0
     b_matrix[2, 2] = 1 / lattice.get_c()
 
-    #  print '[DB...TEST] B matrix: determination = ', numpy.linalg.det(b_matrix), '\n', b_matrix
-
     return b_matrix
 
 
@@ -286,8 +284,6 @@ def calculate_upphi(omg0, theta2ave, chiave, phiave):
     up_phi[1] = m_sin(theta2ave*0.5+omg0)*m_cos(chiave)*m_sin(phiave)-m_cos(theta2ave*0.5+omg0)*m_cos(phiave)
     up_phi[2] = m_sin(theta2ave*0.5+omg0)*m_sin(chiave)
 
-    print '[DB...TEST] UP PHI = ', up_phi, '|UP PHI| = ', numpy.dot(up_phi, up_phi)
-
     return up_phi
 
 
@@ -298,8 +294,6 @@ def calculate_usphi(omg0, theta2ave, chiave, phiave):
     us_phi[0] = m_sin(theta2ave*0.5-omg0)*m_cos(chiave)*m_cos(phiave)-m_cos(theta2ave*0.5-omg0)*m_sin(phiave)
     us_phi[1] = m_sin(theta2ave*0.5-omg0)*m_cos(chiave)*m_sin(phiave)+m_cos(theta2ave*0.5-omg0)*m_cos(phiave)
     us_phi[2] = m_sin(theta2ave*0.5-omg0)*m_sin(chiave)
-
-    print '[DB...TEST] US PHI = ', us_phi, '|US PHI| = ', numpy.dot(us_phi, us_phi)
 
     return us_phi
 
@@ -315,9 +309,6 @@ def calculate_absorption_correction_spice(exp_number, scan_number, lattice, ub_m
     chiave = get_average_spice_table(exp_number, scan_number, 'chi') # sum(chi(:))/length(chi);
     phiave = get_average_spice_table(exp_number, scan_number, 'phi') # sum(phi(:))/length(phi);
     omg0 = theta2ave * 0.5
-
-    print '[DB...TEST] Exp = %d Scan = %d:\n2theta = %f, chi = %f, phi = %f, omega = %f' \
-          '' % (exp_number, scan_number, theta2ave, chiave, phiave, omg0)
 
     upphi = calculate_upphi(omg0, theta2ave, chiave, phiave)
     usphi = calculate_usphi(omg0, theta2ave, chiave, phiave)
@@ -420,9 +411,6 @@ def calculate_absorption_correction_2(exp_number, scan_number, spice_ub_matrix):
     chiave = get_average_spice_table(exp_number, scan_number, 'chi')  # sum(chi(:))/length(chi);
     phiave = get_average_spice_table(exp_number, scan_number, 'phi')  # sum(phi(:))/length(phi);
     avg_omega = get_average_omega(exp_number, scan_number)
-
-    print '[DB...TEST] Exp = %d Scan = %d:\n2theta = %f, chi = %f, phi = %f, omega = %s' % (
-        exp_number, scan_number, theta2ave, chiave, phiave, str(avg_omega))
 
     up_phi = calculate_upphi(avg_omega, theta2ave, chiave, phiave)
     us_phi = calculate_usphi(avg_omega, theta2ave, chiave, phiave)

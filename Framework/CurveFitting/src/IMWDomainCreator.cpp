@@ -322,7 +322,11 @@ boost::shared_ptr<API::Workspace> IMWDomainCreator::createOutputWorkspace(
   auto &Diff = ws->mutableY(2);
   const size_t nData = values->size();
   for (size_t i = 0; i < nData; ++i) {
-    Diff[i] = values->getFitData(i) - Ycal[i];
+    if (values->getFitWeight(i) != 0.0) {
+      Diff[i] = values->getFitData(i) - Ycal[i];
+    } else {
+      Diff[i] = 0.0;
+    }
   }
 
   if (!outputWorkspacePropertyName.empty()) {

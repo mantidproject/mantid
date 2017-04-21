@@ -131,14 +131,12 @@ void CostFuncFitting::calCovarianceMatrix(GSLMatrix &covar, double epsrel) {
   size_t np = m_function->nParams();
 
   bool isTransformationIdentity = true;
-  size_t ii = 0;
   for (size_t i = 0; i < np; ++i) {
     if (!m_function->isActive(i))
       continue;
     isTransformationIdentity =
         isTransformationIdentity &&
         (m_function->activeParameter(i) == m_function->getParameter(i));
-    ++ii;
   }
 
   if (isTransformationIdentity) {

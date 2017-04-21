@@ -17,6 +17,7 @@
 
 #include "MantidHistogramData/LinearGenerator.h"
 #include "MantidAPI/Axis.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidDataObjects/EventList.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
@@ -169,7 +170,8 @@ public:
         WorkspaceCreationHelper::createEventWorkspaceWithFullInstrument(
             1, 10, false /*dont clear the events*/);
     TS_ASSERT_EQUALS(ws->getSpectrum(2).getNumberEvents(), 200);
-    ws->maskWorkspaceIndex(2);
+    ws->getSpectrum(2).clearData();
+    ws->mutableSpectrumInfo().setMasked(2, true);
     TS_ASSERT_EQUALS(ws->getSpectrum(2).getNumberEvents(), 0);
   }
 

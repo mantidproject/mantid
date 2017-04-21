@@ -6,6 +6,7 @@
 #include "MantidTestHelpers/FakeObjects.h"
 #include "MantidTestHelpers/InstrumentCreationHelper.h"
 #include "MantidAPI/NearestNeighbourInfo.h"
+#include "MantidAPI/SpectrumInfo.h"
 
 using Mantid::API::NearestNeighbourInfo;
 
@@ -23,7 +24,8 @@ public:
     InstrumentCreationHelper::addFullInstrumentToWorkspace(workspace, false,
                                                            false, "");
     workspace.rebuildSpectraMapping();
-    workspace.maskWorkspaceIndex(0);
+    workspace.getSpectrum(0).clearData();
+    workspace.mutableSpectrumInfo().setMasked(0, true);
   }
 
   void test_construct() {

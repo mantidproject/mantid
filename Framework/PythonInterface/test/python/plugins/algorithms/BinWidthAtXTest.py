@@ -28,7 +28,7 @@ class BinWidthAtXTest(unittest.TestCase):
         xs = self._make_boundaries(xBegin, binWidths)
         ys = numpy.zeros(len(xs) - 1)
         ws = CreateWorkspace(DataX=xs, DataY=ys)
-        i = len(binWidths) / 2
+        i = len(binWidths) // 2
         middleBinWidth = binWidths[i]
         middleBinX = xs[i] + 0.5 * middleBinWidth
         return ws, middleBinX, middleBinWidth

@@ -13,8 +13,6 @@
 #include <stdexcept>
 #include <boost/shared_ptr.hpp>
 #include <limits>
-#include <boost/lexical_cast.hpp>
-#include <boost/mpl/if.hpp>
 #include <boost/type_traits.hpp>
 #include <boost/numeric/conversion/cast.hpp>
 
@@ -138,6 +136,8 @@ public:
   }
   /// Read in a string and set the value at the given index
   void read(size_t index, const std::string &text) override;
+  /// Read in from stream and set the value at the given index
+  void read(const size_t index, std::istream &in) override;
   /// Type check
   bool isBool() const override { return typeid(Type) == typeid(API::Boolean); }
   /// Memory used by the column
@@ -153,14 +153,30 @@ public:
    * is throw. In case of an overflow boost::numeric::positive_overflow or
    * boost::numeric::negative_overflow
    * is throw.
-   * @param i :: The index to an element.
+   * @param value :: The value of the element.
    */
-  double toDouble(size_t i) const override {
+  template <typename T> double convertToDouble(const T &value) const {
     typedef
-        typename boost::mpl::if_c<boost::is_convertible<double, Type>::value,
-                                  Type, InconvertibleToDoubleType>::type
-            DoubleType;
-    return boost::numeric_cast<double, DoubleType>(m_data[i]);
+        typename std::conditional<std::is_convertible<double, T>::value, T,
+                                  InconvertibleToDoubleType>::type DoubleType;
+    return boost::numeric_cast<double, DoubleType>(value);
+  }
+
+  /**
+   * Cast an string to double if possible. If it's impossible
+   * std::invalid_argument
+   * is throw. In case of an overflow boost::numeric::positive_overflow or
+   * boost::numeric::negative_overflow
+   * is throw.
+   * @param value :: The value of the element.
+   */
+
+  double convertToDouble(const std::string &value) const {
+    return std::stod(value);
+  }
+
+  double toDouble(size_t i) const override {
+    return convertToDouble(m_data[i]);
   }
 
   /**
@@ -173,10 +189,9 @@ public:
    * @param value: cast this value
    */
   void fromDouble(size_t i, double value) override {
-    typedef
-        typename boost::mpl::if_c<boost::is_convertible<double, Type>::value,
-                                  Type, InconvertibleToDoubleType>::type
-            DoubleType;
+    typedef typename std::conditional<std::is_convertible<double, Type>::value,
+                                      Type, InconvertibleToDoubleType>::type
+        DoubleType;
     m_data[i] =
         static_cast<Type>(boost::numeric_cast<DoubleType, double>(value));
   }
@@ -192,7 +207,7 @@ public:
   /// that the casting is possible
   double operator[](size_t i) const override {
     try {
-      return boost::lexical_cast<double>(m_data[i]);
+      return convertToDouble(m_data[i]);
     } catch (...) {
       return std::numeric_limits<double>::quiet_NaN();
     }
@@ -249,6 +264,12 @@ template <typename Type>
 void TableColumn<Type>::read(size_t index, const std::string &text) {
   std::istringstream istr(text);
   istr >> m_data[index];
+}
+
+/// Read in from stream and set the value at the given index
+template <typename Type>
+void TableColumn<Type>::read(size_t index, std::istream &in) {
+  in >> m_data[index];
 }
 
 namespace {

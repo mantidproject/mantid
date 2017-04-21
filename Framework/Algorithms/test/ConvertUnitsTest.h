@@ -11,11 +11,11 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAlgorithms/ConvertToDistribution.h"
 #include "MantidAlgorithms/ConvertUnits.h"
-#include "MantidDataHandling/LoadEventPreNexus.h"
 #include "MantidDataHandling/LoadInstrument.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Objects/Object.h"
 #include "MantidKernel/UnitFactory.h"
 
 using namespace Mantid::Kernel;
@@ -531,7 +531,6 @@ public:
     ws->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
 
     Instrument_sptr testInst(new Instrument);
-    ws->setInstrument(testInst);
     // Make it look like MARI (though not bin boundaries are different to the
     // real MARI file used before)
     // Define a source and sample position
@@ -551,6 +550,7 @@ public:
     physicalPixel->setPos(-0.34732, -3.28797, -2.29022);
     testInst->add(physicalPixel);
     testInst->markAsDetector(physicalPixel);
+    ws->setInstrument(testInst);
     ws->getSpectrum(0).addDetectorID(physicalPixel->getID());
 
     ConvertUnits conv;
@@ -589,6 +589,24 @@ public:
     TS_ASSERT_EQUALS(output->blocksize(), 2275);
     // Check EMode has been set
     TS_ASSERT_EQUALS(Mantid::Kernel::DeltaEMode::Indirect, output->getEMode());
+
+    ConvertUnits conv3;
+    conv3.initialize();
+    conv3.setProperty("InputWorkspace", ws);
+    conv3.setPropertyValue("OutputWorkspace", outputSpace);
+    conv3.setPropertyValue("Target", "DeltaE_inFrequency");
+    conv3.setPropertyValue("Emode", "Direct");
+    conv3.setPropertyValue("Efixed", "12.95");
+    conv3.execute();
+
+    TS_ASSERT_THROWS_NOTHING(
+        output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+            outputSpace));
+    TS_ASSERT_EQUALS(output->getAxis(0)->unit()->unitID(),
+                     "DeltaE_inFrequency");
+    TS_ASSERT_EQUALS(output->blocksize(), 1669);
+    // Check EMode has been set
+    TS_ASSERT_EQUALS(Mantid::Kernel::DeltaEMode::Direct, output->getEMode());
 
     AnalysisDataService::Instance().remove(outputSpace);
   }

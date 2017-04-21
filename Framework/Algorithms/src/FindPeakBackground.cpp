@@ -85,7 +85,7 @@ void FindPeakBackground::exec() {
   } else if (inpwsindex < 0 ||
              inpwsindex >= static_cast<int>(inpWS->getNumberHistograms())) {
     stringstream errss;
-    errss << "Input workspace " << inpWS->name() << " has "
+    errss << "Input workspace " << inpWS->getName() << " has "
           << inpWS->getNumberHistograms() << " spectra.  Input workspace index "
           << inpwsindex << " is out of boundary. ";
     throw runtime_error(errss.str());

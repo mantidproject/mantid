@@ -3,6 +3,7 @@
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidKernel/MandatoryValidator.h"
 
+#include <deque>
 #include <unordered_map>
 
 using namespace Mantid::API;

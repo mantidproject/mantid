@@ -44,7 +44,6 @@
 #include <QBitmap>
 #include <QClipboard>
 #include <QCursor>
-#include <QFileDialog>
 #include <QImageWriter>
 #include <QMessageBox>
 #include <QPixmap>
@@ -3101,4 +3100,10 @@ std::string Graph3D::saveToProject(ApplicationWindow *app) {
 
   tsv.writeRaw("</SurfacePlot>");
   return tsv.outputLines();
+}
+
+std::vector<std::string> Graph3D::getWorkspaceNames() {
+  // wsName is actually "Workspace workspacename", so we chop off
+  // the first 10 characters.
+  return {title.toStdString().substr(10, std::string::npos)};
 }

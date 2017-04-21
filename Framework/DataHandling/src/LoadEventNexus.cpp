@@ -9,6 +9,7 @@
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/SpectrumDetectorMapping.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
@@ -296,6 +297,14 @@ public:
         // (from the IDF)
         // ID. Setting this will abort the loading of the bank.
         m_loadError = true;
+      }
+      // fixup the minimum pixel id in the case that it's lower than the lowest
+      // 'known' id. We test this by checking that when we add the offset we
+      // would not get a negative index into the vector. Note that m_min_id is
+      // a uint so we have to be cautious about adding it to an int which may be
+      // negative.
+      if (static_cast<int32_t>(m_min_id) + alg->pixelID_to_wi_offset < 0) {
+        m_min_id = static_cast<uint32_t>(abs(alg->pixelID_to_wi_offset));
       }
       // fixup the maximum pixel id in the case that it's higher than the
       // highest 'known' id
@@ -864,7 +873,7 @@ void LoadEventNexus::init() {
 */
 void LoadEventNexus::setTopEntryName() {
   std::string nxentryProperty = getProperty("NXentryName");
-  if (nxentryProperty.size() > 0) {
+  if (!nxentryProperty.empty()) {
     m_top_entry_name = nxentryProperty;
     return;
   }
@@ -1940,8 +1949,7 @@ void LoadEventNexus::runLoadMonitorsAsEvents(API::Progress *const prog) {
           << "data workspace.\n";
       try {
         auto to = m_ws->getSingleHeldWorkspace();
-        auto from = dataWS;
-        copyLogs(from, to);
+        copyLogs(dataWS, to);
         g_log.information() << "Log data copied.\n";
       } catch (std::runtime_error &) {
         g_log.error()

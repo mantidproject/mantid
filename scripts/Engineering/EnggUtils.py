@@ -279,7 +279,7 @@ def convertToDSpacing(parent, ws):
     """
     # A check to catch possible errors in an understandable way
     expectedDim = 'Time-of-flight'
-    dimType = ws.getXDimension().getName()
+    dimType = ws.getXDimension().name
     if expectedDim != dimType:
         raise ValueError("This function expects a workspace with %s X dimension, but "
                          "the X dimension of the input workspace is: '%s'. This is an internal logic "
@@ -343,6 +343,7 @@ def sumSpectra(parent, ws):
     """
     alg = parent.createChildAlgorithm('SumSpectra')
     alg.setProperty('InputWorkspace', ws)
+    alg.setProperty('RemoveSpecialValues', True)
     alg.execute()
 
     return alg.getProperty('OutputWorkspace').value

@@ -1,5 +1,6 @@
 #include "MantidHistogramData/Rebin.h"
 #include "MantidHistogramData/BinEdges.h"
+#include "MantidHistogramData/Exception.h"
 #include "MantidHistogramData/Histogram.h"
 #include <algorithm>
 #include <numeric>
@@ -12,6 +13,7 @@ using Mantid::HistogramData::CountVariances;
 using Mantid::HistogramData::Frequencies;
 using Mantid::HistogramData::FrequencyStandardDeviations;
 using Mantid::HistogramData::FrequencyVariances;
+using Mantid::HistogramData::Exception::InvalidBinEdgesError;
 
 namespace {
 Histogram rebinCounts(const Histogram &input, const BinEdges &binEdges) {
@@ -39,7 +41,7 @@ Histogram rebinCounts(const Histogram &input, const BinEdges &binEdges) {
     auto nwidth = xn_high - xn_low;
 
     if (owidth <= 0.0 || nwidth <= 0.0)
-      throw std::runtime_error("Negative or zero bin widths not allowed.");
+      throw InvalidBinEdgesError("Negative or zero bin widths not allowed.");
 
     if (xn_high <= xo_low)
       inew++; /* old and new bins do not overlap */
@@ -50,9 +52,8 @@ Histogram rebinCounts(const Histogram &input, const BinEdges &binEdges) {
       auto delta = xo_high < xn_high ? xo_high : xn_high;
       delta -= xo_low > xn_low ? xo_low : xn_low;
 
-      auto factor = 1 / owidth;
-      ynew[inew] += yold[iold] * delta * factor;
-      enew[inew] += eold[iold] * eold[iold] * delta * factor;
+      ynew[inew] += yold[iold] * delta / owidth;
+      enew[inew] += eold[iold] * eold[iold] * delta / owidth;
 
       if (xn_high > xo_high) {
         iold++;
@@ -92,7 +93,7 @@ Histogram rebinFrequencies(const Histogram &input, const BinEdges &binEdges) {
     auto nwidth = xn_high - xn_low;
 
     if (owidth <= 0.0 || nwidth <= 0.0)
-      throw std::runtime_error("Negative or zero bin widths not allowed.");
+      throw InvalidBinEdgesError("Negative or zero bin widths not allowed.");
 
     if (xn_high <= xo_low)
       inew++; /* old and new bins do not overlap */
@@ -109,12 +110,16 @@ Histogram rebinFrequencies(const Histogram &input, const BinEdges &binEdges) {
       if (xn_high > xo_high) {
         iold++;
       } else {
-        auto factor = 1 / nwidth;
-        ynew[inew] *= factor;
-        enew[inew] = sqrt(enew[inew]) * factor;
         inew++;
       }
     }
+  }
+
+  for (size_t i = 0; i < size_ynew; ++i) {
+    auto width = xnew[i + 1] - xnew[i];
+    auto factor = 1 / width;
+    ynew[i] *= factor;
+    enew[i] = sqrt(enew[i]) * factor;
   }
 
   return Histogram(binEdges, newFrequencies, newFrequencyStdDev);

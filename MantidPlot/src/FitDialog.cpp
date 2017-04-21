@@ -65,8 +65,6 @@
 
 #include <qwt_plot_curve.h>
 
-#include "MantidQtAPI/FileDialogHandler.h"
-
 using namespace MantidQt::API;
 
 FitDialog::FitDialog(Graph *g, QWidget *parent, Qt::WFlags fl)
@@ -662,7 +660,7 @@ void FitDialog::saveUserFunction() {
     }
     QString filter = tr("MantidPlot fit model") + " (*.fit);;";
     filter += tr("All files") + " (*)";
-    QString fn = MantidQt::API::FileDialogHandler::getSaveFileName(
+    QString fn = QFileDialog::getSaveFileName(
         app, tr("MantidPlot") + " - " + tr("Save Fit Model As"),
         app->fitModelsPath + "/" + name, filter);
     if (!fn.isEmpty()) {
@@ -1423,7 +1421,7 @@ void FitDialog::saveInitialGuesses() {
     }
     QString filter = tr("MantidPlot fit model") + " (*.fit);;";
     filter += tr("All files") + " (*)";
-    QString fn = MantidQt::API::FileDialogHandler::getSaveFileName(
+    QString fn = QFileDialog::getSaveFileName(
         app, tr("MantidPlot") + " - " + tr("Save Fit Model As"),
         app->fitModelsPath + "/" + d_current_fit->objectName(), filter);
     if (!fn.isEmpty()) {

@@ -2,7 +2,6 @@
 // Includes
 //----------------------------------
 #include "MantidQtAPI/AlgorithmInputHistory.h"
-#include "MantidQtAPI/FileDialogHandler.h"
 #include "MantidQtAPI/UserSubWindow.h"
 #include "MantidKernel/UsageService.h"
 
@@ -129,7 +128,7 @@ QString UserSubWindow::openFileDialog(const bool save,
 
   QString filename;
   if (save) {
-    filename = MantidQt::API::FileDialogHandler::getSaveFileName(
+    filename = QFileDialog::getSaveFileName(
         this, "Save file",
         AlgorithmInputHistory::Instance().getPreviousDirectory(), filter);
   } else {

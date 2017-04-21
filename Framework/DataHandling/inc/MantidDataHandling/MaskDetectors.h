@@ -1,15 +1,15 @@
 #ifndef MANTID_DATAHANDLING_MASKDETECTORS_H_
 #define MANTID_DATAHANDLING_MASKDETECTORS_H_
 
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/MaskWorkspace.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 
 namespace Mantid {
+namespace Indexing {
+class SpectrumNumber;
+}
 namespace DataHandling {
 /** An algorithm to mask a detector, or set of detectors.
     The workspace spectra associated with those detectors are zeroed.
@@ -69,6 +69,9 @@ public:
   const std::string category() const override { return "Transforms\\Masking"; }
 
 private:
+  // create type for range information
+  using RangeInfo = std::tuple<size_t, size_t, bool>;
+
   const std::string workspaceMethodName() const override {
     return "maskDetectors";
   }
@@ -79,16 +82,40 @@ private:
   // Implement abstract Algorithm methods
   void init() override;
   void exec() override;
-  void execPeaks(DataObjects::PeaksWorkspace_sptr WS);
+
+  /// Choose how to mask given that we have a mask workspace
   void
-  fillIndexListFromSpectra(std::vector<size_t> &indexList,
-                           const std::vector<specnum_t> &spectraList,
-                           const API::MatrixWorkspace_sptr WS,
-                           const std::tuple<size_t, size_t, bool> &range_info);
+  handleMaskByMaskWorkspace(const DataObjects::MaskWorkspace_const_sptr maskWs,
+                            const API::MatrixWorkspace_const_sptr WS,
+                            std::vector<detid_t> &detectorList,
+                            std::vector<size_t> &indexList,
+                            const RangeInfo &rangeInfo);
+
+  /// Choose how to mask given that we have a matrix workspace
+  void handleMaskByMatrixWorkspace(const API::MatrixWorkspace_const_sptr maskWs,
+                                   const API::MatrixWorkspace_const_sptr WS,
+                                   std::vector<detid_t> &detectorList,
+                                   std::vector<size_t> &indexList,
+                                   const RangeInfo &rangeInfo);
+
+  void execPeaks(DataObjects::PeaksWorkspace_sptr WS);
+  void fillIndexListFromSpectra(
+      std::vector<size_t> &indexList,
+      const std::vector<Indexing::SpectrumNumber> &spectraList,
+      const API::MatrixWorkspace_sptr WS, const RangeInfo &range_info);
+  void appendToDetectorListFromComponentList(
+      std::vector<detid_t> &detectorList,
+      const std::vector<std::string> &componentList,
+      const API::MatrixWorkspace_const_sptr WS);
   void
   appendToIndexListFromWS(std::vector<size_t> &indexList,
-                          const API::MatrixWorkspace_sptr maskedWorkspace,
-                          const std::tuple<size_t, size_t, bool> &range_info);
+                          const API::MatrixWorkspace_const_sptr maskedWorkspace,
+                          const RangeInfo &range_info);
+  void appendToDetectorListFromWS(
+      std::vector<detid_t> &detectorList,
+      const API::MatrixWorkspace_const_sptr inputWs,
+      const API::MatrixWorkspace_const_sptr maskWs,
+      const std::tuple<size_t, size_t, bool> &range_info);
   void appendToIndexListFromMaskWS(
       std::vector<size_t> &indexList,
       const DataObjects::MaskWorkspace_const_sptr maskedWorkspace,
@@ -96,12 +123,10 @@ private:
   void
   extractMaskedWSDetIDs(std::vector<detid_t> &detectorList,
                         const DataObjects::MaskWorkspace_const_sptr &maskWS);
-  void
-  constrainMaskedIndexes(std::vector<size_t> &indexList,
-                         const std::tuple<size_t, size_t, bool> &range_info);
+  void constrainMaskedIndexes(std::vector<size_t> &indexList,
+                              const RangeInfo &range_info);
 
-  std::tuple<size_t, size_t, bool>
-  getRanges(const API::MatrixWorkspace_sptr &targWS);
+  RangeInfo getRanges(const API::MatrixWorkspace_sptr &targWS);
 };
 
 } // namespace DataHandling

@@ -31,7 +31,7 @@ public:
     TSM_ASSERT("Should have no recursion depth for top level splitting.",
                boost::none ==
                    Mantid::VATES::findRecursionDepthForTopLevelSplitting(
-                       wsName, std::move(workspaceProvider)));
+                       wsName, *workspaceProvider));
 
     // Clean up
     AnalysisDataService::Instance().remove(wsName);
@@ -48,7 +48,7 @@ public:
     TSM_ASSERT("Should have no recursion depth for top level splitting.",
                boost::none ==
                    Mantid::VATES::findRecursionDepthForTopLevelSplitting(
-                       wsName, std::move(workspaceProvider)));
+                       wsName, *workspaceProvider));
 
     // Clean up
     AnalysisDataService::Instance().remove(wsName);
@@ -70,7 +70,7 @@ public:
 
     // Act
     auto result = Mantid::VATES::findRecursionDepthForTopLevelSplitting(
-        wsName, std::move(workspaceProvider));
+        wsName, *workspaceProvider);
     // Assert
 
     TSM_ASSERT("Should have recursion depth of 1 for top level splitting.",

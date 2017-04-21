@@ -42,7 +42,6 @@ void setUpWorkspace(int histograms = 3, int bins = 10) {
   input->getSpectrum(1).setSpectrumNo(1);
   input->getSpectrum(2).setSpectrumNo(2);
   boost::shared_ptr<Instrument> instr = boost::make_shared<Instrument>();
-  input->setInstrument(instr);
   Mantid::Geometry::Detector *mon =
       new Mantid::Geometry::Detector("monitor", 0, NULL);
   instr->add(mon);
@@ -51,6 +50,7 @@ void setUpWorkspace(int histograms = 3, int bins = 10) {
       new Mantid::Geometry::Detector("NOTmonitor", 1, NULL);
   instr->add(det);
   instr->markAsDetector(det);
+  input->setInstrument(instr);
 
   AnalysisDataService::Instance().addOrReplace("normMon", input);
 

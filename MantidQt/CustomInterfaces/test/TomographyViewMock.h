@@ -4,6 +4,8 @@
 #include "MantidKernel/WarningSuppressions.h"
 #include "MantidQtCustomInterfaces/Tomography/ITomographyIfaceView.h"
 
+#include <QString>
+
 #include <gmock/gmock.h>
 
 GCC_DIAG_OFF_SUGGEST_OVERRIDE
@@ -69,15 +71,6 @@ public:
   // void enableRunReconstruct(bool on) {}
   MOCK_METHOD1(enableRunReconstruct, void(bool on));
 
-  // std::string showImagePath() {}
-  MOCK_CONST_METHOD0(showImagePath, std::string());
-
-  // void showImage(const Mantid::API::MatrixWorkspace_sptr &wsg) {}
-  MOCK_METHOD1(showImage, void(const Mantid::API::MatrixWorkspace_sptr &wsg));
-
-  // void showImage(const std::string &path) {}
-  MOCK_METHOD1(showImage, void(const std::string &path));
-
   // TomoPathsConfig currentPathsConfig() const {}
   MOCK_CONST_METHOD0(currentPathsConfig,
                      MantidQt::CustomInterfaces::TomoPathsConfig());
@@ -125,6 +118,20 @@ public:
 
   // virtual void runAggregateBands(Mantid::API::IAlgorithm_sptr alg)
   MOCK_METHOD1(runAggregateBands, void(Mantid::API::IAlgorithm_sptr alg));
+
+  //   virtual bool userConfirmation(const std::string &title, const std::string
+  //   &body)
+  MOCK_METHOD2(userConfirmation,
+               bool(const std::string &title, const std::string &body));
+
+  //   virtual std::string getCachedExecutable() const = 0;
+  MOCK_CONST_METHOD0(getCachedExecutable, std::string());
+
+  //  virtual std::vector<std::string> getCachedArguments() const = 0;
+  MOCK_CONST_METHOD0(getCachedArguments, std::vector<std::string>());
+
+  //  virtual void externalProcessFinished(const QString &str) = 0;
+  MOCK_METHOD1(emitExternalProcessFinished, void(const QString &str));
 };
 
 GCC_DIAG_ON_SUGGEST_OVERRIDE

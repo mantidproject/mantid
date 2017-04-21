@@ -158,23 +158,26 @@ void FunctionGenerator::unfix(size_t i) {
 /// Return parameter index from a parameter reference.
 size_t
 FunctionGenerator::getParameterIndex(const ParameterReference &ref) const {
-  auto index = m_source->getParameterIndex(ref);
-  if (index < m_nOwnParams) {
-    return index;
+  if (ref.getFunction() == this) {
+    auto index = ref.getIndex();
+    auto np = nParams();
+    if (index < np) {
+      return index;
+    }
+    return np;
   }
   checkTargetFunction();
   return m_target->getParameterIndex(ref) + m_nOwnParams;
 }
 
 /// Tie a parameter to other parameters (or a constant)
-API::ParameterTie *FunctionGenerator::tie(const std::string &parName,
-                                          const std::string &expr,
-                                          bool isDefault) {
+void FunctionGenerator::tie(const std::string &parName, const std::string &expr,
+                            bool isDefault) {
   if (isSourceName(parName)) {
-    return m_source->tie(parName, expr, isDefault);
+    m_source->tie(parName, expr, isDefault);
   } else {
     checkTargetFunction();
-    return m_target->tie(parName, expr, isDefault);
+    m_target->tie(parName, expr, isDefault);
   }
 }
 
@@ -216,15 +219,15 @@ ParameterTie *FunctionGenerator::getTie(size_t i) const {
 }
 
 /// Add a constraint to function
-void FunctionGenerator::addConstraint(API::IConstraint *ic) {
+void FunctionGenerator::addConstraint(std::unique_ptr<API::IConstraint> ic) {
   auto i = ic->getIndex();
   if (i < m_nOwnParams) {
     ic->reset(m_source.get(), i);
-    m_source->addConstraint(ic);
+    m_source->addConstraint(std::move(ic));
   } else {
     checkTargetFunction();
     ic->reset(m_target.get(), i - m_nOwnParams);
-    m_target->addConstraint(ic);
+    m_target->addConstraint(std::move(ic));
   }
 }
 
@@ -259,13 +262,15 @@ void FunctionGenerator::declareParameter(const std::string &, double,
 }
 
 /// Add a new tie. Derived classes must provide storage for ties
-void FunctionGenerator::addTie(API::ParameterTie *tie) {
+void FunctionGenerator::addTie(std::unique_ptr<API::ParameterTie> tie) {
   size_t i = getParameterIndex(*tie);
   if (i < m_nOwnParams) {
-    m_source->addTie(tie);
+    m_source->addTie(std::move(tie));
   } else {
     checkTargetFunction();
-    m_target->addTie(tie);
+    tie->reset(m_target.get(), tie->getIndex() - m_nOwnParams,
+               tie->isDefault());
+    m_target->addTie(std::move(tie));
   }
 }
 

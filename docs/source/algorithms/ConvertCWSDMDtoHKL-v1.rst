@@ -9,7 +9,7 @@
 Description
 -----------
 
-This algorithms is to convert an MDEventWorkspace in Q-sample coordinate 
+This algorithms is to convert an MDEventWorkspace in Q-sample coordinate
 to HKL coordindate for a reactor-based four-circle single crystal diffractometer.
 Meanwhile, the algorithm is able to export the MDEvents to file.
 
@@ -26,20 +26,20 @@ Inputs
 
 **InputWorkspace** is an MDEventWorkspace ???.
 
-**PeakWorkspace** is an optional input as in many cases especially after calculating UB matrix, ... 
+**PeakWorkspace** is an optional input as in many cases especially after calculating UB matrix, ...
 
-**UBMatrix** is ???. 
+**UBMatrix** is ???.
 
 
 Outputs
 #######
 
-The output is an MDEventWorkspace that... .. 
+The output is an MDEventWorkspace that... ..
 
 MDEvent
 +++++++
 
-Each MDEvent in output MDEventWorkspace contain 
+Each MDEvent in output MDEventWorkspace contain
 * *H*
 * *K*
 * *L*
@@ -61,29 +61,31 @@ Usage
 .. testcode:: ExConvertHB3AToHKL
 
   # Create input table workspaces for experiment information and virtual instrument parameters
-  CollectHB3AExperimentInfo(ExperimentNumber='406', ScanList='298', PtLists='-1,22', 
+  CollectHB3AExperimentInfo(ExperimentNumber='406', ScanList='298', PtLists='-1,22',
       DataDirectory='',
       GenerateVirtualInstrument=False,
       OutputWorkspace='ExpInfoTable', DetectorTableWorkspace='VirtualInstrumentTable')
 
   # Convert to MDWorkspace
-  ConvertCWSDExpToMomentum(InputWorkspace='ExpInfoTable', CreateVirtualInstrument=False, 
+  ConvertCWSDExpToMomentum(InputWorkspace='ExpInfoTable', CreateVirtualInstrument=False,
       OutputWorkspace='QSampleMD',
       Directory='')
-      
-  ConvertCWSDMDtoHKL(InputWorkspace='QSampleMD', 
+
+  ConvertCWSDMDtoHKL(InputWorkspace='QSampleMD',
                 UBMatrix='0.13329061, 0.07152342, -0.04215966, 0.01084569, -0.1620849, 0.0007607, -0.14018499, -0.07841385, -0.04002737',
                 OutputWorkspace='HKLMD')
-              
-  
+
+
   # Examine
   mdws = mtd['QSampleMD']
-  print 'Output MDEventWorkspace has %d events.'%(mdws.getNEvents())
-  
   hklws = mtd['HKLMD']
-  print 'H: range from %.5f to %.5f.' % (hklws.getXDimension().getMinimum(), hklws.getXDimension().getMaximum())
-  print 'K: range from %.5f to %.5f.' % (hklws.getYDimension().getMinimum(), hklws.getYDimension().getMaximum())
-  print 'L: range from %.5f to %.5f.' % (hklws.getZDimension().getMinimum(), hklws.getZDimension().getMaximum())
+  print 'Output QSample and HKL workspaces have %d and %d events.'%(mdws.getNEvents(), hklws.getNEvents())
+
+  BinMD(InputWorkspace='HKLMD', AlignedDim0='H,-0.3,0.3,60', AlignedDim1='K,-0.4,0.5,90', AlignedDim2='L,4,8,10', OutputWorkspace='BinndHKL')
+  histws = mtd['BinndHKL']
+  events_array = histws.getNumEventsArray()
+  print 'events[22, 53, 5] = %.1f' % events_array[22, 53, 5]
+  print 'events[30, 40, 5] = %.1f' % events_array[30, 40, 5]
 
 .. testcleanup::  ExConvertHB3AToHKL
 
@@ -94,14 +96,14 @@ Usage
   DeleteWorkspace(Workspace='HB3A_exp0406_scan0298')
   DeleteWorkspace(Workspace='spicematrixws')
 
+
 Output:
 
 .. testoutput:: ExConvertHB3AToHKL
 
-  Output MDEventWorkspace has 1631 events.
-  H: range from -0.26128 to 0.24943.
-  K: range from -0.35012 to 0.44396.
-  L: range from 4.96512 to 7.18855.
+  Output QSample and HKL workspaces have 1631 and 1631 events.
+  events[22, 53, 5] = 19.0
+  events[30, 40, 5] = 38.0
 
 .. categories::
 

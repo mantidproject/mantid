@@ -48,7 +48,7 @@ VatesParaViewApplication::VatesParaViewApplication()
         "set this variable.");
   }
 
-  Q_ASSERT(pqApplicationCore::instance() == NULL);
+  Q_ASSERT(pqApplicationCore::instance() == nullptr);
 
   // Provide ParaView's application core with a path to the running executable
   int argc = 1;
@@ -114,7 +114,7 @@ VatesParaViewApplication::~VatesParaViewApplication() {}
 
 VatesParaViewApplication *VatesParaViewApplication::instance() {
   static QPointer<VatesParaViewApplication> arg;
-  if (arg == NULL) {
+  if (!arg) {
     arg = new VatesParaViewApplication();
   }
   return arg;

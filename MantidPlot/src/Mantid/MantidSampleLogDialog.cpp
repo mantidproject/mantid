@@ -48,14 +48,21 @@ MantidSampleLogDialog::MantidSampleLogDialog(const QString &wsname,
   filterPeriod = new QRadioButton("Period");
   filterStatusPeriod = new QRadioButton("Status + Period");
   filterStatusPeriod->setChecked(true);
+  const std::vector<QRadioButton *> filterRadioButtons{
+      filterNone, filterStatus, filterPeriod, filterStatusPeriod};
 
+  // Add options to layout
   QVBoxLayout *vbox = new QVBoxLayout;
-  vbox->addWidget(filterNone);
-  vbox->addWidget(filterStatus);
-  vbox->addWidget(filterPeriod);
-  vbox->addWidget(filterStatusPeriod);
-  // vbox->addStretch(1);
+  for (auto *radioButton : filterRadioButtons) {
+    vbox->addWidget(radioButton);
+  }
   groupBox->setLayout(vbox);
+
+  // Changing filter option updates stats
+  for (auto *radioButton : filterRadioButtons) {
+    connect(radioButton, SIGNAL(toggled(bool)), this,
+            SLOT(showLogStatistics()));
+  }
 
   // -------------- Statistics on logs ------------------------
   std::string stats[NUM_STATS] = {
@@ -142,5 +149,22 @@ void MantidSampleLogDialog::importItem(QTreeWidgetItem *item) {
     break;
   default:
     throw std::invalid_argument("Error importing log entry, wrong data type");
+  }
+}
+
+/**
+ * Return filter type based on which radio button is selected
+ * @returns :: Filter type selected in UI
+ */
+Mantid::API::LogFilterGenerator::FilterType
+MantidSampleLogDialog::getFilterType() const {
+  if (filterStatus->isChecked()) {
+    return Mantid::API::LogFilterGenerator::FilterType::Status;
+  } else if (filterPeriod->isChecked()) {
+    return Mantid::API::LogFilterGenerator::FilterType::Period;
+  } else if (filterStatusPeriod->isChecked()) {
+    return Mantid::API::LogFilterGenerator::FilterType::StatusAndPeriod;
+  } else {
+    return Mantid::API::LogFilterGenerator::FilterType::None;
   }
 }

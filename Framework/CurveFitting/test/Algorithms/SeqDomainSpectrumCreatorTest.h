@@ -17,6 +17,7 @@
 
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/SpectrumInfo.h"
 
 #include "MantidTestHelpers/HistogramDataTestHelper.h"
 
@@ -245,9 +246,10 @@ public:
       const auto &y = outputWsMatrix->y(i);
 
       TS_ASSERT_EQUALS(x, matrixWs->x(i));
+      const auto &spectrumInfo = outputWsMatrix->spectrumInfo();
       for (size_t j = 0; j < x.size(); ++j) {
         // If detector is not masked, there should be values, otherwise 0.
-        if (!outputWsMatrix->getDetector(i)->isMasked()) {
+        if (!spectrumInfo.isMasked(i)) {
           TS_ASSERT_EQUALS(y[j], static_cast<double>(i) + slope * x[j]);
         } else {
           TS_ASSERT_EQUALS(y[j], 0.0);

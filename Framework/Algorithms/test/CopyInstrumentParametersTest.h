@@ -8,7 +8,9 @@
 #include "MantidAlgorithms/CopyInstrumentParameters.h"
 #include "MantidAPI/Workspace.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidAPI/DetectorInfo.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "WorkspaceCreationHelperTest.h"
 #include "MantidAPI/AnalysisDataService.h"
@@ -18,7 +20,6 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Component.h"
 #include "MantidDataHandling/LoadEmptyInstrument.h"
-#include "MantidGeometry/Instrument/ComponentHelper.h"
 #include <cmath>
 #include <stdexcept>
 
@@ -28,7 +29,6 @@ using namespace Mantid::Kernel;
 using namespace Mantid::DataObjects;
 using Mantid::Geometry::IDetector_const_sptr;
 using Mantid::Geometry::IComponent_const_sptr;
-using namespace Geometry::ComponentHelper;
 
 class CopyInstrumentParametersTest : public CxxTest::TestSuite {
 public:
@@ -64,21 +64,19 @@ public:
     // Get instrument of input workspace and move some detectors
     Geometry::ParameterMap *pmap;
     pmap = &(ws1->instrumentParameters());
+    auto &detectorInfoWs1 = ws1->mutableDetectorInfo();
     Geometry::Instrument_const_sptr instrument = ws1->getInstrument();
-    IComponent_const_sptr det1 = instrument->getDetector(1);
-    Geometry::ComponentHelper::moveComponent(*det1, *pmap, V3D(6.0, 0.0, 0.7),
-                                             Absolute);
-    IComponent_const_sptr det2 = instrument->getDetector(2);
-    Geometry::ComponentHelper::moveComponent(*det2, *pmap, V3D(6.0, 0.1, 0.7),
-                                             Absolute);
+    detectorInfoWs1.setPosition(0, V3D(6.0, 0.0, 0.7));
+    detectorInfoWs1.setPosition(1, V3D(6.0, 0.1, 0.7));
+
     // add auxiliary instrument parameters
     pmap->addDouble(instrument.get(), "Ei", 100);
     pmap->addString(instrument.get(), "some_param", "some_value");
 
     // Verify that a detector moved in the input workspace has not yet been
     // moved in the output workspace
-    IDetector_const_sptr deto = ws2->getDetector(0);
-    V3D newPos = deto->getPos();
+    const auto &spectrumInfoWs2 = ws2->spectrumInfo();
+    V3D newPos = spectrumInfoWs2.position(0);
     TS_ASSERT_DELTA(newPos.Z(), 5.0, 0.0001);
 
     // Execute Algorithm
@@ -88,16 +86,15 @@ public:
 
     // Verify that the detectors in the output workspace have been moved as in
     // the input workspace before execution
-    IDetector_const_sptr deto1 = ws2->getDetector(0);
-    int id1 = deto1->getID();
-    V3D newPos1 = deto1->getPos();
+    const auto &spectrumInfoWs2New = ws2->spectrumInfo();
+    int id1 = spectrumInfoWs2New.detector(0).getID();
+    V3D newPos1 = spectrumInfoWs2New.position(0);
     TS_ASSERT_EQUALS(id1, 1);
     TS_ASSERT_DELTA(newPos1.X(), 6.0, 0.0001);
     TS_ASSERT_DELTA(newPos1.Y(), 0.0, 0.0001);
     TS_ASSERT_DELTA(newPos1.Z(), 0.7, 0.0001);
-    IDetector_const_sptr deto2 = ws2->getDetector(1);
-    int id2 = deto2->getID();
-    V3D newPos2 = deto2->getPos();
+    int id2 = spectrumInfoWs2New.detector(1).getID();
+    V3D newPos2 = spectrumInfoWs2New.position(1);
     TS_ASSERT_EQUALS(id2, 2);
     TS_ASSERT_DELTA(newPos2.X(), 6.0, 0.0001);
     TS_ASSERT_DELTA(newPos2.Y(), 0.1, 0.0001);
@@ -128,12 +125,9 @@ public:
     // add auxiliary instrument parameters
     pmap->addDouble(instrument.get(), "Ei", 100);
     pmap->addString(instrument.get(), "some_param", "some_value");
-    IComponent_const_sptr det1 = instrument->getDetector(1);
-    Geometry::ComponentHelper::moveComponent(*det1, *pmap, V3D(6.0, 0.0, 0.7),
-                                             Absolute);
-    IComponent_const_sptr det4 = instrument->getDetector(4);
-    Geometry::ComponentHelper::moveComponent(*det4, *pmap, V3D(6.0, 0.1, 0.7),
-                                             Absolute);
+    auto &detectorInfoWs1 = ws1->mutableDetectorInfo();
+    detectorInfoWs1.setPosition(0, V3D(6.0, 0.0, 0.7));
+    detectorInfoWs1.setPosition(3, V3D(6.0, 0.1, 0.7));
 
     // Create output workspace with another parameterized instrument and put
     // into data store
@@ -144,12 +138,11 @@ public:
     dataStore.add(wsName2, ws2);
 
     pmap = &(ws2->instrumentParameters());
+    auto &detectorInfoWs2 = ws2->mutableDetectorInfo();
     instrument = ws2->getInstrument();
     pmap->addDouble(instrument.get(), "T", 10);
     pmap->addString(instrument.get(), "some_param", "other_value");
-    IComponent_const_sptr det2 = instrument->getDetector(2);
-    Geometry::ComponentHelper::moveComponent(*det2, *pmap, V3D(6.0, 0.2, 0.7),
-                                             Absolute);
+    detectorInfoWs2.setPosition(1, V3D(6.0, 0.2, 0.7));
 
     // Set properties
     TS_ASSERT_THROWS_NOTHING(
@@ -173,19 +166,21 @@ public:
     TS_ASSERT_EQUALS(100, (instr2->getNumberParameter("Ei"))[0]);
     // TS_ASSERT_EQUALS(10,(instr2->getNumberParameter("T"))[0]);
 
+    const auto &spectrumInfoWs2New = ws2->spectrumInfo();
+
     // new detector allocation applied
-    IDetector_const_sptr deto1 = ws2->getDetector(0);
-    int id1 = deto1->getID();
-    V3D newPos1 = deto1->getPos();
+    const auto &deto1 = spectrumInfoWs2New.detector(0);
+    int id1 = deto1.getID();
+    V3D newPos1 = deto1.getPos();
     TS_ASSERT_EQUALS(id1, 1);
     TS_ASSERT_DELTA(newPos1.X(), 6.0, 0.0001);
     TS_ASSERT_DELTA(newPos1.Y(), 0.0, 0.0001);
     TS_ASSERT_DELTA(newPos1.Z(), 0.7, 0.0001);
 
     // previous detector placement rejected
-    IDetector_const_sptr deto2 = ws2->getDetector(1);
-    int id2 = deto2->getID();
-    V3D newPos2 = deto2->getPos();
+    const auto &deto2 = spectrumInfoWs2New.detector(1);
+    int id2 = deto2.getID();
+    V3D newPos2 = deto2.getPos();
     TS_ASSERT_EQUALS(id2, 2);
     TS_ASSERT_DELTA(newPos2.X(), 0.0, 0.0001);
     TS_ASSERT_DELTA(newPos2.Y(), 0.0, 0.0001);
@@ -233,12 +228,11 @@ public:
                       static_cast<double>(i * 10));
     }
     // calibrate detectors;
+    auto &detectorInfo = ws1->mutableDetectorInfo();
     for (size_t i = 0; i < n_detectors; i++) {
-      IComponent_const_sptr det =
-          instrument->getDetector(static_cast<Mantid::detid_t>(i + 1));
-      Geometry::ComponentHelper::moveComponent(
-          *det, *pmap,
-          V3D(sin(M_PI * double(i)), cos(M_PI * double(i / 500)), 7), Absolute);
+      auto detIndex = detectorInfo.indexOf(static_cast<Mantid::detid_t>(i + 1));
+      detectorInfo.setPosition(
+          detIndex, V3D(sin(M_PI * double(i)), cos(M_PI * double(i / 500)), 7));
     }
 
     // Create output workspace with another parameterized instrument and put
@@ -289,10 +283,10 @@ public:
 
     // new detector allocation applied
     size_t nDetectors = ws2->getNumberHistograms();
+    const auto &spectrumInfo = ws2->spectrumInfo();
     for (size_t i = 0; i < nDetectors; i++) {
-      IDetector_const_sptr deto1 = ws2->getDetector(i);
-      int id = deto1->getID();
-      V3D newPos1 = deto1->getPos();
+      int id = spectrumInfo.detector(i).getID();
+      V3D newPos1 = spectrumInfo.position(i);
       TS_ASSERT_EQUALS(id, i + 1);
       TS_ASSERT_DELTA(newPos1.X(), sin(M_PI * double(i)), 0.0001);
       TS_ASSERT_DELTA(newPos1.Y(), cos(M_PI * double(i / 500)), 0.0001);

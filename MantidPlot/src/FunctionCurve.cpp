@@ -36,8 +36,6 @@
 #include <MantidAPI/IFunction.h>
 #include <MantidAPI/MatrixWorkspace.h>
 
-#include <QMessageBox>
-
 FunctionCurve::FunctionCurve(const QString &name)
     : PlotCurve(name), d_function_type(Normal), d_variable("x"), d_formulas(),
       d_from(0.0), d_to(0.0), m_identifier(NULL) {
@@ -141,36 +139,23 @@ void FunctionCurve::loadData(int points) {
       if (wsIndex >= static_cast<int>(ws->getNumberHistograms()))
         return;
 
-      const Mantid::MantidVec &wsX = ws->readX(wsIndex);
+      const auto &wsXPoints = ws->points(wsIndex);
 
-      if (d_from < wsX.front()) {
-        d_from = wsX.front();
-      }
-      if (d_to > wsX.back()) {
-        d_to = wsX.back();
-      }
+      if (d_from < wsXPoints.front())
+        d_from = wsXPoints.front();
+      if (d_to > wsXPoints.back())
+        d_to = wsXPoints.back();
 
       std::vector<double> X;
-      X.reserve(static_cast<int>(wsX.size()));
+      X.reserve(wsXPoints.size());
 
-      if (ws->isHistogramData()) {
-        for (int i = 0; i < static_cast<int>(ws->blocksize()) - 1; i++) {
-          double x = (wsX[i] + wsX[i + 1]) / 2;
-          if (x < d_from)
-            continue;
-          if (x > d_to)
-            break;
-          X.push_back(x);
-        }
-      } else {
-        for (int i = 0; i < static_cast<int>(ws->blocksize()); i++) {
-          double x = wsX[i];
-          if (x < d_from)
-            continue;
-          if (x > d_to)
-            break;
-          X.push_back(x);
-        }
+      for (int i = 0; i < static_cast<int>(ws->blocksize()); i++) {
+        const double x = wsXPoints[i];
+        if (x < d_from)
+          continue;
+        if (x > d_to)
+          break;
+        X.push_back(x);
       }
 
       // Create the function and initialize it using fnInput which was saved in
@@ -254,9 +239,10 @@ void FunctionCurve::loadData(int points) {
  * Load the data from a MatrixWorkspace if it is a Mantid-type FunctionCurve.
  * @param ws :: A workspace to load the data from.
  * @param wi :: An index of a histogram with the data.
+ * @param peakRadius :: A peak radius to pass to the domain.
  */
 void FunctionCurve::loadMantidData(Mantid::API::MatrixWorkspace_const_sptr ws,
-                                   size_t wi) {
+                                   size_t wi, int peakRadius) {
   if (!d_variable.isEmpty() || d_formulas.isEmpty() ||
       d_formulas[0] != "Mantid")
     return;
@@ -270,36 +256,23 @@ void FunctionCurve::loadMantidData(Mantid::API::MatrixWorkspace_const_sptr ws,
     if (wi >= ws->getNumberHistograms())
       return;
 
-    const Mantid::MantidVec &wsX = ws->readX(wi);
+    const auto &wsXPoints = ws->points(wi);
 
-    if (d_from < wsX.front()) {
-      d_from = wsX.front();
-    }
-    if (d_to > wsX.back()) {
-      d_to = wsX.back();
-    }
+    if (d_from < wsXPoints.front())
+      d_from = wsXPoints.front();
+    if (d_to > wsXPoints.back())
+      d_to = wsXPoints.back();
 
     std::vector<double> X;
-    X.reserve(wsX.size());
+    X.reserve(wsXPoints.size());
 
-    if (ws->isHistogramData()) {
-      for (size_t i = 0; i < ws->blocksize() - 1; i++) {
-        double x = (wsX[i] + wsX[i + 1]) / 2;
-        if (x < d_from)
-          continue;
-        if (x > d_to)
-          break;
-        X.push_back(x);
-      }
-    } else {
-      for (size_t i = 0; i < ws->blocksize(); i++) {
-        double x = wsX[i];
-        if (x < d_from)
-          continue;
-        if (x > d_to)
-          break;
-        X.push_back(x);
-      }
+    for (int i = 0; i < static_cast<int>(ws->blocksize()); i++) {
+      const double x = wsXPoints[i];
+      if (x < d_from)
+        continue;
+      if (x > d_to)
+        break;
+      X.push_back(x);
     }
 
     // Create the function and initialize it using fnInput which was saved in
@@ -310,6 +283,9 @@ void FunctionCurve::loadMantidData(Mantid::API::MatrixWorkspace_const_sptr ws,
     f->applyTies();
     Mantid::API::FunctionDomain1DVector domain(X);
     Mantid::API::FunctionValues Y(domain);
+    if (peakRadius > 0) {
+      domain.setPeakRadius(peakRadius);
+    }
     f->function(domain, Y);
 
     setData(&X[0], Y.getPointerToCalculated(0), static_cast<int>(X.size()));

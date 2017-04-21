@@ -1,11 +1,23 @@
 #include "MantidAPI/Workspace.h"
+#include "MantidAPI/WorkspaceHistory.h"
 #include "MantidKernel/IPropertyManager.h"
 #include "MantidKernel/Memory.h"
+#include "MantidKernel/make_unique.h"
 
 #include <boost/lexical_cast.hpp>
 
 namespace Mantid {
 namespace API {
+
+Workspace::Workspace() : m_history(Kernel::make_unique<WorkspaceHistory>()) {}
+
+// Defined as default in source for forward declaration with std::unique_ptr.
+Workspace::~Workspace() = default;
+
+Workspace::Workspace(const Workspace &other)
+    : Kernel::DataItem(other), m_title(other.m_title),
+      m_comment(other.m_comment), m_name(other.m_name),
+      m_history(Kernel::make_unique<WorkspaceHistory>(other.getHistory())) {}
 
 /** Set the title of the workspace
  *
@@ -55,7 +67,7 @@ const std::string &Workspace::getName() const { return m_name; }
  * @param n: number of algorithms defining a clean workspace
  */
 bool Workspace::isDirty(const int n) const {
-  return static_cast<int>(m_history.size()) > n;
+  return static_cast<int>(m_history->size()) > n;
 }
 
 /**

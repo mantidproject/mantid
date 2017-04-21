@@ -78,13 +78,13 @@ private:
   void sortByDistance(std::map<specnum_t, Mantid::Kernel::V3D> &nearest,
                       const size_t noNeighbours);
   /// create expanded bounding box for our purposes
-  void createBox(boost::shared_ptr<const Geometry::IDetector> det,
-                 Geometry::BoundingBox &bndbox, double searchDist);
+  void createBox(const Geometry::IDetector &det, Geometry::BoundingBox &bndbox,
+                 double searchDist);
   /// grow dimensions of our bounding box to the factor
   void growBox(double &min, double &max, const double factor);
 
   /// map of detectors in the instrument
-  std::map<specnum_t, boost::shared_ptr<const Geometry::IDetector>> m_detectors;
+  std::map<specnum_t, Kernel::V3D> m_positions;
   /// flag which detectors are included in a group already
   std::set<specnum_t> m_included;
   /// first and last values for each group

@@ -3,6 +3,7 @@
 
 #include "MantidKernel/System.h"
 #include "MantidAlgorithms/ConvertUnits.h"
+#include "MantidAPI/DeprecatedAlgorithm.h"
 #include "MantidKernel/Unit.h"
 
 namespace Mantid {
@@ -34,7 +35,9 @@ namespace Algorithms {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport ConvertUnitsUsingDetectorTable : public ConvertUnits {
+class DLLExport ConvertUnitsUsingDetectorTable
+    : public ConvertUnits,
+      public API::DeprecatedAlgorithm {
 public:
   const std::string name() const override;
   int version() const override;

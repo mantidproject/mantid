@@ -69,10 +69,6 @@ public:
   const std::string &GetWorkspaceName();
   /// Getter for the workspace type
   std::string GetWorkspaceTypeName();
-  /// Getter for the minimum value of the workspace data
-  double GetMinValue();
-  /// Getter for the maximum value of the workspace data
-  double GetMaxValue();
   /// Getter for the maximum value of the workspace data
   std::string GetInstrument();
   /// Setter for the normalization

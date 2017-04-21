@@ -53,7 +53,7 @@ public:
 
     alg.setPropertyValue("Filename", file);
     Mantid::Kernel::NexusDescriptor descr(alg.getPropertyValue("Filename"));
-    TS_ASSERT_EQUALS(alg.confidence(descr), 80);
+    TS_ASSERT_EQUALS(alg.confidence(descr), 70);
   }
 
   void doExecTest(const std::string &file) {
@@ -89,8 +89,49 @@ public:
   }
 
 private:
-  std::string m_dataFile2013;
-  std::string m_dataFile2015;
+  const std::string m_dataFile2013;
+  const std::string m_dataFile2015;
 };
 
+class LoadILLIndirectTestPerformance : public CxxTest::TestSuite {
+public:
+  void setUp() override {
+    for (int i = 0; i < numberOfIterations; ++i) {
+      loadAlgPtrs.emplace_back(setupAlg());
+    }
+  }
+
+  void testLoadILLIndirectPerformance() {
+    for (auto alg : loadAlgPtrs) {
+      TS_ASSERT_THROWS_NOTHING(alg->execute());
+    }
+  }
+
+  void tearDown() override {
+    for (int i = 0; i < numberOfIterations; i++) {
+      delete loadAlgPtrs[i];
+      loadAlgPtrs[i] = nullptr;
+    }
+    Mantid::API::AnalysisDataService::Instance().remove(outWSName);
+  }
+
+private:
+  std::vector<LoadILLIndirect *> loadAlgPtrs;
+
+  const int numberOfIterations = 5;
+
+  const std::string inFileName = "ILLIN16B_127500.nxs";
+  const std::string outWSName = "LoadILLWsOut";
+
+  LoadILLIndirect *setupAlg() {
+    LoadILLIndirect *loader = new LoadILLIndirect;
+    loader->initialize();
+    loader->isInitialized();
+    loader->setPropertyValue("Filename", inFileName);
+    loader->setPropertyValue("OutputWorkspace", outWSName);
+
+    loader->setRethrows(true);
+    return loader;
+  }
+};
 #endif /* MANTID_DATAHANDLING_LOADILLINDIRECTTEST_H_ */

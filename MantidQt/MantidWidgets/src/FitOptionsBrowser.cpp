@@ -201,6 +201,15 @@ void FitOptionsBrowser::createCommonProperties() {
                 &FitOptionsBrowser::getStringEnumProperty,
                 &FitOptionsBrowser::setStringEnumProperty);
   }
+  // Create PeakRadius property
+  m_peakRadius = m_intManager->addProperty("Peak Radius");
+  {
+    m_intManager->setValue(m_peakRadius, 0);
+    m_intManager->setMinimum(m_peakRadius, 0);
+    m_browser->addProperty(m_peakRadius);
+    addProperty("PeakRadius", m_peakRadius, &FitOptionsBrowser::getIntProperty,
+                &FitOptionsBrowser::setIntProperty);
+  }
 }
 
 void FitOptionsBrowser::createSimultaneousFitProperties() {
@@ -786,7 +795,7 @@ QtProperty *FitOptionsBrowser::addDoubleProperty(const QString &propertyName) {
   }
   QtProperty *property = m_doubleManager->addProperty(propertyName);
   m_doubleManager->setDecimals(property, m_decimals);
-  m_doubleManager->setRange(property, -std::numeric_limits<double>::max(),
+  m_doubleManager->setRange(property, std::numeric_limits<double>::lowest(),
                             std::numeric_limits<double>::max());
   this->addProperty(propertyName, property,
                     &FitOptionsBrowser::getDoubleProperty,

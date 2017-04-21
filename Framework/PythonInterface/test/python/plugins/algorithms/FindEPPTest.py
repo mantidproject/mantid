@@ -1,12 +1,11 @@
 from __future__ import (absolute_import, division, print_function)
 
 import unittest
+import mantid
 from mantid.simpleapi import DeleteWorkspace, CreateSampleWorkspace, CloneWorkspace, GroupWorkspaces
-from testhelpers import run_algorithm
-from mantid.api import AnalysisDataService, WorkspaceGroup
+from mantid.api import AnalysisDataService, WorkspaceGroup, mtd
 import numpy as np
-
-
+from testhelpers import run_algorithm
 
 
 class FindEPPTest(unittest.TestCase):
@@ -101,6 +100,16 @@ class FindEPPTest(unittest.TestCase):
 
         run_algorithm("DeleteWorkspace", Workspace=wsoutput)
         run_algorithm("DeleteWorkspace", Workspace=ws_narrow)
+
+    def testFitOutputWorkspacesAreDeleted(self):
+        OutputWorkspaceName = "outputws1"
+        alg_test = run_algorithm("FindEPP", InputWorkspace=self._input_ws, OutputWorkspace=OutputWorkspaceName)
+        wsoutput = AnalysisDataService.retrieve(OutputWorkspaceName)
+        DeleteWorkspace(wsoutput)
+        oldOption = mantid.config['MantidOptions.InvisibleWorkspaces']
+        mantid.config['MantidOptions.InvisibleWorkspaces'] = '1'
+        self.assertEqual(mtd.size(), 1) # Only self._input_ws exists.
+        mantid.config['MantidOptions.InvisibleWorkspaces'] = oldOption
 
 if __name__ == "__main__":
     unittest.main()

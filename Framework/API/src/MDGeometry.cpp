@@ -1,9 +1,12 @@
 #include "MantidAPI/MDGeometry.h"
 #include "MantidKernel/System.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/CoordTransform.h"
 #include "MantidGeometry/MDGeometry/MDGeometryXMLBuilder.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
+#include "MantidKernel/make_unique.h"
+#include <Poco/NObserver.h>
 #include <boost/make_shared.hpp>
 
 using namespace Mantid::Kernel;
@@ -13,14 +16,54 @@ using namespace Mantid::Geometry;
 namespace Mantid {
 namespace API {
 
+class MDGeometryNotificationHelper {
+public:
+  explicit MDGeometryNotificationHelper(MDGeometry &parent)
+      : m_parent(parent),
+        m_delete_observer(
+            *this, &MDGeometryNotificationHelper::deleteNotificationReceived) {}
+
+  ~MDGeometryNotificationHelper() {
+    if (m_observingDelete) {
+      // Stop watching once object is deleted
+      API::AnalysisDataService::Instance().notificationCenter.removeObserver(
+          m_delete_observer);
+    }
+  }
+
+  void watchForWorkspaceDeletions() {
+    if (!m_observingDelete) {
+      API::AnalysisDataService::Instance().notificationCenter.addObserver(
+          m_delete_observer);
+      m_observingDelete = true;
+    }
+  }
+
+  void deleteNotificationReceived(
+      Mantid::API::WorkspacePreDeleteNotification_ptr notice) {
+    m_parent.deleteNotificationReceived(notice->object());
+  }
+
+private:
+  MDGeometry &m_parent;
+
+  /// Poco delete notification observer object
+  Poco::NObserver<MDGeometryNotificationHelper, WorkspacePreDeleteNotification>
+      m_delete_observer;
+
+  /// Set to True when the m_delete_observer is observing workspace deletions.
+  bool m_observingDelete{false};
+};
+
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
 MDGeometry::MDGeometry()
     : m_dimensions(), m_originalWorkspaces(), m_origin(),
       m_transforms_FromOriginal(), m_transforms_ToOriginal(),
-      m_delete_observer(*this, &MDGeometry::deleteNotificationReceived),
-      m_observingDelete(false), m_Wtransf(3, 3, true), m_basisVectors() {}
+      m_notificationHelper(
+          Kernel::make_unique<MDGeometryNotificationHelper>(*this)),
+      m_Wtransf(3, 3, true), m_basisVectors() {}
 
 //----------------------------------------------------------------------------------------------
 /** Copy Constructor
@@ -28,9 +71,9 @@ MDGeometry::MDGeometry()
 MDGeometry::MDGeometry(const MDGeometry &other)
     : m_dimensions(), m_originalWorkspaces(), m_origin(other.m_origin),
       m_transforms_FromOriginal(), m_transforms_ToOriginal(),
-      m_delete_observer(*this, &MDGeometry::deleteNotificationReceived),
-      m_observingDelete(false), m_Wtransf(other.m_Wtransf),
-      m_basisVectors(other.m_basisVectors) {
+      m_notificationHelper(
+          Kernel::make_unique<MDGeometryNotificationHelper>(*this)),
+      m_Wtransf(other.m_Wtransf), m_basisVectors(other.m_basisVectors) {
   // Perform a deep copy of the dimensions
   std::vector<Mantid::Geometry::IMDDimension_sptr> dimensions;
   for (size_t d = 0; d < other.getNumDims(); d++) {
@@ -84,15 +127,7 @@ void MDGeometry::clearOriginalWorkspaces() { m_originalWorkspaces.clear(); }
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-MDGeometry::~MDGeometry() {
-
-  if (m_observingDelete) {
-    // Stop watching once object is deleted
-    API::AnalysisDataService::Instance().notificationCenter.removeObserver(
-        m_delete_observer);
-  }
-  m_dimensions.clear();
-}
+MDGeometry::~MDGeometry() { m_dimensions.clear(); }
 
 //----------------------------------------------------------------------------------------------
 /** Initialize the geometry
@@ -343,12 +378,7 @@ void MDGeometry::setOriginalWorkspace(boost::shared_ptr<Workspace> ws,
   if (index >= m_originalWorkspaces.size())
     m_originalWorkspaces.resize(index + 1);
   m_originalWorkspaces[index] = ws;
-  // Watch for workspace deletions
-  if (!m_observingDelete) {
-    API::AnalysisDataService::Instance().notificationCenter.addObserver(
-        m_delete_observer);
-    m_observingDelete = true;
-  }
+  m_notificationHelper->watchForWorkspaceDeletions();
 }
 
 //---------------------------------------------------------------------------------------------------
@@ -398,14 +428,13 @@ void MDGeometry::transformDimensions(std::vector<double> &scaling,
  * This checks if the "original workspace" in this object is being deleted,
  * and removes the reference to it to allow it to be destructed properly.
  *
- * @param notice :: notification of workspace deletion
+ * @param deleted :: The deleted workspace
  */
 void MDGeometry::deleteNotificationReceived(
-    Mantid::API::WorkspacePreDeleteNotification_ptr notice) {
+    const boost::shared_ptr<const Workspace> &deleted) {
   for (auto &original : m_originalWorkspaces) {
     if (original) {
       // Compare the pointer being deleted to the one stored as the original.
-      Workspace_sptr deleted = notice->object();
       if (original == deleted) {
         // Clear the reference
         original.reset();

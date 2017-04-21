@@ -1,3 +1,4 @@
+from __future__ import (absolute_import, division, print_function)
 # Copyright &copy; 2014-2015 ISIS Rutherford Appleton Laboratory, NScD
 # Oak Ridge National Laboratory & European Spallation Source
 #
@@ -48,11 +49,11 @@ def _import_tool_astra():
     MIN_ASTRA_VERSION = 106
     vers = astra.astra.version()
     if isinstance(vers, int) and vers >= MIN_ASTRA_VERSION:
-        print "Imported astra successfully. Version: {0}".format(astra.astra.version())
+        print("Imported astra successfully. Version: {0}".format(astra.astra.version()))
     else:
         raise RuntimeError("Could not find the required version of astra. Found version: {0}".format(vers))
 
-    print "Astra using cuda: {0}". format(astra.astra.use_cuda())
+    print("Astra using cuda: {0}". format(astra.astra.use_cuda()))
     return astra
 
 

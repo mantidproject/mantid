@@ -52,7 +52,7 @@ void CalculatePeaksHKL::exec() {
   const int n_peaks = ws->getNumberPeaks();
 
   OrientedLattice o_lattice = ws->mutableSample().getOrientedLattice();
-  Matrix<double> UB = o_lattice.getUB();
+  const Matrix<double> &UB = o_lattice.getUB();
 
   DblMatrix UB_inverse(UB);
 

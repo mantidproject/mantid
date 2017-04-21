@@ -23,7 +23,7 @@
 #include <QApplication>
 #include <QCloseEvent>
 #include <QDateTime>
-#include <QFileDialog>
+#include <QFileInfo>
 #include <QList>
 #include <QMenu>
 #include <QMenuBar>

@@ -1,4 +1,3 @@
-#pylint: disable=invalid-name,too-many-branches,too-many-arguments,deprecated-module,no-name-in-module,too-many-locals
 from __future__ import (absolute_import, division, print_function)
 from mantid.api import WorkspaceGroup, AlgorithmManager
 from mantid import mtd, logger, config
@@ -34,12 +33,12 @@ def load_files(data_files, ipf_filename, spec_min, spec_max, sum_files=False, lo
 
     for filename in data_files:
         # The filename without path and extension will be the workspace name
-        ws_name = os.path.splitext(os.path.basename(filename))[0]
+        ws_name = os.path.splitext(os.path.basename(str(filename)))[0]
         logger.debug('Loading file %s as workspace %s' % (filename, ws_name))
 
         if 'VESUVIO' in ipf_filename:
-            evs_filename = os.path.basename(filename).replace('EVS', '')
-            LoadVesuvio(Filename=evs_filename,
+            # Load all spectra. They are cropped later
+            LoadVesuvio(Filename=str(filename),
                         OutputWorkspace=ws_name,
                         SpectrumList='1-198',
                         **load_opts)

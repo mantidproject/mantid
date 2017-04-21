@@ -5,11 +5,13 @@
 
 #include "MantidAPI/DetectorInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidTestHelpers/FakeObjects.h"
 #include "MantidTestHelpers/InstrumentCreationHelper.h"
 
 #include <algorithm>
 
+using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
 using namespace Mantid::API;
 
@@ -23,7 +25,7 @@ public:
   DetectorInfoTest() {
     size_t numberOfHistograms = 5;
     size_t numberOfBins = 1;
-    m_workspace.init(numberOfHistograms, numberOfBins + 1, numberOfBins);
+    m_workspace.initialize(numberOfHistograms, numberOfBins + 1, numberOfBins);
     bool includeMonitors = true;
     bool startYNegative = true;
     const std::string instrumentName("SimpleFakeInstrument");
@@ -31,17 +33,23 @@ public:
         m_workspace, includeMonitors, startYNegative, instrumentName);
 
     std::set<int64_t> toMask{0, 3};
-    ParameterMap &pmap = m_workspace.instrumentParameters();
+    auto &detInfo = m_workspace.mutableDetectorInfo();
     for (size_t i = 0; i < m_workspace.getNumberHistograms(); ++i) {
       if (toMask.find(i) != toMask.end()) {
-        IDetector_const_sptr det = m_workspace.getDetector(i);
-        pmap.addBool(det.get(), "masked", true);
+        detInfo.setMasked(i, true);
       }
     }
 
-    m_workspaceNoInstrument.init(numberOfHistograms, numberOfBins,
-                                 numberOfBins - 1);
+    m_workspaceNoInstrument.initialize(numberOfHistograms, numberOfBins + 1,
+                                       numberOfBins);
   }
+
+  void test_comparison() {
+    TS_ASSERT(
+        m_workspace.detectorInfo().isEquivalent(m_workspace.detectorInfo()));
+  }
+
+  void test_size() { TS_ASSERT_EQUALS(m_workspace.detectorInfo().size(), 5); }
 
   void test_sourcePosition() {
     TS_ASSERT_EQUALS(m_workspace.detectorInfo().sourcePosition(),
@@ -125,6 +133,9 @@ public:
     TS_ASSERT_DELTA(detectorInfo.twoTheta(0), 0.0199973, 1e-6);
     TS_ASSERT_DELTA(detectorInfo.twoTheta(1), 0.0, 1e-6);
     TS_ASSERT_DELTA(detectorInfo.twoTheta(2), 0.0199973, 1e-6);
+    // Monitors
+    TS_ASSERT_THROWS(detectorInfo.twoTheta(3), std::logic_error);
+    TS_ASSERT_THROWS(detectorInfo.twoTheta(4), std::logic_error);
   }
 
   // Legacy test via the workspace method detectorTwoTheta(), which might be
@@ -141,6 +152,9 @@ public:
     TS_ASSERT_DELTA(detectorInfo.signedTwoTheta(0), -0.0199973, 1e-6);
     TS_ASSERT_DELTA(detectorInfo.signedTwoTheta(1), 0.0, 1e-6);
     TS_ASSERT_DELTA(detectorInfo.signedTwoTheta(2), 0.0199973, 1e-6);
+    // Monitors
+    TS_ASSERT_THROWS(detectorInfo.signedTwoTheta(3), std::logic_error);
+    TS_ASSERT_THROWS(detectorInfo.signedTwoTheta(4), std::logic_error);
   }
 
   void test_position() {
@@ -174,6 +188,20 @@ public:
     TS_ASSERT_EQUALS(detectorInfo.rotation(2), Quat(1.0, 0.0, 0.0, 0.0));
     TS_ASSERT_EQUALS(detectorInfo.rotation(3), Quat(1.0, 0.0, 0.0, 0.0));
     TS_ASSERT_EQUALS(detectorInfo.rotation(4), Quat(1.0, 0.0, 0.0, 0.0));
+  }
+
+  void test_setMasked() {
+    auto &detectorInfo = m_workspace.mutableDetectorInfo();
+    TS_ASSERT_EQUALS(detectorInfo.isMasked(0), true);
+    detectorInfo.setMasked(0, false);
+    TS_ASSERT_EQUALS(detectorInfo.isMasked(0), false);
+    detectorInfo.setMasked(0, true);
+    TS_ASSERT_EQUALS(detectorInfo.isMasked(0), true);
+    // Make sure no other detectors are affected
+    TS_ASSERT_EQUALS(detectorInfo.isMasked(1), false);
+    TS_ASSERT_EQUALS(detectorInfo.isMasked(2), false);
+    TS_ASSERT_EQUALS(detectorInfo.isMasked(3), true);
+    TS_ASSERT_EQUALS(detectorInfo.isMasked(4), false);
   }
 
   void test_setRotation() {
@@ -266,11 +294,99 @@ public:
     detInfo.setRotation(*root, oldRot);
   }
 
+  void test_setRotation_component_moved_root() {
+    auto &detInfo = m_workspace.mutableDetectorInfo();
+    const auto &instrument = m_workspace.getInstrument();
+    const auto &root = instrument->getComponentByName("SimpleFakeInstrument");
+    const auto oldPos = root->getPos();
+    const auto oldRot = root->getRotation();
+    V3D e2{0, 1, 0};
+    Quat rot(180.0, e2);
+
+    detInfo.setPosition(*root, V3D{0.0, 0.0, 1.0});
+    detInfo.setRotation(*root, rot);
+
+    // Rotations *and* positions have changed since *parent* was rotated
+    TS_ASSERT_EQUALS(detInfo.rotation(0), rot);
+    TS_ASSERT_EQUALS(detInfo.rotation(1), rot);
+    TS_ASSERT_EQUALS(detInfo.rotation(2), rot);
+    TS_ASSERT_EQUALS(detInfo.rotation(3), rot);
+    TS_ASSERT_EQUALS(detInfo.rotation(4), rot);
+    TS_ASSERT_EQUALS(detInfo.sourcePosition(), V3D(0.0, 0.0, 21.0));
+    TS_ASSERT_EQUALS(detInfo.samplePosition(), V3D(0.0, 0.0, 1.0));
+    TS_ASSERT_EQUALS(detInfo.position(0), V3D(0.0, -0.1, -4.0));
+
+    // For additional verification we do *not* use detInfo, but make sure that
+    // the changes actually affected the workspace.
+    const auto &clone = m_workspace.clone();
+    const auto &info = clone->detectorInfo();
+    TS_ASSERT_EQUALS(info.sourcePosition(), V3D(0.0, 0.0, 21.0));
+    TS_ASSERT_EQUALS(info.samplePosition(), V3D(0.0, 0.0, 1.0));
+    TS_ASSERT_EQUALS(info.position(0), V3D(0.0, -0.1, -4.0));
+
+    detInfo.setRotation(*root, oldRot);
+    detInfo.setPosition(*root, oldPos);
+  }
+
+  void test_setRotation_setPosition_commute() {
+    auto &detInfo = m_workspace.mutableDetectorInfo();
+    const auto &instrument = m_workspace.getInstrument();
+    const auto &root = instrument->getComponentByName("SimpleFakeInstrument");
+    const auto oldRot = root->getRotation();
+    const auto oldPos = root->getPos();
+    V3D axis{0.1, 0.2, 0.7};
+    Quat rot(42.0, axis);
+    V3D pos{-11.0, 7.0, 42.0};
+
+    // Note the order: We are going in a (figurative) square...
+    detInfo.setRotation(*root, rot);
+    detInfo.setPosition(*root, pos);
+    detInfo.setRotation(*root, oldRot);
+    detInfo.setPosition(*root, oldPos);
+    // ... and check that we come back to where we started.
+    TS_ASSERT_EQUALS(detInfo.position(0), V3D(0.0, -0.1, 5.0));
+    TS_ASSERT_EQUALS(detInfo.position(1), V3D(0.0, 0.0, 5.0));
+    TS_ASSERT_EQUALS(detInfo.position(2), V3D(0.0, 0.1, 5.0));
+    TS_ASSERT_EQUALS(detInfo.position(3), V3D(0.0, 0.0, -9.0));
+    TS_ASSERT_EQUALS(detInfo.position(4), V3D(0.0, 0.0, -2.0));
+    TS_ASSERT_EQUALS(detInfo.rotation(0), Quat(1.0, 0.0, 0.0, 0.0));
+    TS_ASSERT_EQUALS(detInfo.rotation(1), Quat(1.0, 0.0, 0.0, 0.0));
+    TS_ASSERT_EQUALS(detInfo.rotation(2), Quat(1.0, 0.0, 0.0, 0.0));
+    TS_ASSERT_EQUALS(detInfo.rotation(3), Quat(1.0, 0.0, 0.0, 0.0));
+    TS_ASSERT_EQUALS(detInfo.rotation(4), Quat(1.0, 0.0, 0.0, 0.0));
+  }
+
+  void test_positions_rotations_multi_level() {
+    WorkspaceTester ws;
+    ws.initialize(9, 1, 1);
+    ws.setInstrument(
+        ComponentCreationHelper::createTestInstrumentCylindrical(1));
+    auto &detInfo = ws.mutableDetectorInfo();
+    const auto root = ws.getInstrument();
+    const auto bank = root->getComponentByName("bank1");
+    TS_ASSERT_EQUALS(detInfo.position(0), (V3D{-0.008, -0.0002, 5.0}));
+    const auto rootRot = root->getRotation();
+    const auto rootPos = root->getPos();
+    const auto bankPos = bank->getPos();
+    V3D axis{0.1, 0.2, 0.7};
+    Quat rot(42.0, axis);
+    V3D delta1{-11.0, 7.0, 42.0};
+    V3D delta2{1.0, 3.0, 2.0};
+    detInfo.setRotation(*root, rot);
+    detInfo.setPosition(*root, delta1);
+    detInfo.setPosition(*bank, delta1 + delta2);
+    // Undo, but *not* in reverse order.
+    detInfo.setRotation(*root, rootRot);
+    detInfo.setPosition(*root, rootPos);
+    detInfo.setPosition(*bank, bankPos);
+    TS_ASSERT_EQUALS(detInfo.position(0), (V3D{-0.008, -0.0002, 5.0}));
+  }
+
   void test_detectorIDs() {
     WorkspaceTester workspace;
     int32_t numberOfHistograms = 5;
     size_t numberOfBins = 1;
-    workspace.init(numberOfHistograms, numberOfBins, numberOfBins - 1);
+    workspace.initialize(numberOfHistograms, numberOfBins + 1, numberOfBins);
     for (int32_t i = 0; i < numberOfHistograms; ++i)
       workspace.getSpectrum(i)
           .setSpectrumNo(static_cast<int32_t>(numberOfHistograms) - i);
@@ -293,6 +409,22 @@ public:
     TS_ASSERT_EQUALS(ids, sorted_ids);
   }
 
+  void test_assignment() {
+    auto ws1 = makeWorkspace(2);
+    auto ws2 = makeWorkspace(2);
+    TS_ASSERT_THROWS_NOTHING(ws2->mutableDetectorInfo() = ws1->detectorInfo());
+    // TODO Beamline::DetectorInfo is currently not containing data, so there is
+    // nothing we can check here. Once the class is getting populated add more
+    // checks here.
+  }
+
+  void test_assignment_mismatch() {
+    auto ws1 = makeWorkspace(1);
+    auto ws2 = makeWorkspace(2);
+    TS_ASSERT_THROWS(ws2->mutableDetectorInfo() = ws1->detectorInfo(),
+                     std::runtime_error);
+  }
+
 private:
   WorkspaceTester m_workspace;
   WorkspaceTester m_workspaceNoInstrument;
@@ -301,15 +433,17 @@ private:
     auto ws = Kernel::make_unique<WorkspaceTester>();
     ws->initialize(numSpectra, 1, 1);
     auto inst = boost::make_shared<Instrument>("TestInstrument");
-    ws->setInstrument(inst);
-    auto &pmap = ws->instrumentParameters();
     for (size_t i = 0; i < ws->getNumberHistograms(); ++i) {
       auto det = new Detector("pixel", static_cast<detid_t>(i), inst.get());
       inst->add(det);
       inst->markAsDetector(det);
+    }
+    ws->setInstrument(inst);
+    auto &detInfo = ws->mutableDetectorInfo();
+    for (size_t i = 0; i < ws->getNumberHistograms(); ++i) {
       ws->getSpectrum(i).addDetectorID(static_cast<detid_t>(i));
       if (i % 2 == 0)
-        pmap.addBool(det->getComponentID(), "masked", true);
+        detInfo.setMasked(i, true);
     }
     return std::move(ws);
   }
@@ -325,7 +459,7 @@ public:
   DetectorInfoTestPerformance() : m_workspace() {
     size_t numberOfHistograms = 10000;
     size_t numberOfBins = 1;
-    m_workspace.init(numberOfHistograms, numberOfBins + 1, numberOfBins);
+    m_workspace.initialize(numberOfHistograms, numberOfBins + 1, numberOfBins);
     bool includeMonitors = false;
     bool startYNegative = true;
     const std::string instrumentName("SimpleFakeInstrument");

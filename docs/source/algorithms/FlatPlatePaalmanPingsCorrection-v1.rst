@@ -9,12 +9,12 @@
 Description
 -----------
 
-Calculates absorption corrections for a flat plate sample giving output in the
-Paalman & Pings absorption factors: :math:`A_{s,s}` (correction factor for
-scattering and absorption in sample), :math:`A_{s,sc}` (scattering in sample and
-absorption in sample and container), :math:`A_{c,sc}` (scattering in container
-and absorption in sample and container) and  :math:`A_{c,c}` (scattering and
-absorption in container).
+Calculates absorption corrections for an infinite flat plate sample giving output in the
+Paalman & Pings absorption factors:
+:math:`A_{s,s}` (scattering and absorption in sample),
+:math:`A_{s,sc}` (scattering in sample and absorption in sample and container),
+:math:`A_{c,sc}` (scattering in container and absorption in sample and container)
+and  :math:`A_{c,c}` (scattering and absorption in container).
 
 Details of the analytical method used to calculate the correction factors is
 available in `RAL Technical Report 74-103
@@ -23,9 +23,15 @@ available in `RAL Technical Report 74-103
 Restrictions on the input workspace
 ###################################
 
-The input workspace must have a fully defined instrument that has X axis units
-of wavelength.
+- The input workspaces must have a fully defined instrument.
+- In the energy transfer modes other than **Efixed** they have to have X axis units of wavelength.
 
+Efixed mode
+###########
+
+- In **Efixed** mode, the correction will be computed for a single wavelength number derived from the analyser or monochromator energy,
+  which by default will be attempted to be read from the instrument parameters (named **Efixed**), but can also be overridden in the **Efixed** input property.
+  In this case, the `NumberWavelengths` and `Interpolate` options will be ignored.
 
 Workflow
 --------

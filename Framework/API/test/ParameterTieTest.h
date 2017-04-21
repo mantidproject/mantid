@@ -222,6 +222,40 @@ public:
     TS_ASSERT_THROWS(tie.set(""), std::runtime_error);
   }
 
+  void test_untie_fixed() {
+    ParameterTieTest_Linear bk;
+    bk.fix(0);
+    TS_ASSERT(bk.isFixed(0));
+    bk.removeTie("a");
+    TS_ASSERT(!bk.isFixed(0));
+    bk.fix(0);
+    bk.fix(1);
+    bk.clearTies();
+    TS_ASSERT(!bk.isFixed(0));
+    TS_ASSERT(!bk.isFixed(1));
+  }
+
+  void test_untie_fixed_composite() {
+    CompositeFunction_sptr mf = CompositeFunction_sptr(new CompositeFunction);
+    IFunction_sptr bk1 = IFunction_sptr(new ParameterTieTest_Linear());
+    IFunction_sptr bk2 = IFunction_sptr(new ParameterTieTest_Linear());
+    mf->addFunction(bk1);
+    mf->addFunction(bk2);
+    mf->fix(0);
+    mf->fix(3);
+    TS_ASSERT(mf->isFixed(0));
+    TS_ASSERT(mf->isFixed(3));
+    mf->removeTie("f0.a");
+    mf->removeTie("f1.b");
+    TS_ASSERT(!mf->isFixed(0));
+    TS_ASSERT(!mf->isFixed(3));
+    mf->fix(0);
+    mf->fix(3);
+    mf->clearTies();
+    TS_ASSERT(!mf->isFixed(0));
+    TS_ASSERT(!mf->isFixed(3));
+  }
+
 private:
   void mustThrow1(CompositeFunction *fun) { ParameterTie tie(fun, "sig", "0"); }
   void mustThrow2(CompositeFunction *fun) {

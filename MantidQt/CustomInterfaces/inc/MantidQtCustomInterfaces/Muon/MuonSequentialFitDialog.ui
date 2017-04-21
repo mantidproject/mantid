@@ -35,7 +35,7 @@
       <number>6</number>
      </property>
      <item row="0" column="1">
-      <widget class="MantidQt::MantidWidgets::MWRunFiles" name="runs" native="true">
+      <widget class="MantidQt::API::MWRunFiles" name="runs" native="true">
        <property name="label" stdset="0">
         <string/>
        </property>
@@ -257,9 +257,9 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>MantidQt::MantidWidgets::MWRunFiles</class>
+   <class>MantidQt::API::MWRunFiles</class>
    <extends>QWidget</extends>
-   <header>MantidQtMantidWidgets/MWRunFiles.h</header>
+   <header>MantidQtAPI/MWRunFiles.h</header>
   </customwidget>
  </customwidgets>
  <resources/>

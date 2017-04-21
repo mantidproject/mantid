@@ -3,6 +3,7 @@
 
 #include <cxxtest/TestSuite.h>
 #include "MantidAlgorithms/SofQWPolygon.h"
+#include "MantidAPI/WorkspaceHistory.h"
 
 #include "SofQWTest.h"
 

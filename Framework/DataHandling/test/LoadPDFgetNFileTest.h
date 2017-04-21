@@ -5,6 +5,7 @@
 
 #include "MantidDataHandling/LoadPDFgetNFile.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidAPI/AnalysisDataService.h"
 
 using Mantid::DataHandling::LoadPDFgetNFile;
 using namespace Mantid;
@@ -47,7 +48,7 @@ public:
 
     TS_ASSERT_EQUALS(outws->getNumberHistograms(), 2);
 
-    TS_ASSERT_DELTA(outws->readX(0)[2], 0.17986950, 1.0E-8);
+    TS_ASSERT_DELTA(outws->x(0)[2], 0.17986950, 1.0E-8);
   }
 
   /** Test to load .sq file

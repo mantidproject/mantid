@@ -1,8 +1,12 @@
 #include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidGeometry/Objects/BoundingBox.h"
 #include "MantidGeometry/IDetector.h"
+#include "MantidKernel/Cache.h"
+#include "MantidBeamline/ComponentInfo.h"
+#include "MantidBeamline/DetectorInfo.h"
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/ParameterFactory.h"
 #include <cstring>
 #include <boost/algorithm/string.hpp>
 
@@ -38,6 +42,12 @@ const std::string QUAT_PARAM_NAME = "Quat";
 
 // static logger reference
 Kernel::Logger g_log("ParameterMap");
+
+void checkIsNotMaskingParameter(const std::string &name) {
+  if (name == std::string("masked"))
+    throw std::runtime_error("Masking data (\"masked\") cannot be stored in "
+                             "ParameterMap. Use DetectorInfo instead");
+}
 }
 //--------------------------------------------------------------------------
 // Public method
@@ -45,7 +55,29 @@ Kernel::Logger g_log("ParameterMap");
 /**
  * Default constructor
  */
-ParameterMap::ParameterMap() : m_parameterFileNames(), m_map() {}
+ParameterMap::ParameterMap()
+    : m_cacheLocMap(
+          Kernel::make_unique<Kernel::Cache<const ComponentID, Kernel::V3D>>()),
+      m_cacheRotMap(Kernel::make_unique<
+          Kernel::Cache<const ComponentID, Kernel::Quat>>()),
+      m_boundingBoxMap(Kernel::make_unique<
+          Kernel::Cache<const ComponentID, BoundingBox>>()) {}
+
+ParameterMap::ParameterMap(const ParameterMap &other)
+    : m_parameterFileNames(other.m_parameterFileNames), m_map(other.m_map),
+      m_cacheLocMap(
+          Kernel::make_unique<Kernel::Cache<const ComponentID, Kernel::V3D>>(
+              *other.m_cacheLocMap)),
+      m_cacheRotMap(
+          Kernel::make_unique<Kernel::Cache<const ComponentID, Kernel::Quat>>(
+              *other.m_cacheRotMap)),
+      m_boundingBoxMap(
+          Kernel::make_unique<Kernel::Cache<const ComponentID, BoundingBox>>(
+              *other.m_boundingBoxMap)),
+      m_detectorInfo(other.m_detectorInfo), m_instrument(other.m_instrument) {}
+
+// Defined as default in source for forward declaration with std::unique_ptr.
+ParameterMap::~ParameterMap() = default;
 
 /**
 * Return string to be inserted into the parameter map
@@ -262,6 +294,7 @@ const std::string ParameterMap::diff(const ParameterMap &rhs,
  * @param name :: The name of the parameter
  */
 void ParameterMap::clearParametersByName(const std::string &name) {
+  checkIsNotMaskingParameter(name);
   // Key is component ID so have to search through whole lot
   for (auto itr = m_map.begin(); itr != m_map.end();) {
     if (itr->second->name() == name) {
@@ -282,6 +315,7 @@ void ParameterMap::clearParametersByName(const std::string &name) {
  */
 void ParameterMap::clearParametersByName(const std::string &name,
                                          const IComponent *comp) {
+  checkIsNotMaskingParameter(name);
   if (!m_map.empty()) {
     const ComponentID id = comp->getComponentID();
     auto itrs = m_map.equal_range(id);
@@ -332,6 +366,7 @@ void ParameterMap::add(const std::string &type, const IComponent *comp,
 void ParameterMap::add(const IComponent *comp,
                        const boost::shared_ptr<Parameter> &par,
                        const std::string *const pDescription) {
+  checkIsNotMaskingParameter(par->name());
   // can not add null pointer
   if (!par)
     return;
@@ -573,6 +608,33 @@ void ParameterMap::addBool(const IComponent *comp, const std::string &name,
   add(pBool(), comp, name, value, pDescription);
 }
 
+/** Force adding masking information. ONLY FOR INTERNAL USE by class Instrument.
+ *
+ * ParameterMap usually rejects "legacy style" masking information since it is
+ * now stored in DetectorInfo. However, for the purpose of writing files class
+ * Instrument needs to insert masking information. This method is only for
+ * internal use by class Instrument. ParameterMaps modified by this method are
+ * only for use as a temporary. */
+void ParameterMap::forceUnsafeSetMasked(const IComponent *comp, bool value) {
+  const std::string name("masked");
+  auto param = create(pBool(), name);
+  auto typedParam = boost::dynamic_pointer_cast<ParameterType<bool>>(param);
+  typedParam->setValue(value);
+
+// When using Clang & Linux, TBB 4.4 doesn't detect C++11 features.
+// https://software.intel.com/en-us/forums/intel-threading-building-blocks/topic/641658
+#if defined(__clang__) && !defined(__APPLE__)
+#define CLANG_ON_LINUX true
+#else
+#define CLANG_ON_LINUX false
+#endif
+#if TBB_VERSION_MAJOR >= 4 && TBB_VERSION_MINOR >= 4 && !CLANG_ON_LINUX
+  m_map.emplace(comp->getComponentID(), param);
+#else
+  m_map.insert(std::make_pair(comp->getComponentID(), param));
+#endif
+}
+
 /**
  * Adds a std::string value to the parameter map.
  * @param comp :: Component to which the new parameter is related
@@ -668,6 +730,7 @@ bool ParameterMap::contains(const IComponent *comp, const std::string &name,
  */
 bool ParameterMap::contains(const IComponent *comp, const char *name,
                             const char *type) const {
+  checkIsNotMaskingParameter(name);
   if (m_map.empty())
     return false;
   const ComponentID id = comp->getComponentID();
@@ -690,6 +753,7 @@ bool ParameterMap::contains(const IComponent *comp, const char *name,
  */
 bool ParameterMap::contains(const IComponent *comp,
                             const Parameter &parameter) const {
+  checkIsNotMaskingParameter(parameter.name());
   if (m_map.empty() || !comp)
     return false;
 
@@ -731,6 +795,7 @@ Parameter_sptr ParameterMap::get(const IComponent *comp,
 boost::shared_ptr<Parameter> ParameterMap::get(const IComponent *comp,
                                                const char *name,
                                                const char *type) const {
+  checkIsNotMaskingParameter(name);
   Parameter_sptr result;
   if (!comp)
     return result;
@@ -874,6 +939,7 @@ Parameter_sptr ParameterMap::getRecursive(const IComponent *comp,
 Parameter_sptr ParameterMap::getRecursive(const IComponent *comp,
                                           const char *name,
                                           const char *type) const {
+  checkIsNotMaskingParameter(name);
   Parameter_sptr result = this->get(comp->getComponentID(), name, type);
   if (result)
     return result;
@@ -961,9 +1027,9 @@ std::string ParameterMap::asString() const {
  * Clears the location, rotation & bounding box caches
  */
 void ParameterMap::clearPositionSensitiveCaches() {
-  m_cacheLocMap.clear();
-  m_cacheRotMap.clear();
-  m_boundingBoxMap.clear();
+  m_cacheLocMap->clear();
+  m_cacheRotMap->clear();
+  m_boundingBoxMap->clear();
 }
 
 /// Sets a cached location on the location cache
@@ -971,7 +1037,7 @@ void ParameterMap::clearPositionSensitiveCaches() {
 /// @param location :: The location
 void ParameterMap::setCachedLocation(const IComponent *comp,
                                      const V3D &location) const {
-  m_cacheLocMap.setCache(comp->getComponentID(), location);
+  m_cacheLocMap->setCache(comp->getComponentID(), location);
 }
 
 /// Attempts to retrieve a location from the location cache
@@ -980,7 +1046,7 @@ void ParameterMap::setCachedLocation(const IComponent *comp,
 /// @returns true if the location is in the map, otherwise false
 bool ParameterMap::getCachedLocation(const IComponent *comp,
                                      V3D &location) const {
-  return m_cacheLocMap.getCache(comp->getComponentID(), location);
+  return m_cacheLocMap->getCache(comp->getComponentID(), location);
 }
 
 /// Sets a cached rotation on the rotation cache
@@ -988,7 +1054,7 @@ bool ParameterMap::getCachedLocation(const IComponent *comp,
 /// @param rotation :: The rotation as a quaternion
 void ParameterMap::setCachedRotation(const IComponent *comp,
                                      const Quat &rotation) const {
-  m_cacheRotMap.setCache(comp->getComponentID(), rotation);
+  m_cacheRotMap->setCache(comp->getComponentID(), rotation);
 }
 
 /// Attempts to retrieve a rotation from the rotation cache
@@ -997,7 +1063,7 @@ void ParameterMap::setCachedRotation(const IComponent *comp,
 /// @returns true if the rotation is in the map, otherwise false
 bool ParameterMap::getCachedRotation(const IComponent *comp,
                                      Quat &rotation) const {
-  return m_cacheRotMap.getCache(comp->getComponentID(), rotation);
+  return m_cacheRotMap->getCache(comp->getComponentID(), rotation);
 }
 
 /// Sets a cached bounding box
@@ -1005,7 +1071,7 @@ bool ParameterMap::getCachedRotation(const IComponent *comp,
 /// @param box :: A reference to the bounding box
 void ParameterMap::setCachedBoundingBox(const IComponent *comp,
                                         const BoundingBox &box) const {
-  m_boundingBoxMap.setCache(comp->getComponentID(), box);
+  m_boundingBoxMap->setCache(comp->getComponentID(), box);
 }
 
 /// Attempts to retrieve a bounding box from the cache
@@ -1014,7 +1080,7 @@ void ParameterMap::setCachedBoundingBox(const IComponent *comp,
 /// @returns true if the bounding is in the map, otherwise false
 bool ParameterMap::getCachedBoundingBox(const IComponent *comp,
                                         BoundingBox &box) const {
-  return m_boundingBoxMap.getCache(comp->getComponentID(), box);
+  return m_boundingBoxMap->getCache(comp->getComponentID(), box);
 }
 
 /**
@@ -1077,6 +1143,68 @@ const std::vector<std::string> &ParameterMap::getParameterFilenames() const {
 */
 void ParameterMap::addParameterFilename(const std::string &filename) {
   m_parameterFileNames.push_back(filename);
+}
+
+/// Wrapper for ParameterFactory::create to avoid include in header
+boost::shared_ptr<Parameter>
+ParameterMap::create(const std::string &className,
+                     const std::string &name) const {
+  return ParameterFactory::create(className, name);
+}
+
+/// Only for use by ExperimentInfo. Returns returns true if this instrument
+/// contains a DetectorInfo.
+bool ParameterMap::hasDetectorInfo() const {
+  return static_cast<bool>(m_detectorInfo);
+}
+/// Only for use by ExperimentInfo. Returns a reference to the DetectorInfo.
+const Beamline::DetectorInfo &ParameterMap::detectorInfo() const {
+  if (!hasDetectorInfo())
+    throw std::runtime_error("Cannot return reference to NULL DetectorInfo");
+  return *m_detectorInfo;
+}
+
+/**
+ * @brief ParameterMap::hasComponentInfo
+ * @return True if a ComponentInfo is stored.
+ */
+bool ParameterMap::hasComponentInfo() const {
+  return static_cast<bool>(m_componentInfo);
+}
+
+/**
+ * @brief ParameterMap::componentInfo
+ * @return A const ref to the ComponentInfo if stored. Throws a
+ * std::runtime_error
+ * exception otherwise.
+ */
+const Beamline::ComponentInfo &ParameterMap::componentInfo() const {
+  if (!hasComponentInfo()) {
+    throw std::runtime_error("Cannot return reference to NULL ComponentInfo");
+  }
+  return *m_componentInfo;
+}
+
+/// Only for use by Detector. Returns a detector index for a detector ID.
+size_t ParameterMap::detectorIndex(const detid_t detID) const {
+  return m_instrument->detectorIndex(detID);
+}
+
+/// Only for use by ExperimentInfo. Sets the pointer to the DetectorInfo.
+void ParameterMap::setDetectorInfo(
+    boost::shared_ptr<const Beamline::DetectorInfo> detectorInfo) {
+  m_detectorInfo = std::move(detectorInfo);
+}
+
+/// Only for use by ExperimentInfo. Sets the pointer to the ComponentInfo.
+void ParameterMap::setComponentInfo(
+    boost::shared_ptr<const Beamline::ComponentInfo> componentInfo) {
+  m_componentInfo = std::move(componentInfo);
+}
+
+/// Only for use by Instrument. Sets the pointer to the owning instrument.
+void ParameterMap::setInstrument(const Instrument *instrument) {
+  m_instrument = instrument;
 }
 
 } // Namespace Geometry

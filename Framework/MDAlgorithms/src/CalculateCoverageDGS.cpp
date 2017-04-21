@@ -1,11 +1,14 @@
 #include "MantidMDAlgorithms/CalculateCoverageDGS.h"
+#include "MantidAPI/DetectorInfo.h"
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
 #include "MantidDataObjects/MDHistoWorkspace.h"
+#include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/ArrayLengthValidator.h"
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidGeometry/Instrument.h"
@@ -163,14 +166,13 @@ void CalculateCoverageDGS::exec() {
       getProperty("InputWorkspace");
   convention = Kernel::ConfigService::Instance().getString("Q.convention");
   // cache two theta and phi
-  auto instrument = inputWS->getInstrument();
-  std::vector<detid_t> detIDS = instrument->getDetectorIDs(true);
+  const auto &detectorInfo = inputWS->detectorInfo();
   std::vector<double> tt, phi;
-  for (auto &id : detIDS) {
-    auto detector = instrument->getDetector(id);
-    if (!detector->isMasked()) {
-      tt.push_back(detector->getTwoTheta(V3D(0, 0, 0), V3D(0, 0, 1)));
-      phi.push_back(detector->getPhi());
+  for (size_t i = 0; i < detectorInfo.size(); ++i) {
+    if (!detectorInfo.isMasked(i) && !detectorInfo.isMonitor(i)) {
+      const auto &detector = detectorInfo.detector(i);
+      tt.push_back(detector.getTwoTheta(V3D(0, 0, 0), V3D(0, 0, 1)));
+      phi.push_back(detector.getPhi());
     }
   }
 

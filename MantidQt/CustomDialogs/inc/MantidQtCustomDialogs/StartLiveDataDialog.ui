@@ -28,18 +28,73 @@
       </property>
       <layout class="QVBoxLayout" name="widgetLeftLayout">
        <item>
-        <layout class="QHBoxLayout" name="horizontalLayout_5">
-         <item>
+        <layout class="QGridLayout" name="gridLayout_3">
+         <item row="0" column="0">
           <widget class="QLabel" name="lblInstrument">
            <property name="text">
             <string>Instrument:</string>
            </property>
           </widget>
          </item>
-         <item>
+         <item row="1" column="1">
+          <widget class="QComboBox" name="cmbConnection"/>
+         </item>
+         <item row="1" column="0">
+          <widget class="QLabel" name="lblConnection">
+           <property name="text">
+            <string>Connection:</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="1">
           <widget class="QComboBox" name="cmbInstrument"/>
          </item>
         </layout>
+       </item>
+       <item>
+        <widget class="QGroupBox" name="grpConnection">
+         <property name="styleSheet">
+          <string notr="true">QGroupBox { border: 1px solid gray;  border-radius: 4px; font-weight: bold; margin-top: 4px; margin-bottom: 4px; padding-top: 16px; }
+QGroupBox::title { background-color: transparent;  subcontrol-position: top center;  padding-top:4px; padding-bottom:4px; } 
+</string>
+         </property>
+         <property name="title">
+          <string>Connection Parameters</string>
+         </property>
+         <layout class="QVBoxLayout" name="verticalLayout">
+          <item>
+           <layout class="QGridLayout" name="gridLayout_2">
+            <item row="0" column="1">
+             <widget class="QComboBox" name="cmbConnListener"/>
+            </item>
+            <item row="0" column="0">
+             <widget class="QLabel" name="lblConnListener">
+              <property name="text">
+               <string>Listener Type:</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="0">
+             <widget class="QLabel" name="lblConnAddress">
+              <property name="text">
+               <string>Address String:</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="1">
+             <widget class="QLineEdit" name="edtConnAddress">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+         </layout>
+        </widget>
        </item>
        <item>
         <widget class="QGroupBox" name="groupBox">
@@ -52,56 +107,39 @@ QGroupBox::title { background-color: transparent;  subcontrol-position: top cent
           <string>Starting Time</string>
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_4">
+          <property name="spacing">
+           <number>2</number>
+          </property>
           <item>
-           <layout class="QHBoxLayout" name="horizontalLayout">
-            <item>
-             <widget class="QRadioButton" name="radNow">
-              <property name="toolTip">
-               <string>Start collecting data from current time</string>
-              </property>
-              <property name="text">
-               <string>Now</string>
-              </property>
-              <property name="checked">
-               <bool>true</bool>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QRadioButton" name="radStartOfRun">
-              <property name="toolTip">
-               <string>Start processing data from the beginning of the current run</string>
-              </property>
-              <property name="text">
-               <string>Start of Run</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <spacer name="horizontalSpacer">
-              <property name="orientation">
-               <enum>Qt::Horizontal</enum>
-              </property>
-              <property name="sizeHint" stdset="0">
-               <size>
-                <width>40</width>
-                <height>20</height>
-               </size>
-              </property>
-             </spacer>
-            </item>
-           </layout>
+           <widget class="QRadioButton" name="radNow">
+            <property name="toolTip">
+             <string>Start collecting data from current time</string>
+            </property>
+            <property name="text">
+             <string>Now</string>
+            </property>
+            <property name="checked">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QRadioButton" name="radStartOfRun">
+            <property name="toolTip">
+             <string>Start processing data from the beginning of the current run</string>
+            </property>
+            <property name="text">
+             <string>Start of Run</string>
+            </property>
+           </widget>
           </item>
           <item>
            <layout class="QHBoxLayout" name="horizontalLayout_4">
+            <property name="spacing">
+             <number>6</number>
+            </property>
             <item>
              <widget class="QRadioButton" name="radAbsoluteTime">
-              <property name="maximumSize">
-               <size>
-                <width>17</width>
-                <height>16777215</height>
-               </size>
-              </property>
               <property name="toolTip">
                <string>Start collecting data from a specific time:</string>
               </property>
@@ -175,19 +213,6 @@ QGroupBox::title { background-color: transparent;  subcontrol-position: top cent
        <item>
         <layout class="QHBoxLayout" name="horizontalLayout_8">
          <item>
-          <spacer name="horizontalSpacer_4">
-           <property name="orientation">
-            <enum>Qt::Horizontal</enum>
-           </property>
-           <property name="sizeHint" stdset="0">
-            <size>
-             <width>40</width>
-             <height>20</height>
-            </size>
-           </property>
-          </spacer>
-         </item>
-         <item>
           <widget class="QGroupBox" name="grpProcess">
            <property name="styleSheet">
             <string notr="true">QGroupBox { border: 1px solid gray;  border-radius: 4px; font-weight: bold; margin-top: 4px; margin-bottom: 4px; padding-top: 16px; }
@@ -198,6 +223,9 @@ QGroupBox::title { background-color: transparent;  subcontrol-position: top cent
             <string>Processing</string>
            </property>
            <layout class="QVBoxLayout" name="verticalLayout_5">
+            <property name="spacing">
+             <number>2</number>
+            </property>
             <item>
              <widget class="QRadioButton" name="radProcessNone">
               <property name="toolTip">
@@ -234,55 +262,16 @@ QGroupBox::title { background-color: transparent;  subcontrol-position: top cent
            </layout>
           </widget>
          </item>
-         <item>
-          <spacer name="horizontalSpacer_3">
-           <property name="orientation">
-            <enum>Qt::Horizontal</enum>
-           </property>
-           <property name="sizeHint" stdset="0">
-            <size>
-             <width>40</width>
-             <height>20</height>
-            </size>
-           </property>
-          </spacer>
-         </item>
         </layout>
        </item>
        <item>
         <layout class="QHBoxLayout" name="horizontalLayout_3">
-         <item>
-          <spacer name="horizontalSpacer_9">
-           <property name="orientation">
-            <enum>Qt::Horizontal</enum>
-           </property>
-           <property name="sizeHint" stdset="0">
-            <size>
-             <width>40</width>
-             <height>20</height>
-            </size>
-           </property>
-          </spacer>
-         </item>
          <item>
           <widget class="QCheckBox" name="chkPreserveEvents">
            <property name="text">
             <string>Preserve Events</string>
            </property>
           </widget>
-         </item>
-         <item>
-          <spacer name="horizontalSpacer_10">
-           <property name="orientation">
-            <enum>Qt::Horizontal</enum>
-           </property>
-           <property name="sizeHint" stdset="0">
-            <size>
-             <width>40</width>
-             <height>20</height>
-            </size>
-           </property>
-          </spacer>
          </item>
         </layout>
        </item>
@@ -303,19 +292,6 @@ p, li { white-space: pre-wrap; }
        <item>
         <layout class="QHBoxLayout" name="horizontalLayout_7">
          <item>
-          <spacer name="horizontalSpacer_8">
-           <property name="orientation">
-            <enum>Qt::Horizontal</enum>
-           </property>
-           <property name="sizeHint" stdset="0">
-            <size>
-             <width>40</width>
-             <height>20</height>
-            </size>
-           </property>
-          </spacer>
-         </item>
-         <item>
           <widget class="QLabel" name="lblInstrument_2">
            <property name="text">
             <string>Accumulation Method:</string>
@@ -325,36 +301,10 @@ p, li { white-space: pre-wrap; }
          <item>
           <widget class="QComboBox" name="cmbAccumulationMethod"/>
          </item>
-         <item>
-          <spacer name="horizontalSpacer_7">
-           <property name="orientation">
-            <enum>Qt::Horizontal</enum>
-           </property>
-           <property name="sizeHint" stdset="0">
-            <size>
-             <width>40</width>
-             <height>20</height>
-            </size>
-           </property>
-          </spacer>
-         </item>
         </layout>
        </item>
        <item>
         <layout class="QHBoxLayout" name="horizontalLayout_9">
-         <item>
-          <spacer name="horizontalSpacer_5">
-           <property name="orientation">
-            <enum>Qt::Horizontal</enum>
-           </property>
-           <property name="sizeHint" stdset="0">
-            <size>
-             <width>40</width>
-             <height>20</height>
-            </size>
-           </property>
-          </spacer>
-         </item>
          <item>
           <widget class="QGroupBox" name="grpPostProcessing">
            <property name="styleSheet">
@@ -366,6 +316,9 @@ QGroupBox::title { background-color: transparent;  subcontrol-position: top cent
             <string>Post Processing</string>
            </property>
            <layout class="QVBoxLayout" name="verticalLayout_7">
+            <property name="spacing">
+             <number>2</number>
+            </property>
             <item>
              <widget class="QRadioButton" name="radPostProcessNone">
               <property name="toolTip">
@@ -402,36 +355,10 @@ QGroupBox::title { background-color: transparent;  subcontrol-position: top cent
            </layout>
           </widget>
          </item>
-         <item>
-          <spacer name="horizontalSpacer_6">
-           <property name="orientation">
-            <enum>Qt::Horizontal</enum>
-           </property>
-           <property name="sizeHint" stdset="0">
-            <size>
-             <width>40</width>
-             <height>20</height>
-            </size>
-           </property>
-          </spacer>
-         </item>
         </layout>
        </item>
        <item>
         <layout class="QHBoxLayout" name="horizontalLayout_6">
-         <item>
-          <spacer name="horizontalSpacer_11">
-           <property name="orientation">
-            <enum>Qt::Horizontal</enum>
-           </property>
-           <property name="sizeHint" stdset="0">
-            <size>
-             <width>40</width>
-             <height>20</height>
-            </size>
-           </property>
-          </spacer>
-         </item>
          <item>
           <widget class="QLabel" name="lblRunTransitionBehavior">
            <property name="text">
@@ -441,19 +368,6 @@ QGroupBox::title { background-color: transparent;  subcontrol-position: top cent
          </item>
          <item>
           <widget class="QComboBox" name="cmbRunTransitionBehavior"/>
-         </item>
-         <item>
-          <spacer name="horizontalSpacer_12">
-           <property name="orientation">
-            <enum>Qt::Horizontal</enum>
-           </property>
-           <property name="sizeHint" stdset="0">
-            <size>
-             <width>40</width>
-             <height>20</height>
-            </size>
-           </property>
-          </spacer>
          </item>
         </layout>
        </item>

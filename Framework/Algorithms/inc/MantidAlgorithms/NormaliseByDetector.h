@@ -64,7 +64,7 @@ private:
   /// parameter.
   const Mantid::Geometry::FitParameter
   tryParseFunctionParameter(Mantid::Geometry::Parameter_sptr parameter,
-                            Geometry::IDetector_const_sptr det);
+                            const Geometry::IDetector &det);
   /// Block to process histograms.
   boost::shared_ptr<Mantid::API::MatrixWorkspace>
   processHistograms(boost::shared_ptr<Mantid::API::MatrixWorkspace> inWS);

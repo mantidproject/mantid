@@ -10,9 +10,12 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ListValidator.h"
 
+#include <algorithm>
+
 namespace Mantid {
 namespace MDAlgorithms {
 
+using namespace Mantid::HistogramData;
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 
@@ -108,7 +111,7 @@ void GetSpiceDataRawCountsFromMD::exec() {
                               ylabel, donormalize);
   } else if (mode.compare("Sample Log") == 0) {
     std::string samplelogname = getProperty("SampleLogName");
-    if (samplelogname.size() == 0)
+    if (samplelogname.empty())
       throw std::runtime_error(
           "For mode 'Sample Log', value of 'SampleLogName' must be specified.");
     exportSampleLogValue(datamdws, samplelogname, vecX, vecY, xlabel, ylabel);
@@ -220,7 +223,7 @@ void GetSpiceDataRawCountsFromMD::exportIndividualDetCounts(
   std::vector<double> vecDetCounts;
   int runnumber = -1;
   bool get2theta = false;
-  if (xlabel.size() == 0) {
+  if (xlabel.empty()) {
     // xlabel is in default and thus use 2-theta for X
     get2theta = true;
   }
@@ -305,7 +308,7 @@ void GetSpiceDataRawCountsFromMD::exportSampleLogValue(
   ylabel = samplelogname;
 
   // X values
-  if (xlabel.size() == 0) {
+  if (xlabel.empty()) {
     // default
     xlabel = "Pt.";
   }
@@ -382,8 +385,8 @@ void GetSpiceDataRawCountsFromMD::getDetCounts(
   while (scancell) {
     // get the number of events of this cell
     size_t numev2 = mditer->getNumEvents();
-    g_log.debug() << "MDWorkspace " << mdws->name() << " Cell " << nextindex - 1
-                  << ": Number of events = " << numev2
+    g_log.debug() << "MDWorkspace " << mdws->getName() << " Cell "
+                  << nextindex - 1 << ": Number of events = " << numev2
                   << " Does NEXT cell exist = " << mditer->next() << "\n";
 
     // loop over all the events in current cell
@@ -460,7 +463,7 @@ void GetSpiceDataRawCountsFromMD::getSampleLogValues(
     // Check property exists
     if (!expinfo->run().hasProperty(samplelogname)) {
       std::stringstream ess;
-      ess << "Workspace " << mdws->name() << "'s " << iexp
+      ess << "Workspace " << mdws->getName() << "'s " << iexp
           << "-th ExperimentInfo with "
              "run number " << thisrunnumber
           << " does not have specified property " << samplelogname;
@@ -499,21 +502,14 @@ MatrixWorkspace_sptr GetSpiceDataRawCountsFromMD::createOutputWorkspace(
     throw std::runtime_error("Failed to create output matrix workspace.");
 
   // Set data
-  MantidVec &dataX = outws->dataX(0);
-  MantidVec &dataY = outws->dataY(0);
-  MantidVec &dataE = outws->dataE(0);
-  for (size_t i = 0; i < sizex; ++i) {
-    dataX[i] = vecX[i];
-    dataY[i] = vecY[i];
-    if (dataY[i] > 1.)
-      dataE[i] = sqrt(dataY[i]);
-    else
-      dataE[i] = 1.;
-  }
+  outws->setHistogram(0, Points(std::move(vecX)), Counts(std::move(vecY)));
+  auto &dataE = outws->mutableE(0);
+  std::replace_if(dataE.begin(), dataE.end(),
+                  [](double val) { return val < 1.0; }, 1.0);
 
   // Set label
   outws->setYUnitLabel(ylabel);
-  if (xlabel.size() != 0) {
+  if (!xlabel.empty()) {
     try {
       outws->getAxis(0)->setUnit(xlabel);
     } catch (...) {

@@ -1,8 +1,10 @@
 #include "MantidKernel/InstrumentInfo.h"
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidPythonInterface/kernel/StlExportDefinitions.h"
+
 #include <boost/python/class.hpp>
 #include <boost/python/copy_const_reference.hpp>
+#include <boost/python/overloads.hpp>
 
 using Mantid::Kernel::InstrumentInfo;
 using namespace boost::python;
@@ -46,10 +48,36 @@ void export_InstrumentInfo() {
            return_value_policy<copy_const_reference>(),
            "Returns the facility that contains this instrument.")
 
+      .def("liveListener", &InstrumentInfo::liveListener,
+           (arg("self"), arg("name") = ""),
+           "Returns the name of the specific LiveListener class that is used "
+           "by the given connection name. If no name is provided, the default "
+           "connection is used.")
+
+      // Unclear why this is named "instdae", leaving in case legacy req'd
       .def("instdae", &InstrumentInfo::liveDataAddress, arg("self"),
-           return_value_policy<copy_const_reference>(),
            "Returns the host name and the port of the machine hosting DAE and "
            "providing port to connect to for a live data stream")
+
+      .def("liveDataAddress", &InstrumentInfo::liveDataAddress,
+           (arg("self"), arg("name") = ""),
+           "Returns the Address string of a live data connection on this "
+           "instrument. If no connection name is provided, the default "
+           "connection is used.")
+
+      .def("liveListenerInfo", &InstrumentInfo::liveListenerInfo,
+           (arg("self"), arg("name") = ""),
+           return_value_policy<copy_const_reference>(),
+           "Returns a LiveListenerInfo instance for this instrument. If "
+           "no connection name is specified, the default is used.")
+
+      .def("hasLiveListenerInfo", &InstrumentInfo::hasLiveListenerInfo,
+           arg("self"),
+           "Returns true if this instrument has at least one LiveListenerInfo")
+
+      .def("liveListenerInfoList", &InstrumentInfo::liveListenerInfoList,
+           arg("self"), return_value_policy<copy_const_reference>(),
+           "Returns all available LiveListenerInfo instances as a vector")
 
       ;
 }

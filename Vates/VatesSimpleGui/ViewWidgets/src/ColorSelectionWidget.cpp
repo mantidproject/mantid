@@ -28,7 +28,7 @@ namespace SimpleGui {
 ColorSelectionWidget::ColorSelectionWidget(QWidget *parent)
     : QWidget(parent), m_minHistoric(0.01), m_maxHistoric(0.01),
       m_ignoreColorChangeCallbacks(false),
-      m_inProcessUserRequestedAutoScale(false), m_colorScaleLock(NULL) {
+      m_inProcessUserRequestedAutoScale(false), m_colorScaleLock(nullptr) {
   this->m_ui.setupUi(this);
   this->m_ui.autoColorScaleCheckBox->setChecked(true);
   this->setEditorStatus(false);
@@ -443,7 +443,7 @@ void ColorSelectionWidget::reset() {
  */
 void ColorSelectionWidget::setColorScaleLock(
     Mantid::VATES::ColorScaleLock *lock) {
-  if (m_colorScaleLock == NULL) {
+  if (!m_colorScaleLock) {
     m_colorScaleLock = lock;
   }
 }

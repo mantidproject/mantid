@@ -3,6 +3,8 @@
 // tests for different parts of ConvertToMD exec functions
 
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/SpectrumInfo.h"
+#include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidMDAlgorithms/ConvertToMD.h"
 #include "MantidMDAlgorithms/MDWSTransform.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
@@ -319,32 +321,12 @@ public:
     auto inputWS = boost::dynamic_pointer_cast<API::MatrixWorkspace>(
         API::AnalysisDataService::Instance().retrieve(wsName));
     const size_t nRows = inputWS->getNumberHistograms();
-
-    // build detectors ID list to mask
-    std::vector<detid_t> detectorList;
-    detectorList.reserve(nRows);
-    std::vector<size_t> indexLis;
-    indexLis.reserve(nRows);
+    auto &spectrumInfo = inputWS->mutableSpectrumInfo();
     for (size_t i = 0; i < nRows; i++) {
-      // get detector or detector group which corresponds to the spectra i
-      Geometry::IDetector_const_sptr spDet;
-      try {
-        spDet = inputWS->getDetector(i);
-      } catch (Kernel::Exception::NotFoundError &) {
+      if (!spectrumInfo.hasDetectors(i) || spectrumInfo.isMonitor(i))
         continue;
-      }
-
-      // Check that we aren't dealing with monitor...
-      if (spDet->isMonitor())
-        continue;
-
-      indexLis.push_back(i);
-      // detectorList.push_back(spDet->getID());
-    }
-
-    std::vector<size_t>::const_iterator wit;
-    for (wit = indexLis.begin(); wit != indexLis.end(); ++wit) {
-      inputWS->maskWorkspaceIndex(*wit);
+      inputWS->getSpectrum(i).clearData();
+      spectrumInfo.setMasked(i, true);
     }
   }
 };

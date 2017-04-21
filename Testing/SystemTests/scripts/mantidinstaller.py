@@ -188,6 +188,9 @@ class LinuxInstaller(MantidInstaller):
         else:
             install_prefix += '/Mantid'
 
+        if 'python3' in package:
+            install_prefix += '-python3'
+
         self.mantidPlotPath = install_prefix + '/bin/MantidPlot'
         self.python_cmd = install_prefix + '/bin/mantidpython'
 

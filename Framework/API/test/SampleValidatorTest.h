@@ -9,6 +9,7 @@
 #include "MantidTestHelpers/FakeObjects.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 
+using namespace Mantid::Kernel;
 using Mantid::API::SampleValidator;
 
 class SampleValidatorTest : public CxxTest::TestSuite {
@@ -22,7 +23,7 @@ public:
 
   void test_fail() {
     auto ws = boost::make_shared<WorkspaceTester>();
-    ws->init(2, 11, 10);
+    ws->initialize(2, 11, 10);
     SampleValidator validator;
     TS_ASSERT_EQUALS(
         validator.isValid(ws),

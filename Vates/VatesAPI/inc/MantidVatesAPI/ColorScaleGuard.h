@@ -3,30 +3,24 @@
 #include "MantidKernel/System.h"
 #include "MantidKernel/Logger.h"
 
-namespace {
-Mantid::Kernel::Logger g_log("ColorScaleGuard");
-}
-
 namespace Mantid {
 namespace VATES {
 
 class DLLExport ColorScaleLock {
 public:
-  ColorScaleLock() : m_isLocked(false){};
-  ~ColorScaleLock() {}
   bool isLocked() { return m_isLocked; }
   void lock() { m_isLocked = true; }
   void unlock() { m_isLocked = false; }
 
 private:
-  bool m_isLocked;
+  bool m_isLocked{false};
 };
 
 class DLLExport ColorScaleLockGuard {
 public:
   ColorScaleLockGuard(ColorScaleLock *lock) {
-    if (lock == NULL || lock->isLocked()) {
-      m_lock = NULL;
+    if (!lock || lock->isLocked()) {
+      m_lock = nullptr;
     } else {
       m_lock = lock;
       m_lock->lock();
@@ -34,7 +28,7 @@ public:
   }
 
   ~ColorScaleLockGuard() {
-    if (m_lock != NULL) {
+    if (m_lock) {
       m_lock->unlock();
     }
   }

@@ -62,6 +62,8 @@ public:
   QStringList getChosenGroups() const override;
   /// Set chosen group
   void setChosenGroup(const QString &group) override;
+  /// Clear list of selected groups
+  void clearChosenGroups() const;
   /// Get selected periods
   QStringList getPeriodSelections() const override;
   /// Set selected period
@@ -88,9 +90,9 @@ public:
 public slots:
   /// Set number of periods in data
   void setNumPeriods(size_t numPeriods) override;
-  /// Set starting run number and instrument
-  void setWorkspaceDetails(const QString &runNumbers,
-                           const QString &instName) override;
+  /// Set starting run number, instrument and (optionally) file path
+  void setWorkspaceDetails(const QString &runNumbers, const QString &instName,
+                           const boost::optional<QString> &filePath) override;
   /// Set names of available groups
   void setAvailableGroups(const QStringList &groupNames) override;
   /// Set start time for fit

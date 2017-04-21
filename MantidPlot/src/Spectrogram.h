@@ -175,6 +175,8 @@ public:
   void setIntensityChange(bool on);
   /// returns boolan flag intensity change
   bool isIntensityChanged();
+  /// returns the name of workspace for this spectrogram
+  std::string workspaceName() { return d_wsName; };
 
 signals:
   void removeMe(Spectrogram *);

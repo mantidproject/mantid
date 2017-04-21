@@ -326,7 +326,7 @@ class CollectHB3AExperimentInfo(PythonAlgorithm):
                     dataws = self._loadHB3ADetCountFile(scannumber, ptnumber)
 
                     # write each detector's position and ID to table workspace
-                    maxdetid = 0
+                    maxdetid = -1
                     for iws in range(dataws.getNumberHistograms()):
                         detector = dataws.getDetector(iws)
                         detpos = detector.getPos()

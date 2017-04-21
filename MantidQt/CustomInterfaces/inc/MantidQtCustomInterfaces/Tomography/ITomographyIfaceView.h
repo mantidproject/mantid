@@ -6,11 +6,13 @@
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidQtCustomInterfaces/Tomography/ImageStackPreParams.h"
 #include "MantidQtCustomInterfaces/Tomography/TomoPathsConfig.h"
-#include "MantidQtCustomInterfaces/Tomography/TomoReconToolsUserSettings.h"
 #include "MantidQtCustomInterfaces/Tomography/TomoReconFiltersSettings.h"
+#include "MantidQtCustomInterfaces/Tomography/TomoReconToolsUserSettings.h"
 #include "MantidQtCustomInterfaces/Tomography/TomoSystemSettings.h"
 
 #include "MantidQtCustomInterfaces/Tomography/TomoToolConfigDialogBase.h"
+
+#include <QString>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -206,41 +208,6 @@ public:
   virtual void enableRunReconstruct(bool on) = 0;
 
   /**
-   * Path to the image (2D) being shown on the interface.
-   *
-   * @return path as a string
-   */
-  virtual std::string showImagePath() const = 0;
-
-  /**
-   * Draw an image on the visualization tab/interface, from a path to
-   * a recognized image format. Here recognized format means something
-   * that is supported natively by the widgets library, in practice
-   * Qt. Normally you can expect that .tiff and .png images are
-   * supported.
-   *
-   * @param path path to the image file.
-   */
-  virtual void showImage(const std::string &path) = 0;
-
-  /**
-   * Draw an image on the visualization tab/interface, from a matrix
-   * workspace (for example when elsewhere you load a FITS or similar
-   * format that is loaded through a Mantid algorithm, say LoadFITS,
-   * and you want to display it here). This should check dimensions
-   * and workspace structure and shows user warning/error messages
-   * appropriately. But in principle it should not raise any
-   * exceptions under reasonable circumstances. It assumes that the
-   * workspace contains an image in the form in which LoadFITS loads
-   * FITS images (or spectrum per row, all of them with the same
-   * number of data points (columns)).
-   *
-   * @param ws Workspace where a FITS or similar image has been loaded
-   * with LoadFITS or similar algorithm.
-   */
-  virtual void showImage(const Mantid::API::MatrixWorkspace_sptr &ws) = 0;
-
-  /**
    * Paths to the sample, open beam, etc. data (image) files.
    *
    * @return paths configuration object
@@ -319,6 +286,35 @@ public:
    * @param alg algorithm initialized and ready to run.
    */
   virtual void runAggregateBands(Mantid::API::IAlgorithm_sptr alg) = 0;
+
+  /**
+   * Prompts the user for confirmation with a yes/no dialogue.
+   * The body can use HTML formatting.
+   *
+   * @param title The title that the message has
+   * @param body The body that the message has. This CAN use HTML formatting
+   */
+  virtual bool userConfirmation(const std::string &title,
+                                const std::string &body) = 0;
+
+  /**
+   * Returns the cached executable string. This will be cached by calls from the
+   * tabs, and allow the execution of any external program
+   */
+  virtual std::string getCachedExecutable() const = 0;
+
+  /**
+   * Returns the cached arguments string. This will be cached by calls from the
+   * tabs, and allow the execution of any external program
+   */
+  virtual std::vector<std::string> getCachedArguments() const = 0;
+
+  /**
+   * Emit the external process output signal so that it can be processed by it's
+   * receivers. The signals are connected inside the View's concrete class'
+   * @param str the output string of the process
+   */
+  virtual void emitExternalProcessFinished(const QString &str) = 0;
 };
 
 } // namespace CustomInterfaces

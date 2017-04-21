@@ -1,12 +1,9 @@
-//------------------------------------------------------------------------------
-// Includes
-//------------------------------------------------------------------------------
 #include "MantidAlgorithms/Rebin2D.h"
 #include "MantidAPI/BinEdgeAxis.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidDataObjects/FractionalRebinning.h"
 #include "MantidDataObjects/RebinnedOutput.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidGeometry/Math/ConvexPolygon.h"
 #include "MantidGeometry/Math/PolygonIntersection.h"
 #include "MantidGeometry/Math/Quadrilateral.h"
@@ -184,30 +181,23 @@ Rebin2D::createOutputWorkspace(MatrixWorkspace_const_sptr parent,
 
   auto &newY = newYBins.mutableRawData();
   // First create the two sets of bin boundaries
-  const int newXSize = createAxisFromRebinParams(getProperty("Axis1Binning"),
-                                                 newXBins.mutableRawData());
+  static_cast<void>(createAxisFromRebinParams(getProperty("Axis1Binning"),
+                                              newXBins.mutableRawData()));
   const int newYSize =
       createAxisFromRebinParams(getProperty("Axis2Binning"), newY);
   // and now the workspace
+  HistogramData::BinEdges binEdges(newXBins);
   MatrixWorkspace_sptr outputWS;
   if (!useFractionalArea) {
-    outputWS = WorkspaceFactory::Instance().create(parent, newYSize - 1,
-                                                   newXSize, newXSize - 1);
+    outputWS = create<MatrixWorkspace>(*parent, newYSize - 1, binEdges);
   } else {
-    outputWS = WorkspaceFactory::Instance().create(
-        "RebinnedOutput", newYSize - 1, newXSize, newXSize - 1);
-    WorkspaceFactory::Instance().initializeFromParent(parent, outputWS, true);
+    outputWS = create<RebinnedOutput>(*parent, newYSize - 1, binEdges);
   }
   Axis *const verticalAxis = new BinEdgeAxis(newY);
   // Meta data
   verticalAxis->unit() = parent->getAxis(1)->unit();
   verticalAxis->title() = parent->getAxis(1)->title();
   outputWS->replaceAxis(1, verticalAxis);
-
-  // Now set the axis values
-  for (size_t i = 0; i < static_cast<size_t>(newYSize - 1); ++i) {
-    outputWS->setBinEdges(i, newXBins);
-  }
 
   return outputWS;
 }

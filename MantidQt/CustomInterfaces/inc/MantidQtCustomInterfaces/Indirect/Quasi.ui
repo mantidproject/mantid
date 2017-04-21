@@ -31,9 +31,6 @@
          <verstretch>0</verstretch>
         </sizepolicy>
        </property>
-       <property name="loadLabelText" stdset="0">
-        <string>Plot</string>
-       </property>
        <property name="workspaceSuffixes" stdset="0">
         <stringlist>
          <string>_red</string>
@@ -46,12 +43,18 @@
          <string>_sqw.nxs</string>
         </stringlist>
        </property>
+       <property name="showLoad" stdset="0">
+        <bool>false</bool>
+       </property>
+       <property name="autoLoad" stdset="0">
+        <bool>true</bool>
+       </property>
       </widget>
      </item>
      <item row="0" column="0">
-      <widget class="QLabel" name="lblInput">
+      <widget class="QLabel" name="lblSample">
        <property name="text">
-        <string>Input:</string>
+        <string>Sample:</string>
        </property>
       </widget>
      </item>
@@ -137,7 +140,7 @@
          </widget>
         </item>
         <item row="1" column="1">
-         <widget class="MantidQt::MantidWidgets::MWRunFiles" name="mwFixWidthDat" native="true">
+         <widget class="MantidQt::API::MWRunFiles" name="mwFixWidthDat" native="true">
           <property name="enabled">
            <bool>false</bool>
           </property>
@@ -310,6 +313,13 @@
            </property>
           </spacer>
          </item>
+         <item>
+          <widget class="QPushButton" name="pbPlotPreview">
+           <property name="text">
+            <string>Plot Current Preview</string>
+           </property>
+          </widget>
+         </item>
         </layout>
        </item>
       </layout>
@@ -405,11 +415,6 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>MantidQt::MantidWidgets::MWRunFiles</class>
-   <extends>QWidget</extends>
-   <header>MantidQtMantidWidgets/MWRunFiles.h</header>
-  </customwidget>
-  <customwidget>
    <class>MantidQt::MantidWidgets::DataSelector</class>
    <extends>QWidget</extends>
    <header>MantidQtMantidWidgets/DataSelector.h</header>
@@ -419,6 +424,11 @@
    <extends>QWidget</extends>
    <header>MantidQtMantidWidgets/PreviewPlot.h</header>
    <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>MantidQt::API::MWRunFiles</class>
+   <extends>QWidget</extends>
+   <header>MantidQtAPI/MWRunFiles.h</header>
   </customwidget>
  </customwidgets>
  <resources/>

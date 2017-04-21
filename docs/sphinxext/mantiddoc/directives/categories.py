@@ -6,9 +6,11 @@
     creates "index" pages that lists the contents of each category. The display of each
     "index" page is controlled by a jinja2 template.
 """
+from __future__ import (absolute_import, division, print_function)
 from mantiddoc.directives.base import AlgorithmBaseDirective, algorithm_name_and_version #pylint: disable=unused-import
 from sphinx.util.osutil import relative_uri
 import os
+from six import iteritems, itervalues
 
 CATEGORY_PAGE_TEMPLATE = "category.html"
 # relative to the directory containing the source file
@@ -319,7 +321,7 @@ def create_category_pages(app):
     template = CATEGORY_PAGE_TEMPLATE
 
     categories = env.categories
-    for name, category in categories.iteritems():
+    for name, category in iteritems(categories):
         context = {}
         # First write out the named page
         context["title"] = category.name
@@ -378,7 +380,7 @@ def purge_categories(app, env, docname):
         return
 
     deadref = PageRef(name, docname)
-    for category in categories.itervalues():
+    for category in itervalues(categories):
         pages = category.pages
         if deadref in pages:
             pages.remove(deadref)

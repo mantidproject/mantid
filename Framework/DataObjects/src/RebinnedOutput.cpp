@@ -1,8 +1,11 @@
 #include "MantidDataObjects/RebinnedOutput.h"
 
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidKernel/Logger.h"
 
 #include <algorithm>
+#include <iterator>
+#include <sstream>
 
 namespace Mantid {
 namespace DataObjects {
@@ -36,6 +39,16 @@ void RebinnedOutput::init(const std::size_t &NVectors,
   this->fracArea.resize(nHist);
   for (std::size_t i = 0; i < nHist; ++i) {
     this->fracArea[i].resize(YLength);
+  }
+}
+
+void RebinnedOutput::init(const std::size_t &NVectors,
+                          const HistogramData::Histogram &histogram) {
+  Workspace2D::init(NVectors, histogram);
+  std::size_t nHist = this->getNumberHistograms();
+  this->fracArea.resize(nHist);
+  for (std::size_t i = 0; i < nHist; ++i) {
+    this->fracArea[i].resize(histogram.size());
   }
 }
 

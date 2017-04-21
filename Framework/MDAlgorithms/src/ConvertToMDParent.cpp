@@ -1,5 +1,6 @@
 #include "MantidMDAlgorithms/ConvertToMDParent.h"
 
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/Run.h"

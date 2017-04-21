@@ -5,6 +5,7 @@
 #include "MantidCurveFitting/Functions/VesuvioResolution.h"
 
 #include "MantidAPI/Axis.h"
+#include "MantidAPI/DetectorInfo.h"
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/SampleShapeValidator.h"
 #include "MantidAPI/SpectrumInfo.h"
@@ -254,31 +255,28 @@ void VesuvioCalculateMS::cacheInputs() {
   m_sampleProps->mu = numberDensity * m_sampleProps->totalxsec * 1e-28;
 
   // -- Detector geometry -- choose first detector that is not a monitor
-  Geometry::IDetector_const_sptr detPixel;
+  const auto &spectrumInfo = m_inputWS->spectrumInfo();
+  int64_t index = -1;
   for (size_t i = 0; i < m_inputWS->getNumberHistograms(); ++i) {
-    try {
-      detPixel = m_inputWS->getDetector(i);
-    } catch (Exception::NotFoundError &) {
+    if (!spectrumInfo.hasDetectors(i))
       continue;
-    }
-    if (!detPixel->isMonitor())
+    if (!spectrumInfo.isMonitor(i)) {
+      index = i;
       break;
+    }
   }
   // Bounding box in detector frame
-  if (!detPixel) {
+  if (index < 0) {
     throw std::runtime_error("Failed to get detector");
   }
-  Geometry::Object_const_sptr pixelShape;
-  Geometry::DetectorGroup_const_sptr detPixelGroup =
-      boost::dynamic_pointer_cast<const Geometry::DetectorGroup>(detPixel);
-  if (detPixelGroup) {
-    // If is a detector group then take shape of first pixel
-    // All detectors in same bansk should be same shape anyway
-    if (detPixelGroup->nDets() > 0)
-      pixelShape = detPixelGroup->getDetectors()[0]->shape();
-  } else {
-    pixelShape = detPixel->shape();
-  }
+  // If is a detector group then take shape of first pixel
+  // All detectors in same bansk should be same shape anyway
+  // If the detector is a DetectorGroup, getID gives ID of first detector.
+  const auto &detectorInfo = m_inputWS->detectorInfo();
+  const size_t detIndex =
+      detectorInfo.indexOf(spectrumInfo.detector(index).getID());
+  const auto pixelShape = detectorInfo.detector(detIndex).shape();
+
   if (!pixelShape || !pixelShape->hasValidShape()) {
     throw std::invalid_argument("Detector pixel has no defined shape!");
   }

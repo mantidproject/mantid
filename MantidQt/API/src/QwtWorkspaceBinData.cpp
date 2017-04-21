@@ -5,6 +5,7 @@
 #include "MantidQtAPI/PlotAxis.h"
 
 #include <QStringBuilder>
+#include <sstream>
 
 /// Constructor
 QwtWorkspaceBinData::QwtWorkspaceBinData(

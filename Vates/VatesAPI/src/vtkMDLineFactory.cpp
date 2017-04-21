@@ -29,14 +29,11 @@ namespace Mantid {
 namespace VATES {
 /**
 Constructor
-@param thresholdRange : Thresholding range functor
 @param normalizationOption : Normalization option to use
 */
 vtkMDLineFactory::vtkMDLineFactory(
-    ThresholdRange_scptr thresholdRange,
     const VisualNormalization normalizationOption)
-    : m_thresholdRange(thresholdRange),
-      m_normalizationOption(normalizationOption) {}
+    : m_normalizationOption(normalizationOption) {}
 
 /// Destructor
 vtkMDLineFactory::~vtkMDLineFactory() {}
@@ -99,7 +96,7 @@ vtkMDLineFactory::create(ProgressAction &progressUpdating) const {
     vtkNew<vtkIdList> linePointList;
     linePointList->SetNumberOfIds(2);
 
-    Mantid::API::CoordTransform const *transform = NULL;
+    Mantid::API::CoordTransform const *transform = nullptr;
     if (m_useTransform) {
       transform = imdws->getTransformToOriginal();
     }
@@ -115,8 +112,7 @@ vtkMDLineFactory::create(ProgressAction &progressUpdating) const {
       progressUpdating.eventRaised(double(iBox) * progressFactor);
 
       Mantid::signal_t signal_normalized = it->getNormalizedSignal();
-      if (std::isfinite(signal_normalized) &&
-          m_thresholdRange->inRange(signal_normalized)) {
+      if (std::isfinite(signal_normalized)) {
         useBox[iBox] = true;
         signals->InsertNextValue(static_cast<float>(signal_normalized));
 
@@ -173,7 +169,7 @@ vtkMDLineFactory::create(ProgressAction &progressUpdating) const {
 }
 
 /// Initalize with a target workspace.
-void vtkMDLineFactory::initialize(Mantid::API::Workspace_sptr ws) {
+void vtkMDLineFactory::initialize(const Mantid::API::Workspace_sptr &ws) {
   m_workspace = doInitialize<IMDEventWorkspace, 1>(ws);
 }
 
@@ -184,7 +180,7 @@ std::string vtkMDLineFactory::getFactoryTypeName() const {
 
 /// Template Method pattern to validate the factory before use.
 void vtkMDLineFactory::validate() const {
-  if (NULL == m_workspace.get()) {
+  if (!m_workspace) {
     throw std::runtime_error(
         "vtkMDLineFactory has no workspace to run against");
   }

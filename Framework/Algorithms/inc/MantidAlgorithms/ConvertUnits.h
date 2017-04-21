@@ -3,6 +3,7 @@
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidKernel/Unit.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -21,8 +22,8 @@ namespace Algorithms {
    </LI>
     </UL>
 
-    Optional properties required for certain units (DeltaE &
-   DeltaE_inWavenumber):
+    Optional properties required for certain units (DeltaE,
+   DeltaE_inWavenumber, DeltaE_inFrequency):
     <UL>
     <LI> Emode  - The energy mode (0=elastic, 1=direct geometry, 2=indirect
    geometry) </LI>

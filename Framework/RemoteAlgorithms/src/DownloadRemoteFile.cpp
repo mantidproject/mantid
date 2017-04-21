@@ -22,6 +22,10 @@ using namespace Mantid::API;
 
 // A reference to the logger is provided by the base class, it is called g_log.
 
+DownloadRemoteFile::DownloadRemoteFile() {
+  this->useAlgorithm("DownloadRemoteFile", 2);
+}
+
 void DownloadRemoteFile::init() {
   // Unlike most algorithms, this one doesn't deal with workspaces....
 

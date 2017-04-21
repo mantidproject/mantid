@@ -1,5 +1,6 @@
-﻿# pylint: disable=no-init,attribute-defined-outside-init,too-many-public-methods
+# pylint: disable=no-init,attribute-defined-outside-init,too-many-public-methods
 
+from __future__ import (absolute_import, division, print_function)
 from mantid.api import AnalysisDataService, MatrixWorkspace, WorkspaceGroup, \
     ITableWorkspace
 from mantid.simpleapi import *
@@ -34,8 +35,8 @@ class ISISPowderDiffractionGem(stresstesting.MantidStressTest):
             for files in filenames:
                 path = os.path.join(directories[0], files)
                 os.remove(path)
-        except OSError, ose:
-            print 'could not delete generated file : ', ose.filename
+        except OSError as ose:
+            print('could not delete generated file : ', ose.filename)
 
     def runTest(self):
         self._success = False
@@ -103,19 +104,19 @@ class LoadTests(unittest.TestCase):
             self.assertTrue(isinstance(data1[i], MatrixWorkspace))
         self.assertTrue(isinstance(data1[3], ITableWorkspace))
 
-        self.assertTrue("CalWorkspace1_group" in data1[0].getName())
-        self.assertTrue("CalWorkspace1_offsets" in data1[1].getName())
-        self.assertTrue("CalWorkspace1_mask" in data1[2].getName())
-        self.assertTrue("CalWorkspace1_cal" in data1[3].getName())
+        self.assertTrue("CalWorkspace1_group" in data1[0].name())
+        self.assertTrue("CalWorkspace1_offsets" in data1[1].name())
+        self.assertTrue("CalWorkspace1_mask" in data1[2].name())
+        self.assertTrue("CalWorkspace1_cal" in data1[3].name())
 
         for i in range(0, 3):
             self.assertTrue(isinstance(data2[i], MatrixWorkspace))
             self.assertTrue(isinstance(data1[3], ITableWorkspace))
 
-        self.assertTrue("CalWorkspace2_group" in data2[0].getName())
-        self.assertTrue("CalWorkspace2_offsets" in data2[1].getName())
-        self.assertTrue("CalWorkspace2_mask" in data2[2].getName())
-        self.assertTrue("CalWorkspace2_cal" in data2[3].getName())
+        self.assertTrue("CalWorkspace2_group" in data2[0].name())
+        self.assertTrue("CalWorkspace2_offsets" in data2[1].name())
+        self.assertTrue("CalWorkspace2_mask" in data2[2].name())
+        self.assertTrue("CalWorkspace2_cal" in data2[3].name())
 
     def test_nxsfile_with_workspace(self):
         self.wsname = "NexusWorkspace"
@@ -127,7 +128,7 @@ class LoadTests(unittest.TestCase):
 
         for i in range(1, 7):
             self.assertTrue(isinstance(data[i], MatrixWorkspace))
-            self.assertTrue("ResultTOF-" + str(i) in data[i].getName())
+            self.assertTrue("ResultTOF-" + str(i) in data[i].name())
 
         self.assertTrue('ResultTOFgrp', self.wsname[0])
 
@@ -155,7 +156,7 @@ class LoadTests(unittest.TestCase):
             self.assertTrue(isinstance(_file, MatrixWorkspace))
 
         for i in range(0, len(dat_data)):
-            self.assertTrue(("datWorkspace" + str(i + 1)) in dat_data[i].getName())
+            self.assertTrue(("datWorkspace" + str(i + 1)) in dat_data[i].name())
 
         for _file in dat_data:
             self.assertEquals(1, _file.getNumberHistograms())
@@ -209,8 +210,8 @@ class ISISPowderDiffractionGem2(stresstesting.MantidStressTest):
                 os.remove(path)
                 cali_path = os.path.join(directories[0], "GEM/test/Cycle_09_5_No_ExtV/Calibration")
             shutil.rmtree(cali_path)
-        except OSError, ose:
-            print 'could not delete generated file : ', ose.filename
+        except OSError as ose:
+            print('could not delete generated file : ', ose.filename)
 
     def runTest(self):
         self._success = False
@@ -277,19 +278,19 @@ class LoadTests2(unittest.TestCase):
             self.assertTrue(isinstance(data1[i], MatrixWorkspace))
         self.assertTrue(isinstance(data1[3], ITableWorkspace))
 
-        self.assertTrue("CalWorkspace1_group" in data1[0].getName())
-        self.assertTrue("CalWorkspace1_offsets" in data1[1].getName())
-        self.assertTrue("CalWorkspace1_mask" in data1[2].getName())
-        self.assertTrue("CalWorkspace1_cal" in data1[3].getName())
+        self.assertTrue("CalWorkspace1_group" in data1[0].name())
+        self.assertTrue("CalWorkspace1_offsets" in data1[1].name())
+        self.assertTrue("CalWorkspace1_mask" in data1[2].name())
+        self.assertTrue("CalWorkspace1_cal" in data1[3].name())
 
         for i in range(0, 3):
             self.assertTrue(isinstance(data2[i], MatrixWorkspace))
             self.assertTrue(isinstance(data1[3], ITableWorkspace))
 
-        self.assertTrue("CalWorkspace2_group" in data2[0].getName())
-        self.assertTrue("CalWorkspace2_offsets" in data2[1].getName())
-        self.assertTrue("CalWorkspace2_mask" in data2[2].getName())
-        self.assertTrue("CalWorkspace2_cal" in data2[3].getName())
+        self.assertTrue("CalWorkspace2_group" in data2[0].name())
+        self.assertTrue("CalWorkspace2_offsets" in data2[1].name())
+        self.assertTrue("CalWorkspace2_mask" in data2[2].name())
+        self.assertTrue("CalWorkspace2_cal" in data2[3].name())
 
     def test_nxsfile_with_workspace(self):
         self.wsname = "NexusWorkspace"
@@ -301,7 +302,7 @@ class LoadTests2(unittest.TestCase):
 
         for i in range(1, 7):
             self.assertTrue(isinstance(data[i], MatrixWorkspace))
-            self.assertTrue("ResultTOF-" + str(i) in data[i].getName())
+            self.assertTrue("ResultTOF-" + str(i) in data[i].name())
 
     def test_gssfile_with_workspace(self):
         gssfile = (DIRS[0] + "GEM/test/Cycle_09_5_No_ExtV/mantid_tester/GEM48436.gss")
@@ -327,7 +328,7 @@ class LoadTests2(unittest.TestCase):
             self.assertTrue(isinstance(_file, MatrixWorkspace))
 
         for i in range(0, len(dat_data)):
-            self.assertTrue(("datWorkspace" + str(i + 1)) in dat_data[i].getName())
+            self.assertTrue(("datWorkspace" + str(i + 1)) in dat_data[i].name())
 
         for _file in dat_data:
             self.assertEquals(1, _file.getNumberHistograms())

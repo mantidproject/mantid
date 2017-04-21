@@ -125,8 +125,11 @@ IFunction_sptr FunctionFactoryImpl::createSimple(
         fun->setParameter(parName, boost::lexical_cast<double>(parValue));
       } catch (boost::bad_lexical_cast &) {
         throw std::runtime_error(
-            "Error in value of parameter " + parName + ".\n" + parValue +
-            " cannot be interpreted as a floating point value.");
+            std::string("Error in value of parameter ")
+                .append(parName)
+                .append(".\n")
+                .append(parValue)
+                .append(" cannot be interpreted as a floating point value."));
       }
     }
   } // for term
@@ -278,9 +281,9 @@ void FunctionFactoryImpl::addConstraints(IFunction_sptr fun,
  */
 void FunctionFactoryImpl::addConstraint(IFunction_sptr fun,
                                         const Expression &expr) const {
-  IConstraint *c =
-      ConstraintFactory::Instance().createInitialized(fun.get(), expr);
-  fun->addConstraint(c);
+  auto c = std::unique_ptr<IConstraint>(
+      ConstraintFactory::Instance().createInitialized(fun.get(), expr));
+  fun->addConstraint(std::move(c));
 }
 
 /**

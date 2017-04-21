@@ -1,6 +1,7 @@
 #include "MantidAPI/NearestNeighbourInfo.h"
+#include "MantidAPI/NearestNeighbours.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/SpectrumDetectorMapping.h"
+#include "MantidKernel/make_unique.h"
 
 namespace Mantid {
 namespace API {
@@ -15,10 +16,18 @@ namespace API {
 NearestNeighbourInfo::NearestNeighbourInfo(const MatrixWorkspace &workspace,
                                            const bool ignoreMaskedDetectors,
                                            const int nNeighbours)
-    : m_workspace(workspace),
-      m_nearestNeighbours(nNeighbours, workspace.getInstrument(),
-                          SpectrumDetectorMapping(&workspace).getMapping(),
-                          ignoreMaskedDetectors) {}
+    : m_workspace(workspace) {
+  std::vector<specnum_t> spectrumNumbers;
+  for (size_t i = 0; i < m_workspace.getNumberHistograms(); ++i)
+    spectrumNumbers.push_back(m_workspace.getSpectrum(i).getSpectrumNo());
+
+  m_nearestNeighbours = Kernel::make_unique<NearestNeighbours>(
+      nNeighbours, workspace.spectrumInfo(), std::move(spectrumNumbers),
+      ignoreMaskedDetectors);
+}
+
+// Defined as default in source for forward declaration with std::unique_ptr.
+NearestNeighbourInfo::~NearestNeighbourInfo() = default;
 
 /** Queries the NearestNeighbours object for the selected detector.
 * NOTE! getNeighbours(spectrumNumber, radius) is MUCH faster.
@@ -39,7 +48,7 @@ NearestNeighbourInfo::getNeighbours(const Geometry::IDetector *comp,
                                            "detector",
                                            comp->getID());
   }
-  return m_nearestNeighbours.neighboursInRadius(spectra[0], radius);
+  return m_nearestNeighbours->neighboursInRadius(spectra[0], radius);
 }
 
 /** Queries the NearestNeighbours object for the selected spectrum number.
@@ -50,7 +59,7 @@ NearestNeighbourInfo::getNeighbours(const Geometry::IDetector *comp,
 */
 std::map<specnum_t, Kernel::V3D>
 NearestNeighbourInfo::getNeighbours(specnum_t spec, const double radius) const {
-  return m_nearestNeighbours.neighboursInRadius(spec, radius);
+  return m_nearestNeighbours->neighboursInRadius(spec, radius);
 }
 
 /** Queries the NearestNeighbours object for the selected spectrum number.
@@ -60,7 +69,7 @@ NearestNeighbourInfo::getNeighbours(specnum_t spec, const double radius) const {
 */
 std::map<specnum_t, Kernel::V3D>
 NearestNeighbourInfo::getNeighboursExact(specnum_t spec) const {
-  return m_nearestNeighbours.neighbours(spec);
+  return m_nearestNeighbours->neighbours(spec);
 }
 
 } // namespace API

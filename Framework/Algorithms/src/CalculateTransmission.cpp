@@ -7,6 +7,7 @@
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/IFunction.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceOpOverloads.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidGeometry/Instrument.h"
@@ -137,7 +138,7 @@ void CalculateTransmission::exec() {
   if (!usingSameInstrument)
     throw std::invalid_argument(
         "The input workspaces do not come from the same instrument.");
-  if (!WorkspaceHelpers::matchingBins(sampleWS, directWS))
+  if (!WorkspaceHelpers::matchingBins(*sampleWS, *directWS))
     throw std::invalid_argument(
         "The input workspaces do not have matching bins.");
 
@@ -492,9 +493,9 @@ void CalculateTransmission::logIfNotMonitor(API::MatrixWorkspace_sptr sampleWS,
                                             size_t index) {
   const std::string message = "The detector at index " + std::to_string(index) +
                               " is not a monitor in the ";
-  if (!sampleWS->getDetector(index)->isMonitor())
+  if (!sampleWS->spectrumInfo().isMonitor(index))
     g_log.information(message + "sample workspace.");
-  if (!directWS->getDetector(index)->isMonitor())
+  if (!directWS->spectrumInfo().isMonitor(index))
     g_log.information(message + "direct workspace.");
 }
 

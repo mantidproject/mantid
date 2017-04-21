@@ -1,6 +1,7 @@
 //------------------------------------------------------------------------------
 // Includes
 //------------------------------------------------------------------------------
+#include <string>
 #include "MantidKernel/NormalDistribution.h"
 #include "MantidKernel/MersenneTwister.h"
 

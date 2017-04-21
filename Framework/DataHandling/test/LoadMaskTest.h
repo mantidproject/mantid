@@ -10,6 +10,9 @@
 #include "MantidDataObjects/MaskWorkspace.h"
 #include "MantidTestHelpers/ScopedFileHelper.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/DetectorInfo.h"
+#include "MantidAPI/SpectrumInfo.h"
 
 using namespace Mantid;
 using namespace Mantid::DataHandling;
@@ -194,7 +197,7 @@ public:
     std::vector<detid_t> detIDs = source->getInstrument()->getDetectorIDs(true);
     size_t index = 0;
     auto it = --detIDs.end();
-    for (; it > detIDs.begin(); --it) {
+    for (; it >= detIDs.begin(); --it) {
       const detid_t detId = *it;
       auto &spec = source->getSpectrum(index);
       Mantid::specnum_t specNo =
@@ -259,15 +262,21 @@ public:
     // masked
     std::vector<detid_t> maskSourceDet, maskTargDet;
 
+    const auto &spectrumInfoSource = source->spectrumInfo();
+    const auto &spectrumInfoTarget = maskWs->spectrumInfo();
     size_t n_steps = source->getNumberHistograms();
     for (size_t i = 0; i < n_steps; ++i) {
-      bool source_masked = source->getDetector(i)->isMasked();
+      bool source_masked = spectrumInfoSource.isMasked(i);
       if (source_masked) {
-        maskSourceDet.push_back(source->getDetector(i)->getID());
+        const auto &detector = spectrumInfoSource.detector(i);
+        const auto detectorId = detector.getID();
+        maskSourceDet.push_back(detectorId);
       }
       bool targ_masked = (maskWs->getSpectrum(i).y()[0] > 0.5);
       if (targ_masked) {
-        maskTargDet.push_back(maskWs->getDetector(i)->getID());
+        const auto &detector = spectrumInfoTarget.detector(i);
+        const auto detectorId = detector.getID();
+        maskTargDet.push_back(detectorId);
       }
     }
     std::sort(maskSourceDet.begin(), maskSourceDet.end());

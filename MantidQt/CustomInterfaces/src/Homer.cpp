@@ -2,7 +2,6 @@
 #include "MantidQtCustomInterfaces/Background.h"
 #include "MantidQtCustomInterfaces/deltaECalc.h"
 #include "MantidQtMantidWidgets/MWDiag.h"
-#include "MantidQtAPI/FileDialogHandler.h"
 #include "MantidQtAPI/MantidDesktopServices.h"
 
 #include "MantidKernel/ConfigService.h"
@@ -392,8 +391,8 @@ QString Homer::openFileDia(const bool save, const QStringList &exts) {
 
   QString filename;
   if (save) {
-    filename = API::FileDialogHandler::getSaveFileName(this, "Save file",
-                                                       m_lastSaveDir, filter);
+    filename =
+        QFileDialog::getSaveFileName(this, "Save file", m_lastSaveDir, filter);
     if (!filename.isEmpty()) {
       m_lastSaveDir = QFileInfo(filename).absoluteDir().path();
     }

@@ -5,6 +5,7 @@
 
 #include "MantidCurveFitting/Algorithms/RefinePowderInstrumentParameters3.h"
 
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/TableWorkspace.h"
@@ -305,6 +306,7 @@ public:
   static RefinePowderInstParams3TestPerformance *createSuite() {
     return new RefinePowderInstParams3TestPerformance();
   }
+
   static void destroySuite(RefinePowderInstParams3TestPerformance *suite) {
     delete suite;
   }

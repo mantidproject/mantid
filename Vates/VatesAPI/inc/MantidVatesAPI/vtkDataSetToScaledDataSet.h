@@ -39,6 +39,9 @@ class DLLExport vtkDataSetToScaledDataSet {
 public:
   /// Constructor
   vtkDataSetToScaledDataSet();
+  vtkDataSetToScaledDataSet(const vtkDataSetToScaledDataSet &) = delete;
+  vtkDataSetToScaledDataSet &
+  operator=(const vtkDataSetToScaledDataSet &) = delete;
   /// Destructor
   virtual ~vtkDataSetToScaledDataSet();
   /// Apply the scaling and add metadata
@@ -46,10 +49,10 @@ public:
                        vtkPointSet *inputData, vtkInformation *info);
   /// Apply the scaling and add metadata
   vtkPointSet *execute(double xScale, double yScale, double zScale,
-                       vtkPointSet *inputData, vtkPointSet *outputData = NULL);
+                       vtkPointSet *inputData,
+                       vtkPointSet *outputData = nullptr);
 
 private:
-  vtkDataSetToScaledDataSet &operator=(const vtkDataSetToScaledDataSet &other);
   /// Set metadata on the dataset to handle scaling
   void updateMetaData(double xScale, double yScale, double zScale,
                       vtkPointSet *inputData, vtkPointSet *outputData);

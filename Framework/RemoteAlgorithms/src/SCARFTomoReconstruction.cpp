@@ -1351,12 +1351,11 @@ void SCARFTomoReconstruction::getOneJobFile(const std::string &jobId,
       {"Content-Type", "application/xml"},
       {"Cookie", token},
       {"Accept", m_acceptType}};
-  std::string body = remotePath;
   int code;
   std::stringstream ss;
   try {
-    code = doSendRequestGetResponse(httpsURL, ss, headers,
-                                    Poco::Net::HTTPRequest::HTTP_GET, body);
+    code = doSendRequestGetResponse(
+        httpsURL, ss, headers, Poco::Net::HTTPRequest::HTTP_GET, remotePath);
   } catch (Kernel::Exception::InternetError &ie) {
     throw std::runtime_error(
         "Error while sending HTTP request to download a file: " +

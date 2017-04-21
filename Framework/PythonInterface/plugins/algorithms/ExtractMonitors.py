@@ -56,33 +56,34 @@ class ExtractMonitors(DataProcessorAlgorithm):
 
         monitors = []
         detectors = []
+        spectrumInfo = in_ws.spectrumInfo()
         for i in range(in_ws.getNumberHistograms()):
             try:
-                monitors.append(i) if in_ws.getDetector(i).isMonitor() else detectors.append(i)
+                monitors.append(i) if spectrumInfo.isMonitor(i) else detectors.append(i)
             except RuntimeError:
                 self.log().warning("Missing detector at " + str(i))
 
         if detector_ws_name:
             if detectors:
-                detector_ws = ExtractSpectra(InputWorkspace=in_ws,
-                                             WorkspaceIndexList=detectors)
+                extract_alg = self.createChildAlgorithm("ExtractSpectra")
+                extract_alg.setProperty("InputWorkspace", in_ws)
+                extract_alg.setProperty("WorkspaceIndexList", detectors)
+                extract_alg.execute()
+                detector_ws = extract_alg.getProperty("OutputWorkspace").value
+                self.setProperty("DetectorWorkspace", detector_ws)
             else:
                 self.log().error("No detectors found in input workspace. No detector output workspace created.")
 
         if monitor_ws_name:
             if monitors:
-                monitor_ws = ExtractSpectra(InputWorkspace=in_ws,
-                                            WorkspaceIndexList=monitors)
+                extract_alg = self.createChildAlgorithm("ExtractSpectra")
+                extract_alg.setProperty("InputWorkspace", in_ws)
+                extract_alg.setProperty("WorkspaceIndexList", monitors)
+                extract_alg.execute()
+                monitor_ws = extract_alg.getProperty("OutputWorkspace").value
+                self.setProperty("MonitorWorkspace", monitor_ws)
             else:
                 self.log().error("No monitors found in input workspace. No monitor output workspace created.")
-
-        if detector_ws_name and detectors:
-            self.setProperty("DetectorWorkspace", detector_ws)
-            DeleteWorkspace(detector_ws)
-
-        if monitor_ws_name and monitors:
-            self.setProperty("MonitorWorkspace", monitor_ws)
-            DeleteWorkspace(monitor_ws)
 
         if detector_ws_name and detectors and monitor_ws_name and monitors:
             detector_ws.setMonitorWorkspace(monitor_ws)

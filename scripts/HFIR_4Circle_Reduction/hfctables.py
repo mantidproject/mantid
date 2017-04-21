@@ -1087,11 +1087,9 @@ class ScanSurveyTable(tableBase.NTableWidget):
             # check with filters: original order is counts, scan, Pt., ...
             scan_number = sum_item[1]
             if scan_number < start_scan or scan_number > end_scan:
-                # print 'Scan %d is out of range.' % scan_number
                 continue
             counts = sum_item[0]
             if counts < min_counts or counts > max_counts:
-                # print 'Scan %d Counts %f is out of range.' % (scan_number, counts)
                 continue
 
             # modify for appending to table

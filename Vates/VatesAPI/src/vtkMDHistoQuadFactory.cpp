@@ -17,7 +17,6 @@
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/make_unique.h"
 
-using Mantid::API::IMDWorkspace;
 using Mantid::Kernel::CPUTimer;
 using Mantid::DataObjects::MDHistoWorkspace;
 using Mantid::DataObjects::MDHistoWorkspaceIterator;
@@ -30,10 +29,8 @@ namespace Mantid {
 
 namespace VATES {
 vtkMDHistoQuadFactory::vtkMDHistoQuadFactory(
-    ThresholdRange_scptr thresholdRange,
     const VisualNormalization normalizationOption)
-    : m_normalizationOption(normalizationOption),
-      m_thresholdRange(thresholdRange) {}
+    : m_normalizationOption(normalizationOption) {}
 
 /**
 Assigment operator
@@ -44,7 +41,6 @@ vtkMDHistoQuadFactory &vtkMDHistoQuadFactory::
 operator=(const vtkMDHistoQuadFactory &other) {
   if (this != &other) {
     this->m_normalizationOption = other.m_normalizationOption;
-    this->m_thresholdRange = other.m_thresholdRange;
     this->m_workspace = other.m_workspace;
   }
   return *this;
@@ -57,7 +53,6 @@ Copy Constructor
 vtkMDHistoQuadFactory::vtkMDHistoQuadFactory(
     const vtkMDHistoQuadFactory &other) {
   this->m_normalizationOption = other.m_normalizationOption;
-  this->m_thresholdRange = other.m_thresholdRange;
   this->m_workspace = other.m_workspace;
 }
 
@@ -141,8 +136,7 @@ vtkMDHistoQuadFactory::create(ProgressAction &progressUpdating) const {
             iterator->getNormalizedSignal()); // Get signal normalized as per
                                               // m_normalizationOption
 
-        if (!std::isfinite(signalScalar) ||
-            !m_thresholdRange->inRange(signalScalar)) {
+        if (!std::isfinite(signalScalar)) {
           // out of range
           voxelShown[index] = false;
         } else {
@@ -166,7 +160,7 @@ vtkMDHistoQuadFactory::create(ProgressAction &progressUpdating) const {
 
     // Get the transformation that takes the points in the TRANSFORMED space
     // back into the ORIGINAL (not-rotated) space.
-    Mantid::API::CoordTransform const *transform = NULL;
+    Mantid::API::CoordTransform const *transform = nullptr;
     if (m_useTransform)
       transform = m_workspace->getTransformToOriginal();
 
@@ -239,16 +233,12 @@ vtkMDHistoQuadFactory::create(ProgressAction &progressUpdating) const {
 }
 
 void vtkMDHistoQuadFactory::initialize(
-    Mantid::API::Workspace_sptr wspace_sptr) {
+    const Mantid::API::Workspace_sptr &wspace_sptr) {
   m_workspace = doInitialize<MDHistoWorkspace, 2>(wspace_sptr);
-
-  // Setup range values according to whatever strategy object has been injected.
-  m_thresholdRange->setWorkspace(wspace_sptr);
-  m_thresholdRange->calculate();
 }
 
 void vtkMDHistoQuadFactory::validate() const {
-  if (NULL == m_workspace.get()) {
+  if (!m_workspace) {
     throw std::runtime_error("IMDWorkspace is null");
   }
 }

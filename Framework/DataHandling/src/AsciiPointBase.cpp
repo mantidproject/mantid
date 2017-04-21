@@ -4,14 +4,12 @@ SaveILLCosmosAscii and SaveANSTOAscii export-only Acii-based save formats. It is
 based on a python script by Maximilian Skoda, written for the ISIS Reflectometry
 GUI
 */
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidDataHandling/AsciiPointBase.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/ListValidator.h"
 
+#include <boost/lexical_cast.hpp>
 #include <boost/tokenizer.hpp>
 #include <boost/regex.hpp>
 #include <boost/make_shared.hpp>

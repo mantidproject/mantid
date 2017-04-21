@@ -186,7 +186,7 @@ void CompositeBraggScatterer::redeclareProperties() {
     std::vector<Property *> properties =
         scatterer->getPropertiesInGroup(getPropagatingGroupName());
     for (auto &property : properties) {
-      std::string propertyName = property->name();
+      const std::string &propertyName = property->name();
       if (!existsProperty(propertyName)) {
         declareProperty(std::unique_ptr<Property>(property->clone()));
       }

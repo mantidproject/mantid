@@ -30,6 +30,17 @@ public:
   /// Populate a menu with actions
   void populateMenu(QMenu *menu);
 
+  static IProjectSerialisable *loadFromProject(const std::string &lines,
+                                               ApplicationWindow *app,
+                                               const int fileVersion);
+
+  /// Serialises to a string that can be saved to a project file.
+  std::string saveToProject(ApplicationWindow *app) override;
+  /// Returns a list of workspace names that are used by this window
+  std::vector<std::string> getWorkspaceNames() override;
+  /// Returns the user friendly name of the window
+  std::string getWindowName() override;
+
 public slots:
 
   /// Get number of rows

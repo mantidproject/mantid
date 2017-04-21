@@ -116,7 +116,7 @@ template class DLLExport ArrayProperty<std::vector<float>>;
 template class DLLExport ArrayProperty<std::vector<double>>;
 template class DLLExport ArrayProperty<std::vector<std::string>>;
 
-#if defined(_WIN32) || defined(__clang__)
+#if defined(_WIN32) || defined(__clang__) && defined(__APPLE__)
 template class DLLExport ArrayProperty<long>;
 template class DLLExport ArrayProperty<unsigned long>;
 template class DLLExport ArrayProperty<std::vector<long>>;

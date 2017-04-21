@@ -6,9 +6,9 @@
 #include "MantidQtCustomInterfaces/Tomography/ITomographyIfaceView.h"
 #include "MantidQtCustomInterfaces/Tomography/TomographyIfaceModel.h"
 
-#include <boost/scoped_ptr.hpp>
 #include <QMutex>
 #include <QObject>
+#include <boost/scoped_ptr.hpp>
 
 // Qt classes forward declarations
 class QThread;
@@ -50,7 +50,6 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 class MANTIDQT_CUSTOMINTERFACES_DLL TomographyIfacePresenter
     : public QObject,
       public ITomographyIfacePresenter {
-  // Q_OBJECT for the 'keep alive' signals
   Q_OBJECT
 
 public:
@@ -66,34 +65,25 @@ protected:
   /// clean shut down of model, view, etc.
   void cleanup();
 
+  // notification methods
   void processSystemSettingsUpdated();
   void processSetupResourcesAndTools();
   void processCompResourceChanged();
   void processToolChanged();
   void processTomoPathsChanged();
   void processTomoPathsEditedByUser();
+  void processRunExternalProcess();
   void processLogin();
   void processLogout();
   void processSetupReconTool();
   void processRunRecon();
-
-protected slots:
-  /// It may be run on user request, or periodically from a timer/thread
-  void processRefreshJobs();
-
-protected:
   void processCancelJobs();
   void processVisualizeJobs();
-  void processViewImg();
   void processLogMsg();
   void processAggregateEnergyBands();
   void processShutDown();
 
   void doVisualize(const std::vector<std::string> &ids);
-
-  /// To prepare a local run
-  void makeRunnableWithOptionsLocal(const std::string &comp, std::string &run,
-                                    std::string &opt);
 
   /// auto-guess additional directories when the user gives the samples path
   void findFlatsDarksFromSampleGivenByUser(TomoPathsConfig &cfg);
@@ -108,8 +98,34 @@ protected:
   void killKeepAliveMechanism();
 
   bool isLocalResourceSelected() const;
+signals:
+  void terminated();
+
+protected slots:
+  /// It may be run on user request, or periodically from a timer/thread
+  void processRefreshJobs();
+  void readWorkerStdOut(const QString &workerString);
+  void readWorkerStdErr(const QString &workerString);
+  void addProcessToJobList();
+  void reconProcessFailedToStart();
+  void workerFinished(const qint64 pid, const int exitCode);
+  void emitExternalProcessOutput(const qint64 pid, const int exitCode);
 
 private:
+  /// Update the model's filter, COR and ROI/Area of norm settings
+  /// and build the runnable and arguments
+  void prepareSubmissionArguments(const bool local, std::string &runnable,
+                                  std::vector<std::string> &args,
+                                  std::string &allOpts);
+  /// Asks the user for permission to cancel the running reconstruction
+  bool userConfirmationToCancelRecon();
+  void setupAndRunLocalReconstruction(const std::string &runnable,
+                                      const std::vector<std::string> &args,
+                                      const std::string &allOpts);
+
+  void setupAndRunLocalExternalProcess(const std::string &runnable,
+                                       const std::vector<std::string> &args,
+                                       const std::string &allOpts);
   /// creates the correct dialog pointer and sets it to the member variable
   void createConfigDialogUsingToolName(const std::string &toolName);
 
@@ -150,12 +166,17 @@ private:
 
   // for periodic update of the job status table/tree
   QTimer *m_keepAliveTimer;
-  QThread *m_keepAliveThread;
+
+  std::unique_ptr<TomographyThread> m_workerThread;
+  QString m_workerOutputCache;
+  QString m_workerErrorCache;
 
   std::unique_ptr<TomoToolConfigDialogBase> m_configDialog;
 
   static const std::string g_defOutPathLocal;
   static const std::string g_defOutPathRemote;
+
+  bool m_reconRunning = false;
 };
 
 } // namespace CustomInterfaces

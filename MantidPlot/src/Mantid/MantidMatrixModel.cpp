@@ -3,11 +3,10 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/SpectraAxis.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/RefAxis.h"
 #include "MantidAPI/TextAxis.h"
 #include "MantidKernel/ReadLock.h"
-
-#include "MantidGeometry/IDetector.h"
 
 #include <QApplication>
 #include <QObject>
@@ -55,14 +54,19 @@ double MantidMatrixModel::data(int row, int col) const {
   Mantid::Kernel::ReadLock _lock(*m_workspace);
 
   double val;
-  if (m_type == X) {
-    val = m_workspace->readX(row + m_startRow)[col];
-  } else if (m_type == Y) {
-    val = m_workspace->readY(row + m_startRow)[col];
-  } else if (m_type == E) {
-    val = m_workspace->readE(row + m_startRow)[col];
-  } else {
-    val = m_workspace->readDx(row + m_startRow)[col];
+  switch (m_type) {
+  case X:
+    val = m_workspace->x(row + m_startRow)[col];
+    break;
+  case Y:
+    val = m_workspace->y(row + m_startRow)[col];
+    break;
+  case E:
+    val = m_workspace->e(row + m_startRow)[col];
+    break;
+  default:
+    val = m_workspace->dx(row + m_startRow)[col];
+    break;
   }
   return val;
 }
@@ -143,7 +147,7 @@ QVariant MantidMatrixModel::headerData(int section, Qt::Orientation orientation,
 
       // get bin centre value
       double binCentreValue;
-      const Mantid::MantidVec xVec = m_workspace->readX(0);
+      const auto &xVec = m_workspace->x(0);
       if (m_workspace->isHistogramData()) {
         if ((section + 1) >= static_cast<int>(xVec.size()))
           return section;
@@ -244,7 +248,8 @@ QVariant MantidMatrixModel::data(const QModelIndex &index, int role) const {
     return QVariant(m_locale.toString(val, m_format, m_prec));
   }
   case Qt::BackgroundRole: {
-    if (checkMaskedCache(index.row())) {
+    if (checkMaskedCache(index.row()) ||
+        checkMaskedBinCache(index.row(), index.column())) {
       return m_mask_color;
     } else if (checkMonitorCache(index.row())) {
       return m_mon_color;
@@ -253,17 +258,22 @@ QVariant MantidMatrixModel::data(const QModelIndex &index, int role) const {
     }
   }
   case Qt::ToolTipRole: {
+    QString tooltip;
     if (checkMaskedCache(index.row())) {
       if (checkMonitorCache(index.row())) {
-        return QString("This is a masked monitor spectrum");
+        tooltip = "This is a masked monitor spectrum. ";
       } else {
-        return QString("This is a masked spectrum");
+        tooltip = "This is a masked spectrum. ";
       }
     } else if (checkMonitorCache(index.row())) {
-      return QString("This is a monitor spectrum");
-    } else {
-      return QString();
+      tooltip = "This is a monitor spectrum. ";
+      if (checkMaskedBinCache(index.row(), index.column())) {
+        tooltip += "This bin is masked. ";
+      }
+    } else if (checkMaskedBinCache(index.row(), index.column())) {
+      tooltip = "This bin is masked. ";
     }
+    return tooltip;
   }
   default:
     return QVariant();
@@ -280,17 +290,13 @@ bool MantidMatrixModel::checkMonitorCache(int row) const {
   if (m_workspace->axes() > 1 && m_workspace->getAxis(1)->isSpectra()) {
     bool isMon = false;
     if (m_monCache.contains(row)) {
-      isMon = m_monCache.value(row);
+      isMon = true;
     } else {
-      try {
-        size_t wsIndex = static_cast<size_t>(row);
-        auto det = m_workspace->getDetector(wsIndex);
-        isMon = det->isMonitor();
-        m_monCache.insert(row, isMon);
-      } catch (std::exception &) {
-        m_monCache.insert(row, false);
-        isMon = false;
-      }
+      const auto &specInfo = m_workspace->spectrumInfo();
+      size_t wsIndex = static_cast<size_t>(row);
+      isMon = specInfo.hasDetectors(wsIndex) && specInfo.isMonitor(wsIndex);
+      if (isMon)
+        m_monCache.insert(row);
     }
     return isMon;
   } else {
@@ -308,19 +314,44 @@ bool MantidMatrixModel::checkMaskedCache(int row) const {
   if (m_workspace->axes() > 1 && m_workspace->getAxis(1)->isSpectra()) {
     bool isMasked = false;
     if (m_maskCache.contains(row)) {
-      isMasked = m_maskCache.value(row);
+      isMasked = true;
     } else {
-      try {
-        size_t wsIndex = static_cast<size_t>(row);
-        auto det = m_workspace->getDetector(wsIndex);
-        isMasked = det->isMasked();
-        m_maskCache.insert(row, isMasked);
-      } catch (std::exception &) {
-        m_maskCache.insert(row, false);
-        isMasked = false;
-      }
+      const auto &specInfo = m_workspace->spectrumInfo();
+      size_t wsIndex = static_cast<size_t>(row);
+      isMasked = specInfo.hasDetectors(wsIndex) && specInfo.isMasked(wsIndex);
+      if (isMasked)
+        m_maskCache.insert(row);
     }
     return isMasked;
+  } else {
+    return false;
+  }
+}
+
+/**   Checks if the given bin of the given spectrum is masked, then returns
+it, otherwise it looks it up and adds it to the cache for quick lookup
+@param row :: current row in the table that maps to a detector.
+@param bin :: current bin (column) in the row
+@return bool :: the value of if the bin is masked or not.
+*/
+bool MantidMatrixModel::checkMaskedBinCache(int row, int bin) const {
+  row += m_startRow; // correctly offset the row
+  if (m_workspace->axes() > 1) {
+    bool isMaskedBin = false;
+    size_t wsIndex = static_cast<size_t>(row);
+    size_t binIndex = static_cast<size_t>(bin);
+    if (m_maskBinCache.contains(row) && m_maskBinCache[row].contains(bin)) {
+      isMaskedBin = true;
+    } else {
+      if (m_workspace->hasMaskedBins(wsIndex)) {
+        const auto &maskedBins = m_workspace->maskedBins(wsIndex);
+        if (maskedBins.find(binIndex) != maskedBins.end()) {
+          isMaskedBin = true;
+          m_maskBinCache[row].insert(bin);
+        }
+      }
+    }
+    return isMaskedBin;
   } else {
     return false;
   }

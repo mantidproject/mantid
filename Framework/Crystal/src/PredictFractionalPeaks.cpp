@@ -161,7 +161,7 @@ void PredictFractionalPeaks::exec() {
     hkl[2] = peak0.getL();
   }
 
-  Kernel::DblMatrix UB = ol.getUB();
+  const Kernel::DblMatrix &UB = ol.getUB();
   vector<vector<int>> AlreadyDonePeaks;
   bool done = false;
   int ErrPos = 1; // Used to determine position in code of a throw

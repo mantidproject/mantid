@@ -3,6 +3,7 @@
 
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/DetectorInfo.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataHandling/LoadInstrument.h"
@@ -13,6 +14,7 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidDataHandling/LoadMuonNexus.h"
 #include "MantidDataHandling/LoadNexus.h"
@@ -144,28 +146,35 @@ public:
     // LoadInstrumentTest
     //
     Instrument_const_sptr i = output->getInstrument();
+    const auto &detectorInfo = output->detectorInfo();
+
     // std::cerr << "Count = " << i.use_count();
     boost::shared_ptr<const IComponent> source = i->getSource();
     TS_ASSERT(source != NULL);
     if (source != NULL) {
       TS_ASSERT_EQUALS(source->getName(), "source");
-      TS_ASSERT_DELTA(source->getPos().Y(), 0.0, 0.01);
+      TS_ASSERT_DELTA(detectorInfo.sourcePosition().Y(), 0.0, 0.01);
 
       boost::shared_ptr<const IComponent> samplepos = i->getSample();
       TS_ASSERT_EQUALS(samplepos->getName(), "some-surface-holder");
-      TS_ASSERT_DELTA(samplepos->getPos().X(), 0.0, 0.01);
+      TS_ASSERT_DELTA(detectorInfo.samplePosition().X(), 0.0, 0.01);
 
-      boost::shared_ptr<const Detector> ptrDet103 =
-          boost::dynamic_pointer_cast<const Detector>(i->getDetector(103));
-      if (ptrDet103 != NULL) {
-        TS_ASSERT_EQUALS(ptrDet103->getID(), 103);
-        TS_ASSERT_EQUALS(ptrDet103->getName(), "linear-detector-pixel");
-        TS_ASSERT_DELTA(ptrDet103->getPos().Z(), 12.403, 0.01);
-        TS_ASSERT_DELTA(ptrDet103->getPos().Y(), 0.1164, 0.01);
-        double d = ptrDet103->getPos().distance(samplepos->getPos());
+      size_t detectorIndex;
+      auto hasDetector(true);
+      try {
+        detectorIndex = detectorInfo.indexOf(103);
+      } catch (std::out_of_range &) {
+        hasDetector = false;
+      }
+
+      if (hasDetector) {
+        const auto &detector103 = detectorInfo.detector(detectorIndex);
+        TS_ASSERT_EQUALS(detector103.getID(), 103);
+        TS_ASSERT_EQUALS(detector103.getName(), "linear-detector-pixel");
+        TS_ASSERT_DELTA(detectorInfo.position(detectorIndex).Z(), 12.403, 0.01);
+        TS_ASSERT_DELTA(detectorInfo.position(detectorIndex).Y(), 0.1164, 0.01);
+        const auto d = detectorInfo.l2(detectorIndex);
         TS_ASSERT_DELTA(d, 2.1561, 0.0001);
-        double cmpDistance = ptrDet103->getDistance(*samplepos);
-        TS_ASSERT_DELTA(cmpDistance, 2.1561, 0.0001);
       }
     }
 

@@ -73,6 +73,7 @@ public:
     fitalg.setProperty("Function", funtion_string);
     fitalg.setProperty("InputWorkspace", data_workspace);
     fitalg.setPropertyValue("WorkspaceIndex", "0");
+    fitalg.setProperty("IgnoreInvalidData", true);
     TS_ASSERT_THROWS_NOTHING(TS_ASSERT(fitalg.execute()));
     TS_ASSERT(fitalg.isExecuted());
 

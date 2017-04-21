@@ -456,8 +456,7 @@ void ProcessBackground::selectBkgdPoints() {
   // explicitly
   string outbkgdparwsname =
       getPropertyValue("OutputBackgroundParameterWorkspace");
-  if (outbkgdparwsname.size() > 0 &&
-      outbkgdparwsname.compare("_dummy02") != 0) {
+  if (!outbkgdparwsname.empty() && outbkgdparwsname.compare("_dummy02") != 0) {
     // Will fit the selected background
     string bkgdfunctype = getPropertyValue("OutputBackgroundType");
     fitBackgroundFunction(bkgdfunctype);
@@ -692,7 +691,7 @@ ProcessBackground::filterForBackground(BackgroundFunction_sptr bkgdfunction) {
 
   // Optional output
   string userbkgdwsname = getPropertyValue("UserBackgroundWorkspace");
-  if (userbkgdwsname.size() == 0)
+  if (userbkgdwsname.empty())
     throw runtime_error("In mode SelectBackgroundPoints, "
                         "UserBackgroundWorkspace must be given!");
 

@@ -1,8 +1,13 @@
 #include "MantidCrystal/SetGoniometer.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
+#include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidKernel/Strings.h"
 #include "MantidKernel/TimeSeriesProperty.h"
+
+#include <boost/algorithm/string/classification.hpp>
+#include <boost/algorithm/string/split.hpp>
 
 using Mantid::Geometry::Goniometer;
 using namespace Mantid::Geometry;

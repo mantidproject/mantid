@@ -113,7 +113,7 @@ class ResNorm(PythonAlgorithm):
             input_str += '%s,i%d;' % (padded_res_ws, idx)
             prog_namer.report('Generating PlotPeak input string')
 
-        base_name = padded_res_ws.getName()
+        base_name = padded_res_ws.name()
         out_name = '%sResNorm_Fit' % (base_name[:-3])
         function = 'name=TabulatedFunction,Workspace=%s,Scaling=1,Shift=0,XScaling=1,ties=(Shift=0)' % self._van_ws
 

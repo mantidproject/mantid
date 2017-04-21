@@ -30,6 +30,11 @@ public:
     return std::unique_ptr<GroupingWorkspace>(doClone());
   }
 
+  /// Returns a default-initialized clone of the workspace
+  std::unique_ptr<GroupingWorkspace> cloneEmpty() const {
+    return std::unique_ptr<GroupingWorkspace>(doCloneEmpty());
+  }
+
   /** Gets the name of the workspace type
   @return Standard string name  */
   const std::string id() const override { return "GroupingWorkspace"; }
@@ -46,6 +51,9 @@ protected:
 private:
   GroupingWorkspace *doClone() const override {
     return new GroupingWorkspace(*this);
+  }
+  GroupingWorkspace *doCloneEmpty() const override {
+    return new GroupingWorkspace();
   }
 };
 

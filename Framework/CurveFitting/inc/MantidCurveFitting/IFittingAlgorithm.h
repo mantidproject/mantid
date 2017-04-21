@@ -75,7 +75,7 @@ protected:
   std::vector<std::string> getCostFunctionNames() const;
   void declareCostFunctionProperty();
   boost::shared_ptr<CostFunctions::CostFuncFitting>
-  getCostFunctionProperty() const;
+  getCostFunctionInitialized() const;
 
   /// Keep the domain type
   API::IDomainCreator::DomainType m_domainType{API::IDomainCreator::Simple};

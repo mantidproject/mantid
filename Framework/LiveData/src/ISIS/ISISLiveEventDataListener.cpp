@@ -41,9 +41,8 @@ Kernel::Logger g_log("ISISLiveEventDataListener");
  * The constructor
  */
 ISISLiveEventDataListener::ISISLiveEventDataListener()
-    : API::ILiveListener(), m_isConnected(false), m_stopThread(false),
-      m_runNumber(0), m_daeHandle(), m_numberOfPeriods(0),
-      m_numberOfSpectra(0) {
+    : LiveListener(), m_isConnected(false), m_stopThread(false), m_runNumber(0),
+      m_daeHandle(), m_numberOfPeriods(0), m_numberOfSpectra(0) {
   m_warnings["period"] = "Period number is outside the range. Changed to 0.";
 }
 
@@ -183,8 +182,8 @@ boost::shared_ptr<API::Workspace> ISISLiveEventDataListener::extractData() {
                 1));
 
     // Copy geometry over.
-    API::WorkspaceFactory::Instance().initializeFromParent(m_eventBuffer[i],
-                                                           temp, false);
+    API::WorkspaceFactory::Instance().initializeFromParent(*m_eventBuffer[i],
+                                                           *temp, false);
 
     // Clear out the old logs
     temp->mutableRun().clearTimeSeriesLogs();
@@ -364,7 +363,7 @@ void ISISLiveEventDataListener::initEventBuffer(
 
       // Copy geometry over.
       API::WorkspaceFactory::Instance().initializeFromParent(
-          m_eventBuffer[0], m_eventBuffer[i], false);
+          *m_eventBuffer[0], *m_eventBuffer[i], false);
     }
   }
 }

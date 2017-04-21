@@ -8,6 +8,7 @@
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/ParameterTie.h"
 #include "MantidCurveFitting/Constraints/BoundaryConstraint.h"
+#include "MantidKernel/Strings.h"
 
 #include <algorithm>
 #include <iostream>
@@ -104,7 +105,7 @@ std::string CrystalFieldSpectrum::asString() const {
   std::vector<std::string> attr = this->getAttributeNames();
   for (const auto &attName : attr) {
     std::string attValue = this->getAttribute(attName).value();
-    if (!attValue.empty() && attValue != "\"\"") {
+    if (!attValue.empty() && attValue != "\"\"" && attValue != "()") {
       ostr << ',' << attName << '=' << attValue;
     }
   }
@@ -116,11 +117,29 @@ std::string CrystalFieldSpectrum::asString() const {
     }
   }
 
+  // collect non-default constraints
+  std::vector<std::string> constraints;
+  for (size_t i = 0; i < m_nOwnParams; i++) {
+    auto constraint = writeConstraint(i);
+    if (!constraint.empty()) {
+      constraints.push_back(constraint);
+    }
+  }
+
+  // collect the non-default ties
+  std::vector<std::string> ties;
+  for (size_t i = 0; i < m_nOwnParams; i++) {
+    auto tie = writeTie(i);
+    if (!tie.empty()) {
+      ties.push_back(tie);
+    }
+  }
+
   // Print parameters of the important peaks only
   const CompositeFunction &spectrum =
       dynamic_cast<const CompositeFunction &>(*m_target);
   for (size_t ip = 0; ip < m_nPeaks; ++ip) {
-    const auto &peak = *spectrum.getFunction(ip);
+    const auto &peak = dynamic_cast<IPeakFunction &>(*spectrum.getFunction(ip));
     // Print peak's atributes
     auto attr = peak.getAttributeNames();
     for (const auto &attName : attr) {
@@ -136,11 +155,30 @@ std::string CrystalFieldSpectrum::asString() const {
         ostr << ",f" << ip << "." << peak.parameterName(i) << '='
              << peak.getParameter(i);
       }
+      auto constraint = writeConstraint(i);
+      if (!constraint.empty()) {
+        constraints.push_back(constraint);
+      }
+      auto tieStr = writeTie(i);
+      if (!tieStr.empty()) {
+        ties.push_back(tieStr);
+      }
     }
+  } // for peaks
+
+  // print constraints
+  if (!constraints.empty()) {
+    ostr << ",constraints=("
+         << Kernel::Strings::join(constraints.begin(), constraints.end(), ",")
+         << ")";
   }
 
-  writeConstraints(ostr);
-  writeTies(ostr);
+  // print the ties
+  if (!ties.empty()) {
+    ostr << ",ties=(" << Kernel::Strings::join(ties.begin(), ties.end(), ",")
+         << ")";
+  }
+
   return ostr.str();
 }
 

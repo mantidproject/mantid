@@ -80,10 +80,6 @@ void ExtractMask::exec() {
   }
   PARALLEL_CHECK_INTERUPT_REGION
 
-  // Clear all the "masked" bits on the output masked workspace
-  Geometry::ParameterMap &pmap = maskWS->instrumentParameters();
-  pmap.clearParametersByName("masked");
-
   g_log.information() << maskWS->getNumberMasked() << " spectra are masked\n";
   g_log.information() << detectorList.size() << " detectors are masked\n";
   setProperty("OutputWorkspace", maskWS);

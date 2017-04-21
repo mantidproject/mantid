@@ -6,5 +6,7 @@
         <file>pvIcon.png</file>
         <file>pqEditColor24.png</file>
         <file>resetViewToAll24.png</file>
+        <file>pqSlice24.png</file>
+        <file>pqThreshold24.png</file>
     </qresource>
 </RCC>

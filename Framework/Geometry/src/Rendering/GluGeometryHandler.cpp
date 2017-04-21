@@ -3,6 +3,7 @@
 #include "MantidGeometry/Objects/Object.h"
 #include "MantidGeometry/Rendering/GeometryHandler.h"
 #include "MantidGeometry/Rendering/GluGeometryRenderer.h"
+#include "MantidKernel/make_unique.h"
 
 #include <boost/make_shared.hpp>
 

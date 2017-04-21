@@ -8,6 +8,7 @@
 #include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidAPI/WorkspaceHistory.h"
 #include "MantidDataHandling/LoadNexusProcessed.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/RebinnedOutput.h"
@@ -1676,17 +1677,6 @@ std::map<std::string, std::string> LoadNexusProcessed::validateInputs() {
   if (specMax < specMin) {
     errorList["SpectrumMin"] = "SpectrumMin must be smaller than SpectrumMax";
     errorList["SpectrumMax"] = "SpectrumMax must be larger than SpectrumMin";
-  }
-
-  // Next check that SpecMax is less than maximum int
-  if (specMax > INT_MAX) {
-    errorList["SpectrumMax"] =
-        "SpectrumMax must be less than " + to_string(INT_MAX);
-  }
-
-  if (specMin > INT_MAX) {
-    errorList["SpectrumMin"] =
-        "SpectrumMin must be less than " + to_string(INT_MAX);
   }
 
   // Finished testing return any errors

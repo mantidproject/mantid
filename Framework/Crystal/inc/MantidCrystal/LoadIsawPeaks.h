@@ -3,6 +3,7 @@
 
 #include "MantidKernel/System.h"
 #include "MantidAPI/IFileLoader.h"
+#include "MantidAPI/DetectorInfo.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 
 namespace Mantid {
@@ -43,11 +44,6 @@ private:
 
   /// Run the algorithm
   void exec() override;
-
-  /// Reads calibration/detector section and returns first word of next line
-  std::string ApplyCalibInfo(std::ifstream &in, std::string startChar,
-                             Geometry::Instrument_const_sptr instr_old,
-                             Geometry::Instrument_const_sptr instr, double &T0);
 
   /// Reads first line of peaks file and returns first word of next line
   std::string readHeader(Mantid::DataObjects::PeaksWorkspace_sptr outWS,

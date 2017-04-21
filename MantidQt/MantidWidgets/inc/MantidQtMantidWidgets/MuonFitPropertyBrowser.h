@@ -2,7 +2,8 @@
 #define MUONFITPROPERTYBROWSER_H_
 
 #include "MantidQtMantidWidgets/FitPropertyBrowser.h"
-#include "MantidQtMantidWidgets/IMuonFitFunctionControl.h"
+#include "MantidQtMantidWidgets/IMuonFitDataModel.h"
+#include "MantidQtMantidWidgets/IMuonFitFunctionModel.h"
 
 /* Forward declarations */
 
@@ -32,7 +33,8 @@ class PropertyHandler;
 
 class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS MuonFitPropertyBrowser
     : public MantidQt::MantidWidgets::FitPropertyBrowser,
-      public MantidQt::MantidWidgets::IMuonFitFunctionControl {
+      public MantidQt::MantidWidgets::IMuonFitFunctionModel,
+      public IMuonFitDataModel {
   Q_OBJECT
 
 public:
@@ -76,6 +78,8 @@ public:
   }
   /// Set multiple fitting mode on or off
   void setMultiFittingMode(bool enabled) override;
+  /// After fit checks done, continue
+  void continueAfterChecks(bool sequential) override;
   /// Remove a plotted guess
   void doRemoveGuess() override { emit removeGuess(); }
   /// Plot a guess function
@@ -102,6 +106,8 @@ signals:
   void userChangedDatasetIndex(int index) override;
   /// Emitted when "fit to raw data" is changed
   void fitRawDataClicked(bool enabled) override;
+  /// Emitted when fit is about to be run
+  void preFitChecksRequested(bool sequential) override;
 
 protected:
   void showEvent(QShowEvent *e) override;

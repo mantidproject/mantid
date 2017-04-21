@@ -1,5 +1,6 @@
 #include "MantidCrystal/OptimizeLatticeForCellType.h"
 #include "MantidCrystal/GSLFunctions.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IPeakFunction.h"

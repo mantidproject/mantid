@@ -197,8 +197,6 @@ def write_scd_fullprof_kvector(user_header, wave_length, k_vector_dict, peak_dic
     # END-IF
 
     # peak intensities
-    print '[DB...BAT] Number of peaks to output: ', len(peak_dict_list)
-
     for i_peak, peak_dict in enumerate(peak_dict_list):
         # check
         assert isinstance(peak_dict, dict), '%d-th peak must be a dictionary but not %s.' % (i_peak,

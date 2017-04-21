@@ -16,6 +16,7 @@ set ( TEST_PY_FILES
   InstrumentInfoTest.py
   IPropertySettingsTest.py
   ListValidatorTest.py
+  LiveListenerInfoTest.py
   LogFilterTest.py
   LoggerTest.py
   MandatoryValidatorTest.py

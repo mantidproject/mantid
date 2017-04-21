@@ -3,6 +3,7 @@
 #include "MantidAlgorithms/Qhelper.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/CommonBinsValidator.h"
+#include "MantidAPI/DetectorInfo.h"
 #include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/ISpectrum.h"
@@ -75,14 +76,23 @@ void Q1D2::init() {
                   Direction::Input);
   auto mustBePositive = boost::make_shared<BoundedValidator<double>>();
   mustBePositive->setLower(0.0);
-  declareProperty("RadiusCut", 0.0, mustBePositive,
-                  "To increase resolution some wavelengths are excluded within "
-                  "this distance from\n"
-                  "the beam center (mm)");
+
+  declareProperty(
+      "RadiusCut", 0.0, mustBePositive,
+      "To increase resolution some wavelengths are excluded within "
+      "this distance from the beam center (mm). Note that RadiusCut\n"
+      " and WaveCut both need to be larger than 0 to affect \n"
+      "the effective cutoff. See the algorithm description for\n"
+      " a detailed explanation of the cutoff.");
+
   declareProperty(
       "WaveCut", 0.0, mustBePositive,
       "To increase resolution by starting to remove some wavelengths below this"
-      "freshold (angstrom)");
+      " threshold (angstrom).  Note that WaveCut\n"
+      " and RadiusCut both need to be larger than 0 to affect \n"
+      "on the effective cutoff. See the algorithm description for\n"
+      " a detailed explanation of the cutoff.");
+
   declareProperty("OutputParts", false,
                   "Set to true to output two additional workspaces which will "
                   "have the names OutputWorkspace_sumOfCounts "
@@ -161,8 +171,9 @@ void Q1D2::exec() {
     // get the bins that are included inside the RadiusCut/WaveCutcut off, those
     // to calculate for
     // const size_t wavStart = waveLengthCutOff(i);
-    const size_t wavStart = helper.waveLengthCutOff(
-        m_dataWS, getProperty("RadiusCut"), getProperty("WaveCut"), i);
+    const size_t wavStart = helper.waveLengthCutOff(m_dataWS, spectrumInfo,
+                                                    getProperty("RadiusCut"),
+                                                    getProperty("WaveCut"), i);
     if (wavStart >= m_dataWS->y(i).size()) {
       // all the spectra in this detector are out of range
       continue;
@@ -382,11 +393,17 @@ void Q1D2::calculateNormalization(
 void Q1D2::pixelWeight(API::MatrixWorkspace_const_sptr pixelAdj,
                        const size_t wsIndex, double &weight,
                        double &error) const {
-  const V3D samplePos = m_dataWS->getInstrument()->getSample()->getPos();
+  const auto &detectorInfo = m_dataWS->detectorInfo();
+  const V3D samplePos = detectorInfo.samplePosition();
 
-  if (m_doSolidAngle)
-    weight = m_dataWS->getDetector(wsIndex)->solidAngle(samplePos);
-  else
+  if (m_doSolidAngle) {
+    weight = 0.0;
+    for (const auto detID : m_dataWS->getSpectrum(wsIndex).getDetectorIDs()) {
+      const auto index = detectorInfo.indexOf(detID);
+      if (!detectorInfo.isMasked(index))
+        weight += detectorInfo.detector(index).solidAngle(samplePos);
+    }
+  } else
     weight = 1.0;
 
   if (weight < 1e-200) {

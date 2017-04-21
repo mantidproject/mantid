@@ -206,7 +206,7 @@ class AlignComponents(PythonAlgorithm):
 
         # Need to get instrument in order to check components are valid
         if self.getProperty("Workspace").value is not None:
-            wks_name = self.getProperty("Workspace").value.getName()
+            wks_name = self.getProperty("Workspace").value.name()
         else:
             inputFilename = self.getProperty("InstrumentFilename").value
             if inputFilename == "":
@@ -263,7 +263,7 @@ class AlignComponents(PythonAlgorithm):
         detID = calWS.column('detid')
 
         if self.getProperty("Workspace").value is not None:
-            wks_name = self.getProperty("Workspace").value.getName()
+            wks_name = self.getProperty("Workspace").value.name()
         else:
             wks_name = "alignedWorkspace"
             api.LoadEmptyInstrument(Filename=self.getProperty("InstrumentFilename").value,

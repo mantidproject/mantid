@@ -1,15 +1,13 @@
 #include "SampleLogDialogBase.h"
 
-// Mantid API
-#include <MantidAPI/MultipleExperimentInfos.h>
-#include <MantidAPI/IMDWorkspace.h>
+#include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/IMDWorkspace.h"
+#include "MantidAPI/MultipleExperimentInfos.h"
 #include "MantidAPI/Run.h"
 
-// Mantid Kernel
-#include <MantidKernel/TimeSeriesProperty.h>
-#include <MantidKernel/ArrayProperty.h>
+#include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/Strings.h"
 
-// Qt
 #include <QMenu>
 #include <QFileInfo>
 #include <QHeaderView>
@@ -86,11 +84,14 @@ void SampleLogDialogBase::importSelectedLogs() {
 *	@date 05/11/2009
 */
 void SampleLogDialogBase::showLogStatistics() {
+
+  const auto &filter = this->getFilterType();
+
   QList<QTreeWidgetItem *> items = m_tree->selectedItems();
   QListIterator<QTreeWidgetItem *> pItr(items);
   if (pItr.hasNext()) {
     // Show only the first one
-    showLogStatisticsOfItem(pItr.next());
+    showLogStatisticsOfItem(pItr.next(), filter);
   }
 }
 
@@ -99,12 +100,14 @@ void SampleLogDialogBase::showLogStatistics() {
 * Show the stats of the log for the selected item
 *
 *	@param item :: The item to be imported
+* @param filter :: Type of filtering (default none)
 *	@throw invalid_argument if format identifier for the item is wrong
 *
 *	@author Martyn Gigg, Tessella Support Services plc
 *	@date 05/11/2009
 */
-void SampleLogDialogBase::showLogStatisticsOfItem(QTreeWidgetItem *item) {
+void SampleLogDialogBase::showLogStatisticsOfItem(
+    QTreeWidgetItem *item, const LogFilterGenerator::FilterType filter) {
   // Assume that you can't show the stats
   for (size_t i = 0; i < NUM_STATS; i++) {
     statValues[i]->setText(QString(""));
@@ -127,19 +130,23 @@ void SampleLogDialogBase::showLogStatisticsOfItem(QTreeWidgetItem *item) {
       return;
 
     // Now the log
+    const auto &logName = item->text(0).toStdString();
     Mantid::Kernel::TimeSeriesPropertyStatistics stats;
-    Mantid::Kernel::Property *logData =
-        m_ei->run().getLogData(item->text(0).toStdString());
-    // Get the stas if its a series of int or double; fail otherwise
+    Mantid::Kernel::Property *logData = m_ei->run().getLogData(logName);
+    // Get the stats if its a series of int or double; fail otherwise
     Mantid::Kernel::TimeSeriesProperty<double> *tspd =
         dynamic_cast<TimeSeriesProperty<double> *>(logData);
     Mantid::Kernel::TimeSeriesProperty<int> *tspi =
         dynamic_cast<TimeSeriesProperty<int> *>(logData);
     double timeAvg = 0.;
+    LogFilterGenerator generator(filter, m_ei->run());
+    const auto &logFilter = generator.generateFilter(logName);
     if (tspd) {
+      ScopedFilter<double> applyFilter(tspd, std::move(logFilter));
       stats = tspd->getStatistics();
       timeAvg = tspd->timeAverageValue();
     } else if (tspi) {
+      ScopedFilter<int> applyFilter(tspi, std::move(logFilter));
       stats = tspi->getStatistics();
       timeAvg = tspi->timeAverageValue();
     } else

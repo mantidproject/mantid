@@ -848,6 +848,7 @@ public slots:
   //@}
   void updateDataCurves();
   void reverseCurveOrder();
+  int getNumCurves() { return n_curves; };
 
 signals:
   void selectedGraph(Graph *);
@@ -898,6 +899,8 @@ private:
   void niceLogScales(QwtPlot::Axis axis);
   void deselectCurves();
   void addLegendItem();
+  /// trim a title from a legend key
+  QString trimTableNameFromLegendKey(const QString &key) const;
 
   QString yAxisTitleFromFirstCurve();
 

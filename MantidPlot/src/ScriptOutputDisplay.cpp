@@ -4,7 +4,6 @@
 #include <MantidQtAPI/pixmaps.h>
 
 #include <QDateTime>
-#include <QFileDialog>
 #include <QKeyEvent>
 #include <QMenu>
 #include <QPrintDialog>

@@ -4,7 +4,6 @@ set( INC_FILES
  WidgetDllOption.h
  LowHighStepInputWidget.h
  SimpleBinInputWidget.h
- ThresholdRangeWidget.h
 )
 
 # header files that are mocced
@@ -12,14 +11,12 @@ set( HDR_FILES
   BinInputWidget.h
   LowHighStepInputWidget.h
   SimpleBinInputWidget.h
-  ThresholdRangeWidget.h
 )
 
 # source files
 set( SRC_FILES
   LowHighStepInputWidget.cpp
   SimpleBinInputWidget.cpp
-  ThresholdRangeWidget.cpp
 )
 
 # Handle QtWidget header files
@@ -39,9 +36,6 @@ if (OSX_VERSION VERSION_GREATER 10.8)
 endif ()
 
 add_definitions( -DIN_MANTIDPARAVIEWQT_MANTIDPARAVIEWWIDGETS )
-
-# Put library into subfolder.
-#SET_TARGET_OUTPUT_DIRECTORY(MantidParaViewQtWidgets PVPlugins)
 
 install( TARGETS MantidParaViewQtWidgets ${SYSTEM_PACKAGE_TARGET} DESTINATION ${LIB_DIR} )
 

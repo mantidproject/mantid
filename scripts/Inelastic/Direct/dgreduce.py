@@ -289,7 +289,7 @@ def abs_units(wb_for_run,sample_run,monovan_run,wb_for_monovanadium,samp_rmm,sam
 
     wksp_out = arb_units(wb_for_run,sample_run,ei_guess,rebin,map_file,monovan_run,wb_for_monovanadium,**kwargs)
 
-    if  results_name != wksp_out.getName():
+    if  results_name != wksp_out.name():
         RenameWorkspace(InputWorkspace=wksp_out,OutputWorkspace=results_name)
 
     return wksp_out

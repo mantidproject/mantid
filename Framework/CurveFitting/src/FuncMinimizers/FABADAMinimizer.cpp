@@ -1002,7 +1002,7 @@ bool FABADAMinimizer::IterationContinuation() {
       std::string failed = "";
       for (size_t i = 0; i < m_nParams; ++i) {
         if (!m_par_converged[i]) {
-          failed = failed + m_FitFunction->parameterName(i) + ", ";
+          failed.append(m_FitFunction->parameterName(i)).append(", ");
         }
       }
       failed.replace(failed.end() - 2, failed.end(), ".");
