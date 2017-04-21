@@ -58,6 +58,7 @@ void SaveIsawPeaks::exec() {
   PeaksWorkspace_sptr ws = getProperty("InputWorkspace");
   std::vector<Peak> peaks = ws->getPeaks();
   inst = ws->getInstrument();
+  const DetectorInfo &detectorInfo = ws->detectorInfo();
 
   // We must sort the peaks first by run, then bank #, and save the list of
   // workspace indices of it
@@ -85,6 +86,7 @@ void SaveIsawPeaks::exec() {
     Strings::convert(bankName, bank);
     if (bank == 0)
       continue;
+    if (bankMasked(comp, detectorInfo)) continue;
     // Track unique bank numbers
     uniqueBanks.insert(bank);
   }
@@ -390,6 +392,38 @@ void SaveIsawPeaks::exec() {
 
   out.flush();
   out.close();
+}
+
+bool SaveIsawPeaks::bankMasked(IComponent_const_sptr parent, const DetectorInfo &detectorInfo) {
+  std::vector<Geometry::IComponent_const_sptr> children;
+  boost::shared_ptr<const Geometry::ICompAssembly> asmb =
+    boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(parent);
+  asmb->getChildren(children, false);
+  if (children[0]->getName().compare("sixteenpack") == 0) {
+    asmb = boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(
+      children[0]);
+    children.clear();
+    asmb->getChildren(children, false);
+  }
+   
+  for (auto &col : children) {
+    boost::shared_ptr<const Geometry::ICompAssembly> asmb2 =
+      boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(col);
+    std::vector<Geometry::IComponent_const_sptr> grandchildren;
+    asmb2->getChildren(grandchildren, false);
+
+    for (auto &row : grandchildren) {
+      Detector *d =
+        dynamic_cast<Detector *>(const_cast<IComponent *>(row.get()));
+      if (d) {
+      auto detID = d->getID();
+      if (detID < 0) continue;
+      const auto index = detectorInfo.indexOf(detID);
+      if (!detectorInfo.isMasked(index)) return false;
+      }
+    }
+  }
+  return true;
 }
 
 V3D SaveIsawPeaks::findPixelPos(std::string bankName, int col, int row) {
