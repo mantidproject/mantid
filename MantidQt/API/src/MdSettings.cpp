@@ -224,10 +224,10 @@ bool MdSettings::getUserSettingAutoColorAxes() {
   QSettings settings;
 
   settings.beginGroup(m_vsiGroup);
-  bool logScale = settings.value(m_lblUserSettingAutoColorAxes, false).toBool();
+  bool autoColor = settings.value(m_lblUserSettingAutoColorAxes, false).toBool();
   settings.endGroup();
 
-  return logScale;
+  return autoColor;
 }
 
 void MdSettings::setUserSettingAutoColorAxes(bool autoColor) {
