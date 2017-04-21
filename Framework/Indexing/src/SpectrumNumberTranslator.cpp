@@ -91,12 +91,12 @@ SpectrumNumberTranslator::makeIndexSet(SpectrumNumber min,
   static_cast<void>(m_spectrumNumberToPartition.at(min));
   static_cast<void>(m_spectrumNumberToPartition.at(max));
 
-  // The order of spectrum numbers can be arbitrary so we need to iterate.
+  std::call_once(m_mapSetup, &SpectrumNumberTranslator::setupMaps, this);
   std::vector<size_t> indices;
-  for (const auto &index : m_spectrumNumberToIndex) {
-    if (index.first >= min && index.first <= max)
-      indices.push_back(index.second);
-  }
+  const auto begin = lower_bound(m_spectrumNumberToIndex, min);
+  const auto end = upper_bound(m_spectrumNumberToIndex, max);
+  for (auto it = begin; it != end; ++it)
+    indices.push_back(it->second);
   return SpectrumIndexSet(indices, m_spectrumNumberToIndex.size());
 }
 
@@ -122,11 +122,7 @@ SpectrumNumberTranslator::makeIndexSet(GlobalSpectrumIndex min,
 SpectrumIndexSet SpectrumNumberTranslator::makeIndexSet(
     const std::vector<SpectrumNumber> &spectrumNumbers) const {
   checkUniqueSpectrumNumbers();
-  // May result in re-sorting, but once sorted it is fast. Can optimize later.
-  std::sort(m_spectrumNumberToIndex.begin(), m_spectrumNumberToIndex.end(),
-            [](const std::pair<SpectrumNumber, size_t> &a,
-               const std::pair<SpectrumNumber, size_t> &b)
-                -> bool { return std::get<0>(a) < std::get<0>(b); });
+  std::call_once(m_mapSetup, &SpectrumNumberTranslator::setupMaps, this);
   std::vector<size_t> indices;
   for (const auto &spectrumNumber : spectrumNumbers)
     if (m_spectrumNumberToPartition.at(spectrumNumber) == m_partition)
@@ -162,6 +158,13 @@ void SpectrumNumberTranslator::checkUniqueSpectrumNumbers() const {
   if (m_globalSpectrumNumbers.size() != m_spectrumNumberToPartition.size())
     throw std::logic_error("SpectrumNumberTranslator: The vector of spectrum "
                            "numbers contained duplicate entries.");
+}
+
+void SpectrumNumberTranslator::setupMaps() const {
+  std::sort(m_spectrumNumberToIndex.begin(), m_spectrumNumberToIndex.end(),
+            [](const std::pair<SpectrumNumber, size_t> &a,
+               const std::pair<SpectrumNumber, size_t> &b)
+                -> bool { return std::get<0>(a) < std::get<0>(b); });
 }
 
 } // namespace Indexing
