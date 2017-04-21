@@ -25,20 +25,56 @@ DetectorInfo::DetectorInfo(
     : m_detectorInfo(detectorInfo), m_pmap(pmap), m_instrument(instrument),
       m_lastDetector(PARALLEL_GET_MAX_THREADS),
       m_lastAssemblyDetectorIndices(PARALLEL_GET_MAX_THREADS),
-      m_lastIndex(PARALLEL_GET_MAX_THREADS, -1),
-      m_detIDToIndex(boost::make_shared<std::unordered_map<detid_t, size_t>>())
-
-{
+      m_lastIndex(PARALLEL_GET_MAX_THREADS, -1) {
   // Note: This does not seem possible currently (the instrument objects is
   // always allocated, even if it is empty), so this will not fail.
   if (!m_instrument)
-    throw std::runtime_error("Workspace does not contain an instrument!");
+    throw std::invalid_argument("DetectorInfo::DetectorInfo: Workspace does "
+                                "not contain an instrument!");
 
   m_detectorIDs = instrument->getDetectorIDs(false /* do not skip monitors */);
   const size_t nDetIds = m_detectorIDs.size();
-  m_detIDToIndex->reserve(nDetIds);
-  for (size_t i = 0; i < nDetIds; ++i)
-    (*m_detIDToIndex)[m_detectorIDs[i]] = i;
+  auto tmpDetIdToIndex =
+      boost::make_shared<std::unordered_map<detid_t, size_t>>();
+  tmpDetIdToIndex->reserve(nDetIds);
+  for (size_t i = 0; i < nDetIds; ++i) {
+    (*tmpDetIdToIndex)[m_detectorIDs[i]] = i;
+  }
+  m_detIDToIndex = std::move(tmpDetIdToIndex);
+}
+
+/** Construct DetectorInfo based on an Instrument.
+ *
+ * The Instrument reference `instrument` must be the parameterized instrument
+ * obtained from a workspace. The pointer to the ParameterMap `pmap` can be
+ * null. If it is not null, it must refer to the same map as wrapped in
+ * `instrument`. Non-const methods of DetectorInfo may only be called if `pmap`
+ * is not null. Detector ID -> index map provided as constructor argument.
+ *
+ * */
+DetectorInfo::DetectorInfo(
+    Beamline::DetectorInfo &detectorInfo,
+    boost::shared_ptr<const Geometry::Instrument> instrument,
+    Geometry::ParameterMap *pmap,
+    boost::shared_ptr<const std::unordered_map<detid_t, size_t>>
+        detIdToIndexMap)
+    : m_detectorInfo(detectorInfo), m_pmap(pmap), m_instrument(instrument),
+      m_detIDToIndex(std::move(detIdToIndexMap)),
+      m_lastDetector(PARALLEL_GET_MAX_THREADS),
+      m_lastAssemblyDetectorIndices(PARALLEL_GET_MAX_THREADS),
+      m_lastIndex(PARALLEL_GET_MAX_THREADS, -1) {
+
+  // Note: This does not seem possible currently (the instrument objects is
+  // always allocated, even if it is empty), so this will not fail.
+  if (!m_instrument)
+    throw std::invalid_argument(
+        "DetectorInfo::DetectorInfo Workspace does not contain an instrument!");
+
+  m_detectorIDs = instrument->getDetectorIDs(false /* do not skip monitors */);
+  if (m_detectorIDs.size() != m_detIDToIndex->size()) {
+    throw std::invalid_argument(
+        "DetectorInfo::DetectorInfo: ID and ID->index map do not match");
+  }
 }
 
 /// Assigns the contents of the non-wrapping part of `rhs` to this.

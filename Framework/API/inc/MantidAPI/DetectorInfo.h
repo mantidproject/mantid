@@ -70,6 +70,12 @@ public:
                boost::shared_ptr<const Geometry::Instrument> instrument,
                Geometry::ParameterMap *pmap = nullptr);
 
+  DetectorInfo(Beamline::DetectorInfo &detectorInfo,
+               boost::shared_ptr<const Geometry::Instrument> instrument,
+               Geometry::ParameterMap *pmap,
+               boost::shared_ptr<const std::unordered_map<detid_t, size_t>>
+                   detIdToIndexMap);
+
   DetectorInfo &operator=(const DetectorInfo &rhs);
 
   bool isEquivalent(const DetectorInfo &other) const;
@@ -156,7 +162,7 @@ private:
   Geometry::ParameterMap *m_pmap;
   boost::shared_ptr<const Geometry::Instrument> m_instrument;
   std::vector<detid_t> m_detectorIDs;
-  boost::shared_ptr<std::unordered_map<detid_t, size_t>> m_detIDToIndex;
+  boost::shared_ptr<const std::unordered_map<detid_t, size_t>> m_detIDToIndex;
   // The following variables are mutable, since they are initialized (cached)
   // only on demand, by const getters.
   mutable boost::shared_ptr<const Geometry::IComponent> m_source;

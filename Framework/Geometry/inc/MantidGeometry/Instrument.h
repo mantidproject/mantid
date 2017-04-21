@@ -250,7 +250,9 @@ public:
 
   size_t detectorIndex(const detid_t detID) const;
   void
-  setDetectorInfo(boost::shared_ptr<const Beamline::DetectorInfo> detectorInfo);
+  setDetectorInfo(boost::shared_ptr<const Beamline::DetectorInfo> detectorInfo,
+                  boost::shared_ptr<const std::unordered_map<detid_t, size_t>>
+                      detIdToIndexMap);
   void setComponentInfo(
       boost::shared_ptr<const Beamline::ComponentInfo> componentInfo,
       boost::shared_ptr<const std::vector<Geometry::ComponentID>> componentIds,
@@ -263,6 +265,9 @@ public:
 
   boost::shared_ptr<const std::unordered_map<Geometry::ComponentID, size_t>>
   componentIdToIndexMap() const;
+
+  boost::shared_ptr<const std::unordered_map<detid_t, size_t>>
+  detIdToIndexMap() const;
 
 private:
   /// Save information about a set of detectors to Nexus
@@ -350,9 +355,13 @@ private:
   /// associated with an ExperimentInfo oject.
   boost::shared_ptr<const std::vector<Geometry::ComponentID>> m_componentIds;
   /// Component ID to component index map. NULL unless the instrument is
-  /// associated with an ExperimentInfo oject.
+  /// associated with an ExperimentInfo object.
   boost::shared_ptr<const std::unordered_map<Geometry::ComponentID, size_t>>
       m_componentIdToIndexMap;
+  /// Detector ID to detector index map. NULL unless the instrument is
+  /// associated with an ExperimentInfo object.
+  boost::shared_ptr<const std::unordered_map<detid_t, size_t>>
+      m_detIdToIndexMap;
 };
 namespace Conversion {
 
