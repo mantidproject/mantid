@@ -70,6 +70,7 @@ private:
   void subscribeAtOffset(int64_t offset);
   void checkTopicsExist() const;
   void createConsumer();
+  int64_t getCurrentOffset(const std::string &topic, int partition);
   std::vector<RdKafka::TopicPartition *> getTopicPartitions();
 };
 

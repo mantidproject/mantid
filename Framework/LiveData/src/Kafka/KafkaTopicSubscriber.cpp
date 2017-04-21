@@ -3,7 +3,9 @@
 
 #include <algorithm>
 #include <cassert>
+#include <chrono>
 #include <sstream>
+#include <thread>
 
 using RdKafka::Conf;
 using RdKafka::KafkaConsumer;
@@ -32,6 +34,7 @@ std::unique_ptr<Conf> createGlobalConfiguration(const std::string &brokerAddr) {
   conf->set("enable.auto.commit", "false", errorMsg);
   conf->set("enable.auto.offset.store", "false", errorMsg);
   conf->set("offset.store.method", "none", errorMsg);
+  conf->set("api.version.request", "true", errorMsg);
   return conf;
 }
 
@@ -116,9 +119,10 @@ void KafkaTopicSubscriber::subscribe(int64_t offset) {
  */
 std::vector<RdKafka::TopicPartition *>
 KafkaTopicSubscriber::getTopicPartitions() {
+  using namespace std::chrono_literals;
   std::vector<RdKafka::TopicPartition *> partitions;
-  subscribe();
   m_consumer->subscribe(m_topicNames);
+  std::this_thread::sleep_for(2s);
   auto error = m_consumer->assignment(partitions);
   if (error != RdKafka::ERR_NO_ERROR) {
     throw std::runtime_error("In KafkaTopicSubscriber failed to get "
@@ -129,13 +133,12 @@ KafkaTopicSubscriber::getTopicPartitions() {
 }
 
 /**
- * Setup the connection to the broker for the configured topic
+ * Setup the connection to the broker for the configured topics
  * at a specified time
  * @param time (milliseconds since 1 Jan 1970) at which to start listening on
  * topic
  */
 void KafkaTopicSubscriber::subscribeAtTime(int64_t time) {
-  // Get list of TopicPartitions for the topic
   auto partitions = getTopicPartitions();
   for (auto partition : partitions) {
     partition->set_offset(time);
@@ -146,11 +149,44 @@ void KafkaTopicSubscriber::subscribeAtTime(int64_t time) {
     throw std::runtime_error("In KafkaTopicSubscriber failed to lookup "
                              "partition offsets for specified start time.");
   }
-  LOGGER().debug() << "Attempting to subscribe to " << partitions.size()
-                   << " partitions in KafkaTopicSubscriber::subscribeAtTime()"
-                   << std::endl;
+
+  if (LOGGER().debug()) {
+    for (auto partition : partitions) {
+      LOGGER().debug() << "Assigning topic: " << partition->topic()
+                       << ", partition: " << partition->partition()
+                       << ", time (milliseconds past epoch): " << time
+                       << ", looked up offset as: " << partition->offset()
+                       << ", current high watermark is: "
+                       << getCurrentOffset(partition->topic(),
+                                           partition->partition())
+                       << std::endl;
+    }
+  }
+
   error = m_consumer->assign(partitions);
   reportSuccessOrFailure(error, 0);
+}
+
+/**
+ * Query the broker for the current high watermark offset for a particular topic
+ * and partition, useful for debugging
+ * @param topic : topic name
+ * @param partition : partition number
+ * @return high watermark offset
+ */
+int64_t KafkaTopicSubscriber::getCurrentOffset(const std::string &topic,
+                                               int partition) {
+  int64_t lowOffset = 0;
+  int64_t highOffset = 0;
+  auto err = m_consumer->query_watermark_offsets(topic, partition, &lowOffset,
+                                                 &highOffset, -1);
+  if (err != RdKafka::ERR_NO_ERROR) {
+    LOGGER().debug()
+        << "Failed to query current high watermark offset, returning as -1 "
+        << RdKafka::err2str(err) << std::endl;
+    return -1;
+  }
+  return highOffset;
 }
 
 /**
