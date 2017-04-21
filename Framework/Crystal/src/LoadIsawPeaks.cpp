@@ -191,7 +191,8 @@ std::string LoadIsawPeaks::readHeader(PeaksWorkspace_sptr outWS,
     int bank = 0;
     // Save all bank numbers in header lines
     Strings::convert(getWord(in, false), bank);
-    if (s == "5") det.push_back(bank);
+    if (s == "5")
+      det.push_back(bank);
   }
   // Find bank numbers in instument that are not in header lines
   std::string maskBanks;
@@ -213,19 +214,20 @@ std::string LoadIsawPeaks::readHeader(PeaksWorkspace_sptr outWS,
     int bank = 0;
     Strings::convert(bankName, bank);
     for (size_t j = 0; j < det.size(); j++) {
-      if(bank == det[j]) {
+      if (bank == det[j]) {
         bank = 0;
         continue;
       }
     }
-    if (bank == 0) continue;
+    if (bank == 0)
+      continue;
     // Track unique bank numbers
     maskBanks += bankName + ",";
- }
- 
- if (!maskBanks.empty()) {
+  }
+
+  if (!maskBanks.empty()) {
     // remove last comma
-    maskBanks.resize (maskBanks.size () - 1);
+    maskBanks.resize(maskBanks.size() - 1);
     // Mask banks that are not in header lines
     Algorithm_sptr alg = createChildAlgorithm("MaskBTP");
     alg->setProperty<Workspace_sptr>("Workspace", outWS);
