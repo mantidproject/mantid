@@ -189,6 +189,25 @@ public:
     // Note no detector counted
     TS_ASSERT_EQUALS(visitor.size(), expectedSize);
   }
+
+  void test_visitor_collects_detector_id_to_index_mappings() {
+
+    // Create a very basic instrument to visit
+    auto visitee = createMinimalInstrument(V3D(0, 0, 0) /*source pos*/,
+                                           V3D(10, 0, 0) /*sample pos*/
+                                           ,
+                                           V3D(11, 0, 0) /*detector position*/);
+
+    InfoComponentVisitor visitor(1, [](const Mantid::detid_t)
+                                        -> size_t { return 0; });
+
+    // Visit everything
+    visitee->registerContents(visitor);
+
+    TS_ASSERT_EQUALS(visitor.detectorIdToIndexMap().size(), 1);
+    TS_ASSERT_EQUALS(visitor.detectorIdToIndexMap().at(1),
+                     0); // ID 1 to index 0
+  }
 };
 
 class InfoComponentVisitorTestPerformance : public CxxTest::TestSuite {

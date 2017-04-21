@@ -72,6 +72,9 @@ private:
   std::unordered_map<Mantid::Geometry::IComponent *, size_t>
       m_componentIdToIndexMap;
 
+  /// Detector ID -> index mappings
+  std::unordered_map<detid_t, size_t> m_detectorIdToIndexMap;
+
 public:
   InfoComponentVisitor(const size_t nDetectors,
                        std::function<size_t(Mantid::detid_t)> mapperFunc);
@@ -93,6 +96,7 @@ public:
   const std::unordered_map<Mantid::Geometry::IComponent *, size_t> &
   componentIdToIndexMap() const;
 
+  const std::unordered_map<detid_t, size_t> &detectorIdToIndexMap() const;
   size_t size() const;
 };
 } // namespace API
