@@ -161,9 +161,10 @@ void LoadILLReflectometry::init() {
   declareProperty("ScatteringType", "incoherent",
                   boost::make_shared<StringListValidator>(scattering),
                   "Scattering type used to calculate the Bragg angle");
-  setPropertySettings("ScatteringType",
-                      Kernel::make_unique<EnabledWhenProperty>(
-                          "InputAngle", IS_NOT_EQUAL_TO, "user defined"));
+  // setPropertySettings("ScatteringType",
+  //                    Kernel::make_unique<EnabledWhenProperty>(
+  //                        "InputAngle", IS_NOT_EQUAL_TO, "user defined"));
+  // user defined and Figaro
 
   declareProperty(Kernel::make_unique<FileProperty>("DirectBeam", std::string(),
                                                     FileProperty::OptionalLoad,
@@ -271,6 +272,7 @@ void LoadILLReflectometry::initNames(NeXus::NXEntry &entry) {
   if (m_instrumentName == "D17") {
     m_detectorDistance = "det";
     m_detectorAngleName = "dan.value";
+    m_sampleAngleName = "san.value";
     m_offsetFrom = "VirtualChopper";
     m_offsetName = "open_offset";
     m_pixelCentre = 135.75; // or 135.75 or 132.5
@@ -280,6 +282,7 @@ void LoadILLReflectometry::initNames(NeXus::NXEntry &entry) {
   } else if (m_instrumentName == "Figaro") {
     m_detectorDistance = "DTR";
     m_detectorAngleName = "VirtualAxis.DAN_actual_angle";
+    m_sampleAngleName = "CollAngle.actual_coll_angle";
     m_offsetFrom = "CollAngle";
     m_offsetName = "openOffset";
     m_pixelCentre = double(m_numberOfHistograms) / 2.0;
@@ -606,7 +609,8 @@ void LoadILLReflectometry::loadBeam(MatrixWorkspace_sptr &beamWS,
     /* uncommented since validation needed. This cannot be found in cosmos
     // set offset angle
     if (!(incidentAngle == "user defined")) {
-      double sampleAngle = getDouble("san.value"); // read directly from Nexus
+      double sampleAngle = getDouble(m_sampleAngleName); // read directly from
+    Nexus
     file
       double detectorAngle = getDouble(m_detectorAngleName); // read directly
     from Nexus file
@@ -722,7 +726,7 @@ double LoadILLReflectometry::computeBraggAngle() {
   const std::string inputAngle = getPropertyValue("InputAngle");
   std::string incidentAngle{std::string()};
   if (inputAngle == "sample angle" || inputAngle == "detector angle") {
-    inputAngle == "sample angle" ? incidentAngle = "san.value"
+    inputAngle == "sample angle" ? incidentAngle = m_sampleAngleName
                                  : incidentAngle = m_detectorAngleName;
   } else
     incidentAngle = "user defined";
@@ -747,11 +751,13 @@ double LoadILLReflectometry::computeBraggAngle() {
   if (m_instrumentName == "Figaro") {
     down = getDouble("theta");
     down > 0. ? down = 1. : down = -1.;
+    if (inputAngle == "detectorAngle")
+      down = down;
   }
   double sign{-down};
   if (((inputAngle == ("sample angle")) || (m_instrumentName == "Figaro")) &&
       (scatteringType == "coherent")) {
-    angleBragg = eq2(angle inRad, peakPosRB[1], peakPosRB[0], -down);
+    angleBragg = eq2(angle inRad, peakPosRB[1], peakPosRB[0], sign);
   } else if (inputAngle == "detector angle") {
     // DirectBeam is abvailable and we can read from its Nexus file
     std::vector<double> peakPosDB =

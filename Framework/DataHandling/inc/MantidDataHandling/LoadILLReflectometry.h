@@ -92,6 +92,7 @@ private:
   double m_offsetAngle{0.0};
   std::string m_detectorDistance{std::string()};
   std::string m_detectorAngleName{std::string()};
+  std::string m_sampleAngleName{std::string()};
   std::string m_offsetName{std::string()};
   std::string m_offsetFrom{std::string()};
   std::string m_chopper1Name{std::string()};
