@@ -110,11 +110,21 @@ void VisibleAxesColor::backgroundColorChangeCallback(vtkObject *caller,
 
   auto color = getContrastingColor(backgroundColor);
 
+  pqView *view = pqActiveObjects::instance().activeView();
+
+  safeSetProperty(view->getProxy(), {"OrientationAxesLabelColor"}, color);
+
+  vtkSMProxy *gridAxes3DActor =
+      vtkSMPropertyHelper(view->getProxy(), "AxesGrid", true).GetAsProxy();
+  safeSetProperty(gridAxes3DActor,
+                  {"XTitleColor", "YTitleColor", "ZTitleColor", "XLabelColor",
+                   "YLabelColor", "ZLabelColor", "GridColor"},
+                  color);
+
   // Update for all sources and all reps
   pqServer *server = pqActiveObjects::instance().activeServer();
   pqServerManagerModel *smModel =
       pqApplicationCore::instance()->getServerManagerModel();
-  pqView *view = pqActiveObjects::instance().activeView();
 
   const QList<pqPipelineSource *> sources =
       smModel->findItems<pqPipelineSource *>(server);
