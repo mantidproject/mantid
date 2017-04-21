@@ -474,20 +474,6 @@ void IntegrateEllipsoids::exec() {
     }
   }
   if (principalaxis1.size() > 1) {
-    size_t histogramNumber = 3;
-    Workspace_sptr wsProfile = WorkspaceFactory::Instance().create(
-        "Workspace2D", histogramNumber, principalaxis1.size(),
-        principalaxis1.size());
-    Workspace2D_sptr wsProfile2D =
-        boost::dynamic_pointer_cast<Workspace2D>(wsProfile);
-    AnalysisDataService::Instance().addOrReplace("EllipsoidAxes", wsProfile2D);
-
-    // set output workspace
-    Points points(principalaxis1.size(), LinearGenerator(0, 1));
-    wsProfile2D->setHistogram(0, points, Counts(std::move(principalaxis1)));
-    wsProfile2D->setHistogram(1, points, Counts(std::move(principalaxis2)));
-    wsProfile2D->setHistogram(2, points, Counts(std::move(principalaxis3)));
-
     Statistics stats1 = getStatistics(principalaxis1);
     g_log.notice() << "principalaxis1: "
                    << " mean " << stats1.mean << " standard_deviation "
@@ -506,6 +492,20 @@ void IntegrateEllipsoids::exec() {
                    << stats3.standard_deviation << " minimum " << stats3.minimum
                    << " maximum " << stats3.maximum << " median "
                    << stats3.median << "\n";
+    size_t histogramNumber = 3;
+    Workspace_sptr wsProfile = WorkspaceFactory::Instance().create(
+        "Workspace2D", histogramNumber, principalaxis1.size(),
+        principalaxis1.size());
+    Workspace2D_sptr wsProfile2D =
+        boost::dynamic_pointer_cast<Workspace2D>(wsProfile);
+    AnalysisDataService::Instance().addOrReplace("EllipsoidAxes", wsProfile2D);
+
+    // set output workspace
+    Points points(principalaxis1.size(), LinearGenerator(0, 1));
+    wsProfile2D->setHistogram(0, points, Counts(std::move(principalaxis1)));
+    wsProfile2D->setHistogram(1, points, Counts(std::move(principalaxis2)));
+    wsProfile2D->setHistogram(2, points, Counts(std::move(principalaxis3)));
+
     if (cutoffIsigI != EMPTY_DBL()) {
       principalaxis1.clear();
       principalaxis2.clear();

@@ -8,8 +8,7 @@ from isis_powder.routines import yaml_sanity
 
 def get_run_dictionary(run_number_string, file_path):
     if isinstance(run_number_string, str):
-        run_number_list = common.generate_run_numbers(run_number_string=run_number_string)
-        run_number_string = run_number_list[0]
+        run_number_string = common.get_first_run_number(run_number_string=run_number_string)
 
     config_file = open_yaml_file_as_dictionary(file_path)
     yaml_sanity.calibration_file_sanity_check(config_file, file_path)
@@ -57,7 +56,8 @@ def _find_dictionary_key(dict_to_search, run_number):
             except RuntimeError:
                 raise ValueError("Could not parse '" + str(key) + "'\n"
                                  "This should be a range of runs in the mapping file."
-                                 " Please check your indentation if the syntax looks correct.")
+                                 " Please check your indentation and YAML syntax is correct.")
+
             if run_number in generated_runs:
                 return key
 

@@ -471,7 +471,7 @@ void LoadGroupXMLFile::parseXML() {
       if (autogroupid) {
         curgroupid++;
       } else {
-        curgroupid = atoi(idstr.c_str());
+        curgroupid = std::stoi(idstr);
       }
 
       // b) Set in map
@@ -512,7 +512,7 @@ void LoadGroupXMLFile::parseXML() {
             this->getAttributeValueByName(pNode, "val", valfound);
         std::string finalvalue;
         if (valfound && !value.empty())
-          finalvalue = value + ", " + val_value;
+          finalvalue.append(value).append(", ").append(val_value);
         else if (value.empty())
           finalvalue = val_value;
         else
@@ -535,7 +535,7 @@ void LoadGroupXMLFile::parseXML() {
             this->getAttributeValueByName(pNode, "val", valfound);
         std::string finalvalue;
         if (valfound && !value.empty())
-          finalvalue = value + ", " + val_value;
+          finalvalue.append(value).append(", ").append(val_value);
         else if (value.empty())
           finalvalue = val_value;
         else
@@ -560,7 +560,7 @@ void LoadGroupXMLFile::parseXML() {
             this->getAttributeValueByName(pNode, "val", valfound);
         std::string finalvalue;
         if (valfound && !value.empty())
-          finalvalue = value + ", " + val_value;
+          finalvalue.append(value).append(", ").append(val_value);
         else if (value.empty())
           finalvalue = val_value;
         else

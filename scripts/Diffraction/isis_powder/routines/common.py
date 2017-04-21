@@ -134,7 +134,11 @@ def generate_run_numbers(run_number_string):
     """
     # Check its not a single run
     if isinstance(run_number_string, int):
-            return [int(run_number_string)]  # Cast into a list and return
+        # Cast into a list and return
+        return [run_number_string]
+    elif isinstance(run_number_string, str) and run_number_string.isdigit():
+        # We can let Python handle the conversion in this case
+        return [int(run_number_string)]
 
     # If its a string we must parse it
     run_number_string = run_number_string.strip()
@@ -147,7 +151,9 @@ def generate_splined_name(vanadium_string, *args):
     """
     Generates a unique splined vanadium name which encapsulates
     any properties passed into this method so that the vanadium
-    can be later loaded.
+    can be later loaded. This acts as a fingerprint for the vanadium
+    as some properties (such as offset file used) can impact
+    on the correct splined vanadium file to use.
     :param vanadium_string: The name of this vanadium run
     :param args: Any identifying properties to append to the name
     :return: The splined vanadium name
@@ -188,8 +194,8 @@ def get_monitor_ws(ws_to_process, run_number_string, instrument):
     :param instrument: The instrument to query for the monitor position
     :return: The extracted monitor as a workspace
     """
-    number_list = generate_run_numbers(run_number_string)
-    monitor_spectra = instrument._get_monitor_spectra_index(number_list[0])
+    first_run_number = get_first_run_number(run_number_string)
+    monitor_spectra = instrument._get_monitor_spectra_index(first_run_number)
     load_monitor_ws = mantid.ExtractSingleSpectrum(InputWorkspace=ws_to_process, WorkspaceIndex=monitor_spectra)
     return load_monitor_ws
 

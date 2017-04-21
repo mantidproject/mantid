@@ -48,6 +48,7 @@ private:
   class FittedPeaks; // forward declare of private inner class
 
   void init() override;
+  std::map<std::string, std::string> validateInputs() override;
   void exec() override;
   API::MatrixWorkspace_sptr loadAndBin();
   API::MatrixWorkspace_sptr rebin(API::MatrixWorkspace_sptr wksp);
@@ -69,9 +70,13 @@ private:
   std::vector<double> m_peaksInDspacing;
   std::string calParams;
   std::map<detid_t, size_t> m_detidToRow;
-  double m_tofMin;
-  double m_tofMax;
-  bool m_hasDasIds;
+  double m_tofMin{0.};
+  double m_tofMax{0.};
+  double m_tzeroMin{0.};
+  double m_tzeroMax{0.};
+  double m_difaMin{0.};
+  double m_difaMax{0.};
+  bool m_hasDasIds{false};
 };
 
 } // namespace Algorithms

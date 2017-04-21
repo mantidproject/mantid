@@ -54,6 +54,11 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
                              doc='Filename of the .cal file to use in the [[AlignDetectors]] and ' +
                                  '[[DiffractionFocussing]] child algorithms.')
 
+        self.declareProperty(FileProperty('InstrumentParFile', '',
+                                          action=FileAction.OptionalLoad,
+                                          extensions=['.dat', '.par']),
+                             doc='PAR file containing instrument definition. For VESUVIO only')
+
         self.declareProperty(StringArrayProperty(name='VanadiumFiles'),
                              doc='Comma separated array of vanadium runs')
 
@@ -131,6 +136,7 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
     # ------------------------------------------------------------------------------
 
     def PyExec(self):
+
         from IndirectReductionCommon import (get_multi_frame_rebin,
                                              identify_bad_detectors,
                                              unwrap_monitor,
@@ -146,6 +152,7 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
 
         load_opts = dict()
         if self._instrument_name == 'VESUVIO':
+            load_opts['InstrumentParFile'] = self._par_filename
             load_opts['Mode'] = 'FoilOut'
             load_opts['LoadMonitors'] = True
 
@@ -189,6 +196,8 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
 
             # Process workspaces
             for ws_name in workspaces:
+                monitor_ws_name = ws_name + '_mon'
+
                 # Subtract empty container if there is one
                 if self._container_workspace is not None:
                     Minus(LHSWorkspace=ws_name,
@@ -196,12 +205,37 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
                           OutputWorkspace=ws_name)
 
                 if self._vanadium_ws:
+                    van_ws_name = self._vanadium_ws[index]
+                    van_ws = mtd[van_ws_name]
+                    if self._container_workspace is not None:
+                        cont_ws = mtd[self._container_workspace]
+
+                        if van_ws.blocksize() > cont_ws.blocksize():
+                            RebinToWorkspace(WorkspaceToRebin=van_ws_name,
+                                             WorkspaceToMatch=self._container_workspace,
+                                             OutputWorkspace=van_ws_name)
+                        elif cont_ws.blocksize() > van_ws.blocksize():
+                            RebinToWorkspace(WorkspaceToRebin=self._container_workspace,
+                                             WorkspaceToMatch=van_ws_name,
+                                             OutputWorkspace=self._container_workspace)
+
+                        Minus(LHSWorkspace=van_ws_name,
+                              RHSWorkspace=self._container_workspace,
+                              OutputWorkspace=van_ws_name)
+
+                    if mtd[ws_name].blocksize() > van_ws.blocksize():
+                        RebinToWorkspace(WorkspaceToRebin=ws_name,
+                                         WorkspaceToMatch=van_ws_name,
+                                         OutputWorkspace=ws_name)
+                    elif van_ws.blocksize() > mtd[ws_name].blocksize():
+                        RebinToWorkspace(WorkspaceToRebin=van_ws_name,
+                                         WorkspaceToMatch=ws_name,
+                                         OutputWorkspace=van_ws_name)
+
                     Divide(LHSWorkspace=ws_name,
-                           RHSWorkspace=self._vanadium_ws[index],
+                           RHSWorkspace=van_ws_name,
                            OutputWorkspace=ws_name,
                            AllowDifferentNumberSpectra=True)
-
-                monitor_ws_name = ws_name + '_mon'
 
                 # Process monitor
                 if not unwrap_monitor(ws_name):
@@ -264,6 +298,7 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
         self._data_files = self.getProperty('InputFiles').value
         self._container_data_files = self.getProperty('ContainerFiles').value
         self._cal_file = self.getProperty('CalFile').value
+        self._par_filename = self.getPropertyValue('InstrumentParFile')
         self._vanadium_runs = self.getProperty('VanadiumFiles').value
         self._container_scale_factor = self.getProperty('ContainerScaleFactor').value
         self._load_logs = self.getProperty('LoadLogFiles').value

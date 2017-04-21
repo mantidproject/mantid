@@ -16,6 +16,7 @@ set ( TEST_PY_FILES
   IndirectCalibrationTest.py
   IndirectCylinderAbsorptionTest.py
   IndirectCylinderAbsorption2Test.py
+  IndirectDiffScanTest.py
   IndirectFlatPlateAbsorptionTest.py
   IndirectFlatPlateAbsorption2Test.py
   IndirectILLEnergyTransferTest.py
@@ -23,6 +24,7 @@ set ( TEST_PY_FILES
   IndirectILLReductionFWSTest.py
   IndirectILLReductionQENSTest.py
   IndirectResolutionTest.py
+  IndirectSampleChangerTest.py
   IndirectTransmissionMonitorTest.py
   IqtFitMultipleTest.py
   IqtFitSequentialTest.py

@@ -1,9 +1,9 @@
 #include "MantidLiveData/FileEventDataListener.h"
-#include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/LiveListenerFactory.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FileFinder.h"
 #include "MantidAPI/FileLoaderRegistry.h"
+#include "MantidAPI/LiveListenerFactory.h"
 #include "MantidKernel/ConfigService.h"
 
 using namespace Mantid::Kernel;
@@ -20,7 +20,7 @@ Kernel::Logger g_log("FileEventDataListener");
 
 /// Constructor
 FileEventDataListener::FileEventDataListener()
-    : ILiveListener(), m_filename(), m_runNumber(-1),
+    : LiveListener(), m_filename(), m_runNumber(-1),
       m_tempWSname("__filelistenerchunk"), m_nextChunk(1),
       m_filePropName("Filename"), m_loaderName(""), m_canLoadMonitors(true),
       m_chunkload(nullptr) {
