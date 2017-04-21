@@ -1,19 +1,130 @@
 # pylint: disable=invalid-name
 
 """ Handles calibration of SANS workspaces."""
+from __future__ import (absolute_import, division, print_function)
 from os.path import (basename, splitext, isfile)
 from mantid.api import (AnalysisDataService)
 
 from sans.common.file_information import find_full_file_path
 from sans.common.constants import (EMPTY_NAME, CALIBRATION_WORKSPACE_TAG)
 from sans.common.log_tagger import (has_tag, get_tag, set_tag)
-from sans.common.general_functions import create_unmanaged_algorithm
+from sans.common.general_functions import (create_child_algorithm, sanitise_instrument_name)
 from sans.common.enums import SANSDataType
 
 
-# -----------------------------
+# ---------------------------------
 #  Free functions for Calibration
-# -----------------------------
+# ---------------------------------
+def apply_calibration(calibration_file_name, workspaces, monitor_workspaces, use_loaded, publish_to_ads, parent_alg):
+    """
+    Apply (tube) calibration to scatter workspaces and corresponding monitor workspaces.
+
+    :param calibration_file_name: the file name of the calibration file.
+    :param workspaces: a map with scatter workspaces for sample and can
+    :param monitor_workspaces: a map with scatter monitor workspaces for sample and can
+    :param use_loaded: if calibration file from ADS is to be used (if it exists)
+    :param publish_to_ads: if the calibration file should be published to the ADS
+    :param parent_alg: a handle to the parent algorithm
+    :return:
+    """
+    full_file_path = find_full_file_path(calibration_file_name)
+
+    # Check for the sample scatter and the can scatter workspaces
+    workspaces_to_calibrate = {}
+    if SANSDataType.SampleScatter in workspaces:
+        workspaces_to_calibrate.update({SANSDataType.SampleScatter: workspaces[SANSDataType.SampleScatter]})
+    if SANSDataType.CanScatter in workspaces:
+        workspaces_to_calibrate.update({SANSDataType.CanScatter: workspaces[SANSDataType.CanScatter]})
+    do_apply_calibration(full_file_path, workspaces_to_calibrate, use_loaded, publish_to_ads, parent_alg)
+
+    # Check for the sample scatter and the can scatter workspaces monitors
+    workspace_monitors_to_calibrate = {}
+    if SANSDataType.SampleScatter in monitor_workspaces:
+        workspace_monitors_to_calibrate.update({SANSDataType.SampleScatter:
+                                                monitor_workspaces[SANSDataType.SampleScatter]})
+    if SANSDataType.CanScatter in monitor_workspaces:
+        workspace_monitors_to_calibrate.update({SANSDataType.CanScatter:
+                                                monitor_workspaces[SANSDataType.CanScatter]})
+    do_apply_calibration(full_file_path, workspace_monitors_to_calibrate,
+                         use_loaded, publish_to_ads, parent_alg)
+
+
+def do_apply_calibration(full_file_path, workspaces_to_calibrate, use_loaded, publish_to_ads, parent_alg):
+    """
+    Applies calibration to a data workspace
+
+    :param full_file_path: the file path to the calibration file.
+    :param workspaces_to_calibrate: the workspace which is to be calibrated.
+    :param use_loaded: if already loaded calibration workspace is to be used.
+    :param publish_to_ads: if calibration workspace is to be added to the ADS.
+    :param parent_alg: a handle to the parent algorithm
+    """
+    # Load calibration workspace
+    calibration_workspace = get_calibration_workspace(full_file_path, use_loaded, parent_alg)
+
+    # Check if the workspace has a calibration already applied to it and if it coincides with the
+    # provided calibration file
+    for workspaces in list(workspaces_to_calibrate.values()):
+        # If it is already calibrated then don't do anything, We only need to check the first element, even for
+        # GroupWorkspaces
+        to_check = workspaces[0]
+        if has_calibration_already_been_applied(to_check, full_file_path):
+            continue
+
+        # Apply calibration to workspace
+        # This means that we copy the Parameter Map (PM) from the calibration workspace to the
+        # actual data workspace. Entries which only exist in the data workspace would be lost, hence we need to
+        # add the missing entries  to the PM of the calibration workspace. Once the calibration has been
+        # applied, we don't want these extra parameters to avoid data-cross-talk between different data sets. If
+        # we used a workspace from the ADS or intend to publish to the ADS, we will be working with a cloned calibration
+        # workspace in order to avoid this cross-talk. The calibration workspace sizes allow for very fast in-memory
+        # cloning.
+        has_been_published = False
+        for workspace in workspaces:
+            if use_loaded or publish_to_ads:
+                calibration_workspace_to_use = get_cloned_calibration_workspace(calibration_workspace, parent_alg)
+            else:
+                calibration_workspace_to_use = calibration_workspace
+            missing_parameters = get_missing_parameters(calibration_workspace_to_use, workspace)
+            apply_missing_parameters(calibration_workspace_to_use, workspace, missing_parameters, parent_alg)
+            calibrate(calibration_workspace_to_use, workspace, parent_alg)
+
+            # Publish to ADS if requested
+            if publish_to_ads and not has_been_published:
+                add_to_ads(calibration_workspace, full_file_path)
+                has_been_published = True
+
+            # Add calibration tag to workspace
+            add_calibration_tag_to_workspace(workspace, full_file_path)
+
+
+def get_calibration_workspace(full_file_path, use_loaded, parent_alg):
+    """
+    Load the calibration workspace from the specified file
+
+    :param full_file_path: Path to the calibration file.
+    :param use_loaded: Allows us to check for the calibration file on the ADS.
+    :param parent_alg: a handle to the parent algorithm
+    :return: the calibration workspace.
+    """
+    calibration_workspace = None
+    # Here we can avoid reloading of the calibration workspace
+    if use_loaded:
+        calibration_workspace = get_already_loaded_calibration_workspace(full_file_path)
+
+    if calibration_workspace is None:
+        if not isfile(full_file_path):
+            raise RuntimeError("SANSCalibration: The file for  {0} does not seem to exist".format(full_file_path))
+        loader_name = "LoadNexusProcessed"
+        loader_options = {"Filename": full_file_path,
+                          "OutputWorkspace": "dummy"}
+        loader = create_child_algorithm(parent_alg, loader_name, **loader_options)
+        loader.execute()
+        calibration_workspace = loader.getProperty("OutputWorkspace").value
+
+    return calibration_workspace
+
+
 def has_calibration_already_been_applied(workspace, full_file_path):
     """
     Checks if particular calibration, defined by the file path has been applied to a workspace.
@@ -67,43 +178,18 @@ def get_already_loaded_calibration_workspace(full_file_path):
     return output_ws
 
 
-def get_calibration_workspace(full_file_path, use_loaded):
-    """
-    Load the calibration workspace from the specified file
-
-    :param full_file_path: Path to the calibration file.
-    :param use_loaded: Allows us to check for the calibration file on the ADS.
-    :return: the calibration workspace.
-    """
-    calibration_workspace = None
-    # Here we can avoid reloading of the calibration workspace
-    if use_loaded:
-        calibration_workspace = get_already_loaded_calibration_workspace(full_file_path)
-
-    if calibration_workspace is None:
-        if not isfile(full_file_path):
-            raise RuntimeError("SANSCalibration: The file for  {0} does not seem to exist".format(full_file_path))
-        loader_name = "LoadNexusProcessed"
-        loader_options = {"Filename": full_file_path,
-                          "OutputWorkspace": "dummy"}
-        loader = create_unmanaged_algorithm(loader_name, **loader_options)
-        loader.execute()
-        calibration_workspace = loader.getProperty("OutputWorkspace").value
-
-    return calibration_workspace
-
-
-def get_cloned_calibration_workspace(calibration_workspace):
+def get_cloned_calibration_workspace(calibration_workspace, parent_alg):
     """
     Creates a clone from a calibration workspace, in order to consume it later.
 
     :param calibration_workspace: the calibration workspace which is being cloned
+    :param parent_alg: a handle to the parent algorithm
     :return: a cloned calibration workspace
     """
     clone_name = "CloneWorkspace"
     clone_options = {"InputWorkspace": calibration_workspace,
                      "OutputWorkspace": EMPTY_NAME}
-    alg = create_unmanaged_algorithm(clone_name, **clone_options)
+    alg = create_child_algorithm(parent_alg, clone_name, **clone_options)
     alg.execute()
     return alg.getProperty("OutputWorkspace").value
 
@@ -125,7 +211,7 @@ def get_missing_parameters(calibration_workspace, workspace):
     return missing_parameter_names
 
 
-def apply_missing_parameters(calibration_workspace, workspace, missing_parameters):
+def apply_missing_parameters(calibration_workspace, workspace, missing_parameters, parent_alg):
     """
     Transfers missing properties from the data workspace to the calibration workspace.
 
@@ -133,12 +219,15 @@ def apply_missing_parameters(calibration_workspace, workspace, missing_parameter
     :param workspace: the data workspace.
     :param missing_parameters: a list of missing parameters which exist on the data workspace but not on the calibration
                                workspace.
+    :param parent_alg: a handle to the parent algorithm
     """
     instrument = workspace.getInstrument()
     component_name = instrument.getName()
+    component_name = sanitise_instrument_name(component_name)
+    set_instrument_name = "SetInstrumentParameter"
     set_instrument_parameter_options = {"Workspace": calibration_workspace,
                                         "ComponentName": component_name}
-    alg = create_unmanaged_algorithm("SetInstrumentParameter", **set_instrument_parameter_options)
+    alg = create_child_algorithm(parent_alg, set_instrument_name, **set_instrument_parameter_options)
 
     # For now only string, int and double are handled
     type_options = {"string": "String", "int": "Number", "double": "Number"}
@@ -159,17 +248,18 @@ def apply_missing_parameters(calibration_workspace, workspace, missing_parameter
                            "was going to be copied. Cannot handle this currently.")
 
 
-def calibrate(calibration_workspace, workspace_to_calibrate):
+def calibrate(calibration_workspace, workspace_to_calibrate, parent_alg):
     """
     Performs a calibration. The instrument parameters are copied from the calibration workspace to the data workspace.
 
     :param calibration_workspace: the calibration workspace
     :param workspace_to_calibrate: the workspace which has the calibration applied to it.
+    :param parent_alg: a handle to the parent algorithm
     """
     copy_instrument_name = "CopyInstrumentParameters"
     copy_instrument_options = {"InputWorkspace": calibration_workspace,
                                "OutputWorkspace": workspace_to_calibrate}
-    alg = create_unmanaged_algorithm(copy_instrument_name, **copy_instrument_options)
+    alg = create_child_algorithm(parent_alg, copy_instrument_name, **copy_instrument_options)
     alg.execute()
 
 
@@ -182,83 +272,3 @@ def add_to_ads(calibration_workspace, full_file_path):
     """
     calibration_workspace_name = get_expected_calibration_workspace_name(full_file_path)
     AnalysisDataService.addOrReplace(calibration_workspace_name, calibration_workspace)
-
-
-def do_apply_calibration(full_file_path, workspaces_to_calibrate, use_loaded, publish_to_ads):
-    """
-    Applies calibration to a data workspace
-
-    :param full_file_path: the file path to the calibration file.
-    :param workspaces_to_calibrate: the workspace which is to be calibrated.
-    :param use_loaded: if already loaded calibration workspace is to be used.
-    :param publish_to_ads: if calibration workspace is to be added to the ADS.
-    """
-    # Load calibration workspace
-    calibration_workspace = get_calibration_workspace(full_file_path, use_loaded)
-
-    # Check if the workspace has a calibration already applied to it and if it coincides with the
-    # provided calibration file
-    for workspaces in list(workspaces_to_calibrate.values()):
-        # If it is already calibrated then don't do anything, We only need to check the first element, even for
-        # GroupWorkspaces
-        if has_calibration_already_been_applied(workspaces[0], full_file_path):
-            continue
-
-        # Apply calibration to workspace
-        # This means that we copy the Parameter Map (PM) from the calibration workspace to the
-        # actual data workspace. Entries which only exist in the data workspace would be lost, hence we need to
-        # add the missing entries  to the PM of the calibration workspace. Once the calibration has been
-        # applied, we don't want these extra parameters to avoid data-cross-talk between different data sets. If
-        # we used a workspace from the ADS or intend to publish to the ADS, we will be working with a cloned calibration
-        # workspace in order to avoid this cross-talk. The calibration workspace sizes allow for very fast in-memory
-        # cloning.
-        has_been_published = False
-        for workspace in workspaces:
-            if use_loaded or publish_to_ads:
-                calibration_workspace_to_use = get_cloned_calibration_workspace(calibration_workspace)
-            else:
-                calibration_workspace_to_use = calibration_workspace
-            missing_parameters = get_missing_parameters(calibration_workspace_to_use, workspace)
-            apply_missing_parameters(calibration_workspace_to_use, workspace, missing_parameters)
-            calibrate(calibration_workspace_to_use, workspace)
-
-            # Publish to ADS if requested
-            if publish_to_ads and not has_been_published:
-                add_to_ads(calibration_workspace, full_file_path)
-                has_been_published = True
-
-            # Add calibration tag to workspace
-            add_calibration_tag_to_workspace(workspace, full_file_path)
-
-
-def apply_calibration(calibration_file_name, workspaces, monitor_workspaces, use_loaded, publish_to_ads):
-    """
-    Apply (tube) calibration to scatter workspaces and corresponding monitor workspaces.
-
-    :param calibration_file_name: the file name of the calibration file.
-    :param workspaces: a map with scatter workspaces for sample and can
-    :param monitor_workspaces: a map with scatter monitor workspaces for sample and can
-    :param use_loaded: if calibration file from ADS is to be used (if it exists)
-    :param publish_to_ads: if the calibration file should be published to the ADS
-    :return:
-    """
-    full_file_path = find_full_file_path(calibration_file_name)
-
-    # Check for the sample scatter and the can scatter workspaces
-    workspaces_to_calibrate = {}
-    if SANSDataType.SampleScatter in workspaces:
-        workspaces_to_calibrate.update({SANSDataType.SampleScatter: workspaces[SANSDataType.SampleScatter]})
-    if SANSDataType.CanScatter in workspaces:
-        workspaces_to_calibrate.update({SANSDataType.CanScatter: workspaces[SANSDataType.CanScatter]})
-    do_apply_calibration(full_file_path, workspaces_to_calibrate, use_loaded, publish_to_ads)
-
-    # Check for the sample scatter and the can scatter workspaces monitors
-    workspace_monitors_to_calibrate = {}
-    if SANSDataType.SampleScatter in monitor_workspaces:
-        workspace_monitors_to_calibrate.update({SANSDataType.SampleScatter:
-                                                monitor_workspaces[SANSDataType.SampleScatter]})
-    if SANSDataType.CanScatter in monitor_workspaces:
-        workspace_monitors_to_calibrate.update({SANSDataType.CanScatter:
-                                                monitor_workspaces[SANSDataType.CanScatter]})
-    do_apply_calibration(full_file_path, workspace_monitors_to_calibrate,
-                         use_loaded, publish_to_ads)

@@ -113,7 +113,7 @@ class FindClusterFacesTest : public CxxTest::TestSuite {
 
 private:
   void verify_table_row(ITableWorkspace_sptr &outWS, int expectedClusterId,
-                        size_t expectedWorkspaceIndex,
+                        double expectedWorkspaceIndex,
                         int expectedNormalDimensionIndex,
                         bool expectedMaxExtent, double expectedRadius = -1) {
     for (size_t rowIndex = 0; rowIndex < outWS->rowCount(); ++rowIndex) {
@@ -185,7 +185,7 @@ public:
     TSM_ASSERT_EQUALS("Two faces should be identified", outWS->rowCount(), 2);
 
     int clusterId = 1;
-    size_t expectedWorkspaceIndex = 1;
+    double expectedWorkspaceIndex = 1.;
     int expectedNormalDimensionIndex = 0;
     bool maxExtent = true;
     verify_table_row(outWS, clusterId, expectedWorkspaceIndex,

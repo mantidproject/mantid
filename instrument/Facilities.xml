@@ -117,6 +117,7 @@
   </instrument>
 
   <instrument name="LOQ">
+    <zeropadding size="8" startRunNumber="99738" prefix="LOQ"/>
     <technique>Small Angle Scattering</technique>
     <livedata>
       <connection name="histo" address="NDXLOQ:6789" listener="ISISHistoDataListener" />
@@ -784,6 +785,13 @@
     <technique>Test Listener</technique>
     <livedata>
       <connection name="fake" address="127.0.0.1:0" listener="FakeEventDataListener" />
+    </livedata>
+  </instrument>
+  
+  <instrument name="ISIS_Kafka_Event">
+    <technique>Test Listener</technique>
+    <livedata>
+      <connection name="kafka_event" address="sakura:9092" listener="KafkaEventListener" />
     </livedata>
   </instrument>
 
