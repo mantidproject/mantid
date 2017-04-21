@@ -19,6 +19,7 @@ InfoComponentVisitor::InfoComponentVisitor(
       m_detectorIdToIndexMapperFunction(mapperFunc) {
   m_assemblySortedDetectorIndices.reserve(nDetectors);
   m_componentIdToIndexMap.reserve(nDetectors);
+  m_detectorIdToIndexMap.reserve(nDetectors);
 }
 
 /**
@@ -94,10 +95,11 @@ void InfoComponentVisitor::registerDetector(const IDetector &detector) {
     * 2. Guarantee on ordering such that the
     * detectorIndex == componentIndex for all detectors.
     */
-    // Record the ID -> index mapping
+    // Record the comp ID -> index mapping
     m_componentIdToIndexMap[detector.getComponentID()] = m_componentIds.size();
     m_componentIds[detectorIndex] = detector.getComponentID();
-
+    // Record the det ID -> index mapping
+    m_detectorIdToIndexMap[detector.getID()] = detectorIndex;
     // register the detector index
     m_assemblySortedDetectorIndices.push_back(detectorIndex);
   }
@@ -147,6 +149,11 @@ size_t InfoComponentVisitor::size() const {
 const std::unordered_map<Mantid::Geometry::IComponent *, size_t> &
 InfoComponentVisitor::componentIdToIndexMap() const {
   return m_componentIdToIndexMap;
+}
+
+const std::unordered_map<detid_t, size_t> &
+InfoComponentVisitor::detectorIdToIndexMap() const {
+  return m_detectorIdToIndexMap;
 }
 } // namespace API
 } // namespace Mantid
