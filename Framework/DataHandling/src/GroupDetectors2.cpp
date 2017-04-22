@@ -1229,7 +1229,6 @@ std::map<std::string, std::string> GroupDetectors2::validateInputs() {
     if (!pattern.empty() && !boost::regex_match(pattern, re)) {
       errors["GroupingPattern"] =
           "GroupingPattern is not well formed: " + pattern;
-      break;
     }
   } catch (boost::exception &) {
     // If the pattern is too large, split on comma and evaluate each piece.
