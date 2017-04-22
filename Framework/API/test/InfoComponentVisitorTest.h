@@ -103,16 +103,21 @@ public:
     TSM_ASSERT_EQUALS("Should contain the source id", 1,
                       componentIds.count(visitee->getComponentByName("source")
                                              ->getComponentID()));
+
+    auto detectorComponentId =
+        visitee->getComponentByName("point-detector")->getComponentID();
+    TSM_ASSERT_EQUALS("Should contain the detector id", 1,
+                      componentIds.count(detectorComponentId));
     TSM_ASSERT_EQUALS(
-        "Should contain the detector id", 1,
-        componentIds.count(
-            visitee->getComponentByName("point-detector")->getComponentID()));
+        "Detectors are guaranteed to occupy the lowest component range",
+        componentIdToIndexMap[detectorComponentId], 0);
+
     std::set<size_t> uniqueIndices;
     for (auto id : componentIds) {
       uniqueIndices.insert(componentIdToIndexMap.at(id));
     }
     TSM_ASSERT_EQUALS("We should have unique index values in our map",
-                      uniqueIndices.size(), componentIds.size() - 1);
+                      uniqueIndices.size(), componentIds.size());
     TSM_ASSERT_EQUALS(
         "Indices are out of range",
         *std::max_element(uniqueIndices.begin(), uniqueIndices.end()),

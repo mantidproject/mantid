@@ -95,7 +95,8 @@ void InfoComponentVisitor::registerDetector(const IDetector &detector) {
     * detectorIndex == componentIndex for all detectors.
     */
     // Record the ID -> index mapping
-    m_componentIdToIndexMap[detector.getComponentID()] = m_componentIds.size();
+    m_componentIdToIndexMap[detector.getComponentID()] =
+        m_assemblySortedDetectorIndices.size();
     m_componentIds[detectorIndex] = detector.getComponentID();
 
     // register the detector index
@@ -133,6 +134,18 @@ InfoComponentVisitor::assemblySortedDetectorIndices() const {
 const std::vector<Mantid::Geometry::ComponentID> &
 InfoComponentVisitor::componentIds() const {
   return m_componentIds;
+  /*
+   * TODO. There is an issue here that will need to be addressed.
+   * Detectors can be dropped (see above). This is a workaround of Instrument
+   * 1.0 for
+   * the fact that in some cases we have IDFs that provide an invalid ID for a
+   * detector.
+   * However, we use a fixed offset for the non-detector component indexes
+   * calculated to be the
+   * exact size of the number of detectors we expect to get. When we drop
+   * detectors we introduce gaps in
+   * an otherwise contiguous range.
+  */
 }
 
 /**

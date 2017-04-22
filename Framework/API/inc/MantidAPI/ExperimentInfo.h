@@ -12,7 +12,6 @@
 
 #include <list>
 #include <mutex>
-#include <unordered_map>
 
 namespace Mantid {
 class SpectrumDefinition;
@@ -235,7 +234,6 @@ private:
   // This vector stores boolean flags but uses char to do so since
   // std::vector<bool> is not thread-safe.
   mutable std::vector<char> m_spectrumDefinitionNeedsUpdate;
-  boost::shared_ptr<const std::unordered_map<detid_t, size_t>> m_detectorIdToIndexMap; 
 };
 
 /// Shared pointer to ExperimentInfo

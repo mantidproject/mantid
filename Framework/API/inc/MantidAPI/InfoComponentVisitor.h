@@ -68,6 +68,7 @@ private:
   /// Counter for dropped detectors
   size_t m_droppedDetectors = 0;
 
+  /// Component ID -> Component Index map
   std::unordered_map<Mantid::Geometry::IComponent *, size_t>
       m_componentIdToIndexMap;
 

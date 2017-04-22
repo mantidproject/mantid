@@ -306,15 +306,14 @@ void ExperimentInfo::setInstrument(const Instrument_const_sptr &instr) {
   m_parmap->setDetectorInfo(m_detectorInfo);
   if (instr->hasDetectorInfo()) {
  
-    m_detectorIdToIndexMap = instr->detIdToIndexMap(); 
     // Reuse the ID -> index map for the detector ids
     m_detectorInfoWrapper = Kernel::make_unique<DetectorInfo>(
         *m_detectorInfo, getInstrument(), m_parmap.get(),
-        m_detectorIdToIndexMap);
+        instr->detIdToIndexMap());
   } else {
-    m_detectorIdToIndexMap = makeDetIdToIndexMap(instr->getDetectorIDs());
     m_detectorInfoWrapper = Kernel::make_unique<DetectorInfo>(
-        *m_detectorInfo, getInstrument(), m_parmap.get(),m_detectorIdToIndexMap);
+        *m_detectorInfo, getInstrument(), m_parmap.get(),
+        makeDetIdToIndexMap(instr->getDetectorIDs()));
   }
   boost::shared_ptr<const std::vector<Geometry::ComponentID>> componentIds;
   boost::shared_ptr<const std::unordered_map<Geometry::ComponentID, size_t>>
@@ -346,8 +345,14 @@ Instrument_const_sptr ExperimentInfo::getInstrument() const {
   checkDetectorInfoSize(*sptr_instrument, *m_detectorInfo);
   auto instrument = Geometry::ParComponentFactory::createInstrument(
       sptr_instrument, m_parmap);
-  instrument->setDetectorInfo(m_detectorInfo,
-                              m_detectorIdToIndexMap);
+  // We can only set the DetectorInfo on the return Instrument if the API
+  // wrapper is fully constructed
+  if (m_detectorInfoWrapper) {
+    instrument->setDetectorInfo(m_detectorInfo,
+                                m_detectorInfoWrapper->detIdToIndexMap());
+  }
+  // We can only set the ComponentInfo on the return Instrument if the API
+  // wrapper is fully constructed
   if(m_componentInfoWrapper){
   instrument->setComponentInfo(m_componentInfo,
                                m_componentInfoWrapper->componentIds(),
