@@ -185,7 +185,8 @@ private:
 };
 
 /// Helper Non-member to make the ID->index mappings for detector IDs
-MANTID_API_DLL boost::shared_ptr<const std::unordered_map<detid_t, size_t>> makeDetIdToIndexMap(const std::vector<detid_t>& detIds);
+MANTID_API_DLL boost::shared_ptr<const std::unordered_map<detid_t, size_t>>
+makeDetIdToIndexMap(const std::vector<detid_t> &detIds);
 
 } // namespace API
 } // namespace Mantid

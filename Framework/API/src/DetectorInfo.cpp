@@ -16,11 +16,11 @@ namespace API {
  * @param detIds : Detector IDs to build the indexes for
  * @return shared_ptr to const map of detector ID -> detector index.
  */
-boost::shared_ptr<const std::unordered_map<detid_t, size_t>> makeDetIdToIndexMap(const std::vector<detid_t>& detIds){
+boost::shared_ptr<const std::unordered_map<detid_t, size_t>>
+makeDetIdToIndexMap(const std::vector<detid_t> &detIds) {
 
   const size_t nDetIds = detIds.size();
-  auto detIdToIndex =
-      boost::make_shared<std::unordered_map<detid_t, size_t>>();
+  auto detIdToIndex = boost::make_shared<std::unordered_map<detid_t, size_t>>();
   detIdToIndex->reserve(nDetIds);
   for (size_t i = 0; i < nDetIds; ++i) {
     (*detIdToIndex)[detIds[i]] = i;
@@ -69,8 +69,7 @@ DetectorInfo::DetectorInfo(
     boost::shared_ptr<const std::unordered_map<detid_t, size_t>>
         detIdToIndexMap)
     : m_detectorInfo(detectorInfo), m_pmap(pmap), m_instrument(instrument),
-      m_detIDToIndex(detIdToIndexMap),
-      m_lastDetector(PARALLEL_GET_MAX_THREADS),
+      m_detIDToIndex(detIdToIndexMap), m_lastDetector(PARALLEL_GET_MAX_THREADS),
       m_lastAssemblyDetectorIndices(PARALLEL_GET_MAX_THREADS),
       m_lastIndex(PARALLEL_GET_MAX_THREADS, -1) {
 

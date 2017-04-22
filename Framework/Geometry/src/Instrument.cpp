@@ -78,8 +78,7 @@ Instrument::Instrument(const Instrument &instr)
       m_detectorInfo(instr.m_detectorInfo),
       m_componentInfo(instr.m_componentInfo),
       m_componentIdToIndexMap(instr.m_componentIdToIndexMap),
-      m_detIdToIndexMap(instr.m_detIdToIndexMap)
-{
+      m_detIdToIndexMap(instr.m_detIdToIndexMap) {
   // Now we need to fill the detector, source and sample caches with pointers
   // into the new instrument
   std::vector<IComponent_const_sptr> children;
