@@ -2639,7 +2639,7 @@ public:
 
   void test_compressEvents_Parallel() {
     EventList out_el;
-    el_sorted.compressEvents(10.0, &out_el, true);
+    el_sorted.compressEvents(10.0, &out_el);
   }
 
   void test_multiply() { el_random *= 2.345; }
