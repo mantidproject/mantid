@@ -66,8 +66,8 @@ void CompressEvents::exec() {
     // We DONT copy the data though
     // Loop over the histograms (detector spectra)
     tbb::parallel_for(tbb::blocked_range<size_t>(0, noSpectra),
-                      [tolerance, &inputWS, &outputWS,
-                       &prog](const tbb::blocked_range<size_t> &range) {
+                      [tolerance, &inputWS, &outputWS, &prog](
+                          const tbb::blocked_range<size_t> &range) {
                         for (size_t index = range.begin(); index < range.end();
                              ++index) {
                           // The input event list

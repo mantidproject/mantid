@@ -1976,7 +1976,6 @@ public:
         std::cout << "   - " << timer2.elapsed()
                   << " seconds to sortTof (original).\n";
       TS_ASSERT(checkSort("sortTof"));
-
     }
   }
 
