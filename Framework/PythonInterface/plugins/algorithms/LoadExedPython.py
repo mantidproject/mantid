@@ -9,7 +9,8 @@ import types
 
 def read_file(fn):
     """
-    function to read header and return a dictionary of the parameters
+    function to read header and return a dictionary of the parameters parms_dict
+    the read the data and return it in det_udet, det_count, det_tbc, and data
     """
     fin = open(fn,'rb')
     header = True
@@ -33,8 +34,7 @@ def read_file(fn):
             while line.find("DATA=")<0:
                 b_line = fin.readline()
                 line=b_line.decode('ascii')
-                print line
-    #
+                #print line
     nrows=int(parms_dict['NDET'])
     nbins=int(parms_dict['NTC'])
     print "read UDET"
@@ -125,64 +125,37 @@ class LoadEXED(PythonAlgorithm):
         if self.fxml == "":
             self.fxml = '.'.join(fn.split('.')[:-1]+['xml'])
 
-        #load header
+        #load data
 
         parms_dict, det_udet, det_count, det_tbc, data = read_file(fn)
         nrows=int(parms_dict['NDET'])
         nbins=int(parms_dict['NTC'])
+        xdata = np.array(det_tbc)
+        xdata_mon = np.linspace(xdata[0],xdata[-1], len(xdata))
         ydata=data.astype(np.float)
         edata=np.sqrt(ydata)
-        CreateWorkspace(OutputWorkspace=wsn,DataX=det_tbc,DataY=ydata,DataE=edata,NSpec=nrows,UnitX='TOF')
+        CreateWorkspace(OutputWorkspace=wsn,DataX=xdata,DataY=ydata,DataE=edata,
+        NSpec=nrows,UnitX='TOF',WorkspaceTitle='Data',YUnitLabel='Counts')
 
-
-        #ws = WorkspaceFactory.create("Workspace2D", NVectors=nrows,
-        #                                    XLength = nbins+1,
-        #                                    YLength = nbins)
-        self.setProperty("OutputWorkspace", wsn)
+        #self.setProperty("OutputWorkspace", wsn)
         print "ws:", wsn
         ws=mtd[wsn]
-        #ws.setYUnit("Counts")
-        #ws.setTitle("Data")
-        #unit = ws.getAxis(0).setUnit("TOF")
-        #data.shape = (nrows,nbins)
-        # xdata = np.array(det_tbc)
-        # xdata_mon = np.linspace(xdata[0],xdata[-1], len(xdata))
-        # ydata=data.astype(np.float)
-        # edata=np.sqrt(ydata)
-        # for i in range(nrows-2):
-        #         #print i
-        #     tmp = data[i]
-        #     ydata = tmp.astype(np.float)
-        #     edata = np.sqrt(ydata)
-        #     ws.setX(i,xdata)
-        #     ws.setY(i,ydata)
-        #     ws.setE(i,edata)
-        # for i in range(nrows-2,nrows):
-        #         #print i
-        #     tmp = data[i]
-        #     ydata = tmp.astype(np.float)
-        #     edata = np.sqrt(ydata)
-        #     ws.setX(i,xdata_mon)
-        #     ws.setY(i,ydata)
-        #     ws.setE(i,edata)
-        #
-        # print nrows, nbins
+
+        # fix the x values for the monitor
+        for i in range(nrows-2,nrows):
+            ws.setX(i,xdata_mon)
 
         print "set detector IDs"
     	#set detetector IDs
     	for i in range(nrows):
     		s = ws.getSpectrum(i).setDetectorID(det_udet[i])
 
-        #ws = LoadExedHelper(Filename = fn, XMLFilename = self.fxml, OutputWorkspace = wsn)
-
+        #load idf # needs fixing
 
         if (self.fxml == ""):
             self.fxml = fn[:fn.find('.')] + ".xml"
 
-        #print ws, wsn
-
-
-        #LoadInstrument(Workspace=str(ws), Filename = self.fxml, RewriteSpectraMap= True)
+        LoadInstrument(Workspace=wsn, Filename = self.fxml, RewriteSpectraMap= True)
 
         #Sample_logs load the header values into the sample logs
 
@@ -192,16 +165,15 @@ class LoadEXED(PythonAlgorithm):
             if isinstance(parms_dict[sl],types.UnicodeType):
                 AddSampleLog(Workspace=wsn, LogName=key_in, LogText=parms_dict[sl].encode('ascii','ignore'))#, LogType='Number')
             else:
-                AddSampleLog(Workspace=wsn, LogName=key_in, LogText=str(parms_dict[sl])), #LogType='Number')
+                AddSampleLog(Workspace=wsn, LogName=key_in, LogText=str(parms_dict[sl]))#, LogType='Number')
 
         SetGoniometer(Workspace=wsn, Goniometers='Universal', Axis0='phi,0,1,0,1')
         # ExtractSingleSpectrum(InputWorkspace = wsn, WorkspaceIndex = nrows-2, OutputWorkspace = wsn + '_Monitors')
         ExtractSpectra(InputWorkspace = wsn, WorkspaceIndexList = ','.join([str(s) for s in range(nrows-2, nrows)]), OutputWorkspace = wsn + '_Monitors')
         MaskDetectors(Workspace = wsn, WorkspaceIndexList = ','.join([str(s) for s in range(nrows-2, nrows)]))
-        ws = RemoveMaskedSpectra(InputWorkspace = wsn, OutputWorkspace = wsn)
+        RemoveMaskedSpectra(InputWorkspace = wsn, OutputWorkspace = wsn)
 
         self.setProperty("OutputWorkspace", wsn)
-
 
 # Register algorthm with Mantid.
 AlgorithmFactory.subscribe(LoadEXED)
