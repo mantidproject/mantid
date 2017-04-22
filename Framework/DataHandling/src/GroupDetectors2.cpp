@@ -1226,7 +1226,7 @@ std::map<std::string, std::string> GroupDetectors2::validateInputs() {
       "^\\s*[0-9]+\\s*$|^(\\s*,*[0-9]+(\\s*(,|:|\\+|\\-)\\s*)*[0-9]*)*$");
 
   try {
-    if (!pattern.empty() && !boost::regex_match(groupStr, re)) {
+    if (!pattern.empty() && !boost::regex_match(pattern, re)) {
       errors["GroupingPattern"] =
           "GroupingPattern is not well formed: " + pattern;
       break;
