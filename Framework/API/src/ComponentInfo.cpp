@@ -22,9 +22,9 @@ ComponentInfo::ComponentInfo(
     boost::shared_ptr<const std::vector<Mantid::Geometry::IComponent *>>
         componentIds,
     boost::shared_ptr<const std::unordered_map<Geometry::IComponent *, size_t>>
-        compIdToIndexMap)
+        componentIdToIndexMap)
     : m_componentInfo(componentInfo), m_componentIds(std::move(componentIds)),
-      m_compIDToIndex(std::move(compIdToIndexMap)) {
+      m_compIDToIndex(std::move(componentIdToIndexMap)) {
 
   if (m_componentIds->size() != m_compIDToIndex->size()) {
     throw std::invalid_argument(
