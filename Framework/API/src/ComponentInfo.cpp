@@ -29,8 +29,9 @@ ComponentInfo::ComponentInfo(
    * m_componentInfo.size().
    * Currently that check would break too much in Mantid.
    */
-
-  for (size_t i = 0; i < m_componentInfo.size(); ++i) {
+  const auto infoSize = m_componentInfo.size();
+  m_compIDToIndex->reserve(infoSize);
+  for (size_t i = 0; i < infoSize; ++i) {
     (*m_compIDToIndex)[(*m_componentIds)[i]] = i;
   }
 }
