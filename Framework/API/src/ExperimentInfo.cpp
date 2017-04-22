@@ -305,7 +305,7 @@ void ExperimentInfo::setInstrument(const Instrument_const_sptr &instr) {
   m_detectorInfo = makeDetectorInfo(*parInstrument, *instr);
   m_parmap->setDetectorInfo(m_detectorInfo);
   if (instr->hasDetectorInfo()) {
- 
+
     // Reuse the ID -> index map for the detector ids
     m_detectorInfoWrapper = Kernel::make_unique<DetectorInfo>(
         *m_detectorInfo, getInstrument(), m_parmap.get(),
@@ -353,10 +353,10 @@ Instrument_const_sptr ExperimentInfo::getInstrument() const {
   }
   // We can only set the ComponentInfo on the return Instrument if the API
   // wrapper is fully constructed
-  if(m_componentInfoWrapper){
-  instrument->setComponentInfo(m_componentInfo,
-                               m_componentInfoWrapper->componentIds(),
-                               m_componentInfoWrapper->componentIdToIndexMap());
+  if (m_componentInfoWrapper) {
+    instrument->setComponentInfo(
+        m_componentInfo, m_componentInfoWrapper->componentIds(),
+        m_componentInfoWrapper->componentIdToIndexMap());
   }
   return instrument;
 }
