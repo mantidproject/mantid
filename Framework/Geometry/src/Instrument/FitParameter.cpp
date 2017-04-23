@@ -20,7 +20,7 @@ Kernel::Logger g_log("FitParameter");
 */
 std::string FitParameter::getConstraint() const {
 
-  if (m_constraintMin.compare("") == 0 && m_constraintMax.compare("") == 0)
+  if (m_constraintMin == "" && m_constraintMax == "")
     return std::string("");
 
   std::stringstream constraint;
@@ -67,7 +67,7 @@ double FitParameter::getValue(const double &at) const {
     return m_value;
   }
 
-  if (m_formula.compare("") != 0) {
+  if (m_formula != "") {
     size_t found;
     std::string equationStr = m_formula;
     std::string toReplace = "centre"; // replace this string in formula

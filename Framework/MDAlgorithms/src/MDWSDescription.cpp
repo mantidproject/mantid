@@ -450,7 +450,7 @@ MDWSDescription::getCoordinateSystem() const {
  * @return True only if in Q3D mode
  */
 bool MDWSDescription::isQ3DMode() const {
-  return this->AlgID.compare("Q3D") == 0;
+  return this->AlgID == "Q3D";
 }
 
 bool MDWSDescription::hasLattice() const {
