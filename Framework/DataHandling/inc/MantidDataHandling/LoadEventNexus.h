@@ -330,8 +330,7 @@ bool LoadEventNexus::runLoadInstrument(const std::string &nexusfilename,
       }
     }
   }
-  if (instrument ==
-      "POWGEN3") // hack for powgen b/c of bad long name
+  if (instrument == "POWGEN3") // hack for powgen b/c of bad long name
     instrument = "POWGEN";
   if (instrument == "NOM") // hack for nomad
     instrument = "NOMAD";

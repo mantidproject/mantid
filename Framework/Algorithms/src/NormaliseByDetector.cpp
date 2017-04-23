@@ -118,7 +118,7 @@ void NormaliseByDetector::processHistogram(size_t wsIndex,
     const Geometry::FitParameter &fitParam =
         tryParseFunctionParameter(param, det);
 
-    if (fitParam.getFormula() == "") {
+    if (fitParam.getFormula().empty()) {
       throw std::runtime_error(
           "A Forumla has not been provided for a fit function");
     } else {

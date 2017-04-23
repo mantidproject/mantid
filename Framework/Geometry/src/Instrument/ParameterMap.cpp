@@ -174,9 +174,8 @@ const std::string ParameterMap::getDescription(const std::string &compName,
   pmap_cit it;
   std::string result;
   for (it = m_map.begin(); it != m_map.end(); ++it) {
-    if (compName == ((const IComponent *)(*it).first)->getName()) {
-      boost::shared_ptr<Parameter> param =
-          get((const IComponent *)(*it).first, name);
+    if (compName == it->first->getName()) {
+      boost::shared_ptr<Parameter> param = get(it->first, name);
       if (param) {
         result = param->getDescription();
         if (!result.empty())

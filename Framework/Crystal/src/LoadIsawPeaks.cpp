@@ -124,7 +124,7 @@ std::string LoadIsawPeaks::readHeader(PeaksWorkspace_sptr outWS,
   if (r.length() < 1)
     throw std::logic_error(std::string("No first line of Peaks file"));
 
-  if (r != std::string("Version:"))
+  if (r != "Version:")
     throw std::logic_error(
         std::string("No Version: on first line of Peaks file"));
 
@@ -349,7 +349,7 @@ std::string LoadIsawPeaks::readPeakBlockHeader(std::string lastStr,
     }
   }
 
-  if (s != std::string("1"))
+  if (s != "1")
     return s;
 
   run = std::stoi(getWord(in, false));
@@ -396,7 +396,7 @@ void LoadIsawPeaks::appendFile(PeaksWorkspace_sptr outWS,
   if (!in.good() || s.length() < 1)
     throw std::runtime_error("End of Peaks file before peaks");
 
-  if (s != std::string("0"))
+  if (s != "0")
     throw std::logic_error("No header for Peak segments");
 
   readToEndOfLine(in, true);

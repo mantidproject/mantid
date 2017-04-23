@@ -784,13 +784,13 @@ void IFunction::setMatrixWorkspace(
                 dynamic_cast<IFunctionWithLocation *>(this);
             if (testWithLocation == nullptr ||
                 (!fitParam.getLookUpTable().containData() &&
-                 fitParam.getFormula() == "")) {
+                 fitParam.getFormula().empty())) {
               setParameter(i, fitParam.getValue());
             } else {
               double centreValue = testWithLocation->centre();
               Kernel::Unit_sptr centreUnit; // unit of value used in formula or
                                             // to look up value in lookup table
-              if (fitParam.getFormula() == "")
+              if (fitParam.getFormula().empty())
                 centreUnit = fitParam.getLookUpTable().getXUnit(); // from table
               else {
                 if (!fitParam.getFormulaUnit().empty()) {
@@ -827,7 +827,7 @@ void IFunction::setMatrixWorkspace(
               // a unit of its own. If set convert param value
               // See section 'Using fitting parameters in
               // www.mantidproject.org/IDF
-              if (fitParam.getFormula() == "") {
+              if (fitParam.getFormula().empty()) {
                 // so from look up table
                 Kernel::Unit_sptr resultUnit =
                     fitParam.getLookUpTable().getYUnit(); // from table
