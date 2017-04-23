@@ -358,8 +358,7 @@ void CreateGroupingWorkspace::exec() {
   }
 
   // Validation for 2_4Grouping input used only for SNAP
-  if (inst->getName() != "SNAP" &&
-      grouping == "2_4Grouping") {
+  if (inst->getName() != "SNAP" && grouping == "2_4Grouping") {
     const std::string message("2_4Grouping only works for SNAP.");
     g_log.error(message);
     throw std::invalid_argument(message);
@@ -368,11 +367,9 @@ void CreateGroupingWorkspace::exec() {
   if (GroupNames.empty() && OldCalFilename.empty()) {
     if (grouping == "All") {
       GroupNames = inst->getName();
-    } else if (inst->getName() == "SNAP" &&
-               grouping == "Group") {
+    } else if (inst->getName() == "SNAP" && grouping == "Group") {
       GroupNames = "East,West";
-    } else if (inst->getName() == "SNAP" &&
-               grouping == "2_4Grouping") {
+    } else if (inst->getName() == "SNAP" && grouping == "2_4Grouping") {
       GroupNames = "Column1,Column2,Column3,Column4,Column5,Column6,";
     } else {
       sortnames = true;

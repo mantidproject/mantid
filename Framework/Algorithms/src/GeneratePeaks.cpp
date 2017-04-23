@@ -199,8 +199,7 @@ void GeneratePeaks::processAlgProperties(std::string &peakfunctype,
   } else if (bkgdfunctype == "None") {
     m_useAutoBkgd = false;
     m_genBackground = false;
-  } else if (bkgdfunctype == "Linear" ||
-             bkgdfunctype == "Flat") {
+  } else if (bkgdfunctype == "Linear" || bkgdfunctype == "Flat") {
     m_useAutoBkgd = false;
     bkgdfunctype = bkgdfunctype + "Background";
   }

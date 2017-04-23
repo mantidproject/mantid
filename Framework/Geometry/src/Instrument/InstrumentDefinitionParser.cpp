@@ -1094,8 +1094,7 @@ void InstrumentDefinitionParser::appendAssembly(
     category = pType->getAttribute("is");
 
   // check if special Component
-  if (category == "SamplePos" ||
-      category == "samplePos") {
+  if (category == "SamplePos" || category == "samplePos") {
     m_instrument->markAsSamplePos(ass);
   }
   if (category == "Source" || category == "source") {
@@ -1606,12 +1605,10 @@ void InstrumentDefinitionParser::appendLeaf(Geometry::ICompAssembly *parent,
     if (category == "Source" || category == "source") {
       m_instrument->markAsSource(comp);
     }
-    if (category == "SamplePos" ||
-        category == "samplePos") {
+    if (category == "SamplePos" || category == "samplePos") {
       m_instrument->markAsSamplePos(comp);
     }
-    if (category == "ChopperPos" ||
-        category == "chopperPos") {
+    if (category == "ChopperPos" || category == "chopperPos") {
       m_instrument->markAsChopperPoint(comp);
     }
 

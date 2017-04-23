@@ -1663,12 +1663,11 @@ void ExperimentInfo::populateWithParameter(
       m_detectorInfo->setMasked(detectorInfo().indexOf(det->getID()),
                                 paramValue);
     }
-  } else if (name == "x" || name == "y" ||
-             name == "z") {
+  } else if (name == "x" || name == "y" || name == "z") {
     paramMapForPosAndRot.addPositionCoordinate(paramInfo.m_component, name,
                                                paramValue);
-  } else if (name == "rot" || name == "rotx" ||
-             name == "roty" || name == "rotz") {
+  } else if (name == "rot" || name == "rotx" || name == "roty" ||
+             name == "rotz") {
     // Effectively this is dropping any parameters named 'rot'.
     paramMapForPosAndRot.addRotationParam(paramInfo.m_component, name,
                                           paramValue, pDescription);

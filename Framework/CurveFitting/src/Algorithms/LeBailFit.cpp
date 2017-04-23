@@ -1080,8 +1080,7 @@ void LeBailFit::parseBraggPeaksParametersTable() {
                   << " < 3 as required.\n";
     throw std::runtime_error("Input parameter workspace is wrong. ");
   }
-  if (colnames[0] != "H" || colnames[1] != "K" ||
-      colnames[2] != "L") {
+  if (colnames[0] != "H" || colnames[1] != "K" || colnames[2] != "L") {
     stringstream errss;
     errss << "Input Bragg peak parameter TableWorkspace does not have the "
              "columns in order.  "

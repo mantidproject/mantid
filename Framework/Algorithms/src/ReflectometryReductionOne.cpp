@@ -503,10 +503,8 @@ void ReflectometryReductionOne::exec() {
     theta = temp;
   }
   const std::string strAnalysisMode = getProperty("AnalysisMode");
-  const bool isPointDetector =
-      (pointDetectorAnalysis == strAnalysisMode);
-  const bool isMultiDetector =
-      (multiDetectorAnalysis == strAnalysisMode);
+  const bool isPointDetector = (pointDetectorAnalysis == strAnalysisMode);
+  const bool isMultiDetector = (multiDetectorAnalysis == strAnalysisMode);
 
   const MinMax wavelengthInterval =
       this->getMinMax("WavelengthMin", "WavelengthMax");

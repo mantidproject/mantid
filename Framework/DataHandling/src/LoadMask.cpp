@@ -189,8 +189,7 @@ void parseISISStringToVector(const std::string &ins,
         boost::lexical_cast<Mantid::specnum_t>(splitstrings[index]));
 
     // ii)  push the ending vector
-    if (index == splitstrings.size() - 1 ||
-        splitstrings[index + 1] != "-") {
+    if (index == splitstrings.size() - 1 || splitstrings[index + 1] != "-") {
       // the next one is not '-'
       ranges.push_back(
           boost::lexical_cast<Mantid::specnum_t>(splitstrings[index]));

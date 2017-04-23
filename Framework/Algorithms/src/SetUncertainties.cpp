@@ -78,10 +78,8 @@ void SetUncertainties::exec() {
   MatrixWorkspace_const_sptr inputWorkspace = getProperty("InputWorkspace");
   std::string errorType = getProperty("SetError");
   bool zeroError = (errorType == ZERO);
-  bool takeSqrt =
-      ((errorType == SQRT) || (errorType == SQRT_OR_ONE));
-  bool resetOne = ((errorType == ONE_IF_ZERO) ||
-                   (errorType == SQRT_OR_ONE));
+  bool takeSqrt = ((errorType == SQRT) || (errorType == SQRT_OR_ONE));
+  bool resetOne = ((errorType == ONE_IF_ZERO) || (errorType == SQRT_OR_ONE));
 
   // Create the output workspace. This will copy many aspects from the input
   // one.

@@ -40,10 +40,8 @@ int LoadPDFgetNFile::confidence(Kernel::FileDescriptor &descriptor) const {
   // check the file extension
   const std::string &extn = descriptor.extension();
   // Only allow known file extensions
-  if (extn != "sq" && extn != "sqa" &&
-      extn != "sqb" && extn != "gr" &&
-      extn != "ain" && extn != "braw" &&
-      extn != "bsmo") {
+  if (extn != "sq" && extn != "sqa" && extn != "sqb" && extn != "gr" &&
+      extn != "ain" && extn != "braw" && extn != "bsmo") {
     return 0;
   }
 

@@ -26,8 +26,7 @@ LoadDaveGrp::LoadDaveGrp() : ifile(), line(), nGroups(0), xLength(0) {}
  */
 int LoadDaveGrp::confidence(Kernel::FileDescriptor &descriptor) const {
   const std::string &extn = descriptor.extension();
-  if (extn != ".grp" && extn != ".sqe" &&
-      extn != ".txt" && extn != ".dat")
+  if (extn != ".grp" && extn != ".sqe" && extn != ".txt" && extn != ".dat")
     return 0;
 
   if (!descriptor.isAscii())

@@ -102,8 +102,7 @@ void ConvertSpectrumAxis2::createThetaMap(API::Progress &progress,
                                           API::MatrixWorkspace_sptr &inputWS) {
   // Not sure about default, previously there was a call to a null function?
   bool signedTheta = false;
-  if (targetUnit == "signed_theta" ||
-      targetUnit == "SignedTheta") {
+  if (targetUnit == "signed_theta" || targetUnit == "SignedTheta") {
     signedTheta = true;
   } else if (targetUnit == "theta" || targetUnit == "Theta") {
     signedTheta = false;

@@ -379,8 +379,7 @@ void CreateChunkingFromInstrument::exec() {
       getGroupNames(this->getPropertyValue(PARAM_CHUNK_NAMES));
   if (groupLevel == "All") {
     return; // nothing to do
-  } else if (inst->getName() == "SNAP" &&
-             groupLevel == "Group") {
+  } else if (inst->getName() == "SNAP" && groupLevel == "Group") {
     groupNames.clear();
     groupNames.emplace_back("East");
     groupNames.emplace_back("West");

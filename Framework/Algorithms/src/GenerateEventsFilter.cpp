@@ -773,9 +773,9 @@ void GenerateEventsFilter::processMultipleValueFilters(double minvalue,
         filterincrease, filterdecrease, m_startTime, m_stopTime);
   } else {
     // Make filters in serial
-    makeMultipleFiltersByValues(
-        indexwsindexmap, logvalueranges, logboundary == "centre",
-        filterincrease, filterdecrease, m_startTime, m_stopTime);
+    makeMultipleFiltersByValues(indexwsindexmap, logvalueranges,
+                                logboundary == "centre", filterincrease,
+                                filterdecrease, m_startTime, m_stopTime);
   }
 }
 

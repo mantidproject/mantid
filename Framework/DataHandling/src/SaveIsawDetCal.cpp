@@ -158,8 +158,7 @@ void SaveIsawDetCal::exec() {
     // Retrieve it
     boost::shared_ptr<const IComponent> det =
         inst->getComponentByName(bankName);
-    if (inst->getName() ==
-        "CORELLI") // for Corelli with sixteenpack under bank
+    if (inst->getName() == "CORELLI") // for Corelli with sixteenpack under bank
     {
       std::vector<Geometry::IComponent_const_sptr> children;
       boost::shared_ptr<const Geometry::ICompAssembly> asmb =
