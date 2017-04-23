@@ -165,15 +165,11 @@ void pqCameraReactionNonOrthogonalAxes::resetCamera() {
 }
 
 //-----------------------------------------------------------------------------
-void pqCameraReactionNonOrthogonalAxes::resetDirection(double look_x,
-                                                       double look_y,
-                                                       double look_z,
-                                                       double up_x, double up_y,
-                                                       double up_z) {
+void pqCameraReactionNonOrthogonalAxes::resetDirection(
+    double sign, std::array<int, 2> axes) {
   pqRenderView *ren =
       qobject_cast<pqRenderView *>(pqActiveObjects::instance().activeView());
   if (ren) {
-    double look[3] = {look_x, look_y, look_z};
     vtkSMSourceProxy *nonOrthogonalSource =
         FindVisibleProducerWithChangeOfBasisMatrix(ren);
     if (nonOrthogonalSource) {
@@ -182,43 +178,48 @@ void pqCameraReactionNonOrthogonalAxes::resetDirection(double look_x,
               nonOrthogonalSource);
       vtkNew<vtkMatrix4x4> mat;
       mat->DeepCopy(cobm.GetData());
-      vtkNew<vtkMatrixToLinearTransform> transform;
-      transform->SetInput(mat.Get());
-      transform->TransformPoint(look, look);
-      // vtkPerspectiveTransform::SetupCamera will orthogonalize viewUp.
+      double a[3], up[3], look[3];
+      for (int j = 0; j < 3; ++j) {
+        a[j] = mat->GetElement(j, axes[0]);
+        up[j] = mat->GetElement(j, axes[1]);
+      }
+      vtkMath::Cross(a, up, look);
+      for (int i = 0; i < 3; ++i) {
+        look[i] *= sign;
+      }
+      ren->resetViewDirection(look[0], look[1], look[2], up[0], up[1], up[2]);
     }
-    ren->resetViewDirection(look[0], look[1], look[2], up_x, up_y, up_z);
   }
 }
 
 //-----------------------------------------------------------------------------
 void pqCameraReactionNonOrthogonalAxes::resetPositiveU() {
-  pqCameraReactionNonOrthogonalAxes::resetDirection(1, 0, 0, 0, 0, 1);
+  pqCameraReactionNonOrthogonalAxes::resetDirection(1., {{1, 2}});
 }
 
 //-----------------------------------------------------------------------------
 void pqCameraReactionNonOrthogonalAxes::resetNegativeU() {
-  pqCameraReactionNonOrthogonalAxes::resetDirection(-1, 0, 0, 0, 0, 1);
+  pqCameraReactionNonOrthogonalAxes::resetDirection(-1., {{1, 2}});
 }
 
 //-----------------------------------------------------------------------------
 void pqCameraReactionNonOrthogonalAxes::resetPositiveV() {
-  pqCameraReactionNonOrthogonalAxes::resetDirection(0, 1, 0, 0, 0, 1);
+  pqCameraReactionNonOrthogonalAxes::resetDirection(1., {{0, 2}});
 }
 
 //-----------------------------------------------------------------------------
 void pqCameraReactionNonOrthogonalAxes::resetNegativeV() {
-  pqCameraReactionNonOrthogonalAxes::resetDirection(0, -1, 0, 0, 0, 1);
+  pqCameraReactionNonOrthogonalAxes::resetDirection(-1., {{0, 2}});
 }
 
 //-----------------------------------------------------------------------------
 void pqCameraReactionNonOrthogonalAxes::resetPositiveW() {
-  pqCameraReactionNonOrthogonalAxes::resetDirection(0, 0, 1, 0, 1, 0);
+  pqCameraReactionNonOrthogonalAxes::resetDirection(1., {{0, 1}});
 }
 
 //-----------------------------------------------------------------------------
 void pqCameraReactionNonOrthogonalAxes::resetNegativeW() {
-  pqCameraReactionNonOrthogonalAxes::resetDirection(0, 0, -1, 0, 1, 0);
+  pqCameraReactionNonOrthogonalAxes::resetDirection(-1., {{0, 1}});
 }
 
 //-----------------------------------------------------------------------------

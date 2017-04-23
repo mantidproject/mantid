@@ -99,8 +99,7 @@ public:
   static void resetNegativeU();
   static void resetNegativeV();
   static void resetNegativeW();
-  static void resetDirection(double look_u, double look_v, double look_w,
-                             double up_u, double up_v, double up_w);
+  static void resetDirection(double sign, std::array<int, 2> axes);
   static void zoomToData();
   static void rotateCamera(double angle);
 
