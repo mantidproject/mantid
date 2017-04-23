@@ -6,7 +6,14 @@
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/Unit.h"
 
+#ifdef _MSC_VER
+// qualifier applied to function type has no meaning; ignored
+#pragma warning(disable : 4180)
+#endif
 #include "tbb/parallel_sort.h"
+#ifdef _MSC_VER
+#pragma warning(default : 4180)
+#endif
 
 #include <cfloat>
 #include <cmath>
