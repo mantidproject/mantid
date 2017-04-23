@@ -1568,12 +1568,6 @@ void EventList::compressEventsParallelHelper(
  *the same.
  * @param destination :: EventList that will receive the compressed events. Can
  *be == this.
- * @param parallel :: if true, the compression will be done with all available
- *cores in parallel.
- *        Note: The parallel results may be slightly different than the serial
- *calculation.
- *        There will typically be more events because of the list was split up.
- *        Note: CURRENTLY IGNORED!
  */
 void EventList::compressEvents(double tolerance, EventList *destination) {
   this->sortTof();
