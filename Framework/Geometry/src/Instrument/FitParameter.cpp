@@ -29,14 +29,14 @@ std::string FitParameter::getConstraint() const {
   foundMaxPercentage = m_constraintMax.find('%');
   double min = 0;
   double max = 0;
-  if (m_constraintMin.empty()) {
+  if (!m_constraintMin.empty()) {
     if (foundMinPercentage != std::string::npos)
       min = std::stod(m_constraintMin.substr(0, m_constraintMin.size() - 1)) *
             m_value * 0.01;
     else
       min = std::stod(m_constraintMin);
   }
-  if (m_constraintMax.empty()) {
+  if (!m_constraintMax.empty()) {
     if (foundMaxPercentage != std::string::npos)
       max = std::stod(m_constraintMax.substr(0, m_constraintMax.size() - 1)) *
             m_value * 0.01;
@@ -44,7 +44,9 @@ std::string FitParameter::getConstraint() const {
       max = std::stod(m_constraintMax);
   }
 
-  if (m_constraintMin.empty()) {
+  if (!(m_constraintMin.empty() && m_constraintMax.empty())) {
+    constraint << min << " < " << m_name << " < " << max;
+  } else if (!m_constraintMin.empty()) {
     constraint << min << " < " << m_name;
   } else {
     constraint << m_name << " < " << max;
