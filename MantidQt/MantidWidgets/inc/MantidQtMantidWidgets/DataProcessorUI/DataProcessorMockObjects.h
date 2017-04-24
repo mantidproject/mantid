@@ -27,7 +27,7 @@ GCC_DIAG_OFF_SUGGEST_OVERRIDE
 
 class MockDataProcessorView : public DataProcessorView {
 public:
-  MockDataProcessorView(){};
+  MockDataProcessorView(){}
   ~MockDataProcessorView() override {}
 
   // Prompt
@@ -79,7 +79,7 @@ public:
 class MockMainPresenter : public DataProcessorMainPresenter {
 
 public:
-  MockMainPresenter(){};
+  MockMainPresenter(){}
   ~MockMainPresenter() override {}
 
   // Notify
@@ -93,8 +93,7 @@ public:
   MOCK_METHOD2(giveUserWarning, void(std::string, std::string));
   MOCK_METHOD2(giveUserCritical, void(std::string, std::string));
   MOCK_METHOD1(runPythonAlgorithm, std::string(const std::string &));
-  MOCK_CONST_METHOD0(getPreprocessingProperties,
-                     std::map<std::string, std::set<std::string>>());
+  MOCK_CONST_METHOD0(getPreprocessingProperties, QString());
 
   // Global options
   MOCK_CONST_METHOD0(getPreprocessingOptionsAsString, QString());
@@ -103,8 +102,8 @@ public:
   MOCK_CONST_METHOD0(getTimeSlicingOptions, QString());
 
   // Event handling
-  MOCK_CONST_METHOD0(getTimeSlicingValues, std::string());
-  MOCK_CONST_METHOD0(getTimeSlicingType, std::string());
+  MOCK_CONST_METHOD0(getTimeSlicingValues, QString());
+  MOCK_CONST_METHOD0(getTimeSlicingType, QString());
 };
 
 class MockDataProcessorPresenter : public DataProcessorPresenter {
@@ -142,13 +141,13 @@ private:
     return std::set<std::string>();
   };
   // Calls we don't care about
-  void setOptions(const std::map<std::string, QVariant> &) override{};
+  void setOptions(const std::map<std::string, QVariant> &) override{}
   void
-  transfer(const std::vector<std::map<std::string, std::string>> &) override{};
+  transfer(const std::vector<std::map<std::string, std::string>> &) override{}
   void setInstrumentList(const std::vector<std::string> &,
-                         const std::string &) override{};
+                         const std::string &) override{}
   // void accept(WorkspaceReceiver *) {};
-  void acceptViews(DataProcessorView *, ProgressableView *) override{};
+  void acceptViews(DataProcessorView *, ProgressableView *) override{}
 
   std::map<std::string, QVariant> m_options;
 };

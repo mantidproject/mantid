@@ -1005,8 +1005,7 @@ public:
         .WillRepeatedly(Return(QString()));
     EXPECT_CALL(mockMainPresenter, getPreprocessingProperties())
         .Times(2)
-        .WillRepeatedly(Return(std::map<std::string, std::set<std::string>>()));
-    .Times(2).WillRepeatedly(Return(QString()));
+        .WillRepeatedly(Return(QString()));
     EXPECT_CALL(mockMainPresenter, getProcessingOptions())
         .Times(2)
         .WillRepeatedly(Return(""));
@@ -1090,8 +1089,7 @@ public:
         .WillRepeatedly(Return(QString()));
     EXPECT_CALL(mockMainPresenter, getPreprocessingProperties())
         .Times(2)
-        .WillRepeatedly(Return(std::map<std::string, std::set<std::string>>()));
-    .Times(2).WillRepeatedly(Return(QString()));
+        .WillRepeatedly(Return(QString()));
     EXPECT_CALL(mockMainPresenter, getProcessingOptions())
         .Times(2)
         .WillRepeatedly(Return(""));
@@ -1186,8 +1184,7 @@ public:
         .WillRepeatedly(Return(QString()));
     EXPECT_CALL(mockMainPresenter, getPreprocessingProperties())
         .Times(2)
-        .WillRepeatedly(Return(std::map<std::string, std::set<std::string>>()));
-    .Times(2).WillRepeatedly(Return(QString()));
+        .WillRepeatedly(Return(QString()));
     EXPECT_CALL(mockMainPresenter, getProcessingOptions())
         .Times(2)
         .WillRepeatedly(Return(""));
@@ -1276,8 +1273,7 @@ public:
         .WillRepeatedly(Return(QString()));
     EXPECT_CALL(mockMainPresenter, getPreprocessingProperties())
         .Times(2)
-        .WillRepeatedly(Return(std::map<std::string, std::set<std::string>>()));
-    .Times(2).WillRepeatedly(Return(QString()));
+        .WillRepeatedly(Return(QString()));
     EXPECT_CALL(mockMainPresenter, getProcessingOptions())
         .Times(2)
         .WillRepeatedly(Return(""));
@@ -1359,8 +1355,7 @@ public:
         .WillRepeatedly(Return(QString()));
     EXPECT_CALL(mockMainPresenter, getPreprocessingProperties())
         .Times(2)
-        .WillRepeatedly(Return(std::map<std::string, std::set<std::string>>()));
-    .Times(2).WillRepeatedly(Return(QString()));
+        .WillRepeatedly(Return(QString()));
     EXPECT_CALL(mockMainPresenter, getProcessingOptions())
         .Times(2)
         .WillRepeatedly(Return(""));
@@ -1502,8 +1497,7 @@ public:
         .WillRepeatedly(Return(QString()));
     EXPECT_CALL(mockMainPresenter, getPreprocessingProperties())
         .Times(2)
-        .WillRepeatedly(Return(std::map<std::string, std::set<std::string>>()));
-    .Times(2).WillRepeatedly(Return(QString()));
+        .WillRepeatedly(Return(QString()));
     EXPECT_CALL(mockMainPresenter, getProcessingOptions())
         .Times(2)
         .WillRepeatedly(Return(""));
@@ -3088,7 +3082,7 @@ public:
     EXPECT_CALL(mockMainPresenter, getPreprocessingOptionsAsString()).Times(0);
     EXPECT_CALL(mockMainPresenter, getPreprocessingProperties())
         .Times(2)
-        .WillRepeatedly(Return(std::map<std::string, std::set<std::string>>()));
+        .WillRepeatedly(Return(QString()));
     EXPECT_CALL(mockMainPresenter, getProcessingOptions())
         .Times(2)
         .WillRepeatedly(Return(""));
@@ -3282,8 +3276,7 @@ public:
         .WillRepeatedly(Return(QString()));
     EXPECT_CALL(mockMainPresenter, getPreprocessingProperties())
         .Times(2)
-        .WillRepeatedly(Return(std::map<std::string, std::set<std::string>>()));
-    .Times(2).WillRepeatedly(Return(QString()));
+        .WillRepeatedly(Return(QString()));
     EXPECT_CALL(mockMainPresenter, getProcessingOptions())
         .Times(2)
         .WillRepeatedly(Return(""));
