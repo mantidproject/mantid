@@ -89,9 +89,9 @@ class PredictPeaksCalculateStructureFactorsTest(stresstesting.MantidStressTest):
                              MinDSpacing=0.5, MaxDSpacing=10,
                              CalculateStructureFactors=True)
 
-        self.assertEquals(peaks.getNumberPeaks(), 540)
+        self.assertEquals(peaks.getNumberPeaks(), 546)
 
-        for i in range(540):
+        for i in range(546):
             peak = peaks.getPeak(i)
             self.assertLessThan(0.0, peak.getIntensity())
 
@@ -100,6 +100,6 @@ class PredictPeaksCalculateStructureFactorsTest(stresstesting.MantidStressTest):
                                    MinDSpacing=0.5, MaxDSpacing=10,
                                    CalculateStructureFactors=False)
 
-        for i in range(540):
+        for i in range(546):
             peak = peaks_no_sf.getPeak(i)
             self.assertEquals(0.0, peak.getIntensity())
