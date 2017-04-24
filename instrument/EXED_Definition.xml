@@ -91,8 +91,8 @@ last-modified="2017-04-21 14:58:37">
 </type>
 
 <!-- Monitors -->
-<type name="monitors" idlist="monitors">
-   <component type="monitor">
+<type name="monitors" >
+   <component type="monitor" idlist="monitors">
      <location x="0" z="-1.973" name="monitor1"/>
      <location x="0" z="-0.1" name="monitor2"/>
    </component>
