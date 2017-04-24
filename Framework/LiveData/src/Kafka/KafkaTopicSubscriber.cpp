@@ -429,8 +429,10 @@ KafkaTopicSubscriber::getOffsetsForTimestamp(int64_t timestamp) {
 
   // Get the offsets from the topic partitions and add them to map
   for (auto partition : partitions) {
-    partitionOffsetMap[partition->topic()][partition->partition()] =
-        partition->offset();
+    auto offset = partition->offset();
+    if (offset < 0)
+      offset = getCurrentOffset(partition->topic(), partition->partition()) - 1;
+    partitionOffsetMap[partition->topic()][partition->partition()] = offset;
   }
   return partitionOffsetMap;
 }

@@ -283,7 +283,6 @@ void KafkaEventStreamDecoder::captureImplExcept() {
           m_extractedEndRunData = false;
           g_log.debug() << "Reached end of run in data stream." << std::endl;
         }
-        continue;
       }
     }
 
@@ -335,7 +334,7 @@ void KafkaEventStreamDecoder::captureImplExcept() {
         // Wait for max latency so that we don't miss any late messages
         std::this_thread::sleep_for(MAX_LATENCY);
         stopOffsets = m_eventStream->getOffsetsForTimestamp(
-            (stopTime * 1000) + 1); // Convert seconds to milliseconds
+            (stopTime + 1) * 1000); // Convert seconds to milliseconds
         // Set reachedEnd to false for each topic
         for (auto keyValue : stopOffsets) {
           // Ignore the runInfo topic
