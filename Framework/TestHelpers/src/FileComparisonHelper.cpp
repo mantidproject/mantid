@@ -1,9 +1,88 @@
 #include "MantidTestHelpers/FileComparisonHelper.h"
 
 #include "MantidAPI/FileFinder.h"
+#include "MantidKernel/Logger.h"
 
 #include <fstream>
 #include <string>
+
+namespace { // Anonymous namespace
+// Bring typedef back into anonymous namespace
+using streamCharIter = std::istreambuf_iterator<char>;
+
+// Returns if the difference was due to EOL and fixes the position of the
+// stream if it was due to EOL
+bool isEolDifference(streamCharIter streamOne, streamCharIter streamTwo) {
+
+  // Check which is the Windows file stream (CR in CRLF)
+  // and advance it by a character so we are back to LF on both
+  if (*streamOne == '\r' && *streamTwo == '\n') {
+
+    streamOne++;
+  } else if (*streamOne == '\n' && *streamTwo == '\r') {
+    streamTwo++;
+  } else {
+    // Was not a different EOL so indicate false to that
+    return false;
+  }
+  // We sorted EOL issues - return that this was the issue
+  return true;
+}
+
+// Checks if two char streams are identical whilst accounting for
+// EOL differences
+bool checkCharactersAreIdentical(streamCharIter streamOne,
+                                 streamCharIter streamTwo) {
+  const char charOne = *streamOne;
+  const char charTwo = *streamTwo;
+
+  // Do comparison first so we do the least ops on good path
+  if (charOne == charTwo) {
+    return true;
+  }
+
+  // Have the handle EOL differences
+  return isEolDifference(streamOne, streamTwo);
+}
+
+void logDifferenceError(streamCharIter refStream, streamCharIter testStream,
+                        size_t numNewLines, size_t numChars) {
+  // Make note of differing characters
+  const char refChar = *refStream;
+  const char testChar = *testStream;
+
+  const std::string lineNumber = std::to_string(numNewLines);
+  const std::string charNumber = std::to_string(numChars);
+
+  // Rewind to previous new line
+  const int numCharsToRewind = -1 * static_cast<int>(numChars);
+  std::advance(refStream, (numCharsToRewind));
+  std::advance(testStream, (numCharsToRewind));
+
+  // Then convert it to an output string
+  std::string refString, testString;
+  refString.reserve(numChars);
+  testString.reserve(numChars);
+  for (size_t i = 0; i < numChars; i++) {
+    refString += *refStream;
+    testString += *testStream;
+    refStream++;
+    testStream++;
+  }
+
+  // Build our output string
+  std::string outError;
+  (outError += "At line number: ") += lineNumber;
+  (outError += ". Character number: ") += charNumber;
+  (outError += " expected : '") += refChar;
+  (outError += "' found: '") += testChar;
+  (outError += "'. Expected line:\n") += refString;
+  (outError += "\nFound Line:\n") += testString;
+  Mantid::Kernel::Logger g_log("FileComparisonHelper");
+  g_log.error(std::move(outError));
+}
+
+} // End of anonymous namespace
 
 namespace FileComparisonHelper {
 /**
@@ -12,28 +91,49 @@ namespace FileComparisonHelper {
 * or value it will return false. If they are identical it will
 * return true.
 *
-* @param firstIter1:: The starting position of the first iterator to check
-* @param firstIter2:: The starting position of the second iterator to check
-* @param lastIter1:: The final position of the first iterator to check
-* @param lastIter2:: The final position of the second iterator to check
+* @param refStream:: The starting position of the reference stream to check
+* @param testStream:: The starting position of the test stream to check
+* @param refStreamEnd:: The final position of the reference stream to check
+* @param testStreamEnd:: The final position of the second stream to check
 *
 * @return True if iterators are identical in value and length else false
 */
-template <typename iter1, typename iter2>
-bool areFileStreamsEqual(iter1 firstIter1, iter2 firstIter2, iter1 lastIter1,
-                         iter2 lastIter2) {
-
-  while (firstIter1 != lastIter1 && firstIter2 != lastIter2) {
+bool areIteratorsEqual(streamCharIter refStream, streamCharIter testStream,
+                       streamCharIter refStreamEnd,
+                       streamCharIter testStreamEnd) {
+  size_t numNewLines = 0;
+  size_t numCharsOnLine = 0;
+  while (refStream != refStreamEnd && testStream != testStreamEnd) {
     // Check individual values of iterators
-    if (*firstIter1 != *firstIter2) {
+    if (!checkCharactersAreIdentical(refStream, testStream)) {
+      logDifferenceError(refStream, testStream, numNewLines, numCharsOnLine);
       return false;
     }
 
-    firstIter1++;
-    firstIter2++;
+    // Keep track of where the previous EOL is in case we need to log an error
+    if (*refStream == '\n') {
+      numCharsOnLine = 0;
+      numNewLines++;
+    } else {
+      numCharsOnLine++;
+    }
+    // Move iterators alone to compare next char
+    refStream++;
+    testStream++;
   }
-  // Check that both iterators were the same length
-  return (firstIter1 == lastIter1 && firstIter2 == lastIter2);
+  // Lastly check both iterators were the same length as they should both
+  // point to the end value
+  if (refStream != refStreamEnd || testStream != testStreamEnd) {
+    Mantid::Kernel::Logger g_log("FileComparisonHelper");
+    g_log.error("Length of both files were not identical");
+    return false;
+  } else if (numCharsOnLine == 0 && numNewLines == 0) {
+    Mantid::Kernel::Logger g_log("FileComparisonHelper");
+    g_log.error("No characters checked in FileComparisonHelper");
+    return false;
+  }
+  // These file are identical
+  return true;
 }
 
 /**
@@ -52,11 +152,11 @@ bool areFilesEqual(const std::string &referenceFileFullPath,
   std::ifstream refFileStream(referenceFileFullPath, std::ifstream::binary);
   std::ifstream outFileStream(outFileFullPath, std::ifstream::binary);
 
-  if (!refFileStream.is_open()) {
+  if (refFileStream.fail()) {
     throw std::runtime_error("Could not open reference file at specified path");
   }
 
-  if (!outFileStream.is_open()) {
+  if (outFileStream.fail()) {
     throw std::runtime_error("Could not open output file at specified path");
   }
 
@@ -76,13 +176,12 @@ bool areFilesEqual(const std::string &referenceFileFullPath,
 */
 bool areFileStreamsEqual(std::ifstream &referenceFileStream,
                          std::ifstream &fileToCheck) {
-  // Open iterators for templated function to run on
-  std::istreambuf_iterator<char> refIter(referenceFileStream);
-  std::istreambuf_iterator<char> checkIter(fileToCheck);
+  // Open iterators for function to run on
+  streamCharIter refIter(referenceFileStream), checkIter(fileToCheck);
   // Last iterator in istream is equivalent of uninitialized iterator
-  std::istreambuf_iterator<char> end;
+  streamCharIter end;
 
-  return areFileStreamsEqual(refIter, checkIter, end, end);
+  return areIteratorsEqual(refIter, checkIter, end, end);
 }
 
 /**

@@ -37,11 +37,15 @@ namespace FileComparisonHelper {
 
 
 */
-/// Compares the length and content of two iterators and returns if they are
-/// equal
-template <typename iter1, typename iter2>
-bool areIteratorsEqual(iter1 firstIter1, iter2 firstIter2, iter1 lastIter1,
-                       iter2 lastIter2);
+
+/// Typedef buffered stream iterator (char) to a shorter name
+using streamCharIter = std::istreambuf_iterator<char>;
+
+/// Compares the length and content of std::streams iterators
+///	and returns if they are equal
+bool areIteratorsEqual(streamCharIter refStream, streamCharIter testStream,
+                       streamCharIter refStreamEnd = streamCharIter(),
+                       streamCharIter testStreamEnd = streamCharIter());
 
 /// Checks if two files are equal in content and length at the specified path.
 /// Accounts for EOL differences if they exist
