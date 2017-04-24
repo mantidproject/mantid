@@ -132,10 +132,10 @@ KafkaTopicSubscriber::getTopicPartitions() {
     auto partitionMetadata = matchedTopic->partitions();
     auto numberOfPartitions = partitionMetadata->size();
     // Create a TopicPartition for each partition in the topic
-    for (int partitionNumber = 0; partitionNumber < numberOfPartitions;
+    for (size_t partitionNumber = 0; partitionNumber < numberOfPartitions;
          ++partitionNumber) {
-      auto topicPartition =
-          RdKafka::TopicPartition::create(topicName, partitionNumber);
+      auto topicPartition = RdKafka::TopicPartition::create(
+          topicName, static_cast<int>(partitionNumber));
       partitions.push_back(topicPartition);
     }
   }
@@ -349,7 +349,9 @@ void KafkaTopicSubscriber::reportSuccessOrFailure(
  * cleared
  * on entry into the method
  */
-void KafkaTopicSubscriber::consumeMessage(std::string *payload) {
+void KafkaTopicSubscriber::consumeMessage(std::string *payload, int64_t &offset,
+                                          int32_t &partition,
+                                          std::string &topic) {
   using RdKafka::Message;
   using RdKafka::err2str;
   assert(m_consumer);
@@ -365,6 +367,9 @@ void KafkaTopicSubscriber::consumeMessage(std::string *payload) {
     if (kfMsg->len() > 0) {
       payload->assign(static_cast<const char *>(kfMsg->payload()),
                       static_cast<int>(kfMsg->len()));
+      offset = kfMsg->offset();
+      partition = kfMsg->partition();
+      topic = kfMsg->topic_name();
     } else {
       // If RdKafka indicates no error then we should always get a
       // non-zero length message
@@ -386,6 +391,48 @@ void KafkaTopicSubscriber::consumeMessage(std::string *payload) {
        << RdKafka::err2str(kfMsg->err());
     throw std::runtime_error(os.str());
   }
+}
+
+/**
+ * Get offsets corresponding to given timestamp for each topic-partition to
+ * which we are subscribed
+ * @param timestamp : timestamp at which to get corresponding offsets
+ * @return : map with topic names as key with a vector of offsets for the
+ * partitions
+ */
+std::unordered_map<std::string, std::vector<int64_t>>
+KafkaTopicSubscriber::getOffsetsForTimestamp(int64_t timestamp) {
+  auto partitions = getTopicPartitions();
+  for (auto partition : partitions) {
+    partition->set_offset(timestamp);
+  }
+  // Convert the timestamps to partition offsets
+  auto error = m_consumer->offsetsForTimes(partitions, 2000);
+  if (error != RdKafka::ERR_NO_ERROR) {
+    throw std::runtime_error("In KafkaTopicSubscriber failed to lookup "
+                             "partition offsets for specified start time.");
+  }
+
+  // Preallocate map
+  auto metadata = queryMetadata();
+  auto topics = metadata->topics();
+  std::unordered_map<std::string, std::vector<int64_t>> partitionOffsetMap;
+  std::for_each(
+      topics->cbegin(), topics->cend(),
+      [&partitionOffsetMap, this](const TopicMetadata *tpc) {
+        if (std::find(m_topicNames.cbegin(), m_topicNames.cend(),
+                      tpc->topic()) != m_topicNames.cend()) {
+          partitionOffsetMap.insert(
+              {tpc->topic(), std::vector<int64_t>(tpc->partitions()->size())});
+        }
+      });
+
+  // Get the offsets from the topic partitions and add them to map
+  for (auto partition : partitions) {
+    partitionOffsetMap[partition->topic()][partition->partition()] =
+        partition->offset();
+  }
+  return partitionOffsetMap;
 }
 }
 }

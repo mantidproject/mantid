@@ -21,6 +21,7 @@ GCC_DIAG_ON(conversion)
 
 #include <boost/make_shared.hpp>
 
+#include <MantidLiveData/Kafka/KafkaTopicSubscriber.h>
 #include <cassert>
 #include <functional>
 #include <map>
@@ -29,9 +30,15 @@ namespace {
 /// Logger
 Mantid::Kernel::Logger g_log("KafkaEventStreamDecoder");
 
-std::string PROTON_CHARGE_PROPERTY = "proton_charge";
-std::string RUN_NUMBER_PROPERTY = "run_number";
-std::string RUN_START_PROPERTY = "run_start";
+static const std::string PROTON_CHARGE_PROPERTY = "proton_charge";
+static const std::string RUN_NUMBER_PROPERTY = "run_number";
+static const std::string RUN_START_PROPERTY = "run_start";
+
+// File identifiers from flatbuffers schema
+static const std::string RUN_MESSAGE_ID = "ba57";
+static const std::string EVENT_MESSAGE_ID = "ev42";
+
+static const std::chrono::seconds MAX_LATENCY(1);
 }
 
 namespace Mantid {
@@ -210,33 +217,20 @@ void KafkaEventStreamDecoder::captureImplExcept() {
   g_log.debug("Event capture starting");
   initLocalCaches();
 
-  // File identifiers from flatbuffers schema
-  std::string runMessageID = "ba57";
-  std::string eventMessageID = "ev42";
-
   m_interrupt = false;
   m_endRun = false;
   m_runStatusSeen = false;
   m_extractedEndRunData = true;
   std::string buffer;
+  int64_t offset;
+  int32_t partition;
+  std::string topicName;
+  std::unordered_map<std::string, std::vector<int64_t>> stopOffsets;
+  std::unordered_map<std::string, bool> reachedEnd;
   // Set to true when a runStop message has been received and we need to start
-  // checking if we have allowed enough time for late messages (0.5 seconds?)
-  bool runStopping = false;
+  // checking if we have reached the last message in the run for each partition
+  bool checkOffsets = false;
   while (!m_interrupt) {
-
-    if (runStopping) {
-      // todo if clock has reached max latency time
-      m_endRun = true;
-      // If we've reached the end of a run then set m_extractWaiting to true
-      // so that we wait until the buffer is emptied before continuing.
-      // Otherwise we can end up with data from two different runs in the
-      // same buffer workspace which is problematic if the user wanted the
-      // "Stop" or "Rename" run transition option.
-      m_extractWaiting = true;
-      m_extractedEndRunData = false;
-      g_log.debug() << "Reached end of run in data stream." << std::endl;
-    }
-
     // If extractData method is waiting for access to the buffer workspace
     // then we wait for it to finish
     std::unique_lock<std::mutex> readyLock(m_waitMutex);
@@ -260,17 +254,44 @@ void KafkaEventStreamDecoder::captureImplExcept() {
     }
 
     // Pull in events
-    m_eventStream->consumeMessage(&buffer);
+    m_eventStream->consumeMessage(&buffer, offset, partition, topicName);
     // No events, wait for some to come along...
     if (buffer.empty())
       continue;
+
+    if (checkOffsets) {
+      if (offset >= stopOffsets[topicName][partition]) {
+        reachedEnd[topicName] = true;
+        g_log.debug() << "Reached end-of-run in " << topicName << " topic."
+                      << std::endl;
+        g_log.debug() << "topic: " << topicName << " offset: " << offset
+                      << " stopOffset: " << stopOffsets[topicName][partition]
+                      << std::endl;
+        for (auto kv : reachedEnd) {
+          g_log.debug() << kv.first << " " << kv.second << std::endl;
+        }
+        // Check if we've reached the stop offset on every topic
+        if (std::all_of(reachedEnd.cbegin(), reachedEnd.cend(),
+                        [](auto kv) { return kv.second; })) {
+          m_endRun = true;
+          // If we've reached the end of a run then set m_extractWaiting to true
+          // so that we wait until the buffer is emptied before continuing.
+          // Otherwise we can end up with data from two different runs in the
+          // same buffer workspace which is problematic if the user wanted the
+          // "Stop" or "Rename" run transition option.
+          m_extractWaiting = true;
+          m_extractedEndRunData = false;
+          g_log.debug() << "Reached end of run in data stream." << std::endl;
+        }
+        continue;
+      }
+    }
 
     // Check if we have an event message
     // Most will be event messages so we check for this type first
     if (flatbuffers::BufferHasIdentifier(
             reinterpret_cast<const uint8_t *>(buffer.c_str()),
-            eventMessageID.c_str())) {
-
+            EVENT_MESSAGE_ID.c_str())) {
       auto eventMsg =
           GetEventMessage(reinterpret_cast<const uint8_t *>(buffer.c_str()));
 
@@ -303,13 +324,29 @@ void KafkaEventStreamDecoder::captureImplExcept() {
     // Check if we have a runMessage
     if (flatbuffers::BufferHasIdentifier(
             reinterpret_cast<const uint8_t *>(buffer.c_str()),
-            runMessageID.c_str())) {
+            RUN_MESSAGE_ID.c_str())) {
       // Check if we have a runStop message
       auto runMsg =
           GetRunInfo(reinterpret_cast<const uint8_t *>(buffer.c_str()));
       if (runMsg->info_type_type() == InfoTypes_RunStop) {
-        runStopping = true;
-        // todo start the stopwatch
+        auto runStopMsg = static_cast<const RunStop *>(runMsg->info_type());
+        auto stopTime = runStopMsg->stop_time();
+        g_log.debug() << "stopTime is " << stopTime << std::endl;
+        // Wait for max latency so that we don't miss any late messages
+        std::this_thread::sleep_for(MAX_LATENCY);
+        stopOffsets = m_eventStream->getOffsetsForTimestamp(
+            (stopTime * 1000) + 1); // Convert seconds to milliseconds
+        // Set reachedEnd to false for each topic
+        for (auto keyValue : stopOffsets) {
+          // Ignore the runInfo topic
+          if (keyValue.first.substr(
+                  keyValue.first.length() -
+                  KafkaTopicSubscriber::RUN_TOPIC_SUFFIX.length()) !=
+              KafkaTopicSubscriber::RUN_TOPIC_SUFFIX)
+            reachedEnd.insert({keyValue.first, false});
+        }
+        checkOffsets = true;
+        g_log.debug("Received an end-of-run message");
       }
     }
   }
@@ -351,7 +388,10 @@ void KafkaEventStreamDecoder::initLocalCaches() {
   std::string rawMsgBuffer;
 
   // Load spectra-detector mapping from stream
-  m_spDetStream->consumeMessage(&rawMsgBuffer);
+  int64_t offset;
+  int32_t partition;
+  std::string topicName;
+  m_spDetStream->consumeMessage(&rawMsgBuffer, offset, partition, topicName);
   if (rawMsgBuffer.empty()) {
     throw std::runtime_error("KafkaEventStreamDecoder::initLocalCaches() - "
                              "Empty message received from spectrum-detector "
@@ -422,7 +462,10 @@ void KafkaEventStreamDecoder::initLocalCaches() {
  * @param rawMsgBuffer : string to use as message buffer
  */
 void KafkaEventStreamDecoder::getRunInfoMessage(std::string &rawMsgBuffer) {
-  m_runStream->consumeMessage(&rawMsgBuffer);
+  int64_t offset;
+  int32_t partition;
+  std::string topicName;
+  m_runStream->consumeMessage(&rawMsgBuffer, offset, partition, topicName);
   if (rawMsgBuffer.empty()) {
     throw std::runtime_error("KafkaEventStreamDecoder::initLocalCaches() - "
                              "Empty message received from run info "

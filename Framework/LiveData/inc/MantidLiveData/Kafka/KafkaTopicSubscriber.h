@@ -49,7 +49,10 @@ public:
 
   virtual void subscribe() override;
   virtual void subscribe(int64_t offset) override;
-  virtual void consumeMessage(std::string *payload) override;
+  virtual void consumeMessage(std::string *payload, int64_t &offset,
+                              int32_t &partition, std::string &topic) override;
+  virtual std::unordered_map<std::string, std::vector<int64_t>>
+  getOffsetsForTimestamp(int64_t timestamp) override;
 
   static const std::string EVENT_TOPIC_SUFFIX;
   static const std::string RUN_TOPIC_SUFFIX;
