@@ -158,6 +158,9 @@ public:
 
     // should fail to execute and throw a runtime error
     TS_ASSERT(!alg.isExecuted());
+
+    // Remove workspace from the data service.
+    AnalysisDataService::Instance().remove(outWSName);
   }
 
   void test_exec_withInputHKLList() {
