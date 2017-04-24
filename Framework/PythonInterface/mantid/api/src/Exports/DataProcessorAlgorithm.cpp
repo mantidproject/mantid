@@ -41,7 +41,8 @@ void export_DataProcessorAlgorithm() {
            "processed data [Default=Plus]")
 
       .def("copyProperties", &DataProcessorAdapter::copyPropertiesProxy,
-           (arg("self"), arg("alg"), arg("properties"), arg("version") = -1),
+           (arg("self"), arg("alg"),
+            arg("properties") = boost::python::object(), arg("version") = -1),
            "Copy properties from another algorithm")
 
       .def("determineChunk", &DataProcessorAdapter::determineChunkProxy,
