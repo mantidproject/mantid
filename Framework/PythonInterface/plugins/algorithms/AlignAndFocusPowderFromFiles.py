@@ -112,6 +112,11 @@ class AlignAndFocusPowderFromFiles(DataProcessorAlgorithm):
         DeleteWorkspace(Workspace=tempname)
 
     def __getCacheName(self, wkspname):
+        cachedir = self.getProperty('CacheDirectory').value
+        if len(cachedir) <= 0:
+            self.log().warning('CacheDirectory is not specified - functionality disabled')
+            return None
+
         propman_properties = ['bank', 'd_min', 'd_max', 'tof_min', 'tof_max', 'wavelength_min', 'wavelength_max']
         alignandfocusargs = []
         for name in PROPS_FOR_ALIGN:
@@ -124,7 +129,7 @@ class AlignAndFocusPowderFromFiles(DataProcessorAlgorithm):
                                    PropertyManager=self.getProperty('ReductionProperties').valueAsStr,
                                    Properties=propman_properties,
                                    OtherProperties=alignandfocusargs,
-                                   CacheDir=self.getProperty('CacheDirectory').value).OutputFilename
+                                   CacheDir=cachedir).OutputFilename
 
     def __processFile(self, filename, wkspname, file_prog_start):
         chunks = determineChunking(filename, self.chunkSize)
@@ -192,7 +197,7 @@ class AlignAndFocusPowderFromFiles(DataProcessorAlgorithm):
             cachefile = self.__getCacheName(wkspname)
             wkspname += '_f%d' % i # add file number to be unique
 
-            if os.path.exists(cachefile):
+            if cachefile is not None and os.path.exists(cachefile):
                 LoadNexusProcessed(Filename=cachefile, OutputWorkspace=wkspname)
                 # TODO LoadNexusProcessed has a bug. When it finds the
                 # instrument name without xml it reads in from an IDF
@@ -205,7 +210,8 @@ class AlignAndFocusPowderFromFiles(DataProcessorAlgorithm):
                 EditInstrumentGeometry(Workspace=wkspname, **editinstrargs)
             else:
                 self.__processFile(filename, wkspname, self.prog_per_file*float(i))
-                SaveNexusProcessed(InputWorkspace=wkspname, Filename=cachefile)
+                if cachefile is not None:
+                    SaveNexusProcessed(InputWorkspace=wkspname, Filename=cachefile)
 
             # accumulate runs
             if i == 0:
