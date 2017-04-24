@@ -83,7 +83,9 @@ library_filenames = ["libboost_regex-mt.dylib",
                      "libcrypto.dylib",
                      "libtbb.dylib",
                      "libtbbmalloc.dylib",
-                     "libtbbmalloc_proxy.dylib"]
+                     "libtbbmalloc_proxy.dylib",
+                     "librdkafka.dylib",
+                     "librdkafka++.dylib"]
 
 poco_version = "@POCO_VERSION@".split(".").map(&:to_i)
 if(poco_version[0] > 1 || (poco_version[0] == 1 && poco_version[1] >= 6))

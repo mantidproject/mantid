@@ -15,16 +15,16 @@ class vtkSplatterPlotFactory;
 class VTK_EXPORT vtkSplatterPlot : public vtkUnstructuredGridAlgorithm {
 public:
   static vtkSplatterPlot *New();
-  vtkTypeMacro(vtkSplatterPlot,
-               vtkUnstructuredGridAlgorithm) double getTime() const;
+  vtkSplatterPlot(const vtkSplatterPlot &) = delete;
+  void operator=(const vtkSplatterPlot &) = delete;
+  // clang-format off
+  vtkTypeMacro(vtkSplatterPlot, vtkUnstructuredGridAlgorithm)
+  double getTime() const;
+  // clang-format on
   void PrintSelf(ostream &os, vtkIndent indent) override;
   void SetNumberOfPoints(int nPoints);
   void SetTopPercentile(double topPercentile);
   void updateAlgorithmProgress(double progress, const std::string &message);
-  /// Getter for the minimum value of the workspace data
-  double GetMinValue();
-  /// Getter for the maximum value of the workspace data
-  double GetMaxValue();
   /// Getter for the maximum value of the workspace data
   const char *GetInstrument();
 
@@ -47,8 +47,5 @@ private:
   std::string m_wsName;
   /// Time.
   double m_time;
-
-  vtkSplatterPlot(const vtkSplatterPlot &);
-  void operator=(const vtkSplatterPlot &);
 };
 #endif

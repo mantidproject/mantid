@@ -28,17 +28,17 @@ class StateReductionBuilderTest(unittest.TestCase):
         builder = get_save_builder(data_info)
         self.assertTrue(builder)
 
-        file_name = "test_file_name"
+        user_specified_output_name = "test_file_name"
         zero_free_correction = True
         file_format = [SaveType.Nexus, SaveType.CanSAS]
 
-        builder.set_file_name(file_name)
+        builder.set_user_specified_output_name(user_specified_output_name)
         builder.set_zero_free_correction(zero_free_correction)
         builder.set_file_format(file_format)
         state = builder.build()
 
         # Assert
-        self.assertTrue(state.file_name == file_name)
+        self.assertTrue(state.user_specified_output_name == user_specified_output_name)
         self.assertTrue(state.zero_free_correction == zero_free_correction)
         self.assertTrue(state.file_format == file_format)
 

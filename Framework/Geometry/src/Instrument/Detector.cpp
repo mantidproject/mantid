@@ -1,4 +1,5 @@
 #include "MantidGeometry/Instrument/Detector.h"
+#include "MantidGeometry/Instrument/ComponentVisitor.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidBeamline/DetectorInfo.h"
 #include "MantidKernel/EigenConversionHelpers.h"
@@ -163,6 +164,10 @@ const ParameterMap &Detector::parameterMap() const { return *m_map; }
 
 /// Helper for legacy access mode. Returns the index of the detector.
 size_t Detector::index() const { return m_map->detectorIndex(m_id); }
+
+void Detector::registerContents(ComponentVisitor &componentVisitor) const {
+  componentVisitor.registerDetector(*this);
+}
 
 } // Namespace Geometry
 } // Namespace Mantid

@@ -9,6 +9,9 @@
 #include <type_traits>
 
 namespace Mantid {
+namespace Geometry {
+class Instrument;
+}
 namespace API {
 class MatrixWorkspace;
 class HistoWorkspace;
@@ -41,6 +44,7 @@ class Workspace2D;
       EventWorkspace can be created from it.
 
   Other arguments can include:
+  - The instrument.
   - The desired number of spectra (NumSpectra) to be created in the output
     workspace.
   - A reference to an IndexInfo object, defining the number of spectra and
@@ -56,6 +60,8 @@ class Workspace2D;
   ~~~{.cpp}
   create<T>(NumSpectra, Histogram)
   create<T>(IndexInfo,  Histogram)
+  create<T>(Instrument, NumSpectra, Histogram)
+  create<T>(Instrument, IndexInfo,  Histogram)
   create<T>(ParentWS)
   create<T>(ParentWS, Histogram)
   create<T>(ParentWS, NumSpectra, Histogram)
@@ -156,6 +162,13 @@ std::unique_ptr<T> create(const P &parent, const IndexArg &indexArg,
       ws = detail::createConcreteHelper<T>();
     }
   }
+
+  // The instrument is also copied by initializeFromParent, but if indexArg is
+  // IndexInfo and contains non-empty spectrum definitions the initialize call
+  // will fail due to invalid indices in the spectrum definitions. Therefore, we
+  // copy the instrument first. This should be cleaned up once we figure out the
+  // future of WorkspaceFactory.
+  ws->setInstrument(parent.getInstrument());
   ws->initialize(indexArg, HistogramData::Histogram(histArg));
   detail::initializeFromParent(parent, *ws);
   return ws;
@@ -169,6 +182,19 @@ std::unique_ptr<T> create(const IndexArg &indexArg, const HistArg &histArg) {
   auto ws = Kernel::make_unique<T>();
   ws->initialize(indexArg, HistogramData::Histogram(histArg));
   return ws;
+}
+
+template <class T, class IndexArg, class HistArg,
+          typename std::enable_if<
+              !std::is_base_of<API::MatrixWorkspace, IndexArg>::value>::type * =
+              nullptr>
+std::unique_ptr<T>
+create(const boost::shared_ptr<const Geometry::Instrument> instrument,
+       const IndexArg &indexArg, const HistArg &histArg) {
+  auto ws = Kernel::make_unique<T>();
+  ws->setInstrument(std::move(instrument));
+  ws->initialize(indexArg, HistogramData::Histogram(histArg));
+  return std::move(ws);
 }
 
 template <class T, class P,

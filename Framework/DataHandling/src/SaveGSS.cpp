@@ -317,7 +317,7 @@ void SaveGSS::setOtherProperties(IAlgorithm *alg,
   }
   // We want the bank number to increment for each member of the group
   else if (propertyName == "Bank") {
-    alg->setProperty("Bank", atoi(propertyValue.c_str()) + periodNum - 1);
+    alg->setProperty("Bank", std::stoi(propertyValue) + periodNum - 1);
   } else
     Algorithm::setOtherProperties(alg, propertyName, propertyValue, periodNum);
 }

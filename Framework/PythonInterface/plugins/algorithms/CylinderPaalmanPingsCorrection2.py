@@ -144,6 +144,18 @@ class CylinderPaalmanPingsCorrection(PythonAlgorithm):
         sample_ws_name = self.getPropertyValue('SampleWorkspace')
         can_ws_name = self.getPropertyValue('CanWorkspace')
 
+        if (self._radii[1] - self._radii[0]) < 1e-4:
+            issues['SampleOuterRadius']='Sample outer radius must be bigger than inner radius'
+
+        logger.information('Sample : inner radius = %f ; outer radius = %f' % (self._radii[0], self._radii[1]))
+
+        if self._use_can:
+            self._radii[2] = self._can_outer_radius
+            if (self._radii[2] - self._radii[1]) < 1e-4:
+                issues['CanOuterRadius'] = 'Can outer radius must be bigger than sample outer radius'
+            else:
+                logger.information('Can : inner radius = %f ; outer radius = %f' % (self._radii[1], self._radii[2]))
+
         # Ensure that a can chemical formula is given when using a can workspace
         if self._use_can:
             can_chemical_formula = self.getPropertyValue('CanChemicalFormula')
@@ -154,11 +166,12 @@ class CylinderPaalmanPingsCorrection(PythonAlgorithm):
         number_steps = int((self._sample_outer_radius - self._sample_inner_radius) / self._step_size)
         if number_steps < 20:
             issues['StepSize'] = 'Number of steps (%d) should be >= 20' % number_steps
+        logger.information('Sample : ms = %i ' % self._ms)
 
         if self._emode != 'Efixed':
-            # require both sample and can ws have wavelenght as x-axis
+            # require both sample and can ws have wavelength as x-axis
             if mtd[sample_ws_name].getAxis(0).getUnit().unitID() != 'Wavelength':
-                issues['SampleWorkspace'] = 'Workspace must have units of wavelenght.'
+                issues['SampleWorkspace'] = 'Workspace must have units of wavelength.'
 
             if self._use_can and mtd[can_ws_name].getAxis(0).getUnit().unitID() != 'Wavelength':
                 issues['CanWorkspace'] = 'Workspace must have units of wavelength.'
@@ -293,23 +306,9 @@ class CylinderPaalmanPingsCorrection(PythonAlgorithm):
         self._radii = np.zeros(self._number_can +1)
         self._radii[0] = self._sample_inner_radius
         self._radii[1] = self._sample_outer_radius
-        if (self._radii[1] - self._radii[0]) < 1e-4:
-            raise ValueError('Sample outer radius not > inner radius')
-        else:
-            logger.information('Sample : inner radius = %f ; outer radius = %f' % (self._radii[0], self._radii[1]))
-            self._ms = int((self._radii[1] - self._radii[0] + 0.0001)/self._step_size)
-            if self._ms < 20:
-                raise ValueError('Number of steps ( %i ) should be >= 20' % self._ms)
-            else:
-                if self._ms < 1:
-                    self._ms = 1
-                logger.information('Sample : ms = %i ' % self._ms)
         if self._use_can:
             self._radii[2] = self._can_outer_radius
-            if (self._radii[2] - self._radii[1]) < 1e-4:
-                raise ValueError('Can outer radius not > sample outer radius')
-            else:
-                logger.information('Can : inner radius = %f ; outer radius = %f' % (self._radii[1], self._radii[2]))
+
         setup_prog.report('Obtaining beam values')
         beam_width = self.getProperty('BeamWidth').value
         beam_height = self.getProperty('BeamHeight').value
@@ -329,6 +328,10 @@ class CylinderPaalmanPingsCorrection(PythonAlgorithm):
         self._emode = self.getPropertyValue('Emode')
         self._efixed = self.getProperty('Efixed').value
 
+        if self._emode == 'Efixed':
+            logger.information('No interpolation is possible in Efixed mode.')
+            self._interpolate = False
+
         if self._efixed == 0. and self._emode != 'Elastic':
             # In all the modes other than elastic, efixed is needed.
             # So try to get from instrument if the input is not set.
@@ -338,10 +341,6 @@ class CylinderPaalmanPingsCorrection(PythonAlgorithm):
             except ValueError:
                 raise RuntimeError('Could not find the Efixed parameter in the instrument. '
                                    'Please specify manually.')
-
-        if self._emode == 'Efixed':
-            logger.information('No interpolation is possible in Efixed mode.')
-            self._interpolate = False
 
         # purge the lists
         self._angles = list()

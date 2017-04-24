@@ -107,7 +107,6 @@ LoadResult MuonAnalysisDataLoader::loadFiles(const QStringList &files) const {
 
     load->initialize();
     load->setChild(true);
-    load->setLogging(false); // We'll take care of printing messages ourselves
     load->setPropertyValue("Filename", file);
 
     // Just to pass validation

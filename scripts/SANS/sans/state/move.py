@@ -7,9 +7,8 @@ import json
 import copy
 
 from sans.state.state_base import (StateBase, FloatParameter, DictParameter, ClassTypeParameter,
-                                   StringParameter, rename_descriptor_names)
+                                   StringWithNoneParameter, rename_descriptor_names)
 from sans.common.enums import (Coordinates, CanonicalCoordinates, SANSInstrument, DetectorType)
-from sans.common.file_information import (get_instrument_paths_for_sans_file)
 from sans.state.automatic_setters import automatic_setters
 from sans.state.state_functions import (validation_message, set_detector_names, set_monitor_names)
 
@@ -35,8 +34,8 @@ class StateMoveDetector(StateBase):
     sample_centre_pos2 = FloatParameter()
 
     # Name of the detector
-    detector_name = StringParameter()
-    detector_name_short = StringParameter()
+    detector_name = StringWithNoneParameter()
+    detector_name_short = StringWithNoneParameter()
 
     def __init__(self):
         super(StateMoveDetector, self).__init__()
@@ -59,12 +58,12 @@ class StateMoveDetector(StateBase):
 
     def validate(self):
         is_invalid = {}
-        if not self.detector_name:
+        if self.detector_name == "" or self.detector_name is None:
             entry = validation_message("Missing detector name",
                                        "Make sure that a detector name was specified.",
                                        {"detector_name": self.detector_name})
             is_invalid.update(entry)
-        if not self.detector_name_short:
+        if self.detector_name_short == "" or self.detector_name_short is None:
             entry = validation_message("Missing short detector name",
                                        "Make sure that a short detector name was specified.",
                                        {"detector_name_short": self.detector_name_short})
@@ -79,6 +78,7 @@ class StateMove(StateBase):
     sample_offset = FloatParameter()
     sample_offset_direction = ClassTypeParameter(Coordinates)
     detectors = DictParameter()
+    monitor_names = DictParameter()
 
     def __init__(self):
         super(StateMove, self).__init__()
@@ -89,19 +89,18 @@ class StateMove(StateBase):
         # The sample offset direction is Z for the ISIS instruments
         self.sample_offset_direction = CanonicalCoordinates.Z
 
-        # Setup the detectors
-        self.detectors = {DetectorType.to_string(DetectorType.LAB): StateMoveDetector(),
-                          DetectorType.to_string(DetectorType.HAB): StateMoveDetector()}
-
     def validate(self):
         # No validation of the descriptors on this level, let potential exceptions from detectors "bubble" up
         for key in self.detectors:
             self.detectors[key].validate()
 
+        # If the detectors are empty, then we raise
+        if not self.detectors:
+            raise ValueError("No detectors have been set.")
+
 
 @rename_descriptor_names
 class StateMoveLOQ(StateMove):
-    monitor_names = DictParameter()
     center_position = FloatParameter()
 
     def __init__(self):
@@ -112,6 +111,10 @@ class StateMoveLOQ(StateMove):
         # Set the monitor names
         self.monitor_names = {}
 
+        # Setup the detectors
+        self.detectors = {DetectorType.to_string(DetectorType.LAB): StateMoveDetector(),
+                          DetectorType.to_string(DetectorType.HAB): StateMoveDetector()}
+
     def validate(self):
         # No validation of the descriptors on this level, let potential exceptions from detectors "bubble" up
         super(StateMoveLOQ, self).validate()
@@ -119,8 +122,6 @@ class StateMoveLOQ(StateMove):
 
 @rename_descriptor_names
 class StateMoveSANS2D(StateMove):
-    monitor_names = DictParameter()
-
     hab_detector_radius = FloatParameter()
     hab_detector_default_sd_m = FloatParameter()
     hab_detector_default_x_m = FloatParameter()
@@ -157,13 +158,16 @@ class StateMoveSANS2D(StateMove):
 
         self.monitor_4_offset = 0.0
 
+        # Setup the detectors
+        self.detectors = {DetectorType.to_string(DetectorType.LAB): StateMoveDetector(),
+                          DetectorType.to_string(DetectorType.HAB): StateMoveDetector()}
+
     def validate(self):
         super(StateMoveSANS2D, self).validate()
 
 
 @rename_descriptor_names
 class StateMoveLARMOR(StateMove):
-    monitor_names = DictParameter()
     bench_rotation = FloatParameter()
 
     def __init__(self):
@@ -175,6 +179,9 @@ class StateMoveLARMOR(StateMove):
         # Set the monitor names
         self.monitor_names = {}
 
+        # Setup the detectors
+        self.detectors = {DetectorType.to_string(DetectorType.LAB): StateMoveDetector()}
+
     def validate(self):
         super(StateMoveLARMOR, self).validate()
 
@@ -182,14 +189,15 @@ class StateMoveLARMOR(StateMove):
 # ----------------------------------------------------------------------------------------------------------------------
 # Builder
 # ----------------------------------------------------------------------------------------------------------------------
-def setup_idf_and_ipf_content(move_info, data_info):
+def setup_idf_and_ipf_content(move_info, data_info, invalid_detector_types=None, invalid_monitor_names=None):
     # Get the IDF and IPF path since they contain most of the import information
-    file_name = data_info.sample_scatter
-    idf_path, ipf_path = get_instrument_paths_for_sans_file(file_name)
+    idf_file_path = data_info.idf_file_path
+    ipf_file_path = data_info.ipf_file_path
+
     # Set the detector names
-    set_detector_names(move_info, ipf_path)
+    set_detector_names(move_info, ipf_file_path, invalid_detector_types)
     # Set the monitor names
-    set_monitor_names(move_info, idf_path)
+    set_monitor_names(move_info, idf_file_path, invalid_monitor_names)
 
 
 class StateMoveLOQBuilder(object):
@@ -215,7 +223,9 @@ class StateMoveSANS2DBuilder(object):
     def __init__(self, data_info):
         super(StateMoveSANS2DBuilder, self).__init__()
         self.state = StateMoveSANS2D()
-        setup_idf_and_ipf_content(self.state, data_info)
+        # TODO Automate this
+        invalid_monitor_names = ["monitor5", "monitor6", "monitor7", "monitor8"]
+        setup_idf_and_ipf_content(self.state, data_info, invalid_monitor_names=invalid_monitor_names)
 
     def build(self):
         self.state.validate()
@@ -233,13 +243,20 @@ class StateMoveLARMORBuilder(object):
     def __init__(self, data_info):
         super(StateMoveLARMORBuilder, self).__init__()
         self.state = StateMoveLARMOR()
-        setup_idf_and_ipf_content(self.state, data_info)
+        # There are several invalid monitor names which are not setup for LARMOR, also the IPF has a high-angle-bank
+        # but this is not setup for LARMOR
+        # TODO Automate this
+        invalid_monitor_names = ["monitor6", "monitor7", "monitor8", "monitor9", "monitor10"]
+        invalid_detector_types = [DetectorType.HAB]
+        setup_idf_and_ipf_content(self.state, data_info,
+                                  invalid_detector_types=invalid_detector_types,
+                                  invalid_monitor_names=invalid_monitor_names)
         self.conversion_value = 1000.
         self._set_conversion_value(data_info)
 
     def _set_conversion_value(self, data_info):
         run_number = data_info.sample_scatter_run_number
-        self.conversion_value = 1000. if run_number >= 2217 else 1.
+        self.conversion_value = 1000. if run_number <= 2217 else 1.
 
     def build(self):
         self.state.validate()
