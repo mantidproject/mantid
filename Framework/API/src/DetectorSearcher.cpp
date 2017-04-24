@@ -165,6 +165,7 @@ DetectorSearcher::searchUsingNearestNeighbours(const V3D &q) {
  * the predicted detector direction slightly.
  *
  * @param detectorDir :: the predicted direction towards a detector
+ * @param neighbours :: the NearestNeighbour results to check interception with
  * @return a detector search result with whether a detector was hit
  */
 DetectorSearcher::DetectorSearchResult DetectorSearcher::handleTubeGap(
