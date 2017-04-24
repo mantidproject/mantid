@@ -45,39 +45,19 @@ bool checkCharactersAreIdentical(streamCharIter streamOne,
   return isEolDifference(streamOne, streamTwo);
 }
 
-void logDifferenceError(streamCharIter refStream, streamCharIter testStream,
-                        size_t numNewLines, size_t numChars) {
-  // Make note of differing characters
-  const char refChar = *refStream;
-  const char testChar = *testStream;
-
+void logDifferenceError(char refChar, char testChar, size_t numNewLines,
+                        const std::string &seenChars) {
   const std::string lineNumber = std::to_string(numNewLines);
-  const std::string charNumber = std::to_string(numChars);
-
-  // Rewind to previous new line
-  const int numCharsToRewind = -1 * static_cast<int>(numChars);
-  std::advance(refStream, (numCharsToRewind));
-  std::advance(testStream, (numCharsToRewind));
-
-  // Then convert it to an output string
-  std::string refString, testString;
-  refString.reserve(numChars);
-  testString.reserve(numChars);
-  for (size_t i = 0; i < numChars; i++) {
-    refString += *refStream;
-    testString += *testStream;
-    refStream++;
-    testStream++;
-  }
 
   // Build our output string
   std::string outError;
   (outError += "At line number: ") += lineNumber;
-  (outError += ". Character number: ") += charNumber;
+  (outError += ". Character number: ") += std::to_string(seenChars.size() + 1);
   (outError += " expected : '") += refChar;
   (outError += "' found: '") += testChar;
-  (outError += "'. Expected line:\n") += refString;
-  (outError += "\nFound Line:\n") += testString;
+  ((outError += "\nReference output:\n") += seenChars) += refChar;
+  ((outError += "\nTest output:\n") += seenChars) += testChar;
+
   Mantid::Kernel::Logger g_log("FileComparisonHelper");
   g_log.error(std::move(outError));
 }
@@ -101,39 +81,44 @@ namespace FileComparisonHelper {
 bool areIteratorsEqual(streamCharIter refStream, streamCharIter testStream,
                        streamCharIter refStreamEnd,
                        streamCharIter testStreamEnd) {
+  // Used if we need to display to the user something did not match
   size_t numNewLines = 0;
-  size_t numCharsOnLine = 0;
+  std::string seenChars;
+
   while (refStream != refStreamEnd && testStream != testStreamEnd) {
     // Check individual values of iterators
     if (!checkCharactersAreIdentical(refStream, testStream)) {
-      logDifferenceError(refStream, testStream, numNewLines, numCharsOnLine);
+      logDifferenceError(*refStream, *testStream, numNewLines, seenChars);
       return false;
     }
 
     // Keep track of where the previous EOL is in case we need to log an error
     if (*refStream == '\n') {
-      numCharsOnLine = 0;
+      seenChars.clear();
       numNewLines++;
     } else {
-      numCharsOnLine++;
+      seenChars += *refStream;
     }
     // Move iterators alone to compare next char
     refStream++;
     testStream++;
   }
+
+  bool areStreamsEqual = true;
+
   // Lastly check both iterators were the same length as they should both
   // point to the end value
   if (refStream != refStreamEnd || testStream != testStreamEnd) {
     Mantid::Kernel::Logger g_log("FileComparisonHelper");
     g_log.error("Length of both files were not identical");
-    return false;
-  } else if (numCharsOnLine == 0 && numNewLines == 0) {
+    areStreamsEqual = false;
+  } else if (numNewLines == 0 && seenChars.size() == 0) {
     Mantid::Kernel::Logger g_log("FileComparisonHelper");
     g_log.error("No characters checked in FileComparisonHelper");
-    return false;
+    areStreamsEqual = false;
   }
-  // These file are identical
-  return true;
+
+  return areStreamsEqual;
 }
 
 /**
@@ -194,7 +179,6 @@ bool areFileStreamsEqual(std::ifstream &referenceFileStream,
   * @param referenceFileName :: The filename of the reference file
   * @param outFileFullPath :: The path to the file written by the test to
   *compare
-  *
   * @throws :: If the reference file could not be found throws
   *std::invalid_argument
   *
@@ -207,8 +191,9 @@ bool isEqualToReferenceFile(const std::string &referenceFileName,
       Mantid::API::FileFinder::Instance().getFullPath(referenceFileName);
 
   if (referenceFilePath == "") {
-    throw std::invalid_argument("No file with the name: " + referenceFileName +
-                                " could be found by Mantid");
+    throw std::invalid_argument("No reference file with the name: " +
+                                referenceFileName +
+                                " could be found by FileComparisonHelper");
   }
   return areFilesEqual(referenceFilePath, outFileFullPath);
 }

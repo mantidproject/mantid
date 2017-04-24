@@ -6,10 +6,12 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidDataHandling/SaveGSS.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidTestHelpers/FileComparisonHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
+
 #include "cxxtest/TestSuite.h"
 
-#include <Poco/File.h>
+#include <Poco/TemporaryFile.h>
 #include <fstream>
 
 using namespace Mantid;
@@ -70,7 +72,7 @@ API::MatrixWorkspace_sptr generateTestMatrixWorkspace(int numHistograms,
 
   return dataws;
 }
-}
+} // End of anonymous namespace
 
 class SaveGSSTest : public CxxTest::TestSuite {
 public:
@@ -81,103 +83,61 @@ public:
     TS_ASSERT_EQUALS(saver.version(), 1)
   }
 
-  //----------------------------------------------------------------------------------------------
-  /** Save a 2 banks diffraction data with instrument
-    */
-  void test_2BankInstrument() {
+  void test_2BankInstrumentSLOG() {
+    // Save a 2 banks diffraction data with instrument using SLOG format
     // Create a workspace for writing out
+    const std::string wsName = "SaveGSS_2BankSLOG";
     MatrixWorkspace_sptr dataws =
         generateTestMatrixWorkspace(m_defaultNumHistograms, m_defaultNumBins);
-    AnalysisDataService::Instance().addOrReplace("Test2BankWS", dataws);
+    AnalysisDataService::Instance().addOrReplace(wsName, dataws);
 
     Mantid::DataHandling::SaveGSS saver;
     saver.initialize();
 
+    // Get the output file handle
+    auto outputFileHandle = Poco::TemporaryFile();
+    const std::string outPath = outputFileHandle.path();
+
     // Set properties
-    TS_ASSERT_THROWS_NOTHING(
-        saver.setPropertyValue("InputWorkspace", "Test2BankWS"));
-    TS_ASSERT_THROWS_NOTHING(saver.setProperty("Filename", "test1.gsa"));
+    TS_ASSERT_THROWS_NOTHING(saver.setPropertyValue("InputWorkspace", wsName));
+    TS_ASSERT_THROWS_NOTHING(saver.setProperty("Filename", outPath));
     TS_ASSERT_THROWS_NOTHING(saver.setProperty("Format", "SLOG"));
     TS_ASSERT_THROWS_NOTHING(saver.setProperty("SplitFiles", false));
     TS_ASSERT_THROWS_NOTHING(saver.setProperty("MultiplyByBinWidth", false));
     TS_ASSERT_THROWS_NOTHING(saver.setProperty("Append", false));
+    saver.setRethrows(true);
 
     // Execute
     saver.execute();
     TS_ASSERT(saver.isExecuted());
 
-    // Check result
-    // locate output file
-    std::string outfilepath = saver.getPropertyValue("Filename");
-    std::cout << "Output file is located at " << outfilepath << "\n";
-
-    Poco::File gsasfile(outfilepath);
-    TS_ASSERT(gsasfile.exists());
-
-    // check file
-    if (gsasfile.exists()) {
-      size_t numlines = 0;
-      std::ifstream fs_gsas(outfilepath.c_str());
-      std::string line;
-      while (std::getline(fs_gsas, line)) {
-        size_t linenumber = numlines;
-        std::stringstream liness(line);
-        if (linenumber == 11) {
-          std::string bank;
-          int banknumber;
-          liness >> bank >> banknumber;
-          TS_ASSERT_EQUALS(bank, "BANK");
-          TS_ASSERT_EQUALS(banknumber, 1);
-        } else if (linenumber == 60) {
-          double x, y, e;
-          liness >> x >> y >> e;
-          TS_ASSERT_DELTA(x, 8101.43, 0.01);
-          TS_ASSERT_DELTA(y, 688.18, 0.01);
-          TS_ASSERT_DELTA(e, 26.23, 0.01);
-        } else if (linenumber == 114) {
-          std::string bank;
-          int banknumber;
-          liness >> bank >> banknumber;
-          TS_ASSERT_EQUALS(bank, "BANK");
-          TS_ASSERT_EQUALS(banknumber, 2);
-        } else if (linenumber == 173) {
-          double x, y, e;
-          liness >> x >> y >> e;
-          TS_ASSERT_DELTA(x, 8949.02, 0.01);
-          TS_ASSERT_DELTA(y, 1592.26, 0.01);
-          TS_ASSERT_DELTA(e, 39.90, 0.01);
-        }
-
-        ++numlines;
-      }
-
-      TS_ASSERT_EQUALS(numlines, 215);
-    }
+    // Check file is identical
+    TS_ASSERT(FileComparisonHelper::isEqualToReferenceFile(
+        "SaveGSS_test2BankInstSLOG_Ref.gsa", outPath));
 
     // Clean
-    AnalysisDataService::Instance().remove("Test2BankWS");
-    if (gsasfile.exists())
-      gsasfile.remove();
-
-    return;
+    AnalysisDataService::Instance().remove(wsName);
   }
 
-  //----------------------------------------------------------------------------------------------
-  /** Save a 2 banks diffraction data with instrument
-    */
   void test_2BankInstrumentRALF() {
+    // Save a 2 banks diffraction data with RALF format
+
     // Create a workspace for writing out
+    const std::string wsName = "SaveGSS_2BankRALF";
     MatrixWorkspace_sptr dataws =
         generateTestMatrixWorkspace(m_defaultNumHistograms, m_defaultNumBins);
-    AnalysisDataService::Instance().addOrReplace("Test2BankWS", dataws);
+    AnalysisDataService::Instance().addOrReplace(wsName, dataws);
+
+    // Get file handle
+    auto outFileHandle = Poco::TemporaryFile();
+    const std::string outFilePath = outFileHandle.path();
 
     Mantid::DataHandling::SaveGSS saver;
     saver.initialize();
 
     // Set properties
-    TS_ASSERT_THROWS_NOTHING(
-        saver.setPropertyValue("InputWorkspace", "Test2BankWS"));
-    TS_ASSERT_THROWS_NOTHING(saver.setProperty("Filename", "test1r.gsa"));
+    TS_ASSERT_THROWS_NOTHING(saver.setPropertyValue("InputWorkspace", wsName));
+    TS_ASSERT_THROWS_NOTHING(saver.setProperty("Filename", outFilePath));
     TS_ASSERT_THROWS_NOTHING(saver.setProperty("Format", "RALF"));
     TS_ASSERT_THROWS_NOTHING(saver.setProperty("SplitFiles", false));
     TS_ASSERT_THROWS_NOTHING(saver.setProperty("MultiplyByBinWidth", false));
@@ -188,77 +148,32 @@ public:
     TS_ASSERT(saver.isExecuted());
 
     // Check result
-    // locate output file
-    std::string outfilepath = saver.getPropertyValue("Filename");
-    std::cout << "Output file is located at " << outfilepath << "\n";
-
-    Poco::File gsasfile(outfilepath);
-    TS_ASSERT(gsasfile.exists());
-
-    // check file
-    if (gsasfile.exists()) {
-      size_t numlines = 0;
-      std::ifstream fs_gsas(outfilepath.c_str());
-      std::string line;
-      while (std::getline(fs_gsas, line)) {
-        size_t linenumber = numlines;
-        std::stringstream liness(line);
-        if (linenumber == 8) {
-          std::string bank;
-          int banknumber;
-          liness >> bank >> banknumber;
-          TS_ASSERT_EQUALS(bank, "BANK");
-          TS_ASSERT_EQUALS(banknumber, 1);
-        } else if (linenumber == 57) {
-          double x, y, e;
-          liness >> x >> y >> e;
-          TS_ASSERT_DELTA(x, 8101.43, 0.01);
-          TS_ASSERT_DELTA(y, 688.18, 0.01);
-          TS_ASSERT_DELTA(e, 26.23, 0.01);
-        } else if (linenumber == 111) {
-          std::string bank;
-          int banknumber;
-          liness >> bank >> banknumber;
-          TS_ASSERT_EQUALS(bank, "BANK");
-          TS_ASSERT_EQUALS(banknumber, 2);
-        } else if (linenumber == 170) {
-          double x, y, e;
-          liness >> x >> y >> e;
-          TS_ASSERT_DELTA(x, 8949.02, 0.01);
-          TS_ASSERT_DELTA(y, 1592.26, 0.01);
-          TS_ASSERT_DELTA(e, 39.90, 0.01);
-        }
-
-        ++numlines;
-      }
-
-      TS_ASSERT_EQUALS(numlines, 212);
-    }
+    TS_ASSERT(FileComparisonHelper::isEqualToReferenceFile(
+        "SaveGSS_test2BankInstRALF_ref.gsa", outFilePath));
 
     // Clean
-    AnalysisDataService::Instance().remove("Test2BankWS");
-    if (gsasfile.exists())
-      gsasfile.remove();
-
-    return;
+    AnalysisDataService::Instance().remove(wsName);
   }
 
-  //----------------------------------------------------------------------------------------------
-  /** Save a 2 bank workspace in point data format and without instrument
-    */
   void test_2BankNoInstrumentData() {
+  // Save a 2 bank workspace in point data format and without instrument
+	  const std::string wsName = "SaveGSS_NoInstWs";
     MatrixWorkspace_sptr dataws =
         generateNoInstrumentWorkspace(m_defaultNumHistograms, m_defaultNumBins);
 
-    AnalysisDataService::Instance().addOrReplace("TestNoInstWS", dataws);
+    AnalysisDataService::Instance().addOrReplace(wsName, dataws);
 
     Mantid::DataHandling::SaveGSS saver;
     saver.initialize();
 
+	// Get file handle
+	auto outFileHandle = Poco::TemporaryFile();
+	const std::string outFilePath = outFileHandle.path();
+
     // Set properties
     TS_ASSERT_THROWS_NOTHING(
-        saver.setPropertyValue("InputWorkspace", "TestNoInstWS"));
-    TS_ASSERT_THROWS_NOTHING(saver.setProperty("Filename", "test2.gsa"));
+        saver.setPropertyValue("InputWorkspace", wsName));
+    TS_ASSERT_THROWS_NOTHING(saver.setProperty("Filename", outFilePath));
     TS_ASSERT_THROWS_NOTHING(saver.setProperty("Format", "SLOG"));
     TS_ASSERT_THROWS_NOTHING(saver.setProperty("SplitFiles", false));
     TS_ASSERT_THROWS_NOTHING(saver.setProperty("MultiplyByBinWidth", false));
@@ -268,60 +183,10 @@ public:
     saver.execute();
     TS_ASSERT(saver.isExecuted());
 
-    // Check result
-    // locate output file
-    std::string outfilepath = saver.getPropertyValue("Filename");
-    std::cout << "Output file is located at " << outfilepath << "\n";
-
-    Poco::File gsasfile(outfilepath);
-    TS_ASSERT(gsasfile.exists());
-
-    // check file
-    if (gsasfile.exists()) {
-      size_t numlines = 0;
-      std::ifstream fs_gsas(outfilepath.c_str());
-      std::string line;
-      while (std::getline(fs_gsas, line)) {
-        size_t linenumber = numlines;
-        std::stringstream liness(line);
-        if (linenumber == 10) {
-          std::string bank;
-          int banknumber;
-          liness >> bank >> banknumber;
-          TS_ASSERT_EQUALS(bank, "BANK");
-          TS_ASSERT_EQUALS(banknumber, 1);
-        } else if (linenumber == 59) {
-          double x, y, e;
-          liness >> x >> y >> e;
-          TS_ASSERT_DELTA(x, 8101.43, 0.01);
-          TS_ASSERT_DELTA(y, 688.18, 0.01);
-          TS_ASSERT_DELTA(e, 26.23, 0.01);
-        } else if (linenumber == 112) {
-          std::string bank;
-          int banknumber;
-          liness >> bank >> banknumber;
-          TS_ASSERT_EQUALS(bank, "BANK");
-          TS_ASSERT_EQUALS(banknumber, 2);
-        } else if (linenumber == 171) {
-          double x, y, e;
-          liness >> x >> y >> e;
-          TS_ASSERT_DELTA(x, 8949.02, 0.01);
-          TS_ASSERT_DELTA(y, 1592.26, 0.01);
-          TS_ASSERT_DELTA(e, 39.90, 0.01);
-        }
-
-        ++numlines;
-      }
-
-      TS_ASSERT_EQUALS(numlines, 213);
-    }
+	TS_ASSERT(FileComparisonHelper::isEqualToReferenceFile("SaveGSS_test2BankNoInst_Ref.gsa", outFilePath));
 
     // Clean
-    AnalysisDataService::Instance().remove("TestNoInstWS");
-    if (gsasfile.exists())
-      gsasfile.remove();
-
-    return;
+    AnalysisDataService::Instance().remove(wsName);
   }
 
 private:

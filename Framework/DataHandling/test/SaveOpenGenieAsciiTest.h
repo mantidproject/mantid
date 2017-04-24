@@ -6,10 +6,8 @@
 #include "MantidTestHelpers/FileComparisonHelper.H"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
+#include <Poco/TemporaryFile.h>
 #include <cxxtest/TestSuite.h>
-#include <Poco/File.h>
-#include <Poco/Path.h>
-
 #include <fstream>
 #include <memory>
 
@@ -25,7 +23,7 @@ public:
     const int numHist(2);
     const auto ws =
         WorkspaceCreationHelper::create2DWorkspace(numHist, numBins);
-    const auto fileHandle = getTempFileHandle();
+    const auto fileHandle = Poco::TemporaryFile();
     auto alg = createAlg(ws, fileHandle.path());
 
     TS_ASSERT_THROWS(alg->execute(), std::runtime_error);
@@ -37,7 +35,7 @@ public:
     const bool isHist = false;
     const auto ws =
         WorkspaceCreationHelper::create2DWorkspace123(numHist, numBins, isHist);
-    const auto fileHandle = getTempFileHandle();
+    const auto fileHandle = Poco::TemporaryFile();
     auto alg = createAlg(ws, fileHandle.path());
 
     TS_ASSERT_THROWS(alg->execute(), std::runtime_error);
@@ -58,7 +56,7 @@ public:
     const auto ws = AnalysisDataService::Instance().retrieve(wsName);
     const auto inputWs = boost::dynamic_pointer_cast<MatrixWorkspace>(ws);
 
-    auto fileHandle = getTempFileHandle();
+    auto fileHandle = Poco::TemporaryFile();
     auto alg = createAlg(inputWs, fileHandle.path());
     TS_ASSERT_THROWS_NOTHING(alg->execute());
     TS_ASSERT(alg->isExecuted());
@@ -75,6 +73,7 @@ public:
 private:
   const std::string m_referenceFileName{
       "SaveOpenGenieAsciiEnginXReference.his"};
+  const std::string m_outputFileName{"SaveOpenGenieAscii_output.his"};
   const std::string m_inputNexusFile{"SaveOpenGenieAsciiInput.nxs"};
 
   std::unique_ptr<SaveOpenGenieAscii>
@@ -87,14 +86,6 @@ private:
     alg->setProperty("OpenGenieFormat", "ENGIN-X Format");
     alg->setRethrows(true);
     return alg;
-  }
-
-  Poco::File getTempFileHandle() {
-    const std::string outName = "SaveOpenGenieAsciiTest.his";
-    Poco::Path tempPath(Poco::Path::temp());
-    tempPath.append(outName);
-    Poco::File tempFile(tempPath.toString());
-    return tempFile;
   }
 };
 
