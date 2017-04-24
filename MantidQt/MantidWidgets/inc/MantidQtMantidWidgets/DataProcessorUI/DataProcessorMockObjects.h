@@ -27,7 +27,7 @@ GCC_DIAG_OFF_SUGGEST_OVERRIDE
 
 class MockDataProcessorView : public DataProcessorView {
 public:
-  MockDataProcessorView(){}
+  MockDataProcessorView() {}
   ~MockDataProcessorView() override {}
 
   // Prompt
@@ -79,7 +79,7 @@ public:
 class MockMainPresenter : public DataProcessorMainPresenter {
 
 public:
-  MockMainPresenter(){}
+  MockMainPresenter() {}
   ~MockMainPresenter() override {}
 
   // Notify
@@ -141,13 +141,13 @@ private:
     return std::set<std::string>();
   };
   // Calls we don't care about
-  void setOptions(const std::map<std::string, QVariant> &) override{}
+  void setOptions(const std::map<std::string, QVariant> &) override {}
   void
-  transfer(const std::vector<std::map<std::string, std::string>> &) override{}
+  transfer(const std::vector<std::map<std::string, std::string>> &) override {}
   void setInstrumentList(const std::vector<std::string> &,
-                         const std::string &) override{}
+                         const std::string &) override {}
   // void accept(WorkspaceReceiver *) {};
-  void acceptViews(DataProcessorView *, ProgressableView *) override{}
+  void acceptViews(DataProcessorView *, ProgressableView *) override {}
 
   std::map<std::string, QVariant> m_options;
 };
