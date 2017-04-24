@@ -67,8 +67,7 @@ class AlignAndFocusPowderFromFiles(DataProcessorAlgorithm):
                                                      Direction.Input, PropertyMode.Optional),
                              doc='Divide data by this Pixel-by-pixel workspace')
 
-        self.declareProperty(FileProperty(name="CacheDirectory",defaultValue="",
-                                          action=FileAction.OptionalDirectory))
+        self.copyProperties('CreateCacheFilename', 'CacheDir')
 
         self.declareProperty(MatrixWorkspaceProperty('OutputWorkspace', '',
                                                      Direction.Output),
@@ -112,9 +111,9 @@ class AlignAndFocusPowderFromFiles(DataProcessorAlgorithm):
         DeleteWorkspace(Workspace=tempname)
 
     def __getCacheName(self, wkspname):
-        cachedir = self.getProperty('CacheDirectory').value
+        cachedir = self.getProperty('CacheDir').value
         if len(cachedir) <= 0:
-            self.log().warning('CacheDirectory is not specified - functionality disabled')
+            self.log().warning('CacheDir is not specified - functionality disabled')
             return None
 
         propman_properties = ['bank', 'd_min', 'd_max', 'tof_min', 'tof_max', 'wavelength_min', 'wavelength_max']
