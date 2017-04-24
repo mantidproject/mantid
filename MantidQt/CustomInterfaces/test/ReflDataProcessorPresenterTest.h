@@ -161,7 +161,7 @@ public:
         .WillRepeatedly(Return(QString()));
     EXPECT_CALL(mockMainPresenter, getPreprocessingProperties())
         .Times(6)
-        .WillRepeatedly(Return(std::map<std::string, std::set<std::string>>()));
+        .WillRepeatedly(Return(QString()));
     EXPECT_CALL(mockMainPresenter, getProcessingOptions())
         .Times(6)
         .WillRepeatedly(Return(""));
@@ -256,10 +256,7 @@ public:
         .WillRepeatedly(Return(QString()));
     EXPECT_CALL(mockMainPresenter, getPreprocessingProperties())
         .Times(8)
-        .WillRepeatedly(Return(std::map<std::string, std::set<std::string>>()));
-    EXPECT_CALL(mockMainPresenter, getPreprocessingOptions())
-        .Times(8)
-        .WillRepeatedly(Return(std::map<std::string, std::string>()));
+        .WillRepeatedly(Return(QString()));
     EXPECT_CALL(mockMainPresenter, getPostprocessingOptions())
         .Times(3)
         .WillRepeatedly(Return(""));
@@ -367,7 +364,7 @@ public:
         .WillRepeatedly(Return(QString()));
     EXPECT_CALL(mockMainPresenter, getPreprocessingProperties())
         .Times(6)
-        .WillRepeatedly(Return(std::map<std::string, std::set<std::string>>()));
+        .WillRepeatedly(Return(QString()));
     EXPECT_CALL(mockMainPresenter, getProcessingOptions())
         .Times(6)
         .WillRepeatedly(Return(""));
@@ -462,7 +459,7 @@ public:
         .WillRepeatedly(Return(QString()));
     EXPECT_CALL(mockMainPresenter, getPreprocessingProperties())
         .Times(1)
-        .WillRepeatedly(Return(std::map<std::string, std::set<std::string>>()));
+        .WillRepeatedly(Return(QString()));
     EXPECT_CALL(mockMainPresenter, getProcessingOptions())
         .Times(1)
         .WillRepeatedly(Return(""));
@@ -523,7 +520,7 @@ public:
         .WillRepeatedly(Return(QString()));
     EXPECT_CALL(mockMainPresenter, getPreprocessingProperties())
         .Times(2)
-        .WillRepeatedly(Return(std::map<std::string, std::set<std::string>>()));
+        .WillRepeatedly(Return(QString()));
     EXPECT_CALL(mockMainPresenter, getProcessingOptions())
         .Times(2)
         .WillRepeatedly(Return(""));
