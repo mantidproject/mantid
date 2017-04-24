@@ -7,6 +7,7 @@
 #include "MantidAPI/TextAxis.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/IPeaksWorkspace.h"
+#include "MantidAPI/Run.h"
 
 namespace Mantid {
 namespace API {
@@ -84,19 +85,27 @@ WorkspaceFactoryImpl::create(const MatrixWorkspace_const_sptr &parent,
  * @param child :: the child workspace
  * @param differentSize :: A flag to indicate if the two workspace will be
  *different sizes
+ * @param noproperty :: A flag for not cloning Run object
  */
-void WorkspaceFactoryImpl::initializeFromParent(
-    const MatrixWorkspace &parent, MatrixWorkspace &child,
-    const bool differentSize) const {
+void WorkspaceFactoryImpl::initializeFromParent(const MatrixWorkspace &parent,
+                                                MatrixWorkspace &child,
+                                                const bool differentSize,
+                                                const bool noproperty) const {
   child.setTitle(parent.getTitle());
   child.setComment(parent.getComment());
   child.setInstrument(parent.getInstrument()); // This call also copies the
                                                // SHARED POINTER to the
                                                // parameter map
+
+  //  g_log.warning() << child.run().getProperites() << "\n";
+
   // This call will (should) perform a COPY of the parameter map.
   child.instrumentParameters();
   child.m_sample = parent.m_sample;
-  child.m_run = parent.m_run;
+  if (!noproperty)
+    child.m_run = parent.m_run;
+  else
+    child.m_run = boost::make_shared<API::Run>();
   child.setYUnit(parent.m_YUnit);
   child.setYUnitLabel(parent.m_YUnitLabel);
   child.setDistribution(parent.isDistribution());

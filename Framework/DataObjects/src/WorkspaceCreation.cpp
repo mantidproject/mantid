@@ -34,12 +34,19 @@ template <> std::unique_ptr<API::HistoWorkspace> createConcreteHelper() {
   return {nullptr};
 }
 
+/** Initialize a MatrixWorkspace from its parent including instrument, unit,
+ * number of spectra and possibly Run
+ * @brief initializeFromParent
+ * @param parent
+ * @param ws
+ * @param noproperty
+ */
 void initializeFromParent(const API::MatrixWorkspace &parent,
-                          API::MatrixWorkspace &ws) {
+                          API::MatrixWorkspace &ws, const bool noproperty) {
   bool differentSize = (parent.x(0).size() != ws.x(0).size()) ||
                        (parent.y(0).size() != ws.y(0).size());
-  API::WorkspaceFactory::Instance().initializeFromParent(parent, ws,
-                                                         differentSize);
+  API::WorkspaceFactory::Instance().initializeFromParent(
+      parent, ws, differentSize, noproperty);
   // For EventWorkspace, `ws.y(0)` put entry 0 in the MRU. However, clients
   // would typically expect an empty MRU and fail to clear it. This dummy call
   // removes the entry from the MRU.

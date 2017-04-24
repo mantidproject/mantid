@@ -136,14 +136,17 @@ createConcreteHelper();
 
 MANTID_DATAOBJECTS_DLL void
 initializeFromParent(const API::MatrixWorkspace &parent,
-                     API::MatrixWorkspace &ws);
+                     API::MatrixWorkspace &ws, const bool noproperty = false);
 }
 
+/** This is the create() method that all the other create() methods call
+ */
 template <class T, class P, class IndexArg, class HistArg,
           class = typename std::enable_if<
               std::is_base_of<API::MatrixWorkspace, P>::value>::type>
 std::unique_ptr<T> create(const P &parent, const IndexArg &indexArg,
-                          const HistArg &histArg) {
+                          const HistArg &histArg,
+                          const bool &no_property = false) {
   // Figure out (dynamic) target type:
   // - Type is same as parent if T is base of parent
   // - If T is not base of parent, conversion may occur. Currently only
@@ -170,7 +173,7 @@ std::unique_ptr<T> create(const P &parent, const IndexArg &indexArg,
   // future of WorkspaceFactory.
   ws->setInstrument(parent.getInstrument());
   ws->initialize(indexArg, HistogramData::Histogram(histArg));
-  detail::initializeFromParent(parent, *ws);
+  detail::initializeFromParent(parent, *ws, no_property);
   return ws;
 }
 
@@ -204,6 +207,23 @@ std::unique_ptr<T> create(const P &parent) {
   const auto numHistograms = parent.getNumberHistograms();
   auto ws =
       create<T>(parent, numHistograms, detail::stripData(parent.histogram(0)));
+  for (size_t i = 0; i < numHistograms; ++i) {
+    ws->setSharedX(i, parent.sharedX(i));
+  }
+  return ws;
+}
+
+/** create a new workspace with empty run
+ *
+ */
+template <class T, class P,
+          typename std::enable_if<std::is_base_of<API::MatrixWorkspace,
+                                                  P>::value>::type * = nullptr>
+std::unique_ptr<T> createWithEmptyRun(const P &parent) {
+  const auto numHistograms = parent.getNumberHistograms();
+  const bool no_property = true;
+  auto ws = create<T>(parent, numHistograms,
+                      detail::stripData(parent.histogram(0)), no_property);
   for (size_t i = 0; i < numHistograms; ++i) {
     ws->setSharedX(i, parent.sharedX(i));
   }
