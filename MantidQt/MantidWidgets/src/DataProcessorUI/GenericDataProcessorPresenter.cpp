@@ -1,5 +1,6 @@
 #include "MantidQtMantidWidgets/DataProcessorUI/GenericDataProcessorPresenter.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/IEventWorkspace.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/NotebookWriter.h"
@@ -23,6 +24,8 @@
 #include "MantidQtMantidWidgets/ProgressableView.h"
 
 #include <boost/algorithm/string/join.hpp>
+#include <algorithm>
+#include <unordered_map>
 #include <boost/regex.hpp>
 #include <boost/tokenizer.hpp>
 #include <fstream>
@@ -53,6 +56,31 @@ convertStringToMap(const std::string &options) {
   }
   return optionsMap;
 }
+
+std::unordered_map<std::string, std::set<std::string>>
+convertStringToMapWithSet(const std::string& properties) {
+  // The provided string has the form
+  // key1: value11, value12; key2: value21;
+  // The keys are keys in a map which maps to a set of values
+  std::unordered_map<std::string, std::set<std::string>> props;
+
+  // Split by each map pair
+  std::vector<std::string> propVec;
+  boost::split(propVec, properties, boost::is_any_of(";"));
+
+  for (const auto& prop : propVec) {
+      // Split the key and values
+      std::vector<std::string> elements;
+      boost::split(elements, prop, boost::is_any_of(":"));
+
+      // Split values
+      std::vector<std::string> vals;
+      boost::split(vals, elements[1], boost::is_any_of(","));
+      std::set<std::string> values(vals.begin(), vals.end());
+      props[elements[0]] = values;
+  }
+  return props;
+}
 }
 
 namespace MantidQt {
@@ -78,10 +106,10 @@ GenericDataProcessorPresenter::GenericDataProcessorPresenter(
     const std::map<std::string, std::string> &postprocessMap,
     const std::string &loader)
     : WorkspaceObserver(), m_view(nullptr), m_progressView(nullptr),
-      m_mainPresenter(), m_whitelist(whitelist), m_preprocessMap(preprocessMap),
-      m_processor(processor), m_postprocessor(postprocessor),
-      m_postprocessMap(postprocessMap), m_loader(loader), m_postprocess(true),
-      m_tableDirty(false) {
+      m_mainPresenter(), m_loader(loader), m_whitelist(whitelist),
+      m_preprocessMap(preprocessMap), m_processor(processor),
+      m_postprocessor(postprocessor), m_postprocessMap(postprocessMap),
+      m_postprocess(true), m_tableDirty(false) {
 
   // Column Options must be added to the whitelist
   m_whitelist.addElement("Options", "Options",
@@ -215,7 +243,7 @@ Process selected data
 */
 void GenericDataProcessorPresenter::process() {
 
-  const auto items = m_manager->selectedData(true);
+  const auto items = m_manager->selectedData();
 
   // Don't bother continuing if there are no items to process
   if (items.size() == 0)
@@ -416,7 +444,7 @@ Workspace_sptr GenericDataProcessorPresenter::prepareRunWorkspace(
 
   // If we're only given one run, just return that
   if (runs.size() == 1)
-    return loadRun(runs[0], instrument, preprocessor.prefix());
+    return getRun(runs[0], instrument, preprocessor.prefix());
 
   const std::string outputName =
       preprocessor.prefix() + boost::algorithm::join(runs, "_");
@@ -430,7 +458,7 @@ Workspace_sptr GenericDataProcessorPresenter::prepareRunWorkspace(
   alg->initialize();
   alg->setProperty(
       preprocessor.lhsProperty(),
-      loadRun(runs[0], instrument, preprocessor.prefix())->getName());
+      getRun(runs[0], instrument, preprocessor.prefix())->getName());
   alg->setProperty(preprocessor.outputProperty(), outputName);
 
   // Drop the first run from the runs list
@@ -451,7 +479,7 @@ Workspace_sptr GenericDataProcessorPresenter::prepareRunWorkspace(
 
       alg->setProperty(
           preprocessor.rhsProperty(),
-          loadRun(*runIt, instrument, preprocessor.prefix())->getName());
+          getRun(*runIt, instrument, preprocessor.prefix())->getName());
       alg->execute();
 
       if (runIt != --runs.end()) {
@@ -546,53 +574,99 @@ std::string GenericDataProcessorPresenter::getPostprocessedWorkspaceName(
   return prefix + boost::join(outputNames, "_");
 }
 
-/**
-Loads a run from disk or fetches it from the AnalysisDataService
-@param run : The name of the run
-@param instrument : The instrument the run belongs to
-@param prefix : The prefix to be prepended to the run number
-@throws std::runtime_error if the run could not be loaded
-@returns a shared pointer to the workspace
-*/
+/** Loads a run found from disk or AnalysisDataService
+ *
+ * @param run : The name of the run
+ * @param instrument : The instrument the run belongs to
+ * @param prefix : The prefix to be prepended to the run number
+ * @throws std::runtime_error if the run could not be loaded
+ * @returns a shared pointer to the workspace
+ */
 Workspace_sptr
-GenericDataProcessorPresenter::loadRun(const std::string &run,
-                                       const std::string &instrument,
-                                       const std::string &prefix) {
-  // First, let's see if the run given is the name of a workspace in the ADS
-  if (AnalysisDataService::Instance().doesExist(run))
-    return AnalysisDataService::Instance().retrieveWS<Workspace>(run);
-  // Try with prefix
-  if (AnalysisDataService::Instance().doesExist(prefix + run))
-    return AnalysisDataService::Instance().retrieveWS<Workspace>(prefix + run);
+GenericDataProcessorPresenter::getRun(const std::string &run,
+                                      const std::string &instrument,
+                                      const std::string &prefix) {
 
-  // Is the run string is numeric
-  if (boost::regex_match(run, boost::regex("\\d+"))) {
-    std::string wsName;
+  bool runFound;
+  std::string outName;
+  std::string fileName = instrument + run;
 
-    // Look for "<run_number>" in the ADS
-    wsName = run;
-    if (AnalysisDataService::Instance().doesExist(wsName))
-      return AnalysisDataService::Instance().retrieveWS<Workspace>(wsName);
-
-    // Look for "<instrument><run_number>" in the ADS
-    wsName = instrument + run;
-    if (AnalysisDataService::Instance().doesExist(wsName))
-      return AnalysisDataService::Instance().retrieveWS<Workspace>(wsName);
+  outName = findRunInADS(run, prefix, runFound);
+  if (!runFound) {
+    outName = loadRun(run, instrument, prefix, m_loader, runFound);
+    if (!runFound)
+      throw std::runtime_error("Could not open " + fileName);
   }
 
-  // We'll just have to load it ourselves
-  const std::string filename = instrument + run;
+  return AnalysisDataService::Instance().retrieveWS<Workspace>(outName);
+}
+
+/** Tries fetching a run from AnalysisDataService
+ *
+ * @param run : The name of the run
+ * @param prefix : The prefix to be prepended to the run number
+ * @param runFound : Whether or not the run was actually found
+ * @returns string name of the run
+ */
+std::string GenericDataProcessorPresenter::findRunInADS(
+    const std::string &run, const std::string &prefix, bool &runFound) {
+
+  runFound = true;
+
+  // First, let's see if the run given is the name of a workspace in the ADS
+  if (AnalysisDataService::Instance().doesExist(run))
+    return run;
+
+  // Try with prefix
+  if (AnalysisDataService::Instance().doesExist(prefix + run))
+    return prefix + run;
+
+  // Is the run string is numeric?
+  if (boost::regex_match(run, boost::regex("\\d+"))) {
+
+    // Look for "<run_number>" in the ADS
+    if (AnalysisDataService::Instance().doesExist(run))
+      return run;
+
+    // Look for "<instrument><run_number>" in the ADS
+    if (AnalysisDataService::Instance().doesExist(prefix + run))
+      return prefix + run;
+  }
+
+  // Run not found in ADS;
+  runFound = false;
+  return "";
+}
+
+/** Tries loading a run from disk
+ *
+ * @param run : The name of the run
+ * @param instrument : The instrument the run belongs to
+ * @param prefix : The prefix to be prepended to the run number
+ * @param loader : The algorithm used for loading runs
+ * @param runFound : Whether or not the run was actually found
+ * @returns string name of the run
+ */
+std::string GenericDataProcessorPresenter::loadRun(
+    const std::string &run, const std::string &instrument,
+    const std::string &prefix, const std::string &loader, bool &runFound) {
+
+  runFound = true;
+  const std::string fileName = instrument + run;
   const std::string outputName = prefix + run;
-  IAlgorithm_sptr algLoadRun = AlgorithmManager::Instance().create(m_loader);
+
+  IAlgorithm_sptr algLoadRun = AlgorithmManager::Instance().create(loader);
   algLoadRun->initialize();
-  algLoadRun->setProperty("Filename", filename);
+  algLoadRun->setProperty("Filename", fileName);
   algLoadRun->setProperty("OutputWorkspace", outputName);
   algLoadRun->execute();
+  if (!algLoadRun->isExecuted()) {
+    // Run not loaded from disk
+    runFound = false;
+    return "";
+  }
 
-  if (!algLoadRun->isExecuted())
-    throw std::runtime_error("Could not open " + filename);
-
-  return AnalysisDataService::Instance().retrieveWS<Workspace>(outputName);
+  return outputName;
 }
 
 /**
@@ -619,6 +693,12 @@ GenericDataProcessorPresenter::reduceRow(const std::vector<std::string> &data) {
     globalOptions = convertStringToMap(
         m_mainPresenter->getPreprocessingOptionsAsString().toStdString());
 
+  // Pre-processing properties
+  auto preProcessPropMap = convertStringToMapWithSet(m_mainPresenter->getPreprocessingProperties().toStdString());
+
+  // Properties not to be used in processing
+  std::set<std::string> restrictedProps;
+
   // Loop over all columns in the whitelist except 'Options'
   for (int i = 0; i < m_columns - 1; i++) {
 
@@ -627,27 +707,40 @@ GenericDataProcessorPresenter::reduceRow(const std::vector<std::string> &data) {
     // The column's name
     auto columnName = m_whitelist.colNameFromColIndex(i);
 
+    // The value for which preprocessing can be conducted on
+    std::string options;
+
+    if (globalOptions.count(columnName) &&
+        !globalOptions[columnName].empty()) {
+      options = globalOptions[columnName];
+    } else if (!data.at(i).empty()) {
+      options = data.at(i);
+    } else {
+      continue;
+    }
+
     if (m_preprocessMap.count(columnName)) {
       // This column needs pre-processing
 
-      const std::string runStr = data.at(i);
-
-      if (!runStr.empty()) {
-
-        auto preprocessor = m_preprocessMap[columnName];
-
-        // Global pre-processing options for this algorithm as a string
-        const std::string options = globalOptions[columnName];
-
-        auto optionsMap = parseKeyValueString(options);
-        auto runWS = prepareRunWorkspace(runStr, preprocessor, optionsMap);
-        alg->setProperty(propertyName, runWS->getName());
+      // We do not want the associated properties to be set again in
+      // processing
+      for (auto &prop : preProcessPropMap[columnName]) {
+        restrictedProps.insert(prop);
       }
+
+      auto preprocessor = m_preprocessMap.at(columnName);
+
+      auto optionsMap = parseKeyValueString(options);
+      auto runWS =
+          prepareRunWorkspace(options, preprocessor, optionsMap);
+      alg->setProperty(propertyName, runWS->getName());
     } else {
       // No pre-processing needed
-      auto propertyValue = data.at(i);
-      if (!propertyValue.empty())
-        alg->setPropertyValue(propertyName, propertyValue);
+        // No pre-processing needed
+        auto propertyValue = data.at(i);
+        if (!propertyValue.empty())
+          alg->setPropertyValue(propertyName, propertyValue);
+      //alg->setPropertyValue(propertyName, globalOptions);
     }
   }
 
@@ -658,7 +751,8 @@ GenericDataProcessorPresenter::reduceRow(const std::vector<std::string> &data) {
   auto optionsMap = parseKeyValueString(options);
   for (auto kvp = optionsMap.begin(); kvp != optionsMap.end(); ++kvp) {
     try {
-      alg->setProperty(kvp->first, kvp->second);
+      if (restrictedProps.find(kvp->first) == restrictedProps.end())
+        alg->setProperty(kvp->first, kvp->second);
     } catch (Mantid::Kernel::Exception::NotFoundError &) {
       throw std::runtime_error("Invalid property in options column: " +
                                kvp->first);
@@ -763,9 +857,20 @@ void GenericDataProcessorPresenter::groupRows() {
 }
 
 /**
+Expand all groups
+*/
+void GenericDataProcessorPresenter::expandAll() { m_view->expandAll(); }
+
+/**
+Collapse all groups
+*/
+void GenericDataProcessorPresenter::collapseAll() { m_view->collapseAll(); }
+
+/**
 Used by the view to tell the presenter something has changed
 */
 void GenericDataProcessorPresenter::notify(DataProcessorPresenter::Flag flag) {
+
   switch (flag) {
   case DataProcessorPresenter::SaveAsFlag:
     saveTableAs();
@@ -829,6 +934,12 @@ void GenericDataProcessorPresenter::notify(DataProcessorPresenter::Flag flag) {
     break;
   case DataProcessorPresenter::PlotGroupFlag:
     plotGroup();
+    break;
+  case DataProcessorPresenter::ExpandAllGroupsFlag:
+    expandAll();
+    break;
+  case DataProcessorPresenter::CollapseAllGroupsFlag:
+    collapseAll();
     break;
   }
   // Not having a 'default' case is deliberate. gcc issues a warning if there's
@@ -937,8 +1048,9 @@ void GenericDataProcessorPresenter::importTable() {
   // result will hold the name of the output workspace
   // otherwise this should be an empty string.
   QString outputWorkspaceName = QString::fromStdString(result);
-  auto toOpen = outputWorkspaceName.trimmed().toStdString();
-  m_view->setModel(toOpen);
+  std::string toOpen = outputWorkspaceName.trimmed().toStdString();
+  if (!toOpen.empty())
+    m_view->setModel(toOpen);
 }
 
 /**

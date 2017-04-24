@@ -27,6 +27,27 @@ public:
 
   ReflMainWindowPresenterTest() {}
 
+  void testGetTransmissionValues() {
+    MockMainWindowView mockView;
+    MockRunsTabPresenter mockRunsTabPresenter;
+    MockEventTabPresenter mockEventTabPresenter;
+    MockSettingsTabPresenter mockSettingsTabPresenter;
+    MockSaveTabPresenter mockSaveTabPresenter;
+    ReflMainWindowPresenter presenter(
+        &mockView, &mockRunsTabPresenter, &mockEventTabPresenter,
+        &mockSettingsTabPresenter, &mockSaveTabPresenter);
+
+    EXPECT_CALL(mockSettingsTabPresenter, getTransmissionRuns(0, false))
+        .Times(Exactly(1));
+    presenter.getTransmissionRuns(0);
+
+    EXPECT_CALL(mockSettingsTabPresenter, getTransmissionRuns(1, false))
+        .Times(Exactly(1));
+    presenter.getTransmissionRuns(1);
+
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockSettingsTabPresenter));
+  }
+
   void testGetTransmissionOptions() {
     MockMainWindowView mockView;
     MockRunsTabPresenter mockRunsPresenter;

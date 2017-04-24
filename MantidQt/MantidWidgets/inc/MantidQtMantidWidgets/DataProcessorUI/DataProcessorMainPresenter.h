@@ -42,22 +42,26 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class DataProcessorMainPresenter {
 public:
-  virtual ~DataProcessorMainPresenter(){};
+  virtual ~DataProcessorMainPresenter(){}
 
   /// Notify this receiver with the list of table workspaces in the ADS that can
   /// be loaded into the interface
   virtual void notifyADSChanged(const QSet<QString> &workspaceList) {
     UNUSED_ARG(workspaceList);
-  };
+  }
 
   /// Return global options for pre-processing as a string
-  virtual QString getPreprocessingOptionsAsString() const { return QString(); };
+  virtual QString getPreprocessingOptionsAsString() const { return QString(); }
+  /// Return property names associated with pre-processing values
+  virtual QString getPreprocessingProperties() const {return QString(); }
   /// Return global options for reduction
-  virtual QString getProcessingOptions() const { return QString(); };
+  virtual QString getProcessingOptions() const { return QString(); }
   /// Return global options for post-processing
-  virtual QString getPostprocessingOptions() const { return QString(); };
-  /// Return global options for time-slicing
-  virtual QString getTimeSlicingOptions() const { return QString(); };
+  virtual QString getPostprocessingOptions() const { return QString(); }
+  /// Return time-slicing values
+  virtual QString getTimeSlicingValues() const { return QString(); }
+  /// Return time-slicing type
+  virtual QString getTimeSlicingType() const { return QString(); }
 };
 }
 }

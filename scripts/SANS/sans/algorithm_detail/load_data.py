@@ -42,9 +42,11 @@ Adding to the cache(ADS) is supported for the TubeCalibration file.
 Reading from the cache is supported for all files. This avoids data reloads if the correct file is already in the
 cache.
 """
-
+from __future__ import (absolute_import, division, print_function)
 from abc import (ABCMeta, abstractmethod)
 from six import with_metaclass
+import os
+from mantid.kernel import config
 from mantid.api import (AnalysisDataService)
 from sans.common.file_information import (SANSFileInformationFactory, FileType, get_extension_for_file_type,
                                           find_full_file_path)
@@ -52,7 +54,7 @@ from sans.common.constants import (EMPTY_NAME, SANS_SUFFIX, TRANS_SUFFIX, MONITO
                                    SANS_FILE_TAG, OUTPUT_WORKSPACE_GROUP, OUTPUT_MONITOR_WORKSPACE,
                                    OUTPUT_MONITOR_WORKSPACE_GROUP)
 from sans.common.enums import (SANSInstrument, SANSDataType)
-from sans.common.general_functions import (create_unmanaged_algorithm)
+from sans.common.general_functions import (create_child_algorithm)
 from sans.common.log_tagger import (set_tag, has_tag, get_tag)
 from sans.state.data import (StateData)
 from sans.algorithm_detail.calibration import apply_calibration
@@ -111,12 +113,8 @@ def is_transmission_type(to_check):
     :param to_check: A SANSDataType object.
     :return: true if the SANSDataType object is a transmission object (transmission or direct) else false.
     """
-    if ((to_check is SANSDataType.SampleTransmission) or (to_check is SANSDataType.SampleDirect) or
-            (to_check is SANSDataType.CanTransmission) or (to_check is SANSDataType.CanDirect)):
-        is_transmission = True
-    else:
-        is_transmission = False
-    return is_transmission
+    return ((to_check is SANSDataType.SampleTransmission) or (to_check is SANSDataType.SampleDirect) or
+            (to_check is SANSDataType.CanTransmission) or (to_check is SANSDataType.CanDirect))
 
 
 def get_expected_file_tags(file_information, is_transmission, period):
@@ -129,10 +127,7 @@ def get_expected_file_tags(file_information, is_transmission, period):
     :return: a list of file tags
     """
     suffix_file_type = get_extension_for_file_type(file_information)
-    if is_transmission:
-        suffix_data = TRANS_SUFFIX
-    else:
-        suffix_data = SANS_SUFFIX
+    suffix_data = TRANS_SUFFIX if is_transmission else SANS_SUFFIX
     file_path = file_information.get_file_name()
 
     # Three possibilities:
@@ -236,10 +231,17 @@ def has_loaded_correctly_from_ads(file_information, workspaces, period):
 
 
 def is_calibration_correct(workspace, calibration_file):
-    is_correct = True
-    if has_tag(CALIBRATION_WORKSPACE_TAG, workspace):
-        is_correct = calibration_file == get_tag(CALIBRATION_WORKSPACE_TAG, workspace)
-    return is_correct
+    """
+    Check if the calibration has been applied. If no calibration has been specified then none should be have
+    been applied.
+
+    @param workspace: the workspace to check.
+    @param calibration_file: the path to the calibration file.
+    @return: True if the calibration file matches or if none was set and the path is empty, else False
+    """
+    has_calibration = has_tag(CALIBRATION_WORKSPACE_TAG, workspace)
+    return (has_calibration and calibration_file == get_tag(CALIBRATION_WORKSPACE_TAG, workspace)) or\
+           (not has_calibration and not calibration_file)
 
 
 def get_workspaces_from_ads_if_exist(file_tags, full_calibration_file_path, workspaces):
@@ -277,7 +279,7 @@ def use_cached_workspaces_from_ads(file_information,  is_transmission,  period, 
     workspaces = []
     workspace_monitors = []
 
-    full_calibration_file_path = find_full_file_path(calibration_file_name)
+    full_calibration_file_path = find_full_file_path(calibration_file_name) if calibration_file_name else ""
 
     # Get the expected sans_original_workspace tag entries
     file_tags = get_expected_file_tags(file_information, is_transmission, period)
@@ -330,7 +332,7 @@ def tag_workspaces_with_file_names(workspaces, file_information, is_transmission
 # -----------------
 # Added data loader
 # -----------------
-def run_added_loader(loader, file_information, is_transmission, period):
+def run_added_loader(loader, file_information, is_transmission, period, parent_alg):
     """
     Runs the loader for added workspaces.
 
@@ -348,11 +350,12 @@ def run_added_loader(loader, file_information, is_transmission, period):
        iii. We have N periods but only want to load period K. We get again only two entries but we need to
        request the kth entry for the added event data and the k + NumPeriods entry for the monitor.
 
-    @param loader: a handles to a preset load algorithm
-    @param file_information: the FileInformation object
-    @param is_transmission: if  the set is a transmission
-    @param period: the selected period
-    @return:
+    :param loader: a handles to a preset load algorithm
+    :param file_information: the FileInformation object
+    :param is_transmission: if  the set is a transmission
+    :param period: the selected period
+    :param parent_alg: a handle to the parent algorithm
+    @return: workspaces and monitors
     """
     def extract_histogram_data(load_alg, num_periods, selected_period):
         ws_collection = []
@@ -370,13 +373,14 @@ def run_added_loader(loader, file_information, is_transmission, period):
         ws_monitor_collection = []
         if num_periods == 1 or (num_periods > 1 and selected_period is not StateData.ALL_PERIODS):
             # First get the added event data
+            period_to_load = selected_period if selected_period is not StateData.ALL_PERIODS else 1
             offset = num_periods
-            load_alg.setProperty("EntryNumber", selected_period)
+            load_alg.setProperty("EntryNumber", period_to_load)
             load_alg.execute()
             ws_collection.append(load_alg.getProperty("OutputWorkspace").value)
 
             # Second get the added monitor data
-            load_alg.setProperty("EntryNumber", selected_period + offset)
+            load_alg.setProperty("EntryNumber", period_to_load + offset)
             load_alg.execute()
             ws_monitor_collection.append(load_alg.getProperty("OutputWorkspace").value)
         else:
@@ -409,7 +413,7 @@ def run_added_loader(loader, file_information, is_transmission, period):
             extract_name = "ExtractMonitors"
             extract_options = {"DetectorWorkspace": "dummy1",
                                "MonitorWorkspace": "dummy2"}
-            extract_alg = create_unmanaged_algorithm(extract_name, **extract_options)
+            extract_alg = create_child_algorithm(parent_alg, extract_name, **extract_options)
             for workspace in workspace_collection:
                 extract_alg.setProperty("InputWorkspace", workspace)
                 extract_alg.execute()
@@ -421,14 +425,15 @@ def run_added_loader(loader, file_information, is_transmission, period):
     return workspaces, workspace_monitors
 
 
-def loader_for_added_isis_nexus(file_information, is_transmission, period):
+def loader_for_added_isis_nexus(file_information, is_transmission, period, parent_alg):
     """
     Get the name and options for the load algorithm for ISIS nexus.
 
-    @param file_information: a SANSFileInformation object.
-    @param is_transmission: if the current file corresponds to transmission data
-    @param period: the period to load
-    @return: the name of the load algorithm and the selected load options
+    :param file_information: a SANSFileInformation object.
+    :param is_transmission: if the current file corresponds to transmission data
+    :param period: the period to load
+    :param parent_alg: a handle to the parent algorithm
+    :return: the name of the load algorithm and the selected load options
     """
     _ = is_transmission  # noqa
     loader_name = "LoadNexusProcessed"
@@ -438,25 +443,26 @@ def loader_for_added_isis_nexus(file_information, is_transmission, period):
                       "FastMultiPeriod": True}
     if period != StateData.ALL_PERIODS:
         loader_options.update({"EntryNumber": period})
-    loader_alg = create_unmanaged_algorithm(loader_name, **loader_options)
-    return run_added_loader(loader_alg, file_information, is_transmission, period)
+    loader_alg = create_child_algorithm(parent_alg, loader_name, **loader_options)
+    return run_added_loader(loader_alg, file_information, is_transmission, period, parent_alg)
 
 
 # -----------------
 # Nexus data loader
 # -----------------
-def extract_multi_period_event_workspace(loader, index, output_workspace_property_name):
+def extract_multi_period_event_workspace(loader, index, output_workspace_property_name, parent_alg):
     """
     Extract a single workspace from a WorkspaceGroup.
 
     Note that we need to perform a CloneWorkspace operation because this is the only way to get an individual workspace
     from a WorkspaceGroup. They are extremely "sticky" and using the indexed access will only provide a weak pointer
     which means that we will have a dead reference once the WorkspaceGroup goes out of scope
-    @param loader: an executed LoadEventNexus algorithm
-    @param index: an index variable into the GroupWorkspace, not that it is offset by 1
-    @param output_workspace_property_name: the name of the output workspace property, i.e. OutputWorkspace or
+    :param loader: an executed LoadEventNexus algorithm
+    :param index: an index variable into the GroupWorkspace, not that it is offset by 1
+    :param output_workspace_property_name: the name of the output workspace property, i.e. OutputWorkspace or
                                            MonitorWorkspace
-    @return: a single workspace
+    :param parent_alg: a handle to the parent algorithm
+    :return: a single workspace
     """
     group_workspace = loader.getProperty(output_workspace_property_name).value
     group_workspace_index = index - 1
@@ -465,12 +471,12 @@ def extract_multi_period_event_workspace(loader, index, output_workspace_propert
     clone_name = "CloneWorkspace"
     clone_options = {"InputWorkspace": workspace_of_interest,
                      "OutputWorkspace": EMPTY_NAME}
-    clone_alg = create_unmanaged_algorithm(clone_name, **clone_options)
+    clone_alg = create_child_algorithm(parent_alg, clone_name, **clone_options)
     clone_alg.execute()
     return clone_alg.getProperty("OutputWorkspace").value
 
 
-def loader_for_isis_nexus(file_information, is_transmission, period):
+def loader_for_isis_nexus(file_information, is_transmission, period, parent_alg):
     """
     Get name and the options for the loading algorithm.
 
@@ -478,11 +484,12 @@ def loader_for_isis_nexus(file_information, is_transmission, period):
     :param file_information: a SANSFileInformation object.
     :param is_transmission: if the workspace is a transmission workspace.
     :param period: the period to load.
+    :param parent_alg: a handle to the parent algorithm
     :return: the name of the load algorithm and the selected load options.
     """
     loader_options = {"Filename": file_information.get_file_name(),
                       "OutputWorkspace": EMPTY_NAME}
-    if file_information.is_event_mode():
+    if file_information.is_event_mode() and not is_transmission:
         loader_name = "LoadEventNexus"
         # Note that currently we don't have a way to only load one monitor
         loader_options.update({"LoadMonitors": True})
@@ -492,6 +499,10 @@ def loader_for_isis_nexus(file_information, is_transmission, period):
                                "EntryNumber": 0})
         if period != StateData.ALL_PERIODS:
             loader_options.update({"EntryNumber": period})
+    elif file_information.is_event_mode() and is_transmission:
+        # We have the rare case of an event file which is used for transmission calculations. In this case
+        # we only extract the monitors
+        loader_name = "LoadNexusMonitors"
     else:
         # We must be dealing with a transmission file, we need to load the whole file.
         # The file itself will most of the time only contain monitors anyway, but sometimes the detector
@@ -501,35 +512,40 @@ def loader_for_isis_nexus(file_information, is_transmission, period):
                                "EntryNumber": 0})
         if period != StateData.ALL_PERIODS:
             loader_options.update({"EntryNumber": period})
-    loader_alg = create_unmanaged_algorithm(loader_name, **loader_options)
-    return run_loader(loader_alg, file_information, is_transmission, period)
+    loader_alg = create_child_algorithm(parent_alg, loader_name, **loader_options)
+    return run_loader(loader_alg, file_information, is_transmission, period, parent_alg)
 
 
 # ---------------
 # Raw data loader
 # ---------------
-def loader_for_raw(file_information, is_transmission, period):
+def loader_for_raw(file_information, is_transmission, period, parent_alg):
     """
     Get the load algorithm information for an raw file
 
     :param file_information: a SANSFileInformation object.
     :param is_transmission: if the workspace is a transmission workspace.
     :param period: the period to load.
+    :param parent_alg: a handle to the parent algorithm
     :return: the name of the load algorithm and the selected load options.
     """
     loader_name = "LoadRaw"
     loader_options = {"Filename": file_information.get_file_name(),
                       "OutputWorkspace": EMPTY_NAME}
-    loader_options.update({"LoadMonitors": "Separate"})
+    if is_transmission:
+        loader_options.update({"LoadMonitors": "Include"})
+    else:
+        loader_options.update({"LoadMonitors": "Separate"})
+
     if period != StateData.ALL_PERIODS:
         loader_options.update({"PeriodList": period})
-    loader_alg = create_unmanaged_algorithm(loader_name, **loader_options)
-    workspaces, monitor_workspaces = run_loader(loader_alg, file_information, is_transmission, period)
+    loader_alg = create_child_algorithm(parent_alg, loader_name, **loader_options)
+    workspaces, monitor_workspaces = run_loader(loader_alg, file_information, is_transmission, period, parent_alg)
 
     # Add the sample details to the loaded workspace
     sample_name = "LoadSampleDetailsFromRaw"
     sample_options = {"Filename": file_information.get_file_name()}
-    sample_alg = create_unmanaged_algorithm(sample_name, **sample_options)
+    sample_alg = create_child_algorithm(parent_alg, sample_name, **sample_options)
 
     for workspace in workspaces:
         sample_alg.setProperty("InputWorkspace", workspace)
@@ -545,7 +561,7 @@ def loader_for_raw(file_information, is_transmission, period):
 # ---------------
 # General
 # ---------------
-def run_loader(loader, file_information, is_transmission, period):
+def run_loader(loader, file_information, is_transmission, period, parent_alg):
     """
     Runs the load algorithm.
 
@@ -554,6 +570,7 @@ def run_loader(loader, file_information, is_transmission, period):
     :param file_information: a SANSFileInformation object
     :param is_transmission: if the workspace is a transmission workspace.
     :param period: the selected period.
+    :param parent_alg: a handle to the parent algorithm
     :return: a list of workspaces and a list of monitor workspaces
     """
     loader.execute()
@@ -572,13 +589,13 @@ def run_loader(loader, file_information, is_transmission, period):
         workspaces.append(loader.getProperty("OutputWorkspace").value)
     elif number_of_periods > 1 and period is not StateData.ALL_PERIODS:
         if file_information.is_event_mode():
-            workspaces.append(extract_multi_period_event_workspace(loader, period, "OutputWorkspace"))
+            workspaces.append(extract_multi_period_event_workspace(loader, period, "OutputWorkspace", parent_alg))
         else:
             workspaces.append(loader.getProperty("OutputWorkspace").value)
     else:
         for index in range(1, number_of_periods + 1):
             if file_information.is_event_mode():
-                workspaces.append(extract_multi_period_event_workspace(loader, index, "OutputWorkspace"))
+                workspaces.append(extract_multi_period_event_workspace(loader, index, "OutputWorkspace", parent_alg))
             else:
                 workspaces.append(loader.getProperty(OUTPUT_WORKSPACE_GROUP + str(index)).value)
 
@@ -589,14 +606,15 @@ def run_loader(loader, file_information, is_transmission, period):
         elif number_of_periods > 1 and period is not StateData.ALL_PERIODS:
             if file_information.is_event_mode():
                 workspace_monitors.append(extract_multi_period_event_workspace(loader, period,
-                                                                               OUTPUT_MONITOR_WORKSPACE))
+                                                                               OUTPUT_MONITOR_WORKSPACE,
+                                                                               parent_alg))
             else:
                 workspace_monitors.append(loader.getProperty(OUTPUT_MONITOR_WORKSPACE).value)
         else:
             for index in range(1, number_of_periods + 1):
                 if file_information.is_event_mode():
                     workspace_monitors.append(
-                        extract_multi_period_event_workspace(loader, index, OUTPUT_MONITOR_WORKSPACE))
+                        extract_multi_period_event_workspace(loader, index, OUTPUT_MONITOR_WORKSPACE, parent_alg))
                 else:
                     workspace_monitors.append(loader.getProperty(OUTPUT_MONITOR_WORKSPACE_GROUP + str(index)).value)
     if workspaces:
@@ -624,7 +642,7 @@ def get_loader_strategy(file_information):
     return loader
 
 
-def load_isis(data_type, file_information, period, use_cached, calibration_file_name):
+def load_isis(data_type, file_information, period, use_cached, calibration_file_name, parent_alg):
     """
     Loads workspaces according a SANSFileInformation object for ISIS.
 
@@ -636,6 +654,7 @@ def load_isis(data_type, file_information, period, use_cached, calibration_file_
     :param calibration_file_name: the calibration file name. Note that this is only used for cached loading of data
                                   workspaces and not for loading of calibration files. We just want to make sure that
                                   the potentially cached data has had the correct calibration file applied to it.
+    :param parent_alg: a handle to the parent algorithm.
     :return: a SANSDataType-Workspace map for data workspaces and a SANSDataType-Workspace map for monitor workspaces
     """
     workspace = []
@@ -652,7 +671,7 @@ def load_isis(data_type, file_information, period, use_cached, calibration_file_
     # of scatter, ie. non-trans, there is no monitor workspace. There are several ways to load the data
     if len(workspace) == 0 or (len(workspace_monitor) == 0 and not is_transmission):
         loader = get_loader_strategy(file_information)
-        workspace, workspace_monitor = loader(file_information, is_transmission, period)
+        workspace, workspace_monitor = loader(file_information, is_transmission, period, parent_alg=parent_alg)
 
     # Associate the data type with the workspace
     workspace_pack = {data_type: workspace}
@@ -668,12 +687,12 @@ class SANSLoadData(with_metaclass(ABCMeta, object)):
     """ Base class for all SANSLoad implementations."""
 
     @abstractmethod
-    def do_execute(self, data_info, use_cached, publish_to_ads, progress):
+    def do_execute(self, data_info, use_cached, publish_to_ads, progress, parent_alg):
         pass
 
-    def execute(self, data_info, use_cached, publish_to_ads, progress):
+    def execute(self, data_info, use_cached, publish_to_ads, progress, parent_alg):
         SANSLoadData._validate(data_info)
-        return self.do_execute(data_info, use_cached, publish_to_ads, progress)
+        return self.do_execute(data_info, use_cached, publish_to_ads, progress, parent_alg)
 
     @staticmethod
     def _validate(data_info):
@@ -685,19 +704,14 @@ class SANSLoadData(with_metaclass(ABCMeta, object)):
 
 class SANSLoadDataISIS(SANSLoadData):
     """Load implementation of SANSLoad for ISIS data"""
-    def do_execute(self, data_info, use_cached, publish_to_ads, progress):
+    def do_execute(self, data_info, use_cached, publish_to_ads, progress, parent_alg):
         # Get all entries from the state file
         file_infos, period_infos = get_file_and_period_information_from_data(data_info)
 
         # Several important remarks regarding the loading
         # 1. Scatter files are loaded as with monitors and the data in two separate workspaces.
-        # 2. Transmission files are loaded entirely. They cannot be event-mode
+        # 2. Transmission files are loaded entirely. If they are event mode then only the monitor is loaded as the data.
         # 3. Added data is handled differently because it is already processed data.
-
-        # Check that the transmission data is not event mode
-        if is_data_transmission_and_event_mode(file_infos):
-            raise RuntimeError("SANSLoad: You have provided an event-type file for a transmission workspace. "
-                               "Only histogram-type files are supported.")
 
         workspaces = {}
         workspace_monitors = {}
@@ -713,7 +727,8 @@ class SANSLoadDataISIS(SANSLoadData):
             progress.report(report_message)
 
             workspace_pack, workspace_monitors_pack = load_isis(key, value, period_infos[key],
-                                                                use_cached, calibration_file)
+                                                                use_cached, calibration_file,
+                                                                parent_alg)
 
             # Add them to the already loaded workspaces
             workspaces.update(workspace_pack)
@@ -724,7 +739,11 @@ class SANSLoadDataISIS(SANSLoadData):
         if data_info.calibration:
             report_message = "Applying calibration."
             progress.report(report_message)
-            apply_calibration(calibration_file, workspaces, workspace_monitors, use_cached, publish_to_ads)
+            apply_calibration(calibration_file, workspaces, workspace_monitors, use_cached, publish_to_ads, parent_alg)
+
+        # Apply corrections for transmission workspaces
+        transmission_correction = get_transmission_correction(data_info)
+        transmission_correction.correct(workspaces, parent_alg)
 
         return workspaces, workspace_monitors
 
@@ -758,3 +777,62 @@ class SANSLoadDataFactory(object):
         else:
             raise RuntimeError("SANSLoaderFactory: Other instruments are not implemented yet.")
         return loader
+
+
+# -------------------------------------------------
+#  Corrections for a loaded transmission workspace
+# -------------------------------------------------
+
+class TransmissionCorrection(with_metaclass(ABCMeta, object)):
+    @abstractmethod
+    def correct(self, workspaces, parent_alg):
+        pass
+
+
+class NullTransmissionCorrection(TransmissionCorrection):
+    def correct(self, workspaces, parent_alg):
+        pass
+
+
+class LOQTransmissionCorrection(TransmissionCorrection):
+    def correct(self, workspaces, parent_alg):
+        """
+        For LOQ we want to apply a different instrument definition for the transmission runs.
+
+        :param workspaces: a dictionary of data types, e.g. SampleScatter vs. a workspace
+        :param parent_alg: a handle to the parent algorithm
+        """
+        # Get the transmission and the direct workspaces and apply the correction to them
+        workspace_which_require_transmission_correction = []
+        for data_type, _ in list(workspaces.items()):
+            if is_transmission_type(data_type):
+                workspace_which_require_transmission_correction.append(workspaces[data_type])
+
+        # We want to apply a different instrument for the transmission runs
+
+        for workspace in workspace_which_require_transmission_correction:
+            assert len(workspace) == 1
+            workspace = workspace[0]
+            instrument = workspace.getInstrument()
+            has_m4 = instrument.getComponentByName("monitor4")
+            if has_m4 is None:
+                trans_definition_file = os.path.join(config.getString('instrumentDefinition.directory'),
+                                                     'LOQ_trans_Definition.xml')
+            else:
+                trans_definition_file = os.path.join(config.getString('instrumentDefinition.directory'),
+                                                     'LOQ_trans_Definition_M4.xml')
+            # Done
+            instrument_name = "LoadInstrument"
+            instrument_options = {"Workspace": workspace,
+                                  "Filename": trans_definition_file,
+                                  "RewriteSpectraMap": False}
+            instrument_alg = create_child_algorithm(parent_alg, instrument_name, **instrument_options)
+            instrument_alg.execute()
+
+
+def get_transmission_correction(data_info):
+    instrument_type = data_info.instrument
+    if instrument_type is SANSInstrument.LOQ:
+        return LOQTransmissionCorrection()
+    else:
+        return NullTransmissionCorrection()

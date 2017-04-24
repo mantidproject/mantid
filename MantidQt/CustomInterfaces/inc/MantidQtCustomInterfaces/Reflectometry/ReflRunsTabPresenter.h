@@ -66,11 +66,13 @@ public:
   void acceptMainPresenter(IReflMainWindowPresenter *mainPresenter) override;
   void notify(IReflRunsTabPresenter::Flag flag) override;
   void notifyADSChanged(const QSet<QString> &workspaceList) override;
+  QString getPreprocessingProperties() const override;
   /// Global options (inherited from DataProcessorMainPresenter)
   QString getPreprocessingOptionsAsString() const override;
   QString getProcessingOptions() const override;
   QString getPostprocessingOptions() const override;
-  QString getTimeSlicingOptions() const override;
+  QString getTimeSlicingValues() const override;
+  QString getTimeSlicingType() const override;
 
 private:
   /// The search model

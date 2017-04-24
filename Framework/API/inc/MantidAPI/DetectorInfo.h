@@ -75,6 +75,7 @@ public:
   bool isEquivalent(const DetectorInfo &other) const;
 
   size_t size() const;
+  bool isScanning() const;
 
   bool isMonitor(const size_t index) const;
   bool isMonitor(const std::pair<size_t, size_t> &index) const;

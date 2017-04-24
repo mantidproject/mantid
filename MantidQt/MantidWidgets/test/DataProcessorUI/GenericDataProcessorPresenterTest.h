@@ -1003,6 +1003,11 @@ public:
     EXPECT_CALL(mockMainPresenter, getPreprocessingOptionsAsString())
         .Times(2)
         .WillRepeatedly(Return(QString()));
+    EXPECT_CALL(mockMainPresenter, getPreprocessingProperties())
+        .Times(2)
+        .WillRepeatedly(Return(std::map<std::string, std::set<std::string>>()));
+        .Times(2)
+        .WillRepeatedly(Return(QString()));
     EXPECT_CALL(mockMainPresenter, getProcessingOptions())
         .Times(2)
         .WillRepeatedly(Return(""));
@@ -1082,6 +1087,11 @@ public:
         .Times(1)
         .WillRepeatedly(Return(grouplist));
     EXPECT_CALL(mockMainPresenter, getPreprocessingOptionsAsString())
+        .Times(2)
+        .WillRepeatedly(Return(QString()));
+    EXPECT_CALL(mockMainPresenter, getPreprocessingProperties())
+        .Times(2)
+        .WillRepeatedly(Return(std::map<std::string, std::set<std::string>>()));
         .Times(2)
         .WillRepeatedly(Return(QString()));
     EXPECT_CALL(mockMainPresenter, getProcessingOptions())
@@ -1176,6 +1186,11 @@ public:
     EXPECT_CALL(mockMainPresenter, getPreprocessingOptionsAsString())
         .Times(2)
         .WillRepeatedly(Return(QString()));
+    EXPECT_CALL(mockMainPresenter, getPreprocessingProperties())
+        .Times(2)
+        .WillRepeatedly(Return(std::map<std::string, std::set<std::string>>()));
+        .Times(2)
+        .WillRepeatedly(Return(QString()));
     EXPECT_CALL(mockMainPresenter, getProcessingOptions())
         .Times(2)
         .WillRepeatedly(Return(""));
@@ -1262,6 +1277,11 @@ public:
     EXPECT_CALL(mockMainPresenter, getPreprocessingOptionsAsString())
         .Times(2)
         .WillRepeatedly(Return(QString()));
+    EXPECT_CALL(mockMainPresenter, getPreprocessingProperties())
+        .Times(2)
+        .WillRepeatedly(Return(std::map<std::string, std::set<std::string>>()));
+        .Times(2)
+        .WillRepeatedly(Return(QString()));
     EXPECT_CALL(mockMainPresenter, getProcessingOptions())
         .Times(2)
         .WillRepeatedly(Return(""));
@@ -1341,6 +1361,11 @@ public:
     EXPECT_CALL(mockMainPresenter, getPreprocessingOptionsAsString())
         .Times(2)
         .WillRepeatedly(Return(QString()));
+    EXPECT_CALL(mockMainPresenter, getPreprocessingProperties())
+        .Times(2)
+        .WillRepeatedly(Return(std::map<std::string, std::set<std::string>>()));
+        .Times(2)
+        .WillRepeatedly(Return(QString()));
     EXPECT_CALL(mockMainPresenter, getProcessingOptions())
         .Times(2)
         .WillRepeatedly(Return(""));
@@ -1367,6 +1392,56 @@ public:
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
+  }
+
+  void testExpandAllGroups() {
+    NiceMock<MockDataProcessorView> mockDataProcessorView;
+    NiceMock<MockProgressableView> mockProgress;
+    NiceMock<MockMainPresenter> mockMainPresenter;
+    GenericDataProcessorPresenter presenter(
+        createReflectometryWhiteList(), createReflectometryPreprocessMap(),
+        createReflectometryProcessor(), createReflectometryPostprocessor());
+    presenter.acceptViews(&mockDataProcessorView, &mockProgress);
+    presenter.accept(&mockMainPresenter);
+
+    createPrefilledWorkspace("TestWorkspace", presenter.getWhiteList());
+    EXPECT_CALL(mockDataProcessorView, getWorkspaceToOpen())
+        .Times(1)
+        .WillRepeatedly(Return("TestWorkspace"));
+    presenter.notify(DataProcessorPresenter::OpenTableFlag);
+
+    // We should not receive any errors
+    EXPECT_CALL(mockMainPresenter, giveUserCritical(_, _)).Times(0);
+
+    // The user hits the 'Expand All' button
+    EXPECT_CALL(mockDataProcessorView, expandAll()).Times(1);
+
+    presenter.notify(DataProcessorPresenter::ExpandAllGroupsFlag);
+  }
+
+  void testCollapseAllGroups() {
+    NiceMock<MockDataProcessorView> mockDataProcessorView;
+    NiceMock<MockProgressableView> mockProgress;
+    NiceMock<MockMainPresenter> mockMainPresenter;
+    GenericDataProcessorPresenter presenter(
+        createReflectometryWhiteList(), createReflectometryPreprocessMap(),
+        createReflectometryProcessor(), createReflectometryPostprocessor());
+    presenter.acceptViews(&mockDataProcessorView, &mockProgress);
+    presenter.accept(&mockMainPresenter);
+
+    createPrefilledWorkspace("TestWorkspace", presenter.getWhiteList());
+    EXPECT_CALL(mockDataProcessorView, getWorkspaceToOpen())
+        .Times(1)
+        .WillRepeatedly(Return("TestWorkspace"));
+    presenter.notify(DataProcessorPresenter::OpenTableFlag);
+
+    // We should not receive any errors
+    EXPECT_CALL(mockMainPresenter, giveUserCritical(_, _)).Times(0);
+
+    // The user hits the 'Expand All' button
+    EXPECT_CALL(mockDataProcessorView, collapseAll()).Times(1);
+
+    presenter.notify(DataProcessorPresenter::CollapseAllGroupsFlag);
   }
 
   /*
@@ -1428,6 +1503,11 @@ public:
         .Times(1)
         .WillRepeatedly(Return(grouplist));
     EXPECT_CALL(mockMainPresenter, getPreprocessingOptionsAsString())
+        .Times(2)
+        .WillRepeatedly(Return(QString()));
+    EXPECT_CALL(mockMainPresenter, getPreprocessingProperties())
+        .Times(2)
+        .WillRepeatedly(Return(std::map<std::string, std::set<std::string>>()));
         .Times(2)
         .WillRepeatedly(Return(QString()));
     EXPECT_CALL(mockMainPresenter, getProcessingOptions())
@@ -3012,6 +3092,9 @@ public:
         .Times(1)
         .WillRepeatedly(Return(grouplist));
     EXPECT_CALL(mockMainPresenter, getPreprocessingOptionsAsString()).Times(0);
+    EXPECT_CALL(mockMainPresenter, getPreprocessingProperties())
+        .Times(2)
+        .WillRepeatedly(Return(std::map<std::string, std::set<std::string>>()));
     EXPECT_CALL(mockMainPresenter, getProcessingOptions())
         .Times(2)
         .WillRepeatedly(Return(""));
@@ -3201,6 +3284,11 @@ public:
         .Times(1)
         .WillRepeatedly(Return(grouplist));
     EXPECT_CALL(mockMainPresenter, getPreprocessingOptionsAsString())
+        .Times(2)
+        .WillRepeatedly(Return(QString()));
+    EXPECT_CALL(mockMainPresenter, getPreprocessingProperties())
+        .Times(2)
+        .WillRepeatedly(Return(std::map<std::string, std::set<std::string>>()));
         .Times(2)
         .WillRepeatedly(Return(QString()));
     EXPECT_CALL(mockMainPresenter, getProcessingOptions())

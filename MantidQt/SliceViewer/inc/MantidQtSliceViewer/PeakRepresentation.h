@@ -1,7 +1,6 @@
 #ifndef MANTID_SLICEVIEWER_PEAK_REPRESENTATION_H
 #define MANTID_SLICEVIEWER_PEAK_REPRESENTATION_H
 
-#include "MantidKernel/System.h"
 #include "MantidQtSliceViewer/PeakPrimitives.h"
 #include "MantidQtSliceViewer/PeakViewColor.h"
 #include "MantidGeometry/Crystal/PeakTransform.h"
@@ -11,7 +10,7 @@ class QPainter;
 
 namespace MantidQt {
 namespace SliceViewer {
-struct DLLExport PeakRepresentationViewInformation {
+struct EXPORT_OPT_MANTIDQT_SLICEVIEWER PeakRepresentationViewInformation {
   double windowHeight;
   double windowWidth;
   double viewHeight;
@@ -48,7 +47,7 @@ typedef boost::optional<double> optional_double;
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport PeakRepresentation {
+class EXPORT_OPT_MANTIDQT_SLICEVIEWER PeakRepresentation {
 public:
   virtual ~PeakRepresentation() {}
 

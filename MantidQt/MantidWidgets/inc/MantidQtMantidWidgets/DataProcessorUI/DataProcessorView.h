@@ -77,6 +77,10 @@ public:
   // produced
   virtual bool getEnableNotebook() = 0;
 
+  // Expand/Collapse all groups
+  virtual void expandAll() = 0;
+  virtual void collapseAll() = 0;
+
   // Setter methods
   virtual void setTableList(const QSet<QString> &tables) = 0;
   virtual void setInstrumentList(const QString &instruments,

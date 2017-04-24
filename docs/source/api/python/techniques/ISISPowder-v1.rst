@@ -12,13 +12,6 @@ ISIS Powder Diffraction Scripts
     :local:
 
 
-Instrument Specific Documentation
----------------------------------
-
-- :ref:`isis-powder-diffraction-pearl-ref`
-- :ref:`isis-powder-diffraction-polaris-ref`
-
-
 Overview and General Information
 --------------------------------
 These objective of these scripts are to combine the work-flows of several powder
@@ -26,6 +19,14 @@ diffraction instruments into a single collection of scripts whilst catering to
 their individual requirements. At the most fundamental level it provides the
 functionality to calculate and apply vanadium calibrations and subsequently
 apply these corrections to experimental data.
+
+.. _instrument_doc_links_isis-powder-diffraction-ref:
+
+Instrument Specific Documentation
+---------------------------------
+- :ref:`isis-powder-diffraction-gem-ref`
+- :ref:`isis-powder-diffraction-pearl-ref`
+- :ref:`isis-powder-diffraction-polaris-ref`
 
 
 Data Files Setup
@@ -92,7 +93,7 @@ Calibration Configuration File
 The calibration mapping file allows users to specify ranges of runs and their
 common properties to all of them. These include the vanadium and empty run numbers,
 offset file and label for those runs. Each format is bespoke to the instrument's
-requirements and is documented as part of the instrument documentation.
+requirements and is documented as part of the :ref:`instrument_doc_links_isis-powder-diffraction-ref`
 
 - The first line in all examples holds the run numbers.
 - This is the range of runs inclusively for example *123-130*

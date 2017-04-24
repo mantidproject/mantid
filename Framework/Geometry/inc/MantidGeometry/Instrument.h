@@ -19,6 +19,7 @@ namespace Mantid {
 typedef std::map<detid_t, Geometry::IDetector_const_sptr> detid2det_map;
 
 namespace Beamline {
+class ComponentInfo;
 class DetectorInfo;
 }
 namespace Geometry {
@@ -243,10 +244,17 @@ public:
 
   bool hasDetectorInfo() const;
   const Beamline::DetectorInfo &detectorInfo() const;
+  bool hasComponentInfo() const;
+  const Beamline::ComponentInfo &componentInfo() const;
+
   size_t detectorIndex(const detid_t detID) const;
   void
   setDetectorInfo(boost::shared_ptr<const Beamline::DetectorInfo> detectorInfo);
-
+  void setComponentInfo(
+      boost::shared_ptr<const Beamline::ComponentInfo> componentInfo,
+      boost::shared_ptr<const std::vector<Geometry::ComponentID>> componentIds);
+  boost::shared_ptr<const std::vector<Geometry::ComponentID>>
+  componentIds() const;
   boost::shared_ptr<ParameterMap> makeLegacyParameterMap() const;
 
 private:
@@ -327,6 +335,9 @@ private:
   /// Pointer to the DetectorInfo object. NULL unless the instrument is
   /// associated with an ExperimentInfo object.
   boost::shared_ptr<const Beamline::DetectorInfo> m_detectorInfo{nullptr};
+
+  boost::shared_ptr<const Beamline::ComponentInfo> m_componentInfo{nullptr};
+  boost::shared_ptr<const std::vector<Geometry::ComponentID>> m_componentIds;
 };
 namespace Conversion {
 

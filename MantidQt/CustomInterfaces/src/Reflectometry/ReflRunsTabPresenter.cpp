@@ -137,7 +137,7 @@ void ReflRunsTabPresenter::pushCommands() {
   m_view->clearCommands();
 
   // The expected number of commands
-  const size_t nCommands = 27;
+  const size_t nCommands = 29;
   auto commands =
       m_tablePresenters.at(m_view->getSelectedGroup())->publishCommands();
   if (commands.size() != nCommands) {
@@ -354,11 +354,22 @@ void ReflRunsTabPresenter::notifyADSChanged(
   pushCommands();
 }
 
-/** Requests global pre-processing options as a string. Options are supplied by
-* the main
-* presenter
-* @return :: Global pre-processing options
+
+/** Requests property names associated with pre-processing values.
+* @return :: Pre-processing property names.
 */
+QString
+ReflRunsTabPresenter::getPreprocessingProperties() const {
+
+  std::string properties = "Transmission Run(s):FirstTransmissionRun,SecondTransmissionRun";
+  return QString::fromStdString(properties);
+}
+
+
+/** Requests global pre-processing options as a string. Options are supplied by
+  * the main presenter.
+  * @return :: Global pre-processing options
+  */
 QString ReflRunsTabPresenter::getPreprocessingOptionsAsString() const {
 
   std::string optionsStr =
@@ -388,14 +399,18 @@ QString ReflRunsTabPresenter::getPostprocessingOptions() const {
       m_mainPresenter->getStitchOptions(m_view->getSelectedGroup()));
 }
 
-/** Requests global time-slicing options. Options are supplied by the main
-* presenter
-* @return :: Global time-slicing options
+/** Requests time-slicing values. Values are supplied by the main presenter
+* @return :: Time-slicing values
 */
-QString ReflRunsTabPresenter::getTimeSlicingOptions() const {
+QString ReflRunsTabPresenter::getTimeSlicingValues() const {
+  return QString::fromStdString(m_mainPresenter->getTimeSlicingValues(m_view->getSelectedGroup()));
+}
 
-  return QString::fromStdString(
-      m_mainPresenter->getTimeSlicingOptions(m_view->getSelectedGroup()));
+/** Requests time-slicing type. Type is supplied by the main presenter
+* @return :: Time-slicing values
+*/
+QString ReflRunsTabPresenter::getTimeSlicingType() const {
+  return QString::fromStdString(m_mainPresenter->getTimeSlicingType(m_view->getSelectedGroup()));
 }
 
 /** Changes the current instrument in the data processor widget. Also updates

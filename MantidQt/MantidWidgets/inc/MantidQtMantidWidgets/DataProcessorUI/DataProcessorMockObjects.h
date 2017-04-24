@@ -32,9 +32,7 @@ public:
 
   // Prompt
   MOCK_METHOD0(requestNotebookPath, std::string());
-  MOCK_METHOD3(askUserString,
-               std::string(const std::string &, const std::string &,
-                           const std::string &));
+  MOCK_METHOD3(askUserString, std::string(const std::string &, const std::string &, const std::string &));
   MOCK_METHOD2(askUserYesNo, bool(std::string, std::string));
   MOCK_METHOD2(giveUserWarning, void(std::string, std::string));
   MOCK_METHOD2(giveUserCritical, void(std::string, std::string));
@@ -47,6 +45,8 @@ public:
   MOCK_CONST_METHOD0(getClipboard, std::string());
   MOCK_CONST_METHOD0(getProcessInstrument, std::string());
   MOCK_METHOD0(getEnableNotebook, bool());
+  MOCK_METHOD0(expandAll, void());
+  MOCK_METHOD0(collapseAll, void());
   MOCK_METHOD1(setSelection, void(const std::set<int> &rows));
   MOCK_METHOD1(setClipboard, void(const std::string &text));
 
@@ -91,12 +91,18 @@ public:
   MOCK_METHOD2(giveUserWarning, void(std::string, std::string));
   MOCK_METHOD2(giveUserCritical, void(std::string, std::string));
   MOCK_METHOD1(runPythonAlgorithm, std::string(const std::string &));
+  MOCK_CONST_METHOD0(getPreprocessingProperties,
+                     std::map<std::string, std::set<std::string>>());
 
   // Global options
   MOCK_CONST_METHOD0(getPreprocessingOptionsAsString, QString());
   MOCK_CONST_METHOD0(getProcessingOptions, QString());
   MOCK_CONST_METHOD0(getPostprocessingOptions, QString());
   MOCK_CONST_METHOD0(getTimeSlicingOptions, QString());
+
+  // Event handling
+  MOCK_CONST_METHOD0(getTimeSlicingValues, std::string());
+  MOCK_CONST_METHOD0(getTimeSlicingType, std::string());
 };
 
 class MockDataProcessorPresenter : public DataProcessorPresenter {
@@ -124,7 +130,7 @@ private:
 
   std::vector<DataProcessorCommand_uptr> publishCommands() override {
     std::vector<DataProcessorCommand_uptr> commands;
-    for (size_t i = 0; i < 27; i++)
+    for (size_t i = 0; i < 29; i++)
       commands.push_back(
           Mantid::Kernel::make_unique<DataProcessorAppendRowCommand>(this));
     publishCommandsMocked();

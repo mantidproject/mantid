@@ -100,6 +100,10 @@ public:
   // produced
   bool getEnableNotebook() override;
 
+  // Expand/Collapse all groups
+  void expandAll() override;
+  void collapseAll() override;
+
   // Settor methods
   void setSelection(const std::set<int> &groups) override;
   void setTableList(const QSet<QString> &tables) override;
