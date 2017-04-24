@@ -1,12 +1,15 @@
 from __future__ import (absolute_import, division, print_function)
 
-from mantid.api import mtd, AlgorithmFactory, DataProcessorAlgorithm, ITableWorkspaceProperty, MatrixWorkspaceProperty, MultipleFileProperty, PropertyMode
+from mantid.api import mtd, AlgorithmFactory, DataProcessorAlgorithm, ITableWorkspaceProperty, \
+    MatrixWorkspaceProperty, FileAction, FileProperty, MultipleFileProperty, PropertyMode
 from mantid.kernel import Direction
-from mantid.simpleapi import AlignAndFocusPowder, CompressEvents, ConvertUnits, DeleteWorkspace, DetermineChunking, Divide, FilterBadPulses, Load, PDDetermineCharacterizations, Plus, RenameWorkspace
+from mantid.simpleapi import AlignAndFocusPowder, CompressEvents, ConvertUnits, CreateCacheFilename, \
+    DeleteWorkspace, DetermineChunking, Divide, EditInstrumentGeometry, FilterBadPulses, Load, \
+    LoadNexusProcessed, PDDetermineCharacterizations, Plus, RenameWorkspace, SaveNexusProcessed
 import os
 
 EXTENSIONS_NXS = ["_event.nxs", ".nxs.h5"]
-
+PROPS_FOR_INSTR = ["PrimaryFlightPath", "SpectrumIDs", "L2", "Polar", "Azimuthal"]
 PROPS_FOR_ALIGN = ["CalFileName", "GroupFilename", "GroupingWorkspace",
                    "CalibrationWorkspace", "OffsetsWorkspace",
                    "MaskWorkspace", "MaskBinTable",
@@ -15,8 +18,9 @@ PROPS_FOR_ALIGN = ["CalFileName", "GroupFilename", "GroupingWorkspace",
                    "RemovePromptPulseWidth", "CompressTolerance",
                    "UnwrapRef", "LowResRef",
                    "CropWavelengthMin", "CropWavelengthMax",
-                   "PrimaryFlightPath", "SpectrumIDs", "L2", "Polar", "Azimuthal",
                    "LowResSpectrumOffset", "ReductionProperties"]
+PROPS_FOR_ALIGN.extend(PROPS_FOR_INSTR)
+
 
 def determineChunking(filename, chunkSize):
     chunks = DetermineChunking(Filename=filename, MaxChunkSize=chunkSize, OutputWorkspace='chunks')
@@ -34,6 +38,7 @@ def determineChunking(filename, chunkSize):
     DeleteWorkspace(Workspace='chunks')
 
     return strategy
+
 
 class AlignAndFocusPowderFromFiles(DataProcessorAlgorithm):
     def category(self):
@@ -61,6 +66,10 @@ class AlignAndFocusPowderFromFiles(DataProcessorAlgorithm):
         self.declareProperty(MatrixWorkspaceProperty('AbsorptionWorkspace', '',
                                                      Direction.Input, PropertyMode.Optional),
                              doc='Divide data by this Pixel-by-pixel workspace')
+
+        self.declareProperty(FileProperty(name="CacheDirectory",defaultValue="",
+                                          action=FileAction.OptionalDirectory))
+
         self.declareProperty(MatrixWorkspaceProperty('OutputWorkspace', '',
                                                      Direction.Output),
                              doc='Combined output workspace')
@@ -81,7 +90,7 @@ class AlignAndFocusPowderFromFiles(DataProcessorAlgorithm):
                 linearizedRuns.append(item)
         return linearizedRuns
 
-    def getAlignAndFocusArgs(self):
+    def __getAlignAndFocusArgs(self):
         args = {}
         for name in PROPS_FOR_ALIGN:
             prop = self.getProperty(name)
@@ -89,56 +98,114 @@ class AlignAndFocusPowderFromFiles(DataProcessorAlgorithm):
                 args[name] = prop.value
         return args
 
+    def __determineCharacterizations(self, filename, wkspname):
+        tempname = '__%s_temp' % wkspname
+        Load(Filename=filename, OutputWorkspace=tempname,
+             MetaDataOnly=True)
+        if self.charac is not None:
+            PDDetermineCharacterizations(InputWorkspace=tempname,
+                                         Characterizations=self.charac,
+                                         ReductionProperties=self.getProperty('ReductionProperties').valueAsStr)
+        else:
+            PDDetermineCharacterizations(InputWorkspace=tempname,
+                                         ReductionProperties=self.getProperty('ReductionProperties').valueAsStr)
+        DeleteWorkspace(Workspace=tempname)
+
+    def __getCacheName(self, wkspname):
+        propman_properties = ['bank', 'd_min', 'd_max', 'tof_min', 'tof_max', 'wavelength_min', 'wavelength_max']
+        alignandfocusargs = []
+        for name in PROPS_FOR_ALIGN:
+            prop = self.getProperty(name)
+            if name == 'PreserveEvents' or not prop.isDefault:
+                # TODO need unique identifier for absorption workspace
+                alignandfocusargs.append('%s=%s' % (name, prop.valueAsStr))
+
+        return CreateCacheFilename(Prefix=wkspname,
+                                   PropertyManager=self.getProperty('ReductionProperties').valueAsStr,
+                                   Properties=propman_properties,
+                                   OtherProperties=alignandfocusargs,
+                                   CacheDir=self.getProperty('CacheDirectory').value).OutputFilename
+
+    def __processFile(self, filename, wkspname, file_prog_start):
+        chunks = determineChunking(filename, self.chunkSize)
+        self.log().information('Processing \'%s\' in %d chunks' % (filename, len(chunks)))
+        prog_per_chunk_step = self.prog_per_file * 1./(6.*float(len(chunks))) # for better progress reporting - 6 steps per chunk
+
+        # inner loop is over chunks
+        for (j, chunk) in enumerate(chunks):
+            prog_start = file_prog_start + float(j) * 5. * prog_per_chunk_step
+            chunkname = "%s_c%d" % (wkspname, j)
+            Load(Filename=filename, OutputWorkspace=chunkname,
+                 startProgress=prog_start, endProgress=prog_start+prog_per_chunk_step,
+                 **chunk)
+            prog_start += prog_per_chunk_step
+            if self.filterBadPulses > 0.:
+                FilterBadPulses(InputWorkspace=chunkname, OutputWorkspace=chunkname,
+                                LowerCutoff=self.filterBadPulses,
+                                startProgress=prog_start, endProgress=prog_start+prog_per_chunk_step)
+            prog_start += prog_per_chunk_step
+
+            # absorption correction workspace
+            if self.absorption is not None and len(str(self.absorption)) > 0:
+                ConvertUnits(InputWorkspace=chunkname, OutputWorkspace=chunkname,
+                             Target='Wavelength', EMode='Elastic')
+                Divide(LHSWorkspace=chunkname, RHSWorkspace=self.absorption, OutputWorkspace=chunkname,
+                       startProgress=prog_start, endProgress=prog_start+prog_per_chunk_step)
+                ConvertUnits(InputWorkspace=chunkname, OutputWorkspace=chunkname,
+                             Target='TOF', EMode='Elastic')
+            prog_start += prog_per_chunk_step
+
+            AlignAndFocusPowder(InputWorkspace=chunkname, OutputWorkspace=chunkname,
+                                startProgress=prog_start, endProgress=prog_start+2.*prog_per_chunk_step,
+                                **self.kwargs)
+            prog_start += 2.*prog_per_chunk_step # AlignAndFocusPowder counts for two steps
+
+            if j == 0:
+                RenameWorkspace(InputWorkspace=chunkname, OutputWorkspace=wkspname)
+            else:
+                Plus(LHSWorkspace=wkspname, RHSWorkspace=chunkname, OutputWorkspace=wkspname,
+                     ClearRHSWorkspace=self.kwargs['PreserveEvents'],
+                     startProgress=prog_start, endProgress=prog_start+prog_per_chunk_step)
+                DeleteWorkspace(Workspace=chunkname)
+                if self.kwargs['PreserveEvents']:
+                    CompressEvents(InputWorkspace=wkspname, OutputWorkspace=wkspname)
+        # end of inner loop
+
     def PyExec(self):
         filenames = self._getLinearizedFilenames('Filename')
-        filterBadPulses = self.getProperty('FilterBadPulses').value
-        chunkSize = self.getProperty('MaxChunkSize').value
-        absorption = self.getProperty('AbsorptionWorkspace').value
-        charac = self.getProperty('Characterizations').value
+        self.filterBadPulses = self.getProperty('FilterBadPulses').value
+        self.chunkSize = self.getProperty('MaxChunkSize').value
+        self.absorption = self.getProperty('AbsorptionWorkspace').value
+        self.charac = self.getProperty('Characterizations').value
         finalname = self.getProperty('OutputWorkspace').valueAsStr
 
+        self.prog_per_file = 1./float(len(filenames)) # for better progress reporting
+
         # these are also passed into the child-algorithms
-        kwargs = self.getAlignAndFocusArgs()
+        self.kwargs = self.__getAlignAndFocusArgs()
 
         # outer loop creates chunks to load
         for (i, filename) in enumerate(filenames):
-            wkspname = os.path.split(filename)[-1].split('.')[0] + '_' + str(i)
-            chunks = determineChunking(filename, chunkSize)
+            # default name is based off of filename
+            wkspname = os.path.split(filename)[-1].split('.')[0]
+            self.__determineCharacterizations(filename, wkspname)
+            cachefile = self.__getCacheName(wkspname)
+            wkspname += '_f%d' % i # add file number to be unique
 
-            # inner loop is over chunks
-            for (j, chunk) in enumerate(chunks):
-                chunkname = "%s_chunk%d" % (wkspname, j)
-                Load(Filename=filename, OutputWorkspace=chunkname, **chunk)
-                if filterBadPulses > 0.:
-                    FilterBadPulses(InputWorkspace=chunkname, OutputWorkspace=chunkname,
-                                    LowerCutoff=filterBadPulses)
-
-                # TODO only do once per file
-                if j == 0 and charac is not None:
-                    PDDetermineCharacterizations(InputWorkspace=chunkname,
-                                                 Characterizations=charac,
-                                                 ReductionProperties=self.getProperty('ReductionProperties').valueAsStr)
-
-                # absorption correction workspace
-                if absorption is not None and len(str(absorption)) > 0:
-                    ConvertUnits(InputWorkspace=chunkname, OutputWorkspace=chunkname,
-                                 Target='Wavelength', EMode='Elastic')
-                    Divide(LHSWorkspace=chunkname, RHSWorkspace=absorption, OutputWorkspace=chunkname)
-                    ConvertUnits(InputWorkspace=chunkname, OutputWorkspace=chunkname,
-                                 Target='TOF', EMode='Elastic')
-
-                AlignAndFocusPowder(InputWorkspace=chunkname, OutputWorkspace=chunkname, **kwargs)
-
-
-                if j == 0:
-                    RenameWorkspace(InputWorkspace=chunkname, OutputWorkspace=wkspname)
-                else:
-                    Plus(LHSWorkspace=wkspname, RHSWorkspace=chunkname, OutputWorkspace=wkspname,
-                         ClearRHSWorkspace=kwargs['PreserveEvents'])
-                    DeleteWorkspace(Workspace=chunkname)
-                    if kwargs['PreserveEvents']:
-                        CompressEvents(InputWorkspace=wkspname, OutputWorkspace=wkspname)
-            # end of inner loop
+            if os.path.exists(cachefile):
+                LoadNexusProcessed(Filename=cachefile, OutputWorkspace=wkspname)
+                # TODO LoadNexusProcessed has a bug. When it finds the
+                # instrument name without xml it reads in from an IDF
+                # in the instrument directory.
+                editinstrargs = {}
+                for name in PROPS_FOR_INSTR:
+                    prop = self.getProperty(name)
+                    if not prop.isDefault:
+                        editinstrargs[name] = prop.value
+                EditInstrumentGeometry(Workspace=wkspname, **editinstrargs)
+            else:
+                self.__processFile(filename, wkspname, self.prog_per_file*float(i))
+                SaveNexusProcessed(InputWorkspace=wkspname, Filename=cachefile)
 
             # accumulate runs
             if i == 0:
@@ -146,9 +213,9 @@ class AlignAndFocusPowderFromFiles(DataProcessorAlgorithm):
                     RenameWorkspace(InputWorkspace=wkspname, OutputWorkspace=finalname)
             else:
                 Plus(LHSWorkspace=finalname, RHSWorkspace=wkspname, OutputWorkspace=finalname,
-                     ClearRHSWorkspace=kwargs['PreserveEvents'])
+                     ClearRHSWorkspace=self.kwargs['PreserveEvents'])
                 DeleteWorkspace(Workspace=wkspname)
-                if kwargs['PreserveEvents']:
+                if self.kwargs['PreserveEvents']:
                     CompressEvents(InputWorkspace=finalname, OutputWorkspace=finalname)
 
         # set the output workspace
