@@ -1,6 +1,3 @@
-
-//#include "MantidKernel/Logger.h"
-
 #include "MantidVatesSimpleGuiViewWidgets/VisibleAxesColor.h"
 
 #include <array>
