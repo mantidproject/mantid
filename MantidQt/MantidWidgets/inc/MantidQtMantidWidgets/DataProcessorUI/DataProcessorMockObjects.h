@@ -32,7 +32,9 @@ public:
 
   // Prompt
   MOCK_METHOD0(requestNotebookPath, std::string());
-  MOCK_METHOD3(askUserString, std::string(const std::string &, const std::string &, const std::string &));
+  MOCK_METHOD3(askUserString,
+               std::string(const std::string &, const std::string &,
+                           const std::string &));
   MOCK_METHOD2(askUserYesNo, bool(std::string, std::string));
   MOCK_METHOD2(giveUserWarning, void(std::string, std::string));
   MOCK_METHOD2(giveUserCritical, void(std::string, std::string));

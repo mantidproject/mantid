@@ -33,8 +33,8 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 class DataProcessorExpandGroupsCommand : public DataProcessorCommandBase {
 public:
   DataProcessorExpandGroupsCommand(DataProcessorPresenter *tablePresenter)
-      : DataProcessorCommandBase(tablePresenter){}
-  virtual ~DataProcessorExpandGroupsCommand(){}
+      : DataProcessorCommandBase(tablePresenter) {}
+  virtual ~DataProcessorExpandGroupsCommand() {}
 
   void execute() override {
     m_presenter->notify(DataProcessorPresenter::ExpandAllGroupsFlag);

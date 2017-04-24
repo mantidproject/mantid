@@ -58,7 +58,7 @@ convertStringToMap(const std::string &options) {
 }
 
 std::unordered_map<std::string, std::set<std::string>>
-convertStringToMapWithSet(const std::string& properties) {
+convertStringToMapWithSet(const std::string &properties) {
   // The provided string has the form
   // key1: value11, value12; key2: value21;
   // The keys are keys in a map which maps to a set of values
@@ -68,16 +68,16 @@ convertStringToMapWithSet(const std::string& properties) {
   std::vector<std::string> propVec;
   boost::split(propVec, properties, boost::is_any_of(";"));
 
-  for (const auto& prop : propVec) {
-      // Split the key and values
-      std::vector<std::string> elements;
-      boost::split(elements, prop, boost::is_any_of(":"));
+  for (const auto &prop : propVec) {
+    // Split the key and values
+    std::vector<std::string> elements;
+    boost::split(elements, prop, boost::is_any_of(":"));
 
-      // Split values
-      std::vector<std::string> vals;
-      boost::split(vals, elements[1], boost::is_any_of(","));
-      std::set<std::string> values(vals.begin(), vals.end());
-      props[elements[0]] = values;
+    // Split values
+    std::vector<std::string> vals;
+    boost::split(vals, elements[1], boost::is_any_of(","));
+    std::set<std::string> values(vals.begin(), vals.end());
+    props[elements[0]] = values;
   }
   return props;
 }
@@ -694,7 +694,8 @@ GenericDataProcessorPresenter::reduceRow(const std::vector<std::string> &data) {
         m_mainPresenter->getPreprocessingOptionsAsString().toStdString());
 
   // Pre-processing properties
-  auto preProcessPropMap = convertStringToMapWithSet(m_mainPresenter->getPreprocessingProperties().toStdString());
+  auto preProcessPropMap = convertStringToMapWithSet(
+      m_mainPresenter->getPreprocessingProperties().toStdString());
 
   // Properties not to be used in processing
   std::set<std::string> restrictedProps;
@@ -710,8 +711,7 @@ GenericDataProcessorPresenter::reduceRow(const std::vector<std::string> &data) {
     // The value for which preprocessing can be conducted on
     std::string options;
 
-    if (globalOptions.count(columnName) &&
-        !globalOptions[columnName].empty()) {
+    if (globalOptions.count(columnName) && !globalOptions[columnName].empty()) {
       options = globalOptions[columnName];
     } else if (!data.at(i).empty()) {
       options = data.at(i);
@@ -731,16 +731,15 @@ GenericDataProcessorPresenter::reduceRow(const std::vector<std::string> &data) {
       auto preprocessor = m_preprocessMap.at(columnName);
 
       auto optionsMap = parseKeyValueString(options);
-      auto runWS =
-          prepareRunWorkspace(options, preprocessor, optionsMap);
+      auto runWS = prepareRunWorkspace(options, preprocessor, optionsMap);
       alg->setProperty(propertyName, runWS->getName());
     } else {
       // No pre-processing needed
-        // No pre-processing needed
-        auto propertyValue = data.at(i);
-        if (!propertyValue.empty())
-          alg->setPropertyValue(propertyName, propertyValue);
-      //alg->setPropertyValue(propertyName, globalOptions);
+      // No pre-processing needed
+      auto propertyValue = data.at(i);
+      if (!propertyValue.empty())
+        alg->setPropertyValue(propertyName, propertyValue);
+      // alg->setPropertyValue(propertyName, globalOptions);
     }
   }
 

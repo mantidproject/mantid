@@ -33,8 +33,8 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 class DataProcessorCollapseGroupsCommand : public DataProcessorCommandBase {
 public:
   DataProcessorCollapseGroupsCommand(DataProcessorPresenter *tablePresenter)
-      : DataProcessorCommandBase(tablePresenter){}
-  virtual ~DataProcessorCollapseGroupsCommand(){}
+      : DataProcessorCommandBase(tablePresenter) {}
+  virtual ~DataProcessorCollapseGroupsCommand() {}
 
   void execute() override {
     m_presenter->notify(DataProcessorPresenter::CollapseAllGroupsFlag);

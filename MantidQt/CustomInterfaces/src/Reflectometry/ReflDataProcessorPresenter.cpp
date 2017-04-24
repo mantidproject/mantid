@@ -50,7 +50,8 @@ void ReflDataProcessorPresenter::process() {
 
   // If uniform slicing is empty process normally, delegating to
   // GenericDataProcessorPresenter
-  auto timeSlicingValues = m_mainPresenter->getTimeSlicingValues().toStdString();
+  auto timeSlicingValues =
+      m_mainPresenter->getTimeSlicingValues().toStdString();
   if (timeSlicingValues.empty()) {
     // Check if any input event workspaces still exist in ADS
     if (proceedIfWSTypeInADS(items, true))
@@ -300,13 +301,13 @@ void ReflDataProcessorPresenter::parseUniform(const std::string &timeSlicing,
     mws = AnalysisDataService::Instance().retrieveWS<IEventWorkspace>(wsName);
     if (!mws) {
       m_view->giveUserCritical("Workspace to slice " + wsName +
-                                            " is not an event workspace!",
-                                        "Time slicing error");
+                                   " is not an event workspace!",
+                               "Time slicing error");
       return;
     }
   } else {
     m_view->giveUserCritical("Workspace to slice not found: " + wsName,
-                                      "Time slicing error");
+                             "Time slicing error");
     return;
   }
 
@@ -515,7 +516,8 @@ void ReflDataProcessorPresenter::plotRow() {
     return;
 
   // If slicing values are empty plot normally
-  auto timeSlicingValues = m_mainPresenter->getTimeSlicingValues().toStdString();
+  auto timeSlicingValues =
+      m_mainPresenter->getTimeSlicingValues().toStdString();
   if (timeSlicingValues.empty()) {
     GenericDataProcessorPresenter::plotRow();
     return;
@@ -584,7 +586,8 @@ void ReflDataProcessorPresenter::plotGroup() {
     return;
 
   // If slicing values are empty plot normally
-  auto timeSlicingValues = m_mainPresenter->getTimeSlicingValues().toStdString();
+  auto timeSlicingValues =
+      m_mainPresenter->getTimeSlicingValues().toStdString();
   if (timeSlicingValues.empty()) {
     GenericDataProcessorPresenter::plotGroup();
     return;

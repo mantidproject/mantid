@@ -43,7 +43,7 @@ public:
     }
   };
   DataProcessorCommandBase(const QDataProcessorWidget &widget)
-      : DataProcessorCommandBase(widget.getPresenter()){}
+      : DataProcessorCommandBase(widget.getPresenter()) {}
 
 protected:
   DataProcessorPresenter *const m_presenter;

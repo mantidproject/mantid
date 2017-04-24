@@ -354,17 +354,15 @@ void ReflRunsTabPresenter::notifyADSChanged(
   pushCommands();
 }
 
-
 /** Requests property names associated with pre-processing values.
 * @return :: Pre-processing property names.
 */
-QString
-ReflRunsTabPresenter::getPreprocessingProperties() const {
+QString ReflRunsTabPresenter::getPreprocessingProperties() const {
 
-  std::string properties = "Transmission Run(s):FirstTransmissionRun,SecondTransmissionRun";
+  std::string properties =
+      "Transmission Run(s):FirstTransmissionRun,SecondTransmissionRun";
   return QString::fromStdString(properties);
 }
-
 
 /** Requests global pre-processing options as a string. Options are supplied by
   * the main presenter.
@@ -403,14 +401,16 @@ QString ReflRunsTabPresenter::getPostprocessingOptions() const {
 * @return :: Time-slicing values
 */
 QString ReflRunsTabPresenter::getTimeSlicingValues() const {
-  return QString::fromStdString(m_mainPresenter->getTimeSlicingValues(m_view->getSelectedGroup()));
+  return QString::fromStdString(
+      m_mainPresenter->getTimeSlicingValues(m_view->getSelectedGroup()));
 }
 
 /** Requests time-slicing type. Type is supplied by the main presenter
 * @return :: Time-slicing values
 */
 QString ReflRunsTabPresenter::getTimeSlicingType() const {
-  return QString::fromStdString(m_mainPresenter->getTimeSlicingType(m_view->getSelectedGroup()));
+  return QString::fromStdString(
+      m_mainPresenter->getTimeSlicingType(m_view->getSelectedGroup()));
 }
 
 /** Changes the current instrument in the data processor widget. Also updates

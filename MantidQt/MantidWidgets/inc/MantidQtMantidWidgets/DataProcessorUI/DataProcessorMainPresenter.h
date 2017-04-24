@@ -42,7 +42,7 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class DataProcessorMainPresenter {
 public:
-  virtual ~DataProcessorMainPresenter(){}
+  virtual ~DataProcessorMainPresenter() {}
 
   /// Notify this receiver with the list of table workspaces in the ADS that can
   /// be loaded into the interface
@@ -53,7 +53,7 @@ public:
   /// Return global options for pre-processing as a string
   virtual QString getPreprocessingOptionsAsString() const { return QString(); }
   /// Return property names associated with pre-processing values
-  virtual QString getPreprocessingProperties() const {return QString(); }
+  virtual QString getPreprocessingProperties() const { return QString(); }
   /// Return global options for reduction
   virtual QString getProcessingOptions() const { return QString(); }
   /// Return global options for post-processing
