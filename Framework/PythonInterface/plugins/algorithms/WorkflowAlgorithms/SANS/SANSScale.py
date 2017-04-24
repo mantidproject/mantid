@@ -31,7 +31,6 @@ class SANSScale(DataProcessorAlgorithm):
                                                      optional=PropertyMode.Mandatory, direction=Direction.Output),
                              doc='The scaled output workspace')
 
-
     def PyExec(self):
         state_property_manager = self.getProperty("SANSState").value
         state = create_deserialized_sans_state_from_property_manager(state_property_manager)
