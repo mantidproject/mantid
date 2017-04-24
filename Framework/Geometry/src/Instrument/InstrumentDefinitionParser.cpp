@@ -17,6 +17,7 @@
 #include "MantidKernel/ProgressBase.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/UnitFactory.h"
+#include "MantidKernel/make_unique.h"
 
 #include <Poco/DOM/DOMParser.h>
 #include <Poco/DOM/DOMWriter.h>
@@ -2461,9 +2462,9 @@ InstrumentDefinitionParser::getAppliedCachingOption() const {
 
 void InstrumentDefinitionParser::createNeutronicInstrument() {
   // Create a copy of the instrument
-  auto physical = boost::make_shared<Instrument>(*m_instrument);
+  auto physical = Kernel::make_unique<Instrument>(*m_instrument);
   // Store the physical instrument 'inside' the neutronic instrument
-  m_instrument->setPhysicalInstrument(physical);
+  m_instrument->setPhysicalInstrument(std::move(physical));
 
   // Now we manipulate the original instrument (m_instrument) to hold
   // neutronic positions

@@ -214,7 +214,7 @@ public:
   // Methods for use with indirect geometry instruments,
   // where the physical instrument differs from the 'neutronic' one
   boost::shared_ptr<const Instrument> getPhysicalInstrument() const;
-  void setPhysicalInstrument(boost::shared_ptr<const Instrument>);
+  void setPhysicalInstrument(std::unique_ptr<Instrument>);
 
   void getInstrumentParameters(double &l1, Kernel::V3D &beamline,
                                double &beamline_norm,
@@ -338,6 +338,7 @@ private:
 
   boost::shared_ptr<const Beamline::ComponentInfo> m_componentInfo{nullptr};
   boost::shared_ptr<const std::vector<Geometry::ComponentID>> m_componentIds;
+  bool m_isPhysicalInstrument{false};
 };
 namespace Conversion {
 
