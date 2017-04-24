@@ -31,12 +31,6 @@ class SANSScale(DataProcessorAlgorithm):
                                                      optional=PropertyMode.Mandatory, direction=Direction.Output),
                              doc='The scaled output workspace')
 
-        # The data type
-        # allowed_data = StringListValidator([DataType.to_string(DataType.Sample),
-        #                                     DataType.to_string(DataType.Can)])
-        # self.declareProperty("DataType", DataType.to_string(DataType.Sample),
-        #                      validator=allowed_data, direction=Direction.Input,
-        #                      doc="The component of the instrument which is to be reduced.")
 
     def PyExec(self):
         state_property_manager = self.getProperty("SANSState").value
