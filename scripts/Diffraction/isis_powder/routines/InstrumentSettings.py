@@ -65,9 +65,9 @@ class InstrumentSettings(object):
             self._parse_attributes(self._adv_config_dict, suppress_warnings=suppress_warnings)
         if advanced_config or basic_config:
             self._parse_attributes(self._basic_conf_dict,
-                                   suppress_warnings=(not bool(basic_config or suppress_warnings)))
+                                   suppress_warnings=(not basic_config or suppress_warnings))
         if advanced_config or basic_config or kwargs:
-            self._parse_attributes(self._kwargs, suppress_warnings=(not bool(kwargs or suppress_warnings)))
+            self._parse_attributes(self._kwargs, suppress_warnings=(not kwargs or suppress_warnings))
 
     def _parse_attributes(self, dict_to_parse, suppress_warnings=False):
         if not dict_to_parse:
@@ -101,7 +101,8 @@ class InstrumentSettings(object):
 
         # Does the attribute exist - has it changed and are we suppressing warnings
         if not suppress_warnings:
-            if hasattr(self, attribute_name) and getattr(self, attribute_name) != param_val:
+            previous_value = getattr(self, attribute_name) if hasattr(self, attribute_name) else None
+            if previous_value and previous_value != param_val:
                 # Print warning of what we value we are replacing for which parameter
                 warnings.warn("Replacing parameter: '" + str(param_map.ext_name) + "' which was previously set to: '" +
                               str(getattr(self, attribute_name)) + "' with new value: '" + str(param_val) + "'")

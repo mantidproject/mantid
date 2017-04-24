@@ -6,8 +6,6 @@
 #include "MantidVatesAPI/vtkMDHistoHex4DFactory.h"
 #include "MantidVatesAPI/ProgressAction.h"
 
-using Mantid::API::IMDWorkspace;
-using Mantid::Kernel::CPUTimer;
 using namespace Mantid::DataObjects;
 
 namespace Mantid {

@@ -215,7 +215,7 @@ public:
   // Methods for use with indirect geometry instruments,
   // where the physical instrument differs from the 'neutronic' one
   boost::shared_ptr<const Instrument> getPhysicalInstrument() const;
-  void setPhysicalInstrument(boost::shared_ptr<const Instrument>);
+  void setPhysicalInstrument(std::unique_ptr<Instrument>);
 
   void getInstrumentParameters(double &l1, Kernel::V3D &beamline,
                                double &beamline_norm,
@@ -362,6 +362,7 @@ private:
   /// associated with an ExperimentInfo object.
   boost::shared_ptr<const std::unordered_map<detid_t, size_t>>
       m_detIdToIndexMap;
+  bool m_isPhysicalInstrument{false};
 };
 namespace Conversion {
 
