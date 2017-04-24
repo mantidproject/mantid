@@ -242,7 +242,6 @@ public:
 
 class PredictPeaksTestPerformance : public CxxTest::TestSuite {
 public:
-
   void test_many_peaks_rectangular() {
     MatrixWorkspace_sptr inWS =
         WorkspaceCreationHelper::create2DWorkspace(10000, 1);

@@ -9,7 +9,6 @@ using namespace Eigen;
 
 class NearestNeighboursTest : public CxxTest::TestSuite {
 public:
-
   NearestNeighboursTest() {}
 
   void test_construct() {

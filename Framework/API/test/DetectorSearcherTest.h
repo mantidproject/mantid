@@ -142,7 +142,6 @@ public:
 
 class DetectorSearcherTestPerformance : public CxxTest::TestSuite {
 public:
-
   void test_rectangular() {
     auto inst =
         ComponentCreationHelper::createTestInstrumentRectangular2(1, 100);
