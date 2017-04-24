@@ -198,7 +198,7 @@ class DGSPlannerGUI(QtGui.QWidget):
                         return
             if self.masterDict['makeFast']:
                 sp=list(range(mantid.mtd["__temp_instrument"].getNumberHistograms()))
-                tomask=sp[::4]+sp[1::4]+sp[2::4]
+                tomask=sp[1::4]+sp[2::4]+sp[3::4]
                 mantid.simpleapi.MaskDetectors("__temp_instrument",SpectraList=tomask)
             i=0
             groupingStrings=[]

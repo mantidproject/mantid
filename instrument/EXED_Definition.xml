@@ -1,8 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<instrument name="EXED" date="6th Mar 2017"
+<instrument xmlns="http://www.mantidproject.org/IDF/1.0"
+            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+            xsi:schemaLocation="http://www.mantidproject.org/IDF/1.0 http://schema.mantidproject.org/IDF/1.0/IDFSchema.xsd"
+            name="EXED"
 valid-from="2017-03-05 23:59:59"
 valid-to="2100-01-31 23:59:59"
-last-modified="2017-04-20 14:58:37">
+last-modified="2017-04-21 14:58:37">
 <defaults>
 <length unit="meter"/>
 <angle unit="degree"/>
@@ -88,264 +91,265 @@ last-modified="2017-04-20 14:58:37">
 </type>
 
 <!-- Monitors -->
-<type name="monitors" idlist="monitors">
-<component type="monitor" is="monitor">
-<location x="0" z="-1.973" name="monitor1"/></component>
-<component type="monitor" is="monitor">
-<location x="0" z="-0.1" name="monitor2"/></component>
-</type>
-<type name="panel02" idlist="panel02">
-<properties />
-<component type="tube0_913">
-<location x="-0.44" z="-3.359" name="tube1"/>
-<location x="-0.4536" z="-3.356" name="tube2"/>
-<location x="-0.4673" z="-3.353" name="tube3"/>
-<location x="-0.4809" z="-3.35" name="tube4"/>
-<location x="-0.4945" z="-3.347" name="tube5"/>
-<location x="-0.5082" z="-3.344" name="tube6"/>
-<location x="-0.5218" z="-3.341" name="tube7"/>
-<location x="-0.5355" z="-3.338" name="tube8"/>
-<location x="-0.5491" z="-3.335" name="tube9"/>
-<location x="-0.5627" z="-3.332" name="tube10"/>
-<location x="-0.5764" z="-3.329" name="tube11"/>
-<location x="-0.59" z="-3.326" name="tube12"/>
-<location x="-0.6037" z="-3.323" name="tube13"/>
-<location x="-0.6173" z="-3.32" name="tube14"/>
-<location x="-0.631" z="-3.318" name="tube15"/>
-<location x="-0.6446" z="-3.315" name="tube16"/>
-<location x="-0.6582" z="-3.312" name="tube17"/>
-<location x="-0.6719" z="-3.309" name="tube18"/>
-<location x="-0.6855" z="-3.306" name="tube19"/>
-<location x="-0.6992" z="-3.303" name="tube20"/>
-<location x="-0.7128" z="-3.3" name="tube21"/>
-<location x="-0.7264" z="-3.297" name="tube22"/>
-<location x="-0.7401" z="-3.294" name="tube23"/>
-<location x="-0.7537" z="-3.291" name="tube24"/>
-<location x="-0.7674" z="-3.288" name="tube25"/>
-<location x="-0.781" z="-3.285" name="tube26"/>
-<location x="-0.7946" z="-3.282" name="tube27"/>
-<location x="-0.8083" z="-3.279" name="tube28"/>
-<location x="-0.8219" z="-3.276" name="tube29"/>
-<location x="-0.8356" z="-3.273" name="tube30"/>
-<location x="-0.8492" z="-3.27" name="tube31"/>
-<location x="-0.8628" z="-3.267" name="tube32"/>
-<location x="-0.8765" z="-3.264" name="tube33"/>
-<location x="-0.8901" z="-3.261" name="tube34"/>
-<location x="-0.9038" z="-3.258" name="tube35"/>
-<location x="-0.9174" z="-3.255" name="tube36"/>
-<location x="-0.931" z="-3.252" name="tube37"/>
-<location x="-0.9447" z="-3.249" name="tube38"/>
-<location x="-0.9583" z="-3.246" name="tube39"/>
-<location x="-0.972" z="-3.243" name="tube40"/>
-<location x="-0.9856" z="-3.24" name="tube41"/>
-<location x="-0.9993" z="-3.237" name="tube42"/>
-<location x="-1.013" z="-3.234" name="tube43"/>
-<location x="-1.027" z="-3.231" name="tube44"/>
-<location x="-1.04" z="-3.228" name="tube45"/>
-<location x="-1.054" z="-3.226" name="tube46"/>
-<location x="-1.067" z="-3.223" name="tube47"/>
-<location x="-1.081" z="-3.22" name="tube48"/>
+<component type="monitors" idlist="monitors">
+  <location/>
 </component>
+<type name="monitors" >
+   <component type="monitor">
+     <location x="0" z="-1.973" name="monitor1"/>
+     <location x="0" z="-0.1" name="monitor2"/>
+   </component>
 </type>
-<type name="panel04" idlist="panel04">
+<!-- Detector Panel -->
+<type name="panel02">
 <properties />
-<component type="tube0_913">
-<location x="1.013" z="-3.267" name="tube49"/>
-<location x="0.9989" z="-3.27" name="tube50"/>
-<location x="0.9851" z="-3.272" name="tube51"/>
-<location x="0.9713" z="-3.274" name="tube52"/>
-<location x="0.9575" z="-3.276" name="tube53"/>
-<location x="0.9438" z="-3.279" name="tube54"/>
-<location x="0.93" z="-3.281" name="tube55"/>
-<location x="0.9162" z="-3.283" name="tube56"/>
-<location x="0.9024" z="-3.285" name="tube57"/>
-<location x="0.8887" z="-3.288" name="tube58"/>
-<location x="0.8749" z="-3.29" name="tube59"/>
-<location x="0.8611" z="-3.292" name="tube60"/>
-<location x="0.8473" z="-3.294" name="tube61"/>
-<location x="0.8335" z="-3.297" name="tube62"/>
-<location x="0.8198" z="-3.299" name="tube63"/>
-<location x="0.806" z="-3.301" name="tube64"/>
-<location x="0.7922" z="-3.303" name="tube65"/>
-<location x="0.7784" z="-3.305" name="tube66"/>
-<location x="0.7647" z="-3.308" name="tube67"/>
-<location x="0.7509" z="-3.31" name="tube68"/>
-<location x="0.7371" z="-3.312" name="tube69"/>
-<location x="0.7233" z="-3.314" name="tube70"/>
-<location x="0.7095" z="-3.317" name="tube71"/>
-<location x="0.6958" z="-3.319" name="tube72"/>
-<location x="0.682" z="-3.321" name="tube73"/>
-<location x="0.6682" z="-3.323" name="tube74"/>
-<location x="0.6544" z="-3.326" name="tube75"/>
-<location x="0.6406" z="-3.328" name="tube76"/>
-<location x="0.6269" z="-3.33" name="tube77"/>
-<location x="0.6131" z="-3.332" name="tube78"/>
-<location x="0.5993" z="-3.335" name="tube79"/>
-<location x="0.5855" z="-3.337" name="tube80"/>
-<location x="0.5718" z="-3.339" name="tube81"/>
-<location x="0.558" z="-3.341" name="tube82"/>
-<location x="0.5442" z="-3.343" name="tube83"/>
-<location x="0.5304" z="-3.346" name="tube84"/>
-<location x="0.5166" z="-3.348" name="tube85"/>
-<location x="0.5029" z="-3.35" name="tube86"/>
-<location x="0.4891" z="-3.352" name="tube87"/>
-<location x="0.4753" z="-3.355" name="tube88"/>
-<location x="0.4615" z="-3.357" name="tube89"/>
-<location x="0.4478" z="-3.359" name="tube90"/>
-<location x="0.434" z="-3.361" name="tube91"/>
-<location x="0.4202" z="-3.364" name="tube92"/>
-<location x="0.4064" z="-3.366" name="tube93"/>
-<location x="0.3926" z="-3.368" name="tube94"/>
-<location x="0.3789" z="-3.37" name="tube95"/>
-<location x="0.3651" z="-3.373" name="tube96"/>
-</component>
+  <component type="tube0_913">
+    <location x="-0.44" z="-3.359" name="tube1"/>
+    <location x="-0.4536" z="-3.356" name="tube2"/>
+    <location x="-0.4673" z="-3.353" name="tube3"/>
+    <location x="-0.4809" z="-3.35" name="tube4"/>
+    <location x="-0.4945" z="-3.347" name="tube5"/>
+    <location x="-0.5082" z="-3.344" name="tube6"/>
+    <location x="-0.5218" z="-3.341" name="tube7"/>
+    <location x="-0.5355" z="-3.338" name="tube8"/>
+    <location x="-0.5491" z="-3.335" name="tube9"/>
+    <location x="-0.5627" z="-3.332" name="tube10"/>
+    <location x="-0.5764" z="-3.329" name="tube11"/>
+    <location x="-0.59" z="-3.326" name="tube12"/>
+    <location x="-0.6037" z="-3.323" name="tube13"/>
+    <location x="-0.6173" z="-3.32" name="tube14"/>
+    <location x="-0.631" z="-3.318" name="tube15"/>
+    <location x="-0.6446" z="-3.315" name="tube16"/>
+    <location x="-0.6582" z="-3.312" name="tube17"/>
+    <location x="-0.6719" z="-3.309" name="tube18"/>
+    <location x="-0.6855" z="-3.306" name="tube19"/>
+    <location x="-0.6992" z="-3.303" name="tube20"/>
+    <location x="-0.7128" z="-3.3" name="tube21"/>
+    <location x="-0.7264" z="-3.297" name="tube22"/>
+    <location x="-0.7401" z="-3.294" name="tube23"/>
+    <location x="-0.7537" z="-3.291" name="tube24"/>
+    <location x="-0.7674" z="-3.288" name="tube25"/>
+    <location x="-0.781" z="-3.285" name="tube26"/>
+    <location x="-0.7946" z="-3.282" name="tube27"/>
+    <location x="-0.8083" z="-3.279" name="tube28"/>
+    <location x="-0.8219" z="-3.276" name="tube29"/>
+    <location x="-0.8356" z="-3.273" name="tube30"/>
+    <location x="-0.8492" z="-3.27" name="tube31"/>
+    <location x="-0.8628" z="-3.267" name="tube32"/>
+    <location x="-0.8765" z="-3.264" name="tube33"/>
+    <location x="-0.8901" z="-3.261" name="tube34"/>
+    <location x="-0.9038" z="-3.258" name="tube35"/>
+    <location x="-0.9174" z="-3.255" name="tube36"/>
+    <location x="-0.931" z="-3.252" name="tube37"/>
+    <location x="-0.9447" z="-3.249" name="tube38"/>
+    <location x="-0.9583" z="-3.246" name="tube39"/>
+    <location x="-0.972" z="-3.243" name="tube40"/>
+    <location x="-0.9856" z="-3.24" name="tube41"/>
+    <location x="-0.9993" z="-3.237" name="tube42"/>
+    <location x="-1.013" z="-3.234" name="tube43"/>
+    <location x="-1.027" z="-3.231" name="tube44"/>
+    <location x="-1.04" z="-3.228" name="tube45"/>
+    <location x="-1.054" z="-3.226" name="tube46"/>
+    <location x="-1.067" z="-3.223" name="tube47"/>
+    <location x="-1.081" z="-3.22" name="tube48"/>
+  </component>
 </type>
-<type name="panel05" idlist="panel05">
+<type name="panel04">
 <properties />
-<component type="tube2">
-<location x="-1.039" z="4.378" name="tube97"/>
-<location x="-1.019" z="4.383" name="tube98"/>
-<location x="-0.9983" z="4.388" name="tube99"/>
-<location x="-0.978" z="4.392" name="tube100"/>
-<location x="-0.9577" z="4.397" name="tube101"/>
-<location x="-0.9374" z="4.401" name="tube102"/>
-<location x="-0.917" z="4.406" name="tube103"/>
-<location x="-0.8967" z="4.41" name="tube104"/>
-<location x="-0.8763" z="4.414" name="tube105"/>
-<location x="-0.8559" z="4.418" name="tube106"/>
-<location x="-0.8354" z="4.422" name="tube107"/>
-<location x="-0.815" z="4.426" name="tube108"/>
-<location x="-0.7945" z="4.429" name="tube109"/>
-<location x="-0.774" z="4.433" name="tube110"/>
-<location x="-0.7535" z="4.436" name="tube111"/>
-<location x="-0.733" z="4.44" name="tube112"/>
-<location x="-0.7125" z="4.443" name="tube113"/>
-<location x="-0.6919" z="4.446" name="tube114"/>
-<location x="-0.6714" z="4.45" name="tube115"/>
-<location x="-0.6508" z="4.453" name="tube116"/>
-<location x="-0.6302" z="4.456" name="tube117"/>
-<location x="-0.6096" z="4.459" name="tube118"/>
-<location x="-0.589" z="4.461" name="tube119"/>
-</component>
+  <component type="tube0_913">
+    <location x="1.013" z="-3.267" name="tube49"/>
+    <location x="0.9989" z="-3.27" name="tube50"/>
+    <location x="0.9851" z="-3.272" name="tube51"/>
+    <location x="0.9713" z="-3.274" name="tube52"/>
+    <location x="0.9575" z="-3.276" name="tube53"/>
+    <location x="0.9438" z="-3.279" name="tube54"/>
+    <location x="0.93" z="-3.281" name="tube55"/>
+    <location x="0.9162" z="-3.283" name="tube56"/>
+    <location x="0.9024" z="-3.285" name="tube57"/>
+    <location x="0.8887" z="-3.288" name="tube58"/>
+    <location x="0.8749" z="-3.29" name="tube59"/>
+    <location x="0.8611" z="-3.292" name="tube60"/>
+    <location x="0.8473" z="-3.294" name="tube61"/>
+    <location x="0.8335" z="-3.297" name="tube62"/>
+    <location x="0.8198" z="-3.299" name="tube63"/>
+    <location x="0.806" z="-3.301" name="tube64"/>
+    <location x="0.7922" z="-3.303" name="tube65"/>
+    <location x="0.7784" z="-3.305" name="tube66"/>
+    <location x="0.7647" z="-3.308" name="tube67"/>
+    <location x="0.7509" z="-3.31" name="tube68"/>
+    <location x="0.7371" z="-3.312" name="tube69"/>
+    <location x="0.7233" z="-3.314" name="tube70"/>
+    <location x="0.7095" z="-3.317" name="tube71"/>
+    <location x="0.6958" z="-3.319" name="tube72"/>
+    <location x="0.682" z="-3.321" name="tube73"/>
+    <location x="0.6682" z="-3.323" name="tube74"/>
+    <location x="0.6544" z="-3.326" name="tube75"/>
+    <location x="0.6406" z="-3.328" name="tube76"/>
+    <location x="0.6269" z="-3.33" name="tube77"/>
+    <location x="0.6131" z="-3.332" name="tube78"/>
+    <location x="0.5993" z="-3.335" name="tube79"/>
+    <location x="0.5855" z="-3.337" name="tube80"/>
+    <location x="0.5718" z="-3.339" name="tube81"/>
+    <location x="0.558" z="-3.341" name="tube82"/>
+    <location x="0.5442" z="-3.343" name="tube83"/>
+    <location x="0.5304" z="-3.346" name="tube84"/>
+    <location x="0.5166" z="-3.348" name="tube85"/>
+    <location x="0.5029" z="-3.35" name="tube86"/>
+    <location x="0.4891" z="-3.352" name="tube87"/>
+    <location x="0.4753" z="-3.355" name="tube88"/>
+    <location x="0.4615" z="-3.357" name="tube89"/>
+    <location x="0.4478" z="-3.359" name="tube90"/>
+    <location x="0.434" z="-3.361" name="tube91"/>
+    <location x="0.4202" z="-3.364" name="tube92"/>
+    <location x="0.4064" z="-3.366" name="tube93"/>
+    <location x="0.3926" z="-3.368" name="tube94"/>
+    <location x="0.3789" z="-3.37" name="tube95"/>
+    <location x="0.3651" z="-3.373" name="tube96"/>
+  </component>
 </type>
-<type name="panel06" idlist="panel06">
+<type name="panel05" >
 <properties />
-<component type="tube2_4">
-<location x="-0.5344" z="4.468" name="tube120"/>
-<location x="-0.5138" z="4.471" name="tube121"/>
-<location x="-0.4931" z="4.473" name="tube122"/>
-<location x="-0.4724" z="4.475" name="tube123"/>
-<location x="-0.4517" z="4.477" name="tube124"/>
-<location x="-0.431" z="4.479" name="tube125"/>
-<location x="-0.4103" z="4.481" name="tube126"/>
-<location x="-0.3896" z="4.483" name="tube127"/>
-<location x="-0.3689" z="4.485" name="tube128"/>
-<location x="-0.3481" z="4.487" name="tube129"/>
-<location x="-0.3274" z="4.488" name="tube130"/>
-<location x="-0.3067" z="4.49" name="tube131"/>
-<location x="-0.2859" z="4.491" name="tube132"/>
-<location x="-0.2651" z="4.492" name="tube133"/>
-<location x="-0.2444" z="4.493" name="tube134"/>
-<location x="-0.2236" z="4.494" name="tube135"/>
-<location x="-0.2028" z="4.495" name="tube136"/>
-<location x="-0.182" z="4.496" name="tube137"/>
-<location x="-0.1613" z="4.497" name="tube138"/>
-<location x="-0.1405" z="4.498" name="tube139"/>
-<location x="-0.1197" z="4.498" name="tube140"/>
-<location x="-0.09888" z="4.499" name="tube141"/>
-<location x="-0.07808" z="4.499" name="tube142"/>
-<location x="-0.05729" z="4.5" name="tube143"/>
-<location x="-0.03649" z="4.5" name="tube144"/>
-<location x="-0.01569" z="4.5" name="tube145"/>
-<location x="0.005111" z="4.5" name="tube146"/>
-<location x="0.02591" z="4.5" name="tube147"/>
-<location x="0.04671" z="4.5" name="tube148"/>
-<location x="0.06751" z="4.499" name="tube149"/>
-<location x="0.08831" z="4.499" name="tube150"/>
-</component>
+  <component type="tube2">
+    <location x="-1.039" z="4.378" name="tube97"/>
+    <location x="-1.019" z="4.383" name="tube98"/>
+    <location x="-0.9983" z="4.388" name="tube99"/>
+    <location x="-0.978" z="4.392" name="tube100"/>
+    <location x="-0.9577" z="4.397" name="tube101"/>
+    <location x="-0.9374" z="4.401" name="tube102"/>
+    <location x="-0.917" z="4.406" name="tube103"/>
+    <location x="-0.8967" z="4.41" name="tube104"/>
+    <location x="-0.8763" z="4.414" name="tube105"/>
+    <location x="-0.8559" z="4.418" name="tube106"/>
+    <location x="-0.8354" z="4.422" name="tube107"/>
+    <location x="-0.815" z="4.426" name="tube108"/>
+    <location x="-0.7945" z="4.429" name="tube109"/>
+    <location x="-0.774" z="4.433" name="tube110"/>
+    <location x="-0.7535" z="4.436" name="tube111"/>
+    <location x="-0.733" z="4.44" name="tube112"/>
+    <location x="-0.7125" z="4.443" name="tube113"/>
+    <location x="-0.6919" z="4.446" name="tube114"/>
+    <location x="-0.6714" z="4.45" name="tube115"/>
+    <location x="-0.6508" z="4.453" name="tube116"/>
+    <location x="-0.6302" z="4.456" name="tube117"/>
+    <location x="-0.6096" z="4.459" name="tube118"/>
+    <location x="-0.589" z="4.461" name="tube119"/>
+  </component>
 </type>
-<type name="panel07" idlist="panel07">
+<type name="panel06" >
 <properties />
-<component type="tube2_4">
-<location x="0.1401" z="4.498" name="tube151"/>
-<location x="0.1609" z="4.497" name="tube152"/>
-<location x="0.1817" z="4.496" name="tube153"/>
-<location x="0.2025" z="4.495" name="tube154"/>
-<location x="0.2232" z="4.494" name="tube155"/>
-<location x="0.244" z="4.493" name="tube156"/>
-<location x="0.2648" z="4.492" name="tube157"/>
-<location x="0.2855" z="4.491" name="tube158"/>
-<location x="0.3063" z="4.49" name="tube159"/>
-<location x="0.327" z="4.488" name="tube160"/>
-<location x="0.3478" z="4.487" name="tube161"/>
-<location x="0.3685" z="4.485" name="tube162"/>
-<location x="0.3892" z="4.483" name="tube163"/>
-<location x="0.41" z="4.481" name="tube164"/>
-<location x="0.4307" z="4.479" name="tube165"/>
-<location x="0.4514" z="4.477" name="tube166"/>
-<location x="0.4721" z="4.475" name="tube167"/>
-<location x="0.4927" z="4.473" name="tube168"/>
-<location x="0.5134" z="4.471" name="tube169"/>
-<location x="0.5341" z="4.468" name="tube170"/>
-<location x="0.5547" z="4.466" name="tube171"/>
-<location x="0.5754" z="4.463" name="tube172"/>
-<location x="0.596" z="4.46" name="tube173"/>
-<location x="0.6166" z="4.458" name="tube174"/>
-<location x="0.6372" z="4.455" name="tube175"/>
-<location x="0.6578" z="4.452" name="tube176"/>
-<location x="0.6783" z="4.449" name="tube177"/>
-<location x="0.6989" z="4.445" name="tube178"/>
-<location x="0.7194" z="4.442" name="tube179"/>
-<location x="0.74" z="4.439" name="tube180"/>
-<location x="0.7605" z="4.435" name="tube181"/>
-</component>
+  <component type="tube2_4">
+    <location x="-0.5344" z="4.468" name="tube120"/>
+    <location x="-0.5138" z="4.471" name="tube121"/>
+    <location x="-0.4931" z="4.473" name="tube122"/>
+    <location x="-0.4724" z="4.475" name="tube123"/>
+    <location x="-0.4517" z="4.477" name="tube124"/>
+    <location x="-0.431" z="4.479" name="tube125"/>
+    <location x="-0.4103" z="4.481" name="tube126"/>
+    <location x="-0.3896" z="4.483" name="tube127"/>
+    <location x="-0.3689" z="4.485" name="tube128"/>
+    <location x="-0.3481" z="4.487" name="tube129"/>
+    <location x="-0.3274" z="4.488" name="tube130"/>
+    <location x="-0.3067" z="4.49" name="tube131"/>
+    <location x="-0.2859" z="4.491" name="tube132"/>
+    <location x="-0.2651" z="4.492" name="tube133"/>
+    <location x="-0.2444" z="4.493" name="tube134"/>
+    <location x="-0.2236" z="4.494" name="tube135"/>
+    <location x="-0.2028" z="4.495" name="tube136"/>
+    <location x="-0.182" z="4.496" name="tube137"/>
+    <location x="-0.1613" z="4.497" name="tube138"/>
+    <location x="-0.1405" z="4.498" name="tube139"/>
+    <location x="-0.1197" z="4.498" name="tube140"/>
+    <location x="-0.09888" z="4.499" name="tube141"/>
+    <location x="-0.07808" z="4.499" name="tube142"/>
+    <location x="-0.05729" z="4.5" name="tube143"/>
+    <location x="-0.03649" z="4.5" name="tube144"/>
+    <location x="-0.01569" z="4.5" name="tube145"/>
+    <location x="0.005111" z="4.5" name="tube146"/>
+    <location x="0.02591" z="4.5" name="tube147"/>
+    <location x="0.04671" z="4.5" name="tube148"/>
+    <location x="0.06751" z="4.499" name="tube149"/>
+    <location x="0.08831" z="4.499" name="tube150"/>
+  </component>
 </type>
-<type name="panel08" idlist="panel08">
+<type name="panel07" >
 <properties />
-<component type="tube2">
-<location x="0.8132" z="4.426" name="tube182"/>
-<location x="0.8336" z="4.422" name="tube183"/>
-<location x="0.8541" z="4.418" name="tube184"/>
-<location x="0.8745" z="4.414" name="tube185"/>
-<location x="0.8949" z="4.41" name="tube186"/>
-<location x="0.9152" z="4.406" name="tube187"/>
-<location x="0.9356" z="4.402" name="tube188"/>
-<location x="0.9559" z="4.397" name="tube189"/>
-<location x="0.9762" z="4.393" name="tube190"/>
-<location x="0.9965" z="4.388" name="tube191"/>
-<location x="1.017" z="4.384" name="tube192"/>
-<location x="1.037" z="4.379" name="tube193"/>
-<location x="1.057" z="4.374" name="tube194"/>
-<location x="1.077" z="4.369" name="tube195"/>
-<location x="1.098" z="4.364" name="tube196"/>
-<location x="1.118" z="4.359" name="tube197"/>
-<location x="1.138" z="4.354" name="tube198"/>
-<location x="1.158" z="4.348" name="tube199"/>
-<location x="1.178" z="4.343" name="tube200"/>
-<location x="1.198" z="4.338" name="tube201"/>
-<location x="1.218" z="4.332" name="tube202"/>
-<location x="1.238" z="4.326" name="tube203"/>
-<location x="1.258" z="4.321" name="tube204"/>
-</component>
+  <component type="tube2_4">
+    <location x="0.1401" z="4.498" name="tube151"/>
+    <location x="0.1609" z="4.497" name="tube152"/>
+    <location x="0.1817" z="4.496" name="tube153"/>
+    <location x="0.2025" z="4.495" name="tube154"/>
+    <location x="0.2232" z="4.494" name="tube155"/>
+    <location x="0.244" z="4.493" name="tube156"/>
+    <location x="0.2648" z="4.492" name="tube157"/>
+    <location x="0.2855" z="4.491" name="tube158"/>
+    <location x="0.3063" z="4.49" name="tube159"/>
+    <location x="0.327" z="4.488" name="tube160"/>
+    <location x="0.3478" z="4.487" name="tube161"/>
+    <location x="0.3685" z="4.485" name="tube162"/>
+    <location x="0.3892" z="4.483" name="tube163"/>
+    <location x="0.41" z="4.481" name="tube164"/>
+    <location x="0.4307" z="4.479" name="tube165"/>
+    <location x="0.4514" z="4.477" name="tube166"/>
+    <location x="0.4721" z="4.475" name="tube167"/>
+    <location x="0.4927" z="4.473" name="tube168"/>
+    <location x="0.5134" z="4.471" name="tube169"/>
+    <location x="0.5341" z="4.468" name="tube170"/>
+    <location x="0.5547" z="4.466" name="tube171"/>
+    <location x="0.5754" z="4.463" name="tube172"/>
+    <location x="0.596" z="4.46" name="tube173"/>
+    <location x="0.6166" z="4.458" name="tube174"/>
+    <location x="0.6372" z="4.455" name="tube175"/>
+    <location x="0.6578" z="4.452" name="tube176"/>
+    <location x="0.6783" z="4.449" name="tube177"/>
+    <location x="0.6989" z="4.445" name="tube178"/>
+    <location x="0.7194" z="4.442" name="tube179"/>
+    <location x="0.74" z="4.439" name="tube180"/>
+    <location x="0.7605" z="4.435" name="tube181"/>
+  </component>
+</type>
+<type name="panel08">
+<properties />
+  <component type="tube2">
+    <location x="0.8132" z="4.426" name="tube182"/>
+    <location x="0.8336" z="4.422" name="tube183"/>
+    <location x="0.8541" z="4.418" name="tube184"/>
+    <location x="0.8745" z="4.414" name="tube185"/>
+    <location x="0.8949" z="4.41" name="tube186"/>
+    <location x="0.9152" z="4.406" name="tube187"/>
+    <location x="0.9356" z="4.402" name="tube188"/>
+    <location x="0.9559" z="4.397" name="tube189"/>
+    <location x="0.9762" z="4.393" name="tube190"/>
+    <location x="0.9965" z="4.388" name="tube191"/>
+    <location x="1.017" z="4.384" name="tube192"/>
+    <location x="1.037" z="4.379" name="tube193"/>
+    <location x="1.057" z="4.374" name="tube194"/>
+    <location x="1.077" z="4.369" name="tube195"/>
+    <location x="1.098" z="4.364" name="tube196"/>
+    <location x="1.118" z="4.359" name="tube197"/>
+    <location x="1.138" z="4.354" name="tube198"/>
+    <location x="1.158" z="4.348" name="tube199"/>
+    <location x="1.178" z="4.343" name="tube200"/>
+    <location x="1.198" z="4.338" name="tube201"/>
+    <location x="1.218" z="4.332" name="tube202"/>
+    <location x="1.238" z="4.326" name="tube203"/>
+    <location x="1.258" z="4.321" name="tube204"/>
+  </component>
 </type>
 <type name="tube0_913">
-<component type="pixel_s">
-<locations y="0.004565" y-end="0.9084" n-elements="100" name="det">
-<facing x="0" y="0" z="0"/>
-</locations>
-</component></type>
+  <component type="pixel_s">
+    <locations y="0.004565" y-end="0.9084" n-elements="100" name="det"/>
+  </component>
+</type>
 <type name="tube2">
-<component type="pixel_l1">
-<locations y="0.01" y-end="1.99" n-elements="100" name="det">
-<facing x="0" y="0" z="0"/>
-</locations>
-</component></type>
+  <component type="pixel_l1">
+    <locations y="0.01" y-end="1.99" n-elements="100" name="det"/>
+  </component>
+</type>
 <type name="tube2_4">
-<component type="pixel_l2">
-<locations y="0.012" y-end="2.388" n-elements="100" name="det">
-<facing x="0" y="0" z="0"/>
-</locations>
-</component></type>
+  <component type="pixel_l2">
+    <locations y="0.012" y-end="2.388" n-elements="100" name="det"/>
+  </component>
+</type>
 <type name="monitor" is="monitor">
 <properties/>
 <cylinder id="some-shape">
