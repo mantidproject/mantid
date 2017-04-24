@@ -1,7 +1,7 @@
 from __future__ import (absolute_import, division, print_function)
 
 from mantid.api import mtd, AlgorithmFactory, DataProcessorAlgorithm, ITableWorkspaceProperty, \
-    MatrixWorkspaceProperty, FileAction, FileProperty, MultipleFileProperty, PropertyMode
+    MatrixWorkspaceProperty, MultipleFileProperty, PropertyMode
 from mantid.kernel import Direction
 from mantid.simpleapi import AlignAndFocusPowder, CompressEvents, ConvertUnits, CreateCacheFilename, \
     DeleteWorkspace, DetermineChunking, Divide, EditInstrumentGeometry, FilterBadPulses, Load, \
