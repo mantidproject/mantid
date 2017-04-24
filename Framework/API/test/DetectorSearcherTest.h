@@ -142,13 +142,6 @@ public:
 
 class DetectorSearcherTestPerformance : public CxxTest::TestSuite {
 public:
-  static DetectorSearcherTestPerformance *createSuite() {
-    return new DetectorSearcherTestPerformance();
-  }
-
-  static void destroySuite(DetectorSearcherTestPerformance *suite) {
-    delete suite;
-  }
 
   void test_rectangular() {
     auto inst =

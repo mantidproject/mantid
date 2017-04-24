@@ -479,18 +479,13 @@ void PredictPeaks::calculateQAndAddToOutput(const V3D &hkl,
       this->m_inst->getReferenceFrame();
   const V3D refBeamDir = refFrame->vecPointingAlongBeam();
   // Default for ki-kf has -q
-  double qSign = 1.0;
-  if (convention == "Crystallography")
-    qSign = -1.0;
+  const auto qSign = (convention == "Crystallography") ? -1.0 : 1.0;
   const double qBeam = q.scalar_prod(refBeamDir) * qSign;
   double one_over_wl = (norm_q * norm_q) / (2.0 * qBeam);
   double wl = (2.0 * M_PI) / one_over_wl;
   // Default for ki-kf has -q
-  qSign = -1.0;
-  if (convention == "Crystallography")
-    qSign = 1.0;
-
-  V3D detectorDir = q * qSign;
+  const auto inverseQSign = (convention == "Crystallography") ? 1.0 : -1.0;
+  V3D detectorDir = q * inverseQSign;
   detectorDir[refFrame->pointingAlongBeam()] = one_over_wl - qBeam;
   detectorDir.normalize();
 
@@ -530,7 +525,9 @@ void PredictPeaks::calculateQAndAddToOutput(const V3D &hkl,
         m_inst->getComponentByName("extended-detector-space");
     const auto c = boost::dynamic_pointer_cast<const ObjComponent>(component);
     if (!c)
-      return;
+      throw std::runtime_error("PredictPeaks: user requested use of a extended "
+                               "detector space to predict peaks but there is no"
+                               "definition in the IDF");
 
     // find where this Q vector should intersect with "extended" space
     Geometry::Track track(detInfo.samplePosition(), detectorDir);

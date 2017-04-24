@@ -17,8 +17,8 @@ namespace API {
 class MatrixWorkspace;
 class WorkspaceNearestNeighbours;
 
-/** NearestNeighbourInfo provides easy access to nearest-neighbour information
-  for a workspace.
+/** WorkspaceNearestNeighbourInfo provides easy access to nearest-neighbour
+  information for a workspace.
 
   Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source
@@ -63,4 +63,4 @@ private:
 } // namespace API
 } // namespace Mantid
 
-#endif /* MANTID_API_NEARESTNEIGHBOURINFO_H_ */
+#endif /* MANTID_API_WORKSPACENEARESTNEIGHBOURINFO_H_ */

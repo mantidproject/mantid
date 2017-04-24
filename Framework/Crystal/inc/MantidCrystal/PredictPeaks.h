@@ -11,8 +11,6 @@
 #include <MantidGeometry/Crystal/StructureFactorCalculator.h>
 #include "MantidKernel/Matrix.h"
 
-#include <tuple>
-
 namespace Mantid {
 namespace Crystal {
 
