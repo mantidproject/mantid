@@ -17,9 +17,6 @@
 #include "vtkSMViewProxy.h"
 
 namespace Mantid {
-// static logger
-// Kernel::Logger g_log("VisibleAxesColor");
-
 namespace Vates {
 namespace SimpleGui {
 
@@ -41,6 +38,9 @@ void safeSetProperty(vtkSMProxy *gridAxis,
 }
 
 std::array<double, 3> getContrastingColor(const std::vector<double> &color) {
+  // Approximate formula for color brightness
+  // https://www.w3.org/TR/AERT#color-contrast
+
   double criteria =
       1. - (0.299 * color[0] + 0.587 * color[1] + 0.114 * color[2]);
 
