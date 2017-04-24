@@ -19,6 +19,9 @@ User Interface
 
 - MantidPlot now respects the system scaling on high-resolution displays. All icons and bitmaps will now be sized
   appropriately rather than being too small to be usable (Windows only).
+- Masked bins are greyed out in the table view of the workspaces (except for EventWorkspaces):
+
+.. figure:: ../../images/maskedbins.jpg  
 
 Instrument View
 ###############
