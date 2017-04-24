@@ -30,8 +30,8 @@ VisibleWhenProperty::VisibleWhenProperty(
     : // For the python interface to be able to easily copy objects in
       // Make a deep copy and turn into a shared pointer and forward on
       VisibleWhenProperty(
-          std::move(std::make_shared<VisibleWhenProperty>(conditionOne)),
-          std::move(std::make_shared<VisibleWhenProperty>(conditionTwo)),
+          std::make_shared<VisibleWhenProperty>(conditionOne),
+          std::make_shared<VisibleWhenProperty>(conditionTwo),
           logicOperator) {}
 
 /** Multiple conditions constructor - takes two shared pointers to

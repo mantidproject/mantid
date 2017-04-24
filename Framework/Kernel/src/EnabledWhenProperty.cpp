@@ -38,8 +38,8 @@ EnabledWhenProperty::EnabledWhenProperty(
       // objects
       // Copy the object then forward onto our move constructor
       EnabledWhenProperty(
-          std::move(std::make_shared<EnabledWhenProperty>(conditionOne)),
-          std::move(std::make_shared<EnabledWhenProperty>(conditionTwo)),
+          std::make_shared<EnabledWhenProperty>(conditionOne),
+          std::make_shared<EnabledWhenProperty>(conditionTwo),
           logicOperator) {}
 
 /** Multiple conditions constructor - takes two shared pointers to
