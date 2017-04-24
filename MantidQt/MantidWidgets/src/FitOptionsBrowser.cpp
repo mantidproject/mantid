@@ -795,7 +795,7 @@ QtProperty *FitOptionsBrowser::addDoubleProperty(const QString &propertyName) {
   }
   QtProperty *property = m_doubleManager->addProperty(propertyName);
   m_doubleManager->setDecimals(property, m_decimals);
-  m_doubleManager->setRange(property, -std::numeric_limits<double>::max(),
+  m_doubleManager->setRange(property, std::numeric_limits<double>::lowest(),
                             std::numeric_limits<double>::max());
   this->addProperty(propertyName, property,
                     &FitOptionsBrowser::getDoubleProperty,

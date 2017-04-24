@@ -1,5 +1,6 @@
 # pylint: disable=too-many-public-methods, invalid-name, too-many-arguments
 
+from __future__ import (absolute_import, division, print_function)
 import unittest
 import stresstesting
 
@@ -197,7 +198,7 @@ class SANSLoadTest(unittest.TestCase):
             load_alg.setProperty("BeamCoordinates", beam_coordinates)
 
         if output_workspace_names:
-            for name, value in list(output_workspace_names.items()):
+            for name, value in output_workspace_names.items():
                 load_alg.setProperty(name, value)
 
         # Act
@@ -205,12 +206,11 @@ class SANSLoadTest(unittest.TestCase):
         # self.assertTrue(load_alg.isExecuted())
         return load_alg
 
-    def test_that_raises_when_transmission_is_event(self):
+    def test_that_when_transmission_is_event_monitor_is_used(self):
         # Arrange
         state = SANSLoadTest._get_simple_state(sample_scatter="SANS2D00028827",
                                                sample_trans="SANS2D00028827",
-                                               sample_direct="SANS2D00028827",
-                                               calibration="TUBE_SANS2D_BOTH_27345_20Mar15.nxs")
+                                               sample_direct="SANS2D00028827")
 
         # Act
         output_workspace_names = {"SampleScatterWorkspace": "sample_scatter",
@@ -218,10 +218,11 @@ class SANSLoadTest(unittest.TestCase):
                                   "SampleTransmissionWorkspace": "sample_transmission",
                                   "SampleDirectWorkspace": "sample_direct"}
 
-        kwargs = {"state": state, "publish_to_cache": False, "use_cached": False, "move_workspace": False,
+        kwargs = {"state": state, "publish_to_cache": True, "use_cached": True, "move_workspace": False,
                   "output_workspace_names": output_workspace_names}
-
-        self.assertRaises(RuntimeError, self._run_load, **kwargs)
+        load_alg = self._run_load(**kwargs)
+        transmission_workspace = load_alg.getProperty("SampleTransmissionWorkspace").value
+        self.assertTrue(transmission_workspace.getNumberHistograms() == 8)
 
     def test_that_runs_for_isis_nexus_file_with_event_data_and_single_period(self):
         # Arrange
@@ -392,7 +393,7 @@ class SANSLoadTest(unittest.TestCase):
     def test_that_can_load_single_period_from_added_multi_period_histogram_file(self):
         # Arrange
         special_selection_on_group = 7
-        state = SANSLoadTest._get_simple_state(sample_scatter="AddedMultiPeriodTestFile-add.nxs",
+        state = SANSLoadTest._get_simple_state(sample_scatter="AddedMultiPeriodHistogram-add.nxs",
                                                sample_scatter_period=special_selection_on_group)
 
         # Act
@@ -415,7 +416,7 @@ class SANSLoadTest(unittest.TestCase):
 
     def test_that_can_load_all_periods_from_added_multi_period_histogram_file(self):
         # Arrange
-        state = SANSLoadTest._get_simple_state(sample_scatter="AddedMultiPeriodTestFile-add.nxs")
+        state = SANSLoadTest._get_simple_state(sample_scatter="AddedMultiPeriodHistogram-add.nxs")
 
         # Act
         output_workspace_names = {"SampleScatterWorkspace": "sample_scatter",
@@ -438,7 +439,7 @@ class SANSLoadTest(unittest.TestCase):
     def test_that_can_load_single_period_from_added_multi_period_event_file(self):
         # Arrange
         special_selection_on_group = 2
-        state = SANSLoadTest._get_simple_state(sample_scatter="V2_LARMOR00013065-add.nxs",
+        state = SANSLoadTest._get_simple_state(sample_scatter="AddedMultiPeriodEvent-add.nxs",
                                                sample_scatter_period=special_selection_on_group)
 
         # Act
@@ -461,7 +462,7 @@ class SANSLoadTest(unittest.TestCase):
 
     def test_that_can_load_all_periods_from_added_multi_period_event_file(self):
         # Arrange
-        state = SANSLoadTest._get_simple_state(sample_scatter="V2_LARMOR00013065-add.nxs")
+        state = SANSLoadTest._get_simple_state(sample_scatter="AddedMultiPeriodEvent-add.nxs")
 
         # Act
         output_workspace_names = {"SampleScatterWorkspace": "sample_scatter",

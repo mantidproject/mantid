@@ -38,7 +38,7 @@ class CreateCacheFilename(PythonAlgorithm):
         # is there a place to register that?
         self.require()
 
-        self.declareProperty("PropertyManager", "", "name of a property manager from which properties are extracted from")
+        self.declareProperty("PropertyManager", "", "Name of a property manager from which properties are extracted from")
 
         self.declareProperty(
             StringArrayProperty("Properties", Direction.Input),
@@ -49,15 +49,15 @@ class CreateCacheFilename(PythonAlgorithm):
             "A list of key=value strings for other properties not in the property manager")
 
         self.declareProperty(
-            "Prefix", "", "prefix to the output hash name")
+            "Prefix", "", "prefix for the output file name")
 
         self.declareProperty(
             "CacheDir", "",
             "the directory in which the cache file will be created")
 
-        self.declareProperty("OutputFilename", "", "output filename", Direction.Output)
+        self.declareProperty("OutputFilename", "", "Full path of output file name", Direction.Output)
 
-        self.declareProperty("OutputSignature", "", "output signature", Direction.Output)
+        self.declareProperty("OutputSignature", "", "Calculated sha1 hash", Direction.Output)
         return
 
     def PyExec(self):

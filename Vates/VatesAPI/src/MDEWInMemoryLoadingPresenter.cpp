@@ -83,16 +83,6 @@ MDEWInMemoryLoadingPresenter::execute(vtkDataSetFactory *factory,
     from ::executeLoadMetadata will not have ensured that all dimensions
     have proper range extents set.
   */
-
-  // Update the meta data min and max values with the values of the visual data
-  // set. This is necessary since we want the full data range of the visual
-  // data set and not of the actual underlying data set.
-  double *range = visualDataSet->GetScalarRange();
-  if (range) {
-    this->m_metadataJsonManager->setMinValue(range[0]);
-    this->m_metadataJsonManager->setMaxValue(range[1]);
-  }
-
   this->extractMetadata(*eventWs);
 
   this->appendMetadata(visualDataSet, eventWs->getName());
@@ -110,12 +100,6 @@ void MDEWInMemoryLoadingPresenter::executeLoadMetadata() {
       boost::dynamic_pointer_cast<Mantid::API::IMDEventWorkspace>(ws);
   m_wsTypeName = eventWs->id();
   m_specialCoords = eventWs->getSpecialCoordinateSystem();
-
-  // Set the minimum and maximum of the workspace data.
-  QwtDoubleInterval minMaxContainer =
-      m_metaDataExtractor->getMinAndMax(eventWs.get());
-  m_metadataJsonManager->setMinValue(minMaxContainer.minValue());
-  m_metadataJsonManager->setMaxValue(minMaxContainer.maxValue());
 
   // Set the instrument which is associated with the workspace.
   m_metadataJsonManager->setInstrument(

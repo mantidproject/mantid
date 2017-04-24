@@ -15,6 +15,7 @@ set ( EXPORT_FILES
   src/Exports/SpecialWorkspace2D.cpp
   src/Exports/GroupingWorkspace.cpp
   src/Exports/MaskWorkspace.cpp
+  src/Exports/MaskWorkspaceProperty.cpp
   src/Exports/OffsetsWorkspace.cpp
   src/Exports/MDEventWorkspace.cpp
   src/Exports/MDHistoWorkspace.cpp

@@ -133,7 +133,7 @@ void FFTSmooth2::exec() {
       if (sn.empty())
         n = 2;
       else
-        n = atoi(sn.c_str());
+        n = std::stoi(sn);
       if (n <= 1)
         throw std::invalid_argument(
             "Truncation parameter must be an integer > 1");
@@ -154,8 +154,8 @@ void FFTSmooth2::exec() {
       } else {
         std::string param0 = params.at(0);
         std::string param1 = params.at(1);
-        n = atoi(param0.c_str());
-        order = atoi(param1.c_str());
+        n = std::stoi(param0);
+        order = std::stoi(param1);
       }
       if (n <= 1)
         throw std::invalid_argument(

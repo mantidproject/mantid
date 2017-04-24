@@ -53,6 +53,11 @@ public:
   virtual void giveUserCritical(std::string prompt, std::string title) = 0;
   virtual std::string runPythonAlgorithm(const std::string &algorithm) = 0;
 
+  /// Return values to perform pre-processing on
+  virtual std::map<std::string, std::string> getPreprocessingValues() const = 0;
+  /// Return property names associated with pre-processing values
+  virtual std::map<std::string, std::set<std::string>>
+  getPreprocessingProperties() const = 0;
   /// Return global options for pre-processing
   virtual std::map<std::string, std::string>
   getPreprocessingOptions() const = 0;
@@ -60,8 +65,10 @@ public:
   virtual std::string getProcessingOptions() const = 0;
   /// Return global options for post-processing
   virtual std::string getPostprocessingOptions() const = 0;
-  /// Return global options for time-slicing
-  virtual std::string getTimeSlicingOptions() const = 0;
+  /// Return time-slicing values
+  virtual std::string getTimeSlicingValues() const = 0;
+  /// Return time-slicing type
+  virtual std::string getTimeSlicingType() const = 0;
 };
 }
 }

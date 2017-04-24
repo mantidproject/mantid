@@ -2604,18 +2604,18 @@ public:
   EventListTestPerformance() {
     // Source for a randome event list
     el_random_source.clear();
-    for (size_t i = 0; i < 2e6; i++)
+    for (size_t i = 0; i < 2000000; i++)
       el_random_source += TofEvent((rand() % 200000) * 0.05, rand() % 1000);
 
     // 10 million events, up to 1e5 tof
     el_sorted_original.clear();
-    for (size_t i = 0; i < 10e6; i++)
+    for (size_t i = 0; i < 10000000; i++)
       el_sorted_original +=
           TofEvent(static_cast<double>(i) / 100.0, rand() % 1000);
     el_sorted_original.setSortOrder(TOF_SORT);
 
     el_sorted_weighted.clear();
-    for (size_t i = 0; i < 10e6; i++)
+    for (size_t i = 0; i < 10000000; i++)
       el_sorted_weighted += WeightedEvent(static_cast<double>(i) / 100.0,
                                           rand() % 1000, 2.34, 4.56);
     el_sorted_weighted.setSortOrder(TOF_SORT);
