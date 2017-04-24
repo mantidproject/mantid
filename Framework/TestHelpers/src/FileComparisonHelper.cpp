@@ -1,5 +1,7 @@
 #include "MantidTestHelpers/FileComparisonHelper.h"
 
+#include "MantidAPI/FileFinder.h"
+
 #include <fstream>
 #include <string>
 
@@ -11,15 +13,15 @@ namespace FileComparisonHelper {
 * return true.
 *
 * @param firstIter1:: The starting position of the first iterator to check
-* @param lastIter1:: The final position of the first iterator to check
 * @param firstIter2:: The starting position of the second iterator to check
+* @param lastIter1:: The final position of the first iterator to check
 * @param lastIter2:: The final position of the second iterator to check
 *
 * @return True if iterators are identical in value and length else false
 */
 template <typename iter1, typename iter2>
-bool areIteratorsEqual(iter1 firstIter1, iter1 lastIter1, iter2 firstIter2,
-                       iter2 lastIter2) {
+bool areFileStreamsEqual(iter1 firstIter1, iter2 firstIter2, iter1 lastIter1,
+                         iter2 lastIter2) {
 
   while (firstIter1 != lastIter1 && firstIter2 != lastIter2) {
     // Check individual values of iterators
@@ -45,8 +47,8 @@ bool areIteratorsEqual(iter1 firstIter1, iter1 lastIter1, iter2 firstIter2,
 *
 * @return True if files are equal in content and length, else false.
 */
-bool checkFilesAreEqual(const std::string &referenceFileFullPath,
-                        const std::string &outFileFullPath) {
+bool areFilesEqual(const std::string &referenceFileFullPath,
+                   const std::string &outFileFullPath) {
   std::ifstream refFileStream(referenceFileFullPath, std::ifstream::binary);
   std::ifstream outFileStream(outFileFullPath, std::ifstream::binary);
 
@@ -58,7 +60,7 @@ bool checkFilesAreEqual(const std::string &referenceFileFullPath,
     throw std::runtime_error("Could not open output file at specified path");
   }
 
-  return compareFileStreams(refFileStream, outFileStream);
+  return areFileStreamsEqual(refFileStream, outFileStream);
 }
 
 /**
@@ -72,14 +74,44 @@ bool checkFilesAreEqual(const std::string &referenceFileFullPath,
 *
 * @return True if files are identical else false
 */
-bool compareFileStreams(std::ifstream &referenceFileStream,
-                        std::ifstream &fileToCheck) {
+bool areFileStreamsEqual(std::ifstream &referenceFileStream,
+                         std::ifstream &fileToCheck) {
   // Open iterators for templated function to run on
   std::istreambuf_iterator<char> refIter(referenceFileStream);
   std::istreambuf_iterator<char> checkIter(fileToCheck);
   // Last iterator in istream is equivalent of uninitialized iterator
   std::istreambuf_iterator<char> end;
 
-  return areIteratorsEqual(refIter, end, checkIter, end);
+  return areFileStreamsEqual(refIter, checkIter, end, end);
 }
+
+/**
+  * Attempts to find a reference file with the given name using
+  * the FileFinder. If it cannot be found it will throw a
+  * std::invalid_argument. If the file is found it will compare
+  * the two specified files are equal in length and content
+  * whilst ignoring EOL differences
+  *
+  * @param referenceFileName :: The filename of the reference file
+  * @param outFileFullPath :: The path to the file written by the test to
+  *compare
+  *
+  * @throws :: If the reference file could not be found throws
+  *std::invalid_argument
+  *
+  * @return :: True if files are equal length and content (ignoring EOL) else
+  *false.
+  */
+bool isEqualToReferenceFile(const std::string &referenceFileName,
+                            const std::string &outFileFullPath) {
+  const std::string referenceFilePath =
+      Mantid::API::FileFinder::Instance().getFullPath(referenceFileName);
+
+  if (referenceFilePath == "") {
+    throw std::invalid_argument("No file with the name: " + referenceFileName +
+                                " could be found by Mantid");
+  }
+  return areFilesEqual(referenceFilePath, outFileFullPath);
 }
+
+} // Namespace FileComparisonHelper

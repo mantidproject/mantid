@@ -1,17 +1,17 @@
 #ifndef SAVEOPENGENIEASCIITEST_H_
 #define SAVEOPENGENIEASCIITEST_H_
-
-#include <Poco/File.h>
-#include <Poco/Path.h>
-#include <cxxtest/TestSuite.h>
-#include <fstream>
-#include <memory>
-
 #include "MantidDataHandling/SaveOpenGenieAscii.h"
 
-#include "MantidAPI/FileFinder.h"
 #include "MantidDataHandling/Load.h"
+#include "MantidTestHelpers/FileComparisonHelper.H"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
+
+#include <cxxtest/TestSuite.h>
+#include <Poco/File.h>
+#include <Poco/Path.h>
+
+#include <fstream>
+#include <memory>
 
 using namespace Mantid;
 using namespace Mantid::API;
@@ -44,11 +44,6 @@ public:
   }
 
   void testFileMatchesExpectedFormat() {
-    const std::string referenceFilePath =
-        FileFinder::Instance().getFullPath(m_referenceFileName);
-    // Check the reference file was found
-    TS_ASSERT_DIFFERS(referenceFilePath, "");
-
     // Get a .nxs file as we need to make sure that the all the correct
     // log files save in the correct format which is non-trivial
     // to set up using the workspace creation helpers
@@ -70,9 +65,9 @@ public:
 
     AnalysisDataService::Instance().remove(wsName);
 
+    const bool wasEqual = FileComparisonHelper::isEqualToReferenceFile(
+        m_referenceFileName, fileHandle.path());
     // Delete output file then do the assertion so we always delete
-    const bool wasEqual =
-        checkFilesAreEqual(referenceFilePath, fileHandle.path());
     fileHandle.remove();
     TS_ASSERT(wasEqual);
   }
@@ -81,36 +76,6 @@ private:
   const std::string m_referenceFileName{
       "SaveOpenGenieAsciiEnginXReference.his"};
   const std::string m_inputNexusFile{"SaveOpenGenieAsciiInput.nxs"};
-
-  bool checkFilesAreEqual(const std::string &refFilePath,
-                          const std::string &outFilePath) {
-    std::ifstream referenceFileStream(refFilePath);
-    std::ifstream outFileStream(outFilePath);
-
-    std::istreambuf_iterator<char> refIter(referenceFileStream);
-    std::istreambuf_iterator<char> outIter(outFileStream);
-    // Last iterator in istream is equivalent of uninitialized iterator
-    std::istreambuf_iterator<char> end;
-
-    return fileEqualityChecker(refIter, end, outIter, end);
-  }
-
-  template <typename FileIter1, typename FileIter2>
-  bool fileEqualityChecker(FileIter1 firstIter1, FileIter1 lastIter1,
-                           FileIter2 firstIter2, FileIter2 lastIter2) {
-
-    while (firstIter1 != lastIter1 && firstIter2 != lastIter2) {
-      // Check individual values of iterators
-      if (*firstIter1 != *firstIter2) {
-        return false;
-      }
-
-      firstIter1++;
-      firstIter2++;
-    }
-    // Check that both iterators were the same length
-    return (firstIter1 == lastIter1 && firstIter2 == lastIter2);
-  }
 
   std::unique_ptr<SaveOpenGenieAscii>
   createAlg(MatrixWorkspace_sptr ws, const std::string &tempFilePath) {
