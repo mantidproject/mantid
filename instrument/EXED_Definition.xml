@@ -92,10 +92,10 @@ last-modified="2017-04-21 14:58:37">
 
 <!-- Monitors -->
 <type name="monitors" idlist="monitors">
-<component type="monitor" is="monitor">
-<location x="0" z="-1.973" name="monitor1"/></component>
-<component type="monitor" is="monitor">
-<location x="0" z="-0.1" name="monitor2"/></component>
+   <component type="monitor">
+     <location x="0" z="-1.973" name="monitor1"/>
+     <location x="0" z="-0.1" name="monitor2"/>
+   </component>
 </type>
 <type name="panel02" idlist="panel02">
 <properties />
