@@ -66,10 +66,8 @@ def struct_data_read(fin,nrows,data_type='i',byte_size=4):
 
 class LoadEXED(PythonAlgorithm):
     __doc__ = """This is the EXED data loader written in Python.
-    Original code was written by Wolf-Dieter Stein.
-    Modifications have been made by Maciej Bartkowiak and Garrett Granroth (ORNL) in 2017,
-    in order to fully replace the C++ version of LoadEXED,
-    improve the treatment of the monitor spectra and Bring Exed into the Mantid Distribution.
+    Based off code was written by Wolf-Dieter Stein and  Maciej Bartkowiak.
+    Garrett Granroth (ORNL) in 2017,
     """
 
     def category(self):
@@ -96,7 +94,7 @@ class LoadEXED(PythonAlgorithm):
         self.declareProperty(FileProperty(name="InstrumentXML",defaultValue = "",
                                           action=FileAction.OptionalLoad,
                                           extensions = ["xml"]),
-                             doc="Instrument definition file. By default taken to have the same name as the data file, but with XML extension.")
+                             doc="Instrument definition file. If no file is specified, the default idf is used.")
 
         self.declareProperty(MatrixWorkspaceProperty(name="OutputWorkspace",
                                                      defaultValue = "",
@@ -122,8 +120,6 @@ class LoadEXED(PythonAlgorithm):
         print fn, wsn
 
         self.fxml = self.getPropertyValue("InstrumentXML")
-        if self.fxml == "":
-            self.fxml = '.'.join(fn.split('.')[:-1]+['xml'])
 
         #load data
 
@@ -150,14 +146,14 @@ class LoadEXED(PythonAlgorithm):
     	for i in range(nrows):
     		s = ws.getSpectrum(i).setDetectorID(det_udet[i])
 
-        #load idf # needs fixing
+        #load idf
 
         if (self.fxml == ""):
-            self.fxml = fn[:fn.find('.')] + ".xml"
+            LoadInstrument(Workspace=wsn, InstrumentName = "Exed", RewriteSpectraMap= True)
+        else:
+            LoadInstrument(Workspace=wsn, Filename = self.fxml, RewriteSpectraMap= True)
 
-        LoadInstrument(Workspace=wsn, Filename = self.fxml, RewriteSpectraMap= True)
-
-        #Sample_logs load the header values into the sample logs
+        #Sample_logs the header values are written into the sample logs
 
         for sl in parms_dict.keys():
             #print (sl.encode('ascii','ignore'), parms_dict[sl].encode('ascii','ignore'))
@@ -168,7 +164,7 @@ class LoadEXED(PythonAlgorithm):
                 AddSampleLog(Workspace=wsn, LogName=key_in, LogText=str(parms_dict[sl]))#, LogType='Number')
 
         SetGoniometer(Workspace=wsn, Goniometers='Universal', Axis0='phi,0,1,0,1')
-        # ExtractSingleSpectrum(InputWorkspace = wsn, WorkspaceIndex = nrows-2, OutputWorkspace = wsn + '_Monitors')
+        # Separate monitors into seperate workspace
         ExtractSpectra(InputWorkspace = wsn, WorkspaceIndexList = ','.join([str(s) for s in range(nrows-2, nrows)]), OutputWorkspace = wsn + '_Monitors')
         MaskDetectors(Workspace = wsn, WorkspaceIndexList = ','.join([str(s) for s in range(nrows-2, nrows)]))
         RemoveMaskedSpectra(InputWorkspace = wsn, OutputWorkspace = wsn)
