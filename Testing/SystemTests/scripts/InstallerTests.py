@@ -3,10 +3,7 @@ from __future__ import (absolute_import, division, print_function)
 """
 import os
 import sys
-import platform
-import shutil
 import subprocess
-import sys
 
 from getopt import getopt
 
@@ -69,7 +66,7 @@ if doInstall:
         installer.install()
         log("Application path " + installer.mantidPlotPath)
         installer.no_uninstall = False
-    except Exception,err:
+    except Exception as err:
         scriptfailure("Installing failed. "+str(err))
 else:
     installer.no_uninstall = True
@@ -81,7 +78,7 @@ try:
     if version and len(version) > 0:
         version_tested.write(version)
     version_tested.close()
-except Exception, err:
+except Exception as err:
     scriptfailure('Version test failed: '+str(err), installer)
 
 try:
@@ -91,7 +88,7 @@ try:
     if revision and len(version) > 0:
         revision_tested.write(revision)
     revision_tested.close()
-except Exception, err:
+except Exception as err:
     scriptfailure('Revision test failed: '+str(err), installer)
 
 log("Running system tests. Log files are: '%s' and '%s'" % (testRunLogPath,testRunErrPath))
@@ -118,7 +115,7 @@ try:
         testsRunErr.close()
     if p.returncode != 0:
         failure(installer)
-except Exception, exc:
+except Exception as exc:
     scriptfailure(str(exc),installer)
 except:
     failure(installer)
