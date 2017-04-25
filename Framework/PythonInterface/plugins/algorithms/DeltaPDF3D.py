@@ -22,7 +22,7 @@ class DeltaPDF3D(PythonAlgorithm):
         self.declareProperty(IMDHistoWorkspaceProperty("InputWorkspace", "",
                                                        optional=PropertyMode.Mandatory,
                                                        direction=Direction.Input),
-                             "Input Workspace")
+                             "Input Workspace with HKL dimensions centered on zero.")
         self.declareProperty(WorkspaceProperty("IntermediateWorkspace", "",
                                                optional=PropertyMode.Optional,
                                                direction=Direction.Output),

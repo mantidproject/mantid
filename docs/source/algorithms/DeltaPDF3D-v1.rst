@@ -15,8 +15,12 @@ algorithm utilizes the punch-and-fill method [#f2]_.
 
 This algorithm is still in development and features may be added,
 removed or changed. The scale of the resulting 3D-ΔPDF is, as yet, not
-scaled correctly, so while the magnitube is not correct the sign
+scaled correctly, so while the magnitude is not correct the sign
 should be.
+
+The input workspace must be a :ref:`MDHistoWorkspace
+<MDHistoWorkspace>` with dimensions '[H,0,0]', '[0,K,0]' and
+'[0,0,L]', The dimensions must be centered on zero.
 
 The convolution option requires `astropy
 <http://docs.astropy.org/en/stable/index.html>`_ to be installed as it
