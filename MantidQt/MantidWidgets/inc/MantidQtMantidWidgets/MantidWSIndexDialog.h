@@ -221,13 +221,12 @@ private:
 class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS MantidWSIndexWidget : public QWidget {
   Q_OBJECT
 
-  /** Auxiliar class to wrap the QLine allowing to have a warn to the user
- * for
- *  invalid inputs.
-*/
+  /** Auxiliary class to wrap the QLineEdit allowing warning to the user
+   * for invalid inputs.
+   */
   class QLineEditWithErrorMark : public QWidget {
   public:
-    /// constructor that will join togheter the QLineEdit and an 'invisible'
+    /// constructor to join together the QLineEdit and an 'invisible'
     /// *
     /// label.
     explicit QLineEditWithErrorMark(QWidget *parent = 0);
@@ -383,12 +382,12 @@ private:
   /// Pointers to the obligatory Qt objects:
   QLabel *m_wsMessage, *m_spectraMessage, *m_orMessage, *m_plotOptionLabel,
       *m_logLabel, *m_customLogLabel, *m_axisLabel;
-  QLineEditWithErrorMark *m_wsField, *m_spectraField;
+  QLineEditWithErrorMark *m_wsField, *m_spectraField, *m_logValues;
   QGroupBox *m_logOptionsGroup;
   QVBoxLayout *m_outer, *m_wsBox, *m_spectraBox, *m_logBox, *m_optionsBox;
   QComboBox *m_plotOptions, *m_logSelector;
   QCheckBox *m_showErrorBars;
-  QLineEdit *m_axisNameEdit, *m_logValues;
+  QLineEdit *m_axisNameEdit;
 
   /// A list of names of workspaces which are to be plotted.
   QList<QString> m_wsNames;

@@ -158,7 +158,7 @@ void MantidWSIndexWidget::showPlotOptionsError(const QString &message) {
 const std::set<double> MantidWSIndexWidget::getCustomLogValues() const {
   std::set<double> logValues;
   if (m_logSelector->currentText() == CUSTOM) {
-    QStringList values = m_logValues->text().split(',');
+    QStringList values = m_logValues->lineEdit->text().split(',');
     foreach (QString value, values) {
       bool ok = false;
       double number = value.toDouble(&ok);
@@ -454,7 +454,7 @@ void MantidWSIndexWidget::initLogs() {
   populateLogComboBox();
 
   m_customLogLabel = new QLabel(tr("<br>Custom log values:"));
-  m_logValues = new QLineEdit();
+  m_logValues = new QLineEditWithErrorMark();
 
   m_axisLabel = new QLabel(tr("<br>Label for plot axis:"));
   m_axisNameEdit = new QLineEdit();
@@ -488,7 +488,7 @@ void MantidWSIndexWidget::initLogs() {
 */
 void MantidWSIndexWidget::onLogSelected(const QString &logName) {
   m_logValues->setEnabled(logName == CUSTOM);
-  m_logValues->clear();
+  m_logValues->lineEdit->clear();
   m_axisNameEdit->setText(logName);
 }
 
@@ -505,7 +505,7 @@ void MantidWSIndexWidget::onPlotOptionChanged(const QString &plotOption) {
   m_showErrorBars->setEnabled(!isSurfaceOrContourPlot);
   m_logSelector->setEnabled(useLogNames);
   m_logValues->setEnabled(useLogNames && isLogSelectorCustom);
-  m_logValues->clear();
+  m_logValues->lineEdit->clear();
   m_axisNameEdit->setEnabled(isSurfaceOrContourPlot);
   if (useLogNames) {
     // Make sure an appropriate name is shown for the default log option.
