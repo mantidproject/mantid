@@ -218,7 +218,7 @@ class DeltaPDF3D(PythonAlgorithm):
 
         # Copy first experiment info
         if inWS.getNumExperimentInfo() > 0:
-            outWS.addExperimentInfo(inWS.getExperimentInfo(0))
+            outWS.copyExperimentInfos(inWS)
 
         progress.report()
 
