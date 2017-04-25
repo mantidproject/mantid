@@ -698,7 +698,8 @@ GenericDataProcessorPresenter::reduceRow(const std::vector<std::string> &data) {
         m_mainPresenter->getPreprocessingOptionsAsString().toStdString());
 
   // Pre-processing properties
-  auto preProcessPropMap = convertStringToMapWithSet(m_mainPresenter->getPreprocessingProperties().toStdString());
+  auto preProcessPropMap = convertStringToMapWithSet(
+      m_mainPresenter->getPreprocessingProperties().toStdString());
 
   // Properties not to be used in processing
   std::set<std::string> restrictedProps;
@@ -716,7 +717,7 @@ GenericDataProcessorPresenter::reduceRow(const std::vector<std::string> &data) {
 
     if (globalOptions.count(columnName) && !globalOptions[columnName].empty()) {
       auto tmpOptionsMap = parseKeyValueString(globalOptions[columnName]);
-      for (auto& optionMapEntry : tmpOptionsMap) {
+      for (auto &optionMapEntry : tmpOptionsMap) {
         preProcessValue += optionMapEntry.second;
       }
     } else if (!data.at(i).empty()) {
@@ -738,11 +739,13 @@ GenericDataProcessorPresenter::reduceRow(const std::vector<std::string> &data) {
 
       auto preprocessor = m_preprocessMap.at(columnName);
 
-      const std::string globalOptionsForColumn = globalOptions.count(columnName) > 0
-                                       ? globalOptions.at(columnName) : "";
+      const std::string globalOptionsForColumn =
+          globalOptions.count(columnName) > 0 ? globalOptions.at(columnName)
+                                              : "";
 
       auto optionsMap = parseKeyValueString(globalOptionsForColumn);
-      auto runWS = prepareRunWorkspace(preProcessValue, preprocessor, optionsMap);
+      auto runWS =
+          prepareRunWorkspace(preProcessValue, preprocessor, optionsMap);
       alg->setProperty(propertyName, runWS->getName());
     } else {
       // No pre-processing needed
