@@ -3,6 +3,7 @@
 #include "MantidAPI/DetectorInfo.h"
 #include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/InstrumentValidator.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
@@ -14,7 +15,6 @@
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/VectorHelper.h"
-#include "MantidAPI/Run.h"
 
 #include <algorithm>
 #include <cmath>
@@ -192,6 +192,7 @@ void Qxy::exec() {
         maskFractions[it->first] -= it->second;
       }
     }
+    maskFractions.clear();
     double maskFraction(1);
 
     // this object is not used if gravity correction is off, but it is only
@@ -256,8 +257,7 @@ void Qxy::exec() {
         // in an equivalent bin to where the data was stored
 
         // first take into account the product of contributions to the weight
-        // which have
-        // no errors
+        // which have no errors
         double weight = 0.0;
         if (doSolidAngle)
           weight = maskFraction * angle;
@@ -380,21 +380,19 @@ std::vector<double> Qxy::logBinning(double min, double max, int num) {
   return outBins;
 }
 
-double Qxy::getQminFromWs(
-		const API::MatrixWorkspace_const_sptr& inputWorkspace) {
-	// get qmin from the run properties
-	double qmin = 0;
-	const API::Run& run = inputWorkspace->run();
-	if (run.hasProperty("qmin")) {
-		Kernel::Property* prop = run.getProperty("Qmin");
-		qmin = boost::lexical_cast<double, std::string>(prop->value());
-	} else {
-		g_log.warning() << "Could not retrieve Qmin from run object. "
-				<< "Using min=" << qmin << ".\n";
-	}
-	g_log.notice() << "QxQy: Using logarithm binning with qmin=" << qmin
-			<< ".\n";
-	return qmin;
+double
+Qxy::getQminFromWs(const API::MatrixWorkspace_const_sptr &inputWorkspace) {
+  // get qmin from the run properties
+  double qmin = 0;
+  const API::Run &run = inputWorkspace->run();
+  if (run.hasProperty("qmin")) {
+    Kernel::Property *prop = run.getProperty("Qmin");
+    qmin = boost::lexical_cast<double, std::string>(prop->value());
+  } else {
+    g_log.warning() << "Could not retrieve Qmin from run object.\n";
+  }
+  g_log.notice() << "QxQy: Using logarithm binning with qmin=" << qmin << ".\n";
+  return qmin;
 }
 
 /** Creates the output workspace, setting the X vector to the bins boundaries in
@@ -413,9 +411,9 @@ Qxy::setUpOutputWorkspace(API::MatrixWorkspace_const_sptr inputWorkspace) {
   HistogramData::BinEdges axis;
   double startVal;
   if (log_binning) {
-
-	  // get qmin from the run properties
-		double qmin = getQminFromWs(inputWorkspace);
+    // get qmin from the run properties
+    double qmin = getQminFromWs(inputWorkspace);
+    // Filling the binning vector: negative, 0 and then positive
     std::vector<double> totalBinning;
     std::vector<double> positiveBinning = logBinning(qmin, max, nBins);
     std::reverse(std::begin(positiveBinning), std::end(positiveBinning));
@@ -458,13 +456,11 @@ Qxy::setUpOutputWorkspace(API::MatrixWorkspace_const_sptr inputWorkspace) {
 
   if (log_binning) {
     for (int i = 0; i < nBins; ++i) {
-          const double currentVal = axis[i];
-          // Set the Y value on the axis
-          verticalAxis->setValue(i, currentVal);
-        }
-
-  }
-  else {
+      const double currentVal = axis[i];
+      // Set the Y value on the axis
+      verticalAxis->setValue(i, currentVal);
+    }
+  } else {
     for (int i = 0; i < nBins; ++i) {
       const double currentVal = startVal + i * delta;
       // Set the Y value on the axis
