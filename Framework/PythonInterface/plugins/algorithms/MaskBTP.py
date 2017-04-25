@@ -37,9 +37,7 @@ class MaskBTP(mantid.api.PythonAlgorithm):
     def PyInit(self):
         self.declareProperty(mantid.api.WorkspaceProperty("Workspace", "",direction=mantid.kernel.Direction.InOut,
                                                           optional = mantid.api.PropertyMode.Optional), "Input workspace (optional)")
-        allowedInstrumentList = self.INSTRUMENT_LIST[:]
-        allowedInstrumentList.insert(0, '')
-        allowedInstrumentList=mantid.kernel.StringListValidator(allowedInstrumentList)
+        allowedInstrumentList=mantid.kernel.StringListValidator(['']+self.INSTRUMENT_LIST)
         self.declareProperty("Instrument","",validator=allowedInstrumentList,doc="One of the following instruments: "
                              + ', '.join(self.INSTRUMENT_LIST))
         self.declareProperty("Bank","",doc="Bank(s) to be masked. If empty, will apply to all banks")
