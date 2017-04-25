@@ -192,7 +192,6 @@ void Qxy::exec() {
         maskFractions[it->first] -= it->second;
       }
     }
-    maskFractions.clear();
     double maskFraction(1);
 
     // this object is not used if gravity correction is off, but it is only
