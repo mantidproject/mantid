@@ -55,7 +55,8 @@ class PointCharge(object):
     def __init__(self, *args, **kwargs):
         """
         Constructor.
-        @param Structure: either a mantid ws with valid crystal structure
+        @param Structure: either a Mantid CrystalStructure object (from mantid.geometry)
+                          or workspace with valid attached crystal structure
                           or a CIF file name (string)
                           or an explicit list of ligands, each element being: [charge, xpos, ypos, zpos]
         @param IonLabel: the magnetic ion name in the structure.
@@ -80,7 +81,7 @@ class PointCharge(object):
             arguments may be set later using the "dot" notation: e.g.
             pc = PointCharge('file.cif'); pc.IonLabel = 'Yb'; pc.Charges = {'Yb':3, 'O':-2}
         """
-        self._ws = None          # Internal workspace or workspace pointer containing a crystal structure
+        self._cryst = None       # Mantid CrystalStructure object, from either LoadCIF, a workspace or direct input
         self._ligands = None     # List of ligands. Calculated by .getLigands() or entered directly
         self._charges = None     # Dictionary of ion labels and associated charges
         self._ionlabel = None    # Label of the magnetic ion
@@ -88,7 +89,6 @@ class PointCharge(object):
         self._maxdistance = None # Outer distance of shell within which to compute charges
         self._neighbour = None   # Nth level of nearest neighbour ions within which to compute charges
         self._atoms = None       # A list of all the inequivalent sites by their unique labels and coordinates
-        self._fromCIF = False    # Indicates that input was from CIF (so should delete _ws on cleanup)
         # Parse args / kwargs
         argname = ['Structure', 'IonLabel', 'Charges', 'Ion', 'MaxDistance', 'Neighbour']
         argdict = {'MaxDistance':5.}
@@ -117,30 +117,35 @@ class PointCharge(object):
         for parname, value in argdict.items():
             setattr(self, parname, value)
 
-    def __del__(self):
-        if self._ws is not None and self._fromCIF:
-            from mantid.simpleapi import DeleteWorkspace
-            try:
-                DeleteWorkspace(self._ws)
-            except RuntimeError:   # Workspace already deleted
-                pass
+    def _copyCrystalStructure(self, cryst):
+        from mantid.geometry import CrystalStructure
+        cell = cryst.getUnitCell()
+        cellstr = ' '.join([str(v) for v in [cell.a(), cell.b(), cell.c(), cell.alpha(), cell.beta(), cell.gamma()]])
+        return CrystalStructure(cellstr, cryst.getSpaceGroup().getHMSymbol(), ';'.join(cryst.getScatterers()))
 
     def _parseStructure(self, structure):
-        from mantid.simpleapi import mtd, LoadCIF, CreateWorkspace
+        from mantid.simpleapi import mtd, LoadCIF, CreateWorkspace, DeleteWorkspace
         import uuid
         self._fromCIF = False
         if isinstance(structure, string_types):
             if mtd.doesExist(structure):
-                self._ws = mtd[structure]
                 try:
+                    self._cryst = self._copyCrystalStructure(mtd[structure].sample().getCrystalStructure())
                     self._getUniqueAtoms()
                 except RuntimeError:
-                    raise ValueError('Workspace ''%s'' has no valid CrystalStructure' % (self._ws.name()))
+                    raise ValueError('Workspace ''%s'' has no valid CrystalStructure' % (structure))
             else:
-                self._ws = CreateWorkspace(1, 1, OutputWorkspace='_tempPointCharge_'+str(uuid.uuid4())[:8])
-                self._fromCIF = True
-                LoadCIF(self._ws, structure)
-                self._getUniqueAtoms()
+                tmpws = CreateWorkspace(1, 1, OutputWorkspace='_tempPointCharge_'+str(uuid.uuid4())[:8])
+                try:
+                    LoadCIF(tmpws, structure)
+                    # Attached CrystalStructure object gets destroyed when workspace is deleted
+                    self._cryst = self._copyCrystalStructure(tmpws.sample().getCrystalStructure())
+                except:
+                    DeleteWorkspace(tmpws)
+                    raise
+                else:
+                    DeleteWorkspace(tmpws)
+                    self._getUniqueAtoms()
         elif isinstance(structure, list):
             if (len(structure) == 4 and all([isinstance(x, (int, float)) for x in structure])):
                 structure = [structure]
@@ -150,22 +155,24 @@ class PointCharge(object):
             else:
                 raise ValueError('Incorrect ligands direct input. Must be a 4-element list or a list '
                                  'of 4-element list. Each ligand must be of the form [charge, x, y, z]')
+        elif hasattr(structure, 'getScatterers'):
+            self._cryst = structure
+            self._getUniqueAtoms()
         else:
             if not hasattr(structure, 'sample'):
-                raise ValueError('First input must be a Mantid workspace or string '
+                raise ValueError('First input must be a Mantid CrystalStructure object, workspace or string '
                                  '(name of CIF file or workspace)')
             try:
-                self._ws = structure
+                self._cryst = self._copyCrystalStructure(structure.sample().getCrystalStructure())
                 self._getUniqueAtoms()
             except RuntimeError:
-                raise ValueError('Workspace ''%s'' has no valid CrystalStructure' % (self._ws.name()))
+                raise ValueError('Workspace ''%s'' has no valid CrystalStructure' % (structure.name()))
 
     def _getUniqueAtoms(self):
         """Gets a list of unique ion names for each non-equivalent ion in the unit cell"""
-        cryst = self._ws.sample().getCrystalStructure()
         self._atoms = {}
         index = {}
-        for atom in [entry.split() for entry in cryst.getScatterers()]:
+        for atom in [entry.split() for entry in self._cryst.getScatterers()]:
             name = atom[0]
             if name in self._atoms.keys():
                 index[name] = (index[name] + 1) if name in index.keys() else 2
@@ -339,14 +346,12 @@ class PointCharge(object):
         Parses the stored crystal structure and returns a set of ligands
         @param dist - the maximum distance of ligands (if dist > 0) or the nth neighbour shell (if dist < 0)
         """
-        # Reads CrystalStructure information from a workspace.
-        cryst = self._ws.sample().getCrystalStructure()
         # Determine the transformation matrix to convert from fractional to Cartesian coordinates and back.
-        cell = cryst.getUnitCell()
+        cell = self._cryst.getUnitCell()
         rtoijk = cell.getBinv()
         invrtoijk = cell.getB()
         # Make a list of all atomic positions
-        sg = cryst.getSpaceGroup()
+        sg = self._cryst.getSpaceGroup()
         pos = {}
         for name, coords in self._atoms.items():
             pos[name] = [c for c in sg.getEquivalentPositions(coords)]

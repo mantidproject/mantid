@@ -1602,14 +1602,19 @@ class CrystalFieldFitTest(unittest.TestCase):
         from mantid.geometry import CrystalStructure
         from mantid.simpleapi import CreateWorkspace, DeleteWorkspace
         import uuid
+        perovskite = CrystalStructure('4 4 4', 'P m -3 m', 
+                                      'Ce 0. 0. 0. 1. 0.; Al 0.5 0.5 0.5 1. 0.; O 0.5 0.5 0. 1. 0.')
+        # Check direct input of CrystalStructure works
+        pc = PointCharge(perovskite, 'Ce', {'Ce':3, 'Al':3, 'O':-2})
+        blm0 = pc.calculate()
         # Set up a PointCharge calculation from a workspace with a structure
         # Cannot use CrystalField.fitting.makeWorkspace because it only gets passed as a string (ws name) in Python.
         ws = CreateWorkspace(1, 1, OutputWorkspace='ws_'+str(uuid.uuid4())[:8])
-        perovskite = CrystalStructure('4 4 4', 'P m -3 m', 
-                                      'Ce 0. 0. 0. 1. 0.; Al 0.5 0.5 0.5 1. 0.; O 0.5 0.5 0. 1. 0.')
         ws.sample().setCrystalStructure(perovskite)
         pc = PointCharge(ws, 'Ce', {'Ce':3, 'Al':3, 'O':-2})
         blm = pc.calculate()
+        for k, v in blm.items():
+            self.assertAlmostEqual(blm0[k], v)
         self.assertEqual(len(blm), 2)
         self.assertAlmostEqual(blm['B44'] / blm['B40'], 5., 3)   # Cubic symmetry implies B44=5B40
         self.assertRaises(ValueError, PointCharge, ws, 'Pr', {'Ce':3, 'Al':3, 'O':-2})
@@ -1626,10 +1631,8 @@ class CrystalFieldFitTest(unittest.TestCase):
         import mantid.simpleapi
         # Just check that LoadCIF is called... we'll rely on LoadCIF working properly!
         with mock.patch.object(mantid.simpleapi, 'LoadCIF') as loadcif:
-            with mock.patch.object(PointCharge, '_getUniqueAtoms') as uniqueatoms:
-                pc = PointCharge('somefile.cif')
+            self.assertRaises(RuntimeError, PointCharge, 'somefile.cif')  # Error because no actual CIF loaded
         loadcif.assert_called_with(mock.ANY, 'somefile.cif')
-        uniqueatoms.assert_called()
 
     def test_CrystalFieldFit_physical_properties(self):
         from CrystalField.fitting import makeWorkspace
