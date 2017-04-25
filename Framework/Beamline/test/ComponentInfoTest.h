@@ -56,5 +56,29 @@ public:
                                           1 /*component index*/),
                      std::vector<size_t>({0, 2}));
   }
+
+  void test_equality() {
+    // Check default
+    TS_ASSERT_EQUALS(ComponentInfo{}, ComponentInfo{});
+
+    // Check same for copy construction
+    std::vector<size_t> bankSortedDetectorIndices{0, 1, 2};
+    std::vector<std::pair<size_t, size_t>> ranges;
+    ComponentInfo a(bankSortedDetectorIndices, ranges);
+    ComponentInfo b = a;
+    TS_ASSERT_EQUALS(a, b);
+
+    // Different ranges
+    auto differentRanges = ranges;
+    differentRanges.push_back(std::make_pair(0, 1));
+    auto c = ComponentInfo(bankSortedDetectorIndices, differentRanges);
+    TS_ASSERT_DIFFERS(a, c);
+
+    // Different detector indices
+    auto differentIndices = bankSortedDetectorIndices;
+    differentIndices[0] = 7;
+    auto d = ComponentInfo(differentIndices, ranges);
+    TS_ASSERT_DIFFERS(a, d);
+  }
 };
 #endif /* MANTID_BEAMLINE_COMPONENTINFOTEST_H_ */
