@@ -426,7 +426,6 @@ Qxy::setUpOutputWorkspace(API::MatrixWorkspace_const_sptr inputWorkspace) {
     totalBinning.insert(std::end(totalBinning), std::begin(positiveBinning),
                         std::end(positiveBinning));
     nBins = nBins * 2 + 1;
-    startVal = totalBinning[0];
     axis = totalBinning;
 
   } else {
@@ -453,19 +452,10 @@ Qxy::setUpOutputWorkspace(API::MatrixWorkspace_const_sptr inputWorkspace) {
   // Create a numeric axis to replace the vertical one
   Axis *verticalAxis = new BinEdgeAxis(nBins);
   outputWorkspace->replaceAxis(1, verticalAxis);
-
-  if (log_binning) {
-    for (int i = 0; i < nBins; ++i) {
-      const double currentVal = axis[i];
-      // Set the Y value on the axis
-      verticalAxis->setValue(i, currentVal);
-    }
-  } else {
-    for (int i = 0; i < nBins; ++i) {
-      const double currentVal = startVal + i * delta;
-      // Set the Y value on the axis
-      verticalAxis->setValue(i, currentVal);
-    }
+  for (int i = 0; i < nBins; ++i) {
+    const double currentVal = axis[i];
+    // Set the Y value on the axis
+    verticalAxis->setValue(i, currentVal);
   }
 
   // Fill the X vectors in the output workspace
