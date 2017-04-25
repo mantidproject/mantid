@@ -97,13 +97,10 @@ MantidWSIndexWidget::UserInput MantidWSIndexWidget::getSelections() {
     }
     userInputAdvanced.workspaceNames = m_wsNames;
     if (userInputAdvanced.logName == CUSTOM) {
-      try {
         userInputAdvanced.customLogValues = getCustomLogValues();
-      } catch (const std::invalid_argument &ex) {
-        QString error("Invalid log value supplied: ");
-        showPlotOptionsError(error.append(ex.what()));
-        userInputAdvanced.accepted = false;
-      }
+        if(userInputAdvanced.customLogValues.empty()){
+          userInputAdvanced.accepted = false;
+        }
     }
     options.isAdvanced = true;
     options.advanced = userInputAdvanced;
@@ -157,15 +154,19 @@ void MantidWSIndexWidget::showPlotOptionsError(const QString &message) {
 */
 const std::set<double> MantidWSIndexWidget::getCustomLogValues() const {
   std::set<double> logValues;
+  std::set<double> emptySet;
   if (m_logSelector->currentText() == CUSTOM) {
-    QStringList values = m_logValues->lineEdit->text().split(',');
+    QStringList values = m_logValues->lineEdit()->text().split(',');
     foreach (QString value, values) {
       bool ok = false;
       double number = value.toDouble(&ok);
       if (ok) {
         logValues.insert(number);
       } else {
-        throw std::invalid_argument(value.toStdString());
+        m_logValues->setError("A custom log value is not valid: "+value);
+        // Too late to validate here! Validation will be moved to
+        // validatePlotOptions()
+        return emptySet;
       }
     }
   }
@@ -335,14 +336,24 @@ bool MantidWSIndexWidget::plotRequested() {
           "Spectra numbers or workspace indices are needed");
     }
   }
-  return acceptable;
+  // To give maximum feedback to user, we validate plot options,
+  // even if intervals are not acceptable
+  return validatePlotOptions() && acceptable;
 }
 
 /**
  * Called when dialog requests to plot all
  */
-void MantidWSIndexWidget::plotAllRequested() {
+bool MantidWSIndexWidget::plotAllRequested() {
   m_wsIndexChoice = m_wsIndexIntervals;
+  return validatePlotOptions();
+}
+
+/**
+ * Validate plot options when a plot is requested
+ */
+bool MantidWSIndexWidget::validatePlotOptions() {
+  return true;
 }
 
 /**
@@ -488,7 +499,7 @@ void MantidWSIndexWidget::initLogs() {
 */
 void MantidWSIndexWidget::onLogSelected(const QString &logName) {
   m_logValues->setEnabled(logName == CUSTOM);
-  m_logValues->lineEdit->clear();
+  m_logValues->lineEdit()->clear();
   m_axisNameEdit->setText(logName);
 }
 
@@ -505,7 +516,7 @@ void MantidWSIndexWidget::onPlotOptionChanged(const QString &plotOption) {
   m_showErrorBars->setEnabled(!isSurfaceOrContourPlot);
   m_logSelector->setEnabled(useLogNames);
   m_logValues->setEnabled(useLogNames && isLogSelectorCustom);
-  m_logValues->lineEdit->clear();
+  m_logValues->lineEdit()->clear();
   m_axisNameEdit->setEnabled(isSurfaceOrContourPlot);
   if (useLogNames) {
     // Make sure an appropriate name is shown for the default log option.
@@ -791,8 +802,9 @@ void MantidWSIndexDialog::plot() {
  * Called when "Plot all" button pressed
  */
 void MantidWSIndexDialog::plotAll() {
-  m_widget.plotAllRequested();
-  accept();
+  if (m_widget.plotAllRequested()) {
+    accept();
+  }
 }
 
 //----------------------------------

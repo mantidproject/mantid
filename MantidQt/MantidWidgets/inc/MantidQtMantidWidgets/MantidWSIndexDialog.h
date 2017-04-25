@@ -303,7 +303,9 @@ public:
   /// Called by dialog when plot requested
   bool plotRequested();
   /// Called by dialog when plot all requested
-  void plotAllRequested();
+  bool plotAllRequested();
+  /// Validate plot options when either plot or plot all is requested
+  bool validatePlotOptions();
   /// Returns whether the tiled plot option has been selected
   bool isTiledPlotSelected() const;
   /// Returns whether surface plot is selected
