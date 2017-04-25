@@ -286,29 +286,25 @@ class DMGInstaller(MantidInstaller):
 # If called as a standalone script then this can be used to install/uninstall
 # Mantid
 if __name__ == "__main__":
-    import optparse
-    parser = optparse.OptionParser("Usage: %prog <command> <pkg directory>",
+    import argparse
+    parser = argparse.ArgumentParser(#"Usage: %prog <command> <pkg directory>",
                                    description="Commands available: install, uninstall")
-    parser.add_option("-d", "--dump-exe-path", dest="dump_exe_path",
-                      help="Filepath to write the full path of the MantidPlot executable")
-    (options, args) = parser.parse_args()
-    # All arguments are required
-    if len(args) != 2:
-        parser.print_help()
-        sys.exit(1)
+    parser.add_argument('command', choices=['install', 'uninstall'], help='command to run')
+    parser.add_argument('directory', help='package directory')
+    parser.add_argument('-d', '--dump-exe-path', dest='dump_exe_path',
+                        help='Filepath to write the full path of the MantidPlot executable')
 
-    command, package_dir = args[0], args[1]
-    package_dir = os.path.abspath(package_dir)
+    options = parser.parse_args()
+
+    package_dir = os.path.abspath(options.directory)
     print("Searching for packages in '%s'" % package_dir)
     installer = get_installer(package_dir)
-    if command.lower() == "install":
+    if options.command == "install":
         print("Installing package '%s'" % installer.mantidInstaller)
         installer.install()
         if options.dump_exe_path is not None:
             with open(options.dump_exe_path, 'w') as f:
                 f.write(installer.mantidPlotPath)
-    elif command.lower() == "uninstall":
+    elif options.command == "uninstall":
         print("Removing package '%s'" % installer.mantidInstaller)
         installer.uninstall()
-    else:
-        raise RuntimeError("Invalid command '%s'. Options are: install, uninstall" % command)
