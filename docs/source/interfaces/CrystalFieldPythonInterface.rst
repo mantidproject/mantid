@@ -515,6 +515,14 @@ For ``Charges``, instead of listing the charges of each site, you can just give 
     cif_pc_model.Charges = {'O':-2, 'Yb':3}
     cif_blm = cif_pc_model.calculate()
 
+The result of the ``calculate()`` method can be put directly into a ``CrystalField`` object and used either
+to calculate a spectrum or as the starting parameters in a fit::
+
+    cf = CrystalField('Yb', 'C2', Temperature=5, FWHM=10, **cif_pc_model.calculate())
+    plot(**cf.getSpectrum())
+    fit = CrystalFieldFit(cf, InputWorkspace=ws)
+    fit.fit()
+
 Finally, note that the calculated crystal field parameters are defined with the quantisation axis along the *z* direction
 in the Busing-Levy convention (that is, it is perpendicular to the *a*-*b* plane). This means that if the particular 
 magnetic ion lies on a higher symmetry site but the highest symmetry rotation axis is not along *z* (for example, the A 
