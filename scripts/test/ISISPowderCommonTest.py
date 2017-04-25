@@ -3,7 +3,7 @@ from __future__ import (absolute_import, division, print_function)
 import mantid.simpleapi as mantid  # Have to import Mantid to setup paths
 import unittest
 
-from six import assertRaisesRegex
+from six_shim import assertRaisesRegex
 
 from isis_powder.routines import common
 
