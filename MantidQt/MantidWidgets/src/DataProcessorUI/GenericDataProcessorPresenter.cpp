@@ -64,6 +64,10 @@ convertStringToMapWithSet(const std::string &properties) {
   // The keys are keys in a map which maps to a set of values
   std::unordered_map<std::string, std::set<std::string>> props;
 
+  if (properties.empty()) {
+    return props;
+  }
+
   // Split by each map pair
   std::vector<std::string> propVec;
   boost::split(propVec, properties, boost::is_any_of(";"));
@@ -694,8 +698,7 @@ GenericDataProcessorPresenter::reduceRow(const std::vector<std::string> &data) {
         m_mainPresenter->getPreprocessingOptionsAsString().toStdString());
 
   // Pre-processing properties
-  auto preProcessPropMap = convertStringToMapWithSet(
-      m_mainPresenter->getPreprocessingProperties().toStdString());
+  auto preProcessPropMap = convertStringToMapWithSet(m_mainPresenter->getPreprocessingProperties().toStdString());
 
   // Properties not to be used in processing
   std::set<std::string> restrictedProps;
@@ -709,12 +712,15 @@ GenericDataProcessorPresenter::reduceRow(const std::vector<std::string> &data) {
     auto columnName = m_whitelist.colNameFromColIndex(i);
 
     // The value for which preprocessing can be conducted on
-    std::string options;
+    std::string preProcessValue;
 
     if (globalOptions.count(columnName) && !globalOptions[columnName].empty()) {
-      options = globalOptions[columnName];
+      auto tmpOptionsMap = parseKeyValueString(globalOptions[columnName]);
+      for (auto& optionMapEntry : tmpOptionsMap) {
+        preProcessValue += optionMapEntry.second;
+      }
     } else if (!data.at(i).empty()) {
-      options = data.at(i);
+      preProcessValue = data.at(i);
     } else {
       continue;
     }
@@ -724,14 +730,19 @@ GenericDataProcessorPresenter::reduceRow(const std::vector<std::string> &data) {
 
       // We do not want the associated properties to be set again in
       // processing
-      for (auto &prop : preProcessPropMap[columnName]) {
-        restrictedProps.insert(prop);
+      if (preProcessPropMap.count(columnName) > 0) {
+        for (auto &prop : preProcessPropMap[columnName]) {
+          restrictedProps.insert(prop);
+        }
       }
 
       auto preprocessor = m_preprocessMap.at(columnName);
 
-      auto optionsMap = parseKeyValueString(options);
-      auto runWS = prepareRunWorkspace(options, preprocessor, optionsMap);
+      const std::string globalOptionsForColumn = globalOptions.count(columnName) > 0
+                                       ? globalOptions.at(columnName) : "";
+
+      auto optionsMap = parseKeyValueString(globalOptionsForColumn);
+      auto runWS = prepareRunWorkspace(preProcessValue, preprocessor, optionsMap);
       alg->setProperty(propertyName, runWS->getName());
     } else {
       // No pre-processing needed
