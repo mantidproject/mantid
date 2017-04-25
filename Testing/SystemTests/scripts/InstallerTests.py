@@ -1,3 +1,4 @@
+from __future__ import (absolute_import, division, print_function)
 """Finds a package, installs it and runs the tests against it.
 """
 import os
@@ -9,7 +10,7 @@ import sys
 
 from getopt import getopt
 
-from mantidinstaller import (createScriptLog, log, stop, failure, scriptfailure, 
+from mantidinstaller import (createScriptLog, log, stop, failure, scriptfailure,
                              get_installer, run)
 
 THIS_MODULE_DIR = os.path.dirname(os.path.realpath(__file__))
@@ -21,15 +22,15 @@ except:
     opt = [('-h','')]
 
 if ('-h','') in opt:
-    print "Usage: %s [OPTIONS]" % os.path.basename(sys.argv[0])
-    print
-    print "Valid options are:"
-    print "       -d Directory to look for packages. Defaults to current working directory"
-    print "       -n Run tests without installing Mantid (it must be already installed)"
-    print "       -o Output to the screen instead of log files"
-    print "       -h Display the usage"
-    print "       -R Optionally only run the test matched by the regex"
-    print "       -l Log level"
+    print("Usage: %s [OPTIONS]" % os.path.basename(sys.argv[0]))
+    print()
+    print("Valid options are:")
+    print("       -d Directory to look for packages. Defaults to current working directory")
+    print("       -n Run tests without installing Mantid (it must be already installed)")
+    print("       -o Output to the screen instead of log files")
+    print("       -h Display the usage")
+    print("       -R Optionally only run the test matched by the regex")
+    print("       -l Log level")
     sys.exit(0)
 
 doInstall = True
@@ -101,7 +102,7 @@ try:
     if test_regex is not None:
         run_test_cmd += " -R " + test_regex
     if out2stdout:
-        print "Executing command '{0}'".format(run_test_cmd)
+        print("Executing command '{0}'".format(run_test_cmd))
         p = subprocess.Popen(run_test_cmd, shell=True) # no PIPE: print on screen for debugging
         p.wait()
     else:
