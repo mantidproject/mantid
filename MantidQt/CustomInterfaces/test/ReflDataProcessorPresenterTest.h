@@ -439,7 +439,7 @@ public:
     groupList.insert(0);
 
     // We should be warned
-    EXPECT_CALL(mockMainPresenter, giveUserWarning(_, _)).Times(1);
+    EXPECT_CALL(mockDataProcessorView, giveUserWarning(_, _)).Times(1);
 
     // The user hits the "process" button with the first group selected
     EXPECT_CALL(mockDataProcessorView, getSelectedChildren())
@@ -500,7 +500,7 @@ public:
     groupList.insert(0);
 
     // We should be warned
-    EXPECT_CALL(mockMainPresenter, giveUserWarning(_, _)).Times(2);
+    EXPECT_CALL(mockDataProcessorView, giveUserWarning(_, _)).Times(2);
 
     // The user hits the "process" button with the first group selected
     EXPECT_CALL(mockDataProcessorView, getSelectedChildren())
@@ -579,7 +579,7 @@ public:
     rowlist[0].insert(1);
 
     // We should not be warned
-    EXPECT_CALL(mockMainPresenter, giveUserWarning(_, _)).Times(0);
+    EXPECT_CALL(mockDataProcessorView, giveUserWarning(_, _)).Times(0);
 
     // The user hits "plot rows" with the first row selected
     EXPECT_CALL(mockDataProcessorView, getSelectedChildren())
@@ -606,7 +606,7 @@ public:
         "base_graph = plotSpectrum(\"IvsQ_13462_slice_2\", 0, True, window = "
         "base_graph)\nbase_graph.activeLayer().logLogAxes()\n";
 
-    EXPECT_CALL(mockMainPresenter, runPythonAlgorithm(pythonCode)).Times(1);
+    EXPECT_CALL(mockDataProcessorView, runPythonAlgorithm(pythonCode)).Times(1);
     TS_ASSERT_THROWS_NOTHING(
         presenter->notify(DataProcessorPresenter::PlotRowFlag));
 
@@ -654,7 +654,7 @@ public:
     groupList.insert(0);
 
     // We should not be warned
-    EXPECT_CALL(mockMainPresenter, giveUserWarning(_, _)).Times(0);
+    EXPECT_CALL(mockDataProcessorView, giveUserWarning(_, _)).Times(0);
 
     // The user hits "plot rows" with the first row selected
     EXPECT_CALL(mockDataProcessorView, getSelectedChildren())
@@ -681,7 +681,7 @@ public:
         "base_graph = plotSpectrum(\"IvsQ_13462_slice_2\", 0, True, window = "
         "base_graph)\nbase_graph.activeLayer().logLogAxes()\n";
 
-    EXPECT_CALL(mockMainPresenter, runPythonAlgorithm(pythonCode)).Times(1);
+    EXPECT_CALL(mockDataProcessorView, runPythonAlgorithm(pythonCode)).Times(1);
     TS_ASSERT_THROWS_NOTHING(
         presenter->notify(DataProcessorPresenter::PlotRowFlag));
 
@@ -715,7 +715,7 @@ public:
     rowlist[0].insert(0);
 
     // We should be warned
-    EXPECT_CALL(mockMainPresenter, giveUserWarning(_, _)).Times(1);
+    EXPECT_CALL(mockDataProcessorView, giveUserWarning(_, _)).Times(1);
 
     // The user hits "plot rows" with the first row selected
     EXPECT_CALL(mockDataProcessorView, getSelectedChildren())
@@ -762,7 +762,7 @@ public:
     groupList.insert(0);
 
     // We should be warned
-    EXPECT_CALL(mockMainPresenter, giveUserWarning(_, _)).Times(1);
+    EXPECT_CALL(mockDataProcessorView, giveUserWarning(_, _)).Times(1);
 
     // The user hits "plot rows" with the first row selected
     EXPECT_CALL(mockDataProcessorView, getSelectedChildren())
