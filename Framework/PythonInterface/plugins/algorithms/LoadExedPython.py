@@ -67,7 +67,7 @@ def struct_data_read(fin,nrows,data_type='i',byte_size=4):
 class LoadEXED(PythonAlgorithm):
     __doc__ = """This is the EXED data loader written in Python.
     Based off code was written by Wolf-Dieter Stein and  Maciej Bartkowiak.
-    Garrett Granroth (ORNL) in 2017,
+    Garrett Granroth (ORNL) 
     """
 
     def category(self):
