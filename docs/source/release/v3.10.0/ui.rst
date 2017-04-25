@@ -19,6 +19,9 @@ User Interface
 
 - MantidPlot now respects the system scaling on high-resolution displays. All icons and bitmaps will now be sized
   appropriately rather than being too small to be usable (Windows only).
+- Masked bins are greyed out in the table view of the workspaces (except for EventWorkspaces):
+
+.. figure:: ../../images/maskedbins.jpg  
 
 Instrument View
 ###############
@@ -69,6 +72,7 @@ VSI Improvments
 - The mapped array vtkMDHWSignalArray has been refactored to use the new vtkGenericDataArray class template. This interface minimizes virtual indirection and allows advanced compiler optimizations such as vectorization.
 - Minimize the number of times the workspace min and max values are calculated.
 - Threshold filter now reports progress to the user.
+- Camera toolbar snaps to views along crystallographic axes,
 
 |
 
