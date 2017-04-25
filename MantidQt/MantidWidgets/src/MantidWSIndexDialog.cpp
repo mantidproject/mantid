@@ -150,11 +150,9 @@ void MantidWSIndexWidget::showPlotOptionsError(const QString &message) {
 * Note that the set is ordered by definition, and values are only added if they
 * are successfully converted to a double.
 * @returns Set of numerical log values
-* @throws invalid_argument if values are not numeric
 */
 const std::set<double> MantidWSIndexWidget::getCustomLogValues() const {
   std::set<double> logValues;
-  std::set<double> emptySet;
   if (m_logSelector->currentText() == CUSTOM) {
     QStringList values = m_logValues->lineEdit()->text().split(',');
     foreach (QString value, values) {
@@ -162,12 +160,7 @@ const std::set<double> MantidWSIndexWidget::getCustomLogValues() const {
       double number = value.toDouble(&ok);
       if (ok) {
         logValues.insert(number);
-      } else {
-        m_logValues->setError("A custom log value is not valid: "+value);
-        // Too late to validate here! Validation will be moved to
-        // validatePlotOptions()
-        return emptySet;
-      }
+      } 
     }
   }
   return logValues;
@@ -351,9 +344,28 @@ bool MantidWSIndexWidget::plotAllRequested() {
 
 /**
  * Validate plot options when a plot is requested
+ * set appropriate error if not valid
  */
 bool MantidWSIndexWidget::validatePlotOptions() {
-  return true;
+
+  bool validOptions = true;
+
+  // We only validate the custom log values and
+  // only if custom logs are selected, else it's OK.
+  if (m_logSelector->currentText() == CUSTOM) {
+    QStringList values = m_logValues->lineEdit()->text().split(',');
+    foreach(QString value, values) {
+      bool ok = false;
+      double number = value.toDouble(&ok);
+      if (!ok) {
+        m_logValues->setError("A custom log value is not valid: " + value);
+        validOptions = false;
+        break;
+      }
+    }
+  }
+
+  return validOptions;
 }
 
 /**
