@@ -39,9 +39,9 @@ class DeltaPDF3D(PythonAlgorithm):
         self.setPropertySettings("Shape", condition)
         val_min_zero = FloatArrayBoundedValidator()
         val_min_zero.setLower(0.)
-        self.declareProperty(FloatArrayProperty("Width", [0.1], validator=val_min_zero),
-                             "Width of sphere/cube to remove reflections, in (HKL)")
-        self.setPropertySettings("Width", condition)
+        self.declareProperty(FloatArrayProperty("Size", [0.2], validator=val_min_zero),
+                             "Width of cube/diameter of sphere used to remove reflections, in (HKL)")
+        self.setPropertySettings("Size", condition)
         self.declareProperty("SpaceGroup", "",
                              doc="Space group for reflection removal, either full name or number. If empty all HKL's will be removed.")
         self.setPropertySettings("SpaceGroup", condition)
@@ -62,7 +62,7 @@ class DeltaPDF3D(PythonAlgorithm):
         # Reflections
         self.setPropertyGroup("RemoveReflections","Reflection Removal")
         self.setPropertyGroup("Shape","Reflection Removal")
-        self.setPropertyGroup("Width","Reflection Removal")
+        self.setPropertyGroup("Size","Reflection Removal")
         self.setPropertyGroup("SpaceGroup","Reflection Removal")
 
         # Sphere
@@ -96,9 +96,9 @@ class DeltaPDF3D(PythonAlgorithm):
             except ImportError:
                 issues["Convolution"] = 'python-astropy required to do convolution'
 
-        width = self.getProperty("Width").value
-        if len(width) != 1 and len(width) != 3:
-            issues["Width"] = 'Must provide 1 or 3 widths'
+        size = self.getProperty("Size").value
+        if len(size) != 1 and len(size) != 3:
+            issues["Size"] = 'Must provide 1 or 3 sizes'
 
         if self.getProperty("SpaceGroup").value:
             space_group=self.getProperty("SpaceGroup").value
@@ -111,11 +111,11 @@ class DeltaPDF3D(PythonAlgorithm):
 
         sphereMin = self.getProperty("SphereMin").value
         if len(sphereMin) != 1 and len(sphereMin) != 3:
-            issues["SphereMin"] = 'Must provide 1 or 3 widths'
+            issues["SphereMin"] = 'Must provide 1 or 3 diameters'
 
         sphereMax = self.getProperty("SphereMax").value
         if len(sphereMax) != 1 and len(sphereMax) != 3:
-            issues["SphereMax"] = 'Must provide 1 or 3 widths'
+            issues["SphereMax"] = 'Must provide 1 or 3 diameters'
 
         return issues
 
@@ -136,9 +136,10 @@ class DeltaPDF3D(PythonAlgorithm):
 
         if self.getProperty("RemoveReflections").value:
             progress.report("Removing Reflections")
-            width = self.getProperty("Width").value
-            if len(width)==1:
-                width = np.repeat(width, 3)
+            size = self.getProperty("Size").value
+            if len(size)==1:
+                size = np.repeat(size, 3)
+            size/=2.0 # We want radii or half box width
             cut_shape = self.getProperty("Shape").value
             space_group = self.getProperty("SpaceGroup").value
             if space_group:
@@ -156,15 +157,15 @@ class DeltaPDF3D(PythonAlgorithm):
                     for l in range(int(np.ceil(dimZ.getMinimum())), int(np.floor(dimZ.getMaximum()))+1):
                         if not check_space_group or sg.isAllowedReflection([h,k,l]):
                             if cut_shape == 'cube':
-                                x_min=np.searchsorted(X,h-width[0])
-                                x_max=np.searchsorted(X,h+width[0])
-                                y_min=np.searchsorted(Y,k-width[1])
-                                y_max=np.searchsorted(Y,k+width[1])
-                                z_min=np.searchsorted(Z,l-width[2])
-                                z_max=np.searchsorted(Z,l+width[2])
+                                x_min=np.searchsorted(X,h-size[0])
+                                x_max=np.searchsorted(X,h+size[0])
+                                y_min=np.searchsorted(Y,k-size[1])
+                                y_max=np.searchsorted(Y,k+size[1])
+                                z_min=np.searchsorted(Z,l-size[2])
+                                z_max=np.searchsorted(Z,l+size[2])
                                 signal[x_min:x_max,y_min:y_max,z_min:z_max]=np.nan
                             else:  # sphere
-                                signal[(Xs-h)**2/width[0]**2 + (Ys-k)**2/width[1]**2 + (Zs-l)**2/width[2]**2 < 1]=np.nan
+                                signal[(Xs-h)**2/size[0]**2 + (Ys-k)**2/size[1]**2 + (Zs-l)**2/size[2]**2 < 1]=np.nan
 
         if self.getProperty("CropSphere").value:
             progress.report("Cropping to sphere")

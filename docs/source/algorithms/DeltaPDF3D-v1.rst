@@ -98,7 +98,7 @@ The IntermediateWorkspace shows the changes to the input workspace.
 .. testcode:: fft2
 
    DeltaPDF3D(InputWorkspace='DeltaPDF3D_MDH',OutputWorkspace='fft2',IntermediateWorkspace='int2',
-              RemoveReflections=True,Width=0.2,Convolution=False)
+              RemoveReflections=True,Size=0.4,Convolution=False)
    print "The value at [1,0,0] is " + str(mtd['fft2'].signalAt(1866))
    print "The value at [0,1,0] is " + str(mtd['fft2'].signalAt(2226))
 
@@ -123,7 +123,7 @@ The IntermediateWorkspace shows the changes to the input workspace.
 .. testcode:: fft3
 
    DeltaPDF3D(InputWorkspace='DeltaPDF3D_MDH',OutputWorkspace='fft3',IntermediateWorkspace='int3',
-              RemoveReflections=True,Width=0.2,CropSphere=True,SphereMax=3,Convolution=False)
+              RemoveReflections=True,Size=0.4,CropSphere=True,SphereMax=3,Convolution=False)
    print "The value at [1,0,0] is " + str(mtd['fft3'].signalAt(1866))
    print "The value at [0,1,0] is " + str(mtd['fft3'].signalAt(2226))
 
@@ -148,7 +148,7 @@ The IntermediateWorkspace shows the changes to the input workspace.
 .. code-block:: python
 
    DeltaPDF3D(InputWorkspace='DeltaPDF3D_MDH',OutputWorkspace='fft4',IntermediateWorkspace='int4'
-              RemoveReflections=True,Width=0.2,CropSphere=True,SphereMax=3,Convolution=True)
+              RemoveReflections=True,Size=0.4,CropSphere=True,SphereMax=3,Convolution=True)
    print "The value at [1,0,0] is " + str(mtd['fft4'].signalAt(1866))
    print "The value at [0,1,0] is " + str(mtd['fft4'].signalAt(2226))
 
