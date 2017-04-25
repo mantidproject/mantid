@@ -129,7 +129,7 @@ public:
 
     // Check result
     TS_ASSERT(FileComparisonHelper::isEqualToReferenceFile(
-        "SaveGSS_test2BankInstRALF_ref.gsa", outFilePath));
+        "SaveGSS_test2BankInstRALF_Ref.gsa", outFilePath));
 
     // Clean
     AnalysisDataService::Instance().remove(wsName);

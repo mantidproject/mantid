@@ -2,6 +2,7 @@
 #define FILECOMPARISONHELPER_H_
 
 #include <iosfwd>
+#include <iterator>
 #include <string>
 
 namespace FileComparisonHelper {

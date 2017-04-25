@@ -3,7 +3,7 @@
 #include "MantidDataHandling/SaveOpenGenieAscii.h"
 
 #include "MantidDataHandling/Load.h"
-#include "MantidTestHelpers/FileComparisonHelper.H"
+#include "MantidTestHelpers/FileComparisonHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 #include <Poco/TemporaryFile.h>
