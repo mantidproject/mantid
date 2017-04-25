@@ -178,39 +178,39 @@ IPeaksWorkspace_sptr CountReflections::getPeaksWorkspace(
   std::string outputWorkspaceName =
       getPropertyValue("MissingReflectionsWorkspace");
 
-  if (!outputWorkspaceName.empty()) {
-    IPeaksWorkspace_sptr rawOutputPeaksWorkspace =
-        getProperty("MissingReflectionsWorkspace");
-
-    PeaksWorkspace_sptr outputPeaksWorkspace =
-        boost::dynamic_pointer_cast<PeaksWorkspace>(rawOutputPeaksWorkspace);
-
-    if (outputPeaksWorkspace != templateWorkspace) {
-      outputPeaksWorkspace = templateWorkspace->clone();
-    }
-
-    const auto &missingPeaks = reflections.getUnobservedUniqueReflections();
-
-    std::vector<Peak> peaks;
-    peaks.reserve(missingPeaks.size() * pointGroup->order());
-
-    for (const auto &reflection : missingPeaks) {
-      auto hkls = pointGroup->getEquivalents(reflection);
-
-      for (const auto &hkl : hkls) {
-        Peak peak;
-        peak.setHKL(hkl);
-
-        peaks.emplace_back(peak);
-      }
-    }
-
-    outputPeaksWorkspace->getPeaks().swap(peaks);
-
-    return boost::static_pointer_cast<IPeaksWorkspace>(outputPeaksWorkspace);
+  if (outputWorkspaceName.empty()) {
+    return IPeaksWorkspace_sptr();
   }
 
-  return IPeaksWorkspace_sptr();
+  IPeaksWorkspace_sptr rawOutputPeaksWorkspace =
+      getProperty("MissingReflectionsWorkspace");
+
+  PeaksWorkspace_sptr outputPeaksWorkspace =
+      boost::dynamic_pointer_cast<PeaksWorkspace>(rawOutputPeaksWorkspace);
+
+  if (outputPeaksWorkspace != templateWorkspace) {
+    outputPeaksWorkspace = templateWorkspace->clone();
+  }
+
+  const auto &missingPeaks = reflections.getUnobservedUniqueReflections();
+
+  std::vector<Peak> peaks;
+  peaks.reserve(missingPeaks.size() * pointGroup->order());
+
+  for (const auto &reflection : missingPeaks) {
+    auto hkls = pointGroup->getEquivalents(reflection);
+
+    for (const auto &hkl : hkls) {
+      Peak peak;
+      peak.setHKL(hkl);
+
+      peaks.emplace_back(peak);
+    }
+  }
+
+  outputPeaksWorkspace->getPeaks().swap(peaks);
+
+  return boost::static_pointer_cast<IPeaksWorkspace>(outputPeaksWorkspace);
 }
 
 } // namespace Crystal

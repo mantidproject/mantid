@@ -44,30 +44,30 @@ std::vector<double> UniqueReflection::getSigmas() const {
 
 /// Removes peaks whose intensity deviates more than sigmaCritical from the
 /// intensities' mean.
-void UniqueReflection::removeOutliers(double sigmaCritical) {
+UniqueReflection UniqueReflection::removeOutliers(double sigmaCritical) const {
   if (sigmaCritical <= 0.0) {
     throw std::invalid_argument(
         "Critical sigma value has to be greater than 0.");
   }
 
+  UniqueReflection newReflection(m_hkl);
+
   if (m_peaks.size() > 2) {
     const std::vector<double> &intensities = getIntensities();
     const std::vector<double> &zScores = Kernel::getZscore(intensities);
 
-    std::vector<size_t> outlierIndices;
     for (size_t i = 0; i < zScores.size(); ++i) {
-      if (zScores[i] > sigmaCritical) {
-        outlierIndices.push_back(i);
+      if (zScores[i] <= sigmaCritical) {
+        newReflection.addPeak(m_peaks[i]);
       }
     }
-
-    if (!outlierIndices.empty()) {
-      for (auto it = outlierIndices.rbegin(); it != outlierIndices.rend();
-           ++it) {
-        m_peaks.erase(m_peaks.begin() + (*it));
-      }
+  } else {
+    for (auto peak : m_peaks) {
+      newReflection.addPeak(peak);
     }
   }
+
+  return newReflection;
 }
 
 /// Sets the intensities and sigmas of all stored peaks to the supplied values.
@@ -97,11 +97,11 @@ UniqueReflectionCollection::UniqueReflectionCollection(
     const ReflectionCondition_sptr &centering)
     : m_reflections(), m_pointgroup(pointGroup) {
   HKLGenerator generator(cell, dLimits.first);
-  HKLFilter_const_sptr dFilter = boost::make_shared<const HKLFilterDRange>(
-      cell, dLimits.first, dLimits.second);
-  HKLFilter_const_sptr centeringFilter =
+  auto dFilter = boost::make_shared<const HKLFilterDRange>(cell, dLimits.first,
+                                                           dLimits.second);
+  auto centeringFilter =
       boost::make_shared<const HKLFilterCentering>(centering);
-  HKLFilter_const_sptr filter = dFilter & centeringFilter;
+  auto filter = dFilter & centeringFilter;
 
   // Generate map of UniqueReflection-objects with reflection family as key.
   for (const auto &hkl : generator) {
@@ -198,13 +198,13 @@ UniqueReflectionCollection::getReflections() const {
  * @param uniqueReflections :: Map of unique reflections and peaks.
  */
 void PeaksStatistics::calculatePeaksStatistics(
-    std::map<V3D, UniqueReflection> uniqueReflections) {
+    const std::map<V3D, UniqueReflection> &uniqueReflections) {
   double rMergeNumerator = 0.0;
   double rPimNumerator = 0.0;
   double intensitySumRValues = 0.0;
   double iOverSigmaSum = 0.0;
 
-  for (auto &unique : uniqueReflections) {
+  for (const auto &unique : uniqueReflections) {
     /* Since all possible unique reflections are explored
      * there may be 0 observations for some of them.
      * In that case, nothing can be done.*/
@@ -212,17 +212,17 @@ void PeaksStatistics::calculatePeaksStatistics(
       ++m_uniqueReflections;
 
       // Possibly remove outliers.
-      unique.second.removeOutliers();
+      UniqueReflection outliersRemoved = unique.second.removeOutliers();
 
       // I/sigma is calculated for all reflections, even if there is only one
       // observation.
-      const std::vector<double> &intensities = unique.second.getIntensities();
-      const std::vector<double> &sigmas = unique.second.getSigmas();
+      const std::vector<double> &intensities = outliersRemoved.getIntensities();
+      const std::vector<double> &sigmas = outliersRemoved.getSigmas();
 
       // Accumulate the I/sigma's for current reflection into sum
       iOverSigmaSum += getIOverSigmaSum(sigmas, intensities);
 
-      if (unique.second.count() > 1) {
+      if (outliersRemoved.count() > 1) {
         // Get mean, standard deviation for intensities
         Statistics intensityStatistics = Kernel::getStatistics(
             intensities, StatOptions::Mean | StatOptions::UncorrectedStdDev);
@@ -247,7 +247,7 @@ void PeaksStatistics::calculatePeaksStatistics(
 
         // For Rpim, the sum is weighted by a factor depending on N
         double rPimFactor =
-            sqrt(1.0 / (static_cast<double>(unique.second.count()) - 1.0));
+            sqrt(1.0 / (static_cast<double>(outliersRemoved.count()) - 1.0));
         rPimNumerator += (rPimFactor * sumOfDeviationsFromMean);
 
         // Collect sum of intensities for R-value calculation
@@ -256,11 +256,11 @@ void PeaksStatistics::calculatePeaksStatistics(
 
         // The original algorithm sets the intensities and sigmas to the mean.
         double sqrtOfMeanSqrSigma = getRMS(sigmas);
-        unique.second.setPeaksIntensityAndSigma(meanIntensity,
-                                                sqrtOfMeanSqrSigma);
+        outliersRemoved.setPeaksIntensityAndSigma(meanIntensity,
+                                                  sqrtOfMeanSqrSigma);
       }
 
-      const std::vector<Peak> &reflectionPeaks = unique.second.getPeaks();
+      const std::vector<Peak> &reflectionPeaks = outliersRemoved.getPeaks();
       m_peaks.insert(m_peaks.end(), reflectionPeaks.begin(),
                      reflectionPeaks.end());
     }

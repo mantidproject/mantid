@@ -154,22 +154,22 @@ public:
         getReflectionWithPeaks({30.0, 34.0, 32.0, 31.0}, {4.5, 6.5, 10.0, 2.3});
 
     // standard deviation is 1.70782512765993
-    reflection.removeOutliers();
+    auto cleanReflection = reflection.removeOutliers();
     TSM_ASSERT_EQUALS(
         "UniqueReflection removed outlier although it should not.",
-        reflection.count(), 4);
+        cleanReflection.count(), 4);
 
-    reflection.removeOutliers(2.0);
+    cleanReflection = reflection.removeOutliers(2.0);
     TSM_ASSERT_EQUALS(
         "UniqueReflection removed outlier although it should not.",
-        reflection.count(), 4);
+        cleanReflection.count(), 4);
 
-    reflection.removeOutliers(1.0);
+    cleanReflection = reflection.removeOutliers(1.0);
     TSM_ASSERT_EQUALS(
         "UniqueReflection did not remove outliers although it should have.",
-        reflection.count(), 2);
+        cleanReflection.count(), 2);
 
-    std::vector<double> cleanIntensities = reflection.getIntensities();
+    std::vector<double> cleanIntensities = cleanReflection.getIntensities();
     TS_ASSERT_EQUALS(cleanIntensities[0], 32.0);
     TS_ASSERT_EQUALS(cleanIntensities[1], 31.0);
   }
