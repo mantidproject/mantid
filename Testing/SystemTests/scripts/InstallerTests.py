@@ -20,6 +20,8 @@ parser.add_argument('-o', dest='out2stdout', action='store_true',
                     help='Output to the screen instead of log files')
 parser.add_argument('-R', dest='test_regex', metavar='regexp', default=None,
                     help='Optionally only run the test matched by the regex')
+parser.add_option("", "--archivesearch", dest="archivesearch", action="store_true",
+                  help="Turn on archive search for file finder.")
 log_levels = ['error', 'warning', 'notice', 'information', 'debug']
 parser.add_argument('-l', dest='log_level', metavar='level', default='notice',
                     choices=log_levels, help='Log level '+str(log_levels))
@@ -76,6 +78,8 @@ try:
                  THIS_MODULE_DIR, options.log_level, installer.python_cmd, installer.python_args)
     if options.test_regex is not None:
         run_test_cmd += " -R " + options.test_regex
+    if options.archivesearch:
+        run_test_cmd += ' --archivesearch'
     if options.out2stdout:
         print("Executing command '{0}'".format(run_test_cmd))
         p = subprocess.Popen(run_test_cmd, shell=True) # no PIPE: print on screen for debugging
