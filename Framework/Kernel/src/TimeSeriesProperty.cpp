@@ -531,8 +531,12 @@ void TimeSeriesProperty<TYPE>::splitByTimeVector(
     std::vector<TimeSeriesProperty *> outputs) {
   // check inputs
   if (splitter_time_vec.size() != target_vec.size() + 1)
-    throw std::runtime_error("Input time vector's size does not match taget "
-                             "workspace index vector's size.");
+  {
+    std::stringstream errss;
+    errss << "Input time vector's size " << splitter_time_vec.size() << " does not match (one more larger than) taget "
+             "workspace index vector's size " << target_vec.size() << "\n";
+    throw std::runtime_error(errss.str());
+  }
   // return if the output vector TimeSeriesProperties is not defined
   if (outputs.empty())
     return;

@@ -400,17 +400,10 @@ void FilterEvents::splitTimeSeriesLogs(const std::vector<TimeSeriesProperty<int>
     }
 
     // split log
-    if (m_useSplittersWorkspace) {
-
-      ;
-      // TODO/NOW - consider to call splitLog
-      //   int_tsp_vector[i]->split(m_vecSplitterTime, child_vectors);
-    } else {
-      // split with vector
-
-      dbl_tsp_vector[i]->splitByTimeVector(split_datetime_vec,
-                                           m_vecSplitterGroup, output_vector);
-    }
+    g_log.warning() << "Split datetime vector size = " << split_datetime_vec.size()
+                    << ", vector of splitter group size = " << m_vecSplitterGroup.size() << "\n";
+    dbl_tsp_vector[i]->splitByTimeVector(split_datetime_vec,
+                                         m_vecSplitterGroup, output_vector);
 
     // assign to output workspaces
     for (int tindex = 0; tindex <= max_target_index; ++tindex) {
@@ -423,6 +416,8 @@ void FilterEvents::splitTimeSeriesLogs(const std::vector<TimeSeriesProperty<int>
                       << "\n";
       } else {
         DataObjects::EventWorkspace_sptr ws_i = wsiter->second;
+        g_log.warning() << "Output workspace " << tindex << ".  split log " << output_vector[tindex]->name()
+                        << " has length " << output_vector[tindex]->size() << "\n";
         ws_i->mutableRun().addProperty(output_vector[tindex], true);
       }
     }
@@ -712,6 +707,7 @@ void FilterEvents::convertSplittersWorkspaceToVectors() {
   m_vecSplitterTime.clear();
 
   // convert SplittersWorkspace to a set of pairs which can be sorted
+  // TODO/FIXME/NOW - This is where the bug is!
   size_t num_rows = this->m_splittersWorkspace->rowCount();
   for (size_t irow = 0; irow < num_rows; ++irow) {
     Kernel::SplittingInterval splitter =
