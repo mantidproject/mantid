@@ -332,6 +332,8 @@ void FilterEvents::splitTimeSeriesLogs(const std::vector<TimeSeriesProperty<int>
     convertSplittersWorkspaceToVectors();
   }
 
+  return;
+
   // convert splitter time vector to DateAndTime format
   split_datetime_vec.resize(m_vecSplitterTime.size());
   for (size_t i = 0; i < m_vecSplitterTime.size(); ++i) {
@@ -707,24 +709,31 @@ void FilterEvents::convertSplittersWorkspaceToVectors() {
   m_vecSplitterTime.clear();
 
   // convert SplittersWorkspace to a set of pairs which can be sorted
-  // TODO/FIXME/NOW - This is where the bug is!
   size_t num_rows = this->m_splittersWorkspace->rowCount();
   for (size_t irow = 0; irow < num_rows; ++irow) {
+    // get splitter
     Kernel::SplittingInterval splitter =
         m_splittersWorkspace->getSplitter(irow);
+
+    // convert splitter to 2 X-value
     if (m_vecSplitterTime.size() == 0 ||
         splitter.start() > m_vecSplitterTime.back() + TOLERANCE) {
+      // first splitter or splitter with gap
       m_vecSplitterTime.push_back(splitter.start().totalNanoseconds());
       m_vecSplitterTime.push_back(splitter.stop().totalNanoseconds());
-      // 0 stands for not defined
-      m_vecSplitterGroup.push_back(0);
+      if (m_vecSplitterGroup.size() > 0)
+      {
+        // 0 stands for not defined
+        m_vecSplitterGroup.push_back(0);
+      }
       m_vecSplitterGroup.push_back(splitter.index());
     } else if (splitter.start() < m_vecSplitterTime.back() - TOLERANCE) {
       // almost same: then add the spliters.stop() only
       m_vecSplitterTime.push_back(splitter.stop().totalNanoseconds());
       m_vecSplitterGroup.push_back(splitter.index());
     } else {
-      // have to insert the somewhere
+      throw std::runtime_error("Very suspicious");
+      // have to insert the somewhere (in case the log is not in time order
       std::vector<int64_t>::iterator finditer =
           std::lower_bound(m_vecSplitterTime.begin(), m_vecSplitterTime.end(),
                            splitter.start().totalNanoseconds());
@@ -772,7 +781,12 @@ void FilterEvents::convertSplittersWorkspaceToVectors() {
         throw std::runtime_error("This is not a possible situation!");
       }
     } // IF-ELSE to add a new entry
-  }   // END-FOR (add all splitters)
+
+    // debug output
+    g_log.warning() << "entry " << irow << ", size = " << m_vecSplitterTime.size() << ", "
+                    << m_vecSplitterGroup.size() << "\n";
+
+  } // END-FOR (add all splitters)
 
   return;
 }
