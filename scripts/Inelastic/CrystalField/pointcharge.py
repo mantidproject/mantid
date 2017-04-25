@@ -346,6 +346,9 @@ class PointCharge(object):
         Parses the stored crystal structure and returns a set of ligands
         @param dist - the maximum distance of ligands (if dist > 0) or the nth neighbour shell (if dist < 0)
         """
+        # Check that the charges have been defined:
+        if self._charges is None:
+            raise RuntimeError('No charges have been defined for this model.')
         # Determine the transformation matrix to convert from fractional to Cartesian coordinates and back.
         cell = self._cryst.getUnitCell()
         rtoijk = cell.getBinv()
@@ -353,10 +356,17 @@ class PointCharge(object):
         # Make a list of all atomic positions
         sg = self._cryst.getSpaceGroup()
         pos = {}
+        charges = self._charges
         for name, coords in self._atoms.items():
             pos[name] = [c for c in sg.getEquivalentPositions(coords)]
             if name not in self._charges.keys():
-                raise RuntimeError('Atom type ''%s'' in structure not in list of charges' % (name))
+                import re
+                try:
+                    charges[name] = self._charges[re.match('^[A-z]+', name).group(0)]
+                except (KeyError, AttributeError):
+                    warnstr = 'Atom type ''%s'' in structure not in list of charges. Assuming q=0' % (name)
+                    warnings.warn(warnstr, RuntimeWarning)
+                    charges[name] = 0.
         if self._ionlabel not in pos.keys():
             raise RuntimeError('Magnetic ion ''%s'' not found in structure' % (self._ionlabel))
         # Construct a large enough supercell such that we can be sure to find all neighbours of the magnetic
@@ -382,7 +392,7 @@ class PointCharge(object):
                                 rvec = np.array(np.matrix(r1 - rn) * rtoijk)[0]
                                 r = np.linalg.norm(rvec)
                                 if (r > 0) and (r < (dist if dist > 0 else r+1)):
-                                    entries.append([r, self._charges[name], rvec[0], rvec[1], rvec[2]])
+                                    entries.append([r, charges[name], rvec[0], rvec[1], rvec[2]])
         if dist < 0:
             rlist = np.sort(np.unique([ent[0] for ent in entries]))
             entries = [ent for ent in entries if ent[0] < rlist[nn]]  # Truncates the entries to nnth neighbours
