@@ -112,17 +112,42 @@ public:
     calculatePeaksStatistics(reflections.getReflections());
   }
 
+  /// Total number of observed reflections - no symmetry is taken into
+  /// account for this.
   int m_measuredReflections;
-  int m_uniqueReflections;
-  double m_completeness;
-  double m_redundancy;
-  double m_rMerge;
-  double m_rPim;
-  double m_meanIOverSigma;
-  double m_dspacingMin;
-  double m_dspacingMax;
-  double m_chiSquared;
 
+  /// Number of unique reflections. This counts each reflection family once,
+  /// according to the point group.
+  int m_uniqueReflections;
+
+  /// Fraction of observed unique reflections in the resolution range defined
+  /// by d_min and d_max.
+  double m_completeness;
+
+  /// Average number of observations for a unique reflection.
+  double m_redundancy;
+
+  /// Merging R-factor, R_merge, sometimes also called R_sym. This is a basic
+  /// measure for how well the intensities of symmetry equivalent reflections
+  /// agree with each other.
+  double m_rMerge;
+
+  /// Precision indicating R-factor (R_{p.i.m}). Also a measurement of agreement
+  /// between equivalent reflections, but without some of the weeknesses of
+  /// R_merge.
+  double m_rPim;
+
+  /// Average signal to noise ratio in the reflections.
+  double m_meanIOverSigma;
+
+  /// Lower d-spacing limit in the data set, sometimes referred to as upper
+  /// resolution limit.
+  double m_dspacingMin;
+
+  /// Upper d-spacing limit in the data set.
+  double m_dspacingMax;
+
+  double m_chiSquared;
   std::vector<DataObjects::Peak> m_peaks;
 
 private:
