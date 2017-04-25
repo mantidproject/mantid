@@ -317,7 +317,7 @@ void PDCalibration::exec() {
   } else {
     g_log.information("Using all TZERO values");
 
-    m_tzeroMin = -1. * std::numeric_limits<double>::max();
+    m_tzeroMin = std::numeric_limits<double>::lowest();
     m_tzeroMax = std::numeric_limits<double>::max();
   }
 
@@ -333,7 +333,7 @@ void PDCalibration::exec() {
   } else {
     g_log.information("Using all DIFA values");
 
-    m_difaMin = -1. * std::numeric_limits<double>::max();
+    m_difaMin = std::numeric_limits<double>::lowest();
     m_difaMax = std::numeric_limits<double>::max();
   }
 

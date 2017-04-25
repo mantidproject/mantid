@@ -39,14 +39,15 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class DLLExport vtkDataSetToWsLocation {
 public:
+  vtkDataSetToWsLocation &
+  operator=(const vtkDataSetToWsLocation &other) = delete;
+  vtkDataSetToWsLocation(const vtkDataSetToWsLocation &other) = delete;
   static std::string exec(vtkDataSet *dataSet);
   vtkDataSetToWsLocation(vtkDataSet *dataSet);
   std::string execute();
   ~vtkDataSetToWsLocation();
 
 private:
-  vtkDataSetToWsLocation &operator=(const vtkDataSetToWsLocation &other);
-  vtkDataSetToWsLocation(const vtkDataSetToWsLocation &other);
   vtkDataSet *m_dataset;
 };
 }

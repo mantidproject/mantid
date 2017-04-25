@@ -29,9 +29,9 @@ set ( INC_FILES
 	inc/MantidLiveData/FileEventDataListener.h
 	inc/MantidLiveData/ISIS/FakeISISEventDAE.h
 	inc/MantidLiveData/ISIS/FakeISISHistoDAE.h
-	inc/MantidLiveData/ISIS/TCPEventStreamDefs.h
 	inc/MantidLiveData/ISIS/ISISHistoDataListener.h
 	inc/MantidLiveData/ISIS/ISISLiveEventDataListener.h
+	inc/MantidLiveData/ISIS/TCPEventStreamDefs.h
 	inc/MantidLiveData/LiveDataAlgorithm.h
 	inc/MantidLiveData/LoadLiveData.h
 	inc/MantidLiveData/MonitorLiveData.h
@@ -53,6 +53,35 @@ set ( TEST_FILES
 	MonitorLiveDataTest.h
 	StartLiveDataTest.h
 )
+
+find_package ( LibRDKafka )
+if ( LIBRDKAFKA_FOUND )
+  set ( SRC_FILES
+    ${SRC_FILES}
+    src/Kafka/KafkaEventListener.cpp
+    src/Kafka/KafkaEventStreamDecoder.cpp
+    src/Kafka/KafkaBroker.cpp
+    src/Kafka/KafkaTopicSubscriber.cpp
+  )
+  set ( INC_FILES
+    ${INC_FILES}
+    inc/MantidLiveData/Kafka/KafkaEventListener.h
+    inc/MantidLiveData/Kafka/KafkaEventStreamDecoder.h
+    inc/MantidLiveData/Kafka/IKafkaStreamSubscriber.h
+    inc/MantidLiveData/Kafka/IKafkaBroker.h
+    inc/MantidLiveData/Kafka/KafkaBroker.h
+    inc/MantidLiveData/Kafka/KafkaTopicSubscriber.h
+    src/Kafka/private/Schema/flatbuffers/flatbuffers.h
+    src/Kafka/private/Schema/det_spec_mapping_schema_generated.h
+    src/Kafka/private/Schema/event_schema_generated.h
+    src/Kafka/private/Schema/run_info_schema_generated.h
+  )
+  set ( TEST_FILES
+    ${TEST_FILES}
+    KafkaEventStreamDecoderTest.h
+    KafkaTopicSubscriberTest.h
+  )
+endif()
 
 if (COVERALLS)
     foreach( loop_var ${SRC_FILES} ${INC_FILES})
@@ -86,7 +115,11 @@ if ( WIN32 )
   set ( WINSOCK ws2_32 )
 endif ()
 
-target_link_libraries ( LiveData LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} ${MANTIDLIBS} ${WINSOCK} )
+set ( PRIVATE_LINK_LIBRARIES ${TCMALLOC_LIBRARIES_LINKTIME} ${MANTIDLIBS} ${WINSOCK})
+if ( LIBRDKAFKA_FOUND )
+  set ( PRIVATE_LINK_LIBRARIES ${PRIVATE_LINK_LIBRARIES} ${LibRDKafka_LIBRARIES} )
+endif()
+target_link_libraries ( LiveData LINK_PRIVATE ${PRIVATE_LINK_LIBRARIES} )
 
 # Add the unit tests directory
 add_subdirectory ( test )

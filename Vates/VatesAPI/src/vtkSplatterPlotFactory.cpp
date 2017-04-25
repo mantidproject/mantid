@@ -54,7 +54,7 @@ vtkSplatterPlotFactory::vtkSplatterPlotFactory(const std::string &scalarName,
                                                const size_t numPoints,
                                                const double percentToUse)
     : m_scalarName(scalarName), m_numPoints(numPoints), m_buildSortedList(true),
-      m_wsName(""), slice(false), m_time(0.0), m_minValue(0.1), m_maxValue(0.1),
+      m_wsName(""), slice(false), m_time(0.0),
       m_metaDataExtractor(new MetaDataExtractorUtils()),
       m_metadataJsonManager(new MetadataJsonManager()),
       m_vatesConfigurations(new VatesConfigurations()) {
@@ -441,16 +441,6 @@ vtkSplatterPlotFactory::create(ProgressAction &progressUpdating) const {
 
   // Set the instrument
   m_instrument = m_metaDataExtractor->extractInstrument(m_workspace.get());
-  double *range = nullptr;
-
-  if (dataSet) {
-    range = dataSet->GetScalarRange();
-  }
-
-  if (range) {
-    m_minValue = range[0];
-    m_maxValue = range[1];
-  }
 
   // Check for the workspace type, i.e. if it is MDHisto or MDEvent
   IMDEventWorkspace_sptr eventWorkspace =
@@ -514,20 +504,7 @@ void vtkSplatterPlotFactory::validate() const {
  * Add meta data to the visual data set.
  */
 void vtkSplatterPlotFactory::addMetadata() const {
-  const double defaultValue = 0.1;
-
   if (this->dataSet) {
-    double *range = dataSet->GetScalarRange();
-    if (range) {
-      m_minValue = range[0];
-      m_maxValue = range[1];
-    } else {
-      m_minValue = defaultValue;
-      m_maxValue = defaultValue;
-    }
-
-    m_metadataJsonManager->setMinValue(m_minValue);
-    m_metadataJsonManager->setMaxValue(m_maxValue);
     m_metadataJsonManager->setInstrument(
         m_metaDataExtractor->extractInstrument(m_workspace.get()));
     m_metadataJsonManager->setSpecialCoordinates(
@@ -540,7 +517,7 @@ void vtkSplatterPlotFactory::addMetadata() const {
     // Add metadata to dataset.
     MetadataToFieldData convert;
     convert(outputFD.GetPointer(), jsonString,
-            m_vatesConfigurations->getMetadataIdJson().c_str());
+            m_vatesConfigurations->getMetadataIdJson());
     dataSet->SetFieldData(outputFD.GetPointer());
   }
 }
@@ -556,18 +533,16 @@ void vtkSplatterPlotFactory::setMetadata(vtkFieldData *fieldData,
   // the dataset
   FieldDataToMetadata convertFtoM;
   std::string xmlString = convertFtoM(fieldData, XMLDefinitions::metaDataId());
-  std::string jsonString =
-      convertFtoM(dataSet->GetFieldData(),
-                  m_vatesConfigurations->getMetadataIdJson().c_str());
+  std::string jsonString = convertFtoM(
+      dataSet->GetFieldData(), m_vatesConfigurations->getMetadataIdJson());
 
   // Create a new field data array
   MetadataToFieldData convertMtoF;
   vtkNew<vtkFieldData> outputFD;
   outputFD->ShallowCopy(fieldData);
-  convertMtoF(outputFD.GetPointer(), xmlString,
-              XMLDefinitions::metaDataId().c_str());
+  convertMtoF(outputFD.GetPointer(), xmlString, XMLDefinitions::metaDataId());
   convertMtoF(outputFD.GetPointer(), jsonString,
-              m_vatesConfigurations->getMetadataIdJson().c_str());
+              m_vatesConfigurations->getMetadataIdJson());
   dataSet->SetFieldData(outputFD.GetPointer());
 }
 
@@ -603,18 +578,6 @@ void vtkSplatterPlotFactory::setTime(double time) {
   }
   m_time = time;
 }
-
-/**
-* Getter for the minimum value;
-* @return The minimum value of the data set.
-*/
-double vtkSplatterPlotFactory::getMinValue() { return m_minValue; }
-
-/**
-* Getter for the maximum value;
-* @return The maximum value of the data set.
-*/
-double vtkSplatterPlotFactory::getMaxValue() { return m_maxValue; }
 
 /**
 * Getter for the instrument.

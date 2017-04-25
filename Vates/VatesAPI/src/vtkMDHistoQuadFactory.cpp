@@ -17,7 +17,6 @@
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/make_unique.h"
 
-using Mantid::API::IMDWorkspace;
 using Mantid::Kernel::CPUTimer;
 using Mantid::DataObjects::MDHistoWorkspace;
 using Mantid::DataObjects::MDHistoWorkspaceIterator;

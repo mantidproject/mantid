@@ -1,4 +1,6 @@
 from __future__ import (absolute_import, division, print_function)
+
+
 def assert_validate_error(caller, error_type, obj):
     try:
         obj.validate()
@@ -11,7 +13,6 @@ def assert_validate_error(caller, error_type, obj):
 
 
 def assert_raises_nothing(caller, obj):
-    obj.validate()
     try:
         obj.validate()
     except:  # noqa

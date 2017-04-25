@@ -178,7 +178,7 @@ API::MatrixWorkspace_sptr LoadGSS::loadGSASFile(const std::string &filename,
 
       if (key2 == "Histograms") {
         // NSpec (Format: 'nspec HISTOGRAM')
-        nSpec = atoi(key1.c_str());
+        nSpec = std::stoi(key1);
         g_log.information() << "Histogram Line:  " << key1
                             << "  nSpec = " << nSpec << "\n";
       } else if (key1 == "Instrument:") {

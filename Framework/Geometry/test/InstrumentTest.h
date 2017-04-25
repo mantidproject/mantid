@@ -551,7 +551,9 @@ public:
     // Extract information from instrument to create DetectorInfo
     auto detInfo = makeDetectorInfo(instrument);
 
-    instrument.setDetectorInfo(detInfo);
+    boost::shared_ptr<const std::unordered_map<detid_t, size_t>>
+        detIdToIndexMap;
+    instrument.setDetectorInfo(detInfo, detIdToIndexMap);
     // bank 1
     TS_ASSERT(detInfo->position(0).isApprox(
         toVector3d(bankOffset + V3D{-0.008, -0.0002, 0.0}), 1e-12));
@@ -615,7 +617,9 @@ public:
     // Extract information from instrument to create DetectorInfo
     auto detInfo = makeDetectorInfo(instrument);
 
-    instrument.setDetectorInfo(detInfo);
+    boost::shared_ptr<const std::unordered_map<detid_t, size_t>>
+        detIdToIndexMap;
+    instrument.setDetectorInfo(detInfo, detIdToIndexMap);
     // bank 1
     double pitch = 0.008;
     TS_ASSERT(

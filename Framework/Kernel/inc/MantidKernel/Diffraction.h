@@ -8,7 +8,7 @@ namespace Mantid {
 namespace Kernel {
 namespace Diffraction {
 
-/** Diffraction : TODO: DESCRIPTION
+/** Diffraction : Collection of functions useful in diffraction scattering
 
   Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source

@@ -700,7 +700,7 @@ void ConfigDialog::initMantidPage() {
   const std::string ignoreParaViewProperty = "paraview.ignore";
   bool ignoreParaView =
       cfgSvc.hasProperty(ignoreParaViewProperty) &&
-      bool(atoi(cfgSvc.getString(ignoreParaViewProperty).c_str()));
+      (std::stoi(cfgSvc.getString(ignoreParaViewProperty)) != 0);
   ckIgnoreParaView->setChecked(ignoreParaView);
   grid->addWidget(ckIgnoreParaView, 3, 0);
 

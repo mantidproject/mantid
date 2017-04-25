@@ -67,7 +67,7 @@ void RebinnedSourcesManager::addHandle(const std::string &workspaceName,
                                        Mantid::API::Workspace_sptr workspace) {
   // Check if the workspace which has experienced a change is being tracked in
   // our buffer
-  if (m_newWorkspacePairBuffer.size() == 0) {
+  if (m_newWorkspacePairBuffer.empty()) {
     return;
   }
 
@@ -212,7 +212,7 @@ void RebinnedSourcesManager::repipeRebinnedSource() {
   // e.g. when changing from BinMD to SliceMD, then we need to untrack the old,
   // rebinned
   // workspace
-  if (m_newRebinnedWorkspacePairBuffer.size() > 0) {
+  if (!m_newRebinnedWorkspacePairBuffer.empty()) {
     untrackWorkspaces(createKeyPairForSource(m_inputSource));
   }
 
@@ -257,7 +257,7 @@ void RebinnedSourcesManager::swapSources(pqPipelineSource *src1,
 
   // Check if the original source has a filter if such then repipe otherwise we
   // are done
-  if ((src1->getAllConsumers()).size() <= 0) {
+  if (src1->getAllConsumers().empty()) {
     // Need to press apply to finalize the internal setup of the source.
     // emit triggerAcceptForNewFilters();
     return;
@@ -767,7 +767,7 @@ void RebinnedSourcesManager::deleteSpecificSource(pqPipelineSource *source) {
     // Go to the end of the source and work your way back
     pqPipelineSource *tempSource = source;
 
-    while ((tempSource->getAllConsumers()).size() > 0) {
+    while (!tempSource->getAllConsumers().empty()) {
       tempSource = tempSource->getConsumer(0);
     }
 
