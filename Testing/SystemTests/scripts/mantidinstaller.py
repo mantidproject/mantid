@@ -287,8 +287,7 @@ class DMGInstaller(MantidInstaller):
 # Mantid
 if __name__ == "__main__":
     import argparse
-    parser = argparse.ArgumentParser(#"Usage: %prog <command> <pkg directory>",
-                                   description="Commands available: install, uninstall")
+    parser = argparse.ArgumentParser(description="Commands available: install, uninstall")
     parser.add_argument('command', choices=['install', 'uninstall'], help='command to run')
     parser.add_argument('directory', help='package directory')
     parser.add_argument('-d', '--dump-exe-path', dest='dump_exe_path',
