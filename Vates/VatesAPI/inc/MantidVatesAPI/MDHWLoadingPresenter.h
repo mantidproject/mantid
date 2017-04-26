@@ -53,8 +53,6 @@ public:
   void setAxisLabels(vtkDataSet *visualDataSet) override;
   ~MDHWLoadingPresenter() override;
   const std::string &getInstrument() override;
-  double getMinValue() override;
-  double getMaxValue() override;
 
   /// Transpose a workspace to push integrated dimensions to the last
   static void

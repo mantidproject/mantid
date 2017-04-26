@@ -857,7 +857,7 @@ void ConfigServiceImpl::saveConfig(const std::string &filename) const {
       // If it does exist make sure the value is current
       std::string value = getString(key, false);
       Poco::replaceInPlace(value, "\\", "\\\\"); // replace single \ with double
-      updated_file += key + "=" + value;
+      updated_file.append(key).append("=").append(value);
       // Remove the key from the changed key list
       m_changed_keys.erase(key);
     }
@@ -957,9 +957,9 @@ void ConfigServiceImpl::getKeysRecursive(
   for (auto &rootKey : rootKeys) {
     std::string searchString;
     if (root.empty()) {
-      searchString = rootKey;
+      searchString.append(rootKey);
     } else {
-      searchString = root + "." + rootKey;
+      searchString.append(root).append(".").append(rootKey);
     }
 
     getKeysRecursive(searchString, allKeys);

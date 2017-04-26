@@ -180,6 +180,9 @@ public:
 
   // virtual void plotCalibOutput();
   MOCK_METHOD1(plotCalibOutput, void(const std::string &pyCode));
+
+  // virtual void updateTabsInstrument(const std::string & newInstrument) = 0;
+  MOCK_METHOD1(updateTabsInstrument, void(const std::string &newInstrument));
 };
 GCC_DIAG_ON_SUGGEST_OVERRIDE
 

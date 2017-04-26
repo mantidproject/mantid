@@ -42,7 +42,8 @@ std::vector<std::string> fileExtension(Format fmt);
 
 std::string fileExtension(const std::string &format);
 
-bool isFileExtension(std::string extension, const std::string &shortName);
+bool isFileExtension(const std::string &extension,
+                     const std::string &shortName);
 
 std::string description(Format fmt);
 

@@ -50,19 +50,6 @@ class StateSliceEvent(StateBase):
                                                         "end_time": self.end_time})
                             is_invalid.update(entry)
 
-            # Check that the entries are monotonically increasing. We don't want 12, 24, 22
-            if len(self.start_time) > 1 and not monotonically_increasing(self.start_time):
-                entry = validation_message("Not monotonically increasing start time list",
-                                           "Make sure that the start times increase monotonically.",
-                                           {"start_time": self.start_time})
-                is_invalid.update(entry)
-
-            if len(self.end_time) > 1 and not monotonically_increasing(self.end_time):
-                entry = validation_message("Not monotonically increasing end time list",
-                                           "Make sure that the end times increase monotonically.",
-                                           {"end_time": self.end_time})
-                is_invalid.update(entry)
-
             # Check that end_time is not smaller than start_time
             if not is_smaller(self.start_time, self.end_time):
                 entry = validation_message("Start time larger than end time.",

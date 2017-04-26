@@ -5,14 +5,25 @@ Direct Inelastic Changes
 .. contents:: Table of Contents
    :local:
 
+Performance
+-----------
+
+Several system tests for the Direct Inelastic technique area are reporting significant improvements in speed. These are the result of some core framework changes. See Framework notes for more information.
+
 Algorithms
 ----------
+
+New
+###
+
+- :ref:`CreateEPP <algm-CreateEPP>`: generate EPP tables compatible with :ref:`FindEPP <algm-FindEPP>` directly from instrument geometry.
 
 Improved
 ########
 
 - :ref:`LoadILLTof <algm-LoadILLTOF-v2>` now loads the monitor spectra last making the spectrum numbers and detectors IDs match.
 - In :ref:`CorrectTOFAxis <algm-CorrectTOFAxis>`, the sample to detector distance can now be directly given using the new *L2* property.
+- :ref:`DPDFReduction <algm-DPDFReduction>` now detects :math:`\theta^*` such that :math:`\langle S(\theta^*,E) \rangle_E \ll \langle S(\theta,E) \rangle_{\theta,E}`
 
 Deprecated
 ##########

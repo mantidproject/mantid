@@ -38,31 +38,17 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 class DLLExport MetadataJsonManager {
 public:
   MetadataJsonManager();
-
   ~MetadataJsonManager();
-
   std::string getSerializedJson();
-
   void readInSerializedJson(const std::string &serializedJson);
-
   void setInstrument(const std::string &instrument);
   std::string &getInstrument();
-
-  void setMinValue(double minValue);
-  double getMinValue();
-
-  void setMaxValue(double maxValue);
-  double getMaxValue();
-
   void setSpecialCoordinates(int specialCoordinates);
   int getSpecialCoordinates();
 
 private:
   Json::Value metadataContainer;
-
   std::string instrument;
-  double minValue;
-  double maxValue;
   int specialCoordinates;
 };
 }

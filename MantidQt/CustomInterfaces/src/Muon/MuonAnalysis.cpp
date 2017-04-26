@@ -145,7 +145,7 @@ void MuonAnalysis::initLayout() {
   // Allow loading current run, provided platform and facility support this
   setLoadCurrentRunEnabled(true);
 
-  // If facility if not supported by the interface - show a warning, but still
+  // If facility is not supported by the interface - show a warning, but still
   // open it
   if (supportedFacilities.find(userFacility) == supportedFacilities.end()) {
     const std::string supportedFacilitiesStr = Strings::join(
@@ -398,7 +398,7 @@ void MuonAnalysis::plotSelectedItem() {
 void MuonAnalysis::plotItem(ItemType itemType, int tableRow,
                             PlotType plotType) {
   m_updating = true;
-
+  m_dataSelector->clearChosenGroups();
   AnalysisDataServiceImpl &ads = AnalysisDataService::Instance();
 
   try {
@@ -1295,8 +1295,7 @@ void MuonAnalysis::inputFileChanged(const QStringList &files) {
   }
 
   // Populate bin width info in Plot options
-  double binWidth =
-      matrix_workspace->dataX(0)[1] - matrix_workspace->dataX(0)[0];
+  double binWidth = matrix_workspace->x(0)[1] - matrix_workspace->x(0)[0];
   m_uiForm.optionLabelBinWidth->setText(
       QString("Data collected with histogram bins of %1 %2s")
           .arg(binWidth)
@@ -1661,9 +1660,26 @@ void MuonAnalysis::plotSpectrum(const QString &wsName, bool logScale) {
   s << "      layer.removeCurve(i)"; // remove everything else
 
   // Plot data in the given window with given options
-  s << "def plot_data(ws_name, errors, connect, window_to_use):";
-  s << "  w = plotSpectrum(ws_name, 0, error_bars = errors, type = connect, "
-       "window = window_to_use)";
+  s << "def plot_data(ws_name,errors, connect, window_to_use):";
+  if (parsePlotType(m_uiForm.frontPlotFuncs) == PlotType::Asymmetry) {
+    // clang-format off
+    s << "w = plotSpectrum(source = ws_name,"
+         "indices = 0,"
+         "distribution = mantidqtpython.MantidQt.DistributionFalse,"
+         "error_bars = errors," 
+         "type = connect,"
+         "window = window_to_use)";
+    // clang-format on
+  } else {
+    // clang-format off
+    s << "w = plotSpectrum(source = ws_name,"
+         "indices = 0,"
+         "distribution = mantidqtpython.MantidQt.DistributionDefault,"
+         "error_bars = errors,"
+         "type = connect,"
+         "window = window_to_use)";
+    // clang-format on
+  }
   s << "  w.setName(ws_name + '-1')";
   s << "  w.setObjectName(ws_name)";
   s << "  w.show()";
@@ -1755,15 +1771,15 @@ QMap<QString, QString> MuonAnalysis::getPlotStyleParams(const QString &wsName) {
           AnalysisDataService::Instance().retrieve(wsName.toStdString());
       MatrixWorkspace_sptr matrix_workspace =
           boost::dynamic_pointer_cast<MatrixWorkspace>(ws_ptr);
-      const Mantid::MantidVec &dataY = matrix_workspace->readY(0);
+      const auto &yData = matrix_workspace->y(0);
 
       if (min.isEmpty())
         params["YAxisMin"] =
-            QString::number(*min_element(dataY.begin(), dataY.end()));
+            QString::number(*min_element(yData.begin(), yData.end()));
 
       if (max.isEmpty())
         params["YAxisMax"] =
-            QString::number(*max_element(dataY.begin(), dataY.end()));
+            QString::number(*max_element(yData.begin(), yData.end()));
     }
   }
 
@@ -1978,7 +1994,7 @@ std::string MuonAnalysis::rebinParams(Workspace_sptr wsForRebin) {
     return "";
   } else if (rebinType == MuonAnalysisOptionTab::FixedRebin) {
     MatrixWorkspace_sptr ws = firstPeriod(wsForRebin);
-    double binSize = ws->dataX(0)[1] - ws->dataX(0)[0];
+    double binSize = ws->x(0)[1] - ws->x(0)[0];
 
     double stepSize = m_optionTab->getRebinStep();
 
@@ -2694,7 +2710,7 @@ void MuonAnalysis::doSetToolbarsHidden(bool hidden) {
  */
 void MuonAnalysis::onDeadTimeTypeChanged(int choice) {
   m_deadTimesChanged = true;
-
+  m_dataLoader.clearCache();
   if (choice == 0 || choice == 1) // if choice == none || choice == from file
   {
     m_uiForm.mwRunDeadTimeFile->setVisible(false);
@@ -2757,6 +2773,7 @@ void MuonAnalysis::deadTimeFileSelected() {
  * from the form
  */
 void MuonAnalysis::setTimeZeroState(int checkBoxState) {
+  m_dataLoader.clearCache();
   if (checkBoxState == -1)
     checkBoxState = m_uiForm.timeZeroAuto->checkState();
 
@@ -2778,6 +2795,7 @@ void MuonAnalysis::setTimeZeroState(int checkBoxState) {
  * from the form
  */
 void MuonAnalysis::setFirstGoodDataState(int checkBoxState) {
+  m_dataLoader.clearCache();
   if (checkBoxState == -1)
     checkBoxState = m_uiForm.firstGoodDataAuto->checkState();
 
@@ -3022,6 +3040,9 @@ void MuonAnalysis::multiFitCheckboxChanged(int state) {
                                                 ? Muon::MultiFitState::Enabled
                                                 : Muon::MultiFitState::Disabled;
   m_fitFunctionPresenter->setMultiFitState(multiFitState);
+  if (multiFitState == Muon::MultiFitState::Disabled) {
+    m_dataSelector->clearChosenGroups();
+  }
 }
 
 /**

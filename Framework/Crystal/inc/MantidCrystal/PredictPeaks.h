@@ -63,6 +63,8 @@ private:
                                 const Kernel::DblMatrix &goniometerMatrix);
 
 private:
+  void logNumberOfPeaksFound(size_t allowedPeakCount) const;
+
   /// Reflection conditions possible
   std::vector<Mantid::Geometry::ReflectionCondition_sptr> m_refConds;
 

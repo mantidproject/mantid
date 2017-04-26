@@ -107,7 +107,6 @@ LoadResult MuonAnalysisDataLoader::loadFiles(const QStringList &files) const {
 
     load->initialize();
     load->setChild(true);
-    load->setLogging(false); // We'll take care of printing messages ourselves
     load->setPropertyValue("Filename", file);
 
     // Just to pass validation
@@ -469,6 +468,12 @@ void MuonAnalysisDataLoader::updateCache() const {
   for (const auto &key : invalidKeys) {
     g_log.information("Erasing invalid cached entry for file(s): " + key);
     m_loadedDataCache.erase(key);
+  }
+}
+
+void MuonAnalysisDataLoader::clearCache() {
+  if (!m_loadedDataCache.empty()) {
+    m_loadedDataCache.clear();
   }
 }
 

@@ -69,16 +69,16 @@ class GenerateGroupingSNSInelastic(mantid.api.PythonAlgorithm):
 
         spectra = numpy.arange(numdet).reshape(-1,8,128)
 
-        banks = numdet/8/128
+        banks = numdet//8//128
 
         f = open(filename,'w')
 
         f.write('<?xml version="1.0" encoding="UTF-8" ?>\n<detector-grouping instrument="'+instrument+'">\n')
 
         groupnum = 0
-        for i in numpy.arange(banks):
-            for j in numpy.arange(8/pixelsx)*pixelsx:
-                for k in numpy.arange(128/pixelsy)*pixelsy:
+        for i in range(banks):
+            for j in range(0,8,pixelsx):
+                for k in range(0,128,pixelsy):
 
                     groupname = str(groupnum)
                     ids = spectra[i, j:j+pixelsx, k:k+pixelsy].reshape(-1)

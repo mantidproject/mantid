@@ -8,6 +8,7 @@ try:
     import xml.etree.cElementTree as eTree
 except ImportError:
     import xml.etree.ElementTree as eTree
+from mantid.kernel import DateAndTime
 
 
 def get_named_elements_from_ipf_file(ipf_file, names_to_search, value_type):
@@ -41,11 +42,13 @@ def get_named_elements_from_ipf_file(ipf_file, names_to_search, value_type):
     return output
 
 
-def get_monitor_names_from_idf_file(idf_file):
+def get_monitor_names_from_idf_file(idf_file, invalid_monitor_names=None):
     """
     Gets the monitor names from the IDF
 
     :param idf_file: the path to the IDF
+    :param invalid_monitor_names: a list of invalid monitor names, which is required since some monitors are
+                                  dummy monitors which exist in the IDF but not in the workspace.
     :return: a NumberAsString vs Monitor Name map
     """
     def get_tag(tag_in):
@@ -55,6 +58,7 @@ def get_monitor_names_from_idf_file(idf_file):
     idname = "idname"
     id_tag = "id"
     for _, element in eTree.iterparse(idf_file):
+        # Get the names from the ID list
         if element.tag == get_tag(tag) and idname in list(element.keys()):
             name = element.get(idname)
             if "monitor" in name:
@@ -75,4 +79,14 @@ def get_monitor_names_from_idf_file(idf_file):
                     element.clear()
                 else:
                     continue
+
+    # Remove any monitor entries where the
+    if invalid_monitor_names:
+        output = {key: value for key, value in list(output.items()) if value not in invalid_monitor_names}
     return output
+
+
+def get_valid_to_time_from_idf_string(idf_string):
+    tree_root = eTree.fromstring(idf_string)
+    valid_to_date = tree_root.attrib["valid-to"]
+    return DateAndTime(valid_to_date)

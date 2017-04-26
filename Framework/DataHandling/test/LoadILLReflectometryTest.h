@@ -313,4 +313,46 @@ public:
   }
 };
 
+  class LoadILLReflectometryTestPerformance : public CxxTest::TestSuite {
+  public:
+    void setUp() override {
+      for (int i = 0; i < numberOfIterations; ++i) {
+        loadAlgPtrs.emplace_back(setupAlg());
+      }
+    }
+
+    void testLoadILLReflectometryPerformance() {
+      for (auto alg : loadAlgPtrs) {
+        TS_ASSERT_THROWS_NOTHING(alg->execute());
+      }
+    }
+
+    void tearDown() override {
+      for (int i = 0; i < numberOfIterations; i++) {
+        delete loadAlgPtrs[i];
+        loadAlgPtrs[i] = nullptr;
+      }
+      Mantid::API::AnalysisDataService::Instance().remove(outWSName);
+    }
+
+  private:
+    std::vector<LoadILLReflectometry *> loadAlgPtrs;
+
+    const int numberOfIterations = 5;
+
+    const std::string inFileName = "ILLD17-161876-Ni.nxs";
+    const std::string outWSName = "LoadILLReflectomeryWsOut";
+
+    LoadILLReflectometry *setupAlg() {
+      LoadILLReflectometry *loader = new LoadILLReflectometry;
+      loader->initialize();
+      loader->isInitialized();
+      loader->setPropertyValue("Filename", inFileName);
+      loader->setPropertyValue("OutputWorkspace", outWSName);
+
+      loader->setRethrows(true);
+      return loader;
+    }
+  };
+
 #endif /* MANTID_DATAHANDLING_LOADILLREFLECTOMETRYTEST_H_ */

@@ -2,6 +2,7 @@
 #define MANTIDQTMANTIDWIDGETS_GENERICDATAPROCESSORPRESENTER_H
 
 #include "MantidAPI/ITableWorkspace_fwd.h"
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidQtAPI/WorkspaceObserver.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorCommand.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorPostprocessingAlgorithm.h"
@@ -118,11 +119,16 @@ protected:
   DataProcessorMainPresenter *m_mainPresenter;
   // The tree manager, a proxy class to retrieve data from the model
   std::unique_ptr<DataProcessorTreeManager> m_manager;
+  // Loader
+  std::string m_loader;
 
   // Post-process some rows
   void postProcessGroup(const GroupData &data);
   // Reduce a row
   std::vector<std::string> reduceRow(const std::vector<std::string> &data);
+  // Finds a run in the AnalysisDataService
+  std::string findRunInADS(const std::string &run, const std::string &prefix,
+                           bool &runFound);
 
   // Process selected rows
   virtual void process();
@@ -144,8 +150,6 @@ private:
   DataProcessorPostprocessingAlgorithm m_postprocessor;
   // Post-processing map
   std::map<std::string, std::string> m_postprocessMap;
-  // Loader
-  std::string m_loader;
   // A boolean indicating whether a post-processing algorithm has been defined
   bool m_postprocess;
   // The number of columns
@@ -155,9 +159,13 @@ private:
   // stores the user options for the presenter
   std::map<std::string, QVariant> m_options;
   // load a run into the ADS, or re-use one in the ADS if possible
-  Mantid::API::Workspace_sptr loadRun(const std::string &run,
-                                      const std::string &instrument,
-                                      const std::string &prefix);
+  Mantid::API::Workspace_sptr getRun(const std::string &run,
+                                     const std::string &instrument,
+                                     const std::string &prefix);
+  // Loads a run from disk
+  std::string loadRun(const std::string &run, const std::string &instrument,
+                      const std::string &prefix, const std::string &loader,
+                      bool &runFound);
   // prepare a run or list of runs for processing
   Mantid::API::Workspace_sptr
   prepareRunWorkspace(const std::string &run,
@@ -183,6 +191,10 @@ private:
   void groupRows();
   // expand selection to group
   void expandSelection();
+  // expand all groups
+  void expandAll();
+  // close all groups
+  void collapseAll();
   // table io methods
   void newTable();
   void openTable();

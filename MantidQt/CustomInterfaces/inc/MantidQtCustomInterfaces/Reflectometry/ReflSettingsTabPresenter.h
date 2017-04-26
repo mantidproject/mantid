@@ -15,7 +15,7 @@ class IReflSettingsPresenter;
 /** @class ReflSettingsTabPresenter
 
 ReflSettingsTabPresenter is a presenter class for the tab 'Settings' in the
-Reflectometry (Polref) Interface.
+ISIS Reflectometry Interface.
 
 Copyright &copy; 2011-16 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
 National Laboratory & European Spallation Source
@@ -48,6 +48,8 @@ public:
   /// Set the instrument name
   void setInstrumentName(const std::string &instName) override;
 
+  /// Returns values passed for 'Transmission run(s)'
+  std::string getTransmissionRuns(int group, bool loadRuns) const override;
   /// Returns global options for 'CreateTransmissionWorkspaceAuto'
   std::string getTransmissionOptions(int group) const override;
   /// Returns global options for 'ReflectometryReductionOneAuto'

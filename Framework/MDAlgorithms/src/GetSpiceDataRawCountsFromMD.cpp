@@ -10,9 +10,12 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ListValidator.h"
 
+#include <algorithm>
+
 namespace Mantid {
 namespace MDAlgorithms {
 
+using namespace Mantid::HistogramData;
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 
@@ -499,17 +502,10 @@ MatrixWorkspace_sptr GetSpiceDataRawCountsFromMD::createOutputWorkspace(
     throw std::runtime_error("Failed to create output matrix workspace.");
 
   // Set data
-  MantidVec &dataX = outws->dataX(0);
-  MantidVec &dataY = outws->dataY(0);
-  MantidVec &dataE = outws->dataE(0);
-  for (size_t i = 0; i < sizex; ++i) {
-    dataX[i] = vecX[i];
-    dataY[i] = vecY[i];
-    if (dataY[i] > 1.)
-      dataE[i] = sqrt(dataY[i]);
-    else
-      dataE[i] = 1.;
-  }
+  outws->setHistogram(0, Points(std::move(vecX)), Counts(std::move(vecY)));
+  auto &dataE = outws->mutableE(0);
+  std::replace_if(dataE.begin(), dataE.end(),
+                  [](double val) { return val < 1.0; }, 1.0);
 
   // Set label
   outws->setYUnitLabel(ylabel);

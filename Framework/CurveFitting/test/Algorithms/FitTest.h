@@ -1562,25 +1562,31 @@ public:
     fit.setProperty(
         "Function",
         "name=IkedaCarpenterPV, I=1000, SigmaSquared=25.0, Gamma=0.1, X0=50.0");
-    fit.setProperty("Ties", "Alpha0=1.6, Alpha1=1.5, Beta0=31.9, Kappa=46.0");
     fit.setProperty("InputWorkspace", ws);
-    fit.setPropertyValue("StartX", "0");
-    fit.setPropertyValue("EndX", "150");
+    fit.setPropertyValue("StartX", "30");
+    fit.setPropertyValue("EndX", "100");
+    // from the fitfunctions documentation:
+    // In general when fitting a single peak it is not recommended to refine
+    // both Alpha0 and Alpha1 at the same time since these two parameters will
+    // effectively be 100% correlated because the wavelength over a single peak
+    // is likely effectively constant. All parameters are constrained to be
+    // non-negative.
+    fit.setProperty("Ties", "Alpha0=1.6666");
     TS_ASSERT_THROWS_NOTHING(fit.execute());
     TS_ASSERT(fit.isExecuted());
 
     // test the output from fit is what you expect
     double chi2 = fit.getProperty("OutputChi2overDoF");
-    TS_ASSERT_DELTA(chi2, 0.0, 0.1);
+    TS_ASSERT_DELTA(chi2, 0.0, 0.01);
 
     IFunction_sptr out = fit.getProperty("Function");
-    TS_ASSERT_DELTA(out->getParameter("I"), 3101.672, 0.1);
-    TS_ASSERT_DELTA(out->getParameter("Alpha0"), 1.6, 0.0001);
-    TS_ASSERT_DELTA(out->getParameter("Alpha1"), 1.5, 0.001);
-    TS_ASSERT_DELTA(out->getParameter("Beta0"), 31.9, 0.0001);
-    TS_ASSERT_DELTA(out->getParameter("Kappa"), 46.0, 0.0001);
+    // test that all parameters are non-negative
+    TS_ASSERT_DELTA(out->getParameter("I"), 3101.7067, 1.0);
+    TS_ASSERT_DELTA(out->getParameter("Alpha1"), 1.4276, 0.005);
+    TS_ASSERT_DELTA(out->getParameter("Beta0"), 31.9007, 0.02);
+    TS_ASSERT_DELTA(out->getParameter("Kappa"), 46.0238, 0.005);
     TS_ASSERT_DELTA(out->getParameter("SigmaSquared"), 99.935, 0.1);
-    TS_ASSERT_DELTA(out->getParameter("Gamma"), 0.0, 0.1);
+    TS_ASSERT_DELTA(out->getParameter("Gamma"), 0.05, 0.05);
     TS_ASSERT_DELTA(out->getParameter("X0"), 49.984, 0.1);
   }
 

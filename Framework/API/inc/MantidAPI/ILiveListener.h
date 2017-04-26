@@ -4,12 +4,12 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include <string>
-#include <Poco/Net/SocketAddress.h>
+#include "MantidAPI/DllConfig.h"
+#include "MantidGeometry/IDTypes.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/PropertyManager.h"
-#include "MantidGeometry/IDTypes.h"
-#include "MantidAPI/DllConfig.h"
+#include <Poco/Net/SocketAddress.h>
+#include <string>
 
 namespace Mantid {
 namespace API {
@@ -59,8 +59,8 @@ public:
   //----------------------------------------------------------------------
 
   /** Connect to the specified address and start listening/buffering
-   *  @param address   The IP address and port to contact
-   *  @return True if the connection was successfully established
+   * @param address The IP address and port to contact
+   * @return True if the connection was successfully established
    */
   virtual bool connect(const Poco::Net::SocketAddress &address) = 0;
 
@@ -73,9 +73,10 @@ public:
    *  is called (indeed this may be required by some protocols).
    *  @param startTime The timestamp of the earliest data requested (default:
    * now).
-   *                   Ignored if not supported by an implementation.
-   *                   The value of 'now' is zero for compatibility with the SNS
-   * live stream.
+   *      Ignored if not supported by an implementation.
+   *      The value of 'now' is zero
+   *      The value of 'start of run' is 1 second
+   *      for compatibility with the SNS live stream and ISIS Kafka live stream.
    */
   virtual void start(Kernel::DateAndTime startTime = Kernel::DateAndTime()) = 0;
 
@@ -97,7 +98,7 @@ public:
   virtual boost::shared_ptr<Workspace> extractData() = 0;
 
   //----------------------------------------------------------------------
-  // State flags
+  // State information
   //----------------------------------------------------------------------
 
   /** Has the connection to the DAS been established?
@@ -114,7 +115,7 @@ public:
    * to
    *  extracting the data. Calling this method resets the flag.
    */
-  virtual bool dataReset();
+  virtual bool dataReset() = 0;
 
   /** The possible run statuses (initial list taken from SNS SMS protocol)
    *  None    : No current run
@@ -123,6 +124,7 @@ public:
    *  End     : The run has ended since the last call to extractData
    */
   enum RunStatus { NoRun = 0, BeginRun = 1, Running = 2, EndRun = 4 };
+
   /** Gets the current run status of the listened-to data stream
    *  @return A value of the RunStatus enumeration indicating the present status
    */
@@ -131,19 +133,15 @@ public:
   /// Returns the run number of the current run
   virtual int runNumber() const = 0;
 
-  /** Sets a list of spectra to be extracted. Default is reading all available
-   * spectra.
+  /** Sets a list of spectra to be extracted.
    * @param specList :: A vector with spectra indices.
    */
-  virtual void setSpectra(const std::vector<specnum_t> &specList) {
-    (void)specList;
-  }
+  virtual void setSpectra(const std::vector<specnum_t> &specList) = 0;
 
-  /// Constructor.
-  ILiveListener();
-
-protected:
-  bool m_dataReset; ///< Indicates the receipt of a reset signal from the DAS.
+  /** Allow listener to see calling algorithm
+   * @param callingAlgorithm : const ref to calling algorithm
+   */
+  virtual void setAlgorithm(const class IAlgorithm &callingAlgorithm) = 0;
 };
 
 /// Shared pointer to an ILiveListener
