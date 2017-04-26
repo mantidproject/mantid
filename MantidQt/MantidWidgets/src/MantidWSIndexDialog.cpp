@@ -363,6 +363,22 @@ bool MantidWSIndexWidget::validatePlotOptions() {
         break;
       }
     }
+
+    if(validOptions) {
+      int numCustomLogValues = values.size();
+      QString nCustomLogValues; 
+      nCustomLogValues.setNum(numCustomLogValues); 
+      int numWorkspaces = m_wsNames.size();
+      if (m_plotOptions->currentText() == SURFACE_PLOT || m_plotOptions->currentText() == CONTOUR_PLOT) {
+        QString nWorkspaces; 
+        nWorkspaces.setNum(numWorkspaces);
+        if(numCustomLogValues != m_wsNames.size()){
+          m_logValues->setError("The number of custom log values (" + nCustomLogValues 
+                                + ") is not equal to the number of workspaces (" + nWorkspaces + ").");
+          validOptions = false;
+        }
+      }
+    }
   }
 
   return validOptions;
