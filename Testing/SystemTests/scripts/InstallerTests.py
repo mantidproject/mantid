@@ -20,8 +20,8 @@ parser.add_argument('-o', dest='out2stdout', action='store_true',
                     help='Output to the screen instead of log files')
 parser.add_argument('-R', dest='test_regex', metavar='regexp', default=None,
                     help='Optionally only run the test matched by the regex')
-parser.add_option("", "--archivesearch", dest="archivesearch", action="store_true",
-                  help="Turn on archive search for file finder.")
+parser.add_argument('--archivesearch', dest='archivesearch', action='store_true',
+                    help='Turn on archive search for file finder')
 log_levels = ['error', 'warning', 'notice', 'information', 'debug']
 parser.add_argument('-l', dest='log_level', metavar='level', default='notice',
                     choices=log_levels, help='Log level '+str(log_levels))
