@@ -4,7 +4,7 @@ import mantid
 import unittest
 import warnings
 
-from six import assertRaisesRegex, assertRegex
+from six_shim import assertRaisesRegex, assertRegex
 
 from isis_powder.routines import InstrumentSettings, ParamMapEntry
 
