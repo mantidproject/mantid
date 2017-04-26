@@ -241,6 +241,9 @@ void FilterEvents::exec() {
   progress(m_progress, "Completed");
 }
 
+/** group output workspaces
+ * @brief FilterEvents::groupOutputWorkspace
+ */
 void FilterEvents::groupOutputWorkspace() {
   // TODO:FIXME - move this part to a method
   if (m_toGroupWS) {
@@ -318,7 +321,12 @@ void FilterEvents::copyNoneSplitLogs(std::vector<TimeSeriesProperty<int> *> &int
 	return;
 }
 
-// Split all the TimeSeriesProperty sample logs to all the output workspace
+/** Split all the TimeSeriesProperty sample logs to all the output workspace
+ * @brief FilterEvents::splitTimeSeriesLogs
+ * @param int_tsp_vector
+ * @param dbl_tsp_vector
+ * @param bool_tsp_vector
+ */
 void FilterEvents::splitTimeSeriesLogs(const std::vector<TimeSeriesProperty<int> *> &int_tsp_vector,
 									   const std::vector<TimeSeriesProperty<double> *> &dbl_tsp_vector,
 									   const std::vector<TimeSeriesProperty<bool> *> &bool_tsp_vector)
@@ -331,8 +339,6 @@ void FilterEvents::splitTimeSeriesLogs(const std::vector<TimeSeriesProperty<int>
   if (m_useSplittersWorkspace) {
     convertSplittersWorkspaceToVectors();
   }
-
-  return;
 
   // convert splitter time vector to DateAndTime format
   split_datetime_vec.resize(m_vecSplitterTime.size());
@@ -709,81 +715,54 @@ void FilterEvents::convertSplittersWorkspaceToVectors() {
   m_vecSplitterTime.clear();
 
   // convert SplittersWorkspace to a set of pairs which can be sorted
-  size_t num_rows = this->m_splittersWorkspace->rowCount();
-  for (size_t irow = 0; irow < num_rows; ++irow) {
-    // get splitter
-    Kernel::SplittingInterval splitter =
-        m_splittersWorkspace->getSplitter(irow);
+  size_t num_splitters = m_splitters.size();
+  int64_t last_entry_time(0);
 
-    // convert splitter to 2 X-value
-    if (m_vecSplitterTime.size() == 0 ||
-        splitter.start() > m_vecSplitterTime.back() + TOLERANCE) {
-      // first splitter or splitter with gap
-      m_vecSplitterTime.push_back(splitter.start().totalNanoseconds());
-      m_vecSplitterTime.push_back(splitter.stop().totalNanoseconds());
-      if (m_vecSplitterGroup.size() > 0)
-      {
-        // 0 stands for not defined
-        m_vecSplitterGroup.push_back(0);
-      }
+  // it is assumed that m_splitters is sorted by time
+  for (size_t i_splitter = 0; i_splitter < num_splitters; ++ i_splitter)
+  {
+    // get splitter
+    Kernel::SplittingInterval splitter = m_splitters[i_splitter];
+    if (m_vecSplitterTime.size() > 0)
+      g_log.warning() << "Last time with tolerance =  " << m_vecSplitterTime.back() + TOLERANCE << "\n";
+
+    int64_t start_time_i64 = splitter.start().totalNanoseconds();
+    int64_t stop_time_i64 = splitter.stop().totalNanoseconds();
+    if (m_vecSplitterTime.size() == 0)
+    {
+      // first entry: add
+      m_vecSplitterTime.push_back(start_time_i64);
+      m_vecSplitterTime.push_back(stop_time_i64);
       m_vecSplitterGroup.push_back(splitter.index());
-    } else if (splitter.start() < m_vecSplitterTime.back() - TOLERANCE) {
-      // almost same: then add the spliters.stop() only
-      m_vecSplitterTime.push_back(splitter.stop().totalNanoseconds());
+    }
+    else if (last_entry_time - TOLERANCE < start_time_i64 < last_entry_time + TOLERANCE)
+    {
+      // start time is SAME as last entry
+      m_vecSplitterTime.push_back(stop_time_i64);
       m_vecSplitterGroup.push_back(splitter.index());
-    } else {
-      throw std::runtime_error("Very suspicious");
-      // have to insert the somewhere (in case the log is not in time order
-      std::vector<int64_t>::iterator finditer =
-          std::lower_bound(m_vecSplitterTime.begin(), m_vecSplitterTime.end(),
-                           splitter.start().totalNanoseconds());
-      // get the index
-      size_t split_index =
-          static_cast<size_t>(finditer - m_vecSplitterTime.begin());
-      if (*finditer - splitter.start().totalNanoseconds() > TOLERANCE) {
-        // the start time is before one splitter indicated by *finditer: insert
-        // both
-        // check
-        if (m_vecSplitterGroup[split_index] != UNDEFINED_SPLITTING_TARGET) {
-          std::stringstream errss;
-          errss << "Tried to insert splitter [" << splitter.start() << ", "
-                << splitter.stop() << "] but there is "
-                << "already a time entry with target "
-                << m_vecSplitterGroup[split_index] << " inside it.";
-          throw std::runtime_error(errss.str());
-        }
-        // inset the full set
-        m_vecSplitterTime.insert(finditer, splitter.stop().totalNanoseconds());
-        m_vecSplitterTime.insert(finditer, splitter.start().totalNanoseconds());
-        // insert the target
-        m_vecSplitterGroup.insert(m_vecSplitterGroup.begin() + split_index,
-                                  static_cast<int>(UNDEFINED_SPLITTING_TARGET));
-        m_vecSplitterGroup.insert(m_vecSplitterGroup.begin() + split_index,
-                                  static_cast<int>(splitter.index()));
-      } else if (*finditer - splitter.start().totalNanoseconds() > -TOLERANCE) {
-        // the start time is an existing entry
-        // check
-        if (m_vecSplitterGroup[split_index] != UNDEFINED_SPLITTING_TARGET) {
-          std::stringstream errss;
-          errss << "Tried to insert splitter [" << splitter.start() << ", "
-                << splitter.stop() << "] but there is "
-                << "already a time entry with target "
-                << m_vecSplitterGroup[split_index] << " inside it.";
-          throw std::runtime_error(errss.str());
-        }
-        // inset the stop time
-        m_vecSplitterTime.insert(finditer + 1,
-                                 splitter.stop().totalNanoseconds());
-        // insert the target
-        m_vecSplitterGroup.insert(m_vecSplitterGroup.begin() + split_index + 1,
-                                  splitter.index());
-      } else {
-        throw std::runtime_error("This is not a possible situation!");
-      }
-    } // IF-ELSE to add a new entry
+    }
+    else if (start_time_i64 > last_entry_time + TOLERANCE)
+    {
+      // start time is way behind. then add an empty one
+      m_vecSplitterTime.push_back(start_time_i64);
+      m_vecSplitterTime.push_back(stop_time_i64);
+      m_vecSplitterGroup.push_back(0);
+      m_vecSplitterGroup.push_back(splitter.index());
+    }
+    else
+    {
+      // some impossible situation
+      std::stringstream errorss;
+      errorss << "New start time " << start_time_i64 << " is before last entry's time "
+              << last_entry_time;
+      throw std::runtime_error(errorss.str());
+    }
+
+    // update
+    last_entry_time = m_vecSplitterTime.back();
 
     // debug output
-    g_log.warning() << "entry " << irow << ", size = " << m_vecSplitterTime.size() << ", "
+    g_log.warning() << "entry " << i_splitter << ", size = " << m_vecSplitterTime.size() << ", "
                     << m_vecSplitterGroup.size() << "\n";
 
   } // END-FOR (add all splitters)
