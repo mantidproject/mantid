@@ -113,8 +113,6 @@ private:
                           const std::string &propertyValue,
                           int periodNum) override;
 
-  bool m_useSpecAsBank;
-
   /// Workspace
   API::MatrixWorkspace_const_sptr inputWS;
 };

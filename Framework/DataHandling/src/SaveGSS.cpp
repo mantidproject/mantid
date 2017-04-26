@@ -26,13 +26,10 @@ using namespace Mantid::API;
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(SaveGSS)
 
-namespace {
+namespace { // Anonymous namespace
 const std::string RALF("RALF");
 const std::string SLOG("SLOG");
 const double TOLERANCE = 1.e-10;
-}
-
-SaveGSS::SaveGSS() : Mantid::API::Algorithm(), m_useSpecAsBank(false) {}
 
 bool isEqual(const double left, const double right) {
   if (left == right)
@@ -51,8 +48,21 @@ bool isConstantDelta(const HistogramData::HistogramX &xAxis) {
   return true;
 }
 
-/** Initialise the algorithm
-  */
+double fixErrorValue(const double value) {
+// Fix error if value is less than zero or infinity
+// Negative errors cannot be read by GSAS
+	if (value <= 0. ||
+		!std::isfinite(value)) 
+		return 0.;
+	else
+		return value;
+}
+} // End of anonymous namespace
+
+// Constructor
+SaveGSS::SaveGSS() : Mantid::API::Algorithm() {}
+
+// Initialise the algorithm
 void SaveGSS::init() {
   // Data must be in TOF
   declareProperty(Kernel::make_unique<API::WorkspaceProperty<>>(
@@ -74,9 +84,7 @@ void SaveGSS::init() {
       "The bank number to include in the file header for the first spectrum, "
       "i.e., the starting bank number. "
       "This will increment for each spectrum or group member. ");
-  std::vector<std::string> formats;
-  formats.push_back(RALF);
-  formats.push_back(SLOG);
+  std::vector<std::string> formats{RALF, SLOG};
   declareProperty("Format", RALF,
                   boost::make_shared<Kernel::StringListValidator>(formats),
                   "GSAS format to save as");
@@ -92,8 +100,7 @@ void SaveGSS::init() {
       "otherwise, the continuous bank IDs are applied. ");
 }
 
-/** Execute the algorithm
-  */
+// Execute the algorithm
 void SaveGSS::exec() {
   // Process properties
   // Retrieve the input workspace
@@ -114,15 +121,12 @@ void SaveGSS::exec() {
     throw std::invalid_argument(errss.str());
   }
 
-  std::string filename = getProperty("Filename");
+  const std::string filename = getProperty("Filename");
 
   const int bank = getProperty("Bank");
-  const bool MultiplyByBinWidth = getProperty("MultiplyByBinWidth");
-  bool split = getProperty("SplitFiles");
-
-  std::string outputFormat = getProperty("Format");
-
-  m_useSpecAsBank = getProperty("UseSpectrumNumberAsBankID");
+  const bool multipleByBinWidth = getProperty("MultiplyByBinWidth");
+  const bool split = getProperty("SplitFiles");
+  const std::string outputFormat = getProperty("Format");
 
   // Check whether to append to an already existing file or overwrite
   bool append = getProperty("Append");
@@ -144,7 +148,7 @@ void SaveGSS::exec() {
     }
   }
 
-  writeGSASFile(filename, append, bank, MultiplyByBinWidth, split,
+  writeGSASFile(filename, append, bank, multipleByBinWidth, split,
                 outputFormat);
 }
 
@@ -253,7 +257,8 @@ void SaveGSS::writeGSASFile(const std::string &outfilename, bool append,
 
     // Determine bank number into GSAS file
     int bankid;
-    if (m_useSpecAsBank) {
+    const bool useSpecAsBank = getProperty("UseSpectrumNumberAsBankID");
+    if (useSpecAsBank) {
       bankid =
           static_cast<int>(inputWS->getSpectrum(histoIndex).getSpectrumNo());
     } else {
@@ -455,16 +460,6 @@ inline void writeBankLine(std::stringstream &out, const std::string &bintype,
       << std::fixed << " " << datasize << std::fixed << " " << datasize
       << std::fixed << " " << bintype;
   out.flags(fflags);
-}
-
-/** Fix error if value is less than zero or infinity
-  */
-inline double fixErrorValue(const double value) {
-  if (value <= 0. ||
-      !std::isfinite(value)) // Negative errors cannot be read by GSAS
-    return 0.;
-  else
-    return value;
 }
 
 /**
