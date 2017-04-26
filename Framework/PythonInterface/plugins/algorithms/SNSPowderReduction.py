@@ -200,9 +200,6 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                              "Width of events (in microseconds) near the prompt pulse to remove. 0 disables")
         self.declareProperty("MaxChunkSize", 0.0,
                              "Specify maximum Gbytes of file to read in one chunk.  Default is whole file.")
-        self.declareProperty("FilterCharacterizations", False,
-                             "Filter the characterization runs using above parameters. This only works for event files."
-                             "")
         self.declareProperty(FloatArrayProperty("Binning", values=[0., 0., 0.],
                                                 direction=Direction.Input),
                              "Positive is linear bins, negative is logorithmic")
@@ -416,8 +413,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
             # process the container
             can_run_numbers = self._info["container"].value
             can_run_numbers = ['%s_%d' % (self._instrument, value) for value in can_run_numbers]
-            can_run_ws_name = self._process_container_runs(can_run_numbers, sample_time_filter_wall,
-                                                           samRunIndex, calib, preserveEvents)
+            can_run_ws_name = self._process_container_runs(can_run_numbers, samRunIndex, calib, preserveEvents)
             if can_run_ws_name is not None:
                 workspacelist.append(can_run_ws_name)
 
@@ -426,7 +422,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
             van_run_number_list = ['%s_%d' % (self._instrument, value) for value in van_run_number_list]
             van_specified = not noRunSpecified(van_run_number_list)
             if van_specified:
-                van_run_ws_name = self._process_vanadium_runs(van_run_number_list, sample_time_filter_wall, samRunIndex, calib)
+                van_run_ws_name = self._process_vanadium_runs(van_run_number_list, samRunIndex, calib)
                 workspacelist.append(van_run_ws_name)
             else:
                 van_run_ws_name = None
@@ -1268,8 +1264,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
 
         return do_split_raw_wksp, num_out_wksp
 
-    def _process_container_runs(self, can_run_numbers, timeFilterWall, samRunIndex, calib,
-                                preserveEvents):
+    def _process_container_runs(self, can_run_numbers, samRunIndex, calib, preserveEvents):
         """ Process container runs
         :param can_run_numbers:
         :return:
@@ -1281,15 +1276,6 @@ class SNSPowderReduction(DataProcessorAlgorithm):
             can_run_ws_name = None
         else:
             # reduce container run such that it can be removed from sample run
-
-            # set up the filters
-            if self.getProperty("FilterCharacterizations").value:
-                # use common time filter
-                canFilterWall = timeFilterWall
-            else:
-                # no time filter
-                canFilterWall = (0., 0.)
-            # END-IF
 
             if len(can_run_numbers) == 1:
                 # only 1 container run
@@ -1308,10 +1294,10 @@ class SNSPowderReduction(DataProcessorAlgorithm):
             else:
                 # load the container run
                 if self.getProperty("Sum").value:
-                    can_run_ws_name = self._focusAndSum(can_run_numbers, canFilterWall, calib,
+                    can_run_ws_name = self._focusAndSum(can_run_numbers, calib=calib,
                                                         preserveEvents=preserveEvents)
                 else:
-                    can_run_ws_name = self._focusChunks(can_run_number, canFilterWall, calib,
+                    can_run_ws_name = self._focusChunks(can_run_number, calib=calib,
                                                         normalisebycurrent=self._normalisebycurrent,
                                                         preserveEvents=preserveEvents)
 
@@ -1335,7 +1321,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
 
         return can_run_ws_name
 
-    def _process_vanadium_runs(self, van_run_number_list, timeFilterWall, samRunIndex, calib, **dummy_focuspos):
+    def _process_vanadium_runs(self, van_run_number_list, samRunIndex, calib, **dummy_focuspos):
         """
         Purpose: process vanadium runs
         Requirements: if more than 1 run in given run number list, then samRunIndex must be given.
@@ -1364,18 +1350,12 @@ class SNSPowderReduction(DataProcessorAlgorithm):
         else:
             # Explicitly load, reduce and correct vanadium runs
 
-            # set up filter wall for van run
-            if self.getProperty("FilterCharacterizations").value:
-                vanFilterWall = {'FilterByTimeStart': timeFilterWall[0], 'FilterByTimeStop': timeFilterWall[1]}
-            else:
-                vanFilterWall = {'FilterByTimeStart': Property.EMPTY_DBL, 'FilterByTimeStop': Property.EMPTY_DBL}
-
             # load the vanadium
             van_run_ws_name = getBasename(van_run_number)
             if self.getProperty("Sum").value:
-                van_run_ws_name = self._loadAndSum(van_run_number_list, van_run_ws_name, **vanFilterWall)
+                van_run_ws_name = self._loadAndSum(van_run_number_list, van_run_ws_name)
             else:
-                van_run_ws_name = self._loadAndSum([van_run_number], van_run_ws_name, **vanFilterWall)
+                van_run_ws_name = self._loadAndSum([van_run_number], van_run_ws_name)
 
             # load the vanadium background (if appropriate)
             van_bkgd_run_number_list = self._info["vanadium_background"].value
@@ -1391,9 +1371,9 @@ class SNSPowderReduction(DataProcessorAlgorithm):
 
                 # load background runs and sum if necessary
                 if self.getProperty("Sum").value:
-                    van_bkgd_ws_name = self._loadAndSum(van_bkgd_run_number_list, van_bkgd_ws_name, **vanFilterWall)
+                    van_bkgd_ws_name = self._loadAndSum(van_bkgd_run_number_list, van_bkgd_ws_name)
                 else:
-                    van_bkgd_ws_name = self._loadAndSum([van_bkgd_run_number], van_bkgd_ws_name, **vanFilterWall)
+                    van_bkgd_ws_name = self._loadAndSum([van_bkgd_run_number], van_bkgd_ws_name)
 
                 van_bkgd_ws = get_workspace(van_bkgd_ws_name)
                 if van_bkgd_ws.id() == EVENT_WORKSPACE_ID and van_bkgd_ws.getNumberEvents() <= 0:
