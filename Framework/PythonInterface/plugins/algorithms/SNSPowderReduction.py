@@ -253,11 +253,11 @@ class SNSPowderReduction(DataProcessorAlgorithm):
 
         self.declareProperty("CompressTOFTolerance", 0.01, "Tolerance to compress events in TOF.")
 
-        self.declareProperty(StringArrayProperty("FrequencyLogNames", ["SpeedRequest1", "Speed1", "frequency"],
+        self.declareProperty(StringArrayProperty("FrequencyLogNames", ["SpeedRequest1", "Speed1", "frequency", "skf1.speed"],
                                                  direction=Direction.Input),
                              "Possible log names for frequency.")
 
-        self.declareProperty(StringArrayProperty("WaveLengthLogNames", ["LambdaRequest", "lambda"],
+        self.declareProperty(StringArrayProperty("WaveLengthLogNames", ["LambdaRequest", "lambda", "skf12.lambda"],
                                                  direction=Direction.Input),
                              "Candidate log names for wave length.")
 
