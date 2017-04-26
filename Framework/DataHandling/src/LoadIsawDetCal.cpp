@@ -98,7 +98,7 @@ std::map<std::string, std::string> LoadIsawDetCal::validateInputs() {
     Workspace_const_sptr wksp = getProperty("InputWorkspace");
     const auto instname = getInstName(wksp);
 
-    if (instname.compare("SNAP") != 0) {
+    if (instname != "SNAP") {
       result["Filename"] = "Two files is only valid for SNAP";
     }
   } else if (filenames.size() > 2) {
@@ -175,7 +175,7 @@ void LoadIsawDetCal::exec() {
   }
   std::unordered_set<int> uniqueBanks; // for CORELLI and WISH
   std::string bankPart = "bank";
-  if (instname.compare("WISH") == 0)
+  if (instname == "WISH")
     bankPart = "WISHpanel";
   if (detList.empty()) {
     // Get all children
@@ -205,7 +205,7 @@ void LoadIsawDetCal::exec() {
       std::stringstream(line) >> count >> mL1 >> mT0;
       setProperty("TimeOffset", mT0);
       // Convert from cm to m
-      if (instname.compare("WISH") == 0)
+      if (instname == "WISH")
         center(0.0, 0.0, -mL1, "undulator", ws, detectorInfo);
       else
         center(0.0, 0.0, -mL1, "moderator", ws, detectorInfo);
@@ -235,7 +235,7 @@ void LoadIsawDetCal::exec() {
     std::stringstream(line) >> count >> id >> nrows >> ncols >> width >>
         height >> depth >> detd >> x >> y >> z >> base_x >> base_y >> base_z >>
         up_x >> up_y >> up_z;
-    if (id == 10 && filenames.size() == 2 && instname.compare("SNAP") == 0) {
+    if (id == 10 && filenames.size() == 2 && instname == "SNAP") {
       input.close();
       input.open(filenames[1].c_str());
       while (std::getline(input, line)) {
@@ -284,7 +284,7 @@ void LoadIsawDetCal::exec() {
     // Retrieve it
     auto comp = inst->getComponentByName(bankName);
     // for Corelli with sixteenpack under bank
-    if (instname.compare("CORELLI") == 0) {
+    if (instname == "CORELLI") {
       std::vector<Geometry::IComponent_const_sptr> children;
       boost::shared_ptr<const Geometry::ICompAssembly> asmb =
           boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(

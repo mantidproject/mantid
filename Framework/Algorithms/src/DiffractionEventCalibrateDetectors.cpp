@@ -307,7 +307,7 @@ void DiffractionEventCalibrateDetectors::exec() {
 
     det = boost::dynamic_pointer_cast<RectangularDetector>((*inst)[i]);
     if (det) {
-      if (det->getName().compare(onebank) == 0)
+      if (det->getName() == onebank)
         detList.push_back(det);
       if (!doOneBank)
         detList.push_back(det);
@@ -320,7 +320,7 @@ void DiffractionEventCalibrateDetectors::exec() {
         for (int j = 0; j < assem->nelements(); j++) {
           det = boost::dynamic_pointer_cast<RectangularDetector>((*assem)[j]);
           if (det) {
-            if (det->getName().compare(onebank) == 0)
+            if (det->getName() == onebank)
               detList.push_back(det);
             if (!doOneBank)
               detList.push_back(det);
@@ -336,7 +336,7 @@ void DiffractionEventCalibrateDetectors::exec() {
                 det = boost::dynamic_pointer_cast<RectangularDetector>(
                     (*assem2)[k]);
                 if (det) {
-                  if (det->getName().compare(onebank) == 0)
+                  if (det->getName() == onebank)
                     detList.push_back(det);
                   if (!doOneBank)
                     detList.push_back(det);

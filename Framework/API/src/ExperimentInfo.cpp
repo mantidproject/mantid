@@ -1628,7 +1628,7 @@ void ExperimentInfo::readParameterMap(const std::string &parameterStr) {
 
     const auto &paramType = tokens[1];
     const auto &paramName = tokens[2];
-    if (paramName.compare("masked") == 0) {
+    if (paramName == "masked") {
       bool value = getParam<bool>(paramType, paramValue);
       if (value) {
         // Do not add masking to ParameterMap, it is stored in DetectorInfo
@@ -1688,7 +1688,7 @@ void ExperimentInfo::populateWithParameter(
     pDescription = &paramInfo.m_description;
 
   // Some names are special. Values should be convertible to double
-  if (name.compare("masked") == 0) {
+  if (name == "masked") {
     bool value(paramValue);
     if (value) {
       // Do not add masking to ParameterMap, it is stored in DetectorInfo
@@ -1700,16 +1700,15 @@ void ExperimentInfo::populateWithParameter(
       m_detectorInfo->setMasked(detectorInfo().indexOf(det->getID()),
                                 paramValue);
     }
-  } else if (name.compare("x") == 0 || name.compare("y") == 0 ||
-             name.compare("z") == 0) {
+  } else if (name == "x" || name == "y" || name == "z") {
     paramMapForPosAndRot.addPositionCoordinate(paramInfo.m_component, name,
                                                paramValue);
-  } else if (name.compare("rot") == 0 || name.compare("rotx") == 0 ||
-             name.compare("roty") == 0 || name.compare("rotz") == 0) {
+  } else if (name == "rot" || name == "rotx" || name == "roty" ||
+             name == "rotz") {
     // Effectively this is dropping any parameters named 'rot'.
     paramMapForPosAndRot.addRotationParam(paramInfo.m_component, name,
                                           paramValue, pDescription);
-  } else if (category.compare("fitting") == 0) {
+  } else if (category == "fitting") {
     std::ostringstream str;
     str << paramInfo.m_value << " , " << paramInfo.m_fittingFunction << " , "
         << name << " , " << paramInfo.m_constraint[0] << " , "
@@ -1719,12 +1718,12 @@ void ExperimentInfo::populateWithParameter(
         << (*(paramInfo.m_interpolation));
     paramMap.add("fitting", paramInfo.m_component, name, str.str(),
                  pDescription);
-  } else if (category.compare("string") == 0) {
+  } else if (category == "string") {
     paramMap.addString(paramInfo.m_component, name, paramInfo.m_value,
                        pDescription);
-  } else if (category.compare("bool") == 0) {
+  } else if (category == "bool") {
     paramMap.addBool(paramInfo.m_component, name, paramValue, pDescription);
-  } else if (category.compare("int") == 0) {
+  } else if (category == "int") {
     paramMap.addInt(paramInfo.m_component, name, paramValue, pDescription);
   } else { // assume double
     paramMap.addDouble(paramInfo.m_component, name, paramValue, pDescription);

@@ -174,9 +174,8 @@ const std::string ParameterMap::getDescription(const std::string &compName,
   pmap_cit it;
   std::string result;
   for (it = m_map.begin(); it != m_map.end(); ++it) {
-    if (compName.compare(((const IComponent *)(*it).first)->getName()) == 0) {
-      boost::shared_ptr<Parameter> param =
-          get((const IComponent *)(*it).first, name);
+    if (compName == it->first->getName()) {
+      boost::shared_ptr<Parameter> param = get(it->first, name);
       if (param) {
         result = param->getDescription();
         if (!result.empty())
@@ -199,7 +198,7 @@ ParameterMap::getShortDescription(const std::string &compName,
   pmap_cit it;
   std::string result;
   for (it = m_map.begin(); it != m_map.end(); ++it) {
-    if (compName.compare(it->first->getName()) == 0) {
+    if (compName == it->first->getName()) {
       boost::shared_ptr<Parameter> param = get(it->first, name);
       if (param) {
         result = param->getShortDescription();
@@ -424,11 +423,11 @@ void ParameterMap::addPositionCoordinate(
 
   // adjust position
 
-  if (name.compare(posx()) == 0)
+  if (name == posx())
     position.setX(value);
-  else if (name.compare(posy()) == 0)
+  else if (name == posy())
     position.setY(value);
-  else if (name.compare(posz()) == 0)
+  else if (name == posz())
     position.setZ(value);
   else {
     g_log.warning() << "addPositionCoordinate() called with unrecognized "
@@ -483,15 +482,15 @@ void ParameterMap::addRotationParam(const IComponent *comp,
 
   // adjust rotation
   Quat quat;
-  if (name.compare(rotx()) == 0) {
+  if (name == rotx()) {
     addDouble(comp, rotx(), deg);
     quat = Quat(deg, V3D(1, 0, 0)) * Quat(rotY, V3D(0, 1, 0)) *
            Quat(rotZ, V3D(0, 0, 1));
-  } else if (name.compare(roty()) == 0) {
+  } else if (name == roty()) {
     addDouble(comp, roty(), deg);
     quat = Quat(rotX, V3D(1, 0, 0)) * Quat(deg, V3D(0, 1, 0)) *
            Quat(rotZ, V3D(0, 0, 1));
-  } else if (name.compare(rotz()) == 0) {
+  } else if (name == rotz()) {
     addDouble(comp, rotz(), deg);
     quat = Quat(rotX, V3D(1, 0, 0)) * Quat(rotY, V3D(0, 1, 0)) *
            Quat(deg, V3D(0, 0, 1));
