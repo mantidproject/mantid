@@ -121,7 +121,7 @@ class MockInstSettings(object):
 
     @staticmethod
     def gen_random_string():
-        return ''.join(random.choice(string.lower(s)) for s in range(10))
+        return ''.join(random.choice(string.ascii_lowercase) for _ in range(10))
 
 if __name__ == "__main__":
     unittest.main()
