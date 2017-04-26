@@ -755,7 +755,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
         return outName
 
     #pylint: disable=too-many-arguments
-    def _focusAndSum(self, filenames, filterWall, calib, preserveEvents=True, reload_if_loaded=True):
+    def _focusAndSum(self, filenames, filterWall=(0.,0.), calib='', preserveEvents=True, reload_if_loaded=True):
         """Load, sum, and focus data in chunks
         Purpose:
             Load, sum and focus data in chunks;
@@ -815,8 +815,8 @@ class SNSPowderReduction(DataProcessorAlgorithm):
         return sumRun
 
     #pylint: disable=too-many-arguments,too-many-locals,too-many-branches
-    def _focusChunks(self, filename, filter_wall, calib,  # noqa
-                     normalisebycurrent, splitwksp=None, preserveEvents=True,
+    def _focusChunks(self, filename, filter_wall=(0.,0.), calib='',  # noqa
+                     normalisebycurrent=True, splitwksp=None, preserveEvents=True,
                      reload_if_loaded=True):  # noqa
         """
         Load, (optional) split and focus data in chunks
