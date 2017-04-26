@@ -600,39 +600,42 @@ void TimeSeriesProperty<TYPE>::splitByTimeVector(
     }
   }
 
-  g_log.debug() << "TSP entry: " << index_tsp_time
-                << ", Splitter index = " << index_splitter << "\n";
+  g_log.warning() << "1st in-range TSP entry: " << index_tsp_time
+                  << ", Splitter index = " << index_splitter << "\n";
 
   // now it is the time to put TSP's entries to corresponding
   continue_search = !no_entry_in_range;
   while (continue_search) {
+    // get next target
+    int target = target_vec[index_splitter];
+
     // get the first entry index
     if (index_tsp_time > 0)
       --index_tsp_time;
 
-    int target = target_vec[index_splitter];
-
-    g_log.debug() << "Target = " << target
+    g_log.warning() << "[L1] Target = " << target
                   << " with splitter index = " << index_splitter << "\n"
                   << "\t"
                   << "Time index = " << index_tsp_time << "\n\n";
 
+    // add the continous entries to same target time series property
     bool continue_add = true;
     while (continue_add) {
       // add current entry
-      g_log.debug() << "Add entry " << index_tsp_time << " to target " << target
-                    << "\n";
       if (outputs[target]->size() == 0 ||
           outputs[target]->lastTime() < tsp_time) {
         // avoid to add duplicate entry
         outputs[target]->addValue(m_values[index_tsp_time].time(),
                                   m_values[index_tsp_time].value());
+
+        g_log.warning() << "Case 1 add entry " << index_tsp_time << " to target " << target
+                        << "\n";
       }
 
       // advance to next entry
       ++index_tsp_time;
 
-      g_log.debug() << "\tEntry time " << tsp_time_vec[index_tsp_time]
+      g_log.warning() << "\tEntry time " << tsp_time_vec[index_tsp_time]
                     << ", stop time " << split_stop_time << "\n";
 
       if (index_tsp_time == tsp_time_vec.size()) {
@@ -645,6 +648,9 @@ void TimeSeriesProperty<TYPE>::splitByTimeVector(
           // avoid the duplicate cases occured in fast frequency issue
           outputs[target]->addValue(m_values[index_tsp_time].time(),
                                     m_values[index_tsp_time].value());
+
+          g_log.warning() << "Case 2 add entry " << index_tsp_time << " to target " << target
+                          << "\n";
         }
         // FIXME - in future, need to find out WHETHER there is way to skip the
         // rest without going through the whole sequence

@@ -347,6 +347,16 @@ void FilterEvents::splitTimeSeriesLogs(const std::vector<TimeSeriesProperty<int>
     split_datetime_vec[i] = split_time;
   }
 
+  // debug output the result
+  for (size_t i = 0; i < m_vecSplitterTime.size(); ++i)
+  {
+      g_log.warning() << "item " << i << " :  " << m_vecSplitterTime[i];
+      if (i < m_vecSplitterGroup.size())
+          g_log.warning() << "  group " << m_vecSplitterGroup[i] << "\n";
+  }
+
+
+
   // find the maximum index of the outputs' index
   std::set<int>::iterator target_iter;
   int max_target_index = 0;
@@ -355,6 +365,9 @@ void FilterEvents::splitTimeSeriesLogs(const std::vector<TimeSeriesProperty<int>
     if (*target_iter > max_target_index)
       max_target_index = *target_iter;
   }
+  g_log.warning() << "Maximum target index = " << max_target_index << "\n";
+  if (m_useSplittersWorkspace)
+      ++ max_target_index;
 
   // initialize a search iteration for string set
   std::set<std::string>::iterator set_iter;
@@ -392,7 +405,8 @@ void FilterEvents::splitTimeSeriesLogs(const std::vector<TimeSeriesProperty<int>
   for (size_t i = 0; i < dbl_tsp_vector.size(); ++i) {
     // get property name and etc
     std::string property_name = dbl_tsp_vector[i]->name();
-    g_log.warning() << "[DB] Split double sample log " << property_name << "\n";
+    g_log.warning() << "[DB] Split double sample log " << property_name << " with size "
+                    << dbl_tsp_vector[i]->size() << "\n";
     set_iter = m_excludedSampleLogs.find(property_name);
 
     // skip the log if it is in the excluded sample log list
@@ -697,6 +711,8 @@ void FilterEvents::processSplittersWorkspace() {
                       << "  Information may not be accurate. \n";
     }
   }
+
+  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -713,6 +729,9 @@ void FilterEvents::convertSplittersWorkspaceToVectors() {
   // clear and get ready
   m_vecSplitterGroup.clear();
   m_vecSplitterTime.clear();
+
+  // define filter-left target index
+  int no_filter_index = m_maxTargetIndex + 1;
 
   // convert SplittersWorkspace to a set of pairs which can be sorted
   size_t num_splitters = m_splitters.size();
@@ -735,8 +754,7 @@ void FilterEvents::convertSplittersWorkspaceToVectors() {
       m_vecSplitterTime.push_back(stop_time_i64);
       m_vecSplitterGroup.push_back(splitter.index());
     }
-    else if (last_entry_time - TOLERANCE < start_time_i64 < last_entry_time + TOLERANCE)
-    {
+    else if (abs(last_entry_time - start_time_i64) < TOLERANCE){
       // start time is SAME as last entry
       m_vecSplitterTime.push_back(stop_time_i64);
       m_vecSplitterGroup.push_back(splitter.index());
@@ -746,7 +764,7 @@ void FilterEvents::convertSplittersWorkspaceToVectors() {
       // start time is way behind. then add an empty one
       m_vecSplitterTime.push_back(start_time_i64);
       m_vecSplitterTime.push_back(stop_time_i64);
-      m_vecSplitterGroup.push_back(0);
+      m_vecSplitterGroup.push_back(no_filter_index);
       m_vecSplitterGroup.push_back(splitter.index());
     }
     else
@@ -960,91 +978,12 @@ void FilterEvents::processTableSplittersWorkspace() {
   return;
 }
 
-////----------------------------------------------------------------------------------------------
-///** create an EventWorkspace from m_eventWS but without copying over any
-/// TimeSeriesProperty
-// *  with more than 1 entry
-// * Note: This method is migrated from WorkspaceFactory::initializeFromParent()
-// * @brief FilterEvents::createEventWorkspaceNoLog
-// * @return
-// */
-// boost::shared_ptr<DataObjects::EventWorkspace>
-// FilterEvents::createEventWorkspaceNoLog()
-//{
-//  // create an EventWorkspac
-//  boost::shared_ptr<EventWorkspace> child =
-//  boost::make_shared<EventWorkspace>();
-//  boost::shared_ptr<EventWorkspace> parent = m_eventWS;
-//  g_log.information("1");
-//  child->init(parent->getNumberHistograms(), 2, 1);
-//  g_log.information() << "Child workspace is initialized\n";
-
-//  // clone title, comment
-//  child->setTitle(parent->getTitle());
-//  child->setComment(parent->getComment());
-//  // clone instrument, This call also copies the SHARED POINTER to the
-//  parameter map
-//  g_log.information("Child workspace is set with title and comment");
-//  child->setInstrument(parent->getInstrument());
-//  // This call will (should) perform a COPY of the parameter map.
-//  child->instrumentParameters();
-
-//  // sample and no run!
-//  child->m_sample = parent->m_sample;
-
-//  // child.m_run = parent.m_run;
-
-//  // set the Y unit and etc.
-//  child->setYUnit(parent->YUnit());
-//  child->setYUnitLabel(parent->YUnitLabel());
-//  child->setDistribution(parent->isDistribution());
-
-//  // Same number of histograms = copy over the spectra data
-// //  if (parent->getNumberHistograms() == child->getNumberHistograms()) {
-// //    for (size_t i = 0; i < parent->getNumberHistograms(); ++i)
-// //      child->getSpectrum(i).copyInfoFrom(parent->getSpectrum(i));
-// //    // We use this variant without ISpectrum update to avoid costly
-// rebuilds
-// //    // triggered by setIndexInfo(). ISpectrum::copyInfoFrom sets invalid
-// flags
-// //    // for spectrum definitions, so it is important to call this
-// *afterwards*,
-// //    // since it clears the flags:
-// //    // child->setIndexInfoWithoutISpectrumUpdate(parent->indexInfo());
-// //  }
-
-// //  // deal with axis
-// //  for (size_t i = 0; i < parent->m_axes.size(); ++i) {
-// //    const size_t newAxisLength = child->getAxis(i)->length();
-// //    const size_t oldAxisLength = parent->getAxis(i)->length();
-
-// //    if (newAxisLength == oldAxisLength) {
-// //      // Need to delete the existing axis created in init above
-// //      delete child->m_axes[i];
-// //      // Now set to a copy of the parent workspace's axis
-// //      child->m_axes[i] = parent->m_axes[i]->clone(&child);
-// //    } else {
-// //      if (!parent.getAxis(i)->isSpectra()) // WHY???
-// //      {
-// //        delete child->m_axes[i];
-// //        // Call the 'different length' clone variant
-// //        child->m_axes[i] = parent->m_axes[i]->clone(newAxisLength, &child);
-// //      }
-// //    }
-// // }
-
-//  return child;
-//}
-
 //----------------------------------------------------------------------------------------------
 /** Create a list of EventWorkspace for output in the case that splitters are
  * given by
  *  SplittersWorkspace
  */
 void FilterEvents::createOutputWorkspaces() {
-
-    g_log.warning("Start!");
-
   // Convert information workspace to map
   std::map<int, std::string> infomap;
   if (m_hasInfoWS) {

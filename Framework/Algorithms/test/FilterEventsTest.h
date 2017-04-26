@@ -112,6 +112,14 @@ public:
         createEventWorkspace(runstart_i64, pulsedt, tofdt, numpulses);
     AnalysisDataService::Instance().addOrReplace("Test02", inpWS);
 
+    Kernel::TimeSeriesProperty<double> *proton_charge_raw =
+            dynamic_cast<Kernel::TimeSeriesProperty<double> *>(inpWS->run().getProperty("proton_charge"));
+    for (size_t i = 0; i < static_cast<size_t>(proton_charge_raw->size()); ++i)
+    {
+        std::cout << i << "  " << proton_charge_raw->nthTime(i).totalNanoseconds() << "  " << proton_charge_raw->nthValue(i)
+                  << "\n";
+    }
+
     SplittersWorkspace_sptr splws =
         createSplitter(runstart_i64, pulsedt, tofdt);
     AnalysisDataService::Instance().addOrReplace("Splitter02", splws);
@@ -142,6 +150,15 @@ public:
     TS_ASSERT_EQUALS(filteredws0->getSpectrum(0).getNumberEvents(), 4);
     TS_ASSERT_EQUALS(filteredws0->run().getProtonCharge(), 10);
 
+    Kernel::TimeSeriesProperty<double> *proton_charge =
+            dynamic_cast<Kernel::TimeSeriesProperty<double> *>(filteredws0->run().getProperty("proton_charge"));
+    for (size_t i = 0; i < proton_charge->size(); ++i)
+    {
+        std::cout << proton_charge->nthTime(i).totalNanoseconds() << "  " << proton_charge->nthValue(i)
+                  << "\n";
+    }
+
+
     // check splitter log
     TS_ASSERT(filteredws0->run().hasProperty("splitter"));
     Kernel::TimeSeriesProperty<int> *splitter0 =
@@ -161,6 +178,14 @@ public:
     TS_ASSERT(filteredws1);
     TS_ASSERT_EQUALS(filteredws1->getSpectrum(1).getNumberEvents(), 16);
     TS_ASSERT_EQUALS(filteredws1->run().getProtonCharge(), 11);
+
+    Kernel::TimeSeriesProperty<double> *proton_charge1 =
+            dynamic_cast<Kernel::TimeSeriesProperty<double> *>(filteredws1->run().getProperty("proton_charge"));
+    for (size_t i = 0; i < proton_charge1->size(); ++i)
+    {
+        std::cout << proton_charge1->nthTime(i).totalNanoseconds() << "  " << proton_charge1->nthValue(i)
+                  << "\n";
+    }
 
     // check splitter log
     TS_ASSERT(filteredws0->run().hasProperty("splitter"));
@@ -183,6 +208,14 @@ public:
     TS_ASSERT(filteredws2);
     TS_ASSERT_EQUALS(filteredws2->getSpectrum(1).getNumberEvents(), 21);
     TS_ASSERT_EQUALS(filteredws2->run().getProtonCharge(), 21);
+
+    Kernel::TimeSeriesProperty<double> *proton_charge2 =
+            dynamic_cast<Kernel::TimeSeriesProperty<double> *>(filteredws1->run().getProperty("proton_charge"));
+    for (size_t i = 0; i < proton_charge2->size(); ++i)
+    {
+        std::cout << proton_charge2->nthTime(i).totalNanoseconds() << "  " << proton_charge2->nthValue(i)
+                  << "\n";
+    }
 
     EventList elist3 = filteredws2->getSpectrum(3);
     elist3.sortPulseTimeTOF();
@@ -965,14 +998,16 @@ public:
   EventWorkspace_sptr createEventWorkspace(int64_t runstart_i64,
                                            int64_t pulsedt, int64_t tofdt,
                                            size_t numpulses) {
-    // 1. Create an EventWorkspace with 10 detectors
+    // Create an EventWorkspace with 10 detectors
     EventWorkspace_sptr eventWS =
         WorkspaceCreationHelper::createEventWorkspaceWithFullInstrument(10, 1,
                                                                         true);
 
     Kernel::DateAndTime runstart(runstart_i64);
 
-    // 2. Set run_start time
+    std::cout << "Create a new EventWorkspace\n";
+
+    // Set run_start time
     eventWS->mutableRun().addProperty("run_start", runstart.toISO8601String(),
                                       true);
 
@@ -983,10 +1018,18 @@ public:
     for (size_t i = 0; i < eventWS->getNumberHistograms(); i++) {
       auto &elist = eventWS->getSpectrum(i);
 
+      std::cout << "For spectrum " << i << "\n";
+
       for (int64_t pid = 0; pid < static_cast<int64_t>(numpulses); pid++) {
         int64_t pulsetime_i64 = pid * pulsedt + runstart.totalNanoseconds();
         Kernel::DateAndTime pulsetime(pulsetime_i64);
-        pchargeLog->addValue(pulsetime, 1.);
+
+        // add pulse time to proton charge log once and only once
+        if (i == 0){
+            pchargeLog->addValue(pulsetime, 1.);
+            std::cout << "Add proton charge log " << pulsetime.totalNanoseconds() << "\n";
+        }
+
         for (size_t e = 0; e < 10; e++) {
           double tof = static_cast<double>(e * tofdt / 1000);
           TofEvent event(tof, pulsetime);
@@ -1182,7 +1225,7 @@ public:
     Kernel::SplittingInterval interval0(t0, t1, 0);
     splitterws->addSplitter(interval0);
 
-    std::cout << "Add splitters: " << t0 << ", " << t1 << ", " << 0 << "\n";
+    std::cout << "[UnitTest] Add splitters: " << t0 << ", " << t1 << ", " << 0 << "\n";
 
     // 2. Splitter 1: 3+ ~ 9+ (second pulse)
     t0 = t1;
@@ -1190,7 +1233,7 @@ public:
     Kernel::SplittingInterval interval1(t0, t1, 1);
     splitterws->addSplitter(interval1);
 
-    std::cout << "Add splitters: " << t0 << ", " << t1 << ", " << 1 << "\n";
+    std::cout << "[UnitTest] Add splitters: " << t0 << ", " << t1 << ", " << 1 << "\n";
 
     // 3. Splitter 2: from 3rd pulse, 0 ~ 6+
     for (size_t i = 2; i < 5; i++) {
@@ -1198,8 +1241,7 @@ public:
       t1 = runstart_i64 + i * pulsedt + 6 * tofdt + tofdt / 2;
       Kernel::SplittingInterval interval2(t0, t1, 2);
       splitterws->addSplitter(interval2);
-      // std::cout << "Add splitters: " << t0 << ", " << t1 << ", " << 2 <<
-      // "\n";
+      std::cout << "[UnitTest] Add splitters: " << t0 << ", " << t1 << ", " << 2 << "\n";
     }
 
     return splitterws;
