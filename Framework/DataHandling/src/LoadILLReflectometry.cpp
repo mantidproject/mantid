@@ -6,16 +6,15 @@
 #include "MantidAPI/IPeakFunction.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/RegisterFileLoader.h"
+#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidHistogramData/LinearGenerator.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/Quat.h"
 #include "MantidKernel/UnitFactory.h"
-
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
-#include "MantidHistogramData/LinearGenerator.h"
 
 using Mantid::HistogramData::Histogram;
 using Mantid::HistogramData::Points;
@@ -161,10 +160,8 @@ void LoadILLReflectometry::init() {
   declareProperty("ScatteringType", "incoherent",
                   boost::make_shared<StringListValidator>(scattering),
                   "Scattering type used to calculate the Bragg angle");
-  // setPropertySettings("ScatteringType",
-  //                    Kernel::make_unique<EnabledWhenProperty>(
-  //                        "InputAngle", IS_NOT_EQUAL_TO, "user defined"));
-  // user defined and Figaro
+
+  // user defined InputAngle and D17 instrument: ScatteringAngle can be disabled
 
   declareProperty(Kernel::make_unique<FileProperty>("DirectBeam", std::string(),
                                                     FileProperty::OptionalLoad,
@@ -369,11 +366,15 @@ void LoadILLReflectometry::loadDataDetails(NeXus::NXEntry &entry) {
   // PSD data D17 256 x 1 x 1000
   // PSD data Figaro 1 x 256 x 1000
 
-  NXFloat timeOfFlight = entry.openNXFloat("instrument/PSD/time_of_flight");
-  timeOfFlight.load();
-  m_channelWidth = static_cast<double>(timeOfFlight[0]);
-  m_numberOfChannels = size_t(timeOfFlight[1]);
-  m_tofDelay = timeOfFlight[2];
+  if (m_acqMode) {
+    NXFloat timeOfFlight = entry.openNXFloat("instrument/PSD/time_of_flight");
+    timeOfFlight.load();
+    m_channelWidth = static_cast<double>(timeOfFlight[0]);
+    m_numberOfChannels = size_t(timeOfFlight[1]);
+    m_tofDelay = timeOfFlight[2];
+  } else {// monochromatic mode
+    m_numberOfChannels = 1;
+  }
 
   NXInt nChannels = entry.openNXInt("instrument/PSD/detsize");
   nChannels.load();
@@ -394,8 +395,7 @@ void LoadILLReflectometry::loadDataDetails(NeXus::NXEntry &entry) {
               "several tubes, after integration one "
               "tube remains in the Nexus file.\n Number of tubes (banks): 1\n");
   debugLog("Number of pixels per tube (number of detectors and number "
-           "of histograms): ",
-           m_numberOfHistograms);
+           "of histograms): ", m_numberOfHistograms);
   debugLog("Number of time channels: ", m_numberOfChannels);
   g_log.debug() << "Channel width: " << m_channelWidth << " 10e-6 sec\n";
   debugLog("TOF delay: ", m_tofDelay);

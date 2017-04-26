@@ -30,7 +30,7 @@ Detector position
 -----------------
 
 For the input file :literal:`Filename`, the detector position will be updated, which was initially defined by the corresponding instrument definition file, see `D17_definition.xml <https://github.com/mantidproject/mantid/blob/master/instrument/D17_Definition.xml>`_ or `Figaro_definition.xml <https://github.com/mantidproject/mantid/blob/master/instrument/Figaro_Definition.xml>`_ for more information.
-First, the detector will be moved to the current sample-detector distance (D17) or xxx(Figaro). Then, the detector will be rotated around the :math:`y` axis depending on the scattering angle :math:`\theta`, which is the Bragg angle multiplied by the factor two, calculated based on the user's choice of :literal:`InputAngle` for the options :literal:`sample angle`, :literal:`detector angle` and :literal:`ScatteringType`. Finally, an initial offset :math:`\Delta_{o}` of the direct beam (only when :literal:`InputAngle` is the :literal:`detector angle`) will be added to the scattering angle:
+First, the detector will be moved to the current sample-detector distance. Then, the detector will be rotated around the :math:`y` axis depending on the scattering angle :math:`\theta`, which is the Bragg angle multiplied by the factor two, calculated based on the user's choice of :literal:`InputAngle` for the options :literal:`sample angle`, :literal:`detector angle` and :literal:`ScatteringType`. Finally, an initial offset :math:`\Delta_{o}` of the direct beam (only when :literal:`InputAngle` is the :literal:`detector angle`) will be added to the scattering angle:
 
 .. math:: \theta = \theta + \Delta_{o}.
 
@@ -55,17 +55,23 @@ For the input option :literal:`InputAngle` is :literal:`detector angle`, the cen
 
 .. math:: \phi_{c} = \pm \frac{\phi_{\mbox{detector}, r} - \phi_{\mbox{detector}, d}}{2},
 
-where the beginning sign depends on the Figaro reflection (up (+) or down (-)), :math:`\phi_{\mbox{detector}, r}` is the input detector angle of the reflected beam and :math:`\phi_{\mbox{detector}, d}` is the detector angle of the direct beam. Other entries of the table describe the sample angle of the reflected beam :math:`\phi_{\mbox{sample}, r}`, the fitted detector peak position of the reflected beam (fittedR) and the direct beam (fittedD), the maximum detector peak position of the reflected beam (peakR) and the direct beam (peakD).
+where the beginning sign is positive for :literal:`D17`. It depends on the reflection (up (+) or down (-)) for :literal:`Figaro`. Furthermore, :math:`\phi_{\mbox{detector}, r}` is the input detector angle of the reflected beam and :math:`\phi_{\mbox{detector}, d}` is the detector angle of the direct beam. Other entries of the table describe the sample angle of the reflected beam :math:`\phi_{\mbox{sample}, r}`, the fitted detector peak position of the reflected beam (fittedR) and the direct beam (fittedD), the maximum detector peak position of the reflected beam (peakR) and the direct beam (peakD).
 
-+-----------------+--------------------------------------------------------+-----------------------------------------------------------------------+
-| Scattering type | incoherent                                             | coherent                                                              |
-+-----------------+-----------------+---------+--------------+-------------+--------------------------------+---------+--------------+-------------+
-|                 | :math:`\gamma`  |:math:`s`|:math:`\alpha`|:math:`\beta`| :math:`\gamma`                 |:math:`s`|:math:`\alpha`|:math:`\beta`| 
-+=================+=================+=========+==============+=============+================================+=========+==============+=============+
-| sample angle    | \-              |  \-     | \-           | \-          | :math:`\phi_{\mbox{sample}, r}`| -1.0    | peakR        | fittedR     |
-+-----------------+-----------------+---------+--------------+-------------+--------------------------------+---------+--------------+-------------+
-| detector angle  | :math:`\phi_{c}`| -1.0    | fittedD      | fittedR     | :math:`\phi_{c}`               | -1.0    | fittedD      | peakR       |
-+-----------------+-----------------+---------+--------------+-------------+--------------------------------+---------+--------------+-------------+
+The sample-detector distance :math:`d_{\mbox{detector}}` for each instrument. While :literal:`D17` takes the :literal:`det/value`, we calculate the difference :literal:`DTR/value - DTR/offset_value` for :literal:`Figaro`.
+
++-----------+-----------------+---------------------------------------------------------------+------------------------------------------------------------------------------+
+|           | Scattering type | incoherent                                                    | coherent                                                                     |
++-----------+-----------------+-----------------+----------------+--------------+-------------+--------------------------------+----------------+--------------+-------------+
+|           |                 | :math:`\gamma`  |:math:`s`       |:math:`\alpha`|:math:`\beta`| :math:`\gamma`                 |:math:`s`       |:math:`\alpha`|:math:`\beta`| 
++===========+=================+=================+================+==============+=============+================================+================+==============+=============+
+| D17       | sample angle    | \-              |  \-            | \-           | \-          | :math:`\phi_{\mbox{sample}, r}`| -1.0           | peakR        | fittedR     |
++-----------+-----------------+-----------------+----------------+--------------+-------------+--------------------------------+----------------+--------------+-------------+
+|           | detector angle  | :math:`\phi_{c}`| -1.0           | fittedD      | fittedR     | :math:`\phi_{c}`               | -1.0           | fittedD      | peakR       |
++-----------+-----------------+-----------------+----------------+--------------+-------------+--------------------------------+----------------+--------------+-------------+
+| Figaro    | sample angle    | \-              |  \-            | \-           | \-          | :math:`\phi_{\mbox{sample}, r}`| +/- 1.0        | peakR        | fittedR     |
++-----------+-----------------+-----------------+----------------+--------------+-------------+--------------------------------+----------------+--------------+-------------+
+|           | detector angle  | :math:`\phi_{c}`| +/- 1.0        | fittedD      | fittedR     | :math:`\phi_{c}`               | +/- 1.0        | fittedD      | peakR       |
++-----------+-----------------+-----------------+----------------+--------------+-------------+--------------------------------+----------------+--------------+-------------+
 
 The pre-procedure before fitting the detector peak position can be described by the following example Python code:
 
@@ -77,78 +83,79 @@ The pre-procedure before fitting the detector peak position can be described by 
 
 Pay attention that the x unit must be :literal:`TimeOfFlight` for avoiding varying bins and the :literal:`StartWorkspaceIndex` must be 2 in order to exclude the two monitors at index 0 and 1.
 
-Description of Nexus file and corresponding workspace Sample Log entries
-------------------------------------------------------------------------
+Description of Nexus file and corresponding workspace SampleLog entries
+-----------------------------------------------------------------------
 
-The following table summarizes the Nexus file entries partially required by the loader.
+The following table summarizes the Nexus file entries partially required by the loader: the choice of the chopper is Chopper or VirtualChopper for :literal:`D17` and two choppers are selected out of four existing choppers for :literal:`Figaro`.
+A new :literal:`SampleLog` entry for the incident energy :literal:`Ei` with unit meV will be created for :literal:`D17`.
 
-+-------------------+---------------------------------------+-----------------------------+----------------------------------------------+-------------+
-| Nexus entry       | D17                                   | Figaro                      | Description                                  | Unit        |
-+===================+=======================================+=============================+==============================================+=============+
-| acquisition_mode  |                                       |                             | If time of flight mode or not                | \-          |
-+-------------------+---------------------------------------+-----------------------------+----------------------------------------------+-------------+
-| data              | PSD_data                              | PSD_data                    |                                              | \-          |
-+-------------------+---------------------------------------+-----------------------------+----------------------------------------------+-------------+
-| instrument        | Chopper1/phase                        | CH1/phase                   | chopper phase                                | degree      |
-|                   +                                       +                             +                                              +             +            
-|                   | Chopper1/rotation_speed               | CH1/rotation_speed          | chopper speed                                | rpm         |
-|                   +---------------------------------------+-----------------------------+----------------------------------------------+-------------+
-|                   | Chopper2/phase                        | CH2/phase                   |                                              | degree      |
-|                   +                                       +                             +                                              +             +  
-|                   | Chopper2/rotation_speed               | CH2/rotation_speed          |                                              | rpm         |
-|                   +---------------------------------------+-----------------------------+----------------------------------------------+-------------+
-|                   |                                       | CH3/phase                   |                                              | degree      |
-|                   +                                       +                             +                                              +             +  
-|                   |                                       | CH3/rotation_speed          |                                              | rpm         |
-|                   +---------------------------------------+-----------------------------+----------------------------------------------+-------------+ 
-|                   |                                       | CH4/phase                   |                                              | degree      |
-|                   +                                       +                             +                                              +             +  
-|                   |                                       | CH4/rotation_speed          |                                              | rpm         |
-|                   +---------------------------------------+-----------------------------+----------------------------------------------+-------------+
-|                   |                                       | ChopperSetting/firstChopper | Number of selected first chopper             | \-          |
-|                   +                                       +                             +                                              +             +  
-|                   |                                       | ChopperSetting/secondChopper| Number of selected second chopper            | \-          | 
-|                   +---------------------------------------+-----------------------------+----------------------------------------------+-------------+
-|                   | VirtualChopper/chopper1_phase_average |                             |                                              | degree      |
-|                   +                                       +                             +                                              +             +
-|                   | VirtualChopper/chopper1_speed_average |                             |                                              | rpm         |
-|                   +                                       +                             +                                              +             +  
-|                   | VirtualChopper/chopper2_phase_average |                             |                                              | degree      |
-|                   +                                       +                             +                                              +             +  
-|                   | VirtualChopper/chopper2_speed_average |                             |                                              | rpm         |
-|                   +---------------------------------------+-----------------------------+----------------------------------------------+-------------+
-|                   | VirtualChopper/open_offset            | CollAngle/openOffset        |                                              | degree      |
-|                   +                                       +                             +                                              +             +  
-|                   | VirtualChopper/poff                   | CollAngle/poff              |                                              | degree      |
-|                   +---------------------------------------+-----------------------------+----------------------------------------------+-------------+
-|                   | det/offset_value                      | DTR/offset_value            | detector distance offset                     | millimeter  |
-|                   +                                       +                             +                                              +             +  
-|                   | det/value                             | DTR/value                   | detector distance value                      | millimeter  |
-|                   +---------------------------------------+-----------------------------+----------------------------------------------+-------------+
-|                   | PSD/detsize                           | PSD/detsize                 | detector size                                | \-          |
-|                   +                                       +                             +                                              +             +  
-|                   | PSD/detsum                            | PSD/detsum                  | sum of detector counts                       | \-          |
-|                   +---------------------------------------+-----------------------------+----------------------------------------------+-------------+
-|                   | PSD/mmpx                              | PSD/mmpy                    | pixel width                                  | millimeter  |
-|                   +---------------------------------------+-----------------------------+----------------------------------------------+-------------+
-|                   | PSD/time_of_flight_0                  | PSD/time_of_flight_0        | channel width                                | microseconds|
-|                   +                                       +                             +                                              +             +  
-|                   | PSD/time_of_flight_1                  | PSD/time_of_flight_1        | number of channels                           | \-          |
-|                   +                                       +                             +                                              +             +  
-|                   | PSD/time_of_flight_2                  | PSD/time_of_flight_2        | time-of-flight delay                         | microseconds|
-|                   +---------------------------------------+-----------------------------+----------------------------------------------+-------------+
-|                   | dan/value                             | VirtualAxis/DAN_actual_angle| detector angle                               | degree      |
-|                   +---------------------------------------+-----------------------------+----------------------------------------------+-------------+ 
-|                   | san/value                             | CollAngle/actual_coll_angle | sample angle                                 | degree      |
-+-------------------+---------------------------------------+-----------------------------+----------------------------------------------+-------------+
-| monitor1          | data                                  | data                        |                                              | \-          |
-+-------------------+---------------------------------------+-----------------------------+----------------------------------------------+-------------+
-| monitor2          | data                                  | data                        |                                              | \-          |
-+-------------------+---------------------------------------+-----------------------------+----------------------------------------------+-------------+
-| wavelength (D17)  |                                       |                             | calculate SampleLog entry incident energy Ei | meV         |
-+-------------------+---------------------------------------+-----------------------------+----------------------------------------------+-------------+
-| theta (Figaro)    |                                       |                             | sign determines reflection up/down           | degree      |
-+-------------------+---------------------------------------+-----------------------------+----------------------------------------------+-------------+
++-------------------+---------------------------------------+-----------------------------+----------------------------------------------------+-------------+
+| Nexus entry       | D17                                   | Figaro                      | Description                                        | Unit        |
++===================+=======================================+=============================+====================================================+=============+
+| acquisition_mode  |                                       |                             | If time of flight mode or not                      | \-          |
++-------------------+---------------------------------------+-----------------------------+----------------------------------------------------+-------------+
+| data              | PSD_data                              | PSD_data                    |                                                    | \-          |
++-------------------+---------------------------------------+-----------------------------+----------------------------------------------------+-------------+
+| instrument        | Chopper1/phase                        | CH1/phase                   | chopper phase                                      | degree      |
+|                   +                                       +                             +                                                    +             +            
+|                   | Chopper1/rotation_speed               | CH1/rotation_speed          | chopper speed                                      | rpm         |
+|                   +---------------------------------------+-----------------------------+----------------------------------------------------+-------------+
+|                   | Chopper2/phase                        | CH2/phase                   |                                                    | degree      |
+|                   +                                       +                             +                                                    +             +  
+|                   | Chopper2/rotation_speed               | CH2/rotation_speed          |                                                    | rpm         |
+|                   +---------------------------------------+-----------------------------+----------------------------------------------------+-------------+
+|                   |                                       | CH3/phase                   |                                                    | degree      |
+|                   +                                       +                             +                                                    +             +  
+|                   |                                       | CH3/rotation_speed          |                                                    | rpm         |
+|                   +---------------------------------------+-----------------------------+----------------------------------------------------+-------------+ 
+|                   |                                       | CH4/phase                   |                                                    | degree      |
+|                   +                                       +                             +                                                    +             +  
+|                   |                                       | CH4/rotation_speed          |                                                    | rpm         |
+|                   +---------------------------------------+-----------------------------+----------------------------------------------------+-------------+
+|                   |                                       | ChopperSetting/firstChopper | Number of selected first chopper                   | \-          |
+|                   +                                       +                             +                                                    +             +  
+|                   |                                       | ChopperSetting/secondChopper| Number of selected second chopper                  | \-          | 
+|                   +---------------------------------------+-----------------------------+----------------------------------------------------+-------------+
+|                   | VirtualChopper/chopper1_phase_average |                             |                                                    | degree      |
+|                   +                                       +                             +                                                    +             +
+|                   | VirtualChopper/chopper1_speed_average |                             |                                                    | rpm         |
+|                   +                                       +                             +                                                    +             +  
+|                   | VirtualChopper/chopper2_phase_average |                             |                                                    | degree      |
+|                   +                                       +                             +                                                    +             +  
+|                   | VirtualChopper/chopper2_speed_average |                             |                                                    | rpm         |
+|                   +---------------------------------------+-----------------------------+----------------------------------------------------+-------------+
+|                   | VirtualChopper/open_offset            | CollAngle/openOffset        |                                                    | degree      |
+|                   +                                       +                             +                                                    +             +  
+|                   | VirtualChopper/poff                   | CollAngle/poff              |                                                    | degree      |
+|                   +---------------------------------------+-----------------------------+----------------------------------------------------+-------------+
+|                   | det/offset_value                      | DTR/offset_value            | detector distance offset                           | millimeter  |
+|                   +                                       +                             +                                                    +             +  
+|                   | det/value                             | DTR/value                   | detector distance value                            | millimeter  |
+|                   +---------------------------------------+-----------------------------+----------------------------------------------------+-------------+
+|                   | PSD/detsize                           | PSD/detsize                 | detector size                                      | \-          |
+|                   +                                       +                             +                                                    +             +  
+|                   | PSD/detsum                            | PSD/detsum                  | sum of detector counts                             | \-          |
+|                   +---------------------------------------+-----------------------------+----------------------------------------------------+-------------+
+|                   | PSD/mmpx                              | PSD/mmpy                    | pixel width                                        | millimeter  |
+|                   +---------------------------------------+-----------------------------+----------------------------------------------------+-------------+
+|                   | PSD/time_of_flight_0                  | PSD/time_of_flight_0        | channel width                                      | microseconds|
+|                   +                                       +                             +                                                    +             +  
+|                   | PSD/time_of_flight_1                  | PSD/time_of_flight_1        | number of channels                                 | \-          |
+|                   +                                       +                             +                                                    +             +  
+|                   | PSD/time_of_flight_2                  | PSD/time_of_flight_2        | time-of-flight delay                               | microseconds|
+|                   +---------------------------------------+-----------------------------+----------------------------------------------------+-------------+
+|                   | dan/value                             | VirtualAxis/DAN_actual_angle| detector angle                                     | degree      |
+|                   +---------------------------------------+-----------------------------+----------------------------------------------------+-------------+ 
+|                   | san/value                             | CollAngle/actual_coll_angle | sample angle                                       | degree      |
++-------------------+---------------------------------------+-----------------------------+----------------------------------------------------+-------------+
+| monitor1          | data                                  | data                        |                                                    | \-          |
++-------------------+---------------------------------------+-----------------------------+----------------------------------------------------+-------------+
+| monitor2          | data                                  | data                        |                                                    | \-          |
++-------------------+---------------------------------------+-----------------------------+----------------------------------------------------+-------------+
+| wavelength (D17)  |                                       |                             | **new** SampleLog entry incident energy Ei in meV  |:math:`\r{A}`|
++-------------------+---------------------------------------+-----------------------------+----------------------------------------------------+-------------+
+| theta (Figaro)    |                                       |                             | sign determines reflection up/down                 | degree      |
++-------------------+---------------------------------------+-----------------------------+----------------------------------------------------+-------------+
 
 
 Usage

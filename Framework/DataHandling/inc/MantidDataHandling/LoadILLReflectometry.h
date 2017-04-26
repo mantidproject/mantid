@@ -81,7 +81,7 @@ private:
 
   /* Values parsed from the nexus file */
   std::string m_instrumentName; ///< Name of the instrument
-  size_t m_acqMode{1}; ///< Acquisition mode (TOF (default), monochromatic)
+  size_t m_acqMode{1}; ///< Acquisition mode (1 TOF (default), 0 monochromatic)
   size_t m_numberOfChannels{0};
   double m_tofDelay{0.0};
   size_t m_numberOfHistograms{
