@@ -286,7 +286,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
         self._vanPeakFWHM = self.getProperty("VanadiumFWHM").value
         self._vanSmoothing = self.getProperty("VanadiumSmoothParams").value
         self._vanRadius = self.getProperty("VanadiumRadius").value
-        calib = self.getProperty("CalibrationFile").value
+        self.calib = self.getProperty("CalibrationFile").value
         self._scaleFactor = self.getProperty("ScaleData").value
         self._outDir = self.getProperty("OutputDirectory").value
         self._outPrefix = self.getProperty("OutputFilePrefix").value.strip()
@@ -362,7 +362,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
             if self._splittersWS is not None:
                 raise NotImplementedError("Summing spectra and filtering events are not supported simultaneously.")
 
-            sam_ws_name = self._focusAndSum(samRuns, sample_time_filter_wall, calib,
+            sam_ws_name = self._focusAndSum(samRuns, sample_time_filter_wall,
                                             reload_if_loaded=reload_event_file,
                                             preserveEvents=preserveEvents)
             assert isinstance(sam_ws_name, str), 'Returned from _focusAndSum() must be a string but not' \
@@ -376,7 +376,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
             for sam_run_number in samRuns:
                 # first round of processing the sample
                 self._info = None
-                returned = self._focusChunks(sam_run_number, sample_time_filter_wall, calib,
+                returned = self._focusChunks(sam_run_number, sample_time_filter_wall,
                                              splitwksp=self._splittersWS,
                                              normalisebycurrent=self._normalisebycurrent,
                                              reload_if_loaded=reload_event_file,
@@ -413,7 +413,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
             # process the container
             can_run_numbers = self._info["container"].value
             can_run_numbers = ['%s_%d' % (self._instrument, value) for value in can_run_numbers]
-            can_run_ws_name = self._process_container_runs(can_run_numbers, samRunIndex, calib, preserveEvents)
+            can_run_ws_name = self._process_container_runs(can_run_numbers, samRunIndex, preserveEvents)
             if can_run_ws_name is not None:
                 workspacelist.append(can_run_ws_name)
 
@@ -422,7 +422,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
             van_run_number_list = ['%s_%d' % (self._instrument, value) for value in van_run_number_list]
             van_specified = not noRunSpecified(van_run_number_list)
             if van_specified:
-                van_run_ws_name = self._process_vanadium_runs(van_run_number_list, samRunIndex, calib)
+                van_run_ws_name = self._process_vanadium_runs(van_run_number_list, samRunIndex)
                 workspacelist.append(van_run_ws_name)
             else:
                 van_run_ws_name = None
@@ -755,7 +755,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
         return outName
 
     #pylint: disable=too-many-arguments
-    def _focusAndSum(self, filenames, filterWall=(0.,0.), calib='', preserveEvents=True, reload_if_loaded=True):
+    def _focusAndSum(self, filenames, filterWall=(0.,0.), preserveEvents=True, reload_if_loaded=True):
         """Load, sum, and focus data in chunks
         Purpose:
             Load, sum and focus data in chunks;
@@ -766,7 +766,6 @@ class SNSPowderReduction(DataProcessorAlgorithm):
         @param run_number_list:
         @param extension:
         @param filterWall:
-        @param calib:
         @param preserveEvents:
         @return: string as the summed workspace's name
         """
@@ -777,7 +776,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
             self.log().information("[Sum] Process run number %s. " % filename)
 
             # focus one run
-            out_ws_name = self._focusChunks(filename, filterWall, calib,
+            out_ws_name = self._focusChunks(filename, filterWall,
                                             reload_if_loaded=reload_if_loaded,
                                             normalisebycurrent=False,
                                             preserveEvents=preserveEvents)
@@ -815,14 +814,13 @@ class SNSPowderReduction(DataProcessorAlgorithm):
         return sumRun
 
     #pylint: disable=too-many-arguments,too-many-locals,too-many-branches
-    def _focusChunks(self, filename, filter_wall=(0.,0.), calib='',  # noqa
+    def _focusChunks(self, filename, filter_wall=(0.,0.),  # noqa
                      normalisebycurrent=True, splitwksp=None, preserveEvents=True,
                      reload_if_loaded=True):  # noqa
         """
         Load, (optional) split and focus data in chunks
         @param filename: integer for run number
         @param filter_wall:  Enabled if splitwksp is defined
-        @param calib:
         @param normalisebycurrent: Set to False if summing runs for correct math
         @param splitwksp: SplittersWorkspace (if None then no split)
         @param preserveEvents:
@@ -899,7 +897,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                 self.log().notice('Align and focus workspace %s' % out_ws_name_chunk_split)
                 api.AlignAndFocusPowder(InputWorkspace=out_ws_name_chunk_split,
                                         OutputWorkspace=out_ws_name_chunk_split,
-                                        CalFileName=calib,
+                                        CalFileName=self.calib,
                                         GroupFilename=self.getProperty("GroupingFile").value,
                                         Params=self._binning,
                                         ResampleX=self._resampleX,
@@ -1264,7 +1262,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
 
         return do_split_raw_wksp, num_out_wksp
 
-    def _process_container_runs(self, can_run_numbers, samRunIndex, calib, preserveEvents):
+    def _process_container_runs(self, can_run_numbers, samRunIndex, preserveEvents):
         """ Process container runs
         :param can_run_numbers:
         :return:
@@ -1294,10 +1292,10 @@ class SNSPowderReduction(DataProcessorAlgorithm):
             else:
                 # load the container run
                 if self.getProperty("Sum").value:
-                    can_run_ws_name = self._focusAndSum(can_run_numbers, calib=calib,
+                    can_run_ws_name = self._focusAndSum(can_run_numbers,
                                                         preserveEvents=preserveEvents)
                 else:
-                    can_run_ws_name = self._focusChunks(can_run_number, calib=calib,
+                    can_run_ws_name = self._focusChunks(can_run_number,
                                                         normalisebycurrent=self._normalisebycurrent,
                                                         preserveEvents=preserveEvents)
 
@@ -1321,7 +1319,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
 
         return can_run_ws_name
 
-    def _process_vanadium_runs(self, van_run_number_list, samRunIndex, calib, **dummy_focuspos):
+    def _process_vanadium_runs(self, van_run_number_list, samRunIndex, **dummy_focuspos):
         """
         Purpose: process vanadium runs
         Requirements: if more than 1 run in given run number list, then samRunIndex must be given.
@@ -1329,7 +1327,6 @@ class SNSPowderReduction(DataProcessorAlgorithm):
         :param van_run_number_list: list of vanadium run
         :param timeFilterWall: time filter wall
         :param samRunIndex: sample run index
-        :param calib: calibration run
         :param focuspos:
         :return:
         """
@@ -1417,7 +1414,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
             self.log().warning('Reducing vanadium run %s.' % van_run_ws_name)
             api.AlignAndFocusPowder(InputWorkspace=van_run_ws_name,
                                     OutputWorkspace=van_run_ws_name,
-                                    CalFileName=calib,
+                                    CalFileName=self.calib,
                                     GroupFilename=self.getProperty("GroupingFile").value,
                                     Params=self._binning,
                                     ResampleX=self._resampleX,
