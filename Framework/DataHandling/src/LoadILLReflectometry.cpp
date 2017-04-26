@@ -372,7 +372,7 @@ void LoadILLReflectometry::loadDataDetails(NeXus::NXEntry &entry) {
     m_channelWidth = static_cast<double>(timeOfFlight[0]);
     m_numberOfChannels = size_t(timeOfFlight[1]);
     m_tofDelay = timeOfFlight[2];
-  } else {// monochromatic mode
+  } else { // monochromatic mode
     m_numberOfChannels = 1;
   }
 
@@ -395,7 +395,8 @@ void LoadILLReflectometry::loadDataDetails(NeXus::NXEntry &entry) {
               "several tubes, after integration one "
               "tube remains in the Nexus file.\n Number of tubes (banks): 1\n");
   debugLog("Number of pixels per tube (number of detectors and number "
-           "of histograms): ", m_numberOfHistograms);
+           "of histograms): ",
+           m_numberOfHistograms);
   debugLog("Number of time channels: ", m_numberOfChannels);
   g_log.debug() << "Channel width: " << m_channelWidth << " 10e-6 sec\n";
   debugLog("TOF delay: ", m_tofDelay);

@@ -162,36 +162,39 @@ public:
                     1.3877788e-17, 1e-16);
     // test default inputs
     TS_ASSERT_EQUALS(output->run().getPropertyValueAsType<double>("stheta"),
-                     2.4221309013948832e-19);
+                     0.01085594758122008);
     AnalysisDataService::Instance().clear();
   }
 
   void testIncoherentScatteringSampleAngleFigaro() {
-    testScatteringAngle(2.4221309013948832e-19, "sample angle", "incoherent",
+    testScatteringAngle(0.01085594758122008, "sample angle", "incoherent",
                         m_figaroFile);
   }
 
   void testCoherentScatteringSampleAngleFigaro() {
-    testScatteringAngle(1.0, "sample angle", "coherent", m_figaroFile);
+    testScatteringAngle(0.017701593089980518, "sample angle", "coherent",
+                        m_figaroFile);
   }
 
   void testIncoherentScatteringDetectorAngleFigaro() {
-    testScatteringAngle(0.0, "detector angle", "incoherent", m_figaroFile);
+    testScatteringAngle(-0.009931402389595764, "detector angle", "incoherent",
+                        m_figaroFile);
   }
 
   void testCoherentScatteringDetectorAngleFigaro() {
-    testScatteringAngle(1.0, "detector angle", "coherent", m_figaroFile);
+    testScatteringAngle(0.01770084511622124, "detector angle", "coherent",
+                        m_figaroFile);
+  }
+
+  void testCoherentScatteringUserAngleFigaro() {
+    testScatteringAngle(0.5304444211070592, "user defined", "coherent",
+                        m_figaroFile);
   }
 
   // user defined input angle of 30.0 degree only needs to be converted to
   // radiant
   void testIncoherentScatteringUserAngleFigaro() {
     testScatteringAngle(30.0 * M_PI / 180., "user defined", "incoherent",
-                        m_figaroFile);
-  }
-
-  void testCoherentScatteringUserAngleFigaro() {
-    testScatteringAngle(30.0 * M_PI / 180., "user defined", "coherent",
                         m_figaroFile);
   }
 
