@@ -53,7 +53,10 @@ Instrument::Instrument(const boost::shared_ptr<const Instrument> instr,
       m_ValidTo(instr->m_ValidTo), m_referenceFrame(new ReferenceFrame),
       m_detectorInfo(instr->m_detectorInfo),
       m_componentInfo(instr->m_componentInfo) {
-  m_map_nonconst->setInstrument(m_instr.get());
+  bool isPhysicalInstrument =
+      m_map ? m_instr->m_isPhysicalInstrument : m_isPhysicalInstrument;
+  if (!isPhysicalInstrument)
+    m_map_nonconst->setInstrument(m_instr.get());
 }
 
 /** Copy constructor
@@ -162,9 +165,12 @@ Instrument_const_sptr Instrument::getPhysicalInstrument() const {
   if (m_map) {
     if (m_instr->getPhysicalInstrument()) {
       // A physical instrument should use the same parameter map as the 'main'
-      // instrument
-      return Instrument_const_sptr(
-          new Instrument(m_instr->getPhysicalInstrument(), m_map_nonconst));
+      // instrument. This constructor automatically sets the instrument as the
+      // owning instrument in the ParameterMap. We need to undo this immediately
+      // since the ParameterMap must always be owned by the neutronic
+      // instrument.
+      return boost::make_shared<Instrument>(m_instr->getPhysicalInstrument(),
+                                            m_map_nonconst);
     } else {
       return Instrument_const_sptr();
     }
@@ -178,11 +184,11 @@ Instrument_const_sptr Instrument::getPhysicalInstrument() const {
  * algorithms.
  *  @param physInst A pointer to the physical instrument object.
  */
-void Instrument::setPhysicalInstrument(
-    boost::shared_ptr<const Instrument> physInst) {
-  if (!m_map)
-    m_physicalInstrument = physInst;
-  else
+void Instrument::setPhysicalInstrument(std::unique_ptr<Instrument> physInst) {
+  if (!m_map) {
+    physInst->m_isPhysicalInstrument = true;
+    m_physicalInstrument = std::move(physInst);
+  } else
     throw std::runtime_error("Instrument::setPhysicalInstrument() called on a "
                              "parametrized instrument.");
 }
