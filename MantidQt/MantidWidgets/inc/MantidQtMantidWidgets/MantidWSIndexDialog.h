@@ -167,6 +167,8 @@ public:
   /// IntervalList
   /// object.
   void setIntervalList(const IntervalList &);
+  /// Clears the interval list
+  void clear();
 
   /// Returns a set of ints that represents the interval.
   std::set<int> getIntSet() const;
@@ -393,10 +395,12 @@ private:
 
   /// A list of names of workspaces which are to be plotted.
   QList<QString> m_wsNames;
-  /// IntervalLists for the range of indices/IDs AVAILABLE to the user.
+  /// IntervalLists for the range of indices/numbers AVAILABLE to the user.
   IntervalList m_wsIndexIntervals, m_spectraNumIntervals;
-  /// IntervalLists for the range of indices/IDs CHOSEN by the user.
-  IntervalList m_wsIndexChoice, m_spectraIdChoice;
+  /// IntervalLists for the range of indices/numbers CHOSEN by the user.
+  IntervalList m_wsIndexChoice, m_spectraNumChoice;
+  /// Flags to indicate which one of the two interval lists above is chosen by user
+  bool m_usingWsIndexChoice = false, m_usingSprectraNumChoice = false;
 };
 
 class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS MantidWSIndexDialog : public QDialog {

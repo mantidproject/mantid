@@ -50,7 +50,7 @@ MantidWSIndexWidget::MantidWSIndexWidget(QWidget *parent, Qt::WFlags flags,
       m_waterfall(showWaterfallOption), m_tiled(showTiledOption),
       m_advanced(isAdvanced), m_plotOptions(), m_wsNames(wsNames),
       m_wsIndexIntervals(), m_spectraNumIntervals(), m_wsIndexChoice(),
-      m_spectraIdChoice() {
+      m_spectraNumChoice() {
   checkForSpectraAxes();
   // Generate the intervals allowed to be plotted by the user.
   generateWsIndexIntervals();
@@ -199,7 +199,7 @@ QMultiMap<QString, std::set<int>> MantidWSIndexWidget::getPlots() const {
     }
   }
   // Else if the user typed in the spectraField ...
-  else if (m_spectraIdChoice.getList().size() > 0) {
+  else if (m_spectraNumChoice.getList().size() > 0) {
     for (int i = 0; i < m_wsNames.size(); i++) {
       // Convert the spectra choices of the user into workspace indices for us
       // to use.
@@ -213,7 +213,7 @@ QMultiMap<QString, std::set<int>> MantidWSIndexWidget::getPlots() const {
       const Mantid::spec2index_map spec2index =
           ws->getSpectrumToWorkspaceIndexMap();
 
-      std::set<int> origSet = m_spectraIdChoice.getIntSet();
+      std::set<int> origSet = m_spectraNumChoice.getIntSet();
       std::set<int>::iterator it = origSet.begin();
       std::set<int> convertedSet;
 
@@ -282,10 +282,8 @@ bool MantidWSIndexWidget::isErrorBarsSelected() const {
  * Called when user edits workspace field
  */
 void MantidWSIndexWidget::editedWsField() {
-  if (usingSpectraNumbers()) {
     m_spectraField->lineEdit()->clear();
     m_spectraField->setError("");
-  }
 }
 
 /**
@@ -311,13 +309,19 @@ bool MantidWSIndexWidget::plotRequested() {
       m_spectraField->lineEdit()->validator()->validate(spectraText, npos);
   if (wsState == QValidator::Acceptable) {
     m_wsIndexChoice.addIntervals(m_wsField->lineEdit()->text());
+    m_usingWsIndexChoice = true;
+    m_usingSprectraNumChoice = false;
     acceptable = true;
   }
   // Else if the user typed in the spectraField ...
   else if (spectraState == QValidator::Acceptable) {
-    m_spectraIdChoice.addIntervals(m_spectraField->lineEdit()->text());
+    m_spectraNumChoice.addIntervals(m_spectraField->lineEdit()->text());
+    m_usingSprectraNumChoice = true;
+    m_usingWsIndexChoice = false;
     acceptable = true;
   } else {
+    m_usingSprectraNumChoice = false;
+    m_usingWsIndexChoice = false;
     QString error_message("Invalid input. It is not in the range available");
     if (!wsText.isEmpty())
       m_wsField->setError(error_message);
@@ -339,6 +343,8 @@ bool MantidWSIndexWidget::plotRequested() {
  */
 bool MantidWSIndexWidget::plotAllRequested() {
   m_wsIndexChoice = m_wsIndexIntervals;
+  m_usingWsIndexChoice = true;
+  m_usingSprectraNumChoice = false;
   return validatePlotOptions();
 }
 
@@ -347,6 +353,9 @@ bool MantidWSIndexWidget::plotAllRequested() {
  * set appropriate error if not valid
  */
 bool MantidWSIndexWidget::validatePlotOptions() {
+
+  // Only bother is plotting is advanced
+  if (!m_advanced) return true;
 
   bool validOptions = true;
 
@@ -370,15 +379,37 @@ bool MantidWSIndexWidget::validatePlotOptions() {
       nCustomLogValues.setNum(numCustomLogValues); 
       int numWorkspaces = m_wsNames.size();
       if (m_plotOptions->currentText() == SURFACE_PLOT || m_plotOptions->currentText() == CONTOUR_PLOT) {
-        QString nWorkspaces; 
+        QString nWorkspaces;
         nWorkspaces.setNum(numWorkspaces);
-        if(numCustomLogValues != m_wsNames.size()){
-          m_logValues->setError("The number of custom log values (" + nCustomLogValues 
-                                + ") is not equal to the number of workspaces (" + nWorkspaces + ").");
+
+        if (numCustomLogValues != numWorkspaces) {
+          m_logValues->setError("The number of custom log values (" + nCustomLogValues
+            + ") is not equal to the number of workspaces (" + nWorkspaces + ").");
+          validOptions = false;
+        }
+      }
+      else {
+        int numSpectra = 0;
+        if (m_usingWsIndexChoice) 
+          numSpectra = m_wsIndexChoice.totalIntervalLength();
+        if (m_usingSprectraNumChoice) 
+          numSpectra = m_spectraNumChoice.totalIntervalLength();
+        QString nPlots;
+        nPlots.setNum(numWorkspaces*numSpectra);
+
+        if (numCustomLogValues != numWorkspaces*numSpectra) {
+          m_logValues->setError("The number of custom log values (" + nCustomLogValues
+            + ") is not equal to the number of plots (" + nPlots + ").");
           validOptions = false;
         }
       }
     }
+  }
+
+  if (!validOptions) {
+    // Clear record of user choices, because they may change.
+    m_wsIndexChoice.clear();
+    m_spectraNumChoice.clear();
   }
 
   return validOptions;
@@ -1142,6 +1173,10 @@ void IntervalList::setIntervalList(const IntervalList &intervals) {
   m_list = QList<Interval>(intervals.getList());
 }
 
+void IntervalList::clear() {
+  m_list = QList<Interval>();
+}
+
 std::set<int> IntervalList::getIntSet() const {
   std::set<int> intSet;
 
@@ -1152,6 +1187,7 @@ std::set<int> IntervalList::getIntSet() const {
 
   return intSet;
 }
+
 
 bool IntervalList::contains(const Interval &other) const {
   for (int i = 0; i < m_list.size(); i++) {
