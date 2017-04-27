@@ -56,11 +56,11 @@ const std::string SCDCalibratePanels::category() const {
 bool SCDCalibratePanels::edgePixel(const PeaksWorkspace &ws,
                                    const std::string &bankName, int col,
                                    int row, int Edge) {
-  if (bankName.compare("None") == 0)
+  if (bankName == "None")
     return false;
   auto Iptr = ws.getInstrument();
   auto parent = Iptr->getComponentByName(bankName);
-  if (parent->type().compare("RectangularDetector") == 0) {
+  if (parent->type() == "RectangularDetector") {
     auto RDet = boost::dynamic_pointer_cast<const RectangularDetector>(parent);
     return col < Edge || col >= (RDet->xpixels() - Edge) || row < Edge ||
            row >= (RDet->ypixels() - Edge);

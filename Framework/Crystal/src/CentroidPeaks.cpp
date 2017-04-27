@@ -335,7 +335,7 @@ int CentroidPeaks::findPixelID(std::string bankName, int col, int row) {
   Geometry::Instrument_const_sptr Iptr = inWS->getInstrument();
   boost::shared_ptr<const IComponent> parent =
       Iptr->getComponentByName(bankName);
-  if (parent->type().compare("RectangularDetector") == 0) {
+  if (parent->type() == "RectangularDetector") {
     boost::shared_ptr<const RectangularDetector> RDet =
         boost::dynamic_pointer_cast<const RectangularDetector>(parent);
 
@@ -358,12 +358,12 @@ int CentroidPeaks::findPixelID(std::string bankName, int col, int row) {
 }
 bool CentroidPeaks::edgePixel(std::string bankName, int col, int row,
                               int Edge) {
-  if (bankName.compare("None") == 0)
+  if (bankName == "None")
     return false;
   Geometry::Instrument_const_sptr Iptr = inWS->getInstrument();
   boost::shared_ptr<const IComponent> parent =
       Iptr->getComponentByName(bankName);
-  if (parent->type().compare("RectangularDetector") == 0) {
+  if (parent->type() == "RectangularDetector") {
     boost::shared_ptr<const RectangularDetector> RDet =
         boost::dynamic_pointer_cast<const RectangularDetector>(parent);
 
