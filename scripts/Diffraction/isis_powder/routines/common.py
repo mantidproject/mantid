@@ -159,15 +159,15 @@ def generate_splined_name(vanadium_string, *args):
     :param args: Any identifying properties to append to the name
     :return: The splined vanadium name
     """
-    out_name = "VanSplined".join('_').join(str(vanadium_string))
+    out_name = "VanSplined" + '_' + str(vanadium_string)
     for passed_arg in args:
         if isinstance(passed_arg, list):
-            for val in passed_arg:
-                out_name += '_'.join(str(val))
+            for arg in passed_arg:
+                out_name += '_' + str(arg)
         else:
-            out_name += '_'.join(str(passed_arg))
+            out_name += '_' + (str(passed_arg))
 
-    out_name.join(".nxs")
+    out_name += ".nxs"
     return out_name
 
 
