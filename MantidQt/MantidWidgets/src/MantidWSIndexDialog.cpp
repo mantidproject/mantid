@@ -97,10 +97,10 @@ MantidWSIndexWidget::UserInput MantidWSIndexWidget::getSelections() {
     }
     userInputAdvanced.workspaceNames = m_wsNames;
     if (userInputAdvanced.logName == CUSTOM) {
-        userInputAdvanced.customLogValues = getCustomLogValues();
-        if(userInputAdvanced.customLogValues.empty()){
-          userInputAdvanced.accepted = false;
-        }
+      userInputAdvanced.customLogValues = getCustomLogValues();
+      if (userInputAdvanced.customLogValues.empty()) {
+        userInputAdvanced.accepted = false;
+      }
     }
     options.isAdvanced = true;
     options.advanced = userInputAdvanced;
@@ -160,7 +160,7 @@ const std::set<double> MantidWSIndexWidget::getCustomLogValues() const {
       double number = value.toDouble(&ok);
       if (ok) {
         logValues.insert(number);
-      } 
+      }
     }
   }
   return logValues;
@@ -282,8 +282,8 @@ bool MantidWSIndexWidget::isErrorBarsSelected() const {
  * Called when user edits workspace field
  */
 void MantidWSIndexWidget::editedWsField() {
-    m_spectraField->lineEdit()->clear();
-    m_spectraField->setError("");
+  m_spectraField->lineEdit()->clear();
+  m_spectraField->setError("");
 }
 
 /**
@@ -355,7 +355,8 @@ bool MantidWSIndexWidget::plotAllRequested() {
 bool MantidWSIndexWidget::validatePlotOptions() {
 
   // Only bother is plotting is advanced
-  if (!m_advanced) return true;
+  if (!m_advanced)
+    return true;
 
   bool validOptions = true;
 
@@ -363,7 +364,7 @@ bool MantidWSIndexWidget::validatePlotOptions() {
   // only if custom logs are selected, else it's OK.
   if (m_logSelector->currentText() == CUSTOM) {
     QStringList values = m_logValues->lineEdit()->text().split(',');
-    foreach(QString value, values) {
+    foreach (QString value, values) {
       bool ok = false;
       double number = value.toDouble(&ok);
       if (!ok) {
@@ -373,33 +374,36 @@ bool MantidWSIndexWidget::validatePlotOptions() {
       }
     }
 
-    if(validOptions) {
+    if (validOptions) {
       int numCustomLogValues = values.size();
-      QString nCustomLogValues; 
-      nCustomLogValues.setNum(numCustomLogValues); 
+      QString nCustomLogValues;
+      nCustomLogValues.setNum(numCustomLogValues);
       int numWorkspaces = m_wsNames.size();
-      if (m_plotOptions->currentText() == SURFACE_PLOT || m_plotOptions->currentText() == CONTOUR_PLOT) {
+      if (m_plotOptions->currentText() == SURFACE_PLOT ||
+          m_plotOptions->currentText() == CONTOUR_PLOT) {
         QString nWorkspaces;
         nWorkspaces.setNum(numWorkspaces);
 
         if (numCustomLogValues != numWorkspaces) {
-          m_logValues->setError("The number of custom log values (" + nCustomLogValues
-            + ") is not equal to the number of workspaces (" + nWorkspaces + ").");
+          m_logValues->setError("The number of custom log values (" +
+                                nCustomLogValues +
+                                ") is not equal to the number of workspaces (" +
+                                nWorkspaces + ").");
           validOptions = false;
         }
-      }
-      else {
+      } else {
         int numSpectra = 0;
-        if (m_usingWsIndexChoice) 
+        if (m_usingWsIndexChoice)
           numSpectra = m_wsIndexChoice.totalIntervalLength();
-        if (m_usingSprectraNumChoice) 
+        if (m_usingSprectraNumChoice)
           numSpectra = m_spectraNumChoice.totalIntervalLength();
         QString nPlots;
-        nPlots.setNum(numWorkspaces*numSpectra);
+        nPlots.setNum(numWorkspaces * numSpectra);
 
-        if (numCustomLogValues != numWorkspaces*numSpectra) {
-          m_logValues->setError("The number of custom log values (" + nCustomLogValues
-            + ") is not equal to the number of plots (" + nPlots + ").");
+        if (numCustomLogValues != numWorkspaces * numSpectra) {
+          m_logValues->setError(
+              "The number of custom log values (" + nCustomLogValues +
+              ") is not equal to the number of plots (" + nPlots + ").");
           validOptions = false;
         }
       }
@@ -1173,9 +1177,7 @@ void IntervalList::setIntervalList(const IntervalList &intervals) {
   m_list = QList<Interval>(intervals.getList());
 }
 
-void IntervalList::clear() {
-  m_list = QList<Interval>();
-}
+void IntervalList::clear() { m_list = QList<Interval>(); }
 
 std::set<int> IntervalList::getIntSet() const {
   std::set<int> intSet;
@@ -1187,7 +1189,6 @@ std::set<int> IntervalList::getIntSet() const {
 
   return intSet;
 }
-
 
 bool IntervalList::contains(const Interval &other) const {
   for (int i = 0; i < m_list.size(); i++) {

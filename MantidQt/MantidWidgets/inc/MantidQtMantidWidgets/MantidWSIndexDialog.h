@@ -399,7 +399,8 @@ private:
   IntervalList m_wsIndexIntervals, m_spectraNumIntervals;
   /// IntervalLists for the range of indices/numbers CHOSEN by the user.
   IntervalList m_wsIndexChoice, m_spectraNumChoice;
-  /// Flags to indicate which one of the two interval lists above is chosen by user
+  /// Flags to indicate which one of the two interval lists above is chosen by
+  /// user
   bool m_usingWsIndexChoice = false, m_usingSprectraNumChoice = false;
 };
 
