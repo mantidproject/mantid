@@ -41,6 +41,10 @@ Improved
 - :ref:`MergeRuns <algm-MergeRuns>` now has a sum option and more control over failure when binning is different or sample logs do not match.
 - Made it possible for LiveListeners to read properties from the calling Algorithm. This gives greater flexiblity for authors of LiveListener plugins.
 - Improved verification of IDFs
+- :ref:`AddSampleLog <algm-AddSampleLog>` now can optionionally take a MatrixWorkspace for the time and value of the newly-added TimeSeriesProperty sample log.
+- :ref:`ExportTimeSeriesLog <algm-ExportTimeSeriesLog>` now can export the first derivative of the sample log as an opotion.
+- :ref:`ExportTimeSeriesLog <algm-ExportTimeSeriesLog>` now add information of exported log to the output work, which
+  :ref:`AddSampleLog <algm-AddSampleLog>` can retrieve automatically.
 - ``ThreadPool`` now respects the value of ``OMP_NUM_THREADS`` environment variable (documented in [msdn](https://msdn.microsoft.com/en-us/library/yw6c0z19.aspx) and [gcc](https://gcc.gnu.org/onlinedocs/libgomp/OMP_005fNUM_005fTHREADS.html))
 
 Bug Fixes
@@ -105,7 +109,7 @@ Python
       3.0
       3.0
 
-- ``mantid.geometry.Object`` has a new method ``volume()`` which calculates the volume of the shape.
+- :class:`mantid.geometry.Object` has a new method ``volume()`` which calculates the volume of the shape.
 - A ``SpectraAxis`` object can now be created from Python, in a similar way to the other Axis types:
 
   .. code-block:: python
@@ -114,12 +118,17 @@ Python
      # Create a new axis reference
      s_axis = SpectraAxis.create(ws1)
 
+
+- ``CrystalStructure``, ``UnitCell``, ``PointGroup``, and ``SpaceGroup`` all have better console printing
 - Fixed a bug on MDHistogramWorkspaces where passing an index larger than the size of the dimensions of the workspace to ``setSignalAt`` would crash Mantid.
+
 
 Python Algorithms
 #################
 
-|
+- :class:`mantid.api.DataProcessorAlgorithm` now have a new method
+  ``copyProperties()`` which allow them to copy properties (with
+  defaults, validators, and documentation) from other algorithms.
 
 Full list of
 `Framework <http://github.com/mantidproject/mantid/pulls?q=is%3Apr+milestone%3A%22Release+3.10%22+is%3Amerged+label%3A%22Component%3A+Framework%22>`__
