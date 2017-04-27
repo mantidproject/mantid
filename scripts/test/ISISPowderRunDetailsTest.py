@@ -8,11 +8,10 @@ import string
 import unittest
 import warnings
 
-from isis_powder.routines import RunDetails
+from isis_powder.routines import run_details
 
 
 class ISISPowderInstrumentRunDetailsTest(unittest.TestCase):
-
     def setup_mock_inst_settings(self, yaml_file_path):
         calibration_dir = tempfile.mkdtemp()
         self._folders_to_remove = [calibration_dir]
@@ -39,8 +38,8 @@ class ISISPowderInstrumentRunDetailsTest(unittest.TestCase):
         run_number_string = "17-18"
         mock_inst = self.setup_mock_inst_settings(yaml_file_path="ISISPowderRunDetailsTest.yaml")
 
-        output_obj = RunDetails.create_run_details_object(run_number_string=run_number_string, inst_settings=mock_inst,
-                                                          is_vanadium_run=False)
+        output_obj = run_details.create_run_details_object(run_number_string=run_number_string, inst_settings=mock_inst,
+                                                           is_vanadium_run=False)
 
         self.assertEqual(output_obj.empty_runs, expected_empty_runs)
         self.assertEqual(output_obj.grouping_file_path,
@@ -58,8 +57,8 @@ class ISISPowderInstrumentRunDetailsTest(unittest.TestCase):
         run_number_string = "17-18"
         expected_vanadium_runs = "11-12"
         mock_inst = self.setup_mock_inst_settings(yaml_file_path="ISISPowderRunDetailsTest.yaml")
-        output_obj = RunDetails.create_run_details_object(run_number_string=run_number_string, inst_settings=mock_inst,
-                                                          is_vanadium_run=True)
+        output_obj = run_details.create_run_details_object(run_number_string=run_number_string, inst_settings=mock_inst,
+                                                           is_vanadium_run=True)
 
         self.assertEqual(expected_vanadium_runs, output_obj.run_number)
         self.assertEqual(output_obj.vanadium_run_numbers, output_obj.run_number)
@@ -75,21 +74,22 @@ class ISISPowderInstrumentRunDetailsTest(unittest.TestCase):
         mock_inst = self.setup_mock_inst_settings(yaml_file_path="ISISPowderRunDetailsTestCallable.yaml")
 
         # Get the YAML file as a dict first
-        wrapped_funcs = RunDetails.WrappedFunctionsRunDetails
+        wrapped_funcs = run_details.WrappedFunctionsRunDetails
 
-        yaml_callable = RunDetails.RunDetailsFuncWrapper(function=wrapped_funcs.get_cal_mapping_dict,
-                                                         run_number_string=run_number_string, inst_settings=mock_inst)
+        yaml_callable = run_details.CustomFuncForRunDetails(function=wrapped_funcs.get_cal_mapping_dict,
+                                                            run_number_string=run_number_string,
+                                                            inst_settings=mock_inst)
 
         empty_callable = yaml_callable.add_to_func_chain(user_function=wrapped_funcs.cal_dictionary_key_helper,
                                                          key="custom_empty_run_numbers")
         vanadium_callable = yaml_callable.add_to_func_chain(user_function=wrapped_funcs.cal_dictionary_key_helper,
                                                             key="custom_vanadium_run_numbers")
-        grouping_callable = RunDetails.RunDetailsFuncWrapper(function=lambda: expected_grouping_file_name)
+        grouping_callable = run_details.CustomFuncForRunDetails(function=lambda: expected_grouping_file_name)
 
-        output_obj = RunDetails.create_run_details_object(run_number_string=run_number_string, inst_settings=mock_inst,
-                                                          is_vanadium_run=True, empty_run_call=empty_callable,
-                                                          vanadium_run_call=vanadium_callable,
-                                                          grouping_file_name_call=grouping_callable)
+        output_obj = run_details.create_run_details_object(run_number_string=run_number_string, inst_settings=mock_inst,
+                                                           is_vanadium_run=True, empty_run_call=empty_callable,
+                                                           vanadium_run_call=vanadium_callable,
+                                                           grouping_file_name_call=grouping_callable)
 
         self.assertEqual(output_obj.label, expected_label)
         self.assertEqual(output_obj.empty_runs, expected_empty_runs)
@@ -103,8 +103,8 @@ class ISISPowderInstrumentRunDetailsTest(unittest.TestCase):
         expected_offset_file_name = "offset_file_name"
         splined_name_list = ["bar", "bang", "baz"]
         mock_inst = self.setup_mock_inst_settings(yaml_file_path="ISISPowderRunDetailsTest.yaml")
-        output_obj = RunDetails.create_run_details_object(run_number_string=10, inst_settings=mock_inst,
-                                                          is_vanadium_run=False, splined_name_list=splined_name_list)
+        output_obj = run_details.create_run_details_object(run_number_string=10, inst_settings=mock_inst,
+                                                           is_vanadium_run=False, splined_name_list=splined_name_list)
 
         expected_splined_out_str = ''.join('_' + val for val in splined_name_list)
         expected_output_name = "VanSplined_" + expected_vanadium_runs + expected_splined_out_str
@@ -122,6 +122,7 @@ class MockInstSettings(object):
     @staticmethod
     def gen_random_string():
         return ''.join(random.choice(string.ascii_lowercase) for _ in range(10))
+
 
 if __name__ == "__main__":
     unittest.main()

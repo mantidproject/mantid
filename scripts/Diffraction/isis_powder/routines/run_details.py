@@ -137,7 +137,7 @@ class CustomFuncForRunDetails(object):
         if not previous_callable:
             return None
         elif not isinstance(previous_callable, CustomFuncForRunDetails):
-            raise ValueError("Previous callable is not a RunDetailsFuncWrapper type")
+            raise ValueError("Previous callable is not a CustomFuncForRunDetails type")
 
         self._previous_callable = previous_callable
 
