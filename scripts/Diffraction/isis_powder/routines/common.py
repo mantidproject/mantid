@@ -9,10 +9,10 @@ from isis_powder.routines.common_enums import INPUT_BATCHING, WORKSPACE_UNITS
 def cal_map_dictionary_key_helper(dictionary, key, append_to_error_message=None):
     """
     Provides a light wrapper around the dictionary key helper and uses case insensitive lookup.
-    This also provides a generic error message stating the following key could not be found 
-    in the calibration mapping file. As several instruments will use this message it makes 
-    sense to localise it to common. If a message is passed in append_to_error_message it 
-    will append that to the end of the generic error message in its own line when an 
+    This also provides a generic error message stating the following key could not be found
+    in the calibration mapping file. As several instruments will use this message it makes
+    sense to localise it to common. If a message is passed in append_to_error_message it
+    will append that to the end of the generic error message in its own line when an
     exception is raised. 
     :param dictionary: The dictionary to search in for the key
     :param key: The key to search for

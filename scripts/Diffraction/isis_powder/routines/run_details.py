@@ -84,9 +84,8 @@ def _get_customisable_attributes(cal_dict, inst_settings, empty_run_call, groupi
 
 class RunDetailsWrappedCommonFuncs(object):
     """
-    Creates a compatible signature when using custom functions when 
+    Creates a compatible signature when using custom functions when
     constructing RunDetails objects and calls the common methods underneath.
-    
     """
     @staticmethod
     def get_cal_mapping_dict(run_number_string, inst_settings):
