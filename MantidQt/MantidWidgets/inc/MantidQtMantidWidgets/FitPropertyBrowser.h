@@ -298,6 +298,7 @@ protected slots:
   virtual void populateFunctionNames();
   /// Called when a bool property is changed
   virtual void boolChanged(QtProperty *prop);
+  virtual void stringChanged(QtProperty *prop);
 
 private slots:
 
@@ -306,7 +307,6 @@ private slots:
   virtual void doubleChanged(QtProperty *prop);
   /// Called when one of the parameter values gets changed
   void parameterChanged(QtProperty *prop);
-  void stringChanged(QtProperty *prop);
   void filenameChanged(QtProperty *prop);
   void columnChanged(QtProperty *prop);
   void currentItemChanged(QtBrowserItem *);

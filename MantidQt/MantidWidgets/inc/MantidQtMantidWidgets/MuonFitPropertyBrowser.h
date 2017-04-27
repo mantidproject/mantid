@@ -5,7 +5,7 @@
 #include "MantidQtMantidWidgets/IMuonFitDataModel.h"
 #include "MantidQtMantidWidgets/IMuonFitFunctionModel.h"
 
-
+#include "MantidQtAPI/MWRunFiles.h"
 /* Forward declarations */
 class QDockWidget;
 class QLabel;
@@ -127,6 +127,8 @@ protected:
 private slots:
   void doubleChanged(QtProperty *prop) override;
   void boolChanged(QtProperty *prop) override;
+  void stringChanged(QtProperty *prop) override;
+
 private:
    /// new menu option
    QAction *m_fitActiontest;
@@ -149,6 +151,10 @@ private:
   std::string m_simultaneousLabel;
   QtProperty *m_normalization; 
   mutable QStringList m_normalizationValue;
+  QtBrowserItem *m_multiFitSettingsGroup;
+  mutable QString m_strRuns;
+  QtProperty *m_propRuns;
+  MantidQt::API::MWRunFiles *m_runs;
 };
 
 	std::vector<double> readNormalization();

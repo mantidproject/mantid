@@ -69,7 +69,7 @@ const std::string MuonFitPropertyBrowser::SIMULTANEOUS_PREFIX{"MuonSimulFit_"};
 MuonFitPropertyBrowser::MuonFitPropertyBrowser(QWidget *parent,
                                                QObject *mantidui)
     : FitPropertyBrowser(parent, mantidui), m_widgetSplitter(nullptr),
-      m_mainSplitter(nullptr) {}
+      m_mainSplitter(nullptr),m_runs(NULL) {}
 
 /**
 * Initialise the muon fit property browser.
@@ -86,6 +86,16 @@ void MuonFitPropertyBrowser::init() {
 
   // Seperates the data and the settings into two seperate categories
   settingsGroup = m_groupManager->addProperty("Data");
+
+
+  QSettings multiFitSettings;
+  multiFitSettings.beginGroup("");
+
+  /* Create function group */
+  QtProperty *multiFitSettingsGroup(NULL);
+
+  // Seperates the data and the settings into two seperate categories
+  multiFitSettingsGroup = m_groupManager->addProperty("Data");
 
   // Have slightly different names as requested by the muon scientists.
   m_startX =
@@ -129,7 +139,20 @@ void MuonFitPropertyBrowser::init() {
   settingsGroup->addSubProperty(m_startX);
   settingsGroup->addSubProperty(m_endX); 
   settingsGroup->addSubProperty(m_normalization);
-  connect(m_browser, SIGNAL(currentItemChanged(QtBrowserItem *)), this,
+  
+
+  // Disable "Browse" button - use case is that first run will always be the one
+  // selected on front tab. User will type in the runs they want rather than
+  // using the Browse button. (If they want to "Browse" they can use front tab).
+  
+ 
+  //m_listRuns = m_runs->getFileExtensions();
+  m_propRuns = m_stringManager->addProperty("Runs");
+  multiFitSettingsGroup->addSubProperty(m_propRuns);
+  multiFitSettingsGroup->addSubProperty(m_startX);
+  multiFitSettingsGroup->addSubProperty(m_endX);
+
+connect(m_browser, SIGNAL(currentItemChanged(QtBrowserItem *)), this,
 	  SLOT(currentItemChanged(QtBrowserItem *)));
   /* Create editors and assign them to the managers */
   createEditors(w);
@@ -138,11 +161,11 @@ void MuonFitPropertyBrowser::init() {
 
   m_functionsGroup = m_browser->addProperty(functionsGroup);
   m_settingsGroup = m_browser->addProperty(settingsGroup);
-
+  m_multiFitSettingsGroup = m_browser->addProperty(multiFitSettingsGroup);
   // Don't show "Function" or "Data" sections as they have separate widgets
   m_browser->setItemVisible(m_functionsGroup, false);
   m_browser->setItemVisible(m_settingsGroup, false);
-
+  m_browser->setItemVisible(m_multiFitSettingsGroup,true);
   // Custom settings that are specific and asked for by the muon scientists.
   QtProperty *customSettingsGroup = m_groupManager->addProperty("Settings");
 
@@ -204,6 +227,23 @@ void MuonFitPropertyBrowser::executeMuonFitMenu(const QString &item) {
 	 FitPropertyBrowser::executeFitMenu(item);
  }
 }
+/** Called when a string property changed
+* @param prop :: A pointer to the property
+*/
+void MuonFitPropertyBrowser::stringChanged(QtProperty *prop) {
+	if (!m_changeSlotsEnabled)
+		return;
+
+	if (prop == m_propRuns) {
+		//QString tmp = m_stringManager->value(prop);
+		auto tmp= m_runs->getLabelText().toStdString();// setLabelText(tmp);
+	}
+	else{
+		FitPropertyBrowser::stringChanged(prop);
+	}
+}
+
+
 /**
 * @brief Initialise the layout of the fit menu button.
 * This initialization includes:
@@ -788,7 +828,7 @@ void MuonFitPropertyBrowser::setMultiFittingMode(bool enabled) {
   // Show or hide "Function" and "Data" sections
   m_browser->setItemVisible(m_functionsGroup, !enabled);
   m_browser->setItemVisible(m_settingsGroup, !enabled);
-
+  m_browser->setItemVisible(m_multiFitSettingsGroup, enabled);
   // Show or hide additional widgets
   for (int i = 0; i < m_widgetSplitter->count(); ++i) {
     if (auto *widget = m_widgetSplitter->widget(i)) {
