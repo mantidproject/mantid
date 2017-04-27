@@ -366,6 +366,7 @@ bool MantidWSIndexWidget::validatePlotOptions() {
     QStringList values = m_logValues->lineEdit()->text().split(',');
     foreach (QString value, values) {
       bool ok = false;
+      value.toDouble(&ok);
       if (!ok) {
         m_logValues->setError("A custom log value is not valid: " + value);
         validOptions = false;
