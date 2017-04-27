@@ -19,9 +19,9 @@ def calculate_absorb_corrections(ws_to_correct, multiple_scattering):
 def get_run_details(run_number_string, inst_settings, is_vanadium_run):
     # Get the chopper mode as vanadium and empty run numbers depend on different modes
     chopper_config_callable = RunDetailsFuncWrapper().\
-        add_to_func_chain(function=WrappedFunctionsRunDetails.get_cal_mapping_dict, run_number_string=run_number_string,
+        add_to_func_chain(user_function=WrappedFunctionsRunDetails.get_cal_mapping_dict, run_number_string=run_number_string,
                           inst_settings=inst_settings).\
-        add_to_func_chain(function=polaris_get_chopper_config, inst_settings=inst_settings)
+        add_to_func_chain(user_function=polaris_get_chopper_config, inst_settings=inst_settings)
 
     # Then use the results to set the empty and vanadium runs
     err_message = "this must be under the relevant chopper_on / chopper_off section."

@@ -7,7 +7,7 @@ import os
 def create_run_details_object(run_number_string, inst_settings, is_vanadium_run, empty_run_call=None,
                               grouping_file_name_call=None, vanadium_run_call=None,
                               splined_name_list=None, van_abs_file_name=None):
-    cal_map_dict = WrappedFunctionsRunDetails.get_cal_mapping_dict(
+    cal_map_dict = RunDetailsWrappedCommonFuncs.get_cal_mapping_dict(
         run_number_string=run_number_string, inst_settings=inst_settings)
     run_number = common.get_first_run_number(run_number_string=run_number_string)
 
@@ -40,7 +40,7 @@ def create_run_details_object(run_number_string, inst_settings, is_vanadium_run,
         output_run_string = run_number_string
 
     # Sample empty if there is one
-    sample_empty = inst_settings.sample_empty if hasattr(inst_settings, "sample_empty") else None
+    sample_empty = getattr(inst_settings, "sample_empty", None)
 
     # Generate the paths
     grouping_file_path = os.path.join(calibration_dir, results_dict["grouping_file_name"])
@@ -82,10 +82,12 @@ def _get_customisable_attributes(cal_dict, inst_settings, empty_run_call, groupi
     return dict_to_return
 
 
-class WrappedFunctionsRunDetails(object):
-    def __init__(self):
-        pass
-
+class RunDetailsWrappedCommonFuncs(object):
+    """
+    Creates a compatible signature when using custom functions when 
+    constructing RunDetails objects and calls the common methods underneath.
+    
+    """
     @staticmethod
     def get_cal_mapping_dict(run_number_string, inst_settings):
         # Get the python dictionary from the YAML mapping
@@ -101,16 +103,16 @@ class WrappedFunctionsRunDetails(object):
                                                     append_to_error_message=append_to_error_message)
 
 
-class RunDetailsFuncWrapper(object):
+class CustomFuncForRunDetails(object):
     # Holds a callable method, associated args and return value so we can pass it in
     # as a single method
 
-    def __init__(self, function=None, *args, **func_kwargs):
+    def __init__(self, user_function=None, *args, **func_kwargs):
         if args:
             # If we allow args with position Python gets confused as the forwarded value can be in the first place too
             raise RuntimeError("Cannot use un-named arguments with callable methods")
 
-        self.function = function
+        self.user_function = user_function
         self.function_kwargs = func_kwargs
 
         self._previous_callable = None
@@ -120,29 +122,29 @@ class RunDetailsFuncWrapper(object):
     def _exec_func(self):
         forwarded_value = self._previous_callable.get_result() if self._previous_callable else None
 
-        if not self.function:
+        if not self.user_function:
             # We maybe are the 0th case just return any values we hold
             return forwarded_value
 
         if forwarded_value:
             self.function_kwargs["forwarded_value"] = forwarded_value
-            self._returned_value = self.function(**self.function_kwargs)
+            self._returned_value = self.user_function(**self.function_kwargs)
         else:
-            self._returned_value = self.function(**self.function_kwargs)
+            self._returned_value = self.user_function(**self.function_kwargs)
 
         self._function_is_executed = True
 
     def _set_previous_callable(self, previous_callable):
         if not previous_callable:
             return None
-        elif not isinstance(previous_callable, RunDetailsFuncWrapper):
+        elif not isinstance(previous_callable, CustomFuncForRunDetails):
             raise ValueError("Previous callable is not a RunDetailsFuncWrapper type")
 
         self._previous_callable = previous_callable
 
-    def add_to_func_chain(self, function, *args, **func_kwargs):
+    def add_to_func_chain(self, user_function, *args, **func_kwargs):
         # Construct a new object that will be the next in line
-        next_in_chain = RunDetailsFuncWrapper(function=function, *args, **func_kwargs)
+        next_in_chain = CustomFuncForRunDetails(user_function=user_function, *args, **func_kwargs)
         next_in_chain._set_previous_callable(self)
         return next_in_chain
 

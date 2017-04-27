@@ -75,8 +75,9 @@ def get_run_details(run_number_string, inst_settings, is_vanadium_run):
     if inst_settings.long_mode:
         splined_name_list.append("_long")
 
-    grouping_file_name_callable = RunDetailsFuncWrapper().add_to_func_chain(function=_pearl_get_tt_grouping_file_name,
-                                                                            inst_settings=inst_settings)
+    grouping_file_name_callable = RunDetailsFuncWrapper().add_to_func_chain(
+        user_function=_pearl_get_tt_grouping_file_name,
+        inst_settings=inst_settings)
 
     return create_run_details_object(run_number_string=run_number_string, inst_settings=inst_settings,
                                      is_vanadium_run=is_vanadium_run, splined_name_list=splined_name_list,

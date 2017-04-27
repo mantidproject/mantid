@@ -80,9 +80,9 @@ class ISISPowderInstrumentRunDetailsTest(unittest.TestCase):
         yaml_callable = RunDetails.RunDetailsFuncWrapper(function=wrapped_funcs.get_cal_mapping_dict,
                                                          run_number_string=run_number_string, inst_settings=mock_inst)
 
-        empty_callable = yaml_callable.add_to_func_chain(function=wrapped_funcs.cal_dictionary_key_helper,
+        empty_callable = yaml_callable.add_to_func_chain(user_function=wrapped_funcs.cal_dictionary_key_helper,
                                                          key="custom_empty_run_numbers")
-        vanadium_callable = yaml_callable.add_to_func_chain(function=wrapped_funcs.cal_dictionary_key_helper,
+        vanadium_callable = yaml_callable.add_to_func_chain(user_function=wrapped_funcs.cal_dictionary_key_helper,
                                                             key="custom_vanadium_run_numbers")
         grouping_callable = RunDetails.RunDetailsFuncWrapper(function=lambda: expected_grouping_file_name)
 

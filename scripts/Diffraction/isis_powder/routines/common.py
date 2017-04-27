@@ -8,11 +8,12 @@ from isis_powder.routines.common_enums import INPUT_BATCHING, WORKSPACE_UNITS
 
 def cal_map_dictionary_key_helper(dictionary, key, append_to_error_message=None):
     """
-    Provides a light wrapper around the dictionary key helper which provides a generic error
-    message stating the following key could not be found in the calibration mapping file. As
-    several instruments will use this message it makes sense to localise it to common. If a
-    message is passed in append_to_error_message it will append that to the end of the generic
-    error message in its own line when an exception is raised. This lookup is case insensitive.
+    Provides a light wrapper around the dictionary key helper and uses case insensitive lookup.
+    This also provides a generic error message stating the following key could not be found 
+    in the calibration mapping file. As several instruments will use this message it makes 
+    sense to localise it to common. If a message is passed in append_to_error_message it 
+    will append that to the end of the generic error message in its own line when an 
+    exception is raised. 
     :param dictionary: The dictionary to search in for the key
     :param key: The key to search for
     :param append_to_error_message: (Optional) The message to append to the end of the error message
@@ -158,15 +159,15 @@ def generate_splined_name(vanadium_string, *args):
     :param args: Any identifying properties to append to the name
     :return: The splined vanadium name
     """
-    out_name = "VanSplined" + '_' + str(vanadium_string)
+    out_name = "VanSplined".join('_').join(str(vanadium_string))
     for passed_arg in args:
         if isinstance(passed_arg, list):
             for val in passed_arg:
-                out_name += '_' + str(val)
+                out_name += '_'.join(str(val))
         else:
-            out_name += '_' + str(passed_arg)
+            out_name += '_'.join(str(passed_arg))
 
-    out_name += ".nxs"
+    out_name.join(".nxs")
     return out_name
 
 
