@@ -27,18 +27,21 @@ namespace {
 /** Get the twoTheta angle for the centre of the detector associated with the
 * given spectrum
 *
-* @return : the twoTheta angle in degrees
+* @param spectrumInfo : the spectrum info
+* @param spectrumIdx : the workspace index of the spectrum
+* @return : the twoTheta angle in radians
 */
 double getDetectorTwoTheta(const SpectrumInfo *spectrumInfo,
                            const size_t spectrumIdx) {
-  double twoTheta = spectrumInfo->signedTwoTheta(spectrumIdx);
-  return twoTheta * 180.0 / M_PI;
+  return spectrumInfo->signedTwoTheta(spectrumIdx);
 }
 
 /** Get the twoTheta angle range for the top/bottom of the detector associated
 * with the given spectrum
 *
-* @return : the twoTheta angle in degrees
+* @param spectrumInfo : the spectrum info
+* @param spectrumIdx : the workspace index of the spectrum
+* @return : the twoTheta angle in radians
 */
 double getDetectorTwoThetaRange(const SpectrumInfo *spectrumInfo,
                                 const size_t spectrumIdx) {
@@ -860,14 +863,17 @@ void ReflectometryReductionOne2::findTheta0() {
     }
   }
 
-  g_log.debug() << "theta0: " << theta0() << std::endl;
+  g_log.debug() << "theta0: " << theta0() << " degrees" << std::endl;
+
+  // Store in radians
+  m_theta0 *= M_PI / 180.0;
 }
 
 /**
 * Get the (arbitrary) reference angle twoThetaR for use for summation
 * in Q
 *
-* @return : the angle twoThetaR
+* @return : the angle twoThetaR in radians
 * @throws : if the angle could not be found
 */
 double
@@ -876,8 +882,11 @@ ReflectometryReductionOne2::twoThetaR(const std::vector<size_t> &detectors) {
 }
 
 /**
-* Get the minimum twoTheta index in the area of interest
-* @return : the spectrum index
+* Get the minimum twoTheta angle in a given list of detectors
+*
+* @param detectors : list of workspace indices of detectors to consider
+* @return : the twoTheta angle in radians
+* @throws : if the angle could not be found
 */
 double
 ReflectometryReductionOne2::twoThetaMin(const std::vector<size_t> &detectors) {
@@ -885,8 +894,11 @@ ReflectometryReductionOne2::twoThetaMin(const std::vector<size_t> &detectors) {
 }
 
 /**
-* Get the maximum twoTheta index in the area of interest
-* @return : the spectrum index
+* Get the maximum twoTheta angle in a given list of detectors
+*
+* @param detectors : list of workspace indices of detectors to consider
+* @return : the twoTheta angle in radians
+* @throws : if the angle could not be found
 */
 double
 ReflectometryReductionOne2::twoThetaMax(const std::vector<size_t> &detectors) {
@@ -1144,24 +1156,26 @@ void ReflectometryReductionOne2::getProjectedLambdaRange(
     const double lambda, const double twoTheta, const double bLambda,
     const double bTwoTheta, double &lambdaMin, double &lambdaMax,
     const std::vector<size_t> &detectors) {
+
   // Get the angle from twoThetaR to this detector
-  const double gamma = twoTheta - twoThetaR(detectors);
+  const double twoThetaRVal = twoThetaR(detectors);
+  const double gammaRad = twoTheta - twoThetaRVal;
   // Get the angle from the horizon to the reference angle
-  const double horizonThetaR = twoThetaR(detectors) - theta0();
+  const double horizonThetaR = twoThetaRVal - theta0();
 
   // Calculate the projected wavelength range
   try {
     const double lambdaTop = std::sin(horizonThetaR) * (lambda + bLambda / 2) /
-                             std::sin(horizonThetaR + gamma - bTwoTheta / 2);
+                             std::sin(horizonThetaR + gammaRad - bTwoTheta/ 2);
     const double lambdaBot = std::sin(horizonThetaR) * (lambda - bLambda / 2) /
-                             std::sin(horizonThetaR + gamma + bTwoTheta / 2);
+                             std::sin(horizonThetaR + gammaRad + bTwoTheta/ 2);
 
     lambdaMin = std::min(lambdaTop, lambdaBot);
     lambdaMax = std::max(lambdaTop, lambdaBot);
   } catch (std::exception &ex) {
     std::stringstream errMsg;
     errMsg << "Failed to project (lambda, twoTheta) = (" << lambda << ","
-           << twoTheta << ") onto twoThetaR = " << twoThetaR(detectors) << ": "
+           << twoTheta * 180.0 / M_PI << ") onto twoThetaR = " << twoThetaRVal << ": "
            << ex.what();
     throw std::runtime_error(errMsg.str());
   }
