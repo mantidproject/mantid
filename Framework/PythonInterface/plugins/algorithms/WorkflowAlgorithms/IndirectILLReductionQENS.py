@@ -15,6 +15,7 @@ class IndirectILLReductionQENS(PythonAlgorithm):
     _alignment_files = None
     _background_files = None
     _calibration_files = None
+    _background_calib_files = None
     _sum_all_runs = None
     _unmirror_option = None
     _back_scaling = None
@@ -50,6 +51,11 @@ class IndirectILLReductionQENS(PythonAlgorithm):
                                                   action=FileAction.OptionalLoad,
                                                   extensions=['nxs']),
                              doc='Run number(s) of vanadium calibration run(s).')
+
+        self.declareProperty(MultipleFileProperty('CalibrationBackgroundRun',
+                                                  action=FileAction.OptionalLoad,
+                                                  extensions=['nxs']),
+                             doc='Run number(s) of background (empty can) run(s) for vanadium run.')
 
         self.declareProperty(MultipleFileProperty('AlignmentRun',
                                                   action=FileAction.OptionalLoad,
@@ -135,6 +141,9 @@ class IndirectILLReductionQENS(PythonAlgorithm):
                 issues['CalibrationPeakRange'] = 'Please provide valid calibration range. ' \
                                                  'Start energy is bigger than end energy.'
 
+        if self.getPropertyValue('CalibrationBackgroundRun') and not self.getPropertyValue('CalibrationRun'):
+            issues['CalibrationRun'] = 'Calibration run is required when calibration background is given.'
+
         return issues
 
     def setUp(self):
@@ -143,6 +152,7 @@ class IndirectILLReductionQENS(PythonAlgorithm):
         self._alignment_file = self.getPropertyValue('AlignmentRun').replace(',', '+') # automatic summing
         self._background_file = self.getPropertyValue('BackgroundRun').replace(',', '+') # automatic summing
         self._calibration_file = self.getPropertyValue('CalibrationRun').replace(',', '+') # automatic summing
+        self._background_calib_files = self.getPropertyValue('CalibrationBackgroundRun').replace(',', '+') # automatic summing
         self._sum_all_runs = self.getProperty('SumRuns').value
         self._unmirror_option = self.getProperty('UnmirrorOption').value
         self._back_scaling = self.getProperty('BackgroundScalingFactor').value
@@ -231,6 +241,9 @@ class IndirectILLReductionQENS(PythonAlgorithm):
         if self._calibration_file:
             self._calibration_file = self._filter_files(self._calibration_file, 'calibration')
 
+        if self._background_calib_files:
+            self._background_calib_files = self._filter_files(self._background_calib_files, 'calibration background')
+
         if self._alignment_file:
             self._alignment_file = self._filter_files(self._alignment_file, 'alignment')
 
@@ -266,6 +279,12 @@ class IndirectILLReductionQENS(PythonAlgorithm):
         if self._calibration_file:
             calibration = '__calibration_'+self._red_ws
             IndirectILLEnergyTransfer(Run = self._calibration_file, OutputWorkspace = calibration, **self._common_args)
+
+            if self._background_calib_files:
+                back_calibration = '__calibration_back_'+self._red_ws
+                IndirectILLEnergyTransfer(Run = self._background_calib_files, OutputWorkspace = back_calibration, **self._common_args)
+                Minus(LHSWorkspace=calibration, RHSWorkspace=back_calibration, OutputWorkspace=calibration)
+
             MatchPeaks(InputWorkspace=calibration,OutputWorkspace=calibration,MaskBins=True)
             Integration(InputWorkspace=calibration,RangeLower=self._peak_range[0],RangeUpper=self._peak_range[1],
                         OutputWorkspace=calibration)
@@ -287,6 +306,9 @@ class IndirectILLReductionQENS(PythonAlgorithm):
 
         if self._calibration_file:
             DeleteWorkspace(calibration)
+
+        if self._background_calib_files:
+            DeleteWorkspace(back_calibration)
 
         if self._unmirror_option == 5 or self._unmirror_option == 7:
             DeleteWorkspace(alignment)
