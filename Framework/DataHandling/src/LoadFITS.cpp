@@ -716,7 +716,7 @@ LoadFITS::makeWorkspace(const FITSInfo &fileInfo, size_t &newFileNumber,
 
   if (loadAsRectImg && 1 == binSize) {
     // set data directly into workspace
-    readDataToWorkspace(fileInfo, cmpp, ws, buffer);
+    readDataToWorkspace(fileInfo, ws, buffer);
   } else {
     readDataToImgs(fileInfo, imageY, imageE, buffer);
     doFilterNoise(noiseThresh, imageY, imageE);
@@ -850,7 +850,7 @@ void LoadFITS::addAxesInfoAndLogs(Workspace2D_sptr ws, bool loadAsRectImg,
  *
  * @throws std::runtime_error if there are file input issues
  */
-void LoadFITS::readDataToWorkspace(const FITSInfo &fileInfo, double cmpp,
+void LoadFITS::readDataToWorkspace(const FITSInfo &fileInfo,
                                    Workspace2D_sptr ws,
                                    std::vector<char> &buffer) {
   const size_t bytespp = (fileInfo.bitsPerPixel / 8);
