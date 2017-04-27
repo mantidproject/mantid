@@ -148,7 +148,7 @@ public:
     TS_ASSERT(filteredws0);
     TS_ASSERT_EQUALS(filteredws0->getNumberHistograms(), 10);
     TS_ASSERT_EQUALS(filteredws0->getSpectrum(0).getNumberEvents(), 4);
-    TS_ASSERT_EQUALS(filteredws0->run().getProtonCharge(), 10);
+    TS_ASSERT_EQUALS(filteredws0->run().getProtonCharge(), 2);
 
     Kernel::TimeSeriesProperty<double> *proton_charge =
             dynamic_cast<Kernel::TimeSeriesProperty<double> *>(filteredws0->run().getProperty("proton_charge"));
@@ -177,7 +177,7 @@ public:
             AnalysisDataService::Instance().retrieve("FilteredWS01_1"));
     TS_ASSERT(filteredws1);
     TS_ASSERT_EQUALS(filteredws1->getSpectrum(1).getNumberEvents(), 16);
-    TS_ASSERT_EQUALS(filteredws1->run().getProtonCharge(), 11);
+    TS_ASSERT_EQUALS(filteredws1->run().getProtonCharge(), 3);
 
     Kernel::TimeSeriesProperty<double> *proton_charge1 =
             dynamic_cast<Kernel::TimeSeriesProperty<double> *>(filteredws1->run().getProperty("proton_charge"));
@@ -207,10 +207,10 @@ public:
             AnalysisDataService::Instance().retrieve("FilteredWS01_2"));
     TS_ASSERT(filteredws2);
     TS_ASSERT_EQUALS(filteredws2->getSpectrum(1).getNumberEvents(), 21);
-    TS_ASSERT_EQUALS(filteredws2->run().getProtonCharge(), 21);
+    TS_ASSERT_EQUALS(filteredws2->run().getProtonCharge(), 3);
 
     Kernel::TimeSeriesProperty<double> *proton_charge2 =
-            dynamic_cast<Kernel::TimeSeriesProperty<double> *>(filteredws1->run().getProperty("proton_charge"));
+            dynamic_cast<Kernel::TimeSeriesProperty<double> *>(filteredws2->run().getProperty("proton_charge"));
     for (size_t i = 0; i < proton_charge2->size(); ++i)
     {
         std::cout << proton_charge2->nthTime(i).totalNanoseconds() << "  " << proton_charge2->nthValue(i)
@@ -285,7 +285,7 @@ public:
    *  (2) Count events in each output including "-1", the excluded/unselected
    *events
    */
-  void Ntest_FilterWOCorrection2() {
+  void test_FilterWOCorrection2() {
     // Create EventWorkspace and SplittersWorkspace
     int64_t runstart_i64 = 20000000000;
     int64_t pulsedt = 100 * 1000 * 1000;
@@ -368,7 +368,7 @@ public:
   //----------------------------------------------------------------------------------------------
   /**  Filter test with TOF correction
     */
-  void Ntest_FilterWithCustumizedCorrection() {
+  void test_FilterWithCustumizedCorrection() {
     // 1. Create EventWorkspace and SplittersWorkspace
     int64_t runstart_i64 = 20000000000;
     int64_t pulsedt = 100 * 1000 * 1000;
@@ -452,7 +452,7 @@ public:
   //----------------------------------------------------------------------------------------------
   /** Test filtering with correction of direct geometry
     */
-  void Ntest_FilterElasticCorrection() {
+  void test_FilterElasticCorrection() {
     EventWorkspace_sptr ws = createEventWorkspaceElastic(0, 1000000);
     AnalysisDataService::Instance().addOrReplace("MockElasticEventWS", ws);
     TS_ASSERT_EQUALS(ws->getNumberEvents(), 10000);
@@ -510,7 +510,7 @@ public:
   //----------------------------------------------------------------------------------------------
   /** Test filtering with correction of direct geometry
     */
-  void Ntest_FilterDGCorrection() {
+  void test_FilterDGCorrection() {
     EventWorkspace_sptr ws = createEventWorkspaceDirect(0, 1000000);
     AnalysisDataService::Instance().addOrReplace("MockDirectEventWS", ws);
 
@@ -561,7 +561,7 @@ public:
   //----------------------------------------------------------------------------------------------
   /** Test filtering with correction to indirect geometry inelastic instrument
     */
-  void Ntest_FilterIndirectGeometryCorrection() {
+  void test_FilterIndirectGeometryCorrection() {
     // Create workspaces for filtering
     EventWorkspace_sptr ws = createEventWorkspaceInDirect(0, 1000000);
     AnalysisDataService::Instance().addOrReplace("MockIndirectEventWS", ws);
@@ -646,7 +646,7 @@ public:
         979: 3: 2.65e+08  -  3.65e+08: 2
         979: 4: 3.65e+08  -  4.65e+08: 2
    */
-  void Ntest_FilterRelativeTime() {
+  void test_FilterRelativeTime() {
     // Create EventWorkspace and SplittersWorkspace
     int64_t runstart_i64 = 20000000000;
     int64_t pulsedt = 100 * 1000 * 1000;
@@ -835,7 +835,7 @@ public:
    *  (2) Count events in each output including "-1", the excluded/unselected
    * events
    */
-  void Ntest_tableSplitter() {
+  void test_tableSplitter() {
     // Create EventWorkspace and SplittersWorkspace
     int64_t runstart_i64 = 20000000000;
     int64_t pulsedt = 100 * 1000 * 1000;
