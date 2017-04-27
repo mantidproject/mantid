@@ -310,38 +310,54 @@ public:
       TS_ASSERT_THROWS_NOTHING(
           ws = boost::dynamic_pointer_cast<MatrixWorkspace>(out->getItem(i)));
 
-      TSM_ASSERT_EQUALS("The number of histograms should be the expected,dimension of the image",ws->getNumberHistograms(), g_SPECTRA_COUNT_ASRECT);
+      TSM_ASSERT_EQUALS("The number of histograms should be the "
+                        "expected,dimension of the image",
+                        ws->getNumberHistograms(), g_SPECTRA_COUNT_ASRECT);
     }
 
-    TSM_ASSERT_EQUALS("The output workspace group should have two workspaces ",out->size(),2);
+    TSM_ASSERT_EQUALS("The output workspace group should have two workspaces ",
+                      out->size(), 2);
 
     // and finally a basic check of values in the image, to be safe
     MatrixWorkspace_sptr ws0;
     TS_ASSERT_THROWS_NOTHING(
         ws0 = boost::dynamic_pointer_cast<MatrixWorkspace>(out->getItem(0)));
 
-    TSM_ASSERT_EQUALS("The title of the first output workspace is not the name of the first file",ws0->getTitle(), g_smallFname1);
+    TSM_ASSERT_EQUALS("The title of the first output workspace is not the name "
+                      "of the first file",
+                      ws0->getTitle(), g_smallFname1);
 
     size_t n = ws0->getNumberHistograms();
     TSM_ASSERT_EQUALS(
-        "The value at a given spectrum and bin (first one) is not as expected ",ws0->y(n - 1)[0],137);
+        "The value at a given spectrum and bin (first one) is not as expected ",
+        ws0->y(n - 1)[0], 137);
+
+    TSM_ASSERT_EQUALS("The value at a given spectrum and bin (middle one) is "
+                      "not as expected ",
+                      ws0->y(n - 1)[g_SPECTRA_COUNT_ASRECT / 2], 159);
 
     TSM_ASSERT_EQUALS(
-        "The value at a given spectrum and bin (middle one) is not as expected ",ws0->y(n - 1)[g_SPECTRA_COUNT_ASRECT / 2],159);
-
-    TSM_ASSERT_EQUALS(
-        "The value at a given spectrum and bin (last one) is not as expected ",ws0->y(n - 1).back(),142);
+        "The value at a given spectrum and bin (last one) is not as expected ",
+        ws0->y(n - 1).back(), 142);
 
     MatrixWorkspace_sptr ws1;
     TS_ASSERT_THROWS_NOTHING(
         ws1 = boost::dynamic_pointer_cast<MatrixWorkspace>(out->getItem(1)));
 
-    TSM_ASSERT_EQUALS("The title of the second output workspace is not the name of the second file",ws1->getTitle(), g_smallFname2);
-    TSM_ASSERT_EQUALS("The value at a given spectrum and bin (first one) is not as expected ",ws1->y(n - 1)[0],155);
+    TSM_ASSERT_EQUALS("The title of the second output workspace is not the "
+                      "name of the second file",
+                      ws1->getTitle(), g_smallFname2);
+    TSM_ASSERT_EQUALS(
+        "The value at a given spectrum and bin (first one) is not as expected ",
+        ws1->y(n - 1)[0], 155);
 
-    TSM_ASSERT_EQUALS("The value at a given spectrum and bin (middle one) is not as expected ",ws1->y(n - 1)[g_SPECTRA_COUNT_ASRECT / 2],199);
+    TSM_ASSERT_EQUALS("The value at a given spectrum and bin (middle one) is "
+                      "not as expected ",
+                      ws1->y(n - 1)[g_SPECTRA_COUNT_ASRECT / 2], 199);
 
-    TSM_ASSERT_EQUALS("The value at a given spectrum and bin (last one) is not as expected ",ws1->y(n - 1).back(),133);
+    TSM_ASSERT_EQUALS(
+        "The value at a given spectrum and bin (last one) is not as expected ",
+        ws1->y(n - 1).back(), 133);
   }
 
   void test_loadEmpty() {
