@@ -74,9 +74,12 @@ class ISISPowderInstrumentRunDetailsTest(unittest.TestCase):
         mock_inst = self.setup_mock_inst_settings(yaml_file_path="ISISPowderRunDetailsTestCallable.yaml")
 
         # Get the YAML file as a dict first
-        wrapped_funcs = run_details.WrappedFunctionsRunDetails
+        wrapped_funcs = run_details.RunDetailsWrappedCommonFuncs
 
-        yaml_callable = run_details.CustomFuncForRunDetails(function=wrapped_funcs.get_cal_mapping_dict,
+        import pydevd
+        pydevd.settrace('localhost', port=34901, stdoutToServer=True, stderrToServer=True)
+
+        yaml_callable = run_details.CustomFuncForRunDetails(user_function=wrapped_funcs.get_cal_mapping_dict,
                                                             run_number_string=run_number_string,
                                                             inst_settings=mock_inst)
 
@@ -84,8 +87,7 @@ class ISISPowderInstrumentRunDetailsTest(unittest.TestCase):
                                                          key="custom_empty_run_numbers")
         vanadium_callable = yaml_callable.add_to_func_chain(user_function=wrapped_funcs.cal_dictionary_key_helper,
                                                             key="custom_vanadium_run_numbers")
-        grouping_callable = run_details.CustomFuncForRunDetails(function=lambda: expected_grouping_file_name)
-
+        grouping_callable = run_details.CustomFuncForRunDetails(user_function=lambda: expected_grouping_file_name)
         output_obj = run_details.create_run_details_object(run_number_string=run_number_string, inst_settings=mock_inst,
                                                            is_vanadium_run=True, empty_run_call=empty_callable,
                                                            vanadium_run_call=vanadium_callable,

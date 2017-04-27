@@ -3,7 +3,8 @@ from __future__ import (absolute_import, division, print_function)
 import mantid.simpleapi as mantid
 
 from isis_powder.routines import absorb_corrections, common
-from isis_powder.routines.RunDetails import create_run_details_object, RunDetailsFuncWrapper, WrappedFunctionsRunDetails
+from isis_powder.routines.run_details import create_run_details_object, \
+                                             CustomFuncForRunDetails, RunDetailsWrappedCommonFuncs
 from isis_powder.polaris_routines import polaris_advanced_config
 
 
@@ -18,20 +19,20 @@ def calculate_absorb_corrections(ws_to_correct, multiple_scattering):
 
 def get_run_details(run_number_string, inst_settings, is_vanadium_run):
     # Get the chopper mode as vanadium and empty run numbers depend on different modes
-    chopper_config_callable = RunDetailsFuncWrapper().\
-        add_to_func_chain(user_function=WrappedFunctionsRunDetails.get_cal_mapping_dict, run_number_string=run_number_string,
-                          inst_settings=inst_settings).\
+    chopper_config_callable = CustomFuncForRunDetails().\
+        add_to_func_chain(user_function=RunDetailsWrappedCommonFuncs.get_cal_mapping_dict,
+                          run_number_string=run_number_string, inst_settings=inst_settings).\
         add_to_func_chain(user_function=polaris_get_chopper_config, inst_settings=inst_settings)
 
     # Then use the results to set the empty and vanadium runs
     err_message = "this must be under the relevant chopper_on / chopper_off section."
 
     empty_runs_callable = chopper_config_callable.add_to_func_chain(
-        WrappedFunctionsRunDetails.cal_dictionary_key_helper,
+        RunDetailsWrappedCommonFuncs.cal_dictionary_key_helper,
         key="empty_run_numbers", append_to_error_message=err_message)
 
     vanadium_runs_callable = chopper_config_callable.add_to_func_chain(
-        WrappedFunctionsRunDetails.cal_dictionary_key_helper, key="vanadium_run_numbers",
+        RunDetailsWrappedCommonFuncs.cal_dictionary_key_helper, key="vanadium_run_numbers",
         append_to_error_message=err_message)
 
     run_details = create_run_details_object(run_number_string=run_number_string, inst_settings=inst_settings,

@@ -4,7 +4,7 @@ import numpy as numpy
 import mantid.simpleapi as mantid
 
 import isis_powder.routines.common as common
-from isis_powder.routines.RunDetails import create_run_details_object, RunDetailsFuncWrapper
+from isis_powder.routines.run_details import create_run_details_object, CustomFuncForRunDetails
 
 
 def attenuate_workspace(attenuation_file_path, ws_to_correct):
@@ -75,7 +75,7 @@ def get_run_details(run_number_string, inst_settings, is_vanadium_run):
     if inst_settings.long_mode:
         splined_name_list.append("_long")
 
-    grouping_file_name_callable = RunDetailsFuncWrapper().add_to_func_chain(
+    grouping_file_name_callable = CustomFuncForRunDetails().add_to_func_chain(
         user_function=_pearl_get_tt_grouping_file_name,
         inst_settings=inst_settings)
 
@@ -112,7 +112,8 @@ def normalise_ws_current(ws_to_correct, monitor_ws, spline_coeff, lambda_values,
     splined_monitor_ws = mantid.SplineBackground(InputWorkspace=processed_monitor_ws,
                                                  WorkspaceIndex=0, NCoeff=spline_coeff)
 
-    normalised_ws = mantid.ConvertUnits(InputWorkspace=ws_to_correct, Target="Wavelength", OutputWorkspace=ws_to_correct)
+    normalised_ws = mantid.ConvertUnits(InputWorkspace=ws_to_correct, Target="Wavelength",
+                                        OutputWorkspace=ws_to_correct)
     normalised_ws = mantid.NormaliseToMonitor(InputWorkspace=normalised_ws, MonitorWorkspace=splined_monitor_ws,
                                               IntegrationRangeMin=integration_range[0],
                                               IntegrationRangeMax=integration_range[-1],

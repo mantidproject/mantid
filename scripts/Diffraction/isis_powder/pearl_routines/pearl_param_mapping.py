@@ -1,6 +1,6 @@
 from __future__ import (absolute_import, division, print_function)
 
-from isis_powder.routines.ParamMapEntry import ParamMapEntry
+from isis_powder.routines.param_map_entry import ParamMapEntry
 from isis_powder.pearl_routines.pearl_enums import PEARL_FOCUS_MODES, PEARL_TT_MODES
 
 #                 Maps friendly user name (ext_name) -> script name (int_name)

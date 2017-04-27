@@ -1,6 +1,6 @@
 from __future__ import (absolute_import, division, print_function)
 
-from isis_powder.routines.ParamMapEntry import ParamMapEntry
+from isis_powder.routines.param_map_entry import ParamMapEntry
 from isis_powder.gem_routines.gem_enums import GEM_CHOPPER_MODES
 from isis_powder.routines.common_enums import INPUT_BATCHING, WORKSPACE_UNITS
 

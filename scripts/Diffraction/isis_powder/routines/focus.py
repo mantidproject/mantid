@@ -45,7 +45,7 @@ def _focus_one_ws(ws, run_number, instrument, perform_vanadium_norm):
     # Output
     d_spacing_group, tof_group = instrument._output_focused_ws(cropped_spectra, run_details=run_details)
 
-    common.keep_single_ws_unit(d_spacing_group=d_spacing_group,tof_group=tof_group,
+    common.keep_single_ws_unit(d_spacing_group=d_spacing_group, tof_group=tof_group,
                                unit_to_keep=instrument._get_unit_to_keep())
 
     # Tidy workspaces from Mantid

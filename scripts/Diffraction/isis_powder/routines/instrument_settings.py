@@ -6,7 +6,7 @@ import warnings
 
 # Have to patch warnings at runtime to not print the source code. This is even advertised as a 'feature' of
 # the warnings library in the documentation: https://docs.python.org/3/library/warnings.html#warnings.showwarning
-def warning_no_source(msg, *ignored):
+def warning_no_source(msg, *_):
     return str(msg) + '\n'
 
 warnings.formatwarning = warning_no_source

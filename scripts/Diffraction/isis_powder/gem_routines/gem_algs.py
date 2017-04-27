@@ -3,7 +3,8 @@ from __future__ import (absolute_import, division, print_function)
 import mantid.simpleapi as mantid
 
 from isis_powder.routines import absorb_corrections, common
-from isis_powder.routines.RunDetails import create_run_details_object, RunDetailsFuncWrapper, WrappedFunctionsRunDetails
+from isis_powder.routines.run_details import create_run_details_object, \
+                                             RunDetailsWrappedCommonFuncs, CustomFuncForRunDetails
 from isis_powder.gem_routines import gem_advanced_config
 
 
@@ -24,8 +25,8 @@ def gem_get_chopper_config(forwarded_value, inst_settings):
 
 
 def get_run_details(run_number_string, inst_settings, is_vanadium_run):
-    cal_mapping_callable = RunDetailsFuncWrapper().add_to_func_chain(
-        WrappedFunctionsRunDetails.get_cal_mapping_dict, run_number_string=run_number_string,
+    cal_mapping_callable = CustomFuncForRunDetails().add_to_func_chain(
+        user_function=RunDetailsWrappedCommonFuncs.get_cal_mapping_dict, run_number_string=run_number_string,
         inst_settings=inst_settings
     ).add_to_func_chain(user_function=gem_get_chopper_config, inst_settings=inst_settings)
 
@@ -33,11 +34,11 @@ def get_run_details(run_number_string, inst_settings, is_vanadium_run):
     err_message = "this must be under the relevant Rietveld or PDF mode."
 
     empty_run_callable = cal_mapping_callable.add_to_func_chain(
-        user_function=WrappedFunctionsRunDetails.cal_dictionary_key_helper, key="empty_run_numbers",
+        user_function=RunDetailsWrappedCommonFuncs.cal_dictionary_key_helper, key="empty_run_numbers",
         append_to_error_message=err_message)
 
     vanadium_run_callable = cal_mapping_callable.add_to_func_chain(
-        user_function=WrappedFunctionsRunDetails.cal_dictionary_key_helper, key="vanadium_run_numbers",
+        user_function=RunDetailsWrappedCommonFuncs.cal_dictionary_key_helper, key="vanadium_run_numbers",
         append_to_error_message=err_message)
 
     return create_run_details_object(run_number_string=run_number_string, inst_settings=inst_settings,

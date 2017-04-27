@@ -2,7 +2,7 @@ from __future__ import (absolute_import, division, print_function)
 
 import os
 
-from isis_powder.routines import common, InstrumentSettings, yaml_parser
+from isis_powder.routines import common, instrument_settings, yaml_parser
 from isis_powder.abstract_inst import AbstractInst
 from isis_powder.polaris_routines import polaris_advanced_config, polaris_algs, polaris_param_mapping
 
@@ -10,7 +10,7 @@ from isis_powder.polaris_routines import polaris_advanced_config, polaris_algs, 
 class Polaris(AbstractInst):
     def __init__(self, **kwargs):
         basic_config_dict = yaml_parser.open_yaml_file_as_dictionary(kwargs.get("config_file", None))
-        self._inst_settings = InstrumentSettings.InstrumentSettings(
+        self._inst_settings = instrument_settings.InstrumentSettings(
             param_map=polaris_param_mapping.attr_mapping, adv_conf_dict=polaris_advanced_config.variables,
             basic_conf_dict=basic_config_dict, kwargs=kwargs)
 

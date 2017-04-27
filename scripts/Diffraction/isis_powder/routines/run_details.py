@@ -97,8 +97,8 @@ class RunDetailsWrappedCommonFuncs(object):
 
     @staticmethod
     def cal_dictionary_key_helper(key, append_to_error_message=None, **kwargs):
-        forwarded_value = kwargs.pop("forwarded_value")
-        return common.cal_map_dictionary_key_helper(dictionary=forwarded_value, key=key,
+        dictionary = kwargs.pop("forwarded_value")
+        return common.cal_map_dictionary_key_helper(dictionary=dictionary, key=key,
                                                     append_to_error_message=append_to_error_message)
 
 
