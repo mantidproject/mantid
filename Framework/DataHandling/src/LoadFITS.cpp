@@ -7,8 +7,8 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidHistogramData/Points.h"
 #include "MantidHistogramData/LinearGenerator.h"
+#include "MantidHistogramData/Points.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
@@ -123,12 +123,12 @@ void LoadFITS::init() {
   declareProperty(make_unique<API::WorkspaceProperty<API::Workspace>>(
       "OutputWorkspace", "", Kernel::Direction::Output));
 
-  // declareProperty(
-  //     make_unique<Kernel::PropertyWithValue<bool>>("LoadAsRectImg", true,
-  //                                                  Kernel::Direction::Input),
-  //     "If enabled (not by default), the output Workspace2D will have "
-  //     "one histogram per row and one bin per pixel, such that a 2D "
-  //     "color plot (color fill plot) will display an image.");
+  declareProperty(
+      make_unique<Kernel::PropertyWithValue<bool>>("LoadAsRectImg", true,
+                                                   Kernel::Direction::Input),
+      "If enabled (not by default), the output Workspace2D will have "
+      "one histogram per row and one bin per pixel, such that a 2D "
+      "color plot (color fill plot) will display an image.");
 
   auto zeroOrPosDbl = boost::make_shared<BoundedValidator<double>>();
   zeroOrPosDbl->setLower(0.0);
@@ -168,10 +168,10 @@ void LoadFITS::exec() {
 
   int binSize = getProperty("BinSize");
   double noiseThresh = getProperty("FilterNoiseLevel");
-  bool loadAsRectImg = true;
   // This is disabled because not loading as a rectangle makes a
   // 16 MB image into a 7GB workspace.
   // bool loadAsRectImg = getProperty("LoadAsRectImg");
+  bool loadAsRectImg = true;
   const std::string outWSName = getPropertyValue("OutputWorkspace");
 
   doLoadFiles(paths, outWSName, loadAsRectImg, binSize, noiseThresh);
@@ -862,7 +862,7 @@ void LoadFITS::readDataToWorkspace(const FITSInfo &fileInfo, double cmpp,
   // Treat buffer as a series of bytes
   uint8_t *buffer8 = reinterpret_cast<uint8_t *>(buffer.data());
 
-  HistogramData::Points sharedX(ncols,HistogramData::LinearGenerator(0, 0));
+  HistogramData::Points sharedX(ncols, HistogramData::LinearGenerator(0, 0));
   HistogramData::PointStandardDeviations sharedErrors(
       ncols, HistogramData::LinearGenerator(0, 0));
   PARALLEL_FOR_NO_WSP_CHECK()
