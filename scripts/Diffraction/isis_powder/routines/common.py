@@ -13,7 +13,7 @@ def cal_map_dictionary_key_helper(dictionary, key, append_to_error_message=None)
     in the calibration mapping file. As several instruments will use this message it makes
     sense to localise it to common. If a message is passed in append_to_error_message it
     will append that to the end of the generic error message in its own line when an
-    exception is raised. 
+    exception is raised.
     :param dictionary: The dictionary to search in for the key
     :param key: The key to search for
     :param append_to_error_message: (Optional) The message to append to the end of the error message
