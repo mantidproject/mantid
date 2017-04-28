@@ -1,7 +1,7 @@
 #ifndef MANTID_SLICEVIEWER_PEAK_BOUNDING_BOX_H_
 #define MANTID_SLICEVIEWER_PEAK_BOUNDING_BOX_H_
 
-#include "MantidKernel/System.h"
+#include "DllOption.h"
 #include <string>
 #include <vector>
 #include "MantidGeometry/Crystal/PeakTransform.h"
@@ -14,7 +14,7 @@ IntToType Parameter Type. Simple mechanism for ensuring type
 safety when working with so many arguments of the same core type in
 PeakBoundingBox.
 */
-template <int I> class DLLExport DoubleParam {
+template <int I> class EXPORT_OPT_MANTIDQT_SLICEVIEWER DoubleParam {
 public:
   explicit DoubleParam(const double &val) : value(val) {}
   DoubleParam(const DoubleParam<I> &other) : value(other.value) {}
@@ -62,7 +62,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport PeakBoundingBox {
+class EXPORT_OPT_MANTIDQT_SLICEVIEWER PeakBoundingBox {
 private:
   /// Left edge
   Left m_left;

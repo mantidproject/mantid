@@ -1,13 +1,14 @@
+from __future__ import (absolute_import, division, print_function)
 from mantid.kernel import logger
 
-from sans.common.enums import (DetectorType, FitModeForMerge, RebinType, DataType)
+from sans.common.enums import (DetectorType, FitModeForMerge, RebinType, DataType, FitType)
 from sans.common.file_information import find_full_file_path
 from sans.common.general_functions import (get_ranges_for_rebin_setting, get_ranges_for_rebin_array,
                                            get_ranges_from_event_slice_setting)
 from sans.user_file.user_file_reader import UserFileReader
-from sans.user_file.user_file_common import (DetectorId, BackId, LimitsId, TransId, TubeCalibrationFileId,
-                                             QResolutionId, MaskId, SampleId, SetId, MonId, FitId, GravityId, OtherId,
-                                             simple_range, complex_range, rebin_string_values)
+from sans.user_file.user_file_common import (DetectorId, BackId, LimitsId, rebin_string_values, simple_range,
+                                             complex_range, MaskId, SampleId, SetId, TransId, TubeCalibrationFileId,
+                                             QResolutionId, FitId, MonId, GravityId, OtherId)
 
 from sans.state.automatic_setters import set_up_setter_forwarding_from_director_to_builder
 from sans.state.state import get_state_builder
@@ -32,12 +33,12 @@ def check_if_contains_only_one_element(to_check, element_name):
         msg = "The element {0} contains more than one element. Expected only one element. " \
               "The last element {1} is used. The elements {2} are discarded.".format(element_name,
                                                                                      to_check[-1], to_check[:-1])
-        logger.notice(msg)
+        logger.information(msg)
 
 
 def log_non_existing_field(field):
     msg = "The field {0} does not seem to exist on the state.".format(field)
-    logger.notice(msg)
+    logger.information(msg)
 
 
 def convert_detector(detector_type):
@@ -263,6 +264,9 @@ class UserFileStateDirectorISIS(object):
         # Compatibility state
         self._set_up_compatibility(user_file_items)
 
+        # Save state
+        self._set_up_save(user_file_items)
+
     def construct(self):
         # Create the different sub states and add them to the state
         # Mask state
@@ -443,7 +447,7 @@ class UserFileStateDirectorISIS(object):
                 self._move_builder.set_LAB_side_correction(tilt_correction.entry)
             else:
                 raise RuntimeError("UserFileStateDirector: An unknown detector {0} was used for the"
-                                   " titlt correction.".format(tilt_correction.detector_type))
+                                   " tilt correction.".format(tilt_correction.detector_type))
 
         # ---------------------------
         # Sample offset
@@ -479,8 +483,10 @@ class UserFileStateDirectorISIS(object):
                 pos2 = beam_centre.pos2
                 self._move_builder.set_LAB_sample_centre_pos1(self._move_builder.convert_pos1(pos1))
                 self._move_builder.set_LAB_sample_centre_pos2(self._move_builder.convert_pos2(pos2))
-                self._move_builder.set_HAB_sample_centre_pos1(self._move_builder.convert_pos1(pos1))
-                self._move_builder.set_HAB_sample_centre_pos2(self._move_builder.convert_pos2(pos2))
+                if hasattr(self._move_builder, "set_HAB_sample_centre_pos1"):
+                    self._move_builder.set_HAB_sample_centre_pos1(self._move_builder.convert_pos1(pos1))
+                if hasattr(self._move_builder, "set_HAB_sample_centre_pos2"):
+                    self._move_builder.set_HAB_sample_centre_pos2(self._move_builder.convert_pos2(pos2))
 
             for beam_centre in beam_centres_for_hab:
                 pos1 = beam_centre.pos1
@@ -963,19 +969,9 @@ class UserFileStateDirectorISIS(object):
             limits_q = user_file_items[LimitsId.q]
             check_if_contains_only_one_element(limits_q, LimitsId.q)
             limits_q = limits_q[-1]
-            # Now we have to check if we have a simple pattern or a more complex pattern at hand
-            is_complex = isinstance(limits_q, complex_range)
-            self._convert_to_q_builder.set_q_min(limits_q.start)
-            self._convert_to_q_builder.set_q_max(limits_q.stop)
-            if is_complex:
-                self._convert_to_q_builder.set_q_step(limits_q.step1)
-                self._convert_to_q_builder.set_q_step_type(limits_q.step_type1)
-                self._convert_to_q_builder.set_q_mid(limits_q.mid)
-                self._convert_to_q_builder.set_q_step2(limits_q.step2)
-                self._convert_to_q_builder.set_q_step_type2(limits_q.step_type2)
-            else:
-                self._convert_to_q_builder.set_q_step(limits_q.step)
-                self._convert_to_q_builder.set_q_step_type(limits_q.step_type)
+            self._convert_to_q_builder.set_q_min(limits_q.min)
+            self._convert_to_q_builder.set_q_max(limits_q.max)
+            self._convert_to_q_builder.set_q_1d_rebin_string(limits_q.rebin_string)
 
         # Get the 2D q values
         if LimitsId.qxy in user_file_items:
@@ -1106,14 +1102,26 @@ class UserFileStateDirectorISIS(object):
             fit_general = user_file_items[FitId.general]
             # We can have settings for both the sample or the can or individually
             # There can be three types of settings:
-            # 1. General settings where the entry data_type is not specified. Settings apply to both sample and can
-            # 2. Sample settings
-            # 3. Can settings
+            # 1. Clearing the fit setting
+            # 2. General settings where the entry data_type is not specified. Settings apply to both sample and can
+            # 3. Sample settings
+            # 4. Can settings
             # We first apply the general settings. Specialized settings for can or sample override the general settings
             # As usual if there are multiple settings for a specific case, then the last in the list is used.
 
-            # 1. General settings
-            general_settings = [item for item in fit_general if item.data_type is None]
+            # 1 Fit type settings
+            clear_settings = [item for item in fit_general if item.data_type is None and item.fit_type is FitType.NoFit]
+
+            if clear_settings:
+                check_if_contains_only_one_element(clear_settings, FitId.general)
+                clear_settings = clear_settings[-1]
+                # Will set the fitting to NoFit
+                self._calculate_transmission_builder.set_Sample_fit_type(clear_settings.fit_type)
+                self._calculate_transmission_builder.set_Can_fit_type(clear_settings.fit_type)
+
+            # 2. General settings
+            general_settings = [item for item in fit_general if item.data_type is None and
+                                item.fit_type is not FitType.NoFit]
             if general_settings:
                 check_if_contains_only_one_element(general_settings, FitId.general)
                 general_settings = general_settings[-1]
@@ -1126,7 +1134,7 @@ class UserFileStateDirectorISIS(object):
                 self._calculate_transmission_builder.set_Can_wavelength_low(general_settings.start)
                 self._calculate_transmission_builder.set_Can_wavelength_high(general_settings.stop)
 
-            # 2. Sample settings
+            # 3. Sample settings
             sample_settings = [item for item in fit_general if item.data_type is DataType.Sample]
             if sample_settings:
                 check_if_contains_only_one_element(sample_settings, FitId.general)
@@ -1136,7 +1144,7 @@ class UserFileStateDirectorISIS(object):
                 self._calculate_transmission_builder.set_Sample_wavelength_low(sample_settings.start)
                 self._calculate_transmission_builder.set_Sample_wavelength_high(sample_settings.stop)
 
-            # 2. Can settings
+            # 4. Can settings
             can_settings = [item for item in fit_general if item.data_type is DataType.Can]
             if can_settings:
                 check_if_contains_only_one_element(can_settings, FitId.general)
@@ -1214,6 +1222,39 @@ class UserFileStateDirectorISIS(object):
             check_if_contains_only_one_element(use_compatibility_mode, OtherId.use_compatibility_mode)
             use_compatibility_mode = use_compatibility_mode[-1]
             self._compatibility_builder.set_use_compatibility_mode(use_compatibility_mode)
+
+    def _set_up_save(self, user_file_items):
+        if OtherId.save_types in user_file_items:
+            save_types = user_file_items[OtherId.save_types]
+            check_if_contains_only_one_element(save_types, OtherId.save_types)
+            save_types = save_types[-1]
+            self._save_builder.set_file_format(save_types)
+
+        if OtherId.save_as_zero_error_free in user_file_items:
+            save_as_zero_error_free = user_file_items[OtherId.save_as_zero_error_free]
+            check_if_contains_only_one_element(save_as_zero_error_free, OtherId.save_as_zero_error_free)
+            save_as_zero_error_free = save_as_zero_error_free[-1]
+            self._save_builder.set_zero_free_correction(save_as_zero_error_free)
+
+        if OtherId.user_specified_output_name in user_file_items:
+            user_specified_output_name = user_file_items[OtherId.user_specified_output_name]
+            check_if_contains_only_one_element(user_specified_output_name, OtherId.user_specified_output_name)
+            user_specified_output_name = user_specified_output_name[-1]
+            self._save_builder.set_user_specified_output_name(user_specified_output_name)
+
+        if OtherId.user_specified_output_name_suffix in user_file_items:
+            user_specified_output_name_suffix = user_file_items[OtherId.user_specified_output_name_suffix]
+            check_if_contains_only_one_element(user_specified_output_name_suffix,
+                                               OtherId.user_specified_output_name_suffix)
+            user_specified_output_name_suffix = user_specified_output_name_suffix[-1]
+            self._save_builder.set_user_specified_output_name_suffix(user_specified_output_name_suffix)
+
+        if OtherId.use_reduction_mode_as_suffix in user_file_items:
+            use_reduction_mode_as_suffix = user_file_items[OtherId.use_reduction_mode_as_suffix]
+            check_if_contains_only_one_element(use_reduction_mode_as_suffix,
+                                               OtherId.use_reduction_mode_as_suffix)
+            use_reduction_mode_as_suffix = use_reduction_mode_as_suffix[-1]
+            self._save_builder.set_use_reduction_mode_as_suffix(use_reduction_mode_as_suffix)
 
     def _add_information_to_data_state(self, user_file_items):
         # The only thing that should be set on the data is the tube calibration file which is specified in

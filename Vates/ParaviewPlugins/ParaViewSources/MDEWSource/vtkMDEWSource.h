@@ -47,9 +47,12 @@ class MDLoadingPresenter;
 class VTK_EXPORT vtkMDEWSource : public vtkUnstructuredGridAlgorithm {
 public:
   static vtkMDEWSource *New();
-  vtkTypeMacro(vtkMDEWSource, vtkUnstructuredGridAlgorithm) void PrintSelf(
-      ostream &os, vtkIndent indent) override;
-
+  vtkMDEWSource(const vtkMDEWSource &) = delete;
+  void operator=(const vtkMDEWSource &) = delete;
+  // clang-format off
+  vtkTypeMacro(vtkMDEWSource, vtkUnstructuredGridAlgorithm)
+  void PrintSelf(ostream &os, vtkIndent indent) override;
+  // clang-format on
   void SetWsName(const std::string &wsName);
   void SetDepth(int depth);
   void SetNormalization(int option);
@@ -96,9 +99,6 @@ private:
 
   /// Normalization option
   Mantid::VATES::VisualNormalization m_normalization;
-
-  vtkMDEWSource(const vtkMDEWSource &);
-  void operator=(const vtkMDEWSource &);
   void setTimeRange(vtkInformationVector *outputVector);
 };
 #endif

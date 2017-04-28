@@ -15,8 +15,6 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/scoped_ptr.hpp>
 
-using Mantid::DataObjects::MDEventWorkspace;
-
 namespace Mantid {
 namespace VATES {
 
@@ -90,7 +88,8 @@ public:
 
 private:
   template <typename MDE, size_t nd>
-  void doCreate(typename MDEventWorkspace<MDE, nd>::sptr ws) const;
+  void doCreate(
+      typename Mantid::DataObjects::MDEventWorkspace<MDE, nd>::sptr ws) const;
 
   /// Check if the MDHisto workspace is 3D or 4D in nature
   bool doMDHisto4D(const Mantid::API::IMDHistoWorkspace *workspace) const;

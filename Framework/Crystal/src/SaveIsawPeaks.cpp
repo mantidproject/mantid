@@ -169,8 +169,8 @@ void SaveIsawPeaks::exec() {
         // Retrieve it
         boost::shared_ptr<const IComponent> det =
             inst->getComponentByName(bankName);
-        if (inst->getName().compare("CORELLI") ==
-            0) // for Corelli with sixteenpack under bank
+        if (inst->getName() ==
+            "CORELLI") // for Corelli with sixteenpack under bank
         {
           std::vector<Geometry::IComponent_const_sptr> children;
           boost::shared_ptr<const Geometry::ICompAssembly> asmb =
@@ -376,7 +376,7 @@ void SaveIsawPeaks::exec() {
 V3D SaveIsawPeaks::findPixelPos(std::string bankName, int col, int row) {
   boost::shared_ptr<const IComponent> parent =
       inst->getComponentByName(bankName);
-  if (parent->type().compare("RectangularDetector") == 0) {
+  if (parent->type() == "RectangularDetector") {
     boost::shared_ptr<const RectangularDetector> RDet =
         boost::dynamic_pointer_cast<const RectangularDetector>(parent);
 
@@ -387,7 +387,7 @@ V3D SaveIsawPeaks::findPixelPos(std::string bankName, int col, int row) {
     boost::shared_ptr<const Geometry::ICompAssembly> asmb =
         boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(parent);
     asmb->getChildren(children, false);
-    if (children[0]->getName().compare("sixteenpack") == 0) {
+    if (children[0]->getName() == "sixteenpack") {
       asmb = boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(
           children[0]);
       children.clear();
@@ -408,11 +408,11 @@ V3D SaveIsawPeaks::findPixelPos(std::string bankName, int col, int row) {
 }
 void SaveIsawPeaks::sizeBanks(std::string bankName, int &NCOLS, int &NROWS,
                               double &xsize, double &ysize) {
-  if (bankName.compare("None") == 0)
+  if (bankName == "None")
     return;
   boost::shared_ptr<const IComponent> parent =
       inst->getComponentByName(bankName);
-  if (parent->type().compare("RectangularDetector") == 0) {
+  if (parent->type() == "RectangularDetector") {
     boost::shared_ptr<const RectangularDetector> RDet =
         boost::dynamic_pointer_cast<const RectangularDetector>(parent);
 
@@ -425,7 +425,7 @@ void SaveIsawPeaks::sizeBanks(std::string bankName, int &NCOLS, int &NROWS,
     boost::shared_ptr<const Geometry::ICompAssembly> asmb =
         boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(parent);
     asmb->getChildren(children, false);
-    if (children[0]->getName().compare("sixteenpack") == 0) {
+    if (children[0]->getName() == "sixteenpack") {
       asmb = boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(
           children[0]);
       children.clear();

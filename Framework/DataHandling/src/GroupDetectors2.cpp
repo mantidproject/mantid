@@ -12,6 +12,7 @@
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidTypes/SpectrumDefinition.h"
+#include "MantidKernel/StringTokenizer.h"
 
 #include <boost/algorithm/string/classification.hpp>
 #include <boost/regex.hpp>
@@ -39,26 +40,25 @@ namespace { // anonymous namespace
 // An add operation, i.e. "3+4" -> [3+4]
 void translateAdd(const std::string &instructions,
                   std::vector<std::vector<int>> &outGroups) {
-  std::vector<std::string> spectra;
-  boost::split(spectra, instructions, boost::is_any_of("+"));
+  auto spectra = Kernel::StringTokenizer(
+      instructions, "+", Kernel::StringTokenizer::TOK_TRIM |
+                             Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
 
   std::vector<int> outSpectra;
+  outSpectra.reserve(spectra.count());
   for (auto spectrum : spectra) {
-    // remove leading/trailing whitespace
-    boost::trim(spectrum);
     // add this spectrum to the group we're about to add
     outSpectra.push_back(boost::lexical_cast<int>(spectrum));
   }
-  outGroups.push_back(outSpectra);
+  outGroups.push_back(std::move(outSpectra));
 }
 
 // A range summation, i.e. "3-6" -> [3+4+5+6]
 void translateSumRange(const std::string &instructions,
                        std::vector<std::vector<int>> &outGroups) {
   // add a group with the sum of the spectra in the range
-  std::vector<std::string> spectra;
-  boost::split(spectra, instructions, boost::is_any_of("-"));
-  if (spectra.size() != 2)
+  auto spectra = Kernel::StringTokenizer(instructions, "-");
+  if (spectra.count() != 2)
     throw std::runtime_error("Malformed range (-) operation.");
   // fetch the start and stop spectra
   int first = boost::lexical_cast<int>(spectra[0]);
@@ -69,19 +69,20 @@ void translateSumRange(const std::string &instructions,
 
   // add all the spectra in the range to the output group
   std::vector<int> outSpectra;
+  outSpectra.reserve(last - first + 1);
   for (int i = first; i <= last; ++i)
     outSpectra.push_back(i);
   if (!outSpectra.empty())
-    outGroups.push_back(outSpectra);
+    outGroups.push_back(std::move(outSpectra));
 }
 
 // A range insertion, i.e. "3:6" -> [3,4,5,6]
 void translateRange(const std::string &instructions,
                     std::vector<std::vector<int>> &outGroups) {
   // add a group per spectra
-  std::vector<std::string> spectra;
-  boost::split(spectra, instructions, boost::is_any_of(":"));
-  if (spectra.size() != 2)
+  auto spectra = Kernel::StringTokenizer(
+      instructions, ":", Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
+  if (spectra.count() != 2)
     throw std::runtime_error("Malformed range (:) operation.");
   // fetch the start and stop spectra
   int first = boost::lexical_cast<int>(spectra[0]);
@@ -92,10 +93,8 @@ void translateRange(const std::string &instructions,
 
   // add all the spectra in the range to separate output groups
   for (int i = first; i <= last; ++i) {
-    // create group of size 1 with the spectrum in it
-    std::vector<int> newGroup(1, i);
-    // and add it to output
-    outGroups.push_back(newGroup);
+    // create group of size 1 with the spectrum and add it to output
+    outGroups.emplace_back(1, i);
   }
 }
 
@@ -112,13 +111,8 @@ translateInstructions(const std::string &instructions) {
 
   // split into comma separated groups, each group potentially containing
   // an operation (+-:) that produces even more groups.
-  std::vector<std::string> groups;
-  boost::split(groups, instructions, boost::is_any_of(","));
-
-  for (auto groupStr : groups) {
-    // remove leading/trailing whitespace
-    boost::trim(groupStr);
-
+  auto groups = Kernel::StringTokenizer(instructions, ",", IGNORE_SPACES);
+  for (const auto &groupStr : groups) {
     // Look for the various operators in the string. If one is found then
     // do the necessary translation into groupings.
     if (groupStr.find('+') != std::string::npos) {
@@ -130,10 +124,8 @@ translateInstructions(const std::string &instructions) {
       translateRange(groupStr, outGroups);
     } else if (!groupStr.empty()) {
       // contains no instructions, just add this spectrum as a new group
-      // create group of size 1 with the spectrum in it
-      std::vector<int> newGroup(1, boost::lexical_cast<int>(groupStr));
-      // and add it to output
-      outGroups.push_back(newGroup);
+      // create group of size 1 with the spectrum in it and add it to output
+      outGroups.emplace_back(1, boost::lexical_cast<int>(groupStr));
     }
   }
 
@@ -694,13 +686,11 @@ void GroupDetectors2::processXMLFile(std::string fname,
   }   // for group
 
   // 5. Spectrum Nos
-  std::map<int, std::vector<int>>::iterator pit;
-  for (pit = mGroupSpectraMap.begin(); pit != mGroupSpectraMap.end(); ++pit) {
-    int groupid = pit->first;
-    std::vector<int> spectra = pit->second;
+  for (const auto &pit : mGroupSpectraMap) {
+    int groupid = pit.first;
+    const std::vector<int> &spectra = pit.second;
 
-    storage_map::iterator sit;
-    sit = m_GroupWsInds.find(groupid);
+    auto sit = m_GroupWsInds.find(groupid);
     if (sit == m_GroupWsInds.end())
       continue;
 
@@ -751,7 +741,6 @@ void GroupDetectors2::processGroupingWorkspace(
       }
       // get a reference to the set
       std::set<size_t> &targetWSIndexSet = group2WSIndexSetmap[groupid];
-
       for (const auto &spectrumDefinition :
            spectrumInfo.spectrumDefinition(i)) {
         // translate detectors to target det ws indexes
@@ -770,10 +759,9 @@ void GroupDetectors2::processGroupingWorkspace(
   for (auto &dit : group2WSIndexSetmap) {
     size_t groupid = dit.first;
     std::set<size_t> &targetWSIndexSet = dit.second;
-    std::vector<size_t> tempv;
-    tempv.assign(targetWSIndexSet.begin(), targetWSIndexSet.end());
-    m_GroupWsInds.insert(
-        std::make_pair(static_cast<specnum_t>(groupid), tempv));
+    m_GroupWsInds.emplace(
+        static_cast<specnum_t>(groupid),
+        std::vector<size_t>(targetWSIndexSet.begin(), targetWSIndexSet.end()));
   }
 }
 
@@ -1307,9 +1295,22 @@ std::map<std::string, std::string> GroupDetectors2::validateInputs() {
 
   boost::regex re(
       "^\\s*[0-9]+\\s*$|^(\\s*,*[0-9]+(\\s*(,|:|\\+|\\-)\\s*)*[0-9]*)*$");
-  if (!pattern.empty() && !boost::regex_match(pattern, re)) {
-    errors["GroupingPattern"] =
-        "GroupingPattern is not well formed: " + pattern;
+
+  try {
+    if (!pattern.empty() && !boost::regex_match(pattern, re)) {
+      errors["GroupingPattern"] =
+          "GroupingPattern is not well formed: " + pattern;
+    }
+  } catch (boost::exception &) {
+    // If the pattern is too large, split on comma and evaluate each piece.
+    auto groups = Kernel::StringTokenizer(pattern, ",", IGNORE_SPACES);
+    for (const auto &groupStr : groups) {
+      if (!pattern.empty() && !boost::regex_match(groupStr, re)) {
+        errors["GroupingPattern"] =
+            "GroupingPattern is not well formed: " + pattern;
+        break;
+      }
+    }
   }
 
   return errors;

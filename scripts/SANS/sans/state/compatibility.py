@@ -6,6 +6,7 @@
    that we are dealing with a bug
 """
 
+from __future__ import (absolute_import, division, print_function)
 import copy
 from sans.state.state_base import (StateBase, rename_descriptor_names, BoolParameter, StringParameter)
 from sans.state.automatic_setters import (automatic_setters)

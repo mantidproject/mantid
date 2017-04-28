@@ -36,7 +36,7 @@ using namespace Mantid::Geometry;
 int LoadIsawPeaks::confidence(Kernel::FileDescriptor &descriptor) const {
   const std::string &extn = descriptor.extension();
   // If the extension is peaks or integrate then give it a go
-  if (extn.compare(".peaks") != 0 && extn.compare(".integrate") != 0)
+  if (extn != ".peaks" && extn != ".integrate")
     return 0;
 
   int confidence(0);
@@ -49,7 +49,7 @@ int LoadIsawPeaks::confidence(Kernel::FileDescriptor &descriptor) const {
     if (r.length() < 1)
       throw std::logic_error(std::string("No first line of Peaks file"));
 
-    if (r.compare("Version:") != 0)
+    if (r != "Version:")
       throw std::logic_error(
           std::string("No Version: on first line of Peaks file"));
 
@@ -124,7 +124,7 @@ std::string LoadIsawPeaks::readHeader(PeaksWorkspace_sptr outWS,
   if (r.length() < 1)
     throw std::logic_error(std::string("No first line of Peaks file"));
 
-  if (r.compare(std::string("Version:")) != 0)
+  if (r != "Version:")
     throw std::logic_error(
         std::string("No Version: on first line of Peaks file"));
 
@@ -226,7 +226,7 @@ DataObjects::Peak LoadIsawPeaks::readPeak(PeaksWorkspace_sptr outWS,
   if (s.length() < 1)
     throw std::runtime_error("Empty peak line encountered.");
 
-  if (s.compare("2") == 0) {
+  if (s == "2") {
     readToEndOfLine(in, true);
     for (s = getWord(in, false); s.length() < 1 && in.good();
          s = getWord(in, true)) {
@@ -237,29 +237,29 @@ DataObjects::Peak LoadIsawPeaks::readPeak(PeaksWorkspace_sptr outWS,
   if (s.length() < 1)
     throw std::runtime_error("Empty peak line encountered.");
 
-  if (s.compare("3") != 0)
+  if (s != "3")
     throw std::runtime_error("Empty peak line encountered.");
 
-  seqNum = atoi(getWord(in, false).c_str());
+  seqNum = std::stoi(getWord(in, false));
 
-  h = strtod(getWord(in, false).c_str(), nullptr);
-  k = strtod(getWord(in, false).c_str(), nullptr);
-  l = strtod(getWord(in, false).c_str(), nullptr);
+  h = std::stod(getWord(in, false), nullptr);
+  k = std::stod(getWord(in, false), nullptr);
+  l = std::stod(getWord(in, false), nullptr);
 
-  col = strtod(getWord(in, false).c_str(), nullptr);
-  row = strtod(getWord(in, false).c_str(), nullptr);
-  strtod(getWord(in, false).c_str(), nullptr); // chan
-  strtod(getWord(in, false).c_str(), nullptr); // L2
-  strtod(getWord(in, false).c_str(), nullptr); // ScatAng
+  col = std::stod(getWord(in, false), nullptr);
+  row = std::stod(getWord(in, false), nullptr);
+  UNUSED_ARG(std::stod(getWord(in, false), nullptr)); // chan
+  UNUSED_ARG(std::stod(getWord(in, false), nullptr)); // L2
+  UNUSED_ARG(std::stod(getWord(in, false), nullptr)); // ScatAng
 
-  strtod(getWord(in, false).c_str(), nullptr); // Az
-  wl = strtod(getWord(in, false).c_str(), nullptr);
-  strtod(getWord(in, false).c_str(), nullptr); // D
-  IPK = strtod(getWord(in, false).c_str(), nullptr);
+  UNUSED_ARG(std::stod(getWord(in, false), nullptr)); // Az
+  wl = std::stod(getWord(in, false), nullptr);
+  UNUSED_ARG(std::stod(getWord(in, false), nullptr)); // D
+  IPK = std::stod(getWord(in, false), nullptr);
 
-  Inti = strtod(getWord(in, false).c_str(), nullptr);
-  SigI = strtod(getWord(in, false).c_str(), nullptr);
-  static_cast<void>(atoi(getWord(in, false).c_str())); // iReflag
+  Inti = std::stod(getWord(in, false), nullptr);
+  SigI = std::stod(getWord(in, false), nullptr);
+  UNUSED_ARG(std::stoi(getWord(in, false))); // iReflag
 
   // Finish the line and get the first word of next line
   readToEndOfLine(in, true);
@@ -289,7 +289,7 @@ int LoadIsawPeaks::findPixelID(Instrument_const_sptr inst, std::string bankName,
   boost::shared_ptr<const IComponent> parent =
       getCachedBankByName(bankName, inst);
 
-  if (parent->type().compare("RectangularDetector") == 0) {
+  if (parent->type() == "RectangularDetector") {
     boost::shared_ptr<const RectangularDetector> RDet =
         boost::dynamic_pointer_cast<const RectangularDetector>(parent);
 
@@ -300,7 +300,7 @@ int LoadIsawPeaks::findPixelID(Instrument_const_sptr inst, std::string bankName,
     boost::shared_ptr<const Geometry::ICompAssembly> asmb =
         boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(parent);
     asmb->getChildren(children, false);
-    if (children[0]->getName().compare("sixteenpack") == 0) {
+    if (children[0]->getName() == "sixteenpack") {
       asmb = boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(
           children[0]);
       children.clear();
@@ -340,7 +340,7 @@ std::string LoadIsawPeaks::readPeakBlockHeader(std::string lastStr,
   if (s.length() < 1)
     return std::string();
 
-  if (s.compare("0") == 0) {
+  if (s == "0") {
     readToEndOfLine(in, true);
     s = getWord(in, false);
     while (s.length() < 1) {
@@ -349,16 +349,16 @@ std::string LoadIsawPeaks::readPeakBlockHeader(std::string lastStr,
     }
   }
 
-  if (s.compare(std::string("1")) != 0)
+  if (s != "1")
     return s;
 
-  run = atoi(getWord(in, false).c_str());
-  detName = atoi(getWord(in, false).c_str());
-  chi = strtod(getWord(in, false).c_str(), nullptr);
-  phi = strtod(getWord(in, false).c_str(), nullptr);
+  run = std::stoi(getWord(in, false));
+  detName = std::stoi(getWord(in, false));
+  chi = std::stod(getWord(in, false), nullptr);
+  phi = std::stod(getWord(in, false), nullptr);
 
-  omega = strtod(getWord(in, false).c_str(), nullptr);
-  monCount = strtod(getWord(in, false).c_str(), nullptr);
+  omega = std::stod(getWord(in, false), nullptr);
+  monCount = std::stod(getWord(in, false), nullptr);
   readToEndOfLine(in, true);
 
   return getWord(in, false);
@@ -396,7 +396,7 @@ void LoadIsawPeaks::appendFile(PeaksWorkspace_sptr outWS,
   if (!in.good() || s.length() < 1)
     throw std::runtime_error("End of Peaks file before peaks");
 
-  if (s.compare(std::string("0")) != 0)
+  if (s != "0")
     throw std::logic_error("No header for Peak segments");
 
   readToEndOfLine(in, true);
