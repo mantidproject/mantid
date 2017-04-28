@@ -112,9 +112,14 @@ private:
 
   /// Generates the filename(s) and paths to write to
   void generateOutFileNames(size_t numberOfOutFiles);
-  
+
+  /// Returns the log value in a GSAS format as a string stream
+  std::stringstream
+  getLogValue(const Run &runinfo, const std::string &name,
+              const std::string &failsafeValue = "UNKNOWN") const;
+
   /// Returns if the input workspace instrument is valid
-  bool SaveGSS::isInstrumentValid() const;
+  bool isInstrumentValid() const;
 
   /// Opens a new file stream at the path specified.
   std::ofstream openFileStream(const std::string &outFilePath);

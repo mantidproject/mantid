@@ -63,6 +63,18 @@ double fixErrorValue(const double value) {
   else
     return value;
 }
+
+std::stringstream writeBankLine(const std::string &bintype, const int banknum,
+                                const size_t datasize) {
+  std::stringstream out;
+  std::ios::fmtflags fflags(out.flags());
+  out << "BANK " << std::fixed << std::setprecision(0)
+      << banknum // First bank should be 1 for GSAS; this can be changed
+      << std::fixed << " " << datasize << std::fixed << " " << datasize
+      << std::fixed << " " << bintype;
+  out.flags(fflags);
+  return out;
+}
 } // End of anonymous namespace
 
 // Constructor
@@ -140,55 +152,6 @@ void SaveGSS::exec() {
   writeBufferToFile(numOfOutFiles, numOutSpectra);
 }
 
-// TODO cleanup  and move
-/** Write value from a RunInfo property (i.e., log) to a stream
-*/
-void writeLogValue(std::ostream &os, const Run &runinfo,
-	const std::string &name,
-	const std::string &defValue = "UNKNOWN") {
-	// Return without property exists
-	if (!runinfo.hasProperty(name)) {
-		os << defValue;
-		return;
-	}
-
-	// Get handler of property
-	Kernel::Property *prop = runinfo.getProperty(name);
-
-	// Return without a valid pointer to property
-	if (prop == nullptr) {
-		os << defValue;
-		return;
-	}
-
-	// Get value
-	Kernel::TimeSeriesProperty<double> *log =
-		dynamic_cast<Kernel::TimeSeriesProperty<double> *>(prop);
-	if (log) {
-		// Time series to get mean
-		os << log->getStatistics().mean;
-	}
-	else {
-		// None time series
-		os << prop->value();
-	}
-
-	// Unit
-	std::string units = prop->units();
-	if (!units.empty())
-		os << " " << units;
-}
-
-void writeBankLine(std::stringstream &out, const std::string &bintype,
-	const int banknum, const size_t datasize) {
-	std::ios::fmtflags fflags(out.flags());
-	out << "BANK " << std::fixed << std::setprecision(0)
-		<< banknum // First bank should be 1 for GSAS; this can be changed
-		<< std::fixed << " " << datasize << std::fixed << " " << datasize
-		<< std::fixed << " " << bintype;
-	out.flags(fflags);
-}
-
 bool SaveGSS::areAllDetectorsValid() const {
   const auto &spectrumInfo = m_inputWS->spectrumInfo();
   const size_t numHist = m_inputWS->getNumberHistograms();
@@ -216,59 +179,56 @@ bool SaveGSS::areAllDetectorsValid() const {
 }
 
 std::stringstream SaveGSS::generateBankData(size_t specIndex) const {
-	// Determine bank number into GSAS file
-	std::stringstream outBuffer;
-	const bool useSpecAsBank = getProperty("UseSpectrumNumberAsBankID");
-	const bool multiplyByBinWidth = getProperty("MultiplyByBinWidth");
-	const int userStartingBankNumber = getProperty("Bank");
-	const std::string outputFormat = getPropertyValue("Format");
-	int bankid;
-	if (useSpecAsBank) {
-		bankid =
-			static_cast<int>(m_inputWS->getSpectrum(specIndex).getSpectrumNo());
-	}
-	else {
-		bankid = userStartingBankNumber + static_cast<int>(specIndex);
-	}
+  // Determine bank number into GSAS file
+  std::stringstream outBuffer;
+  const bool useSpecAsBank = getProperty("UseSpectrumNumberAsBankID");
+  const bool multiplyByBinWidth = getProperty("MultiplyByBinWidth");
+  const int userStartingBankNumber = getProperty("Bank");
+  const std::string outputFormat = getPropertyValue("Format");
+  int bankid;
+  if (useSpecAsBank) {
+    bankid =
+        static_cast<int>(m_inputWS->getSpectrum(specIndex).getSpectrumNo());
+  } else {
+    bankid = userStartingBankNumber + static_cast<int>(specIndex);
+  }
 
-	// Write data
-	if (outputFormat == RALF) {
-		this->writeRALFdata(bankid, multiplyByBinWidth, outBuffer,
-			m_inputWS->histogram(specIndex));
-	}
-	else if (outputFormat == SLOG) {
-		this->writeSLOGdata(bankid, multiplyByBinWidth, outBuffer,
-			m_inputWS->histogram(specIndex));
-	}
-	else {
-		throw std::runtime_error("Cannot write to the unknown " + outputFormat +
-			"output format");
-	}
-	return outBuffer;
+  // Write data
+  if (outputFormat == RALF) {
+    this->writeRALFdata(bankid, multiplyByBinWidth, outBuffer,
+                        m_inputWS->histogram(specIndex));
+  } else if (outputFormat == SLOG) {
+    this->writeSLOGdata(bankid, multiplyByBinWidth, outBuffer,
+                        m_inputWS->histogram(specIndex));
+  } else {
+    throw std::runtime_error("Cannot write to the unknown " + outputFormat +
+                             "output format");
+  }
+  return outBuffer;
 }
 
 std::stringstream
 SaveGSS::generateBankHeader(const Mantid::API::SpectrumInfo &spectrumInfo,
-	size_t specIndex) const {
-	std::stringstream outBuffer;
-	double l1{ 0 }, l2{ 0 }, twoTheta{ 0 }, difc{ 0 };
-	// If we have all valid detectors get these properties else use 0
-	if (m_allDetectorsValid) {
-		l1 = spectrumInfo.l1();
-		l2 = spectrumInfo.l2(specIndex);
-		twoTheta = spectrumInfo.twoTheta(specIndex);
-		difc = (2.0 * PhysicalConstants::NeutronMass * sin(twoTheta * 0.5) *
-			(l1 + l2)) /
-			(PhysicalConstants::h * 1.e4);
-	}
+                            size_t specIndex) const {
+  std::stringstream outBuffer;
+  double l1{0}, l2{0}, twoTheta{0}, difc{0};
+  // If we have all valid detectors get these properties else use 0
+  if (m_allDetectorsValid) {
+    l1 = spectrumInfo.l1();
+    l2 = spectrumInfo.l2(specIndex);
+    twoTheta = spectrumInfo.twoTheta(specIndex);
+    difc = (2.0 * PhysicalConstants::NeutronMass * sin(twoTheta * 0.5) *
+            (l1 + l2)) /
+           (PhysicalConstants::h * 1.e4);
+  }
 
-	if (m_allDetectorsValid) {
-		outBuffer << "# Total flight path " << (l1 + l2) << "m, tth "
-			<< (twoTheta * 180. / M_PI) << "deg, DIFC " << difc << "\n";
-	}
+  if (m_allDetectorsValid) {
+    outBuffer << "# Total flight path " << (l1 + l2) << "m, tth "
+              << (twoTheta * 180. / M_PI) << "deg, DIFC " << difc << "\n";
+  }
 
-	outBuffer << "# Data for spectrum :" << specIndex << "\n";
-	return outBuffer;
+  outBuffer << "# Data for spectrum :" << specIndex << "\n";
+  return outBuffer;
 }
 
 void SaveGSS::generateGSASFile(size_t numOutFiles, size_t numOutSpectra) {
@@ -311,113 +271,150 @@ void SaveGSS::generateGSASFile(size_t numOutFiles, size_t numOutSpectra) {
 * @param l1 :: Value for the moderator to sample distance
 */
 std::stringstream SaveGSS::generateInstrumentHeader(double l1) const {
-	const Run &runinfo = m_inputWS->run();
-	const std::string format = getPropertyValue("Format");
-	std::stringstream outBuffer;
+  const Run &runinfo = m_inputWS->run();
+  const std::string format = getPropertyValue("Format");
+  std::stringstream outBuffer;
 
-	// Run number
-	if (format.compare(SLOG) == 0) {
-		outBuffer << "Sample Run: ";
-		writeLogValue(outBuffer, runinfo, "run_number");
-		outBuffer << " Vanadium Run: ";
-		writeLogValue(outBuffer, runinfo, "van_number");
-		outBuffer << " Wavelength: ";
-		writeLogValue(outBuffer, runinfo, "LambdaRequest");
-		outBuffer << "\n";
-	}
+  // Run number
+  if (format.compare(SLOG) == 0) {
+    outBuffer << "Sample Run: ";
+    outBuffer << getLogValue(runinfo, "run_number").rdbuf();
+    outBuffer << " Vanadium Run: ";
+    outBuffer << getLogValue(runinfo, "van_number").rdbuf();
+    outBuffer << " Wavelength: ";
+    outBuffer << getLogValue(runinfo, "LambdaRequest").rdbuf();
+    outBuffer << "\n";
+  }
 
-	if (this->getProperty("ExtendedHeader")) {
-		// the instrument parameter file
-		if (runinfo.hasProperty("iparm_file")) {
-			Kernel::Property *prop = runinfo.getProperty("iparm_file");
-			if (prop != nullptr && (!prop->value().empty())) {
-				std::stringstream line;
-				line << "#Instrument parameter file: " << prop->value();
-				outBuffer << std::setw(80) << std::left << line.str() << "\n";
-			}
-		}
+  if (this->getProperty("ExtendedHeader")) {
+    // the instrument parameter file
+    if (runinfo.hasProperty("iparm_file")) {
+      Kernel::Property *prop = runinfo.getProperty("iparm_file");
+      if (prop != nullptr && (!prop->value().empty())) {
+        std::stringstream line;
+        line << "#Instrument parameter file: " << prop->value();
+        outBuffer << std::setw(80) << std::left << line.str() << "\n";
+      }
+    }
 
-		// write out the GSAS monitor counts
-		outBuffer << "Monitor: ";
-		if (runinfo.hasProperty("gsas_monitor")) {
-			writeLogValue(outBuffer, runinfo, "gsas_monitor");
-		}
-		else {
-			writeLogValue(outBuffer, runinfo, "gd_prtn_chrg", "1");
-		}
-		outBuffer << "\n";
-	}
+    // write out the GSAS monitor counts
+    outBuffer << "Monitor: ";
+    if (runinfo.hasProperty("gsas_monitor")) {
+      outBuffer << getLogValue(runinfo, "gsas_monitor").rdbuf();
+    } else {
+      outBuffer << getLogValue(runinfo, "gd_prtn_chrg", "1").rdbuf;
+    }
+    outBuffer << "\n";
+  }
 
-	if (format.compare(SLOG) == 0) {
-		outBuffer << "# "; // make the next line a comment
-	}
-	outBuffer << m_inputWS->getTitle() << "\n";
-	outBuffer << "# " << m_inputWS->getNumberHistograms() << " Histograms\n";
-	outBuffer << "# File generated by Mantid:\n";
-	outBuffer << "# Instrument: " << m_inputWS->getInstrument()->getName()
-		<< "\n";
-	outBuffer << "# From workspace named : " << m_inputWS->getName() << "\n";
-	if (getProperty("MultiplyByBinWidth"))
-		outBuffer << "# with Y multiplied by the bin widths.\n";
-	outBuffer << "# Primary flight path " << l1 << "m \n";
-	if (format.compare(SLOG) == 0) {
-		outBuffer << "# Sample Temperature: ";
-		writeLogValue(outBuffer, runinfo, "SampleTemp");
-		outBuffer << " Freq: ";
-		writeLogValue(outBuffer, runinfo, "SpeedRequest1");
-		outBuffer << " Guide: ";
-		writeLogValue(outBuffer, runinfo, "guide");
-		outBuffer << "\n";
+  if (format.compare(SLOG) == 0) {
+    outBuffer << "# "; // make the next line a comment
+  }
+  outBuffer << m_inputWS->getTitle() << "\n";
+  outBuffer << "# " << m_inputWS->getNumberHistograms() << " Histograms\n";
+  outBuffer << "# File generated by Mantid:\n";
+  outBuffer << "# Instrument: " << m_inputWS->getInstrument()->getName()
+            << "\n";
+  outBuffer << "# From workspace named : " << m_inputWS->getName() << "\n";
+  if (getProperty("MultiplyByBinWidth"))
+    outBuffer << "# with Y multiplied by the bin widths.\n";
+  outBuffer << "# Primary flight path " << l1 << "m \n";
+  if (format.compare(SLOG) == 0) {
+    outBuffer << "# Sample Temperature: ";
+    outBuffer << getLogValue(runinfo, "SampleTemp").rdbuf();
+    outBuffer << " Freq: ";
+    outBuffer << getLogValue(runinfo, "SpeedRequest1").rdbuf();
+    outBuffer << " Guide: ";
+    outBuffer << getLogValue(runinfo, "guide").rdbuf();
+    outBuffer << "\n";
 
-		// print whether it is normalized by monitor or proton charge
-		bool norm_by_current = false;
-		bool norm_by_monitor = false;
-		const Mantid::API::AlgorithmHistories &algohist =
-			m_inputWS->getHistory().getAlgorithmHistories();
-		for (const auto &algo : algohist) {
-			if (algo->name().compare("NormaliseByCurrent") == 0)
-				norm_by_current = true;
-			if (algo->name().compare("NormaliseToMonitor") == 0)
-				norm_by_monitor = true;
-		}
-		outBuffer << "#";
-		if (norm_by_current)
-			outBuffer << " Normalised to pCharge";
-		if (norm_by_monitor)
-			outBuffer << " Normalised to monitor";
-		outBuffer << "\n";
-	}
+    // print whether it is normalized by monitor or proton charge
+    bool norm_by_current = false;
+    bool norm_by_monitor = false;
+    const Mantid::API::AlgorithmHistories &algohist =
+        m_inputWS->getHistory().getAlgorithmHistories();
+    for (const auto &algo : algohist) {
+      if (algo->name().compare("NormaliseByCurrent") == 0)
+        norm_by_current = true;
+      if (algo->name().compare("NormaliseToMonitor") == 0)
+        norm_by_monitor = true;
+    }
+    outBuffer << "#";
+    if (norm_by_current)
+      outBuffer << " Normalised to pCharge";
+    if (norm_by_monitor)
+      outBuffer << " Normalised to monitor";
+    outBuffer << "\n";
+  }
 
-	return outBuffer;
+  return outBuffer;
 }
 
 void Mantid::DataHandling::SaveGSS::generateOutFileNames(
-	size_t numberOfOutFiles) {
-	const std::string outputFileName = getProperty("Filename");
+    size_t numberOfOutFiles) {
+  const std::string outputFileName = getProperty("Filename");
 
-	if (!getProperty("SplitFiles")) {
-		// Only add one name and don't generate split filenames
-		// when we are not in split mode
-		m_outFileNames.push_back(outputFileName);
-		return;
-	}
+  if (!getProperty("SplitFiles")) {
+    // Only add one name and don't generate split filenames
+    // when we are not in split mode
+    m_outFileNames.push_back(outputFileName);
+    return;
+  }
 
-	m_outFileNames.resize(numberOfOutFiles);
+  m_outFileNames.resize(numberOfOutFiles);
 
-	Poco::Path path(outputFileName);
-	// Filename minus extension
-	const std::string basename = path.getBaseName();
-	const std::string ext = path.getExtension();
+  Poco::Path path(outputFileName);
+  // Filename minus extension
+  const std::string basename = path.getBaseName();
+  const std::string ext = path.getExtension();
 
-	for (size_t i = 0; i < numberOfOutFiles; i++) {
-		// Construct output name of the form 'base name-i.ext'
-		std::string newFileName = basename;
-		((newFileName += '-') += std::to_string(i) += ".") += ext;
-		// Remove filename from path
-		path.makeParent();
-		path.append(newFileName);
-		m_outFileNames[i].assign(path.toString());
-	}
+  for (size_t i = 0; i < numberOfOutFiles; i++) {
+    // Construct output name of the form 'base name-i.ext'
+    std::string newFileName = basename;
+    ((newFileName += '-') += std::to_string(i) += ".") += ext;
+    // Remove filename from path
+    path.makeParent();
+    path.append(newFileName);
+    m_outFileNames[i].assign(path.toString());
+  }
+}
+
+/** Write value from a RunInfo property (i.e., log) to a stream
+*/
+std::stringstream SaveGSS::getLogValue(const Run &runinfo,
+                                       const std::string &name,
+                                       const std::string &failsafeValue) const {
+  std::stringstream os;
+  // Return without property exists
+  if (!runinfo.hasProperty(name)) {
+    os << failsafeValue;
+    return;
+  }
+  // Get handle of property
+  auto *prop = runinfo.getProperty(name);
+
+  // Return without a valid pointer to property
+  if (!prop) {
+    os << failsafeValue;
+    return;
+  }
+
+  // Get value
+  auto *log = dynamic_cast<Kernel::TimeSeriesProperty<double> *>(prop);
+  if (log) {
+    // Time series to get mean
+    os << log->getStatistics().mean;
+  } else {
+    // None time series
+    os << prop->value();
+  }
+
+  // Unit
+  std::string units = prop->units();
+  if (!units.empty()) {
+    os << " " << units;
+  }
+  return os;
 }
 
 bool SaveGSS::isInstrumentValid() const {
@@ -464,23 +461,21 @@ std::ofstream SaveGSS::openFileStream(const std::string &outFilePath) {
 *  @param periodNum ::     Effectively a counter through the group members
 */
 void SaveGSS::setOtherProperties(IAlgorithm *alg,
-	const std::string &propertyName,
-	const std::string &propertyValue,
-	int periodNum) {
-	// We want to append subsequent group members to the first one
-	if (propertyName == "Append") {
-		if (periodNum != 1) {
-			alg->setPropertyValue(propertyName, "1");
-		}
-		else
-			alg->setPropertyValue(propertyName, propertyValue);
-	}
-	// We want the bank number to increment for each member of the group
-	else if (propertyName == "Bank") {
-		alg->setProperty("Bank", std::stoi(propertyValue) + periodNum - 1);
-	}
-	else
-		Algorithm::setOtherProperties(alg, propertyName, propertyValue, periodNum);
+                                 const std::string &propertyName,
+                                 const std::string &propertyValue,
+                                 int periodNum) {
+  // We want to append subsequent group members to the first one
+  if (propertyName == "Append") {
+    if (periodNum != 1) {
+      alg->setPropertyValue(propertyName, "1");
+    } else
+      alg->setPropertyValue(propertyName, propertyValue);
+  }
+  // We want the bank number to increment for each member of the group
+  else if (propertyName == "Bank") {
+    alg->setProperty("Bank", std::stoi(propertyValue) + periodNum - 1);
+  } else
+    Algorithm::setOtherProperties(alg, propertyName, propertyValue, periodNum);
 }
 
 void SaveGSS::validateInputs() const {
@@ -543,7 +538,7 @@ void SaveGSS::writeRALFdata(const int bank, const bool MultiplyByBinWidth,
     bc4 = 0; // If X is zero for BANK
 
   // Write out the data header
-  writeBankLine(out, "RALF", bank, datasize);
+  out << writeBankLine("RALF", bank, datasize).rdbuf();
   out << std::fixed << " " << std::setprecision(0) << std::setw(8) << bc1
       << std::fixed << " " << std::setprecision(0) << std::setw(8) << bc2
       << std::fixed << " " << std::setprecision(0) << std::setw(8) << bc1
@@ -602,7 +597,7 @@ void SaveGSS::writeSLOGdata(const int bank, const bool MultiplyByBinWidth,
 
   g_log.debug() << "SaveGSS(): Min TOF = " << bc1 << '\n';
 
-  writeBankLine(out, "SLOG", bank, datasize);
+  out << writeBankLine("SLOG", bank, datasize).rdbuf();
   out << std::fixed << " " << std::setprecision(0) << std::setw(10) << bc1
       << std::fixed << " " << std::setprecision(0) << std::setw(10) << bc2
       << std::fixed << " " << std::setprecision(7) << std::setw(10) << bc3
