@@ -76,9 +76,6 @@ class ISISPowderInstrumentRunDetailsTest(unittest.TestCase):
         # Get the YAML file as a dict first
         wrapped_funcs = run_details.RunDetailsWrappedCommonFuncs
 
-        import pydevd
-        pydevd.settrace('localhost', port=34901, stdoutToServer=True, stderrToServer=True)
-
         yaml_callable = run_details.CustomFuncForRunDetails(user_function=wrapped_funcs.get_cal_mapping_dict,
                                                             run_number_string=run_number_string,
                                                             inst_settings=mock_inst)
