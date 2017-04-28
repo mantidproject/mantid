@@ -94,7 +94,9 @@ private:
   void exec() override;
 
   /// Writes the current buffer to the user specified file path
-  void writeBufferToFile(const std::vector<std::string> &outFileNames, size_t numOutFiles, size_t numSpectra);
+  void writeBufferToFile(size_t numOutFiles, size_t numSpectra);
+
+  void validateInputs() const;
 
   /// Opens a new file stream at the path specified.
   std::ofstream openFileStream(const std::string &outFilePath);
@@ -102,22 +104,19 @@ private:
   void addDetectorInformation(std::ostream &outBuffer,
                               Mantid::API::SpectrumInfo &spectrumInfo,
                               size_t histoIndex, bool allDetectorsValid);
+  bool SaveGSS::isInstrumentValid() const;
 
-  bool isInstrumentValid() const;
-
-  bool
-  areAllDetectorsValid(const Mantid::API::SpectrumInfo &spectrumInfo) const;
+  bool areAllDetectorsValid() const;
 
   /// Write GSAS file
-  void writeGSASFile(const std::string &outfilename, bool append,
-                     int basebanknumber, bool multiplybybinwidth, bool split,
-                     const std::string &outputFormat);
+  void writeGSASFile(size_t numOutFiles, size_t numOutSpectra);
 
   /// Write the header information
   std::stringstream generateInstrumentHeader(double l1) const;
 
-  std::stringstream generateBankHeader(const Mantid::API::SpectrumInfo &spectrumInfo,
-	  size_t specIndex) const;
+  std::stringstream
+  generateBankHeader(const Mantid::API::SpectrumInfo &spectrumInfo,
+                     size_t specIndex) const;
 
   std::stringstream generateBankData(size_t specIndex) const;
 
@@ -139,10 +138,12 @@ private:
                           int periodNum) override;
 
   /// Workspace
-  API::MatrixWorkspace_const_sptr inputWS;
+  API::MatrixWorkspace_const_sptr m_inputWS;
 
   std::vector<std::stringstream> m_outputBuffer{};
-  bool m_allDetectorsValid{ false };
+  std::vector<std::string> m_outFileNames{};
+  bool m_allDetectorsValid{false};
+  std::unique_ptr<API::Progress> m_progress{ nullptr };
 };
 }
 }

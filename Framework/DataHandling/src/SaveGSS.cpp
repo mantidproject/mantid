@@ -108,72 +108,78 @@ void SaveGSS::init() {
 
 // Execute the algorithm
 void SaveGSS::exec() {
-  // Process properties
-  // Retrieve the input workspace
+  // Retrieve the input workspace and associated properties
+  m_inputWS = getProperty("InputWorkspace");
+  const size_t nHist = m_inputWS->getNumberHistograms();
 
-	inputWS = getProperty("InputWorkspace");
-
-  // Check whether it is PointData or Histogram
-  if (!inputWS->isHistogramData())
-    g_log.warning("Input workspace is NOT histogram!  SaveGSS may not work "
-                  "well with PointData.");
-
-  // Check the number of histogram/spectra < 99
-  const int nHist = static_cast<int>(inputWS->getNumberHistograms());
-  if (nHist > 99) {
-    std::stringstream errss;
-    errss << "Number of Spectra (" << nHist
-          << ") cannot be larger than 99 for GSAS file";
-    g_log.error(errss.str());
-    throw std::invalid_argument(errss.str());
-  }
-
-  if (isInstrumentValid() && areAllDetectorsValid(inputWS->spectrumInfo())) {
-    m_allDetectorsValid = true;
-  } else {
-    m_allDetectorsValid = false;
-  }
-
-  const std::string filename = getProperty("Filename");
-
-  const int bank = getProperty("Bank");
-  const bool multipleByBinWidth = getProperty("MultiplyByBinWidth");
+  // Are we writing one file with n spectra or
+  // n files with 1 spectra each
   const bool split = getProperty("SplitFiles");
-  const std::string outputFormat = getProperty("Format");
+  const size_t numOfOutFiles{ split ? nHist : 1 };
+  const size_t numOutSpectra{ split ? 1 : nHist };
+  
+  // Initialise various properties we are going to need within this alg
+  m_allDetectorsValid = (isInstrumentValid() && areAllDetectorsValid());
+  m_outFileNames = generateOutFileNames(numOfOutFiles);
+  m_outputBuffer.resize(nHist);
 
-  // Check whether to append to an already existing file or overwrite
-  const bool append = getProperty("Append");
+  // Check the user input
+  validateInputs();
 
-  // Check whether append or not
-  if (!split) {
-    Poco::File fileobj(filename);
-    if (fileobj.exists() && !append) {
-      // Non-append mode and will be overwritten
-      g_log.warning() << "Target GSAS file " << filename
-                      << " exists and will be overwritten. "
-                      << "\n";
-    } else if (!fileobj.exists() && append) {
-      // File does not exist but in append mode
-      g_log.warning() << "Target GSAS file " << filename
-                      << " does not exist but algorithm was set to append."
-                      << "\n";
-    }
-  }
+  // Progress is 2 * number of histograms. One for generating data
+  // one for writing out data
+  m_progress = Kernel::make_unique<Progress>(this, 0.0, 1.0, (nHist * 2));
 
-  writeGSASFile(filename, append, bank, multipleByBinWidth, split,
-                outputFormat);
+  // For the way we are using the vector we must have N number files
+  // OR N number spectra. Otherwise we would need a vector of vector
+  assert(numOutSpectra + numOfOutFiles == nHist + 1);
+  assert(m_outputBuffer.size() == nHist);
+
+  writeGSASFile(numOfOutFiles, numOutSpectra);
+  // Write file
+  writeBufferToFile(numOfOutFiles, numOutSpectra);
 }
 
-void SaveGSS::writeBufferToFile(const std::vector<std::string> &outFileNames,
-                                size_t numOutFiles, size_t numSpectra) {
+void SaveGSS::writeBufferToFile(size_t numOutFiles, size_t numSpectra) {
   for (size_t fileIndex = 0; fileIndex < numOutFiles; fileIndex++) {
     // Open each file when there are multiple
-    auto outFile = openFileStream(outFileNames[fileIndex]);
+    auto outFile = openFileStream(m_outFileNames[fileIndex]);
     for (size_t specIndex = 0; specIndex < numSpectra; specIndex++) {
       // Write each spectra when there are multiple
       outFile << m_outputBuffer[specIndex].rdbuf();
     }
     outFile.close();
+  }
+}
+
+void SaveGSS::validateInputs() const {
+  // Check whether it is PointData or Histogram
+  if (!m_inputWS->isHistogramData())
+    g_log.warning("Input workspace is NOT histogram! SaveGSS may not work "
+                  "well with PointData.");
+
+  // Check the number of histogram/spectra < 99
+  const int nHist = static_cast<int>(m_inputWS->getNumberHistograms());
+  if (nHist > 99) {
+    std::string outError = "Number of Spectra(" + std::to_string(nHist) +
+                           ") cannot be larger than 99 for GSAS file";
+    g_log.error(outError);
+    throw std::invalid_argument(outError);
+  }
+
+  // Check we have any output filenames
+  assert(m_outFileNames.size() > 0);
+
+  const std::string filename = getProperty("Filename");
+  const bool append = getProperty("Append");
+  for (const auto &filename : m_outFileNames) {
+    if (!append && doesFileExist(filename)) {
+      g_log.warning("Target GSAS file " + filename +
+                    " exists and will be overwritten.\n");
+    } else if (append && !doesFileExist(filename)) {
+      g_log.warning("Target GSAS file " + filename +
+                    " does not exist but algorithm was set to append.\n");
+    }
   }
 }
 
@@ -199,7 +205,7 @@ std::ofstream SaveGSS::openFileStream(const std::string &outFilePath) {
 
 bool SaveGSS::isInstrumentValid() const {
   // Instrument related
-  Geometry::Instrument_const_sptr instrument = inputWS->getInstrument();
+  Geometry::Instrument_const_sptr instrument = m_inputWS->getInstrument();
   Geometry::IComponent_const_sptr source;
   Geometry::IComponent_const_sptr sample;
   if (instrument != nullptr) {
@@ -212,9 +218,15 @@ bool SaveGSS::isInstrumentValid() const {
   return false;
 }
 
-bool SaveGSS::areAllDetectorsValid(
-    const API::SpectrumInfo &spectrumInfo) const {
-  const size_t numHist = inputWS->getNumberHistograms();
+bool SaveGSS::areAllDetectorsValid() const {
+  const auto &spectrumInfo = m_inputWS->spectrumInfo();
+  const size_t numHist = m_inputWS->getNumberHistograms();
+
+  if (!isInstrumentValid()) {
+    g_log.warning("No valid instrument found with this workspace"
+                  " Treating as NO-INSTRUMENT CASE");
+  }
+
   bool allValid = true;
   // TODO parallel
   for (size_t histoIndex = 0; histoIndex < numHist; histoIndex++) {
@@ -234,59 +246,39 @@ bool SaveGSS::areAllDetectorsValid(
 
 /** Write GSAS file based on user-specified request
   */
-void SaveGSS::writeGSASFile(const std::string &outfilename, bool append,
-                            int basebanknumber, bool multiplybybinwidth,
-                            bool split, const std::string &outputFormat) {
+void SaveGSS::writeGSASFile(size_t numOutFiles, size_t numOutSpectra) {
+  // Generate the output buffer for each histogram (spectrum)
+  const auto &spectrumInfo = m_inputWS->spectrumInfo();
+  const bool append = getProperty("Append");
 
-  // Write GSAS file for each histogram (spectrum)
-  std::stringstream outbuffer;
+  // Check if the caller has reserved space in our output buffer
+  assert(m_outputBuffer.size() > 0);
 
-  size_t nHist = inputWS->getNumberHistograms();
-  // TODO handle progress better
-  Progress p(this, 0.0, 1.0, nHist);
-
-  const auto &spectrumInfo = inputWS->spectrumInfo();
-
-  // Determine if we are writing one file with n spectra or
-  // n files with 0 spectra
-  const size_t numOfFiles{split ? nHist : 1};
-  const size_t numOutSpectra{split ? 1 : nHist};
-  // For the way we are using the vector we must have N number files
-  // OR N number spectra. Otherwise we would need a vector of vector
-  assert(numOutSpectra + numOfFiles == nHist + 1);
-  g_log.debug() << "[SaveGSS] Append = " << append << ", split = " << split
-                << "\n";
-
-  m_outputBuffer.resize(nHist);
-  std::vector<std::string> splitFileNames = generateOutFileNames(numOfFiles);
   // If all detectors are not valid we use the no instrument case and
   // set l1 to 0
   const double l1{m_allDetectorsValid ? spectrumInfo.l1() : 0};
 
   // Create the various output files we will need in a loop
-  for (size_t fileIndex = 0; fileIndex < numOfFiles; fileIndex++) {
+  for (size_t fileIndex = 0; fileIndex < numOutFiles; fileIndex++) {
     // Add header to new files (e.g. doesn't exist or overwriting)
-    if (!doesFileExist(splitFileNames[fileIndex]) || !append) {
+    if (!doesFileExist(m_outFileNames[fileIndex]) || !append) {
       m_outputBuffer[fileIndex] = generateInstrumentHeader(l1);
     }
 
-    // Then add each spectra to the file
+    // Then add each spectra to buffer
     for (size_t specIndex = 0; specIndex < numOutSpectra; specIndex++) {
       // Determine whether to skip the spectrum due to being masked
       if (m_allDetectorsValid && spectrumInfo.isMasked(specIndex)) {
         continue;
       }
-      // Add bank header and details to file
+      // Add bank header and details to buffer
       m_outputBuffer[specIndex]
           << generateBankHeader(spectrumInfo, specIndex).rdbuf();
+	  // Add data to buffer
       m_outputBuffer[specIndex] << generateBankData(specIndex).rdbuf();
-      p.report();
+      m_progress->report();
     }
-
-  } // ENDFOR (histoIndex)
-
-  // Write file
-  writeBufferToFile(splitFileNames, numOfFiles, numOutSpectra);
+  }
 }
 
 /** Ensures that when a workspace group is passed as output to this workspace
@@ -358,7 +350,7 @@ void writeLogValue(std::ostream &os, const Run &runinfo,
    * @param l1 :: Value for the moderator to sample distance
    */
 std::stringstream SaveGSS::generateInstrumentHeader(double l1) const {
-  const Run &runinfo = inputWS->run();
+  const Run &runinfo = m_inputWS->run();
   const std::string format = getPropertyValue("Format");
   std::stringstream outBuffer;
 
@@ -397,11 +389,12 @@ std::stringstream SaveGSS::generateInstrumentHeader(double l1) const {
   if (format.compare(SLOG) == 0) {
     outBuffer << "# "; // make the next line a comment
   }
-  outBuffer << inputWS->getTitle() << "\n";
-  outBuffer << "# " << inputWS->getNumberHistograms() << " Histograms\n";
+  outBuffer << m_inputWS->getTitle() << "\n";
+  outBuffer << "# " << m_inputWS->getNumberHistograms() << " Histograms\n";
   outBuffer << "# File generated by Mantid:\n";
-  outBuffer << "# Instrument: " << inputWS->getInstrument()->getName() << "\n";
-  outBuffer << "# From workspace named : " << inputWS->getName() << "\n";
+  outBuffer << "# Instrument: " << m_inputWS->getInstrument()->getName()
+            << "\n";
+  outBuffer << "# From workspace named : " << m_inputWS->getName() << "\n";
   if (getProperty("MultiplyByBinWidth"))
     outBuffer << "# with Y multiplied by the bin widths.\n";
   outBuffer << "# Primary flight path " << l1 << "m \n";
@@ -418,7 +411,7 @@ std::stringstream SaveGSS::generateInstrumentHeader(double l1) const {
     bool norm_by_current = false;
     bool norm_by_monitor = false;
     const Mantid::API::AlgorithmHistories &algohist =
-        inputWS->getHistory().getAlgorithmHistories();
+        m_inputWS->getHistory().getAlgorithmHistories();
     for (const auto &algo : algohist) {
       if (algo->name().compare("NormaliseByCurrent") == 0)
         norm_by_current = true;
@@ -469,7 +462,8 @@ std::stringstream SaveGSS::generateBankData(size_t specIndex) const {
   const std::string outputFormat = getPropertyValue("Format");
   int bankid;
   if (useSpecAsBank) {
-    bankid = static_cast<int>(inputWS->getSpectrum(specIndex).getSpectrumNo());
+    bankid =
+        static_cast<int>(m_inputWS->getSpectrum(specIndex).getSpectrumNo());
   } else {
     bankid = userStartingBankNumber + static_cast<int>(specIndex);
   }
@@ -477,10 +471,10 @@ std::stringstream SaveGSS::generateBankData(size_t specIndex) const {
   // Write data
   if (outputFormat == RALF) {
     this->writeRALFdata(bankid, multiplyByBinWidth, outBuffer,
-                        inputWS->histogram(specIndex));
+                        m_inputWS->histogram(specIndex));
   } else if (outputFormat == SLOG) {
     this->writeSLOGdata(bankid, multiplyByBinWidth, outBuffer,
-                        inputWS->histogram(specIndex));
+                        m_inputWS->histogram(specIndex));
   } else {
     throw std::runtime_error("Cannot write to the unknown " + outputFormat +
                              "output format");
@@ -599,8 +593,8 @@ void SaveGSS::writeSLOGdata(const int bank, const bool MultiplyByBinWidth,
   }
   if (isConstantDelta(xVals)) {
     std::stringstream msg;
-    msg << "While writing SLOG format: Found constant delta-T binning for bank "
-        << bank;
+    msg << "While writing SLOG format: Found constant delta-T binning for "
+           "bank " << bank;
     throw std::runtime_error(msg.str());
   }
   const double bc2 =
