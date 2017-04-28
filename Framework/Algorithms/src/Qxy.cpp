@@ -379,11 +379,10 @@ std::vector<double> Qxy::logBinning(double min, double max, int num) {
   return outBins;
 }
 
-double
-Qxy::getQminFromWs(API::MatrixWorkspace_const_sptr inputWorkspace) {
+double Qxy::getQminFromWs(const API::MatrixWorkspace &inputWorkspace) {
   // get qmin from the run properties
   double qmin = 0;
-  const API::Run &run = inputWorkspace->run();
+  const API::Run &run = inputWorkspace.run();
   if (run.hasProperty("qmin")) {
     Kernel::Property *prop = run.getProperty("Qmin");
     qmin = boost::lexical_cast<double, std::string>(prop->value());
@@ -411,7 +410,7 @@ Qxy::setUpOutputWorkspace(API::MatrixWorkspace_const_sptr inputWorkspace) {
   double startVal;
   if (log_binning) {
     // get qmin from the run properties
-    double qmin = getQminFromWs(inputWorkspace);
+    double qmin = getQminFromWs(*inputWorkspace);
     // Filling the binning vector: negative, 0 and then positive
     std::vector<double> totalBinning;
     std::vector<double> positiveBinning = logBinning(qmin, max, nBins);
