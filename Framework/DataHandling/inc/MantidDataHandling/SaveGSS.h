@@ -6,6 +6,7 @@
 //---------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/SpectrumInfo.h"
+#include "MantidAPI/Run.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/cow_ptr.h"
 
@@ -115,7 +116,7 @@ private:
 
   /// Returns the log value in a GSAS format as a string stream
   std::stringstream
-  getLogValue(const Run &runinfo, const std::string &name,
+  getLogValue(const API::Run &runinfo, const std::string &name,
               const std::string &failsafeValue = "UNKNOWN") const;
 
   /// Returns if the input workspace instrument is valid

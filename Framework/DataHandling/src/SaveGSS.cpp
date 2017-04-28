@@ -102,7 +102,7 @@ void SaveGSS::init() {
       "The bank number to include in the file header for the first spectrum, "
       "i.e., the starting bank number. "
       "This will increment for each spectrum or group member. ");
-  std::vector<std::string> formats{RALF, SLOG};
+  const std::vector<std::string> formats{RALF, SLOG};
   declareProperty("Format", RALF,
                   boost::make_shared<Kernel::StringListValidator>(formats),
                   "GSAS format to save as");
@@ -152,6 +152,12 @@ void SaveGSS::exec() {
   writeBufferToFile(numOfOutFiles, numOutSpectra);
 }
 
+/**
+  * Returns if each spectra contains a valid detector
+  * and implicitly if the instrument is valid
+  *
+  * @return :: True if every spectra has a detector. Else false
+  */
 bool SaveGSS::areAllDetectorsValid() const {
   const auto &spectrumInfo = m_inputWS->spectrumInfo();
   const size_t numHist = m_inputWS->getNumberHistograms();
@@ -159,6 +165,7 @@ bool SaveGSS::areAllDetectorsValid() const {
   if (!isInstrumentValid()) {
     g_log.warning("No valid instrument found with this workspace"
                   " Treating as NO-INSTRUMENT CASE");
+    return false;
   }
 
   bool allValid = true;
@@ -178,6 +185,15 @@ bool SaveGSS::areAllDetectorsValid() const {
   return allValid;
 }
 
+/**
+  * Generates a string stream in GSAS format containing the
+  * data for the specified bank from the workspace. This
+  * can either be in RALF or SLOG format.
+  *
+  * @param specIndex :: The index of the bank to convert into
+  * a string stream
+  * @return :: A string stream containing the bank data in GSAS format
+  */
 std::stringstream SaveGSS::generateBankData(size_t specIndex) const {
   // Determine bank number into GSAS file
   std::stringstream outBuffer;
@@ -207,8 +223,16 @@ std::stringstream SaveGSS::generateBankData(size_t specIndex) const {
   return outBuffer;
 }
 
+/**
+  * Generates the bank header (which precedes bank data)
+  * for the spectra index specified.
+  *
+  * @param spectrumInfo :: The input workspace spectrum info object
+  * @param specIndex :: The bank index to generate a header for
+  * @return :: String stream containing a bank header in GSAS format
+  */
 std::stringstream
-SaveGSS::generateBankHeader(const Mantid::API::SpectrumInfo &spectrumInfo,
+SaveGSS::generateBankHeader(const API::SpectrumInfo &spectrumInfo,
                             size_t specIndex) const {
   std::stringstream outBuffer;
   double l1{0}, l2{0}, twoTheta{0}, difc{0};
@@ -231,6 +255,13 @@ SaveGSS::generateBankHeader(const Mantid::API::SpectrumInfo &spectrumInfo,
   return outBuffer;
 }
 
+/**
+  * Generates the GSAS file and populates the output buffer
+  * with the data to be written to the file(s) in subsequent methods
+  *
+  * @param :: numOutFiles The number of file to be written
+  * @param :: numOutSpectra The number of spectra per file to be written
+  */
 void SaveGSS::generateGSASFile(size_t numOutFiles, size_t numOutSpectra) {
   // Generate the output buffer for each histogram (spectrum)
   const auto &spectrumInfo = m_inputWS->spectrumInfo();
@@ -266,9 +297,13 @@ void SaveGSS::generateGSASFile(size_t numOutFiles, size_t numOutSpectra) {
   }
 }
 
-/** Write the header information, which is independent of bank, from the given
-* workspace
-* @param l1 :: Value for the moderator to sample distance
+/**
+  * Creates the file header information, which should be at the top of
+  * each GSAS output file from the given workspace.
+  *
+  * @param l1 :: Value for the moderator to sample distance
+  * @return :: A string stream containing the bank header details to be
+  * written to the start of the file
 */
 std::stringstream SaveGSS::generateInstrumentHeader(double l1) const {
   const Run &runinfo = m_inputWS->run();
@@ -302,7 +337,7 @@ std::stringstream SaveGSS::generateInstrumentHeader(double l1) const {
     if (runinfo.hasProperty("gsas_monitor")) {
       outBuffer << getLogValue(runinfo, "gsas_monitor").rdbuf();
     } else {
-      outBuffer << getLogValue(runinfo, "gd_prtn_chrg", "1").rdbuf;
+      outBuffer << getLogValue(runinfo, "gd_prtn_chrg", "1").rdbuf();
     }
     outBuffer << "\n";
   }
@@ -350,16 +385,26 @@ std::stringstream SaveGSS::generateInstrumentHeader(double l1) const {
   return outBuffer;
 }
 
+/**
+  * Generates the out filename(s). If only one file is specified
+  * this is the user specified filename. However when >1 file
+  * is required (in split mode) generates the new file name
+  * as 'name-n.ext' (where n is the current bank). This is stored
+  * as a member variable
+  *
+  * @param numberOfOutFiles :: The number of output files required
+  */
 void Mantid::DataHandling::SaveGSS::generateOutFileNames(
     size_t numberOfOutFiles) {
   const std::string outputFileName = getProperty("Filename");
+  assert(numberOfOutFiles > 0);
 
-  if (!getProperty("SplitFiles")) {
-    // Only add one name and don't generate split filenames
-    // when we are not in split mode
-    m_outFileNames.push_back(outputFileName);
-    return;
-  }
+  if (numberOfOutFiles == 1) {
+      // Only add one name and don't generate split filenames
+      // when we are not in split mode
+      m_outFileNames.push_back(outputFileName);
+      return;
+    }
 
   m_outFileNames.resize(numberOfOutFiles);
 
@@ -379,7 +424,17 @@ void Mantid::DataHandling::SaveGSS::generateOutFileNames(
   }
 }
 
-/** Write value from a RunInfo property (i.e., log) to a stream
+/**
+  * Gets the value from a RunInfo property (i.e., log) and turns it
+  * into a string stream. If the property is unknown by default
+  * UNKNOWN is written. However an alternative value can be
+  * specified to be written out.
+  *
+  * @param runInfo :: Reference to the associated runInfo
+  * @param name :: Name of the property to use
+  * @param failsafeValue :: The value to use if the property cannot be
+  * found. Defaults to 'UNKNOWN'
+  * @return :: The property as a string stream
 */
 std::stringstream SaveGSS::getLogValue(const Run &runinfo,
                                        const std::string &name,
@@ -388,7 +443,7 @@ std::stringstream SaveGSS::getLogValue(const Run &runinfo,
   // Return without property exists
   if (!runinfo.hasProperty(name)) {
     os << failsafeValue;
-    return;
+    return os;
   }
   // Get handle of property
   auto *prop = runinfo.getProperty(name);
@@ -396,7 +451,7 @@ std::stringstream SaveGSS::getLogValue(const Run &runinfo,
   // Return without a valid pointer to property
   if (!prop) {
     os << failsafeValue;
-    return;
+    return os;
   }
 
   // Get value
@@ -417,14 +472,17 @@ std::stringstream SaveGSS::getLogValue(const Run &runinfo,
   return os;
 }
 
+/**
+  * Returns if the input workspace instrument is valid
+  *
+  * @return :: True if the instrument is valid, else false
+  */
 bool SaveGSS::isInstrumentValid() const {
   // Instrument related
   Geometry::Instrument_const_sptr instrument = m_inputWS->getInstrument();
-  Geometry::IComponent_const_sptr source;
-  Geometry::IComponent_const_sptr sample;
-  if (instrument != nullptr) {
-    source = instrument->getSource();
-    sample = instrument->getSample();
+  if (instrument) {
+    auto source = instrument->getSource();
+    auto sample = instrument->getSample();
     if (source && sample) {
       return true;
     }
@@ -432,6 +490,17 @@ bool SaveGSS::isInstrumentValid() const {
   return false;
 }
 
+/**
+  * Attempts to open an output stream at the user specified path.
+  * This uses the append property to determine whether to append
+  * or overwrite the file at the given path. The caller is
+  * responsible for closing to stream when finished.
+  *
+  * @param outFilePath :: The full path of the file to open a stream out
+  * @throws :: If the fail bit is set on the out stream. Additionally
+  * logs the system reported error as a Mantid error.
+  * @return :: The opened file stream at the user specified path
+  */
 std::ofstream SaveGSS::openFileStream(const std::string &outFilePath) {
   const bool append = getProperty("Append");
 
@@ -478,6 +547,13 @@ void SaveGSS::setOtherProperties(IAlgorithm *alg,
     Algorithm::setOtherProperties(alg, propertyName, propertyValue, periodNum);
 }
 
+/**
+  * Validates the user input is matches certain constraints
+  * in length and type and logs a warning or throws depending on
+  * whether we can continue.
+  *
+  * @throws:: If for any reason we cannot run the algorithm
+  */
 void SaveGSS::validateInputs() const {
   // Check whether it is PointData or Histogram
   if (!m_inputWS->isHistogramData())
@@ -509,6 +585,14 @@ void SaveGSS::validateInputs() const {
   }
 }
 
+/**
+  * Writes all the spectra to the file(s) from the buffer to the
+  * list of output file paths.
+  *
+  * @param numOutFiles :: The number of files to be written
+  * @param numSpectra :: The number of spectra per file to write
+  * @throws :: If the file writing fails at all
+  */
 void SaveGSS::writeBufferToFile(size_t numOutFiles, size_t numSpectra) {
   for (size_t fileIndex = 0; fileIndex < numOutFiles; fileIndex++) {
     // Open each file when there are multiple
@@ -516,6 +600,7 @@ void SaveGSS::writeBufferToFile(size_t numOutFiles, size_t numSpectra) {
     auto outFile = openFileStream(m_outFileNames[fileIndex]);
     for (size_t specIndex = 0; specIndex < numSpectra; specIndex++) {
       // Write each spectra when there are multiple
+      assert(m_outputBuffer[specIndex].str().size() > 0);
       outFile << m_outputBuffer[specIndex].rdbuf();
     }
     outFile.close();
@@ -525,7 +610,7 @@ void SaveGSS::writeBufferToFile(size_t numOutFiles, size_t numSpectra) {
 void SaveGSS::writeRALFdata(const int bank, const bool MultiplyByBinWidth,
                             std::stringstream &out,
                             const HistogramData::Histogram &histo) const {
-
+  // TODO change this so it returns a SS
   const auto &xVals = histo.x();
   const auto &yVals = histo.y();
   const auto &eVals = histo.e();
