@@ -99,6 +99,7 @@ signals:
   void multiFitStateChanged(int state);
   /// Emitted when TF Asymmetry mode is turned on/off
   void TFAsymmStateChanged(int state);
+
 private:
   /// Default widget values
   static const QString START_TIME_DEFAULT;

@@ -273,8 +273,8 @@ void FitPropertyBrowser::init() {
 * @param w widget parenting the action menus and the property tree browser
 */
 void FitPropertyBrowser::initLayout(QWidget *w) {
-	QPushButton *btnFit=createFitMenuButton(w);
-	initBasicLayout(w,btnFit);
+  QPushButton *btnFit = createFitMenuButton(w);
+  initBasicLayout(w, btnFit);
 }
 
 /**
@@ -286,36 +286,36 @@ void FitPropertyBrowser::initLayout(QWidget *w) {
 * @return push botton for the fit menu
 */
 QPushButton *FitPropertyBrowser::createFitMenuButton(QWidget *w) {
-	QPushButton *btnFit = new QPushButton("Fit");
-	m_tip = new QLabel("", w);
+  QPushButton *btnFit = new QPushButton("Fit");
+  m_tip = new QLabel("", w);
 
-	m_fitMenu = new QMenu(this);
-	m_fitActionFit = new QAction("Fit", this);
-	m_fitActionSeqFit = new QAction("Sequential Fit", this);
-	m_fitActionUndoFit = new QAction("Undo Fit", this);
-	m_fitActionEvaluate = new QAction("Evaluate function", this);
-	
-	m_fitMapper = new QSignalMapper(this);
-	m_fitMapper->setMapping(m_fitActionFit, "Fit");
-	m_fitMapper->setMapping(m_fitActionSeqFit, "SeqFit");
-	m_fitMapper->setMapping(m_fitActionUndoFit, "UndoFit");
-	m_fitMapper->setMapping(m_fitActionEvaluate, "Evaluate");
+  m_fitMenu = new QMenu(this);
+  m_fitActionFit = new QAction("Fit", this);
+  m_fitActionSeqFit = new QAction("Sequential Fit", this);
+  m_fitActionUndoFit = new QAction("Undo Fit", this);
+  m_fitActionEvaluate = new QAction("Evaluate function", this);
 
-	connect(m_fitActionFit, SIGNAL(triggered()), m_fitMapper, SLOT(map()));
-	connect(m_fitActionSeqFit, SIGNAL(triggered()), m_fitMapper, SLOT(map()));
-	connect(m_fitActionUndoFit, SIGNAL(triggered()), m_fitMapper, SLOT(map()));
-	connect(m_fitActionEvaluate, SIGNAL(triggered()), m_fitMapper, SLOT(map()));
+  m_fitMapper = new QSignalMapper(this);
+  m_fitMapper->setMapping(m_fitActionFit, "Fit");
+  m_fitMapper->setMapping(m_fitActionSeqFit, "SeqFit");
+  m_fitMapper->setMapping(m_fitActionUndoFit, "UndoFit");
+  m_fitMapper->setMapping(m_fitActionEvaluate, "Evaluate");
 
-	connect(m_fitMapper, SIGNAL(mapped(const QString &)), this,
-		SLOT(executeFitMenu(const QString &)));
-	m_fitMenu->addAction(m_fitActionFit);
-	m_fitMenu->addAction(m_fitActionSeqFit);
-	m_fitMenu->addAction(m_fitActionEvaluate);
-	m_fitMenu->addSeparator();
-	m_fitMenu->addAction(m_fitActionUndoFit);
-	m_fitMenu->addSeparator();
-	btnFit->setMenu(m_fitMenu);
-	return btnFit;
+  connect(m_fitActionFit, SIGNAL(triggered()), m_fitMapper, SLOT(map()));
+  connect(m_fitActionSeqFit, SIGNAL(triggered()), m_fitMapper, SLOT(map()));
+  connect(m_fitActionUndoFit, SIGNAL(triggered()), m_fitMapper, SLOT(map()));
+  connect(m_fitActionEvaluate, SIGNAL(triggered()), m_fitMapper, SLOT(map()));
+
+  connect(m_fitMapper, SIGNAL(mapped(const QString &)), this,
+          SLOT(executeFitMenu(const QString &)));
+  m_fitMenu->addAction(m_fitActionFit);
+  m_fitMenu->addAction(m_fitActionSeqFit);
+  m_fitMenu->addAction(m_fitActionEvaluate);
+  m_fitMenu->addSeparator();
+  m_fitMenu->addAction(m_fitActionUndoFit);
+  m_fitMenu->addSeparator();
+  btnFit->setMenu(m_fitMenu);
+  return btnFit;
 }
 /**
 * @brief Initialise the layout, except for the fit button in the menu bar.
@@ -361,8 +361,6 @@ void FitPropertyBrowser::initBasicLayout(QWidget *w, QPushButton *btnFit) {
 
   QVBoxLayout *layout = new QVBoxLayout(w);
   QGridLayout *buttonsLayout = new QGridLayout();
-
-
 
   QPushButton *btnDisplay = new QPushButton("Display");
   QMenu *displayMenu = new QMenu(this);

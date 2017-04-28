@@ -11,7 +11,6 @@
 #include "MantidWorkflowAlgorithms/MuonGroupCountsCalculator.h"
 #include "MantidWorkflowAlgorithms/MuonPairAsymmetryCalculator.h"
 
-
 // free functions
 namespace {
 /**
@@ -183,7 +182,7 @@ void MuonProcess::exec() {
     } else if (outputType == "GroupAsymmetry") {
       asymCalc = Mantid::Kernel::make_unique<MuonGroupAsymmetryCalculator>(
           allPeriodsWS, summedPeriods, subtractedPeriods, groupIndex,
-	getProperty("Xmin"), getProperty("Xmax"));
+          getProperty("Xmin"), getProperty("Xmax"));
     } else if (outputType == "PairAsymmetry") {
       int first = getProperty("PairFirstIndex");
       int second = getProperty("PairSecondIndex");

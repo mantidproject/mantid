@@ -133,7 +133,7 @@ void EstimateMuonAsymmetryFromCounts::exec() {
       throw std::invalid_argument("The spectral index " +
                                   std::to_string(spectra[i]) +
                                   " is greater than the number of spectra!");
-	}
+    }
     // Calculate the normalised counts
     const double normConst = estimateNormalisationConst(
         inputWS->histogram(specNum), numGoodFrames, startX, endX);

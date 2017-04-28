@@ -254,7 +254,6 @@ double CalculateMuonAsymmetry::getNormConstant(API::MatrixWorkspace_sptr ws,
   fit->setProperty("EndX", endX);
   fit->execute();
 
-
   std::string fitStatus = fit->getProperty("OutputStatus");
   API::IFunction_sptr result = fit->getProperty("Function");
   const double A0 = result->getParameter(0);
