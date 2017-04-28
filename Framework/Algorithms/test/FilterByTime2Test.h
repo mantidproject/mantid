@@ -16,6 +16,7 @@
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidKernel/DateAndTime.h"
+#include "MantidKernel/TimeSeriesProperty.h"
 
 using namespace Mantid::Algorithms;
 using namespace Mantid::DataHandling;
@@ -42,7 +43,7 @@ public:
 
   /** In this test, only a very simple event workspace is used
    */
-  void NtestTooManyParams() {
+  void testTooManyParams() {
     EventWorkspace_sptr ws =
         WorkspaceCreationHelper::createEventWorkspace(1, 1);
     AnalysisDataService::Instance().addOrReplace("eventWS", ws);
@@ -118,6 +119,18 @@ public:
     // Proton charge is lower
     TS_ASSERT_LESS_THAN(outWS->run().getProtonCharge(),
                         WS->run().getProtonCharge());
+
+    Mantid::Kernel::TimeSeriesProperty<double> *raw_pc =
+        dynamic_cast<Mantid::Kernel::TimeSeriesProperty<double> *>(WS->run().getProperty("proton_charge");
+    std::cout << "Original proton charge: " << "size = " << raw_pc->size() << "\n";
+    for (size_t i = 0; i < raw_pc->size(); ++i)
+      std::cout << i << "\t\t" << raw_pc->nthTime(i) << ", " << raw_pc->nthValue(i) << "\n";
+
+    Mantid::Kernel::TimeSeriesProperty<double> *child_pc =
+        dynamic_cast<Mantid::Kernel::TimeSeriesProperty<double> *>(outputWS->run().getProperty("proton_charge");
+    std::cout << "Original proton charge: " << "size = " << child_pc->size() << "\n";
+    for (size_t i = 0; i < child_pc->size(); ++i)
+      std::cout << i << "\t\t" << child_pc->nthTime(i) << ", " << child_pc->nthValue(i) << "\n";
 
     //-------------- Absolute time filtering --------------------
     alg = new FilterByTime2();
