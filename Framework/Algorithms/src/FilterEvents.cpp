@@ -422,6 +422,7 @@ void FilterEvents::splitTimeSeriesProperty(
   for (int tindex = 0; tindex <= max_target_index; ++tindex) {
     TimeSeriesProperty<TYPE> *new_property =
         new TimeSeriesProperty<TYPE>(property_name);
+    new_property->setUnits(tsp->units());
     output_vector.push_back(new_property);
   }
 
