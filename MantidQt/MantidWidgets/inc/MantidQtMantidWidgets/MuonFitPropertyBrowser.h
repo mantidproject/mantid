@@ -132,7 +132,7 @@ private:
   /// new menu option
   QAction *m_fitActiontest;
   /// Create new fit menu
-  QPushButton *MuonFitPropertyBrowser::createMuonFitMenuButton(QWidget *w);
+  QPushButton createMuonFitMenuButton(QWidget *w);
 
   /// Get the registered function names
   void populateFunctionNames() override;

@@ -384,7 +384,7 @@ std::vector<double> convertToVec(std::string const &list) {
 }
 /**
 * Creates an instance of Fit algorithm, sets its properties and launches it.
-* @params maxIterations is the maximum number of iterations for the fit
+* @param maxIterations is the maximum number of iterations for the fit
 */
 void MuonFitPropertyBrowser::TFAsymmFit(int maxIterations) {
   const std::string wsName = workspaceName();
@@ -496,7 +496,7 @@ std::vector<double> readNormalization() {
             Mantid::API::AnalysisDataService::Instance().retrieve("__norm__"));
     auto colNorm = table->getColumn("norm");
 
-    for (int j = 0; j < table->rowCount(); j++) {
+    for (size_t j = 0; j < table->rowCount(); j++) {
       norm.push_back((*colNorm)[j]); // record and update norm....
     }
   }

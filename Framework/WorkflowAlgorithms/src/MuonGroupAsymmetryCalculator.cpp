@@ -19,6 +19,8 @@ namespace WorkflowAlgorithms {
 * @param summedPeriods :: [input] Vector of period indexes to be summed
 * @param subtractedPeriods :: [input] Vector of period indexes to be subtracted
 * from summed periods
+* @param start is the start time
+* @param end is the end time
 * @param groupIndex :: [input] Workspace index of the group to analyse
  */
 MuonGroupAsymmetryCalculator::MuonGroupAsymmetryCalculator(
