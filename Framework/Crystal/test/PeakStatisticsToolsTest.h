@@ -139,14 +139,18 @@ public:
     reflection.addPeak(peaks[0]);
 
     TS_ASSERT_THROWS_NOTHING(reflection.removeOutliers());
+
+    auto outliersRemoved = reflection.removeOutliers();
     TSM_ASSERT_EQUALS("Peak was removed as outlier although there's only 1.",
-                      reflection.count(), 1);
+                      outliersRemoved.count(), 1);
 
     reflection.addPeak(peaks[1]);
 
     TS_ASSERT_THROWS_NOTHING(reflection.removeOutliers());
+
+    outliersRemoved = reflection.removeOutliers();
     TSM_ASSERT_EQUALS("Peak was removed as outlier although there's only 2.",
-                      reflection.count(), 2);
+                      outliersRemoved.count(), 2);
   }
 
   void test_UniqueReflectionRemoveOutliers() {

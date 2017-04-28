@@ -53,8 +53,8 @@ UniqueReflection UniqueReflection::removeOutliers(double sigmaCritical) const {
   UniqueReflection newReflection(m_hkl);
 
   if (m_peaks.size() > 2) {
-    const std::vector<double> &intensities = getIntensities();
-    const std::vector<double> &zScores = Kernel::getZscore(intensities);
+    auto intensities = getIntensities();
+    auto zScores = Kernel::getZscore(intensities);
 
     for (size_t i = 0; i < zScores.size(); ++i) {
       if (zScores[i] <= sigmaCritical) {
@@ -212,19 +212,19 @@ void PeaksStatistics::calculatePeaksStatistics(
       ++m_uniqueReflections;
 
       // Possibly remove outliers.
-      UniqueReflection outliersRemoved = unique.second.removeOutliers();
+      auto outliersRemoved = unique.second.removeOutliers();
 
       // I/sigma is calculated for all reflections, even if there is only one
       // observation.
-      const std::vector<double> &intensities = outliersRemoved.getIntensities();
-      const std::vector<double> &sigmas = outliersRemoved.getSigmas();
+      auto intensities = outliersRemoved.getIntensities();
+      auto sigmas = outliersRemoved.getSigmas();
 
       // Accumulate the I/sigma's for current reflection into sum
       iOverSigmaSum += getIOverSigmaSum(sigmas, intensities);
 
       if (outliersRemoved.count() > 1) {
         // Get mean, standard deviation for intensities
-        Statistics intensityStatistics = Kernel::getStatistics(
+        auto intensityStatistics = Kernel::getStatistics(
             intensities, StatOptions::Mean | StatOptions::UncorrectedStdDev);
 
         double meanIntensity = intensityStatistics.mean;
@@ -285,7 +285,7 @@ void PeaksStatistics::calculatePeaksStatistics(
     m_meanIOverSigma =
         iOverSigmaSum / static_cast<double>(m_measuredReflections);
 
-    std::pair<double, double> dspacingLimits = getDSpacingLimits(m_peaks);
+    auto dspacingLimits = getDSpacingLimits(m_peaks);
     m_dspacingMin = dspacingLimits.first;
     m_dspacingMax = dspacingLimits.second;
   }
