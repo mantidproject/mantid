@@ -255,9 +255,8 @@ public:
 
     pmap_cit it;
     for (it = m_map.begin(); it != m_map.end(); ++it) {
-      if (compName.compare(((const IComponent *)(*it).first)->getName()) == 0) {
-        boost::shared_ptr<Parameter> param =
-            get((const IComponent *)(*it).first, name);
+      if (compName == it->first->getName()) {
+        boost::shared_ptr<Parameter> param = get(it->first, name);
         if (param)
           retval.push_back(param->value<T>());
       }

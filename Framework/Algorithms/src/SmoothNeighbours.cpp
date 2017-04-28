@@ -411,8 +411,8 @@ void SmoothNeighbours::findNeighboursUbiqutious() {
             neighbParent = det.getParent();
             neighbGParent = neighbParent->getParent();
             if (noNeigh >= sum ||
-                neighbParent->getName().compare(parent->getName()) != 0 ||
-                neighbGParent->getName().compare(grandparent->getName()) != 0 ||
+                neighbParent->getName() != parent->getName() ||
+                neighbGParent->getName() != grandparent->getName() ||
                 used[neighWI])
               continue;
             noNeigh++;
