@@ -231,6 +231,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                              "'pdfgetn', and 'topas'")
         self.declareProperty("OutputFilePrefix", "", "Overrides the default filename for the output file (Optional).")
         self.declareProperty(FileProperty(name="OutputDirectory",defaultValue="",action=FileAction.Directory))
+        self.copyProperties('AlignAndFocusPowderFromFiles', 'CacheDir')
         self.declareProperty("FinalDataUnits", "dSpacing", StringListValidator(["dSpacing","MomentumTransfer"]))
 
         workspace_prop = WorkspaceProperty('SplittersWorkspace', '', Direction.Input, PropertyMode.Optional)
@@ -1290,19 +1291,32 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                                  OutputWorkspace=can_run_ws_name,
                                  Target="TOF")
             else:
-                # load the container run
+                fileArg = can_run_number
                 if self.getProperty("Sum").value:
-                    can_run_ws_name = self._focusAndSum(can_run_numbers,
-                                                        preserveEvents=preserveEvents)
-                else:
-                    can_run_ws_name = self._focusChunks(can_run_number,
-                                                        normalisebycurrent=self._normalisebycurrent,
-                                                        preserveEvents=preserveEvents)
-
-                # convert unit to TOF
-                api.ConvertUnits(InputWorkspace=can_run_ws_name,
-                                 OutputWorkspace=can_run_ws_name,
-                                 Target="TOF")
+                    fileArg = can_run_numbers
+                api.AlignAndFocusPowderFromFiles(Filename=fileArg,
+                                                 OutputWorkspace=can_run_ws_name,
+                                                 MaxChunkSize=self._chunks,
+                                                 FilterBadPulses=self._filterBadPulses,
+                                                 CacheDir=self.getProperty("CacheDir").value,
+                                                 CalFileName=self.calib,
+                                                 GroupFilename=self.getProperty("GroupingFile").value,
+                                                 Params=self._binning,
+                                                 ResampleX=self._resampleX,
+                                                 Dspacing=self._bin_in_dspace,
+                                                 PreserveEvents=preserveEvents,
+                                                 RemovePromptPulseWidth=self._removePromptPulseWidth,
+                                                 CompressTolerance=self.COMPRESS_TOL_TOF,
+                                                 UnwrapRef=self._LRef,
+                                                 LowResRef=self._DIFCref,
+                                                 LowResSpectrumOffset=self._lowResTOFoffset,
+                                                 CropWavelengthMin=self._wavelengthMin,
+                                                 CropWavelengthMax=self._wavelengthMax,
+                                                 ReductionProperties="__snspowderreduction",
+                                                 **self._focusPos)
+                api.NormaliseByCurrent(InputWorkspace=can_run_ws_name,
+                                       OutputWorkspace=can_run_ws_name,
+                                       RecalculatePCharge=True)
 
                 # smooth background
                 smoothParams = self.getProperty("BackgroundSmoothParams").value
