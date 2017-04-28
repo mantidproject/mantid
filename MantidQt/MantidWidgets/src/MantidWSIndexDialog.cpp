@@ -579,7 +579,6 @@ void MantidWSIndexWidget::onPlotOptionChanged(const QString &plotOption) {
   m_showErrorBars->setEnabled(!isSurfaceOrContourPlot);
   m_logSelector->setEnabled(useLogNames);
   m_logValues->setEnabled(useLogNames && isLogSelectorCustom);
-  m_logValues->lineEdit()->clear();
   m_axisNameEdit->setEnabled(isSurfaceOrContourPlot);
   if (useLogNames) {
     // Make sure an appropriate name is shown for the default log option.
