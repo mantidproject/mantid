@@ -115,12 +115,12 @@ void SaveGSS::exec() {
   // Are we writing one file with n spectra or
   // n files with 1 spectra each
   const bool split = getProperty("SplitFiles");
-  const size_t numOfOutFiles{ split ? nHist : 1 };
-  const size_t numOutSpectra{ split ? 1 : nHist };
-  
+  const size_t numOfOutFiles{split ? nHist : 1};
+  const size_t numOutSpectra{split ? 1 : nHist};
+
   // Initialise various properties we are going to need within this alg
   m_allDetectorsValid = (isInstrumentValid() && areAllDetectorsValid());
-  m_outFileNames = generateOutFileNames(numOfOutFiles);
+  generateOutFileNames(numOfOutFiles);
   m_outputBuffer.resize(nHist);
 
   // Check the user input
@@ -135,21 +135,352 @@ void SaveGSS::exec() {
   assert(numOutSpectra + numOfOutFiles == nHist + 1);
   assert(m_outputBuffer.size() == nHist);
 
-  writeGSASFile(numOfOutFiles, numOutSpectra);
-  // Write file
+  // Now start executing main part of the code
+  generateGSASFile(numOfOutFiles, numOutSpectra);
   writeBufferToFile(numOfOutFiles, numOutSpectra);
 }
 
-void SaveGSS::writeBufferToFile(size_t numOutFiles, size_t numSpectra) {
-  for (size_t fileIndex = 0; fileIndex < numOutFiles; fileIndex++) {
-    // Open each file when there are multiple
-    auto outFile = openFileStream(m_outFileNames[fileIndex]);
-    for (size_t specIndex = 0; specIndex < numSpectra; specIndex++) {
-      // Write each spectra when there are multiple
-      outFile << m_outputBuffer[specIndex].rdbuf();
-    }
-    outFile.close();
+// TODO cleanup  and move
+/** Write value from a RunInfo property (i.e., log) to a stream
+*/
+void writeLogValue(std::ostream &os, const Run &runinfo,
+	const std::string &name,
+	const std::string &defValue = "UNKNOWN") {
+	// Return without property exists
+	if (!runinfo.hasProperty(name)) {
+		os << defValue;
+		return;
+	}
+
+	// Get handler of property
+	Kernel::Property *prop = runinfo.getProperty(name);
+
+	// Return without a valid pointer to property
+	if (prop == nullptr) {
+		os << defValue;
+		return;
+	}
+
+	// Get value
+	Kernel::TimeSeriesProperty<double> *log =
+		dynamic_cast<Kernel::TimeSeriesProperty<double> *>(prop);
+	if (log) {
+		// Time series to get mean
+		os << log->getStatistics().mean;
+	}
+	else {
+		// None time series
+		os << prop->value();
+	}
+
+	// Unit
+	std::string units = prop->units();
+	if (!units.empty())
+		os << " " << units;
+}
+
+void writeBankLine(std::stringstream &out, const std::string &bintype,
+	const int banknum, const size_t datasize) {
+	std::ios::fmtflags fflags(out.flags());
+	out << "BANK " << std::fixed << std::setprecision(0)
+		<< banknum // First bank should be 1 for GSAS; this can be changed
+		<< std::fixed << " " << datasize << std::fixed << " " << datasize
+		<< std::fixed << " " << bintype;
+	out.flags(fflags);
+}
+
+bool SaveGSS::areAllDetectorsValid() const {
+  const auto &spectrumInfo = m_inputWS->spectrumInfo();
+  const size_t numHist = m_inputWS->getNumberHistograms();
+
+  if (!isInstrumentValid()) {
+    g_log.warning("No valid instrument found with this workspace"
+                  " Treating as NO-INSTRUMENT CASE");
   }
+
+  bool allValid = true;
+  // TODO parallel
+  for (size_t histoIndex = 0; histoIndex < numHist; histoIndex++) {
+    if (allValid == false) {
+      break;
+    }
+    // Check this spectra has detectors
+    if (!spectrumInfo.hasDetectors(histoIndex)) {
+      allValid = false;
+      g_log.warning() << "There is no detector associated with spectrum "
+                      << histoIndex
+                      << ". Workspace is treated as NO-INSTRUMENT case. \n";
+    }
+  }
+  return allValid;
+}
+
+std::stringstream SaveGSS::generateBankData(size_t specIndex) const {
+	// Determine bank number into GSAS file
+	std::stringstream outBuffer;
+	const bool useSpecAsBank = getProperty("UseSpectrumNumberAsBankID");
+	const bool multiplyByBinWidth = getProperty("MultiplyByBinWidth");
+	const int userStartingBankNumber = getProperty("Bank");
+	const std::string outputFormat = getPropertyValue("Format");
+	int bankid;
+	if (useSpecAsBank) {
+		bankid =
+			static_cast<int>(m_inputWS->getSpectrum(specIndex).getSpectrumNo());
+	}
+	else {
+		bankid = userStartingBankNumber + static_cast<int>(specIndex);
+	}
+
+	// Write data
+	if (outputFormat == RALF) {
+		this->writeRALFdata(bankid, multiplyByBinWidth, outBuffer,
+			m_inputWS->histogram(specIndex));
+	}
+	else if (outputFormat == SLOG) {
+		this->writeSLOGdata(bankid, multiplyByBinWidth, outBuffer,
+			m_inputWS->histogram(specIndex));
+	}
+	else {
+		throw std::runtime_error("Cannot write to the unknown " + outputFormat +
+			"output format");
+	}
+	return outBuffer;
+}
+
+std::stringstream
+SaveGSS::generateBankHeader(const Mantid::API::SpectrumInfo &spectrumInfo,
+	size_t specIndex) const {
+	std::stringstream outBuffer;
+	double l1{ 0 }, l2{ 0 }, twoTheta{ 0 }, difc{ 0 };
+	// If we have all valid detectors get these properties else use 0
+	if (m_allDetectorsValid) {
+		l1 = spectrumInfo.l1();
+		l2 = spectrumInfo.l2(specIndex);
+		twoTheta = spectrumInfo.twoTheta(specIndex);
+		difc = (2.0 * PhysicalConstants::NeutronMass * sin(twoTheta * 0.5) *
+			(l1 + l2)) /
+			(PhysicalConstants::h * 1.e4);
+	}
+
+	if (m_allDetectorsValid) {
+		outBuffer << "# Total flight path " << (l1 + l2) << "m, tth "
+			<< (twoTheta * 180. / M_PI) << "deg, DIFC " << difc << "\n";
+	}
+
+	outBuffer << "# Data for spectrum :" << specIndex << "\n";
+	return outBuffer;
+}
+
+void SaveGSS::generateGSASFile(size_t numOutFiles, size_t numOutSpectra) {
+  // Generate the output buffer for each histogram (spectrum)
+  const auto &spectrumInfo = m_inputWS->spectrumInfo();
+  const bool append = getProperty("Append");
+
+  // Check if the caller has reserved space in our output buffer
+  assert(m_outputBuffer.size() > 0);
+
+  // If all detectors are not valid we use the no instrument case and
+  // set l1 to 0
+  const double l1{m_allDetectorsValid ? spectrumInfo.l1() : 0};
+
+  // Create the various output files we will need in a loop
+  for (size_t fileIndex = 0; fileIndex < numOutFiles; fileIndex++) {
+    // Add header to new files (e.g. doesn't exist or overwriting)
+    if (!doesFileExist(m_outFileNames[fileIndex]) || !append) {
+      m_outputBuffer[fileIndex] = generateInstrumentHeader(l1);
+    }
+
+    // Then add each spectra to buffer
+    for (size_t specIndex = 0; specIndex < numOutSpectra; specIndex++) {
+      // Determine whether to skip the spectrum due to being masked
+      if (m_allDetectorsValid && spectrumInfo.isMasked(specIndex)) {
+        continue;
+      }
+      // Add bank header and details to buffer
+      m_outputBuffer[specIndex]
+          << generateBankHeader(spectrumInfo, specIndex).rdbuf();
+      // Add data to buffer
+      m_outputBuffer[specIndex] << generateBankData(specIndex).rdbuf();
+      m_progress->report();
+    }
+  }
+}
+
+/** Write the header information, which is independent of bank, from the given
+* workspace
+* @param l1 :: Value for the moderator to sample distance
+*/
+std::stringstream SaveGSS::generateInstrumentHeader(double l1) const {
+	const Run &runinfo = m_inputWS->run();
+	const std::string format = getPropertyValue("Format");
+	std::stringstream outBuffer;
+
+	// Run number
+	if (format.compare(SLOG) == 0) {
+		outBuffer << "Sample Run: ";
+		writeLogValue(outBuffer, runinfo, "run_number");
+		outBuffer << " Vanadium Run: ";
+		writeLogValue(outBuffer, runinfo, "van_number");
+		outBuffer << " Wavelength: ";
+		writeLogValue(outBuffer, runinfo, "LambdaRequest");
+		outBuffer << "\n";
+	}
+
+	if (this->getProperty("ExtendedHeader")) {
+		// the instrument parameter file
+		if (runinfo.hasProperty("iparm_file")) {
+			Kernel::Property *prop = runinfo.getProperty("iparm_file");
+			if (prop != nullptr && (!prop->value().empty())) {
+				std::stringstream line;
+				line << "#Instrument parameter file: " << prop->value();
+				outBuffer << std::setw(80) << std::left << line.str() << "\n";
+			}
+		}
+
+		// write out the GSAS monitor counts
+		outBuffer << "Monitor: ";
+		if (runinfo.hasProperty("gsas_monitor")) {
+			writeLogValue(outBuffer, runinfo, "gsas_monitor");
+		}
+		else {
+			writeLogValue(outBuffer, runinfo, "gd_prtn_chrg", "1");
+		}
+		outBuffer << "\n";
+	}
+
+	if (format.compare(SLOG) == 0) {
+		outBuffer << "# "; // make the next line a comment
+	}
+	outBuffer << m_inputWS->getTitle() << "\n";
+	outBuffer << "# " << m_inputWS->getNumberHistograms() << " Histograms\n";
+	outBuffer << "# File generated by Mantid:\n";
+	outBuffer << "# Instrument: " << m_inputWS->getInstrument()->getName()
+		<< "\n";
+	outBuffer << "# From workspace named : " << m_inputWS->getName() << "\n";
+	if (getProperty("MultiplyByBinWidth"))
+		outBuffer << "# with Y multiplied by the bin widths.\n";
+	outBuffer << "# Primary flight path " << l1 << "m \n";
+	if (format.compare(SLOG) == 0) {
+		outBuffer << "# Sample Temperature: ";
+		writeLogValue(outBuffer, runinfo, "SampleTemp");
+		outBuffer << " Freq: ";
+		writeLogValue(outBuffer, runinfo, "SpeedRequest1");
+		outBuffer << " Guide: ";
+		writeLogValue(outBuffer, runinfo, "guide");
+		outBuffer << "\n";
+
+		// print whether it is normalized by monitor or proton charge
+		bool norm_by_current = false;
+		bool norm_by_monitor = false;
+		const Mantid::API::AlgorithmHistories &algohist =
+			m_inputWS->getHistory().getAlgorithmHistories();
+		for (const auto &algo : algohist) {
+			if (algo->name().compare("NormaliseByCurrent") == 0)
+				norm_by_current = true;
+			if (algo->name().compare("NormaliseToMonitor") == 0)
+				norm_by_monitor = true;
+		}
+		outBuffer << "#";
+		if (norm_by_current)
+			outBuffer << " Normalised to pCharge";
+		if (norm_by_monitor)
+			outBuffer << " Normalised to monitor";
+		outBuffer << "\n";
+	}
+
+	return outBuffer;
+}
+
+void Mantid::DataHandling::SaveGSS::generateOutFileNames(
+	size_t numberOfOutFiles) {
+	const std::string outputFileName = getProperty("Filename");
+
+	if (!getProperty("SplitFiles")) {
+		// Only add one name and don't generate split filenames
+		// when we are not in split mode
+		m_outFileNames.push_back(outputFileName);
+		return;
+	}
+
+	m_outFileNames.resize(numberOfOutFiles);
+
+	Poco::Path path(outputFileName);
+	// Filename minus extension
+	const std::string basename = path.getBaseName();
+	const std::string ext = path.getExtension();
+
+	for (size_t i = 0; i < numberOfOutFiles; i++) {
+		// Construct output name of the form 'base name-i.ext'
+		std::string newFileName = basename;
+		((newFileName += '-') += std::to_string(i) += ".") += ext;
+		// Remove filename from path
+		path.makeParent();
+		path.append(newFileName);
+		m_outFileNames[i].assign(path.toString());
+	}
+}
+
+bool SaveGSS::isInstrumentValid() const {
+  // Instrument related
+  Geometry::Instrument_const_sptr instrument = m_inputWS->getInstrument();
+  Geometry::IComponent_const_sptr source;
+  Geometry::IComponent_const_sptr sample;
+  if (instrument != nullptr) {
+    source = instrument->getSource();
+    sample = instrument->getSample();
+    if (source && sample) {
+      return true;
+    }
+  }
+  return false;
+}
+
+std::ofstream SaveGSS::openFileStream(const std::string &outFilePath) {
+  const bool append = getProperty("Append");
+
+  // Select to append to current stream or override
+  using std::ios_base;
+  const ios_base::openmode mode = (append ? (ios_base::out | ios_base::app)
+                                          : (ios_base::out | ios_base::trunc));
+
+  auto outStream = std::ofstream(outFilePath, mode);
+  if (outStream.fail()) {
+    // Get the error message from library and log before throwing
+    const std::string error = strerror(errno);
+    g_log.error("Failed to open file. Error was: " + error);
+    throw std::runtime_error("Could not open the file at the following path: " +
+                             outFilePath);
+  }
+  // Stream is good - return to caller through a std::move
+  return std::move(outStream);
+}
+
+/** Ensures that when a workspace group is passed as output to this workspace
+*  everything is saved to one file and the bank number increments for each
+*  group member.
+*  @param alg ::           Pointer to the algorithm
+*  @param propertyName ::  Name of the property
+*  @param propertyValue :: Value  of the property
+*  @param periodNum ::     Effectively a counter through the group members
+*/
+void SaveGSS::setOtherProperties(IAlgorithm *alg,
+	const std::string &propertyName,
+	const std::string &propertyValue,
+	int periodNum) {
+	// We want to append subsequent group members to the first one
+	if (propertyName == "Append") {
+		if (periodNum != 1) {
+			alg->setPropertyValue(propertyName, "1");
+		}
+		else
+			alg->setPropertyValue(propertyName, propertyValue);
+	}
+	// We want the bank number to increment for each member of the group
+	else if (propertyName == "Bank") {
+		alg->setProperty("Bank", std::stoi(propertyValue) + periodNum - 1);
+	}
+	else
+		Algorithm::setOtherProperties(alg, propertyName, propertyValue, periodNum);
 }
 
 void SaveGSS::validateInputs() const {
@@ -183,349 +514,19 @@ void SaveGSS::validateInputs() const {
   }
 }
 
-std::ofstream SaveGSS::openFileStream(const std::string &outFilePath) {
-  const bool append = getProperty("Append");
-
-  // Select to append to current stream or override
-  using std::ios_base;
-  const ios_base::openmode mode = (append ? (ios_base::out | ios_base::app)
-                                          : (ios_base::out | ios_base::trunc));
-
-  auto outStream = std::ofstream(outFilePath, mode);
-  if (outStream.fail()) {
-    // Get the error message from library and log before throwing
-    const std::string error = strerror(errno);
-    g_log.error("Failed to open file. Error was: " + error);
-    throw std::runtime_error("Could not open the file at the following path: " +
-                             outFilePath);
-  }
-  // Stream is good - return to caller through a std::move
-  return std::move(outStream);
-}
-
-bool SaveGSS::isInstrumentValid() const {
-  // Instrument related
-  Geometry::Instrument_const_sptr instrument = m_inputWS->getInstrument();
-  Geometry::IComponent_const_sptr source;
-  Geometry::IComponent_const_sptr sample;
-  if (instrument != nullptr) {
-    source = instrument->getSource();
-    sample = instrument->getSample();
-    if (source && sample) {
-      return true;
-    }
-  }
-  return false;
-}
-
-bool SaveGSS::areAllDetectorsValid() const {
-  const auto &spectrumInfo = m_inputWS->spectrumInfo();
-  const size_t numHist = m_inputWS->getNumberHistograms();
-
-  if (!isInstrumentValid()) {
-    g_log.warning("No valid instrument found with this workspace"
-                  " Treating as NO-INSTRUMENT CASE");
-  }
-
-  bool allValid = true;
-  // TODO parallel
-  for (size_t histoIndex = 0; histoIndex < numHist; histoIndex++) {
-    if (allValid == false) {
-      break;
-    }
-    // Check this spectra has detectors
-    if (!spectrumInfo.hasDetectors(histoIndex)) {
-      allValid = false;
-      g_log.warning() << "There is no detector associated with spectrum "
-                      << histoIndex
-                      << ". Workspace is treated as NO-INSTRUMENT case. \n";
-    }
-  }
-  return allValid;
-}
-
-/** Write GSAS file based on user-specified request
-  */
-void SaveGSS::writeGSASFile(size_t numOutFiles, size_t numOutSpectra) {
-  // Generate the output buffer for each histogram (spectrum)
-  const auto &spectrumInfo = m_inputWS->spectrumInfo();
-  const bool append = getProperty("Append");
-
-  // Check if the caller has reserved space in our output buffer
-  assert(m_outputBuffer.size() > 0);
-
-  // If all detectors are not valid we use the no instrument case and
-  // set l1 to 0
-  const double l1{m_allDetectorsValid ? spectrumInfo.l1() : 0};
-
-  // Create the various output files we will need in a loop
+void SaveGSS::writeBufferToFile(size_t numOutFiles, size_t numSpectra) {
   for (size_t fileIndex = 0; fileIndex < numOutFiles; fileIndex++) {
-    // Add header to new files (e.g. doesn't exist or overwriting)
-    if (!doesFileExist(m_outFileNames[fileIndex]) || !append) {
-      m_outputBuffer[fileIndex] = generateInstrumentHeader(l1);
+    // Open each file when there are multiple
+    // TODO Parallel and reporting
+    auto outFile = openFileStream(m_outFileNames[fileIndex]);
+    for (size_t specIndex = 0; specIndex < numSpectra; specIndex++) {
+      // Write each spectra when there are multiple
+      outFile << m_outputBuffer[specIndex].rdbuf();
     }
-
-    // Then add each spectra to buffer
-    for (size_t specIndex = 0; specIndex < numOutSpectra; specIndex++) {
-      // Determine whether to skip the spectrum due to being masked
-      if (m_allDetectorsValid && spectrumInfo.isMasked(specIndex)) {
-        continue;
-      }
-      // Add bank header and details to buffer
-      m_outputBuffer[specIndex]
-          << generateBankHeader(spectrumInfo, specIndex).rdbuf();
-	  // Add data to buffer
-      m_outputBuffer[specIndex] << generateBankData(specIndex).rdbuf();
-      m_progress->report();
-    }
+    outFile.close();
   }
 }
 
-/** Ensures that when a workspace group is passed as output to this workspace
-   *  everything is saved to one file and the bank number increments for each
-   *  group member.
-   *  @param alg ::           Pointer to the algorithm
-   *  @param propertyName ::  Name of the property
-   *  @param propertyValue :: Value  of the property
-   *  @param periodNum ::     Effectively a counter through the group members
-   */
-void SaveGSS::setOtherProperties(IAlgorithm *alg,
-                                 const std::string &propertyName,
-                                 const std::string &propertyValue,
-                                 int periodNum) {
-  // We want to append subsequent group members to the first one
-  if (propertyName == "Append") {
-    if (periodNum != 1) {
-      alg->setPropertyValue(propertyName, "1");
-    } else
-      alg->setPropertyValue(propertyName, propertyValue);
-  }
-  // We want the bank number to increment for each member of the group
-  else if (propertyName == "Bank") {
-    alg->setProperty("Bank", std::stoi(propertyValue) + periodNum - 1);
-  } else
-    Algorithm::setOtherProperties(alg, propertyName, propertyValue, periodNum);
-}
-
-/** Write value from a RunInfo property (i.e., log) to a stream
-    */
-void writeLogValue(std::ostream &os, const Run &runinfo,
-                   const std::string &name,
-                   const std::string &defValue = "UNKNOWN") {
-  // Return without property exists
-  if (!runinfo.hasProperty(name)) {
-    os << defValue;
-    return;
-  }
-
-  // Get handler of property
-  Kernel::Property *prop = runinfo.getProperty(name);
-
-  // Return without a valid pointer to property
-  if (prop == nullptr) {
-    os << defValue;
-    return;
-  }
-
-  // Get value
-  Kernel::TimeSeriesProperty<double> *log =
-      dynamic_cast<Kernel::TimeSeriesProperty<double> *>(prop);
-  if (log) {
-    // Time series to get mean
-    os << log->getStatistics().mean;
-  } else {
-    // None time series
-    os << prop->value();
-  }
-
-  // Unit
-  std::string units = prop->units();
-  if (!units.empty())
-    os << " " << units;
-}
-
-//--------------------------------------------------------------------------------------------
-/** Write the header information, which is independent of bank, from the given
- * workspace
-   * @param l1 :: Value for the moderator to sample distance
-   */
-std::stringstream SaveGSS::generateInstrumentHeader(double l1) const {
-  const Run &runinfo = m_inputWS->run();
-  const std::string format = getPropertyValue("Format");
-  std::stringstream outBuffer;
-
-  // Run number
-  if (format.compare(SLOG) == 0) {
-    outBuffer << "Sample Run: ";
-    writeLogValue(outBuffer, runinfo, "run_number");
-    outBuffer << " Vanadium Run: ";
-    writeLogValue(outBuffer, runinfo, "van_number");
-    outBuffer << " Wavelength: ";
-    writeLogValue(outBuffer, runinfo, "LambdaRequest");
-    outBuffer << "\n";
-  }
-
-  if (this->getProperty("ExtendedHeader")) {
-    // the instrument parameter file
-    if (runinfo.hasProperty("iparm_file")) {
-      Kernel::Property *prop = runinfo.getProperty("iparm_file");
-      if (prop != nullptr && (!prop->value().empty())) {
-        std::stringstream line;
-        line << "#Instrument parameter file: " << prop->value();
-        outBuffer << std::setw(80) << std::left << line.str() << "\n";
-      }
-    }
-
-    // write out the GSAS monitor counts
-    outBuffer << "Monitor: ";
-    if (runinfo.hasProperty("gsas_monitor")) {
-      writeLogValue(outBuffer, runinfo, "gsas_monitor");
-    } else {
-      writeLogValue(outBuffer, runinfo, "gd_prtn_chrg", "1");
-    }
-    outBuffer << "\n";
-  }
-
-  if (format.compare(SLOG) == 0) {
-    outBuffer << "# "; // make the next line a comment
-  }
-  outBuffer << m_inputWS->getTitle() << "\n";
-  outBuffer << "# " << m_inputWS->getNumberHistograms() << " Histograms\n";
-  outBuffer << "# File generated by Mantid:\n";
-  outBuffer << "# Instrument: " << m_inputWS->getInstrument()->getName()
-            << "\n";
-  outBuffer << "# From workspace named : " << m_inputWS->getName() << "\n";
-  if (getProperty("MultiplyByBinWidth"))
-    outBuffer << "# with Y multiplied by the bin widths.\n";
-  outBuffer << "# Primary flight path " << l1 << "m \n";
-  if (format.compare(SLOG) == 0) {
-    outBuffer << "# Sample Temperature: ";
-    writeLogValue(outBuffer, runinfo, "SampleTemp");
-    outBuffer << " Freq: ";
-    writeLogValue(outBuffer, runinfo, "SpeedRequest1");
-    outBuffer << " Guide: ";
-    writeLogValue(outBuffer, runinfo, "guide");
-    outBuffer << "\n";
-
-    // print whether it is normalized by monitor or proton charge
-    bool norm_by_current = false;
-    bool norm_by_monitor = false;
-    const Mantid::API::AlgorithmHistories &algohist =
-        m_inputWS->getHistory().getAlgorithmHistories();
-    for (const auto &algo : algohist) {
-      if (algo->name().compare("NormaliseByCurrent") == 0)
-        norm_by_current = true;
-      if (algo->name().compare("NormaliseToMonitor") == 0)
-        norm_by_monitor = true;
-    }
-    outBuffer << "#";
-    if (norm_by_current)
-      outBuffer << " Normalised to pCharge";
-    if (norm_by_monitor)
-      outBuffer << " Normalised to monitor";
-    outBuffer << "\n";
-  }
-
-  return outBuffer;
-}
-
-std::stringstream
-SaveGSS::generateBankHeader(const Mantid::API::SpectrumInfo &spectrumInfo,
-                            size_t specIndex) const {
-  std::stringstream outBuffer;
-  double l1{0}, l2{0}, twoTheta{0}, difc{0};
-  // If we have all valid detectors get these properties else use 0
-  if (m_allDetectorsValid) {
-    l1 = spectrumInfo.l1();
-    l2 = spectrumInfo.l2(specIndex);
-    twoTheta = spectrumInfo.twoTheta(specIndex);
-    difc = (2.0 * PhysicalConstants::NeutronMass * sin(twoTheta * 0.5) *
-            (l1 + l2)) /
-           (PhysicalConstants::h * 1.e4);
-  }
-
-  if (m_allDetectorsValid) {
-    outBuffer << "# Total flight path " << (l1 + l2) << "m, tth "
-              << (twoTheta * 180. / M_PI) << "deg, DIFC " << difc << "\n";
-  }
-
-  outBuffer << "# Data for spectrum :" << specIndex << "\n";
-  return outBuffer;
-}
-
-std::stringstream SaveGSS::generateBankData(size_t specIndex) const {
-  // Determine bank number into GSAS file
-  std::stringstream outBuffer;
-  const bool useSpecAsBank = getProperty("UseSpectrumNumberAsBankID");
-  const bool multiplyByBinWidth = getProperty("MultiplyByBinWidth");
-  const int userStartingBankNumber = getProperty("Bank");
-  const std::string outputFormat = getPropertyValue("Format");
-  int bankid;
-  if (useSpecAsBank) {
-    bankid =
-        static_cast<int>(m_inputWS->getSpectrum(specIndex).getSpectrumNo());
-  } else {
-    bankid = userStartingBankNumber + static_cast<int>(specIndex);
-  }
-
-  // Write data
-  if (outputFormat == RALF) {
-    this->writeRALFdata(bankid, multiplyByBinWidth, outBuffer,
-                        m_inputWS->histogram(specIndex));
-  } else if (outputFormat == SLOG) {
-    this->writeSLOGdata(bankid, multiplyByBinWidth, outBuffer,
-                        m_inputWS->histogram(specIndex));
-  } else {
-    throw std::runtime_error("Cannot write to the unknown " + outputFormat +
-                             "output format");
-  }
-  return outBuffer;
-}
-
-// Write a single line for a bank
-void writeBankLine(std::stringstream &out, const std::string &bintype,
-                   const int banknum, const size_t datasize) {
-  std::ios::fmtflags fflags(out.flags());
-  out << "BANK " << std::fixed << std::setprecision(0)
-      << banknum // First bank should be 1 for GSAS; this can be changed
-      << std::fixed << " " << datasize << std::fixed << " " << datasize
-      << std::fixed << " " << bintype;
-  out.flags(fflags);
-}
-
-std::vector<std::string> Mantid::DataHandling::SaveGSS::generateOutFileNames(
-    size_t numberOfOutFiles) const {
-  std::vector<std::string> outFileNames;
-  const std::string outputFileName = getProperty("Filename");
-
-  if (!getProperty("SplitFiles")) {
-    // Only add one name and don't generate split filenames
-    // when we are not in split mode
-    outFileNames.push_back(outputFileName);
-    return outFileNames;
-  }
-
-  outFileNames.resize(numberOfOutFiles);
-
-  Poco::Path path(outputFileName);
-  // Filename minus extension
-  const std::string basename = path.getBaseName();
-  const std::string ext = path.getExtension();
-
-  for (size_t i = 0; i < numberOfOutFiles; i++) {
-    // Construct output name of the form 'base name-i.ext'
-    std::string newFileName = basename;
-    ((newFileName += '-') += std::to_string(i) += ".") += ext;
-    // Remove filename from path
-    path.makeParent();
-    path.append(newFileName);
-    outFileNames[i] = path.toString();
-  }
-  return outFileNames;
-}
-
-/**
-  */
 void SaveGSS::writeRALFdata(const int bank, const bool MultiplyByBinWidth,
                             std::stringstream &out,
                             const HistogramData::Histogram &histo) const {
@@ -575,9 +576,6 @@ void SaveGSS::writeRALFdata(const int bank, const bool MultiplyByBinWidth,
   }
 }
 
-//--------------------------------------------------------------------------------------------
-/** Write data in SLOG format
-  */
 void SaveGSS::writeSLOGdata(const int bank, const bool MultiplyByBinWidth,
                             std::stringstream &out,
                             const HistogramData::Histogram &histo) const {

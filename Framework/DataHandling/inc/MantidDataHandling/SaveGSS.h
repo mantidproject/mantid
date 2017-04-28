@@ -93,34 +93,42 @@ private:
   /// Execution code
   void exec() override;
 
-  /// Writes the current buffer to the user specified file path
-  void writeBufferToFile(size_t numOutFiles, size_t numSpectra);
-
-  void validateInputs() const;
-
-  /// Opens a new file stream at the path specified.
-  std::ofstream openFileStream(const std::string &outFilePath);
-
-  void addDetectorInformation(std::ostream &outBuffer,
-                              Mantid::API::SpectrumInfo &spectrumInfo,
-                              size_t histoIndex, bool allDetectorsValid);
-  bool SaveGSS::isInstrumentValid() const;
-
+  /// Determines if all spectra have detectors
   bool areAllDetectorsValid() const;
 
-  /// Write GSAS file
-  void writeGSASFile(size_t numOutFiles, size_t numOutSpectra);
+  /// Turns the data associated with this spectra into a string stream
+  std::stringstream generateBankData(size_t specIndex) const;
 
-  /// Write the header information
-  std::stringstream generateInstrumentHeader(double l1) const;
-
+  /// Generates the bank header and returns this as a string stream
   std::stringstream
   generateBankHeader(const Mantid::API::SpectrumInfo &spectrumInfo,
                      size_t specIndex) const;
 
-  std::stringstream generateBankData(size_t specIndex) const;
+  /// Generates the output which will be written to the GSAS file
+  void generateGSASFile(size_t numOutFiles, size_t numOutSpectra);
 
-  std::vector<std::string> generateOutFileNames(size_t numberOfOutFiles) const;
+  /// Generates the instrument header and returns this as a string stream
+  std::stringstream generateInstrumentHeader(double l1) const;
+
+  /// Generates the filename(s) and paths to write to
+  void generateOutFileNames(size_t numberOfOutFiles);
+  
+  /// Returns if the input workspace instrument is valid
+  bool SaveGSS::isInstrumentValid() const;
+
+  /// Opens a new file stream at the path specified.
+  std::ofstream openFileStream(const std::string &outFilePath);
+
+  /// sets non workspace properties for the algorithm
+  void setOtherProperties(IAlgorithm *alg, const std::string &propertyName,
+                          const std::string &propertyValue,
+                          int periodNum) override;
+
+  /// Validates the user input and warns / throws on bad conditions
+  void validateInputs() const;
+
+  /// Writes the current buffer to the user specified file path
+  void writeBufferToFile(size_t numOutFiles, size_t numSpectra);
 
   /// Write out the data in RALF format
   void writeRALFdata(const int bank, const bool MultiplyByBinWidth,
@@ -132,18 +140,17 @@ private:
                      std::stringstream &out,
                      const HistogramData::Histogram &histo) const;
 
-  /// sets non workspace properties for the algorithm
-  void setOtherProperties(IAlgorithm *alg, const std::string &propertyName,
-                          const std::string &propertyValue,
-                          int periodNum) override;
-
   /// Workspace
   API::MatrixWorkspace_const_sptr m_inputWS;
-
+  /// The output buffer. This is either n spectra in one file,
+  /// or n files with 1 spectra
   std::vector<std::stringstream> m_outputBuffer{};
+  /// The output filename(s)
   std::vector<std::string> m_outFileNames{};
+  /// Indicates whether all spectra have valid detectors
   bool m_allDetectorsValid{false};
-  std::unique_ptr<API::Progress> m_progress{ nullptr };
+  /// Holds pointer to progress bar
+  std::unique_ptr<API::Progress> m_progress{nullptr};
 };
 }
 }
