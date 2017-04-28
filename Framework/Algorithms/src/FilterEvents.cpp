@@ -347,16 +347,6 @@ void FilterEvents::splitTimeSeriesLogs(const std::vector<TimeSeriesProperty<int>
     split_datetime_vec[i] = split_time;
   }
 
-  // debug output the result
-  for (size_t i = 0; i < m_vecSplitterTime.size(); ++i)
-  {
-      g_log.warning() << "item " << i << " :  " << m_vecSplitterTime[i];
-      if (i < m_vecSplitterGroup.size())
-          g_log.warning() << "  group " << m_vecSplitterGroup[i] << "\n";
-  }
-
-
-
   // find the maximum index of the outputs' index
   std::set<int>::iterator target_iter;
   int max_target_index = 0;
@@ -369,88 +359,22 @@ void FilterEvents::splitTimeSeriesLogs(const std::vector<TimeSeriesProperty<int>
   if (m_useSplittersWorkspace)
       ++ max_target_index;
 
-  // initialize a search iteration for string set
-  std::set<std::string>::iterator set_iter;
-
   // deal with integer time series property
   for (size_t i = 0; i < int_tsp_vector.size(); ++i)
   {
-    // TODO/FIXME - debug continue
-    continue;
-
-    std::string property_name = int_tsp_vector[i]->name();
-    set_iter = m_excludedSampleLogs.find(property_name);
-    if (set_iter == m_excludedSampleLogs.end())
-    {
-      // split log
-      std::vector<TimeSeriesProperty<int> *> child_vectors;
-      if (m_useSplittersWorkspace)
-      {
-          ;
-          // TODO/NOW - consider to call splitLog
-        //   int_tsp_vector[i]->split(m_vecSplitterTime, child_vectors);
-      }
-      else
-      {
-          ;
-        //  int_tsp_vector[i]->split(m_vecSplitterGroup, child_vectors);
-      }
-      // assign to output workspaces
-      for (auto ws_iter = m_outputWorkspacesMap.begin(); ws_iter != m_outputWorkspacesMap.end(); ++ws_iter)
-        ws_iter->second->mutableRun().addProperty(child_vectors.front());
-    }
+    splitTimeSeriesProperty(int_tsp_vector[i], split_datetime_vec, max_target_index);
   }
 
-  splitDoubleTimeSeriesLogs(dbl_tsp_vector, split_datetime_vec, max_target_index);
-
-//  // deal with double time series property
-//  for (size_t i = 0; i < dbl_tsp_vector.size(); ++i) {
-//    // get property name and etc
-//    std::string property_name = dbl_tsp_vector[i]->name();
-//    g_log.warning() << "[DB] Split double sample log " << property_name << " with size "
-//                    << dbl_tsp_vector[i]->size() << "\n";
-//    set_iter = m_excludedSampleLogs.find(property_name);
-
-//    // skip the log if it is in the excluded sample log list
-//    if (set_iter != m_excludedSampleLogs.end())
-//      continue;
-
-//    // generate new propertys for the source to split to
-//    std::vector<TimeSeriesProperty<double> *> output_vector;
-//    for (int tindex = 0; tindex <= max_target_index; ++tindex) {
-//      TimeSeriesProperty<double> *new_property =
-//          new TimeSeriesProperty<double>(property_name);
-//      output_vector.push_back(new_property);
-//    }
-
-//    // split log
-//    g_log.warning() << "Split datetime vector size = " << split_datetime_vec.size()
-//                    << ", vector of splitter group size = " << m_vecSplitterGroup.size() << "\n";
-//    dbl_tsp_vector[i]->splitByTimeVector(split_datetime_vec,
-//                                         m_vecSplitterGroup, output_vector);
-
-//    // assign to output workspaces
-//    for (int tindex = 0; tindex <= max_target_index; ++tindex) {
-//      // find output workspace
-//      std::map<int, DataObjects::EventWorkspace_sptr>::iterator wsiter;
-//      wsiter = m_outputWorkspacesMap.find(tindex);
-//      if (wsiter == m_outputWorkspacesMap.end()) {
-//        g_log.error() << "Workspace target (" << tindex
-//                      << ") does not have workspace associated."
-//                      << "\n";
-//      } else {
-//        DataObjects::EventWorkspace_sptr ws_i = wsiter->second;
-//        g_log.warning() << "Output workspace " << tindex << ".  split log " << output_vector[tindex]->name()
-//                        << " has length " << output_vector[tindex]->size() << "\n";
-//        ws_i->mutableRun().addProperty(output_vector[tindex], true);
-//      }
-//    }
-//  } // END-FOR (i)
+  // split double time series property
+  for (size_t i = 0; i < dbl_tsp_vector.size(); ++i)
+  {
+    splitTimeSeriesProperty(dbl_tsp_vector[i], split_datetime_vec, max_target_index);
+  }
+  // splitDoubleTimeSeriesLogs(dbl_tsp_vector, split_datetime_vec, max_target_index);
 
   // deal with bool time series property
   for (size_t i_bool = 0; i_bool < bool_tsp_vector.size(); ++i_bool) {
       splitTimeSeriesProperty(bool_tsp_vector[i_bool], split_datetime_vec, max_target_index);
-    ;
   }
 
   // integrate proton charge

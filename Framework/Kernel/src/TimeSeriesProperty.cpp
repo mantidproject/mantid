@@ -600,9 +600,6 @@ void TimeSeriesProperty<TYPE>::splitByTimeVector(
     }
   }
 
-  g_log.warning() << "1st in-range TSP entry: " << index_tsp_time
-                  << ", Splitter index = " << index_splitter << "\n";
-
   // now it is the time to put TSP's entries to corresponding
   continue_search = !no_entry_in_range;
   while (continue_search) {
@@ -613,11 +610,6 @@ void TimeSeriesProperty<TYPE>::splitByTimeVector(
     if (index_tsp_time > 0)
       --index_tsp_time;
 
-    g_log.warning() << "[OuterLoop] Target = " << target
-                    << " with splitter index = " << index_splitter << "\n"
-                    << "\t"
-                    << "Time index = " << index_tsp_time << "\n\n";
-
     // add the continous entries to same target time series property
     bool continue_add = true;
     while (continue_add) {
@@ -627,17 +619,10 @@ void TimeSeriesProperty<TYPE>::splitByTimeVector(
         // avoid to add duplicate entry
         outputs[target]->addValue(m_values[index_tsp_time].time(),
                                   m_values[index_tsp_time].value());
-
-        g_log.warning() << "[Add] entry " << index_tsp_time << "("
-                        << m_values[index_tsp_time].time() << ") to target " << target
-                        << "\n";
       }
 
       // advance to next entry
       ++index_tsp_time;
-
-      g_log.warning() << "\t[+Time] index " << index_tsp_time << " with T = " << tsp_time_vec[index_tsp_time]
-                      << " comparing to split\'s stop time " << split_stop_time << "\n";
 
       if (index_tsp_time == tsp_time_vec.size()) {
         // last entry. quit all loops
@@ -649,9 +634,6 @@ void TimeSeriesProperty<TYPE>::splitByTimeVector(
           // avoid the duplicate cases occured in fast frequency issue
           outputs[target]->addValue(m_values[index_tsp_time].time(),
                                     m_values[index_tsp_time].value());
-
-          g_log.warning() << "[Add+Quit] entry " << index_tsp_time << " to target " << target
-                          << "\n";
         }
         // FIXME - in future, need to find out WHETHER there is way to skip the
         // rest without going through the whole sequence
@@ -674,15 +656,6 @@ void TimeSeriesProperty<TYPE>::splitByTimeVector(
       split_stop_time = splitter_time_vec[index_splitter + 1];
     }
   } // END-OF-WHILE
-
-
-  // debug output
-  for (size_t i = 0; i < outputs.size(); ++i)
-  {
-     g_log.warning() << "Split log " << i << " with size " << outputs[i]->size() << "\n";
-     for (size_t j = 0; j < outputs[i]->size(); ++j)
-         g_log.warning() << outputs[i]->nthTime(j) << "\n";
-  }
 
   return;
 }
