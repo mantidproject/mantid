@@ -88,8 +88,6 @@ private:
   Muon::MultiFitState m_multiFitState;
   /// Whether TF Asymmetry is disabled or enabled
   Muon::TFAsymmState m_TFAsymmState;
-
-
 };
 
 } // namespace CustomInterfaces

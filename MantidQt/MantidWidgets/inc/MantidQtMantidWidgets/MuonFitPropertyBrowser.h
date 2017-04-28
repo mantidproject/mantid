@@ -6,6 +6,7 @@
 #include "MantidQtMantidWidgets/IMuonFitFunctionModel.h"
 
 #include "MantidQtAPI/MWRunFiles.h"
+
 /* Forward declarations */
 class QDockWidget;
 class QLabel;
@@ -93,7 +94,7 @@ public:
   void doPlotGuess() override { emit plotGuess(); }
   /// Whether a guess is plotted or not
   bool hasGuess() const override;
-  
+
   /// Enable/disable the Fit button;
   virtual void setFitEnabled(bool yes) override;
 
@@ -120,6 +121,7 @@ signals:
   void fitRawDataClicked(bool enabled) override;
   /// Emitted when fit is about to be run
   void preFitChecksRequested(bool sequential) override;
+
 protected:
   void showEvent(QShowEvent *e) override;
   double Normalization() const;
@@ -129,11 +131,12 @@ private slots:
   void boolChanged(QtProperty *prop) override;
   void stringChanged(QtProperty *prop) override;
 
+
 private:
-   /// new menu option
-   QAction *m_fitActiontest;
-   /// Create new fit menu
-   QPushButton *MuonFitPropertyBrowser::createMuonFitMenuButton(QWidget *w);
+  /// new menu option
+  QAction *m_fitActiontest;
+  /// Create new fit menu
+  QPushButton *MuonFitPropertyBrowser::createMuonFitMenuButton(QWidget *w);
 
   /// Get the registered function names
   void populateFunctionNames() override;
@@ -149,7 +152,7 @@ private:
   std::vector<std::string> m_workspacesToFit;
   /// Label to use for simultaneous fits
   std::string m_simultaneousLabel;
-  QtProperty *m_normalization; 
+  QtProperty *m_normalization;
   mutable QStringList m_normalizationValue;
   QtBrowserItem *m_multiFitSettingsGroup;
   mutable QString m_strRuns;
@@ -157,7 +160,7 @@ private:
   MantidQt::API::MWRunFiles *m_runs;
 };
 
-	std::vector<double> readNormalization();
+std::vector<double> readNormalization();
 
 } // MantidQt
 } // API

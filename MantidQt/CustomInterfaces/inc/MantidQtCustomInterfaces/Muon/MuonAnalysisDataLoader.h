@@ -98,10 +98,12 @@ public:
   // empty the cache
   void clearCache();
   // Find if name is in group/pair collection
-  static bool isContainedIn(const std::string &name, const std::vector<std::string> &collection) {
-	  return std::find(collection.begin(), collection.end(), name) !=
-		  collection.end();
+  static bool isContainedIn(const std::string &name,
+                            const std::vector<std::string> &collection) {
+    return std::find(collection.begin(), collection.end(), name) !=
+           collection.end();
   };
+
 protected:
   /// Set properties of algorithm from options
   void
@@ -109,7 +111,6 @@ protected:
                                 const Muon::AnalysisOptions &options) const;
   /// Remove from cache any workspaces that have been deleted in the meantime
   void updateCache() const;
-
 
 private:
   /// Get instrument name from workspace

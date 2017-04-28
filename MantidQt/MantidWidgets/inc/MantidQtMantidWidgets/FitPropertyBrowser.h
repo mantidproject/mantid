@@ -374,7 +374,7 @@ protected:
   ///
   void initLayout(QWidget *w);
   ///
-  void initBasicLayout(QWidget *w,QPushButton *btnFit);
+  void initBasicLayout(QWidget *w, QPushButton *btnFit);
   ///
   QPushButton *createFitMenuButton(QWidget *w);
   ///
@@ -534,13 +534,10 @@ private:
   QAction *m_displayActionClearAll;
   QString m_windowBaseString;
 
-
   /// Setup menu
   QAction *m_setupActionCustomSetup;
   QAction *m_setupActionRemove;
   void updateSetupMenus();
-
- 
 
   // The widget for choosing the fit function.
   QDialog *m_fitSelector;
@@ -598,7 +595,6 @@ private:
 
   /// store current workspace name
   std::string m_storedWorkspaceName;
-
 
   friend class PropertyHandler;
   friend class CreateAttributeProperty;

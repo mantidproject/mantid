@@ -258,9 +258,9 @@ void MuonAnalysisFitFunctionPresenter::setMultiFitState(
 * @param state :: [input] On/off for TF Asymmetry mode.
 */
 void MuonAnalysisFitFunctionPresenter::setTFAsymmState(
-	Muon::TFAsymmState state) {
-	m_fitBrowser->setTFAsymmMode(state == Muon::TFAsymmState::Enabled);
-	m_TFAsymmState = state;
+    Muon::TFAsymmState state) {
+  m_fitBrowser->setTFAsymmMode(state == Muon::TFAsymmState::Enabled);
+  m_TFAsymmState = state;
 }
 /**
  * Set the given function in the model (fit property browser).

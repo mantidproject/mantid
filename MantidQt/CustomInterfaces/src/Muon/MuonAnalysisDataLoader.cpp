@@ -231,7 +231,7 @@ bool MuonAnalysisDataLoader::shouldBeCached(
  */
 Workspace_sptr MuonAnalysisDataLoader::correctAndGroup(
     const Muon::LoadResult &loadedData,
-    const Mantid::API::Grouping &grouping) const { 
+    const Mantid::API::Grouping &grouping) const {
   ITableWorkspace_sptr deadTimes;
   try { // to get the dead time correction
     deadTimes = getDeadTimesTable(loadedData);
