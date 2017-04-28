@@ -74,7 +74,7 @@ public:
   }
 
 private:
-    friend struct Mantid::Kernel::CreateUsingNew<FilterEvents>;
+  friend struct Mantid::Kernel::CreateUsingNew<FilterEvents>;
 
   // Implement abstract Algorithm methods
   void init() override;
@@ -132,9 +132,10 @@ private:
   /// (itarget)
   void convertSplittersWorkspaceToVectors();
 
-  void splitTimeSeriesLogs(const std::vector<Kernel::TimeSeriesProperty<int> *> &int_tsp_vector,
-                           const std::vector<Kernel::TimeSeriesProperty<double> *> &dbl_tsp_vector,
-                           const std::vector<Kernel::TimeSeriesProperty<bool> *> &bool_tsp_vector);
+  void splitTimeSeriesLogs(
+      const std::vector<Kernel::TimeSeriesProperty<int> *> &int_tsp_vector,
+      const std::vector<Kernel::TimeSeriesProperty<double> *> &dbl_tsp_vector,
+      const std::vector<Kernel::TimeSeriesProperty<bool> *> &bool_tsp_vector);
 
   /// get the names of all the time series properties in the input workspace's
   /// Run object
@@ -162,10 +163,15 @@ private:
       std::vector<Kernel::TimeSeriesProperty<bool> *> &bool_tsp_name_vector);
 
   template <typename TYPE>
-  void splitTimeSeriesProperty(Kernel::TimeSeriesProperty<TYPE> *tsp,  std::vector<Kernel::DateAndTime> &split_datetime_vec,
-                               const int max_target_index);
+  void
+  splitTimeSeriesProperty(Kernel::TimeSeriesProperty<TYPE> *tsp,
+                          std::vector<Kernel::DateAndTime> &split_datetime_vec,
+                          const int max_target_index);
 
-  void splitDoubleTimeSeriesLogs(const std::vector<Kernel::TimeSeriesProperty<double> *> &dbl_tsp_vector, std::vector<Kernel::DateAndTime> &split_datetime_vec, const int max_target_index);
+  void splitDoubleTimeSeriesLogs(
+      const std::vector<Kernel::TimeSeriesProperty<double> *> &dbl_tsp_vector,
+      std::vector<Kernel::DateAndTime> &split_datetime_vec,
+      const int max_target_index);
 
   void groupOutputWorkspace();
 

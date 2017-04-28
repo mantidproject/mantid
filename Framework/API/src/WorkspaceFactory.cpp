@@ -105,7 +105,7 @@ void WorkspaceFactoryImpl::initializeFromParent(const MatrixWorkspace &parent,
   if (!noproperty)
     child.m_run = parent.m_run;
   else
-      child.m_run = boost::make_shared<API::Run>();
+    child.m_run = boost::make_shared<API::Run>();
   child.setYUnit(parent.m_YUnit);
   child.setYUnitLabel(parent.m_YUnitLabel);
   child.setDistribution(parent.isDistribution());
