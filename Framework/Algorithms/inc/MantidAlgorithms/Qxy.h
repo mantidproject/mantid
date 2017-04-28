@@ -70,7 +70,7 @@ private:
   std::vector<double> logBinning(double min, double max, int num);
   API::MatrixWorkspace_sptr
   setUpOutputWorkspace(API::MatrixWorkspace_const_sptr inputWorkspace);
-  double getQminFromWs(const API::MatrixWorkspace_const_sptr &inputWorkspace);
+  double getQminFromWs(API::MatrixWorkspace_const_sptr inputWorkspace);
 };
 
 } // namespace Algorithms

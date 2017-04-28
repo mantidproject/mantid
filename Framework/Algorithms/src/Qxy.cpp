@@ -380,7 +380,7 @@ std::vector<double> Qxy::logBinning(double min, double max, int num) {
 }
 
 double
-Qxy::getQminFromWs(const API::MatrixWorkspace_const_sptr &inputWorkspace) {
+Qxy::getQminFromWs(API::MatrixWorkspace_const_sptr inputWorkspace) {
   // get qmin from the run properties
   double qmin = 0;
   const API::Run &run = inputWorkspace->run();
