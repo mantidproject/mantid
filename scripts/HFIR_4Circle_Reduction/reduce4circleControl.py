@@ -111,6 +111,9 @@ class CWSCDReductionControl(object):
         # detector geometry: initialized to unphysical value
         self._detectorSize = [-1, -1]
 
+        # reference workspace for LoadMask
+        self._refWorkspaceForMask = None
+
         # register startup
         mantid.UsageService.registerFeatureUsage("Interface","4-Circle Reduction",False)
 
@@ -984,9 +987,14 @@ class CWSCDReductionControl(object):
             # use given name
             mask_ws_name = str(mask_tag)
 
+        if self._refWorkspaceForMask is None:
+            return False, 'There is no reference workspace. Plot a Pt. first!'
+        elif AnalysisDataService.doesExist(self._refWorkspaceForMask) is False:
+            return False, 'Previous reference workspace has been deleted. Plot a Pt. first'
         mantidsimple.LoadMask(Instrument='HB3A',
                               InputFile=mask_file_name,
-                              OutputWorkspace=mask_ws_name)
+                              OutputWorkspace=mask_ws_name,
+                              RefWorkspace=self._refWorkspaceForMask)
         mantidsimple.InvertMask(InputWorkspace=mask_ws_name,
                                 OutputWorkspace=mask_ws_name)
 
@@ -1424,6 +1432,8 @@ class CWSCDReductionControl(object):
                                            OutputWorkspace=pt_ws_name,
                                            SpiceTableWorkspace=spice_table_name,
                                            PtNumber=pt_no)
+            if self._refWorkspaceForMask is None or AnalysisDataService.doesExist(pt_ws_name) is False:
+                self._refWorkspaceForMask = pt_ws_name
         except RuntimeError as run_err:
             return False, str(run_err)
 
