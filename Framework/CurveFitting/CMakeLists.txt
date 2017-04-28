@@ -58,6 +58,7 @@ set ( SRC_FILES
 	src/Functions/ComptonScatteringCountRate.cpp
 	src/Functions/Convolution.cpp
 	src/Functions/CrystalElectricField.cpp
+	src/Functions/CrystalFieldFunction.cpp
 	src/Functions/CrystalFieldPeaks.cpp
 	src/Functions/CrystalFieldPeaksBase.cpp
 	src/Functions/CrystalFieldMultiSpectrum.cpp
@@ -214,6 +215,7 @@ set ( INC_FILES
 	inc/MantidCurveFitting/Functions/ComptonScatteringCountRate.h
 	inc/MantidCurveFitting/Functions/Convolution.h
 	inc/MantidCurveFitting/Functions/CrystalElectricField.h
+	inc/MantidCurveFitting/Functions/CrystalFieldFunction.h
 	inc/MantidCurveFitting/Functions/CrystalFieldMultiSpectrum.h
 	inc/MantidCurveFitting/Functions/CrystalFieldPeaks.h
 	inc/MantidCurveFitting/Functions/CrystalFieldPeaksBase.h
@@ -366,6 +368,7 @@ set ( TEST_FILES
 	Functions/ComptonScatteringCountRateTest.h
 	Functions/ConvolutionTest.h
 	Functions/CrystalFieldEnergiesTest.h
+	Functions/CrystalFieldFunctionTest.h
 	Functions/CrystalFieldPeaksTest.h
 	Functions/CrystalFieldTest.h
 	Functions/CrystalFieldMultiSpectrumTest.h

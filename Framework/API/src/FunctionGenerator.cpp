@@ -9,15 +9,21 @@ using namespace Kernel;
 
 /// Constructor
 FunctionGenerator::FunctionGenerator(IFunction_sptr source)
-    : m_source(source), m_nOwnParams(source->nParams()), m_dirty(true) {
-  if (!m_source) {
-    throw std::logic_error(
-        "FunctionGenerator initialised with null source function.");
+    : m_source(source), m_dirty(true) {
+  if (source) {
+    m_nOwnParams = source->nParams();
   }
   declareAttribute("NumDeriv", Attribute(false));
 }
 
 void FunctionGenerator::init() {}
+
+/// Set the source function
+/// @param source :: New source function.
+void FunctionGenerator::setSource(IFunction_sptr source) const {
+  m_source = source;
+}
+
 
 /// Set i-th parameter
 void FunctionGenerator::setParameter(size_t i, const double &value,
