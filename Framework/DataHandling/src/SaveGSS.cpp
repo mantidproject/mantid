@@ -29,13 +29,20 @@ DECLARE_ALGORITHM(SaveGSS)
 namespace { // Anonymous namespace
 const std::string RALF("RALF");
 const std::string SLOG("SLOG");
-const double TOLERANCE = 1.e-10;
+
+/// Determines the tolerance when comparing two doubles for equality
+const double m_TOLERANCE = 1.e-10;
+
+bool doesFileExist(const std::string &filePath) {
+  auto file = Poco::File(filePath);
+  return file.exists();
+}
 
 bool isEqual(const double left, const double right) {
   if (left == right)
     return true;
   return (2. * std::fabs(left - right) <=
-          std::fabs(TOLERANCE * (right + left)));
+          std::fabs(m_TOLERANCE * (right + left)));
 }
 
 bool isConstantDelta(const HistogramData::HistogramX &xAxis) {
@@ -49,13 +56,12 @@ bool isConstantDelta(const HistogramData::HistogramX &xAxis) {
 }
 
 double fixErrorValue(const double value) {
-// Fix error if value is less than zero or infinity
-// Negative errors cannot be read by GSAS
-	if (value <= 0. ||
-		!std::isfinite(value)) 
-		return 0.;
-	else
-		return value;
+  // Fix error if value is less than zero or infinity
+  // Negative errors cannot be read by GSAS
+  if (value <= 0. || !std::isfinite(value))
+    return 0.;
+  else
+    return value;
 }
 } // End of anonymous namespace
 
@@ -104,7 +110,8 @@ void SaveGSS::init() {
 void SaveGSS::exec() {
   // Process properties
   // Retrieve the input workspace
-  inputWS = getProperty("InputWorkspace");
+
+	inputWS = getProperty("InputWorkspace");
 
   // Check whether it is PointData or Histogram
   if (!inputWS->isHistogramData())
@@ -121,6 +128,12 @@ void SaveGSS::exec() {
     throw std::invalid_argument(errss.str());
   }
 
+  if (isInstrumentValid() && areAllDetectorsValid(inputWS->spectrumInfo())) {
+    m_allDetectorsValid = true;
+  } else {
+    m_allDetectorsValid = false;
+  }
+
   const std::string filename = getProperty("Filename");
 
   const int bank = getProperty("Bank");
@@ -129,7 +142,7 @@ void SaveGSS::exec() {
   const std::string outputFormat = getProperty("Format");
 
   // Check whether to append to an already existing file or overwrite
-  bool append = getProperty("Append");
+  const bool append = getProperty("Append");
 
   // Check whether append or not
   if (!split) {
@@ -142,9 +155,8 @@ void SaveGSS::exec() {
     } else if (!fileobj.exists() && append) {
       // File does not exist but in append mode
       g_log.warning() << "Target GSAS file " << filename
-                      << " does not exist.  Append mode is set to false "
+                      << " does not exist but algorithm was set to append."
                       << "\n";
-      append = false;
     }
   }
 
@@ -152,153 +164,129 @@ void SaveGSS::exec() {
                 outputFormat);
 }
 
+void SaveGSS::writeBufferToFile(const std::vector<std::string> &outFileNames,
+                                size_t numOutFiles, size_t numSpectra) {
+  for (size_t fileIndex = 0; fileIndex < numOutFiles; fileIndex++) {
+    // Open each file when there are multiple
+    auto outFile = openFileStream(outFileNames[fileIndex]);
+    for (size_t specIndex = 0; specIndex < numSpectra; specIndex++) {
+      // Write each spectra when there are multiple
+      outFile << m_outputBuffer[specIndex].rdbuf();
+    }
+    outFile.close();
+  }
+}
+
+std::ofstream SaveGSS::openFileStream(const std::string &outFilePath) {
+  const bool append = getProperty("Append");
+
+  // Select to append to current stream or override
+  using std::ios_base;
+  const ios_base::openmode mode = (append ? (ios_base::out | ios_base::app)
+                                          : (ios_base::out | ios_base::trunc));
+
+  auto outStream = std::ofstream(outFilePath, mode);
+  if (outStream.fail()) {
+    // Get the error message from library and log before throwing
+    const std::string error = strerror(errno);
+    g_log.error("Failed to open file. Error was: " + error);
+    throw std::runtime_error("Could not open the file at the following path: " +
+                             outFilePath);
+  }
+  // Stream is good - return to caller through a std::move
+  return std::move(outStream);
+}
+
+bool SaveGSS::isInstrumentValid() const {
+  // Instrument related
+  Geometry::Instrument_const_sptr instrument = inputWS->getInstrument();
+  Geometry::IComponent_const_sptr source;
+  Geometry::IComponent_const_sptr sample;
+  if (instrument != nullptr) {
+    source = instrument->getSource();
+    sample = instrument->getSample();
+    if (source && sample) {
+      return true;
+    }
+  }
+  return false;
+}
+
+bool SaveGSS::areAllDetectorsValid(
+    const API::SpectrumInfo &spectrumInfo) const {
+  const size_t numHist = inputWS->getNumberHistograms();
+  bool allValid = true;
+  // TODO parallel
+  for (size_t histoIndex = 0; histoIndex < numHist; histoIndex++) {
+    if (allValid == false) {
+      break;
+    }
+    // Check this spectra has detectors
+    if (!spectrumInfo.hasDetectors(histoIndex)) {
+      allValid = false;
+      g_log.warning() << "There is no detector associated with spectrum "
+                      << histoIndex
+                      << ". Workspace is treated as NO-INSTRUMENT case. \n";
+    }
+  }
+  return allValid;
+}
+
 /** Write GSAS file based on user-specified request
   */
 void SaveGSS::writeGSASFile(const std::string &outfilename, bool append,
                             int basebanknumber, bool multiplybybinwidth,
                             bool split, const std::string &outputFormat) {
-  // Initialize the file stream
-  using std::ios_base;
-  ios_base::openmode mode =
-      (append ? (ios_base::out | ios_base::app) : ios_base::out);
-
-  // Instrument related
-  Geometry::Instrument_const_sptr instrument = inputWS->getInstrument();
-  Geometry::IComponent_const_sptr source;
-  Geometry::IComponent_const_sptr sample;
-  bool has_instrument = false;
-  if (instrument != nullptr) {
-    source = instrument->getSource();
-    sample = instrument->getSample();
-    if (source && sample)
-      has_instrument = true;
-  }
 
   // Write GSAS file for each histogram (spectrum)
   std::stringstream outbuffer;
 
-  int nHist = static_cast<int>(inputWS->getNumberHistograms());
+  size_t nHist = inputWS->getNumberHistograms();
+  // TODO handle progress better
   Progress p(this, 0.0, 1.0, nHist);
 
   const auto &spectrumInfo = inputWS->spectrumInfo();
-  // Loop over each histogram within the workspace
-  for (int histoIndex = 0; histoIndex < nHist; histoIndex++) {
-    // Determine whether to skip the spectrum due to being masked
-    if (has_instrument) {
-      if (!spectrumInfo.hasDetectors(histoIndex)) {
-        has_instrument = false;
-        g_log.warning() << "There is no detector associated with spectrum "
-                        << histoIndex
-                        << ". Workspace is treated as NO-INSTRUMENT case. \n";
-      } else if (spectrumInfo.isMasked(histoIndex)) {
+
+  // Determine if we are writing one file with n spectra or
+  // n files with 0 spectra
+  const size_t numOfFiles{split ? nHist : 1};
+  const size_t numOutSpectra{split ? 1 : nHist};
+  // For the way we are using the vector we must have N number files
+  // OR N number spectra. Otherwise we would need a vector of vector
+  assert(numOutSpectra + numOfFiles == nHist + 1);
+  g_log.debug() << "[SaveGSS] Append = " << append << ", split = " << split
+                << "\n";
+
+  m_outputBuffer.resize(nHist);
+  std::vector<std::string> splitFileNames = generateOutFileNames(numOfFiles);
+  // If all detectors are not valid we use the no instrument case and
+  // set l1 to 0
+  const double l1{m_allDetectorsValid ? spectrumInfo.l1() : 0};
+
+  // Create the various output files we will need in a loop
+  for (size_t fileIndex = 0; fileIndex < numOfFiles; fileIndex++) {
+    // Add header to new files (e.g. doesn't exist or overwriting)
+    if (!doesFileExist(splitFileNames[fileIndex]) || !append) {
+      m_outputBuffer[fileIndex] = generateInstrumentHeader(l1);
+    }
+
+    // Then add each spectra to the file
+    for (size_t specIndex = 0; specIndex < numOutSpectra; specIndex++) {
+      // Determine whether to skip the spectrum due to being masked
+      if (m_allDetectorsValid && spectrumInfo.isMasked(specIndex)) {
         continue;
       }
+      // Add bank header and details to file
+      m_outputBuffer[specIndex]
+          << generateBankHeader(spectrumInfo, specIndex).rdbuf();
+      m_outputBuffer[specIndex] << generateBankData(specIndex).rdbuf();
+      p.report();
     }
-
-    // Obtain detector information
-    double l1, l2, tth, difc;
-    if (has_instrument) {
-      l1 = spectrumInfo.l1();
-      l2 = spectrumInfo.l2(histoIndex);
-      tth = spectrumInfo.twoTheta(histoIndex);
-      difc =
-          ((2.0 * PhysicalConstants::NeutronMass * sin(tth * 0.5) * (l1 + l2)) /
-           (PhysicalConstants::h * 1.e4));
-
-    } else {
-      l1 = l2 = tth = difc = 0;
-    }
-    g_log.debug() << "Spectrum " << histoIndex << ": L1 = " << l1
-                  << "  L2 = " << l2 << "  2theta = " << tth << "\n";
-
-    std::stringstream tmpbuffer;
-
-    // Header: 2 cases requires header: (1) first bank in non-append mode and
-    // (2) split
-    g_log.debug() << "[DB9933] Append = " << append << ", split = " << split
-                  << "\n";
-
-    bool writeheader = false;
-    std::string splitfilename;
-    if (!split && histoIndex == 0 && !append) {
-      // Non-split mode and first spectrum and in non-append mode
-      writeheader = true;
-    } else if (split) {
-      std::stringstream number;
-      number << "-" << histoIndex;
-
-      Poco::Path path(outfilename);
-      std::string basename = path.getBaseName(); // Filename minus extension
-      std::string ext = path.getExtension();
-      // Chop off filename
-      path.makeParent();
-      path.append(basename + number.str() + "." + ext);
-      Poco::File fileobj(path);
-      const bool exists = fileobj.exists();
-      if (!exists || !append)
-        writeheader = true;
-      if (fileobj.exists() && !append)
-        g_log.warning() << "File " << path.getFileName()
-                        << " exists and will be overwritten."
-                        << "\n";
-      splitfilename = path.toString();
-    }
-
-    // Create header
-    if (writeheader)
-      writeHeaders(outputFormat, tmpbuffer, l1);
-
-    // Write bank header
-    if (has_instrument) {
-      tmpbuffer << "# Total flight path " << (l1 + l2) << "m, tth "
-                << (tth * 180. / M_PI) << "deg, DIFC " << difc << "\n";
-    }
-    tmpbuffer << "# Data for spectrum :" << histoIndex << "\n";
-
-    // Determine bank number into GSAS file
-    int bankid;
-    const bool useSpecAsBank = getProperty("UseSpectrumNumberAsBankID");
-    if (useSpecAsBank) {
-      bankid =
-          static_cast<int>(inputWS->getSpectrum(histoIndex).getSpectrumNo());
-    } else {
-      bankid = basebanknumber + histoIndex;
-    }
-
-    // Write data
-    if (RALF.compare(outputFormat) == 0) {
-      this->writeRALFdata(bankid, multiplybybinwidth, tmpbuffer,
-                          inputWS->histogram(histoIndex));
-    } else if (SLOG.compare(outputFormat) == 0) {
-      this->writeSLOGdata(bankid, multiplybybinwidth, tmpbuffer,
-                          inputWS->histogram(histoIndex));
-    } else {
-      throw std::runtime_error("Cannot write to the unknown " + outputFormat +
-                               "output format");
-    }
-
-    // Write out to file if necessary
-    if (split) {
-      // Create a new file name and a new file with ofstream
-      std::ofstream out;
-      out.open(splitfilename.c_str(), mode);
-      out.write(tmpbuffer.str().c_str(), tmpbuffer.str().size());
-      out.close();
-    } else {
-      outbuffer << tmpbuffer.str();
-    }
-
-    p.report();
 
   } // ENDFOR (histoIndex)
 
   // Write file
-  if (!split) {
-    std::ofstream out;
-    out.open(outfilename.c_str(), mode);
-    out.write(outbuffer.str().c_str(), outbuffer.str().length());
-    out.close();
-  }
+  writeBufferToFile(splitFileNames, numOfFiles, numOutSpectra);
 }
 
 /** Ensures that when a workspace group is passed as output to this workspace
@@ -367,24 +355,22 @@ void writeLogValue(std::ostream &os, const Run &runinfo,
 //--------------------------------------------------------------------------------------------
 /** Write the header information, which is independent of bank, from the given
  * workspace
-   * @param format :: The string containing the header formatting
-   * @param os :: The stream to use to write the information
-   * @param primaryflightpath :: Value for the moderator to sample distance
+   * @param l1 :: Value for the moderator to sample distance
    */
-void SaveGSS::writeHeaders(const std::string &format, std::stringstream &os,
-                           double primaryflightpath) const {
+std::stringstream SaveGSS::generateInstrumentHeader(double l1) const {
   const Run &runinfo = inputWS->run();
-  std::ios::fmtflags fflags(os.flags());
+  const std::string format = getPropertyValue("Format");
+  std::stringstream outBuffer;
 
   // Run number
   if (format.compare(SLOG) == 0) {
-    os << "Sample Run: ";
-    writeLogValue(os, runinfo, "run_number");
-    os << " Vanadium Run: ";
-    writeLogValue(os, runinfo, "van_number");
-    os << " Wavelength: ";
-    writeLogValue(os, runinfo, "LambdaRequest");
-    os << "\n";
+    outBuffer << "Sample Run: ";
+    writeLogValue(outBuffer, runinfo, "run_number");
+    outBuffer << " Vanadium Run: ";
+    writeLogValue(outBuffer, runinfo, "van_number");
+    outBuffer << " Wavelength: ";
+    writeLogValue(outBuffer, runinfo, "LambdaRequest");
+    outBuffer << "\n";
   }
 
   if (this->getProperty("ExtendedHeader")) {
@@ -394,41 +380,41 @@ void SaveGSS::writeHeaders(const std::string &format, std::stringstream &os,
       if (prop != nullptr && (!prop->value().empty())) {
         std::stringstream line;
         line << "#Instrument parameter file: " << prop->value();
-        os << std::setw(80) << std::left << line.str() << "\n";
+        outBuffer << std::setw(80) << std::left << line.str() << "\n";
       }
     }
 
-    // write out the gsas monitor counts
-    os << "Monitor: ";
+    // write out the GSAS monitor counts
+    outBuffer << "Monitor: ";
     if (runinfo.hasProperty("gsas_monitor")) {
-      writeLogValue(os, runinfo, "gsas_monitor");
+      writeLogValue(outBuffer, runinfo, "gsas_monitor");
     } else {
-      writeLogValue(os, runinfo, "gd_prtn_chrg", "1");
+      writeLogValue(outBuffer, runinfo, "gd_prtn_chrg", "1");
     }
-    os << "\n";
+    outBuffer << "\n";
   }
 
   if (format.compare(SLOG) == 0) {
-    os << "# "; // make the next line a comment
+    outBuffer << "# "; // make the next line a comment
   }
-  os << inputWS->getTitle() << "\n";
-  os << "# " << inputWS->getNumberHistograms() << " Histograms\n";
-  os << "# File generated by Mantid:\n";
-  os << "# Instrument: " << inputWS->getInstrument()->getName() << "\n";
-  os << "# From workspace named : " << inputWS->getName() << "\n";
+  outBuffer << inputWS->getTitle() << "\n";
+  outBuffer << "# " << inputWS->getNumberHistograms() << " Histograms\n";
+  outBuffer << "# File generated by Mantid:\n";
+  outBuffer << "# Instrument: " << inputWS->getInstrument()->getName() << "\n";
+  outBuffer << "# From workspace named : " << inputWS->getName() << "\n";
   if (getProperty("MultiplyByBinWidth"))
-    os << "# with Y multiplied by the bin widths.\n";
-  os << "# Primary flight path " << primaryflightpath << "m \n";
+    outBuffer << "# with Y multiplied by the bin widths.\n";
+  outBuffer << "# Primary flight path " << l1 << "m \n";
   if (format.compare(SLOG) == 0) {
-    os << "# Sample Temperature: ";
-    writeLogValue(os, runinfo, "SampleTemp");
-    os << " Freq: ";
-    writeLogValue(os, runinfo, "SpeedRequest1");
-    os << " Guide: ";
-    writeLogValue(os, runinfo, "guide");
-    os << "\n";
+    outBuffer << "# Sample Temperature: ";
+    writeLogValue(outBuffer, runinfo, "SampleTemp");
+    outBuffer << " Freq: ";
+    writeLogValue(outBuffer, runinfo, "SpeedRequest1");
+    outBuffer << " Guide: ";
+    writeLogValue(outBuffer, runinfo, "guide");
+    outBuffer << "\n";
 
-    // print whether it is normalized by monitor or pcharge
+    // print whether it is normalized by monitor or proton charge
     bool norm_by_current = false;
     bool norm_by_monitor = false;
     const Mantid::API::AlgorithmHistories &algohist =
@@ -439,27 +425,109 @@ void SaveGSS::writeHeaders(const std::string &format, std::stringstream &os,
       if (algo->name().compare("NormaliseToMonitor") == 0)
         norm_by_monitor = true;
     }
-    os << "#";
+    outBuffer << "#";
     if (norm_by_current)
-      os << " Normalised to pCharge";
+      outBuffer << " Normalised to pCharge";
     if (norm_by_monitor)
-      os << " Normalised to monitor";
-    os << "\n";
+      outBuffer << " Normalised to monitor";
+    outBuffer << "\n";
   }
 
-  os.flags(fflags);
+  return outBuffer;
 }
 
-/** Write a single line for bank
-  */
-inline void writeBankLine(std::stringstream &out, const std::string &bintype,
-                          const int banknum, const size_t datasize) {
+std::stringstream
+SaveGSS::generateBankHeader(const Mantid::API::SpectrumInfo &spectrumInfo,
+                            size_t specIndex) const {
+  std::stringstream outBuffer;
+  double l1{0}, l2{0}, twoTheta{0}, difc{0};
+  // If we have all valid detectors get these properties else use 0
+  if (m_allDetectorsValid) {
+    l1 = spectrumInfo.l1();
+    l2 = spectrumInfo.l2(specIndex);
+    twoTheta = spectrumInfo.twoTheta(specIndex);
+    difc = (2.0 * PhysicalConstants::NeutronMass * sin(twoTheta * 0.5) *
+            (l1 + l2)) /
+           (PhysicalConstants::h * 1.e4);
+  }
+
+  if (m_allDetectorsValid) {
+    outBuffer << "# Total flight path " << (l1 + l2) << "m, tth "
+              << (twoTheta * 180. / M_PI) << "deg, DIFC " << difc << "\n";
+  }
+
+  outBuffer << "# Data for spectrum :" << specIndex << "\n";
+  return outBuffer;
+}
+
+std::stringstream SaveGSS::generateBankData(size_t specIndex) const {
+  // Determine bank number into GSAS file
+  std::stringstream outBuffer;
+  const bool useSpecAsBank = getProperty("UseSpectrumNumberAsBankID");
+  const bool multiplyByBinWidth = getProperty("MultiplyByBinWidth");
+  const int userStartingBankNumber = getProperty("Bank");
+  const std::string outputFormat = getPropertyValue("Format");
+  int bankid;
+  if (useSpecAsBank) {
+    bankid = static_cast<int>(inputWS->getSpectrum(specIndex).getSpectrumNo());
+  } else {
+    bankid = userStartingBankNumber + static_cast<int>(specIndex);
+  }
+
+  // Write data
+  if (outputFormat == RALF) {
+    this->writeRALFdata(bankid, multiplyByBinWidth, outBuffer,
+                        inputWS->histogram(specIndex));
+  } else if (outputFormat == SLOG) {
+    this->writeSLOGdata(bankid, multiplyByBinWidth, outBuffer,
+                        inputWS->histogram(specIndex));
+  } else {
+    throw std::runtime_error("Cannot write to the unknown " + outputFormat +
+                             "output format");
+  }
+  return outBuffer;
+}
+
+// Write a single line for a bank
+void writeBankLine(std::stringstream &out, const std::string &bintype,
+                   const int banknum, const size_t datasize) {
   std::ios::fmtflags fflags(out.flags());
   out << "BANK " << std::fixed << std::setprecision(0)
       << banknum // First bank should be 1 for GSAS; this can be changed
       << std::fixed << " " << datasize << std::fixed << " " << datasize
       << std::fixed << " " << bintype;
   out.flags(fflags);
+}
+
+std::vector<std::string> Mantid::DataHandling::SaveGSS::generateOutFileNames(
+    size_t numberOfOutFiles) const {
+  std::vector<std::string> outFileNames;
+  const std::string outputFileName = getProperty("Filename");
+
+  if (!getProperty("SplitFiles")) {
+    // Only add one name and don't generate split filenames
+    // when we are not in split mode
+    outFileNames.push_back(outputFileName);
+    return outFileNames;
+  }
+
+  outFileNames.resize(numberOfOutFiles);
+
+  Poco::Path path(outputFileName);
+  // Filename minus extension
+  const std::string basename = path.getBaseName();
+  const std::string ext = path.getExtension();
+
+  for (size_t i = 0; i < numberOfOutFiles; i++) {
+    // Construct output name of the form 'base name-i.ext'
+    std::string newFileName = basename;
+    ((newFileName += '-') += std::to_string(i) += ".") += ext;
+    // Remove filename from path
+    path.makeParent();
+    path.append(newFileName);
+    outFileNames[i] = path.toString();
+  }
+  return outFileNames;
 }
 
 /**

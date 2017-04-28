@@ -5,8 +5,12 @@
 // Includes
 //---------------------------------------------------
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/cow_ptr.h"
+
+#include <iosfwd>
+#include <vector>
 
 // Forward declare
 namespace Mantid {
@@ -89,14 +93,35 @@ private:
   /// Execution code
   void exec() override;
 
+  /// Writes the current buffer to the user specified file path
+  void writeBufferToFile(const std::vector<std::string> &outFileNames, size_t numOutFiles, size_t numSpectra);
+
+  /// Opens a new file stream at the path specified.
+  std::ofstream openFileStream(const std::string &outFilePath);
+
+  void addDetectorInformation(std::ostream &outBuffer,
+                              Mantid::API::SpectrumInfo &spectrumInfo,
+                              size_t histoIndex, bool allDetectorsValid);
+
+  bool isInstrumentValid() const;
+
+  bool
+  areAllDetectorsValid(const Mantid::API::SpectrumInfo &spectrumInfo) const;
+
   /// Write GSAS file
   void writeGSASFile(const std::string &outfilename, bool append,
                      int basebanknumber, bool multiplybybinwidth, bool split,
                      const std::string &outputFormat);
 
   /// Write the header information
-  void writeHeaders(const std::string &format, std::stringstream &os,
-                    double primaryflightpath) const;
+  std::stringstream generateInstrumentHeader(double l1) const;
+
+  std::stringstream generateBankHeader(const Mantid::API::SpectrumInfo &spectrumInfo,
+	  size_t specIndex) const;
+
+  std::stringstream generateBankData(size_t specIndex) const;
+
+  std::vector<std::string> generateOutFileNames(size_t numberOfOutFiles) const;
 
   /// Write out the data in RALF format
   void writeRALFdata(const int bank, const bool MultiplyByBinWidth,
@@ -115,6 +140,9 @@ private:
 
   /// Workspace
   API::MatrixWorkspace_const_sptr inputWS;
+
+  std::vector<std::stringstream> m_outputBuffer{};
+  bool m_allDetectorsValid{ false };
 };
 }
 }
