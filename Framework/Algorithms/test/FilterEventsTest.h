@@ -112,15 +112,6 @@ public:
         createEventWorkspace(runstart_i64, pulsedt, tofdt, numpulses);
     AnalysisDataService::Instance().addOrReplace("Test02", inpWS);
 
-    Kernel::TimeSeriesProperty<double> *proton_charge_raw =
-        dynamic_cast<Kernel::TimeSeriesProperty<double> *>(
-            inpWS->run().getProperty("proton_charge"));
-    for (size_t i = 0; i < static_cast<size_t>(proton_charge_raw->size());
-         ++i) {
-      std::cout << i << "  " << proton_charge_raw->nthTime(i).totalNanoseconds()
-                << "  " << proton_charge_raw->nthValue(i) << "\n";
-    }
-
     SplittersWorkspace_sptr splws =
         createSplitter(runstart_i64, pulsedt, tofdt);
     AnalysisDataService::Instance().addOrReplace("Splitter02", splws);
@@ -151,14 +142,6 @@ public:
     TS_ASSERT_EQUALS(filteredws0->getSpectrum(0).getNumberEvents(), 4);
     TS_ASSERT_EQUALS(filteredws0->run().getProtonCharge(), 2);
 
-    Kernel::TimeSeriesProperty<double> *proton_charge =
-        dynamic_cast<Kernel::TimeSeriesProperty<double> *>(
-            filteredws0->run().getProperty("proton_charge"));
-    for (size_t i = 0; i < proton_charge->size(); ++i) {
-      std::cout << proton_charge->nthTime(i).totalNanoseconds() << "  "
-                << proton_charge->nthValue(i) << "\n";
-    }
-
     // check splitter log
     TS_ASSERT(filteredws0->run().hasProperty("splitter"));
     Kernel::TimeSeriesProperty<int> *splitter0 =
@@ -178,14 +161,6 @@ public:
     TS_ASSERT(filteredws1);
     TS_ASSERT_EQUALS(filteredws1->getSpectrum(1).getNumberEvents(), 16);
     TS_ASSERT_EQUALS(filteredws1->run().getProtonCharge(), 3);
-
-    Kernel::TimeSeriesProperty<double> *proton_charge1 =
-        dynamic_cast<Kernel::TimeSeriesProperty<double> *>(
-            filteredws1->run().getProperty("proton_charge"));
-    for (size_t i = 0; i < proton_charge1->size(); ++i) {
-      std::cout << proton_charge1->nthTime(i).totalNanoseconds() << "  "
-                << proton_charge1->nthValue(i) << "\n";
-    }
 
     // check splitter log
     TS_ASSERT(filteredws0->run().hasProperty("splitter"));
@@ -208,14 +183,6 @@ public:
     TS_ASSERT(filteredws2);
     TS_ASSERT_EQUALS(filteredws2->getSpectrum(1).getNumberEvents(), 21);
     TS_ASSERT_EQUALS(filteredws2->run().getProtonCharge(), 3);
-
-    Kernel::TimeSeriesProperty<double> *proton_charge2 =
-        dynamic_cast<Kernel::TimeSeriesProperty<double> *>(
-            filteredws2->run().getProperty("proton_charge"));
-    for (size_t i = 0; i < proton_charge2->size(); ++i) {
-      std::cout << proton_charge2->nthTime(i).totalNanoseconds() << "  "
-                << proton_charge2->nthValue(i) << "\n";
-    }
 
     EventList elist3 = filteredws2->getSpectrum(3);
     elist3.sortPulseTimeTOF();

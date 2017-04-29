@@ -21,6 +21,7 @@
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/VisibleWhenProperty.h"
 #include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/Strings.h"
 
 #include <memory>
 #include <sstream>
