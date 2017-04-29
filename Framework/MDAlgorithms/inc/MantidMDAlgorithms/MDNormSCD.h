@@ -63,7 +63,7 @@ private:
                                      const API::MatrixWorkspace &integrFlux,
                                      size_t sp,
                                      std::vector<double> &yValues) const;
-  void calculateIntersections(std::vector<std::vector<double>> &intersections,
+  void calculateIntersections(std::vector<std::array<double, 4>> &intersections,
                               const double theta, const double phi);
 
   /// Normalization workspace

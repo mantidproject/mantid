@@ -27,8 +27,8 @@ using namespace Mantid::Kernel;
 
 namespace {
 // function to  compare two intersections (h,k,l,Momentum) by Momentum
-bool compareMomentum(const std::vector<double> &v1,
-                     const std::vector<double> &v2) {
+bool compareMomentum(const std::array<double,4> &v1,
+                     const std::array<double,4> &v2) {
   return (v1[3] < v2[3]);
 }
 }
@@ -414,7 +414,7 @@ void MDNormSCD::calculateNormalization(
 
   std::vector<std::atomic<signal_t>> signalArray(m_normWS->getNPoints());
 
-  std::vector<std::vector<double>> intersections;
+  std::vector<std::array<double, 4>> intersections;
   std::vector<double> xValues, yValues;
   auto prog = make_unique<API::Progress>(this, 0.3, 1.0, ndets);
 #pragma omp parallel for private(intersections, xValues,                       \
@@ -447,9 +447,9 @@ void MDNormSCD::calculateNormalization(
     // momentum values at intersections
     auto intersectionsBegin = intersections.begin();
     // copy momenta to xValues
-    auto x = xValues.begin();
     xValues.resize(intersections.size());
     yValues.resize(intersections.size());
+    auto x = xValues.begin();
     for (auto it = intersectionsBegin; it != intersections.end(); ++it, ++x) {
       *x = (*it)[3];
     }
@@ -583,7 +583,7 @@ void MDNormSCD::calcIntegralsForIntersections(
  * @return A list of intersections in HKL space
  */
 void MDNormSCD::calculateIntersections(
-    std::vector<std::vector<double>> &intersections, const double theta,
+    std::vector<std::array<double,4>> &intersections, const double theta,
     const double phi) {
   V3D q(-sin(theta) * cos(phi), -sin(theta) * sin(phi), 1. - cos(theta));
   q = m_rubw * q;
@@ -621,7 +621,7 @@ void MDNormSCD::calculateIntersections(
           if ((ki >= m_kmin) && (ki <= m_kmax) && (li >= m_lmin) &&
               (li <= m_lmax)) {
             double momi = fmom * (hi - hStart) + m_kiMin;
-            intersections.push_back({hi, ki, li, momi});
+            intersections.push_back({{hi, ki, li, momi}});
           }
         }
       }
@@ -634,7 +634,7 @@ void MDNormSCD::calculateIntersections(
       double lhmin = fl * (m_hmin - hStart) + lStart;
       if ((khmin >= m_kmin) && (khmin <= m_kmax) && (lhmin >= m_lmin) &&
           (lhmin <= m_lmax)) {
-        intersections.push_back({m_hmin, khmin, lhmin, momhMin});
+        intersections.push_back({{m_hmin, khmin, lhmin, momhMin}});
       }
     }
     double momhMax = fmom * (m_hmax - hStart) + m_kiMin;
@@ -644,7 +644,7 @@ void MDNormSCD::calculateIntersections(
       double lhmax = fl * (m_hmax - hStart) + lStart;
       if ((khmax >= m_kmin) && (khmax <= m_kmax) && (lhmax >= m_lmin) &&
           (lhmax <= m_lmax)) {
-        intersections.push_back({m_hmax, khmax, lhmax, momhMax});
+        intersections.push_back({{m_hmax, khmax, lhmax, momhMax}});
       }
     }
   }
@@ -666,7 +666,7 @@ void MDNormSCD::calculateIntersections(
           if ((hi >= m_hmin) && (hi <= m_hmax) && (li >= m_lmin) &&
               (li <= m_lmax)) {
             double momi = fmom * (ki - kStart) + m_kiMin;
-            intersections.push_back({hi, ki, li, momi});
+            intersections.push_back({{hi, ki, li, momi}});
           }
         }
       }
@@ -679,7 +679,7 @@ void MDNormSCD::calculateIntersections(
       double lkmin = fl * (m_kmin - kStart) + lStart;
       if ((hkmin >= m_hmin) && (hkmin <= m_hmax) && (lkmin >= m_lmin) &&
           (lkmin <= m_lmax)) {
-        intersections.push_back({hkmin, m_kmin, lkmin, momkMin});
+        intersections.push_back({{hkmin, m_kmin, lkmin, momkMin}});
       }
     }
     double momkMax = fmom * (m_kmax - kStart) + m_kiMin;
@@ -689,7 +689,7 @@ void MDNormSCD::calculateIntersections(
       double lkmax = fl * (m_kmax - kStart) + lStart;
       if ((hkmax >= m_hmin) && (hkmax <= m_hmax) && (lkmax >= m_lmin) &&
           (lkmax <= m_lmax)) {
-        intersections.push_back({hkmax, m_kmax, lkmax, momkMax});
+        intersections.push_back({{hkmax, m_kmax, lkmax, momkMax}});
       }
     }
   }
@@ -711,7 +711,7 @@ void MDNormSCD::calculateIntersections(
           if ((hi >= m_hmin) && (hi <= m_hmax) && (ki >= m_kmin) &&
               (ki <= m_kmax)) {
             double momi = fmom * (li - lStart) + m_kiMin;
-            intersections.push_back({hi, ki, li, momi});
+            intersections.push_back({{hi, ki, li, momi}});
           }
         }
       }
@@ -724,7 +724,7 @@ void MDNormSCD::calculateIntersections(
       double klmin = fk * (m_lmin - lStart) + kStart;
       if ((hlmin >= m_hmin) && (hlmin <= m_hmax) && (klmin >= m_kmin) &&
           (klmin <= m_kmax)) {
-        intersections.push_back({hlmin, klmin, m_lmin, momlMin});
+        intersections.push_back({{hlmin, klmin, m_lmin, momlMin}});
       }
     }
     double momlMax = fmom * (m_lmax - lStart) + m_kiMin;
@@ -734,7 +734,7 @@ void MDNormSCD::calculateIntersections(
       double klmax = fk * (m_lmax - lStart) + kStart;
       if ((hlmax >= m_hmin) && (hlmax <= m_hmax) && (klmax >= m_kmin) &&
           (klmax <= m_kmax)) {
-        intersections.push_back({hlmax, klmax, m_lmax, momlMax});
+        intersections.push_back({{hlmax, klmax, m_lmax, momlMax}});
       }
     }
   }
@@ -742,11 +742,11 @@ void MDNormSCD::calculateIntersections(
   // add endpoints
   if ((hStart >= m_hmin) && (hStart <= m_hmax) && (kStart >= m_kmin) &&
       (kStart <= m_kmax) && (lStart >= m_lmin) && (lStart <= m_lmax)) {
-    intersections.push_back({hStart, kStart, lStart, m_kiMin});
+    intersections.push_back({{hStart, kStart, lStart, m_kiMin}});
   }
   if ((hEnd >= m_hmin) && (hEnd <= m_hmax) && (kEnd >= m_kmin) &&
       (kEnd <= m_kmax) && (lEnd >= m_lmin) && (lEnd <= m_lmax)) {
-    intersections.push_back({hEnd, kEnd, lEnd, m_kiMax});
+    intersections.push_back({{hEnd, kEnd, lEnd, m_kiMax}});
   }
 
   // sort intersections by momentum
