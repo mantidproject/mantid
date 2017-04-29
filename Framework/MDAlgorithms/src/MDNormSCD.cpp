@@ -27,8 +27,8 @@ using namespace Mantid::Kernel;
 
 namespace {
 // function to  compare two intersections (h,k,l,Momentum) by Momentum
-bool compareMomentum(const Mantid::Kernel::VMD &v1,
-                     const Mantid::Kernel::VMD &v2) {
+bool compareMomentum(const std::vector<double> &v1,
+                     const std::vector<double> &v2) {
   return (v1[3] < v2[3]);
 }
 }
@@ -415,9 +415,10 @@ void MDNormSCD::calculateNormalization(
   std::vector<std::atomic<signal_t>> signalArray(m_normWS->getNPoints());
 
   std::vector<std::vector<double>> intersections;
+  std::vector<double> xValues, yValues;
   auto prog = make_unique<API::Progress>(this, 0.3, 1.0, ndets);
-#pragma omp parallel for private(intersections) if Kernel::threadSafe(         \
-    *integrFlux)
+#pragma omp parallel for private(intersections, xValues,                       \
+                                 yValues) if Kernel::threadSafe(*integrFlux)
   for (int64_t i = 0; i < ndets; i++) {
     PARALLEL_START_INTERUPT_REGION
 
@@ -445,14 +446,12 @@ void MDNormSCD::calculateNormalization(
     // -- calculate integrals for the intersection --
     // momentum values at intersections
     auto intersectionsBegin = intersections.begin();
-    std::vector<double> xValues(intersections.size()),
-        yValues(intersections.size());
-    {
-      // copy momenta to xValues
-      auto x = xValues.begin();
-      for (auto it = intersectionsBegin; it != intersections.end(); ++it, ++x) {
-        *x = (*it)[3];
-      }
+    // copy momenta to xValues
+    auto x = xValues.begin();
+    xValues.resize(intersections.size());
+    yValues.resize(intersections.size());
+    for (auto it = intersectionsBegin; it != intersections.end(); ++it, ++x) {
+      *x = (*it)[3];
     }
     // calculate integrals at momenta from xValues by interpolating between
     // points in spectrum sp
@@ -751,7 +750,6 @@ void MDNormSCD::calculateIntersections(
   }
 
   // sort intersections by momentum
-  typedef std::vector<Mantid::Kernel::VMD>::iterator IterType;
   std::stable_sort(intersections.begin(), intersections.end(), compareMomentum);
 }
 
