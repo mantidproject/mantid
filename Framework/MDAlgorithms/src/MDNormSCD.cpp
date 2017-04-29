@@ -418,7 +418,7 @@ void MDNormSCD::calculateNormalization(
   std::vector<double> xValues, yValues;
   auto prog = make_unique<API::Progress>(this, 0.3, 1.0, ndets);
 #pragma omp parallel for private(intersections, xValues,                       \
-                                 yValues) if Kernel::threadSafe(*integrFlux)
+                                 yValues) if (Kernel::threadSafe(*integrFlux))
   for (int64_t i = 0; i < ndets; i++) {
     PARALLEL_START_INTERUPT_REGION
 
