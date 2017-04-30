@@ -412,13 +412,15 @@ void MDNormSCD::calculateNormalization(
   const detid2index_map solidAngDetToIdx =
       solidAngleWS->getDetectorIDToWorkspaceIndexMap();
 
+  const size_t vmdDims = 4;
+  std::vector<coord_t> pos(vmdDims + otherValues.size());
   std::vector<std::atomic<signal_t>> signalArray(m_normWS->getNPoints());
-
   std::vector<std::array<double, 4>> intersections;
   std::vector<double> xValues, yValues;
+  std::vector<coord_t> posNew;
   auto prog = make_unique<API::Progress>(this, 0.3, 1.0, ndets);
-#pragma omp parallel for private(intersections, xValues,                       \
-                                 yValues) if (Kernel::threadSafe(*integrFlux))
+#pragma omp parallel for private(intersections, xValues, yValues, posNew,      \
+                                 pos) if (Kernel::threadSafe(*integrFlux))
   for (int64_t i = 0; i < ndets; i++) {
     PARALLEL_START_INTERUPT_REGION
 
@@ -459,12 +461,10 @@ void MDNormSCD::calculateNormalization(
     calcIntegralsForIntersections(xValues, *integrFlux, wsIdx, yValues);
 
     // Compute final position in HKL
-    const size_t vmdDims = intersections.front().size();
     // pre-allocate for efficiency and copy non-hkl dim values into place
-    std::vector<coord_t> pos(vmdDims + otherValues.size());
     std::copy(otherValues.begin(), otherValues.end(),
               pos.begin() + vmdDims - 1);
-    pos.push_back(1.);
+    pos.back() = 1.;
 
     for (auto it = intersectionsBegin + 1; it != intersections.end(); ++it) {
       const auto &curIntSec = *it;
@@ -478,7 +478,7 @@ void MDNormSCD::calculateNormalization(
       std::transform(curIntSec.begin(), curIntSec.begin() + vmdDims - 1,
                      prevIntSec.begin(), pos.begin(),
                      VectorHelper::SimpleAverage<coord_t>());
-      std::vector<coord_t> posNew = affineTrans * pos;
+      affineTrans.multiplyPoint(pos, posNew);
       size_t linIndex = m_normWS->getLinearIndexAtCoord(posNew.data());
       if (linIndex == size_t(-1))
         continue;

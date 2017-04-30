@@ -385,6 +385,16 @@ std::vector<T> Matrix<T>::operator*(const std::vector<T> &Vec) const
 }
 
 template <typename T>
+void Matrix<T>::multiplyPoint(const std::vector<T> &in,
+                              std::vector<T> &out) const {
+  for (size_t i = 0; i < nx; i++) {
+    for (size_t j = 0; j < ny; j++) {
+      out[i] += V[i][j] * in[j];
+    }
+  }
+}
+
+template <typename T>
 V3D Matrix<T>::operator*(const V3D &Vx) const
 /**
   Matrix multiplication THIS * V
