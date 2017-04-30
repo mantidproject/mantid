@@ -417,7 +417,7 @@ void MDNormSCD::calculateNormalization(
   std::vector<std::atomic<signal_t>> signalArray(m_normWS->getNPoints());
   std::vector<std::array<double, 4>> intersections;
   std::vector<double> xValues, yValues;
-  std::vector<coord_t> posNew;
+  std::vector<coord_t> posNew(4);
   auto prog = make_unique<API::Progress>(this, 0.3, 1.0, ndets);
 #pragma omp parallel for private(intersections, xValues, yValues, posNew,      \
                                  pos) if (Kernel::threadSafe(*integrFlux))
