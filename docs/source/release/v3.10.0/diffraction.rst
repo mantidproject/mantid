@@ -9,6 +9,7 @@ Crystal Improvements
 --------------------
 
  - :ref:`algm-PredictPeaks` has a new option ``PredictPeaksOutsideDetectors`` which will predict peaks which fall outside of any defined detectors. This feature requires an extended detector space definition and will do nothing if this is not present in the IDF.
+ - :ref:`algm-PredictPeaks` has a new option ``EdgePixels`` which will not predict peaks which fall in the number of pixels input from the edge of detectors.
  - :ref:`StartLiveData <algm-StartLiveData>` will load "live" data streaming from MaNDi data server.
 
 Engineering Diffraction
