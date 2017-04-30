@@ -416,10 +416,10 @@ void MDNormSCD::calculateNormalization(
   std::vector<std::atomic<signal_t>> signalArray(m_normWS->getNPoints());
   std::vector<std::array<double, 4>> intersections;
   std::vector<double> xValues, yValues;
-  std::vector<coord_t> posNew(vmdDims);
+  std::vector<coord_t> pos, posNew;
   auto prog = make_unique<API::Progress>(this, 0.3, 1.0, ndets);
-#pragma omp parallel for private(intersections, xValues, yValues,              \
-                                 pos) if (Kernel::threadSafe(*integrFlux))
+#pragma omp parallel for private(intersections, xValues, yValues, pos,         \
+                                 posNew) if (Kernel::threadSafe(*integrFlux))
   for (int64_t i = 0; i < ndets; i++) {
     PARALLEL_START_INTERUPT_REGION
 
@@ -461,7 +461,7 @@ void MDNormSCD::calculateNormalization(
 
     // Compute final position in HKL
     // pre-allocate for efficiency and copy non-hkl dim values into place
-    std::vector<coord_t> pos(vmdDims + otherValues.size());
+    pos.resize(vmdDims + otherValues.size());
     std::copy(otherValues.begin(), otherValues.end(),
               pos.begin() + vmdDims - 1);
     pos.push_back(1.);
