@@ -575,7 +575,7 @@ void MDNormSCD::calcIntegralsForIntersections(
  * Calculate the points of intersection for the given detector with cuboid
  * surrounding the
  * detector position in HKL
- * @param intersetions A list of intersections in HKL space
+ * @param intersections A list of intersections in HKL space
  * @param theta Polar angle withd detector
  * @param phi Azimuthal angle with detector
  */
