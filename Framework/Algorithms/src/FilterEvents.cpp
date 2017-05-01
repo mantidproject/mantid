@@ -157,9 +157,14 @@ void FilterEvents::init() {
       "Start time for splitters that can be parsed to DateAndTime.");
 
   declareProperty(
-      Kernel::make_unique<ArrayProperty<std::string>>("ExcludedLogs"),
-      "List of name of sample logs that will not be copied or split into the "
-      "chopped workspace.");
+      Kernel::make_unique<ArrayProperty<std::string>>("TimeSeriesPropertyLogs"),
+      "List of name of sample logs of TimeSeriesProperty format. "
+      "They will be either excluded from splitting if ExcludedSpecifiedLogs is specified as True. Or "
+      "They will be the only TimeSeriesProperty sample logs that will be split to child workspaces.");
+
+  declareProperty("ExcludeSpecifiedLogs", true,
+                  "If true, all the TimeSeriesProperty logs listed will be excluded from duplicating. "
+                  "Otherwise, only those specified logs will be split.");
 }
 
 /** Execution body
@@ -405,15 +410,10 @@ void FilterEvents::splitTimeSeriesProperty(
     Kernel::TimeSeriesProperty<TYPE> *tsp,
     std::vector<Kernel::DateAndTime> &split_datetime_vec,
     const int max_target_index) {
-
-  std::set<std::string>::iterator set_iter;
-
+  // skip the sample logs if they are specified
   // get property name and etc
   std::string property_name = tsp->name();
-  g_log.warning() << "[DB] Split double sample log " << property_name
-                  << " with size " << tsp->size() << "\n";
-  set_iter = m_excludedSampleLogs.find(property_name);
-
+  std::set<std::string>::iterator set_iter = m_excludedSampleLogs.find(property_name);
   // skip the log if it is in the excluded sample log list
   if (set_iter != m_excludedSampleLogs.end())
     return;
@@ -427,12 +427,20 @@ void FilterEvents::splitTimeSeriesProperty(
     output_vector.push_back(new_property);
   }
 
-  // split log
-  g_log.warning() << "Split datetime vector size = "
-                  << split_datetime_vec.size()
-                  << ", vector of splitter group size = "
-                  << m_vecSplitterGroup.size() << "\n";
-  tsp->splitByTimeVector(split_datetime_vec, m_vecSplitterGroup, output_vector);
+  // duplicate the time series property if the size is just one
+  if (tsp->size() == 1)
+  {
+    // duplicate
+    for (size_t i_out = 0; i_out < output_vector.size(); ++i_out)
+    {
+      output_vector[i_out]->addValue(tsp->firstTime(), tsp->firstValue());
+    }
+  }
+  else
+  {
+    // split log
+    tsp->splitByTimeVector(split_datetime_vec, m_vecSplitterGroup, output_vector);
+  }
 
   // assign to output workspaces
   for (int tindex = 0; tindex <= max_target_index; ++tindex) {
@@ -467,71 +475,71 @@ void FilterEvents::splitTimeSeriesProperty(
   return;
 }
 
-void FilterEvents::splitDoubleTimeSeriesLogs(
-    const std::vector<TimeSeriesProperty<double> *> &dbl_tsp_vector,
-    std::vector<Kernel::DateAndTime> &split_datetime_vec,
-    const int max_target_index) {
-  std::set<std::string>::iterator set_iter;
+//void FilterEvents::splitDoubleTimeSeriesLogs(
+//    const std::vector<TimeSeriesProperty<double> *> &dbl_tsp_vector,
+//    std::vector<Kernel::DateAndTime> &split_datetime_vec,
+//    const int max_target_index) {
+//  std::set<std::string>::iterator set_iter;
 
-  // deal with double time series property
-  for (size_t i = 0; i < dbl_tsp_vector.size(); ++i) {
-    // get property name and etc
-    std::string property_name = dbl_tsp_vector[i]->name();
-    g_log.warning() << "[DB] Split double sample log " << property_name
-                    << " with size " << dbl_tsp_vector[i]->size() << "\n";
-    set_iter = m_excludedSampleLogs.find(property_name);
+//  // deal with double time series property
+//  for (size_t i = 0; i < dbl_tsp_vector.size(); ++i) {
+//    // get property name and etc
+//    std::string property_name = dbl_tsp_vector[i]->name();
+//    g_log.warning() << "[DB] Split double sample log " << property_name
+//                    << " with size " << dbl_tsp_vector[i]->size() << "\n";
+//    set_iter = m_excludedSampleLogs.find(property_name);
 
-    // skip the log if it is in the excluded sample log list
-    if (set_iter != m_excludedSampleLogs.end())
-      continue;
+//    // skip the log if it is in the excluded sample log list
+//    if (set_iter != m_excludedSampleLogs.end())
+//      continue;
 
-    // generate new propertys for the source to split to
-    std::vector<TimeSeriesProperty<double> *> output_vector;
-    for (int tindex = 0; tindex <= max_target_index; ++tindex) {
-      TimeSeriesProperty<double> *new_property =
-          new TimeSeriesProperty<double>(property_name);
-      output_vector.push_back(new_property);
-    }
+//    // generate new propertys for the source to split to
+//    std::vector<TimeSeriesProperty<double> *> output_vector;
+//    for (int tindex = 0; tindex <= max_target_index; ++tindex) {
+//      TimeSeriesProperty<double> *new_property =
+//          new TimeSeriesProperty<double>(property_name);
+//      output_vector.push_back(new_property);
+//    }
 
-    // split log
-    g_log.warning() << "Split datetime vector size = "
-                    << split_datetime_vec.size()
-                    << ", vector of splitter group size = "
-                    << m_vecSplitterGroup.size() << "\n";
-    dbl_tsp_vector[i]->splitByTimeVector(split_datetime_vec, m_vecSplitterGroup,
-                                         output_vector);
+//    // split log
+//    g_log.warning() << "Split datetime vector size = "
+//                    << split_datetime_vec.size()
+//                    << ", vector of splitter group size = "
+//                    << m_vecSplitterGroup.size() << "\n";
+//    dbl_tsp_vector[i]->splitByTimeVector(split_datetime_vec, m_vecSplitterGroup,
+//                                         output_vector);
 
-    // assign to output workspaces
-    for (int tindex = 0; tindex <= max_target_index; ++tindex) {
-      // debug
-      g_log.warning() << "Split TSP " << tindex
-                      << ": size = " << output_vector[tindex]->size() << "\n";
-      if (output_vector[tindex]->size() > 0)
-        g_log.warning() << "\t Starting from "
-                        << output_vector[tindex]->nthTime(0) << "\n";
+//    // assign to output workspaces
+//    for (int tindex = 0; tindex <= max_target_index; ++tindex) {
+//      // debug
+//      g_log.warning() << "Split TSP " << tindex
+//                      << ": size = " << output_vector[tindex]->size() << "\n";
+//      if (output_vector[tindex]->size() > 0)
+//        g_log.warning() << "\t Starting from "
+//                        << output_vector[tindex]->nthTime(0) << "\n";
 
-      // find output workspace
-      std::map<int, DataObjects::EventWorkspace_sptr>::iterator wsiter;
-      wsiter = m_outputWorkspacesMap.find(tindex);
-      if (wsiter == m_outputWorkspacesMap.end()) {
-        g_log.error() << "Workspace target (" << tindex
-                      << ") does not have workspace associated."
-                      << "\n";
-      } else {
-        DataObjects::EventWorkspace_sptr ws_i = wsiter->second;
-        g_log.warning() << "Workspace target " << ws_i->getName()
-                        << " is associated ";
-        ws_i->mutableRun().addProperty(output_vector[tindex], true);
-        if (output_vector[tindex]->size() > 0) {
-          g_log.warning() << "with 1st time = "
-                          << output_vector[tindex]->nthTime(0) << "\n";
-        } else {
-          g_log.warning("without any entry.");
-        }
-      }
-    }
-  } // END-FOR (i)
-}
+//      // find output workspace
+//      std::map<int, DataObjects::EventWorkspace_sptr>::iterator wsiter;
+//      wsiter = m_outputWorkspacesMap.find(tindex);
+//      if (wsiter == m_outputWorkspacesMap.end()) {
+//        g_log.error() << "Workspace target (" << tindex
+//                      << ") does not have workspace associated."
+//                      << "\n";
+//      } else {
+//        DataObjects::EventWorkspace_sptr ws_i = wsiter->second;
+//        g_log.warning() << "Workspace target " << ws_i->getName()
+//                        << " is associated ";
+//        ws_i->mutableRun().addProperty(output_vector[tindex], true);
+//        if (output_vector[tindex]->size() > 0) {
+//          g_log.warning() << "with 1st time = "
+//                          << output_vector[tindex]->nthTime(0) << "\n";
+//        } else {
+//          g_log.warning("without any entry.");
+//        }
+//      }
+//    }
+//  } // END-FOR (i)
+//}
 
 //----------------------------------------------------------------------------------------------
 /** Process input properties
@@ -654,7 +662,7 @@ void FilterEvents::processAlgorithmProperties() {
   } // END-IF: m_isSplitterRelativeTime
 
   // sample logs
-  std::vector<std::string> excluded_logs = getProperty("ExcludedLogs");
+  std::vector<std::string> excluded_logs = getProperty("TimeSeriesPropertyLogs");
   for (auto iter = excluded_logs.begin(); iter != excluded_logs.end(); ++iter)
     m_excludedSampleLogs.insert(*iter);
 }
