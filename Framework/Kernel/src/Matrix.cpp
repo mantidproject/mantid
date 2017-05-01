@@ -384,6 +384,12 @@ std::vector<T> Matrix<T>::operator*(const std::vector<T> &Vec) const
   return Out;
 }
 
+/**
+  Matrix multiplication THIS * Vec to produce a vec
+  @param in :: size of vector > this->nrows
+  @param out :: result of Matrix(This * Vec)
+  @throw MisMatch<size_t> if there is a size mismatch.
+*/
 template <typename T>
 void Matrix<T>::multiplyPoint(const std::vector<T> &in,
                               std::vector<T> &out) const {
