@@ -964,9 +964,8 @@ public:
     }
 
     // cleanup
-    for (auto it = outputs.begin(); it != outputs.end(); ++it)
-      delete (*it);
-    outputs.clear();
+    for (auto &it : outputs)
+      delete it;
   }
 
   //----------------------------------------------------------------------------
