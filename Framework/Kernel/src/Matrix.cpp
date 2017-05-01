@@ -387,7 +387,8 @@ std::vector<T> Matrix<T>::operator*(const std::vector<T> &Vec) const
 template <typename T>
 void Matrix<T>::multiplyPoint(const std::vector<T> &in,
                               std::vector<T> &out) const {
-  out.assign(nx, static_cast<T>(0.0));
+  out.resize(nx);
+  std::fill(std::begin(out), std::end(out), static_cast<T>(0.0));
   if (ny > in.size())
     throw Kernel::Exception::MisMatch<size_t>(ny, in.size(),
                                               "Matrix::multiplyPoint(in,out)");
