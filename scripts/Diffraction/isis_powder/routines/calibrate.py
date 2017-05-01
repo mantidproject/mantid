@@ -45,7 +45,7 @@ def create_van(instrument, run_details, absorb):
 
     _create_vanadium_splines(focused_spectra, instrument, run_details)
 
-    common.keep_single_ws_unit(d_spacing_group=d_spacing_group,tof_group=tof_group,
+    common.keep_single_ws_unit(d_spacing_group=d_spacing_group, tof_group=tof_group,
                                unit_to_keep=instrument._get_unit_to_keep())
 
     common.remove_intermediate_workspace(corrected_van_ws)
