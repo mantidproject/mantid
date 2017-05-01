@@ -1,4 +1,5 @@
 from __future__ import (absolute_import, division, print_function)
+from six import iterkeys
 
 import mantid.kernel as kernel
 import mantid.simpleapi as mantid
@@ -7,11 +8,12 @@ from isis_powder.routines.common_enums import INPUT_BATCHING, WORKSPACE_UNITS
 
 def cal_map_dictionary_key_helper(dictionary, key, append_to_error_message=None):
     """
-    Provides a light wrapper around the dictionary key helper which provides a generic error
-    message stating the following key could not be found in the calibration mapping file. As
-    several instruments will use this message it makes sense to localise it to common. If a
-    message is passed in append_to_error_message it will append that to the end of the generic
-    error message in its own line when an exception is raised.
+    Provides a light wrapper around the dictionary key helper and uses case insensitive lookup.
+    This also provides a generic error message stating the following key could not be found
+    in the calibration mapping file. As several instruments will use this message it makes
+    sense to localise it to common. If a message is passed in append_to_error_message it
+    will append that to the end of the generic error message in its own line when an
+    exception is raised.
     :param dictionary: The dictionary to search in for the key
     :param key: The key to search for
     :param append_to_error_message: (Optional) The message to append to the end of the error message
@@ -19,7 +21,9 @@ def cal_map_dictionary_key_helper(dictionary, key, append_to_error_message=None)
     """
     err_message = "The field '" + str(key) + "' is required within the calibration file but was not found."
     err_message += '\n' + str(append_to_error_message) if append_to_error_message else ''
-    return dictionary_key_helper(dictionary=dictionary, key=key, throws=True, exception_msg=err_message)
+
+    return dictionary_key_helper(dictionary=dictionary, key=key, throws=True,
+                                 case_insensitive=True, exception_msg=err_message)
 
 
 def crop_banks_using_crop_list(bank_list, crop_values_list):
@@ -67,7 +71,7 @@ def crop_in_tof(ws_to_crop, x_min=None, x_max=None):
     return cropped_ws
 
 
-def dictionary_key_helper(dictionary, key, throws=True, exception_msg=None):
+def dictionary_key_helper(dictionary, key, throws=True, case_insensitive=False, exception_msg=None):
     """
     Checks if the key is in the dictionary and performs various different actions if it is not depending on
     the user parameters. If set to not throw it will return none. Otherwise it will throw a custom user message
@@ -75,12 +79,25 @@ def dictionary_key_helper(dictionary, key, throws=True, exception_msg=None):
     :param dictionary: The dictionary to search for the key
     :param key: The key to search for in the dictionary
     :param throws: (Optional) Defaults to true, whether this should throw on a key not being present
+    :param case_insensitive (Optional) Defaults to false, if set to true it accounts for mixed case but is O(n) time
     :param exception_msg: (Optional) The error message to print in the KeyError instead of the default Python message
     :return: The key if it was found, None if throws was set to false and the key was not found.
     """
     if key in dictionary:
+        # Try to use hashing first
         return dictionary[key]
-    elif not throws:
+
+    # If we still couldn't find it use the O(n) method
+    if case_insensitive:
+        # Convert key to str
+        lower_key = str(key).lower()
+        for dict_key in iterkeys(dictionary):
+            if str(dict_key).lower() == lower_key:
+                # Found it
+                return dictionary[dict_key]
+
+    # It doesn't exist at this point lets go into our error handling
+    if not throws:
         return None
     elif exception_msg:
         # Print user specified message
@@ -143,8 +160,12 @@ def generate_splined_name(vanadium_string, *args):
     :return: The splined vanadium name
     """
     out_name = "VanSplined" + '_' + str(vanadium_string)
-    for value in args:
-        out_name += '_' + str(value)
+    for passed_arg in args:
+        if isinstance(passed_arg, list):
+            for arg in passed_arg:
+                out_name += '_' + str(arg)
+        else:
+            out_name += '_' + (str(passed_arg))
 
     out_name += ".nxs"
     return out_name
