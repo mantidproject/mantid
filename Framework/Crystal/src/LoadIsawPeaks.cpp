@@ -12,6 +12,8 @@
 #include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/Unit.h"
+#include "MantidAPI/AnalysisDataService.h"
+#include <boost/algorithm/string/trim.hpp>
 
 using Mantid::Kernel::Strings::readToEndOfLine;
 using Mantid::Kernel::Strings::getWord;
@@ -99,6 +101,8 @@ void LoadIsawPeaks::init() {
 void LoadIsawPeaks::exec() {
   // Create the workspace
   PeaksWorkspace_sptr ws(new PeaksWorkspace());
+  std::string outputwsName = getPropertyValue("OutputWorkspace");
+  AnalysisDataService::Instance().addOrReplace(outputwsName, ws);
 
   // This loads (appends) the peaks
   this->appendFile(ws, getPropertyValue("Filename"));
@@ -180,11 +184,62 @@ std::string LoadIsawPeaks::readHeader(PeaksWorkspace_sptr outWS,
   // Now skip all lines on L1, detector banks, etc. until we get to a block of
   // peaks. They start with 0.
   std::string s;
+  std::vector<int> det;
   while (s != "0" && in.good()) {
     readToEndOfLine(in, true);
     s = getWord(in, false);
+    int bank = 0;
+    // Save all bank numbers in header lines
+    Strings::convert(getWord(in, false), bank);
+    if (s == "5")
+      det.push_back(bank);
+  }
+  // Find bank numbers in instument that are not in header lines
+  std::string maskBanks;
+  if (!instr)
+    throw std::runtime_error(
+        "No instrument in the Workspace. Cannot save DetCal file.");
+  // We cannot assume the peaks have bank type detector modules, so we have a
+  // string to check this
+  std::string bankPart = "bank";
+  if (instr->getName().compare("WISH") == 0)
+    bankPart = "WISHpanel";
+  // Get all children
+  std::vector<IComponent_const_sptr> comps;
+  instr->getChildren(comps, true);
+  for (auto &comp : comps) {
+    std::string bankName = comp->getName();
+    boost::trim(bankName);
+    boost::erase_all(bankName, bankPart);
+    int bank = 0;
+    Strings::convert(bankName, bank);
+    for (size_t j = 0; j < det.size(); j++) {
+      if (bank == det[j]) {
+        bank = 0;
+        continue;
+      }
+    }
+    if (bank == 0)
+      continue;
+    // Track unique bank numbers
+    maskBanks += bankName + ",";
   }
 
+  if (!maskBanks.empty()) {
+    // remove last comma
+    maskBanks.resize(maskBanks.size() - 1);
+    // Mask banks that are not in header lines
+    try {
+      Algorithm_sptr alg = createChildAlgorithm("MaskBTP");
+      alg->setProperty<Workspace_sptr>("Workspace", outWS);
+      alg->setProperty("Bank", maskBanks);
+      if (!alg->execute())
+        throw std::runtime_error(
+            "MaskDetectors Child Algorithm has not executed successfully");
+    } catch (...) {
+      g_log.error("Can't execute MaskBTP algorithm");
+    }
+  }
   return s;
 }
 
