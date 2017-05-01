@@ -27,8 +27,8 @@ using namespace Mantid::Kernel;
 
 namespace {
 // function to  compare two intersections (h,k,l,Momentum) by Momentum
-bool compareMomentum(const std::array<double,4> &v1,
-                     const std::array<double,4> &v2) {
+bool compareMomentum(const std::array<double, 4> &v1,
+                     const std::array<double, 4> &v2) {
   return (v1[3] < v2[3]);
 }
 }
@@ -419,82 +419,80 @@ void MDNormSCD::calculateNormalization(
   std::vector<coord_t> pos, posNew;
   auto prog = make_unique<API::Progress>(this, 0.3, 1.0, ndets);
 PRAGMA_OMP(parallel for private(intersections, xValues, yValues, pos, posNew) if (Kernel::threadSafe(*integrFlux)))
-  for (int64_t i = 0; i < ndets; i++) {
-    PARALLEL_START_INTERUPT_REGION
+for (int64_t i = 0; i < ndets; i++) {
+  PARALLEL_START_INTERUPT_REGION
 
-    if (!spectrumInfo.hasDetectors(i) || spectrumInfo.isMonitor(i) ||
-        spectrumInfo.isMasked(i)) {
-      continue;
-    }
-    const auto &detector = spectrumInfo.detector(i);
-    double theta = detector.getTwoTheta(m_samplePos, m_beamDir);
-    double phi = detector.getPhi();
-    // If the dtefctor is a group, this should be the ID of the first detector
-    const auto detID = detector.getID();
-
-    // Intersections
-    this->calculateIntersections(intersections, theta, phi);
-    if (intersections.empty())
-      continue;
-
-    // get the flux spetrum number
-    size_t wsIdx = fluxDetToIdx.find(detID)->second;
-    // Get solid angle for this contribution
-    double solid =
-        solidAngleWS->y(solidAngDetToIdx.find(detID)->second)[0] * protonCharge;
-
-    // -- calculate integrals for the intersection --
-    // momentum values at intersections
-    auto intersectionsBegin = intersections.begin();
-    // copy momenta to xValues
-    xValues.resize(intersections.size());
-    yValues.resize(intersections.size());
-    auto x = xValues.begin();
-    for (auto it = intersectionsBegin; it != intersections.end(); ++it, ++x) {
-      *x = (*it)[3];
-    }
-    // calculate integrals at momenta from xValues by interpolating between
-    // points in spectrum sp
-    // of workspace integrFlux. The result is stored in yValues
-    calcIntegralsForIntersections(xValues, *integrFlux, wsIdx, yValues);
-
-    // Compute final position in HKL
-    // pre-allocate for efficiency and copy non-hkl dim values into place
-    pos.resize(vmdDims + otherValues.size());
-    std::copy(otherValues.begin(), otherValues.end(),
-              pos.begin() + vmdDims - 1);
-    pos.push_back(1.);
-
-    for (auto it = intersectionsBegin + 1; it != intersections.end(); ++it) {
-      const auto &curIntSec = *it;
-      const auto &prevIntSec = *(it - 1);
-      // the full vector isn't used so compute only what is necessary
-      double delta = curIntSec[3] - prevIntSec[3];
-      if (delta < 1e-07)
-        continue; // Assume zero contribution if difference is small
-
-      // Average between two intersections for final position
-      std::transform(curIntSec.begin(), curIntSec.begin() + vmdDims - 1,
-                     prevIntSec.begin(), pos.begin(),
-                     VectorHelper::SimpleAverage<coord_t>());
-      affineTrans.multiplyPoint(pos, posNew);
-      size_t linIndex = m_normWS->getLinearIndexAtCoord(posNew.data());
-      if (linIndex == size_t(-1))
-        continue;
-
-      // index of the current intersection
-      size_t k = static_cast<size_t>(std::distance(intersectionsBegin, it));
-      // signal = integral between two consecutive intersections
-      signal_t signal = (yValues[k] - yValues[k - 1]) * solid;
-      AtomicOp(signalArray[linIndex], signal, std::plus<signal_t>());
-    }
-    prog->report();
-
-    PARALLEL_END_INTERUPT_REGION
+  if (!spectrumInfo.hasDetectors(i) || spectrumInfo.isMonitor(i) ||
+      spectrumInfo.isMasked(i)) {
+    continue;
   }
-  PARALLEL_CHECK_INTERUPT_REGION
-  std::copy(signalArray.cbegin(), signalArray.cend(),
-            m_normWS->getSignalArray());
+  const auto &detector = spectrumInfo.detector(i);
+  double theta = detector.getTwoTheta(m_samplePos, m_beamDir);
+  double phi = detector.getPhi();
+  // If the dtefctor is a group, this should be the ID of the first detector
+  const auto detID = detector.getID();
+
+  // Intersections
+  this->calculateIntersections(intersections, theta, phi);
+  if (intersections.empty())
+    continue;
+
+  // get the flux spetrum number
+  size_t wsIdx = fluxDetToIdx.find(detID)->second;
+  // Get solid angle for this contribution
+  double solid =
+      solidAngleWS->y(solidAngDetToIdx.find(detID)->second)[0] * protonCharge;
+
+  // -- calculate integrals for the intersection --
+  // momentum values at intersections
+  auto intersectionsBegin = intersections.begin();
+  // copy momenta to xValues
+  xValues.resize(intersections.size());
+  yValues.resize(intersections.size());
+  auto x = xValues.begin();
+  for (auto it = intersectionsBegin; it != intersections.end(); ++it, ++x) {
+    *x = (*it)[3];
+  }
+  // calculate integrals at momenta from xValues by interpolating between
+  // points in spectrum sp
+  // of workspace integrFlux. The result is stored in yValues
+  calcIntegralsForIntersections(xValues, *integrFlux, wsIdx, yValues);
+
+  // Compute final position in HKL
+  // pre-allocate for efficiency and copy non-hkl dim values into place
+  pos.resize(vmdDims + otherValues.size());
+  std::copy(otherValues.begin(), otherValues.end(), pos.begin() + vmdDims - 1);
+  pos.push_back(1.);
+
+  for (auto it = intersectionsBegin + 1; it != intersections.end(); ++it) {
+    const auto &curIntSec = *it;
+    const auto &prevIntSec = *(it - 1);
+    // the full vector isn't used so compute only what is necessary
+    double delta = curIntSec[3] - prevIntSec[3];
+    if (delta < 1e-07)
+      continue; // Assume zero contribution if difference is small
+
+    // Average between two intersections for final position
+    std::transform(curIntSec.begin(), curIntSec.begin() + vmdDims - 1,
+                   prevIntSec.begin(), pos.begin(),
+                   VectorHelper::SimpleAverage<coord_t>());
+    affineTrans.multiplyPoint(pos, posNew);
+    size_t linIndex = m_normWS->getLinearIndexAtCoord(posNew.data());
+    if (linIndex == size_t(-1))
+      continue;
+
+    // index of the current intersection
+    size_t k = static_cast<size_t>(std::distance(intersectionsBegin, it));
+    // signal = integral between two consecutive intersections
+    signal_t signal = (yValues[k] - yValues[k - 1]) * solid;
+    AtomicOp(signalArray[linIndex], signal, std::plus<signal_t>());
+  }
+  prog->report();
+
+  PARALLEL_END_INTERUPT_REGION
+}
+PARALLEL_CHECK_INTERUPT_REGION
+std::copy(signalArray.cbegin(), signalArray.cend(), m_normWS->getSignalArray());
 }
 
 /**
@@ -582,7 +580,7 @@ void MDNormSCD::calcIntegralsForIntersections(
  * @return A list of intersections in HKL space
  */
 void MDNormSCD::calculateIntersections(
-    std::vector<std::array<double,4>> &intersections, const double theta,
+    std::vector<std::array<double, 4>> &intersections, const double theta,
     const double phi) {
   V3D q(-sin(theta) * cos(phi), -sin(theta) * sin(phi), 1. - cos(theta));
   q = m_rubw * q;
