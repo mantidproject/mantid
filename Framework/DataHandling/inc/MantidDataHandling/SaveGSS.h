@@ -98,26 +98,26 @@ private:
   bool areAllDetectorsValid() const;
 
   /// Turns the data associated with this spectra into a string stream
-  std::stringstream generateBankData(size_t specIndex) const;
+  void generateBankData(std::stringstream &outBuf, size_t specIndex) const;
 
   /// Generates the bank header and returns this as a string stream
-  std::stringstream
-  generateBankHeader(const Mantid::API::SpectrumInfo &spectrumInfo,
-                     size_t specIndex) const;
+  void generateBankHeader(std::stringstream &out,
+                          const API::SpectrumInfo &spectrumInfo,
+                          size_t specIndex) const;
 
   /// Generates the output which will be written to the GSAS file
   void generateGSASFile(size_t numOutFiles, size_t numOutSpectra);
 
   /// Generates the instrument header and returns this as a string stream
-  std::stringstream generateInstrumentHeader(double l1) const;
+  void generateInstrumentHeader(std::stringstream &out, double l1) const;
 
-  /// Generates the filename(s) and paths to write to
+  /// Generates the filename(s) and paths to write to and stores in member var
   void generateOutFileNames(size_t numberOfOutFiles);
 
   /// Returns the log value in a GSAS format as a string stream
-  std::stringstream
-  getLogValue(const API::Run &runinfo, const std::string &name,
-              const std::string &failsafeValue = "UNKNOWN") const;
+  void getLogValue(std::stringstream &out, const API::Run &runinfo,
+                   const std::string &name,
+                   const std::string &failsafeValue = "UNKNOWN") const;
 
   /// Returns if the input workspace instrument is valid
   bool isInstrumentValid() const;
