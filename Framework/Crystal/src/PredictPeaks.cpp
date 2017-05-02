@@ -12,6 +12,7 @@
 #include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidAPI/DetectorInfo.h"
 
 using Mantid::Kernel::EnabledWhenProperty;
 
@@ -50,7 +51,7 @@ PredictPeaks::PredictPeaks()
 /** Initialize the algorithm's properties.
  */
 void PredictPeaks::init() {
-  declareProperty(make_unique<WorkspaceProperty<Workspace>>(
+  declareProperty(make_unique<WorkspaceProperty<Workspace> >(
                       "InputWorkspace", "", Direction::Input),
                   "An input workspace (MatrixWorkspace, MDEventWorkspace, or "
                   "PeaksWorkspace) containing:\n"
@@ -59,21 +60,21 @@ void PredictPeaks::init() {
                   "  - The goniometer rotation matrix.");
 
   declareProperty(
-      make_unique<PropertyWithValue<double>>("WavelengthMin", 0.1,
-                                             Direction::Input),
+      make_unique<PropertyWithValue<double> >("WavelengthMin", 0.1,
+                                              Direction::Input),
       "Minimum wavelength limit at which to start looking for single-crystal "
       "peaks.");
   declareProperty(
-      make_unique<PropertyWithValue<double>>("WavelengthMax", 100.0,
-                                             Direction::Input),
+      make_unique<PropertyWithValue<double> >("WavelengthMax", 100.0,
+                                              Direction::Input),
       "Maximum wavelength limit at which to stop looking for single-crystal "
       "peaks.");
 
-  declareProperty(make_unique<PropertyWithValue<double>>("MinDSpacing", 1.0,
-                                                         Direction::Input),
+  declareProperty(make_unique<PropertyWithValue<double> >("MinDSpacing", 1.0,
+                                                          Direction::Input),
                   "Minimum d-spacing of peaks to consider. Default = 1.0");
-  declareProperty(make_unique<PropertyWithValue<double>>("MaxDSpacing", 100.0,
-                                                         Direction::Input),
+  declareProperty(make_unique<PropertyWithValue<double> >("MaxDSpacing", 100.0,
+                                                          Direction::Input),
                   "Maximum d-spacing of peaks to consider.");
 
   // Build up a list of reflection conditions to use
@@ -91,7 +92,7 @@ void PredictPeaks::init() {
                   "a crystal structure assigned.");
 
   declareProperty(
-      make_unique<WorkspaceProperty<PeaksWorkspace>>(
+      make_unique<WorkspaceProperty<PeaksWorkspace> >(
           "HKLPeaksWorkspace", "", Direction::Input, PropertyMode::Optional),
       "Optional: An input PeaksWorkspace with the HKL of the peaks "
       "that we should predict. \n"
@@ -119,7 +120,7 @@ void PredictPeaks::init() {
   setPropertySettings("MaxDSpacing", makeSet());
   setPropertySettings("ReflectionCondition", makeSet());
 
-  declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace>>(
+  declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace> >(
                       "OutputWorkspace", "", Direction::Output),
                   "An output PeaksWorkspace.");
 
@@ -128,7 +129,7 @@ void PredictPeaks::init() {
                   " instrument) to predict peaks which do not fall onto any"
                   "detector. This may produce a very high number of results.");
 
-  auto nonNegativeInt = boost::make_shared<BoundedValidator<int>>();
+  auto nonNegativeInt = boost::make_shared<BoundedValidator<int> >();
   nonNegativeInt->setLower(0);
   declareProperty("EdgePixels", 0, nonNegativeInt,
                   "Remove peaks that are at pixels this close to edge. ");
@@ -139,6 +140,7 @@ void PredictPeaks::init() {
 void PredictPeaks::exec() {
   // Get the input properties
   Workspace_sptr rawInputWorkspace = getProperty("InputWorkspace");
+  m_edge = this->getProperty("EdgePixels");
 
   ExperimentInfo_sptr inputExperimentInfo =
       boost::dynamic_pointer_cast<ExperimentInfo>(rawInputWorkspace);
@@ -156,7 +158,8 @@ void PredictPeaks::exec() {
     try {
       DblMatrix goniometerMatrix = matrixWS->run().getGoniometerMatrix();
       gonioVec.push_back(goniometerMatrix);
-    } catch (std::runtime_error &e) {
+    }
+    catch (std::runtime_error &e) {
       // If there is no goniometer matrix, use identity matrix instead.
       g_log.error() << "Error getting the goniometer rotation matrix from the "
                        "InputWorkspace.\n" << e.what() << '\n';
@@ -165,7 +168,7 @@ void PredictPeaks::exec() {
   } else if (peaksWS) {
     // Sort peaks by run number so that peaks with equal goniometer matrices are
     // adjacent
-    std::vector<std::pair<std::string, bool>> criteria;
+    std::vector<std::pair<std::string, bool> > criteria;
     criteria.push_back(std::pair<std::string, bool>("RunNumber", true));
 
     peaksWS->sort(criteria);
@@ -196,7 +199,8 @@ void PredictPeaks::exec() {
         DblMatrix goniometerMatrix =
             mdWS->getExperimentInfo(i)->mutableRun().getGoniometerMatrix();
         gonioVec.push_back(goniometerMatrix);
-      } catch (std::runtime_error &e) {
+      }
+      catch (std::runtime_error &e) {
         // If there is no goniometer matrix, use identity matrix instead.
         gonioVec.push_back(DblMatrix(3, 3, true));
 
@@ -319,8 +323,8 @@ void PredictPeaks::logNumberOfPeaksFound(size_t allowedPeakCount) const {
 }
 
 /// Tries to set the internally stored instrument from an ExperimentInfo-object.
-void PredictPeaks::setInstrumentFromInputWorkspace(
-    const ExperimentInfo_sptr &inWS) {
+void
+PredictPeaks::setInstrumentFromInputWorkspace(const ExperimentInfo_sptr &inWS) {
   // Check that there is an input workspace that has a sample.
   if (!inWS || !inWS->getInstrument())
     throw std::invalid_argument("Did not specify a valid InputWorkspace with a "
@@ -330,8 +334,8 @@ void PredictPeaks::setInstrumentFromInputWorkspace(
 }
 
 /// Sets the run number from the supplied ExperimentInfo or throws an exception.
-void PredictPeaks::setRunNumberFromInputWorkspace(
-    const ExperimentInfo_sptr &inWS) {
+void
+PredictPeaks::setRunNumberFromInputWorkspace(const ExperimentInfo_sptr &inWS) {
   if (!inWS) {
     throw std::runtime_error("Failed to get run number");
   }
@@ -436,8 +440,8 @@ void PredictPeaks::fillPossibleHKLsUsingPeaksWorkspace(
  *
  * @param sample :: Sample, potentially with crystal structure
  */
-void PredictPeaks::setStructureFactorCalculatorFromSample(
-    const Sample &sample) {
+void
+PredictPeaks::setStructureFactorCalculatorFromSample(const Sample &sample) {
   bool calculateStructureFactors = getProperty("CalculateStructureFactors");
 
   if (calculateStructureFactors && sample.hasCrystalStructure()) {
@@ -472,9 +476,9 @@ void PredictPeaks::calculateQAndAddToOutput(const V3D &hkl,
 
   // Create the peak using the Q in the lab framewith all its info:
   Peak p(m_inst, q);
-  int edge = this->getProperty("EdgePixels");
-  if (edge > 0) {
-    if (edgePixel(p.getBankName(), p.getCol(), p.getRow(), edge))
+  if (m_edge > 0) {
+    if (DetectorInfo::edgePixel(m_inst, p.getBankName(), p.getCol(), p.getRow(),
+                                m_edge))
       return;
   }
   /* The constructor calls setQLabFrame, which already calls findDetector, which
@@ -504,50 +508,6 @@ void PredictPeaks::calculateQAndAddToOutput(const V3D &hkl,
   // Add it to the workspace
   m_pw->addPeak(p);
 }
-//-----------------------------------------------------------------------------------------
-/**
-  @param  bankName     Name of bank containing peak
-  @param  col          Column number containing peak
-  @param  row          Row number containing peak
-  @param  Edge         Number of edge points for each bank
-  @return True if peak is on edge
-*/
-bool PredictPeaks::edgePixel(std::string bankName, int col, int row, int Edge) {
-  if (bankName == "None")
-    return false;
-  boost::shared_ptr<const IComponent> parent =
-      m_inst->getComponentByName(bankName);
-  if (parent->type() == "RectangularDetector") {
-    boost::shared_ptr<const RectangularDetector> RDet =
-        boost::dynamic_pointer_cast<const RectangularDetector>(parent);
 
-    return col < Edge || col >= (RDet->xpixels() - Edge) || row < Edge ||
-           row >= (RDet->ypixels() - Edge);
-  } else {
-    std::vector<IComponent_const_sptr> children;
-    boost::shared_ptr<const ICompAssembly> asmb =
-        boost::dynamic_pointer_cast<const ICompAssembly>(parent);
-    asmb->getChildren(children, false);
-    int startI = 1;
-    if (children[0]->getName() == "sixteenpack") {
-      startI = 0;
-      parent = children[0];
-      children.clear();
-      boost::shared_ptr<const ICompAssembly> asmb =
-          boost::dynamic_pointer_cast<const ICompAssembly>(parent);
-      asmb->getChildren(children, false);
-    }
-    boost::shared_ptr<const ICompAssembly> asmb2 =
-        boost::dynamic_pointer_cast<const ICompAssembly>(children[0]);
-    std::vector<IComponent_const_sptr> grandchildren;
-    asmb2->getChildren(grandchildren, false);
-    int NROWS = static_cast<int>(grandchildren.size());
-    int NCOLS = static_cast<int>(children.size());
-    // Wish pixels and tubes start at 1 not 0
-    return col - startI < Edge || col - startI >= (NCOLS - Edge) ||
-           row - startI < Edge || row - startI >= (NROWS - Edge);
-  }
-  return false;
-}
 } // namespace Mantid
 } // namespace Crystal

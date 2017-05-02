@@ -25,7 +25,9 @@ public:
   PredictPeaks();
 
   /// Algorithm's name for identification
-  const std::string name() const override { return "PredictPeaks"; };
+  const std::string name() const override {
+    return "PredictPeaks";
+  };
   /// Summary of algorithms purpose
   const std::string summary() const override {
     return "Using a known crystal lattice and UB matrix, predict where single "
@@ -34,7 +36,9 @@ public:
   }
 
   /// Algorithm's version for identification
-  int version() const override { return 1; };
+  int version() const override {
+    return 1;
+  };
   /// Algorithm's category for identification
   const std::string category() const override { return "Crystal\\Peaks"; }
 
@@ -64,8 +68,10 @@ private:
 
 private:
   void logNumberOfPeaksFound(size_t allowedPeakCount) const;
-  /// Function to find peaks near detector edge
-  bool edgePixel(std::string bankName, int col, int row, int Edge);
+
+  /// Number of edge pixels with no peaks
+  int m_edge;
+
   /// Reflection conditions possible
   std::vector<Mantid::Geometry::ReflectionCondition_sptr> m_refConds;
 
