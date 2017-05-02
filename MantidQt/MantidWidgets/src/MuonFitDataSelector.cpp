@@ -1,6 +1,11 @@
 #include "MantidQtMantidWidgets/MuonFitDataSelector.h"
 #include "MantidKernel/Logger.h"
 
+
+
+#include "qttreepropertybrowser.h"
+#include "qtpropertymanager.h"
+
 namespace {
 Mantid::Kernel::Logger g_log("MuonFitDataSelector");
 }
@@ -27,6 +32,25 @@ MuonFitDataSelector::MuonFitDataSelector(QWidget *parent)
   // selected on front tab. User will type in the runs they want rather than
   // using the Browse button. (If they want to "Browse" they can use front tab).
   m_ui.runs->doButtonOpt(API::MWRunFiles::ButtonOpts::None);
+
+
+  QSettings multiFitSettings;
+  multiFitSettings.beginGroup("");
+
+  /* Create function group */
+  QtProperty *multiFitSettingsGroup(NULL);
+  // Seperates the data and the settings into two seperate categories
+  //multiFitSettingsGroup=parent->addToGroupManager("Test");
+/*  m_groupsToFit = FitPropertyBrowser::m_enumManager->addProperty("Groups/Pairs to fit");
+  m_groupsToFitOptions << "All groups"
+	  << "All Pairs"
+	  << "Custom";
+  //moo need to add periods.... 
+
+  m_enumManager->setEnumNames(m_groupsToFit, m_groupsToFitOptions);
+  multiFitSettingsGroup->addSubProperty(m_groupsToFit);*/
+
+
 }
 
 /**

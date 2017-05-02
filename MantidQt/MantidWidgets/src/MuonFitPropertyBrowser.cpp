@@ -8,6 +8,9 @@
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidQtMantidWidgets/StringEditorFactory.h"
 
+#include "MantidQtMantidWidgets/MuonFitDataSelector.h"
+
+
 // Suppress a warning coming out of code that isn't ours
 #if defined(__INTEL_COMPILER)
 #pragma warning disable 1125
@@ -68,7 +71,7 @@ const std::string MuonFitPropertyBrowser::SIMULTANEOUS_PREFIX{"MuonSimulFit_"};
 MuonFitPropertyBrowser::MuonFitPropertyBrowser(QWidget *parent,
                                                QObject *mantidui)
     : FitPropertyBrowser(parent, mantidui), m_widgetSplitter(nullptr),
-      m_mainSplitter(nullptr),m_runs(NULL) {}
+      m_mainSplitter(nullptr) {}
 
 /**
 * Initialise the muon fit property browser.
@@ -147,10 +150,17 @@ void MuonFitPropertyBrowser::init() {
   
  
   //m_listRuns = m_runs->getFileExtensions();
-  m_propRuns = m_stringManager->addProperty("Runs");
-  multiFitSettingsGroup->addSubProperty(m_propRuns);
+  //multiFitSettingsGroup->addSubProperty(m_propRuns);
   multiFitSettingsGroup->addSubProperty(m_startX);
   multiFitSettingsGroup->addSubProperty(m_endX);
+  m_groupsToFit = m_enumManager->addProperty("Groups/Pairs to fit");
+  m_groupsToFitOptions << "All groups"
+	  << "All Pairs"
+	  << "Custom"; 
+  //moo need to add periods.... 
+
+  m_enumManager->setEnumNames(m_groupsToFit, m_groupsToFitOptions);
+  multiFitSettingsGroup->addSubProperty(m_groupsToFit);
 
   connect(m_browser, SIGNAL(currentItemChanged(QtBrowserItem *)), this,
           SLOT(currentItemChanged(QtBrowserItem *)));
@@ -227,23 +237,6 @@ void MuonFitPropertyBrowser::executeMuonFitMenu(const QString &item) {
     FitPropertyBrowser::executeFitMenu(item);
   }
 }
-/** Called when a string property changed
-* @param prop :: A pointer to the property
-*/
-void MuonFitPropertyBrowser::stringChanged(QtProperty *prop) {
-	if (!m_changeSlotsEnabled)
-		return;
-
-	if (prop == m_propRuns) {
-		//QString tmp = m_stringManager->value(prop);
-		auto tmp= m_runs->getLabelText().toStdString();// setLabelText(tmp);
-	}
-	else{
-		FitPropertyBrowser::stringChanged(prop);
-	}
-}
-
-
 /**
 * @brief Initialise the layout of the fit menu button.
 * This initialization includes:
@@ -295,6 +288,12 @@ void MuonFitPropertyBrowser::setFitEnabled(bool yes) {
   m_fitActionSeqFit->setEnabled(yes);
   m_fitActiontest->setEnabled(yes);
 }
+/*
+* Called when the group/pair selected is changed
+*/
+void MuonFitPropertyBrowser::groupToFitChanged() {
+	
+}
 
 /**
 * Set the input workspace name
@@ -310,7 +309,23 @@ void MuonFitPropertyBrowser::setWorkspaceName(const QString &wsName) {
   if (i >= 0)
     m_enumManager->setValue(m_workspace, i);
 }
+/** Called when the function name property changed
+* @param prop :: A pointer to the function name property m_functionName
+*/
+void MuonFitPropertyBrowser::enumChanged(QtProperty *prop) {
+	if (!m_changeSlotsEnabled)
+		return;
 
+	bool storeSettings = false;
+	if (prop == m_groupsToFit) {
+		int j = m_enumManager->value(m_groupsToFit);
+		std::string option = m_groupsToFitOptions[j].toStdString();
+		double a = 1.;
+	}
+	else {
+		FitPropertyBrowser::enumChanged(prop);
+	}
+}
 /** Called when a double property changed
  * @param prop :: A pointer to the property
  */
@@ -876,6 +891,9 @@ bool MuonFitPropertyBrowser::hasGuess() const {
     return false;
   }
 }
+
+
+QtProperty *MuonFitPropertyBrowser::addToGroupManager(QString name) { return m_groupManager->addProperty(name); };
 
 } // MantidQt
 } // API

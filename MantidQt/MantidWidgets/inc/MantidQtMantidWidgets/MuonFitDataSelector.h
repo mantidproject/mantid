@@ -6,6 +6,9 @@
 #include "MantidQtMantidWidgets/IMuonFitDataSelector.h"
 #include "MantidQtAPI/MantidWidget.h"
 
+#include "MantidQtMantidWidgets/MuonFitPropertyBrowser.h"
+#include "MantidQtMantidWidgets/FitPropertyBrowser.h"
+
 namespace MantidQt {
 namespace MantidWidgets {
 
@@ -37,12 +40,13 @@ namespace MantidWidgets {
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS MuonFitDataSelector
-    : public MantidQt::API::MantidWidget,
+    :public  MantidQt::API::MantidWidget,
       public IMuonFitDataSelector {
   Q_OBJECT
+
 public:
   /// Basic constructor
-  explicit MuonFitDataSelector(QWidget *parent);
+	explicit MuonFitDataSelector(QWidget *parent);
   /// Constructor with more options
   MuonFitDataSelector(QWidget *parent, int runNumber, const QString &instName,
                       size_t numPeriods, const QStringList &groups);
@@ -151,7 +155,7 @@ private:
   QMap<QString, QCheckBox *> m_groupBoxes;
   /// Map of period names to checkboxes
   QMap<QString, QCheckBox *> m_periodBoxes;
-
+  double startX;
 private slots:
   /// Set normal cursor and enable input
   void unsetBusyState();
@@ -159,6 +163,8 @@ private slots:
   void setPreviousDataset();
   /// Change dataset to next one
   void setNextDataset();
+//  QtProperty *m_groupsToFit;
+//  mutable QStringList m_groupsToFitOptions;
 };
 
 } // namespace MantidWidgets

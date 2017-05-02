@@ -64,6 +64,7 @@ public:
   Mantid::API::IFunction_sptr getFunction() const override {
     return getFittingFunction();
   }
+  QtProperty *addToGroupManager(QString name);
   /// Set list of workspaces to fit
   void setWorkspaceNames(const QStringList &wsNames) override;
   /// Get output name
@@ -126,12 +127,11 @@ protected:
   void showEvent(QShowEvent *e) override;
   double Normalization() const;
   void setNormalization();
+  void groupToFitChanged();
 private slots:
   void doubleChanged(QtProperty *prop) override;
   void boolChanged(QtProperty *prop) override;
-  void stringChanged(QtProperty *prop) override;
-
-
+  void enumChanged(QtProperty *prop) override;
 private:
   /// new menu option
   QAction *m_fitActiontest;
@@ -155,9 +155,9 @@ private:
   QtProperty *m_normalization;
   mutable QStringList m_normalizationValue;
   QtBrowserItem *m_multiFitSettingsGroup;
-  mutable QString m_strRuns;
-  QtProperty *m_propRuns;
-  MantidQt::API::MWRunFiles *m_runs;
+  QtProperty *m_groupsToFit;
+  mutable QStringList m_groupsToFitOptions;
+
 };
 
 std::vector<double> readNormalization();
