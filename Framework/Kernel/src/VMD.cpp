@@ -144,8 +144,8 @@ VMDBase<TYPE> &VMDBase<TYPE>::operator=(const VMDBase &other) {
  * @param other :: move into this
  */
 template <typename TYPE>
-VMDBase<TYPE>::VMDBase(VMDBase &&other) noexcept
-    : nd(other.nd), data(other.data) {
+VMDBase<TYPE>::VMDBase(VMDBase &&other) noexcept : nd(other.nd),
+                                                   data(other.data) {
   other.data = nullptr;
   other.nd = 0;
 }
