@@ -233,6 +233,13 @@ void QtReflRunsTabView::on_actionSearch_triggered() {
 }
 
 /**
+This slot notifies the presenter that the "autoreduce" button has been pressed
+*/
+void QtReflRunsTabView::on_actionAutoreduce_triggered() {
+  m_presenter->notify(IReflRunsTabPresenter::AutoreduceFlag);
+}
+
+/**
 This slot notifies the presenter that the "transfer" button has been pressed
 */
 void QtReflRunsTabView::on_actionTransfer_triggered() {

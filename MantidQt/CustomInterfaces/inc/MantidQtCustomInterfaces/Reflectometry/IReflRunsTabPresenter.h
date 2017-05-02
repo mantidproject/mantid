@@ -40,6 +40,7 @@ public:
 
   enum Flag {
     SearchFlag,
+    AutoreduceFlag,
     ICATSearchCompleteFlag,
     TransferFlag,
     InstrumentChangedFlag,

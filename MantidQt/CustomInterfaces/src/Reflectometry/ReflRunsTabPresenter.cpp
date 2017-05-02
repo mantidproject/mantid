@@ -111,6 +111,9 @@ void ReflRunsTabPresenter::notify(IReflRunsTabPresenter::Flag flag) {
   case IReflRunsTabPresenter::SearchFlag:
     search();
     break;
+  case IReflRunsTabPresenter::AutoreduceFlag:
+    std::cout << "Ayy lmao...\n";
+    break;
   case IReflRunsTabPresenter::ICATSearchCompleteFlag: {
     auto algRunner = m_view->getAlgorithmRunner();
     IAlgorithm_sptr searchAlg = algRunner->getAlgorithm();
