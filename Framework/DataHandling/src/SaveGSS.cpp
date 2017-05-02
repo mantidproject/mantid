@@ -45,7 +45,7 @@ bool isEqual(const double left, const double right) {
           std::fabs(m_TOLERANCE * (right + left)));
 }
 
-bool isConstantDelta(const HistogramData::HistogramX &xAxis) {
+bool isConstantDelta(const HistogramData::BinEdges &xAxis) {
   const double deltaX = (xAxis[1] - xAxis[0]);
   for (std::size_t i = 1; i < xAxis.size(); ++i) {
     if (!isEqual(xAxis[i] - xAxis[i - 1], deltaX)) {
@@ -277,7 +277,7 @@ void SaveGSS::generateGSASFile(size_t numOutFiles, size_t numOutSpectra) {
     }
 
     // Then add each spectra to buffer
-    for (int64_t specIndex = 0; specIndex < numOutSpectra; specIndex++) {
+    for (size_t specIndex = 0; specIndex < numOutSpectra; specIndex++) {
       // Determine whether to skip the spectrum due to being masked
       if (m_allDetectorsValid && spectrumInfo.isMasked(specIndex)) {
         continue;
@@ -600,7 +600,7 @@ void SaveGSS::writeBufferToFile(size_t numOutFiles, size_t numSpectra) {
 void SaveGSS::writeRALFdata(const int bank, const bool MultiplyByBinWidth,
                             std::stringstream &out,
                             const HistogramData::Histogram &histo) const {
-  const auto &xVals = histo.x();
+  const auto &xVals = histo.binEdges();
   const auto &xPointVals = histo.points();
   const auto &yVals = histo.y();
   const auto &eVals = histo.e();
@@ -626,18 +626,15 @@ void SaveGSS::writeRALFdata(const int bank, const bool MultiplyByBinWidth,
   PARALLEL_FOR_NO_WSP_CHECK()
   for (int64_t i = 0; i < datasize; i++) {
     auto &outLine = outLines[i];
+    const double binWidth = xVals[i + 1] - xVals[i];
+    const double outYVal{MultiplyByBinWidth ? yVals[i] * binWidth : yVals[i]};
+    const double epos =
+        fixErrorValue(MultiplyByBinWidth ? eVals[i] * binWidth : eVals[i]);
+
     // The center of the X bin.
     outLine << std::fixed << std::setprecision(5) << std::setw(15)
             << xPointVals[i];
-
-    // The Y value
-    const double outYVal{
-        MultiplyByBinWidth ? yVals[i] * (xVals[i + 1] - xVals[i]) : yVals[i]};
     outLine << std::fixed << std::setprecision(8) << std::setw(18) << outYVal;
-
-    // Calculate the error
-    const double epos = fixErrorValue(
-        MultiplyByBinWidth ? eVals[i] * (xVals[i + 1] - xVals[i]) : eVals[i]);
     outLine << std::fixed << std::setprecision(8) << std::setw(18) << epos
             << "\n";
   }
@@ -651,53 +648,57 @@ void SaveGSS::writeRALFdata(const int bank, const bool MultiplyByBinWidth,
 void SaveGSS::writeSLOGdata(const int bank, const bool MultiplyByBinWidth,
                             std::stringstream &out,
                             const HistogramData::Histogram &histo) const {
-  const auto &xVals = histo.x();
+  const auto &xVals = histo.binEdges();
+  const auto &xPoints = histo.points();
   const auto &yVals = histo.y();
   const auto &eVals = histo.e();
-
   const size_t datasize = yVals.size();
-  const double bc1 = xVals.front(); // minimum TOF in microseconds
+
+  const double bc1 = xVals.front();        // minimum TOF in microseconds
+  const double bc2 = *(xPoints.end() - 1); // maximum TOF (in microseconds?)
+  const double bc3 = (*(xVals.begin() + 1) - bc1) / bc1; // deltaT/T
+
   if (bc1 <= 0.) {
     throw std::runtime_error(
-        "Cannot write out logarithmic data starting at zero");
+        "Cannot write out logarithmic data starting at zero or less");
   }
   if (isConstantDelta(xVals)) {
-    std::stringstream msg;
-    msg << "While writing SLOG format: Found constant delta-T binning for "
-           "bank " << bank;
-    throw std::runtime_error(msg.str());
+    throw std::runtime_error("While writing SLOG format : Found constant "
+                             "delta - T binning for bank " +
+                             std::to_string(bank));
   }
-  const double bc2 =
-      0.5 * (*(xVals.rbegin()) +
-             *(xVals.rbegin() + 1)); // maximum TOF (in microseconds?)
-  const double bc3 = (*(xVals.begin() + 1) - bc1) / bc1; // deltaT/T
 
   g_log.debug() << "SaveGSS(): Min TOF = " << bc1 << '\n';
 
+  // Write bank header
   writeBankLine(out, "SLOG", bank, datasize);
   out << std::fixed << " " << std::setprecision(0) << std::setw(10) << bc1
       << std::fixed << " " << std::setprecision(0) << std::setw(10) << bc2
       << std::fixed << " " << std::setprecision(7) << std::setw(10) << bc3
       << std::fixed << " 0 FXYE\n";
 
-  for (size_t i = 0; i < datasize; i++) {
-    double y = yVals[i];
-    double e = eVals[i];
-    if (MultiplyByBinWidth) {
-      // Multiple by bin width as
-      double delta = xVals[i + 1] - xVals[i];
-      y *= delta;
-      e *= delta;
-    }
-    e = fixErrorValue(e);
+  std::vector<std::stringstream> outLines;
+  outLines.resize(datasize);
 
-    out << "  " << std::fixed << std::setprecision(9) << std::setw(20)
-        << 0.5 * (xVals[i] + xVals[i + 1]) << "  " << std::fixed
-        << std::setprecision(9) << std::setw(20) << y << "  " << std::fixed
-        << std::setprecision(9) << std::setw(20) << e << std::setw(12) << " "
-        << "\n"; // let it flush its own buffer
+  PARALLEL_FOR_NO_WSP_CHECK()
+  for (int64_t i = 0; i < datasize; i++) {
+    auto &outLine = outLines[i];
+    const double binWidth = xVals[i + 1] - xVals[i];
+    const double yValue{MultiplyByBinWidth ? yVals[i] * binWidth : yVals[i]};
+    const double eValue{
+        fixErrorValue(MultiplyByBinWidth ? eVals[i] * binWidth : eVals[i])};
+
+    outLine << "  " << std::fixed << std::setprecision(9) << std::setw(20)
+            << xPoints[i] << "  " << std::fixed << std::setprecision(9)
+            << std::setw(20) << yValue << "  " << std::fixed
+            << std::setprecision(9) << std::setw(20) << eValue << std::setw(12)
+            << " "
+            << "\n"; // let it flush its own buffer
   }
-  out << std::flush;
+
+  for (const auto &outLine : outLines) {
+    out << outLine.rdbuf();
+  }
 }
 
 } // namespace DataHandling
