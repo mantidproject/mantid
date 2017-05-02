@@ -102,8 +102,6 @@ class SkipReduction(RuntimeError):
     pass
 
 
-
-
 def addRunToStore(parts, run_store):
     """ Add a CSV line to the input data store (run_store)
         @param parts: the parts of a CSV line

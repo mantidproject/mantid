@@ -413,7 +413,7 @@ class ISISReducer(Reducer):
 
     def has_time_sliced_transmissions(self):
         return self.transmission_unfitted_slices_sample or self.transmission_unfitted_slices_can or\
-        self.transmission_fitted_slices_sample or self.transmission_fitted_slices_can  # no qa
+               self.transmission_fitted_slices_sample or self.transmission_fitted_slices_can  # noqa
 
     def group_transmission_slices(self, group_name):
         # If the Workspace Group already exists then we delete the child workspaces and add the new transmission
