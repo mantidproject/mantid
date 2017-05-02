@@ -112,7 +112,7 @@ void ReflRunsTabPresenter::notify(IReflRunsTabPresenter::Flag flag) {
     search();
     break;
   case IReflRunsTabPresenter::AutoreduceFlag:
-    std::cout << "Ayy lmao...\n";
+    autoreduce();
     break;
   case IReflRunsTabPresenter::ICATSearchCompleteFlag: {
     auto algRunner = m_view->getAlgorithmRunner();
@@ -219,6 +219,15 @@ void ReflRunsTabPresenter::populateSearch(IAlgorithm_sptr searchAlg) {
         *getTransferStrategy(), results, m_view->getSearchInstrument()));
     m_view->showSearch(m_searchModel);
   }
+}
+
+/** Searches ICAT for runs with given instrument and investigation id, transfers
+* runs to table and processes them
+*/
+void ReflRunsTabPresenter::autoreduce() {
+  notify(IReflRunsTabPresenter::ICATSearchCompleteFlag);
+  m_view->setAllSearchRowsSelected();
+  notify(IReflRunsTabPresenter::TransferFlag);
 }
 
 /** Transfers the selected runs in the search results to the processing table

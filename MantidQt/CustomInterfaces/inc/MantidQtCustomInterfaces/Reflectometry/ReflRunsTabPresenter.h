@@ -106,6 +106,7 @@ private:
   /// searching
   void search();
   void populateSearch(Mantid::API::IAlgorithm_sptr searchAlg);
+  void autoreduce();
   void transfer();
   void pushCommands();
   /// transfer strategy

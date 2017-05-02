@@ -148,6 +148,14 @@ void QtReflRunsTabView::setRowCommands(
 }
 
 /**
+* Sets all rows in the table view to be selected
+*/
+void QtReflRunsTabView::setAllSearchRowsSelected() {
+
+  ui.tableSearchResults->selectAll();
+}
+
+/**
 * Clears all the actions (commands)
 */
 void QtReflRunsTabView::clearCommands() { m_commands.clear(); }
@@ -233,10 +241,13 @@ void QtReflRunsTabView::on_actionSearch_triggered() {
 }
 
 /**
-This slot notifies the presenter that the "autoreduce" button has been pressed
+This slot conducts a search operation before notifying the presenter that the
+"autoreduce" button has been pressed
 */
 void QtReflRunsTabView::on_actionAutoreduce_triggered() {
-  m_presenter->notify(IReflRunsTabPresenter::AutoreduceFlag);
+  m_presenter->notify(IReflRunsTabPresenter::SearchFlag);
+  connect(m_algoRunner.get(), SIGNAL(algorithmComplete(bool)), this,
+          SLOT(doAutoreduction()));
 }
 
 /**
@@ -281,6 +292,13 @@ void QtReflRunsTabView::instrumentChanged(int index) {
       ui.comboSearchInstrument->itemText(index).toStdString());
   m_calculator->processInstrumentHasBeenChanged();
   m_presenter->notify(IReflRunsTabPresenter::InstrumentChangedFlag);
+}
+
+/**
+This slot notifies the presenter that the "autoreduce" button has been pressed
+*/
+void QtReflRunsTabView::doAutoreduction() {
+  m_presenter->notify(IReflRunsTabPresenter::AutoreduceFlag);
 }
 
 /**

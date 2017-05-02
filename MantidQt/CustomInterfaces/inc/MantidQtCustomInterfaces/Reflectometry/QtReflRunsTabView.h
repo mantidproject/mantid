@@ -76,6 +76,7 @@ public:
                             tableCommands) override;
   void setRowCommands(
       std::vector<std::unique_ptr<DataProcessorCommand>> rowCommands) override;
+  void setAllSearchRowsSelected() override;
   void clearCommands() override;
 
   // Set the status of the progress bar
@@ -122,6 +123,7 @@ private slots:
   void instrumentChanged(int index);
   void groupChanged();
   void showSearchContextMenu(const QPoint &pos);
+  void doAutoreduction();
 };
 
 } // namespace Mantid
