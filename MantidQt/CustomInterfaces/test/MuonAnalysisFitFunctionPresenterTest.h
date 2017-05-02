@@ -226,7 +226,7 @@ public:
   }
   void test_setTFAsymmMode_On() {
 	  EXPECT_CALL(*m_fitBrowser, setTFAsymmMode(true)).Times(1);
-	  m_presenter->setTFAsymmState(MantidQt::CustomInterfaces::Muon::TFAsymmState::Disabled);
+	  m_presenter->setTFAsymmState(MantidQt::CustomInterfaces::Muon::TFAsymmState::Enabled);
   }
 
   void test_setTFAsymmMode_Off() {
