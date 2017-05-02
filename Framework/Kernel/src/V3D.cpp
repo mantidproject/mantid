@@ -9,6 +9,19 @@
 #include "MantidKernel/Quat.h"
 #include <boost/math/common_factor.hpp>
 
+#include <ostream>
+#include <sstream>
+#include <boost/archive/binary_oarchive.hpp>
+#include <boost/archive/binary_iarchive.hpp>
+
+namespace {
+void dummy() {
+  std::stringbuf buf;
+  std::ostream os{&buf};
+  boost::archive::binary_oarchive oa(os);
+}
+}
+
 namespace Mantid {
 namespace Kernel {
 
