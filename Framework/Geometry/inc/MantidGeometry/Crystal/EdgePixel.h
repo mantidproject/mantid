@@ -4,7 +4,7 @@
 #include "MantidGeometry/Instrument.h"
 
 namespace Mantid {
-namespace Geometry{
+namespace Geometry {
 
 /**
   Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
@@ -29,11 +29,10 @@ namespace Geometry{
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
-  /// Function to find peaks near detector edge
-  MANTID_GEOMETRY_DLL bool edgePixel(Geometry::Instrument_const_sptr inst,
-                        std::string bankName, int col, int row, int Edge);
-
-
+/// Function to find peaks near detector edge
+MANTID_GEOMETRY_DLL bool edgePixel(Geometry::Instrument_const_sptr inst,
+                                   std::string bankName, int col, int row,
+                                   int Edge);
 
 } // namespace Geometry
 } // namespace Mantid

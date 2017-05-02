@@ -24,27 +24,27 @@ using namespace Mantid::Crystal;
 /** Initialize the algorithm's properties.
  */
 void CentroidPeaks::init() {
-  declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace> >(
+  declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace>>(
                       "InPeaksWorkspace", "", Direction::Input),
                   "A PeaksWorkspace containing the peaks to centroid.");
 
   declareProperty(
-      make_unique<WorkspaceProperty<> >("InputWorkspace", "", Direction::Input),
+      make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
       "An input 2D Workspace.");
 
   declareProperty(
-      make_unique<PropertyWithValue<int> >("PeakRadius", 10, Direction::Input),
+      make_unique<PropertyWithValue<int>>("PeakRadius", 10, Direction::Input),
       "Fixed radius around each peak position in which to calculate the "
       "centroid.");
 
   declareProperty(
-      make_unique<PropertyWithValue<int> >("edgePixels", 0, Direction::Input),
+      make_unique<PropertyWithValue<int>>("edgePixels", 0, Direction::Input),
       "The number of pixels where peaks are removed at edges. Only "
       "for instruments with RectangularDetectors. ");
 
   declareProperty(
-      make_unique<WorkspaceProperty<PeaksWorkspace> >("OutPeaksWorkspace", "",
-                                                      Direction::Output),
+      make_unique<WorkspaceProperty<PeaksWorkspace>>("OutPeaksWorkspace", "",
+                                                     Direction::Output),
       "The output PeaksWorkspace will be a copy of the input PeaksWorkspace "
       "with the peaks' positions modified by the new found centroids.");
 }

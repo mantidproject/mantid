@@ -15,7 +15,7 @@ namespace Geometry {
   @return True if peak is on edge
 */
 bool edgePixel(Mantid::Geometry::Instrument_const_sptr inst,
-                             std::string bankName, int col, int row, int Edge) {
+               std::string bankName, int col, int row, int Edge) {
   if (bankName == "None")
     return false;
   boost::shared_ptr<const Geometry::IComponent> parent =

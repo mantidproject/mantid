@@ -31,7 +31,7 @@ using namespace DataObjects;
  */
 void OptimizeLatticeForCellType::init() {
 
-  declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace> >(
+  declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace>>(
                       "PeaksWorkspace", "", Direction::InOut),
                   "An input PeaksWorkspace with an instrument.");
   std::vector<std::string> cellTypes;
@@ -50,8 +50,8 @@ void OptimizeLatticeForCellType::init() {
   declareProperty("Tolerance", 0.12, "Indexing Tolerance");
   declareProperty("edgePixels", 0,
                   "Remove peaks that are at pixels this close to edge. ");
-  declareProperty(make_unique<PropertyWithValue<double> >("OutputChi2", 0.0,
-                                                          Direction::Output),
+  declareProperty(make_unique<PropertyWithValue<double>>("OutputChi2", 0.0,
+                                                         Direction::Output),
                   "Returns the goodness of the fit");
   declareProperty(
       make_unique<FileProperty>("OutputDirectory", ".",
@@ -90,7 +90,7 @@ void OptimizeLatticeForCellType::exec() {
   runWS.push_back(ws);
 
   if (perRun) {
-    std::vector<std::pair<std::string, bool> > criteria;
+    std::vector<std::pair<std::string, bool>> criteria;
     // Sort by run number
     criteria.push_back(std::pair<std::string, bool>("runnumber", true));
     ws->sort(criteria);
@@ -127,8 +127,7 @@ void OptimizeLatticeForCellType::exec() {
     IAlgorithm_sptr fit_alg;
     try {
       fit_alg = createChildAlgorithm("Fit", -1, -1, false);
-    }
-    catch (Exception::NotFoundError &) {
+    } catch (Exception::NotFoundError &) {
       g_log.error("Can't locate Fit algorithm");
       throw;
     }
@@ -147,8 +146,7 @@ void OptimizeLatticeForCellType::exec() {
     IAlgorithm_sptr ub_alg;
     try {
       ub_alg = createChildAlgorithm("CalculateUMatrix", -1, -1, false);
-    }
-    catch (Exception::NotFoundError &) {
+    } catch (Exception::NotFoundError &) {
       g_log.error("Can't locate CalculateUMatrix algorithm");
       throw;
     }
