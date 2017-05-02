@@ -40,6 +40,7 @@ except ImportError:
 
 _VERBOSE_ = False
 LAST_SAMPLE = None
+TRANSMISSION_SUFFIX = "_transmissions"
 
 
 def SetVerboseMode(state):
@@ -677,9 +678,20 @@ def _WavRangeReduction(name_suffix=None):
             if group_name[-2] == "_":
                 group_name = group_name[:-2]
             _group_workspaces(slices, group_name)
+
+            # Group the transmission slices if required
+            if ReductionSingleton().has_time_sliced_transmissions():
+                group_name_transmissions = group_name + TRANSMISSION_SUFFIX
+                ReductionSingleton().group_transmission_slices(group_name_transmissions)
+
             return group_name
         else:
-            return ReductionSingleton()._reduce()
+            reduced_workspace_name = ReductionSingleton()._reduce()
+            if ReductionSingleton().has_time_sliced_transmissions():
+                # Note that a time slice over the full time is also a time slice
+                group_name_transmissions = reduced_workspace_name + TRANSMISSION_SUFFIX
+                ReductionSingleton().group_transmission_slices(group_name_transmissions)
+            return reduced_workspace_name
 
     result = ""
     if ReductionSingleton().get_sample().loader.periods_in_file == 1:

@@ -1789,6 +1789,22 @@ class TestMonitorSlicing(unittest.TestCase):
         self.assertAlmostEqual(sliced_monitor.dataY(3)[0], 10.0, places=7)
         self._clean_up()
 
+    def test_that_take_entire_workspace_if_can_has_been_specified(self):
+        event_monitor = self._create_event_workspace()
+        start_time = "2010-01-01T00:00:00"
+        addSampleLogEntry('proton_charge', event_monitor, start_time=start_time, extra_time_shift=0.0,
+                          number_of_times=30)
+        self.assertTrue(isinstance(event_monitor, IEventWorkspace))
+        reducer = self.get_mock_reducer(min_limit=0., max_limit=1000., settings={"events.binning": "0,200,20000"},
+                                        is_can=True)
+        sliced_monitor = su.get_sliced_monitor(reducer=reducer, monitor=event_monitor, do_scale=True)
+        self.assertTrue(isinstance(sliced_monitor, Workspace2D))
+        self.assertAlmostEqual(sliced_monitor.dataY(0)[0], 10.0, places=7)
+        self.assertAlmostEqual(sliced_monitor.dataY(1)[0], 10.0, places=7)
+        self.assertAlmostEqual(sliced_monitor.dataY(2)[0], 10.0, places=7)
+        self.assertAlmostEqual(sliced_monitor.dataY(3)[0], 10.0, places=7)
+        self._clean_up()
+
 
 if __name__ == "__main__":
     unittest.main()

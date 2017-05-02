@@ -347,7 +347,7 @@ def sliceByTimeWs(ws_event, time_start=None, time_stop=None):
     return sliced_ws
 
 
-def slice2histogram(ws_event, time_start, time_stop, monitor, binning=""):
+def slice2histogram(ws_event, time_start, time_stop, monitor, binning="", is_can=False):
     """Return the histogram of the sliced event and a tuple with the following:
        - total time of the experiment
        - total charge
@@ -358,6 +358,7 @@ def slice2histogram(ws_event, time_start, time_stop, monitor, binning=""):
        @param time_stop: the maximum value to filter. Pass -1 to get the maximum available
        @param monitor: pointer to the monitor workspace
        @param binning: optional binning string to use instead of the binning from the monitor
+       @param is_can: true if is can else false
     """
     if not isEventWorkspace(ws_event):
         raise RuntimeError("The workspace "+str(ws_event)+ " is not a valid Event workspace")
@@ -379,6 +380,10 @@ def slice2histogram(ws_event, time_start, time_stop, monitor, binning=""):
 
     # If the monitor is an event workspace then we need to slice it too
     if isinstance(monitor, IEventWorkspace):
+        # If we are dealing with a monitor from a can, then we take the whole can
+        if is_can:
+            time_start = 0.0
+            time_stop = tot_t + 0.001
         scaled_monitor = sliceByTimeWs(monitor, time_start, time_stop)
     else:
         scaled_monitor = monitor * (part_c/tot_c)
@@ -413,6 +418,11 @@ def get_sliced_monitor(reducer, monitor, do_scale=True):
             monitor_workspace_name = monitor.name()
             Rebin(InputWorkspace=monitor, Params=binning, PreserveEvents=False, OutputWorkspace=monitor_workspace_name)
             return mtd[monitor_workspace_name]
+
+        # If we are dealing with a can then select a full slice, since we don't slice can transmissions
+        if reducer.is_can():
+            start_slice_time = -1
+            stop_slice_time = -1
 
         # If only one of them is odd, then reset it
         if start_slice_time == -1:

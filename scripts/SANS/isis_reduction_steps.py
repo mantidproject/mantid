@@ -2446,11 +2446,16 @@ class TransmissionCalc(ReductionStep):
         if direct_tmp_out != trans_tmp_out:
             files2delete.append(direct_tmp_out)
 
-        if sel_settings[FITMETHOD] in ['OFF', 'CLEAR']:
+        is_fitting_off = sel_settings[FITMETHOD] in ['OFF', 'CLEAR']
+
+        if is_fitting_off:
             result = unfittedtransws
             files2delete.append(fittedtransws)
         else:
             result = fittedtransws
+
+        # Record the transmission workspaces if required
+        reducer.record_transmission_workspaces(fittedtransws, unfittedtransws, is_fitting_off)
 
         reducer.deleteWorkspaces(files2delete)
 
@@ -2461,6 +2466,8 @@ class TransmissionCalc(ReductionStep):
         fitted_name += self.CAN_SAMPLE_SUFFIXES[reducer.is_can()]
         fitted_name += '_' + str(lambda_min) + '_' + str(lambda_max)
 
+        if reducer.load_monitors_as_event:
+            fitted_name = reducer.add_slice_suffix(fitted_name)
         unfitted = fitted_name + "_unfitted"
 
         return fitted_name, unfitted
@@ -3198,19 +3205,19 @@ class SliceEvent(ReductionStep):
         # If a sample data set is converted then we want to be able to slice
         # If a can data set is being converted, the slice limits should not be applied
         # but rather the full data set should be used. -1 is the no limit signal
-        if not reducer.is_can():
+        is_can = reducer.is_can()
+        if not is_can:
             start, stop = reducer.getCurrSliceLimit()
         else:
             start = -1
             stop = -1
-
         _monitor = reducer.get_sample().get_monitor()
 
         if "events.binning" in reducer.settings:
             binning = reducer.settings["events.binning"]
         else:
             binning = ""
-        _hist, (_tot_t, tot_c, _part_t, part_c) = slice2histogram(ws_pointer, start, stop, _monitor, binning)
+        _hist, (_tot_t, tot_c, _part_t, part_c) = slice2histogram(ws_pointer, start, stop, _monitor, binning, is_can)
         self.scale = part_c / tot_c
 
 
