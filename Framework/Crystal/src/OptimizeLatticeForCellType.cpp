@@ -12,7 +12,7 @@
 #include "MantidGeometry/Crystal/IndexingUtils.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidGeometry/Crystal/ReducedCell.h"
-#include "MantidAPI/DetectorInfo.h"
+#include "MantidGeometry/Crystal/EdgePixel.h"
 #include <fstream>
 
 using namespace Mantid::Geometry;
@@ -31,7 +31,7 @@ using namespace DataObjects;
  */
 void OptimizeLatticeForCellType::init() {
 
-  declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace>>(
+  declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace> >(
                       "PeaksWorkspace", "", Direction::InOut),
                   "An input PeaksWorkspace with an instrument.");
   std::vector<std::string> cellTypes;
@@ -48,10 +48,10 @@ void OptimizeLatticeForCellType::init() {
   declareProperty("Apply", false, "Re-index the peaks");
   declareProperty("PerRun", false, "Make per run orientation matrices");
   declareProperty("Tolerance", 0.12, "Indexing Tolerance");
-  declareProperty("EdgePixels", 0,
+  declareProperty("edgePixels", 0,
                   "Remove peaks that are at pixels this close to edge. ");
-  declareProperty(make_unique<PropertyWithValue<double>>("OutputChi2", 0.0,
-                                                         Direction::Output),
+  declareProperty(make_unique<PropertyWithValue<double> >("OutputChi2", 0.0,
+                                                          Direction::Output),
                   "Returns the goodness of the fit");
   declareProperty(
       make_unique<FileProperty>("OutputDirectory", ".",
@@ -72,7 +72,7 @@ void OptimizeLatticeForCellType::exec() {
   bool apply = this->getProperty("Apply");
   bool perRun = this->getProperty("PerRun");
   double tolerance = this->getProperty("Tolerance");
-  int edge = this->getProperty("EdgePixels");
+  int edge = this->getProperty("edgePixels");
   std::string cell_type = getProperty("CellType");
   DataObjects::PeaksWorkspace_sptr ws = getProperty("PeaksWorkspace");
   Geometry::Instrument_const_sptr inst = ws->getInstrument();
@@ -81,8 +81,8 @@ void OptimizeLatticeForCellType::exec() {
   if (edge > 0) {
     for (int i = int(ws->getNumberPeaks()) - 1; i >= 0; --i) {
       const std::vector<Peak> &peaks = ws->getPeaks();
-      if (DetectorInfo::edgePixel(inst, peaks[i].getBankName(),
-                                  peaks[i].getCol(), peaks[i].getRow(), edge)) {
+      if (edgePixel(inst, peaks[i].getBankName(), peaks[i].getCol(),
+                    peaks[i].getRow(), edge)) {
         ws->removePeak(i);
       }
     }
@@ -90,7 +90,7 @@ void OptimizeLatticeForCellType::exec() {
   runWS.push_back(ws);
 
   if (perRun) {
-    std::vector<std::pair<std::string, bool>> criteria;
+    std::vector<std::pair<std::string, bool> > criteria;
     // Sort by run number
     criteria.push_back(std::pair<std::string, bool>("runnumber", true));
     ws->sort(criteria);
@@ -127,7 +127,8 @@ void OptimizeLatticeForCellType::exec() {
     IAlgorithm_sptr fit_alg;
     try {
       fit_alg = createChildAlgorithm("Fit", -1, -1, false);
-    } catch (Exception::NotFoundError &) {
+    }
+    catch (Exception::NotFoundError &) {
       g_log.error("Can't locate Fit algorithm");
       throw;
     }
@@ -146,7 +147,8 @@ void OptimizeLatticeForCellType::exec() {
     IAlgorithm_sptr ub_alg;
     try {
       ub_alg = createChildAlgorithm("CalculateUMatrix", -1, -1, false);
-    } catch (Exception::NotFoundError &) {
+    }
+    catch (Exception::NotFoundError &) {
       g_log.error("Can't locate CalculateUMatrix algorithm");
       throw;
     }

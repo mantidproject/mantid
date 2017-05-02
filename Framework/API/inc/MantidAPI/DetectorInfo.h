@@ -5,7 +5,6 @@
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/Quat.h"
 #include "MantidKernel/V3D.h"
-#include "MantidGeometry/Instrument.h"
 
 #include <boost/shared_ptr.hpp>
 
@@ -74,7 +73,7 @@ public:
   DetectorInfo(Beamline::DetectorInfo &detectorInfo,
                boost::shared_ptr<const Geometry::Instrument> instrument,
                Geometry::ParameterMap *pmap,
-               boost::shared_ptr<const std::unordered_map<detid_t, size_t>>
+               boost::shared_ptr<const std::unordered_map<detid_t, size_t> >
                    detIdToIndexMap);
 
   DetectorInfo &operator=(const DetectorInfo &rhs);
@@ -135,13 +134,9 @@ public:
 
   void merge(const DetectorInfo &other);
 
-  boost::shared_ptr<const std::unordered_map<detid_t, size_t>>
+  boost::shared_ptr<const std::unordered_map<detid_t, size_t> >
   detIdToIndexMap() const;
   friend class SpectrumInfo;
-
-  /// Function to find peaks near detector edge
-  static bool edgePixel(Geometry::Instrument_const_sptr inst,
-                        std::string bankName, int col, int row, int Edge);
 
 private:
   const Geometry::IDetector &getDetector(const size_t index) const;
@@ -167,13 +162,13 @@ private:
   Geometry::ParameterMap *m_pmap;
   boost::shared_ptr<const Geometry::Instrument> m_instrument;
   std::vector<detid_t> m_detectorIDs;
-  boost::shared_ptr<const std::unordered_map<detid_t, size_t>> m_detIDToIndex;
+  boost::shared_ptr<const std::unordered_map<detid_t, size_t> > m_detIDToIndex;
   // The following variables are mutable, since they are initialized (cached)
   // only on demand, by const getters.
   mutable boost::shared_ptr<const Geometry::IComponent> m_source;
   mutable boost::shared_ptr<const Geometry::IComponent> m_sample;
-  mutable bool m_sourceGood{false};
-  mutable bool m_sampleGood{false};
+  mutable bool m_sourceGood{ false };
+  mutable bool m_sampleGood{ false };
   mutable Kernel::V3D m_sourcePos;
   mutable Kernel::V3D m_samplePos;
   mutable double m_L1;
@@ -181,16 +176,16 @@ private:
   mutable std::once_flag m_sampleCached;
   mutable std::once_flag m_L1Cached;
 
-  mutable std::vector<boost::shared_ptr<const Geometry::IDetector>>
-      m_lastDetector;
+  mutable std::vector<boost::shared_ptr<const Geometry::IDetector> >
+  m_lastDetector;
   mutable std::vector<
-      std::pair<const Geometry::IComponent *, std::vector<size_t>>>
-      m_lastAssemblyDetectorIndices;
+      std::pair<const Geometry::IComponent *, std::vector<size_t> > >
+  m_lastAssemblyDetectorIndices;
   mutable std::vector<size_t> m_lastIndex;
 };
 
 /// Helper Non-member to make the ID->index mappings for detector IDs
-MANTID_API_DLL boost::shared_ptr<const std::unordered_map<detid_t, size_t>>
+MANTID_API_DLL boost::shared_ptr<const std::unordered_map<detid_t, size_t> >
 makeDetIdToIndexMap(const std::vector<detid_t> &detIds);
 
 } // namespace API

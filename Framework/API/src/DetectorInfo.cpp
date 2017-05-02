@@ -17,11 +17,12 @@ namespace API {
  * @param detIds : Detector IDs to build the indexes for
  * @return shared_ptr to const map of detector ID -> detector index.
  */
-boost::shared_ptr<const std::unordered_map<detid_t, size_t>>
+boost::shared_ptr<const std::unordered_map<detid_t, size_t> >
 makeDetIdToIndexMap(const std::vector<detid_t> &detIds) {
 
   const size_t nDetIds = detIds.size();
-  auto detIdToIndex = boost::make_shared<std::unordered_map<detid_t, size_t>>();
+  auto detIdToIndex =
+      boost::make_shared<std::unordered_map<detid_t, size_t> >();
   detIdToIndex->reserve(nDetIds);
   for (size_t i = 0; i < nDetIds; ++i) {
     (*detIdToIndex)[detIds[i]] = i;
@@ -67,7 +68,7 @@ DetectorInfo::DetectorInfo(
     Beamline::DetectorInfo &detectorInfo,
     boost::shared_ptr<const Geometry::Instrument> instrument,
     Geometry::ParameterMap *pmap,
-    boost::shared_ptr<const std::unordered_map<detid_t, size_t>>
+    boost::shared_ptr<const std::unordered_map<detid_t, size_t> >
         detIdToIndexMap)
     : m_detectorInfo(detectorInfo), m_pmap(pmap), m_instrument(instrument),
       m_detIDToIndex(detIdToIndexMap), m_lastDetector(PARALLEL_GET_MAX_THREADS),
@@ -462,7 +463,7 @@ size_t DetectorInfo::scanCount(const size_t index) const {
 std::pair<Kernel::DateAndTime, Kernel::DateAndTime>
 DetectorInfo::scanInterval(const std::pair<size_t, size_t> &index) const {
   const auto &interval = m_detectorInfo.scanInterval(index);
-  return {interval.first, interval.second};
+  return { interval.first, interval.second };
 }
 
 /** Set the scan interval of the detector with given detector index.
@@ -475,8 +476,8 @@ DetectorInfo::scanInterval(const std::pair<size_t, size_t> &index) const {
 void DetectorInfo::setScanInterval(
     const size_t index,
     const std::pair<Kernel::DateAndTime, Kernel::DateAndTime> &interval) {
-  m_detectorInfo.setScanInterval(index, {interval.first.totalNanoseconds(),
-                                         interval.second.totalNanoseconds()});
+  m_detectorInfo.setScanInterval(index, { interval.first.totalNanoseconds(),
+                                          interval.second.totalNanoseconds() });
 }
 
 /** Merges the contents of other into this.
@@ -577,55 +578,10 @@ void DetectorInfo::doCacheSample() const {
 
 void DetectorInfo::cacheL1() const { m_L1 = m_source->getDistance(*m_sample); }
 
-boost::shared_ptr<const std::unordered_map<detid_t, size_t>>
+boost::shared_ptr<const std::unordered_map<detid_t, size_t> >
 DetectorInfo::detIdToIndexMap() const {
   return m_detIDToIndex;
 }
-/**
-  @param  bankName     Name of bank containing peak
-  @param  col          Column number containing peak
-  @param  row          Row number containing peak
-  @param  Edge         Number of edge points for each bank
-  @return True if peak is on edge
-*/
-bool DetectorInfo::edgePixel(Mantid::Geometry::Instrument_const_sptr inst,
-                             std::string bankName, int col, int row, int Edge) {
-  if (bankName == "None")
-    return false;
-  boost::shared_ptr<const Geometry::IComponent> parent =
-      inst->getComponentByName(bankName);
-  if (parent->type() == "RectangularDetector") {
-    boost::shared_ptr<const Geometry::RectangularDetector> RDet =
-        boost::dynamic_pointer_cast<const Geometry::RectangularDetector>(
-            parent);
 
-    return col < Edge || col >= (RDet->xpixels() - Edge) || row < Edge ||
-           row >= (RDet->ypixels() - Edge);
-  } else {
-    std::vector<Geometry::IComponent_const_sptr> children;
-    boost::shared_ptr<const Geometry::ICompAssembly> asmb =
-        boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(parent);
-    asmb->getChildren(children, false);
-    int startI = 1;
-    if (children[0]->getName() == "sixteenpack") {
-      startI = 0;
-      parent = children[0];
-      children.clear();
-      boost::shared_ptr<const Geometry::ICompAssembly> asmb =
-          boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(parent);
-      asmb->getChildren(children, false);
-    }
-    boost::shared_ptr<const Geometry::ICompAssembly> asmb2 =
-        boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(children[0]);
-    std::vector<Geometry::IComponent_const_sptr> grandchildren;
-    asmb2->getChildren(grandchildren, false);
-    int NROWS = static_cast<int>(grandchildren.size());
-    int NCOLS = static_cast<int>(children.size());
-    // Wish pixels and tubes start at 1 not 0
-    return col - startI < Edge || col - startI >= (NCOLS - Edge) ||
-           row - startI < Edge || row - startI >= (NROWS - Edge);
-  }
-  return false;
-}
 } // namespace API
 } // namespace Mantid

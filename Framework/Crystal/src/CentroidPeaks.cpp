@@ -4,7 +4,7 @@
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/VectorHelper.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
-#include "MantidAPI/DetectorInfo.h"
+#include "MantidGeometry/Crystal/EdgePixel.h"
 
 using Mantid::DataObjects::PeaksWorkspace;
 
@@ -24,27 +24,27 @@ using namespace Mantid::Crystal;
 /** Initialize the algorithm's properties.
  */
 void CentroidPeaks::init() {
-  declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace>>(
+  declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace> >(
                       "InPeaksWorkspace", "", Direction::Input),
                   "A PeaksWorkspace containing the peaks to centroid.");
 
   declareProperty(
-      make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
+      make_unique<WorkspaceProperty<> >("InputWorkspace", "", Direction::Input),
       "An input 2D Workspace.");
 
   declareProperty(
-      make_unique<PropertyWithValue<int>>("PeakRadius", 10, Direction::Input),
+      make_unique<PropertyWithValue<int> >("PeakRadius", 10, Direction::Input),
       "Fixed radius around each peak position in which to calculate the "
       "centroid.");
 
   declareProperty(
-      make_unique<PropertyWithValue<int>>("EdgePixels", 0, Direction::Input),
+      make_unique<PropertyWithValue<int> >("edgePixels", 0, Direction::Input),
       "The number of pixels where peaks are removed at edges. Only "
       "for instruments with RectangularDetectors. ");
 
   declareProperty(
-      make_unique<WorkspaceProperty<PeaksWorkspace>>("OutPeaksWorkspace", "",
-                                                     Direction::Output),
+      make_unique<WorkspaceProperty<PeaksWorkspace> >("OutPeaksWorkspace", "",
+                                                      Direction::Output),
       "The output PeaksWorkspace will be a copy of the input PeaksWorkspace "
       "with the peaks' positions modified by the new found centroids.");
 }
@@ -87,7 +87,7 @@ void CentroidPeaks::integrate() {
     }
   }
 
-  int Edge = getProperty("EdgePixels");
+  int Edge = getProperty("edgePixels");
   Progress prog(this, MinPeaks, 1.0, MaxPeaks);
   PARALLEL_FOR_IF(Kernel::threadSafe(*inWS, *peakWS))
   for (int i = MinPeaks; i <= MaxPeaks; ++i) {
@@ -121,7 +121,7 @@ void CentroidPeaks::integrate() {
     for (int ichan = chanstart; ichan <= chanend; ++ichan) {
       for (int irow = rowstart; irow <= rowend; ++irow) {
         for (int icol = colstart; icol <= colend; ++icol) {
-          if (DetectorInfo::edgePixel(inst, bankName, icol, irow, Edge))
+          if (edgePixel(inst, bankName, icol, irow, Edge))
             continue;
           const auto it =
               wi_to_detid_map.find(findPixelID(bankName, icol, irow));
@@ -149,7 +149,7 @@ void CentroidPeaks::integrate() {
 
     peak.setDetectorID(findPixelID(bankName, col, row));
     // Set wavelength to change tof for peak object
-    if (!DetectorInfo::edgePixel(inst, bankName, col, row, Edge)) {
+    if (!edgePixel(inst, bankName, col, row, Edge)) {
       it = wi_to_detid_map.find(findPixelID(bankName, col, row));
       workspaceIndex = (it->second);
       Mantid::Kernel::Units::Wavelength wl;
@@ -176,7 +176,7 @@ void CentroidPeaks::integrate() {
     int row = peak.getRow();
     std::string bankName = peak.getBankName();
 
-    if (DetectorInfo::edgePixel(inst, bankName, col, row, Edge)) {
+    if (edgePixel(inst, bankName, col, row, Edge)) {
       peakWS->removePeak(i);
     }
   }
@@ -224,7 +224,7 @@ void CentroidPeaks::integrateEvent() {
     }
   }
 
-  int Edge = getProperty("EdgePixels");
+  int Edge = getProperty("edgePixels");
   Progress prog(this, MinPeaks, 1.0, MaxPeaks);
   PARALLEL_FOR_IF(Kernel::threadSafe(*inWS, *peakWS))
   for (int i = MinPeaks; i <= MaxPeaks; ++i) {
@@ -238,7 +238,7 @@ void CentroidPeaks::integrateEvent() {
 
     double intensity = 0.0;
     double tofcentroid = 0.0;
-    if (DetectorInfo::edgePixel(inst, bankName, col, row, Edge))
+    if (edgePixel(inst, bankName, col, row, Edge))
       continue;
 
     double tofstart = TOFPeakd * std::pow(1.004, -PeakRadius);
@@ -251,7 +251,7 @@ void CentroidPeaks::integrateEvent() {
     int colend = col + PeakRadius;
     for (int irow = rowstart; irow <= rowend; ++irow) {
       for (int icol = colstart; icol <= colend; ++icol) {
-        if (DetectorInfo::edgePixel(inst, bankName, icol, irow, Edge))
+        if (edgePixel(inst, bankName, icol, irow, Edge))
           continue;
         auto it1 = wi_to_detid_map.find(findPixelID(bankName, icol, irow));
         size_t workspaceIndex = (it1->second);
@@ -277,7 +277,7 @@ void CentroidPeaks::integrateEvent() {
     row = std::max(0, row);
     col = int(colcentroid / intensity);
     col = std::max(0, col);
-    if (!DetectorInfo::edgePixel(inst, bankName, col, row, Edge)) {
+    if (!edgePixel(inst, bankName, col, row, Edge)) {
       peak.setDetectorID(findPixelID(bankName, col, row));
 
       // Set wavelength to change tof for peak object
@@ -306,7 +306,7 @@ void CentroidPeaks::integrateEvent() {
     int row = peak.getRow();
     std::string bankName = peak.getBankName();
 
-    if (DetectorInfo::edgePixel(inst, bankName, col, row, Edge)) {
+    if (edgePixel(inst, bankName, col, row, Edge)) {
       peakWS->removePeak(i);
     }
   }
