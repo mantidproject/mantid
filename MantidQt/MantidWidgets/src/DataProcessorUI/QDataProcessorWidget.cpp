@@ -215,6 +215,11 @@ Collapse all currently expanded groups
 void QDataProcessorWidget::collapseAll() { ui.viewTable->collapseAll(); }
 
 /**
+Select all groups
+*/
+void QDataProcessorWidget::selectAll() { ui.viewTable->selectAll(); }
+
+/**
 Save settings
 @param options : map of user options to save
 */

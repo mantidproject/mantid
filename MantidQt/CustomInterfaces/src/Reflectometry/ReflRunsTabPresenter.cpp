@@ -226,8 +226,12 @@ void ReflRunsTabPresenter::populateSearch(IAlgorithm_sptr searchAlg) {
 */
 void ReflRunsTabPresenter::autoreduce() {
   notify(IReflRunsTabPresenter::ICATSearchCompleteFlag);
-  m_view->setAllSearchRowsSelected();
+  m_view->setAllSearchRowsSelected(); // Select all rows for transfer
   notify(IReflRunsTabPresenter::TransferFlag);
+
+  auto tablePresenter = m_tablePresenters.at(m_view->getSelectedGroup());
+  tablePresenter->notify(DataProcessorPresenter::SelectAllGroupsFlag);
+  tablePresenter->notify(DataProcessorPresenter::ProcessFlag);
 }
 
 /** Transfers the selected runs in the search results to the processing table

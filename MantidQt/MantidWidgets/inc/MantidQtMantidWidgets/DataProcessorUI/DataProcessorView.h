@@ -73,6 +73,9 @@ public:
   virtual void expandAll() = 0;
   virtual void collapseAll() = 0;
 
+  // Select all groups
+  virtual void selectAll() = 0;
+
   // Setter methods
   virtual void setTableList(const std::set<std::string> &tables) = 0;
   virtual void setInstrumentList(const std::vector<std::string> &instruments,

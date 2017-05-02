@@ -815,6 +815,11 @@ Collapse all groups
 void GenericDataProcessorPresenter::collapseAll() { m_view->collapseAll(); }
 
 /**
+Select all groups
+*/
+void GenericDataProcessorPresenter::selectAll() { m_view->selectAll(); }
+
+/**
 Used by the view to tell the presenter something has changed
 */
 void GenericDataProcessorPresenter::notify(DataProcessorPresenter::Flag flag) {
@@ -888,6 +893,9 @@ void GenericDataProcessorPresenter::notify(DataProcessorPresenter::Flag flag) {
     break;
   case DataProcessorPresenter::CollapseAllGroupsFlag:
     collapseAll();
+    break;
+  case DataProcessorPresenter::SelectAllGroupsFlag:
+    selectAll();
     break;
   }
   // Not having a 'default' case is deliberate. gcc issues a warning if there's

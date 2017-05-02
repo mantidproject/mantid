@@ -195,6 +195,8 @@ private:
   void expandAll();
   // close all groups
   void collapseAll();
+  // select all groups
+  void selectAll();
   // table io methods
   void newTable();
   void openTable();
