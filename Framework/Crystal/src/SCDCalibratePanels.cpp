@@ -18,6 +18,7 @@
 #include "MantidGeometry/Crystal/IndexingUtils.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidGeometry/Crystal/ReducedCell.h"
+#include "MantidAPI/DetectorInfo.h"
 #include <boost/math/special_functions/round.hpp>
 #include <boost/container/flat_set.hpp>
 #include <Poco/File.h>
@@ -44,67 +45,21 @@ const std::string SCDCalibratePanels::category() const {
   return "Crystal\\Corrections";
 }
 
-//-----------------------------------------------------------------------------------------
-/**
-  @param  ws           Name of workspace containing peaks
-  @param  bankName     Name of bank containing peak
-  @param  col          Column number containing peak
-  @param  row          Row number containing peak
-  @param  Edge         Number of edge points for each bank
-  @return True if peak is on edge
-*/
-bool SCDCalibratePanels::edgePixel(const PeaksWorkspace &ws,
-                                   const std::string &bankName, int col,
-                                   int row, int Edge) {
-  if (bankName == "None")
-    return false;
-  auto Iptr = ws.getInstrument();
-  auto parent = Iptr->getComponentByName(bankName);
-  if (parent->type() == "RectangularDetector") {
-    auto RDet = boost::dynamic_pointer_cast<const RectangularDetector>(parent);
-    return col < Edge || col >= (RDet->xpixels() - Edge) || row < Edge ||
-           row >= (RDet->ypixels() - Edge);
-  } else {
-    std::vector<Geometry::IComponent_const_sptr> children;
-    auto asmb =
-        boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(parent);
-    asmb->getChildren(children, false);
-    int startI = 1;
-    if (children[0]->getName() == "sixteenpack") {
-      startI = 0;
-      parent = children[0];
-      children.clear();
-      auto asmb =
-          boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(parent);
-      asmb->getChildren(children, false);
-    }
-    auto asmb2 =
-        boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(children[0]);
-    std::vector<Geometry::IComponent_const_sptr> grandchildren;
-    asmb2->getChildren(grandchildren, false);
-    int NROWS = static_cast<int>(grandchildren.size());
-    int NCOLS = static_cast<int>(children.size());
-    // Wish pixels and tubes start at 1 not 0
-    return col - startI < Edge || col - startI >= (NCOLS - Edge) ||
-           row - startI < Edge || row - startI >= (NROWS - Edge);
-  }
-  return false;
-}
-
 void SCDCalibratePanels::exec() {
   PeaksWorkspace_sptr peaksWs = getProperty("PeakWorkspace");
   // We must sort the peaks
-  std::vector<std::pair<std::string, bool>> criteria{{"BankName", true}};
+  std::vector<std::pair<std::string, bool> > criteria{ { "BankName", true } };
   peaksWs->sort(criteria);
   // Remove peaks on edge
   int edge = this->getProperty("EdgePixels");
   if (edge > 0) {
+    Geometry::Instrument_const_sptr inst = peaksWs->getInstrument();
     std::vector<Peak> &peaks = peaksWs->getPeaks();
-    auto it = std::remove_if(
-        peaks.begin(), peaks.end(), [&peaksWs, edge, this](const Peak &pk) {
-          return this->edgePixel(*peaksWs, pk.getBankName(), pk.getCol(),
-                                 pk.getRow(), edge);
-        });
+    auto it = std::remove_if(peaks.begin(), peaks.end(),
+                             [&peaksWs, edge, inst](const Peak &pk) {
+      return DetectorInfo::edgePixel(inst, pk.getBankName(), pk.getCol(),
+                                     pk.getRow(), edge);
+    });
     peaks.erase(it, peaks.end());
   }
   findU(peaksWs);
@@ -178,7 +133,8 @@ void SCDCalibratePanels::exec() {
     IAlgorithm_sptr fit_alg;
     try {
       fit_alg = createChildAlgorithm("Fit", -1, -1, false);
-    } catch (Exception::NotFoundError &) {
+    }
+    catch (Exception::NotFoundError &) {
       g_log.error("Can't locate Fit algorithm");
       throw;
     }
@@ -217,7 +173,8 @@ void SCDCalibratePanels::exec() {
       IAlgorithm_sptr fit2_alg;
       try {
         fit2_alg = createChildAlgorithm("Fit", -1, -1, false);
-      } catch (Exception::NotFoundError &) {
+      }
+      catch (Exception::NotFoundError &) {
         g_log.error("Can't locate Fit algorithm");
         throw;
       }
@@ -359,7 +316,8 @@ void SCDCalibratePanels::exec() {
           RowY[icount] = theoretical.getRow();
           TofX[icount] = peak.getTOF();
           TofY[icount] = theoretical.getTOF();
-        } catch (...) {
+        }
+        catch (...) {
           // g_log.debug() << "Problem only in printing peaks\n";
         }
         icount++;
@@ -417,7 +375,8 @@ void SCDCalibratePanels::findL1(int nPeaks,
   IAlgorithm_sptr fitL1_alg;
   try {
     fitL1_alg = createChildAlgorithm("Fit", -1, -1, false);
-  } catch (Exception::NotFoundError &) {
+  }
+  catch (Exception::NotFoundError &) {
     g_log.error("Can't locate Fit algorithm");
     throw;
   }
@@ -452,7 +411,8 @@ void SCDCalibratePanels::findU(DataObjects::PeaksWorkspace_sptr peaksWs) {
   IAlgorithm_sptr ub_alg;
   try {
     ub_alg = createChildAlgorithm("CalculateUMatrix", -1, -1, false);
-  } catch (Exception::NotFoundError &) {
+  }
+  catch (Exception::NotFoundError &) {
     g_log.error("Can't locate CalculateUMatrix algorithm");
     throw;
   }
@@ -532,11 +492,11 @@ void SCDCalibratePanels::saveIsawDetCal(
 }
 
 void SCDCalibratePanels::init() {
-  declareProperty(Kernel::make_unique<WorkspaceProperty<PeaksWorkspace>>(
+  declareProperty(Kernel::make_unique<WorkspaceProperty<PeaksWorkspace> >(
                       "PeakWorkspace", "", Kernel::Direction::InOut),
                   "Workspace of Indexed Peaks");
 
-  auto mustBePositive = boost::make_shared<BoundedValidator<double>>();
+  auto mustBePositive = boost::make_shared<BoundedValidator<double> >();
   mustBePositive->setLower(0.0);
 
   declareProperty("a", EMPTY_DBL(), mustBePositive,
@@ -566,7 +526,7 @@ void SCDCalibratePanels::init() {
                   "Remove peaks that are at pixels this close to edge. ");
 
   // ---------- outputs
-  const std::vector<std::string> detcalExts{".DetCal", ".Det_Cal"};
+  const std::vector<std::string> detcalExts{ ".DetCal", ".Det_Cal" };
   declareProperty(
       Kernel::make_unique<FileProperty>("DetCalFilename", "SCDCalibrate.DetCal",
                                         FileProperty::Save, detcalExts),

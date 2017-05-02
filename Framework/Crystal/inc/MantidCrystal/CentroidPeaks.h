@@ -18,7 +18,9 @@ namespace Crystal {
 class DLLExport CentroidPeaks : public API::Algorithm {
 public:
   /// Algorithm's name for identification
-  const std::string name() const override { return "CentroidPeaks"; };
+  const std::string name() const override {
+    return "CentroidPeaks";
+  };
   /// Summary of algorithms purpose
   const std::string summary() const override {
     return "Find the centroid of single-crystal peaks in a 2D Workspace, in "
@@ -26,7 +28,9 @@ public:
   }
 
   /// Algorithm's version for identification
-  int version() const override { return 1; };
+  int version() const override {
+    return 1;
+  };
   /// Algorithm's category for identification
   const std::string category() const override { return "Crystal\\Peaks"; }
 
@@ -38,7 +42,7 @@ private:
   void integrate();
   void integrateEvent();
   int findPixelID(std::string bankName, int col, int row);
-  bool edgePixel(std::string bankName, int col, int row, int Edge);
+  Geometry::Instrument_const_sptr inst;
 
   /// Input 2D Workspace
   API::MatrixWorkspace_sptr inWS;
