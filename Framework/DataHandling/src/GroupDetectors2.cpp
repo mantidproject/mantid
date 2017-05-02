@@ -106,12 +106,12 @@ void translateRange(const std::string &instructions,
  * spectrum indices
  */
 std::vector<std::vector<int>>
-translateInstructions(const std::string &instructions) {
+translateInstructions(const std::string &instructions, unsigned options) {
   std::vector<std::vector<int>> outGroups;
 
   // split into comma separated groups, each group potentially containing
   // an operation (+-:) that produces even more groups.
-  auto groups = Kernel::StringTokenizer(instructions, ",", IGNORE_SPACES);
+  auto groups = Kernel::StringTokenizer(instructions, ",", options);
   for (const auto &groupStr : groups) {
     // Look for the various operators in the string. If one is found then
     // do the necessary translation into groupings.
@@ -456,7 +456,7 @@ void GroupDetectors2::getGroups(API::MatrixWorkspace_const_sptr workspace,
       specs2index = axis->getSpectraIndexMap();
 
     // Translate the instructions into a vector of groups
-    auto groups = translateInstructions(instructions);
+    auto groups = translateInstructions(instructions, IGNORE_SPACES);
     // Fill commandsSS with the contents of a map file
     std::stringstream commandsSS;
     convertGroupsToMapFile(groups, axis, commandsSS);
