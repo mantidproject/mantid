@@ -228,7 +228,7 @@ public:
 
   void test_groupAsymmetry_singlePeriod() {
     MatrixWorkspace_sptr inWS = createWorkspace();
-    inWS->mutableRun().addProperty("goodfrm",10);	
+    inWS->mutableRun().addProperty("goodfrm", 10);
     auto inputWSGroup = boost::make_shared<WorkspaceGroup>();
     inputWSGroup->addWorkspace(inWS);
 
@@ -262,9 +262,9 @@ public:
 
   void test_groupAsymmetry_twoPeriods_minus() {
     MatrixWorkspace_sptr inWS = createWorkspace(3);
-    inWS->mutableRun().addProperty("goodfrm",10);	
+    inWS->mutableRun().addProperty("goodfrm", 10);
     MatrixWorkspace_sptr inWSSecond = createWorkspace();
-    inWSSecond->mutableRun().addProperty("goodfrm",10);	
+    inWSSecond->mutableRun().addProperty("goodfrm", 10);
     auto inputWSGroup = boost::make_shared<WorkspaceGroup>();
     inputWSGroup->addWorkspace(inWS);
     inputWSGroup->addWorkspace(inWSSecond);
@@ -299,9 +299,9 @@ public:
 
   void test_groupAsymmetry_twoPeriods_plus() {
     MatrixWorkspace_sptr inWS = createWorkspace(3);
-    inWS->mutableRun().addProperty("goodfrm",10);	
+    inWS->mutableRun().addProperty("goodfrm", 10);
     MatrixWorkspace_sptr inWSSecond = createWorkspace();
-    inWSSecond->mutableRun().addProperty("goodfrm",10);	
+    inWSSecond->mutableRun().addProperty("goodfrm", 10);
     auto inputWSGroup = boost::make_shared<WorkspaceGroup>();
     inputWSGroup->addWorkspace(inWS);
     inputWSGroup->addWorkspace(inWSSecond);
@@ -339,11 +339,11 @@ public:
   */
   void test_groupAsymmetry_threePeriods_plus() {
     MatrixWorkspace_sptr periodOne = createWorkspace();
-    periodOne->mutableRun().addProperty("goodfrm",10);	
+    periodOne->mutableRun().addProperty("goodfrm", 10);
     MatrixWorkspace_sptr periodTwo = createWorkspace(3);
-    periodTwo->mutableRun().addProperty("goodfrm",10);	
+    periodTwo->mutableRun().addProperty("goodfrm", 10);
     MatrixWorkspace_sptr periodThree = createWorkspace(1);
-    periodThree->mutableRun().addProperty("goodfrm",10);	
+    periodThree->mutableRun().addProperty("goodfrm", 10);
     auto inputWSGroup = boost::make_shared<WorkspaceGroup>();
     inputWSGroup->addWorkspace(periodOne);
     inputWSGroup->addWorkspace(periodTwo);
@@ -382,11 +382,11 @@ public:
   */
   void test_groupAsymmetry_threePeriods_minus() {
     MatrixWorkspace_sptr periodOne = createWorkspace();
-    periodOne->mutableRun().addProperty("goodfrm",10);	
+    periodOne->mutableRun().addProperty("goodfrm", 10);
     MatrixWorkspace_sptr periodTwo = createWorkspace(3);
-    periodTwo->mutableRun().addProperty("goodfrm",10);	
+    periodTwo->mutableRun().addProperty("goodfrm", 10);
     MatrixWorkspace_sptr periodThree = createWorkspace(1);
-    periodThree->mutableRun().addProperty("goodfrm",10);	
+    periodThree->mutableRun().addProperty("goodfrm", 10);
     auto inputWSGroup = boost::make_shared<WorkspaceGroup>();
     inputWSGroup->addWorkspace(periodOne);
     inputWSGroup->addWorkspace(periodTwo);
