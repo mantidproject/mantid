@@ -661,6 +661,19 @@ public:
                      V3D(scalex * pitch, scaley * pitch, 5.0));
   }
 
+  void test_empty_instrument() {
+    Instrument instrument{};
+    TS_ASSERT(instrument.isEmptyInstrument());
+  }
+
+  void test_not_empty_instrument() {
+
+    Instrument instrument{};
+    TS_ASSERT(instrument.isEmptyInstrument());
+    instrument.add(new CompAssembly{});
+    TS_ASSERT(!instrument.isEmptyInstrument());
+  }
+
 private:
   Instrument_sptr createInstrumentWithSource() {
     using Mantid::Kernel::V3D;

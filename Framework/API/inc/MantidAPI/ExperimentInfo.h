@@ -193,6 +193,8 @@ protected:
   Geometry::Instrument_const_sptr sptr_instrument;
 
 private:
+  void makeAPIComponentInfo(const Geometry::Instrument &instr);
+
   /// Fill with given instrument parameter
   void populateWithParameter(Geometry::ParameterMap &paramMap,
                              Geometry::ParameterMap &paramMapForPosAndRot,

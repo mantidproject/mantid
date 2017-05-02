@@ -1311,6 +1311,8 @@ Instrument::detIdToIndexMap() const {
   return m_detIdToIndexMap;
 }
 
+bool Instrument::isEmptyInstrument() const { return this->nelements() == 0; }
+
 /* Only for use by ExperimentInfo. Sets the pointer to the DetectorInfo.
  * Sets the pointer to the detector id -> index map
 */

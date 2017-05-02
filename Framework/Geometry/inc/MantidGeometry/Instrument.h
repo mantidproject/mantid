@@ -269,6 +269,8 @@ public:
   boost::shared_ptr<const std::unordered_map<detid_t, size_t>>
   detIdToIndexMap() const;
 
+  bool isEmptyInstrument() const;
+
 private:
   /// Save information about a set of detectors to Nexus
   void saveDetectorSetInfoToNexus(::NeXus::File *file,
