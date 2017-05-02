@@ -47,11 +47,18 @@
 #include <QAction>
 #include <QLayout>
 #include <QSplitter>
-#include <QMap>
 #include <QLabel>
 #include <QPushButton>
+
 #include <QMenu>
 #include <QSignalMapper>
+
+#include <QCheckBox>
+
+
+
+
+
 namespace {
 Mantid::Kernel::Logger g_log("MuonFitPropertyBrowser");
 }
@@ -164,8 +171,14 @@ void MuonFitPropertyBrowser::init() {
 
   connect(m_browser, SIGNAL(currentItemChanged(QtBrowserItem *)), this,
           SLOT(currentItemChanged(QtBrowserItem *)));
+  m_groupWindow = new QWidget();
+  
+  QString tmp="moo";
+  addGroupCheckbox(tmp);
+  tmp = "baa";
+  addGroupCheckbox(tmp);
 
-  /* Create editors and assign them to the managers */
+	  /* Create editors and assign them to the managers */
   createEditors(w);
 
   updateDecimals();
@@ -212,6 +225,8 @@ void MuonFitPropertyBrowser::init() {
   m_mainSplitter = new QSplitter(Qt::Vertical, w);
   m_mainSplitter->insertWidget(0, m_widgetSplitter);
   m_mainSplitter->insertWidget(1, m_browser);
+   //moo 
+  m_mainSplitter->insertWidget(2,m_groupWindow);
   m_mainSplitter->setStretchFactor(0, 1);
   m_mainSplitter->setStretchFactor(1, 0);
 
@@ -320,7 +335,6 @@ void MuonFitPropertyBrowser::enumChanged(QtProperty *prop) {
 	if (prop == m_groupsToFit) {
 		int j = m_enumManager->value(m_groupsToFit);
 		std::string option = m_groupsToFitOptions[j].toStdString();
-		double a = 1.;
 	}
 	else {
 		FitPropertyBrowser::enumChanged(prop);
@@ -891,9 +905,92 @@ bool MuonFitPropertyBrowser::hasGuess() const {
     return false;
   }
 }
+/**
+* Sets group names and updates checkboxes on UI
+* By default sets all unchecked
+* @param groups :: [input] List of group names
+*/
+void MuonFitPropertyBrowser::setAvailableGroups(const QStringList &groups) {
+	// If it's the same list, do nothing
+	if (groups.size() == m_groupBoxes.size()) {
+		auto existingGroups = m_groupBoxes.keys();
+		auto newGroups = groups;
+		qSort(existingGroups);
+		qSort(newGroups);
+		if (existingGroups == newGroups) {
+			return;
+		}
+	}
 
+	clearGroupCheckboxes();
+	for (const auto group : groups) {
+		addGroupCheckbox(group); 
+		std::string tmp = group.toStdString();
+		double a = 1.;
+	}
+}
+/**
+* Clears all group names and checkboxes
+* (ready to add new ones)
+*/
+void MuonFitPropertyBrowser::clearGroupCheckboxes() {
+	for (const auto &checkbox : m_groupBoxes) {
+		delete(checkbox);
+		//checkbox->deleteLater(); // will disconnect signal automatically
+	}
+	m_groupBoxes.clear();
+}
+/**
+* Add a new checkbox to the list of groups with given name
+* The new checkbox is unchecked by default
+* @param name :: [input] Name of group to add
+*/
+void MuonFitPropertyBrowser::addGroupCheckbox(const QString &name) {
+	auto checkBox = new QCheckBox(name,m_groupWindow);
+	//m_groupWindow->updateGeometry();//m_groupWindow->addWidget(checkBox);
+	//m_groupWindow->setLayout(layout);
+	m_groupBoxes.insert(name, checkBox);
+	checkBox->setChecked(false);
+	connect(checkBox, SIGNAL(clicked(bool)), this,
+		SIGNAL(selectedGroupsChanged()));
+}
+/**
+* Returns a list of the selected groups (checked boxes)
+* @returns :: list of selected groups
+*/
+QStringList MuonFitPropertyBrowser::getChosenGroups() const {
+	QStringList chosen;
+	for (auto iter = m_groupBoxes.constBegin(); iter != m_groupBoxes.constEnd();
+		++iter) {
+		if (iter.value()->isChecked()) {
+			chosen.append(iter.key());
+		}
+	}
+	return chosen;
+}
+/**
+* Clears the list of selected groups (unchecks boxes)
+*/
+void MuonFitPropertyBrowser::clearChosenGroups() const {
+	for (auto iter = m_groupBoxes.constBegin(); iter != m_groupBoxes.constEnd();
+		++iter) {
+		iter.value()->setChecked(false);
+	}
+}
+/**
+* Set the chosen group ticked and all others off
+* Used when switching from Home tab to Data Analysis tab
+* @param group :: [input] Name of group to select
+*/
+void MuonFitPropertyBrowser::setChosenGroup(const QString &group) {
+	for (auto iter = m_groupBoxes.constBegin(); iter != m_groupBoxes.constEnd();
+		++iter) {
+		if (iter.key() == group) {
+			iter.value()->setChecked(true);
+		}
+	}
+}
 
-QtProperty *MuonFitPropertyBrowser::addToGroupManager(QString name) { return m_groupManager->addProperty(name); };
 
 } // MantidQt
 } // API

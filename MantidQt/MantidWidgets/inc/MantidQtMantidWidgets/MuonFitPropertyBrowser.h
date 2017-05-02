@@ -6,7 +6,8 @@
 #include "MantidQtMantidWidgets/IMuonFitFunctionModel.h"
 
 #include "MantidQtAPI/MWRunFiles.h"
-
+#include <QMap>
+#include <QCheckBox>
 /* Forward declarations */
 class QDockWidget;
 class QLabel;
@@ -24,6 +25,9 @@ class QtProperty;
 class QtBrowserItem;
 class QVBoxLayout;
 class QSplitter;
+class QWidget;
+
+
 
 namespace Mantid {
 namespace API {
@@ -64,7 +68,6 @@ public:
   Mantid::API::IFunction_sptr getFunction() const override {
     return getFittingFunction();
   }
-  QtProperty *addToGroupManager(QString name);
   /// Set list of workspaces to fit
   void setWorkspaceNames(const QStringList &wsNames) override;
   /// Get output name
@@ -100,6 +103,11 @@ public:
   virtual void setFitEnabled(bool yes) override;
 
   void TFAsymmFit(int maxIterations);
+  void setAvailableGroups(const QStringList &groups);
+  QStringList getChosenGroups() const;
+  void setChosenGroup(const QString &group);
+  /// Clear list of selected groups
+  void clearChosenGroups() const;
 
 public slots:
   /// Perform the fit algorithm
@@ -136,7 +144,7 @@ private:
   /// new menu option
   QAction *m_fitActiontest;
   /// Create new fit menu
-  QPushButton *MuonFitPropertyBrowser::createMuonFitMenuButton(QWidget *w);
+  QPushButton *createMuonFitMenuButton(QWidget *w);
 
   /// Get the registered function names
   void populateFunctionNames() override;
@@ -146,6 +154,8 @@ private:
   /// workspaces
   void finishAfterSimultaneousFit(const Mantid::API::IAlgorithm *fitAlg,
                                   const int nWorkspaces) const;
+  void clearGroupCheckboxes();
+  void addGroupCheckbox(const QString &name);
   /// Splitter for additional widgets and splitter between this and browser
   QSplitter *m_widgetSplitter, *m_mainSplitter;
   /// Names of workspaces to fit
@@ -157,7 +167,10 @@ private:
   QtBrowserItem *m_multiFitSettingsGroup;
   QtProperty *m_groupsToFit;
   mutable QStringList m_groupsToFitOptions;
-
+  /// Map of group names to checkboxes
+  QMap<QString,QCheckBox *> m_groupBoxes;
+  QWidget *m_groupWindow;
+  //int m_groupWindowCount;
 };
 
 std::vector<double> readNormalization();
