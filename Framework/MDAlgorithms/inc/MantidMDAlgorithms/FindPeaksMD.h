@@ -24,9 +24,7 @@ class DLLExport FindPeaksMD : public API::Algorithm {
 public:
   FindPeaksMD();
   /// Algorithm's name for identification
-  const std::string name() const override {
-    return "FindPeaksMD";
-  };
+  const std::string name() const override { return "FindPeaksMD"; };
   /// Summary of algorithms purpose
   const std::string summary() const override {
     return "Find peaks in reciprocal space in a MDEventWorkspace or a "
@@ -34,9 +32,7 @@ public:
   }
 
   /// Algorithm's version for identification
-  int version() const override {
-    return 1;
-  };
+  int version() const override { return 1; };
   /// Algorithm's category for identification
   const std::string category() const override {
     return "Optimization\\PeakFinding;MDAlgorithms\\Peaks";
@@ -91,11 +87,7 @@ private:
   Mantid::API::Progress *prog;
 
   /** Enum describing which type of dimensions in the MDEventWorkspace */
-  enum eDimensionType {
-    HKL,
-    QLAB,
-    QSAMPLE
-  };
+  enum eDimensionType { HKL, QLAB, QSAMPLE };
 
   /// Instrument
   Mantid::Geometry::Instrument_const_sptr inst;

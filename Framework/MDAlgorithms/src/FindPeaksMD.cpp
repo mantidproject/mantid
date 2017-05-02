@@ -117,23 +117,23 @@ FindPeaksMD::FindPeaksMD()
 /** Initialize the algorithm's properties.
  */
 void FindPeaksMD::init() {
-  declareProperty(make_unique<WorkspaceProperty<IMDWorkspace> >(
+  declareProperty(make_unique<WorkspaceProperty<IMDWorkspace>>(
                       "InputWorkspace", "", Direction::Input),
                   "An input MDEventWorkspace or MDHistoWorkspace with at least "
                   "3 dimensions.");
 
   declareProperty(
-      make_unique<PropertyWithValue<double> >("PeakDistanceThreshold", 0.1,
-                                              Direction::Input),
+      make_unique<PropertyWithValue<double>>("PeakDistanceThreshold", 0.1,
+                                             Direction::Input),
       "Threshold distance for rejecting peaks that are found to be too close "
       "from each other.\n"
       "This should be some multiple of the radius of a peak. Default: 0.1.");
 
-  declareProperty(make_unique<PropertyWithValue<int64_t> >("MaxPeaks", 500,
-                                                           Direction::Input),
+  declareProperty(make_unique<PropertyWithValue<int64_t>>("MaxPeaks", 500,
+                                                          Direction::Input),
                   "Maximum number of peaks to find. Default: 500.");
 
-  declareProperty(make_unique<PropertyWithValue<double> >(
+  declareProperty(make_unique<PropertyWithValue<double>>(
                       "DensityThresholdFactor", 10.0, Direction::Input),
                   "The overall signal density of the workspace will be "
                   "multiplied by this factor \n"
@@ -141,7 +141,7 @@ void FindPeaksMD::init() {
                   "considered to be peaks. See the help.\n"
                   "Default: 10.0");
 
-  declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace> >(
+  declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "An output PeaksWorkspace with the peaks' found positions.");
 
@@ -150,7 +150,7 @@ void FindPeaksMD::init() {
                   "if it exists. \n"
                   "If unchecked, the output workspace is replaced (Default).");
 
-  auto nonNegativeInt = boost::make_shared<BoundedValidator<int> >();
+  auto nonNegativeInt = boost::make_shared<BoundedValidator<int>>();
   nonNegativeInt->setLower(0);
   declareProperty("EdgePixels", 0, nonNegativeInt,
                   "Remove peaks that are at pixels this close to edge. ");
@@ -184,8 +184,7 @@ void FindPeaksMD::readExperimentInfo(const ExperimentInfo_sptr &ei,
       Mantid::Kernel::Matrix<double>(3, 3, true); // Default IDENTITY matrix
   try {
     m_goniometer = ei->mutableRun().getGoniometerMatrix();
-  }
-  catch (std::exception &e) {
+  } catch (std::exception &e) {
     g_log.warning() << "Error finding goniometer matrix. It will not be set in "
                        "the peaks found.\n";
     g_log.warning() << e.what() << '\n';
@@ -208,8 +207,7 @@ void FindPeaksMD::addPeak(const V3D &Q, const double binCount) {
     }
     if (p->getDetectorID() != -1)
       peakWS->addPeak(*p);
-  }
-  catch (std::exception &e) {
+  } catch (std::exception &e) {
     g_log.notice() << "Error creating peak at " << Q << " because of '"
                    << e.what() << "'. Peak will be skipped.\n";
   }
@@ -236,8 +234,7 @@ FindPeaksMD::createPeak(const Mantid::Kernel::V3D &Q, const double binCount) {
 
   try { // Look for a detector
     p->findDetector();
-  }
-  catch (...) { /* Ignore errors in ray-tracer */
+  } catch (...) { /* Ignore errors in ray-tracer */
   }
 
   p->setBinCount(binCount);
@@ -432,8 +429,7 @@ void FindPeaksMD::findPeaks(typename MDEventWorkspace<MDE, nd>::sptr ws) {
           g_log.information() << "Add new peak with Q-center = " << Q[0] << ", "
                               << Q[1] << ", " << Q[2] << "\n";
         }
-      }
-      catch (std::exception &e) {
+      } catch (std::exception &e) {
         g_log.notice() << "Error creating peak at " << Q << " because of '"
                        << e.what() << "'. Peak will be skipped.\n";
       }
@@ -452,8 +448,8 @@ void FindPeaksMD::findPeaks(typename MDEventWorkspace<MDE, nd>::sptr ws) {
  *
  * @param ws :: MDHistoWorkspace
  */
-void
-FindPeaksMD::findPeaksHisto(Mantid::DataObjects::MDHistoWorkspace_sptr ws) {
+void FindPeaksMD::findPeaksHisto(
+    Mantid::DataObjects::MDHistoWorkspace_sptr ws) {
   size_t nd = ws->getNumDims();
   if (nd < 3)
     throw std::invalid_argument("Workspace must have at least 3 dimensions.");
@@ -623,7 +619,7 @@ void FindPeaksMD::exec() {
   delete prog;
 
   // Do a sort by bank name and then descending bin count (intensity)
-  std::vector<std::pair<std::string, bool> > criteria;
+  std::vector<std::pair<std::string, bool>> criteria;
   criteria.push_back(std::pair<std::string, bool>("RunNumber", true));
   criteria.push_back(std::pair<std::string, bool>("BankName", true));
   criteria.push_back(std::pair<std::string, bool>("bincount", false));
