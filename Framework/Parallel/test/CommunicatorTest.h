@@ -9,7 +9,9 @@
 #endif
 
 using namespace Mantid::Parallel;
+#ifdef MPI_EXPERIMENTAL
 using namespace ParallelTestHelpers;
+#endif
 
 #ifdef MPI_EXPERIMENTAL
 namespace {
