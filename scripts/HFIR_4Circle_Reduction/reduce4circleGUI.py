@@ -309,6 +309,9 @@ class MainWindow(QtGui.QMainWindow):
         # Validator ... (NEXT)
 
         # Declaration of class variable
+        # IPTS number
+        self._iptsNumber = None
+
         # some configuration
         self._homeSrcDir = os.getcwd()
         self._homeDir = os.getcwd()
@@ -2412,10 +2415,39 @@ class MainWindow(QtGui.QMainWindow):
 
         return
 
+    def do_set_ipts_number(self):
+        """
+        set IPTS number
+        :return:
+        """
+        # get IPTS number
+        status, ret_obj = gutil.parse_integers_editors([self.ui.lineEdit_iptsNumber])
+        if status:
+            # a valid IPTS number
+            ipts_number = ret_obj[0]
+
+            # search archive for available experiment number under this IPTS
+            status, ret_obj = self._myControl.check_ipts(ipts_number=ipts_number)
+            if status:
+                exp_number_list = ret_obj
+                self._iptsNumber = ipts_number
+                self.ui.comboBox_expInIPTS.clear()
+                for exp_number in exp_number_list:
+                    self.ui.comboBox_expInIPTS.addItem(str(exp_number))
+            else:
+                self.pop_one_button_dialog('Unable to locate IPTS {0} due to {1}'.format(ipts_number, ret_obj))
+                return
+        else:
+            # error
+            self.pop_one_button_dialog('User specified IPTS number {0} is not correct.'
+                                       ''.format(str(self.ui.lineEdit_iptsNumber.text())))
+            return
+
     def do_set_experiment(self):
         """ Set experiment
         :return:
         """
+        # get exp number
         status, ret_obj = gutil.parse_integers_editors([self.ui.lineEdit_exp])
         if status:
             # new experiment number
@@ -2431,9 +2463,15 @@ class MainWindow(QtGui.QMainWindow):
             self.setWindowTitle('Experiment %d' % exp_number)
 
             # try to set the default
-            default_data_dir = '/HFIR/HB3A/exp%d/Datafiles' % exp_number
+            if self._iptsNumber is not None:
+                default_data_dir = '/HFIR/HB3A/IPTS-{0}/exp{1}/Datafiles'.format(self._iptsNumber, exp_number)
+            else:
+                default_data_dir = '/HFIR/HB3A/exp{0}/Datafiles'.format(exp_number)
             if os.path.exists(default_data_dir):
+                # set the directory in
                 self.ui.lineEdit_localSpiceDir.setText(default_data_dir)
+                # find out the detector type
+                status, ret_obj = self._myControl.find_detector_size(default_data_dir)
 
         else:
             err_msg = ret_obj

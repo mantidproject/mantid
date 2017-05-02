@@ -240,6 +240,29 @@ class CWSCDReductionControl(object):
 
         return True, peak_center
 
+    @staticmethod
+    def find_detector_size(exp_directory, exp_number):
+        """
+        find detector size from experiment directory
+        :param exp_directory:
+        :param exp_number
+        :return:
+        """
+        # guess the file name
+        first_xm_file = os.path.join(exp_directory, 'HB3A_Exp{0}_Scan0001_00001.xml'.format(exp_number))
+        if os.path.exists(first_xm_file):
+            file_size = os.path.getsize(first_xm_file)
+            if file_size < abcd:
+                det_size = 256, 256
+            elif file_size < efgh:
+                det_size = 512, 512
+            else:
+                raise RuntimeError('File size is over {0}.  It is not supported.')
+
+            return True, det_size
+
+        return False, 'Unable to find first Pt file {0}'.format(first_xm_file)
+
     def calculate_ub_matrix(self, peak_info_list, a, b, c, alpha, beta, gamma):
         """
         Calculate UB matrix
