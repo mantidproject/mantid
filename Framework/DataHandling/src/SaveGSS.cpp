@@ -277,7 +277,7 @@ void SaveGSS::generateGSASFile(size_t numOutFiles, size_t numOutSpectra) {
     }
 
     // Then add each spectra to buffer
-    for (size_t specIndex = 0; specIndex < numOutSpectra; specIndex++) {
+    for (int64_t specIndex = 0; specIndex < numOutSpectra; specIndex++) {
       // Determine whether to skip the spectrum due to being masked
       if (m_allDetectorsValid && spectrumInfo.isMasked(specIndex)) {
         continue;
@@ -583,9 +583,10 @@ void SaveGSS::validateInputs() const {
   * @throws :: If the file writing fails at all
   */
 void SaveGSS::writeBufferToFile(size_t numOutFiles, size_t numSpectra) {
-  for (size_t fileIndex = 0; fileIndex < numOutFiles; fileIndex++) {
+  // When there are multiple files we can open them all in parallel
+  PARALLEL_FOR_NO_WSP_CHECK()
+  for (int64_t fileIndex = 0; fileIndex < numOutFiles; fileIndex++) {
     // Open each file when there are multiple
-    // TODO Parallel and reporting
     auto outFile = openFileStream(m_outFileNames[fileIndex]);
     for (size_t specIndex = 0; specIndex < numSpectra; specIndex++) {
       // Write each spectra when there are multiple
@@ -599,8 +600,8 @@ void SaveGSS::writeBufferToFile(size_t numOutFiles, size_t numSpectra) {
 void SaveGSS::writeRALFdata(const int bank, const bool MultiplyByBinWidth,
                             std::stringstream &out,
                             const HistogramData::Histogram &histo) const {
-  // TODO change this so it returns a SS
   const auto &xVals = histo.x();
+  const auto &xPointVals = histo.points();
   const auto &yVals = histo.y();
   const auto &eVals = histo.e();
   const size_t datasize = yVals.size();
@@ -619,29 +620,31 @@ void SaveGSS::writeRALFdata(const int bank, const bool MultiplyByBinWidth,
       << std::fixed << " " << std::setprecision(5) << std::setw(7) << bc4
       << " FXYE\n";
 
-  // Run over each Y entry
-  for (size_t j = 0; j < datasize; j++) {
-    // Calculate the error
-    double Epos;
-    if (MultiplyByBinWidth)
-      Epos = eVals[j] * (xVals[j + 1] - xVals[j]); // E[j]*X[j]*bc4;
-    else
-      Epos = eVals[j];
-    Epos = fixErrorValue(Epos);
+  std::vector<std::stringstream> outLines;
+  outLines.resize(datasize);
 
+  PARALLEL_FOR_NO_WSP_CHECK()
+  for (int64_t i = 0; i < datasize; i++) {
+    auto &outLine = outLines[i];
     // The center of the X bin.
-    out << std::fixed << std::setprecision(5) << std::setw(15)
-        << 0.5 * (xVals[j] + xVals[j + 1]);
+    outLine << std::fixed << std::setprecision(5) << std::setw(15)
+            << xPointVals[i];
 
     // The Y value
-    if (MultiplyByBinWidth)
-      out << std::fixed << std::setprecision(8) << std::setw(18)
-          << yVals[j] * (xVals[j + 1] - xVals[j]);
-    else
-      out << std::fixed << std::setprecision(8) << std::setw(18) << yVals[j];
+    const double outYVal{
+        MultiplyByBinWidth ? yVals[i] * (xVals[i + 1] - xVals[i]) : yVals[i]};
+    outLine << std::fixed << std::setprecision(8) << std::setw(18) << outYVal;
 
-    // The error
-    out << std::fixed << std::setprecision(8) << std::setw(18) << Epos << "\n";
+    // Calculate the error
+    const double epos = fixErrorValue(
+        MultiplyByBinWidth ? eVals[i] * (xVals[i + 1] - xVals[i]) : eVals[i]);
+    outLine << std::fixed << std::setprecision(8) << std::setw(18) << epos
+            << "\n";
+  }
+
+  for (const auto &outLine : outLines) {
+    // Ensure the output order is preserved
+    out << outLine.rdbuf();
   }
 }
 
