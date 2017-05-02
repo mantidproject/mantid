@@ -599,9 +599,8 @@ void FilterEvents::splitTimeSeriesLogs(
     std::map<int, DataObjects::EventWorkspace_sptr>::iterator wsiter;
     wsiter = m_outputWorkspacesMap.find(tindex);
     if (wsiter == m_outputWorkspacesMap.end()) {
-      g_log.error() << "Workspace target (" << tindex
-                    << ") does not have workspace associated."
-                    << "\n";
+      g_log.error() << "Workspace target (indexed as " << tindex
+                    << ") does not have workspace associated.\n";
     } else {
       DataObjects::EventWorkspace_sptr ws_i = wsiter->second;
       ws_i->mutableRun().integrateProtonCharge();
@@ -660,8 +659,6 @@ void FilterEvents::splitTimeSeriesProperty(
     } else {
       // add property to the associated workspace
       DataObjects::EventWorkspace_sptr ws_i = wsiter->second;
-      g_log.debug() << "Workspace target " << ws_i->getName()
-                    << " is associated ";
       ws_i->mutableRun().addProperty(output_vector[tindex], true);
     }
   }
