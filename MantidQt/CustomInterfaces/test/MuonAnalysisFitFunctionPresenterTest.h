@@ -225,13 +225,15 @@ public:
     m_presenter->setMultiFitState(MultiFitState::Disabled);
   }
   void test_setTFAsymmMode_On() {
-	  EXPECT_CALL(*m_fitBrowser, setTFAsymmMode(true)).Times(1);
-	  m_presenter->setTFAsymmState(MantidQt::CustomInterfaces::Muon::TFAsymmState::Enabled);
+    EXPECT_CALL(*m_fitBrowser, setTFAsymmMode(true)).Times(1);
+    m_presenter->setTFAsymmState(
+        MantidQt::CustomInterfaces::Muon::TFAsymmState::Enabled);
   }
 
   void test_setTFAsymmMode_Off() {
-	  EXPECT_CALL(*m_fitBrowser, setTFAsymmMode(false)).Times(1);
-	  m_presenter->setTFAsymmState(MantidQt::CustomInterfaces::Muon::TFAsymmState::Disabled);
+    EXPECT_CALL(*m_fitBrowser, setTFAsymmMode(false)).Times(1);
+    m_presenter->setTFAsymmState(
+        MantidQt::CustomInterfaces::Muon::TFAsymmState::Disabled);
   }
   void test_setFunctionInModel_multiFitOn_hasGuess() {
     doTest_setFunctionInModel(MultiFitState::Enabled, true);
