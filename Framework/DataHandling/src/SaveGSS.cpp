@@ -543,7 +543,7 @@ void SaveGSS::setOtherProperties(IAlgorithm *alg,
   *
   * @throws:: If for any reason we cannot run the algorithm
   */
-void SaveGSS::validateInputs() const {
+void SaveGSS::validateUserInput() const {
   // Check whether it is PointData or Histogram
   if (!m_inputWS->isHistogramData())
     g_log.warning("Input workspace is NOT histogram! SaveGSS may not work "
@@ -585,7 +585,8 @@ void SaveGSS::validateInputs() const {
 void SaveGSS::writeBufferToFile(size_t numOutFiles, size_t numSpectra) {
   // When there are multiple files we can open them all in parallel
   PARALLEL_FOR_NO_WSP_CHECK()
-  for (int64_t fileIndex = 0; fileIndex < numOutFiles; fileIndex++) {
+  for (int64_t fileIndex = 0; fileIndex < static_cast<int64_t>(numOutFiles);
+       fileIndex++) {
     // Open each file when there are multiple
     auto outFile = openFileStream(m_outFileNames[fileIndex]);
     for (size_t specIndex = 0; specIndex < numSpectra; specIndex++) {
@@ -624,7 +625,7 @@ void SaveGSS::writeRALFdata(const int bank, const bool MultiplyByBinWidth,
   outLines.resize(datasize);
 
   PARALLEL_FOR_NO_WSP_CHECK()
-  for (int64_t i = 0; i < datasize; i++) {
+  for (int64_t i = 0; i < static_cast<int64_t>(datasize); i++) {
     auto &outLine = outLines[i];
     const double binWidth = xVals[i + 1] - xVals[i];
     const double outYVal{MultiplyByBinWidth ? yVals[i] * binWidth : yVals[i]};
@@ -681,7 +682,7 @@ void SaveGSS::writeSLOGdata(const int bank, const bool MultiplyByBinWidth,
   outLines.resize(datasize);
 
   PARALLEL_FOR_NO_WSP_CHECK()
-  for (int64_t i = 0; i < datasize; i++) {
+  for (int64_t i = 0; i < static_cast<int64_t>(datasize); i++) {
     auto &outLine = outLines[i];
     const double binWidth = xVals[i + 1] - xVals[i];
     const double yValue{MultiplyByBinWidth ? yVals[i] * binWidth : yVals[i]};

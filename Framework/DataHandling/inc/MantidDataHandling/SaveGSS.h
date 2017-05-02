@@ -131,7 +131,7 @@ private:
                           int periodNum) override;
 
   /// Validates the user input and warns / throws on bad conditions
-  void validateInputs() const;
+  void validateUserInput() const;
 
   /// Writes the current buffer to the user specified file path
   void writeBufferToFile(size_t numOutFiles, size_t numSpectra);
