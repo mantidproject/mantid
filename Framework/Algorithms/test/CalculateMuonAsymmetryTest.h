@@ -277,7 +277,8 @@ public:
     TS_ASSERT(alg->isExecuted());
     MatrixWorkspace_sptr outFromCounts = alg->getProperty("OutputWorkspace");
     auto normFromCounts =
-		Mantid::Kernel::VectorHelper::splitStringIntoVector<double>(alg->getPropertyValue("NormalizationConstant"));
+        Mantid::Kernel::VectorHelper::splitStringIntoVector<double>(
+            alg->getPropertyValue("NormalizationConstant"));
     // calculate in two parts
     // get estimate for asymmetry
     IAlgorithm_sptr estAlg =
@@ -306,7 +307,8 @@ public:
     TS_ASSERT(alg2->isExecuted());
     MatrixWorkspace_sptr outFromAsymm = alg2->getProperty("OutputWorkspace");
     auto normFromAsymm =
-		Mantid::Kernel::VectorHelper::splitStringIntoVector<double>(alg2->getPropertyValue("NormalizationConstant"));
+        Mantid::Kernel::VectorHelper::splitStringIntoVector<double>(
+            alg2->getPropertyValue("NormalizationConstant"));
 
     // normalization constants should be the same for both methods
     double Delta = 1.e-4;

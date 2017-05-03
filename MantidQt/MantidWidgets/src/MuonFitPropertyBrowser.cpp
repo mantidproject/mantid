@@ -427,7 +427,8 @@ void MuonFitPropertyBrowser::doTFAsymmFit(int maxIterations) {
   }
   // record result
   auto tmp = asymmAlg->getPropertyValue("NormalizationConstant");
-  std::vector<double> normEst = Mantid::Kernel::VectorHelper::splitStringIntoVector<double>(tmp);
+  std::vector<double> normEst =
+      Mantid::Kernel::VectorHelper::splitStringIntoVector<double>(tmp);
   ITableWorkspace_sptr table = WorkspaceFactory::Instance().createTable();
   AnalysisDataService::Instance().addOrReplace("__norm__", table);
   table->addColumn("double", "norm");
