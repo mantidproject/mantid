@@ -230,7 +230,7 @@ void FilterEvents::exec() {
     generateSplitterTSP(split_tsp_vector);
   }
 
-  // TODO:FIXME - assign split_tsp_vector to all the output workspaces!
+  // assign split_tsp_vector to all the output workspaces!
   mapSplitterTSPtoWorkspaces(split_tsp_vector);
 
   // split times series property
