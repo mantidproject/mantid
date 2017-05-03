@@ -7,7 +7,9 @@
 namespace Mantid {
 namespace Parallel {
 
+#ifdef MPI_EXPERIMENTAL
 Request::Request(const boost::mpi::request &request) : m_request(request) {}
+#endif
 
 void Request::wait() {
   // Not returning a status since it would usually not get initialized. See
@@ -15,7 +17,9 @@ void Request::wait() {
   if (m_threadingBackend)
     if (m_thread.joinable())
       m_thread.join();
+#ifdef MPI_EXPERIMENTAL
   static_cast<void>(m_request.wait());
+#endif
 }
 
 } // namespace Parallel

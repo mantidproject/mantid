@@ -14,9 +14,7 @@
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidParallel/Communicator.h"
-#ifdef MPI_EXPERIMENTAL
 #include "MantidTestHelpers/ParallelRunner.h"
-#endif
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -534,57 +532,43 @@ public:
 
   void testNoParallelism() {
     runNoParallelism(Parallel::Communicator{});
-#ifdef MPI_EXPERIMENTAL
     runParallel(runNoParallelism);
-#endif
     Mantid::API::AnalysisDataService::Instance().clear();
   }
 
   void testGetInputWorkspaceStorageModes() {
     runTestGetInputWorkspaceStorageModes(Parallel::Communicator{});
-#ifdef MPI_EXPERIMENTAL
     runParallel(runTestGetInputWorkspaceStorageModes);
-#endif
     Mantid::API::AnalysisDataService::Instance().clear();
   }
 
   void testBadGetParallelExecutionMode() {
     runBadGetParallelExecutionMode(Parallel::Communicator{});
-#ifdef MPI_EXPERIMENTAL
     runParallel(runBadGetParallelExecutionMode);
-#endif
     Mantid::API::AnalysisDataService::Instance().clear();
   }
 
   void test1To1() {
     run1To1(Parallel::Communicator{});
-#ifdef MPI_EXPERIMENTAL
     runParallel(run1To1);
-#endif
     Mantid::API::AnalysisDataService::Instance().clear();
   }
 
   void testNTo0() {
     runNTo0(Parallel::Communicator{});
-#ifdef MPI_EXPERIMENTAL
     runParallel(runNTo0);
-#endif
     Mantid::API::AnalysisDataService::Instance().clear();
   }
 
   void testNTo1StorageModeFailure() {
     runNTo1StorageModeFailure(Parallel::Communicator{});
-#ifdef MPI_EXPERIMENTAL
     runParallel(runNTo1StorageModeFailure);
-#endif
     Mantid::API::AnalysisDataService::Instance().clear();
   }
 
   void testNTo1() {
     runNTo1(Parallel::Communicator{});
-#ifdef MPI_EXPERIMENTAL
     runParallel(runNTo1);
-#endif
     Mantid::API::AnalysisDataService::Instance().clear();
   }
 
@@ -592,11 +576,9 @@ public:
     run0To1<Parallel::StorageMode::Cloned>(Parallel::Communicator{});
     run0To1<Parallel::StorageMode::Distributed>(Parallel::Communicator{});
     run0To1<Parallel::StorageMode::MasterOnly>(Parallel::Communicator{});
-#ifdef MPI_EXPERIMENTAL
     runParallel(run0To1<Parallel::StorageMode::Cloned>);
     runParallel(run0To1<Parallel::StorageMode::Distributed>);
     runParallel(run0To1<Parallel::StorageMode::MasterOnly>);
-#endif
     Mantid::API::AnalysisDataService::Instance().clear();
   }
 
@@ -624,7 +606,6 @@ public:
     run1To1StorageModeTransition<StorageMode::MasterOnly,
                                  StorageMode::MasterOnly>(
         Parallel::Communicator{});
-#ifdef MPI_EXPERIMENTAL
     runParallel(
         run1To1StorageModeTransition<StorageMode::Cloned, StorageMode::Cloned>);
     runParallel(run1To1StorageModeTransition<StorageMode::Cloned,
@@ -643,7 +624,6 @@ public:
                                              StorageMode::Distributed>);
     runParallel(run1To1StorageModeTransition<StorageMode::MasterOnly,
                                              StorageMode::MasterOnly>);
-#endif
     Mantid::API::AnalysisDataService::Instance().clear();
   }
 
@@ -651,9 +631,7 @@ public:
     // Test that output from one algorithm can be fed into another (in
     // combination with non-trivial storage modes).
     runChained(Parallel::Communicator{});
-#ifdef MPI_EXPERIMENTAL
     runParallel(runChained);
-#endif
     Mantid::API::AnalysisDataService::Instance().clear();
   }
 };

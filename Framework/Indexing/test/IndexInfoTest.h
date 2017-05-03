@@ -9,13 +9,14 @@
 #include "MantidKernel/make_cow.h"
 #include "MantidTypes/SpectrumDefinition.h"
 
+#include "MantidTestHelpers/ParallelRunner.h"
 #ifdef MPI_EXPERIMENTAL
-#include "MantidParallel/ParallelRunner.h"
 #include <boost/mpi/environment.hpp>
 #endif
 
 using namespace Mantid;
 using namespace Indexing;
+using namespace ParallelTestHelpers;
 
 namespace {
 void run_StorageMode_Cloned(const Parallel::Communicator &comm) {
@@ -187,48 +188,33 @@ public:
   }
 
   void test_StorageMode_Cloned() {
-#ifdef MPI_EXPERIMENTAL
     runParallel(run_StorageMode_Cloned);
-#else
     // Trivial: Run with one partition.
     run_StorageMode_Cloned(Parallel::Communicator{});
-#endif
   }
 
   void test_StorageMode_Distributed() {
-#ifdef MPI_EXPERIMENTAL
     runParallel(run_StorageMode_Distributed);
-#else
     // Trivial: Run with one partition.
     run_StorageMode_Distributed(Parallel::Communicator{});
-#endif
   }
 
   void test_StorageMode_MasterOnly() {
-#ifdef MPI_EXPERIMENTAL
     runParallel(run_StorageMode_MasterOnly);
-#else
     // Trivial: Run with one partition.
     run_StorageMode_MasterOnly(Parallel::Communicator{});
-#endif
   }
 
   void test_isOnThisPartition_StorageMode_Cloned() {
-#ifdef MPI_EXPERIMENTAL
     runParallel(run_isOnThisPartition_StorageMode_Cloned);
-#else
     // Trivial: Run with one partition.
     run_isOnThisPartition_StorageMode_Cloned(Parallel::Communicator{});
-#endif
   }
 
   void test_isOnThisPartition_StorageMode_Distributed() {
-#ifdef MPI_EXPERIMENTAL
     runParallel(run_isOnThisPartition_StorageMode_Distributed);
-#else
     // Trivial: Run with one partition.
     run_isOnThisPartition_StorageMode_Distributed(Parallel::Communicator{});
-#endif
   }
 
 private:

@@ -13,6 +13,7 @@ if ( CXXTEST_FOUND )
                         ../../TestHelpers/src/ScopedFileHelper.cpp
                         ../../TestHelpers/src/BoxControllerDummyIO.cpp
                         ../../TestHelpers/src/FakeObjects.cpp
+                        ../../TestHelpers/src/ParallelRunner.cpp
   )
 
   cxxtest_add_test ( DataObjectsTest ${TEST_FILES} )

@@ -10,18 +10,17 @@
 #include "MantidIndexing/IndexInfo.h"
 #include "MantidParallel/Communicator.h"
 #include "MantidParallel/StorageMode.h"
-#ifdef MPI_EXPERIMENTAL
-#include "MantidParallel/ParallelRunner.h"
-#endif
 #include "MantidTypes/SpectrumDefinition.h"
 
 #include "MantidTestHelpers/ComponentCreationHelper.h"
+#include "MantidTestHelpers/ParallelRunner.h"
 
 using namespace Mantid;
 using namespace API;
 using namespace DataObjects;
 using namespace HistogramData;
 using namespace Indexing;
+using namespace ParallelTestHelpers;
 
 namespace {
 void run_create_partitioned(const Parallel::Communicator &comm) {
@@ -381,17 +380,17 @@ public:
 
   void test_create_partitioned() {
     run_create_partitioned(Parallel::Communicator{});
-#ifdef MPI_EXPERIMENTAL
     runParallel(run_create_partitioned);
-#endif
   }
 
   void test_create_partitioned_with_instrument() {
     run_create_partitioned_with_instrument(Parallel::Communicator{},
                                            m_instrument);
-#ifdef MPI_EXPERIMENTAL
-    runParallel(run_create_partitioned_with_instrument, m_instrument);
-#endif
+    // Currently having 0 spectra on a rank is not supported by MatrixWorkspace
+    // so we must make sure to use fewer threads than detectors here:
+    int n_thread = 3;
+    ParallelRunner runner(n_thread);
+    runner.run(run_create_partitioned_with_instrument, m_instrument);
   }
 
   void test_indexInfo_legacy_compatibility_partitioned_workspace_failure() {
@@ -400,10 +399,8 @@ public:
     // workspace.
     run_indexInfo_legacy_compatibility_partitioned_workspace_failure(
         Parallel::Communicator{});
-#ifdef MPI_EXPERIMENTAL
     runParallel(
         run_indexInfo_legacy_compatibility_partitioned_workspace_failure);
-#endif
   }
 
 private:
