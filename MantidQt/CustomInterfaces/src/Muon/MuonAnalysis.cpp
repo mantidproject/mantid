@@ -2115,7 +2115,7 @@ void MuonAnalysis::loadFittings() {
   m_fitFunctionPresenter->setMultiFitState(multiFitState);
   // Set TF Asymmetry mode on/off as appropriate
   const auto &TFAsymmState = m_optionTab->getTFAsymmState();
-  m_fitFunctionPresenter->setTFAsymmState(TFAsymmState);
+  setTFAsymm(TFAsymmState);
 }
 
 /**
@@ -2486,7 +2486,7 @@ void MuonAnalysis::connectAutoUpdate() {
   connect(m_optionTab, SIGNAL(multiFitStateChanged(int)), this,
           SLOT(multiFitCheckboxChanged(int)));
   connect(m_optionTab, SIGNAL(TFAsymmStateChanged(int)), this,
-          SLOT(TFAsymmCheckboxChanged(int)));
+          SLOT(changedTFAsymmCheckbox(int)));
 }
 
 /**
@@ -3044,7 +3044,7 @@ void MuonAnalysis::multiFitCheckboxChanged(int state) {
     m_uiForm.chkTFAsymm->setChecked(false);
     changedTFAsymmCheckbox(0);
     // reset the view
-    m_fitFunctionPresenter->setTFAsymmState(Muon::TFAsymmState::Disabled);
+    setTFAsymm(Muon::TFAsymmState::Disabled);
   }
   m_fitFunctionPresenter->setMultiFitState(multiFitState);
   if (multiFitState == Muon::MultiFitState::Disabled) {
@@ -3061,14 +3061,14 @@ void MuonAnalysis::changedTFAsymmCheckbox(int state) {
                                               : Muon::TFAsymmState::Disabled;
   // If both multiFit and TFAsymm are checked
   // uncheck the multiFit
-  if (m_uiForm.chkEnableMultiFit->isChecked() && state != 0) {
+  if (m_uiForm.chkTFAsymm->isChecked() && state != 0) {
     // uncheck the box
     m_uiForm.chkEnableMultiFit->setChecked(false);
     multiFitCheckboxChanged(0);
     // reset the view
     m_fitFunctionPresenter->setMultiFitState(Muon::MultiFitState::Disabled);
   }
-  m_fitFunctionPresenter->setTFAsymmState(TFAsymmState);
+ setTFAsymm(TFAsymmState);
 }
 /**
 * Called when the "TF Asymmetry" is needed (from home tab)
@@ -3084,7 +3084,9 @@ void MuonAnalysis::setTFAsymm(Muon::TFAsymmState TFAsymmState) {
   // If both multiFit and TFAsymm are checked
   // uncheck the multiFit
   if (m_uiForm.chkEnableMultiFit->isChecked() &&
-      TFAsymmState == Muon::TFAsymmState::Enabled) {
+      TFAsymmState ==
+          Muon::TFAsymmState::Enabled) 
+  {
     // uncheck the box
     m_uiForm.chkEnableMultiFit->setChecked(false);
     multiFitCheckboxChanged(0);
