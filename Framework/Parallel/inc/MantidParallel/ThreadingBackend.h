@@ -3,7 +3,6 @@
 
 #include "MantidParallel/DllConfig.h"
 #include "MantidParallel/Request.h"
-#include "MantidKernel/make_unique.h"
 
 #include <boost/archive/binary_oarchive.hpp>
 #include <boost/archive/binary_iarchive.hpp>
@@ -20,9 +19,9 @@ namespace Mantid {
 namespace Parallel {
 namespace detail {
 
-/** ThreadingBackend provides a backend for data exchange between
-  Communicators in the case of non-MPI builds when communication between threads
-  is used to mimic MPI calls.
+/** ThreadingBackend provides a backend for data exchange between Communicators
+  in the case of non-MPI builds when communication between threads is used to
+  mimic MPI calls. This is FOR UNIT TESTING ONLY and is NOT FOR PRODUCTION CODE.
 
   @author Simon Heybrock
   @date 2017
@@ -72,22 +71,16 @@ public:
 
 private:
   int m_size{1};
-  std::map<std::tuple<int, int, int>,
-           std::vector<std::unique_ptr<std::stringbuf>>> m_buffer;
+  std::map<std::tuple<int, int, int>, std::vector<std::stringbuf>> m_buffer;
   std::mutex m_mutex;
 };
 
 template <typename... T>
 void ThreadingBackend::send(int source, int dest, int tag, T &&... args) {
-  auto buf = Kernel::make_unique<std::stringbuf>();
-  std::ostream os(buf.get());
-  {
-    // binary_oarchive must be scoped, otherwise the destructor segaults. Since
-    // the buffer is in a unique_ptr that is being moved, maybe this is due to
-    // access from another thread once the lock goes out if scope?
-    boost::archive::binary_oarchive oa(os);
-    oa.operator<<(std::forward<T>(args)...);
-  }
+  std::stringbuf buf;
+  std::ostream os(&buf);
+  boost::archive::binary_oarchive oa(os);
+  oa.operator<<(std::forward<T>(args)...);
   std::lock_guard<std::mutex> lock(m_mutex);
   m_buffer[std::make_tuple(source, dest, tag)].push_back(std::move(buf));
 }
@@ -103,13 +96,9 @@ void ThreadingBackend::recv(int dest, int source, int tag, T &&... args) {
     auto &queue = it->second;
     if (queue.empty())
       continue;
-    std::istream is(queue.front().get());
-    {
-      // binary_iarchive scoped to ensure that it goes out of scope before
-      // erasing the buffer, otherwise this segfaults.
-      boost::archive::binary_iarchive ia(is);
-      ia.operator>>(std::forward<T>(args)...);
-    }
+    std::istream is(&queue.front());
+    boost::archive::binary_iarchive ia(is);
+    ia.operator>>(std::forward<T>(args)...);
     queue.erase(queue.begin());
     return;
   }
