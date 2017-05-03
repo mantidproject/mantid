@@ -28,6 +28,7 @@
 
 namespace Mantid {
 namespace API {
+class IAlgorithm;
 /** The factory for creating instances of ILiveListener implementations.
 
     Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
@@ -53,12 +54,12 @@ class MANTID_API_DLL LiveListenerFactoryImpl
 public:
   boost::shared_ptr<ILiveListener>
   create(const std::string &instrumentName, bool connect = false,
-         const Kernel::IPropertyManager *properties = nullptr,
+         const API::IAlgorithm *callingAlgorithm = nullptr,
          const std::string &listenerConnectionName = "") const;
 
   boost::shared_ptr<ILiveListener>
   create(const Kernel::LiveListenerInfo &info, bool connect = false,
-         const Kernel::IPropertyManager *properties = nullptr) const;
+         const API::IAlgorithm *callingAlgorithm = nullptr) const;
 
   LiveListenerFactoryImpl(const LiveListenerFactoryImpl &) = delete;
   LiveListenerFactoryImpl &operator=(const LiveListenerFactoryImpl &) = delete;

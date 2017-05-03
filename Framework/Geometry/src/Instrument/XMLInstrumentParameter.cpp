@@ -132,7 +132,7 @@ double XMLInstrumentParameter::createParamValue(
     const bool bUsingStandardStatistics =
         statisics_choice != statistics_types.end();
 
-    if (m_extractSingleValueAs.compare("mean") == 0) {
+    if (m_extractSingleValueAs == "mean") {
       extractedValue = timeMean(logData);
     } else if (bUsingStandardStatistics) {
       extractedValue =

@@ -50,6 +50,8 @@ public:
                           IReflSaveTabPresenter *savePresenter);
   /// Destructor
   ~ReflMainWindowPresenter() override;
+  /// Returns values passed for 'Transmission run(s)'
+  std::string getTransmissionRuns(int group) const override;
   /// Returns global options for 'CreateTransmissionWorkspaceAuto'
   std::string getTransmissionOptions(int group) const override;
   /// Returns global options for 'ReflectometryReductionOneAuto'

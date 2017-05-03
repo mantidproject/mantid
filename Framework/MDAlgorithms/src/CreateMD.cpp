@@ -166,7 +166,7 @@ void CreateMD::init() {
       "The name of the Nexus file to write, as a full or relative path.\n"
       "Only used if FileBackEnd is true.");
   setPropertySettings("Filename", make_unique<EnabledWhenProperty>(
-                                      "CreateFileBackEnd", IS_EQUAL_TO, "1"));
+                                      "FileBackEnd", IS_EQUAL_TO, "1"));
 
   declareProperty("FileBackEnd", false,
                   "If true, Filename must also be specified. The algorithm "

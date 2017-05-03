@@ -47,6 +47,43 @@ public:
     TS_ASSERT(Mock::VerifyAndClearExpectations(&presenter_2));
   }
 
+  void test_transmission_runs() {
+    MockSettingsPresenter presenter_0;
+    MockSettingsPresenter presenter_1;
+    MockSettingsPresenter presenter_2;
+
+    std::vector<IReflSettingsPresenter *> settingsPresenters;
+    settingsPresenters.push_back(&presenter_0);
+    settingsPresenters.push_back(&presenter_1);
+    settingsPresenters.push_back(&presenter_2);
+
+    ReflSettingsTabPresenter presenter(settingsPresenters);
+
+    EXPECT_CALL(presenter_0, getTransmissionRuns(false)).Times(1);
+    EXPECT_CALL(presenter_1, getTransmissionRuns(false)).Times(0);
+    EXPECT_CALL(presenter_2, getTransmissionRuns(false)).Times(0);
+    presenter.getTransmissionRuns(0, false);
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&presenter_0));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&presenter_1));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&presenter_2));
+
+    EXPECT_CALL(presenter_0, getTransmissionRuns(false)).Times(0);
+    EXPECT_CALL(presenter_1, getTransmissionRuns(false)).Times(1);
+    EXPECT_CALL(presenter_2, getTransmissionRuns(false)).Times(0);
+    presenter.getTransmissionRuns(1, false);
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&presenter_0));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&presenter_1));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&presenter_2));
+
+    EXPECT_CALL(presenter_0, getTransmissionRuns(false)).Times(0);
+    EXPECT_CALL(presenter_1, getTransmissionRuns(false)).Times(0);
+    EXPECT_CALL(presenter_2, getTransmissionRuns(false)).Times(1);
+    presenter.getTransmissionRuns(2, false);
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&presenter_0));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&presenter_1));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&presenter_2));
+  }
+
   void test_transmission_options() {
     MockSettingsPresenter presenter_0;
     MockSettingsPresenter presenter_1;

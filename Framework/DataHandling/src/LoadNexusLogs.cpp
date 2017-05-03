@@ -602,7 +602,7 @@ LoadNexusLogs::createTimeSeries(::NeXus::File &file,
       throw;
     }
   }
-  if (start.compare("No Time") == 0) {
+  if (start == "No Time") {
     start = freqStart;
   }
 

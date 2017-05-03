@@ -5,6 +5,7 @@ from mantid.kernel import *  # noqa
 from mantid.api import *  # noqa
 from mantid import mtd
 import numpy
+import os
 
 
 class IndirectILLReductionQENS(PythonAlgorithm):

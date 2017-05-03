@@ -11,10 +11,14 @@ Muon Analysis
 -  The new algorithms :ref:`EstimateMuonAsymmetryFromCounts <algm-EstimateMuonAsymmetryFromCounts-v1>`: and :ref:`CalculateMuonAsymmetry <algm-CalculateMuonAsymmetry-v1>` are now used in the muon analysis GUI.
 
 
+
+- Fixed a bug that meant transverse field asymmetry data was normalized to bin width. 
+
 Algorithms
 ----------
 -  :ref:`EstimateMuonAsymmetryFromCounts <algm-EstimateMuonAsymmetryFromCounts-v1>`: new algorithm to estimate the asymmetry.
 -  :ref:`CalculateMuonAsymmetry <algm-CalculateMuonAsymmetry-v1>`: new algorithm to calculate the asymmetry by using a fitting function.
+
 
 Fit Functions
 -------------

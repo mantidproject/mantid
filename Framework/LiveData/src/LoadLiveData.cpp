@@ -1,12 +1,12 @@
 #include "MantidLiveData/LoadLiveData.h"
-#include "MantidLiveData/Exception.h"
-#include "MantidKernel/WriteLock.h"
-#include "MantidKernel/ReadLock.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/Workspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidKernel/CPUTimer.h"
+#include "MantidKernel/ReadLock.h"
+#include "MantidKernel/WriteLock.h"
+#include "MantidLiveData/Exception.h"
 
 #include <boost/algorithm/string.hpp>
 #include <boost/lexical_cast.hpp>
@@ -263,8 +263,6 @@ void LoadLiveData::addMatrixWSChunk(const std::string &algoName,
           " Algorithm's OutputWorkspace property is not a WorkspaceProperty!");
     Workspace_sptr temp = wsProp->getWorkspace();
     accumWS = temp;
-    // And sort the events, if any
-    doSortEvents(accumWS);
   }
 }
 
@@ -278,8 +276,6 @@ void LoadLiveData::replaceChunk(Mantid::API::Workspace_sptr chunkWS) {
   // When the algorithm exits the chunk workspace will be renamed
   // and overwrite the old one
   m_accumWS = chunkWS;
-  // And sort the events, if any
-  doSortEvents(m_accumWS);
 }
 
 //----------------------------------------------------------------------------------------------
@@ -353,28 +349,7 @@ Workspace_sptr LoadLiveData::appendMatrixWSChunk(Workspace_sptr accumWS,
 
   MatrixWorkspace_sptr temp = alg->getProperty("OutputWorkspace");
   accumWS = temp;
-  // And sort the events, if any
-  doSortEvents(accumWS);
   return accumWS;
-}
-
-//----------------------------------------------------------------------------------------------
-/** Perform SortEvents on the output workspaces (accumulation or output)
- * but only if they are EventWorkspaces. This will help the GUI
- * cope with redrawing.
- *
- * @param ws :: any Workspace. Does nothing if not EventWorkspace.
- */
-void LoadLiveData::doSortEvents(Mantid::API::Workspace_sptr ws) {
-  EventWorkspace_sptr eventWS = boost::dynamic_pointer_cast<EventWorkspace>(ws);
-  if (!eventWS)
-    return;
-  CPUTimer tim;
-  Algorithm_sptr alg = this->createChildAlgorithm("SortEvents");
-  alg->setProperty("InputWorkspace", eventWS);
-  alg->setPropertyValue("SortBy", "X Value");
-  alg->executeAsChildAlg();
-  g_log.debug() << tim << " to perform SortEvents on " << ws->getName() << '\n';
 }
 
 //----------------------------------------------------------------------------------------------
@@ -494,7 +469,6 @@ void LoadLiveData::exec() {
     // Set both output workspaces
     this->setProperty("AccumulationWorkspace", m_accumWS);
     this->setProperty("OutputWorkspace", m_outputWS);
-    doSortEvents(m_outputWS);
   } else {
     // ----------- No post-processing -------------
     m_outputWS = m_accumWS;

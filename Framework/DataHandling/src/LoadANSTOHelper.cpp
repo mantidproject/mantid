@@ -430,7 +430,7 @@ bool File::append(const std::string &path, const std::string &name,
     if (fileName.length() == 0)
       break;
 
-    if (fileName.compare(name) == 0)
+    if (fileName == name)
       targetPosition = lastHeaderPosition;
     else if (targetPosition != -1)
       throw std::runtime_error(

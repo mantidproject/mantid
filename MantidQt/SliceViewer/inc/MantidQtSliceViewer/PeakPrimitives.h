@@ -1,12 +1,13 @@
 #ifndef MANTID_SLICEVIEWER_PEAK_PRIMITIVES_H
 #define MANTID_SLICEVIEWER_PEAK_PRIMITIVES_H
 
+#include "DllOption.h"
 #include "MantidKernel/V3D.h"
 
 namespace MantidQt {
 namespace SliceViewer {
 
-struct DLLExport PeakPrimitives {
+struct EXPORT_OPT_MANTIDQT_SLICEVIEWER PeakPrimitives {
   PeakPrimitives(Mantid::Kernel::V3D peakOrigin, double peakOpacityAtDistance,
                  int peakLineWidth)
       : peakOrigin(peakOrigin), peakOpacityAtDistance(peakOpacityAtDistance),
@@ -16,7 +17,8 @@ struct DLLExport PeakPrimitives {
   int peakLineWidth;
 };
 
-struct DLLExport PeakPrimitivesCross : public PeakPrimitives {
+struct EXPORT_OPT_MANTIDQT_SLICEVIEWER PeakPrimitivesCross
+    : public PeakPrimitives {
   PeakPrimitivesCross(Mantid::Kernel::V3D peakOrigin,
                       double peakOpacityAtDistance, int peakLineWidth,
                       int peakHalfCrossWidth, int peakHalfCrossHeight)
@@ -27,7 +29,8 @@ struct DLLExport PeakPrimitivesCross : public PeakPrimitives {
   int peakHalfCrossHeight;
 };
 
-struct DLLExport PeakPrimitiveCircle : public PeakPrimitives {
+struct EXPORT_OPT_MANTIDQT_SLICEVIEWER PeakPrimitiveCircle
+    : public PeakPrimitives {
   PeakPrimitiveCircle(Mantid::Kernel::V3D peakOrigin,
                       double peakOpacityAtDistance, int peakLineWidth,
                       double peakInnerRadiusX, double peakInnerRadiusY,
@@ -49,7 +52,8 @@ struct DLLExport PeakPrimitiveCircle : public PeakPrimitives {
   double backgroundInnerRadiusY;
 };
 
-struct DLLExport PeakPrimitivesEllipse : public PeakPrimitives {
+struct EXPORT_OPT_MANTIDQT_SLICEVIEWER PeakPrimitivesEllipse
+    : public PeakPrimitives {
   PeakPrimitivesEllipse(Mantid::Kernel::V3D peakOrigin,
                         double peakOpacityAtDistance, int peakLineWidth,
                         double peakInnerRadiusMajorAxis,

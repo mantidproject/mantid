@@ -40,7 +40,7 @@ class MANTID_BEAMLINE_DLL ComponentInfo {
 private:
   boost::shared_ptr<std::vector<size_t>> m_assemblySortedDetectorIndices;
   boost::shared_ptr<const std::vector<std::pair<size_t, size_t>>> m_ranges;
-  const size_t m_size = 0;
+  size_t m_size = 0;
 
 public:
   ComponentInfo();
@@ -48,6 +48,8 @@ public:
                 const std::vector<std::pair<size_t, size_t>> &ranges);
   std::vector<size_t> detectorIndices(const size_t componentIndex) const;
   size_t size() const;
+  bool operator==(const ComponentInfo &other) const;
+  bool operator!=(const ComponentInfo &other) const;
 };
 } // namespace Beamline
 } // namespace Mantid
