@@ -849,18 +849,18 @@ void ReflectometryReductionOne2::findDetectorsOfInterest() {
 void ReflectometryReductionOne2::findTheta0() {
   const std::string reductionType = getProperty("ReductionType");
 
+  // For the non-flat sample case theta0 is 0
   m_theta0 = 0.0;
 
-  if (reductionType == "DivergentBeam") {
+  // Allow the default theta0 to be overridden by the Theta0 property
+  Property *theta0Property = getProperty("Theta0");
+  if (!theta0Property->isDefault()) {
+    m_theta0 = getProperty("Theta0");
+  } else if (reductionType == "DivergentBeam") {
     // theta0 is at the angle at the centre of the detector. This is the
     // angle the detector has been rotated around and should be defined in
-    // the log as stheta. It can be overridden with the Theta0 property.
-    Property *theta0Property = getProperty("Theta0");
-    if (!theta0Property->isDefault()) {
-      m_theta0 = getProperty("Theta0");
-    } else {
-      m_theta0 = getThetaFromLogs(m_runWS);
-    }
+    // the log as stheta
+    m_theta0 = getThetaFromLogs(m_runWS);
   }
 
   g_log.debug() << "theta0: " << theta0() << " degrees" << std::endl;
