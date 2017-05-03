@@ -16,6 +16,7 @@
 #include "MantidQtCustomInterfaces/Reflectometry/ReflSearchModel.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorCommand.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorPresenter.h"
+#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorPresenterWorker.h"
 #include "MantidQtMantidWidgets/ProgressPresenter.h"
 
 #include <boost/regex.hpp>
@@ -47,7 +48,7 @@ ReflRunsTabPresenter::ReflRunsTabPresenter(
     boost::shared_ptr<IReflSearcher> searcher)
     : m_view(mainView), m_progressView(progressableView),
       m_tablePresenters(tablePresenters), m_mainPresenter(),
-      m_searcher(searcher) {
+      m_searcher(searcher), m_workerThread(nullptr) {
 
   // Register this presenter as the workspace receiver
   // When doing so, the inner presenters will notify this
@@ -230,8 +231,24 @@ void ReflRunsTabPresenter::autoreduce() {
   notify(IReflRunsTabPresenter::TransferFlag);
 
   auto tablePresenter = m_tablePresenters.at(m_view->getSelectedGroup());
-  tablePresenter->notify(DataProcessorPresenter::SelectAllGroupsFlag);
-  tablePresenter->notify(DataProcessorPresenter::ProcessFlag);
+
+  // Start a new thread
+  delete m_workerThread;
+  m_workerThread = new QThread(this);
+  auto *worker = new DataProcessorPresenterWorker(tablePresenter);
+  worker->moveToThread(m_workerThread);
+
+  connect(m_workerThread, SIGNAL(started()), worker, SLOT(autoreduce()));
+  connect(worker, SIGNAL(finished()), this, SLOT(autoreductionFinished()));
+  m_workerThread->start();
+}
+
+/** Tidy up after autoreduction */
+void ReflRunsTabPresenter::autoreductionFinished() {
+  if (m_workerThread) {
+    delete m_workerThread;
+    m_workerThread = nullptr;
+  }
 }
 
 /** Transfers the selected runs in the search results to the processing table

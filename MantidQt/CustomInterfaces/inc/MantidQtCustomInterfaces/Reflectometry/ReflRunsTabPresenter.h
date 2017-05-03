@@ -7,6 +7,10 @@
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorMainPresenter.h"
 #include <boost/shared_ptr.hpp>
 
+#include <QObject>
+
+class QThread;
+
 namespace MantidQt {
 
 namespace MantidWidgets {
@@ -54,8 +58,11 @@ File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class MANTIDQT_CUSTOMINTERFACES_DLL ReflRunsTabPresenter
-    : public IReflRunsTabPresenter,
+    : public QObject,
+      public IReflRunsTabPresenter,
       public MantidQt::MantidWidgets::DataProcessorMainPresenter {
+  Q_OBJECT
+
 public:
   ReflRunsTabPresenter(IReflRunsTabView *mainView,
                        ProgressableView *progressView,
@@ -83,6 +90,10 @@ public:
   std::string getTimeSlicingValues() const override;
   std::string getTimeSlicingType() const override;
 
+protected slots:
+  void autoreduce();
+  void autoreductionFinished();
+
 private:
   /// The search model
   boost::shared_ptr<ReflSearchModel> m_searchModel;
@@ -103,10 +114,11 @@ private:
   /// Measure transfer method
   static const std::string MeasureTransferMethod;
 
+  QThread *m_workerThread;
+
   /// searching
   void search();
   void populateSearch(Mantid::API::IAlgorithm_sptr searchAlg);
-  void autoreduce();
   void transfer();
   void pushCommands();
   /// transfer strategy

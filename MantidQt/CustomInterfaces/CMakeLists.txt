@@ -426,6 +426,7 @@ set ( MOC_FILES inc/MantidQtCustomInterfaces/Background.h
                 inc/MantidQtCustomInterfaces/Muon/MuonAnalysisOptionTab.h
                 inc/MantidQtCustomInterfaces/Muon/MuonAnalysisResultTableTab.h
                 inc/MantidQtCustomInterfaces/Muon/MuonSequentialFitDialog.h
+		inc/MantidQtCustomInterfaces/Reflectometry/ReflRunsTabPresenter.h
                 inc/MantidQtCustomInterfaces/Reflectometry/ReflSearchModel.h
                 inc/MantidQtCustomInterfaces/Reflectometry/QtReflEventTabView.h
                 inc/MantidQtCustomInterfaces/Reflectometry/QtReflEventView.h
