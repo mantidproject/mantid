@@ -8,6 +8,7 @@
 #include "MantidIndexing/IndexInfo.h"
 #include "MantidIndexing/LegacyConversion.h"
 #include "MantidIndexing/SpectrumIndexSet.h"
+#include "MantidKernel/ArrayBoundedValidator.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/EnabledWhenProperty.h"
@@ -55,12 +56,19 @@ void MaskDetectors::init() {
                                                 Direction::InOut),
       "The name of the input and output workspace on which to perform the "
       "algorithm.");
-  declareProperty(make_unique<ArrayProperty<specnum_t>>("SpectraList"),
+  auto spectrumStartsAtOne = boost::make_shared<ArrayBoundedValidator<specnum_t>>();
+  spectrumStartsAtOne->setLower(1);
+  auto detectorStartsAtZero = boost::make_shared<ArrayBoundedValidator<detid_t>>();
+  detectorStartsAtZero->setLower(0);
+  auto wsIndexStartsAtZero = boost::make_shared<ArrayBoundedValidator<size_t>>();
+  //wsIndexStartsAtZero->setLower(0);
+
+  declareProperty(make_unique<ArrayProperty<specnum_t>>("SpectraList", spectrumStartsAtOne),
                   "An ArrayProperty containing a list of spectra to mask");
   declareProperty(
-      make_unique<ArrayProperty<detid_t>>("DetectorList"),
+      make_unique<ArrayProperty<detid_t>>("DetectorList", detectorStartsAtZero),
       "An ArrayProperty containing a list of detector ID's to mask");
-  declareProperty(make_unique<ArrayProperty<size_t>>("WorkspaceIndexList"),
+  declareProperty(make_unique<ArrayProperty<size_t>>("WorkspaceIndexList", wsIndexStartsAtZero),
                   "An ArrayProperty containing the workspace indices to mask");
   declareProperty(make_unique<WorkspaceProperty<>>("MaskedWorkspace", "",
                                                    Direction::Input,
