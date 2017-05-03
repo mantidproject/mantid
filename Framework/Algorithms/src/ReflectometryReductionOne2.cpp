@@ -1165,11 +1165,10 @@ void ReflectometryReductionOne2::getProjectedLambdaRange(
 
   // Calculate the projected wavelength range
   try {
-    const double lambdaTop = std::sin(horizonThetaR) * (lambda + bLambda / 2) /
-                             std::sin(horizonThetaR + gammaRad - bTwoTheta/ 2);
-    const double lambdaBot = std::sin(horizonThetaR) * (lambda - bLambda / 2) /
-                             std::sin(horizonThetaR + gammaRad + bTwoTheta/ 2);
-
+    const double lambdaTop = std::sin(horizonThetaR) * (lambda + bLambda / 2.0) /
+                             std::sin(horizonThetaR + gammaRad - bTwoTheta/ 2.0);
+    const double lambdaBot = std::sin(horizonThetaR) * (lambda - bLambda / 2.0) /
+                             std::sin(horizonThetaR + gammaRad + bTwoTheta/ 2.0);
     lambdaMin = std::min(lambdaTop, lambdaBot);
     lambdaMax = std::max(lambdaTop, lambdaBot);
   } catch (std::exception &ex) {
