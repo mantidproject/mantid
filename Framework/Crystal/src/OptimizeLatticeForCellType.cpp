@@ -48,7 +48,7 @@ void OptimizeLatticeForCellType::init() {
   declareProperty("Apply", false, "Re-index the peaks");
   declareProperty("PerRun", false, "Make per run orientation matrices");
   declareProperty("Tolerance", 0.12, "Indexing Tolerance");
-  declareProperty("edgePixels", 0,
+  declareProperty("EdgePixels", 0,
                   "Remove peaks that are at pixels this close to edge. ");
   declareProperty(make_unique<PropertyWithValue<double>>("OutputChi2", 0.0,
                                                          Direction::Output),
@@ -72,7 +72,7 @@ void OptimizeLatticeForCellType::exec() {
   bool apply = this->getProperty("Apply");
   bool perRun = this->getProperty("PerRun");
   double tolerance = this->getProperty("Tolerance");
-  int edge = this->getProperty("edgePixels");
+  int edge = this->getProperty("EdgePixels");
   std::string cell_type = getProperty("CellType");
   DataObjects::PeaksWorkspace_sptr ws = getProperty("PeaksWorkspace");
   Geometry::Instrument_const_sptr inst = ws->getInstrument();

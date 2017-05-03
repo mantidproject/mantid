@@ -131,7 +131,7 @@ void PredictPeaks::init() {
 
   auto nonNegativeInt = boost::make_shared<BoundedValidator<int>>();
   nonNegativeInt->setLower(0);
-  declareProperty("edgePixels", 0, nonNegativeInt,
+  declareProperty("EdgePixels", 0, nonNegativeInt,
                   "Remove peaks that are at pixels this close to edge. ");
 }
 
@@ -140,7 +140,7 @@ void PredictPeaks::init() {
 void PredictPeaks::exec() {
   // Get the input properties
   Workspace_sptr rawInputWorkspace = getProperty("InputWorkspace");
-  m_edge = this->getProperty("edgePixels");
+  m_edge = this->getProperty("EdgePixels");
 
   ExperimentInfo_sptr inputExperimentInfo =
       boost::dynamic_pointer_cast<ExperimentInfo>(rawInputWorkspace);

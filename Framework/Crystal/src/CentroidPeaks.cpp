@@ -38,7 +38,7 @@ void CentroidPeaks::init() {
       "centroid.");
 
   declareProperty(
-      make_unique<PropertyWithValue<int>>("edgePixels", 0, Direction::Input),
+      make_unique<PropertyWithValue<int>>("EdgePixels", 0, Direction::Input),
       "The number of pixels where peaks are removed at edges. Only "
       "for instruments with RectangularDetectors. ");
 
@@ -87,7 +87,7 @@ void CentroidPeaks::integrate() {
     }
   }
 
-  int Edge = getProperty("edgePixels");
+  int Edge = getProperty("EdgePixels");
   Progress prog(this, MinPeaks, 1.0, MaxPeaks);
   PARALLEL_FOR_IF(Kernel::threadSafe(*inWS, *peakWS))
   for (int i = MinPeaks; i <= MaxPeaks; ++i) {
@@ -224,7 +224,7 @@ void CentroidPeaks::integrateEvent() {
     }
   }
 
-  int Edge = getProperty("edgePixels");
+  int Edge = getProperty("EdgePixels");
   Progress prog(this, MinPeaks, 1.0, MaxPeaks);
   PARALLEL_FOR_IF(Kernel::threadSafe(*inWS, *peakWS))
   for (int i = MinPeaks; i <= MaxPeaks; ++i) {

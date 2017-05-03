@@ -51,7 +51,7 @@ void SCDCalibratePanels::exec() {
   std::vector<std::pair<std::string, bool>> criteria{{"BankName", true}};
   peaksWs->sort(criteria);
   // Remove peaks on edge
-  int edge = this->getProperty("edgePixels");
+  int edge = this->getProperty("EdgePixels");
   if (edge > 0) {
     Geometry::Instrument_const_sptr inst = peaksWs->getInstrument();
     std::vector<Peak> &peaks = peaksWs->getPeaks();
@@ -516,7 +516,7 @@ void SCDCalibratePanels::init() {
                                            "detectors.  Implemented only for "
                                            "RectangularDetectors.");
 
-  declareProperty("edgePixels", 0,
+  declareProperty("EdgePixels", 0,
                   "Remove peaks that are at pixels this close to edge. ");
 
   // ---------- outputs

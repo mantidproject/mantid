@@ -152,7 +152,7 @@ void FindPeaksMD::init() {
 
   auto nonNegativeInt = boost::make_shared<BoundedValidator<int>>();
   nonNegativeInt->setLower(0);
-  declareProperty("edgePixels", 0, nonNegativeInt,
+  declareProperty("EdgePixels", 0, nonNegativeInt,
                   "Remove peaks that are at pixels this close to edge. ");
 }
 
@@ -602,7 +602,7 @@ void FindPeaksMD::exec() {
 
   DensityThresholdFactor = getProperty("DensityThresholdFactor");
   m_maxPeaks = getProperty("MaxPeaks");
-  m_edge = this->getProperty("edgePixels");
+  m_edge = this->getProperty("EdgePixels");
 
   // Execute the proper algo based on the type of workspace
   if (inMDHW) {
