@@ -416,12 +416,11 @@ class ISISReducer(Reducer):
                self.transmission_fitted_slices_sample or self.transmission_fitted_slices_can  # noqa
 
     def group_transmission_slices(self, group_name):
-        # If the Workspace Group already exists then we delete the child workspaces and add the new transmission
-        # workspaces to it.
+        # If the Workspace Group already exists then we un-group the workspace. This leaves the child workspaces around
         if AnalysisDataService.doesExist(group_name):
             group_ws = AnalysisDataService.retrieve(group_name)
 
-            # If the workspace is not a workspace group then we might be overriding important data, so don't do anything
+            # If the workspace is not a WorkspaceGroup then we might be overriding important data, so don't do anything
             # but provide a log
             if not isinstance(group_ws, WorkspaceGroup):
                 logger.warning("There is a non-WorkspaceGroup workspace in the ADS with the name {}. This was going to"
@@ -429,10 +428,8 @@ class ISISReducer(Reducer):
                                "aborted. To avoid this message, rename your workspace.".format(group_name))
                 return
 
-            # Delete all sub workspaces
-            sub_workspace_names = group_ws.getNames()
-            for element in sub_workspace_names:
-                AnalysisDataService.remove(element)
+            # Ungroup the WorkspaceGroup
+            UnGroupWorkspace(InputWorkspace=group_ws)
 
         # Add the workspaces to the group workspace
         workspaces_to_add = []
