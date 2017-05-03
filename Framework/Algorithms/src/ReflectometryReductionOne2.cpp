@@ -997,6 +997,7 @@ MatrixWorkspace_sptr ReflectometryReductionOne2::constructIvsLamWS(
 
   for (int i = 0; i < ws->blocksize(); ++i) {
     ws->dataY(0)[i] = 0.0;
+    ws->dataE(0)[i] = 0.0;
   }
 
   return ws;
@@ -1014,6 +1015,7 @@ ReflectometryReductionOne2::sumInQ(MatrixWorkspace_sptr detectorWS,
                                    const std::vector<size_t> &detectors) {
   // Construct the output array in virtual lambda
   MatrixWorkspace_sptr IvsLam = constructIvsLamWS(detectorWS, detectors);
+  auto &outputE = IvsLam->dataE(0);
 
   // Loop through each spectrum in the region of interest
   for (size_t spIdx : detectors) {
@@ -1025,6 +1027,7 @@ ReflectometryReductionOne2::sumInQ(MatrixWorkspace_sptr detectorWS,
     // Check X length is Y length + 1
     const auto &inputX = detectorWS->x(spIdx);
     const auto &inputY = detectorWS->y(spIdx);
+    const auto &inputE = detectorWS->e(spIdx);
     if (inputX.size() != inputY.size() + 1) {
       std::ostringstream errMsg;
       errMsg << "Expected input workspace to be histogram data (got X len="
@@ -1032,12 +1035,30 @@ ReflectometryReductionOne2::sumInQ(MatrixWorkspace_sptr detectorWS,
       throw std::runtime_error(errMsg.str());
     }
 
+    // Create a vector for the projected errors for this spectrum.
+    // (Output Y values can simply be accumulated directly into the output
+    // workspace, but for error values we need to create a separate error 
+    // vector for the projected errors from each input spectrum and then
+    // do an overall sum in quadrature.)
+    std::vector<double> projectedE(outputE.size(), 0.0);
+
     // Process each value in the spectrum
     for (int inputIdx = 0; inputIdx < inputY.size(); ++inputIdx) {
-      sumInQProcessValue(inputIdx, twoTheta, bTwoTheta, inputX, inputY, IvsLam,
-                         detectors);
+      // Do the summation in Q
+      sumInQProcessValue(inputIdx, twoTheta, bTwoTheta, inputX, inputY, inputE,
+                         IvsLam, detectors, projectedE);
+    }
+
+    // Sum errors in quadrature
+    for (int outIdx = 0; outIdx < outputE.size(); ++outIdx) {
+      outputE[outIdx] += projectedE[outIdx] * projectedE[outIdx];
     }
   }
+
+  // Take the square root of all the accumulated squared errors. Assumes
+  // Gaussian errors
+  double(*rs)(double) = std::sqrt;
+  std::transform(outputE.begin(), outputE.end(), outputE.begin(), rs);
 
   return IvsLam;
 }
@@ -1055,7 +1076,8 @@ ReflectometryReductionOne2::sumInQ(MatrixWorkspace_sptr detectorWS,
 void ReflectometryReductionOne2::sumInQProcessValue(
     const int inputIdx, const double twoTheta, const double bTwoTheta,
     const HistogramX &inputX, const HistogramY &inputY,
-    MatrixWorkspace_sptr IvsLam, const std::vector<size_t> &detectors) {
+    const HistogramE &inputE, MatrixWorkspace_sptr IvsLam,
+    const std::vector<size_t> &detectors, std::vector<double> &outputE) {
 
   // Check whether there are any counts (if not, nothing to share)
   const double inputCounts = inputY[inputIdx];
@@ -1071,7 +1093,8 @@ void ReflectometryReductionOne2::sumInQProcessValue(
   getProjectedLambdaRange(lambda, twoTheta, bLambda, bTwoTheta, lambdaMin,
                           lambdaMax, detectors);
   // Share the input counts into the output array
-  sumInQShareCounts(inputCounts, bLambda, lambdaMin, lambdaMax, IvsLam);
+  sumInQShareCounts(inputCounts, inputE[inputIdx], bLambda, lambdaMin,
+                    lambdaMax, IvsLam, outputE);
 }
 
 /**
@@ -1086,8 +1109,9 @@ void ReflectometryReductionOne2::sumInQProcessValue(
 * @param IvsLam [in,out] :: the output workspace
 */
 void ReflectometryReductionOne2::sumInQShareCounts(
-    const double inputCounts, const double bLambda, const double lambdaMin,
-    const double lambdaMax, MatrixWorkspace_sptr IvsLam) {
+    const double inputCounts, const double inputErr, const double bLambda,
+    const double lambdaMin, const double lambdaMax,
+    MatrixWorkspace_sptr IvsLam, std::vector<double> &outputE) {
   // Check that we have histogram data
   const auto &outputX = IvsLam->dataX(0);
   auto &outputY = IvsLam->dataY(0);
@@ -1110,10 +1134,10 @@ void ReflectometryReductionOne2::sumInQShareCounts(
 
   // Loop through all overlapping output bins. Convert the iterator to an
   // index because we need to index both the X and Y arrays.
-  for (auto outputIdx = startIter - outputX.begin();
-       outputIdx < outputX.size() - 1; ++outputIdx) {
-    const double binStart = outputX[outputIdx];
-    const double binEnd = outputX[outputIdx + 1];
+  for (auto outIdx = startIter - outputX.begin();
+       outIdx < outputX.size() - 1; ++outIdx) {
+    const double binStart = outputX[outIdx];
+    const double binEnd = outputX[outIdx + 1];
     if (binStart > lambdaMax) {
       // No longer in the overlap region so we're finished
       break;
@@ -1122,7 +1146,9 @@ void ReflectometryReductionOne2::sumInQShareCounts(
     // overlap.
     const double overlapWidth =
         std::min({bLambda, lambdaMax - binStart, binEnd - lambdaMin});
-    outputY[outputIdx] += (inputCounts * overlapWidth) / (totalWidth);
+    const double fraction = overlapWidth / totalWidth;
+    outputY[outIdx] += inputCounts * fraction;
+    outputE[outIdx] += inputErr * fraction;
   }
 }
 

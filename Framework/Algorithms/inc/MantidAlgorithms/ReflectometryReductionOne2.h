@@ -97,12 +97,16 @@ private:
                           const double bTwoTheta,
                           const HistogramData::HistogramX &inputX,
                           const HistogramData::HistogramY &inputY,
+                          const HistogramData::HistogramE &inputE,
                           API::MatrixWorkspace_sptr IvsLam,
-                          const std::vector<size_t> &detectors);
+                          const std::vector<size_t> &detectors,
+                          std::vector<double> &outputE);
   // Share counts to a projected value for summation in Q
-  void sumInQShareCounts(const double inputCounts, const double bLambda,
-                         const double lambdaMin, const double lambdaMax,
-                         API::MatrixWorkspace_sptr IvsLam);
+  void sumInQShareCounts(const double inputCounts, const double inputErr,
+                         const double bLambda, const double lambdaMin,
+                         const double lambdaMax,
+                         API::MatrixWorkspace_sptr IvsLam,
+                         std::vector<double> &outputE);
   // Construct the output workspace
   Mantid::API::MatrixWorkspace_sptr
   constructIvsLamWS(API::MatrixWorkspace_sptr detectorWS,
