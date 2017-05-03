@@ -14,6 +14,7 @@ Crystal Improvements
  - :ref:`algm-PDCalibration <algm-PDCalibration>` is better at giving out physically meaningful results. It will no longer create calibrations that will convert time-of-flight to negative or imaginary d-spacing.
  - :ref:`SaveIsawPeaks <algm-SaveIsawPeaks>` now saves the calibration data for all detector banks in instrument so the header may be longer
  - :ref:`LoadIsawPeaks <algm-LoadIsawPeaks>` now uses the calibration lines to calibrate the detectors banks for CORELLI
+ - :ref:SCD Event Data Reduction interface and SCD_Reduction python scripts work with both nxs and h5 extensions for data file.
 
 Engineering Diffraction
 -----------------------
