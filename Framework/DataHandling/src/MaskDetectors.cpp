@@ -61,7 +61,7 @@ void MaskDetectors::init() {
   auto detectorStartsAtZero = boost::make_shared<ArrayBoundedValidator<detid_t>>();
   detectorStartsAtZero->setLower(0);
   auto wsIndexStartsAtZero = boost::make_shared<ArrayBoundedValidator<size_t>>();
-  //wsIndexStartsAtZero->setLower(0);
+  wsIndexStartsAtZero->setLower(0);
 
   declareProperty(make_unique<ArrayProperty<specnum_t>>("SpectraList", spectrumStartsAtOne),
                   "An ArrayProperty containing a list of spectra to mask");
