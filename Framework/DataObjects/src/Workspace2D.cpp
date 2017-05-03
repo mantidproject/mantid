@@ -73,20 +73,16 @@ void Workspace2D::init(const std::size_t &NVectors, const std::size_t &XLength,
       XLength, HistogramData::LinearGenerator(1.0, 1.0));
   HistogramData::Counts y(YLength);
   HistogramData::CountStandardDeviations e(YLength);
+  Histogram1D spec(HistogramData::getHistogramXMode(XLength, YLength),
+                   HistogramData::Histogram::YMode::Counts);
+  spec.setX(x);
+  spec.setCounts(y);
+  spec.setCountStandardDeviations(e);
   for (size_t i = 0; i < m_noVectors; i++) {
-    // Create the spectrum upon init
-    auto spec =
-        new Histogram1D(HistogramData::getHistogramXMode(XLength, YLength),
-                        HistogramData::Histogram::YMode::Counts);
-    data[i] = spec;
-    // Set the data and X
-    spec->setX(x);
-    // Y,E arrays populated
-    spec->setCounts(y);
-    spec->setCountStandardDeviations(e);
+    data[i] = new Histogram1D(spec);
     // Default spectrum number = starts at 1, for workspace index 0.
-    spec->setSpectrumNo(specnum_t(i + 1));
-    spec->setDetectorID(detid_t(i + 1));
+    data[i]->setSpectrumNo(specnum_t(i + 1));
+    data[i]->setDetectorID(detid_t(i + 1));
   }
 
   // Add axes that reference the data
@@ -112,10 +108,10 @@ void Workspace2D::init(const std::size_t &NVectors,
     }
   }
 
+  Histogram1D spec(initializedHistogram.xMode(), initializedHistogram.yMode());
+  spec.setHistogram(initializedHistogram);
   for (size_t i = 0; i < m_noVectors; i++) {
-    data[i] = new Histogram1D(initializedHistogram.xMode(),
-                              initializedHistogram.yMode());
-    data[i]->setHistogram(initializedHistogram);
+    data[i] = new Histogram1D(spec);
     // Default spectrum number = starts at 1, for workspace index 0.
     data[i]->setSpectrumNo(specnum_t(i + 1));
     data[i]->setDetectorID(detid_t(i + 1));

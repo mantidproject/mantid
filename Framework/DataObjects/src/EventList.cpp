@@ -138,9 +138,9 @@ EventList::EventList(EventWorkspaceMRU *mru, specnum_t specNo)
 /** Constructor copying from an existing event list
  * @param rhs :: EventList object to copy*/
 EventList::EventList(const EventList &rhs)
-    : IEventList(rhs), m_histogram(HistogramData::Histogram::XMode::BinEdges,
-                                   HistogramData::Histogram::YMode::Counts),
-      mru{nullptr} {
+    : IEventList(rhs), m_histogram(rhs.m_histogram), mru{nullptr} {
+  // Note that operator= also assigns m_histogram, but the above use of the copy
+  // constructor avoid a memory allocation and is thus faster.
   this->operator=(rhs);
 }
 
