@@ -59,10 +59,10 @@ void SpiceXMLNode::setParameters(const std::string &nodetype,
                                  const std::string &nodeunit,
                                  const std::string &nodedescription) {
   // data type
-  if (nodetype.compare("FLOAT32") == 0) {
+  if (nodetype == "FLOAT32") {
     m_typefullname = nodetype;
     m_typechar = FLOAT32;
-  } else if (nodetype.compare("INT32") == 0) {
+  } else if (nodetype == "INT32") {
     m_typefullname = nodetype;
     m_typechar = INT32;
   }
@@ -391,7 +391,7 @@ LoadSpiceXML2DDet::parseSpiceXML(const std::string &xmlfilename) {
       g_log.debug() << "Parent node " << nodename << " has " << numchildren
                     << " children."
                     << "\n";
-      if (nodename.compare("SPICErack") == 0) {
+      if (nodename == "SPICErack") {
         // SPICErack is the main parent node.  start_time and end_time are there
         unsigned long numattr = pNode->attributes()->length();
         for (unsigned long j = 0; j < numattr; ++j) {
@@ -421,13 +421,13 @@ LoadSpiceXML2DDet::parseSpiceXML(const std::string &xmlfilename) {
         std::string attname = pNode->attributes()->item(j)->nodeName();
         g_log.debug() << "     attribute " << j << " name = " << attname << ", "
                       << "value = " << atttext << "\n";
-        if (attname.compare("type") == 0) {
+        if (attname == "type") {
           // type
           nodetype = atttext;
-        } else if (attname.compare("unit") == 0) {
+        } else if (attname == "unit") {
           // unit
           nodeunit = atttext;
-        } else if (attname.compare("description") == 0) {
+        } else if (attname == "description") {
           // description
           nodedescription = atttext;
         }
@@ -487,7 +487,7 @@ MatrixWorkspace_sptr LoadSpiceXML2DDet::createMatrixWorkspace(
   for (size_t n = 0; n < numxmlnodes; ++n) {
     // Process node for detector's count
     const SpiceXMLNode &xmlnode = vecxmlnode[n];
-    if (xmlnode.getName().compare(detnodename) == 0) {
+    if (xmlnode.getName() == detnodename) {
       // Get node value string (256x256 as a whole)
       const std::string detvaluestr = xmlnode.getValue();
 
@@ -585,7 +585,7 @@ MatrixWorkspace_sptr LoadSpiceXML2DDet::createMatrixWorkspace(
                       << " (int) value = " << ivalue << "\n";
       } else {
         std::string str_value(nodevalue);
-        if (nodename.compare("start_time") == 0) {
+        if (nodename == "start_time") {
           // replace 2015-01-17 13:36:45 by  2015-01-17T13:36:45
           str_value = nodevalue;
           str_value.replace(10, 1, "T");
@@ -634,7 +634,7 @@ MatrixWorkspace_sptr LoadSpiceXML2DDet::createMatrixWorkspaceVersion2(
   for (size_t n = 0; n < numxmlnodes; ++n) {
     // Process node for detector's count
     const SpiceXMLNode &xmlnode = vecxmlnode[n];
-    if (xmlnode.getName().compare(detnodename) == 0) {
+    if (xmlnode.getName() == detnodename) {
       // Get node value string (256x256 as a whole)
       const std::string detvaluestr = xmlnode.getValue();
 
@@ -654,7 +654,7 @@ MatrixWorkspace_sptr LoadSpiceXML2DDet::createMatrixWorkspaceVersion2(
         int ivalue = std::stoi(nodevalue);
         int_log_map.emplace(nodename, ivalue);
       } else {
-        if (nodename.compare("start_time") == 0) {
+        if (nodename == "start_time") {
           // replace 2015-01-17 13:36:45 by  2015-01-17T13:36:45
           std::string str_value(nodevalue);
           str_value.replace(10, 1, "T");

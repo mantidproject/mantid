@@ -41,5 +41,13 @@ ComponentInfo::detectorIndices(const size_t componentIndex) const {
 
 size_t ComponentInfo::size() const { return m_size; }
 
+bool ComponentInfo::operator==(const ComponentInfo &other) const {
+  return m_size == other.m_size && m_ranges == other.m_ranges &&
+         *m_assemblySortedDetectorIndices ==
+             *other.m_assemblySortedDetectorIndices;
+}
+bool ComponentInfo::operator!=(const ComponentInfo &other) const {
+  return !(this->operator==(other));
+}
 } // namespace Beamline
 } // namespace Mantid

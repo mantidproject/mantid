@@ -1,5 +1,6 @@
 from __future__ import (absolute_import, division, print_function)
 
+import os
 import numpy as np
 from mantid.simpleapi import *  # noqa
 from mantid.kernel import *  # noqa
