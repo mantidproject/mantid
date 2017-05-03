@@ -37,8 +37,10 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 class IReflEventTabPresenter {
 public:
   virtual ~IReflEventTabPresenter(){};
-  /// Time-slicing
-  virtual std::string getTimeSlicingOptions(int group) const = 0;
+  /// Time-slicing values
+  virtual std::string getTimeSlicingValues(int group) const = 0;
+  /// Time-slicing type
+  virtual std::string getTimeSlicingType(int group) const = 0;
 };
 }
 }

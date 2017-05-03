@@ -253,7 +253,7 @@ void IntegratePeaksMD2::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
   std::string profileFunction = getProperty("ProfileFunction");
   std::string integrationOption = getProperty("IntegrationOption");
   std::ofstream out;
-  if (cylinderBool && profileFunction.compare("NoFit") != 0) {
+  if (cylinderBool && profileFunction != "NoFit") {
     std::string outFile = getProperty("InputWorkspace");
     outFile.append(profileFunction);
     outFile.append(".dat");
@@ -467,7 +467,7 @@ void IntegratePeaksMD2::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
         wsProfile2D->setHistogram(i, points, signal_fit);
       }
 
-      if (profileFunction.compare("NoFit") == 0) {
+      if (profileFunction == "NoFit") {
         signal = 0.;
         for (size_t j = 0; j < numSteps; j++) {
           if (j < peakMin || j > peakMax)
@@ -560,7 +560,7 @@ void IntegratePeaksMD2::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
 
         // Calculate intensity
         signal = 0.0;
-        if (integrationOption.compare("Sum") == 0) {
+        if (integrationOption == "Sum") {
           for (size_t j = peakMin; j <= peakMax; j++)
             if (std::isfinite(yy[j]))
               signal += yy[j];

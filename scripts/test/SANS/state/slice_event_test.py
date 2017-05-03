@@ -27,15 +27,6 @@ class StateSliceEventTest(unittest.TestCase):
         # Act + Assert
         self.assertRaises(ValueError, state.validate)
 
-    def test_validate_method_raises_value_error_for_non_increasing_time(self):
-        # Arrange
-        state = StateSliceEvent()
-        state.start_time = [1.0, 2.0, 1.5]
-        state.end_time = [1.1, 2.1, 2.5]
-
-        # Act + Assert
-        self.assertRaises(ValueError, state.validate)
-
     def test_validate_method_raises_value_error_for_end_time_smaller_than_start_time(self):
         # Arrange
         state = StateSliceEvent()

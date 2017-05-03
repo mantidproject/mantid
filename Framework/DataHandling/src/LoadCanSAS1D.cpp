@@ -57,7 +57,7 @@ DECLARE_FILELOADER_ALGORITHM(LoadCanSAS1D)
  */
 int LoadCanSAS1D::confidence(Kernel::FileDescriptor &descriptor) const {
   const std::string &extn = descriptor.extension();
-  if (extn.compare(".xml") != 0)
+  if (extn != ".xml")
     return 0;
 
   std::istream &is = descriptor.data();
@@ -77,7 +77,7 @@ int LoadCanSAS1D::confidence(Kernel::FileDescriptor &descriptor) const {
     // Get pointer to root element
     Element *pRootElem = pDoc->documentElement();
     if (pRootElem) {
-      if (pRootElem->tagName().compare("SASroot") == 0) {
+      if (pRootElem->tagName() == "SASroot") {
         confidence = 80;
       }
     }

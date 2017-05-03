@@ -110,7 +110,13 @@ void WorkspaceFactoryImpl::initializeFromParent(
 
   // Same number of histograms = copy over the spectra data
   if (parent.getNumberHistograms() == child.getNumberHistograms()) {
-    child.setIndexInfo(parent.indexInfo());
+    for (size_t i = 0; i < parent.getNumberHistograms(); ++i)
+      child.getSpectrum(i).copyInfoFrom(parent.getSpectrum(i));
+    // We use this variant without ISpectrum update to avoid costly rebuilds
+    // triggered by setIndexInfo(). ISpectrum::copyInfoFrom sets invalid flags
+    // for spectrum definitions, so it is important to call this *afterwards*,
+    // since it clears the flags:
+    child.setIndexInfoWithoutISpectrumUpdate(parent.indexInfo());
   }
 
   // deal with axis

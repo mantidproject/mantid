@@ -233,15 +233,6 @@ Peak::Peak(const Geometry::IPeak &ipeak)
   }
 }
 
-#if defined(_MSC_VER) && _MSC_VER <= 1900
-Peak::Peak(Peak &&) = default;
-Peak &Peak::operator=(Peak &&) = default;
-#elif defined(__GNUC__) && (__GNUC__ == 5)
-// already defined in the header
-#else
-Peak::Peak(Peak &&) noexcept = default;
-Peak &Peak::operator=(Peak &&) noexcept = default;
-#endif
 //----------------------------------------------------------------------------------------------
 /** Set the incident wavelength of the neutron. Calculates the energy from this.
  * Assumes elastic scattering.
@@ -311,7 +302,7 @@ void Peak::setDetectorID(int id) {
   // Use the grand-parent whenever possible
   m_bankName = parent->getName();
   // For CORELLI, one level above sixteenpack
-  if (m_bankName.compare("sixteenpack") == 0) {
+  if (m_bankName == "sixteenpack") {
     parent = parent->getParent();
     m_bankName = parent->getName();
   }
