@@ -171,8 +171,8 @@ void MuonFitPropertyBrowser::init() {
 
   connect(m_browser, SIGNAL(currentItemChanged(QtBrowserItem *)), this,
           SLOT(currentItemChanged(QtBrowserItem *)));
-  m_groupWindow = new QWidget();
-  
+
+  //m_groupWindow = new QtProperty;
   QString tmp="moo";
   addGroupCheckbox(tmp);
   tmp = "baa";
@@ -226,7 +226,7 @@ void MuonFitPropertyBrowser::init() {
   m_mainSplitter->insertWidget(0, m_widgetSplitter);
   m_mainSplitter->insertWidget(1, m_browser);
    //moo 
-  m_mainSplitter->insertWidget(2,m_groupWindow);
+  //m_mainSplitter->insertWidget(2,m_groupWindow);
   m_mainSplitter->setStretchFactor(0, 1);
   m_mainSplitter->setStretchFactor(1, 0);
 
@@ -922,12 +922,16 @@ void MuonFitPropertyBrowser::setAvailableGroups(const QStringList &groups) {
 		}
 	}
 
-	clearGroupCheckboxes();
+	clearGroupCheckboxes();	
+	QSettings settings;
+	settings.beginGroup("Mantid/test");
+	QtProperty *groupSettings = m_groupManager->addProperty("test");
 	for (const auto group : groups) {
 		addGroupCheckbox(group); 
-		std::string tmp = group.toStdString();
-		double a = 1.;
+		groupSettings->addSubProperty(m_groupBoxes.value(group));
 	}
+	m_groupWindow = m_browser->addProperty(groupSettings); 
+
 }
 /**
 * Clears all group names and checkboxes
@@ -946,13 +950,20 @@ void MuonFitPropertyBrowser::clearGroupCheckboxes() {
 * @param name :: [input] Name of group to add
 */
 void MuonFitPropertyBrowser::addGroupCheckbox(const QString &name) {
-	auto checkBox = new QCheckBox(name,m_groupWindow);
-	//m_groupWindow->updateGeometry();//m_groupWindow->addWidget(checkBox);
-	//m_groupWindow->setLayout(layout);
-	m_groupBoxes.insert(name, checkBox);
-	checkBox->setChecked(false);
-	connect(checkBox, SIGNAL(clicked(bool)), this,
-		SIGNAL(selectedGroupsChanged()));
+	//auto checkBox = new QCheckBox(name);
+
+
+	m_groupBoxes.insert(name,m_boolManager->addProperty(name));
+	
+	//m_groupBoxes.value(name)->setChecked(false);
+	//QSettings settings;
+	//settings.beginGroup("Mantid/test");
+	
+	bool plotDiff = false;
+	m_boolManager->setValue(m_groupBoxes.value(name), plotDiff);
+	//m_groupWindow->addSubProperty(m_groupBoxes.value(name));
+	//connect(m_groupBoxes.value(name), SIGNAL(clicked(bool)), this,
+	//	SIGNAL(selectedGroupsChanged()));
 }
 /**
 * Returns a list of the selected groups (checked boxes)
@@ -962,7 +973,7 @@ QStringList MuonFitPropertyBrowser::getChosenGroups() const {
 	QStringList chosen;
 	for (auto iter = m_groupBoxes.constBegin(); iter != m_groupBoxes.constEnd();
 		++iter) {
-		if (iter.value()->isChecked()) {
+		if (iter.value()==false) {
 			chosen.append(iter.key());
 		}
 	}
@@ -974,7 +985,8 @@ QStringList MuonFitPropertyBrowser::getChosenGroups() const {
 void MuonFitPropertyBrowser::clearChosenGroups() const {
 	for (auto iter = m_groupBoxes.constBegin(); iter != m_groupBoxes.constEnd();
 		++iter) {
-		iter.value()->setChecked(false);
+		m_boolManager->setValue(iter.value(), false);
+		//iter.value()->setChecked(false);
 	}
 }
 /**
@@ -986,7 +998,9 @@ void MuonFitPropertyBrowser::setChosenGroup(const QString &group) {
 	for (auto iter = m_groupBoxes.constBegin(); iter != m_groupBoxes.constEnd();
 		++iter) {
 		if (iter.key() == group) {
-			iter.value()->setChecked(true);
+			m_boolManager->setValue(iter.value(), false);
+
+			//iter.value()->setChecked(true);
 		}
 	}
 }

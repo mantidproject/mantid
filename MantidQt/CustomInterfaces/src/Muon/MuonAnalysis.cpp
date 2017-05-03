@@ -2978,7 +2978,8 @@ void MuonAnalysis::dataToFitChanged() {
     m_fitDataPresenter->setPlotType(parsePlotType(m_uiForm.frontPlotFuncs));
     // Set busy cursor while workspaces are being created
     QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
-    m_fitDataPresenter->handleSelectedDataChanged(isOverwriteEnabled());
+	//set chosen roups in data selector m_uiForm.fitBrowser->getChosenGroups()
+    m_fitDataPresenter->handleSelectedDataChanged(isOverwriteEnabled()); // need to pass new data selection.... 
     QApplication::restoreOverrideCursor();
   }
 }

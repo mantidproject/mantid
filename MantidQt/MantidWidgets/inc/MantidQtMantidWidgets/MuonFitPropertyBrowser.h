@@ -168,8 +168,8 @@ private:
   QtProperty *m_groupsToFit;
   mutable QStringList m_groupsToFitOptions;
   /// Map of group names to checkboxes
-  QMap<QString,QCheckBox *> m_groupBoxes;
-  QWidget *m_groupWindow;
+  QMap<QString,QtProperty *> m_groupBoxes;
+  QtBrowserItem *m_groupWindow;
   //int m_groupWindowCount;
 };
 
