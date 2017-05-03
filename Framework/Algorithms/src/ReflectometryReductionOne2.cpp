@@ -983,7 +983,7 @@ MatrixWorkspace_sptr ReflectometryReductionOne2::constructIvsLamWS(
   // Use the same number of bins as the input
   const int origNumBins = static_cast<int>(detectorWS->blocksize());
   const double binWidth = (lambdaMax() - lambdaMin()) / origNumBins;
-  const int newNumBins = (lambdaVMax - lambdaVMin) / binWidth;
+  const int newNumBins = static_cast<int>((lambdaVMax - lambdaVMin) / binWidth);
   std::stringstream params;
   params << lambdaVMin << "," << binWidth << "," << lambdaVMax;
 
