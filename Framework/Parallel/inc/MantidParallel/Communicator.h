@@ -85,6 +85,9 @@ template <typename... T> void Communicator::send(T &&... args) const {
     return m_backend->send(m_rank, std::forward<T>(args)...);
 #ifdef MPI_EXPERIMENTAL
   m_communicator.send(std::forward<T>(args)...);
+#else
+  throw std::runtime_error(
+      "Parallel::Communicator without backend in non-MPI build");
 #endif
 }
 
@@ -95,6 +98,9 @@ template <typename... T> void Communicator::recv(T &&... args) const {
     return m_backend->recv(m_rank, std::forward<T>(args)...);
 #ifdef MPI_EXPERIMENTAL
   static_cast<void>(m_communicator.recv(std::forward<T>(args)...));
+#else
+  throw std::runtime_error(
+      "Parallel::Communicator without backend in non-MPI build");
 #endif
 }
 
@@ -103,6 +109,9 @@ template <typename... T> Request Communicator::isend(T &&... args) const {
     return m_backend->isend(m_rank, std::forward<T>(args)...);
 #ifdef MPI_EXPERIMENTAL
   return m_communicator.isend(std::forward<T>(args)...);
+#else
+  throw std::runtime_error(
+      "Parallel::Communicator without backend in non-MPI build");
 #endif
 }
 
@@ -111,6 +120,9 @@ template <typename... T> Request Communicator::irecv(T &&... args) const {
     return m_backend->irecv(m_rank, std::forward<T>(args)...);
 #ifdef MPI_EXPERIMENTAL
   return m_communicator.irecv(std::forward<T>(args)...);
+#else
+  throw std::runtime_error(
+      "Parallel::Communicator without backend in non-MPI build");
 #endif
 }
 
