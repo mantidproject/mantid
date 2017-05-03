@@ -482,11 +482,10 @@ void FilterEvents::copyNoneSplitLogs(
     std::vector<TimeSeriesProperty<bool> *> &bool_tsp_name_vector) {
   // get the user input information
   bool exclude_listed_logs = getProperty("ExcludeSpecifiedLogs");
-  std::vector<std::string> tsp_logs =
-      getProperty("TimeSeriesPropertyLogs");
+  std::vector<std::string> tsp_logs = getProperty("TimeSeriesPropertyLogs");
   // convert to set
   std::set<std::string> tsp_logs_set;
-  for (auto iter=tsp_logs.begin(); iter!=tsp_logs.end(); ++iter)
+  for (auto iter = tsp_logs.begin(); iter != tsp_logs.end(); ++iter)
     tsp_logs_set.insert(*iter);
 
   std::set<std::string>::iterator set_iter;
@@ -510,20 +509,17 @@ void FilterEvents::copyNoneSplitLogs(
         dynamic_cast<TimeSeriesProperty<bool> *>(prop_i);
 
     // check for time series properties
-    if (dbl_prop || int_prop || bool_prop)
-    {
+    if (dbl_prop || int_prop || bool_prop) {
       // check whether the log is there
       set_iter = tsp_logs_set.find(name_i);
-      if (exclude_listed_logs && set_iter != tsp_logs_set.end())
-      {
+      if (exclude_listed_logs && set_iter != tsp_logs_set.end()) {
         // exclude all the listed tsp logs and this log name is in the set
         // skip
         g_log.information() << "Skip splitting sample log " << name_i << "\n";
         continue;
-      }
-      else if (!exclude_listed_logs && set_iter == tsp_logs_set.end())
-      {
-        // include all the listed tsp logs to split but this log name is NOT in the set
+      } else if (!exclude_listed_logs && set_iter == tsp_logs_set.end()) {
+        // include all the listed tsp logs to split but this log name is NOT in
+        // the set
         // skip
         g_log.information() << "Skip splitting sample log " << name_i << "\n";
         continue;
@@ -533,26 +529,21 @@ void FilterEvents::copyNoneSplitLogs(
       if (dbl_prop) {
         // is double time series property
         dbl_tsp_name_vector.push_back(dbl_prop);
-      }
-      else if (int_prop) {
+      } else if (int_prop) {
         // is integer time series property
         int_tsp_name_vector.push_back(int_prop);
-      }
-      else if (bool_prop) {
+      } else if (bool_prop) {
         // is integer time series property
         bool_tsp_name_vector.push_back(bool_prop);
         continue;
       }
 
-    }
-    else
-    {
+    } else {
       // non time series properties
       // single value property: copy to the new workspace
       std::map<int, DataObjects::EventWorkspace_sptr>::iterator ws_iter;
       for (ws_iter = m_outputWorkspacesMap.begin();
            ws_iter != m_outputWorkspacesMap.end(); ++ws_iter) {
-
 
         std::string value_i = prop_i->value();
         double double_v;
