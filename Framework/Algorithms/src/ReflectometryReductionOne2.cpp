@@ -258,7 +258,7 @@ int mapSpectrumIndexToWorkspace(const spec2index_map &map, const size_t mapIdx,
 
   // Get the spectrum numbers for these indices
   auto it = std::find_if(map.begin(), map.end(),
-    [mapIdx](auto wsIt) { return wsIt.second == mapIdx; });
+                         [mapIdx](auto wsIt) { return wsIt.second == mapIdx; });
 
   if (it == map.end()) {
     std::ostringstream errMsg;
@@ -284,7 +284,7 @@ int mapSpectrumIndexToWorkspace(const spec2index_map &map, const size_t mapIdx,
 *as a vector of groups of vectors of spectrum indices
 */
 std::vector<std::vector<size_t>> mapSpectrumIndicesToWorkspace(
-  MatrixWorkspace_const_sptr originWS, MatrixWorkspace_const_sptr hostWS,
+    MatrixWorkspace_const_sptr originWS, MatrixWorkspace_const_sptr hostWS,
     const std::vector<std::vector<size_t>> &detectors) {
 
   auto map = originWS->getSpectrumToWorkspaceIndexMap();
@@ -377,7 +377,6 @@ std::string createProcessingCommandsFromDetectorWS(
   return result.str();
 }
 } // unnamed namespace
-
 
 //----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
@@ -537,7 +536,7 @@ MatrixWorkspace_sptr ReflectometryReductionOne2::makeIvsLam() {
     /// todo Generalise this to support multiple ranges
     if (m_detectors.size() > 1) {
       throw std::runtime_error(
-        "Only a single range is supported for summing in Q");
+          "Only a single range is supported for summing in Q");
     }
     const auto &detectors = m_detectors[0];
     // Convert to lambda
@@ -703,8 +702,8 @@ MatrixWorkspace_sptr ReflectometryReductionOne2::transmissionCorrection(
       // transmission workspace. Note that we use the run workspace here
       // because the detectorWS may already have been reduced and may not
       // contain the original spectra.
-      transmissionCommands =
-          createProcessingCommandsFromDetectorWS(m_runWS, transmissionWS, m_detectors);
+      transmissionCommands = createProcessingCommandsFromDetectorWS(
+          m_runWS, transmissionWS, m_detectors);
     }
 
     MatrixWorkspace_sptr secondTransmissionWS =
@@ -722,12 +721,12 @@ MatrixWorkspace_sptr ReflectometryReductionOne2::transmissionCorrection(
     Property *backgroundMin = getProperty("MonitorBackgroundWavelengthMin");
     if (!backgroundMin->isDefault()) {
       alg->setPropertyValue("MonitorBackgroundWavelengthMin",
-        getPropertyValue("MonitorBackgroundWavelengthMin"));
+                            getPropertyValue("MonitorBackgroundWavelengthMin"));
     }
     Property *backgroundMax = getProperty("MonitorBackgroundWavelengthMax");
     if (!backgroundMax->isDefault()) {
       alg->setPropertyValue("MonitorBackgroundWavelengthMax",
-        getPropertyValue("MonitorBackgroundWavelengthMax"));
+                            getPropertyValue("MonitorBackgroundWavelengthMax"));
     }
     alg->setPropertyValue("MonitorIntegrationWavelengthMin",
                           getPropertyValue("MonitorIntegrationWavelengthMin"));
@@ -1037,7 +1036,7 @@ ReflectometryReductionOne2::sumInQ(MatrixWorkspace_sptr detectorWS,
 
     // Create a vector for the projected errors for this spectrum.
     // (Output Y values can simply be accumulated directly into the output
-    // workspace, but for error values we need to create a separate error 
+    // workspace, but for error values we need to create a separate error
     // vector for the projected errors from each input spectrum and then
     // do an overall sum in quadrature.)
     std::vector<double> projectedE(outputE.size(), 0.0);
@@ -1057,7 +1056,7 @@ ReflectometryReductionOne2::sumInQ(MatrixWorkspace_sptr detectorWS,
 
   // Take the square root of all the accumulated squared errors. Assumes
   // Gaussian errors
-  double(*rs)(double) = std::sqrt;
+  double (*rs)(double) = std::sqrt;
   std::transform(outputE.begin(), outputE.end(), outputE.begin(), rs);
 
   return IvsLam;
@@ -1081,7 +1080,8 @@ void ReflectometryReductionOne2::sumInQProcessValue(
 
   // Check whether there are any counts (if not, nothing to share)
   const double inputCounts = inputY[inputIdx];
-  if (inputCounts <= 0.0 || std::isnan(inputCounts) || std::isinf(inputCounts)) {
+  if (inputCounts <= 0.0 || std::isnan(inputCounts) ||
+      std::isinf(inputCounts)) {
     return;
   }
   // Get the bin width and the bin centre
@@ -1110,8 +1110,8 @@ void ReflectometryReductionOne2::sumInQProcessValue(
 */
 void ReflectometryReductionOne2::sumInQShareCounts(
     const double inputCounts, const double inputErr, const double bLambda,
-    const double lambdaMin, const double lambdaMax,
-    MatrixWorkspace_sptr IvsLam, std::vector<double> &outputE) {
+    const double lambdaMin, const double lambdaMax, MatrixWorkspace_sptr IvsLam,
+    std::vector<double> &outputE) {
   // Check that we have histogram data
   const auto &outputX = IvsLam->dataX(0);
   auto &outputY = IvsLam->dataY(0);
@@ -1134,8 +1134,8 @@ void ReflectometryReductionOne2::sumInQShareCounts(
 
   // Loop through all overlapping output bins. Convert the iterator to an
   // index because we need to index both the X and Y arrays.
-  for (auto outIdx = startIter - outputX.begin();
-       outIdx < outputX.size() - 1; ++outIdx) {
+  for (auto outIdx = startIter - outputX.begin(); outIdx < outputX.size() - 1;
+       ++outIdx) {
     const double binStart = outputX[outIdx];
     const double binEnd = outputX[outIdx + 1];
     if (binStart > lambdaMax) {
@@ -1191,17 +1191,19 @@ void ReflectometryReductionOne2::getProjectedLambdaRange(
 
   // Calculate the projected wavelength range
   try {
-    const double lambdaTop = std::sin(horizonThetaR) * (lambda + bLambda / 2.0) /
-                             std::sin(horizonThetaR + gammaRad - bTwoTheta/ 2.0);
-    const double lambdaBot = std::sin(horizonThetaR) * (lambda - bLambda / 2.0) /
-                             std::sin(horizonThetaR + gammaRad + bTwoTheta/ 2.0);
+    const double lambdaTop =
+        std::sin(horizonThetaR) * (lambda + bLambda / 2.0) /
+        std::sin(horizonThetaR + gammaRad - bTwoTheta / 2.0);
+    const double lambdaBot =
+        std::sin(horizonThetaR) * (lambda - bLambda / 2.0) /
+        std::sin(horizonThetaR + gammaRad + bTwoTheta / 2.0);
     lambdaMin = std::min(lambdaTop, lambdaBot);
     lambdaMax = std::max(lambdaTop, lambdaBot);
   } catch (std::exception &ex) {
     std::stringstream errMsg;
     errMsg << "Failed to project (lambda, twoTheta) = (" << lambda << ","
-           << twoTheta * 180.0 / M_PI << ") onto twoThetaR = " << twoThetaRVal << ": "
-           << ex.what();
+           << twoTheta * 180.0 / M_PI << ") onto twoThetaR = " << twoThetaRVal
+           << ": " << ex.what();
     throw std::runtime_error(errMsg.str());
   }
 }
