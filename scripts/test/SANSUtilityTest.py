@@ -1797,6 +1797,7 @@ class TestMonitorSlicing(unittest.TestCase):
         self.assertTrue(isinstance(event_monitor, IEventWorkspace))
         reducer = self.get_mock_reducer(min_limit=0., max_limit=1000., settings={"events.binning": "0,200,20000"},
                                         is_can=True)
+
         sliced_monitor = su.get_sliced_monitor(reducer=reducer, monitor=event_monitor, do_scale=True)
         self.assertTrue(isinstance(sliced_monitor, Workspace2D))
         self.assertAlmostEqual(sliced_monitor.dataY(0)[0], 10.0, places=7)
