@@ -64,8 +64,10 @@ private:
 
 private:
   void logNumberOfPeaksFound(size_t allowedPeakCount) const;
-  /// Function to find peaks near detector edge
-  bool edgePixel(std::string bankName, int col, int row, int Edge);
+
+  /// Number of edge pixels with no peaks
+  int m_edge;
+
   /// Reflection conditions possible
   std::vector<Mantid::Geometry::ReflectionCondition_sptr> m_refConds;
 

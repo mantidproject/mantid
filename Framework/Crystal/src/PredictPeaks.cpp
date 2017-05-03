@@ -12,6 +12,7 @@
 #include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidGeometry/Crystal/EdgePixel.h"
 
 using Mantid::Kernel::EnabledWhenProperty;
 
@@ -139,6 +140,7 @@ void PredictPeaks::init() {
 void PredictPeaks::exec() {
   // Get the input properties
   Workspace_sptr rawInputWorkspace = getProperty("InputWorkspace");
+  m_edge = this->getProperty("EdgePixels");
 
   ExperimentInfo_sptr inputExperimentInfo =
       boost::dynamic_pointer_cast<ExperimentInfo>(rawInputWorkspace);
@@ -472,9 +474,8 @@ void PredictPeaks::calculateQAndAddToOutput(const V3D &hkl,
 
   // Create the peak using the Q in the lab framewith all its info:
   Peak p(m_inst, q);
-  int edge = this->getProperty("EdgePixels");
-  if (edge > 0) {
-    if (edgePixel(p.getBankName(), p.getCol(), p.getRow(), edge))
+  if (m_edge > 0) {
+    if (edgePixel(m_inst, p.getBankName(), p.getCol(), p.getRow(), m_edge))
       return;
   }
   /* The constructor calls setQLabFrame, which already calls findDetector, which
@@ -504,50 +505,6 @@ void PredictPeaks::calculateQAndAddToOutput(const V3D &hkl,
   // Add it to the workspace
   m_pw->addPeak(p);
 }
-//-----------------------------------------------------------------------------------------
-/**
-  @param  bankName     Name of bank containing peak
-  @param  col          Column number containing peak
-  @param  row          Row number containing peak
-  @param  Edge         Number of edge points for each bank
-  @return True if peak is on edge
-*/
-bool PredictPeaks::edgePixel(std::string bankName, int col, int row, int Edge) {
-  if (bankName == "None")
-    return false;
-  boost::shared_ptr<const IComponent> parent =
-      m_inst->getComponentByName(bankName);
-  if (parent->type() == "RectangularDetector") {
-    boost::shared_ptr<const RectangularDetector> RDet =
-        boost::dynamic_pointer_cast<const RectangularDetector>(parent);
 
-    return col < Edge || col >= (RDet->xpixels() - Edge) || row < Edge ||
-           row >= (RDet->ypixels() - Edge);
-  } else {
-    std::vector<IComponent_const_sptr> children;
-    boost::shared_ptr<const ICompAssembly> asmb =
-        boost::dynamic_pointer_cast<const ICompAssembly>(parent);
-    asmb->getChildren(children, false);
-    int startI = 1;
-    if (children[0]->getName() == "sixteenpack") {
-      startI = 0;
-      parent = children[0];
-      children.clear();
-      boost::shared_ptr<const ICompAssembly> asmb =
-          boost::dynamic_pointer_cast<const ICompAssembly>(parent);
-      asmb->getChildren(children, false);
-    }
-    boost::shared_ptr<const ICompAssembly> asmb2 =
-        boost::dynamic_pointer_cast<const ICompAssembly>(children[0]);
-    std::vector<IComponent_const_sptr> grandchildren;
-    asmb2->getChildren(grandchildren, false);
-    int NROWS = static_cast<int>(grandchildren.size());
-    int NCOLS = static_cast<int>(children.size());
-    // Wish pixels and tubes start at 1 not 0
-    return col - startI < Edge || col - startI >= (NCOLS - Edge) ||
-           row - startI < Edge || row - startI >= (NROWS - Edge);
-  }
-  return false;
-}
 } // namespace Mantid
 } // namespace Crystal
