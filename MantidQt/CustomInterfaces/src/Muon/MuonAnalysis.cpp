@@ -3042,7 +3042,7 @@ void MuonAnalysis::multiFitCheckboxChanged(int state) {
   if (m_uiForm.chkEnableMultiFit->isChecked() && state != 0) {
     // uncheck the box
     m_uiForm.chkTFAsymm->setChecked(false);
-    TFAsymmCheckboxChanged(0);
+    changedTFAsymmCheckbox(0);
     // reset the view
     m_fitFunctionPresenter->setTFAsymmState(Muon::TFAsymmState::Disabled);
   }
@@ -3055,7 +3055,7 @@ void MuonAnalysis::multiFitCheckboxChanged(int state) {
 * Called when the "TF Asymmetry" checkbox is changed (settings tab.)
 * Forward this to the fit function presenter.
 */
-void MuonAnalysis::TFAsymmCheckboxChanged(int state) {
+void MuonAnalysis::changedTFAsymmCheckbox(int state) {
   const Muon::TFAsymmState TFAsymmState = state == Qt::CheckState::Checked
                                               ? Muon::TFAsymmState::Enabled
                                               : Muon::TFAsymmState::Disabled;
@@ -3085,7 +3085,7 @@ void MuonAnalysis::setTFAsymm(Muon::TFAsymmState TFAsymmState) {
   // uncheck the multiFit
   if (m_uiForm.chkEnableMultiFit->isChecked() &&
       TFAsymmState ==
-          Muon::TFAsymmState::Enabled) // m_uiForm.chkTFAsymm->isChecked())
+          Muon::TFAsymmState::Enabled)
   {
     // uncheck the box
     m_uiForm.chkEnableMultiFit->setChecked(false);

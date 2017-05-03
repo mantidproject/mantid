@@ -250,7 +250,7 @@ private slots:
   void multiFitCheckboxChanged(int state);
 
   /// Called when "TF Asymmetry" checkbox is turned on/off
-  void TFAsymmCheckboxChanged(int state);
+  void changedTFAsymmCheckbox(int state);
   void setTFAsymm(Muon::TFAsymmState);
   /// Called when "overwrite" is changed
   void updateDataPresenterOverwrite(int state);

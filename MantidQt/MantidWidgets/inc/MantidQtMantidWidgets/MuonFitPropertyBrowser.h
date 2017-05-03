@@ -96,7 +96,7 @@ public:
   /// Enable/disable the Fit button;
   virtual void setFitEnabled(bool yes) override;
 
-  void TFAsymmFit(int maxIterations);
+  void doTFAsymmFit(int maxIterations);
 
 public slots:
   /// Perform the fit algorithm
@@ -122,7 +122,7 @@ signals:
 
 protected:
   void showEvent(QShowEvent *e) override;
-  double Normalization() const;
+  double normalization() const;
   void setNormalization();
 private slots:
   void doubleChanged(QtProperty *prop) override;

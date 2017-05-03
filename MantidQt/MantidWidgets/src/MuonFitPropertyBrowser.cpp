@@ -6,6 +6,7 @@
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidKernel/VectorHelper.h"
 #include "MantidQtMantidWidgets/StringEditorFactory.h"
 
 // Suppress a warning coming out of code that isn't ours
@@ -197,7 +198,7 @@ void MuonFitPropertyBrowser::init() {
 // Set up the execution of the muon fit menu
 void MuonFitPropertyBrowser::executeMuonFitMenu(const QString &item) {
   if (item == "TFAsymm") {
-    TFAsymmFit(1000);
+    doTFAsymmFit(1000);
   } else {
     FitPropertyBrowser::executeFitMenu(item);
   }
@@ -314,12 +315,12 @@ void MuonFitPropertyBrowser::doubleChanged(QtProperty *prop) {
 }
 /** @returns the normalization
 */
-double MuonFitPropertyBrowser::Normalization() const {
+double MuonFitPropertyBrowser::normalization() const {
   return readNormalization()[0];
 }
 void MuonFitPropertyBrowser::setNormalization() {
   m_normalizationValue.clear();
-  m_normalizationValue.append(QString::number(Normalization()));
+  m_normalizationValue.append(QString::number(normalization()));
   m_enumManager->setEnumNames(m_normalization, m_normalizationValue);
 }
 
@@ -372,21 +373,11 @@ void MuonFitPropertyBrowser::populateFunctionNames() {
     }
   }
 }
-
-// move this to helper later
-std::vector<double> convertToVec(std::string const &list) {
-  std::vector<double> vec;
-  std::vector<std::string> tmpVec;
-  boost::split(tmpVec, list, boost::is_any_of(","));
-  std::transform(tmpVec.begin(), tmpVec.end(), std::back_inserter(vec),
-                 [](std::string const &element) { return std::stod(element); });
-  return vec;
-}
 /**
 * Creates an instance of Fit algorithm, sets its properties and launches it.
 * @param maxIterations is the maximum number of iterations for the fit
 */
-void MuonFitPropertyBrowser::TFAsymmFit(int maxIterations) {
+void MuonFitPropertyBrowser::doTFAsymmFit(int maxIterations) {
   const std::string wsName = workspaceName();
 
   if (wsName.empty()) {
@@ -436,7 +427,7 @@ void MuonFitPropertyBrowser::TFAsymmFit(int maxIterations) {
   }
   // record result
   auto tmp = asymmAlg->getPropertyValue("NormalizationConstant");
-  std::vector<double> normEst = convertToVec(tmp);
+  std::vector<double> normEst = Mantid::Kernel::VectorHelper::splitStringIntoVector<double>(tmp);
   ITableWorkspace_sptr table = WorkspaceFactory::Instance().createTable();
   AnalysisDataService::Instance().addOrReplace("__norm__", table);
   table->addColumn("double", "norm");

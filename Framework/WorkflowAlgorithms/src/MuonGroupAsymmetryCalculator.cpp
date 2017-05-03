@@ -2,6 +2,7 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/TableRow.h"
+#include "MantidKernel/VectorHelper.h"
 
 using Mantid::API::MatrixWorkspace_sptr;
 using Mantid::API::Workspace_sptr;
@@ -30,7 +31,7 @@ MuonGroupAsymmetryCalculator::MuonGroupAsymmetryCalculator(
     const double start, const double end)
     : MuonGroupCalculator(inputWS, summedPeriods, subtractedPeriods,
                           groupIndex) {
-  MuonGroupCalculator::SetStartEnd(start, end);
+  MuonGroupCalculator::setStartEnd(start, end);
 }
 
 /**
@@ -51,12 +52,12 @@ MatrixWorkspace_sptr MuonGroupAsymmetryCalculator::calculate() const {
 
     // Remove decay (summed periods ws)
     MatrixWorkspace_sptr asymSummedPeriods =
-        EstimateAsymmetry(summedWS, m_groupIndex);
+        estimateAsymmetry(summedWS, m_groupIndex);
 
     if (!m_subtractedPeriods.empty()) {
       // Remove decay (subtracted periods ws)
       MatrixWorkspace_sptr asymSubtractedPeriods =
-          EstimateAsymmetry(subtractedWS, m_groupIndex);
+          estimateAsymmetry(subtractedWS, m_groupIndex);
 
       // Now subtract
       tempWS = subtractWorkspaces(asymSummedPeriods, asymSubtractedPeriods);
@@ -65,7 +66,7 @@ MatrixWorkspace_sptr MuonGroupAsymmetryCalculator::calculate() const {
     }
   } else {
     // Only one period was supplied
-    tempWS = EstimateAsymmetry(m_inputWS->getItem(0),
+    tempWS = estimateAsymmetry(m_inputWS->getItem(0),
                                m_groupIndex); // change -1 to m_groupIndex and
                                               // follow through to store as a
                                               // table for later.
@@ -114,7 +115,7 @@ MuonGroupAsymmetryCalculator::removeExpDecay(const Workspace_sptr &inputWS,
 * @returns Result of the removal
 */
 MatrixWorkspace_sptr
-MuonGroupAsymmetryCalculator::EstimateAsymmetry(const Workspace_sptr &inputWS,
+MuonGroupAsymmetryCalculator::estimateAsymmetry(const Workspace_sptr &inputWS,
                                                 const int index) const {
   std::vector<double> normEst;
   MatrixWorkspace_sptr outWS;
@@ -129,13 +130,13 @@ MuonGroupAsymmetryCalculator::EstimateAsymmetry(const Workspace_sptr &inputWS,
       asym->setProperty("Spectra", spec);
     }
     asym->setProperty("OutputWorkspace", "__NotUsed__");
-    asym->setProperty("StartX", StartX);
-    asym->setProperty("EndX", EndX);
+    asym->setProperty("StartX", m_startX);
+    asym->setProperty("EndX", m_endX);
     asym->execute();
     outWS = asym->getProperty("OutputWorkspace");
     auto tmp = asym->getPropertyValue("NormalizationConstant");
     // move to helper later as a function
-    normEst = convertToVec(tmp);
+    normEst = Kernel::VectorHelper::splitStringIntoVector<double>(tmp);
     ITableWorkspace_sptr table = WorkspaceFactory::Instance().createTable();
     API::AnalysisDataService::Instance().addOrReplace("__norm__", table);
     table->addColumn("double", "norm");
@@ -148,15 +149,6 @@ MuonGroupAsymmetryCalculator::EstimateAsymmetry(const Workspace_sptr &inputWS,
     }
   }
   return outWS;
-}
-// move to helper later
-std::vector<double> convertToVec(std::string const &list) {
-  std::vector<double> vec;
-  std::vector<std::string> tmpVec;
-  boost::split(tmpVec, list, boost::is_any_of(","));
-  std::transform(tmpVec.begin(), tmpVec.end(), std::back_inserter(vec),
-                 [](std::string const &element) { return std::stod(element); });
-  return vec;
 }
 } // namespace WorkflowAlgorithms
 } // namespace Mantid
