@@ -440,11 +440,7 @@ void FilterEvents::processAlgorithmProperties() {
     }
   } // END-IF: m_isSplitterRelativeTime
 
-  // sample logs
-  std::vector<std::string> excluded_logs =
-      getProperty("TimeSeriesPropertyLogs");
-  for (auto iter = excluded_logs.begin(); iter != excluded_logs.end(); ++iter)
-    m_excludedSampleLogs.insert(*iter);
+  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -484,6 +480,16 @@ void FilterEvents::copyNoneSplitLogs(
     std::vector<TimeSeriesProperty<int> *> &int_tsp_name_vector,
     std::vector<TimeSeriesProperty<double> *> &dbl_tsp_name_vector,
     std::vector<TimeSeriesProperty<bool> *> &bool_tsp_name_vector) {
+  // get the user input information
+  bool exclude_listed_logs = getProperty("ExcludeSpecifiedLogs");
+  std::vector<std::string> tsp_logs =
+      getProperty("TimeSeriesPropertyLogs");
+  // convert to set
+  std::set<std::string> tsp_logs_set;
+  for (auto iter=tsp_logs.begin(); iter!=tsp_logs.end(); ++iter)
+    tsp_logs_set.insert(*iter);
+
+  std::set<std::string>::iterator set_iter;
   // initialize
   int_tsp_name_vector.clear();
   dbl_tsp_name_vector.clear();
@@ -491,45 +497,75 @@ void FilterEvents::copyNoneSplitLogs(
 
   std::vector<Property *> prop_vector = m_eventWS->run().getProperties();
   for (size_t i = 0; i < prop_vector.size(); ++i) {
+    // get property
+    Property *prop_i = prop_vector[i];
+    std::string name_i = prop_i->name();
+
     // cast to different type of TimeSeriesProperties
     TimeSeriesProperty<double> *dbl_prop =
-        dynamic_cast<TimeSeriesProperty<double> *>(prop_vector[i]);
-    if (dbl_prop) {
-      // is double time series property
-      dbl_tsp_name_vector.push_back(dbl_prop);
-      continue;
-    }
+        dynamic_cast<TimeSeriesProperty<double> *>(prop_i);
     TimeSeriesProperty<int> *int_prop =
-        dynamic_cast<TimeSeriesProperty<int> *>(prop_vector[i]);
-    if (int_prop) {
-      // is integer time series property
-      int_tsp_name_vector.push_back(int_prop);
-      continue;
-    }
+        dynamic_cast<TimeSeriesProperty<int> *>(prop_i);
     TimeSeriesProperty<bool> *bool_prop =
-        dynamic_cast<TimeSeriesProperty<bool> *>(prop_vector[i]);
-    if (bool_prop) {
-      // is integer time series property
-      bool_tsp_name_vector.push_back(bool_prop);
-      continue;
+        dynamic_cast<TimeSeriesProperty<bool> *>(prop_i);
+
+    // check for time series properties
+    if (dbl_prop || int_prop || bool_prop)
+    {
+      // check whether the log is there
+      set_iter = tsp_logs_set.find(name_i);
+      if (exclude_listed_logs && set_iter != tsp_logs_set.end())
+      {
+        // exclude all the listed tsp logs and this log name is in the set
+        // skip
+        g_log.information() << "Skip splitting sample log " << name_i << "\n";
+        continue;
+      }
+      else if (!exclude_listed_logs && set_iter == tsp_logs_set.end())
+      {
+        // include all the listed tsp logs to split but this log name is NOT in the set
+        // skip
+        g_log.information() << "Skip splitting sample log " << name_i << "\n";
+        continue;
+      }
+
+      // insert the time series property to proper target vector
+      if (dbl_prop) {
+        // is double time series property
+        dbl_tsp_name_vector.push_back(dbl_prop);
+      }
+      else if (int_prop) {
+        // is integer time series property
+        int_tsp_name_vector.push_back(int_prop);
+      }
+      else if (bool_prop) {
+        // is integer time series property
+        bool_tsp_name_vector.push_back(bool_prop);
+        continue;
+      }
+
     }
-    // single value property: copy to the new workspace
-    std::map<int, DataObjects::EventWorkspace_sptr>::iterator ws_iter;
-    for (ws_iter = m_outputWorkspacesMap.begin();
-         ws_iter != m_outputWorkspacesMap.end(); ++ws_iter) {
-      Property *prop_i = prop_vector[i];
-      std::string name_i = prop_i->name();
-      std::string value_i = prop_i->value();
-      double double_v;
-      int int_v;
-      if (Strings::convert(value_i, double_v) != 0) // double value
-        ws_iter->second->mutableRun().addProperty(name_i, double_v, true);
-      else if (Strings::convert(value_i, int_v) != 0)
-        ws_iter->second->mutableRun().addProperty(name_i, int_v, true);
-      else
-        ws_iter->second->mutableRun().addProperty(name_i, value_i, true);
+    else
+    {
+      // non time series properties
+      // single value property: copy to the new workspace
+      std::map<int, DataObjects::EventWorkspace_sptr>::iterator ws_iter;
+      for (ws_iter = m_outputWorkspacesMap.begin();
+           ws_iter != m_outputWorkspacesMap.end(); ++ws_iter) {
+
+
+        std::string value_i = prop_i->value();
+        double double_v;
+        int int_v;
+        if (Strings::convert(value_i, double_v) != 0) // double value
+          ws_iter->second->mutableRun().addProperty(name_i, double_v, true);
+        else if (Strings::convert(value_i, int_v) != 0)
+          ws_iter->second->mutableRun().addProperty(name_i, int_v, true);
+        else
+          ws_iter->second->mutableRun().addProperty(name_i, value_i, true);
+      }
     }
-  }
+  } // end for
 
   return;
 }
@@ -619,12 +655,6 @@ void FilterEvents::splitTimeSeriesProperty(
   // skip the sample logs if they are specified
   // get property name and etc
   std::string property_name = tsp->name();
-  std::set<std::string>::iterator set_iter =
-      m_excludedSampleLogs.find(property_name);
-  // skip the log if it is in the excluded sample log list
-  if (set_iter != m_excludedSampleLogs.end())
-    return;
-
   // generate new propertys for the source to split to
   std::vector<TimeSeriesProperty<TYPE> *> output_vector;
   for (int tindex = 0; tindex <= max_target_index; ++tindex) {
@@ -1966,9 +1996,11 @@ std::vector<std::string> FilterEvents::getTimeSeriesLogNames() {
         dynamic_cast<Kernel::TimeSeriesProperty<double> *>(ip);
     Kernel::TimeSeriesProperty<int> *inttimeprop =
         dynamic_cast<Kernel::TimeSeriesProperty<int> *>(ip);
+    Kernel::TimeSeriesProperty<bool> *booltimeprop =
+        dynamic_cast<Kernel::TimeSeriesProperty<bool> *>(ip);
 
     // append to vector if it is either double TimeSeries or int TimeSeries
-    if (dbltimeprop || inttimeprop) {
+    if (dbltimeprop || inttimeprop || booltimeprop) {
       std::string pname = ip->name();
       lognames.push_back(pname);
     }

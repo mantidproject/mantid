@@ -224,7 +224,6 @@ private:
 
   /// Flag to split sample logs
   bool m_splitSampleLogs;
-  std::set<std::string> m_excludedSampleLogs;
 
   /// Debug
   bool m_useDBSpectrum;
