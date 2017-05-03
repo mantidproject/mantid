@@ -6,6 +6,8 @@
 #include "MantidDataHandling/GroupDetectors.h"
 #include "MantidHistogramData/HistogramMath.h"
 #include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/ArrayBoundedValidator.h"
+
 #include <set>
 #include <numeric>
 
@@ -24,17 +26,27 @@ void GroupDetectors::init() {
           boost::make_shared<CommonBinsValidator>()),
       "The name of the workspace2D on which to perform the algorithm");
 
+  auto spectrumStartsAtOne =
+      boost::make_shared<ArrayBoundedValidator<specnum_t>>();
+  spectrumStartsAtOne->setLower(1);
   declareProperty(
-      make_unique<ArrayProperty<specnum_t>>("SpectraList"),
+      make_unique<ArrayProperty<specnum_t>>("SpectraList", spectrumStartsAtOne),
       "An array containing a list of the indexes of the spectra to combine\n"
       "(DetectorList and WorkspaceIndexList are ignored if this is set)");
 
+  auto detectorStartsAtZero =
+      boost::make_shared<ArrayBoundedValidator<detid_t>>();
+  detectorStartsAtZero->setLower(0);
   declareProperty(
-      make_unique<ArrayProperty<detid_t>>("DetectorList"),
+      make_unique<ArrayProperty<detid_t>>("DetectorList", detectorStartsAtZero),
       "An array of detector ID's (WorkspaceIndexList is ignored if this is\n"
       "set)");
 
-  declareProperty(make_unique<ArrayProperty<size_t>>("WorkspaceIndexList"),
+  auto wsIndexStartsAtZero =
+      boost::make_shared<ArrayBoundedValidator<size_t>>();
+  wsIndexStartsAtZero->setLower(0);
+  declareProperty(make_unique<ArrayProperty<size_t>>("WorkspaceIndexList",
+                                                     wsIndexStartsAtZero),
                   "An array of workspace indices to combine");
 
   declareProperty("ResultIndex", -1,

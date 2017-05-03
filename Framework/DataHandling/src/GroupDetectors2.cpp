@@ -61,15 +61,29 @@ void GroupDetectors2::init() {
                       "GroupingPattern", "", Direction::Input),
                   "Describes how this algorithm should group the detectors. "
                   "See full instruction list.");
+
+  auto spectrumStartsAtOne =
+      boost::make_shared<ArrayBoundedValidator<specnum_t>>();
+  spectrumStartsAtOne->setLower(1);
   declareProperty(
-      make_unique<ArrayProperty<specnum_t>>("SpectraList"),
+      make_unique<ArrayProperty<specnum_t>>("SpectraList", spectrumStartsAtOne),
       "An array containing a list of the spectrum numbers to combine\n"
       "(DetectorList and WorkspaceIndexList are ignored if this is set)");
-  declareProperty(make_unique<ArrayProperty<detid_t>>("DetectorList"),
-                  "An array of detector IDs to combine (WorkspaceIndexList is "
-                  "ignored if this is\n"
-                  "set)");
-  declareProperty(make_unique<ArrayProperty<size_t>>("WorkspaceIndexList"),
+
+  auto detectorStartsAtZero =
+      boost::make_shared<ArrayBoundedValidator<detid_t>>();
+  detectorStartsAtZero->setLower(0);
+  declareProperty(
+      make_unique<ArrayProperty<detid_t>>("DetectorList", detectorStartsAtZero),
+      "An array of detector IDs to combine (WorkspaceIndexList is "
+      "ignored if this is\n"
+      "set)");
+
+  auto wsIndexStartsAtZero =
+      boost::make_shared<ArrayBoundedValidator<size_t>>();
+  wsIndexStartsAtZero->setLower(0);
+  declareProperty(make_unique<ArrayProperty<size_t>>("WorkspaceIndexList",
+                                                     wsIndexStartsAtZero),
                   "An array of workspace indices to combine");
   declareProperty(
       "KeepUngroupedSpectra", false,

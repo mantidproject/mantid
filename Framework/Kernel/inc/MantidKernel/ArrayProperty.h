@@ -57,7 +57,7 @@ public:
   std::string value() const override;
 
   std::string setValue(const std::string &value) override;
-  // May want to add specialisation the the class later, e.g. setting just one
+  // May want to add specialisation the class later, e.g. setting just one
   // element of the vector
 };
 
