@@ -1,4 +1,5 @@
 #include "MantidAPI/DetectorInfo.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ComponentHelper.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
@@ -6,8 +7,6 @@
 #include "MantidKernel/EigenConversionHelpers.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/MultiThreaded.h"
-#include "MantidGeometry/Instrument/RectangularDetector.h"
-#include "MantidGeometry/Instrument/Component.h"
 
 namespace Mantid {
 namespace API {
@@ -581,6 +580,5 @@ boost::shared_ptr<const std::unordered_map<detid_t, size_t>>
 DetectorInfo::detIdToIndexMap() const {
   return m_detIDToIndex;
 }
-
 } // namespace API
 } // namespace Mantid
