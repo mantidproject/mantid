@@ -626,8 +626,8 @@ void FilterEvents::splitTimeSeriesLogs(
     std::map<int, DataObjects::EventWorkspace_sptr>::iterator wsiter;
     wsiter = m_outputWorkspacesMap.find(tindex);
     if (wsiter == m_outputWorkspacesMap.end()) {
-      g_log.error() << "Workspace target (indexed as " << tindex
-                    << ") does not have workspace associated.\n";
+      g_log.information() << "Workspace target (indexed as " << tindex
+                          << ") does not have workspace associated.\n";
     } else {
       DataObjects::EventWorkspace_sptr ws_i = wsiter->second;
       ws_i->mutableRun().integrateProtonCharge();
@@ -674,9 +674,9 @@ void FilterEvents::splitTimeSeriesProperty(
     wsiter = m_outputWorkspacesMap.find(tindex);
     if (wsiter == m_outputWorkspacesMap.end()) {
       // unable to find workspace associated with target index
-      g_log.error() << "Workspace target (" << tindex
-                    << ") does not have workspace associated."
-                    << "\n";
+      g_log.information() << "Workspace target (" << tindex
+                          << ") does not have workspace associated."
+                          << "\n";
     } else {
       // add property to the associated workspace
       DataObjects::EventWorkspace_sptr ws_i = wsiter->second;
@@ -767,10 +767,6 @@ void FilterEvents::convertSplittersWorkspaceToVectors() {
   for (size_t i_splitter = 0; i_splitter < num_splitters; ++i_splitter) {
     // get splitter
     Kernel::SplittingInterval splitter = m_splitters[i_splitter];
-    if (m_vecSplitterTime.size() > 0)
-      g_log.warning() << "Last time with tolerance =  "
-                      << m_vecSplitterTime.back() + TOLERANCE << "\n";
-
     int64_t start_time_i64 = splitter.start().totalNanoseconds();
     int64_t stop_time_i64 = splitter.stop().totalNanoseconds();
     if (m_vecSplitterTime.size() == 0) {
@@ -1957,7 +1953,7 @@ void FilterEvents::mapSplitterTSPtoWorkspaces(
 
       // skip if an itarget does not have matched workspace
       if (ws_iter == m_outputWorkspacesMap.end()) {
-        g_log.warning() << "iTarget " << itarget
+        g_log.warning() << "Target with index " << itarget
                         << " does not have any workspace associated.\n";
         continue;
       }
