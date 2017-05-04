@@ -1747,21 +1747,6 @@ Parallel::ExecutionMode Algorithm::getParallelExecutionMode(
   return Parallel::ExecutionMode::Invalid;
 }
 
-/// Helper function to translate from StorageMode to ExecutionMode.
-Parallel::ExecutionMode Algorithm::getCorrespondingExecutionMode(
-    Parallel::StorageMode storageMode) const {
-  switch (storageMode) {
-  case Parallel::StorageMode::Cloned:
-    return Parallel::ExecutionMode::Identical;
-  case Parallel::StorageMode::Distributed:
-    return Parallel::ExecutionMode::Distributed;
-  case Parallel::StorageMode::MasterOnly:
-    return Parallel::ExecutionMode::MasterOnly;
-  default:
-    return Parallel::ExecutionMode::Invalid;
-  }
-}
-
 /// Sets up skipping workspace validation on non-master ranks for
 /// StorageMode::MasterOnly.
 void Algorithm::setupSkipValidationMasterOnly() {

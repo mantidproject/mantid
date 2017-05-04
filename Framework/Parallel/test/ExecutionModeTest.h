@@ -14,6 +14,15 @@ public:
   static ExecutionModeTest *createSuite() { return new ExecutionModeTest(); }
   static void destroySuite(ExecutionModeTest *suite) { delete suite; }
 
+  void test_getCorrespondingExecutionMode() {
+    TS_ASSERT_EQUALS(getCorrespondingExecutionMode(StorageMode::Cloned),
+                     ExecutionMode::Identical);
+    TS_ASSERT_EQUALS(getCorrespondingExecutionMode(StorageMode::Distributed),
+                     ExecutionMode::Distributed);
+    TS_ASSERT_EQUALS(getCorrespondingExecutionMode(StorageMode::MasterOnly),
+                     ExecutionMode::MasterOnly);
+  }
+
   void test_toString() {
     TS_ASSERT_EQUALS(toString(ExecutionMode::Invalid),
                      "Parallel::ExecutionMode::Invalid");

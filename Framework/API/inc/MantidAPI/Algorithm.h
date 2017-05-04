@@ -324,9 +324,6 @@ protected:
   virtual Parallel::ExecutionMode getParallelExecutionMode(
       const std::map<std::string, Parallel::StorageMode> &storageModes) const;
 
-  Parallel::ExecutionMode
-  getCorrespondingExecutionMode(Parallel::StorageMode storageMode) const;
-
   /// Returns a semi-colon separated list of workspace types to attach this
   /// algorithm
   virtual const std::string workspaceMethodOnTypes() const { return ""; }

@@ -3,6 +3,20 @@
 namespace Mantid {
 namespace Parallel {
 
+/// Returns the corresponding ExecutionMode for a given StorageMode.
+ExecutionMode getCorrespondingExecutionMode(StorageMode storageMode) {
+  switch (storageMode) {
+  case StorageMode::Cloned:
+    return ExecutionMode::Identical;
+  case StorageMode::Distributed:
+    return ExecutionMode::Distributed;
+  case StorageMode::MasterOnly:
+    return ExecutionMode::MasterOnly;
+  default:
+    return ExecutionMode::Invalid;
+  }
+}
+
 /// Returns a human-readable string representation of an ExecutionMode.
 std::string toString(ExecutionMode mode) {
   switch (mode) {

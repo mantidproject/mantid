@@ -2,6 +2,7 @@
 #define MANTID_PARALLEL_EXECUTIONMODE_H_
 
 #include "MantidParallel/DllConfig.h"
+#include "MantidParallel/StorageMode.h"
 
 #include <string>
 
@@ -47,6 +48,9 @@ enum class ExecutionMode {
   Distributed,
   MasterOnly
 };
+
+MANTID_PARALLEL_DLL ExecutionMode
+getCorrespondingExecutionMode(StorageMode storageMode);
 
 MANTID_PARALLEL_DLL std::string toString(ExecutionMode mode);
 
