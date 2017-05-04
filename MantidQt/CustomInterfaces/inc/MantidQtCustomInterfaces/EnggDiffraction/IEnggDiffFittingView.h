@@ -278,6 +278,17 @@ public:
    * Save user settings (normally when closing the interface).
    */
   virtual void saveSettings() const = 0;
+
+  /**
+  * Gets the current selected instrument
+  */
+  virtual std::string getCurrentInstrument() const = 0;
+
+  /**
+   * Sets the currently selected instrument
+   * @param newInstrument the new instrument that is selected
+   */
+  virtual void setCurrentInstrument(const std::string &newInstrument) = 0;
 };
 
 } // namespace CustomInterfaces
