@@ -293,9 +293,9 @@ makeDetectorInfo(const Instrument &oldInstr, const Instrument &newInstr) {
 
 /**
  * Make the beamline and API ComponentInfo
- * @param inst : instrument to make the component info around
+ * @param instr : instrument to make the component info around
  */
-void ExperimentInfo::makeAPIComponentInfo(const Instrument &inst) {
+void ExperimentInfo::makeAPIComponentInfo(const Instrument &instr) {
 
   boost::shared_ptr<const std::vector<Geometry::ComponentID>> componentIds;
   boost::shared_ptr<const std::unordered_map<Geometry::ComponentID, size_t>>
