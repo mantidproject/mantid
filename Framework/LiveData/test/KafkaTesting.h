@@ -59,9 +59,19 @@ class FakeExceptionThrowingStreamSubscriber
 public:
   void subscribe() override {}
   void subscribe(int64_t offset) override { UNUSED_ARG(offset) }
-  void consumeMessage(std::string *buffer) override {
+  void consumeMessage(std::string *buffer, int64_t &offset, int32_t &partition,
+                      std::string &topic) override {
     buffer->clear();
+    UNUSED_ARG(offset);
+    UNUSED_ARG(partition);
+    UNUSED_ARG(topic);
     throw std::runtime_error("FakeExceptionThrowingStreamSubscriber");
+  }
+  std::unordered_map<std::string, std::vector<int64_t>>
+  getOffsetsForTimestamp(int64_t timestamp) override {
+    UNUSED_ARG(timestamp);
+    return {
+        std::pair<std::string, std::vector<int64_t>>("topic_name", {1, 2, 3})};
   }
 };
 
@@ -73,7 +83,19 @@ class FakeEmptyStreamSubscriber
 public:
   void subscribe() override {}
   void subscribe(int64_t offset) override { UNUSED_ARG(offset) }
-  void consumeMessage(std::string *buffer) override { buffer->clear(); }
+  void consumeMessage(std::string *buffer, int64_t &offset, int32_t &partition,
+                      std::string &topic) override {
+    buffer->clear();
+    UNUSED_ARG(offset);
+    UNUSED_ARG(partition);
+    UNUSED_ARG(topic);
+  }
+  std::unordered_map<std::string, std::vector<int64_t>>
+  getOffsetsForTimestamp(int64_t timestamp) override {
+    UNUSED_ARG(timestamp);
+    return {
+        std::pair<std::string, std::vector<int64_t>>("topic_name", {1, 2, 3})};
+  }
 };
 
 // -----------------------------------------------------------------------------
@@ -86,7 +108,8 @@ public:
       : m_nperiods(nperiods), m_nextPeriod(0) {}
   void subscribe() override {}
   void subscribe(int64_t offset) override { UNUSED_ARG(offset) }
-  void consumeMessage(std::string *buffer) override {
+  void consumeMessage(std::string *buffer, int64_t &offset, int32_t &partition,
+                      std::string &topic) override {
     assert(buffer);
 
     flatbuffers::FlatBufferBuilder builder;
@@ -108,6 +131,16 @@ public:
     buffer->assign(reinterpret_cast<const char *>(builder.GetBufferPointer()),
                    builder.GetSize());
     m_nextPeriod = ((m_nextPeriod + 1) % m_nperiods);
+
+    UNUSED_ARG(offset);
+    UNUSED_ARG(partition);
+    UNUSED_ARG(topic);
+  }
+  std::unordered_map<std::string, std::vector<int64_t>>
+  getOffsetsForTimestamp(int64_t timestamp) override {
+    UNUSED_ARG(timestamp);
+    return {
+        std::pair<std::string, std::vector<int64_t>>("topic_name", {1, 2, 3})};
   }
 
 private:
@@ -124,7 +157,8 @@ public:
   FakeISISRunInfoStreamSubscriber(int32_t nperiods) : m_nperiods(nperiods) {}
   void subscribe() override {}
   void subscribe(int64_t offset) override { UNUSED_ARG(offset) }
-  void consumeMessage(std::string *buffer) override {
+  void consumeMessage(std::string *buffer, int64_t &offset, int32_t &partition,
+                      std::string &topic) override {
     assert(buffer);
 
     // Convert date to time_t
@@ -143,6 +177,16 @@ public:
     // Copy to provided buffer
     buffer->assign(reinterpret_cast<const char *>(builder.GetBufferPointer()),
                    builder.GetSize());
+
+    UNUSED_ARG(offset);
+    UNUSED_ARG(partition);
+    UNUSED_ARG(topic);
+  }
+  std::unordered_map<std::string, std::vector<int64_t>>
+  getOffsetsForTimestamp(int64_t timestamp) override {
+    UNUSED_ARG(timestamp);
+    return {
+        std::pair<std::string, std::vector<int64_t>>("topic_name", {1, 2, 3})};
   }
 
 private:
@@ -161,7 +205,8 @@ class FakeISISSpDetStreamSubscriber
 public:
   void subscribe() override {}
   void subscribe(int64_t offset) override { UNUSED_ARG(offset) }
-  void consumeMessage(std::string *buffer) override {
+  void consumeMessage(std::string *buffer, int64_t &offset, int32_t &partition,
+                      std::string &topic) override {
     assert(buffer);
 
     // Serialize data with flatbuffers
@@ -174,6 +219,16 @@ public:
     // Copy to provided buffer
     buffer->assign(reinterpret_cast<const char *>(builder.GetBufferPointer()),
                    builder.GetSize());
+
+    UNUSED_ARG(offset);
+    UNUSED_ARG(partition);
+    UNUSED_ARG(topic);
+  }
+  std::unordered_map<std::string, std::vector<int64_t>>
+  getOffsetsForTimestamp(int64_t timestamp) override {
+    UNUSED_ARG(timestamp);
+    return {
+        std::pair<std::string, std::vector<int64_t>>("topic_name", {1, 2, 3})};
   }
 
 private:
