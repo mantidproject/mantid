@@ -125,7 +125,11 @@ public:
     }
   }
 
-  void test_integrateWithStrongPeak() {
+  void test_integrateWeakPeakInPerfectCase() {
+    /* Check that we can integrate a weak peak using a strong peak in the
+     * perfect case when there is absolutely no background
+     */
+
     // synthesize two peaks
     V3D peak_1(20, 0, 0);
     V3D peak_2(0, 20, 0);
@@ -138,14 +142,16 @@ public:
     UBinv.setRow(2, V3D(0, 0, .25));
 
     std::vector<std::pair<double, V3D>> event_Qs;
-    generatePeak(event_Qs, peak_1, 1, 10000, 1); // strong peak
-    generatePeak(event_Qs, peak_2, 1, 100, 1);   // weak peak
+    const int numStrongEvents = 10000;
+    const int numWeakEvents  = 100;
+    generatePeak(event_Qs, peak_1, 0.1, numStrongEvents, 1); // strong peak
+    generatePeak(event_Qs, peak_2, 0.1, numWeakEvents, 1);   // weak peak
 
     IntegrationParameters params;
-    params.peakRadius = 1.2;
-    params.backgroundInnerRadius = 1.2;
-    params.backgroundOuterRadius = 1.3;
-    params.regionRadius = 1.5;
+    params.peakRadius = 0.5;
+    params.backgroundInnerRadius = 0.5;
+    params.backgroundOuterRadius = 0.8;
+    params.regionRadius = 0.5;
 
     // Create integraton region + events & UB
     Integrate3DEvents integrator(peak_q_list, UBinv, params.regionRadius);
@@ -156,18 +162,30 @@ public:
     const auto shape = boost::dynamic_pointer_cast<const PeakShapeEllipsoid>(result.first);
     const auto frac = result.second;
 
-    TS_ASSERT_DELTA(frac, 0.2948, 0.0001);
-    TS_ASSERT_DELTA(strong_inti, 2616.18, 0.01);
+    // Check the fraction of the peak that is contained within a "standard core"
+    // the standard core is just the sigma in each direction
+    TS_ASSERT_DELTA(frac, 0.8369, 0.0001);
 
-    double inti, sigi;
-    std::vector<double> sigmas;
+    // Check the integrated intensity for a strong peak is exactly what we set
+    // it to be when generating the peak
+    TS_ASSERT_DELTA(strong_inti, numStrongEvents, 0.01);
 
-    integrator.integrateWeakPeak(params, shape, frac, peak_2, inti, sigi);
+    // Now integrate weak peak using the parameters we got from the strong peak
+    double weak_inti, weak_sigi;
+    integrator.integrateWeakPeak(params, shape, frac, peak_2, weak_inti, weak_sigi);
 
-    TS_ASSERT_DELTA(inti, 78.0140, 0.001);
+    // Check the integrated intensity for a weak peak is exactly what we set it
+    // to be weighted by the fraction of strong peak contained in a standard
+    // core. This is not exactly the same because of the weighting from the
+    // strong peak
+    TS_ASSERT_DELTA(weak_inti, numWeakEvents / frac, 0.001);
   }
 
-  void test_estimateSignalToNoiseRatio() {
+  void test_integrateWeakPeakWithBackground() {
+    /* Check that we can integrate a weak peak using a strong peak in the
+     * perfect case when there is absolutely no background
+     */
+
     // synthesize two peaks
     V3D peak_1(20, 0, 0);
     V3D peak_2(0, 20, 0);
@@ -180,25 +198,125 @@ public:
     UBinv.setRow(2, V3D(0, 0, .25));
 
     std::vector<std::pair<double, V3D>> event_Qs;
-    generatePeak(event_Qs, peak_1, 0.1, 100000, 1); // strong peak
-    generatePeak(event_Qs, peak_2, 0.1, 1000, 1);   // weak peak
-    generateNoise(event_Qs, -40, 40, 10000000);
+    const int numStrongEvents = 10000;
+    const int numWeakEvents  = 100;
+    generatePeak(event_Qs, peak_1, 0.1, numStrongEvents, 1); // strong peak
+    generatePeak(event_Qs, peak_2, 0.1, numWeakEvents, 1);   // weak peak
+    generateUniformBackground(event_Qs, 10, -30, 30);
+
+    IntegrationParameters params;
+    params.peakRadius = 0.5;
+    params.backgroundInnerRadius = 0.5;
+    params.backgroundOuterRadius = 0.8;
+    params.regionRadius = 0.5;
+
+    // Create integraton regions + events & UB
+    Integrate3DEvents integrator(peak_q_list, UBinv, params.regionRadius);
+    integrator.addEvents(event_Qs, false);
+
+    double strong_inti, strong_sigi;
+    auto result = integrator.integrateStrongPeak(params, peak_1, strong_inti, strong_sigi);
+    const auto shape = boost::dynamic_pointer_cast<const PeakShapeEllipsoid>(result.first);
+    const auto frac = result.second;
+
+    // Check the fraction of the peak that is contained within a "standard core"
+    // the standard core is just the sigma in each direction
+    TS_ASSERT_DELTA(frac, 0.8363, 0.0001);
+
+    // Check the integrated intensity for a strong peak is close to what we set
+    // it to be when generating the peak
+    TS_ASSERT_DELTA(strong_inti, numStrongEvents, 15);
+
+    // Now integrate weak peak using the parameters we got from the strong peak
+    double weak_inti, weak_sigi;
+    integrator.integrateWeakPeak(params, shape, frac, peak_2, weak_inti, weak_sigi);
+
+    // Check the integrated intensity for a weak peak is exactly what we set it
+    // to be weighted by the fraction of strong peak contained in a standard
+    // core. This is not exactly the same because of the weighting from the
+    // strong peak
+    TS_ASSERT_DELTA(weak_inti, numWeakEvents, 35);
+  }
+
+  void test_estimateSignalToNoiseRatioInPerfectCase() {
+    V3D peak_1(20, 0, 0);
+    V3D peak_2(0, 20, 0);
+    V3D peak_3(0, 0, 20);
+    std::vector<std::pair<double, V3D>> peak_q_list {
+      {1., peak_1}, {1., peak_2}, {1., peak_3}
+    };
+
+    // synthesize a UB-inverse to map
+    DblMatrix UBinv(3, 3, false); // Q to h,k,l
+    UBinv.setRow(0, V3D(.1, 0, 0));
+    UBinv.setRow(1, V3D(0, .2, 0));
+    UBinv.setRow(2, V3D(0, 0, .25));
+
+    std::vector<std::pair<double, V3D>> event_Qs;
+    const int numStrongEvents = 10000;
+    const int numWeakEvents  = 100;
+    generatePeak(event_Qs, peak_1, 0.1, numStrongEvents, 1); // strong peak
+    generatePeak(event_Qs, peak_2, 0.1, numWeakEvents, 1);   // weak peak
+    generatePeak(event_Qs, peak_3, 0.1, numWeakEvents/2, 1); // very weak peak
 
     // Create integraton region + events & UB
     Integrate3DEvents integrator(peak_q_list, UBinv, 1.5);
     integrator.addEvents(event_Qs, false);
 
     IntegrationParameters params;
-    params.peakRadius = 1.2;
-    params.backgroundInnerRadius = 1.2;
-    params.backgroundOuterRadius = 1.3;
-    params.regionRadius = 1.5;
+    params.peakRadius = 0.5;
+    params.backgroundInnerRadius = 0.5;
+    params.backgroundOuterRadius = 0.8;
+    params.regionRadius = 0.5;
 
     const auto ratio1 = integrator.estimateSignalToNoiseRatio(params, peak_1);
     const auto ratio2 = integrator.estimateSignalToNoiseRatio(params, peak_2);
+    const auto ratio3 = integrator.estimateSignalToNoiseRatio(params, peak_3);
 
-    TS_ASSERT_DELTA(ratio1, 1.9679, 0.0001);
-    TS_ASSERT_DELTA(ratio2, 0.0842, 0.0001);
+    TS_ASSERT_DELTA(ratio1, numStrongEvents, 0.0001);
+    TS_ASSERT_DELTA(ratio2, numWeakEvents, 0.0001);
+    TS_ASSERT_DELTA(ratio3, numWeakEvents/2, 0.0001);
+  }
+
+  void test_estimateSignalToNoiseRatioWithBackground() {
+    V3D peak_1(20, 0, 0);
+    V3D peak_2(0, 20, 0);
+    V3D peak_3(0, 0, 20);
+    std::vector<std::pair<double, V3D>> peak_q_list {
+      {1., peak_1}, {1., peak_2}, {1., peak_3}
+    };
+
+    // synthesize a UB-inverse to map
+    DblMatrix UBinv(3, 3, false); // Q to h,k,l
+    UBinv.setRow(0, V3D(.1, 0, 0));
+    UBinv.setRow(1, V3D(0, .2, 0));
+    UBinv.setRow(2, V3D(0, 0, .25));
+
+    std::vector<std::pair<double, V3D>> event_Qs;
+    const int numStrongEvents = 10000;
+    const int numWeakEvents  = 100;
+    generatePeak(event_Qs, peak_1, 0.1, numStrongEvents, 1); // strong peak
+    generatePeak(event_Qs, peak_2, 0.1, numWeakEvents, 1);   // weak peak
+    generatePeak(event_Qs, peak_3, 0.1, numWeakEvents/2, 1); // very weak peak
+    generateUniformBackground(event_Qs, 10, -30, 30);
+
+    // Create integraton region + events & UB
+    Integrate3DEvents integrator(peak_q_list, UBinv, 1.5);
+    integrator.addEvents(event_Qs, false);
+
+    IntegrationParameters params;
+    params.peakRadius = 0.5;
+    params.backgroundInnerRadius = 0.5;
+    params.backgroundOuterRadius = 0.8;
+    params.regionRadius = 0.5;
+
+    const auto ratio1 = integrator.estimateSignalToNoiseRatio(params, peak_1);
+    const auto ratio2 = integrator.estimateSignalToNoiseRatio(params, peak_2);
+    const auto ratio3 = integrator.estimateSignalToNoiseRatio(params, peak_3);
+
+    TS_ASSERT_DELTA(ratio1, 171.9040, 0.0001);
+    TS_ASSERT_DELTA(ratio2, 1.2632, 0.0001);
+    TS_ASSERT_DELTA(ratio3, 0.1824, 0.0001);
   }
 
   /** Generate a symmetric Gaussian peak
@@ -221,17 +339,20 @@ public:
     }
   }
 
-   void generateNoise(std::vector<std::pair<double, V3D>>& event_Qs, double lower, double upper, size_t numSamples = 1000, int seed = 1) {
-
+   void generateUniformBackground(std::vector<std::pair<double, V3D>>& event_Qs, size_t countsPerQ, const double lower, const double upper, const int countVariation = 3, const double step = 0.5, int seed =1) {
     std::mt19937 gen;
-    std::uniform_real_distribution<> d(lower,upper);
+    std::uniform_real_distribution<> d(-countVariation, countVariation);
     gen.seed(seed);
 
-    for (size_t i = 0; i < numSamples; ++i) {
-      V3D point(d(gen), d(gen), d(gen));
-      event_Qs.push_back(std::make_pair(10., point));
-    }
-  }
+     for (double i = lower; i < upper; i+= step) {
+       for (double j = lower; j < upper; j+= step) {
+         for (double k = lower; k < upper; k+= step) {
+           event_Qs.emplace_back(countsPerQ+d(gen), V3D(i,j,k));
+         }
+       }
+     }
+
+   }
 };
 
 #endif /* MANTID_MDEVENTS_INTEGRATE_3D_EVENTS_TEST_H_ */

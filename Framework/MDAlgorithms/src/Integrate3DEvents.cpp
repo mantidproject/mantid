@@ -134,7 +134,7 @@ std::pair<boost::shared_ptr<const Geometry::PeakShape>, double> Integrate3DEvent
    const auto ratio = pow(r1, 3) / (pow(r3, 3) - pow(r2, 3));
 
    inti = peak - ratio * backgrd;
-   sigi = sqrt(peak_w_back + ratio * ratio * backgrd);
+   sigi = sqrt(peak + ratio * ratio * backgrd);
 
    const auto total = (core + peak) - ratio * backgrd;
    const auto frac = inti / total;
