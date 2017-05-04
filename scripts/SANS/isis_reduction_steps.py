@@ -2466,10 +2466,12 @@ class TransmissionCalc(ReductionStep):
         fitted_name += self.CAN_SAMPLE_SUFFIXES[reducer.is_can()]
         fitted_name += '_' + str(lambda_min) + '_' + str(lambda_max)
 
-        if reducer.load_monitors_as_event:
-            fitted_name = reducer.add_slice_suffix(fitted_name)
+        # If the data set is a can then we always slice the full workspace. Hence we should not encode the slice in the
+        # name
+        if not reducer.is_can():
+            if reducer.load_monitors_as_event:
+                fitted_name = reducer.add_slice_suffix(fitted_name)
         unfitted = fitted_name + "_unfitted"
-
         return fitted_name, unfitted
 
     def _get_fit_property(self, selector, property_name):
