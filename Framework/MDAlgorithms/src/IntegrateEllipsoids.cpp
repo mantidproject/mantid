@@ -455,14 +455,6 @@ void IntegrateEllipsoids::exec() {
       PeakRadiusVector[i] = adaptiveRadius;
       BackgroundInnerRadiusVector[i] = adaptiveBack_inner_radius;
       BackgroundOuterRadiusVector[i] = adaptiveBack_outer_radius;
-
-      IntegrationParameters params;
-      params.regionRadius = radius;
-      params.specifySize = specify_size;
-      params.peakRadius = peak_radius;
-      params.backgroundInnerRadius = back_inner_radius;
-      params.backgroundOuterRadius = back_outer_radius;
-      integrator.estimateSignalToNoiseRatio(params, peak_q);
       Mantid::Geometry::PeakShape_const_sptr shape =
           integrator.ellipseIntegrateEvents(
               E1Vec, peak_q, specify_size, adaptiveRadius,

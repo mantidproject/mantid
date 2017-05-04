@@ -1,5 +1,6 @@
 #include "MantidMDAlgorithms/IntegrateEllipsoidsTwoStep.h"
 
+#include "MantidAPI/DetectorInfo.h"
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
@@ -81,6 +82,23 @@ void IntegrateEllipsoidsTwoStep::init() {
                   "Half-length of major axis for outer ellipsoidal surface of "
                   "background region");
 
+  declareProperty("IntegrateInHKL", false,
+                  "If true, integrate in HKL space not Q space.");
+  declareProperty(
+      "IntegrateIfOnEdge", true,
+      "Set to false to not integrate if peak radius is off edge of detector."
+      "Background will be scaled if background radius is off edge.");
+
+  declareProperty("AdaptiveQBackground", false,
+                  "Default is false.   If true, "
+                  "BackgroundOuterRadius + AdaptiveQMultiplier * **|Q|** and "
+                  "BackgroundInnerRadius + AdaptiveQMultiplier * **|Q|**");
+
+  declareProperty("AdaptiveQMultiplier", 0.0,
+                  "PeakRadius + AdaptiveQMultiplier * **|Q|** "
+                  "so each peak has a "
+                  "different integration radius.  Q includes the 2*pi factor.");
+
   declareProperty("WeakPeakThreshold", 1.0, mustBePositive,
                   "Intensity threshold use to classify a peak as weak.");
 
@@ -134,21 +152,29 @@ void IntegrateEllipsoidsTwoStep::exec() {
     qList.emplace_back(1., V3D(peaks[i].getQLabFrame()));
   }
 
-  IntegrationParameters params;
-  params.peakRadius = getProperty("PeakSize");
-  params.backgroundInnerRadius = getProperty("BackgroundInnerSize");
-  params.backgroundOuterRadius = getProperty("BackgroundOuterSize");
-  params.regionRadius = getProperty("RegionRadius");
-  params.specifySize = getProperty("SpecifySize");
+  const bool integrateEdge = getProperty("IntegrateIfOnEdge");
+  if (!integrateEdge) {
+    // This only fails in the unit tests which say that MaskBTP is not
+    // registered
+    try {
+      runMaskDetectors(input_peak_ws, "Tube", "edges");
+      runMaskDetectors(input_peak_ws, "Pixel", "edges");
+    } catch (...) {
+      g_log.error("Can't execute MaskBTP algorithm for this instrument to set "
+                  "edge for IntegrateIfOnEdge option");
+    }
+    calculateE1(input_peak_ws->detectorInfo()); // fill E1Vec for use in detectorQ
+  }
 
-  Integrate3DEvents integrator(qList, UBinv, params.regionRadius);
+  const bool integrateInHKL = getProperty("IntegrateInHKL");
+  Integrate3DEvents integrator(qList, UBinv, getProperty("RegionRadius"));
 
   if (eventWS) {
     // process as EventWorkspace
-    qListFromEventWS(integrator, prog, eventWS, UBinv, false);
+    qListFromEventWS(integrator, prog, eventWS, UBinv, integrateInHKL);
   } else {
     // process as Workspace2D
-    qListFromHistoWS(integrator, prog, histoWS, UBinv, false);
+    qListFromHistoWS(integrator, prog, histoWS, UBinv, integrateInHKL);
   }
 
   std::vector<std::pair<int, V3D>> weakPeaks, strongPeaks;
@@ -157,7 +183,7 @@ void IntegrateEllipsoidsTwoStep::exec() {
   int index = 0;
   for (const auto& item : qList) {
     const auto center = item.second;
-
+    IntegrationParameters params = makeIntegrationParameters(center);
     auto sig2noise = integrator.estimateSignalToNoiseRatio(params, center);
 
     auto& peak = peak_ws->getPeak(index);
@@ -183,6 +209,7 @@ void IntegrateEllipsoidsTwoStep::exec() {
     const auto q = item.second;
     double inti, sigi;
 
+    IntegrationParameters params = makeIntegrationParameters(q);
     const auto result = integrator.integrateStrongPeak(params, q, inti, sigi);
     shapeLibrary.push_back(result);
 
@@ -211,7 +238,7 @@ void IntegrateEllipsoidsTwoStep::exec() {
     const auto index = item.first;
     const auto q = item.second;
 
-    const auto result = kdTree.findNearest(Eigen::Vector3d(q[0], q[1], q[2]));
+    const auto result = kdTree.findNearest(Eigen::Vector3d(q[0], q[1], q[2]), 5);
     const auto strongIndex = static_cast<int>(std::get<1>(result[0]));
 
     auto& peak = peak_ws->getPeak(index);
@@ -224,6 +251,7 @@ void IntegrateEllipsoidsTwoStep::exec() {
     const auto frac = libShape.second.first;
 
     g_log.information() << "Weak peak will be adjusted by " << frac << "\n";
+    IntegrationParameters params = makeIntegrationParameters(strongPeak.getQLabFrame());
     const auto weakShape = integrator.integrateWeakPeak(params, shape, libShape.second, q, inti, sigi);
 
     peak.setIntensity(inti);
@@ -236,6 +264,32 @@ void IntegrateEllipsoidsTwoStep::exec() {
   // integrated.
   peak_ws->mutableRun().addProperty("PeaksIntegrated", 1, true);
   setProperty("OutputWorkspace", peak_ws);
+}
+
+IntegrationParameters IntegrateEllipsoidsTwoStep::makeIntegrationParameters(const V3D &peak_q) const
+{
+    IntegrationParameters params;
+    params.peakRadius = getProperty("PeakSize");
+    params.backgroundInnerRadius = getProperty("BackgroundInnerSize");
+    params.backgroundOuterRadius = getProperty("BackgroundOuterSize");
+    params.regionRadius = getProperty("RegionRadius");
+    params.specifySize = getProperty("SpecifySize");
+    params.E1Vectors = E1Vec;
+
+    const bool adaptiveQBackground = getProperty("AdaptiveQBackground");
+    const double adaptiveQMultiplier = getProperty("AdaptiveQMultiplier");
+    const double adaptiveQBackgroundMultiplier = (adaptiveQBackground) ? adaptiveQMultiplier : 0.0;
+
+    // modulus of Q
+    const double lenQpeak = peak_q.norm();
+    // change params to support adaptive Q
+    params.peakRadius =
+                    adaptiveQMultiplier * lenQpeak + params.peakRadius;
+    params.backgroundInnerRadius =
+                    adaptiveQBackgroundMultiplier * lenQpeak + params.backgroundInnerRadius;
+    params.backgroundOuterRadius =
+                    adaptiveQBackgroundMultiplier * lenQpeak + params.backgroundOuterRadius;
+    return params;
 }
 
 
@@ -422,6 +476,45 @@ void IntegrateEllipsoidsTwoStep::qListFromHistoWS(Integrate3DEvents &integrator,
     PARALLEL_END_INTERUPT_REGION
   } // end of loop over spectra
   PARALLEL_CHECK_INTERUPT_REGION
+}
+
+/*
+ * Define edges for each instrument by masking. For CORELLI, tubes 1 and 16, and
+ *pixels 0 and 255.
+ * Get Q in the lab frame for every peak, call it C
+ * For every point on the edge, the trajectory in reciprocal space is a straight
+ *line, going through O=V3D(0,0,0).
+ * Calculate a point at a fixed momentum, say k=1. Q in the lab frame
+ *E=V3D(-k*sin(tt)*cos(ph),-k*sin(tt)*sin(ph),k-k*cos(ph)).
+ * Normalize E to 1: E=E*(1./E.norm())
+ *
+ * @param inst: instrument
+ */
+void IntegrateEllipsoidsTwoStep::calculateE1(const API::DetectorInfo &detectorInfo) {
+  for (size_t i = 0; i < detectorInfo.size(); ++i) {
+    if (detectorInfo.isMonitor(i))
+      continue; // skip monitor
+    if (!detectorInfo.isMasked(i))
+      continue; // edge is masked so don't check if not masked
+    const auto &det = detectorInfo.detector(i);
+    double tt1 = det.getTwoTheta(V3D(0, 0, 0), V3D(0, 0, 1)); // two theta
+    double ph1 = det.getPhi();                                // phi
+    V3D E1 = V3D(-std::sin(tt1) * std::cos(ph1), -std::sin(tt1) * std::sin(ph1),
+                 1. - std::cos(tt1)); // end of trajectory
+    E1 = E1 * (1. / E1.norm());       // normalize
+    E1Vec.push_back(E1);
+  }
+}
+
+void IntegrateEllipsoidsTwoStep::runMaskDetectors(
+    Mantid::DataObjects::PeaksWorkspace_sptr peakWS, std::string property,
+    std::string values) {
+  IAlgorithm_sptr alg = createChildAlgorithm("MaskBTP");
+  alg->setProperty<Workspace_sptr>("Workspace", peakWS);
+  alg->setProperty(property, values);
+  if (!alg->execute())
+    throw std::runtime_error(
+        "MaskDetectors Child Algorithm has not executed successfully");
 }
 
 }

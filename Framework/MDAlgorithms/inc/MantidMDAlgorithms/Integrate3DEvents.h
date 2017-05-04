@@ -160,6 +160,7 @@ private:
   Kernel::DblMatrix m_UBinv;  // matrix mapping from Q to h,k,l
   double m_radius;            // size of sphere to use for events around a peak
   std::vector<std::pair<double, Kernel::V3D>> m_events;
+
 };
 
 } // namespace MDAlgorithms

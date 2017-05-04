@@ -56,12 +56,19 @@ public:
 private:
   void init() override;
   void exec() override;
+  IntegrationParameters makeIntegrationParameters(const Kernel::V3D& peak_q) const;
 
   void qListFromHistoWS(Integrate3DEvents &integrator, API::Progress &prog, DataObjects::Workspace2D_sptr &wksp, const Kernel::DblMatrix &UBinv, bool hkl_integ);
   void qListFromEventWS(Integrate3DEvents &integrator, API::Progress &prog, DataObjects::EventWorkspace_sptr &wksp, const Kernel::DblMatrix &UBinv, bool hkl_integ);
+  /// Calculate if this Q is on a detector
+  void calculateE1(const API::DetectorInfo &detectorInfo);
+  void runMaskDetectors(Mantid::DataObjects::PeaksWorkspace_sptr peakWS,
+                        std::string property, std::string values);
 
   /// integrate a collection of strong peaks
   DataObjects::PeaksWorkspace_sptr integratePeaks(DataObjects::PeaksWorkspace_sptr peaks, API::MatrixWorkspace_sptr ws);
+  /// save all detector pixels
+  std::vector<Kernel::V3D> E1Vec;
 };
 
 } // namespace MDAlgorithms
