@@ -98,7 +98,7 @@ public:
   /// it from teh ADS
   void test_saveOK() {
     TS_ASSERT(testSave->isInitialized());
-	testSave->setRethrows(true);
+    testSave->setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(
         testSave->setPropertyValue("InputWorkspaces", wsName));
     TS_ASSERT_THROWS_NOTHING(
