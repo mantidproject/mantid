@@ -319,7 +319,7 @@ class AbinsCASTEPTestScale(stresstesting.MantidStressTest, HelperTestingClass):
 # noinspection PyAttributeOutsideInit,PyPep8Naming
 class AbinsCASTEPNoH(stresstesting.MantidStressTest, HelperTestingClass):
     """
-    In this benchmark it is tested if scaling is correct.
+    In this benchmark it is tested if calculation for systems without H is correct.
     """
     _wrk_1 = None
     _ref_result = None
