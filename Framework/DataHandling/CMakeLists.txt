@@ -163,7 +163,6 @@ set ( SRC_FILES
 	src/SaveSavuTomoConfig.cpp
 	src/SaveToSNSHistogramNexus.cpp
 	src/SaveVTK.cpp
-    src/ScanningWorkspaceBuilder.cpp
 	src/SetBeam.cpp
 	src/SetSample.cpp
 	src/SetSampleMaterial.cpp
@@ -335,7 +334,6 @@ set ( INC_FILES
 	inc/MantidDataHandling/SaveSavuTomoConfig.h
 	inc/MantidDataHandling/SaveToSNSHistogramNexus.h
 	inc/MantidDataHandling/SaveVTK.h
-    inc/MantidDataHandling/ScanningWorkspaceBuilder.h
 	inc/MantidDataHandling/SetBeam.h
 	inc/MantidDataHandling/SetSample.h
 	inc/MantidDataHandling/SetSampleMaterial.h
@@ -500,7 +498,6 @@ set ( TEST_FILES
 	SaveSPETest.h
 	SaveSavuTomoConfigTest.h
 	SaveToSNSHistogramNexusTest.h
-	ScanningWorkspaceBuilderTest.h
 	SetBeamTest.h
 	SetSampleMaterialTest.h
 	SetSampleTest.h

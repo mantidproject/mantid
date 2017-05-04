@@ -1,9 +1,9 @@
-#ifndef MANTID_DATAHANDLING_SCANNINGWORKSPACEBUILDERTEST_H_
-#define MANTID_DATAHANDLING_SCANNINGWORKSPACEBUILDERTEST_H_
+#ifndef MANTID_DATAOBJECTS_SCANNINGWORKSPACEBUILDERTEST_H_
+#define MANTID_DATAOBJECTS_SCANNINGWORKSPACEBUILDERTEST_H_
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidDataHandling/ScanningWorkspaceBuilder.h"
+#include "MantidDataObjects/ScanningWorkspaceBuilder.h"
 
 #include "MantidAPI/DetectorInfo.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -15,7 +15,7 @@
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
-using Mantid::DataHandling::ScanningWorkspaceBuilder;
+using Mantid::DataObjects::ScanningWorkspaceBuilder;
 
 class ScanningWorkspaceBuilderTest : public CxxTest::TestSuite {
 public:
@@ -404,4 +404,4 @@ private:
   }
 };
 
-#endif /* MANTID_DATAHANDLING_SCANNINGWORKSPACEBUILDERTEST_H_ */
+#endif /* MANTID_DATAOBJECTS_SCANNINGWORKSPACEBUILDERTEST_H_ */

@@ -1,4 +1,4 @@
-#include "MantidDataHandling/ScanningWorkspaceBuilder.h"
+#include "MantidDataObjects/ScanningWorkspaceBuilder.h"
 
 #include "MantidAPI/DetectorInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
@@ -9,7 +9,7 @@ using namespace Mantid::API;
 using namespace Mantid::Indexing;
 
 namespace Mantid {
-namespace DataHandling {
+namespace DataObjects {
 
 ScanningWorkspaceBuilder::ScanningWorkspaceBuilder(size_t nDetectors,
                                                    size_t nTimeIndexes,
@@ -244,5 +244,5 @@ void ScanningWorkspaceBuilder::validateInputs() const {
                            "building.");
 }
 
-} // namespace DataHandling
+} // namespace DataObjects
 } // namespace Mantid
