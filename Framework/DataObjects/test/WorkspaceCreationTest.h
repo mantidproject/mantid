@@ -399,7 +399,11 @@ public:
     // workspace.
     run_indexInfo_legacy_compatibility_partitioned_workspace_failure(
         Parallel::Communicator{});
-    runParallel(
+    // Currently having 0 spectra on a rank is not supported by MatrixWorkspace
+    // so we must make sure to use fewer threads than detectors here:
+    int n_thread = 3;
+    ParallelRunner runner(n_thread);
+    runner.run(
         run_indexInfo_legacy_compatibility_partitioned_workspace_failure);
   }
 
