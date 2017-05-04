@@ -107,7 +107,7 @@ public:
     GroupDetectors grouper2;
     grouper2.initialize();
     grouper2.setPropertyValue("Workspace", "GroupTestWS");
-    grouper2.setPropertyValue("SpectraList", "0,3");
+    grouper2.setPropertyValue("SpectraList", "1,3");
     TS_ASSERT_THROWS_NOTHING(grouper2.execute());
     TS_ASSERT(grouper2.isExecuted());
 
