@@ -117,18 +117,17 @@ public:
     const HistogramX tens{10, 11, 12, 13, 14, 15};
     const HistogramY yOnes(5, 1.0);
     const HistogramE eOnes(5, 1.0);
-    const HistogramY threes(5, 3.0);
+    const HistogramY twos(5, 2.0);
     const HistogramY yZeroes(5, 0.0);
     const HistogramE eZeroes(5, 0.0);
     TS_ASSERT_EQUALS(outputWS->x(0), tens);
-    TS_ASSERT_EQUALS(outputWS->y(0), threes);
+    TS_ASSERT_EQUALS(outputWS->y(0), twos);
     for (int i = 0; i < 5; ++i) {
-      TS_ASSERT_DELTA(outputWS->e(0)[i], 1.7321, 0.0001);
+      TS_ASSERT_DELTA(outputWS->e(0)[i], 1.4142, 0.0001);
     }
     TS_ASSERT_EQUALS(outputWS->getSpectrum(0).getSpectrumNo(), 0);
     TS_ASSERT_EQUALS(outputWS->x(1), tens);
-    TS_ASSERT_EQUALS(outputWS->y(1), yOnes);
-    TS_ASSERT_EQUALS(outputWS->e(1), eOnes);
+    TS_ASSERT_EQUALS(outputWS->y(1), twos);
     TS_ASSERT_EQUALS(outputWS->getSpectrum(1).getSpectrumNo(), 1);
     TS_ASSERT_EQUALS(outputWS->x(2), tens);
     TS_ASSERT_EQUALS(outputWS->y(2), yZeroes);
@@ -151,7 +150,7 @@ public:
 
     TS_ASSERT(spectrumInfo.hasDetectors(1));
     const auto &det1 = spectrumInfo.detector(1);
-    TS_ASSERT_THROWS_NOTHING((void)dynamic_cast<const Detector &>(det1));
+    TS_ASSERT_THROWS_NOTHING((void)dynamic_cast<const DetectorGroup &>(det1));
 
     TS_ASSERT(!spectrumInfo.hasDetectors(2));
     TS_ASSERT(!spectrumInfo.hasDetectors(3));
