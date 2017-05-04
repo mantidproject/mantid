@@ -299,6 +299,7 @@ void runNoParallelism(const Parallel::Communicator &comm) {
     auto in = boost::make_shared<WorkspaceTester>(storageMode);
     alg.initialize();
     alg.setProperty("InputWorkspace", in);
+    alg.setRethrows(true);
     if (comm.size() == 1) {
       TS_ASSERT_THROWS_NOTHING(alg.execute());
       TS_ASSERT(alg.isExecuted());
@@ -334,6 +335,7 @@ void runBadGetParallelExecutionMode(const Parallel::Communicator &comm) {
   FakeAlgBadGetParallelExecutionMode alg;
   alg.setCommunicator(comm);
   alg.initialize();
+  alg.setRethrows(true);
   if (comm.size() == 1) {
     TS_ASSERT_THROWS_NOTHING(alg.execute());
   } else {

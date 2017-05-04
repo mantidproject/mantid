@@ -538,8 +538,6 @@ bool Algorithm::execute() {
   // Read or write locks every input/output workspace
   this->lockWorkspaces();
 
-  Parallel::ExecutionMode executionMode = getExecutionMode();
-
   // Invoke exec() method of derived class and catch all uncaught exceptions
   try {
     try {
@@ -551,7 +549,7 @@ bool Algorithm::execute() {
       // Start a timer
       Timer timer;
       // Call the concrete algorithm's exec method
-      this->exec(executionMode);
+      this->exec(getExecutionMode());
       registerFeatureUsage();
       // Check for a cancellation request in case the concrete algorithm doesn't
       interruption_point();
