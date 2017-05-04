@@ -202,3 +202,5 @@ install ( FILES ${PY_FILES} DESTINATION ${BIN_DIR}/mantid/kernel )
 # packagesetup.py that will overwrite the ones from the built target
 install ( FILES ${CMAKE_CURRENT_BINARY_DIR}/${PACKAGESETUP_PY}.install.py DESTINATION
           ${BIN_DIR}/mantid/kernel RENAME ${PACKAGESETUP_PY}.py )
+install ( FILES ${CMAKE_CURRENT_BINARY_DIR}/${MPISETUP_PY}.install.py DESTINATION
+          ${BIN_DIR}/mantid/kernel RENAME ${MPISETUP_PY}.py )
