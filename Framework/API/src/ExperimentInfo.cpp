@@ -296,7 +296,7 @@ makeDetectorInfo(const Instrument &oldInstr, const Instrument &newInstr) {
  * @param inst : instrument to make the component info around
  */
 void ExperimentInfo::makeAPIComponentInfo(const Instrument &inst) {
-  // Output variables
+
   boost::shared_ptr<const std::vector<Geometry::ComponentID>> componentIds;
   boost::shared_ptr<const std::unordered_map<Geometry::ComponentID, size_t>>
       componentIdToIndexMap;
