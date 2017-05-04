@@ -67,29 +67,85 @@ Integrate3DEvents::Integrate3DEvents(
  */
 void Integrate3DEvents::addEvents(
     std::vector<std::pair<double, V3D>> const &event_qs, bool hkl_integ) {
+
+  m_events.insert(m_events.end(), event_qs.begin(), event_qs.end());
+
   for (const auto &event_q : event_qs) {
     addEvent(event_q, hkl_integ);
   }
 }
 
 std::pair<boost::shared_ptr<const Geometry::PeakShape>, double> Integrate3DEvents::integrateStrongPeak(const IntegrationParameters& params,
-  double &inti, double &sigi) {
+  const V3D& peak_q, double &inti, double &sigi) {
 
-    double shell_inti, shell_sigi;
+    auto result = getEvents(peak_q);
+    if(!result)
+      return std::make_pair(boost::make_shared<NoShape>(), 0.0);
+
+    const auto& events = result.get();
+    if(events.empty())
+      return std::make_pair(boost::make_shared<NoShape>(), 0.0);
+
+    DblMatrix cov_matrix(3, 3);
+    makeCovarianceMatrix(events, cov_matrix, params.regionRadius);
+
+    std::vector<V3D> eigen_vectors;
+    getEigenVectors(cov_matrix, eigen_vectors);
+
     std::vector<double> sigmas;
+    for (int i = 0; i < 3; i++) {
+      sigmas.push_back(stdDev(events, eigen_vectors[i], params.regionRadius));
+    }
 
-    auto shapeShell = ellipseIntegrateEvents(
-          params.E1Vectors, params.peakCenter, params.specifySize, params.backgroundInnerRadius,
-          params.backgroundInnerRadius, params.backgroundOuterRadius, sigmas, shell_inti, shell_sigi);
+    const auto max_sigma = *std::max_element(sigmas.begin(), sigmas.end());
+    if (max_sigma == 0)
+      return std::make_pair(boost::make_shared<NoShape>(), 0.0);
 
-    auto shapeCore = ellipseIntegrateEvents(
-          params.E1Vectors, params.peakCenter, params.specifySize, params.peakRadius,
-          params.backgroundInnerRadius, params.backgroundOuterRadius, sigmas, inti, sigi);
+    // scale specified sizes by 1/max_sigma
+    // so when multiplied by the individual
+    // sigmas in different directions, the
+    double r1 = params.peakRadius / max_sigma;
+    double r2 = params.backgroundInnerRadius / max_sigma;
+    double r3 = params.backgroundOuterRadius / max_sigma;
 
-    return std::make_pair(shapeCore, inti / shell_inti);
+    std::vector<double> abcBackgroundOuterRadii, abcBackgroundInnerRadii;
+    std::vector<double> peakRadii;
+    std::vector<double> coreRadii;
+    for (int i = 0; i < 3; i++) {
+      abcBackgroundOuterRadii.push_back(r3 * sigmas[i]);
+      abcBackgroundInnerRadii.push_back(r2 * sigmas[i]);
+      peakRadii.push_back(r1*sigmas[i]);
+    }
+
+   auto rValues = peakRadii;
+   const auto isPeakOnDetector = correctForDetectorEdges(rValues, params.E1Vectors, peak_q, peakRadii, abcBackgroundInnerRadii, abcBackgroundOuterRadii);
+
+   if(!isPeakOnDetector)
+     return std::make_pair(boost::make_shared<NoShape>(), 0.0);
+
+   // adjust volume factors for edge corrections
+   r1 = rValues[0];
+   r2 = rValues[1];
+   r3 = rValues[2];
+
+   const auto backgrd = numInEllipsoidBkg(events, eigen_vectors, abcBackgroundOuterRadii, abcBackgroundInnerRadii);
+   const auto core = numInEllipsoid(events, eigen_vectors, sigmas);
+   const auto peak = numInEllipsoid(events, eigen_vectors, peakRadii);
+   const auto ratio = pow(r1, 3) / (pow(r3, 3) - pow(r2, 3));
+
+   inti = peak - ratio * backgrd;
+   sigi = sqrt(peak_w_back + ratio * ratio * backgrd);
+
+   const auto total = (core + peak) - ratio * backgrd;
+   const auto frac = inti / total;
+   const auto shapeCore = boost::make_shared<const PeakShapeEllipsoid>(
+                           eigen_vectors, peakRadii, abcBackgroundInnerRadii, abcBackgroundOuterRadii,
+                           Mantid::Kernel::QLab, "IntegrateEllipsoidsTwoStep");
+
+   return std::make_pair(shapeCore, frac);
 }
 
- boost::shared_ptr<const Geometry::PeakShape> Integrate3DEvents::integrateWeakPeak(const IntegrationParameters &params, PeakShapeEllipsoid_const_sptr shape, double frac, V3D center, double &inti, double &sigi) {
+ boost::shared_ptr<const Geometry::PeakShape> Integrate3DEvents::integrateWeakPeak(const IntegrationParameters &params, PeakShapeEllipsoid_const_sptr shape, double frac, const V3D& center, double &inti, double &sigi) {
 
    inti = 0.0; // default values, in case something
    sigi = 0.0; // is wrong with the peak.
@@ -138,40 +194,50 @@ std::pair<boost::shared_ptr<const Geometry::PeakShape>, double> Integrate3DEvent
      return .0;
 
    const auto& events = result.get();
+   if(events.empty())
+     return .0;
 
-   DblMatrix cov_matrix(3, 3);
-   makeCovarianceMatrix(events, cov_matrix, m_radius);
+  DblMatrix cov_matrix(3, 3);
+  makeCovarianceMatrix(events, cov_matrix, params.regionRadius);
 
-   std::vector<V3D> eigen_vectors;
-   getEigenVectors(cov_matrix, eigen_vectors);
-
-   double r1 = 3;
-   double r2 = 3;
-   double r3 = r2 * 1.25992105; // A factor of 2 ^ (1/3) will make the background
-   // shell volume equal to the peak region volume.
-
+  std::vector<V3D> eigen_vectors;
+  getEigenVectors(cov_matrix, eigen_vectors);
 
   std::vector<double> sigmas;
   for (int i = 0; i < 3; i++) {
     sigmas.push_back(stdDev(events, eigen_vectors[i], params.regionRadius));
   }
 
-   std::vector<double> regionRadii;
+   const auto max_sigma = *std::max_element(sigmas.begin(), sigmas.end());
+   if (max_sigma == 0)
+     return .0;
+
+   // scale specified sizes by 1/max_sigma
+   // so when multiplied by the individual
+   // sigmas in different directions, the
+   double r1 = params.peakRadius / max_sigma;
+   double r2 = params.backgroundInnerRadius / max_sigma;
+   double r3 = params.backgroundOuterRadius / max_sigma;
+
+   std::vector<double> abcBackgroundOuterRadii, abcBackgroundInnerRadii;
    std::vector<double> peakRadii;
    for (int i = 0; i < 3; i++) {
-     regionRadii.push_back(r3*sigmas[i]);
+     abcBackgroundOuterRadii.push_back(r3 * sigmas[i]);
+     abcBackgroundInnerRadii.push_back(r2 * sigmas[i]);
      peakRadii.push_back(r1*sigmas[i]);
    }
 
-//   double backgrd = numInEllipsoidBkg(events, eigen_vectors, abcBackgroundOuterRadii, abcBackgroundInnerRadii);
-   double region_inti = numInEllipsoid(events, eigen_vectors, regionRadii);
-   double peak_inti = numInEllipsoid(events, eigen_vectors, peakRadii);
+   // Background / Peak / Background
+   double backgrd = numInEllipsoidBkg(
+                           events, eigen_vectors, abcBackgroundOuterRadii, abcBackgroundInnerRadii);
 
-   region_inti = region_inti / (regionRadii[0]*regionRadii[1]*regionRadii[2]*M_PI*4./3.);
-   peak_inti = peak_inti / (peakRadii[0]*peakRadii[1]*peakRadii[2]*M_PI*4./3.);
-   return peak_inti / std::max(1.0, region_inti);
+   double peak_w_back = numInEllipsoid(events, eigen_vectors, peakRadii);
+
+   double ratio = pow(r1, 3) / (pow(r3, 3) - pow(r2, 3));
+   double inti = peak_w_back  - ratio * backgrd;
+
+   return inti / std::max(1.0, (ratio * backgrd));
  }
-
 
  boost::optional<const std::vector<std::pair<double, V3D>>&> Integrate3DEvents::getEvents(const V3D& peak_q) {
    const auto hkl_key = getHklKey(peak_q);

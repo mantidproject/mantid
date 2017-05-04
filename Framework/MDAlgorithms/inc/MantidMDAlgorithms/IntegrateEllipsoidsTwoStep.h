@@ -2,6 +2,13 @@
 #define MANTID_MDALGORITHMS_INTEGRATE_ELLIPSOIDS_TWO_STEP_H_
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/Progress.h"
+#include "MantidKernel/Matrix.h"
+#include "MantidDataObjects/EventWorkspace.h"
+#include "MantidDataObjects/PeaksWorkspace.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidMDAlgorithms/Integrate3DEvents.h"
 
 namespace Mantid {
 namespace MDAlgorithms {
@@ -34,19 +41,27 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 
 class DLLExport IntegrateEllipsoidsTwoStep : public API::Algorithm {
 public:
+  /// Get the name of this algorithm
   const std::string name() const override;
+  /// Get the version of this algorithm
+  int version() const override;
+  /// Get the category of this algorithm
+  const std::string category() const override;
   /// Summary of algorithms purpose
   const std::string summary() const override {
     return "Integrate Single Crystal Diffraction Bragg peaks using 3D "
            "ellipsoids.";
   }
 
-  int version() const override;
-  const std::string category() const override;
-
 private:
   void init() override;
   void exec() override;
+
+  void qListFromHistoWS(Integrate3DEvents &integrator, API::Progress &prog, DataObjects::Workspace2D_sptr &wksp, const Kernel::DblMatrix &UBinv, bool hkl_integ);
+  void qListFromEventWS(Integrate3DEvents &integrator, API::Progress &prog, DataObjects::EventWorkspace_sptr &wksp, const Kernel::DblMatrix &UBinv, bool hkl_integ);
+
+  /// integrate a collection of strong peaks
+  DataObjects::PeaksWorkspace_sptr integratePeaks(DataObjects::PeaksWorkspace_sptr peaks, API::MatrixWorkspace_sptr ws);
 };
 
 } // namespace MDAlgorithms

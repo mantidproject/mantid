@@ -141,14 +141,18 @@ public:
     generatePeak(event_Qs, peak_1, 1, 10000, 1); // strong peak
     generatePeak(event_Qs, peak_2, 1, 100, 1);   // weak peak
 
-    IntegrationParameters params(peak_1, 1.2, 0.1, 0.2, true);
+    IntegrationParameters params;
+    params.peakRadius = 1.2;
+    params.backgroundInnerRadius = 1.2;
+    params.backgroundOuterRadius = 1.3;
+    params.regionRadius = 1.5;
 
     // Create integraton region + events & UB
     Integrate3DEvents integrator(peak_q_list, UBinv, params.regionRadius);
     integrator.addEvents(event_Qs, false);
 
     double strong_inti, strong_sigi;
-    auto result = integrator.integrateStrongPeak(params, strong_inti, strong_sigi);
+    auto result = integrator.integrateStrongPeak(params, peak_1, strong_inti, strong_sigi);
     const auto shape = boost::dynamic_pointer_cast<const PeakShapeEllipsoid>(result.first);
     const auto frac = result.second;
 
@@ -176,15 +180,19 @@ public:
     UBinv.setRow(2, V3D(0, 0, .25));
 
     std::vector<std::pair<double, V3D>> event_Qs;
-    generatePeak(event_Qs, peak_1, 1, 10000, 1); // strong peak
-    generatePeak(event_Qs, peak_2, 1, 10, 1);   // weak peak
-    generateNoise(event_Qs, -40, 40, 10000);
-
-    IntegrationParameters params(peak_1, 1.2, 0.1, 0.2, true);
+    generatePeak(event_Qs, peak_1, 0.1, 100000, 1); // strong peak
+    generatePeak(event_Qs, peak_2, 0.1, 1000, 1);   // weak peak
+    generateNoise(event_Qs, -40, 40, 10000000);
 
     // Create integraton region + events & UB
-    Integrate3DEvents integrator(peak_q_list, UBinv, params.regionRadius);
+    Integrate3DEvents integrator(peak_q_list, UBinv, 1.5);
     integrator.addEvents(event_Qs, false);
+
+    IntegrationParameters params;
+    params.peakRadius = 1.2;
+    params.backgroundInnerRadius = 1.2;
+    params.backgroundOuterRadius = 1.3;
+    params.regionRadius = 1.5;
 
     const auto ratio1 = integrator.estimateSignalToNoiseRatio(params, peak_1);
     const auto ratio2 = integrator.estimateSignalToNoiseRatio(params, peak_2);
@@ -221,7 +229,7 @@ public:
 
     for (size_t i = 0; i < numSamples; ++i) {
       V3D point(d(gen), d(gen), d(gen));
-      event_Qs.push_back(std::make_pair(1., point));
+      event_Qs.push_back(std::make_pair(10., point));
     }
   }
 };

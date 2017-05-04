@@ -19,20 +19,7 @@ class PeakShapeEllipsoid;
 namespace MDAlgorithms {
 
 struct IntegrationParameters {
-  IntegrationParameters(Kernel::V3D center, double radius, double backgroundWidth, double regionPadding, bool specifySize = true) {
-    const auto coreVolumeFactor = 1.0;
-    const auto shellVolumeFactor = std::pow(4.0, (2./3.));
-
-    this->peakCenter = center;
-    this->peakRadius = radius * coreVolumeFactor;
-    this->backgroundInnerRadius = radius * shellVolumeFactor;
-    this->backgroundOuterRadius = this->backgroundInnerRadius + backgroundWidth;
-    this->regionRadius = this->backgroundOuterRadius + regionPadding;
-    this->specifySize = specifySize;
-  }
-
   std::vector<Kernel::V3D> E1Vectors;
-  Kernel::V3D peakCenter;
   double backgroundInnerRadius;
   double backgroundOuterRadius;
   double regionRadius;
@@ -102,14 +89,15 @@ public:
 
   /// Find the net integrated intensity of a peak, using ellipsoidal volumes
   std::pair<boost::shared_ptr<const Mantid::Geometry::PeakShape>, double> integrateStrongPeak(
-      const IntegrationParameters& params, double &inti, double &sigi);
+      const IntegrationParameters& params, const Kernel::V3D& peak_q, double &inti, double &sigi);
 
 
   boost::shared_ptr<const Geometry::PeakShape> integrateWeakPeak(
       const IntegrationParameters &params, Mantid::DataObjects::PeakShapeEllipsoid_const_sptr shape,
-      double frac, Mantid::Kernel::V3D center, double &inti, double &sigi);
+      double frac, const Mantid::Kernel::V3D& peak_q, double &inti, double &sigi);
 
-  double estimateSignalToNoiseRatio(const IntegrationParameters &params, const Mantid::Kernel::V3D &center);
+  double estimateSignalToNoiseRatio(const IntegrationParameters& params, const Mantid::Kernel::V3D &center);
+
 private:
   /// Get a list of events for a given Q
   boost::optional<const std::vector<std::pair<double, Mantid::Kernel::V3D>>&> getEvents(const Mantid::Kernel::V3D& peak_q);
@@ -171,6 +159,7 @@ private:
   EventListMap m_event_lists; // hashtable with lists of events for each peak
   Kernel::DblMatrix m_UBinv;  // matrix mapping from Q to h,k,l
   double m_radius;            // size of sphere to use for events around a peak
+  std::vector<std::pair<double, Kernel::V3D>> m_events;
 };
 
 } // namespace MDAlgorithms
