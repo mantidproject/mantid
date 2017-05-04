@@ -157,6 +157,29 @@ public:
     AnalysisDataService::Instance().remove(wsName);
   }
 
+  void test_2BankRalfAltFormat() {
+    // Tests saving a 2 bank instrument in RALF - Alternative format
+    const std::string wsName = "SaveGSS_RALF_ALT_ws";
+
+    // Choose a number where mod 4 != 0 to check it handles having
+    // not enough data for one line correctly
+    const int numBins = 10;
+    auto dataWs =
+        generateTestMatrixWorkspace(wsName, m_defaultNumHistograms, numBins);
+
+    auto outFileHandle = Poco::TemporaryFile();
+    const std::string outFilePath = outFileHandle.path();
+
+    auto alg = setupSaveGSSAlg(outFilePath, wsName, "RALF");
+    alg->setProperty("Data Format", "ALT");
+    alg->execute();
+    TS_ASSERT(alg->isExecuted());
+    TS_ASSERT(FileComparisonHelper::isEqualToReferenceFile(
+        "SaveGSS_test2BankRalfAltFormat_ref.gsa", outFilePath));
+
+    AnalysisDataService::Instance().remove(wsName);
+  }
+
 private:
   const int m_defaultNumHistograms = 2;
   const int m_defaultNumBins = 100;
