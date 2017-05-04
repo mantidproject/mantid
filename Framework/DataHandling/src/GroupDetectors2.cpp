@@ -9,6 +9,7 @@
 #include "MantidDataHandling/LoadDetectorsGroupingFile.h"
 #include "MantidHistogramData/HistogramMath.h"
 #include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/ArrayBoundedValidator.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidTypes/SpectrumDefinition.h"

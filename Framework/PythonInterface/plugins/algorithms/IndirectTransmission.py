@@ -173,7 +173,7 @@ class IndirectTransmission(PythonAlgorithm):
         except ValueError:
             # If that fails then get it by taking from group of all detectors
             wsHandle = mtd[workspace]
-            spectra_list = list(range(0, wsHandle.getNumberHistograms()))
+            spectra_list = list(range(1, wsHandle.getNumberHistograms() + 1))
             GroupDetectors(InputWorkspace=workspace,
                            OutputWorkspace=workspace,
                            SpectraList=spectra_list)
