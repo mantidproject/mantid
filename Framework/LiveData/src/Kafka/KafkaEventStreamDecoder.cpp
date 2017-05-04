@@ -269,11 +269,12 @@ void KafkaEventStreamDecoder::captureImplExcept() {
                       << std::endl;
         // Check if we've reached the stop offset on every partition of every
         // topic
-        if (std::all_of(reachedEnd.cbegin(), reachedEnd.cend(), [](auto kv) {
-              return std::all_of(
-                  kv.second.cbegin(), kv.second.cend(),
-                  [](auto partitionEnd) { return partitionEnd; });
-            })) {
+        if (std::all_of(reachedEnd.cbegin(), reachedEnd.cend(),
+                        [](std::pair<std::string, std::vector<bool>> kv) {
+                          return std::all_of(
+                              kv.second.cbegin(), kv.second.cend(),
+                              [](bool partitionEnd) { return partitionEnd; });
+                        })) {
           m_endRun = true;
           // If we've reached the end of a run then set m_extractWaiting to true
           // so that we wait until the buffer is emptied before continuing.
