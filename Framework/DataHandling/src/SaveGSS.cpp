@@ -7,9 +7,10 @@
 #include "MantidAPI/WorkspaceHistory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidGeometry/Instrument.h"
-#include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/PhysicalConstants.h"
+#include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidKernel/VisibleWhenProperty.h"
 #include "MantidHistogramData/Histogram.h"
 
 #include <Poco/File.h>
@@ -29,6 +30,8 @@ DECLARE_ALGORITHM(SaveGSS)
 namespace { // Anonymous namespace
 const std::string RALF("RALF");
 const std::string SLOG("SLOG");
+const std::string FXYE("FXYE");
+const std::string ALT("ALT");
 
 /// Determines the tolerance when comparing two doubles for equality
 const double m_TOLERANCE = 1.e-10;
@@ -64,8 +67,8 @@ double fixErrorValue(const double value) {
     return value;
 }
 
-void writeBankLine(std::stringstream &out, const std::string &bintype,
-                   const int banknum, const size_t datasize) {
+void writeBankHeader(std::stringstream &out, const std::string &bintype,
+                     const int banknum, const size_t datasize) {
   std::ios::fmtflags fflags(out.flags());
   out << "BANK " << std::fixed << std::setprecision(0)
       << banknum // First bank should be 1 for GSAS; this can be changed
@@ -85,27 +88,44 @@ void SaveGSS::init() {
                       "InputWorkspace", "", Kernel::Direction::Input,
                       boost::make_shared<API::WorkspaceUnitValidator>("TOF")),
                   "The input workspace, which must be in time-of-flight");
+
   declareProperty(Kernel::make_unique<API::FileProperty>(
                       "Filename", "", API::FileProperty::Save),
                   "The filename to use for the saved data");
-  declareProperty("SplitFiles", true,
-                  "Whether to save each spectrum into a separate file ('true') "
-                  "or not ('false'). "
-                  "Note that this is a string, not a boolean property.");
+
+  declareProperty(
+      "SplitFiles", true,
+      "Whether to save each spectrum into a separate file ('true') "
+      "or not ('false'). Note that this is a string, not a boolean property.");
+
   declareProperty(
       "Append", true,
       "If true and Filename already exists, append, else overwrite ");
+
   declareProperty(
       "Bank", 1,
       "The bank number to include in the file header for the first spectrum, "
       "i.e., the starting bank number. "
-      "This will increment for each spectrum or group member. ");
+      "This will increment for each spectrum or group member.");
+
   const std::vector<std::string> formats{RALF, SLOG};
   declareProperty("Format", RALF,
                   boost::make_shared<Kernel::StringListValidator>(formats),
                   "GSAS format to save as");
+
+  const std::vector<std::string> ralfDataFormats{FXYE, ALT};
+  declareProperty(
+      "Data Format", FXYE,
+      boost::make_shared<Kernel::StringListValidator>(ralfDataFormats),
+      "Saves RALF data as either FXYE or alternative format");
+  setPropertySettings(
+      "Data Format",
+      Kernel::make_unique<Kernel::VisibleWhenProperty>(
+          "Format", Kernel::ePropertyCriterion::IS_EQUAL_TO, RALF));
+
   declareProperty("MultiplyByBinWidth", true,
                   "Multiply the intensity (Y) by the bin width; default TRUE.");
+
   declareProperty(
       "ExtendedHeader", false,
       "Add information to the header about iparm file and normalization");
@@ -199,6 +219,8 @@ void SaveGSS::generateBankData(std::stringstream &outBuf,
   const bool multiplyByBinWidth = getProperty("MultiplyByBinWidth");
   const int userStartingBankNumber = getProperty("Bank");
   const std::string outputFormat = getPropertyValue("Format");
+  const std::string ralfDataFormat = getPropertyValue("Data Format");
+
   int bankid;
   if (useSpecAsBank) {
     bankid =
@@ -208,12 +230,17 @@ void SaveGSS::generateBankData(std::stringstream &outBuf,
   }
 
   // Write data
+  const auto &histogram = m_inputWS->histogram(specIndex);
   if (outputFormat == RALF) {
-    this->writeRALFdata(bankid, multiplyByBinWidth, outBuf,
-                        m_inputWS->histogram(specIndex));
+    if (ralfDataFormat == FXYE) {
+      writeRALF_XYEdata(bankid, multiplyByBinWidth, outBuf, histogram);
+    } else if (ralfDataFormat == ALT) {
+      writeRALF_ALTdata(outBuf, bankid, histogram);
+    } else {
+      throw std::runtime_error("Unknown RALF data format" + ralfDataFormat);
+    }
   } else if (outputFormat == SLOG) {
-    this->writeSLOGdata(bankid, multiplyByBinWidth, outBuf,
-                        m_inputWS->histogram(specIndex));
+    writeSLOGdata(bankid, multiplyByBinWidth, outBuf, histogram);
   } else {
     throw std::runtime_error("Cannot write to the unknown " + outputFormat +
                              "output format");
@@ -598,14 +625,10 @@ void SaveGSS::writeBufferToFile(size_t numOutFiles, size_t numSpectra) {
   }
 }
 
-void SaveGSS::writeRALFdata(const int bank, const bool MultiplyByBinWidth,
-                            std::stringstream &out,
-                            const HistogramData::Histogram &histo) const {
+void SaveGSS::writeRALFHeader(std::stringstream &out, int bank,
+                              const HistogramData::Histogram &histo) const {
   const auto &xVals = histo.binEdges();
-  const auto &xPointVals = histo.points();
-  const auto &yVals = histo.y();
-  const auto &eVals = histo.e();
-  const size_t datasize = yVals.size();
+  const size_t datasize = histo.y().size();
   const double bc1 = xVals[0] * 32;
   const double bc2 = (xVals[1] - xVals[0]) * 32;
   // Logarithmic step
@@ -614,12 +637,76 @@ void SaveGSS::writeRALFdata(const int bank, const bool MultiplyByBinWidth,
     bc4 = 0; // If X is zero for BANK
 
   // Write out the data header
-  writeBankLine(out, "RALF", bank, datasize);
+  writeBankHeader(out, "RALF", bank, datasize);
+  const std::string bankDataType = getPropertyValue("Data Format");
   out << std::fixed << " " << std::setprecision(0) << std::setw(8) << bc1
       << std::fixed << " " << std::setprecision(0) << std::setw(8) << bc2
       << std::fixed << " " << std::setprecision(0) << std::setw(8) << bc1
-      << std::fixed << " " << std::setprecision(5) << std::setw(7) << bc4
-      << " FXYE\n";
+      << std::fixed << " " << std::setprecision(5) << std::setw(7) << bc4 << " "
+      << bankDataType << "\n";
+}
+
+void SaveGSS::writeRALF_ALTdata(std::stringstream &out, const int bank,
+                                const HistogramData::Histogram &histo) const {
+  const size_t datasize = histo.y().size();
+  const auto &xPointVals = histo.points();
+  const auto &yVals = histo.y();
+  const auto &eVals = histo.e();
+
+  writeRALFHeader(out, bank, histo);
+
+  const size_t dataEntriesPerLine = 4;
+  // Use integer ceiling with casting to double and back
+  // As if we have 6 data entries across 4 lines we need
+  // 2 output lines (4 + 2)
+  const int64_t numberOfOutLines =
+      (datasize + dataEntriesPerLine - 1) / dataEntriesPerLine;
+
+  std::vector<std::stringstream> outLines;
+  outLines.resize(numberOfOutLines);
+
+  // PARALLEL_FOR_NO_WSP_CHECK()
+  for (int64_t i = 0; i < numberOfOutLines; i++) {
+    auto &outLine = outLines[i];
+
+    size_t dataPosition = i * dataEntriesPerLine;
+    const size_t endPosition = dataPosition + dataEntriesPerLine;
+
+    // 4 Blocks of data (20 chars) per line (80 chars)
+    for (; dataPosition < endPosition; dataPosition++) {
+      if (dataPosition >= datasize) {
+        // We have run out of data to append
+        break;
+      }
+
+      const int epos =
+          static_cast<int>(fixErrorValue(eVals[dataPosition] * 1000));
+
+      outLine << std::fixed << std::setw(8)
+              << static_cast<int>(xPointVals[dataPosition] * 32);
+      outLine << std::fixed << std::setw(7)
+              << static_cast<int>(yVals[dataPosition] * 1000);
+      outLine << std::fixed << std::setw(5) << epos;
+    }
+    outLine << "\n";
+  }
+
+  for (const auto &outLine : outLines) {
+    // Ensure the output order is preserved
+    out << outLine.rdbuf();
+  }
+}
+
+void SaveGSS::writeRALF_XYEdata(const int bank, const bool MultiplyByBinWidth,
+                                std::stringstream &out,
+                                const HistogramData::Histogram &histo) const {
+  const auto &xVals = histo.binEdges();
+  const auto &xPointVals = histo.points();
+  const auto &yVals = histo.y();
+  const auto &eVals = histo.e();
+  const size_t datasize = yVals.size();
+
+  writeRALFHeader(out, bank, histo);
 
   std::vector<std::stringstream> outLines;
   outLines.resize(datasize);
@@ -672,7 +759,7 @@ void SaveGSS::writeSLOGdata(const int bank, const bool MultiplyByBinWidth,
   g_log.debug() << "SaveGSS(): Min TOF = " << bc1 << '\n';
 
   // Write bank header
-  writeBankLine(out, "SLOG", bank, datasize);
+  writeBankHeader(out, "SLOG", bank, datasize);
   out << std::fixed << " " << std::setprecision(0) << std::setw(10) << bc1
       << std::fixed << " " << std::setprecision(0) << std::setw(10) << bc2
       << std::fixed << " " << std::setprecision(7) << std::setw(10) << bc3

@@ -136,8 +136,14 @@ private:
   /// Writes the current buffer to the user specified file path
   void writeBufferToFile(size_t numOutFiles, size_t numSpectra);
 
-  /// Write out the data in RALF format
-  void writeRALFdata(const int bank, const bool MultiplyByBinWidth,
+  // Writes the header for RALF data format to the buffer
+  void writeRALFHeader(std::stringstream & out, int bank, const HistogramData::Histogram & histo) const;
+
+  /// Write out the data in RALF - ALT format
+  void writeRALF_ALTdata(std::stringstream & out, const int bank, const HistogramData::Histogram & histo) const;
+
+  /// Write out the data in RALF - FXYE format
+  void writeRALF_XYEdata(const int bank, const bool MultiplyByBinWidth,
                      std::stringstream &out,
                      const HistogramData::Histogram &histo) const;
 
