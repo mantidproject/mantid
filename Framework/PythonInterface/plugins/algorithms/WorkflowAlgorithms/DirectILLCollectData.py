@@ -3,14 +3,16 @@
 from __future__ import (absolute_import, division, print_function)
 
 import DirectILL_common as common
-from mantid.api import (AlgorithmFactory, DataProcessorAlgorithm, FileAction, FileProperty, InstrumentValidator,
-                        ITableWorkspaceProperty, MatrixWorkspaceProperty, Progress, PropertyMode, WorkspaceProperty, WorkspaceUnitValidator)
+from mantid.api import (AlgorithmFactory, DataProcessorAlgorithm, FileAction, InstrumentValidator,
+                        ITableWorkspaceProperty, MatrixWorkspaceProperty, MultipleFileProperty, Progress, PropertyMode,
+                        WorkspaceProperty, WorkspaceUnitValidator)
 from mantid.kernel import (CompositeValidator, Direct, Direction, FloatBoundedValidator, IntBoundedValidator, IntArrayBoundedValidator,
                            IntMandatoryValidator, Property, StringListValidator, UnitConversion)
 from mantid.simpleapi import (AddSampleLog, CalculateFlatBackground, CloneWorkspace, CorrectTOFAxis, CreateEPP, CreateSingleValuedWorkspace,
-                              CreateWorkspace, CropWorkspace, Divide, ExtractMonitors, FindEPP, GetEiMonDet, Load, MergeRuns, Minus,
+                              CreateWorkspace, CropWorkspace, Divide, ExtractMonitors, FindEPP, GetEiMonDet, LoadILLTOF, MergeRuns, Minus,
                               NormaliseToMonitor, Scale)
 import numpy
+import os.path
 
 
 def _applyIncidentEnergyCalibration(ws, wsType, eiWS, wsNames, report,
@@ -138,19 +140,27 @@ def _fitEPP(ws, wsType, wsNames, algorithmLogging):
     return eppWS
 
 
-def _loadFiles(inputFilename, wsNames, wsCleanup, algorithmLogging):
-    """Load files specified by inputFilename, merging them into a single workspace."""
-    # TODO Explore ways of loading data file-by-file and merging pairwise.
-    #      Should save some memory (IN5!).
-    rawWSName = wsNames.withSuffix('raw')
-    rawWS = Load(Filename=inputFilename,
-                 OutputWorkspace=rawWSName,
-                 EnableLogging=algorithmLogging)
+def _loadFiles(inputFilenames, wsNames, wsCleanup, algorithmLogging):
+    """Load files specified by inputFilenames, merging them into a single workspace."""
+    filename = inputFilenames.pop(0)
+    runNumber = os.path.basename(filename).split('.')[0]
+    firstWSName = wsNames.withSuffix('raw-' + runNumber)
+    mergedWS = LoadILLTOF(Filename=filename,
+                          OutputWorkspace=firstWSName,
+                          EnableLogging=algorithmLogging)
     mergedWSName = wsNames.withSuffix('merged')
-    mergedWS = MergeRuns(InputWorkspaces=rawWS,
-                         OutputWorkspace=mergedWSName,
-                         EnableLogging=algorithmLogging)
-    wsCleanup.cleanup(rawWS)
+    for i, filename in enumerate(inputFilenames):
+        runNumber = os.path.basename(filename).split('.')[0]
+        rawWSName = wsNames.withSuffix('raw-' + runNumber)
+        rawWS = LoadILLTOF(Filename=filename,
+                           OutputWorkspace=rawWSName,
+                           EnableLogging=algorithmLogging)
+        mergedWS = MergeRuns(InputWorkspaces=[mergedWS, rawWS],
+                             OutputWorkspace=mergedWSName,
+                             EnableLogging=algorithmLogging)
+        if i == 0:
+            wsCleanup.cleanup(firstWSName)
+        wsCleanup.cleanup(rawWS)
     return mergedWS
 
 
@@ -344,18 +354,17 @@ class DirectILLCollectData(DataProcessorAlgorithm):
         inputWorkspaceValidator.add(WorkspaceUnitValidator('TOF'))
 
         # Properties.
-        self.declareProperty(FileProperty(name=common.PROP_INPUT_FILE,
-                                          defaultValue='',
-                                          action=FileAction.OptionalLoad,
-                                          extensions=['nxs']),
-                             doc='Input file')
+        self.declareProperty(MultipleFileProperty(name=common.PROP_INPUT_FILE,
+                                                  action=FileAction.OptionalLoad,
+                                                  extensions=['nxs']),
+                             doc='An input file or numor or a list thereof.')
         self.declareProperty(MatrixWorkspaceProperty(
             name=common.PROP_INPUT_WS,
             defaultValue='',
             validator=inputWorkspaceValidator,
             optional=PropertyMode.Optional,
             direction=Direction.Input),
-            doc='Input workspace.')
+            doc='Input workspace if no file is given.')
         self.declareProperty(WorkspaceProperty(name=common.PROP_OUTPUT_WS,
                                                defaultValue='',
                                                direction=Direction.Output),
@@ -651,9 +660,15 @@ class DirectILLCollectData(DataProcessorAlgorithm):
 
     def _inputWS(self, wsNames, wsCleanup, subalgLogging):
         """Return the raw input workspace."""
-        inputFile = self.getProperty(common.PROP_INPUT_FILE).value
-        if inputFile:
-            mainWS = _loadFiles(inputFile, wsNames, wsCleanup, subalgLogging)
+        inputFiles = self.getProperty(common.PROP_INPUT_FILE).value
+        if len(inputFiles) > 0:
+            flattened = list()
+            for i in inputFiles:
+                if isinstance(i, str):
+                    flattened.append(i)
+                else:
+                    flattened += i
+            mainWS = _loadFiles(flattened, wsNames, wsCleanup, subalgLogging)
         else:
             mainWS = self.getProperty(common.PROP_INPUT_WS).value
             wsCleanup.protect(mainWS)
