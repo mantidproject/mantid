@@ -160,7 +160,7 @@ public:
     double strong_inti, strong_sigi;
     auto result = integrator.integrateStrongPeak(params, peak_1, strong_inti, strong_sigi);
     const auto shape = boost::dynamic_pointer_cast<const PeakShapeEllipsoid>(result.first);
-    const auto frac = result.second;
+    const auto frac = result.second.first;
 
     // Check the fraction of the peak that is contained within a "standard core"
     // the standard core is just the sigma in each direction
@@ -169,16 +169,18 @@ public:
     // Check the integrated intensity for a strong peak is exactly what we set
     // it to be when generating the peak
     TS_ASSERT_DELTA(strong_inti, numStrongEvents, 0.01);
+    TS_ASSERT_DELTA(strong_sigi, 100, 0.1);
 
     // Now integrate weak peak using the parameters we got from the strong peak
     double weak_inti, weak_sigi;
-    integrator.integrateWeakPeak(params, shape, frac, peak_2, weak_inti, weak_sigi);
+    integrator.integrateWeakPeak(params, shape, result.second, peak_2, weak_inti, weak_sigi);
 
     // Check the integrated intensity for a weak peak is exactly what we set it
     // to be weighted by the fraction of strong peak contained in a standard
     // core. This is not exactly the same because of the weighting from the
     // strong peak
     TS_ASSERT_DELTA(weak_inti, numWeakEvents / frac, 0.001);
+    TS_ASSERT_DELTA(weak_sigi, 11.96, 0.1);
   }
 
   void test_integrateWeakPeakWithBackground() {
@@ -217,7 +219,7 @@ public:
     double strong_inti, strong_sigi;
     auto result = integrator.integrateStrongPeak(params, peak_1, strong_inti, strong_sigi);
     const auto shape = boost::dynamic_pointer_cast<const PeakShapeEllipsoid>(result.first);
-    const auto frac = result.second;
+    const auto frac = result.second.first;
 
     // Check the fraction of the peak that is contained within a "standard core"
     // the standard core is just the sigma in each direction
@@ -226,16 +228,18 @@ public:
     // Check the integrated intensity for a strong peak is close to what we set
     // it to be when generating the peak
     TS_ASSERT_DELTA(strong_inti, numStrongEvents, 15);
+    TS_ASSERT_DELTA(strong_sigi, 100, 0.1);
 
     // Now integrate weak peak using the parameters we got from the strong peak
     double weak_inti, weak_sigi;
-    integrator.integrateWeakPeak(params, shape, frac, peak_2, weak_inti, weak_sigi);
+    integrator.integrateWeakPeak(params, shape, result.second, peak_2, weak_inti, weak_sigi);
 
     // Check the integrated intensity for a weak peak is exactly what we set it
     // to be weighted by the fraction of strong peak contained in a standard
     // core. This is not exactly the same because of the weighting from the
     // strong peak
     TS_ASSERT_DELTA(weak_inti, numWeakEvents, 35);
+    TS_ASSERT_DELTA(weak_sigi, 12.5, 0.1);
   }
 
   void test_estimateSignalToNoiseRatioInPerfectCase() {
@@ -339,6 +343,15 @@ public:
     }
   }
 
+   /** Generate a uniform background
+    *
+    * @param event_Qs :: vector of event Qs
+    * @param countsPerQ :: average value for the flat background
+    * @param lower :: the smallest extent of Q space in all directions
+    * @param upper :: the largest extent of Q space in all directions
+    * @param countVariation :: how much the average background can vary by
+    * @param seed :: the random seed to use (default 1)
+    */
    void generateUniformBackground(std::vector<std::pair<double, V3D>>& event_Qs, size_t countsPerQ, const double lower, const double upper, const int countVariation = 3, const double step = 0.5, int seed =1) {
     std::mt19937 gen;
     std::uniform_real_distribution<> d(-countVariation, countVariation);

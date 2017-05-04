@@ -175,7 +175,7 @@ void IntegrateEllipsoidsTwoStep::exec() {
     ++index;
   }
 
-  std::vector<std::pair<boost::shared_ptr<const Geometry::PeakShape>, double>> shapeLibrary;
+  std::vector<std::pair<boost::shared_ptr<const Geometry::PeakShape>, std::pair<double, double>>> shapeLibrary;
 
   // Integrate strong peaks
   for (const auto& item : strongPeaks) {
@@ -221,10 +221,10 @@ void IntegrateEllipsoidsTwoStep::exec() {
 
     const auto libShape = shapeLibrary[static_cast<int>(strongIndex)];
     const auto shape = boost::dynamic_pointer_cast<const PeakShapeEllipsoid>(libShape.first);
-    const auto frac = libShape.second;
+    const auto frac = libShape.second.first;
 
     g_log.information() << "Weak peak will be adjusted by " << frac << "\n";
-    const auto weakShape = integrator.integrateWeakPeak(params, shape, frac, q, inti, sigi);
+    const auto weakShape = integrator.integrateWeakPeak(params, shape, libShape.second, q, inti, sigi);
 
     peak.setIntensity(inti);
     peak.setSigmaIntensity(sigi);

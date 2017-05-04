@@ -88,13 +88,13 @@ public:
       double &sigi);
 
   /// Find the net integrated intensity of a peak, using ellipsoidal volumes
-  std::pair<boost::shared_ptr<const Mantid::Geometry::PeakShape>, double> integrateStrongPeak(
+  std::pair<boost::shared_ptr<const Mantid::Geometry::PeakShape>, std::pair<double, double>> integrateStrongPeak(
       const IntegrationParameters& params, const Kernel::V3D& peak_q, double &inti, double &sigi);
 
 
   boost::shared_ptr<const Geometry::PeakShape> integrateWeakPeak(
       const IntegrationParameters &params, Mantid::DataObjects::PeakShapeEllipsoid_const_sptr shape,
-      double frac, const Mantid::Kernel::V3D& peak_q, double &inti, double &sigi);
+      const std::pair<double, double>& libFrac, const Mantid::Kernel::V3D& peak_q, double &inti, double &sigi);
 
   double estimateSignalToNoiseRatio(const IntegrationParameters& params, const Mantid::Kernel::V3D &center);
 

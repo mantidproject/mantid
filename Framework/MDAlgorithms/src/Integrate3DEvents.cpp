@@ -75,16 +75,16 @@ void Integrate3DEvents::addEvents(
   }
 }
 
-std::pair<boost::shared_ptr<const Geometry::PeakShape>, double> Integrate3DEvents::integrateStrongPeak(const IntegrationParameters& params,
+std::pair<boost::shared_ptr<const Geometry::PeakShape>, std::pair<double, double>> Integrate3DEvents::integrateStrongPeak(const IntegrationParameters& params,
   const V3D& peak_q, double &inti, double &sigi) {
 
     auto result = getEvents(peak_q);
     if(!result)
-      return std::make_pair(boost::make_shared<NoShape>(), 0.0);
+      return std::make_pair(boost::make_shared<NoShape>(), make_pair(0.0, 0.0));
 
     const auto& events = result.get();
     if(events.empty())
-      return std::make_pair(boost::make_shared<NoShape>(), 0.0);
+      return std::make_pair(boost::make_shared<NoShape>(), make_pair(0.0, 0.0));
 
     DblMatrix cov_matrix(3, 3);
     makeCovarianceMatrix(events, cov_matrix, params.regionRadius);
@@ -99,7 +99,7 @@ std::pair<boost::shared_ptr<const Geometry::PeakShape>, double> Integrate3DEvent
 
     const auto max_sigma = *std::max_element(sigmas.begin(), sigmas.end());
     if (max_sigma == 0)
-      return std::make_pair(boost::make_shared<NoShape>(), 0.0);
+      return std::make_pair(boost::make_shared<NoShape>(), make_pair(0.0, 0.0));
 
     // scale specified sizes by 1/max_sigma
     // so when multiplied by the individual
@@ -121,7 +121,7 @@ std::pair<boost::shared_ptr<const Geometry::PeakShape>, double> Integrate3DEvent
    const auto isPeakOnDetector = correctForDetectorEdges(rValues, params.E1Vectors, peak_q, peakRadii, abcBackgroundInnerRadii, abcBackgroundOuterRadii);
 
    if(!isPeakOnDetector)
-     return std::make_pair(boost::make_shared<NoShape>(), 0.0);
+     return std::make_pair(boost::make_shared<NoShape>(), make_pair(0.0, 0.0));
 
    // adjust volume factors for edge corrections
    r1 = rValues[0];
@@ -136,16 +136,24 @@ std::pair<boost::shared_ptr<const Geometry::PeakShape>, double> Integrate3DEvent
    inti = peak - ratio * backgrd;
    sigi = sqrt(peak + ratio * ratio * backgrd);
 
+   // compute the fraction of peak within the standard core
    const auto total = (core + peak) - ratio * backgrd;
    const auto frac = inti / total;
-   const auto shapeCore = boost::make_shared<const PeakShapeEllipsoid>(
+   // compute the uncertainty in the fraction
+   const auto df_ds_core = (1 - frac) / peak;
+   const auto df_ds_peak = frac / peak;
+   const auto fracError = sqrt(peak * pow(df_ds_core, 2) + core * pow(df_ds_peak, 2));
+
+   // create the peaks shape for the strong peak
+   const auto shape = boost::make_shared<const PeakShapeEllipsoid>(
                            eigen_vectors, peakRadii, abcBackgroundInnerRadii, abcBackgroundOuterRadii,
                            Mantid::Kernel::QLab, "IntegrateEllipsoidsTwoStep");
 
-   return std::make_pair(shapeCore, frac);
+   return std::make_pair(shape, std::make_pair(frac, fracError));
 }
 
- boost::shared_ptr<const Geometry::PeakShape> Integrate3DEvents::integrateWeakPeak(const IntegrationParameters &params, PeakShapeEllipsoid_const_sptr shape, double frac, const V3D& center, double &inti, double &sigi) {
+ boost::shared_ptr<const Geometry::PeakShape> Integrate3DEvents::integrateWeakPeak(const IntegrationParameters &params, PeakShapeEllipsoid_const_sptr shape,
+                                                                                   const std::pair<double, double>& libFrac, const V3D& center, double &inti, double &sigi) {
 
    inti = 0.0; // default values, in case something
    sigi = 0.0; // is wrong with the peak.
@@ -175,14 +183,18 @@ std::pair<boost::shared_ptr<const Geometry::PeakShape>, double> Integrate3DEvent
    double peak_w_back = numInEllipsoid(events, directions, abcRadii);
    double ratio = pow(r1, 3) / (pow(r3, 3) - pow(r2, 3));
 
+   const auto frac = libFrac.first;
+   const auto fracError = libFrac.second;
+
    inti = peak_w_back - ratio * backgrd;
-   sigi = sqrt(peak_w_back + ratio * ratio * backgrd);
+   sigi = inti + ratio * ratio * backgrd;
 
    // correct for fractional intensity
+   sigi = sigi/pow(inti,2);
+   sigi += pow((fracError / frac), 2);
+
    inti = inti / frac;
-   // TODO:
-   // - Correct sigi
-   // - Correct Peak shape
+   sigi = sqrt(sigi) * inti;
 
    return shape;
  }
