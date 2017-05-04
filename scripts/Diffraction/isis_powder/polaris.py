@@ -89,6 +89,9 @@ class Polaris(AbstractInst):
     def _get_input_batching_mode(self):
         return self._inst_settings.input_mode
 
+    def _get_instrument_bin_widths(self):
+        return self._inst_settings.focused_bin_widths
+
     def _get_run_details(self, run_number_string):
         if self._run_details_last_run_number == run_number_string:
             return self._run_details_cached_obj

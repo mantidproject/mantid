@@ -45,6 +45,7 @@ def _focus_one_ws(ws, run_number, instrument, perform_vanadium_norm):
                                                      perform_vanadium_norm=perform_vanadium_norm)
 
     cropped_spectra = instrument._crop_banks_to_user_tof(calibrated_spectra)
+    rebinned_spectra = instrument._get_instrument_bin_widths
 
     # Output
     d_spacing_group, tof_group = instrument._output_focused_ws(cropped_spectra, run_details=run_details)

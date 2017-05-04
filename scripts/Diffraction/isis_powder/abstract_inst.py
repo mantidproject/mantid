@@ -159,6 +159,15 @@ class AbstractInst(object):
         """
         return None
 
+    def _get_instrument_bin_widths(self):
+        """
+        Returns the bin widths to rebin the focused workspace to. If
+        the instrument does not want this step a value of None should
+        not rebin the workspace
+        :return: List of bin widths or None if no rebinning should take place
+        """
+        return None
+
     def _generate_auto_vanadium_calibration(self, run_details):
         """
         Used by focus if a vanadium spline was not found to automatically generate said spline if the instrument

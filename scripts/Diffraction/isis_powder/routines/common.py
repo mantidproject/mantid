@@ -280,6 +280,41 @@ def rebin_workspace(workspace, new_bin_width, start_x=None, end_x=None):
     return workspace
 
 
+def rebin_workspace_list(workspace_list, bin_width_list, start_x_list=None, end_x_list=None):
+    """
+    Rebins a list of workspaces with the specified bin widths in the list provided.
+    The number of bin widths and workspaces in the list must match. Additionally if
+    the optional parameters for start_x_list or end_x_list are provided these must
+    have the same length too.
+    :param workspace_list: The list of workspaces to rebin in place
+    :param bin_width_list: The list of new bin widths to apply to each workspace
+    :param start_x_list: The list of starting x boundaries to rebin to
+    :param end_x_list: The list of ending x boundaries to rebin to
+    :return: List of rebinned workspace 
+    """
+    if not isinstance(workspace_list, list) or not isinstance(bin_width_list, list):
+        raise RuntimeError("One of the types passed to rebin_workspace_list was not a list")
+
+    ws_list_len = len(workspace_list)
+    if ws_list_len != len(bin_width_list):
+        raise ValueError("The number of bin widths found to rebin to does not match the number of banks")
+    if start_x_list and len(start_x_list) != ws_list_len:
+        raise ValueError("The number of starting bin values does not match the number of banks")
+    if end_x_list and len(end_x_list) != ws_list_len:
+        raise ValueError("The number of ending bin values does not match the number of banks")
+
+    # Create a list of None types of equal length to make using zip iterator easy
+    start_x_list = [None for _ in range(ws_list_len)] if start_x_list is None else start_x_list
+    end_x_list = [None for _ in range(ws_list_len)] if end_x_list is None else end_x_list
+
+    output_list = []
+    for ws, bin_width, start_x, end_x in zip(workspace_list, bin_width_list, start_x_list, end_x_list):
+        output_list.append(rebin_workspace(workspace=ws, new_bin_width=bin_width,
+                                           start_x=start_x, end_x=end_x))
+
+    return output_list
+
+
 def remove_intermediate_workspace(workspaces):
     """
     Removes the specified workspace(s) from the ADS. Can accept lists of workspaces. It

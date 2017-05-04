@@ -13,6 +13,7 @@ attr_mapping = \
      ParamMapEntry(ext_name="do_absorb_corrections",    int_name="do_absorb_corrections"),
      ParamMapEntry(ext_name="do_van_normalisation",     int_name="do_van_normalisation"),
      ParamMapEntry(ext_name="focused_cropping_values",  int_name="focused_cropping_values"),
+     ParamMapEntry(ext_name="focused_bin_widths",       int_name="focused_bin_widths"),
      ParamMapEntry(ext_name="grouping_file_name",       int_name="grouping_file_name"),
      ParamMapEntry(ext_name="input_mode",               int_name="input_mode", enum_class=INPUT_BATCHING),
      ParamMapEntry(ext_name="masking_file_name",        int_name="masking_file_name"),

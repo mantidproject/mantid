@@ -265,13 +265,13 @@ class ISISPowderCommonTest(unittest.TestCase):
         mantid.DeleteWorkspace(ws)
 
     def test_rebin_bin_boundary_specified(self):
-        ws = mantid.CreateSampleWorkspace(OutputWorkspace='test_rebin_bin_boundary_default',
+        ws = mantid.CreateSampleWorkspace(OutputWorkspace='test_rebin_bin_boundary_specified',
                                           Function='Flat background', NumBanks=1, BankPixelWidth=1, XMax=10, BinWidth=1)
         # Originally we had 10 bins from 0, 10. Resize from 0, 0.5, 5 so we should have the same number of output
         # bins with different boundaries
         new_bin_width = 0.5
-
         original_number_bins = ws.getNumberBins()
+
         expected_start_x = 1
         expected_end_x = 6
 
@@ -286,6 +286,69 @@ class ISISPowderCommonTest(unittest.TestCase):
         self.assertEqual(ws.readX(0)[-1], expected_end_x)
 
         mantid.DeleteWorkspace(ws)
+
+    def test_rebin_workspace_list_defaults(self):
+        new_bin_width = 0.5
+        number_of_ws = 10
+
+        ws_bin_widths = [new_bin_width for _ in range(number_of_ws)]
+        ws_list = []
+        for i in range(number_of_ws):
+            out_name = "test_rebin_workspace_list_defaults_" + str(i)
+            ws_list.append(mantid.CreateSampleWorkspace(OutputWorkspace=out_name, Function='Flat background',
+                                                        NumBanks=1, BankPixelWidth=1, XMax=10, BinWidth=1))
+        # What if the item passed in is not a list
+        err_msg_not_list = "was not a list"
+        with assertRaisesRegex(self, RuntimeError, err_msg_not_list):
+            common.rebin_workspace_list(workspace_list=ws_list, bin_width_list=None)
+
+        with assertRaisesRegex(self, RuntimeError, err_msg_not_list):
+            common.rebin_workspace_list(workspace_list=None, bin_width_list=[])
+
+        # What about if the lists aren't the same length
+        with assertRaisesRegex(self, ValueError, "does not match the number of banks"):
+            incorrect_number_bin_widths = [1 for _ in range(number_of_ws - 1)]
+            common.rebin_workspace_list(workspace_list=ws_list, bin_width_list=incorrect_number_bin_widths)
+
+        # Does it return all the workspaces as a list - another unit test checks the implementation
+        output = common.rebin_workspace_list(workspace_list=ws_list, bin_width_list=ws_bin_widths)
+        self.assertEqual(len(output), number_of_ws)
+
+        for ws in output:
+            mantid.DeleteWorkspace(ws)
+
+    def test_rebin_workspace_list_x_start_end(self):
+        new_start_x = 1
+        new_end_x = 5
+        new_bin_width = 0.5
+        number_of_ws = 10
+
+        ws_bin_widths = [new_bin_width for _ in range(number_of_ws)]
+        start_x_list = [new_start_x for _ in range(number_of_ws)]
+        end_x_list = [new_end_x for _ in range(number_of_ws)]
+
+        ws_list = []
+        for i in range(number_of_ws):
+            out_name = "test_rebin_workspace_list_defaults_" + str(i)
+            ws_list.append(mantid.CreateSampleWorkspace(OutputWorkspace=out_name, Function='Flat background',
+                                                        NumBanks=1, BankPixelWidth=1, XMax=10, BinWidth=1))
+
+        # Are the lengths checked
+        incorrect_length = [1 for _ in range(number_of_ws - 1)]
+        with assertRaisesRegex(self, ValueError, "The number of starting bin values"):
+            common.rebin_workspace_list(workspace_list=ws_list, bin_width_list=ws_bin_widths,
+                                        start_x_list=incorrect_length, end_x_list=end_x_list)
+        with assertRaisesRegex(self, ValueError, "The number of ending bin values"):
+            common.rebin_workspace_list(workspace_list=ws_list, bin_width_list=ws_bin_widths,
+                                        start_x_list=start_x_list, end_x_list=incorrect_length)
+
+        output_list = common.rebin_workspace_list(workspace_list=ws_list, bin_width_list=ws_bin_widths,
+                                                  start_x_list=start_x_list, end_x_list=end_x_list)
+        self.assertEqual(len(output_list), number_of_ws)
+        for ws in output_list:
+            self.assertEqual(ws.readX(0)[0], new_start_x)
+            self.assertEqual(ws.readX(0)[-1], new_end_x)
+            mantid.DeleteWorkspace(ws)
 
     def test_remove_intermediate_workspace(self):
         ws_list = []
