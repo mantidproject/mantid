@@ -34,31 +34,6 @@ makeDetIdToIndexMap(const std::vector<detid_t> &detIds) {
  * obtained from a workspace. The pointer to the ParameterMap `pmap` can be
  * null. If it is not null, it must refer to the same map as wrapped in
  * `instrument`. Non-const methods of DetectorInfo may only be called if `pmap`
- * is not null. */
-DetectorInfo::DetectorInfo(
-    Beamline::DetectorInfo &detectorInfo,
-    boost::shared_ptr<const Geometry::Instrument> instrument,
-    Geometry::ParameterMap *pmap)
-    : m_detectorInfo(detectorInfo), m_pmap(pmap), m_instrument(instrument),
-      m_lastDetector(PARALLEL_GET_MAX_THREADS),
-      m_lastAssemblyDetectorIndices(PARALLEL_GET_MAX_THREADS),
-      m_lastIndex(PARALLEL_GET_MAX_THREADS, -1) {
-  // Note: This does not seem possible currently (the instrument objects is
-  // always allocated, even if it is empty), so this will not fail.
-  if (!m_instrument)
-    throw std::invalid_argument("DetectorInfo::DetectorInfo: Workspace does "
-                                "not contain an instrument!");
-
-  m_detectorIDs = instrument->getDetectorIDs(false /* do not skip monitors */);
-  m_detIDToIndex = makeDetIdToIndexMap(m_detectorIDs);
-}
-
-/** Construct DetectorInfo based on an Instrument.
- *
- * The Instrument reference `instrument` must be the parameterized instrument
- * obtained from a workspace. The pointer to the ParameterMap `pmap` can be
- * null. If it is not null, it must refer to the same map as wrapped in
- * `instrument`. Non-const methods of DetectorInfo may only be called if `pmap`
  * is not null. Detector ID -> index map provided as constructor argument.
  *
  * */

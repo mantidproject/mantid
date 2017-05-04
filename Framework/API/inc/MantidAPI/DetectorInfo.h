@@ -66,9 +66,6 @@ class SpectrumInfo;
 */
 class MANTID_API_DLL DetectorInfo {
 public:
-  DetectorInfo(Beamline::DetectorInfo &detectorInfo,
-               boost::shared_ptr<const Geometry::Instrument> instrument,
-               Geometry::ParameterMap *pmap = nullptr);
 
   DetectorInfo(Beamline::DetectorInfo &detectorInfo,
                boost::shared_ptr<const Geometry::Instrument> instrument,

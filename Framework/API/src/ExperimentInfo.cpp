@@ -75,8 +75,9 @@ ExperimentInfo::ExperimentInfo()
   m_parmap->setDetectorInfo(m_detectorInfo);
   m_parmap->setComponentInfo(m_componentInfo);
   m_detectorInfoWrapper = Kernel::make_unique<DetectorInfo>(
-      *m_detectorInfo, parInstrument, m_parmap.get());
-  makeAPIComponentInfo(*parInstrument);
+      *m_detectorInfo, sptr_instrument, m_parmap.get(),
+      makeDetIdToIndexMap(sptr_instrument->getDetectorIDs()));
+  makeAPIComponentInfo(*sptr_instrument);
 }
 
 /**
@@ -302,7 +303,7 @@ void ExperimentInfo::makeAPIComponentInfo(const Instrument &instr) {
       componentIdToIndexMap;
 
   std::tie(m_componentInfo, componentIds, componentIdToIndexMap) =
-      makeBeamlineComponentInfo(inst, detectorInfo());
+      makeBeamlineComponentInfo(instr, detectorInfo());
   m_parmap->setComponentInfo(m_componentInfo);
 
   m_componentInfoWrapper = Kernel::make_unique<ComponentInfo>(
