@@ -257,6 +257,29 @@ def load_current_normalised_ws_list(run_number_string, instrument, input_batchin
     return normalised_ws_list
 
 
+def rebin_workspace(workspace, new_bin_width, start_x=None, end_x=None):
+    """
+    Rebins the specified workspace with the specified new bin width. Allows the user
+    to also set optionally the first and final bin boundaries of the histogram too.
+    If the bin boundaries are not set they are preserved from the original workspace
+    :param workspace: 
+    :param new_bin_width: 
+    :param start_x: 
+    :param end_x: 
+    :return: 
+    """
+
+    # Find the starting and ending bin boundaries if they were not set
+    if start_x is None:
+        start_x = workspace.readX(0)[0]
+    if end_x is None:
+        end_x = workspace.readX(0)[-1]
+
+    rebin_string = str(start_x) + ',' + str(new_bin_width) + ',' + str(end_x)
+    workspace = mantid.Rebin(InputWorkspace=workspace, OutputWorkspace=workspace, Params=rebin_string)
+    return workspace
+
+
 def remove_intermediate_workspace(workspaces):
     """
     Removes the specified workspace(s) from the ADS. Can accept lists of workspaces. It
