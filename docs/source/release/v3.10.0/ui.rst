@@ -34,6 +34,13 @@ Instrument View
 Plotting Improvements
 #####################
 
+- Surface, Contour, Waterfall, 1D and Tiled plotting of workspaces are now available from one dialog box (Plot Advanced) got from right-click menu of a workspace selection.
+- The log value facilities for Surface and Contour plot are now available for Waterfall and 1D plots, where they appear in the legend.
+
+.. figure:: ../../images/ArtRightGUIWaterfallCustom2sp1.PNG
+
+See `this <https://www.mantidproject.org/MBC_Displaying_data_in_multiple_workspaces>`_ for more details.
+
 Algorithm Toolbox
 #################
 
