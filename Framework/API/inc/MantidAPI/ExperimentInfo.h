@@ -195,10 +195,7 @@ protected:
 private:
   void makeAPIComponentInfo(const Geometry::Instrument &instr);
 
-  boost::shared_ptr<Geometry::Instrument> makeParameterizedInstrument(
-      boost::shared_ptr<const Geometry::Instrument> instrument,
-      const Beamline::DetectorInfo &detectorInfo,
-      boost::shared_ptr<Geometry::ParameterMap> pmap) const;
+  boost::shared_ptr<Geometry::Instrument> makeParameterizedInstrument() const;
   /// Fill with given instrument parameter
   void populateWithParameter(Geometry::ParameterMap &paramMap,
                              Geometry::ParameterMap &paramMapForPosAndRot,

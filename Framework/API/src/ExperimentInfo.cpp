@@ -71,8 +71,7 @@ ExperimentInfo::ExperimentInfo()
       sptr_instrument(new Instrument()),
       m_detectorInfo(boost::make_shared<Beamline::DetectorInfo>()),
       m_componentInfo(boost::make_shared<Beamline::ComponentInfo>()) {
-  auto parInstrument =
-      makeParameterizedInstrument(sptr_instrument, *m_detectorInfo, m_parmap);
+  auto parInstrument = makeParameterizedInstrument();
   m_parmap->setDetectorInfo(m_detectorInfo);
   m_parmap->setComponentInfo(m_componentInfo);
   m_detectorInfoWrapper = Kernel::make_unique<DetectorInfo>(
@@ -294,7 +293,7 @@ makeDetectorInfo(const Instrument &oldInstr, const Instrument &newInstr) {
 
 /**
  * Make the beamline and API ComponentInfo
- * @param inst
+ * @param inst : instrument to make the component info around
  */
 void ExperimentInfo::makeAPIComponentInfo(const Instrument &inst) {
   // Output variables
@@ -334,14 +333,12 @@ void ExperimentInfo::setInstrument(const Instrument_const_sptr &instr) {
 
     // Reuse the ID -> index map for the detector ids
     m_detectorInfoWrapper = Kernel::make_unique<DetectorInfo>(
-        *m_detectorInfo,
-        makeParameterizedInstrument(sptr_instrument, *m_detectorInfo, m_parmap),
-        m_parmap.get(), instr->detIdToIndexMap());
+        *m_detectorInfo, makeParameterizedInstrument(), m_parmap.get(),
+        instr->detIdToIndexMap());
   } else {
     m_detectorInfoWrapper = Kernel::make_unique<DetectorInfo>(
-        *m_detectorInfo,
-        makeParameterizedInstrument(sptr_instrument, *m_detectorInfo, m_parmap),
-        m_parmap.get(), makeDetIdToIndexMap(instr->getDetectorIDs()));
+        *m_detectorInfo, makeParameterizedInstrument(), m_parmap.get(),
+        makeDetIdToIndexMap(instr->getDetectorIDs()));
   }
   makeAPIComponentInfo(*instr);
 
@@ -352,13 +349,11 @@ void ExperimentInfo::setInstrument(const Instrument_const_sptr &instr) {
   invalidateAllSpectrumDefinitions();
 }
 
-Instrument_sptr ExperimentInfo::makeParameterizedInstrument(
-    boost::shared_ptr<const Instrument> instrument,
-    const Beamline::DetectorInfo &detectorInfo,
-    boost::shared_ptr<Geometry::ParameterMap> pmap) const {
+Instrument_sptr ExperimentInfo::makeParameterizedInstrument() const {
   populateIfNotLoaded();
-  checkDetectorInfoSize(*instrument, detectorInfo);
-  return Geometry::ParComponentFactory::createInstrument(instrument, pmap);
+  checkDetectorInfoSize(*sptr_instrument, *m_detectorInfo);
+  return Geometry::ParComponentFactory::createInstrument(sptr_instrument,
+                                                         m_parmap);
 }
 
 /** Get a shared pointer to the parametrized instrument associated with this
@@ -368,8 +363,7 @@ Instrument_sptr ExperimentInfo::makeParameterizedInstrument(
 */
 Instrument_const_sptr ExperimentInfo::getInstrument() const {
 
-  auto instrument =
-      makeParameterizedInstrument(sptr_instrument, *m_detectorInfo, m_parmap);
+  auto instrument = makeParameterizedInstrument();
 
   instrument->setDetectorInfo(m_detectorInfo,
                               m_detectorInfoWrapper->detIdToIndexMap());
