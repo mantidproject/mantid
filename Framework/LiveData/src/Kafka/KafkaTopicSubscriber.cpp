@@ -169,17 +169,26 @@ void KafkaTopicSubscriber::subscribeAtTime(int64_t time) {
   auto partitions = getTopicPartitions();
   for (auto partition : partitions) {
     partition->set_offset(time);
+    LOGGER().debug() << "Topic: " << partition->topic()
+                     << ", partition: " << partition->partition()
+                     << ", time (milliseconds past epoch): " << time
+                     << ", offset is set to: " << partition->offset()
+                     << ", current high watermark is: "
+                     << getCurrentOffset(partition->topic(),
+                                         partition->partition())
+                     << std::endl;
   }
   // Convert the timestamps to partition offsets
-  auto error = m_consumer->offsetsForTimes(partitions, 2000);
+  auto error = m_consumer->offsetsForTimes(partitions, 10000);
   if (error != RdKafka::ERR_NO_ERROR) {
     throw std::runtime_error("In KafkaTopicSubscriber failed to lookup "
                              "partition offsets for specified start time.");
   }
+  LOGGER().debug("Called offsetsForTimes");
 
   if (LOGGER().debug()) {
     for (auto partition : partitions) {
-      LOGGER().debug() << "Assigning topic: " << partition->topic()
+      LOGGER().debug() << "Topic: " << partition->topic()
                        << ", partition: " << partition->partition()
                        << ", time (milliseconds past epoch): " << time
                        << ", looked up offset as: " << partition->offset()
@@ -191,6 +200,10 @@ void KafkaTopicSubscriber::subscribeAtTime(int64_t time) {
   }
 
   error = m_consumer->assign(partitions);
+
+  // Clean up topicPartition pointers
+  std::for_each(partitions.cbegin(), partitions.cend(),
+                [](RdKafka::TopicPartition *partition) { delete partition; });
   reportSuccessOrFailure(error, 0);
 }
 
@@ -306,6 +319,11 @@ void KafkaTopicSubscriber::subscribeAtOffset(int64_t offset) {
                    << " partitions in KafkaTopicSubscriber::subscribeAtOffset()"
                    << std::endl;
   error = m_consumer->assign(topicPartitions);
+
+  // Clean up topicPartition pointers
+  std::for_each(topicPartitions.cbegin(), topicPartitions.cend(),
+                [](RdKafka::TopicPartition *partition) { delete partition; });
+
   reportSuccessOrFailure(error, confOffset);
 }
 
@@ -410,7 +428,7 @@ KafkaTopicSubscriber::getOffsetsForTimestamp(int64_t timestamp) {
   auto error = m_consumer->offsetsForTimes(partitions, 2000);
   if (error != RdKafka::ERR_NO_ERROR) {
     throw std::runtime_error("In KafkaTopicSubscriber failed to lookup "
-                             "partition offsets for specified start time.");
+                             "partition offsets for specified time.");
   }
 
   // Preallocate map
@@ -434,6 +452,11 @@ KafkaTopicSubscriber::getOffsetsForTimestamp(int64_t timestamp) {
       offset = getCurrentOffset(partition->topic(), partition->partition()) - 1;
     partitionOffsetMap[partition->topic()][partition->partition()] = offset;
   }
+
+  // Clean up topicPartition pointers
+  std::for_each(partitions.cbegin(), partitions.cend(),
+                [](RdKafka::TopicPartition *partition) { delete partition; });
+
   return partitionOffsetMap;
 }
 }
