@@ -62,12 +62,6 @@ class Gem(AbstractInst):
     def _get_input_batching_mode(self):
         return self._inst_settings.input_batching
 
-    def _get_sample_empty(self):
-        sample_empty = self._inst_settings.sample_empty
-        if sample_empty:
-            raise NotImplementedError("Subtracting s-empty is not implemented yet.")
-        return sample_empty
-
     def _get_unit_to_keep(self):
         return self._inst_settings.unit_to_keep
 

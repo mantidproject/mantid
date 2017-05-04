@@ -16,6 +16,10 @@ The elements in the `common` package include widely used general purpose functio
 
 The elements in the `state` package contain the definition of the reduction configuration and the corresponding builders.
 
+## `test_helper`
+
+This elements of this package are used for testing the SANS reduction framework.
+
 ## `user_file`
 
-This elements of this package are used to parse a SANS user file and to setup a state object from the specified settings.
+The elements of this package are used to parse a SANS user file and to setup a state object from the specified settings.

@@ -151,13 +151,6 @@ class AbstractInst(object):
         """
         return van_ws_to_crop
 
-    def _get_sample_empty(self):
-        """
-        Returns the sample empty number to subtract. If one is not specified it returns None
-        :return: Sample empty run number(s), else None
-        """
-        return None
-
     def _get_unit_to_keep(self):
         """
         Returns the unit to keep once focusing has completed. E.g. a setting of

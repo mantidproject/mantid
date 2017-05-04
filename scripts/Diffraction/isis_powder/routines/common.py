@@ -319,7 +319,7 @@ def spline_workspaces(focused_vanadium_spectra, num_splines):
     return splined_ws_list
 
 
-def subtract_sample_empty(ws_to_correct, empty_sample_ws_string, instrument):
+def subtract_summed_runs(ws_to_correct, empty_sample_ws_string, instrument):
     """
     Loads the list of empty runs specified by the empty_sample_ws_string and subtracts
     them from the workspace specified. Returns the subtracted workspace.
