@@ -296,7 +296,7 @@ QPushButton *FitPropertyBrowser::createFitMenuButton(QWidget *w) {
 }
 
 /**
-* @Populate the fit button.
+* @brief Populate the fit button.
 * This initialization includes:
 *   1. SIGNALs/SLOTs when properties change.
 *   2. Actions and associated SIGNALs/SLOTs.
