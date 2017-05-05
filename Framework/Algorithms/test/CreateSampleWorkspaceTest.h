@@ -4,6 +4,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/DetectorInfo.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/IComponent.h"
@@ -44,7 +45,7 @@ public:
       std::string userFunction = "", int numBanks = 2, int bankPixelWidth = 10,
       int numEvents = 1000, bool isRandom = false, std::string xUnit = "TOF",
       double xMin = 0.0, double xMax = 20000.0, double binWidth = 200.0,
-      int numScanPoints = 0) {
+      int numScanPoints = 1) {
 
     CreateSampleWorkspace alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
@@ -523,6 +524,13 @@ public:
     MatrixWorkspace_sptr ws =
         createSampleWorkspace(outWSName, "", "", "", 2, 10, 1000, false, "TOF",
                               0.0, 20000.0, 200.0, 10);
+
+    TS_ASSERT_EQUALS(ws->getNumberHistograms(), 2 * 10 * 10 * 10);
+
+    const auto &detectorInfo = ws->detectorInfo();
+    TS_ASSERT(detectorInfo.isScanning());
+
+    // TODO: DetectorInfo checks
 
     // Remove workspace from the data service.
     AnalysisDataService::Instance().remove(outWSName);
