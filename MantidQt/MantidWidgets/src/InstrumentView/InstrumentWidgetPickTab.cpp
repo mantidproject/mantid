@@ -849,17 +849,9 @@ QString ComponentInfoController::displayDetectorInfo(Mantid::detid_t detid) {
   QString text;
   if (detid >= 0) {
     // collect info about selected detector and add it to text
-    Mantid::Geometry::IDetector_const_sptr det;
-    try {
-      det = m_instrActor->getInstrument()->getDetector(detid);
-    } catch (...) {
-      // if this slot is called during instrument window deletion
-      // expect exceptions thrown
-      return "";
-    }
+    auto &det = m_instrActor->getDetectorByDetID(detid);
 
-    text =
-        "Selected detector: " + QString::fromStdString(det->getName()) + "\n";
+    text = "Selected detector: " + QString::fromStdString(det.getName()) + "\n";
     text += "Detector ID: " + QString::number(detid) + '\n';
     QString wsIndex;
     try {
@@ -869,7 +861,7 @@ QString ComponentInfoController::displayDetectorInfo(Mantid::detid_t detid) {
       wsIndex = "None";
     }
     text += "Workspace index: " + wsIndex + '\n';
-    Mantid::Kernel::V3D pos = det->getPos();
+    Mantid::Kernel::V3D pos = det.getPos();
     text += "xyz: " + QString::number(pos.X()) + "," +
             QString::number(pos.Y()) + "," + QString::number(pos.Z()) + '\n';
     double r, t, p;
@@ -878,7 +870,7 @@ QString ComponentInfoController::displayDetectorInfo(Mantid::detid_t detid) {
             QString::number(p) + '\n';
     Mantid::Geometry::ICompAssembly_const_sptr parent =
         boost::dynamic_pointer_cast<const Mantid::Geometry::ICompAssembly>(
-            det->getParent());
+            det.getParent());
     if (parent) {
       QString textpath;
       while (parent) {
@@ -888,7 +880,7 @@ QString ComponentInfoController::displayDetectorInfo(Mantid::detid_t detid) {
                 parent->getParent());
       }
       text += "Component path:" + textpath + "/" +
-              QString::fromStdString(det->getName()) + '\n';
+              QString::fromStdString(det.getName()) + '\n';
     }
     const double integrated = m_instrActor->getIntegratedCounts(detid);
     const QString counts =
@@ -907,10 +899,10 @@ QString ComponentInfoController::displayDetectorInfo(Mantid::detid_t detid) {
 */
 QString ComponentInfoController::displayNonDetectorInfo(
     Mantid::Geometry::ComponentID compID) {
-  auto component = m_instrActor->getInstrument()->getComponentByID(compID);
+  auto &component = *m_instrActor->getInstrument()->getComponentByID(compID);
   QString text = "Selected component: ";
-  text += QString::fromStdString(component->getName()) + '\n';
-  Mantid::Kernel::V3D pos = component->getPos();
+  text += QString::fromStdString(component.getName()) + '\n';
+  Mantid::Kernel::V3D pos = component.getPos();
   text += "xyz: " + QString::number(pos.X()) + "," + QString::number(pos.Y()) +
           "," + QString::number(pos.Z()) + '\n';
   double r, t, p;
@@ -1049,12 +1041,12 @@ void ComponentInfoController::displayAlignPeaksInfo(
 * Form a string for output from the components instrument parameters
 */
 QString ComponentInfoController::getParameterInfo(
-    Mantid::Geometry::IComponent_const_sptr comp) {
+    const Mantid::Geometry::IComponent &comp) {
   QString text = "";
   std::map<Mantid::Geometry::ComponentID, std::vector<std::string>>
       mapCmptToNameVector;
 
-  auto paramNames = comp->getParameterNamesByComponent();
+  auto paramNames = comp.getParameterNamesByComponent();
   for (auto itParamName = paramNames.begin(); itParamName != paramNames.end();
        ++itParamName) {
     // build the data structure I need Map comp id -> vector of names
@@ -1069,9 +1061,11 @@ QString ComponentInfoController::getParameterInfo(
   }
 
   // walk out from the selected component
-  Mantid::Geometry::IComponent_const_sptr paramComp = comp;
+  const Mantid::Geometry::IComponent *paramComp = &comp;
+  boost::shared_ptr<const Mantid::Geometry::IComponent> parentComp;
   while (paramComp) {
-    auto &compParamNames = mapCmptToNameVector[paramComp->getComponentID()];
+    auto id = paramComp->getComponentID();
+    auto &compParamNames = mapCmptToNameVector[id];
     if (compParamNames.size() > 0) {
       text += QString::fromStdString("\nParameters from: " +
                                      paramComp->getName() + "\n");
@@ -1089,7 +1083,8 @@ QString ComponentInfoController::getParameterInfo(
         }
       }
     }
-    paramComp = paramComp->getParent();
+    parentComp = paramComp->getParent();
+    paramComp = parentComp.get();
   }
 
   return text;
@@ -1240,11 +1235,10 @@ void DetectorPlotController::plotSingle(int detid) {
 *   with this id.
 */
 void DetectorPlotController::plotTube(int detid) {
-  Mantid::API::MatrixWorkspace_const_sptr ws = m_instrActor->getWorkspace();
-  Mantid::Geometry::IDetector_const_sptr det =
-      m_instrActor->getInstrument()->getDetector(detid);
+  auto ws = m_instrActor->getWorkspace();
+  auto &det = m_instrActor->getDetectorByDetID(detid);
   boost::shared_ptr<const Mantid::Geometry::IComponent> parent =
-      det->getParent();
+      det.getParent();
   Mantid::Geometry::ICompAssembly_const_sptr ass =
       boost::dynamic_pointer_cast<const Mantid::Geometry::ICompAssembly>(
           parent);
@@ -1276,10 +1270,8 @@ void DetectorPlotController::plotTubeSums(int detid) {
     clear();
     return;
   }
-  Mantid::Geometry::IDetector_const_sptr det =
-      m_instrActor->getInstrument()->getDetector(detid);
-  boost::shared_ptr<const Mantid::Geometry::IComponent> parent =
-      det->getParent();
+  auto &det = m_instrActor->getDetectorByDetID(detid);
+  auto parent = det.getParent();
   QString label = QString::fromStdString(parent->getName()) + " (" +
                   QString::number(detid) + ") Sum";
   m_plot->setData(&x[0], &y[0], static_cast<int>(y.size()),
@@ -1300,8 +1292,7 @@ void DetectorPlotController::plotTubeSums(int detid) {
 *   with this id.
 */
 void DetectorPlotController::plotTubeIntegrals(int detid) {
-  Mantid::Geometry::IDetector_const_sptr det =
-      m_instrActor->getInstrument()->getDetector(detid);
+  auto &det = m_instrActor->getDetectorByDetID(detid);
   std::vector<double> x, y;
   prepareDataForIntegralsPlot(detid, x, y);
   if (x.empty() || y.empty()) {
@@ -1315,8 +1306,7 @@ void DetectorPlotController::plotTubeIntegrals(int detid) {
   }
   m_plot->setData(&x[0], &y[0], static_cast<int>(y.size()),
                   xAxisCaption.toStdString());
-  boost::shared_ptr<const Mantid::Geometry::IComponent> parent =
-      det->getParent();
+  auto parent = det.getParent();
   // curve label: "tube_name (detid) Integrals"
   // detid is included to distiguish tubes with the same name
   QString label = QString::fromStdString(parent->getName()) + " (" +
@@ -1370,14 +1360,11 @@ void DetectorPlotController::prepareDataForSumsPlot(int detid,
                                                     std::vector<double> &x,
                                                     std::vector<double> &y,
                                                     std::vector<double> *err) {
-  Mantid::API::MatrixWorkspace_const_sptr ws = m_instrActor->getWorkspace();
-  Mantid::Geometry::IDetector_const_sptr det =
-      m_instrActor->getInstrument()->getDetector(detid);
-  boost::shared_ptr<const Mantid::Geometry::IComponent> parent =
-      det->getParent();
-  Mantid::Geometry::ICompAssembly_const_sptr ass =
-      boost::dynamic_pointer_cast<const Mantid::Geometry::ICompAssembly>(
-          parent);
+  auto ws = m_instrActor->getWorkspace();
+  auto &det = m_instrActor->getDetectorByDetID(detid);
+  auto parent = det.getParent();
+  auto ass = boost::dynamic_pointer_cast<const Mantid::Geometry::ICompAssembly>(
+      parent);
   size_t wi;
   try {
     wi = m_instrActor->getWorkspaceIndex(detid);
@@ -1459,13 +1446,10 @@ void DetectorPlotController::prepareDataForIntegralsPlot(
                           std::find(parameters.begin(), parameters.end(),
                                     "Always") != parameters.end();
 
-  Mantid::Geometry::IDetector_const_sptr det =
-      m_instrActor->getInstrument()->getDetector(detid);
-  boost::shared_ptr<const Mantid::Geometry::IComponent> parent =
-      det->getParent();
-  Mantid::Geometry::ICompAssembly_const_sptr ass =
-      boost::dynamic_pointer_cast<const Mantid::Geometry::ICompAssembly>(
-          parent);
+  auto &det = m_instrActor->getDetectorByDetID(detid);
+  auto parent = det.getParent();
+  auto ass = boost::dynamic_pointer_cast<const Mantid::Geometry::ICompAssembly>(
+      parent);
   size_t wi;
   try {
     wi = m_instrActor->getWorkspaceIndex(detid);
