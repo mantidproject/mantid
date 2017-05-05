@@ -193,6 +193,10 @@ private:
   void checkSpectrumIndex(size_t iSpec) const;
   /// Check if there is an attribute specific to a spectrum (multi-spectrum case only).
   bool hasSpectrumAttribute(size_t iSpec, const std::string &attName) const;
+  /// Get an attribute specific to a spectrum (multi-spectrum case only).
+  Attribute getSpectrumAttribute(size_t iSpec, const std::string &attName) const;
+  /// Set a value to a spectrum-specific attribute
+  void setSpectrumAttribute(size_t iSpec, const std::string &name, const Attribute &);
 
   /// Function that calculates parameters of the target function.
   mutable API::IFunction_sptr m_source;

@@ -32,6 +32,11 @@ DECLARE_FUNCTION(CrystalFieldFunction)
 
 namespace {
 
+// Regex for names of attributes/parameters for a particular spectrum
+// Example: sp1.FWHMX
+const std::regex SPECTRUM_ATTR_REGEX("sp([0-9]+)\\.(.+)");
+
+
 /// Define the source function for CrystalFieldFunction.
 /// Its function() method is not needed.
 class Peaks : public CrystalFieldPeaksBase, public API::IFunctionGeneral {
@@ -295,8 +300,14 @@ std::vector<std::string> CrystalFieldFunction::getAttributeNames() const {
 }
 
 /// Return a value of attribute attName
+/// @param attName :: Name of an attribute.
 IFunction::Attribute
 CrystalFieldFunction::getAttribute(const std::string &attName) const {
+  std::smatch match;
+  if (std::regex_match(attName, match, SPECTRUM_ATTR_REGEX)) {
+    auto i = std::stoul(match[1]);
+    return getSpectrumAttribute(i, match[2]);
+  }
   return IFunction::getAttribute(attName);
 
   // if (IFunction::hasAttribute(attName)) {
@@ -309,11 +320,29 @@ CrystalFieldFunction::getAttribute(const std::string &attName) const {
   //}
 }
 
+/// Perform custom actions on setting certain attributes.
+void CrystalFieldFunction::setAttribute(const std::string &attName,
+                                        const Attribute &attr) {
+  if (attName == "Ions") {
+    setIonsAttribute(attName, attr);
+  } else if (attName == "Symmetries") {
+    setSymmetriesAttribute(attName, attr);
+  } else if (attName == "Temperatures") {
+    setTemperaturesAttribute(attName, attr);
+  } else {
+    std::smatch match;
+    if (std::regex_match(attName, match, SPECTRUM_ATTR_REGEX)) {
+      auto i = std::stoul(match[1]);
+      setSpectrumAttribute(i, match[2], attr);
+    }
+    API::IFunction::setAttribute(attName, attr);
+  }
+}
+
 /// Check if attribute attName exists
 bool CrystalFieldFunction::hasAttribute(const std::string &attName) const {
-  std::regex spAttrRegex("sp([0-9]+)\\.(.+)");
   std::smatch match;
-  if (std::regex_match(attName, match, spAttrRegex)) {
+  if (std::regex_match(attName, match, SPECTRUM_ATTR_REGEX)) {
     auto i = std::stoul(match[1]);
     return hasSpectrumAttribute(i, match[2]);
   }
@@ -361,24 +390,54 @@ bool CrystalFieldFunction::hasSpectrumAttribute(size_t iSpec, const std::string 
     return false;
   }
   checkSpectrumIndex(iSpec);
-  if (attName == "FWHMX" || attName == "FWHMY") {
+  if (attName == "FWHMX" || attName == "FWHMY" || attName == "Temperature") {
     return true;
   }
   return false;
 }
 
+/// Get an attribute specific to a spectrum (multi-spectrum case only).
+/// @param iSpec :: Index of a spectrum.
+/// @param attName :: Name of an attribute.
+API::IFunction::Attribute
+CrystalFieldFunction::getSpectrumAttribute(size_t iSpec,
+                                           const std::string &attName) const {
+  checkSpectrumIndex(iSpec);
+  if (attName == "FWHMX") {
+    if (iSpec < m_fwhmX.size()) {
+      return Attribute(m_fwhmX[iSpec]);
+    } else {
+      return Attribute(std::vector<double>());
+    }
+  } else if (attName == "FWHMY") {
+    if (iSpec < m_fwhmY.size()) {
+      return Attribute(m_fwhmY[iSpec]);
+    } else {
+      return Attribute(std::vector<double>());
+    }
+  } else if (attName == "Temperature") {
+    return Attribute(m_temperatures[iSpec]);
+  }
+  throw std::runtime_error("Attribute " + attName + " not found.");
+}
 
-/// Perform custom actions on setting certain attributes.
-void CrystalFieldFunction::setAttribute(const std::string &name,
-                                        const Attribute &attr) {
-  if (name == "Ions") {
-    setIonsAttribute(name, attr);
-  } else if (name == "Symmetries") {
-    setSymmetriesAttribute(name, attr);
-  } else if (name == "Temperatures") {
-    setTemperaturesAttribute(name, attr);
-  } else {
-    API::IFunction::setAttribute(name, attr);
+/// Set a value to a spectrum-specific attribute
+/// @param iSpec :: Index of a spectrum.
+/// @param attName :: Name of an attribute.
+/// @param value :: New value of the attribute.
+void CrystalFieldFunction::setSpectrumAttribute(size_t iSpec, const std::string &attName, const Attribute &value) {
+  checkSpectrumIndex(iSpec);
+  if (attName == "FWHMX") {
+    if (iSpec < m_fwhmX.size()) {
+      m_fwhmX[iSpec] = value.asVector();
+    }
+  } else if (attName == "FWHMY") {
+    if (iSpec < m_fwhmY.size()) {
+      m_fwhmY[iSpec] = value.asVector();
+    }
+  } else if (attName == "Temperature") {
+    m_temperatures[iSpec] = value.asDouble();
+    IFunction::storeAttributeValue("Temperatures", Attribute(m_temperatures));
   }
 }
 
