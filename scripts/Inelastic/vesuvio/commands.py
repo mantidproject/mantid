@@ -1,4 +1,4 @@
-#pylint: disable=too-many-arguments,invalid-name,too-many-locals,too-many-branches
+# pylint: disable=too-many-arguments,invalid-name,too-many-locals,too-many-branches
 """
 Defines functions and classes to start the processing of Vesuvio data.
 The main entry point that most users should care about is fit_tof().
@@ -56,12 +56,18 @@ def fit_tof(runs, flags, iterations=1, convergence_threshold=None):
 
     exit_iteration = 0
 
-    for iteration in range(1, iterations+1):
+    for iteration in range(1, iterations + 1):
 
-        hydrogen_tof = ms.CloneWorkspace(InputWorkspace = sample_data, OutputWorkspace = 'hydrogen_tof_iteration_'+str(iteration))
-        masses_tof = ms.CloneWorkspace(InputWorkspace = sample_data, OutputWorkspace = 'masses_tof_iteration_'+str(iteration))
-        gamma_correction = ms.CloneWorkspace(InputWorkspace=sample_data, OutputWorkspace = 'gamma_correction_iteration_'+str(iteration))
-        multiple_correction = ms.CloneWorkspace(InputWorkspace=sample_data, OutputWorkspace = 'multiple_correction_iteration_'+str(iteration))
+        hydrogen_tof = ms.CloneWorkspace(InputWorkspace=sample_data, OutputWorkspace=runs + '_iteration_' + str(iteration) + '_Hydrogen_tof')
+        masses_tof = ms.CloneWorkspace(InputWorkspace=sample_data, OutputWorkspace=runs + '_iteration_' + str(iteration) + '_Masses')
+        gb_correction = ms.CloneWorkspace(InputWorkspace=sample_data, OutputWorkspace=runs + '_correction_iteration_' + str(iteration) + '_GammaBackground')
+        ts_correction = ms.CloneWorkspace(InputWorkspace=sample_data, OutputWorkspace=runs + '_correction_iteration_' + str(iteration) + '_TotalScattering')
+        ms_correction = ms.CloneWorkspace(InputWorkspace=sample_data,OutputWorkspace=runs + '_correction_iteration_' + str(iteration) + '_MultipleScattering')
+        gb_corrected = ms.CloneWorkspace(InputWorkspace=sample_data, OutputWorkspace=runs + '_corrected_iteration_' + str(iteration) + '_GammaBackground')
+        ts_corrected = ms.CloneWorkspace(InputWorkspace=sample_data, OutputWorkspace=runs + '_corrected_iteration_' + str(iteration) + '_TotalScattering')
+        ms_corrected = ms.CloneWorkspace(InputWorkspace=sample_data,OutputWorkspace=runs + '_corrected_iteration_' + str(iteration) + '_MultipleScattering')
+
+        corrections_workspaces = [gb_correction,ts_correction,ms_correction,gb_corrected,ts_corrected,ms_corrected]
 
         iteration_flags = copy.deepcopy(flags)
         iteration_flags['iteration'] = iteration
@@ -87,20 +93,22 @@ def fit_tof(runs, flags, iterations=1, convergence_threshold=None):
                 break
 
         last_results = results
-
         workspaces = results[0]
         for index, ws in enumerate(workspaces):
             data_workspace = ws[0]
             multiple_scattering_correction = ws[4]
             gamma_correction_workspace = ws[2]
 
-            #for point in range(hydrogen_tof.blocksize()):
+            # for point in range(hydrogen_tof.blocksize()):
             hydrogen_tof.dataY(index)[:] = data_workspace.dataY(0)[:] - data_workspace.dataY(4)[:] - data_workspace.dataY(5)[:]
             masses_tof.dataY(index)[:] = data_workspace.dataY(4)[:] + data_workspace.dataY(5)[:]
             masses_tof.dataE(index)[:] = 0
+            gb_correction.dataY(index)[:] = gamma_correction_workspace.dataY(0)[:]
+            gb_correction.dataE(index)[:] = 0
+            ms_correction.dataY(index)[:] = multiple_scattering_correction.dataY(0)[:]
+            ms_correction.dataE(index)[:] = 0
 
-
-    return (last_results[0], last_results[2], last_results[3], exit_iteration)
+    return last_results[0], last_results[2], last_results[3], exit_iteration
 
 
 def fit_tof_iteration(sample_data, container_data, runs, flags):
@@ -166,7 +174,7 @@ def fit_tof_iteration(sample_data, container_data, runs, flags):
         ms.DeleteWorkspace(corrections_fit_name)
         corrections_args['FitParameters'] = pre_correction_pars_name
 
-        # Add the mutiple scattering arguments
+        # Add the multiple scattering arguments
         corrections_args.update(flags['ms_flags'])
 
         corrected_data_name = runs + "_tof_corrected" + suffix
@@ -253,7 +261,7 @@ def fit_tof_iteration(sample_data, container_data, runs, flags):
     else:
         result_ws = output_groups[0]
 
-    return (result_ws, pre_correct_pars_workspace, pars_workspace, chi2_values)
+    return result_ws, pre_correct_pars_workspace, pars_workspace, chi2_values
 
 
 def load_and_crop_data(runs, spectra, ip_file, diff_mode='single',
@@ -310,6 +318,7 @@ def load_and_crop_data(runs, spectra, ip_file, diff_mode='single',
 
     return tof_data
 
+
 # --------------------------------------------------------------------------------
 # Private Functions
 # --------------------------------------------------------------------------------
@@ -317,7 +326,7 @@ def load_and_crop_data(runs, spectra, ip_file, diff_mode='single',
 
 def _update_masses_from_params(old_masses, param_ws):
     """
-    Update the massses flag based on the results of a fit.
+    Update the masses flag based on the results of a fit.
 
     @param old_masses The existing masses dictionary
     @param param_ws The workspace to update from
@@ -390,7 +399,7 @@ def _create_tof_workspace_suffix(runs, spectra):
 
 def _create_fit_workspace_suffix(index, tof_data, fit_mode, spectra, iteration=None):
     if fit_mode == "bank":
-        suffix = "_" + spectra + "_bank_" + str(index+1)
+        suffix = "_" + spectra + "_bank_" + str(index + 1)
     else:
         spectrum = tof_data.getSpectrum(index)
         suffix = "_spectrum_" + str(spectrum.getSpectrumNo())
@@ -449,7 +458,7 @@ def _create_intensity_constraint_str(intensity_constraints):
     """
     if intensity_constraints:
         if not isinstance(intensity_constraints[0], list):
-            intensity_constraints = [intensity_constraints,]
+            intensity_constraints = [intensity_constraints, ]
         # Make each element a string and then join them together
         intensity_constraints = [str(c) for c in intensity_constraints]
         intensity_constraints_str = ";".join(intensity_constraints)
@@ -469,11 +478,11 @@ def _create_user_defined_ties_str(masses):
     for index, mass in enumerate(masses):
         if 'ties' in mass:
             ties = mass['ties'].split(',')
-            function_indentifier = 'f' + str(index) + '.'
+            function_identifier = 'f' + str(index) + '.'
             for t in ties:
-                tie_str = function_indentifier + t
+                tie_str = function_identifier + t
                 equal_pos = tie_str.index('=') + 1
-                tie_str = tie_str[:equal_pos] + function_indentifier + tie_str[equal_pos:]
+                tie_str = tie_str[:equal_pos] + function_identifier + tie_str[equal_pos:]
                 user_defined_ties.append(tie_str)
     user_defined_ties = ','.join(user_defined_ties)
     return user_defined_ties
