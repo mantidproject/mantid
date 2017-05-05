@@ -232,7 +232,7 @@ void profile(std::vector<double> &Xs, std::vector<double> &Ys,
  * @param n Number of summed points.
  * @return The average.
  */
-double averageMode(const double sum, const int n, const int) {
+double averageMode(const double sum, const int n, const int) noexcept {
   return sum / n;
 }
 
@@ -241,18 +241,19 @@ double averageMode(const double sum, const int n, const int) {
  * @param sum A sum of data points.
  * @return The sum.
  */
-double sumMode(const double sum, const int, const int) {
+double sumMode(const double sum, const int, const int) noexcept {
   return sum;
 }
 
 /**
- * A mode function for weighed summing.
- * @param sum
- * @param n
- * @param nTot
- * @return
+ * A mode function for weighed summing. The weight is inversely proportional
+ * to the number of data points in the sum.
+ * @param sum A sum of data points.
+ * @param n Number of summed points.
+ * @param nTot Total number of possible points, including NaNs and infs.
+ * @return The weighed sum.
  */
-double weighedSumMode(const double sum, const int n, const int nTot) {
+double weighedSumMode(const double sum, const int n, const int nTot) noexcept {
   return static_cast<double>(nTot) / static_cast<double>(n) * sum;
 }
 
@@ -260,7 +261,7 @@ double weighedSumMode(const double sum, const int n, const int nTot) {
  * Return a suitable function to calculate the profile over its width.
  * @param modeName The name of the calculation mode.
  */
-auto createMode(const std::string &modeName) {
+auto createMode(const std::string &modeName) noexcept {
   if (modeName == ModeChoices::AVERAGE) {
     return averageMode;
   }
