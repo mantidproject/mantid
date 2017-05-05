@@ -175,8 +175,7 @@ void KafkaTopicSubscriber::subscribeAtTime(int64_t time) {
                      << ", offset is set to: " << partition->offset()
                      << ", current high watermark is: "
                      << getCurrentOffset(partition->topic(),
-                                         partition->partition())
-                     << std::endl;
+                                         partition->partition()) << std::endl;
   }
   // Convert the timestamps to partition offsets
   auto error = m_consumer->offsetsForTimes(partitions, 10000);
@@ -194,8 +193,7 @@ void KafkaTopicSubscriber::subscribeAtTime(int64_t time) {
                        << ", looked up offset as: " << partition->offset()
                        << ", current high watermark is: "
                        << getCurrentOffset(partition->topic(),
-                                           partition->partition())
-                       << std::endl;
+                                           partition->partition()) << std::endl;
     }
   }
 

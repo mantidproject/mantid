@@ -171,8 +171,7 @@ public:
     auto runInfo = CreateRunInfo(
         builder, InfoTypes_RunStart,
         CreateRunStart(builder, startTime, m_runNumber,
-                       builder.CreateString(m_instName), m_nperiods)
-            .Union());
+                       builder.CreateString(m_instName), m_nperiods).Union());
     builder.Finish(runInfo);
     // Copy to provided buffer
     buffer->assign(reinterpret_cast<const char *>(builder.GetBufferPointer()),
