@@ -72,20 +72,20 @@ FitPropertyBrowser::FitPropertyBrowser(QWidget *parent, QObject *mantidui)
       m_fitActionFit(nullptr), m_fitActionEvaluate(nullptr),
       m_functionsGroup(nullptr), m_settingsGroup(nullptr),
       m_customSettingsGroup(nullptr), m_changeSlotsEnabled(false),
-      m_guessOutputName(true), m_fitMapper(nullptr),
+      m_guessOutputName(true),
       m_updateObserver(*this, &FitPropertyBrowser::handleFactoryUpdate),
-      m_fitMenu(nullptr), m_displayActionPlotGuess(nullptr),
-      m_displayActionQuality(nullptr), m_displayActionClearAll(nullptr),
-      m_setupActionCustomSetup(nullptr), m_tip(nullptr),
-      m_setupActionRemove(nullptr), m_fitSelector(nullptr), m_fitTree(nullptr),
-      m_currentHandler(0), m_defaultFunction("Gaussian"),
+      m_fitMapper(nullptr), m_fitMenu(nullptr),
+      m_displayActionPlotGuess(nullptr), m_displayActionQuality(nullptr),
+      m_displayActionClearAll(nullptr), m_setupActionCustomSetup(nullptr),
+      m_setupActionRemove(nullptr), m_tip(nullptr), m_fitSelector(nullptr),
+      m_fitTree(nullptr), m_currentHandler(0), m_defaultFunction("Gaussian"),
       m_defaultPeak("Gaussian"), m_defaultBackground("LinearBackground"),
       m_index_(0), m_peakToolOn(false), m_auto_back(false),
       m_autoBgName(QString::fromStdString(
           Mantid::Kernel::ConfigService::Instance().getString(
               "curvefitting.autoBackground"))),
-      m_autoBackground(nullptr), m_decimals(-1), m_shouldBeNormalised(false),
-      m_mantidui(mantidui) {
+      m_autoBackground(nullptr), m_decimals(-1), m_mantidui(mantidui),
+      m_shouldBeNormalised(false) {
   // Make sure plugins are loaded
   std::string libpath =
       Mantid::Kernel::ConfigService::Instance().getString("plugins.directory");
@@ -273,8 +273,7 @@ void FitPropertyBrowser::init() {
 * @param w widget parenting the action menus and the property tree browser
 */
 void FitPropertyBrowser::initLayout(QWidget *w) {
-  QPushButton *btnFit = createFitMenuButton(w);
-  initBasicLayout(w, btnFit);
+  initBasicLayout(w);
 }
 
 /**
@@ -289,34 +288,50 @@ QPushButton *FitPropertyBrowser::createFitMenuButton(QWidget *w) {
   QPushButton *btnFit = new QPushButton("Fit");
   m_tip = new QLabel("", w);
 
+  m_fitMapper = new QSignalMapper(this);
   m_fitMenu = new QMenu(this);
+  populateFitMenuButton(m_fitMapper,m_fitMenu);
+  connect(m_fitMapper, SIGNAL(mapped(const QString &)), this,
+          SLOT(executeFitMenu(const QString &)));
+  btnFit->setMenu(m_fitMenu);
+  return btnFit;
+
+}
+ 
+
+/**
+* @Populate the fit button.
+* This initialization includes:
+*   1. SIGNALs/SLOTs when properties change.
+*   2. Actions and associated SIGNALs/SLOTs.
+* @param fitMapper the QMap to the fit mapper
+* @param fitMenu the QMenu for the fit button
+*/
+void FitPropertyBrowser::populateFitMenuButton(QSignalMapper *fitMapper, QMenu *fitMenu) {
+  //assert(fitmapper);
+
   m_fitActionFit = new QAction("Fit", this);
   m_fitActionSeqFit = new QAction("Sequential Fit", this);
   m_fitActionUndoFit = new QAction("Undo Fit", this);
   m_fitActionEvaluate = new QAction("Evaluate function", this);
 
-  m_fitMapper = new QSignalMapper(this);
-  m_fitMapper->setMapping(m_fitActionFit, "Fit");
-  m_fitMapper->setMapping(m_fitActionSeqFit, "SeqFit");
-  m_fitMapper->setMapping(m_fitActionUndoFit, "UndoFit");
-  m_fitMapper->setMapping(m_fitActionEvaluate, "Evaluate");
+  fitMapper->setMapping(m_fitActionFit, "Fit");
+  fitMapper->setMapping(m_fitActionSeqFit, "SeqFit");
+  fitMapper->setMapping(m_fitActionUndoFit, "UndoFit");
+  fitMapper->setMapping(m_fitActionEvaluate, "Evaluate");
 
-  connect(m_fitActionFit, SIGNAL(triggered()), m_fitMapper, SLOT(map()));
-  connect(m_fitActionSeqFit, SIGNAL(triggered()), m_fitMapper, SLOT(map()));
-  connect(m_fitActionUndoFit, SIGNAL(triggered()), m_fitMapper, SLOT(map()));
-  connect(m_fitActionEvaluate, SIGNAL(triggered()), m_fitMapper, SLOT(map()));
-
-  connect(m_fitMapper, SIGNAL(mapped(const QString &)), this,
-          SLOT(executeFitMenu(const QString &)));
-  m_fitMenu->addAction(m_fitActionFit);
-  m_fitMenu->addAction(m_fitActionSeqFit);
-  m_fitMenu->addAction(m_fitActionEvaluate);
-  m_fitMenu->addSeparator();
-  m_fitMenu->addAction(m_fitActionUndoFit);
-  m_fitMenu->addSeparator();
-  btnFit->setMenu(m_fitMenu);
-  return btnFit;
-}
+  connect(m_fitActionFit, SIGNAL(triggered()), fitMapper, SLOT(map()));
+  connect(m_fitActionSeqFit, SIGNAL(triggered()),fitMapper, SLOT(map()));
+  connect(m_fitActionUndoFit, SIGNAL(triggered()), fitMapper, SLOT(map()));
+  connect(m_fitActionEvaluate, SIGNAL(triggered()),fitMapper, SLOT(map()));
+ 
+  fitMenu->addAction(m_fitActionFit);
+  fitMenu->addAction(m_fitActionSeqFit);
+  fitMenu->addAction(m_fitActionEvaluate);
+  fitMenu->addSeparator();
+  fitMenu->addAction(m_fitActionUndoFit);
+  fitMenu->addSeparator();
+ }
 /**
 * @brief Initialise the layout, except for the fit button in the menu bar.
 * This initialization includes:
@@ -325,9 +340,9 @@ QPushButton *FitPropertyBrowser::createFitMenuButton(QWidget *w) {
 *   3. Initialize the CompositeFunction, the root from which to build the Model.
 *   4. Update the list of available functions
 * @param w widget parenting the action menus and the property tree browser
-* @param btnFit the fit push button
 */
-void FitPropertyBrowser::initBasicLayout(QWidget *w, QPushButton *btnFit) {
+void FitPropertyBrowser::initBasicLayout(QWidget *w) {
+  QPushButton *btnFit=createFitMenuButton(w);
   // to be able to change windows title from tread
   connect(this, SIGNAL(changeWindowTitle(const QString &)), this,
           SLOT(setWindowTitle(const QString &)));
@@ -3121,5 +3136,12 @@ void FitPropertyBrowser::allowSequentialFits(bool allow) {
   }
 }
 
+void FitPropertyBrowser::modifyFitMenu(QAction *fitAction,bool enabled){
+	if(enabled){
+		m_fitMenu->addAction(fitAction);
+	}else{
+		m_fitMenu->removeAction(fitAction);
+	}
+}
 } // MantidQt
 } // API

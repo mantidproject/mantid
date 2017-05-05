@@ -103,7 +103,7 @@ public slots:
   void fit() override;
   /// Open sequential fit dialog
   void sequentialFit() override;
-  void executeMuonFitMenu(const QString &item);
+  void executeFitMenu(const QString &item) override;
 signals:
   /// Emitted when sequential fit is requested by user
   void sequentialFitRequested();
@@ -131,9 +131,8 @@ private slots:
 private:
   /// new menu option
   QAction *m_fitActiontest;
-  /// Create new fit menu
-  QPushButton *createMuonFitMenuButton(QWidget *w);
-
+  /// override populating fit menu
+  void populateFitMenuButton(QSignalMapper *fitMapper, QMenu *fitMenu) override;
   /// Get the registered function names
   void populateFunctionNames() override;
   /// Check if the workspace can be used in the fit
