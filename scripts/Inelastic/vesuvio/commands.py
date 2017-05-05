@@ -103,10 +103,11 @@ def fit_tof(runs, flags, iterations=1, convergence_threshold=None):
             hydrogen_tof.dataY(index)[:] = data_workspace.dataY(0)[:] - data_workspace.dataY(4)[:] - data_workspace.dataY(5)[:]
             masses_tof.dataY(index)[:] = data_workspace.dataY(4)[:] + data_workspace.dataY(5)[:]
             masses_tof.dataE(index)[:] = 0
-            gb_correction.dataY(index)[:] = gamma_correction_workspace.dataY(0)[:]
-            gb_correction.dataE(index)[:] = 0
-            ms_correction.dataY(index)[:] = multiple_scattering_correction.dataY(0)[:]
-            ms_correction.dataE(index)[:] = 0
+            k = list(ws)
+            for c_ws, old_ws in zip(corrections_workspaces,k[2:]):
+                print(c_ws,old_ws)
+                c_ws.dataY(index)[:] = old_ws.dataY(0)[:]
+                c_ws.dataE(index)[:] = 0
 
     return last_results[0], last_results[2], last_results[3], exit_iteration
 
