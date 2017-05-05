@@ -9,10 +9,9 @@ from isis_powder.polaris_routines import polaris_advanced_config, polaris_algs, 
 
 class Polaris(AbstractInst):
     def __init__(self, **kwargs):
-        basic_config_dict = yaml_parser.open_yaml_file_as_dictionary(kwargs.get("config_file", None))
         self._inst_settings = instrument_settings.InstrumentSettings(
             param_map=polaris_param_mapping.attr_mapping, adv_conf_dict=polaris_advanced_config.variables,
-            basic_conf_dict=basic_config_dict, kwargs=kwargs)
+            kwargs=kwargs)
 
         super(Polaris, self).__init__(user_name=self._inst_settings.user_name,
                                       calibration_dir=self._inst_settings.calibration_dir,
