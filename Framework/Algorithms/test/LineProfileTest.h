@@ -86,7 +86,8 @@ public:
 
     const int start = 2;
     const int end = nBins - 2;
-    Workspace2D_sptr outputWS = profileOverTwoSpectra(inputWS, start, end, "Sum");
+    Workspace2D_sptr outputWS =
+        profileOverTwoSpectra(inputWS, start, end, "Sum");
     TS_ASSERT(outputWS);
     TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 1)
     const auto hist = outputWS->histogram(0);
@@ -98,7 +99,7 @@ public:
     }
     const double realE = std::sqrt(2 * inputWS->e(0)[0] * inputWS->e(0)[0]);
     for (const auto e : hist.e()) {
-      TS_ASSERT_EQUALS(e, realE )
+      TS_ASSERT_EQUALS(e, realE)
     }
     const auto vertAxis = outputWS->getAxis(1);
     TS_ASSERT_EQUALS(vertAxis->getValue(0),
@@ -116,7 +117,8 @@ public:
     }
     const int start = 2;
     const int end = nBins - 2;
-    Workspace2D_sptr outputWS = profileOverTwoSpectra(inputWS, start, end, "Weighed Sum");
+    Workspace2D_sptr outputWS =
+        profileOverTwoSpectra(inputWS, start, end, "Weighed Sum");
     TS_ASSERT(outputWS);
     TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 1)
     const auto hist = outputWS->histogram(0);
@@ -348,7 +350,9 @@ public:
   }
 
 private:
-  Workspace2D_sptr profileOverTwoSpectra(MatrixWorkspace_sptr inputWS, const int start, const int end, const std::string& mode) {
+  Workspace2D_sptr profileOverTwoSpectra(MatrixWorkspace_sptr inputWS,
+                                         const int start, const int end,
+                                         const std::string &mode) {
     LineProfile alg;
     // Don't put output in ADS by default
     alg.setChild(true);
@@ -358,8 +362,8 @@ private:
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", inputWS))
     TS_ASSERT_THROWS_NOTHING(
         alg.setPropertyValue("OutputWorkspace", "_unused_for_child"))
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setProperty("Centre", static_cast<double>(inputWS->getNumberHistograms()) / 2))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty(
+        "Centre", static_cast<double>(inputWS->getNumberHistograms()) / 2))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("HalfWidth", 0.5))
     TS_ASSERT_THROWS_NOTHING(
         alg.setProperty("Start", static_cast<double>(start)))
@@ -371,7 +375,6 @@ private:
     Workspace2D_sptr outputWS = alg.getProperty("OutputWorkspace");
     return outputWS;
   }
-
 };
 
 #endif /* MANTID_ALGORITHMS_LINEPROFILETEST_H_ */

@@ -194,8 +194,9 @@ template <typename Container, typename Function>
 void profile(std::vector<double> &Xs, std::vector<double> &Ys,
              std::vector<double> &Es, const MatrixWorkspace_const_sptr &ws,
              const LineDirection dir, const IndexLimits &limits,
-             const Container &lineBins, const bool isBinEdges, Function modeFunction,
-             const bool ignoreNans, const bool ignoreInfs) {
+             const Container &lineBins, const bool isBinEdges,
+             Function modeFunction, const bool ignoreNans,
+             const bool ignoreInfs) {
   const auto lineSize = limits.lineEnd - limits.lineStart;
   Xs.resize(lineSize + (isBinEdges ? 1 : 0));
   Ys.resize(lineSize);
@@ -216,8 +217,10 @@ void profile(std::vector<double> &Xs, std::vector<double> &Ys,
       eSqSum += ws->e(iVert)[iHor] * ws->e(iVert)[iHor];
       ++n;
     }
-    const int nTotal = static_cast<int>(limits.widthEnd) - static_cast<int>(limits.widthStart);
-    Ys[i - limits.lineStart] = n == 0 ? std::nan("") : modeFunction(ySum, n, nTotal);
+    const int nTotal =
+        static_cast<int>(limits.widthEnd) - static_cast<int>(limits.widthStart);
+    Ys[i - limits.lineStart] =
+        n == 0 ? std::nan("") : modeFunction(ySum, n, nTotal);
     const double e = modeFunction(std::sqrt(eSqSum), n, nTotal);
     Es[i - limits.lineStart] = std::isnan(e) ? 0 : e;
   }
@@ -241,9 +244,7 @@ double averageMode(const double sum, const int n, const int) noexcept {
  * @param sum A sum of data points.
  * @return The sum.
  */
-double sumMode(const double sum, const int, const int) noexcept {
-  return sum;
-}
+double sumMode(const double sum, const int, const int) noexcept { return sum; }
 
 /**
  * A mode function for weighed summing. The weight is inversely proportional
@@ -323,13 +324,14 @@ void LineProfile::init() {
                   "Orientation of the profile line.");
   declareProperty(PropertyNames::START, EMPTY_DBL(),
                   "Starting point of the line.");
-  declareProperty(PropertyNames::END, EMPTY_DBL(),
-                  "End point of the line.");
-  const std::set<std::string> modes{ModeChoices::AVERAGE, ModeChoices::SUM, ModeChoices::WEIGHED_SUM};
-  declareProperty(PropertyNames::MODE, ModeChoices::AVERAGE, boost::make_shared<ListValidator<std::string>>(modes), "How the profile is calculated over the line width.");
-  declareProperty(
-      PropertyNames::IGNORE_INFS, false,
-      "If true, ignore infinities when calculating the profile.");
+  declareProperty(PropertyNames::END, EMPTY_DBL(), "End point of the line.");
+  const std::set<std::string> modes{ModeChoices::AVERAGE, ModeChoices::SUM,
+                                    ModeChoices::WEIGHED_SUM};
+  declareProperty(PropertyNames::MODE, ModeChoices::AVERAGE,
+                  boost::make_shared<ListValidator<std::string>>(modes),
+                  "How the profile is calculated over the line width.");
+  declareProperty(PropertyNames::IGNORE_INFS, false,
+                  "If true, ignore infinities when calculating the profile.");
   declareProperty(
       PropertyNames::IGNORE_NANS, true,
       "If true, ignore not-a-numbers when calculating the profile.");
