@@ -88,7 +88,16 @@ def fit_tof(runs, flags, iterations=1, convergence_threshold=None):
 
         last_results = results
 
+        workspaces = results[0]
+        for index, ws in enumerate(workspaces):
+            data_workspace = ws[0]
+            multiple_scattering_correction = ws[4]
+            gamma_correction_workspace = ws[2]
 
+            #for point in range(hydrogen_tof.blocksize()):
+            hydrogen_tof.dataY(index)[:] = data_workspace.dataY(0)[:] - data_workspace.dataY(4)[:] - data_workspace.dataY(5)[:]
+            masses_tof.dataY(index)[:] = data_workspace.dataY(4)[:] + data_workspace.dataY(5)[:]
+            masses_tof.dataE(index)[:] = 0
 
 
     return (last_results[0], last_results[2], last_results[3], exit_iteration)
