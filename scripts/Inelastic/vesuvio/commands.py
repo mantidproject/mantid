@@ -96,10 +96,7 @@ def fit_tof(runs, flags, iterations=1, convergence_threshold=None):
         workspaces = results[0]
         for index, ws in enumerate(workspaces):
             data_workspace = ws[0]
-            multiple_scattering_correction = ws[4]
-            gamma_correction_workspace = ws[2]
 
-            # for point in range(hydrogen_tof.blocksize()):
             hydrogen_tof.dataY(index)[:] = data_workspace.dataY(0)[:] - data_workspace.dataY(4)[:] - data_workspace.dataY(5)[:]
             masses_tof.dataY(index)[:] = data_workspace.dataY(4)[:] + data_workspace.dataY(5)[:]
             masses_tof.dataE(index)[:] = 0
@@ -108,6 +105,13 @@ def fit_tof(runs, flags, iterations=1, convergence_threshold=None):
                 print(c_ws,old_ws)
                 c_ws.dataY(index)[:] = old_ws.dataY(0)[:]
                 c_ws.dataE(index)[:] = 0
+
+        ms.GroupWorkspaces(InputWorkspaces=[ws[0] for ws in workspaces], OutputWorkspace=runs + '_data_iteration_' + str(iteration))
+        ms.GroupWorkspaces(InputWorkspaces=[ws[1] for ws in workspaces], OutputWorkspace=runs + '_params_iteration_' + str(iteration))
+        ms.GroupWorkspaces(InputWorkspaces = corrections_workspaces, OutputWorkspace = runs+'_iteration_'+str(iteration))
+
+        for ws in workspaces:
+            ms.DeleteWorkspace(ws)
 
     return last_results[0], last_results[2], last_results[3], exit_iteration
 
