@@ -37,50 +37,54 @@ namespace DataObjects {
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class MANTID_DATAOBJECTS_DLL ScanningWorkspaceBuilder {
- public:
-   enum class IndexingType { DEFAULT, TIME_ORIENTED, DETECTOR_ORIENTED };
+public:
+  enum class IndexingType { DEFAULT, TIME_ORIENTED, DETECTOR_ORIENTED };
 
-   ScanningWorkspaceBuilder(size_t nDetectors, size_t nTimeIndexes,
-                            size_t nBins);
+  ScanningWorkspaceBuilder(size_t nDetectors, size_t nTimeIndexes,
+                           size_t nBins);
 
-   void setInstrument(boost::shared_ptr<const Geometry::Instrument> instrument);
-   void setTimeRanges(const std::vector<
-       std::pair<Kernel::DateAndTime, Kernel::DateAndTime>> &timeRanges);
-   void setTimeRanges(const Kernel::DateAndTime &startTime,
-                      const std::vector<double> &durations);
-   void setPositions(std::vector<std::vector<Kernel::V3D>> &positions);
-   void setRotations(std::vector<std::vector<Kernel::Quat>> &rotations);
-   void setInstrumentAngles(std::vector<double> &instrumentAngles);
+  void setHistogram(HistogramData::Histogram histogram);
 
-   void setIndexingType(IndexingType indexingType);
+  void setInstrument(boost::shared_ptr<const Geometry::Instrument> instrument);
+  void setTimeRanges(const std::vector<
+      std::pair<Kernel::DateAndTime, Kernel::DateAndTime>> &timeRanges);
+  void setTimeRanges(const Kernel::DateAndTime &startTime,
+                     const std::vector<double> &durations);
+  void setPositions(std::vector<std::vector<Kernel::V3D>> &positions);
+  void setRotations(std::vector<std::vector<Kernel::Quat>> &rotations);
+  void setInstrumentAngles(std::vector<double> &instrumentAngles);
 
-   API::MatrixWorkspace_sptr buildWorkspace();
+  void setIndexingType(IndexingType indexingType);
 
- private:
-   size_t m_nDetectors;
-   size_t m_nTimeIndexes;
-   size_t m_nBins;
+  API::MatrixWorkspace_sptr buildWorkspace();
 
-   boost::shared_ptr<const Geometry::Instrument> m_instrument;
-   std::vector<std::pair<Kernel::DateAndTime, Kernel::DateAndTime>> m_timeRanges;
-   std::vector<std::vector<Kernel::V3D>> m_positions;
-   std::vector<std::vector<Kernel::Quat>> m_rotations;
-   std::vector<double> m_instrumentAngles;
+private:
+  size_t m_nDetectors;
+  size_t m_nTimeIndexes;
+  size_t m_nBins;
 
-   IndexingType m_indexingType;
+  HistogramData::Histogram m_histogram;
 
-   void buildPositions(API::DetectorInfo &outputDetectorInfo) const;
-   void buildRotations(API::DetectorInfo &outputDetectorInfo) const;
-   void buildInstrumentAngles(API::DetectorInfo &outputDetectorInfo) const;
+  boost::shared_ptr<const Geometry::Instrument> m_instrument;
+  std::vector<std::pair<Kernel::DateAndTime, Kernel::DateAndTime>> m_timeRanges;
+  std::vector<std::vector<Kernel::V3D>> m_positions;
+  std::vector<std::vector<Kernel::Quat>> m_rotations;
+  std::vector<double> m_instrumentAngles;
 
-   void createTimeOrientedIndexInfo(API::MatrixWorkspace_sptr &ws);
-   void createDetectorOrientedIndexInfo(API::MatrixWorkspace_sptr &ws);
+  IndexingType m_indexingType;
 
-   void verifyTimeIndexSize(size_t timeIndexSize,
-                            const std::string &description) const;
-   void verifyDetectorSize(size_t detectorSize,
+  void buildPositions(API::DetectorInfo &outputDetectorInfo) const;
+  void buildRotations(API::DetectorInfo &outputDetectorInfo) const;
+  void buildInstrumentAngles(API::DetectorInfo &outputDetectorInfo) const;
+
+  void createTimeOrientedIndexInfo(API::MatrixWorkspace &ws);
+  void createDetectorOrientedIndexInfo(API::MatrixWorkspace &ws);
+
+  void verifyTimeIndexSize(size_t timeIndexSize,
                            const std::string &description) const;
-   void validateInputs() const;
+  void verifyDetectorSize(size_t detectorSize,
+                          const std::string &description) const;
+  void validateInputs() const;
 };
 
 } // namespace DataObjects

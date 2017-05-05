@@ -6,6 +6,7 @@
 #include "MantidAPI/FunctionProperty.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidDataObjects/ScanningWorkspaceBuilder.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
@@ -159,6 +160,10 @@ void CreateSampleWorkspace::init() {
                   boost::make_shared<BoundedValidator<double>>(0, 1000, true),
                   "The distance along the beam direction from the source to "
                   "the sample in M (default:10.0)");
+  auto maximumValidator = boost::make_shared<BoundedValidator<int>>();
+  maximumValidator->setUpper(360);
+  declareProperty("NumScanPoints", 0, maximumValidator,
+                  "Add a number of detector scan points to the instrument.");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -180,6 +185,7 @@ void CreateSampleWorkspace::exec() {
   const double pixelSpacing = getProperty("PixelSpacing");
   const double bankDistanceFromSample = getProperty("BankDistanceFromSample");
   const double sourceSampleDistance = getProperty("SourceDistanceFromSample");
+  const int numScanPoints = getProperty("NumScanPoints");
 
   if (xMax <= xMin) {
     throw std::invalid_argument("XMax must be larger than XMin");
@@ -226,6 +232,10 @@ void CreateSampleWorkspace::exec() {
   if (wsType == "Event") {
     ws = createEventWorkspace(numPixels, numBins, numMonitors, numEvents, xMin,
                               binWidth, inst, functionString, isRandom);
+  } else if (numScanPoints > 0) {
+    ws =
+        createScanningWorkspace(numPixels, numBins, numMonitors, xMin, binWidth,
+                                inst, functionString, isRandom, numScanPoints);
   } else {
     ws = createHistogramWorkspace(numPixels, numBins, numMonitors, xMin,
                                   binWidth, inst, functionString, isRandom);
@@ -307,6 +317,36 @@ MatrixWorkspace_sptr CreateSampleWorkspace::createHistogramWorkspace(
   indexInfo.setSpectrumDefinitions(std::move(specDefs));
 
   return create<Workspace2D>(inst, indexInfo, Histogram(x, y));
+}
+
+/** Create scanning histogram workspace
+ */
+MatrixWorkspace_sptr CreateSampleWorkspace::createScanningWorkspace(
+    int numPixels, int numBins, int numMonitors, double x0, double binDelta,
+    Geometry::Instrument_sptr inst, const std::string &functionString,
+    bool isRandom, int numScanPoints) {
+  auto builder =
+      ScanningWorkspaceBuilder(numPixels + numMonitors, numScanPoints, numBins);
+  builder.setInstrument(inst);
+
+  auto angles = std::vector<double>();
+  auto timeRanges = std::vector<double>();
+  for (int i = 0; i < numScanPoints; ++i) {
+    angles.push_back(double(i));
+    timeRanges.push_back(double(i + 1));
+  }
+
+  builder.setTimeRanges(Kernel::DateAndTime(0), timeRanges);
+  builder.setInstrumentAngles(angles);
+
+  BinEdges x(numBins + 1, LinearGenerator(x0, binDelta));
+
+  std::vector<double> xValues(cbegin(x), cend(x) - 1);
+  Counts y(evalFunction(functionString, xValues, isRandom ? 1 : 0));
+
+  builder.setHistogram(Histogram(x, y));
+
+  return builder.buildWorkspace();
 }
 
 /** Create event workspace

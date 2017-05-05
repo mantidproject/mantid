@@ -2,7 +2,12 @@
 
 #include "MantidAPI/DetectorInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidHistogramData/BinEdges.h"
+#include "MantidHistogramData/Histogram.h"
+#include "MantidHistogramData/LinearGenerator.h"
 #include "MantidTypes/SpectrumDefinition.h"
 
 using namespace Mantid::API;
@@ -15,6 +20,7 @@ ScanningWorkspaceBuilder::ScanningWorkspaceBuilder(size_t nDetectors,
                                                    size_t nTimeIndexes,
                                                    size_t nBins)
     : m_nDetectors(nDetectors), m_nTimeIndexes(nTimeIndexes), m_nBins(nBins),
+      m_histogram(HistogramData::BinEdges({0, 1})),
       m_indexingType(IndexingType::DEFAULT) {}
 
 void ScanningWorkspaceBuilder::setInstrument(
@@ -26,6 +32,16 @@ void ScanningWorkspaceBuilder::setInstrument(
   }
 
   m_instrument = instrument;
+}
+
+void ScanningWorkspaceBuilder::setHistogram(
+    HistogramData::Histogram histogram) {
+  if ((histogram.counts().size() != m_nDetectors * m_nTimeIndexes) ||
+      (histogram.binEdges().size() != m_nBins + 1))
+    throw std::logic_error(
+        "Histogram supplied does not have the correct size.");
+
+  m_histogram = histogram;
 }
 
 void ScanningWorkspaceBuilder::setTimeRanges(const std::vector<
@@ -106,18 +122,15 @@ void ScanningWorkspaceBuilder::setIndexingType(IndexingType indexingType) {
 MatrixWorkspace_sptr ScanningWorkspaceBuilder::buildWorkspace() {
   validateInputs();
 
-  auto outputWorkspace = WorkspaceFactory::Instance().create(
-      "Workspace2D", m_nDetectors * m_nTimeIndexes, m_nBins + 1, m_nBins);
-  outputWorkspace->setInstrument(m_instrument);
-
-  MatrixWorkspace_const_sptr parentWorkspace = outputWorkspace->clone();
+  auto outputWorkspace = create<Workspace2D>(
+      m_instrument, m_nDetectors * m_nTimeIndexes, m_histogram);
 
   auto &outputDetectorInfo = outputWorkspace->mutableDetectorInfo();
   outputDetectorInfo.setScanInterval(0, m_timeRanges[0]);
 
   for (size_t i = 1; i < m_nTimeIndexes; ++i) {
-    auto mergeWorkspace =
-        WorkspaceFactory::Instance().create(parentWorkspace, m_nDetectors);
+    const auto mergeWorkspace =
+        create<Workspace2D>(m_instrument, m_nDetectors, m_histogram.binEdges());
     auto &mergeDetectorInfo = mergeWorkspace->mutableDetectorInfo();
     for (size_t j = 0; j < m_nDetectors; ++j) {
       mergeDetectorInfo.setScanInterval(j, m_timeRanges[i]);
@@ -140,14 +153,14 @@ MatrixWorkspace_sptr ScanningWorkspaceBuilder::buildWorkspace() {
         Indexing::IndexInfo(m_nDetectors * m_nTimeIndexes));
     break;
   case IndexingType::TIME_ORIENTED:
-    createTimeOrientedIndexInfo(outputWorkspace);
+    createTimeOrientedIndexInfo(*outputWorkspace);
     break;
   case IndexingType::DETECTOR_ORIENTED:
-    createDetectorOrientedIndexInfo(outputWorkspace);
+    createDetectorOrientedIndexInfo(*outputWorkspace);
     break;
   }
 
-  return outputWorkspace;
+  return boost::shared_ptr<MatrixWorkspace>(std::move(outputWorkspace));
 }
 
 void ScanningWorkspaceBuilder::buildRotations(
@@ -183,8 +196,8 @@ void ScanningWorkspaceBuilder::buildInstrumentAngles(
 }
 
 void ScanningWorkspaceBuilder::createTimeOrientedIndexInfo(
-    MatrixWorkspace_sptr &ws) {
-  auto indexInfo = ws->indexInfo();
+    MatrixWorkspace &ws) {
+  auto indexInfo = ws.indexInfo();
   auto spectrumDefinitions = Kernel::make_cow<std::vector<SpectrumDefinition>>(
       m_nDetectors * m_nTimeIndexes);
 
@@ -196,12 +209,12 @@ void ScanningWorkspaceBuilder::createTimeOrientedIndexInfo(
   }
 
   indexInfo.setSpectrumDefinitions(spectrumDefinitions);
-  ws->setIndexInfo(indexInfo);
+  ws.setIndexInfo(indexInfo);
 }
 
 void ScanningWorkspaceBuilder::createDetectorOrientedIndexInfo(
-    MatrixWorkspace_sptr &ws) {
-  auto indexInfo = ws->indexInfo();
+    MatrixWorkspace &ws) {
+  auto indexInfo = ws.indexInfo();
   auto spectrumDefinitions = Kernel::make_cow<std::vector<SpectrumDefinition>>(
       m_nDetectors * m_nTimeIndexes);
 
@@ -213,7 +226,7 @@ void ScanningWorkspaceBuilder::createDetectorOrientedIndexInfo(
   }
 
   indexInfo.setSpectrumDefinitions(spectrumDefinitions);
-  ws->setIndexInfo(indexInfo);
+  ws.setIndexInfo(indexInfo);
 }
 
 void ScanningWorkspaceBuilder::verifyTimeIndexSize(
