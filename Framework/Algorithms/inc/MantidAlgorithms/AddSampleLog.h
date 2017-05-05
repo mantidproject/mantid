@@ -5,6 +5,8 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/ExperimentInfo.h"
+#include "MantidAPI/Run.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -63,6 +65,44 @@ private:
   void init() override;
   /// Execution code
   void exec() override;
+
+  void addStringLog(API::Run &theRun, const std::string &propName,
+                    const std::string &propValue, const std::string &propUnit);
+
+  void addTimeSeriesProperty(API::Run &run_obj, const std::string &prop_name,
+                             const std::string &prop_value,
+                             const std::string &prop_unit,
+                             const std::string &prop_number_type);
+
+  void addSingleValueProperty(API::Run &theRun, const std::string &propName,
+                              const std::string &propValue,
+                              const std::string &propUnit,
+                              const std::string &propNumberType);
+
+  /// set the time series property's entries to the newly added
+  /// TimeSeriesProperty
+  void setTimeSeriesData(API::Run &run_obj, const std::string &property_name,
+                         bool value_is_int);
+
+  /// get run start time
+  Kernel::DateAndTime getRunStart(API::Run &run_obj);
+
+  /// get value vector of the integer TimeSeriesProperty entries
+  std::vector<int> getIntValues(API::MatrixWorkspace_const_sptr dataws,
+                                int workspace_index);
+
+  /// get value vector of the double TimeSeriesProperty entries
+  std::vector<double> getDblValues(API::MatrixWorkspace_const_sptr dataws,
+                                   int workspace_index);
+
+  /// get the vector of times of the TimeSeriesProperty entries
+  std::vector<Kernel::DateAndTime>
+  getTimes(API::MatrixWorkspace_const_sptr dataws, int workspace_index,
+           bool is_epoch, bool is_second, API::Run &run_obj);
+
+  /// get meta data from input workspace or user input
+  void getMetaData(API::MatrixWorkspace_const_sptr dataws, bool &epochtime,
+                   std::string &timeunit);
 };
 
 } // namespace Algorithms

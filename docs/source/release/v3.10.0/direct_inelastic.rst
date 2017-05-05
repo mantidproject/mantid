@@ -33,7 +33,9 @@ Deprecated
 Crystal Field
 -------------
 
-- Now accepts arbitrary `J` (or `S` - angular momentum quantum number, determining the basis states) 
-  values with the syntax: `Ion=S<n>` or `Ion=J<n>` where `<n>` is an integer or half integer.
+- Now accepts arbitrary ``J`` (or ``S`` - angular momentum quantum number, determining the basis states) 
+  values with the syntax: ``Ion=S<n>`` or ``Ion=J<n>`` where ``<n>`` is an integer or half integer.
+- Crystal field parameters from a *point charge model* can now be calculated using the ``PointCharge`` class, from a defined crystal structure or CIF file. 
+  See the :ref:`Crystal Field Python Interface` for details of the syntax.
 
 `Full list of changes on GitHub <https://github.com/mantidproject/mantid/issues?q=is%3Aclosed+milestone%3A%22Release+3.10%22+label%3A%22Component%3A+Direct+Inelastic%22>`_

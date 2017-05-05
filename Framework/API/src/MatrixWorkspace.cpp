@@ -1027,11 +1027,7 @@ void MatrixWorkspace::flagMasked(const size_t &index, const size_t &binIndex,
     // First get a reference to the list for this spectrum (or create a new
     // list)
     MaskList &binList = m_masks[index];
-    auto it = binList.find(binIndex);
-    if (it != binList.end()) {
-      binList.erase(it);
-    }
-    binList.emplace(binIndex, weight);
+    binList[binIndex] = weight;
   }
 }
 

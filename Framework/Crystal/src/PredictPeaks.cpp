@@ -10,6 +10,9 @@
 #include "MantidGeometry/Objects/InstrumentRayTracer.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/EnabledWhenProperty.h"
+#include "MantidGeometry/Instrument/RectangularDetector.h"
+#include "MantidKernel/BoundedValidator.h"
+#include "MantidGeometry/Crystal/EdgePixel.h"
 
 using Mantid::Kernel::EnabledWhenProperty;
 
@@ -125,6 +128,11 @@ void PredictPeaks::init() {
                   "Use an extended detector space (if defined for the"
                   " instrument) to predict peaks which do not fall onto any"
                   "detector. This may produce a very high number of results.");
+
+  auto nonNegativeInt = boost::make_shared<BoundedValidator<int>>();
+  nonNegativeInt->setLower(0);
+  declareProperty("EdgePixels", 0, nonNegativeInt,
+                  "Remove peaks that are at pixels this close to edge. ");
 }
 
 /** Execute the algorithm.
@@ -132,6 +140,7 @@ void PredictPeaks::init() {
 void PredictPeaks::exec() {
   // Get the input properties
   Workspace_sptr rawInputWorkspace = getProperty("InputWorkspace");
+  m_edge = this->getProperty("EdgePixels");
 
   ExperimentInfo_sptr inputExperimentInfo =
       boost::dynamic_pointer_cast<ExperimentInfo>(rawInputWorkspace);
@@ -465,7 +474,10 @@ void PredictPeaks::calculateQAndAddToOutput(const V3D &hkl,
 
   // Create the peak using the Q in the lab framewith all its info:
   Peak p(m_inst, q);
-
+  if (m_edge > 0) {
+    if (edgePixel(m_inst, p.getBankName(), p.getCol(), p.getRow(), m_edge))
+      return;
+  }
   /* The constructor calls setQLabFrame, which already calls findDetector, which
      is expensive. It's not necessary to call it again, instead it's enough to
      check whether a detector has already been set.

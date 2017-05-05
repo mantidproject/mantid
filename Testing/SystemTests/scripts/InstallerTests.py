@@ -1,53 +1,31 @@
+from __future__ import (absolute_import, division, print_function)
 """Finds a package, installs it and runs the tests against it.
 """
+import argparse
 import os
-import sys
-import platform
-import shutil
 import subprocess
-import sys
 
-from getopt import getopt
-
-from mantidinstaller import (createScriptLog, log, stop, failure, scriptfailure, 
+from mantidinstaller import (createScriptLog, log, stop, failure, scriptfailure,
                              get_installer, run)
 
 THIS_MODULE_DIR = os.path.dirname(os.path.realpath(__file__))
 SAVE_DIR_LIST_PATH = os.path.join(THIS_MODULE_DIR, "defaultsave-directory.txt")
 
-try:
-    opt, argv = getopt(sys.argv[1:],'d:nohvR:l:')
-except:
-    opt = [('-h','')]
-
-if ('-h','') in opt:
-    print "Usage: %s [OPTIONS]" % os.path.basename(sys.argv[0])
-    print
-    print "Valid options are:"
-    print "       -d Directory to look for packages. Defaults to current working directory"
-    print "       -n Run tests without installing Mantid (it must be already installed)"
-    print "       -o Output to the screen instead of log files"
-    print "       -h Display the usage"
-    print "       -R Optionally only run the test matched by the regex"
-    print "       -l Log level"
-    sys.exit(0)
-
-doInstall = True
-test_regex = None
-out2stdout = False
-log_level = 'notice'
-package_dir = os.getcwd()
-for option, arg in opt:
-    if option == '-n':
-        doInstall = False
-    if option == '-o':
-        out2stdout = True
-    if option == '-R' and arg != "":
-        test_regex = arg
-    if option == '-l' and arg != "":
-        log_level = arg
-    if option == '-d' and arg != "":
-        package_dir = arg
+parser = argparse.ArgumentParser()
+parser.add_argument('-d', dest='package_dir', metavar='directory', default=os.getcwd(),
+                    help='Directory to look for packages. Defaults to current working directory')
+parser.add_argument('-n', dest='doInstall', action='store_false',
+                    help='Run tests without installing Mantid (it must be already installed)')
+parser.add_argument('-o', dest='out2stdout', action='store_true',
+                    help='Output to the screen instead of log files')
+parser.add_argument('-R', dest='test_regex', metavar='regexp', default=None,
+                    help='Optionally only run the test matched by the regex')
+parser.add_argument('--archivesearch', dest='archivesearch', action='store_true',
+                    help='Turn on archive search for file finder')
+log_levels = ['error', 'warning', 'notice', 'information', 'debug']
+parser.add_argument('-l', dest='log_level', metavar='level', default='notice',
+                    choices=log_levels, help='Log level '+str(log_levels))
+options = parser.parse_args()
 
 # Log to the configured default save directory
 with open(SAVE_DIR_LIST_PATH, 'r') as f_handle:
@@ -58,17 +36,17 @@ testRunLogPath = os.path.join(output_dir, "test_output.log")
 testRunErrPath = os.path.join(output_dir, "test_errors.log")
 
 log('Starting system tests')
-log('Searching for packages in ' + package_dir)
-installer = get_installer(package_dir, doInstall)
+log('Searching for packages in ' + options.package_dir)
+installer = get_installer(options.package_dir, options.doInstall)
 
 # Install the found package
-if doInstall:
+if options.doInstall:
     log("Installing package '%s'" % installer.mantidInstaller)
     try:
         installer.install()
         log("Application path " + installer.mantidPlotPath)
         installer.no_uninstall = False
-    except Exception,err:
+    except Exception as err:
         scriptfailure("Installing failed. "+str(err))
 else:
     installer.no_uninstall = True
@@ -80,7 +58,7 @@ try:
     if version and len(version) > 0:
         version_tested.write(version)
     version_tested.close()
-except Exception, err:
+except Exception as err:
     scriptfailure('Version test failed: '+str(err), installer)
 
 try:
@@ -90,18 +68,20 @@ try:
     if revision and len(version) > 0:
         revision_tested.write(revision)
     revision_tested.close()
-except Exception, err:
+except Exception as err:
     scriptfailure('Revision test failed: '+str(err), installer)
 
 log("Running system tests. Log files are: '%s' and '%s'" % (testRunLogPath,testRunErrPath))
 try:
     run_test_cmd = '%s %s %s/runSystemTests.py --loglevel=%s --executable="%s" --exec-args="%s"' % \
                 (installer.python_cmd,  installer.python_args,
-                 THIS_MODULE_DIR, log_level, installer.python_cmd, installer.python_args)
-    if test_regex is not None:
-        run_test_cmd += " -R " + test_regex
-    if out2stdout:
-        print "Executing command '{0}'".format(run_test_cmd)
+                 THIS_MODULE_DIR, options.log_level, installer.python_cmd, installer.python_args)
+    if options.test_regex is not None:
+        run_test_cmd += " -R " + options.test_regex
+    if options.archivesearch:
+        run_test_cmd += ' --archivesearch'
+    if options.out2stdout:
+        print("Executing command '{0}'".format(run_test_cmd))
         p = subprocess.Popen(run_test_cmd, shell=True) # no PIPE: print on screen for debugging
         p.wait()
     else:
@@ -117,7 +97,7 @@ try:
         testsRunErr.close()
     if p.returncode != 0:
         failure(installer)
-except Exception, exc:
+except Exception as exc:
     scriptfailure(str(exc),installer)
 except:
     failure(installer)
