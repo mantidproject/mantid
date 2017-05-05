@@ -58,6 +58,7 @@ double FunctionGenerator::getParameter(size_t i) const {
 /// Set parameter by name.
 void FunctionGenerator::setParameter(const std::string &name,
                                      const double &value, bool explicitlySet) {
+  checkTargetFunction();
   auto i = parameterIndex(name);
   setParameter(i, value, explicitlySet);
 }
@@ -65,6 +66,7 @@ void FunctionGenerator::setParameter(const std::string &name,
 /// Set description of parameter by name.
 void FunctionGenerator::setParameterDescription(
     const std::string &name, const std::string &description) {
+  checkTargetFunction();
   auto i = parameterIndex(name);
   setParameterDescription(i, description);
 }

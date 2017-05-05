@@ -32,14 +32,58 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport CrystalFieldFunction : public API::FunctionGenerator {
+class DLLExport CrystalFieldFunction : public API::IFunction {
 public:
   CrystalFieldFunction();
   std::string name() const override { return "CrystalFieldFunction"; }
   const std::string category() const override { return "General"; }
   size_t getNumberDomains() const override;
   std::vector<API::IFunction_sptr> createEquivalentFunctions() const override;
-  void buildTargetFunction() const override;
+  /// Evaluate the function
+  void function(const API::FunctionDomain &domain,
+                API::FunctionValues &values) const override;
+
+  //@ Parameters
+  //@{
+  /// Set i-th parameter
+  void setParameter(size_t, const double &value,
+                    bool explicitlySet = true) override;
+  /// Set i-th parameter description
+  void setParameterDescription(size_t, const std::string &description) override;
+  /// Get i-th parameter
+  double getParameter(size_t i) const override;
+  /// Set parameter by name.
+  void setParameter(const std::string &name, const double &value,
+                    bool explicitlySet = true) override;
+  /// Set description of parameter by name.
+  void setParameterDescription(const std::string &name,
+                               const std::string &description) override;
+  /// Get parameter by name.
+  double getParameter(const std::string &name) const override;
+  /// Total number of parameters
+  size_t nParams() const override;
+  /// Returns the index of parameter name
+  size_t parameterIndex(const std::string &name) const override;
+  /// Returns the name of parameter i
+  std::string parameterName(size_t i) const override;
+  /// Returns the description of parameter i
+  std::string parameterDescription(size_t i) const override;
+  /// Checks if a parameter has been set explicitly
+  bool isExplicitlySet(size_t i) const override;
+  /// Get the fitting error for a parameter
+  double getError(size_t i) const override;
+  /// Set the fitting error for a parameter
+  void setError(size_t i, double err) override;
+
+  /// Return parameter index from a parameter reference.
+  size_t getParameterIndex(const API::ParameterReference &ref) const override;
+  /// Set up the function for a fit.
+  void setUpForFit() override;
+  /// Get the tie for i-th parameter
+  API::ParameterTie *getTie(size_t i) const override;
+  /// Get the i-th constraint
+  API::IConstraint *getConstraint(size_t i) const override;
+  //@}
 
   /** @name Attributes */
   //@{
@@ -74,8 +118,20 @@ public:
   void checkConsistent() const;
   //@}
 
+  /// Build target function.
+  void buildTargetFunction() const;
+  /// Get number of the number of spectra (excluding phys prop data).
+  size_t nSpectra() const;
+
 protected:
-  void updateTargetFunction() const override;
+  /// Declare a new parameter
+  void declareParameter(const std::string &name, double initValue = 0,
+                        const std::string &description = "") override;
+  /// Change status of parameter
+  void setParameterStatus(size_t i, ParameterStatus status) override;
+  /// Get status of parameter
+  ParameterStatus getParameterStatus(size_t i) const override;
+  void updateTargetFunction() const;
 
 private:
   /// Build the target function in a single site case.
@@ -90,6 +146,19 @@ private:
   void buildMultiSiteSingleSpectrum() const;
   /// Build the target function in a multi site - multi spectrum case.
   void buildMultiSiteMultiSpectrum() const;
+
+  /// Update the target function in a single site case.
+  void updateSingleSite() const;
+  /// Update the target function in a multi site case.
+  void updateMultiSite() const;
+  /// Update the target function in a single site - single spectrum case.
+  void updateSingleSiteSingleSpectrum() const;
+  /// Update the target function in a single site - multi spectrum case.
+  void updateSingleSiteMultiSpectrum() const;
+  /// Update the target function in a multi site - single spectrum case.
+  void updateMultiSiteSingleSpectrum() const;
+  /// Update the target function in a multi site - multi spectrum case.
+  void updateMultiSiteMultiSpectrum() const;
 
   /// Build a function for a single spectrum.
   API::IFunction_sptr buildSpectrum(int nre, const DoubleFortranVector &en,
@@ -113,6 +182,26 @@ private:
   void setTemperaturesAttribute(const std::string &name, const Attribute &attr);
 
   void chacheAttributes() const;
+  /// Set the source function
+  void setSource(API::IFunction_sptr source) const;
+  /// Update target function if necessary.
+  void checkTargetFunction() const;
+  /// Test if a name (parameter's or attribute's) belongs to m_source
+  bool isSourceName(const std::string &aName) const;
+
+  /// Check that a spectrum index is within the range
+  void checkSpectrumIndex(size_t iSpec) const;
+  /// Check if there is an attribute specific to a spectrum (multi-spectrum case only).
+  bool hasSpectrumAttribute(size_t iSpec, const std::string &attName) const;
+
+  /// Function that calculates parameters of the target function.
+  mutable API::IFunction_sptr m_source;
+  /// Function that actually calculates the output.
+  mutable API::IFunction_sptr m_target;
+  /// Cached number of parameters in m_source.
+  mutable size_t m_nOwnParams;
+  /// Flag indicating that updateTargetFunction() is required.
+  mutable bool m_dirty;
 
   /// @name Attribute caches
   //@{
@@ -125,7 +214,7 @@ private:
   /// Cache the default peak FWHMs
   mutable std::vector<double> m_FWHMs;
   /// Cache number of fitted peaks
-  mutable std::vector<size_t> m_nPeaks;
+  //mutable std::vector<size_t> m_nPeaks;
   /// Cache the list of "spectra" corresponding to physical properties
   mutable std::vector<int> m_physprops;
   /// Caches of the width functions
