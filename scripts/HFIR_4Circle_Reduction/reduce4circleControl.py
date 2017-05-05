@@ -252,9 +252,9 @@ class CWSCDReductionControl(object):
         first_xm_file = os.path.join(exp_directory, 'HB3A_Exp{0}_Scan0001_00001.xml'.format(exp_number))
         if os.path.exists(first_xm_file):
             file_size = os.path.getsize(first_xm_file)
-            if file_size < abcd:
+            if file_size < 136132 * 2: 
                 det_size = 256, 256
-            elif file_size < efgh:
+            elif file_size < 529887 * 2:
                 det_size = 512, 512
             else:
                 raise RuntimeError('File size is over {0}.  It is not supported.')

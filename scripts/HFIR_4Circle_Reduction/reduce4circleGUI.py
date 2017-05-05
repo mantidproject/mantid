@@ -357,7 +357,7 @@ class MainWindow(QtGui.QMainWindow):
         self.setWindowTitle('No Experiment Is Set')
 
         # detector geometry
-        self.ui.lineEdit_detectorGeometry.setText('256, 256')
+        # TODO/FIXME/NOW - combox instead self.ui.lineEdit_detectorGeometry.setText('256, 256')
 
         # Table widgets
         self.ui.tableWidget_peaksCalUB.setup()
@@ -2404,6 +2404,9 @@ class MainWindow(QtGui.QMainWindow):
         set the detector size to controller
         :return:
         """
+        # TODO/ISSUE/NOW - It is combox box now!
+        self._myControl.set_detector_geometry(256, 256)
+        return
         try:
             ret_obj = gutil.parse_integer_list(str(self.ui.lineEdit_detectorGeometry.text()), expected_size=2)
             size_x, size_y = ret_obj
@@ -2471,7 +2474,7 @@ class MainWindow(QtGui.QMainWindow):
                 # set the directory in
                 self.ui.lineEdit_localSpiceDir.setText(default_data_dir)
                 # find out the detector type
-                status, ret_obj = self._myControl.find_detector_size(default_data_dir)
+                status, ret_obj = self._myControl.find_detector_size(default_data_dir, exp_number)
 
         else:
             err_msg = ret_obj
