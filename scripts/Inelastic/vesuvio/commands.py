@@ -58,10 +58,10 @@ def fit_tof(runs, flags, iterations=1, convergence_threshold=None):
 
     for iteration in range(1, iterations+1):
 
-        hydrogen_tof = ms.CloneWorkspace(InputWorkspace = sample_data)
-        masses_tof = ms.CloneWorkspace(InputWorkspace = sample_data)
-        gamma_correction = ms.CloneWorkspace(InputWorkspace=sample_data)
-        multiple_correction = ms.CloneWorkspace(InputWorkspace=sample_data)
+        hydrogen_tof = ms.CloneWorkspace(InputWorkspace = sample_data, OutputWorkspace = 'hydrogen_tof_iteration_'+str(iteration))
+        masses_tof = ms.CloneWorkspace(InputWorkspace = sample_data, OutputWorkspace = 'masses_tof_iteration_'+str(iteration))
+        gamma_correction = ms.CloneWorkspace(InputWorkspace=sample_data, OutputWorkspace = 'gamma_correction_iteration_'+str(iteration))
+        multiple_correction = ms.CloneWorkspace(InputWorkspace=sample_data, OutputWorkspace = 'multiple_correction_iteration_'+str(iteration))
 
         iteration_flags = copy.deepcopy(flags)
         iteration_flags['iteration'] = iteration
