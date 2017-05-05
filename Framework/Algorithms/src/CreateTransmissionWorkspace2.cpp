@@ -146,9 +146,9 @@ MatrixWorkspace_sptr CreateTransmissionWorkspace2::normalizeDetectorsByMonitors(
   }
 
   Property *backgroundMinProperty =
-    getProperty("MonitorBackgroundWavelengthMin");
+      getProperty("MonitorBackgroundWavelengthMin");
   Property *backgroundMaxProperty =
-    getProperty("MonitorBackgroundWavelengthMin");
+      getProperty("MonitorBackgroundWavelengthMin");
   bool background = !backgroundMinProperty->isDefault() &&
                     !backgroundMaxProperty->isDefault();
 

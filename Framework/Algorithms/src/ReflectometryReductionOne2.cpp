@@ -723,9 +723,9 @@ MatrixWorkspace_sptr ReflectometryReductionOne2::transmissionCorrection(
     alg->setPropertyValue("MonitorBackgroundWavelengthMax",
                           getPropertyValue("MonitorBackgroundWavelengthMax"));
     alg->setPropertyValue("MonitorIntegrationWavelengthMin",
-        getPropertyValue("MonitorIntegrationWavelengthMin"));
+                          getPropertyValue("MonitorIntegrationWavelengthMin"));
     alg->setPropertyValue("MonitorIntegrationWavelengthMax",
-        getPropertyValue("MonitorIntegrationWavelengthMax"));
+                          getPropertyValue("MonitorIntegrationWavelengthMax"));
     alg->setProperty("ProcessingInstructions", transmissionCommands);
     alg->execute();
     transmissionWS = alg->getProperty("OutputWorkspace");
