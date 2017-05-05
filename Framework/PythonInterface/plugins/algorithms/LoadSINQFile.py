@@ -68,8 +68,7 @@ class LoadSINQFile(PythonAlgorithm):
 
         if inst == "POLDI":
             if ws.getNumberHistograms() == 800:
-                ws.maskDetectors(SpectraList=list(range(0,800))[::2])
-
+                ws.maskDetectors(SpectraList=list(range(2, 800, 2)))
                 config.appendDataSearchDir(config['groupingFiles.directory'])
                 grp_file = "POLDI_Grouping_800to400.xml"
                 ws = mantid.simpleapi.GroupDetectors(InputWorkspace=ws,
