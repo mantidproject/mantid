@@ -20,13 +20,16 @@ class InstrumentSettings(object):
         self._param_map = param_map
         self._adv_config_dict = adv_conf_dict
         self._kwargs = kwargs
+        self._basic_conf_dict = None
 
-        config_file_path = kwargs.get("config_file", None)
-        if not config_file_path:
-            warnings.warn("No config file was specified. If one was meant to be used the path to a YAML config file"
-                          " is set with the 'config_file' parameter.")
-        # Always do this so we have a known state of the internal variable
-        self._basic_conf_dict = yaml_parser.open_yaml_file_as_dictionary(config_file_path)
+        # Check if we have kwargs otherwise this work cannot be completed (e.g. using automated testing)
+        if kwargs:
+            config_file_path = kwargs.get("config_file", None)
+            if not config_file_path:
+                warnings.warn("No config file was specified. If one was meant to be used the path to a YAML config file"
+                              " is set with the 'config_file' parameter.")
+            # Always do this so we have a known state of the internal variable
+            self._basic_conf_dict = yaml_parser.open_yaml_file_as_dictionary(config_file_path)
 
         # We parse in the order advanced config, basic config (if specified), kwargs.
         # This means that users can use the advanced config as a safe set of defaults, with their own preferences as
