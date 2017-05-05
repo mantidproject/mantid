@@ -16,7 +16,6 @@ from vesuvio.instrument import VESUVIO
 
 import mantid.simpleapi as ms
 
-
 # --------------------------------------------------------------------------------
 # Functions
 # --------------------------------------------------------------------------------
@@ -105,13 +104,26 @@ def fit_tof(runs, flags, iterations=1, convergence_threshold=None):
                 print(c_ws,old_ws)
                 c_ws.dataY(index)[:] = old_ws.dataY(0)[:]
                 c_ws.dataE(index)[:] = 0
+                ms.DeleteWorkspace(old_ws)
 
-        ms.GroupWorkspaces(InputWorkspaces=[ws[0] for ws in workspaces], OutputWorkspace=runs + '_data_iteration_' + str(iteration))
-        ms.GroupWorkspaces(InputWorkspaces=[ws[1] for ws in workspaces], OutputWorkspace=runs + '_params_iteration_' + str(iteration))
-        ms.GroupWorkspaces(InputWorkspaces = corrections_workspaces, OutputWorkspace = runs+'_iteration_'+str(iteration))
+        #w = list(workspaces)
+        data_ws = [ws[0] for ws in workspaces]
+        params_ws = [ws[1] for ws in workspaces]
+
+        corrections_workspaces.append(runs+'_data_iteration_'+str(iteration))
+        corrections_workspaces.append(runs + '_params_iteration_'+str(iteration))
+        corrections_workspaces.append(hydrogen_tof)
+        corrections_workspaces.append(masses_tof)
+
 
         for ws in workspaces:
-            ms.DeleteWorkspace(ws)
+            ms.UnGroupWorkspace(ws)
+
+        ms.GroupWorkspaces(InputWorkspaces = data_ws, OutputWorkspace = runs+'_data_iteration_'+str(iteration))
+        ms.GroupWorkspaces(InputWorkspaces = params_ws, OutputWorkspace = runs + '_params_iteration_'+str(iteration))
+        ms.GroupWorkspaces(InputWorkspaces = corrections_workspaces, OutputWorkspace = runs+'_iteration_'+str(iteration))
+
+
 
     return last_results[0], last_results[2], last_results[3], exit_iteration
 
