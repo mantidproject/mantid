@@ -258,8 +258,8 @@ public:
         .Times(8)
         .WillRepeatedly(Return(QString()));
     EXPECT_CALL(mockMainPresenter, getProcessingOptions())
-      .Times(8)
-      .WillRepeatedly(Return(""));
+        .Times(8)
+        .WillRepeatedly(Return(""));
     EXPECT_CALL(mockMainPresenter, getPostprocessingOptions())
         .Times(3)
         .WillRepeatedly(Return(""));
