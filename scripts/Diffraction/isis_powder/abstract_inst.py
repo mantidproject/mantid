@@ -22,6 +22,7 @@ class AbstractInst(object):
         self._calibration_dir = calibration_dir
         self._inst_prefix = inst_prefix
         self._output_dir = output_dir
+        self._is_vanadium = None
 
     @property
     def calibration_dir(self):
@@ -35,13 +36,16 @@ class AbstractInst(object):
     def user_name(self):
         return self._user_name
 
-    def _create_vanadium(self, run_details, do_absorb_corrections=True):
+    def _create_vanadium(self, run_number_string, do_absorb_corrections=True):
         """
         Creates a vanadium calibration - should be called by the concrete instrument
-        :param run_details: The run details for the run to process
+        :param run_number_string : The user input string for any run within the cycle
+        to help us determine the correct vanadium to create later
         :param do_absorb_corrections: Set to true if absorption corrections should be applied
         :return: d_spacing focused vanadium group
         """
+        self._is_vanadium = True
+        run_details = self._get_run_details(run_number_string)
         return calibrate.create_van(instrument=self, run_details=run_details,
                                     absorb=do_absorb_corrections)
 
@@ -52,6 +56,7 @@ class AbstractInst(object):
         :param do_van_normalisation: True to divide by the vanadium run, false to not.
         :return:
         """
+        self._is_vanadium = False
         return focus.focus(run_number_string=run_number_string, perform_vanadium_norm=do_van_normalisation,
                            instrument=self)
 
@@ -146,13 +151,6 @@ class AbstractInst(object):
         """
         return van_ws_to_crop
 
-    def _get_sample_empty(self):
-        """
-        Returns the sample empty number to subtract. If one is not specified it returns None
-        :return: Sample empty run number(s), else None
-        """
-        return None
-
     def _get_unit_to_keep(self):
         """
         Returns the unit to keep once focusing has completed. E.g. a setting of
@@ -213,7 +211,7 @@ class AbstractInst(object):
 
         common_output.save_focused_data(d_spacing_group=d_spacing_group, tof_group=tof_group,
                                         output_paths=output_paths, inst_prefix=self._inst_prefix,
-                                        run_number_string=run_details.user_input_run_number)
+                                        run_number_string=run_details.output_run_string)
 
         return d_spacing_group, tof_group
 
@@ -227,7 +225,7 @@ class AbstractInst(object):
         """
         output_directory = os.path.join(self._output_dir, run_details.label, self._user_name)
         output_directory = os.path.abspath(os.path.expanduser(output_directory))
-        file_name = str(self._generate_output_file_name(run_number_string=run_details.user_input_run_number))
+        file_name = str(self._generate_output_file_name(run_number_string=run_details.output_run_string))
         nxs_file = os.path.join(output_directory, (file_name + ".nxs"))
         gss_file = os.path.join(output_directory, (file_name + ".gsas"))
         tof_xye_file = os.path.join(output_directory, (file_name + "_tof_xye.dat"))

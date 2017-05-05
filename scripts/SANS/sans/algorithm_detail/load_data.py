@@ -685,7 +685,6 @@ def load_isis(data_type, file_information, period, use_cached, calibration_file_
 # ----------------------------------------------------------------------------------------------------------------------
 class SANSLoadData(with_metaclass(ABCMeta, object)):
     """ Base class for all SANSLoad implementations."""
-
     @abstractmethod
     def do_execute(self, data_info, use_cached, publish_to_ads, progress, parent_alg):
         pass

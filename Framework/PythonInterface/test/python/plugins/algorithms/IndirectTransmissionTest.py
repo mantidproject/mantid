@@ -69,7 +69,8 @@ class IndirectTransmissionTest(unittest.TestCase):
                                   ChemicalFormula=formula, DensityType='Number Density', Density=density, Thickness=thickness)
 
         # Expected values from table
-        ref_result = [6.2665, 0.7729, 2.5819, 53.5069, 56.0888, 0.1 , 0.1, 0.5663, 0.4293]
+        ref_result = [6.2676, 0.7731, 2.5819, 53.5069, 56.0888, 0.1, 0.1, 0.5663, 0.4293]
+
         values = ws.column(1)
         print(ref_result)
         print(values)
