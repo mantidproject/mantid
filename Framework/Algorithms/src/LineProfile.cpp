@@ -336,7 +336,13 @@ void LineProfile::exec() {
   const double centre = getProperty(PropertyNames::CENTRE);
   const double halfWidth = getProperty(PropertyNames::HALF_WIDTH);
   double start = getProperty(PropertyNames::START);
+  if (start == EMPTY_DBL()) {
+    start = std::numeric_limits<double>::lowest();
+  }
   double end = getProperty(PropertyNames::END);
+  if (end == EMPTY_DBL()) {
+    end = std::numeric_limits<double>::max();
+  }
   // Define a box in workspace's units to have a standard representation
   // of the profile's dimensions.
   Box bounds;

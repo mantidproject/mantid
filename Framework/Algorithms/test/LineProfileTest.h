@@ -178,8 +178,6 @@ public:
     const size_t nBins = 23;
     MatrixWorkspace_sptr inputWS = create2DWorkspace154(nHist, nBins);
 
-    const int start = -1;
-    const int end = nHist + 1;
     LineProfile alg;
     // Don't put output in ADS by default
     alg.setChild(true);
@@ -193,9 +191,6 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         alg.setProperty("Centre", static_cast<double>(nBins) / 2))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("HalfWidth", 3.0))
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setProperty("Start", static_cast<double>(start)))
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("End", static_cast<double>(end)))
     TS_ASSERT_THROWS_NOTHING(alg.execute())
     TS_ASSERT(alg.isExecuted())
 
