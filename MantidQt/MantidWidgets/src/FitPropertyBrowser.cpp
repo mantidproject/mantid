@@ -272,9 +272,7 @@ void FitPropertyBrowser::init() {
 *   4. Update the list of available functions
 * @param w widget parenting the action menus and the property tree browser
 */
-void FitPropertyBrowser::initLayout(QWidget *w) {
-  initBasicLayout(w);
-}
+void FitPropertyBrowser::initLayout(QWidget *w) { initBasicLayout(w); }
 
 /**
 * @brief Initialise the layout for the fit button.
@@ -290,14 +288,12 @@ QPushButton *FitPropertyBrowser::createFitMenuButton(QWidget *w) {
 
   m_fitMapper = new QSignalMapper(this);
   m_fitMenu = new QMenu(this);
-  populateFitMenuButton(m_fitMapper,m_fitMenu);
+  populateFitMenuButton(m_fitMapper, m_fitMenu);
   connect(m_fitMapper, SIGNAL(mapped(const QString &)), this,
           SLOT(executeFitMenu(const QString &)));
   btnFit->setMenu(m_fitMenu);
   return btnFit;
-
 }
- 
 
 /**
 * @Populate the fit button.
@@ -307,8 +303,9 @@ QPushButton *FitPropertyBrowser::createFitMenuButton(QWidget *w) {
 * @param fitMapper the QMap to the fit mapper
 * @param fitMenu the QMenu for the fit button
 */
-void FitPropertyBrowser::populateFitMenuButton(QSignalMapper *fitMapper, QMenu *fitMenu) {
-  //assert(fitmapper);
+void FitPropertyBrowser::populateFitMenuButton(QSignalMapper *fitMapper,
+                                               QMenu *fitMenu) {
+  // assert(fitmapper);
 
   m_fitActionFit = new QAction("Fit", this);
   m_fitActionSeqFit = new QAction("Sequential Fit", this);
@@ -321,17 +318,17 @@ void FitPropertyBrowser::populateFitMenuButton(QSignalMapper *fitMapper, QMenu *
   fitMapper->setMapping(m_fitActionEvaluate, "Evaluate");
 
   connect(m_fitActionFit, SIGNAL(triggered()), fitMapper, SLOT(map()));
-  connect(m_fitActionSeqFit, SIGNAL(triggered()),fitMapper, SLOT(map()));
+  connect(m_fitActionSeqFit, SIGNAL(triggered()), fitMapper, SLOT(map()));
   connect(m_fitActionUndoFit, SIGNAL(triggered()), fitMapper, SLOT(map()));
-  connect(m_fitActionEvaluate, SIGNAL(triggered()),fitMapper, SLOT(map()));
- 
+  connect(m_fitActionEvaluate, SIGNAL(triggered()), fitMapper, SLOT(map()));
+
   fitMenu->addAction(m_fitActionFit);
   fitMenu->addAction(m_fitActionSeqFit);
   fitMenu->addAction(m_fitActionEvaluate);
   fitMenu->addSeparator();
   fitMenu->addAction(m_fitActionUndoFit);
   fitMenu->addSeparator();
- }
+}
 /**
 * @brief Initialise the layout, except for the fit button in the menu bar.
 * This initialization includes:
@@ -342,7 +339,7 @@ void FitPropertyBrowser::populateFitMenuButton(QSignalMapper *fitMapper, QMenu *
 * @param w widget parenting the action menus and the property tree browser
 */
 void FitPropertyBrowser::initBasicLayout(QWidget *w) {
-  QPushButton *btnFit=createFitMenuButton(w);
+  QPushButton *btnFit = createFitMenuButton(w);
   // to be able to change windows title from tread
   connect(this, SIGNAL(changeWindowTitle(const QString &)), this,
           SLOT(setWindowTitle(const QString &)));
@@ -3136,12 +3133,12 @@ void FitPropertyBrowser::allowSequentialFits(bool allow) {
   }
 }
 
-void FitPropertyBrowser::modifyFitMenu(QAction *fitAction,bool enabled){
-	if(enabled){
-		m_fitMenu->addAction(fitAction);
-	}else{
-		m_fitMenu->removeAction(fitAction);
-	}
+void FitPropertyBrowser::modifyFitMenu(QAction *fitAction, bool enabled) {
+  if (enabled) {
+    m_fitMenu->addAction(fitAction);
+  } else {
+    m_fitMenu->removeAction(fitAction);
+  }
 }
 } // MantidQt
 } // API

@@ -363,9 +363,9 @@ private slots:
   void updateStructureTooltips();
 
 protected:
-  void modifyFitMenu(QAction *fitAction,bool enabled);
+  void modifyFitMenu(QAction *fitAction, bool enabled);
   virtual void populateFitMenuButton(QSignalMapper *fitMapper, QMenu *fitMenu);
-  bool getShouldBeNormalised(){return m_shouldBeNormalised;};
+  bool getShouldBeNormalised() { return m_shouldBeNormalised; };
   /// actions to do before the browser made visible
   void showEvent(QShowEvent *e) override;
   /// actions to do before the browser is hidden
@@ -479,6 +479,7 @@ protected:
 
   /// To keep a copy of the initial parameters in case for undo fit
   std::vector<double> m_initialParameters;
+
 private:
   ///
   QPushButton *createFitMenuButton(QWidget *w);
@@ -537,7 +538,7 @@ private:
 
   /// To display a tip text
   QLabel *m_tip;
- 
+
   // The widget for choosing the fit function.
   QDialog *m_fitSelector;
   // The tree widget containing the fit functions.
@@ -594,10 +595,9 @@ private:
 
   /// store current workspace name
   std::string m_storedWorkspaceName;
- 
+
   /// Should the data be normalised before fitting?
   bool m_shouldBeNormalised;
-
 
   friend class PropertyHandler;
   friend class CreateAttributeProperty;
