@@ -369,8 +369,8 @@ void LineProfile::exec() {
   // Choose mode.
   auto mode = createMode(getProperty(PropertyNames::MODE));
   // Build the actual profile.
-  std::vector<double> averageYs;
-  std::vector<double> averageEs;
+  std::vector<double> profileYs;
+  std::vector<double> profileEs;
   std::vector<double> Xs;
   if (dir == LineDirection::horizontal) {
     IndexLimits limits;
@@ -378,7 +378,7 @@ void LineProfile::exec() {
     limits.lineEnd = horEnd;
     limits.widthStart = vertStart;
     limits.widthEnd = vertEnd;
-    profile(Xs, averageYs, averageEs, ws, dir, limits, horizontalBins,
+    profile(Xs, profileYs, profileEs, ws, dir, limits, horizontalBins,
             horizontalIsBinEdges, mode, ignoreNans, ignoreInfs);
   } else {
     IndexLimits limits;
@@ -386,19 +386,19 @@ void LineProfile::exec() {
     limits.lineEnd = vertEnd;
     limits.widthStart = horStart;
     limits.widthEnd = horEnd;
-    profile(Xs, averageYs, averageEs, ws, dir, limits, verticalBins,
+    profile(Xs, profileYs, profileEs, ws, dir, limits, verticalBins,
             verticalIsBinEdges, mode, ignoreNans, ignoreInfs);
   }
   // Prepare and set output.
   Workspace2D_sptr outWS;
-  if (Xs.size() > averageYs.size()) {
+  if (Xs.size() > profileYs.size()) {
     outWS =
-        create<Workspace2D>(1, Histogram(BinEdges(Xs), Counts(averageYs),
-                                         CountStandardDeviations(averageEs)));
+        create<Workspace2D>(1, Histogram(BinEdges(Xs), Counts(profileYs),
+                                         CountStandardDeviations(profileEs)));
   } else {
     outWS =
-        create<Workspace2D>(1, Histogram(Points(Xs), Counts(averageYs),
-                                         CountStandardDeviations(averageEs)));
+        create<Workspace2D>(1, Histogram(Points(Xs), Counts(profileYs),
+                                         CountStandardDeviations(profileEs)));
   }
   // The actual profile might be of different size than what user
   // specified.
