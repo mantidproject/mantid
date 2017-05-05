@@ -262,11 +262,11 @@ def rebin_workspace(workspace, new_bin_width, start_x=None, end_x=None):
     Rebins the specified workspace with the specified new bin width. Allows the user
     to also set optionally the first and final bin boundaries of the histogram too.
     If the bin boundaries are not set they are preserved from the original workspace
-    :param workspace: 
-    :param new_bin_width: 
-    :param start_x: 
-    :param end_x: 
-    :return: 
+    :param workspace: The workspace to rebin
+    :param new_bin_width: The new bin width to use across the workspace
+    :param start_x: (Optional) The first x bin to crop to
+    :param end_x: (Optional) The final x bin to crop to
+    :return: The rebinned workspace
     """
 
     # Find the starting and ending bin boundaries if they were not set
@@ -290,7 +290,7 @@ def rebin_workspace_list(workspace_list, bin_width_list, start_x_list=None, end_
     :param bin_width_list: The list of new bin widths to apply to each workspace
     :param start_x_list: The list of starting x boundaries to rebin to
     :param end_x_list: The list of ending x boundaries to rebin to
-    :return: List of rebinned workspace 
+    :return: List of rebinned workspace
     """
     if not isinstance(workspace_list, list) or not isinstance(bin_width_list, list):
         raise RuntimeError("One of the types passed to rebin_workspace_list was not a list")
