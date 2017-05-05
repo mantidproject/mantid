@@ -10,11 +10,22 @@
 Description
 -----------
 
-This algorithm extracts horizontal or vertical profiles averaged over given bins from a MatrixWorkspace. The profile is returned as a single histogram workspace. :ref:`Ragged workspaces <Ragged_Workspace>` are not supported.
+This algorithm extracts horizontal or vertical profiles from a MatrixWorkspace. The profile is returned as a single histogram workspace. :ref:`Ragged workspaces <Ragged_Workspace>` are not supported.
 
-The orientation of the profile is selected by the *Direction* property. The starting point is given by *Start* while the end point by *End*. Optionally, the end point can be omitted by specifying a line *Length*. A region over which the profile is averaged is given by *HalfWidth*. The width is rounded to full bins so that partial bins are included entirely.
+The orientation of the profile is selected by the *Direction* property. By default, the line runs over the entire workspace. The length can be optionally limited by specifying the *Start* and/or the *End* properties. A region over which the profile is calculated is given by *HalfWidth*. The width is rounded to full bins so that partial bins are included entirely.
 
-Special values can be completely ignored by the *IgnoreNans* and *IgnoreInfs* properties. If a segment of the line contains special values only, it will be set to zero.
+Special values can be completely ignored by the *IgnoreNans* and *IgnoreInfs* properties. If a segment of the line contains special values only, it will be set to NaN.
+
+By default, the profile is calculated as an average over the line width. This behavior can be changed by the *Mode* property. The choices are:
+
+'Average'
+    Average the values. This is the default.
+
+'Sum'
+    Sum the values.
+
+'Weighed Sum'
+    Sum the values, weighing them by :math:`n / n_{tot}` where :math:`n` is the number of summed data points (excluding special values if *IgnoreNans* or *IgnoreInfs* is set) and :math:`n_{tot}` is the total number of data points (including special values).
 
 Usage
 -----
@@ -36,7 +47,7 @@ Usage
         Centre=7.5,
         HalfWidth=2.5,
         Start=3000,
-        Length=10000
+        End=13000
     )
     
     indexMax = numpy.argmax(horProfile.readY(0))
@@ -103,6 +114,64 @@ Output:
     Average intensity between 5200.0 and 5800.0 microsec: 0.1
     Average intensity between 5600.0 and 6400.0 microsec: 0.227
     Average intensity between 6200.0 and 6800.0 microsec: 0.1
+
+**Example - Using different modes**
+
+.. testcode:: Modes
+
+    import numpy
+
+    ws = CreateSampleWorkspace(
+        Function='Quasielastic Tunnelling',
+        NumBanks=1
+    )
+
+    wsInTheta = ConvertSpectrumAxis(
+        InputWorkspace=ws,
+        Target='Theta'
+    )
+
+    # Lets assing NaNs to the lower left and upper right corners
+    # of the workspace.
+    for iVert in range(wsInTheta.getNumberHistograms()):
+        for iHor in range(wsInTheta.blocksize()):
+            if iVert + iHor < 60:
+                ys = wsInTheta.dataY(iVert)
+                ys[iHor] = numpy.nan
+            elif iVert + iHor > 120:
+                ys = wsInTheta.dataY(iVert)
+                ys[iHor] = numpy.nan
+
+    centre = 0.6
+    width = 0.05
+    sumCutWS = LineProfile(wsInTheta, centre, width, Mode='Sum')
+    weighedSumCutWS = LineProfile(wsInTheta, centre, width, Mode='Weighed Sum')
+
+    # When no NaNs are present both modes give the same result.
+    iElastic = sumCutWS.blocksize() / 2
+    y = sumCutWS.readY(0)[iElastic]
+    e = sumCutWS.readE(0)[iElastic]
+    print('Sum profile at elastic peak: {} +/- {}'.format(y, e))
+    y = weighedSumCutWS.readY(0)[iElastic]
+    e = weighedSumCutWS.readE(0)[iElastic]
+    print('Weighed profile at elastic peak: {} +/- {}'.format(y, e))
+
+    # The weighing is apparent when the profile crosses some
+    # special values.
+    iEdge = sumCutWS.blocksize() / 6
+    y = sumCutWS.readY(0)[iEdge]
+    e = sumCutWS.readE(0)[iEdge]
+    print('Sum profile near NaNs: {} +/- {}'.format(y, e))
+    y = weighedSumCutWS.readY(0)[iEdge]
+    e = weighedSumCutWS.readE(0)[iEdge]
+    print('Weighed profile near NaNs: {} +/- {}'.format(y, e))
+
+.. testoutput:: Modes
+
+    Sum profile at elastic peak: 103.45916358 +/- 10.1714877761
+    Weighed profile at elastic peak: 103.45916358 +/- 10.1714877761
+    Sum profile near NaNs: 0.400000002549 +/- 0.632455534049
+    Weighed profile near NaNs: 1.60000001019 +/- 2.52982213619
 
 .. categories::
 
