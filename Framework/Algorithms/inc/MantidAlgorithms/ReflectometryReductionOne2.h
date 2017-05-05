@@ -2,15 +2,17 @@
 #define MANTID_ALGORITHMS_REFLECTOMETRYREDUCTIONONE2_H_
 
 #include "MantidAlgorithms/ReflectometryWorkflowBase2.h"
-#include "MantidAPI/SpectraDetectorTypes.h"
-#include "MantidHistogramData/Histogram.h"
 
 namespace Mantid {
 // Forward declaration
 namespace API {
 class SpectrumInfo;
 }
-
+namespace HistogramData {
+class HistogramX;
+class HistogramY;
+class HistogramE;
+}
 namespace Algorithms {
 
 /** ReflectometryReductionOne2 : Reflectometry reduction of a single input TOF
