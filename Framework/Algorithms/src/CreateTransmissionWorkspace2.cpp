@@ -139,18 +139,18 @@ MatrixWorkspace_sptr CreateTransmissionWorkspace2::normalizeDetectorsByMonitors(
   MatrixWorkspace_sptr detectorWS = makeDetectorWS(IvsLam);
 
   // Monitor workspace
-  // Only if I0MonitorIndex has been given
-  Property *monProperty = getProperty("I0MonitorIndex");
-  if (monProperty->isDefault()) {
-    return detectorWS;
-  }
+  // Only if I0MonitorIndex, MonitorBackgroundWavelengthMin
+  // and MonitorBackgroundWavelengthMax have been given
 
+  Property *monProperty = getProperty("I0MonitorIndex");
   Property *backgroundMinProperty =
       getProperty("MonitorBackgroundWavelengthMin");
   Property *backgroundMaxProperty =
       getProperty("MonitorBackgroundWavelengthMin");
-  bool background = !backgroundMinProperty->isDefault() &&
-                    !backgroundMaxProperty->isDefault();
+  if (monProperty->isDefault() || backgroundMinProperty->isDefault() ||
+      backgroundMaxProperty->isDefault()) {
+    return detectorWS;
+  }
 
   // Normalization by integrated monitors
   // Only if both MonitorIntegrationWavelengthMin and
@@ -161,7 +161,7 @@ MatrixWorkspace_sptr CreateTransmissionWorkspace2::normalizeDetectorsByMonitors(
   const bool integratedMonitors =
       !(intMinProperty->isDefault() || intMaxProperty->isDefault());
 
-  auto monitorWS = makeMonitorWS(IvsLam, integratedMonitors, background);
+  auto monitorWS = makeMonitorWS(IvsLam, integratedMonitors);
   if (!integratedMonitors)
     detectorWS = rebinDetectorsToMonitors(detectorWS, monitorWS);
 

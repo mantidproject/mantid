@@ -389,7 +389,9 @@ ReflectometryWorkflowBase2::makeDetectorWS(MatrixWorkspace_sptr inputWS,
 }
 
 /** Creates a monitor workspace in wavelength from an input workspace in TOF.
-* This method should only be called if IOMonitorIndex has been specified.
+* This method should only be called if IOMonitorIndex has been specified and
+* MonitorBackgroundWavelengthMin and MonitorBackgroundWavelengthMax have been
+* given.
 * @param inputWS :: the input workspace in TOF
 * @param integratedMonitors :: boolean to indicate if monitors should be
 * integrated
@@ -397,8 +399,7 @@ ReflectometryWorkflowBase2::makeDetectorWS(MatrixWorkspace_sptr inputWS,
 */
 MatrixWorkspace_sptr
 ReflectometryWorkflowBase2::makeMonitorWS(MatrixWorkspace_sptr inputWS,
-                                          const bool integratedMonitors,
-                                          const bool background) {
+                                          const bool integratedMonitors) {
 
   // Extract the monitor workspace
   const int monitorIndex = getProperty("I0MonitorIndex");
@@ -413,19 +414,17 @@ ReflectometryWorkflowBase2::makeMonitorWS(MatrixWorkspace_sptr inputWS,
 
   monitorWS = convertToWavelength(monitorWS);
 
-  if (background) {
-    // Flat background correction
-    const double backgroundMin = getProperty("MonitorBackgroundWavelengthMin");
-    const double backgroundMax = getProperty("MonitorBackgroundWavelengthMax");
-    auto correctMonitorsAlg = createChildAlgorithm("CalculateFlatBackground");
-    correctMonitorsAlg->initialize();
-    correctMonitorsAlg->setProperty("InputWorkspace", monitorWS);
-    correctMonitorsAlg->setProperty("StartX", backgroundMin);
-    correctMonitorsAlg->setProperty("EndX", backgroundMax);
-    correctMonitorsAlg->setProperty("SkipMonitors", false);
-    correctMonitorsAlg->execute();
-    monitorWS = correctMonitorsAlg->getProperty("OutputWorkspace");
-  }
+  // Flat background correction
+  const double backgroundMin = getProperty("MonitorBackgroundWavelengthMin");
+  const double backgroundMax = getProperty("MonitorBackgroundWavelengthMax");
+  auto correctMonitorsAlg = createChildAlgorithm("CalculateFlatBackground");
+  correctMonitorsAlg->initialize();
+  correctMonitorsAlg->setProperty("InputWorkspace", monitorWS);
+  correctMonitorsAlg->setProperty("StartX", backgroundMin);
+  correctMonitorsAlg->setProperty("EndX", backgroundMax);
+  correctMonitorsAlg->setProperty("SkipMonitors", false);
+  correctMonitorsAlg->execute();
+  monitorWS = correctMonitorsAlg->getProperty("OutputWorkspace");
 
   // Normalization by integrated monitors ?
   if (!integratedMonitors) {

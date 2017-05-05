@@ -569,7 +569,8 @@ MatrixWorkspace_sptr ReflectometryReductionOne2::makeIvsLam() {
 }
 
 /**
-* Normalize by monitors (only if I0MonitorIndex has been given)
+* Normalize by monitors (only if I0MonitorIndex, MonitorBackgroundWavelengthMin
+* and MonitorBackgroundWavelengthMax have been given)
 *
 * @param detectorWS :: the detector workspace to normalise, in lambda
 * @param runWS :: the original run workspace in TOF
@@ -582,14 +583,12 @@ ReflectometryReductionOne2::monitorCorrection(MatrixWorkspace_sptr detectorWS) {
   Property *backgroundMinProperty =
       getProperty("MonitorBackgroundWavelengthMin");
   Property *backgroundMaxProperty =
-      getProperty("MonitorBackgroundWavelengthMax");
-  if (!monProperty->isDefault()) {
-    const bool background = !backgroundMinProperty->isDefault() &&
-                            !backgroundMaxProperty->isDefault();
+      getProperty("MonitorBackgroundWavelengthMin");
+  if (!monProperty->isDefault() && !backgroundMinProperty->isDefault() &&
+      !backgroundMaxProperty->isDefault()) {
     const bool integratedMonitors =
         getProperty("NormalizeByIntegratedMonitors");
-    const auto monitorWS =
-        makeMonitorWS(m_runWS, integratedMonitors, background);
+    const auto monitorWS = makeMonitorWS(m_runWS, integratedMonitors);
     if (!integratedMonitors)
       detectorWS = rebinDetectorsToMonitors(detectorWS, monitorWS);
     IvsLam = divide(detectorWS, monitorWS);

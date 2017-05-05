@@ -70,7 +70,7 @@ protected:
   // Create a monitor workspace from input workspace in wavelength
   Mantid::API::MatrixWorkspace_sptr
   makeMonitorWS(Mantid::API::MatrixWorkspace_sptr inputWS,
-                bool integratedMonitors, bool background);
+                bool integratedMonitors);
   // Rebin detectors to monitors
   Mantid::API::MatrixWorkspace_sptr
   rebinDetectorsToMonitors(Mantid::API::MatrixWorkspace_sptr detectorWS,
