@@ -21,7 +21,7 @@ New
 ###
 
 - :ref:`DeleteWorkspaces <algm-DeleteWorkspaces>` will delete a list of workspaces.
-- :ref:`LineProfile <algm-LineProfile>` will give the average of a workspace over the width of a horizontal or vertical line.
+- :ref:`LineProfile <algm-LineProfile>` will give a horizontal or vertical line profile over a workspace.
 
 Improved
 ########
