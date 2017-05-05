@@ -293,15 +293,15 @@ void LineProfile::init() {
   declareProperty(PropertyNames::HALF_WIDTH, EMPTY_DBL(),
                   mandatoryPositiveDouble,
                   "Half of the width over which to calcualte the average.");
-  declareProperty(PropertyNames::START, EMPTY_DBL(),
-                  "Starting point of the line.");
-  declareProperty(PropertyNames::END, EMPTY_DBL(),
-                  "End point of the line.");
   const std::set<std::string> directions{DirectionChoices::HORIZONTAL,
                                          DirectionChoices::VERTICAL};
   declareProperty(PropertyNames::DIRECTION, DirectionChoices::HORIZONTAL,
                   boost::make_shared<ListValidator<std::string>>(directions),
                   "Orientation of the profile line.");
+  declareProperty(PropertyNames::START, EMPTY_DBL(),
+                  "Starting point of the line.");
+  declareProperty(PropertyNames::END, EMPTY_DBL(),
+                  "End point of the line.");
   const std::set<std::string> modes{ModeChoices::AVERAGE, ModeChoices::SUM, ModeChoices::WEIGHED_SUM};
   declareProperty(PropertyNames::MODE, ModeChoices::AVERAGE, boost::make_shared<ListValidator<std::string>>(modes), "How the profile is calculated over the line width.");
   declareProperty(
