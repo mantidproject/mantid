@@ -391,7 +391,7 @@ private:
   QVBoxLayout *m_outer, *m_wsBox, *m_spectraBox, *m_logBox, *m_optionsBox;
   QComboBox *m_plotOptions, *m_logSelector;
   QCheckBox *m_showErrorBars;
-  QLineEdit *m_axisNameEdit;
+  QLineEditWithErrorMark *m_axisNameEdit;
 
   /// A list of names of workspaces which are to be plotted.
   QList<QString> m_wsNames;

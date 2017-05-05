@@ -171,7 +171,7 @@ const std::set<double> MantidWSIndexWidget::getCustomLogValues() const {
 * @returns Name input by user for axis
 */
 const QString MantidWSIndexWidget::getAxisName() const {
-  return m_axisNameEdit->text();
+  return m_axisNameEdit->lineEdit()->text();
 }
 
 /**
@@ -531,8 +531,8 @@ void MantidWSIndexWidget::initLogs() {
   m_logValues = new QLineEditWithErrorMark();
 
   m_axisLabel = new QLabel(tr("<br>Label for plot axis:"));
-  m_axisNameEdit = new QLineEdit();
-  m_axisNameEdit->setText(m_logSelector->currentText());
+  m_axisNameEdit = new QLineEditWithErrorMark();
+  m_axisNameEdit->lineEdit()->setText(m_logSelector->currentText());
 
   m_logBox->addWidget(m_logLabel);
   m_logBox->addWidget(m_logSelector);
@@ -563,7 +563,7 @@ void MantidWSIndexWidget::initLogs() {
 void MantidWSIndexWidget::onLogSelected(const QString &logName) {
   m_logValues->setEnabled(logName == CUSTOM);
   m_logValues->lineEdit()->clear();
-  m_axisNameEdit->setText(logName);
+  m_axisNameEdit->lineEdit()->setText(logName);
 }
 
 /**
@@ -585,8 +585,8 @@ void MantidWSIndexWidget::onPlotOptionChanged(const QString &plotOption) {
     if (m_plotOptions->currentText() == SURFACE_PLOT ||
         m_plotOptions->currentText() == CONTOUR_PLOT) {
       m_logSelector->setItemText(0, WORKSPACE_INDEX);
-      if (m_axisNameEdit->text() == WORKSPACE_NAME) {
-        m_axisNameEdit->setText(WORKSPACE_INDEX);
+      if (m_axisNameEdit->lineEdit()->text() == WORKSPACE_NAME) {
+        m_axisNameEdit->lineEdit()->setText(WORKSPACE_INDEX);
       }
     } else {
       m_logSelector->setItemText(0, WORKSPACE_NAME);
