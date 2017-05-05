@@ -483,13 +483,13 @@ of the available actions.
 +------------------+-------------------------------------------------------------------------------------------------------------------------+
 | Action           | Description                                                                                                             |
 +==================+=========================================================================================================================+
-| Open Table       | A submenu containing a list of valid TableWorkspaces that can be loaded in the processing table |
+| Open Table       | A submenu containing a list of valid TableWorkspaces that can be loaded in the processing table                         |
 |                  | for processing. Valid table workspaces are those who have the same number of columns as the processing table.           |
 +------------------+-------------------------------------------------------------------------------------------------------------------------+
 | New Table        | Discards the current contents of the processing table                                                                   |
 |                  | presenting a blank table.                                                                                               |
 +------------------+-------------------------------------------------------------------------------------------------------------------------+
-| Save Table       | Saves the current contents of the processing to the TableWorkspaces it came from. If no such    |
+| Save Table       | Saves the current contents of the processing to the TableWorkspaces it came from. If no such                            |
 |                  | workspace already exists, a new one can be created.                                                                     |
 +------------------+-------------------------------------------------------------------------------------------------------------------------+
 | Save Table As    | Saves the current contents of the processing table to a new table workspace.                                            |
@@ -609,7 +609,7 @@ If a post-processing algorithm is defined:
 
     post_alg = MantidQt.MantidWidgets.DataProcessorPostprocessingAlgorithm('Stitch1DMany', 'stitched_', 'InputWorkspaces, OutputWorkspaces')
 
-the name of the post-processed workspace will start with prefix specified in the post-processing algorithm, "stitched_" in this case,
+the name of the post-processed workspace will start with prefix specified in the post-processing algorithm, stitched_ in this case,
 plus the names of the reduced workspaces without their prefixes joined with "_". That is, in this example we would get a workspace
 called :literal:`stitched_13460_q_0.01_0.06_13462_q_0.035_0.3`.
 
