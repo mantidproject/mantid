@@ -4,11 +4,10 @@
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/MandatoryValidator.h"
+#include "MantidKernel/StringTokenizer.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/Unit.h"
 
-#include <boost/algorithm/string/split.hpp>
-#include <boost/algorithm/string/trim.hpp>
 #include <algorithm>
 
 using namespace Mantid::Kernel;
@@ -140,26 +139,25 @@ double getThetaFromLogs(MatrixWorkspace_sptr inputWs) {
 // An add operation, i.e. "3+4" -> [3+4]
 void translateAdd(const std::string &instructions,
                   std::vector<std::vector<size_t>> &outGroups) {
-  std::vector<std::string> spectra;
-  boost::split(spectra, instructions, boost::is_any_of("+"));
+  auto spectra = Kernel::StringTokenizer(
+      instructions, "+", Kernel::StringTokenizer::TOK_TRIM |
+                             Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
 
   std::vector<size_t> outSpectra;
+  outSpectra.reserve(spectra.count());
   for (auto spectrum : spectra) {
-    // remove leading/trailing whitespace
-    boost::trim(spectrum);
     // add this spectrum to the group we're about to add
     outSpectra.push_back(boost::lexical_cast<size_t>(spectrum));
   }
-  outGroups.push_back(outSpectra);
+  outGroups.push_back(std::move(outSpectra));
 }
 
 // A range summation, i.e. "3-6" -> [3+4+5+6]
 void translateSumRange(const std::string &instructions,
                        std::vector<std::vector<size_t>> &outGroups) {
   // add a group with the sum of the spectra in the range
-  std::vector<std::string> spectra;
-  boost::split(spectra, instructions, boost::is_any_of("-"));
-  if (spectra.size() != 2)
+  auto spectra = Kernel::StringTokenizer(instructions, "-");
+  if (spectra.count() != 2)
     throw std::runtime_error("Malformed range (-) operation.");
   // fetch the start and stop spectra
   size_t first = boost::lexical_cast<size_t>(spectra[0]);
@@ -170,19 +168,20 @@ void translateSumRange(const std::string &instructions,
 
   // add all the spectra in the range to the output group
   std::vector<size_t> outSpectra;
+  outSpectra.reserve(last - first + 1);
   for (size_t i = first; i <= last; ++i)
     outSpectra.push_back(i);
   if (!outSpectra.empty())
-    outGroups.push_back(outSpectra);
+    outGroups.push_back(std::move(outSpectra));
 }
 
 // A range insertion, i.e. "3:6" -> [3,4,5,6]
 void translateRange(const std::string &instructions,
                     std::vector<std::vector<size_t>> &outGroups) {
   // add a group per spectra
-  std::vector<std::string> spectra;
-  boost::split(spectra, instructions, boost::is_any_of(":"));
-  if (spectra.size() != 2)
+  auto spectra = Kernel::StringTokenizer(
+      instructions, ":", Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
+  if (spectra.count() != 2)
     throw std::runtime_error("Malformed range (:) operation.");
   // fetch the start and stop spectra
   size_t first = boost::lexical_cast<size_t>(spectra[0]);
@@ -193,10 +192,8 @@ void translateRange(const std::string &instructions,
 
   // add all the spectra in the range to separate output groups
   for (size_t i = first; i <= last; ++i) {
-    // create group of size 1 with the spectrum in it
-    std::vector<size_t> newGroup(1, i);
-    // and add it to output
-    outGroups.push_back(newGroup);
+    // create group of size 1 with the spectrum and add it to output
+    outGroups.emplace_back(1, i);
   }
 }
 
@@ -214,13 +211,10 @@ translateInstructions(const std::string &instructions) {
   try {
     // split into comma separated groups, each group potentially containing
     // an operation (+-:) that produces even more groups.
-    std::vector<std::string> groups;
-    boost::split(groups, instructions, boost::is_any_of(","));
-
-    for (auto groupStr : groups) {
-      // remove leading/trailing whitespace
-      boost::trim(groupStr);
-
+    auto groups = Kernel::StringTokenizer(
+        instructions, ",",
+        StringTokenizer::TOK_TRIM | StringTokenizer::TOK_IGNORE_EMPTY);
+    for (const auto &groupStr : groups) {
       // Look for the various operators in the string. If one is found then
       // do the necessary translation into groupings.
       if (groupStr.find('+') != std::string::npos) {
@@ -232,10 +226,8 @@ translateInstructions(const std::string &instructions) {
         translateRange(groupStr, outGroups);
       } else if (!groupStr.empty()) {
         // contains no instructions, just add this spectrum as a new group
-        // create group of size 1 with the spectrum in it
-        std::vector<size_t> newGroup(1, boost::lexical_cast<size_t>(groupStr));
-        // and add it to output
-        outGroups.push_back(newGroup);
+        // create group of size 1 with the spectrum in it and add it to output
+        outGroups.emplace_back(1, boost::lexical_cast<size_t>(groupStr));
       }
     }
   } catch (boost::bad_lexical_cast &) {
