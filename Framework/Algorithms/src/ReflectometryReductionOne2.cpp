@@ -3,7 +3,6 @@
 #include "MantidAPI/Run.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/Unit.h"
@@ -655,6 +654,8 @@ MatrixWorkspace_sptr ReflectometryReductionOne2::directBeamCorrection(
 * Perform either transmission or algorithmic correction according to the
 * settings.
 * @param detectorWS : workspace in wavelength which is to be normalized
+* @param detectorWSReduced:: whether the input detector workspace has been
+* reduced
 * @return : corrected workspace
 */
 MatrixWorkspace_sptr ReflectometryReductionOne2::transOrAlgCorrection(
@@ -676,7 +677,8 @@ MatrixWorkspace_sptr ReflectometryReductionOne2::transOrAlgCorrection(
 /** Perform transmission correction by running 'CreateTransmissionWorkspace' on
 * the input workspace
 * @param detectorWS :: the input workspace
-* @param detectorWSReduced:: the input detector workspace has been reduced
+* @param detectorWSReduced:: whether the input detector workspace has been
+* reduced
 * @return :: the input workspace normalized by transmission
 */
 MatrixWorkspace_sptr ReflectometryReductionOne2::transmissionCorrection(
@@ -719,9 +721,9 @@ MatrixWorkspace_sptr ReflectometryReductionOne2::transmissionCorrection(
     alg->setPropertyValue("WavelengthMin", getPropertyValue("WavelengthMin"));
     alg->setPropertyValue("WavelengthMax", getPropertyValue("WavelengthMax"));
     alg->setPropertyValue("MonitorBackgroundWavelengthMin",
-                            getPropertyValue("MonitorBackgroundWavelengthMin"));
+                          getPropertyValue("MonitorBackgroundWavelengthMin"));
     alg->setPropertyValue("MonitorBackgroundWavelengthMax",
-                            getPropertyValue("MonitorBackgroundWavelengthMax"));
+                          getPropertyValue("MonitorBackgroundWavelengthMax"));
     alg->setPropertyValue("MonitorIntegrationWavelengthMin",
         getPropertyValue("MonitorIntegrationWavelengthMin"));
     alg->setPropertyValue("MonitorIntegrationWavelengthMax",
