@@ -337,7 +337,7 @@ std::vector<std::string> ReflectometryReductionOneAuto2::getDetectorNames(
         detectors.push_back(detectorName);
       }
     }
-  } catch (boost::bad_lexical_cast &ex) {
+  } catch (boost::bad_lexical_cast &) {
     throw std::runtime_error("Invalid processing instructions: " +
                              instructions);
   }
