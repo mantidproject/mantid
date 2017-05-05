@@ -9,7 +9,7 @@ try:
 except ImportError:
     import xml.etree.ElementTree as eTree
 from mantid.kernel import DateAndTime
-import warnings
+
 
 def get_named_elements_from_ipf_file(ipf_file, names_to_search, value_type):
     """
