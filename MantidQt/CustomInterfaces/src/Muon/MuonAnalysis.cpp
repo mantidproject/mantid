@@ -3085,7 +3085,7 @@ void MuonAnalysis::changedTFAsymmCheckbox(int state) {
     // reset the view
     m_fitFunctionPresenter->setMultiFitState(Muon::MultiFitState::Disabled);
   }
- setTFAsymm(TFAsymmState);
+  setTFAsymm(TFAsymmState);
 }
 /**
 * Called when the "TF Asymmetry" is needed (from home tab)
@@ -3101,9 +3101,7 @@ void MuonAnalysis::setTFAsymm(Muon::TFAsymmState TFAsymmState) {
   // If both multiFit and TFAsymm are checked
   // uncheck the multiFit
   if (m_uiForm.chkEnableMultiFit->isChecked() &&
-      TFAsymmState ==
-          Muon::TFAsymmState::Enabled) 
-  {
+      TFAsymmState == Muon::TFAsymmState::Enabled) {
     // uncheck the box
     m_uiForm.chkEnableMultiFit->setChecked(false);
     multiFitCheckboxChanged(0);
