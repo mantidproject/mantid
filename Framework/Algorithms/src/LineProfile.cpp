@@ -292,7 +292,7 @@ void LineProfile::init() {
                   "Centre of the line.");
   declareProperty(PropertyNames::HALF_WIDTH, EMPTY_DBL(),
                   mandatoryPositiveDouble,
-                  "Half of the width over which to calcualte the average.");
+                  "Half of the width over which to calcualte the profile.");
   const std::set<std::string> directions{DirectionChoices::HORIZONTAL,
                                          DirectionChoices::VERTICAL};
   declareProperty(PropertyNames::DIRECTION, DirectionChoices::HORIZONTAL,
@@ -306,10 +306,10 @@ void LineProfile::init() {
   declareProperty(PropertyNames::MODE, ModeChoices::AVERAGE, boost::make_shared<ListValidator<std::string>>(modes), "How the profile is calculated over the line width.");
   declareProperty(
       PropertyNames::IGNORE_INFS, false,
-      "Do not take infinities into account when calculating the average.");
+      "If true, ignore infinities when calculating the profile.");
   declareProperty(
       PropertyNames::IGNORE_NANS, true,
-      "Do not take not-a-numbers into account when calculating the average.");
+      "If true, ignore not-a-numbers when calculating the profile.");
 }
 
 //----------------------------------------------------------------------------------------------
