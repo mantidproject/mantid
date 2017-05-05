@@ -540,30 +540,36 @@ MatrixWorkspace_sptr ReflectometryReductionOne2::makeIvsLam() {
     const auto &detectors = m_detectors[0];
     // Convert to lambda
     if (m_convertUnits) {
+      g_log.debug() << "Converting input workspace to wavelength" << std::endl;
       result = convertToWavelength(result);
     }
     // Normalise
     if (m_normalise) {
+      g_log.debug() << "Normalising input workspace" << std::endl;
       result = directBeamCorrection(result);
       result = monitorCorrection(result);
       result = transOrAlgCorrection(result, false);
     }
     // Do the summation in Q
     if (m_sum) {
+      g_log.debug() << "Summing in Q" << std::endl;
       result = sumInQ(result, detectors);
     }
   } else {
     // Do the summation in lambda
     if (m_sum) {
+      g_log.debug() << "Summing in wavelength" << std::endl;
       result = makeDetectorWS(result, m_convertUnits);
     }
     // Normalise the 1D result
     if (m_normalise) {
+      g_log.debug() << "Normalising output workspace" << std::endl;
       result = directBeamCorrection(result);
       result = monitorCorrection(result);
       result = transOrAlgCorrection(result, true);
     }
     // Crop to wavelength limits
+    g_log.debug() << "Cropping output workspace" << std::endl;
     result = cropWavelength(result);
   }
 
