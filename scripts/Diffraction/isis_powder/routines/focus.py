@@ -27,8 +27,10 @@ def _focus_one_ws(ws, run_number, instrument, perform_vanadium_norm):
     input_workspace = common.subtract_summed_runs(ws_to_correct=ws, instrument=instrument,
                                                   empty_sample_ws_string=run_details.empty_runs)
     # Subtract a sample empty if specified
-    input_workspace = common.subtract_summed_runs(ws_to_correct=input_workspace, instrument=instrument,
-                                                  empty_sample_ws_string=run_details.sample_empty)
+    if run_details.sample_empty:
+        input_workspace = common.subtract_summed_runs(ws_to_correct=input_workspace, instrument=instrument,
+                                                      empty_sample_ws_string=run_details.sample_empty,
+                                                      scale_factor=instrument._inst_settings.sample_empty_scale)
 
     # Crop to largest acceptable TOF range
     input_workspace = instrument._crop_raw_to_expected_tof_range(ws_to_crop=input_workspace)
