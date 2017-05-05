@@ -1697,6 +1697,10 @@ void SliceViewer::changedShownDim(int index, int dim, int oldDim) {
   }
   // Show the new slice. This finds m_dimX and m_dimY
   this->updateDisplay();
+
+  // AutoRebin if required
+  autoRebinIfRequired();
+
   // Send out a signal
   emit changedShownDim(m_dimX, m_dimY);
 }

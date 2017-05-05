@@ -36,7 +36,7 @@ static bool endswith(const std::string &s, const std::string &subs) {
   // get a substring
   std::string tail = s.substr(s.size() - subs.size());
 
-  return tail.compare(subs) == 0;
+  return tail == subs;
 }
 
 static bool checkIntersection(std::vector<std::string> v1,
@@ -320,7 +320,7 @@ API::ITableWorkspace_sptr LoadSpiceAscii::createDataWS(
       boost::make_shared<DataObjects::TableWorkspace>();
   size_t ipt = -1;
   for (size_t i = 0; i < titles.size(); ++i) {
-    if (titles[i].compare("Pt.") == 0) {
+    if (titles[i] == "Pt.") {
       outws->addColumn("int", titles[i]);
       ipt = i;
     } else {
@@ -555,7 +555,7 @@ std::string LoadSpiceAscii::processTimeString(const std::string &rawtime,
     std::vector<std::string> terms;
     boost::split(terms, rawtime, boost::is_any_of(" "));
     bool pm = false;
-    if (terms[1].compare("PM") == 0)
+    if (terms[1] == "PM")
       pm = true;
 
     std::vector<std::string> terms2;

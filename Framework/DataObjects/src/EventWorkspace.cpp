@@ -1,23 +1,25 @@
+#include "MantidDataObjects/EventWorkspace.h"
+#include "MantidAPI/ISpectrum.h"
+#include "MantidAPI/Progress.h"
 #include "MantidAPI/RefAxis.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/SpectraAxis.h"
-#include "MantidAPI/Progress.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/EventWorkspaceMRU.h"
-#include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/IDetector.h"
-#include "MantidKernel/Exception.h"
-#include "MantidKernel/TimeSeriesProperty.h"
-#include "MantidKernel/MultiThreaded.h"
-#include "MantidKernel/FunctionTask.h"
-#include "MantidKernel/ThreadPool.h"
+#include "MantidGeometry/Instrument.h"
+#include "MantidKernel/CPUTimer.h"
 #include "MantidKernel/DateAndTime.h"
+#include "MantidKernel/Exception.h"
+#include "MantidKernel/FunctionTask.h"
+#include "MantidKernel/MultiThreaded.h"
+#include "MantidKernel/TimeSeriesProperty.h"
+
+#include "tbb/parallel_for.h"
+
 #include <limits>
 #include <numeric>
-#include "MantidAPI/ISpectrum.h"
-#include "MantidKernel/CPUTimer.h"
 
 using namespace boost::posix_time;
 using Mantid::API::ISpectrum;
@@ -83,17 +85,22 @@ void EventWorkspace::init(const std::size_t &NVectors,
     throw std::out_of_range(
         "Negative or 0 Number of Pixels specified to EventWorkspace::init");
   }
-  // Initialize the data
-  data.resize(NVectors, nullptr);
-  // Make sure SOMETHING exists for all initialized spots.
-  for (size_t i = 0; i < NVectors; i++)
-    data[i] = new EventList(mru, specnum_t(i));
 
   // Set each X vector to have one bin of 0 & extremely close to zero
   // Move the rhs very,very slightly just incase something doesn't like them
   // being the same
   HistogramData::BinEdges edges{0.0, std::numeric_limits<double>::min()};
-  this->setAllX(edges);
+
+  // Initialize the data
+  data.resize(NVectors, nullptr);
+  // Make sure SOMETHING exists for all initialized spots.
+  EventList el;
+  el.setHistogram(edges);
+  for (size_t i = 0; i < NVectors; i++) {
+    data[i] = new EventList(el);
+    data[i]->setMRU(mru);
+    data[i]->setSpectrumNo(specnum_t(i));
+  }
 
   // Create axes.
   m_axes.resize(2);
@@ -112,9 +119,13 @@ void EventWorkspace::init(const std::size_t &NVectors,
         "EventWorkspace cannot be initialized non-NULL Y or E data");
 
   data.resize(NVectors, nullptr);
-  for (size_t i = 0; i < NVectors; i++)
-    data[i] = new EventList(mru, specnum_t(i));
-  this->setAllX(histogram.binEdges());
+  EventList el;
+  el.setHistogram(histogram);
+  for (size_t i = 0; i < NVectors; i++) {
+    data[i] = new EventList(el);
+    data[i]->setMRU(mru);
+    data[i]->setSpectrumNo(specnum_t(i));
+  }
 
   m_axes.resize(2);
   m_axes[0] = new API::RefAxis(histogram.x().size(), this);
@@ -563,60 +574,26 @@ void EventWorkspace::setAllX(const HistogramData::BinEdges &x) {
 }
 
 /** Task for sorting an event list */
-class EventSortingTask final : public Task {
+class EventSortingTask {
 public:
   /// ctor
-  EventSortingTask(const EventWorkspace *WS, size_t wiStart, size_t wiStop,
-                   EventSortType sortType, size_t howManyCores,
+  EventSortingTask(const EventWorkspace *WS, EventSortType sortType,
                    Mantid::API::Progress *prog)
-      : Task(), m_wiStart(wiStart), m_wiStop(wiStop), m_sortType(sortType),
-        m_howManyCores(howManyCores), m_WS(WS), prog(prog) {
-    m_cost = 0;
-    if (m_wiStop > m_WS->getNumberHistograms())
-      m_wiStop = m_WS->getNumberHistograms();
-
-    for (size_t wi = m_wiStart; wi < m_wiStop; wi++) {
-      double n = static_cast<double>(m_WS->getSpectrum(wi).getNumberEvents());
-      // Sorting time is approximately n * ln (n)
-      m_cost += n * log(n);
-    }
-
-    if (!((m_howManyCores == 1) || (m_howManyCores == 2) ||
-          (m_howManyCores == 4)))
-      throw std::invalid_argument("howManyCores should be 1,2 or 4.");
-  }
+      : m_sortType(sortType), m_WS(WS), prog(prog) {}
 
   // Execute the sort as specified.
-  void run() override {
-    if (!m_WS)
-      return;
-    for (size_t wi = m_wiStart; wi < m_wiStop; wi++) {
-      if (m_sortType != TOF_SORT)
-        m_WS->getSpectrum(wi).sort(m_sortType);
-      else {
-        if (m_howManyCores == 1) {
-          m_WS->getSpectrum(wi).sort(m_sortType);
-        } else if (m_howManyCores == 2) {
-          m_WS->getSpectrum(wi).sortTof2();
-        } else if (m_howManyCores == 4) {
-          m_WS->getSpectrum(wi).sortTof4();
-        }
-      }
-      // Report progress
-      if (prog)
-        prog->report("Sorting");
+  void operator()(const tbb::blocked_range<size_t> &range) const {
+    for (size_t wi = range.begin(); wi < range.end(); ++wi) {
+      m_WS->getSpectrum(wi).sort(m_sortType);
     }
+    // Report progress
+    if (prog)
+      prog->report("Sorting");
   }
 
 private:
-  /// Start workspace index to process
-  size_t m_wiStart;
-  /// Stop workspace index to process
-  size_t m_wiStop;
   /// How to sort
   EventSortType m_sortType;
-  /// How many cores for each sort
-  size_t m_howManyCores;
   /// EventWorkspace on which to sort
   const EventWorkspace *m_WS;
   /// Optional Progress dialog.
@@ -651,46 +628,9 @@ void EventWorkspace::sortAll(EventSortType sortType,
     return;
   }
 
-  size_t num_threads;
-  num_threads = ThreadPool::getNumPhysicalCores();
-  g_log.debug() << num_threads << " cores found. ";
-
-  // Initial chunk size: set so that each core will be called for 20 tasks.
-  // (This is to avoid making too small tasks.)
-  size_t chunk_size = data.size() / (num_threads * 20);
-  if (chunk_size < 1)
-    chunk_size = 1;
-
-  // Sort with 1 core per event list by default
-  size_t howManyCores = 1;
-  // And auto-detect how many threads
-  size_t howManyThreads = 0;
-#ifdef _OPENMP
-  if (data.size() < num_threads * 10) {
-    // If you have few vectors, sort with 2 cores.
-    chunk_size = 1;
-    howManyCores = 2;
-    howManyThreads = num_threads / 2 + 1;
-  } else if (data.size() < num_threads) {
-    // If you have very few vectors, sort with 4 cores.
-    chunk_size = 1;
-    howManyCores = 4;
-    howManyThreads = num_threads / 4 + 1;
-  }
-#endif
-  g_log.debug() << "Performing sort with " << howManyCores
-                << " cores per EventList, in " << howManyThreads
-                << " threads, using a chunk size of " << chunk_size << ".\n";
-
   // Create the thread pool, and optimize by doing the longest sorts first.
-  ThreadPool pool(new ThreadSchedulerLargestCost(), howManyThreads);
-  for (size_t i = 0; i < data.size(); i += chunk_size) {
-    pool.schedule(new EventSortingTask(this, i, i + chunk_size, sortType,
-                                       howManyCores, prog));
-  }
-
-  // Now run it all
-  pool.joinAll();
+  EventSortingTask task(this, sortType, prog);
+  tbb::parallel_for(tbb::blocked_range<size_t>(0, data.size()), task);
 }
 
 /** Integrate all the spectra in the matrix workspace within the range given.
