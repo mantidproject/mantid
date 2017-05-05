@@ -39,7 +39,13 @@ Plotting Improvements
 
 .. figure:: ../../images/ArtRightGUIWaterfallCustom2sp1.PNG
 
-See `this <https://www.mantidproject.org/MBC_Displaying_data_in_multiple_workspaces>`_ for more details.
+Here are a couple of plots with "Temp" selected as the log:
+
+.. figure:: ../../images/ArtWaterfallT1.PNG
+
+.. figure:: ../../images/ArtSurfacePlotT1.PNG
+
+More datails `here <https://www.mantidproject.org/MBC_Displaying_data_in_multiple_workspaces>`_ .
 
 Algorithm Toolbox
 #################
