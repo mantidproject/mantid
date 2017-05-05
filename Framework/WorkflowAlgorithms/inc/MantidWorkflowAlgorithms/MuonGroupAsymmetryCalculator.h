@@ -47,7 +47,6 @@ private:
   API::MatrixWorkspace_sptr
   estimateAsymmetry(const API::Workspace_sptr &inputWS, const int index) const;
 };
-std::vector<double> convertToVec(std::string const &list);
 } // namespace WorkflowAlgorithms
 } // namespace Mantid
 
