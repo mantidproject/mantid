@@ -408,11 +408,11 @@ void SaveAscii2::populateAngleMetaData() {
 */
 void SaveAscii2::populateAllMetaData() {
   for (const auto &metaDataType : m_metaData) {
-    if (metaDataType.compare("spectrumnumber") == 0)
+    if (metaDataType == "spectrumnumber")
       populateSpectrumNumberMetaData();
-    if (metaDataType.compare("q") == 0)
+    if (metaDataType == "q")
       populateQMetaData();
-    if (metaDataType.compare("angle") == 0)
+    if (metaDataType == "angle")
       populateAngleMetaData();
   }
 }

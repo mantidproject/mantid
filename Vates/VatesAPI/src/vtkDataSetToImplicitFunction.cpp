@@ -63,6 +63,6 @@ Mantid::Geometry::MDImplicitFunction *vtkDataSetToImplicitFunction::execute() {
 }
 
 /// Destructor.
-vtkDataSetToImplicitFunction::~vtkDataSetToImplicitFunction() {}
+vtkDataSetToImplicitFunction::~vtkDataSetToImplicitFunction() = default;
 }
 }

@@ -96,7 +96,7 @@ class SANSConvertToQ(DataProcessorAlgorithm):
         q_resolution_calculator = q_resolution_factory.create_q_resolution_calculator(state)
         q_resolution_workspace = q_resolution_calculator.get_q_resolution_workspace(convert_to_q, data_workspace)
 
-        output_parts = True
+        output_parts = self.getProperty("OutputParts").value
 
         # Extract relevant settings
         q_binning = convert_to_q.q_1d_rebin_string
@@ -135,7 +135,7 @@ class SANSConvertToQ(DataProcessorAlgorithm):
 
     def _run_q_2d(self, state):
         """
-        This methods performs a 2D data reduction on our workspace.
+        This method performs a 2D data reduction on our workspace.
 
         Note that it does not perform any q resolution calculation, nor any wavelength-and-pixel adjustment. The
         output workspace contains two numerical axes.
@@ -147,7 +147,7 @@ class SANSConvertToQ(DataProcessorAlgorithm):
         wavelength_adjustment_workspace = self.getProperty("InputWorkspaceWavelengthAdjustment").value
         pixel_adjustment_workspace = self.getProperty("InputWorkspacePixelAdjustment").value
 
-        output_parts = True
+        output_parts = self.getProperty("OutputParts").value
 
         # Extract relevant settings
         convert_to_q = state.convert_to_q
