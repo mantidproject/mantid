@@ -73,19 +73,20 @@ FitPropertyBrowser::FitPropertyBrowser(QWidget *parent, QObject *mantidui)
       m_functionsGroup(nullptr), m_settingsGroup(nullptr),
       m_customSettingsGroup(nullptr), m_changeSlotsEnabled(false),
       m_guessOutputName(true),
+      m_fitMapper(nullptr), 
       m_updateObserver(*this, &FitPropertyBrowser::handleFactoryUpdate),
-      m_fitMapper(nullptr), m_fitMenu(nullptr),
+      m_fitMenu(nullptr),
       m_displayActionPlotGuess(nullptr), m_displayActionQuality(nullptr),
       m_displayActionClearAll(nullptr), m_setupActionCustomSetup(nullptr),
-      m_setupActionRemove(nullptr), m_tip(nullptr), m_fitSelector(nullptr),
+      m_tip(nullptr), m_setupActionRemove(nullptr), m_fitSelector(nullptr),
       m_fitTree(nullptr), m_currentHandler(0), m_defaultFunction("Gaussian"),
       m_defaultPeak("Gaussian"), m_defaultBackground("LinearBackground"),
       m_index_(0), m_peakToolOn(false), m_auto_back(false),
       m_autoBgName(QString::fromStdString(
           Mantid::Kernel::ConfigService::Instance().getString(
               "curvefitting.autoBackground"))),
-      m_autoBackground(nullptr), m_decimals(-1), m_mantidui(mantidui),
-      m_shouldBeNormalised(false) {
+      m_autoBackground(nullptr), m_decimals(-1), m_shouldBeNormalised(false),
+     m_mantidui(mantidui) {
   // Make sure plugins are loaded
   std::string libpath =
       Mantid::Kernel::ConfigService::Instance().getString("plugins.directory");
