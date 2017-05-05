@@ -136,6 +136,7 @@ public slots:
   void openSequentialFitDialog();
   /// Handles "fit raw data" selection/deselection
   void handleFitRawData(bool enabled, bool updateWorkspaces = true);
+//  void handleGroupBox(bool enabled, bool updateWorkspaces = true);
   /// Perform pre-fit checks
   void doPreFitChecks(bool sequentialFit);
 

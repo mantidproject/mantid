@@ -144,6 +144,8 @@ void MuonAnalysisFitDataPresenter::doConnect() {
             SLOT(doPreFitChecks(bool)));
     connect(fitBrowser, SIGNAL(fitRawDataClicked(bool)), this,
             SLOT(handleFitRawData(bool)));
+//	connect(fitBrowser, SIGNAL(groupBoxClicked(bool)), this,
+//		SLOT(handleGroupBox(bool)));
   }
   if (const QObject *dataSelector = dynamic_cast<QObject *>(m_dataSelector)) {
     connect(dataSelector, SIGNAL(dataPropertiesChanged()), this,

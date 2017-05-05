@@ -318,6 +318,7 @@ void MuonAnalysis::initLayout() {
   // Manage User Directories
   connect(m_uiForm.manageDirectoriesBtn, SIGNAL(clicked()), this,
           SLOT(openDirectoryDialog()));
+ // m_uiForm.
 }
 
 /**
@@ -2112,6 +2113,9 @@ void MuonAnalysis::loadFittings() {
           SLOT(dataToFitChanged()));
   connect(m_uiForm.plotCreation, SIGNAL(currentIndexChanged(int)), this,
           SLOT(updateDataPresenterOverwrite(int)));
+  connect(m_uiForm.fitBrowser, SIGNAL(groupBoxClicked(bool)), this,
+	  SLOT(handleGroupBox(bool)));
+  //add changed here?
   m_fitDataPresenter->setOverwrite(isOverwriteEnabled());
   // Set multi fit mode on/off as appropriate
   const auto &multiFitState = m_optionTab->getMultiFitState();
@@ -2120,7 +2124,20 @@ void MuonAnalysis::loadFittings() {
   const auto &TFAsymmState = m_optionTab->getTFAsymmState();
   m_fitFunctionPresenter->setTFAsymmState(TFAsymmState);
 }
-
+/**
+* Handle "groups" selected/deselected
+* Update stored value
+* Create raw workspaces if necessary
+* @param enabled :: [input] Whether option has been selected or unselected
+* @param updateWorkspaces :: [input] Whether to create workspaces if they don't
+* exist
+*/
+void MuonAnalysis::handleGroupBox(bool enabled,
+	bool updateWorkspaces) {
+	//send the group to dataselector
+	m_dataSelector->setGroupsSelected(m_uiForm.fitBrowser->getChosenGroups());
+	m_fitDataPresenter->handleSelectedDataChanged(true);
+}
 /**
  * Allow/disallow loading.
  */

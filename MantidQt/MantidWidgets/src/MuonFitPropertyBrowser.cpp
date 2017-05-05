@@ -163,11 +163,17 @@ void MuonFitPropertyBrowser::init() {
   m_groupsToFit = m_enumManager->addProperty("Groups/Pairs to fit");
   m_groupsToFitOptions << "All groups"
 	  << "All Pairs"
-	  << "Custom"; 
+	  << "Custom"<<"Show"; 
+
+  m_showGroupValue << "groups";
+  m_showGroup = m_enumManager->addProperty("Selected Groups");
+  
   //moo need to add periods.... 
 
   m_enumManager->setEnumNames(m_groupsToFit, m_groupsToFitOptions);
   multiFitSettingsGroup->addSubProperty(m_groupsToFit);
+  multiFitSettingsGroup->addSubProperty(m_showGroup);
+  m_enumManager->setEnumNames(m_showGroup, m_showGroupValue);
 
   connect(m_browser, SIGNAL(currentItemChanged(QtBrowserItem *)), this,
           SLOT(currentItemChanged(QtBrowserItem *)));
@@ -186,6 +192,8 @@ void MuonFitPropertyBrowser::init() {
   m_functionsGroup = m_browser->addProperty(functionsGroup);
   m_settingsGroup = m_browser->addProperty(settingsGroup);
   m_multiFitSettingsGroup = m_browser->addProperty(multiFitSettingsGroup);
+  m_multiFitSettingsGroup->property()->removeSubProperty(m_showGroup);
+
   // Don't show "Function" or "Data" sections as they have separate widgets
   m_browser->setItemVisible(m_functionsGroup, false);
   m_browser->setItemVisible(m_settingsGroup, false);
@@ -330,16 +338,56 @@ void MuonFitPropertyBrowser::setWorkspaceName(const QString &wsName) {
 void MuonFitPropertyBrowser::enumChanged(QtProperty *prop) {
 	if (!m_changeSlotsEnabled)
 		return;
-
+	m_multiFitSettingsGroup->property()->removeSubProperty(m_showGroup);
 	bool storeSettings = false;
 	if (prop == m_groupsToFit) {
 		int j = m_enumManager->value(m_groupsToFit);
 		std::string option = m_groupsToFitOptions[j].toStdString();
+
+
+		if (option == "All groups") {
+			setAllGroups();
+		}
+		else if (option == "All Pairs") {
+			setAllPairs();
+		}
+		else if(option == "Custom") {
+		genGroupWindow();		    	
+		
+		}
+		else if (option == "Show") {
+			m_showGroupValue.clear();
+			m_showGroupValue << getChosenGroups().join(",");
+			m_enumManager->setEnumNames(m_showGroup, m_showGroupValue);
+			m_multiFitSettingsGroup->property()->addSubProperty(m_showGroup);
+		}
+
+		//m_enumManager->setEnumNames(m_groupsToFit, m_groupsToFitOptions);
+
 	}
 	else {
 		FitPropertyBrowser::enumChanged(prop);
 	}
 }
+
+void MuonFitPropertyBrowser::setGroupOptions(int current, std::string option) {
+	m_groupsToFitOptions.clear();
+	if (option == "Custom") {
+		if (current == 2) {
+			m_groupsToFitOptions << "All groups"
+				<< "All Pairs"
+				<< "Show" << "Custom";
+		}
+		else {
+			m_groupsToFitOptions << "All groups"
+				<< "All Pairs"
+				<< "Custom" << "Show";
+		}
+	}	
+	m_enumManager->setEnumNames(m_groupsToFit, m_groupsToFitOptions);
+
+}
+
 /** Called when a double property changed
  * @param prop :: A pointer to the property
  */
@@ -401,9 +449,22 @@ void MuonFitPropertyBrowser::boolChanged(QtProperty *prop) {
   if (prop == m_rawData) {
     const bool val = m_boolManager->value(prop);
     emit fitRawDataClicked(val);
-  } else {
-    // defer to parent class
-    FitPropertyBrowser::boolChanged(prop);
+  }
+  else {
+	  bool done = false;
+	  for (auto iter = m_groupBoxes.constBegin(); iter != m_groupBoxes.constEnd();
+		  ++iter) {
+		  if (iter.value() == prop) {
+			  const bool val = m_boolManager->value(prop);
+			  done = true;
+			  emit groupBoxClicked(val);
+		  }
+	  }
+
+	  if (done == false) {
+		  // defer to parent class
+		  FitPropertyBrowser::boolChanged(prop);
+	  }
   }
 }
 
@@ -931,6 +992,7 @@ void MuonFitPropertyBrowser::setAvailableGroups(const QStringList &groups) {
 		groupSettings->addSubProperty(m_groupBoxes.value(group));
 	}
 	m_groupWindow = m_browser->addProperty(groupSettings); 
+	//m_groupWindow2 = m_groupBrowser->addProperty(groupSettings);
 
 }
 /**
@@ -950,20 +1012,15 @@ void MuonFitPropertyBrowser::clearGroupCheckboxes() {
 * @param name :: [input] Name of group to add
 */
 void MuonFitPropertyBrowser::addGroupCheckbox(const QString &name) {
-	//auto checkBox = new QCheckBox(name);
-
-
-	m_groupBoxes.insert(name,m_boolManager->addProperty(name));
-	
-	//m_groupBoxes.value(name)->setChecked(false);
-	//QSettings settings;
-	//settings.beginGroup("Mantid/test");
-	
-	bool plotDiff = false;
-	m_boolManager->setValue(m_groupBoxes.value(name), plotDiff);
-	//m_groupWindow->addSubProperty(m_groupBoxes.value(name));
-	//connect(m_groupBoxes.value(name), SIGNAL(clicked(bool)), this,
-	//	SIGNAL(selectedGroupsChanged()));
+	m_groupBoxes.insert(name, m_boolManager->addProperty(name));
+	int j = m_enumManager->value(m_groupsToFit);
+	auto option = m_groupsToFitOptions[j].toStdString();
+	if (option == "All groups") {
+		setAllGroups();
+	}
+	else if (option == "All Pairs") {
+		setAllPairs();
+	}
 }
 /**
 * Returns a list of the selected groups (checked boxes)
@@ -973,7 +1030,7 @@ QStringList MuonFitPropertyBrowser::getChosenGroups() const {
 	QStringList chosen;
 	for (auto iter = m_groupBoxes.constBegin(); iter != m_groupBoxes.constEnd();
 		++iter) {
-		if (iter.value()==false) {
+		if (m_boolManager->value(iter.value()) ==true) {
 			chosen.append(iter.key());
 		}
 	}
@@ -989,22 +1046,63 @@ void MuonFitPropertyBrowser::clearChosenGroups() const {
 		//iter.value()->setChecked(false);
 	}
 }
+
 /**
-* Set the chosen group ticked and all others off
-* Used when switching from Home tab to Data Analysis tab
-* @param group :: [input] Name of group to select
+* Selects all groups
 */
-void MuonFitPropertyBrowser::setChosenGroup(const QString &group) {
+void MuonFitPropertyBrowser::setAllGroups() {
+	
+	clearChosenGroups();
 	for (auto iter = m_groupBoxes.constBegin(); iter != m_groupBoxes.constEnd();
 		++iter) {
-		if (iter.key() == group) {
-			m_boolManager->setValue(iter.value(), false);
+		for (auto group : m_groupsList) {
+			if (iter.key().toStdString() == group) {
+				m_boolManager->setValue(iter.value(), true);
 
-			//iter.value()->setChecked(true);
+			}
 		}
 	}
 }
-
-
+/*
+* sets all pairs
+*/
+void MuonFitPropertyBrowser::setAllPairs() {
+	clearChosenGroups();
+	bool isItGroup = false;
+	for (auto iter = m_groupBoxes.constBegin(); iter != m_groupBoxes.constEnd();
+		++iter) {
+		isItGroup = false;
+		for (auto group : m_groupsList) {
+			if (iter.key().toStdString() == group) {
+				isItGroup = true;
+			}
+		}
+		if (!isItGroup) {
+			m_boolManager->setValue(iter.value(), true);
+		}
+	}
+}
+/*
+* Create a popup window to select a custom
+* selection of groups/pairs
+*/
+void MuonFitPropertyBrowser::genGroupWindow() {
+	QWidget *w = new QWidget;
+	QtGroupPropertyManager *groupManager = new QtGroupPropertyManager(w);
+	QVBoxLayout *layout = new QVBoxLayout(w);
+	QtTreePropertyBrowser *groupBrowser = new QtTreePropertyBrowser();
+	QtProperty *groupSettings = groupManager->addProperty("test");
+	for (auto iter = m_groupBoxes.constBegin(); iter != m_groupBoxes.constEnd();
+		++iter){
+		groupSettings->addSubProperty(m_groupBoxes.value(iter.key()));
+		m_boolManager->setValue(iter.value(),m_boolManager->value(iter.value()));
+	}
+	QtCheckBoxFactory *checkBoxFactory = new QtCheckBoxFactory(w);
+	groupBrowser->setFactoryForManager(m_boolManager, checkBoxFactory);
+	groupBrowser->addProperty(groupSettings);
+	layout->addWidget(groupBrowser);
+	w->setLayout(layout);
+	w->show();
+}
 } // MantidQt
 } // API

@@ -378,14 +378,19 @@ QStringList MuonFitDataSelector::getPeriodSelections() const {
  * @returns :: list of selected groups
  */
 QStringList MuonFitDataSelector::getChosenGroups() const {
-  QStringList chosen;
+	/*for (auto group : m_chosenGroups) {
+	std::string tmp = group.toStdString();
+	double a = 1.;
+}*/
+	return m_chosenGroups;
+	/*QStringList chosen;
   for (auto iter = m_groupBoxes.constBegin(); iter != m_groupBoxes.constEnd();
        ++iter) {
     if (iter.value()->isChecked()) {
       chosen.append(iter.key());
     }
   }
-  return chosen;
+  return chosen;*/
 }
 /**
 * Clears the list of selected groups (unchecks boxes)
@@ -520,9 +525,9 @@ IMuonFitDataSelector::FitType MuonFitDataSelector::getFitType() const { // will 
   // If radio buttons disabled, it's a single fit unless multiple groups/periods
   // chosen
   if (!m_ui.rbCoAdd->isEnabled()) {
-    const auto groups = getChosenGroups();
+	  const auto groups = m_chosenGroups.size();//getChosenGroups();
     const auto periods = getPeriodSelections();
-    return groups.size() <= 1 && periods.size() <= 1 ? FitType::Single
+    return groups <= 1 && periods.size() <= 1 ? FitType::Single
                                                      : FitType::Simultaneous;
   } else {
     // which button is selected
@@ -651,9 +656,9 @@ void MuonFitDataSelector::setSimultaneousFitLabel(const QString &label) {
  * Called when groups/periods selection changes.
  */
 void MuonFitDataSelector::checkForMultiGroupPeriodSelection() {
-  const auto groups = getChosenGroups();
+ // const auto groups = getChosenGroups();
   const auto periods = getPeriodSelections();
-  m_ui.txtSimFitLabel->setEnabled(groups.size() > 1 || periods.size() > 1 ||
+  m_ui.txtSimFitLabel->setEnabled(m_chosenGroups.size() > 1 || periods.size() > 1 ||
                                   getFitType() == FitType::Simultaneous);
 }
 

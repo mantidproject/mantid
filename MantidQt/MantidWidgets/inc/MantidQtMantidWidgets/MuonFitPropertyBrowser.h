@@ -105,9 +105,10 @@ public:
   void TFAsymmFit(int maxIterations);
   void setAvailableGroups(const QStringList &groups);
   QStringList getChosenGroups() const;
-  void setChosenGroup(const QString &group);
   /// Clear list of selected groups
   void clearChosenGroups() const;
+  void setAllGroups();
+  void setAllPairs();
 
 public slots:
   /// Perform the fit algorithm
@@ -128,6 +129,8 @@ signals:
   void userChangedDatasetIndex(int index) override;
   /// Emitted when "fit to raw data" is changed
   void fitRawDataClicked(bool enabled) override;
+  void groupBoxClicked(bool enabled);
+
   /// Emitted when fit is about to be run
   void preFitChecksRequested(bool sequential) override;
 
@@ -156,6 +159,8 @@ private:
                                   const int nWorkspaces) const;
   void clearGroupCheckboxes();
   void addGroupCheckbox(const QString &name);
+  void genGroupWindow();
+  void setGroupOptions(int current,std::string option);
   /// Splitter for additional widgets and splitter between this and browser
   QSplitter *m_widgetSplitter, *m_mainSplitter;
   /// Names of workspaces to fit
@@ -170,7 +175,11 @@ private:
   /// Map of group names to checkboxes
   QMap<QString,QtProperty *> m_groupBoxes;
   QtBrowserItem *m_groupWindow;
-  //int m_groupWindowCount;
+  //QtTreePropertyBrowser *m_groupBrowser; 
+  QtProperty *m_showGroup;
+  mutable QStringList m_showGroupValue;
+  std::vector<std::string> m_groupsList = { "fwd","bkwd","top","bottom","bwd"};
+
 };
 
 std::vector<double> readNormalization();
