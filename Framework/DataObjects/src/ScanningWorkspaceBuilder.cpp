@@ -36,7 +36,7 @@ void ScanningWorkspaceBuilder::setInstrument(
 
 void ScanningWorkspaceBuilder::setHistogram(
     HistogramData::Histogram histogram) {
-  if ((histogram.counts().size() != m_nDetectors * m_nTimeIndexes) ||
+  if ((histogram.counts().size() != m_nBins) ||
       (histogram.binEdges().size() != m_nBins + 1))
     throw std::logic_error(
         "Histogram supplied does not have the correct size.");

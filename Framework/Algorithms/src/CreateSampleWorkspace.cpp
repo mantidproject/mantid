@@ -160,10 +160,11 @@ void CreateSampleWorkspace::init() {
                   boost::make_shared<BoundedValidator<double>>(0, 1000, true),
                   "The distance along the beam direction from the source to "
                   "the sample in M (default:10.0)");
-  auto maximumValidator = boost::make_shared<BoundedValidator<int>>();
-  maximumValidator->setUpper(360);
-  declareProperty("NumScanPoints", 0, maximumValidator,
-                  "Add a number of detector scan points to the instrument.");
+  declareProperty("NumScanPoints", 1,
+                  boost::make_shared<BoundedValidator<int>>(0, 360, true),
+                  "Add a number of detector scan points to the instrument. "
+                  "Minimum (default) is 1 scan point, which gives a "
+                  "non-scanning workspace.");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -232,7 +233,7 @@ void CreateSampleWorkspace::exec() {
   if (wsType == "Event") {
     ws = createEventWorkspace(numPixels, numBins, numMonitors, numEvents, xMin,
                               binWidth, inst, functionString, isRandom);
-  } else if (numScanPoints > 0) {
+  } else if (numScanPoints > 1) {
     ws =
         createScanningWorkspace(numPixels, numBins, numMonitors, xMin, binWidth,
                                 inst, functionString, isRandom, numScanPoints);
