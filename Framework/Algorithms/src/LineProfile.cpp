@@ -226,18 +226,40 @@ void profile(std::vector<double> &Xs, std::vector<double> &Ys,
   }
 }
 
+/**
+ * A mode function for averaging.
+ * @param sum A sum of data point.
+ * @param n Number of summed points.
+ * @return The average.
+ */
 double averageMode(const double sum, const int n, const int) {
   return sum / n;
 }
 
+/**
+ * A mode function for summing.
+ * @param sum A sum of data points.
+ * @return The sum.
+ */
 double sumMode(const double sum, const int, const int) {
   return sum;
 }
 
+/**
+ * A mode function for weighed summing.
+ * @param sum
+ * @param n
+ * @param nTot
+ * @return
+ */
 double weighedSumMode(const double sum, const int n, const int nTot) {
   return static_cast<double>(nTot) / static_cast<double>(n) * sum;
 }
 
+/**
+ * Return a suitable function to calculate the profile over its width.
+ * @param modeName The name of the calculation mode.
+ */
 auto createMode(const std::string &modeName) {
   if (modeName == ModeChoices::AVERAGE) {
     return averageMode;
