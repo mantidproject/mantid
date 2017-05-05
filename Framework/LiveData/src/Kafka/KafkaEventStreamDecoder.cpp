@@ -85,9 +85,9 @@ void KafkaEventStreamDecoder::startCapture(bool startNow) {
     auto runStartData = getRunStartMessage(rawMsgBuffer);
     auto startTimeMilliseconds =
         runStartData.startTime * 1000; // seconds to milliseconds
-    m_eventStream =
-        m_broker->subscribe({m_eventTopic, m_runInfoTopic},
-                            startTimeMilliseconds, subscribeAtOption::TIME);
+    m_eventStream = m_broker->subscribe(
+        {m_eventTopic, m_runInfoTopic},
+        static_cast<int64_t>(startTimeMilliseconds), subscribeAtOption::TIME);
   } else {
     m_eventStream = m_broker->subscribe({m_eventTopic, m_runInfoTopic},
                                         subscribeAtOption::LATEST);
@@ -260,12 +260,13 @@ void KafkaEventStreamDecoder::captureImplExcept() {
       continue;
 
     if (checkOffsets) {
-      if (offset >= stopOffsets[topicName][partition]) {
-        reachedEnd[topicName][partition] = true;
+      if (offset >= stopOffsets[topicName][static_cast<size_t>(partition)]) {
+        reachedEnd[topicName][static_cast<size_t>(partition)] = true;
         g_log.debug() << "Reached end-of-run in " << topicName << " topic."
                       << std::endl;
         g_log.debug() << "topic: " << topicName << " offset: " << offset
-                      << " stopOffset: " << stopOffsets[topicName][partition]
+                      << " stopOffset: "
+                      << stopOffsets[topicName][static_cast<size_t>(partition)]
                       << std::endl;
         // Check if we've reached the stop offset on every partition of every
         // topic
@@ -315,7 +316,8 @@ void KafkaEventStreamDecoder::captureImplExcept() {
       mutableRunInfo.getTimeSeriesProperty<double>(PROTON_CHARGE_PROPERTY)
           ->addValue(pulseTime, ISISMsg->proton_charge());
       for (decltype(nEvents) i = 0; i < nEvents; ++i) {
-        auto &spectrum = periodBuffer.getSpectrum(m_specToIdx[detData[i]]);
+        auto &spectrum = periodBuffer.getSpectrum(
+            m_specToIdx[static_cast<int32_t>(detData[i])]);
         spectrum.addEventQuickly(TofEvent(static_cast<double>(tofData[i]) *
                                               1e-9, // nanoseconds to seconds
                                           pulseTime));
@@ -335,8 +337,9 @@ void KafkaEventStreamDecoder::captureImplExcept() {
         g_log.debug() << "stopTime is " << stopTime << std::endl;
         // Wait for max latency so that we don't miss any late messages
         std::this_thread::sleep_for(MAX_LATENCY);
-        stopOffsets = m_eventStream->getOffsetsForTimestamp(
-            (stopTime + 1) * 1000); // Convert seconds to milliseconds
+        stopOffsets =
+            m_eventStream->getOffsetsForTimestamp(static_cast<int64_t>(
+                (stopTime + 1) * 1000)); // Convert seconds to milliseconds
         // Set reachedEnd to false for each topic and partition
         for (auto keyValue : stopOffsets) {
           // Ignore the runInfo topic

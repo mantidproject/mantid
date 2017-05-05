@@ -167,16 +167,11 @@ std::unique_ptr<Metadata> KafkaTopicSubscriber::queryMetadata() const {
  */
 void KafkaTopicSubscriber::subscribeAtTime(int64_t time) {
   auto partitions = getTopicPartitions();
-  for (auto partition : partitions) {
-    partition->set_offset(time);
-    LOGGER().debug() << "Topic: " << partition->topic()
-                     << ", partition: " << partition->partition()
-                     << ", time (milliseconds past epoch): " << time
-                     << ", offset is set to: " << partition->offset()
-                     << ", current high watermark is: "
-                     << getCurrentOffset(partition->topic(),
-                                         partition->partition()) << std::endl;
-  }
+  std::for_each(partitions.cbegin(), partitions.cend(),
+                [time](RdKafka::TopicPartition *partition) {
+                  partition->set_offset(time);
+                });
+
   // Convert the timestamps to partition offsets
   auto error = m_consumer->offsetsForTimes(partitions, 10000);
   if (error != RdKafka::ERR_NO_ERROR) {

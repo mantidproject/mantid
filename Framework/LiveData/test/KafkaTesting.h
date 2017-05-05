@@ -123,8 +123,8 @@ public:
         builder, builder.CreateString("KafkaTesting"), 0, frameTime,
         builder.CreateVector(tof), builder.CreateVector(spec),
         FacilityData_ISISData,
-        CreateISISData(builder, m_nextPeriod, RunState_RUNNING, protonCharge)
-            .Union());
+        CreateISISData(builder, static_cast<uint32_t>(m_nextPeriod),
+                       RunState_RUNNING, protonCharge).Union());
     builder.Finish(messageFlatbuf);
 
     // Copy to provided buffer
@@ -192,7 +192,6 @@ private:
   std::string m_startTime = "2016-08-31T12:07:42";
   int32_t m_runNumber = 1000;
   std::string m_instName = "HRPDTEST";
-  int64_t m_streamOffset = 0;
   int32_t m_nperiods = 1;
 };
 
