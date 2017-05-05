@@ -17,11 +17,9 @@ using namespace Mantid::HistogramData;
 namespace Mantid {
 namespace Algorithms {
 
-// Register the algorithm into the AlgorithmFactory
-DECLARE_ALGORITHM(ReflectometryReductionOne2)
-
-// unnamed namespace
+/*Anonomous namespace */
 namespace {
+
 /** Get the twoTheta angle for the centre of the detector associated with the
 * given spectrum
 *
@@ -367,7 +365,10 @@ std::string createProcessingCommandsFromDetectorWS(
 
   return result.str();
 }
-} // unnamed namespace
+}
+
+// Register the algorithm into the AlgorithmFactory
+DECLARE_ALGORITHM(ReflectometryReductionOne2)
 
 //----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
