@@ -85,11 +85,6 @@ Improved
 
 - :ref:`IkedaCarpenterPV <func-IkedaCarpenterPV>` now constrains all parameters to be non-negative which helps the fits converge faster and produces better fits.
 
-LiveData
---------
-
-- A new live listener for event data, `KafkaEventListener`, has been added. This is in development for the ESS and ISIS. It is only available on IBEX instruments at ISIS.
-
 Python
 ------
 
