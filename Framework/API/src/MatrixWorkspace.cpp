@@ -2012,6 +2012,12 @@ void MatrixWorkspace::updateCachedDetectorGrouping(const size_t index) const {
 void MatrixWorkspace::buildDefaultSpectrumDefinitions() {
   const auto &detInfo = detectorInfo();
   size_t numberOfDetectors{detInfo.size()};
+  if (numberOfDetectors == 0) {
+    // Default to empty spectrum definitions if there is no instrument.
+    m_indexInfo->setSpectrumDefinitions(
+        std::vector<SpectrumDefinition>(m_indexInfo->size()));
+    return;
+  }
   size_t numberOfSpectra{0};
   if (detInfo.isScanning()) {
     for (size_t i = 0; i < numberOfDetectors; ++i)
