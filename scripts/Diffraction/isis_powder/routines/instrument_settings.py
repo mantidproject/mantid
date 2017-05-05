@@ -135,11 +135,10 @@ def _check_value_is_in_enum(val, enum):
     :return: The correctly cased val. Otherwise raises a value error.
     """
     seen_val_in_enum = False
-    enum_known_vals = []
+    enum_known_vals = _get_enum_values(enum_cls=enum)
     lower_string_val = str(val).lower()
 
-    known_values = _get_enum_values(enum_cls=enum)
-    for enum_val in known_values:
+    for enum_val in enum_known_vals:
 
         if lower_string_val == enum_val.lower():
             # Get the correctly capitalised value so we no longer have to call lower
