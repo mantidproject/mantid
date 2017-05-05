@@ -19,11 +19,22 @@ see http://www.mantidproject.org/IDF -->
     </reference-frame>
     <default-view axis-view="z"/>
   </defaults>
+
   <!-- BRIEF DESCRIPTION OF IMAT INSTRUMENT:
        IMAT (Imaging and Materials Science & Engineering)
+       This IDF is for the 2 prototype banks, each with 200 detectors.
+       
+       The sample is considered Origin (0.0, 0.0, 0.0).
+       The source is at location z = -56.0, because it is 56 meters away from the sample.
+
+       The way the instrument is built in the IDF is by:
+         - First we define the monitors, as distance FROM the sample, hence the negative
+         - Second we define both North and South bank, both of them being the same type object -> detector-bank.
+              This means we can reuse the definition of a detector-bank for both.
+              This also means that WE MUST rotate one of the banks otherwise they would face the same way.
+         - 
   -->
 <!-- First, the source, sample and monitors -->
-
 <component type="some source type">
   <location z="-56.0" />
 </component>
@@ -47,16 +58,21 @@ see http://www.mantidproject.org/IDF -->
 
 <type name="monitors">
   <component type="monitor-cylinder">
-     <!--Example, first monitor is at 11.6534 m from the source, in the direction towards the sample => z = 11.6534 - 56 = -44.3466 (from the sample, which is at z=0)-->
+     <!--Example, first monitor is at 11.6534 m from the source, in the direction 
+     towards the sample => z = 11.6534 - 56 = -44.3466 (from the sample, which is at z=0)-->
+
     <!--11.6534 - 56 -->
     <location z="-44.3466" name="monitor1a"/>  
     <location z="-44.3466" name="monitor1b"/>
+
     <!--19.8144 - 56 -->
     <location z="-36.1856" name="monitor2a"/>  
     <location z="-36.1856" name="monitor2b"/>
+    
     <!--20.8944 - 56 -->
     <location z="-35.1056" name="monitor3a"/>  
     <location z="-35.1056" name="monitor3b"/>
+    
     <!--46.1774 - 56 -->
     <location z="-9.8226" name="monitor4a"/>  
     <location z="-9.8226" name="monitor4b"/>
@@ -64,14 +80,15 @@ see http://www.mantidproject.org/IDF -->
     <!--49.0 - 56 -->
     <location z="-7" name="monitor5a"/>  
     <location z="-7" name="monitor5b"/>
-  
   </component>
 
-  <!-- We don't really care about those showing up in the Instrument View -->
+  <!-- 
+       Define the monitor shapes, they are not completely accurately defined,
+       because the shape is only used for visualisation.
+  -->
   <component type="dummy-monitor">
     <!--56 - 56-->
     <location z="0.0" name="CalMon"/>   
-  
     <!--60 - 56-->
     <location z="4.0" name="He_in"/>   
     <location z="4.0" name="He_out"/>
@@ -105,7 +122,7 @@ see http://www.mantidproject.org/IDF -->
   </cylinder>
 </type>
 
-<!-- IDs for the monitors -->
+<!-- Spectrum IDs for the monitors -->
 <idlist idname="monitors">
   <id start="0" end="13" />
 </idlist>
@@ -154,14 +171,26 @@ see http://www.mantidproject.org/IDF -->
 	   The blocks, and the pixels within each block, are specified in order from the lowest to the
 	   highest two-theta -->
   <component type="detector-block">
-    <!-- We have a total of 2 detector blocks per ROW -->
+    <!-- 
+        Currently (May 2017) the detectors that IMAT uses have 200 elements each,
+        structured in 2 rows, with 100 pixels each. We simulate that by defining 100 pixels 
+        below, and adding two of them in separate rows.
+
+        In 2018 new detectors are expected, if they are the full ones they will have more
+        rows per bank than these ones currently.
+    -->
     <location r="0" t="0" p="0"> <facing x="0.0" y="0.0" z="0.0"/> </location>
     <location r="0" t="-0" p="0"> <facing x="0.0" y="0.0" z="0.0"/> </location>
   </component>
 </type>
+
 <!-- Pixels inside a single detector block -->
 <type name="detector-block">
-  <!--# we need 100 pixels per row-->
+  <!--
+      Currently we have 100 pixels per row with a 0.004 gap between each detector pixel.
+      I am not sure if the number of pixels will change with the new detectors in 2018,
+      but I believe that it should be changed here
+  -->
   <component type="detector-pixel">
     <location x="0.196" y="0" z="0" name="pixel1" /> 
     <location x="0.192" y="0" z="0" name="pixel2" /> 
@@ -263,8 +292,6 @@ see http://www.mantidproject.org/IDF -->
     <location x="-0.192" y="0" z="0" name="pixel98" /> 
     <location x="-0.196" y="0" z="0" name="pixel99" /> 
     <location x="-0.2" y="0" z="0" name="pixel100" /> 
-
-
   </component>
 </type>
 
@@ -278,9 +305,29 @@ see http://www.mantidproject.org/IDF -->
   <algebra val="shape" />
 </type>
 
-<!-- 2 banks, 100 detectors per line, 400 total -->
+<!-- 
+    Here we define the spectra number for each detector. Each detector gets one spectra.
+    The current structure leaves spectra 13 and 14 empty, so they are excluded.
+    Excluded spectra:
+      - 13 and 14: left empty
+      - 215 to 249 are excluded
+      - 449 to the end are excluded
+
+    The current structure of the spectra is:
+        We have 2 banks with 2 rows, and 100 detectors per row
+        
+        This means we have 400 detectors in total.
+
+        15-214 is 200 detectors - the range is [15,214] (last index not excluded)
+        250-449 is 200 detectors - same for the range [250,449]
+
+        I have tried with 15-215, and 250-450, but Mantid fails to parse and the error
+        is that we have more spectra than detectors. The [15,214], [250,449] range works.
+
+    In the future we will still have 2 banks, but they will have more detector-blocks and maybe more pixels
+    inside each detector-blocks
+  -->
 <idlist idname="NorthBank">
-  <!-- 100 detectors per line -->
   <id start="15" end="214"/>
 </idlist>
 
