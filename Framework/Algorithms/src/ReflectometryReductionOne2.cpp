@@ -59,7 +59,7 @@ double getDetectorTwoThetaRange(const SpectrumInfo *spectrumInfo,
 */
 double getLambdaRange(const HistogramX &xValues, const int xIdx) {
   // The lambda range is the bin width from the given index to the next.
-  if (xIdx < 0 || xIdx + 1 >= xValues.size()) {
+  if (xIdx < 0 || xIdx + 1 >= static_cast<int>(xValues.size())) {
     std::ostringstream errMsg;
     errMsg << "Error accessing X values out of range (index=" << xIdx + 1
            << ", size=" << xValues.size();
@@ -76,7 +76,7 @@ double getLambdaRange(const HistogramX &xValues, const int xIdx) {
 * @return : the lambda range
 */
 double getLambda(const HistogramX &xValues, const int xIdx) {
-  if (xIdx >= xValues.size()) {
+  if (xIdx < 0 || xIdx >= static_cast<int>(xValues.size())) {
     std::ostringstream errMsg;
     errMsg << "Error accessing X values out of range (index=" << xIdx
            << ", size=" << xValues.size();
@@ -210,7 +210,9 @@ int mapSpectrumIndexToWorkspace(const spec2index_map &map, const size_t mapIdx,
 
   // Get the spectrum numbers for these indices
   auto it = std::find_if(map.begin(), map.end(),
-                         [mapIdx](auto wsIt) { return wsIt.second == mapIdx; });
+                         [mapIdx](const std::pair<specnum_t, size_t> &mapIter) {
+                           return mapIter.second == mapIdx;
+                         });
 
   if (it == map.end()) {
     std::ostringstream errMsg;
@@ -281,7 +283,7 @@ std::string createProcessingCommandsFromDetectorWS(
   // Add each group to the output, separated by ','
   /// @todo Add support to separate contiguous groups by ':' to avoid having
   /// long lists in the processing instructions
-  for (auto &groupIt = hostGroups.begin(); groupIt != hostGroups.end();
+  for (auto groupIt = hostGroups.begin(); groupIt != hostGroups.end();
        ++groupIt) {
     const auto &hostDetectors = *groupIt;
 
@@ -291,9 +293,9 @@ std::string createProcessingCommandsFromDetectorWS(
     bool contiguous = false;
     size_t contiguousStart = 0;
 
-    for (auto &it = hostDetectors.begin(); it != hostDetectors.end(); ++it) {
+    for (auto it = hostDetectors.begin(); it != hostDetectors.end(); ++it) {
       // Check if the next iterator is a contiguous increment from this one
-      auto &nextIt = it + 1;
+      auto nextIt = it + 1;
       if (nextIt != hostDetectors.end() && *nextIt == *it + 1) {
         // If this is a start of a new contiguous region, remember the start
         // index
@@ -871,7 +873,8 @@ MatrixWorkspace_sptr ReflectometryReductionOne2::constructIvsLamWS(
       getDetectorTwoThetaRange(m_spectrumInfo, spIdxMin);
   // For bLambda, use the average bin size for this spectrum
   auto xValues = detectorWS->x(spIdxMin);
-  double bLambda = (xValues[xValues.size() - 1] - xValues[0]) / xValues.size();
+  double bLambda = (xValues[xValues.size() - 1] - xValues[0]) /
+                   static_cast<int>(xValues.size());
   getProjectedLambdaRange(lambdaMax, twoThetaMin, bLambda, bTwoThetaMin,
                           detectors, lambdaVMin, dummy);
 
@@ -880,7 +883,8 @@ MatrixWorkspace_sptr ReflectometryReductionOne2::constructIvsLamWS(
   const double bTwoThetaMax =
       getDetectorTwoThetaRange(m_spectrumInfo, spIdxMax);
   xValues = detectorWS->x(spIdxMax);
-  bLambda = (xValues[xValues.size() - 1] - xValues[0]) / xValues.size();
+  bLambda = (xValues[xValues.size() - 1] - xValues[0]) /
+            static_cast<int>(xValues.size());
   getProjectedLambdaRange(lambdaMin, twoThetaMax, bLambda, bTwoThetaMax,
                           detectors, dummy, lambdaVMax);
 
@@ -891,7 +895,6 @@ MatrixWorkspace_sptr ReflectometryReductionOne2::constructIvsLamWS(
   // Use the same number of bins as the input
   const int origNumBins = static_cast<int>(detectorWS->blocksize());
   const double binWidth = (lambdaMax - lambdaMin) / origNumBins;
-  const int newNumBins = static_cast<int>((lambdaVMax - lambdaVMin) / binWidth);
   std::stringstream params;
   params << lambdaVMin << "," << binWidth << "," << lambdaVMax;
 
@@ -903,7 +906,7 @@ MatrixWorkspace_sptr ReflectometryReductionOne2::constructIvsLamWS(
   rebinAlg->execute();
   ws = rebinAlg->getProperty("OutputWorkspace");
 
-  for (int i = 0; i < ws->blocksize(); ++i) {
+  for (int i = 0; i < static_cast<int>(ws->blocksize()); ++i) {
     ws->dataY(0)[i] = 0.0;
     ws->dataE(0)[i] = 0.0;
   }
@@ -951,14 +954,16 @@ ReflectometryReductionOne2::sumInQ(MatrixWorkspace_sptr detectorWS,
     std::vector<double> projectedE(outputE.size(), 0.0);
 
     // Process each value in the spectrum
-    for (int inputIdx = 0; inputIdx < inputY.size(); ++inputIdx) {
+    const int ySize = static_cast<int>(inputY.size());
+    for (int inputIdx = 0; inputIdx < ySize; ++inputIdx) {
       // Do the summation in Q
       sumInQProcessValue(inputIdx, twoTheta, bTwoTheta, inputX, inputY, inputE,
                          detectors, IvsLam, projectedE);
     }
 
     // Sum errors in quadrature
-    for (int outIdx = 0; outIdx < outputE.size(); ++outIdx) {
+    const int eSize = static_cast<int>(inputE.size());
+    for (int outIdx = 0; outIdx < eSize; ++outIdx) {
       outputE[outIdx] += projectedE[outIdx] * projectedE[outIdx];
     }
   }
@@ -1048,7 +1053,8 @@ void ReflectometryReductionOne2::sumInQShareCounts(
 
   // Loop through all overlapping output bins. Convert the iterator to an
   // index because we need to index both the X and Y arrays.
-  for (auto outIdx = startIter - outputX.begin(); outIdx < outputX.size() - 1;
+  const int xSize = static_cast<int>(outputX.size());
+  for (auto outIdx = startIter - outputX.begin(); outIdx < xSize - 1;
        ++outIdx) {
     const double binStart = outputX[outIdx];
     const double binEnd = outputX[outIdx + 1];
