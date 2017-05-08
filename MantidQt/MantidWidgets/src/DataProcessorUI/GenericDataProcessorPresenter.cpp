@@ -18,7 +18,8 @@
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorTwoLevelTreeManager.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorView.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorWorkspaceCommand.h"
-#include "MantidQtMantidWidgets/DataProcessorUI/GenericDataProcessorPresenterReducerWorker.h"
+#include "MantidQtMantidWidgets/DataProcessorUI/GenericDataProcessorPresenterRowReducerWorker.h"
+#include "MantidQtMantidWidgets/DataProcessorUI/GenericDataProcessorPresenterGroupReducerWorker.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/ParseKeyValueString.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/QtDataProcessorOptionsDialog.h"
 #include "MantidQtMantidWidgets/ProgressPresenter.h"
@@ -270,6 +271,9 @@ void GenericDataProcessorPresenter::process() {
   }
 }
 
+/**
+Process a new row
+*/
 void GenericDataProcessorPresenter::nextRow() {
 
   int groupIndex = m_gqueue.front().first;
@@ -277,6 +281,7 @@ void GenericDataProcessorPresenter::nextRow() {
   int rowIndex = m_rowItem.first;
   auto &rowData = m_rowItem.second;
 
+  // Update with the previously processed row item
   m_manager->update(groupIndex, rowIndex, rowData);
   m_groupData[rowIndex] = rowData;
 
@@ -289,24 +294,27 @@ void GenericDataProcessorPresenter::nextRow() {
     m_rowItem = rqueue.front();
     rqueue.pop();
 
-    auto *worker =
-        new GenericDataProcessorPresenterReducerWorker(this, m_rowItem.second);
+    auto *worker = new GenericDataProcessorPresenterRowReducerWorker(
+        this, m_rowItem.second);
     worker->moveToThread(m_workerThread);
     connect(m_workerThread, SIGNAL(started()), worker, SLOT(processRow()));
-    connect(worker, SIGNAL(finishedRow()), this, SLOT(nextRow()));
+    connect(worker, SIGNAL(finished()), this, SLOT(nextRow()));
     m_workerThread->start();
   } else {
     // Do post-processing on containing group (if necessary)
     m_gqueue.pop();
     auto *worker =
-        new GenericDataProcessorPresenterReducerWorker(this, m_groupData);
+        new GenericDataProcessorPresenterGroupReducerWorker(this, m_groupData);
     worker->moveToThread(m_workerThread);
     connect(m_workerThread, SIGNAL(started()), worker, SLOT(processGroup()));
-    connect(worker, SIGNAL(finishedGroup()), this, SLOT(nextGroup()));
+    connect(worker, SIGNAL(finished()), this, SLOT(nextGroup()));
     m_workerThread->start();
   }
 }
 
+/**
+Process a new group
+*/
 void GenericDataProcessorPresenter::nextGroup() {
 
   delete m_workerThread;
@@ -319,11 +327,11 @@ void GenericDataProcessorPresenter::nextGroup() {
     m_rowItem = rqueue.front();
     rqueue.pop();
 
-    auto *worker =
-        new GenericDataProcessorPresenterReducerWorker(this, m_rowItem.second);
+    auto *worker = new GenericDataProcessorPresenterRowReducerWorker(
+        this, m_rowItem.second);
     worker->moveToThread(m_workerThread);
     connect(m_workerThread, SIGNAL(started()), worker, SLOT(processRow()));
-    connect(worker, SIGNAL(finishedRow()), this, SLOT(nextRow()));
+    connect(worker, SIGNAL(finished()), this, SLOT(nextRow()));
     m_workerThread->start();
   }
 }
