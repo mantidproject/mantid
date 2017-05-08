@@ -226,6 +226,9 @@ class AbstractInst(object):
         output_directory = os.path.join(self._output_dir, run_details.label, self._user_name)
         output_directory = os.path.abspath(os.path.expanduser(output_directory))
         file_name = str(self._generate_output_file_name(run_number_string=run_details.output_run_string))
+        # Prepend the file extension used if it was set, this groups the files nicely in the file browser
+        # Also remove the dot at the start so we don't make hidden files in *nix systems
+        file_name = run_details.file_extension[1:] + file_name if run_details.file_extension else file_name
         nxs_file = os.path.join(output_directory, (file_name + ".nxs"))
         gss_file = os.path.join(output_directory, (file_name + ".gsas"))
         tof_xye_file = os.path.join(output_directory, (file_name + "_tof_xye.dat"))
