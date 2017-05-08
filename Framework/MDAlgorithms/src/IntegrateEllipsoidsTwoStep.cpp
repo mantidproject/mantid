@@ -192,10 +192,10 @@ void IntegrateEllipsoidsTwoStep::exec() {
 
     const auto result = std::make_pair(index, center);
     if (sig2noise < weakPeakThreshold) {
-      g_log.information() << "Peak " << peak.getHKL() <<  " with Q = " << center << " is a weak peak with signal to noise " << sig2noise << "\n";
+      g_log.notice() << "Peak " << peak.getHKL() <<  " with Q = " << center << " is a weak peak with signal to noise " << sig2noise << "\n";
       weakPeaks.push_back(result);
     } else {
-      g_log.information() << "Peak " << peak.getHKL() <<  " with Q = " << center << " is a strong peak with signal to noise " << sig2noise << "\n";
+      g_log.notice() << "Peak " << peak.getHKL() <<  " with Q = " << center << " is a strong peak with signal to noise " << sig2noise << "\n";
       strongPeaks.push_back(result);
     }
     ++index;
@@ -238,7 +238,7 @@ void IntegrateEllipsoidsTwoStep::exec() {
     const auto index = item.first;
     const auto q = item.second;
 
-    const auto result = kdTree.findNearest(Eigen::Vector3d(q[0], q[1], q[2]), 5);
+    const auto result = kdTree.findNearest(Eigen::Vector3d(q[0], q[1], q[2]));
     const auto strongIndex = static_cast<int>(std::get<1>(result[0]));
 
     auto& peak = peak_ws->getPeak(index);

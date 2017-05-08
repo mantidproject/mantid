@@ -6,7 +6,6 @@
 #include "MantidDataObjects/PeakShapeEllipsoid.h"
 
 #include <cxxtest/TestSuite.h>
-#include <iostream>
 #include <random>
 
 using namespace Mantid;
