@@ -233,7 +233,6 @@ void ReflectometryReductionOneAuto2::exec() {
   // Mandatory properties
   alg->setProperty("SummationType", getPropertyValue("SummationType"));
   alg->setProperty("ReductionType", getPropertyValue("ReductionType"));
-  alg->setProperty("Theta0", getPropertyValue("ThetaIn"));
   double wavMin = checkForMandatoryInstrumentDefault<double>(
       this, "WavelengthMin", instrument, "LambdaMin");
   alg->setProperty("WavelengthMin", wavMin);
@@ -255,6 +254,7 @@ void ReflectometryReductionOneAuto2::exec() {
     // Calculate theta
     theta = calculateTheta(instructions, inputWS);
   }
+  alg->setProperty("ThetaIn", theta);
 
   // Optional properties
 

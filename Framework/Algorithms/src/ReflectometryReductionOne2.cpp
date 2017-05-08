@@ -101,7 +101,7 @@ double getLambda(const HistogramX &xValues, const int xIdx) {
 /*
 Get the value of theta from the logs
 @param inputWs : the input workspace
-@return : theta found in the logs
+@return : theta found in the logs, in degrees
 @throw: runtime_error if 'stheta' was not found.
 */
 double getThetaFromLogs(MatrixWorkspace_sptr inputWs) {
@@ -382,10 +382,10 @@ void ReflectometryReductionOne2::init() {
 
   initReductionProperties();
 
-  // Theta0
+  // ThetaIn
   declareProperty(make_unique<PropertyWithValue<double>>(
-                      "Theta0", Mantid::EMPTY_DBL(), Direction::Input),
-                  "Horizon angle in degrees");
+                      "ThetaIn", Mantid::EMPTY_DBL(), Direction::Input),
+                  "Angle in degrees");
 
   // Processing instructions
   declareProperty(Kernel::make_unique<PropertyWithValue<std::string>>(
@@ -818,7 +818,7 @@ void ReflectometryReductionOne2::findDetectorGroups() {
 }
 
 /**
-* Find and cache the horizon angle theta0 for use for summation in Q.
+* Find and cache the angle theta0 from which lines of constant Q emanate
 */
 void ReflectometryReductionOne2::findTheta0() {
   // Only requried if summing in Q
@@ -831,15 +831,17 @@ void ReflectometryReductionOne2::findTheta0() {
   // For the non-flat sample case theta0 is 0
   m_theta0 = 0.0;
 
-  // Allow the default theta0 to be overridden by the Theta0 property
-  Property *theta0Property = getProperty("Theta0");
-  if (!theta0Property->isDefault()) {
-    m_theta0 = getProperty("Theta0");
-  } else if (reductionType == "DivergentBeam") {
-    // theta0 is at the angle at the centre of the detector. This is the
-    // angle the detector has been rotated around and should be defined in
-    // the log as stheta
-    m_theta0 = getThetaFromLogs(m_runWS);
+  if (reductionType == "DivergentBeam") {
+    // theta0 is the horizon angle, which is half the twoTheta angle of the
+    // detector position. This is the angle the detector has been rotated
+    // to, which we can get from ThetaIn, if given, or from stheta in the logs
+    // otherwise.
+    Property *thetaIn = getProperty("ThetaIn");
+    if (!thetaIn->isDefault()) {
+      m_theta0 = getProperty("ThetaIn");
+    } else {
+      m_theta0 = getThetaFromLogs(m_runWS);
+    }
   }
 
   g_log.debug() << "theta0: " << theta0() << " degrees" << std::endl;
