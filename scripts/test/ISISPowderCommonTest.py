@@ -5,7 +5,7 @@ import unittest
 
 from six_shim import assertRaisesRegex
 
-from isis_powder.routines import common
+from isis_powder.routines import common, common_enums
 
 
 class ISISPowderCommonTest(unittest.TestCase):
@@ -66,12 +66,14 @@ class ISISPowderCommonTest(unittest.TestCase):
             common.crop_banks_using_crop_list(bank_list=bank_list[1:], crop_values_list=cropping_value_list)
 
         # Check we can crop a single workspace from the list
-        cropped_single_ws_list = common.crop_banks_using_crop_list(bank_list=[bank_list[0]], crop_values_list=[cropping_value])
+        cropped_single_ws_list = common.crop_banks_using_crop_list(bank_list=[bank_list[0]],
+                                                                   crop_values_list=[cropping_value])
         self.assertEqual(cropped_single_ws_list[0].blocksize(), expected_number_of_bins)
         mantid.DeleteWorkspace(Workspace=cropped_single_ws_list[0])
 
         # Check we can crop a whole list
-        cropped_ws_list = common.crop_banks_using_crop_list(bank_list=bank_list[1:], crop_values_list=cropping_value_list[1:])
+        cropped_ws_list = common.crop_banks_using_crop_list(bank_list=bank_list[1:],
+                                                            crop_values_list=cropping_value_list[1:])
         for ws in cropped_ws_list[1:]:
             self.assertEqual(ws.blocksize(), expected_number_of_bins)
             mantid.DeleteWorkspace(Workspace=ws)
@@ -242,6 +244,75 @@ class ISISPowderCommonTest(unittest.TestCase):
         with assertRaisesRegex(self, ValueError, run_input_sting):
             common.generate_run_numbers(run_number_string=run_input_sting)
 
+    def test_load_current_normalised_workspace(self):
+        run_number_single = 95597
+        run_number_range = "95597-95598"
+
+        first_run_bin_value = 7852
+        second_run_bin_value = 5336
+
+        # Check it handles a single workspace correctly
+        single_workspace = common.load_current_normalised_ws_list(run_number_string=run_number_single,
+                                                                  instrument=ISISPowderMockInst())
+        # Get the only workspace in the list, ask for the 0th spectrum and the value at the 200th bin
+        self.assertTrue(isinstance(single_workspace, list))
+        self.assertEqual(len(single_workspace), 1)
+        self.assertEqual(single_workspace[0].readY(0)[200], first_run_bin_value)
+        mantid.DeleteWorkspace(single_workspace[0])
+
+        # Does it return multiple workspaces when instructed
+        multiple_ws = common.load_current_normalised_ws_list(
+            run_number_string=run_number_range, instrument=ISISPowderMockInst(),
+            input_batching=common_enums.INPUT_BATCHING.Individual)
+
+        self.assertTrue(isinstance(multiple_ws, list))
+        self.assertEqual(len(multiple_ws), 2)
+
+        # Check the bins haven't been summed
+        self.assertEqual(multiple_ws[0].readY(0)[200], first_run_bin_value)
+        self.assertEqual(multiple_ws[1].readY(0)[200], second_run_bin_value)
+        for ws in multiple_ws:
+            mantid.DeleteWorkspace(ws)
+
+        # Does it sum workspaces when instructed
+        summed_ws = common.load_current_normalised_ws_list(
+            run_number_string=run_number_range, instrument=ISISPowderMockInst(),
+            input_batching=common_enums.INPUT_BATCHING.Summed)
+
+        self.assertTrue(isinstance(summed_ws, list))
+        self.assertEqual(len(summed_ws), 1)
+
+        # Check bins have been summed
+        self.assertEqual(summed_ws[0].readY(0)[200], (first_run_bin_value + second_run_bin_value))
+        mantid.DeleteWorkspace(summed_ws[0])
+
+    def test_load_current_normalised_ws_respects_ext(self):
+        run_number = "96913"
+        file_ext_one = ".s1"
+        file_ext_two = ".s2"
+
+        bin_index = 5963  # This bin has data in both workspaces and is very different (1 vs >100)
+
+        result_ext_one = 1
+        result_ext_two = 175
+
+        # Check that it respects the ext flag - try the first extension of this name
+        returned_ws_one = common.load_current_normalised_ws_list(instrument=ISISPowderMockInst(file_ext=file_ext_one),
+                                                                 run_number_string=run_number)
+        # Have to store result and delete the ws as they share the same name so will overwrite
+        result_ws_one = returned_ws_one[0].readY(0)[bin_index]
+        mantid.DeleteWorkspace(returned_ws_one[0])
+
+        returned_ws_two = common.load_current_normalised_ws_list(instrument=ISISPowderMockInst(file_ext=file_ext_two),
+                                                                 run_number_string=run_number)
+        result_ws_two = returned_ws_two[0].readY(0)[bin_index]
+        mantid.DeleteWorkspace(returned_ws_two[0])
+
+        # Ensure it loaded two different workspaces
+        self.assertEqual(result_ws_one, result_ext_one)
+        self.assertEqual(result_ws_two, result_ext_two)
+        self.assertNotAlmostEqual(result_ext_one, result_ext_two)
+
     def test_remove_intermediate_workspace(self):
         ws_list = []
         ws_names_list = []
@@ -301,6 +372,33 @@ class ISISPowderCommonTest(unittest.TestCase):
         for input_ws, splined_ws in zip(ws_list, splined_list):
             mantid.DeleteWorkspace(input_ws)
             mantid.DeleteWorkspace(splined_ws)
+
+
+class ISISPowderMockInst(object):
+    def __init__(self, file_ext=None):
+        self._file_ext = file_ext
+
+    @staticmethod
+    def _get_input_batching_mode(**_):
+        # By default return multiple files as it makes something going wrong easier to spot
+        return common_enums.INPUT_BATCHING.Individual
+
+    def _get_run_details(self, **_):
+        return ISISPowderMockRunDetails(file_ext=self._file_ext)
+
+    @staticmethod
+    def _generate_input_file_name(run_number):
+        # Mantid will automatically convert this into either POL or POLARIS
+        return "POL" + str(run_number)
+
+    @staticmethod
+    def _normalise_ws_current(ws_to_correct, **_):
+        return ws_to_correct
+
+
+class ISISPowderMockRunDetails(object):
+    def __init__(self, file_ext):
+        self.file_extension = file_ext
 
 
 if __name__ == "__main__":

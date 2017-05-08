@@ -179,6 +179,6 @@ class _RunDetails(object):
         self.vanadium_run_numbers = vanadium_run_number
 
         # Optional
-        self.file_extension = file_extension
+        self.file_extension = file_extension if file_extension.startswith('.') else '.' + file_extension
         self.sample_empty = sample_empty
         self.vanadium_absorption_path = vanadium_abs_path
