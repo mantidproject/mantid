@@ -133,8 +133,6 @@ private:
   void findTheta0();
   // Accessors for detectors and theta and lambda values
   const std::vector<std::vector<size_t>>& detectorGroups() const { return m_detectorGroups; };
-  double lambdaMin() { return m_lambdaMin; }
-  double lambdaMax() { return m_lambdaMax; }
   double twoThetaMin(const std::vector<size_t> &detectors);
   double twoThetaMax(const std::vector<size_t> &detectors);
   double theta0() { return m_theta0; }
@@ -149,10 +147,6 @@ private:
   bool m_normalise;              // normalise by monitors etc.
   bool m_sum;                    // whether to do summation
   double m_theta0;               // horizon angle
-  double m_twoThetaR;            // reference angle for summation in Q
-  double m_lambdaMin;            // min wavelength in area of interest
-  double m_lambdaMax;            // max wavelength in area of interest
-  size_t m_twoThetaRDetectorIdx; // detector index at reference angle thetaR
   // groups of spectrum indices of the detectors of interest
   std::vector<std::vector<size_t>> m_detectorGroups;
 };
