@@ -70,16 +70,6 @@ double getLambdaRange(const HistogramX &xValues, const int xIdx) {
   return result;
 }
 
-/** Get the start/end of the lambda range for the detector associated
-* with the given spectrum
-*
-* @return : the lambda range
-*/
-double getLambdaRange(MatrixWorkspace_const_sptr ws, const size_t spectrumIdx,
-                      const int xIdx) {
-  return getLambdaRange(ws->x(spectrumIdx), xIdx);
-}
-
 /** Get the lambda value at the centre of the detector associated
 * with the given spectrum
 *
