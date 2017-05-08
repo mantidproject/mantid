@@ -44,16 +44,16 @@ void run_StorageMode_Distributed(const Parallel::Communicator &comm) {
 }
 
 void run_StorageMode_MasterOnly(const Parallel::Communicator &comm) {
-  IndexInfo i(3, Parallel::StorageMode::MasterOnly, comm);
   if (comm.rank() == 0) {
+    IndexInfo i(3, Parallel::StorageMode::MasterOnly, comm);
     TS_ASSERT_EQUALS(i.size(), 3);
     TS_ASSERT_EQUALS(i.globalSize(), 3);
     TS_ASSERT_EQUALS(i.spectrumNumber(0), 1);
     TS_ASSERT_EQUALS(i.spectrumNumber(1), 2);
     TS_ASSERT_EQUALS(i.spectrumNumber(2), 3);
   } else {
-    TS_ASSERT_EQUALS(i.size(), 0);
-    TS_ASSERT_EQUALS(i.globalSize(), 3);
+    TS_ASSERT_THROWS(IndexInfo(3, Parallel::StorageMode::MasterOnly, comm),
+                     std::runtime_error);
   }
 }
 

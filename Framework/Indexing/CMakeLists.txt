@@ -3,7 +3,6 @@ set ( SRC_FILES
 	src/Group.cpp
 	src/IndexInfo.cpp
 	src/LegacyConversion.cpp
-	src/MasterOnlyPartitioner.cpp
 	src/Partitioner.cpp
 	src/RoundRobinPartitioner.cpp
 	src/SpectrumNumberTranslator.cpp
@@ -19,7 +18,6 @@ set ( INC_FILES
 	inc/MantidIndexing/IndexSet.h
 	inc/MantidIndexing/IndexType.h
 	inc/MantidIndexing/LegacyConversion.h
-	inc/MantidIndexing/MasterOnlyPartitioner.h
 	inc/MantidIndexing/PartitionIndex.h
 	inc/MantidIndexing/Partitioner.h
 	inc/MantidIndexing/RoundRobinPartitioner.h
@@ -37,7 +35,6 @@ set ( TEST_FILES
 	IndexSetTest.h
 	IndexTypeTest.h
 	LegacyConversionTest.h
-	MasterOnlyPartitionerTest.h
 	PartitionIndexTest.h
 	PartitionerTest.h
 	RoundRobinPartitionerTest.h

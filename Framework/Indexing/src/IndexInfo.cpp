@@ -1,5 +1,4 @@
 #include "MantidIndexing/IndexInfo.h"
-#include "MantidIndexing/MasterOnlyPartitioner.h"
 #include "MantidIndexing/RoundRobinPartitioner.h"
 #include "MantidIndexing/SpectrumNumberTranslator.h"
 #include "MantidParallel/Communicator.h"
@@ -216,22 +215,19 @@ void IndexInfo::makeSpectrumNumberTranslator(
     partition = PartitionIndex(0);
     numberOfPartitions = 1;
   } else if (m_storageMode == Parallel::StorageMode::MasterOnly) {
-    partition = PartitionIndex(m_communicator->rank());
-    numberOfPartitions = m_communicator->size();
+    if (m_communicator->rank() != 0)
+      throw std::runtime_error(
+          "IndexInfo: storage mode is " + Parallel::toString(m_storageMode) +
+          " but creation on non-master rank has been attempted");
+    partition = PartitionIndex(0);
+    numberOfPartitions = 1;
   } else {
     throw std::runtime_error("IndexInfo: unknown storage mode " +
                              Parallel::toString(m_storageMode));
   }
-  std::unique_ptr<Partitioner> partitioner;
-  if (m_storageMode == Parallel::StorageMode::MasterOnly) {
-    partitioner = Kernel::make_unique<MasterOnlyPartitioner>(
-        numberOfPartitions, partition,
-        Partitioner::MonitorStrategy::TreatAsNormalSpectrum);
-  } else {
-    partitioner = Kernel::make_unique<RoundRobinPartitioner>(
-        numberOfPartitions, partition,
-        Partitioner::MonitorStrategy::TreatAsNormalSpectrum);
-  }
+  auto partitioner = Kernel::make_unique<RoundRobinPartitioner>(
+      numberOfPartitions, partition,
+      Partitioner::MonitorStrategy::TreatAsNormalSpectrum);
   m_spectrumNumberTranslator = Kernel::make_cow<SpectrumNumberTranslator>(
       std::move(spectrumNumbers), std::move(partitioner), partition);
 }
