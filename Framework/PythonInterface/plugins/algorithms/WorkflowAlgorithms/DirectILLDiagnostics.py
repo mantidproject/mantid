@@ -2,12 +2,13 @@
 
 from __future__ import (absolute_import, division, print_function)
 
+import collections
 import DirectILL_common as common
 from mantid.api import (AlgorithmFactory, DataProcessorAlgorithm, InstrumentValidator,
                         ITableWorkspaceProperty, MatrixWorkspaceProperty, mtd, Progress, PropertyMode, WorkspaceProperty,
                         WorkspaceUnitValidator)
 from mantid.kernel import (CompositeValidator, Direction, FloatBoundedValidator, IntArrayBoundedValidator,
-                           IntArrayProperty, StringArrayProperty, StringListValidator)
+                           IntArrayProperty, PropertyManagerProperty, StringArrayProperty, StringListValidator)
 from mantid.simpleapi import (ClearMaskFlag, CloneWorkspace, CreateEmptyTableWorkspace, Divide,
                               ExtractMask, Integration, MaskDetectors, MedianDetectorTest, Plus, SolidAngle)
 import numpy
@@ -27,49 +28,6 @@ class _DiagnosticsSettings:
         self.significanceTest = significanceTest
 
 
-def _addBkgDiagnosticsToReport(reportWS, bkgWS, diagnosticsWS):
-    """Add background diagnostics information to a report workspace."""
-    BKG_COLUMN = 'FlatBkg'
-    DIAGNOSED_COLUMN = 'BkgDiagnosed'
-    existingColumnNames = reportWS.getColumnNames()
-    if BKG_COLUMN not in existingColumnNames:
-        reportWS.addColumn('double', BKG_COLUMN, _PLOT_TYPE_Y)
-    if DIAGNOSED_COLUMN not in existingColumnNames:
-        reportWS.addColumn('double', DIAGNOSED_COLUMN, _PLOT_TYPE_Y)
-    for i in range(bkgWS.getNumberHistograms()):
-        bkg = bkgWS.readY(i)[0]
-        reportWS.setCell(BKG_COLUMN, i, bkg)
-        diagnosed = int(diagnosticsWS.readY(i)[0])
-        reportWS.setCell(DIAGNOSED_COLUMN, i, diagnosed)
-
-
-def _addElasticPeakDiagnosticsToReport(reportWS, peakIntensityWS, diagnosticsWS):
-    """Add elastic peak diagnostics information to a report workspace."""
-    INTENSITY_COLUMN = 'ElasticIntensity'
-    DIAGNOSED_COLUMN = 'IntensityDiagnosed'
-    existingColumnNames = reportWS.getColumnNames()
-    if INTENSITY_COLUMN not in existingColumnNames:
-        reportWS.addColumn('double', INTENSITY_COLUMN, _PLOT_TYPE_Y)
-    if DIAGNOSED_COLUMN not in existingColumnNames:
-        reportWS.addColumn('double', DIAGNOSED_COLUMN, _PLOT_TYPE_Y)
-    for i in range(peakIntensityWS.getNumberHistograms()):
-        intensity = peakIntensityWS.readY(i)[0]
-        reportWS.setCell(INTENSITY_COLUMN, i, intensity)
-        diagnosed = int(diagnosticsWS.readY(i)[0])
-        reportWS.setCell(DIAGNOSED_COLUMN, i, diagnosed)
-
-
-def _addUserMaskToReport(reportWS, maskWS):
-    """Add user mask information to a report workspace."""
-    MASKED_COLUMN = 'UserMask'
-    existingColumnNames = reportWS.getColumnNames()
-    if MASKED_COLUMN not in existingColumnNames:
-        reportWS.addColumn('double', MASKED_COLUMN, _PLOT_TYPE_Y)
-    for i in range(maskWS.getNumberHistograms()):
-        diagnosed = int(maskWS.readY(i)[0])
-        reportWS.setCell(MASKED_COLUMN, i, diagnosed)
-
-
 def _bkgDiagnostics(bkgWS, noisyBkgSettings, reportWS, wsNames, algorithmLogging):
     """Diagnose noisy flat backgrounds and return a mask workspace."""
     noisyBkgWSName = wsNames.withSuffix('diagnostics_noisy_bkg')
@@ -83,9 +41,8 @@ def _bkgDiagnostics(bkgWS, noisyBkgSettings, reportWS, wsNames, algorithmLogging
                            EnableLogging=algorithmLogging)
     ClearMaskFlag(Workspace=noisyBkgDiagnostics,
                   EnableLogging=algorithmLogging)
-    if reportWS is not None:
-        _addBkgDiagnosticsToReport(reportWS, bkgWS, noisyBkgDiagnostics)
-    return noisyBkgDiagnostics
+    maskedSpectra = _reportBkgDiagnostics(reportWS, bkgWS, noisyBkgDiagnostics)
+    return noisyBkgDiagnostics, maskedSpectra
 
 
 def _createDiagnosticsReportTable(reportWSName, numberHistograms, algorithmLogging):
@@ -153,10 +110,9 @@ def _elasticPeakDiagnostics(ws, eppWS, peakSettings, sigmaMultiplier, reportWS,
                            EnableLogging=algorithmLogging)
     ClearMaskFlag(Workspace=elasticPeakDiagnostics,
                   EnableLogging=algorithmLogging)
-    if reportWS is not None:
-        _addElasticPeakDiagnosticsToReport(reportWS, solidAngleCorrectedElasticPeaksWS, elasticPeakDiagnostics)
+    maskedSpectra = _reportPeakDiagnostics(reportWS, solidAngleCorrectedElasticPeaksWS, elasticPeakDiagnostics)
     wsCleanup.cleanup(solidAngleCorrectedElasticPeaksWS)
-    return elasticPeakDiagnostics
+    return elasticPeakDiagnostics, maskedSpectra
 
 
 def _extractUserMask(ws, wsNames, algorithmLogging):
@@ -178,6 +134,84 @@ def _maskDiagnosedDetectors(ws, diagnosticsWS, wsNames, algorithmLogging):
                   MaskedWorkspace=diagnosticsWS,
                   EnableLogging=algorithmLogging)
     return maskedWS
+
+
+def _maskedListToStr(masked):
+    """Return a string presentation of a list of spectrum numbers."""
+    if not masked:
+        return ''
+    def addBlock(string, begin, end):
+        if blockBegin == blockEnd:
+            string += str(blockEnd) + ', '
+        else:
+            string += str(blockBegin) + '-' + str(blockEnd) + ', '
+        return string       
+    string = str()
+    blockBegin = None
+    blockEnd = None
+    maxMasked = max(masked)
+    for i in sorted(masked):
+        if blockBegin is None:
+            blockBegin = i
+            blockEnd = i
+        if i == maxMasked:
+            if i > blockEnd + 1:
+                string = addBlock(string, blockBegin, blockEnd)
+                string += str(i)
+            else:
+                string += str(blockBegin) + '-' + str(i)
+            break
+        if i > blockEnd + 1:
+            string = addBlock(string, blockBegin, blockEnd)
+            blockBegin = i
+        blockEnd = i
+    return string
+
+
+def _reportBkgDiagnostics(reportWS, bkgWS, diagnosticsWS):
+    """Return masked spectrum numbers and add background diagnostics information to a report workspace."""
+    return _reportDiagnostics(reportWS, bkgWS, diagnosticsWS, 'FlatBkg', 'BkgDiagnosed')
+
+
+def _reportDiagnostics(reportWS, dataWS, diagnosticsWS, dataColumn, diagnosedColumn):
+    """Return masked spectrum numbers and add diagnostics information to a report workspace."""
+    if reportWS is not None:
+        existingColumnNames = reportWS.getColumnNames()
+        if dataColumn not in existingColumnNames:
+            reportWS.addColumn('double', dataColumn, _PLOT_TYPE_Y)
+        if diagnosedColumn not in existingColumnNames:
+            reportWS.addColumn('double', diagnosedColumn, _PLOT_TYPE_Y)
+    maskedSpectra = list()
+    for i in range(dataWS.getNumberHistograms()):
+        diagnosed = int(diagnosticsWS.readY(i)[0])
+        if reportWS is not None:
+            y = dataWS.readY(i)[0]
+            reportWS.setCell(dataColumn, i, y)
+            reportWS.setCell(diagnosedColumn, i, diagnosed)
+        if diagnosed != 0:
+            maskedSpectra.append(dataWS.getSpectrum(i).getSpectrumNo())
+    return maskedSpectra
+
+
+def _reportPeakDiagnostics(reportWS, peakIntensityWS, diagnosticsWS):
+    """Return masked spectrum numbers and add elastic peak diagnostics information to a report workspace."""
+    return _reportDiagnostics(reportWS, peakIntensityWS, diagnosticsWS, 'ElasticIntensity', 'IntensityDiagnosed')
+
+def _reportUserMask(reportWS, maskWS):
+    """Return masked spectrum numbers and add user mask information to a report workspace."""
+    if reportWS is not None:
+        MASKED_COLUMN = 'UserMask'
+        existingColumnNames = reportWS.getColumnNames()
+        if MASKED_COLUMN not in existingColumnNames:
+            reportWS.addColumn('double', MASKED_COLUMN, _PLOT_TYPE_Y)
+    maskedSpectra = list()
+    for i in range(maskWS.getNumberHistograms()):
+        diagnosed = int(maskWS.readY(i)[0])
+        if reportWS is not None:
+            reportWS.setCell(MASKED_COLUMN, i, diagnosed)
+        if diagnosed != 0:
+            maskedSpectra.append(maskWS.getSpectrum(i).getSpectrumNo())
+    return maskedSpectra
 
 
 class DirectILLDiagnostics(DataProcessorAlgorithm):
@@ -359,6 +393,12 @@ class DirectILLDiagnostics(DataProcessorAlgorithm):
             doc='Output table workspace for detector diagnostics reporting.')
         self.setPropertyGroup(common.PROP_OUTPUT_DIAGNOSTICS_REPORT_WS,
                               common.PROPGROUP_OPTIONAL_OUTPUT)
+        self.declareProperty(name=common.PROP_OUTPUT_DIAGNOSTICS_REPORT,
+                             defaultValue='',
+                             direction=Direction.Output,
+                             doc='Diagnostics report as a string.')
+        self.setPropertyGroup(common.PROP_OUTPUT_DIAGNOSTICS_REPORT,
+                              common.PROPGROUP_OPTIONAL_OUTPUT)
 
     def validateInputs(self):
         """Check for issues with user input."""
@@ -390,8 +430,7 @@ class DirectILLDiagnostics(DataProcessorAlgorithm):
         diagnosticsWS = CloneWorkspace(InputWorkspace=userMaskWS,
                                        OutputWorkspace=diagnosticsWSName,
                                        EnableLogging=subalgLogging)
-        if reportWS is not None:
-            _addUserMaskToReport(reportWS, userMaskWS)
+        userMaskedSpectra = _reportUserMask(reportWS, userMaskWS)
         wsCleanup.cleanup(userMaskWS)
         if not self.getProperty(common.PROP_EPP_WS).isDefault:
             eppWS = self.getProperty(common.PROP_EPP_WS).value
@@ -400,8 +439,8 @@ class DirectILLDiagnostics(DataProcessorAlgorithm):
             significanceTest = self.getProperty(common.PROP_PEAK_DIAGNOSTICS_SIGNIFICANCE_TEST).value
             settings = _DiagnosticsSettings(lowThreshold, highThreshold, significanceTest)
             sigmaMultiplier = self.getProperty(common.PROP_ELASTIC_PEAK_SIGMA_MULTIPLIER).value
-            peakDiagnosticsWS = _elasticPeakDiagnostics(mainWS, eppWS, settings, sigmaMultiplier, reportWS, wsNames,
-                                                        wsCleanup, subalgLogging)
+            peakDiagnosticsWS, peakMaskedSpectra = _elasticPeakDiagnostics(mainWS, eppWS, settings, sigmaMultiplier,
+                                                                           reportWS, wsNames, wsCleanup, subalgLogging)
             diagnosticsWS = Plus(LHSWorkspace=diagnosticsWS,
                                  RHSWorkspace=peakDiagnosticsWS,
                                  OutputWorkspace=diagnosticsWSName,
@@ -413,15 +452,14 @@ class DirectILLDiagnostics(DataProcessorAlgorithm):
             highThreshold = self.getProperty(common.PROP_BKG_DIAGNOSTICS_HIGH_THRESHOLD).value
             significanceTest = self.getProperty(common.PROP_BKG_DIAGNOSTICS_SIGNIFICANCE_TEST).value
             settings = _DiagnosticsSettings(lowThreshold, highThreshold, significanceTest)
-            bkgDiagnosticsWS = _bkgDiagnostics(bkgWS, settings, reportWS, wsNames, subalgLogging)
+            bkgDiagnosticsWS, bkgMaskedSpectra = _bkgDiagnostics(bkgWS, settings, reportWS, wsNames, subalgLogging)
             diagnosticsWS = Plus(LHSWorkspace=diagnosticsWS,
                                  RHSWorkspace=bkgDiagnosticsWS,
                                  OutputWorkspace=diagnosticsWSName,
                                  EnableLogging=subalgLogging)
             wsCleanup.cleanup(bkgDiagnosticsWS)
         wsCleanup.cleanup(mainWS)
-        if reportWS is not None:
-            self.setProperty(common.PROP_OUTPUT_DIAGNOSTICS_REPORT_WS, reportWS)
+        self._outputReports(reportWS, userMaskedSpectra, peakMaskedSpectra, bkgMaskedSpectra)
         return diagnosticsWS
 
     def _finalize(self, outWS, wsCleanup):
@@ -435,6 +473,26 @@ class DirectILLDiagnostics(DataProcessorAlgorithm):
         mainWS = self.getProperty(common.PROP_INPUT_WS).value
         wsCleanup.protect(mainWS)
         return mainWS
+
+    def _outputReports(self, reportWS, userMaskedSpectra, peakMaskedSpectra, bkgMaskedSpectra):
+        if reportWS is not None:
+            self.setProperty(common.PROP_OUTPUT_DIAGNOSTICS_REPORT_WS, reportWS)
+        report = 'Spectra masked by user:\n'
+        if userMaskedSpectra:
+            report += _maskedListToStr(userMaskedSpectra)
+        else:
+            report += 'None'
+        report += '\nSpectra marked as bad by elastic peak diagnostics:\n'
+        if peakMaskedSpectra:
+            report += _maskedListToStr(peakMaskedSpectra)
+        else:
+            report += 'None'
+        report += '\nSpectra marked as bad by flat background diagnostics:\n'
+        if bkgMaskedSpectra:
+            report += _maskedListToStr(bkgMaskedSpectra)
+        else:
+            report += 'None'
+        self.setProperty(common.PROP_OUTPUT_DIAGNOSTICS_REPORT, report)
 
 
 AlgorithmFactory.subscribe(DirectILLDiagnostics)
