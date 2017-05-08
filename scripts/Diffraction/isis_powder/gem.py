@@ -2,7 +2,7 @@ from __future__ import (absolute_import, division, print_function)
 
 from isis_powder.abstract_inst import AbstractInst
 from isis_powder.gem_routines import gem_advanced_config, gem_algs, gem_param_mapping
-from isis_powder.routines import common, instrument_settings, yaml_parser
+from isis_powder.routines import common, instrument_settings
 
 
 class Gem(AbstractInst):

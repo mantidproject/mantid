@@ -2,7 +2,7 @@ from __future__ import (absolute_import, division, print_function)
 
 import mantid.simpleapi as mantid
 
-from isis_powder.routines import common, instrument_settings, yaml_parser
+from isis_powder.routines import common, instrument_settings
 from isis_powder.abstract_inst import AbstractInst
 from isis_powder.pearl_routines import pearl_algs, pearl_output, pearl_advanced_config, pearl_param_mapping
 
