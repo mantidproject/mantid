@@ -387,9 +387,16 @@ public:
     check_zeroed_data(*ws);
   }
 
+  void test_default_StorageMode_is_Cloned() {
+    IndexInfo indices(2);
+    indices.setSpectrumDefinitions(std::vector<SpectrumDefinition>(2));
+    TS_ASSERT_EQUALS(
+        create<Workspace2D>(indices, BinEdges{1, 2, 4})->storageMode(),
+        Parallel::StorageMode::Cloned);
+  }
+
   void test_create_with_StorageMode() {
     IndexInfo indices(2, Parallel::StorageMode::Distributed);
-    indices.setSpectrumNumbers({2, 4});
     indices.setSpectrumDefinitions(std::vector<SpectrumDefinition>(2));
     std::unique_ptr<Workspace2D> ws;
     TS_ASSERT_THROWS_NOTHING(ws = create<Workspace2D>(indices, BinEdges{1, 2, 4}));
@@ -398,7 +405,6 @@ public:
 
   void test_storageMode_propagated() {
     IndexInfo indices(2, Parallel::StorageMode::Distributed);
-    indices.setSpectrumNumbers({2, 4});
     indices.setSpectrumDefinitions(std::vector<SpectrumDefinition>(2));
     const auto parent = create<Workspace2D>(indices, BinEdges{1, 2, 4});
     const auto ws = create<Workspace2D>(*parent);
