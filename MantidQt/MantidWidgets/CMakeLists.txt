@@ -132,6 +132,7 @@ set ( MOC_FILES
     inc/MantidQtMantidWidgets/CheckboxHeader.h
     inc/MantidQtMantidWidgets/ColorBarWidget.h
     inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorCommandAdapter.h
+    inc/MantidQtMantidWidgets/DataProcessorUI/GenericDataProcessorPresenter.h
     inc/MantidQtMantidWidgets/DataProcessorUI/GenericDataProcessorPresenterReducerWorker.h
     inc/MantidQtMantidWidgets/DataProcessorUI/QDataProcessorOneLevelTreeModel.h
     inc/MantidQtMantidWidgets/DataProcessorUI/QDataProcessorTwoLevelTreeModel.h
@@ -258,7 +259,6 @@ set ( INC_FILES
 	inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorView.h
 	inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorWhiteList.h
 	inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorWorkspaceCommand.h
-	inc/MantidQtMantidWidgets/DataProcessorUI/GenericDataProcessorPresenter.h
 	inc/MantidQtMantidWidgets/DataProcessorUI/GenericDataProcessorPresenterFactory.h
 	inc/MantidQtMantidWidgets/DataProcessorUI/ParseKeyValueString.h
 	inc/MantidQtMantidWidgets/ErrorCurve.h

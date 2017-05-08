@@ -18,6 +18,7 @@
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorTwoLevelTreeManager.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorView.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorWorkspaceCommand.h"
+#include "MantidQtMantidWidgets/DataProcessorUI/GenericDataProcessorPresenterReducerWorker.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/ParseKeyValueString.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/QtDataProcessorOptionsDialog.h"
 #include "MantidQtMantidWidgets/ProgressPresenter.h"
@@ -60,7 +61,7 @@ GenericDataProcessorPresenter::GenericDataProcessorPresenter(
       m_mainPresenter(), m_loader(loader), m_whitelist(whitelist),
       m_preprocessMap(preprocessMap), m_processor(processor),
       m_postprocessor(postprocessor), m_postprocessMap(postprocessMap),
-      m_postprocess(true), m_tableDirty(false) {
+      m_postprocess(true), m_tableDirty(false), m_workerThread(nullptr) {
 
   // Column Options must be added to the whitelist
   m_whitelist.addElement("Options", "Options",
@@ -210,6 +211,20 @@ void GenericDataProcessorPresenter::process() {
                                      m_progressView);
 
   for (const auto &item : items) {
+    // Loop over each group
+    RowQueue rowQueue;
+
+    for (const auto &data : item.second) {
+      // Add all row items to queue
+      rowQueue.push(data);
+    }
+    m_gqueue.push(std::make_pair(item.first, rowQueue));
+  }
+
+  nextGroup();
+
+  /*
+  for (const auto &item : items) {
 
     // Group with updated columns
     GroupData newGroup;
@@ -247,11 +262,69 @@ void GenericDataProcessorPresenter::process() {
         return;
       }
     }
-  }
+  }*/
 
   // If "Output Notebook" checkbox is checked then create an ipython notebook
   if (m_view->getEnableNotebook()) {
     saveNotebook(items);
+  }
+}
+
+void GenericDataProcessorPresenter::nextRow() {
+
+  int groupIndex = m_gqueue.front().first;
+  auto &rqueue = m_gqueue.front().second;
+  int rowIndex = m_rowItem.first;
+  auto &rowData = m_rowItem.second;
+
+  m_manager->update(groupIndex, rowIndex, rowData);
+  m_groupData[rowIndex] = rowData;
+
+  // Prepare a new thread
+  delete m_workerThread;
+  m_workerThread = new QThread(this);
+
+  if (!rqueue.empty()) {
+    // Reduce next row
+    m_rowItem = rqueue.front();
+    rqueue.pop();
+
+    auto *worker =
+        new GenericDataProcessorPresenterReducerWorker(this, m_rowItem.second);
+    worker->moveToThread(m_workerThread);
+    connect(m_workerThread, SIGNAL(started()), worker, SLOT(processRow()));
+    connect(worker, SIGNAL(finishedRow()), this, SLOT(nextRow()));
+    m_workerThread->start();
+  } else {
+    // Do post-processing on containing group (if necessary)
+    m_gqueue.pop();
+    auto *worker =
+        new GenericDataProcessorPresenterReducerWorker(this, m_groupData);
+    worker->moveToThread(m_workerThread);
+    connect(m_workerThread, SIGNAL(started()), worker, SLOT(processGroup()));
+    connect(worker, SIGNAL(finishedGroup()), this, SLOT(nextGroup()));
+    m_workerThread->start();
+  }
+}
+
+void GenericDataProcessorPresenter::nextGroup() {
+
+  delete m_workerThread;
+
+  if (!m_gqueue.empty()) {
+    // Prepare a new thread
+    m_workerThread = new QThread(this);
+
+    auto &rqueue = m_gqueue.front().second;
+    m_rowItem = rqueue.front();
+    rqueue.pop();
+
+    auto *worker =
+        new GenericDataProcessorPresenterReducerWorker(this, m_rowItem.second);
+    worker->moveToThread(m_workerThread);
+    connect(m_workerThread, SIGNAL(started()), worker, SLOT(processRow()));
+    connect(worker, SIGNAL(finishedRow()), this, SLOT(nextRow()));
+    m_workerThread->start();
   }
 }
 

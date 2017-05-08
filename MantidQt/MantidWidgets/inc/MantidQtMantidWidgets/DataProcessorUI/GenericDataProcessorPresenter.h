@@ -12,9 +12,16 @@
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorWhiteList.h"
 #include "MantidQtMantidWidgets/WidgetDllOption.h"
 
+#include <queue>
 #include <set>
 
-using GroupData = std::map<int, std::vector<std::string>>;
+#include <QObject>
+
+using RowData = std::vector<std::string>;
+using GroupData = std::map<int, RowData>;
+using RowItem = std::pair<int, RowData>;
+using RowQueue = std::queue<RowItem>;
+using GroupQueue = std::queue<std::pair<int, RowQueue>>;
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -51,8 +58,12 @@ File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS GenericDataProcessorPresenter
-    : public DataProcessorPresenter,
+    : public QObject,
+      public DataProcessorPresenter,
       public MantidQt::API::WorkspaceObserver {
+  // Q_OBJECT for 'connect' with thread/worker
+  Q_OBJECT
+
 public:
   // Constructor: pre-processing and post-processing
   GenericDataProcessorPresenter(
@@ -137,6 +148,10 @@ protected:
   virtual void plotGroup();
   void plotWorkspaces(const std::set<std::string> &workspaces);
 
+protected slots:
+  void nextRow();
+  void nextGroup();
+
 private:
   // the name of the workspace/table/model in the ADS, blank if unsaved
   std::string m_wsName;
@@ -150,6 +165,12 @@ private:
   DataProcessorPostprocessingAlgorithm m_postprocessor;
   // Post-processing map
   std::map<std::string, std::string> m_postprocessMap;
+  // The current queue of groups to be reduced
+  GroupQueue m_gqueue;
+  // The current group we are reducing row data for
+  GroupData m_groupData;
+  // The current row item being reduced
+  RowItem m_rowItem;
   // A boolean indicating whether a post-processing algorithm has been defined
   bool m_postprocess;
   // The number of columns
@@ -158,6 +179,8 @@ private:
   bool m_tableDirty;
   // stores the user options for the presenter
   std::map<std::string, QVariant> m_options;
+  // Thread to run reducer worker in
+  QThread *m_workerThread;
   // load a run into the ADS, or re-use one in the ADS if possible
   Mantid::API::Workspace_sptr getRun(const std::string &run,
                                      const std::string &instrument,

@@ -11,8 +11,8 @@ namespace MantidWidgets {
 /**
 Worker to run the reduction process for each row for the
 GenericDataProcessorPresenter for the GUI it is attached to. It has
-a finished() signal, and it is expected to emit it when the
-hard/long-work methods finish.
+a finishedRow() and finishedGroup() signal, and it is expected to
+emit one of these when the hard/long-work methods finish.
 
 Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory, NScD
 Oak Ridge National Laboratory & European Spallation Source
@@ -35,26 +35,37 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-// EXPORT_OPT_MANTIDQT_MANTIDWIDGETS
 class GenericDataProcessorPresenterReducerWorker : public QObject {
   Q_OBJECT
 
 public:
-  // for fitting (single peak fits)
+  // Constructor for processing rows
   GenericDataProcessorPresenterReducerWorker(
-      GenericDataProcessorPresenter *presenter)
-      : m_presenter(presenter) {}
+      GenericDataProcessorPresenter *presenter, const RowData &rowData)
+      : m_presenter(presenter), m_rowData(rowData) {}
+
+  // Constructor for processing groups
+  GenericDataProcessorPresenterReducerWorker(
+      GenericDataProcessorPresenter *presenter, const GroupData &groupData)
+      : m_presenter(presenter), m_groupData(groupData) {}
 
 private slots:
-  void reduceRow() {
-    emit finished();
+  void processRow() {
+    emit finishedRow();
+  }
+
+  void processGroup() {
+    emit finishedGroup();
   }
 
 signals:
-  void finished();
+  void finishedRow();
+  void finishedGroup();
 
 private:
   GenericDataProcessorPresenter *m_presenter;
+  const RowData m_rowData;
+  const GroupData m_groupData;
 };
 
 } // namespace MantidWidgets
