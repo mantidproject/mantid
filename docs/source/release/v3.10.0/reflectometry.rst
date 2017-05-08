@@ -17,6 +17,7 @@ Algorithms
 - :ref:`algm-ReflectometryReductionOneAuto-v2` and :ref:`algm-CreateTransmissionWorkspaceAuto-v2` attempts to populate properties `StartOverlap` and `EndOverlap` with values from the IDF.
 - :ref:`algm-GroupDetectors-v2` peforms a more resilient validation of grouping pattern that is less likely to throw an exception.
 - :ref:`algm-ReflectometryReductionOneAuto-v2` - fixed a bug where processing instructions were not applied correctly to the specified transmission run.
+- :ref:`algm-ReflectometryReductionOne-v2` and :ref:`algm-ReflectometryReductionOneAugo-v2` have a new property, ``SummationType``, which specifies whether summation should be done in wavelength (default) or in Q. For summation in Q, there is an additional new property, ``ReductionType``, which should be used to specify whether the reduction is for a divergent beam or non-flat sample.
 
 ConvertToReflectometryQ
 -----------------------
