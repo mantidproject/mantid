@@ -117,7 +117,7 @@ private:
   /// The history of the workspace, algorithm and environment
   std::unique_ptr<WorkspaceHistory> m_history;
   /// Storage mode of the Workspace (used for MPI runs)
-  Parallel::StorageMode m_storageMode{Parallel::StorageMode::Cloned};
+  Parallel::StorageMode m_storageMode{Parallel::StorageMode::MasterOnly};
 
   /// Virtual clone method. Not implemented to force implementation in children.
   virtual Workspace *doClone() const = 0;

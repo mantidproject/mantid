@@ -106,6 +106,13 @@ const Indexing::IndexInfo &MatrixWorkspace::indexInfo() const {
  *
  * Used for setting spectrum number and detector ID information of spectra */
 void MatrixWorkspace::setIndexInfo(const Indexing::IndexInfo &indexInfo) {
+  if (m_isInitialized && (indexInfo.storageMode() != storageMode()))
+    throw std::invalid_argument("MatrixWorkspace::setIndexInfo: "
+                                "Parallel::StorageMode in IndexInfo does not "
+                                "match storage mode in workspace");
+  else
+    setStorageMode(indexInfo.storageMode());
+
   // Comparing the *local* size of the indexInfo.
   if (indexInfo.size() != getNumberHistograms())
     throw std::invalid_argument("MatrixWorkspace::setIndexInfo: IndexInfo size "
@@ -145,6 +152,11 @@ void MatrixWorkspace::setIndexInfo(const Indexing::IndexInfo &indexInfo) {
 /// Variant of setIndexInfo, used by WorkspaceFactoryImpl.
 void MatrixWorkspace::setIndexInfoWithoutISpectrumUpdate(
     const Indexing::IndexInfo &indexInfo) {
+  // Workspace is already initialized (m_isInitialized == true), but this is
+  // called by initializedFromParent which is some sort of second-stage
+  // initialization, so there is not check for storage mode compatibility here,
+  // in contrast to what setIndexInfo() does.
+  setStorageMode(indexInfo.storageMode());
   // Comparing the *local* size of the indexInfo.
   if (indexInfo.size() != getNumberHistograms())
     throw std::invalid_argument("MatrixWorkspace::setIndexInfo: IndexInfo size "
@@ -201,11 +213,7 @@ void MatrixWorkspace::initialize(const std::size_t &NVectors,
                                  const std::size_t &XLength,
                                  const std::size_t &YLength) {
   // Check validity of arguments
-#ifdef MPI_EXPERIMENTAL
-  if (XLength == 0 || YLength == 0) {
-#else
   if (NVectors == 0 || XLength == 0 || YLength == 0) {
-#endif
     throw std::out_of_range(
         "All arguments to init must be positive and non-zero");
   }
@@ -232,11 +240,7 @@ void MatrixWorkspace::initialize(const std::size_t &NVectors,
 void MatrixWorkspace::initialize(const std::size_t &NVectors,
                                  const HistogramData::Histogram &histogram) {
   // Check validity of arguments
-#ifdef MPI_EXPERIMENTAL
-  if (histogram.x().size() == 0) {
-#else
   if (NVectors == 0 || histogram.x().size() == 0) {
-#endif
     throw std::out_of_range(
         "All arguments to init must be positive and non-zero");
   }
@@ -263,8 +267,9 @@ void MatrixWorkspace::initialize(const std::size_t &NVectors,
 void MatrixWorkspace::initialize(const Indexing::IndexInfo &indexInfo,
                                  const HistogramData::Histogram &histogram) {
   initialize(indexInfo.size(), histogram);
+  m_isInitialized = false;
   setIndexInfo(indexInfo);
-  setStorageMode(indexInfo.storageMode());
+  m_isInitialized = true;
 }
 
 //---------------------------------------------------------------------------------------

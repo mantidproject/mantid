@@ -274,12 +274,12 @@ void CreateWorkspace::exec() {
 
 Parallel::ExecutionMode CreateWorkspace::getParallelExecutionMode(
     const std::map<std::string, Parallel::StorageMode> &storageModes) const {
-  // Storage mode of (optional) parent takes precedence over user input.
-  if (!storageModes.empty())
-    return Parallel::getCorrespondingExecutionMode(
-        storageModes.begin()->second);
   const auto storageMode =
       Parallel::fromString(getProperty("ParallelStorageMode"));
+  if (!storageModes.empty())
+    if (storageModes.begin()->second != storageMode)
+      throw std::invalid_argument("Input workspace storage mode differs from "
+                                  "requested output workspace storage mode.");
   return Parallel::getCorrespondingExecutionMode(storageMode);
 }
 
@@ -287,9 +287,7 @@ void CreateWorkspace::execNonMaster() {
   MatrixWorkspace_const_sptr parentWS = getProperty("ParentWorkspace");
   if (parentWS)
     return Algorithm::execNonMaster();
-
-  IndexInfo indexInfo(0, Parallel::StorageMode::MasterOnly);
-  setProperty("OutputWorkspace", create<Workspace2D>(indexInfo, Points(1)));
+  setProperty("OutputWorkspace", Kernel::make_unique<Workspace2D>());
 }
 
 } // Algorithms

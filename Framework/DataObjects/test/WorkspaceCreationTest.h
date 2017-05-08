@@ -387,6 +387,24 @@ public:
     check_zeroed_data(*ws);
   }
 
+  void test_create_with_StorageMode() {
+    IndexInfo indices(2, Parallel::StorageMode::Distributed);
+    indices.setSpectrumNumbers({2, 4});
+    indices.setSpectrumDefinitions(std::vector<SpectrumDefinition>(2));
+    std::unique_ptr<Workspace2D> ws;
+    TS_ASSERT_THROWS_NOTHING(ws = create<Workspace2D>(indices, BinEdges{1, 2, 4}));
+    TS_ASSERT_EQUALS(ws->storageMode(), Parallel::StorageMode::Distributed);
+  }
+
+  void test_storageMode_propagated() {
+    IndexInfo indices(2, Parallel::StorageMode::Distributed);
+    indices.setSpectrumNumbers({2, 4});
+    indices.setSpectrumDefinitions(std::vector<SpectrumDefinition>(2));
+    const auto parent = create<Workspace2D>(indices, BinEdges{1, 2, 4});
+    const auto ws = create<Workspace2D>(*parent);
+    TS_ASSERT_EQUALS(ws->storageMode(), Parallel::StorageMode::Distributed);
+  }
+
   void test_create_partitioned() {
     run_create_partitioned(Parallel::Communicator{});
     runParallel(run_create_partitioned);
