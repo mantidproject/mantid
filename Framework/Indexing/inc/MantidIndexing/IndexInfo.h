@@ -116,8 +116,7 @@ public:
 
   bool isOnThisPartition(GlobalSpectrumIndex globalIndex) const;
 
-  // TODO how can we avoid conflicts with storage mode in Workspace?
-  Parallel::StorageMode storageMode() const { return m_storageMode; }
+  Parallel::StorageMode storageMode() const;
 
 private:
   void makeSpectrumNumberTranslator(
