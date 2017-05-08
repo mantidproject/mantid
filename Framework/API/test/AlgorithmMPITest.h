@@ -533,51 +533,41 @@ public:
   AlgorithmMPITest() { AnalysisDataService::Instance(); }
 
   void testNoParallelism() {
-    runNoParallelism(Parallel::Communicator{});
     runParallel(runNoParallelism);
     Mantid::API::AnalysisDataService::Instance().clear();
   }
 
   void testGetInputWorkspaceStorageModes() {
-    runTestGetInputWorkspaceStorageModes(Parallel::Communicator{});
     runParallel(runTestGetInputWorkspaceStorageModes);
     Mantid::API::AnalysisDataService::Instance().clear();
   }
 
   void testBadGetParallelExecutionMode() {
-    runBadGetParallelExecutionMode(Parallel::Communicator{});
     runParallel(runBadGetParallelExecutionMode);
     Mantid::API::AnalysisDataService::Instance().clear();
   }
 
   void test1To1() {
-    run1To1(Parallel::Communicator{});
     runParallel(run1To1);
     Mantid::API::AnalysisDataService::Instance().clear();
   }
 
   void testNTo0() {
-    runNTo0(Parallel::Communicator{});
     runParallel(runNTo0);
     Mantid::API::AnalysisDataService::Instance().clear();
   }
 
   void testNTo1StorageModeFailure() {
-    runNTo1StorageModeFailure(Parallel::Communicator{});
     runParallel(runNTo1StorageModeFailure);
     Mantid::API::AnalysisDataService::Instance().clear();
   }
 
   void testNTo1() {
-    runNTo1(Parallel::Communicator{});
     runParallel(runNTo1);
     Mantid::API::AnalysisDataService::Instance().clear();
   }
 
   void test0To1() {
-    run0To1<Parallel::StorageMode::Cloned>(Parallel::Communicator{});
-    run0To1<Parallel::StorageMode::Distributed>(Parallel::Communicator{});
-    run0To1<Parallel::StorageMode::MasterOnly>(Parallel::Communicator{});
     runParallel(run0To1<Parallel::StorageMode::Cloned>);
     runParallel(run0To1<Parallel::StorageMode::Distributed>);
     runParallel(run0To1<Parallel::StorageMode::MasterOnly>);
@@ -586,28 +576,6 @@ public:
 
   void test1To1StorageModeTransition() {
     using Parallel::StorageMode;
-    run1To1StorageModeTransition<StorageMode::Cloned, StorageMode::Cloned>(
-        Parallel::Communicator{});
-    run1To1StorageModeTransition<StorageMode::Cloned, StorageMode::Distributed>(
-        Parallel::Communicator{});
-    run1To1StorageModeTransition<StorageMode::Cloned, StorageMode::MasterOnly>(
-        Parallel::Communicator{});
-    run1To1StorageModeTransition<StorageMode::Distributed, StorageMode::Cloned>(
-        Parallel::Communicator{});
-    run1To1StorageModeTransition<StorageMode::Distributed,
-                                 StorageMode::Distributed>(
-        Parallel::Communicator{});
-    run1To1StorageModeTransition<StorageMode::Distributed,
-                                 StorageMode::MasterOnly>(
-        Parallel::Communicator{});
-    run1To1StorageModeTransition<StorageMode::MasterOnly, StorageMode::Cloned>(
-        Parallel::Communicator{});
-    run1To1StorageModeTransition<StorageMode::MasterOnly,
-                                 StorageMode::Distributed>(
-        Parallel::Communicator{});
-    run1To1StorageModeTransition<StorageMode::MasterOnly,
-                                 StorageMode::MasterOnly>(
-        Parallel::Communicator{});
     runParallel(
         run1To1StorageModeTransition<StorageMode::Cloned, StorageMode::Cloned>);
     runParallel(run1To1StorageModeTransition<StorageMode::Cloned,
@@ -632,7 +600,6 @@ public:
   void testChained() {
     // Test that output from one algorithm can be fed into another (in
     // combination with non-trivial storage modes).
-    runChained(Parallel::Communicator{});
     runParallel(runChained);
     Mantid::API::AnalysisDataService::Instance().clear();
   }

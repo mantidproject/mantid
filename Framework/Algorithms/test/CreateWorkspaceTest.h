@@ -227,19 +227,16 @@ public:
   }
 
   void test_parallel_cloned() {
-    run_create(Parallel::Communicator{}, "Parallel::StorageMode::Cloned");
     ParallelTestHelpers::runParallel(run_create,
                                      "Parallel::StorageMode::Cloned");
   }
 
   void test_parallel_distributed() {
-    run_create(Parallel::Communicator{}, "Parallel::StorageMode::Distributed");
     ParallelTestHelpers::runParallel(run_create,
                                      "Parallel::StorageMode::Distributed");
   }
 
   void test_parallel_master_only() {
-    run_create(Parallel::Communicator{}, "Parallel::StorageMode::MasterOnly");
     ParallelTestHelpers::runParallel(run_create,
                                      "Parallel::StorageMode::MasterOnly");
   }

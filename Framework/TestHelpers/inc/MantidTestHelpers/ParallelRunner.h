@@ -57,6 +57,9 @@ void ParallelRunner::run(Function &&f, Args &&... args) {
     Mantid::Parallel::Communicator comm;
     f(comm, std::forward<Args>(args)...);
   } else {
+    // 1. Run serial
+    f(Mantid::Parallel::Communicator{}, std::forward<Args>(args)...);
+    // 2. Run parallel
     std::vector<std::thread> threads;
     for (int t = 0; t < m_backend->size(); ++t) {
       Mantid::Parallel::Communicator comm(m_backend, t);
