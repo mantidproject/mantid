@@ -1,14 +1,13 @@
 #include "MantidAlgorithms/ReflectometryReductionOne2.h"
 #include "MantidAPI/Axis.h"
-#include "MantidAPI/Run.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/StringTokenizer.h"
-#include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/Unit.h"
 
 #include <algorithm>
+#include <boost/lexical_cast.hpp>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -96,32 +95,6 @@ double getLambda(const HistogramX &xValues, const int xIdx) {
 
   // The centre of the bin is the lower bin edge plus half the width
   return xValues[xIdx] + getLambdaRange(xValues, xIdx) / 2.0;
-}
-
-/*
-Get the value of theta from the logs
-@param inputWs : the input workspace
-@return : theta found in the logs, in degrees
-@throw: runtime_error if 'stheta' was not found.
-*/
-double getThetaFromLogs(MatrixWorkspace_sptr inputWs) {
-
-  double theta = -1.;
-  const Mantid::API::Run &run = inputWs->run();
-  try {
-    Property *p = run.getLogData("stheta");
-    auto incidentThetas = dynamic_cast<TimeSeriesProperty<double> *>(p);
-    if (!incidentThetas) {
-      throw std::runtime_error("stheta log not found");
-    }
-    theta =
-        incidentThetas->valuesAsVector().back(); // Not quite sure what to do
-                                                 // with the time series for
-                                                 // stheta
-  } catch (Exception::NotFoundError &) {
-    return theta;
-  }
-  return theta;
 }
 
 /** @todo The following translate functions are duplicates of code in
@@ -834,13 +807,15 @@ void ReflectometryReductionOne2::findTheta0() {
   if (reductionType == "DivergentBeam") {
     // theta0 is the horizon angle, which is half the twoTheta angle of the
     // detector position. This is the angle the detector has been rotated
-    // to, which we can get from ThetaIn, if given, or from stheta in the logs
-    // otherwise.
+    // to, which we can get from ThetaIn
     Property *thetaIn = getProperty("ThetaIn");
     if (!thetaIn->isDefault()) {
       m_theta0 = getProperty("ThetaIn");
     } else {
-      m_theta0 = getThetaFromLogs(m_runWS);
+      /// @todo Find the value of theta using calculateTheta (which could
+      /// be moved to the base class from ReflectometryReductionOneAuto)
+      throw std::runtime_error(
+          "The ThetaIn property is required for the DivergentBeam case");
     }
   }
 
