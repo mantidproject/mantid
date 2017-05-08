@@ -206,8 +206,7 @@ void ReflectometryReductionOneAuto2::init() {
 
   // Output workspace in Q
   declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
-                      "OutputWorkspaceBinned", "", Direction::Output,
-                      PropertyMode::Optional),
+                      "OutputWorkspaceBinned", "", Direction::Output),
                   "Output workspace in Q (rebinned workspace)");
 
   // Output workspace in Q (unbinned)
@@ -276,17 +275,12 @@ void ReflectometryReductionOneAuto2::exec() {
   MatrixWorkspace_sptr IvsLam = alg->getProperty("OutputWorkspaceWavelength");
   MatrixWorkspace_sptr IvsQ = alg->getProperty("OutputWorkspace");
 
+  std::vector<double> params;
+  MatrixWorkspace_sptr IvsQB = rebinAndScale(IvsQ, theta, params);
+
   setProperty("OutputWorkspaceWavelength", IvsLam);
   setProperty("OutputWorkspace", IvsQ);
-
-  std::vector<double> params;
-  try {
-    MatrixWorkspace_sptr IvsQB = rebinAndScale(IvsQ, theta, params);
-    setProperty("OutputWorkspaceBinned", IvsQB);
-  } catch (std::exception &ex) {
-    g_log.error() << "Failed to rebin and scale result: " << ex.what()
-                  << ". OutputWorkspaceBinned will not be set.";
-  }
+  setProperty("OutputWorkspaceBinned", IvsQB);
 
   // Set other properties so they can be updated in the Reflectometry interface
   setProperty("ThetaIn", theta);
