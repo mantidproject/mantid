@@ -154,7 +154,7 @@ void MatrixWorkspace::setIndexInfoWithoutISpectrumUpdate(
     const Indexing::IndexInfo &indexInfo) {
   // Workspace is already initialized (m_isInitialized == true), but this is
   // called by initializedFromParent which is some sort of second-stage
-  // initialization, so there is not check for storage mode compatibility here,
+  // initialization, so there is no check for storage mode compatibility here,
   // in contrast to what setIndexInfo() does.
   setStorageMode(indexInfo.storageMode());
   // Comparing the *local* size of the indexInfo.
