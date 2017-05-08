@@ -76,6 +76,7 @@ Bugs
 ----
 
 - We have fixed a bug where Mantid could crash when deleting a large number of workspaces.
+- Fixed a bug in :ref:`ConvertToMD <algm-ConvertToMD>` causing it to fail with the error "Run::storeEnergyBinBoundaries - Inconsistent start & end values" if monitors were all NaN, Inf, or zero.
 
 CurveFitting
 ------------
