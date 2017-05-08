@@ -169,7 +169,7 @@ void CreateWorkspace::exec() {
 
   // Create the OutputWorkspace
   auto storageMode = Parallel::fromString(getProperty("ParallelStorageMode"));
-  IndexInfo indexInfo(nSpec, storageMode);
+  IndexInfo indexInfo(nSpec, storageMode, communicator());
   MatrixWorkspace_const_sptr parentWS = getProperty("ParentWorkspace");
   MatrixWorkspace_sptr outputWS;
   if (parentWS) {

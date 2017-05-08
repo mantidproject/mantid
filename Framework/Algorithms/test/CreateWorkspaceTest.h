@@ -5,9 +5,52 @@
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/TextAxis.h"
 #include "MantidKernel/Memory.h"
+#include "MantidTestHelpers/ParallelRunner.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
+using namespace Mantid;
 using namespace Mantid::API;
+
+namespace {
+void run_create(const Parallel::Communicator &comm,
+                const std::string &storageMode) {
+  Mantid::Algorithms::CreateWorkspace alg;
+  alg.setCommunicator(comm);
+  alg.initialize();
+  std::vector<double> dataEYX(2000);
+  int nspec = 1000;
+  alg.setProperty<int>("NSpec", nspec);
+  alg.setProperty<std::vector<double>>("DataX", dataEYX);
+  alg.setProperty<std::vector<double>>("DataY", dataEYX);
+  alg.setProperty<std::vector<double>>("DataE", dataEYX);
+  // In a true MPI run we could simply use "out", but in the threaded
+  // fake-runner we have only one ADS, so we have to avoid clashes.
+  std::string outName("out" + std::to_string(comm.rank()));
+  alg.setProperty("OutputWorkspace", outName);
+  alg.setProperty("ParallelStorageMode", storageMode);
+  alg.execute();
+  auto ws = boost::dynamic_pointer_cast<const MatrixWorkspace>(
+      AnalysisDataService::Instance().retrieve(outName));
+  TS_ASSERT_EQUALS(ws->storageMode(), Parallel::fromString(storageMode));
+  switch (ws->storageMode()) {
+  case Parallel::StorageMode::Cloned: {
+    TS_ASSERT_EQUALS(ws->getNumberHistograms(), nspec);
+    break;
+  }
+  case Parallel::StorageMode::Distributed: {
+    int remainder = nspec % comm.size() > comm.rank() ? 1 : 0;
+    size_t expected = nspec / comm.size() + remainder;
+    TS_ASSERT_EQUALS(ws->getNumberHistograms(), expected);
+    break;
+  }
+  case Parallel::StorageMode::MasterOnly: {
+    size_t expected = comm.rank() == 0 ? nspec : 0;
+    TS_ASSERT_EQUALS(ws->getNumberHistograms(), expected);
+    break;
+  }
+  }
+}
+}
 
 class CreateWorkspaceTest : public CxxTest::TestSuite {
 public:
@@ -181,6 +224,24 @@ public:
 
     // Remove workspace
     Mantid::API::AnalysisDataService::Instance().remove("test_CreateWorkspace");
+  }
+
+  void test_parallel_cloned() {
+    run_create(Parallel::Communicator{}, "Parallel::StorageMode::Cloned");
+    ParallelTestHelpers::runParallel(run_create,
+                                     "Parallel::StorageMode::Cloned");
+  }
+
+  void test_parallel_distributed() {
+    run_create(Parallel::Communicator{}, "Parallel::StorageMode::Distributed");
+    ParallelTestHelpers::runParallel(run_create,
+                                     "Parallel::StorageMode::Distributed");
+  }
+
+  void test_parallel_master_only() {
+    run_create(Parallel::Communicator{}, "Parallel::StorageMode::MasterOnly");
+    ParallelTestHelpers::runParallel(run_create,
+                                     "Parallel::StorageMode::MasterOnly");
   }
 
 private:
