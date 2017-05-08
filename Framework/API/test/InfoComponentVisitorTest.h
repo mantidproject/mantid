@@ -32,7 +32,7 @@ public:
                                            V3D(11, 0, 0) /*detector position*/);
 
     // Create the visitor.
-    InfoComponentVisitor visitor(1, [](const Mantid::detid_t) { return 0; });
+    InfoComponentVisitor visitor(1);
 
     // Visit everything
     visitee->registerContents(visitor);
@@ -56,9 +56,9 @@ public:
                                            V3D(11, 0, 0) /*detector position*/);
 
     // Create the visitor.
-    const size_t detectorIndex = 0;
-    InfoComponentVisitor visitor(
-        1, [&](const Mantid::detid_t) { return detectorIndex; });
+    const size_t detectorIndex =
+        0; // Internally we expect detector index to start at 0
+    InfoComponentVisitor visitor(1);
 
     // Visit everything
     visitee->registerContents(visitor);
@@ -80,7 +80,7 @@ public:
                                            V3D(11, 0, 0) /*detector position*/);
 
     // Create the visitor.
-    InfoComponentVisitor visitor(1, [](const Mantid::detid_t) { return 0; });
+    InfoComponentVisitor visitor(1);
 
     // Visit everything
     visitee->registerContents(visitor);
@@ -132,7 +132,7 @@ public:
                                            V3D(11, 0, 0) /*detector position*/);
 
     // Create the visitor.
-    InfoComponentVisitor visitor(1, [](const Mantid::detid_t) { return 0; });
+    InfoComponentVisitor visitor(1);
 
     // Visit everything
     visitee->registerContents(visitor);
@@ -158,38 +158,6 @@ public:
     TS_ASSERT_EQUALS(ranges[2].second, 1);
   }
 
-  void test_visitor_drops_detectors_without_id() {
-    /*
-     We have to go via DetectorInfo::indexOf to get the index of a detector.
-     if this throws because the detector has an invalid id, we are forced to
-     drop it.
-
-     Some IDFs i.e. SNAP have montiors with detector ids <  0.
-    */
-
-    // Create a very basic instrument to visit
-    auto visitee = createMinimalInstrument(V3D(0, 0, 0) /*source pos*/,
-                                           V3D(10, 0, 0) /*sample pos*/
-                                           ,
-                                           V3D(11, 0, 0) /*detector position*/);
-
-    // Create the visitor. Note any access to the indexOf lambda will throw for
-    // detectors.
-    InfoComponentVisitor visitor(1, [](const Mantid::detid_t) -> size_t {
-      throw std::out_of_range("");
-    });
-
-    // Visit everything
-    visitee->registerContents(visitor);
-
-    size_t expectedSize = 0;
-    ++expectedSize; // source
-    ++expectedSize; // sample
-    ++expectedSize; // instrument
-    // Note no detector counted
-    TS_ASSERT_EQUALS(visitor.size(), expectedSize);
-  }
-
   void test_visitor_collects_detector_id_to_index_mappings() {
 
     // Create a very basic instrument to visit
@@ -198,8 +166,7 @@ public:
                                            ,
                                            V3D(11, 0, 0) /*detector position*/);
 
-    InfoComponentVisitor visitor(1, [](const Mantid::detid_t)
-                                        -> size_t { return 0; });
+    InfoComponentVisitor visitor(1);
 
     // Visit everything
     visitee->registerContents(visitor);
@@ -231,9 +198,7 @@ public:
   }
 
   void test_process_rectangular_instrument() {
-    InfoComponentVisitor visitor(
-        m_nPixels * m_nPixels,
-        [](const Mantid::detid_t id) { return static_cast<size_t>(id); });
+    InfoComponentVisitor visitor(m_nPixels * m_nPixels);
     m_instrument->registerContents(visitor);
     TS_ASSERT(visitor.size() >= size_t(m_nPixels * m_nPixels));
   }

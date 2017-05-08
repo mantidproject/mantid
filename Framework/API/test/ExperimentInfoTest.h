@@ -901,14 +901,9 @@ public:
     instrument->markAsSamplePos(sample);
 
     ExperimentInfo expInfo;
-    expInfo.setInstrument(instrument);
-    const Mantid::API::ComponentInfo &compInfo = expInfo.componentInfo();
-
-    TSM_ASSERT_EQUALS("Should be a valid component index", 0,
-                      compInfo.indexOf(det1->getComponentID()));
-    TSM_ASSERT_THROWS("Should throw. Duplicate should have been rejected",
-                      compInfo.indexOf(det2->getComponentID()),
-                      std::out_of_range &);
+    TSM_ASSERT_THROWS(
+        "Component count and detector count will be out of sync. Should throw.",
+        expInfo.setInstrument(instrument), std::invalid_argument &);
   }
 
 private:

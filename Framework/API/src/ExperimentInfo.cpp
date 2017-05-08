@@ -77,7 +77,10 @@ ExperimentInfo::ExperimentInfo()
   m_detectorInfoWrapper = Kernel::make_unique<DetectorInfo>(
       *m_detectorInfo, sptr_instrument, m_parmap.get(),
       makeDetIdToIndexMap(sptr_instrument->getDetectorIDs()));
-  makeAPIComponentInfo(*sptr_instrument);
+
+  // ComponentInfo may be required even if the instrument is never set.
+  const InfoComponentVisitor tmpVisitor(sptr_instrument->getNumberDetectors());
+  makeAPIComponentInfo(*sptr_instrument, tmpVisitor);
 }
 
 /**
@@ -196,7 +199,7 @@ std::tuple<
     boost::shared_ptr<const std::vector<Geometry::ComponentID>>,
     boost::shared_ptr<const std::unordered_map<Geometry::ComponentID, size_t>>>
 makeBeamlineComponentInfo(const Instrument &instrument,
-                          const API::DetectorInfo &detectorInfo) {
+                          const InfoComponentVisitor &visitor) {
 
   // Use cached values on instrument if avalialbe as optimization
   if (instrument.hasComponentInfo() && !instrument.isEmptyInstrument()) {
@@ -207,17 +210,6 @@ makeBeamlineComponentInfo(const Instrument &instrument,
         Kernel::make_unique<Beamline::ComponentInfo>(componentInfo),
         componentIds, componentIdMap);
   } else {
-    // Parse the instrument
-    InfoComponentVisitor visitor(
-        detectorInfo.size(), std::bind(&DetectorInfo::indexOf, &detectorInfo,
-                                       std::placeholders::_1));
-
-    if (instrument.isParametrized()) {
-      // Register everything via visitor
-      instrument.baseInstrument()->registerContents(visitor);
-    } else {
-      instrument.registerContents(visitor);
-    }
 
     // Extract component ids. We need this for the ComponentInfo wrapper.
     auto componentIds =
@@ -295,15 +287,17 @@ makeDetectorInfo(const Instrument &oldInstr, const Instrument &newInstr) {
 /**
  * Make the beamline and API ComponentInfo
  * @param instr : instrument to make the component info around
+ * @param visitor : Component visitor to query
  */
-void ExperimentInfo::makeAPIComponentInfo(const Instrument &instr) {
+void ExperimentInfo::makeAPIComponentInfo(const Instrument &instr,
+                                          const InfoComponentVisitor &visitor) {
 
   boost::shared_ptr<const std::vector<Geometry::ComponentID>> componentIds;
   boost::shared_ptr<const std::unordered_map<Geometry::ComponentID, size_t>>
       componentIdToIndexMap;
 
   std::tie(m_componentInfo, componentIds, componentIdToIndexMap) =
-      makeBeamlineComponentInfo(instr, detectorInfo());
+      makeBeamlineComponentInfo(instr, visitor);
   m_parmap->setComponentInfo(m_componentInfo);
 
   m_componentInfoWrapper = Kernel::make_unique<ComponentInfo>(
@@ -328,20 +322,21 @@ void ExperimentInfo::setInstrument(const Instrument_const_sptr &instr) {
   }
   const auto parInstrument = Geometry::ParComponentFactory::createInstrument(
       sptr_instrument, m_parmap);
+
+  if (!m_infoVisitor) {
+    m_infoVisitor = Kernel::make_unique<InfoComponentVisitor>(
+        sptr_instrument->getNumberDetectors(false /*do not skip monitors*/));
+    sptr_instrument->registerContents(*m_infoVisitor);
+  }
+
   m_detectorInfo = makeDetectorInfo(*parInstrument, *instr);
   m_parmap->setDetectorInfo(m_detectorInfo);
-  if (instr->hasDetectorInfo()) {
+  m_detectorInfoWrapper = Kernel::make_unique<DetectorInfo>(
+      *m_detectorInfo, makeParameterizedInstrument(), m_parmap.get(),
+      boost::make_shared<const std::unordered_map<detid_t, size_t>>(
+          m_infoVisitor->detectorIdToIndexMap()));
 
-    // Reuse the ID -> index map for the detector ids
-    m_detectorInfoWrapper = Kernel::make_unique<DetectorInfo>(
-        *m_detectorInfo, makeParameterizedInstrument(), m_parmap.get(),
-        instr->detIdToIndexMap());
-  } else {
-    m_detectorInfoWrapper = Kernel::make_unique<DetectorInfo>(
-        *m_detectorInfo, makeParameterizedInstrument(), m_parmap.get(),
-        makeDetIdToIndexMap(instr->getDetectorIDs()));
-  }
-  makeAPIComponentInfo(*instr);
+  makeAPIComponentInfo(*instr, *m_infoVisitor);
 
   // Detector IDs that were previously dropped because they were not part of the
   // instrument may now suddenly be valid, so we have to reinitialize the
