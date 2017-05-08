@@ -1831,7 +1831,8 @@ void MuonAnalysis::selectMultiPeak(const QString &wsName,
                    std::back_inserter(groupsAndPairs), &QString::fromStdString);
     m_dataSelector->setAvailableGroups(groupsAndPairs);
 	m_uiForm.fitBrowser->setAvailableGroups(groupsAndPairs);
-	
+	m_uiForm.fitBrowser->setNumPeriods(m_numPeriods);
+
     m_dataSelector->setNumPeriods(m_numPeriods);
 
     // Set the selected run, group/pair and period
@@ -2115,6 +2116,9 @@ void MuonAnalysis::loadFittings() {
           SLOT(updateDataPresenterOverwrite(int)));
   connect(m_uiForm.fitBrowser, SIGNAL(groupBoxClicked(bool)), this,
 	  SLOT(handleGroupBox(bool)));
+  connect(m_uiForm.fitBrowser, SIGNAL(periodBoxClicked(bool)), this,
+	  SLOT(handlePeriodBox(bool)));
+
   //add changed here?
   m_fitDataPresenter->setOverwrite(isOverwriteEnabled());
   // Set multi fit mode on/off as appropriate
@@ -2136,6 +2140,20 @@ void MuonAnalysis::handleGroupBox(bool enabled,
 	bool updateWorkspaces) {
 	//send the group to dataselector
 	m_dataSelector->setGroupsSelected(m_uiForm.fitBrowser->getChosenGroups());
+	m_fitDataPresenter->handleSelectedDataChanged(true);
+}
+/**
+* Handle"periods" selected/deselected
+* Update stored value
+* Create raw workspaces if necessary
+* @param enabled :: [input] Whether option has been selected or unselected
+* @param updateWorkspaces :: [input] Whether to create workspaces if they don't
+* exist
+*/
+void MuonAnalysis::handlePeriodBox(bool enabled,
+	bool updateWorkspaces) {
+	//send the group to dataselector
+	m_dataSelector->setPeriodsSelected(m_uiForm.fitBrowser->getChosenPeriods());
 	m_fitDataPresenter->handleSelectedDataChanged(true);
 }
 /**

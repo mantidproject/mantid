@@ -67,6 +67,8 @@ public:
   /// Set chosen group
   void setChosenGroup(const QString &group) override;
   void setGroupsSelected(QStringList groups) { m_chosenGroups = groups; };
+  void setPeriodsSelected(QStringList periods) { m_chosenPeriods = periods; };
+
   /// Clear list of selected groups
   void clearChosenGroups() const;
   /// Get selected periods
@@ -158,6 +160,8 @@ private:
   QMap<QString, QCheckBox *> m_periodBoxes;
   double startX;
   QStringList m_chosenGroups;
+  QStringList m_chosenPeriods;
+
 private slots:
   /// Set normal cursor and enable input
   void unsetBusyState();

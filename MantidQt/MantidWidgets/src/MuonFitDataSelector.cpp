@@ -346,7 +346,8 @@ void MuonFitDataSelector::setNumPeriods(size_t numPeriods) {
  * @returns :: list of periods e.g. "1", "3", "1+2-3+4", or "" if single-period
  */
 QStringList MuonFitDataSelector::getPeriodSelections() const {
-  QStringList checked;
+	return m_chosenPeriods;
+  /*QStringList checked;
   if (m_ui.groupBoxPeriods->isVisible()) {
     for (auto iter = m_periodBoxes.constBegin();
          iter != m_periodBoxes.constEnd(); ++iter) {
@@ -370,7 +371,7 @@ QStringList MuonFitDataSelector::getPeriodSelections() const {
     // Single-period data
     checked << "";
   }
-  return checked;
+  return checked;*/
 }
 
 /**
@@ -460,8 +461,8 @@ void MuonFitDataSelector::setChosenPeriod(const QString &period) {
       // set the combination
       QStringList parts = period.split('-');
       if (parts.size() == 2) {
-        m_ui.txtFirst->setText(parts[0].replace("+", ", "));
-        m_ui.txtSecond->setText(parts[1].replace("+", ", "));
+        m_ui.txtFirst->setText(parts[0].replace(",", "+ "));
+        m_ui.txtSecond->setText(parts[1].replace(",", "+ "));
         setPeriodCombination(true);
       }
     }

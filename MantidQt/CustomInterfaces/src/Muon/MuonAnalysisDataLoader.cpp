@@ -5,6 +5,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidKernel/ArrayProperty.h"
 #include "MantidQtCustomInterfaces/Muon/MuonAnalysisHelper.h"
 
 using Mantid::API::AlgorithmManager;

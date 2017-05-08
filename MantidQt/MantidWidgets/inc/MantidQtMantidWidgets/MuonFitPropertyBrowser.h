@@ -24,6 +24,7 @@ class QtEnumPropertyManager;
 class QtProperty;
 class QtBrowserItem;
 class QVBoxLayout;
+class QGroupBox;
 class QSplitter;
 class QWidget;
 
@@ -104,7 +105,11 @@ public:
 
   void TFAsymmFit(int maxIterations);
   void setAvailableGroups(const QStringList &groups);
+  void setAvailablePeriods(const QStringList &periods);
+
   QStringList getChosenGroups() const;
+  QStringList getChosenPeriods() const;
+
   /// Clear list of selected groups
   void clearChosenGroups() const;
   void setAllGroups();
@@ -116,6 +121,9 @@ public slots:
   /// Open sequential fit dialog
   void sequentialFit() override;
   void executeMuonFitMenu(const QString &item);
+  void groupBtnPressed();
+  void periodBtnPressed();
+  void setNumPeriods(size_t numPeriods);
 signals:
   /// Emitted when sequential fit is requested by user
   void sequentialFitRequested();
@@ -130,7 +138,8 @@ signals:
   /// Emitted when "fit to raw data" is changed
   void fitRawDataClicked(bool enabled) override;
   void groupBoxClicked(bool enabled);
-
+  void periodBoxClicked(bool enabled);
+  void reselctGroupClicked(bool enabled);
   /// Emitted when fit is about to be run
   void preFitChecksRequested(bool sequential) override;
 
@@ -160,7 +169,14 @@ private:
   void clearGroupCheckboxes();
   void addGroupCheckbox(const QString &name);
   void genGroupWindow();
-  void setGroupOptions(int current,std::string option);
+  void genPeriodWindow();
+  void updateGroupDisplay();
+  void updatePeriodDisplay();
+
+  void clearPeriodCheckboxes();
+  void addPeriodCheckbox(const QString &name);
+
+
   /// Splitter for additional widgets and splitter between this and browser
   QSplitter *m_widgetSplitter, *m_mainSplitter;
   /// Names of workspaces to fit
@@ -169,17 +185,31 @@ private:
   std::string m_simultaneousLabel;
   QtProperty *m_normalization;
   mutable QStringList m_normalizationValue;
+
+  QtBrowserItem *m_groupWindow;
+
   QtBrowserItem *m_multiFitSettingsGroup;
   QtProperty *m_groupsToFit;
   mutable QStringList m_groupsToFitOptions;
   /// Map of group names to checkboxes
   QMap<QString,QtProperty *> m_groupBoxes;
-  QtBrowserItem *m_groupWindow;
   //QtTreePropertyBrowser *m_groupBrowser; 
   QtProperty *m_showGroup;
-  mutable QStringList m_showGroupValue;
-  std::vector<std::string> m_groupsList = { "fwd","bkwd","top","bottom","bwd"};
+  mutable QStringList m_showGroupValue; 
 
+  QtProperty *m_periodsToFit;
+  mutable QStringList m_periodsToFitOptions;
+  /// Map of group names to checkboxes
+  QMap<QString, QtProperty *> m_periodBoxes;
+  QtProperty *m_showPeriods;
+  mutable QStringList m_showPeriodValue;
+
+  QPushButton *m_reselectGroupBtn;
+  QPushButton *m_reselectPeriodBtn;
+  QGroupBox *m_btnGroup;
+
+
+  std::vector<std::string> m_groupsList = { "fwd","bkwd","top","bottom","bwd"};
 };
 
 std::vector<double> readNormalization();

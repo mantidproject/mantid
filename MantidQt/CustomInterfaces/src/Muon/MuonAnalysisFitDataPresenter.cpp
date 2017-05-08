@@ -403,8 +403,9 @@ MuonAnalysisFitDataPresenter::createWorkspace(const std::string &name,
     if (params.periods.empty()) {
       analysisOptions.summedPeriods = "1";
     } else {
-      std::replace(params.periods.begin(), params.periods.end(), ',', '+');
-      const size_t minus = params.periods.find('-');
+	  //need a comma seperated list
+      std::replace(params.periods.begin(), params.periods.end(), '+', ',');
+	  const size_t minus = params.periods.find('-');
       analysisOptions.summedPeriods = params.periods.substr(0, minus);
       if (minus != std::string::npos && minus != params.periods.size()) {
         analysisOptions.subtractedPeriods =
