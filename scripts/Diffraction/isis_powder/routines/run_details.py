@@ -41,8 +41,12 @@ def create_run_details_object(run_number_string, inst_settings, is_vanadium_run,
         output_run_string = run_number_string
 
     # Get the file extension if set
-    file_extension = getattr(inst_settings, "file_extension", None)
-    # Sample empty if there is one
+    file_extension = getattr(inst_settings, "file_extension" )
+    if file_extension:
+        # Prefix dot if user has forgotten to
+        file_extension = file_extension if file_extension.startswith('.') else '.' + file_extension
+
+    # Sample empty if there is one as this is instrument specific
     sample_empty = getattr(inst_settings, "sample_empty", None)
 
     # Generate the paths
@@ -179,6 +183,6 @@ class _RunDetails(object):
         self.vanadium_run_numbers = vanadium_run_number
 
         # Optional
-        self.file_extension = file_extension if file_extension.startswith('.') else '.' + file_extension
+        self.file_extension = str(file_extension)
         self.sample_empty = sample_empty
         self.vanadium_absorption_path = vanadium_abs_path
