@@ -40,21 +40,33 @@ class GenericDataProcessorPresenterRowReducerWorker : public QObject {
 
 public:
   GenericDataProcessorPresenterRowReducerWorker(
-      GenericDataProcessorPresenter *presenter, RowData *rowData)
-      : m_presenter(presenter), m_rowData(rowData) {}
+      GenericDataProcessorPresenter *presenter, RowItem *rowItem,
+      int groupIndex)
+      : m_presenter(presenter), m_rowItem(rowItem), m_groupIndex(groupIndex) {}
 
 private slots:
   void processRow() {
-    m_presenter->reduceRow(m_rowData);
+    try {
+      m_presenter->reduceRow(&m_rowItem->second);
+      m_presenter->m_manager->update(m_groupIndex, m_rowItem->first,
+                                     m_rowItem->second);
+      emit updateProgressSignal();
+    } catch (std::exception &ex) {
+      m_presenter->m_mainPresenter->giveUserCritical(ex.what(), "Error");
+      emit clearProgressSignal();
+    }
     emit finished();
   }
 
 signals:
   void finished();
+  void updateProgressSignal();
+  void clearProgressSignal();
 
 private:
   GenericDataProcessorPresenter *m_presenter;
-  RowData *m_rowData;
+  RowItem *m_rowItem;
+  int m_groupIndex;
 };
 
 } // namespace MantidWidgets

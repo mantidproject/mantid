@@ -13,16 +13,12 @@
 #include "MantidKernel/make_unique.h"
 #include "MantidQtMantidWidgets/AlgorithmHintStrategy.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorGenerateNotebook.h"
-#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorMainPresenter.h"
-#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorOneLevelTreeManager.h"
-#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorTwoLevelTreeManager.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorView.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorWorkspaceCommand.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/GenericDataProcessorPresenterRowReducerWorker.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/GenericDataProcessorPresenterGroupReducerWorker.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/ParseKeyValueString.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/QtDataProcessorOptionsDialog.h"
-#include "MantidQtMantidWidgets/ProgressPresenter.h"
 #include "MantidQtMantidWidgets/ProgressableView.h"
 
 #include <algorithm>
@@ -59,7 +55,7 @@ GenericDataProcessorPresenter::GenericDataProcessorPresenter(
     const std::map<std::string, std::string> &postprocessMap,
     const std::string &loader)
     : WorkspaceObserver(), m_view(nullptr), m_progressView(nullptr),
-      m_mainPresenter(), m_loader(loader), m_whitelist(whitelist),
+      m_mainPresenter(), m_progressReporter(nullptr), m_loader(loader), m_whitelist(whitelist),
       m_preprocessMap(preprocessMap), m_processor(processor),
       m_postprocessor(postprocessor), m_postprocessMap(postprocessMap),
       m_postprocess(true), m_tableDirty(false), m_workerThread(nullptr) {
@@ -208,8 +204,8 @@ void GenericDataProcessorPresenter::process() {
   for (const auto subitem : items) {
     maxProgress += (int)(subitem.second.size());
   }
-  ProgressPresenter progressReporter(progress, maxProgress, maxProgress,
-                                     m_progressView);
+  m_progressReporter =
+      new ProgressPresenter(progress, maxProgress, maxProgress, m_progressView);
 
   for (const auto &item : items) {
     // Loop over each group
@@ -277,18 +273,12 @@ Process a new row
 */
 void GenericDataProcessorPresenter::nextRow() {
 
-  int groupIndex = m_gqueue.front().first;
-  auto &rqueue = m_gqueue.front().second;
-  int rowIndex = m_rowItem.first;
-  auto &rowData = m_rowItem.second;
-
-  // Update with the previously processed row item
-  m_manager->update(groupIndex, rowIndex, rowData);
-  m_groupData[rowIndex] = rowData;
-
   // Prepare a new thread
   delete m_workerThread;
   m_workerThread = new QThread(this);
+
+  int groupIndex = m_gqueue.front().first;
+  auto &rqueue = m_gqueue.front().second;
 
   if (!rqueue.empty()) {
     // Reduce next row
@@ -296,20 +286,30 @@ void GenericDataProcessorPresenter::nextRow() {
     rqueue.pop();
 
     auto *worker = new GenericDataProcessorPresenterRowReducerWorker(
-        this, &m_rowItem.second);
+        this, &m_rowItem, groupIndex);
     worker->moveToThread(m_workerThread);
     connect(m_workerThread, SIGNAL(started()), worker, SLOT(processRow()));
     connect(worker, SIGNAL(finished()), this, SLOT(nextRow()));
+    connect(worker, SIGNAL(updateProgressSignal()), this, SLOT(updateProgress()), Qt::QueuedConnection);
+    connect(worker, SIGNAL(clearProgressSignal()), this, SLOT(clearProgress()), Qt::QueuedConnection);
     m_workerThread->start();
+
   } else {
-    // Do post-processing on containing group (if necessary)
     m_gqueue.pop();
-    auto *worker =
-        new GenericDataProcessorPresenterGroupReducerWorker(this, m_groupData);
-    worker->moveToThread(m_workerThread);
-    connect(m_workerThread, SIGNAL(started()), worker, SLOT(processGroup()));
-    connect(worker, SIGNAL(finished()), this, SLOT(nextGroup()));
-    m_workerThread->start();
+    if (m_groupData.size() > 1) {
+      // Multiple rows in containing group, do post-processing on the group
+      auto *worker =
+          new GenericDataProcessorPresenterGroupReducerWorker(this, m_groupData);
+      worker->moveToThread(m_workerThread);
+      connect(m_workerThread, SIGNAL(started()), worker, SLOT(processGroup()));
+      connect(worker, SIGNAL(finished()), this, SLOT(nextGroup()));
+      connect(worker, SIGNAL(updateProgressSignal()), this, SLOT(updateProgress()), Qt::QueuedConnection);
+      connect(worker, SIGNAL(clearProgressSignal()), this, SLOT(clearProgress()), Qt::QueuedConnection);
+      m_workerThread->start();
+    } else {
+      // Single row in containing group, skip to next group
+      nextGroup();
+    }
   }
 }
 
@@ -318,23 +318,41 @@ Process a new group
 */
 void GenericDataProcessorPresenter::nextGroup() {
 
-  delete m_workerThread;
-
   if (!m_gqueue.empty()) {
     // Prepare a new thread
+    delete m_workerThread;
     m_workerThread = new QThread(this);
 
+    int groupIndex = m_gqueue.front().first;
     auto &rqueue = m_gqueue.front().second;
     m_rowItem = rqueue.front();
     rqueue.pop();
 
     auto *worker = new GenericDataProcessorPresenterRowReducerWorker(
-        this, &m_rowItem.second);
+        this, &m_rowItem, groupIndex);
     worker->moveToThread(m_workerThread);
     connect(m_workerThread, SIGNAL(started()), worker, SLOT(processRow()));
     connect(worker, SIGNAL(finished()), this, SLOT(nextRow()));
+    connect(worker, SIGNAL(updateProgressSignal()), this, SLOT(updateProgress()), Qt::QueuedConnection);
+    connect(worker, SIGNAL(clearProgressSignal()), this, SLOT(clearProgress()), Qt::QueuedConnection);
     m_workerThread->start();
+  } else {
+    delete m_workerThread;
   }
+}
+
+/**
+Update progress
+*/
+void GenericDataProcessorPresenter::updateProgress() {
+  m_progressReporter->report();
+}
+
+/**
+Clear progress
+*/
+void GenericDataProcessorPresenter::clearProgress() {
+  m_progressReporter->clear();
 }
 
 /**

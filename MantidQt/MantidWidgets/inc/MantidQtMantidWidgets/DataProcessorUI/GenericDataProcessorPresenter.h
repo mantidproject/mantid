@@ -5,11 +5,15 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidQtAPI/WorkspaceObserver.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorCommand.h"
+#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorMainPresenter.h"
+#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorOneLevelTreeManager.h"
+#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorTwoLevelTreeManager.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorPostprocessingAlgorithm.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorPreprocessingAlgorithm.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorPresenter.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorProcessingAlgorithm.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorWhiteList.h"
+#include "MantidQtMantidWidgets/ProgressPresenter.h"
 #include "MantidQtMantidWidgets/WidgetDllOption.h"
 
 #include <queue>
@@ -154,6 +158,8 @@ protected:
 protected slots:
   void nextRow();
   void nextGroup();
+  void updateProgress();
+  void clearProgress();
 
 private:
   // the name of the workspace/table/model in the ADS, blank if unsaved
@@ -174,6 +180,8 @@ private:
   GroupData m_groupData;
   // The current row item being reduced
   RowItem m_rowItem;
+  // The progress reporter
+  ProgressPresenter *m_progressReporter;
   // A boolean indicating whether a post-processing algorithm has been defined
   bool m_postprocess;
   // The number of columns

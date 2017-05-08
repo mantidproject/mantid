@@ -45,12 +45,20 @@ public:
 
 private slots:
   void processGroup() {
-    m_presenter->postProcessGroup(m_groupData);
+    try {
+      m_presenter->postProcessGroup(m_groupData);
+      emit updateProgressSignal();
+    } catch (std::exception &ex) {
+      m_presenter->m_mainPresenter->giveUserCritical(ex.what(), "Error");
+      emit clearProgressSignal();
+    }
     emit finished();
   }
 
 signals:
   void finished();
+  void updateProgressSignal();
+  void clearProgressSignal();
 
 private:
   GenericDataProcessorPresenter *m_presenter;
