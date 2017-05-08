@@ -115,14 +115,11 @@ private:
                     const std::vector<size_t> &detectors);
   // Whether summation should be done in Q or the default lambda
   bool summingInQ();
-  // Get angle details for a specific detector
-  void getDetectorDetails(const size_t spIdx, double &twoTheta,
-                          double &bTwoTheta);
   // Get projected coordinates onto twoThetaR
   void getProjectedLambdaRange(const double lambda, const double twoTheta,
                                const double bLambda, const double bTwoTheta,
-                               double &lambdaTop, double &lambdaBot,
-                               const std::vector<size_t> &detectors);
+                               const std::vector<size_t> &detectors,
+                               double &lambdaTop, double &lambdaBot);
   // Check whether two spectrum maps match
   void verifySpectrumMaps(API::MatrixWorkspace_const_sptr ws1,
                           API::MatrixWorkspace_const_sptr ws2,
@@ -133,13 +130,9 @@ private:
   void findTheta0();
   // Accessors for detectors and theta and lambda values
   const std::vector<std::vector<size_t>>& detectorGroups() const { return m_detectorGroups; };
-  double twoThetaMin(const std::vector<size_t> &detectors);
-  double twoThetaMax(const std::vector<size_t> &detectors);
   double theta0() { return m_theta0; }
   double twoThetaR(const std::vector<size_t> &detectors);
   size_t twoThetaRDetectorIdx(const std::vector<size_t> &detectors);
-  size_t spectrumMin(const std::vector<size_t> &detectors);
-  size_t spectrumMax(const std::vector<size_t> &detectors);
 
   API::MatrixWorkspace_sptr m_runWS;
   const API::SpectrumInfo *m_spectrumInfo;
