@@ -468,8 +468,6 @@ void ReflectometryReductionOne2::exec() {
     throw std::invalid_argument(
         "InputWorkspace must have units of TOF or Wavelength");
 
-  m_lambdaMin = getProperty("WavelengthMin");
-  m_lambdaMax = getProperty("WavelengthMax");
   m_spectrumInfo = &m_runWS->spectrumInfo();
 
   // Find and cache detector groups and theta0
@@ -937,6 +935,10 @@ MatrixWorkspace_sptr ReflectometryReductionOne2::constructIvsLamWS(
   cropWorkspaceAlg->execute();
   MatrixWorkspace_sptr ws = cropWorkspaceAlg->getProperty("OutputWorkspace");
 
+  // Get the max/min wavelength of region of interest
+  const double lambdaMin = getProperty("WavelengthMin");
+  const double lambdaMax = getProperty("WavelengthMax");
+
   // Get the max and min values of the projected (virtual) lambda range
   double lambdaVMin = 0.0;
   double lambdaVMax = 0.0;
@@ -947,14 +949,14 @@ MatrixWorkspace_sptr ReflectometryReductionOne2::constructIvsLamWS(
   auto xValues = detectorWS->x(spIdx);
   double bLambda = (xValues[xValues.size() - 1] - xValues[0]) / xValues.size();
   const double bTwoThetaMin = getDetectorTwoThetaRange(m_spectrumInfo, spIdx);
-  getProjectedLambdaRange(lambdaMax(), twoThetaMin(detectors), bLambda,
+  getProjectedLambdaRange(lambdaMax, twoThetaMin(detectors), bLambda,
                           bTwoThetaMin, lambdaVMin, dummy, detectors);
 
   spIdx = spectrumMax(detectors);
   xValues = detectorWS->x(spIdx);
   bLambda = (xValues[xValues.size() - 1] - xValues[0]) / xValues.size();
   const double bTwoThetaMax = getDetectorTwoThetaRange(m_spectrumInfo, spIdx);
-  getProjectedLambdaRange(lambdaMin(), twoThetaMax(detectors), bLambda,
+  getProjectedLambdaRange(lambdaMin, twoThetaMax(detectors), bLambda,
                           bTwoThetaMax, dummy, lambdaVMax, detectors);
 
   if (lambdaVMin > lambdaVMax) {
@@ -963,7 +965,7 @@ MatrixWorkspace_sptr ReflectometryReductionOne2::constructIvsLamWS(
 
   // Use the same number of bins as the input
   const int origNumBins = static_cast<int>(detectorWS->blocksize());
-  const double binWidth = (lambdaMax() - lambdaMin()) / origNumBins;
+  const double binWidth = (lambdaMax - lambdaMin) / origNumBins;
   const int newNumBins = static_cast<int>((lambdaVMax - lambdaVMin) / binWidth);
   std::stringstream params;
   params << lambdaVMin << "," << binWidth << "," << lambdaVMax;
@@ -1070,13 +1072,13 @@ void ReflectometryReductionOne2::sumInQProcessValue(
   const double bLambda = getLambdaRange(inputX, inputIdx);
   const double lambda = getLambda(inputX, inputIdx);
   // Project these coordinates onto the virtual-lambda output (at twoThetaR)
-  double lambdaMin = 0.0;
-  double lambdaMax = 0.0;
-  getProjectedLambdaRange(lambda, twoTheta, bLambda, bTwoTheta, lambdaMin,
-                          lambdaMax, detectors);
+  double lambdaVMin = 0.0;
+  double lambdaVMax = 0.0;
+  getProjectedLambdaRange(lambda, twoTheta, bLambda, bTwoTheta, lambdaVMin,
+                          lambdaVMax, detectors);
   // Share the input counts into the output array
-  sumInQShareCounts(inputCounts, inputE[inputIdx], bLambda, lambdaMin,
-                    lambdaMax, IvsLam, outputE);
+  sumInQShareCounts(inputCounts, inputE[inputIdx], bLambda, lambdaVMin,
+                    lambdaVMax, IvsLam, outputE);
 }
 
 /**
@@ -1086,8 +1088,8 @@ void ReflectometryReductionOne2::sumInQProcessValue(
 *
 * @param inputCounts [in] :: the input counts to share out
 * @param bLambda [in] :: the bin width in lambda
-* @param lambdaMin [in] :: the start of the range to share counts to
-* @param lambdaMax [in] :: the end of the range to share counts to
+* @param lambdaVMin [in] :: the start of the range to share counts to
+* @param lambdaVMax [in] :: the end of the range to share counts to
 * @param IvsLam [in,out] :: the output workspace
 */
 void ReflectometryReductionOne2::sumInQShareCounts(
@@ -1150,19 +1152,19 @@ void ReflectometryReductionOne2::getDetectorDetails(const size_t spIdx,
 }
 
 /**
-* Get the projected wavelength range onto the line theataR from the given
-* coordinates.
+* Get the projected (virtual) wavelength range onto the line theataR from the
+* given coordinates.
 *
 * @param lambda [in] :: the lambda coord to project
 * @param twoTheta [in] :: the twoTheta coord to project
 * @param bLambda [in] :: the pixel size in lambda
 * @param bTwoTheta [in] :: the pixel size in twoTheta
-* @param lambdaMin [out] :: the projected range start
-* @param lambdaMax [out] :: the projected range end
+* @param lambdaVMin [out] :: the projected range start
+* @param lambdaVMax [out] :: the projected range end
 */
 void ReflectometryReductionOne2::getProjectedLambdaRange(
     const double lambda, const double twoTheta, const double bLambda,
-    const double bTwoTheta, double &lambdaMin, double &lambdaMax,
+    const double bTwoTheta, double &lambdaVMin, double &lambdaVMax,
     const std::vector<size_t> &detectors) {
 
   // Get the angle from twoThetaR to this detector
@@ -1179,8 +1181,8 @@ void ReflectometryReductionOne2::getProjectedLambdaRange(
     const double lambdaBot =
         std::sin(horizonThetaR) * (lambda - bLambda / 2.0) /
         std::sin(horizonThetaR + gammaRad + bTwoTheta / 2.0);
-    lambdaMin = std::min(lambdaTop, lambdaBot);
-    lambdaMax = std::max(lambdaTop, lambdaBot);
+    lambdaVMin = std::min(lambdaTop, lambdaBot);
+    lambdaVMax = std::max(lambdaTop, lambdaBot);
   } catch (std::exception &ex) {
     std::stringstream errMsg;
     errMsg << "Failed to project (lambda, twoTheta) = (" << lambda << ","
