@@ -185,9 +185,11 @@ void CreateWorkspace::exec() {
   for (int i = 0; i < nSpec; i++) {
     PARALLEL_START_INTERUPT_REGION
 
+    // In an MPI run the global index i is not necessary on this rank, i.e.,
+    // there might not be a corrsponding workspace index.
     const auto localIndices =
         indexInfo.makeIndexSet({static_cast<GlobalSpectrumIndex>(i)});
-    if (localIndices.size() == 0)
+    if (localIndices.empty())
       continue;
 
     const std::vector<double>::difference_type xStart = i * xSize;

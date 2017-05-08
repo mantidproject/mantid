@@ -94,6 +94,9 @@ public:
   /// Returns the size of the set.
   size_t size() const { return m_size; }
 
+  /// Returns true if the set is empty.
+  size_t empty() const { return m_size == 0; }
+
   /// Returns the element at given index (range 0...size()-1).
   size_t operator[](size_t index) const {
     // This is accessed frequently in loops and thus inlined.
