@@ -130,7 +130,7 @@ private slots:
 
 private:
   /// new menu option
-  QAction *m_fitActiontest;
+  QAction *m_fitActionTFAsymm;
   /// override populating fit menu
   void populateFitMenuButton(QSignalMapper *fitMapper, QMenu *fitMenu) override;
   /// Get the registered function names

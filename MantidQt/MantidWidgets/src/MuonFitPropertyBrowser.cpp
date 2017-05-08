@@ -211,19 +211,19 @@ pulate the fit button.
 void MuonFitPropertyBrowser::populateFitMenuButton(QSignalMapper *fitMapper,
                                                    QMenu *fitMenu) {
 
-  m_fitActiontest = new QAction("TF Asymmetry Fit", this);
-  fitMapper->setMapping(m_fitActiontest, "TFAsymm");
+  m_fitActionTFAsymm = new QAction("TF Asymmetry Fit", this);
+  fitMapper->setMapping(m_fitActionTFAsymm, "TFAsymm");
 
   FitPropertyBrowser::populateFitMenuButton(fitMapper, fitMenu);
-  connect(m_fitActiontest, SIGNAL(triggered()), fitMapper, SLOT(map()));
+  connect(m_fitActionTFAsymm, SIGNAL(triggered()), fitMapper, SLOT(map()));
   fitMenu->addSeparator();
-  fitMenu->addAction(m_fitActiontest);
+  fitMenu->addAction(m_fitActionTFAsymm);
 }
 /// Enable/disable the Fit button;
 void MuonFitPropertyBrowser::setFitEnabled(bool yes) {
   m_fitActionFit->setEnabled(yes);
   m_fitActionSeqFit->setEnabled(yes);
-  m_fitActiontest->setEnabled(yes);
+  m_fitActionTFAsymm->setEnabled(yes);
 }
 
 /**
@@ -764,7 +764,7 @@ void MuonFitPropertyBrowser::setMultiFittingMode(bool enabled) {
 void MuonFitPropertyBrowser::setTFAsymmMode(bool enabled) {
   // First, clear whatever model is currently set
   this->clear();
-  modifyFitMenu(m_fitActiontest, enabled);
+  modifyFitMenu(m_fitActionTFAsymm, enabled);
 
   // Show or hide the TFAsymmetry fit
   if (enabled) {
