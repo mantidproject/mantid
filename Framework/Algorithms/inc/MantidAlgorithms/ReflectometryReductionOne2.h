@@ -100,8 +100,8 @@ private:
                           const HistogramData::HistogramX &inputX,
                           const HistogramData::HistogramY &inputY,
                           const HistogramData::HistogramE &inputE,
-                          API::MatrixWorkspace_sptr IvsLam,
                           const std::vector<size_t> &detectors,
+                          API::MatrixWorkspace_sptr IvsLam,
                           std::vector<double> &outputE);
   // Share counts to a projected value for summation in Q
   void sumInQShareCounts(const double inputCounts, const double inputErr,

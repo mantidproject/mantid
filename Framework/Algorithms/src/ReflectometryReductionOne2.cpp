@@ -77,7 +77,7 @@ double getLambdaRange(const HistogramX &xValues, const int xIdx) {
 */
 double getLambdaRange(MatrixWorkspace_const_sptr ws, const size_t spectrumIdx,
                       const int xIdx) {
-  return getLambdaRange(ws->x(spectrumIdx), static_cast<int>(spectrumIdx));
+  return getLambdaRange(ws->x(spectrumIdx), xIdx);
 }
 
 /** Get the lambda value at the centre of the detector associated
@@ -536,7 +536,6 @@ MatrixWorkspace_sptr ReflectometryReductionOne2::makeIvsLam() {
 * and MonitorBackgroundWavelengthMax have been given)
 *
 * @param detectorWS :: the detector workspace to normalise, in lambda
-* @param runWS :: the original run workspace in TOF
 * @return :: the normalized workspace in lambda
 */
 MatrixWorkspace_sptr
@@ -594,7 +593,6 @@ ReflectometryReductionOne2::makeDirectBeamWS(MatrixWorkspace_sptr inputWS) {
 * Normalize the workspace by the direct beam (optional)
 *
 * @param detectorWS : workspace in wavelength which is to be normalized
-* @param runWS :: the original run workspace in TOF
 * @return : corrected workspace
 */
 MatrixWorkspace_sptr ReflectometryReductionOne2::directBeamCorrection(
@@ -927,7 +925,8 @@ MatrixWorkspace_sptr ReflectometryReductionOne2::constructIvsLamWS(
 * Sum counts from the input workspace in lambda along lines of constant Q by
 * projecting to "virtual lambda" at a reference angle twoThetaR.
 *
-* @param detectorWS :: the input workspace in wavelength
+* @param detectorWS [in] :: the input workspace in wavelength
+* @param detectors [in] :: spectrum indices of the detectors of interest
 * @return :: the output workspace in wavelength
 */
 MatrixWorkspace_sptr
@@ -965,7 +964,7 @@ ReflectometryReductionOne2::sumInQ(MatrixWorkspace_sptr detectorWS,
     for (int inputIdx = 0; inputIdx < inputY.size(); ++inputIdx) {
       // Do the summation in Q
       sumInQProcessValue(inputIdx, twoTheta, bTwoTheta, inputX, inputY, inputE,
-                         IvsLam, detectors, projectedE);
+                         detectors, IvsLam, projectedE);
     }
 
     // Sum errors in quadrature
@@ -988,15 +987,18 @@ ReflectometryReductionOne2::sumInQ(MatrixWorkspace_sptr detectorWS,
 * @param inputIdx [in] :: the index into the input arrays
 * @param twoTheta [in] :: the value of twotTheta for this spectrum
 * @param bTwoTheta [in] :: the size of the pixel in twoTheta
+* @param inputX [in] :: the input spectrum X values
 * @param inputY [in] :: the input spectrum Y values
-* @param inputX [in] :: the input spectrum Y values
+* @param inputE [in] :: the input spectrum E values
+* @param detectors [in] :: spectrum indices of the detectors of interest
 * @param IvsLam [in,out] :: the output workspace
+* @param outputE [in,out] :: the projected E values
 */
 void ReflectometryReductionOne2::sumInQProcessValue(
     const int inputIdx, const double twoTheta, const double bTwoTheta,
     const HistogramX &inputX, const HistogramY &inputY,
-    const HistogramE &inputE, MatrixWorkspace_sptr IvsLam,
-    const std::vector<size_t> &detectors, std::vector<double> &outputE) {
+    const HistogramE &inputE, const std::vector<size_t> &detectors,
+    MatrixWorkspace_sptr IvsLam, std::vector<double> &outputE) {
 
   // Check whether there are any counts (if not, nothing to share)
   const double inputCounts = inputY[inputIdx];
@@ -1023,10 +1025,12 @@ void ReflectometryReductionOne2::sumInQProcessValue(
 * outputX.size() must equal outputY.size() + 1
 *
 * @param inputCounts [in] :: the input counts to share out
+* @param inputErr [in] :: the input errors to share out
 * @param bLambda [in] :: the bin width in lambda
-* @param lambdaVMin [in] :: the start of the range to share counts to
-* @param lambdaVMax [in] :: the end of the range to share counts to
+* @param lambdaMin [in] :: the start of the range to share counts to
+* @param lambdaMax [in] :: the end of the range to share counts to
 * @param IvsLam [in,out] :: the output workspace
+* @param outputE [in,out] :: the projected E values
 */
 void ReflectometryReductionOne2::sumInQShareCounts(
     const double inputCounts, const double inputErr, const double bLambda,
