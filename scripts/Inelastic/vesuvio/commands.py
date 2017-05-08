@@ -16,6 +16,7 @@ from vesuvio.instrument import VESUVIO
 
 import mantid.simpleapi as ms
 
+
 # --------------------------------------------------------------------------------
 # Functions
 # --------------------------------------------------------------------------------
@@ -57,16 +58,7 @@ def fit_tof(runs, flags, iterations=1, convergence_threshold=None):
 
     for iteration in range(1, iterations + 1):
 
-        hydrogen_tof = ms.CloneWorkspace(InputWorkspace=sample_data, OutputWorkspace=runs + '_iteration_' + str(iteration) + '_Hydrogen_tof')
-        masses_tof = ms.CloneWorkspace(InputWorkspace=sample_data, OutputWorkspace=runs + '_iteration_' + str(iteration) + '_Masses')
-        gb_correction = ms.CloneWorkspace(InputWorkspace=sample_data, OutputWorkspace=runs + '_correction_iteration_' + str(iteration) + '_GammaBackground')
-        ts_correction = ms.CloneWorkspace(InputWorkspace=sample_data, OutputWorkspace=runs + '_correction_iteration_' + str(iteration) + '_TotalScattering')
-        ms_correction = ms.CloneWorkspace(InputWorkspace=sample_data,OutputWorkspace=runs + '_correction_iteration_' + str(iteration) + '_MultipleScattering')
-        gb_corrected = ms.CloneWorkspace(InputWorkspace=sample_data, OutputWorkspace=runs + '_corrected_iteration_' + str(iteration) + '_GammaBackground')
-        ts_corrected = ms.CloneWorkspace(InputWorkspace=sample_data, OutputWorkspace=runs + '_corrected_iteration_' + str(iteration) + '_TotalScattering')
-        ms_corrected = ms.CloneWorkspace(InputWorkspace=sample_data,OutputWorkspace=runs + '_corrected_iteration_' + str(iteration) + '_MultipleScattering')
-
-        corrections_workspaces = [gb_correction,ts_correction,ms_correction,gb_corrected,ts_corrected,ms_corrected]
+        hydrogen_tof, masses_tof, corrections_workspaces = _get_corrections_workspaces(sample_data, runs, iteration)
 
         iteration_flags = copy.deepcopy(flags)
         iteration_flags['iteration'] = iteration
@@ -100,30 +92,27 @@ def fit_tof(runs, flags, iterations=1, convergence_threshold=None):
             masses_tof.dataY(index)[:] = data_workspace.dataY(4)[:] + data_workspace.dataY(5)[:]
             masses_tof.dataE(index)[:] = 0
             k = list(ws)
-            for c_ws, old_ws in zip(corrections_workspaces,k[2:]):
-                print(c_ws,old_ws)
+            for c_ws, old_ws in zip(corrections_workspaces, k[2:]):
+                print(c_ws, old_ws)
                 c_ws.dataY(index)[:] = old_ws.dataY(0)[:]
                 c_ws.dataE(index)[:] = 0
                 ms.DeleteWorkspace(old_ws)
 
-        #w = list(workspaces)
+        # w = list(workspaces)
         data_ws = [ws[0] for ws in workspaces]
         params_ws = [ws[1] for ws in workspaces]
 
-        corrections_workspaces.append(runs+'_data_iteration_'+str(iteration))
-        corrections_workspaces.append(runs + '_params_iteration_'+str(iteration))
+        corrections_workspaces.append(runs + '_data_iteration_' + str(iteration))
+        corrections_workspaces.append(runs + '_params_iteration_' + str(iteration))
         corrections_workspaces.append(hydrogen_tof)
         corrections_workspaces.append(masses_tof)
-
 
         for ws in workspaces:
             ms.UnGroupWorkspace(ws)
 
-        ms.GroupWorkspaces(InputWorkspaces = data_ws, OutputWorkspace = runs+'_data_iteration_'+str(iteration))
-        ms.GroupWorkspaces(InputWorkspaces = params_ws, OutputWorkspace = runs + '_params_iteration_'+str(iteration))
-        ms.GroupWorkspaces(InputWorkspaces = corrections_workspaces, OutputWorkspace = runs+'_iteration_'+str(iteration))
-
-
+        ms.GroupWorkspaces(InputWorkspaces=data_ws, OutputWorkspace=runs + '_data_iteration_' + str(iteration))
+        ms.GroupWorkspaces(InputWorkspaces=params_ws, OutputWorkspace=runs + '_params_iteration_' + str(iteration))
+        ms.GroupWorkspaces(InputWorkspaces=corrections_workspaces, OutputWorkspace=runs + '_iteration_' + str(iteration))
 
     return last_results[0], last_results[2], last_results[3], exit_iteration
 
@@ -503,3 +492,24 @@ def _create_user_defined_ties_str(masses):
                 user_defined_ties.append(tie_str)
     user_defined_ties = ','.join(user_defined_ties)
     return user_defined_ties
+
+
+def _get_corrections_workspaces(sample_ws, runs, iteration):
+    prefix = runs + '_iteration_' + str(iteration)
+
+    hydrogen_tof = ms.CloneWorkspace(InputWorkspace=sample_ws, OutputWorkspace=prefix + '_Hydrogen_tof')
+    masses_tof = ms.CloneWorkspace(InputWorkspace=sample_ws, OutputWorkspace=prefix + '_Masses')
+
+    prefix = runs + '_correction_iteration_' + str(iteration)
+    gb_correction = ms.CloneWorkspace(InputWorkspace=sample_ws, OutputWorkspace=prefix + '_GammaBackground')
+    ts_correction = ms.CloneWorkspace(InputWorkspace=sample_ws, OutputWorkspace=prefix + '_TotalScattering')
+    ms_correction = ms.CloneWorkspace(InputWorkspace=sample_ws, OutputWorkspace=prefix + '_MultipleScattering')
+
+    prefix = runs + '_corrected_iteration_' + str(iteration)
+    gb_corrected = ms.CloneWorkspace(InputWorkspace=sample_ws, OutputWorkspace=prefix + '_GammaBackground')
+    ts_corrected = ms.CloneWorkspace(InputWorkspace=sample_ws, OutputWorkspace=prefix + '_TotalScattering')
+    ms_corrected = ms.CloneWorkspace(InputWorkspace=sample_ws, OutputWorkspace=prefix + '_MultipleScattering')
+
+    corrections_workspaces = [gb_correction, ts_correction, ms_correction, gb_corrected, ts_corrected, ms_corrected]
+
+    return hydrogen_tof, masses_tof, corrections_workspaces
