@@ -902,20 +902,22 @@ MatrixWorkspace_sptr ReflectometryReductionOne2::constructIvsLamWS(
 
   const size_t spIdxMin = detectors.front();
   const double twoThetaMin = getDetectorTwoTheta(m_spectrumInfo, spIdxMin);
-  const double bTwoThetaMin = getDetectorTwoThetaRange(m_spectrumInfo, spIdxMin);
+  const double bTwoThetaMin =
+      getDetectorTwoThetaRange(m_spectrumInfo, spIdxMin);
   // For bLambda, use the average bin size for this spectrum
   auto xValues = detectorWS->x(spIdxMin);
   double bLambda = (xValues[xValues.size() - 1] - xValues[0]) / xValues.size();
-  getProjectedLambdaRange(lambdaMax, twoThetaMin, bLambda,
-                          bTwoThetaMin, detectors, lambdaVMin, dummy);
+  getProjectedLambdaRange(lambdaMax, twoThetaMin, bLambda, bTwoThetaMin,
+                          detectors, lambdaVMin, dummy);
 
   const size_t spIdxMax = detectors.back();
   const double twoThetaMax = getDetectorTwoTheta(m_spectrumInfo, spIdxMax);
-  const double bTwoThetaMax = getDetectorTwoThetaRange(m_spectrumInfo, spIdxMax);
+  const double bTwoThetaMax =
+      getDetectorTwoThetaRange(m_spectrumInfo, spIdxMax);
   xValues = detectorWS->x(spIdxMax);
   bLambda = (xValues[xValues.size() - 1] - xValues[0]) / xValues.size();
-  getProjectedLambdaRange(lambdaMin, twoThetaMax, bLambda,
-                          bTwoThetaMax, detectors, dummy, lambdaVMax);
+  getProjectedLambdaRange(lambdaMin, twoThetaMax, bLambda, bTwoThetaMax,
+                          detectors, dummy, lambdaVMax);
 
   if (lambdaVMin > lambdaVMax) {
     std::swap(lambdaVMin, lambdaVMax);
@@ -1100,7 +1102,8 @@ void ReflectometryReductionOne2::sumInQShareCounts(
 * output range in "virtual" lambda (lambdaV).
 *
 * @param lambda [in] :: the lambda coord of the centre of the pixel to project
-* @param twoTheta [in] :: the twoTheta coord of the centre of the pixel to project
+* @param twoTheta [in] :: the twoTheta coord of the centre of the pixel to
+*project
 * @param bLambda [in] :: the pixel size in lambda
 * @param bTwoTheta [in] :: the pixel size in twoTheta
 * @param detectors [in] :: spectrum indices of the detectors of interest
@@ -1121,12 +1124,12 @@ void ReflectometryReductionOne2::getProjectedLambdaRange(
 
   // Calculate the projected wavelength range
   try {
-    const double lambdaTop =
-        std::sin(horizonThetaR) * (lambda + bLambda / 2.0) /
-        std::sin(horizonThetaR + gamma - bTwoTheta / 2.0);
-    const double lambdaBot =
-        std::sin(horizonThetaR) * (lambda - bLambda / 2.0) /
-        std::sin(horizonThetaR + gamma + bTwoTheta / 2.0);
+    const double lambdaTop = std::sin(horizonThetaR) *
+                             (lambda + bLambda / 2.0) /
+                             std::sin(horizonThetaR + gamma - bTwoTheta / 2.0);
+    const double lambdaBot = std::sin(horizonThetaR) *
+                             (lambda - bLambda / 2.0) /
+                             std::sin(horizonThetaR + gamma + bTwoTheta / 2.0);
     lambdaVMin = std::min(lambdaTop, lambdaBot);
     lambdaVMax = std::max(lambdaTop, lambdaBot);
   } catch (std::exception &ex) {
