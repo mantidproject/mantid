@@ -129,9 +129,10 @@ private:
                           const bool severe);
 
   // Find and cache constants
-  void findDetectorsOfInterest();
+  void findDetectorGroups();
   void findTheta0();
-  // Accessors for theta and lambda values
+  // Accessors for detectors and theta and lambda values
+  const std::vector<std::vector<size_t>>& detectorGroups() const { return m_detectorGroups; };
   double lambdaMin() { return m_lambdaMin; }
   double lambdaMax() { return m_lambdaMax; }
   double twoThetaMin(const std::vector<size_t> &detectors);
@@ -153,7 +154,7 @@ private:
   double m_lambdaMax;            // max wavelength in area of interest
   size_t m_twoThetaRDetectorIdx; // detector index at reference angle thetaR
   // groups of spectrum indices of the detectors of interest
-  std::vector<std::vector<size_t>> m_detectors;
+  std::vector<std::vector<size_t>> m_detectorGroups;
 };
 
 } // namespace Algorithms

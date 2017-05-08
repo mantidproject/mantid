@@ -274,12 +274,12 @@ int mapSpectrumIndexToWorkspace(const spec2index_map &map, const size_t mapIdx,
 */
 std::vector<std::vector<size_t>> mapSpectrumIndicesToWorkspace(
     MatrixWorkspace_const_sptr originWS, MatrixWorkspace_const_sptr hostWS,
-    const std::vector<std::vector<size_t>> &detectors) {
+    const std::vector<std::vector<size_t>> &detectorGroups) {
 
   auto map = originWS->getSpectrumToWorkspaceIndexMap();
   std::vector<std::vector<size_t>> hostGroups;
 
-  for (auto group : detectors) {
+  for (auto group : detectorGroups) {
     std::vector<size_t> hostDetectors;
     for (auto i : group) {
       const int hostIdx = mapSpectrumIndexToWorkspace(map, i, hostWS);
@@ -307,13 +307,13 @@ std::vector<std::vector<size_t>> mapSpectrumIndicesToWorkspace(
 */
 std::string createProcessingCommandsFromDetectorWS(
     MatrixWorkspace_const_sptr originWS, MatrixWorkspace_const_sptr hostWS,
-    const std::vector<std::vector<size_t>> &detectors) {
+    const std::vector<std::vector<size_t>> &detectorGroups) {
 
   std::stringstream result;
 
   // Map the original indices to the host workspace
   std::vector<std::vector<size_t>> hostGroups =
-      mapSpectrumIndicesToWorkspace(originWS, hostWS, detectors);
+      mapSpectrumIndicesToWorkspace(originWS, hostWS, detectorGroups);
 
   // Add each group to the output, separated by ','
   /// @todo Add support to separate contiguous groups by ':' to avoid having
@@ -459,6 +459,7 @@ ReflectometryReductionOne2::validateInputs() {
 /** Execute the algorithm.
 */
 void ReflectometryReductionOne2::exec() {
+  // Get input properties
   m_runWS = getProperty("InputWorkspace");
   const auto xUnitID = m_runWS->getAxis(0)->unit()->unitID();
 
@@ -470,7 +471,9 @@ void ReflectometryReductionOne2::exec() {
   m_lambdaMin = getProperty("WavelengthMin");
   m_lambdaMax = getProperty("WavelengthMax");
   m_spectrumInfo = &m_runWS->spectrumInfo();
-  findDetectorsOfInterest();
+
+  // Find and cache detector groups and theta0
+  findDetectorGroups();
   findTheta0();
 
   // Check whether conversion, normalisation and summation has already been done
@@ -485,7 +488,7 @@ void ReflectometryReductionOne2::exec() {
     // Assume summation is already done if the number of histograms in the input
     // is the same as the number of detector groups (which will define the
     // number of histograms in the output)
-    if (m_runWS->getNumberHistograms() == m_detectors.size()) {
+    if (m_runWS->getNumberHistograms() == detectorGroups().size()) {
       m_sum = false;
     }
   }
@@ -514,11 +517,11 @@ MatrixWorkspace_sptr ReflectometryReductionOne2::makeIvsLam() {
   if (summingInQ()) {
     // Currently only support a single input range of detectors
     /// todo Generalise this to support multiple ranges
-    if (m_detectors.size() > 1) {
+    if (detectorGroups().size() > 1) {
       throw std::runtime_error(
           "Only a single range is supported for summing in Q");
     }
-    const auto &detectors = m_detectors[0];
+    const auto &detectors = detectorGroups()[0];
     // Convert to lambda
     if (m_convertUnits) {
       g_log.debug() << "Converting input workspace to wavelength" << std::endl;
@@ -691,7 +694,7 @@ MatrixWorkspace_sptr ReflectometryReductionOne2::transmissionCorrection(
       // because the detectorWS may already have been reduced and may not
       // contain the original spectra.
       transmissionCommands = createProcessingCommandsFromDetectorWS(
-          m_runWS, transmissionWS, m_detectors);
+          m_runWS, transmissionWS, detectorGroups());
     }
 
     MatrixWorkspace_sptr secondTransmissionWS =
@@ -806,12 +809,12 @@ bool ReflectometryReductionOne2::summingInQ() {
 /**
 * Find and cache the indicies of the detectors of interest
 */
-void ReflectometryReductionOne2::findDetectorsOfInterest() {
+void ReflectometryReductionOne2::findDetectorGroups() {
   std::string instructions = getPropertyValue("ProcessingInstructions");
 
-  m_detectors = translateInstructions(instructions);
+  m_detectorGroups = translateInstructions(instructions);
 
-  if (m_detectors.size() == 0) {
+  if (m_detectorGroups.size() == 0) {
     throw std::runtime_error("Invalid processing instructions");
   }
 }
