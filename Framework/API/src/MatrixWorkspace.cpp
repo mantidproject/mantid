@@ -201,7 +201,11 @@ void MatrixWorkspace::initialize(const std::size_t &NVectors,
                                  const std::size_t &XLength,
                                  const std::size_t &YLength) {
   // Check validity of arguments
+#ifdef MPI_EXPERIMENTAL
+  if (XLength == 0 || YLength == 0) {
+#else
   if (NVectors == 0 || XLength == 0 || YLength == 0) {
+#endif
     throw std::out_of_range(
         "All arguments to init must be positive and non-zero");
   }
@@ -228,7 +232,11 @@ void MatrixWorkspace::initialize(const std::size_t &NVectors,
 void MatrixWorkspace::initialize(const std::size_t &NVectors,
                                  const HistogramData::Histogram &histogram) {
   // Check validity of arguments
+#ifdef MPI_EXPERIMENTAL
+  if (histogram.x().size() == 0) {
+#else
   if (NVectors == 0 || histogram.x().size() == 0) {
+#endif
     throw std::out_of_range(
         "All arguments to init must be positive and non-zero");
   }
@@ -256,6 +264,7 @@ void MatrixWorkspace::initialize(const Indexing::IndexInfo &indexInfo,
                                  const HistogramData::Histogram &histogram) {
   initialize(indexInfo.size(), histogram);
   setIndexInfo(indexInfo);
+  setStorageMode(indexInfo.storageMode());
 }
 
 //---------------------------------------------------------------------------------------
