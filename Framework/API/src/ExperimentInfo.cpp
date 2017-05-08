@@ -212,13 +212,9 @@ makeBeamlineComponentInfo(const Instrument &instrument,
   } else {
 
     // Extract component ids. We need this for the ComponentInfo wrapper.
-    auto componentIds =
-        boost::make_shared<const std::vector<Geometry::ComponentID>>(
-            visitor.componentIds());
+    auto componentIds = visitor.componentIds();
 
-    auto componentIdMap = boost::make_shared<
-        const std::unordered_map<Geometry::ComponentID, size_t>>(
-        visitor.componentIdToIndexMap());
+    auto componentIdMap = visitor.componentIdToIndexMap();
     return std::make_tuple(Kernel::make_unique<Mantid::Beamline::ComponentInfo>(
                                visitor.assemblySortedDetectorIndices(),
                                visitor.componentDetectorRanges()),
@@ -333,8 +329,7 @@ void ExperimentInfo::setInstrument(const Instrument_const_sptr &instr) {
   m_parmap->setDetectorInfo(m_detectorInfo);
   m_detectorInfoWrapper = Kernel::make_unique<DetectorInfo>(
       *m_detectorInfo, makeParameterizedInstrument(), m_parmap.get(),
-      boost::make_shared<const std::unordered_map<detid_t, size_t>>(
-          m_infoVisitor->detectorIdToIndexMap()));
+      m_infoVisitor->detectorIdToIndexMap());
 
   makeAPIComponentInfo(*instr, *m_infoVisitor);
 

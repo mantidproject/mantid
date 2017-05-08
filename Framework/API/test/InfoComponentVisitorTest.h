@@ -68,7 +68,7 @@ public:
      * it did the job correctly.
     */
     TSM_ASSERT_EQUALS("Single detector should have index of 0",
-                      visitor.assemblySortedDetectorIndices(),
+                      *visitor.assemblySortedDetectorIndices(),
                       std::vector<size_t>{detectorIndex});
   }
 
@@ -86,13 +86,13 @@ public:
     visitee->registerContents(visitor);
 
     std::set<Mantid::Geometry::ComponentID> componentIds(
-        visitor.componentIds().begin(), visitor.componentIds().end());
+        visitor.componentIds()->begin(), visitor.componentIds()->end());
 
     auto componentIdToIndexMap = visitor.componentIdToIndexMap();
 
     TSM_ASSERT_EQUALS("Expect 4 component Ids", componentIds.size(), 4);
     TSM_ASSERT_EQUALS("Expect 4 component Ids in map",
-                      componentIdToIndexMap.size(), 4);
+                      componentIdToIndexMap->size(), 4);
 
     TSM_ASSERT_EQUALS("Should contain the instrument id", 1,
                       componentIds.count(visitee->getComponentID()));
@@ -110,11 +110,11 @@ public:
                       componentIds.count(detectorComponentId));
     TSM_ASSERT_EQUALS(
         "Detectors are guaranteed to occupy the lowest component range",
-        componentIdToIndexMap[detectorComponentId], 0);
+        componentIdToIndexMap->at(detectorComponentId), 0);
 
     std::set<size_t> uniqueIndices;
     for (auto id : componentIds) {
-      uniqueIndices.insert(componentIdToIndexMap.at(id));
+      uniqueIndices.insert(componentIdToIndexMap->at(id));
     }
     TSM_ASSERT_EQUALS("We should have unique index values in our map",
                       uniqueIndices.size(), componentIds.size());
@@ -138,7 +138,7 @@ public:
     visitee->registerContents(visitor);
 
     auto ranges = visitor.componentDetectorRanges();
-    TSM_ASSERT_EQUALS("There are 3 non-detector components", ranges.size(), 3);
+    TSM_ASSERT_EQUALS("There are 3 non-detector components", ranges->size(), 3);
 
     /*
      * In this instrument there is only a single assembly (the instrument
@@ -148,14 +148,14 @@ public:
      * working on ComponentInfo.
      */
     // Source has no detectors
-    TS_ASSERT_EQUALS(ranges[0].first, 0);
-    TS_ASSERT_EQUALS(ranges[0].second, 0);
+    TS_ASSERT_EQUALS((*ranges)[0].first, 0);
+    TS_ASSERT_EQUALS((*ranges)[0].second, 0);
     // Sample has no detectors
-    TS_ASSERT_EQUALS(ranges[1].first, 0);
-    TS_ASSERT_EQUALS(ranges[1].second, 0);
+    TS_ASSERT_EQUALS((*ranges)[1].first, 0);
+    TS_ASSERT_EQUALS((*ranges)[1].second, 0);
     // Instrument has 1 detector.
-    TS_ASSERT_EQUALS(ranges[2].first, 0);
-    TS_ASSERT_EQUALS(ranges[2].second, 1);
+    TS_ASSERT_EQUALS((*ranges)[2].first, 0);
+    TS_ASSERT_EQUALS((*ranges)[2].second, 1);
   }
 
   void test_visitor_collects_detector_id_to_index_mappings() {
@@ -171,8 +171,8 @@ public:
     // Visit everything
     visitee->registerContents(visitor);
 
-    TS_ASSERT_EQUALS(visitor.detectorIdToIndexMap().size(), 1);
-    TS_ASSERT_EQUALS(visitor.detectorIdToIndexMap().at(1),
+    TS_ASSERT_EQUALS(visitor.detectorIdToIndexMap()->size(), 1);
+    TS_ASSERT_EQUALS(visitor.detectorIdToIndexMap()->at(1),
                      0); // ID 1 to index 0
   }
 };

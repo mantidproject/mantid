@@ -7,6 +7,7 @@
 #include <utility>
 #include <vector>
 #include <unordered_map>
+#include <boost/shared_ptr.hpp>
 
 namespace Mantid {
 using detid_t = int32_t;
@@ -52,20 +53,20 @@ class MANTID_API_DLL InfoComponentVisitor
     : public Mantid::Geometry::ComponentVisitor {
 private:
   /// Detectors components always specified first
-  std::vector<Mantid::Geometry::IComponent *> m_componentIds;
+  boost::shared_ptr<std::vector<Mantid::Geometry::IComponent *>> m_componentIds;
 
   /// Detector indexes
-  std::vector<size_t> m_assemblySortedDetectorIndices;
+  boost::shared_ptr<std::vector<size_t>> m_assemblySortedDetectorIndices;
 
   /// Only Assemblies and other NON-detectors yield ranges
-  std::vector<std::pair<size_t, size_t>> m_ranges;
+  boost::shared_ptr<std::vector<std::pair<size_t, size_t>>> m_ranges;
 
   /// Component ID -> Component Index map
-  std::unordered_map<Mantid::Geometry::IComponent *, size_t>
+  boost::shared_ptr<std::unordered_map<Mantid::Geometry::IComponent *, size_t>>
       m_componentIdToIndexMap;
 
   /// Detector ID -> index mappings
-  std::unordered_map<detid_t, size_t> m_detectorIdToIndexMap;
+  boost::shared_ptr<std::unordered_map<detid_t, size_t>> m_detectorIdToIndexMap;
 
 public:
   InfoComponentVisitor(const size_t nDetectors);
@@ -78,16 +79,21 @@ public:
   virtual void
   registerDetector(const Mantid::Geometry::IDetector &detector) override;
 
-  const std::vector<Mantid::Geometry::IComponent *> &componentIds() const;
+  boost::shared_ptr<const std::vector<Mantid::Geometry::IComponent *>>
+  componentIds() const;
 
-  const std::vector<std::pair<size_t, size_t>> &componentDetectorRanges() const;
+  boost::shared_ptr<const std::vector<std::pair<size_t, size_t>>>
+  componentDetectorRanges() const;
 
-  const std::vector<size_t> &assemblySortedDetectorIndices() const;
+  boost::shared_ptr<const std::vector<size_t>>
+  assemblySortedDetectorIndices() const;
 
-  const std::unordered_map<Mantid::Geometry::IComponent *, size_t> &
+  boost::shared_ptr<
+      const std::unordered_map<Mantid::Geometry::IComponent *, size_t>>
   componentIdToIndexMap() const;
 
-  const std::unordered_map<detid_t, size_t> &detectorIdToIndexMap() const;
+  boost::shared_ptr<const std::unordered_map<detid_t, size_t>>
+  detectorIdToIndexMap() const;
   size_t size() const;
 };
 } // namespace API
