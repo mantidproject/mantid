@@ -63,6 +63,9 @@ class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS GenericDataProcessorPresenter
       public MantidQt::API::WorkspaceObserver {
   // Q_OBJECT for 'connect' with thread/worker
   Q_OBJECT
+  
+  friend class GenericDataProcessorPresenterRowReducerWorker;
+  friend class GenericDataProcessorPresenterGroupReducerWorker;
 
 public:
   // Constructor: pre-processing and post-processing
@@ -136,7 +139,7 @@ protected:
   // Post-process some rows
   void postProcessGroup(const GroupData &data);
   // Reduce a row
-  std::vector<std::string> reduceRow(const std::vector<std::string> &data);
+  void reduceRow(RowData *data);
   // Finds a run in the AnalysisDataService
   std::string findRunInADS(const std::string &run, const std::string &prefix,
                            bool &runFound);

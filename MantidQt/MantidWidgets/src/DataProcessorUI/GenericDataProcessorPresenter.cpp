@@ -222,6 +222,7 @@ void GenericDataProcessorPresenter::process() {
     m_gqueue.push(std::make_pair(item.first, rowQueue));
   }
 
+  // Start processing all groups
   nextGroup();
 
   /*
@@ -295,7 +296,7 @@ void GenericDataProcessorPresenter::nextRow() {
     rqueue.pop();
 
     auto *worker = new GenericDataProcessorPresenterRowReducerWorker(
-        this, m_rowItem.second);
+        this, &m_rowItem.second);
     worker->moveToThread(m_workerThread);
     connect(m_workerThread, SIGNAL(started()), worker, SLOT(processRow()));
     connect(worker, SIGNAL(finished()), this, SLOT(nextRow()));
@@ -328,7 +329,7 @@ void GenericDataProcessorPresenter::nextGroup() {
     rqueue.pop();
 
     auto *worker = new GenericDataProcessorPresenterRowReducerWorker(
-        this, m_rowItem.second);
+        this, &m_rowItem.second);
     worker->moveToThread(m_workerThread);
     connect(m_workerThread, SIGNAL(started()), worker, SLOT(processRow()));
     connect(worker, SIGNAL(finished()), this, SLOT(nextRow()));
@@ -698,15 +699,13 @@ std::string GenericDataProcessorPresenter::loadRun(
   return outputName;
 }
 
-/**
-Reduce a row
-@param data :: [input] The data in this row as a vector where elements
-correspond to column contents
-@throws std::runtime_error if reduction fails
-@return :: Data updated after running the algorithm
-*/
-std::vector<std::string>
-GenericDataProcessorPresenter::reduceRow(const std::vector<std::string> &data) {
+/** Reduce a row
+ *
+ * @param data :: [input] The data in this row as a vector where elements
+ * correspond to column contents
+ * @throws std::runtime_error if reduction fails
+ */
+void GenericDataProcessorPresenter::reduceRow(RowData *data) {
 
   /* Create the processing algorithm */
 
@@ -742,8 +741,8 @@ GenericDataProcessorPresenter::reduceRow(const std::vector<std::string> &data) {
     if (preProcessValMap.count(columnName) &&
         !preProcessValMap[columnName].empty()) {
       preProcessValue = preProcessValMap[columnName];
-    } else if (!data.at(i).empty()) {
-      preProcessValue = data.at(i);
+    } else if (!data->at(i).empty()) {
+      preProcessValue = data->at(i);
     } else {
       continue;
     }
@@ -789,7 +788,7 @@ GenericDataProcessorPresenter::reduceRow(const std::vector<std::string> &data) {
   }
 
   /* Now deal with 'Options' column */
-  options = data.back();
+  options = data->back();
 
   // Parse and set any user-specified options
   optionsMap = parseKeyValueString(options);
@@ -805,7 +804,7 @@ GenericDataProcessorPresenter::reduceRow(const std::vector<std::string> &data) {
   /* We need to give a name to the output workspaces */
   for (size_t i = 0; i < m_processor.numberOfOutputProperties(); i++) {
     alg->setProperty(m_processor.outputPropertyName(i),
-                     getReducedWorkspaceName(data, m_processor.prefix(i)));
+                     getReducedWorkspaceName(*data, m_processor.prefix(i)));
   }
 
   /* Now run the processing algorithm */
@@ -819,7 +818,7 @@ GenericDataProcessorPresenter::reduceRow(const std::vector<std::string> &data) {
 
       auto columnName = m_whitelist.colNameFromColIndex(i);
 
-      if (data.at(i).empty() && !m_preprocessMap.count(columnName)) {
+      if (data->at(i).empty() && !m_preprocessMap.count(columnName)) {
 
         std::string propValue =
             alg->getPropertyValue(m_whitelist.algPropFromColIndex(i));
@@ -834,11 +833,10 @@ GenericDataProcessorPresenter::reduceRow(const std::vector<std::string> &data) {
               exp;
         }
 
-        newData[i] = propValue;
+        newData->at(i) = propValue;
       }
     }
   }
-  return newData;
 }
 
 /**

@@ -40,11 +40,12 @@ class GenericDataProcessorPresenterRowReducerWorker : public QObject {
 
 public:
   GenericDataProcessorPresenterRowReducerWorker(
-      GenericDataProcessorPresenter *presenter, const RowData &rowData)
+      GenericDataProcessorPresenter *presenter, RowData *rowData)
       : m_presenter(presenter), m_rowData(rowData) {}
 
 private slots:
   void processRow() {
+    m_presenter->reduceRow(m_rowData);
     emit finished();
   }
 
@@ -53,8 +54,7 @@ signals:
 
 private:
   GenericDataProcessorPresenter *m_presenter;
-  const RowData m_rowData;
-  const GroupData m_groupData;
+  RowData *m_rowData;
 };
 
 } // namespace MantidWidgets

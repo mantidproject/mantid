@@ -206,11 +206,11 @@ bool ReflDataProcessorPresenter::processGroupAsEventWS(
     for (size_t i = 0; i < numSlices; i++) {
       try {
         auto wsName = takeSlice(runNo, i, startTimes[i], stopTimes[i]);
-        std::vector<std::string> slice(data);
+        RowData slice(data);
         slice[0] = wsName;
-        auto newData = reduceRow(slice);
-        newData[0] = data[0];
-        m_manager->update(groupID, rowID, newData);
+        reduceRow(&slice);
+        slice[0] = data[0];
+        m_manager->update(groupID, rowID, slice);
       } catch (...) {
         return true;
       }
@@ -257,16 +257,16 @@ bool ReflDataProcessorPresenter::processGroupAsEventWS(
 * @return :: true if errors were encountered
 */
 bool ReflDataProcessorPresenter::processGroupAsNonEventWS(
-    int groupID, const GroupData &group) {
+    int groupID, GroupData &group) {
 
   bool errors = false;
 
-  for (const auto &row : group) {
+  for (auto &row : group) {
 
     // Reduce this row
-    auto newData = reduceRow(row.second);
+    reduceRow(&row.second);
     // Update the tree
-    m_manager->update(groupID, row.first, newData);
+    m_manager->update(groupID, row.first, row.second);
   }
 
   // Post-process (if needed)

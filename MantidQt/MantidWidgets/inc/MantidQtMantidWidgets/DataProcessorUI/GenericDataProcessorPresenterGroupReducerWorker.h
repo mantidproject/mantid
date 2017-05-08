@@ -44,7 +44,10 @@ public:
       : m_presenter(presenter), m_groupData(groupData) {}
 
 private slots:
-  void processGroup() { emit finished(); }
+  void processGroup() {
+    m_presenter->postProcessGroup(m_groupData);
+    emit finished();
+  }
 
 signals:
   void finished();
