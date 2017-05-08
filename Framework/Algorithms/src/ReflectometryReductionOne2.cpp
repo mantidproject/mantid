@@ -456,13 +456,10 @@ ReflectometryReductionOne2::validateInputs() {
   return results;
 }
 
-/**
-* Initialise class members for a particular run
+/** Execute the algorithm.
 */
-void ReflectometryReductionOne2::initRun() {
+void ReflectometryReductionOne2::exec() {
   m_runWS = getProperty("InputWorkspace");
-  m_spectrumInfo = &m_runWS->spectrumInfo();
-
   const auto xUnitID = m_runWS->getAxis(0)->unit()->unitID();
 
   // Neither TOF or Lambda? Abort.
@@ -470,22 +467,20 @@ void ReflectometryReductionOne2::initRun() {
     throw std::invalid_argument(
         "InputWorkspace must have units of TOF or Wavelength");
 
+  m_lambdaMin = getProperty("WavelengthMin");
+  m_lambdaMax = getProperty("WavelengthMax");
+  m_spectrumInfo = &m_runWS->spectrumInfo();
   findDetectorsOfInterest();
+  findTheta0();
 
-  if (summingInQ()) {
-    // These values are only required for summation in Q
-    findLambdaMinMax();
-    findTheta0();
-  }
-
+  // Check whether conversion, normalisation and summation has already been done
   m_convertUnits = true;
   m_normalise = true;
   m_sum = true;
-
   if (xUnitID == "Wavelength") {
     // Already converted converted to wavelength
     m_convertUnits = false;
-    // Assume it's also already normalised
+    // Assume it's also already been normalised
     m_normalise = false;
     // Assume summation is already done if the number of histograms in the input
     // is the same as the number of detector groups (which will define the
@@ -494,13 +489,6 @@ void ReflectometryReductionOne2::initRun() {
       m_sum = false;
     }
   }
-}
-
-/** Execute the algorithm.
-*/
-void ReflectometryReductionOne2::exec() {
-  // Set up member variables from inputs for this run
-  initRun();
 
   // Create the output workspace in wavelength
   MatrixWorkspace_sptr IvsLam = makeIvsLam();
@@ -816,14 +804,6 @@ bool ReflectometryReductionOne2::summingInQ() {
 }
 
 /**
-* Find and cache the min/max lambda in the region of interest
-*/
-void ReflectometryReductionOne2::findLambdaMinMax() {
-  m_lambdaMin = getProperty("WavelengthMin");
-  m_lambdaMax = getProperty("WavelengthMax");
-}
-
-/**
 * Find and cache the indicies of the detectors of interest
 */
 void ReflectometryReductionOne2::findDetectorsOfInterest() {
@@ -840,6 +820,11 @@ void ReflectometryReductionOne2::findDetectorsOfInterest() {
 * Find and cache the horizon angle theta0 for use for summation in Q.
 */
 void ReflectometryReductionOne2::findTheta0() {
+  // Only requried if summing in Q
+  if (!summingInQ()) {
+    return;
+  }
+
   const std::string reductionType = getProperty("ReductionType");
 
   // For the non-flat sample case theta0 is 0
@@ -858,7 +843,7 @@ void ReflectometryReductionOne2::findTheta0() {
 
   g_log.debug() << "theta0: " << theta0() << " degrees" << std::endl;
 
-  // Store in radians
+  // Convert to radians
   m_theta0 *= M_PI / 180.0;
 }
 

@@ -129,8 +129,6 @@ private:
                           const bool severe);
 
   // Find and cache constants
-  void initRun();
-  void findLambdaMinMax();
   void findDetectorsOfInterest();
   void findTheta0();
   // Accessors for theta and lambda values
