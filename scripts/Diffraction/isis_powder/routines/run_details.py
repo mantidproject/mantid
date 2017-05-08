@@ -37,8 +37,11 @@ def create_run_details_object(run_number_string, inst_settings, is_vanadium_run,
         run_number = vanadium_run_string
         output_run_string = vanadium_run_string
     else:
+        # Otherwise set it to the user input
         output_run_string = run_number_string
 
+    # Get the file extension if set
+    file_extension = getattr(inst_settings, "file_extension", None)
     # Sample empty if there is one
     sample_empty = getattr(inst_settings, "sample_empty", None)
 
@@ -49,11 +52,11 @@ def create_run_details_object(run_number_string, inst_settings, is_vanadium_run,
     splined_van_path = os.path.join(calibration_dir, label, results_dict["splined_van_name"])
     van_absorb_path = os.path.join(calibration_dir, van_abs_file_name) if van_abs_file_name else None
 
-    return _RunDetails(empty_run_number=results_dict["empty_runs"], run_number=run_number,
-                       output_run_string=output_run_string, label=label, offset_file_path=offset_file_path,
-                       grouping_file_path=grouping_file_path, splined_vanadium_path=splined_van_path,
-                       vanadium_run_number=vanadium_run_string, sample_empty=sample_empty,
-                       vanadium_abs_path=van_absorb_path)
+    return _RunDetails(empty_run_number=results_dict["empty_runs"], file_extension=file_extension,
+                       run_number=run_number, output_run_string=output_run_string, label=label,
+                       offset_file_path=offset_file_path, grouping_file_path=grouping_file_path,
+                       splined_vanadium_path=splined_van_path, vanadium_run_number=vanadium_run_string,
+                       sample_empty=sample_empty, vanadium_abs_path=van_absorb_path)
 
 
 def _get_customisable_attributes(cal_dict, inst_settings, empty_run_call, grouping_name_call, vanadium_run_call,
@@ -158,7 +161,7 @@ class _RunDetails(object):
     This class holds the full file paths associated with each run and various other useful attributes
     """
 
-    def __init__(self, empty_run_number, run_number, output_run_string, label,
+    def __init__(self, empty_run_number, file_extension, run_number, output_run_string, label,
                  offset_file_path, grouping_file_path, splined_vanadium_path, vanadium_run_number,
                  sample_empty, vanadium_abs_path):
 
@@ -176,5 +179,6 @@ class _RunDetails(object):
         self.vanadium_run_numbers = vanadium_run_number
 
         # Optional
+        self.file_extension = file_extension
         self.sample_empty = sample_empty
         self.vanadium_absorption_path = vanadium_abs_path

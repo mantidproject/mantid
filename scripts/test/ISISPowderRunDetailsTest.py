@@ -14,13 +14,15 @@ from isis_powder.routines import run_details
 class ISISPowderInstrumentRunDetailsTest(unittest.TestCase):
     def setup_mock_inst_settings(self, yaml_file_path):
         calibration_dir = tempfile.mkdtemp()
+        # Keep track of list of folders to remove
         self._folders_to_remove = [calibration_dir]
 
+        # Check the required unit test files could be found
         test_configuration_path = mantid.api.FileFinder.getFullPath(yaml_file_path)
         if not test_configuration_path or len(test_configuration_path) <= 0:
             self.fail("Could not find the unit test input file called: " + str(yaml_file_path))
-        mock_inst = MockInstSettings(cal_file_path=test_configuration_path, calibration_dir=calibration_dir)
-        return mock_inst
+
+        return MockInstSettings(cal_file_path=test_configuration_path, calibration_dir=calibration_dir)
 
     def tearDown(self):
         for folder in self._folders_to_remove:
