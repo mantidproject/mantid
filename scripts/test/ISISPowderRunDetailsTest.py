@@ -46,6 +46,9 @@ class ISISPowderInstrumentRunDetailsTest(unittest.TestCase):
         self.assertEqual(output_obj.empty_runs, expected_empty_runs)
         self.assertEqual(output_obj.grouping_file_path,
                          os.path.join(mock_inst.calibration_dir, mock_inst.grouping_file_name))
+        expected_file_ext = mock_inst.file_extension
+        expected_file_ext = expected_file_ext if expected_file_ext.startswith('.') else '.' + expected_file_ext
+        self.assertEqual(output_obj.file_extension, expected_file_ext)
         self.assertEqual(output_obj.label, expected_label)
         self.assertEqual(output_obj.offset_file_path,
                          os.path.join(mock_inst.calibration_dir, expected_label, expected_offset_file_name))
@@ -119,6 +122,7 @@ class MockInstSettings(object):
         self.calibration_dir = calibration_dir
         self.cal_mapping_path = cal_file_path
         self.grouping_file_name = MockInstSettings.gen_random_string()
+        self.file_extension = MockInstSettings.gen_random_string()
 
     @staticmethod
     def gen_random_string():
