@@ -3,7 +3,6 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ArrayProperty.h"
-#include "MantidKernel/ArrayBoundedValidator.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/Strings.h"
@@ -49,13 +48,9 @@ void SetInstrumentParameter::init() {
                                        "the parameter to. Default: the whole "
                                        "instrument");
 
-  auto detectorStartsAtZero =
-      boost::make_shared<ArrayBoundedValidator<detid_t>>();
-  detectorStartsAtZero->setLower(0);
-  declareProperty(
-      make_unique<ArrayProperty<detid_t>>("DetectorList", detectorStartsAtZero),
-      "The detector ID list to attach the parameter to. If set "
-      "this will override any ComponentName");
+  declareProperty(make_unique<ArrayProperty<detid_t>>("DetectorList"),
+                  "The detector ID list to attach the parameter to. If set "
+                  "this will override any ComponentName");
   declareProperty("ParameterName", "",
                   boost::make_shared<MandatoryValidator<std::string>>(),
                   "The name that will identify the parameter");

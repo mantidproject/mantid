@@ -34,11 +34,8 @@ void GroupDetectors::init() {
       "An array containing a list of the indexes of the spectra to combine\n"
       "(DetectorList and WorkspaceIndexList are ignored if this is set)");
 
-  auto detectorStartsAtZero =
-      boost::make_shared<ArrayBoundedValidator<detid_t>>();
-  detectorStartsAtZero->setLower(0);
   declareProperty(
-      make_unique<ArrayProperty<detid_t>>("DetectorList", detectorStartsAtZero),
+      make_unique<ArrayProperty<detid_t>>("DetectorList"),
       "An array of detector ID's (WorkspaceIndexList is ignored if this is\n"
       "set)");
 

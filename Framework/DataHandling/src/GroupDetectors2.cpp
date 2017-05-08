@@ -71,11 +71,8 @@ void GroupDetectors2::init() {
       "An array containing a list of the spectrum numbers to combine\n"
       "(DetectorList and WorkspaceIndexList are ignored if this is set)");
 
-  auto detectorStartsAtZero =
-      boost::make_shared<ArrayBoundedValidator<detid_t>>();
-  detectorStartsAtZero->setLower(0);
   declareProperty(
-      make_unique<ArrayProperty<detid_t>>("DetectorList", detectorStartsAtZero),
+      make_unique<ArrayProperty<detid_t>>("DetectorList"),
       "An array of detector IDs to combine (WorkspaceIndexList is "
       "ignored if this is\n"
       "set)");
