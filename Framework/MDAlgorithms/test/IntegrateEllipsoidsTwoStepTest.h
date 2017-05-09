@@ -21,6 +21,7 @@ using namespace Mantid::MDAlgorithms;
 using namespace Mantid::DataObjects;
 using Mantid::Kernel::V3D;
 using Mantid::Geometry::OrientedLattice;
+using namespace Mantid::SingleCrystalDiffractionTestHelper;
 
 class IntegrateEllipsoidsTwoStepTest : public CxxTest::TestSuite {
 
@@ -36,7 +37,7 @@ public:
     const auto sigmas = std::make_tuple(.002, .002, 0.1);
 
     // Build some diffraction data
-    SingleCrystalDiffractionTestHelper::WorkspaceBuilder builder;
+    WorkspaceBuilder builder;
     builder.setNumPixels(100);
     builder.addBackground(false);
     builder.addPeakByHKL(V3D(1, -5, -3), numEventsPerPeak, sigmas);
@@ -51,7 +52,7 @@ public:
     auto peaksWS = std::get<1>(data);
 
     // Run algorithm
-    Mantid::MDAlgorithms::IntegrateEllipsoidsTwoStep alg;
+    IntegrateEllipsoidsTwoStep alg;
     alg.setChild(true);
     alg.setRethrows(true);
     TS_ASSERT_THROWS_NOTHING( alg.initialize() );
@@ -92,7 +93,7 @@ public:
     const auto sigmas = std::make_tuple(.002, .002, 0.01);
     const std::vector<double> rebinParams = { 800, 5, 10000 };
 
-    SingleCrystalDiffractionTestHelper::WorkspaceBuilder builder;
+    WorkspaceBuilder builder;
     builder.setNumPixels(100);
     builder.addBackground(false);
     builder.outputAsHistogram(true);
@@ -143,7 +144,7 @@ public:
     const auto nBackgroundEvents = 1000;
 
     // Build some diffraction data
-    SingleCrystalDiffractionTestHelper::WorkspaceBuilder builder;
+    WorkspaceBuilder builder;
     builder.setNumPixels(100);
     builder.addBackground(true);
     builder.setBackgroundParameters(nBackgroundEvents, backgroundDetSize, backgroundTOFSize);
@@ -160,7 +161,7 @@ public:
     auto peaksWS = std::get<1>(data);
 
     // Run algorithm
-    Mantid::MDAlgorithms::IntegrateEllipsoidsTwoStep alg;
+    IntegrateEllipsoidsTwoStep alg;
     alg.setChild(true);
     alg.setRethrows(true);
     TS_ASSERT_THROWS_NOTHING( alg.initialize() );
@@ -204,7 +205,7 @@ public:
     const auto backgroundTOFSize = 100.0;
     const auto nBackgroundEvents = 1000;
 
-    SingleCrystalDiffractionTestHelper::WorkspaceBuilder builder;
+    WorkspaceBuilder builder;
     builder.setNumPixels(100);
     builder.addBackground(true);
     builder.setBackgroundParameters(nBackgroundEvents, backgroundDetSize, backgroundTOFSize);

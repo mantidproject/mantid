@@ -22,6 +22,7 @@ using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
 
+namespace Mantid {
 namespace SingleCrystalDiffractionTestHelper {
 
 void WorkspaceBuilder::setNumPixels(const int numPixels) {
@@ -250,4 +251,5 @@ void WorkspaceBuilder::rebinWorkspace() {
   m_workspace = rebinAlg->getProperty("OutputWorkspace");
 }
 
+}
 }

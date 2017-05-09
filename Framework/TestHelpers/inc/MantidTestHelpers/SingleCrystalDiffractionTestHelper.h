@@ -11,6 +11,7 @@
 #include <tuple>
 #include <random>
 
+namespace Mantid {
 namespace SingleCrystalDiffractionTestHelper {
 
 class WorkspaceBuilder {
@@ -91,6 +92,7 @@ private:
   std::mt19937 m_generator;
 };
 
+}
 }
 
 #endif
