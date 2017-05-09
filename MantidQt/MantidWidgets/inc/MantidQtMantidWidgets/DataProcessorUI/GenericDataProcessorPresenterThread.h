@@ -4,6 +4,9 @@
 #include "MantidQtMantidWidgets/DataProcessorUI/GenericDataProcessorPresenter.h"
 
 #include <QThread>
+#include <QMetaType>
+
+Q_DECLARE_METATYPE(std::exception)
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -34,7 +37,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-
 class GenericDataProcessorPresenterThread : public QThread {
   Q_OBJECT
 
@@ -48,6 +50,9 @@ public:
             SLOT(updateProgress()), Qt::QueuedConnection);
     connect(worker, SIGNAL(clearProgressSignal()), parent,
             SLOT(clearProgress()), Qt::QueuedConnection);
+    qRegisterMetaType<std::exception>("std::exception");
+    connect(worker, SIGNAL(reductionErrorSignal(std::exception)), parent,
+            SLOT(reductionError(std::exception)), Qt::QueuedConnection);
     // Early deletion of thread and worker
     connect(m_worker, SIGNAL(finished()), m_worker, SLOT(deleteLater()));
     connect(this, SIGNAL(finished()), this, SLOT(deleteLater()),

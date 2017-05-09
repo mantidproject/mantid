@@ -49,8 +49,10 @@ private slots:
       m_presenter->postProcessGroup(m_groupData);
       emit updateProgressSignal();
     } catch (std::exception &ex) {
-      m_presenter->m_mainPresenter->giveUserCritical(ex.what(), "Error");
+      emit reductionErrorSignal(ex);
       emit clearProgressSignal();
+      // Prevent finished() signal from running additional code
+      disconnect(this, SIGNAL(finished()), 0, 0);
     }
     emit finished();
   }
@@ -59,6 +61,7 @@ signals:
   void finished();
   void updateProgressSignal();
   void clearProgressSignal();
+  void reductionErrorSignal(std::exception ex);
 
 private:
   GenericDataProcessorPresenter *m_presenter;

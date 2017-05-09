@@ -307,6 +307,13 @@ void GenericDataProcessorPresenter::clearProgress() {
 }
 
 /**
+Handle reduction error
+*/
+void GenericDataProcessorPresenter::reductionError(std::exception ex) {
+  m_mainPresenter->giveUserCritical(ex.what(), "Error");
+}
+
+/**
 Display a dialog to choose save location for notebook, then save the notebook
 there
 @param data : the processed data

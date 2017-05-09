@@ -162,6 +162,7 @@ protected slots:
   void nextGroup();
   void updateProgress();
   void clearProgress();
+  void reductionError(std::exception ex);
 
 private:
   // the name of the workspace/table/model in the ADS, blank if unsaved
