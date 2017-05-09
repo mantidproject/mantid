@@ -12,7 +12,7 @@
 #include "MantidTestHelpers/SingleCrystalDiffractionTestHelper.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 
-#include <fstream>
+#include <cmath>
 #include <random>
 #include <tuple>
 
@@ -125,8 +125,12 @@ void WorkspaceBuilder::createEventWorkspace() {
 /** Create peaks for all HKL descriptors passed to the builder
  */
 void WorkspaceBuilder::createPeaks() {
+  int index = 0;
   for (const auto& descriptor : m_peakDescriptors) {
     createPeak(descriptor);
+    if (m_useBackground)
+      createBackground(index);
+    ++index;
   }
 }
 
@@ -136,7 +140,7 @@ void WorkspaceBuilder::createPeaks() {
  * position of a corresponding HKL value.
  *
  * This distribution of events is controlled by the sigmas parameter of the HKL
- * descriptor which described the variance in the x, y, and TOF position.
+ * descriptor which describes the variance in the x, y, and TOF position.
  *
  * @param descriptor a HKLPeakDescriptor which describes the position, intensity
  * and variance in a peak
@@ -174,16 +178,52 @@ void WorkspaceBuilder::createPeak(const HKLPeakDescriptor &descriptor) {
     const auto pos = V3D(detPos[0]+xOffset, detPos[1] + yOffset, detPos[2]);
     const auto result = m_detectorSearcher->findNearest(Eigen::Vector3d(pos[0], pos[1], pos[2]));
     const auto index = std::get<1>(result[0]);
-    const auto id = info.detector(index).getID();
-
-    auto &el = m_eventWorkspace->getSpectrum(id - m_totalNPixels);
+    auto &el = m_eventWorkspace->getSpectrum(index);
     el.addEventQuickly(TofEvent(tof));
   }
 
+
+}
+
+/** Create a uniform background around each peak in the workspace
+ *
+ * This will NOT add background to the entire workspace as that would cause the
+ * generator to take too long to be used in a unit test. Instead this will
+ * generate a uniform background in a "box" around a peak.
+ *
+ * @param index :: index of the peak to create a uniform background for
+ */
+void WorkspaceBuilder::createBackground(const int index) {
+  const auto& peak = m_peaksWorkspace->getPeak(index);
+  const auto detectorId = peak.getDetectorID();
+  const auto tofExact = peak.getTOF();
+  const auto &info = m_eventWorkspace->detectorInfo();
+  const auto detPos = info.position(info.indexOf(detectorId));
+
+  const auto nBackgroundEvents = std::get<0>(m_backgroundParameters);
+  const auto backgroundDetSize = std::get<1>(m_backgroundParameters);
+  const auto backgroundTOFSize = std::get<2>(m_backgroundParameters);
+
+  std::uniform_real_distribution<> backgroundXDist(-backgroundDetSize, backgroundDetSize);
+  std::uniform_real_distribution<> backgroundYDist(-backgroundDetSize, backgroundDetSize);
+  std::uniform_real_distribution<> backgroundTOFDist(tofExact-backgroundTOFSize, tofExact+backgroundTOFSize);
+
+  for (int i = 0; i < nBackgroundEvents; ++i) {
+    const auto xOffset = backgroundXDist(m_generator);
+    const auto yOffset = backgroundYDist(m_generator);
+    const auto tof = backgroundTOFDist(m_generator);
+
+    const auto pos = V3D(detPos[0] + xOffset, detPos[1] + yOffset, detPos[2]);
+    const auto result = m_detectorSearcher->findNearest(Eigen::Vector3d(pos[0], pos[1], pos[2]));
+    const auto index = std::get<1>(result[0]);
+
+    auto &el = m_eventWorkspace->getSpectrum(index);
+    el.addEventQuickly(TofEvent(tof));
+  }
 }
 
 
-/** Cretae a KD-Tree of detector positions that can be used to find the closest
+/** Create a KD-Tree of detector positions that can be used to find the closest
  * detector to a given event position
  */
 void WorkspaceBuilder::createNeighbourSearch() {

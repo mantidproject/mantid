@@ -22,11 +22,16 @@ public:
   /// Set the total number of peaks to use
   void setNumPixels(const int numPixels);
   /// Set whether to create an event workspace or a histogram workspace
-  void setOutputAsHistogram(const bool outputAsHistogram)
+  void outputAsHistogram(const bool outputAsHistogram)
   { m_outputAsHistogram = outputAsHistogram; };
   /// Set the rebin parameters to use
   void setRebinParameters(const std::vector<double>& rebinParams)
   { m_rebinParams = rebinParams; }
+  void addBackground(const bool useBackground)
+  { m_useBackground = useBackground; }
+  /// Set the parameters for the uniform background
+  void setBackgroundParameters(const int nEvents, const double detRange, const double tofRange)
+  { m_backgroundParameters = std::make_tuple(nEvents, detRange, tofRange); }
   /// Add a HKL peak to the diffraction dataset
   void addPeakByHKL(const Mantid::Kernel::V3D& hkl, const int numEvents, const std::tuple<double, double, double>& sigmas);
   /// Make a tuple of event workspace and peaks workspace
@@ -47,6 +52,8 @@ private:
   void createPeaks();
   /// Create a single HKL peak in the event workspace
   void createPeak(const HKLPeakDescriptor& descriptor);
+  /// Create a flat background for the workspace
+  void createBackground(const int index);
   /// Rebin the event workspace to a histogram workspace
   void rebinWorkspace();
 
@@ -71,8 +78,12 @@ private:
   int m_totalNPixels;
   // whether to output event or histogram data
   bool m_outputAsHistogram;
+  // whether to add a background
+  bool m_useBackground;
   // rebin parameters
   std::vector<double> m_rebinParams;
+  // background parameters
+  std::tuple<int, double, double> m_backgroundParameters;
 
   // Other instance varianbles
 
