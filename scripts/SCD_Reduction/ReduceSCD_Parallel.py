@@ -179,7 +179,7 @@ if output_nexus:
         for item in candidates:
             if os.path.exists(item):
                 full_name = str(item)
-    
+
         if not full_name.endswith('nxs') and not full_name.endswith('h5'):
             print("Exiting since the data_directory was not specified and")
             print("findnexus failed for event NeXus file: " + instrument_name + " " + str(run_nums[0]))
