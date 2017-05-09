@@ -101,9 +101,6 @@ void SpecularReflectionAlgorithm::initCommonProperties() {
                   "checking protects against non-sequential integers in which "
                   "spectrum numbers are not in {min, min+1, ..., max}");
 
-  setPropertySettings("SampleComponentName",
-                      make_unique<Kernel::EnabledWhenProperty>(
-                          "SpectrumNumbersOfGrouped", IS_NOT_DEFAULT));
   setPropertySettings("SpectrumNumbersOfDetectors",
                       make_unique<Kernel::EnabledWhenProperty>(
                           "SampleComponentName", IS_NOT_DEFAULT));

@@ -14,8 +14,10 @@ Algorithms
 - A new input property *RebinCanToSample* was added to :ref:`ApplyPaalmanPingsCorrection <algm-ApplyPaalmanPingsCorrection>` which enables or disables the rebinning of the empty container workspace.
 - :ref:`FlatPlatePaalmanPingsCorrection <algm-FlatPlatePaalmanPingsCorrection>` and :ref:`CylinderPaalmanPingsCorrection <algm-CylinderPaalmanPingsCorrection>` algorithms are extended for `Efixed` mode, where the correction will be computed for a single wavelength point.
 - :ref:`LoadVesuvio <algm-LoadVesuvio>` can now load NeXus files as well as raw files
+- :ref:`VesuvioPeakPrediction <algm-VesuvioPeakPrediction>` to predict parameters for Vesuvio peaks
 - :ref:`BASISReduction311 <algm-BASISReduction311>` has been deprecated (2017-03-11). Use :ref:`BASISReduction <algm-BASISReduction>` instead.
 - :ref:`BASISReduction <algm-BASISReduction>` includes now an option to compute and save the dynamic susceptibility.
+- :ref:`VesuvioDiffractionReduction <algm-VesuvioDiffractionReduction>` has been deprecated, use :ref:`ISISIndirectDiffractionReduction <algm-ISISIndirectDiffractionReduction>`
 
 QuickRuns
 ~~~~~~~~~
@@ -51,6 +53,8 @@ Improvements
 
 - Bayes interfaces have the functionality to plot the current preview in the miniplot
 - OSIRIS diffraction now rebins container workspaces to match the sample workspace
+- :ref:`ISISIndirectDiffractionReduction <algm-ISISIndirectDiffractionReduction>` now fully supports VESUVIO data
+- Inelastic pixel ID's in BASIS instrument definition file grouped into continuous physical pixels.
 
 
 Bugfixes

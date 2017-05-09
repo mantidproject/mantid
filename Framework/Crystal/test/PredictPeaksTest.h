@@ -49,7 +49,7 @@ public:
   void do_test_exec(std::string reflectionCondition, size_t expectedNumber,
                     std::vector<V3D> hkls, int convention = 1,
                     bool useExtendedDetectorSpace = false,
-                    bool addExtendedDetectorDefinition = false) {
+                    bool addExtendedDetectorDefinition = false, int edge = 0) {
     // Name of the output workspace.
     std::string outWSName("PredictPeaksTest_OutputWS");
 
@@ -90,6 +90,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("HKLPeaksWorkspace", hklPW));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("PredictPeaksOutsideDetectors",
                                              useExtendedDetectorSpace));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("EdgePixels", edge));
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
     TS_ASSERT(alg.isExecuted());
 
@@ -105,7 +106,7 @@ public:
     TS_ASSERT_EQUALS(ws->getNumberPeaks(), expectedNumber);
     V3D hklTest = {-10, -6, 1};
     hklTest *= convention;
-    if (expectedNumber > 1 && !addExtendedDetectorDefinition) {
+    if (expectedNumber > 5 && !addExtendedDetectorDefinition) {
       TS_ASSERT_EQUALS(ws->getPeak(0).getHKL(), hklTest);
     }
 
@@ -209,6 +210,9 @@ public:
     Kernel::ConfigService::Instance().setString("Q.convention",
                                                 "Crystallography");
     do_test_exec("Primitive", 10, std::vector<V3D>(), -1);
+  }
+  void test_edge() {
+    do_test_exec("Primitive", 5, std::vector<V3D>(), 1, false, false, 10);
   }
 };
 

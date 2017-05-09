@@ -1741,8 +1741,8 @@ std::string ConfigServiceImpl::getFacilityFilename(const std::string &fName) {
       this->getString("UpdateInstrumentDefinitions.OnStartup");
 
   auto instrDir = directoryNames.begin();
-  if (updateInstrStr.compare("1") == 0 || updateInstrStr.compare("on") == 0 ||
-      updateInstrStr.compare("On") == 0) {
+  if (updateInstrStr == "1" || updateInstrStr == "on" ||
+      updateInstrStr == "On") {
     // do nothing
   } else {
     instrDir++; // advance to after the first value

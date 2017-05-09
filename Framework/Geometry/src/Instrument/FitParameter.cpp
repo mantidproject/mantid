@@ -20,8 +20,8 @@ Kernel::Logger g_log("FitParameter");
 */
 std::string FitParameter::getConstraint() const {
 
-  if (m_constraintMin.compare("") == 0 && m_constraintMax.compare("") == 0)
-    return std::string("");
+  if (m_constraintMin.empty() && m_constraintMax.empty())
+    return std::string();
 
   std::stringstream constraint;
   size_t foundMinPercentage, foundMaxPercentage;
@@ -29,26 +29,24 @@ std::string FitParameter::getConstraint() const {
   foundMaxPercentage = m_constraintMax.find('%');
   double min = 0;
   double max = 0;
-  if (m_constraintMin.compare("")) {
+  if (!m_constraintMin.empty()) {
     if (foundMinPercentage != std::string::npos)
-      min =
-          atof(m_constraintMin.substr(0, m_constraintMin.size() - 1).c_str()) *
-          m_value * 0.01;
+      min = std::stod(m_constraintMin.substr(0, m_constraintMin.size() - 1)) *
+            m_value * 0.01;
     else
-      min = atof(m_constraintMin.c_str());
+      min = std::stod(m_constraintMin);
   }
-  if (m_constraintMax.compare("")) {
+  if (!m_constraintMax.empty()) {
     if (foundMaxPercentage != std::string::npos)
-      max =
-          atof(m_constraintMax.substr(0, m_constraintMax.size() - 1).c_str()) *
-          m_value * 0.01;
+      max = std::stod(m_constraintMax.substr(0, m_constraintMax.size() - 1)) *
+            m_value * 0.01;
     else
-      max = atof(m_constraintMax.c_str());
+      max = std::stod(m_constraintMax);
   }
 
-  if (m_constraintMin.compare("") && m_constraintMax.compare("")) {
+  if (!(m_constraintMin.empty() && m_constraintMax.empty())) {
     constraint << min << " < " << m_name << " < " << max;
-  } else if (m_constraintMin.compare("")) {
+  } else if (!m_constraintMin.empty()) {
     constraint << min << " < " << m_name;
   } else {
     constraint << m_name << " < " << max;
@@ -69,7 +67,7 @@ double FitParameter::getValue(const double &at) const {
     return m_value;
   }
 
-  if (m_formula.compare("") != 0) {
+  if (!m_formula.empty()) {
     size_t found;
     std::string equationStr = m_formula;
     std::string toReplace = "centre"; // replace this string in formula

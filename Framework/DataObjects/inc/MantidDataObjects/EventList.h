@@ -168,8 +168,6 @@ public:
   void setSortOrder(const EventSortType order) const;
 
   void sortTof() const;
-  void sortTof2() const;
-  void sortTof4() const;
 
   void sortPulseTime() const;
   void sortPulseTimeTOF() const;
@@ -222,8 +220,7 @@ public:
 
   virtual size_t histogram_size() const;
 
-  void compressEvents(double tolerance, EventList *destination,
-                      bool parallel = false);
+  void compressEvents(double tolerance, EventList *destination);
   // get EventType declaration
   void generateHistogram(const MantidVec &X, MantidVec &Y, MantidVec &E,
                          bool skipError = false) const override;
@@ -354,7 +351,7 @@ public:
 
   void generateCountsHistogramPulseTime(
       const double &xMin, const double &xMax, MantidVec &Y,
-      const double TofMin = -std::numeric_limits<double>::max(),
+      const double TofMin = std::numeric_limits<double>::lowest(),
       const double TofMax = std::numeric_limits<double>::max()) const;
 
 protected:
