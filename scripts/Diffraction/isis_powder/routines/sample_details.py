@@ -127,8 +127,8 @@ class _Material(object):
 
         _check_value_is_physical("absorption_cross_section", abs_cross_sect)
         _check_value_is_physical("scattering_cross_section", scattering_cross_sect)
-        self._absorption_cross_section = abs_cross_sect
-        self._scattering_cross_section = scattering_cross_sect
+        self._absorption_cross_section = float(abs_cross_sect)
+        self._scattering_cross_section = float(scattering_cross_sect)
         self._is_material_props_set = True
 
 
