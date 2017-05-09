@@ -287,8 +287,8 @@ class ISISPowderCommonTest(unittest.TestCase):
 
     def test_subtract_summed_runs(self):
         # Load a vanadium workspace for this test
-        sample_empty_number = "95598"
-        ws_file_name = "POL" + sample_empty_number
+        sample_empty_number = "0100"
+        ws_file_name = "ISIS_POWDER" + sample_empty_number
         original_ws = mantid.Load(ws_file_name)
         no_scale_ws = mantid.CloneWorkspace(InputWorkspace=original_ws, OutputWorkspace="test_subtract_sample_empty_ws")
 
@@ -334,7 +334,7 @@ class MockPolarisInstrument(object):
 
     @staticmethod
     def _generate_input_file_name(run_number):
-        return "POL" + str(run_number)
+        return "ISIS_POWDER" + str(run_number)
 
     def _normalise_ws_current(self, ws_to_correct, run_details=None):
         return ws_to_correct
