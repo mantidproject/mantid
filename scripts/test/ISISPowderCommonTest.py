@@ -245,11 +245,12 @@ class ISISPowderCommonTest(unittest.TestCase):
             common.generate_run_numbers(run_number_string=run_input_sting)
 
     def test_load_current_normalised_workspace(self):
-        run_number_single = 95597
-        run_number_range = "95597-95598"
+        run_number_single = 100
+        run_number_range = "100-101"
 
-        first_run_bin_value = 7852
-        second_run_bin_value = 5336
+        bin_index = 8
+        first_run_bin_value = 0.59706224
+        second_run_bin_value = 1.48682782
 
         # Check it handles a single workspace correctly
         single_workspace = common.load_current_normalised_ws_list(run_number_string=run_number_single,
@@ -257,7 +258,7 @@ class ISISPowderCommonTest(unittest.TestCase):
         # Get the only workspace in the list, ask for the 0th spectrum and the value at the 200th bin
         self.assertTrue(isinstance(single_workspace, list))
         self.assertEqual(len(single_workspace), 1)
-        self.assertEqual(single_workspace[0].readY(0)[200], first_run_bin_value)
+        self.assertAlmostEqual(single_workspace[0].readY(0)[bin_index], first_run_bin_value)
         mantid.DeleteWorkspace(single_workspace[0])
 
         # Does it return multiple workspaces when instructed
@@ -269,8 +270,8 @@ class ISISPowderCommonTest(unittest.TestCase):
         self.assertEqual(len(multiple_ws), 2)
 
         # Check the bins haven't been summed
-        self.assertEqual(multiple_ws[0].readY(0)[200], first_run_bin_value)
-        self.assertEqual(multiple_ws[1].readY(0)[200], second_run_bin_value)
+        self.assertAlmostEqual(multiple_ws[0].readY(0)[bin_index], first_run_bin_value)
+        self.assertAlmostEqual(multiple_ws[1].readY(0)[bin_index], second_run_bin_value)
         for ws in multiple_ws:
             mantid.DeleteWorkspace(ws)
 
@@ -283,18 +284,18 @@ class ISISPowderCommonTest(unittest.TestCase):
         self.assertEqual(len(summed_ws), 1)
 
         # Check bins have been summed
-        self.assertEqual(summed_ws[0].readY(0)[200], (first_run_bin_value + second_run_bin_value))
+        self.assertAlmostEqual(summed_ws[0].readY(0)[bin_index], (first_run_bin_value + second_run_bin_value))
         mantid.DeleteWorkspace(summed_ws[0])
 
     def test_load_current_normalised_ws_respects_ext(self):
-        run_number = "96913"
+        run_number = "100"
         file_ext_one = ".s1"
         file_ext_two = ".s2"
 
-        bin_index = 5963  # This bin has data in both workspaces and is very different (1 vs >100)
+        bin_index = 5
 
-        result_ext_one = 1
-        result_ext_two = 175
+        result_ext_one = 1.25270032
+        result_ext_two = 1.15126361
 
         # Check that it respects the ext flag - try the first extension of this name
         returned_ws_one = common.load_current_normalised_ws_list(instrument=ISISPowderMockInst(file_ext=file_ext_one),
@@ -309,8 +310,8 @@ class ISISPowderCommonTest(unittest.TestCase):
         mantid.DeleteWorkspace(returned_ws_two[0])
 
         # Ensure it loaded two different workspaces
-        self.assertEqual(result_ws_one, result_ext_one)
-        self.assertEqual(result_ws_two, result_ext_two)
+        self.assertAlmostEqual(result_ws_one, result_ext_one)
+        self.assertAlmostEqual(result_ws_two, result_ext_two)
         self.assertNotAlmostEqual(result_ext_one, result_ext_two)
 
     def test_remove_intermediate_workspace(self):
