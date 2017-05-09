@@ -18,6 +18,7 @@
 #include "MantidKernel/make_unique.h"
 #include "MantidIndexing/IndexInfo.h"
 #include "MantidIndexing/GlobalSpectrumIndex.h"
+#include "MantidParallel/Communicator.h"
 #include "MantidTypes/SpectrumDefinition.h"
 
 #include <cmath>
@@ -656,6 +657,10 @@ double MatrixWorkspace::getXMax() const {
 }
 
 void MatrixWorkspace::getXMinMax(double &xmin, double &xmax) const {
+  if (m_indexInfo->communicator().size() > 1)
+    throw std::runtime_error(
+        "MatrixWorkspace: Parallel support for XMin and XMax not implemented.");
+
   // set to crazy values to start
   xmin = std::numeric_limits<double>::max();
   xmax = -1.0 * xmin;

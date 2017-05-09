@@ -204,6 +204,11 @@ bool IndexInfo::isOnThisPartition(GlobalSpectrumIndex globalIndex) const {
 /// Returns the storage mode used in MPI runs.
 Parallel::StorageMode IndexInfo::storageMode() const { return m_storageMode; }
 
+/// Returns the communicator used in MPI runs.
+Parallel::Communicator IndexInfo::communicator() const {
+  return *m_communicator;
+}
+
 void IndexInfo::makeSpectrumNumberTranslator(
     std::vector<SpectrumNumber> &&spectrumNumbers) const {
   PartitionIndex partition;

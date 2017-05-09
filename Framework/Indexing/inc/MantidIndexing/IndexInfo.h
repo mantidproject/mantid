@@ -117,6 +117,7 @@ public:
   bool isOnThisPartition(GlobalSpectrumIndex globalIndex) const;
 
   Parallel::StorageMode storageMode() const;
+  Parallel::Communicator communicator() const;
 
 private:
   void makeSpectrumNumberTranslator(
