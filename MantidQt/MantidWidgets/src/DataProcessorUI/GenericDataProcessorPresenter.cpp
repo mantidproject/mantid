@@ -17,6 +17,7 @@
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorWorkspaceCommand.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/GenericDataProcessorPresenterRowReducerWorker.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/GenericDataProcessorPresenterGroupReducerWorker.h"
+#include "MantidQtMantidWidgets/DataProcessorUI/GenericDataProcessorPresenterThread.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/ParseKeyValueString.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/QtDataProcessorOptionsDialog.h"
 #include "MantidQtMantidWidgets/ProgressableView.h"
@@ -58,7 +59,7 @@ GenericDataProcessorPresenter::GenericDataProcessorPresenter(
       m_mainPresenter(), m_progressReporter(nullptr), m_loader(loader), m_whitelist(whitelist),
       m_preprocessMap(preprocessMap), m_processor(processor),
       m_postprocessor(postprocessor), m_postprocessMap(postprocessMap),
-      m_postprocess(true), m_tableDirty(false), m_workerThread(nullptr) {
+      m_postprocess(true), m_tableDirty(false) {
 
   // Column Options must be added to the whitelist
   m_whitelist.addElement("Options", "Options",
@@ -221,51 +222,9 @@ void GenericDataProcessorPresenter::process() {
   // Start processing all groups
   nextGroup();
 
-  /*
-  for (const auto &item : items) {
-
-    // Group with updated columns
-    GroupData newGroup;
-
-    // Reduce rows sequentially
-
-    // Loop over rows within this group
-    for (const auto &data : item.second) {
-      // data.first -> index of this row within the group
-      // data.second -> vector containing data
-
-      try {
-        auto newData = reduceRow(data.second);
-        m_manager->update(item.first, data.first, newData);
-        newGroup[data.first] = newData;
-        progressReporter.report();
-
-      } catch (std::exception &ex) {
-        m_mainPresenter->giveUserCritical(ex.what(), "Error");
-        progressReporter.clear();
-        return;
-      }
-
-      progressReporter.report();
-    }
-
-    // Post-process (if needed)
-    if (item.second.size() > 1) {
-      try {
-        postProcessGroup(newGroup);
-        progressReporter.report();
-      } catch (std::exception &ex) {
-        m_mainPresenter->giveUserCritical(ex.what(), "Error");
-        progressReporter.clear();
-        return;
-      }
-    }
-  }*/
-
   // If "Output Notebook" checkbox is checked then create an ipython notebook
-  if (m_view->getEnableNotebook()) {
+  if (m_view->getEnableNotebook())
     saveNotebook(items);
-  }
 }
 
 /**
@@ -273,11 +232,11 @@ Process a new row
 */
 void GenericDataProcessorPresenter::nextRow() {
 
-  // Prepare a new thread
-  delete m_workerThread;
-  m_workerThread = new QThread(this);
+  m_workerThread.reset();
 
-  int groupIndex = m_gqueue.front().first;
+  // Add processed row data to the group
+  int groupIndex = m_rowItem.first;
+  m_groupData[groupIndex] = m_rowItem.second;
   auto &rqueue = m_gqueue.front().second;
 
   if (!rqueue.empty()) {
@@ -287,24 +246,20 @@ void GenericDataProcessorPresenter::nextRow() {
 
     auto *worker = new GenericDataProcessorPresenterRowReducerWorker(
         this, &m_rowItem, groupIndex);
-    worker->moveToThread(m_workerThread);
-    connect(m_workerThread, SIGNAL(started()), worker, SLOT(processRow()));
     connect(worker, SIGNAL(finished()), this, SLOT(nextRow()));
-    connect(worker, SIGNAL(updateProgressSignal()), this, SLOT(updateProgress()), Qt::QueuedConnection);
-    connect(worker, SIGNAL(clearProgressSignal()), this, SLOT(clearProgress()), Qt::QueuedConnection);
+    m_workerThread =
+        make_unique<GenericDataProcessorPresenterThread>(this, worker);
     m_workerThread->start();
 
   } else {
     m_gqueue.pop();
     if (m_groupData.size() > 1) {
       // Multiple rows in containing group, do post-processing on the group
-      auto *worker =
-          new GenericDataProcessorPresenterGroupReducerWorker(this, m_groupData);
-      worker->moveToThread(m_workerThread);
-      connect(m_workerThread, SIGNAL(started()), worker, SLOT(processGroup()));
+      auto *worker = new GenericDataProcessorPresenterGroupReducerWorker(
+          this, m_groupData);
       connect(worker, SIGNAL(finished()), this, SLOT(nextGroup()));
-      connect(worker, SIGNAL(updateProgressSignal()), this, SLOT(updateProgress()), Qt::QueuedConnection);
-      connect(worker, SIGNAL(clearProgressSignal()), this, SLOT(clearProgress()), Qt::QueuedConnection);
+      m_workerThread =
+          make_unique<GenericDataProcessorPresenterThread>(this, worker);
       m_workerThread->start();
     } else {
       // Single row in containing group, skip to next group
@@ -318,26 +273,22 @@ Process a new group
 */
 void GenericDataProcessorPresenter::nextGroup() {
 
-  if (!m_gqueue.empty()) {
-    // Prepare a new thread
-    delete m_workerThread;
-    m_workerThread = new QThread(this);
+  m_workerThread.reset();
 
+  if (!m_gqueue.empty()) {
+    // Reduce first row
     int groupIndex = m_gqueue.front().first;
     auto &rqueue = m_gqueue.front().second;
     m_rowItem = rqueue.front();
     rqueue.pop();
 
+    // Prepare a new thread
     auto *worker = new GenericDataProcessorPresenterRowReducerWorker(
         this, &m_rowItem, groupIndex);
-    worker->moveToThread(m_workerThread);
-    connect(m_workerThread, SIGNAL(started()), worker, SLOT(processRow()));
+    m_workerThread =
+        make_unique<GenericDataProcessorPresenterThread>(this, worker);
     connect(worker, SIGNAL(finished()), this, SLOT(nextRow()));
-    connect(worker, SIGNAL(updateProgressSignal()), this, SLOT(updateProgress()), Qt::QueuedConnection);
-    connect(worker, SIGNAL(clearProgressSignal()), this, SLOT(clearProgress()), Qt::QueuedConnection);
     m_workerThread->start();
-  } else {
-    delete m_workerThread;
   }
 }
 

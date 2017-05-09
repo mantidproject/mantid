@@ -133,6 +133,7 @@ set ( MOC_FILES
     inc/MantidQtMantidWidgets/ColorBarWidget.h
     inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorCommandAdapter.h
     inc/MantidQtMantidWidgets/DataProcessorUI/GenericDataProcessorPresenter.h
+    inc/MantidQtMantidWidgets/DataProcessorUI/GenericDataProcessorPresenterThread.h
     inc/MantidQtMantidWidgets/DataProcessorUI/GenericDataProcessorPresenterRowReducerWorker.h
     inc/MantidQtMantidWidgets/DataProcessorUI/GenericDataProcessorPresenterGroupReducerWorker.h
     inc/MantidQtMantidWidgets/DataProcessorUI/QDataProcessorOneLevelTreeModel.h

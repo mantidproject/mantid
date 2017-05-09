@@ -45,7 +45,7 @@ public:
       : m_presenter(presenter), m_rowItem(rowItem), m_groupIndex(groupIndex) {}
 
 private slots:
-  void processRow() {
+  void startWorker() {
     try {
       m_presenter->reduceRow(&m_rowItem->second);
       m_presenter->m_manager->update(m_groupIndex, m_rowItem->first,

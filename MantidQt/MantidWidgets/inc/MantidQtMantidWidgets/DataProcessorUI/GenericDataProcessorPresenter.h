@@ -13,6 +13,7 @@
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorPresenter.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorProcessingAlgorithm.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorWhiteList.h"
+#include "MantidQtMantidWidgets/DataProcessorUI/GenericDataProcessorPresenterThread.h"
 #include "MantidQtMantidWidgets/ProgressPresenter.h"
 #include "MantidQtMantidWidgets/WidgetDllOption.h"
 
@@ -33,6 +34,7 @@ namespace MantidWidgets {
 class ProgressableView;
 class DataProcessorView;
 class DataProcessorTreeManager;
+class GenericDataProcessorPresenterThread;
 
 /** @class GenericDataProcessorPresenter
 
@@ -191,7 +193,7 @@ private:
   // stores the user options for the presenter
   std::map<std::string, QVariant> m_options;
   // Thread to run reducer worker in
-  QThread *m_workerThread;
+  std::unique_ptr<GenericDataProcessorPresenterThread> m_workerThread;
   // load a run into the ADS, or re-use one in the ADS if possible
   Mantid::API::Workspace_sptr getRun(const std::string &run,
                                      const std::string &instrument,
