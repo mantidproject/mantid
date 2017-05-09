@@ -17,8 +17,7 @@ class Gem(AbstractInst):
                                   calibration_dir=self._inst_settings.calibration_dir,
                                   output_dir=self._inst_settings.output_dir, inst_prefix="GEM")
 
-        self._cached_run_details = None
-        self._cached_run_number = None
+        self._cached_run_details = {}
 
     def focus(self, **kwargs):
         self._inst_settings.update_attributes(kwargs=kwargs)
@@ -32,8 +31,13 @@ class Gem(AbstractInst):
                                      do_absorb_corrections=self._inst_settings.do_absorb_corrections)
 
     def _get_run_details(self, run_number_string):
-        return gem_algs.get_run_details(run_number_string=run_number_string, inst_settings=self._inst_settings,
-                                        is_vanadium_run=self._is_vanadium)
+        run_number_string_key = run_number_string + str(self._inst_settings.file_extension)
+        if run_number_string_key in self._cached_run_details:
+            return self._cached_run_details[run_number_string_key]
+
+        self._cached_run_details[run_number_string_key] = gem_algs.get_run_details(
+            run_number_string=run_number_string, inst_settings=self._inst_settings, is_vanadium_run=self._is_vanadium)
+        return self._cached_run_details[run_number_string_key]
 
     def _generate_auto_vanadium_calibration(self, run_details):
         raise NotImplementedError()
