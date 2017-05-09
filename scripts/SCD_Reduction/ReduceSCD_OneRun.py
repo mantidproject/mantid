@@ -129,7 +129,7 @@ short_filename = "%s_%s" % (instrument_name, str(run))
 if data_directory is not None:
     full_name = data_directory + "/" + short_filename + ".nxs.h5"
     if not os.path.exists(full_name):
-        full_name = data_directory + "/" + short_filename + "_event.nxs"   
+        full_name = data_directory + "/" + short_filename + "_event.nxs"
 else:
     candidates = FileFinder.findRuns(short_filename)
     full_name = ""
