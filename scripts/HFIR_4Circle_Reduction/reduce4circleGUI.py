@@ -3620,8 +3620,13 @@ class MainWindow(QtGui.QMainWindow):
         # raw_det_data = numpy.rot90(raw_det_data, 1)
         self.ui.graphicsView_detector2dPlot.clear_canvas()
         # get the configuration of detector from GUI
-        ret_obj = gutil.parse_integer_list(str(self.ui.lineEdit_detectorGeometry.text()), expected_size=2)
-        x_max, y_max = ret_obj
+	# FIXME/TODO/ISSUE/NOW
+        if 0:
+            ret_obj = gutil.parse_integer_list(str(self.ui.lineEdit_detectorGeometry.text()), expected_size=2)
+            x_max, y_max = ret_obj
+	else:
+	    x_max, y_max = 256, 256
+
         self.ui.graphicsView_detector2dPlot.add_plot_2d(raw_det_data, x_min=0, x_max=x_max, y_min=0, y_max=y_max,
                                                         hold_prev_image=False)
         status, roi = self._myControl.get_region_of_interest(exp_no, scan_number=None)
