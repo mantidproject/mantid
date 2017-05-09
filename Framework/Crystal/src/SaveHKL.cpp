@@ -415,8 +415,8 @@ void SaveHKL::exec() {
           // Distance to center of detector
           boost::shared_ptr<const IComponent> det0 =
               inst->getComponentByName(p.getBankName());
-          if (inst->getName().compare("CORELLI") ==
-              0) // for Corelli with sixteenpack under bank
+          if (inst->getName() ==
+              "CORELLI") // for Corelli with sixteenpack under bank
           {
             std::vector<Geometry::IComponent_const_sptr> children;
             boost::shared_ptr<const Geometry::ICompAssembly> asmb =
@@ -721,21 +721,21 @@ double SaveHKL::spectrumCalc(double TOF, int iSpec,
   return spect;
 }
 void SaveHKL::sizeBanks(std::string bankName, int &nCols, int &nRows) {
-  if (bankName.compare("None") == 0)
+  if (bankName == "None")
     return;
   boost::shared_ptr<const IComponent> parent =
       ws->getInstrument()->getComponentByName(bankName);
   if (!parent)
     return;
-  if (parent->type().compare("RectangularDetector") == 0) {
+  if (parent->type() == "RectangularDetector") {
     boost::shared_ptr<const RectangularDetector> RDet =
         boost::dynamic_pointer_cast<const RectangularDetector>(parent);
 
     nCols = RDet->xpixels();
     nRows = RDet->ypixels();
   } else {
-    if (ws->getInstrument()->getName().compare("CORELLI") ==
-        0) // for Corelli with sixteenpack under bank
+    if (ws->getInstrument()->getName() ==
+        "CORELLI") // for Corelli with sixteenpack under bank
     {
       std::vector<Geometry::IComponent_const_sptr> children;
       boost::shared_ptr<const Geometry::ICompAssembly> asmb =

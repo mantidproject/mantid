@@ -22,7 +22,14 @@ Kernel::IValidator_sptr SpectraAxisValidator::clone() const {
 */
 std::string
 SpectraAxisValidator::checkValidity(const MatrixWorkspace_sptr &value) const {
-  Mantid::API::Axis *axis = value->getAxis(m_axisNumber);
+  Mantid::API::Axis *axis;
+  try {
+    axis = value->getAxis(m_axisNumber);
+  } catch (Kernel::Exception::IndexError) {
+    return "No axis at index " + std::to_string(m_axisNumber) +
+           " available in the workspace";
+  }
+
   if (axis->isSpectra())
     return "";
   else

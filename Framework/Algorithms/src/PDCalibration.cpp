@@ -477,24 +477,6 @@ void PDCalibration::exec() {
   PARALLEL_CHECK_INTERUPT_REGION
 }
 
-namespace {
-struct d_to_tof {
-  d_to_tof(const double difc, const double difa, const double tzero) {
-    this->difc = difc;
-    this->difa = difa;
-    this->tzero = tzero;
-  }
-
-  double operator()(const double dspacing) const {
-    return difc * dspacing + difa * dspacing * dspacing + tzero;
-  }
-
-  double difc;
-  double difa;
-  double tzero;
-};
-}
-
 void PDCalibration::fitDIFCtZeroDIFA(const std::vector<double> &d,
                                      const std::vector<double> &tof,
                                      double &difc, double &t0, double &difa) {
@@ -688,7 +670,7 @@ PDCalibration::getDSpacingToTof(const detid_t detid) {
   const double difc = m_calibrationTable->getRef<double>("difc", rowNum);
   const double tzero = m_calibrationTable->getRef<double>("tzero", rowNum);
 
-  return d_to_tof(difc, difa, tzero);
+  return Kernel::Diffraction::getDToTofConversionFunc(difc, difa, tzero);
 }
 
 void PDCalibration::setCalibrationValues(const detid_t detid, const double difc,

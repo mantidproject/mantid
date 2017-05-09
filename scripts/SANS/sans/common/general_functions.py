@@ -8,8 +8,8 @@ import re
 from copy import deepcopy
 import json
 from mantid.api import (AlgorithmManager, AnalysisDataService, isSameWorkspaceObject)
-from sans.common.constants import (SANS_FILE_TAG, ALL_PERIODS,
-                                   SANS2D, LOQ, LARMOR, EMPTY_NAME, REDUCED_CAN_TAG)
+from sans.common.constants import (SANS_FILE_TAG, ALL_PERIODS, SANS2D, LOQ, LARMOR, EMPTY_NAME,
+                                   REDUCED_CAN_TAG)
 from sans.common.log_tagger import (get_tag, has_tag, set_tag, has_hash, get_hash_value, set_hash)
 from sans.common.enums import (DetectorType, RangeStepType, ReductionDimensionality, OutputParts, ISISReductionMode)
 
@@ -95,6 +95,7 @@ def create_unmanaged_algorithm(name, **kwargs):
     alg = AlgorithmManager.createUnmanaged(name)
     alg.initialize()
     alg.setChild(True)
+    alg.setRethrows(True)
     for key, value in list(kwargs.items()):
         alg.setProperty(key, value)
     return alg
@@ -111,6 +112,7 @@ def create_managed_non_child_algorithm(name, **kwargs):
     alg = AlgorithmManager.create(name)
     alg.initialize()
     alg.setChild(False)
+    alg.setRethrows(True)
     for key, value in list(kwargs.items()):
         alg.setProperty(key, value)
     return alg
@@ -127,6 +129,7 @@ def create_child_algorithm(parent_alg, name, **kwargs):
     """
     if parent_alg:
         alg = parent_alg.createChildAlgorithm(name)
+        alg.setRethrows(True)
         for key, value in list(kwargs.items()):
             alg.setProperty(key, value)
     else:
@@ -150,7 +153,7 @@ def get_input_workspace_as_copy_if_not_same_as_output_workspace(alg):
         clone_alg.execute()
         return clone_alg.getProperty("OutputWorkspace").value
 
-    if "InputWorkspace" not in alg or "OutputWorkspace" not in alg:  #  noqa
+    if "InputWorkspace" not in alg or "OutputWorkspace" not in alg:
         raise RuntimeError("The algorithm {} does not seem to have an InputWorkspace and"
                            " an OutputWorkspace property.".format(alg.name()))
 
