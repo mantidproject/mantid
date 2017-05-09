@@ -797,10 +797,10 @@ void MuonAnalysisFitDataPresenter::setUpDataSelector(
   const auto &groups = m_dataSelector->getChosenGroups();
   const auto &periods = m_dataSelector->getPeriodSelections();
   if (!groups.contains(groupToSet)) {
-    m_dataSelector->setChosenGroup(groupToSet);
+  //  m_dataSelector->setChosenGroup(groupToSet);
   }
   if (!periodToSet.isEmpty() && !periods.contains(periodToSet)) {
-    m_dataSelector->setChosenPeriod(periodToSet);
+//    m_dataSelector->setChosenPeriod(periodToSet);
   }
 
   // If given an optional file path to "current run", cache it for later use

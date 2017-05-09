@@ -399,7 +399,7 @@ void MuonAnalysis::plotSelectedItem() {
 void MuonAnalysis::plotItem(ItemType itemType, int tableRow,
                             PlotType plotType) {
   m_updating = true;
-  m_dataSelector->clearChosenGroups();
+//  m_dataSelector->clearChosenGroups();
   m_uiForm.fitBrowser->clearChosenGroups();
   m_uiForm.fitBrowser->clearChosenPeriods();
 
@@ -1831,12 +1831,12 @@ void MuonAnalysis::selectMultiPeak(const QString &wsName,
                    std::back_inserter(groupsAndPairs), &QString::fromStdString);
     std::transform(groups.pairNames.begin(), groups.pairNames.end(),
                    std::back_inserter(groupsAndPairs), &QString::fromStdString);
-    m_dataSelector->setAvailableGroups(groupsAndPairs);
+  //  m_dataSelector->setAvailableGroups(groupsAndPairs);
 	m_uiForm.fitBrowser->setAvailableGroups(groupsAndPairs);
 	m_uiForm.fitBrowser->setAllGroups();
 	m_uiForm.fitBrowser->setNumPeriods(m_numPeriods);
 
-    m_dataSelector->setNumPeriods(m_numPeriods);
+  //  m_dataSelector->setNumPeriods(m_numPeriods);
 
     // Set the selected run, group/pair and period
     m_fitDataPresenter->setAssignedFirstRun(wsName, filePath);
@@ -2448,7 +2448,10 @@ void MuonAnalysis::changeTab(int newTabIndex) {
   if (newTab == m_uiForm.DataAnalysis) // Entering DA tab
   {
     // Save last fitting range
-    auto xmin = m_dataSelector->getStartTime();
+	  auto xmin = m_uiForm.fitBrowser->startX();
+	m_dataSelector->setStartTime(xmin);
+
+    //auto xmin = m_dataSelector->getStartTime();
     auto xmax = m_dataSelector->getEndTime();
 
     // Say MantidPlot to use Muon Analysis fit prop. browser
@@ -3090,7 +3093,7 @@ void MuonAnalysis::multiFitCheckboxChanged(int state) {
   }
   m_fitFunctionPresenter->setMultiFitState(multiFitState);
   if (multiFitState == Muon::MultiFitState::Disabled) {
-    m_dataSelector->clearChosenGroups();
+//    m_dataSelector->clearChosenGroups();
 	m_uiForm.fitBrowser->clearChosenGroups();
 	m_uiForm.fitBrowser->clearChosenPeriods();
 

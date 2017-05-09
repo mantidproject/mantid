@@ -65,16 +65,16 @@ public:
   /// Get names of chosen groups
   QStringList getChosenGroups() const override;
   /// Set chosen group
-  void setChosenGroup(const QString &group) override;
+ // void setChosenGroup(const QString &group) override;
   void setGroupsSelected(QStringList groups) { m_chosenGroups = groups; };
   void setPeriodsSelected(QStringList periods) { m_chosenPeriods = periods; };
 
   /// Clear list of selected groups
-  void clearChosenGroups() const;
+  //void clearChosenGroups() const;
   /// Get selected periods
   QStringList getPeriodSelections() const override;
   /// Set selected period
-  void setChosenPeriod(const QString &period) override;
+  //void setChosenPeriod(const QString &period) override;
   /// Get type of fit
   IMuonFitDataSelector::FitType getFitType() const override;
   /// Get instrument name
@@ -96,12 +96,12 @@ public:
 
 public slots:
   /// Set number of periods in data
-  void setNumPeriods(size_t numPeriods) override;
+  //void setNumPeriods(size_t numPeriods) override;
   /// Set starting run number, instrument and (optionally) file path
   void setWorkspaceDetails(const QString &runNumbers, const QString &instName,
                            const boost::optional<QString> &filePath) override;
   /// Set names of available groups
-  void setAvailableGroups(const QStringList &groupNames) override;
+  //void setAvailableGroups(const QStringList &groupNames) override;
   /// Set start time for fit
   void setStartTime(double start) override;
   /// Set end time for fit
@@ -113,7 +113,7 @@ public slots:
   /// Called when user changes runs
   void userChangedRuns();
   /// Called when period combination box checked/unchecked
-  void periodCombinationStateChanged(int state);
+  //void periodCombinationStateChanged(int state);
   /// Called when fit type changed
   void fitTypeChanged(bool state);
   /// Called when group/period box selection changes
@@ -123,9 +123,9 @@ signals:
   /// Edited the start or end fields
   void dataPropertiesChanged();
   /// Changed the groups selection
-  void selectedGroupsChanged();
+  //void selectedGroupsChanged();
   /// Changed the periods selection
-  void selectedPeriodsChanged();
+  //void selectedPeriodsChanged();
   /// Changed the workspace
   void workspaceChanged();
   /// Simultaneous fit label changed
@@ -135,30 +135,31 @@ signals:
 
 private:
   /// Add a checkbox to Groups section
-  void addGroupCheckbox(const QString &name);
+  //void addGroupCheckbox(const QString &name);
   /// Clear all checkboxes from Groups section
-  void clearGroupCheckboxes();
+  //void clearGroupCheckboxes();
   /// Set visibility of "Periods" section
-  void setPeriodVisibility(bool visible);
+  //void setPeriodVisibility(bool visible);
   /// Set default values in some input controls
   void setDefaultValues();
   /// Set up validators for input
-  void setUpValidators();
+  //void setUpValidators();
   /// Set up connections for signals/slots
   void setUpConnections();
   /// Set type for fit
   void setFitType(IMuonFitDataSelector::FitType type);
   /// Check/uncheck "Combination" box and enable/disable text boxes
-  void setPeriodCombination(bool on);
+  //void setPeriodCombination(bool on);
   /// Set busy cursor and disable input
   void setBusyState();
   /// Member - user interface
   Ui::MuonFitDataSelector m_ui;
   /// Map of group names to checkboxes
-  QMap<QString, QCheckBox *> m_groupBoxes;
+  //QMap<QString, QCheckBox *> m_groupBoxes;
   /// Map of period names to checkboxes
-  QMap<QString, QCheckBox *> m_periodBoxes;
-  double startX;
+  //QMap<QString, QCheckBox *> m_periodBoxes;
+  double m_startX;
+  double m_endX;
   QStringList m_chosenGroups;
   QStringList m_chosenPeriods;
 

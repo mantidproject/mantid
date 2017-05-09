@@ -20,14 +20,14 @@ namespace MantidWidgets {
 MuonFitDataSelector::MuonFitDataSelector(QWidget *parent)
     : MantidWidget(parent) {
   m_ui.setupUi(this);
-  this->setUpValidators();
+ // this->setUpValidators();
   this->setDefaultValues();
   this->setUpConnections();
-  m_groupBoxes.insert("fwd", m_ui.chkFwd);
+ /* m_groupBoxes.insert("fwd", m_ui.chkFwd);
   m_groupBoxes.insert("bwd", m_ui.chkBwd);
   m_periodBoxes.insert("1", m_ui.chk1);
   m_periodBoxes.insert("2", m_ui.chk2);
-
+  */
   // Disable "Browse" button - use case is that first run will always be the one
   // selected on front tab. User will type in the runs they want rather than
   // using the Browse button. (If they want to "Browse" they can use front tab).
@@ -51,8 +51,8 @@ MuonFitDataSelector::MuonFitDataSelector(QWidget *parent, int runNumber,
     : MuonFitDataSelector(parent) {
   this->setWorkspaceDetails(QString::number(runNumber), instName,
                             boost::optional<QString>{});
-  this->setNumPeriods(numPeriods);
-  this->setAvailableGroups(groups);
+  //this->setNumPeriods(numPeriods);
+  //this->setAvailableGroups(groups);
 }
 
 /**
@@ -63,18 +63,18 @@ void MuonFitDataSelector::setUpConnections() {
   connect(m_ui.runs, SIGNAL(filesFound()), this, SLOT(userChangedRuns()));
   connect(m_ui.rbCoAdd, SIGNAL(toggled(bool)), this,
           SLOT(fitTypeChanged(bool)));
-  connect(m_ui.txtStart, SIGNAL(editingFinished()), this,
-          SIGNAL(dataPropertiesChanged()));
-  connect(m_ui.txtEnd, SIGNAL(editingFinished()), this,
-          SIGNAL(dataPropertiesChanged()));
-  connect(m_ui.chkCombine, SIGNAL(stateChanged(int)), this,
-          SLOT(periodCombinationStateChanged(int)));
+//  connect(m_ui.txtStart, SIGNAL(editingFinished()), this,
+  //        SIGNAL(dataPropertiesChanged()));
+ // connect(m_ui.txtEnd, SIGNAL(editingFinished()), this,
+ //         SIGNAL(dataPropertiesChanged()));
+ //onnect(m_ui.chkCombine, SIGNAL(stateChanged(int)), this,
+     //     SLOT(periodCombinationStateChanged(int)));
   connect(m_ui.txtSimFitLabel, SIGNAL(editingFinished()), this,
           SIGNAL(simulLabelChanged()));
-  connect(this, SIGNAL(selectedGroupsChanged()), this,
-          SLOT(checkForMultiGroupPeriodSelection()));
-  connect(this, SIGNAL(selectedPeriodsChanged()), this,
-          SLOT(checkForMultiGroupPeriodSelection()));
+//  connect(this, SIGNAL(selectedGroupsChanged()), this,
+   //       SLOT(checkForMultiGroupPeriodSelection()));
+ // connect(this, SIGNAL(selectedPeriodsChanged()), this,
+    //      SLOT(checkForMultiGroupPeriodSelection()));
   connect(this, SIGNAL(workspaceChanged()), this,
           SLOT(checkForMultiGroupPeriodSelection()));
   connect(m_ui.cbDataset, SIGNAL(currentIndexChanged(int)), this,
@@ -82,10 +82,10 @@ void MuonFitDataSelector::setUpConnections() {
   connect(m_ui.btnNextDataset, SIGNAL(clicked()), this, SLOT(setNextDataset()));
   connect(m_ui.btnPrevDataset, SIGNAL(clicked()), this,
           SLOT(setPreviousDataset()));
-  connect(m_ui.txtFirst, SIGNAL(editingFinished()), this,
-          SIGNAL(selectedPeriodsChanged()));
-  connect(m_ui.txtSecond, SIGNAL(editingFinished()), this,
-          SIGNAL(selectedPeriodsChanged()));
+//  connect(m_ui.txtFirst, SIGNAL(editingFinished()), this,
+      //    SIGNAL(selectedPeriodsChanged()));
+//  connect(m_ui.txtSecond, SIGNAL(editingFinished()), this,
+   //       SIGNAL(selectedPeriodsChanged()));
 }
 
 /**
@@ -119,7 +119,6 @@ void MuonFitDataSelector::userChangedRuns() {
  * Sets group names and updates checkboxes on UI
  * By default sets all unchecked
  * @param groups :: [input] List of group names
- */
 void MuonFitDataSelector::setAvailableGroups(const QStringList &groups) {
   // If it's the same list, do nothing
   if (groups.size() == m_groupBoxes.size()) {
@@ -137,15 +136,15 @@ void MuonFitDataSelector::setAvailableGroups(const QStringList &groups) {
     addGroupCheckbox(group);
   }
 }
-
+*/
 /**
  * Get the user's supplied start time (default 0)
  * @returns :: start time input by user in microseconds
  */
 double MuonFitDataSelector::getStartTime() const {
   // Validator ensures cast to double will succeed
-  const QString start = m_ui.txtStart->text();
-  return start.toDouble();
+  //const QString start = m_ui.txtStart->text();
+  return m_startX;// start.toDouble();
 }
 
 /**
@@ -153,7 +152,8 @@ double MuonFitDataSelector::getStartTime() const {
  * @param start :: [input] Start time in microseconds
  */
 void MuonFitDataSelector::setStartTimeQuietly(double start) {
-  m_ui.txtStart->setText(QString::number(start));
+  //m_ui.txtStart->setText(QString::number(start));
+  m_startX = start;
 }
 
 /**
@@ -171,8 +171,8 @@ void MuonFitDataSelector::setStartTime(double start) {
  */
 double MuonFitDataSelector::getEndTime() const {
   // Validator ensures cast to double will succeed
-  const QString end = m_ui.txtEnd->text();
-  return end.toDouble();
+  //const QString end = m_ui.txtEnd->text();
+	return m_endX;// end.toDouble();
 }
 
 /**
@@ -180,7 +180,8 @@ double MuonFitDataSelector::getEndTime() const {
  * @param end :: [input] End time in microseconds
  */
 void MuonFitDataSelector::setEndTimeQuietly(double end) {
-  m_ui.txtEnd->setText(QString::number(end));
+	m_endX = end;
+	//m_ui.txtEnd->setText(QString::number(end));
 }
 
 /**
@@ -204,11 +205,11 @@ QStringList MuonFitDataSelector::getFilenames() const {
  * Set up input validation on UI controls
  * e.g. some boxes should only accept numeric input
  */
-void MuonFitDataSelector::setUpValidators() {
+//void MuonFitDataSelector::setUpValidators() {
   // Start/end times: numeric values only
-  m_ui.txtStart->setValidator(new QDoubleValidator(this));
-  m_ui.txtEnd->setValidator(new QDoubleValidator(this));
-}
+//  m_ui.txtStart->setValidator(new QDoubleValidator(this));
+//  m_ui.txtEnd->setValidator(new QDoubleValidator(this));
+//}
 
 /**
  * Set up run finder with initial run number and instrument
@@ -250,11 +251,11 @@ void MuonFitDataSelector::setWorkspaceDetails(
  */
 void MuonFitDataSelector::setDefaultValues() {
   const QChar muMicro{0x03BC}; // mu in Unicode
-  m_ui.lblStart->setText(QString("Start (%1s)").arg(muMicro));
-  m_ui.lblEnd->setText(QString("End (%1s)").arg(muMicro));
+//  m_ui.lblStart->setText(QString("Start (%1s)").arg(muMicro));
+ // m_ui.lblEnd->setText(QString("End (%1s)").arg(muMicro));
   this->setStartTime(0.0);
   this->setEndTime(0.0);
-  setPeriodCombination(false);
+  //setPeriodCombination(false);
   m_ui.txtSimFitLabel->setText("0");
   emit simulLabelChanged(); // make sure default "0" is set
 }
@@ -264,15 +265,15 @@ void MuonFitDataSelector::setDefaultValues() {
  * (if single-period, hide to not confuse the user)
  * @param visible :: [input] Whether to show or hide the options
  */
-void MuonFitDataSelector::setPeriodVisibility(bool visible) {
+/*void MuonFitDataSelector::setPeriodVisibility(bool visible) {
   m_ui.groupBoxPeriods->setVisible(visible);
-}
+}*/
 
 /**
  * Add a new checkbox to the list of groups with given name
  * The new checkbox is unchecked by default
  * @param name :: [input] Name of group to add
- */
+ *//*
 void MuonFitDataSelector::addGroupCheckbox(const QString &name) {
   auto checkBox = new QCheckBox(name);
   m_groupBoxes.insert(name, checkBox);
@@ -280,26 +281,26 @@ void MuonFitDataSelector::addGroupCheckbox(const QString &name) {
   m_ui.verticalLayoutGroups->addWidget(checkBox);
   connect(checkBox, SIGNAL(clicked(bool)), this,
           SIGNAL(selectedGroupsChanged()));
-}
+}*/
 
 /**
  * Clears all group names and checkboxes
  * (ready to add new ones)
- */
+ *//*
 void MuonFitDataSelector::clearGroupCheckboxes() {
   for (const auto &checkbox : m_groupBoxes) {
     m_ui.verticalLayoutGroups->removeWidget(checkbox);
     checkbox->deleteLater(); // will disconnect signal automatically
   }
   m_groupBoxes.clear();
-}
+}*/
 
 /**
  * Sets checkboxes on UI for given number
  * of periods plus "combination" boxes.
  * Hides control for single-period data.
  * @param numPeriods :: [input] Number of periods
- */
+
 void MuonFitDataSelector::setNumPeriods(size_t numPeriods) {
   const size_t currentPeriods = static_cast<size_t>(m_periodBoxes.size());
   if (numPeriods > currentPeriods) {
@@ -340,38 +341,14 @@ void MuonFitDataSelector::setNumPeriods(size_t numPeriods) {
   // Hide box if single-period
   this->setPeriodVisibility(numPeriods > 1);
 }
-
+*/
 /**
  * Returns a list of periods and combinations chosen in UI
  * @returns :: list of periods e.g. "1", "3", "1+2-3+4", or "" if single-period
  */
 QStringList MuonFitDataSelector::getPeriodSelections() const {
 	return m_chosenPeriods;
-  QStringList checked;
-  if (m_ui.groupBoxPeriods->isVisible()) {
-    for (auto iter = m_periodBoxes.constBegin();
-         iter != m_periodBoxes.constEnd(); ++iter) {
-      if (iter.value()->isChecked()) {
-        checked.append(iter.key());
-      }
-    }
-
-    // combination
-    if (m_ui.chkCombine->isChecked()) {
-      QString combination = m_ui.txtFirst->text();
-      const auto second = m_ui.txtSecond->text();
-      if (!second.isEmpty()) {
-        combination.append("-").append(m_ui.txtSecond->text());
-      }
-      combination.replace(" ", "");
-      combination.replace(",", "+");
-      checked.append(combination);
-    }
-  } else {
-    // Single-period data
-    checked << "";
-  }
-  return checked;
+  
 }
 
 /**
@@ -379,34 +356,25 @@ QStringList MuonFitDataSelector::getPeriodSelections() const {
  * @returns :: list of selected groups
  */
 QStringList MuonFitDataSelector::getChosenGroups() const {
-	/*for (auto group : m_chosenGroups) {
-	std::string tmp = group.toStdString();
-	double a = 1.;
-}*/
 	return m_chosenGroups;
-	/*QStringList chosen;
-  for (auto iter = m_groupBoxes.constBegin(); iter != m_groupBoxes.constEnd();
-       ++iter) {
-    if (iter.value()->isChecked()) {
-      chosen.append(iter.key());
-    }
-  }
-  return chosen;*/
 }
 /**
 * Clears the list of selected groups (unchecks boxes)
 */
+/*
+
 void MuonFitDataSelector::clearChosenGroups() const {
   for (auto iter = m_groupBoxes.constBegin(); iter != m_groupBoxes.constEnd();
        ++iter) {
     iter.value()->setChecked(false);
   }
-}
+}*/
 /**
  * Set the chosen group ticked and all others off
  * Used when switching from Home tab to Data Analysis tab
  * @param group :: [input] Name of group to select
  */
+/*
 void MuonFitDataSelector::setChosenGroup(const QString &group) {
   for (auto iter = m_groupBoxes.constBegin(); iter != m_groupBoxes.constEnd();
        ++iter) {
@@ -414,14 +382,14 @@ void MuonFitDataSelector::setChosenGroup(const QString &group) {
       iter.value()->setChecked(true);
     }
   }
-}
+}*/
 
 /**
  * Set the chosen period/combination ticked and all others off
  * Used when switching from Home tab to Data Analysis tab
  * @param period :: [input] Period string to set selected
  * (can be just one period or a combination)
- */
+ 
 void MuonFitDataSelector::setChosenPeriod(const QString &period) {
   // Begin by unchecking everything
   for (auto checkbox : m_periodBoxes) {
@@ -447,7 +415,7 @@ void MuonFitDataSelector::setChosenPeriod(const QString &period) {
     // Test if period can be cast to int (just one period) or if it's a
     // combination e.g. "1+2"
     bool onePeriod(false);
-    /*const int chosenPeriod = */ period.toInt(&onePeriod);
+    /*const int chosenPeriod = *//* period.toInt(&onePeriod);
     if (onePeriod) {
       // set just one
       for (auto iter = m_periodBoxes.constBegin();
@@ -468,7 +436,7 @@ void MuonFitDataSelector::setChosenPeriod(const QString &period) {
     }
   }
 }
-
+*/
 /**
 *Gets user input in the form of a QVariant
 *
@@ -562,17 +530,18 @@ void MuonFitDataSelector::setFitType(IMuonFitDataSelector::FitType type) {
  * enabled/disabled
  * @param on :: [input] Turn on or off
  */
+/*
 void MuonFitDataSelector::setPeriodCombination(bool on) {
   m_ui.chkCombine->setChecked(on);
   m_ui.txtFirst->setEnabled(on);
   m_ui.txtSecond->setEnabled(on);
 }
-
+*/
 /**
  * Slot: Keeps enabled/disabled state of textboxes in sync with checkbox
  * for period combination choices
  * @param state :: [input] New check state of box
- */
+ *//*
 void MuonFitDataSelector::periodCombinationStateChanged(int state) {
   m_ui.txtFirst->setEnabled(state == Qt::Checked);
   m_ui.txtSecond->setEnabled(state == Qt::Checked);
@@ -582,7 +551,7 @@ void MuonFitDataSelector::periodCombinationStateChanged(int state) {
   }
   emit selectedPeriodsChanged();
 }
-
+*/
 /**
  * Return the instrument name currently set as the override
  * for the data selector
@@ -612,11 +581,11 @@ void MuonFitDataSelector::unsetBusyState() {
   disconnect(m_ui.runs, SIGNAL(fileInspectionFinished()), this,
              SLOT(unsetBusyState()));
   this->setCursor(Qt::ArrowCursor);
-  m_ui.groupBoxDataSelector->setEnabled(true);
-  m_ui.groupBoxGroups->setEnabled(true);
-  if (m_ui.groupBoxPeriods->isVisible()) {
-    m_ui.groupBoxPeriods->setEnabled(true);
-  }
+ // m_ui.groupBoxDataSelector->setEnabled(true);
+////  m_ui.groupBoxGroups->setEnabled(true);
+ // if (m_ui.groupBoxPeriods->isVisible()) {
+ //   m_ui.groupBoxPeriods->setEnabled(true);
+ // }
 }
 
 /**
@@ -627,11 +596,11 @@ void MuonFitDataSelector::setBusyState() {
   connect(m_ui.runs, SIGNAL(fileInspectionFinished()), this,
           SLOT(unsetBusyState()));
   this->setCursor(Qt::WaitCursor);
-  m_ui.groupBoxDataSelector->setEnabled(false);
-  m_ui.groupBoxGroups->setEnabled(false);
-  if (m_ui.groupBoxPeriods->isVisible()) {
-    m_ui.groupBoxPeriods->setEnabled(false);
-  }
+ // m_ui.groupBoxDataSelector->setEnabled(false);
+//  m_ui.groupBoxGroups->setEnabled(false);
+  //if (m_ui.groupBoxPeriods->isVisible()) {
+  //  m_ui.groupBoxPeriods->setEnabled(false);
+  //}
 }
 
 /**
