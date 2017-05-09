@@ -114,6 +114,7 @@ public:
   void clearChosenGroups() const;
   void setAllGroups();
   void setAllPairs();
+  void clearChosenPeriods() const;
 
 public slots:
   /// Perform the fit algorithm
@@ -123,6 +124,9 @@ public slots:
   void executeMuonFitMenu(const QString &item);
   void groupBtnPressed();
   void periodBtnPressed();
+  void generateBtnPressed();
+  void combineBtnPressed();
+  //void positiveCombo(QString value) { m_positiveCombo->setText(value); };
   void setNumPeriods(size_t numPeriods);
 signals:
   /// Emitted when sequential fit is requested by user
@@ -170,9 +174,10 @@ private:
   void addGroupCheckbox(const QString &name);
   void genGroupWindow();
   void genPeriodWindow();
+  void genCombinePeriodWindow();
   void updateGroupDisplay();
   void updatePeriodDisplay();
-
+  void setChosenPeriods(const QStringList &chosenPeriods);
   void clearPeriodCheckboxes();
   void addPeriodCheckbox(const QString &name);
 
@@ -203,9 +208,12 @@ private:
   QMap<QString, QtProperty *> m_periodBoxes;
   QtProperty *m_showPeriods;
   mutable QStringList m_showPeriodValue;
+  QLineEdit *m_positiveCombo;
+  QLineEdit *m_negativeCombo;
 
   QPushButton *m_reselectGroupBtn;
   QPushButton *m_reselectPeriodBtn;
+  QPushButton *m_generateBtn;
   QGroupBox *m_btnGroup;
 
 

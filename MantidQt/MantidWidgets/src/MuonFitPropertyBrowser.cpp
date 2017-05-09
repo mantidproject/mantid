@@ -45,6 +45,8 @@
 #include <QSettings>
 #include <QMessageBox>
 #include <QAction>
+#include <QFormLayout>
+
 #include <QLayout>
 #include <QSplitter>
 #include <QLabel>
@@ -186,11 +188,6 @@ void MuonFitPropertyBrowser::init() {
   multiFitSettingsGroup->addSubProperty(m_showPeriods);
 
   m_enumManager->setEnumNames(m_showPeriods, m_showPeriodValue);
-  tmp = "1";
-  addPeriodCheckbox(tmp);
-  tmp = "2";
-  addPeriodCheckbox(tmp);
-
 
   connect(m_browser, SIGNAL(currentItemChanged(QtBrowserItem *)), this,
           SLOT(currentItemChanged(QtBrowserItem *)));
@@ -211,12 +208,18 @@ void MuonFitPropertyBrowser::init() {
   QHBoxLayout *btnLayout = new QHBoxLayout;
   m_reselectGroupBtn = new QPushButton("Groups/Pairs");
   m_reselectPeriodBtn = new QPushButton("Periods");
+  m_generateBtn = new QPushButton("Combine Periods");
+
   m_reselectGroupBtn->setEnabled(false);
   m_reselectPeriodBtn->setEnabled(false);
   connect(m_reselectGroupBtn, SIGNAL(released()), this, SLOT(groupBtnPressed()));
   connect(m_reselectPeriodBtn, SIGNAL(released()), this, SLOT(periodBtnPressed()));
+  connect(m_generateBtn, SIGNAL(released()), this, SLOT(generateBtnPressed()));
+
   btnLayout->addWidget(m_reselectGroupBtn);
   btnLayout->addWidget(m_reselectPeriodBtn);
+  btnLayout->addWidget(m_generateBtn);
+
   m_btnGroup->setLayout(btnLayout);
 
 	 
@@ -297,6 +300,10 @@ void MuonFitPropertyBrowser::groupBtnPressed() {
 // Create period selection pop up
 void MuonFitPropertyBrowser::periodBtnPressed() {
 	genPeriodWindow();
+}
+// Create period selection pop up
+void MuonFitPropertyBrowser::generateBtnPressed() {
+	genCombinePeriodWindow();
 }
 /**
 * @brief Initialise the layout of the fit menu button.
@@ -410,8 +417,6 @@ void MuonFitPropertyBrowser::enumChanged(QtProperty *prop) {
 		else {
 			for (auto iter = m_periodBoxes.constBegin(); iter != m_periodBoxes.constEnd();
 				++iter) {
-
-				auto njtds = iter.key().toStdString();
 				if (option == iter.key().toStdString()) {
 					m_boolManager->setValue(iter.value(), true);
 				}
@@ -419,11 +424,9 @@ void MuonFitPropertyBrowser::enumChanged(QtProperty *prop) {
 					m_boolManager->setValue(iter.value(), false);
 				}
 				m_reselectPeriodBtn->setEnabled(false);
-
 			}			
 		}			
 		updatePeriodDisplay();
-
 	}
 	else {
 		FitPropertyBrowser::enumChanged(prop);
@@ -442,8 +445,10 @@ void MuonFitPropertyBrowser::updateGroupDisplay() {
 * selected periods
 */
 void MuonFitPropertyBrowser::updatePeriodDisplay() {
-	m_showPeriodValue.clear();
-	m_showPeriodValue << getChosenPeriods().join(",");
+	m_showPeriodValue.clear(); 
+	auto tmp = getChosenPeriods();
+	tmp.replaceInStrings(QRegExp(","), "+");
+	m_showPeriodValue << tmp.join(",");
 	m_enumManager->setEnumNames(m_showPeriods, m_showPeriodValue);
 	m_multiFitSettingsGroup->property()->addSubProperty(m_showPeriods);
 }
@@ -1186,15 +1191,21 @@ void MuonFitPropertyBrowser::genGroupWindow() {
 void MuonFitPropertyBrowser::setNumPeriods(size_t numPeriods) {
 	clearPeriodCheckboxes();
 	m_periodsToFitOptions.clear();
-		// create more boxes
+	// create more boxes
 	for (size_t i = 0; i != numPeriods; i++) {
 		QString name = QString::number(i + 1);
 		addPeriodCheckbox(name);
 	}
-	//add custom back into list
-	m_periodsToFitOptions << "Custom";
-	m_enumManager->setEnumNames(m_periodsToFit, m_periodsToFitOptions);
-
+	if (m_periodsToFitOptions.size() == 1) {
+		m_generateBtn->setDisabled(true);
+		m_multiFitSettingsGroup->property()->removeSubProperty(m_periodsToFit);
+		m_multiFitSettingsGroup->property()->removeSubProperty(m_showPeriods);
+	}
+	else {
+		//add custom back into list
+		m_periodsToFitOptions << "Custom";
+		m_enumManager->setEnumNames(m_periodsToFit, m_periodsToFitOptions);
+	}
 }
 /**
 * Sets group names and updates checkboxes on UI
@@ -1204,7 +1215,7 @@ void MuonFitPropertyBrowser::setNumPeriods(size_t numPeriods) {
 void MuonFitPropertyBrowser::setAvailablePeriods(const QStringList &periods) {
 	// If it's the same list, do nothing
 	if (periods.size() == m_periodBoxes.size()) {
-		auto existingGroups = m_periodBoxes.keys();
+		auto existingGroups = m_periodBoxes.keys(); 
 		auto newGroups = periods;
 		qSort(existingGroups);
 		qSort(newGroups);
@@ -1214,6 +1225,7 @@ void MuonFitPropertyBrowser::setAvailablePeriods(const QStringList &periods) {
 	}
 
 	clearPeriodCheckboxes();
+
 	QSettings settings;
 	//settings.beginGroup("Mantid/test");
 	QtProperty *groupSettings = m_groupManager->addProperty("test");
@@ -1231,7 +1243,20 @@ void MuonFitPropertyBrowser::clearPeriodCheckboxes() {
 	for (const auto &checkbox : m_periodBoxes) {
 		delete(checkbox);
 	}
+	m_periodsToFitOptions.clear();
 	m_periodBoxes.clear();
+	m_periodsToFitOptions << "1";
+	m_enumManager->setEnumNames(m_periodsToFit, m_periodsToFitOptions);
+
+}
+/**
+* Clears the list of selected groups (unchecks boxes)
+*/
+void MuonFitPropertyBrowser::clearChosenPeriods() const {
+	for (auto iter = m_periodBoxes.constBegin(); iter != m_periodBoxes.constEnd();
+		++iter) {
+		m_boolManager->setValue(iter.value(), false);
+	}
 }
 /**
 * Add a new checkbox to the list of periods with given name
@@ -1241,18 +1266,13 @@ void MuonFitPropertyBrowser::clearPeriodCheckboxes() {
 void MuonFitPropertyBrowser::addPeriodCheckbox(const QString &name) {
 	m_periodBoxes.insert(name, m_boolManager->addProperty(name));
 	int j = m_enumManager->value(m_periodsToFit);
-	//add new period to list
-	m_periodsToFitOptions << name;
+	
+	//add new period to list will go after inital list
+	m_periodsToFitOptions <<  name;
+	auto active = getChosenPeriods();
 	m_enumManager->setEnumNames(m_periodsToFit, m_periodsToFitOptions);
-
-	auto option = m_periodsToFitOptions[j].toStdString();
-
-/*	if (option == "All groups") {
-		setAllGroups();
-	}
-	else if (option == "All Pairs") {
-		setAllPairs();
-	}*/
+	setChosenPeriods(active);
+	m_enumManager->setValue(m_periodsToFit, j);
 }
 /**
 * Returns a list of the selected periods (checked boxes)
@@ -1267,6 +1287,22 @@ QStringList MuonFitPropertyBrowser::getChosenPeriods() const {
 		}
 	}
 	return chosen;
+}
+/**
+* Ticks the selected periods 
+* @param chsoenPeriods :: list of selected periods
+*/
+void MuonFitPropertyBrowser::setChosenPeriods(const QStringList &chosenPeriods){
+	clearChosenPeriods();
+	for (auto selected : chosenPeriods) {
+		for (auto iter = m_periodBoxes.constBegin(); iter != m_periodBoxes.constEnd();
+			++iter) {
+			auto tmp = iter.key();
+			if (iter.key() == selected) {
+				m_boolManager->setValue(iter.value(), true);
+			}
+		}
+	}
 }
 /*
 * Create a popup window to select a custom
@@ -1290,5 +1326,39 @@ void MuonFitPropertyBrowser::genPeriodWindow() {
 	w->setLayout(layout);
 	w->show();
 }
+/*
+* Create a popup window to create
+* a combination of periods
+*/
+void MuonFitPropertyBrowser::genCombinePeriodWindow() {
+	QWidget *w = new QWidget;
+	QVBoxLayout *layout = new QVBoxLayout(w);
+	QFormLayout *formLayout = new QFormLayout;
+	m_positiveCombo = new QLineEdit();
+	m_negativeCombo = new QLineEdit();
+	formLayout->addRow(new QLabel(tr("Combine:")), m_positiveCombo);
+	formLayout->addRow(new QLabel(tr("   -    ")), m_negativeCombo);
+	layout->addLayout(formLayout);
+
+	QPushButton *applyBtn = new QPushButton("Apply");
+	
+	connect(applyBtn, SIGNAL(released()), this, SLOT(combineBtnPressed()));
+
+	layout->addWidget(applyBtn);
+	w->setLayout(layout);
+	w->show();
+	
+
+}
+
+void MuonFitPropertyBrowser::combineBtnPressed() {
+	QString value = m_positiveCombo->text();
+	value.append("-").append(m_negativeCombo->text());
+	m_positiveCombo->clear();
+	m_negativeCombo->clear();
+	addPeriodCheckbox(value);
+
+}
+
 } // MantidQt
 } // API

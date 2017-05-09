@@ -401,6 +401,8 @@ void MuonAnalysis::plotItem(ItemType itemType, int tableRow,
   m_updating = true;
   m_dataSelector->clearChosenGroups();
   m_uiForm.fitBrowser->clearChosenGroups();
+  m_uiForm.fitBrowser->clearChosenPeriods();
+
   AnalysisDataServiceImpl &ads = AnalysisDataService::Instance();
 
   try {
@@ -1831,6 +1833,7 @@ void MuonAnalysis::selectMultiPeak(const QString &wsName,
                    std::back_inserter(groupsAndPairs), &QString::fromStdString);
     m_dataSelector->setAvailableGroups(groupsAndPairs);
 	m_uiForm.fitBrowser->setAvailableGroups(groupsAndPairs);
+	m_uiForm.fitBrowser->setAllGroups();
 	m_uiForm.fitBrowser->setNumPeriods(m_numPeriods);
 
     m_dataSelector->setNumPeriods(m_numPeriods);
@@ -3089,6 +3092,8 @@ void MuonAnalysis::multiFitCheckboxChanged(int state) {
   if (multiFitState == Muon::MultiFitState::Disabled) {
     m_dataSelector->clearChosenGroups();
 	m_uiForm.fitBrowser->clearChosenGroups();
+	m_uiForm.fitBrowser->clearChosenPeriods();
+
   }
 }
 /**
