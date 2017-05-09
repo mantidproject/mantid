@@ -15,7 +15,9 @@ namespace API {
 class IndexTypeProperty;
 class MatrixWorkspace;
 
-/** WorkspacePropertyWithIndex : TODO: DESCRIPTION
+/** WorkspacePropertyWithIndex : Workspace property which allows users to
+  specify an input index type. The property then simultaneously returns the
+  workspace and the indices.
   @author Lamar Moore
   @Date 05-05-2017
   Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
@@ -85,6 +87,7 @@ private:
   std::unique_ptr<Kernel::ArrayProperty<int>> m_indexListProp;
   std::unique_ptr<IndexTypeProperty> m_indexTypeProp;
 
+  /// MatrixWorkspace required in order to use IndexInfo::makeIndexset
   const void checkWorkspace() const {
     if (!std::is_convertible<TYPE *, MatrixWorkspace *>::value)
       throw std::runtime_error(

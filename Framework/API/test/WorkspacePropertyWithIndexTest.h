@@ -195,6 +195,27 @@ public:
     for (int i = 0; i < indexSet.size(); i++)
       TS_ASSERT_EQUALS(indexSet[i] + 1, indices[i]);
   }
+
+  void testReturnAllIndicesWhenNoSpectrumNumbersProvided() {
+    auto ws = WorkspaceFactory::Instance().create("WorkspaceTester", 10, 10, 9);
+
+    MatrixWorkspaceIndexProp prop(IndexType::SpectrumNumber);
+    prop = ws; // Set workspace pointer
+
+    // Create indices
+    MatrixWorkspace_sptr outWs;
+    SpectrumIndexSet indexSet(0);
+
+    std::tie(outWs, indexSet) =
+        std::pair<MatrixWorkspace_sptr, SpectrumIndexSet>(prop);
+
+    TS_ASSERT_EQUALS(outWs, ws);
+
+    TS_ASSERT_EQUALS(indexSet.size(), 10);
+
+    for (int i = 0; i < indexSet.size(); i++)
+      TS_ASSERT_EQUALS(indexSet[i], i);
+  }
 };
 
 #endif /* MANTID_API_WORKSPACEPROPERTYWITHINDEXTEST_H_ */

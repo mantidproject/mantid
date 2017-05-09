@@ -105,19 +105,24 @@ const SpectrumIndexSet WorkspacePropertyWithIndex<TYPE>::getIndices() const {
   auto matWs = boost::dynamic_pointer_cast<MatrixWorkspace>(wksp);
 
   const auto &indexInfo = matWs->indexInfo();
-  std::vector<int> indices = this->m_indexListProp->operator()();
-  SpectrumIndexSet indexSet(indices.size());
+  std::vector<int> list = this->m_indexListProp->operator()();
+
+  //If no indices provided, then assume all
+  if (list.size() == 0) 
+	  return indexInfo.makeIndexSet();
+
+  SpectrumIndexSet indexSet(list.size());
 
   switch (m_indexTypeProp->selectedType()) {
   case IndexType::SpectrumNumber:
     indexSet =
         indexInfo.makeIndexSet(std::vector<Mantid::Indexing::SpectrumNumber>(
-            indices.begin(), indices.end()));
+            list.begin(), list.end()));
     break;
   case IndexType::WorkspaceIndex:
     indexSet = indexInfo.makeIndexSet(
-        std::vector<Mantid::Indexing::GlobalSpectrumIndex>(indices.begin(),
-                                                           indices.end()));
+        std::vector<Mantid::Indexing::GlobalSpectrumIndex>(list.begin(),
+                                                           list.end()));
     break;
   }
 
