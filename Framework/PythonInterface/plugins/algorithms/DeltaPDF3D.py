@@ -58,6 +58,8 @@ class DeltaPDF3D(PythonAlgorithm):
         self.declareProperty("ConvolutionWidth", 2.0, validator=FloatBoundedValidator(0.),
                              doc="Width of gaussian convolution in pixels")
         self.setPropertySettings("ConvolutionWidth", condition)
+        self.declareProperty("Deconvolution", True, "Apply deconvolution after fourier transform")
+        self.setPropertySettings("Deconvolution", condition)
 
         # Reflections
         self.setPropertyGroup("RemoveReflections","Reflection Removal")
@@ -73,6 +75,7 @@ class DeltaPDF3D(PythonAlgorithm):
         # Convolution
         self.setPropertyGroup("Convolution","Convolution")
         self.setPropertyGroup("ConvolutionWidth","Convolution")
+        self.setPropertyGroup("Deconvolution","Convolution")
 
     def validateInputs(self):
         issues = dict()
@@ -220,11 +223,15 @@ class DeltaPDF3D(PythonAlgorithm):
         signal[np.isnan(signal)]=0
         signal[np.isinf(signal)]=0
 
-        signal=np.fft.fftshift(np.fft.fftn(np.fft.ifftshift(signal))).real
+        signal=np.fft.fftshift(np.fft.fftn(np.fft.ifftshift(signal)))
         number_of_bins = signal.shape
 
+        # Do deconvolution
+        if self.getProperty("Convolution").value and self.getProperty("Deconvolution").value:
+            signal /= self._deconvolution(np.array(signal.shape))
+
         # CreateMDHistoWorkspace expects Fortan `column-major` ordering
-        signal = signal.flatten('F')
+        signal = signal.real.flatten('F')
 
         createWS_alg = self.createChildAlgorithm("CreateMDHistoWorkspace", enableLogging=False)
         createWS_alg.setProperty("SignalInput", signal)
@@ -247,7 +254,7 @@ class DeltaPDF3D(PythonAlgorithm):
 
     def _convolution(self, signal):
         from astropy.convolution import convolve, convolve_fft, Gaussian1DKernel
-        G1D = Gaussian1DKernel(2).array
+        G1D = Gaussian1DKernel(self.getProperty("ConvolutionWidth").value).array
         G3D = G1D * G1D.reshape((-1,1)) * G1D.reshape((-1,1,1))
         try:
             logger.debug('Trying astropy.convolution.convolve_fft for convolution')
@@ -255,6 +262,15 @@ class DeltaPDF3D(PythonAlgorithm):
         except ValueError:
             logger.debug('Using astropy.convolution.convolve for convolution')
             return convolve(signal, G3D)
+
+    def _deconvolution(self, shape):
+        from astropy.convolution import Gaussian1DKernel
+        G1D = Gaussian1DKernel(self.getProperty("ConvolutionWidth").value).array
+        G3D = G1D * G1D.reshape((-1,1)) * G1D.reshape((-1,1,1))
+        G3D_shape = np.array(G3D.shape)
+        G3D = np.pad(G3D,pad_width=np.array([np.floor((shape-G3D_shape)/2),
+                                             np.ceil((shape-G3D_shape)/2)],dtype=np.int).transpose(),mode='constant')
+        return np.fft.fftshift(np.fft.fftn(np.fft.ifftshift(G3D)))
 
     def _calc_new_extents(self, inWS):
         # Calculate new extents for fft space
