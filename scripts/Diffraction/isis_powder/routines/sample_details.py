@@ -9,9 +9,9 @@ class SampleDetails(object):
         # Currently we only support cylinders
         self.shape_type = "cylinder"
         SampleDetails._validate_sample_details_constructor_inputs(height=height, radius=radius, center=center)
-        self.height = height
-        self.radius = radius
-        self.center = center  # List of X, Y, Z position
+        self.height = float(height)
+        self.radius = float(radius)
+        self.center = [float(i) for i in center]  # List of X, Y, Z position
 
         self._material_object = None
 
@@ -32,7 +32,7 @@ class SampleDetails(object):
 
     def set_material_properties(self, absorption_cross_section, scattering_cross_section):
         if self._material_object is None:
-            raise RuntimeError("The material has not been set (or reset). Please set it by calling "
+            raise RuntimeError("The material has not been set (or reset). Please set it by calling"
                                " 'set_material()' to set the material details of the sample.")
 
         self._material_object.set_material_properties(abs_cross_sect=absorption_cross_section,
@@ -42,9 +42,9 @@ class SampleDetails(object):
         print("Sample Details:")
         print("------------------------")
         print("Cylinder:")
-        print("Height: {}").format(self.height)
-        print("Radius: {}").format(self.radius)
-        print("Center X:{}, Y:{}, Z{}").format(self.center[0], self.center[1], self.center[2])
+        print("Height: {}".format(self.height))
+        print("Radius: {}".format(self.radius))
+        print("Center X:{}, Y:{}, Z{}".format(self.center[0], self.center[1], self.center[2]))
         print("------------------------")
         if self._material_object is None:
             print("Material has not been set (or has been reset).")
@@ -101,18 +101,18 @@ class _Material(object):
     def print_material(self):
         print("Material properties:")
         print("------------------------")
-        print("Chemical formula: {}").format(self._chemical_formula)
+        print("Chemical formula: {}".format(self._chemical_formula))
 
         if self._numeric_density:
-            print("Numeric Density: {}").format(self._numeric_density)
+            print("Numeric Density: {}".format(self._numeric_density))
         else:
             print("Numeric Density: Set from elemental properties by Mantid")
         self._print_material_properties()
 
     def _print_material_properties(self):
         if self._is_material_props_set:
-            print("Absorption cross section: {}").format(self._absorption_cross_section)
-            print("Scattering cross section: {}").format(self._scattering_cross_section)
+            print("Absorption cross section: {}".format(self._absorption_cross_section))
+            print("Scattering cross section: {}".format(self._scattering_cross_section))
         else:
             print("Absorption cross section: Calculated by Mantid based on chemical/elemental formula")
             print("Scattering cross section: Calculated by Mantid based on chemical/elemental formula")
@@ -133,11 +133,14 @@ class _Material(object):
 
 
 def _check_value_is_physical(property_name, value):
+    original_value = value
     value = convert_to_float(value)
-    if not value:
-        raise ValueError("Could not convert the " + property_name + " to a number. The input was: " + str(value))
+    if value is None:
+        raise ValueError("Could not convert the " + property_name + " to a number."
+                         " The input was: '" + str(original_value) + "'")
+
     if value <= 0 or math.isnan(value):
-        raise ValueError("The value set for " + property_name + " was: " + str(value)
+        raise ValueError("The value set for " + property_name + " was: " + str(original_value)
                          + " which is impossible for a physical object")
 
 
