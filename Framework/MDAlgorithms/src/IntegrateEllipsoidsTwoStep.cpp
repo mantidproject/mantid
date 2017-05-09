@@ -244,13 +244,13 @@ void IntegrateEllipsoidsTwoStep::exec() {
     auto& peak = peak_ws->getPeak(index);
     auto& strongPeak = peak_ws->getPeak(strongIndex);
 
-    g_log.information() << "Integrating weak peak " << peak.getHKL() << " using strong peak " << strongPeak.getHKL() << "\n";
+    g_log.notice() << "Integrating weak peak " << peak.getHKL() << " using strong peak " << strongPeak.getHKL() << "\n";
 
     const auto libShape = shapeLibrary[static_cast<int>(strongIndex)];
     const auto shape = boost::dynamic_pointer_cast<const PeakShapeEllipsoid>(libShape.first);
     const auto frac = libShape.second.first;
 
-    g_log.information() << "Weak peak will be adjusted by " << frac << "\n";
+    g_log.notice() << "Weak peak will be adjusted by " << frac << "\n";
     IntegrationParameters params = makeIntegrationParameters(strongPeak.getQLabFrame());
     const auto weakShape = integrator.integrateWeakPeak(params, shape, libShape.second, q, inti, sigi);
 

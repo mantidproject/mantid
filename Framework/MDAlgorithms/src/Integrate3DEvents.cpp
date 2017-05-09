@@ -193,7 +193,7 @@ std::pair<boost::shared_ptr<const Geometry::PeakShape>, std::pair<double, double
    sigi = sigi/pow(inti,2);
    sigi += pow((fracError / frac), 2);
 
-   inti = inti / frac;
+   inti = inti * frac;
    sigi = sqrt(sigi) * inti;
 
    return shape;

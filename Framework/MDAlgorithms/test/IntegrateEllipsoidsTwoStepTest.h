@@ -246,5 +246,79 @@ public:
                        integratedPeaksWS->getPeak(i).getIntensity(), numEventsPerPeak, 600);
     }
   }
+
+  void test_exec_events_with_weak_peaks() {
+    const int numEventsPerStrongPeak = 10000;
+    const int numEventsPerWeakPeak = 100;
+
+    // Very tight distribution with events happening at a single point
+    const auto sigmas = std::make_tuple(.002, .002, 0.1);
+    const auto backgroundDetSize = 0.05;
+    const auto backgroundTOFSize = 100.0;
+    const auto nBackgroundEvents = 1000;
+
+    // Build some diffraction data
+    WorkspaceBuilder builder;
+    builder.setNumPixels(100);
+    builder.addBackground(true);
+    builder.setBackgroundParameters(nBackgroundEvents, backgroundDetSize, backgroundTOFSize);
+
+    builder.addPeakByHKL(V3D(1, -5, -3), numEventsPerStrongPeak, sigmas);
+    builder.addPeakByHKL(V3D(1, -4, -4), numEventsPerStrongPeak, sigmas);
+
+    builder.addPeakByHKL(V3D(1, -3, -5), numEventsPerWeakPeak, sigmas);
+    builder.addPeakByHKL(V3D(1, -4, -2), numEventsPerWeakPeak, sigmas);
+
+    builder.addPeakByHKL(V3D(1, -4, 0), numEventsPerStrongPeak, sigmas);
+    builder.addPeakByHKL(V3D(2, -3, -4), numEventsPerStrongPeak, sigmas);
+
+    auto data = builder.build();
+    auto eventWS = std::get<0>(data);
+    auto peaksWS = std::get<1>(data);
+
+    // Run algorithm
+    IntegrateEllipsoidsTwoStep alg;
+    alg.setChild(true);
+    alg.setRethrows(true);
+    TS_ASSERT_THROWS_NOTHING( alg.initialize() );
+    alg.setProperty("InputWorkspace", eventWS);
+    alg.setProperty("PeaksWorkspace", peaksWS);
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("SpecifySize", true));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("PeakSize", 0.35));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("BackgroundInnerSize", 0.35));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("BackgroundOuterSize", 0.4));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("WeakPeakThreshold", 5.0));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("IntegrateIfOnEdge", true));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "dummy"));
+    TS_ASSERT_THROWS_NOTHING(alg.execute() );
+
+    // Check output
+    TS_ASSERT( alg.isExecuted() );
+    PeaksWorkspace_sptr integratedPeaksWS = alg.getProperty("OutputWorkspace");
+    TS_ASSERT( integratedPeaksWS );
+
+    TSM_ASSERT_EQUALS("Wrong number of peaks in output workspace",
+                      integratedPeaksWS->getNumberPeaks(),
+                      peaksWS->getNumberPeaks());
+    const auto& run = integratedPeaksWS->mutableRun();
+    TSM_ASSERT("Output workspace must be integrated",
+                run.hasProperty("PeaksIntegrated"));
+    TSM_ASSERT_EQUALS("Output workspace must be integrated",
+                run.getProperty("PeaksIntegrated")->value(), "1");
+
+    TSM_ASSERT_DELTA("Wrong intensity for peak " + std::to_string(0),
+                     integratedPeaksWS->getPeak(0).getIntensity(), numEventsPerStrongPeak, 300);
+    TSM_ASSERT_DELTA("Wrong intensity for peak " + std::to_string(1),
+                     integratedPeaksWS->getPeak(1).getIntensity(), numEventsPerStrongPeak, 300);
+    TSM_ASSERT_DELTA("Wrong intensity for peak " + std::to_string(2),
+                     integratedPeaksWS->getPeak(2).getIntensity(), numEventsPerWeakPeak, 100);
+    TSM_ASSERT_DELTA("Wrong intensity for peak " + std::to_string(3),
+                     integratedPeaksWS->getPeak(3).getIntensity(), numEventsPerWeakPeak, 100);
+    TSM_ASSERT_DELTA("Wrong intensity for peak " + std::to_string(4),
+                     integratedPeaksWS->getPeak(4).getIntensity(), numEventsPerStrongPeak, 300);
+    TSM_ASSERT_DELTA("Wrong intensity for peak " + std::to_string(5),
+                     integratedPeaksWS->getPeak(5).getIntensity(), numEventsPerStrongPeak, 800);
+  }
+
 };
 
