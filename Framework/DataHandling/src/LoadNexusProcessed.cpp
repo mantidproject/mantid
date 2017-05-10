@@ -15,6 +15,7 @@
 #include "MantidDataObjects/PeakShapeEllipsoidFactory.h"
 #include "MantidDataObjects/PeakShapeSphericalFactory.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
+#include "MantidDataObjects/Peak.h"
 #include "MantidDataObjects/RebinnedOutput.h"
 #include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidKernel/ArrayProperty.h"
@@ -1068,12 +1069,12 @@ API::Workspace_sptr LoadNexusProcessed::loadPeaksEntry(NXEntry &entry) {
     // below this one) is set before QLabFrame as this causes Peak to ray trace
     // to find the location of the detector, which significantly increases
     // loading times.
-    Geometry::IPeak *peak = new Peak();
     const auto goniometer = peakWS->run().getGoniometer();
-    peak->setInstrument(peakWS->getInstrument());
-    peak->setGoniometerMatrix(goniometer.getR());
-    peak->setRunNumber(peakWS->getRunNumber());
-    peakWS->addPeak(*peak);
+    Peak peak;
+    peak.setInstrument(peakWS->getInstrument());
+    peak.setGoniometerMatrix(goniometer.getR());
+    peak.setRunNumber(peakWS->getRunNumber());
+    peakWS->addPeak(std::move(peak));
   }
 
   for (const auto &str : columnNames) {
