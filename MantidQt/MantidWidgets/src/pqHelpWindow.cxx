@@ -328,9 +328,9 @@ void pqHelpWindow::showPage(const QUrl& url)
 //-----------------------------------------------------------------------------
 void pqHelpWindow::printPage() {
   QPrinter printer;
-  QPrintDialog *dialog = new QPrintDialog(&printer, this);
-  dialog->setWindowTitle(tr("Print Document"));
-  if (dialog->exec() != QDialog::Accepted)
+  QPrintDialog dialog(&printer, this);
+  dialog.setWindowTitle(tr("Print Document"));
+  if (dialog.exec() != QDialog::Accepted)
     return;
   m_browser->print(&printer);
 }
