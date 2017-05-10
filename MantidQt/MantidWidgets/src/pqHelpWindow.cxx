@@ -198,7 +198,8 @@ pqHelpWindow::pqHelpWindow(
   // add a navigation toolbar
   QToolBar *navigation = new QToolBar("Navigation");
   QPushButton *home = new QPushButton("Home");
-  QPushButton *print = new QPushButton("Print");
+  QPushButton *print = new QPushButton("Print...");
+  print->setToolTip("Print the current page");
 
   m_forward = new QToolButton();
   m_forward->setArrowType(Qt::RightArrow);
@@ -325,14 +326,13 @@ void pqHelpWindow::showPage(const QUrl& url)
 }
 
 //-----------------------------------------------------------------------------
-void pqHelpWindow::printPage()
-{
-   QPrinter printer;
-   QPrintDialog *dialog = new QPrintDialog(&printer, this);
-   dialog->setWindowTitle(tr("Print Document"));
-   if (dialog->exec() != QDialog::Accepted)
-       return;
-   m_browser->print(&printer);
+void pqHelpWindow::printPage() {
+  QPrinter printer;
+  QPrintDialog *dialog = new QPrintDialog(&printer, this);
+  dialog->setWindowTitle(tr("Print Document"));
+  if (dialog->exec() != QDialog::Accepted)
+    return;
+  m_browser->print(&printer);
 }
 
 //-----------------------------------------------------------------------------
