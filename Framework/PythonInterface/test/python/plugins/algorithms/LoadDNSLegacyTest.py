@@ -5,7 +5,6 @@ from testhelpers import run_algorithm
 from mantid.api import AnalysisDataService
 from math import pi
 import os
-import numpy as np
 from mantid.simpleapi import LoadDNSLegacy
 
 
@@ -36,7 +35,8 @@ class LoadDNSLegacyTest(unittest.TestCase):
         run = ws.getRun()
         self.assertEqual(-8.54, run.getProperty('deterota').value)
         self.assertEqual(8332872, run.getProperty('mon_sum').value)
-        self.assertEqual('z', run.getProperty('polarisation').value)
+        pol = run.getProperty('polarisation').value
+        self.assertEqual('z', pol.decode('utf-8', 'ignore'))
         self.assertEqual('7', str(run.getProperty('polarisation_comment').value))
         self.assertEqual('no', run.getProperty('normalized').value)
         # check whether detector bank is rotated
@@ -148,7 +148,8 @@ class LoadDNSLegacyTest(unittest.TestCase):
         run = ws.getRun()
         self.assertEqual(-8.54, run.getProperty('deterota').value)
         self.assertEqual(8332872, run.getProperty('mon_sum').value)
-        self.assertEqual('z', run.getProperty('polarisation').value)
+        pol = run.getProperty('polarisation').value
+        self.assertEqual('z', pol.decode('utf-8', 'ignore'))
         self.assertEqual('7', str(run.getProperty('polarisation_comment').value))
         self.assertEqual('no', run.getProperty('normalized').value)
         # check whether detector bank is rotated
@@ -160,7 +161,7 @@ class LoadDNSLegacyTest(unittest.TestCase):
     def test_LoadTOF(self):
         outputWorkspaceName = "LoadDNSLegacyTest_Test7"
         filename = "dnstof.d_dat"
-        tof1 = 385.651386222     # must be changed if L1 will change
+        tof1 = 385.651     # must be changed if L1 will change
         alg_test = run_algorithm("LoadDNSLegacy", Filename=filename, Normalization='no',
                                  OutputWorkspace=outputWorkspaceName)
         self.assertTrue(alg_test.isExecuted())
@@ -172,13 +173,15 @@ class LoadDNSLegacyTest(unittest.TestCase):
         self.assertEqual(100,  ws.getNumberBins())
         # data array
         self.assertEqual(1, ws.readY(19)[5])
-        self.assertAlmostEqual(tof1, ws.readX(0)[0])
+        self.assertAlmostEqual(tof1, ws.readX(0)[0], 3)
+        self.assertAlmostEqual(tof1+802.0*100, ws.readX(0)[100], 3)
         # sample logs
         run = ws.getRun()
         self.assertEqual(-7.5, run.getProperty('deterota').value)
         self.assertEqual(100, run.getProperty('tof_channels').value)
         self.assertEqual(51428, run.getProperty('mon_sum').value)
-        self.assertEqual('z', run.getProperty('polarisation').value)
+        pol = run.getProperty('polarisation').value
+        self.assertEqual('z', pol.decode('utf-8', 'ignore'))
         self.assertEqual('7', str(run.getProperty('polarisation_comment').value))
         self.assertEqual('no', run.getProperty('normalized').value)
         # check whether detector bank is rotated
