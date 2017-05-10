@@ -12,6 +12,7 @@
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/EnabledWhenProperty.h"
+#include "MantidKernel/make_unique.h"
 #include "MantidAPI/DetectorInfo.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include <Eigen/StdVector>
@@ -216,7 +217,7 @@ void PredictPeaks::exec() {
 
   setInstrumentFromInputWorkspace(inputExperimentInfo);
   setRunNumberFromInputWorkspace(inputExperimentInfo);
-
+  setReferenceFrameAndBeamDirection();
   checkBeamDirection();
 
   // Create the output
@@ -470,24 +471,10 @@ void PredictPeaks::calculateQAndAddToOutput(const V3D &hkl,
   // The q-vector direction of the peak is = goniometer * ub * hkl_vector
   // This is in inelastic convention: momentum transfer of the LATTICE!
   // Also, q does have a 2pi factor = it is equal to 2pi/wavelength.
-  const V3D q = orientedUB * hkl * (2.0 * M_PI * m_qConventionFactor);
-
-  const auto convention =
-      Kernel::ConfigService::Instance().getString("Q.convention");
-  double norm_q = q.norm();
-  boost::shared_ptr<const ReferenceFrame> refFrame =
-      this->m_inst->getReferenceFrame();
-  const V3D refBeamDir = refFrame->vecPointingAlongBeam();
-  // Default for ki-kf has -q
-  const auto qSign = (convention == "Crystallography") ? -1.0 : 1.0;
-  const double qBeam = q.scalar_prod(refBeamDir) * qSign;
-  double one_over_wl = (norm_q * norm_q) / (2.0 * qBeam);
-  double wl = (2.0 * M_PI) / one_over_wl;
-  // Default for ki-kf has -q
-  const auto inverseQSign = (convention == "Crystallography") ? 1.0 : -1.0;
-  V3D detectorDir = q * inverseQSign;
-  detectorDir[refFrame->pointingAlongBeam()] = one_over_wl - qBeam;
-  detectorDir.normalize();
+  const auto q = orientedUB * hkl * (2.0 * M_PI * m_qConventionFactor);
+  const auto params = getPeakParametersFromQ(q);
+  const auto detectorDir = std::get<0>(params);
+  const auto wl = std::get<1>(params);
 
   const bool useExtendedDetectorSpace =
       getProperty("PredictPeaksOutsideDetectors");
@@ -501,24 +488,14 @@ void PredictPeaks::calculateQAndAddToOutput(const V3D &hkl,
 
   const auto &detInfo = m_pw->detectorInfo();
   const auto &det = detInfo.detector(index);
+  std::unique_ptr<Peak> peak;
+
   if (hitDetector) {
     // peak hit a detector to add it to the list
-    Peak peak(m_inst, det.getID(), wl);
-    if (!peak.getDetector())
+    peak = Kernel::make_unique<Peak>(m_inst, det.getID(), wl);
+    if (!peak->getDetector())
       return;
 
-    // Only add peaks that hit the detector
-    peak.setGoniometerMatrix(goniometerMatrix);
-    // Save the run number found before.
-    peak.setRunNumber(m_runNumber);
-    peak.setHKL(hkl * m_qConventionFactor);
-
-    if (m_sfCalculator) {
-      peak.setIntensity(m_sfCalculator->getFSquared(hkl));
-    }
-
-    // Add it to the workspace
-    m_pw->addPeak(peak);
   } else if (useExtendedDetectorSpace) {
     // use extended detector space to try and guess peak position
     const auto component =
@@ -534,22 +511,41 @@ void PredictPeaks::calculateQAndAddToOutput(const V3D &hkl,
     if (!c->interceptSurface(track))
       return;
 
+    // The exit point is the vector to the place that we hit a detector
     const auto magnitude = track.back().exitPoint.norm();
-    Peak peak(m_inst, q, boost::optional<double>(magnitude));
-
-    // Only add peaks that hit the detector
-    peak.setGoniometerMatrix(goniometerMatrix);
-    // Save the run number found before.
-    peak.setRunNumber(m_runNumber);
-    peak.setHKL(hkl * m_qConventionFactor);
-
-    if (m_sfCalculator) {
-      peak.setIntensity(m_sfCalculator->getFSquared(hkl));
-    }
-
-    // Add it to the workspace
-    m_pw->addPeak(peak);
+    peak = Kernel::make_unique<Peak>(m_inst, q, boost::optional<double>(magnitude));
   }
+
+  // Only add peaks that hit the detector
+  peak->setGoniometerMatrix(goniometerMatrix);
+  // Save the run number found before.
+  peak->setRunNumber(m_runNumber);
+  peak->setHKL(hkl * m_qConventionFactor);
+
+  if (m_sfCalculator) {
+      peak->setIntensity(m_sfCalculator->getFSquared(hkl));
+  }
+
+  // Add it to the workspace
+  m_pw->addPeak(*peak);
+}
+
+std::tuple<V3D, double> PredictPeaks::getPeakParametersFromQ(const V3D& q) const {
+  double norm_q = q.norm();
+  // Default for ki-kf has -q
+  const double qBeam = q.scalar_prod(m_refBeamDir) * m_qConventionFactor;
+  double one_over_wl = (norm_q * norm_q) / (2.0 * qBeam);
+  double wl = (2.0 * M_PI) / one_over_wl;
+  // Default for ki-kf has -q
+  V3D detectorDir = q * -m_qConventionFactor;
+  detectorDir[m_refFrame->pointingAlongBeam()] = one_over_wl - qBeam;
+  detectorDir.normalize();
+  return std::make_tuple(detectorDir, wl);
+}
+
+void PredictPeaks::setReferenceFrameAndBeamDirection() {
+  m_refFrame = m_inst->getReferenceFrame();
+  m_refBeamDir = m_refFrame->vecPointingAlongBeam();
 }
 
 } // namespace Mantid

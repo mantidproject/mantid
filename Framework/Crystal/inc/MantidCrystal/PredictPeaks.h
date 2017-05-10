@@ -11,6 +11,8 @@
 #include <MantidGeometry/Crystal/StructureFactorCalculator.h>
 #include "MantidKernel/Matrix.h"
 
+#include <tuple>
+
 namespace Mantid {
 namespace Crystal {
 
@@ -65,6 +67,10 @@ private:
                                 const Kernel::DblMatrix &goniometerMatrix);
 
 private:
+  /// Get the predicted detector direction from Q
+  std::tuple<Kernel::V3D, double> getPeakParametersFromQ(const Kernel::V3D& q) const;
+  /// Cache the reference frame and beam direction from the instrument
+  void setReferenceFrameAndBeamDirection();
   void logNumberOfPeaksFound(size_t allowedPeakCount) const;
 
   /// Reflection conditions possible
@@ -75,6 +81,10 @@ private:
   int m_runNumber;
   /// Instrument reference
   Geometry::Instrument_const_sptr m_inst;
+  /// Reference frame for the instrument
+  boost::shared_ptr<const Geometry::ReferenceFrame> m_refFrame;
+  /// Direction of the beam for this instrument
+  Kernel::V3D m_refBeamDir;
   /// Output peaks workspace
   Mantid::DataObjects::PeaksWorkspace_sptr m_pw;
   Geometry::StructureFactorCalculator_sptr m_sfCalculator;
