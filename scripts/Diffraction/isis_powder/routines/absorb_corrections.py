@@ -48,27 +48,19 @@ def run_cylinder_absorb_corrections(ws_to_correct, multiple_scattering, sample_d
                            " SampleDetails object and set the relevant properties it. Then set the new sample by "
                            "calling set_sample_details()")
 
-    height = sample_details_obj.height
-    radius = sample_details_obj.radius
-    pos = sample_details_obj.center
-
     # Get the underlying material object
     if not sample_details_obj.is_material_set():
         raise RuntimeError("The material for this sample has not been set yet. Please call"
                            " set_material on the SampleDetails object to set the material")
-    material_obj = sample_details_obj.material_object
-    formula = material_obj.chemical_formula
-    number_density = material_obj.number_density
 
     ws_to_correct = _calculate__cylinder_absorb_corrections(
         ws_to_correct=ws_to_correct, multiple_scattering=multiple_scattering,
-        c_height=height, c_radius=radius, c_pos=pos, chemical_formula=formula, number_density=number_density)
+        sample_details_obj=sample_details_obj)
 
     return ws_to_correct
 
 
-def _calculate__cylinder_absorb_corrections(ws_to_correct, multiple_scattering,
-                                            c_height, c_radius, c_pos, chemical_formula, number_density):
+def _calculate__cylinder_absorb_corrections(ws_to_correct, multiple_scattering, sample_details_obj):
     """
     Calculates vanadium absorption corrections for the specified workspace. The workspace
     should have any monitor spectra masked before being passed into this method. Additionally
@@ -76,20 +68,23 @@ def _calculate__cylinder_absorb_corrections(ws_to_correct, multiple_scattering,
     the specified geometry. This function uses Mayers Sample Correction to perform the corrections.
     :param ws_to_correct: The workspace to apply the sample corrections to
     :param multiple_scattering: True if the effects of multiple scattering should be accounted for, else False
-    :param c_height: The height of the cylinder as a float
-    :param c_radius: The radius of the cylinder as a float
-    :param c_pos: The position as a list of three float values
-    :param chemical_formula: The chemical formula of the container - usually set to 'V' for Vanadium
-    :param number_density: The number density if the element is not elemental. Note it is up to the caller
+    :param sample_details_obj: The SampleDetails object in a checked state which describes the sample
     to ensure a none elemental formula has associated number density
     :return: The workspace with corrections applied
     """
-    geometry_json = {'Shape': 'Cylinder', 'Height': c_height,
-                     'Radius': c_radius, 'Center': c_pos}
-    material_json = {'ChemicalFormula': chemical_formula}
 
-    if number_density:
-        material_json["SampleNumberDensity"] = number_density
+    geometry_json = {'Shape': 'Cylinder',
+                     'Height': sample_details_obj.height, 'Radius': sample_details_obj.radius,
+                     'Center': sample_details_obj.center}
+    material = sample_details_obj.material_object
+    # See SetSampleMaterial for documentation on this dictionary
+    material_json = {'ChemicalFormula': material.chemical_formula}
+    if material.number_density:
+        material_json["SampleNumberDensity"] = material.number_density
+    if material.absorption_cross_section:
+        material_json["AttenuationXSection"] = material.absorption_cross_section
+    if material.scattering_cross_section:
+        material_json["ScatteringXSection"] = material.scattering_cross_section
 
     mantid.SetSample(InputWorkspace=ws_to_correct, Geometry=geometry_json, Material=material_json)
 
