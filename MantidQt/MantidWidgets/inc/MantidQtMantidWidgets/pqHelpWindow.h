@@ -62,6 +62,7 @@ public slots:
   /// shows that page.
   virtual void showHomePage(const QString &namespace_name);
   virtual void showHomePage();
+  virtual void printPage();
 
 signals:
   /// fired to relay warning messages from the help system.
