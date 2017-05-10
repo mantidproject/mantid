@@ -48,6 +48,8 @@ public:
   void notify(IReflSettingsPresenter::Flag flag) override;
   void setInstrumentName(const std::string &instName) override;
 
+  /// Returns values passed for 'Transmission run(s)'
+  std::string getTransmissionRuns(bool loadRuns) const override;
   /// Returns global options for 'CreateTransmissionWorkspaceAuto'
   std::string getTransmissionOptions() const override;
   /// Returns global options for 'ReflectometryReductionOneAuto'
@@ -63,7 +65,6 @@ private:
   Mantid::API::IAlgorithm_sptr createReductionAlg();
   Mantid::Geometry::Instrument_const_sptr
   createEmptyInstrument(const std::string &instName);
-  std::string getTransmissionRuns() const;
 
   /// The view we are managing
   IReflSettingsView *m_view;

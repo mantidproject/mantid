@@ -6,6 +6,7 @@
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidKernel/VectorHelper.h"
 #include "MantidQtMantidWidgets/StringEditorFactory.h"
 
 #include "MantidQtMantidWidgets/MuonFitDataSelector.h"
@@ -150,8 +151,7 @@ void MuonFitPropertyBrowser::init() {
   settingsGroup->addSubProperty(m_startX);
   settingsGroup->addSubProperty(m_endX);
   settingsGroup->addSubProperty(m_normalization);
-
-  
+ 
 
   // Disable "Browse" button - use case is that first run will always be the one
   // selected on front tab. User will type in the runs they want rather than
@@ -251,8 +251,7 @@ void MuonFitPropertyBrowser::init() {
   m_customSettingsGroup = m_browser->addProperty(customSettingsGroup);
 
   // Initialise the layout.
-  QPushButton *btnFit = createMuonFitMenuButton(w);
-  initBasicLayout(w, btnFit);
+  initBasicLayout(w);
 
   // Create an empty splitter that can hold extra widgets
   m_widgetSplitter = new QSplitter(Qt::Vertical, w);
@@ -286,9 +285,9 @@ void MuonFitPropertyBrowser::init() {
   connect(this, SIGNAL(functionChanged()), SLOT(updateStructureTooltips()));
 }
 // Set up the execution of the muon fit menu
-void MuonFitPropertyBrowser::executeMuonFitMenu(const QString &item) {
+void MuonFitPropertyBrowser::executeFitMenu(const QString &item) {
   if (item == "TFAsymm") {
-    TFAsymmFit(1000);
+    doTFAsymmFit(1000);
   } else {
     FitPropertyBrowser::executeFitMenu(item);
   }
@@ -306,55 +305,29 @@ void MuonFitPropertyBrowser::generateBtnPressed() {
 	genCombinePeriodWindow();
 }
 /**
-* @brief Initialise the layout of the fit menu button.
+pulate the fit button.
 * This initialization includes:
 *   1. SIGNALs/SLOTs when properties change.
-*   2. Action menus and associated SIGNALs/SLOTs.
-* @param w widget parenting the action menus and the property tree browser
-* @return QPushButton for the fit menu
+*   2. Actions and associated SIGNALs/SLOTs.
+* @param fitMapper the QMap to the fit mapper
+* @param fitMenu the QMenu for the fit button
 */
-QPushButton *MuonFitPropertyBrowser::createMuonFitMenuButton(QWidget *w) {
-  QPushButton *btnFit = new QPushButton("Fit");
-  m_tip = new QLabel("", w);
+void MuonFitPropertyBrowser::populateFitMenuButton(QSignalMapper *fitMapper,
+                                                   QMenu *fitMenu) {
 
-  m_fitMenu = new QMenu(this);
-  m_fitActionFit = new QAction("Fit", this);
-  m_fitActionSeqFit = new QAction("Sequential Fit", this);
-  m_fitActionUndoFit = new QAction("Undo Fit", this);
-  m_fitActionEvaluate = new QAction("Evaluate function", this);
-  m_fitActiontest = new QAction("TF Asymmetry Fit", this);
+  m_fitActionTFAsymm = new QAction("TF Asymmetry Fit", this);
+  fitMapper->setMapping(m_fitActionTFAsymm, "TFAsymm");
 
-  m_fitMapper = new QSignalMapper(this);
-  m_fitMapper->setMapping(m_fitActionFit, "Fit");
-  m_fitMapper->setMapping(m_fitActionSeqFit, "SeqFit");
-  m_fitMapper->setMapping(m_fitActionUndoFit, "UndoFit");
-  m_fitMapper->setMapping(m_fitActionEvaluate, "Evaluate");
-  m_fitMapper->setMapping(m_fitActiontest, "TFAsymm");
-
-  connect(m_fitActionFit, SIGNAL(triggered()), m_fitMapper, SLOT(map()));
-  connect(m_fitActionSeqFit, SIGNAL(triggered()), m_fitMapper, SLOT(map()));
-  connect(m_fitActionUndoFit, SIGNAL(triggered()), m_fitMapper, SLOT(map()));
-  connect(m_fitActionEvaluate, SIGNAL(triggered()), m_fitMapper, SLOT(map()));
-  connect(m_fitActiontest, SIGNAL(triggered()), m_fitMapper, SLOT(map()));
-
-  connect(m_fitMapper, SIGNAL(mapped(const QString &)), this,
-          SLOT(executeMuonFitMenu(const QString &)));
-  m_fitMenu->addAction(m_fitActionFit);
-  m_fitMenu->addAction(m_fitActionSeqFit);
-  m_fitMenu->addAction(m_fitActionEvaluate);
-  m_fitMenu->addSeparator();
-  m_fitMenu->addAction(m_fitActionUndoFit);
-  m_fitMenu->addSeparator();
-  m_fitMenu->addAction(m_fitActiontest);
-  btnFit->setMenu(m_fitMenu);
-  return btnFit;
+  FitPropertyBrowser::populateFitMenuButton(fitMapper, fitMenu);
+  connect(m_fitActionTFAsymm, SIGNAL(triggered()), fitMapper, SLOT(map()));
+  fitMenu->addSeparator();
+  fitMenu->addAction(m_fitActionTFAsymm);
 }
-
 /// Enable/disable the Fit button;
 void MuonFitPropertyBrowser::setFitEnabled(bool yes) {
   m_fitActionFit->setEnabled(yes);
   m_fitActionSeqFit->setEnabled(yes);
-  m_fitActiontest->setEnabled(yes);
+  m_fitActionTFAsymm->setEnabled(yes);
 }
 /*
 * Called when the group/pair selected is changed
@@ -499,12 +472,12 @@ void MuonFitPropertyBrowser::doubleChanged(QtProperty *prop) {
 }
 /** @returns the normalization
 */
-double MuonFitPropertyBrowser::Normalization() const {
+double MuonFitPropertyBrowser::normalization() const {
   return readNormalization()[0];
 }
 void MuonFitPropertyBrowser::setNormalization() {
   m_normalizationValue.clear();
-  m_normalizationValue.append(QString::number(Normalization()));
+  m_normalizationValue.append(QString::number(normalization()));
   m_enumManager->setEnumNames(m_normalization, m_normalizationValue);
 }
 
@@ -585,21 +558,11 @@ void MuonFitPropertyBrowser::populateFunctionNames() {
     }
   }
 }
-
-// move this to helper later
-std::vector<double> convertToVec(std::string const &list) {
-  std::vector<double> vec;
-  std::vector<std::string> tmpVec;
-  boost::split(tmpVec, list, boost::is_any_of(","));
-  std::transform(tmpVec.begin(), tmpVec.end(), std::back_inserter(vec),
-                 [](std::string const &element) { return std::stod(element); });
-  return vec;
-}
 /**
 * Creates an instance of Fit algorithm, sets its properties and launches it.
-* @params maxIterations is the maximum number of iterations for the fit
+* @param maxIterations is the maximum number of iterations for the fit
 */
-void MuonFitPropertyBrowser::TFAsymmFit(int maxIterations) {
+void MuonFitPropertyBrowser::doTFAsymmFit(int maxIterations) {
   const std::string wsName = workspaceName();
 
   if (wsName.empty()) {
@@ -649,7 +612,8 @@ void MuonFitPropertyBrowser::TFAsymmFit(int maxIterations) {
   }
   // record result
   auto tmp = asymmAlg->getPropertyValue("NormalizationConstant");
-  std::vector<double> normEst = convertToVec(tmp);
+  std::vector<double> normEst =
+      Mantid::Kernel::VectorHelper::splitStringIntoVector<double>(tmp);
   ITableWorkspace_sptr table = WorkspaceFactory::Instance().createTable();
   AnalysisDataService::Instance().addOrReplace("__norm__", table);
   table->addColumn("double", "norm");
@@ -682,7 +646,7 @@ void MuonFitPropertyBrowser::TFAsymmFit(int maxIterations) {
     alg->setProperty("MaxIterations", maxIterations);
     alg->setProperty("PeakRadius", getPeakRadius());
     if (!isHistogramFit()) {
-      alg->setProperty("Normalise", m_shouldBeNormalised);
+      alg->setProperty("Normalise", getShouldBeNormalised());
       // Always output each composite function but not necessarily plot it
       alg->setProperty("OutputCompositeMembers", true);
       if (alg->existsProperty("ConvolveMembers")) {
@@ -709,7 +673,7 @@ std::vector<double> readNormalization() {
             Mantid::API::AnalysisDataService::Instance().retrieve("__norm__"));
     auto colNorm = table->getColumn("norm");
 
-    for (int j = 0; j < table->rowCount(); j++) {
+    for (size_t j = 0; j < table->rowCount(); j++) {
       norm.push_back((*colNorm)[j]); // record and update norm....
     }
   }
@@ -1016,14 +980,13 @@ void MuonFitPropertyBrowser::setMultiFittingMode(bool enabled) {
 void MuonFitPropertyBrowser::setTFAsymmMode(bool enabled) {
   // First, clear whatever model is currently set
   this->clear();
+  modifyFitMenu(m_fitActionTFAsymm, enabled);
 
   // Show or hide the TFAsymmetry fit
   if (enabled) {
-    m_fitMenu->addAction(m_fitActiontest);
     m_settingsGroup->property()->addSubProperty(m_normalization);
     setNormalization();
   } else {
-    m_fitMenu->removeAction(m_fitActiontest);
     m_settingsGroup->property()->removeSubProperty(m_normalization);
   }
 }

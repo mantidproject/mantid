@@ -45,9 +45,8 @@ private:
   API::MatrixWorkspace_sptr removeExpDecay(const API::Workspace_sptr &inputWS,
                                            const int index) const;
   API::MatrixWorkspace_sptr
-  EstimateAsymmetry(const API::Workspace_sptr &inputWS, const int index) const;
+  estimateAsymmetry(const API::Workspace_sptr &inputWS, const int index) const;
 };
-std::vector<double> convertToVec(std::string const &list);
 } // namespace WorkflowAlgorithms
 } // namespace Mantid
 

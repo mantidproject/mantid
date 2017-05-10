@@ -22,9 +22,9 @@ def create_van(instrument, run_details, absorb):
     input_van_ws = input_van_ws_list[0]  # As we asked for a summed ws there should only be one returned
 
     # TODO where do we subtract empty can on GEM ?
-    corrected_van_ws = common.subtract_sample_empty(ws_to_correct=input_van_ws,
-                                                    empty_sample_ws_string=run_details.empty_runs,
-                                                    instrument=instrument)
+    corrected_van_ws = common.subtract_summed_runs(ws_to_correct=input_van_ws,
+                                                   empty_sample_ws_string=run_details.empty_runs,
+                                                   instrument=instrument)
 
     # Crop the tail end of the data on PEARL if they are not capturing slow neutrons
     corrected_van_ws = instrument._crop_raw_to_expected_tof_range(ws_to_crop=corrected_van_ws)
@@ -45,7 +45,7 @@ def create_van(instrument, run_details, absorb):
 
     _create_vanadium_splines(focused_spectra, instrument, run_details)
 
-    common.keep_single_ws_unit(d_spacing_group=d_spacing_group,tof_group=tof_group,
+    common.keep_single_ws_unit(d_spacing_group=d_spacing_group, tof_group=tof_group,
                                unit_to_keep=instrument._get_unit_to_keep())
 
     common.remove_intermediate_workspace(corrected_van_ws)

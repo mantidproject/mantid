@@ -253,7 +253,7 @@ public slots:
   void clearBrowser();
   void setPeakToolOn(bool on);
   void findPeaks();
-  void executeFitMenu(const QString &);
+  virtual void executeFitMenu(const QString &);
   void executeDisplayMenu(const QString &);
   void executeSetupMenu(const QString &);
   void executeSetupManageMenu(const QString &);
@@ -362,6 +362,9 @@ private slots:
   void updateStructureTooltips();
 
 protected:
+  void modifyFitMenu(QAction *fitAction, bool enabled);
+  virtual void populateFitMenuButton(QSignalMapper *fitMapper, QMenu *fitMenu);
+  bool getShouldBeNormalised() { return m_shouldBeNormalised; };
   /// actions to do before the browser made visible
   void showEvent(QShowEvent *e) override;
   /// actions to do before the browser is hidden
@@ -373,9 +376,7 @@ protected:
   ///
   void initLayout(QWidget *w);
   ///
-  void initBasicLayout(QWidget *w, QPushButton *btnFit);
-  ///
-  QPushButton *createFitMenuButton(QWidget *w);
+  void initBasicLayout(QWidget *w);
   ///
   void updateDecimals();
   /// Sets the workspace to a function
@@ -477,16 +478,10 @@ protected:
 
   /// To keep a copy of the initial parameters in case for undo fit
   std::vector<double> m_initialParameters;
-  /// To display a tip text
-  QLabel *m_tip;
-  /// Fit and Display menu
-  QSignalMapper *m_fitMapper;
-  QMenu *m_fitMenu;
-
-  /// Should the data be normalised before fitting?
-  bool m_shouldBeNormalised;
 
 private:
+  ///
+  QPushButton *createFitMenuButton(QWidget *w);
   /// load and save function
   void loadFunction(const QString &funcString);
   void saveFunction(const QString &fnName);
@@ -528,6 +523,8 @@ private:
   // void validateGroupMember();
 
   /// Fit and Display menu
+  QSignalMapper *m_fitMapper;
+  QMenu *m_fitMenu;
   QAction *m_displayActionPlotGuess;
   QAction *m_displayActionQuality;
   QAction *m_displayActionClearAll;
@@ -537,6 +534,9 @@ private:
   QAction *m_setupActionCustomSetup;
   QAction *m_setupActionRemove;
   void updateSetupMenus();
+
+  /// To display a tip text
+  QLabel *m_tip;
 
   // The widget for choosing the fit function.
   QDialog *m_fitSelector;
@@ -594,6 +594,9 @@ private:
 
   /// store current workspace name
   std::string m_storedWorkspaceName;
+
+  /// Should the data be normalised before fitting?
+  bool m_shouldBeNormalised;
 
   friend class PropertyHandler;
   friend class CreateAttributeProperty;

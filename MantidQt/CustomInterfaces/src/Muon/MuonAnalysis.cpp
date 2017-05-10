@@ -1671,9 +1671,26 @@ void MuonAnalysis::plotSpectrum(const QString &wsName, bool logScale) {
   s << "      layer.removeCurve(i)"; // remove everything else
 
   // Plot data in the given window with given options
-  s << "def plot_data(ws_name, errors, connect, window_to_use):";
-  s << "  w = plotSpectrum(ws_name, 0, error_bars = errors, type = connect, "
-       "window = window_to_use)";
+  s << "def plot_data(ws_name,errors, connect, window_to_use):";
+  if (parsePlotType(m_uiForm.frontPlotFuncs) == PlotType::Asymmetry) {
+    // clang-format off
+    s << "  w = plotSpectrum(source = ws_name,"
+         "indices = 0,"
+         "distribution = mantidqtpython.MantidQt.DistributionFalse,"
+         "error_bars = errors," 
+         "type = connect,"
+         "window = window_to_use)";
+    // clang-format on
+  } else {
+    // clang-format off
+    s << "  w = plotSpectrum(source = ws_name,"
+         "indices = 0,"
+         "distribution = mantidqtpython.MantidQt.DistributionDefault,"
+         "error_bars = errors,"
+         "type = connect,"
+         "window = window_to_use)";
+    // clang-format on
+  }
   s << "  w.setName(ws_name + '-1')";
   s << "  w.setObjectName(ws_name)";
   s << "  w.show()";
@@ -2129,7 +2146,7 @@ void MuonAnalysis::loadFittings() {
   m_fitFunctionPresenter->setMultiFitState(multiFitState);
   // Set TF Asymmetry mode on/off as appropriate
   const auto &TFAsymmState = m_optionTab->getTFAsymmState();
-  m_fitFunctionPresenter->setTFAsymmState(TFAsymmState);
+  setTFAsymm(TFAsymmState);
 }
 /**
 * Handle "groups" selected/deselected
@@ -2530,7 +2547,7 @@ void MuonAnalysis::connectAutoUpdate() {
   connect(m_optionTab, SIGNAL(multiFitStateChanged(int)), this,
           SLOT(multiFitCheckboxChanged(int)));
   connect(m_optionTab, SIGNAL(TFAsymmStateChanged(int)), this,
-          SLOT(TFAsymmCheckboxChanged(int)));
+          SLOT(changedTFAsymmCheckbox(int)));
 }
 
 /**
@@ -3087,9 +3104,9 @@ void MuonAnalysis::multiFitCheckboxChanged(int state) {
   if (m_uiForm.chkEnableMultiFit->isChecked() && state != 0) {
     // uncheck the box
     m_uiForm.chkTFAsymm->setChecked(false);
-    TFAsymmCheckboxChanged(0);
+    changedTFAsymmCheckbox(0);
     // reset the view
-    m_fitFunctionPresenter->setTFAsymmState(Muon::TFAsymmState::Disabled);
+    setTFAsymm(Muon::TFAsymmState::Disabled);
   }
   m_fitFunctionPresenter->setMultiFitState(multiFitState);
   if (multiFitState == Muon::MultiFitState::Disabled) {
@@ -3103,20 +3120,20 @@ void MuonAnalysis::multiFitCheckboxChanged(int state) {
 * Called when the "TF Asymmetry" checkbox is changed (settings tab.)
 * Forward this to the fit function presenter.
 */
-void MuonAnalysis::TFAsymmCheckboxChanged(int state) {
+void MuonAnalysis::changedTFAsymmCheckbox(int state) {
   const Muon::TFAsymmState TFAsymmState = state == Qt::CheckState::Checked
                                               ? Muon::TFAsymmState::Enabled
                                               : Muon::TFAsymmState::Disabled;
   // If both multiFit and TFAsymm are checked
   // uncheck the multiFit
-  if (m_uiForm.chkEnableMultiFit->isChecked() && state != 0) {
+  if (m_uiForm.chkTFAsymm->isChecked() && state != 0) {
     // uncheck the box
     m_uiForm.chkEnableMultiFit->setChecked(false);
     multiFitCheckboxChanged(0);
     // reset the view
     m_fitFunctionPresenter->setMultiFitState(Muon::MultiFitState::Disabled);
   }
-  m_fitFunctionPresenter->setTFAsymmState(TFAsymmState);
+  setTFAsymm(TFAsymmState);
 }
 /**
 * Called when the "TF Asymmetry" is needed (from home tab)
@@ -3132,9 +3149,7 @@ void MuonAnalysis::setTFAsymm(Muon::TFAsymmState TFAsymmState) {
   // If both multiFit and TFAsymm are checked
   // uncheck the multiFit
   if (m_uiForm.chkEnableMultiFit->isChecked() &&
-      TFAsymmState ==
-          Muon::TFAsymmState::Enabled) // m_uiForm.chkTFAsymm->isChecked())
-  {
+      TFAsymmState == Muon::TFAsymmState::Enabled) {
     // uncheck the box
     m_uiForm.chkEnableMultiFit->setChecked(false);
     multiFitCheckboxChanged(0);

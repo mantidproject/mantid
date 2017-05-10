@@ -35,13 +35,13 @@ public:
                       const std::vector<int> summedPeriods,
                       const std::vector<int> subtractedPeriods,
                       const int groupIndex);
-  void SetStartEnd(const double start, const double end);
+  void setStartEnd(const double start, const double end);
 
 protected:
   /// Workspace index of the group to analyse
   const int m_groupIndex;
-  double StartX;
-  double EndX;
+  double m_startX;
+  double m_endX;
 };
 
 } // namespace WorkflowAlgorithms

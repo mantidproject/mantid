@@ -103,7 +103,7 @@ public:
   /// Enable/disable the Fit button;
   virtual void setFitEnabled(bool yes) override;
 
-  void TFAsymmFit(int maxIterations);
+  void doTFAsymmFit(int maxIterations);
   void setAvailableGroups(const QStringList &groups);
   void setAvailablePeriods(const QStringList &periods);
 
@@ -121,13 +121,15 @@ public slots:
   void fit() override;
   /// Open sequential fit dialog
   void sequentialFit() override;
-  void executeMuonFitMenu(const QString &item);
+
+  void executeFitMenu(const QString &item) override;
   void groupBtnPressed();
   void periodBtnPressed();
   void generateBtnPressed();
   void combineBtnPressed();
   //void positiveCombo(QString value) { m_positiveCombo->setText(value); };
   void setNumPeriods(size_t numPeriods);
+
 signals:
   /// Emitted when sequential fit is requested by user
   void sequentialFitRequested();
@@ -149,7 +151,7 @@ signals:
 
 protected:
   void showEvent(QShowEvent *e) override;
-  double Normalization() const;
+  double normalization() const;
   void setNormalization();
   void groupToFitChanged();
 private slots:
@@ -158,9 +160,9 @@ private slots:
   void enumChanged(QtProperty *prop) override;
 private:
   /// new menu option
-  QAction *m_fitActiontest;
-  /// Create new fit menu
-  QPushButton *createMuonFitMenuButton(QWidget *w);
+  QAction *m_fitActionTFAsymm;
+  /// override populating fit menu
+  void populateFitMenuButton(QSignalMapper *fitMapper, QMenu *fitMenu) override;
 
   /// Get the registered function names
   void populateFunctionNames() override;

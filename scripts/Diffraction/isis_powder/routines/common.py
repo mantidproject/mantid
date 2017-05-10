@@ -1,4 +1,5 @@
 from __future__ import (absolute_import, division, print_function)
+from six import iterkeys
 
 import mantid.kernel as kernel
 import mantid.simpleapi as mantid
@@ -7,11 +8,12 @@ from isis_powder.routines.common_enums import INPUT_BATCHING, WORKSPACE_UNITS
 
 def cal_map_dictionary_key_helper(dictionary, key, append_to_error_message=None):
     """
-    Provides a light wrapper around the dictionary key helper which provides a generic error
-    message stating the following key could not be found in the calibration mapping file. As
-    several instruments will use this message it makes sense to localise it to common. If a
-    message is passed in append_to_error_message it will append that to the end of the generic
-    error message in its own line when an exception is raised.
+    Provides a light wrapper around the dictionary key helper and uses case insensitive lookup.
+    This also provides a generic error message stating the following key could not be found
+    in the calibration mapping file. As several instruments will use this message it makes
+    sense to localise it to common. If a message is passed in append_to_error_message it
+    will append that to the end of the generic error message in its own line when an
+    exception is raised.
     :param dictionary: The dictionary to search in for the key
     :param key: The key to search for
     :param append_to_error_message: (Optional) The message to append to the end of the error message
@@ -19,12 +21,14 @@ def cal_map_dictionary_key_helper(dictionary, key, append_to_error_message=None)
     """
     err_message = "The field '" + str(key) + "' is required within the calibration file but was not found."
     err_message += '\n' + str(append_to_error_message) if append_to_error_message else ''
-    return dictionary_key_helper(dictionary=dictionary, key=key, throws=True, exception_msg=err_message)
+
+    return dictionary_key_helper(dictionary=dictionary, key=key, throws=True,
+                                 case_insensitive=True, exception_msg=err_message)
 
 
-def crop_banks_in_tof(bank_list, crop_values_list):
+def crop_banks_using_crop_list(bank_list, crop_values_list):
     """
-    Crops the each bank by the specified tuple values from a list of tuples in TOF. The number
+    Crops each bank by the specified tuple values from a list of tuples in TOF. The number
     of tuples must match the number of banks to crop. A list of [(100,200), (150,250)] would crop
     bank 1 to the values 100, 200 and bank 2 to 150 and 250 in TOF.
     :param bank_list: The list of workspaces each containing one bank of data to crop
@@ -32,11 +36,12 @@ def crop_banks_in_tof(bank_list, crop_values_list):
     :return: A list of cropped workspaces
     """
     if not isinstance(crop_values_list, list):
-        if isinstance(bank_list, list):
-            raise ValueError("The cropping values were not in a list type")
-        else:
-            raise RuntimeError("Attempting to use list based cropping on a single workspace not in a list")
+        raise ValueError("The cropping values were not in a list type")
+    elif not isinstance(bank_list, list):
+        # This error is probably internal as we control the bank lists
+        raise RuntimeError("Attempting to use list based cropping on a single workspace not in a list")
 
+    # Finally check the number of elements are equal
     if len(bank_list) != len(crop_values_list):
         raise RuntimeError("The number of TOF cropping values does not match the number of banks for this instrument")
 
@@ -66,7 +71,7 @@ def crop_in_tof(ws_to_crop, x_min=None, x_max=None):
     return cropped_ws
 
 
-def dictionary_key_helper(dictionary, key, throws=True, exception_msg=None):
+def dictionary_key_helper(dictionary, key, throws=True, case_insensitive=False, exception_msg=None):
     """
     Checks if the key is in the dictionary and performs various different actions if it is not depending on
     the user parameters. If set to not throw it will return none. Otherwise it will throw a custom user message
@@ -74,12 +79,25 @@ def dictionary_key_helper(dictionary, key, throws=True, exception_msg=None):
     :param dictionary: The dictionary to search for the key
     :param key: The key to search for in the dictionary
     :param throws: (Optional) Defaults to true, whether this should throw on a key not being present
+    :param case_insensitive (Optional) Defaults to false, if set to true it accounts for mixed case but is O(n) time
     :param exception_msg: (Optional) The error message to print in the KeyError instead of the default Python message
     :return: The key if it was found, None if throws was set to false and the key was not found.
     """
     if key in dictionary:
+        # Try to use hashing first
         return dictionary[key]
-    elif not throws:
+
+    # If we still couldn't find it use the O(n) method
+    if case_insensitive:
+        # Convert key to str
+        lower_key = str(key).lower()
+        for dict_key in iterkeys(dictionary):
+            if str(dict_key).lower() == lower_key:
+                # Found it
+                return dictionary[dict_key]
+
+    # It doesn't exist at this point lets go into our error handling
+    if not throws:
         return None
     elif exception_msg:
         # Print user specified message
@@ -142,8 +160,12 @@ def generate_splined_name(vanadium_string, *args):
     :return: The splined vanadium name
     """
     out_name = "VanSplined" + '_' + str(vanadium_string)
-    for value in args:
-        out_name += '_' + str(value)
+    for passed_arg in args:
+        if isinstance(passed_arg, list):
+            for arg in passed_arg:
+                out_name += '_' + str(arg)
+        else:
+            out_name += '_' + (str(passed_arg))
 
     out_name += ".nxs"
     return out_name
@@ -156,7 +178,10 @@ def get_first_run_number(run_number_string):
     :return: The first run for the user input of runs
     """
     run_numbers = generate_run_numbers(run_number_string=run_number_string)
-    return run_numbers[0]
+    if isinstance(run_numbers, list):
+        run_numbers = run_numbers[0]
+
+    return run_numbers
 
 
 def get_monitor_ws(ws_to_process, run_number_string, instrument):
@@ -170,8 +195,8 @@ def get_monitor_ws(ws_to_process, run_number_string, instrument):
     :param instrument: The instrument to query for the monitor position
     :return: The extracted monitor as a workspace
     """
-    number_list = generate_run_numbers(run_number_string)
-    monitor_spectra = instrument._get_monitor_spectra_index(number_list[0])
+    first_run_number = get_first_run_number(run_number_string)
+    monitor_spectra = instrument._get_monitor_spectra_index(first_run_number)
     load_monitor_ws = mantid.ExtractSingleSpectrum(InputWorkspace=ws_to_process, WorkspaceIndex=monitor_spectra)
     return load_monitor_ws
 
@@ -221,7 +246,7 @@ def load_current_normalised_ws_list(run_number_string, instrument, input_batchin
     run_information = instrument._get_run_details(run_number_string=run_number_string)
     raw_ws_list = _load_raw_files(run_number_string=run_number_string, instrument=instrument)
 
-    if input_batching.lower() == INPUT_BATCHING.Summed.lower() and len(raw_ws_list) > 1:
+    if input_batching == INPUT_BATCHING.Summed and len(raw_ws_list) > 1:
         summed_ws = _sum_ws_range(ws_list=raw_ws_list)
         remove_intermediate_workspace(raw_ws_list)
         raw_ws_list = [summed_ws]
@@ -294,7 +319,7 @@ def spline_workspaces(focused_vanadium_spectra, num_splines):
     return splined_ws_list
 
 
-def subtract_sample_empty(ws_to_correct, empty_sample_ws_string, instrument):
+def subtract_summed_runs(ws_to_correct, empty_sample_ws_string, instrument):
     """
     Loads the list of empty runs specified by the empty_sample_ws_string and subtracts
     them from the workspace specified. Returns the subtracted workspace.
@@ -424,4 +449,4 @@ def _run_number_generator(processed_string):
         number_generator = kernel.IntArrayProperty('array_generator', processed_string)
         return number_generator.value.tolist()
     except RuntimeError:
-        raise RuntimeError("Could not generate run numbers from this input: " + processed_string)
+        raise ValueError("Could not generate run numbers from this input: " + processed_string)

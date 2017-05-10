@@ -45,7 +45,7 @@ RectangularDetectorPixel::RectangularDetectorPixel(
  * @return position relative to the 0,0 point of the parent panel
  */
 Kernel::V3D RectangularDetectorPixel::getRelativePos() const {
-  if (m_map && m_map->hasDetectorInfo())
+  if (m_map && hasDetectorInfo())
     return Detector::getRelativePos();
   // Calculate the x,y position
   double x = m_panel->xstart() + double(m_col) * m_panel->xstep();
