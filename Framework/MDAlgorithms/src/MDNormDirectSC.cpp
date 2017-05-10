@@ -462,71 +462,70 @@ void MDNormDirectSC::calculateNormalization(
   std::vector<coord_t> pos, posNew;
   auto prog = make_unique<API::Progress>(this, 0.3, 1.0, ndets);
 PRAGMA_OMP(parallel for private(intersections, pos, posNew))
-  for (int64_t i = 0; i < ndets; i++) {
-    PARALLEL_START_INTERUPT_REGION
+for (int64_t i = 0; i < ndets; i++) {
+  PARALLEL_START_INTERUPT_REGION
 
-    if (!spectrumInfo.hasDetectors(i) || spectrumInfo.isMonitor(i) ||
-        spectrumInfo.isMasked(i)) {
-      continue;
-    }
-    const auto &detector = spectrumInfo.detector(i);
-    double theta = detector.getTwoTheta(m_samplePos, m_beamDir);
-    double phi = detector.getPhi();
-    // If the detector is a group, this should be the ID of the first detector
-    const auto detID = detector.getID();
-
-    // Intersections
-    this->calculateIntersections(intersections, theta, phi);
-    if (intersections.empty())
-      continue;
-
-    // Get solid angle for this contribution
-    double solid = protonCharge;
-    if (haveSA) {
-      solid = solidAngleWS->y(solidAngDetToIdx.find(detID)->second)[0] *
-              protonCharge;
-    }
-    // Compute final position in HKL
-    // pre-allocate for efficiency and copy non-hkl dim values into place
-    pos.resize(vmdDims + otherValues.size() + 1);
-    std::copy(otherValues.begin(), otherValues.end(), pos.begin() + vmdDims);
-    pos.push_back(1.);
-    auto intersectionsBegin = intersections.begin();
-    for (auto it = intersectionsBegin + 1; it != intersections.end(); ++it) {
-      const auto &curIntSec = *it;
-      const auto &prevIntSec = *(it - 1);
-      // the full vector isn't used so compute only what is necessary
-      double delta =
-          (curIntSec[3] * curIntSec[3] - prevIntSec[3] * prevIntSec[3]) /
-          energyToK;
-      if (delta < 1e-10)
-        continue; // Assume zero contribution if difference is small
-
-      // Average between two intersections for final position
-      std::transform(curIntSec.data(), curIntSec.data() + vmdDims,
-                     prevIntSec.data(), pos.begin(),
-                     VectorHelper::SimpleAverage<coord_t>());
-
-      // transform kf to energy transfer
-      pos[3] = static_cast<coord_t>(m_Ei - pos[3] * pos[3] / energyToK);
-      affineTrans.multiplyPoint(pos, posNew);
-      size_t linIndex = m_normWS->getLinearIndexAtCoord(posNew.data());
-      if (linIndex == size_t(-1))
-        continue;
-
-      // signal = integral between two consecutive intersections *solid angle
-      // *PC
-      double signal = solid * delta;
-      Mantid::Kernel::AtomicOp(signalArray[linIndex], signal,
-                               std::plus<signal_t>());
-    }
-    prog->report();
-
-    PARALLEL_END_INTERUPT_REGION
+  if (!spectrumInfo.hasDetectors(i) || spectrumInfo.isMonitor(i) ||
+      spectrumInfo.isMasked(i)) {
+    continue;
   }
-  PARALLEL_CHECK_INTERUPT_REGION
-  std::copy(signalArray.cbegin(), signalArray.cend(),
-            m_normWS->getSignalArray());
+  const auto &detector = spectrumInfo.detector(i);
+  double theta = detector.getTwoTheta(m_samplePos, m_beamDir);
+  double phi = detector.getPhi();
+  // If the detector is a group, this should be the ID of the first detector
+  const auto detID = detector.getID();
+
+  // Intersections
+  this->calculateIntersections(intersections, theta, phi);
+  if (intersections.empty())
+    continue;
+
+  // Get solid angle for this contribution
+  double solid = protonCharge;
+  if (haveSA) {
+    solid =
+        solidAngleWS->y(solidAngDetToIdx.find(detID)->second)[0] * protonCharge;
+  }
+  // Compute final position in HKL
+  // pre-allocate for efficiency and copy non-hkl dim values into place
+  pos.resize(vmdDims + otherValues.size() + 1);
+  std::copy(otherValues.begin(), otherValues.end(), pos.begin() + vmdDims);
+  pos.push_back(1.);
+  auto intersectionsBegin = intersections.begin();
+  for (auto it = intersectionsBegin + 1; it != intersections.end(); ++it) {
+    const auto &curIntSec = *it;
+    const auto &prevIntSec = *(it - 1);
+    // the full vector isn't used so compute only what is necessary
+    double delta =
+        (curIntSec[3] * curIntSec[3] - prevIntSec[3] * prevIntSec[3]) /
+        energyToK;
+    if (delta < 1e-10)
+      continue; // Assume zero contribution if difference is small
+
+    // Average between two intersections for final position
+    std::transform(curIntSec.data(), curIntSec.data() + vmdDims,
+                   prevIntSec.data(), pos.begin(),
+                   VectorHelper::SimpleAverage<coord_t>());
+
+    // transform kf to energy transfer
+    pos[3] = static_cast<coord_t>(m_Ei - pos[3] * pos[3] / energyToK);
+    affineTrans.multiplyPoint(pos, posNew);
+    size_t linIndex = m_normWS->getLinearIndexAtCoord(posNew.data());
+    if (linIndex == size_t(-1))
+      continue;
+
+    // signal = integral between two consecutive intersections *solid angle
+    // *PC
+    double signal = solid * delta;
+    Mantid::Kernel::AtomicOp(signalArray[linIndex], signal,
+                             std::plus<signal_t>());
+  }
+  prog->report();
+
+  PARALLEL_END_INTERUPT_REGION
+}
+PARALLEL_CHECK_INTERUPT_REGION
+std::copy(signalArray.cbegin(), signalArray.cend(), m_normWS->getSignalArray());
 }
 
 /**
