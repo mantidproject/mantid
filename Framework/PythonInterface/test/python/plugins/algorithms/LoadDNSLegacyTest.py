@@ -36,7 +36,7 @@ class LoadDNSLegacyTest(unittest.TestCase):
         self.assertEqual(-8.54, run.getProperty('deterota').value)
         self.assertEqual(8332872, run.getProperty('mon_sum').value)
         self.assertEqual('z', run.getProperty('polarisation').value)
-        self.assertEqual('7', run.getProperty('polarisation_comment').value)
+        self.assertEqual('7', str(run.getProperty('polarisation_comment').value))
         self.assertEqual('no', run.getProperty('normalized').value)
         # check whether detector bank is rotated
         det = ws.getDetector(0)
