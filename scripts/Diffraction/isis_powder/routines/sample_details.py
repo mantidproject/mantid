@@ -1,11 +1,18 @@
 from __future__ import (absolute_import, division, print_function)
 
 from six import iteritems
+from isis_powder.routines import common
 import math
 
 
 class SampleDetails(object):
-    def __init__(self, height, radius, center):
+    def __init__(self, **kwargs):
+        # By using kwargs we get a better error that, init takes 4 arguments
+        err_string = "A following sample property was not passed as an argument: "
+        height = common.dictionary_key_helper(dictionary=kwargs, key="height", exception_msg=err_string + "height")
+        radius = common.dictionary_key_helper(dictionary=kwargs, key="radius", exception_msg=err_string + "radius")
+        center = common.dictionary_key_helper(dictionary=kwargs, key="center", exception_msg=err_string + "center")
+
         # Currently we only support cylinders
         self.shape_type = "cylinder"
         SampleDetails._validate_sample_details_constructor_inputs(height=height, radius=radius, center=center)
@@ -21,7 +28,12 @@ class SampleDetails(object):
     def reset_sample_material(self):
         self._material_object = None
 
-    def set_material(self, chemical_formula, number_density=None):
+    def set_material(self, **kwargs):
+        chemical_formula = common.dictionary_key_helper(dictionary=kwargs, key="chemical_formula",
+                                                        exception_msg="The following argument is required but was not"
+                                                                      " passed: chemical_formula")
+        number_density = common.dictionary_key_helper(dictionary=kwargs, key="number_density", throws=False)
+
         if self._material_object is not None:
             self.print_sample_details()
             raise RuntimeError("The material has already been set to the above details. If the properties"
@@ -30,7 +42,12 @@ class SampleDetails(object):
 
         self._material_object = _Material(chemical_formula=chemical_formula, numeric_density=number_density)
 
-    def set_material_properties(self, absorption_cross_section, scattering_cross_section):
+    def set_material_properties(self, **kwargs):
+        err_msg = "The following argument is required but was not set or passed: "
+        absorption_cross_section = common.dictionary_key_helper(dictionary=kwargs, key="absorption_cross_section",
+                                                                exception_msg=err_msg + "absorption_cross_section")
+        scattering_cross_section = common.dictionary_key_helper(dictionary=kwargs, key="scattering_cross_section",
+                                                                exception_msg=err_msg + "scattering_cross_section")
         if self._material_object is None:
             raise RuntimeError("The material has not been set (or reset). Please set it by calling"
                                " 'set_material()' to set the material details of the sample.")
@@ -66,13 +83,12 @@ class SampleDetails(object):
         if not isinstance(center, list):
             raise ValueError("The center of the cylinder must be specified as a list of X, Y, Z co-ordinates."
                              " For example [0., 1., 2.]")
+
+        # The center of the cylinder can be at any position of X Y Z so don't check against physical constraints
         if len(center) != 3:
             raise ValueError("The center must have three values corresponding to X, Y, Z position of the sample."
                              " For example [0. ,1., 2.]")
-        center_name = "center"
-        for value in center:
-            _check_value_is_physical(property_name=center_name, value=value)
-            # All properties validated at this point
+        # All properties validated at this point
 
 
 class _Material(object):
@@ -83,8 +99,8 @@ class _Material(object):
         # which is required for absorption corrections.
         if len(chemical_formula) > 2 and numeric_density is None:
                 raise ValueError("A numeric density formula must be set on a chemical formula which is not elemental."
-                                 " An elemental chemical formula can only be a maximum of 2 characters "
-                                 "(e.g. 'Si' or 'V')")
+                                 " An element can only be a maximum of 2 characters (e.g. 'Si' or 'V'). The numeric"
+                                 " density can be set using the following key: numeric_density")
         if numeric_density:
             # Always check value is sane if user has given one
             _check_value_is_physical(property_name="numeric_density", value=numeric_density)
