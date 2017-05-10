@@ -239,12 +239,12 @@ double averageMode(const double sum, const int n, const int) noexcept {
 }
 
 /**
- * A mode function for weighed summing. The weight is inversely proportional
+ * A mode function for weigthed summing. The weight is inversely proportional
  * to the number of data points in the sum.
  * @param sum A sum of data points.
  * @param n Number of summed points.
  * @param nTot Total number of possible points, including NaNs and infs.
- * @return The weighed sum.
+ * @return The weigthed sum.
  */
 double sumMode(const double sum, const int n, const int nTot) noexcept {
   return static_cast<double>(nTot) / static_cast<double>(n) * sum;

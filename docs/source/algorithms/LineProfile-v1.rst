@@ -22,7 +22,7 @@ By default, the profile is calculated as an average over the line width. This be
     Average the values. This is the default.
 
 'Sum'
-    Sum the values, weighing them by :math:`n / n_{tot}` where :math:`n` is the number of summed data points (excluding special values if *IgnoreNans* or *IgnoreInfs* is set) and :math:`n_{tot}` is the total number of data points (including special values).
+    Sum the values, weighting them by :math:`n / n_{tot}` where :math:`n` is the number of summed data points (excluding special values if *IgnoreNans* or *IgnoreInfs* is set) and :math:`n_{tot}` is the total number of data points (including special values).
 
 Usage
 -----
@@ -149,7 +149,7 @@ Output:
     e = sumCutWS.readE(0)[iElastic]
     print('Sum profile at elastic peak: {} +/- {}'.format(y, e))
 
-    # The weighing is apparent when the profile crosses some
+    # The weighting is apparent when the profile crosses some
     # special values.
     iEdge = sumCutWS.blocksize() / 6
     y = sumCutWS.readY(0)[iEdge]

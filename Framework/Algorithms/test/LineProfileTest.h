@@ -79,7 +79,7 @@ public:
                      static_cast<double>(nHist) / 2 + 0.5)
   }
 
-  void test__summing_profile() {
+  void test_summing_profile() {
     const size_t nHist = 13;
     const size_t nBins = 23;
     MatrixWorkspace_sptr inputWS = create2DWorkspace154(nHist, nBins);
