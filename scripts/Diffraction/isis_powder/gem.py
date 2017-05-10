@@ -33,19 +33,17 @@ class Gem(AbstractInst):
                                      do_absorb_corrections=self._inst_settings.do_absorb_corrections)
 
     def set_sample_details(self, **kwargs):
+        kwarg_name = "sample"
         sample_details_obj = common.dictionary_key_helper(
-            dictionary=kwargs, key="new_sample_details",
+            dictionary=kwargs, key=kwarg_name,
             exception_msg="The argument containing sample details was not found. Please"
-                          " set the following argument: new_sample_details")
-        if not isinstance(sample_details_obj, sample_details.SampleDetails):
-            raise ValueError("The object passed was not a SampleDetails object. Please create a"
-                             " SampleDetails object and set the relevant properties to use on this method")
+                          " set the following argument: " + kwarg_name)
         self._sample_details = sample_details_obj
 
     # Private methods
 
     def _get_run_details(self, run_number_string):
-        run_number_string_key = run_number_string + str(self._inst_settings.file_extension)
+        run_number_string_key = str(run_number_string) + str(self._inst_settings.file_extension)
         if run_number_string_key in self._cached_run_details:
             return self._cached_run_details[run_number_string_key]
 
@@ -70,7 +68,7 @@ class Gem(AbstractInst):
         else:
             return absorb_corrections.run_cylinder_absorb_corrections(
                 ws_to_correct=ws_to_correct, multiple_scattering=self._inst_settings.multiple_scattering,
-                sample_details_obj=sample_details)
+                sample_details_obj=self._sample_details)
 
     def _crop_banks_to_user_tof(self, focused_banks):
         return common.crop_banks_using_crop_list(focused_banks, self._inst_settings.focused_cropping_values)

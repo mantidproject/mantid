@@ -14,7 +14,7 @@ def focus(run_number_string, instrument, perform_vanadium_norm, absorb):
         return _individual_run_focusing(instrument=instrument, perform_vanadium_norm=perform_vanadium_norm,
                                         run_number=run_number_string, absorb=absorb)
     elif input_batching == INPUT_BATCHING.Summed:
-        return _batched_run_focusing(instrument, perform_vanadium_norm, run_number_string)
+        return _batched_run_focusing(instrument, perform_vanadium_norm, run_number_string, absorb=absorb)
     else:
         raise ValueError("Input batching not passed through. Please contact development team.")
 
@@ -33,17 +33,18 @@ def _focus_one_ws(ws, run_number, instrument, perform_vanadium_norm, absorb):
                                                       empty_sample_ws_string=run_details.sample_empty,
                                                       scale_factor=instrument._inst_settings.sample_empty_scale)
 
+    # Crop to largest acceptable TOF range
+    input_workspace = instrument._crop_raw_to_expected_tof_range(ws_to_crop=input_workspace)
+
+    # Align
+    aligned_ws = mantid.AlignDetectors(InputWorkspace=input_workspace,
+                                       CalibrationFile=run_details.offset_file_path)
+
     # Correct for absorption / multiple scattering if required
     if absorb:
         input_workspace = instrument._apply_absorb_corrections(run_details=run_details, ws_to_correct=input_workspace)
 
-    # Crop to largest acceptable TOF range
-    input_workspace = instrument._crop_raw_to_expected_tof_range(ws_to_crop=input_workspace)
-
-    # Align / Focus
-    aligned_ws = mantid.AlignDetectors(InputWorkspace=input_workspace,
-                                       CalibrationFile=run_details.offset_file_path)
-
+    # Focus the spectra into banks
     focused_ws = mantid.DiffractionFocussing(InputWorkspace=aligned_ws,
                                              GroupingFileName=run_details.grouping_file_path)
 

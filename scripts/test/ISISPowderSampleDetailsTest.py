@@ -149,7 +149,7 @@ class ISISPowderSampleDetailsTest(unittest.TestCase):
         material_obj_one_char = sample_details._Material(chemical_formula=chemical_formula_one_char_element)
         self.assertIsNotNone(material_obj_one_char)
         self.assertEqual(material_obj_one_char.chemical_formula, chemical_formula_one_char_element)
-        self.assertIsNone(material_obj_one_char.numeric_density)
+        self.assertIsNone(material_obj_one_char.number_density)
 
         # Also check that the absorption and scattering X sections have not been set
         self.assertIsNone(material_obj_one_char.absorption_cross_section)
@@ -160,12 +160,12 @@ class ISISPowderSampleDetailsTest(unittest.TestCase):
         material_obj_two_char = sample_details._Material(chemical_formula=chemical_formula_two_char_element)
         self.assertIsNotNone(material_obj_two_char)
         self.assertEqual(material_obj_two_char.chemical_formula, chemical_formula_two_char_element)
-        self.assertIsNone(material_obj_two_char.numeric_density)
+        self.assertIsNone(material_obj_two_char.number_density)
 
         # Check it stores numeric density if passed
         material_obj_numeric_density = sample_details._Material(chemical_formula=chemical_formula_two_char_element,
                                                                 numeric_density=numeric_density_sample)
-        self.assertEqual(material_obj_numeric_density.numeric_density, numeric_density_sample)
+        self.assertEqual(material_obj_numeric_density.number_density, numeric_density_sample)
 
         # Check that it raises an error if we have a non-elemental formula without numeric density
         with assertRaisesRegex(self, ValueError, "A numeric density formula must be set on a chemical formula"):
@@ -175,7 +175,7 @@ class ISISPowderSampleDetailsTest(unittest.TestCase):
         material_obj_num_complex_formula = sample_details._Material(chemical_formula=chemical_formula_complex,
                                                                     numeric_density=numeric_density_sample)
         self.assertEqual(material_obj_num_complex_formula.chemical_formula, chemical_formula_complex)
-        self.assertEqual(material_obj_num_complex_formula.numeric_density, numeric_density_sample)
+        self.assertEqual(material_obj_num_complex_formula.number_density, numeric_density_sample)
 
     def test_material_set_properties(self):
         bad_absorb = '-1'

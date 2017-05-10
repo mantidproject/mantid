@@ -2,7 +2,7 @@ from __future__ import (absolute_import, division, print_function)
 
 import mantid.simpleapi as mantid
 
-from isis_powder.routines import common, sample_details
+from isis_powder.routines import common, common_enums, sample_details
 
 
 def create_vanadium_sample_details_obj(config_dict):
@@ -26,7 +26,7 @@ def create_vanadium_sample_details_obj(config_dict):
     formula = common.dictionary_key_helper(dictionary=config_dict, key=formula_key, exception_msg=e_msg + formula_key)
     number_density = common.dictionary_key_helper(dictionary=config_dict, key=number_density_key, throws=False)
 
-    vanadium_sample_details = sample_details.SampleDetails(height=height, radius=radius, pos=pos)
+    vanadium_sample_details = sample_details.SampleDetails(height=height, radius=radius, center=pos)
     vanadium_sample_details.set_material(chemical_formula=formula, number_density=number_density)
     return vanadium_sample_details
 
@@ -42,6 +42,11 @@ def run_cylinder_absorb_corrections(ws_to_correct, multiple_scattering, sample_d
     :param sample_details_obj: The object containing the sample details
     :return: The corrected workspace
     """
+
+    if not isinstance(sample_details_obj, sample_details.SampleDetails):
+        raise RuntimeError("A SampleDetails object was not set or a different object type was found. Please create a"
+                           " SampleDetails object and set the relevant properties it. Then set the new sample by "
+                           "calling set_sample_details()")
 
     height = sample_details_obj.height
     radius = sample_details_obj.radius
@@ -88,9 +93,17 @@ def _calculate__cylinder_absorb_corrections(ws_to_correct, multiple_scattering,
 
     mantid.SetSample(InputWorkspace=ws_to_correct, Geometry=geometry_json, Material=material_json)
 
-    ws_to_correct = mantid.ConvertUnits(InputWorkspace=ws_to_correct, OutputWorkspace=ws_to_correct, Target="TOF")
+    previous_units = ws_to_correct.getAxis(0).getUnit().unitID()
+    ws_units = common_enums.WORKSPACE_UNITS
+
+    # Mayers Sample correction must be completed in TOF, convert if needed. Then back to original units afterwards
+    if previous_units != ws_units.tof:
+        ws_to_correct = mantid.ConvertUnits(InputWorkspace=ws_to_correct, OutputWorkspace=ws_to_correct,
+                                            Target=ws_units.tof)
     ws_to_correct = mantid.MayersSampleCorrection(InputWorkspace=ws_to_correct, OutputWorkspace=ws_to_correct,
                                                   MultipleScattering=multiple_scattering)
-    ws_to_correct = mantid.ConvertUnits(InputWorkspace=ws_to_correct, OutputWorkspace=ws_to_correct, Target="dSpacing")
+    if previous_units != ws_units.tof:
+        ws_to_correct = mantid.ConvertUnits(InputWorkspace=ws_to_correct, OutputWorkspace=ws_to_correct,
+                                            Target=previous_units)
 
     return ws_to_correct

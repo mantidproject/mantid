@@ -43,7 +43,7 @@ class SampleDetails(object):
                                " have not been set they can be modified with 'set_material_properties()'. Otherwise"
                                " to change the material call 'reset_sample_material()'")
 
-        self.material_object = _Material(chemical_formula=chemical_formula, numeric_density=number_density)
+        self.material_object = _Material(chemical_formula=chemical_formula, number_density=number_density)
 
     def set_material_properties(self, **kwargs):
         err_msg = "The following argument is required but was not set or passed: "
@@ -95,20 +95,20 @@ class SampleDetails(object):
 
 
 class _Material(object):
-    def __init__(self, chemical_formula, numeric_density=None):
+    def __init__(self, chemical_formula, number_density=None):
         self.chemical_formula = chemical_formula
 
-        # If it is not an element Mantid requires us to provide the numeric density
+        # If it is not an element Mantid requires us to provide the number density
         # which is required for absorption corrections.
-        if len(chemical_formula) > 2 and numeric_density is None:
-                raise ValueError("A numeric density formula must be set on a chemical formula which is not elemental."
-                                 " An element can only be a maximum of 2 characters (e.g. 'Si' or 'V'). The numeric"
-                                 " density can be set using the following key: numeric_density")
-        if numeric_density:
+        if len(chemical_formula) > 2 and number_density is None:
+                raise ValueError("A number density formula must be set on a chemical formula which is not elemental."
+                                 " An element can only be a maximum of 2 characters (e.g. 'Si' or 'V'). The number"
+                                 " density can be set using the following key: number_density")
+        if number_density:
             # Always check value is sane if user has given one
-            _check_value_is_physical(property_name="numeric_density", value=numeric_density)
+            _check_value_is_physical(property_name="number_density", value=number_density)
 
-        self.numeric_density = numeric_density
+        self.number_density = number_density
 
         # Advanced material properties
         self.absorption_cross_section = None
@@ -122,10 +122,10 @@ class _Material(object):
         print("------------------------")
         print("Chemical formula: {}".format(self.chemical_formula))
 
-        if self.numeric_density:
-            print("Numeric Density: {}".format(self.numeric_density))
+        if self.number_density:
+            print("Number Density: {}".format(self.number_density))
         else:
-            print("Numeric Density: Set from elemental properties by Mantid")
+            print("Number Density: Set from elemental properties by Mantid")
         self._print_material_properties()
 
     def _print_material_properties(self):
