@@ -115,7 +115,7 @@ public:
     const auto numPoints = static_cast<int>(points.size());
     if (numPoints == 0)
       std::runtime_error(
-          "Need at least one point to initilise NearestNeighbours.");
+          "Need at least one point to initialise NearestNeighbours.");
 
     m_dataPoints = make_unique<NNDataPoints>(numPoints, static_cast<int>(N));
 
@@ -179,8 +179,7 @@ private:
       // create Eigen array from ANNpoint
       auto pos = m_dataPoints->mutablePoint(nnIndexList[i]);
       VectorType point = Eigen::Map<VectorType>(pos, N, 1);
-      auto item = std::make_tuple(point, nnIndexList[i], nnDistList[i]);
-      results.push_back(item);
+      results.emplace_back(point, nnIndexList[i], nnDistList[i]);
     }
 
     return results;
