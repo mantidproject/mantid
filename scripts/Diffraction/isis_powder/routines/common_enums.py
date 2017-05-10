@@ -4,7 +4,7 @@ from __future__ import (absolute_import, division, print_function)
 
 
 class INPUT_BATCHING(object):
-    enum_friendly_name = "batching modes"
+    enum_friendly_name = "input batching mode"
     Individual = "Individual"
     Summed = "Summed"
 

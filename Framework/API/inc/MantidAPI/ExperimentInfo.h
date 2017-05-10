@@ -228,7 +228,6 @@ private:
 
   boost::shared_ptr<Beamline::ComponentInfo> m_componentInfo;
   std::unique_ptr<API::ComponentInfo> m_componentInfoWrapper;
-
   mutable std::unique_ptr<Beamline::SpectrumInfo> m_spectrumInfo;
   mutable std::unique_ptr<SpectrumInfo> m_spectrumInfoWrapper;
   mutable std::mutex m_spectrumInfoMutex;

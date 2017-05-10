@@ -114,22 +114,20 @@ void ConvertCWPDMDToSpectra::exec() {
 
     uint16_t numexpinfo = inputDataWS->getNumExperimentInfo();
     for (uint16_t iexp = 0; iexp < numexpinfo; ++iexp) {
-      int runid = atoi(inputDataWS->getExperimentInfo(iexp)
-                           ->run()
-                           .getProperty("run_number")
-                           ->value()
-                           .c_str());
+      int runid = std::stoi(inputDataWS->getExperimentInfo(iexp)
+                                ->run()
+                                .getProperty("run_number")
+                                ->value());
       // skip if run id is not a valid one
       if (runid < 0)
         continue;
       double thislambda = wavelength;
       if (inputDataWS->getExperimentInfo(iexp)->run().hasProperty(
               wavelengthpropertyname))
-        thislambda = atof(inputDataWS->getExperimentInfo(iexp)
-                              ->run()
-                              .getProperty(wavelengthpropertyname)
-                              ->value()
-                              .c_str());
+        thislambda = std::stod(inputDataWS->getExperimentInfo(iexp)
+                                   ->run()
+                                   .getProperty(wavelengthpropertyname)
+                                   ->value());
       else if (wavelength == EMPTY_DBL()) {
         std::stringstream errss;
         errss << "In order to convert unit to " << outputunit
@@ -248,9 +246,9 @@ API::MatrixWorkspace_sptr ConvertCWPDMDToSpectra::reducePowderData(
 
   // Convert unit to unit char bit
   char unitchar = 't'; // default 2theta
-  if (targetunit.compare("dSpacing") == 0)
+  if (targetunit == "dSpacing")
     unitchar = 'd';
-  else if (targetunit.compare("Momentum Transfer (Q)") == 0)
+  else if (targetunit == "Momentum Transfer (Q)")
     unitchar = 'q';
 
   binMD(dataws, unitchar, map_runwavelength, vecx, vecy, vec_excludeddets);
@@ -383,15 +381,15 @@ void ConvertCWPDMDToSpectra::findXBoundary(
 
       // convert unit optionally
       double outx = -1;
-      if (targetunit.compare("2theta") == 0)
+      if (targetunit == "2theta")
         outx = twotheta;
       else {
         if (wavelength <= 0)
           throw std::runtime_error("Wavelength is not defined!");
 
-        if (targetunit.compare("dSpacing") == 0)
+        if (targetunit == "dSpacing")
           outx = calculateDspaceFrom2Theta(twotheta, wavelength);
-        else if (targetunit.compare("Momentum Transfer (Q)") == 0)
+        else if (targetunit == "Momentum Transfer (Q)")
           outx = calculateQFrom2Theta(twotheta, wavelength);
         else
           throw std::runtime_error("Unrecognized unit.");

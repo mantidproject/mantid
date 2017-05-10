@@ -150,7 +150,7 @@ class InstrumentSetupWidget(QtGui.QWidget):
         metrics=QtGui.QFontMetrics(self.font())
         self.signaldict=dict()
         #instrument selector
-        self.instrumentList=['ARCS','CNCS','DNS','FOCUS','HET','HYSPEC','LET','MAPS','MARI','MERLIN','SEQUOIA']
+        self.instrumentList=['ARCS','CNCS','DNS','EXED','FOCUS','HET','HYSPEC','LET','MAPS','MARI','MERLIN','SEQUOIA']
         self.combo = QtGui.QComboBox(self)
         for inst in self.instrumentList:
             self.combo.addItem(inst)
@@ -170,7 +170,7 @@ class InstrumentSetupWidget(QtGui.QWidget):
         self.signaldict['Ei']=self.Ei
         self.validatorS2=QtGui.QDoubleValidator(-90.,90.,5,self)
         self.validatorEi=QtGui.QDoubleValidator(1.,10000.,5,self)
-        self.labelS2=QtGui.QLabel('HYSPEC S2')
+        self.labelS2=QtGui.QLabel('S2')
         self.labelEi=QtGui.QLabel('Incident Energy')
         self.editS2=QtGui.QLineEdit()
         self.editS2.setValidator(self.validatorS2)
@@ -312,7 +312,7 @@ class InstrumentSetupWidget(QtGui.QWidget):
         d=dict()
         self.instrument=text
         d['instrument']=str(self.instrument)
-        if self.instrument=="HYSPEC":
+        if self.instrument in ["HYSPEC", "EXED"]:
             self.labelS2.show()
             self.editS2.show()
         else:

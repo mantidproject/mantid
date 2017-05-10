@@ -176,6 +176,18 @@ void setErrorSquaredArray(IMDHistoWorkspace &self,
     self.setErrorSquaredAt(i, extract<double>(flattened[i])());
   }
 }
+
+/**
+ * Set the signal at a specific index in the workspace
+ */
+void setSignalAt(IMDHistoWorkspace &self, const size_t index,
+                 const double value) {
+  if (index >= self.getNPoints())
+    throw std::invalid_argument("setSignalAt: The index is greater than the "
+                                "number of bins in the workspace");
+
+  self.setSignalAt(index, value);
+}
 }
 
 void export_IMDHistoWorkspace() {
@@ -204,7 +216,7 @@ void export_IMDHistoWorkspace() {
            return_value_policy<copy_non_const_reference>(),
            "Return the squared-errors at the linear index")
 
-      .def("setSignalAt", &IMDHistoWorkspace::setSignalAt,
+      .def("setSignalAt", &setSignalAt,
            (arg("self"), arg("index"), arg("value")),
            "Sets the signal at the specified index.")
 

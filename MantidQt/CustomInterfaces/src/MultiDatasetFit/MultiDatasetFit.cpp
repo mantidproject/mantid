@@ -572,7 +572,6 @@ double MultiDatasetFit::getLocalParameterValue(const QString &parName,
 
 /// Reset the caches. Prepare to fill them in lazily.
 void MultiDatasetFit::reset() {
-  m_functionBrowser->resetLocalParameters();
   m_functionBrowser->setNumberOfDatasets(getNumberOfSpectra());
   setParameterNamesForPlotting();
   m_plotController->setGuessFunction(m_functionBrowser->getFunctionString());
