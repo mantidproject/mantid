@@ -2,7 +2,7 @@ from __future__ import (absolute_import, division, print_function)
 
 from isis_powder.abstract_inst import AbstractInst
 from isis_powder.gem_routines import gem_advanced_config, gem_algs, gem_param_mapping
-from isis_powder.routines import common, instrument_settings
+from isis_powder.routines import common, instrument_settings, sample_details
 
 
 class Gem(AbstractInst):
@@ -16,6 +16,9 @@ class Gem(AbstractInst):
                                   output_dir=self._inst_settings.output_dir, inst_prefix="GEM")
 
         self._cached_run_details = {}
+        self._sample_details = None
+
+    # Public API
 
     def focus(self, **kwargs):
         self._inst_settings.update_attributes(kwargs=kwargs)
@@ -27,6 +30,18 @@ class Gem(AbstractInst):
 
         return self._create_vanadium(run_number_string=self._inst_settings.run_in_range,
                                      do_absorb_corrections=self._inst_settings.do_absorb_corrections)
+
+    def set_sample_details(self, **kwargs):
+        sample_details_obj = common.dictionary_key_helper(
+            dictionary=kwargs, key="new_sample_details",
+            exception_msg="The argument containing sample details was not found. Please"
+                          " set the following argument: new_sample_details")
+        if not isinstance(sample_details_obj, sample_details.SampleDetails):
+            raise ValueError("The object passed was not a SampleDetails object. Please create a"
+                             " SampleDetails object and set the relevant properties to use on this method")
+        self._sample_details = sample_details_obj
+
+    # Private methods
 
     def _get_run_details(self, run_number_string):
         run_number_string_key = run_number_string + str(self._inst_settings.file_extension)

@@ -112,7 +112,7 @@ class ISISPowderSampleDetailsTest(unittest.TestCase):
 
         # Check that we can only set a material once. We will test the underlying class elsewhere
         sample_details_obj.set_material(chemical_formula='V')
-        self.assertIsNotNone(sample_details_obj._material_object)
+        self.assertIsNotNone(sample_details_obj.material_object)
 
         # Check that the material is now immutable
         with assertRaisesRegex(self, RuntimeError, "The material has already been set to the above details"):
@@ -120,16 +120,16 @@ class ISISPowderSampleDetailsTest(unittest.TestCase):
 
         # Check resetting it works
         sample_details_obj.reset_sample_material()
-        self.assertIsNone(sample_details_obj._material_object)
+        self.assertIsNone(sample_details_obj.material_object)
 
         # And ensure setting it for a second time works
         sample_details_obj.set_material(chemical_formula='V')
-        self.assertIsNotNone(sample_details_obj._material_object)
+        self.assertIsNotNone(sample_details_obj.material_object)
 
     def test_set_material_properties(self):
         sample_details_obj = sample_details.SampleDetails(height=1.0, radius=1.0, center=[2, 3, 5])
 
-        self.assertIsNone(sample_details_obj._material_object)
+        self.assertIsNone(sample_details_obj.material_object)
 
         # Check we cannot set a material property without setting the underlying material
         with assertRaisesRegex(self, RuntimeError, "The material has not been set"):
@@ -148,24 +148,24 @@ class ISISPowderSampleDetailsTest(unittest.TestCase):
 
         material_obj_one_char = sample_details._Material(chemical_formula=chemical_formula_one_char_element)
         self.assertIsNotNone(material_obj_one_char)
-        self.assertEqual(material_obj_one_char._chemical_formula, chemical_formula_one_char_element)
-        self.assertIsNone(material_obj_one_char._numeric_density)
+        self.assertEqual(material_obj_one_char.chemical_formula, chemical_formula_one_char_element)
+        self.assertIsNone(material_obj_one_char.numeric_density)
 
         # Also check that the absorption and scattering X sections have not been set
-        self.assertIsNone(material_obj_one_char._absorption_cross_section)
-        self.assertIsNone(material_obj_one_char._scattering_cross_section)
+        self.assertIsNone(material_obj_one_char.absorption_cross_section)
+        self.assertIsNone(material_obj_one_char.scattering_cross_section)
         self.assertFalse(material_obj_one_char._is_material_props_set)
 
         # Check if it accepts two character elements without numeric density
         material_obj_two_char = sample_details._Material(chemical_formula=chemical_formula_two_char_element)
         self.assertIsNotNone(material_obj_two_char)
-        self.assertEqual(material_obj_two_char._chemical_formula, chemical_formula_two_char_element)
-        self.assertIsNone(material_obj_two_char._numeric_density)
+        self.assertEqual(material_obj_two_char.chemical_formula, chemical_formula_two_char_element)
+        self.assertIsNone(material_obj_two_char.numeric_density)
 
         # Check it stores numeric density if passed
         material_obj_numeric_density = sample_details._Material(chemical_formula=chemical_formula_two_char_element,
                                                                 numeric_density=numeric_density_sample)
-        self.assertEqual(material_obj_numeric_density._numeric_density, numeric_density_sample)
+        self.assertEqual(material_obj_numeric_density.numeric_density, numeric_density_sample)
 
         # Check that it raises an error if we have a non-elemental formula without numeric density
         with assertRaisesRegex(self, ValueError, "A numeric density formula must be set on a chemical formula"):
@@ -174,8 +174,8 @@ class ISISPowderSampleDetailsTest(unittest.TestCase):
         # Check it constructs if it is given the numeric density too
         material_obj_num_complex_formula = sample_details._Material(chemical_formula=chemical_formula_complex,
                                                                     numeric_density=numeric_density_sample)
-        self.assertEqual(material_obj_num_complex_formula._chemical_formula, chemical_formula_complex)
-        self.assertEqual(material_obj_num_complex_formula._numeric_density, numeric_density_sample)
+        self.assertEqual(material_obj_num_complex_formula.chemical_formula, chemical_formula_complex)
+        self.assertEqual(material_obj_num_complex_formula.numeric_density, numeric_density_sample)
 
     def test_material_set_properties(self):
         bad_absorb = '-1'
@@ -196,20 +196,20 @@ class ISISPowderSampleDetailsTest(unittest.TestCase):
             material_obj.set_material_properties(abs_cross_sect=good_absorb, scattering_cross_sect=bad_scattering)
 
         # Check nothing has been set yet
-        self.assertIsNone(material_obj._absorption_cross_section)
-        self.assertIsNone(material_obj._scattering_cross_section)
+        self.assertIsNone(material_obj.absorption_cross_section)
+        self.assertIsNone(material_obj.scattering_cross_section)
 
         # Set the object this time
         material_obj.set_material_properties(abs_cross_sect=good_absorb, scattering_cross_sect=good_scattering)
         self.assertTrue(material_obj._is_material_props_set)
-        self.assertEqual(material_obj._absorption_cross_section, float(good_absorb))
-        self.assertEqual(material_obj._scattering_cross_section, float(good_scattering))
+        self.assertEqual(material_obj.absorption_cross_section, float(good_absorb))
+        self.assertEqual(material_obj.scattering_cross_section, float(good_scattering))
 
         # Check we cannot set it twice and fields do not change
         with assertRaisesRegex(self, RuntimeError, "The material properties have already been set"):
             material_obj.set_material_properties(abs_cross_sect=999, scattering_cross_sect=999)
-        self.assertEqual(material_obj._absorption_cross_section, float(good_absorb))
-        self.assertEqual(material_obj._scattering_cross_section, float(good_scattering))
+        self.assertEqual(material_obj.absorption_cross_section, float(good_absorb))
+        self.assertEqual(material_obj.scattering_cross_section, float(good_scattering))
 
     def test_print_sample_details(self):
         expected_height = 1

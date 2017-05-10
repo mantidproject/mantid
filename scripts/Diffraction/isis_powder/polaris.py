@@ -2,7 +2,7 @@ from __future__ import (absolute_import, division, print_function)
 
 import os
 
-from isis_powder.routines import common, instrument_settings
+from isis_powder.routines import common, instrument_settings, sample_details
 from isis_powder.abstract_inst import AbstractInst
 from isis_powder.polaris_routines import polaris_advanced_config, polaris_algs, polaris_param_mapping
 
@@ -19,6 +19,9 @@ class Polaris(AbstractInst):
 
         # Hold the last dictionary later to avoid us having to keep parsing the YAML
         self._run_details_cached_obj = {}
+        self._sample_details = None
+
+    # Public API
 
     def focus(self, **kwargs):
         self._inst_settings.update_attributes(kwargs=kwargs)
@@ -29,6 +32,16 @@ class Polaris(AbstractInst):
         self._inst_settings.update_attributes(kwargs=kwargs)
         return self._create_vanadium(run_number_string=self._inst_settings.run_in_range,
                                      do_absorb_corrections=self._inst_settings.do_absorb_corrections)
+
+    def set_sample_details(self, **kwargs):
+        sample_details_obj = common.dictionary_key_helper(
+            dictionary=kwargs, key="new_sample_details",
+            exception_msg="The argument containing sample details was not found. Please"
+                          " set the following argument: new_sample_details")
+        if not isinstance(sample_details_obj, sample_details.SampleDetails):
+            raise ValueError("The object passed was not a SampleDetails object. Please create a"
+                             " SampleDetails object and set the relevant properties to use on this method")
+        self._sample_details = sample_details_obj
 
     # Overrides
     def _apply_absorb_corrections(self, run_details, van_ws):

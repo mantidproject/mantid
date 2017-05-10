@@ -20,13 +20,16 @@ class SampleDetails(object):
         self.radius = float(radius)
         self.center = [float(i) for i in center]  # List of X, Y, Z position
 
-        self._material_object = None
+        self.material_object = None
+
+    def is_material_set(self):
+        return self.material_object is not None
 
     def print_sample_details(self):
         self._print()
 
     def reset_sample_material(self):
-        self._material_object = None
+        self.material_object = None
 
     def set_material(self, **kwargs):
         chemical_formula = common.dictionary_key_helper(dictionary=kwargs, key="chemical_formula",
@@ -34,13 +37,13 @@ class SampleDetails(object):
                                                                       " passed: chemical_formula")
         number_density = common.dictionary_key_helper(dictionary=kwargs, key="number_density", throws=False)
 
-        if self._material_object is not None:
+        if self.material_object is not None:
             self.print_sample_details()
             raise RuntimeError("The material has already been set to the above details. If the properties"
                                " have not been set they can be modified with 'set_material_properties()'. Otherwise"
                                " to change the material call 'reset_sample_material()'")
 
-        self._material_object = _Material(chemical_formula=chemical_formula, numeric_density=number_density)
+        self.material_object = _Material(chemical_formula=chemical_formula, numeric_density=number_density)
 
     def set_material_properties(self, **kwargs):
         err_msg = "The following argument is required but was not set or passed: "
@@ -48,12 +51,12 @@ class SampleDetails(object):
                                                                 exception_msg=err_msg + "absorption_cross_section")
         scattering_cross_section = common.dictionary_key_helper(dictionary=kwargs, key="scattering_cross_section",
                                                                 exception_msg=err_msg + "scattering_cross_section")
-        if self._material_object is None:
+        if self.material_object is None:
             raise RuntimeError("The material has not been set (or reset). Please set it by calling"
                                " 'set_material()' to set the material details of the sample.")
 
-        self._material_object.set_material_properties(abs_cross_sect=absorption_cross_section,
-                                                      scattering_cross_sect=scattering_cross_section)
+        self.material_object.set_material_properties(abs_cross_sect=absorption_cross_section,
+                                                     scattering_cross_sect=scattering_cross_section)
 
     def _print(self):
         print("Sample Details:")
@@ -63,10 +66,10 @@ class SampleDetails(object):
         print("Radius: {}".format(self.radius))
         print("Center X:{}, Y:{}, Z{}".format(self.center[0], self.center[1], self.center[2]))
         print("------------------------")
-        if self._material_object is None:
+        if self.material_object is None:
             print("Material has not been set (or has been reset).")
         else:
-            self._material_object.print_material()
+            self.material_object.print_material()
         print()  # Newline for visual spacing
 
     @staticmethod
@@ -93,7 +96,7 @@ class SampleDetails(object):
 
 class _Material(object):
     def __init__(self, chemical_formula, numeric_density=None):
-        self._chemical_formula = chemical_formula
+        self.chemical_formula = chemical_formula
 
         # If it is not an element Mantid requires us to provide the numeric density
         # which is required for absorption corrections.
@@ -105,11 +108,11 @@ class _Material(object):
             # Always check value is sane if user has given one
             _check_value_is_physical(property_name="numeric_density", value=numeric_density)
 
-        self._numeric_density = numeric_density
+        self.numeric_density = numeric_density
 
         # Advanced material properties
-        self._absorption_cross_section = None
-        self._scattering_cross_section = None
+        self.absorption_cross_section = None
+        self.scattering_cross_section = None
 
         # Internal flags so we are only allowed to set the material properties once
         self._is_material_props_set = False
@@ -117,18 +120,18 @@ class _Material(object):
     def print_material(self):
         print("Material properties:")
         print("------------------------")
-        print("Chemical formula: {}".format(self._chemical_formula))
+        print("Chemical formula: {}".format(self.chemical_formula))
 
-        if self._numeric_density:
-            print("Numeric Density: {}".format(self._numeric_density))
+        if self.numeric_density:
+            print("Numeric Density: {}".format(self.numeric_density))
         else:
             print("Numeric Density: Set from elemental properties by Mantid")
         self._print_material_properties()
 
     def _print_material_properties(self):
         if self._is_material_props_set:
-            print("Absorption cross section: {}".format(self._absorption_cross_section))
-            print("Scattering cross section: {}".format(self._scattering_cross_section))
+            print("Absorption cross section: {}".format(self.absorption_cross_section))
+            print("Scattering cross section: {}".format(self.scattering_cross_section))
         else:
             print("Absorption cross section: Calculated by Mantid based on chemical/elemental formula")
             print("Scattering cross section: Calculated by Mantid based on chemical/elemental formula")
@@ -143,8 +146,8 @@ class _Material(object):
 
         _check_value_is_physical("absorption_cross_section", abs_cross_sect)
         _check_value_is_physical("scattering_cross_section", scattering_cross_sect)
-        self._absorption_cross_section = float(abs_cross_sect)
-        self._scattering_cross_section = float(scattering_cross_sect)
+        self.absorption_cross_section = float(abs_cross_sect)
+        self.scattering_cross_section = float(scattering_cross_sect)
         self._is_material_props_set = True
 
 
