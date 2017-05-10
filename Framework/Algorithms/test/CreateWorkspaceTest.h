@@ -184,7 +184,9 @@ public:
   }
 
 private:
-  MatrixWorkspace_sptr executeVerticalAxisTest(const std::string &vertUnit, const std::vector<std::string> &vertValues) {
+  MatrixWorkspace_sptr
+  executeVerticalAxisTest(const std::string &vertUnit,
+                          const std::vector<std::string> &vertValues) {
     Mantid::Algorithms::CreateWorkspace alg;
     alg.initialize();
     alg.setPropertyValue("OutputWorkspace", "test_CreateWorkspace");

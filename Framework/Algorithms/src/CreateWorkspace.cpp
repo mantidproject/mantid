@@ -107,9 +107,11 @@ void CreateWorkspace::exec() {
   const std::vector<std::string> vAxis = getProperty("VerticalAxisValues");
 
   const int vAxisSize = static_cast<int>(vAxis.size());
-  if (vUnit != "SpectraNumber" && ((vUnit == "Text" && vAxisSize != nSpec) || (vAxisSize != nSpec && vAxisSize != nSpec + 1))) {
-    throw std::invalid_argument(
-        "The number of vertical axis values doesn't match the number of histograms.");
+  if (vUnit != "SpectraNumber" &&
+      ((vUnit == "Text" && vAxisSize != nSpec) ||
+       (vAxisSize != nSpec && vAxisSize != nSpec + 1))) {
+    throw std::invalid_argument("The number of vertical axis values doesn't "
+                                "match the number of histograms.");
   }
 
   // Verify length of vectors makes sense with NSpec
