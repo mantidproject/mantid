@@ -450,7 +450,9 @@ void MuonFitPropertyBrowser::updatePeriodDisplay() {
 	tmp.replaceInStrings(QRegExp(","), "+");
 	m_showPeriodValue << tmp.join(",");
 	m_enumManager->setEnumNames(m_showPeriods, m_showPeriodValue);
-	m_multiFitSettingsGroup->property()->addSubProperty(m_showPeriods);
+	if (m_periodsToFitOptions.size() > 1) {
+		m_multiFitSettingsGroup->property()->addSubProperty(m_showPeriods);
+	}
 }
 /** Called when a double property changed
  * @param prop :: A pointer to the property
@@ -1053,6 +1055,8 @@ bool MuonFitPropertyBrowser::hasGuess() const {
 * @param groups :: [input] List of group names
 */
 void MuonFitPropertyBrowser::setAvailableGroups(const QStringList &groups) {
+
+	m_enumManager->setValue(m_groupsToFit, 0);
 	// If it's the same list, do nothing
 	if (groups.size() == m_groupBoxes.size()) {
 		auto existingGroups = m_groupBoxes.keys();
@@ -1200,9 +1204,18 @@ void MuonFitPropertyBrowser::setNumPeriods(size_t numPeriods) {
 		m_generateBtn->setDisabled(true);
 		m_multiFitSettingsGroup->property()->removeSubProperty(m_periodsToFit);
 		m_multiFitSettingsGroup->property()->removeSubProperty(m_showPeriods);
+		m_enumManager->setValue(m_periodsToFit, 0);
+		clearChosenPeriods();
+		m_boolManager->setValue(m_periodBoxes.constBegin().value(), true);
+					
+
 	}
 	else {
 		//add custom back into list
+		m_multiFitSettingsGroup->property()->insertSubProperty(m_periodsToFit,m_showGroup);
+		m_multiFitSettingsGroup->property()->addSubProperty(m_showPeriods);
+		m_generateBtn->setDisabled(false);
+
 		m_periodsToFitOptions << "Custom";
 		m_enumManager->setEnumNames(m_periodsToFit, m_periodsToFitOptions);
 	}
@@ -1240,11 +1253,16 @@ void MuonFitPropertyBrowser::setAvailablePeriods(const QStringList &periods) {
 * (ready to add new ones)
 */
 void MuonFitPropertyBrowser::clearPeriodCheckboxes() {
-	for (const auto &checkbox : m_periodBoxes) {
-		delete(checkbox);
-	}
+	if (m_periodBoxes.size() > 1) {
+		for (auto iter = m_periodBoxes.constBegin(); iter != m_periodBoxes.constEnd();
+			++iter) {
+			if (iter != m_periodBoxes.constBegin()) {
+				delete(iter);
+			}
+		}
+		//m_periodBoxes.clear();
+	}		
 	m_periodsToFitOptions.clear();
-	m_periodBoxes.clear();
 	m_periodsToFitOptions << "1";
 	m_enumManager->setEnumNames(m_periodsToFit, m_periodsToFitOptions);
 
