@@ -414,16 +414,6 @@ void MDNormDirectSC::cacheDimensionXValues() {
   }
 }
 
-namespace {
-template <typename T, typename BinaryOp>
-void AtomicOp(std::atomic<T> &f, T d, BinaryOp _Op) {
-  T old = f.load();
-  T desired = _Op(old, d);
-  while (!f.compare_exchange_weak(old, desired))
-    desired = _Op(old, d);
-}
-} // namespace
-
 /**
  * Computed the normalization for the input workspace. Results are stored in
  * m_normWS
@@ -527,7 +517,8 @@ PRAGMA_OMP(parallel for private(intersections, pos, posNew))
       // signal = integral between two consecutive intersections *solid angle
       // *PC
       double signal = solid * delta;
-      AtomicOp(signalArray[linIndex], signal, std::plus<signal_t>());
+      Mantid::Kernel::AtomicOp(signalArray[linIndex], signal,
+                               std::plus<signal_t>());
     }
     prog->report();
 

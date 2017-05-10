@@ -58,6 +58,15 @@ threadSafe(const Arg &workspace, Args &&... others) {
   return workspace.threadSafe() && threadSafe(std::forward<Args>(others)...);
 }
 
+template <typename T, typename BinaryOp>
+void AtomicOp(std::atomic<T> &f, T d, BinaryOp op) {
+  T old = f.load();
+  T desired;
+  do {
+    desired = op(old, d);
+  } while (!f.compare_exchange_weak(old, desired));
+}
+
 } // namespace Kernel
 } // namespace Mantid
 

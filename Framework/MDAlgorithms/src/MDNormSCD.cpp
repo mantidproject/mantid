@@ -357,16 +357,6 @@ void MDNormSCD::cacheDimensionXValues() {
   }
 }
 
-namespace {
-template <typename T, typename BinaryOp>
-void AtomicOp(std::atomic<T> &f, T d, BinaryOp _Op) {
-  T old = f.load();
-  T desired = _Op(old, d);
-  while (!f.compare_exchange_weak(old, desired))
-    desired = _Op(old, d);
-}
-} // namespace
-
 /**
  * Computed the normalization for the input workspace. Results are stored in
  * m_normWS
@@ -479,7 +469,8 @@ for (int64_t i = 0; i < ndets; i++) {
     size_t k = static_cast<size_t>(std::distance(intersectionsBegin, it));
     // signal = integral between two consecutive intersections
     signal_t signal = (yValues[k] - yValues[k - 1]) * solid;
-    AtomicOp(signalArray[linIndex], signal, std::plus<signal_t>());
+    Mantid::Kernel::AtomicOp(signalArray[linIndex], signal,
+                             std::plus<signal_t>());
   }
   prog->report();
 
