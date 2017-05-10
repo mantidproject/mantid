@@ -1193,7 +1193,7 @@ void MuonFitPropertyBrowser::genGroupWindow() {
 * @param numPeriods :: [input] Number of periods
 */
 void MuonFitPropertyBrowser::setNumPeriods(size_t numPeriods) {
-	clearPeriodCheckboxes();
+	//clearPeriodCheckboxes();
 	m_periodsToFitOptions.clear();
 	// create more boxes
 	for (size_t i = 0; i != numPeriods; i++) {
@@ -1253,6 +1253,7 @@ void MuonFitPropertyBrowser::setAvailablePeriods(const QStringList &periods) {
 * (ready to add new ones)
 */
 void MuonFitPropertyBrowser::clearPeriodCheckboxes() {
+	int aaa = m_periodBoxes.size();
 	if (m_periodBoxes.size() > 1) {
 		for (auto iter = m_periodBoxes.constBegin(); iter != m_periodBoxes.constEnd();
 			++iter) {

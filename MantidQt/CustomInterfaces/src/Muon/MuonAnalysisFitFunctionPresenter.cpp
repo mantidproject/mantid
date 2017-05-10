@@ -85,6 +85,7 @@ void MuonAnalysisFitFunctionPresenter::setParameterUpdates(bool on) {
 void MuonAnalysisFitFunctionPresenter::updateFunction() {
   // Check there is still a function to update
   const auto funcString = m_funcBrowser->getFunctionString();
+  auto tmp = funcString.toStdString();
   const Mantid::API::IFunction_sptr function =
       funcString.isEmpty() ? nullptr // last function has been removed
                            : m_funcBrowser->getGlobalFunction();
