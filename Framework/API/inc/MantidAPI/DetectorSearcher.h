@@ -89,7 +89,7 @@ private:
   /// flag for whether to use InstrumentRayTracer or NearestNeighbours
   const bool m_usingFullRayTrace;
   /// flag for whether the crystallography convention is to be used
-  const bool m_crystallography_convention;
+  const double m_crystallography_convention;
   /// detector info for the instrument
   const DetectorInfo &m_detInfo;
   /// handle to the instrument to search for detectors in

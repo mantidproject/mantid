@@ -12,6 +12,12 @@ using Mantid::Geometry::ReferenceFrame;
 using namespace Mantid;
 using namespace Mantid::API;
 
+double getQSign() {
+    const auto convention = Kernel::ConfigService::Instance().getString(
+            "Q.convention");
+    return (convention == "Crystallography") ? -1.0 : 1.0;
+}
+
 /** Create a new DetectorSearcher for the given instrument
  *
  * The search strategy will be determined in the constructor based on the
@@ -24,8 +30,7 @@ DetectorSearcher::DetectorSearcher(Geometry::Instrument_const_sptr instrument,
                                    const API::DetectorInfo &detInfo)
     : m_usingFullRayTrace(instrument->containsRectDetectors() ==
                           Geometry::Instrument::ContainsState::Full),
-      m_crystallography_convention(Kernel::ConfigService::Instance().getString(
-                                       "Q.convention") == "Crystallography"),
+      m_crystallography_convention(getQSign()),
       m_detInfo(detInfo), m_instrument(instrument) {
 
   /* Choose the search strategy to use
@@ -52,24 +57,26 @@ void DetectorSearcher::createDetectorCache() {
   points.reserve(m_detInfo.size());
   m_indexMap.reserve(m_detInfo.size());
 
+  const auto frame = m_instrument->getReferenceFrame();
+  auto beam = frame->vecPointingAlongBeam();
+  auto up = frame->vecPointingUp();
+  beam.normalize();
+
   for (size_t pointNo = 0; pointNo < m_detInfo.size(); ++pointNo) {
     if (m_detInfo.isMonitor(pointNo) || m_detInfo.isMasked(pointNo))
       continue; // detector is a monitor or masked so don't use
 
-    // calculate a Q vector for each detector
+    // Calculate a unit Q vector for each detector
     // This follows a method similar to that used in IntegrateEllipsoids
-    const auto &det = m_detInfo.detector(pointNo);
-    const auto tt1 = det.getTwoTheta(V3D(0, 0, 0), V3D(0, 0, 1)); // two theta
-    const auto ph1 = det.getPhi();                                // phi
-    auto E1 =
-        V3D(-std::sin(tt1) * std::cos(ph1), -std::sin(tt1) * std::sin(ph1),
-            1. - std::cos(tt1)); // end of trajectory
-    E1 = E1 * (1. / E1.norm());  // normalize
+    auto pos = m_detInfo.position(pointNo);
+    pos.normalize();
+    auto E1 = (pos - beam) * -m_crystallography_convention;
+    E1.normalize();
 
     Eigen::Vector3d point(E1[0], E1[1], E1[2]);
 
     // Ignore nonsensical points
-    if (point.hasNaN())
+    if (point.hasNaN() || up.coLinear(beam, pos))
       continue;
 
     points.push_back(point);
@@ -239,12 +246,10 @@ V3D DetectorSearcher::convertQtoDirection(const V3D &q) const {
   const auto refFrame = m_instrument->getReferenceFrame();
   const V3D refBeamDir = refFrame->vecPointingAlongBeam();
 
-  const auto qSign = (m_crystallography_convention) ? -1.0 : 1.0;
-  const double qBeam = q.scalar_prod(refBeamDir) * qSign;
+  const double qBeam = q.scalar_prod(refBeamDir) * m_crystallography_convention;
   double one_over_wl = (norm_q * norm_q) / (2.0 * qBeam);
 
-  const auto inverseQSign = (m_crystallography_convention) ? 1.0 : -1.0;
-  auto detectorDir = q * inverseQSign;
+  auto detectorDir = q * -m_crystallography_convention;
   detectorDir[refFrame->pointingAlongBeam()] = one_over_wl - qBeam;
   detectorDir.normalize();
   return detectorDir;
