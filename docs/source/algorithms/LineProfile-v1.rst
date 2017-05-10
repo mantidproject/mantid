@@ -22,9 +22,6 @@ By default, the profile is calculated as an average over the line width. This be
     Average the values. This is the default.
 
 'Sum'
-    Sum the values.
-
-'Weighed Sum'
     Sum the values, weighing them by :math:`n / n_{tot}` where :math:`n` is the number of summed data points (excluding special values if *IgnoreNans* or *IgnoreInfs* is set) and :math:`n_{tot}` is the total number of data points (including special values).
 
 Usage
@@ -145,16 +142,12 @@ Output:
     centre = 0.6
     width = 0.05
     sumCutWS = LineProfile(wsInTheta, centre, width, Mode='Sum')
-    weighedSumCutWS = LineProfile(wsInTheta, centre, width, Mode='Weighed Sum')
 
     # When no NaNs are present both modes give the same result.
     iElastic = sumCutWS.blocksize() / 2
     y = sumCutWS.readY(0)[iElastic]
     e = sumCutWS.readE(0)[iElastic]
     print('Sum profile at elastic peak: {} +/- {}'.format(y, e))
-    y = weighedSumCutWS.readY(0)[iElastic]
-    e = weighedSumCutWS.readE(0)[iElastic]
-    print('Weighed profile at elastic peak: {} +/- {}'.format(y, e))
 
     # The weighing is apparent when the profile crosses some
     # special values.
@@ -162,16 +155,11 @@ Output:
     y = sumCutWS.readY(0)[iEdge]
     e = sumCutWS.readE(0)[iEdge]
     print('Sum profile near NaNs: {} +/- {}'.format(y, e))
-    y = weighedSumCutWS.readY(0)[iEdge]
-    e = weighedSumCutWS.readE(0)[iEdge]
-    print('Weighed profile near NaNs: {} +/- {}'.format(y, e))
 
 .. testoutput:: Modes
 
     Sum profile at elastic peak: 103.45916358 +/- 10.1714877761
-    Weighed profile at elastic peak: 103.45916358 +/- 10.1714877761
     Sum profile near NaNs: 0.400000002549 +/- 0.632455534049
-    Weighed profile near NaNs: 1.60000001019 +/- 2.52982213619
 
 .. categories::
 

@@ -56,7 +56,6 @@ const static std::string VERTICAL{"Vertical"};
 namespace ModeChoices {
 const static std::string AVERAGE{"Average"};
 const static std::string SUM{"Sum"};
-const static std::string WEIGHED_SUM{"Weighed Sum"};
 }
 
 /// A private namespace for property names.
@@ -240,13 +239,6 @@ double averageMode(const double sum, const int n, const int) noexcept {
 }
 
 /**
- * A mode function for summing.
- * @param sum A sum of data points.
- * @return The sum.
- */
-double sumMode(const double sum, const int, const int) noexcept { return sum; }
-
-/**
  * A mode function for weighed summing. The weight is inversely proportional
  * to the number of data points in the sum.
  * @param sum A sum of data points.
@@ -254,7 +246,7 @@ double sumMode(const double sum, const int, const int) noexcept { return sum; }
  * @param nTot Total number of possible points, including NaNs and infs.
  * @return The weighed sum.
  */
-double weighedSumMode(const double sum, const int n, const int nTot) noexcept {
+double sumMode(const double sum, const int n, const int nTot) noexcept {
   return static_cast<double>(nTot) / static_cast<double>(n) * sum;
 }
 
@@ -266,10 +258,7 @@ auto createMode(const std::string &modeName) noexcept {
   if (modeName == ModeChoices::AVERAGE) {
     return averageMode;
   }
-  if (modeName == ModeChoices::SUM) {
-    return sumMode;
-  }
-  return weighedSumMode;
+  return sumMode;
 }
 }
 
@@ -325,8 +314,7 @@ void LineProfile::init() {
   declareProperty(PropertyNames::START, EMPTY_DBL(),
                   "Starting point of the line.");
   declareProperty(PropertyNames::END, EMPTY_DBL(), "End point of the line.");
-  const std::set<std::string> modes{ModeChoices::AVERAGE, ModeChoices::SUM,
-                                    ModeChoices::WEIGHED_SUM};
+  const std::set<std::string> modes{ModeChoices::AVERAGE, ModeChoices::SUM};
   declareProperty(PropertyNames::MODE, ModeChoices::AVERAGE,
                   boost::make_shared<ListValidator<std::string>>(modes),
                   "How the profile is calculated over the line width.");

@@ -79,36 +79,7 @@ public:
                      static_cast<double>(nHist) / 2 + 0.5)
   }
 
-  void test_summing_profile() {
-    const size_t nHist = 13;
-    const size_t nBins = 23;
-    MatrixWorkspace_sptr inputWS = create2DWorkspace154(nHist, nBins);
-
-    const int start = 2;
-    const int end = nBins - 2;
-    Workspace2D_sptr outputWS =
-        profileOverTwoSpectra(inputWS, start, end, "Sum");
-    TS_ASSERT(outputWS);
-    TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 1)
-    const auto hist = outputWS->histogram(0);
-    for (size_t i = 0; i < hist.x().size(); ++i) {
-      TS_ASSERT_EQUALS(hist.x()[i], i + start)
-    }
-    for (const auto y : hist.y()) {
-      TS_ASSERT_EQUALS(y, 2 * inputWS->y(0)[0])
-    }
-    const double realE = std::sqrt(2 * inputWS->e(0)[0] * inputWS->e(0)[0]);
-    for (const auto e : hist.e()) {
-      TS_ASSERT_EQUALS(e, realE)
-    }
-    const auto vertAxis = outputWS->getAxis(1);
-    TS_ASSERT_EQUALS(vertAxis->getValue(0),
-                     static_cast<double>(nHist) / 2 - 0.5)
-    TS_ASSERT_EQUALS(vertAxis->getValue(1),
-                     static_cast<double>(nHist) / 2 + 1.5)
-  }
-
-  void test_weighed_summing_profile() {
+  void test__summing_profile() {
     const size_t nHist = 13;
     const size_t nBins = 23;
     MatrixWorkspace_sptr inputWS = create2DWorkspace154(nHist, nBins);
@@ -118,7 +89,7 @@ public:
     const int start = 2;
     const int end = nBins - 2;
     Workspace2D_sptr outputWS =
-        profileOverTwoSpectra(inputWS, start, end, "Weighed Sum");
+        profileOverTwoSpectra(inputWS, start, end, "Sum");
     TS_ASSERT(outputWS);
     TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 1)
     const auto hist = outputWS->histogram(0);
