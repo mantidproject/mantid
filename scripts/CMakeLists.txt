@@ -24,50 +24,55 @@ set_property ( TARGET CompileUIUI PROPERTY FOLDER "CompilePyUI" )
 set_property ( TARGET CompileUIHFIR_4Circle_Reduction PROPERTY FOLDER "CompilePyUI" )
 
 set ( TEST_PY_FILES
+      test/AbinsAtomsDataTest.py
+      test/AbinsCalculateDWSingleCrystalTest.py
+      test/AbinsCalculatePowderTest.py
+      test/AbinsCalculateQToscaTest.py
+      test/AbinsCalculateSingleCrystalTest.py
+      test/AbinsCalculateSPowderTest.py
+      test/AbinsDWSingleCrystalDataTest.py
+      test/AbinsFrequencyPowderGeneratorTest.py
+      test/AbinsIOmoduleTest.py
+      test/AbinsKpointsDataTest.py
+      test/AbinsLoadCASTEPTest.py
+      test/AbinsLoadCRYSTALTest.py
+      test/AbinsPowderDataTest.py
       test/ConvertToWavelengthTest.py
       test/CrystalFieldTest.py
-      test/DirectReductionHelpersTest.py
-      test/DirectPropertyManagerTest.py
       test/DirectEnergyConversionTest.py
-      test/ISISDirecInelasticConfigTest.py
+      test/DirectPropertyManagerTest.py
+      test/DirectReductionHelpersTest.py
       test/IndirectCommonTests.py
+      test/ISISDirecInelasticConfigTest.py
+      test/ISISPowderAbsorptionTest.py
+      test/ISISPowderCommonTest.py
+      test/ISISPowderInstrumentSettingsTest.py
+      test/ISISPowderRunDetailsTest.py
+      test/ISISPowderYamlParserTest.py
       test/PyChopTest.py
+      test/ReductionSettingsTest.py
       test/ReductionWrapperTest.py
       test/ReflectometryQuickAuxiliaryTest.py
       test/RunDescriptorTest.py
-      test/SansIsisGuiSettings.py
       test/SANSBatchModeTest.py
       test/SANSCentreFinderTest.py
       test/SANSCommandInterfaceTest.py
       test/SANSDarkRunCorrectionTest.py
-      test/SANSUserFileParserTest.py
-      test/SANSUtilityTest.py
+      test/SansIsisGuiSettings.py
       test/SANSIsisInstrumentTest.py
       test/SANSReducerTest.py
       test/SANSReductionStepsUserFileTest.py
+      test/SANSUserFileParserTest.py
+      test/SANSUtilityTest.py
       test/SettingsTest.py
       test/VesuvioBackgroundTest.py
       test/VesuvioFittingTest.py
       test/VesuvioProfileTest.py
-      test/ReductionSettingsTest.py
-      test/AbinsIOmoduleTest.py
-      test/AbinsLoadCASTEPTest.py
-      test/AbinsLoadCRYSTALTest.py
-      test/AbinsCalculateQToscaTest.py
-      test/AbinsFrequencyPowderGeneratorTest.py
-      test/AbinsKpointsDataTest.py
-      test/AbinsAtomsDataTest.py
-      test/AbinsDWSingleCrystalDataTest.py
-      test/AbinsCalculateDWSingleCrystalTest.py
-      test/AbinsPowderDataTest.py
-      test/AbinsCalculatePowderTest.py
-      test/AbinsCalculateSingleCrystalTest.py
-      test/AbinsCalculateSPowderTest.py
       )
 
 # Addition tests for SANS components
 add_subdirectory(test/SANS)
-	  
+
 # python unit tests
 if (PYUNITTEST_FOUND)
   pyunittest_add_test ( ${CMAKE_CURRENT_SOURCE_DIR}/test PythonScriptsTest ${TEST_PY_FILES} )

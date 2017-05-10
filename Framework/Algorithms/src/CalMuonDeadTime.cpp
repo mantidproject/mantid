@@ -192,13 +192,13 @@ void CalMuonDeadTime::exec() {
     API::IFunction_sptr result = fit->getProperty("Function");
 
     // Check order of names
-    if (result->parameterName(0).compare("A0") != 0) {
+    if (result->parameterName(0) != "A0") {
       g_log.error() << "Parameter 0 should be A0, but is "
                     << result->parameterName(0) << '\n';
       throw std::invalid_argument(
           "Parameters are out of order @ 0, should be A0");
     }
-    if (result->parameterName(1).compare("A1") != 0) {
+    if (result->parameterName(1) != "A1") {
       g_log.error() << "Parameter 1 should be A1, but is "
                     << result->parameterName(1) << '\n';
       throw std::invalid_argument(

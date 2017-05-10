@@ -44,7 +44,7 @@ File structure:
     label : "10_1"
     vanadium_run_numbers : "123-125"
     empty_run_numbers : "135-137"
-    calibration_file : "offsets_example_10_1.cal"
+    offset_file_name : "offsets_example_10_1.cal"
 
   141-145: ...etc.
 

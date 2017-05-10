@@ -5,6 +5,7 @@ from mantid.simpleapi import *  # noqa
 from mantid.kernel import *  # noqa
 from mantid.api import *  # noqa
 from mantid import mtd
+import os
 import numpy as np
 import time
 

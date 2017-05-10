@@ -127,7 +127,7 @@ ResultType performBinaryOp(const LHSType lhs, const RHSType rhs,
     }
   } catch (std::runtime_error &exc) {
     error = exc.what();
-    if (error.compare("algorithm") == 0) {
+    if (error == "algorithm") {
       error = "Unknown binary operation requested: " + op;
       throw std::runtime_error(error);
     } else {

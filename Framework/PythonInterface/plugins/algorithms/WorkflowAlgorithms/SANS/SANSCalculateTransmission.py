@@ -288,7 +288,7 @@ class SANSCalculateTransmission(DataProcessorAlgorithm):
         rebin_type = calculate_transmission_state.rebin_type
         wavelength_step_type = calculate_transmission_state.wavelength_step_type
 
-        convert_name = "ConvertToWavelength"
+        convert_name = "SANSConvertToWavelengthAndRebin"
         convert_options = {"InputWorkspace": workspace,
                            "WavelengthLow": wavelength_low,
                            "WavelengthHigh": wavelength_high,
