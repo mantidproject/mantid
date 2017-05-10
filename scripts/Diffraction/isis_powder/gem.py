@@ -2,7 +2,7 @@ from __future__ import (absolute_import, division, print_function)
 
 from isis_powder.abstract_inst import AbstractInst
 from isis_powder.gem_routines import gem_advanced_config, gem_algs, gem_param_mapping
-from isis_powder.routines import common, instrument_settings, sample_details
+from isis_powder.routines import absorb_corrections, common, instrument_settings, sample_details
 
 
 class Gem(AbstractInst):
@@ -22,8 +22,9 @@ class Gem(AbstractInst):
 
     def focus(self, **kwargs):
         self._inst_settings.update_attributes(kwargs=kwargs)
-        return self._focus(run_number_string=self._inst_settings.run_number,
-                           do_van_normalisation=self._inst_settings.do_van_norm)
+        return self._focus(
+            run_number_string=self._inst_settings.run_number, do_van_normalisation=self._inst_settings.do_van_norm,
+            do_absorb_corrections=self._inst_settings.do_absorb_corrections)
 
     def create_vanadium(self, **kwargs):
         self._inst_settings.update_attributes(kwargs=kwargs)
@@ -62,9 +63,14 @@ class Gem(AbstractInst):
     def _generate_input_file_name(run_number):
         return _gem_generate_inst_name(run_number=run_number)
 
-    def _apply_absorb_corrections(self, run_details, van_ws):
-        return gem_algs.calculate_van_absorb_corrections(ws_to_correct=van_ws,
-                                                         multiple_scattering=self._inst_settings.multiple_scattering)
+    def _apply_absorb_corrections(self, run_details, ws_to_correct):
+        if self._is_vanadium:
+            return gem_algs.calculate_van_absorb_corrections(
+                ws_to_correct=ws_to_correct, multiple_scattering=self._inst_settings.multiple_scattering)
+        else:
+            return absorb_corrections.run_cylinder_absorb_corrections(
+                ws_to_correct=ws_to_correct, multiple_scattering=self._inst_settings.multiple_scattering,
+                sample_details_obj=sample_details)
 
     def _crop_banks_to_user_tof(self, focused_banks):
         return common.crop_banks_using_crop_list(focused_banks, self._inst_settings.focused_cropping_values)
