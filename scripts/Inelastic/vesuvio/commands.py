@@ -57,9 +57,6 @@ def fit_tof(runs, flags, iterations=1, convergence_threshold=None):
     exit_iteration = 0
 
     for iteration in range(1, iterations + 1):
-
-        hydrogen_tof, masses_tof, corrections_workspaces = _get_corrections_workspaces(sample_data, runs, iteration)
-
         iteration_flags = copy.deepcopy(flags)
         iteration_flags['iteration'] = iteration
 
@@ -84,35 +81,6 @@ def fit_tof(runs, flags, iterations=1, convergence_threshold=None):
                 break
 
         last_results = results
-        workspaces = results[0]
-        for index, ws in enumerate(workspaces):
-            data_workspace = ws[0]
-
-            hydrogen_tof.dataY(index)[:] = data_workspace.dataY(0)[:] - data_workspace.dataY(4)[:] - data_workspace.dataY(5)[:]
-            masses_tof.dataY(index)[:] = data_workspace.dataY(4)[:] + data_workspace.dataY(5)[:]
-            masses_tof.dataE(index)[:] = 0
-            k = list(ws)
-            for c_ws, old_ws in zip(corrections_workspaces, k[2:]):
-                print(c_ws, old_ws)
-                c_ws.dataY(index)[:] = old_ws.dataY(0)[:]
-                c_ws.dataE(index)[:] = 0
-                ms.DeleteWorkspace(old_ws)
-
-        # w = list(workspaces)
-        data_ws = [ws[0] for ws in workspaces]
-        params_ws = [ws[1] for ws in workspaces]
-
-        corrections_workspaces.append(runs + '_data_iteration_' + str(iteration))
-        corrections_workspaces.append(runs + '_params_iteration_' + str(iteration))
-        corrections_workspaces.append(hydrogen_tof)
-        corrections_workspaces.append(masses_tof)
-
-        for ws in workspaces:
-            ms.UnGroupWorkspace(ws)
-
-        ms.GroupWorkspaces(InputWorkspaces=data_ws, OutputWorkspace=runs + '_data_iteration_' + str(iteration))
-        ms.GroupWorkspaces(InputWorkspaces=params_ws, OutputWorkspace=runs + '_params_iteration_' + str(iteration))
-        ms.GroupWorkspaces(InputWorkspaces=corrections_workspaces, OutputWorkspace=runs + '_iteration_' + str(iteration))
 
     return last_results[0], last_results[2], last_results[3], exit_iteration
 
@@ -252,6 +220,15 @@ def fit_tof_iteration(sample_data, container_data, runs, flags):
             output_workspaces += mtd[corrections_args["CorrectedWorkspaces"]].getNames()
             ms.UnGroupWorkspace(corrections_args["CorrectionWorkspaces"])
             ms.UnGroupWorkspace(corrections_args["CorrectedWorkspaces"])
+
+        for workspace in output_workspaces[2:]:
+            n = workspace.split('_')
+            name = '_'.join(n[:2] + n[-3:])
+            ms.CloneWorkspace(InputWorkspace=workspace, OutputWorkspace=workspace + 'clone')
+            if index == 0:
+                ms.RenameWorkspace(InputWorkspace=workspace + 'clone', OutputWorkspace=name)
+            else:
+                ms.ConjoinWorkspaces(InputWorkspace1=name, InputWorkspace2=workspace + 'clone')
 
         output_groups.append(ms.GroupWorkspaces(InputWorkspaces=output_workspaces,
                                                 OutputWorkspace=group_name))
@@ -459,7 +436,7 @@ def _create_background_str(background_flags):
 def _create_intensity_constraint_str(intensity_constraints):
     """
     Create a string suitable for the algorithms out of the intensity constraint flags
-    :param inten_constr_flags: A list of lists for the constraints (can be None)
+    :param intensity_constraints: A list of lists for the constraints (can be None)
     :return: A string to pass to the algorithm
     """
     if intensity_constraints:
@@ -492,24 +469,3 @@ def _create_user_defined_ties_str(masses):
                 user_defined_ties.append(tie_str)
     user_defined_ties = ','.join(user_defined_ties)
     return user_defined_ties
-
-
-def _get_corrections_workspaces(sample_ws, runs, iteration):
-    prefix = runs + '_iteration_' + str(iteration)
-
-    hydrogen_tof = ms.CloneWorkspace(InputWorkspace=sample_ws, OutputWorkspace=prefix + '_Hydrogen_tof')
-    masses_tof = ms.CloneWorkspace(InputWorkspace=sample_ws, OutputWorkspace=prefix + '_Masses')
-
-    prefix = runs + '_correction_iteration_' + str(iteration)
-    gb_correction = ms.CloneWorkspace(InputWorkspace=sample_ws, OutputWorkspace=prefix + '_GammaBackground')
-    ts_correction = ms.CloneWorkspace(InputWorkspace=sample_ws, OutputWorkspace=prefix + '_TotalScattering')
-    ms_correction = ms.CloneWorkspace(InputWorkspace=sample_ws, OutputWorkspace=prefix + '_MultipleScattering')
-
-    prefix = runs + '_corrected_iteration_' + str(iteration)
-    gb_corrected = ms.CloneWorkspace(InputWorkspace=sample_ws, OutputWorkspace=prefix + '_GammaBackground')
-    ts_corrected = ms.CloneWorkspace(InputWorkspace=sample_ws, OutputWorkspace=prefix + '_TotalScattering')
-    ms_corrected = ms.CloneWorkspace(InputWorkspace=sample_ws, OutputWorkspace=prefix + '_MultipleScattering')
-
-    corrections_workspaces = [gb_correction, ts_correction, ms_correction, gb_corrected, ts_corrected, ms_corrected]
-
-    return hydrogen_tof, masses_tof, corrections_workspaces
