@@ -13,9 +13,9 @@ using namespace Mantid;
 using namespace Mantid::API;
 
 double getQSign() {
-    const auto convention = Kernel::ConfigService::Instance().getString(
-            "Q.convention");
-    return (convention == "Crystallography") ? -1.0 : 1.0;
+  const auto convention =
+      Kernel::ConfigService::Instance().getString("Q.convention");
+  return (convention == "Crystallography") ? -1.0 : 1.0;
 }
 
 /** Create a new DetectorSearcher for the given instrument
@@ -30,8 +30,8 @@ DetectorSearcher::DetectorSearcher(Geometry::Instrument_const_sptr instrument,
                                    const API::DetectorInfo &detInfo)
     : m_usingFullRayTrace(instrument->containsRectDetectors() ==
                           Geometry::Instrument::ContainsState::Full),
-      m_crystallography_convention(getQSign()),
-      m_detInfo(detInfo), m_instrument(instrument) {
+      m_crystallography_convention(getQSign()), m_detInfo(detInfo),
+      m_instrument(instrument) {
 
   /* Choose the search strategy to use
    * If the instrument uses rectangular detectors (e.g. TOPAZ) then it is faster

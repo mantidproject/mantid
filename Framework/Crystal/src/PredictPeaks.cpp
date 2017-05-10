@@ -520,11 +520,13 @@ void PredictPeaks::calculateQAndAddToOutput(const V3D &hkl,
 
     // The exit point is the vector to the place that we hit a detector
     const auto magnitude = track.back().exitPoint.norm();
-    peak = Kernel::make_unique<Peak>(m_inst, q, boost::optional<double>(magnitude));
+    peak = Kernel::make_unique<Peak>(m_inst, q,
+                                     boost::optional<double>(magnitude));
   }
 
-  if (m_edge > 0 && edgePixel(m_inst, peak->getBankName(), peak->getCol(), peak->getRow(), m_edge))
-      return;
+  if (m_edge > 0 && edgePixel(m_inst, peak->getBankName(), peak->getCol(),
+                              peak->getRow(), m_edge))
+    return;
 
   // Only add peaks that hit the detector
   peak->setGoniometerMatrix(goniometerMatrix);
@@ -533,7 +535,7 @@ void PredictPeaks::calculateQAndAddToOutput(const V3D &hkl,
   peak->setHKL(hkl * m_qConventionFactor);
 
   if (m_sfCalculator) {
-      peak->setIntensity(m_sfCalculator->getFSquared(hkl));
+    peak->setIntensity(m_sfCalculator->getFSquared(hkl));
   }
 
   // Add it to the workspace
@@ -545,7 +547,8 @@ void PredictPeaks::calculateQAndAddToOutput(const V3D &hkl,
  * @param q :: the q lab vector for this peak
  * @return a tuple containing the detector direction and the wavelength
  */
-std::tuple<V3D, double> PredictPeaks::getPeakParametersFromQ(const V3D& q) const {
+std::tuple<V3D, double>
+PredictPeaks::getPeakParametersFromQ(const V3D &q) const {
   double norm_q = q.norm();
   // Default for ki-kf has -q
   const double qBeam = q.scalar_prod(m_refBeamDir) * m_qConventionFactor;

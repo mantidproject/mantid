@@ -68,7 +68,8 @@ private:
 
 private:
   /// Get the predicted detector direction from Q
-  std::tuple<Kernel::V3D, double> getPeakParametersFromQ(const Kernel::V3D& q) const;
+  std::tuple<Kernel::V3D, double>
+  getPeakParametersFromQ(const Kernel::V3D &q) const;
   /// Cache the reference frame and beam direction from the instrument
   void setReferenceFrameAndBeamDirection();
   void logNumberOfPeaksFound(size_t allowedPeakCount) const;
