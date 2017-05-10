@@ -35,8 +35,7 @@ class LoadDNSLegacyTest(unittest.TestCase):
         run = ws.getRun()
         self.assertEqual(-8.54, run.getProperty('deterota').value)
         self.assertEqual(8332872, run.getProperty('mon_sum').value)
-        pol = run.getProperty('polarisation').value
-        self.assertEqual('z', pol.decode('utf-8', 'ignore'))
+        self.assertEqual('z', run.getProperty('polarisation').value)
         self.assertEqual('7', str(run.getProperty('polarisation_comment').value))
         self.assertEqual('no', run.getProperty('normalized').value)
         # check whether detector bank is rotated
@@ -148,8 +147,7 @@ class LoadDNSLegacyTest(unittest.TestCase):
         run = ws.getRun()
         self.assertEqual(-8.54, run.getProperty('deterota').value)
         self.assertEqual(8332872, run.getProperty('mon_sum').value)
-        pol = run.getProperty('polarisation').value
-        self.assertEqual('z', pol.decode('utf-8', 'ignore'))
+        self.assertEqual('z', run.getProperty('polarisation').value)
         self.assertEqual('7', str(run.getProperty('polarisation_comment').value))
         self.assertEqual('no', run.getProperty('normalized').value)
         # check whether detector bank is rotated
@@ -180,8 +178,7 @@ class LoadDNSLegacyTest(unittest.TestCase):
         self.assertEqual(-7.5, run.getProperty('deterota').value)
         self.assertEqual(100, run.getProperty('tof_channels').value)
         self.assertEqual(51428, run.getProperty('mon_sum').value)
-        pol = run.getProperty('polarisation').value
-        self.assertEqual('z', pol.decode('utf-8', 'ignore'))
+        self.assertEqual('z', run.getProperty('polarisation').value)
         self.assertEqual('7', str(run.getProperty('polarisation_comment').value))
         self.assertEqual('no', run.getProperty('normalized').value)
         # check whether detector bank is rotated
