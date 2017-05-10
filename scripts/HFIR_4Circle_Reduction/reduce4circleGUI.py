@@ -356,8 +356,8 @@ class MainWindow(QtGui.QMainWindow):
         self._baseTitle = str(self.windowTitle())
         self.setWindowTitle('No Experiment Is Set')
 
-        # detector geometry
-        # TODO/FIXME/NOW - combox instead self.ui.lineEdit_detectorGeometry.setText('256, 256')
+        # detector geometry (set to 256 x 256)
+        self.ui.comboBox_detectorSize.setCurrentIndex(0)
 
         # Table widgets
         self.ui.tableWidget_peaksCalUB.setup()
@@ -523,8 +523,20 @@ class MainWindow(QtGui.QMainWindow):
         ui_dict['survey start'] = str(self.ui.lineEdit_surveyStartPt.text())
         ui_dict['survey stop'] = str(self.ui.lineEdit_surveyEndPt.text())
 
-        # export/save project
-        self._myControl.export_project(project_file_name, ui_dict)
+        # detector-sample distance
+        det_distance_str = str(self.ui.lineEdit_infoDetSampleDistance.text()).strip()
+        if len(det_distance_str) > 0:
+            ui_dict['det_sample_distance'] = det_distance_str
+
+        # wave length
+        wave_length_str = str(self.ui.lineEdit_infoWavelength.text()).strip()
+        if len(wave_length_str) > 0:
+            ui_dict['wave_length'] = wave_length_str
+
+        # calibrated detector center
+        det_center_str = str(self.ui.lineEdit_infoDetCenter.text())
+        if len(det_center_str) > 0:
+            ui_dict['det_center'] = det_center_str
 
         # register and make it as a queue for last n opened/saved project
         last_1_path = str(self.ui.label_last1Path.text())
@@ -552,34 +564,6 @@ class MainWindow(QtGui.QMainWindow):
         # END-IF
 
         self.load_project(project_file_name)
-
-        return
-
-    def load_project(self, project_file_name):
-        """
-        Load a saved project
-        :param project_file_name:
-        :return:
-        """
-        assert isinstance(project_file_name, str), 'Project file name %s must be a string but not %s.' \
-                                                   '' % (str(project_file_name), type(project_file_name))
-        assert os.path.exists(project_file_name), 'Project file "%s" cannot be found.' % project_file_name
-
-        # load project
-        ui_dict = self._myControl.load_project(project_file_name)
-
-        # set the UI parameters to GUI
-        try:
-            self.ui.lineEdit_localSpiceDir.setText(ui_dict['local spice dir'])
-            self.ui.lineEdit_workDir.setText(ui_dict['work dir'])
-            self.ui.lineEdit_surveyStartPt.setText(ui_dict['survey start'])
-            self.ui.lineEdit_surveyEndPt.setText(ui_dict['survey stop'])
-
-            # now try to call some actions
-            self.do_apply_setup()
-            self.do_set_experiment()
-        except KeyError:
-            print '[Error] Some field cannot be found.'
 
         return
 
@@ -2096,6 +2080,62 @@ class MainWindow(QtGui.QMainWindow):
 
         return
 
+    def load_project(self, project_file_name):
+        """
+        Load a saved project with all the setup loaded to memory
+        :param project_file_name:
+        :return:
+        """
+        assert isinstance(project_file_name, str), 'Project file name %s must be a string but not %s.' \
+                                                   '' % (str(project_file_name), type(project_file_name))
+        assert os.path.exists(project_file_name), 'Project file "%s" cannot be found.' % project_file_name
+
+        # load project
+        ui_dict = self._myControl.load_project(project_file_name)
+
+        # get experiment number and IPTS number
+        exp_number = ui_dict['exp number']
+        self.ui.lineEdit_exp.setText(str(exp_number))
+        if 'ipts' in ui_dict and ui_dict['ipts'] is not None:
+            self.ui.lineEdit_iptsNumber.setText(str(ui_dict['ipts']))
+
+        # set the UI parameters to GUI
+        try:
+            self.ui.lineEdit_localSpiceDir.setText(ui_dict['local spice dir'])
+            self.ui.lineEdit_workDir.setText(ui_dict['work dir'])
+            self.ui.lineEdit_surveyStartPt.setText(ui_dict['survey start'])
+            self.ui.lineEdit_surveyEndPt.setText(ui_dict['survey stop'])
+
+            # now try to call some actions
+            self.do_apply_setup()
+            self.do_set_experiment()
+
+        except KeyError:
+            print '[Error] Some field cannot be found.'
+
+        # set experiment configurations
+        # set sample distance
+        if 'det_sample_distance' in ui_dict and ui_dict['det_sample_distance'] is not None:
+            det_sample_distance = float(ui_dict['det_sample_distance'])
+            self.ui.lineEdit_infoDetSampleDistance.setText(str(det_sample_distance))
+            self._myControl.set_default_detector_sample_distance(det_sample_distance)
+
+        # set user-specified wave length
+        if 'wave_length' in ui_dict and ui_dict['wave_length'] is not None:
+            wave_length = float(ui_dict['wave_length'])
+            self.ui.lineEdit_infoWavelength.setText(str(wave_length))
+            self._myControl.set_user_wave_length(exp_number, wave_length)
+
+        if 'det_center' in ui_dict and ui_dict['det_center'] is not None:
+            det_center_str = ui_dict['det_center'].strip()
+            terms = det_center_str.split(',')
+            center_row = int(terms[0].strip())
+            center_col = int(terms[1].strip())
+            self.ui.lineEdit_infoDetCenter.setText('{0}, {1}'.format(center_row, center_col))
+            self._myControl.set_detector_center(exp_number, center_row, center_col)
+
+        return
+
     # add slot for UB refinement configuration window's signal to connect to
     @QtCore.pyqtSlot(int)
     def refine_ub_lattice(self, val):
@@ -2404,17 +2444,20 @@ class MainWindow(QtGui.QMainWindow):
         set the detector size to controller
         :return:
         """
-        # TODO/ISSUE/NOW - It is combox box now!
+        det_size_str = str(self.ui.comboBox_detectorSize.currentText())
+
+        # TODO/ISSUE/NOW - parse whatever from the box from now on!
         self._myControl.set_detector_geometry(256, 256)
-        return
-        try:
-            ret_obj = gutil.parse_integer_list(str(self.ui.lineEdit_detectorGeometry.text()), expected_size=2)
-            size_x, size_y = ret_obj
-            self._myControl.set_detector_geometry(size_x, size_y)
-            if size_x != size_y or (size_x != 256 and size_x != 512):
-                self.pop_one_button_dialog('Detector geometry should be either 256 x 256 or 512 x 512.')
-        except RuntimeError as run_err:
-            self.pop_one_button_dialog('Detector geometry is not correct! Re-set it!  FYI: {0}'.format(run_err))
+        #
+        #
+        # try:
+        #     ret_obj = gutil.parse_integer_list(str(self.ui.lineEdit_detectorGeometry.text()), expected_size=2)
+        #     size_x, size_y = ret_obj
+        #     self._myControl.set_detector_geometry(size_x, size_y)
+        #     if size_x != size_y or (size_x != 256 and size_x != 512):
+        #         self.pop_one_button_dialog('Detector geometry should be either 256 x 256 or 512 x 512.')
+        # except RuntimeError as run_err:
+        #     self.pop_one_button_dialog('Detector geometry is not correct! Re-set it!  FYI: {0}'.format(run_err))
 
         return
 
@@ -3290,64 +3333,6 @@ class MainWindow(QtGui.QMainWindow):
 
         return
 
-    # def ui_apply_lorentz_correction_mt(self):
-    #     """
-    #     Apply Lorentz corrections to the integrated peak intensities of all the selected peaks
-    #     at the UI level
-    #     :return:
-    #     """
-    #     # get experiment number
-    #     exp_number = int(self.ui.lineEdit_exp.text())
-    #
-    #     # select rows
-    #     selected_rows = self.ui.tableWidget_mergeScans.get_selected_rows(True)
-    #
-    #     # apply for each row selected for Lorentz correction
-    #     error_message = ''
-    #     for row_number in selected_rows:
-    #         # get scan number
-    #         scan_number = self.ui.tableWidget_mergeScans.get_scan_number(row_number)
-    #         # get peak information object
-    #         peak_info_obj = self._myControl.get_peak_info(exp_number, scan_number)
-    #         if peak_info_obj is None:
-    #             error_message += 'Unable to get peak information from scan %d\n' % scan_number
-    #             continue
-    #         # get intensity
-    #         peak_intensity = peak_info_obj.get_intensity(simple_sum=True, lorentz_corrected=True)
-    #         # self.ui.tableWidget_mergeScans.set_status(row_number, str(run_err))
-    #
-    #         # # get Q-vector of the peak center and calculate |Q| from it
-    #         # peak_center_q = peak_info_obj.get_peak_centre_v3d().norm()
-    #         # # get wave length
-    #         wavelength = self._myControl.get_wave_length(exp_number, [scan_number])
-    #         self.ui.tableWidget_mergeScans.set_wave_length(row_number, wavelength)
-    #         # # get motor step (choose from omega, phi and chi)
-    #         try:
-    #             motor_move_tup = self._myControl.get_motor_step(exp_number, scan_number)
-    #         except RuntimeError as run_err:
-    #             self.ui.tableWidget_mergeScans.set_status(row_number, str(run_err))
-    #             continue
-    #         except AssertionError as ass_err:
-    #             self.ui.tableWidget_mergeScans.set_status(row_number, str(ass_err))
-    #             continue
-    #         # set motor information (the moving motor)
-    #         self.ui.tableWidget_mergeScans.set_motor_info(row_number, motor_move_tup)
-    #         motor_step = motor_move_tup[1]
-    #         # # apply the Lorentz correction to the intensity
-    #         # # corrected = self._myControl.apply_lorentz_correction(peak_intensity, q, wavelength, motor_step)
-    #
-    #         # FIXME - Later need to
-    #         self.ui.tableWidget_mergeScans.set_peak_intensity(row_number, peak_intensity, lorentz_corrected=True,
-    #                                                           standard_error=
-    #                                                           integrate_method='sum')
-    #         self._myControl.set_peak_intensity(exp_number, scan_number, corrected)
-    #     # END-FOR (row_number)
-    #
-    #     if len(error_message) > 0:
-    #         self.pop_one_button_dialog(error_message)
-
-        return
-
     def pop_one_button_dialog(self, message):
         """ Pop up a one-button dialog
         :param message:
@@ -3471,6 +3456,7 @@ class MainWindow(QtGui.QMainWindow):
         h, k, l = peak_info.get_hkl(user_hkl=False)
         q_x, q_y, q_z = peak_info.get_peak_centre()
         m1 = self._myControl.get_sample_log_value(exp_number, scan_number, 1, '_m1')
+        # TODO/ISSUE/NOW consider user specified
         wave_length = hb3a_util.convert_to_wave_length(m1_position=m1)
 
         # Set to table
@@ -3512,6 +3498,19 @@ class MainWindow(QtGui.QMainWindow):
         lattice_gamma = str(self.ui.lineEdit_gamma.text())
         settings.setValue('gamma', lattice_gamma)
 
+        # calibrated instrument configurations
+        user_wave_length = str(self.ui.lineEdit_userWaveLength.text())
+        settings.setValue('wave_length', user_wave_length)
+
+        det_row_center = str(self.ui.lineEdit_detCenterPixHorizontal.text())
+        settings.setValue('row_center', det_row_center)
+
+        det_col_center = str(self.ui.lineEdit_detCenterPixVertical.text())
+        settings.setValue('col_center', det_col_center)
+
+        det_sample_distance_str = str(self.ui.lineEdit_userDetSampleDistance.text())
+        settings.setValue('det_sample_distance', det_sample_distance_str)
+
         # last project
         last_1_project_path = str(self.ui.label_last1Path.text())
         settings.setValue('last1path', last_1_project_path)
@@ -3549,6 +3548,19 @@ class MainWindow(QtGui.QMainWindow):
             self.ui.lineEdit_beta.setText(str(lattice_beta))
             lattice_gamma = settings.value('gamma')
             self.ui.lineEdit_gamma.setText(str(lattice_gamma))
+
+            # calibrated instrument configurations
+            user_wave_length = settings.value('wave_length')
+            self.ui.lineEdit_userWaveLength.setText(user_wave_length)
+
+            det_row_center = settings.value('row_center')
+            self.ui.lineEdit_detCenterPixHorizontal.setText(det_row_center)
+
+            det_col_center = settings.value('col_center')
+            self.ui.lineEdit_detCenterPixVertical.setText(det_col_center)
+
+            det_sample_distance = settings.value('det_sample_distance')
+            self.ui.lineEdit_userDetSampleDistance.setText(det_sample_distance)
 
             # last project
             last_1_project_path = str(settings.value('last1path'))
@@ -3620,12 +3632,12 @@ class MainWindow(QtGui.QMainWindow):
         # raw_det_data = numpy.rot90(raw_det_data, 1)
         self.ui.graphicsView_detector2dPlot.clear_canvas()
         # get the configuration of detector from GUI
-	# FIXME/TODO/ISSUE/NOW
+        #  FIXME/TODO/ISSUE/NOW - use the detector size wrong!
         if 0:
             ret_obj = gutil.parse_integer_list(str(self.ui.lineEdit_detectorGeometry.text()), expected_size=2)
             x_max, y_max = ret_obj
-	else:
-	    x_max, y_max = 256, 256
+        else:
+            x_max, y_max = 256, 256
 
         self.ui.graphicsView_detector2dPlot.add_plot_2d(raw_det_data, x_min=0, x_max=x_max, y_min=0, y_max=y_max,
                                                         hold_prev_image=False)
