@@ -72,7 +72,7 @@ class LoadDNSLegacy(PythonAlgorithm):
             self.log().debug("Loaded polarisation table:\n" + str(poltable))
             return poltable
         try:
-            currents = np.genfromtxt(poltable_name, names=True, dtype=None)
+            currents = np.genfromtxt(poltable_name, names=True, dtype='U2,U2,f8,f8,f8,f8')
             self.log().debug("Coil currents are: " + str(currents))
         except ValueError as err:
             raise RuntimeError("Invalid coil currents table: " + str(err))
