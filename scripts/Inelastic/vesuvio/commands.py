@@ -116,6 +116,8 @@ def fit_tof_iteration(sample_data, container_data, runs, flags):
 
     output_groups = []
     chi2_values = []
+    fit_workspaces = []
+    data_workspaces = []
     for index in range(num_spec):
         if isinstance(profiles_strs, list):
             profiles = profiles_strs[index]
@@ -213,31 +215,42 @@ def fit_tof_iteration(sample_data, container_data, runs, flags):
 
         # Process spectrum group
         # Note the ordering of operations here gives the order in the WorkspaceGroup
-        group_name = runs + suffix
-        output_workspaces = [fit_ws_name, linear_correction_fit_params_name]
+        group_name = runs + '_iteration_1'
+
+        output_workspaces = []
+        fit_workspaces.append(linear_correction_fit_params_name)
+        data_workspaces.append(fit_ws_name)
+        # output_workspaces = [fit_ws_name, linear_correction_fit_params_name]
         if flags.get('output_verbose_corrections', False):
             output_workspaces += mtd[corrections_args["CorrectionWorkspaces"]].getNames()
             output_workspaces += mtd[corrections_args["CorrectedWorkspaces"]].getNames()
             ms.UnGroupWorkspace(corrections_args["CorrectionWorkspaces"])
             ms.UnGroupWorkspace(corrections_args["CorrectedWorkspaces"])
 
-        for workspace in output_workspaces[2:]:
+        result_workspaces = []
+        for workspace in output_workspaces:
             n = workspace.split('_')
             name = '_'.join(n[:2] + n[-3:])
-            ms.CloneWorkspace(InputWorkspace=workspace, OutputWorkspace=workspace + 'clone')
+            group_name = runs + '_' + '_'.join(n[4:6])
+            result_workspaces.append(name)
+            # ms.CloneWorkspace(InputWorkspace=workspace, OutputWorkspace=workspace + 'clone')
             if index == 0:
-                ms.RenameWorkspace(InputWorkspace=workspace + 'clone', OutputWorkspace=name)
+                ms.RenameWorkspace(InputWorkspace=workspace, OutputWorkspace=name)
             else:
-                ms.ConjoinWorkspaces(InputWorkspace1=name, InputWorkspace2=workspace + 'clone')
-
-        output_groups.append(ms.GroupWorkspaces(InputWorkspaces=output_workspaces,
-                                                OutputWorkspace=group_name))
+                ms.ConjoinWorkspaces(InputWorkspace1=name, InputWorkspace2=workspace)
 
         # Output the parameter workspaces
         params_pre_corr = runs + "_params_pre_correction_iteration_" + str(flags['iteration'])
         params_name = runs + "_params_iteration_" + str(flags['iteration'])
         AnalysisDataService.Instance().addOrReplace(params_pre_corr, pre_correct_pars_workspace)
         AnalysisDataService.Instance().addOrReplace(params_name, pars_workspace)
+
+    output_groups.append(ms.GroupWorkspaces(InputWorkspaces=result_workspaces,
+                                            OutputWorkspace=group_name))
+    output_groups.append(ms.GroupWorkspaces(InputWorkspaces=fit_workspaces,
+                                            OutputWorkspace=group_name + '_fit'))
+    output_groups.append(ms.GroupWorkspaces(InputWorkspaces=data_workspaces,
+                                            OutputWorkspace=group_name + '_data'))
 
     if len(output_groups) > 1:
         result_ws = output_groups
