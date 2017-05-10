@@ -45,8 +45,8 @@ class Polaris(AbstractInst):
 
     # Overrides
     def _apply_absorb_corrections(self, run_details, van_ws):
-        return polaris_algs.calculate_absorb_corrections(ws_to_correct=van_ws,
-                                                         multiple_scattering=self._inst_settings.multiple_scattering)
+        return polaris_algs.calculate_van_absorb_corrections(ws_to_correct=van_ws,
+                                                             multiple_scattering=self._inst_settings.multiple_scattering)
 
     @staticmethod
     def _can_auto_gen_vanadium_cal():

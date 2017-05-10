@@ -8,12 +8,13 @@ from isis_powder.routines.run_details import create_run_details_object, \
 from isis_powder.polaris_routines import polaris_advanced_config
 
 
-def calculate_absorb_corrections(ws_to_correct, multiple_scattering):
+def calculate_van_absorb_corrections(ws_to_correct, multiple_scattering):
     mantid.MaskDetectors(ws_to_correct, SpectraList=list(range(1, 55)))
 
     absorb_dict = polaris_advanced_config.absorption_correction_params
+    sample_details_obj = absorb_corrections.create_vanadium_sample_details_obj(config_dict=absorb_dict)
     ws_to_correct = absorb_corrections.run_cylinder_absorb_corrections(
-        ws_to_correct=ws_to_correct, multiple_scattering=multiple_scattering, config_dict=absorb_dict)
+        ws_to_correct=ws_to_correct, multiple_scattering=multiple_scattering, sample_details_obj=sample_details_obj)
     return ws_to_correct
 
 

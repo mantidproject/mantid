@@ -63,8 +63,8 @@ class Gem(AbstractInst):
         return _gem_generate_inst_name(run_number=run_number)
 
     def _apply_absorb_corrections(self, run_details, van_ws):
-        return gem_algs.calculate_absorb_corrections(ws_to_correct=van_ws,
-                                                     multiple_scattering=self._inst_settings.multiple_scattering)
+        return gem_algs.calculate_van_absorb_corrections(ws_to_correct=van_ws,
+                                                         multiple_scattering=self._inst_settings.multiple_scattering)
 
     def _crop_banks_to_user_tof(self, focused_banks):
         return common.crop_banks_using_crop_list(focused_banks, self._inst_settings.focused_cropping_values)
