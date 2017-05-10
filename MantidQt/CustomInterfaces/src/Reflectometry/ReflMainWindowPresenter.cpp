@@ -23,7 +23,7 @@ ReflMainWindowPresenter::ReflMainWindowPresenter(
     IReflSaveTabPresenter *savePresenter)
     : m_view(view), m_runsPresenter(runsPresenter),
       m_eventPresenter(eventPresenter), m_settingsPresenter(settingsPresenter),
-      m_savePresenter(savePresenter) {
+      m_savePresenter(savePresenter), m_isProcessing(false) {
 
   // Tell the tab presenters that this is going to be the main presenter
   m_runsPresenter->acceptMainPresenter(this);
@@ -37,6 +37,28 @@ ReflMainWindowPresenter::ReflMainWindowPresenter(
 /** Destructor
 */
 ReflMainWindowPresenter::~ReflMainWindowPresenter() {}
+
+/**
+Used by the view to tell the presenter something has changed
+*/
+void ReflMainWindowPresenter::notify(IReflMainWindowPresenter::Flag flag) {
+
+  switch (flag) {
+  case IReflMainWindowPresenter::PauseReductionFlag:
+    pauseReduction();
+    break;
+  case IReflMainWindowPresenter::ResumeReductionFlag:
+    resumeReduction();
+    break;
+  case IReflMainWindowPresenter::ConfirmReductionPausedFlag:
+    confirmReductionPaused();
+    break;
+  case IReflMainWindowPresenter::ConfirmReductionResumedFlag:
+    confirmReductionResumed();
+  }
+  // Not having a 'default' case is deliberate. gcc issues a warning if there's
+  // a flag we aren't handling.
+}
 
 /** Returns values passed for 'Transmission run(s)'
 *
@@ -201,6 +223,15 @@ void ReflMainWindowPresenter::setInstrumentName(
   m_settingsPresenter->setInstrumentName(instName);
 }
 
+/**
+Checks whether or not data is currently being processed in the Runs Tab
+* @return : Bool on whether data is being processed
+*/
+bool ReflMainWindowPresenter::checkIfProcessing() const {
+
+  return m_isProcessing;
+}
+
 /** Checks for Settings Tab null pointer
 * @param pointer :: The pointer
 */
@@ -217,6 +248,36 @@ void ReflMainWindowPresenter::checkEventPtrValid(
     IReflEventTabPresenter *pointer) const {
   if (pointer == nullptr)
     throw std::invalid_argument("Could not read event handling");
+}
+
+/** Pauses reduction in the runs tab
+*/
+void ReflMainWindowPresenter::pauseReduction() const {
+
+  m_runsPresenter->notify(IReflRunsTabPresenter::PauseReductionFlag);
+}
+
+/** Resumes reduction in the runs tab
+*/
+void ReflMainWindowPresenter::resumeReduction() const {
+
+  m_isProcessing = true;
+  m_runsPresenter->notify(IReflRunsTabPresenter::ResumeReductionFlag);
+}
+
+/** Confirm that reduction in the runs tab has been paused
+*/
+void ReflMainWindowPresenter::confirmReductionPaused() const {
+
+  m_isProcessing = false;
+  m_view->confirmCloseWindow();
+}
+
+/** Confirm that reduction in the runs tab has been resumed
+*/
+void ReflMainWindowPresenter::confirmReductionResumed() const {
+
+  m_isProcessing = true;
 }
 }
 }

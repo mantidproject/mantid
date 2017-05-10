@@ -126,6 +126,12 @@ void ReflRunsTabPresenter::notify(IReflRunsTabPresenter::Flag flag) {
   case IReflRunsTabPresenter::GroupChangedFlag:
     pushCommands();
     break;
+  case IReflRunsTabPresenter::PauseReductionFlag:
+    pauseReduction();
+    break;
+  case IReflRunsTabPresenter::ResumeReductionFlag:
+    resumeReduction();
+    break;
   }
   // Not having a 'default' case is deliberate. gcc issues a warning if there's
   // a flag we aren't handling.
@@ -343,13 +349,16 @@ ReflRunsTabPresenter::getTransferStrategy() {
 }
 
 /**
-Used to tell the presenter something has changed in the ADS
+Used to tell the presenter something has changed
 */
 void ReflRunsTabPresenter::notify(DataProcessorMainPresenter::Flag flag) {
 
   switch (flag) {
   case DataProcessorMainPresenter::ADSChangedFlag:
     pushCommands();
+    break;
+  case DataProcessorMainPresenter::ConfirmReductionPausedFlag:
+    confirmReductionPaused();
     break;
   }
   // Not having a 'default' case is deliberate. gcc issues a warning if there's
@@ -427,6 +436,21 @@ std::string ReflRunsTabPresenter::getTimeSlicingType() const {
   return m_mainPresenter->getTimeSlicingType(m_view->getSelectedGroup());
 }
 
+/** Notifies main presenter that data reduction is confirmed to be paused
+*/
+void ReflRunsTabPresenter::confirmReductionPaused() const {
+
+  m_mainPresenter->notify(IReflMainWindowPresenter::ConfirmReductionPausedFlag);
+}
+
+/** Notifies main presenter that data reduction is confirmed to be resumed
+*/
+void ReflRunsTabPresenter::confirmReductionResumed() const {
+
+  m_mainPresenter->notify(
+      IReflMainWindowPresenter::ConfirmReductionResumedFlag);
+}
+
 /**
 Tells the view to show an critical error dialog
 @param prompt : The prompt to appear on the dialog
@@ -495,6 +519,24 @@ void ReflRunsTabPresenter::changeInstrument() {
   Mantid::Kernel::ConfigService::Instance().setString("default.instrument",
                                                       instrument);
   g_log.information() << "Instrument changed to " << instrument;
+}
+
+/**
+Tells table presenter to pause reducing runs
+*/
+void ReflRunsTabPresenter::pauseReduction() {
+
+  m_tablePresenters[m_view->getSelectedGroup()]->notify(
+      DataProcessorPresenter::PauseFlag);
+}
+
+/**
+Tells table presenter to resume reducing runs
+*/
+void ReflRunsTabPresenter::resumeReduction() {
+
+  m_tablePresenters[m_view->getSelectedGroup()]->notify(
+      DataProcessorPresenter::ResumeFlag);
 }
 
 const std::string ReflRunsTabPresenter::MeasureTransferMethod = "Measurement";

@@ -71,7 +71,9 @@ public:
     PlotRowFlag,
     PlotGroupFlag,
     ExpandAllGroupsFlag,
-    CollapseAllGroupsFlag
+    CollapseAllGroupsFlag,
+    PauseFlag,
+    ResumeFlag
   };
 
   // Tell the presenter something happened

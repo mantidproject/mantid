@@ -195,6 +195,12 @@ private:
   std::map<std::string, QVariant> m_options;
   // Thread to run reducer worker in
   std::unique_ptr<GenericDataProcessorPresenterThread> m_workerThread;
+  // A boolean indicating whether or not data reduction has been paused
+  mutable bool m_reductionPaused;
+  // Enumeration of the reduction actions that can be taken
+  enum ReductionFlag { ReduceRowFlag, ReduceGroupFlag };
+  // A flag of the next action due to be carried out
+  ReductionFlag m_nextActionFlag;
   // load a run into the ADS, or re-use one in the ADS if possible
   Mantid::API::Workspace_sptr getRun(const std::string &run,
                                      const std::string &instrument,
@@ -246,6 +252,13 @@ private:
 
   // actions/commands
   void addCommands();
+
+  // start reduction
+  void startReduction();
+
+  // pause/resume reduction
+  void pause();
+  void resume();
 
   // List of workspaces the user can open
   std::set<std::string> m_workspaceList;

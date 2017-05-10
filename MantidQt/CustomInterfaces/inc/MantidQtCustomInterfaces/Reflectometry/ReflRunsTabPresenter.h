@@ -82,6 +82,9 @@ public:
   std::string getPostprocessingOptions() const override;
   std::string getTimeSlicingValues() const override;
   std::string getTimeSlicingType() const override;
+  /// Reduction paused/resumed confirmation handler
+  void confirmReductionPaused() const override;
+  void confirmReductionResumed() const override;
 
 private:
   /// The search model
@@ -112,6 +115,9 @@ private:
   std::unique_ptr<ReflTransferStrategy> getTransferStrategy();
   /// change the instrument
   void changeInstrument();
+  /// handle pausing/resuming reduction
+  void pauseReduction();
+  void resumeReduction();
 };
 }
 }

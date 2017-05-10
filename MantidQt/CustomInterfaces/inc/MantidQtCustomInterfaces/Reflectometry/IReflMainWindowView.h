@@ -52,6 +52,9 @@ public:
   virtual void giveUserInfo(const std::string &prompt,
                             const std::string &title) = 0;
   virtual std::string runPythonAlgorithm(const std::string &pythonCode) = 0;
+
+  /// Close window handler
+  virtual void confirmCloseWindow() = 0;
 };
 }
 }

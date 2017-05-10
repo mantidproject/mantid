@@ -5,6 +5,8 @@
 #include "MantidQtCustomInterfaces/Reflectometry/IReflMainWindowView.h"
 #include "ui_ReflMainWindowWidget.h"
 
+#include <QCloseEvent>
+
 namespace MantidQt {
 namespace CustomInterfaces {
 
@@ -65,6 +67,10 @@ public:
                     const std::string &title) override;
   std::string runPythonAlgorithm(const std::string &pythonCode) override;
 
+  /// Close window handlers
+  void confirmCloseWindow() override;
+  void closeEvent(QCloseEvent *event) override;
+
 private:
   /// Initializes the interface
   void initLayout() override;
@@ -81,6 +87,8 @@ private:
   Ui::RelMainWindowWidget m_ui;
   /// The presenter handling this view
   std::unique_ptr<IReflMainWindowPresenter> m_presenter;
+  /// Temporary store for a close event
+  QCloseEvent *m_closeEvent;
 };
 }
 }

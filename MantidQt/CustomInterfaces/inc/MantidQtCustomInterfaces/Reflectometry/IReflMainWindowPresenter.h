@@ -38,6 +38,15 @@ class IReflMainWindowPresenter {
 public:
   /// Destructor
   virtual ~IReflMainWindowPresenter(){};
+
+  enum Flag {
+    PauseReductionFlag,
+    ResumeReductionFlag,
+    ConfirmReductionPausedFlag,
+    ConfirmReductionResumedFlag
+  };
+  virtual void notify(IReflMainWindowPresenter::Flag flag) = 0;
+
   /// Pre-processing
   virtual std::string getTransmissionRuns(int group) const = 0;
   virtual std::string getTransmissionOptions(int group) const = 0;
@@ -63,6 +72,8 @@ public:
                             const std::string &title) = 0;
   virtual std::string runPythonAlgorithm(const std::string &pythonCode) = 0;
   virtual void setInstrumentName(const std::string &instName) const = 0;
+  /// Data processing check
+  virtual bool checkIfProcessing() const = 0;
 };
 }
 }

@@ -56,10 +56,11 @@ GenericDataProcessorPresenter::GenericDataProcessorPresenter(
     const std::map<std::string, std::string> &postprocessMap,
     const std::string &loader)
     : WorkspaceObserver(), m_view(nullptr), m_progressView(nullptr),
-      m_mainPresenter(), m_progressReporter(nullptr), m_loader(loader), m_whitelist(whitelist),
-      m_preprocessMap(preprocessMap), m_processor(processor),
-      m_postprocessor(postprocessor), m_postprocessMap(postprocessMap),
-      m_postprocess(true), m_tableDirty(false) {
+      m_mainPresenter(), m_progressReporter(nullptr), m_loader(loader),
+      m_whitelist(whitelist), m_preprocessMap(preprocessMap),
+      m_processor(processor), m_postprocessor(postprocessor),
+      m_postprocessMap(postprocessMap), m_postprocess(true),
+      m_tableDirty(false), m_reductionPaused(false) {
 
   // Column Options must be added to the whitelist
   m_whitelist.addElement("Options", "Options",
@@ -219,8 +220,7 @@ void GenericDataProcessorPresenter::process() {
     m_gqueue.push(std::make_pair(item.first, rowQueue));
   }
 
-  // Start processing all groups
-  nextGroup();
+  startReduction();
 
   // If "Output Notebook" checkbox is checked then create an ipython notebook
   if (m_view->getEnableNotebook())
@@ -233,6 +233,14 @@ Process a new row
 void GenericDataProcessorPresenter::nextRow() {
 
   m_workerThread.reset();
+
+  if (m_reductionPaused) {
+    // Set action flag and notify presenter that reduction is paused
+    m_nextActionFlag = GenericDataProcessorPresenter::ReduceRowFlag;
+    m_mainPresenter->notify(
+        DataProcessorMainPresenter::ConfirmReductionPausedFlag);
+    return;
+  }
 
   // Add processed row data to the group
   int groupIndex = m_rowItem.first;
@@ -274,6 +282,14 @@ Process a new group
 void GenericDataProcessorPresenter::nextGroup() {
 
   m_workerThread.reset();
+
+  if (m_reductionPaused) {
+    // Set action flag and notify presenter that reduction is paused
+    m_nextActionFlag = GenericDataProcessorPresenter::ReduceGroupFlag;
+    m_mainPresenter->notify(
+        DataProcessorMainPresenter::ConfirmReductionPausedFlag);
+    return;
+  }
 
   if (!m_gqueue.empty()) {
     // Reduce first row
@@ -944,6 +960,12 @@ void GenericDataProcessorPresenter::notify(DataProcessorPresenter::Flag flag) {
   case DataProcessorPresenter::CollapseAllGroupsFlag:
     collapseAll();
     break;
+  case DataProcessorPresenter::PauseFlag:
+    pause();
+    break;
+  case DataProcessorPresenter::ResumeFlag:
+    resume();
+    break;
   }
   // Not having a 'default' case is deliberate. gcc issues a warning if there's
   // a flag we aren't handling.
@@ -1354,6 +1376,50 @@ void GenericDataProcessorPresenter::addCommands() {
   for (size_t comm = 10; comm < commands.size(); comm++)
     commandsToShow.push_back(std::move(commands.at(comm)));
   m_view->addActions(std::move(commandsToShow));
+}
+
+/**
+Start the reduction process and notify main presenter appropriately
+*/
+void GenericDataProcessorPresenter::startReduction() {
+
+  m_mainPresenter->notify(
+    DataProcessorMainPresenter::ConfirmReductionResumedFlag);
+  // Start processing the first group
+  nextGroup();
+  m_mainPresenter->notify(
+    DataProcessorMainPresenter::ConfirmReductionPausedFlag);
+}
+
+/**
+Pauses reduction. If currently reducing runs, this does not take effect until
+the current thread for reducing a row or group has finished
+*/
+void GenericDataProcessorPresenter::pause() {
+
+  if (!m_reductionPaused)
+    m_mainPresenter->notify(
+        DataProcessorMainPresenter::ConfirmReductionPausedFlag);
+
+  m_reductionPaused = true;
+}
+
+/** Resumes reduction if currently paused
+*/
+void GenericDataProcessorPresenter::resume() {
+
+  m_reductionPaused = false;
+  m_mainPresenter->notify(
+      DataProcessorMainPresenter::ConfirmReductionResumedFlag);
+
+  switch (m_nextActionFlag) {
+  case GenericDataProcessorPresenter::ReduceRowFlag:
+    nextRow();
+    break;
+  case GenericDataProcessorPresenter::ReduceGroupFlag:
+    nextGroup();
+    break;
+  }
 }
 
 /**
