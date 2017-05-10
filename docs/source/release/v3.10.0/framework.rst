@@ -49,6 +49,7 @@ Improved
 - ``ThreadPool`` now respects the value of ``OMP_NUM_THREADS`` environment variable (documented in [gcc](https://gcc.gnu.org/onlinedocs/libgomp/OMP_005fNUM_005fTHREADS.html))
 - Improved parallel scaling of :ref:`MDNormSCD <algm-MDNormSCD>` with > 4 cores.
 - Reduced execution time of ``EventList::sortTof`` by over 2x, improving performance in algorithms such as :ref:`algm-CompressEvents` and :ref:`algm-SortEvents` which call it.
+- :ref:`LoadDNSLegacy <algm-LoadDNSLegacy-v1>` can now read the TOF data. CoilCurrentsTable is now optional. The default coil currents are now in the instrument parameters file.
 
 Bug Fixes
 #########
