@@ -73,6 +73,9 @@ private:
   void setReferenceFrameAndBeamDirection();
   void logNumberOfPeaksFound(size_t allowedPeakCount) const;
 
+  /// Number of edge pixels with no peaks
+  int m_edge;
+
   /// Reflection conditions possible
   std::vector<Mantid::Geometry::ReflectionCondition_sptr> m_refConds;
   /// Detector search cache for fast look-up of detectors

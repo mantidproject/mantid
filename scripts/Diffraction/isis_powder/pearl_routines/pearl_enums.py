@@ -2,7 +2,7 @@ from __future__ import (absolute_import, division, print_function)
 
 
 class PEARL_FOCUS_MODES(object):
-    enum_friendly_name  = "focus modes"
+    enum_friendly_name = "focus modes"
     all = "all"
     groups = "groups"
     trans = "trans"

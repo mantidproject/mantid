@@ -467,7 +467,7 @@ StructuredDetector::getComponentByName(const std::string &cname,
 
   // check that the searched for name starts with the detector's
   // name as they are generated
-  if (cname.substr(0, MEMBER_NAME.length()).compare(MEMBER_NAME) != 0) {
+  if (cname.substr(0, MEMBER_NAME.length()) != MEMBER_NAME) {
     return boost::shared_ptr<const IComponent>();
   } else {
     return CompAssembly::getComponentByName(cname, nlevels);

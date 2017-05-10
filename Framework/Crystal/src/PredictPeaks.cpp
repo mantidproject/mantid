@@ -1,4 +1,5 @@
 #include "MantidCrystal/PredictPeaks.h"
+#include "MantidAPI/DetectorInfo.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
@@ -10,12 +11,12 @@
 #include "MantidGeometry/Objects/InstrumentRayTracer.h"
 #include "MantidGeometry/Objects/BoundingBox.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
+#include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidKernel/make_unique.h"
-#include "MantidAPI/DetectorInfo.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
-#include <Eigen/StdVector>
+#include "MantidGeometry/Crystal/EdgePixel.h"
 
 #include <fstream>
 using Mantid::Kernel::EnabledWhenProperty;
@@ -132,6 +133,11 @@ void PredictPeaks::init() {
                   "Use an extended detector space (if defined for the"
                   " instrument) to predict peaks which do not fall onto any"
                   "detector. This may produce a very high number of results.");
+
+  auto nonNegativeInt = boost::make_shared<BoundedValidator<int>>();
+  nonNegativeInt->setLower(0);
+  declareProperty("EdgePixels", 0, nonNegativeInt,
+                  "Remove peaks that are at pixels this close to edge. ");
 }
 
 /** Execute the algorithm.
@@ -139,6 +145,7 @@ void PredictPeaks::init() {
 void PredictPeaks::exec() {
   // Get the input properties
   Workspace_sptr rawInputWorkspace = getProperty("InputWorkspace");
+  m_edge = this->getProperty("EdgePixels");
 
   ExperimentInfo_sptr inputExperimentInfo =
       boost::dynamic_pointer_cast<ExperimentInfo>(rawInputWorkspace);
@@ -515,6 +522,9 @@ void PredictPeaks::calculateQAndAddToOutput(const V3D &hkl,
     const auto magnitude = track.back().exitPoint.norm();
     peak = Kernel::make_unique<Peak>(m_inst, q, boost::optional<double>(magnitude));
   }
+
+  if (m_edge > 0 && edgePixel(m_inst, peak->getBankName(), peak->getCol(), peak->getRow(), m_edge))
+      return;
 
   // Only add peaks that hit the detector
   peak->setGoniometerMatrix(goniometerMatrix);
