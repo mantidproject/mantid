@@ -510,7 +510,7 @@ void MultiTabScriptInterpreter::showSelectFont() {
     fontToUse = m_fontFamily;
 
   const auto results = fontList->findItems(fontToUse, Qt::MatchExactly);
-  if (results.empty()) {
+  if (!results.empty()) {
     const auto item = results[0];
     fontList->setItemSelected(item, true);
     fontList->scrollToItem(item, QAbstractItemView::PositionAtTop);
