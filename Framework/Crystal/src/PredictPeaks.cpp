@@ -530,6 +530,11 @@ void PredictPeaks::calculateQAndAddToOutput(const V3D &hkl,
   m_pw->addPeak(*peak);
 }
 
+/** Get the detector direction and wavelength of a peak from it's QLab vector
+ *
+ * @param q :: the q lab vector for this peak
+ * @return a tuple containing the detector direction and the wavelength
+ */
 std::tuple<V3D, double> PredictPeaks::getPeakParametersFromQ(const V3D& q) const {
   double norm_q = q.norm();
   // Default for ki-kf has -q
@@ -543,6 +548,8 @@ std::tuple<V3D, double> PredictPeaks::getPeakParametersFromQ(const V3D& q) const
   return std::make_tuple(detectorDir, wl);
 }
 
+/** Cache the reference frame and beam direction using the instrument
+ */
 void PredictPeaks::setReferenceFrameAndBeamDirection() {
   m_refFrame = m_inst->getReferenceFrame();
   m_refBeamDir = m_refFrame->vecPointingAlongBeam();
