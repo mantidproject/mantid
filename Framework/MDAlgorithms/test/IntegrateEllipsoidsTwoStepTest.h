@@ -131,7 +131,7 @@ public:
     for (int i = 0; i < 5; ++i) {
       TSM_ASSERT_DELTA("Wrong intensity for peak " + std::to_string(i),
                        integratedPeaksWS->getPeak(i).getIntensity(),
-                       numEventsPerPeak, 0.01);
+                       numEventsPerPeak, 5);
     }
   }
 

@@ -324,9 +324,9 @@ public:
     const auto ratio2 = integrator.estimateSignalToNoiseRatio(params, peak_2);
     const auto ratio3 = integrator.estimateSignalToNoiseRatio(params, peak_3);
 
-    TS_ASSERT_DELTA(ratio1, 171.9040, 0.01);
-    TS_ASSERT_DELTA(ratio2, 1.2632, 0.01);
-    TS_ASSERT_DELTA(ratio3, 0.1824, 0.01);
+    TS_ASSERT_DELTA(ratio1, 171.90, 0.05);
+    TS_ASSERT_DELTA(ratio2, 1.2632, 0.05);
+    TS_ASSERT_DELTA(ratio3, 0.1824, 0.05);
   }
 
   /** Generate a symmetric Gaussian peak
