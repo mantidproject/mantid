@@ -18,7 +18,7 @@ class WorkspaceBuilder {
 
 public:
   WorkspaceBuilder() : m_numPixels(0), m_totalNPixels(0),
-    m_outputAsHistogram(false), m_generator(1.0) {};
+    m_outputAsHistogram(false), m_generator(std::random_device()()) {};
 
   /// Set the total number of peaks to use
   void setNumPixels(const int numPixels);
@@ -33,6 +33,8 @@ public:
   /// Set the parameters for the uniform background
   void setBackgroundParameters(const int nEvents, const double detRange, const double tofRange)
   { m_backgroundParameters = std::make_tuple(nEvents, detRange, tofRange); }
+  /// Set the random seed for generating events
+  void setRandomSeed(const int seed) { m_generator.seed(seed); }
   /// Add a HKL peak to the diffraction dataset
   void addPeakByHKL(const Mantid::Kernel::V3D& hkl, const int numEvents, const std::tuple<double, double, double>& sigmas);
   /// Make a tuple of event workspace and peaks workspace
@@ -73,22 +75,22 @@ private:
 
   // Instance variables for builder settings
 
-  // number of pixels along a single axis on the detector bank
+  /// number of pixels along a single axis on the detector bank
   int m_numPixels;
-  // total number of pixels in the detector bank
+  /// total number of pixels in the detector bank
   int m_totalNPixels;
-  // whether to output event or histogram data
+  /// whether to output event or histogram data
   bool m_outputAsHistogram;
-  // whether to add a background
+  /// whether to add a background
   bool m_useBackground;
-  // rebin parameters
+  /// rebin parameters
   std::vector<double> m_rebinParams;
-  // background parameters
+  /// background parameters
   std::tuple<int, double, double> m_backgroundParameters;
 
   // Other instance varianbles
 
-  // Random generator for making events
+  /// Random generator for making events
   std::mt19937 m_generator;
 };
 
