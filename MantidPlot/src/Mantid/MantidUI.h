@@ -637,10 +637,10 @@ private:
                              const std::set<int> &spectra);
 
   /// Get log values and put into a curve spec list
-  void putLogsIntoCurveSpecs(std::vector<CurveSpec> & curveSpecList,
-    const QMultiMap<QString, int> &toPlot, 
-    const QString &log, 
-    const std::set<double> &customLogValues = std::set<double>());
+  void putLogsIntoCurveSpecs(
+      std::vector<CurveSpec> &curveSpecList,
+      const QMultiMap<QString, int> &toPlot, const QString &log,
+      const std::set<double> &customLogValues = std::set<double>());
 
   // Private variables
 

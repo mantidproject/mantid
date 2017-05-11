@@ -3164,42 +3164,37 @@ MultiLayer *MantidUI::plot1D(const QMultiMap<QString, int> &toPlot,
 *  @param log :: log value
 *  @param customLogValues :: custom log values
 */
-void MantidUI::putLogsIntoCurveSpecs(std::vector<CurveSpec> & curveSpecList,
-  const QMultiMap<QString, int> &toPlot,
-  const QString &log,
-  const std::set<double> &customLogValues)
-{
+void MantidUI::putLogsIntoCurveSpecs(std::vector<CurveSpec> &curveSpecList,
+                                     const QMultiMap<QString, int> &toPlot,
+                                     const QString &log,
+                                     const std::set<double> &customLogValues) {
   // Try to store log values, if needed, and prepare for sorting.
   int i = 0;
   for (QMultiMap<QString, int>::const_iterator it = toPlot.begin();
-    it != toPlot.end(); ++it) {
+       it != toPlot.end(); ++it) {
     CurveSpec curveSpec;
 
     try {
       if (!log.isEmpty()) { // Get log value from workspace
         if (!customLogValues.empty()) {
           curveSpec.logVal = getSingleWorkspaceLogValue(i++, customLogValues);
-        }
-        else {
+        } else {
           MatrixWorkspace_const_sptr workspace =
-            AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-              it.key().toStdString());
+              AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+                  it.key().toStdString());
           curveSpec.logVal = getSingleWorkspaceLogValue(1, workspace, log);
         }
-      }
-      else {
+      } else {
         curveSpec.logVal = 0.1234; // This should not be used.
       }
       curveSpec.wsName = it.key();
       curveSpec.index = it.value();
       curveSpecList.push_back(curveSpec);
 
-    }
-    catch (Mantid::Kernel::Exception::NotFoundError &) {
+    } catch (Mantid::Kernel::Exception::NotFoundError &) {
       g_log.warning() << "Workspace " << it.key().toStdString()
-        << " not found\n";
-    }
-    catch (std::exception &ex) {
+                      << " not found\n";
+    } catch (std::exception &ex) {
       g_log.warning() << ex.what() << '\n';
     }
   }
@@ -3208,7 +3203,6 @@ void MantidUI::putLogsIntoCurveSpecs(std::vector<CurveSpec> & curveSpecList,
   if (!log.isEmpty()) {
     sort(curveSpecList.begin(), curveSpecList.end(), byLogValue);
   }
-
 }
 
 /**
