@@ -115,6 +115,8 @@ std::vector<std::string> ProjectSaveModel::getWorkspaceNames() const {
 /**
  * Get window information for a selection of workspaces
  * @param wsNames :: vector of workspace names to find associated windows for
+ * @param includeUnattached :: whether to append windows not attached to any
+ * workspace
  * @return vector of window info objects associated with the workpaces
  */
 std::vector<WindowInfo>
