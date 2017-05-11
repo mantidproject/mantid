@@ -147,16 +147,17 @@ public:
     generatePeak(event_Qs, peak_2, 0.1, numWeakEvents, 1);   // weak peak
 
     IntegrationParameters params;
-    params.peakRadius = 0.5;
-    params.backgroundInnerRadius = 0.5;
-    params.backgroundOuterRadius = 0.8;
-    params.regionRadius = 0.5;
+    params.peakRadius = 1.0;
+    params.backgroundInnerRadius = 1.0;
+    params.backgroundOuterRadius = 1.2;
+    params.regionRadius = 1.2;
+    params.specifySize = true;
 
     // Create integraton region + events & UB
     Integrate3DEvents integrator(peak_q_list, UBinv, params.regionRadius);
     integrator.addEvents(event_Qs, false);
 
-    double strong_inti, strong_sigi;
+    double strong_inti = 0, strong_sigi = 0;
     auto result = integrator.integrateStrongPeak(params, peak_1, strong_inti,
                                                  strong_sigi);
     const auto shape =
@@ -181,8 +182,8 @@ public:
     // to be weighted by the fraction of strong peak contained in a standard
     // core. This is not exactly the same because of the weighting from the
     // strong peak
-    TS_ASSERT_DELTA(weak_inti, numWeakEvents / frac, 0.001);
-    TS_ASSERT_DELTA(weak_sigi, 11.96, 0.1);
+    TS_ASSERT_DELTA(weak_inti, 83.6960, 0.001);
+    TS_ASSERT_DELTA(weak_sigi, 8.37, 0.1);
   }
 
   void test_integrateWeakPeakWithBackground() {
@@ -227,11 +228,11 @@ public:
 
     // Check the fraction of the peak that is contained within a "standard core"
     // the standard core is just the sigma in each direction
-    TS_ASSERT_DELTA(frac, 0.8363, 0.0001);
+    TS_ASSERT_DELTA(frac, 0.8284, 0.0001);
 
     // Check the integrated intensity for a strong peak is close to what we set
     // it to be when generating the peak
-    TS_ASSERT_DELTA(strong_inti, numStrongEvents, 15);
+    TS_ASSERT_DELTA(strong_inti, numStrongEvents, 600);
     TS_ASSERT_DELTA(strong_sigi, 100, 0.1);
 
     // Now integrate weak peak using the parameters we got from the strong peak
@@ -244,7 +245,7 @@ public:
     // core. This is not exactly the same because of the weighting from the
     // strong peak
     TS_ASSERT_DELTA(weak_inti, numWeakEvents, 35);
-    TS_ASSERT_DELTA(weak_sigi, 12.5, 0.1);
+    TS_ASSERT_DELTA(weak_sigi, 8.62, 0.1);
   }
 
   void test_estimateSignalToNoiseRatioInPerfectCase() {
@@ -276,6 +277,7 @@ public:
     params.backgroundInnerRadius = 0.5;
     params.backgroundOuterRadius = 0.8;
     params.regionRadius = 0.5;
+    params.specifySize = true;
 
     const auto ratio1 = integrator.estimateSignalToNoiseRatio(params, peak_1);
     const auto ratio2 = integrator.estimateSignalToNoiseRatio(params, peak_2);
@@ -316,6 +318,7 @@ public:
     params.backgroundInnerRadius = 0.5;
     params.backgroundOuterRadius = 0.8;
     params.regionRadius = 0.5;
+    params.specifySize = true;
 
     const auto ratio1 = integrator.estimateSignalToNoiseRatio(params, peak_1);
     const auto ratio2 = integrator.estimateSignalToNoiseRatio(params, peak_2);
