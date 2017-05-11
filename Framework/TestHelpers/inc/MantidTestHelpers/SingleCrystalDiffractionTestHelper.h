@@ -17,31 +17,41 @@ namespace SingleCrystalDiffractionTestHelper {
 class WorkspaceBuilder {
 
 public:
-  WorkspaceBuilder() : m_numPixels(0), m_totalNPixels(0),
-    m_outputAsHistogram(false), m_generator(std::random_device()()) {};
+  WorkspaceBuilder()
+      : m_numPixels(0), m_totalNPixels(0), m_outputAsHistogram(false),
+        m_generator(std::random_device()()){};
 
   /// Set the total number of peaks to use
   void setNumPixels(const int numPixels);
   /// Set whether to create an event workspace or a histogram workspace
-  void outputAsHistogram(const bool outputAsHistogram)
-  { m_outputAsHistogram = outputAsHistogram; };
+  void outputAsHistogram(const bool outputAsHistogram) {
+    m_outputAsHistogram = outputAsHistogram;
+  };
   /// Set the rebin parameters to use
-  void setRebinParameters(const std::vector<double>& rebinParams)
-  { m_rebinParams = rebinParams; }
-  void addBackground(const bool useBackground)
-  { m_useBackground = useBackground; }
+  void setRebinParameters(const std::vector<double> &rebinParams) {
+    m_rebinParams = rebinParams;
+  }
+  void addBackground(const bool useBackground) {
+    m_useBackground = useBackground;
+  }
   /// Set the parameters for the uniform background
-  void setBackgroundParameters(const int nEvents, const double detRange, const double tofRange)
-  { m_backgroundParameters = std::make_tuple(nEvents, detRange, tofRange); }
+  void setBackgroundParameters(const int nEvents, const double detRange,
+                               const double tofRange) {
+    m_backgroundParameters = std::make_tuple(nEvents, detRange, tofRange);
+  }
   /// Set the random seed for generating events
   void setRandomSeed(const int seed) { m_generator.seed(seed); }
   /// Add a HKL peak to the diffraction dataset
-  void addPeakByHKL(const Mantid::Kernel::V3D& hkl, const int numEvents, const std::tuple<double, double, double>& sigmas);
+  void addPeakByHKL(const Mantid::Kernel::V3D &hkl, const int numEvents,
+                    const std::tuple<double, double, double> &sigmas);
   /// Make a tuple of event workspace and peaks workspace
-  std::tuple<Mantid::API::MatrixWorkspace_sptr, Mantid::DataObjects::PeaksWorkspace_sptr> build();
+  std::tuple<Mantid::API::MatrixWorkspace_sptr,
+             Mantid::DataObjects::PeaksWorkspace_sptr>
+  build();
 
 private:
-  using HKLPeakDescriptor = std::tuple<Mantid::Kernel::V3D, int, std::tuple<double, double, double>>;
+  using HKLPeakDescriptor =
+      std::tuple<Mantid::Kernel::V3D, int, std::tuple<double, double, double>>;
 
   /// Create a dummy instrument
   void createInstrument();
@@ -54,7 +64,7 @@ private:
   /// Create peaks at the requested HKL positions
   void createPeaks();
   /// Create a single HKL peak in the event workspace
-  void createPeak(const HKLPeakDescriptor& descriptor);
+  void createPeak(const HKLPeakDescriptor &descriptor);
   /// Create a flat background for the workspace
   void createBackground(const int index);
   /// Rebin the event workspace to a histogram workspace
@@ -93,7 +103,6 @@ private:
   /// Random generator for making events
   std::mt19937 m_generator;
 };
-
 }
 }
 

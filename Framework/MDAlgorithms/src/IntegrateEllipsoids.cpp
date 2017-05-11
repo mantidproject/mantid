@@ -175,7 +175,7 @@ void IntegrateEllipsoids::qListFromHistoWS(Integrate3DEvents &integrator,
         if (hkl_integ)
           qVec = UBinv * qVec;
 
-        if(isnan(qVec[0]) || isnan(qVec[1]) || isnan(qVec[2]))
+        if (isnan(qVec[0]) || isnan(qVec[1]) || isnan(qVec[2]))
           continue;
         // Account for counts in histograms by increasing the qList with the
         // same q-point

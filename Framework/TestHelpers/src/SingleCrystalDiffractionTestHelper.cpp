@@ -27,7 +27,7 @@ namespace SingleCrystalDiffractionTestHelper {
 
 void WorkspaceBuilder::setNumPixels(const int numPixels) {
   m_numPixels = numPixels;
-  m_totalNPixels = numPixels*numPixels;
+  m_totalNPixels = numPixels * numPixels;
 }
 
 /** Add a peak to the data set to be generated
@@ -43,7 +43,9 @@ void WorkspaceBuilder::setNumPixels(const int numPixels) {
  * @param numEvents :: the number of events to create for the peak
  * @param sigmas :: tuple controlling the distribution of events
  */
-void WorkspaceBuilder::addPeakByHKL(const V3D &hkl, const int numEvents, const std::tuple<double, double, double> &sigmas) {
+void WorkspaceBuilder::addPeakByHKL(
+    const V3D &hkl, const int numEvents,
+    const std::tuple<double, double, double> &sigmas) {
   m_peakDescriptors.emplace_back(hkl, numEvents, sigmas);
 }
 
@@ -58,14 +60,15 @@ void WorkspaceBuilder::addPeakByHKL(const V3D &hkl, const int numEvents, const s
  *
  * @return a tuple containing a matrix workspace and a peaks workspace
  */
-std::tuple<MatrixWorkspace_sptr, PeaksWorkspace_sptr> WorkspaceBuilder::build() {
+std::tuple<MatrixWorkspace_sptr, PeaksWorkspace_sptr>
+WorkspaceBuilder::build() {
   createInstrument();
   createPeaksWorkspace();
   createEventWorkspace();
   createNeighbourSearch();
   createPeaks();
 
-  if(m_outputAsHistogram)
+  if (m_outputAsHistogram)
     rebinWorkspace();
 
   return std::make_tuple(m_workspace, m_peaksWorkspace);
@@ -78,10 +81,9 @@ std::tuple<MatrixWorkspace_sptr, PeaksWorkspace_sptr> WorkspaceBuilder::build() 
  *
  */
 void WorkspaceBuilder::createInstrument() {
-  m_instrument =
-      ComponentCreationHelper::createTestInstrumentRectangular(
-          1 /*num_banks*/, m_numPixels /*pixels in each direction yields n by n*/,
-          0.01, 1.0);
+  m_instrument = ComponentCreationHelper::createTestInstrumentRectangular(
+      1 /*num_banks*/, m_numPixels /*pixels in each direction yields n by n*/,
+      0.01, 1.0);
 }
 
 /** Create an empty peaks workspace
@@ -110,7 +112,7 @@ void WorkspaceBuilder::createEventWorkspace() {
   m_eventWorkspace = boost::make_shared<EventWorkspace>();
   m_eventWorkspace->setInstrument(m_instrument);
   m_eventWorkspace->initialize(m_totalNPixels /*n spectra*/, 3 /* x-size */,
-                      3 /* y-size */);
+                               3 /* y-size */);
   m_eventWorkspace->getAxis(0)->setUnit("TOF");
   // Give the spectra-detector mapping for all event lists
   for (int i = 0; i < m_totalNPixels; ++i) {
@@ -127,7 +129,7 @@ void WorkspaceBuilder::createEventWorkspace() {
  */
 void WorkspaceBuilder::createPeaks() {
   int index = 0;
-  for (const auto& descriptor : m_peakDescriptors) {
+  for (const auto &descriptor : m_peakDescriptors) {
     createPeak(descriptor);
     if (m_useBackground)
       createBackground(index);
@@ -176,14 +178,13 @@ void WorkspaceBuilder::createPeak(const HKLPeakDescriptor &descriptor) {
     const auto yOffset = yDist(m_generator);
     const auto tof = tofDist(m_generator);
 
-    const auto pos = V3D(detPos[0]+xOffset, detPos[1] + yOffset, detPos[2]);
-    const auto result = m_detectorSearcher->findNearest(Eigen::Vector3d(pos[0], pos[1], pos[2]));
+    const auto pos = V3D(detPos[0] + xOffset, detPos[1] + yOffset, detPos[2]);
+    const auto result = m_detectorSearcher->findNearest(
+        Eigen::Vector3d(pos[0], pos[1], pos[2]));
     const auto index = std::get<1>(result[0]);
     auto &el = m_eventWorkspace->getSpectrum(index);
     el.addEventQuickly(TofEvent(tof));
   }
-
-
 }
 
 /** Create a uniform background around each peak in the workspace
@@ -195,7 +196,7 @@ void WorkspaceBuilder::createPeak(const HKLPeakDescriptor &descriptor) {
  * @param index :: index of the peak to create a uniform background for
  */
 void WorkspaceBuilder::createBackground(const int index) {
-  const auto& peak = m_peaksWorkspace->getPeak(index);
+  const auto &peak = m_peaksWorkspace->getPeak(index);
   const auto detectorId = peak.getDetectorID();
   const auto tofExact = peak.getTOF();
   const auto &info = m_eventWorkspace->detectorInfo();
@@ -205,9 +206,12 @@ void WorkspaceBuilder::createBackground(const int index) {
   const auto backgroundDetSize = std::get<1>(m_backgroundParameters);
   const auto backgroundTOFSize = std::get<2>(m_backgroundParameters);
 
-  std::uniform_real_distribution<> backgroundXDist(-backgroundDetSize, backgroundDetSize);
-  std::uniform_real_distribution<> backgroundYDist(-backgroundDetSize, backgroundDetSize);
-  std::uniform_real_distribution<> backgroundTOFDist(tofExact-backgroundTOFSize, tofExact+backgroundTOFSize);
+  std::uniform_real_distribution<> backgroundXDist(-backgroundDetSize,
+                                                   backgroundDetSize);
+  std::uniform_real_distribution<> backgroundYDist(-backgroundDetSize,
+                                                   backgroundDetSize);
+  std::uniform_real_distribution<> backgroundTOFDist(
+      tofExact - backgroundTOFSize, tofExact + backgroundTOFSize);
 
   for (int i = 0; i < nBackgroundEvents; ++i) {
     const auto xOffset = backgroundXDist(m_generator);
@@ -215,7 +219,8 @@ void WorkspaceBuilder::createBackground(const int index) {
     const auto tof = backgroundTOFDist(m_generator);
 
     const auto pos = V3D(detPos[0] + xOffset, detPos[1] + yOffset, detPos[2]);
-    const auto result = m_detectorSearcher->findNearest(Eigen::Vector3d(pos[0], pos[1], pos[2]));
+    const auto result = m_detectorSearcher->findNearest(
+        Eigen::Vector3d(pos[0], pos[1], pos[2]));
     const auto index = std::get<1>(result[0]);
 
     auto &el = m_eventWorkspace->getSpectrum(index);
@@ -223,12 +228,11 @@ void WorkspaceBuilder::createBackground(const int index) {
   }
 }
 
-
 /** Create a KD-Tree of detector positions that can be used to find the closest
  * detector to a given event position
  */
 void WorkspaceBuilder::createNeighbourSearch() {
-  const auto& info = m_eventWorkspace->detectorInfo();
+  const auto &info = m_eventWorkspace->detectorInfo();
   std::vector<Eigen::Vector3d> points;
   for (size_t i = 0; i < info.size(); ++i) {
     const auto pos = info.position(i);
@@ -250,6 +254,5 @@ void WorkspaceBuilder::rebinWorkspace() {
   rebinAlg->execute();
   m_workspace = rebinAlg->getProperty("OutputWorkspace");
 }
-
 }
 }
