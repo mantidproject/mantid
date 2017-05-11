@@ -54,24 +54,29 @@ public:
     TS_ASSERT(allowed & IndexType::WorkspaceIndex);
   }
 
-  void testCorrectTypeReturned() {
+  void testCorrectTypeReturnedWhenSetWithString() {
     IndexTypeProperty prop(IndexType::SpectrumNumber |
                            IndexType::WorkspaceIndex);
 
     prop = "SpectrumNumber";
 
     TS_ASSERT(prop.selectedType() & IndexType::SpectrumNumber);
+
+    prop = "WorkspaceIndex";
+
+    TS_ASSERT(prop.selectedType() & IndexType::WorkspaceIndex);
   }
 
-  void testCorrectTypeReturnedWithSingleType() {
-    IndexTypeProperty prop(IndexType::WorkspaceIndex);
+  void testCorrectTypeReturnedWhenSetWithIndexType() {
+    IndexTypeProperty prop(IndexType::SpectrumNumber);
+
+    prop = IndexType::SpectrumNumber;
+
+    TS_ASSERT(prop.selectedType() & IndexType::SpectrumNumber);
+
+    prop = IndexType::WorkspaceIndex;
 
     TS_ASSERT(prop.selectedType() & IndexType::WorkspaceIndex);
-
-    prop = "SpectrumNumber";
-
-    TS_ASSERT(prop.selectedType() & IndexType::WorkspaceIndex);
-    TS_ASSERT(!(prop.selectedType() & IndexType::SpectrumNumber));
   }
 };
 

@@ -1,3 +1,6 @@
+#ifndef MANTIDAPI_WORKSPACEPROPERTY_TCC
+#define MANTIDAPI_WORKSPACEPROPERTY_TCC
+
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/Workspace.h"
@@ -464,3 +467,5 @@ void WorkspaceProperty<TYPE>::retrieveWorkspaceFromADS() {
 
 } // namespace API
 } // namespace Mantid
+
+#endif //MANTIDAPI_WORKSPACEPROPERTY_TCC

@@ -8,7 +8,7 @@
 #include "MantidAPI/Workspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
 
-// WorkspaceProperty implementation
+// WorkspacePropertyWithIndex implementation
 #include "MantidAPI/WorkspacePropertyWithIndex.tcc"
 
 namespace Mantid {

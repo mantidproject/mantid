@@ -47,7 +47,9 @@ public:
 
   bool isMultipleSelectionAllowed() override;
 
-  std::string &operator=(const std::string &value) override;
+  using PropertyWithValue<std::string>::operator=;
+
+  std::string &operator=(API::IndexType type);
 
 private:
   std::vector<std::string> m_allowedValues;

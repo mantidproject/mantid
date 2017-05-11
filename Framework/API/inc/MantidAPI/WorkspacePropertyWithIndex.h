@@ -2,12 +2,14 @@
 #define MANTID_API_WORKSPACEPROPERTYWITHINDEX_H_
 
 #include "MantidAPI/WorkspaceProperty.h"
+#include <MantidIndexing/GlobalSpectrumIndex.h>
 #include <MantidIndexing/SpectrumIndexSet.h>
+#include <MantidIndexing/SpectrumNumber.h>
 #include <MantidKernel/ArrayProperty.h>
 #include <algorithm>
 #include <boost/shared_ptr.hpp>
 #include <memory>
-#include <utility>
+#include <tuple>
 #include <vector>
 
 namespace Mantid {
@@ -56,12 +58,17 @@ public:
   std::string isValid() const override;
 
   bool operator==(const WorkspacePropertyWithIndex<TYPE> &rhs);
+  WorkspacePropertyWithIndex &operator=(
+      const std::tuple<boost::shared_ptr<TYPE>, std::string, std::vector<int>>
+          &rhs);
+  WorkspacePropertyWithIndex &operator=(
+      const std::tuple<boost::shared_ptr<TYPE>, std::string, std::string> &rhs);
   WorkspacePropertyWithIndex &
   operator=(const WorkspacePropertyWithIndex<TYPE> &rhs);
   WorkspacePropertyWithIndex &
   operator+=(WorkspacePropertyWithIndex<TYPE> const *rhs);
 
-  operator const std::pair<boost::shared_ptr<TYPE>,
+  operator const std::tuple<boost::shared_ptr<TYPE>,
                            Indexing::SpectrumIndexSet>() const;
 
   WorkspacePropertyWithIndex *clone() const override;

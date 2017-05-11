@@ -1,10 +1,14 @@
+#ifndef MANTIDAPI_WORKSPACEPROPERTYWITHINDEX_TCC
+#define MANTIDAPI_WORKSPACEPROPERTYWITHINDEX_TCC
+
 #include "MantidAPI/IndexTypeProperty.h"
 #include "MantidAPI/WorkspacePropertyWithIndex.h"
 #include <MantidAPI/MatrixWorkspace.h>
-#include <MantidIndexing/GlobalSpectrumIndex.h>
 #include <MantidIndexing/IndexInfo.h>
 #include <MantidKernel/Property.h>
 #include <MantidKernel/make_unique.h>
+
+#include "MantidAPI/WorkspaceProperty.tcc"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::Indexing;
@@ -15,8 +19,7 @@ namespace API {
 template <typename TYPE>
 WorkspacePropertyWithIndex<TYPE>::WorkspacePropertyWithIndex(
     const int indexType, const std::string &wsName, IValidator_sptr validator)
-    : WorkspaceProperty<TYPE>("InputWorkspaceWithIndex", wsName,
-                              Direction::Input),
+    : WorkspaceProperty<TYPE>("InputWorkspace", wsName, Direction::Input),
       m_indexListProp(
           make_unique<ArrayProperty<int>>("indices", Direction::Output)),
       m_indexTypeProp(make_unique<IndexTypeProperty>(indexType)) {
@@ -62,6 +65,39 @@ operator==(const WorkspacePropertyWithIndex<TYPE> &rhs) {
 
 template <typename TYPE>
 WorkspacePropertyWithIndex<TYPE> &WorkspacePropertyWithIndex<TYPE>::
+operator=(const std::tuple<boost::shared_ptr<TYPE>, std::string,
+                           std::vector<int>> &rhs) {
+  boost::shared_ptr<TYPE> ws;
+  std::string type;
+  std::vector<int> list;
+
+  std::tie(ws, type, list) = rhs;
+
+  *this = ws;
+  *this->m_indexTypeProp.get() = type;
+  *this->m_indexListProp.get() = list;
+
+  return *this;
+}
+
+template <typename TYPE>
+WorkspacePropertyWithIndex<TYPE> &WorkspacePropertyWithIndex<TYPE>::operator=(
+    const std::tuple<boost::shared_ptr<TYPE>, std::string, std::string> &rhs) {
+  boost::shared_ptr<TYPE> ws;
+  std::string type;
+  std::string list;
+
+  std::tie(ws, type, list) = rhs;
+
+  *this = ws;
+  *this->m_indexTypeProp.get() = type;
+  m_indexListProp->setValue(list);
+
+  return *this;
+}
+
+template <typename TYPE>
+WorkspacePropertyWithIndex<TYPE> &WorkspacePropertyWithIndex<TYPE>::
 operator=(const WorkspacePropertyWithIndex<TYPE> &rhs) {
   if (&rhs == this)
     return *this;
@@ -90,7 +126,7 @@ WorkspacePropertyWithIndex<TYPE>::clone() const {
 
 template <typename TYPE>
 WorkspacePropertyWithIndex<TYPE>::
-operator const std::pair<boost::shared_ptr<TYPE>, SpectrumIndexSet>() const {
+operator const std::tuple<boost::shared_ptr<TYPE>, SpectrumIndexSet>() const {
   auto wksp = getWorkspace();
   SpectrumIndexSet indices = this->getIndices();
   return std::make_pair(boost::dynamic_pointer_cast<TYPE>(wksp), indices);
@@ -107,9 +143,9 @@ const SpectrumIndexSet WorkspacePropertyWithIndex<TYPE>::getIndices() const {
   const auto &indexInfo = matWs->indexInfo();
   std::vector<int> list = this->m_indexListProp->operator()();
 
-  //If no indices provided, then assume all
-  if (list.size() == 0) 
-	  return indexInfo.makeIndexSet();
+  // If no indices provided, then assume all
+  if (list.size() == 0)
+    return indexInfo.makeIndexSet();
 
   SpectrumIndexSet indexSet(list.size());
 
@@ -130,3 +166,4 @@ const SpectrumIndexSet WorkspacePropertyWithIndex<TYPE>::getIndices() const {
 }
 } // namespace API
 } // namespace Mantid
+#endif // MANTIDAPI_WORKSPACEPROPERTYWITHINDEX_TCC

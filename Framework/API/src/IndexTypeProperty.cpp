@@ -50,12 +50,20 @@ std::vector<std::string> IndexTypeProperty::allowedValues() const {
 
 bool IndexTypeProperty::isMultipleSelectionAllowed() { return true; }
 
-std::string &IndexTypeProperty::operator=(const std::string &value) {
-  // If there is only one allowed value, this only need be set once.
-  if (m_allowedValues.size() == 1)
-    return m_value;
-  else
-    return PropertyWithValue<std::string>::operator=(value);
+std::string &IndexTypeProperty::operator=(API::IndexType type) {
+  std::string val;
+
+  switch (type) {
+  case IndexType::SpectrumNumber:
+    val = "SpectrumNumber";
+    break;
+  case IndexType::WorkspaceIndex:
+    val = "WorkspaceIndex";
+    break;
+  }
+
+  return *this = val;
 }
+
 } // namespace API
 } // namespace Mantid
