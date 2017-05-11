@@ -24,6 +24,8 @@
 #include "MantidQtAPI/MantidAlgorithmMetatype.h"
 #include "MantidQtAPI/QwtWorkspaceSpectrumData.h"
 
+#include "MantidPlotUtilities.h"
+
 #include <Poco/NObserver.h>
 
 #include <QApplication>
@@ -633,6 +635,12 @@ private:
                              const bool plotDist, int &row, int &col,
                              const QString &wsName,
                              const std::set<int> &spectra);
+
+  /// Get log values and put into a curve spec list
+  void putLogsIntoCurveSpecs(std::vector<CurveSpec> & curveSpecList,
+    const QMultiMap<QString, int> &toPlot, 
+    const QString &log, 
+    const std::set<double> &customLogValues = std::set<double>());
 
   // Private variables
 

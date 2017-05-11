@@ -12,7 +12,6 @@
 #include "MantidMatrixCurve.h"
 #include "MantidQtMantidWidgets/FitPropertyBrowser.h"
 #include "MantidQtMantidWidgets/MantidWSIndexDialog.h"
-#include "MantidPlotUtilities.h"
 #include "MantidSampleLogDialog.h"
 #include "MantidSampleMaterialDialog.h"
 #include "MantidTable.h"
@@ -3109,42 +3108,8 @@ MultiLayer *MantidUI::plot1D(const QMultiMap<QString, int> &toPlot,
     plotAsDistribution = (distr == MantidQt::DistributionTrue);
   }
 
-  // Try to store log values, if needed, and prepare for sorting.
   vector<CurveSpec> curveSpecList;
-  int i = 0;
-  for (QMultiMap<QString, int>::const_iterator it = toPlot.begin();
-       it != toPlot.end(); ++it) {
-    CurveSpec curveSpec;
-
-    try {
-      if (!log.isEmpty()) { // Get log value from workspace
-        if (!customLogValues.empty()) {
-          curveSpec.logVal = getSingleWorkspaceLogValue(i++, customLogValues);
-        } else {
-          MatrixWorkspace_const_sptr workspace =
-              AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-                  it.key().toStdString());
-          curveSpec.logVal = getSingleWorkspaceLogValue(1, workspace, log);
-        }
-      } else {
-        curveSpec.logVal = 0.1234; // This should not be used.
-      }
-      curveSpec.wsName = it.key();
-      curveSpec.index = it.value();
-      curveSpecList.push_back(curveSpec);
-
-    } catch (Mantid::Kernel::Exception::NotFoundError &) {
-      g_log.warning() << "Workspace " << it.key().toStdString()
-                      << " not found\n";
-    } catch (std::exception &ex) {
-      g_log.warning() << ex.what() << '\n';
-    }
-  }
-
-  // Sort curves, if log values are used
-  if (!log.isEmpty()) {
-    sort(curveSpecList.begin(), curveSpecList.end(), byLogValue);
-  }
+  putLogsIntoCurveSpecs(curveSpecList, toPlot, log, customLogValues);
 
   // Add curves to the plot
   Graph *g = ml->activeGraph();
@@ -3190,6 +3155,60 @@ MultiLayer *MantidUI::plot1D(const QMultiMap<QString, int> &toPlot,
   ml->maybeNeedToClose();
 
   return ml;
+}
+
+/* Get the log values and put into a curve spec list in preparation of
+*  the creation of the curves
+*  @param curveSpecList :: list of curve specs to recieve the logs
+*  @param toPlot :: workspaces to plot
+*  @param log :: log value
+*  @param customLogValues :: custom log values
+*/
+void MantidUI::putLogsIntoCurveSpecs(std::vector<CurveSpec> & curveSpecList,
+  const QMultiMap<QString, int> &toPlot,
+  const QString &log,
+  const std::set<double> &customLogValues)
+{
+  // Try to store log values, if needed, and prepare for sorting.
+  int i = 0;
+  for (QMultiMap<QString, int>::const_iterator it = toPlot.begin();
+    it != toPlot.end(); ++it) {
+    CurveSpec curveSpec;
+
+    try {
+      if (!log.isEmpty()) { // Get log value from workspace
+        if (!customLogValues.empty()) {
+          curveSpec.logVal = getSingleWorkspaceLogValue(i++, customLogValues);
+        }
+        else {
+          MatrixWorkspace_const_sptr workspace =
+            AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+              it.key().toStdString());
+          curveSpec.logVal = getSingleWorkspaceLogValue(1, workspace, log);
+        }
+      }
+      else {
+        curveSpec.logVal = 0.1234; // This should not be used.
+      }
+      curveSpec.wsName = it.key();
+      curveSpec.index = it.value();
+      curveSpecList.push_back(curveSpec);
+
+    }
+    catch (Mantid::Kernel::Exception::NotFoundError &) {
+      g_log.warning() << "Workspace " << it.key().toStdString()
+        << " not found\n";
+    }
+    catch (std::exception &ex) {
+      g_log.warning() << ex.what() << '\n';
+    }
+  }
+
+  // Sort curves, if log values are used
+  if (!log.isEmpty()) {
+    sort(curveSpecList.begin(), curveSpecList.end(), byLogValue);
+  }
+
 }
 
 /**
