@@ -101,14 +101,10 @@ Integrate3DEvents::integrateStrongPeak(const IntegrationParameters &params,
     sigmas.push_back(stdDev(events, eigen_vectors[i], params.regionRadius));
   }
 
-  bool invalid_peak = false;
-  for (int i = 0; i < 3; i++) {
-    if ((std::isnan)(sigmas[i])) {
-      invalid_peak = true;
-    } else if (sigmas[i] <= 0) {
-      invalid_peak = true;
-    }
-  }
+  bool invalid_peak =
+      std::any_of(sigmas.cbegin(), sigmas.cend(), [](const double sigma) {
+        return std::isnan(sigma) || sigma <= 0;
+      });
 
   if (invalid_peak)
     return std::make_pair(boost::make_shared<NoShape>(),
@@ -404,14 +400,10 @@ Integrate3DEvents::ellipseIntegrateEvents(
     sigmas.push_back(stdDev(some_events, eigen_vectors[i], m_radius));
   }
 
-  bool invalid_peak = false;
-  for (int i = 0; i < 3; i++) {
-    if ((std::isnan)(sigmas[i])) {
-      invalid_peak = true;
-    } else if (sigmas[i] <= 0) {
-      invalid_peak = true;
-    }
-  }
+  bool invalid_peak =
+      std::any_of(sigmas.cbegin(), sigmas.cend(), [](const double sigma) {
+        return std::isnan(sigma) || sigma <= 0;
+      });
 
   if (invalid_peak)                       // if data collapses to a line or
   {                                       // to a plane, the volume of the
