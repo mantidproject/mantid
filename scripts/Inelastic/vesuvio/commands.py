@@ -118,6 +118,8 @@ def fit_tof_iteration(sample_data, container_data, runs, flags):
     chi2_values = []
     fit_workspaces = []
     data_workspaces = []
+    result_workspaces = []
+    group_name = runs + '_result'
     for index in range(num_spec):
         if isinstance(profiles_strs, list):
             profiles = profiles_strs[index]
@@ -215,8 +217,6 @@ def fit_tof_iteration(sample_data, container_data, runs, flags):
 
         # Process spectrum group
         # Note the ordering of operations here gives the order in the WorkspaceGroup
-        group_name = runs + '_iteration_1'
-
         output_workspaces = []
         fit_workspaces.append(linear_correction_fit_params_name)
         data_workspaces.append(fit_ws_name)
@@ -227,13 +227,10 @@ def fit_tof_iteration(sample_data, container_data, runs, flags):
             ms.UnGroupWorkspace(corrections_args["CorrectionWorkspaces"])
             ms.UnGroupWorkspace(corrections_args["CorrectedWorkspaces"])
 
-        result_workspaces = []
         for workspace in output_workspaces:
-            n = workspace.split('_')
-            name = '_'.join(n[:2] + n[-3:])
+
             group_name = runs + '_' + '_'.join(n[4:6])
             result_workspaces.append(name)
-            # ms.CloneWorkspace(InputWorkspace=workspace, OutputWorkspace=workspace + 'clone')
             if index == 0:
                 ms.RenameWorkspace(InputWorkspace=workspace, OutputWorkspace=name)
             else:
