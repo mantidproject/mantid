@@ -1683,10 +1683,9 @@ void Algorithm::execNonMaster() {
     }
   }
   throw std::runtime_error(
-      "Algorithm with " +
+      "Attempt to run algorithm with " +
       Parallel::toString(Parallel::ExecutionMode::MasterOnly) +
-      ": Automatic creation of dummy workspaces on non-master ranks not "
-      "possible.");
+      ": Execution in this mode not implemented.");
 }
 
 /** Get a (valid) execution mode for this algorithm.
