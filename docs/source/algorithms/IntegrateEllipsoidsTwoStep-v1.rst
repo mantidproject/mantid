@@ -90,22 +90,22 @@ Explanation of Inputs
    IntegrateEllipsoidsTwoStep algorithm regions map.
 
 -  If the *SpecifySize* option is selected, then the user MUST specify the
-  *PeakSize*, *BackgroundInnerSize* and *BackgroundOuterSize*. In this mode, the
-  algorithm is similar to the :ref:`algm-IntegratePeaksMD` algorithm. As shown
-  in the figure, these values determine the length of the major axis for the
-  ellipsoidal peak region, and of the inner and outer ellipsoids bounding the
-  background region. The same major axis lengths are used for all peaks, but the
-  lengths of the other two axes of the ellipsoids are adjusted based on the
-  standard deviations of the events in those directions. If *SpecifySize* is
-  false, then the major axis length for each peak will be set to include a range
-  of plus or minus three times the standard deviation of the events in that
-  direction. That is, *PeakSize* is set to three times the standard deviation in
-  the direction of the first principal axis. Also, in this case the
-  *BackgroundInnerSize* is set to the *PeakSize* and the *BackgroundOuterSize*
-  is set so that the background ellipsoidal shell has the same volume as the
-  peak ellipsoidal region. If specified by the user, these parameters must be
-  ordered correctly with: :math:`0 < PeakSize \leq BackgroundInnerSize` and
-  :math:`BackgroundInnerSize < BackgroundOuterSize \leq RegionRadius`
+   *PeakSize*, *BackgroundInnerSize* and *BackgroundOuterSize*. In this mode, the
+   algorithm is similar to the :ref:`algm-IntegratePeaksMD` algorithm. As shown
+   in the figure, these values determine the length of the major axis for the
+   ellipsoidal peak region, and of the inner and outer ellipsoids bounding the
+   background region. The same major axis lengths are used for all peaks, but the
+   lengths of the other two axes of the ellipsoids are adjusted based on the
+   standard deviations of the events in those directions. If *SpecifySize* is
+   false, then the major axis length for each peak will be set to include a range
+   of plus or minus three times the standard deviation of the events in that
+   direction. That is, *PeakSize* is set to three times the standard deviation in
+   the direction of the first principal axis. Also, in this case the
+   *BackgroundInnerSize* is set to the *PeakSize* and the *BackgroundOuterSize*
+   is set so that the background ellipsoidal shell has the same volume as the
+   peak ellipsoidal region. If specified by the user, these parameters must be
+   ordered correctly with: :math:`0 < PeakSize \leq BackgroundInnerSize` and
+   :math:`BackgroundInnerSize < BackgroundOuterSize \leq RegionRadius`
 
 -  The top 1% of the background events are removed so that there are no
    intensity spikes near the edges.
