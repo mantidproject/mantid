@@ -139,13 +139,38 @@ void IntegrateEllipsoidsTwoStep::exec() {
 
   Progress prog(this, 0.5, 1.0, input_ws->getNumberHistograms());
 
-  const auto& UB = input_peak_ws->sample().getOrientedLattice().getUB();
-  auto UBinv = UB;
+  std::vector<Peak> &peaks = peak_ws->getPeaks();
+  size_t n_peaks = peak_ws->getNumberPeaks();
+  size_t indexed_count = 0;
+  std::vector<V3D> peak_q_list;
+  std::vector<V3D> hkl_vectors;
+  for (size_t i = 0; i < n_peaks; i++) // Note: we skip un-indexed peaks
+  {
+    V3D hkl(peaks[i].getH(), peaks[i].getK(), peaks[i].getL());
+    if (Geometry::IndexingUtils::ValidIndex(hkl, 1.0)) // use tolerance == 1 to
+                                                       // just check for (0,0,0)
+    {
+      peak_q_list.emplace_back(peaks[i].getQLabFrame());
+      V3D miller_ind(static_cast<double>(boost::math::iround<double>(hkl[0])),
+                     static_cast<double>(boost::math::iround<double>(hkl[1])),
+                     static_cast<double>(boost::math::iround<double>(hkl[2])));
+      hkl_vectors.push_back(miller_ind);
+      indexed_count++;
+    }
+  }
+
+  if (indexed_count < 3) {
+    throw std::runtime_error(
+        "At least three linearly independent indexed peaks are needed.");
+  }
+  // Get UB using indexed peaks and
+  // lab-Q vectors
+  Matrix<double> UB(3, 3, false);
+  Geometry::IndexingUtils::Optimize_UB(UB, hkl_vectors, peak_q_list);
+  Matrix<double> UBinv(UB);
   UBinv.Invert();
   UBinv *= (1.0 / (2.0 * M_PI));
 
-  std::vector<Peak> &peaks = peak_ws->getPeaks();
-  size_t n_peaks = peak_ws->getNumberPeaks();
   std::vector<std::pair<double, V3D>> qList;
   for (size_t i = 0; i < n_peaks; i++)
   {
@@ -201,7 +226,7 @@ void IntegrateEllipsoidsTwoStep::exec() {
     ++index;
   }
 
-  std::vector<std::pair<boost::shared_ptr<const Geometry::PeakShape>, std::pair<double, double>>> shapeLibrary;
+  std::vector<std::pair<boost::shared_ptr<const Geometry::PeakShape>, std::tuple<double, double, double>>> shapeLibrary;
 
   // Integrate strong peaks
   for (const auto& item : strongPeaks) {
@@ -248,7 +273,7 @@ void IntegrateEllipsoidsTwoStep::exec() {
 
     const auto libShape = shapeLibrary[static_cast<int>(strongIndex)];
     const auto shape = boost::dynamic_pointer_cast<const PeakShapeEllipsoid>(libShape.first);
-    const auto frac = libShape.second.first;
+    const auto frac = std::get<0>(libShape.second);
 
     g_log.notice() << "Weak peak will be adjusted by " << frac << "\n";
     IntegrationParameters params = makeIntegrationParameters(strongPeak.getQLabFrame());

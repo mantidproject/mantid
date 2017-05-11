@@ -192,7 +192,7 @@ public:
 
     for (int i = 0; i < 5; ++i) {
       TSM_ASSERT_DELTA("Wrong intensity for peak " + std::to_string(i),
-                       integratedPeaksWS->getPeak(i).getIntensity(), numEventsPerPeak, 300);
+                       integratedPeaksWS->getPeak(i).getIntensity(), numEventsPerPeak, 450);
 
     }
   }
@@ -243,7 +243,7 @@ public:
 
     for (int i = 0; i < 5; ++i) {
       TSM_ASSERT_DELTA("Wrong intensity for peak " + std::to_string(i),
-                       integratedPeaksWS->getPeak(i).getIntensity(), numEventsPerPeak, 600);
+                       integratedPeaksWS->getPeak(i).getIntensity(), numEventsPerPeak, 700);
     }
   }
 
@@ -315,7 +315,7 @@ public:
     TSM_ASSERT_DELTA("Wrong intensity for peak " + std::to_string(3),
                      integratedPeaksWS->getPeak(3).getIntensity(), numEventsPerWeakPeak, 100);
     TSM_ASSERT_DELTA("Wrong intensity for peak " + std::to_string(4),
-                     integratedPeaksWS->getPeak(4).getIntensity(), numEventsPerStrongPeak, 300);
+                     integratedPeaksWS->getPeak(4).getIntensity(), numEventsPerStrongPeak, 450);
     TSM_ASSERT_DELTA("Wrong intensity for peak " + std::to_string(5),
                      integratedPeaksWS->getPeak(5).getIntensity(), numEventsPerStrongPeak, 800);
   }

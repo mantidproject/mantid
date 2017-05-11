@@ -1,13 +1,16 @@
 #ifndef INTEGRATE_3D_EVENTS_H
 #define INTEGRATE_3D_EVENTS_H
 
-#include <vector>
-#include <boost/shared_ptr.hpp>
-#include <unordered_map>
 #include "MantidDataObjects/Peak.h"
 #include "MantidDataObjects/PeakShapeEllipsoid.h"
 #include "MantidKernel/V3D.h"
 #include "MantidKernel/Matrix.h"
+
+#include <boost/shared_ptr.hpp>
+
+#include <tuple>
+#include <unordered_map>
+#include <vector>
 
 namespace Mantid {
 namespace Geometry {
@@ -88,13 +91,13 @@ public:
       double &sigi);
 
   /// Find the net integrated intensity of a peak, using ellipsoidal volumes
-  std::pair<boost::shared_ptr<const Mantid::Geometry::PeakShape>, std::pair<double, double>> integrateStrongPeak(
+  std::pair<boost::shared_ptr<const Mantid::Geometry::PeakShape>, std::tuple<double, double, double>> integrateStrongPeak(
       const IntegrationParameters& params, const Kernel::V3D& peak_q, double &inti, double &sigi);
 
 
   boost::shared_ptr<const Geometry::PeakShape> integrateWeakPeak(
       const IntegrationParameters &params, Mantid::DataObjects::PeakShapeEllipsoid_const_sptr shape,
-      const std::pair<double, double>& libFrac, const Mantid::Kernel::V3D& peak_q, double &inti, double &sigi);
+      const std::tuple<double, double, double>& libPeak, const Mantid::Kernel::V3D& peak_q, double &inti, double &sigi);
 
   double estimateSignalToNoiseRatio(const IntegrationParameters& params, const Mantid::Kernel::V3D &center);
 
@@ -159,8 +162,6 @@ private:
   EventListMap m_event_lists; // hashtable with lists of events for each peak
   Kernel::DblMatrix m_UBinv;  // matrix mapping from Q to h,k,l
   double m_radius;            // size of sphere to use for events around a peak
-  std::vector<std::pair<double, Kernel::V3D>> m_events;
-
 };
 
 } // namespace MDAlgorithms

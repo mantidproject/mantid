@@ -159,7 +159,7 @@ public:
     double strong_inti, strong_sigi;
     auto result = integrator.integrateStrongPeak(params, peak_1, strong_inti, strong_sigi);
     const auto shape = boost::dynamic_pointer_cast<const PeakShapeEllipsoid>(result.first);
-    const auto frac = result.second.first;
+    const auto frac = std::get<0>(result.second);
 
     // Check the fraction of the peak that is contained within a "standard core"
     // the standard core is just the sigma in each direction
@@ -218,7 +218,7 @@ public:
     double strong_inti, strong_sigi;
     auto result = integrator.integrateStrongPeak(params, peak_1, strong_inti, strong_sigi);
     const auto shape = boost::dynamic_pointer_cast<const PeakShapeEllipsoid>(result.first);
-    const auto frac = result.second.first;
+    const auto frac = std::get<0>(result.second);
 
     // Check the fraction of the peak that is contained within a "standard core"
     // the standard core is just the sigma in each direction
