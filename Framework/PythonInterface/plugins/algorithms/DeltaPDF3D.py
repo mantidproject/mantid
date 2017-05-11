@@ -52,6 +52,8 @@ class DeltaPDF3D(PythonAlgorithm):
         self.setPropertySettings("SphereMin", condition)
         self.declareProperty(FloatArrayProperty("SphereMax", [Property.EMPTY_DBL], validator=val_min_zero), "Max Sphere")
         self.setPropertySettings("SphereMax", condition)
+        self.declareProperty("FillValue", Property.EMPTY_DBL, "Value to replace with outside sphere")
+        self.setPropertySettings("FillValue", condition)
 
         self.declareProperty("Convolution", True, "Apply convolution to fill in removed reflections")
         condition = EnabledWhenProperty("Convolution", PropertyCriterion.IsDefault)
@@ -71,6 +73,7 @@ class DeltaPDF3D(PythonAlgorithm):
         self.setPropertyGroup("CropSphere","Cropping to a sphere")
         self.setPropertyGroup("SphereMin","Cropping to a sphere")
         self.setPropertyGroup("SphereMax","Cropping to a sphere")
+        self.setPropertyGroup("FillValue","Cropping to a sphere")
 
         # Convolution
         self.setPropertyGroup("Convolution","Convolution")
@@ -198,11 +201,17 @@ class DeltaPDF3D(PythonAlgorithm):
                 if len(sphereMin)==1:
                     sphereMin = np.repeat(sphereMin, 3)
                 signal[Xs**2/sphereMin[0]**2 + Ys**2/sphereMin[1]**2 + Zs**2/sphereMin[2]**2 < 1]=np.nan
+
             sphereMax = self.getProperty("SphereMax").value
+
             if sphereMax[0] < Property.EMPTY_DBL:
                 if len(sphereMax)==1:
                     sphereMax = np.repeat(sphereMax, 3)
-                signal[Xs**2/sphereMax[0]**2 + Ys**2/sphereMax[1]**2 + Zs**2/sphereMax[2]**2 > 1]=np.nan
+                if self.getProperty("FillValue").value == Property.EMPTY_DBL:
+                    fill_value = np.nan
+                else:
+                    fill_value = self.getProperty("FillValue").value
+                signal[Xs**2/sphereMax[0]**2 + Ys**2/sphereMax[1]**2 + Zs**2/sphereMax[2]**2 > 1]=fill_value
 
         if self.getProperty("Convolution").value:
             progress.report("Convoluting signal")
