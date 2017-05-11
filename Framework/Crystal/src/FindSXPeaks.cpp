@@ -4,9 +4,11 @@
 #include "MantidCrystal/FindSXPeaks.h"
 #include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/DetectorInfo.h"
+#include "MantidAPI/WorkspaceUnitValidator.h"
+#include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidIndexing/IndexInfo.h"
-#include "MantidKernel/VectorHelper.h"
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/CompositeValidator.h"
 
 #include <unordered_map>
 #include <vector>
@@ -23,6 +25,7 @@ wsIndexToDetIds mapDetectorsToWsIndexes(const API::DetectorInfo &detectorInfo,
   const auto &detectorIds = detectorInfo.detectorIDs();
   wsIndexToDetIds indexToDetMapping;
 
+  indexToDetMapping.reserve(detectorIds.size());
   for (const auto detectorID : detectorIds) {
     auto detMapEntry = mapping.find(detectorID);
     if (detMapEntry == mapping.end()) {
@@ -61,9 +64,12 @@ FindSXPeaks::FindSXPeaks()
  *
  */
 void FindSXPeaks::init() {
+  auto wsValidation = boost::make_shared<CompositeValidator>();
+  wsValidation->add<HistogramValidator>();
+  wsValidation->add<WorkspaceUnitValidator>("TOF");
+
   declareProperty(make_unique<WorkspaceProperty<>>(
-                      "InputWorkspace", "", Direction::Input,
-                      boost::make_shared<HistogramValidator>()),
+                      "InputWorkspace", "", Direction::Input, wsValidation),
                   "The name of the Workspace2D to take as input");
   declareProperty("RangeLower", EMPTY_DBL(),
                   "The X value to search from (default 0)");
@@ -139,19 +145,28 @@ void FindSXPeaks::exec() {
   const auto &spectrumInfo = localworkspace->spectrumInfo();
   const auto &detectorInfo = localworkspace->detectorInfo();
 
-  const auto wsIndexToDetIdMap = mapDetectorsToWsIndexes(
-      detectorInfo, localworkspace->getDetectorIDToWorkspaceIndexMap());
+  const std::unordered_map<size_t, std::vector<detid_t>> wsIndexToDetIdMap =
+      mapDetectorsToWsIndexes(
+          detectorInfo, localworkspace->getDetectorIDToWorkspaceIndexMap());
 
   peakvector entries;
   entries.reserve(m_MaxWsIndex - m_MinWsIndex);
   // Count the peaks so that we can resize the peak vector at the end.
   PARALLEL_FOR_IF(Kernel::threadSafe(*localworkspace))
-  for (int i = static_cast<int>(m_MinWsIndex);
-       i <= static_cast<int>(m_MaxWsIndex); ++i) {
+  for (int wsIndex = static_cast<int>(m_MinWsIndex);
+       wsIndex <= static_cast<int>(m_MaxWsIndex); ++wsIndex) {
     PARALLEL_START_INTERUPT_REGION
+
+    // If no detector found / monitor, skip onto the next spectrum
+    const size_t wsIndexSize_t = static_cast<size_t>(wsIndex);
+    if (!spectrumInfo.hasDetectors(wsIndexSize_t) ||
+        spectrumInfo.isMonitor(wsIndexSize_t)) {
+      continue;
+    }
+
     // Retrieve the spectrum into a vector
-    const auto &X = localworkspace->x(i);
-    const auto &Y = localworkspace->y(i);
+    const auto &X = localworkspace->x(wsIndex);
+    const auto &Y = localworkspace->y(wsIndex);
 
     // Find the range [min,max]
     auto lowit = (m_MinRange == EMPTY_DBL())
@@ -191,27 +206,27 @@ void FindSXPeaks::exec() {
     double rightBinEdge = *std::next(leftBinPosition);
     double tof = 0.5 * (leftBinEdge + rightBinEdge);
 
-    // If no detector found, skip onto the next spectrum
-    if (!spectrumInfo.hasDetectors(static_cast<size_t>(i))) {
-      continue;
-    }
-    if (!spectrumInfo.hasUniqueDetector(i)) {
-      std::ostringstream sout;
-      sout << "Spectrum at workspace index " << i
-           << " has unsupported number of detectors.";
-      throw std::runtime_error(sout.str());
+    double phi = -999;
+    const size_t numDetectors = wsIndexToDetIdMap.at(wsIndex).size();
+    const auto &det = spectrumInfo.detector(wsIndexSize_t);
+    if (numDetectors == 1) {
+      phi = det.getPhi();
+    } else {
+      // Have to average the value for phi
+      auto detectorGroup = dynamic_cast<const Geometry::DetectorGroup *>(&det);
+      if (!detectorGroup) {
+        throw std::runtime_error("Could not cast to detector group");
+      }
+      detectorGroup->getPhi();
     }
 
-    const auto &det = spectrumInfo.detector(static_cast<size_t>(i));
-
-    double phi = det.getPhi();
     if (phi < 0) {
       phi += 2.0 * M_PI;
     }
 
-    std::vector<int> specs(1, i);
+    std::vector<int> specs(1, wsIndex);
 
-    SXPeak peak(tof, phi, *maxY, specs, i, spectrumInfo);
+    SXPeak peak(tof, phi, *maxY, specs, wsIndex, spectrumInfo);
     PARALLEL_CRITICAL(entries) { entries.push_back(peak); }
     progress.report();
     PARALLEL_END_INTERUPT_REGION
