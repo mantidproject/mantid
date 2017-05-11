@@ -539,12 +539,18 @@ class MainWindow(QtGui.QMainWindow):
             ui_dict['det_center'] = det_center_str
 
         # register and make it as a queue for last n opened/saved project
+        # FIXME/ISSUE/NOW/TODAY - This does not work.  Investigate!
         last_1_path = str(self.ui.label_last1Path.text())
         if last_1_path != project_file_name:
             self.ui.label_last3Path.setText(self.ui.label_last2Path.text())
             self.ui.label_last2Path.setText(self.ui.label_last1Path.text())
             self.ui.label_last1Path.setText(last_1_path)
         # END-IF
+
+        self._myControl.save_project(project_file_name, ui_dict)
+
+
+        # TODO/NOW/TODAY - Implement a pop-up dialog for this
 
         return
 

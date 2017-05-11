@@ -2585,7 +2585,7 @@ class CWSCDReductionControl(object):
 
         return True, scan_sum_list, error_message
 
-    def export_project(self, project_file_name, ui_dict):
+    def save_project(self, project_file_name, ui_dict):
         """ Export project
         - the data structure and information will be written to a ProjectManager file
         :param project_file_name:
