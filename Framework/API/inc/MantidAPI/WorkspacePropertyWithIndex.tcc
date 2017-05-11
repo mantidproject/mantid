@@ -19,7 +19,7 @@ namespace API {
 template <typename TYPE>
 WorkspacePropertyWithIndex<TYPE>::WorkspacePropertyWithIndex(
     const int indexType, const std::string &wsName, IValidator_sptr validator)
-    : WorkspaceProperty<TYPE>("InputWorkspace", wsName, Direction::Input),
+    : WorkspaceProperty<TYPE>("InputWorkspaceWithIndex", wsName, Direction::Input),
       m_indexListProp(
           make_unique<ArrayProperty<int>>("indices", Direction::Output)),
       m_indexTypeProp(make_unique<IndexTypeProperty>(indexType)) {

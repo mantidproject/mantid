@@ -9,11 +9,23 @@
 #include "MantidAPI/WorkspaceProperty.tcc"
 #include "MantidAPI/WorkspacePropertyWithIndex.h"
 #include "MantidAPI/WorkspacePropertyWithIndex.tcc"
-#include "MantidKernel/PropertyManagerDataService.h"
+#include "MantidKernel/PropertyManager.h"
+#include "MantidKernel/make_unique.h"
 #include <numeric>
 
 using namespace Mantid::API;
 using Mantid::API::WorkspacePropertyWithIndex;
+
+namespace {
+class PropertyManagerHelper : public PropertyManager {
+public:
+  PropertyManagerHelper() : PropertyManager() {}
+
+  using PropertyManager::declareProperty;
+  using PropertyManager::setProperty;
+  using PropertyManager::getPointerToProperty;
+};
+} // namespace
 
 using MatrixWorkspaceIndexProp = WorkspacePropertyWithIndex<MatrixWorkspace>;
 class WorkspacePropertyWithIndexTest : public CxxTest::TestSuite {
@@ -219,6 +231,28 @@ public:
     TS_ASSERT_EQUALS(indexSet[2], 3);
     TS_ASSERT_EQUALS(indexSet[3], 4);
     TS_ASSERT_EQUALS(indexSet[4], 8);
+  }
+
+  void testRetrievePropertyUsingPropertyManager() {
+    PropertyManagerHelper mgr;
+    mgr.declareProperty(Mantid::Kernel::make_unique<MatrixWorkspaceIndexProp>(
+        IndexType::WorkspaceIndex));
+    auto ws = WorkspaceFactory::Instance().create("WorkspaceTester", 10, 10, 9);
+    mgr.setProperty("InputWorkspaceWithIndex", ws);
+
+    MatrixWorkspace_sptr outWs;
+    SpectrumIndexSet indexSet(0);
+
+    std::tie(outWs, indexSet) =
+        std::tuple<MatrixWorkspace_sptr, SpectrumIndexSet>(
+            mgr.getProperty("InputWorkspaceWithIndex"));
+
+	TS_ASSERT_EQUALS(outWs, ws);
+
+	TS_ASSERT_EQUALS(indexSet.size(), 10);
+
+	for (int i = 0; i < indexSet.size(); i++)
+		TS_ASSERT_EQUALS(indexSet[i], i);
   }
 };
 
