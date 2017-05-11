@@ -550,6 +550,7 @@ class MainWindow(QtGui.QMainWindow):
 
         # TODO/NOW/TODAY - Implement a pop-up dialog for this
         print '[DB] Project has been saved to {0}'.format(project_file_name)
+        print '[DB...BAT] UI dict keys: {0}'.format(ui_dict)
 
         return
 
@@ -559,6 +560,9 @@ class MainWindow(QtGui.QMainWindow):
         :return:
         """
         project_file_name = str(QtGui.QFileDialog.getOpenFileName(self, 'Choose Project File', os.getcwd()))
+        if len(project_file_name) == 0:
+            # return if cancelled
+            return
 
         # make it as a queue for last n opened/saved project
         last_1_path = str(self.ui.label_last1Path.text())
@@ -2099,7 +2103,7 @@ class MainWindow(QtGui.QMainWindow):
         ui_dict = self._myControl.load_project(project_file_name)
 
         # get experiment number and IPTS number
-        exp_number = ui_dict['exp number']
+        exp_number = int(ui_dict['exp number'])
         self.ui.lineEdit_exp.setText(str(exp_number))
         if 'ipts' in ui_dict and ui_dict['ipts'] is not None:
             self.ui.lineEdit_iptsNumber.setText(str(ui_dict['ipts']))
@@ -2119,6 +2123,7 @@ class MainWindow(QtGui.QMainWindow):
             print '[Error] Some field cannot be found.'
 
         # set experiment configurations
+        print '[DB...BAT] ui dictionary keys: {0}'.format(ui_dict.keys())
         # set sample distance
         if 'det_sample_distance' in ui_dict and ui_dict['det_sample_distance'] is not None:
             det_sample_distance = float(ui_dict['det_sample_distance'])
@@ -2139,7 +2144,8 @@ class MainWindow(QtGui.QMainWindow):
             self.ui.lineEdit_infoDetCenter.setText('{0}, {1}'.format(center_row, center_col))
             self._myControl.set_detector_center(exp_number, center_row, center_col)
 
-        # TODO/ISSUE/NOW/TODAY - Shall pop out a dialog to notify the 
+        # TODO/ISSUE/NOW/TODAY - Shall pop out a dialog to notify the completion
+        print '[INFO] Project from file {0} is loaded.'.format(project_file_name)
 
         return
 
