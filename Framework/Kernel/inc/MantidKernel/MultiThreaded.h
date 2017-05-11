@@ -3,6 +3,7 @@
 
 #include "MantidKernel/DataItem.h"
 
+#include <atomic>
 #include <mutex>
 
 namespace Mantid {
