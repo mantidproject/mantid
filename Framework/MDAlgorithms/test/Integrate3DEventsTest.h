@@ -364,6 +364,7 @@ public:
                                  const double upper,
                                  const int countVariation = 3,
                                  const double step = 0.5, int seed = 1) {
+    const auto counts = static_cast<double>(countsPerQ);
     std::mt19937 gen;
     std::uniform_real_distribution<> d(-countVariation, countVariation);
     gen.seed(seed);
@@ -371,7 +372,7 @@ public:
     for (double i = lower; i < upper; i += step) {
       for (double j = lower; j < upper; j += step) {
         for (double k = lower; k < upper; k += step) {
-          event_Qs.emplace_back(countsPerQ + d(gen), V3D(i, j, k));
+          event_Qs.emplace_back(counts + d(gen), V3D(i, j, k));
         }
       }
     }
