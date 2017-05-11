@@ -144,7 +144,6 @@ Integrate3DEvents::integrateStrongPeak(const IntegrationParameters &params,
 
   std::vector<double> abcBackgroundOuterRadii, abcBackgroundInnerRadii;
   std::vector<double> peakRadii;
-  std::vector<double> coreRadii;
   for (int i = 0; i < 3; i++) {
     abcBackgroundOuterRadii.push_back(r3 * sigmas[i]);
     abcBackgroundInnerRadii.push_back(r2 * sigmas[i]);
@@ -372,29 +371,31 @@ bool Integrate3DEvents::correctForDetectorEdges(
     const V3D &peak_q, const std::vector<double> &axesRadii,
     const std::vector<double> &bkgInnerRadii,
     const std::vector<double> &bkgOuterRadii) {
+
+  if (E1Vecs.empty())
+      return true;
+
   double &r1 = radii[0], r2 = radii[1], r3 = radii[2];
-  if (!E1Vecs.empty()) {
-    double h3 = 1.0 - detectorQ(E1Vecs, peak_q, bkgOuterRadii);
-    // scaled from area of circle minus segment when r normalized to 1
-    double m3 = std::sqrt(
-        1.0 -
-        (std::acos(1.0 - h3) - (1.0 - h3) * std::sqrt(2.0 * h3 - h3 * h3)) /
-            M_PI);
-    double h1 = 1.0 - detectorQ(E1Vecs, peak_q, axesRadii);
-    // Do not use peak if edge of detector is inside integration radius
-    if (h1 > 0.0)
+  double h3 = 1.0 - detectorQ(E1Vecs, peak_q, bkgOuterRadii);
+  // scaled from area of circle minus segment when r normalized to 1
+  double m3 = std::sqrt(
+          1.0 -
+          (std::acos(1.0 - h3) - (1.0 - h3) * std::sqrt(2.0 * h3 - h3 * h3)) /
+          M_PI);
+  double h1 = 1.0 - detectorQ(E1Vecs, peak_q, axesRadii);
+  // Do not use peak if edge of detector is inside integration radius
+  if (h1 > 0.0)
       return false;
 
-    r3 *= m3;
-    if (r2 != r1) {
+  r3 *= m3;
+  if (r2 != r1) {
       double h2 = 1.0 - detectorQ(E1Vecs, peak_q, bkgInnerRadii);
       // scaled from area of circle minus segment when r normalized to 1
       double m2 = std::sqrt(
-          1.0 -
-          (std::acos(1.0 - h2) - (1.0 - h2) * std::sqrt(2.0 * h2 - h2 * h2)) /
+              1.0 -
+              (std::acos(1.0 - h2) - (1.0 - h2) * std::sqrt(2.0 * h2 - h2 * h2)) /
               M_PI);
       r2 *= m2;
-    }
   }
 
   return true;

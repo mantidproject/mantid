@@ -470,7 +470,6 @@ void IntegrateEllipsoidsTwoStep::qListFromHistoWS(Integrate3DEvents &integrator,
     MDTransfQ3D qConverter;
     qConverter.initialize(m_targWSDescr);
 
-    std::vector<double> buffer(DIMS);
     // get tof and counts
     const auto &xVals = wksp->points(i);
     const auto &yVals = wksp->counts(i);
