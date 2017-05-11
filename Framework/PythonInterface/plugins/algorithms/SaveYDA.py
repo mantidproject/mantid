@@ -21,7 +21,7 @@ class SaveYDA(PythonAlgorithm):
         return bin
 
     def category(self):
-        return 'DataHandling'
+        return 'DataHandling\\Text'
 
     def PyInit(self):
 
@@ -40,17 +40,14 @@ class SaveYDA(PythonAlgorithm):
 
         allowUn = 'MomentumTransfer'
         ws      = self.getProperty("InputWorkspace").value
-        ax      = ws.getAxis(1)
+        if ws:
+            ax = ws.getAxis(1)
 
-        self.log().debug(str(ax.getUnit().unitID()))
+            if not ax.isSpectra() and ax.getUnit().unitID() != allowUn:
+                issues["InputWorkspace"] = "Y axis is not 'Spectrum Axis' or 'Momentum Transfer'"
 
-        if not ax.isSpectra() and ax.getUnit().unitID() != allowUn:
-            issues["InputWorkspace"] = "Y axis is not 'Spectrum Axis' or 'Momentum Transfer'"
-
-        if not isinstance(ws, Workspace2D):
-            issues["InputWorkspace"] = "Input Workspace is not a Workspace2D"
-
-        self.log().debug(str(ax.isSpectra()))
+            if not isinstance(ws, Workspace2D):
+                issues["InputWorkspace"] = "Input Workspace is not a Workspace2D"
 
         return issues
 
@@ -72,13 +69,13 @@ class SaveYDA(PythonAlgorithm):
 
         metadata = CommentedMap()
 
-        metadata["format"] =  "yaml/frida 2.0"
-        metadata["type"]   = "gerneric tabular data"
+        metadata["format"] = "yaml/frida 2.0"
+        metadata["type"]   = "generic tabular data"
 
         hist = []
 
         if run.hasProperty('proposal_number'):
-            propn ="Proposal number " + run.getLogData("proposal_number").value
+            propn = "Proposal number " + run.getLogData("proposal_number").value
             hist.append(propn)
         else:
             self.log().warning("no proposal number found")

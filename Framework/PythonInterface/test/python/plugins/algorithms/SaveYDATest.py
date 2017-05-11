@@ -11,18 +11,14 @@ import unittest
 
 class SaveYDATest(unittest.TestCase):
 
-    propn = 3
-    propt = "PropTitle"
-    expt = "Experiment Team"
-    temperature = 100.0
-    Ei = 1.0
-    datax = [1, 2, 3, 4]
-    datay = [2.0, 3.0, 4.0]
-    _n_file = None
-    _n_ws = None
-    _no_sample_file = None
-
     def setUp(self):
+        self.propn = 3
+        self.propt = "PropTitle"
+        self.expt = "Experiment Team"
+        self.temperature = 100.0
+        self.Ei = 1.0
+        self.datax = range(1, 5)
+        self.datay = [2.0, 3.0, 4.0]
         self._n_ws = self._createWorkspace()
         self._n_file = self._file(self._n_ws, 'File')
         ws = self._createWorkspace(sample=False)
@@ -41,12 +37,12 @@ class SaveYDATest(unittest.TestCase):
 
         self.assertEqual(meta[0], "Meta:\n")
         self.assertEqual(meta[1], "    format: yaml/frida 2.0\n")
-        self.assertEqual(meta[2], "    type: gerneric tabular data\n")
+        self.assertEqual(meta[2], "    type: generic tabular data\n")
 
-    def test_history(self):
+    def test_history_all_samples(self):
         history = []
         for i in range(0, 8):
-            s= self._n_file.readline()
+            s = self._n_file.readline()
             if i >= 3:
                 history.append(s)
 
@@ -56,6 +52,7 @@ class SaveYDATest(unittest.TestCase):
         self.assertEqual(history[3], "  - " + self.expt + "\n")
         self.assertEqual(history[4], "  - data reduced with mantid\n")
 
+    def test_history_no_samples(self):
         history = []
         for i in range(0, 5):
             s = self._no_sample_file.readline()
@@ -156,13 +153,12 @@ class SaveYDATest(unittest.TestCase):
         AddSampleLog(ws, "Ei", str(self.Ei), LogUnit="meV")
 
     def _file(self, ws, filename):
-        path = os.path.expanduser("~/" + filename + ".yaml")
-        SaveYDA(InputWorkspace=ws, Filename=path)
-        f = open(path, 'r')
+        SaveYDA(InputWorkspace=ws, Filename=filename)
+        f = open(filename, 'r')
         return f
 
     def _createWorkspace(self, ws_2D=True, sample=True, xAx=True, yAxSpec=True,
-                         yAxMt=True, instrument=True, temperature=True):
+                         yAxMt=True, instrument=True):
         if not ws_2D:
             ws = CreateSampleWorkspace('Event', 'One Peak', XUnit='DeltaE')
             return ws

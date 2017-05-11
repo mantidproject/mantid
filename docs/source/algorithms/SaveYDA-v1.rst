@@ -8,7 +8,9 @@
 
 Description
 -----------
-
+This algorithm exports a given :ref:`Workspace2D <Workspace2D>` to a YAML format which supposed to be read by the
+`Frida 2.0 <http://apps.jcns.fz-juelich.de/doku/frida/start>`_  software for further data analysis. The algorithm has been developed for the TOFTOF instrument,
+but can be used for other TOF instruments as well.
 
 Limitations
 ###########
@@ -25,9 +27,7 @@ Usage
 
 .. testcode:: SaveYDAExample
 
-    # import functions to work with folders
     import os
-    # import functions to work with more dimensional arrays
     import numpy as np
 
     # create x and y data
@@ -63,7 +63,7 @@ Usage
 
     Meta:
         format: yaml/frida 2.0
-        type: gerneric tabular data
+        type: generic tabular data
     History:
       - Proposal number 3
       - Proposal Title
