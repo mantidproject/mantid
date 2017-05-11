@@ -151,6 +151,10 @@ class DeltaPDF3D(PythonAlgorithm):
         Y=np.linspace(Ymin,Ymax,Ybins+1)
         Z=np.linspace(Zmin,Zmax,Zbins+1)
 
+        X, Y, Z = np.ogrid[(dimX.getX(0)+dimX.getX(1))/2:(dimX.getX(Xbins)+dimX.getX(Xbins-1))/2:Xbins*1j,
+                           (dimY.getX(0)+dimY.getX(1))/2:(dimY.getX(Ybins)+dimY.getX(Ybins-1))/2:Ybins*1j,
+                           (dimZ.getX(0)+dimZ.getX(1))/2:(dimZ.getX(Zbins)+dimZ.getX(Zbins-1))/2:Zbins*1j]
+
         if self.getProperty("RemoveReflections").value:
             progress.report("Removing Reflections")
             size = self.getProperty("Size").value
@@ -179,28 +183,28 @@ class DeltaPDF3D(PythonAlgorithm):
                                        int((k-size[1]-Ymin)/Ywidth+1):int((k+size[1]-Ymin)/Ywidth),
                                        int((l-size[2]-Zmin)/Zwidth+1):int((l+size[2]-Zmin)/Zwidth)]=np.nan
             else:  # sphere
-                Xst = ((X[:-1]+X[1:])/2).reshape((Xbins, 1, 1))
-                Yst = ((Y[:-1]+Y[1:])/2).reshape((1, Ybins, 1))
-                Zst = ((Z[:-1]+Z[1:])/2).reshape((1, 1, Zbins))
+                mask=((X-np.round(X))**2//size[0]**2 + (Y-np.round(Y))**2/size[1]**2 + (Z-np.round(Z))**2/size[2]**2 < 1)
 
-                for h in range(int(np.ceil(Xmin)), int(Xmax)+1):
-                    for k in range(int(np.ceil(Ymin)), int(Ymax)+1):
-                        for l in range(int(np.ceil(Zmin)), int(Zmax)+1):
-                            if not check_space_group or sg.isAllowedReflection([h,k,l]):
-                                signal[(Xst-h)**2/size[0]**2 + (Yst-k)**2/size[1]**2 + (Zst-l)**2/size[2]**2 < 1]=np.nan
+                # Unmask invalid reflections
+                if check_space_group:
+                    for h in range(int(np.ceil(Xmin)), int(Xmax)+1):
+                        for k in range(int(np.ceil(Ymin)), int(Ymax)+1):
+                            for l in range(int(np.ceil(Zmin)), int(Zmax)+1):
+                                if not sg.isAllowedReflection([h,k,l]):
+                                    mask[int((h-0.5-Xmin)/Xwidth+1):int((h+0.5-Xmin)/Xwidth),
+                                         int((k-0.5-Ymin)/Ywidth+1):int((k+0.5-Ymin)/Ywidth),
+                                         int((l-0.5-Zmin)/Zwidth+1):int((l+0.5-Zmin)/Zwidth)]=False
+
+                signal[mask]=np.nan
 
         if self.getProperty("CropSphere").value:
             progress.report("Cropping to sphere")
             sphereMin = self.getProperty("SphereMin").value
 
-            Xs, Ys, Zs = np.mgrid[(X[0]+X[1])/2:(X[-1]+X[-2])/2:Xbins*1j,
-                                  (Y[0]+Y[1])/2:(Y[-1]+Y[-2])/2:Ybins*1j,
-                                  (Z[0]+Z[1])/2:(Z[-1]+Z[-2])/2:Zbins*1j]
-
             if sphereMin[0] < Property.EMPTY_DBL:
                 if len(sphereMin)==1:
                     sphereMin = np.repeat(sphereMin, 3)
-                signal[Xs**2/sphereMin[0]**2 + Ys**2/sphereMin[1]**2 + Zs**2/sphereMin[2]**2 < 1]=np.nan
+                signal[X**2/sphereMin[0]**2 + Y**2/sphereMin[1]**2 + Z**2/sphereMin[2]**2 < 1]=np.nan
 
             sphereMax = self.getProperty("SphereMax").value
 
@@ -211,7 +215,7 @@ class DeltaPDF3D(PythonAlgorithm):
                     fill_value = np.nan
                 else:
                     fill_value = self.getProperty("FillValue").value
-                signal[Xs**2/sphereMax[0]**2 + Ys**2/sphereMax[1]**2 + Zs**2/sphereMax[2]**2 > 1]=fill_value
+                signal[X**2/sphereMax[0]**2 + Y**2/sphereMax[1]**2 + Z**2/sphereMax[2]**2 > 1]=fill_value
 
         if self.getProperty("Convolution").value:
             progress.report("Convoluting signal")
