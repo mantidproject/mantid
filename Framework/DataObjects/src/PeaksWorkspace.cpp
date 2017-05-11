@@ -165,7 +165,7 @@ void PeaksWorkspace::addPeak(const Geometry::IPeak &ipeak) {
 /** Add a peak to the list
  * @param ipeak :: Peak object to add (move) into this.
  */
-void PeaksWorkspace::addPeak(Peak &&ipeak) { peaks.push_back(ipeak); }
+void PeaksWorkspace::addPeak(Peak &&peak) { peaks.push_back(peak); }
 
 //---------------------------------------------------------------------------------------------
 /** Return a reference to the Peak
