@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<testsuite name="MDAlgorithmsTest"  tests="5" errors="0" failures="0" package="MDAlgorithmsTest" time="1.20364" >
+    <testcase classname="MDAlgorithmsTest.Integrate3DEventsTest" name="test_1" line="24" time="0.003196" totalTime="0.003237" CPUFraction="0.900188"> <measurement><name>CPUFraction</name><value>0.900188</value></measurement>    </testcase>
+    <testcase classname="MDAlgorithmsTest.Integrate3DEventsTest" name="test_integrateWeakPeakInPerfectCase" line="127" time="0.014629" totalTime="0.01465" CPUFraction="0.983663"> <measurement><name>CPUFraction</name><value>0.983663</value></measurement>    </testcase>
+    <testcase classname="MDAlgorithmsTest.Integrate3DEventsTest" name="test_integrateWeakPeakWithBackground" line="189" time="0.627726" totalTime="0.627766" CPUFraction="0.997743"> <measurement><name>CPUFraction</name><value>0.997743</value></measurement>    </testcase>
+    <testcase classname="MDAlgorithmsTest.Integrate3DEventsTest" name="test_estimateSignalToNoiseRatioInPerfectCase" line="251" time="0.009339" totalTime="0.009355" CPUFraction="1"> <measurement><name>CPUFraction</name><value>1</value></measurement>    </testcase>
+    <testcase classname="MDAlgorithmsTest.Integrate3DEventsTest" name="test_estimateSignalToNoiseRatioWithBackground" line="291" time="0.548603" totalTime="0.548634" CPUFraction="0.999588"> <measurement><name>CPUFraction</name><value>0.999588</value></measurement>    </testcase>
+</testsuite>

@@ -19,6 +19,7 @@
 #include "MantidMDAlgorithms/MDTransfQ3D.h"
 #include "MantidMDAlgorithms/UnitsConversionHelper.h"
 
+#include <cmath>
 #include <string>
 #include <tuple>
 #include <boost/math/special_functions/round.hpp>
@@ -495,7 +496,7 @@ void IntegrateEllipsoidsTwoStep::qListFromHistoWS(Integrate3DEvents &integrator,
         if (hkl_integ)
           qVec = UBinv * qVec;
 
-        if (isnan(qVec[0]) || isnan(qVec[1]) || isnan(qVec[2]))
+        if (std::isnan(qVec[0]) || std::isnan(qVec[1]) || std::isnan(qVec[2]))
           continue;
         // Account for counts in histograms by increasing the qList with the
         // same q-point
