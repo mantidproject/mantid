@@ -119,28 +119,8 @@ Integrate3DEvents::integrateStrongPeak(const IntegrationParameters &params,
     return std::make_pair(boost::make_shared<NoShape>(),
                           make_tuple(0., 0., 0.));
 
-  // scale specified sizes by 1/max_sigma
-  // so when multiplied by the individual
-  // sigmas in different directions, the
-  double r1 = params.peakRadius / max_sigma;
-  double r2 = params.backgroundInnerRadius / max_sigma;
-  double r3 = params.backgroundOuterRadius / max_sigma;
-
-  if (!params.specifySize) {
-    r1 = 3;
-    r2 = 3;
-    r3 = r2 * 1.25992105; // A factor of 2 ^ (1/3) will make the background
-    // shell volume equal to the peak region volume.
-
-    // if necessary restrict the background ellipsoid
-    // to lie within the specified sphere, and adjust
-    // the other sizes, proportionally
-    if (r3 * max_sigma > params.regionRadius) {
-      r3 = params.regionRadius / max_sigma;
-      r1 = r3 * 0.79370053f; // This value for r1 and r2 makes the background
-      r2 = r1;               // shell volume equal to the peak region volume.
-    }
-  }
+  auto rValues = calculateRadiusFactors(params, max_sigma);
+  auto& r1 = std::get<0>(rValues), r2 = std::get<1>(rValues), r3 = std::get<2>(rValues);
 
   std::vector<double> abcBackgroundOuterRadii, abcBackgroundInnerRadii;
   std::vector<double> peakRadii;
@@ -150,7 +130,6 @@ Integrate3DEvents::integrateStrongPeak(const IntegrationParameters &params,
     peakRadii.push_back(r1 * sigmas[i]);
   }
 
-  std::vector<double> rValues = {r1, r2, r3};
   const auto isPeakOnDetector =
       correctForDetectorEdges(rValues, params.E1Vectors, peak_q, peakRadii,
                               abcBackgroundInnerRadii, abcBackgroundOuterRadii);
@@ -158,11 +137,6 @@ Integrate3DEvents::integrateStrongPeak(const IntegrationParameters &params,
   if (!isPeakOnDetector)
     return std::make_pair(boost::make_shared<NoShape>(),
                           make_tuple(0.0, 0.0, 0.));
-
-  // adjust volume factors for edge corrections
-  r1 = rValues[0];
-  r2 = rValues[1];
-  r3 = rValues[2];
 
   const auto backgrd = numInEllipsoidBkg(
       events, eigen_vectors, abcBackgroundOuterRadii, abcBackgroundInnerRadii);
@@ -217,31 +191,8 @@ Integrate3DEvents::integrateWeakPeak(
   const auto &abcRadii = shape->abcRadii();
 
   const auto max_sigma = std::get<2>(libPeak);
+  auto rValues = calculateRadiusFactors(params, max_sigma);
 
-  // scale specified sizes by 1/max_sigma
-  // so when multiplied by the individual
-  // sigmas in different directions, the
-  auto r1 = params.peakRadius / max_sigma;
-  auto r2 = params.backgroundInnerRadius / max_sigma;
-  auto r3 = params.backgroundOuterRadius / max_sigma;
-
-  if (!params.specifySize) {
-    r1 = 3;
-    r2 = 3;
-    r3 = r2 * 1.25992105; // A factor of 2 ^ (1/3) will make the background
-    // shell volume equal to the peak region volume.
-
-    // if necessary restrict the background ellipsoid
-    // to lie within the specified sphere, and adjust
-    // the other sizes, proportionally
-    if (r3 * max_sigma > params.regionRadius) {
-      r3 = params.regionRadius / max_sigma;
-      r1 = r3 * 0.79370053f; // This value for r1 and r2 makes the background
-      r2 = r1;               // shell volume equal to the peak region volume.
-    }
-  }
-
-  std::vector<double> rValues = {r1, r2, r3};
   const auto isPeakOnDetector =
       correctForDetectorEdges(rValues, params.E1Vectors, center, abcRadii,
                               abcBackgroundInnerRadii, abcBackgroundOuterRadii);
@@ -249,7 +200,7 @@ Integrate3DEvents::integrateWeakPeak(
   if (!isPeakOnDetector)
     return shape;
 
-  r1 = rValues[0], r2 = rValues[1], r3 = rValues[2];
+  const double r1 = std::get<0>(rValues), r2 = std::get<1>(rValues), r3 = std::get<2>(rValues);
 
   // integrate
   double backgrd = numInEllipsoidBkg(
@@ -304,28 +255,8 @@ double Integrate3DEvents::estimateSignalToNoiseRatio(
   if (max_sigma == 0)
     return .0;
 
-  // scale specified sizes by 1/max_sigma
-  // so when multiplied by the individual
-  // sigmas in different directions, the
-  double r1 = params.peakRadius / max_sigma;
-  double r2 = params.backgroundInnerRadius / max_sigma;
-  double r3 = params.backgroundOuterRadius / max_sigma;
-
-  if (!params.specifySize) {
-    r1 = 3;
-    r2 = 3;
-    r3 = r2 * 1.25992105; // A factor of 2 ^ (1/3) will make the background
-    // shell volume equal to the peak region volume.
-
-    // if necessary restrict the background ellipsoid
-    // to lie within the specified sphere, and adjust
-    // the other sizes, proportionally
-    if (r3 * max_sigma > params.regionRadius) {
-      r3 = params.regionRadius / max_sigma;
-      r1 = r3 * 0.79370053f; // This value for r1 and r2 makes the background
-      r2 = r1;               // shell volume equal to the peak region volume.
-    }
-  }
+  auto rValues = calculateRadiusFactors(params, max_sigma);
+  auto& r1 = std::get<0>(rValues), r2 = std::get<1>(rValues), r3 = std::get<2>(rValues);
 
   std::vector<double> abcBackgroundOuterRadii, abcBackgroundInnerRadii;
   std::vector<double> peakRadii;
@@ -367,7 +298,7 @@ Integrate3DEvents::getEvents(const V3D &peak_q) {
 }
 
 bool Integrate3DEvents::correctForDetectorEdges(
-    std::vector<double> &radii, const std::vector<V3D> &E1Vecs,
+    std::tuple<double, double, double> &radii, const std::vector<V3D> &E1Vecs,
     const V3D &peak_q, const std::vector<double> &axesRadii,
     const std::vector<double> &bkgInnerRadii,
     const std::vector<double> &bkgOuterRadii) {
@@ -375,23 +306,23 @@ bool Integrate3DEvents::correctForDetectorEdges(
   if (E1Vecs.empty())
       return true;
 
-  double &r1 = radii[0], r2 = radii[1], r3 = radii[2];
-  double h3 = 1.0 - detectorQ(E1Vecs, peak_q, bkgOuterRadii);
+  auto& r1 = std::get<0>(radii), r2 = std::get<1>(radii), r3 = std::get<2>(radii);
+  auto h3 = 1.0 - detectorQ(E1Vecs, peak_q, bkgOuterRadii);
   // scaled from area of circle minus segment when r normalized to 1
-  double m3 = std::sqrt(
+  auto m3 = std::sqrt(
           1.0 -
           (std::acos(1.0 - h3) - (1.0 - h3) * std::sqrt(2.0 * h3 - h3 * h3)) /
           M_PI);
-  double h1 = 1.0 - detectorQ(E1Vecs, peak_q, axesRadii);
+  auto h1 = 1.0 - detectorQ(E1Vecs, peak_q, axesRadii);
   // Do not use peak if edge of detector is inside integration radius
   if (h1 > 0.0)
       return false;
 
   r3 *= m3;
   if (r2 != r1) {
-      double h2 = 1.0 - detectorQ(E1Vecs, peak_q, bkgInnerRadii);
+      auto h2 = 1.0 - detectorQ(E1Vecs, peak_q, bkgInnerRadii);
       // scaled from area of circle minus segment when r normalized to 1
-      double m2 = std::sqrt(
+      auto m2 = std::sqrt(
               1.0 -
               (std::acos(1.0 - h2) - (1.0 - h2) * std::sqrt(2.0 * h2 - h2 * h2)) /
               M_PI);
@@ -927,6 +858,44 @@ double Integrate3DEvents::detectorQ(std::vector<Kernel::V3D> E1Vec,
   }
   return quot;
 }
+
+
+/** Calculate the radius to use for each axis of the ellipsoid from the 
+ * parameters provided
+ *
+ * @param params :: the integration parameters
+ * @param max_sigma :: the largest sigma of all axes
+ * @return tuple of values representing the radius for each axis.
+ */
+std::tuple<double, double, double> Integrate3DEvents::calculateRadiusFactors(const IntegrationParameters &params, double max_sigma) const {
+  double r1 = 0, r2 = 0, r3 = 0;
+
+  if (!params.specifySize) {
+    r1 = 3;
+    r2 = 3;
+    r3 = r2 * 1.25992105; // A factor of 2 ^ (1/3) will make the background
+    // shell volume equal to the peak region volume.
+
+    // if necessary restrict the background ellipsoid
+    // to lie within the specified sphere, and adjust
+    // the other sizes, proportionally
+    if (r3 * max_sigma > params.regionRadius) {
+      r3 = params.regionRadius / max_sigma;
+      r1 = r3 * 0.79370053f; // This value for r1 and r2 makes the background
+      r2 = r1;               // shell volume equal to the peak region volume.
+    }
+  } else {
+      // scale specified sizes by 1/max_sigma
+      // so when multiplied by the individual
+      // sigmas in different directions, the
+      r1 = params.peakRadius / max_sigma;
+      r2 = params.backgroundInnerRadius / max_sigma;
+      r3 = params.backgroundOuterRadius / max_sigma;
+  }
+
+  return std::make_tuple(r1, r2, r3);
+}
+
 } // namespace MDAlgorithms
 
 } // namespace Mantid

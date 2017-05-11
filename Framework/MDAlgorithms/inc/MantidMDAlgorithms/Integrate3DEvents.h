@@ -111,7 +111,7 @@ private:
   boost::optional<const std::vector<std::pair<double, Mantid::Kernel::V3D>> &>
   getEvents(const Mantid::Kernel::V3D &peak_q);
 
-  bool correctForDetectorEdges(std::vector<double> &radii,
+  bool correctForDetectorEdges(std::tuple<double, double, double> &radii,
                                const std::vector<Mantid::Kernel::V3D> &E1Vecs,
                                const Mantid::Kernel::V3D &peak_q,
                                const std::vector<double> &axesRadii,
@@ -163,10 +163,16 @@ private:
       std::vector<double> const &sigmas, bool specify_size, double peak_radius,
       double back_inner_radius, double back_outer_radius,
       std::vector<double> &axes_radii, double &inti, double &sigi);
+
+  /// Compute if a particular Q falls on the edge of a detector 
   double detectorQ(std::vector<Kernel::V3D> E1Vec,
                    const Mantid::Kernel::V3D QLabFrame,
                    const std::vector<double> &r);
+
+  std::tuple<double, double, double> calculateRadiusFactors(const IntegrationParameters &params, double max_sigma) const;
+
   // Private data members
+
   PeakQMap m_peak_qs;         // hashtable with peak Q-vectors
   EventListMap m_event_lists; // hashtable with lists of events for each peak
   Kernel::DblMatrix m_UBinv;  // matrix mapping from Q to h,k,l
