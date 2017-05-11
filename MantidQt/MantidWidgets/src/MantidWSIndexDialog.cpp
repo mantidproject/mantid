@@ -364,13 +364,31 @@ bool MantidWSIndexWidget::validatePlotOptions() {
   // only if custom logs are selected, else it's OK.
   if (m_logSelector->currentText() == CUSTOM) {
     QStringList values = m_logValues->lineEdit()->text().split(',');
+    bool firstValue = true;
+    double previousValue = 0.0;
     foreach (QString value, values) {
       bool ok = false;
-      value.toDouble(&ok);
+      double currentValue =value.toDouble(&ok);
+      // Check for non-numeric value
       if (!ok) {
         m_logValues->setError("A custom log value is not valid: " + value);
         validOptions = false;
         break;
+      }
+      // Check for order
+      if (firstValue) {
+        firstValue = false;
+        previousValue = currentValue;
+      }
+      else {
+        if (previousValue < currentValue) {
+          previousValue = currentValue;
+        }
+        else {
+          m_logValues->setError("The custom log values must be in numerical order and distinct.");
+          validOptions = false;
+          break;
+        }
       }
     }
 
