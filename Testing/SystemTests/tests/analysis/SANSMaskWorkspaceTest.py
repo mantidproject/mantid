@@ -110,8 +110,8 @@ class SANSMaskWorkspaceTest(unittest.TestCase):
 
         spectrum_range_start = [20, 30]
         spectrum_range_stop = [25, 35]
-        expected_spectra.extend(range(20, 25 + 1))
-        expected_spectra.extend(range(30, 35 + 1))
+        expected_spectra.extend(list(range(20, 25 + 1)))
+        expected_spectra.extend(list(range(30, 35 + 1)))
 
         # Detector-specific single horizontal strip mask
         # The horizontal strip will be evaluated for SANS2D on the LAB as:

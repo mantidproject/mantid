@@ -65,6 +65,7 @@ SliceViewer Improvements
 ------------------------
 - Fixed a bug where the rebin button was toggled when the user switch axes.
 - Changed zoom level on peak. Now when zooming onto a spherical or ellipsoidal peak, the entire peak is visible when using the default window size.
+- Fixed a bug where swapping the dimensions did not rebin the workspace despite having autorebin enabled.
 
 VSI Improvments
 ---------------
