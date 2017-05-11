@@ -151,7 +151,7 @@ void PeaksWorkspace::removePeak(const int peakNum) {
 
 //---------------------------------------------------------------------------------------------
 /** Add a peak to the list
- * @param peak :: Peak object to add (copy) into this.
+ * @param ipeak :: Peak object to add (copy) into this.
  */
 void PeaksWorkspace::addPeak(const Geometry::IPeak &ipeak) {
   if (dynamic_cast<const Peak *>(&ipeak)) {
@@ -163,7 +163,7 @@ void PeaksWorkspace::addPeak(const Geometry::IPeak &ipeak) {
 
 //---------------------------------------------------------------------------------------------
 /** Add a peak to the list
- * @param ipeak :: Peak object to add (move) into this.
+ * @param peak :: Peak object to add (move) into this.
  */
 void PeaksWorkspace::addPeak(Peak &&peak) { peaks.push_back(peak); }
 
