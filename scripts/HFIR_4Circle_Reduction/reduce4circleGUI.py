@@ -539,18 +539,17 @@ class MainWindow(QtGui.QMainWindow):
             ui_dict['det_center'] = det_center_str
 
         # register and make it as a queue for last n opened/saved project
-        # FIXME/ISSUE/NOW/TODAY - This does not work.  Investigate!
         last_1_path = str(self.ui.label_last1Path.text())
         if last_1_path != project_file_name:
             self.ui.label_last3Path.setText(self.ui.label_last2Path.text())
             self.ui.label_last2Path.setText(self.ui.label_last1Path.text())
-            self.ui.label_last1Path.setText(last_1_path)
+            self.ui.label_last1Path.setText(project_file_name)
         # END-IF
 
         self._myControl.save_project(project_file_name, ui_dict)
 
-
         # TODO/NOW/TODAY - Implement a pop-up dialog for this
+        print '[DB] Project has been saved to {0}'.format(project_file_name)
 
         return
 
@@ -2140,6 +2139,8 @@ class MainWindow(QtGui.QMainWindow):
             self.ui.lineEdit_infoDetCenter.setText('{0}, {1}'.format(center_row, center_col))
             self._myControl.set_detector_center(exp_number, center_row, center_col)
 
+        # TODO/ISSUE/NOW/TODAY - Shall pop out a dialog to notify the 
+
         return
 
     # add slot for UB refinement configuration window's signal to connect to
@@ -3336,6 +3337,8 @@ class MainWindow(QtGui.QMainWindow):
         self._myControl.set_local_data_dir(str(self.ui.lineEdit_localSpiceDir.text()))
         self._myControl.set_working_directory(str(self.ui.lineEdit_workDir.text()))
         self._myControl.set_server_url(str(self.ui.lineEdit_url.text()))
+
+        print '[INFO] Session {0} has been loaded.'.format(filename)
 
         return
 
