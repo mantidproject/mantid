@@ -166,7 +166,7 @@ public:
 
     // Check the fraction of the peak that is contained within a "standard core"
     // the standard core is just the sigma in each direction
-    TS_ASSERT_DELTA(frac, 0.8369, 0.0001);
+    TS_ASSERT_DELTA(frac, 0.8369, 0.01);
 
     // Check the integrated intensity for a strong peak is exactly what we set
     // it to be when generating the peak
@@ -182,7 +182,7 @@ public:
     // to be weighted by the fraction of strong peak contained in a standard
     // core. This is not exactly the same because of the weighting from the
     // strong peak
-    TS_ASSERT_DELTA(weak_inti, 83.6960, 0.001);
+    TS_ASSERT_DELTA(weak_inti, 83.6960, 0.5);
     TS_ASSERT_DELTA(weak_sigi, 8.37, 0.1);
   }
 
@@ -228,7 +228,7 @@ public:
 
     // Check the fraction of the peak that is contained within a "standard core"
     // the standard core is just the sigma in each direction
-    TS_ASSERT_DELTA(frac, 0.8284, 0.0001);
+    TS_ASSERT_DELTA(frac, 0.8284, 0.01);
 
     // Check the integrated intensity for a strong peak is close to what we set
     // it to be when generating the peak
@@ -245,7 +245,7 @@ public:
     // core. This is not exactly the same because of the weighting from the
     // strong peak
     TS_ASSERT_DELTA(weak_inti, numWeakEvents, 35);
-    TS_ASSERT_DELTA(weak_sigi, 8.62, 0.1);
+    TS_ASSERT_DELTA(weak_sigi, 8.62, 0.2);
   }
 
   void test_estimateSignalToNoiseRatioInPerfectCase() {
@@ -324,9 +324,9 @@ public:
     const auto ratio2 = integrator.estimateSignalToNoiseRatio(params, peak_2);
     const auto ratio3 = integrator.estimateSignalToNoiseRatio(params, peak_3);
 
-    TS_ASSERT_DELTA(ratio1, 171.9040, 0.0001);
-    TS_ASSERT_DELTA(ratio2, 1.2632, 0.0001);
-    TS_ASSERT_DELTA(ratio3, 0.1824, 0.0001);
+    TS_ASSERT_DELTA(ratio1, 171.9040, 0.01);
+    TS_ASSERT_DELTA(ratio2, 1.2632, 0.01);
+    TS_ASSERT_DELTA(ratio3, 0.1824, 0.01);
   }
 
   /** Generate a symmetric Gaussian peak
