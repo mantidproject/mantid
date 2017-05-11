@@ -103,6 +103,18 @@ const std::string AlgorithmAdapter<BaseAlgorithm>::summary() const {
 }
 
 /**
+ * Optional documentation URL of the algorithm, empty string if not overridden.
+ */
+template <typename BaseAlgorithm>
+const std::string AlgorithmAdapter<BaseAlgorithm>::helpURL() const {
+  try {
+    return callMethod<std::string>(getSelf(), "helpURL");
+  } catch (UndefinedAttributeError &) {
+    return std::string();
+  }
+}
+
+  /**
  * @return True if the algorithm is considered to be running
  */
 template <typename BaseAlgorithm>
