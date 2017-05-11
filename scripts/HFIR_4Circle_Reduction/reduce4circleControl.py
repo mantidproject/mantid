@@ -828,20 +828,22 @@ class CWSCDReductionControl(object):
         """ Get region of interest
         :param exp_number:
         :param scan_number:
-        :return:
+        :return: region of interest
         """
         # check
-        assert isinstance(exp_number, int)
-        assert isinstance(scan_number, int) or scan_number is None
+        assert isinstance(exp_number, int), 'blabla TODAY'
+        assert isinstance(scan_number, int) or scan_number is None, 'blabla TODAY'
 
         if (exp_number, scan_number) in self._roiDict:
             # able to find region of interest for this scan
             ret_status = True
             ret_value = self._roiDict[(exp_number, scan_number)]
+            print '[DB...BAT] From this scan: {0}, {1}'.format(ret_value[0], ret_value[1])
         elif exp_number in self._roiDict:
             # able to find region of interest for this experiment
             ret_status = True
             ret_value = self._roiDict[exp_number]
+            print '[DB...BAT] From saved scan: {0}, {1}'.format(ret_value[0], ret_value[1])
         else:
             # region of interest of experiment is not defined
             ret_status = False

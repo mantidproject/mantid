@@ -1885,11 +1885,14 @@ class MainWindow(QtGui.QMainWindow):
         # get the mask
         status, ret_obj = self._myControl.get_region_of_interest(exp, scan)
         if status is False:
+            # unable to get region of interest
             self.pop_one_button_dialog(ret_obj)
             return
+        else:
+            corner1, corner2 = ret_obj
 
         # create mask workspace
-        status, error = self._myControl.generate_mask_workspace(exp, scan, ret_obj[0], ret_obj[1])
+        status, error = self._myControl.generate_mask_workspace(exp, scan, corner1, corner2)
         if status is False:
             self.pop_one_button_dialog(error)
             return
@@ -2139,7 +2142,7 @@ class MainWindow(QtGui.QMainWindow):
             self.ui.lineEdit_infoDetCenter.setText('{0}, {1}'.format(center_row, center_col))
             self._myControl.set_detector_center(exp_number, center_row, center_col)
 
-        # TODO/ISSUE/NOW/TODAY - Shall pop out a dialog to notify the 
+        # TODO/ISSUE/NOW/TODAY - Shall pop out a dialog to notify the
 
         return
 
