@@ -176,7 +176,6 @@ void MuonFitPropertyBrowser::init() {
   addGroupCheckbox(tmp);
   tmp = "bwd";
   addGroupCheckbox(tmp);
-  //moo need to add periods.... 
   m_periodsToFit = m_enumManager->addProperty("Periods to fit");
   m_periodsToFitOptions << "1"
 	  << "2"
@@ -191,9 +190,6 @@ void MuonFitPropertyBrowser::init() {
 
   connect(m_browser, SIGNAL(currentItemChanged(QtBrowserItem *)), this,
           SLOT(currentItemChanged(QtBrowserItem *)));
-
-  //m_groupWindow = new QtProperty;
-
 
 	  /* Create editors and assign them to the managers */
   createEditors(w);
@@ -262,8 +258,6 @@ void MuonFitPropertyBrowser::init() {
   m_mainSplitter = new QSplitter(Qt::Vertical, w);
   m_mainSplitter->insertWidget(0, m_widgetSplitter);
   m_mainSplitter->insertWidget(1, m_browser);
-   //moo 
-  //m_mainSplitter->insertWidget(2,m_groupWindow);
   m_mainSplitter->setStretchFactor(0, 1);
   m_mainSplitter->setStretchFactor(1, 0);
 
@@ -1026,13 +1020,9 @@ void MuonFitPropertyBrowser::setAvailableGroups(const QStringList &groups) {
 
 	clearGroupCheckboxes();	
 	QSettings settings;
-	//settings.beginGroup("Mantid/test");
-	//QtProperty *groupSettings = m_groupManager->addProperty("test");
 	for (const auto group : groups) {
 		addGroupCheckbox(group); 
-		//groupSettings->addSubProperty(m_groupBoxes.value(group));
 	}
-	//m_groupWindow = m_browser->addProperty(groupSettings); 
 }
 /**
 * Clears all group names and checkboxes
@@ -1081,7 +1071,6 @@ void MuonFitPropertyBrowser::clearChosenGroups() const {
 	for (auto iter = m_groupBoxes.constBegin(); iter != m_groupBoxes.constEnd();
 		++iter) {
 		m_boolManager->setValue(iter.value(), false);
-		//iter.value()->setChecked(false);
 	}
 }
 
@@ -1205,14 +1194,9 @@ void MuonFitPropertyBrowser::setAvailablePeriods(const QStringList &periods) {
 
 	clearPeriodCheckboxes();
 
-	QSettings settings;
-	//settings.beginGroup("Mantid/test");
-	QtProperty *groupSettings = m_groupManager->addProperty("test");
 	for (const auto group : periods) {
 		addPeriodCheckbox(group);
-		groupSettings->addSubProperty(m_periodBoxes.value(group));
 	}
-	m_groupWindow = m_browser->addProperty(groupSettings); 
 }
 /**
 * Clears all group names and checkboxes
@@ -1227,7 +1211,6 @@ void MuonFitPropertyBrowser::clearPeriodCheckboxes() {
 				delete(iter);
 			}
 		}
-		//m_periodBoxes.clear();
 	}		
 	m_periodsToFitOptions.clear();
 	m_periodsToFitOptions << "1";
@@ -1357,7 +1340,13 @@ void MuonFitPropertyBrowser::genCombinePeriodWindow() {
 
 void MuonFitPropertyBrowser::combineBtnPressed() {
 	QString value = m_positiveCombo->text();
-	value.append("-").append(m_negativeCombo->text());
+	if (value.isEmpty()) {
+		g_log.error("There are no positive periods (top box)");
+		return;
+	}
+	if (!m_negativeCombo->text().isEmpty()) {
+		value.append("-").append(m_negativeCombo->text());
+	}
 	m_positiveCombo->clear();
 	m_negativeCombo->clear();
 	addPeriodCheckbox(value);

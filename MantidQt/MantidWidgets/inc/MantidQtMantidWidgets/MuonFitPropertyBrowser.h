@@ -5,13 +5,12 @@
 #include "MantidQtMantidWidgets/IMuonFitDataModel.h"
 #include "MantidQtMantidWidgets/IMuonFitFunctionModel.h"
 
-#include "MantidQtAPI/MWRunFiles.h"
 #include <QMap>
-#include <QCheckBox>
 /* Forward declarations */
 class QDockWidget;
 class QLabel;
 class QPushButton;
+class QCheckBox;
 class QMenu;
 class QSignalMapper;
 class QtTreePropertyBrowser;
@@ -128,7 +127,6 @@ public slots:
   void periodBtnPressed();
   void generateBtnPressed();
   void combineBtnPressed();
-  //void positiveCombo(QString value) { m_positiveCombo->setText(value); };
   void setNumPeriods(size_t numPeriods);
 
 signals:
@@ -194,7 +192,6 @@ private:
   QtProperty *m_normalization;
   mutable QStringList m_normalizationValue;
 
-  QtBrowserItem *m_groupWindow;
 
   QtBrowserItem *m_multiFitSettingsGroup;
   QtProperty *m_groupsToFit;
