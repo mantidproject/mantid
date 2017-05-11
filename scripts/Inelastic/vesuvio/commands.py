@@ -220,7 +220,6 @@ def fit_tof_iteration(sample_data, container_data, runs, flags):
         output_workspaces = []
         fit_workspaces.append(linear_correction_fit_params_name)
         data_workspaces.append(fit_ws_name)
-        # output_workspaces = [fit_ws_name, linear_correction_fit_params_name]
         if flags.get('output_verbose_corrections', False):
             output_workspaces += mtd[corrections_args["CorrectionWorkspaces"]].getNames()
             output_workspaces += mtd[corrections_args["CorrectedWorkspaces"]].getNames()
@@ -229,7 +228,8 @@ def fit_tof_iteration(sample_data, container_data, runs, flags):
 
         for workspace in output_workspaces:
 
-            group_name = runs + '_' + '_'.join(n[4:6])
+            group_name = runs + '_iteration_' + str(flags.get('iteration', None))
+            name = group_name + '_' + workspace.split('_')[1] +'_'+ workspace.split('_')[-1]
             result_workspaces.append(name)
             if index == 0:
                 ms.RenameWorkspace(InputWorkspace=workspace, OutputWorkspace=name)
