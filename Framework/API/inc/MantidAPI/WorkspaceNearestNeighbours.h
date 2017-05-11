@@ -19,7 +19,8 @@ class IDetector;
 namespace API {
 class SpectrumInfo;
 /**
- * This class is not intended for direct use. Use NearestNeighbourInfo instead!
+ * This class is not intended for direct use. Use WorkspaceNearestNeighbourInfo
+ * instead!
  *
  * This class is used to find the nearest neighbours of a detector in the
  * instrument geometry. This class can be queried through calls to the

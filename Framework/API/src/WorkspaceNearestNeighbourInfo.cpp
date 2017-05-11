@@ -6,7 +6,7 @@
 namespace Mantid {
 namespace API {
 
-/** Creates NearestNeighbourInfo.
+/** Creates WorkspaceNearestNeighbourInfo.
 *
 * @param workspace :: Reference to workspace providing instrument and
 * spectrum-detector mapping
@@ -29,7 +29,7 @@ WorkspaceNearestNeighbourInfo::WorkspaceNearestNeighbourInfo(
 // Defined as default in source for forward declaration with std::unique_ptr.
 WorkspaceNearestNeighbourInfo::~WorkspaceNearestNeighbourInfo() = default;
 
-/** Queries the NearestNeighbours object for the selected detector.
+/** Queries the WorkspaceNearestNeighbours object for the selected detector.
 * NOTE! getNeighbours(spectrumNumber, radius) is MUCH faster.
 *
 * @param comp :: pointer to the querying detector
@@ -51,7 +51,8 @@ WorkspaceNearestNeighbourInfo::getNeighbours(const Geometry::IDetector *comp,
   return m_nearestNeighbours->neighboursInRadius(spectra[0], radius);
 }
 
-/** Queries the NearestNeighbours object for the selected spectrum number.
+/** Queries the WorkspaceNearestNeighbours object for the selected spectrum
+* number.
 *
 * @param spec :: spectrum number of the detector you are looking at
 * @param radius :: distance from detector on which to filter results
@@ -63,7 +64,8 @@ WorkspaceNearestNeighbourInfo::getNeighbours(specnum_t spec,
   return m_nearestNeighbours->neighboursInRadius(spec, radius);
 }
 
-/** Queries the NearestNeighbours object for the selected spectrum number.
+/** Queries the WorkspaceNearestNeighbours object for the selected spectrum
+* number.
 *
 * @param spec :: spectrum number of the detector you are looking at
 * @return map of DetectorID to distance for the nearest neighbours

@@ -68,7 +68,7 @@ std::string vtkMDHWNexusReader::GetInputGeometryXML() {
     return std::string();
   }
   try {
-    return m_presenter->getGeometryXML().c_str();
+    return m_presenter->getGeometryXML();
   } catch (std::runtime_error &) {
     return std::string();
   }

@@ -1,6 +1,7 @@
 #include "MantidAPI/DetectorSearcher.h"
-#include "MantidKernel/ConfigService.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
+#include "MantidKernel/ConfigService.h"
+#include "MantidKernel/NearestNeighbours.h"
 
 #include <tuple>
 
@@ -10,6 +11,12 @@ using Mantid::Geometry::IDetector;
 using Mantid::Geometry::ReferenceFrame;
 using namespace Mantid;
 using namespace Mantid::API;
+
+double getQSign() {
+  const auto convention =
+      Kernel::ConfigService::Instance().getString("Q.convention");
+  return (convention == "Crystallography") ? -1.0 : 1.0;
+}
 
 /** Create a new DetectorSearcher for the given instrument
  *
@@ -23,10 +30,19 @@ DetectorSearcher::DetectorSearcher(Geometry::Instrument_const_sptr instrument,
                                    const API::DetectorInfo &detInfo)
     : m_usingFullRayTrace(instrument->containsRectDetectors() ==
                           Geometry::Instrument::ContainsState::Full),
-      m_crystallography_convention(Kernel::ConfigService::Instance().getString(
-                                       "Q.convention") == "Crystallography"),
-      m_detInfo(detInfo), m_instrument(instrument) {
-  // choose the search strategy to use
+      m_crystallography_convention(getQSign()), m_detInfo(detInfo),
+      m_instrument(instrument) {
+
+  /* Choose the search strategy to use
+   * If the instrument uses rectangular detectors (e.g. TOPAZ) then it is faster
+   * to run a full ray trace starting from the top of the instrument. This is
+   * due to the speed up of looking up a single pixel in the rectangular
+   * detector.
+   *
+   * If the instrument does not use rectangular detectors (e.g. WISH, CORELLI)
+   * then it is faster to use a nearest neighbour search to find the closest
+   * pixels, then check them for intersection.
+   * */
   if (!m_usingFullRayTrace) {
     createDetectorCache();
   } else {
@@ -41,24 +57,26 @@ void DetectorSearcher::createDetectorCache() {
   points.reserve(m_detInfo.size());
   m_indexMap.reserve(m_detInfo.size());
 
+  const auto frame = m_instrument->getReferenceFrame();
+  auto beam = frame->vecPointingAlongBeam();
+  auto up = frame->vecPointingUp();
+  beam.normalize();
+
   for (size_t pointNo = 0; pointNo < m_detInfo.size(); ++pointNo) {
     if (m_detInfo.isMonitor(pointNo) || m_detInfo.isMasked(pointNo))
       continue; // detector is a monitor or masked so don't use
 
-    // calculate a Q vector for each detector
+    // Calculate a unit Q vector for each detector
     // This follows a method similar to that used in IntegrateEllipsoids
-    const auto &det = m_detInfo.detector(pointNo);
-    const auto tt1 = det.getTwoTheta(V3D(0, 0, 0), V3D(0, 0, 1)); // two theta
-    const auto ph1 = det.getPhi();                                // phi
-    auto E1 =
-        V3D(-std::sin(tt1) * std::cos(ph1), -std::sin(tt1) * std::sin(ph1),
-            1. - std::cos(tt1)); // end of trajectory
-    E1 = E1 * (1. / E1.norm());  // normalize
+    auto pos = m_detInfo.position(pointNo);
+    pos.normalize();
+    auto E1 = (pos - beam) * -m_crystallography_convention;
+    E1.normalize();
 
     Eigen::Vector3d point(E1[0], E1[1], E1[2]);
 
     // Ignore nonsensical points
-    if (point.hasNaN())
+    if (point.hasNaN() || up.coLinear(beam, pos))
       continue;
 
     points.push_back(point);
@@ -77,7 +95,7 @@ void DetectorSearcher::createDetectorCache() {
  * @param q :: the Qlab vector to find a detector for
  * @return tuple with data <detector found, detector index>
  */
-const DetectorSearcher::DetectorSearchResult
+DetectorSearcher::DetectorSearchResult
 DetectorSearcher::findDetectorIndex(const V3D &q) {
   // quick check to see if this Q is valid
   if (q.nullVector())
@@ -99,7 +117,7 @@ DetectorSearcher::findDetectorIndex(const V3D &q) {
  * @param q :: the Qlab vector to find a detector for
  * @return tuple with data <detector found, detector index>
  */
-const DetectorSearcher::DetectorSearchResult
+DetectorSearcher::DetectorSearchResult
 DetectorSearcher::searchUsingInstrumentRayTracing(const V3D &q) {
   const auto direction = convertQtoDirection(q);
   m_rayTracer->traceFromSample(direction);
@@ -124,7 +142,7 @@ DetectorSearcher::searchUsingInstrumentRayTracing(const V3D &q) {
  * @param q :: the Qlab vector to find a detector for
  * @return tuple with data <detector found, detector index>
  */
-const DetectorSearcher::DetectorSearchResult
+DetectorSearcher::DetectorSearchResult
 DetectorSearcher::searchUsingNearestNeighbours(const V3D &q) {
   const auto detectorDir = convertQtoDirection(q);
   // find where this Q vector should intersect with "extended" space
@@ -140,30 +158,46 @@ DetectorSearcher::searchUsingNearestNeighbours(const V3D &q) {
   if (hitDetector)
     return std::make_tuple(true, m_indexMap[index]);
 
-  // Tube Gap Parameter specifically applies to CORELLI
+  // Tube Gap Parameter specifically applies to tube instruments
   if (!hitDetector && m_instrument->hasParameter("tube-gap")) {
-    std::vector<double> gaps =
-        m_instrument->getNumberParameter("tube-gap", true);
-    if (!gaps.empty()) {
-      const auto gap = static_cast<double>(gaps.front());
-      // try adding and subtracting tube-gap in 3 q dimensions to see if you can
-      // find detectors on each side of tube gap
-      for (int i = 0; i < 3; i++) {
-        auto gapDir = V3D(0., 0., 0.);
-        gapDir[i] = gap;
+    return handleTubeGap(detectorDir, neighbours);
+  }
 
-        auto beam1 = detectorDir + gapDir;
-        const auto result1 = checkInteceptWithNeighbours(beam1, neighbours);
-        const auto hit1 = std::get<0>(result1);
+  return std::make_tuple(false, 0);
+}
 
-        auto beam2 = detectorDir - gapDir;
-        const auto result2 = checkInteceptWithNeighbours(beam2, neighbours);
-        const auto hit2 = std::get<0>(result2);
+/** Handle the tube-gap parameter in tube based instruments.
+ *
+ * This will check for interceptions with the nearest neighbours by "wiggling"
+ * the predicted detector direction slightly.
+ *
+ * @param detectorDir :: the predicted direction towards a detector
+ * @param neighbours :: the NearestNeighbour results to check interception with
+ * @return a detector search result with whether a detector was hit
+ */
+DetectorSearcher::DetectorSearchResult DetectorSearcher::handleTubeGap(
+    const V3D &detectorDir,
+    const Kernel::NearestNeighbours<3>::NearestNeighbourResults &neighbours) {
+  std::vector<double> gaps = m_instrument->getNumberParameter("tube-gap", true);
+  if (!gaps.empty()) {
+    const auto gap = static_cast<double>(gaps.front());
+    // try adding and subtracting tube-gap in 3 q dimensions to see if you can
+    // find detectors on each side of tube gap
+    for (int i = 0; i < 3; i++) {
+      auto gapDir = V3D(0., 0., 0.);
+      gapDir[i] = gap;
 
-        if (hit1 && hit2) {
-          // Set the detector to one of the neighboring pixels
-          return std::make_tuple(true, m_indexMap[std::get<1>(result1)]);
-        }
+      auto beam1 = detectorDir + gapDir;
+      const auto result1 = checkInteceptWithNeighbours(beam1, neighbours);
+      const auto hit1 = std::get<0>(result1);
+
+      auto beam2 = detectorDir - gapDir;
+      const auto result2 = checkInteceptWithNeighbours(beam2, neighbours);
+      const auto hit2 = std::get<0>(result2);
+
+      if (hit1 && hit2) {
+        // Set the detector to one of the neighboring pixels
+        return std::make_tuple(true, m_indexMap[std::get<1>(result1)]);
       }
     }
   }
@@ -178,13 +212,13 @@ DetectorSearcher::searchUsingNearestNeighbours(const V3D &q) {
  * @param neighbours :: vector of nearest neighbours to check
  * @return tuple of <detector hit, index of correct index in m_IndexMap>
  */
-const std::tuple<bool, size_t> DetectorSearcher::checkInteceptWithNeighbours(
+std::tuple<bool, size_t> DetectorSearcher::checkInteceptWithNeighbours(
     const V3D &direction,
     const Kernel::NearestNeighbours<3>::NearestNeighbourResults &neighbours)
     const {
   Geometry::Track track(m_detInfo.samplePosition(), direction);
   // Find which of the neighbours we actually intersect with
-  for (const auto neighbour : neighbours) {
+  for (const auto &neighbour : neighbours) {
     const auto index = std::get<1>(neighbour);
     const auto &det = m_detInfo.detector(m_indexMap[index]);
 
@@ -212,12 +246,10 @@ V3D DetectorSearcher::convertQtoDirection(const V3D &q) const {
   const auto refFrame = m_instrument->getReferenceFrame();
   const V3D refBeamDir = refFrame->vecPointingAlongBeam();
 
-  auto qSign = (m_crystallography_convention) ? -1.0 : 1.0;
-  const double qBeam = q.scalar_prod(refBeamDir) * qSign;
+  const double qBeam = q.scalar_prod(refBeamDir) * m_crystallography_convention;
   double one_over_wl = (norm_q * norm_q) / (2.0 * qBeam);
 
-  qSign = (m_crystallography_convention) ? 1.0 : -1.0;
-  auto detectorDir = q * qSign;
+  auto detectorDir = q * -m_crystallography_convention;
   detectorDir[refFrame->pointingAlongBeam()] = one_over_wl - qBeam;
   detectorDir.normalize();
   return detectorDir;

@@ -61,8 +61,8 @@ public:
    * @param nPts :: the number of data points
    * @param nElems :: the number of elements for each point
    */
-  NNDataPoints(const size_t nPts, const size_t nElems) : m_nPts(nPts) {
-    m_data = annAllocPts(static_cast<int>(m_nPts), static_cast<int>(nElems));
+  NNDataPoints(const int nPts, const int nElems) : m_nPts(nPts) {
+    m_data = annAllocPts(m_nPts, nElems);
   }
 
   ~NNDataPoints() { annDeallocPts(m_data); }
@@ -81,7 +81,7 @@ public:
    * @param i :: the index of the point to return a handle to
    * @return handle to a single point in the collection of points
    */
-  ANNcoord *mutablePoint(const size_t i) {
+  ANNcoord *mutablePoint(const int i) {
     if (i < m_nPts)
       return m_data[i];
     else
@@ -90,7 +90,7 @@ public:
 
 private:
   /// Number of points stored
-  const size_t m_nPts;
+  const int m_nPts;
   /// Array of points for use with NN search
   ANNpointArray m_data;
 };
@@ -115,12 +115,13 @@ public:
     const auto numPoints = static_cast<int>(points.size());
     if (numPoints == 0)
       std::runtime_error(
-          "Need at least one point to initilise NearestNeighbours.");
+          "Need at least one point to initialise NearestNeighbours.");
 
-    m_dataPoints = make_unique<NNDataPoints>(numPoints, N);
+    m_dataPoints = make_unique<NNDataPoints>(numPoints, static_cast<int>(N));
 
     for (size_t i = 0; i < points.size(); ++i) {
-      Eigen::Map<VectorType>(m_dataPoints->mutablePoint(i), N, 1) = points[i];
+      Eigen::Map<VectorType>(m_dataPoints->mutablePoint(static_cast<int>(i)), N,
+                             1) = points[i];
     }
     m_kdTree = make_unique<ANNkd_tree>(m_dataPoints->rawData(), numPoints,
                                        static_cast<int>(N));
@@ -178,8 +179,7 @@ private:
       // create Eigen array from ANNpoint
       auto pos = m_dataPoints->mutablePoint(nnIndexList[i]);
       VectorType point = Eigen::Map<VectorType>(pos, N, 1);
-      auto item = std::make_tuple(point, nnIndexList[i], nnDistList[i]);
-      results.push_back(item);
+      results.emplace_back(point, nnIndexList[i], nnDistList[i]);
     }
 
     return results;

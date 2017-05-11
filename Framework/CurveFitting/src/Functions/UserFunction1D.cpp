@@ -81,7 +81,7 @@ void UserFunction1D::prepare() {
       varName = varName.substr(i0, i1 - i0 + 1);
       if (varName.empty() || varValue.empty())
         throw std::invalid_argument("Property InitialParameters is malformed");
-      double value = atof(varValue.c_str());
+      double value = std::stod(varValue);
       if (!existsProperty(varName))
         throw std::invalid_argument("Fit parameter " + varName +
                                     " does not exist");
