@@ -116,6 +116,7 @@ public:
   void setAllPairs();
   void clearChosenPeriods() const;
   void setChosenGroup(QString &group);
+  void setChosenPeriods(const QString &period);
 public slots:
   /// Perform the fit algorithm
   void fit() override;

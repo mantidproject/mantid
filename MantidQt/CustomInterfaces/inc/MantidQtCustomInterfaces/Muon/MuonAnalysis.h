@@ -104,6 +104,8 @@ private slots:
   void handleGroupBox(bool enabled, bool updateWorkspaces = true);
   void handlePeriodBox(bool enabled, bool updateWorkspaces = true);
   void setChosenGroupSlot(QString &group);
+  void setChosenPeriodSlot(QString &period);
+
   /// Checks whether two specified periods are equal and, if they are, sets
   /// second one to None
   void checkForEqualPeriods();

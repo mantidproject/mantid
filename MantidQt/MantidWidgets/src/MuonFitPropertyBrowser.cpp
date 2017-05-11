@@ -1294,6 +1294,20 @@ void MuonFitPropertyBrowser::setChosenPeriods(const QStringList &chosenPeriods){
 		}
 	}
 }
+/**
+* Ticks the selected periods
+* @param chsoenPeriods :: list of selected periods
+*/
+void MuonFitPropertyBrowser::setChosenPeriods(const QString &period) {
+	clearChosenPeriods();
+		for (auto iter = m_periodBoxes.constBegin(); iter != m_periodBoxes.constEnd();
+			++iter) {
+			auto tmp = iter.key();
+			if (iter.key() == period) {
+				m_boolManager->setValue(iter.value(), true);
+			}
+	}
+}
 /*
 * Create a popup window to select a custom
 * selection of periods
@@ -1349,6 +1363,5 @@ void MuonFitPropertyBrowser::combineBtnPressed() {
 	addPeriodCheckbox(value);
 
 }
-
 } // MantidQt
 } // API

@@ -123,6 +123,8 @@ public:
 
 signals:
   void setChosenGroupSignal(QString &group);
+  void setChosenPeriodSignal(QString &period);
+
 public slots:
   /// Transforms fit results when a simultaneous fit finishes
   void handleFitFinished(const QString &status = QString("success")) const;
@@ -138,7 +140,6 @@ public slots:
   void openSequentialFitDialog();
   /// Handles "fit raw data" selection/deselection
   void handleFitRawData(bool enabled, bool updateWorkspaces = true);
-//  void handleGroupBox(bool enabled, bool updateWorkspaces = true);
   /// Perform pre-fit checks
   void doPreFitChecks(bool sequentialFit);
 

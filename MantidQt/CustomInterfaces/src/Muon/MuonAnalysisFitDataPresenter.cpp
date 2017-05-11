@@ -144,8 +144,6 @@ void MuonAnalysisFitDataPresenter::doConnect() {
             SLOT(doPreFitChecks(bool)));
     connect(fitBrowser, SIGNAL(fitRawDataClicked(bool)), this,
             SLOT(handleFitRawData(bool)));
-//	connect(fitBrowser, SIGNAL(groupBoxClicked(bool)), this,
-//		SLOT(handleGroupBox(bool)));
   }
   if (const QObject *dataSelector = dynamic_cast<QObject *>(m_dataSelector)) {
     connect(dataSelector, SIGNAL(dataPropertiesChanged()), this,
@@ -793,15 +791,14 @@ void MuonAnalysisFitDataPresenter::setUpDataSelector(
   // (unless extra groups/periods are already selected, in which case don't
   // unselect them)
   QString &groupToSet = QString::fromStdString(wsParams.itemName);
-  const QString &periodToSet = QString::fromStdString(wsParams.periods);
+  QString &periodToSet = QString::fromStdString(wsParams.periods);
   const auto &groups = m_dataSelector->getChosenGroups();
   const auto &periods = m_dataSelector->getPeriodSelections();
   if (!groups.contains(groupToSet)) {
-  //  m_dataSelector->setChosenGroup(groupToSet);
 	  emit setChosenGroupSignal(groupToSet); 
   }
   if (!periodToSet.isEmpty() && !periods.contains(periodToSet)) {
-//    m_dataSelector->setChosenPeriod(periodToSet);
+	  emit setChosenPeriodSignal(periodToSet);
   }
 
   // If given an optional file path to "current run", cache it for later use
