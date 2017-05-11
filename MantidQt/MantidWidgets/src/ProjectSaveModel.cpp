@@ -30,11 +30,11 @@ ProjectSaveModel::ProjectSaveModel(
     // then track it so we can always add it to the included
     // window list
     if (wsNames.size() == 0) {
-        m_unattachedWindows.push_back(window);
-        continue;
+      m_unattachedWindows.push_back(window);
+      continue;
     }
 
-    // otherwise add a reference mapping the window to the 
+    // otherwise add a reference mapping the window to the
     // it's various connected workspaces
     for (auto &name : wsNames) {
       m_workspaceWindows[name].push_back(window);
@@ -117,8 +117,9 @@ std::vector<std::string> ProjectSaveModel::getWorkspaceNames() const {
  * @param wsNames :: vector of workspace names to find associated windows for
  * @return vector of window info objects associated with the workpaces
  */
-std::vector<WindowInfo> ProjectSaveModel::getWindowInformation(
-    const std::vector<std::string> &wsNames, bool includeUnattached) const {
+std::vector<WindowInfo>
+ProjectSaveModel::getWindowInformation(const std::vector<std::string> &wsNames,
+                                       bool includeUnattached) const {
   std::vector<WindowInfo> winInfo;
 
   for (auto window : getUniqueWindows(wsNames)) {
@@ -127,22 +128,23 @@ std::vector<WindowInfo> ProjectSaveModel::getWindowInformation(
   }
 
   if (includeUnattached) {
-      for (const auto window : m_unattachedWindows) {
-          auto info = makeWindowInfoObject(window);
-          winInfo.push_back(info);
-      }
+    for (const auto window : m_unattachedWindows) {
+      auto info = makeWindowInfoObject(window);
+      winInfo.push_back(info);
+    }
   }
 
   return winInfo;
 }
 
-WindowInfo ProjectSaveModel::makeWindowInfoObject(IProjectSerialisable * window) const {
-    WindowIcons icons;
-    WindowInfo info;
-    info.name = window->getWindowName();
-    info.type = window->getWindowType();
-    info.icon_id = icons.getIconID(window->getWindowType());
-    return info;
+WindowInfo
+ProjectSaveModel::makeWindowInfoObject(IProjectSerialisable *window) const {
+  WindowIcons icons;
+  WindowInfo info;
+  info.name = window->getWindowName();
+  info.type = window->getWindowType();
+  info.icon_id = icons.getIconID(window->getWindowType());
+  return info;
 }
 
 /**
