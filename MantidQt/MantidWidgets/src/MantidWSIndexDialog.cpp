@@ -368,7 +368,7 @@ bool MantidWSIndexWidget::validatePlotOptions() {
     double previousValue = 0.0;
     foreach (QString value, values) {
       bool ok = false;
-      double currentValue =value.toDouble(&ok);
+      double currentValue = value.toDouble(&ok);
       // Check for non-numeric value
       if (!ok) {
         m_logValues->setError("A custom log value is not valid: " + value);
@@ -379,13 +379,12 @@ bool MantidWSIndexWidget::validatePlotOptions() {
       if (firstValue) {
         firstValue = false;
         previousValue = currentValue;
-      }
-      else {
+      } else {
         if (previousValue < currentValue) {
           previousValue = currentValue;
-        }
-        else {
-          m_logValues->setError("The custom log values must be in numerical order and distinct.");
+        } else {
+          m_logValues->setError(
+              "The custom log values must be in numerical order and distinct.");
           validOptions = false;
           break;
         }
