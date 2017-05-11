@@ -11,23 +11,6 @@
 namespace Mantid {
 namespace API {
 
-/**
- * Defined conversion from ID to index for detectors
- * @param detIds : Detector IDs to build the indexes for
- * @return shared_ptr to const map of detector ID -> detector index.
- */
-boost::shared_ptr<const std::unordered_map<detid_t, size_t>>
-makeDetIdToIndexMap(const std::vector<detid_t> &detIds) {
-
-  const size_t nDetIds = detIds.size();
-  auto detIdToIndex = boost::make_shared<std::unordered_map<detid_t, size_t>>();
-  detIdToIndex->reserve(nDetIds);
-  for (size_t i = 0; i < nDetIds; ++i) {
-    (*detIdToIndex)[detIds[i]] = i;
-  }
-  return std::move(detIdToIndex);
-}
-
 /** Construct DetectorInfo based on an Instrument.
  *
  * The Instrument reference `instrument` must be the parameterized instrument

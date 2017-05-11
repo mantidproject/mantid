@@ -1,7 +1,7 @@
-#ifndef MANTID_API_INFOCOMPONENTVISITOR_H_
-#define MANTID_API_INFOCOMPONENTVISITOR_H_
+#ifndef MANTID_GEOMETRY_INFOCOMPONENTVISITOR_H_
+#define MANTID_GEOMETRY_INFOCOMPONENTVISITOR_H_
 
-#include "MantidAPI/DllConfig.h"
+#include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/Instrument/ComponentVisitor.h"
 #include <cstddef>
 #include <utility>
@@ -16,8 +16,11 @@ class IComponent;
 class ICompAssembly;
 class IDetector;
 }
+namespace Beamline {
+class ComponentInfo;
+}
 
-namespace API {
+namespace Geometry {
 
 /** InfoComponentVisitor : Visitor for components with access to Info wrapping
   features.
@@ -49,7 +52,7 @@ namespace API {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTID_API_DLL InfoComponentVisitor
+class MANTID_GEOMETRY_DLL InfoComponentVisitor
     : public Mantid::Geometry::ComponentVisitor {
 private:
   /// Detectors components always specified first
@@ -95,8 +98,12 @@ public:
   boost::shared_ptr<const std::unordered_map<detid_t, size_t>>
   detectorIdToIndexMap() const;
   size_t size() const;
+
+  bool isEmpty() const;
+
+  std::unique_ptr<Beamline::ComponentInfo> componentInfo() const;
 };
-} // namespace API
+} // namespace Geometry
 } // namespace Mantid
 
-#endif /* MANTID_API_INFOCOMPONENTVISITOR_H_ */
+#endif /* MANTID_GEOMETRY_INFOCOMPONENTVISITOR_H_ */

@@ -24,7 +24,7 @@ class ComponentInfo;
 class DetectorInfo;
 }
 namespace Geometry {
-
+class InfoComponentVisitor;
 class XMLInstrumentParameter;
 class ParameterMap;
 class ReferenceFrame;
@@ -259,6 +259,10 @@ public:
       boost::shared_ptr<const std::unordered_map<Geometry::ComponentID, size_t>>
           componentIdToIndexMap);
 
+  void setInfoVisitor(const InfoComponentVisitor &visitor);
+
+  const InfoComponentVisitor &infoVisitor() const;
+
   boost::shared_ptr<const std::vector<Geometry::ComponentID>>
   componentIds() const;
   boost::shared_ptr<ParameterMap> makeLegacyParameterMap() const;
@@ -364,7 +368,10 @@ private:
   /// associated with an ExperimentInfo object.
   boost::shared_ptr<const std::unordered_map<detid_t, size_t>>
       m_detIdToIndexMap;
+  /// Flag - is this the physical rather than neutronic instrument
   bool m_isPhysicalInstrument{false};
+  /// Component and Detector info relevant cache
+  std::unique_ptr<const InfoComponentVisitor> m_infoVisitor{nullptr};
 };
 namespace Conversion {
 

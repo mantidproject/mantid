@@ -1,15 +1,17 @@
-#include "MantidAPI/InfoComponentVisitor.h"
-#include "MantidAPI/DetectorInfo.h"
+#include "MantidGeometry/Instrument/InfoComponentVisitor.h"
 #include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/ICompAssembly.h"
 #include "MantidGeometry/IDetector.h"
+#include "MantidBeamline/ComponentInfo.h"
+#include "MantidKernel/make_unique.h"
 
 #include <numeric>
 #include <algorithm>
 #include <boost/make_shared.hpp>
 
 namespace Mantid {
-namespace API {
+
+namespace Geometry {
 
 using namespace Mantid::Geometry;
 
@@ -78,22 +80,22 @@ void InfoComponentVisitor::registerGenericComponent(
 void InfoComponentVisitor::registerDetector(const IDetector &detector) {
 
   const size_t detectorIndex = m_assemblySortedDetectorIndices->size();
-    /* Already allocated we just need to index into the inital front-detector
-    * part of the collection.
-    * 1. Guarantee on grouping detectors by type such that the first n
-    * components
-    * are detectors.
-    * 2. Guarantee on ordering such that the
-    * detectorIndex == componentIndex for all detectors.
-    */
+  /* Already allocated we just need to index into the inital front-detector
+  * part of the collection.
+  * 1. Guarantee on grouping detectors by type such that the first n
+  * components
+  * are detectors.
+  * 2. Guarantee on ordering such that the
+  * detectorIndex == componentIndex for all detectors.
+  */
   // Record the ID -> component index mapping
   (*m_componentIdToIndexMap)[detector.getComponentID()] = detectorIndex;
   (*m_componentIds)[detectorIndex] = detector.getComponentID();
-    // Record the det ID -> index mapping
+  // Record the det ID -> index mapping
   (*m_detectorIdToIndexMap)[detector.getID()] =
       detectorIndex; // register the detector index
   m_assemblySortedDetectorIndices->push_back(detectorIndex);
-    // Increment counter for next registration
+  // Increment counter for next registration
 }
 
 /**
@@ -135,6 +137,8 @@ InfoComponentVisitor::componentIds() const {
  */
 size_t InfoComponentVisitor::size() const { return m_componentIds->size(); }
 
+bool InfoComponentVisitor::isEmpty() const { return size() == 0; }
+
 boost::shared_ptr<
     const std::unordered_map<Mantid::Geometry::IComponent *, size_t>>
 InfoComponentVisitor::componentIdToIndexMap() const {
@@ -145,5 +149,12 @@ boost::shared_ptr<const std::unordered_map<detid_t, size_t>>
 InfoComponentVisitor::detectorIdToIndexMap() const {
   return m_detectorIdToIndexMap;
 }
-} // namespace API
+
+std::unique_ptr<Beamline::ComponentInfo>
+InfoComponentVisitor::componentInfo() const {
+  return Kernel::make_unique<Mantid::Beamline::ComponentInfo>(
+      m_assemblySortedDetectorIndices, m_ranges);
+}
+
+} // namespace Geometry
 } // namespace Mantid

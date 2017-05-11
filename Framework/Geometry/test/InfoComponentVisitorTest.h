@@ -1,16 +1,16 @@
-#ifndef MANTID_API_INFOCOMPONENTVISITORTEST_H_
-#define MANTID_API_INFOCOMPONENTVISITORTEST_H_
+#ifndef MANTID_GEOMETRY_INFOCOMPONENTVISITORTEST_H_
+#define MANTID_GEOMETRY_INFOCOMPONENTVISITORTEST_H_
 
 #include <cxxtest/TestSuite.h>
 
 #include "MantidKernel/V3D.h"
 #include "MantidGeometry/IComponent.h"
-#include "MantidAPI/InfoComponentVisitor.h"
+#include "MantidGeometry/Instrument/InfoComponentVisitor.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include <set>
 #include <algorithm>
 
-using Mantid::API::InfoComponentVisitor;
+using Mantid::Geometry::InfoComponentVisitor;
 using Mantid::Kernel::V3D;
 using namespace ComponentCreationHelper;
 

@@ -24,6 +24,7 @@ class DetectorInfo;
 class SpectrumInfo;
 }
 namespace Geometry {
+class InfoComponentVisitor;
 class ParameterMap;
 class XMLInstrumentParameter;
 }
@@ -32,7 +33,6 @@ namespace API {
 class ChopperModel;
 class ComponentInfo;
 class DetectorInfo;
-class InfoComponentVisitor;
 class ModeratorModel;
 class Run;
 class Sample;
@@ -194,8 +194,7 @@ protected:
   Geometry::Instrument_const_sptr sptr_instrument;
 
 private:
-  void makeAPIComponentInfo(const Geometry::Instrument &instr,
-                            const InfoComponentVisitor &visitor);
+  void makeAPIComponentInfo(const Geometry::InfoComponentVisitor &visitor);
 
   boost::shared_ptr<Geometry::Instrument> makeParameterizedInstrument() const;
   /// Fill with given instrument parameter
@@ -239,7 +238,7 @@ private:
   // This vector stores boolean flags but uses char to do so since
   // std::vector<bool> is not thread-safe.
   mutable std::vector<char> m_spectrumDefinitionNeedsUpdate;
-  std::unique_ptr<InfoComponentVisitor> m_infoVisitor;
+  std::unique_ptr<Geometry::InfoComponentVisitor> m_infoVisitor;
 };
 
 /// Shared pointer to ExperimentInfo

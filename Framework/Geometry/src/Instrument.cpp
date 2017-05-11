@@ -1,4 +1,5 @@
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/InfoComponentVisitor.h"
 #include "MantidGeometry/Instrument/ParComponentFactory.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
@@ -1340,6 +1341,18 @@ void Instrument::setComponentInfo(
   m_componentInfo = std::move(componentInfo);
   m_componentIds = std::move(componentIds);
   m_componentIdToIndexMap = std::move(componentIdToIndexMap);
+}
+
+void Instrument::setInfoVisitor(const InfoComponentVisitor &visitor) {
+  m_infoVisitor.reset(new InfoComponentVisitor(visitor));
+}
+
+const InfoComponentVisitor &Instrument::infoVisitor() const {
+  if (!m_infoVisitor) {
+    throw std::runtime_error(
+        "Instrument::infoVisitor InfoComponentInfo never set");
+  }
+  return *m_infoVisitor;
 }
 
 /// Returns the index for a detector ID. Used for accessing DetectorInfo.
