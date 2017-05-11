@@ -4,7 +4,7 @@
 #
 # Notes:
 #
-# WORKSPACE, JOB_NAME, NODE_LABEL GIT_COMMIT are environment variables that 
+# WORKSPACE, JOB_NAME, NODE_LABEL GIT_COMMIT are environment variables that
 # are set by Jenkins. The last one corresponds to any labels set on a slave.
 ###############################################################################
 
@@ -22,6 +22,11 @@ echo "SHA1=${sha1}"
 ###############################################################################
 if [ -z "$MANTID_DATA_STORE" ]; then
   export MANTID_DATA_STORE=$HOME/MantidExternalData
+fi
+
+# -z checks for empty string
+if [ -z "$EXTRA_ARGS" ]; then
+  EXTRA_ARGS=''
 fi
 
 ###############################################################################
@@ -69,5 +74,4 @@ echo "CheckMantidVersion.OnStartup = 0" >> $userprops
 
 # Run
 PKGDIR=${WORKSPACE}/build
-python $WORKSPACE/Testing/SystemTests/scripts/InstallerTests.py -o -d $PKGDIR
-
+python $WORKSPACE/Testing/SystemTests/scripts/InstallerTests.py -o -d $PKGDIR $EXTRA_ARGS

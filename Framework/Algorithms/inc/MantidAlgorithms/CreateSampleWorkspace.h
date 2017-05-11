@@ -56,11 +56,11 @@ private:
   DataObjects::EventWorkspace_sptr
   createEventWorkspace(int numPixels, int numBins, int numMonitors,
                        int numEvents, double x0, double binDelta,
-                       int start_at_pixelID, Geometry::Instrument_sptr inst,
+                       Geometry::Instrument_sptr inst,
                        const std::string &functionString, bool isRandom);
   API::MatrixWorkspace_sptr
   createHistogramWorkspace(int numPixels, int numBins, int numMonitors,
-                           double x0, double binDelta, int start_at_pixelID,
+                           double x0, double binDelta,
                            Geometry::Instrument_sptr inst,
                            const std::string &functionString, bool isRandom);
   Geometry::Instrument_sptr createTestInstrumentRectangular(

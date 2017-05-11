@@ -58,7 +58,7 @@ void SetGoniometer::exec() {
   // Create the goniometer
   Goniometer gon;
 
-  if (gonioDefined.compare("Universal") == 0)
+  if (gonioDefined == "Universal")
     gon.makeUniversalGoniometer();
   else
     for (size_t i = 0; i < NUM_AXES; i++) {

@@ -54,37 +54,42 @@ namespace API {
 
 class MANTID_API_DLL DetectorSearcher {
 public:
+  /// Search result type representing whether a detector was found and if so
+  /// which detector index it was.
   typedef std::tuple<bool, size_t> DetectorSearchResult;
 
   /// Create a new DetectorSearcher with the given instrument & detectors
   DetectorSearcher(Geometry::Instrument_const_sptr instrument,
                    const DetectorInfo &detInfo);
   /// Find a detector that intsects with the given Qlab vector
-  const DetectorSearchResult findDetectorIndex(const Kernel::V3D &q);
+  DetectorSearchResult findDetectorIndex(const Kernel::V3D &q);
 
 private:
   /// Attempt to find a detector using a full instrument ray tracing strategy
-  const DetectorSearchResult
-  searchUsingInstrumentRayTracing(const Kernel::V3D &q);
+  DetectorSearchResult searchUsingInstrumentRayTracing(const Kernel::V3D &q);
   /// Attempt to find a detector using a nearest neighbours search strategy
-  const DetectorSearchResult searchUsingNearestNeighbours(const Kernel::V3D &q);
+  DetectorSearchResult searchUsingNearestNeighbours(const Kernel::V3D &q);
   /// Check whether the given direction in detector space intercepts with a
   /// detector
-  const std::tuple<bool, size_t> checkInteceptWithNeighbours(
+  std::tuple<bool, size_t> checkInteceptWithNeighbours(
       const Kernel::V3D &direction,
       const Kernel::NearestNeighbours<3>::NearestNeighbourResults &neighbours)
       const;
   /// Helper function to build the nearest neighbour tree
   void createDetectorCache();
-  /// Helper function to conver a Qlab vector to a direction in detector space
+  /// Helper function to convert a Qlab vector to a direction in detector space
   Kernel::V3D convertQtoDirection(const Kernel::V3D &q) const;
+  /// Helper function to handle the tube gap parameter in tube instruments
+  DetectorSearchResult handleTubeGap(
+      const Kernel::V3D &detectorDir,
+      const Kernel::NearestNeighbours<3>::NearestNeighbourResults &neighbours);
 
   // Instance variables
 
   /// flag for whether to use InstrumentRayTracer or NearestNeighbours
   const bool m_usingFullRayTrace;
   /// flag for whether the crystallography convention is to be used
-  const bool m_crystallography_convention;
+  const double m_crystallography_convention;
   /// detector info for the instrument
   const DetectorInfo &m_detInfo;
   /// handle to the instrument to search for detectors in

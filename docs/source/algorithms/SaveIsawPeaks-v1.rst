@@ -42,10 +42,10 @@ Usage
 
   # Print out 11 first lines of the peaks file, skipping line #8 because it's
   # different on different systems and breaks tests
-  for line in file[:8]:
+  for line in file[:9]:
       # print the line stripping any ending white spaces
       print line.rstrip()
-  for line in file[9:11]:
+  for line in file[10:12]:
       # print the line stripping any ending white spaces
       print line.rstrip()
 
@@ -60,6 +60,7 @@ Output
    7  1000.0000       0.000
    4 DETNUM  NROWS  NCOLS   WIDTH   HEIGHT   DEPTH   DETD   CenterX   CenterY   CenterZ    BaseX    BaseY    BaseZ      UpX      UpY      UpZ
    5      1     10     10  8.0000  8.0000   0.2000 500.00    0.0000    0.0000  500.0000  1.00000  0.00000  0.00000  0.00000  1.00000  0.00000
+   5      2     10     10  8.0000  8.0000   0.2000 1000.00    0.0000    0.0000 1000.0000  1.00000  0.00000  0.00000  0.00000  1.00000  0.00000
    0  NRUN DETNUM     CHI      PHI    OMEGA       MONCNT
    1     0      1    0.00     0.00     0.00            0
    2   SEQN    H    K    L     COL      ROW     CHAN        L2   2_THETA        AZ         WL         D      IPK       INTI    SIGI  RFLG

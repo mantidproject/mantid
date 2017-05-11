@@ -2,7 +2,7 @@ set ( SRC_FILES
 	src/ANN_complete.cpp
 	src/ArrayBoundedValidator.cpp
 	src/ArrayLengthValidator.cpp
-  src/ArrayOrderedPairsValidator.cpp
+	src/ArrayOrderedPairsValidator.cpp
 	src/ArrayProperty.cpp
 	src/Atom.cpp
 	src/BinFinder.cpp
@@ -18,6 +18,7 @@ set ( SRC_FILES
 	src/DateTimeValidator.cpp
 	src/DateValidator.cpp
 	src/DeltaEMode.cpp
+	src/Diffraction.cpp
 	src/DirectoryValidator.cpp
 	src/DiskBuffer.cpp
 	src/DllOpen.cpp
@@ -84,8 +85,8 @@ set ( SRC_FILES
 	src/PropertyManager.cpp
 	src/PropertyManagerDataService.cpp
 	src/PropertyManagerOwner.cpp
-    	src/PropertyManagerProperty.cpp
-    	src/PropertyNexus.cpp
+	src/PropertyManagerProperty.cpp
+	src/PropertyNexus.cpp
 	src/PropertyWithValue.cpp
 	src/ProxyInfo.cpp
 	src/PseudoRandomNumberGenerator.cpp
@@ -166,6 +167,7 @@ set ( INC_FILES
 	inc/MantidKernel/DateTimeValidator.h
 	inc/MantidKernel/DateValidator.h
 	inc/MantidKernel/DeltaEMode.h
+	inc/MantidKernel/Diffraction.h
 	inc/MantidKernel/DirectoryValidator.h
 	inc/MantidKernel/DiskBuffer.h
 	inc/MantidKernel/DllConfig.h
@@ -335,6 +337,7 @@ set ( TEST_FILES
 	DateTimeValidatorTest.h
 	DateValidatorTest.h
 	DeltaEModeTest.h
+	DiffractionTest.h
 	DirectoryValidatorTest.h
 	DiskBufferISaveableTest.h
 	DiskBufferTest.h
@@ -471,7 +474,7 @@ add_library ( Kernel ${SRC_FILES} ${INC_FILES} )
 set_target_properties ( Kernel PROPERTIES OUTPUT_NAME MantidKernel
                                           COMPILE_DEFINITIONS "IN_MANTID_KERNEL;PSAPI_VERSION=1" )
 
-target_include_directories ( Kernel PRIVATE ${GSL_INCLUDE_DIR} ${OPENSSL_INCLUDE_DIR})
+target_include_directories ( Kernel PUBLIC ${EIGEN3_INCLUDE_DIR} PRIVATE ${GSL_INCLUDE_DIR} ${OPENSSL_INCLUDE_DIR})
 
 if (OSX_VERSION VERSION_GREATER 10.8)
   set_target_properties ( Kernel PROPERTIES INSTALL_RPATH "@loader_path/../MacOS")

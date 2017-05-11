@@ -171,11 +171,12 @@ DateAndTime::DateAndTime(const boost::posix_time::ptime _ptime)
  * @param nanoseconds :: nanoseconds to add to the number of seconds
  */
 DateAndTime::DateAndTime(const double seconds, const double nanoseconds) {
-  double nano = seconds * 1e9 + nanoseconds;
-  // Limit times
-  if (nano > MAX_NANOSECONDS)
+  double nano = seconds * 1.e9 + nanoseconds;
+  constexpr double minimum = static_cast<double>(MIN_NANOSECONDS);
+  constexpr double maximum = static_cast<double>(MAX_NANOSECONDS);
+  if (nano > maximum)
     _nanoseconds = MAX_NANOSECONDS;
-  else if (nano < MIN_NANOSECONDS)
+  else if (nano < minimum)
     _nanoseconds = MIN_NANOSECONDS;
   else
     _nanoseconds = static_cast<int64_t>(nano);
@@ -837,11 +838,13 @@ time_duration DateAndTime::durationFromNanoseconds(int64_t dur) {
  * @return int64 of the number of nanoseconds
  */
 int64_t DateAndTime::nanosecondsFromSeconds(double sec) {
-  double nano = sec * 1e9;
+  const double nano = sec * 1e9;
+  constexpr double minimum = static_cast<double>(MIN_NANOSECONDS);
+  constexpr double maximum = static_cast<double>(MAX_NANOSECONDS);
   // Use these limits to avoid integer overflows
-  if (nano > MAX_NANOSECONDS)
+  if (nano > maximum)
     return MAX_NANOSECONDS;
-  else if (nano < MIN_NANOSECONDS)
+  else if (nano < minimum)
     return MIN_NANOSECONDS;
   else
     return int64_t(nano);

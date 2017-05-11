@@ -9,6 +9,8 @@
 
 #include <algorithm>
 #include <map>
+#include <memory>
+#include <mutex>
 #include <unordered_map>
 
 namespace Mantid {
@@ -46,8 +48,13 @@ namespace Indexing {
 class MANTID_INDEXING_DLL SpectrumNumberTranslator {
 public:
   SpectrumNumberTranslator(const std::vector<SpectrumNumber> &spectrumNumbers,
-                           const Partitioner &partitioner,
+                           std::unique_ptr<Partitioner> partitioner,
                            const PartitionIndex &partition);
+
+  size_t globalSize() const;
+  size_t localSize() const;
+
+  SpectrumNumber spectrumNumber(const size_t index) const;
 
   SpectrumIndexSet makeIndexSet() const;
   SpectrumIndexSet makeIndexSet(SpectrumNumber min, SpectrumNumber max) const;
@@ -59,6 +66,11 @@ public:
   makeIndexSet(const std::vector<GlobalSpectrumIndex> &globalIndices) const;
 
 private:
+  bool isPartitioned() const;
+  void checkUniqueSpectrumNumbers() const;
+  // Not thread-safe! Use only in combination with std::call_once!
+  void setupSpectrumNumberToIndexMap() const;
+
   struct SpectrumNumberHash {
     std::size_t operator()(const SpectrumNumber &spectrumNumber) const {
       return std::hash<std::int32_t>()(
@@ -68,9 +80,14 @@ private:
 
   const PartitionIndex m_partition;
   std::unordered_map<SpectrumNumber, PartitionIndex, SpectrumNumberHash>
-      m_partitions;
-  std::map<SpectrumNumber, size_t> m_indices;
-  std::map<GlobalSpectrumIndex, size_t> m_globalToLocal;
+      m_spectrumNumberToPartition;
+  mutable std::vector<std::pair<SpectrumNumber, size_t>>
+      m_spectrumNumberToIndex;
+  std::vector<std::pair<GlobalSpectrumIndex, size_t>> m_globalToLocal;
+  std::vector<SpectrumNumber> m_spectrumNumbers;
+  std::vector<SpectrumNumber> m_globalSpectrumNumbers;
+
+  mutable std::once_flag m_mapSetup;
 };
 
 } // namespace Indexing

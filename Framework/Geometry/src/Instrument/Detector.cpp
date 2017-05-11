@@ -1,4 +1,6 @@
+#include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Detector.h"
+#include "MantidGeometry/Instrument/ComponentVisitor.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidBeamline/DetectorInfo.h"
 #include "MantidKernel/EigenConversionHelpers.h"
@@ -125,7 +127,7 @@ det_topology Detector::getTopology(V3D &center) const {
 
 /// Return the relative position to the parent
 Kernel::V3D Detector::getRelativePos() const {
-  if (m_map && m_map->hasDetectorInfo())
+  if (m_map && hasDetectorInfo())
     return Kernel::toV3D(m_map->detectorInfo().position(index())) -
            getParent()->getPos();
   return ObjComponent::getRelativePos();
@@ -133,14 +135,14 @@ Kernel::V3D Detector::getRelativePos() const {
 
 /// Return the absolute position of the Detector
 Kernel::V3D Detector::getPos() const {
-  if (m_map && m_map->hasDetectorInfo())
+  if (m_map && hasDetectorInfo())
     return Kernel::toV3D(m_map->detectorInfo().position(index()));
   return ObjComponent::getPos();
 }
 
 /// Return the relative rotation to the parent
 Kernel::Quat Detector::getRelativeRot() const {
-  if (m_map && m_map->hasDetectorInfo()) {
+  if (m_map && hasDetectorInfo()) {
     auto inverseParentRot = getParent()->getRotation();
     inverseParentRot.inverse();
     // Note the unusual order. This matches the convention in Component::getPos
@@ -153,7 +155,7 @@ Kernel::Quat Detector::getRelativeRot() const {
 
 /// Return the absolute rotation of the Detector
 Kernel::Quat Detector::getRotation() const {
-  if (m_map && m_map->hasDetectorInfo())
+  if (m_map && hasDetectorInfo())
     return Kernel::toQuat(m_map->detectorInfo().rotation(index()));
   return ObjComponent::getRotation();
 }
@@ -163,6 +165,18 @@ const ParameterMap &Detector::parameterMap() const { return *m_map; }
 
 /// Helper for legacy access mode. Returns the index of the detector.
 size_t Detector::index() const { return m_map->detectorIndex(m_id); }
+
+void Detector::registerContents(ComponentVisitor &componentVisitor) const {
+  componentVisitor.registerDetector(*this);
+}
+
+bool Detector::hasDetectorInfo() const {
+  const IComponent *root = m_base;
+  while (auto parent = root->getBareParent())
+    root = parent;
+  auto instrument = dynamic_cast<const Instrument *>(root);
+  return m_map->hasDetectorInfo(instrument);
+}
 
 } // Namespace Geometry
 } // Namespace Mantid

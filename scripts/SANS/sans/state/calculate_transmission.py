@@ -13,7 +13,6 @@ from sans.common.configurations import Configurations
 from sans.state.state_functions import (is_pure_none_or_not_none, validation_message,
                                         is_not_none_and_first_larger_than_second, one_is_none)
 from sans.state.automatic_setters import (automatic_setters)
-from sans.common.file_information import (get_instrument_paths_for_sans_file)
 from sans.common.xml_parsing import get_named_elements_from_ipf_file
 
 
@@ -29,7 +28,7 @@ class StateTransmissionFit(StateBase):
 
     def __init__(self):
         super(StateTransmissionFit, self).__init__()
-        self.fit_type = FitType.Linear
+        self.fit_type = FitType.Log
         self.polynomial_order = 0
 
     def validate(self):  # noqa
@@ -79,6 +78,7 @@ class StateCalculateTransmission(StateBase):
     # ----------------------
     prompt_peak_correction_min = PositiveFloatParameter()
     prompt_peak_correction_max = PositiveFloatParameter()
+    prompt_peak_correction_enabled = BoolParameter()
 
     # ----------------
     # Wavelength rebin
@@ -117,6 +117,11 @@ class StateCalculateTransmission(StateBase):
         self.fit = {DataType.to_string(DataType.Sample): StateTransmissionFit(),
                     DataType.to_string(DataType.Can): StateTransmissionFit()}
         self.use_full_wavelength_range = False
+
+        # Default rebin type is a standard Rebin
+        self.rebin_type = RebinType.Rebin
+
+        self.prompt_peak_correction_enabled = False
 
     def validate(self):  # noqa
         is_invalid = {}
@@ -167,7 +172,7 @@ class StateCalculateTransmission(StateBase):
         # Wavelength rebin
         # -----------------
         if one_is_none([self.wavelength_low, self.wavelength_high, self.wavelength_step, self.wavelength_step_type,
-                        self.rebin_type]):
+                        self.wavelength_step_type, self.rebin_type]):
             entry = validation_message("A wavelength entry has not been set.",
                                        "Make sure that all entries are set.",
                                        {"wavelength_low": self.wavelength_low,
@@ -283,6 +288,7 @@ class StateCalculateTransmissionLOQ(StateCalculateTransmission):
         # Set the LOQ default range for prompt peak correction
         self.prompt_peak_correction_min = Configurations.LOQ.prompt_peak_correction_min
         self.prompt_peak_correction_max = Configurations.LOQ.prompt_peak_correction_max
+        self.prompt_peak_correction_enabled = True
 
     def validate(self):
         super(StateCalculateTransmissionLOQ, self).validate()
@@ -319,12 +325,11 @@ def set_default_monitors(calculate_transmission_info, data_info):
     :param calculate_transmission_info: a StateCalculateTransmission object on which we set the default value
     :param data_info: a StateData object
     """
-    file_name = data_info.sample_scatter
-    _, ipf_path = get_instrument_paths_for_sans_file(file_name)
+    ipf_file_path = data_info.ipf_file_path
     incident_tag = "default-incident-monitor-spectrum"
     transmission_tag = "default-transmission-monitor-spectrum"
     monitors_to_search = [incident_tag, transmission_tag]
-    found_monitor_spectrum = get_named_elements_from_ipf_file(ipf_path, monitors_to_search, int)
+    found_monitor_spectrum = get_named_elements_from_ipf_file(ipf_file_path, monitors_to_search, int)
     if incident_tag in found_monitor_spectrum:
         calculate_transmission_info.default_incident_monitor = found_monitor_spectrum[incident_tag]
     if transmission_tag in found_monitor_spectrum:
