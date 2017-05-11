@@ -15,8 +15,6 @@
 #include "MantidAPI/ParameterTie.h"
 
 #include "MantidKernel/Exception.h"
-#include "MantidKernel/StringTokenizer.h"
-#include "MantidKernel/Strings.h"
 #include <iostream>
 #include <regex>
 
@@ -78,12 +76,12 @@ public:
 } // namespace
 
 /// Constructor
-CrystalFieldFunction::CrystalFieldFunction() : IFunction() {
-  declareAttribute("Ions", Attribute(""));
-  declareAttribute("Symmetries", Attribute(""));
-  declareAttribute("Temperatures", Attribute(std::vector<double>()));
-  declareAttribute("ToleranceEnergy", Attribute(1.0e-10));
-  declareAttribute("ToleranceIntensity", Attribute(1.0e-1));
+CrystalFieldFunction::CrystalFieldFunction() : IFunction(), m_isMultiSpectrum(false), m_hasPeaks(false) {
+  //declareAttribute("Ions", Attribute(""));
+  //declareAttribute("Symmetries", Attribute(""));
+  //declareAttribute("Temperatures", Attribute(std::vector<double>()));
+  //declareAttribute("ToleranceEnergy", Attribute(1.0e-10));
+  //declareAttribute("ToleranceIntensity", Attribute(1.0e-1));
   // declareAttribute("PhysicalProperties",
   //                 Attribute(std::vector<double>(1, 0.0)));
 }
@@ -129,37 +127,41 @@ CrystalFieldFunction::createEquivalentFunctions() const {
 /// Set i-th parameter
 void CrystalFieldFunction::setParameter(size_t i, const double &value,
                                         bool explicitlySet) {
-  if (i < m_nOwnParams) {
+  checkSourceFunction();
+  if (i < m_nSourceParams) {
     m_source->setParameter(i, value, explicitlySet);
     m_dirty = true;
   } else {
     checkTargetFunction();
-    m_target->setParameter(i - m_nOwnParams, value, explicitlySet);
+    m_target->setParameter(i - m_nSourceParams, value, explicitlySet);
   }
 }
 
 /// Set i-th parameter description
 void CrystalFieldFunction::setParameterDescription(
     size_t i, const std::string &description) {
-  if (i < m_nOwnParams) {
+  checkSourceFunction();
+  if (i < m_nSourceParams) {
     m_source->setParameterDescription(i, description);
   } else {
     checkTargetFunction();
-    m_target->setParameterDescription(i - m_nOwnParams, description);
+    m_target->setParameterDescription(i - m_nSourceParams, description);
   }
 }
 
 /// Get i-th parameter
 double CrystalFieldFunction::getParameter(size_t i) const {
+  checkSourceFunction();
   checkTargetFunction();
-  return i < m_nOwnParams ? m_source->getParameter(i)
-                          : m_target->getParameter(i - m_nOwnParams);
+  return i < m_nSourceParams ? m_source->getParameter(i)
+                          : m_target->getParameter(i - m_nSourceParams);
 }
 
 /// Set parameter by name.
 void CrystalFieldFunction::setParameter(const std::string &name,
                                         const double &value,
                                         bool explicitlySet) {
+  checkSourceFunction();
   checkTargetFunction();
   auto i = parameterIndex(name);
   setParameter(i, value, explicitlySet);
@@ -168,6 +170,7 @@ void CrystalFieldFunction::setParameter(const std::string &name,
 /// Set description of parameter by name.
 void CrystalFieldFunction::setParameterDescription(
     const std::string &name, const std::string &description) {
+  checkSourceFunction();
   checkTargetFunction();
   auto i = parameterIndex(name);
   setParameterDescription(i, description);
@@ -181,83 +184,93 @@ double CrystalFieldFunction::getParameter(const std::string &name) const {
 
 /// Total number of parameters
 size_t CrystalFieldFunction::nParams() const {
+  checkSourceFunction();
   checkTargetFunction();
   return m_source->nParams() + m_target->nParams();
 }
 
 /// Returns the index of parameter name
 size_t CrystalFieldFunction::parameterIndex(const std::string &name) const {
+  checkSourceFunction();
   if (isSourceName(name)) {
     return m_source->parameterIndex(name);
   } else {
     checkTargetFunction();
-    return m_target->parameterIndex(name) + m_nOwnParams;
+    return m_target->parameterIndex(name) + m_nSourceParams;
   }
 }
 
 /// Returns the name of parameter i
 std::string CrystalFieldFunction::parameterName(size_t i) const {
+  checkSourceFunction();
   checkTargetFunction();
-  return i < m_nOwnParams ? m_source->parameterName(i)
-                          : m_target->parameterName(i - m_nOwnParams);
+  return i < m_nSourceParams ? m_source->parameterName(i)
+                          : m_target->parameterName(i - m_nSourceParams);
 }
 
 /// Returns the description of parameter i
 std::string CrystalFieldFunction::parameterDescription(size_t i) const {
+  checkSourceFunction();
   checkTargetFunction();
-  return i < m_nOwnParams ? m_source->parameterDescription(i)
-                          : m_target->parameterDescription(i - m_nOwnParams);
+  return i < m_nSourceParams ? m_source->parameterDescription(i)
+                          : m_target->parameterDescription(i - m_nSourceParams);
 }
 
 /// Checks if a parameter has been set explicitly
 bool CrystalFieldFunction::isExplicitlySet(size_t i) const {
+  checkSourceFunction();
   checkTargetFunction();
-  return i < m_nOwnParams ? m_source->isExplicitlySet(i)
-                          : m_target->isExplicitlySet(i - m_nOwnParams);
+  return i < m_nSourceParams ? m_source->isExplicitlySet(i)
+                          : m_target->isExplicitlySet(i - m_nSourceParams);
 }
 
 /// Get the fitting error for a parameter
 double CrystalFieldFunction::getError(size_t i) const {
+  checkSourceFunction();
   checkTargetFunction();
-  return i < m_nOwnParams ? m_source->getError(i)
-                          : m_target->getError(i - m_nOwnParams);
+  return i < m_nSourceParams ? m_source->getError(i)
+                          : m_target->getError(i - m_nSourceParams);
 }
 
 /// Set the fitting error for a parameter
 void CrystalFieldFunction::setError(size_t i, double err) {
-  if (i < m_nOwnParams) {
+  checkSourceFunction();
+  if (i < m_nSourceParams) {
     m_source->setError(i, err);
   } else {
     checkTargetFunction();
-    m_target->setError(i - m_nOwnParams, err);
+    m_target->setError(i - m_nSourceParams, err);
   }
 }
 
 /// Change status of parameter
 void CrystalFieldFunction::setParameterStatus(
     size_t i, IFunction::ParameterStatus status) {
-  if (i < m_nOwnParams) {
+  checkSourceFunction();
+  if (i < m_nSourceParams) {
     m_source->setParameterStatus(i, status);
   } else {
     checkTargetFunction();
-    m_target->setParameterStatus(i - m_nOwnParams, status);
+    m_target->setParameterStatus(i - m_nSourceParams, status);
   }
 }
 
 /// Get status of parameter
 IFunction::ParameterStatus
 CrystalFieldFunction::getParameterStatus(size_t i) const {
-  if (i < m_nOwnParams) {
+  checkSourceFunction();
+  if (i < m_nSourceParams) {
     return m_source->getParameterStatus(i);
   } else {
     checkTargetFunction();
-    return m_target->getParameterStatus(i - m_nOwnParams);
+    return m_target->getParameterStatus(i - m_nSourceParams);
   }
 }
 
 /// Return parameter index from a parameter reference.
 size_t
 CrystalFieldFunction::getParameterIndex(const ParameterReference &ref) const {
+  checkSourceFunction();
   if (ref.getLocalFunction() == this) {
     auto index = ref.getLocalIndex();
     auto np = nParams();
@@ -267,11 +280,12 @@ CrystalFieldFunction::getParameterIndex(const ParameterReference &ref) const {
     return np;
   }
   checkTargetFunction();
-  return m_target->getParameterIndex(ref) + m_nOwnParams;
+  return m_target->getParameterIndex(ref) + m_nSourceParams;
 }
 
 /// Set up the function for a fit.
 void CrystalFieldFunction::setUpForFit() {
+  checkSourceFunction();
   updateTargetFunction();
   IFunction::setUpForFit();
 }
@@ -285,16 +299,16 @@ void CrystalFieldFunction::declareParameter(const std::string &, double,
 
 /// Returns the number of attributes associated with the function
 size_t CrystalFieldFunction::nAttributes() const {
-  // TODO: uncomment
-  // checkTargetFunction();
+  checkSourceFunction();
+  checkTargetFunction();
   return IFunction::nAttributes() + m_source->nAttributes() +
          m_target->nAttributes();
 }
 
 /// Returns a list of attribute names
 std::vector<std::string> CrystalFieldFunction::getAttributeNames() const {
-  // TODO: uncomment
-  // checkTargetFunction();
+  checkSourceFunction();
+  checkTargetFunction();
   std::vector<std::string> attNames = IFunction::getAttributeNames();
   return attNames;
 }
@@ -303,21 +317,28 @@ std::vector<std::string> CrystalFieldFunction::getAttributeNames() const {
 /// @param attName :: Name of an attribute.
 IFunction::Attribute
 CrystalFieldFunction::getAttribute(const std::string &attName) const {
-  std::smatch match;
-  if (std::regex_match(attName, match, SPECTRUM_ATTR_REGEX)) {
-    auto i = std::stoul(match[1]);
-    return getSpectrumAttribute(i, match[2]);
+  if (IFunction::hasAttribute(attName)) {
+    return IFunction::getAttribute(attName);
+  } else if (isSourceName(attName)) {
+    checkSourceFunction();
+    if (isMultiSite()) {
+      if (attName == "Temperature" && !isMultiSpectrum()) {
+        return compositeSource().getFunction(0)->getAttribute("Temperature");
+      } else {
+        throw std::logic_error("Attributes of multi-site source are not implemented yet.");
+      }
+    } else {
+      return m_source->getAttribute(attName);
+    }
+  } else {
+    checkTargetFunction();
+    std::smatch match;
+    if (std::regex_match(attName, match, SPECTRUM_ATTR_REGEX)) {
+      auto i = std::stoul(match[1]);
+      return getSpectrumAttribute(i, match[2]);
+    }
+    return m_target->getAttribute(attName);
   }
-  return IFunction::getAttribute(attName);
-
-  // if (IFunction::hasAttribute(attName)) {
-  //  return IFunction::getAttribute(attName);
-  //} else if (isSourceName(attName)) {
-  //  return m_source->getAttribute(attName);
-  //} else {
-  //  checkTargetFunction();
-  //  return m_target->getAttribute(attName);
-  //}
 }
 
 /// Perform custom actions on setting certain attributes.
@@ -328,14 +349,32 @@ void CrystalFieldFunction::setAttribute(const std::string &attName,
   } else if (attName == "Symmetries") {
     setSymmetriesAttribute(attName, attr);
   } else if (attName == "Temperatures") {
-    setTemperaturesAttribute(attName, attr);
+    //setTemperaturesAttribute(attName, attr);
+  } else if (IFunction::hasAttribute(attName)) {
+    IFunction::setAttribute(attName, attr);
+  } else if (isSourceName(attName)) {
+    checkSourceFunction();
+    if (isMultiSite()) {
+      if (attName == "Temperature" && !isMultiSpectrum()) {
+        auto &source = compositeSource();
+        for(size_t i=0; i < m_control.nFunctions(); ++i) {
+          source.getFunction(i)->setAttribute("Temperature", attr);
+        }
+      } else {
+        throw std::logic_error("Attributes of multi-site source are not implemented yet.");
+      }
+    } else {
+      m_source->setAttribute(attName, attr);
+    }
   } else {
+    checkTargetFunction();
     std::smatch match;
     if (std::regex_match(attName, match, SPECTRUM_ATTR_REGEX)) {
       auto i = std::stoul(match[1]);
       setSpectrumAttribute(i, match[2], attr);
+    } else {
+      m_target->setAttribute(attName, attr);
     }
-    API::IFunction::setAttribute(attName, attr);
   }
 }
 
@@ -350,20 +389,43 @@ bool CrystalFieldFunction::hasAttribute(const std::string &attName) const {
   if (IFunction::hasAttribute(attName)) {
     return true;
   }
-  if (!m_source) {
-    return false;
-  }
+
   if (isSourceName(attName)) {
-    return m_source->hasAttribute(attName);
+    checkSourceFunction();
+    if (isMultiSite()) {
+      if (attName == "Temperature" && !isMultiSpectrum()) {
+        return true;
+      } else {
+        throw std::logic_error("Attributes of multi-site source are not implemented yet.");
+      }
+    } else {
+      return m_source->hasAttribute(attName);
+    }
   } else {
     checkTargetFunction();
     return m_target->hasAttribute(attName);
   }
 }
 
+/// Get a reference to an attribute.
+/// @param attName :: A name of an attribute. It can be a code rather than an
+/// actual name.  This method interprets the code and finds the function and
+/// attribute it referes to.
+/// @returns :: A pair (IFunction, attribute_name) where attribute_name is a
+/// name that the IFunction has.
+std::pair<API::IFunction *, std::string>
+CrystalFieldFunction::getAttributeReference(const std::string &attName) const {
+  std::smatch match;
+  if (std::regex_match(attName, match, SPECTRUM_ATTR_REGEX)) {
+    auto i = std::stoul(match[1]);
+    //return hasSpectrumAttribute(i, match[2]);
+  }
+  return std::make_pair(m_source.get(), "");
+}
+
 /// Get number of the number of spectra (excluding phys prop data).
 size_t CrystalFieldFunction::nSpectra() const {
-  return m_temperatures.size();
+  return m_control.nFunctions();
 }
 
 /// Check that a spectrum index is within the range
@@ -402,22 +464,22 @@ bool CrystalFieldFunction::hasSpectrumAttribute(size_t iSpec, const std::string 
 API::IFunction::Attribute
 CrystalFieldFunction::getSpectrumAttribute(size_t iSpec,
                                            const std::string &attName) const {
-  checkSpectrumIndex(iSpec);
-  if (attName == "FWHMX") {
-    if (iSpec < m_fwhmX.size()) {
-      return Attribute(m_fwhmX[iSpec]);
-    } else {
-      return Attribute(std::vector<double>());
-    }
-  } else if (attName == "FWHMY") {
-    if (iSpec < m_fwhmY.size()) {
-      return Attribute(m_fwhmY[iSpec]);
-    } else {
-      return Attribute(std::vector<double>());
-    }
-  } else if (attName == "Temperature") {
-    return Attribute(m_temperatures[iSpec]);
-  }
+  //checkSpectrumIndex(iSpec);
+  //if (attName == "FWHMX") {
+  //  if (iSpec < m_fwhmX.size()) {
+  //    return Attribute(m_fwhmX[iSpec]);
+  //  } else {
+  //    return Attribute(std::vector<double>());
+  //  }
+  //} else if (attName == "FWHMY") {
+  //  if (iSpec < m_fwhmY.size()) {
+  //    return Attribute(m_fwhmY[iSpec]);
+  //  } else {
+  //    return Attribute(std::vector<double>());
+  //  }
+  //} else if (attName == "Temperature") {
+  //  return Attribute(m_temperatures[iSpec]);
+  //}
   throw std::runtime_error("Attribute " + attName + " not found.");
 }
 
@@ -426,45 +488,47 @@ CrystalFieldFunction::getSpectrumAttribute(size_t iSpec,
 /// @param attName :: Name of an attribute.
 /// @param value :: New value of the attribute.
 void CrystalFieldFunction::setSpectrumAttribute(size_t iSpec, const std::string &attName, const Attribute &value) {
-  checkSpectrumIndex(iSpec);
-  if (attName == "FWHMX") {
-    if (iSpec < m_fwhmX.size()) {
-      m_fwhmX[iSpec] = value.asVector();
-    }
-  } else if (attName == "FWHMY") {
-    if (iSpec < m_fwhmY.size()) {
-      m_fwhmY[iSpec] = value.asVector();
-    }
-  } else if (attName == "Temperature") {
-    m_temperatures[iSpec] = value.asDouble();
-    IFunction::storeAttributeValue("Temperatures", Attribute(m_temperatures));
-  }
+  //checkSpectrumIndex(iSpec);
+  //if (attName == "FWHMX") {
+  //  if (iSpec < m_fwhmX.size()) {
+  //    m_fwhmX[iSpec] = value.asVector();
+  //  }
+  //} else if (attName == "FWHMY") {
+  //  if (iSpec < m_fwhmY.size()) {
+  //    m_fwhmY[iSpec] = value.asVector();
+  //  }
+  //} else if (attName == "Temperature") {
+  //  m_temperatures[iSpec] = value.asDouble();
+  //  IFunction::storeAttributeValue("Temperatures", Attribute(m_temperatures));
+  //}
 }
 
 /// Get the tie for i-th parameter
 ParameterTie *CrystalFieldFunction::getTie(size_t i) const {
+  checkSourceFunction();
   auto tie = IFunction::getTie(i);
   if (!tie) {
     return nullptr;
   }
-  if (i < m_nOwnParams) {
+  if (i < m_nSourceParams) {
     tie = m_source->getTie(i);
   } else {
     checkTargetFunction();
-    tie = m_target->getTie(i - m_nOwnParams);
+    tie = m_target->getTie(i - m_nSourceParams);
   }
   return tie;
 }
 
 /// Get the i-th constraint
 IConstraint *CrystalFieldFunction::getConstraint(size_t i) const {
+  checkSourceFunction();
   auto constraint = IFunction::getConstraint(i);
   if (constraint == nullptr) {
-    if (i < m_nOwnParams) {
+    if (i < m_nSourceParams) {
       constraint = m_source->getConstraint(i);
     } else {
       checkTargetFunction();
-      constraint = m_target->getConstraint(i - m_nOwnParams);
+      constraint = m_target->getConstraint(i - m_nSourceParams);
     }
   }
   return constraint;
@@ -472,61 +536,52 @@ IConstraint *CrystalFieldFunction::getConstraint(size_t i) const {
 
 void CrystalFieldFunction::setIonsAttribute(const std::string &name,
                                             const Attribute &attr) {
-  Kernel::StringTokenizer tokenizer(attr.asString(), ",",
-                                    Kernel::StringTokenizer::TOK_TRIM);
-  m_ions.clear();
-  m_ions.insert(m_ions.end(), tokenizer.begin(), tokenizer.end());
-  auto attrValue = Kernel::Strings::join(m_ions.begin(), m_ions.end(), ",");
-  IFunction::storeAttributeValue(name, Attribute(attrValue));
 }
 
 void CrystalFieldFunction::setSymmetriesAttribute(const std::string &name,
                                                   const Attribute &attr) {
-  Kernel::StringTokenizer tokenizer(attr.asString(), ",",
-                                    Kernel::StringTokenizer::TOK_TRIM);
-  m_symmetries.clear();
-  m_symmetries.insert(m_symmetries.end(), tokenizer.begin(), tokenizer.end());
-  auto attrValue =
-      Kernel::Strings::join(m_symmetries.begin(), m_symmetries.end(), ",");
-  IFunction::storeAttributeValue(name, Attribute(attrValue));
 }
 
-void CrystalFieldFunction::setTemperaturesAttribute(const std::string &name,
-                                                    const Attribute &attr) {
-  m_temperatures = attr.asVector();
-  IFunction::storeAttributeValue(name, attr);
-  declareAttribute("Background", Attribute("", true));
-  declareAttribute("PeakShape", Attribute("Lorentzian"));
-  declareAttribute("FWHMs", Attribute(std::vector<double>()));
-  declareAttribute("FWHMVariation", Attribute(0.1));
-  if (m_temperatures.size() == 1) {
-    declareAttribute("FWHMX", Attribute(std::vector<double>()));
-    declareAttribute("FWHMY", Attribute(std::vector<double>()));
-  }
-  declareAttribute("NPeaks", Attribute(0));
-  declareAttribute("FixAllPeaks", Attribute(false));
-
-  // Define (declare) the parameters for intensity scaling.
-  // const auto nSpec = attr.asVector().size();
-  // dynamic_cast<Peaks &>(*m_source).declareIntensityScaling(nSpec);
-  // m_nOwnParams = m_source->nParams();
-  // m_fwhmX.resize(nSpec);
-  // m_fwhmY.resize(nSpec);
-  // for (size_t iSpec = 0; iSpec < nSpec; ++iSpec) {
-  //  const auto suffix = std::to_string(iSpec);
-  //  declareAttribute("FWHMX" + suffix, Attribute(m_fwhmX[iSpec]));
-  //  declareAttribute("FWHMY" + suffix, Attribute(m_fwhmY[iSpec]));
-  //}
-}
+//void CrystalFieldFunction::setTemperaturesAttribute(const std::string &name,
+//                                                    const Attribute &attr) {
+//  m_temperatures = attr.asVector();
+//  IFunction::storeAttributeValue(name, attr);
+//  declareAttribute("Background", Attribute("", true));
+//  declareAttribute("PeakShape", Attribute("Lorentzian"));
+//  declareAttribute("FWHMs", Attribute(std::vector<double>()));
+//  declareAttribute("FWHMVariation", Attribute(0.1));
+//  if (m_temperatures.size() == 1) {
+//    declareAttribute("FWHMX", Attribute(std::vector<double>()));
+//    declareAttribute("FWHMY", Attribute(std::vector<double>()));
+//  }
+//  declareAttribute("NPeaks", Attribute(0));
+//  declareAttribute("FixAllPeaks", Attribute(false));
+//
+//  // Define (declare) the parameters for intensity scaling.
+//  // const auto nSpec = attr.asVector().size();
+//  // dynamic_cast<Peaks &>(*m_source).declareIntensityScaling(nSpec);
+//  // m_nSourceParams = m_source->nParams();
+//  // m_fwhmX.resize(nSpec);
+//  // m_fwhmY.resize(nSpec);
+//  // for (size_t iSpec = 0; iSpec < nSpec; ++iSpec) {
+//  //  const auto suffix = std::to_string(iSpec);
+//  //  declareAttribute("FWHMX" + suffix, Attribute(m_fwhmX[iSpec]));
+//  //  declareAttribute("FWHMY" + suffix, Attribute(m_fwhmY[iSpec]));
+//  //}
+//}
 
 /// Check if the function is set up for a multi-site calculations.
 /// (Multiple ions defined)
-bool CrystalFieldFunction::isMultiSite() const { return m_ions.size() > 1; }
+bool CrystalFieldFunction::isMultiSite() const {
+  m_control.checkConsistent();
+  return m_control.isMultiSite();
+}
 
 /// Check if the function is set up for a multi-spectrum calculations
 /// (Multiple temperatures defined)
 bool CrystalFieldFunction::isMultiSpectrum() const {
-  return m_temperatures.size() > 1;
+  m_control.checkConsistent();
+  return m_control.isMultiSpectrum();
 }
 
 /// Check if the spectra have a background.
@@ -539,28 +594,10 @@ bool CrystalFieldFunction::hasBackground() const {
 }
 
 /// Check if there are peaks (there is at least one spectrum).
-bool CrystalFieldFunction::hasPeaks() const { return !m_temperatures.empty(); }
+bool CrystalFieldFunction::hasPeaks() const { return m_hasPeaks; }
 
 /// Check if there are any phys. properties.
 bool CrystalFieldFunction::hasPhysProperties() const { return false; }
-
-void CrystalFieldFunction::chacheAttributes() const {
-  if (hasAttribute("FWHMs")) {
-    m_FWHMs = getAttribute("FWHMs").asVector();
-  }
-  if (hasAttribute("FWHMX")) {
-    auto fwhmX = getAttribute("FWHMX").asVector();
-    auto fwhmY = getAttribute("FWHMY").asVector();
-    if (!fwhmX.empty()) {
-      m_fwhmX.clear();
-      m_fwhmX.push_back(fwhmX);
-    }
-    if (!fwhmY.empty()) {
-      m_fwhmY.clear();
-      m_fwhmY.push_back(fwhmY);
-    }
-  }
-}
 
 /// Test if a name (parameter's or attribute's) belongs to m_source
 /// @param aName :: A name to test.
@@ -569,51 +606,49 @@ bool CrystalFieldFunction::isSourceName(const std::string &aName) const {
     throw std::invalid_argument(
         "Parameter or attribute name cannot be empty string.");
   }
+
   return (aName.front() != 'f' || aName.find('.') == std::string::npos);
 }
+
+/// Get a reference to the source function if it's composite
+API::CompositeFunction &CrystalFieldFunction::compositeSource() const {
+  auto composite = dynamic_cast<CompositeFunction*>(m_source.get());
+  if (composite == nullptr) {
+    throw std::logic_error("Source of CrystalFieldFunction is not composite.");
+  }
+  return *composite;
+}
+
+///// Check that attributes needed to build the source are consistent
+//void CrystalFieldFunction::checkSourceConsistent() const {
+//  if (m_ions.empty()) {
+//    throw std::runtime_error("No ions are set.");
+//  }
+//  if (m_ions.size() != m_symmetries.size()) {
+//    throw std::runtime_error(
+//        "Number of ions is different from number of symmetries.");
+//  }
+//}
 
 /// Check that attributes and parameters are consistent.
 /// If not excepion is thrown.
 void CrystalFieldFunction::checkConsistent() const {
-  if (m_ions.empty()) {
-    throw std::runtime_error("No ions are set.");
-  }
-  if (m_ions.size() != m_symmetries.size()) {
-    throw std::runtime_error(
-        "Number of ions is different from number of symmetries.");
-  }
-  chacheAttributes();
-  if (!m_temperatures.empty()) {
-    const auto nSpec = m_temperatures.size();
-    if (m_FWHMs.empty()) {
-      if (m_fwhmX.empty() || m_fwhmY.empty()) {
-        throw std::runtime_error("No peak width settings (FWHMs and FWHMX and "
-                                 "FWHMY attributes not set).");
-      }
-      if (m_fwhmX.size() != nSpec || m_fwhmY.size() != nSpec) {
-        throw std::runtime_error("There must be as many (FWHMX, FWHMY) pairs of attributes as there are Temperatures.");
-      }
-      for(size_t i = 0; i < nSpec; ++i) {
-        if (m_fwhmX[i].size() != m_fwhmY[i].size()) {
-          throw std::runtime_error("Vectors in each pair of (FWHMX, FWHMY) attributes must have the same size");
-        }
-      }
-      m_FWHMs.resize(nSpec, 0.0);
-    } else if (m_FWHMs.size() != nSpec) {
-      if (m_FWHMs.size() == 1) {
-        auto fwhm = m_FWHMs.front();
-        m_FWHMs.resize(nSpec, fwhm);
-      } else {
-        throw std::runtime_error(
-            "Vector of FWHMs must either have same size as "
-            "Temperatures (" +
-            std::to_string(nSpec) + ") or have size 1.");
-      }
-    } else if (!m_fwhmX.empty() || !m_fwhmY.empty()) {
-      throw std::runtime_error("Either FWHMs or (FWHMX and FWHMY) can be set but not all.");
-    }
+  m_control.checkConsistent();
+}
+
+/// Build source function if necessary.
+void CrystalFieldFunction::checkSourceFunction() const {
+  if (!m_source) {
+    buildSourceFunction();
   }
 }
+
+/// Build the source function
+void CrystalFieldFunction::buildSourceFunction() const {
+  setSource(m_control.buildSource());
+  m_nSourceParams = m_source->nParams();
+}
+
 
 /// Update spectrum function if necessary.
 void CrystalFieldFunction::checkTargetFunction() const {
@@ -640,7 +675,6 @@ void CrystalFieldFunction::buildTargetFunction() const {
 
 /// Build the target function in a single site case.
 void CrystalFieldFunction::buildSingleSite() const {
-  m_source.reset(new CrystalFieldPeaks);
   if (isMultiSpectrum()) {
     buildSingleSiteMultiSpectrum();
   } else {
@@ -650,7 +684,6 @@ void CrystalFieldFunction::buildSingleSite() const {
 
 /// Build the target function in a multi site case.
 void CrystalFieldFunction::buildMultiSite() const {
-  m_source.reset(new Peaks);
   if (isMultiSpectrum()) {
     buildMultiSiteMultiSpectrum();
   } else {
@@ -677,11 +710,11 @@ void CrystalFieldFunction::buildSingleSiteSingleSpectrum() const {
         "CrystalFieldPeaks returned odd number of values.");
   }
 
-  checkConsistent();
-  bool hasWidthModel = !m_fwhmX.empty();
-  auto xVec = hasWidthModel ? m_fwhmX[0] : std::vector<double>();
-  auto yVec = hasWidthModel ? m_fwhmY[0] : std::vector<double>();
-  auto defaultFWHM = m_FWHMs.empty() ? 0.0 : m_FWHMs[0];
+  //bool hasWidthModel = !m_fwhmX.empty();
+  auto xVec = m_control.getFunction(0)->getAttribute("FWHMX").asVector();
+  auto yVec = m_control.getFunction(0)->getAttribute("FWHMX").asVector();
+  auto FWHMs = m_control.getAttribute("FWHMs").asVector();
+  auto defaultFWHM = FWHMs.empty() ? 0.0 : FWHMs[0];
 
   auto fwhmVariation = getAttribute("FWHMVariation").asDouble();
   auto peakShape = getAttribute("PeakShape").asString();
@@ -696,7 +729,6 @@ void CrystalFieldFunction::buildSingleSiteSingleSpectrum() const {
 
 /// Build the target function in a single site - multi spectrum case.
 void CrystalFieldFunction::buildSingleSiteMultiSpectrum() const {
-  setSource(IFunction_sptr(new Peaks));
   auto fun = new MultiDomainFunction;
   m_target.reset(fun);
 
@@ -705,11 +737,11 @@ void CrystalFieldFunction::buildSingleSiteMultiSpectrum() const {
   ComplexFortranMatrix ham;
   ComplexFortranMatrix hz;
   int nre = 0;
-  auto &peakCalculator = dynamic_cast<Peaks &>(*m_source);
+  auto &peakCalculator = dynamic_cast<CrystalFieldPeaksBase &>(*m_source);
   peakCalculator.calculateEigenSystem(en, wf, ham, hz, nre);
   ham += hz;
 
-  const auto nSpec = m_temperatures.size();
+  const auto nSpec = nSpectra();
   // Get a list of "spectra" which corresponds to physical properties
   // const auto physprops = getAttribute("PhysicalProperties").asVector();
   // if (physprops.empty()) {
@@ -730,26 +762,27 @@ void CrystalFieldFunction::buildSingleSiteMultiSpectrum() const {
   //}
   // Create the single-spectrum functions.
   // m_nPeaks.resize(nSpec);
-  if (m_fwhmX.empty()) {
-    m_fwhmX.resize(nSpec);
-    m_fwhmY.resize(nSpec);
-  }
+
+  //if (m_fwhmX.empty()) {
+  //  m_fwhmX.resize(nSpec);
+  //  m_fwhmY.resize(nSpec);
+  //}
+  auto temperatures = m_control.getAttribute("Temperatures").asVector();
+  auto FWHMs = m_control.getAttribute("FWHMs").asVector();
   for (size_t i = 0; i < nSpec; ++i) {
-    if (m_fwhmX[i].empty()) {
+    //if (m_fwhmX[i].empty()) {
       // auto suffix = std::to_string(i);
       // m_fwhmX[i] = IFunction::getAttribute("FWHMX" + suffix).asVector();
       // m_fwhmY[i] = IFunction::getAttribute("FWHMY" + suffix).asVector();
-    }
+    //}
     fun->addFunction(
-        buildSpectrum(nre, en, wf, m_temperatures[i], m_FWHMs[i], i));
+        buildSpectrum(nre, en, wf, temperatures[i], FWHMs[i], i));
     fun->setDomainIndex(i, i);
   }
 }
 
 /// Build the target function in a multi site - single spectrum case.
 void CrystalFieldFunction::buildMultiSiteSingleSpectrum() const {
-  throw std::runtime_error(
-      "buildMultiSiteSingleSpectrum() not implemented yet.");
 }
 
 /// Build the target function in a multi site - multi spectrum case.
@@ -773,13 +806,13 @@ void CrystalFieldFunction::calcExcitations(
                        iEnergies);
   calculateExcitations(eEnergies, iEnergies, de, di, eExcitations,
                        iExcitations);
-  const size_t nSpec = m_temperatures.size();
+  const size_t nSpec = nSpectra();
   // Get intensity scaling parameter "IntensityScaling" + std::to_string(iSpec)
   // using an index instead of a name for performance reasons
-  auto &source = dynamic_cast<Peaks &>(*m_source);
+  auto &source = dynamic_cast<CrystalFieldPeaksBase &>(*m_source);
   double intensityScaling = 1.0;
   // if (source.m_IntensityScalingIdx.size() == 0) {
-  //  intensityScaling = getParameter(m_nOwnParams - nSpec + iSpec);
+  //  intensityScaling = getParameter(m_nSourceParams - nSpec + iSpec);
   //} else {
   //  intensityScaling = getParameter(source.m_IntensityScalingIdx[iSpec]);
   //}
@@ -821,8 +854,10 @@ API::IFunction_sptr CrystalFieldFunction::buildSpectrum(
     }
   }
 
+  auto xVec = m_control.getFunction(iSpec)->getAttribute("FWHMX").asVector();
+  auto yVec = m_control.getFunction(iSpec)->getAttribute("FWHMX").asVector();
   nPeaks = CrystalFieldUtils::buildSpectrumFunction(
-      *spectrum, peakShape, values, m_fwhmX[iSpec], m_fwhmY[iSpec],
+      *spectrum, peakShape, values, xVec, yVec,
       fwhmVariation, fwhm, nRequiredPeaks, fixAllPeaks);
   (void)nPeaks;
   return IFunction_sptr(spectrum);
@@ -866,10 +901,10 @@ void CrystalFieldFunction::updateSingleSiteSingleSpectrum() const {
   auto fwhmVariation = getAttribute("FWHMVariation").asDouble();
   auto peakShape = getAttribute("PeakShape").asString();
   bool fixAllPeaks = getAttribute("FixAllPeaks").asBool();
-  bool hasWidthModel = !m_fwhmX.empty();
-  auto xVec = hasWidthModel ? m_fwhmX[0] : std::vector<double>();
-  auto yVec = hasWidthModel ? m_fwhmY[0] : std::vector<double>();
-  auto defaultFWHM = m_FWHMs.empty() ? 0.0 : m_FWHMs[0];
+  auto xVec = m_control.getFunction(0)->getAttribute("FWHMX").asVector();
+  auto yVec = m_control.getFunction(0)->getAttribute("FWHMX").asVector();
+  auto FWHMs = m_control.getAttribute("FWHMs").asVector();
+  auto defaultFWHM = FWHMs.empty() ? 0.0 : FWHMs[0];
 
   FunctionDomainGeneral domain;
   FunctionValues values;
@@ -890,15 +925,17 @@ void CrystalFieldFunction::updateSingleSiteMultiSpectrum() const {
   ComplexFortranMatrix ham;
   ComplexFortranMatrix hz;
   int nre = 0;
-  auto &peakCalculator = dynamic_cast<Peaks &>(*m_source);
+  auto &peakCalculator = dynamic_cast<CrystalFieldPeaksBase &>(*m_source);
   peakCalculator.calculateEigenSystem(en, wf, ham, hz, nre);
   ham += hz;
 
   auto &fun = dynamic_cast<MultiDomainFunction &>(*m_target);
   try {
-    for (size_t i = 0; i < m_temperatures.size(); ++i) {
-      updateSpectrum(*fun.getFunction(i), nre, en, wf, ham, m_temperatures[i],
-                     m_FWHMs[i], i);
+    auto temperatures = m_control.getAttribute("Temperatures").asVector();
+    auto FWHMs = m_control.getAttribute("FWHMs").asVector();
+    for (size_t i = 0; i < temperatures.size(); ++i) {
+      updateSpectrum(*fun.getFunction(i), nre, en, wf, ham, temperatures[i],
+                     FWHMs[i], i);
     }
   } catch (std::out_of_range &) {
     buildTargetFunction();
@@ -922,11 +959,13 @@ void CrystalFieldFunction::updateSpectrum(API::IFunction &spectrum, int nre,
   const auto fwhmVariation = getAttribute("FWHMVariation").asDouble();
   const auto peakShape = IFunction::getAttribute("PeakShape").asString();
   const bool fixAllPeaks = getAttribute("FixAllPeaks").asBool();
+  auto xVec = m_control.getFunction(iSpec)->getAttribute("FWHMX").asVector();
+  auto yVec = m_control.getFunction(iSpec)->getAttribute("FWHMX").asVector();
   FunctionValues values;
   calcExcitations(nre, en, wf, temperature, values, iSpec);
   auto &composite = dynamic_cast<API::CompositeFunction &>(spectrum);
   auto nPeaks = CrystalFieldUtils::updateSpectrumFunction(
-      composite, peakShape, values, 1, m_fwhmX[iSpec], m_fwhmY[iSpec],
+      composite, peakShape, values, 1, xVec, yVec,
       fwhmVariation, fwhm, fixAllPeaks);
   (void)nPeaks;
 }

@@ -4,6 +4,7 @@
 #include "MantidAPI/FunctionGenerator.h"
 #include "MantidAPI/FunctionValues.h"
 #include "MantidCurveFitting/FortranDefs.h"
+#include "MantidCurveFitting/Functions/CrystalFieldControl.h"
 
 namespace Mantid {
 namespace CurveFitting {
@@ -32,7 +33,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport CrystalFieldFunction : public API::IFunction {
+class MANTID_CURVEFITTING_DLL CrystalFieldFunction : public API::IFunction {
 public:
   CrystalFieldFunction();
   std::string name() const override { return "CrystalFieldFunction"; }
@@ -131,9 +132,15 @@ protected:
   void setParameterStatus(size_t i, ParameterStatus status) override;
   /// Get status of parameter
   ParameterStatus getParameterStatus(size_t i) const override;
+
+  /// Build the source function
+  void buildSourceFunction() const;
+  /// Update the target function
   void updateTargetFunction() const;
 
 private:
+
+
   /// Build the target function in a single site case.
   void buildSingleSite() const;
   /// Build the target function in a multi site case.
@@ -179,15 +186,20 @@ private:
 
   void setIonsAttribute(const std::string &name, const Attribute &attr);
   void setSymmetriesAttribute(const std::string &name, const Attribute &attr);
-  void setTemperaturesAttribute(const std::string &name, const Attribute &attr);
+  //void setTemperaturesAttribute(const std::string &name, const Attribute &attr);
 
-  void chacheAttributes() const;
   /// Set the source function
   void setSource(API::IFunction_sptr source) const;
+  /// Build source function if necessary.
+  void checkSourceFunction() const;
+  /// Check that attributes needed to build the source are consistent
+  //void checkSourceConsistent() const;
   /// Update target function if necessary.
   void checkTargetFunction() const;
   /// Test if a name (parameter's or attribute's) belongs to m_source
   bool isSourceName(const std::string &aName) const;
+  /// Get a reference to the source function if it's composite
+  API::CompositeFunction &compositeSource() const;
 
   /// Check that a spectrum index is within the range
   void checkSpectrumIndex(size_t iSpec) const;
@@ -197,34 +209,21 @@ private:
   Attribute getSpectrumAttribute(size_t iSpec, const std::string &attName) const;
   /// Set a value to a spectrum-specific attribute
   void setSpectrumAttribute(size_t iSpec, const std::string &name, const Attribute &);
+  /// Get a reference to an attribute
+  std::pair<API::IFunction*, std::string> getAttributeReference(const std::string& attName) const;
 
+  /// Function that creates the source function.
+  mutable CrystalFieldControl m_control;
   /// Function that calculates parameters of the target function.
   mutable API::IFunction_sptr m_source;
   /// Function that actually calculates the output.
   mutable API::IFunction_sptr m_target;
   /// Cached number of parameters in m_source.
-  mutable size_t m_nOwnParams;
+  mutable size_t m_nSourceParams;
   /// Flag indicating that updateTargetFunction() is required.
   mutable bool m_dirty;
-
-  /// @name Attribute caches
-  //@{
-  /// The ion names
-  mutable std::vector<std::string> m_ions;
-  /// The symmetries
-  mutable std::vector<std::string> m_symmetries;
-  /// The temperatures
-  mutable std::vector<double> m_temperatures;
-  /// Cache the default peak FWHMs
-  mutable std::vector<double> m_FWHMs;
-  /// Cache number of fitted peaks
-  //mutable std::vector<size_t> m_nPeaks;
-  /// Cache the list of "spectra" corresponding to physical properties
-  mutable std::vector<int> m_physprops;
-  /// Caches of the width functions
-  mutable std::vector<std::vector<double>> m_fwhmX;
-  mutable std::vector<std::vector<double>> m_fwhmY;
-  //@}
+  mutable bool m_isMultiSpectrum;
+  mutable bool m_hasPeaks;
 };
 
 } // namespace Functions
