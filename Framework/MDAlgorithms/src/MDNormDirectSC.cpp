@@ -532,9 +532,9 @@ std::copy(signalArray.cbegin(), signalArray.cend(), m_normWS->getSignalArray());
  * Calculate the points of intersection for the given detector with cuboid
  * surrounding the
  * detector position in HKL
- * @param theta Polar angle withd detector
+ * @param intersections A list of intersections in HKL space
+ * @param theta Polar angle with detector
  * @param phi Azimuthal angle with detector
- * @return A list of intersections in HKL space
  */
 void MDNormDirectSC::calculateIntersections(
     std::vector<std::array<double, 4>> &intersections, const double theta,
