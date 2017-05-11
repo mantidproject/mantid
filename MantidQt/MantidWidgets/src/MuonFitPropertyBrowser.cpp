@@ -329,13 +329,6 @@ void MuonFitPropertyBrowser::setFitEnabled(bool yes) {
   m_fitActionSeqFit->setEnabled(yes);
   m_fitActionTFAsymm->setEnabled(yes);
 }
-/*
-* Called when the group/pair selected is changed
-*/
-void MuonFitPropertyBrowser::groupToFitChanged() {
-	
-}
-
 /**
 * Set the input workspace name
 */
@@ -1127,6 +1120,16 @@ void MuonFitPropertyBrowser::setAllPairs() {
 		}
 	}
 }
+
+void MuonFitPropertyBrowser::setChosenGroup(QString &group) {
+	clearChosenGroups();
+	for (auto iter = m_groupBoxes.constBegin(); iter != m_groupBoxes.constEnd();
+		++iter) {
+		if (iter.key() == group) {
+			m_boolManager->setValue(iter.value(), true);
+		}
+	}
+}
 /*
 * Create a popup window to select a custom
 * selection of groups/pairs
@@ -1262,10 +1265,15 @@ void MuonFitPropertyBrowser::addPeriodCheckbox(const QString &name) {
 */
 QStringList MuonFitPropertyBrowser::getChosenPeriods() const {
 	QStringList chosen;
-	for (auto iter = m_periodBoxes.constBegin(); iter != m_periodBoxes.constEnd();
-		++iter) {
-		if (m_boolManager->value(iter.value()) == true) {
-			chosen.append(iter.key());
+	if (m_periodsToFitOptions.size() == 1) {
+		chosen << "";
+	}
+	else {
+		for (auto iter = m_periodBoxes.constBegin(); iter != m_periodBoxes.constEnd();
+			++iter) {
+			if (m_boolManager->value(iter.value()) == true) {
+				chosen.append(iter.key());
+			}
 		}
 	}
 	return chosen;

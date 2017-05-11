@@ -115,7 +115,7 @@ public:
   void setAllGroups();
   void setAllPairs();
   void clearChosenPeriods() const;
-
+  void setChosenGroup(QString &group);
 public slots:
   /// Perform the fit algorithm
   void fit() override;
@@ -153,7 +153,6 @@ protected:
   void showEvent(QShowEvent *e) override;
   double normalization() const;
   void setNormalization();
-  void groupToFitChanged();
 private slots:
   void doubleChanged(QtProperty *prop) override;
   void boolChanged(QtProperty *prop) override;
@@ -172,6 +171,7 @@ private:
   /// workspaces
   void finishAfterSimultaneousFit(const Mantid::API::IAlgorithm *fitAlg,
                                   const int nWorkspaces) const;
+  
   void clearGroupCheckboxes();
   void addGroupCheckbox(const QString &name);
   void genGroupWindow();

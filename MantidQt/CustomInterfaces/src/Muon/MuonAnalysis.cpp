@@ -319,6 +319,11 @@ void MuonAnalysis::initLayout() {
   connect(m_uiForm.manageDirectoriesBtn, SIGNAL(clicked()), this,
           SLOT(openDirectoryDialog()));
  // m_uiForm.
+  connect(this, SIGNAL(setChosenGroupSignal(QString &)), this, SLOT(setChosenGroupSlot(QString &)));
+}
+
+void MuonAnalysis::setChosenGroupSlot(QString &group) {
+	m_uiForm.fitBrowser->setChosenGroup(group);
 }
 
 /**
@@ -401,7 +406,7 @@ void MuonAnalysis::plotItem(ItemType itemType, int tableRow,
   m_updating = true;
 //  m_dataSelector->clearChosenGroups();
   m_uiForm.fitBrowser->clearChosenGroups();
-  m_uiForm.fitBrowser->clearChosenPeriods();
+ // m_uiForm.fitBrowser->clearChosenPeriods();
 
   AnalysisDataServiceImpl &ads = AnalysisDataService::Instance();
 
@@ -2469,7 +2474,8 @@ void MuonAnalysis::changeTab(int newTabIndex) {
 	m_dataSelector->setStartTime(xmin);
 
     //auto xmin = m_dataSelector->getStartTime();
-    auto xmax = m_dataSelector->getEndTime();
+	auto xmax = m_uiForm.fitBrowser->endX();
+    m_dataSelector->setEndTime(xmax);
 
     // Say MantidPlot to use Muon Analysis fit prop. browser
     emit setFitPropertyBrowser(m_uiForm.fitBrowser);
@@ -3112,7 +3118,7 @@ void MuonAnalysis::multiFitCheckboxChanged(int state) {
   if (multiFitState == Muon::MultiFitState::Disabled) {
 //    m_dataSelector->clearChosenGroups();
 	m_uiForm.fitBrowser->clearChosenGroups();
-	m_uiForm.fitBrowser->clearChosenPeriods();
+//	m_uiForm.fitBrowser->clearChosenPeriods();
 
   }
 }

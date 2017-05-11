@@ -121,6 +121,8 @@ public:
   /// Updates label to avoid overwriting existing results
   void checkAndUpdateFitLabel(bool sequentialFit);
 
+signals:
+  void setChosenGroupSignal(QString &group);
 public slots:
   /// Transforms fit results when a simultaneous fit finishes
   void handleFitFinished(const QString &status = QString("success")) const;
