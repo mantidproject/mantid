@@ -164,12 +164,14 @@ private:
       double back_inner_radius, double back_outer_radius,
       std::vector<double> &axes_radii, double &inti, double &sigi);
 
-  /// Compute if a particular Q falls on the edge of a detector 
+  /// Compute if a particular Q falls on the edge of a detector
   double detectorQ(std::vector<Kernel::V3D> E1Vec,
                    const Mantid::Kernel::V3D QLabFrame,
                    const std::vector<double> &r);
 
-  std::tuple<double, double, double> calculateRadiusFactors(const IntegrationParameters &params, double max_sigma) const;
+  std::tuple<double, double, double>
+  calculateRadiusFactors(const IntegrationParameters &params,
+                         double max_sigma) const;
 
   // Private data members
 
