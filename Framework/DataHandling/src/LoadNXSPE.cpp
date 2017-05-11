@@ -46,7 +46,7 @@ using Mantid::HistogramData::BinEdges;
  */
 int LoadNXSPE::identiferConfidence(const std::string &value) {
   int confidence = 0;
-  if (value.compare("NXSPE") == 0) {
+  if (value == "NXSPE") {
     confidence = 99;
   } else {
     boost::regex re("^NXSP", boost::regex::icase);

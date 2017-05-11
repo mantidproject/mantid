@@ -137,6 +137,11 @@ public:
    * @param specList :: A vector with spectra indices.
    */
   virtual void setSpectra(const std::vector<specnum_t> &specList) = 0;
+
+  /** Allow listener to see calling algorithm
+   * @param callingAlgorithm : const ref to calling algorithm
+   */
+  virtual void setAlgorithm(const class IAlgorithm &callingAlgorithm) = 0;
 };
 
 /// Shared pointer to an ILiveListener
