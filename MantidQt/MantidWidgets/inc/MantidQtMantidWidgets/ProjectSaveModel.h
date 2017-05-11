@@ -51,7 +51,7 @@ public:
   std::vector<std::string> getWorkspaceNames() const;
   /// Get all window information for a collection of workspaces
   std::vector<WindowInfo>
-  getWindowInformation(const std::vector<std::string> &wsNames) const;
+  getWindowInformation(const std::vector<std::string> &wsNames, bool includeUnattached = false) const;
   /// Get all workspace information
   std::vector<WorkspaceInfo> getWorkspaceInformation() const;
   /// Get all window handles for this workspace
@@ -68,12 +68,16 @@ private:
   WorkspaceInfo
   makeWorkspaceInfoObject(Mantid::API::Workspace_const_sptr ws) const;
 
+  WindowInfo makeWindowInfoObject(MantidQt::API::IProjectSerialisable * window) const;
+
   // Instance variables
 
   /// Map to hold which windows are associated with a workspace
   std::unordered_map<std::string,
                      std::vector<MantidQt::API::IProjectSerialisable *>>
       m_workspaceWindows;
+
+  std::vector<MantidQt::API::IProjectSerialisable *> m_unattachedWindows;
 };
 
 } // CustomInterfaces
