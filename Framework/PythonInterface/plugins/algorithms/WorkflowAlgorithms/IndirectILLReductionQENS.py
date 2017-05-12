@@ -19,6 +19,7 @@ class IndirectILLReductionQENS(PythonAlgorithm):
     _sum_all_runs = None
     _unmirror_option = None
     _back_scaling = None
+    _back_calib_scaling = None
     _criteria = None
     _progress = None
     _red_ws = None
@@ -86,6 +87,10 @@ class IndirectILLReductionQENS(PythonAlgorithm):
         self.declareProperty(name='BackgroundScalingFactor', defaultValue=1.,
                              validator=FloatBoundedValidator(lower=0),
                              doc='Scaling factor for background subtraction')
+
+        self.declareProperty(name='CalibrationBackgroundScalingFactor', defaultValue=1.,
+                             validator=FloatBoundedValidator(lower=0),
+                             doc='Scaling factor for background subtraction for vanadium calibration')
 
         self.declareProperty(name='CalibrationPeakRange', defaultValue=[-0.003,0.003],
                              validator=FloatArrayMandatoryValidator(),
@@ -156,6 +161,7 @@ class IndirectILLReductionQENS(PythonAlgorithm):
         self._sum_all_runs = self.getProperty('SumRuns').value
         self._unmirror_option = self.getProperty('UnmirrorOption').value
         self._back_scaling = self.getProperty('BackgroundScalingFactor').value
+        self._back_calib_scaling = self.getProperty('CalibrationBackgroundScalingFactor').value
         self._peak_range = self.getProperty('CalibrationPeakRange').value
         self._spectrum_axis = self.getPropertyValue('SpectrumAxis')
 
@@ -283,6 +289,7 @@ class IndirectILLReductionQENS(PythonAlgorithm):
             if self._background_calib_files:
                 back_calibration = '__calibration_back_'+self._red_ws
                 IndirectILLEnergyTransfer(Run = self._background_calib_files, OutputWorkspace = back_calibration, **self._common_args)
+                Scale(InputWorkspace=back_calibration, Factor=self._back_calib_scaling, OutputWorkspace=back_calibration)
                 Minus(LHSWorkspace=calibration, RHSWorkspace=back_calibration, OutputWorkspace=calibration)
 
             MatchPeaks(InputWorkspace=calibration,OutputWorkspace=calibration,MaskBins=True)
