@@ -74,6 +74,13 @@ void CrystalFieldControl::cacheAttributes() {
 /// Check that all attributes are consistent
 void CrystalFieldControl::checkConsistent()  {
   cacheAttributes();
+  if (m_ions.empty()) {
+    throw std::runtime_error("No ions are set.");
+  }
+  if (m_ions.size() != m_symmetries.size()) {
+    throw std::runtime_error(
+        "Number of ions is different from number of symmetries.");
+  }
   if (!m_temperatures.empty()) {
     // If temperatures are given then there will be spectra with peaks
     // and peaks need some width information. It comes either from
