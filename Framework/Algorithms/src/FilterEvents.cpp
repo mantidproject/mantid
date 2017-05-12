@@ -1861,11 +1861,12 @@ void FilterEvents::generateSplitterTSP(
     if (start_time <= m_runStartTime) {
       // clear the initial value with check first
       if (split_tsp_vec[itarget]->size() != 1) {
-        g_log.error() << "With start time " << start_time
-                      << " same as run start time " << m_runStartTime
-                      << ", the TSP must have only 1 entry from "
-                         "initialization.  But not it has "
-                      << split_tsp_vec[itarget]->size() << "entries\n";
+        g_log.error() << "In generating splitter-log: splitter " << igrp << "'s start time "
+                      << start_time
+                      << " earlier or same as experiment's run start time " << m_runStartTime
+                      << "; the splitter TSP must have only 1 entry from "
+                         "initialization.  But now it has "
+                      << split_tsp_vec[itarget]->size() << " entries\n";
         throw std::runtime_error("Coding logic error");
       }
       split_tsp_vec[itarget]->clear();
