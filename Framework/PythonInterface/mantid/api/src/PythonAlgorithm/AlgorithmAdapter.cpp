@@ -114,9 +114,9 @@ const std::string AlgorithmAdapter<BaseAlgorithm>::helpURL() const {
   }
 }
 
-  /**
- * @return True if the algorithm is considered to be running
- */
+/**
+*@return True if the algorithm is considered to be running
+*/
 template <typename BaseAlgorithm>
 bool AlgorithmAdapter<BaseAlgorithm>::isRunning() const {
   if (!m_isRunningObj) {
