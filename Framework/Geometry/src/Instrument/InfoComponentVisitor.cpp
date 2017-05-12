@@ -24,10 +24,12 @@ InfoComponentVisitor::InfoComponentVisitor(const size_t nDetectors)
       m_componentIdToIndexMap(boost::make_shared<
           std::unordered_map<Mantid::Geometry::IComponent *, size_t>>()),
       m_detectorIdToIndexMap(
-          boost::make_shared<std::unordered_map<detid_t, size_t>>()) {
+          boost::make_shared<std::unordered_map<detid_t, size_t>>()),
+      m_detectorIds(boost::make_shared<std::vector<detid_t>>()) {
   m_assemblySortedDetectorIndices->reserve(nDetectors);
   m_componentIdToIndexMap->reserve(nDetectors);
   m_detectorIdToIndexMap->reserve(nDetectors);
+  m_detectorIds->reserve(nDetectors);
 }
 
 /**
@@ -91,9 +93,11 @@ void InfoComponentVisitor::registerDetector(const IDetector &detector) {
   // Record the ID -> component index mapping
   (*m_componentIdToIndexMap)[detector.getComponentID()] = detectorIndex;
   (*m_componentIds)[detectorIndex] = detector.getComponentID();
-  // Record the det ID -> index mapping
-  (*m_detectorIdToIndexMap)[detector.getID()] =
+  // Record the detector ID -> index mapping
+  const auto detectorId = detector.getID();
+  (*m_detectorIdToIndexMap)[detectorId] =
       detectorIndex; // register the detector index
+  m_detectorIds->push_back(detectorId);
   m_assemblySortedDetectorIndices->push_back(detectorIndex);
   // Increment counter for next registration
 }
@@ -154,6 +158,11 @@ std::unique_ptr<Beamline::ComponentInfo>
 InfoComponentVisitor::componentInfo() const {
   return Kernel::make_unique<Mantid::Beamline::ComponentInfo>(
       m_assemblySortedDetectorIndices, m_ranges);
+}
+
+boost::shared_ptr<std::vector<detid_t>>
+InfoComponentVisitor::detectorIds() const {
+  return m_detectorIds;
 }
 
 } // namespace Geometry

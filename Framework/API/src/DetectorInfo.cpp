@@ -23,11 +23,13 @@ namespace API {
 DetectorInfo::DetectorInfo(
     Beamline::DetectorInfo &detectorInfo,
     boost::shared_ptr<const Geometry::Instrument> instrument,
+    boost::shared_ptr<std::vector<detid_t>> detectorIds,
     Geometry::ParameterMap *pmap,
     boost::shared_ptr<const std::unordered_map<detid_t, size_t>>
         detIdToIndexMap)
     : m_detectorInfo(detectorInfo), m_pmap(pmap), m_instrument(instrument),
-      m_detIDToIndex(detIdToIndexMap), m_lastDetector(PARALLEL_GET_MAX_THREADS),
+      m_detectorIDs(detectorIds), m_detIDToIndex(detIdToIndexMap),
+      m_lastDetector(PARALLEL_GET_MAX_THREADS),
       m_lastAssemblyDetectorIndices(PARALLEL_GET_MAX_THREADS),
       m_lastIndex(PARALLEL_GET_MAX_THREADS, -1) {
 
@@ -37,8 +39,7 @@ DetectorInfo::DetectorInfo(
     throw std::invalid_argument(
         "DetectorInfo::DetectorInfo Workspace does not contain an instrument!");
 
-  m_detectorIDs = instrument->getDetectorIDs(false /* do not skip monitors */);
-  if (m_detectorIDs.size() != m_detIDToIndex->size()) {
+  if (m_detectorIDs->size() != m_detIDToIndex->size()) {
     throw std::invalid_argument(
         "DetectorInfo::DetectorInfo: ID and ID->index map do not match");
   }
@@ -71,7 +72,7 @@ bool DetectorInfo::isEquivalent(const DetectorInfo &other) const {
 
 /// Returns the size of the DetectorInfo, i.e., the number of detectors in the
 /// instrument.
-size_t DetectorInfo::size() const { return m_detectorIDs.size(); }
+size_t DetectorInfo::size() const { return m_detectorIDs->size(); }
 
 /// Returns true if the beamline has scanning detectors.
 bool DetectorInfo::isScanning() const { return m_detectorInfo.isScanning(); }
@@ -404,7 +405,7 @@ double DetectorInfo::l1() const {
 
 /// Returns a sorted vector of all detector IDs.
 const std::vector<detid_t> &DetectorInfo::detectorIDs() const {
-  return m_detectorIDs;
+  return *m_detectorIDs;
 }
 
 /// Returns the scan count of the detector with given detector index.
@@ -449,7 +450,7 @@ const Geometry::IDetector &DetectorInfo::getDetector(const size_t index) const {
   size_t thread = static_cast<size_t>(PARALLEL_THREAD_NUMBER);
   if (m_lastIndex[thread] != index) {
     m_lastIndex[thread] = index;
-    m_lastDetector[thread] = m_instrument->getDetector(m_detectorIDs[index]);
+    m_lastDetector[thread] = m_instrument->getDetector((*m_detectorIDs)[index]);
   }
 
   return *m_lastDetector[thread];

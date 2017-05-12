@@ -174,6 +174,9 @@ public:
     TS_ASSERT_EQUALS(visitor.detectorIdToIndexMap()->size(), 1);
     TS_ASSERT_EQUALS(visitor.detectorIdToIndexMap()->at(1),
                      0); // ID 1 to index 0
+
+    TS_ASSERT_EQUALS(visitor.detectorIds()->size(), 1);
+    TS_ASSERT_EQUALS(visitor.detectorIds()->at(0), 1); // index 0 is ID 1
   }
 };
 

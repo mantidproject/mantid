@@ -71,6 +71,9 @@ private:
   /// Detector ID -> index mappings
   boost::shared_ptr<std::unordered_map<detid_t, size_t>> m_detectorIdToIndexMap;
 
+  /// Detector indices
+  boost::shared_ptr<std::vector<detid_t>> m_detectorIds;
+
 public:
   InfoComponentVisitor(const size_t nDetectors);
 
@@ -102,6 +105,8 @@ public:
   bool isEmpty() const;
 
   std::unique_ptr<Beamline::ComponentInfo> componentInfo() const;
+
+  boost::shared_ptr<std::vector<detid_t>> detectorIds() const;
 };
 } // namespace Geometry
 } // namespace Mantid

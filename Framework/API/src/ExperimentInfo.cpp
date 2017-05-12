@@ -77,8 +77,8 @@ ExperimentInfo::ExperimentInfo()
   m_parmap->setDetectorInfo(m_detectorInfo);
   m_parmap->setComponentInfo(m_componentInfo);
   m_detectorInfoWrapper = Kernel::make_unique<DetectorInfo>(
-      *m_detectorInfo, sptr_instrument, m_parmap.get(),
-      m_infoVisitor->detectorIdToIndexMap());
+      *m_detectorInfo, sptr_instrument, m_infoVisitor->detectorIds(),
+      m_parmap.get(), m_infoVisitor->detectorIdToIndexMap());
 
   makeAPIComponentInfo(*m_infoVisitor);
 }
@@ -312,7 +312,8 @@ void ExperimentInfo::setInstrument(const Instrument_const_sptr &instr) {
   m_detectorInfo = makeDetectorInfo(*parInstrument, *instr);
   m_parmap->setDetectorInfo(m_detectorInfo);
   m_detectorInfoWrapper = Kernel::make_unique<DetectorInfo>(
-      *m_detectorInfo, makeParameterizedInstrument(), m_parmap.get(),
+      *m_detectorInfo, makeParameterizedInstrument(),
+      m_infoVisitor->detectorIds(), m_parmap.get(),
       m_infoVisitor->detectorIdToIndexMap());
 
   makeAPIComponentInfo(*m_infoVisitor);
