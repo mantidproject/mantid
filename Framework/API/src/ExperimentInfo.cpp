@@ -75,7 +75,6 @@ ExperimentInfo::ExperimentInfo()
           sptr_instrument->getNumberDetectors())) {
   auto parInstrument = makeParameterizedInstrument();
   m_parmap->setDetectorInfo(m_detectorInfo);
-  m_parmap->setComponentInfo(m_componentInfo);
   m_detectorInfoWrapper = Kernel::make_unique<DetectorInfo>(
       *m_detectorInfo, sptr_instrument, m_infoVisitor->detectorIds(),
       m_parmap.get(), m_infoVisitor->detectorIdToIndexMap());
@@ -274,7 +273,6 @@ void ExperimentInfo::makeAPIComponentInfo(const InfoComponentVisitor &visitor) {
 
   std::tie(m_componentInfo, componentIds, componentIdToIndexMap) =
       makeBeamlineComponentInfo(visitor);
-  m_parmap->setComponentInfo(m_componentInfo);
 
   m_componentInfoWrapper = Kernel::make_unique<ComponentInfo>(
       *m_componentInfo, componentIds, componentIdToIndexMap);
