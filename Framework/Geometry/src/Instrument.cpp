@@ -6,7 +6,6 @@
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidGeometry/Instrument/RectangularDetectorPixel.h"
 #include "MantidBeamline/DetectorInfo.h"
-#include "MantidBeamline/ComponentInfo.h"
 #include "MantidKernel/EigenConversionHelpers.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Logger.h"
@@ -52,12 +51,7 @@ Instrument::Instrument(const boost::shared_ptr<const Instrument> instr,
       m_defaultViewAxis(instr->m_defaultViewAxis), m_instr(instr),
       m_map_nonconst(map), m_ValidFrom(instr->m_ValidFrom),
       m_ValidTo(instr->m_ValidTo), m_referenceFrame(new ReferenceFrame),
-      m_detectorInfo(instr->m_detectorInfo),
-      m_componentInfo(instr->m_componentInfo),
-      m_componentIdToIndexMap(instr->m_componentIdToIndexMap),
-      m_detIdToIndexMap(instr->m_detIdToIndexMap)
-
-{
+      m_detectorInfo(instr->m_detectorInfo) {
   bool isPhysicalInstrument =
       m_map ? m_instr->m_isPhysicalInstrument : m_isPhysicalInstrument;
   if (!isPhysicalInstrument)
@@ -79,10 +73,7 @@ Instrument::Instrument(const Instrument &instr)
       m_map_nonconst(), /* Should not be parameterized */
       m_ValidFrom(instr.m_ValidFrom), m_ValidTo(instr.m_ValidTo),
       m_referenceFrame(instr.m_referenceFrame),
-      m_detectorInfo(instr.m_detectorInfo),
-      m_componentInfo(instr.m_componentInfo),
-      m_componentIdToIndexMap(instr.m_componentIdToIndexMap),
-      m_detIdToIndexMap(instr.m_detIdToIndexMap) {
+      m_detectorInfo(instr.m_detectorInfo) {
   // Now we need to fill the detector, source and sample caches with pointers
   // into the new instrument
   std::vector<IComponent_const_sptr> children;
@@ -1254,62 +1245,15 @@ const Beamline::DetectorInfo &Instrument::detectorInfo() const {
  * @return True only if a ComponentInfo has been set
  */
 bool Instrument::hasComponentInfo() const {
-  return static_cast<bool>(m_componentInfo);
+  return static_cast<bool>(m_infoVisitor); // The source of the component info
 }
 
 /**
  * Only for use by ExperimentInfo
- * @return const ref to a ComponentInfo. Throws a std::runtime_error if
- * ComponentInfo
- * not set.
+ * @return True only if a InfoComponentVisitor has been set.
  */
-const Beamline::ComponentInfo &Instrument::componentInfo() const {
-  if (!hasComponentInfo()) {
-    throw std::runtime_error("Cannot return reference to NULL ComponentInfo");
-  }
-  return *m_componentInfo;
-}
-
-/**
- * Only for use by ExperimentInfo
- * @return shared_ptr of vector of ComponentIds. Throws a std::runtime_error if
- * ComponentInfo not set.
- */
-boost::shared_ptr<const std::vector<Geometry::ComponentID>>
-Instrument::componentIds() const {
-  if (!hasComponentInfo()) {
-    throw std::runtime_error(
-        "Cannot return component ids with a NULL ComponentInfo");
-  }
-  return m_componentIds;
-}
-
-/**
- * Only for use by ExperimentInfo
- * @return shared_ptr of ComponentID -> component index map. Throws a
- * std::runtime_error if
- * ComponentInfo not set.
- */
-boost::shared_ptr<const std::unordered_map<Geometry::ComponentID, size_t>>
-Instrument::componentIdToIndexMap() const {
-  if (!hasComponentInfo()) {
-    throw std::runtime_error(
-        "Cannot return component index map with a NULL ComponentInfo");
-  }
-  return m_componentIdToIndexMap;
-}
-
-/**
- * Only for use by ExperimentInfo
- * @return shared_ptr of detid_t -> detector index map. Throws a
- * std::runtime_error if
- * DetectorInfo not set
- */
-boost::shared_ptr<const std::unordered_map<detid_t, size_t>>
-Instrument::detIdToIndexMap() const {
-  if (!hasDetectorInfo())
-    throw std::runtime_error("Cannot return reference to NULL DetectorInfo");
-  return m_detIdToIndexMap;
+bool Instrument::hasInfoVisitor() const {
+  return static_cast<bool>(m_infoVisitor);
 }
 
 bool Instrument::isEmptyInstrument() const { return this->nelements() == 0; }
@@ -1318,29 +1262,8 @@ bool Instrument::isEmptyInstrument() const { return this->nelements() == 0; }
  * Sets the pointer to the detector id -> index map
 */
 void Instrument::setDetectorInfo(
-    boost::shared_ptr<const Beamline::DetectorInfo> detectorInfo,
-    boost::shared_ptr<const std::unordered_map<detid_t, size_t>>
-        detIdToIndexMap) {
+    boost::shared_ptr<const Beamline::DetectorInfo> detectorInfo) {
   m_detectorInfo = std::move(detectorInfo);
-  m_detIdToIndexMap = std::move(detIdToIndexMap);
-}
-
-/**
- * Gets called when an Instrument is associated with an ExperimentInfo
- *
- * @param componentInfo : ComponentInfo to store
- * @param componentIds : ComponentIds to store
- * @param componentIdToIndexMap : Comp ID to index map to store.
- */
-void Instrument::setComponentInfo(
-    boost::shared_ptr<const Beamline::ComponentInfo> componentInfo,
-    boost::shared_ptr<const std::vector<Geometry::ComponentID>> componentIds,
-    boost::shared_ptr<const std::unordered_map<Geometry::ComponentID, size_t>>
-        componentIdToIndexMap) {
-
-  m_componentInfo = std::move(componentInfo);
-  m_componentIds = std::move(componentIds);
-  m_componentIdToIndexMap = std::move(componentIdToIndexMap);
 }
 
 void Instrument::setInfoVisitor(const InfoComponentVisitor &visitor) {
@@ -1350,7 +1273,7 @@ void Instrument::setInfoVisitor(const InfoComponentVisitor &visitor) {
 const InfoComponentVisitor &Instrument::infoVisitor() const {
   if (!m_infoVisitor) {
     throw std::runtime_error(
-        "Instrument::infoVisitor InfoComponentInfo never set");
+        "Instrument::infoVisitor InfoComponentVisitor never set");
   }
   return *m_infoVisitor;
 }

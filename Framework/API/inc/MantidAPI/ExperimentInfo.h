@@ -222,6 +222,8 @@ private:
   mutable std::unordered_map<detid_t, size_t> m_det2group;
   void cacheDefaultDetectorGrouping() const; // Not thread-safe
   void invalidateAllSpectrumDefinitions();
+  std::unique_ptr<Geometry::InfoComponentVisitor>
+  makeOrRetrieveVisitor(const Geometry::Instrument &instrument) const;
   mutable std::once_flag m_defaultDetectorGroupingCached;
 
   /// Mutex to protect against cow_ptr copying

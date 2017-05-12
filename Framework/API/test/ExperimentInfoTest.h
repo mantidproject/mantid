@@ -77,7 +77,14 @@ public:
     ExperimentInfo ws;
     boost::shared_ptr<const Instrument> i = ws.getInstrument();
     TSM_ASSERT("ExperimentInfo gets a default, empty Instrument.", i);
+    TS_ASSERT(i->isEmptyInstrument());
     TS_ASSERT_EQUALS(ws.getInstrument()->type(), "Instrument");
+
+    // ALL of these should be set. Even though we have just an empty instrument
+    // stored. See constructor.
+    TS_ASSERT(i->hasInfoVisitor());
+    TS_ASSERT(i->hasComponentInfo());
+    TS_ASSERT(i->hasDetectorInfo());
   }
 
   void test_GetSetInstrument_default() {

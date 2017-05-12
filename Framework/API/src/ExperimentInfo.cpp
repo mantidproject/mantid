@@ -193,16 +193,6 @@ void checkDetectorInfoSize(const Instrument &instr,
                              "instrument");
 }
 
-std::tuple<
-    std::unique_ptr<Beamline::ComponentInfo>,
-    boost::shared_ptr<const std::vector<Geometry::ComponentID>>,
-    boost::shared_ptr<const std::unordered_map<Geometry::ComponentID, size_t>>>
-makeBeamlineComponentInfo(const InfoComponentVisitor &visitor) {
-
-  return std::make_tuple(visitor.componentInfo(), visitor.componentIds(),
-                         visitor.componentIdToIndexMap());
-}
-
 void clearPositionAndRotationsParameters(ParameterMap &pmap,
                                          const IDetector &det) {
   pmap.clearParametersByName(ParameterMap::pos(), &det);
@@ -263,19 +253,40 @@ makeDetectorInfo(const Instrument &oldInstr, const Instrument &newInstr) {
 
 /**
  * Make the beamline and API ComponentInfo
- * @param visitor : Component visitor to query
+ * @param visitor : Component visitor to query. Visitor MUST have been filled
+ * via registerContents.
  */
 void ExperimentInfo::makeAPIComponentInfo(const InfoComponentVisitor &visitor) {
 
-  boost::shared_ptr<const std::vector<Geometry::ComponentID>> componentIds;
+  boost::shared_ptr<const std::vector<Geometry::ComponentID>> componentIds =
+      visitor.componentIds();
   boost::shared_ptr<const std::unordered_map<Geometry::ComponentID, size_t>>
-      componentIdToIndexMap;
+      componentIdToIndexMap = visitor.componentIdToIndexMap();
 
-  std::tie(m_componentInfo, componentIds, componentIdToIndexMap) =
-      makeBeamlineComponentInfo(visitor);
+  m_componentInfo = visitor.componentInfo();
 
   m_componentInfoWrapper = Kernel::make_unique<ComponentInfo>(
       *m_componentInfo, componentIds, componentIdToIndexMap);
+}
+
+/**
+ * Take the visitor from the instrument if it's already there or make from
+ * scratch.
+ * @param instrument : Instrument which might carry a visitor.
+ * @return InfoComponentVisitor
+ */
+std::unique_ptr<Geometry::InfoComponentVisitor>
+ExperimentInfo::makeOrRetrieveVisitor(const Instrument &instrument) const {
+
+  if (!instrument.hasInfoVisitor() || instrument.isEmptyInstrument()) {
+    const auto nDetectors =
+        instrument.getNumberDetectors(false /*do not skip monitors*/);
+    auto visitor = Kernel::make_unique<InfoComponentVisitor>(nDetectors);
+    instrument.registerContents(*visitor);
+    return visitor;
+  } else {
+    return Kernel::make_unique<InfoComponentVisitor>(instrument.infoVisitor());
+  }
 }
 
 /** Set the instrument
@@ -297,15 +308,7 @@ void ExperimentInfo::setInstrument(const Instrument_const_sptr &instr) {
   const auto parInstrument = Geometry::ParComponentFactory::createInstrument(
       sptr_instrument, m_parmap);
 
-  if (!m_infoVisitor || m_infoVisitor->isEmpty()) {
-    m_infoVisitor = Kernel::make_unique<InfoComponentVisitor>(
-        sptr_instrument->getNumberDetectors(false /*do not skip monitors*/));
-    sptr_instrument->registerContents(*m_infoVisitor);
-  } else {
-
-    m_infoVisitor =
-        Kernel::make_unique<InfoComponentVisitor>(instr->infoVisitor());
-  }
+  m_infoVisitor = makeOrRetrieveVisitor(*sptr_instrument);
 
   m_detectorInfo = makeDetectorInfo(*parInstrument, *instr);
   m_parmap->setDetectorInfo(m_detectorInfo);
@@ -339,17 +342,9 @@ Instrument_const_sptr ExperimentInfo::getInstrument() const {
 
   auto instrument = makeParameterizedInstrument();
 
-  instrument->setDetectorInfo(
-      m_detectorInfo,
-      m_detectorInfoWrapper->detIdToIndexMap()); // TODO remove
-
-  instrument->setComponentInfo(
-      m_componentInfo,
-      m_componentInfoWrapper->componentIds(),           // TODO remove
-      m_componentInfoWrapper->componentIdToIndexMap()); // TODO remove
+  instrument->setDetectorInfo(m_detectorInfo);
 
   instrument->setInfoVisitor(*m_infoVisitor);
-  // instrument->setInstrumentInfo(m_infoVisitor); // TODO add
 
   return instrument;
 }
