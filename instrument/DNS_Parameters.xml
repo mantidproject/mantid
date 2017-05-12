@@ -44,7 +44,7 @@
 
                 <!-- Normalization workspace name suffix -->
                 <parameter name="normws_suffix" type="string">
-                        <value val="_norm"/>
+                        <value val="_n"/>
                 </parameter>
 
                 <!-- formula for Monitor efficiency calculation. Algorithm: MonitorEfficiencyCorUser  -->
