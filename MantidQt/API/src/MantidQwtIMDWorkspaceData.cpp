@@ -159,7 +159,12 @@ void MantidQwtIMDWorkspaceData::calculateMinMax() { calculateYMinAndMax(); }
 //-----------------------------------------------------------------------------
 /** Size of the data set
  */
-size_t MantidQwtIMDWorkspaceData::size() const { return m_Y.size(); }
+size_t MantidQwtIMDWorkspaceData::size() const {
+  if (!isPlottable()) {
+    return 0;
+  }
+  return m_Y.size();
+}
 
 /** Return the x value of data point i
 @param i :: Index

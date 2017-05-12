@@ -53,6 +53,9 @@ QwtWorkspaceSpectrumData *QwtWorkspaceSpectrumData::copyWithNewSource(
 /** Size of the data set
  */
 size_t QwtWorkspaceSpectrumData::size() const {
+  if (!isPlottable()) {
+    return 0;
+  }
   if (m_binCentres || m_isHistogram) {
     return m_Y.size();
   }
@@ -121,15 +124,14 @@ bool QwtWorkspaceSpectrumData::setAsDistribution(bool on) {
 QwtWorkspaceSpectrumData &QwtWorkspaceSpectrumData::
 operator=(const QwtWorkspaceSpectrumData &rhs) {
   if (this != &rhs) {
-    static_cast<MantidQwtMatrixWorkspaceData &>(*this) = rhs;
-    m_wsIndex = rhs.m_wsIndex;
-    m_X = rhs.m_X;
-    m_Y = rhs.m_Y;
-    m_E = rhs.m_E;
-    m_xTitle = rhs.m_xTitle;
-    m_yTitle = rhs.m_yTitle;
-    m_isHistogram = rhs.m_isHistogram;
-    m_binCentres = rhs.m_binCentres;
+    m_wsIndex = this->m_wsIndex;
+    m_X = this->m_X;
+    m_Y = this->m_Y;
+    m_E = this->m_E;
+    m_xTitle = this->m_xTitle;
+    m_yTitle = this->m_yTitle;
+    m_isHistogram = this->m_isHistogram;
+    m_binCentres = this->m_binCentres;
   }
   return *this;
 }
