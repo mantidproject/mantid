@@ -244,7 +244,6 @@ public:
 
   bool hasDetectorInfo() const;
   const Beamline::DetectorInfo &detectorInfo() const;
-  bool hasComponentInfo() const;
   bool hasInfoVisitor() const;
 
   size_t detectorIndex(const detid_t detID) const;

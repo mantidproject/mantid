@@ -679,9 +679,6 @@ public:
     TSM_ASSERT("Can only be "
                "available when associated with ExperimentInfo",
                !loneInstrument.hasDetectorInfo());
-    TSM_ASSERT("Can only be "
-               "available when associated with ExperimentInfo",
-               !loneInstrument.hasComponentInfo());
   }
 
 private:

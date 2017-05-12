@@ -258,15 +258,13 @@ makeDetectorInfo(const Instrument &oldInstr, const Instrument &newInstr) {
  */
 void ExperimentInfo::makeAPIComponentInfo(const InfoComponentVisitor &visitor) {
 
-  boost::shared_ptr<const std::vector<Geometry::ComponentID>> componentIds =
-      visitor.componentIds();
-  boost::shared_ptr<const std::unordered_map<Geometry::ComponentID, size_t>>
-      componentIdToIndexMap = visitor.componentIdToIndexMap();
-
+  // Internal Beamline ComponentInfo
   m_componentInfo = visitor.componentInfo();
 
+  // Wrapper API ComponentInfo
   m_componentInfoWrapper = Kernel::make_unique<ComponentInfo>(
-      *m_componentInfo, componentIds, componentIdToIndexMap);
+      *m_componentInfo, visitor.componentIds(),
+      visitor.componentIdToIndexMap());
 }
 
 /**

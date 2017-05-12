@@ -1242,14 +1242,6 @@ const Beamline::DetectorInfo &Instrument::detectorInfo() const {
 
 /**
  * Only for use by ExperimentInfo
- * @return True only if a ComponentInfo has been set
- */
-bool Instrument::hasComponentInfo() const {
-  return static_cast<bool>(m_infoVisitor); // The source of the component info
-}
-
-/**
- * Only for use by ExperimentInfo
  * @return True only if a InfoComponentVisitor has been set.
  */
 bool Instrument::hasInfoVisitor() const {
