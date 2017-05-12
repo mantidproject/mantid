@@ -11,6 +11,7 @@ from mantid.kernel import (DateAndTime, time_duration, FloatTimeSeriesProperty,
 import SANSUtility as su
 import re
 import random
+import os
 import numpy as np
 
 

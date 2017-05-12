@@ -73,6 +73,9 @@ private:
   /// Max # of peaks
   int64_t m_maxPeaks;
 
+  /// Number of edge pixels with no peaks
+  int m_edge;
+
   /// Flag to include the detectors within the peak
   bool m_addDetectors;
 

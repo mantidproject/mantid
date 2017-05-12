@@ -48,6 +48,8 @@ public:
 
   VMDBase(const VMDBase &other);
   VMDBase &operator=(const VMDBase &other);
+  VMDBase(VMDBase &&other) noexcept;
+  VMDBase &operator=(VMDBase &&other) noexcept;
   VMDBase(size_t nd, const double *bareData);
   VMDBase(size_t nd, const float *bareData);
   VMDBase(const V3D &vector);
