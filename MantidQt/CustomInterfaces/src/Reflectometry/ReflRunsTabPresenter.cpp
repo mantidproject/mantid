@@ -360,6 +360,9 @@ void ReflRunsTabPresenter::notify(DataProcessorMainPresenter::Flag flag) {
   case DataProcessorMainPresenter::ConfirmReductionPausedFlag:
     confirmReductionPaused();
     break;
+  case DataProcessorMainPresenter::ConfirmReductionResumedFlag:
+    confirmReductionResumed();
+    break;
   }
   // Not having a 'default' case is deliberate. gcc issues a warning if there's
   // a flag we aren't handling.

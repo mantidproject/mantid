@@ -253,9 +253,6 @@ private:
   // actions/commands
   void addCommands();
 
-  // start reduction
-  void startReduction();
-
   // pause/resume reduction
   void pause();
   void resume();

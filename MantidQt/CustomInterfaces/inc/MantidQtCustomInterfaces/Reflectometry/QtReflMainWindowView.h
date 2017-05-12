@@ -87,8 +87,6 @@ private:
   Ui::RelMainWindowWidget m_ui;
   /// The presenter handling this view
   std::unique_ptr<IReflMainWindowPresenter> m_presenter;
-  /// Temporary store for a close event
-  QCloseEvent *m_closeEvent;
 };
 }
 }

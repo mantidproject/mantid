@@ -55,6 +55,7 @@ void ReflMainWindowPresenter::notify(IReflMainWindowPresenter::Flag flag) {
     break;
   case IReflMainWindowPresenter::ConfirmReductionResumedFlag:
     confirmReductionResumed();
+    break;
   }
   // Not having a 'default' case is deliberate. gcc issues a warning if there's
   // a flag we aren't handling.

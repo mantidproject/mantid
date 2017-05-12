@@ -220,11 +220,16 @@ void GenericDataProcessorPresenter::process() {
     m_gqueue.push(std::make_pair(item.first, rowQueue));
   }
 
-  startReduction();
+  m_mainPresenter->notify(
+      DataProcessorMainPresenter::ConfirmReductionResumedFlag);
 
+  // Start processing the first group
+  nextGroup();
+
+  /*
   // If "Output Notebook" checkbox is checked then create an ipython notebook
   if (m_view->getEnableNotebook())
-    saveNotebook(items);
+    saveNotebook(items);*/
 }
 
 /**
@@ -305,6 +310,9 @@ void GenericDataProcessorPresenter::nextGroup() {
         make_unique<GenericDataProcessorPresenterThread>(this, worker);
     connect(worker, SIGNAL(finished()), this, SLOT(nextRow()));
     m_workerThread->start();
+  } else {
+    m_mainPresenter->notify(
+        DataProcessorMainPresenter::ConfirmReductionPausedFlag);
   }
 }
 
@@ -1379,25 +1387,12 @@ void GenericDataProcessorPresenter::addCommands() {
 }
 
 /**
-Start the reduction process and notify main presenter appropriately
-*/
-void GenericDataProcessorPresenter::startReduction() {
-
-  m_mainPresenter->notify(
-    DataProcessorMainPresenter::ConfirmReductionResumedFlag);
-  // Start processing the first group
-  nextGroup();
-  m_mainPresenter->notify(
-    DataProcessorMainPresenter::ConfirmReductionPausedFlag);
-}
-
-/**
 Pauses reduction. If currently reducing runs, this does not take effect until
 the current thread for reducing a row or group has finished
 */
 void GenericDataProcessorPresenter::pause() {
 
-  if (!m_reductionPaused)
+  if (m_reductionPaused)
     m_mainPresenter->notify(
         DataProcessorMainPresenter::ConfirmReductionPausedFlag);
 
