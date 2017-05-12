@@ -56,14 +56,10 @@ public:
   MOCK_CONST_METHOD0(getFilenames, QStringList());
   MOCK_CONST_METHOD0(getStartTime, double());
   MOCK_CONST_METHOD0(getEndTime, double());
-  MOCK_METHOD1(setNumPeriods, void(size_t));
-  MOCK_METHOD1(setChosenPeriod, void(const QString &));
-  MOCK_CONST_METHOD0(getPeriodSelections, QStringList());
+  MOCK_CONST_METHOD0(getPeriodSelected, QStringList());
   MOCK_METHOD3(setWorkspaceDetails, void(const QString &, const QString &,
                                          const boost::optional<QString> &));
-  MOCK_METHOD1(setAvailableGroups, void(const QStringList &));
-  MOCK_CONST_METHOD0(getChosenGroups, QStringList());
-  MOCK_METHOD1(setChosenGroup, void(const QString &));
+  MOCK_CONST_METHOD0(getGroupsSelected, QStringList());
   MOCK_METHOD1(setStartTime, void(double));
   MOCK_METHOD1(setEndTime, void(double));
   MOCK_METHOD1(setStartTimeQuietly, void(double));
@@ -95,6 +91,13 @@ public:
   MOCK_METHOD1(userChangedDataset, void(int));
   MOCK_CONST_METHOD0(rawData, bool());
   MOCK_METHOD1(continueAfterChecks, void(bool));
+
+  MOCK_METHOD1(setNumPeriods, void(size_t));
+  MOCK_METHOD1(setChosenPeriods, void(const QString &));
+  MOCK_METHOD1(setChosenGroups, void(const QString &));
+  MOCK_METHOD1(setAvailableGroups, void(const QStringList &));
+  MOCK_CONST_METHOD0(getChosenGroups, QStringList());
+
   void preFitChecksRequested(bool sequential) override {
     UNUSED_ARG(sequential);
   }
@@ -205,8 +208,8 @@ public:
     EXPECT_CALL(*m_dataSelector,
                 setWorkspaceDetails(QString("00015189-91"), QString("MUSR"),
                                     Eq(boost::optional<QString>{}))).Times(1);
-    EXPECT_CALL(*m_dataSelector, setChosenGroup(QString("long"))).Times(1);
-    EXPECT_CALL(*m_dataSelector, setChosenPeriod(QString("1"))).Times(1);
+    EXPECT_CALL(*m_fitBrowser, setChosenGroup(QString("long"))).Times(1);
+    EXPECT_CALL(*m_fitBrowser, setChosenPeriod(QString("1"))).Times(1);
     m_presenter->setAssignedFirstRun(wsName, boost::none);
   }
 
@@ -217,8 +220,8 @@ public:
                 setWorkspaceDetails(QString("00015189-91, 15193"),
                                     QString("MUSR"),
                                     Eq(boost::optional<QString>{}))).Times(1);
-    EXPECT_CALL(*m_dataSelector, setChosenGroup(QString("long"))).Times(1);
-    EXPECT_CALL(*m_dataSelector, setChosenPeriod(QString("1"))).Times(1);
+    EXPECT_CALL(*m_fitBrowser, setChosenGroup(QString("long"))).Times(1);
+    EXPECT_CALL(*m_fitBrowser, setChosenPeriod(QString("1"))).Times(1);
     m_presenter->setAssignedFirstRun(wsName, boost::none);
   }
 
@@ -228,8 +231,8 @@ public:
     m_presenter->setAssignedFirstRun(wsName, boost::none);
     EXPECT_CALL(*m_dataSelector, setWorkspaceDetails(_, _, _)).Times(0);
     EXPECT_CALL(*m_fitBrowser, allowSequentialFits(_)).Times(0);
-    EXPECT_CALL(*m_dataSelector, setChosenGroup(QString("long"))).Times(0);
-    EXPECT_CALL(*m_dataSelector, setChosenPeriod(QString("1"))).Times(0);
+    EXPECT_CALL(*m_fitBrowser, setChosenGroup(QString("long"))).Times(0);
+    EXPECT_CALL(*m_fitBrowser, setChosenPeriod(QString("1"))).Times(0);
     m_presenter->setAssignedFirstRun(wsName, boost::none);
   }
 
