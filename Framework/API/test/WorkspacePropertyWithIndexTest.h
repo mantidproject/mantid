@@ -40,31 +40,28 @@ public:
   }
 
   void testConstructor() {
-    TS_ASSERT_THROWS_NOTHING(
-        (MatrixWorkspaceIndexProp(API::IndexType::SpectrumNumber)));
+    TS_ASSERT_THROWS_NOTHING((MatrixWorkspaceIndexProp()));
   }
 
   void testContructorFailsWithoutMatrixWorkspace() {
     // MatrixWorkspace needed for indexInfo.
-    TS_ASSERT_THROWS(
-        WorkspacePropertyWithIndex<Workspace>(
-            static_cast<unsigned int>(API::IndexType::SpectrumNumber)),
-        std::runtime_error);
+    TS_ASSERT_THROWS(WorkspacePropertyWithIndex<Workspace>(),
+                     std::runtime_error);
 
-    TS_ASSERT_THROWS(
-        WorkspacePropertyWithIndex<ITableWorkspace>(
-            static_cast<unsigned int>(API::IndexType::SpectrumNumber)),
-        std::runtime_error);
+    TS_ASSERT_THROWS(WorkspacePropertyWithIndex<ITableWorkspace>(),
+                     std::runtime_error);
   }
 
   void testConstructorFailsWithInvalidIndexType() {
-    TS_ASSERT_THROWS(MatrixWorkspaceIndexProp(0), std::invalid_argument);
+    TS_ASSERT_THROWS(MatrixWorkspaceIndexProp("InputWorkspaceWithIndex", 0),
+                     std::invalid_argument);
   }
 
   void testRetrieveWorkspaceAndSpectrumIndexSetUsingWorkspaceIndices() {
     auto ws = WorkspaceFactory::Instance().create("WorkspaceTester", 10, 10, 9);
 
-    MatrixWorkspaceIndexProp prop(IndexType::WorkspaceIndex);
+    MatrixWorkspaceIndexProp prop("InputWorkspaceWithIndex",
+                                  IndexType::WorkspaceIndex);
     prop = ws; // Set workspace pointer
 
     const auto &indexInfo = ws->indexInfo();
@@ -91,7 +88,8 @@ public:
     // Spectrum Numbers will range from 1 to 10
     auto ws = WorkspaceFactory::Instance().create("WorkspaceTester", 10, 10, 9);
 
-    MatrixWorkspaceIndexProp prop(IndexType::SpectrumNumber);
+    MatrixWorkspaceIndexProp prop("InputWorkspaceWithIndex",
+                                  IndexType::SpectrumNumber);
     prop = ws; // Set workspace pointer (necessary for using indexInfo)
 
     // Valid spectrum numbers could be set at the GUI level
@@ -104,7 +102,8 @@ public:
     // Spectrum Numbers will range from 1 to 10
     auto ws = WorkspaceFactory::Instance().create("WorkspaceTester", 10, 10, 9);
 
-    MatrixWorkspaceIndexProp prop(IndexType::SpectrumNumber);
+    MatrixWorkspaceIndexProp prop("InputWorkspaceWithIndex",
+                                  IndexType::SpectrumNumber);
     prop = ws; // Set workspace pointer
 
     // Invalid spectrum numbers could be set at the GUI level
@@ -116,7 +115,8 @@ public:
   void testRetrieveWorkspaceAndSpectrumIndexSetUsingSpectrumNumbers() {
     auto ws = WorkspaceFactory::Instance().create("WorkspaceTester", 10, 10, 9);
 
-    MatrixWorkspaceIndexProp prop(IndexType::SpectrumNumber);
+    MatrixWorkspaceIndexProp prop("InputWorkspaceWithIndex",
+                                  IndexType::SpectrumNumber);
     prop = ws; // Set workspace pointer
 
     const auto &indexInfo = ws->indexInfo();
@@ -143,7 +143,8 @@ public:
   void testArbitrarySetOfSpectrumNumbers() {
     auto ws = WorkspaceFactory::Instance().create("WorkspaceTester", 10, 10, 9);
 
-    MatrixWorkspaceIndexProp prop(IndexType::SpectrumNumber);
+    MatrixWorkspaceIndexProp prop("InputWorkspaceWithIndex",
+                                  IndexType::SpectrumNumber);
     prop = ws; // Set workspace pointer
 
     const auto &indexInfo = ws->indexInfo();
@@ -171,7 +172,8 @@ public:
   void testReturnAllIndicesWhenNoSpectrumNumbersProvided() {
     auto ws = WorkspaceFactory::Instance().create("WorkspaceTester", 10, 10, 9);
 
-    MatrixWorkspaceIndexProp prop(IndexType::SpectrumNumber);
+    MatrixWorkspaceIndexProp prop("InputWorkspaceWithIndex",
+                                  IndexType::SpectrumNumber);
     prop = ws; // Set workspace pointer
 
     // Create indices
@@ -189,12 +191,13 @@ public:
       TS_ASSERT_EQUALS(indexSet[i], i);
   }
 
-  void testAssignWorkspaceTypeAndVector() {
+  void testAssignWorkspaceTupleWithArrayVector() {
     auto ws = WorkspaceFactory::Instance().create("WorkspaceTester", 10, 10, 9);
     std::vector<int> list{1, 3, 9};
-    MatrixWorkspaceIndexProp prop(IndexType::SpectrumNumber);
-    prop = std::tuple<MatrixWorkspace_sptr, std::string, std::vector<int>>(
-        ws, "SpectrumNumber", list);
+    MatrixWorkspaceIndexProp prop("InputWorkspaceWithIndex",
+                                  IndexType::SpectrumNumber);
+    prop = std::tuple<MatrixWorkspace_sptr, IndexType, std::vector<int>>(
+        ws, IndexType::SpectrumNumber, list);
 
     MatrixWorkspace_sptr outWs;
     SpectrumIndexSet indexSet(0);
@@ -210,12 +213,12 @@ public:
       TS_ASSERT_EQUALS(indexSet[i] + 1, list[i]);
   }
 
-  void testAssignWorkspaceTypeAndString() {
+  void testAssignWorkspaceTupleWithArrayString() {
     auto ws = WorkspaceFactory::Instance().create("WorkspaceTester", 10, 10, 9);
-    std::string list("1:4,8");
-    MatrixWorkspaceIndexProp prop(IndexType::WorkspaceIndex);
-    prop = std::tuple<MatrixWorkspace_sptr, std::string, std::string>(
-        ws, "WorkspaceIndex", list);
+    MatrixWorkspaceIndexProp prop("InputWorkspaceWithIndex",
+                                  IndexType::WorkspaceIndex);
+    prop = std::tuple<MatrixWorkspace_sptr, IndexType, std::string>(
+        ws, IndexType::WorkspaceIndex, "1:4,8");
 
     MatrixWorkspace_sptr outWs;
     SpectrumIndexSet indexSet(0);
@@ -236,7 +239,7 @@ public:
   void testRetrievePropertyUsingPropertyManager() {
     PropertyManagerHelper mgr;
     mgr.declareProperty(Mantid::Kernel::make_unique<MatrixWorkspaceIndexProp>(
-        IndexType::WorkspaceIndex));
+        "InputWorkspaceWithIndex", IndexType::WorkspaceIndex));
     auto ws = WorkspaceFactory::Instance().create("WorkspaceTester", 10, 10, 9);
     mgr.setProperty("InputWorkspaceWithIndex", ws);
 
@@ -247,12 +250,62 @@ public:
         std::tuple<MatrixWorkspace_sptr, SpectrumIndexSet>(
             mgr.getProperty("InputWorkspaceWithIndex"));
 
-	TS_ASSERT_EQUALS(outWs, ws);
+    TS_ASSERT_EQUALS(outWs, ws);
 
-	TS_ASSERT_EQUALS(indexSet.size(), 10);
+    TS_ASSERT_EQUALS(indexSet.size(), 10);
 
-	for (int i = 0; i < indexSet.size(); i++)
-		TS_ASSERT_EQUALS(indexSet[i], i);
+    for (int i = 0; i < indexSet.size(); i++)
+      TS_ASSERT_EQUALS(indexSet[i], i);
+  }
+
+  void testSetPropertyTupleWithStringUsingPropertyManager() {
+    PropertyManagerHelper mgr;
+    mgr.declareProperty(Mantid::Kernel::make_unique<MatrixWorkspaceIndexProp>(
+        "InputWorkspaceWithIndex", IndexType::WorkspaceIndex));
+    auto ws = WorkspaceFactory::Instance().create("WorkspaceTester", 10, 10, 9);
+
+    mgr.setProperty<MatrixWorkspace_sptr, API::IndexType, std::string>(
+        "InputWorkspaceWithIndex", ws, IndexType::WorkspaceIndex, "2:3,1,9");
+
+    MatrixWorkspace_sptr outWs;
+    SpectrumIndexSet indexSet(0);
+
+    std::tie(outWs, indexSet) =
+        std::tuple<MatrixWorkspace_sptr, SpectrumIndexSet>(
+            mgr.getProperty("InputWorkspaceWithIndex"));
+
+    TS_ASSERT_EQUALS(outWs, ws);
+
+    TS_ASSERT_EQUALS(indexSet.size(), 4);
+    TS_ASSERT_EQUALS(indexSet[0], 1);
+    TS_ASSERT_EQUALS(indexSet[1], 2);
+    TS_ASSERT_EQUALS(indexSet[2], 3);
+    TS_ASSERT_EQUALS(indexSet[3], 9);
+  }
+
+  void testSetPropertyTupleWithVectorUsingPropertyManager() {
+    PropertyManagerHelper mgr;
+    mgr.declareProperty(Mantid::Kernel::make_unique<MatrixWorkspaceIndexProp>(
+        "InputWorkspaceWithIndex", IndexType::SpectrumNumber));
+    auto ws = WorkspaceFactory::Instance().create("WorkspaceTester", 10, 10, 9);
+
+    mgr.setProperty<MatrixWorkspace_sptr, API::IndexType, std::vector<int>>(
+        "InputWorkspaceWithIndex", ws, IndexType::SpectrumNumber, {8, 1, 2, 4});
+
+    MatrixWorkspace_sptr outWs;
+    SpectrumIndexSet indexSet(0);
+
+    std::tie(outWs, indexSet) =
+        std::tuple<MatrixWorkspace_sptr, SpectrumIndexSet>(
+            mgr.getProperty("InputWorkspaceWithIndex"));
+
+    TS_ASSERT_EQUALS(outWs, ws);
+
+    TS_ASSERT_EQUALS(indexSet.size(), 4);
+    TS_ASSERT_EQUALS(indexSet[0], 0);
+    TS_ASSERT_EQUALS(indexSet[1], 1);
+    TS_ASSERT_EQUALS(indexSet[2], 3);
+    TS_ASSERT_EQUALS(indexSet[3], 7);
   }
 };
 

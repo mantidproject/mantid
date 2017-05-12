@@ -2,6 +2,7 @@
 #define MANTID_API_WORKSPACEPROPERTYWITHINDEX_H_
 
 #include "MantidAPI/WorkspaceProperty.h"
+#include <MantidAPI/IndexTypeProperty.h>
 #include <MantidIndexing/GlobalSpectrumIndex.h>
 #include <MantidIndexing/SpectrumIndexSet.h>
 #include <MantidIndexing/SpectrumNumber.h>
@@ -14,7 +15,6 @@
 
 namespace Mantid {
 namespace API {
-class IndexTypeProperty;
 class MatrixWorkspace;
 
 /** WorkspacePropertyWithIndex : Workspace property which allows users to
@@ -47,7 +47,9 @@ template <typename TYPE = MatrixWorkspace>
 class WorkspacePropertyWithIndex : public WorkspaceProperty<TYPE> {
 public:
   explicit WorkspacePropertyWithIndex(
-      const int indexType, const std::string &wsName = "",
+      const std::string &name = "InputWorkspaceWithIndex",
+      const int indexType = IndexType::SpectrumNumber,
+      const std::string &wsName = "",
       Kernel::IValidator_sptr validator =
           Kernel::IValidator_sptr(new NullValidator));
 
@@ -58,18 +60,19 @@ public:
   std::string isValid() const override;
 
   bool operator==(const WorkspacePropertyWithIndex<TYPE> &rhs);
+  WorkspacePropertyWithIndex &
+  operator=(const std::tuple<boost::shared_ptr<TYPE>, API::IndexType,
+                             std::vector<int>> &rhs);
   WorkspacePropertyWithIndex &operator=(
-      const std::tuple<boost::shared_ptr<TYPE>, std::string, std::vector<int>>
+      const std::tuple<boost::shared_ptr<TYPE>, API::IndexType, std::string>
           &rhs);
-  WorkspacePropertyWithIndex &operator=(
-      const std::tuple<boost::shared_ptr<TYPE>, std::string, std::string> &rhs);
   WorkspacePropertyWithIndex &
   operator=(const WorkspacePropertyWithIndex<TYPE> &rhs);
   WorkspacePropertyWithIndex &
   operator+=(WorkspacePropertyWithIndex<TYPE> const *rhs);
 
   operator const std::tuple<boost::shared_ptr<TYPE>,
-                           Indexing::SpectrumIndexSet>() const;
+                            Indexing::SpectrumIndexSet>() const;
 
   WorkspacePropertyWithIndex *clone() const override;
 

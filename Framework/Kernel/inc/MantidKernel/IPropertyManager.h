@@ -10,8 +10,8 @@
 #include <boost/type_traits.hpp>
 #endif
 
-#include <unordered_set>
 #include <tuple>
+#include <unordered_set>
 #include <vector>
 
 namespace Json {
@@ -142,6 +142,19 @@ public:
   template <typename T>
   IPropertyManager *setProperty(const std::string &name, const T &value) {
     return doSetProperty(name, value);
+  }
+
+  /** Templated method to set the value of a PropertyWithValue with multiple
+   * arguments
+   *  @param name::The name of the property(case insensitive)
+   *  @param args::The values to assign to the property
+   *  @throw Exception::NotFoundError If the named property is unknown
+   *  @throw std::invalid_argument If an attempt is made to assign to a property
+   * of different type
+   */
+  template <typename... T>
+  IPropertyManager *setProperty(const std::string &name, const T... args) {
+    return setTypedProperty(name, std::tuple<T...>(args...));
   }
 
   /** Templated method to set the value of a PropertyWithValue from a
@@ -504,6 +517,19 @@ private:
     }
     return this;
   }
+
+  /**
+   * Set a property value for handling tuples
+   *  @param name :: The name of the property (case insensitive)
+   *  @param value :: The value to assign to the property as a tuple
+   *  @throw Exception::NotFoundError If the named property is unknown
+   *  @throw std::invalid_argument If an attempt is made to assign to a property
+   * of different type
+   */
+  template <typename... T>
+  IPropertyManager *setTypedProperty(const std::string &name,
+                                     const std::tuple<T...> &value);
+
   /**
    * Set a property value that is convertible to a DataItem_sptr
    *  @param name :: The name of the property (case insensitive)

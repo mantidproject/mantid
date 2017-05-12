@@ -30,3 +30,45 @@ template class MANTID_API_DLL
 ///@endcond TEMPLATE
 } // namespace API
 } // namespace Mantid
+
+namespace Mantid {
+namespace Kernel {
+template <>
+MANTID_API_DLL IPropertyManager *
+IPropertyManager::setTypedProperty<API::MatrixWorkspace_sptr, API::IndexType,
+                                   std::vector<int>>(
+    const std::string &name,
+    const std::tuple<API::MatrixWorkspace_sptr, API::IndexType,
+                     std::vector<int>> &value) {
+  API::WorkspacePropertyWithIndex<API::MatrixWorkspace> *prop =
+      dynamic_cast<API::WorkspacePropertyWithIndex<API::MatrixWorkspace> *>(
+          getPointerToProperty(name));
+  if (prop) {
+    *prop = value;
+  } else {
+    throw std::invalid_argument("Attempt to assign to property (" + name +
+                                ") of incorrect type");
+  }
+  return this;
+}
+
+template <>
+MANTID_API_DLL IPropertyManager *
+IPropertyManager::setTypedProperty<API::MatrixWorkspace_sptr, API::IndexType,
+                                   std::string>(
+    const std::string &name,
+    const std::tuple<API::MatrixWorkspace_sptr, API::IndexType, std::string>
+        &value) {
+  API::WorkspacePropertyWithIndex<API::MatrixWorkspace> *prop =
+      dynamic_cast<API::WorkspacePropertyWithIndex<API::MatrixWorkspace> *>(
+          getPointerToProperty(name));
+  if (prop) {
+    *prop = value;
+  } else {
+    throw std::invalid_argument("Attempt to assign to property (" + name +
+                                ") of incorrect type");
+  }
+  return this;
+}
+} // namespace Kernel
+} // namespace Mantid
