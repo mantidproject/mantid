@@ -276,7 +276,7 @@ void MuonFitDataSelector::setUserInput(const QVariant &value) {
  * doing a simultaneous fit, chosen via the radio buttons.
  * @returns :: fit type from enum
  */
-IMuonFitDataSelector::FitType MuonFitDataSelector::getFitType() const { // will need to pass group and periods
+IMuonFitDataSelector::FitType MuonFitDataSelector::getFitType() const { 
   // If radio buttons disabled, it's a single fit unless multiple groups/periods
   // chosen
   if (!m_ui.rbCoAdd->isEnabled()) {

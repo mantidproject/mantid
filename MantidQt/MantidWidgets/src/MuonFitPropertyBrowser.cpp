@@ -294,7 +294,7 @@ void MuonFitPropertyBrowser::groupBtnPressed() {
 void MuonFitPropertyBrowser::periodBtnPressed() {
 	genPeriodWindow();
 }
-// Create period selection pop up
+// Create combination selection pop up
 void MuonFitPropertyBrowser::generateBtnPressed() {
 	genCombinePeriodWindow();
 }
@@ -337,8 +337,8 @@ void MuonFitPropertyBrowser::setWorkspaceName(const QString &wsName) {
   if (i >= 0)
     m_enumManager->setValue(m_workspace, i);
 }
-/** Called when the function name property changed
-* @param prop :: A pointer to the function name property m_functionName
+/** Called when a dropdown menu is changed
+* @param prop :: A pointer to the function name property 
 */
 void MuonFitPropertyBrowser::enumChanged(QtProperty *prop) {
 	if (!m_changeSlotsEnabled)
@@ -477,7 +477,7 @@ void MuonFitPropertyBrowser::boolChanged(QtProperty *prop) {
     emit fitRawDataClicked(val);
   }
   else {
-	  //search map for group change
+	  //search map for group/pair change
 	  bool done = false;
 	  for (auto iter = m_groupBoxes.constBegin(); iter != m_groupBoxes.constEnd();
 		  ++iter) {
@@ -1025,6 +1025,19 @@ void MuonFitPropertyBrowser::setAvailableGroups(const QStringList &groups) {
 	}
 }
 /**
+* Selects a single group/pair
+* @param groups :: [input] Group/pair to select
+*/
+void MuonFitPropertyBrowser::setChosenGroup(QString &group) {
+	clearChosenGroups();
+	for (auto iter = m_groupBoxes.constBegin(); iter != m_groupBoxes.constEnd();
+		++iter) {
+		if (iter.key() == group) {
+			m_boolManager->setValue(iter.value(), true);
+		}
+	}
+}
+/**
 * Clears all group names and checkboxes
 * (ready to add new ones)
 */
@@ -1036,7 +1049,7 @@ void MuonFitPropertyBrowser::clearGroupCheckboxes() {
 }
 /**
 * Add a new checkbox to the list of groups with given name
-* The new checkbox is unchecked by default
+* The new checkbox is checked according to dropdown menu selection
 * @param name :: [input] Name of group to add
 */
 void MuonFitPropertyBrowser::addGroupCheckbox(const QString &name) {
@@ -1091,7 +1104,7 @@ void MuonFitPropertyBrowser::setAllGroups() {
 	}
 }
 /*
-* sets all pairs
+* Sets all pairs
 */
 void MuonFitPropertyBrowser::setAllPairs() {
 	clearChosenGroups();
@@ -1110,15 +1123,6 @@ void MuonFitPropertyBrowser::setAllPairs() {
 	}
 }
 
-void MuonFitPropertyBrowser::setChosenGroup(QString &group) {
-	clearChosenGroups();
-	for (auto iter = m_groupBoxes.constBegin(); iter != m_groupBoxes.constEnd();
-		++iter) {
-		if (iter.key() == group) {
-			m_boolManager->setValue(iter.value(), true);
-		}
-	}
-}
 /*
 * Create a popup window to select a custom
 * selection of groups/pairs
@@ -1143,12 +1147,9 @@ void MuonFitPropertyBrowser::genGroupWindow() {
 }
 /**
 * Sets checkboxes for periods
-* and "combination" boxes.
-* Hides control for single-period data.
 * @param numPeriods :: [input] Number of periods
 */
 void MuonFitPropertyBrowser::setNumPeriods(size_t numPeriods) {
-	//clearPeriodCheckboxes();
 	m_periodsToFitOptions.clear();
 	// create more boxes
 	for (size_t i = 0; i != numPeriods; i++) {
@@ -1162,8 +1163,6 @@ void MuonFitPropertyBrowser::setNumPeriods(size_t numPeriods) {
 		m_enumManager->setValue(m_periodsToFit, 0);
 		clearChosenPeriods();
 		m_boolManager->setValue(m_periodBoxes.constBegin().value(), true);
-					
-
 	}
 	else {
 		//add custom back into list
@@ -1176,9 +1175,9 @@ void MuonFitPropertyBrowser::setNumPeriods(size_t numPeriods) {
 	}
 }
 /**
-* Sets group names and updates checkboxes on UI
+* Sets period names and updates checkboxes on UI
 * By default sets all unchecked
-* @param groups :: [input] List of group names
+* @param groups :: [input] List of period names
 */
 void MuonFitPropertyBrowser::setAvailablePeriods(const QStringList &periods) {
 	// If it's the same list, do nothing
@@ -1199,7 +1198,7 @@ void MuonFitPropertyBrowser::setAvailablePeriods(const QStringList &periods) {
 	}
 }
 /**
-* Clears all group names and checkboxes
+* Clears all pair names and checkboxes
 * (ready to add new ones)
 */
 void MuonFitPropertyBrowser::clearPeriodCheckboxes() {
@@ -1215,7 +1214,6 @@ void MuonFitPropertyBrowser::clearPeriodCheckboxes() {
 	m_periodsToFitOptions.clear();
 	m_periodsToFitOptions << "1";
 	m_enumManager->setEnumNames(m_periodsToFit, m_periodsToFitOptions);
-
 }
 /**
 * Clears the list of selected groups (unchecks boxes)
@@ -1248,6 +1246,7 @@ void MuonFitPropertyBrowser::addPeriodCheckbox(const QString &name) {
 */
 QStringList MuonFitPropertyBrowser::getChosenPeriods() const {
 	QStringList chosen;
+	//if single period
 	if (m_periodsToFitOptions.size() == 1) {
 		chosen << "";
 	}
@@ -1263,7 +1262,7 @@ QStringList MuonFitPropertyBrowser::getChosenPeriods() const {
 }
 /**
 * Ticks the selected periods 
-* @param chsoenPeriods :: list of selected periods
+* @param chosenPeriods :: list of selected periods
 */
 void MuonFitPropertyBrowser::setChosenPeriods(const QStringList &chosenPeriods){
 	clearChosenPeriods();
@@ -1279,7 +1278,7 @@ void MuonFitPropertyBrowser::setChosenPeriods(const QStringList &chosenPeriods){
 }
 /**
 * Ticks the selected periods
-* @param chsoenPeriods :: list of selected periods
+* @param chosenPeriods :: list of selected periods
 */
 void MuonFitPropertyBrowser::setChosenPeriods(const QString &period) {
 	clearChosenPeriods();
@@ -1292,7 +1291,7 @@ void MuonFitPropertyBrowser::setChosenPeriods(const QString &period) {
 	}
 }
 /*
-* Create a popup window to select a custom
+* Create a pop up window to select a custom
 * selection of periods
 */
 void MuonFitPropertyBrowser::genPeriodWindow() {
@@ -1314,7 +1313,7 @@ void MuonFitPropertyBrowser::genPeriodWindow() {
 	w->show();
 }
 /*
-* Create a popup window to create
+* Create a pop up window to create
 * a combination of periods
 */
 void MuonFitPropertyBrowser::genCombinePeriodWindow() {
@@ -1337,7 +1336,11 @@ void MuonFitPropertyBrowser::genCombinePeriodWindow() {
 	
 
 }
-
+/* 
+* Get the positive and negative parts of the 
+* combination of periods and produce a new
+* tick box. Unticked by default.
+*/
 void MuonFitPropertyBrowser::combineBtnPressed() {
 	QString value = m_positiveCombo->text();
 	if (value.isEmpty()) {
