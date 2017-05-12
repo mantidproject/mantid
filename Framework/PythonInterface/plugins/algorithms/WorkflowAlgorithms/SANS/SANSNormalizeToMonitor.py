@@ -185,7 +185,7 @@ class SANSNormalizeToMonitor(DataProcessorAlgorithm):
         wavelength_step = normalize_to_monitor_state.wavelength_step
         wavelength_step_type = normalize_to_monitor_state.wavelength_step_type
         wavelength_rebin_mode = normalize_to_monitor_state.rebin_type
-        convert_name = "ConvertToWavelength"
+        convert_name = "SANSConvertToWavelengthAndRebin"
         convert_options = {"InputWorkspace": workspace,
                            "WavelengthLow": wavelength_low,
                            "WavelengthHigh": wavelength_high,

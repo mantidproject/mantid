@@ -111,7 +111,7 @@ void GetDetectorOffsets::exec() {
   Progress prog(this, 0, 1.0, nspec);
   auto &spectrumInfo = maskWS->mutableSpectrumInfo();
   PARALLEL_FOR_IF(Kernel::threadSafe(*inputW))
-  for (int wi = 0; wi < nspec; ++wi) {
+  for (int64_t wi = 0; wi < nspec; ++wi) {
     PARALLEL_START_INTERUPT_REGION
     // Fit the peak
     double offset = fitSpectra(wi, isAbsolute);

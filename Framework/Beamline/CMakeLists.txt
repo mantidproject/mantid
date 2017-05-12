@@ -31,11 +31,9 @@ endif(UNITY_BUILD)
 add_library ( Beamline ${SRC_FILES} ${INC_FILES} )
 # Set the name of the generated library
 set_target_properties ( Beamline PROPERTIES OUTPUT_NAME MantidBeamline
-  COMPILE_DEFINITIONS IN_MANTID_BEAMLINE )
-
-if (OSX_VERSION VERSION_GREATER 10.8)
-  set_target_properties ( Beamline PROPERTIES INSTALL_RPATH "@loader_path/../MacOS")
-endif ()
+                                 COMPILE_DEFINITIONS IN_MANTID_BEAMLINE
+                                 INSTALL_RPATH "@loader_path/../MacOS" )
+target_include_directories( Beamline PUBLIC ${EIGEN3_INCLUDE_DIR} )
 
 # Add to the 'Framework' group in VS
 set_property ( TARGET Beamline PROPERTY FOLDER "MantidFramework" )
