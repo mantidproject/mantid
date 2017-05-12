@@ -112,11 +112,11 @@ def fit_tof_iteration(sample_data, container_data, runs, flags):
     num_spec = sample_data.getNumberHistograms()
     pre_correct_pars_workspace = None
     pars_workspace = None
+    fit_workspace = None
     max_fit_iterations = flags.get('max_fit_iterations', 5000)
 
     output_groups = []
     chi2_values = []
-    fit_workspaces = []
     data_workspaces = []
     result_workspaces = []
     group_name = runs + '_result'
@@ -203,6 +203,9 @@ def fit_tof_iteration(sample_data, container_data, runs, flags):
         if pars_workspace is None:
             pars_workspace = _create_param_workspace(num_spec, mtd[pars_name])
 
+        if fit_workspace is None:
+            fit_workspace = _create_param_workspace(num_spec, mtd[linear_correction_fit_params_name])
+
         spec_num_str = str(sample_data.getSpectrum(index).getSpectrumNo())
         current_spec = 'spectrum_' + spec_num_str
 
@@ -212,13 +215,15 @@ def fit_tof_iteration(sample_data, container_data, runs, flags):
         _update_fit_params(pars_workspace, index,
                            mtd[pars_name], current_spec)
 
+        _update_fit_params(fit_workspace, index, mtd[linear_correction_fit_params_name], current_spec)
+
         ms.DeleteWorkspace(pre_correction_pars_name)
         ms.DeleteWorkspace(pars_name)
+        ms.DeleteWorkspace(linear_correction_fit_params_name)
 
         # Process spectrum group
         # Note the ordering of operations here gives the order in the WorkspaceGroup
         output_workspaces = []
-        fit_workspaces.append(linear_correction_fit_params_name)
         data_workspaces.append(fit_ws_name)
         if flags.get('output_verbose_corrections', False):
             output_workspaces += mtd[corrections_args["CorrectionWorkspaces"]].getNames()
@@ -229,7 +234,7 @@ def fit_tof_iteration(sample_data, container_data, runs, flags):
         for workspace in output_workspaces:
 
             group_name = runs + '_iteration_' + str(flags.get('iteration', None))
-            name = group_name + '_' + workspace.split('_')[1] +'_'+ workspace.split('_')[-1]
+            name = group_name + '_' + workspace.split('_')[1] + '_' + workspace.split('_')[-1]
             result_workspaces.append(name)
             if index == 0:
                 ms.RenameWorkspace(InputWorkspace=workspace, OutputWorkspace=name)
@@ -239,13 +244,13 @@ def fit_tof_iteration(sample_data, container_data, runs, flags):
         # Output the parameter workspaces
         params_pre_corr = runs + "_params_pre_correction_iteration_" + str(flags['iteration'])
         params_name = runs + "_params_iteration_" + str(flags['iteration'])
+        fit_name = runs + "_correction_fit_scale_iteration_" + str(flags['iteration'])
         AnalysisDataService.Instance().addOrReplace(params_pre_corr, pre_correct_pars_workspace)
         AnalysisDataService.Instance().addOrReplace(params_name, pars_workspace)
+        AnalysisDataService.Instance().addOrReplace(fit_name, fit_workspace)
 
     output_groups.append(ms.GroupWorkspaces(InputWorkspaces=result_workspaces,
                                             OutputWorkspace=group_name))
-    output_groups.append(ms.GroupWorkspaces(InputWorkspaces=fit_workspaces,
-                                            OutputWorkspace=group_name + '_fit'))
     output_groups.append(ms.GroupWorkspaces(InputWorkspaces=data_workspaces,
                                             OutputWorkspace=group_name + '_data'))
 
