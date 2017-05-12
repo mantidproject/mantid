@@ -39,16 +39,16 @@ namespace MantidWidgets {
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS MuonFitDataSelector
-    :public  MantidQt::API::MantidWidget,
+    : public MantidQt::API::MantidWidget,
       public IMuonFitDataSelector {
   Q_OBJECT
 
 public:
   /// Basic constructor
-	explicit MuonFitDataSelector(QWidget *parent);
+  explicit MuonFitDataSelector(QWidget *parent);
   /// Constructor with more options
   MuonFitDataSelector(QWidget *parent, int runNumber, const QString &instName);
-                     //, size_t numPeriods, const QStringList &groups);
+  //, size_t numPeriods, const QStringList &groups);
   // --- MantidWidget methods ---
   /// Get user input through a common interface
   QVariant getUserInput() const override;

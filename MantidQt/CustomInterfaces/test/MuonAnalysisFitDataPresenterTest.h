@@ -56,7 +56,7 @@ public:
   MOCK_CONST_METHOD0(getFilenames, QStringList());
   MOCK_CONST_METHOD0(getStartTime, double());
   MOCK_CONST_METHOD0(getEndTime, double());
-  MOCK_METHOD1(setPeriodsSelected, void(const QStringList & ));
+  MOCK_METHOD1(setPeriodsSelected, void(const QStringList &));
   MOCK_CONST_METHOD0(getPeriodSelections, QStringList());
   MOCK_METHOD3(setWorkspaceDetails, void(const QString &, const QString &,
                                          const boost::optional<QString> &));
@@ -206,9 +206,11 @@ public:
     EXPECT_CALL(*m_dataSelector,
                 setWorkspaceDetails(QString("00015189-91"), QString("MUSR"),
                                     Eq(boost::optional<QString>{}))).Times(1);
-    EXPECT_CALL(*m_dataSelector, setPeriodsSelected(QStringList({"1"}))).Times(1);
-    EXPECT_CALL(*m_dataSelector, setGroupsSelected(QStringList({"long"}))).Times(1);
-    localSetAssignedFirstRun(wsName,boost::none);
+    EXPECT_CALL(*m_dataSelector, setPeriodsSelected(QStringList({"1"})))
+        .Times(1);
+    EXPECT_CALL(*m_dataSelector, setGroupsSelected(QStringList({"long"})))
+        .Times(1);
+    localSetAssignedFirstRun(wsName, boost::none);
   }
 
   void test_setAssignedFirstRun_nonContiguousRange() {
@@ -218,9 +220,11 @@ public:
                 setWorkspaceDetails(QString("00015189-91, 15193"),
                                     QString("MUSR"),
                                     Eq(boost::optional<QString>{}))).Times(1);
-    EXPECT_CALL(*m_dataSelector, setGroupsSelected(QStringList({"long"}))).Times(1);
-    EXPECT_CALL(*m_dataSelector, setPeriodsSelected(QStringList({"1"}))).Times(1);
-    //m_presenter->setAssignedFirstRun(wsName, boost::none);
+    EXPECT_CALL(*m_dataSelector, setGroupsSelected(QStringList({"long"})))
+        .Times(1);
+    EXPECT_CALL(*m_dataSelector, setPeriodsSelected(QStringList({"1"})))
+        .Times(1);
+    // m_presenter->setAssignedFirstRun(wsName, boost::none);
     localSetAssignedFirstRun(wsName, boost::none);
   }
 
@@ -230,9 +234,11 @@ public:
     m_presenter->setAssignedFirstRun(wsName, boost::none);
     EXPECT_CALL(*m_dataSelector, setWorkspaceDetails(_, _, _)).Times(0);
     EXPECT_CALL(*m_fitBrowser, allowSequentialFits(_)).Times(0);
-    EXPECT_CALL(*m_dataSelector, setGroupsSelected(QStringList({"long"}))).Times(1);
-    EXPECT_CALL(*m_dataSelector, setPeriodsSelected(QStringList({"1"}))).Times(1);
-    //m_presenter->setAssignedFirstRun(wsName, boost::none);
+    EXPECT_CALL(*m_dataSelector, setGroupsSelected(QStringList({"long"})))
+        .Times(1);
+    EXPECT_CALL(*m_dataSelector, setPeriodsSelected(QStringList({"1"})))
+        .Times(1);
+    // m_presenter->setAssignedFirstRun(wsName, boost::none);
     localSetAssignedFirstRun(wsName, boost::none);
   }
 
@@ -244,14 +250,14 @@ public:
     EXPECT_CALL(*m_dataSelector,
                 setWorkspaceDetails(QString("00061335"), QString("MUSR"),
                                     Eq(currentRunPath))).Times(1);
-    //m_presenter->setAssignedFirstRun(wsName, currentRunPath);
+    // m_presenter->setAssignedFirstRun(wsName, currentRunPath);
     localSetAssignedFirstRun(wsName, currentRunPath);
   }
 
   void test_getAssignedFirstRun() {
     setupGroupPeriodSelections();
     const QString wsName("MUSR00015189; Pair; long; Asym; 1; #1");
-    //m_presenter->setAssignedFirstRun(wsName, boost::none);
+    // m_presenter->setAssignedFirstRun(wsName, boost::none);
     localSetAssignedFirstRun(wsName, boost::none);
     TS_ASSERT_EQUALS(wsName, m_presenter->getAssignedFirstRun());
   }
@@ -688,8 +694,10 @@ public:
     EXPECT_CALL(*m_dataSelector,
                 setWorkspaceDetails(QString("00015189-91"), QString("MUSR"),
                                     Eq(boost::none))).Times(1);
-    EXPECT_CALL(*m_dataSelector, setGroupsSelected(QStringList({"fwd"}))).Times(1);
-    EXPECT_CALL(*m_dataSelector, setPeriodsSelected(QStringList({"1"}))).Times(1);
+    EXPECT_CALL(*m_dataSelector, setGroupsSelected(QStringList({"fwd"})))
+        .Times(1);
+    EXPECT_CALL(*m_dataSelector, setPeriodsSelected(QStringList({"1"})))
+        .Times(1);
 
     localSetSelectedWorkspace(wsName, boost::none);
   }
@@ -709,8 +717,10 @@ public:
     EXPECT_CALL(*m_dataSelector,
                 setWorkspaceDetails(QString("00061335"), QString("MUSR"),
                                     Eq(currentRunPath))).Times(1);
-    EXPECT_CALL(*m_dataSelector, setGroupsSelected(QStringList({"fwd"}))).Times(1);
-    EXPECT_CALL(*m_dataSelector, setPeriodsSelected(QStringList({"1"}))).Times(1);
+    EXPECT_CALL(*m_dataSelector, setGroupsSelected(QStringList({"fwd"})))
+        .Times(1);
+    EXPECT_CALL(*m_dataSelector, setPeriodsSelected(QStringList({"1"})))
+        .Times(1);
 
     localSetSelectedWorkspace(wsName, currentRunPath);
   }
@@ -1055,25 +1065,35 @@ private:
     m_presenter->doPreFitChecks(sequential);
   }
 
-/// method to manually set up workspace
-/// this is a work around for the signal/slots
-  void localSetAssignedFirstRun( const QString &wsName, const boost::optional<QString> &filepath ){
+  /// method to manually set up workspace
+  /// this is a work around for the signal/slots
+  void localSetAssignedFirstRun(const QString &wsName,
+                                const boost::optional<QString> &filepath) {
     m_presenter->setAssignedFirstRun(wsName, filepath);
     // manually replicate signal
-    const auto wsParams=MantidQt::CustomInterfaces::MuonAnalysisHelper::parseWorkspaceName(wsName.toStdString());
-    m_dataSelector->setPeriodsSelected(QStringList{QString::fromStdString(wsParams.periods)});
-    m_dataSelector->setGroupsSelected(QStringList{QString::fromStdString(wsParams.itemName)});
-}
+    const auto wsParams =
+        MantidQt::CustomInterfaces::MuonAnalysisHelper::parseWorkspaceName(
+            wsName.toStdString());
+    m_dataSelector->setPeriodsSelected(
+        QStringList{QString::fromStdString(wsParams.periods)});
+    m_dataSelector->setGroupsSelected(
+        QStringList{QString::fromStdString(wsParams.itemName)});
+  }
 
-/// method to manually set up workspace
-/// this is a work around for the signal/slots
-  void localSetSelectedWorkspace( const QString &wsName, const boost::optional<QString> &filepath ){
+  /// method to manually set up workspace
+  /// this is a work around for the signal/slots
+  void localSetSelectedWorkspace(const QString &wsName,
+                                 const boost::optional<QString> &filepath) {
     m_presenter->setSelectedWorkspace(wsName, filepath);
     // manually replicate signal
-    const auto wsParams=MantidQt::CustomInterfaces::MuonAnalysisHelper::parseWorkspaceName(wsName.toStdString());
-    m_dataSelector->setPeriodsSelected(QStringList{QString::fromStdString(wsParams.periods)});
-    m_dataSelector->setGroupsSelected(QStringList{QString::fromStdString(wsParams.itemName)});
-}
+    const auto wsParams =
+        MantidQt::CustomInterfaces::MuonAnalysisHelper::parseWorkspaceName(
+            wsName.toStdString());
+    m_dataSelector->setPeriodsSelected(
+        QStringList{QString::fromStdString(wsParams.periods)});
+    m_dataSelector->setGroupsSelected(
+        QStringList{QString::fromStdString(wsParams.itemName)});
+  }
 
   MockDataSelector *m_dataSelector;
   MockFitBrowser *m_fitBrowser;

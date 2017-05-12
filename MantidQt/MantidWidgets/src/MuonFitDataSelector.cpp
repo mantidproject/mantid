@@ -1,8 +1,6 @@
 #include "MantidQtMantidWidgets/MuonFitDataSelector.h"
 #include "MantidKernel/Logger.h"
 
-
-
 #include "qttreepropertybrowser.h"
 #include "qtpropertymanager.h"
 
@@ -37,18 +35,18 @@ MuonFitDataSelector::MuonFitDataSelector(QWidget *parent)
  * @param groups :: [input] Group names from initial workspace
  */
 MuonFitDataSelector::MuonFitDataSelector(QWidget *parent, int runNumber,
-                                         const QString &instName)/*
-                                         size_t numPeriods,
-                                         const QStringList &groups)*/
+                                         const QString &instName) /*
+                                          size_t numPeriods,
+                                          const QStringList &groups)*/
     : MuonFitDataSelector(parent) {
   this->setWorkspaceDetails(QString::number(runNumber), instName,
                             boost::optional<QString>{});
   // not used in this case
-  // but leave these here as a remainder 
+  // but leave these here as a remainder
   // for future changes that may need to assign them
 
-  //this->setNumPeriods(numPeriods);
-  //this->setAvailableGroups(groups);
+  // this->setNumPeriods(numPeriods);
+  // this->setAvailableGroups(groups);
 }
 
 /**
@@ -103,8 +101,8 @@ void MuonFitDataSelector::userChangedRuns() {
  */
 double MuonFitDataSelector::getStartTime() const {
   // Validator ensures cast to double will succeed
-  //const QString start = m_ui.txtStart->text();
-  return m_startX;// start.toDouble();
+  // const QString start = m_ui.txtStart->text();
+  return m_startX; // start.toDouble();
 }
 
 /**
@@ -112,7 +110,7 @@ double MuonFitDataSelector::getStartTime() const {
  * @param start :: [input] Start time in microseconds
  */
 void MuonFitDataSelector::setStartTimeQuietly(double start) {
-  //m_ui.txtStart->setText(QString::number(start));
+  // m_ui.txtStart->setText(QString::number(start));
   m_startX = start;
 }
 
@@ -131,8 +129,8 @@ void MuonFitDataSelector::setStartTime(double start) {
  */
 double MuonFitDataSelector::getEndTime() const {
   // Validator ensures cast to double will succeed
-  //const QString end = m_ui.txtEnd->text();
-	return m_endX;// end.toDouble();
+  // const QString end = m_ui.txtEnd->text();
+  return m_endX; // end.toDouble();
 }
 
 /**
@@ -140,8 +138,8 @@ double MuonFitDataSelector::getEndTime() const {
  * @param end :: [input] End time in microseconds
  */
 void MuonFitDataSelector::setEndTimeQuietly(double end) {
-	m_endX = end;
-	//m_ui.txtEnd->setText(QString::number(end));
+  m_endX = end;
+  // m_ui.txtEnd->setText(QString::number(end));
 }
 
 /**
@@ -211,8 +209,7 @@ void MuonFitDataSelector::setDefaultValues() {
  * @returns :: list of periods e.g. "1", "3", "1+2-3+4", or "" if single-period
  */
 QStringList MuonFitDataSelector::getPeriodSelections() const {
-	return m_chosenPeriods;
-  
+  return m_chosenPeriods;
 }
 
 /**
@@ -220,7 +217,7 @@ QStringList MuonFitDataSelector::getPeriodSelections() const {
  * @returns :: list of selected groups
  */
 QStringList MuonFitDataSelector::getChosenGroups() const {
-	return m_chosenGroups;
+  return m_chosenGroups;
 }
 
 /**
@@ -276,12 +273,13 @@ void MuonFitDataSelector::setUserInput(const QVariant &value) {
  * doing a simultaneous fit, chosen via the radio buttons.
  * @returns :: fit type from enum
  */
-IMuonFitDataSelector::FitType MuonFitDataSelector::getFitType() const { 
+IMuonFitDataSelector::FitType MuonFitDataSelector::getFitType() const {
   // If radio buttons disabled, it's a single fit unless multiple groups/periods
   // chosen
   if (!m_ui.rbCoAdd->isEnabled()) {
-    return m_chosenGroups.size() <= 1 && m_chosenPeriods.size() <= 1 ? FitType::Single
-                                                     : FitType::Simultaneous;
+    return m_chosenGroups.size() <= 1 && m_chosenPeriods.size() <= 1
+               ? FitType::Single
+               : FitType::Simultaneous;
   } else {
     // which button is selected
     if (m_ui.rbCoAdd->isChecked()) {
@@ -372,7 +370,8 @@ void MuonFitDataSelector::setSimultaneousFitLabel(const QString &label) {
  * Called when groups/periods selection changes.
  */
 void MuonFitDataSelector::checkForMultiGroupPeriodSelection() {
-  m_ui.txtSimFitLabel->setEnabled(m_chosenGroups.size() > 1 || m_chosenPeriods.size() > 1 ||
+  m_ui.txtSimFitLabel->setEnabled(m_chosenGroups.size() > 1 ||
+                                  m_chosenPeriods.size() > 1 ||
                                   getFitType() == FitType::Simultaneous);
 }
 

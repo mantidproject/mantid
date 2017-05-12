@@ -318,17 +318,18 @@ void MuonAnalysis::initLayout() {
   // Manage User Directories
   connect(m_uiForm.manageDirectoriesBtn, SIGNAL(clicked()), this,
           SLOT(openDirectoryDialog()));
- // m_uiForm.
-  connect(this, SIGNAL(setChosenGroupSignal(QString &)), this, SLOT(setChosenGroupSlot(QString &)));
-  connect(this, SIGNAL(setChosenPeriodSignal(QString &)), this, SLOT(setChosenPeriodSlot(QString &)));
-
+  // m_uiForm.
+  connect(this, SIGNAL(setChosenGroupSignal(QString &)), this,
+          SLOT(setChosenGroupSlot(QString &)));
+  connect(this, SIGNAL(setChosenPeriodSignal(QString &)), this,
+          SLOT(setChosenPeriodSlot(QString &)));
 }
 
 void MuonAnalysis::setChosenGroupSlot(QString &group) {
-	m_uiForm.fitBrowser->setChosenGroup(group);
+  m_uiForm.fitBrowser->setChosenGroup(group);
 }
 void MuonAnalysis::setChosenPeriodSlot(QString &period) {
-	m_uiForm.fitBrowser->setChosenPeriods(period);
+  m_uiForm.fitBrowser->setChosenPeriods(period);
 }
 /**
 * Muon Analysis help (slot)
@@ -1856,10 +1857,10 @@ void MuonAnalysis::selectMultiPeak(const QString &wsName,
                    std::back_inserter(groupsAndPairs), &QString::fromStdString);
     std::transform(groups.pairNames.begin(), groups.pairNames.end(),
                    std::back_inserter(groupsAndPairs), &QString::fromStdString);
-	m_uiForm.fitBrowser->setAvailableGroups(groupsAndPairs);
-	//set default selection (all groups) for groups/pairs
-	m_uiForm.fitBrowser->setAllGroups();
-	m_uiForm.fitBrowser->setNumPeriods(m_numPeriods);
+    m_uiForm.fitBrowser->setAvailableGroups(groupsAndPairs);
+    // set default selection (all groups) for groups/pairs
+    m_uiForm.fitBrowser->setAllGroups();
+    m_uiForm.fitBrowser->setNumPeriods(m_numPeriods);
 
     // Set the selected run, group/pair and period
     m_fitDataPresenter->setAssignedFirstRun(wsName, filePath);
@@ -2141,9 +2142,9 @@ void MuonAnalysis::loadFittings() {
   connect(m_uiForm.plotCreation, SIGNAL(currentIndexChanged(int)), this,
           SLOT(updateDataPresenterOverwrite(int)));
   connect(m_uiForm.fitBrowser, SIGNAL(groupBoxClicked()), this,
-	  SLOT(handleGroupBox()));
+          SLOT(handleGroupBox()));
   connect(m_uiForm.fitBrowser, SIGNAL(periodBoxClicked()), this,
-	  SLOT(handlePeriodBox()));
+          SLOT(handlePeriodBox()));
 
   m_fitDataPresenter->setOverwrite(isOverwriteEnabled());
   // Set multi fit mode on/off as appropriate
@@ -2158,18 +2159,18 @@ void MuonAnalysis::loadFittings() {
 * Update stored value
 */
 void MuonAnalysis::handleGroupBox() {
-	//send the group to dataselector
-	m_dataSelector->setGroupsSelected(m_uiForm.fitBrowser->getChosenGroups());
-	m_fitDataPresenter->handleSelectedDataChanged(true);
+  // send the group to dataselector
+  m_dataSelector->setGroupsSelected(m_uiForm.fitBrowser->getChosenGroups());
+  m_fitDataPresenter->handleSelectedDataChanged(true);
 }
 /**
 * Handle"periods" selected/deselected
 * Update stored value
 */
 void MuonAnalysis::handlePeriodBox() {
-	//send the group to dataselector
-	m_dataSelector->setPeriodsSelected(m_uiForm.fitBrowser->getChosenPeriods());
-	m_fitDataPresenter->handleSelectedDataChanged(true);
+  // send the group to dataselector
+  m_dataSelector->setPeriodsSelected(m_uiForm.fitBrowser->getChosenPeriods());
+  m_fitDataPresenter->handleSelectedDataChanged(true);
 }
 /**
  * Allow/disallow loading.
@@ -2460,10 +2461,10 @@ void MuonAnalysis::changeTab(int newTabIndex) {
   if (newTab == m_uiForm.DataAnalysis) // Entering DA tab
   {
     // Save last fitting range
-	auto xmin = m_uiForm.fitBrowser->startX();
-	auto xmax = m_uiForm.fitBrowser->endX();	
-	//make sure data selector has same values
-	m_dataSelector->setStartTime(xmin);
+    auto xmin = m_uiForm.fitBrowser->startX();
+    auto xmax = m_uiForm.fitBrowser->endX();
+    // make sure data selector has same values
+    m_dataSelector->setStartTime(xmin);
     m_dataSelector->setEndTime(xmax);
 
     // Say MantidPlot to use Muon Analysis fit prop. browser
@@ -3031,7 +3032,7 @@ void MuonAnalysis::dataToFitChanged() {
     m_fitDataPresenter->setPlotType(parsePlotType(m_uiForm.frontPlotFuncs));
     // Set busy cursor while workspaces are being created
     QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
-    m_fitDataPresenter->handleSelectedDataChanged(isOverwriteEnabled()); 
+    m_fitDataPresenter->handleSelectedDataChanged(isOverwriteEnabled());
     QApplication::restoreOverrideCursor();
   }
 }
@@ -3104,9 +3105,8 @@ void MuonAnalysis::multiFitCheckboxChanged(int state) {
   }
   m_fitFunctionPresenter->setMultiFitState(multiFitState);
   if (multiFitState == Muon::MultiFitState::Disabled) {
-	m_uiForm.fitBrowser->clearChosenGroups();
-//	m_uiForm.fitBrowser->clearChosenPeriods();
-
+    m_uiForm.fitBrowser->clearChosenGroups();
+    //	m_uiForm.fitBrowser->clearChosenPeriods();
   }
 }
 /**

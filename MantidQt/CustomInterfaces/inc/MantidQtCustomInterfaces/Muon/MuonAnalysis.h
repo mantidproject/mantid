@@ -101,7 +101,7 @@ signals:
 private slots:
   /// Guess Alpha clicked
   void guessAlphaClicked();
-  void handleGroupBox( );
+  void handleGroupBox();
   void handlePeriodBox();
   void setChosenGroupSlot(QString &group);
   void setChosenPeriodSlot(QString &period);

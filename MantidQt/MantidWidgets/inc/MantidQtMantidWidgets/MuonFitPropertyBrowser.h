@@ -27,8 +27,6 @@ class QGroupBox;
 class QSplitter;
 class QWidget;
 
-
-
 namespace Mantid {
 namespace API {
 class IFitFunction;
@@ -156,6 +154,7 @@ private slots:
   void doubleChanged(QtProperty *prop) override;
   void boolChanged(QtProperty *prop) override;
   void enumChanged(QtProperty *prop) override;
+
 private:
   /// new menu option
   QAction *m_fitActionTFAsymm;
@@ -170,7 +169,7 @@ private:
   /// workspaces
   void finishAfterSimultaneousFit(const Mantid::API::IAlgorithm *fitAlg,
                                   const int nWorkspaces) const;
-  
+
   void clearGroupCheckboxes();
   void addGroupCheckbox(const QString &name);
   void genGroupWindow();
@@ -182,7 +181,6 @@ private:
   void clearPeriodCheckboxes();
   void addPeriodCheckbox(const QString &name);
 
-
   /// Splitter for additional widgets and splitter between this and browser
   QSplitter *m_widgetSplitter, *m_mainSplitter;
   /// Names of workspaces to fit
@@ -192,15 +190,14 @@ private:
   QtProperty *m_normalization;
   mutable QStringList m_normalizationValue;
 
-
   QtBrowserItem *m_multiFitSettingsGroup;
   QtProperty *m_groupsToFit;
   mutable QStringList m_groupsToFitOptions;
   /// Map of group names to checkboxes
-  QMap<QString,QtProperty *> m_groupBoxes;
-  //QtTreePropertyBrowser *m_groupBrowser; 
+  QMap<QString, QtProperty *> m_groupBoxes;
+  // QtTreePropertyBrowser *m_groupBrowser;
   QtProperty *m_showGroup;
-  mutable QStringList m_showGroupValue; 
+  mutable QStringList m_showGroupValue;
 
   QtProperty *m_periodsToFit;
   mutable QStringList m_periodsToFitOptions;
@@ -216,8 +213,8 @@ private:
   QPushButton *m_generateBtn;
   QGroupBox *m_btnGroup;
 
-
-  std::vector<std::string> m_groupsList = { "fwd","bkwd","top","bottom","bwd"};
+  std::vector<std::string> m_groupsList = {"fwd", "bkwd", "top", "bottom",
+                                           "bwd"};
 };
 
 std::vector<double> readNormalization();

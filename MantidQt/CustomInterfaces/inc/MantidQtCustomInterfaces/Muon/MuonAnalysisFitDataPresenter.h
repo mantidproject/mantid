@@ -145,7 +145,7 @@ public slots:
 
 private:
   /// Generate names of workspaces to be created
-  std::vector<std::string> generateWorkspaceNames( bool overwrite) const;
+  std::vector<std::string> generateWorkspaceNames(bool overwrite) const;
   /// Create analysis workspace
   Mantid::API::Workspace_sptr createWorkspace(const std::string &name,
                                               std::string &groupLabel) const;

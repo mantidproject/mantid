@@ -11,7 +11,6 @@
 
 #include "MantidQtMantidWidgets/MuonFitDataSelector.h"
 
-
 // Suppress a warning coming out of code that isn't ours
 #if defined(__INTEL_COMPILER)
 #pragma warning disable 1125
@@ -58,10 +57,6 @@
 
 #include <QCheckBox>
 
-
-
-
-
 namespace {
 Mantid::Kernel::Logger g_log("MuonFitPropertyBrowser");
 }
@@ -98,7 +93,6 @@ void MuonFitPropertyBrowser::init() {
 
   // Seperates the data and the settings into two seperate categories
   settingsGroup = m_groupManager->addProperty("Data");
-
 
   QSettings multiFitSettings;
   multiFitSettings.beginGroup("");
@@ -151,35 +145,32 @@ void MuonFitPropertyBrowser::init() {
   settingsGroup->addSubProperty(m_startX);
   settingsGroup->addSubProperty(m_endX);
   settingsGroup->addSubProperty(m_normalization);
- 
 
   // Disable "Browse" button - use case is that first run will always be the one
   // selected on front tab. User will type in the runs they want rather than
   // using the Browse button. (If they want to "Browse" they can use front tab).
-  
- 
 
   multiFitSettingsGroup->addSubProperty(m_startX);
   multiFitSettingsGroup->addSubProperty(m_endX);
   m_groupsToFit = m_enumManager->addProperty("Groups/Pairs to fit");
   m_groupsToFitOptions << "All groups"
-	  << "All Pairs"
-	  << "Custom"; 
+                       << "All Pairs"
+                       << "Custom";
   m_showGroupValue << "groups";
   m_showGroup = m_enumManager->addProperty("Selected Groups");
   m_enumManager->setEnumNames(m_groupsToFit, m_groupsToFitOptions);
   multiFitSettingsGroup->addSubProperty(m_groupsToFit);
   multiFitSettingsGroup->addSubProperty(m_showGroup);
 
-  m_enumManager->setEnumNames(m_showGroup, m_showGroupValue);  
-  QString tmp="fwd";
+  m_enumManager->setEnumNames(m_showGroup, m_showGroupValue);
+  QString tmp = "fwd";
   addGroupCheckbox(tmp);
   tmp = "bwd";
   addGroupCheckbox(tmp);
   m_periodsToFit = m_enumManager->addProperty("Periods to fit");
   m_periodsToFitOptions << "1"
-	  << "2"
-	  << "Custom";
+                        << "2"
+                        << "Custom";
   m_showPeriodValue << "1";
   m_showPeriods = m_enumManager->addProperty("Selected Periods");
   m_enumManager->setEnumNames(m_periodsToFit, m_periodsToFitOptions);
@@ -191,7 +182,7 @@ void MuonFitPropertyBrowser::init() {
   connect(m_browser, SIGNAL(currentItemChanged(QtBrowserItem *)), this,
           SLOT(currentItemChanged(QtBrowserItem *)));
 
-	  /* Create editors and assign them to the managers */
+  /* Create editors and assign them to the managers */
   createEditors(w);
 
   updateDecimals();
@@ -200,7 +191,7 @@ void MuonFitPropertyBrowser::init() {
   m_settingsGroup = m_browser->addProperty(settingsGroup);
   m_multiFitSettingsGroup = m_browser->addProperty(multiFitSettingsGroup);
 
-  m_btnGroup =new QGroupBox(tr("Reselect Data"));
+  m_btnGroup = new QGroupBox(tr("Reselect Data"));
   QHBoxLayout *btnLayout = new QHBoxLayout;
   m_reselectGroupBtn = new QPushButton("Groups/Pairs");
   m_reselectPeriodBtn = new QPushButton("Periods");
@@ -208,8 +199,10 @@ void MuonFitPropertyBrowser::init() {
 
   m_reselectGroupBtn->setEnabled(false);
   m_reselectPeriodBtn->setEnabled(false);
-  connect(m_reselectGroupBtn, SIGNAL(released()), this, SLOT(groupBtnPressed()));
-  connect(m_reselectPeriodBtn, SIGNAL(released()), this, SLOT(periodBtnPressed()));
+  connect(m_reselectGroupBtn, SIGNAL(released()), this,
+          SLOT(groupBtnPressed()));
+  connect(m_reselectPeriodBtn, SIGNAL(released()), this,
+          SLOT(periodBtnPressed()));
   connect(m_generateBtn, SIGNAL(released()), this, SLOT(generateBtnPressed()));
 
   btnLayout->addWidget(m_reselectGroupBtn);
@@ -218,12 +211,10 @@ void MuonFitPropertyBrowser::init() {
 
   m_btnGroup->setLayout(btnLayout);
 
-	 
-
   // Don't show "Function" or "Data" sections as they have separate widgets
   m_browser->setItemVisible(m_functionsGroup, false);
   m_browser->setItemVisible(m_settingsGroup, false);
-  m_browser->setItemVisible(m_multiFitSettingsGroup,true);
+  m_browser->setItemVisible(m_multiFitSettingsGroup, true);
   // Custom settings that are specific and asked for by the muon scientists.
   QtProperty *customSettingsGroup = m_groupManager->addProperty("Settings");
 
@@ -270,9 +261,8 @@ void MuonFitPropertyBrowser::init() {
 
     parentLayout->setSpacing(0);
     parentLayout->setMargin(0);
-    parentLayout->setContentsMargins(0, 0, 0, 0);	
-	parentLayout->insertWidget(index+1,m_btnGroup);
-
+    parentLayout->setContentsMargins(0, 0, 0, 0);
+    parentLayout->insertWidget(index + 1, m_btnGroup);
   }
   // Update tooltips when function structure is (or might've been) changed in
   // any way
@@ -287,17 +277,11 @@ void MuonFitPropertyBrowser::executeFitMenu(const QString &item) {
   }
 }
 // Create group/pair selection pop up
-void MuonFitPropertyBrowser::groupBtnPressed() {
-	genGroupWindow();
-}
+void MuonFitPropertyBrowser::groupBtnPressed() { genGroupWindow(); }
 // Create period selection pop up
-void MuonFitPropertyBrowser::periodBtnPressed() {
-	genPeriodWindow();
-}
+void MuonFitPropertyBrowser::periodBtnPressed() { genPeriodWindow(); }
 // Create combination selection pop up
-void MuonFitPropertyBrowser::generateBtnPressed() {
-	genCombinePeriodWindow();
-}
+void MuonFitPropertyBrowser::generateBtnPressed() { genCombinePeriodWindow(); }
 /**
 pulate the fit button.
 * This initialization includes:
@@ -338,79 +322,70 @@ void MuonFitPropertyBrowser::setWorkspaceName(const QString &wsName) {
     m_enumManager->setValue(m_workspace, i);
 }
 /** Called when a dropdown menu is changed
-* @param prop :: A pointer to the function name property 
+* @param prop :: A pointer to the function name property
 */
 void MuonFitPropertyBrowser::enumChanged(QtProperty *prop) {
-	if (!m_changeSlotsEnabled)
-		return;
-	if (prop == m_groupsToFit) {
-		int j = m_enumManager->value(m_groupsToFit);
-		std::string option = m_groupsToFitOptions[j].toStdString();
+  if (!m_changeSlotsEnabled)
+    return;
+  if (prop == m_groupsToFit) {
+    int j = m_enumManager->value(m_groupsToFit);
+    std::string option = m_groupsToFitOptions[j].toStdString();
 
+    if (option == "All groups") {
+      setAllGroups();
+      m_reselectGroupBtn->setEnabled(false);
+    } else if (option == "All Pairs") {
+      setAllPairs();
+      m_reselectGroupBtn->setEnabled(false);
+    } else if (option == "Custom") {
+      m_reselectGroupBtn->setEnabled(true);
+      genGroupWindow();
+    }
+    updateGroupDisplay();
 
-		if (option == "All groups") {
-			setAllGroups();
-			m_reselectGroupBtn->setEnabled(false);
-		}
-		else if (option == "All Pairs") {
-			setAllPairs();
-			m_reselectGroupBtn->setEnabled(false);
-		}
-		else if(option == "Custom") {
-		m_reselectGroupBtn->setEnabled(true);
-		genGroupWindow();		    	
-		
-		}
-		updateGroupDisplay();
-		
-
-	}
-	else if (prop == m_periodsToFit) {
-		int j = m_enumManager->value(m_periodsToFit);
-		std::string option = m_periodsToFitOptions[j].toStdString();
-		if (option == "Custom") {
-			m_reselectPeriodBtn->setEnabled(true);
-			genPeriodWindow();
-		}
-		else {
-			for (auto iter = m_periodBoxes.constBegin(); iter != m_periodBoxes.constEnd();
-				++iter) {
-				if (option == iter.key().toStdString()) {
-					m_boolManager->setValue(iter.value(), true);
-				}
-				else {
-					m_boolManager->setValue(iter.value(), false);
-				}
-				m_reselectPeriodBtn->setEnabled(false);
-			}			
-		}			
-		updatePeriodDisplay();
-	}
-	else {
-		FitPropertyBrowser::enumChanged(prop);
-	}
+  } else if (prop == m_periodsToFit) {
+    int j = m_enumManager->value(m_periodsToFit);
+    std::string option = m_periodsToFitOptions[j].toStdString();
+    if (option == "Custom") {
+      m_reselectPeriodBtn->setEnabled(true);
+      genPeriodWindow();
+    } else {
+      for (auto iter = m_periodBoxes.constBegin();
+           iter != m_periodBoxes.constEnd(); ++iter) {
+        if (option == iter.key().toStdString()) {
+          m_boolManager->setValue(iter.value(), true);
+        } else {
+          m_boolManager->setValue(iter.value(), false);
+        }
+        m_reselectPeriodBtn->setEnabled(false);
+      }
+    }
+    updatePeriodDisplay();
+  } else {
+    FitPropertyBrowser::enumChanged(prop);
+  }
 }
-/** Sets the display for 
+/** Sets the display for
 * selected groups
 */
 void MuonFitPropertyBrowser::updateGroupDisplay() {
-	m_showGroupValue.clear();
-	m_showGroupValue << getChosenGroups().join(",");
-	m_enumManager->setEnumNames(m_showGroup, m_showGroupValue);
-	m_multiFitSettingsGroup->property()->addSubProperty(m_showGroup);
+  m_showGroupValue.clear();
+  m_showGroupValue << getChosenGroups().join(",");
+  m_enumManager->setEnumNames(m_showGroup, m_showGroupValue);
+  m_multiFitSettingsGroup->property()->addSubProperty(m_showGroup);
 }
 /** Sets the display for
 * selected periods
 */
 void MuonFitPropertyBrowser::updatePeriodDisplay() {
-	m_showPeriodValue.clear(); 
-	auto tmp = getChosenPeriods();
-	tmp.replaceInStrings(QRegExp(","), "+");
-	m_showPeriodValue << tmp.join(",");
-	m_enumManager->setEnumNames(m_showPeriods, m_showPeriodValue);
-	if (m_periodsToFitOptions.size() > 1) {
-		m_multiFitSettingsGroup->property()->addSubProperty(m_showPeriods);
-	}
+  m_showPeriodValue.clear();
+  auto tmp = getChosenPeriods();
+  tmp.replaceInStrings(QRegExp(","), "+");
+  m_showPeriodValue << tmp.join(",");
+  m_enumManager->setEnumNames(m_showPeriods, m_showPeriodValue);
+  if (m_periodsToFitOptions.size() > 1) {
+    m_multiFitSettingsGroup->property()->addSubProperty(m_showPeriods);
+  }
 }
 /** Called when a double property changed
  * @param prop :: A pointer to the property
@@ -473,37 +448,34 @@ void MuonFitPropertyBrowser::boolChanged(QtProperty *prop) {
   if (prop == m_rawData) {
     const bool val = m_boolManager->value(prop);
     emit fitRawDataClicked(val);
-  }
-  else {
-	  //search map for group/pair change
-	  bool done = false;
-	  for (auto iter = m_groupBoxes.constBegin(); iter != m_groupBoxes.constEnd();
-		  ++iter) {
-		  if (iter.value() == prop) {
-			  done = true;
-			  updateGroupDisplay();
-			  emit groupBoxClicked();
-		  }
-	  }
-	  //search map for period change
-	  if (done == false) {
-		  for (auto iter = m_periodBoxes.constBegin(); iter != m_periodBoxes.constEnd();
-			  ++iter) {
-			  if (iter.value() == prop) {
-				  done = true;
-				  updatePeriodDisplay();
-				  emit periodBoxClicked();
-			  }
-
-		  }
-	  }
-	  if(done==false){
-		  // defer to parent class
-		  FitPropertyBrowser::boolChanged(prop);
-	  }
+  } else {
+    // search map for group/pair change
+    bool done = false;
+    for (auto iter = m_groupBoxes.constBegin(); iter != m_groupBoxes.constEnd();
+         ++iter) {
+      if (iter.value() == prop) {
+        done = true;
+        updateGroupDisplay();
+        emit groupBoxClicked();
+      }
+    }
+    // search map for period change
+    if (done == false) {
+      for (auto iter = m_periodBoxes.constBegin();
+           iter != m_periodBoxes.constEnd(); ++iter) {
+        if (iter.value() == prop) {
+          done = true;
+          updatePeriodDisplay();
+          emit periodBoxClicked();
+        }
+      }
+    }
+    if (done == false) {
+      // defer to parent class
+      FitPropertyBrowser::boolChanged(prop);
+    }
   }
 }
-
 
 /**
 *Get the registered function names
@@ -886,7 +858,6 @@ void MuonFitPropertyBrowser::addExtraWidget(QWidget *widget) {
   if (m_widgetSplitter) {
     m_widgetSplitter->addWidget(widget);
   }
-
 }
 
 /**
@@ -1002,46 +973,46 @@ bool MuonFitPropertyBrowser::hasGuess() const {
 */
 void MuonFitPropertyBrowser::setAvailableGroups(const QStringList &groups) {
 
-	m_enumManager->setValue(m_groupsToFit, 0);
-	// If it's the same list, do nothing
-	if (groups.size() == m_groupBoxes.size()) {
-		auto existingGroups = m_groupBoxes.keys();
-		auto newGroups = groups;
-		qSort(existingGroups);
-		qSort(newGroups);
-		if (existingGroups == newGroups) {
-			return;
-		}
-	}
+  m_enumManager->setValue(m_groupsToFit, 0);
+  // If it's the same list, do nothing
+  if (groups.size() == m_groupBoxes.size()) {
+    auto existingGroups = m_groupBoxes.keys();
+    auto newGroups = groups;
+    qSort(existingGroups);
+    qSort(newGroups);
+    if (existingGroups == newGroups) {
+      return;
+    }
+  }
 
-	clearGroupCheckboxes();	
-	QSettings settings;
-	for (const auto group : groups) {
-		addGroupCheckbox(group); 
-	}
+  clearGroupCheckboxes();
+  QSettings settings;
+  for (const auto group : groups) {
+    addGroupCheckbox(group);
+  }
 }
 /**
 * Selects a single group/pair
 * @param groups :: [input] Group/pair to select
 */
 void MuonFitPropertyBrowser::setChosenGroup(QString &group) {
-	clearChosenGroups();
-	for (auto iter = m_groupBoxes.constBegin(); iter != m_groupBoxes.constEnd();
-		++iter) {
-		if (iter.key() == group) {
-			m_boolManager->setValue(iter.value(), true);
-		}
-	}
+  clearChosenGroups();
+  for (auto iter = m_groupBoxes.constBegin(); iter != m_groupBoxes.constEnd();
+       ++iter) {
+    if (iter.key() == group) {
+      m_boolManager->setValue(iter.value(), true);
+    }
+  }
 }
 /**
 * Clears all group names and checkboxes
 * (ready to add new ones)
 */
 void MuonFitPropertyBrowser::clearGroupCheckboxes() {
-	for (const auto &checkbox : m_groupBoxes) {
-		delete(checkbox);
-	}
-	m_groupBoxes.clear();
+  for (const auto &checkbox : m_groupBoxes) {
+    delete (checkbox);
+  }
+  m_groupBoxes.clear();
 }
 /**
 * Add a new checkbox to the list of groups with given name
@@ -1049,74 +1020,72 @@ void MuonFitPropertyBrowser::clearGroupCheckboxes() {
 * @param name :: [input] Name of group to add
 */
 void MuonFitPropertyBrowser::addGroupCheckbox(const QString &name) {
-	m_groupBoxes.insert(name, m_boolManager->addProperty(name));
-	int j = m_enumManager->value(m_groupsToFit);
-	auto option = m_groupsToFitOptions[j].toStdString();
-	if (option == "All groups") {
-		setAllGroups();
-	}
-	else if (option == "All Pairs") {
-		setAllPairs();
-	}
+  m_groupBoxes.insert(name, m_boolManager->addProperty(name));
+  int j = m_enumManager->value(m_groupsToFit);
+  auto option = m_groupsToFitOptions[j].toStdString();
+  if (option == "All groups") {
+    setAllGroups();
+  } else if (option == "All Pairs") {
+    setAllPairs();
+  }
 }
 /**
 * Returns a list of the selected groups (checked boxes)
 * @returns :: list of selected groups
 */
 QStringList MuonFitPropertyBrowser::getChosenGroups() const {
-	QStringList chosen;
-	for (auto iter = m_groupBoxes.constBegin(); iter != m_groupBoxes.constEnd();
-		++iter) {
-		if (m_boolManager->value(iter.value()) ==true) {
-			chosen.append(iter.key());
-		}
-	}
-	return chosen;
+  QStringList chosen;
+  for (auto iter = m_groupBoxes.constBegin(); iter != m_groupBoxes.constEnd();
+       ++iter) {
+    if (m_boolManager->value(iter.value()) == true) {
+      chosen.append(iter.key());
+    }
+  }
+  return chosen;
 }
 /**
 * Clears the list of selected groups (unchecks boxes)
 */
 void MuonFitPropertyBrowser::clearChosenGroups() const {
-	for (auto iter = m_groupBoxes.constBegin(); iter != m_groupBoxes.constEnd();
-		++iter) {
-		m_boolManager->setValue(iter.value(), false);
-	}
+  for (auto iter = m_groupBoxes.constBegin(); iter != m_groupBoxes.constEnd();
+       ++iter) {
+    m_boolManager->setValue(iter.value(), false);
+  }
 }
 
 /**
 * Selects all groups
 */
 void MuonFitPropertyBrowser::setAllGroups() {
-	
-	clearChosenGroups();
-	for (auto iter = m_groupBoxes.constBegin(); iter != m_groupBoxes.constEnd();
-		++iter) {
-		for (auto group : m_groupsList) {
-			if (iter.key().toStdString() == group) {
-				m_boolManager->setValue(iter.value(), true);
 
-			}
-		}
-	}
+  clearChosenGroups();
+  for (auto iter = m_groupBoxes.constBegin(); iter != m_groupBoxes.constEnd();
+       ++iter) {
+    for (auto group : m_groupsList) {
+      if (iter.key().toStdString() == group) {
+        m_boolManager->setValue(iter.value(), true);
+      }
+    }
+  }
 }
 /*
 * Sets all pairs
 */
 void MuonFitPropertyBrowser::setAllPairs() {
-	clearChosenGroups();
-	bool isItGroup = false;
-	for (auto iter = m_groupBoxes.constBegin(); iter != m_groupBoxes.constEnd();
-		++iter) {
-		isItGroup = false;
-		for (auto group : m_groupsList) {
-			if (iter.key().toStdString() == group) {
-				isItGroup = true;
-			}
-		}
-		if (!isItGroup) {
-			m_boolManager->setValue(iter.value(), true);
-		}
-	}
+  clearChosenGroups();
+  bool isItGroup = false;
+  for (auto iter = m_groupBoxes.constBegin(); iter != m_groupBoxes.constEnd();
+       ++iter) {
+    isItGroup = false;
+    for (auto group : m_groupsList) {
+      if (iter.key().toStdString() == group) {
+        isItGroup = true;
+      }
+    }
+    if (!isItGroup) {
+      m_boolManager->setValue(iter.value(), true);
+    }
+  }
 }
 
 /*
@@ -1124,51 +1093,51 @@ void MuonFitPropertyBrowser::setAllPairs() {
 * selection of groups/pairs
 */
 void MuonFitPropertyBrowser::genGroupWindow() {
-	QWidget *w = new QWidget;
-	QtGroupPropertyManager *groupManager = new QtGroupPropertyManager(w);
-	QVBoxLayout *layout = new QVBoxLayout(w);
-	QtTreePropertyBrowser *groupBrowser = new QtTreePropertyBrowser();
-	QtProperty *groupSettings = groupManager->addProperty("Group/Pair selection");
-	for (auto iter = m_groupBoxes.constBegin(); iter != m_groupBoxes.constEnd();
-		++iter){
-		groupSettings->addSubProperty(m_groupBoxes.value(iter.key()));
-		m_boolManager->setValue(iter.value(),m_boolManager->value(iter.value()));
-	}
-	QtCheckBoxFactory *checkBoxFactory = new QtCheckBoxFactory(w);
-	groupBrowser->setFactoryForManager(m_boolManager, checkBoxFactory);
-	groupBrowser->addProperty(groupSettings);
-	layout->addWidget(groupBrowser);
-	w->setLayout(layout);
-	w->show();
+  QWidget *w = new QWidget;
+  QtGroupPropertyManager *groupManager = new QtGroupPropertyManager(w);
+  QVBoxLayout *layout = new QVBoxLayout(w);
+  QtTreePropertyBrowser *groupBrowser = new QtTreePropertyBrowser();
+  QtProperty *groupSettings = groupManager->addProperty("Group/Pair selection");
+  for (auto iter = m_groupBoxes.constBegin(); iter != m_groupBoxes.constEnd();
+       ++iter) {
+    groupSettings->addSubProperty(m_groupBoxes.value(iter.key()));
+    m_boolManager->setValue(iter.value(), m_boolManager->value(iter.value()));
+  }
+  QtCheckBoxFactory *checkBoxFactory = new QtCheckBoxFactory(w);
+  groupBrowser->setFactoryForManager(m_boolManager, checkBoxFactory);
+  groupBrowser->addProperty(groupSettings);
+  layout->addWidget(groupBrowser);
+  w->setLayout(layout);
+  w->show();
 }
 /**
 * Sets checkboxes for periods
 * @param numPeriods :: [input] Number of periods
 */
 void MuonFitPropertyBrowser::setNumPeriods(size_t numPeriods) {
-	m_periodsToFitOptions.clear();
-	// create more boxes
-	for (size_t i = 0; i != numPeriods; i++) {
-		QString name = QString::number(i + 1);
-		addPeriodCheckbox(name);
-	}
-	if (m_periodsToFitOptions.size() == 1) {
-		m_generateBtn->setDisabled(true);
-		m_multiFitSettingsGroup->property()->removeSubProperty(m_periodsToFit);
-		m_multiFitSettingsGroup->property()->removeSubProperty(m_showPeriods);
-		m_enumManager->setValue(m_periodsToFit, 0);
-		clearChosenPeriods();
-		m_boolManager->setValue(m_periodBoxes.constBegin().value(), true);
-	}
-	else {
-		//add custom back into list
-		m_multiFitSettingsGroup->property()->insertSubProperty(m_periodsToFit,m_showGroup);
-		m_multiFitSettingsGroup->property()->addSubProperty(m_showPeriods);
-		m_generateBtn->setDisabled(false);
+  m_periodsToFitOptions.clear();
+  // create more boxes
+  for (size_t i = 0; i != numPeriods; i++) {
+    QString name = QString::number(i + 1);
+    addPeriodCheckbox(name);
+  }
+  if (m_periodsToFitOptions.size() == 1) {
+    m_generateBtn->setDisabled(true);
+    m_multiFitSettingsGroup->property()->removeSubProperty(m_periodsToFit);
+    m_multiFitSettingsGroup->property()->removeSubProperty(m_showPeriods);
+    m_enumManager->setValue(m_periodsToFit, 0);
+    clearChosenPeriods();
+    m_boolManager->setValue(m_periodBoxes.constBegin().value(), true);
+  } else {
+    // add custom back into list
+    m_multiFitSettingsGroup->property()->insertSubProperty(m_periodsToFit,
+                                                           m_showGroup);
+    m_multiFitSettingsGroup->property()->addSubProperty(m_showPeriods);
+    m_generateBtn->setDisabled(false);
 
-		m_periodsToFitOptions << "Custom";
-		m_enumManager->setEnumNames(m_periodsToFit, m_periodsToFitOptions);
-	}
+    m_periodsToFitOptions << "Custom";
+    m_enumManager->setEnumNames(m_periodsToFit, m_periodsToFitOptions);
+  }
 }
 /**
 * Sets period names and updates checkboxes on UI
@@ -1176,48 +1145,48 @@ void MuonFitPropertyBrowser::setNumPeriods(size_t numPeriods) {
 * @param groups :: [input] List of period names
 */
 void MuonFitPropertyBrowser::setAvailablePeriods(const QStringList &periods) {
-	// If it's the same list, do nothing
-	if (periods.size() == m_periodBoxes.size()) {
-		auto existingGroups = m_periodBoxes.keys(); 
-		auto newGroups = periods;
-		qSort(existingGroups);
-		qSort(newGroups);
-		if (existingGroups == newGroups) {
-			return;
-		}
-	}
+  // If it's the same list, do nothing
+  if (periods.size() == m_periodBoxes.size()) {
+    auto existingGroups = m_periodBoxes.keys();
+    auto newGroups = periods;
+    qSort(existingGroups);
+    qSort(newGroups);
+    if (existingGroups == newGroups) {
+      return;
+    }
+  }
 
-	clearPeriodCheckboxes();
+  clearPeriodCheckboxes();
 
-	for (const auto group : periods) {
-		addPeriodCheckbox(group);
-	}
+  for (const auto group : periods) {
+    addPeriodCheckbox(group);
+  }
 }
 /**
 * Clears all pair names and checkboxes
 * (ready to add new ones)
 */
 void MuonFitPropertyBrowser::clearPeriodCheckboxes() {
-	if (m_periodBoxes.size() > 1) {
-		for (auto iter = m_periodBoxes.constBegin(); iter != m_periodBoxes.constEnd();
-			++iter) {
-			if (iter != m_periodBoxes.constBegin()) {
-				delete(iter);
-			}
-		}
-	}		
-	m_periodsToFitOptions.clear();
-	m_periodsToFitOptions << "1";
-	m_enumManager->setEnumNames(m_periodsToFit, m_periodsToFitOptions);
+  if (m_periodBoxes.size() > 1) {
+    for (auto iter = m_periodBoxes.constBegin();
+         iter != m_periodBoxes.constEnd(); ++iter) {
+      if (iter != m_periodBoxes.constBegin()) {
+        delete (iter);
+      }
+    }
+  }
+  m_periodsToFitOptions.clear();
+  m_periodsToFitOptions << "1";
+  m_enumManager->setEnumNames(m_periodsToFit, m_periodsToFitOptions);
 }
 /**
 * Clears the list of selected groups (unchecks boxes)
 */
 void MuonFitPropertyBrowser::clearChosenPeriods() const {
-	for (auto iter = m_periodBoxes.constBegin(); iter != m_periodBoxes.constEnd();
-		++iter) {
-		m_boolManager->setValue(iter.value(), false);
-	}
+  for (auto iter = m_periodBoxes.constBegin(); iter != m_periodBoxes.constEnd();
+       ++iter) {
+    m_boolManager->setValue(iter.value(), false);
+  }
 }
 /**
 * Add a new checkbox to the list of periods with given name
@@ -1225,130 +1194,127 @@ void MuonFitPropertyBrowser::clearChosenPeriods() const {
 * @param name :: [input] Name of period to add
 */
 void MuonFitPropertyBrowser::addPeriodCheckbox(const QString &name) {
-	m_periodBoxes.insert(name, m_boolManager->addProperty(name));
-	int j = m_enumManager->value(m_periodsToFit);
-	
-	//add new period to list will go after inital list
-	m_periodsToFitOptions <<  name;
-	auto active = getChosenPeriods();
-	m_enumManager->setEnumNames(m_periodsToFit, m_periodsToFitOptions);
-	setChosenPeriods(active);
-	m_enumManager->setValue(m_periodsToFit, j);
+  m_periodBoxes.insert(name, m_boolManager->addProperty(name));
+  int j = m_enumManager->value(m_periodsToFit);
+
+  // add new period to list will go after inital list
+  m_periodsToFitOptions << name;
+  auto active = getChosenPeriods();
+  m_enumManager->setEnumNames(m_periodsToFit, m_periodsToFitOptions);
+  setChosenPeriods(active);
+  m_enumManager->setValue(m_periodsToFit, j);
 }
 /**
 * Returns a list of the selected periods (checked boxes)
 * @returns :: list of selected periods
 */
 QStringList MuonFitPropertyBrowser::getChosenPeriods() const {
-	QStringList chosen;
-	//if single period
-	if (m_periodsToFitOptions.size() == 1) {
-		chosen << "";
-	}
-	else {
-		for (auto iter = m_periodBoxes.constBegin(); iter != m_periodBoxes.constEnd();
-			++iter) {
-			if (m_boolManager->value(iter.value()) == true) {
-				chosen.append(iter.key());
-			}
-		}
-	}
-	return chosen;
+  QStringList chosen;
+  // if single period
+  if (m_periodsToFitOptions.size() == 1) {
+    chosen << "";
+  } else {
+    for (auto iter = m_periodBoxes.constBegin();
+         iter != m_periodBoxes.constEnd(); ++iter) {
+      if (m_boolManager->value(iter.value()) == true) {
+        chosen.append(iter.key());
+      }
+    }
+  }
+  return chosen;
 }
 /**
-* Ticks the selected periods 
+* Ticks the selected periods
 * @param chosenPeriods :: list of selected periods
 */
-void MuonFitPropertyBrowser::setChosenPeriods(const QStringList &chosenPeriods){
-	clearChosenPeriods();
-	for (auto selected : chosenPeriods) {
-		for (auto iter = m_periodBoxes.constBegin(); iter != m_periodBoxes.constEnd();
-			++iter) {
-			auto tmp = iter.key();
-			if (iter.key() == selected) {
-				m_boolManager->setValue(iter.value(), true);
-			}
-		}
-	}
+void MuonFitPropertyBrowser::setChosenPeriods(
+    const QStringList &chosenPeriods) {
+  clearChosenPeriods();
+  for (auto selected : chosenPeriods) {
+    for (auto iter = m_periodBoxes.constBegin();
+         iter != m_periodBoxes.constEnd(); ++iter) {
+      auto tmp = iter.key();
+      if (iter.key() == selected) {
+        m_boolManager->setValue(iter.value(), true);
+      }
+    }
+  }
 }
 /**
 * Ticks the selected periods
 * @param chosenPeriods :: list of selected periods
 */
 void MuonFitPropertyBrowser::setChosenPeriods(const QString &period) {
-	clearChosenPeriods();
-		for (auto iter = m_periodBoxes.constBegin(); iter != m_periodBoxes.constEnd();
-			++iter) {
-			auto tmp = iter.key();
-			if (iter.key() == period) {
-				m_boolManager->setValue(iter.value(), true);
-			}
-	}
+  clearChosenPeriods();
+  for (auto iter = m_periodBoxes.constBegin(); iter != m_periodBoxes.constEnd();
+       ++iter) {
+    auto tmp = iter.key();
+    if (iter.key() == period) {
+      m_boolManager->setValue(iter.value(), true);
+    }
+  }
 }
 /*
 * Create a pop up window to select a custom
 * selection of periods
 */
 void MuonFitPropertyBrowser::genPeriodWindow() {
-	QWidget *w = new QWidget;
-	QtGroupPropertyManager *groupManager = new QtGroupPropertyManager(w);
-	QVBoxLayout *layout = new QVBoxLayout(w);
-	QtTreePropertyBrowser *groupBrowser = new QtTreePropertyBrowser();
-	QtProperty *groupSettings = groupManager->addProperty("Period selection");
-	for (auto iter = m_periodBoxes.constBegin(); iter != m_periodBoxes.constEnd();
-		++iter) {
-		groupSettings->addSubProperty(m_periodBoxes.value(iter.key()));
-		m_boolManager->setValue(iter.value(), m_boolManager->value(iter.value()));
-	}
-	QtCheckBoxFactory *checkBoxFactory = new QtCheckBoxFactory(w);
-	groupBrowser->setFactoryForManager(m_boolManager, checkBoxFactory);
-	groupBrowser->addProperty(groupSettings);
-	layout->addWidget(groupBrowser);
-	w->setLayout(layout);
-	w->show();
+  QWidget *w = new QWidget;
+  QtGroupPropertyManager *groupManager = new QtGroupPropertyManager(w);
+  QVBoxLayout *layout = new QVBoxLayout(w);
+  QtTreePropertyBrowser *groupBrowser = new QtTreePropertyBrowser();
+  QtProperty *groupSettings = groupManager->addProperty("Period selection");
+  for (auto iter = m_periodBoxes.constBegin(); iter != m_periodBoxes.constEnd();
+       ++iter) {
+    groupSettings->addSubProperty(m_periodBoxes.value(iter.key()));
+    m_boolManager->setValue(iter.value(), m_boolManager->value(iter.value()));
+  }
+  QtCheckBoxFactory *checkBoxFactory = new QtCheckBoxFactory(w);
+  groupBrowser->setFactoryForManager(m_boolManager, checkBoxFactory);
+  groupBrowser->addProperty(groupSettings);
+  layout->addWidget(groupBrowser);
+  w->setLayout(layout);
+  w->show();
 }
 /*
 * Create a pop up window to create
 * a combination of periods
 */
 void MuonFitPropertyBrowser::genCombinePeriodWindow() {
-	QWidget *w = new QWidget;
-	QVBoxLayout *layout = new QVBoxLayout(w);
-	QFormLayout *formLayout = new QFormLayout;
-	m_positiveCombo = new QLineEdit();
-	m_negativeCombo = new QLineEdit();
-	formLayout->addRow(new QLabel(tr("Combine:")), m_positiveCombo);
-	formLayout->addRow(new QLabel(tr("   -    ")), m_negativeCombo);
-	layout->addLayout(formLayout);
+  QWidget *w = new QWidget;
+  QVBoxLayout *layout = new QVBoxLayout(w);
+  QFormLayout *formLayout = new QFormLayout;
+  m_positiveCombo = new QLineEdit();
+  m_negativeCombo = new QLineEdit();
+  formLayout->addRow(new QLabel(tr("Combine:")), m_positiveCombo);
+  formLayout->addRow(new QLabel(tr("   -    ")), m_negativeCombo);
+  layout->addLayout(formLayout);
 
-	QPushButton *applyBtn = new QPushButton("Apply");
-	
-	connect(applyBtn, SIGNAL(released()), this, SLOT(combineBtnPressed()));
+  QPushButton *applyBtn = new QPushButton("Apply");
 
-	layout->addWidget(applyBtn);
-	w->setLayout(layout);
-	w->show();
-	
+  connect(applyBtn, SIGNAL(released()), this, SLOT(combineBtnPressed()));
 
+  layout->addWidget(applyBtn);
+  w->setLayout(layout);
+  w->show();
 }
-/* 
-* Get the positive and negative parts of the 
+/*
+* Get the positive and negative parts of the
 * combination of periods and produce a new
 * tick box. Unticked by default.
 */
 void MuonFitPropertyBrowser::combineBtnPressed() {
-	QString value = m_positiveCombo->text();
-	if (value.isEmpty()) {
-		g_log.error("There are no positive periods (top box)");
-		return;
-	}
-	if (!m_negativeCombo->text().isEmpty()) {
-		value.append("-").append(m_negativeCombo->text());
-	}
-	m_positiveCombo->clear();
-	m_negativeCombo->clear();
-	addPeriodCheckbox(value);
-
+  QString value = m_positiveCombo->text();
+  if (value.isEmpty()) {
+    g_log.error("There are no positive periods (top box)");
+    return;
+  }
+  if (!m_negativeCombo->text().isEmpty()) {
+    value.append("-").append(m_negativeCombo->text());
+  }
+  m_positiveCombo->clear();
+  m_negativeCombo->clear();
+  addPeriodCheckbox(value);
 }
 } // MantidQt
 } // API
