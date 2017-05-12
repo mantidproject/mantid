@@ -529,6 +529,8 @@ void MantidWSIndexWidget::initOptionsBoxes() {
   }
 
   if (m_advanced) {
+    int spacingAboveShowErrorBars = 10;
+    m_optionsBox->addSpacing(spacingAboveShowErrorBars);
     m_showErrorBars = new QCheckBox("Show Error Bars");
     m_optionsBox->addWidget(m_showErrorBars);
   }
