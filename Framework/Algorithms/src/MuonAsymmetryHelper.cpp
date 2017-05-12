@@ -122,7 +122,7 @@ size_t endIndexFromTime(const HistogramData::BinEdges &xData,
                         const double endX) {
   auto lower =
       std::upper_bound(xData.rawData().begin(), xData.rawData().end(), endX);
-
   return std::distance(xData.rawData().begin(), lower - 1);
 }
+
 } // namespace Mantid
