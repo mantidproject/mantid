@@ -125,7 +125,7 @@ public:
   /// Sets the splatterplot button to the desired visibility.
   virtual void setSplatterplot(bool visibility);
   /// Sets axes colors that contrast with the background.
-  virtual void setVisibleAxesColors(bool autoscale);
+  virtual unsigned long setVisibleAxesColors();
   /// Initializes the settings of the color scale
   virtual void initializeColorScale();
   /// Sets the standard veiw button to the desired visibility.

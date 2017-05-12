@@ -53,12 +53,12 @@ std::vector<double> getBackgroundColor(pqView *view) {
 }
 }
 
-void VisibleAxesColor::setAndObserveAxesColor(pqView *view) {
+unsigned long VisibleAxesColor::setAndObserveAxesColor(pqView *view) {
   auto color = getContrastingColor(getBackgroundColor(view));
   this->setOrientationAxesLabelColor(view, color);
   this->setGridAxesColor(view, color);
   this->setScalarBarColor(view, color);
-  this->observe(view);
+  return this->observe(view);
 }
 
 void VisibleAxesColor::setOrientationAxesLabelColor(
@@ -98,8 +98,8 @@ void VisibleAxesColor::setScalarBarColor(pqView *view,
   }
 }
 
-void VisibleAxesColor::observe(pqView *view) {
-  view->getViewProxy()
+unsigned long VisibleAxesColor::observe(pqView *view) {
+  return view->getViewProxy()
       ->GetProperty("Background")
       ->AddObserver(vtkCommand::ModifiedEvent, this,
                     &VisibleAxesColor::backgroundColorChangeCallback);

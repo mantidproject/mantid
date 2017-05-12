@@ -732,12 +732,9 @@ void ViewBase::setColorForBackground(bool useCurrentColorSettings) {
 /**
  * This function sets the default colors for the background and connects a
  * tracker for changes of the background color by the user.
- * @param AutoScale Whether the axes colors should be changed.
  */
-void ViewBase::setVisibleAxesColors(bool AutoScale) {
-  if (AutoScale) {
-    this->m_visibleAxesColor.setAndObserveAxesColor(this->getView());
-  }
+unsigned long ViewBase::setVisibleAxesColors() {
+  return this->m_visibleAxesColor.setAndObserveAxesColor(this->getView());
 }
 
 /**
