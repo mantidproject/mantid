@@ -343,8 +343,6 @@ void MuonFitPropertyBrowser::setWorkspaceName(const QString &wsName) {
 void MuonFitPropertyBrowser::enumChanged(QtProperty *prop) {
 	if (!m_changeSlotsEnabled)
 		return;
-	bool storeSettings = false;
-	
 	if (prop == m_groupsToFit) {
 		int j = m_enumManager->value(m_groupsToFit);
 		std::string option = m_groupsToFitOptions[j].toStdString();
@@ -482,10 +480,9 @@ void MuonFitPropertyBrowser::boolChanged(QtProperty *prop) {
 	  for (auto iter = m_groupBoxes.constBegin(); iter != m_groupBoxes.constEnd();
 		  ++iter) {
 		  if (iter.value() == prop) {
-			  const bool val = m_boolManager->value(prop);
 			  done = true;
 			  updateGroupDisplay();
-			  emit groupBoxClicked(val);
+			  emit groupBoxClicked();
 		  }
 	  }
 	  //search map for period change
@@ -493,10 +490,9 @@ void MuonFitPropertyBrowser::boolChanged(QtProperty *prop) {
 		  for (auto iter = m_periodBoxes.constBegin(); iter != m_periodBoxes.constEnd();
 			  ++iter) {
 			  if (iter.value() == prop) {
-				  const bool val = m_boolManager->value(prop);
 				  done = true;
 				  updatePeriodDisplay();
-				  emit periodBoxClicked(val);
+				  emit periodBoxClicked();
 			  }
 
 		  }
@@ -1202,7 +1198,6 @@ void MuonFitPropertyBrowser::setAvailablePeriods(const QStringList &periods) {
 * (ready to add new ones)
 */
 void MuonFitPropertyBrowser::clearPeriodCheckboxes() {
-	int aaa = m_periodBoxes.size();
 	if (m_periodBoxes.size() > 1) {
 		for (auto iter = m_periodBoxes.constBegin(); iter != m_periodBoxes.constEnd();
 			++iter) {

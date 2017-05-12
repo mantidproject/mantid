@@ -47,8 +47,8 @@ public:
   /// Basic constructor
 	explicit MuonFitDataSelector(QWidget *parent);
   /// Constructor with more options
-  MuonFitDataSelector(QWidget *parent, int runNumber, const QString &instName,
-                      size_t numPeriods, const QStringList &groups);
+  MuonFitDataSelector(QWidget *parent, int runNumber, const QString &instName);
+                     //, size_t numPeriods, const QStringList &groups);
   // --- MantidWidget methods ---
   /// Get user input through a common interface
   QVariant getUserInput() const override;

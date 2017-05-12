@@ -790,8 +790,8 @@ void MuonAnalysisFitDataPresenter::setUpDataSelector(
   // Set selected groups/pairs and periods here too
   // (unless extra groups/periods are already selected, in which case don't
   // unselect them)
-  QString &groupToSet = QString::fromStdString(wsParams.itemName);
-  QString &periodToSet = QString::fromStdString(wsParams.periods);
+  const QString &groupToSet = QString::fromStdString(wsParams.itemName);
+  const QString &periodToSet = QString::fromStdString(wsParams.periods);
   const auto &groups = m_dataSelector->getChosenGroups();
   const auto &periods = m_dataSelector->getPeriodSelections();
   if (!groups.contains(groupToSet)) {

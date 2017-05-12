@@ -37,9 +37,9 @@ MuonFitDataSelector::MuonFitDataSelector(QWidget *parent)
  * @param groups :: [input] Group names from initial workspace
  */
 MuonFitDataSelector::MuonFitDataSelector(QWidget *parent, int runNumber,
-                                         const QString &instName,
+                                         const QString &instName)/*
                                          size_t numPeriods,
-                                         const QStringList &groups)
+                                         const QStringList &groups)*/
     : MuonFitDataSelector(parent) {
   this->setWorkspaceDetails(QString::number(runNumber), instName,
                             boost::optional<QString>{});

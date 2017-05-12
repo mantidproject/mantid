@@ -122,8 +122,8 @@ public:
   void checkAndUpdateFitLabel(bool sequentialFit);
 
 signals:
-  void setChosenGroupSignal(QString &group);
-  void setChosenPeriodSignal(QString &period);
+  void setChosenGroupSignal(const QString &group);
+  void setChosenPeriodSignal(const QString &period);
 
 public slots:
   /// Transforms fit results when a simultaneous fit finishes

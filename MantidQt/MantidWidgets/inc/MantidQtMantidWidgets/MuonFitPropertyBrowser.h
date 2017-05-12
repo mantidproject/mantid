@@ -142,8 +142,8 @@ signals:
   void userChangedDatasetIndex(int index) override;
   /// Emitted when "fit to raw data" is changed
   void fitRawDataClicked(bool enabled) override;
-  void groupBoxClicked(bool enabled);
-  void periodBoxClicked(bool enabled);
+  void groupBoxClicked();
+  void periodBoxClicked();
   void reselctGroupClicked(bool enabled);
   /// Emitted when fit is about to be run
   void preFitChecksRequested(bool sequential) override;

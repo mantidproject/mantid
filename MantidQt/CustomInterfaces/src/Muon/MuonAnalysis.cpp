@@ -2140,10 +2140,10 @@ void MuonAnalysis::loadFittings() {
           SLOT(dataToFitChanged()));
   connect(m_uiForm.plotCreation, SIGNAL(currentIndexChanged(int)), this,
           SLOT(updateDataPresenterOverwrite(int)));
-  connect(m_uiForm.fitBrowser, SIGNAL(groupBoxClicked(bool)), this,
-	  SLOT(handleGroupBox(bool)));
-  connect(m_uiForm.fitBrowser, SIGNAL(periodBoxClicked(bool)), this,
-	  SLOT(handlePeriodBox(bool)));
+  connect(m_uiForm.fitBrowser, SIGNAL(groupBoxClicked()), this,
+	  SLOT(handleGroupBox()));
+  connect(m_uiForm.fitBrowser, SIGNAL(periodBoxClicked()), this,
+	  SLOT(handlePeriodBox()));
 
   m_fitDataPresenter->setOverwrite(isOverwriteEnabled());
   // Set multi fit mode on/off as appropriate
@@ -2156,13 +2156,8 @@ void MuonAnalysis::loadFittings() {
 /**
 * Handle "groups" selected/deselected
 * Update stored value
-* Create raw workspaces if necessary
-* @param enabled :: [input] Whether option has been selected or unselected
-* @param updateWorkspaces :: [input] Whether to create workspaces if they don't
-* exist
 */
-void MuonAnalysis::handleGroupBox(bool enabled,
-	bool updateWorkspaces) {
+void MuonAnalysis::handleGroupBox() {
 	//send the group to dataselector
 	m_dataSelector->setGroupsSelected(m_uiForm.fitBrowser->getChosenGroups());
 	m_fitDataPresenter->handleSelectedDataChanged(true);
@@ -2170,13 +2165,8 @@ void MuonAnalysis::handleGroupBox(bool enabled,
 /**
 * Handle"periods" selected/deselected
 * Update stored value
-* Create raw workspaces if necessary
-* @param enabled :: [input] Whether option has been selected or unselected
-* @param updateWorkspaces :: [input] Whether to create workspaces if they don't
-* exist
 */
-void MuonAnalysis::handlePeriodBox(bool enabled,
-	bool updateWorkspaces) {
+void MuonAnalysis::handlePeriodBox() {
 	//send the group to dataselector
 	m_dataSelector->setPeriodsSelected(m_uiForm.fitBrowser->getChosenPeriods());
 	m_fitDataPresenter->handleSelectedDataChanged(true);
