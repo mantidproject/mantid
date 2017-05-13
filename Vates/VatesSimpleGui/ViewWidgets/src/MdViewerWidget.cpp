@@ -1165,7 +1165,7 @@ void MdViewerWidget::setVisibleAxesColors() {
     this->currentView->getView()
         ->getViewProxy()
         ->GetProperty("Background")
-        ->RemoveObserver(m_axesTag.value());
+        ->RemoveObserver(*m_axesTag);
   }
 }
 
