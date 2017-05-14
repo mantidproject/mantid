@@ -339,7 +339,7 @@ private:
   /// Flag - is this the physical rather than neutronic instrument
   bool m_isPhysicalInstrument{false};
   /// Component and Detector info relevant cache
-  std::unique_ptr<const InfoComponentVisitor> m_infoVisitor{nullptr};
+  std::unique_ptr<const InfoComponentVisitor> m_infoVisitor;
 };
 namespace Conversion {
 
