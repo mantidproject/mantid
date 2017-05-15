@@ -69,13 +69,14 @@ private:
       m_componentIdToIndexMap;
 
   /// Detector ID -> index mappings
-  boost::shared_ptr<std::unordered_map<detid_t, size_t>> m_detectorIdToIndexMap;
+  boost::shared_ptr<const std::unordered_map<detid_t, size_t>>
+      m_detectorIdToIndexMap;
 
   /// Detector indices
-  boost::shared_ptr<std::vector<detid_t>> m_detectorIds;
+  boost::shared_ptr<std::vector<detid_t>> m_orderedDetectorIds;
 
 public:
-  InfoComponentVisitor(const size_t nDetectors);
+  InfoComponentVisitor(std::vector<detid_t> orderedDetectorIds);
 
   virtual void registerComponentAssembly(
       const Mantid::Geometry::ICompAssembly &assembly) override;

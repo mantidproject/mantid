@@ -15,21 +15,35 @@ namespace Geometry {
 
 using namespace Mantid::Geometry;
 
-InfoComponentVisitor::InfoComponentVisitor(const size_t nDetectors)
-    : m_componentIds(
-          boost::make_shared<std::vector<ComponentID>>(nDetectors, nullptr)),
+namespace {
+boost::shared_ptr<const std::unordered_map<detid_t, size_t>>
+makeDetIdToIndexMap(const std::vector<detid_t> &detIds) {
+
+  const size_t nDetIds = detIds.size();
+  auto detIdToIndex = boost::make_shared<std::unordered_map<detid_t, size_t>>();
+  detIdToIndex->reserve(nDetIds);
+  for (size_t i = 0; i < nDetIds; ++i) {
+    (*detIdToIndex)[detIds[i]] = i;
+  }
+  return std::move(detIdToIndex);
+}
+}
+
+InfoComponentVisitor::InfoComponentVisitor(
+    std::vector<detid_t> orderedDetectorIds)
+    : m_componentIds(boost::make_shared<std::vector<ComponentID>>(
+          orderedDetectorIds.size(), nullptr)),
       m_assemblySortedDetectorIndices(
           boost::make_shared<std::vector<size_t>>()),
       m_ranges(boost::make_shared<std::vector<std::pair<size_t, size_t>>>()),
       m_componentIdToIndexMap(boost::make_shared<
           std::unordered_map<Mantid::Geometry::IComponent *, size_t>>()),
-      m_detectorIdToIndexMap(
-          boost::make_shared<std::unordered_map<detid_t, size_t>>()),
-      m_detectorIds(boost::make_shared<std::vector<detid_t>>()) {
+      m_detectorIdToIndexMap(makeDetIdToIndexMap(orderedDetectorIds)),
+      m_orderedDetectorIds(boost::make_shared<std::vector<detid_t>>(
+          std::move(orderedDetectorIds))) {
+  const auto nDetectors = m_orderedDetectorIds->size();
   m_assemblySortedDetectorIndices->reserve(nDetectors);
   m_componentIdToIndexMap->reserve(nDetectors);
-  m_detectorIdToIndexMap->reserve(nDetectors);
-  m_detectorIds->reserve(nDetectors);
 }
 
 /**
@@ -81,7 +95,18 @@ void InfoComponentVisitor::registerGenericComponent(
  */
 void InfoComponentVisitor::registerDetector(const IDetector &detector) {
 
-  const size_t detectorIndex = m_assemblySortedDetectorIndices->size();
+  size_t detectorIndex = 0;
+  try {
+    detectorIndex = m_detectorIdToIndexMap->at(detector.getID());
+  } catch (std::out_of_range &) {
+    /*
+     Do not register a detector with an invalid id. if we can't determine
+     the index, we cannot register it in the right place!
+    */
+
+    throw std::runtime_error("Duplicate detector IDs!");
+  }
+
   /* Already allocated we just need to index into the inital front-detector
   * part of the collection.
   * 1. Guarantee on grouping detectors by type such that the first n
@@ -93,11 +118,6 @@ void InfoComponentVisitor::registerDetector(const IDetector &detector) {
   // Record the ID -> component index mapping
   (*m_componentIdToIndexMap)[detector.getComponentID()] = detectorIndex;
   (*m_componentIds)[detectorIndex] = detector.getComponentID();
-  // Record the detector ID -> index mapping
-  const auto detectorId = detector.getID();
-  (*m_detectorIdToIndexMap)[detectorId] =
-      detectorIndex; // register the detector index
-  m_detectorIds->push_back(detectorId);
   m_assemblySortedDetectorIndices->push_back(detectorIndex);
   // Increment counter for next registration
 }
@@ -162,7 +182,7 @@ InfoComponentVisitor::componentInfo() const {
 
 boost::shared_ptr<std::vector<detid_t>>
 InfoComponentVisitor::detectorIds() const {
-  return m_detectorIds;
+  return m_orderedDetectorIds;
 }
 
 } // namespace Geometry

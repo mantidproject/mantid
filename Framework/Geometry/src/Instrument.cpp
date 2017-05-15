@@ -10,6 +10,7 @@
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/PhysicalConstants.h"
+#include "MantidKernel/make_unique.h"
 
 #include <boost/make_shared.hpp>
 #include <queue>

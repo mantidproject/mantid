@@ -72,7 +72,7 @@ ExperimentInfo::ExperimentInfo()
       m_detectorInfo(boost::make_shared<Beamline::DetectorInfo>()),
       m_componentInfo(boost::make_shared<Beamline::ComponentInfo>()),
       m_infoVisitor(Kernel::make_unique<InfoComponentVisitor>(
-          sptr_instrument->getNumberDetectors())) {
+          sptr_instrument->getDetectorIDs(false /*Do not skip monitors*/))) {
   auto parInstrument = makeParameterizedInstrument();
   m_parmap->setDetectorInfo(m_detectorInfo);
   m_detectorInfoWrapper = Kernel::make_unique<DetectorInfo>(
@@ -277,9 +277,9 @@ std::unique_ptr<Geometry::InfoComponentVisitor>
 ExperimentInfo::makeOrRetrieveVisitor(const Instrument &instrument) const {
 
   if (!instrument.hasInfoVisitor() || instrument.isEmptyInstrument()) {
-    const auto nDetectors =
-        instrument.getNumberDetectors(false /*do not skip monitors*/);
-    auto visitor = Kernel::make_unique<InfoComponentVisitor>(nDetectors);
+    const auto nDetectors = instrument.getNumberDetectors();
+    auto visitor = Kernel::make_unique<InfoComponentVisitor>(
+        instrument.getDetectorIDs(false /*do not skip monitors*/));
     instrument.registerContents(*visitor);
     return visitor;
   } else {

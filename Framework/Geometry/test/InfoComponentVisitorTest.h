@@ -13,6 +13,7 @@
 using Mantid::Geometry::InfoComponentVisitor;
 using Mantid::Kernel::V3D;
 using namespace ComponentCreationHelper;
+using Mantid::detid_t;
 
 class InfoComponentVisitorTest : public CxxTest::TestSuite {
 public:
@@ -32,7 +33,7 @@ public:
                                            V3D(11, 0, 0) /*detector position*/);
 
     // Create the visitor.
-    InfoComponentVisitor visitor(1);
+    InfoComponentVisitor visitor(std::vector<detid_t>{1} /*detector ids*/);
 
     // Visit everything
     visitee->registerContents(visitor);
@@ -58,7 +59,7 @@ public:
     // Create the visitor.
     const size_t detectorIndex =
         0; // Internally we expect detector index to start at 0
-    InfoComponentVisitor visitor(1);
+    InfoComponentVisitor visitor(std::vector<detid_t>{1} /*detector ids*/);
 
     // Visit everything
     visitee->registerContents(visitor);
@@ -80,7 +81,7 @@ public:
                                            V3D(11, 0, 0) /*detector position*/);
 
     // Create the visitor.
-    InfoComponentVisitor visitor(1);
+    InfoComponentVisitor visitor(std::vector<detid_t>{1} /*detector ids*/);
 
     // Visit everything
     visitee->registerContents(visitor);
@@ -132,7 +133,7 @@ public:
                                            V3D(11, 0, 0) /*detector position*/);
 
     // Create the visitor.
-    InfoComponentVisitor visitor(1);
+    InfoComponentVisitor visitor(std::vector<detid_t>{1} /*detector ids*/);
 
     // Visit everything
     visitee->registerContents(visitor);
@@ -166,7 +167,7 @@ public:
                                            ,
                                            V3D(11, 0, 0) /*detector position*/);
 
-    InfoComponentVisitor visitor(1);
+    InfoComponentVisitor visitor(std::vector<detid_t>{1} /*detector ids*/);
 
     // Visit everything
     visitee->registerContents(visitor);
@@ -201,7 +202,7 @@ public:
   }
 
   void test_process_rectangular_instrument() {
-    InfoComponentVisitor visitor(m_nPixels * m_nPixels);
+    InfoComponentVisitor visitor(m_instrument->getDetectorIDs());
     m_instrument->registerContents(visitor);
     TS_ASSERT(visitor.size() >= size_t(m_nPixels * m_nPixels));
   }
