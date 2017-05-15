@@ -514,6 +514,11 @@ private:
   bool isValidUserFile();
   /// Update IDF file path
   void updateIDFFilePath();
+  /// Update IDF file path when running in Batch mode
+  void updateIDFFilePathForBatch();
+  //// Update IDF information
+  void updateIDFInfo(const QString& command);
+
 
   UserSubWindow *slicingWindow;
 };
