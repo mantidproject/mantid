@@ -91,10 +91,10 @@ class DeltaPDF3D(PythonAlgorithm):
         if dimX.name != '[H,0,0]' or dimY.name != '[0,K,0]' or dimZ.name != '[0,0,L]':
             issues['InputWorkspace'] = 'dimensions must be [H,0,0], [0,K,0] and [0,0,L]'
 
-        if (dimX.getMaximum() != -dimX.getMinimum() or
-                dimY.getMaximum() != -dimY.getMinimum() or
-                dimZ.getMaximum() != -dimZ.getMinimum()):
-            issues['InputWorkspace'] = 'dimensions must be centered on zero'
+        for d in range(inWS.getNumDims()):
+            dim = inWS.getDimension(d)
+            if not np.isclose(dim.getMaximum(), -dim.getMinimum()):
+                issues['InputWorkspace'] = 'dimensions must be centered on zero'
 
         if self.getProperty("Convolution").value:
             try:
