@@ -284,13 +284,13 @@ void GenerateEventsFilter::processInputTime() {
   // Obtain time unit converter
   std::string timeunit = this->getProperty("UnitOfTime");
   m_timeUnitConvertFactorToNS = -1.0;
-  if (timeunit.compare("Seconds") == 0) {
+  if (timeunit == "Seconds") {
     // (second)
     m_timeUnitConvertFactorToNS = 1.0E9;
-  } else if (timeunit.compare("Nanoseconds") == 0) {
+  } else if (timeunit == "Nanoseconds") {
     // (nano-seconds)
     m_timeUnitConvertFactorToNS = 1.0;
-  } else if (timeunit.compare("Percent") == 0) {
+  } else if (timeunit == "Percent") {
     // (percent of total run time)
     int64_t runtime_ns =
         m_runEndTime.totalNanoseconds() - runstarttime.totalNanoseconds();
@@ -312,7 +312,7 @@ void GenerateEventsFilter::processInputTime() {
     m_startTime = DateAndTime(s_inpt0);
   } else {
     // Relative time in double.
-    double inpt0 = atof(s_inpt0.c_str());
+    double inpt0 = std::stod(s_inpt0.c_str());
     if (inpt0 < 0) {
       stringstream errss;
       errss << "Input relative StartTime " << inpt0 << " cannot be negative. ";
@@ -332,7 +332,7 @@ void GenerateEventsFilter::processInputTime() {
     m_stopTime = DateAndTime(s_inptf);
   } else {
     // Relative time in double
-    double inptf = atof(s_inptf.c_str());
+    double inptf = std::stod(s_inptf.c_str());
     int64_t tf_ns = runstarttime.totalNanoseconds() +
                     static_cast<int64_t>(inptf * m_timeUnitConvertFactorToNS);
     m_stopTime = Kernel::DateAndTime(tf_ns);
@@ -519,10 +519,10 @@ void GenerateEventsFilter::setFilterByLogValue(std::string logname) {
       getProperty("FilterLogValueByChangingDirection");
   bool filterIncrease;
   bool filterDecrease;
-  if (filterdirection.compare("Both") == 0) {
+  if (filterdirection == "Both") {
     filterIncrease = true;
     filterDecrease = true;
-  } else if (filterdirection.compare("Increase") == 0) {
+  } else if (filterdirection == "Increase") {
     filterIncrease = true;
     filterDecrease = false;
   } else {
@@ -644,7 +644,7 @@ void GenerateEventsFilter::processSingleValueFilter(double minvalue,
   int wsindex = 0;
   makeFilterBySingleValue(minvalue, maxvalue,
                           static_cast<double>(timetolerance_ns) * 1.0E-9,
-                          logboundary.compare("centre") == 0, filterincrease,
+                          logboundary == "centre", filterincrease,
                           filterdecrease, m_startTime, m_stopTime, wsindex);
 
   // Create information table workspace
@@ -769,13 +769,13 @@ void GenerateEventsFilter::processMultipleValueFilters(double minvalue,
   if (m_useParallel) {
     // Make filters in parallel
     makeMultipleFiltersByValuesParallel(
-        indexwsindexmap, logvalueranges, logboundary.compare("centre") == 0,
+        indexwsindexmap, logvalueranges, logboundary == "centre",
         filterincrease, filterdecrease, m_startTime, m_stopTime);
   } else {
     // Make filters in serial
-    makeMultipleFiltersByValues(
-        indexwsindexmap, logvalueranges, logboundary.compare("centre") == 0,
-        filterincrease, filterdecrease, m_startTime, m_stopTime);
+    makeMultipleFiltersByValues(indexwsindexmap, logvalueranges,
+                                logboundary == "centre", filterincrease,
+                                filterdecrease, m_startTime, m_stopTime);
   }
 }
 

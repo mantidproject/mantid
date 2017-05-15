@@ -40,7 +40,7 @@ class SANSConvertToWavelength(DataProcessorAlgorithm):
         # Input workspace
         workspace = get_input_workspace_as_copy_if_not_same_as_output_workspace(self)
 
-        wavelength_name = "ConvertToWavelength"
+        wavelength_name = "SANSConvertToWavelengthAndRebin"
         wavelength_options = {"InputWorkspace": workspace,
                               "WavelengthLow": wavelength_state.wavelength_low,
                               "WavelengthHigh": wavelength_state.wavelength_high,

@@ -33,7 +33,7 @@ class SANSSConvertToWavelengthImplementationTest(unittest.TestCase):
                            "WavelengthHigh": 3.0,
                            "WavelengthStep": 1.5,
                            "WavelengthStepType":  RangeStepType.to_string(RangeStepType.Lin)}
-        convert_alg = create_unmanaged_algorithm("ConvertToWavelength", **convert_options)
+        convert_alg = create_unmanaged_algorithm("SANSConvertToWavelengthAndRebin", **convert_options)
         had_run_time_error = False
         try:
             convert_alg.execute()
@@ -50,7 +50,7 @@ class SANSSConvertToWavelengthImplementationTest(unittest.TestCase):
                            "WavelengthHigh": 3.0,
                            "WavelengthStep": 1.5,
                            "WavelengthStepType":  RangeStepType.to_string(RangeStepType.Log)}
-        convert_alg = create_unmanaged_algorithm("ConvertToWavelength", **convert_options)
+        convert_alg = create_unmanaged_algorithm("SANSConvertToWavelengthAndRebin", **convert_options)
         had_run_time_error = False
         try:
             convert_alg.execute()
@@ -67,7 +67,7 @@ class SANSSConvertToWavelengthImplementationTest(unittest.TestCase):
                            "WavelengthHigh": 3.0,
                            "WavelengthStep": 1.5,
                            "WavelengthStepType":  RangeStepType.to_string(RangeStepType.Log)}
-        convert_alg = create_unmanaged_algorithm("ConvertToWavelength", **convert_options)
+        convert_alg = create_unmanaged_algorithm("SANSConvertToWavelengthAndRebin", **convert_options)
         had_run_time_error = False
         try:
             convert_alg.execute()
@@ -84,7 +84,7 @@ class SANSSConvertToWavelengthImplementationTest(unittest.TestCase):
                            "WavelengthHigh": 10.0,
                            "WavelengthStep": 1.0,
                            "WavelengthStepType": RangeStepType.to_string(RangeStepType.Lin)}
-        convert_alg = create_unmanaged_algorithm("ConvertToWavelength", **convert_options)
+        convert_alg = create_unmanaged_algorithm("SANSConvertToWavelengthAndRebin", **convert_options)
         convert_alg.execute()
         self.assertTrue(convert_alg.isExecuted())
         output_workspace = convert_alg.getProperty("OutputWorkspace").value
@@ -107,7 +107,7 @@ class SANSSConvertToWavelengthImplementationTest(unittest.TestCase):
                            "WavelengthLow": 1.0,
                            "WavelengthStep": 1.0,
                            "WavelengthStepType": RangeStepType.to_string(RangeStepType.Lin)}
-        convert_alg = create_unmanaged_algorithm("ConvertToWavelength", **convert_options)
+        convert_alg = create_unmanaged_algorithm("SANSConvertToWavelengthAndRebin", **convert_options)
         convert_alg.execute()
         self.assertTrue(convert_alg.isExecuted())
         output_workspace = convert_alg.getProperty("OutputWorkspace").value

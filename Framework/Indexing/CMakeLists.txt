@@ -69,6 +69,12 @@ set_property ( TARGET Indexing PROPERTY FOLDER "MantidFramework" )
 
 target_link_libraries ( Indexing LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} ${MANTIDLIBS} )
 
+if( "${UNIX_CODENAME}" STREQUAL "trusty" )
+  # Special linking options are required for some older Ubuntu gcc builds to use std::thread, specific options found here:
+  # http://stackoverflow.com/questions/8649828/what-is-the-correct-link-options-to-use-stdthread-in-gcc-under-linux#comment35723468_8649908
+  target_link_libraries ( Indexing LINK_PRIVATE -Wl,--no-as-needed -pthread )
+endif()
+
 # Add the unit tests directory
 add_subdirectory ( test )
 

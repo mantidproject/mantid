@@ -16,6 +16,7 @@
 #include "MantidKernel/UnitFactory.h"
 #include <algorithm>
 #include <fstream>
+#include <sstream>
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
@@ -41,6 +42,10 @@ void ExportTimeSeriesLog::init() {
       Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
           "OutputWorkspace", "Dummy", Direction::Output),
       "Name of the workspace containing the log events in Export. ");
+
+  declareProperty("CalculateFirstDerivative", false,
+                  "If specified then the first derivative of exported data "
+                  "will be calcualted and put to spectrum 1.");
 
   declareProperty("LogName", "", "Log's name to filter events.");
 
@@ -88,19 +93,23 @@ void ExportTimeSeriesLog::exec() {
   int numberoutputentries = getProperty("NumberEntriesExport");
   bool outputeventworkspace = getProperty("IsEventWorkspace");
 
+  bool cal1stderiv = getProperty("CalculateFirstDerivative");
+
   // Call the main
   exportLog(logname, time_unit, start_time, stop_time, exportEpochTime,
-            outputeventworkspace, numberoutputentries);
+            outputeventworkspace, numberoutputentries, cal1stderiv);
+
+  // calcualte first derivative
+  if (cal1stderiv)
+    calculateFirstDerivative(outputeventworkspace);
+
+  // set up the sample log values for meta information
+  setupMetaData(logname, time_unit, exportEpochTime);
 
   // 3. Output
   setProperty("OutputWorkspace", m_outWS);
 }
-/*
- *  * @param logname ::
-  * @param numentries ::
-  * @param outputeventws ::
- * true.
- */
+
 /** Export part of designated log to an file in column format and a output file
  * @brief ExportTimeSeriesLog::exportLog
  * @param logname ::  name of log to export
@@ -110,13 +119,14 @@ void ExportTimeSeriesLog::exec() {
  * @param exportepoch :: flag to output time as epoch time/absolute time
  * @param outputeventws :: boolean.  output workspace is event workspace if
  * @param numentries :: number of log entries to export
+ * @param cal_first_deriv :: flag to calcualte the first derivative
  */
 void ExportTimeSeriesLog::exportLog(const std::string &logname,
                                     const std::string timeunit,
                                     const double &starttime,
                                     const double &stoptime,
                                     const bool exportepoch, bool outputeventws,
-                                    int numentries) {
+                                    int numentries, bool cal_first_deriv) {
 
   // Get log, time, and etc.
   std::vector<Kernel::DateAndTime> times;
@@ -142,7 +152,7 @@ void ExportTimeSeriesLog::exportLog(const std::string &logname,
 
   // Get start time, stop time and unit factor
   double timeunitfactor = 1.;
-  if (timeunit.compare("Seconds") == 0)
+  if (timeunit == "Seconds")
     timeunitfactor = 1.E-9;
 
   // Get index for start time
@@ -189,8 +199,11 @@ void ExportTimeSeriesLog::exportLog(const std::string &logname,
     setupEventWorkspace(i_start, i_stop, numentries, times, values,
                         exportepoch);
   } else {
+    size_t nspec(1);
+    if (cal_first_deriv)
+      nspec = 2;
     setupWorkspace2D(i_start, i_stop, numentries, times, values, exportepoch,
-                     timeunitfactor);
+                     timeunitfactor, nspec);
   }
 }
 
@@ -203,12 +216,13 @@ void ExportTimeSeriesLog::exportLog(const std::string &logname,
  * @param values :: vector of log value in double
  * @param epochtime :: flag to output time in epoch time/absolute time
  * @param timeunitfactor :: conversion factor for various unit of time for
+ * @param nspec :: number of spectra of the workspace to create
  * output
  */
 void ExportTimeSeriesLog::setupWorkspace2D(
     const size_t &start_index, const size_t &stop_index, int numentries,
     vector<DateAndTime> &times, vector<double> values, const bool &epochtime,
-    const double &timeunitfactor) {
+    const double &timeunitfactor, size_t nspec) {
   // Determine time shift
   int64_t timeshift(0);
   if (!epochtime) {
@@ -225,7 +239,8 @@ void ExportTimeSeriesLog::setupWorkspace2D(
 
   // Create 2D workspace
   m_outWS = boost::dynamic_pointer_cast<MatrixWorkspace>(
-      WorkspaceFactory::Instance().create("Workspace2D", 1, outsize, outsize));
+      WorkspaceFactory::Instance().create("Workspace2D", nspec, outsize,
+                                          outsize));
   if (!m_outWS)
     throw runtime_error(
         "Unable to create a Workspace2D casted to MatrixWorkspace.");
@@ -374,6 +389,71 @@ bool ExportTimeSeriesLog::calculateTimeSeriesRangeByTime(
   }
 
   return true;
+}
+
+void ExportTimeSeriesLog::calculateFirstDerivative(bool is_event_ws) {
+  if (is_event_ws) {
+    g_log.error("It is not supported to calculate first derivative if the "
+                "output is an EventWorkspace.");
+    return;
+  }
+
+  // calcualte output
+  size_t datasize = m_outWS->mutableX(1).size();
+  auto vecX = m_outWS->mutableX(0);
+  auto vecY = m_outWS->mutableY(0);
+  auto &derivX = m_outWS->mutableX(1);
+  auto &derivY = m_outWS->mutableY(1);
+  if (vecY.size() != datasize)
+    throw std::runtime_error("Output workspace 2D is not supposed to have "
+                             "different size of X and Y.");
+
+  std::stringstream errmsg_ss;
+  for (size_t i = 1; i < datasize - 1; ++i) {
+    // set up X
+    derivX[i] = vecX[i];
+    // set up Y
+    double dx = vecX[i + 1] - vecX[i];
+    if (dx <= 0) {
+      errmsg_ss << "Entry " << i << ": " << vecX[i] << " >= " << vecX[i + 1]
+                << "\n";
+      derivY[i] = 1.;
+    } else {
+      derivY[i] = (vecY[i + 1] - vecY[i]) / dx;
+    }
+  }
+
+  // last value
+  derivX[datasize - 1] = vecX[datasize - 1];
+  derivY.back() = 0.;
+
+  // error message
+  std::string errmsg = errmsg_ss.str();
+  if (errmsg.size() > 0)
+    g_log.error(errmsg);
+
+  return;
+}
+
+/** Set up the meta data such as sample log name, unit of time, whether the time
+ * is epoch to
+ *   the output workspace
+ * @brief ExportTimeSeriesLog::setupMetaData
+ * @param log_name
+ * @param time_unit
+ * @param export_epoch
+ */
+void ExportTimeSeriesLog::setupMetaData(const std::string &log_name,
+                                        const std::string &time_unit,
+                                        const bool &export_epoch) {
+
+  m_outWS->mutableRun().addProperty("SampleLogName", log_name, true);
+  m_outWS->mutableRun().addProperty("TimeUnit", time_unit, true);
+
+  std::string is_epoch("0");
+  if (export_epoch)
+    is_epoch = "1";
+  m_outWS->mutableRun().addProperty("IsEpochTime", is_epoch, true);
 }
 
 } // namespace Mantid

@@ -60,16 +60,34 @@ class CreateCacheFilename(PythonAlgorithm):
         self.declareProperty("OutputSignature", "", "Calculated sha1 hash", Direction.Output)
         return
 
+    def validateInputs(self):
+        issues = dict()
+
+        manager = self.getPropertyValue('PropertyManager').strip()
+        if len(manager) > 0 and not mantid.PropertyManagerDataService.doesExist(manager):
+            issues['PropertyManager'] = 'Does not exist'
+        elif len(manager) <= 0 and not self.getProperty('OtherProperties').value:
+            message = "Either PropertyManager or OtherProperties should be supplied"
+            issues['PropertyManager'] = message
+            issues['OtherProperties'] = message
+
+        return issues
+
     def PyExec(self):
         """ Main Execution Body
         """
         # Inputs
-        prop_manager = self.getPropertyValue("PropertyManager")
+        prop_manager = self.getPropertyValue("PropertyManager").strip()
+        if len(prop_manager) > 0:
+            prop_manager = mantid.PropertyManagerDataService.retrieve(prop_manager)
+        else:
+            prop_manager = None
+
         other_props = self.getProperty("OtherProperties").value
+
         if not prop_manager and not other_props:
             raise ValueError("Either PropertyManager or OtherProperties should be supplied")
-        prop_manager = mantid.PropertyManagerDataService.retrieve(prop_manager)\
-            if prop_manager else None
+
         # default to all properties in the manager
         props = self.getProperty("Properties").value
         if not props and prop_manager:

@@ -5,8 +5,17 @@
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/Unit.h"
-#include <cfloat>
 
+#ifdef _MSC_VER
+// qualifier applied to function type has no meaning; ignored
+#pragma warning(disable : 4180)
+#endif
+#include "tbb/parallel_sort.h"
+#ifdef _MSC_VER
+#pragma warning(default : 4180)
+#endif
+
+#include <cfloat>
 #include <cmath>
 #include <functional>
 #include <limits>
@@ -24,8 +33,6 @@ using Kernel::DateAndTime;
 using namespace Mantid::API;
 
 namespace {
-/// The number of events to split for parallel sorting.
-const size_t NUM_EVENTS_PARALLEL_THRESHOLD = 500000;
 
 /**
  * Calculate the corrected full time in nanoseconds
@@ -131,9 +138,9 @@ EventList::EventList(EventWorkspaceMRU *mru, specnum_t specNo)
 /** Constructor copying from an existing event list
  * @param rhs :: EventList object to copy*/
 EventList::EventList(const EventList &rhs)
-    : IEventList(rhs), m_histogram(HistogramData::Histogram::XMode::BinEdges,
-                                   HistogramData::Histogram::YMode::Counts),
-      mru{nullptr} {
+    : IEventList(rhs), m_histogram(rhs.m_histogram), mru{nullptr} {
+  // Note that operator= also assigns m_histogram, but the above use of the copy
+  // constructor avoid a memory allocation and is thus faster.
   this->operator=(rhs);
 }
 
@@ -963,141 +970,6 @@ void EventList::setSortOrder(const EventSortType order) const {
 //    merge(begin, begin_right, end);
 //  }
 
-//----------------------------------------------------------------------------------------------------
-/** Merge two sorted lists into one sorted vector.
- *
- * @tparam T :: the type in the vector.
- * @param begin1 :: iterator at the start of the first list.
- * @param end1 :: iterator at the end of the first list.
- * @param begin2 :: iterator at the start of the second list.
- * @param end2 :: iterator at the end of the second list.
- * @param result_vector :: a vector (by reference) that will be filled with the
- *result.
- * */
-template <typename T>
-void merge(typename std::vector<T>::iterator begin1,
-           typename std::vector<T>::iterator end1,
-           typename std::vector<T>::iterator begin2,
-           typename std::vector<T>::iterator end2,
-           typename std::vector<T> &result_vector) {
-  auto it1 = begin1;
-  auto it2 = begin2;
-  while (!((it1 == end1) && (it2 == end2))) {
-    if (it1 == end1) {
-      // Only it2 makes sense
-      result_vector.push_back(*it2);
-      it2++;
-    } else if (it2 == end2) {
-      // Only it1 makes sense
-      result_vector.push_back(*it1);
-      it1++;
-    } else {
-      // Both iterators are valid. Which is smaller?
-      if (*it1 < *it2) {
-        result_vector.push_back(*it1);
-        it1++;
-      } else {
-        result_vector.push_back(*it2);
-        it2++;
-      }
-    }
-  }
-}
-
-//----------------------------------------------------------------------------------------------------
-/** Perform a parallelized sort on a provided vector, using 2 threads.
- * NOTE: Will temporarily use twice the memory used by the incoming vector.
- *
- * @param vec :: a vector, by refe/rence, that will be sorted-in place.
- */
-template <typename T> void parallel_sort2(typename std::vector<T> &vec) {
-  size_t size = vec.size();
-
-  auto begin = vec.begin();
-  auto middle = begin + size / 2;
-  auto end = vec.end();
-
-  PRAGMA_OMP(parallel sections) {
-    PRAGMA_OMP(section) {
-      std::sort(begin, middle);
-      // std::cout << " ----------- Part 1 --------------\n"; for (typename
-      // std::vector<T>::iterator it = begin; it != middle; it++) std::cout <<
-      // *it << "\n";
-    }
-    PRAGMA_OMP(section) {
-      std::sort(middle, end);
-      // std::cout << " ----------- Part 2 --------------\n";for (typename
-      // std::vector<T>::iterator it = middle; it != end; it++) std::cout << *it
-      // << "\n";
-    }
-  }
-
-  // Now merge back
-  typename std::vector<T> temp;
-  merge(begin, middle, middle, end, temp);
-
-  // std::cout << " ----------- Part 1+2 --------------\n"; for (typename
-  // std::vector<T>::iterator it = temp.begin(); it != temp.end(); it++)
-  // std::cout << *it << "\n";
-  // Swap storage with the temp vector
-  vec.swap(temp);
-  // Which we can now clear
-  temp.clear();
-}
-
-//----------------------------------------------------------------------------------------------------
-/** Perform a parallelized sort on a provided vector, using 4 threads.
- * NOTE: Will temporarily use twice the memory used by the incoming vector.
- *
- * @param vec :: a vector, by reference, that will be sorted-in place.
- */
-template <typename T> void parallel_sort4(std::vector<T> &vec) {
-  // int num_cores = PARALLEL_NUMBER_OF_THREADS;
-  size_t size = vec.size();
-
-  auto begin = vec.begin();
-  auto middle1 = begin + size / 4;
-  auto middle2 = begin + size / 2;
-  auto middle3 = begin + 3 * size / 4;
-  auto end = vec.end();
-
-  PRAGMA_OMP(parallel sections) {
-    PRAGMA_OMP(section) { std::sort(begin, middle1); }
-    PRAGMA_OMP(section) { std::sort(middle1, middle2); }
-    PRAGMA_OMP(section) { std::sort(middle2, middle3); }
-    PRAGMA_OMP(section) { std::sort(middle3, end); }
-  }
-
-  // Now merge back
-  typename std::vector<T> temp1, temp2;
-  // PRAGMA_OMP(parallel sections)
-  {
-    // PRAGMA_OMP(section)
-    { merge(begin, middle1, middle1, middle2, temp1); }
-    // PRAGMA_OMP(section)
-    { merge(middle2, middle3, middle3, end, temp2); }
-  }
-
-  // We can clear the incoming vector to free up memory now,
-  //  because it is copied already in temp1, temp2
-  vec.clear();
-
-  // Final merge
-  std::vector<T> temp;
-  merge(temp1.begin(), temp1.end(), temp2.begin(), temp2.end(), temp);
-
-  // Clear out this temporary storage
-  temp1.clear();
-  temp2.clear();
-  std::vector<T>().swap(temp1);
-  std::vector<T>().swap(temp2);
-
-  // Swap storage with the temp vector
-  vec.swap(temp);
-  // Which we can now clear
-  temp.clear();
-}
-
 // --------------------------------------------------------------------------
 /** Sort events by TOF in one thread */
 void EventList::sortTof() const {
@@ -1112,83 +984,15 @@ void EventList::sortTof() const {
 
   switch (eventType) {
   case TOF:
-    std::sort(events.begin(), events.end(), compareEventTof<TofEvent>);
+    tbb::parallel_sort(events.begin(), events.end(), compareEventTof<TofEvent>);
     break;
   case WEIGHTED:
-    std::sort(weightedEvents.begin(), weightedEvents.end(),
-              compareEventTof<WeightedEvent>);
+    tbb::parallel_sort(weightedEvents.begin(), weightedEvents.end(),
+                       compareEventTof<WeightedEvent>);
     break;
   case WEIGHTED_NOTIME:
-    std::sort(weightedEventsNoTime.begin(), weightedEventsNoTime.end(),
-              compareEventTof<WeightedEventNoTime>);
-    break;
-  }
-  // Save the order to avoid unnecessary re-sorting.
-  this->order = TOF_SORT;
-}
-
-// --------------------------------------------------------------------------
-/** Sort events by TOF, using two threads.
- *
- * Performance for 5e7 events:
- *  - 40.5 secs with sortTof() (one thread)
- *  - 21.1 secs with sortTof2() (two threads)
- *  - 18.2 secs with sortTof4() (four threads)
- * Performance gain tends to go up with longer event lists.
- * */
-void EventList::sortTof2() const {
-  if (this->order == TOF_SORT)
-    return; // nothing to do
-
-  // Avoid sorting from multiple threads
-  std::lock_guard<std::mutex> _lock(m_sortMutex);
-  // If the list was sorted while waiting for the lock, return.
-  if (this->order == TOF_SORT)
-    return;
-
-  switch (eventType) {
-  case TOF:
-    parallel_sort2(events);
-    break;
-  case WEIGHTED:
-    parallel_sort2(weightedEvents);
-    break;
-  case WEIGHTED_NOTIME:
-    parallel_sort2(weightedEventsNoTime);
-    break;
-  }
-  // Save the order to avoid unnecessary re-sorting.
-  this->order = TOF_SORT;
-}
-
-// --------------------------------------------------------------------------
-/** Sort events by TOF, using two threads.
- *
- * Performance for 5e7 events:
- *  - 40.5 secs with sortTof() (one thread)
- *  - 21.1 secs with sortTof2() (two threads)
- *  - 18.2 secs with sortTof4() (four threads)
- * Performance gain tends to go up with longer event lists.
- * */
-void EventList::sortTof4() const {
-  if (this->order == TOF_SORT)
-    return; // nothing to do
-
-  // Avoid sorting from multiple threads
-  std::lock_guard<std::mutex> _lock(m_sortMutex);
-  // If the list was sorted while waiting for the lock, return.
-  if (this->order == TOF_SORT)
-    return;
-
-  switch (eventType) {
-  case TOF:
-    parallel_sort4(events);
-    break;
-  case WEIGHTED:
-    parallel_sort4(weightedEvents);
-    break;
-  case WEIGHTED_NOTIME:
-    parallel_sort4(weightedEventsNoTime);
+    tbb::parallel_sort(weightedEventsNoTime.begin(), weightedEventsNoTime.end(),
+                       compareEventTof<WeightedEventNoTime>);
     break;
   }
   // Save the order to avoid unnecessary re-sorting.
@@ -1221,16 +1025,17 @@ void EventList::sortTimeAtSample(const double &tofFactor,
   switch (eventType) {
   case TOF: {
     CompareTimeAtSample<TofEvent> comparitor(tofFactor, tofShift);
-    std::sort(events.begin(), events.end(), comparitor);
+    tbb::parallel_sort(events.begin(), events.end(), comparitor);
   } break;
   case WEIGHTED: {
     CompareTimeAtSample<WeightedEvent> comparitor(tofFactor, tofShift);
-    std::sort(weightedEvents.begin(), weightedEvents.end(), comparitor);
+    tbb::parallel_sort(weightedEvents.begin(), weightedEvents.end(),
+                       comparitor);
   } break;
   case WEIGHTED_NOTIME: {
     CompareTimeAtSample<WeightedEventNoTime> comparitor(tofFactor, tofShift);
-    std::sort(weightedEventsNoTime.begin(), weightedEventsNoTime.end(),
-              comparitor);
+    tbb::parallel_sort(weightedEventsNoTime.begin(), weightedEventsNoTime.end(),
+                       comparitor);
   } break;
   }
   // Save the order to avoid unnecessary re-sorting.
@@ -1252,11 +1057,11 @@ void EventList::sortPulseTime() const {
   // Perform sort.
   switch (eventType) {
   case TOF:
-    std::sort(events.begin(), events.end(), compareEventPulseTime);
+    tbb::parallel_sort(events.begin(), events.end(), compareEventPulseTime);
     break;
   case WEIGHTED:
-    std::sort(weightedEvents.begin(), weightedEvents.end(),
-              compareEventPulseTime);
+    tbb::parallel_sort(weightedEvents.begin(), weightedEvents.end(),
+                       compareEventPulseTime);
     break;
   case WEIGHTED_NOTIME:
     // Do nothing; there is no time to sort
@@ -1282,11 +1087,11 @@ void EventList::sortPulseTimeTOF() const {
 
   switch (eventType) {
   case TOF:
-    std::sort(events.begin(), events.end(), compareEventPulseTimeTOF);
+    tbb::parallel_sort(events.begin(), events.end(), compareEventPulseTimeTOF);
     break;
   case WEIGHTED:
-    std::sort(weightedEvents.begin(), weightedEvents.end(),
-              compareEventPulseTimeTOF);
+    tbb::parallel_sort(weightedEvents.begin(), weightedEvents.end(),
+                       compareEventPulseTimeTOF);
     break;
   case WEIGHTED_NOTIME:
     // Do nothing; there is no time to sort
@@ -1770,20 +1575,9 @@ void EventList::compressEventsParallelHelper(
  *the same.
  * @param destination :: EventList that will receive the compressed events. Can
  *be == this.
- * @param parallel :: if true, the compression will be done with all available
- *cores in parallel.
- *        Note: The parallel results may be slightly different than the serial
- *calculation.
- *        There will typically be more events because of the list was split up.
- *        Note: CURRENTLY IGNORED!
  */
-void EventList::compressEvents(double tolerance, EventList *destination,
-                               bool parallel) {
-  // Must have a sorted list
-  if (parallel)
-    this->sortTof4();
-  else
-    this->sortTof();
+void EventList::compressEvents(double tolerance, EventList *destination) {
+  this->sortTof();
   switch (eventType) {
   case TOF:
     //      if (parallel)
@@ -2116,18 +1910,7 @@ void EventList::generateHistogram(const MantidVec &X, MantidVec &Y,
                                   MantidVec &E, bool skipError) const {
   // All types of weights need to be sorted by TOF
 
-  size_t numEvents = getNumberEvents();
-  if (numEvents > NUM_EVENTS_PARALLEL_THRESHOLD &&
-      PARALLEL_GET_MAX_THREADS >= 4)
-    // Four-core sort
-    this->sortTof4();
-  else if (numEvents > NUM_EVENTS_PARALLEL_THRESHOLD &&
-           PARALLEL_GET_MAX_THREADS >= 2)
-    // Two-core sort
-    this->sortTof2();
-  else
-    // One-core sort
-    this->sortTof();
+  this->sortTof();
 
   switch (eventType) {
   case TOF:

@@ -1,6 +1,6 @@
 # pylint: disable=too-few-public-methods
 
-""" ConvertToWavelength algorithm converts to wavelength units."""
+""" SANSConvertToWavelengthAndRebin algorithm converts to wavelength units and performs a rebin."""
 
 from __future__ import (absolute_import, division, print_function)
 from mantid.kernel import (Direction, StringListValidator, Property)
@@ -12,12 +12,12 @@ from sans.common.general_functions import (create_unmanaged_algorithm, append_to
 from sans.common.enums import (RebinType, RangeStepType)
 
 
-class ConvertToWavelength(DataProcessorAlgorithm):
+class SANSConvertToWavelengthAndRebin(DataProcessorAlgorithm):
     def category(self):
         return 'SANS\\Wavelength'
 
     def summary(self):
-        return 'Convert the units of a SANS workspace to wavelength'
+        return 'Convert the units of time-of-flight workspace to units of wavelength and performs a rebin.'
 
     def PyInit(self):
         # Workspace which is to be masked
@@ -118,8 +118,8 @@ class ConvertToWavelength(DataProcessorAlgorithm):
         wavelength_low = self.getProperty("WavelengthLow").value
         wavelength_high = self.getProperty("WavelengthHigh").value
 
-        # If the wavelength has not been specified, the get it from the workspace. Only the first spectrum is checked
-        # The the lowest wavelength value is to be found in the spectrum located at workspaces index 0 is a very
+        # If the wavelength has not been specified, then get it from the workspace. Only the first spectrum is checked
+        # The lowest wavelength value is to be found in the spectrum located at workspaces index 0 is a very
         # strong assumption, but it existed in the previous implementation.
         if wavelength_low is None or wavelength_low == Property.EMPTY_DBL:
             wavelength_low = min(workspace.readX(0))
@@ -143,4 +143,4 @@ class ConvertToWavelength(DataProcessorAlgorithm):
 
 
 # Register algorithm with Mantid
-AlgorithmFactory.subscribe(ConvertToWavelength)
+AlgorithmFactory.subscribe(SANSConvertToWavelengthAndRebin)
