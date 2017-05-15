@@ -247,6 +247,7 @@ class SeriesAndConjoinFilesTest(stresstesting.MantidStressTest):
         return ('PG3_9829','PG3_9829_golden')
         #return ('PG3_9830','PG3_9830_golden') # can only validate one workspace
 
+
 class SumFilesTest(stresstesting.MantidStressTest):
     cal_file  = "PG3_FERNS_d4832_2011_08_24.cal"
     char_file = "PG3_characterization_2012_02_23-HR-ILL.txt"
@@ -291,6 +292,7 @@ class SumFilesTest(stresstesting.MantidStressTest):
 
     def validate(self):
         return ('PG3_9829','PG3_9829_golden')
+
 
 class ToPDFgetNTest(stresstesting.MantidStressTest):
     cal_file   = "PG3_FERNS_d4832_2011_08_24.cal"
