@@ -103,14 +103,10 @@ void InfoComponentVisitor::registerDetector(const IDetector &detector) {
      Do not register a detector with an invalid id. if we can't determine
      the index, we cannot register it in the right place!
     */
-
-    throw std::runtime_error("Detector ID does not exist : " +
-                             std::to_string(detector.getID())); // TODO remove
+    ++m_droppedDetectors;
+    return;
   }
-  if (m_componentIds->at(detectorIndex) != nullptr) {
-    throw std::runtime_error("Detector ID is a duplicate : " +
-                             std::to_string(detector.getID())); // TODO remove
-  }
+  if (m_componentIds->at(detectorIndex) == nullptr) {
 
   /* Already allocated we just need to index into the inital front-detector
   * part of the collection.
@@ -124,7 +120,7 @@ void InfoComponentVisitor::registerDetector(const IDetector &detector) {
   (*m_componentIdToIndexMap)[detector.getComponentID()] = detectorIndex;
   (*m_componentIds)[detectorIndex] = detector.getComponentID();
   m_assemblySortedDetectorIndices->push_back(detectorIndex);
-  // Increment counter for next registration
+  }
 }
 
 /**
@@ -164,7 +160,9 @@ InfoComponentVisitor::componentIds() const {
  * @return The total size of the components visited.
  * This will be the same as the number of IDs.
  */
-size_t InfoComponentVisitor::size() const { return m_componentIds->size(); }
+size_t InfoComponentVisitor::size() const {
+  return m_componentIds->size() - m_droppedDetectors;
+}
 
 bool InfoComponentVisitor::isEmpty() const { return size() == 0; }
 

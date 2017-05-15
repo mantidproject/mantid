@@ -179,6 +179,36 @@ public:
     TS_ASSERT_EQUALS(visitor.detectorIds()->size(), 1);
     TS_ASSERT_EQUALS(visitor.detectorIds()->at(0), 1); // index 0 is ID 1
   }
+
+  void test_visitor_drops_detectors_without_id() {
+    /*
+     We have to go via DetectorInfo::indexOf to get the index of a detector.
+     if this throws because the detector has an invalid id, we are forced to
+     drop it.
+     Some IDFs i.e. SNAP have montiors with detector ids <  0.
+    */
+
+    // Create a very basic instrument to visit
+    auto visitee = createMinimalInstrument(V3D(0, 0, 0) /*source pos*/,
+                                           V3D(10, 0, 0) /*sample pos*/
+                                           ,
+                                           V3D(11, 0, 0) /*detector position*/);
+
+    // Create the visitor. Note any access to the indexOf lambda will throw for
+    // detectors.
+    InfoComponentVisitor visitor(std::vector<detid_t>{
+        0 /*sized just 1 to invoke out of range exception*/});
+
+    // Visit everything
+    visitee->registerContents(visitor);
+
+    size_t expectedSize = 0;
+    ++expectedSize; // source
+    ++expectedSize; // sample
+    ++expectedSize; // instrument
+    // Note no detector counted
+    TS_ASSERT_EQUALS(visitor.size(), expectedSize);
+  }
 };
 
 class InfoComponentVisitorTestPerformance : public CxxTest::TestSuite {
