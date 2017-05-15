@@ -31,11 +31,11 @@ MuonFitDataSelector::MuonFitDataSelector(QWidget *parent)
  * @param parent :: [input] Parent dialog for the widget
  * @param runNumber :: [input] Run number of initial workspace
  * @param instName :: [input] Name of instrument from initial workspace
- * @param numPeriods :: [input] Number of periods from initial workspace
- * @param groups :: [input] Group names from initial workspace
- */
+*/
 MuonFitDataSelector::MuonFitDataSelector(QWidget *parent, int runNumber,
                                          const QString &instName) /*
+  * numPeriods :: [input] Number of periods from initial workspace
+  * groups :: [input] Group names from initial workspace
                                           size_t numPeriods,
                                           const QStringList &groups)*/
     : MuonFitDataSelector(parent) {
