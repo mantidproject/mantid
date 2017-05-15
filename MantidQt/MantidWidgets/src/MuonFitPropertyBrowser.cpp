@@ -993,7 +993,7 @@ void MuonFitPropertyBrowser::setAvailableGroups(const QStringList &groups) {
 }
 /**
 * Selects a single group/pair
-* @param groups :: [input] Group/pair to select
+* @param group :: [input] Group/pair to select
 */
 void MuonFitPropertyBrowser::setChosenGroup(QString &group) {
   clearChosenGroups();
@@ -1142,7 +1142,7 @@ void MuonFitPropertyBrowser::setNumPeriods(size_t numPeriods) {
 /**
 * Sets period names and updates checkboxes on UI
 * By default sets all unchecked
-* @param groups :: [input] List of period names
+* @param periods :: [input] List of period names
 */
 void MuonFitPropertyBrowser::setAvailablePeriods(const QStringList &periods) {
   // If it's the same list, do nothing
@@ -1242,7 +1242,7 @@ void MuonFitPropertyBrowser::setChosenPeriods(
 }
 /**
 * Ticks the selected periods
-* @param chosenPeriods :: list of selected periods
+* @param period :: selected periods
 */
 void MuonFitPropertyBrowser::setChosenPeriods(const QString &period) {
   clearChosenPeriods();
