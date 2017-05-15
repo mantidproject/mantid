@@ -909,7 +909,7 @@ public:
     ExperimentInfo expInfo;
     TSM_ASSERT_THROWS(
         "Component count and detector count will be out of sync. Should throw.",
-        expInfo.setInstrument(instrument), std::invalid_argument &);
+        expInfo.setInstrument(instrument), std::runtime_error &);
   }
 
 private:
