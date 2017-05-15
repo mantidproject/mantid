@@ -1531,7 +1531,6 @@ void FitPropertyBrowser::setCurrentFunction(
   setCurrentFunction(getHandler()->findHandler(f));
 }
 
-//#include "../FitDialog.h"
 /**
  * Creates an instance of Fit algorithm, sets its properties and launches it.
  */
