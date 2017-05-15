@@ -219,7 +219,7 @@ class SeriesAndConjoinFilesTest(stresstesting.MantidStressTest):
                            CalibrationFile=self.cal_file,
                            CharacterizationRunsFile=self.char_file,
                            LowResRef=15000, RemovePromptPulseWidth=50,
-                           Binning=-0.0004, BinInDspace=True, FilterBadPulses=True,
+                           Binning=-0.0004, BinInDspace=True, FilterBadPulses=25,
                            SaveAs="gsas", OutputDirectory=savedir,
                            FinalDataUnits="dSpacing")
 
@@ -278,7 +278,7 @@ class SumFilesTest(stresstesting.MantidStressTest):
                            CalibrationFile=self.cal_file,
                            CharacterizationRunsFile=self.char_file,
                            LowResRef=15000, RemovePromptPulseWidth=50,
-                           Binning=-0.0004, BinInDspace=True, FilterBadPulses=True,
+                           Binning=-0.0004, BinInDspace=True, FilterBadPulses=25,
                            SaveAs="gsas", OutputDirectory=savedir,
                            FinalDataUnits="dSpacing")
 
