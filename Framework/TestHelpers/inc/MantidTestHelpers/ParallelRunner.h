@@ -37,7 +37,7 @@ namespace ParallelTestHelpers {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTID_PARALLEL_DLL ParallelRunner {
+class ParallelRunner {
 public:
   ParallelRunner();
   ParallelRunner(const int threads);
