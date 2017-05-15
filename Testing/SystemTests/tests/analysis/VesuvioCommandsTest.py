@@ -222,32 +222,26 @@ class BankByBankForwardSpectraNoBackground(stresstesting.MantidStressTest):
         self.assertEquals(4, len(self._fit_results))
 
         fitted_banks = self._fit_results[0]
-        self.assertTrue(isinstance(fitted_banks, list))
+        self.assertTrue(isinstance(fitted_banks, WorkspaceGroup))
         self.assertEqual(8, len(fitted_banks))
 
         bank1 = fitted_banks[0]
-        self.assertTrue(isinstance(bank1, WorkspaceGroup))
+        self.assertTrue(isinstance(bank1, MatrixWorkspace))
 
-        bank1_data = bank1[0]
-        self.assertTrue(isinstance(bank1_data, MatrixWorkspace))
+        self.assertAlmostEqual(50.0, bank1.readX(0)[0])
+        self.assertAlmostEqual(562.0, bank1.readX(0)[-1])
 
-        self.assertAlmostEqual(50.0, bank1_data.readX(0)[0])
-        self.assertAlmostEqual(562.0, bank1_data.readX(0)[-1])
+        _equal_within_tolerance(self, 8.23840378769e-05, bank1.readY(1)[0])
+        _equal_within_tolerance(self, 0.000556695665501, bank1.readY(1)[-1])
 
-        _equal_within_tolerance(self, 8.23840378769e-05, bank1_data.readY(1)[0])
-        _equal_within_tolerance(self, 0.000556695665501, bank1_data.readY(1)[-1])
+        bank8 = fitted_banks[7]
+        self.assertTrue(isinstance(bank8, MatrixWorkspace))
 
-        bank8 = fitted_banks[-1]
-        self.assertTrue(isinstance(bank8, WorkspaceGroup))
+        self.assertAlmostEqual(50.0, bank8.readX(0)[0])
+        self.assertAlmostEqual(562.0, bank8.readX(0)[-1])
 
-        bank8_data = bank8[0]
-        self.assertTrue(isinstance(bank8_data, MatrixWorkspace))
-
-        self.assertAlmostEqual(50.0, bank8_data.readX(0)[0])
-        self.assertAlmostEqual(562.0, bank8_data.readX(0)[-1])
-
-        _equal_within_tolerance(self, 0.00025454613205, bank8_data.readY(1)[0])
-        _equal_within_tolerance(self, 0.00050412575393, bank8_data.readY(1)[-1])
+        _equal_within_tolerance(self, 0.00025454613205, bank8.readY(1)[0])
+        _equal_within_tolerance(self, 0.00050412575393, bank8.readY(1)[-1])
 
         chisq_values = self._fit_results[2]
         self.assertTrue(isinstance(chisq_values, list))
