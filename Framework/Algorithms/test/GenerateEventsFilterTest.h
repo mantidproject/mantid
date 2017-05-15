@@ -105,7 +105,7 @@ public:
   //----------------------------------------------------------------------------------------------
   /** Test generation of splitters by time
    */
-  void Ptest_genTime1Interval() {
+  void test_genTime1Interval() {
     // 1. Create input Workspace
     DataObjects::EventWorkspace_sptr eventWS = createEventWorkspace();
     AnalysisDataService::Instance().addOrReplace("TestWorkspace", eventWS);
@@ -161,7 +161,7 @@ public:
    * (1) Multiple time interval
    * (2) Default start time and stop time
    */
-  void Ptest_genTimeMultipleInterval() {
+  void test_genTimeMultipleInterval() {
     // Create input Workspace
     DataObjects::EventWorkspace_sptr eventWS = createEventWorkspace();
     for (size_t i = 0; i < eventWS->getNumberHistograms(); ++i)
@@ -241,7 +241,7 @@ public:
    * (1) No time tolerance
    * (2) Just one region
    */
-  void Ptest_genSimpleLogValueFilter() {
+  void test_genSimpleLogValueFilter() {
     // Create input
     DataObjects::EventWorkspace_sptr eventWS = createEventWorkspace();
 
@@ -306,7 +306,7 @@ public:
    * (1) No time tolerance
    * (2) Just one
    */
-  void Ptest_genMultipleLogValuesFilter() {
+  void test_genMultipleLogValuesFilter() {
     // Create input
     DataObjects::EventWorkspace_sptr eventWS = createEventWorkspace();
 
@@ -362,7 +362,7 @@ public:
   //----------------------------------------------------------------------------------------------
   /** Test to generate a set of filters against an integer log
     */
-  void Ptest_genFilterByIntegerLog() {
+  void test_genFilterByIntegerLog() {
     // 1. Create input
     DataObjects::EventWorkspace_sptr eventWS = createEventWorkspaceIntLog();
     AnalysisDataService::Instance().addOrReplace("TestEventData2", eventWS);
@@ -433,7 +433,7 @@ public:
   /** Test to generate a set of filters against an integer log by using the
    * single value mode
     */
-  void Ptest_genFilterByIntegerLog2() {
+  void test_genFilterByIntegerLog2() {
     // Create input
     DataObjects::EventWorkspace_sptr eventWS = createEventWorkspaceIntLog();
     AnalysisDataService::Instance().addOrReplace("TestEventData2", eventWS);
@@ -585,7 +585,7 @@ public:
   //----------------------------------------------------------------------------------------------
   /** Test generation of splitters by time for matrix splitter
    */
-  void Ptest_genTime1IntervalMatrixSplitter() {
+  void test_genTime1IntervalMatrixSplitter() {
     // Create input Workspace
     DataObjects::EventWorkspace_sptr eventWS = createEventWorkspace();
     AnalysisDataService::Instance().add("TestWorkspace", eventWS);
@@ -641,7 +641,7 @@ public:
    * (1) Multiple time interval
    * (2) Default start time and stop time
    */
-  void Ptest_genTimeMultipleIntervalMatrixSplitter() {
+  void test_genTimeMultipleIntervalMatrixSplitter() {
     // Create input Workspace & initial setup
     DataObjects::EventWorkspace_sptr eventWS = createEventWorkspace();
     AnalysisDataService::Instance().addOrReplace("TestEventWorkspace08",
@@ -725,7 +725,7 @@ public:
    * (1) No time tolerance
    * (2) Just one
    */
-  void Ptest_genMultipleLogValuesFilterMatrixSplitter() {
+  void test_genMultipleLogValuesFilterMatrixSplitter() {
     // Create input
     DataObjects::EventWorkspace_sptr eventWS = createEventWorkspace();
     AnalysisDataService::Instance().addOrReplace("TestEventWS04B", eventWS);
@@ -824,7 +824,7 @@ public:
    * (1) No time tolerance
    * (2) Just one
    */
-  void Ptest_genMultipleLogValuesFilterMatrixSplitterParallel() {
+  void test_genMultipleLogValuesFilterMatrixSplitterParallel() {
     // Create input
     DataObjects::EventWorkspace_sptr eventWS = createEventWorkspace();
     AnalysisDataService::Instance().addOrReplace("TestEventWS04B", eventWS);
@@ -924,7 +924,7 @@ public:
   //----------------------------------------------------------------------------------------------
   /** Generate filter by log values in 'FastLog' mode only 1 interval
    */
-  void Ptest_genSingleleLogValuesFilterMatrixSplitter() {
+  void test_genSingleleLogValuesFilterMatrixSplitter() {
     // Create input
     DataObjects::EventWorkspace_sptr eventWS = createEventWorkspace();
     AnalysisDataService::Instance().addOrReplace("TestEventWS09", eventWS);
@@ -976,7 +976,7 @@ public:
    * (1) No time tolerance
    * (2) Just one
    */
-  void Ptest_genMultipleIntLogValuesFilterMatrixSplitter() {
+  void test_genMultipleIntLogValuesFilterMatrixSplitter() {
     // Create input
     DataObjects::EventWorkspace_sptr eventWS = createEventWorkspaceIntLog();
     AnalysisDataService::Instance().addOrReplace("TestEventWS09", eventWS);
@@ -1038,7 +1038,7 @@ public:
    * (1) Multiple time interval with various time interval lengths
    * (2) Default start time and stop time
    */
-  void Ptest_genTimeVariousIntervalMatrixSplitter() {
+  void test_genTimeVariousIntervalMatrixSplitter() {
     // Create input Workspace & initial setup
     DataObjects::EventWorkspace_sptr eventWS = createEventWorkspace();
     AnalysisDataService::Instance().addOrReplace("TestEventWorkspace08v",
