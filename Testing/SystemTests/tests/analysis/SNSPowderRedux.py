@@ -23,6 +23,8 @@ def do_cleanup():
     Files = ["PG3_9829.getn",
              "PG3_9829.gsa",
              "PG3_9829.py",
+             'sum_PG3_9829.gsa',
+             'sum_PG3_9829.py',
              "PG3_9830.gsa",
              "PG3_9830.py",
              "PG3_4844-1.dat",
@@ -214,6 +216,7 @@ class SeriesAndConjoinFilesTest(stresstesting.MantidStressTest):
         # reduce a sum of runs - and drop it
         SNSPowderReduction(Filename="PG3_9829,9830",
                            Sum=True, # This is the difference with the next call
+                           OutputFilePrefix='sum_',
                            PreserveEvents=True, VanadiumNumber=-1,
                            CalibrationFile=self.cal_file,
                            CharacterizationRunsFile=self.char_file,
