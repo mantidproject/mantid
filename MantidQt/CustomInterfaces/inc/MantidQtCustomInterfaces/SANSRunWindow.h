@@ -517,8 +517,7 @@ private:
   /// Update IDF file path when running in Batch mode
   void updateIDFFilePathForBatch();
   //// Update IDF information
-  void updateIDFInfo(const QString& command);
-
+  void updateIDFInfo(const QString &command);
 
   UserSubWindow *slicingWindow;
 };

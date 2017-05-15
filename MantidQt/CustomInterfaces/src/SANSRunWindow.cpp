@@ -5112,7 +5112,7 @@ bool SANSRunWindow::isValidUserFile() {
   return true;
 }
 
-void SANSRunWindow::updateIDFInfo(const QString& command) {
+void SANSRunWindow::updateIDFInfo(const QString &command) {
   QString resultIdf(runPythonCode(command, false));
   resultIdf = resultIdf.simplified();
   if (resultIdf != m_constants.getPythonEmptyKeyword() &&
@@ -5127,7 +5127,7 @@ void SANSRunWindow::updateIDFFilePathForBatch() {
     return;
   }
   // We base the IDF entry on the sample scatter entry of the first row
-  auto* table_item = m_uiForm.batch_table->item(0, 0);
+  auto *table_item = m_uiForm.batch_table->item(0, 0);
   auto scatter_sample_run = table_item->text();
   QString getIdf = "i.get_idf_path_for_run(`" + scatter_sample_run + "`)\n";
   updateIDFInfo(getIdf);
