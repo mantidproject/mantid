@@ -108,18 +108,18 @@ void InfoComponentVisitor::registerDetector(const IDetector &detector) {
   }
   if (m_componentIds->at(detectorIndex) == nullptr) {
 
-  /* Already allocated we just need to index into the inital front-detector
-  * part of the collection.
-  * 1. Guarantee on grouping detectors by type such that the first n
-  * components
-  * are detectors.
-  * 2. Guarantee on ordering such that the
-  * detectorIndex == componentIndex for all detectors.
-  */
-  // Record the ID -> component index mapping
-  (*m_componentIdToIndexMap)[detector.getComponentID()] = detectorIndex;
-  (*m_componentIds)[detectorIndex] = detector.getComponentID();
-  m_assemblySortedDetectorIndices->push_back(detectorIndex);
+    /* Already allocated we just need to index into the inital front-detector
+    * part of the collection.
+    * 1. Guarantee on grouping detectors by type such that the first n
+    * components
+    * are detectors.
+    * 2. Guarantee on ordering such that the
+    * detectorIndex == componentIndex for all detectors.
+    */
+    // Record the ID -> component index mapping
+    (*m_componentIdToIndexMap)[detector.getComponentID()] = detectorIndex;
+    (*m_componentIds)[detectorIndex] = detector.getComponentID();
+    m_assemblySortedDetectorIndices->push_back(detectorIndex);
   }
 }
 
