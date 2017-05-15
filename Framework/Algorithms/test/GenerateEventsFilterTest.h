@@ -526,8 +526,8 @@ public:
       curtime_ns += pulsetime_ns;
     }
     eventws->mutableRun().addProperty(protonchargelog, true);
-//    std::cout << "Proton charge log from " << runstarttime_ns << " to "
-//              << runstoptime_ns << "\n";
+    //    std::cout << "Proton charge log from " << runstarttime_ns << " to "
+    //              << runstoptime_ns << "\n";
 
     // generate a fast log: Sine value log (value record 1/4 of pulse time.
     Kernel::TimeSeriesProperty<double> *sinlog =
@@ -558,26 +558,26 @@ public:
     eventws->mutableRun().addProperty(coslog, true);
 
     // generate a triangle log
-    Kernel::TimeSeriesProperty<double> *triangle_log = new Kernel::TimeSeriesProperty<double>("FieldLog");
+    Kernel::TimeSeriesProperty<double> *triangle_log =
+        new Kernel::TimeSeriesProperty<double>("FieldLog");
     int64_t period_i64 = pulsetime_ns * 2;
     curtime_ns = runstarttime_ns;
     double log_value = 1.5;
     double delta_val = -0.5;
-    while (curtime_ns < runstoptime_ns)
-    {
-        Kernel::DateAndTime curr_time(curtime_ns);
-        triangle_log->addValue(curr_time, log_value);
-        std::cout << curr_time.totalNanoseconds() << "\t\t" << log_value << "\n";
+    while (curtime_ns < runstoptime_ns) {
+      Kernel::DateAndTime curr_time(curtime_ns);
+      triangle_log->addValue(curr_time, log_value);
+      std::cout << curr_time.totalNanoseconds() << "\t\t" << log_value << "\n";
 
-        if (curtime_ns % period_i64 == 0)
-            delta_val *= -1.;
-        log_value += delta_val;
-        curtime_ns += pulsetime_ns / 5;
+      if (curtime_ns % period_i64 == 0)
+        delta_val *= -1.;
+      log_value += delta_val;
+      curtime_ns += pulsetime_ns / 5;
     }
     std::cout << "Field log size = " << triangle_log->size() << "  ends with "
-              << triangle_log->lastTime() << ", " << triangle_log->lastValue() << "\n";
+              << triangle_log->lastTime() << ", " << triangle_log->lastValue()
+              << "\n";
     eventws->mutableRun().addProperty(triangle_log, true);
-
 
     return eventws;
   }
@@ -1121,54 +1121,54 @@ public:
   /** test single value log splitter with separate up/down
    * @brief test_genSingleValueSplitterSeparateUpDown
    */
-  void test_genSingleValueSplitterSeparateUpDown()
-  {
-      // Create input Workspace & initial setup
-      DataObjects::EventWorkspace_sptr eventWS = createEventWorkspace();
-      AnalysisDataService::Instance().addOrReplace("TestEventWorkspace20",
-                                                   eventWS);
+  void test_genSingleValueSplitterSeparateUpDown() {
+    // Create input Workspace & initial setup
+    DataObjects::EventWorkspace_sptr eventWS = createEventWorkspace();
+    AnalysisDataService::Instance().addOrReplace("TestEventWorkspace20",
+                                                 eventWS);
 
-      // Init and set property
-      GenerateEventsFilter alg;
-      alg.initialize();
+    // Init and set property
+    GenerateEventsFilter alg;
+    alg.initialize();
 
-      TS_ASSERT_THROWS_NOTHING(
-          alg.setPropertyValue("InputWorkspace", "TestEventWorkspace20"));
-      TS_ASSERT_THROWS_NOTHING(
-          alg.setPropertyValue("OutputWorkspace", "Splitters20"));
-      TS_ASSERT_THROWS_NOTHING(
-          alg.setPropertyValue("InformationWorkspace", "InfoWS20"));
-      TS_ASSERT_THROWS_NOTHING(alg.setProperty("FastLog", true));
-      TS_ASSERT_THROWS_NOTHING(alg.setProperty("UnitOfTime", "Nanoseconds"));
-      TS_ASSERT_THROWS_NOTHING(alg.setProperty("LogName", "FieldLog"));
-      TS_ASSERT_THROWS_NOTHING(alg.setProperty("FilterLogValueByChangingDirection", "Separate"));
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setPropertyValue("InputWorkspace", "TestEventWorkspace20"));
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setPropertyValue("OutputWorkspace", "Splitters20"));
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setPropertyValue("InformationWorkspace", "InfoWS20"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("FastLog", true));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("UnitOfTime", "Nanoseconds"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("LogName", "FieldLog"));
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setProperty("FilterLogValueByChangingDirection", "Separate"));
 
-      // Running and get result
-      TS_ASSERT_THROWS_NOTHING(alg.execute());
-      TS_ASSERT(alg.isExecuted());
+    // Running and get result
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(alg.isExecuted());
 
-      MatrixWorkspace_sptr splitter_ws = boost::dynamic_pointer_cast<MatrixWorkspace>(
-                  AnalysisDataService::Instance().retrieve("Splitters20"));
-      TS_ASSERT(splitter_ws);
+    MatrixWorkspace_sptr splitter_ws =
+        boost::dynamic_pointer_cast<MatrixWorkspace>(
+            AnalysisDataService::Instance().retrieve("Splitters20"));
+    TS_ASSERT(splitter_ws);
 
-      DataObjects::TableWorkspace_const_sptr info_table_ws =
-          boost::dynamic_pointer_cast<DataObjects::TableWorkspace>(
-              AnalysisDataService::Instance().retrieve("InfoWS20"));
-      TS_ASSERT(info_table_ws);
+    DataObjects::TableWorkspace_const_sptr info_table_ws =
+        boost::dynamic_pointer_cast<DataObjects::TableWorkspace>(
+            AnalysisDataService::Instance().retrieve("InfoWS20"));
+    TS_ASSERT(info_table_ws);
 
-      // check splitters workspace size
-      TS_ASSERT_EQUALS(splitter_ws->readX(0).size(), 7);
-      double period = splitter_ws->histogram(0).readX()[1] - splitter_ws->histogram(0).readX()[0];
-      for (size_t i = 0; i < 4; ++i)
-      {
-          double this_period = splitter_ws->readX(0)[i+2] - splitter_ws->readX(0)[i+1];
-          TS_ASSERT_DELTA(this_period, period, 10);
-      }
-       // std::cout << splitter_ws->histogram(0).readX()[0];
+    // check splitters workspace size
+    TS_ASSERT_EQUALS(splitter_ws->readX(0).size(), 7);
+    double period = splitter_ws->histogram(0).readX()[1] -
+                    splitter_ws->histogram(0).readX()[0];
+    for (size_t i = 0; i < 4; ++i) {
+      double this_period =
+          splitter_ws->readX(0)[i + 2] - splitter_ws->readX(0)[i + 1];
+      TS_ASSERT_DELTA(this_period, period, 10);
+    }
+    // std::cout << splitter_ws->histogram(0).readX()[0];
 
-      TS_ASSERT_EQUALS(info_table_ws->rowCount(), 2);
-
-
+    TS_ASSERT_EQUALS(info_table_ws->rowCount(), 2);
   }
 
   //----------------------------------------------------------------------------------------------
