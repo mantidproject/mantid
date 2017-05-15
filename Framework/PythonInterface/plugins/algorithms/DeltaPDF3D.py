@@ -183,7 +183,7 @@ class DeltaPDF3D(PythonAlgorithm):
                                        int((k-size[1]-Ymin)/Ywidth+1):int((k+size[1]-Ymin)/Ywidth),
                                        int((l-size[2]-Zmin)/Zwidth+1):int((l+size[2]-Zmin)/Zwidth)]=np.nan
             else:  # sphere
-                mask=((X-np.round(X))**2//size[0]**2 + (Y-np.round(Y))**2/size[1]**2 + (Z-np.round(Z))**2/size[2]**2 < 1)
+                mask=((X-np.round(X))**2/size[0]**2 + (Y-np.round(Y))**2/size[1]**2 + (Z-np.round(Z))**2/size[2]**2 < 1)
 
                 # Unmask invalid reflections
                 if check_space_group:
