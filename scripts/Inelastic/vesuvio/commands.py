@@ -231,15 +231,15 @@ def fit_tof_iteration(sample_data, container_data, runs, flags):
             ms.UnGroupWorkspace(corrections_args["CorrectionWorkspaces"])
             ms.UnGroupWorkspace(corrections_args["CorrectedWorkspaces"])
 
-        for workspace in output_workspaces:
+            for workspace in output_workspaces:
 
-            group_name = runs + '_iteration_' + str(flags.get('iteration', None))
-            name = group_name + '_' + workspace.split('_')[1] + '_' + workspace.split('_')[-1]
-            result_workspaces.append(name)
-            if index == 0:
-                ms.RenameWorkspace(InputWorkspace=workspace, OutputWorkspace=name)
-            else:
-                ms.ConjoinWorkspaces(InputWorkspace1=name, InputWorkspace2=workspace)
+                group_name = runs + '_iteration_' + str(flags.get('iteration', None))
+                name = group_name + '_' + workspace.split('_')[1] + '_' + workspace.split('_')[-1]
+                result_workspaces.append(name)
+                if index == 0:
+                    ms.RenameWorkspace(InputWorkspace=workspace, OutputWorkspace=name)
+                else:
+                    ms.ConjoinWorkspaces(InputWorkspace1=name, InputWorkspace2=workspace)
 
         # Output the parameter workspaces
         params_pre_corr = runs + "_params_pre_correction_iteration_" + str(flags['iteration'])
@@ -249,10 +249,15 @@ def fit_tof_iteration(sample_data, container_data, runs, flags):
         AnalysisDataService.Instance().addOrReplace(params_name, pars_workspace)
         AnalysisDataService.Instance().addOrReplace(fit_name, fit_workspace)
 
-    output_groups.append(ms.GroupWorkspaces(InputWorkspaces=result_workspaces,
-                                            OutputWorkspace=group_name))
-    output_groups.append(ms.GroupWorkspaces(InputWorkspaces=data_workspaces,
-                                            OutputWorkspace=group_name + '_data'))
+    if result_workspaces:
+        output_groups.append(ms.GroupWorkspaces(InputWorkspaces=result_workspaces,
+                                                OutputWorkspace=group_name))
+
+    if data_workspaces:
+        output_groups.append(ms.GroupWorkspaces(InputWorkspaces=data_workspaces,
+                                                OutputWorkspace=group_name + '_data'))
+    else:
+        output_groups.append(fit_ws_name)
 
     if len(output_groups) > 1:
         result_ws = output_groups

@@ -169,7 +169,7 @@ class SingleSpectrumBackground(stresstesting.MantidStressTest):
 
         fitted_wsg = self._fit_results[0]
         self.assertTrue(isinstance(fitted_wsg, WorkspaceGroup))
-        self.assertEqual(2, len(fitted_wsg))
+        self.assertEqual(1, len(fitted_wsg))
 
         fitted_ws = fitted_wsg[0]
         self.assertTrue(isinstance(fitted_ws, MatrixWorkspace))
