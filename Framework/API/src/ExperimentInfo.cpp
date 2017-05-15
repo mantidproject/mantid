@@ -277,7 +277,6 @@ std::unique_ptr<Geometry::InfoComponentVisitor>
 ExperimentInfo::makeOrRetrieveVisitor(const Instrument &instrument) const {
 
   if (!instrument.hasInfoVisitor() || instrument.isEmptyInstrument()) {
-    const auto nDetectors = instrument.getNumberDetectors();
     auto visitor = Kernel::make_unique<InfoComponentVisitor>(
         instrument.getDetectorIDs(false /*do not skip monitors*/));
     instrument.registerContents(*visitor);
@@ -337,13 +336,9 @@ Instrument_sptr ExperimentInfo::makeParameterizedInstrument() const {
 *  @return The instrument class
 */
 Instrument_const_sptr ExperimentInfo::getInstrument() const {
-
   auto instrument = makeParameterizedInstrument();
-
   instrument->setDetectorInfo(m_detectorInfo);
-
   instrument->setInfoVisitor(*m_infoVisitor);
-
   return instrument;
 }
 

@@ -104,7 +104,11 @@ void InfoComponentVisitor::registerDetector(const IDetector &detector) {
      the index, we cannot register it in the right place!
     */
 
-    throw std::runtime_error("Duplicate detector IDs!");
+
+    throw std::runtime_error("Detector ID does not exist : " + std::to_string(detector.getID())); //TODO remove
+  }
+  if(m_componentIds->at(detectorIndex) != nullptr){
+      throw std::runtime_error("Detector ID is a duplicate : " + std::to_string(detector.getID())) ; //TODO remove
   }
 
   /* Already allocated we just need to index into the inital front-detector

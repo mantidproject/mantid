@@ -158,7 +158,7 @@ private:
 
   Geometry::ParameterMap *m_pmap;
   boost::shared_ptr<const Geometry::Instrument> m_instrument;
-  boost::shared_ptr<std::vector<detid_t>> m_detectorIDs;
+  boost::shared_ptr<const std::vector<detid_t>> m_detectorIDs;
   boost::shared_ptr<const std::unordered_map<detid_t, size_t>> m_detIDToIndex;
   // The following variables are mutable, since they are initialized (cached)
   // only on demand, by const getters.
