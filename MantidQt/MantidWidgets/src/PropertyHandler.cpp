@@ -1052,7 +1052,8 @@ void PropertyHandler::addTie(const QString &tieStr) {
     }
   } catch (...) {
   }
-  QMessageBox::critical(m_browser, "Mantid - Error", "Failed to set tie: " + tieStr);
+  QMessageBox::critical(m_browser, "Mantid - Error",
+                        "Failed to set tie: " + tieStr);
 }
 
 void PropertyHandler::fix(const QString &parName) {

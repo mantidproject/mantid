@@ -585,7 +585,7 @@ size_t CompositeFunction::parameterLocalIndex(size_t i, bool recursive) const {
   size_t iFun = functionIndex(i);
   auto localIndex = i - m_paramOffsets[iFun];
   if (recursive) {
-    auto cf = dynamic_cast<const CompositeFunction*>(m_functions[iFun].get());
+    auto cf = dynamic_cast<const CompositeFunction *>(m_functions[iFun].get());
     if (cf) {
       return cf->parameterLocalIndex(localIndex, recursive);
     }
@@ -599,12 +599,13 @@ size_t CompositeFunction::parameterLocalIndex(size_t i, bool recursive) const {
  *    a non-composite function is reached.
  * @return The pure parameter name (without the function identifier f#.)
  */
-std::string CompositeFunction::parameterLocalName(size_t i, bool recursive) const {
+std::string CompositeFunction::parameterLocalName(size_t i,
+                                                  bool recursive) const {
   size_t iFun = functionIndex(i);
   auto localIndex = i - m_paramOffsets[iFun];
   auto localFunction = m_functions[iFun].get();
   if (recursive) {
-    auto cf = dynamic_cast<const CompositeFunction*>(localFunction);
+    auto cf = dynamic_cast<const CompositeFunction *>(localFunction);
     if (cf) {
       return cf->parameterLocalName(localIndex, recursive);
     }
