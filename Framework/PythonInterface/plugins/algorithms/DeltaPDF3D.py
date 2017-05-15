@@ -34,7 +34,7 @@ class DeltaPDF3D(PythonAlgorithm):
 
         self.declareProperty("RemoveReflections", True, "Remove HKL reflections")
         condition = EnabledWhenProperty("RemoveReflections", PropertyCriterion.IsDefault)
-        self.declareProperty("Shape", "cube", doc="Shape to cut out reflections",
+        self.declareProperty("Shape", "sphere", doc="Shape to cut out reflections",
                              validator=StringListValidator(['sphere', 'cube']))
         self.setPropertySettings("Shape", condition)
         val_min_zero = FloatArrayBoundedValidator()
@@ -60,7 +60,7 @@ class DeltaPDF3D(PythonAlgorithm):
         self.declareProperty("ConvolutionWidth", 2.0, validator=FloatBoundedValidator(0.),
                              doc="Width of gaussian convolution in pixels")
         self.setPropertySettings("ConvolutionWidth", condition)
-        self.declareProperty("Deconvolution", True, "Apply deconvolution after fourier transform")
+        self.declareProperty("Deconvolution", False, "Apply deconvolution after fourier transform")
         self.setPropertySettings("Deconvolution", condition)
 
         # Reflections
