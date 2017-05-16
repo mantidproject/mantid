@@ -486,36 +486,36 @@ MatrixWorkspace_sptr ReflectometryReductionOne2::makeIvsLam() {
     const auto &detectors = detectorGroups()[0];
     // Convert to lambda
     if (m_convertUnits) {
-      g_log.debug() << "Converting input workspace to wavelength" << std::endl;
+      g_log.debug("Converting input workspace to wavelength\n");
       result = convertToWavelength(result);
     }
     // Normalise
     if (m_normalise) {
-      g_log.debug() << "Normalising input workspace" << std::endl;
+      g_log.debug("Normalising input workspace\n");
       result = directBeamCorrection(result);
       result = monitorCorrection(result);
       result = transOrAlgCorrection(result, false);
     }
     // Do the summation in Q
     if (m_sum) {
-      g_log.debug() << "Summing in Q" << std::endl;
+      g_log.debug("Summing in Q\n");
       result = sumInQ(result, detectors);
     }
   } else {
     // Do the summation in lambda
     if (m_sum) {
-      g_log.debug() << "Summing in wavelength" << std::endl;
+      g_log.debug("Summing in wavelength\n");
       result = makeDetectorWS(result, m_convertUnits);
     }
     // Normalise the 1D result
     if (m_normalise) {
-      g_log.debug() << "Normalising output workspace" << std::endl;
+      g_log.debug("Normalising output workspace\n");
       result = directBeamCorrection(result);
       result = monitorCorrection(result);
       result = transOrAlgCorrection(result, true);
     }
     // Crop to wavelength limits
-    g_log.debug() << "Cropping output workspace" << std::endl;
+    g_log.debug("Cropping output workspace\n");
     result = cropWavelength(result);
   }
 
@@ -808,7 +808,7 @@ void ReflectometryReductionOne2::findTheta0() {
     }
   }
 
-  g_log.debug() << "theta0: " << theta0() << " degrees" << std::endl;
+  g_log.debug("theta0: " + std::to_string(theta0()) + " degrees\n");
 
   // Convert to radians
   m_theta0 *= M_PI / 180.0;
