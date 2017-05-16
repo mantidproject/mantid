@@ -105,7 +105,6 @@ private slots:
   void handlePeriodBox();
   void setChosenGroupSlot(QString &group);
   void setChosenPeriodSlot(QString &period);
-
   /// Checks whether two specified periods are equal and, if they are, sets
   /// second one to None
   void checkForEqualPeriods();
@@ -337,6 +336,10 @@ private:
 
   /// Plots specific WS spectrum (used by plotPair and plotGroup)
   void plotSpectrum(const QString &wsName, bool logScale = false);
+
+  /// set labels for a single data set
+  void updateLabels(std::string &name);
+
 
   /// Get current plot style parameters. wsName and wsIndex are used to get
   /// default values if
