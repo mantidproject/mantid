@@ -55,26 +55,39 @@ std::string QtReflEventView::getTimeSlicingValues() const {
 
   std::string values;
 
-  if (m_sliceType == "UniformEven") {
+  switch (m_sliceType) {
+  case UniformEven:
     values = m_ui.uniformEvenEdit->text().toStdString();
-  } else if (m_sliceType == "Uniform") {
+    break;
+  case Uniform:
     values = m_ui.uniformEdit->text().toStdString();
-  } else if (m_sliceType == "Custom") {
+    break;
+  case Custom:
     values = m_ui.customEdit->text().toStdString();
-  } else if (m_sliceType == "LogValue") {
+    break;
+  case LogValue:
     std::string slicingValues = m_ui.logValueEdit->text().toStdString();
     std::string logFilter = m_ui.logValueTypeEdit->text().toStdString();
     if (!slicingValues.empty() && !logFilter.empty())
       values = "Slicing=\"" + slicingValues + "\",LogFilter=" + logFilter;
+    break;
   }
 
   return values;
 }
 
-/** Returns the type of time slicing that was selected
+/** Returns the type of time slicing that was selected as string
 * @return :: Time slicing type
 */
-std::string QtReflEventView::getTimeSlicingType() const { return m_sliceType; }
+std::string QtReflEventView::getTimeSlicingType() const {
+  std::map<SliceType, std::string> sliceTypeStrMap = {
+      {Uniform, "Uniform"},
+      {UniformEven, "UniformEven"},
+      {Custom, "Custom"},
+      {LogValue, "LogValue"}};
+
+  return sliceTypeStrMap[m_sliceType];
+}
 
 /** Enable slicing option entries for checked button and disable all others.
 */
@@ -82,8 +95,8 @@ void QtReflEventView::toggleSlicingOptions() const {
 
   const auto checkedButton = m_ui.slicingOptionsButtonGroup->checkedButton();
 
-  const std::vector<std::string> slicingTypes = {"UniformEven", "Uniform",
-                                                 "Custom", "LogValue"};
+  const std::vector<SliceType> slicingTypes = {UniformEven, Uniform, Custom,
+                                               LogValue};
 
   std::vector<bool> entriesEnabled(m_buttonList.size(), false);
   for (size_t i = 0; i < m_buttonList.size(); i++) {

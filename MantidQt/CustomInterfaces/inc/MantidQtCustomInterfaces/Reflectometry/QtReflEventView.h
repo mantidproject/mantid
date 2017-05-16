@@ -64,7 +64,7 @@ private:
   std::unique_ptr<IReflEventPresenter> m_presenter;
 
   /// Current slice type
-  mutable std::string m_sliceType;
+  mutable SliceType m_sliceType;
 
   /// List of radio buttons
   std::vector<QRadioButton *> m_buttonList;
