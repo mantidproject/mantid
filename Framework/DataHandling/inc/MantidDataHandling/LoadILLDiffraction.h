@@ -9,11 +9,7 @@
 
 namespace {
 
-enum ScanType : size_t {
-    NoScan = 0,
-    DetectorScan = 1,
-    OtherScan = 2
-};
+enum ScanType : size_t { NoScan = 0, DetectorScan = 1, OtherScan = 2 };
 
 struct ScannedVariables {
   int axis;
@@ -35,8 +31,7 @@ namespace DataHandling {
 
 /** LoadILLDiffraction : Loads ILL diffraction nexus files.
 
-  @author Gagik Vardanyan
-  @date 01/04/17
+  @date 15/05/17
 
   Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source
@@ -73,13 +68,15 @@ private:
   void init() override;
   void exec() override;
 
-  std::vector<Kernel::DateAndTime> getAbsoluteTimes(const NeXus::NXDouble &) const;
+  std::vector<Kernel::DateAndTime>
+  getAbsoluteTimes(const NeXus::NXDouble &) const;
   std::vector<double> getAxis(const NeXus::NXDouble &) const;
   std::vector<double> getDurations(const NeXus::NXDouble &) const;
   std::vector<double> getMonitor(const NeXus::NXDouble &) const;
 
   void fillDataScanMetaData(const NeXus::NXDouble &);
-  void fillMovingInstrumentScan(const NeXus::NXUInt &,const NeXus::NXDouble &) {}
+  void fillMovingInstrumentScan(const NeXus::NXUInt &,
+                                const NeXus::NXDouble &) {}
   void fillStaticInstrumentScan(const NeXus::NXUInt &, const NeXus::NXDouble &,
                                 const NeXus::NXFloat &);
 
@@ -92,18 +89,18 @@ private:
   void resolveInstrument();
   void resolveScanType();
 
-  size_t m_numberDetectorsRead; ///< number of cells read from file
+  size_t m_numberDetectorsRead;   ///< number of cells read from file
   size_t m_numberDetectorsActual; ///< number of cells actually active
-  size_t m_numberScanPoints; ///< number of scan points
+  size_t m_numberScanPoints;      ///< number of scan points
 
-  std::string m_instName; ///< instrument name to load the IDF
+  std::string m_instName;            ///< instrument name to load the IDF
   std::set<std::string> m_instNames; ///< supported instruments
-  std::string m_fileName; ///< file name to load
-  Kernel::DateAndTime m_startTime; ///< start time of acquisition
-  ScanType m_scanType; ///< NoScan, DetectorScan or OtherScan
+  std::string m_fileName;            ///< file name to load
+  Kernel::DateAndTime m_startTime;   ///< start time of acquisition
+  ScanType m_scanType;               ///< NoScan, DetectorScan or OtherScan
 
-  std::vector<ScannedVariables> m_scanVar; ///< holds the scan info
-  LoadHelper m_loadHelper; ///< a helper for metadata
+  std::vector<ScannedVariables> m_scanVar;  ///< holds the scan info
+  LoadHelper m_loadHelper;                  ///< a helper for metadata
   API::MatrixWorkspace_sptr m_outWorkspace; ///< output workspace
 };
 

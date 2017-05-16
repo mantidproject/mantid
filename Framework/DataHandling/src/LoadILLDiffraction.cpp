@@ -1,16 +1,16 @@
 #include "MantidDataHandling/LoadILLDiffraction.h"
-#include "MantidDataHandling/H5Util.h"
-#include "MantidGeometry/Instrument/ComponentHelper.h"
-#include "MantidAPI/FileProperty.h"
 #include "MantidAPI/DetectorInfo.h"
+#include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/RegisterFileLoader.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidDataHandling/H5Util.h"
+#include "MantidGeometry/Instrument/ComponentHelper.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 
-#include <numeric>
 #include <boost/algorithm/string/predicate.hpp>
+#include <numeric>
 
 #include <H5Cpp.h>
 #include <nexus/napi.h>
@@ -236,8 +236,7 @@ void LoadILLDiffraction::loadScanVars() {
   const auto units = H5Util::readStringVector(varNames, "unit");
 
   for (size_t i = 0; i < names.size(); ++i) {
-    m_scanVar.emplace_back(
-        ScannedVariables(names[i], properties[i], units[i]));
+    m_scanVar.emplace_back(ScannedVariables(names[i], properties[i], units[i]));
   }
 
   varNames.close();
@@ -259,7 +258,8 @@ void LoadILLDiffraction::fillDataScanMetaData(const NXDouble &scan) {
       auto property =
           std::make_unique<TimeSeriesProperty<double>>(m_scanVar[i].name);
       for (size_t j = 0; j < m_numberScanPoints; ++j) {
-        property->addValue(absoluteTimes[j], scan(static_cast<int>(i),static_cast<int>(j)));
+        property->addValue(absoluteTimes[j],
+                           scan(static_cast<int>(i), static_cast<int>(j)));
       }
       m_outWorkspace->mutableRun().addLogData(std::move(property));
     }
@@ -329,17 +329,17 @@ LoadILLDiffraction::getDurations(const NXDouble &scan) const {
  */
 std::vector<DateAndTime>
 LoadILLDiffraction::getAbsoluteTimes(const NXDouble &scan) const {
-    std::vector<DateAndTime> times;
-    std::vector<double> durations = getDurations(scan);
-    DateAndTime time = m_startTime;
+  std::vector<DateAndTime> times;
+  std::vector<double> durations = getDurations(scan);
+  DateAndTime time = m_startTime;
+  times.emplace_back(time);
+  size_t timeIndex = 1;
+  while (timeIndex < m_numberScanPoints) {
+    time += durations[timeIndex - 1] * 1E9;
     times.emplace_back(time);
-    size_t timeIndex = 1;
-    while (timeIndex < m_numberScanPoints) {
-        time += durations[timeIndex - 1] * 1E9;
-        times.emplace_back(time);
-        ++timeIndex;
-    }
-    return times;
+    ++timeIndex;
+  }
+  return times;
 }
 
 /**
@@ -370,6 +370,9 @@ void LoadILLDiffraction::resolveInstrument() {
     m_numberDetectorsActual = m_numberDetectorsRead;
     if (m_instName == "D20") {
       switch (m_numberDetectorsRead) {
+      // Here we have to hardcode the numbers of active pixels.
+      // The only way is to read the size of the detectors read from the files
+      // and based on it decide which of the 3 alternative IDFs to load.
       case 1600: {
         // low resolution mode
         m_instName += "_lr";

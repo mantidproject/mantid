@@ -15,8 +15,10 @@ class LoadILLDiffractionTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static LoadILLDiffractionTest *createSuite() { return new LoadILLDiffractionTest(); }
-  static void destroySuite( LoadILLDiffractionTest *suite ) { delete suite; }
+  static LoadILLDiffractionTest *createSuite() {
+    return new LoadILLDiffractionTest();
+  }
+  static void destroySuite(LoadILLDiffractionTest *suite) { delete suite; }
 
   void setUp() override {
     ConfigService::Instance().appendDataSearchSubDir("ILL/D20/");
@@ -47,13 +49,7 @@ public:
     TS_ASSERT_EQUALS(outputWS->blocksize(), 1);
   }
 
-  void _test_Something()
-  {
-    TS_FAIL( "You forgot to write a test!");
-  }
-
-
+  void _test_Something() { TS_FAIL("You forgot to write a test!"); }
 };
-
 
 #endif /* MANTID_DATAHANDLING_LOADILLDIFFRACTIONTEST_H_ */
