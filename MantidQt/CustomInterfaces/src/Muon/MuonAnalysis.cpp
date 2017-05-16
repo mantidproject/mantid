@@ -323,6 +323,7 @@ void MuonAnalysis::initLayout() {
           SLOT(setChosenGroupSlot(QString &)));
   connect(this, SIGNAL(setChosenPeriodSignal(QString &)), this,
           SLOT(setChosenPeriodSlot(QString &)));
+
 }
 
 void MuonAnalysis::setChosenGroupSlot(QString &group) {
@@ -331,6 +332,7 @@ void MuonAnalysis::setChosenGroupSlot(QString &group) {
 void MuonAnalysis::setChosenPeriodSlot(QString &period) {
   m_uiForm.fitBrowser->setChosenPeriods(period);
 }
+
 /**
 * Muon Analysis help (slot)
 */
@@ -2161,6 +2163,11 @@ void MuonAnalysis::loadFittings() {
 void MuonAnalysis::handleGroupBox() {
   // send the group to dataselector
   m_dataSelector->setGroupsSelected(m_uiForm.fitBrowser->getChosenGroups());
+  // update labels for single fit
+  auto names = m_fitDataPresenter->generateWorkspaceNames(true);
+ if (names.size() == 1) {
+		  updateLabels(names[0]);
+}
   m_fitDataPresenter->handleSelectedDataChanged(true);
 }
 /**
@@ -2170,7 +2177,21 @@ void MuonAnalysis::handleGroupBox() {
 void MuonAnalysis::handlePeriodBox() {
   // send the group to dataselector
   m_dataSelector->setPeriodsSelected(m_uiForm.fitBrowser->getChosenPeriods());
+  // update labels for single fit
+  auto names = m_fitDataPresenter->generateWorkspaceNames(true);
+  if (names.size() == 1) {
+	  updateLabels(names[0]);
+  }
   m_fitDataPresenter->handleSelectedDataChanged(true);
+}
+/**
+* Updates the labels (legend and ws) for
+* a single fit when within the mulit-
+* fit GUI.
+* @param name :: the name for the label. 
+*/
+void MuonAnalysis::updateLabels(std::string &name) {
+	m_uiForm.fitBrowser->setOutputName(name);
 }
 /**
  * Allow/disallow loading.
@@ -2486,6 +2507,7 @@ void MuonAnalysis::changeTab(int newTabIndex) {
           m_uiForm.mwRunFiles->getUserInput().toString();
       m_fitDataPresenter->setSelectedWorkspace(m_currentDataName, filePath);
       selectMultiPeak(m_currentDataName, filePath);
+
     }
 
     // In future, when workspace gets changed, show its plot and attach PP tool

@@ -397,7 +397,6 @@ QString MuonFitDataSelector::getDatasetName() const {
  */
 void MuonFitDataSelector::setDatasetNames(const QStringList &datasetNames) {
   const auto selectedName = m_ui.cbDataset->currentText();
-
   // Turn off signals while names are updated
   m_ui.cbDataset->blockSignals(true);
   m_ui.cbDataset->clear();
