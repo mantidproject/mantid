@@ -454,7 +454,7 @@ class TOFTOFScriptElement(BaseScriptElement):
             l("# energy binning")
             l("rebinEnergy = '{:.3f}, {:.3f}, {:.3f}'"
               .format(self.binEstart, self.binEstep, self.binEend))
-            l("{} = Rebin({}, Params=rebinEnergy)" .format(gDataBinE, gLast))
+            l("{} = Rebin({}, Params=rebinEnergy, IgnoreBinErrors=True)" .format(gDataBinE, gLast))
             l()
             gLast = gDataBinE
 
