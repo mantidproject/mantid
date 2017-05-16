@@ -40,6 +40,11 @@ void export_DataProcessorAlgorithm() {
            "Set the name of the algorithm called to accumulate a chunk of "
            "processed data [Default=Plus]")
 
+      .def("copyProperties", &DataProcessorAdapter::copyPropertiesProxy,
+           (arg("self"), arg("alg"),
+            arg("properties") = boost::python::object(), arg("version") = -1),
+           "Copy properties from another algorithm")
+
       .def("determineChunk", &DataProcessorAdapter::determineChunkProxy,
            (arg("self"), arg("file_name")),
            "Return a TableWorkspace containing the information on how to split "

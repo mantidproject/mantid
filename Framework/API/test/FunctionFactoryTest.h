@@ -433,9 +433,9 @@ public:
   void test_MultiDomainFunction_creation_moreComplex() {
     const std::string fnString =
         "composite=MultiDomainFunction,NumDeriv=true;(name=FunctionFactoryTest_"
-        "FunctA,a0=0,a1=0.5;name=FunctionFactoryTest_FunctB,b0=0.1,ties="
+        "FunctA,a0=0,a1=0.5;name=FunctionFactoryTest_FunctB,b0=0.1,b1=0.2,ties="
         "(b1=0.2),$domains=i);(name=FunctionFactoryTest_FunctA,a0=0,a1=0.5;"
-        "name=FunctionFactoryTest_FunctB,b0=0.1,$domains=i);ties=(f1.f1."
+        "name=FunctionFactoryTest_FunctB,b0=0.1,b1=0.2,$domains=i);ties=(f1.f1."
         "b1=f0.f1.b1)";
     IFunction_sptr fun;
     TS_ASSERT_THROWS_NOTHING(

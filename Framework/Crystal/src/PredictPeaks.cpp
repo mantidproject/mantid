@@ -10,6 +10,9 @@
 #include "MantidGeometry/Objects/InstrumentRayTracer.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/EnabledWhenProperty.h"
+#include "MantidGeometry/Instrument/RectangularDetector.h"
+#include "MantidKernel/BoundedValidator.h"
+#include "MantidGeometry/Crystal/EdgePixel.h"
 
 using Mantid::Kernel::EnabledWhenProperty;
 
@@ -101,6 +104,7 @@ void PredictPeaks::init() {
                   "values in the HKLPeaksWorkspace to the nearest integers if "
                   "checked.\n"
                   "Keep unchecked to use the original values");
+
   setPropertySettings("RoundHKL", make_unique<EnabledWhenProperty>(
                                       "HKLPeaksWorkspace", IS_NOT_DEFAULT));
 
@@ -119,6 +123,16 @@ void PredictPeaks::init() {
   declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "An output PeaksWorkspace.");
+
+  declareProperty("PredictPeaksOutsideDetectors", false,
+                  "Use an extended detector space (if defined for the"
+                  " instrument) to predict peaks which do not fall onto any"
+                  "detector. This may produce a very high number of results.");
+
+  auto nonNegativeInt = boost::make_shared<BoundedValidator<int>>();
+  nonNegativeInt->setLower(0);
+  declareProperty("EdgePixels", 0, nonNegativeInt,
+                  "Remove peaks that are at pixels this close to edge. ");
 }
 
 /** Execute the algorithm.
@@ -126,6 +140,7 @@ void PredictPeaks::init() {
 void PredictPeaks::exec() {
   // Get the input properties
   Workspace_sptr rawInputWorkspace = getProperty("InputWorkspace");
+  m_edge = this->getProperty("EdgePixels");
 
   ExperimentInfo_sptr inputExperimentInfo =
       boost::dynamic_pointer_cast<ExperimentInfo>(rawInputWorkspace);
@@ -252,6 +267,13 @@ void PredictPeaks::exec() {
 
     size_t allowedPeakCount = 0;
 
+    bool useExtendedDetectorSpace = getProperty("PredictPeaksOutsideDetectors");
+    if (useExtendedDetectorSpace &&
+        !m_inst->getComponentByName("extended-detector-space")) {
+      g_log.warning() << "Attempting to find peaks outside of detectors but "
+                         "no extended detector space has been defined\n";
+    }
+
     for (auto &possibleHKL : possibleHKLs) {
       if (lambdaFilter.isAllowed(possibleHKL)) {
         ++allowedPeakCount;
@@ -260,13 +282,42 @@ void PredictPeaks::exec() {
       prog.report();
     }
 
-    g_log.notice() << "Out of " << allowedPeakCount
-                   << " allowed peaks within parameters, "
-                   << m_pw->getNumberPeaks()
-                   << " were found to hit a detector.\n";
+    logNumberOfPeaksFound(allowedPeakCount);
   }
 
   setProperty<PeaksWorkspace_sptr>("OutputWorkspace", m_pw);
+}
+
+/**
+ * Log the number of peaks found to fall on and off detectors
+ *
+ * @param allowedPeakCount :: number of candidate peaks found
+ */
+void PredictPeaks::logNumberOfPeaksFound(size_t allowedPeakCount) const {
+  const bool usingExtendedDetectorSpace =
+      getProperty("PredictPeaksOutsideDetectors");
+  const auto &peaks = m_pw->getPeaks();
+  size_t offDetectorPeakCount = 0;
+  size_t onDetectorPeakCount = 0;
+
+  for (const auto &peak : peaks) {
+    if (peak.getDetectorID() == -1) {
+      offDetectorPeakCount++;
+    } else {
+      onDetectorPeakCount++;
+    }
+  }
+
+  g_log.notice() << "Out of " << allowedPeakCount
+                 << " allowed peaks within parameters, " << onDetectorPeakCount
+                 << " were found to hit a detector";
+
+  if (usingExtendedDetectorSpace) {
+    g_log.notice() << " and " << offDetectorPeakCount << " were found in "
+                   << "extended detector space.";
+  }
+
+  g_log.notice() << "\n";
 }
 
 /// Tries to set the internally stored instrument from an ExperimentInfo-object.
@@ -423,24 +474,36 @@ void PredictPeaks::calculateQAndAddToOutput(const V3D &hkl,
 
   // Create the peak using the Q in the lab framewith all its info:
   Peak p(m_inst, q);
-
+  if (m_edge > 0) {
+    if (edgePixel(m_inst, p.getBankName(), p.getCol(), p.getRow(), m_edge))
+      return;
+  }
   /* The constructor calls setQLabFrame, which already calls findDetector, which
      is expensive. It's not necessary to call it again, instead it's enough to
-     check whether a detector has already been set. */
-  if (p.getDetector()) {
-    // Only add peaks that hit the detector
-    p.setGoniometerMatrix(goniometerMatrix);
-    // Save the run number found before.
-    p.setRunNumber(m_runNumber);
-    p.setHKL(hkl * m_qConventionFactor);
+     check whether a detector has already been set.
 
-    if (m_sfCalculator) {
-      p.setIntensity(m_sfCalculator->getFSquared(hkl));
-    }
+     Peaks are added if they fall on a detector OR is the extended detector
+     space component is defined which can be used to approximate a peak's
+     position in detector space.
+     */
+  bool useExtendedDetectorSpace = getProperty("PredictPeaksOutsideDetectors");
+  if (!p.getDetector() &&
+      !(useExtendedDetectorSpace &&
+        m_inst->getComponentByName("extended-detector-space")))
+    return;
 
-    // Add it to the workspace
-    m_pw->addPeak(p);
-  } // Detector was found
+  // Only add peaks that hit the detector
+  p.setGoniometerMatrix(goniometerMatrix);
+  // Save the run number found before.
+  p.setRunNumber(m_runNumber);
+  p.setHKL(hkl * m_qConventionFactor);
+
+  if (m_sfCalculator) {
+    p.setIntensity(m_sfCalculator->getFSquared(hkl));
+  }
+
+  // Add it to the workspace
+  m_pw->addPeak(p);
 }
 
 } // namespace Mantid

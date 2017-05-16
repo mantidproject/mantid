@@ -10,7 +10,7 @@
 
 namespace Mantid {
 namespace API {
-class ExperimentInfo;
+class MatrixWorkspace;
 
 /** A "spectrum" is an object that holds the data for a particular spectrum,
  * in particular:
@@ -240,10 +240,10 @@ public:
     mutableHistogramRef().setSharedE(e);
   }
 
-  void setExperimentInfo(ExperimentInfo *experimentInfo, const size_t index);
+  void setMatrixWorkspace(MatrixWorkspace *matrixWorkspace, const size_t index);
 
 protected:
-  virtual void checkAndSanitizeHistogram(HistogramData::Histogram &) {}
+  virtual void checkAndSanitizeHistogram(HistogramData::Histogram &){};
   virtual void checkWorksWithPoints() const {}
   virtual void checkIsYAndEWritable() const {}
 
@@ -258,8 +258,9 @@ private:
   virtual const HistogramData::Histogram &histogramRef() const = 0;
   virtual HistogramData::Histogram &mutableHistogramRef() = 0;
 
-  void updateExperimentInfo() const;
-  ExperimentInfo *m_experimentInfo{nullptr};
+  void invalidateCachedSpectrumNumbers() const;
+  void invalidateSpectrumDefinition() const;
+  MatrixWorkspace *m_matrixWorkspace{nullptr};
   // The default value is meaningless. This will always be set before use.
   size_t m_index{0};
 

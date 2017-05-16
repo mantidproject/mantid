@@ -32,7 +32,7 @@ using MantidWidgets::DataProcessorCommandAdapter;
 using MantidWidgets::SlitCalculator;
 
 /** QtReflRunsTabView : Provides an interface for the "Runs" tab in the
-Reflectometry (Polref) interface.
+ISIS Reflectometry interface.
 
 Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
 National Laboratory & European Spallation Source

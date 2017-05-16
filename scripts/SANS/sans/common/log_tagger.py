@@ -4,7 +4,7 @@
 
 from __future__ import (absolute_import, division, print_function)
 from hashlib import sha224
-from mantid.api import MatrixWorkspace
+from mantid.api import (MatrixWorkspace, WorkspaceGroup)
 from six import string_types
 
 
@@ -72,32 +72,34 @@ def has_tag(tag, workspace):
     return tag in run
 
 
-def set_hash(tag, value, workspace):
+def set_hash(tag, hashed_value, workspace):
     """
     Sets a value as a hashed tag on a workspace.
 
     :param tag: the tag name
-    :param value: the tag value (which is converted to a hash)
+    :param hashed_value: a hashed value
     :param workspace: the workspace
     """
     check_if_valid_tag_and_workspace(tag, workspace)
-    hash_value = get_hash_value(str(value))
-    set_tag(tag, hash_value, workspace)
+    set_tag(tag, hashed_value, workspace)
 
 
-def has_hash(tag, value, workspace):
+def has_hash(tag, hashed_value, workspace):
     """
-    Checks if a certain hash exists on a workspace.
+    Checks if a hash exists on a workspace.
 
     :param tag: the tag as a hash.
-    :param value: the value which is converted to a hash and checked.
+    :param hashed_value: the hash which is being checked
     :param workspace: the workspace.
     :return: true if the hash exists on the workspace else false.
     """
+    if isinstance(workspace, WorkspaceGroup):
+        return False
+
     check_if_valid_tag_and_workspace(tag, workspace)
-    same_hash = False
-    if has_tag(tag, workspace):
-        saved_hash = get_tag(tag, workspace)
-        to_check_hash = get_hash_value(str(value))
-        same_hash = True if saved_hash == to_check_hash else False
-    return same_hash
+
+    if not has_tag(tag, workspace):
+        return False
+
+    saved_hash = get_tag(tag, workspace)
+    return saved_hash == hashed_value

@@ -1,7 +1,7 @@
 #include "MantidDataHandling/LoadSwans.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidDataHandling/LoadHelper.h"
-#include "MantidGeometry/Instrument/ComponentHelper.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidKernel/StringTokenizer.h"
 
 #include <map>
@@ -51,7 +51,7 @@ const std::string LoadSwans::summary() const { return "Loads SNS SWANS Data"; }
 int LoadSwans::confidence(Kernel::FileDescriptor &descriptor) const {
   // since this is a test loader, the confidence will always be 0!
   // I don't want the Load algorithm to pick this one!
-  if (descriptor.extension().compare(".dat") != 0)
+  if (descriptor.extension() != ".dat")
     return 1;
   else
     return 0;

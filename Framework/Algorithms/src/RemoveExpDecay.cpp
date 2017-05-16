@@ -185,13 +185,13 @@ double MuonRemoveExpDecay::calNormalisationConst(API::MatrixWorkspace_sptr ws,
   std::vector<std::string> paramnames = result->getParameterNames();
 
   // Check order of names
-  if (paramnames[0].compare("A0") != 0) {
+  if (paramnames[0] != "A0") {
     g_log.error() << "Parameter 0 should be A0, but is " << paramnames[0]
                   << '\n';
     throw std::invalid_argument(
         "Parameters are out of order @ 0, should be A0");
   }
-  if (paramnames[1].compare("A1") != 0) {
+  if (paramnames[1] != "A1") {
     g_log.error() << "Parameter 1 should be A1, but is " << paramnames[1]
                   << '\n';
     throw std::invalid_argument(

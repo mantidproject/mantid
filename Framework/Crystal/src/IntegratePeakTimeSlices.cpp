@@ -1751,7 +1751,7 @@ int IntegratePeakTimeSlices::findNameInVector(
 
 {
   for (size_t i = 0; i < nameList.size(); i++)
-    if (oneName.compare(nameList[i]) == 0)
+    if (oneName == nameList[i])
       return static_cast<int>(i);
 
   return -1;

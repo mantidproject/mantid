@@ -18,8 +18,13 @@ Kernel::IValidator_sptr IncreasingAxisValidator::clone() const {
   */
 std::string IncreasingAxisValidator::checkValidity(
     const MatrixWorkspace_sptr &value) const {
-  // 0 for X axis
-  Axis *xAxis = value->getAxis(0);
+  const Axis *xAxis{nullptr};
+  try {
+    // 0 for X axis
+    xAxis = value->getAxis(0);
+  } catch (Kernel::Exception::IndexError &) {
+    return "No X axis available in the workspace";
+  }
 
   // Left-most axis value should be less than the right-most, if ws has
   // more than one X axis value

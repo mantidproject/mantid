@@ -246,7 +246,7 @@ class RebinType(object):
 #  SaveType
 # --------------------------
 @string_convertible
-@serializable_enum("Nexus", "NistQxy", "CanSAS", "RKH", "CSV", "NXcanSAS")
+@serializable_enum("Nexus", "NistQxy", "CanSAS", "RKH", "CSV", "NXcanSAS", "Nexus")
 class SaveType(object):
     """
     Defines the save types available
@@ -298,4 +298,30 @@ def convert_int_to_shape(shape_int):
 # ---------------------------
 @serializable_enum("ISISNexus", "ISISNexusAdded", "ISISRaw", "NoFileType")
 class FileType(object):
+    pass
+
+
+# ---------------------------
+# OutputMode
+# ---------------------------
+@string_convertible
+@serializable_enum("PublishToADS", "SaveToFile", "Both")
+class OutputMode(object):
+    """
+    Defines the output modes of a batch reduction.
+    """
+    pass
+
+
+# ------------------------------
+# Entries of batch reduction file
+# -------------------------------
+@string_convertible
+@serializable_enum("SampleScatter", "SampleTransmission", "SampleDirect", "CanScatter", "CanTransmission", "CanDirect",
+                   "Output", "UserFile", "SampleScatterPeriod", "SampleTransmissionPeriod", "SampleDirectPeriod",
+                   "CanScatterPeriod", "CanTransmissionPeriod", "CanDirectPeriod",)
+class BatchReductionEntry(object):
+    """
+    Defines the entries of a batch reduction file.
+    """
     pass

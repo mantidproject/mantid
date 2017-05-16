@@ -29,7 +29,7 @@ namespace MDAlgorithms {
 class DisabledProperty : public EnabledWhenProperty {
 public:
   DisabledProperty() : EnabledWhenProperty("NonExistingProperty", IS_DEFAULT) {}
-  bool fulfillsCriterion(const IPropertyManager * /*algo*/) const override {
+  bool checkCriterion(const IPropertyManager * /*algo*/) const override {
     return false;
   }
 };
