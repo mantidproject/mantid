@@ -49,6 +49,9 @@ The following units are available in the default Mantid distribution.
 | Spin Echo Time                            | SpinEchoTime                    | :math:`ns`                  | | :math:`constant \times \lambda^3`                                                                              |
 |                                           |                                 |                             | |  The constant is supplied in eFixed                                                                            |
 +-------------------------------------------+---------------------------------+-----------------------------+------------------------------------------------------------------------------------------------------------------+
+| d-spacingOrth                             | dSpacingOrth                    | :math:`\mathrm{\AA}`        | :math:`d_{\perp} = \sqrt{\lambda^2 - 2\log\cos\theta}`                                                           |
++-------------------------------------------+---------------------------------+-----------------------------+------------------------------------------------------------------------------------------------------------------+
+
 
 Where :math:`L_1` and :math:`L_2` are sample to the source and sample to
 detector distances respectively, :math:`L_{tot} = L_1+L_2` and
