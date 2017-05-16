@@ -1485,6 +1485,7 @@ void MuonAnalysis::updateFrontAndCombo() {
   // for now brute force clearing and adding new context
   // could go for softer approach and check if is necessary
   // to completely reset this combo box
+	m_uiForm.fitBrowser->clearChosenGroups();
   int currentI = getGroupOrPairToPlot();
   if (currentI < 0) // in case this combobox has not been set yet
     currentI = 0;
@@ -1858,10 +1859,8 @@ void MuonAnalysis::selectMultiPeak(const QString &wsName,
     std::transform(groups.pairNames.begin(), groups.pairNames.end(),
                    std::back_inserter(groupsAndPairs), &QString::fromStdString);
     m_uiForm.fitBrowser->setAvailableGroups(groupsAndPairs);
-    // set default selection (all groups) for groups/pairs
-    m_uiForm.fitBrowser->setAllGroups();
     m_uiForm.fitBrowser->setNumPeriods(m_numPeriods);
-
+	
     // Set the selected run, group/pair and period
     m_fitDataPresenter->setAssignedFirstRun(wsName, filePath);
   }

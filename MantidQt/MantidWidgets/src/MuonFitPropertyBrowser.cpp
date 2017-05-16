@@ -911,7 +911,14 @@ std::string MuonFitPropertyBrowser::outputName() const {
 void MuonFitPropertyBrowser::setMultiFittingMode(bool enabled) {
   // First, clear whatever model is currently set
   this->clear();
-
+  // set default selection (all groups)
+  if (enabled) {
+	  setAllGroups();
+  }
+  else {// clear current selection
+	  clearChosenGroups();
+	  clearChosenPeriods();
+  }
   // Show or hide "Function" and "Data" sections
   m_browser->setItemVisible(m_functionsGroup, !enabled);
   m_browser->setItemVisible(m_settingsGroup, !enabled);
@@ -923,6 +930,7 @@ void MuonFitPropertyBrowser::setMultiFittingMode(bool enabled) {
       widget->setVisible(enabled);
     }
   }
+
 }
 /**
 * Set TF asymmetry mode on or off.
