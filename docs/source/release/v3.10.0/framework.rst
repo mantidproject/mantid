@@ -17,6 +17,8 @@ Algorithms
 ----------
 
 - Removed the optional flag ``LocationParameters`` from ``ClearInstrumentParameters``.
+- Override method `helpURL` to return the webpage for the algorithm's documentation. Useful when registering Python
+  algorithms at runtime that are not part of the Mantid distribution.
 
 New
 ###
