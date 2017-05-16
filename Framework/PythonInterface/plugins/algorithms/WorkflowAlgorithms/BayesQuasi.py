@@ -363,10 +363,9 @@ class BayesQuasi(PythonAlgorithm):
             comp_prog.report('Running C2Se')
             outWS = self.C2Se(fname)
 
-
         # Sort x axis
-        s_api.SortXAxis(InputWorkspace=outWS, OutputWorkspace=outWS)
-        s_api.SortXAxis(InputWorkspace=probWS, OutputWorkspace=probWS)
+        s_api.SortXAxis(InputWorkspace=outWS, OutputWorkspace=outWS, EnableLogging=False)
+        s_api.SortXAxis(InputWorkspace=probWS, OutputWorkspace=probWS, EnableLogging=False)
 
         log_prog = Progress(self, start=0.8, end=1.0, nreports=8)
         # Add some sample logs to the output workspaces
