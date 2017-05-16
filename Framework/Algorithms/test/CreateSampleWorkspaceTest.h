@@ -521,16 +521,33 @@ public:
     // Name of the output workspace.
     std::string outWSName("scanning_workspace");
 
-    MatrixWorkspace_sptr ws =
-        createSampleWorkspace(outWSName, "", "", "", 2, 10, 1000, false, "TOF",
-                              0.0, 20000.0, 200.0, 10);
+    const int numBanks = 2;
+    const int bankPixelWidth = 10;
+    const int numScanPoints = 10;
 
-    TS_ASSERT_EQUALS(ws->getNumberHistograms(), 2 * 10 * 10 * 10);
+    MatrixWorkspace_sptr ws = createSampleWorkspace(
+        outWSName, "", "", "", numBanks, bankPixelWidth, 1000, false, "TOF",
+        0.0, 20000.0, 200.0, numScanPoints);
+
+    TS_ASSERT_EQUALS(ws->getNumberHistograms(), numBanks * bankPixelWidth *
+                                                    bankPixelWidth *
+                                                    numScanPoints);
 
     const auto &detectorInfo = ws->detectorInfo();
     TS_ASSERT(detectorInfo.isScanning());
 
-    // TODO: DetectorInfo checks
+    const auto centreDetector = numBanks * bankPixelWidth * bankPixelWidth / 2;
+    const auto radiansToDegrees = 180.0 / M_PI;
+
+    // The centre pixel should go from 0 -> 10 degrees, all at the same l2
+    for (size_t j = 0; j < detectorInfo.scanCount(centreDetector); ++j) {
+      const auto index = std::pair<size_t, size_t>(centreDetector, j);
+      TS_ASSERT_DELTA(10.0, detectorInfo.l2(index), 1e-10);
+      TS_ASSERT_DELTA(j, detectorInfo.twoTheta(index) * radiansToDegrees,
+                      1e-10);
+      TS_ASSERT_DELTA(j, detectorInfo.rotation(index).getEulerAngles("XYZ")[1],
+                      1e-10);
+    }
 
     // Remove workspace from the data service.
     AnalysisDataService::Instance().remove(outWSName);
