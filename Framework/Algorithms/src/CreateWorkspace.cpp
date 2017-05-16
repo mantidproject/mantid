@@ -112,9 +112,9 @@ void CreateWorkspace::exec() {
     // In the case of numerical axis, the vertical axis can represent either
     // point data or bin edges.
     if ((vUnit == "Text" && vAxisSize != nSpec) ||
-       (vAxisSize != nSpec && vAxisSize != nSpec + 1)) {
+        (vAxisSize != nSpec && vAxisSize != nSpec + 1)) {
       throw std::invalid_argument("The number of vertical axis values doesn't "
-                                "match the number of histograms.");
+                                  "match the number of histograms.");
     }
   }
 
