@@ -995,8 +995,10 @@ class CWSCDReductionControl(object):
         :return:
         """
         # assert ...
-        assert isinstance(exp_number, int)
-        assert isinstance(scan_number, int)
+        assert isinstance(exp_number, int), 'blabla'
+        assert isinstance(scan_number, int), 'blabla'
+
+	print '[DB...BAT] RIO start (Lower left corner) = {0}. ROI end (upper right corner) = {1}.'.format(roi_start, roi_end)
 
         # create an xml file
         mask_file_name = get_mask_xml_temp(self._workDir, exp_number, scan_number)
@@ -1773,7 +1775,7 @@ class CWSCDReductionControl(object):
         ur_x = int(upper_right_corner[0])
         ur_y = int(upper_right_corner[1])
         assert ll_x < ur_x and ll_y < ur_y, 'Lower left corner (%.5f, %.5f) vs. upper right corner ' \
-                                            '(%.5f, %.5f)' % (ll_x, ll_y, ur_x, ur_y)
+                                            '(%.5f, %.5f) ' % (ll_x, ll_y, ur_x, ur_y)
 
         # Add to dictionary.  Because usually one ROI is defined for all scans in an experiment,
         # then it is better and easier to support client to search this ROI by experiment number
