@@ -93,10 +93,6 @@ private:
   void pauseReduction() const;
   /// Resumes reduction in the Runs Tab
   void resumeReduction() const;
-  /// Confirm reduction in the Runs Tab is paused
-  void confirmReductionPaused() const;
-  /// Confirm reduction in the Runs Tab is resumed
-  void confirmReductionResumed() const;
   /// The view we are handling
   IReflMainWindowView *m_view;
   /// The presenter of tab 'Runs'

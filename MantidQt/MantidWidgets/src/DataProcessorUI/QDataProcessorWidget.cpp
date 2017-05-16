@@ -323,6 +323,15 @@ void QDataProcessorWidget::setClipboard(const std::string &text) {
 }
 
 /**
+Sets a specific action in the row toolbar enabled or disabled
+@param index : The index of the action in the toolbar
+@param enabled : Whether to enable or disable the action
+*/
+void QDataProcessorWidget::setToolbarActionEnabled(int index, bool enabled) {
+  ui.rowToolBar->actions()[index]->setEnabled(enabled);
+}
+
+/**
 Get the selected instrument for processing
 @returns the selected instrument to process with
 */

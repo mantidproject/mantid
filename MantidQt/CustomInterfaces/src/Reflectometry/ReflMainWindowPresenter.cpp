@@ -51,10 +51,10 @@ void ReflMainWindowPresenter::notify(IReflMainWindowPresenter::Flag flag) {
     resumeReduction();
     break;
   case IReflMainWindowPresenter::ConfirmReductionPausedFlag:
-    confirmReductionPaused();
+    m_isProcessing = false;
     break;
   case IReflMainWindowPresenter::ConfirmReductionResumedFlag:
-    confirmReductionResumed();
+    m_isProcessing = true;
     break;
   }
   // Not having a 'default' case is deliberate. gcc issues a warning if there's
@@ -264,21 +264,6 @@ void ReflMainWindowPresenter::resumeReduction() const {
 
   m_isProcessing = true;
   m_runsPresenter->notify(IReflRunsTabPresenter::ResumeReductionFlag);
-}
-
-/** Confirm that reduction in the runs tab has been paused
-*/
-void ReflMainWindowPresenter::confirmReductionPaused() const {
-
-  m_isProcessing = false;
-  m_view->confirmCloseWindow();
-}
-
-/** Confirm that reduction in the runs tab has been resumed
-*/
-void ReflMainWindowPresenter::confirmReductionResumed() const {
-
-  m_isProcessing = true;
 }
 }
 }

@@ -74,9 +74,8 @@ public:
   /// Return time-slicing type
   virtual std::string getTimeSlicingType() const = 0;
   
-  /// Handle data reduction pause confirmation
+  /// Handle data reduction paused/resumed confirmation
   virtual void confirmReductionPaused() const = 0;
-  /// Handle data reduction resume confirmation
   virtual void confirmReductionResumed() const = 0;
 };
 }

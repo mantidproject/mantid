@@ -46,7 +46,8 @@ public:
     GroupChangedFlag,
     PauseReductionFlag,
     ResumeReductionFlag,
-    ConfirmReductionPausedFlag
+    ConfirmReductionPausedFlag,
+    ConfirmReductionResumedFlag
   };
 
   // Tell the presenter something happened

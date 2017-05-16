@@ -67,8 +67,7 @@ public:
                     const std::string &title) override;
   std::string runPythonAlgorithm(const std::string &pythonCode) override;
 
-  /// Close window handlers
-  void confirmCloseWindow() override;
+  /// Close window handler
   void closeEvent(QCloseEvent *event) override;
 
 private:

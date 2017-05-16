@@ -85,6 +85,7 @@ public:
   setOptionsHintStrategy(MantidQt::MantidWidgets::HintStrategy *hintStrategy,
                          int column) override;
   void setClipboard(const std::string &text) override;
+  void setToolbarActionEnabled(int index, bool enabled) override;
 
   // Accessor methods
   std::map<int, std::set<int>> getSelectedChildren() const override;

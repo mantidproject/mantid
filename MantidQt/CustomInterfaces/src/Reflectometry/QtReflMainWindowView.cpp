@@ -171,30 +171,15 @@ QtReflMainWindowView::runPythonAlgorithm(const std::string &pythonCode) {
 }
 
 /**
-Ask the user to confirm if they want to close the main window
-*/
-void QtReflMainWindowView::confirmCloseWindow() {
-
-  if (askUserYesNo("Runs are still being processed, are you sure you want to "
-                   "close and stop processing?",
-                   "Confirm Close"))
-    parentWidget()->parentWidget()->parentWidget()->close();
-  else
-    m_presenter->notify(IReflMainWindowPresenter::ResumeReductionFlag);
-}
-
-/**
 Handles attempt to close main window
 * @param event : [input] The close event
 */
 void QtReflMainWindowView::closeEvent(QCloseEvent *event) {
 
+  // Close only if reduction has been paused
   if (!m_presenter->checkIfProcessing()) {
-    // No runs are being processed, close window
     event->accept();
   } else {
-    // Otherwise send message to pause the reduction and store the close event
-    m_presenter->notify(IReflMainWindowPresenter::PauseReductionFlag);
     event->ignore();
   }
 }

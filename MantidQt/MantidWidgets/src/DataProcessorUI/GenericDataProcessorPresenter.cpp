@@ -187,6 +187,9 @@ void GenericDataProcessorPresenter::acceptViews(
 
   // Start with a blank table
   newTable();
+
+  // Reduction is currently paused
+  pause();
 }
 
 /**
@@ -220,9 +223,9 @@ void GenericDataProcessorPresenter::process() {
     m_gqueue.push(std::make_pair(item.first, rowQueue));
   }
 
-  m_mainPresenter->notify(
-      DataProcessorMainPresenter::ConfirmReductionResumedFlag);
-
+  m_nextActionFlag = GenericDataProcessorPresenter::ReduceGroupFlag;
+  resume();
+  
   // Start processing the first group
   nextGroup();
 
@@ -969,7 +972,7 @@ void GenericDataProcessorPresenter::notify(DataProcessorPresenter::Flag flag) {
     collapseAll();
     break;
   case DataProcessorPresenter::PauseFlag:
-    //pause();
+    pause();
     break;
   case DataProcessorPresenter::ResumeFlag:
     resume();
@@ -1392,6 +1395,9 @@ the current thread for reducing a row or group has finished
 */
 void GenericDataProcessorPresenter::pause() {
 
+  // Disable pause button
+  m_view->setToolbarActionEnabled(1, false);
+
   if (m_reductionPaused)
     m_mainPresenter->notify(
         DataProcessorMainPresenter::ConfirmReductionPausedFlag);
@@ -1403,9 +1409,11 @@ void GenericDataProcessorPresenter::pause() {
 */
 void GenericDataProcessorPresenter::resume() {
 
-  m_reductionPaused = false;
+  // Enable pause button
+  m_view->setToolbarActionEnabled(1, true);
+
   m_mainPresenter->notify(
-      DataProcessorMainPresenter::ConfirmReductionResumedFlag);
+    DataProcessorMainPresenter::ConfirmReductionPausedFlag);
 
   switch (m_nextActionFlag) {
   case GenericDataProcessorPresenter::ReduceRowFlag:
@@ -1415,6 +1423,8 @@ void GenericDataProcessorPresenter::resume() {
     nextGroup();
     break;
   }
+
+  m_reductionPaused = false;
 }
 
 /**
