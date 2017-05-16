@@ -106,6 +106,14 @@ void MDNormDirectSC::init() {
                   "ConvertToMD algorithm was run, and assume that the direct "
                   "geometry inelastic mode is used.");
 
+  declareProperty(make_unique<WorkspaceProperty<MDHistoWorkspace>>(
+                      "TemporaryNormalizationWorkspace", "", Direction::Input),
+                  "Input normalization MDHistoWorkspace.");
+
+  declareProperty(make_unique<WorkspaceProperty<IMDWorkspace>>(
+                      "TemporaryDataWorkspace", "", Direction::Input),
+                  "An input MDWorkspace.");
+
   declareProperty(make_unique<WorkspaceProperty<Workspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "A name for the output data MDHistoWorkspace.");
@@ -249,6 +257,7 @@ MDHistoWorkspace_sptr MDNormDirectSC::binInputWS() {
   for (auto prop : props) {
     const auto &propName = prop->name();
     if (propName != "SolidAngleWorkspace" &&
+        propName != "TemporaryNormalizationWorkspace" &&
         propName != "OutputNormalizationWorkspace" &&
         propName != "SkipSafetyCheck") {
       binMD->setPropertyValue(propName, prop->value());
@@ -265,7 +274,10 @@ MDHistoWorkspace_sptr MDNormDirectSC::binInputWS() {
  */
 void MDNormDirectSC::createNormalizationWS(const MDHistoWorkspace &dataWS) {
   // Copy the MDHisto workspace, and change signals and errors to 0.
-  m_normWS = dataWS.clone();
+  m_normWS = this->getProperty("TemporaryNormalizationWorkspace");
+  if (!m_normWS) {
+    m_normWS = dataWS.clone();
+  }
   m_normWS->setTo(0., 0., 0.);
 }
 

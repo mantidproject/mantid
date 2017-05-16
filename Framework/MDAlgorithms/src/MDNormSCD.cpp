@@ -102,6 +102,14 @@ void MDNormSCD::init() {
                   "An input workspace containing momentum integrated vanadium "
                   "(a measure of the solid angle).");
 
+  declareProperty(make_unique<WorkspaceProperty<MDHistoWorkspace>>(
+                      "TemporaryNormalizationWorkspace", "", Direction::Input),
+                  "Input normalization MDHistoWorkspace.");
+
+  declareProperty(make_unique<WorkspaceProperty<IMDWorkspace>>(
+                      "TemporaryDataWorkspace", "", Direction::Input),
+                  "An input MDWorkspace.");
+
   declareProperty(make_unique<WorkspaceProperty<Workspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "A name for the output data MDHistoWorkspace.");
@@ -215,6 +223,7 @@ MDHistoWorkspace_sptr MDNormSCD::binInputWS() {
   for (auto prop : props) {
     const auto &propName = prop->name();
     if (propName != "FluxWorkspace" && propName != "SolidAngleWorkspace" &&
+        propName != "TemporaryNormalizationWorkspace" &&
         propName != "OutputNormalizationWorkspace") {
       binMD->setPropertyValue(propName, prop->value());
     }
@@ -230,7 +239,11 @@ MDHistoWorkspace_sptr MDNormSCD::binInputWS() {
  */
 void MDNormSCD::createNormalizationWS(const MDHistoWorkspace &dataWS) {
   // Copy the MDHisto workspace, and change signals and errors to 0.
-  m_normWS = dataWS.clone();
+
+  m_normWS = this->getProperty("TemporaryNormalizationWorkspace");
+  if (!m_normWS) {
+    m_normWS = dataWS.clone();
+  }
   m_normWS->setTo(0., 0., 0.);
 }
 

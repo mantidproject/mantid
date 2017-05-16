@@ -75,6 +75,10 @@ void BinMD::init() {
       "due to disk thrashing.");
   setPropertyGroup("Parallel", grp);
 
+  declareProperty(make_unique<WorkspaceProperty<IMDWorkspace>>(
+                      "TemporaryDataWorkspace", "", Direction::Input),
+                  "An input MDWorkspace.");
+
   declareProperty(make_unique<WorkspaceProperty<Workspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "A name for the output MDHistoWorkspace.");
@@ -376,7 +380,12 @@ void BinMD::exec() {
   prog = new Progress(this, 0, 1.0, 1);
 
   // Create the dense histogram. This allocates the memory
-  outWS = MDHistoWorkspace_sptr(new MDHistoWorkspace(m_binDimensions));
+  outWS = this->getProperty("TemporaryDataWorkspace");
+  if (outWS) {
+    outWS->setTo(0., 0., 0.);
+  } else {
+    outWS = boost::make_shared<MDHistoWorkspace>(m_binDimensions);
+  }
 
   // Saves the geometry transformation from original to binned in the workspace
   outWS->setTransformFromOriginal(this->m_transformFromOriginal, 0);
