@@ -1078,6 +1078,10 @@ void ReflectometryReductionOne2::sumInQShareCounts(
 * top-left and bottom-right corners of the pixel are projected, resulting in an
 * output range in "virtual" lambda (lambdaV).
 *
+* For a description of this projection, see:
+*   R. Cubitt, T. Saerbeck, R.A. Campbell, R. Barker, P. Gutfreund
+*   J. Appl. Crystallogr., 48 (6) (2015)
+*
 * @param lambda [in] :: the lambda coord of the centre of the pixel to project
 * @param twoTheta [in] :: the twoTheta coord of the centre of the pixel to
 *project
