@@ -76,12 +76,12 @@ QString QwtWorkspaceBinData::getYAxisLabel() const { return m_yTitle; }
 QwtWorkspaceBinData &QwtWorkspaceBinData::
 operator=(const QwtWorkspaceBinData &rhs) {
   if (this != &rhs) {
-    m_binIndex = this->m_binIndex;
-    m_X = this->m_X;
-    m_Y = this->m_Y;
-    m_E = this->m_E;
-    m_xTitle = this->m_xTitle;
-    m_yTitle = this->m_yTitle;
+    m_binIndex = rhs.m_binIndex;
+    m_X = rhs.m_X;
+    m_Y = rhs.m_Y;
+    m_E = rhs.m_E;
+    m_xTitle = rhs.m_xTitle;
+    m_yTitle = rhs.m_yTitle;
   }
   return *this;
 }
