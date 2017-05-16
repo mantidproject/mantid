@@ -60,10 +60,9 @@ double getDetectorTwoThetaRange(const SpectrumInfo *spectrumInfo,
 double getLambdaRange(const HistogramX &xValues, const int xIdx) {
   // The lambda range is the bin width from the given index to the next.
   if (xIdx < 0 || xIdx + 1 >= static_cast<int>(xValues.size())) {
-    std::ostringstream errMsg;
-    errMsg << "Error accessing X values out of range (index=" << xIdx + 1
-           << ", size=" << xValues.size();
-    throw std::runtime_error(errMsg.str());
+    throw std::runtime_error("Error accessing X values out of range (index=" +
+                             std::to_string(xIdx + 1) + ", size=" +
+                             std::to_string(xValues.size()));
   }
 
   double result = xValues[xIdx + 1] - xValues[xIdx];
@@ -77,10 +76,9 @@ double getLambdaRange(const HistogramX &xValues, const int xIdx) {
 */
 double getLambda(const HistogramX &xValues, const int xIdx) {
   if (xIdx < 0 || xIdx >= static_cast<int>(xValues.size())) {
-    std::ostringstream errMsg;
-    errMsg << "Error accessing X values out of range (index=" << xIdx
-           << ", size=" << xValues.size();
-    throw std::runtime_error(errMsg.str());
+    throw std::runtime_error("Error accessing X values out of range (index=" +
+                             std::to_string(xIdx) + ", size=" +
+                             std::to_string(xValues.size()));
   }
 
   // The centre of the bin is the lower bin edge plus half the width
@@ -215,9 +213,8 @@ int mapSpectrumIndexToWorkspace(const spec2index_map &map, const size_t mapIdx,
                          });
 
   if (it == map.end()) {
-    std::ostringstream errMsg;
-    errMsg << "Workspace index " << mapIdx << " not found in run workspace ";
-    throw std::runtime_error(errMsg.str());
+    throw std::runtime_error("Workspace index " + std::to_string(mapIdx) +
+                             " not found in run workspace ");
   }
   specnum_t specId = it->first;
 
@@ -274,7 +271,7 @@ std::string createProcessingCommandsFromDetectorWS(
     MatrixWorkspace_const_sptr originWS, MatrixWorkspace_const_sptr hostWS,
     const std::vector<std::vector<size_t>> &detectorGroups) {
 
-  std::stringstream result;
+  std::string result;
 
   // Map the original indices to the host workspace
   std::vector<std::vector<size_t>> hostGroups =
@@ -309,26 +306,28 @@ std::string createProcessingCommandsFromDetectorWS(
 
       if (contiguous) {
         // Output the contiguous range, then reset the flag
-        result << contiguousStart << "-" << *it;
+        result.append(std::to_string(contiguousStart))
+            .append("-")
+            .append(std::to_string(*it));
         contiguousStart = 0;
         contiguous = false;
       } else {
         // Just output the value
-        result << *it;
+        result.append(std::to_string(*it));
       }
 
       // Add a separator ready for the next value/range
       if (nextIt != hostDetectors.end()) {
-        result << "+";
+        result.append("+");
       }
     }
 
     if (groupIt + 1 != hostGroups.end()) {
-      result << ",";
+      result.append(",");
     }
   }
 
-  return result.str();
+  return result;
 }
 }
 
@@ -895,14 +894,15 @@ MatrixWorkspace_sptr ReflectometryReductionOne2::constructIvsLamWS(
   // Use the same number of bins as the input
   const int origNumBins = static_cast<int>(detectorWS->blocksize());
   const double binWidth = (lambdaMax - lambdaMin) / origNumBins;
-  std::stringstream params;
-  params << lambdaVMin << "," << binWidth << "," << lambdaVMax;
+  std::string params(std::to_string(lambdaVMin) + "," +
+                     std::to_string(binWidth) + "," +
+                     std::to_string(lambdaVMax));
 
   auto rebinAlg = this->createChildAlgorithm("Rebin");
   rebinAlg->initialize();
   rebinAlg->setProperty("InputWorkspace", ws);
   rebinAlg->setProperty("PreserveEvents", false);
-  rebinAlg->setProperty("Params", params.str());
+  rebinAlg->setProperty("Params", params);
   rebinAlg->execute();
   ws = rebinAlg->getProperty("OutputWorkspace");
 
@@ -940,10 +940,10 @@ ReflectometryReductionOne2::sumInQ(MatrixWorkspace_sptr detectorWS,
     const auto &inputY = detectorWS->y(spIdx);
     const auto &inputE = detectorWS->e(spIdx);
     if (inputX.size() != inputY.size() + 1) {
-      std::ostringstream errMsg;
-      errMsg << "Expected input workspace to be histogram data (got X len="
-             << inputX.size() << ", Y len=" << inputY.size() << ")";
-      throw std::runtime_error(errMsg.str());
+      throw std::runtime_error(
+          "Expected input workspace to be histogram data (got X len=" +
+          std::to_string(inputX.size()) + ", Y len=" +
+          std::to_string(inputY.size()) + ")");
     }
 
     // Create a vector for the projected errors for this spectrum.
@@ -1035,10 +1035,10 @@ void ReflectometryReductionOne2::sumInQShareCounts(
   const auto &outputX = IvsLam->dataX(0);
   auto &outputY = IvsLam->dataY(0);
   if (outputX.size() != outputY.size() + 1) {
-    std::ostringstream errMsg;
-    errMsg << "Expected output array to be histogram data (got X len="
-           << outputX.size() << ", Y len=" << outputY.size() << ")";
-    throw std::runtime_error(errMsg.str());
+    throw std::runtime_error(
+        "Expected output array to be histogram data (got X len=" +
+        std::to_string(outputX.size()) + ", Y len=" +
+        std::to_string(outputY.size()) + ")");
   }
 
   const double totalWidth = lambdaMax - lambdaMin;
@@ -1114,11 +1114,10 @@ void ReflectometryReductionOne2::getProjectedLambdaRange(
     lambdaVMin = std::min(lambdaTop, lambdaBot);
     lambdaVMax = std::max(lambdaTop, lambdaBot);
   } catch (std::exception &ex) {
-    std::stringstream errMsg;
-    errMsg << "Failed to project (lambda, twoTheta) = (" << lambda << ","
-           << twoTheta * 180.0 / M_PI << ") onto twoThetaR = " << twoThetaRVal
-           << ": " << ex.what();
-    throw std::runtime_error(errMsg.str());
+    throw std::runtime_error(
+        "Failed to project (lambda, twoTheta) = (" + std::to_string(lambda) +
+        "," + std::to_string(twoTheta * 180.0 / M_PI) + ") onto twoThetaR = " +
+        std::to_string(twoThetaRVal) + ": " + ex.what());
   }
 }
 
