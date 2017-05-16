@@ -11,7 +11,6 @@
 
 #include <nexus/napi.h>
 
-#include <boost/algorithm/string.hpp>
 #include <boost/algorithm/string/predicate.hpp> //assert(boost::algorithm::ends_with("mystring", "ing"));
 
 namespace Mantid {
@@ -211,7 +210,7 @@ void LoadHelper::recurseAndAddNexusFieldsToWsRun(NXhandle nxfileID,
       if ((opengroup_status = NXopengroup(nxfileID, nxname, nxclass)) ==
           NX_OK) {
 
-        if (!boost::algorithm::contains(std::string(nxclass), "ILL")) {
+        if (std::string(nxclass) != "ILL_data_scan_vars")) {
 
           // Go down to one level, if the group is known to nexus
           std::string p_nxname(
