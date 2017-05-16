@@ -583,6 +583,51 @@ double dSpacing::conversionTOFMax() const { return DBL_MAX / factorTo; }
 
 Unit *dSpacing::clone() const { return new dSpacing(*this); }
 
+
+// ==================================================================================================
+/* D-SPACING Perpendicular
+ * ==================================================================================================
+ *
+ * Conversion uses equation: d^2 = lambda^2 - 2[Angstrom^2]*ln(sin(theta))
+ */
+DECLARE_UNIT(dSpacingOrth)
+
+const UnitLabel dSpacingOrth::label() const { return Symbol::Angstrom; }
+
+dSpacingOrth::dSpacingOrth() : Unit(), factorTo(DBL_MIN), factorFrom(DBL_MIN) {}
+
+void dSpacingOrth::init() {
+  factorTo =
+      (PhysicalConstants::NeutronMass * (l1 + l2)) / PhysicalConstants::h;
+
+  // Now adjustments for the scale of units used
+  const double TOFisinMicroseconds = 1e6;
+  const double toAngstroms = 1e10;
+  factorTo *= TOFisinMicroseconds / toAngstroms;
+  factorFrom = factorTo;
+  if (factorFrom == 0.0)
+    factorFrom = DBL_MIN; // Protect against divide by zero
+  double cos_theta = cos(twoTheta / 2.0);
+  sfpTo = 0.0;
+  if (cos_theta > 0)
+      sfpTo = 2.0*log(cos_theta);
+  sfpFrom = sfpTo;
+}
+
+double dSpacingOrth::singleToTOF(const double x) const {
+  return sqrt(x*x + sfpTo) * factorTo;
+}
+double dSpacingOrth::singleFromTOF(const double tof) const {
+  double temp = tof / factorFrom;
+  return sqrt(temp*temp - sfpFrom);
+}
+double dSpacingOrth::conversionTOFMin() const { return sqrt(-1.0*sfpFrom); }
+double dSpacingOrth::conversionTOFMax() const {
+    return sqrt(std::numeric_limits<double>::max()) / factorFrom;
+}
+
+Unit *dSpacingOrth::clone() const { return new dSpacingOrth(*this); }
+
 // ================================================================================
 /* MOMENTUM TRANSFER
  * ================================================================================
