@@ -17,8 +17,7 @@ DECLARE_SUBWINDOW(QtReflMainWindowView)
 /** Constructor
 */
 QtReflMainWindowView::QtReflMainWindowView(QWidget *parent)
-    : UserSubWindow(parent) {
-}
+  : UserSubWindow(parent) {}
 
 //----------------------------------------------------------------------------------------------
 /** Destructor

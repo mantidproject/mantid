@@ -969,7 +969,7 @@ void GenericDataProcessorPresenter::notify(DataProcessorPresenter::Flag flag) {
     collapseAll();
     break;
   case DataProcessorPresenter::PauseFlag:
-    pause();
+    //pause();
     break;
   case DataProcessorPresenter::ResumeFlag:
     resume();

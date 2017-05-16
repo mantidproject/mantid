@@ -228,23 +228,24 @@ set ( INC_FILES
 	inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorClearSelectedCommand.h
 	inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorCommand.h
 	inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorCommandBase.h
-  inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorCollapseGroupsCommand.h
+  	inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorCollapseGroupsCommand.h
 	inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorCopySelectedCommand.h
 	inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorCutSelectedCommand.h
 	inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorDeleteGroupCommand.h
 	inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorDeleteRowCommand.h
 	inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorExpandCommand.h
-  inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorExpandGroupsCommand.h
+	inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorExpandGroupsCommand.h
 	inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorExportTableCommand.h
 	inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorGenerateNotebook.h
 	inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorGroupRowsCommand.h
 	inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorImportTableCommand.h
-    inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorMainPresenter.h
+	inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorMainPresenter.h
 	inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorNewTableCommand.h
 	inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorOneLevelTreeManager.h
 	inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorOpenTableCommand.h
 	inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorOptionsCommand.h
 	inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorPasteSelectedCommand.h
+	inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorPauseCommand.h
 	inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorPlotGroupCommand.h
 	inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorPlotRowCommand.h
 	inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorPostprocessingAlgorithm.h
