@@ -22,8 +22,6 @@ vtkScaleWorkspace::vtkScaleWorkspace() :
   m_xScaling(1),
   m_yScaling(1),
   m_zScaling(1),
-  m_minValue(0.1),
-  m_maxValue(0.1),
   m_specialCoordinates(-1),
   m_metadataJsonManager(new MetadataJsonManager()),
   m_vatesConfigurations(new VatesConfigurations())
@@ -109,26 +107,6 @@ void vtkScaleWorkspace::SetZScaling(double zScaling)
 }
 
 /**
- * Gets the minimum value of the data associated with the 
- * workspace.
- * @returns The minimum value of the workspace data.
- */
-double vtkScaleWorkspace::GetMinValue()
-{
-  return m_minValue;
-}
-
-/**
- * Gets the maximum value of the data associated with the 
- * workspace.
- * @returns The maximum value of the workspace data.
- */
-double vtkScaleWorkspace::GetMaxValue()
-{
-   return m_maxValue;
-}
-
-/**
  * Gets the (first) instrument which is associated with the workspace.
  * @return The name of the instrument.
  */
@@ -155,8 +133,6 @@ void vtkScaleWorkspace::updateMetaData(vtkPointSet *inputDataSet) {
   std::string jsonString = fieldDataToMetadata(fieldData, m_vatesConfigurations->getMetadataIdJson());
   m_metadataJsonManager->readInSerializedJson(jsonString);
 
-  m_minValue = m_metadataJsonManager->getMinValue();
-  m_maxValue = m_metadataJsonManager->getMaxValue();
   m_instrument = m_metadataJsonManager->getInstrument();
   m_specialCoordinates = m_metadataJsonManager->getSpecialCoordinates();
 }

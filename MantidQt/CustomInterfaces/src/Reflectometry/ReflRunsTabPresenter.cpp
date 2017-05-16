@@ -137,7 +137,7 @@ void ReflRunsTabPresenter::pushCommands() {
   m_view->clearCommands();
 
   // The expected number of commands
-  const size_t nCommands = 27;
+  const size_t nCommands = 29;
   auto commands =
       m_tablePresenters.at(m_view->getSelectedGroup())->publishCommands();
   if (commands.size() != nCommands) {
@@ -356,6 +356,33 @@ void ReflRunsTabPresenter::notify(DataProcessorMainPresenter::Flag flag) {
   // a flag we aren't handling.
 }
 
+/** Requests pre-processing values. Values are supplied by the main
+* presenter
+* @return :: Pre-processing values
+*/
+std::map<std::string, std::string>
+ReflRunsTabPresenter::getPreprocessingValues() const {
+
+  std::map<std::string, std::string> valuesMap;
+  valuesMap["Transmission Run(s)"] =
+      m_mainPresenter->getTransmissionRuns(m_view->getSelectedGroup());
+
+  return valuesMap;
+}
+
+/** Requests property names associated with pre-processing values.
+* @return :: Pre-processing property names.
+*/
+std::map<std::string, std::set<std::string>>
+ReflRunsTabPresenter::getPreprocessingProperties() const {
+
+  std::map<std::string, std::set<std::string>> propertiesMap;
+  propertiesMap["Transmission Run(s)"] = {"FirstTransmissionRun",
+                                          "SecondTransmissionRun"};
+
+  return propertiesMap;
+}
+
 /** Requests global pre-processing options. Options are supplied by the main
 * presenter
 * @return :: Global pre-processing options
@@ -386,12 +413,18 @@ std::string ReflRunsTabPresenter::getPostprocessingOptions() const {
   return m_mainPresenter->getStitchOptions(m_view->getSelectedGroup());
 }
 
-/** Requests global time-slicing options. Options are supplied by the main
-* presenter
-* @return :: Global time-slicing options
+/** Requests time-slicing values. Values are supplied by the main presenter
+* @return :: Time-slicing values
 */
-std::string ReflRunsTabPresenter::getTimeSlicingOptions() const {
-  return m_mainPresenter->getTimeSlicingOptions(m_view->getSelectedGroup());
+std::string ReflRunsTabPresenter::getTimeSlicingValues() const {
+  return m_mainPresenter->getTimeSlicingValues(m_view->getSelectedGroup());
+}
+
+/** Requests time-slicing type. Type is supplied by the main presenter
+* @return :: Time-slicing values
+*/
+std::string ReflRunsTabPresenter::getTimeSlicingType() const {
+  return m_mainPresenter->getTimeSlicingType(m_view->getSelectedGroup());
 }
 
 /**

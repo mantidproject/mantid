@@ -438,7 +438,7 @@ void LoadGroupXMLFile::parseXML() {
 
     const Poco::XML::XMLString value = pNode->innerText();
 
-    if (pNode->nodeName().compare("detector-grouping") == 0) {
+    if (pNode->nodeName() == "detector-grouping") {
       // Node "detector-grouping" (first level)
 
       // Optional instrument name
@@ -453,7 +453,7 @@ void LoadGroupXMLFile::parseXML() {
           getAttributeValueByName(pNode, "description", m_userGiveDescription);
 
     } // "detector-grouping"
-    else if (pNode->nodeName().compare("group") == 0) {
+    else if (pNode->nodeName() == "group") {
       // Group Node:  get ID, set map
       // a) Find group ID
       bool foundid;
@@ -471,7 +471,7 @@ void LoadGroupXMLFile::parseXML() {
       if (autogroupid) {
         curgroupid++;
       } else {
-        curgroupid = atoi(idstr.c_str());
+        curgroupid = std::stoi(idstr);
       }
 
       // b) Set in map
@@ -498,7 +498,7 @@ void LoadGroupXMLFile::parseXML() {
         m_groupSpectraMap[curgroupid] = tempspectrumids;
       }
     } // "group"
-    else if (pNode->nodeName().compare("component") == 0) {
+    else if (pNode->nodeName() == "component") {
       // Node "component" = value
       auto it = m_groupComponentsMap.find(curgroupid);
       if (it == m_groupComponentsMap.end()) {
@@ -512,7 +512,7 @@ void LoadGroupXMLFile::parseXML() {
             this->getAttributeValueByName(pNode, "val", valfound);
         std::string finalvalue;
         if (valfound && !value.empty())
-          finalvalue = value + ", " + val_value;
+          finalvalue.append(value).append(", ").append(val_value);
         else if (value.empty())
           finalvalue = val_value;
         else
@@ -521,7 +521,7 @@ void LoadGroupXMLFile::parseXML() {
       }
 
     } // Component
-    else if (pNode->nodeName().compare("detids") == 0) {
+    else if (pNode->nodeName() == "detids") {
       // Node "detids"
       auto it = m_groupDetectorsMap.find(curgroupid);
       if (it == m_groupDetectorsMap.end()) {
@@ -535,7 +535,7 @@ void LoadGroupXMLFile::parseXML() {
             this->getAttributeValueByName(pNode, "val", valfound);
         std::string finalvalue;
         if (valfound && !value.empty())
-          finalvalue = value + ", " + val_value;
+          finalvalue.append(value).append(", ").append(val_value);
         else if (value.empty())
           finalvalue = val_value;
         else
@@ -546,7 +546,7 @@ void LoadGroupXMLFile::parseXML() {
                           parsedRange.end());
       }
     } // "detids"
-    else if (pNode->nodeName().compare("ids") == 0) {
+    else if (pNode->nodeName() == "ids") {
       // Node ids: for spectrum number
       auto it = m_groupSpectraMap.find(curgroupid);
       if (it == m_groupSpectraMap.end()) {
@@ -560,7 +560,7 @@ void LoadGroupXMLFile::parseXML() {
             this->getAttributeValueByName(pNode, "val", valfound);
         std::string finalvalue;
         if (valfound && !value.empty())
-          finalvalue = value + ", " + val_value;
+          finalvalue.append(value).append(", ").append(val_value);
         else if (value.empty())
           finalvalue = val_value;
         else
@@ -592,7 +592,7 @@ std::string LoadGroupXMLFile::getAttributeValueByName(Poco::XML::Node *pNode,
   // 2. Loop to find
   for (unsigned long i = 0; i < att->length(); ++i) {
     Poco::XML::Node *cNode = att->item(i);
-    if (cNode->localName().compare(attributename) == 0) {
+    if (cNode->localName() == attributename) {
       value = cNode->getNodeValue();
       found = true;
       break;

@@ -3,9 +3,9 @@
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidAPI/FrameworkManager.h"
 #include "MantidSINQ/PoldiAnalyseResiduals.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include "MantidAPI/FrameworkManager.h"
 
 using namespace Mantid::Poldi;
 using namespace Mantid::API;
@@ -64,10 +64,10 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         alg.addValue(testWorkspace, 3.0, std::vector<int>(1, 0)));
 
-    TS_ASSERT_EQUALS(testWorkspace->readY(0)[0], 3.0);
-    TS_ASSERT_EQUALS(testWorkspace->readY(0)[1], 3.0);
-    TS_ASSERT_EQUALS(testWorkspace->readY(1)[0], 4.0);
-    TS_ASSERT_EQUALS(testWorkspace->readY(1)[1], 4.0);
+    TS_ASSERT_EQUALS(testWorkspace->y(0)[0], 3.0);
+    TS_ASSERT_EQUALS(testWorkspace->y(0)[1], 3.0);
+    TS_ASSERT_EQUALS(testWorkspace->y(1)[0], 4.0);
+    TS_ASSERT_EQUALS(testWorkspace->y(1)[1], 4.0);
 
     TS_ASSERT_THROWS_ANYTHING(
         alg.addValue(testWorkspace, 3.0, std::vector<int>(1, 3)));
@@ -85,18 +85,18 @@ public:
         alg.calculateResidualWorkspace(measured, calculated));
     Workspace2D_sptr residuals =
         alg.calculateResidualWorkspace(measured, calculated);
-    TS_ASSERT_EQUALS(residuals->readY(0)[0], -3.0);
-    TS_ASSERT_EQUALS(residuals->readY(0)[1], -3.0);
-    TS_ASSERT_EQUALS(residuals->readY(1)[0], -3.0);
-    TS_ASSERT_EQUALS(residuals->readY(1)[1], -3.0);
+    TS_ASSERT_EQUALS(residuals->y(0)[0], -3.0);
+    TS_ASSERT_EQUALS(residuals->y(0)[1], -3.0);
+    TS_ASSERT_EQUALS(residuals->y(1)[0], -3.0);
+    TS_ASSERT_EQUALS(residuals->y(1)[1], -3.0);
 
     TS_ASSERT_THROWS_NOTHING(
         alg.calculateResidualWorkspace(calculated, measured));
     residuals = alg.calculateResidualWorkspace(calculated, measured);
-    TS_ASSERT_EQUALS(residuals->readY(0)[0], 3.0);
-    TS_ASSERT_EQUALS(residuals->readY(0)[1], 3.0);
-    TS_ASSERT_EQUALS(residuals->readY(1)[0], 3.0);
-    TS_ASSERT_EQUALS(residuals->readY(1)[1], 3.0);
+    TS_ASSERT_EQUALS(residuals->y(0)[0], 3.0);
+    TS_ASSERT_EQUALS(residuals->y(0)[1], 3.0);
+    TS_ASSERT_EQUALS(residuals->y(1)[0], 3.0);
+    TS_ASSERT_EQUALS(residuals->y(1)[1], 3.0);
   }
 
   void testNormalizeResiduals() {
@@ -108,12 +108,12 @@ public:
         alg.normalizeResiduals(testWorkspace, std::vector<int>(1, 1)));
 
     // nothing happens here
-    TS_ASSERT_EQUALS(testWorkspace->readY(0)[0], 2.0);
-    TS_ASSERT_EQUALS(testWorkspace->readY(0)[1], 2.0);
+    TS_ASSERT_EQUALS(testWorkspace->y(0)[0], 2.0);
+    TS_ASSERT_EQUALS(testWorkspace->y(0)[1], 2.0);
 
     // but here, because 1 is a valid workspace index
-    TS_ASSERT_EQUALS(testWorkspace->readY(1)[0], 0.0);
-    TS_ASSERT_EQUALS(testWorkspace->readY(1)[1], 0.0);
+    TS_ASSERT_EQUALS(testWorkspace->y(1)[0], 0.0);
+    TS_ASSERT_EQUALS(testWorkspace->y(1)[1], 0.0);
   }
 
   void testRelativeCountChange() {
@@ -138,10 +138,10 @@ public:
 
     Workspace2D_sptr sum = alg.addWorkspaces(lhs, rhs);
 
-    TS_ASSERT_EQUALS(sum->readY(0)[0], 0.0);
-    TS_ASSERT_EQUALS(sum->readY(0)[1], 0.0);
-    TS_ASSERT_EQUALS(sum->readY(1)[0], 2.0);
-    TS_ASSERT_EQUALS(sum->readY(1)[1], 2.0);
+    TS_ASSERT_EQUALS(sum->y(0)[0], 0.0);
+    TS_ASSERT_EQUALS(sum->y(0)[1], 0.0);
+    TS_ASSERT_EQUALS(sum->y(1)[0], 2.0);
+    TS_ASSERT_EQUALS(sum->y(1)[1], 2.0);
   }
 
   void testRelativeChangeIsLargerThanLimit() {

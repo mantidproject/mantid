@@ -105,22 +105,10 @@ void PanelsSurface::project(const Mantid::Kernel::V3D &, double &, double &,
 
 void PanelsSurface::rotate(const UnwrappedDetector &udet,
                            Mantid::Kernel::Quat &R) const {
-  int index = m_detector2bankMap[udet.detector->getID()];
+  int index = m_detector2bankMap[udet.detID];
   FlatBankInfo &info = *m_flatBanks[index];
-  R = info.rotation * udet.detector->getRotation();
+  R = info.rotation * udet.rotation;
 }
-
-// Draw the outlining polygon for each flat bank.
-// (for debugging)
-// void PanelsSurface::drawCustom(QPainter *painter) const
-//{
-//    painter->setPen(QColor(255,0,0));
-//    for(int i = 0; i < m_flatBanks.size(); ++i)
-//    {
-//        painter->setPen(QColor(255,0,0));
-//        painter->drawPolygon(m_flatBanks[i]->polygon);
-//    }
-//}
 
 /**
 * Define a coordinate system for this projection.
@@ -231,9 +219,8 @@ void PanelsSurface::addFlatBank(ComponentID bankId,
     m_unwrappedDetectors.reserve(m_unwrappedDetectors.size() + nelem);
     for (int i = 0; i < nelem; ++i) {
       // setup detector info
-      Mantid::Geometry::IDetector_const_sptr det =
-          boost::dynamic_pointer_cast<const Mantid::Geometry::IDetector>(
-              assembly->getChild(i));
+      auto det = boost::dynamic_pointer_cast<const Mantid::Geometry::IDetector>(
+          assembly->getChild(i));
       if (!doneRotation) {
         pos0 = det->getPos();
         // find the rotation to put the bank on the plane
@@ -253,7 +240,7 @@ void PanelsSurface::addFlatBank(ComponentID bankId,
         doneRotation = true;
       }
       // add the detector
-      addDetector(det, pos0, index, info->rotation);
+      addDetector(*det, pos0, index, info->rotation);
     }
     // update the outline polygon
     UnwrappedDetector &udet0 = *(m_unwrappedDetectors.end() - nelem);
@@ -302,9 +289,8 @@ void PanelsSurface::addFlatBankOfDetectors(ComponentID bankId,
   // loop over the detectors
   for (int i = 0; i < detectors.size(); ++i) {
     ComponentID id = detectors[i];
-    Mantid::Geometry::IDetector_const_sptr det =
-        boost::dynamic_pointer_cast<const Mantid::Geometry::IDetector>(
-            instr->getComponentByID(id));
+    auto det = boost::dynamic_pointer_cast<const Mantid::Geometry::IDetector>(
+        instr->getComponentByID(id));
 
     if (i == 0) {
       pos0 = det->getPos();
@@ -325,7 +311,7 @@ void PanelsSurface::addFlatBankOfDetectors(ComponentID bankId,
       info->polygon = QPolygonF(vert);
     }
     // add the detector
-    addDetector(det, pos0, index, info->rotation);
+    addDetector(*det, pos0, index, info->rotation);
     // update the outline polygon
     UnwrappedDetector &udet = *(m_unwrappedDetectors.end() - 1);
     QPointF p2 = QPointF(udet.u, udet.v);
@@ -536,7 +522,7 @@ void PanelsSurface::addRectangularDetector(ComponentID bankId) {
   for (int i = 0; i < nx; ++i)
     for (int j = 0; j < ny; ++j) {
       Mantid::Geometry::IDetector_const_sptr det = rectDetector->getAtXY(i, j);
-      addDetector(det, pos0, index, info->rotation);
+      addDetector(*det, pos0, index, info->rotation);
     }
 
   // record the end detector index of the bank
@@ -605,7 +591,7 @@ void PanelsSurface::addStructuredDetector(
     for (size_t j = 0; j < ny; ++j) {
       Mantid::Geometry::IDetector_const_sptr det =
           structDetector->getAtXY(i, j);
-      addDetector(det, pos0, index, info->rotation);
+      addDetector(*det, pos0, index, info->rotation);
     }
 
   // record the end detector index of the bank
@@ -638,18 +624,17 @@ PanelsSurface::calcBankRotation(const Mantid::Kernel::V3D &detPos,
   return Mantid::Kernel::Quat(normal, m_zaxis);
 }
 
-void PanelsSurface::addDetector(
-    const Mantid::Geometry::IDetector_const_sptr det,
-    const Mantid::Kernel::V3D &refPos, int index,
-    Mantid::Kernel::Quat &rotation) {
+void PanelsSurface::addDetector(const Mantid::Geometry::IDetector &det,
+                                const Mantid::Kernel::V3D &refPos, int index,
+                                Mantid::Kernel::Quat &rotation) {
   // setup detector info
-  Mantid::Kernel::V3D pos = det->getPos();
-  Mantid::detid_t detid = det->getID();
+  Mantid::Kernel::V3D pos = det.getPos();
+  Mantid::detid_t detid = det.getID();
   m_detector2bankMap[detid] = index;
-  UnwrappedDetector udet;
-  udet.detector = det;
   // get the colour
-  m_instrActor->getColor(detid).getUB3(&udet.color[0]);
+  unsigned char color[3];
+  m_instrActor->getColor(detid).getUB3(&color[0]);
+  UnwrappedDetector udet(color, det);
   // apply bank's rotation
   pos -= refPos;
   rotation.rotate(pos);

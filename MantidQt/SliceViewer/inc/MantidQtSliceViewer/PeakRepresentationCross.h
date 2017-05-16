@@ -41,7 +41,8 @@ namespace SliceViewer {
   <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport PeakRepresentationCross : public PeakRepresentation {
+class EXPORT_OPT_MANTIDQT_SLICEVIEWER PeakRepresentationCross
+    : public PeakRepresentation {
 public:
   PeakRepresentationCross(const Mantid::Kernel::V3D &origin, const double &maxZ,
                           const double &minZ);

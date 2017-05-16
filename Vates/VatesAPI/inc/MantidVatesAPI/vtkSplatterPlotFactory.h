@@ -15,8 +15,6 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/scoped_ptr.hpp>
 
-using Mantid::DataObjects::MDEventWorkspace;
-
 namespace Mantid {
 namespace VATES {
 
@@ -82,12 +80,6 @@ public:
   /// Set the time value.
   void setTime(double timeStep);
 
-  /// Get the max value of the data set
-  virtual double getMinValue();
-
-  /// Get the min value of the data set
-  virtual double getMaxValue();
-
   /// Getter for the instrument
   virtual const std::string &getInstrument();
 
@@ -96,7 +88,8 @@ public:
 
 private:
   template <typename MDE, size_t nd>
-  void doCreate(typename MDEventWorkspace<MDE, nd>::sptr ws) const;
+  void doCreate(
+      typename Mantid::DataObjects::MDEventWorkspace<MDE, nd>::sptr ws) const;
 
   /// Check if the MDHisto workspace is 3D or 4D in nature
   bool doMDHisto4D(const Mantid::API::IMDHistoWorkspace *workspace) const;
@@ -151,12 +144,6 @@ private:
 
   /// Time value.
   double m_time;
-
-  /// Min data value
-  mutable double m_minValue;
-
-  /// Max data value;
-  mutable double m_maxValue;
 
   /// Instrument
   mutable std::string m_instrument;

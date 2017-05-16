@@ -43,9 +43,6 @@ void CopyInstrumentParameters::exec() {
   // Retrieve and validate the input properties
   this->checkProperties();
 
-  // Get parameters
-  const auto &givParams = m_givingWorkspace->constInstrumentParameters();
-
   if (m_different_instrument_sp) {
     Instrument_const_sptr inst1 = m_givingWorkspace->getInstrument();
     Instrument_const_sptr inst2 = m_receivingWorkspace->getInstrument();
@@ -54,9 +51,11 @@ void CopyInstrumentParameters::exec() {
 
     Geometry::ParameterMap targMap;
 
-    auto it = givParams.begin();
-    for (; it != givParams.end(); it++) {
-      IComponent *oldComponent = it->first;
+    // Get legacy ParameterMap, i.e., including masking, positions, rotations
+    // stored in map (instead of DetectorInfo).
+    const auto &givParams = inst1->makeLegacyParameterMap();
+    for (const auto &item : *givParams) {
+      IComponent *oldComponent = item.first;
 
       const Geometry::IComponent *targComp = nullptr;
 
@@ -88,46 +87,24 @@ void CopyInstrumentParameters::exec() {
       // create shared pointer to independent copy of original parameter. Would
       // be easy and nice to have cow_pointer instead of shared_ptr in the
       // parameter map.
-      auto param = Parameter_sptr(it->second->clone());
+      auto param = Parameter_sptr(item.second->clone());
       // add new parameter to the maps for existing target component
       targMap.add(targComp, param);
     }
 
-    // changed parameters
-    m_receivingWorkspace->swapInstrumentParameters(targMap);
-
-    // Deal with parameters that are stored in DetectorInfo. Note that this
-    // mimics what the above code is doing when copying the ParameterMap, even
-    // if it may not make sense. That is, we do a matching purely based on
-    // detector IDs, but completely ignore whether these belong to different
-    // instruments or different incompatible versions of the same instrument.
-    // This algorithm should probably enforce stricter compatiblity checks.
-    const auto &givingDetInfo = m_givingWorkspace->detectorInfo();
-    auto &receivingDetInfo = m_receivingWorkspace->mutableDetectorInfo();
-    try {
-      // If all detector IDs match a simple assignment should work.
-      receivingDetInfo = givingDetInfo;
-    } catch (std::runtime_error &) {
-      // Fallback for mismatch of detector IDs.
-      const auto &givingDetIDs = givingDetInfo.detectorIDs();
-      for (const auto detID : receivingDetInfo.detectorIDs()) {
-        // TODO Uncomment code and add handling for every field being added to
-        // Beamline::DetectorInfo.
-        // const auto receivingIndex = receivingDetInfo.indexOf(detID);
-        if (std::find(givingDetIDs.begin(), givingDetIDs.end(), detID) !=
-            givingDetIDs.end()) {
-          // const auto givingIndex = givingDetInfo.indexOf(detID);
-          // Copy values for all fields in DetectorInfo
-        } else {
-          // Set default values for all fields in DetectorInfo
-        }
-      }
-    }
+    // Clear old parameters. We also want to clear fields stored in DetectorInfo
+    // (masking, positions, rotations). By setting the base instrument (which
+    // does not include a ParameterMap or DetectorInfo) we make use of the
+    // mechanism in ExperimentInfo that builds a clean DetectorInfo from the
+    // instrument being set.
+    m_receivingWorkspace->setInstrument(inst2->baseInstrument());
+    // ExperimentInfo::readParameterMap deals with extracting legacy information
+    // from ParameterMap.
+    m_receivingWorkspace->readParameterMap(targMap.asString());
   } else {
-    // unchanged Copy parameters
-    m_receivingWorkspace->replaceInstrumentParameters(givParams);
-    m_receivingWorkspace->mutableDetectorInfo() =
-        m_givingWorkspace->detectorInfo();
+    // Same base instrument, copying the instrument is equivalent to copying the
+    // parameters in the ParameterMap and the DetectorInfo.
+    m_receivingWorkspace->setInstrument(m_givingWorkspace->getInstrument());
   }
 }
 

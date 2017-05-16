@@ -577,20 +577,40 @@ void CompositeFunction::parseName(const std::string &varName, size_t &index,
 
 /** Returns the index of parameter i as it declared in its function
  * @param i :: The parameter index
+ * @param recursive :: If true call parameterLocalName recusively until
+ *    a non-composite function is reached.
  * @return The local index of the parameter
  */
-size_t CompositeFunction::parameterLocalIndex(size_t i) const {
+size_t CompositeFunction::parameterLocalIndex(size_t i, bool recursive) const {
   size_t iFun = functionIndex(i);
-  return i - m_paramOffsets[iFun];
+  auto localIndex = i - m_paramOffsets[iFun];
+  if (recursive) {
+    auto cf = dynamic_cast<const CompositeFunction *>(m_functions[iFun].get());
+    if (cf) {
+      return cf->parameterLocalIndex(localIndex, recursive);
+    }
+  }
+  return localIndex;
 }
 
 /** Returns the name of parameter i as it declared in its function
  * @param i :: The parameter index
+ * @param recursive :: If true call parameterLocalName recusively until
+ *    a non-composite function is reached.
  * @return The pure parameter name (without the function identifier f#.)
  */
-std::string CompositeFunction::parameterLocalName(size_t i) const {
+std::string CompositeFunction::parameterLocalName(size_t i,
+                                                  bool recursive) const {
   size_t iFun = functionIndex(i);
-  return m_functions[iFun]->parameterName(i - m_paramOffsets[iFun]);
+  auto localIndex = i - m_paramOffsets[iFun];
+  auto localFunction = m_functions[iFun].get();
+  if (recursive) {
+    auto cf = dynamic_cast<const CompositeFunction *>(localFunction);
+    if (cf) {
+      return cf->parameterLocalName(localIndex, recursive);
+    }
+  }
+  return localFunction->parameterName(localIndex);
 }
 
 /**

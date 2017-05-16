@@ -452,6 +452,11 @@ public:
     presenter.notify(DataProcessorPresenter::SaveAsFlag);
 
     TS_ASSERT(AnalysisDataService::Instance().doesExist("Workspace"));
+    ITableWorkspace_sptr ws =
+        AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(
+            "Workspace");
+    TS_ASSERT_EQUALS(ws->rowCount(), 4);
+    TS_ASSERT_EQUALS(ws->columnCount(), 9);
 
     AnalysisDataService::Instance().remove("TestWorkspace");
     AnalysisDataService::Instance().remove("Workspace");
@@ -1036,6 +1041,12 @@ public:
     EXPECT_CALL(mockDataProcessorView, getSelectedParents())
         .Times(1)
         .WillRepeatedly(Return(grouplist));
+    EXPECT_CALL(mockMainPresenter, getPreprocessingValues())
+        .Times(2)
+        .WillRepeatedly(Return(std::map<std::string, std::string>()));
+    EXPECT_CALL(mockMainPresenter, getPreprocessingProperties())
+        .Times(2)
+        .WillRepeatedly(Return(std::map<std::string, std::set<std::string>>()));
     EXPECT_CALL(mockMainPresenter, getPreprocessingOptions())
         .Times(2)
         .WillRepeatedly(Return(std::map<std::string, std::string>()));
@@ -1117,6 +1128,12 @@ public:
     EXPECT_CALL(mockDataProcessorView, getSelectedParents())
         .Times(1)
         .WillRepeatedly(Return(grouplist));
+    EXPECT_CALL(mockMainPresenter, getPreprocessingValues())
+        .Times(2)
+        .WillRepeatedly(Return(std::map<std::string, std::string>()));
+    EXPECT_CALL(mockMainPresenter, getPreprocessingProperties())
+        .Times(2)
+        .WillRepeatedly(Return(std::map<std::string, std::set<std::string>>()));
     EXPECT_CALL(mockMainPresenter, getPreprocessingOptions())
         .Times(2)
         .WillRepeatedly(Return(std::map<std::string, std::string>()));
@@ -1209,6 +1226,12 @@ public:
     EXPECT_CALL(mockDataProcessorView, getSelectedParents())
         .Times(1)
         .WillRepeatedly(Return(grouplist));
+    EXPECT_CALL(mockMainPresenter, getPreprocessingValues())
+        .Times(2)
+        .WillRepeatedly(Return(std::map<std::string, std::string>()));
+    EXPECT_CALL(mockMainPresenter, getPreprocessingProperties())
+        .Times(2)
+        .WillRepeatedly(Return(std::map<std::string, std::set<std::string>>()));
     EXPECT_CALL(mockMainPresenter, getPreprocessingOptions())
         .Times(2)
         .WillRepeatedly(Return(std::map<std::string, std::string>()));
@@ -1295,6 +1318,12 @@ public:
         .Times(1)
         .WillRepeatedly(Return(std::set<int>()));
     EXPECT_CALL(mockMainPresenter, askUserYesNo(_, _)).Times(0);
+    EXPECT_CALL(mockMainPresenter, getPreprocessingValues())
+        .Times(2)
+        .WillRepeatedly(Return(std::map<std::string, std::string>()));
+    EXPECT_CALL(mockMainPresenter, getPreprocessingProperties())
+        .Times(2)
+        .WillRepeatedly(Return(std::map<std::string, std::set<std::string>>()));
     EXPECT_CALL(mockMainPresenter, getPreprocessingOptions())
         .Times(2)
         .WillRepeatedly(Return(std::map<std::string, std::string>()));
@@ -1374,6 +1403,12 @@ public:
     EXPECT_CALL(mockDataProcessorView, getSelectedParents())
         .Times(1)
         .WillRepeatedly(Return(grouplist));
+    EXPECT_CALL(mockMainPresenter, getPreprocessingValues())
+        .Times(2)
+        .WillRepeatedly(Return(std::map<std::string, std::string>()));
+    EXPECT_CALL(mockMainPresenter, getPreprocessingProperties())
+        .Times(2)
+        .WillRepeatedly(Return(std::map<std::string, std::set<std::string>>()));
     EXPECT_CALL(mockMainPresenter, getPreprocessingOptions())
         .Times(2)
         .WillRepeatedly(Return(std::map<std::string, std::string>()));
@@ -1403,6 +1438,56 @@ public:
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
+  }
+
+  void testExpandAllGroups() {
+    NiceMock<MockDataProcessorView> mockDataProcessorView;
+    NiceMock<MockProgressableView> mockProgress;
+    NiceMock<MockMainPresenter> mockMainPresenter;
+    GenericDataProcessorPresenter presenter(
+        createReflectometryWhiteList(), createReflectometryPreprocessMap(),
+        createReflectometryProcessor(), createReflectometryPostprocessor());
+    presenter.acceptViews(&mockDataProcessorView, &mockProgress);
+    presenter.accept(&mockMainPresenter);
+
+    createPrefilledWorkspace("TestWorkspace", presenter.getWhiteList());
+    EXPECT_CALL(mockDataProcessorView, getWorkspaceToOpen())
+        .Times(1)
+        .WillRepeatedly(Return("TestWorkspace"));
+    presenter.notify(DataProcessorPresenter::OpenTableFlag);
+
+    // We should not receive any errors
+    EXPECT_CALL(mockMainPresenter, giveUserCritical(_, _)).Times(0);
+
+    // The user hits the 'Expand All' button
+    EXPECT_CALL(mockDataProcessorView, expandAll()).Times(1);
+
+    presenter.notify(DataProcessorPresenter::ExpandAllGroupsFlag);
+  }
+
+  void testCollapseAllGroups() {
+    NiceMock<MockDataProcessorView> mockDataProcessorView;
+    NiceMock<MockProgressableView> mockProgress;
+    NiceMock<MockMainPresenter> mockMainPresenter;
+    GenericDataProcessorPresenter presenter(
+        createReflectometryWhiteList(), createReflectometryPreprocessMap(),
+        createReflectometryProcessor(), createReflectometryPostprocessor());
+    presenter.acceptViews(&mockDataProcessorView, &mockProgress);
+    presenter.accept(&mockMainPresenter);
+
+    createPrefilledWorkspace("TestWorkspace", presenter.getWhiteList());
+    EXPECT_CALL(mockDataProcessorView, getWorkspaceToOpen())
+        .Times(1)
+        .WillRepeatedly(Return("TestWorkspace"));
+    presenter.notify(DataProcessorPresenter::OpenTableFlag);
+
+    // We should not receive any errors
+    EXPECT_CALL(mockMainPresenter, giveUserCritical(_, _)).Times(0);
+
+    // The user hits the 'Expand All' button
+    EXPECT_CALL(mockDataProcessorView, collapseAll()).Times(1);
+
+    presenter.notify(DataProcessorPresenter::CollapseAllGroupsFlag);
   }
 
   /*
@@ -1463,6 +1548,12 @@ public:
     EXPECT_CALL(mockDataProcessorView, getSelectedParents())
         .Times(1)
         .WillRepeatedly(Return(grouplist));
+    EXPECT_CALL(mockMainPresenter, getPreprocessingValues())
+        .Times(2)
+        .WillRepeatedly(Return(std::map<std::string, std::string>()));
+    EXPECT_CALL(mockMainPresenter, getPreprocessingProperties())
+        .Times(2)
+        .WillRepeatedly(Return(std::map<std::string, std::set<std::string>>()));
     EXPECT_CALL(mockMainPresenter, getPreprocessingOptions())
         .Times(2)
         .WillRepeatedly(Return(std::map<std::string, std::string>()));
@@ -2745,6 +2836,30 @@ public:
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
   }
 
+  void testPasteToNonexistentGroup() {
+    NiceMock<MockDataProcessorView> mockDataProcessorView;
+    NiceMock<MockProgressableView> mockProgress;
+    NiceMock<MockMainPresenter> mockMainPresenter;
+    GenericDataProcessorPresenter presenter(
+        createReflectometryWhiteList(), createReflectometryPreprocessMap(),
+        createReflectometryProcessor(), createReflectometryPostprocessor());
+    presenter.acceptViews(&mockDataProcessorView, &mockProgress);
+    presenter.accept(&mockMainPresenter);
+
+    // Empty clipboard
+    EXPECT_CALL(mockDataProcessorView, getClipboard())
+        .Times(1)
+        .WillRepeatedly(Return("1\t123\t0.5\t456\t1.2\t3.4\t3.14\t5\tabc"));
+    EXPECT_CALL(mockDataProcessorView, getSelectedChildren())
+        .Times(1)
+        .WillOnce(Return(std::map<int, std::set<int>>()));
+    TS_ASSERT_THROWS_NOTHING(
+        presenter.notify(DataProcessorPresenter::PasteSelectedFlag));
+
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
+  }
+
   void testImportTable() {
     NiceMock<MockDataProcessorView> mockDataProcessorView;
     NiceMock<MockProgressableView> mockProgress;
@@ -3115,6 +3230,12 @@ public:
     EXPECT_CALL(mockDataProcessorView, getSelectedParents())
         .Times(1)
         .WillRepeatedly(Return(grouplist));
+    EXPECT_CALL(mockMainPresenter, getPreprocessingValues())
+        .Times(2)
+        .WillRepeatedly(Return(std::map<std::string, std::string>()));
+    EXPECT_CALL(mockMainPresenter, getPreprocessingProperties())
+        .Times(2)
+        .WillRepeatedly(Return(std::map<std::string, std::set<std::string>>()));
     EXPECT_CALL(mockMainPresenter, getPreprocessingOptions()).Times(0);
     EXPECT_CALL(mockMainPresenter, getProcessingOptions())
         .Times(2)
@@ -3312,6 +3433,12 @@ public:
     EXPECT_CALL(mockDataProcessorView, getSelectedParents())
         .Times(1)
         .WillRepeatedly(Return(grouplist));
+    EXPECT_CALL(mockMainPresenter, getPreprocessingValues())
+        .Times(2)
+        .WillRepeatedly(Return(std::map<std::string, std::string>()));
+    EXPECT_CALL(mockMainPresenter, getPreprocessingProperties())
+        .Times(2)
+        .WillRepeatedly(Return(std::map<std::string, std::set<std::string>>()));
     EXPECT_CALL(mockMainPresenter, getPreprocessingOptions())
         .Times(2)
         .WillRepeatedly(Return(std::map<std::string, std::string>()));

@@ -10,6 +10,7 @@
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/CommonBinsValidator.h"
+#include "MantidAPI/DetectorInfo.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/IMaskWorkspace.h"
@@ -353,13 +354,18 @@ const MantidColorMap &InstrumentActor::getColorMap() const {
   return m_colorMap;
 }
 
-IDetector_const_sptr InstrumentActor::getDetector(size_t i) const {
-  try {
-    // Call the local getInstrument, NOT the one on the workspace
-    return this->getInstrument()->getDetector(m_detIDs.at(i));
-  } catch (...) {
-  };
-  return IDetector_const_sptr();
+/// Get a detector reference given a pick ID.
+const Mantid::Geometry::IDetector &
+InstrumentActor::getDetectorByPickID(size_t pickID) const {
+  return getDetectorByDetID(m_detIDs.at(pickID));
+}
+
+/// Get a reference to a detector by a detector ID.
+const Mantid::Geometry::IDetector &
+InstrumentActor::getDetectorByDetID(Mantid::detid_t detID) const {
+  const auto &detectorInfo = getWorkspace()->detectorInfo();
+  auto detectorIndex = detectorInfo.indexOf(detID);
+  return detectorInfo.detector(detectorIndex);
 }
 
 Mantid::detid_t InstrumentActor::getDetID(size_t pickID) const {
@@ -377,10 +383,8 @@ InstrumentActor::getComponentID(size_t pickID) const {
   size_t ndet = m_detIDs.size();
   auto compID = Mantid::Geometry::ComponentID();
   if (pickID < ndet) {
-    auto det = getDetector(m_detIDs[pickID]);
-    if (det) {
-      compID = det->getComponentID();
-    }
+    auto &det = getDetectorByPickID(m_detIDs[pickID]);
+    compID = det.getComponentID();
   } else if (pickID < ndet + m_nonDetIDs.size()) {
     compID = m_nonDetIDs[pickID - ndet];
   }
@@ -742,9 +746,9 @@ void InstrumentActor::setupPickColors() {
 void InstrumentActor::cacheDetPos() const {
   if (m_detPos.size() != m_detIDs.size()) {
     m_detPos.clear();
-    for (size_t i = 0; i < m_detIDs.size(); i++) {
-      IDetector_const_sptr det = this->getDetector(i);
-      m_detPos.push_back(det->getPos());
+    for (size_t pickID = 0; pickID < m_detIDs.size(); pickID++) {
+      auto &det = this->getDetectorByPickID(pickID);
+      m_detPos.push_back(det.getPos());
     }
   }
 }

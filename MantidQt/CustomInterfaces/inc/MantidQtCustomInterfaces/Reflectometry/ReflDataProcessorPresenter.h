@@ -3,9 +3,14 @@
 
 #include "MantidQtMantidWidgets/DataProcessorUI/GenericDataProcessorPresenter.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorMainPresenter.h"
+#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorTreeManager.h"
+
+#include "MantidQtCustomInterfaces/DllConfig.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
+
+using namespace MantidQt::MantidWidgets;
 
 /** @class ReflDataProcessorPresenter
 
@@ -33,24 +38,26 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class ReflDataProcessorPresenter
-    : public MantidQt::MantidWidgets::GenericDataProcessorPresenter {
+class MANTIDQT_CUSTOMINTERFACES_DLL ReflDataProcessorPresenter
+    : public GenericDataProcessorPresenter {
 public:
   // Constructor
   ReflDataProcessorPresenter(
-      const MantidQt::MantidWidgets::DataProcessorWhiteList &whitelist,
-      const std::map<
-          std::string,
-          MantidQt::MantidWidgets::DataProcessorPreprocessingAlgorithm> &
+      const DataProcessorWhiteList &whitelist,
+      const std::map<std::string, DataProcessorPreprocessingAlgorithm> &
           preprocessMap,
-      const MantidQt::MantidWidgets::DataProcessorProcessingAlgorithm &
-          processor,
-      const MantidQt::MantidWidgets::DataProcessorPostprocessingAlgorithm &
-          postprocessor,
+      const DataProcessorProcessingAlgorithm &processor,
+      const DataProcessorPostprocessingAlgorithm &postprocessor,
       const std::map<std::string, std::string> &postprocessMap =
           std::map<std::string, std::string>(),
       const std::string &loader = "Load");
   ~ReflDataProcessorPresenter() override;
+
+  // The following methods are public for testing purposes only
+  // Add entry for the number of slices for a row in a group
+  void addNumSlicesEntry(int groupID, int rowID, size_t numSlices);
+  // Add entry for the number of slices for all rows in a group
+  void addNumGroupSlicesEntry(int groupID, size_t numSlices);
 
 private:
   // Process selected rows
@@ -58,29 +65,46 @@ private:
   // Plotting
   void plotRow() override;
   void plotGroup() override;
+  // Loads a run from disk
+  std::string loadRun(const std::string &run, const std::string &instrument,
+                      const std::string &prefix, const std::string &loader,
+                      bool &runFound);
   // Get the name of a post-processed workspace
   std::string getPostprocessedWorkspaceName(const GroupData &groupData,
                                             const std::string &prefix,
-                                            double startTime, double stopTime);
+                                            size_t index);
   // Loads a group of runs
   bool loadGroup(const GroupData &group);
   // Process a group of runs which are event workspaces
   bool processGroupAsEventWS(int groupID, const GroupData &group,
-                             const std::vector<double> &startTimes,
-                             const std::vector<double> &stopTimes);
+                             const std::string &timeSlicingType,
+                             const std::string &timeSlicingValues);
   // Process a group of runs which are not event workspaces
   bool processGroupAsNonEventWS(int groupID, const GroupData &group);
-  // Parse time slicing from string
-  void parseTimeSlicing(const std::string &timeSlicing,
-                        std::vector<double> &startTimes,
-                        std::vector<double> &stopTimes);
+
+  // Parse uniform / uniform even time slicing from input string
+  void parseUniform(const std::string &timeSlicing,
+                    const std::string &slicingType, const std::string &wsName,
+                    std::vector<double> &startTimes,
+                    std::vector<double> &stopTimes);
+  // Parse custom time slicing from input string
+  void parseCustom(const std::string &timeSlicing,
+                   std::vector<double> &startTimes,
+                   std::vector<double> &stopTimes);
+
   // Load a run as event workspace
   bool loadEventRun(const std::string &runNo);
   // Load a run (non-event workspace)
   void loadNonEventRun(const std::string &runNo);
   // Take a slice from event workspace
-  std::string takeSlice(const std::string &runNo, double startTime,
-                        double stopTime);
+  std::string takeSlice(const std::string &runNo, size_t sliceIndex,
+                        double startTime, double stopTime);
+  // Asks user if they wish to proceed if a type of workspace exists in the ADS
+  bool proceedIfWSTypeInADS(const MantidQt::MantidWidgets::TreeData &data,
+                            const bool findEventWS);
+
+  std::map<int, std::map<int, size_t>> m_numSlicesMap;
+  std::map<int, size_t> m_numGroupSlicesMap;
 };
 }
 }
