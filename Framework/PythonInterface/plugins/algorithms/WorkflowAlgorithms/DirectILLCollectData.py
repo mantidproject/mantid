@@ -357,14 +357,14 @@ class DirectILLCollectData(DataProcessorAlgorithm):
         self.declareProperty(MultipleFileProperty(name=common.PROP_INPUT_FILE,
                                                   action=FileAction.OptionalLoad,
                                                   extensions=['nxs']),
-                             doc='An input file or numor or a list thereof.')
+                             doc='An input run number (or a list thereof) or a filename.')
         self.declareProperty(MatrixWorkspaceProperty(
             name=common.PROP_INPUT_WS,
             defaultValue='',
             validator=inputWorkspaceValidator,
             optional=PropertyMode.Optional,
             direction=Direction.Input),
-            doc='Input workspace if no file is given.')
+            doc='Input workspace if no run is given.')
         self.declareProperty(WorkspaceProperty(name=common.PROP_OUTPUT_WS,
                                                defaultValue='',
                                                direction=Direction.Output),
