@@ -1160,7 +1160,10 @@ void MdViewerWidget::setColorForBackground() {
 
 void MdViewerWidget::setVisibleAxesColors() {
   if (mdSettings.getUserSettingAutoColorAxes()) {
-    m_axesTag = this->currentView->setVisibleAxesColors();
+    // Only add the observer once.
+    if (!m_axesTag) {
+      m_axesTag = this->currentView->setVisibleAxesColors();
+    }
   } else if (m_axesTag) {
     this->currentView->getView()
         ->getViewProxy()
