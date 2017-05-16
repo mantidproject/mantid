@@ -59,11 +59,11 @@ threadSafe(const Arg &workspace, Args &&... others) {
   return workspace.threadSafe() && threadSafe(std::forward<Args>(others)...);
 }
 
-/** Uses std::compare_exchange_weak to update the atomic value f = op(f, d)  
+/** Uses std::compare_exchange_weak to update the atomic value f = op(f, d)
  * Used to improve parallel scaling in algorithms MDNormDirectSC and MDNormSCD
  * @param f atomic variable being updated
  * @param d second element in binary operation
- * @param op binary operation on elements f and d 
+ * @param op binary operation on elements f and d
  */
 template <typename T, typename BinaryOp>
 void AtomicOp(std::atomic<T> &f, T d, BinaryOp op) {
