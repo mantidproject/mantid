@@ -26,8 +26,8 @@ const QString MantidWSIndexWidget::CUSTOM = "Custom";
 // String for plot types
 const QString MantidWSIndexWidget::SIMPLE_PLOT = "1D Plot";
 const QString MantidWSIndexWidget::WATERFALL_PLOT = "Waterfall Plot";
-const QString MantidWSIndexWidget::SURFACE_PLOT = "Surface Plot of Group";
-const QString MantidWSIndexWidget::CONTOUR_PLOT = "Contour Plot of Group";
+const QString MantidWSIndexWidget::SURFACE_PLOT = "Surface Plot";
+const QString MantidWSIndexWidget::CONTOUR_PLOT = "Contour Plot";
 
 //----------------------------------
 // MantidWSIndexWidget methods
