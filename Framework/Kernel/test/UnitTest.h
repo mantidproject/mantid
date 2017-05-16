@@ -599,9 +599,13 @@ public:
   // d-SpacingOrth tests
   //----------------------------------------------------------------------
 
-  void testdSpacingOrth_unitID() { TS_ASSERT_EQUALS(dp.unitID(), "dSpacingOrth") }
+  void testdSpacingOrth_unitID() {
+    TS_ASSERT_EQUALS(dp.unitID(), "dSpacingOrth")
+  }
 
-  void testdSpacingOrth_caption() { TS_ASSERT_EQUALS(dp.caption(), "d-SpacingOrth") }
+  void testdSpacingOrth_caption() {
+    TS_ASSERT_EQUALS(dp.caption(), "d-SpacingOrth")
+  }
 
   void testdSpacingOrth_label() {
     TS_ASSERT_EQUALS(dp.label().ascii(), "Angstrom")
@@ -629,7 +633,6 @@ public:
     TS_ASSERT_DELTA(x[0], 2.045075, 0.000001)
     TS_ASSERT(yy == y)
   }
-
 
   void testdSpacingOrthRange() {
     std::vector<double> sample, rezult;

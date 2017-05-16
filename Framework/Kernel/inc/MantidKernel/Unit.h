@@ -430,9 +430,8 @@ protected:
   double factorTo;   ///< Constant factor for to conversion
   double sfpTo;      ///< Extra correction factor in to conversion
   double factorFrom; ///< Constant factor for from conversion
-  double sfpFrom;      ///< Extra correction factor in to conversion
+  double sfpFrom;    ///< Extra correction factor in to conversion
 };
-
 
 //=================================================================================================
 /// Momentum Transfer in Angstrom^-1

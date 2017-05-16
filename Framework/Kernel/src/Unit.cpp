@@ -583,7 +583,6 @@ double dSpacing::conversionTOFMax() const { return DBL_MAX / factorTo; }
 
 Unit *dSpacing::clone() const { return new dSpacing(*this); }
 
-
 // ==================================================================================================
 /* D-SPACING Perpendicular
  * ==================================================================================================
@@ -610,20 +609,20 @@ void dSpacingOrth::init() {
   double cos_theta = cos(twoTheta / 2.0);
   sfpTo = 0.0;
   if (cos_theta > 0)
-      sfpTo = 2.0*log(cos_theta);
+    sfpTo = 2.0 * log(cos_theta);
   sfpFrom = sfpTo;
 }
 
 double dSpacingOrth::singleToTOF(const double x) const {
-  return sqrt(x*x + sfpTo) * factorTo;
+  return sqrt(x * x + sfpTo) * factorTo;
 }
 double dSpacingOrth::singleFromTOF(const double tof) const {
   double temp = tof / factorFrom;
-  return sqrt(temp*temp - sfpFrom);
+  return sqrt(temp * temp - sfpFrom);
 }
-double dSpacingOrth::conversionTOFMin() const { return sqrt(-1.0*sfpFrom); }
+double dSpacingOrth::conversionTOFMin() const { return sqrt(-1.0 * sfpFrom); }
 double dSpacingOrth::conversionTOFMax() const {
-    return sqrt(std::numeric_limits<double>::max()) / factorFrom;
+  return sqrt(std::numeric_limits<double>::max()) / factorFrom;
 }
 
 Unit *dSpacingOrth::clone() const { return new dSpacingOrth(*this); }
