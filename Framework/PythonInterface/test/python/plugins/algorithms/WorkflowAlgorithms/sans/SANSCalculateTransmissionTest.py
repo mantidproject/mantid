@@ -170,7 +170,7 @@ class SANSCalculateTransmissionTest(unittest.TestCase):
         if can_fit_type:
             calculate_transmission_builder.set_Can_fit_type(can_fit_type)
         if can_polynomial_order:
-            calculate_transmission_builder.set_Can_polynomial_order(sample_polynomial_order)
+            calculate_transmission_builder.set_Can_polynomial_order(can_polynomial_order)
         if can_wavelength_low:
             calculate_transmission_builder.set_Can_wavelength_low(can_wavelength_low)
         if can_wavelength_high:
