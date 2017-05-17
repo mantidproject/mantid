@@ -92,8 +92,7 @@ private:
   Mantid::API::MatrixWorkspace_sptr makeIvsLam();
   // Do the reduction by summation in Q
   Mantid::API::MatrixWorkspace_sptr
-  sumInQ(API::MatrixWorkspace_sptr detectorWS,
-         const std::vector<size_t> &detectors);
+  sumInQ(API::MatrixWorkspace_sptr detectorWS);
   // Do the summation in Q for a single input value
   void sumInQProcessValue(const int inputIdx, const double twoTheta,
                           const double bTwoTheta,
@@ -101,18 +100,22 @@ private:
                           const HistogramData::HistogramY &inputY,
                           const HistogramData::HistogramE &inputE,
                           const std::vector<size_t> &detectors,
+                          const size_t outSpecIdx,
                           API::MatrixWorkspace_sptr IvsLam,
                           std::vector<double> &outputE);
   // Share counts to a projected value for summation in Q
   void sumInQShareCounts(const double inputCounts, const double inputErr,
                          const double bLambda, const double lambdaMin,
-                         const double lambdaMax,
+                         const double lambdaMax, const size_t outSpecIdx,
                          API::MatrixWorkspace_sptr IvsLam,
                          std::vector<double> &outputE);
   // Construct the output workspace
+  void findIvsLamRange(API::MatrixWorkspace_sptr detectorWS,
+                       const std::vector<size_t> &detectors, double &xMin,
+                       double &xMax);
+  // Construct the output workspace
   Mantid::API::MatrixWorkspace_sptr
-  constructIvsLamWS(API::MatrixWorkspace_sptr detectorWS,
-                    const std::vector<size_t> &detectors);
+  constructIvsLamWS(API::MatrixWorkspace_sptr detectorWS);
   // Whether summation should be done in Q or the default lambda
   bool summingInQ();
   // Get projected coordinates onto twoThetaR
