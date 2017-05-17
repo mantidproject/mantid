@@ -288,6 +288,22 @@ public:
     TS_ASSERT_DELTA(outLam->y(0)[7], 0.08, 0.0001);
   }
 
+  void test_transmission_correction_with_bad_mapped_spectra() {
+    // Run workspace spectrum numbers are 1,2,3,4.
+    // Transmission workspace has spectrum numbers 2,3,4,5.
+    // Processing instructions 0 in the run workspace maps to
+    // spectrum 1, which doesn't exist in the transmission
+    // workspace.
+    ReflectometryReductionOne2 alg;
+    setupAlgorithm(alg, 1.5, 15.0, "0");
+    alg.setProperty("FirstTransmissionRun", m_transmissionWS);
+    alg.setProperty("SecondTransmissionRun", m_transmissionWS);
+    alg.setProperty("StartOverlap", 2.5);
+    alg.setProperty("EndOverlap", 3.0);
+    alg.setProperty("Params", "0.1");
+    TS_ASSERT_THROWS_ANYTHING(alg.execute());
+  }
+
   void test_exponential_correction() {
     // CorrectionAlgorithm: ExponentialCorrection
 
