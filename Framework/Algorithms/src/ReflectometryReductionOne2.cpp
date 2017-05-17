@@ -904,7 +904,7 @@ ReflectometryReductionOne2::constructIvsLamWS(MatrixWorkspace_sptr detectorWS) {
   }
 
   // Loop through each detector group in the input
-  for (auto groupIdx = 0; groupIdx < numGroups; ++groupIdx) {
+  for (size_t groupIdx = 0; groupIdx < numGroups; ++groupIdx) {
     // Get the detectors in this group
     auto &detectors = detectorGroups()[groupIdx];
 
@@ -937,7 +937,6 @@ ReflectometryReductionOne2::constructIvsLamWS(MatrixWorkspace_sptr detectorWS) {
 * projecting to "virtual lambda" at a reference angle twoThetaR.
 *
 * @param detectorWS [in] :: the input workspace in wavelength
-* @param detectors [in] :: spectrum indices of the detectors of interest
 * @return :: the output workspace in wavelength
 */
 MatrixWorkspace_sptr
@@ -948,7 +947,7 @@ ReflectometryReductionOne2::sumInQ(MatrixWorkspace_sptr detectorWS) {
 
   // Loop through each input group (and corresponding output spectrum)
   const size_t numGroups = detectorGroups().size();
-  for (auto groupIdx = 0; groupIdx < numGroups; ++groupIdx) {
+  for (size_t groupIdx = 0; groupIdx < numGroups; ++groupIdx) {
     auto &detectors = detectorGroups()[groupIdx];
     auto &outputE = IvsLam->dataE(groupIdx);
 
@@ -1041,18 +1040,20 @@ void ReflectometryReductionOne2::sumInQProcessValue(
 }
 
 /**
-* Share the given input counts into the output array bins proportionally
-* according to how much the bins overlap the given lambda range.
-* outputX.size() must equal outputY.size() + 1
-*
-* @param inputCounts [in] :: the input counts to share out
-* @param inputErr [in] :: the input errors to share out
-* @param bLambda [in] :: the bin width in lambda
-* @param lambdaMin [in] :: the start of the range to share counts to
-* @param lambdaMax [in] :: the end of the range to share counts to
-* @param IvsLam [in,out] :: the output workspace
-* @param outputE [in,out] :: the projected E values
-*/
+ * Share the given input counts into the output array bins proportionally
+ * according to how much the bins overlap the given lambda range.
+ * outputX.size() must equal outputY.size() + 1
+ *
+ * @param inputCounts [in] :: the input counts to share out
+ * @param inputErr [in] :: the input errors to share out
+ * @param bLambda [in] :: the bin width in lambda
+ * @param lambdaMin [in] :: the start of the range to share counts to
+ * @param lambdaMax [in] :: the end of the range to share counts to
+ * @param outSpecIdx [in] :: the spectrum index to be updated in the output
+ * workspace
+ * @param IvsLam [in,out] :: the output workspace
+ * @param outputE [in,out] :: the projected E values
+ */
 void ReflectometryReductionOne2::sumInQShareCounts(
     const double inputCounts, const double inputErr, const double bLambda,
     const double lambdaMin, const double lambdaMax, const size_t outSpecIdx,
