@@ -237,13 +237,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
 
         self.declareProperty("CompressTOFTolerance", 0.01, "Tolerance to compress events in TOF.")
 
-        self.declareProperty(StringArrayProperty("FrequencyLogNames", ["SpeedRequest1", "Speed1", "frequency"],
-                                                 direction=Direction.Input),
-                             "Possible log names for frequency.")
-
-        self.declareProperty(StringArrayProperty("WaveLengthLogNames", ["LambdaRequest", "lambda"],
-                                                 direction=Direction.Input),
-                             "Candidate log names for wave length.")
+        self.copyProperties('AlignAndFocusPowderFromFiles', ['FrequencyLogNames', 'WaveLengthLogNames'])
 
         return
 
@@ -779,6 +773,8 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                                          LowResSpectrumOffset=self._lowResTOFoffset,
                                          CropWavelengthMin=self._wavelengthMin,
                                          CropWavelengthMax=self._wavelengthMax,
+                                         FrequencyLogNames=self.getProperty("FrequencyLogNames").value,
+                                         WaveLengthLogNames=self.getProperty("WaveLengthLogNames").value,
                                          ReductionProperties="__snspowderreduction",
                                          **self._focusPos)
 
