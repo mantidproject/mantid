@@ -64,20 +64,9 @@ public:
     // No transmission correction
 
     ReflectometryReductionOne2 alg;
-    alg.setChild(true);
-    alg.initialize();
-    alg.setProperty("InputWorkspace", m_multiDetectorWS);
-    alg.setProperty("WavelengthMin", 1.5);
-    alg.setProperty("WavelengthMax", 15.0);
-    alg.setPropertyValue("ProcessingInstructions", "1");
-    alg.setPropertyValue("OutputWorkspace", "IvsQ");
-    alg.setPropertyValue("OutputWorkspaceWavelength", "IvsLam");
-    alg.execute();
-    MatrixWorkspace_sptr outLam = alg.getProperty("OutputWorkspaceWavelength");
+    setupAlgorithm(alg, 1.5, 15.0, "1");
+    MatrixWorkspace_sptr outLam = runAlgorithmLam(alg);
 
-    TS_ASSERT(outLam);
-    TS_ASSERT_EQUALS(outLam->getNumberHistograms(), 1);
-    TS_ASSERT_EQUALS(outLam->blocksize(), 14);
     TS_ASSERT(outLam->x(0)[0] >= 1.5);
     TS_ASSERT(outLam->x(0)[7] <= 15.0);
     TS_ASSERT_DELTA(outLam->y(0)[0], 2.0000, 0.0001);
@@ -92,19 +81,9 @@ public:
     // Processing instructions : 1+2
 
     ReflectometryReductionOne2 alg;
-    alg.setChild(true);
-    alg.initialize();
-    alg.setProperty("InputWorkspace", m_multiDetectorWS);
-    alg.setProperty("WavelengthMin", 1.5);
-    alg.setProperty("WavelengthMax", 15.0);
-    alg.setPropertyValue("ProcessingInstructions", "1+2");
-    alg.setPropertyValue("OutputWorkspace", "IvsQ");
-    alg.setPropertyValue("OutputWorkspaceWavelength", "IvsLam");
-    alg.execute();
-    MatrixWorkspace_sptr outLam = alg.getProperty("OutputWorkspaceWavelength");
+    setupAlgorithm(alg, 1.5, 15.0, "1+2");
+    MatrixWorkspace_sptr outLam = runAlgorithmLam(alg);
 
-    TS_ASSERT_EQUALS(outLam->getNumberHistograms(), 1);
-    TS_ASSERT_EQUALS(outLam->blocksize(), 14);
     TS_ASSERT(outLam->x(0)[0] >= 1.5);
     TS_ASSERT(outLam->x(0)[7] <= 15.0);
     // Y counts, should be 2.0000 * 2
@@ -120,19 +99,9 @@ public:
     // Processing instructions : 1-3
 
     ReflectometryReductionOne2 alg;
-    alg.setChild(true);
-    alg.initialize();
-    alg.setProperty("InputWorkspace", m_multiDetectorWS);
-    alg.setProperty("WavelengthMin", 1.5);
-    alg.setProperty("WavelengthMax", 15.0);
-    alg.setPropertyValue("ProcessingInstructions", "1-3");
-    alg.setPropertyValue("OutputWorkspace", "IvsQ");
-    alg.setPropertyValue("OutputWorkspaceWavelength", "IvsLam");
-    alg.execute();
-    MatrixWorkspace_sptr outLam = alg.getProperty("OutputWorkspaceWavelength");
+    setupAlgorithm(alg, 1.5, 15.0, "1-3");
+    MatrixWorkspace_sptr outLam = runAlgorithmLam(alg);
 
-    TS_ASSERT_EQUALS(outLam->getNumberHistograms(), 1);
-    TS_ASSERT_EQUALS(outLam->blocksize(), 14);
     TS_ASSERT(outLam->x(0)[0] >= 1.5);
     TS_ASSERT(outLam->x(0)[7] <= 15.0);
     // Y counts, should be 2.0000 * 3
@@ -143,17 +112,10 @@ public:
   void test_bad_processing_instructions() {
     // Processing instructions : 5+6
 
-    auto alg = AlgorithmManager::Instance().create("ReflectometryReductionOne");
-    alg->setChild(true);
-    alg->initialize();
-    alg->setProperty("InputWorkspace", m_multiDetectorWS);
-    alg->setProperty("WavelengthMin", 1.5);
-    alg->setProperty("WavelengthMax", 15.0);
-    alg->setPropertyValue("OutputWorkspace", "IvsQ");
-    alg->setPropertyValue("OutputWorkspaceWavelength", "IvsLam");
-    alg->setPropertyValue("ProcessingInstructions", "5+6");
+    ReflectometryReductionOne2 alg;
+    setupAlgorithm(alg, 1.5, 15.0, "5+6");
     // Must throw as spectrum 2 is not defined
-    TS_ASSERT_THROWS_ANYTHING(alg->execute());
+    TS_ASSERT_THROWS_ANYTHING(alg.execute());
   }
 
   void test_IvsLam_direct_beam() {
@@ -164,38 +126,20 @@ public:
     // Processing instructions : 1
 
     ReflectometryReductionOne2 alg;
-    alg.setChild(true);
-    alg.initialize();
-    alg.setProperty("InputWorkspace", m_multiDetectorWS);
-    alg.setProperty("WavelengthMin", 1.5);
-    alg.setProperty("WavelengthMax", 15.0);
-    alg.setPropertyValue("ProcessingInstructions", "1");
+    setupAlgorithm(alg, 1.5, 15.0, "1");
     alg.setPropertyValue("RegionOfDirectBeam", "2-3");
-    alg.setPropertyValue("OutputWorkspace", "IvsQ");
-    alg.setPropertyValue("OutputWorkspaceWavelength", "IvsLam");
-    alg.execute();
-    MatrixWorkspace_sptr outLam = alg.getProperty("OutputWorkspaceWavelength");
+    MatrixWorkspace_sptr outLam = runAlgorithmLam(alg);
 
-    TS_ASSERT_EQUALS(outLam->getNumberHistograms(), 1);
-    TS_ASSERT_EQUALS(outLam->blocksize(), 14);
     // Y counts, should be 0.5 = 1 (from detector ws) / 2 (from direct beam)
     TS_ASSERT_DELTA(outLam->y(0)[0], 0.5, 0.0001);
   }
 
   void test_bad_direct_beam() {
     // Direct beam : 4-5
-
-    auto alg = AlgorithmManager::Instance().create("ReflectometryReductionOne");
-    alg->setChild(true);
-    alg->initialize();
-    alg->setProperty("InputWorkspace", m_multiDetectorWS);
-    alg->setProperty("WavelengthMin", 1.5);
-    alg->setProperty("WavelengthMax", 15.0);
-    alg->setPropertyValue("ProcessingInstructions", "1");
-    alg->setPropertyValue("OutputWorkspace", "IvsQ");
-    alg->setPropertyValue("OutputWorkspaceWavelength", "IvsLam");
-    alg->setPropertyValue("RegionOfDirectBeam", "4-5");
-    TS_ASSERT_THROWS_ANYTHING(alg->execute());
+    ReflectometryReductionOne2 alg;
+    setupAlgorithm(alg, 1.5, 15.0, "1");
+    alg.setPropertyValue("RegionOfDirectBeam", "4-5");
+    TS_ASSERT_THROWS_ANYTHING(alg.execute());
   }
 
   void test_IvsLam_no_monitors() {
@@ -210,20 +154,10 @@ public:
     // MonitorBackgroundWavelengthMax : Not given
 
     ReflectometryReductionOne2 alg;
-    alg.setChild(true);
-    alg.initialize();
-    alg.setProperty("InputWorkspace", m_multiDetectorWS);
-    alg.setProperty("WavelengthMin", 1.5);
-    alg.setProperty("WavelengthMax", 15.0);
+    setupAlgorithm(alg, 1.5, 15.0, "1");
     alg.setProperty("I0MonitorIndex", "0");
-    alg.setPropertyValue("ProcessingInstructions", "1");
-    alg.setPropertyValue("OutputWorkspace", "IvsQ");
-    alg.setPropertyValue("OutputWorkspaceWavelength", "IvsLam");
-    alg.execute();
-    MatrixWorkspace_sptr outLam = alg.getProperty("OutputWorkspaceWavelength");
+    MatrixWorkspace_sptr outLam = runAlgorithmLam(alg);
 
-    TS_ASSERT_EQUALS(outLam->getNumberHistograms(), 1);
-    TS_ASSERT_EQUALS(outLam->blocksize(), 14);
     TS_ASSERT(outLam->x(0)[0] >= 1.5);
     TS_ASSERT(outLam->x(0)[7] <= 15.0);
     // No monitors considered because MonitorBackgroundWavelengthMin
@@ -248,27 +182,18 @@ public:
     // Modify counts in monitor (only for this test)
     // Modify counts only for range that will be fitted
     auto inputWS = m_multiDetectorWS;
-    auto &Y = inputWS->mutableY(0);
+    auto &Y = m_multiDetectorWS->mutableY(0);
     std::fill(Y.begin(), Y.begin() + 2, 1.0);
 
     ReflectometryReductionOne2 alg;
-    alg.setChild(true);
-    alg.initialize();
+    setupAlgorithm(alg, 0.0, 15.0, "1");
     alg.setProperty("InputWorkspace", inputWS);
-    alg.setProperty("WavelengthMin", 0.0);
-    alg.setProperty("WavelengthMax", 15.0);
     alg.setProperty("I0MonitorIndex", "0");
     alg.setProperty("MonitorBackgroundWavelengthMin", 0.5);
     alg.setProperty("MonitorBackgroundWavelengthMax", 3.0);
     alg.setProperty("NormalizeByIntegratedMonitors", "0");
-    alg.setPropertyValue("ProcessingInstructions", "1");
-    alg.setPropertyValue("OutputWorkspace", "IvsQ");
-    alg.setPropertyValue("OutputWorkspaceWavelength", "IvsLam");
-    alg.execute();
-    MatrixWorkspace_sptr outLam = alg.getProperty("OutputWorkspaceWavelength");
+    MatrixWorkspace_sptr outLam = runAlgorithmLam(alg, 10);
 
-    TS_ASSERT_EQUALS(outLam->getNumberHistograms(), 1);
-    TS_ASSERT_EQUALS(outLam->blocksize(), 10);
     TS_ASSERT(outLam->x(0)[0] >= 0.0);
     TS_ASSERT(outLam->x(0)[7] <= 15.0);
     // Expected values are 2.4996 = 3.15301 (detectors) / 1.26139 (monitors)
@@ -296,25 +221,16 @@ public:
     std::fill(Y.begin(), Y.begin() + 2, 1.0);
 
     ReflectometryReductionOne2 alg;
-    alg.setChild(true);
-    alg.initialize();
+    setupAlgorithm(alg, 0.0, 15.0, "1");
     alg.setProperty("InputWorkspace", inputWS);
-    alg.setProperty("WavelengthMin", 0.0);
-    alg.setProperty("WavelengthMax", 15.0);
     alg.setProperty("I0MonitorIndex", "0");
     alg.setProperty("MonitorBackgroundWavelengthMin", 0.5);
     alg.setProperty("MonitorBackgroundWavelengthMax", 3.0);
     alg.setProperty("NormalizeByIntegratedMonitors", "1");
     alg.setProperty("MonitorIntegrationWavelengthMin", 1.5);
     alg.setProperty("MonitorIntegrationWavelengthMax", 15.0);
-    alg.setPropertyValue("ProcessingInstructions", "1");
-    alg.setPropertyValue("OutputWorkspace", "IvsQ");
-    alg.setPropertyValue("OutputWorkspaceWavelength", "IvsLam");
-    alg.execute();
-    MatrixWorkspace_sptr outLam = alg.getProperty("OutputWorkspaceWavelength");
+    MatrixWorkspace_sptr outLam = runAlgorithmLam(alg, 16);
 
-    TS_ASSERT_EQUALS(outLam->getNumberHistograms(), 1);
-    TS_ASSERT_EQUALS(outLam->blocksize(), 16);
     TS_ASSERT(outLam->x(0)[0] >= 0.0);
     TS_ASSERT(outLam->x(0)[7] <= 15.0);
     // Expected values are 0.1981 = 2.0000 (detectors) / (1.26139*8) (monitors)
@@ -326,20 +242,10 @@ public:
     // Transmission run is the same as input run
 
     ReflectometryReductionOne2 alg;
-    alg.setChild(true);
-    alg.initialize();
-    alg.setProperty("InputWorkspace", m_multiDetectorWS);
+    setupAlgorithm(alg, 1.5, 15.0, "1");
     alg.setProperty("FirstTransmissionRun", m_multiDetectorWS);
-    alg.setProperty("WavelengthMin", 1.5);
-    alg.setProperty("WavelengthMax", 15.0);
-    alg.setProperty("ProcessingInstructions", "1");
-    alg.setPropertyValue("OutputWorkspace", "IvsQ");
-    alg.setPropertyValue("OutputWorkspaceWavelength", "IvsLam");
-    alg.execute();
-    MatrixWorkspace_sptr outLam = alg.getProperty("OutputWorkspaceWavelength");
+    MatrixWorkspace_sptr outLam = runAlgorithmLam(alg);
 
-    TS_ASSERT_EQUALS(outLam->getNumberHistograms(), 1);
-    TS_ASSERT_EQUALS(outLam->blocksize(), 14);
     // Expected values are 1 = m_wavelength / m_wavelength
     TS_ASSERT_DELTA(outLam->y(0)[0], 1.0000, 0.0001);
     TS_ASSERT_DELTA(outLam->y(0)[7], 1.0000, 0.0001);
@@ -349,24 +255,14 @@ public:
     // Transmission run is the same as input run
 
     ReflectometryReductionOne2 alg;
-    alg.setChild(true);
-    alg.initialize();
-    alg.setProperty("InputWorkspace", m_multiDetectorWS);
+    setupAlgorithm(alg, 1.5, 15.0, "1");
     alg.setProperty("FirstTransmissionRun", m_multiDetectorWS);
     alg.setProperty("SecondTransmissionRun", m_multiDetectorWS);
     alg.setProperty("StartOverlap", 2.5);
     alg.setProperty("EndOverlap", 3.0);
     alg.setProperty("Params", "0.1");
-    alg.setProperty("WavelengthMin", 1.5);
-    alg.setProperty("WavelengthMax", 15.0);
-    alg.setProperty("ProcessingInstructions", "1");
-    alg.setPropertyValue("OutputWorkspace", "IvsQ");
-    alg.setPropertyValue("OutputWorkspaceWavelength", "IvsLam");
-    alg.execute();
-    MatrixWorkspace_sptr outLam = alg.getProperty("OutputWorkspaceWavelength");
+    MatrixWorkspace_sptr outLam = runAlgorithmLam(alg);
 
-    TS_ASSERT_EQUALS(outLam->getNumberHistograms(), 1);
-    TS_ASSERT_EQUALS(outLam->blocksize(), 14);
     // Expected values are 1 = m_wavelength / m_wavelength
     TS_ASSERT_DELTA(outLam->y(0)[0], 1.0000, 0.0001);
     TS_ASSERT_DELTA(outLam->y(0)[7], 1.0000, 0.0001);
@@ -379,24 +275,14 @@ public:
     // spectra 3-4, which map to indices 1-2 in the transmission
     // workspace.
     ReflectometryReductionOne2 alg;
-    alg.setChild(true);
-    alg.initialize();
-    alg.setProperty("InputWorkspace", m_multiDetectorWS);
+    setupAlgorithm(alg, 1.5, 15.0, "2-3");
     alg.setProperty("FirstTransmissionRun", m_transmissionWS);
     alg.setProperty("SecondTransmissionRun", m_transmissionWS);
     alg.setProperty("StartOverlap", 2.5);
     alg.setProperty("EndOverlap", 3.0);
     alg.setProperty("Params", "0.1");
-    alg.setProperty("WavelengthMin", 1.5);
-    alg.setProperty("WavelengthMax", 15.0);
-    alg.setProperty("ProcessingInstructions", "2-3");
-    alg.setPropertyValue("OutputWorkspace", "IvsQ");
-    alg.setPropertyValue("OutputWorkspaceWavelength", "IvsLam");
-    alg.execute();
-    MatrixWorkspace_sptr outLam = alg.getProperty("OutputWorkspaceWavelength");
+    MatrixWorkspace_sptr outLam = runAlgorithmLam(alg);
 
-    TS_ASSERT_EQUALS(outLam->getNumberHistograms(), 1);
-    TS_ASSERT_EQUALS(outLam->blocksize(), 14);
     // Expected values are 1 = m_wavelength / m_wavelength
     TS_ASSERT_DELTA(outLam->y(0)[0], 0.08, 0.0001);
     TS_ASSERT_DELTA(outLam->y(0)[7], 0.08, 0.0001);
@@ -406,22 +292,12 @@ public:
     // CorrectionAlgorithm: ExponentialCorrection
 
     ReflectometryReductionOne2 alg;
-    alg.setChild(true);
-    alg.initialize();
-    alg.setProperty("InputWorkspace", m_multiDetectorWS);
-    alg.setProperty("WavelengthMin", 1.5);
-    alg.setProperty("WavelengthMax", 15.0);
-    alg.setProperty("ProcessingInstructions", "1");
+    setupAlgorithm(alg, 1.5, 15.0, "1");
     alg.setProperty("CorrectionAlgorithm", "ExponentialCorrection");
     alg.setProperty("C0", 0.2);
     alg.setProperty("C1", 0.1);
-    alg.setPropertyValue("OutputWorkspace", "IvsQ");
-    alg.setPropertyValue("OutputWorkspaceWavelength", "IvsLam");
-    alg.execute();
-    MatrixWorkspace_sptr outLam = alg.getProperty("OutputWorkspaceWavelength");
+    MatrixWorkspace_sptr outLam = runAlgorithmLam(alg);
 
-    TS_ASSERT_EQUALS(outLam->getNumberHistograms(), 1);
-    TS_ASSERT_EQUALS(outLam->blocksize(), 14);
     TS_ASSERT_DELTA(outLam->y(0)[0], 12.5113, 0.0001);
     TS_ASSERT_DELTA(outLam->y(0)[7], 23.4290, 0.0001);
   }
@@ -430,21 +306,11 @@ public:
     // CorrectionAlgorithm: PolynomialCorrection
 
     ReflectometryReductionOne2 alg;
-    alg.setChild(true);
-    alg.initialize();
-    alg.setProperty("InputWorkspace", m_multiDetectorWS);
-    alg.setProperty("WavelengthMin", 1.5);
-    alg.setProperty("WavelengthMax", 15.0);
-    alg.setProperty("ProcessingInstructions", "1");
+    setupAlgorithm(alg, 1.5, 15.0, "1");
     alg.setProperty("CorrectionAlgorithm", "PolynomialCorrection");
     alg.setProperty("Polynomial", "0.1,0.3,0.5");
-    alg.setPropertyValue("OutputWorkspace", "IvsQ");
-    alg.setPropertyValue("OutputWorkspaceWavelength", "IvsLam");
-    alg.execute();
-    MatrixWorkspace_sptr outLam = alg.getProperty("OutputWorkspaceWavelength");
+    MatrixWorkspace_sptr outLam = runAlgorithmLam(alg);
 
-    TS_ASSERT_EQUALS(outLam->getNumberHistograms(), 1);
-    TS_ASSERT_EQUALS(outLam->blocksize(), 14);
     TS_ASSERT_DELTA(outLam->y(0)[0], 0.6093, 0.0001);
     TS_ASSERT_DELTA(outLam->y(0)[7], 0.0514, 0.0001);
   }
@@ -452,22 +318,53 @@ public:
   void test_IvsQ() {
 
     ReflectometryReductionOne2 alg;
-    alg.setChild(true);
-    alg.initialize();
-    alg.setProperty("InputWorkspace", m_multiDetectorWS);
-    alg.setProperty("WavelengthMin", 1.5);
-    alg.setProperty("WavelengthMax", 15.0);
-    alg.setProperty("ProcessingInstructions", "1");
-    alg.setPropertyValue("OutputWorkspace", "IvsQ");
-    alg.setPropertyValue("OutputWorkspaceWavelength", "IvsLam");
-    alg.execute();
-    MatrixWorkspace_sptr outQ = alg.getProperty("OutputWorkspace");
+    setupAlgorithm(alg, 1.5, 15.0, "1");
+    MatrixWorkspace_sptr outQ = runAlgorithmQ(alg);
 
-    TS_ASSERT_EQUALS(outQ->getNumberHistograms(), 1);
-    TS_ASSERT_EQUALS(outQ->blocksize(), 14);
     // X range in outQ
     TS_ASSERT_DELTA(outQ->x(0)[0], 0.3353, 0.0001);
     TS_ASSERT_DELTA(outQ->x(0)[7], 0.5962, 0.0001);
+  }
+
+private:
+  // Do standard algorithm setup
+  void setupAlgorithm(ReflectometryReductionOne2 &alg,
+                      const double wavelengthMin, const double wavelengthMax,
+                      const std::string &procInstr) {
+    alg.setChild(true);
+    alg.initialize();
+    alg.setProperty("InputWorkspace", m_multiDetectorWS);
+    alg.setProperty("WavelengthMin", wavelengthMin);
+    alg.setProperty("WavelengthMax", wavelengthMax);
+    alg.setPropertyValue("ProcessingInstructions", procInstr);
+    alg.setPropertyValue("OutputWorkspace", "IvsQ");
+    alg.setPropertyValue("OutputWorkspaceWavelength", "IvsLam");
+  }
+
+  // Do standard algorithm execution and checks and return IvsLam
+  MatrixWorkspace_sptr runAlgorithmLam(ReflectometryReductionOne2 &alg,
+                                       const size_t blocksize = 14) {
+    alg.execute();
+
+    MatrixWorkspace_sptr outLam = alg.getProperty("OutputWorkspaceWavelength");
+    TS_ASSERT(outLam);
+    TS_ASSERT_EQUALS(outLam->getNumberHistograms(), 1);
+    TS_ASSERT_EQUALS(outLam->blocksize(), blocksize);
+
+    return outLam;
+  }
+
+  // Do standard algorithm execution and checks and return IvsQ
+  MatrixWorkspace_sptr runAlgorithmQ(ReflectometryReductionOne2 &alg,
+                                     const size_t blocksize = 14) {
+    alg.execute();
+
+    MatrixWorkspace_sptr outQ = alg.getProperty("OutputWorkspace");
+    TS_ASSERT(outQ);
+    TS_ASSERT_EQUALS(outQ->getNumberHistograms(), 1);
+    TS_ASSERT_EQUALS(outQ->blocksize(), blocksize);
+
+    return outQ;
   }
 };
 
