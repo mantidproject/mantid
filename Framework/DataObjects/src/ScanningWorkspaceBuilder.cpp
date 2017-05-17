@@ -176,7 +176,7 @@ void ScanningWorkspaceBuilder::setIndexingType(
  *
  * @return Workspace2D with the scanning information set
  */
-MatrixWorkspace_sptr ScanningWorkspaceBuilder::buildWorkspace() {
+MatrixWorkspace_sptr ScanningWorkspaceBuilder::buildWorkspace() const {
   validateInputs();
 
   auto outputWorkspace = create<Workspace2D>(
@@ -213,7 +213,7 @@ MatrixWorkspace_sptr ScanningWorkspaceBuilder::buildWorkspace() {
 }
 
 void ScanningWorkspaceBuilder::buildOutputDetectorInfo(
-    DetectorInfo &outputDetectorInfo) {
+    DetectorInfo &outputDetectorInfo) const {
   for (size_t i = 1; i < m_nTimeIndexes; ++i) {
     const auto mergeWorkspace =
         create<Workspace2D>(m_instrument, m_nDetectors, m_histogram.binEdges());
@@ -258,7 +258,7 @@ void ScanningWorkspaceBuilder::buildInstrumentAngles(
 }
 
 void ScanningWorkspaceBuilder::createTimeOrientedIndexInfo(
-    MatrixWorkspace &ws) {
+    MatrixWorkspace &ws) const {
   auto indexInfo = ws.indexInfo();
   auto spectrumDefinitions = Kernel::make_cow<std::vector<SpectrumDefinition>>(
       m_nDetectors * m_nTimeIndexes);
@@ -275,7 +275,7 @@ void ScanningWorkspaceBuilder::createTimeOrientedIndexInfo(
 }
 
 void ScanningWorkspaceBuilder::createDetectorOrientedIndexInfo(
-    MatrixWorkspace &ws) {
+    MatrixWorkspace &ws) const {
   auto indexInfo = ws.indexInfo();
   auto spectrumDefinitions = Kernel::make_cow<std::vector<SpectrumDefinition>>(
       m_nDetectors * m_nTimeIndexes);

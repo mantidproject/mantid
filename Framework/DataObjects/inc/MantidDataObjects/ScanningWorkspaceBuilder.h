@@ -73,7 +73,7 @@ public:
 
   void setIndexingType(const IndexingType indexingType);
 
-  API::MatrixWorkspace_sptr buildWorkspace();
+  API::MatrixWorkspace_sptr buildWorkspace() const;
 
 private:
   size_t m_nDetectors;
@@ -90,14 +90,14 @@ private:
 
   IndexingType m_indexingType;
 
-  void buildOutputDetectorInfo(API::DetectorInfo &outputDetectorInfo);
+  void buildOutputDetectorInfo(API::DetectorInfo &outputDetectorInfo) const;
 
   void buildPositions(API::DetectorInfo &outputDetectorInfo) const;
   void buildRotations(API::DetectorInfo &outputDetectorInfo) const;
   void buildInstrumentAngles(API::DetectorInfo &outputDetectorInfo) const;
 
-  void createTimeOrientedIndexInfo(API::MatrixWorkspace &ws);
-  void createDetectorOrientedIndexInfo(API::MatrixWorkspace &ws);
+  void createTimeOrientedIndexInfo(API::MatrixWorkspace &ws) const;
+  void createDetectorOrientedIndexInfo(API::MatrixWorkspace &ws) const;
 
   void verifyTimeIndexSize(const size_t timeIndexSize,
                            const std::string &description) const;
