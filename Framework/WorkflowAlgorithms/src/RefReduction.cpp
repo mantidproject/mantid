@@ -182,7 +182,7 @@ MatrixWorkspace_sptr RefReduction::processData(const std::string polarization) {
   // Get scattering angle in degrees
   double theta = getProperty("Theta");
   const std::string instrument = getProperty("Instrument");
-  const bool integrateY = instrument.compare("REF_M") == 0;
+  const bool integrateY = instrument == "REF_M";
 
   // Get pixel ranges in real pixels
   int xmin = 0;
@@ -345,7 +345,7 @@ MatrixWorkspace_sptr RefReduction::processData(const std::string polarization) {
   MatrixWorkspace_sptr outputWS = grpAlg->getProperty("OutputWorkspace");
 
   const std::string prefix = getPropertyValue("OutputWorkspacePrefix");
-  if (polarization.compare(PolStateNone) == 0) {
+  if (polarization == PolStateNone) {
     declareProperty(Kernel::make_unique<WorkspaceProperty<>>(
         "OutputWorkspace", prefix, Direction::Output));
     setProperty("OutputWorkspace", outputWS);
@@ -402,7 +402,7 @@ MatrixWorkspace_sptr RefReduction::processNormalization() {
   }
 
   const std::string instrument = getProperty("Instrument");
-  const bool integrateY = instrument.compare("REF_M") == 0;
+  const bool integrateY = instrument == "REF_M";
   if (integrateY) {
     if (!cropLowRes)
       low_res_max = NY_PIXELS - 1;
@@ -507,7 +507,7 @@ IEventWorkspace_sptr RefReduction::loadData(const std::string dataRun,
       m_output_message += "    |Loading from " + path + "\n";
       IAlgorithm_sptr loadAlg = createChildAlgorithm("LoadEventNexus", 0, 0.2);
       loadAlg->setProperty("Filename", path);
-      if (polarization.compare(PolStateNone) != 0)
+      if (polarization != PolStateNone)
         loadAlg->setProperty("NXentryName", polarization);
       try {
         loadAlg->executeAsChildAlg();
@@ -525,7 +525,7 @@ IEventWorkspace_sptr RefReduction::loadData(const std::string dataRun,
       }
 
       // Move the detector to the right position
-      if (instrument.compare("REF_M") == 0) {
+      if (instrument == "REF_M") {
         const auto &detInfo = rawWS->detectorInfo();
         const size_t detIndex0 = detInfo.indexOf(0);
         double det_distance = detInfo.position(detIndex0).Z();
@@ -701,7 +701,7 @@ MatrixWorkspace_sptr RefReduction::subtractBackground(
     MatrixWorkspace_sptr dataWS, MatrixWorkspace_sptr rawWS, int peakMin,
     int peakMax, int bckMin, int bckMax, int lowResMin, int lowResMax) {
   const std::string instrument = getProperty("Instrument");
-  const bool integrateY = instrument.compare("REF_M") == 0;
+  const bool integrateY = instrument == "REF_M";
 
   int xmin = 0;
   int xmax = 0;

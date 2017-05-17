@@ -62,7 +62,8 @@ class TestDirector(object):
         # Build the SANSStateMove
         if self.move_state is None:
             move_builder = get_move_builder(self.data_state)
-            move_builder.set_HAB_x_translation_correction(21.2)
+            if hasattr(move_builder, "set_HAB_x_translation_correction"):
+                move_builder.set_HAB_x_translation_correction(21.2)
             move_builder.set_LAB_x_translation_correction(12.1)
             self.move_state = move_builder.build()
 
@@ -103,7 +104,7 @@ class TestDirector(object):
         # Build the SANSStateSave
         if self.save_state is None:
             save_builder = get_save_builder(self.data_state)
-            save_builder.set_file_name("test_file_name")
+            save_builder.set_user_specified_output_name("test_file_name")
             save_builder.set_file_format([SaveType.Nexus])
             self.save_state = save_builder.build()
 
@@ -177,8 +178,7 @@ class TestDirector(object):
             convert_to_q_builder.set_wavelength_cutoff(12.)
             convert_to_q_builder.set_q_min(0.1)
             convert_to_q_builder.set_q_max(0.8)
-            convert_to_q_builder.set_q_step(0.01)
-            convert_to_q_builder.set_q_step_type(RangeStepType.Lin)
+            convert_to_q_builder.set_q_1d_rebin_string("0.1,0.01,0.8")
             convert_to_q_builder.set_use_q_resolution(False)
             self.convert_to_q_state = convert_to_q_builder.build()
 

@@ -295,15 +295,15 @@ void FilterEvents::processAlgorithmProperties() {
   //-------------------------------------------------------------------------
   // Type of correction
   string correctiontype = getPropertyValue("CorrectionToSample");
-  if (correctiontype.compare("None") == 0)
+  if (correctiontype == "None")
     m_tofCorrType = NoneCorrect;
-  else if (correctiontype.compare("Customized") == 0)
+  else if (correctiontype == "Customized")
     m_tofCorrType = CustomizedCorrect;
-  else if (correctiontype.compare("Direct") == 0)
+  else if (correctiontype == "Direct")
     m_tofCorrType = DirectCorrect;
-  else if (correctiontype.compare("Elastic") == 0)
+  else if (correctiontype == "Elastic")
     m_tofCorrType = ElasticCorrect;
-  else if (correctiontype.compare("Indirect") == 0)
+  else if (correctiontype == "Indirect")
     m_tofCorrType = IndirectCorrect;
   else {
     g_log.error() << "Correction type '" << correctiontype
@@ -321,9 +321,9 @@ void FilterEvents::processAlgorithmProperties() {
 
   // Spectrum skip
   string skipappr = getPropertyValue("SpectrumWithoutDetector");
-  if (skipappr.compare("Skip") == 0)
+  if (skipappr == "Skip")
     m_specSkipType = EventFilterSkipNoDet;
-  else if (skipappr.compare("Skip only if TOF correction") == 0)
+  else if (skipappr == "Skip only if TOF correction")
     m_specSkipType = EventFilterSkipNoDetTOFCorr;
   else
     throw runtime_error("An unrecognized option for SpectrumWithoutDetector");
@@ -1130,9 +1130,9 @@ void FilterEvents::setupCustomizedTOFCorrection() {
     hasshift = true;
 
   bool usedetid;
-  if (colnames[0].compare("DetectorID") == 0)
+  if (colnames[0] == "DetectorID")
     usedetid = true;
-  else if (colnames[0].compare("Spectrum") == 0)
+  else if (colnames[0] == "Spectrum")
     usedetid = false;
   else {
     usedetid = false;

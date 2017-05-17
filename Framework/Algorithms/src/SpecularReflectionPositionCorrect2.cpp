@@ -87,29 +87,6 @@ void SpecularReflectionPositionCorrect2::init() {
       "An output workspace.");
 }
 
-/** Validate inputs
-*/
-std::map<std::string, std::string>
-SpecularReflectionPositionCorrect2::validateInputs() {
-
-  std::map<std::string, std::string> results;
-
-  MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
-  auto inst = inputWS->getInstrument();
-
-  // Detector
-  const std::string detectorName = getProperty("DetectorComponentName");
-  if (!inst->getComponentByName(detectorName))
-    results["DetectorComponentName"] = "Detector component not found.";
-
-  // Sample
-  const std::string sampleName = getProperty("SampleComponentName");
-  if (!inst->getComponentByName(sampleName))
-    results["SampleComponentName"] = "Sample component not found.";
-
-  return results;
-}
-
 //----------------------------------------------------------------------------------------------
 /** Execute the algorithm.
 */
@@ -132,11 +109,15 @@ void SpecularReflectionPositionCorrect2::exec() {
 
   // Detector
   const std::string detectorName = getProperty("DetectorComponentName");
+  if (!inst->getComponentByName(detectorName))
+    throw std::runtime_error("Detector component not found.");
   IComponent_const_sptr detector = inst->getComponentByName(detectorName);
   const V3D detectorPosition = detector->getPos();
 
   // Sample
   const std::string sampleName = getProperty("SampleComponentName");
+  if (!inst->getComponentByName(sampleName))
+    throw std::runtime_error("Sample component not found.");
   IComponent_const_sptr sample = inst->getComponentByName(sampleName);
   const V3D samplePosition = sample->getPos();
 
