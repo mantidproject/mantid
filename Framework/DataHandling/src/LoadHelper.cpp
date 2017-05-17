@@ -212,12 +212,12 @@ void LoadHelper::recurseAndAddNexusFieldsToWsRun(NXhandle nxfileID,
 
         if (std::string(nxclass) != "ILL_data_scan_vars") {
 
-            // Go down to one level, if the group is known to nexus
-            std::string p_nxname(
+          // Go down to one level, if the group is known to nexus
+          std::string p_nxname(
               nxname); // current names can be useful for next level
-            std::string p_nxclass(nxclass);
+          std::string p_nxclass(nxclass);
 
-            recurseAndAddNexusFieldsToWsRun(nxfileID, runDetails, p_nxname,
+          recurseAndAddNexusFieldsToWsRun(nxfileID, runDetails, p_nxname,
                                           p_nxclass, level + 1);
         }
 
