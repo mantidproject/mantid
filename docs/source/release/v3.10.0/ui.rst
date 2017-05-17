@@ -62,6 +62,7 @@ Bugs Resolved
 -------------
 
 - Fixed an issue in the Script Window that caused the Convert Tabs to Spaces and vice versa operations to corrupt the script.
+- Fixed an issue where some graphs not associated with a workspace would not be shown in the project save as view.
 
 SliceViewer Improvements
 ------------------------
