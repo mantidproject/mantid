@@ -859,7 +859,7 @@ void ReflectometryReductionOne2::findIvsLamRange(
   double bLambda = (xValues[xValues.size() - 1] - xValues[0]) /
                    static_cast<int>(xValues.size());
   getProjectedLambdaRange(lambdaMax, twoThetaMin, bLambda, bTwoThetaMin,
-                          detectors, xMin, dummy);
+                          detectors, dummy, xMax);
 
   const size_t spIdxMax = detectors.back();
   const double twoThetaMax = getDetectorTwoTheta(m_spectrumInfo, spIdxMax);
@@ -869,10 +869,13 @@ void ReflectometryReductionOne2::findIvsLamRange(
   bLambda = (xValues[xValues.size() - 1] - xValues[0]) /
             static_cast<int>(xValues.size());
   getProjectedLambdaRange(lambdaMin, twoThetaMax, bLambda, bTwoThetaMax,
-                          detectors, dummy, xMax);
+                          detectors, xMin, dummy);
 
   if (xMin > xMax) {
-    std::swap(xMin, xMax);
+    throw std::runtime_error(
+        "Error projecting lambda range to reference line at twoTheta=" +
+        std::to_string(twoThetaR(detectors)) + "; projected range (" +
+        std::to_string(xMin) + "," + std::to_string(xMax) + ") is negative.");
   }
 }
 
