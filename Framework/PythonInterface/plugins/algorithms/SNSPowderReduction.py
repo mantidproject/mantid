@@ -5,11 +5,11 @@ import os
 
 import mantid.simpleapi as api
 from mantid.api import mtd, AlgorithmFactory, AnalysisDataService, DataProcessorAlgorithm, \
-    FileAction, FileProperty, ITableWorkspaceProperty, MultipleFileProperty, PropertyMode, \
-    WorkspaceProperty, ITableWorkspace, MatrixWorkspace
+    FileAction, FileProperty, ITableWorkspaceProperty, PropertyMode, WorkspaceProperty, \
+    ITableWorkspace, MatrixWorkspace
 from mantid.kernel import ConfigService, Direction, FloatArrayProperty, \
     FloatBoundedValidator, IntArrayBoundedValidator, IntArrayProperty, \
-    Property, PropertyManagerDataService, StringArrayProperty, StringListValidator
+    PropertyManagerDataService, StringListValidator
 from mantid.dataobjects import SplittersWorkspace  # SplittersWorkspace
 # Use xrange in Python 2
 from six.moves import range #pylint: disable=redefined-builtin
@@ -749,9 +749,6 @@ class SNSPowderReduction(DataProcessorAlgorithm):
         @param preserveEvents:
         @return: string as the summed workspace's name
         """
-        sumRun = None
-        info = None
-
         if final_name is None:
             final_name = getBasename(filenames[0])
         api.AlignAndFocusPowderFromFiles(Filename=','.join(filenames),
