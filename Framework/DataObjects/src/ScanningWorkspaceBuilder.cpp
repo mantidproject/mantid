@@ -185,15 +185,7 @@ MatrixWorkspace_sptr ScanningWorkspaceBuilder::buildWorkspace() {
   auto &outputDetectorInfo = outputWorkspace->mutableDetectorInfo();
   outputDetectorInfo.setScanInterval(0, m_timeRanges[0]);
 
-  for (size_t i = 1; i < m_nTimeIndexes; ++i) {
-    const auto mergeWorkspace =
-        create<Workspace2D>(m_instrument, m_nDetectors, m_histogram.binEdges());
-    auto &mergeDetectorInfo = mergeWorkspace->mutableDetectorInfo();
-    for (size_t j = 0; j < m_nDetectors; ++j) {
-      mergeDetectorInfo.setScanInterval(j, m_timeRanges[i]);
-    }
-    outputDetectorInfo.merge(mergeDetectorInfo);
-  }
+  buildOutputDetectorInfo(outputDetectorInfo);
 
   if (!m_positions.empty())
     buildPositions(outputDetectorInfo);
@@ -218,6 +210,19 @@ MatrixWorkspace_sptr ScanningWorkspaceBuilder::buildWorkspace() {
   }
 
   return boost::shared_ptr<MatrixWorkspace>(std::move(outputWorkspace));
+}
+
+void ScanningWorkspaceBuilder::buildOutputDetectorInfo(
+    DetectorInfo &outputDetectorInfo) {
+  for (size_t i = 1; i < m_nTimeIndexes; ++i) {
+    const auto mergeWorkspace =
+        create<Workspace2D>(m_instrument, m_nDetectors, m_histogram.binEdges());
+    auto &mergeDetectorInfo = mergeWorkspace->mutableDetectorInfo();
+    for (size_t j = 0; j < m_nDetectors; ++j) {
+      mergeDetectorInfo.setScanInterval(j, m_timeRanges[i]);
+    }
+    outputDetectorInfo.merge(mergeDetectorInfo);
+  }
 }
 
 void ScanningWorkspaceBuilder::buildRotations(

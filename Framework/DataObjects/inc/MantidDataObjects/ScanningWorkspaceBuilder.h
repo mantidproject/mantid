@@ -90,6 +90,8 @@ private:
 
   IndexingType m_indexingType;
 
+  void buildOutputDetectorInfo(API::DetectorInfo &outputDetectorInfo);
+
   void buildPositions(API::DetectorInfo &outputDetectorInfo) const;
   void buildRotations(API::DetectorInfo &outputDetectorInfo) const;
   void buildInstrumentAngles(API::DetectorInfo &outputDetectorInfo) const;
