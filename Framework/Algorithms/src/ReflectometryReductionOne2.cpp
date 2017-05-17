@@ -4,6 +4,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidHistogramData/LinearGenerator.h"
+#include "MantidIndexing/IndexInfo.h"
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/StringTokenizer.h"
 #include "MantidKernel/Unit.h"
@@ -14,6 +15,7 @@
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::HistogramData;
+using namespace Mantid::Indexing;
 
 namespace Mantid {
 namespace Algorithms {
@@ -201,28 +203,16 @@ translateInstructions(const std::string &instructions) {
 
 /**
 * Map a spectrum index from the given map to the given workspace
-* @param map : the original spectrum number to index map
-* @param mapIdx : the index to look up in the map
+* @param originWS : the original workspace
+* @param mapIdx : the index in the original workspace
 * @param destWS : the destination workspace
+* @return : the index in the destination workspace
 */
-int mapSpectrumIndexToWorkspace(const spec2index_map &map, const size_t mapIdx,
-                                MatrixWorkspace_const_sptr destWS) {
+size_t mapSpectrumIndexToWorkspace(MatrixWorkspace_const_sptr originWS, const size_t originIdx,
+                                   MatrixWorkspace_const_sptr destWS) {
 
-  // Get the spectrum numbers for these indices
-  auto it = std::find_if(map.begin(), map.end(),
-                         [mapIdx](const std::pair<specnum_t, size_t> &mapIter) {
-                           return mapIter.second == mapIdx;
-                         });
-
-  if (it == map.end()) {
-    throw std::runtime_error("Workspace index " + std::to_string(mapIdx) +
-                             " not found in run workspace ");
-  }
-  specnum_t specId = it->first;
-
-  // Get the workspace index in the destination workspace
-  int wsIdx = static_cast<int>(destWS->getIndexFromSpectrumNumber(specId));
-
+  SpectrumNumber specId = originWS->indexInfo().spectrumNumber(originIdx);
+  size_t wsIdx = destWS->getIndexFromSpectrumNumber(static_cast<specnum_t>(specId));
   return wsIdx;
 }
 
@@ -240,13 +230,12 @@ std::vector<std::vector<size_t>> mapSpectrumIndicesToWorkspace(
     MatrixWorkspace_const_sptr originWS, MatrixWorkspace_const_sptr hostWS,
     const std::vector<std::vector<size_t>> &detectorGroups) {
 
-  auto map = originWS->getSpectrumToWorkspaceIndexMap();
   std::vector<std::vector<size_t>> hostGroups;
 
   for (auto group : detectorGroups) {
     std::vector<size_t> hostDetectors;
     for (auto i : group) {
-      const int hostIdx = mapSpectrumIndexToWorkspace(map, i, hostWS);
+      const size_t hostIdx = mapSpectrumIndexToWorkspace(originWS, i, hostWS);
       hostDetectors.push_back(hostIdx);
     }
     hostGroups.push_back(hostDetectors);
@@ -1159,9 +1148,10 @@ exception. Otherwise a warning is generated.
 void ReflectometryReductionOne2::verifySpectrumMaps(
     MatrixWorkspace_const_sptr ws1, MatrixWorkspace_const_sptr ws2,
     const bool severe) {
-  auto map1 = ws1->getSpectrumToWorkspaceIndexMap();
-  auto map2 = ws2->getSpectrumToWorkspaceIndexMap();
-  if (map1 != map2) {
+  auto indices1 = ws1->indexInfo();
+  auto indices2 = ws2->indexInfo();
+  /// TODO also check actual maps are the same
+  if (indices1.globalSize() != indices2.globalSize()) {
     const std::string message =
         "Spectrum maps between workspaces do NOT match up.";
     if (severe) {
