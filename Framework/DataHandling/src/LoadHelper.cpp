@@ -210,7 +210,7 @@ void LoadHelper::recurseAndAddNexusFieldsToWsRun(NXhandle nxfileID,
       if ((opengroup_status = NXopengroup(nxfileID, nxname, nxclass)) ==
           NX_OK) {
 
-        if (std::string(nxclass) != "ILL_data_scan_vars")) {
+        if (std::string(nxclass) != "ILL_data_scan_vars") {
 
           // Go down to one level, if the group is known to nexus
           std::string p_nxname(
