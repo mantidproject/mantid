@@ -150,11 +150,8 @@ class SNSPowderReduction(DataProcessorAlgorithm):
         return "The algorithm used for reduction of powder diffraction data obtained on SNS instruments (e.g. PG3) "
 
     def PyInit(self):
-        self.declareProperty(MultipleFileProperty(name="Filename",
-                                                  extensions=EXTENSIONS_NXS),
-                             "Event file")
-        self.declareProperty("PreserveEvents", True,
-                             "Argument to supply to algorithms that can change from events to histograms.")
+        self.copyProperties('AlignAndFocusPowderFromFiles', ['Filename', 'PreserveEvents'])
+
         self.declareProperty("Sum", False,
                              "Sum the runs. Does nothing for characterization runs")
         self.declareProperty("PushDataPositive", "None",
@@ -179,7 +176,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                              doc="If specified overrides value in CharacterizationRunsFile. If -1 turns off correction."
                                  "")
         self.declareProperty(FileProperty(name="CalibrationFile",defaultValue="",action=FileAction.Load,
-                                          extensions=[".h5", ".hd5", ".hdf", ".cal"]))
+                                          extensions=[".h5", ".hd5", ".hdf", ".cal"]))  # CalFileName
         self.declareProperty(FileProperty(name="GroupingFile",defaultValue="",action=FileAction.OptionalLoad,
                                           extensions=[".xml"]), "Overrides grouping from CalibrationFile")
         self.declareProperty(FileProperty(name="CharacterizationRunsFile",
@@ -188,27 +185,16 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                                           extensions=["txt"]), "File with characterization runs denoted")
         self.declareProperty(FileProperty(name="ExpIniFilename", defaultValue="", action=FileAction.OptionalLoad,
                                           extensions=[".ini"]))
-        self.declareProperty("UnwrapRef", 0.,
-                             "Reference total flight path for frame unwrapping. Zero skips the correction")
-        self.declareProperty("LowResRef", 0.,
-                             "Reference DIFC for resolution removal. Zero skips the correction")
-        self.declareProperty("CropWavelengthMin", 0.,
-                             "Crop the data at this minimum wavelength. Overrides LowResRef.")
-        self.declareProperty("CropWavelengthMax", Property.EMPTY_DBL,
-                             "Crop the data at this maximum wavelength. Forces use of CropWavelengthMin.")
-        self.declareProperty("RemovePromptPulseWidth", 0.0,
-                             "Width of events (in microseconds) near the prompt pulse to remove. 0 disables")
-        self.declareProperty("MaxChunkSize", 0.0,
-                             "Specify maximum Gbytes of file to read in one chunk.  Default is whole file.")
+        self.copyProperties('AlignAndFocusPowderFromFiles',
+                            ['UnwrapRef', 'LowResRef', 'CropWavelengthMin', 'CropWavelengthMax', 'RemovePromptPulseWidth',
+                             'MaxChunkSize'])
         self.declareProperty(FloatArrayProperty("Binning", values=[0., 0., 0.],
                                                 direction=Direction.Input),
-                             "Positive is linear bins, negative is logorithmic")
-        self.declareProperty("ResampleX", 0,
-                             "Number of bins in x-axis. Non-zero value overrides \"Params\" property. "
-                             "Negative value means logorithmic binning.")
+                             "Positive is linear bins, negative is logorithmic")  # Params
+        self.copyProperties('AlignAndFocusPowderFromFiles', ['ResampleX'])
         self.declareProperty("BinInDspace", True,
                              "If all three bin parameters a specified, whether they are in dspace (true) or "
-                             "time-of-flight (false)")
+                             "time-of-flight (false)")  # DSpacing
         # section of vanadium run processing
         self.declareProperty("StripVanadiumPeaks", True,
                              "Subtract fitted vanadium peaks from the known positions.")
@@ -221,7 +207,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
         self.declareProperty("BackgroundSmoothParams", "", "Default=off, suggested 20,2")
 
         # filtering
-        self.declareProperty("FilterBadPulses", 95.,
+        self.declareProperty("FilterBadPulses", 95.,  # different default value
                              doc="Filter out events measured while proton charge is more than 5% below average")
         self.declareProperty("ScaleData", defaultValue=1., validator=FloatBoundedValidator(lower=0., exclusive=True),
                              doc="Constant to multiply the data before writing out. This does not apply to "
@@ -245,7 +231,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
 
         self.declareProperty("LowResolutionSpectraOffset", -1,
                              "If larger and equal to 0, then process low resolution TOF and offset is the spectra "
-                             "number. Otherwise, ignored.")
+                             "number. Otherwise, ignored.")  # LowResolutionSpectraOffset
 
         self.declareProperty("NormalizeByCurrent", True, "Normalize by current")
 
