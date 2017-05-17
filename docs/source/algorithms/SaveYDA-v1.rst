@@ -53,6 +53,7 @@ Usage
     # save file
     SaveYDA(ws, filename)
 
+
     with open(filename,'r') as f:
         for i in range(12):
             print f.readline(),
@@ -62,17 +63,17 @@ Usage
 .. testoutput:: SaveYDAExample
 
     Meta:
-        format: yaml/frida 2.0
-        type: generic tabular data
+      format: yaml/frida 2.0
+      type: generic tabular data
     History:
       - Proposal number 3
       - Proposal Title
       - Experiment Team name
       - data reduced with mantid
     Coord:
-        x: {name: w, unit: meV}
-        y: {name: 'S(q,w)', unit: meV-1}
-        z: {name: 2th, unit: deg}
+      x: {name: w, unit: meV}
+      y: {name: 'S(q,w)', unit: meV-1}
+      z: {name: 2th, unit: deg}
 
 .. testcleanup:: SaveYDAExample
 

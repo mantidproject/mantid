@@ -3,8 +3,10 @@ from mantid.api import PythonAlgorithm, AlgorithmFactory, MatrixWorkspacePropert
 from mantid.kernel import Direction, CompositeValidator
 from mantid.dataobjects import Workspace2D
 
-import ruamel.yaml
-from ruamel.yaml.comments import CommentedMap, CommentedSeq
+import yaml
+from yaml import Dumper
+
+from collections import OrderedDict
 
 import math
 
@@ -44,6 +46,7 @@ class SaveYDA(PythonAlgorithm):
 
     def validateInputs(self):
         """Basic validation for inputs.
+        :return: issues with not valid Inputs in dictionary
         """
         issues = dict()
         # Only MomentumTransfer is allowed
@@ -86,7 +89,7 @@ class SaveYDA(PythonAlgorithm):
         # commented sequences and maps are used to keep Data in the order they get inserted
         # if a log does not exist a warning is written on the log and the data is not saved in the file
 
-        metadata = CommentedMap()
+        metadata = OrderedDict()
 
         metadata["format"] = "yaml/frida 2.0"
         metadata["type"] = "generic tabular data"
@@ -118,7 +121,7 @@ class SaveYDA(PythonAlgorithm):
         if run.hasProperty("temperature"):
             temperature = float(run.getLogData("temperature").value)
 
-            temp = CommentedMap()
+            temp = OrderedDict()
             temp["name"] = "T"
             temp["unit"] = "K"
             temp["val"] = temperature
@@ -131,7 +134,7 @@ class SaveYDA(PythonAlgorithm):
         if run.hasProperty("Ei"):
             eimeV = float(run.getLogData("Ei").value)
 
-            ei = CommentedMap()
+            ei = OrderedDict()
             ei["name"] = "Ei"
             ei["unit"] = "meV"
             ei["val"] = eimeV
@@ -141,26 +144,25 @@ class SaveYDA(PythonAlgorithm):
         else:
             self.log().warning("no Ei found")
 
-        coord = CommentedMap()
+        coord = OrderedDict()
 
-        x = CommentedMap()
+        x = FlowOrderedDict()
 
         x["name"] = "w"
         x["unit"] = "meV"
 
         # set_flow style is used to keep the Frida 2.0 yaml format
         coord["x"] = x
-        coord["x"].fa.set_flow_style()
+        #coord["x"].fa.set_flow_style()
 
-        y = CommentedMap()
+        y = FlowOrderedDict()
 
         y["name"] = "S(q,w)"
         y["unit"] = "meV-1"
 
         coord["y"] = y
-        coord["y"].fa.set_flow_style()
 
-        z = CommentedMap()
+        z = FlowOrderedDict()
 
         if ax.isSpectra():
             zname = "2th"
@@ -173,7 +175,6 @@ class SaveYDA(PythonAlgorithm):
         z["unit"] = zunit
 
         coord["z"] = z
-        coord["z"].fa.set_flow_style()
 
         slices = []
 
@@ -199,36 +200,33 @@ class SaveYDA(PythonAlgorithm):
 
         for i in range(nHist):
 
-            slicethis = CommentedMap()
+            slicethis = OrderedDict()
 
             # add j to slices, j = counts
             slicethis["j"] = i
 
             # save in list and commented Map to keep format
-            val = CommentedMap()
+            val = FlowOrderedDict()
             val["val"] = bin[i]
-            value = [val]
             # z is bin centers of y axis, SpectrumAxis or NumericAxis in q units
-            slicethis["z"] = CommentedSeq(value)
-            slicethis["z"].fa.set_flow_style()
+            slicethis["z"] = FlowList()
+            slicethis["z"].append(val)
 
             xax = ws.readX(i)
             # get the bin centers not the bin edges
             xcenters = self._get_bin_centers(xax)
             # x axis is NumericAxis in energy transfer units
             xx = [float(j) for j in xcenters]
-            slicethis["x"] = CommentedSeq(xx)
-            slicethis["x"].fa.set_flow_style()
+            slicethis["x"] = FlowList(xx)
 
             ys = ws.dataY(i)
             # y is dataY of the workspace
             yy = [float(j) for j in ys]
-            slicethis["y"] = CommentedSeq(yy)
-            slicethis["y"].fa.set_flow_style()
+            slicethis["y"] = FlowList(yy)
 
             slices.append(slicethis)
 
-        data = CommentedMap()
+        data = OrderedDict()
 
         data["Meta"] = metadata
         data["History"] = hist
@@ -240,15 +238,15 @@ class SaveYDA(PythonAlgorithm):
         # create yaml file
         try:
             with open(filename, "w") as outfile:
-                ruamel.yaml.round_trip_dump(data, outfile, block_seq_indent=2, indent=4)
+                yaml.dump(data, outfile, default_flow_style=False, canonical=False, Dumper=MyDumper)
                 outfile.close()
         except:
             raise RuntimeError("Can't write in File" + filename)
 
     def _get_bin_centers(self, ax):
         """ calculates the bin centers from the bin edges
-        :param bin center axis
-        :return list of bin centers:
+        :param ax: bin center axis
+        :return: list of bin centers
         """
         bin = []
 
@@ -256,6 +254,62 @@ class SaveYDA(PythonAlgorithm):
                 bin.append((ax[i]+ax[i-1])/2)
 
         return bin
+
+
+class MyDumper(Dumper):
+    """ regulates the indent for yaml Dumper
+    """
+    def increase_indent(self, flow=False, indentless=False):
+        return super(MyDumper, self).increase_indent(flow, False)
+
+
+class FlowOrderedDict(OrderedDict):
+    """ Helper class to switch between flow style and no flow style
+
+    Equal to OrderedDict class but other yaml representer
+    """
+    pass
+
+
+class FlowList(list):
+    """ Helper class to switch between flow style and no flow style
+
+    Equal to list class but other yaml representer
+    """
+    pass
+
+
+def _flow_list_rep(dumper, data):
+    """Yaml representer for list in flow style
+    """
+    return dumper.represent_sequence(u'tag:yaml.org,2002:seq', data, flow_style=True)
+
+
+def _flow_ord_dic_rep(dumper, data):
+    """Yaml representer for OrderedDict in flow style
+    """
+    return dumper.represent_mapping(u'tag:yaml.org,2002:map', data, flow_style=True)
+
+
+def _represent_ordered_dict(dumper, data):
+    """Yaml representer for OrderedDict
+
+    regulates dumping for class OrderedDict
+    """
+    value = []
+
+    for item_key, item_value in data.items():
+        node_key = dumper.represent_data(item_key)
+        node_value = dumper.represent_data(item_value)
+
+        value.append((node_key, node_value))
+
+    return yaml.nodes.MappingNode(u'tag:yaml.org,2002:map', value)
+
+# Adding representers to yaml
+yaml.add_representer(OrderedDict, _represent_ordered_dict)
+yaml.add_representer(FlowList, _flow_list_rep)
+yaml.add_representer(FlowOrderedDict, _flow_ord_dic_rep)
 
 #---------------------------------------------------------------------------------------------------------------------#
 

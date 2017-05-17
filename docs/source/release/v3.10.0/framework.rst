@@ -22,6 +22,7 @@ New
 ###
 
 - :ref:`DeleteWorkspaces <algm-DeleteWorkspaces>` will delete a list of workspaces.
+- New algorithm :ref:`SaveYDA <algm-SaveYDA>` do export :ref:`Workspace2D <Workspace2D>` to `Frida 2.0 <http://apps.jcns.fz-juelich.de/doku/frida/start>`_ YAML format.
 
 Improved
 ########

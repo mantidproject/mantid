@@ -41,8 +41,8 @@ class SaveYDATest(unittest.TestCase):
             meta.append(self._n_file.readline())
         # verify values
         self.assertEqual(meta[0], "Meta:\n")
-        self.assertEqual(meta[1], "    format: yaml/frida 2.0\n")
-        self.assertEqual(meta[2], "    type: generic tabular data\n")
+        self.assertEqual(meta[1], "  format: yaml/frida 2.0\n")
+        self.assertEqual(meta[2], "  type: generic tabular data\n")
 
     def test_history_all_samples(self):
         """ Test to save history from workspace with all sample logs
@@ -82,9 +82,9 @@ class SaveYDATest(unittest.TestCase):
                 coord.append(s)
 
         self.assertEqual(coord[0], "Coord:\n")
-        self.assertEqual(coord[1], "    x: {name: w, unit: meV}\n")
-        self.assertEqual(coord[2], "    y: {name: \'S(q,w)\', unit: meV-1}\n")
-        self.assertEqual(coord[3], "    z: {name: 2th, unit: deg}\n")
+        self.assertEqual(coord[1], "  x: {name: w, unit: meV}\n")
+        self.assertEqual(coord[2], "  y: {name: \'S(q,w)\', unit: meV-1}\n")
+        self.assertEqual(coord[3], "  z: {name: 2th, unit: deg}\n")
 
         ws = self._create_workspace(yAxSpec=False)
         f = self._file(ws, "File")
@@ -96,9 +96,9 @@ class SaveYDATest(unittest.TestCase):
                 coord.append(s)
 
         self.assertEqual(coord[0], "Coord:\n")
-        self.assertEqual(coord[1], "    x: {name: w, unit: meV}\n")
-        self.assertEqual(coord[2], "    y: {name: \'S(q,w)\', unit: meV-1}\n")
-        self.assertEqual(coord[3], "    z: {name: q, unit: A-1}\n")
+        self.assertEqual(coord[1], "  x: {name: w, unit: meV}\n")
+        self.assertEqual(coord[2], "  y: {name: \'S(q,w)\', unit: meV-1}\n")
+        self.assertEqual(coord[3], "  z: {name: q, unit: A-1}\n")
 
     def test_rpar(self):
         """ Test save RPar from workspace with and without sample logs
