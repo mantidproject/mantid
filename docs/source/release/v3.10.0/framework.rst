@@ -11,6 +11,7 @@ API
 
 - The default multiple file limit is now made facility dependent. It is 1000 for ILL, and 100 for all the others.
 - Frequency unit (GHz) included as an option to represent energy transfer.
+- Framework changes now mean scanning workspaces (workspaces with moving detectors) can be created. Currently this can be tested using a new option in :ref:`FilterEvents <algm-CreateSampleWorkspace-v1>`, by setting `NumScanPoints`.
 
 Algorithms
 ----------
