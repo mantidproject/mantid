@@ -11,20 +11,22 @@
 #include "MantidTypes/SpectrumDefinition.h"
 
 using namespace Mantid::API;
+using namespace Mantid::HistogramData;
 using namespace Mantid::Indexing;
 
 namespace Mantid {
 namespace DataObjects {
 
-ScanningWorkspaceBuilder::ScanningWorkspaceBuilder(size_t nDetectors,
-                                                   size_t nTimeIndexes,
-                                                   size_t nBins)
+ScanningWorkspaceBuilder::ScanningWorkspaceBuilder(const size_t nDetectors,
+                                                   const size_t nTimeIndexes,
+                                                   const size_t nBins)
     : m_nDetectors(nDetectors), m_nTimeIndexes(nTimeIndexes), m_nBins(nBins),
-      m_histogram(HistogramData::BinEdges({0, 1})),
+      m_histogram(BinEdges(nBins + 1, LinearGenerator(0.0, 1.0)),
+                  Counts(std::vector<double>(nBins, 0.0))),
       m_indexingType(IndexingType::DEFAULT) {}
 
 void ScanningWorkspaceBuilder::setInstrument(
-    boost::shared_ptr<const Geometry::Instrument> instrument) {
+    const boost::shared_ptr<const Geometry::Instrument> &instrument) {
   if (instrument->getNumberDetectors() < m_nDetectors) {
     throw std::logic_error("There are not enough detectors in the instrument "
                            "for the number of detectors set in the scanning "
@@ -34,8 +36,15 @@ void ScanningWorkspaceBuilder::setInstrument(
   m_instrument = instrument;
 }
 
+/**
+ * Set a histogram to be used for all the workspace spectra. This can be used to
+ *set the correct bin edges, but only if the binning is identical for every
+ *spectra.
+ *
+ * @param histogram A histogram with bin edges defined
+ */
 void ScanningWorkspaceBuilder::setHistogram(
-    HistogramData::Histogram histogram) {
+    const HistogramData::Histogram &histogram) {
   if ((histogram.counts().size() != m_nBins) ||
       (histogram.binEdges().size() != m_nBins + 1))
     throw std::logic_error(
@@ -44,12 +53,25 @@ void ScanningWorkspaceBuilder::setHistogram(
   m_histogram = histogram;
 }
 
+/**
+ * Set time ranges from a vector of start time, end time pairs.
+ *
+ * @param timeRanges A vector of DateAndTime pairs, corresponding to the start
+ *and end times
+ */
 void ScanningWorkspaceBuilder::setTimeRanges(const std::vector<
     std::pair<Kernel::DateAndTime, Kernel::DateAndTime>> &timeRanges) {
   verifyTimeIndexSize(timeRanges.size(), "start time, end time pairs");
   m_timeRanges = timeRanges;
 }
 
+/**
+ * Set time ranges from a start time and a vector of durations
+ *
+ * @param startTime A DateAndTime object corresponding to the start of the first
+ *scan
+ * @param durations A vector of doubles containing the duration in seconds
+ */
 void ScanningWorkspaceBuilder::setTimeRanges(
     const Kernel::DateAndTime &startTime,
     const std::vector<double> &durations) {
@@ -69,8 +91,15 @@ void ScanningWorkspaceBuilder::setTimeRanges(
   setTimeRanges(timeRanges);
 }
 
+/**
+ * Supply a vector of vectors which contain positions. The inner vectors should
+ *contain the position for each time index, the outer vector the vector for each
+ *detector.
+ *
+ * @param positions A vector of vectors containing positions
+ */
 void ScanningWorkspaceBuilder::setPositions(
-    std::vector<std::vector<Kernel::V3D>> &positions) {
+    const std::vector<std::vector<Kernel::V3D>> &positions) {
   for (const auto &vector : positions) {
     verifyTimeIndexSize(vector.size(), "positions");
   }
@@ -79,8 +108,15 @@ void ScanningWorkspaceBuilder::setPositions(
   m_positions = positions;
 }
 
+/**
+ * Supply a vector of vectors which contain rotations. The inner vectors should
+ *contain the rotation for each time index, the outer vector the vector for each
+ *detector.
+ *
+ * @param rotations A vector of vectors containing rotations
+ */
 void ScanningWorkspaceBuilder::setRotations(
-    std::vector<std::vector<Kernel::Quat>> &rotations) {
+    const std::vector<std::vector<Kernel::Quat>> &rotations) {
   for (const auto &vector : rotations) {
     verifyTimeIndexSize(vector.size(), "rotations");
   }
@@ -102,7 +138,7 @@ void ScanningWorkspaceBuilder::setRotations(
  *time indexes
  */
 void ScanningWorkspaceBuilder::setInstrumentAngles(
-    std::vector<double> &instrumentAngles) {
+    const std::vector<double> &instrumentAngles) {
 
   if (!m_positions.empty() || !m_rotations.empty())
     throw std::logic_error("Can not set instrument angles, as positions and/or "
@@ -112,13 +148,24 @@ void ScanningWorkspaceBuilder::setInstrumentAngles(
   m_instrumentAngles = instrumentAngles;
 }
 
-void ScanningWorkspaceBuilder::setIndexingType(IndexingType indexingType) {
+/**
+ * Set the indexing type, either to time or detector oriented indexing.
+ *
+ * @param indexingType An index type enum
+ */
+void ScanningWorkspaceBuilder::setIndexingType(
+    const IndexingType indexingType) {
   if (m_indexingType != IndexingType::DEFAULT)
     throw std::logic_error("Indexing type has been set already.");
 
   m_indexingType = indexingType;
 }
 
+/**
+ * Verify everything has been set that is required and return the workspace.
+ *
+ * @return Workspace2D with the scanning information set
+ */
 MatrixWorkspace_sptr ScanningWorkspaceBuilder::buildWorkspace() {
   validateInputs();
 
@@ -230,7 +277,7 @@ void ScanningWorkspaceBuilder::createDetectorOrientedIndexInfo(
 }
 
 void ScanningWorkspaceBuilder::verifyTimeIndexSize(
-    size_t timeIndexSize, const std::string &description) const {
+    const size_t timeIndexSize, const std::string &description) const {
   if (timeIndexSize != m_nTimeIndexes) {
     throw std::logic_error(
         "Number of " + description +
@@ -239,7 +286,7 @@ void ScanningWorkspaceBuilder::verifyTimeIndexSize(
 }
 
 void ScanningWorkspaceBuilder::verifyDetectorSize(
-    size_t detectorSize, const std::string &description) const {
+    const size_t detectorSize, const std::string &description) const {
   if (detectorSize != m_nDetectors) {
     throw std::logic_error("Number of " + description +
                            " supplied does not match the number of detectors.");

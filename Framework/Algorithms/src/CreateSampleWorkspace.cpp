@@ -162,9 +162,9 @@ void CreateSampleWorkspace::init() {
                   "the sample in M (default:10.0)");
   declareProperty("NumScanPoints", 1,
                   boost::make_shared<BoundedValidator<int>>(0, 360, true),
-                  "Add a number of detector scan points to the instrument. "
-                  "Minimum (default) is 1 scan point, which gives a "
-                  "non-scanning workspace.");
+                  "Add a number of time indexed detector scan points to the "
+                  "instrument. Minimum (default) is 1 scan point, which gives "
+                  "a non-scanning workspace.");
 }
 
 //----------------------------------------------------------------------------------------------

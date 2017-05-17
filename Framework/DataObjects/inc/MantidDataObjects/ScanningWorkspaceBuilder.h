@@ -13,7 +13,23 @@
 namespace Mantid {
 namespace DataObjects {
 
-/** ScanningWorkspaceBuilder : TODO: DESCRIPTION
+/** ScanningWorkspaceBuilder : This is a helper class to make it easy to build a
+  scanning workspace (a workspace with moving detectors), where all the
+  information about the scan is known in advance. The constructor takes the
+  arguments for the basic construction, then checks are made for consistency as
+  other information about the scanning workspace is set.
+
+  Things that must be set for successful building:
+   - Number of detectors, number of time indexes and number of bins (set via the
+  constructor)
+   - The instrument set via setInstrument
+   - The time ranges set via setTimeRanges
+
+  Some helper methods exist for specific cases, such as the whole instrument
+  rotating around the sample.
+
+  One current limitation to note here, that is not a general restriction within
+  Mantid, is that every detector must have the same set of time indexes.
 
   Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source
@@ -40,21 +56,22 @@ class MANTID_DATAOBJECTS_DLL ScanningWorkspaceBuilder {
 public:
   enum class IndexingType { DEFAULT, TIME_ORIENTED, DETECTOR_ORIENTED };
 
-  ScanningWorkspaceBuilder(size_t nDetectors, size_t nTimeIndexes,
-                           size_t nBins);
+  ScanningWorkspaceBuilder(const size_t nDetectors, const size_t nTimeIndexes,
+                           const size_t nBins);
 
-  void setHistogram(HistogramData::Histogram histogram);
+  void setHistogram(const HistogramData::Histogram &histogram);
 
-  void setInstrument(boost::shared_ptr<const Geometry::Instrument> instrument);
+  void setInstrument(
+      const boost::shared_ptr<const Geometry::Instrument> &instrument);
   void setTimeRanges(const std::vector<
       std::pair<Kernel::DateAndTime, Kernel::DateAndTime>> &timeRanges);
   void setTimeRanges(const Kernel::DateAndTime &startTime,
                      const std::vector<double> &durations);
-  void setPositions(std::vector<std::vector<Kernel::V3D>> &positions);
-  void setRotations(std::vector<std::vector<Kernel::Quat>> &rotations);
-  void setInstrumentAngles(std::vector<double> &instrumentAngles);
+  void setPositions(const std::vector<std::vector<Kernel::V3D>> &positions);
+  void setRotations(const std::vector<std::vector<Kernel::Quat>> &rotations);
+  void setInstrumentAngles(const std::vector<double> &instrumentAngles);
 
-  void setIndexingType(IndexingType indexingType);
+  void setIndexingType(const IndexingType indexingType);
 
   API::MatrixWorkspace_sptr buildWorkspace();
 
@@ -80,9 +97,9 @@ private:
   void createTimeOrientedIndexInfo(API::MatrixWorkspace &ws);
   void createDetectorOrientedIndexInfo(API::MatrixWorkspace &ws);
 
-  void verifyTimeIndexSize(size_t timeIndexSize,
+  void verifyTimeIndexSize(const size_t timeIndexSize,
                            const std::string &description) const;
-  void verifyDetectorSize(size_t detectorSize,
+  void verifyDetectorSize(const size_t detectorSize,
                           const std::string &description) const;
   void validateInputs() const;
 };

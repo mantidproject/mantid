@@ -7,6 +7,10 @@
 
 #include "MantidAPI/DetectorInfo.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidHistogramData/BinEdges.h"
+#include "MantidHistogramData/Histogram.h"
+#include "MantidHistogramData/LinearGenerator.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidTypes/SpectrumDefinition.h"
 
@@ -14,6 +18,7 @@
 
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
+using namespace Mantid::HistogramData;
 using namespace Mantid::Kernel;
 using Mantid::DataObjects::ScanningWorkspaceBuilder;
 
@@ -34,19 +39,7 @@ public:
     instrumentAngles.clear();
   }
 
-  void test_create_scanning_workspace_with_too_small_instrument() {
-    const auto &instrument = createSimpleInstrument(nDetectors, nBins);
-
-    auto builder =
-        ScanningWorkspaceBuilder(nDetectors + 1, nTimeIndexes, nBins);
-    TS_ASSERT_THROWS_EQUALS(builder.setInstrument(instrument),
-                            const std::logic_error &e, std::string(e.what()),
-                            "There are not enough detectors in the instrument "
-                            "for the number of detectors set in the scanning "
-                            "workspace builder.")
-  }
-
-  void test_create_scanning_workspace_with_correct_time_ranges() {
+  void test_create_scanning_workspace_with_instrument_and_time_ranges() {
     const auto &instrument = createSimpleInstrument(nDetectors, nBins);
 
     auto builder = ScanningWorkspaceBuilder(nDetectors, nTimeIndexes, nBins);
@@ -59,9 +52,62 @@ public:
 
     // Now check every detector has every time range set correctly
     checkTimeRanges(detectorInfo);
+    // Quick check to see if the instrument is set as expected
+    TS_ASSERT_EQUALS(instrument->getNumberDetectors(),
+                     ws->getInstrument()->getNumberDetectors())
   }
 
-  void test_create_scanning_workspace_with_correct_time_durations() {
+  void test_create_scanning_workspace_with_too_small_instrument() {
+    const auto &instrument = createSimpleInstrument(nDetectors, nBins);
+
+    auto builder =
+        ScanningWorkspaceBuilder(nDetectors + 1, nTimeIndexes, nBins);
+    TS_ASSERT_THROWS_EQUALS(builder.setInstrument(instrument),
+                            const std::logic_error &e, std::string(e.what()),
+                            "There are not enough detectors in the instrument "
+                            "for the number of detectors set in the scanning "
+                            "workspace builder.")
+  }
+
+  void test_create_scanning_workspace_with_histogram() {
+    const auto &instrument = createSimpleInstrument(nDetectors, nBins);
+
+    BinEdges x(nBins + 1, LinearGenerator(0.0, 1.0));
+    Counts y(std::vector<double>(nBins, 5.0));
+
+    auto builder = ScanningWorkspaceBuilder(nDetectors, nTimeIndexes, nBins);
+    TS_ASSERT_THROWS_NOTHING(builder.setInstrument(instrument));
+    TS_ASSERT_THROWS_NOTHING(builder.setTimeRanges(timeRanges));
+    TS_ASSERT_THROWS_NOTHING(builder.setHistogram(Histogram(x, y)));
+    MatrixWorkspace_const_sptr ws;
+    TS_ASSERT_THROWS_NOTHING(ws = builder.buildWorkspace());
+
+    for (size_t i = 0; i < ws->getNumberHistograms(); ++i) {
+      const auto &hist = ws->histogram(i);
+
+      const auto &xValues = hist.x();
+      for (size_t i = 0; i < xValues.size(); ++i)
+        TS_ASSERT_EQUALS(xValues[i], double(i))
+
+      const auto &yValues = hist.y();
+      for (size_t i = 0; i < yValues.size(); ++i)
+        TS_ASSERT_EQUALS(yValues[i], 5.0)
+    }
+  }
+
+  void test_create_scanning_workspace_with_incorrectly_sized_histogram() {
+    auto wrongNBins = nBins - 2;
+    BinEdges x(wrongNBins + 1, LinearGenerator(0.0, 1.0));
+    Counts y(std::vector<double>(wrongNBins, 5.0));
+
+    auto builder = ScanningWorkspaceBuilder(nDetectors, nTimeIndexes, nBins);
+    TS_ASSERT_THROWS_EQUALS(
+        builder.setHistogram(Histogram(x, y)), const std::logic_error &e,
+        std::string(e.what()),
+        "Histogram supplied does not have the correct size.")
+  }
+
+  void test_create_scanning_workspace_with_time_durations() {
     const auto &instrument = createSimpleInstrument(nDetectors, nBins);
 
     auto builder = ScanningWorkspaceBuilder(nDetectors, nTimeIndexes, nBins);
