@@ -165,7 +165,7 @@ void MuonAnalysis::initLayout() {
   }
 
   m_uiForm.fitBrowser->init();
-  
+
   // alow appending files
   m_uiForm.mwRunFiles->allowMultipleFiles(true);
 
@@ -323,8 +323,6 @@ void MuonAnalysis::initLayout() {
           SLOT(setChosenGroupSlot(QString &)));
   connect(this, SIGNAL(setChosenPeriodSignal(QString &)), this,
           SLOT(setChosenPeriodSlot(QString &)));
-
-
 }
 
 void MuonAnalysis::setChosenGroupSlot(QString &group) {
@@ -1862,7 +1860,7 @@ void MuonAnalysis::selectMultiPeak(const QString &wsName,
                    std::back_inserter(groupsAndPairs), &QString::fromStdString);
     m_uiForm.fitBrowser->setAvailableGroups(groupsAndPairs);
     m_uiForm.fitBrowser->setNumPeriods(m_numPeriods);
-	
+
     // Set the selected run, group/pair and period
     m_fitDataPresenter->setAssignedFirstRun(wsName, filePath);
   }
@@ -2154,8 +2152,6 @@ void MuonAnalysis::loadFittings() {
   // Set TF Asymmetry mode on/off as appropriate
   const auto &TFAsymmState = m_optionTab->getTFAsymmState();
   setTFAsymm(TFAsymmState);
-
-
 }
 /**
 * Handle "groups" selected/deselected
@@ -2166,9 +2162,9 @@ void MuonAnalysis::handleGroupBox() {
   m_dataSelector->setGroupsSelected(m_uiForm.fitBrowser->getChosenGroups());
   // update labels for single fit
   auto names = m_fitDataPresenter->generateWorkspaceNames(true);
- if (names.size() == 1) {
-		  updateLabels(names[0]);
-}
+  if (names.size() == 1) {
+    updateLabels(names[0]);
+  }
   m_fitDataPresenter->handleSelectedDataChanged(true);
 }
 /**
@@ -2181,7 +2177,7 @@ void MuonAnalysis::handlePeriodBox() {
   // update labels for single fit
   auto names = m_fitDataPresenter->generateWorkspaceNames(true);
   if (names.size() == 1) {
-	  updateLabels(names[0]);
+    updateLabels(names[0]);
   }
   m_fitDataPresenter->handleSelectedDataChanged(true);
 }
@@ -2189,10 +2185,10 @@ void MuonAnalysis::handlePeriodBox() {
 * Updates the labels (legend and ws) for
 * a single fit when within the mulit-
 * fit GUI.
-* @param name :: the name for the label. 
+* @param name :: the name for the label.
 */
 void MuonAnalysis::updateLabels(std::string &name) {
-	m_uiForm.fitBrowser->setOutputName(name);
+  m_uiForm.fitBrowser->setOutputName(name);
 }
 /**
  * Allow/disallow loading.
@@ -2508,7 +2504,6 @@ void MuonAnalysis::changeTab(int newTabIndex) {
           m_uiForm.mwRunFiles->getUserInput().toString();
       m_fitDataPresenter->setSelectedWorkspace(m_currentDataName, filePath);
       selectMultiPeak(m_currentDataName, filePath);
-
     }
 
     // In future, when workspace gets changed, show its plot and attach PP tool
@@ -2519,14 +2514,13 @@ void MuonAnalysis::changeTab(int newTabIndex) {
     // repeat setting the fitting ranges as the above code can set them to an
     // unwanted default value
     setFittingRanges(xmin, xmax);
-	//make sure groups are not on if single fit
-	if (m_optionTab->getMultiFitState() == Muon::MultiFitState::Disabled) {
-		m_uiForm.fitBrowser->setSingleFitLabel(m_currentDataName.toStdString());
-	}
-	else {
-		m_uiForm.fitBrowser->setAllGroups();
-		m_uiForm.fitBrowser->setChosenPeriods("1");
-	}
+    // make sure groups are not on if single fit
+    if (m_optionTab->getMultiFitState() == Muon::MultiFitState::Disabled) {
+      m_uiForm.fitBrowser->setSingleFitLabel(m_currentDataName.toStdString());
+    } else {
+      m_uiForm.fitBrowser->setAllGroups();
+      m_uiForm.fitBrowser->setChosenPeriods("1");
+    }
   } else if (newTab == m_uiForm.ResultsTable) {
     m_resultTableTab->refresh();
   }

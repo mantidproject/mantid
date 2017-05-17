@@ -266,7 +266,6 @@ void MuonFitPropertyBrowser::init() {
   // Update tooltips when function structure is (or might've been) changed in
   // any way
   connect(this, SIGNAL(functionChanged()), SLOT(updateStructureTooltips()));
-
 }
 // Set up the execution of the muon fit menu
 void MuonFitPropertyBrowser::executeFitMenu(const QString &item) {
@@ -361,15 +360,13 @@ void MuonFitPropertyBrowser::enumChanged(QtProperty *prop) {
       }
     }
     updatePeriodDisplay();
-  }
-  else if(prop==m_workspace){
-	  //make sure the output is updated
-	  FitPropertyBrowser::enumChanged(prop);
-	  int j = m_enumManager->value(m_workspace);
-	  std::string option = m_workspaceNames[j].toStdString();
-	  setOutputName(option);
-  }
-  else {
+  } else if (prop == m_workspace) {
+    // make sure the output is updated
+    FitPropertyBrowser::enumChanged(prop);
+    int j = m_enumManager->value(m_workspace);
+    std::string option = m_workspaceNames[j].toStdString();
+    setOutputName(option);
+  } else {
     FitPropertyBrowser::enumChanged(prop);
   }
 }
@@ -718,12 +715,10 @@ void MuonFitPropertyBrowser::runFit() {
         alg->setProperty("StartX_" + suffix, startX());
         alg->setProperty("EndX_" + suffix, endX());
       }
-	}
-	else {
-		setSingleFitLabel(wsName);
-	}
-	alg->setPropertyValue("Output", outputName());
-
+    } else {
+      setSingleFitLabel(wsName);
+    }
+    alg->setPropertyValue("Output", outputName());
 
     observeFinish(alg);
     alg->executeAsync();
@@ -926,11 +921,10 @@ void MuonFitPropertyBrowser::setMultiFittingMode(bool enabled) {
   this->clear();
   // set default selection (all groups)
   if (enabled) {
-	  setAllGroups();
-  }
-  else {// clear current selection
-	  clearChosenGroups();
-	  clearChosenPeriods();
+    setAllGroups();
+  } else { // clear current selection
+    clearChosenGroups();
+    clearChosenPeriods();
   }
   // Show or hide "Function" and "Data" sections
   m_browser->setItemVisible(m_functionsGroup, !enabled);
@@ -943,7 +937,6 @@ void MuonFitPropertyBrowser::setMultiFittingMode(bool enabled) {
       widget->setVisible(enabled);
     }
   }
-
 }
 /**
 * Set TF asymmetry mode on or off.
@@ -1339,26 +1332,26 @@ void MuonFitPropertyBrowser::combineBtnPressed() {
 }
 
 void MuonFitPropertyBrowser::setSingleFitLabel(std::string name) {
-	clearChosenGroups();
-	clearChosenPeriods();
-	std::vector<std::string> splitName;
-	std::string tmpName = name;
-	boost::erase_all(tmpName," ");
-	boost::split(splitName, tmpName, boost::is_any_of(";"));
-	//set single group/pair
-	QString group=QString::fromUtf8(splitName[2].c_str());
-	setChosenGroup(group);
-	//period is set
-	if (splitName.size() == 6) {
-		QString period = QString::fromUtf8(splitName[4].c_str());
-		setChosenPeriods(period);
-	}
-	setOutputName(name);
-	//for single fit in multi fit mode
-	if (m_browser->isItemVisible(m_multiFitSettingsGroup)) {
-		updateGroupDisplay();
-		updatePeriodDisplay();
-	}
+  clearChosenGroups();
+  clearChosenPeriods();
+  std::vector<std::string> splitName;
+  std::string tmpName = name;
+  boost::erase_all(tmpName, " ");
+  boost::split(splitName, tmpName, boost::is_any_of(";"));
+  // set single group/pair
+  QString group = QString::fromUtf8(splitName[2].c_str());
+  setChosenGroup(group);
+  // period is set
+  if (splitName.size() == 6) {
+    QString period = QString::fromUtf8(splitName[4].c_str());
+    setChosenPeriods(period);
+  }
+  setOutputName(name);
+  // for single fit in multi fit mode
+  if (m_browser->isItemVisible(m_multiFitSettingsGroup)) {
+    updateGroupDisplay();
+    updatePeriodDisplay();
+  }
 }
 
 } // MantidQt

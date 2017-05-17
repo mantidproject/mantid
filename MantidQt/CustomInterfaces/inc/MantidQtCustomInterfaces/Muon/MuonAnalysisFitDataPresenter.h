@@ -144,7 +144,6 @@ public slots:
   void doPreFitChecks(bool sequentialFit);
 
 private:
-
   /// Create analysis workspace
   Mantid::API::Workspace_sptr createWorkspace(const std::string &name,
                                               std::string &groupLabel) const;

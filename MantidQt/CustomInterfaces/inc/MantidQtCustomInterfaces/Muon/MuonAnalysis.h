@@ -340,7 +340,6 @@ private:
   /// set labels for a single data set
   void updateLabels(std::string &name);
 
-
   /// Get current plot style parameters. wsName and wsIndex are used to get
   /// default values if
   /// something is not specified
