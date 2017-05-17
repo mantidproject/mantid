@@ -75,8 +75,9 @@ void BinMD::init() {
       "due to disk thrashing.");
   setPropertyGroup("Parallel", grp);
 
-  declareProperty(make_unique<WorkspaceProperty<IMDWorkspace>>(
-                      "TemporaryDataWorkspace", "", Direction::Input),
+  declareProperty(make_unique<WorkspaceProperty<IMDHistoWorkspace>>(
+                      "TemporaryDataWorkspace", "", Direction::Input,
+                      PropertyMode::Optional),
                   "An input MDWorkspace.");
 
   declareProperty(make_unique<WorkspaceProperty<Workspace>>(
@@ -249,8 +250,10 @@ void BinMD::binByIterating(typename MDEventWorkspace<MDE, nd>::sptr ws) {
   errors = outWS->getErrorSquaredArray();
   numEvents = outWS->getNumEventsArray();
 
-  // Start with signal/error/numEvents at 0.0
-  outWS->setTo(0.0, 0.0, 0.0);
+  if (!m_accumulate) {
+    // Start with signal/error/numEvents at 0.0
+    outWS->setTo(0.0, 0.0, 0.0);
+  }
 
   // The dimension (in the output workspace) along which we chunk for parallel
   // processing
@@ -274,10 +277,10 @@ void BinMD::binByIterating(typename MDEventWorkspace<MDE, nd>::sptr ws) {
 
   // Total number of steps
   size_t progNumSteps = 0;
-  if (prog)
+  if (prog) {
     prog->setNotifyStep(0.1);
-  if (prog)
     prog->resetNumSteps(100, 0.00, 1.0);
+  }
 
   // Run the chunks in parallel. There is no overlap in the output workspace so
   // it is thread safe to write to it..
@@ -380,11 +383,13 @@ void BinMD::exec() {
   prog = new Progress(this, 0, 1.0, 1);
 
   // Create the dense histogram. This allocates the memory
-  outWS = this->getProperty("TemporaryDataWorkspace");
-  if (outWS) {
-    outWS->setTo(0., 0., 0.);
-  } else {
+  boost::shared_ptr<IMDHistoWorkspace> tmp =
+      this->getProperty("TemporaryDataWorkspace");
+  outWS = boost::dynamic_pointer_cast<MDHistoWorkspace>(tmp);
+  if (!outWS) {
     outWS = boost::make_shared<MDHistoWorkspace>(m_binDimensions);
+  } else {
+    m_accumulate = true;
   }
 
   // Saves the geometry transformation from original to binned in the workspace
