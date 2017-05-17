@@ -4,6 +4,7 @@
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidQtCustomInterfaces/EnggDiffraction/EnggDiffractionPresenter.h"
 
+#include "EnggDiffFittingViewMock.h"
 #include "EnggDiffractionViewMock.h"
 #include <cxxtest/TestSuite.h>
 
@@ -175,6 +176,14 @@ public:
 
   void test_loadExistingCalibWithAcceptableName() {
     testing::NiceMock<MockEnggDiffractionView> mockView;
+
+    // by setting this here, when initialising the presenter, the function will
+    // be called and the instrument name will be updated
+    const std::string instrumentName = "ENGINX";
+    EXPECT_CALL(mockView, currentInstrument())
+        .Times(1)
+        .WillOnce(Return(instrumentName));
+
     MantidQt::CustomInterfaces::EnggDiffractionPresenter pres(&mockView);
 
     // will need basic calibration settings from the user
@@ -183,10 +192,12 @@ public:
         .Times(1)
         .WillOnce(Return(calibSettings));
 
+    // update the selected instrument
     const std::string mockFname = "ENGINX_111111_222222_foo_bar.par";
     EXPECT_CALL(mockView, askExistingCalibFilename())
         .Times(1)
         .WillOnce(Return(mockFname));
+
     EXPECT_CALL(mockView, newCalibLoaded(testing::_, testing::_, mockFname))
         .Times(1);
 
@@ -1369,14 +1380,26 @@ public:
 
   void test_instChange() {
     testing::NiceMock<MockEnggDiffractionView> mockView;
+
+    // by setting this here, when initialising the presenter, the function will
+    // be called and the instrument name will be updated
+    const std::string instrumentName = "ENGINX";
+
+    // we are calling it twice, once on presenter initialisation
+    // and a second time after when using pres.notify!
+    EXPECT_CALL(mockView, currentInstrument())
+        .Times(2)
+        .WillRepeatedly(Return(instrumentName));
+
     MantidQt::CustomInterfaces::EnggDiffractionPresenter pres(&mockView);
 
-    // 1 error, no warnings
-    EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(1);
+    // we don't expect any warnings or errors
+    EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
     EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(0);
 
     // should not change status
     EXPECT_CALL(mockView, showStatus(testing::_)).Times(0);
+    EXPECT_CALL(mockView, updateTabsInstrument(testing::_)).Times(1);
 
     pres.notify(IEnggDiffractionPresenter::InstrumentChange);
     TSM_ASSERT(

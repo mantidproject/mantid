@@ -97,7 +97,7 @@ void store_value(DataObjects::Workspace2D_sptr ws, int specID, double value,
  * be used
  */
 int LoadSpice2D::confidence(Kernel::FileDescriptor &descriptor) const {
-  if (descriptor.extension().compare(".xml") != 0)
+  if (descriptor.extension() != ".xml")
     return 0;
 
   std::istream &is = descriptor.data();
@@ -122,7 +122,7 @@ int LoadSpice2D::confidence(Kernel::FileDescriptor &descriptor) const {
     // Get pointer to root element
     Element *pRootElem = pDoc->documentElement();
     if (pRootElem) {
-      if (pRootElem->tagName().compare("SPICErack") == 0) {
+      if (pRootElem->tagName() == "SPICErack") {
         confidence = 80;
       }
     }

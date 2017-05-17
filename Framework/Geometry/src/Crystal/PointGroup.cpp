@@ -320,5 +320,16 @@ operator()(const PointGroup::CrystalSystem &lhs,
   return static_cast<int>(lhs) < static_cast<int>(rhs);
 }
 
+/// Returns a streamed representation of the PointGroup object
+std::ostream &operator<<(std::ostream &stream, const PointGroup &self) {
+  stream << "Point group with:\n"
+         << "Lattice system: " << getLatticeSystemAsString(self.latticeSystem())
+         << "\n"
+         << "Crystal system: " << getCrystalSystemAsString(self.crystalSystem())
+         << "\n"
+         << "Symbol: " << self.getSymbol();
+  return stream;
+}
+
 } // namespace Mantid
 } // namespace Geometry

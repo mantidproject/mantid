@@ -98,6 +98,9 @@ protected:
   std::string m_hmSymbol;
 };
 
+MANTID_GEOMETRY_DLL std::ostream &operator<<(std::ostream &stream,
+                                             const SpaceGroup &self);
+
 typedef boost::shared_ptr<SpaceGroup> SpaceGroup_sptr;
 typedef boost::shared_ptr<const SpaceGroup> SpaceGroup_const_sptr;
 

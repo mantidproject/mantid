@@ -851,19 +851,19 @@ void LeBailFit::processInputProperties() {
   // d) Determine Functionality (function mode)
   std::string function = this->getProperty("Function");
   m_fitMode = FIT; // Default: LeBailFit
-  if (function.compare("Calculation") == 0) {
+  if (function == "Calculation") {
     // peak calculation
     m_fitMode = CALCULATION;
-  } else if (function.compare("CalculateBackground") == 0) {
+  } else if (function == "CalculateBackground") {
     // automatic background points selection
     m_fitMode = BACKGROUNDPROCESS;
-  } else if (function.compare("MonteCarlo") == 0) {
+  } else if (function == "MonteCarlo") {
     // Monte Carlo random walk refinement
     m_fitMode = MONTECARLO;
-  } else if (function.compare("LeBailFit") == 0) {
+  } else if (function == "LeBailFit") {
     // Le Bail Fit mode
     m_fitMode = FIT;
-  } else if (function.compare("RefineBackground") == 0) {
+  } else if (function == "RefineBackground") {
     // Refine background mode
     m_fitMode = BACKGROUNDPROCESS;
   } else {
@@ -941,7 +941,7 @@ void LeBailFit::parseInstrumentParametersTable() {
     // c) Parse each term
     for (size_t icol = 0; icol < numcols; ++icol) {
       colname = colnames[icol];
-      if (colname.compare("FitOrTie") != 0 && colname.compare("Name") != 0) {
+      if (colname != "FitOrTie" && colname != "Name") {
         // double data
         g_log.debug() << "Col-name = " << colname << ", ";
         trow >> dblvalue;
@@ -1080,8 +1080,7 @@ void LeBailFit::parseBraggPeaksParametersTable() {
                   << " < 3 as required.\n";
     throw std::runtime_error("Input parameter workspace is wrong. ");
   }
-  if (colnames[0].compare("H") != 0 || colnames[1].compare("K") != 0 ||
-      colnames[2].compare("L") != 0) {
+  if (colnames[0] != "H" || colnames[1] != "K" || colnames[2] != "L") {
     stringstream errss;
     errss << "Input Bragg peak parameter TableWorkspace does not have the "
              "columns in order.  "
@@ -1092,7 +1091,7 @@ void LeBailFit::parseBraggPeaksParametersTable() {
 
   // Has peak height?
   bool hasPeakHeight = false;
-  if (colnames.size() >= 4 && colnames[3].compare("PeakHeight") == 0) {
+  if (colnames.size() >= 4 && colnames[3] == "PeakHeight") {
     // Has a column for peak height
     hasPeakHeight = true;
   }

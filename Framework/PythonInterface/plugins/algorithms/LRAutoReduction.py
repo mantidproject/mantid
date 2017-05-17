@@ -38,8 +38,11 @@ class LRAutoReduction(PythonAlgorithm):
 
     def PyInit(self):
         """ Property declarations """
-        self.declareProperty(FileProperty("Filename", "", FileAction.Load, ['.nxs']),
+        self.declareProperty(FileProperty("Filename", "", FileAction.OptionalLoad, ['.nxs']),
                              "Data file to reduce")
+        self.declareProperty(WorkspaceProperty("InputWorkspace", "",
+                                               Direction.Input, PropertyMode.Optional),
+                             "Optionally, we can provide a workspace directly")
         self.declareProperty(FileProperty("TemplateFile", "", FileAction.OptionalLoad, ['.xml']),
                              "Template reduction file")
 
@@ -78,7 +81,21 @@ class LRAutoReduction(PythonAlgorithm):
                              "Run sequence information (run number, sequence ID, sequence number).")
         self.declareProperty("SlitTolerance", 0.02, doc="Tolerance for matching slit positions")
 
-    def _get_series_info(self, filename):
+    def load_data(self):
+        """
+            Load the data. We can either load it from the specified
+            run numbers, or use the input workspace if no runs are specified.
+        """
+        filename = self.getProperty("Filename").value
+        ws_event_data = self.getProperty("InputWorkspace").value
+
+        if len(filename) > 0:
+            ws_event_data = LoadEventNexus(Filename=filename, MetaDataOnly=False)
+        elif ws_event_data is None:
+            raise RuntimeError("No input data was specified")
+        return ws_event_data
+
+    def _get_series_info(self):
         """
             Retrieve the information about the scan series so
             that we know how to put all the pieces together.
@@ -87,7 +104,7 @@ class LRAutoReduction(PythonAlgorithm):
             We can also pull some of the information from the title.
         """
         # Load meta data to decide what to do
-        self.event_data = LoadEventNexus(Filename=filename, MetaDataOnly=False)
+        self.event_data = self.load_data()
         meta_data_run = self.event_data.getRun()
         run_number = self.event_data.getRunNumber()
 
@@ -586,11 +603,10 @@ class LRAutoReduction(PythonAlgorithm):
             return default
 
     def PyExec(self):
-        filename = self.getProperty("Filename").value
         slit_tolerance = self.getProperty("SlitTolerance").value
 
         # Determine where we are in the scan
-        run_number, first_run_of_set, sequence_number, do_reduction, is_direct_beam = self._get_series_info(filename)
+        run_number, first_run_of_set, sequence_number, do_reduction, is_direct_beam = self._get_series_info()
         logger.information("Run %s - Sequence %s [%s/%s]" % (run_number, first_run_of_set,
                                                              sequence_number,
                                                              self._get_sequence_total(default=-1)))
@@ -631,7 +647,8 @@ class LRAutoReduction(PythonAlgorithm):
         self._write_template(data_set, run_number, first_run_of_set, sequence_number)
 
         # Execute the reduction
-        LiquidsReflectometryReduction(RunNumbers=[int(run_number)],
+        LiquidsReflectometryReduction(#RunNumbers=[int(run_number)],
+                                      InputWorkspace=self.event_data,
                                       NormalizationRunNumber=str(data_set.norm_file),
                                       SignalPeakPixelRange=data_set.DataPeakPixels,
                                       SubtractSignalBackground=data_set.DataBackgroundFlag,

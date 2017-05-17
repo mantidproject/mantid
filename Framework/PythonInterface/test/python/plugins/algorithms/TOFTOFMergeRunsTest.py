@@ -87,6 +87,14 @@ class TOFTOFMergeRunsTest(unittest.TestCase):
         if "output_ws" is not None:
             AnalysisDataService.remove("output_ws")
 
+    def test_single_ws(self):
+        OutputWorkspaceName = "output_ws"
+        Inputws = self._input_ws_base.name()
+        alg_test = run_algorithm("TOFTOFMergeRuns",
+                                 InputWorkspaces=Inputws,
+                                 OutputWorkspace=OutputWorkspaceName)
+        self.assertTrue(alg_test.isExecuted())
+
     def cleanUp(self):
         if self._input_ws_base is not None:
             DeleteWorkspace(self._input_ws_base)
