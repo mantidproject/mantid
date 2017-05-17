@@ -2,8 +2,10 @@
 #include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/ICompAssembly.h"
 #include "MantidGeometry/IDetector.h"
-#include "MantidBeamline/ComponentInfo.h"
+#include "MantidGeometry/Instrument/ParameterMap.h"
+#include "MantidKernel/EigenConversionHelpers.h"
 #include "MantidKernel/make_unique.h"
+#include "MantidBeamline/ComponentInfo.h"
 
 #include <numeric>
 #include <algorithm>
@@ -27,10 +29,22 @@ makeDetIdToIndexMap(const std::vector<detid_t> &detIds) {
   }
   return std::move(detIdToIndex);
 }
+
+void clearPositionAndRotationsParameters(ParameterMap &pmap,
+                                         const IComponent &comp) {
+  pmap.clearParametersByName(ParameterMap::pos(), &comp);
+  pmap.clearParametersByName(ParameterMap::posx(), &comp);
+  pmap.clearParametersByName(ParameterMap::posy(), &comp);
+  pmap.clearParametersByName(ParameterMap::posz(), &comp);
+  pmap.clearParametersByName(ParameterMap::rot(), &comp);
+  pmap.clearParametersByName(ParameterMap::rotx(), &comp);
+  pmap.clearParametersByName(ParameterMap::roty(), &comp);
+  pmap.clearParametersByName(ParameterMap::rotz(), &comp);
+}
 }
 
 InfoComponentVisitor::InfoComponentVisitor(
-    std::vector<detid_t> orderedDetectorIds)
+    std::vector<detid_t> orderedDetectorIds, ParameterMap &pmap)
     : m_componentIds(boost::make_shared<std::vector<ComponentID>>(
           orderedDetectorIds.size(), nullptr)),
       m_assemblySortedDetectorIndices(
@@ -40,7 +54,10 @@ InfoComponentVisitor::InfoComponentVisitor(
           std::unordered_map<Mantid::Geometry::IComponent *, size_t>>()),
       m_detectorIdToIndexMap(makeDetIdToIndexMap(orderedDetectorIds)),
       m_orderedDetectorIds(boost::make_shared<std::vector<detid_t>>(
-          std::move(orderedDetectorIds))) {
+          std::move(orderedDetectorIds))),
+      m_positions(boost::make_shared<std::vector<Eigen::Vector3d>>()),
+      m_rotations(boost::make_shared<std::vector<Eigen::Quaterniond>>()),
+      m_pmap(pmap) {
   const auto nDetectors = m_orderedDetectorIds->size();
   m_assemblySortedDetectorIndices->reserve(nDetectors);
   m_componentIdToIndexMap->reserve(nDetectors);
@@ -70,6 +87,9 @@ void InfoComponentVisitor::registerComponentAssembly(
       m_componentIds->size();
   // For any non-detector we extend the m_componetIds from the back
   m_componentIds->emplace_back(assembly.getComponentID());
+  m_positions->emplace_back(Kernel::toVector3d(assembly.getPos()));
+  m_rotations->emplace_back(Kernel::toQuaterniond(assembly.getRotation()));
+  clearPositionAndRotationsParameters(m_pmap, assembly);
 }
 
 /**
@@ -87,6 +107,9 @@ void InfoComponentVisitor::registerGenericComponent(
   (*m_componentIdToIndexMap)[component.getComponentID()] =
       m_componentIds->size();
   m_componentIds->emplace_back(component.getComponentID());
+  m_positions->emplace_back(Kernel::toVector3d(component.getPos()));
+  m_rotations->emplace_back(Kernel::toQuaterniond(component.getRotation()));
+  clearPositionAndRotationsParameters(m_pmap, component);
 }
 
 /**
@@ -121,6 +144,12 @@ void InfoComponentVisitor::registerDetector(const IDetector &detector) {
     (*m_componentIds)[detectorIndex] = detector.getComponentID();
     m_assemblySortedDetectorIndices->push_back(detectorIndex);
   }
+  /* Note that positions and rotations for detectors are currently
+  NOT stored! These go into DetectorInfo at present. push_back works for other
+  Component types because Detectors are always come first in the resultant
+  component list
+  forming a contiguous block.
+  */
 }
 
 /**
@@ -186,6 +215,16 @@ InfoComponentVisitor::componentInfo() const {
 boost::shared_ptr<std::vector<detid_t>>
 InfoComponentVisitor::detectorIds() const {
   return m_orderedDetectorIds;
+}
+
+boost::shared_ptr<std::vector<Eigen::Vector3d>>
+InfoComponentVisitor::positions() const {
+  return m_positions;
+}
+
+boost::shared_ptr<std::vector<Eigen::Quaterniond>>
+InfoComponentVisitor::rotations() const {
+  return m_rotations;
 }
 
 } // namespace Geometry

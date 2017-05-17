@@ -8,6 +8,7 @@
 #include <vector>
 #include <unordered_map>
 #include <boost/shared_ptr.hpp>
+#include <Eigen/Geometry>
 
 namespace Mantid {
 using detid_t = int32_t;
@@ -15,6 +16,7 @@ namespace Geometry {
 class IComponent;
 class ICompAssembly;
 class IDetector;
+class ParameterMap;
 }
 namespace Beamline {
 class ComponentInfo;
@@ -78,8 +80,18 @@ private:
   /// Detector indices
   boost::shared_ptr<std::vector<detid_t>> m_orderedDetectorIds;
 
+  /// Positions
+  boost::shared_ptr<std::vector<Eigen::Vector3d>> m_positions;
+
+  /// Rotations
+  boost::shared_ptr<std::vector<Eigen::Quaterniond>> m_rotations;
+
+  /// Parameter map to purge.
+  Mantid::Geometry::ParameterMap &m_pmap;
+
 public:
-  InfoComponentVisitor(std::vector<detid_t> orderedDetectorIds);
+  InfoComponentVisitor(std::vector<detid_t> orderedDetectorIds,
+                       ParameterMap &pmap);
 
   virtual void registerComponentAssembly(
       const Mantid::Geometry::ICompAssembly &assembly) override;
@@ -111,6 +123,10 @@ public:
   std::unique_ptr<Beamline::ComponentInfo> componentInfo() const;
 
   boost::shared_ptr<std::vector<detid_t>> detectorIds() const;
+
+  boost::shared_ptr<std::vector<Eigen::Vector3d>> positions() const;
+
+  boost::shared_ptr<std::vector<Eigen::Quaterniond>> rotations() const;
 };
 } // namespace Geometry
 } // namespace Mantid
