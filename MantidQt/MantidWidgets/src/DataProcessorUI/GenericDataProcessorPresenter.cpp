@@ -220,6 +220,9 @@ void GenericDataProcessorPresenter::process() {
   m_progressReporter =
       new ProgressPresenter(progress, maxProgress, maxProgress, m_progressView);
 
+  // Clear the group queue
+  m_gqueue = GroupQueue();
+
   for (const auto &item : m_selectedData) {
     // Loop over each group
     RowQueue rowQueue;
@@ -319,8 +322,10 @@ void GenericDataProcessorPresenter::nextGroup() {
     if (m_view->getEnableNotebook())
       saveNotebook(m_selectedData);
     // Signal end of reduction
+    pause();
     m_mainPresenter->notify(
         DataProcessorMainPresenter::ConfirmReductionPausedFlag);
+    m_selectionChanged = true; // Allow same selection to be processed again
   }
 }
 
@@ -979,9 +984,6 @@ void GenericDataProcessorPresenter::notify(DataProcessorPresenter::Flag flag) {
   case DataProcessorPresenter::PauseFlag:
     pause();
     break;
-  case DataProcessorPresenter::ResumeFlag:
-    resume();
-    break;
   case DataProcessorPresenter::SelectionChangedFlag:
     m_selectionChanged = true;
     break;
@@ -1430,6 +1432,8 @@ void GenericDataProcessorPresenter::resume() {
     nextGroup();
     break;
   }
+  // Not having a 'default' case is deliberate. gcc issues a warning if there's
+  // a flag we aren't handling.
 }
 
 /**

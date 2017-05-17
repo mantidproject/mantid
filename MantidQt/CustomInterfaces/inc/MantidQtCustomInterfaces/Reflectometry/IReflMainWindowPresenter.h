@@ -40,8 +40,6 @@ public:
   virtual ~IReflMainWindowPresenter(){};
 
   enum Flag {
-    PauseReductionFlag,
-    ResumeReductionFlag,
     ConfirmReductionPausedFlag,
     ConfirmReductionResumedFlag
   };

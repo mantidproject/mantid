@@ -126,12 +126,6 @@ void ReflRunsTabPresenter::notify(IReflRunsTabPresenter::Flag flag) {
   case IReflRunsTabPresenter::GroupChangedFlag:
     pushCommands();
     break;
-  case IReflRunsTabPresenter::PauseReductionFlag:
-    pauseReduction();
-    break;
-  case IReflRunsTabPresenter::ResumeReductionFlag:
-    resumeReduction();
-    break;
   }
   // Not having a 'default' case is deliberate. gcc issues a warning if there's
   // a flag we aren't handling.
@@ -522,24 +516,6 @@ void ReflRunsTabPresenter::changeInstrument() {
   Mantid::Kernel::ConfigService::Instance().setString("default.instrument",
                                                       instrument);
   g_log.information() << "Instrument changed to " << instrument;
-}
-
-/**
-Tells table presenter to pause reducing runs
-*/
-void ReflRunsTabPresenter::pauseReduction() {
-
-  m_tablePresenters[m_view->getSelectedGroup()]->notify(
-      DataProcessorPresenter::PauseFlag);
-}
-
-/**
-Tells table presenter to resume reducing runs
-*/
-void ReflRunsTabPresenter::resumeReduction() {
-
-  m_tablePresenters[m_view->getSelectedGroup()]->notify(
-      DataProcessorPresenter::ResumeFlag);
 }
 
 const std::string ReflRunsTabPresenter::MeasureTransferMethod = "Measurement";

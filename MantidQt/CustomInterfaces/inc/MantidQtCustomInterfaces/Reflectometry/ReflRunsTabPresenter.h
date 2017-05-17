@@ -115,9 +115,6 @@ private:
   std::unique_ptr<ReflTransferStrategy> getTransferStrategy();
   /// change the instrument
   void changeInstrument();
-  /// handle pausing/resuming reduction
-  void pauseReduction();
-  void resumeReduction();
 };
 }
 }
