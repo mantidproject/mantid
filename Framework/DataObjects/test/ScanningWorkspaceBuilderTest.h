@@ -263,44 +263,42 @@ public:
     MatrixWorkspace_const_sptr ws;
     TS_ASSERT_THROWS_NOTHING(ws = builder.buildWorkspace())
 
-    const auto &detectorInfo = ws->detectorInfo();
+    const auto &detInfo = ws->detectorInfo();
 
     for (size_t i = 0; i < nDetectors; ++i) {
-      TS_ASSERT_DELTA(0.0, detectorInfo.position({i, 0}).X(), 1e-12)
-      TS_ASSERT_DELTA(5.0, detectorInfo.position({i, 0}).Z(), 1e-12)
+      TS_ASSERT_DELTA(0.0, detInfo.position({i, 0}).X(), 1e-12)
+      TS_ASSERT_DELTA(5.0, detInfo.position({i, 0}).Z(), 1e-12)
 
-      TS_ASSERT_DELTA(2.5, detectorInfo.position({i, 1}).X(), 1e-12)
-      TS_ASSERT_DELTA(5.0 * sqrt(3) / 2, detectorInfo.position({i, 1}).Z(),
-                      1e-12)
+      TS_ASSERT_DELTA(2.5, detInfo.position({i, 1}).X(), 1e-12)
+      TS_ASSERT_DELTA(5.0 * sqrt(3) / 2, detInfo.position({i, 1}).Z(), 1e-12)
 
-      TS_ASSERT_DELTA(5.0 * sqrt(3) / 2, detectorInfo.position({i, 2}).X(),
-                      1e-12)
-      TS_ASSERT_DELTA(2.5, detectorInfo.position({i, 2}).Z(), 1e-12)
+      TS_ASSERT_DELTA(5.0 * sqrt(3) / 2, detInfo.position({i, 2}).X(), 1e-12)
+      TS_ASSERT_DELTA(2.5, detInfo.position({i, 2}).Z(), 1e-12)
 
-      TS_ASSERT_DELTA(5.0, detectorInfo.position({i, 3}).X(), 1e-12)
-      TS_ASSERT_DELTA(0.0, detectorInfo.position({i, 3}).Z(), 1e-12)
+      TS_ASSERT_DELTA(5.0, detInfo.position({i, 3}).X(), 1e-12)
+      TS_ASSERT_DELTA(0.0, detInfo.position({i, 3}).Z(), 1e-12)
 
       for (size_t j = 0; j < nTimeIndexes; ++j) {
-        TS_ASSERT_EQUALS(0.0, detectorInfo.position({double(i) * 0.1, j}).Y())
+        TS_ASSERT_EQUALS(0.0, detInfo.position({double(i) * 0.1, j}).Y())
       }
     }
 
     for (size_t i = 0; i < nDetectors; ++i) {
       for (size_t j = 0; j < nTimeIndexes; ++j) {
-        TS_ASSERT_DELTA(
-            0.0, detectorInfo.rotation({i, j}).getEulerAngles("XYZ")[0], 1e-12)
-        TS_ASSERT_DELTA(
-            0.0, detectorInfo.rotation({i, j}).getEulerAngles("XYZ")[2], 1e-12)
+        TS_ASSERT_DELTA(0.0, detInfo.rotation({i, j}).getEulerAngles("XYZ")[0],
+                        1e-12)
+        TS_ASSERT_DELTA(0.0, detInfo.rotation({i, j}).getEulerAngles("XYZ")[2],
+                        1e-12)
       }
 
-      TS_ASSERT_DELTA(
-          0.0, detectorInfo.rotation({i, 0}).getEulerAngles("XYZ")[1], 1e-12)
-      TS_ASSERT_DELTA(
-          30.0, detectorInfo.rotation({i, 1}).getEulerAngles("XYZ")[1], 1e-12)
-      TS_ASSERT_DELTA(
-          60.0, detectorInfo.rotation({i, 2}).getEulerAngles("XYZ")[1], 1e-12)
-      TS_ASSERT_DELTA(
-          90.0, detectorInfo.rotation({i, 3}).getEulerAngles("XYZ")[1], 1e-12)
+      TS_ASSERT_DELTA(0.0, detInfo.rotation({i, 0}).getEulerAngles("XYZ")[1],
+                      1e-12)
+      TS_ASSERT_DELTA(30.0, detInfo.rotation({i, 1}).getEulerAngles("XYZ")[1],
+                      1e-12)
+      TS_ASSERT_DELTA(60.0, detInfo.rotation({i, 2}).getEulerAngles("XYZ")[1],
+                      1e-12)
+      TS_ASSERT_DELTA(90.0, detInfo.rotation({i, 3}).getEulerAngles("XYZ")[1],
+                      1e-12)
     }
   }
 
@@ -315,10 +313,68 @@ public:
   }
 
   void
+  test_creating_workspace_with_positions_fails_with_positions_already_set() {
+    auto builder = ScanningWorkspaceBuilder(nDetectors, nTimeIndexes, nBins);
+    initalisePositions(nDetectors, nTimeIndexes);
+    TS_ASSERT_THROWS_NOTHING(builder.setPositions(positions))
+    TS_ASSERT_THROWS_EQUALS(builder.setPositions(positions),
+                            const std::logic_error &e, std::string(e.what()),
+                            "Can not set positions, as positions "
+                            "or instrument angles have already been set.")
+  }
+
+  void
+  test_creating_workspace_with_rotations_fails_with_positions_already_set() {
+    auto builder = ScanningWorkspaceBuilder(nDetectors, nTimeIndexes, nBins);
+    initaliseRotations(nDetectors, nTimeIndexes);
+    TS_ASSERT_THROWS_NOTHING(builder.setRotations(rotations))
+    TS_ASSERT_THROWS_EQUALS(builder.setRotations(rotations),
+                            const std::logic_error &e, std::string(e.what()),
+                            "Can not set rotations, as rotations "
+                            "or instrument angles have already been set.")
+  }
+
+  void
+  test_creating_workspace_with_positions_fails_with_instrument_angles_set() {
+    auto builder = ScanningWorkspaceBuilder(nDetectors, nTimeIndexes, nBins);
+    initialiseInstrumentAngles(nTimeIndexes);
+    TS_ASSERT_THROWS_NOTHING(builder.setInstrumentAngles(instrumentAngles))
+    initalisePositions(nDetectors, nTimeIndexes);
+    TS_ASSERT_THROWS_EQUALS(builder.setPositions(positions),
+                            const std::logic_error &e, std::string(e.what()),
+                            "Can not set positions, as positions "
+                            "or instrument angles have already been set.")
+  }
+
+  void
+  test_creating_workspace_with_rotations_fails_with_instrument_angles_set() {
+    auto builder = ScanningWorkspaceBuilder(nDetectors, nTimeIndexes, nBins);
+    initialiseInstrumentAngles(nTimeIndexes);
+    TS_ASSERT_THROWS_NOTHING(builder.setInstrumentAngles(instrumentAngles))
+    initaliseRotations(nDetectors, nTimeIndexes);
+    TS_ASSERT_THROWS_EQUALS(builder.setRotations(rotations),
+                            const std::logic_error &e, std::string(e.what()),
+                            "Can not set rotations, as rotations "
+                            "or instrument angles have already been set.")
+  }
+
+  void
   test_creating_workspace_with_instrument_angles_fails_with_positions_already_set() {
     auto builder = ScanningWorkspaceBuilder(nDetectors, nTimeIndexes, nBins);
     initalisePositions(nDetectors, nTimeIndexes);
     TS_ASSERT_THROWS_NOTHING(builder.setPositions(positions))
+    initialiseInstrumentAngles(nTimeIndexes);
+    TS_ASSERT_THROWS_EQUALS(builder.setInstrumentAngles(instrumentAngles),
+                            const std::logic_error &e, std::string(e.what()),
+                            "Can not set instrument angles, as positions "
+                            "and/or rotations have already been set.")
+  }
+
+  void
+  test_creating_workspace_with_instrument_angles_fails_with_rotations_already_set() {
+    auto builder = ScanningWorkspaceBuilder(nDetectors, nTimeIndexes, nBins);
+    initaliseRotations(nDetectors, nTimeIndexes);
+    TS_ASSERT_THROWS_NOTHING(builder.setRotations(rotations))
     initialiseInstrumentAngles(nTimeIndexes);
     TS_ASSERT_THROWS_EQUALS(builder.setInstrumentAngles(instrumentAngles),
                             const std::logic_error &e, std::string(e.what()),

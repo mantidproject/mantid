@@ -100,6 +100,11 @@ void ScanningWorkspaceBuilder::setTimeRanges(
  */
 void ScanningWorkspaceBuilder::setPositions(
     const std::vector<std::vector<Kernel::V3D>> &positions) {
+
+  if (!m_positions.empty() || !m_instrumentAngles.empty())
+    throw std::logic_error("Can not set positions, as positions or instrument "
+                           "angles have already been set.");
+
   for (const auto &vector : positions) {
     verifyTimeIndexSize(vector.size(), "positions");
   }
@@ -117,6 +122,11 @@ void ScanningWorkspaceBuilder::setPositions(
  */
 void ScanningWorkspaceBuilder::setRotations(
     const std::vector<std::vector<Kernel::Quat>> &rotations) {
+
+  if (!m_rotations.empty() || !m_instrumentAngles.empty())
+    throw std::logic_error("Can not set rotations, as rotations or instrument "
+                           "angles have already been set.");
+
   for (const auto &vector : rotations) {
     verifyTimeIndexSize(vector.size(), "rotations");
   }
