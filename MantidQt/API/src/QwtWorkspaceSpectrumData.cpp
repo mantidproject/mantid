@@ -97,7 +97,12 @@ double QwtWorkspaceSpectrumData::getE(size_t i) const {
   return ei;
 }
 
-size_t QwtWorkspaceSpectrumData::esize() const { return m_E.size(); }
+size_t QwtWorkspaceSpectrumData::esize() const {
+  if (!isPlottable()) {
+    return 0;
+  }
+  return m_E.size();
+}
 
 /**
  * @return A string containin the text to use as an X axis label

@@ -204,7 +204,12 @@ double MantidQwtIMDWorkspaceData::getEX(size_t i) const {
 double MantidQwtIMDWorkspaceData::getE(size_t i) const { return m_E[i]; }
 
 /// Number of error bars to plot
-size_t MantidQwtIMDWorkspaceData::esize() const { return m_E.size(); }
+size_t MantidQwtIMDWorkspaceData::esize() const {
+  if (!isPlottable()) {
+    return 0;
+  }
+  return m_E.size();
+}
 
 bool MantidQwtIMDWorkspaceData::setAsDistribution(bool on) {
   m_isDistribution = on;

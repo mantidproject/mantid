@@ -143,7 +143,12 @@ double MantidQwtWorkspaceData::y(size_t i) const {
   return tmp;
 }
 
-size_t MantidQwtWorkspaceData::esize() const { return this->size(); }
+size_t MantidQwtWorkspaceData::esize() const {
+  if (!isPlottable()) {
+    return 0;
+  }
+  return this->size();
+}
 
 double MantidQwtWorkspaceData::e(size_t i) const {
   double ei = getE(i);
