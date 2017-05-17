@@ -1345,7 +1345,7 @@ void MuonFitPropertyBrowser::setSingleFitLabel(std::string name) {
   // set single group/pair
   QString group = QString::fromUtf8(splitName[2].c_str());
   setChosenGroup(group);
-  // period is set
+  // set period if available
   if (splitName.size() == 6) {
     QString period = QString::fromUtf8(splitName[4].c_str());
     setChosenPeriods(period);
