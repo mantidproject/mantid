@@ -155,6 +155,8 @@ endif()
 set ( MPISETUP_PY mpisetup )
 if ( MPI_EXPERIMENTAL )
   set ( IMPORT_MPI_IN_PYTHON True )
+else()
+  set ( IMPORT_MPI_IN_PYTHON False )
 endif()
 
 # Build version
