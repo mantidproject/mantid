@@ -131,15 +131,33 @@ void GraphDisplay::clear() {
  */
 void GraphDisplay::setRangeScale(double rangeScale) {
   m_rangeScale = rangeScale;
+  auto validateMinMax = [](double &min, double &max) {
+    if (std::isinf(min)) {
+      min = std::copysign(std::numeric_limits<double>::max(), min);
+    }
+    if (std::isinf(max)) {
+      max = std::copysign(std::numeric_limits<double>::max(), max);
+    }
+  };
 
   if (m_isVertical) {
+    double axis_min = m_minX;
     double axis_max = m_rangeScale * (m_maxX - m_minX) + m_minX;
-    m_graphPlot->setAxisScale(QwtPlot::xBottom, m_minX, axis_max);
-    m_graphPlot->setAxisScale(QwtPlot::yLeft, m_minY, m_maxY);
+    validateMinMax(axis_min, axis_max);
+    m_graphPlot->setAxisScale(QwtPlot::xBottom, axis_min, axis_max);
+    axis_min = m_minY;
+    axis_max = m_maxY;
+    validateMinMax(axis_min, axis_max);
+    m_graphPlot->setAxisScale(QwtPlot::yLeft, axis_min, axis_max);
   } else {
+    double axis_min = m_minY;
     double axis_max = m_rangeScale * (m_maxY - m_minY) + m_minY;
-    m_graphPlot->setAxisScale(QwtPlot::yLeft, m_minY, axis_max);
-    m_graphPlot->setAxisScale(QwtPlot::xBottom, m_minX, m_maxX);
+    validateMinMax(axis_min, axis_max);
+    m_graphPlot->setAxisScale(QwtPlot::yLeft, axis_min, axis_max);
+    axis_min = m_minX;
+    axis_max = m_maxX;
+    validateMinMax(axis_min, axis_max);
+    m_graphPlot->setAxisScale(QwtPlot::xBottom, axis_min, axis_max);
   }
   m_graphPlot->replot();
 }

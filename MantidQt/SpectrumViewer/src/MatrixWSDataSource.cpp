@@ -185,7 +185,8 @@ DataArray_const_sptr MatrixWSDataSource::getDataArray(double xMin, double xMax,
 
     m_matWs->generateHistogram(sourceRow, xScale, yVals, err, true);
     for (size_t col = 0; col < numCols; col++) {
-      newData[index] = (float)yVals[col];
+      float value = static_cast<float>(yVals[col]);
+      newData[index] = value;
       index++;
     }
   }
