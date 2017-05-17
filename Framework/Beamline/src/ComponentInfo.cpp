@@ -1,4 +1,5 @@
 #include "MantidBeamline/ComponentInfo.h"
+#include "MantidBeamline/DetectorInfo.h"
 #include <boost/make_shared.hpp>
 #include <numeric>
 #include <utility>
@@ -14,14 +15,39 @@ ComponentInfo::ComponentInfo()
 
 ComponentInfo::ComponentInfo(
     boost::shared_ptr<const std::vector<size_t>> assemblySortedDetectorIndices,
-    boost::shared_ptr<const std::vector<std::pair<size_t, size_t>>> ranges)
+    boost::shared_ptr<const std::vector<std::pair<size_t, size_t>>> ranges,
+    boost::shared_ptr<std::vector<Eigen::Vector3d>> positions,
+    boost::shared_ptr<std::vector<Eigen::Quaterniond>> rotations,
+    boost::shared_ptr<DetectorInfo> detectorInfo)
     : m_assemblySortedDetectorIndices(std::move(assemblySortedDetectorIndices)),
       m_ranges(std::move(ranges)),
-      m_size(m_assemblySortedDetectorIndices->size() + m_ranges->size()) {}
+      m_positions(std::move(positions)), m_rotations(std::move(rotations)),
+      m_size(m_assemblySortedDetectorIndices->size() + m_ranges->size()),
+      m_detectorInfo(detectorInfo)
+{
+    if (m_rotations->size() != m_positions->size()) {
+        throw std::invalid_argument("ComponentInfo should have been provided same "
+                                    "number of postions and rotations");
+      }
+      if (m_rotations->size() != m_ranges->size()) {
+        throw std::invalid_argument("ComponentInfo should have as many positions "
+                                    "and rotations as non-detector component "
+                                    "ranges");
+      }
+      if (m_detectorInfo->size() != m_assemblySortedDetectorIndices->size()) {
+        throw std::invalid_argument("ComponentInfo must have detector indices "
+                                    "input of same size as size of DetectorInfo");
+      }
+
+}
+
+bool ComponentInfo::isDetector(const size_t componentIndex) const {
+  return componentIndex < m_assemblySortedDetectorIndices->size();
+}
 
 std::vector<size_t>
 ComponentInfo::detectorIndices(const size_t componentIndex) const {
-  if (componentIndex < m_assemblySortedDetectorIndices->size()) {
+  if (isDetector(componentIndex)) {
     /* This is a single detector. Just return the corresponding index.
      * detectorIndex == componentIndex
      */
@@ -47,5 +73,50 @@ bool ComponentInfo::operator==(const ComponentInfo &other) const {
 bool ComponentInfo::operator!=(const ComponentInfo &other) const {
   return !(this->operator==(other));
 }
+
+Eigen::Vector3d ComponentInfo::position(const size_t componentIndex) const {
+  if (isDetector(componentIndex)) {
+    return m_detectorInfo->position(componentIndex);
+  }
+  const auto rangesIndex =
+      componentIndex - m_assemblySortedDetectorIndices->size();
+  return (*m_positions)[rangesIndex];
+}
+
+Eigen::Quaterniond ComponentInfo::rotation(const size_t componentIndex) const {
+  if (isDetector(componentIndex)) {
+    return m_detectorInfo->rotation(componentIndex);
+  }
+  const auto rangesIndex =
+      componentIndex - m_assemblySortedDetectorIndices->size();
+  return (*m_rotations)[rangesIndex];
+}
+
+void ComponentInfo::setPosition(const size_t componentIndex,
+                                const Eigen::Vector3d &position) {
+  if (isDetector(componentIndex)) {
+    m_detectorInfo->setPosition(componentIndex, position);
+  }
+  const auto rangesIndex =
+      componentIndex - m_assemblySortedDetectorIndices->size();
+  m_positions.access()[rangesIndex] = position;
+
+  // TODO. ALL Children need to be moved too!
+}
+
+void ComponentInfo::setRotation(const size_t componentIndex,
+                                const Eigen::Quaterniond &rotation) {
+
+  if (isDetector(componentIndex)) {
+    m_detectorInfo->setRotation(componentIndex, rotation);
+  }
+  const auto rangesIndex =
+      componentIndex - m_assemblySortedDetectorIndices->size();
+  m_rotations.access()[rangesIndex] = rotation; // TODO adjust position too.
+                                                // DetectorInfo doesn't seem to
+                                                // encapsulate this?
+  // TODO. ALL Children need to be rotated too!
+}
+
 } // namespace Beamline
 } // namespace Mantid
