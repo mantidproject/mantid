@@ -11,6 +11,8 @@ set( INCLUDE_FILES
   inc/MantidVatesSimpleGuiViewWidgets/LibHelper.h
   inc/MantidVatesSimpleGuiViewWidgets/MdViewerWidget.h
   inc/MantidVatesSimpleGuiViewWidgets/MultisliceView.h
+  inc/MantidVatesSimpleGuiViewWidgets/pqCameraToolbarNonOrthogonalAxes.h
+  inc/MantidVatesSimpleGuiViewWidgets/pqCameraReactionNonOrthogonalAxes.h
   inc/MantidVatesSimpleGuiViewWidgets/VatesParaViewApplication.h
   inc/MantidVatesSimpleGuiViewWidgets/RebinAlgorithmDialogProvider.h
   inc/MantidVatesSimpleGuiViewWidgets/PeaksTableControllerVsi.h
@@ -40,6 +42,8 @@ set( SOURCE_FILES
   src/PeaksTableControllerVsi.cpp
   src/PeaksTabWidget.cpp
   src/PeaksWidget.cpp
+  src/pqCameraToolbarNonOrthogonalAxes.cpp
+  src/pqCameraReactionNonOrthogonalAxes.cpp
   src/SaveScreenshotReaction.cpp
   src/RebinnedSourcesManager.cpp
   src/StandardView.cpp
@@ -64,6 +68,8 @@ qt4_wrap_cpp( MOC_SOURCES
   inc/MantidVatesSimpleGuiViewWidgets/PeaksTableControllerVsi.h
   inc/MantidVatesSimpleGuiViewWidgets/PeaksWidget.h
   inc/MantidVatesSimpleGuiViewWidgets/PeaksTabWidget.h
+  inc/MantidVatesSimpleGuiViewWidgets/pqCameraToolbarNonOrthogonalAxes.h
+  inc/MantidVatesSimpleGuiViewWidgets/pqCameraReactionNonOrthogonalAxes.h
   inc/MantidVatesSimpleGuiViewWidgets/SaveScreenshotReaction.h
   inc/MantidVatesSimpleGuiViewWidgets/RebinnedSourcesManager.h
   inc/MantidVatesSimpleGuiViewWidgets/StandardView.h
@@ -84,6 +90,7 @@ qt4_wrap_ui( UI_BUILT_SOURCES
   inc/MantidVatesSimpleGuiViewWidgets/MultisliceView.ui
   inc/MantidVatesSimpleGuiViewWidgets/PeaksWidget.ui
   inc/MantidVatesSimpleGuiViewWidgets/PeaksTabWidget.ui
+  inc/MantidVatesSimpleGuiViewWidgets/pqCameraToolbarNonOrthogonalAxes.ui
   inc/MantidVatesSimpleGuiViewWidgets/StandardView.ui
   inc/MantidVatesSimpleGuiViewWidgets/SplatterPlotView.ui
   inc/MantidVatesSimpleGuiViewWidgets/ThreesliceView.ui
@@ -131,7 +138,7 @@ set_property( TARGET VatesSimpleGuiViewWidgets PROPERTY FOLDER MantidVatesSimple
 
 include_directories( SYSTEM ${PARAVIEW_INCLUDE_DIRS} ${QWT_INCLUDE_DIR} ${PYTHON_INCLUDE_DIR} )
 
-target_link_libraries( VatesSimpleGuiViewWidgets LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} 
+target_link_libraries( VatesSimpleGuiViewWidgets LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME}
 pqApplicationComponents
 pqComponents
 ${vtkjsoncpp_LIBRARIES}
@@ -156,35 +163,33 @@ if (OSX_VERSION VERSION_GREATER 10.8)
 endif ()
 
 # Create test file projects
-if( CXXTEST_FOUND AND GMOCK_FOUND AND GTEST_FOUND )
-  include_directories ( SYSTEM ${CXXTEST_INCLUDE_DIR} ${GMOCK_INCLUDE_DIR} ${GTEST_INCLUDE_DIR})
+include_directories ( SYSTEM ${CXXTEST_INCLUDE_DIR} ${GMOCK_INCLUDE_DIR} ${GTEST_INCLUDE_DIR} )
 
-  include_directories( inc ../../../Framework/TestHelpers/inc ../../../Framework/DataHandling/inc ../../../Framework/DataObjects/inc)
-  set ( TESTHELPER_SRCS ../../../Framework/TestHelpers/src/ComponentCreationHelper.cpp 
-                        ../../../Framework/TestHelpers/src/InstrumentCreationHelper.cpp
-                        ../../../Framework/TestHelpers/src/WorkspaceCreationHelper.cpp
-                        ../../../Framework/TestHelpers/src/MDEventsTestHelper.cpp 
-                        ../../../Framework/TestHelpers/src/StartFrameworkManager.cpp )
-  cxxtest_add_test( VatesSimpleGuiViewWidgetsTest ${TEST_FILES} )
-  
-  target_link_libraries( VatesSimpleGuiViewWidgetsTest LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} 
-  VatesSimpleGuiViewWidgets 
+include_directories( inc ../../../Framework/TestHelpers/inc ../../../Framework/DataHandling/inc ../../../Framework/DataObjects/inc)
+set ( TESTHELPER_SRCS ../../../Framework/TestHelpers/src/ComponentCreationHelper.cpp
+                      ../../../Framework/TestHelpers/src/InstrumentCreationHelper.cpp
+                      ../../../Framework/TestHelpers/src/WorkspaceCreationHelper.cpp
+                      ../../../Framework/TestHelpers/src/MDEventsTestHelper.cpp
+                      ../../../Framework/TestHelpers/src/StartFrameworkManager.cpp )
+cxxtest_add_test( VatesSimpleGuiViewWidgetsTest ${TEST_FILES} )
+
+target_link_libraries( VatesSimpleGuiViewWidgetsTest LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME}
+  VatesSimpleGuiViewWidgets
   ${vtkjsoncpp_LIBRARIES}
-  DataHandling 
-  Kernel 
+  DataHandling
+  Kernel
   HistogramData
-  DataObjects 
+  DataObjects
   MantidQtAPI
   ${MANTID_SUBPROJECT_LIBS}
   ${POCO_LIBRARIES}
   ${Boost_LIBRARIES}
-  ${GMOCK_LIBRARIES} 
-  ${GTEST_LIBRARIES})
+  ${GMOCK_LIBRARIES}
+  ${GTEST_LIBRARIES} )
 
-  add_dependencies( AllTests VatesSimpleGuiViewWidgetsTest )
-  # Add to the 'UnitTests' group in VS
-  set_property ( TARGET VatesSimpleGuiViewWidgetsTest PROPERTY FOLDER "UnitTests" )
-endif()
+add_dependencies( AllTests VatesSimpleGuiViewWidgetsTest )
+# Add to the 'UnitTests' group in VS
+set_property ( TARGET VatesSimpleGuiViewWidgetsTest PROPERTY FOLDER "UnitTests" )
 
 configure_file ( ${CMAKE_CURRENT_SOURCE_DIR}/inc/MantidVatesSimpleGuiViewWidgets/LibHelper.h.in
                  ${CMAKE_CURRENT_SOURCE_DIR}/inc/MantidVatesSimpleGuiViewWidgets/LibHelper.h )

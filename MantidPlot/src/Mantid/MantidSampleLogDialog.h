@@ -60,6 +60,9 @@ public:
   /// Destructor
   virtual ~MantidSampleLogDialog() override;
 
+  /// Which type of filtering is selected
+  Mantid::API::LogFilterGenerator::FilterType getFilterType() const override;
+
 protected slots:
 
   /// Import a single item

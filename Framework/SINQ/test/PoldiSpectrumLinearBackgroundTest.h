@@ -1,16 +1,15 @@
 #ifndef MANTID_SINQ_POLDISPECTRUMLINEARBACKGROUNDTEST_H_
 #define MANTID_SINQ_POLDISPECTRUMLINEARBACKGROUNDTEST_H_
 
-#include <cxxtest/TestSuite.h>
-
 #include "MantidSINQ/PoldiUtilities/PoldiSpectrumLinearBackground.h"
 
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/AlgorithmManager.h"
-
 #include "MantidCurveFitting/Jacobian.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
+
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid::Poldi;
 using namespace Mantid::API;

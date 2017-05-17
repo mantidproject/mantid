@@ -5,11 +5,14 @@
 
 #include "MantidAPI/DetectorInfo.h"
 #include "MantidAPI/SpectrumInfo.h"
+#include "MantidIndexing/IndexInfo.h"
+#include "MantidIndexing/LegacyConversion.h"
+#include "MantidIndexing/SpectrumIndexSet.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/EnabledWhenProperty.h"
-#include <set>
 #include <numeric>
+#include <set>
 
 namespace { // declare file scoped function
 /** internal method copies values in specified range from source list to the
@@ -38,12 +41,10 @@ namespace DataHandling {
 // Register the algorithm into the algorithm factory
 DECLARE_ALGORITHM(MaskDetectors)
 
-using namespace Kernel;
 using namespace API;
+using namespace Kernel;
 using namespace DataObjects;
-using Geometry::Instrument_const_sptr;
-using Geometry::IDetector_const_sptr;
-using namespace DataObjects;
+using namespace Geometry;
 
 /*
  * Define input arguments
@@ -93,6 +94,9 @@ void MaskDetectors::init() {
       "Default is number of histograms in target workspace if other masks are"
       " present "
       "or ignored if not.");
+  declareProperty(
+      make_unique<ArrayProperty<std::string>>("ComponentList"),
+      "An ArrayProperty containing a list of component names to mask");
 }
 
 /*
@@ -117,8 +121,13 @@ void MaskDetectors::exec() {
   MaskWorkspace_sptr isMaskWS = boost::dynamic_pointer_cast<MaskWorkspace>(WS);
 
   std::vector<size_t> indexList = getProperty("WorkspaceIndexList");
-  std::vector<specnum_t> spectraList = getProperty("SpectraList");
+  auto spectraList =
+      Indexing::makeSpectrumNumberVector(getProperty("SpectraList"));
   std::vector<detid_t> detectorList = getProperty("DetectorList");
+  std::vector<std::string> componentList = getProperty("ComponentList");
+  if (!componentList.empty()) {
+    appendToDetectorListFromComponentList(detectorList, componentList, WS);
+  }
   const MatrixWorkspace_sptr prevMasking = getProperty("MaskedWorkspace");
 
   auto ranges_info = getRanges(WS);
@@ -147,38 +156,13 @@ void MaskDetectors::exec() {
     std::iota(indexList.begin(), indexList.end(), std::get<0>(ranges_info));
   }
 
-  if (prevMasking) {
-    DataObjects::MaskWorkspace_const_sptr maskWS =
-        boost::dynamic_pointer_cast<DataObjects::MaskWorkspace>(prevMasking);
-    if (maskWS) {
-      if (maskWS->getInstrument()->getDetectorIDs().size() !=
-          WS->getInstrument()->getDetectorIDs().size()) {
-        throw std::runtime_error("Instrument's detector numbers mismatch "
-                                 "between input Workspace and MaskWorkspace");
-      }
-
-      g_log.debug() << "Extracting mask from MaskWorkspace (" << maskWS->name()
-                    << ")\n";
-      bool forceDetIDs = getProperty("ForceInstrumentMasking");
-      if (prevMasking->getNumberHistograms() != WS->getNumberHistograms() ||
-          forceDetIDs) {
-        extractMaskedWSDetIDs(detectorList, maskWS);
-      } else {
-        appendToIndexListFromMaskWS(indexList, maskWS, ranges_info);
-      }
-    } else { // not mask workspace
-      // Check the provided workspace has the same number of spectra as the
-      // input
-      if (prevMasking->getNumberHistograms() > WS->getNumberHistograms()) {
-        g_log.error() << "Input workspace has " << WS->getNumberHistograms()
-                      << " histograms   vs. "
-                      << "Input masking workspace has "
-                      << prevMasking->getNumberHistograms()
-                      << " histograms. \n";
-        throw std::runtime_error("Size mismatch between two input workspaces.");
-      }
-      appendToIndexListFromWS(indexList, prevMasking, ranges_info);
-    }
+  auto maskWS =
+      boost::dynamic_pointer_cast<DataObjects::MaskWorkspace>(prevMasking);
+  if (maskWS && prevMasking) { // is a mask workspace
+    handleMaskByMaskWorkspace(maskWS, WS, detectorList, indexList, ranges_info);
+  } else if (prevMasking) { // is not a mask workspace
+    handleMaskByMatrixWorkspace(prevMasking, WS, detectorList, indexList,
+                                ranges_info);
   }
 
   // If the spectraList property has been set, need to loop over the workspace
@@ -237,6 +221,92 @@ void MaskDetectors::exec() {
     setProperty("Workspace", ws);
   }
 }
+
+/** Handle masking a workspace using a MaskWorkspace.
+ *
+ * This will choose the strategy to mask the input workspace with based on
+ * information about the mask workspace.
+ *
+ * @param maskWs :: pointer to the mask workspace to use.
+ * @param WS :: pointer to the workspace to be masked.
+ * @param detectorList :: list of detectors to be masked.
+ * @param indexList :: list of workspace indicies to be masked.
+ * @param rangeInfo :: information about the spectrum range to use when masking
+ */
+void MaskDetectors::handleMaskByMaskWorkspace(
+    const MaskWorkspace_const_sptr maskWs,
+    const API::MatrixWorkspace_const_sptr WS,
+    std::vector<detid_t> &detectorList, std::vector<size_t> &indexList,
+    const RangeInfo &rangeInfo) {
+
+  if (maskWs->getInstrument()->getDetectorIDs().size() !=
+      WS->getInstrument()->getDetectorIDs().size()) {
+    throw std::runtime_error("Instrument's detector numbers mismatch "
+                             "between input Workspace and MaskWorkspace");
+  }
+
+  g_log.debug() << "Extracting mask from MaskWorkspace (" << maskWs->getName()
+                << ")\n";
+  bool forceDetIDs = getProperty("ForceInstrumentMasking");
+  if (maskWs->getNumberHistograms() != WS->getNumberHistograms() ||
+      forceDetIDs) {
+    g_log.notice("Masking using detectors IDs");
+    extractMaskedWSDetIDs(detectorList, maskWs);
+  } else {
+    g_log.notice("Masking using workspace indicies");
+    appendToIndexListFromMaskWS(indexList, maskWs, rangeInfo);
+  }
+}
+
+/** Handle masking a workspace using a MatrixWorkspace.
+ *
+ * This will choose the strategy to mask the input workspace with based on
+ * information about the matrix workspace passed as a mask workspace.
+ *
+ * @param maskWs :: pointer to the workspace to use as a mask.
+ * @param WS :: pointer to the workspace to be masked.
+ * @param detectorList :: list of detectors to be masked.
+ * @param indexList :: list of workspace indicies to be masked.
+ * @param rangeInfo :: information about the spectrum range to use when masking
+ */
+void MaskDetectors::handleMaskByMatrixWorkspace(
+    const API::MatrixWorkspace_const_sptr maskWs,
+    const API::MatrixWorkspace_const_sptr WS,
+    std::vector<detid_t> &detectorList, std::vector<size_t> &indexList,
+    const RangeInfo &rangeInfo) {
+
+  const auto nHist = maskWs->getNumberHistograms();
+  auto instrument = WS->getInstrument();
+  auto maskInstrument = maskWs->getInstrument();
+
+  // Check the provided workspace has the same number of spectra as the
+  // input, if so assume index list
+  if (nHist == WS->getNumberHistograms()) {
+    g_log.notice("Masking using workspace indicies");
+    appendToIndexListFromWS(indexList, maskWs, rangeInfo);
+    // Check they both have instrument and then use detector based masking
+  } else if (instrument && maskInstrument) {
+    const auto inputDetCount = instrument->getNumberDetectors();
+    const auto maskDetCount = maskInstrument->getNumberDetectors();
+
+    g_log.notice("Masking using detectors IDs");
+
+    if (inputDetCount != maskDetCount)
+      g_log.warning() << "Number of detectors does not match between "
+                         "mask workspace and input workspace";
+
+    if (instrument->getName() != maskInstrument->getName())
+      g_log.warning() << "Mask is from a different instrument to the input "
+                         "workspace. ";
+
+    appendToDetectorListFromWS(detectorList, WS, maskWs, rangeInfo);
+    // Not an index list and there's no instrument, so give up.
+  } else {
+    throw std::runtime_error(
+        "Input or mask workspace does not have an instrument.");
+  }
+}
+
 /* Verifies input ranges are defined and returns these ranges if they are.
 *
 * @return tuple containing min/max ranges provided to algorithm
@@ -304,7 +374,7 @@ void MaskDetectors::extractMaskedWSDetIDs(
 
   int64_t nHist = maskWS->getNumberHistograms();
   for (int64_t i = 0; i < nHist; ++i) {
-    if (maskWS->readY(i)[0] > 0.5) {
+    if (maskWS->y(i)[0] > 0.5) {
 
       try {
         const auto dets = maskWS->getSpectrum(i).getDetectorIDs();
@@ -358,8 +428,8 @@ void MaskDetectors::execPeaks(PeaksWorkspace_sptr WS) {
             "Size mismatch between input Workspace and MaskWorkspace");
       }
 
-      g_log.debug() << "Extracting mask from MaskWorkspace (" << maskWS->name()
-                    << ")\n";
+      g_log.debug() << "Extracting mask from MaskWorkspace ("
+                    << maskWS->getName() << ")\n";
 
       for (size_t i = 0; i < maskDetInfo.size(); ++i)
         if (maskDetInfo.isMasked(i))
@@ -380,7 +450,8 @@ void MaskDetectors::execPeaks(PeaksWorkspace_sptr WS) {
  *                      Boolean indicating if these ranges are defined
  */
 void MaskDetectors::fillIndexListFromSpectra(
-    std::vector<size_t> &indexList, const std::vector<specnum_t> &spectraList,
+    std::vector<size_t> &indexList,
+    const std::vector<Indexing::SpectrumNumber> &spectraList,
     const API::MatrixWorkspace_sptr WS,
     const std::tuple<size_t, size_t, bool> &range_info) {
 
@@ -395,14 +466,7 @@ void MaskDetectors::fillIndexListFromSpectra(
     tmp_index.swap(indexList);
   }
 
-  auto SpecID2IndMap = WS->getSpectrumToWorkspaceIndexMap();
-  for (auto specnum : spectraList) {
-    auto element = SpecID2IndMap.find(specnum);
-    if (element == SpecID2IndMap.end()) {
-      continue;
-    }
-    size_t ws_index = element->second;
-
+  for (auto ws_index : WS->indexInfo().makeIndexSet(spectraList)) {
     if (range_constrained && (ws_index < startIndex || ws_index > endIndex)) {
       continue;
     }
@@ -421,7 +485,7 @@ void MaskDetectors::fillIndexListFromSpectra(
  *                            Boolean indicating if these ranges are defined
 */
 void MaskDetectors::appendToIndexListFromWS(
-    std::vector<size_t> &indexList, const MatrixWorkspace_sptr sourceWS,
+    std::vector<size_t> &indexList, const MatrixWorkspace_const_sptr sourceWS,
     const std::tuple<size_t, size_t, bool> &range_info) {
 
   std::vector<size_t> tmp_index;
@@ -449,8 +513,39 @@ void MaskDetectors::appendToIndexListFromWS(
     }
   }
   tmp_index.swap(indexList);
+}
 
-} // appendToIndexListFromWS
+/**
+* Append the indices of a workspace corresponding to detector IDs to the
+* given list
+*
+* @param detectorList :: An existing list of detector IDs
+* @param inputWs :: A workspace to mask detectors in
+* @param maskWs :: A workspace with masked spectra
+* @param range_info    :: tuple containing the information on
+*                      if copied indexes are constrained by ranges and if yes
+*                       -- the range of indexes to topy
+*/
+void MaskDetectors::appendToDetectorListFromWS(
+    std::vector<detid_t> &detectorList,
+    const MatrixWorkspace_const_sptr inputWs,
+    const MatrixWorkspace_const_sptr maskWs,
+    const std::tuple<size_t, size_t, bool> &range_info) {
+  const auto startIndex = std::get<0>(range_info);
+  const auto endIndex = std::get<1>(range_info);
+  const auto &detMap = inputWs->getDetectorIDToWorkspaceIndexMap();
+  detectorList.reserve(maskWs->getNumberHistograms());
+
+  for (size_t i = 0; i < maskWs->getNumberHistograms(); ++i) {
+    if (maskWs->y(i)[0] == 0) {
+      const auto &spec = maskWs->getSpectrum(i);
+      for (const auto &id : spec.getDetectorIDs()) {
+        if (detMap.at(id) >= startIndex && detMap.at(id) <= endIndex)
+          detectorList.push_back(id);
+      }
+    }
+  }
+}
 
 /**
 * Append the indices of the masked spectra from the given workspace list to the
@@ -476,7 +571,7 @@ void MaskDetectors::appendToIndexListFromMaskWS(
     constrainIndexInRange(indexList, tmp_index, startIndex, endIndex);
 
     for (size_t i = startIndex; i <= endIndex; ++i) {
-      if (maskedWorkspace->dataY(i)[0] > 0.5) {
+      if (maskedWorkspace->y(i)[0] > 0.5) {
         g_log.debug() << "Adding WorkspaceIndex " << i << " to mask.\n";
         tmp_index.push_back(i);
       }
@@ -486,7 +581,7 @@ void MaskDetectors::appendToIndexListFromMaskWS(
     endIndex = maskedWorkspace->getNumberHistograms();
     for (size_t i = 0; i < endIndex; ++i) {
 
-      if (maskedWorkspace->dataY(i)[0] > 0.5) {
+      if (maskedWorkspace->y(i)[0] > 0.5) {
         g_log.debug() << "Adding WorkspaceIndex " << i << " to mask.\n";
         tmp_index.push_back(i);
       }
@@ -494,6 +589,48 @@ void MaskDetectors::appendToIndexListFromMaskWS(
   }
   tmp_index.swap(indexList);
 } // appendToIndexListFromWS
+
+/**
+ * Append the detector IDs of detectors found recursively in the list of
+ * components.
+ *
+ * @param detectorList :: An existing list of detector IDs
+ * @param componentList :: List of component names
+ * @param WS :: Workspace instrument of which to use
+ */
+void MaskDetectors::appendToDetectorListFromComponentList(
+    std::vector<detid_t> &detectorList,
+    const std::vector<std::string> &componentList,
+    const API::MatrixWorkspace_const_sptr WS) {
+  const auto instrument = WS->getInstrument();
+  if (!instrument) {
+    g_log.error()
+        << "No instrument in input workspace. Ignoring ComponentList\n";
+    return;
+  }
+  std::set<detid_t> detectorIDs;
+  for (const auto &compName : componentList) {
+    std::vector<IDetector_const_sptr> dets;
+    instrument->getDetectorsInBank(dets, compName);
+    if (dets.empty()) {
+      const auto component = instrument->getComponentByName(compName);
+      const auto det = boost::dynamic_pointer_cast<const IDetector>(component);
+      if (!det) {
+        g_log.warning() << "No detectors found in component '" << compName
+                        << "'\n";
+        continue;
+      }
+      dets.emplace_back(det);
+    }
+    for (const auto &det : dets) {
+      detectorIDs.emplace(det->getID());
+    }
+  }
+  const auto oldSize = detectorList.size();
+  detectorList.resize(detectorList.size() + detectorIDs.size());
+  auto appendBegin = detectorList.begin() + oldSize;
+  std::copy(detectorIDs.cbegin(), detectorIDs.cend(), appendBegin);
+} // appendToDetectorListFromComponentList
 
 } // namespace DataHandling
 } // namespace Mantid

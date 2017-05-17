@@ -1,4 +1,5 @@
 #include "MantidGeometry/IDTypes.h"
+#include "MantidAPI/DetectorInfo.h"
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
@@ -70,5 +71,9 @@ void export_ExperimentInfo() {
            args("self", "detId", "value"))
 
       .def("getEMode", &ExperimentInfo::getEMode, args("self"),
-           "Returns the energy mode.");
+           "Returns the energy mode.")
+
+      .def("detectorInfo", &ExperimentInfo::detectorInfo,
+           return_value_policy<reference_existing_object>(), args("self"),
+           "Return a const reference to the DetectorInfo object.");
 }

@@ -289,8 +289,8 @@ std::string PeaksViewer::saveToProject() const {
     auto zoomedWorkspaces = (*zoomPresenter)->presentedWorkspaces();
     tsv.writeLine("ZoomedPeakIndex") << m_presenter->getZoomedPeakIndex();
     tsv.writeLine("ZoomedPeakWorkspaces");
-    for (auto ws : zoomedWorkspaces) {
-      tsv << ws->name();
+    for (const auto &ws : zoomedWorkspaces) {
+      tsv << ws->getName();
     }
   }
 
@@ -317,7 +317,7 @@ std::string PeaksViewer::saveToProject() const {
 std::string PeaksViewer::savePresentedWorkspace(
     Mantid::API::IPeaksWorkspace_const_sptr ws) const {
   API::TSVSerialiser tsv;
-  tsv.writeLine("Name") << ws->name();
+  tsv.writeLine("Name") << ws->getName();
   tsv.writeLine("ShowBackground") << m_presenter->getShowBackground(ws);
 
   tsv.writeLine("Foreground");
@@ -439,7 +439,7 @@ void PeaksViewer::performUpdate() {
         if (optionalZoomedPresenter.is_initialized()) {
           // Is the zoomed peaks workspace the current workspace.
           if (optionalZoomedPresenter.get().get() ==
-              m_presenter->getPeaksPresenter(ws->name().c_str())) {
+              m_presenter->getPeaksPresenter(ws->getName().c_str())) {
             candidateWidget->setSelectedPeak(optionalZoomedIndex);
           }
         }
@@ -493,7 +493,6 @@ void PeaksViewer::updatePeaksWorkspace(
 bool PeaksViewer::removePeaksWorkspace(
     boost::shared_ptr<const Mantid::API::IPeaksWorkspace> toRemove) {
   bool somethingToRemove = false;
-
   if (m_presenter) {
 
     QList<PeaksWorkspaceWidget *> children =
@@ -513,6 +512,7 @@ bool PeaksViewer::removePeaksWorkspace(
         break;
       }
     }
+    m_presenter->hideInPlot(toRemove, somethingToRemove);
     m_presenter->remove(toRemove);
   }
   return somethingToRemove;

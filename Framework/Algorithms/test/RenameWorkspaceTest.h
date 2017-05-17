@@ -146,9 +146,9 @@ public:
     // course
     TS_ASSERT_EQUALS(resultGroup->size(), 2)
     TS_ASSERT_EQUALS(resultGroup->getItem(0), member1)
-    TS_ASSERT_EQUALS(resultGroup->getItem(0)->name(), "newName_1")
+    TS_ASSERT_EQUALS(resultGroup->getItem(0)->getName(), "newName_1")
     TS_ASSERT_EQUALS(resultGroup->getItem(1), member2)
-    TS_ASSERT_EQUALS(resultGroup->getItem(1)->name(), "newName_2")
+    TS_ASSERT_EQUALS(resultGroup->getItem(1)->getName(), "newName_2")
     // The old ones should not be in the ADS
     TS_ASSERT_THROWS(ads.retrieve("oldName"),
                      Mantid::Kernel::Exception::NotFoundError)

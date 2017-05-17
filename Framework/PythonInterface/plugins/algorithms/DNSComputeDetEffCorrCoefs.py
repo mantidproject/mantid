@@ -168,11 +168,9 @@ class DNSComputeDetEffCorrCoefs(PythonAlgorithm):
         returns number of not masked detectors
         """
         num = 0
-        instrument = workspace.getInstrument()
-        offset = workspace.getSpectrum(0).getDetectorIDs()[0]
+        spectrumInfo = workspace.spectrumInfo()
         for idx in range(workspace.getNumberHistograms()):
-            det = instrument.getDetector(idx + offset)        # for DNS first det ID=1
-            if not det.isMasked():
+            if not spectrumInfo.isMasked(idx):
                 num += 1
         return num
 
@@ -215,13 +213,13 @@ class DNSComputeDetEffCorrCoefs(PythonAlgorithm):
 
         # compute vmean
         _mean_ws_ = api.Mean(",".join(list(total.values())))     # Mean takes string
-        self.toremove.append(_mean_ws_.getName())
+        self.toremove.append(_mean_ws_.name())
         num =  self._get_notmasked_detectors_number(_mean_ws_)
         if num == 0:
             self.cleanup(self.toremove)
             raise RuntimeError("All detectors are masked! Cannot compute coefficients.")
         _vana_mean_ = api.SumSpectra(_mean_ws_)/num
-        self.toremove.append(_vana_mean_.getName())
+        self.toremove.append(_vana_mean_.name())
 
         # compute coefficients k_i = (VSF_i + VNSF_i)/Vmean
         outws_name = self.getPropertyValue("OutputWorkspace")

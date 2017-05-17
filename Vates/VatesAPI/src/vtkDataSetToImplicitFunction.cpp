@@ -26,7 +26,7 @@ Constructor
 */
 vtkDataSetToImplicitFunction::vtkDataSetToImplicitFunction(vtkDataSet *dataSet)
     : m_dataset(dataSet) {
-  if (m_dataset == NULL) {
+  if (!m_dataset) {
     throw std::runtime_error(
         "Tried to construct vtkDataSetToImplicitFunction with NULL vtkDataSet");
   }
@@ -51,7 +51,7 @@ Mantid::Geometry::MDImplicitFunction *vtkDataSetToImplicitFunction::execute() {
     Poco::XML::Element *pRootElem = pDoc->documentElement();
     Poco::XML::Element *functionElem = pRootElem->getChildElement(
         MDGeometryXMLDefinitions::functionElementName());
-    if (NULL != functionElem) {
+    if (functionElem) {
       auto existingFunction =
           std::unique_ptr<Mantid::Geometry::MDImplicitFunction>(
               Mantid::API::ImplicitFunctionFactory::Instance().createUnwrapped(
@@ -63,6 +63,6 @@ Mantid::Geometry::MDImplicitFunction *vtkDataSetToImplicitFunction::execute() {
 }
 
 /// Destructor.
-vtkDataSetToImplicitFunction::~vtkDataSetToImplicitFunction() {}
+vtkDataSetToImplicitFunction::~vtkDataSetToImplicitFunction() = default;
 }
 }

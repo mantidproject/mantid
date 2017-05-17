@@ -80,14 +80,14 @@ void MergeMD::createOutputWorkspace(std::vector<std::string> &inputs) {
   for (auto &ws : m_workspaces) {
     if (ws->getNumDims() != numDims)
       throw std::invalid_argument(
-          "Workspace " + ws->name() +
+          "Workspace " + ws->getName() +
           " does not match the number of dimensions of the others (" +
           Strings::toString(ws->getNumDims()) + ", expected " +
           Strings::toString(numDims) + ")");
 
     if (ws->getEventTypeName() != ws0->getEventTypeName())
       throw std::invalid_argument(
-          "Workspace " + ws->name() +
+          "Workspace " + ws->getName() +
           " does not match the MDEvent type of the others (" +
           ws->getEventTypeName() + ", expected " + ws0->getEventTypeName() +
           ")");
@@ -96,10 +96,11 @@ void MergeMD::createOutputWorkspace(std::vector<std::string> &inputs) {
       IMDDimension_const_sptr dim = ws->getDimension(d);
       IMDDimension_const_sptr dim0 = ws0->getDimension(d);
       if (dim->getName() != dim0->getName())
-        throw std::invalid_argument(
-            "Workspace " + ws->name() + " does not have the same dimension " +
-            Strings::toString(d) + " as the others (" + dim->getName() +
-            ", expected " + dim0->getName() + ")");
+        throw std::invalid_argument("Workspace " + ws->getName() +
+                                    " does not have the same dimension " +
+                                    Strings::toString(d) + " as the others (" +
+                                    dim->getName() + ", expected " +
+                                    dim0->getName() + ")");
 
       // Find the extents
       if (dim->getMaximum() > dimMax[d])
@@ -252,9 +253,9 @@ void MergeMD::exec() {
   // Run PlusMD on each of the input workspaces, in order.
   double progStep = 1.0 / double(m_workspaces.size());
   for (size_t i = 0; i < m_workspaces.size(); i++) {
-    g_log.information() << "Adding workspace " << m_workspaces[i]->name()
+    g_log.information() << "Adding workspace " << m_workspaces[i]->getName()
                         << '\n';
-    progress(double(i) * progStep, m_workspaces[i]->name());
+    progress(double(i) * progStep, m_workspaces[i]->getName());
     CALL_MDEVENT_FUNCTION(doPlus, m_workspaces[i]);
   }
 

@@ -9,11 +9,6 @@ using namespace Mantid::API;
 
 namespace Mantid {
 namespace VATES {
-template <typename Workspace_Type>
-ADSWorkspaceProvider<Workspace_Type>::ADSWorkspaceProvider() {}
-
-template <typename Workspace_Type>
-ADSWorkspaceProvider<Workspace_Type>::~ADSWorkspaceProvider() {}
 
 template <typename Workspace_Type>
 bool ADSWorkspaceProvider<Workspace_Type>::canProvideWorkspace(
@@ -21,7 +16,7 @@ bool ADSWorkspaceProvider<Workspace_Type>::canProvideWorkspace(
   bool bCanProvide = false;
   try {
     bCanProvide =
-        (NULL !=
+        (nullptr !=
          AnalysisDataService::Instance().retrieveWS<Workspace_Type>(wsName));
   } catch (Mantid::Kernel::Exception::NotFoundError &) {
     bCanProvide = false;

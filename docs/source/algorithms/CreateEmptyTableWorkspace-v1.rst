@@ -38,7 +38,7 @@ Usage
    print "The run number for IRIS is " + str(my_table.cell("Run Number", 1)) + "."
    print "The number of rows is " + str(my_table.rowCount()) + "."
    print "The title of the table is " + my_table.getTitle() + "."
-   print "Remember, the table is a workspace.  It's name is \"" + my_table.getName() + "\"."
+   print "Remember, the table is a workspace.  It's name is \"" + my_table.name() + "\"."
 
 Output:
 

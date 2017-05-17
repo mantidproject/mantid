@@ -1,4 +1,4 @@
-﻿#pylint: disable=no-init,invalid-name
+#pylint: disable=no-init,invalid-name
 from __future__ import (absolute_import, division, print_function)
 import mantid.simpleapi
 import mantid.kernel
@@ -66,9 +66,10 @@ class MaskAngle(mantid.api.PythonAlgorithm):
         numspec = ws.getNumberHistograms()
         source=ws.getInstrument().getSource().getPos()
         sample=ws.getInstrument().getSample().getPos()
+        spectrumInfo = ws.spectrumInfo()
         for i in range(numspec):
-            det=ws.getDetector(i)
-            if not det.isMonitor():
+            if not spectrumInfo.isMonitor(i):
+                det = ws.getDetector(i)
                 tt=numpy.degrees(det.getTwoTheta(sample,sample-source))
                 if tt>= ttmin and tt<= ttmax:
                     detlist.append(det.getID())

@@ -126,6 +126,7 @@ void CalculateTransmission::init() {
 }
 
 void CalculateTransmission::exec() {
+  m_done = 0.;
   MatrixWorkspace_sptr sampleWS = getProperty("SampleRunWorkspace");
   MatrixWorkspace_sptr directWS = getProperty("DirectRunWorkspace");
 
@@ -138,7 +139,7 @@ void CalculateTransmission::exec() {
   if (!usingSameInstrument)
     throw std::invalid_argument(
         "The input workspaces do not come from the same instrument.");
-  if (!WorkspaceHelpers::matchingBins(sampleWS, directWS))
+  if (!WorkspaceHelpers::matchingBins(*sampleWS, *directWS))
     throw std::invalid_argument(
         "The input workspaces do not have matching bins.");
 
@@ -402,7 +403,7 @@ CalculateTransmission::fitData(API::MatrixWorkspace_sptr WS, double &grad,
                                double &offset) {
   g_log.information("Fitting the experimental transmission curve");
   double start = m_done;
-  IAlgorithm_sptr childAlg = createChildAlgorithm("Fit", start, m_done = 0.9);
+  IAlgorithm_sptr childAlg = createChildAlgorithm("Fit", start, m_done + 0.9);
   auto linearBack =
       API::FunctionFactory::Instance().createFunction("LinearBackground");
   childAlg->setProperty("Function", linearBack);

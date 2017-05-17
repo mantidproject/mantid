@@ -15,7 +15,16 @@
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QVBoxLayout" name="verticalLayout_4">
-    <property name="margin">
+    <property name="leftMargin">
+     <number>1</number>
+    </property>
+    <property name="topMargin">
+     <number>1</number>
+    </property>
+    <property name="rightMargin">
+     <number>1</number>
+    </property>
+    <property name="bottomMargin">
      <number>1</number>
     </property>
     <item>
@@ -42,7 +51,7 @@
        <string/>
       </property>
       <property name="currentIndex">
-       <number>0</number>
+       <number>4</number>
       </property>
       <widget class="QWidget" name="Home">
        <attribute name="title">
@@ -132,14 +141,14 @@ p, li { white-space: pre-wrap; }
                </item>
                <item>
                 <layout class="QGridLayout" name="gridLayout_23">
+                 <property name="topMargin">
+                  <number>0</number>
+                 </property>
                  <property name="horizontalSpacing">
                   <number>5</number>
                  </property>
                  <property name="verticalSpacing">
                   <number>1</number>
-                 </property>
-                 <property name="topMargin">
-                  <number>0</number>
                  </property>
                  <item row="3" column="1">
                   <widget class="QWidget" name="horizontalWidget_2" native="true">
@@ -150,7 +159,16 @@ p, li { white-space: pre-wrap; }
                     </size>
                    </property>
                    <layout class="QHBoxLayout" name="horizontalLayout_18">
-                    <property name="margin">
+                    <property name="leftMargin">
+                     <number>1</number>
+                    </property>
+                    <property name="topMargin">
+                     <number>1</number>
+                    </property>
+                    <property name="rightMargin">
+                     <number>1</number>
+                    </property>
+                    <property name="bottomMargin">
                      <number>1</number>
                     </property>
                     <item>
@@ -195,7 +213,7 @@ p, li { white-space: pre-wrap; }
                   </widget>
                  </item>
                  <item row="4" column="1">
-                  <widget class="MantidQt::MantidWidgets::MWRunFiles" name="mwRunDeadTimeFile" native="true">
+                  <widget class="MantidQt::API::MWRunFiles" name="mwRunDeadTimeFile" native="true">
                    <property name="enabled">
                     <bool>true</bool>
                    </property>
@@ -301,7 +319,16 @@ p, li { white-space: pre-wrap; }
                     </size>
                    </property>
                    <layout class="QHBoxLayout" name="horizontalLayout_13">
-                    <property name="margin">
+                    <property name="leftMargin">
+                     <number>1</number>
+                    </property>
+                    <property name="topMargin">
+                     <number>1</number>
+                    </property>
+                    <property name="rightMargin">
+                     <number>1</number>
+                    </property>
+                    <property name="bottomMargin">
                      <number>1</number>
                     </property>
                     <item>
@@ -395,7 +422,16 @@ p, li { white-space: pre-wrap; }
                     </size>
                    </property>
                    <layout class="QHBoxLayout" name="horizontalLayout_17">
-                    <property name="margin">
+                    <property name="leftMargin">
+                     <number>1</number>
+                    </property>
+                    <property name="topMargin">
+                     <number>1</number>
+                    </property>
+                    <property name="rightMargin">
+                     <number>1</number>
+                    </property>
+                    <property name="bottomMargin">
                      <number>1</number>
                     </property>
                     <item>
@@ -526,7 +562,7 @@ p, li { white-space: pre-wrap; }
                <item>
                 <layout class="QHBoxLayout" name="fileInputLayout">
                  <item>
-                  <widget class="MantidQt::MantidWidgets::MWRunFiles" name="mwRunFiles" native="true">
+                  <widget class="MantidQt::API::MWRunFiles" name="mwRunFiles" native="true">
                    <property name="sizePolicy">
                     <sizepolicy hsizetype="Expanding" vsizetype="Minimum">
                      <horstretch>0</horstretch>
@@ -534,7 +570,7 @@ p, li { white-space: pre-wrap; }
                     </sizepolicy>
                    </property>
                    <property name="toolTip">
-                    <string>Specify a run number or data file by typing a run number or use 
+                    <string>Specify a run number or data file by typing a run number or use
 the Browse button to select</string>
                    </property>
                    <property name="findRunFiles" stdset="0">
@@ -1159,19 +1195,19 @@ p, li { white-space: pre-wrap; }
              <row/>
              <column>
               <property name="text">
-               <string>Group Pair 
+               <string>Group Pair
 (Name)</string>
               </property>
              </column>
              <column>
               <property name="text">
-               <string>Forward 
+               <string>Forward
 (Group name)</string>
               </property>
              </column>
              <column>
               <property name="text">
-               <string>Backward 
+               <string>Backward
 (Group name)</string>
               </property>
              </column>
@@ -1379,7 +1415,7 @@ p, li { white-space: pre-wrap; }
        <attribute name="toolTip">
         <string>The Results Table tab allows:
  creating result(s) tables
- selecting which instrument log values (temp, field etc) to write out alongside the fit 
+ selecting which instrument log values (temp, field etc) to write out alongside the fit
      parameters
  option to write out fit information from one or several data files</string>
        </attribute>
@@ -1490,9 +1526,9 @@ p, li { white-space: pre-wrap; }
              <item row="0" column="1">
               <widget class="QCheckBox" name="selectAllFittingResults">
                <property name="toolTip">
-                <string>If checked then the fit results 
-from all the runs listed are 
-selected and written to the 
+                <string>If checked then the fit results
+from all the runs listed are
+selected and written to the
 results table.</string>
                </property>
                <property name="text">
@@ -2558,7 +2594,16 @@ p, li { white-space: pre-wrap; }
                    <property name="spacing">
                     <number>6</number>
                    </property>
-                   <property name="margin">
+                   <property name="leftMargin">
+                    <number>0</number>
+                   </property>
+                   <property name="topMargin">
+                    <number>0</number>
+                   </property>
+                   <property name="rightMargin">
+                    <number>0</number>
+                   </property>
+                   <property name="bottomMargin">
                     <number>0</number>
                    </property>
                    <item>
@@ -2637,6 +2682,20 @@ p, li { white-space: pre-wrap; }
                  </property>
                 </widget>
                </item>
+               <item row="4" column="2">
+                <widget class="QCheckBox" name="chkTFAsymm">
+                 <property name="text">
+                  <string/>
+                 </property>
+                </widget>
+               </item>
+               <item row="4" column="0">
+                <widget class="QLabel" name="lblTFAsymmetry">
+                 <property name="text">
+                  <string>TF Asymmetry</string>
+                 </property>
+                </widget>
+               </item>
               </layout>
              </item>
              <item row="6" column="0">
@@ -2669,9 +2728,9 @@ p, li { white-space: pre-wrap; }
  </widget>
  <customwidgets>
   <customwidget>
-   <class>MantidQt::MantidWidgets::MWRunFiles</class>
+   <class>MantidQt::API::MWRunFiles</class>
    <extends>QWidget</extends>
-   <header>MantidQtMantidWidgets/MWRunFiles.h</header>
+   <header>MantidQtAPI/MWRunFiles.h</header>
   </customwidget>
   <customwidget>
    <class>MantidQt::MantidWidgets::InstrumentSelector</class>

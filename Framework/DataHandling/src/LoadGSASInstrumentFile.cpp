@@ -226,7 +226,7 @@ void LoadGSASInstrumentFile::loadFile(string filename, vector<string> &lines) {
 
       // display the line we gathered:
       boost::algorithm::trim(line);
-      if (line.size() > 0)
+      if (!line.empty())
         lines.push_back(line);
     }
 

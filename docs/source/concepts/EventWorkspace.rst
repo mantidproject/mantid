@@ -59,7 +59,7 @@ If you want to check if a variable points to something that is an Event Workspac
     eventWS = CreateSampleWorkspace(WorkspaceType="Event")
 
     if isinstance(eventWS, IEventWorkspace):
-        print eventWS.getName() + " is an " + eventWS.id()
+        print eventWS.name() + " is an " + eventWS.id()
 
 Output:
 

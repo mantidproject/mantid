@@ -227,7 +227,7 @@ void PDDetermineCharacterizations::getInformationFromTable(
             columnNames.end()) {
           g_log.warning() << "Failed to find container name \"" << canName
                           << "\" in characterizations table \""
-                          << m_characterizations->name() << "\"\n";
+                          << m_characterizations->getName() << "\"\n";
         } else {
           const auto canRuns =
               m_characterizations->getRef<std::string>(canName, i);
@@ -284,8 +284,8 @@ double PDDetermineCharacterizations::getLogValue(API::Run &run,
         }
       } else {
         std::stringstream msg;
-        msg << "When looking at " << name
-            << " log encountered unknown units for " << label << ":" << units;
+        msg << "When looking at " << name << " log encountered unknown units '"
+            << units << "' for " << label << ":" << units;
         g_log.warning(msg.str());
       }
     }

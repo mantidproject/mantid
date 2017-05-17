@@ -62,12 +62,12 @@ private:
   void init() override;
   void exec() override;
 
-  void checkForOverlap(API::MatrixWorkspace_const_sptr ws1,
-                       API::MatrixWorkspace_const_sptr ws2,
+  void checkForOverlap(const API::MatrixWorkspace &ws1,
+                       const API::MatrixWorkspace &ws2,
                        bool checkSpectra) const;
-  void fixSpectrumNumbers(API::MatrixWorkspace_const_sptr ws1,
-                          API::MatrixWorkspace_const_sptr ws2,
-                          API::MatrixWorkspace_sptr output) override;
+  void fixSpectrumNumbers(const API::MatrixWorkspace &ws1,
+                          const API::MatrixWorkspace &ws2,
+                          API::MatrixWorkspace &output) override;
   bool processGroups() override;
 
   /// True if spectra overlap

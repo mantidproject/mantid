@@ -37,7 +37,7 @@ class IndirectTransmissionMonitor(PythonAlgorithm):
 
         ws_basename = str(self._sample_ws_in)
 
-        trans_prog = Progress(self, start=0.05, end=0.04, nreports=2)
+        trans_prog = Progress(self, start=0.05, end=0.4, nreports=2)
         trans_prog.report('Transforming monitor for Sample')
         self._trans_mon(ws_basename, 'Sam', self._sample_ws_in)
         trans_prog.report('Transforming monitor for Container')
@@ -96,8 +96,9 @@ class IndirectTransmissionMonitor(PythonAlgorithm):
 
         except IndexError:
             # If that fails just get the first spectrum which is a detector
+            spectrumInfo = workspace.spectrumInfo()
             for spec_idx in range(workspace.getNumberHistograms()):
-                if not workspace.getDetector(spec_idx).isMonitor():
+                if not spectrumInfo.isMonitor(spec_idx):
                     detector_1_idx = spec_idx
                     logger.information('Got index of first detector in workspace: %d' % (detector_1_idx))
                     break

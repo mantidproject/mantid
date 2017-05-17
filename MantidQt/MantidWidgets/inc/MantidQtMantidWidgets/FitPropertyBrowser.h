@@ -253,7 +253,7 @@ public slots:
   void clearBrowser();
   void setPeakToolOn(bool on);
   void findPeaks();
-  void executeFitMenu(const QString &);
+  virtual void executeFitMenu(const QString &);
   void executeDisplayMenu(const QString &);
   void executeSetupMenu(const QString &);
   void executeSetupManageMenu(const QString &);
@@ -311,6 +311,7 @@ private slots:
   void columnChanged(QtProperty *prop);
   void currentItemChanged(QtBrowserItem *);
   void vectorDoubleChanged(QtProperty *prop);
+  void vectorSizeChanged(QtProperty *prop);
   void addTie();
   void addTieToFunction();
   void addFixTie();
@@ -362,6 +363,9 @@ private slots:
   void updateStructureTooltips();
 
 protected:
+  void modifyFitMenu(QAction *fitAction, bool enabled);
+  virtual void populateFitMenuButton(QSignalMapper *fitMapper, QMenu *fitMenu);
+  bool getShouldBeNormalised() { return m_shouldBeNormalised; };
   /// actions to do before the browser made visible
   void showEvent(QShowEvent *e) override;
   /// actions to do before the browser is hidden
@@ -372,6 +376,8 @@ protected:
   void createEditors(QWidget *w);
   ///
   void initLayout(QWidget *w);
+  ///
+  void initBasicLayout(QWidget *w);
   ///
   void updateDecimals();
   /// Sets the workspace to a function
@@ -475,6 +481,8 @@ protected:
   std::vector<double> m_initialParameters;
 
 private:
+  ///
+  QPushButton *createFitMenuButton(QWidget *w);
   /// load and save function
   void loadFunction(const QString &funcString);
   void saveFunction(const QString &fnName);

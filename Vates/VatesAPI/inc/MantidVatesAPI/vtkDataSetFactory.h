@@ -70,7 +70,7 @@ public:
   virtual vtkSmartPointer<vtkDataSet> create(ProgressAction &) const = 0;
 
   /// Initalize with a target workspace.
-  virtual void initialize(Mantid::API::Workspace_sptr) = 0;
+  virtual void initialize(const Mantid::API::Workspace_sptr &workspace) = 0;
 
   /// Create the product in one step.
   virtual vtkSmartPointer<vtkDataSet> oneStepCreate(Mantid::API::Workspace_sptr,
@@ -115,29 +115,19 @@ public:
 
 protected:
   /**
-  Try to cast it to the specified IMDType and then run checks based on the
-  non-integrated dimensionality.
-  The latter checks are only run if the factory is set to apply these checks.
-  @param  workspace : workspace to cast.
-  @param  bExactMatch : run an exact match on non-integarated dimensionality if
-  TRUE, otherwise is less than or equal to ExpectedDimensions.
-  @return  correctly cast shared pointer or an empty shared pointer if cast or
-  checks fail.
-  */
+   Run checks based on the non-integrated dimensionality, which are only run
+   if the factory is set to apply these checks.
+   @param  imdws : workspace to check.
+   @param  bExactMatch : run an exact match on non-integarated dimensionality if
+   TRUE, otherwise is less than or equal to ExpectedDimensions.
+   @return whether the checks pass or fail.
+   */
   template <typename IMDWorkspaceType, size_t ExpectedNDimensions>
-  boost::shared_ptr<IMDWorkspaceType>
-  castAndCheck(Mantid::API::Workspace_sptr workspace,
-               bool bExactMatch = true) const {
-    boost::shared_ptr<IMDWorkspaceType> temp;
-    boost::shared_ptr<IMDWorkspaceType> imdws =
-        boost::dynamic_pointer_cast<IMDWorkspaceType>(workspace);
-    if (!imdws) {
-      // Abort as imdws cannot be dynamically cast to the target type.
-      return temp;
-    }
+  bool checkWorkspace(const IMDWorkspaceType &imdws,
+                      bool bExactMatch = true) const {
     bool bPassesDimensionalityCheck = false;
     size_t actualNonIntegratedDimensionality =
-        imdws->getNonIntegratedDimensions().size();
+        imdws.getNonIntegratedDimensions().size();
     if (bExactMatch) {
       bPassesDimensionalityCheck =
           (ExpectedNDimensions == actualNonIntegratedDimensionality);
@@ -148,13 +138,40 @@ protected:
     if (this->doesCheckDimensionality() && !bPassesDimensionalityCheck) {
       // Abort as there are dimensionality checks to be applied and these checks
       // fail.
-      return temp;
+      return false;
     }
-    return imdws;
+    return true;
   }
 
   /**
-  Common initialization implementation. Most vtkDataSets will need this in order
+   Try to cast it to the specified IMDType and then run checks based on the
+   non-integrated dimensionality.
+   The latter checks are only run if the factory is set to apply these checks.
+   @param  workspace : workspace to cast.
+   @param  bExactMatch : run an exact match on non-integarated dimensionality if
+   TRUE, otherwise is less than or equal to ExpectedDimensions.
+   @return  correctly cast shared pointer or an empty shared pointer if cast or
+   checks fail.
+   */
+  template <typename IMDWorkspaceType, size_t ExpectedNDimensions>
+  boost::shared_ptr<IMDWorkspaceType>
+  castAndCheck(Mantid::API::Workspace_sptr workspace,
+               bool bExactMatch = true) const {
+    boost::shared_ptr<IMDWorkspaceType> imdws =
+        boost::dynamic_pointer_cast<IMDWorkspaceType>(workspace);
+    if (imdws &&
+        this->checkWorkspace<IMDWorkspaceType, ExpectedNDimensions>(
+            *imdws, bExactMatch)) {
+      return imdws;
+    } else {
+      // Abort as imdws cannot be dynamically cast to the target type.
+      return nullptr;
+    }
+  }
+
+  /**
+  Common initialization implementation. Most vtkDataSets will need this in
+  order
   to correctly delegate initialization onto successors.
   @param workspace : workspace to cast.
   @param bExactMatch : run an exact match on non-integarated dimensionality if
@@ -166,7 +183,7 @@ protected:
   boost::shared_ptr<IMDWorkspaceType>
   doInitialize(Mantid::API::Workspace_sptr workspace,
                bool bExactMatch = true) const {
-    if (workspace == NULL) {
+    if (!workspace) {
       std::string message = this->getFactoryTypeName() +
                             " initialize cannot operate on a null workspace";
       throw std::invalid_argument(message);
@@ -187,13 +204,15 @@ protected:
   }
 
   /**
-  Common creation implementation whereby delegation to successor is attempted if
+  Common creation implementation whereby delegation to successor is attempted
+  if
   appropriate.
   @param workspace : workspace to cast and create from.
   @param progressUpdate : object used to pass progress information back up the
   stack.
   @param bExactMatch : Check for an exact match if true.
-  @return TRUE if delegation to successors has occured. Otherwise returns false.
+  @return TRUE if delegation to successors has occured. Otherwise returns
+  false.
   */
   template <typename IMDWorkspaceType, size_t ExpectedNDimensions>
   vtkSmartPointer<vtkDataSet>

@@ -1,17 +1,18 @@
 #ifndef GROUPDETECTORS2TEST_H_
 #define GROUPDETECTORS2TEST_H_
 
-#include <cxxtest/TestSuite.h>
 #include "MantidDataHandling/GroupDetectors2.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include <cxxtest/TestSuite.h>
 
-#include "MantidHistogramData/LinearGenerator.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FrameworkManager.h"
-#include "MantidGeometry/Instrument/DetectorGroup.h"
-#include "MantidKernel/UnitFactory.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidDataHandling/LoadMuonNexus1.h"
 #include "MantidDataHandling/MaskDetectors.h"
+#include "MantidGeometry/Instrument/DetectorGroup.h"
+#include "MantidHistogramData/LinearGenerator.h"
+#include "MantidKernel/UnitFactory.h"
 #include "MantidTestHelpers/HistogramDataTestHelper.h"
 
 #include <Poco/Path.h>
@@ -39,39 +40,15 @@ public:
 
   GroupDetectors2Test()
       : inputWS("groupdetectorstests_input_workspace"),
+        offsetWS("groupdetectorstests_offset_workspace"),
         outputBase("groupdetectorstests_output_basename"),
         inputFile(Poco::Path::current() +
                   "GroupDetectors2Test_mapfile_example") {
     // This is needed to load in the plugin algorithms (specifically Divide,
     // which is a Child Algorithm of GroupDetectors)
     FrameworkManager::Instance();
-    // Set up a small workspace for testing
-    auto space2D = createWorkspace<Workspace2D>(NHIST, NBINS + 1, NBINS);
-    space2D->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
-    BinEdges xs(NBINS + 1, LinearGenerator(10.0, 1.0));
-    CountStandardDeviations errors(NBINS, 1.0);
-    for (int j = 0; j < NHIST; ++j) {
-      space2D->setBinEdges(j, xs);
-      // the y values will be different for each spectra (1+index_number) but
-      // the same for each bin
-      space2D->setCounts(j, NBINS, j + 1);
-      space2D->setCountStandardDeviations(j, errors);
-      space2D->getSpectrum(j).setSpectrumNo(j + 1); // spectra numbers are also
-                                                    // 1 + index_numbers
-                                                    // because this is the
-                                                    // tradition
-      space2D->getSpectrum(j).setDetectorID(j);
-    }
-
-    Instrument_sptr instr(new Instrument);
-    for (detid_t i = 0; i < 6; i++) {
-      Detector *d = new Detector("det", i, 0);
-      instr->markAsDetector(d);
-    }
-    space2D->setInstrument(instr);
-
-    // Register the workspace in the data service
-    AnalysisDataService::Instance().add(inputWS, space2D);
+    createTestWorkspace(inputWS, 0);
+    createTestWorkspace(offsetWS, 1);
   }
 
   ~GroupDetectors2Test() override {
@@ -136,13 +113,13 @@ public:
       TS_ASSERT_DELTA(outputWS->e(0)[i], std::sqrt(double(2)), 0.0001);
     }
 
-    boost::shared_ptr<const IDetector> det;
-    TS_ASSERT_THROWS_NOTHING(det = outputWS->getDetector(0));
-    TS_ASSERT(boost::dynamic_pointer_cast<const DetectorGroup>(det));
-    TS_ASSERT_THROWS_ANYTHING(det = outputWS->getDetector(1));
-
+    const auto &spectrumInfo = outputWS->spectrumInfo();
+    TS_ASSERT(spectrumInfo.hasDetectors(0));
+    TS_ASSERT(!spectrumInfo.hasUniqueDetector(0));
+    TS_ASSERT_THROWS_ANYTHING(spectrumInfo.detector(1));
     AnalysisDataService::Instance().remove(output);
   }
+
   void testIndexList() {
     GroupDetectors2 grouper3;
     grouper3.initialize();
@@ -171,11 +148,113 @@ public:
       TS_ASSERT_DELTA(outputWS->e(0)[i], std::sqrt(4.0), 0.0001);
     }
 
-    boost::shared_ptr<const IDetector> det;
-    TS_ASSERT_THROWS_NOTHING(det = outputWS->getDetector(0));
-    TS_ASSERT(boost::dynamic_pointer_cast<const DetectorGroup>(det));
-    TS_ASSERT_THROWS_ANYTHING(det = outputWS->getDetector(1));
+    const auto &spectrumInfo = outputWS->spectrumInfo();
+    TS_ASSERT(spectrumInfo.hasDetectors(0));
+    TS_ASSERT_THROWS_ANYTHING(spectrumInfo.detector(1));
+    AnalysisDataService::Instance().remove(output);
+  }
 
+  void testGroupingPattern() {
+    GroupDetectors2 grouper3;
+    grouper3.initialize();
+    grouper3.setPropertyValue("InputWorkspace", inputWS);
+    std::string output(outputBase + "Indices");
+    grouper3.setPropertyValue("OutputWorkspace", output);
+
+    // test the algorithm behaves if you give it a non-existent index
+    grouper3.setPropertyValue("GroupingPattern", "4-6");
+    grouper3.execute();
+    TS_ASSERT(!grouper3.isExecuted());
+
+    grouper3.setPropertyValue("GroupingPattern", "2-5");
+    TS_ASSERT_THROWS_NOTHING(grouper3.execute());
+    TS_ASSERT(grouper3.isExecuted());
+
+    MatrixWorkspace_sptr outputWS =
+        boost::dynamic_pointer_cast<MatrixWorkspace>(
+            AnalysisDataService::Instance().retrieve(output));
+    TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 1);
+    HistogramX tens{10, 11, 12, 13, 14};
+    std::vector<double> ones(NBINS, 1.0);
+    TS_ASSERT_EQUALS(outputWS->x(0), tens);
+    TS_ASSERT_EQUALS(outputWS->y(0), HistogramY(NBINS, (3 + 4 + 5 + 6)));
+    for (int i = 0; i < NBINS; ++i) {
+      TS_ASSERT_DELTA(outputWS->e(0)[i], std::sqrt(4.0), 0.0001);
+    }
+
+    const auto &spectrumInfo = outputWS->spectrumInfo();
+    TS_ASSERT(spectrumInfo.hasDetectors(0));
+    TS_ASSERT_THROWS_ANYTHING(spectrumInfo.detector(1));
+    AnalysisDataService::Instance().remove(output);
+  }
+
+  void testIndexListOffsetSpectra() {
+    // Check that the algorithm still works if spectrum numbers are not 1-based
+    GroupDetectors2 grouper3;
+    grouper3.initialize();
+    grouper3.setPropertyValue("InputWorkspace", offsetWS);
+    std::string output(outputBase + "Indices");
+    grouper3.setPropertyValue("OutputWorkspace", output);
+
+    // test the algorithm behaves if you give it a non-existent index
+    grouper3.setPropertyValue("WorkspaceIndexList", "4-6");
+    grouper3.execute();
+    TS_ASSERT(!grouper3.isExecuted());
+
+    grouper3.setPropertyValue("WorkspaceIndexList", "2-5");
+    TS_ASSERT_THROWS_NOTHING(grouper3.execute());
+    TS_ASSERT(grouper3.isExecuted());
+
+    MatrixWorkspace_sptr outputWS =
+        boost::dynamic_pointer_cast<MatrixWorkspace>(
+            AnalysisDataService::Instance().retrieve(output));
+    TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 1);
+    HistogramX tens{10, 11, 12, 13, 14};
+    std::vector<double> ones(NBINS, 1.0);
+    TS_ASSERT_EQUALS(outputWS->x(0), tens);
+    TS_ASSERT_EQUALS(outputWS->y(0), HistogramY(NBINS, (3 + 4 + 5 + 6)));
+    for (int i = 0; i < NBINS; ++i) {
+      TS_ASSERT_DELTA(outputWS->e(0)[i], std::sqrt(4.0), 0.0001);
+    }
+
+    const auto &spectrumInfo = outputWS->spectrumInfo();
+    TS_ASSERT(spectrumInfo.hasDetectors(0));
+    TS_ASSERT_THROWS_ANYTHING(spectrumInfo.detector(1));
+    AnalysisDataService::Instance().remove(output);
+  }
+
+  void testGroupingPatternOffsetSpectra() {
+    // Check that the algorithm still works if spectrum numbers are not 1-based
+    GroupDetectors2 grouper3;
+    grouper3.initialize();
+    grouper3.setPropertyValue("InputWorkspace", offsetWS);
+    std::string output(outputBase + "Indices");
+    grouper3.setPropertyValue("OutputWorkspace", output);
+
+    // test the algorithm behaves if you give it a non-existent index
+    grouper3.setPropertyValue("GroupingPattern", "4-6");
+    grouper3.execute();
+    TS_ASSERT(!grouper3.isExecuted());
+
+    grouper3.setPropertyValue("GroupingPattern", "2-5");
+    TS_ASSERT_THROWS_NOTHING(grouper3.execute());
+    TS_ASSERT(grouper3.isExecuted());
+
+    MatrixWorkspace_sptr outputWS =
+        boost::dynamic_pointer_cast<MatrixWorkspace>(
+            AnalysisDataService::Instance().retrieve(output));
+    TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 1);
+    HistogramX tens{10, 11, 12, 13, 14};
+    std::vector<double> ones(NBINS, 1.0);
+    TS_ASSERT_EQUALS(outputWS->x(0), tens);
+    TS_ASSERT_EQUALS(outputWS->y(0), HistogramY(NBINS, (3 + 4 + 5 + 6)));
+    for (int i = 0; i < NBINS; ++i) {
+      TS_ASSERT_DELTA(outputWS->e(0)[i], std::sqrt(4.0), 0.0001);
+    }
+
+    const auto &spectrumInfo = outputWS->spectrumInfo();
+    TS_ASSERT(spectrumInfo.hasDetectors(0));
+    TS_ASSERT_THROWS_ANYTHING(spectrumInfo.detector(1));
     AnalysisDataService::Instance().remove(output);
   }
 
@@ -206,10 +285,9 @@ public:
       TS_ASSERT_DELTA(outputWS->e(0)[i], std::sqrt(double(NHIST)), 0.0001);
     }
 
-    boost::shared_ptr<const IDetector> det;
-    TS_ASSERT_THROWS_NOTHING(det = outputWS->getDetector(0));
-    TS_ASSERT(boost::dynamic_pointer_cast<const DetectorGroup>(det));
-    TS_ASSERT_THROWS_ANYTHING(det = outputWS->getDetector(1));
+    const auto &spectrumInfo = outputWS->spectrumInfo();
+    TS_ASSERT(spectrumInfo.hasDetectors(0));
+    TS_ASSERT_THROWS_ANYTHING(spectrumInfo.detector(1));
 
     AnalysisDataService::Instance().remove(output);
   }
@@ -270,20 +348,19 @@ public:
     TS_ASSERT_EQUALS(outputWS->getAxis(1)->spectraNo(4), 6);
     TS_ASSERT_EQUALS(outputWS->getSpectrum(4).getSpectrumNo(), 6);
 
-    // the first two spectra should have a group of detectors the other spectra
+    // the first spectrum should have a group of detectors the other spectra
     // a single detector
-
-    boost::shared_ptr<const IDetector> det;
-    TS_ASSERT_THROWS_NOTHING(det = outputWS->getDetector(0));
-    TS_ASSERT(boost::dynamic_pointer_cast<const DetectorGroup>(det));
-    TS_ASSERT_THROWS_NOTHING(det = outputWS->getDetector(1));
-    TS_ASSERT(boost::dynamic_pointer_cast<const Detector>(det));
-    TS_ASSERT_THROWS_NOTHING(det = outputWS->getDetector(2));
-    TS_ASSERT(boost::dynamic_pointer_cast<const Detector>(det));
-    TS_ASSERT_THROWS_NOTHING(det = outputWS->getDetector(3));
-    TS_ASSERT(boost::dynamic_pointer_cast<const Detector>(det));
-    TS_ASSERT_THROWS_NOTHING(det = outputWS->getDetector(4));
-    TS_ASSERT(boost::dynamic_pointer_cast<const Detector>(det));
+    const auto &spectrumInfo = outputWS->spectrumInfo();
+    TS_ASSERT(spectrumInfo.hasDetectors(0));
+    TS_ASSERT(!spectrumInfo.hasUniqueDetector(0));
+    TS_ASSERT(spectrumInfo.hasDetectors(1));
+    TS_ASSERT(spectrumInfo.hasUniqueDetector(1));
+    TS_ASSERT(spectrumInfo.hasDetectors(2));
+    TS_ASSERT(spectrumInfo.hasUniqueDetector(2));
+    TS_ASSERT(spectrumInfo.hasDetectors(3));
+    TS_ASSERT(spectrumInfo.hasUniqueDetector(3));
+    TS_ASSERT(spectrumInfo.hasDetectors(4));
+    TS_ASSERT(spectrumInfo.hasUniqueDetector(4));
 
     AnalysisDataService::Instance().remove(output);
     remove(inputFile.c_str());
@@ -685,7 +762,7 @@ public:
       AnalysisDataService::Instance().remove(outputws);
   }
 
-  void test_GroupingWorkspaceUsingMatrixWrokspace() {
+  void test_GroupingWorkspaceUsingMatrixWorkspace() {
     int bankWidth = 8;
     int numBanks = 2;
     int numSpectraInBank = bankWidth * bankWidth;
@@ -777,8 +854,11 @@ public:
     // check output - should match template
     TS_ASSERT_EQUALS(output->getNumberHistograms(),
                      outputGrp->getNumberHistograms());
-    TS_ASSERT_EQUALS(output->getDetector(0)->getID(),
-                     outputGrp->getDetector(0)->getID());
+
+    const auto &spectrumInfo = output->spectrumInfo();
+    const auto &spectrumInfoGrp = outputGrp->spectrumInfo();
+    TS_ASSERT_EQUALS(spectrumInfo.detector(0).getID(),
+                     spectrumInfoGrp.detector(0).getID());
 
     AnalysisDataService::Instance().remove(nxsWSname);
     AnalysisDataService::Instance().remove(groupWSName);
@@ -799,8 +879,36 @@ public:
   }
 
 private:
-  const std::string inputWS, outputBase, inputFile;
+  const std::string inputWS, offsetWS, outputBase, inputFile;
   enum constants { NHIST = 6, NBINS = 4 };
+
+  void createTestWorkspace(std::string name, const int offset) {
+    // Set up a small workspace for testing
+    auto space2D = createWorkspace<Workspace2D>(NHIST, NBINS + 1, NBINS);
+    space2D->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
+    BinEdges xs(NBINS + 1, LinearGenerator(10.0, 1.0));
+    CountStandardDeviations errors(NBINS, 1.0);
+    for (int j = 0; j < NHIST; ++j) {
+      space2D->setBinEdges(j, xs);
+      // the y values will be different for each spectra (1+index_number) but
+      // the same for each bin
+      space2D->setCounts(j, NBINS, j + 1);
+      space2D->setCountStandardDeviations(j, errors);
+      space2D->getSpectrum(j).setSpectrumNo(j + 1 + offset);
+      space2D->getSpectrum(j).setDetectorID(j);
+    }
+
+    Instrument_sptr instr(new Instrument);
+    for (detid_t i = 0; i < 6; i++) {
+      Detector *d = new Detector("det", i, 0);
+      instr->add(d);
+      instr->markAsDetector(d);
+    }
+    space2D->setInstrument(instr);
+
+    // Register the workspace in the data service
+    AnalysisDataService::Instance().add(name, space2D);
+  }
 
   void writeFileList() {
     std::ofstream file(inputFile.c_str());

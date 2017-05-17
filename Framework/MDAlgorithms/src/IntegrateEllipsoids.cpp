@@ -8,23 +8,25 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidDataObjects/EventWorkspace.h"
-#include "MantidDataObjects/PeaksWorkspace.h"
-#include "MantidDataObjects/PeakShapeEllipsoid.h"
 #include "MantidDataObjects/Peak.h"
+#include "MantidDataObjects/PeakShapeEllipsoid.h"
+#include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidGeometry/Crystal/IndexingUtils.h"
+#include "MantidGeometry/Crystal/OrientedLattice.h"
+#include "MantidHistogramData/LinearGenerator.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/Statistics.h"
-#include "MantidMDAlgorithms/MDTransfQ3D.h"
-#include "MantidMDAlgorithms/MDTransfFactory.h"
-#include "MantidMDAlgorithms/UnitsConversionHelper.h"
 #include "MantidMDAlgorithms/Integrate3DEvents.h"
+#include "MantidMDAlgorithms/MDTransfFactory.h"
+#include "MantidMDAlgorithms/MDTransfQ3D.h"
+#include "MantidMDAlgorithms/UnitsConversionHelper.h"
 
 #include <boost/math/special_functions/round.hpp>
 
 using namespace Mantid::API;
+using namespace Mantid::HistogramData;
 using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
 using namespace Mantid::DataObjects;
@@ -130,7 +132,6 @@ void IntegrateEllipsoids::qListFromHistoWS(Integrate3DEvents &integrator,
   // loop through the eventlists
 
   int numSpectra = static_cast<int>(wksp->getNumberHistograms());
-  const bool histogramForm = wksp->isHistogramData();
   PARALLEL_FOR_IF(Kernel::threadSafe(*wksp))
   for (int i = 0; i < numSpectra; ++i) {
     PARALLEL_START_INTERUPT_REGION
@@ -145,8 +146,8 @@ void IntegrateEllipsoids::qListFromHistoWS(Integrate3DEvents &integrator,
 
     std::vector<double> buffer(DIMS);
     // get tof and counts
-    const Mantid::MantidVec &xVals = wksp->readX(i);
-    const Mantid::MantidVec &yVals = wksp->readY(i);
+    const auto &xVals = wksp->points(i);
+    const auto &yVals = wksp->counts(i);
 
     // update which pixel is being converted
     std::vector<Mantid::coord_t> locCoord(DIMS, 0.);
@@ -163,14 +164,7 @@ void IntegrateEllipsoids::qListFromHistoWS(Integrate3DEvents &integrator,
       const double &yVal = yVals[j];
       if (yVal > 0) // TODO, is this condition right?
       {
-        // Tof from point data
-        double tof = xVals[j];
-        if (histogramForm) {
-          // Tof is the centre point
-          tof = (tof + xVals[j + 1]) / 2;
-        }
-
-        double val = unitConverter.convertUnits(tof);
+        double val = unitConverter.convertUnits(xVals[j]);
         qConverter.calcMatrixCoord(val, locCoord, signal, errorSq);
         for (size_t dim = 0; dim < DIMS; ++dim) {
           buffer[dim] = locCoord[dim]; // TODO. Looks un-necessary to me. Can't
@@ -279,6 +273,16 @@ void IntegrateEllipsoids::init() {
       "IntegrateIfOnEdge", true,
       "Set to false to not integrate if peak radius is off edge of detector."
       "Background will be scaled if background radius is off edge.");
+
+  declareProperty("AdaptiveQBackground", false,
+                  "Default is false.   If true, "
+                  "BackgroundOuterRadius + AdaptiveQMultiplier * **|Q|** and "
+                  "BackgroundInnerRadius + AdaptiveQMultiplier * **|Q|**");
+
+  declareProperty("AdaptiveQMultiplier", 0.0,
+                  "PeakRadius + AdaptiveQMultiplier * **|Q|** "
+                  "so each peak has a "
+                  "different integration radius.  Q includes the 2*pi factor.");
 }
 
 //---------------------------------------------------------------------
@@ -316,6 +320,11 @@ void IntegrateEllipsoids::exec() {
   double back_outer_radius = getProperty("BackgroundOuterSize");
   bool hkl_integ = getProperty("IntegrateInHKL");
   bool integrateEdge = getProperty("IntegrateIfOnEdge");
+  bool adaptiveQBackground = getProperty("AdaptiveQBackground");
+  double adaptiveQMultiplier = getProperty("AdaptiveQMultiplier");
+  double adaptiveQBackgroundMultiplier = 0.0;
+  if (adaptiveQBackground)
+    adaptiveQBackgroundMultiplier = adaptiveQMultiplier;
   if (!integrateEdge) {
     // This only fails in the unit tests which say that MaskBTP is not
     // registered
@@ -417,10 +426,38 @@ void IntegrateEllipsoids::exec() {
     if (Geometry::IndexingUtils::ValidIndex(hkl, 1.0)) {
       peak_q = peaks[i].getQLabFrame();
       std::vector<double> axes_radii;
+      // modulus of Q
+      double lenQpeak = 0.0;
+      if (adaptiveQMultiplier != 0.0) {
+        for (size_t d = 0; d < 3; d++) {
+          lenQpeak += peak_q[d] * peak_q[d];
+        }
+        lenQpeak = std::sqrt(lenQpeak);
+      }
+      const double adaptiveRadius =
+          adaptiveQMultiplier * lenQpeak + peak_radius;
+      if (adaptiveRadius <= 0.0) {
+        g_log.error() << "Error: Radius for integration sphere of peak " << i
+                      << " is negative =  " << adaptiveRadius << '\n';
+        peaks[i].setIntensity(0.0);
+        peaks[i].setSigmaIntensity(0.0);
+        PeakRadiusVector[i] = 0.0;
+        BackgroundInnerRadiusVector[i] = 0.0;
+        BackgroundOuterRadiusVector[i] = 0.0;
+        continue;
+      }
+      const double adaptiveBack_inner_radius =
+          adaptiveQBackgroundMultiplier * lenQpeak + back_inner_radius;
+      const double adaptiveBack_outer_radius =
+          adaptiveQBackgroundMultiplier * lenQpeak + back_outer_radius;
+      PeakRadiusVector[i] = adaptiveRadius;
+      BackgroundInnerRadiusVector[i] = adaptiveBack_inner_radius;
+      BackgroundOuterRadiusVector[i] = adaptiveBack_outer_radius;
       Mantid::Geometry::PeakShape_const_sptr shape =
           integrator.ellipseIntegrateEvents(
-              E1Vec, peak_q, specify_size, peak_radius, back_inner_radius,
-              back_outer_radius, axes_radii, inti, sigi);
+              E1Vec, peak_q, specify_size, adaptiveRadius,
+              adaptiveBack_inner_radius, adaptiveBack_outer_radius, axes_radii,
+              inti, sigi);
       peaks[i].setIntensity(inti);
       peaks[i].setSigmaIntensity(sigi);
       peaks[i].setPeakShape(shape);
@@ -437,24 +474,6 @@ void IntegrateEllipsoids::exec() {
     }
   }
   if (principalaxis1.size() > 1) {
-    size_t histogramNumber = 3;
-    Workspace_sptr wsProfile = WorkspaceFactory::Instance().create(
-        "Workspace2D", histogramNumber, principalaxis1.size(),
-        principalaxis1.size());
-    Workspace2D_sptr wsProfile2D =
-        boost::dynamic_pointer_cast<Workspace2D>(wsProfile);
-    AnalysisDataService::Instance().addOrReplace("EllipsoidAxes", wsProfile2D);
-    for (size_t j = 0; j < principalaxis1.size(); j++) {
-      wsProfile2D->dataX(0)[j] = static_cast<double>(j);
-      wsProfile2D->dataY(0)[j] = principalaxis1[j];
-      wsProfile2D->dataE(0)[j] = std::sqrt(principalaxis1[j]);
-      wsProfile2D->dataX(1)[j] = static_cast<double>(j);
-      wsProfile2D->dataY(1)[j] = principalaxis2[j];
-      wsProfile2D->dataE(1)[j] = std::sqrt(principalaxis2[j]);
-      wsProfile2D->dataX(2)[j] = static_cast<double>(j);
-      wsProfile2D->dataY(2)[j] = principalaxis3[j];
-      wsProfile2D->dataE(2)[j] = std::sqrt(principalaxis3[j]);
-    }
     Statistics stats1 = getStatistics(principalaxis1);
     g_log.notice() << "principalaxis1: "
                    << " mean " << stats1.mean << " standard_deviation "
@@ -473,6 +492,20 @@ void IntegrateEllipsoids::exec() {
                    << stats3.standard_deviation << " minimum " << stats3.minimum
                    << " maximum " << stats3.maximum << " median "
                    << stats3.median << "\n";
+    size_t histogramNumber = 3;
+    Workspace_sptr wsProfile = WorkspaceFactory::Instance().create(
+        "Workspace2D", histogramNumber, principalaxis1.size(),
+        principalaxis1.size());
+    Workspace2D_sptr wsProfile2D =
+        boost::dynamic_pointer_cast<Workspace2D>(wsProfile);
+    AnalysisDataService::Instance().addOrReplace("EllipsoidAxes", wsProfile2D);
+
+    // set output workspace
+    Points points(principalaxis1.size(), LinearGenerator(0, 1));
+    wsProfile2D->setHistogram(0, points, Counts(std::move(principalaxis1)));
+    wsProfile2D->setHistogram(1, points, Counts(std::move(principalaxis2)));
+    wsProfile2D->setHistogram(2, points, Counts(std::move(principalaxis3)));
+
     if (cutoffIsigI != EMPTY_DBL()) {
       principalaxis1.clear();
       principalaxis2.clear();
@@ -483,9 +516,8 @@ void IntegrateEllipsoids::exec() {
                                                   stats2.standard_deviation),
                                          stats3.standard_deviation);
       back_inner_radius = peak_radius;
-      back_outer_radius =
-          peak_radius *
-          1.25992105; // A factor of 2 ^ (1/3) will make the background
+      back_outer_radius = peak_radius * 1.25992105; // A factor of 2 ^ (1/3)
+                                                    // will make the background
       // shell volume equal to the peak region volume.
       V3D peak_q;
       for (size_t i = 0; i < n_peaks; i++) {
@@ -517,17 +549,12 @@ void IntegrateEllipsoids::exec() {
             boost::dynamic_pointer_cast<Workspace2D>(wsProfile2);
         AnalysisDataService::Instance().addOrReplace("EllipsoidAxes_2ndPass",
                                                      wsProfile2D2);
-        for (size_t j = 0; j < principalaxis1.size(); j++) {
-          wsProfile2D2->dataX(0)[j] = static_cast<double>(j);
-          wsProfile2D2->dataY(0)[j] = principalaxis1[j];
-          wsProfile2D2->dataE(0)[j] = std::sqrt(principalaxis1[j]);
-          wsProfile2D2->dataX(1)[j] = static_cast<double>(j);
-          wsProfile2D2->dataY(1)[j] = principalaxis2[j];
-          wsProfile2D2->dataE(1)[j] = std::sqrt(principalaxis2[j]);
-          wsProfile2D2->dataX(2)[j] = static_cast<double>(j);
-          wsProfile2D2->dataY(2)[j] = principalaxis3[j];
-          wsProfile2D2->dataE(2)[j] = std::sqrt(principalaxis3[j]);
-        }
+
+        // set output workspace
+        Points points(principalaxis1.size(), LinearGenerator(0, 1));
+        wsProfile2D->setHistogram(0, points, Counts(std::move(principalaxis1)));
+        wsProfile2D->setHistogram(1, points, Counts(std::move(principalaxis2)));
+        wsProfile2D->setHistogram(2, points, Counts(std::move(principalaxis3)));
       }
     }
   }

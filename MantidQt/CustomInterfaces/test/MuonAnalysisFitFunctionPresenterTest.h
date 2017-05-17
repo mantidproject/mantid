@@ -10,12 +10,12 @@
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidQtCustomInterfaces/Muon/MuonAnalysisFitFunctionPresenter.h"
 #include "MantidQtMantidWidgets/IFunctionBrowser.h"
-#include "MantidQtMantidWidgets/IMuonFitFunctionControl.h"
+#include "MantidQtMantidWidgets/IMuonFitFunctionModel.h"
 
 using MantidQt::CustomInterfaces::MuonAnalysisFitFunctionPresenter;
 using MantidQt::CustomInterfaces::Muon::MultiFitState;
 using MantidQt::MantidWidgets::IFunctionBrowser;
-using MantidQt::MantidWidgets::IMuonFitFunctionControl;
+using MantidQt::MantidWidgets::IMuonFitFunctionModel;
 using namespace testing;
 
 // Mock function browser widget
@@ -53,7 +53,7 @@ private:
 };
 
 // Mock muon fit property browser
-class MockFitFunctionControl : public IMuonFitFunctionControl {
+class MockFitFunctionControl : public IMuonFitFunctionModel {
 public:
   GCC_DIAG_OFF_SUGGEST_OVERRIDE
   MOCK_METHOD1(setFunction, void(const Mantid::API::IFunction_sptr));
@@ -65,6 +65,7 @@ public:
   MOCK_CONST_METHOD0(getWorkspaceNamesToFit, std::vector<std::string>());
   MOCK_METHOD1(userChangedDatasetIndex, void(int));
   MOCK_METHOD1(setMultiFittingMode, void(bool));
+  MOCK_METHOD1(setTFAsymmMode, void(bool));
   MOCK_METHOD1(fitRawDataClicked, void(bool));
   MOCK_METHOD0(doRemoveGuess, void());
   MOCK_METHOD0(doPlotGuess, void());
@@ -223,7 +224,17 @@ public:
     EXPECT_CALL(*m_fitBrowser, setMultiFittingMode(false)).Times(1);
     m_presenter->setMultiFitState(MultiFitState::Disabled);
   }
+  void test_setTFAsymmMode_On() {
+    EXPECT_CALL(*m_fitBrowser, setTFAsymmMode(true)).Times(1);
+    m_presenter->setTFAsymmState(
+        MantidQt::CustomInterfaces::Muon::TFAsymmState::Enabled);
+  }
 
+  void test_setTFAsymmMode_Off() {
+    EXPECT_CALL(*m_fitBrowser, setTFAsymmMode(false)).Times(1);
+    m_presenter->setTFAsymmState(
+        MantidQt::CustomInterfaces::Muon::TFAsymmState::Disabled);
+  }
   void test_setFunctionInModel_multiFitOn_hasGuess() {
     doTest_setFunctionInModel(MultiFitState::Enabled, true);
   }

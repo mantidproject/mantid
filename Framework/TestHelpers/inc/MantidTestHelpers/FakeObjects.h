@@ -97,43 +97,23 @@ private:
 };
 
 //===================================================================================================================
-class WorkspaceTester : public MatrixWorkspace {
+class AxeslessWorkspaceTester : public MatrixWorkspace {
 public:
-  WorkspaceTester() : MatrixWorkspace(), spec(0) {}
-  ~WorkspaceTester() override {}
-
-  /// Returns a clone of the workspace
-  std::unique_ptr<WorkspaceTester> clone() const {
-    return std::unique_ptr<WorkspaceTester>(doClone());
-  }
+  AxeslessWorkspaceTester() : MatrixWorkspace(), m_spec(0) {}
 
   // Empty overrides of virtual methods
-  size_t getNumberHistograms() const override { return spec; }
-  const std::string id() const override { return "WorkspaceTester"; }
-  void init(const size_t &numspec, const size_t &j, const size_t &k) override {
-    spec = numspec;
-    vec.resize(spec, SpectrumTester(HistogramData::getHistogramXMode(j, k),
-                                    HistogramData::Histogram::YMode::Counts));
-    for (size_t i = 0; i < spec; i++) {
-      vec[i].dataX().resize(j, 1.0);
-      vec[i].dataY().resize(k, 1.0);
-      vec[i].dataE().resize(k, 1.0);
-      vec[i].addDetectorID(detid_t(i));
-      vec[i].setSpectrumNo(specnum_t(i + 1));
-    }
-
-    // Put an 'empty' axis in to test the getAxis method
-    m_axes.resize(2);
-    m_axes[0] = new Mantid::API::RefAxis(j, this);
-    m_axes[1] = new Mantid::API::SpectraAxis(this);
-  }
-  size_t size() const override { return vec.size() * blocksize(); }
+  size_t getNumberHistograms() const override { return m_spec; }
+  const std::string id() const override { return "AxeslessWorkspaceTester"; }
+  size_t size() const override { return m_vec.size() * blocksize(); }
   size_t blocksize() const override {
-    return vec.empty() ? 0 : vec[0].dataY().size();
+    return m_vec.empty() ? 0 : m_vec[0].dataY().size();
   }
-  ISpectrum &getSpectrum(const size_t index) override { return vec[index]; }
+  ISpectrum &getSpectrum(const size_t index) override {
+    m_vec[index].setMatrixWorkspace(this, index);
+    return m_vec[index];
+  }
   const ISpectrum &getSpectrum(const size_t index) const override {
-    return vec[index];
+    return m_vec[index];
   }
   void generateHistogram(const std::size_t, const MantidVec &, MantidVec &,
                          MantidVec &, bool) const override {}
@@ -142,12 +122,82 @@ public:
     return Mantid::Kernel::None;
   }
 
+protected:
+  void init(const size_t &numspec, const size_t &j, const size_t &k) override {
+    m_spec = numspec;
+    m_vec.resize(m_spec,
+                 SpectrumTester(HistogramData::getHistogramXMode(j, k),
+                                HistogramData::Histogram::YMode::Counts));
+    for (size_t i = 0; i < m_spec; i++) {
+      m_vec[i].setMatrixWorkspace(this, i);
+      m_vec[i].dataX().resize(j, 1.0);
+      m_vec[i].dataY().resize(k, 1.0);
+      m_vec[i].dataE().resize(k, 1.0);
+      m_vec[i].addDetectorID(detid_t(i));
+      m_vec[i].setSpectrumNo(specnum_t(i + 1));
+    }
+  }
+  void init(const size_t &numspec,
+            const HistogramData::Histogram &histogram) override {
+    m_spec = numspec;
+    m_vec.resize(m_spec, SpectrumTester(histogram.xMode(), histogram.yMode()));
+    for (size_t i = 0; i < m_spec; i++) {
+      m_vec[i].setHistogram(histogram);
+      m_vec[i].addDetectorID(detid_t(i));
+      m_vec[i].setSpectrumNo(specnum_t(i + 1));
+    }
+  }
+
+  AxeslessWorkspaceTester *doClone() const override {
+    return new AxeslessWorkspaceTester(*this);
+  }
+  AxeslessWorkspaceTester *doCloneEmpty() const override {
+    throw std::runtime_error(
+        "Cloning of AxeslessWorkspaceTester is not implemented.");
+  }
+
+private:
+  std::vector<SpectrumTester> m_vec;
+  size_t m_spec;
+};
+
+class WorkspaceTester : public AxeslessWorkspaceTester {
+public:
+  WorkspaceTester() : AxeslessWorkspaceTester() {}
+
+  const std::string id() const override { return "WorkspaceTester"; }
+
+  /// Returns a clone of the workspace
+  std::unique_ptr<WorkspaceTester> clone() const {
+    return std::unique_ptr<WorkspaceTester>(doClone());
+  }
+
+protected:
+  void init(const size_t &numspec, const size_t &j, const size_t &k) override {
+    AxeslessWorkspaceTester::init(numspec, j, k);
+
+    // Put an 'empty' axis in to test the getAxis method
+    m_axes.resize(2);
+    m_axes[0] = new Mantid::API::RefAxis(j, this);
+    m_axes[1] = new Mantid::API::SpectraAxis(this);
+  }
+  void init(const size_t &numspec,
+            const HistogramData::Histogram &histogram) override {
+    AxeslessWorkspaceTester::init(numspec, histogram);
+
+    // Put an 'empty' axis in to test the getAxis method
+    m_axes.resize(2);
+    m_axes[0] = new Mantid::API::RefAxis(histogram.x().size(), this);
+    m_axes[1] = new Mantid::API::SpectraAxis(this);
+  }
+
 private:
   WorkspaceTester *doClone() const override {
     return new WorkspaceTester(*this);
   }
-  std::vector<SpectrumTester> vec;
-  size_t spec;
+  WorkspaceTester *doCloneEmpty() const override {
+    throw std::runtime_error("Cloning of WorkspaceTester is not implemented.");
+  }
 };
 
 //===================================================================================================================

@@ -1,4 +1,4 @@
-﻿#pylint: disable=invalid-name
+#pylint: disable=invalid-name
 """ Sample MERLIN reduction scrip """
 from Direct.ReductionWrapper import *
 try:

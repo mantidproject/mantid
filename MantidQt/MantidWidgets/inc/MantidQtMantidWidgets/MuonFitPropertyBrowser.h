@@ -2,10 +2,15 @@
 #define MUONFITPROPERTYBROWSER_H_
 
 #include "MantidQtMantidWidgets/FitPropertyBrowser.h"
-#include "MantidQtMantidWidgets/IMuonFitFunctionControl.h"
+#include "MantidQtMantidWidgets/IMuonFitDataModel.h"
+#include "MantidQtMantidWidgets/IMuonFitFunctionModel.h"
 
 /* Forward declarations */
-
+class QDockWidget;
+class QLabel;
+class QPushButton;
+class QMenu;
+class QSignalMapper;
 class QtTreePropertyBrowser;
 class QtGroupPropertyManager;
 class QtDoublePropertyManager;
@@ -32,7 +37,8 @@ class PropertyHandler;
 
 class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS MuonFitPropertyBrowser
     : public MantidQt::MantidWidgets::FitPropertyBrowser,
-      public MantidQt::MantidWidgets::IMuonFitFunctionControl {
+      public MantidQt::MantidWidgets::IMuonFitFunctionModel,
+      public IMuonFitDataModel {
   Q_OBJECT
 
 public:
@@ -76,6 +82,10 @@ public:
   }
   /// Set multiple fitting mode on or off
   void setMultiFittingMode(bool enabled) override;
+  void setTFAsymmMode(bool enabled) override;
+
+  /// After fit checks done, continue
+  void continueAfterChecks(bool sequential) override;
   /// Remove a plotted guess
   void doRemoveGuess() override { emit removeGuess(); }
   /// Plot a guess function
@@ -83,12 +93,17 @@ public:
   /// Whether a guess is plotted or not
   bool hasGuess() const override;
 
+  /// Enable/disable the Fit button;
+  virtual void setFitEnabled(bool yes) override;
+
+  void doTFAsymmFit(int maxIterations);
+
 public slots:
   /// Perform the fit algorithm
   void fit() override;
   /// Open sequential fit dialog
   void sequentialFit() override;
-
+  void executeFitMenu(const QString &item) override;
 signals:
   /// Emitted when sequential fit is requested by user
   void sequentialFitRequested();
@@ -102,15 +117,22 @@ signals:
   void userChangedDatasetIndex(int index) override;
   /// Emitted when "fit to raw data" is changed
   void fitRawDataClicked(bool enabled) override;
+  /// Emitted when fit is about to be run
+  void preFitChecksRequested(bool sequential) override;
 
 protected:
   void showEvent(QShowEvent *e) override;
-
+  double normalization() const;
+  void setNormalization();
 private slots:
   void doubleChanged(QtProperty *prop) override;
   void boolChanged(QtProperty *prop) override;
 
 private:
+  /// new menu option
+  QAction *m_fitActionTFAsymm;
+  /// override populating fit menu
+  void populateFitMenuButton(QSignalMapper *fitMapper, QMenu *fitMenu) override;
   /// Get the registered function names
   void populateFunctionNames() override;
   /// Check if the workspace can be used in the fit
@@ -125,7 +147,11 @@ private:
   std::vector<std::string> m_workspacesToFit;
   /// Label to use for simultaneous fits
   std::string m_simultaneousLabel;
+  QtProperty *m_normalization;
+  mutable QStringList m_normalizationValue;
 };
+
+std::vector<double> readNormalization();
 
 } // MantidQt
 } // API

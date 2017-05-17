@@ -1,14 +1,11 @@
-// SetScalingPSD
 // @author Ronald Fowler
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidDataHandling/SetScalingPSD.h"
 #include "LoadRaw/isisraw.h"
 #include "MantidAPI/Axis.h"
+#include "MantidAPI/DetectorInfo.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidGeometry/Instrument/ComponentHelper.h"
+#include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/V3D.h"
@@ -87,7 +84,7 @@ bool SetScalingPSD::processScalingFile(const std::string &scalingFile,
   std::map<int, double> scaleMap;
   std::map<int, double>::iterator its;
 
-  Instrument_const_sptr instrument = m_workspace->getInstrument();
+  const auto &detectorInfo = m_workspace->detectorInfo();
   if (scalingFile.find(".sca") != std::string::npos ||
       scalingFile.find(".SCA") != std::string::npos) {
     // read a .sca text format file
@@ -140,38 +137,35 @@ bool SetScalingPSD::processScalingFile(const std::string &scalingFile,
       // use abs as correction file has -ve l2 for first few detectors
       truPos.spherical(fabs(l2), theta, phi);
       truepos.push_back(truPos);
-      //
-      Geometry::IDetector_const_sptr det;
       try {
-        det = instrument->getDetector(detIndex);
-      } catch (Kernel::Exception::NotFoundError &) {
+        // detIndex is what Mantid usually calls detectorID
+        size_t index = detectorInfo.indexOf(detIndex);
+        Kernel::V3D detPos = detectorInfo.position(index);
+        Kernel::V3D shift = truPos - detPos;
+
+        // scaling applied to dets that are not monitors and have sequential IDs
+        if (detIdLast == detIndex - 1 && !detectorInfo.isMonitor(index)) {
+          Kernel::V3D diffI = detPos - detPosLast;
+          Kernel::V3D diffT = truPos - truPosLast;
+          double scale = diffT.norm() / diffI.norm();
+          // Wish to store the scaling in a map, if we already have a scaling
+          // for this detector (i.e. from the other side) we average the two
+          // values. End of tube detectors only have one scaling estimate.
+          scaleMap[detIndex] = scale;
+          its = scaleMap.find(detIndex - 1);
+          if (its == scaleMap.end())
+            scaleMap[detIndex - 1] = scale;
+          else
+            its->second = 0.5 * (its->second + scale);
+        }
+        detIdLast = detIndex;
+        detPosLast = detPos;
+        truPosLast = truPos;
+        posMap[detIndex] = shift;
+        prog.report();
+      } catch (std::out_of_range &) {
         continue;
       }
-      Kernel::V3D detPos = det->getPos();
-      Kernel::V3D shift = truPos - detPos;
-
-      // scaling applied to dets that are not monitors and have sequential IDs
-      if (detIdLast == detIndex - 1 && !det->isMonitor()) {
-        Kernel::V3D diffI = detPos - detPosLast;
-        Kernel::V3D diffT = truPos - truPosLast;
-        double scale = diffT.norm() / diffI.norm();
-        // Wish to store the scaling in a map, if we already have a scaling
-        // for this detector (i.e. from the other side) we average the two
-        // values. End of tube detectors only have one scaling estimate.
-        scaleMap[detIndex] = scale;
-        its = scaleMap.find(detIndex - 1);
-        if (its == scaleMap.end())
-          scaleMap[detIndex - 1] = scale;
-        else
-          its->second = 0.5 * (its->second + scale);
-        // std::cout << detIndex << scale << scaleDir << '\n';
-      }
-      detIdLast = detIndex;
-      detPosLast = detPos;
-      truPosLast = truPos;
-      posMap[detIndex] = shift;
-      //
-      prog.report();
     }
   } else if (scalingFile.find(".raw") != std::string::npos ||
              scalingFile.find(".RAW") != std::string::npos) {
@@ -189,110 +183,90 @@ bool SetScalingPSD::processScalingFile(const std::string &scalingFile,
     Progress prog(this, 0.0, 0.5, detectorCount);
     for (int i = 0; i < detectorCount; i++) {
       int detIndex = detID[i];
-      Geometry::IDetector_const_sptr det;
       try {
-        det = instrument->getDetector(detIndex);
-      } catch (Kernel::Exception::NotFoundError &) {
+        // detIndex is what Mantid usually calls detectorID
+        size_t index = detectorInfo.indexOf(detIndex);
+        Kernel::V3D detPos = detectorInfo.position(index);
+        Kernel::V3D shift = truepos[i] - detPos;
+
+        if (detIdLast == detIndex - 1 && !detectorInfo.isMonitor(index)) {
+          Kernel::V3D diffI = detPos - detPosLast;
+          Kernel::V3D diffT = truepos[i] - truPosLast;
+          double scale = diffT.norm() / diffI.norm();
+          scaleMap[detIndex] = scale;
+          its = scaleMap.find(detIndex - 1);
+          if (its == scaleMap.end()) {
+            scaleMap[detIndex - 1] = scale;
+          } else {
+            if (m_scalingOption == 0)
+              its->second = 0.5 * (its->second + scale); // average of two
+            else if (m_scalingOption == 1) {
+              if (its->second < scale)
+                its->second = scale; // max
+            } else if (m_scalingOption == 2) {
+              if (its->second < scale)
+                its->second = scale;
+              its->second *= 1.05; // max+5%
+            } else
+              its->second = 3.0; // crazy test value
+          }
+        }
+        detIdLast = detID[i];
+        detPosLast = detPos;
+        truPosLast = truepos[i];
+        posMap[detIndex] = shift;
+        prog.report();
+      } catch (std::out_of_range &) {
         continue;
       }
-      Kernel::V3D detPos = det->getPos();
-      Kernel::V3D shift = truepos[i] - detPos;
-
-      if (detIdLast == detIndex - 1 && !det->isMonitor()) {
-        Kernel::V3D diffI = detPos - detPosLast;
-        Kernel::V3D diffT = truepos[i] - truPosLast;
-        double scale = diffT.norm() / diffI.norm();
-        scaleMap[detIndex] = scale;
-        its = scaleMap.find(detIndex - 1);
-        if (its == scaleMap.end()) {
-          scaleMap[detIndex - 1] = scale;
-        } else {
-          if (m_scalingOption == 0)
-            its->second = 0.5 * (its->second + scale); // average of two
-          else if (m_scalingOption == 1) {
-            if (its->second < scale)
-              its->second = scale; // max
-          } else if (m_scalingOption == 2) {
-            if (its->second < scale)
-              its->second = scale;
-            its->second *= 1.05; // max+5%
-          } else
-            its->second = 3.0; // crazy test value
-        }
-        // std::cout << detIndex << scale << scaleDir << '\n';
-      }
-      detIdLast = detID[i];
-      detPosLast = detPos;
-      truPosLast = truepos[i];
-      posMap[detIndex] = shift;
-      //
-      prog.report();
     }
   }
   movePos(m_workspace, posMap, scaleMap);
   return true;
 }
 
+/**
+ * Move all the detectors to their actual positions, as stored in posMap and set
+ * their scaling as in scaleMap
+ * @param WS :: pointer to the workspace
+ * @param posMap :: A map of integer detector ID to position shift
+ * @param scaleMap :: A map of integer detectorID to scaling (in Y)
+ */
 void SetScalingPSD::movePos(API::MatrixWorkspace_sptr &WS,
                             std::map<int, Kernel::V3D> &posMap,
                             std::map<int, double> &scaleMap) {
 
-  /** Move all the detectors to their actual positions, as stored in posMap and
-  *   set their scaling as in scaleMap
-  *   @param WS :: pointer to the workspace
-  *   @param posMap :: A map of integer detector ID and corresponding position
-  * shift
-  *   @param scaleMap :: A map of integer detectorID and corresponding scaling
-  * (in Y)
-  */
-  auto iter = posMap.begin();
   Geometry::ParameterMap &pmap = WS->instrumentParameters();
-  boost::shared_ptr<const Instrument> inst = WS->getInstrument();
-  boost::shared_ptr<const IComponent> comp;
+  auto &detectorInfo = WS->mutableDetectorInfo();
 
-  // Want to get all the detectors to move, but don't want to do this one at a
-  // time
-  // since the search (based on MoveInstrument findBy methods) is going to be
-  // too slow
-  // Hence findAll gets a vector of IComponent for all detectors, as m_vectDet.
-  m_vectDet.reserve(posMap.size());
-  findAll(inst);
-
-  double scale, maxScale = -1e6, minScale = 1e6, aveScale = 0.0;
+  double maxScale = -1e6, minScale = 1e6, aveScale = 0.0;
   int scaleCount = 0;
-  // progress 50% here inside the for loop
-  // double prog=0.5;
-  Progress prog(this, 0.5, 1.0, static_cast<int>(m_vectDet.size()));
-  // loop over detector (IComps)
-  for (auto &id : m_vectDet) {
-    comp = id;
-    boost::shared_ptr<const IDetector> det =
-        boost::dynamic_pointer_cast<const IDetector>(comp);
-    int idet = 0;
-    if (det)
-      idet = det->getID();
+  Progress prog(this, 0.5, 1.0, static_cast<int>(detectorInfo.size()));
 
-    iter = posMap.find(idet); // check if we have a shift
-    if (iter == posMap.end())
+  for (size_t i = 0; i < detectorInfo.size(); ++i) {
+    int idet = detectorInfo.detectorIDs()[i];
+
+    // Check if we have a shift, else do nothing.
+    auto itPos = posMap.find(idet);
+    if (itPos == posMap.end())
       continue;
-    Geometry::ComponentHelper::moveComponent(
-        *det, pmap, iter->second, Geometry::ComponentHelper::Relative);
+
+    // Do a relative move
+    const auto newPosition = detectorInfo.position(i) + itPos->second;
+    detectorInfo.setPosition(i, newPosition);
 
     // Set the "sca" instrument parameter
-    auto it = scaleMap.find(idet);
-    if (it != scaleMap.end()) {
-      scale = it->second;
+    auto itScale = scaleMap.find(idet);
+    if (itScale != scaleMap.end()) {
+      const double scale = itScale->second;
       if (minScale > scale)
         minScale = scale;
       if (maxScale < scale)
         maxScale = scale;
       aveScale += fabs(1.0 - scale);
       scaleCount++;
-      pmap.addV3D(comp.get(), "sca", V3D(1.0, it->second, 1.0));
+      pmap.addV3D(&detectorInfo.detector(i), "sca", V3D(1.0, scale, 1.0));
     }
-    //
-    // prog+= double(1)/m_vectDet.size();
-    // progress(prog);
     prog.report();
   }
   g_log.debug() << "Range of scaling factors is " << minScale << " to "
@@ -304,25 +278,6 @@ void SetScalingPSD::movePos(API::MatrixWorkspace_sptr &WS,
     g_log.debug() << "Average abs scaling fraction cannot ba calculated "
                      "because the scale count is 0! Its value before dividing "
                      "by the count is " << aveScale << "\n";
-  }
-}
-
-/** Find all detectors in the comp and push the IComp pointers onto m_vectDet
- * @param comp :: The component to search
- */
-void SetScalingPSD::findAll(
-    boost::shared_ptr<const Geometry::IComponent> comp) {
-  boost::shared_ptr<const IDetector> det =
-      boost::dynamic_pointer_cast<const IDetector>(comp);
-  if (det) {
-    m_vectDet.push_back(comp);
-    return;
-  }
-  auto asmb = boost::dynamic_pointer_cast<const ICompAssembly>(comp);
-  if (asmb) {
-    for (int i = 0; i < asmb->nelements(); i++) {
-      findAll((*asmb)[i]);
-    }
   }
 }
 

@@ -9,7 +9,9 @@
 #include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
+#include "MantidAPI/DetectorInfo.h"
 #include "MantidAPI/Sample.h"
+#include "MantidAPI/SpectrumInfo.h"
 
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
@@ -68,7 +70,7 @@ createTestWorkspace(const bool detShape = true,
         "/>"
         "</cuboid>"
         "<algebra val=\"shape\" />";
-    const auto pos = ws2d->getDetector(0)->getPos();
+    const auto pos = ws2d->spectrumInfo().position(0);
     auto instrument =
         ComptonProfileTestHelpers::createTestInstrumentWithFoilChanger(
             1, pos, shapeXML);
@@ -77,7 +79,13 @@ createTestWorkspace(const bool detShape = true,
       // Add another detector in the same position as the first
       auto shape = ShapeFactory().createShape(shapeXML);
       Mantid::Geometry::Detector *det2 = new Detector("det1", 2, shape, NULL);
-      det2->setPos(instrument->getDetector(1)->getPos());
+      // Setting detectors should normally go via DetectorInfo, but here we need
+      // to set a position as we are adding a new detector. In general getPos
+      // should not be called as this tries to set the position of the base
+      // component. If the component is parameterized then this method would
+      // throw. getPos is required here, otherwise the new detector may not have
+      // a base position set.
+      det2->setPos(pos);
       instrument->add(det2);
       instrument->markAsDetector(det2);
 
@@ -192,8 +200,8 @@ public:
 #endif
   }
 
-  // ------------------------ Failure Cases
-  // -----------------------------------------
+  //   ------------------------ Failure Cases
+  //   -----------------------------------------
 
   void test_setting_input_workspace_not_in_tof_throws_invalid_argument() {
     VesuvioCalculateMS alg;

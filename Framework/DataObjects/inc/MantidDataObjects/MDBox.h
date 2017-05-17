@@ -174,7 +174,8 @@ public:
   void calculateDimensionStats(MDDimensionStats *stats) const;
   void integrateSphere(Mantid::API::CoordTransform &radiusTransform,
                        const coord_t radiusSquared, signal_t &signal,
-                       signal_t &errorSquared) const override;
+                       signal_t &errorSquared,
+                       const coord_t innerRadiusSquared = 0.0) const override;
   void centroidSphere(Mantid::API::CoordTransform &radiusTransform,
                       const coord_t radiusSquared, coord_t *centroid,
                       signal_t &signal) const override;
@@ -279,7 +280,6 @@ public:
     return MDLeanEvent<nd>(Signal, Error, Coord);
   }
 };
-
 } // namespace DataObjects
 
 } // namespace Mantid

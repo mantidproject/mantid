@@ -4,7 +4,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/HistoWorkspace.h"
 #include "MantidDataObjects/Histogram1D.h"
 
 namespace Mantid {
@@ -35,7 +35,7 @@ namespace DataObjects {
     File change history is stored at: <https://github.com/mantidproject/mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport WorkspaceSingleValue : public API::MatrixWorkspace {
+class DLLExport WorkspaceSingleValue : public API::HistoWorkspace {
 public:
   /**	Gets the name of the workspace type
    * @return Standard string name  */
@@ -46,6 +46,10 @@ public:
   /// Returns a clone of the workspace
   std::unique_ptr<WorkspaceSingleValue> clone() const {
     return std::unique_ptr<WorkspaceSingleValue>(doClone());
+  }
+  /// Returns a default-initialized clone of the workspace
+  std::unique_ptr<WorkspaceSingleValue> cloneEmpty() const {
+    return std::unique_ptr<WorkspaceSingleValue>(doCloneEmpty());
   }
   WorkspaceSingleValue &operator=(const WorkspaceSingleValue &other) = delete;
   /// Returns the number of single indexable items in the workspace
@@ -75,10 +79,15 @@ private:
   WorkspaceSingleValue *doClone() const override {
     return new WorkspaceSingleValue(*this);
   }
+  WorkspaceSingleValue *doCloneEmpty() const override {
+    return new WorkspaceSingleValue();
+  }
 
   // allocates space in a new workspace - does nothing in this case
   void init(const std::size_t &NVectors, const std::size_t &XLength,
             const std::size_t &YLength) override;
+  void init(const std::size_t &NVectors,
+            const HistogramData::Histogram &histogram) override;
 
   /// Instance of Histogram1D that holds the "spectrum" (AKA the single value);
   Histogram1D data{HistogramData::Histogram::XMode::Points,

@@ -37,7 +37,6 @@ public:
 
     boost::shared_ptr<Instrument> testInst =
         boost::make_shared<Instrument>("testInst");
-    testWS->setInstrument(testInst);
 
     // Define a source and sample position
     // Define a source component
@@ -68,6 +67,8 @@ public:
     det3->setPos(V3D(1.98194, 0.0990971, 3.19728));
     testInst->add(det3);
     testInst->markAsDetector(det3);
+
+    testWS->setInstrument(testInst);
 
     TS_ASSERT_THROWS_NOTHING(
         atten.setProperty<MatrixWorkspace_sptr>("InputWorkspace", testWS));

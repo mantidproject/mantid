@@ -48,7 +48,7 @@ class ILLIN4Tests(unittest.TestCase):
         """
         ILL Loader
         """
-        ms.LoadILL(Filename=dataFile,OutputWorkspace=self.ws_name)
+        ms.LoadILLTOF(Filename=dataFile,OutputWorkspace=self.ws_name)
         self._do_ads_check(self.ws_name)
 
     def _do_ads_check(self, name):

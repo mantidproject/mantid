@@ -4,7 +4,7 @@
 #include "MantidQtCustomInterfaces/DllConfig.h"
 #include "MantidQtCustomInterfaces/Muon/MuonAnalysisHelper.h"
 #include "MantidQtMantidWidgets/IFunctionBrowser.h"
-#include "MantidQtMantidWidgets/IMuonFitFunctionControl.h"
+#include "MantidQtMantidWidgets/IMuonFitFunctionModel.h"
 #include <QObject>
 
 namespace MantidQt {
@@ -43,10 +43,13 @@ public:
   /// Constructor
   MuonAnalysisFitFunctionPresenter(
       QObject *parent,
-      MantidQt::MantidWidgets::IMuonFitFunctionControl *fitBrowser,
+      MantidQt::MantidWidgets::IMuonFitFunctionModel *fitBrowser,
       MantidQt::MantidWidgets::IFunctionBrowser *funcBrowser);
   /// Toggle multiple fitting mode
   void setMultiFitState(Muon::MultiFitState state);
+  /// Toggle TF Asymmetry mode
+  void setTFAsymmState(Muon::TFAsymmState state);
+
   /// Set function in model (fit property browser)
   void setFunctionInModel(const Mantid::API::IFunction_sptr &function);
 public slots:
@@ -78,11 +81,13 @@ private:
   /// Suspend updates to function parameters, or turn back on
   void setParameterUpdates(bool on);
   /// Non-owning pointer to muon fit property browser
-  MantidQt::MantidWidgets::IMuonFitFunctionControl *m_fitBrowser;
+  MantidQt::MantidWidgets::IMuonFitFunctionModel *m_fitBrowser;
   /// Non-owning pointer to function browser widget
   MantidQt::MantidWidgets::IFunctionBrowser *m_funcBrowser;
   /// Whether multi fitting is disabled(function browser is hidden) or enabled
   Muon::MultiFitState m_multiFitState;
+  /// Whether TF Asymmetry is disabled or enabled
+  Muon::TFAsymmState m_TFAsymmState;
 };
 
 } // namespace CustomInterfaces

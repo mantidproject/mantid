@@ -35,14 +35,10 @@ public:
 
     MockRNG rng;
     auto mcabsorb = createTestObject();
-    // Expectations
-    Sequence rand;
-    const double step = static_cast<double>(1) / static_cast<double>(m_nevents);
-    const double start = step;
-    for (size_t i = 0; i < m_nevents; ++i) {
-      double next = start + static_cast<double>(i) * step;
-      EXPECT_CALL(rng, nextValue()).InSequence(rand).WillOnce(Return(next));
-    }
+    // 3 random numbers per event expected
+    EXPECT_CALL(rng, nextValue())
+        .Times(Exactly(30))
+        .WillRepeatedly(Return(0.5));
     const Mantid::Algorithms::IBeamProfile::Ray testRay = {V3D(-2, 0, 0),
                                                            V3D(1, 0, 0)};
     EXPECT_CALL(m_testBeamProfile, generatePoint(_, _))
@@ -54,7 +50,7 @@ public:
     double factor(0.0), error(0.0);
     std::tie(factor, error) =
         mcabsorb.calculate(rng, endPos, lambdaBefore, lambdaAfter);
-    TS_ASSERT_DELTA(8.05621154e-03, factor, 1e-08);
+    TS_ASSERT_DELTA(0.0043828472, factor, 1e-08);
     TS_ASSERT_DELTA(1.0 / std::sqrt(m_nevents), error, 1e-08);
   }
 
@@ -72,10 +68,16 @@ private:
     MOCK_CONST_METHOD2(generatePoint,
                        Ray(Mantid::Kernel::PseudoRandomNumberGenerator &,
                            const Mantid::Geometry::BoundingBox &));
+    MOCK_CONST_METHOD1(defineActiveRegion, Mantid::Geometry::BoundingBox(
+                                               const Mantid::API::Sample &));
     GCC_DIAG_ON_SUGGEST_OVERRIDE
   };
 
   MCAbsorptionStrategy createTestObject() {
+    using namespace ::testing;
+
+    EXPECT_CALL(m_testBeamProfile, defineActiveRegion(_))
+        .WillOnce(Return(m_testSample.getShape().getBoundingBox()));
     return MCAbsorptionStrategy(m_testBeamProfile, m_testSample, m_nevents);
   }
 

@@ -3,6 +3,7 @@
 
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/DeprecatedAlgorithm.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
@@ -53,7 +54,9 @@ namespace Algorithms {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport RefinePowderInstrumentParameters : public API::Algorithm {
+class DLLExport RefinePowderInstrumentParameters
+    : public API::Algorithm,
+      public API::DeprecatedAlgorithm {
 public:
   RefinePowderInstrumentParameters();
 

@@ -161,7 +161,7 @@ void PatchBBY::exec() {
         hdfFiles++;
       else if (itr->rfind(".bin") == len - 4)
         binFiles++;
-      else if (itr->compare(HistoryStr) == 0) {
+      else if (*itr == HistoryStr) {
         if (std::distance(itr, files.end()) != 1)
           throw std::invalid_argument(
               "invalid BBY file (history has to be at the end)");
@@ -301,7 +301,7 @@ void PatchBBY::exec() {
   }
 
   std::string logContentNew = logContentNewBuffer.str();
-  if (logContentNew.size() == 0)
+  if (logContentNew.empty())
     throw std::invalid_argument("nothing to patch");
 
   // merge log content

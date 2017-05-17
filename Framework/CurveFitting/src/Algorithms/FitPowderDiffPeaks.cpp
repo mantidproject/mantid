@@ -295,9 +295,9 @@ void FitPowderDiffPeaks::processInputProperties() {
 
   // fitting algorithm option
   string fitmode = getProperty("FittingMode");
-  if (fitmode.compare("Robust") == 0) {
+  if (fitmode == "Robust") {
     m_fitMode = ROBUSTFIT;
-  } else if (fitmode.compare("Confident") == 0) {
+  } else if (fitmode == "Confident") {
     m_fitMode = TRUSTINPUTFIT;
   } else {
     throw runtime_error(
@@ -310,9 +310,9 @@ void FitPowderDiffPeaks::processInputProperties() {
 
   // peak parameter generation option
   string genpeakparamalg = getProperty("PeakParametersStartingValueFrom");
-  if (genpeakparamalg.compare("(HKL) & Calculation") == 0) {
+  if (genpeakparamalg == "(HKL) & Calculation") {
     m_genPeakStartingValue = HKLCALCULATION;
-  } else if (genpeakparamalg.compare("From Bragg Peak Table") == 0) {
+  } else if (genpeakparamalg == "From Bragg Peak Table") {
     m_genPeakStartingValue = FROMBRAGGTABLE;
   } else {
     throw runtime_error(
@@ -370,8 +370,7 @@ void FitPowderDiffPeaks::fitPeaksRobust() {
       m_vecPeakFunctions[0].second.second->getParameterNames();
 
   // II. Create local background function.
-  Polynomial_sptr backgroundfunction =
-      boost::make_shared<Polynomial>(Polynomial());
+  Polynomial_sptr backgroundfunction = boost::make_shared<Polynomial>();
   backgroundfunction->setAttributeValue("n", 1);
   backgroundfunction->initialize();
 
@@ -1105,8 +1104,7 @@ bool FitPowderDiffPeaks::fitSinglePeakSimulatedAnnealing(
  */
 void FitPowderDiffPeaks::fitPeaksWithGoodStartingValues() {
   // 1. Initialize (local) background function
-  Polynomial_sptr backgroundfunction =
-      boost::make_shared<Polynomial>(Polynomial());
+  Polynomial_sptr backgroundfunction = boost::make_shared<Polynomial>();
   backgroundfunction->setAttributeValue("n", 1);
   backgroundfunction->initialize();
 
@@ -1256,19 +1254,19 @@ bool FitPowderDiffPeaks::fitSinglePeakConfident(
   // a) Peak centre
   double peakcentreleftbound = peak->centre() - peak->fwhm();
   double peakcentrerightbound = peak->centre() + peak->fwhm();
-  BoundaryConstraint *x0bc = new BoundaryConstraint(
+  auto x0bc = Kernel::make_unique<BoundaryConstraint>(
       peak.get(), "X0", peakcentreleftbound, peakcentrerightbound);
-  peak->addConstraint(x0bc);
+  peak->addConstraint(std::move(x0bc));
 
   // b) A
-  BoundaryConstraint *abc =
-      new BoundaryConstraint(peak.get(), "A", 1.0E-10, false);
-  peak->addConstraint(abc);
+  auto abc =
+      Kernel::make_unique<BoundaryConstraint>(peak.get(), "A", 1.0E-10, false);
+  peak->addConstraint(std::move(abc));
 
   // c) B
-  BoundaryConstraint *bbc =
-      new BoundaryConstraint(peak.get(), "B", 1.0E-10, false);
-  peak->addConstraint(bbc);
+  auto bbc =
+      Kernel::make_unique<BoundaryConstraint>(peak.get(), "B", 1.0E-10, false);
+  peak->addConstraint(std::move(bbc));
 
   // d) Guessed height
   peak->setHeight(maxheight);
@@ -1290,7 +1288,7 @@ bool FitPowderDiffPeaks::fitSinglePeakConfident(
   // a) Fit peak height
   for (size_t iparam = 0; iparam < peakparamnames.size(); ++iparam) {
     string &parname = peakparams[iparam];
-    if (parname.compare("I") == 0)
+    if (parname == "I")
       peak->unfix(iparam);
     else
       peak->fix(iparam);
@@ -1335,7 +1333,7 @@ bool FitPowderDiffPeaks::fitSinglePeakConfident(
   double chi2planB;
   for (size_t iparam = 0; iparam < peakparamnames.size(); ++iparam) {
     string parname = peakparams[iparam];
-    if (parname.compare("A") == 0)
+    if (parname == "A")
       peak->fix(iparam);
     else
       peak->unfix(iparam);
@@ -1346,7 +1344,7 @@ bool FitPowderDiffPeaks::fitSinglePeakConfident(
   // iii. Fit "A" only
   for (size_t iparam = 0; iparam < peakparamnames.size(); ++iparam) {
     string parname = peakparams[iparam];
-    if (parname.compare("A") == 0 || parname.compare("I") == 0)
+    if (parname == "A" || parname == "I")
       peak->unfix(iparam);
     else
       peak->fix(iparam);
@@ -1370,7 +1368,7 @@ bool FitPowderDiffPeaks::fitSinglePeakConfident(
   double chi2planC;
   for (size_t iparam = 0; iparam < peakparamnames.size(); ++iparam) {
     string parname = peakparams[iparam];
-    if (parname.compare("A") != 0)
+    if (parname != "A")
       peak->fix(iparam);
     else
       peak->unfix(iparam);
@@ -1381,7 +1379,7 @@ bool FitPowderDiffPeaks::fitSinglePeakConfident(
   // iii. Fit peak height and everything else but "A"
   for (size_t iparam = 0; iparam < peakparamnames.size(); ++iparam) {
     string parname = peakparams[iparam];
-    if (parname.compare("A") == 0)
+    if (parname == "A")
       peak->fix(iparam);
     else
       peak->unfix(iparam);
@@ -1524,26 +1522,26 @@ FitPowderDiffPeaks::doFitPeak(Workspace2D_sptr dataws,
     double tof_h = peakfunction->centre();
     double centerleftend = tof_h - guessedfwhm * 3.0;
     double centerrightend = tof_h + guessedfwhm * 3.0;
-    BoundaryConstraint *centerbound = new BoundaryConstraint(
+    auto centerbound = Kernel::make_unique<BoundaryConstraint>(
         peakfunction.get(), "X0", centerleftend, centerrightend, false);
-    peakfunction->addConstraint(centerbound);
+    peakfunction->addConstraint(std::move(centerbound));
 
     g_log.debug() << "[DoFitPeak] Peak Center Boundary = " << centerleftend
                   << ", " << centerrightend << '\n';
   }
 
   // A > 0, B > 0, S > 0
-  BoundaryConstraint *abound = new BoundaryConstraint(
+  auto abound = Kernel::make_unique<BoundaryConstraint>(
       peakfunction.get(), "A", 0.0000001, DBL_MAX, false);
-  peakfunction->addConstraint(abound);
+  peakfunction->addConstraint(std::move(abound));
 
-  BoundaryConstraint *bbound = new BoundaryConstraint(
+  auto bbound = Kernel::make_unique<BoundaryConstraint>(
       peakfunction.get(), "B", 0.0000001, DBL_MAX, false);
-  peakfunction->addConstraint(bbound);
+  peakfunction->addConstraint(std::move(bbound));
 
-  BoundaryConstraint *sbound =
-      new BoundaryConstraint(peakfunction.get(), "S", 0.0001, DBL_MAX, false);
-  peakfunction->addConstraint(sbound);
+  auto sbound = Kernel::make_unique<BoundaryConstraint>(peakfunction.get(), "S",
+                                                        0.0001, DBL_MAX, false);
+  peakfunction->addConstraint(std::move(sbound));
 
   // 2. Unfix all parameters
   vector<string> paramnames = peakfunction->getParameterNames();
@@ -1812,10 +1810,9 @@ bool FitPowderDiffPeaks::doFitGaussianPeak(DataObjects::Workspace2D_sptr dataws,
   // b) Constraint
   double centerleftend = in_center - leftfwhm * 0.5;
   double centerrightend = in_center + rightfwhm * 0.5;
-  Constraints::BoundaryConstraint *centerbound =
-      new Constraints::BoundaryConstraint(gaussianpeak.get(), "PeakCentre",
-                                          centerleftend, centerrightend, false);
-  gaussianpeak->addConstraint(centerbound);
+  auto centerbound = Kernel::make_unique<BoundaryConstraint>(
+      gaussianpeak.get(), "PeakCentre", centerleftend, centerrightend, false);
+  gaussianpeak->addConstraint(std::move(centerbound));
 
   // 3. Fit
   API::IAlgorithm_sptr fitalg = createChildAlgorithm("Fit", -1, -1, true);
@@ -1964,7 +1961,7 @@ bool FitPowderDiffPeaks::doFitMultiplePeaks(
   // a) Set up fit/fix
   vector<string> peakparnames = peakfuncs[0]->getParameterNames();
   for (size_t ipn = 0; ipn < peakparnames.size(); ++ipn) {
-    bool isI = peakparnames[ipn].compare("I") == 0;
+    bool isI = peakparnames[ipn] == "I";
 
     for (size_t ipk = 0; ipk < numpeaks; ++ipk) {
       BackToBackExponential_sptr thispeak = peakfuncs[ipk];
@@ -2119,9 +2116,9 @@ void FitPowderDiffPeaks::setOverlappedPeaksConstraints(
     double leftcentrebound = centre - 0.5 * fwhm;
     double rightcentrebound = centre + 0.5 * fwhm;
 
-    BoundaryConstraint *bc = new BoundaryConstraint(
+    auto bc = Kernel::make_unique<BoundaryConstraint>(
         thispeak.get(), "X0", leftcentrebound, rightcentrebound, false);
-    thispeak->addConstraint(bc);
+    thispeak->addConstraint(std::move(bc));
   }
 }
 
@@ -2198,7 +2195,7 @@ std::string FitPowderDiffPeaks::parseFitResult(API::IAlgorithm_sptr fitalg,
   chi2 = fitalg->getProperty("OutputChi2overDoF");
   string fitstatus = fitalg->getProperty("OutputStatus");
 
-  fitsuccess = (fitstatus.compare("success") == 0);
+  fitsuccess = (fitstatus == "success");
 
   rss << "  [Algorithm Fit]:  Chi^2 = " << chi2
       << "; Fit Status = " << fitstatus;
@@ -2253,7 +2250,7 @@ void FitPowderDiffPeaks::importInstrumentParameterFromTable(
     throw std::runtime_error(errss.str());
   }
 
-  if (colnames[0].compare("Name") != 0 || colnames[1].compare("Value") != 0) {
+  if (colnames[0] != "Name" || colnames[1] != "Value") {
     stringstream errss;
     errss << "Input parameter table workspace does not have the columns in "
              "order as  "
@@ -2264,7 +2261,7 @@ void FitPowderDiffPeaks::importInstrumentParameterFromTable(
 
   size_t numrows = parameterWS->rowCount();
 
-  g_log.notice() << "[DBx409] Import TableWorkspace " << parameterWS->name()
+  g_log.notice() << "[DBx409] Import TableWorkspace " << parameterWS->getName()
                  << " containing " << numrows
                  << " instrument profile parameters\n";
 
@@ -2309,11 +2306,11 @@ void FitPowderDiffPeaks::parseBraggPeakTable(
       string coltype = coltypes[icol];
       string colname = paramnames[icol];
 
-      if (coltype.compare("int") == 0) {
+      if (coltype == "int") {
         // Integer
         int temp = peakws->cell<int>(irow, icol);
         intmap.emplace(colname, temp);
-      } else if (coltype.compare("double") == 0) {
+      } else if (coltype == "double") {
         // Double
         double temp = peakws->cell<double>(irow, icol);
         doublemap.emplace(colname, temp);
@@ -2328,7 +2325,7 @@ void FitPowderDiffPeaks::parseBraggPeakTable(
 
   g_log.information() << "Import " << hklmaps.size()
                       << " entries from Bragg peak TableWorkspace "
-                      << peakws->name() << '\n';
+                      << peakws->getName() << '\n';
 }
 
 //----------------------------------------------------------------------------
@@ -2727,10 +2724,9 @@ FitPowderDiffPeaks::genPeak(map<string, int> hklmap,
                             map<string, string> bk2bk2braggmap, bool &good,
                             vector<int> &hkl, double &d_h) {
   // Generate a peak function
-  BackToBackExponential newpeak;
-  newpeak.initialize();
   BackToBackExponential_sptr newpeakptr =
-      boost::make_shared<BackToBackExponential>(newpeak);
+      boost::make_shared<BackToBackExponential>();
+  newpeakptr->initialize();
 
   // Check miller index (HKL) is a valid value in a miller indexes pool (hklmap)
   good = getHKLFromMap(hklmap, hkl);
@@ -2830,7 +2826,7 @@ FitPowderDiffPeaks::genPeak(map<string, int> hklmap,
 
       // Set peak parameters
       for (const auto &parname : tnb2bfuncparnames) {
-        if (parname.compare("Height") != 0) {
+        if (parname != "Height") {
           auto miter = m_instrumentParmaeters.find(parname);
           if (miter == m_instrumentParmaeters.end()) {
             stringstream errss;
@@ -2882,7 +2878,7 @@ FitPowderDiffPeaks::genPeak(map<string, int> hklmap,
       if (miter != parammap.end()) {
         // Parameter exist in input
         double parvalue = miter->second;
-        if (b2bexpname.compare("S2") == 0) {
+        if (b2bexpname == "S2") {
           newpeakptr->setParameter("S", sqrt(parvalue));
         } else {
           newpeakptr->setParameter(b2bexpname, parvalue);

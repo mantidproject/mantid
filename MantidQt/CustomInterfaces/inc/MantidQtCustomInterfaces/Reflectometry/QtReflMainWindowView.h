@@ -8,6 +8,7 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
+class IReflEventTabPresenter;
 class IReflMainWindowPresenter;
 class IReflRunsTabPresenter;
 class IReflSettingsTabPresenter;
@@ -47,7 +48,7 @@ public:
   /// Destructor
   ~QtReflMainWindowView() override;
   /// Name of the interface
-  static std::string name() { return "ISIS Reflectometry (Polref)"; }
+  static std::string name() { return "ISIS Reflectometry"; }
   /// This interface's categories.
   static QString categoryInfo() { return "Reflectometry"; }
 
@@ -69,6 +70,8 @@ private:
   void initLayout() override;
   /// Creates the 'Runs' tab
   IReflRunsTabPresenter *createRunsTab();
+  /// Creates the 'Event Handling' tab
+  IReflEventTabPresenter *createEventTab();
   /// Creates the 'Settings' tab
   IReflSettingsTabPresenter *createSettingsTab();
   /// Creates the 'Save ASCII' tab

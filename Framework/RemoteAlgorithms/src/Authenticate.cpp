@@ -24,6 +24,8 @@ using namespace Mantid::Kernel;
 
 // A reference to the logger is provided by the base class, it is called g_log.
 
+Authenticate::Authenticate() { this->useAlgorithm("Authenticate", 2); }
+
 void Authenticate::init() {
   // Unlike most algorithms, this wone doesn't deal with workspaces....
 

@@ -92,6 +92,13 @@ public:
     m_data.at(index) = newValues;
   }
 
+  /// Set item from a stream
+  void read(const size_t index, std::istream &in) override {
+    std::string s;
+    in >> s;
+    read(index, s);
+  }
+
   /// Specialized type check
   bool isBool() const override { return false; }
 

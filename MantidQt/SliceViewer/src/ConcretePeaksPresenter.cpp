@@ -159,7 +159,6 @@ ConcretePeaksPresenter::ConcretePeaksPresenter(
           canAddPeaksTo(peaksWS.get(), m_transform->getCoordinateSystem())) {
   // Check that the workspaces appear to be compatible. Log if otherwise.
   checkWorkspaceCompatibilities(mdWS);
-
   this->initialize();
 }
 
@@ -184,14 +183,11 @@ void ConcretePeaksPresenter::reInitialize(IPeaksWorkspace_sptr peaksWS) {
  * @brief initialize inner components. Produces the views.
  */
 void ConcretePeaksPresenter::initialize() {
-  const bool transformSucceeded = this->configureMappingTransform();
 
   // Make and register each peak widget.
   produceViews();
-
-  if (!transformSucceeded) {
-    hideAll();
-  }
+  changeShownDim(); // in case dimensions shown are not those expected by
+                    // default transformation
 }
 
 /**
@@ -628,7 +624,8 @@ ConcretePeaksPresenter::findVisiblePeakIndexes(const PeakBoundingBox &box) {
     alg->setRethrows(true);
     alg->initialize();
     alg->setProperty("InputWorkspace", peaksWS);
-    alg->setProperty("OutputWorkspace", peaksWS->name() + "_peaks_in_region");
+    alg->setProperty("OutputWorkspace",
+                     peaksWS->getName() + "_peaks_in_region");
     alg->setProperty("Extents", transformedViewableRegion.toExtents());
     alg->setProperty("CheckPeakExtents", false); // consider all peaks as points
     alg->setProperty("PeakRadius", radius);

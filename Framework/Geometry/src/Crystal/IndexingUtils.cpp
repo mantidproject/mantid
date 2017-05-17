@@ -165,9 +165,7 @@ double IndexingUtils::Find_UB(DblMatrix &UB, const std::vector<V3D> &q_vectors,
   // now gradually bring in the remaining
   // peaks and re-optimize the UB to index
   // them as well
-  size_t count = 0;
   while (!fixAll && num_initial < sorted_qs.size()) {
-    count++;
     num_initial = std::lround(1.5 * static_cast<double>(num_initial + 3));
     // add 3, in case we started with
     // a very small number of peaks!

@@ -3,6 +3,7 @@
 #include "MantidCurveFitting/Jacobian.h"
 #include "MantidCurveFitting/SeqDomain.h"
 #include "MantidAPI/IEventWorkspace.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/Workspace.h"
 #include "MantidAPI/WorkspaceOpOverloads.h"
 #include "MantidAPI/WorkspaceProperty.h"
@@ -218,17 +219,12 @@ bool SeqDomainSpectrumCreator::histogramIsUsable(size_t i) const {
     throw std::invalid_argument("No matrix workspace assigned.");
   }
 
-  try {
-    Geometry::IDetector_const_sptr detector = m_matrixWorkspace->getDetector(i);
+  const auto &spectrumInfo = m_matrixWorkspace->spectrumInfo();
 
-    if (!detector) {
-      return true;
-    }
-
-    return !detector->isMasked();
-  } catch (const Kernel::Exception::NotFoundError &) {
+  if (!spectrumInfo.hasDetectors(i)) {
     return true;
   }
+  return !spectrumInfo.isMasked(i);
 }
 
 } // namespace CurveFitting

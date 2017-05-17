@@ -851,19 +851,19 @@ void LeBailFit::processInputProperties() {
   // d) Determine Functionality (function mode)
   std::string function = this->getProperty("Function");
   m_fitMode = FIT; // Default: LeBailFit
-  if (function.compare("Calculation") == 0) {
+  if (function == "Calculation") {
     // peak calculation
     m_fitMode = CALCULATION;
-  } else if (function.compare("CalculateBackground") == 0) {
+  } else if (function == "CalculateBackground") {
     // automatic background points selection
     m_fitMode = BACKGROUNDPROCESS;
-  } else if (function.compare("MonteCarlo") == 0) {
+  } else if (function == "MonteCarlo") {
     // Monte Carlo random walk refinement
     m_fitMode = MONTECARLO;
-  } else if (function.compare("LeBailFit") == 0) {
+  } else if (function == "LeBailFit") {
     // Le Bail Fit mode
     m_fitMode = FIT;
-  } else if (function.compare("RefineBackground") == 0) {
+  } else if (function == "RefineBackground") {
     // Refine background mode
     m_fitMode = BACKGROUNDPROCESS;
   } else {
@@ -913,7 +913,7 @@ void LeBailFit::parseInstrumentParametersTable() {
   } else {
     g_log.information()
         << "[DB] Starting to parse instrument parameter table workspace "
-        << parameterWS->name() << ".\n";
+        << parameterWS->getName() << ".\n";
   }
 
   // 2. Import data to maps
@@ -941,7 +941,7 @@ void LeBailFit::parseInstrumentParametersTable() {
     // c) Parse each term
     for (size_t icol = 0; icol < numcols; ++icol) {
       colname = colnames[icol];
-      if (colname.compare("FitOrTie") != 0 && colname.compare("Name") != 0) {
+      if (colname != "FitOrTie" && colname != "Name") {
         // double data
         g_log.debug() << "Col-name = " << colname << ", ";
         trow >> dblvalue;
@@ -970,7 +970,7 @@ void LeBailFit::parseInstrumentParametersTable() {
       newparameter.name = striter->second;
     } else {
       std::stringstream errmsg;
-      errmsg << "Parameter (table) workspace " << parameterWS->name()
+      errmsg << "Parameter (table) workspace " << parameterWS->getName()
              << " does not contain column 'Name'.  It is not a valid input.  "
                 "Quit ";
       g_log.error() << errmsg.str() << "\n";
@@ -991,7 +991,7 @@ void LeBailFit::parseInstrumentParametersTable() {
       newparameter.fit = tofit;
     } else {
       std::stringstream errmsg;
-      errmsg << "Parameter (table) workspace " << parameterWS->name()
+      errmsg << "Parameter (table) workspace " << parameterWS->getName()
              << " does not contain column 'FitOrTie'.  It is not a valid "
                 "input.  Quit ";
       g_log.error() << errmsg.str() << "\n";
@@ -1004,7 +1004,7 @@ void LeBailFit::parseInstrumentParametersTable() {
       newparameter.curvalue = dbliter->second;
     } else {
       std::stringstream errmsg;
-      errmsg << "Parameter (table) workspace " << parameterWS->name()
+      errmsg << "Parameter (table) workspace " << parameterWS->getName()
              << " does not contain column 'Value'.  It is not a valid input.  "
                 "Quit ";
       g_log.error() << errmsg.str() << "\n";
@@ -1060,7 +1060,7 @@ void LeBailFit::parseInstrumentParametersTable() {
 
   g_log.information()
       << "[DB]: Successfully Imported Peak Parameters TableWorkspace "
-      << parameterWS->name() << ". Imported " << m_funcParameters.size()
+      << parameterWS->getName() << ". Imported " << m_funcParameters.size()
       << " parameters. "
       << "\n";
 }
@@ -1080,8 +1080,7 @@ void LeBailFit::parseBraggPeaksParametersTable() {
                   << " < 3 as required.\n";
     throw std::runtime_error("Input parameter workspace is wrong. ");
   }
-  if (colnames[0].compare("H") != 0 || colnames[1].compare("K") != 0 ||
-      colnames[2].compare("L") != 0) {
+  if (colnames[0] != "H" || colnames[1] != "K" || colnames[2] != "L") {
     stringstream errss;
     errss << "Input Bragg peak parameter TableWorkspace does not have the "
              "columns in order.  "
@@ -1092,7 +1091,7 @@ void LeBailFit::parseBraggPeaksParametersTable() {
 
   // Has peak height?
   bool hasPeakHeight = false;
-  if (colnames.size() >= 4 && colnames[3].compare("PeakHeight") == 0) {
+  if (colnames.size() >= 4 && colnames[3] == "PeakHeight") {
     // Has a column for peak height
     hasPeakHeight = true;
   }
@@ -1151,7 +1150,7 @@ void LeBailFit::parseBackgroundTableWorkspace(TableWorkspace_sptr bkgdparamws,
   if (colnames.size() < 2) {
     stringstream errss;
     errss << "Input background parameter table workspace "
-          << bkgdparamws->name() << " has only " << colnames.size()
+          << bkgdparamws->getName() << " has only " << colnames.size()
           << " columns, which is fewer than 2 columns as required. ";
     g_log.error(errss.str());
     throw runtime_error(errss.str());
@@ -1182,7 +1181,7 @@ void LeBailFit::parseBackgroundTableWorkspace(TableWorkspace_sptr bkgdparamws,
     // Remove extra white spaces
     boost::algorithm::trim(parname);
 
-    if (parname.size() > 0 && (parname[0] == 'A' || parname == "Bkpos")) {
+    if (!parname.empty() && (parname[0] == 'A' || parname == "Bkpos")) {
       // Insert parameter name starting with A or Bkpos (special case for
       // FullprofPolynomial)
       parmap.emplace(parname, parvalue);
@@ -1406,8 +1405,7 @@ void LeBailFit::createOutputDataWorkspace() {
   // 4. Set axis
   m_outputWS->getAxis(0)->setUnit("TOF");
 
-  API::TextAxis *tAxis = nullptr;
-  tAxis = new API::TextAxis(nspec);
+  API::TextAxis *tAxis = new API::TextAxis(nspec);
   tAxis->setLabel(0, "Data");
   tAxis->setLabel(1, "Calc");
   tAxis->setLabel(2, "Diff");

@@ -115,8 +115,9 @@ public:
                      in2->getAxis(1)->spectraNo(2));
 
     // Check masking
-    TS_ASSERT_EQUALS(output->getDetector(maskTop)->isMasked(), true);
-    TS_ASSERT_EQUALS(output->getDetector(10 + maskBottom)->isMasked(), true);
+    const auto &spectrumInfo = output->spectrumInfo();
+    TS_ASSERT_EQUALS(spectrumInfo.isMasked(maskTop), true);
+    TS_ASSERT_EQUALS(spectrumInfo.isMasked(10 + maskBottom), true);
 
     // Check that 2nd input workspace no longer exists
     TS_ASSERT_THROWS(AnalysisDataService::Instance().retrieve("bottom"),

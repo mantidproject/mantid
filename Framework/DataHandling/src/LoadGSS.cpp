@@ -178,7 +178,7 @@ API::MatrixWorkspace_sptr LoadGSS::loadGSASFile(const std::string &filename,
 
       if (key2 == "Histograms") {
         // NSpec (Format: 'nspec HISTOGRAM')
-        nSpec = atoi(key1.c_str());
+        nSpec = std::stoi(key1);
         g_log.information() << "Histogram Line:  " << key1
                             << "  nSpec = " << nSpec << "\n";
       } else if (key1 == "Instrument:") {
@@ -509,7 +509,6 @@ void LoadGSS::createInstrumentGeometry(
   // Create a new instrument and set its name
   Geometry::Instrument_sptr instrument(
       new Geometry::Instrument(instrumentname));
-  workspace->setInstrument(instrument);
 
   // Add dummy source and samplepos to instrument
   Geometry::ObjComponent *samplepos =
@@ -557,6 +556,7 @@ void LoadGSS::createInstrumentGeometry(
     instrument->markAsDetector(detector);
 
   } // ENDFOR (i: spectrum)
+  workspace->setInstrument(instrument);
 }
 
 } // namespace

@@ -1,16 +1,16 @@
-//------------------------------------------------------------------------------
-// Includes
-//------------------------------------------------------------------------------
 #include "MantidAlgorithms/MonteCarloAbsorption.h"
 #include "MantidAlgorithms/InterpolationOption.h"
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/Sample.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidAlgorithms/SampleCorrections/MCAbsorptionStrategy.h"
 #include "MantidAlgorithms/SampleCorrections/RectangularBeamProfile.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidGeometry/Instrument/SampleEnvironment.h"
@@ -30,6 +30,7 @@ using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
 using Mantid::HistogramData::HistogramX;
 using Mantid::HistogramData::interpolateLinearInplace;
+using Mantid::DataObjects::Workspace2D;
 namespace PhysicalConstants = Mantid::PhysicalConstants;
 
 /// @cond
@@ -54,11 +55,11 @@ struct EFixedProvider {
     }
   }
   inline DeltaEMode::Type emode() const { return m_emode; }
-  inline double value(const IDetector_const_sptr &det) const {
+  inline double value(const Mantid::detid_t detID) const {
     if (m_emode != DeltaEMode::Indirect)
       return m_value;
     else
-      return m_expt.getEFixed(det);
+      return m_expt.getEFixed(detID);
   }
 
 private:
@@ -123,7 +124,7 @@ void MonteCarloAbsorption::exec() {
   auto outputWS = doSimulation(*inputWS, static_cast<size_t>(nevents), nlambda,
                                seed, interpolateOpt);
 
-  setProperty("OutputWorkspace", outputWS);
+  setProperty("OutputWorkspace", std::move(outputWS));
 }
 
 /**
@@ -136,7 +137,7 @@ void MonteCarloAbsorption::exec() {
  * @param interpolateOpt Method of interpolation to compute unsimulated points
  * @return A new workspace containing the correction factors & errors
  */
-MatrixWorkspace_sptr
+MatrixWorkspace_uptr
 MonteCarloAbsorption::doSimulation(const MatrixWorkspace &inputWS,
                                    size_t nevents, int nlambda, int seed,
                                    const InterpolationOption &interpolateOpt) {
@@ -166,6 +167,8 @@ MonteCarloAbsorption::doSimulation(const MatrixWorkspace &inputWS,
   // Configure strategy
   MCAbsorptionStrategy strategy(*beamProfile, inputWS.sample(), nevents);
 
+  const auto &spectrumInfo = outputWS->spectrumInfo();
+
   PARALLEL_FOR_IF(Kernel::threadSafe(*outputWS))
   for (int64_t i = 0; i < nhists; ++i) {
     PARALLEL_START_INTERUPT_REGION
@@ -174,15 +177,13 @@ MonteCarloAbsorption::doSimulation(const MatrixWorkspace &inputWS,
     // The input was cloned so clear the errors out
     outE = 0.0;
     // Final detector position
-    IDetector_const_sptr detector;
-    try {
-      detector = outputWS->getDetector(i);
-    } catch (Kernel::Exception::NotFoundError &) {
+    if (!spectrumInfo.hasDetectors(i)) {
       continue;
     }
     // Per spectrum values
-    const auto &detPos = detector->getPos();
-    const double lambdaFixed = toWavelength(efixed.value(detector));
+    const auto &detPos = spectrumInfo.position(i);
+    const double lambdaFixed =
+        toWavelength(efixed.value(spectrumInfo.detector(i).getID()));
     MersenneTwister rng(seed);
 
     auto &outY = outputWS->mutableY(i);
@@ -222,9 +223,9 @@ MonteCarloAbsorption::doSimulation(const MatrixWorkspace &inputWS,
   return outputWS;
 }
 
-MatrixWorkspace_sptr MonteCarloAbsorption::createOutputWorkspace(
+MatrixWorkspace_uptr MonteCarloAbsorption::createOutputWorkspace(
     const MatrixWorkspace &inputWS) const {
-  MatrixWorkspace_sptr outputWS = inputWS.clone();
+  MatrixWorkspace_uptr outputWS = DataObjects::create<Workspace2D>(inputWS);
   // The algorithm computes the signal values at bin centres so they should
   // be treated as a distribution
   outputWS->setDistribution(true);

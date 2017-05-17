@@ -8,6 +8,7 @@
 #include "MantidAlgorithms/AppendSpectra.h"
 #include "MantidDataHandling/LoadRaw3.h"
 #include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidTestHelpers/InstrumentCreationHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <cxxtest/TestSuite.h>
 
@@ -97,8 +98,8 @@ public:
                      in2->getAxis(1)->spectraNo(2));
 
     // Check masking
-    TS_ASSERT_EQUALS(output->getDetector(maskTop)->isMasked(), true);
-    TS_ASSERT_EQUALS(output->getDetector(10 + maskBottom)->isMasked(), true);
+    TS_ASSERT_EQUALS(output->spectrumInfo().isMasked(maskTop), true);
+    TS_ASSERT_EQUALS(output->spectrumInfo().isMasked(10 + maskBottom), true);
   }
 
   //----------------------------------------------------------------------------------------------
@@ -175,6 +176,11 @@ public:
       ws1 = WorkspaceCreationHelper::create2DWorkspace(10, numBins);
       ws2 = WorkspaceCreationHelper::create2DWorkspace(5, numBins);
     }
+    // Add instrument so detector IDs are valid and get copied.
+    InstrumentCreationHelper::addFullInstrumentToWorkspace(*ws1, false, false,
+                                                           "");
+    InstrumentCreationHelper::addFullInstrumentToWorkspace(*ws2, false, false,
+                                                           "");
 
     auto ws1Log = new TimeSeriesProperty<std::string>("aLog");
     ws1Log->addValue(DateAndTime("2014-06-19T16:40:00"), "Hello");

@@ -179,13 +179,13 @@ public:
     MockWorkspace_sptr ws1 = MockWorkspace_sptr(new MockWorkspace);
     test.set(ws1);
 
-    TS_ASSERT_EQUALS(ws1->name(), test.name());
+    TS_ASSERT_EQUALS(ws1->getName(), test.name());
 
     MockWorkspace_sptr ws2 = MockWorkspace_sptr(new MockWorkspace);
     test.set(ws2);
 
-    TS_ASSERT_EQUALS(ws2->name(), test.name());
-    TS_ASSERT(ws1->name().empty());
+    TS_ASSERT_EQUALS(ws2->getName(), test.name());
+    TS_ASSERT(ws1->getName().empty());
     TS_ASSERT_EQUALS(
         m_ads.getObjectNames(Mantid::Kernel::DataServiceSort::Unsorted,
                              Mantid::Kernel::DataServiceHidden::Include).size(),

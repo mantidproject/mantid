@@ -7,7 +7,7 @@
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidCurveFitting/Algorithms/LeBailFit.h"
-#include "MantidDataHandling/LoadAscii.h"
+#include "MantidDataHandling/LoadAscii2.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidHistogramData/Counts.h"
 #include "MantidHistogramData/CountStandardDeviations.h"
@@ -423,7 +423,7 @@ API::MatrixWorkspace_sptr generateArgSiPeak220() {
 /** Import data from a column data file
  */
 void importDataFromColumnFile(std::string filename, std::string wsname) {
-  DataHandling::LoadAscii load;
+  DataHandling::LoadAscii2 load;
   load.initialize();
 
   load.setProperty("FileName", filename);

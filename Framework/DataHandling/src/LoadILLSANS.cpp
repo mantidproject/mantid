@@ -3,6 +3,7 @@
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/RegisterFileLoader.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidHistogramData/LinearGenerator.h"
 #include "MantidGeometry/Instrument.h"
@@ -560,11 +561,11 @@ std::pair<double, double> LoadILLSANS::calculateQMaxQMin() {
          max = std::numeric_limits<double>::min();
   g_log.debug("Calculating Qmin Qmax...");
   std::size_t nHist = m_localWorkspace->getNumberHistograms();
+  const auto &spectrumInfo = m_localWorkspace->spectrumInfo();
   for (std::size_t i = 0; i < nHist; ++i) {
-    Geometry::IDetector_const_sptr det = m_localWorkspace->getDetector(i);
-    if (!det->isMonitor()) {
+    if (!spectrumInfo.isMonitor(i)) {
       const auto &lambdaBinning = m_localWorkspace->x(i);
-      Kernel::V3D detPos = det->getPos();
+      Kernel::V3D detPos = spectrumInfo.position(i);
       double r, theta, phi;
       detPos.getSpherical(r, theta, phi);
       double v1 = calculateQ(*(lambdaBinning.begin()), theta);
@@ -586,7 +587,8 @@ std::pair<double, double> LoadILLSANS::calculateQMaxQMin() {
         max = v2;
       }
     } else
-      g_log.debug() << "Detector " << i << " is a Monitor : " << det->getID()
+      g_log.debug() << "Detector " << i
+                    << " is a Monitor : " << spectrumInfo.detector(i).getID()
                     << '\n';
   }
 

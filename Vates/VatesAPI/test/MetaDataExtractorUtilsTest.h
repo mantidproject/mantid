@@ -45,35 +45,6 @@ public:
     return AnalysisDataService::Instance().retrieve("MD_EVENT_WS_ID");
   }
 
-  void testShouldExtractMinAndMaxFromWorkspaceForMDHisto() {
-    // Arrange
-    Mantid::DataObjects::MDHistoWorkspace_sptr histoWorkspace =
-        makeFakeMDHistoWorkspace(1.0, 4);
-
-    // Act
-    MetaDataExtractorUtils extractor;
-    QwtDoubleInterval minMax = extractor.getMinAndMax(histoWorkspace);
-
-    // Assert
-    TSM_ASSERT("Should find the a min which is smaller/equal to max ",
-               minMax.minValue() <= minMax.maxValue())
-  }
-
-  void testShouldExtractMinAndMaxFromWorkspaceForMDEvent() {
-    // Arrange
-    Mantid::API::Workspace_sptr workspace = getReal4DWorkspace();
-    Mantid::API::IMDEventWorkspace_sptr eventWorkspace =
-        boost::dynamic_pointer_cast<Mantid::API::IMDEventWorkspace>(workspace);
-    MetaDataExtractorUtils extractor;
-
-    // Act
-    QwtDoubleInterval minMax = extractor.getMinAndMax(eventWorkspace);
-
-    // Assert
-    TSM_ASSERT("Should find the a min which is smaller/equal to max ",
-               minMax.minValue() <= minMax.maxValue())
-  }
-
   void testShouldNotFindInstrumentForBadWorkspace() {
     // Arrange
     // Return a table workspace.
@@ -85,7 +56,7 @@ public:
     MetaDataExtractorUtils extractor;
 
     // Act
-    std::string instrument = extractor.extractInstrument(histoWorkspace);
+    std::string instrument = extractor.extractInstrument(histoWorkspace.get());
 
     // Assert
     TSM_ASSERT("Should find an empty instrment for invalid workspace",

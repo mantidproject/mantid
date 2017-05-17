@@ -3,25 +3,21 @@
 #include "MantidQtMantidWidgets/SequentialFitDialog.h"
 #include "MantidQtMantidWidgets/MultifitSetupDialog.h"
 #include "MantidQtAPI/MantidDesktopServices.h"
+#include "MantidQtAPI/HelpWindow.h"
 
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/IPeakFunction.h"
 #include "MantidAPI/IBackgroundFunction.h"
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/AlgorithmManager.h"
-#include "MantidAPI/ConstraintFactory.h"
 #include "MantidAPI/CostFunctionFactory.h"
-#include "MantidAPI/Expression.h"
-#include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/FuncMinimizerFactory.h"
-#include "MantidAPI/IConstraint.h"
 #include "MantidAPI/ICostFunction.h"
 #include "MantidAPI/IFuncMinimizer.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/ParameterTie.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidAPI/WorkspaceGroup.h"
 
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/LibraryManager.h"
@@ -31,7 +27,6 @@
 #include "MantidQtMantidWidgets/StringEditorFactory.h"
 
 #include "qttreepropertybrowser.h"
-#include "qtpropertymanager.h"
 #include "qteditorfactory.h"
 #include "DoubleEditorFactory.h"
 #include "ParameterPropertyManager.h"
@@ -39,18 +34,15 @@
 #include <Poco/ActiveResult.h>
 
 #include <QVBoxLayout>
-#include <QHBoxLayout>
 #include <QGridLayout>
 #include <QPushButton>
 #include <QMenu>
 #include <QMessageBox>
 #include <QInputDialog>
 #include <QSettings>
-#include <QFileInfo>
 #include <QApplication>
 #include <QClipboard>
 #include <QSignalMapper>
-#include <QMetaMethod>
 #include <QTreeWidget>
 #include <QUrl>
 
@@ -280,14 +272,81 @@ void FitPropertyBrowser::init() {
 *   4. Update the list of available functions
 * @param w widget parenting the action menus and the property tree browser
 */
-void FitPropertyBrowser::initLayout(QWidget *w) {
+void FitPropertyBrowser::initLayout(QWidget *w) { initBasicLayout(w); }
+
+/**
+* @brief Initialise the layout for the fit button.
+* This initialization includes:
+*   1. SIGNALs/SLOTs when properties change.
+*   2. Actions and associated SIGNALs/SLOTs.
+* @param w widget parenting the action menus and the property tree browser
+* @return push botton for the fit menu
+*/
+QPushButton *FitPropertyBrowser::createFitMenuButton(QWidget *w) {
+  QPushButton *btnFit = new QPushButton("Fit");
+  m_tip = new QLabel("", w);
+
+  m_fitMapper = new QSignalMapper(this);
+  m_fitMenu = new QMenu(this);
+  populateFitMenuButton(m_fitMapper, m_fitMenu);
+  connect(m_fitMapper, SIGNAL(mapped(const QString &)), this,
+          SLOT(executeFitMenu(const QString &)));
+  btnFit->setMenu(m_fitMenu);
+  return btnFit;
+}
+
+/**
+* @brief Populate the fit button.
+* This initialization includes:
+*   1. SIGNALs/SLOTs when properties change.
+*   2. Actions and associated SIGNALs/SLOTs.
+* @param fitMapper the QMap to the fit mapper
+* @param fitMenu the QMenu for the fit button
+*/
+void FitPropertyBrowser::populateFitMenuButton(QSignalMapper *fitMapper,
+                                               QMenu *fitMenu) {
+  // assert(fitmapper);
+
+  m_fitActionFit = new QAction("Fit", this);
+  m_fitActionSeqFit = new QAction("Sequential Fit", this);
+  m_fitActionUndoFit = new QAction("Undo Fit", this);
+  m_fitActionEvaluate = new QAction("Evaluate function", this);
+
+  fitMapper->setMapping(m_fitActionFit, "Fit");
+  fitMapper->setMapping(m_fitActionSeqFit, "SeqFit");
+  fitMapper->setMapping(m_fitActionUndoFit, "UndoFit");
+  fitMapper->setMapping(m_fitActionEvaluate, "Evaluate");
+
+  connect(m_fitActionFit, SIGNAL(triggered()), fitMapper, SLOT(map()));
+  connect(m_fitActionSeqFit, SIGNAL(triggered()), fitMapper, SLOT(map()));
+  connect(m_fitActionUndoFit, SIGNAL(triggered()), fitMapper, SLOT(map()));
+  connect(m_fitActionEvaluate, SIGNAL(triggered()), fitMapper, SLOT(map()));
+
+  fitMenu->addAction(m_fitActionFit);
+  fitMenu->addAction(m_fitActionSeqFit);
+  fitMenu->addAction(m_fitActionEvaluate);
+  fitMenu->addSeparator();
+  fitMenu->addAction(m_fitActionUndoFit);
+  fitMenu->addSeparator();
+}
+/**
+* @brief Initialise the layout, except for the fit button in the menu bar.
+* This initialization includes:
+*   1. SIGNALs/SLOTs when properties change.
+*   2. Action menus and associated SIGNALs/SLOTs.
+*   3. Initialize the CompositeFunction, the root from which to build the Model.
+*   4. Update the list of available functions
+* @param w widget parenting the action menus and the property tree browser
+*/
+void FitPropertyBrowser::initBasicLayout(QWidget *w) {
+  QPushButton *btnFit = createFitMenuButton(w);
   // to be able to change windows title from tread
   connect(this, SIGNAL(changeWindowTitle(const QString &)), this,
           SLOT(setWindowTitle(const QString &)));
 
   /* Create the top level group */
 
-  /*QtProperty* fitGroup = */ m_groupManager->addProperty("Fit");
+  m_groupManager->addProperty("Fit");
 
   connect(m_enumManager, SIGNAL(propertyChanged(QtProperty *)), this,
           SLOT(enumChanged(QtProperty *)));
@@ -309,36 +368,11 @@ void FitPropertyBrowser::initLayout(QWidget *w) {
           SLOT(vectorDoubleChanged(QtProperty *)));
   connect(m_parameterManager, SIGNAL(propertyChanged(QtProperty *)), this,
           SLOT(parameterChanged(QtProperty *)));
+  connect(m_vectorSizeManager, SIGNAL(propertyChanged(QtProperty *)), this,
+          SLOT(vectorSizeChanged(QtProperty *)));
 
   QVBoxLayout *layout = new QVBoxLayout(w);
   QGridLayout *buttonsLayout = new QGridLayout();
-
-  QPushButton *btnFit = new QPushButton("Fit");
-
-  m_tip = new QLabel("", w);
-
-  m_fitMenu = new QMenu(this);
-  m_fitActionFit = new QAction("Fit", this);
-  m_fitActionSeqFit = new QAction("Sequential Fit", this);
-  m_fitActionUndoFit = new QAction("Undo Fit", this);
-  m_fitActionEvaluate = new QAction("Evaluate function", this);
-  m_fitMapper = new QSignalMapper(this);
-  m_fitMapper->setMapping(m_fitActionFit, "Fit");
-  m_fitMapper->setMapping(m_fitActionSeqFit, "SeqFit");
-  m_fitMapper->setMapping(m_fitActionUndoFit, "UndoFit");
-  m_fitMapper->setMapping(m_fitActionEvaluate, "Evaluate");
-  connect(m_fitActionFit, SIGNAL(triggered()), m_fitMapper, SLOT(map()));
-  connect(m_fitActionSeqFit, SIGNAL(triggered()), m_fitMapper, SLOT(map()));
-  connect(m_fitActionUndoFit, SIGNAL(triggered()), m_fitMapper, SLOT(map()));
-  connect(m_fitActionEvaluate, SIGNAL(triggered()), m_fitMapper, SLOT(map()));
-  connect(m_fitMapper, SIGNAL(mapped(const QString &)), this,
-          SLOT(executeFitMenu(const QString &)));
-  m_fitMenu->addAction(m_fitActionFit);
-  m_fitMenu->addAction(m_fitActionSeqFit);
-  m_fitMenu->addAction(m_fitActionEvaluate);
-  m_fitMenu->addSeparator();
-  m_fitMenu->addAction(m_fitActionUndoFit);
-  btnFit->setMenu(m_fitMenu);
 
   QPushButton *btnDisplay = new QPushButton("Display");
   QMenu *displayMenu = new QMenu(this);
@@ -1057,9 +1091,9 @@ void FitPropertyBrowser::setWorkspaceName(const QString &wsName) {
     }
     if (mws) {
       size_t wi = static_cast<size_t>(workspaceIndex());
-      if (wi < mws->getNumberHistograms() && !mws->readX(wi).empty()) {
-        setStartX(mws->readX(wi).front());
-        setEndX(mws->readX(wi).back());
+      if (wi < mws->getNumberHistograms() && !mws->x(wi).empty()) {
+        setStartX(mws->x(wi).front());
+        setEndX(mws->x(wi).back());
       }
     }
   }
@@ -1497,7 +1531,6 @@ void FitPropertyBrowser::setCurrentFunction(
   setCurrentFunction(getHandler()->findHandler(f));
 }
 
-//#include "../FitDialog.h"
 /**
  * Creates an instance of Fit algorithm, sets its properties and launches it.
  */
@@ -1789,6 +1822,17 @@ void FitPropertyBrowser::currentItemChanged(QtBrowserItem *current) {
  * @param prop :: A property managed by m_vectorDoubleManager.
  */
 void FitPropertyBrowser::vectorDoubleChanged(QtProperty *prop) {
+  PropertyHandler *h = getHandler()->findHandler(prop);
+  if (!h)
+    return;
+  h->setVectorAttribute(prop);
+}
+
+/**
+ * Slot. Responds to changing a vector attribute size
+ * @param prop :: A property managed by m_vectorSizeManager.
+ */
+void FitPropertyBrowser::vectorSizeChanged(QtProperty *prop) {
   PropertyHandler *h = getHandler()->findHandler(prop);
   if (!h)
     return;
@@ -2906,9 +2950,10 @@ FitPropertyBrowser::createMatrixFromTableWorkspace() const {
     Mantid::API::MatrixWorkspace_sptr mws =
         Mantid::API::WorkspaceFactory::Instance().create("Workspace2D", 1,
                                                          rowCount, rowCount);
-    Mantid::MantidVec &X = mws->dataX(0);
-    Mantid::MantidVec &Y = mws->dataY(0);
-    Mantid::MantidVec &E = mws->dataE(0);
+    auto &X = mws->mutableX(0);
+    auto &Y = mws->mutableY(0);
+    auto &E = mws->mutableE(0);
+
     for (size_t row = 0; row < rowCount; ++row) {
       X[row] = xcol->toDouble(row);
       Y[row] = ycol->toDouble(row);
@@ -3058,11 +3103,8 @@ QStringList FitPropertyBrowser::getParameterNames() const {
 void FitPropertyBrowser::functionHelp() {
   PropertyHandler *handler = currentHandler();
   if (handler) {
-    // Create and open the URL of the help page
-    QString url =
-        QString::fromStdString("http://docs.mantidproject.org/fitfunctions/" +
-                               handler->ifun()->name());
-    MantidDesktopServices::openUrl(QUrl(url));
+    MantidQt::API::HelpWindow::showFitFunction(this->nativeParentWidget(),
+                                               handler->ifun()->name());
   }
 }
 
@@ -3090,5 +3132,12 @@ void FitPropertyBrowser::allowSequentialFits(bool allow) {
   }
 }
 
+void FitPropertyBrowser::modifyFitMenu(QAction *fitAction, bool enabled) {
+  if (enabled) {
+    m_fitMenu->addAction(fitAction);
+  } else {
+    m_fitMenu->removeAction(fitAction);
+  }
+}
 } // MantidQt
 } // API

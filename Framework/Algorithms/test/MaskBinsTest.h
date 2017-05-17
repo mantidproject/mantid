@@ -5,7 +5,6 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAlgorithms/MaskBins.h"
-#include "MantidDataHandling/LoadEventPreNexus.h"
 #include "MantidDataObjects/EventList.h"
 #include "MantidDataObjects/EventWorkspace.h"
 

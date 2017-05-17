@@ -2,6 +2,8 @@
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/VectorHelper.h"
@@ -133,17 +135,19 @@ string determineXMinMax(MatrixWorkspace_sptr inputWS, vector<double> &xmins,
     if (updateXMins || updateXMaxs) {
       const auto &xvalues = inputWS->x(i);
       if (updateXMins) {
-        if (std::isnan(xvalues.front())) {
+        const auto minimum = xvalues.front();
+        if (std::isnan(minimum) || minimum >= xmax_wksp) {
           xmins.push_back(xmin_wksp);
         } else {
-          xmins.push_back(xvalues.front());
+          xmins.push_back(minimum);
         }
       }
       if (updateXMaxs) {
-        if (std::isnan(xvalues.back())) {
+        const auto maximum = xvalues.back();
+        if (std::isnan(maximum) || maximum <= xmin_wksp) {
           xmaxs.push_back(xmax_wksp);
         } else {
-          xmaxs.push_back(xvalues.back());
+          xmaxs.push_back(maximum);
         }
       }
     }
@@ -359,18 +363,11 @@ void ResampleX::exec() {
     else // event workspace -> matrix workspace
     {
       //--------- Different output, OR you're inplace but not preserving Events
-      //--- create a Workspace2D -------
       g_log.information() << "Creating a Workspace2D from the EventWorkspace "
                           << inputEventWS->getName() << ".\n";
+      outputWS = create<DataObjects::Workspace2D>(
+          *inputWS, numSpectra, HistogramData::BinEdges(m_numBins));
 
-      // Create a Workspace2D
-      // This creates a new Workspace2D through a torturous route using the
-      // WorkspaceFactory.
-      // The Workspace2D is created with an EMPTY CONSTRUCTOR
-      outputWS = WorkspaceFactory::Instance().create("Workspace2D", numSpectra,
-                                                     m_numBins, m_numBins - 1);
-      WorkspaceFactory::Instance().initializeFromParent(inputWS, outputWS,
-                                                        true);
       // Initialize progress reporting.
       Progress prog(this, 0.0, 1.0, numSpectra);
 

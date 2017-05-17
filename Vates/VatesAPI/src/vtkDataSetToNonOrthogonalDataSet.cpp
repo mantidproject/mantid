@@ -10,19 +10,20 @@
 #include "MantidVatesAPI/ADSWorkspaceProvider.h"
 #include "MantidVatesAPI/vtkDataSetToWsName.h"
 
-#include <vtkPointSet.h>
+#include "vtkSMPTools.h"
+#include "vtkVector.h"
+#include <vtkDataObject.h>
 #include <vtkDataSet.h>
+#include <vtkDoubleArray.h>
 #include <vtkFieldData.h>
 #include <vtkFloatArray.h>
-#include <vtkDoubleArray.h>
 #include <vtkMatrix3x3.h>
-#include "vtkVector.h"
-#include <vtkNew.h>
-#include <vtkPoints.h>
-#include <vtkDataObject.h>
 #include <vtkMatrix4x4.h>
-#include <vtkSmartPointer.h>
+#include <vtkNew.h>
 #include <vtkPVChangeOfBasisHelper.h>
+#include <vtkPointSet.h>
+#include <vtkPoints.h>
+#include <vtkSmartPointer.h>
 
 #include <vtkPointData.h>
 #include "vtkNew.h"
@@ -87,7 +88,7 @@ vtkDataSetToNonOrthogonalDataSet::vtkDataSetToNonOrthogonalDataSet(
       m_basisNorm(), m_basisX(1, 0, 0), m_basisY(0, 1, 0), m_basisZ(0, 0, 1),
       m_coordType(Kernel::HKL),
       m_workspaceProvider(std::move(workspaceProvider)) {
-  if (NULL == m_dataSet) {
+  if (!m_dataSet) {
     throw std::runtime_error("Cannot construct "
                              "vtkDataSetToNonOrthogonalDataSet with null VTK "
                              "dataset");
@@ -104,10 +105,29 @@ vtkDataSetToNonOrthogonalDataSet::vtkDataSetToNonOrthogonalDataSet(
  */
 vtkDataSetToNonOrthogonalDataSet::~vtkDataSetToNonOrthogonalDataSet() {}
 
+namespace {
+struct Worker {
+  Mantid::coord_t *m_skew;
+  vtkFloatArray *m_pts;
+  Worker(Mantid::coord_t *skew, vtkFloatArray *pts)
+      : m_skew(skew), m_pts(pts) {}
+  void operator()(vtkIdType begin, vtkIdType end) {
+    float in[3], out[3];
+    for (vtkIdType index = begin; index < end; ++index) {
+      m_pts->GetTypedTuple(index, in);
+      out[0] = in[0] * m_skew[0] + in[1] * m_skew[1] + in[2] * m_skew[2];
+      out[1] = in[0] * m_skew[3] + in[1] * m_skew[4] + in[2] * m_skew[5];
+      out[2] = in[0] * m_skew[6] + in[1] * m_skew[7] + in[2] * m_skew[8];
+      m_pts->SetTypedTuple(index, out);
+    }
+  }
+};
+} // end anon namespace
+
 void vtkDataSetToNonOrthogonalDataSet::execute(ProgressAction *progress) {
   // Downcast to a vtkPointSet
   vtkPointSet *data = vtkPointSet::SafeDownCast(m_dataSet);
-  if (NULL == data) {
+  if (!data) {
     throw std::runtime_error("VTK dataset does not inherit from vtkPointSet");
   }
 
@@ -214,34 +234,19 @@ void vtkDataSetToNonOrthogonalDataSet::execute(ProgressAction *progress) {
 
   // Get the original points
   vtkFloatArray *points =
-      vtkFloatArray::SafeDownCast(data->GetPoints()->GetData());
-  if (points == NULL) {
+      vtkFloatArray::FastDownCast(data->GetPoints()->GetData());
+  if (!points) {
     throw std::runtime_error("Failed to cast vtkDataArray to vtkFloatArray.");
   } else if (points->GetNumberOfComponents() != 3) {
     throw std::runtime_error("points array must have 3 components.");
   }
-  float *end = points->GetPointer(points->GetNumberOfValues());
 
-  vtkIdType progressIncrement =
-      std::max(static_cast<vtkIdType>(1), points->GetNumberOfValues() / 25);
-
-  double progressFactor =
-      0.25 / static_cast<double>(points->GetNumberOfValues());
-
-  for (float *it = points->GetPointer(0); it < end; std::advance(it, 3)) {
-    if (progress) {
-      vtkIdType index = std::distance(points->GetPointer(0), it);
-      if (index % progressIncrement == 0)
-        progress->eventRaised(0.75 +
-                              static_cast<double>(index) * progressFactor);
-    }
-    float v1 = it[0];
-    float v2 = it[1];
-    float v3 = it[2];
-    it[0] = v1 * skew[0] + v2 * skew[1] + v3 * skew[2];
-    it[1] = v1 * skew[3] + v2 * skew[4] + v3 * skew[5];
-    it[2] = v1 * skew[6] + v2 * skew[7] + v3 * skew[8];
-  }
+  Worker func(skew, points);
+  if (progress)
+    progress->eventRaised(0.67);
+  vtkSMPTools::For(0, points->GetNumberOfTuples(), func);
+  if (progress)
+    progress->eventRaised(1.0);
   this->updateMetaData(data);
 }
 

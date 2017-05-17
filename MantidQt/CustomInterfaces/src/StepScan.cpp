@@ -5,6 +5,7 @@
 #include "MantidAPI/InstrumentDataService.h"
 #include "MantidAPI/LiveListenerFactory.h"
 #include "MantidAPI/Run.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidKernel/InstrumentInfo.h"
 #include "MantidKernel/Strings.h"
@@ -293,7 +294,7 @@ bool StepScan::mergeRuns() {
                    // within a group?)
     IAlgorithm_sptr addScanIndex =
         AlgorithmManager::Instance().create("AddSampleLog");
-    addScanIndex->setPropertyValue("Workspace", ws->name());
+    addScanIndex->setPropertyValue("Workspace", ws->getName());
     addScanIndex->setProperty("LogName", "scan_index");
     addScanIndex->setProperty("LogType", "Number Series");
     addScanIndex->setProperty("LogText", Strings::toString(i + 1));
@@ -427,13 +428,18 @@ void StepScan::fillNormalizationCombobox() {
   clearNormalizationCombobox();
 
   // Add the monitors to the normalization combobox
+  const auto inputWS =
+      AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+          m_inputWSName);
+
   try {
-    auto inputWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-        m_inputWSName);
-    auto monWS = inputWS->monitorWorkspace();
+    const auto monWS = inputWS->monitorWorkspace();
+    const auto &monitorSpectrumInfo = monWS->spectrumInfo();
+
     if (monWS) {
       for (std::size_t i = 0; i < monWS->getNumberHistograms(); ++i) {
-        const std::string monitorName = monWS->getDetector(i)->getName();
+        const std::string monitorName =
+            monitorSpectrumInfo.detector(i).getName();
         m_uiForm.normalization->addItem(QString::fromStdString(monitorName));
       }
     }

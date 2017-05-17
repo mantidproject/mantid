@@ -174,7 +174,7 @@ InstrumentInfo::liveListenerInfo(std::string name) const {
 }
 
 bool InstrumentInfo::hasLiveListenerInfo() const {
-  return m_listeners.size() > 0;
+  return !m_listeners.empty();
 }
 
 const std::vector<LiveListenerInfo> &

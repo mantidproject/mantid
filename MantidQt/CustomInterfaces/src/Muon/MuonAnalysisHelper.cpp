@@ -13,9 +13,9 @@
 #include "MantidKernel/StringTokenizer.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 
-#include <QLineEdit>
 #include <QCheckBox>
 #include <QComboBox>
+#include <QLineEdit>
 #include <QSpinBox>
 
 #include <boost/lexical_cast.hpp>
@@ -162,7 +162,7 @@ void printRunInfo(MatrixWorkspace_sptr runWs, std::ostringstream &out) {
   double counts(0.0);
   for (size_t i = 0; i < runWs->getNumberHistograms(); ++i) {
     for (size_t j = 0; j < runWs->blocksize(); ++j) {
-      counts += runWs->dataY(i)[j];
+      counts += runWs->y(i)[j];
     }
   }
   // output this number to three decimal places
@@ -295,6 +295,8 @@ void WidgetAutoSaver::saveWidgetValue() {
     settings.setValue(senderName, w->isChecked());
   } else if (auto w = qobject_cast<QComboBox *>(sender)) {
     settings.setValue(senderName, w->currentIndex());
+  } else if (auto w = qobject_cast<QSpinBox *>(sender)) {
+    settings.setValue(senderName, w->value());
   }
   // ... add more as neccessary
 }
@@ -319,6 +321,8 @@ void WidgetAutoSaver::loadWidgetValue(QWidget *widget) {
     w->setChecked(value.toBool());
   } else if (auto w = qobject_cast<QComboBox *>(widget)) {
     w->setCurrentIndex(value.toInt());
+  } else if (auto w = qobject_cast<QSpinBox *>(widget)) {
+    w->setValue(value.toInt());
   }
   // ... add more as neccessary
 }
@@ -1090,10 +1094,10 @@ getWorkspaceColors(const std::vector<Workspace_sptr> &workspaces) {
     if (const auto group = boost::dynamic_pointer_cast<WorkspaceGroup>(ws)) {
       for (size_t i = 0; i < group->size(); ++i) {
         const auto &ws = group->getItem(i);
-        if (ws->name().find("_Parameters") != std::string::npos) {
+        if (ws->getName().find("_Parameters") != std::string::npos) {
           params = getKeysFromTable(
               boost::dynamic_pointer_cast<ITableWorkspace>(ws));
-        } else if (ws->name().find("_Workspace") != std::string::npos) {
+        } else if (ws->getName().find("_Workspace") != std::string::npos) {
           ++nRuns;
         }
       }
@@ -1103,7 +1107,7 @@ getWorkspaceColors(const std::vector<Workspace_sptr> &workspaces) {
       params = getKeysFromTable(table);
     } else {
       throw std::invalid_argument(
-          "Unexpected workspace type for " + ws->name() +
+          "Unexpected workspace type for " + ws->getName() +
           " (expected WorkspaceGroup or ITableWorkspace)");
     }
     fitProperties.emplace_back(nRuns, params);

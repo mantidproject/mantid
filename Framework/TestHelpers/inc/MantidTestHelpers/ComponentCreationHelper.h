@@ -14,6 +14,7 @@
 #include "MantidKernel/V3D.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Detector.h"
+#include <memory>
 
 // Forward declarations
 namespace Mantid {
@@ -22,6 +23,7 @@ class CompAssembly;
 class ObjComponent;
 class DetectorGroup;
 class DetectorsRing;
+class IDetector;
 }
 }
 
@@ -123,10 +125,19 @@ boost::shared_ptr<Mantid::Geometry::DetectorGroup>
 createRingOfCylindricalDetectors(const double R_min = 4.5,
                                  const double R_max = 5,
                                  const double z000000000000000 = 4);
+
 /**
- * Create a group of two monitors
+ * Create a detector vector containing detectors ring
+ * R_min -- min radius of the ring
+ * R_max -- max radius of the ring, center has to be in 0 position,
+ * z     -- axial z-coordinate of the detectors position;
+  The detectors are the cylinders with 1.5cm height and 0.5 cm radius
  */
-boost::shared_ptr<Mantid::Geometry::DetectorGroup> createGroupOfTwoMonitors();
+std::vector<std::unique_ptr<Mantid::Geometry::IDetector>>
+createVectorOfCylindricalDetectors(const double R_min = 4.5,
+                                   const double R_max = 5,
+                                   const double z000000000000000 = 4);
+
 /** create instrument with cylindrical detectors located in specific angular
  * positions */
 Mantid::Geometry::Instrument_sptr

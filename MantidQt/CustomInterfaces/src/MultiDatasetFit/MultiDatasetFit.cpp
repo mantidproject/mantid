@@ -374,7 +374,7 @@ QString MultiDatasetFit::getOutputWorkspaceName(int i) const {
     auto ws = Mantid::API::AnalysisDataService::Instance().retrieve(wsName);
     if (auto group =
             boost::dynamic_pointer_cast<Mantid::API::WorkspaceGroup>(ws)) {
-      wsName = group->getItem(i)->name();
+      wsName = group->getItem(i)->getName();
     }
   }
   return QString::fromStdString(wsName);
@@ -572,7 +572,6 @@ double MultiDatasetFit::getLocalParameterValue(const QString &parName,
 
 /// Reset the caches. Prepare to fill them in lazily.
 void MultiDatasetFit::reset() {
-  m_functionBrowser->resetLocalParameters();
   m_functionBrowser->setNumberOfDatasets(getNumberOfSpectra());
   setParameterNamesForPlotting();
   m_plotController->setGuessFunction(m_functionBrowser->getFunctionString());

@@ -205,7 +205,7 @@ void PeakOverlay::removeShapes(const QList<Shape2D *> &shapeList) {
   // Run the DeleteTableRows algorithm to delete the peak.
   auto alg =
       Mantid::API::AlgorithmManager::Instance().create("DeleteTableRows", -1);
-  alg->setPropertyValue("TableWorkspace", m_peaksWorkspace->name());
+  alg->setPropertyValue("TableWorkspace", m_peaksWorkspace->getName());
   alg->setProperty("Rows", rows);
   emit executeAlgorithm(alg);
 }

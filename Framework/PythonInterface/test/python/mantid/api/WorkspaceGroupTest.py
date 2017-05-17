@@ -60,7 +60,7 @@ class WorkspaceGroupTest(unittest.TestCase):
         run_algorithm('CreateWorkspace', OutputWorkspace='Second',DataX=[1.,2.,3.], DataY=[2.,3.], DataE=[2.,3.],UnitX='TOF')
         run_algorithm('GroupWorkspaces',InputWorkspaces='First,Second',OutputWorkspace='group')
         group = mtd['group']
-        self.assertEquals(group.getName(), "group")
+        self.assertEquals(group.name(), "group")
         self.assertEquals(type(group), WorkspaceGroup)
         try:
             w = Scale(group, 1.5)

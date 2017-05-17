@@ -90,6 +90,7 @@ set ( QTIPLOT_SRCS src/ApplicationWindow.cpp
                    src/PluginFit.cpp
                    src/PolynomFitDialog.cpp
                    src/PolynomialFit.cpp
+                   src/ProjectSaveView.cpp
                    src/ProjectSerialiser.cpp
                    src/PythonScript.cpp
                    src/PythonScripting.cpp
@@ -286,7 +287,8 @@ set ( QTIPLOT_HDRS src/ApplicationWindow.h
                    src/PluginFit.h
                    src/PolynomFitDialog.h
                    src/PolynomialFit.h
-		    src/ProjectSerialiser.h
+                   src/ProjectSerialiser.h
+                   src/ProjectSaveView.h
                    src/PythonScript.h
                    src/PythonScripting.h
                    src/QwtBarCurve.h
@@ -534,6 +536,8 @@ set ( QTIPLOT_MOC_FILES src/ApplicationWindow.h
                         src/PluginFit.h
                         src/PolynomFitDialog.h
                         src/PolynomialFit.h
+                        src/ProjectSaveView.h
+                        src/ProjectSerialiser.h
                         src/PythonScript.h
                         src/PythonScripting.h
                         src/QwtPieCurve.h
@@ -612,6 +616,7 @@ set ( MANTID_MOC_FILES src/Mantid/AlgorithmDockWidget.h
 )
 
 set ( UI_FILES src/SendToProgramDialog.ui
+               src/ProjectSave.ui
                src/Mantid/FirstTimeSetup.ui
                src/Mantid/UserFitFunctionDialog.ui
                src/Mantid/MantidAbout.ui
@@ -632,7 +637,11 @@ set ( MOCCED_FILES ${MOCCED_FILES} ${CMAKE_CURRENT_BINARY_DIR}/qtcolorpicker.moc
 
 set ( SRC_FILES ${QTIPLOT_SRCS} ${MANTID_SRCS} ${SIP_SRC} )
 set ( INC_FILES ${QTIPLOT_HDRS} ${MANTID_HDRS} )
-set ( ALL_SRC ${SRC_FILES} ${MOCCED_FILES} )
+if ( WIN32 )
+  set ( MANIFEST_FILES MantidPlot.manifest )
+endif ()
+
+set ( ALL_SRC ${SRC_FILES} ${MOCCED_FILES} ${MANIFEST_FILES} )
 
 # Use a precompiled header where they are supported
 enable_precompiled_headers( src/PrecompiledHeader.h ALL_SRC )

@@ -1,15 +1,12 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidDataHandling/UpdateInstrumentFromFile.h"
-#include "MantidDataHandling/LoadAscii.h"
 #include "MantidDataHandling/LoadEventNexus.h"
 #include "MantidDataHandling/LoadISISNexus2.h"
 #include "MantidDataHandling/LoadRawHelper.h"
+#include "MantidAPI/DetectorInfo.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidGeometry/Instrument.h"
-#include "MantidGeometry/Instrument/ComponentHelper.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidKernel/NexusDescriptor.h"
 #include "LoadRaw/isisraw2.h"
@@ -199,7 +196,6 @@ void UpdateInstrumentFromFile::updateFromAscii(const std::string &filename) {
   AsciiFileHeader header;
   const bool isSpectrum = parseAsciiHeader(header);
 
-  Geometry::Instrument_const_sptr inst = m_workspace->getInstrument();
   // Throws for multiple detectors
   const spec2index_map specToIndex(
       m_workspace->getSpectrumToWorkspaceIndexMap());
@@ -212,6 +208,10 @@ void UpdateInstrumentFromFile::updateFromAscii(const std::string &filename) {
     std::getline(datfile, line);
     ++lineCount;
   }
+
+  Geometry::ParameterMap &pmap = m_workspace->instrumentParameters();
+  auto &detectorInfo = m_workspace->mutableDetectorInfo();
+  const auto &spectrumInfo = m_workspace->spectrumInfo();
 
   std::vector<double> colValues(header.colCount - 1, 0.0);
   while (std::getline(datfile, line)) {
@@ -227,26 +227,48 @@ void UpdateInstrumentFromFile::updateFromAscii(const std::string &filename) {
       continue;
     }
 
-    Geometry::IDetector_const_sptr det;
-    try {
-      if (isSpectrum) {
-        auto it = specToIndex.find(detOrSpec);
-        if (it != specToIndex.end()) {
-          const size_t wsIndex = it->second;
-          det = m_workspace->getDetector(wsIndex);
+    bool skip{false};
+    size_t index = static_cast<size_t>(-1);
+    const Geometry::IDetector *det{nullptr};
+    if (isSpectrum) {
+      auto it = specToIndex.find(detOrSpec);
+      if (it != specToIndex.end()) {
+        index = it->second;
+        if (spectrumInfo.hasDetectors(index)) {
+          det = &spectrumInfo.detector(index);
         } else {
-          g_log.debug() << "Skipping \"" << line
-                        << "\". Spectrum is not in workspace.\n";
-          continue;
+          skip = true;
         }
       } else {
-        det = inst->getDetector(detOrSpec);
+        g_log.debug() << "Skipping \"" << line
+                      << "\". Spectrum is not in workspace.\n";
+        continue;
       }
-    } catch (Kernel::Exception::NotFoundError &) {
+    } else {
+      try {
+        index = detectorInfo.indexOf(detOrSpec);
+        det = &detectorInfo.detector(index);
+      } catch (std::out_of_range &) {
+        skip = true;
+      }
+    }
+    if (skip || index == static_cast<size_t>(-1)) {
       g_log.debug()
           << "Skipping \"" << line
           << "\". Spectrum in workspace but cannot find associated detector.\n";
       continue;
+    }
+
+    std::vector<size_t> indices;
+    if (isSpectrum) {
+      if (auto group = dynamic_cast<const Geometry::DetectorGroup *>(det)) {
+        for (const auto detID : group->getDetectorIDs())
+          indices.push_back(detectorInfo.indexOf(detID));
+      } else {
+        indices.push_back(detectorInfo.indexOf(det->getID()));
+      }
+    } else {
+      indices.push_back(index);
     }
 
     // Special cases for detector r,t,p. Everything else is
@@ -270,7 +292,10 @@ void UpdateInstrumentFromFile::updateFromAscii(const std::string &filename) {
       else if (i == header.phiColIdx)
         phi = value;
       else if (header.detParCols.count(i) == 1) {
-        setDetectorParameter(det, header.colToName[i], value);
+        for (const auto index : indices) {
+          auto id = detectorInfo.detector(index).getComponentID();
+          pmap.addDouble(id, header.colToName[i], value);
+        }
       }
     }
     // Check stream state. stringstream::EOF should have been reached, if not
@@ -284,16 +309,20 @@ void UpdateInstrumentFromFile::updateFromAscii(const std::string &filename) {
 
     // If not supplied use current values
     double r, t, p;
-    det->getPos().getSpherical(r, t, p);
+    if (isSpectrum)
+      spectrumInfo.position(index).getSpherical(r, t, p);
+    else
+      detectorInfo.position(index).getSpherical(r, t, p);
     if (header.rColIdx == 0)
       R = r;
     if (header.thetaColIdx == 0)
       theta = t;
-    if (header.phiColIdx == 0)
+    if (header.phiColIdx == 0 || m_ignorePhi)
       phi = p;
 
-    setDetectorPosition(det, static_cast<float>(R), static_cast<float>(theta),
-                        static_cast<float>(phi));
+    for (const auto index : indices)
+      setDetectorPosition(detectorInfo, index, static_cast<float>(R),
+                          static_cast<float>(theta), static_cast<float>(phi));
   }
 }
 
@@ -351,27 +380,6 @@ bool UpdateInstrumentFromFile::parseAsciiHeader(
 }
 
 /**
- * Attaches a detector parameter to the given detector
- * @param det A pointer to the detector object
- * @param name The name of the parameter
- * @param value Value of the parameter
- */
-void UpdateInstrumentFromFile::setDetectorParameter(
-    const Geometry::IDetector_const_sptr &det, const std::string &name,
-    double value) {
-  Geometry::ParameterMap &pmap = m_workspace->instrumentParameters();
-  if (auto group =
-          boost::dynamic_pointer_cast<const Geometry::DetectorGroup>(det)) {
-    auto dets = group->getDetectors();
-    for (const auto &comp : dets) {
-      pmap.addDouble(comp->getComponentID(), name, value);
-    }
-  } else {
-    pmap.addDouble(det->getComponentID(), name, value);
-  }
-}
-
-/**
  * Set the detector positions given the r,theta and phi.
  * @param detID :: A vector of detector IDs
  * @param l2 :: A vector of l2 distances
@@ -381,16 +389,23 @@ void UpdateInstrumentFromFile::setDetectorParameter(
 void UpdateInstrumentFromFile::setDetectorPositions(
     const std::vector<int32_t> &detID, const std::vector<float> &l2,
     const std::vector<float> &theta, const std::vector<float> &phi) {
-  Geometry::Instrument_const_sptr inst = m_workspace->getInstrument();
   const int numDetector = static_cast<int>(detID.size());
   g_log.information() << "Setting new positions for " << numDetector
                       << " detectors\n";
 
+  auto &detectorInfo = m_workspace->mutableDetectorInfo();
   for (int i = 0; i < numDetector; ++i) {
     try {
-      Geometry::IDetector_const_sptr det = inst->getDetector(detID[i]);
-      setDetectorPosition(det, l2[i], theta[i], phi[i]);
-    } catch (Kernel::Exception::NotFoundError &) {
+      auto index = detectorInfo.indexOf(detID[i]);
+      double p{phi[i]};
+      if (m_ignorePhi) {
+        double r, t;
+        detectorInfo.position(index).getSpherical(r, t, p);
+      }
+      setDetectorPosition(detectorInfo, index, l2[i], theta[i],
+                          static_cast<float>(p));
+    } catch (std::out_of_range &) {
+      // Invalid detID[i]
       continue;
     }
     progress(static_cast<double>(i) / numDetector,
@@ -400,37 +415,23 @@ void UpdateInstrumentFromFile::setDetectorPositions(
 
 /**
  * Set the new detector position given the r,theta and phi.
- * @param det :: A pointer to the detector
+ * @param detectorInfo :: Reference to the DetectorInfo
+ * @param index :: Index into detectorInfo
  * @param l2 :: A single l2
  * @param theta :: A single theta
  * @param phi :: A single phi
  */
-void UpdateInstrumentFromFile::setDetectorPosition(
-    const Geometry::IDetector_const_sptr &det, const float l2,
-    const float theta, const float phi) {
-  if (m_ignoreMonitors && det->isMonitor())
+void UpdateInstrumentFromFile::setDetectorPosition(DetectorInfo &detectorInfo,
+                                                   const size_t index,
+                                                   const float l2,
+                                                   const float theta,
+                                                   const float phi) {
+  if (m_ignoreMonitors && detectorInfo.isMonitor(index))
     return;
 
-  Geometry::ParameterMap &pmap = m_workspace->instrumentParameters();
   Kernel::V3D pos;
-  if (!m_ignorePhi) {
-    pos.spherical(l2, theta, phi);
-  } else {
-    double r, t, p;
-    det->getPos().getSpherical(r, t, p);
-    pos.spherical(l2, theta, p);
-  }
-  if (auto group =
-          boost::dynamic_pointer_cast<const Geometry::DetectorGroup>(det)) {
-    auto dets = group->getDetectors();
-    for (const auto &element : dets) {
-      Geometry::ComponentHelper::moveComponent(
-          *element, pmap, pos, Geometry::ComponentHelper::Absolute);
-    }
-  } else {
-    Geometry::ComponentHelper::moveComponent(
-        *det, pmap, pos, Geometry::ComponentHelper::Absolute);
-  }
+  pos.spherical(l2, theta, phi);
+  detectorInfo.setPosition(index, pos);
 }
 
 } // namespace DataHandling

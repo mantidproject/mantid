@@ -42,14 +42,15 @@ Usage
     # Loading the same data from a castep and phonon file
     phonon_ws = SimulatedDensityOfStates(PHONONFile='squaricn.phonon')
     castep_ws = SimulatedDensityOfStates(CASTEPFile='squaricn.castep')
+    result = CompareWorkspaces(phonon_ws, castep_ws)
 
-    print CheckWorkspacesMatch(phonon_ws, castep_ws)
+    print result[0]
 
 Output:
 
 .. testoutput:: ExSimulatedDensityOfStatesSimple
 
-    Success!
+    True
 
 **Example - loading partial contributions of ions:**
 
@@ -78,13 +79,13 @@ Output:
                                       SumContributions=True)
     total_ws = SimulatedDensityOfStates(PHONONFile='squaricn.phonon')
 
-    print CheckWorkspacesMatch(total_ws, sum_ws, Tolerance=1e-12)
+    print CompareWorkspaces(total_ws, sum_ws, Tolerance=1e-12)[0]
 
 Output:
 
 .. testoutput:: ExSimulatedDensityOfStatesPartialSummed
 
-    Success!
+    True
 
 **Example - Getting the list of ions in a phonon file:**
 

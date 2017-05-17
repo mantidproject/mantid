@@ -157,6 +157,12 @@ public:
   void splitByTime(std::vector<SplittingInterval> &splitter,
                    std::vector<Property *> outputs,
                    bool isPeriodic) const override;
+
+  /// New split method
+  void splitByTimeVector(std::vector<DateAndTime> &splitter_time_vec,
+                         std::vector<int> &target_vec,
+                         std::vector<TimeSeriesProperty *> outputs);
+
   /// Fill a TimeSplitterType that will filter the events by matching
   void makeFilterByValue(std::vector<SplittingInterval> &split, double min,
                          double max, double TimeTolerance = 0.0,
@@ -169,7 +175,7 @@ public:
   double averageValueInFilter(
       const std::vector<SplittingInterval> &filter) const override;
   /// Calculate the time-weighted average of a property
-  double timeAverageValue() const;
+  double timeAverageValue() const override;
   /// generate constant time-step histogram from the property values
   void histogramData(const Kernel::DateAndTime &tMin,
                      const Kernel::DateAndTime &tMax,

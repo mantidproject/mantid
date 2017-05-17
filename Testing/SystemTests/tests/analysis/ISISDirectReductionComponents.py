@@ -1,4 +1,4 @@
-﻿#pylint: disable=invalid-name
+#pylint: disable=invalid-name
 import os
 import sys
 import stresstesting

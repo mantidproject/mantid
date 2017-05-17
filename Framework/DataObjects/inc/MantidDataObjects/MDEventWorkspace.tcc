@@ -921,7 +921,7 @@ TMDE(API::IMDWorkspace::LinePlot MDEventWorkspace)
   }
 
   // If everything was masked
-  if (line.x.size() == 0) {
+  if (line.x.empty()) {
     makeSinglePointWithNaN(line.x, line.y, line.e);
   }
   return line;

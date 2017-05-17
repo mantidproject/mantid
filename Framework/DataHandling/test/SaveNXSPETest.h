@@ -3,17 +3,17 @@
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidAPI/DetectorInfo.h"
+#include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/NumericAxis.h"
+#include "MantidDataHandling/LoadInstrument.h"
 #include "MantidDataHandling/SaveNXSPE.h"
 #include "MantidKernel/UnitFactory.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include "MantidAPI/DetectorInfo.h"
-#include "MantidAPI/NumericAxis.h"
-#include "MantidAPI/FrameworkManager.h"
-#include "MantidDataHandling/LoadInstrument.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
-#include <boost/shared_array.hpp>
 #include "boost/tuple/tuple.hpp"
+#include <boost/shared_array.hpp>
 
 #include <hdf5.h>
 #include <hdf5_hl.h>
@@ -133,8 +133,8 @@ private:
         WorkspaceCreationHelper::create2DWorkspaceBinned(nhist, nx, 1.0);
     // Fill workspace with increasing counter to properly check saving
     for (int i = 0; i < nhist; ++i) {
-      auto &outY = testWS->dataY(i);
-      auto &outE = testWS->dataE(i);
+      auto &outY = testWS->mutableY(i);
+      auto &outE = testWS->mutableE(i);
       for (int j = 0; j < nx; ++j) {
         outY[j] = i * nx + j;
         outE[j] = outY[j] * 2.0;
@@ -152,13 +152,6 @@ private:
         ComponentCreationHelper::createCylInstrumentWithDetInGivenPositions(
             dummy, dummy, dummy);
     inputWS->setInstrument(testInst);
-
-    // Associate detectors with the workspace
-    for (size_t j = 0; j < inputWS->getNumberHistograms(); ++j) {
-      // Just set the spectrum number to match the index
-      inputWS->getSpectrum(j)
-          .setSpectrumNo(static_cast<Mantid::specnum_t>(j + 1));
-    }
 
     // mask the detector
     inputWS->mutableDetectorInfo().setMasked(THEMASKED, true);

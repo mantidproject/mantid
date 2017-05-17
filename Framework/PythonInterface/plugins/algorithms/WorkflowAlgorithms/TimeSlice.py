@@ -15,15 +15,13 @@ def _count_monitors(raw_file):
 
     raw_file = mtd[raw_file]
     num_hist = raw_file.getNumberHistograms()
-    detector = raw_file.getDetector(0)
     mon_count = 1
 
-    if detector.isMonitor():
+    spectrumInfo = raw_file.spectrumInfo()
+    if spectrumInfo.isMonitor(0):
         # Monitors are at the start
         for i in range(1, num_hist):
-            detector = raw_file.getDetector(i)
-
-            if detector.isMonitor():
+            if spectrumInfo.isMonitor(i):
                 mon_count += 1
             else:
                 break
@@ -31,16 +29,12 @@ def _count_monitors(raw_file):
         return mon_count, True
     else:
         # Monitors are at the end
-        detector = raw_file.getDetector(num_hist)
-
-        if not detector.isMonitor():
+        if not spectrumInfo.isMonitor(num_hist):
             #if it's not, we don't have any monitors!
             return 0, True
 
         for i in range(num_hist, 0, -1):
-            detector = raw_file.getDetector(i)
-
-            if detector.isMonitor():
+            if spectrumInfo.isMonitor(i):
                 mon_count += 1
             else:
                 break

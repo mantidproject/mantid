@@ -62,8 +62,8 @@ class WishMasking(stresstesting.MantidStressTest):
         masking_edge = 9
 
                 # Test the 'isMasked' property on the detectors of the original workspace
-        self.assertTrue( ws.getDetector(masking_edge).isMasked() )
-        self.assertTrue( not ws.getDetector(masking_edge + 1).isMasked() )
+        self.assertTrue( ws.spectrumInfo().isMasked(masking_edge) )
+        self.assertTrue( not ws.spectrumInfo().isMasked(masking_edge + 1) )
 
                 # Extract a masking workspace
         ExtractMask( InputWorkspace=ws, OutputWorkspace='masking_wish_workspace' )
@@ -74,8 +74,8 @@ class WishMasking(stresstesting.MantidStressTest):
                 # Test the 'isMasked' property on the detectors of the masked workspace
                 # The following tests have been added even though they are broken because extracted workspaces currently do not preserve the
                 # Masking flags (buty they SHOULD!). Hopefully the broken functionality will be fixed and I can enable them.
-                #self.assertTrue( mask_ws.getDetector(masking_edge).isMasked() )
-                #self.assertTrue( not mask_ws.getDetector(masking_edge + 1).isMasked() )
+                #self.assertTrue( mask_ws.spectrumInfo().isMasked(masking_edge) )
+                #self.assertTrue( not mask_ws.spectrumInfo().isMasked(masking_edge + 1) )
 
                 # Save masking
         mask_file = 'wish_masking_system_test_mask_file_temp.xml'
@@ -101,7 +101,7 @@ class WishMasking(stresstesting.MantidStressTest):
 
                 # Testing that the isMasking is the same on both sides of the masking boundary.
         # If things were working properly the following would not pass!
-        self.assertTrue( mask_ws.getDetector(masking_edge).isMasked() == mask_ws.getDetector(masking_edge + 1).isMasked() )
+        self.assertTrue( mask_ws.spectrumInfo().isMasked(masking_edge) == mask_ws.spectrumInfo().isMasked(masking_edge + 1) )
                 ## END CHARACTERISATION TESTS
 
                 #Test creation with normal masking

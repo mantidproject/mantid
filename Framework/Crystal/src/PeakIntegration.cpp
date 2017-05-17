@@ -95,7 +95,8 @@ void PeakIntegration::exec() {
   outputW = API::WorkspaceFactory::Instance().create(
       inputW, peaksW->getNumberPeaks(), YLength + 1, YLength);
   // Copy geometry over.
-  API::WorkspaceFactory::Instance().initializeFromParent(inputW, outputW, true);
+  API::WorkspaceFactory::Instance().initializeFromParent(*inputW, *outputW,
+                                                         true);
   size_t Numberwi = inputW->getNumberHistograms();
   int NumberPeaks = peaksW->getNumberPeaks();
   int MinPeaks = 0;

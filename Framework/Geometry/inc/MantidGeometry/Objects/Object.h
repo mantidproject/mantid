@@ -15,17 +15,18 @@ namespace Mantid {
 // Forward declarations
 //----------------------------------------------------------------------
 namespace Kernel {
-class V3D;
+class PseudoRandomNumberGenerator;
 class Material;
+class V3D;
 }
 
 namespace Geometry {
-class Rule;
+class CacheGeometryHandler;
 class CompGrp;
+class GeometryHandler;
+class Rule;
 class Surface;
 class Track;
-class GeometryHandler;
-class CacheGeometryHandler;
 class vtkGeometryCacheReader;
 class vtkGeometryCacheWriter;
 
@@ -137,6 +138,9 @@ public:
   // solid angle via ray tracing
   double rayTraceSolidAngle(const Kernel::V3D &observer) const;
 
+  /// Calculates the volume of this object.
+  double volume() const;
+
   /// Calculate (or return cached value of) Axis Aligned Bounding box
   /// (DEPRECATED)
   void getBoundingBox(double &xmax, double &ymax, double &zmax, double &xmin,
@@ -152,6 +156,13 @@ public:
   void setNullBoundingBox();
   // find internal point to object
   int getPointInObject(Kernel::V3D &point) const;
+
+  /// Select a random point within the object
+  Kernel::V3D generatePointInObject(Kernel::PseudoRandomNumberGenerator &rng,
+                                    const size_t) const;
+  Kernel::V3D generatePointInObject(Kernel::PseudoRandomNumberGenerator &rng,
+                                    const BoundingBox &activeRegion,
+                                    const size_t) const;
 
   // Rendering member functions
   void draw() const;
@@ -203,6 +214,12 @@ private:
                         const Mantid::Kernel::V3D &centre,
                         const Mantid::Kernel::V3D &axis, const double radius,
                         const double height) const;
+
+  /// Returns the volume.
+  double monteCarloVolume() const;
+  /// Returns the volume.
+  double singleShotMonteCarloVolume(const int shotSize,
+                                    const size_t seed) const;
 
   /// Top rule [ Geometric scope of object]
   std::unique_ptr<Rule> TopRule;

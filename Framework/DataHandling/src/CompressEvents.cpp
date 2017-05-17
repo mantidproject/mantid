@@ -3,6 +3,9 @@
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
+
+#include "tbb/parallel_for.h"
+
 #include <set>
 #include <numeric>
 
@@ -44,7 +47,7 @@ void CompressEvents::exec() {
 
   // Some starting things
   bool inplace = (inputWS == outputWS);
-  const int noSpectra = static_cast<int>(inputWS->getNumberHistograms());
+  const size_t noSpectra = inputWS->getNumberHistograms();
   Progress prog(this, 0.0, 1.0, noSpectra * 2);
 
   // Sort the input workspace in-place by TOF. This can be faster if there are
@@ -58,57 +61,39 @@ void CompressEvents::exec() {
         API::WorkspaceFactory::Instance().create(
             "EventWorkspace", inputWS->getNumberHistograms(), 2, 1));
     // Copy geometry over.
-    API::WorkspaceFactory::Instance().initializeFromParent(inputWS, outputWS,
+    API::WorkspaceFactory::Instance().initializeFromParent(*inputWS, *outputWS,
                                                            false);
     // We DONT copy the data though
-
-    // Do we want to parallelize over event lists, or in each event list
-    bool parallel_in_each = noSpectra < PARALLEL_GET_MAX_THREADS;
-    // parallel_in_each = false;
-
     // Loop over the histograms (detector spectra)
-    // Don't parallelize the loop if we are going to parallelize each event
-    // list.
-    // cppcheck-suppress syntaxError
-    PRAGMA_OMP( parallel for schedule(dynamic) if (!parallel_in_each) )
-    for (int i = 0; i < noSpectra; ++i) {
-      PARALLEL_START_INTERUPT_REGION
-      // the loop variable i can't be signed because of OpenMp rules inforced in
-      // Linux. Using this signed type suppresses warnings below
-      const size_t index = static_cast<size_t>(i);
-      // The input event list
-      EventList &input_el = inputWS->getSpectrum(index);
-      // And on the output side
-      EventList &output_el = outputWS->getSpectrum(index);
-      // Copy other settings into output
-      output_el.setX(input_el.ptrX());
-
-      // The EventList method does the work.
-      input_el.compressEvents(tolerance, &output_el, parallel_in_each);
-
-      prog.report("Compressing");
-      PARALLEL_END_INTERUPT_REGION
-    }
-    PARALLEL_CHECK_INTERUPT_REGION
-
+    tbb::parallel_for(tbb::blocked_range<size_t>(0, noSpectra),
+                      [tolerance, &inputWS, &outputWS, &prog](
+                          const tbb::blocked_range<size_t> &range) {
+                        for (size_t index = range.begin(); index < range.end();
+                             ++index) {
+                          // The input event list
+                          EventList &input_el = inputWS->getSpectrum(index);
+                          // And on the output side
+                          EventList &output_el = outputWS->getSpectrum(index);
+                          // Copy other settings into output
+                          output_el.setX(input_el.ptrX());
+                          // The EventList method does the work.
+                          input_el.compressEvents(tolerance, &output_el);
+                          prog.report("Compressing");
+                        }
+                      });
+  } else {
+    tbb::parallel_for(
+        tbb::blocked_range<size_t>(0, noSpectra),
+        [tolerance, &outputWS, &prog](const tbb::blocked_range<size_t> &range) {
+          for (size_t index = range.begin(); index < range.end(); ++index) {
+            // The input (also output) event list
+            auto &output_el = outputWS->getSpectrum(index);
+            // The EventList method does the work.
+            output_el.compressEvents(tolerance, &output_el);
+            prog.report("Compressing");
+          }
+        });
   }
-
-  else {
-    // ---- In-place -----
-    // Loop over the histograms (detector spectra)
-    PARALLEL_FOR_NO_WSP_CHECK()
-    for (int64_t i = 0; i < noSpectra; ++i) {
-      PARALLEL_START_INTERUPT_REGION
-      // The input (also output) event list
-      auto &output_el = outputWS->getSpectrum(static_cast<size_t>(i));
-      // The EventList method does the work.
-      output_el.compressEvents(tolerance, &output_el);
-      prog.report("Compressing");
-      PARALLEL_END_INTERUPT_REGION
-    }
-    PARALLEL_CHECK_INTERUPT_REGION
-  }
-
   // Cast to the matrixOutputWS and save it
   this->setProperty("OutputWorkspace", outputWS);
 }

@@ -274,7 +274,7 @@ void DataProcessorAlgorithm::saveNexus(const std::string &outputWSName,
     saveOutput = false;
 #endif
 
-  if (saveOutput && outputFile.size() > 0) {
+  if (saveOutput && !outputFile.empty()) {
     IAlgorithm_sptr saveAlg = createChildAlgorithm("SaveNexus");
     saveAlg->setPropertyValue("Filename", outputFile);
     saveAlg->setPropertyValue("InputWorkspace", outputWSName);

@@ -148,7 +148,7 @@ void PeaksWorkspaceWidget::createTableMVC() {
 }
 
 void PeaksWorkspaceWidget::populate() {
-  m_nameText = QString(m_ws->name().c_str());
+  m_nameText = QString(m_ws->getName().c_str());
   ui.lblWorkspaceName->setText(m_nameText);
   ui.lblWorkspaceName->setToolTip(m_nameText);
 

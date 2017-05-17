@@ -60,11 +60,11 @@ void RebinByPulseTimes::doHistogramming(IEventWorkspace_sptr inWS,
     el.generateHistogramPulseTime(*XValues_new, y_data, e_data);
 
     // Set the X axis for each output histogram
-    outputWS->setX(i, x);
+    outputWS->setSharedX(i, x);
 
     // Copy the data over.
-    outputWS->dataY(i).assign(y_data.begin(), y_data.end());
-    outputWS->dataE(i).assign(e_data.begin(), e_data.end());
+    outputWS->mutableY(i) = std::move(y_data);
+    outputWS->mutableE(i) = std::move(e_data);
 
     // Report progress
     prog.report(name());

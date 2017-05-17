@@ -1,6 +1,15 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<parameter-file instrument = "INTER" valid-from = "2012-01-31T00:00:00">
+<parameter-file instrument = "INTER" valid-from = "2017-01-31T00:00:00">
 <component-link name = "INTER">
+
+  <parameter name="MonitorBackgroundMin">
+    <value val="17.0"/>
+  </parameter>
+
+  <parameter name="MonitorBackgroundMax">
+    <value val="18.0"/>
+  </parameter>
+
   <parameter name="MonitorIntegralMin">
     <value val="4.0"/>
   </parameter>
@@ -9,23 +18,18 @@
     <value val="10.0"/>
   </parameter>
 
-  <parameter name="MonitorBackgroundMin">
-    <value val="15.0"/>
-  </parameter>
-
-  <parameter name="MonitorBackgroundMax">
-    <value val="17.0"/>
-  </parameter>
-
   <parameter name="PointDetectorStart">
     <value val="3"/>
   </parameter>
 
   <parameter name="PointDetectorStop">
-    <value val="4"/>
+    <value val="3"/>
   </parameter>
 
   <parameter name="MultiDetectorStart">
+    <!--
+  This channel number is marks the start of all other linear and/or area detectors.
+   -->
     <value val="6"/>
   </parameter>
 
@@ -34,12 +38,21 @@
   </parameter>
 
   <parameter name="LambdaMin">
-    <value val="1.0"/>
+    <value val="1.5"/>
   </parameter>
 
   <parameter name="LambdaMax">
     <value val="17.0"/>
   </parameter>
+
+  <parameter name="TransRunStartOverlap"> <!-- in wavelength -->
+    <value val="10"/>
+  </parameter>
+
+  <parameter name="TransRunEndOverlap"> <!-- in wavelength -->
+    <value val="12"/>
+  </parameter>
+
 
    <!-- parameters for efficiency correction -->
   <parameter name="correction" type="string">

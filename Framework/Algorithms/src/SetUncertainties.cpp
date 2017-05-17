@@ -77,11 +77,9 @@ void SetUncertainties::init() {
 void SetUncertainties::exec() {
   MatrixWorkspace_const_sptr inputWorkspace = getProperty("InputWorkspace");
   std::string errorType = getProperty("SetError");
-  bool zeroError = (errorType.compare(ZERO) == 0);
-  bool takeSqrt =
-      ((errorType.compare(SQRT) == 0) || (errorType.compare(SQRT_OR_ONE) == 0));
-  bool resetOne = ((errorType.compare(ONE_IF_ZERO) == 0) ||
-                   (errorType.compare(SQRT_OR_ONE) == 0));
+  bool zeroError = (errorType == ZERO);
+  bool takeSqrt = ((errorType == SQRT) || (errorType == SQRT_OR_ONE));
+  bool resetOne = ((errorType == ONE_IF_ZERO) || (errorType == SQRT_OR_ONE));
 
   // Create the output workspace. This will copy many aspects from the input
   // one.
@@ -101,7 +99,7 @@ void SetUncertainties::exec() {
     outputWorkspace->setSharedX(i, inputWorkspace->sharedX(i));
     outputWorkspace->setSharedY(i, inputWorkspace->sharedY(i));
     // copy the E or set to zero depending on the mode
-    if (errorType.compare(ONE_IF_ZERO) == 0) {
+    if (errorType == ONE_IF_ZERO) {
       outputWorkspace->setSharedE(i, inputWorkspace->sharedE(i));
     } else {
       outputWorkspace->mutableE(i) = 0.0;

@@ -1704,3 +1704,5 @@ std::string Matrix::saveToProject(ApplicationWindow *app) {
 
   return tsv.outputLines();
 }
+
+std::vector<std::string> Matrix::getWorkspaceNames() { return {}; }

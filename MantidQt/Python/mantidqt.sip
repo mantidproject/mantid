@@ -84,7 +84,7 @@ namespace GraphOptions
   enum ScaleType {Linear, Log10};
 
   enum Axis{Left, Right, Bottom, Top};
-  
+
   enum CurveType {
   Line,
   Scatter,
@@ -194,13 +194,13 @@ public:
 
 };
 
-namespace MantidWidgets
+namespace API
 {
 
 class MWRunFiles : QWidget
 {
 %TypeHeaderCode
-#include "MantidQtMantidWidgets/MWRunFiles.h"
+#include "MantidQtAPI/MWRunFiles.h"
 %End
 public:
 void setLabelMinWidth(const int);
@@ -395,7 +395,7 @@ void LineViewer::setThickness(int dim, double width)
     Set the thickness to integrate in a particular dimension.
 
     Integration is performed perpendicular to the XY plane,
-    from -thickness below to +thickness above the center.
+    from -0.5 * thickness below to +0.5 * thickness above the center.
 
     Use setPlanarWidth() to set the width along the XY plane.
 
@@ -415,7 +415,7 @@ void LineViewer::setThickness(const QString & dim, double width)
     Set the thickness to integrate in a particular dimension.
 
     Integration is performed perpendicular to the XY plane,
-    from -thickness below to +thickness above the center.
+    from -0.5 * thickness below to +0.5 * thickness above the center.
 
     Use setPlanarWidth() to set the width along the XY plane.
 
@@ -1356,6 +1356,7 @@ MantidQt::SliceViewer::SliceViewer* WidgetFactory::createSliceViewer(const QStri
 
 
 private:
+  WidgetFactory(const MantidQt::Factory::WidgetFactory&);
   WidgetFactory();
 %Docstring
 WidgetFactory::WidgetFactory()

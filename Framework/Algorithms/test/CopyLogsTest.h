@@ -37,7 +37,7 @@ public:
 
     runAlg(inputWs, outputWs, mode);
 
-    WorkspaceCreationHelper::removeWS(outputWs->name());
+    WorkspaceCreationHelper::removeWS(outputWs->getName());
   }
 
   void test_mergeReplaceExisting() {
@@ -67,7 +67,7 @@ public:
     TS_ASSERT_EQUALS(run.getLogData("B")->value(), "World");
     TS_ASSERT_EQUALS(run.getLogData("C")->value(), "1");
 
-    WorkspaceCreationHelper::removeWS(outputWs->name());
+    WorkspaceCreationHelper::removeWS(outputWs->getName());
   }
 
   void test_mergeKeepExisting() {
@@ -97,7 +97,7 @@ public:
     TS_ASSERT_EQUALS(run.getLogData("B")->value(), "Universe");
     TS_ASSERT_EQUALS(run.getLogData("C")->value(), "1");
 
-    WorkspaceCreationHelper::removeWS(outputWs->name());
+    WorkspaceCreationHelper::removeWS(outputWs->getName());
   }
 
   void test_wipeExisting() {
@@ -127,7 +127,7 @@ public:
     TS_ASSERT_EQUALS(run.getLogData("B")->value(), "World");
     TS_ASSERT_THROWS_ANYTHING(run.getLogData("C"));
 
-    WorkspaceCreationHelper::removeWS(outputWs->name());
+    WorkspaceCreationHelper::removeWS(outputWs->getName());
   }
 
   // Run the Copy Logs algorithm

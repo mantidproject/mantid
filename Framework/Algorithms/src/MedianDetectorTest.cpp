@@ -264,14 +264,16 @@ int MedianDetectorTest::maskOutliers(
       }
       if ((value < out_lo * median) && (value > 0.0)) {
         countsWS->getSpectrum(hists[j]).clearData();
-        spectrumInfo.setMasked(hists[j], true);
-        PARALLEL_ATOMIC
-        ++numFailed;
+        PARALLEL_CRITICAL(setMasked) {
+          spectrumInfo.setMasked(hists[j], true);
+          ++numFailed;
+        }
       } else if (value > out_hi * median) {
         countsWS->getSpectrum(hists[j]).clearData();
-        spectrumInfo.setMasked(hists[j], true);
-        PARALLEL_ATOMIC
-        ++numFailed;
+        PARALLEL_CRITICAL(setMasked) {
+          spectrumInfo.setMasked(hists[j], true);
+          ++numFailed;
+        }
       }
     }
     PARALLEL_CHECK_INTERUPT_REGION

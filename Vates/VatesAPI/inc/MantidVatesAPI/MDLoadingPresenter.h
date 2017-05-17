@@ -64,19 +64,6 @@ public:
   virtual ~MDLoadingPresenter() {}
   virtual std::string getWorkspaceTypeName() { return "NotSet"; }
   virtual int getSpecialCoordinates() { return Kernel::None; }
-
-  /**
-   * Gets the minimum value.
-   * @returns The minimum value of the dataset or 0.0
-   */
-  virtual double getMinValue() { return 0.0; };
-
-  /**
-   * Gets the maximum value.
-   * @returns The maximum value of the dataset or 0.0
-   */
-  virtual double getMaxValue() { return 0.0; };
-
   /**
    * Gets the instrument associated with the dataset.
    * @returns The instrument associated with the dataset.

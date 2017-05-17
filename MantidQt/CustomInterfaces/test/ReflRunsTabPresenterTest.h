@@ -5,6 +5,7 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
+#include "MantidKernel/ConfigService.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflRunsTabPresenter.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorMockObjects.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/ProgressableViewMockObject.h"
@@ -13,12 +14,15 @@
 using namespace MantidQt::CustomInterfaces;
 using namespace testing;
 
+namespace {
+ACTION(ICATRuntimeException) { throw std::runtime_error(""); }
+}
+
 //=====================================================================================
 // Functional tests
 //=====================================================================================
 class ReflRunsTabPresenterTest : public CxxTest::TestSuite {
 
-private:
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
@@ -191,6 +195,28 @@ public:
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
   }
 
+  void test_preprocessingValues() {
+    NiceMock<MockRunsTabView> mockRunsTabView;
+    MockProgressableView mockProgress;
+    NiceMock<MockDataProcessorPresenter> mockTablePresenter;
+    MockMainWindowPresenter mockMainPresenter;
+    std::vector<DataProcessorPresenter *> tablePresenterVec;
+    tablePresenterVec.push_back(&mockTablePresenter);
+    ReflRunsTabPresenter presenter(&mockRunsTabView, &mockProgress,
+                                   tablePresenterVec);
+    presenter.acceptMainPresenter(&mockMainPresenter);
+
+    int group = 199;
+    EXPECT_CALL(mockRunsTabView, getSelectedGroup())
+        .Times(Exactly(1))
+        .WillOnce(Return(group));
+    EXPECT_CALL(mockMainPresenter, getTransmissionRuns(group)).Times(1);
+    presenter.getPreprocessingValues();
+
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockRunsTabView));
+  }
+
   void test_preprocessingOptions() {
     NiceMock<MockRunsTabView> mockRunsTabView;
     MockProgressableView mockProgress;
@@ -286,6 +312,65 @@ public:
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockTablePresenter_0));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockTablePresenter_1));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockTablePresenter_2));
+  }
+
+  void test_instrumentChanged() {
+    NiceMock<MockRunsTabView> mockRunsTabView;
+    MockProgressableView mockProgress;
+    MockMainWindowPresenter mockMainPresenter;
+    NiceMock<MockDataProcessorPresenter> mockTablePresenter;
+    std::vector<DataProcessorPresenter *> tablePresenterVec;
+    tablePresenterVec.push_back(&mockTablePresenter);
+
+    ReflRunsTabPresenter presenter(&mockRunsTabView, &mockProgress,
+                                   tablePresenterVec);
+    presenter.acceptMainPresenter(&mockMainPresenter);
+
+    std::vector<std::string> instruments = {"INTER", "POLREF", "OFFSPEC",
+                                            "SURF", "CRISP"};
+    for (const auto &instrument : instruments) {
+      EXPECT_CALL(mockRunsTabView, getSearchInstrument())
+          .Times(Exactly(1))
+          .WillOnce(Return(instrument));
+      EXPECT_CALL(mockMainPresenter, setInstrumentName(instrument))
+          .Times(Exactly(1));
+      presenter.notify(IReflRunsTabPresenter::InstrumentChangedFlag);
+      TS_ASSERT_EQUALS(Mantid::Kernel::ConfigService::Instance().getString(
+                           "default.instrument"),
+                       instrument);
+    }
+  }
+
+  void test_invalid_ICAT_login_credentials_gives_user_critical() {
+    NiceMock<MockRunsTabView> mockRunsTabView;
+    MockProgressableView mockProgress;
+    NiceMock<MockDataProcessorPresenter> mockTablePresenter;
+    MockMainWindowPresenter mockMainPresenter;
+    std::vector<DataProcessorPresenter *> tablePresenterVec;
+    tablePresenterVec.push_back(&mockTablePresenter);
+    ReflRunsTabPresenter presenter(&mockRunsTabView, &mockProgress,
+                                   tablePresenterVec);
+    presenter.acceptMainPresenter(&mockMainPresenter);
+
+    std::stringstream pythonSrc;
+    pythonSrc << "try:\n";
+    pythonSrc << "  algm = CatalogLoginDialog()\n";
+    pythonSrc << "except:\n";
+    pythonSrc << "  pass\n";
+
+    EXPECT_CALL(mockRunsTabView, getSearchString())
+        .Times(Exactly(1))
+        .WillOnce(Return("12345"));
+    EXPECT_CALL(mockMainPresenter, runPythonAlgorithm(pythonSrc.str()))
+        .Times(Exactly(1))
+        .WillRepeatedly(ICATRuntimeException());
+    EXPECT_CALL(mockMainPresenter, giveUserCritical("Error Logging in:\n",
+                                                    "login failed")).Times(1);
+    EXPECT_CALL(
+        mockMainPresenter,
+        giveUserInfo("Error Logging in: Please press 'Search' to try again.",
+                     "Login Failed")).Times(1);
+    presenter.notify(IReflRunsTabPresenter::SearchFlag);
   }
 };
 

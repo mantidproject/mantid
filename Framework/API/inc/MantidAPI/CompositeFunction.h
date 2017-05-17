@@ -150,10 +150,10 @@ public:
   /// Get the tie of i-th parameter
   ParameterTie *getTie(size_t i) const override;
   /// Add a new tie
-  void addTie(ParameterTie *tie) override;
+  void addTie(std::unique_ptr<ParameterTie> tie) override;
 
   /// Overwrite IFunction methods
-  void addConstraint(IConstraint *ic) override;
+  void addConstraint(std::unique_ptr<IConstraint> ic) override;
   /// Get constraint of i-th parameter
   IConstraint *getConstraint(size_t i) const override;
   /// Prepare function for a fit
@@ -183,9 +183,9 @@ public:
   /// Get the function index
   std::size_t functionIndex(std::size_t i) const;
   /// Returns the index of parameter i as it declared in its function
-  size_t parameterLocalIndex(size_t i) const;
+  size_t parameterLocalIndex(size_t i, bool recursive = false) const;
   /// Returns the name of parameter i as it declared in its function
-  std::string parameterLocalName(size_t i) const;
+  std::string parameterLocalName(size_t i, bool recursive = false) const;
   /// Check the function.
   void checkFunction();
   /// Remove all member functions

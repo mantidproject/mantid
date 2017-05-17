@@ -3,6 +3,10 @@
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
+#include "MantidGeometry/Instrument/RectangularDetectorPixel.h"
+#include "MantidBeamline/DetectorInfo.h"
+#include "MantidBeamline/ComponentInfo.h"
+#include "MantidKernel/EigenConversionHelpers.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/PhysicalConstants.h"
@@ -46,7 +50,18 @@ Instrument::Instrument(const boost::shared_ptr<const Instrument> instr,
       m_sampleCache(instr->m_sampleCache), m_defaultView(instr->m_defaultView),
       m_defaultViewAxis(instr->m_defaultViewAxis), m_instr(instr),
       m_map_nonconst(map), m_ValidFrom(instr->m_ValidFrom),
-      m_ValidTo(instr->m_ValidTo), m_referenceFrame(new ReferenceFrame) {}
+      m_ValidTo(instr->m_ValidTo), m_referenceFrame(new ReferenceFrame),
+      m_detectorInfo(instr->m_detectorInfo),
+      m_componentInfo(instr->m_componentInfo),
+      m_componentIdToIndexMap(instr->m_componentIdToIndexMap),
+      m_detIdToIndexMap(instr->m_detIdToIndexMap)
+
+{
+  bool isPhysicalInstrument =
+      m_map ? m_instr->m_isPhysicalInstrument : m_isPhysicalInstrument;
+  if (!isPhysicalInstrument)
+    m_map_nonconst->setInstrument(m_instr.get());
+}
 
 /** Copy constructor
  *  This method was added to deal with having distinct neutronic and physical
@@ -58,11 +73,15 @@ Instrument::Instrument(const Instrument &instr)
       m_chopperPoints(new std::vector<const ObjComponent *>),
       m_sampleCache(nullptr), /* Should only be temporarily null */
       m_logfileCache(instr.m_logfileCache), m_logfileUnit(instr.m_logfileUnit),
-      m_monitorCache(instr.m_monitorCache), m_defaultView(instr.m_defaultView),
+      m_defaultView(instr.m_defaultView),
       m_defaultViewAxis(instr.m_defaultViewAxis), m_instr(),
       m_map_nonconst(), /* Should not be parameterized */
       m_ValidFrom(instr.m_ValidFrom), m_ValidTo(instr.m_ValidTo),
-      m_referenceFrame(instr.m_referenceFrame) {
+      m_referenceFrame(instr.m_referenceFrame),
+      m_detectorInfo(instr.m_detectorInfo),
+      m_componentInfo(instr.m_componentInfo),
+      m_componentIdToIndexMap(instr.m_componentIdToIndexMap),
+      m_detIdToIndexMap(instr.m_detIdToIndexMap) {
   // Now we need to fill the detector, source and sample caches with pointers
   // into the new instrument
   std::vector<IComponent_const_sptr> children;
@@ -71,11 +90,11 @@ Instrument::Instrument(const Instrument &instr)
   for (it = children.begin(); it != children.end(); ++it) {
     // First check if the current component is a detector and add to cache if it
     // is
-    // N.B. The list of monitors should remain unchanged. As the cache holds
-    // detector id
-    // numbers rather than pointers, there's no need for special handling
     if (const IDetector *det = dynamic_cast<const Detector *>(it->get())) {
-      markAsDetector(det);
+      if (instr.isMonitor(det->getID()))
+        markAsMonitor(det);
+      else
+        markAsDetector(det);
       continue;
     }
     // Now check whether the current component is the source or sample.
@@ -150,9 +169,12 @@ Instrument_const_sptr Instrument::getPhysicalInstrument() const {
   if (m_map) {
     if (m_instr->getPhysicalInstrument()) {
       // A physical instrument should use the same parameter map as the 'main'
-      // instrument
-      return Instrument_const_sptr(
-          new Instrument(m_instr->getPhysicalInstrument(), m_map_nonconst));
+      // instrument. This constructor automatically sets the instrument as the
+      // owning instrument in the ParameterMap. We need to undo this immediately
+      // since the ParameterMap must always be owned by the neutronic
+      // instrument.
+      return boost::make_shared<Instrument>(m_instr->getPhysicalInstrument(),
+                                            m_map_nonconst);
     } else {
       return Instrument_const_sptr();
     }
@@ -166,11 +188,11 @@ Instrument_const_sptr Instrument::getPhysicalInstrument() const {
  * algorithms.
  *  @param physInst A pointer to the physical instrument object.
  */
-void Instrument::setPhysicalInstrument(
-    boost::shared_ptr<const Instrument> physInst) {
-  if (!m_map)
-    m_physicalInstrument = physInst;
-  else
+void Instrument::setPhysicalInstrument(std::unique_ptr<Instrument> physInst) {
+  if (!m_map) {
+    physInst->m_isPhysicalInstrument = true;
+    m_physicalInstrument = std::move(physInst);
+  } else
     throw std::runtime_error("Instrument::setPhysicalInstrument() called on a "
                              "parametrized instrument.");
 }
@@ -183,16 +205,16 @@ void Instrument::getDetectors(detid2det_map &out_map) const {
   if (m_map) {
     // Get the base instrument detectors
     out_map.clear();
-    const detid2det_map &in_dets =
-        static_cast<const Instrument *>(m_base)->m_detectorCache;
+    const auto &in_dets = m_instr->m_detectorCache;
     // And turn them into parametrized versions
     for (const auto &in_det : in_dets) {
-      out_map.emplace(in_det.first, ParComponentFactory::createDetector(
-                                        in_det.second.get(), m_map));
+      out_map.emplace(std::get<0>(in_det), getDetector(std::get<0>(in_det)));
     }
   } else {
     // You can just return the detector cache directly.
-    out_map = m_detectorCache;
+    out_map.clear();
+    for (const auto &in_det : m_detectorCache)
+      out_map.emplace(std::get<0>(in_det), std::get<1>(in_det));
   }
 }
 
@@ -201,16 +223,15 @@ void Instrument::getDetectors(detid2det_map &out_map) const {
 std::vector<detid_t> Instrument::getDetectorIDs(bool skipMonitors) const {
   std::vector<detid_t> out;
   if (m_map) {
-    const detid2det_map &in_dets =
-        static_cast<const Instrument *>(m_base)->m_detectorCache;
+    const auto &in_dets = m_instr->m_detectorCache;
     for (const auto &in_det : in_dets)
-      if (!skipMonitors || !in_det.second->isMonitor())
-        out.push_back(in_det.first);
+      if (!skipMonitors || !std::get<2>(in_det))
+        out.push_back(std::get<0>(in_det));
   } else {
-    const detid2det_map &in_dets = m_detectorCache;
+    const auto &in_dets = m_detectorCache;
     for (const auto &in_det : in_dets)
-      if (!skipMonitors || !in_det.second->isMonitor())
-        out.push_back(in_det.first);
+      if (!skipMonitors || !std::get<2>(in_det))
+        out.push_back(std::get<0>(in_det));
   }
   return out;
 }
@@ -220,7 +241,7 @@ std::size_t Instrument::getNumberDetectors(bool skipMonitors) const {
   std::size_t numDetIDs(0);
 
   if (m_map) {
-    numDetIDs = static_cast<const Instrument *>(m_base)->m_detectorCache.size();
+    numDetIDs = m_instr->m_detectorCache.size();
   } else {
     numDetIDs = m_detectorCache.size();
   }
@@ -229,15 +250,14 @@ std::size_t Instrument::getNumberDetectors(bool skipMonitors) const {
   {
     std::size_t monitors(0);
     if (m_map) {
-      const detid2det_map &in_dets =
-          static_cast<const Instrument *>(m_base)->m_detectorCache;
+      const auto &in_dets = m_instr->m_detectorCache;
       for (const auto &in_det : in_dets)
-        if (in_det.second->isMonitor())
+        if (std::get<2>(in_det))
           monitors += 1;
     } else {
-      const detid2det_map &in_dets = m_detectorCache;
+      const auto &in_dets = m_detectorCache;
       for (const auto &in_det : in_dets)
-        if (in_det.second->isMonitor())
+        if (std::get<2>(in_det))
           monitors += 1;
     }
     return (numDetIDs - monitors);
@@ -252,21 +272,43 @@ std::size_t Instrument::getNumberDetectors(bool skipMonitors) const {
  * @param max :: set to the max detector ID
  */
 void Instrument::getMinMaxDetectorIDs(detid_t &min, detid_t &max) const {
-  const detid2det_map *in_dets;
-  if (m_map)
-    in_dets = &(static_cast<const Instrument *>(m_base)->m_detectorCache);
-  else
-    in_dets = &this->m_detectorCache;
+  const auto *in_dets = m_map ? &m_instr->m_detectorCache : &m_detectorCache;
 
   if (in_dets->empty())
     throw std::runtime_error(
         "No detectors on this instrument. Can't find min/max ids");
   // Maps are sorted by key. So it is easy to find
-  min = in_dets->begin()->first;
-  max = in_dets->rbegin()->first;
+  min = std::get<0>(*in_dets->begin());
+  max = std::get<0>(*in_dets->rbegin());
 }
 
-//------------------------------------------------------------------------------------------
+/** Fill a vector with all the detectors contained (at any depth) in a named
+ *component. For example,
+ * you might have a bank10 with 4 tubes with 100 pixels each; this will return
+ *the
+ * 400 contained Detector objects.
+ *
+ * @param[out] dets :: vector filled with detector pointers
+ * @param comp :: the parent component assembly that contains detectors.
+ */
+void Instrument::getDetectorsInBank(std::vector<IDetector_const_sptr> &dets,
+                                    const IComponent &comp) const {
+  const auto bank = dynamic_cast<const ICompAssembly *>(&comp);
+  if (bank) {
+    // Get a vector of children (recursively)
+    std::vector<boost::shared_ptr<const IComponent>> children;
+    bank->getChildren(children, true);
+    std::vector<boost::shared_ptr<const IComponent>>::iterator it;
+    for (it = children.begin(); it != children.end(); ++it) {
+      IDetector_const_sptr det =
+          boost::dynamic_pointer_cast<const IDetector>(*it);
+      if (det) {
+        dets.push_back(det);
+      }
+    }
+  }
+}
+
 /** Fill a vector with all the detectors contained (at any depth) in a named
  *component. For example,
  * you might have a bank10 with 4 tubes with 100 pixels each; this will return
@@ -283,21 +325,7 @@ void Instrument::getMinMaxDetectorIDs(detid_t &min, detid_t &max) const {
 void Instrument::getDetectorsInBank(std::vector<IDetector_const_sptr> &dets,
                                     const std::string &bankName) const {
   boost::shared_ptr<const IComponent> comp = this->getComponentByName(bankName);
-  boost::shared_ptr<const ICompAssembly> bank =
-      boost::dynamic_pointer_cast<const ICompAssembly>(comp);
-  if (bank) {
-    // Get a vector of children (recursively)
-    std::vector<boost::shared_ptr<const IComponent>> children;
-    bank->getChildren(children, true);
-    std::vector<boost::shared_ptr<const IComponent>>::iterator it;
-    for (it = children.begin(); it != children.end(); ++it) {
-      IDetector_const_sptr det =
-          boost::dynamic_pointer_cast<const IDetector>(*it);
-      if (det) {
-        dets.push_back(det);
-      }
-    }
-  }
+  getDetectorsInBank(dets, *comp);
 }
 
 //------------------------------------------------------------------------------------------
@@ -397,7 +425,7 @@ Kernel::V3D Instrument::getBeamDirection() const {
 *   @return A pointer to the component.
 */
 boost::shared_ptr<const IComponent>
-Instrument::getComponentByID(ComponentID id) const {
+Instrument::getComponentByID(const IComponent *id) const {
   const IComponent *base = static_cast<const IComponent *>(id);
   if (m_map)
     return ParComponentFactory::create(
@@ -451,6 +479,28 @@ Instrument::getAllComponentsWithName(const std::string &cname) const {
   return retVec;
 }
 
+namespace {
+// Helpers for accessing m_detectorCache, which is a vector of tuples used as a
+// map. Lookup is by first element in a tuple. Templated to support const and
+// non-const.
+template <class T>
+auto lower_bound(T &map, const detid_t key) -> decltype(map.begin()) {
+  return std::lower_bound(
+      map.begin(), map.end(),
+      std::make_tuple(key, IDetector_const_sptr(nullptr), false),
+      [](const typename T::value_type &a, const typename T::value_type &b)
+          -> bool { return std::get<0>(a) < std::get<0>(b); });
+}
+
+template <class T>
+auto find(T &map, const detid_t key) -> decltype(map.begin()) {
+  auto it = lower_bound(map, key);
+  if ((it != map.end()) && (std::get<0>(*it) == key))
+    return it;
+  return map.end();
+}
+}
+
 /**	Gets a pointer to the detector from its ID
 *  Note that for getting the detector associated with a spectrum, the
 * MatrixWorkspace::getDetector
@@ -462,20 +512,21 @@ Instrument::getAllComponentsWithName(const std::string &cname) const {
 *  @throw   NotFoundError If no detector is found for the detector ID given
 */
 IDetector_const_sptr Instrument::getDetector(const detid_t &detector_id) const {
-  if (m_map) {
-    IDetector_const_sptr baseDet = m_instr->getDetector(detector_id);
-    return ParComponentFactory::createDetector(baseDet.get(), m_map);
-  } else {
-    auto it = m_detectorCache.find(detector_id);
-    if (it == m_detectorCache.end()) {
-      std::stringstream readInt;
-      readInt << detector_id;
-      throw Kernel::Exception::NotFoundError(
-          "Instrument: Detector with ID " + readInt.str() + " not found.", "");
-    }
-
-    return it->second;
+  const auto &baseInstr = m_map ? *m_instr : *this;
+  const auto it = find(baseInstr.m_detectorCache, detector_id);
+  if (it == baseInstr.m_detectorCache.end()) {
+    std::stringstream readInt;
+    readInt << detector_id;
+    throw Kernel::Exception::NotFoundError(
+        "Instrument: Detector with ID " + readInt.str() + " not found.", "");
   }
+  IDetector_const_sptr baseDet = std::get<1>(*it);
+
+  if (!m_map)
+    return baseDet;
+
+  auto det = ParComponentFactory::createDetector(baseDet.get(), m_map);
+  return det;
 }
 
 /**	Gets a pointer to the base (non-parametrized) detector from its ID
@@ -484,23 +535,19 @@ IDetector_const_sptr Instrument::getDetector(const detid_t &detector_id) const {
   *  @returns A const pointer to the detector object
   */
 const IDetector *Instrument::getBaseDetector(const detid_t &detector_id) const {
-  auto it = m_instr->m_detectorCache.find(detector_id);
+  auto it = find(m_instr->m_detectorCache, detector_id);
   if (it == m_instr->m_detectorCache.end()) {
     return nullptr;
   }
-  return it->second.get();
+  return std::get<1>(*it).get();
 }
 
 bool Instrument::isMonitor(const detid_t &detector_id) const {
-  // Find the (base) detector object in the map.
-  auto it = m_instr->m_detectorCache.find(detector_id);
-  if (it == m_instr->m_detectorCache.end())
+  const auto &baseInstr = m_map ? *m_instr : *this;
+  const auto it = find(baseInstr.m_detectorCache, detector_id);
+  if (it == baseInstr.m_detectorCache.end())
     return false;
-  // This is the detector
-  const Detector *det = dynamic_cast<const Detector *>(it->second.get());
-  if (det == nullptr)
-    return false;
-  return det->isMonitor();
+  return std::get<2>(*it);
 }
 
 bool Instrument::isMonitor(const std::set<detid_t> &detector_ids) const {
@@ -528,9 +575,8 @@ Instrument::getDetectorG(const std::set<detid_t> &det_ids) const {
   } else {
     boost::shared_ptr<DetectorGroup> det_group =
         boost::make_shared<DetectorGroup>();
-    bool warn(false);
     for (const auto detID : det_ids) {
-      det_group->addDetector(this->getDetector(detID), warn);
+      det_group->addDetector(this->getDetector(detID));
     }
     return det_group;
   }
@@ -664,9 +710,45 @@ void Instrument::markAsDetector(const IDetector *det) {
 
   // Create a (non-deleting) shared pointer to it
   IDetector_const_sptr det_sptr = IDetector_const_sptr(det, NoDeleting());
-  auto it = m_detectorCache.end();
-  m_detectorCache.insert(it, std::map<int, IDetector_const_sptr>::value_type(
-                                 det->getID(), det_sptr));
+  auto it = lower_bound(m_detectorCache, det->getID());
+  // Silently ignore detector IDs that are already marked as detectors, even if
+  // the actual detector is different.
+  if ((it == m_detectorCache.end()) || (std::get<0>(*it) != det->getID())) {
+    bool isMonitor = false;
+    m_detectorCache.emplace(it, det->getID(), det_sptr, isMonitor);
+  }
+}
+
+/// As markAsDetector but without the required sorting. Must call
+/// markAsDetectorFinalize before accessing detectors.
+void Instrument::markAsDetectorIncomplete(const IDetector *det) {
+  if (m_map)
+    throw std::runtime_error("Instrument::markAsDetector() called on a "
+                             "parametrized Instrument object.");
+
+  // Create a (non-deleting) shared pointer to it
+  IDetector_const_sptr det_sptr = IDetector_const_sptr(det, NoDeleting());
+  bool isMonitor = false;
+  m_detectorCache.emplace_back(det->getID(), det_sptr, isMonitor);
+}
+
+/// Sorts the detector cache. Called after all detectors have been marked via
+/// markAsDetectorIncomplete.
+void Instrument::markAsDetectorFinalize() {
+  // markAsDetector silently ignores detector IDs that are already marked as
+  // detectors, even if the actual detector is different. We mimic this behavior
+  // in this final sort by using stable_sort and removing duplicates. This will
+  // effectively favor the first detector with a certain ID that was added.
+  std::stable_sort(m_detectorCache.begin(), m_detectorCache.end(),
+                   [](const std::tuple<detid_t, IDetector_const_sptr, bool> &a,
+                      const std::tuple<detid_t, IDetector_const_sptr, bool> &b)
+                       -> bool { return std::get<0>(a) < std::get<0>(b); });
+  m_detectorCache.erase(
+      std::unique(m_detectorCache.begin(), m_detectorCache.end(),
+                  [](const std::tuple<detid_t, IDetector_const_sptr, bool> &a,
+                     const std::tuple<detid_t, IDetector_const_sptr, bool> &b)
+                      -> bool { return std::get<0>(a) == std::get<0>(b); }),
+      m_detectorCache.end());
 }
 
 /** Mark a Component which has already been added to the Instrument class
@@ -677,7 +759,7 @@ void Instrument::markAsDetector(const IDetector *det) {
 *
 * @throw Exception::ExistsError if cannot add detector to cache
 */
-void Instrument::markAsMonitor(IDetector *det) {
+void Instrument::markAsMonitor(const IDetector *det) {
   if (m_map)
     throw std::runtime_error("Instrument::markAsMonitor() called on a "
                              "parametrized Instrument object.");
@@ -686,14 +768,8 @@ void Instrument::markAsMonitor(IDetector *det) {
   markAsDetector(det);
 
   // mark detector as a monitor
-  Detector *d = dynamic_cast<Detector *>(det);
-  if (d) {
-    d->markAsMonitor();
-    m_monitorCache.push_back(det->getID());
-  } else {
-    throw std::invalid_argument(
-        "The IDetector pointer does not point to a Detector object");
-  }
+  auto it = find(m_detectorCache, det->getID());
+  std::get<2>(*it) = true;
 }
 
 /** Removes a detector from the instrument and from the detector cache.
@@ -707,13 +783,8 @@ void Instrument::removeDetector(IDetector *det) {
 
   const detid_t id = det->getID();
   // Remove the detector from the detector cache
-  m_detectorCache.erase(id);
-  // Also need to remove from monitor cache if appropriate
-  if (det->isMonitor()) {
-    auto it = std::find(m_monitorCache.begin(), m_monitorCache.end(), id);
-    if (it != m_monitorCache.end())
-      m_monitorCache.erase(it);
-  }
+  const auto it = find(m_detectorCache, id);
+  m_detectorCache.erase(it);
 
   // Remove it from the parent assembly (and thus the instrument). Evilness
   // required here unfortunately.
@@ -731,21 +802,13 @@ void Instrument::removeDetector(IDetector *det) {
 std::vector<detid_t> Instrument::getMonitors() const {
   // Monitors cannot be parametrized. So just return the base.
   if (m_map)
-    return static_cast<const Instrument *>(m_base)->m_monitorCache;
-  else
-    return m_monitorCache;
-}
+    return m_instr->getMonitors();
 
-/**
- * Returns the number of monitors attached to this instrument
- * @returns The number of monitors within the instrument
- */
-size_t Instrument::numMonitors() const {
-  if (m_map) {
-    return static_cast<const Instrument *>(m_base)->m_monitorCache.size();
-  } else {
-    return m_monitorCache.size();
-  }
+  std::vector<detid_t> mons;
+  for (const auto &item : m_detectorCache)
+    if (std::get<2>(item))
+      mons.push_back(std::get<0>(item));
+  return mons;
 }
 
 /**
@@ -846,77 +909,6 @@ void Instrument::appendPlottable(
 const double CONSTANT = (PhysicalConstants::h * 1e10) /
                         (2.0 * PhysicalConstants::NeutronMass * 1e6);
 
-//-----------------------------------------------------------------------
-/** Calculate the conversion factor (tof -> d-spacing) for a single pixel, i.e.,
- *1/DIFC for that pixel.
- *
- * @param l1 :: Primary flight path.
- * @param beamline: vector = samplePos-sourcePos = a vector pointing from the
- *source to the sample,
- *        the length of the distance between the two.
- * @param beamline_norm: (source to sample distance) * 2.0 (apparently)
- * @param samplePos: position of the sample
- * @param det: Geometry object representing the detector (position of the pixel)
- * @param offset: value (close to zero) that changes the factor := factor *
- *(1+offset).
- */
-double Instrument::calcConversion(const double l1, const Kernel::V3D &beamline,
-                                  const double beamline_norm,
-                                  const Kernel::V3D &samplePos,
-                                  const IDetector_const_sptr &det,
-                                  const double offset) {
-  if (offset <=
-      -1.) // not physically possible, means result is negative d-spacing
-  {
-    std::stringstream msg;
-    msg << "Encountered offset of " << offset
-        << " which converts data to negative d-spacing\n";
-    throw std::logic_error(msg.str());
-  }
-
-  // Get the sample-detector distance for this detector (in metres)
-
-  // The scattering angle for this detector (in radians).
-  Kernel::V3D detPos;
-  detPos = det->getPos();
-
-  // Now detPos will be set with respect to samplePos
-  detPos -= samplePos;
-  // 0.5*cos(2theta)
-  double l2 = detPos.norm();
-  double halfcosTwoTheta = detPos.scalar_prod(beamline) / (l2 * beamline_norm);
-  // This is sin(theta)
-  double sinTheta = sqrt(0.5 - halfcosTwoTheta);
-  const double numerator = (1.0 + offset);
-  sinTheta *= (l1 + l2);
-  return (numerator * CONSTANT) / sinTheta;
-}
-
-//-----------------------------------------------------------------------
-/** Calculate the conversion factor (tof -> d-spacing)
- * for a LIST of detectors assigned to a single spectrum.
- */
-double Instrument::calcConversion(
-    const double l1, const Kernel::V3D &beamline, const double beamline_norm,
-    const Kernel::V3D &samplePos,
-    const boost::shared_ptr<const Instrument> &instrument,
-    const std::vector<detid_t> &detectors,
-    const std::map<detid_t, double> &offsets) {
-  double factor = 0.;
-  double offset;
-  for (auto detector : detectors) {
-    auto off_iter = offsets.find(detector);
-    if (off_iter != offsets.cend()) {
-      offset = offsets.find(detector)->second;
-    } else {
-      offset = 0.;
-    }
-    factor += calcConversion(l1, beamline, beamline_norm, samplePos,
-                             instrument->getDetector(detector), offset);
-  }
-  return factor / static_cast<double>(detectors.size());
-}
-
 //------------------------------------------------------------------------------------------------
 /** Get several instrument parameters used in tof to D-space conversion
  *
@@ -1016,8 +1008,9 @@ void Instrument::saveNexus(::NeXus::File *file,
 
   // Now the parameter map, as a NXnote via its saveNexus method
   if (isParametrized()) {
-    const Geometry::ParameterMap &params = *getParameterMap();
-    params.saveNexus(file, "instrument_parameter_map");
+    // Map with data extracted from DetectorInfo -> legacy compatible files.
+    const auto &params = makeLegacyParameterMap();
+    params->saveNexus(file, "instrument_parameter_map");
   }
 
   // Add physical detector and monitor data
@@ -1034,7 +1027,7 @@ void Instrument::saveNexus(::NeXus::File *file,
     auto detmons = getDetectors(detmonIDs);
     std::vector<detid_t> monitorIDs;
     for (size_t i = 0; i < detmonIDs.size(); i++) {
-      if (detmons[i]->isMonitor())
+      if (isMonitorViaIndex(i))
         monitorIDs.push_back(detmonIDs[i]);
     }
 
@@ -1196,7 +1189,7 @@ Instrument::ContainsState Instrument::containsRectDetectors() const {
     // Skip monitors
     IDetector_const_sptr detector =
         boost::dynamic_pointer_cast<const IDetector>(comp);
-    if (detector && detector->isMonitor())
+    if (detector && isMonitor(detector->getID()))
       continue;
 
     // skip choppers HACK!
@@ -1235,5 +1228,253 @@ Instrument::ContainsState Instrument::containsRectDetectors() const {
 
 } // containsRectDetectors
 
+/// Temporary helper for refactoring. Argument is index, *not* ID!
+bool Instrument::isMonitorViaIndex(const size_t index) const {
+  if (m_map)
+    return std::get<2>(m_instr->m_detectorCache[index]);
+  else
+    return std::get<2>(m_detectorCache[index]);
+}
+
+/// Only for use by ExperimentInfo. Returns returns true if this instrument
+/// contains a DetectorInfo.
+bool Instrument::hasDetectorInfo() const {
+  return static_cast<bool>(m_detectorInfo);
+}
+/// Only for use by ExperimentInfo. Returns a reference to the DetectorInfo.
+const Beamline::DetectorInfo &Instrument::detectorInfo() const {
+  if (!hasDetectorInfo())
+    throw std::runtime_error("Cannot return reference to NULL DetectorInfo");
+  return *m_detectorInfo;
+}
+
+/**
+ * Only for use by ExperimentInfo
+ * @return True only if a ComponentInfo has been set
+ */
+bool Instrument::hasComponentInfo() const {
+  return static_cast<bool>(m_componentInfo);
+}
+
+/**
+ * Only for use by ExperimentInfo
+ * @return const ref to a ComponentInfo. Throws a std::runtime_error if
+ * ComponentInfo
+ * not set.
+ */
+const Beamline::ComponentInfo &Instrument::componentInfo() const {
+  if (!hasComponentInfo()) {
+    throw std::runtime_error("Cannot return reference to NULL ComponentInfo");
+  }
+  return *m_componentInfo;
+}
+
+/**
+ * Only for use by ExperimentInfo
+ * @return shared_ptr of vector of ComponentIds. Throws a std::runtime_error if
+ * ComponentInfo not set.
+ */
+boost::shared_ptr<const std::vector<Geometry::ComponentID>>
+Instrument::componentIds() const {
+  if (!hasComponentInfo()) {
+    throw std::runtime_error(
+        "Cannot return component ids with a NULL ComponentInfo");
+  }
+  return m_componentIds;
+}
+
+/**
+ * Only for use by ExperimentInfo
+ * @return shared_ptr of ComponentID -> component index map. Throws a
+ * std::runtime_error if
+ * ComponentInfo not set.
+ */
+boost::shared_ptr<const std::unordered_map<Geometry::ComponentID, size_t>>
+Instrument::componentIdToIndexMap() const {
+  if (!hasComponentInfo()) {
+    throw std::runtime_error(
+        "Cannot return component index map with a NULL ComponentInfo");
+  }
+  return m_componentIdToIndexMap;
+}
+
+/**
+ * Only for use by ExperimentInfo
+ * @return shared_ptr of detid_t -> detector index map. Throws a
+ * std::runtime_error if
+ * DetectorInfo not set
+ */
+boost::shared_ptr<const std::unordered_map<detid_t, size_t>>
+Instrument::detIdToIndexMap() const {
+  if (!hasDetectorInfo())
+    throw std::runtime_error("Cannot return reference to NULL DetectorInfo");
+  return m_detIdToIndexMap;
+}
+
+/* Only for use by ExperimentInfo. Sets the pointer to the DetectorInfo.
+ * Sets the pointer to the detector id -> index map
+*/
+void Instrument::setDetectorInfo(
+    boost::shared_ptr<const Beamline::DetectorInfo> detectorInfo,
+    boost::shared_ptr<const std::unordered_map<detid_t, size_t>>
+        detIdToIndexMap) {
+  m_detectorInfo = std::move(detectorInfo);
+  m_detIdToIndexMap = std::move(detIdToIndexMap);
+}
+
+/**
+ * Gets called when an Instrument is associated with an ExperimentInfo
+ *
+ * @param componentInfo : ComponentInfo to store
+ * @param componentIds : ComponentIds to store
+ * @param componentIdToIndexMap : Comp ID to index map to store.
+ */
+void Instrument::setComponentInfo(
+    boost::shared_ptr<const Beamline::ComponentInfo> componentInfo,
+    boost::shared_ptr<const std::vector<Geometry::ComponentID>> componentIds,
+    boost::shared_ptr<const std::unordered_map<Geometry::ComponentID, size_t>>
+        componentIdToIndexMap) {
+
+  m_componentInfo = std::move(componentInfo);
+  m_componentIds = std::move(componentIds);
+  m_componentIdToIndexMap = std::move(componentIdToIndexMap);
+}
+
+/// Returns the index for a detector ID. Used for accessing DetectorInfo.
+size_t Instrument::detectorIndex(const detid_t detID) const {
+  const auto &baseInstr = m_map ? *m_instr : *this;
+  const auto it = find(baseInstr.m_detectorCache, detID);
+  return std::distance(baseInstr.m_detectorCache.cbegin(), it);
+}
+
+/// Returns a legacy ParameterMap, containing information that is now stored in
+/// DetectorInfo (masking, positions, rotations).
+boost::shared_ptr<ParameterMap> Instrument::makeLegacyParameterMap() const {
+  auto pmap = boost::make_shared<ParameterMap>(*getParameterMap());
+  // Information will be stored directly in pmap so we do not need DetectorInfo.
+  pmap->setDetectorInfo(nullptr);
+  // Instrument is only needed for DetectorInfo access so it is not needed.
+  pmap->setInstrument(nullptr);
+
+  if (!hasDetectorInfo())
+    return pmap;
+
+  const auto &baseInstr = m_map ? *m_instr : *this;
+
+  // Tolerance 1e-9 m with rotation center at a distance of L = 1000 m as in
+  // Beamline::DetectorInfo::isEquivalent.
+  constexpr double d_max = 1e-9;
+  constexpr double L = 1000.0;
+  constexpr double safety_factor = 2.0;
+  const double imag_norm_max = sin(d_max / (2.0 * L * safety_factor));
+
+  const IComponent *oldParent{nullptr};
+  Eigen::Quaterniond invParentRot;
+  Eigen::Affine3d transformation;
+  for (size_t i = 0; i < m_detectorInfo->size(); ++i) {
+    const auto &det = std::get<1>(baseInstr.m_detectorCache[i]);
+    if (m_detectorInfo->isMasked(i)) {
+      pmap->forceUnsafeSetMasked(det.get(), true);
+    }
+
+    // Obtain parent position/rotation/scale.
+    const auto parent = det->getParent();
+    if (parent.get() != oldParent) {
+      oldParent = parent.get();
+      const auto parParent = ParComponentFactory::create(parent, pmap.get());
+      const auto parentPos = toVector3d(parParent->getPos());
+      invParentRot = toQuaterniond(parParent->getRotation()).conjugate();
+      transformation = invParentRot;
+      transformation.translate(-parentPos);
+      // Special case: scaling for RectangularDetectorPixel
+      if (boost::dynamic_pointer_cast<const RectangularDetectorPixel>(det)) {
+        const auto *panel = det->getParent()->getParent().get();
+        Eigen::Vector3d scale(1, 1, 1);
+        if (auto scalex = pmap->get(panel, "scalex"))
+          scale[0] = 1.0 / scalex->value<double>();
+        if (auto scaley = pmap->get(panel, "scaley"))
+          scale[1] = 1.0 / scaley->value<double>();
+        transformation.prescale(scale);
+      }
+    }
+
+    // Undo parent transformation to obtain relative position/rotation.
+    auto relPos = transformation * m_detectorInfo->position(i);
+    auto relRot = invParentRot * m_detectorInfo->rotation(i);
+
+    // Tolerance 1e-9 m as in Beamline::DetectorInfo::isEquivalent.
+    if ((relPos - toVector3d(det->getRelativePos())).norm() >= 1e-9) {
+      if (boost::dynamic_pointer_cast<const RectangularDetectorPixel>(det))
+        throw std::runtime_error("Cannot create legacy ParameterMap: Position "
+                                 "parameters for RectangularDetectorPixel are "
+                                 "not supported");
+      pmap->addV3D(det->getComponentID(), ParameterMap::pos(), toV3D(relPos));
+    }
+
+    if ((relRot * toQuaterniond(det->getRelativeRot()).conjugate())
+            .vec()
+            .norm() >= imag_norm_max)
+      pmap->addQuat(det->getComponentID(), ParameterMap::rot(), toQuat(relRot));
+  }
+  return pmap;
+}
+
+namespace Conversion {
+
+/**
+ * Calculate and return conversion factor from tof to d-spacing.
+ * @param l1
+ * @param l2
+ * @param twoTheta scattering angle
+ * @param offset
+ * @return
+ */
+double tofToDSpacingFactor(const double l1, const double l2,
+                           const double twoTheta, const double offset) {
+  if (offset <=
+      -1.) // not physically possible, means result is negative d-spacing
+  {
+    std::stringstream msg;
+    msg << "Encountered offset of " << offset
+        << " which converts data to negative d-spacing\n";
+    throw std::logic_error(msg.str());
+  }
+
+  auto sinTheta = std::sin(twoTheta / 2);
+
+  const double numerator = (1.0 + offset);
+  sinTheta *= (l1 + l2);
+
+  return (numerator * CONSTANT) / sinTheta;
+}
+
+/** Calculate the conversion factor from tof -> d-spacing
+ * for a LIST of detector ids assigned to a single spectrum.
+ * @brief tofToDSpacingFactor
+ * @param l1
+ * @param l2
+ * @param twoTheta scattering angle
+ * @param detectors
+ * @param offsets
+ * @return
+ */
+double tofToDSpacingFactor(const double l1, const double l2,
+                           const double twoTheta,
+                           const std::vector<detid_t> &detectors,
+                           const std::map<detid_t, double> &offsets) {
+  double factor = 0.;
+  double offset;
+  for (auto detector : detectors) {
+    auto off_iter = offsets.find(detector);
+    if (off_iter != offsets.cend()) {
+      offset = offsets.find(detector)->second;
+    } else {
+      offset = 0.;
+    }
+    factor += tofToDSpacingFactor(l1, l2, twoTheta, offset);
+  }
+  return factor / static_cast<double>(detectors.size());
+}
+}
 } // namespace Geometry
 } // Namespace Mantid

@@ -31,16 +31,13 @@ namespace Mantid {
 namespace VATES {
 
 /*Constructor
-  @param thresholdRange : Threshold range strategy
   @param normalizationOption : Info object setting how normalization should be
   done.
   @param maxDepth : Maximum depth to search to
   */
-vtkMDHexFactory::vtkMDHexFactory(ThresholdRange_scptr thresholdRange,
-                                 const VisualNormalization normalizationOption,
+vtkMDHexFactory::vtkMDHexFactory(const VisualNormalization normalizationOption,
                                  const size_t maxDepth)
-    : m_thresholdRange(thresholdRange),
-      m_normalizationOption(normalizationOption), m_maxDepth(maxDepth),
+    : m_normalizationOption(normalizationOption), m_maxDepth(maxDepth),
       slice(false), m_time(0) {}
 
 /// Destructor
@@ -81,7 +78,7 @@ void vtkMDHexFactory::doCreate(
 
   // Create 8 points per box.
   vtkNew<vtkPoints> points;
-  vtkFloatArray *pointsArray = vtkFloatArray::SafeDownCast(points->GetData());
+  vtkFloatArray *pointsArray = vtkFloatArray::FastDownCast(points->GetData());
   float *pointsPtr = pointsArray->WritePointer(0, numBoxes * 8 * 3);
 
   // One scalar per box
@@ -120,8 +117,7 @@ void vtkMDHexFactory::doCreate(
       API::IMDNode *box = boxes[i];
       Mantid::signal_t signal_normalized = (box->*normFunction)();
 
-      if (std::isfinite(signal_normalized) &&
-          m_thresholdRange->inRange(signal_normalized)) {
+      if (std::isnormal(signal_normalized)) {
         // Cache the signal and using of it
         signalCache[i] = static_cast<float>(signal_normalized);
         useBox[i] = true;
@@ -205,7 +201,7 @@ vtkSmartPointer<vtkDataSet>
 vtkMDHexFactory::create(ProgressAction &progressUpdating) const {
   this->dataSet = tryDelegatingCreation<IMDEventWorkspace, 3>(
       m_workspace, progressUpdating, false);
-  if (this->dataSet != NULL) {
+  if (this->dataSet) {
     return this->dataSet;
   } else {
     IMDEventWorkspace_sptr imdws =
@@ -258,7 +254,7 @@ vtkMDHexFactory::create(ProgressAction &progressUpdating) const {
  * Get the next highest bin boundary
  */
 coord_t
-vtkMDHexFactory::getNextBinBoundary(IMDEventWorkspace_sptr imdws) const {
+vtkMDHexFactory::getNextBinBoundary(const IMDEventWorkspace_sptr &imdws) const {
   auto t_dim = imdws->getTDimension();
   coord_t bin_width = t_dim->getBinWidth();
   coord_t dim_min = t_dim->getMinimum();
@@ -268,8 +264,8 @@ vtkMDHexFactory::getNextBinBoundary(IMDEventWorkspace_sptr imdws) const {
 /*
  * Get the previous bin boundary, or the current one if m_time is on a boundary
  */
-coord_t
-vtkMDHexFactory::getPreviousBinBoundary(IMDEventWorkspace_sptr imdws) const {
+coord_t vtkMDHexFactory::getPreviousBinBoundary(
+    const IMDEventWorkspace_sptr &imdws) const {
   auto t_dim = imdws->getTDimension();
   coord_t bin_width = t_dim->getBinWidth();
   coord_t dim_min = t_dim->getMinimum();
@@ -299,13 +295,9 @@ dataobjects (workspaces) to run against at a later time. If workspace is not an
 IMDEventWorkspace, attempts to use any run-time successor set.
 @Param ws : Workspace to use.
 */
-void vtkMDHexFactory::initialize(Mantid::API::Workspace_sptr ws) {
+void vtkMDHexFactory::initialize(const Mantid::API::Workspace_sptr &ws) {
   IMDEventWorkspace_sptr imdws = doInitialize<IMDEventWorkspace, 3>(ws, false);
   m_workspace = imdws;
-
-  // Setup range values according to whatever strategy object has been injected.
-  m_thresholdRange->setWorkspace(ws);
-  m_thresholdRange->calculate();
 }
 
 /// Validate the current object.

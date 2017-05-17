@@ -1,9 +1,9 @@
 #include "MantidMDAlgorithms/MinusMD.h"
-#include "MantidKernel/System.h"
+#include "MantidDataObjects/MDBox.h"
+#include "MantidDataObjects/MDBoxIterator.h"
 #include "MantidDataObjects/MDEventFactory.h"
 #include "MantidDataObjects/MDEventWorkspace.h"
-#include "MantidDataObjects/MDBoxIterator.h"
-#include "MantidDataObjects/MDBox.h"
+#include "MantidKernel/System.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -132,7 +132,7 @@ void MinusMD::execHistoHisto(
 void MinusMD::execHistoScalar(
     Mantid::DataObjects::MDHistoWorkspace_sptr out,
     Mantid::DataObjects::WorkspaceSingleValue_const_sptr scalar) {
-  out->subtract(scalar->dataY(0)[0], scalar->dataE(0)[0]);
+  out->subtract(scalar->y(0)[0], scalar->e(0)[0]);
 }
 
 } // namespace Mantid

@@ -19,8 +19,29 @@ container and absorption in sample and container) and  :math:`A_{c,c}`
 Restrictions on the input workspace
 ###################################
 
-The input workspace must have a fully defined instrument that has X axis units
-of wavelength.
+The input workspace must have a fully defined instrument.
+
+Energy transfer modes
+#####################
+
+The algorithm operates in different energy transfer modes, where the incident (:math:`\lambda_1`) and the final (:math:`\lambda_2`)
+wavelengths are defined as follows:
+
+- **Elastic** : :math:`\lambda_1 = \lambda_2 = \lambda_{step}`
+
+- **Direct**  : :math:`\lambda_1 = \lambda_{fixed}, \lambda_2 = \lambda_{step}`
+
+- **Indirect** : :math:`\lambda_1 = \lambda_{step}, \lambda_2 = \lambda_{fixed}`
+
+- **Efixed** : :math:`\lambda_1 = \lambda_2 = \lambda_{fixed}`,
+
+where :math:`\lambda_{fixed}` is computed from the `Efixed` value corresponding to the monochromator or the analyser, and
+:math:`\lambda_{step}` iterates equidistantly over the wavelength points in the input workspace x-axis, controlled by `NumberWavelengths` property.
+
+Therefore, in all the modes except **Efixed**, the input workspaces must have the x-axis unit of `Wavelength`.
+In all the modes except **Elastic**, `Efixed` value is needed. By default it will be attempted to be read
+from the instrument parameters, but can be overridden by the homonym property.
+In the **Efixed** mode the `NumberWavelengths` and `Interpolate` options will be ignored.
 
 Usage
 -----

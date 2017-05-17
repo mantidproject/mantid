@@ -239,7 +239,7 @@ public:
         "(composite=Convolution,FixResolution=true,NumDeriv=true;name=Gaussian,"
         "Height=1,PeakCentre=0,Sigma=20,ties=(Height=1,PeakCentre=0,Sigma=20);("
         "name=DiffRotDiscreteCircle,N=3,NumDeriv=true,Q=0.5,Intensity=47.014,"
-        "Radius=1.567,Decay=7.567))";
+        "Radius=1.567,Decay=0.07567))";
 
     // Initialize the fit function in the Fit algorithm
     Algorithms::Fit fitalg;
@@ -258,7 +258,7 @@ public:
                      "name=Gaussian,Height=1,PeakCentre=0,Sigma=20,ties=("
                      "Height=1,PeakCentre=0,Sigma=20);(name="
                      "DiffRotDiscreteCircle,N=3,NumDeriv=true,Q=0.5,Intensity="
-                     "10.0,Radius=1.567,Decay=20.0))";
+                     "20.0,Radius=1.567,Decay=0.1))";
     fitalg.setProperty("Function", funtion_string);
     fitalg.setProperty("InputWorkspace", data_workspace);
     fitalg.setPropertyValue("WorkspaceIndex", "0");
@@ -296,10 +296,10 @@ public:
                     47.014 * 0.05); // allow for a small percent variation
     TS_ASSERT_DELTA(fitalg_structure_factor->getParameter("Radius"), 1.567,
                     1.567 * 0.05); // allow for a small percent variation
-    TS_ASSERT_DELTA(fitalg_structure_factor->getParameter("Decay"), 7.567,
+    TS_ASSERT_DELTA(fitalg_structure_factor->getParameter("Decay"), 0.07567,
                     7.567 * 0.05); // allow for a small percent variation
     // std::cout << "\nGOAL: Intensity = 47.014,  Radius = 1.567,  Decay =
-    // 7.567\n"; // only for debugging purposes
+    // 0.07567\n"; // only for debugging purposes
     // std::cout << "OPTIMIZED: Intensity = " <<
     // fitalg_structure_factor->getParameter("Intensity") << "  Radius = " <<
     // fitalg_structure_factor->getParameter("Radius") << "  Decay = " <<

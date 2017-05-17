@@ -61,7 +61,7 @@ class ILLIN5Tests(unittest.TestCase):
         """
         ILL Loader
         """
-        LoadILL(Filename=dataFile,FilenameVanadium=None,WorkspaceVanadium=None,OutputWorkspace=outWSName)
+        LoadILLTOF(Filename=dataFile,FilenameVanadium=None,WorkspaceVanadium=None,OutputWorkspace=outWSName)
         self._do_ads_check(outWSName)
 
     def _do_ads_check(self, name):

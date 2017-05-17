@@ -283,7 +283,7 @@ void LoadISISNexus2::exec() {
   // ticket #8697
   loadSampleData(local_workspace, entry);
   m_progress->report("Loading logs");
-  loadLogs(local_workspace, entry);
+  loadLogs(local_workspace);
 
   // Load first period outside loop
   m_progress->report("Loading data");
@@ -1117,10 +1117,8 @@ void LoadISISNexus2::loadSampleData(
 *   /raw_data_1/runlog group of the file. Call to this method must be done
 *   within /raw_data_1 group.
 *   @param ws :: The workspace to load the logs to.
-*   @param entry :: Nexus entry
 */
-void LoadISISNexus2::loadLogs(DataObjects::Workspace2D_sptr &ws,
-                              NXEntry &entry) {
+void LoadISISNexus2::loadLogs(DataObjects::Workspace2D_sptr &ws) {
   IAlgorithm_sptr alg = createChildAlgorithm("LoadNexusLogs", 0.0, 0.5);
   alg->setPropertyValue("Filename", this->getProperty("Filename"));
   alg->setProperty<MatrixWorkspace_sptr>("Workspace", ws);
@@ -1131,23 +1129,7 @@ void LoadISISNexus2::loadLogs(DataObjects::Workspace2D_sptr &ws,
                     << "data associated with this workspace\n";
     return;
   }
-  // For ISIS Nexus only, fabricate an additional log containing an array of
-  // proton charge information from the periods group.
-  try {
-    NXClass protonChargeClass = entry.openNXGroup("periods");
-    NXFloat periodsCharge = protonChargeClass.openNXFloat("proton_charge");
-    periodsCharge.load();
-    size_t nperiods = periodsCharge.dim0();
-    std::vector<double> chargesVector(nperiods);
-    std::copy(periodsCharge(), periodsCharge() + nperiods,
-              chargesVector.begin());
-    ArrayProperty<double> *protonLogData =
-        new ArrayProperty<double>("proton_charge_by_period", chargesVector);
-    ws->mutableRun().addProperty(protonLogData);
-  } catch (std::runtime_error &) {
-    this->g_log.debug("Cannot read periods information from the nexus file. "
-                      "This group may be absent.");
-  }
+
   // Populate the instrument parameters.
   ws->populateInstrumentParameters();
 
@@ -1286,11 +1268,37 @@ bool LoadISISNexus2::findSpectraDetRangeInFile(
   if ((totNumOfSpectra != static_cast<size_t>(n_vms_compat_spectra)) ||
       (spectraID_max - spectraID_min + 1 !=
        static_cast<int64_t>(n_vms_compat_spectra))) {
-    throw std::runtime_error("LoadISISNexus: There seems to be an "
-                             "inconsistency in the spectrum numbers.");
+    // At this point we normally throw since there is a mismatch between the
+    // number
+    // spectra of the detectors+monitors and the entry in NSP1, but in the
+    // case of multiple time regimes this comparison is not any longer valid.
+    // Hence we only throw if the file does not correspond to a multiple time
+    // regime file.
+    if (!isMultipleTimeRegimeFile(entry)) {
+      throw std::runtime_error("LoadISISNexus: There seems to be an "
+                               "inconsistency in the spectrum numbers.");
+    }
   }
 
   return separateMonitors;
+}
+
+/**
+ * Determine if a file is a multiple time regime file. Note that for a true
+ * multi-time regime file we need at least three time regime entries, since
+ * two time regimes are handled by vms_compat.
+ * @param entry a handle to the Nexus file
+ * @return if the file has multiple time regimes or not
+ */
+bool LoadISISNexus2::isMultipleTimeRegimeFile(NeXus::NXEntry &entry) const {
+  auto hasMultipleTimeRegimes(false);
+  try {
+    NXClass instrument = entry.openNXGroup("instrument");
+    NXClass dae = instrument.openNXGroup("dae");
+    hasMultipleTimeRegimes = dae.containsGroup("time_channels_3");
+  } catch (...) {
+  }
+  return hasMultipleTimeRegimes;
 }
 
 } // namespace DataHandling

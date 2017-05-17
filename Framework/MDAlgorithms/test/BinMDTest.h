@@ -643,7 +643,7 @@ public:
 
     // Intermediate workspace (the MDHisto)
     TS_ASSERT_EQUALS(binned1->numOriginalWorkspaces(), 2);
-    TS_ASSERT_EQUALS(binned1->getOriginalWorkspace(1)->name(), "binned0");
+    TS_ASSERT_EQUALS(binned1->getOriginalWorkspace(1)->getName(), "binned0");
     // Transforms to/from the INTERMEDIATE workspace exist
     CoordTransform const *toIntermediate = binned1->getTransformToOriginal(1);
     CoordTransform const *fromIntermediate =
@@ -684,7 +684,7 @@ public:
 
     // Intermediate workspace (the MDHisto) is binned0
     TS_ASSERT_EQUALS(binned1->numOriginalWorkspaces(), 2);
-    TS_ASSERT_EQUALS(binned1->getOriginalWorkspace(1)->name(), "binned0");
+    TS_ASSERT_EQUALS(binned1->getOriginalWorkspace(1)->getName(), "binned0");
     // Transforms to/from the INTERMEDIATE workspace exist
     CoordTransform const *toIntermediate = binned1->getTransformToOriginal(1);
     CoordTransform const *fromIntermediate =
@@ -750,7 +750,7 @@ public:
 
     // Intermediate workspace (the MDHisto) is binned0
     TS_ASSERT_EQUALS(binned1->numOriginalWorkspaces(), 2);
-    TS_ASSERT_EQUALS(binned1->getOriginalWorkspace(1)->name(), "binned0");
+    TS_ASSERT_EQUALS(binned1->getOriginalWorkspace(1)->getName(), "binned0");
     // Transforms to/from the INTERMEDIATE workspace exist
     CoordTransform const *toIntermediate = binned1->getTransformToOriginal(1);
     CoordTransform const *fromIntermediate =
@@ -821,7 +821,7 @@ public:
 
     // Intermediate workspace (the MDHisto)
     TS_ASSERT_EQUALS(binned2->numOriginalWorkspaces(), 2);
-    TS_ASSERT_EQUALS(binned2->getOriginalWorkspace(1)->name(), "binned1");
+    TS_ASSERT_EQUALS(binned2->getOriginalWorkspace(1)->getName(), "binned1");
     // Transforms to/from the INTERMEDIATE workspace exist
     TS_ASSERT(binned2->getTransformToOriginal(1));
     TS_ASSERT(binned2->getTransformFromOriginal(1));

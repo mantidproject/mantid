@@ -1,5 +1,26 @@
 ﻿.. _FittingMinimizers:
 
+Which minimizers to use with Mantid
+===================================
+
+Below are listed the current recommendations for which minimizers to use with Mantid:
+
+* By default Mantid uses Levenberg-Marquardt
+
+  We can also recommend Trust Region, in particular where stability is important
+
+The above recommendations are based on the results presented in sections below.
+
+We are expanding the set of fitting problems we test against, which may, for example, 
+provide enough evidence to recommend different minimizers for different subsets of neutron
+fitting problems in the future. And, we are constantly looking for new example, in
+particular, where a user has found a fitting difficult or slow.
+
+Also, if the fit minimizer benchmarking tool is available for anyone to test new minimizers
+and modifications to existing minimizers.
+
+For the task of Bayesian probability sampling: this is supported with the FABADA minimizer.
+
 Comparing Minimizers
 ====================
 
@@ -32,9 +53,7 @@ options are available:
 - `BFGS (Broyden-Fletcher-Goldfarb-Shanno) <../fitminimizers/BFGS.html>`__
 - `Levenberg-Marquardt <../fitminimizers/LevenbergMarquardt.html>`__ (default)
 - `Levenberg-MarquardtMD <../fitminimizers/LevenbergMarquardtMD.html>`__
-
-  A `Levenberg-Marquardt <https://en.wikipedia.org/wiki/Levenberg-Marquardt_algorithm>`__ implementation generalised to allow different cost functions, and supporting chunking techniques for large datasets.
-- `Gauss-Newton <../fitminimizers/DampedGaussNewton.html>`__ algorithm with damping.
+- `Damped Gauss-Newton <../fitminimizers/DampedGaussNewton.html>`__
 - :ref:`FABADA <FABADA>`
 - `Trust region <../fitminimizers/TrustRegion.html>`__
 
@@ -56,7 +75,7 @@ information of the cost function (second-order partial derivatives of
 a Hessian matrix). Some algorithms like BFGS approximate the Hessian by the
 gradient values of successive iterations. The Levenberg-Marquard
 algorithm is a modified Gauss-Newton that introduces an adaptive term
-to prevent unstability when the approximated Hessian is not positive
+to prevent instability when the approximated Hessian is not positive
 defined. An in-depth description of the methods is beyond the scope of
 these pages. More information can be found from the links and general
 references on optimization methods such as [Kelley1999]_ and
@@ -131,7 +150,7 @@ following information:
 - Initial values (starting point) of the function parameters
 - Optional: reference best values for the parameters (some may refer to these as certified values), i.e. target parameter values for the minimizers   
 
-The current problems have been obtained from the following benchmarks and sources:
+The current problems have been obtained from the following sources:
 
 - `NIST nonlinear regression problems
   <http://itl.nist.gov/div898/strd/general/dataarchive.html>`__.

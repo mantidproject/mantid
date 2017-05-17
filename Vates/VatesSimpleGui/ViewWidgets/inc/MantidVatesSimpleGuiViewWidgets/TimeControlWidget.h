@@ -42,7 +42,7 @@ class EXPORT_OPT_MANTIDVATES_SIMPLEGUI_VIEWWIDGETS TimeControlWidget
 
 public:
   /// Default constructor.
-  TimeControlWidget(QWidget *parent = 0);
+  TimeControlWidget(QWidget *parent = nullptr);
   /// Default destructor.
   ~TimeControlWidget() override;
 

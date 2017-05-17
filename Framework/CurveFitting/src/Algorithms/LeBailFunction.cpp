@@ -923,9 +923,9 @@ void LeBailFunction::setFitProfileParameter(string paramname, double minvalue,
   std::stringstream parss;
   parss << "f0." << paramname;
   string parnamef0 = parss.str();
-  Constraints::BoundaryConstraint *bc = new Constraints::BoundaryConstraint(
+  auto bc = Kernel::make_unique<Constraints::BoundaryConstraint>(
       m_compsiteFunction.get(), parnamef0, minvalue, maxvalue);
-  m_compsiteFunction->addConstraint(bc);
+  m_compsiteFunction->addConstraint(std::move(bc));
 }
 
 //----------------------------------------------------------------------------------------------

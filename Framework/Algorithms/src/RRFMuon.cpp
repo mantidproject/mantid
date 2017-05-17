@@ -89,11 +89,9 @@ void RRFMuon::exec() {
 
   // Put results into output workspace
   // Real RRF polarization
-  outputWs->getSpectrum(0).setSpectrumNo(1);
   outputWs->setSharedX(0, inputWs->sharedX(0));
   outputWs->mutableY(0) = rrfRe;
   // Imaginary RRF polarization
-  outputWs->getSpectrum(1).setSpectrumNo(2);
   outputWs->setSharedX(1, inputWs->sharedX(1));
   outputWs->mutableY(1) = rrfIm;
 

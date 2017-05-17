@@ -6,9 +6,11 @@
     creates "index" pages that lists the contents of each category. The display of each
     "index" page is controlled by a jinja2 template.
 """
+from __future__ import (absolute_import, division, print_function)
 from mantiddoc.directives.base import AlgorithmBaseDirective, algorithm_name_and_version #pylint: disable=unused-import
 from sphinx.util.osutil import relative_uri
 import os
+from six import iteritems, itervalues
 
 CATEGORY_PAGE_TEMPLATE = "category.html"
 # relative to the directory containing the source file
@@ -319,7 +321,7 @@ def create_category_pages(app):
     template = CATEGORY_PAGE_TEMPLATE
 
     categories = env.categories
-    for name, category in categories.iteritems():
+    for name, category in iteritems(categories):
         context = {}
         # First write out the named page
         context["title"] = category.name
@@ -346,14 +348,14 @@ def create_category_pages(app):
         # Now any additional index pages if required
         if category.name in INDEX_CATEGORIES:
             # index in categories directory
-            category_html_dir = os.path.dirname(category.html_path)
-            category_html_path_noext = category_html_dir + "/index"
+            category_html_dir = os.path.join(category.name.lower(), 'categories')
+            category_html_path_noext = os.path.join(category_html_dir, 'index')
             yield (category_html_path_noext, context, template)
 
             # index in document directory
             document_dir = os.path.dirname(category_html_dir)
-            category_html_path_noext = document_dir + "/index"
-            context["outpath"] = category_html_path_noext + ".html"
+            category_html_path_noext = os.path.join(document_dir, 'index')
+            context['outpath'] = category_html_path_noext + '.html'
             yield (category_html_path_noext, context, template)
 # enddef
 
@@ -378,7 +380,7 @@ def purge_categories(app, env, docname):
         return
 
     deadref = PageRef(name, docname)
-    for category in categories.itervalues():
+    for category in itervalues(categories):
         pages = category.pages
         if deadref in pages:
             pages.remove(deadref)

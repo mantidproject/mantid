@@ -17,7 +17,6 @@
 #include "MantidVatesAPI/TimeToTimeStep.h"
 #include "MantidVatesAPI/vtkMDHistoHex4DFactory.h"
 #include "MantidVatesAPI/vtkMDHistoHexFactory.h"
-#include "MantidVatesAPI/IgnoreZerosThresholdRange.h"
 #include "MantidVatesAPI/FilteringUpdateProgressAction.h"
 #include "MantidVatesAPI/MDLoadingViewAdapter.h"
 
@@ -69,7 +68,7 @@ std::string vtkMDHWNexusReader::GetInputGeometryXML() {
     return std::string();
   }
   try {
-    return m_presenter->getGeometryXML().c_str();
+    return m_presenter->getGeometryXML();
   } catch (std::runtime_error &) {
     return std::string();
   }
@@ -105,16 +104,13 @@ int vtkMDHWNexusReader::RequestData(
   FilterUpdateProgressAction<vtkMDHWNexusReader> drawingProgressAction(
       this, "Drawing...");
 
-  ThresholdRange_scptr thresholdRange =
-      boost::make_shared<IgnoreZerosThresholdRange>();
-
   // Will attempt to handle drawing in 4D case and then in 3D case
   // if that fails.
   auto factory =
       Mantid::Kernel::make_unique<vtkMDHistoHex4DFactory<TimeToTimeStep>>(
-          thresholdRange, m_normalizationOption, m_time);
-  factory->setSuccessor(Mantid::Kernel::make_unique<vtkMDHistoHexFactory>(
-      thresholdRange, m_normalizationOption));
+          m_normalizationOption, m_time);
+  factory->setSuccessor(
+      Mantid::Kernel::make_unique<vtkMDHistoHexFactory>(m_normalizationOption));
 
   auto product = m_presenter->execute(factory.get(), loadingProgressAction,
                                       drawingProgressAction);

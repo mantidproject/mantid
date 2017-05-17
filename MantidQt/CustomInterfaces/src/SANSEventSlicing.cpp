@@ -75,9 +75,9 @@ SANSEventSlicing::getFullChargeAndTime(const QString &name_ws) {
          << "ws = mtd['" << name_ws << "']\n"
          << "try:\n"
          << "  charge, t_passed = su.getChargeAndTime(ws)\n"
-         << "  print '%.2f, %.2f' %(charge, t_passed)\n"
+         << "  print('%.2f, %.2f' %(charge, t_passed))\n"
          << "except :\n"
-         << "  print 'EXCEPTION:',sys.exc_info()[1]\n";
+         << "  print('EXCEPTION:',sys.exc_info()[1])\n";
 
   QString result = runPythonCode(code).simplified();
 
@@ -126,9 +126,9 @@ QString SANSEventSlicing::createSliceEventCode(const QString &name_ws,
          << "  mon = mtd['" << name_ws << "_monitors']\n"
          << "  hist, times = su.slice2histogram(ws"
          << ", " << start << ", " << stop << ", mon)\n"
-         << "  print '%.2f, %.2f' %(times[3], times[2])\n"
+         << "  print('%.2f, %.2f' %(times[3], times[2]))\n"
          << "except:\n"
-         << "  print 'EXCEPTION:',sys.exc_info()[1]";
+         << "  print('EXCEPTION:',sys.exc_info()[1])";
 
   return code;
 }

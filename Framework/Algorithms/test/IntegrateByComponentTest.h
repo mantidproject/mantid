@@ -4,6 +4,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAPI/DetectorInfo.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAlgorithms/IntegrateByComponent.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
@@ -224,11 +225,12 @@ public:
     TS_ASSERT(result);
     if (!result)
       return;
+    const auto &spectrumInfo = result->spectrumInfo();
     for (size_t i = 0; i < result->getNumberHistograms() / 4; i++) {
       TS_ASSERT_DELTA(result->readY(4 * i + 1)[0], 8 * i + 4, 1e-10);
       TS_ASSERT_DELTA(result->readY(4 * i + 2)[0], 8 * i + 4, 1e-10);
       TS_ASSERT_DELTA(result->readY(4 * i + 3)[0], 8 * i + 4, 1e-10);
-      TS_ASSERT(result->getDetector(4 * i)->isMasked());
+      TS_ASSERT(spectrumInfo.isMasked(4 * i));
     }
 
     // Remove workspace from the data service.

@@ -72,6 +72,49 @@ public:
     return *this;
   }
 
+  /**
+   * Parse all lines matching a name and extract the values to a vector
+   *
+   * This is an overloaded version of the function below that uses a default
+   * extractor function. This expects that the type of the container matches
+   * one of the parsable types implemented in this class.
+   *
+   * @param name :: the name of the line to match with
+   * @param container :: the output vector to store values in
+   */
+  template <typename T>
+  void parseLines(const std::string &name, std::vector<T> &container) {
+
+    auto extractor = [](TSVSerialiser &tsv) {
+      T value;
+      tsv >> value;
+      return value;
+    };
+
+    parseLines(name, container, extractor);
+  }
+
+  /**
+   * Parse all lines matching a name and extract the values to a vector
+   *
+   * The third argument should be a function that accepts a TSVSerialiser
+   * instance and returns the parsed value matching the type of the container.
+   *
+   * @param name :: the name of the line to match with
+   * @param container :: the output vector to store values in
+   * @param extractor :: function to use to extract values from each line
+   */
+  template <typename T, typename Extractor>
+  void parseLines(const std::string &name, std::vector<T> &container,
+                  Extractor &&extractor) {
+    size_t index = 0;
+    while (selectLine(name, index)) {
+      auto value = std::forward<Extractor>(extractor)(*this);
+      container.push_back(value);
+      ++index;
+    }
+  }
+
   std::vector<std::string> sections(const std::string &name) const;
 
   std::string lineAsString(const std::string &name, const size_t i = 0) const;

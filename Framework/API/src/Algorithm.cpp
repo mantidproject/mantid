@@ -1124,7 +1124,7 @@ bool Algorithm::checkGroups() {
             AnalysisDataService::Instance().retrieve(name);
         if (!memberWS)
           throw std::invalid_argument("One of the members of " +
-                                      wsGroup->name() + ", " + name +
+                                      wsGroup->getName() + ", " + name +
                                       " was not found!.");
         thisGroup.push_back(memberWS);
       }
@@ -1200,8 +1200,31 @@ bool Algorithm::doCallProcessGroups(Mantid::Kernel::DateAndTime &startTime) {
   startTime = Mantid::Kernel::DateAndTime::getCurrentTime();
   // Start a timer
   Timer timer;
-  // Call the concrete algorithm's processGroups method
-  const bool completed = processGroups();
+
+  bool completed = false;
+  try {
+    // Call the concrete algorithm's processGroups method
+    completed = processGroups();
+  } catch (std::exception &ex) {
+    // The child algorithm will already have logged the error etc.,
+    // but we also need to update flags in the parent algorithm and
+    // send an ErrorNotification (because the child isn't registered with the
+    // AlgorithmMonitor).
+    setExecuted(false);
+    m_runningAsync = false;
+    m_running = false;
+    notificationCenter().postNotification(
+        new ErrorNotification(this, ex.what()));
+    throw;
+  } catch (...) {
+    setExecuted(false);
+    m_runningAsync = false;
+    m_running = false;
+    notificationCenter().postNotification(new ErrorNotification(
+        this, "UNKNOWN Exception caught from processGroups"));
+    throw;
+  }
+
   // Check for a cancellation request in case the concrete algorithm doesn't
   interruption_point();
 
@@ -1288,12 +1311,12 @@ bool Algorithm::processGroups() {
         // Append the names together
         if (!outputBaseName.empty())
           outputBaseName += "_";
-        outputBaseName += ws->name();
+        outputBaseName += ws->getName();
 
         // Set the property using the name of that workspace
         if (Property *prop =
                 dynamic_cast<Property *>(m_inputWorkspaceProps[iwp])) {
-          alg->setPropertyValue(prop->name(), ws->name());
+          alg->setPropertyValue(prop->name(), ws->getName());
         } else {
           throw std::logic_error("Found a Workspace property which doesn't "
                                  "inherit from Property.");
@@ -1309,10 +1332,12 @@ bool Algorithm::processGroups() {
         // Default name = "in1_in2_out"
         const std::string inName = prop->value();
         std::string outName;
-        if (m_groupsHaveSimilarNames)
-          outName = inName + "_" + Strings::toString(entry + 1);
-        else
-          outName = outputBaseName + "_" + inName;
+        if (m_groupsHaveSimilarNames) {
+          outName.append(inName).append("_").append(
+              Strings::toString(entry + 1));
+        } else {
+          outName.append(outputBaseName).append("_").append(inName);
+        }
 
         auto inputProp = std::find_if(m_inputWorkspaceProps.begin(),
                                       m_inputWorkspaceProps.end(),
@@ -1326,7 +1351,7 @@ bool Algorithm::processGroups() {
           const auto &inputGroup =
               m_groups[inputProp - m_inputWorkspaceProps.begin()];
           if (!inputGroup.empty())
-            outName = inputGroup[entry]->name();
+            outName = inputGroup[entry]->getName();
         }
         // Except if all inputs had similar names, then the name is "out_1"
 
