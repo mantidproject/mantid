@@ -366,7 +366,6 @@ class BayesQuasi(PythonAlgorithm):
         # Sort x axis
         s_api.SortXAxis(InputWorkspace=outWS, OutputWorkspace=outWS, EnableLogging=False)
 
-
         log_prog = Progress(self, start=0.8, end=1.0, nreports=8)
         # Add some sample logs to the output workspaces
         log_prog.report('Copying Logs to outputWorkspace')
