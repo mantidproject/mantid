@@ -78,6 +78,7 @@ public:
 
   // Settor methods
   void setSelection(const std::set<int> &groups) override;
+  void setSelectionModelConnections() override;
   void setTableList(const std::set<std::string> &tables) override;
   void setInstrumentList(const std::vector<std::string> &instruments,
                          const std::string &defaultInstrument) override;
@@ -125,6 +126,7 @@ private slots:
   void tableUpdated(const QModelIndex &topLeft, const QModelIndex &bottomRight);
   void showContextMenu(const QPoint &pos);
   void processClicked();
+  void newSelection(const QItemSelection &, const QItemSelection &);
 };
 
 } // namespace Mantid

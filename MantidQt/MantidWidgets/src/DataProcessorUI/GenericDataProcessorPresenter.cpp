@@ -60,7 +60,7 @@ GenericDataProcessorPresenter::GenericDataProcessorPresenter(
       m_whitelist(whitelist), m_preprocessMap(preprocessMap),
       m_processor(processor), m_postprocessor(postprocessor),
       m_postprocessMap(postprocessMap), m_postprocess(true),
-      m_tableDirty(false), m_reductionPaused(false) {
+      m_tableDirty(false), m_reductionPaused(true), m_selectionChanged(false) {
 
   // Column Options must be added to the whitelist
   m_whitelist.addElement("Options", "Options",
@@ -188,8 +188,9 @@ void GenericDataProcessorPresenter::acceptViews(
   // Start with a blank table
   newTable();
 
-  // Reduction is currently paused
-  pause();
+  // Disable pause button and setup table selection model connections
+  m_view->setToolbarActionEnabled(1, false);
+  m_view->setSelectionModelConnections();
 }
 
 /**
@@ -197,22 +198,29 @@ Process selected data
 */
 void GenericDataProcessorPresenter::process() {
 
-  const auto items = m_manager->selectedData();
-
   // Don't bother continuing if there are no items to process
-  if (items.size() == 0)
+  if (m_manager->selectedData().size() == 0)
     return;
+
+  // If selection unchanged, resume processing the old selection
+  if (!m_selectionChanged) {
+    resume();
+    return;
+  }
+
+  m_selectedData = m_manager->selectedData();
+  m_selectionChanged = false;
 
   // Progress: each group and each row within count as a progress step.
   int progress = 0;
-  int maxProgress = (int)(items.size());
-  for (const auto subitem : items) {
+  int maxProgress = (int)(m_selectedData.size());
+  for (const auto subitem : m_selectedData) {
     maxProgress += (int)(subitem.second.size());
   }
   m_progressReporter =
       new ProgressPresenter(progress, maxProgress, maxProgress, m_progressView);
 
-  for (const auto &item : items) {
+  for (const auto &item : m_selectedData) {
     // Loop over each group
     RowQueue rowQueue;
 
@@ -223,16 +231,9 @@ void GenericDataProcessorPresenter::process() {
     m_gqueue.push(std::make_pair(item.first, rowQueue));
   }
 
+  // Start processing the first group
   m_nextActionFlag = GenericDataProcessorPresenter::ReduceGroupFlag;
   resume();
-  
-  // Start processing the first group
-  nextGroup();
-
-  /*
-  // If "Output Notebook" checkbox is checked then create an ipython notebook
-  if (m_view->getEnableNotebook())
-    saveNotebook(items);*/
 }
 
 /**
@@ -243,7 +244,7 @@ void GenericDataProcessorPresenter::nextRow() {
   m_workerThread.reset();
 
   if (m_reductionPaused) {
-    // Set action flag and notify presenter that reduction is paused
+    // Set next action flag and notify presenter that reduction is paused
     m_nextActionFlag = GenericDataProcessorPresenter::ReduceRowFlag;
     m_mainPresenter->notify(
         DataProcessorMainPresenter::ConfirmReductionPausedFlag);
@@ -292,7 +293,7 @@ void GenericDataProcessorPresenter::nextGroup() {
   m_workerThread.reset();
 
   if (m_reductionPaused) {
-    // Set action flag and notify presenter that reduction is paused
+    // Set next action flag and notify presenter that reduction is paused
     m_nextActionFlag = GenericDataProcessorPresenter::ReduceGroupFlag;
     m_mainPresenter->notify(
         DataProcessorMainPresenter::ConfirmReductionPausedFlag);
@@ -314,6 +315,10 @@ void GenericDataProcessorPresenter::nextGroup() {
     connect(worker, SIGNAL(finished()), this, SLOT(nextRow()));
     m_workerThread->start();
   } else {
+    // If "Output Notebook" checkbox is checked then create an ipython notebook
+    if (m_view->getEnableNotebook())
+      saveNotebook(m_selectedData);
+    // Signal end of reduction
     m_mainPresenter->notify(
         DataProcessorMainPresenter::ConfirmReductionPausedFlag);
   }
@@ -977,6 +982,9 @@ void GenericDataProcessorPresenter::notify(DataProcessorPresenter::Flag flag) {
   case DataProcessorPresenter::ResumeFlag:
     resume();
     break;
+  case DataProcessorPresenter::SelectionChangedFlag:
+    m_selectionChanged = true;
+    break;
   }
   // Not having a 'default' case is deliberate. gcc issues a warning if there's
   // a flag we aren't handling.
@@ -1395,12 +1403,9 @@ the current thread for reducing a row or group has finished
 */
 void GenericDataProcessorPresenter::pause() {
 
-  // Disable pause button
+  // Enable process button and disable pause button
+  m_view->setToolbarActionEnabled(0, true);
   m_view->setToolbarActionEnabled(1, false);
-
-  if (m_reductionPaused)
-    m_mainPresenter->notify(
-        DataProcessorMainPresenter::ConfirmReductionPausedFlag);
 
   m_reductionPaused = true;
 }
@@ -1409,11 +1414,13 @@ void GenericDataProcessorPresenter::pause() {
 */
 void GenericDataProcessorPresenter::resume() {
 
-  // Enable pause button
+  // Disable process button and enable pause button
+  m_view->setToolbarActionEnabled(0, false);
   m_view->setToolbarActionEnabled(1, true);
 
+  m_reductionPaused = false;
   m_mainPresenter->notify(
-    DataProcessorMainPresenter::ConfirmReductionPausedFlag);
+      DataProcessorMainPresenter::ConfirmReductionResumedFlag);
 
   switch (m_nextActionFlag) {
   case GenericDataProcessorPresenter::ReduceRowFlag:
@@ -1423,8 +1430,6 @@ void GenericDataProcessorPresenter::resume() {
     nextGroup();
     break;
   }
-
-  m_reductionPaused = false;
 }
 
 /**

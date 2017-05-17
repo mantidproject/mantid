@@ -73,7 +73,8 @@ public:
     ExpandAllGroupsFlag,
     CollapseAllGroupsFlag,
     PauseFlag,
-    ResumeFlag
+    ResumeFlag,
+    SelectionChangedFlag
   };
 
   // Tell the presenter something happened

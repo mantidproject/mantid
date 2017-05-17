@@ -44,12 +44,6 @@ Used by the view to tell the presenter something has changed
 void ReflMainWindowPresenter::notify(IReflMainWindowPresenter::Flag flag) {
 
   switch (flag) {
-  case IReflMainWindowPresenter::PauseReductionFlag:
-    pauseReduction();
-    break;
-  case IReflMainWindowPresenter::ResumeReductionFlag:
-    resumeReduction();
-    break;
   case IReflMainWindowPresenter::ConfirmReductionPausedFlag:
     m_isProcessing = false;
     break;
@@ -249,21 +243,6 @@ void ReflMainWindowPresenter::checkEventPtrValid(
     IReflEventTabPresenter *pointer) const {
   if (pointer == nullptr)
     throw std::invalid_argument("Could not read event handling");
-}
-
-/** Pauses reduction in the runs tab
-*/
-void ReflMainWindowPresenter::pauseReduction() const {
-
-  m_runsPresenter->notify(IReflRunsTabPresenter::PauseReductionFlag);
-}
-
-/** Resumes reduction in the runs tab
-*/
-void ReflMainWindowPresenter::resumeReduction() const {
-
-  m_isProcessing = true;
-  m_runsPresenter->notify(IReflRunsTabPresenter::ResumeReductionFlag);
 }
 }
 }

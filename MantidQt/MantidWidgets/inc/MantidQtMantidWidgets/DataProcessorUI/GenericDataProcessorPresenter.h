@@ -177,6 +177,8 @@ private:
   DataProcessorPostprocessingAlgorithm m_postprocessor;
   // Post-processing map
   std::map<std::string, std::string> m_postprocessMap;
+  // The list of selected items to reduce
+  TreeData m_selectedData;
   // The current queue of groups to be reduced
   GroupQueue m_gqueue;
   // The current group we are reducing row data for
@@ -191,6 +193,8 @@ private:
   int m_columns;
   // stores whether or not the table has changed since it was last saved
   bool m_tableDirty;
+  // stores whether the table selection has changed before attempted processing
+  bool m_selectionChanged;
   // stores the user options for the presenter
   std::map<std::string, QVariant> m_options;
   // Thread to run reducer worker in
