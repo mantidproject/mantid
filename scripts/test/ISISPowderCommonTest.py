@@ -285,6 +285,31 @@ class ISISPowderCommonTest(unittest.TestCase):
         common.run_normalise_by_current(ws)
         self.assertAlmostEqual(expected_value, ws.dataY(0)[0], delta=1e-8)
 
+    def test_subtract_summed_runs(self):
+        # Load a vanadium workspace for this test
+        sample_empty_number = "100"
+        ws_file_name = "POL" + sample_empty_number
+        original_ws = mantid.Load(ws_file_name)
+        no_scale_ws = mantid.CloneWorkspace(InputWorkspace=original_ws, OutputWorkspace="test_subtract_sample_empty_ws")
+
+        # Subtracting from self should equal 0
+        returned_ws = common.subtract_summed_runs(ws_to_correct=no_scale_ws, instrument=MockInstrument(),
+                                                  empty_sample_ws_string=sample_empty_number)
+        y_values = returned_ws.readY(0)
+        for i in range(0, returned_ws.blocksize()):
+            self.assertAlmostEqual(y_values[i], 0)
+
+        # Check what happens when we specify scale as a half
+        scaled_ws = common.subtract_summed_runs(ws_to_correct=original_ws, instrument=MockInstrument(),
+                                                scale_factor=0.75, empty_sample_ws_string=sample_empty_number)
+        scaled_y_values = scaled_ws.readY(0)
+        self.assertAlmostEqual(scaled_y_values[2], 0.20257424)
+        self.assertAlmostEqual(scaled_y_values[4], 0.31700152)
+        self.assertAlmostEqual(scaled_y_values[7], 0.35193970)
+
+        mantid.DeleteWorkspace(returned_ws)
+        mantid.DeleteWorkspace(scaled_ws)
+
     def test_spline_workspaces(self):
         ws_list = []
         for i in range(1, 4):
@@ -302,6 +327,17 @@ class ISISPowderCommonTest(unittest.TestCase):
             mantid.DeleteWorkspace(input_ws)
             mantid.DeleteWorkspace(splined_ws)
 
+
+class MockInstrument(object):
+    def _get_run_details(self, run_number_string):
+        return None
+
+    @staticmethod
+    def _generate_input_file_name(run_number):
+        return "POL" + str(run_number)
+
+    def _normalise_ws_current(self, ws_to_correct, run_details=None):
+        return ws_to_correct
 
 if __name__ == "__main__":
     unittest.main()
