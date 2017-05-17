@@ -165,7 +165,7 @@ void MuonAnalysis::initLayout() {
   }
 
   m_uiForm.fitBrowser->init();
-
+  
   // alow appending files
   m_uiForm.mwRunFiles->allowMultipleFiles(true);
 
@@ -323,6 +323,7 @@ void MuonAnalysis::initLayout() {
           SLOT(setChosenGroupSlot(QString &)));
   connect(this, SIGNAL(setChosenPeriodSignal(QString &)), this,
           SLOT(setChosenPeriodSlot(QString &)));
+
 
 }
 
@@ -1487,7 +1488,7 @@ void MuonAnalysis::updateFrontAndCombo() {
   // for now brute force clearing and adding new context
   // could go for softer approach and check if is necessary
   // to completely reset this combo box
-	m_uiForm.fitBrowser->clearChosenGroups();
+	//m_uiForm.fitBrowser->clearChosenGroups();
   int currentI = getGroupOrPairToPlot();
   if (currentI < 0) // in case this combobox has not been set yet
     currentI = 0;
@@ -2154,6 +2155,8 @@ void MuonAnalysis::loadFittings() {
   // Set TF Asymmetry mode on/off as appropriate
   const auto &TFAsymmState = m_optionTab->getTFAsymmState();
   setTFAsymm(TFAsymmState);
+
+
 }
 /**
 * Handle "groups" selected/deselected
@@ -2517,6 +2520,12 @@ void MuonAnalysis::changeTab(int newTabIndex) {
     // repeat setting the fitting ranges as the above code can set them to an
     // unwanted default value
     setFittingRanges(xmin, xmax);
+	//make sure groups are not on if single fit
+	if (m_optionTab->getMultiFitState() == Muon::MultiFitState::Disabled) {
+		//replace with func call to set values
+		m_uiForm.fitBrowser->setSingleFitLabel(m_currentDataName.toStdString());
+		//  m_uiForm.fitBrowser->clearChosenPeriods();
+	}
   } else if (newTab == m_uiForm.ResultsTable) {
     m_resultTableTab->refresh();
   }
@@ -3125,9 +3134,11 @@ void MuonAnalysis::multiFitCheckboxChanged(int state) {
     setTFAsymm(Muon::TFAsymmState::Disabled);
   }
   m_fitFunctionPresenter->setMultiFitState(multiFitState);
+  //replace with func call to set values
   if (multiFitState == Muon::MultiFitState::Disabled) {
+//	  m_uiForm.fitBrowser->setSingleFitLabel();
     m_uiForm.fitBrowser->clearChosenGroups();
-    //	m_uiForm.fitBrowser->clearChosenPeriods();
+   //	m_uiForm.fitBrowser->clearChosenPeriods();
   }
 }
 /**

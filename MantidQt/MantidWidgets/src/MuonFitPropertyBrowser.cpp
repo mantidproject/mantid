@@ -176,7 +176,6 @@ void MuonFitPropertyBrowser::init() {
   m_enumManager->setEnumNames(m_periodsToFit, m_periodsToFitOptions);
   multiFitSettingsGroup->addSubProperty(m_periodsToFit);
   multiFitSettingsGroup->addSubProperty(m_showPeriods);
-
   m_enumManager->setEnumNames(m_showPeriods, m_showPeriodValue);
 
   connect(m_browser, SIGNAL(currentItemChanged(QtBrowserItem *)), this,
@@ -267,6 +266,7 @@ void MuonFitPropertyBrowser::init() {
   // Update tooltips when function structure is (or might've been) changed in
   // any way
   connect(this, SIGNAL(functionChanged()), SLOT(updateStructureTooltips()));
+
 }
 // Set up the execution of the muon fit menu
 void MuonFitPropertyBrowser::executeFitMenu(const QString &item) {
@@ -312,6 +312,10 @@ void MuonFitPropertyBrowser::setFitEnabled(bool yes) {
 */
 void MuonFitPropertyBrowser::setWorkspaceName(const QString &wsName) {
   int i = m_workspaceNames.indexOf(wsName);
+  auto tmp = wsName.toStdString();
+  /*if (!m_browser->isItemVisible(m_multiFitSettingsGroup)) {
+	  setSingleFitLabel(tmp);
+  }*/
   if (i < 0) {
     // workspace may not be found because add notification hasn't been processed
     // yet
@@ -361,7 +365,15 @@ void MuonFitPropertyBrowser::enumChanged(QtProperty *prop) {
       }
     }
     updatePeriodDisplay();
-  } else {
+  }
+  else if(prop==m_workspace){
+	  //make sure the output is updated
+	  FitPropertyBrowser::enumChanged(prop);
+	  int j = m_enumManager->value(m_workspace);
+	  std::string option = m_workspaceNames[j].toStdString();
+	  setOutputName(option);
+  }
+  else {
     FitPropertyBrowser::enumChanged(prop);
   }
 }
@@ -691,7 +703,6 @@ void MuonFitPropertyBrowser::runFit() {
     alg->setProperty("WorkspaceIndex", workspaceIndex());
     alg->setProperty("StartX", startX());
     alg->setProperty("EndX", endX());
-    alg->setPropertyValue("Output", outputName());
     alg->setPropertyValue("Minimizer", minimizer());
     alg->setPropertyValue("CostFunction", costFunction());
 
@@ -710,7 +721,13 @@ void MuonFitPropertyBrowser::runFit() {
         alg->setProperty("StartX_" + suffix, startX());
         alg->setProperty("EndX_" + suffix, endX());
       }
-    }
+	}
+	else {
+		setSingleFitLabel(wsName);
+	}
+	auto tmpew = outputName();
+	alg->setPropertyValue("Output", outputName());
+
 
     observeFinish(alg);
     alg->executeAsync();
@@ -1324,5 +1341,24 @@ void MuonFitPropertyBrowser::combineBtnPressed() {
   m_negativeCombo->clear();
   addPeriodCheckbox(value);
 }
+
+void MuonFitPropertyBrowser::setSingleFitLabel(std::string name) {
+	clearChosenGroups();
+	clearChosenPeriods();
+	std::vector<std::string> splitName;
+	boost::split(splitName, name, boost::is_any_of(";"));
+	//set single group/pair
+	QString selection;
+	selection.fromStdString(splitName[2]);
+	setChosenGroup(selection);
+	//period is set
+	if (splitName.size() == 6) {
+		selection.fromStdString(splitName[4]);
+		setChosenPeriods(selection);
+	}
+	setOutputName(name);
+	
+}
+
 } // MantidQt
 } // API

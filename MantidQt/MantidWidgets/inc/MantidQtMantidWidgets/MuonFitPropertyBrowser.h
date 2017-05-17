@@ -114,6 +114,7 @@ public:
   void clearChosenPeriods() const;
   void setChosenGroup(QString &group);
   void setChosenPeriods(const QString &period);
+  void setSingleFitLabel(std::string name);
 public slots:
   /// Perform the fit algorithm
   void fit() override;
