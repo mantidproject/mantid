@@ -11811,8 +11811,7 @@ void ApplicationWindow::createActions() {
   actionCloseAllWindows = new MantidQt::MantidWidgets::TrackedAction(
       QIcon(getQPixmap("quit_xpm")), tr("&Quit"), this);
   actionCloseAllWindows->setShortcut(tr("Ctrl+Q"));
-  connect(actionCloseAllWindows, SIGNAL(triggered()), this,
-          SLOT(close()));
+  connect(actionCloseAllWindows, SIGNAL(triggered()), this, SLOT(close()));
 
   actionDeleteFitTables = new MantidQt::MantidWidgets::TrackedAction(
       QIcon(getQPixmap("close_xpm")), tr("Delete &Fit Tables"), this);
