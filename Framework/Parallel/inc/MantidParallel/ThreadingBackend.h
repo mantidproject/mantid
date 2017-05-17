@@ -77,12 +77,11 @@ private:
 
 template <typename... T>
 void ThreadingBackend::send(int source, int dest, int tag, T &&... args) {
-  std::stringbuf buf;
-  std::ostream os(&buf);
+  std::lock_guard<std::mutex> lock(m_mutex);
+  m_buffer[std::make_tuple(source, dest, tag)].emplace_back();
+  std::ostream os(&m_buffer[std::make_tuple(source, dest, tag)].back());
   boost::archive::binary_oarchive oa(os);
   oa.operator<<(std::forward<T>(args)...);
-  std::lock_guard<std::mutex> lock(m_mutex);
-  m_buffer[std::make_tuple(source, dest, tag)].push_back(std::move(buf));
 }
 
 template <typename... T>
