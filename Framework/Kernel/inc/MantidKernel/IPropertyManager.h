@@ -154,7 +154,7 @@ public:
    */
   template <typename... T>
   IPropertyManager *setProperty(const std::string &name, const T... args) {
-    return setTypedProperty(name, std::tuple<T...>(args...));
+    return doSetProperty(name, args...);
   }
 
   /** Templated method to set the value of a PropertyWithValue from a
@@ -468,6 +468,21 @@ private:
   IPropertyManager *doSetProperty(const std::string &name, const T &value) {
     setTypedProperty(name, value,
                      boost::is_convertible<T, boost::shared_ptr<DataItem>>());
+    this->afterPropertySet(name);
+    return this;
+  }
+
+  /** Helper method to set the value of a PropertyWithValue with variadic
+   * template
+   *  @param name :: The name of the property (case insensitive)
+   *  @param args :: The arguments of variable length
+   *  @throw Exception::NotFoundError If the named property is unknown
+   *  @throw std::invalid_argument If an attempt is made to assign to a property
+   * of different type
+   */
+  template <typename... T>
+  IPropertyManager *doSetProperty(const std::string &name, const T... args) {
+    setTypedProperty(name, std::tuple<T...>(args...));
     this->afterPropertySet(name);
     return this;
   }

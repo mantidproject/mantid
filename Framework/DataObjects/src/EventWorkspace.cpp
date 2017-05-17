@@ -1,23 +1,27 @@
+#include "MantidDataObjects/EventWorkspace.h"
+#include "MantidAPI/ISpectrum.h"
+#include "MantidAPI/Progress.h"
 #include "MantidAPI/RefAxis.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/SpectraAxis.h"
-#include "MantidAPI/Progress.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/EventWorkspaceMRU.h"
-#include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/IDetector.h"
-#include "MantidKernel/Exception.h"
-#include "MantidKernel/TimeSeriesProperty.h"
-#include "MantidKernel/MultiThreaded.h"
-#include "MantidKernel/FunctionTask.h"
-#include "MantidKernel/ThreadPool.h"
+#include "MantidGeometry/Instrument.h"
+#include "MantidKernel/CPUTimer.h"
 #include "MantidKernel/DateAndTime.h"
+#include "MantidKernel/Exception.h"
+#include "MantidKernel/FunctionTask.h"
+#include "MantidKernel/MultiThreaded.h"
+#include "MantidKernel/ThreadPool.h"
+#include "MantidKernel/TimeSeriesProperty.h"
+#include <MantidAPI/IndexTypeProperty.h>
+#include <MantidAPI/WorkspacePropertyWithIndex.h>
+#include <MantidAPI/WorkspacePropertyWithIndex.tcc>
+#include <MantidIndexing/SpectrumIndexSet.h>
 #include <limits>
 #include <numeric>
-#include "MantidAPI/ISpectrum.h"
-#include "MantidKernel/CPUTimer.h"
 
 using namespace boost::posix_time;
 using Mantid::API::ISpectrum;
@@ -28,7 +32,7 @@ namespace DataObjects {
 namespace {
 // static logger
 Kernel::Logger g_log("EventWorkspace");
-}
+} // namespace
 
 DECLARE_WORKSPACE(EventWorkspace)
 
@@ -763,6 +767,66 @@ IPropertyManager::getValue<Mantid::DataObjects::EventWorkspace_const_sptr>(
     throw std::runtime_error(message);
   }
 }
+
+template <>
+DLLExport std::tuple<Mantid::DataObjects::EventWorkspace_sptr,
+                     Indexing::SpectrumIndexSet>
+IPropertyManager::getValue<std::tuple<Mantid::DataObjects::EventWorkspace_sptr,
+                                      Indexing::SpectrumIndexSet>>(
+    const std::string &name) const {
+  Mantid::API::WorkspacePropertyWithIndex<Mantid::DataObjects::EventWorkspace>
+      *prop = dynamic_cast<Mantid::API::WorkspacePropertyWithIndex<
+          Mantid::DataObjects::EventWorkspace> *>(getPointerToProperty(name));
+  if (prop) {
+    return std::tuple<Mantid::DataObjects::EventWorkspace_sptr,
+                      Indexing::SpectrumIndexSet>(*prop);
+  } else {
+    std::string message =
+        "Attempt to assign property " + name +
+        " to incorrect type. Expected shared_ptr<IEventWorkspace>.";
+    throw std::runtime_error(message);
+  }
+}
+
+// Enable setTypedProperty for EventWorkspace
+template <>
+DLLExport IPropertyManager *
+IPropertyManager::setTypedProperty<Mantid::DataObjects::EventWorkspace_sptr,
+                                   API::IndexType, std::vector<int>>(
+    const std::string &name,
+    const std::tuple<Mantid::DataObjects::EventWorkspace_sptr, API::IndexType,
+                     std::vector<int>> &value) {
+  API::WorkspacePropertyWithIndex<DataObjects::EventWorkspace> *prop =
+      dynamic_cast<API::WorkspacePropertyWithIndex<
+          Mantid::DataObjects::EventWorkspace> *>(getPointerToProperty(name));
+  if (prop) {
+    *prop = value;
+  } else {
+    throw std::invalid_argument("Attempt to assign to property (" + name +
+                                ") of incorrect type");
+  }
+  return this;
+}
+
+template <>
+DLLExport IPropertyManager *
+IPropertyManager::setTypedProperty<Mantid::DataObjects::EventWorkspace_sptr,
+                                   API::IndexType, std::string>(
+    const std::string &name,
+    const std::tuple<Mantid::DataObjects::EventWorkspace_sptr, API::IndexType,
+                     std::string> &value) {
+  API::WorkspacePropertyWithIndex<Mantid::DataObjects::EventWorkspace> *prop =
+      dynamic_cast<API::WorkspacePropertyWithIndex<
+          Mantid::DataObjects::EventWorkspace> *>(getPointerToProperty(name));
+  if (prop) {
+    *prop = value;
+  } else {
+    throw std::invalid_argument("Attempt to assign to property (" + name +
+                                ") of incorrect type");
+  }
+  return this;
+}
+
 } // namespace Kernel
 } // namespace Mantid
 

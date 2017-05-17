@@ -33,8 +33,10 @@ template class MANTID_API_DLL
 
 namespace Mantid {
 namespace Kernel {
+
+// Enable setTypedProperty for MatrixWorkspace
 template <>
-MANTID_API_DLL IPropertyManager *
+DLLExport IPropertyManager *
 IPropertyManager::setTypedProperty<API::MatrixWorkspace_sptr, API::IndexType,
                                    std::vector<int>>(
     const std::string &name,
@@ -53,7 +55,7 @@ IPropertyManager::setTypedProperty<API::MatrixWorkspace_sptr, API::IndexType,
 }
 
 template <>
-MANTID_API_DLL IPropertyManager *
+DLLExport IPropertyManager *
 IPropertyManager::setTypedProperty<API::MatrixWorkspace_sptr, API::IndexType,
                                    std::string>(
     const std::string &name,

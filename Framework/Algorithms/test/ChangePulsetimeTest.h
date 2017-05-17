@@ -1,13 +1,14 @@
 #ifndef MANTID_ALGORITHMS_CHANGEPULSETIMETEST_H_
 #define MANTID_ALGORITHMS_CHANGEPULSETIMETEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidKernel/Timer.h"
 #include "MantidKernel/System.h"
+#include "MantidKernel/Timer.h"
+#include <cxxtest/TestSuite.h>
 
 #include "MantidAlgorithms/ChangePulsetime.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include <MantidAPI/IndexTypeProperty.h>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -23,9 +24,10 @@ execute_change_of_pulse_times(EventWorkspace_sptr in_ws, std::string timeOffset,
   alg.initialize();
   alg.setRethrows(true);
   alg.setChild(true);
-  alg.setProperty("InputWorkspace", in_ws);
+  alg.setProperty<EventWorkspace_sptr, IndexType, std::string>(
+      "InputWorkspaceWithIndex", in_ws, IndexType::WorkspaceIndex,
+      workspaceIndexList);
   alg.setPropertyValue("OutputWorkspace", "out_ws");
-  alg.setPropertyValue("WorkspaceIndexList", workspaceIndexList);
   alg.setPropertyValue("TimeOffset", timeOffset);
   alg.execute();
 
@@ -33,7 +35,7 @@ execute_change_of_pulse_times(EventWorkspace_sptr in_ws, std::string timeOffset,
   EventWorkspace_sptr out_ws = alg.getProperty("OutputWorkspace");
   return out_ws;
 }
-}
+} // namespace
 
 //---------------------------------------------------------------------------------
 // Unit Tests
@@ -56,9 +58,10 @@ public:
     in_ws = WorkspaceCreationHelper::createEventWorkspace2(100, 100);
     AnalysisDataService::Instance().addOrReplace(in_ws_name, in_ws);
 
-    alg.setPropertyValue("InputWorkspace", in_ws_name);
+    alg.setProperty<EventWorkspace_sptr, IndexType, std::string>(
+        "InputWorkspaceWithIndex", in_ws, IndexType::SpectrumNumber,
+        WorkspaceIndexList);
     alg.setPropertyValue("OutputWorkspace", out_ws_name);
-    alg.setPropertyValue("WorkspaceIndexList", WorkspaceIndexList);
     alg.setPropertyValue("TimeOffset", "1000.0");
 
     TS_ASSERT_THROWS_NOTHING(alg.execute());

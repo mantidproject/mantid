@@ -48,7 +48,7 @@ class WorkspacePropertyWithIndex : public WorkspaceProperty<TYPE> {
 public:
   explicit WorkspacePropertyWithIndex(
       const std::string &name = "InputWorkspaceWithIndex",
-      const int indexType = IndexType::SpectrumNumber,
+      const int indexType = IndexType::WorkspaceIndex,
       const std::string &wsName = "",
       Kernel::IValidator_sptr validator =
           Kernel::IValidator_sptr(new NullValidator));

@@ -16,9 +16,9 @@
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/make_unique.h"
-#include <MantidIndexing/SpectrumIndexSet.h>
 #include <MantidAPI/WorkspacePropertyWithIndex.h>
 #include <MantidAPI/WorkspacePropertyWithIndex.tcc>
+#include <MantidIndexing/SpectrumIndexSet.h>
 
 #include <cmath>
 

@@ -1,4 +1,5 @@
 #include "MantidAPI/IEventWorkspace.h"
+#include <MantidIndexing/SpectrumIndexSet.h>
 #include "MantidKernel/IPropertyManager.h"
 
 namespace Mantid {
@@ -68,9 +69,28 @@ IPropertyManager::getValue<Mantid::API::IEventWorkspace_const_sptr>(
     throw std::runtime_error(message);
   }
 }
+
+template <>
+MANTID_API_DLL
+    std::tuple<Mantid::API::IEventWorkspace_sptr, Indexing::SpectrumIndexSet>
+    IPropertyManager::getValue<std::tuple<Mantid::API::IEventWorkspace_sptr,
+                                          Indexing::SpectrumIndexSet>>(
+        const std::string &name) const {
+  std::tuple<Mantid::API::IEventWorkspace_sptr, Indexing::SpectrumIndexSet>
+      *prop = dynamic_cast<std::tuple<Mantid::API::IEventWorkspace_sptr,
+                                      Indexing::SpectrumIndexSet> *>(
+          getPointerToProperty(name));
+  if (prop) {
+    return *prop;
+  } else {
+    std::string message =
+        "Attempt to assign property " + name +
+        " to incorrect type. Expected shared_ptr<IEventWorkspace>.";
+    throw std::runtime_error(message);
+  }
 }
 
-// namespace Kernel
+}// namespace Kernel
 } // namespace Mantid
 
 ///\endcond TEMPLATE
