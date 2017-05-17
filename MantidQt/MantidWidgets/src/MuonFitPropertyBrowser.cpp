@@ -312,10 +312,6 @@ void MuonFitPropertyBrowser::setFitEnabled(bool yes) {
 */
 void MuonFitPropertyBrowser::setWorkspaceName(const QString &wsName) {
   int i = m_workspaceNames.indexOf(wsName);
-  auto tmp = wsName.toStdString();
-  /*if (!m_browser->isItemVisible(m_multiFitSettingsGroup)) {
-	  setSingleFitLabel(tmp);
-  }*/
   if (i < 0) {
     // workspace may not be found because add notification hasn't been processed
     // yet
@@ -382,6 +378,7 @@ void MuonFitPropertyBrowser::enumChanged(QtProperty *prop) {
 */
 void MuonFitPropertyBrowser::updateGroupDisplay() {
   m_showGroupValue.clear();
+  auto tmp = getChosenGroups().join(",").toStdString();
   m_showGroupValue << getChosenGroups().join(",");
   m_enumManager->setEnumNames(m_showGroup, m_showGroupValue);
   m_multiFitSettingsGroup->property()->addSubProperty(m_showGroup);
@@ -725,7 +722,6 @@ void MuonFitPropertyBrowser::runFit() {
 	else {
 		setSingleFitLabel(wsName);
 	}
-	auto tmpew = outputName();
 	alg->setPropertyValue("Output", outputName());
 
 
@@ -1346,18 +1342,23 @@ void MuonFitPropertyBrowser::setSingleFitLabel(std::string name) {
 	clearChosenGroups();
 	clearChosenPeriods();
 	std::vector<std::string> splitName;
-	boost::split(splitName, name, boost::is_any_of(";"));
+	std::string tmpName = name;
+	boost::erase_all(tmpName," ");
+	boost::split(splitName, tmpName, boost::is_any_of(";"));
 	//set single group/pair
-	QString selection;
-	selection.fromStdString(splitName[2]);
-	setChosenGroup(selection);
+	QString group=QString::fromUtf8(splitName[2].c_str());
+	setChosenGroup(group);
 	//period is set
 	if (splitName.size() == 6) {
-		selection.fromStdString(splitName[4]);
-		setChosenPeriods(selection);
+		QString period = QString::fromUtf8(splitName[4].c_str());
+		setChosenPeriods(period);
 	}
 	setOutputName(name);
-	
+	//for single fit in multi fit mode
+	if (m_browser->isItemVisible(m_multiFitSettingsGroup)) {
+		updateGroupDisplay();
+		updatePeriodDisplay();
+	}
 }
 
 } // MantidQt
