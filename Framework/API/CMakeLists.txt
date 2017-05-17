@@ -421,6 +421,7 @@ set ( TEST_FILES
 	ParameterReferenceTest.h
 	ParameterTieTest.h
 	PeakFunctionIntegratorTest.h
+        ProgressTest.h
 	ProjectionTest.h
 	RawCountValidatorTest.h
 	RemoteJobManagerFactoryTest.h

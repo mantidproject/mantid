@@ -1444,6 +1444,14 @@ public:
     loader.setPropertyValue("OutputWorkspace", "ws");
     TS_ASSERT(loader.execute());
   }
+
+  void testPeaksWorkspace() {
+    LoadNexusProcessed loader;
+    loader.initialize();
+    loader.setPropertyValue("Filename", "24954_allpeaksbyhand.nxs");
+    loader.setPropertyValue("OutputWorkspace", "peaks");
+    TS_ASSERT(loader.execute());
+  }
 };
 
 #endif /*LOADNEXUSPROCESSEDTESTRAW_H_*/

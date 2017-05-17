@@ -373,7 +373,7 @@ std::vector<double> Qxy::logBinning(double min, double max, int num) {
   min = log10(min);
   max = log10(max);
   double binWidth = fabs((max - min) / (num - 1));
-  for (int i = 0; i <= num; ++i) {
+  for (int i = 0; i < num; ++i) {
     outBins[i] = pow(10, min + i * binWidth);
   }
   return outBins;
@@ -411,15 +411,12 @@ Qxy::setUpOutputWorkspace(API::MatrixWorkspace_const_sptr inputWorkspace) {
   if (log_binning) {
     // get qmin from the run properties
     double qmin = getQminFromWs(*inputWorkspace);
-    // Filling the binning vector: negative, 0 and then positive
-    std::vector<double> totalBinning;
     std::vector<double> positiveBinning = logBinning(qmin, max, nBins);
     std::reverse(std::begin(positiveBinning), std::end(positiveBinning));
-    totalBinning.insert(std::end(totalBinning), std::begin(positiveBinning),
-                        std::end(positiveBinning));
+    std::vector<double> totalBinning = positiveBinning;
     std::for_each(std::begin(totalBinning), std::end(totalBinning),
                   [](double &n) { n = -1 * n; });
-    totalBinning.push_back(0);
+    totalBinning.push_back(0.0);
     std::reverse(std::begin(positiveBinning), std::end(positiveBinning));
     totalBinning.insert(std::end(totalBinning), std::begin(positiveBinning),
                         std::end(positiveBinning));
