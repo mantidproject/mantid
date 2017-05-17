@@ -1465,7 +1465,7 @@ QString MantidUI::createTruncatedList(const std::set<int> &elements) {
     qString =
         qString.arg(first).arg(second).arg(ndets - 4); // First two + n extra
     auto revIter = elements.rbegin(); // Set iterators are unidirectional ... so
-                                 // no operator-()
+                                      // no operator-()
     const Mantid::detid_t last(*revIter++), lastm1(*revIter++);
     qString = qString.arg(lastm1).arg(last);
   } else {

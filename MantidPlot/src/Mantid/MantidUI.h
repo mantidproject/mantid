@@ -345,7 +345,7 @@ public slots:
   /// Create a table of detectors from a PeaksWorkspace
   Table *createDetectorTable(const QString &wsName,
                              const Mantid::API::IPeaksWorkspace_sptr &ws);
-  /// Create a string of the style "1, 2...(100 more)...102, 103" 
+  /// Create a string of the style "1, 2...(100 more)...102, 103"
   QString createTruncatedList(const std::set<int> &elements);
 
   /// Triggers a workspace delete check
