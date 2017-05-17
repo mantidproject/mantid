@@ -20,6 +20,7 @@ class ReflectometryReductionOne2Test : public CxxTest::TestSuite {
 private:
   MatrixWorkspace_sptr m_multiDetectorWS;
   MatrixWorkspace_sptr m_wavelengthWS;
+  MatrixWorkspace_sptr m_transmissionWS;
 
 public:
   // This pair of boilerplate methods prevent the suite being created statically
@@ -40,6 +41,20 @@ public:
     m_wavelengthWS =
         create2DWorkspaceWithReflectometryInstrumentMultiDetector();
     m_wavelengthWS->getAxis(0)->setUnit("Wavelength");
+    // A transmission ws with different spectrum numbers to the run
+    m_transmissionWS =
+        create2DWorkspaceWithReflectometryInstrumentMultiDetector();
+    m_transmissionWS->getSpectrum(0).setSpectrumNo(2);
+    m_transmissionWS->getSpectrum(1).setSpectrumNo(3);
+    m_transmissionWS->getSpectrum(2).setSpectrumNo(4);
+    m_transmissionWS->getSpectrum(3).setSpectrumNo(5);
+    // Set different values in each spectrum so that we can check the correct
+    // spectra were used for the transmission correction
+    using namespace Mantid::HistogramData;
+    m_transmissionWS->setCounts(0, Counts(m_transmissionWS->y(0).size(), 10));
+    m_transmissionWS->setCounts(1, Counts(m_transmissionWS->y(1).size(), 20));
+    m_transmissionWS->setCounts(2, Counts(m_transmissionWS->y(2).size(), 30));
+    m_transmissionWS->setCounts(3, Counts(m_transmissionWS->y(3).size(), 40));
   }
 
   void test_IvsLam() {
@@ -355,6 +370,36 @@ public:
     // Expected values are 1 = m_wavelength / m_wavelength
     TS_ASSERT_DELTA(outLam->y(0)[0], 1.0000, 0.0001);
     TS_ASSERT_DELTA(outLam->y(0)[7], 1.0000, 0.0001);
+  }
+
+  void test_transmission_correction_with_mapped_spectra() {
+    // Run workspace spectrum numbers are 1,2,3,4.
+    // Transmission workspace has spectrum numbers 2,3,4,5.
+    // Processing instructions 2-3 in the run workspace map to
+    // spectra 3-4, which map to indices 1-2 in the transmission
+    // workspace.
+    ReflectometryReductionOne2 alg;
+    alg.setChild(true);
+    alg.initialize();
+    alg.setProperty("InputWorkspace", m_multiDetectorWS);
+    alg.setProperty("FirstTransmissionRun", m_transmissionWS);
+    alg.setProperty("SecondTransmissionRun", m_transmissionWS);
+    alg.setProperty("StartOverlap", 2.5);
+    alg.setProperty("EndOverlap", 3.0);
+    alg.setProperty("Params", "0.1");
+    alg.setProperty("WavelengthMin", 1.5);
+    alg.setProperty("WavelengthMax", 15.0);
+    alg.setProperty("ProcessingInstructions", "2-3");
+    alg.setPropertyValue("OutputWorkspace", "IvsQ");
+    alg.setPropertyValue("OutputWorkspaceWavelength", "IvsLam");
+    alg.execute();
+    MatrixWorkspace_sptr outLam = alg.getProperty("OutputWorkspaceWavelength");
+
+    TS_ASSERT_EQUALS(outLam->getNumberHistograms(), 1);
+    TS_ASSERT_EQUALS(outLam->blocksize(), 14);
+    // Expected values are 1 = m_wavelength / m_wavelength
+    TS_ASSERT_DELTA(outLam->y(0)[0], 0.08, 0.0001);
+    TS_ASSERT_DELTA(outLam->y(0)[7], 0.08, 0.0001);
   }
 
   void test_exponential_correction() {
