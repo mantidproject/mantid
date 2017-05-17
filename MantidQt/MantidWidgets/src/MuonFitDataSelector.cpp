@@ -101,7 +101,6 @@ void MuonFitDataSelector::userChangedRuns() {
  */
 double MuonFitDataSelector::getStartTime() const {
   // Validator ensures cast to double will succeed
-  // const QString start = m_ui.txtStart->text();
   return m_startX; // start.toDouble();
 }
 
@@ -110,7 +109,6 @@ double MuonFitDataSelector::getStartTime() const {
  * @param start :: [input] Start time in microseconds
  */
 void MuonFitDataSelector::setStartTimeQuietly(double start) {
-  // m_ui.txtStart->setText(QString::number(start));
   m_startX = start;
 }
 
@@ -128,9 +126,7 @@ void MuonFitDataSelector::setStartTime(double start) {
  * @returns :: start time input by user in microseconds
  */
 double MuonFitDataSelector::getEndTime() const {
-  // Validator ensures cast to double will succeed
-  // const QString end = m_ui.txtEnd->text();
-  return m_endX; // end.toDouble();
+  return m_endX; 
 }
 
 /**
@@ -139,7 +135,6 @@ double MuonFitDataSelector::getEndTime() const {
  */
 void MuonFitDataSelector::setEndTimeQuietly(double end) {
   m_endX = end;
-  // m_ui.txtEnd->setText(QString::number(end));
 }
 
 /**

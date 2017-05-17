@@ -1330,7 +1330,11 @@ void MuonFitPropertyBrowser::combineBtnPressed() {
   m_negativeCombo->clear();
   addPeriodCheckbox(value);
 }
-
+/**
+* sets the label for a single fit and
+* selects the relevant group/pair
+* @param name :: string of the ws 
+*/
 void MuonFitPropertyBrowser::setSingleFitLabel(std::string name) {
   clearChosenGroups();
   clearChosenPeriods();
