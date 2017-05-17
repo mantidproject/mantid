@@ -953,7 +953,7 @@ ReflectometryReductionOne2::sumInQ(MatrixWorkspace_sptr detectorWS) {
     auto &outputE = IvsLam->dataE(groupIdx);
 
     // Loop through each spectrum in the detector group
-    for (size_t spIdx : detectors) {
+    for (auto spIdx : detectors) {
       // Get the angle of this detector and its size in twoTheta
       const double twoTheta = getDetectorTwoTheta(m_spectrumInfo, spIdx);
       const double bTwoTheta = getDetectorTwoThetaRange(m_spectrumInfo, spIdx);
