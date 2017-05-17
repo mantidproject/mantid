@@ -6071,7 +6071,7 @@ void ApplicationWindow::prepareSaveProject() {
       projectname, *serialiser, windows, this);
   connect(m_projectSaveView, SIGNAL(projectSaved()), this,
           SLOT(postSaveProject()));
-  m_projectSaveView->show();
+  m_projectSaveView->exec();
 }
 
 /**
@@ -9175,32 +9175,6 @@ void ApplicationWindow::closeWindow(MdiSubWindow *window) {
   emit modified();
 }
 
-/**
- * Called when the user choses to close the program
- */
-void ApplicationWindow::prepareToCloseMantid() {
-  if (!saved) {
-    QString savemsg =
-        tr("Save changes to project: <p><b> %1 </b> ?").arg(projectname);
-    int result =
-        QMessageBox::information(this, tr("MantidPlot"), savemsg, tr("Yes"),
-                                 tr("No"), tr("Cancel"), 0, 2);
-    if (result == 0) {
-      prepareSaveProject();
-      // When we're finished saving trigger the close event
-      connect(m_projectSaveView, SIGNAL(finished(int)), qApp,
-              SLOT(closeAllWindows()));
-      return;
-    } else if (result == 2) {
-      // User wanted to cancel, do nothing
-      return;
-    }
-  }
-
-  // Call to close all the windows and shutdown Mantid
-  QApplication::closeAllWindows();
-}
-
 /** Add a serialisable window to the application
  * @param window :: the window to add
  */
@@ -9807,6 +9781,21 @@ void ApplicationWindow::closeEvent(QCloseEvent *ce) {
     // happens in MantidUI::shutdown (called below) because we want it
     // regardless of whether a
     // script is running.
+  }
+
+  if (!saved) {
+    QString savemsg =
+        tr("Save changes to project: <p><b> %1 </b> ?").arg(projectname);
+    int result =
+        QMessageBox::information(this, tr("MantidPlot"), savemsg, tr("Yes"),
+                                 tr("No"), tr("Cancel"), 0, 2);
+    if (result == 0) {
+      prepareSaveProject();
+    } else if (result == 2) {
+      // User wanted to cancel, do nothing
+      ce->ignore();
+      return;
+    }
   }
 
   // Close the remaining MDI windows. The Python API is required to be active
@@ -11821,8 +11810,8 @@ void ApplicationWindow::createActions() {
   actionCloseAllWindows = new MantidQt::MantidWidgets::TrackedAction(
       QIcon(getQPixmap("quit_xpm")), tr("&Quit"), this);
   actionCloseAllWindows->setShortcut(tr("Ctrl+Q"));
-  connect(actionCloseAllWindows, SIGNAL(triggered()), this,
-          SLOT(prepareToCloseMantid()));
+  connect(actionCloseAllWindows, SIGNAL(triggered()), qApp,
+          SLOT(closeAllWindows()));
 
   actionDeleteFitTables = new MantidQt::MantidWidgets::TrackedAction(
       QIcon(getQPixmap("close_xpm")), tr("Delete &Fit Tables"), this);

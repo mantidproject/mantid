@@ -603,7 +603,6 @@ public slots:
   void closeActiveWindow();
   void closeSimilarWindows();
   void closeWindow(MdiSubWindow *window);
-  void prepareToCloseMantid();
 
   //!  Does all the cleaning work before actually deleting a window!
   void removeWindowFromLists(MdiSubWindow *w);
