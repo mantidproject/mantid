@@ -378,7 +378,6 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                 self._info = None
                 returned = self._focusChunks(sam_run_number, sample_time_filter_wall,
                                              splitwksp=self._splittersWS,
-                                             normalisebycurrent=self._normalisebycurrent,
                                              reload_if_loaded=reload_event_file,
                                              preserveEvents=preserveEvents)
 
@@ -757,7 +756,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
         return outName
 
     #pylint: disable=too-many-arguments
-    def _focusAndSum(self, filenames, preserveEvents=True, reload_if_loaded=True):
+    def _focusAndSum(self, filenames, preserveEvents=True, reload_if_loaded=True, final_name=None):
         """Load, sum, and focus data in chunks
         Purpose:
             Load, sum and focus data in chunks;
@@ -773,7 +772,8 @@ class SNSPowderReduction(DataProcessorAlgorithm):
         sumRun = None
         info = None
 
-        final_name = getBasename(filenames[0])
+        if final_name is None:
+            final_name = getBasename(filenames[0])
         api.AlignAndFocusPowderFromFiles(Filename=','.join(filenames),
                                          OutputWorkspace=final_name,
                                          MaxChunkSize=self._chunks,
@@ -809,7 +809,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
 
     #pylint: disable=too-many-arguments,too-many-locals,too-many-branches
     def _focusChunks(self, filename, filter_wall=(0.,0.),  # noqa
-                     normalisebycurrent=True, splitwksp=None, preserveEvents=True,
+                     splitwksp=None, preserveEvents=True,
                      reload_if_loaded=True):  # noqa
         """
         Load, (optional) split and focus data in chunks
@@ -975,7 +975,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                                    OutputWorkspace=output_wksp_list[split_index],
                                    Tolerance=self.COMPRESS_TOL_TOF)  # 100ns
             try:
-                if normalisebycurrent is True:
+                if self._normalisebycurrent is True:
                     api.NormaliseByCurrent(InputWorkspace=output_wksp_list[split_index],
                                            OutputWorkspace=output_wksp_list[split_index],
                                            RecalculatePCharge=True)
@@ -1277,30 +1277,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                 fileArg = can_run_number
                 if self.getProperty("Sum").value:
                     fileArg = can_run_numbers
-                api.AlignAndFocusPowderFromFiles(Filename=fileArg,
-                                                 OutputWorkspace=can_run_ws_name,
-                                                 MaxChunkSize=self._chunks,
-                                                 FilterBadPulses=self._filterBadPulses,
-                                                 CacheDir=self.getProperty("CacheDir").value,
-                                                 CalFileName=self.calib,
-                                                 GroupFilename=self.getProperty("GroupingFile").value,
-                                                 Params=self._binning,
-                                                 ResampleX=self._resampleX,
-                                                 Dspacing=self._bin_in_dspace,
-                                                 PreserveEvents=preserveEvents,
-                                                 RemovePromptPulseWidth=self._removePromptPulseWidth,
-                                                 CompressTolerance=self.COMPRESS_TOL_TOF,
-                                                 UnwrapRef=self._LRef,
-                                                 LowResRef=self._DIFCref,
-                                                 LowResSpectrumOffset=self._lowResTOFoffset,
-                                                 CropWavelengthMin=self._wavelengthMin,
-                                                 CropWavelengthMax=self._wavelengthMax,
-                                                 ReductionProperties="__snspowderreduction",
-                                                 **self._focusPos)
-                if self._normalisebycurrent is True:
-                    api.NormaliseByCurrent(InputWorkspace=can_run_ws_name,
-                                           OutputWorkspace=can_run_ws_name,
-                                           RecalculatePCharge=True)
+                self._focusAndSum(fileArg, preserveEvents, final_name=can_run_ws_name)
 
                 # smooth background
                 smoothParams = self.getProperty("BackgroundSmoothParams").value
