@@ -116,7 +116,7 @@ public:
   bool hasPhysProperties() const;
   /// Check that attributes and parameters are consistent.
   /// If not excepion is thrown.
-  void checkConsistent() const;
+  //void checkConsistent() const;
   //@}
 
   /// Build target function.
@@ -221,7 +221,7 @@ private:
   /// Cached number of parameters in m_source.
   mutable size_t m_nSourceParams;
   /// Flag indicating that updateTargetFunction() is required.
-  mutable bool m_dirty;
+  mutable bool m_dirtyTarget;
   mutable bool m_isMultiSpectrum;
   mutable bool m_hasPeaks;
 };

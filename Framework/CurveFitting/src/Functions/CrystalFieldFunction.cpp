@@ -76,14 +76,7 @@ public:
 } // namespace
 
 /// Constructor
-CrystalFieldFunction::CrystalFieldFunction() : IFunction(), m_isMultiSpectrum(false), m_hasPeaks(false) {
-  //declareAttribute("Ions", Attribute(""));
-  //declareAttribute("Symmetries", Attribute(""));
-  //declareAttribute("Temperatures", Attribute(std::vector<double>()));
-  //declareAttribute("ToleranceEnergy", Attribute(1.0e-10));
-  //declareAttribute("ToleranceIntensity", Attribute(1.0e-1));
-  // declareAttribute("PhysicalProperties",
-  //                 Attribute(std::vector<double>(1, 0.0)));
+CrystalFieldFunction::CrystalFieldFunction() : IFunction(), m_dirtyTarget(true), m_isMultiSpectrum(false), m_hasPeaks(false) {
 }
 
 // Evaluates the function
@@ -130,7 +123,7 @@ void CrystalFieldFunction::setParameter(size_t i, const double &value,
   checkSourceFunction();
   if (i < m_nSourceParams) {
     m_source->setParameter(i, value, explicitlySet);
-    m_dirty = true;
+    m_dirtyTarget = true;
   } else {
     checkTargetFunction();
     m_target->setParameter(i - m_nSourceParams, value, explicitlySet);
@@ -317,69 +310,38 @@ std::vector<std::string> CrystalFieldFunction::getAttributeNames() const {
 /// @param attName :: Name of an attribute.
 IFunction::Attribute
 CrystalFieldFunction::getAttribute(const std::string &attName) const {
-  if (IFunction::hasAttribute(attName)) {
+
+  auto attRef = getAttributeReference(attName);
+  if (attRef.first == nullptr) {
+    // This will throw an exception because attribute doesn't exist
     return IFunction::getAttribute(attName);
-  } else if (isSourceName(attName)) {
-    checkSourceFunction();
-    if (isMultiSite()) {
-      if (attName == "Temperature" && !isMultiSpectrum()) {
-        return compositeSource().getFunction(0)->getAttribute("Temperature");
-      } else {
-        throw std::logic_error("Attributes of multi-site source are not implemented yet.");
-      }
-    } else {
-      return m_source->getAttribute(attName);
-    }
-  } else {
-    checkTargetFunction();
-    std::smatch match;
-    if (std::regex_match(attName, match, SPECTRUM_ATTR_REGEX)) {
-      auto i = std::stoul(match[1]);
-      return getSpectrumAttribute(i, match[2]);
-    }
-    return m_target->getAttribute(attName);
   }
+
+  return attRef.first->getAttribute(attRef.second);
 }
 
 /// Perform custom actions on setting certain attributes.
 void CrystalFieldFunction::setAttribute(const std::string &attName,
                                         const Attribute &attr) {
-  if (attName == "Ions") {
-    setIonsAttribute(attName, attr);
-  } else if (attName == "Symmetries") {
-    setSymmetriesAttribute(attName, attr);
-  } else if (attName == "Temperatures") {
-    //setTemperaturesAttribute(attName, attr);
-  } else if (IFunction::hasAttribute(attName)) {
+  auto attRef = getAttributeReference(attName);
+  if (attRef.first == nullptr) {
+    // This will throw an exception because attribute doesn't exist
     IFunction::setAttribute(attName, attr);
-  } else if (isSourceName(attName)) {
-    checkSourceFunction();
-    if (isMultiSite()) {
-      if (attName == "Temperature" && !isMultiSpectrum()) {
-        auto &source = compositeSource();
-        for(size_t i=0; i < m_control.nFunctions(); ++i) {
-          source.getFunction(i)->setAttribute("Temperature", attr);
-        }
-      } else {
-        throw std::logic_error("Attributes of multi-site source are not implemented yet.");
-      }
-    } else {
-      m_source->setAttribute(attName, attr);
-    }
-  } else {
-    checkTargetFunction();
-    std::smatch match;
-    if (std::regex_match(attName, match, SPECTRUM_ATTR_REGEX)) {
-      auto i = std::stoul(match[1]);
-      setSpectrumAttribute(i, match[2], attr);
-    } else {
-      m_target->setAttribute(attName, attr);
-    }
+  } else if (attRef.first == &m_control) {
+    m_source.reset();
   }
+  attRef.first->setAttribute(attRef.second, attr);
 }
 
 /// Check if attribute attName exists
 bool CrystalFieldFunction::hasAttribute(const std::string &attName) const {
+  auto attRef = getAttributeReference(attName);
+  if (attRef.first == nullptr) {
+    return false;
+  }
+  return attRef.first->hasAttribute(attRef.second);
+
+  //------------------------------------------------//
   std::smatch match;
   if (std::regex_match(attName, match, SPECTRUM_ATTR_REGEX)) {
     auto i = std::stoul(match[1]);
@@ -410,7 +372,7 @@ bool CrystalFieldFunction::hasAttribute(const std::string &attName) const {
 /// Get a reference to an attribute.
 /// @param attName :: A name of an attribute. It can be a code rather than an
 /// actual name.  This method interprets the code and finds the function and
-/// attribute it referes to.
+/// attribute it refers to.
 /// @returns :: A pair (IFunction, attribute_name) where attribute_name is a
 /// name that the IFunction has.
 std::pair<API::IFunction *, std::string>
@@ -418,9 +380,20 @@ CrystalFieldFunction::getAttributeReference(const std::string &attName) const {
   std::smatch match;
   if (std::regex_match(attName, match, SPECTRUM_ATTR_REGEX)) {
     auto i = std::stoul(match[1]);
-    //return hasSpectrumAttribute(i, match[2]);
+    auto name = match[2].str();
+    if (m_control.nFunctions() == 0) {
+      m_control.buildControls();
+    }
+    if (name == "FWHMX" || name == "FWHMY") {
+      if (i < m_control.nFunctions()) {
+        return std::make_pair(m_control.getFunction(i).get(), name);
+      } else {
+        return std::make_pair(nullptr, "");
+      }
+    }
+    return std::make_pair(nullptr, "");
   }
-  return std::make_pair(m_source.get(), "");
+  return std::make_pair(&m_control, attName);
 }
 
 /// Get number of the number of spectra (excluding phys prop data).
@@ -573,14 +546,12 @@ void CrystalFieldFunction::setSymmetriesAttribute(const std::string &name,
 /// Check if the function is set up for a multi-site calculations.
 /// (Multiple ions defined)
 bool CrystalFieldFunction::isMultiSite() const {
-  m_control.checkConsistent();
   return m_control.isMultiSite();
 }
 
 /// Check if the function is set up for a multi-spectrum calculations
 /// (Multiple temperatures defined)
 bool CrystalFieldFunction::isMultiSpectrum() const {
-  m_control.checkConsistent();
   return m_control.isMultiSpectrum();
 }
 
@@ -632,9 +603,12 @@ API::CompositeFunction &CrystalFieldFunction::compositeSource() const {
 
 /// Check that attributes and parameters are consistent.
 /// If not excepion is thrown.
-void CrystalFieldFunction::checkConsistent() const {
-  m_control.checkConsistent();
-}
+//void CrystalFieldFunction::checkConsistent() const {
+//  if (m_control.nFunctions() == 0) {
+//    m_control.buildControls();
+//  }
+//  m_control.checkConsistent();
+//}
 
 /// Build source function if necessary.
 void CrystalFieldFunction::checkSourceFunction() const {
@@ -652,7 +626,7 @@ void CrystalFieldFunction::buildSourceFunction() const {
 
 /// Update spectrum function if necessary.
 void CrystalFieldFunction::checkTargetFunction() const {
-  if (m_dirty) {
+  if (m_dirtyTarget) {
     updateTargetFunction();
   }
   if (!m_target) {
@@ -664,8 +638,8 @@ void CrystalFieldFunction::checkTargetFunction() const {
 /// Uses source to calculate peak centres and intensities
 /// then populates m_spectrum with peaks of type given in PeakShape attribute.
 void CrystalFieldFunction::buildTargetFunction() const {
-  checkConsistent();
-  m_dirty = false;
+  checkSourceFunction();
+  m_dirtyTarget = false;
   if (isMultiSite()) {
     buildMultiSite();
   } else {
@@ -869,8 +843,7 @@ void CrystalFieldFunction::updateTargetFunction() const {
     buildTargetFunction();
     return;
   }
-
-  m_dirty = false;
+  m_dirtyTarget = false;
   if (isMultiSite()) {
     updateMultiSite();
   } else {

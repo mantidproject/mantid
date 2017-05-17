@@ -35,30 +35,53 @@ CrystalFieldControl::CrystalFieldControl() : CompositeFunction() {
   declareAttribute("PhysicalProperties", Attribute(""));
 }
 
+/// Set a value to attribute attName
+void CrystalFieldControl::setAttribute(const std::string &name,
+                                       const API::IFunction::Attribute &attr) {
+  if (name == "Ions") {
+    parseStringListAttribute("Ions", attr.asString(), m_ions);
+  } else if (name == "Symmetries") {
+    parseStringListAttribute("Symmetries", attr.asString(), m_symmetries);
+  } else if (name == "PhysicalProperties") {
+    parseStringListAttribute("PhysicalProperties", attr.asString(),
+                             m_physProps);
+    buildControls();
+  } else {
+    if (name == "Temperatures") {
+      m_temperatures = attr.asVector();
+      buildControls();
+    } else if (name == "FWHMs") {
+      m_FWHMs = attr.asVector();
+    }
+    API::IFunction::setAttribute(name, attr);
+  }
+}
+
 /// Parse a comma-separated list attribute
 /// @param attName :: A name of the attribute to parse.
 /// @param cache :: A vector to chache the parsed values.
-void CrystalFieldControl::parseStringListAttribute(const std::string &attName, std::vector<std::string> &cache) {
+void CrystalFieldControl::parseStringListAttribute(
+    const std::string &attName, const std::string &value,
+    std::vector<std::string> &cache) {
   // Split the attribute value into separate names, white spaces removed
-  auto attr = getAttribute(attName).asString();
-  Kernel::StringTokenizer tokenizer(attr, ",",
+  Kernel::StringTokenizer tokenizer(value, ",",
                                     Kernel::StringTokenizer::TOK_TRIM);
   cache.clear();
   cache.insert(cache.end(), tokenizer.begin(), tokenizer.end());
   auto attrValue = Kernel::Strings::join(cache.begin(), cache.end(), ",");
   // Store back the trimmed names
-  setAttribute(attName, Attribute(attrValue));
+  API::IFunction::setAttribute(attName, Attribute(attrValue));
 }
 
 
 /// Cache function attributes.
 void CrystalFieldControl::cacheAttributes() {
-  parseStringListAttribute("Ions", m_ions);
-  parseStringListAttribute("Symmetries", m_symmetries);
-  parseStringListAttribute("PhysicalProperties", m_physProps);
-  m_temperatures = getAttribute("Temperatures").asVector();
-  buildControls();
-  m_FWHMs = getAttribute("FWHMs").asVector();
+  //parseStringListAttribute("Ions", m_ions);
+  //parseStringListAttribute("Symmetries", m_symmetries);
+  //parseStringListAttribute("PhysicalProperties", m_physProps);
+  //m_temperatures = getAttribute("Temperatures").asVector();
+  //buildControls();
+  //m_FWHMs = getAttribute("FWHMs").asVector();
   const auto nSpec = m_temperatures.size();
   m_fwhmX.clear();
   m_fwhmY.clear();
@@ -73,7 +96,6 @@ void CrystalFieldControl::cacheAttributes() {
 
 /// Check that all attributes are consistent
 void CrystalFieldControl::checkConsistent()  {
-  cacheAttributes();
   if (m_ions.empty()) {
     throw std::runtime_error("No ions are set.");
   }
@@ -130,19 +152,26 @@ void CrystalFieldControl::checkConsistent()  {
 
 /// Build control functions for individual spectra.
 void CrystalFieldControl::buildControls() {
-  if (m_temperatures.empty()) {
-    throw std::runtime_error("No temperatures were defined.");
-  }
+  //if (m_temperatures.empty()) {
+  //  throw std::runtime_error("No temperatures were defined.");
+  //}
   const auto nSpec = m_temperatures.size();
-  this->clear();
+  const auto nFunc = nFunctions();
   for(size_t i = 0; i < nSpec; ++i) {
-    auto control = API::IFunction_sptr(new CrystalFieldSpectrumControl);
-    addFunction(control);
+    if (i >= nFunc) {
+      addFunction(API::IFunction_sptr(new CrystalFieldSpectrumControl));
+    } else if (dynamic_cast<CrystalFieldSpectrumControl*>(getFunction(i).get()) == nullptr) {
+      replaceFunction(i, API::IFunction_sptr(new CrystalFieldSpectrumControl));
+    }
   }
   const auto nPProps = m_physProps.size();
   for(size_t i = 0; i < nPProps; ++i) {
-    auto control = API::IFunction_sptr(new CrystalFieldPhysPropControl);
-    addFunction(control);
+    auto j = nSpec + i;
+    if (j >= nFunc) {
+      addFunction(API::IFunction_sptr(new CrystalFieldPhysPropControl));
+    } else if (dynamic_cast<CrystalFieldPhysPropControl*>(getFunction(j).get()) == nullptr) {
+      replaceFunction(j, API::IFunction_sptr(new CrystalFieldPhysPropControl));
+    }
   }
 }
 
@@ -157,6 +186,7 @@ bool CrystalFieldControl::isMultiSpectrum() const {
 
 /// Build the source function.
 API::IFunction_sptr CrystalFieldControl::buildSource()  {
+  cacheAttributes();
   checkConsistent();
   if (isMultiSite()) {
     return buildMultiSite();
@@ -209,25 +239,35 @@ API::IFunction_sptr CrystalFieldControl::buildSingleSiteMultiSpectrum() {
 
 /// Build the source function in a multi site - single spectrum case.
 API::IFunction_sptr CrystalFieldControl::buildMultiSiteSingleSpectrum() {
-  auto multiSite = CompositeFunction_sptr(new CompositeFunction);
+  auto source = CompositeFunction_sptr(new CompositeFunction);
   auto nSites = m_ions.size();
   auto temperatures = getAttribute("Temperatures").asVector();
   auto temperature = temperatures[0];
   for(size_t i = 0; i < nSites; ++i) {
     auto peakSource = (IFunction_sptr(new CrystalFieldPeaks));
-    multiSite->addFunction(peakSource);
+    source->addFunction(peakSource);
     peakSource->setAttributeValue("Ion", m_ions[i]);
     peakSource->setAttributeValue("Symmetry", m_symmetries[i]);
     peakSource->setAttribute("ToleranceEnergy", IFunction::getAttribute("ToleranceEnergy"));
     peakSource->setAttribute("ToleranceIntensity", IFunction::getAttribute("ToleranceIntensity"));
     peakSource->setAttributeValue("Temperature", temperature);
   }
-  return multiSite;
+  return source;
 }
 
 /// Build the source function in a multi site - multi spectrum case.
 API::IFunction_sptr CrystalFieldControl::buildMultiSiteMultiSpectrum() {
-  throw std::logic_error("buildMultiSiteMultiSpectrumSource not implemented yet.");
+  auto source = CompositeFunction_sptr(new CompositeFunction);
+  auto nSites = m_ions.size();
+  for(size_t i = 0; i < nSites; ++i) {
+    auto peakSource = (IFunction_sptr(new CrystalFieldPeaks));
+    source->addFunction(peakSource);
+    peakSource->setAttributeValue("Ion", m_ions[i]);
+    peakSource->setAttributeValue("Symmetry", m_symmetries[i]);
+    peakSource->setAttribute("ToleranceEnergy", IFunction::getAttribute("ToleranceEnergy"));
+    peakSource->setAttribute("ToleranceIntensity", IFunction::getAttribute("ToleranceIntensity"));
+  }
+  return source;
 }
 
 // ----------------------------------------------------------------------------------- //

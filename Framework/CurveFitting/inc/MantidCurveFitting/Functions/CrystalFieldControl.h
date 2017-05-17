@@ -36,11 +36,13 @@ namespace Functions {
 class MANTID_CURVEFITTING_DLL CrystalFieldControl :public API::CompositeFunction {
 public:
   CrystalFieldControl();
+  /// Set a value to attribute attName
+  void setAttribute(const std::string &name, const Attribute &) override;
   /// Are there multiple ions?
   bool isMultiSite() const;
   bool isMultiSpectrum() const;
-  /// Check that everything is consistent
-  void checkConsistent();
+  /// Build control functions for individual spectra.
+  void buildControls();
   /// Build the source function.
   API::IFunction_sptr buildSource();
   /// Build the source function in a single site case.
@@ -59,10 +61,10 @@ public:
 private:
   /// Cache the attributes
   void cacheAttributes();
-  /// Build control functions for individual spectra.
-  void buildControls();
+  /// Check that everything is consistent
+  void checkConsistent();
   /// Parse a comma-separated list attribute
-  void parseStringListAttribute(const std::string &attName, std::vector<std::string> &cache);
+  void parseStringListAttribute(const std::string &attName, const std::string &value, std::vector<std::string> &cache);
   ///// @name Attribute caches
   ////@{
   /// The ion names

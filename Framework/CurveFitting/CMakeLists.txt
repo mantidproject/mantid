@@ -369,6 +369,7 @@ set ( TEST_FILES
 	Functions/ComptonProfileTest.h
 	Functions/ComptonScatteringCountRateTest.h
 	Functions/ConvolutionTest.h
+	Functions/CrystalFieldControlTest.h
 	Functions/CrystalFieldEnergiesTest.h
 	Functions/CrystalFieldFunctionTest.h
 	Functions/CrystalFieldPeaksTest.h
