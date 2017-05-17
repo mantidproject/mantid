@@ -281,9 +281,12 @@ class DeltaPDF3D(PythonAlgorithm):
         G1D = Gaussian1DKernel(self.getProperty("ConvolutionWidth").value).array
         G3D = G1D * G1D.reshape((-1,1)) * G1D.reshape((-1,1,1))
         G3D_shape = np.array(G3D.shape)
-        G3D = np.pad(G3D,pad_width=np.array([np.floor((shape-G3D_shape)/2),
-                                             np.ceil((shape-G3D_shape)/2)],dtype=np.int).transpose(),mode='constant')
-        return np.fft.fftshift(np.fft.fftn(np.fft.ifftshift(G3D)))
+        G3D = np.pad(G3D,pad_width=np.array([np.maximum(np.floor((shape-G3D_shape)/2),np.zeros(len(shape))),
+                                             np.maximum(np.ceil((shape-G3D_shape)/2),np.zeros(len(shape)))],
+                                            dtype=np.int).transpose(),mode='constant')
+        deconv = np.fft.fftshift(np.fft.fftn(np.fft.ifftshift(G3D)))
+        iarr = (deconv.shape-shape)//2
+        return deconv[iarr[0]:shape[0]+iarr[0],iarr[1]:shape[1]+iarr[1],iarr[2]:shape[2]+iarr[2]]
 
     def _calc_new_extents(self, inWS):
         # Calculate new extents for fft space
