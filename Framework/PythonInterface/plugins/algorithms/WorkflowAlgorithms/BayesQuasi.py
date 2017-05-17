@@ -365,7 +365,7 @@ class BayesQuasi(PythonAlgorithm):
 
         # Sort x axis
         s_api.SortXAxis(InputWorkspace=outWS, OutputWorkspace=outWS, EnableLogging=False)
-        s_api.SortXAxis(InputWorkspace=probWS, OutputWorkspace=probWS, EnableLogging=False)
+
 
         log_prog = Progress(self, start=0.8, end=1.0, nreports=8)
         # Add some sample logs to the output workspaces
@@ -384,6 +384,7 @@ class BayesQuasi(PythonAlgorithm):
         log_prog.report('Setting workspace properties')
 
         if self._program == 'QL':
+            s_api.SortXAxis(InputWorkspace=probWS, OutputWorkspace=probWS, EnableLogging=False)
             self.setProperty('OutputWorkspaceProb', probWS)
 
     def _add_sample_logs(self, workspace, fit_program, e_range, binning):
