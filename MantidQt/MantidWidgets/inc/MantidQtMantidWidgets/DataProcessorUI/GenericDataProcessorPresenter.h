@@ -158,11 +158,8 @@ protected:
   void plotWorkspaces(const std::set<std::string> &workspaces);
 
 protected slots:
-  void nextRow();
-  void nextGroup();
-  void updateProgress();
-  void clearProgress();
   void reductionError(std::exception ex);
+  void threadFinished(const int exitCode);
 
 private:
   // the name of the workspace/table/model in the ADS, blank if unsaved
@@ -256,6 +253,16 @@ private:
 
   // actions/commands
   void addCommands();
+
+  // decide between processing next row or group
+  void doNextAction();
+
+  // process next row/group
+  void nextRow();
+  void nextGroup();
+
+  // end reduction
+  void endReduction();
 
   // pause/resume reduction
   void pause();

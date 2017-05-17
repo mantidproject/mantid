@@ -240,6 +240,23 @@ void GenericDataProcessorPresenter::process() {
 }
 
 /**
+Decide which processing action to take next
+*/
+void GenericDataProcessorPresenter::doNextAction() {
+
+  switch (m_nextActionFlag) {
+  case GenericDataProcessorPresenter::ReduceRowFlag:
+    nextRow();
+    break;
+  case GenericDataProcessorPresenter::ReduceGroupFlag:
+    nextGroup();
+    break;
+  }
+  // Not having a 'default' case is deliberate. gcc issues a warning if there's
+  // a flag we aren't handling.
+}
+
+/**
 Process a new row
 */
 void GenericDataProcessorPresenter::nextRow() {
@@ -247,8 +264,7 @@ void GenericDataProcessorPresenter::nextRow() {
   m_workerThread.reset();
 
   if (m_reductionPaused) {
-    // Set next action flag and notify presenter that reduction is paused
-    m_nextActionFlag = GenericDataProcessorPresenter::ReduceRowFlag;
+    // Notify presenter that reduction is paused
     m_mainPresenter->notify(
         DataProcessorMainPresenter::ConfirmReductionPausedFlag);
     return;
@@ -263,21 +279,24 @@ void GenericDataProcessorPresenter::nextRow() {
     // Reduce next row
     m_rowItem = rqueue.front();
     rqueue.pop();
+    // Set next action flag
+    m_nextActionFlag = GenericDataProcessorPresenter::ReduceRowFlag;
 
     auto *worker = new GenericDataProcessorPresenterRowReducerWorker(
         this, &m_rowItem, groupIndex);
-    connect(worker, SIGNAL(finished()), this, SLOT(nextRow()));
     m_workerThread =
         make_unique<GenericDataProcessorPresenterThread>(this, worker);
     m_workerThread->start();
 
   } else {
     m_gqueue.pop();
+    // Set next action flag
+    m_nextActionFlag = GenericDataProcessorPresenter::ReduceGroupFlag;
+
     if (m_groupData.size() > 1) {
       // Multiple rows in containing group, do post-processing on the group
       auto *worker = new GenericDataProcessorPresenterGroupReducerWorker(
           this, m_groupData);
-      connect(worker, SIGNAL(finished()), this, SLOT(nextGroup()));
       m_workerThread =
           make_unique<GenericDataProcessorPresenterThread>(this, worker);
       m_workerThread->start();
@@ -296,8 +315,7 @@ void GenericDataProcessorPresenter::nextGroup() {
   m_workerThread.reset();
 
   if (m_reductionPaused) {
-    // Set next action flag and notify presenter that reduction is paused
-    m_nextActionFlag = GenericDataProcessorPresenter::ReduceGroupFlag;
+    // Notify presenter that reduction is paused
     m_mainPresenter->notify(
         DataProcessorMainPresenter::ConfirmReductionPausedFlag);
     return;
@@ -309,38 +327,31 @@ void GenericDataProcessorPresenter::nextGroup() {
     auto &rqueue = m_gqueue.front().second;
     m_rowItem = rqueue.front();
     rqueue.pop();
+    // Set next action flag
+    m_nextActionFlag = GenericDataProcessorPresenter::ReduceRowFlag;
 
     // Prepare a new thread
     auto *worker = new GenericDataProcessorPresenterRowReducerWorker(
         this, &m_rowItem, groupIndex);
     m_workerThread =
         make_unique<GenericDataProcessorPresenterThread>(this, worker);
-    connect(worker, SIGNAL(finished()), this, SLOT(nextRow()));
     m_workerThread->start();
   } else {
     // If "Output Notebook" checkbox is checked then create an ipython notebook
     if (m_view->getEnableNotebook())
       saveNotebook(m_selectedData);
-    // Signal end of reduction
-    pause();
-    m_mainPresenter->notify(
-        DataProcessorMainPresenter::ConfirmReductionPausedFlag);
-    m_selectionChanged = true; // Allow same selection to be processed again
+    endReduction();
   }
 }
 
 /**
-Update progress
+End reduction
 */
-void GenericDataProcessorPresenter::updateProgress() {
-  m_progressReporter->report();
-}
-
-/**
-Clear progress
-*/
-void GenericDataProcessorPresenter::clearProgress() {
-  m_progressReporter->clear();
+void GenericDataProcessorPresenter::endReduction() {
+  pause();
+  m_mainPresenter->notify(
+      DataProcessorMainPresenter::ConfirmReductionPausedFlag);
+  m_selectionChanged = true; // Allow same selection to be processed again
 }
 
 /**
@@ -348,6 +359,20 @@ Handle reduction error
 */
 void GenericDataProcessorPresenter::reductionError(std::exception ex) {
   m_mainPresenter->giveUserCritical(ex.what(), "Error");
+}
+
+/**
+Handle thread completion
+*/
+void GenericDataProcessorPresenter::threadFinished(const int exitCode) {
+
+  if (exitCode == 0) { // Success
+    m_progressReporter->report();
+    doNextAction();
+  } else { // Error
+    m_progressReporter->clear();
+    endReduction();
+  }
 }
 
 /**
@@ -1424,16 +1449,7 @@ void GenericDataProcessorPresenter::resume() {
   m_mainPresenter->notify(
       DataProcessorMainPresenter::ConfirmReductionResumedFlag);
 
-  switch (m_nextActionFlag) {
-  case GenericDataProcessorPresenter::ReduceRowFlag:
-    nextRow();
-    break;
-  case GenericDataProcessorPresenter::ReduceGroupFlag:
-    nextGroup();
-    break;
-  }
-  // Not having a 'default' case is deliberate. gcc issues a warning if there's
-  // a flag we aren't handling.
+  doNextAction();
 }
 
 /**

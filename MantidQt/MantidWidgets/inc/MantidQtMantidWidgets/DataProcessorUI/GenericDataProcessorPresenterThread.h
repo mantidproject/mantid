@@ -45,20 +45,24 @@ public:
   GenericDataProcessorPresenterThread(QObject *parent, QObject *worker)
       : QThread(parent), m_worker(worker) {
     // Establish connections between parent and worker
-    connect(this, SIGNAL(started()), m_worker, SLOT(startWorker()));
-    connect(worker, SIGNAL(updateProgressSignal()), parent,
-            SLOT(updateProgress()), Qt::QueuedConnection);
-    connect(worker, SIGNAL(clearProgressSignal()), parent,
-            SLOT(clearProgress()), Qt::QueuedConnection);
+    connect(this, SIGNAL(started()), worker, SLOT(startWorker()));
+    connect(worker, SIGNAL(finished(int)), parent, SLOT(threadFinished(int)));
     qRegisterMetaType<std::exception>("std::exception");
     connect(worker, SIGNAL(reductionErrorSignal(std::exception)), parent,
             SLOT(reductionError(std::exception)), Qt::QueuedConnection);
     // Early deletion of thread and worker
-    connect(m_worker, SIGNAL(finished()), m_worker, SLOT(deleteLater()));
+    connect(worker, SIGNAL(finished(int)), this, SLOT(finished(int)));
     connect(this, SIGNAL(finished()), this, SLOT(deleteLater()),
             Qt::DirectConnection);
 
-    m_worker->moveToThread(this);
+    worker->moveToThread(this);
+  }
+
+public slots:
+  void finished(const int exitCode) {
+    Q_UNUSED(exitCode);
+    // queue worker for deletion
+    m_worker->deleteLater();
   }
 
 private: 

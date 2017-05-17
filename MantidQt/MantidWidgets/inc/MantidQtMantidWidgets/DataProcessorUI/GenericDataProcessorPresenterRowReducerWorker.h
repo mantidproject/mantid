@@ -50,20 +50,15 @@ private slots:
       m_presenter->reduceRow(&m_rowItem->second);
       m_presenter->m_manager->update(m_groupIndex, m_rowItem->first,
                                      m_rowItem->second);
-      emit updateProgressSignal();
     } catch (std::exception &ex) {
       emit reductionErrorSignal(ex);
-      emit clearProgressSignal();
-      // Prevent finished() signal from running additional code
-      disconnect(this, SIGNAL(finished()), 0, 0);
+      emit finished(1);
     }
-    emit finished();
+    emit finished(0);
   }
 
 signals:
-  void finished();
-  void updateProgressSignal();
-  void clearProgressSignal();
+  void finished(const int exitCode);
   void reductionErrorSignal(std::exception ex);
 
 private:

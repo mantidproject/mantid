@@ -47,20 +47,15 @@ private slots:
   void startWorker() {
     try {
       m_presenter->postProcessGroup(m_groupData);
-      emit updateProgressSignal();
     } catch (std::exception &ex) {
       emit reductionErrorSignal(ex);
-      emit clearProgressSignal();
-      // Prevent finished() signal from running additional code
-      disconnect(this, SIGNAL(finished()), 0, 0);
+      emit finished(1);
     }
-    emit finished();
+    emit finished(0);
   }
 
 signals:
-  void finished();
-  void updateProgressSignal();
-  void clearProgressSignal();
+  void finished(const int exitCode);
   void reductionErrorSignal(std::exception ex);
 
 private:
