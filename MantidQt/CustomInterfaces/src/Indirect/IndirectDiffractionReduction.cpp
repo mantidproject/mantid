@@ -192,7 +192,7 @@ void IndirectDiffractionReduction::plotResults() {
           AnalysisDataService::Instance().doesExist(it);
       if (workspaceExists)
         pyInput += "plotSpectrum('" + QString::fromStdString(it) +
-                   "', 0, error_bars = True)\n";
+                   "', 0)\n";
       else
         showInformationBox(QString::fromStdString(
             "Workspace '" + it + "' not found\nUnable to plot workspace"));
