@@ -88,8 +88,6 @@ public:
     return std::unique_ptr<TableWorkspace>(doClone());
   }
 
-  using ITableWorkspace::clone;
-
   /// Returns a default-initialized clone of the workspace
   std::unique_ptr<TableWorkspace> cloneEmpty() const {
     return std::unique_ptr<TableWorkspace>(doCloneEmpty());

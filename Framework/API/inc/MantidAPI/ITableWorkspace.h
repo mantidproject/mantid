@@ -125,12 +125,14 @@ public:
   ITableWorkspace_uptr clone() const {
     return std::unique_ptr<ITableWorkspace>(doClone());
   }
-  ITableWorkspace_uptr clone(const std::vector<std::string> &colNames) const;
 
   /// Returns a default-initialized clone of the workspace
   ITableWorkspace_uptr cloneEmpty() const {
     return ITableWorkspace_uptr(doCloneEmpty());
   }
+
+  ITableWorkspace_uptr
+  cloneColumns(const std::vector<std::string> &colNames) const;
 
   ITableWorkspace &operator=(const ITableWorkspace &) = delete;
   /// Return the workspace typeID
