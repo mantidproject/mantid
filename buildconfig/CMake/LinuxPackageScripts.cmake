@@ -39,9 +39,8 @@ file ( WRITE ${CMAKE_CURRENT_BINARY_DIR}/mantid.sh
   "MANTIDPATH=${CMAKE_INSTALL_PREFIX}/${BIN_DIR}\n"
   "PV_PLUGIN_PATH=${CMAKE_INSTALL_PREFIX}/${PVPLUGINS_DIR}/${PVPLUGINS_DIR}\n"
   "PATH=$PATH:$MANTIDPATH\n"
-  "PYTHONPATH=$MANTIDPATH:$PYTHONPATH\n"
 
-  "export MANTIDPATH PV_PLUGIN_PATH PATH PYTHONPATH\n"
+  "export MANTIDPATH PV_PLUGIN_PATH PATH\n"
 )
 
 # c-shell
@@ -50,17 +49,26 @@ file ( WRITE ${CMAKE_CURRENT_BINARY_DIR}/mantid.csh
   "setenv MANTIDPATH \"${CMAKE_INSTALL_PREFIX}/${BIN_DIR}\"\n"
   "setenv PV_PLUGIN_PATH \"${CMAKE_INSTALL_PREFIX}/${PVPLUGINS_DIR}/${PVPLUGINS_DIR}\"\n"
   "setenv PATH \"\${PATH}:\${MANTIDPATH}\"\n"
-
-  "if ($?PYTHONPATH) then\n"
-  "  setenv PYTHONPATH \"\${MANTIDPATH}:\${PYTHONPATH}\"\n"
-  "else\n"
-  "  setenv PYTHONPATH \"\${MANTIDPATH}\"\n"
-  "endif\n"
 )
 
 install ( PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/mantid.sh
   ${CMAKE_CURRENT_BINARY_DIR}/mantid.csh
+  ${CMAKE_CURRENT_BINARY_DIR}/mantid.pth
   DESTINATION ${ETC_DIR}
+)
+
+###########################################################################
+# Find python site-packages dir and create mantid.pth
+###########################################################################
+execute_process(
+  COMMAND "${PYTHON_EXECUTABLE}" -c "if True:
+    from distutils import sysconfig as sc
+    print(sc.get_python_lib(plat_specific=True))"
+  OUTPUT_VARIABLE PYTHON_SITE
+  OUTPUT_STRIP_TRAILING_WHITESPACE)
+
+file ( WRITE ${CMAKE_CURRENT_BINARY_DIR}/mantid.pth
+  "${CMAKE_INSTALL_PREFIX}/${BIN_DIR}\n"
 )
 
 ############################################################################
