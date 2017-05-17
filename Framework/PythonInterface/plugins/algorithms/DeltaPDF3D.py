@@ -119,7 +119,7 @@ class DeltaPDF3D(PythonAlgorithm):
 
         return issues
 
-    def PyExec(self):
+    def PyExec(self): # noqa
         progress = Progress(self, 0.0, 1.0, 5)
         inWS = self.getProperty("InputWorkspace").value
         signal = inWS.getSignalArray().copy()
@@ -145,10 +145,6 @@ class DeltaPDF3D(PythonAlgorithm):
         Y=np.linspace(Ymin,Ymax,Ybins+1)
         Z=np.linspace(Zmin,Zmax,Zbins+1)
 
-        Xs, Ys, Zs = np.mgrid[(X[0]+X[1])/2:(X[-1]+X[-2])/2:Xbins*1j,
-                              (Y[0]+Y[1])/2:(Y[-1]+Y[-2])/2:Ybins*1j,
-                              (Z[0]+Z[1])/2:(Z[-1]+Z[-2])/2:Zbins*1j]
-
         if self.getProperty("RemoveReflections").value:
             progress.report("Removing Reflections")
             size = self.getProperty("Size").value
@@ -167,20 +163,34 @@ class DeltaPDF3D(PythonAlgorithm):
                 sg=SpaceGroupFactory.createSpaceGroup(space_group)
             else:
                 check_space_group = False
-            for h in range(int(np.ceil(Xmin)), int(Xmax)+1):
-                for k in range(int(np.ceil(Ymin)), int(Ymax)+1):
-                    for l in range(int(np.ceil(Zmin)), int(Zmax)+1):
-                        if not check_space_group or sg.isAllowedReflection([h,k,l]):
-                            if cut_shape == 'cube':
+
+            if cut_shape == 'cube':
+                for h in range(int(np.ceil(Xmin)), int(Xmax)+1):
+                    for k in range(int(np.ceil(Ymin)), int(Ymax)+1):
+                        for l in range(int(np.ceil(Zmin)), int(Zmax)+1):
+                            if not check_space_group or sg.isAllowedReflection([h,k,l]):
                                 signal[int((h-size[0]-Xmin)/Xwidth+1):int((h+size[0]-Xmin)/Xwidth),
                                        int((k-size[1]-Ymin)/Ywidth+1):int((k+size[1]-Ymin)/Ywidth),
                                        int((l-size[2]-Zmin)/Zwidth+1):int((l+size[2]-Zmin)/Zwidth)]=np.nan
-                            else:  # sphere
-                                signal[(Xs-h)**2/size[0]**2 + (Ys-k)**2/size[1]**2 + (Zs-l)**2/size[2]**2 < 1]=np.nan
+            else:  # sphere
+                Xst = ((X[:-1]+X[1:])/2).reshape((Xbins, 1, 1))
+                Yst = ((Y[:-1]+Y[1:])/2).reshape((1, Ybins, 1))
+                Zst = ((Z[:-1]+Z[1:])/2).reshape((1, 1, Zbins))
+
+                for h in range(int(np.ceil(Xmin)), int(Xmax)+1):
+                    for k in range(int(np.ceil(Ymin)), int(Ymax)+1):
+                        for l in range(int(np.ceil(Zmin)), int(Zmax)+1):
+                            if not check_space_group or sg.isAllowedReflection([h,k,l]):
+                                signal[(Xst-h)**2/size[0]**2 + (Yst-k)**2/size[1]**2 + (Zst-l)**2/size[2]**2 < 1]=np.nan
 
         if self.getProperty("CropSphere").value:
             progress.report("Cropping to sphere")
             sphereMin = self.getProperty("SphereMin").value
+
+            Xs, Ys, Zs = np.mgrid[(X[0]+X[1])/2:(X[-1]+X[-2])/2:Xbins*1j,
+                                  (Y[0]+Y[1])/2:(Y[-1]+Y[-2])/2:Ybins*1j,
+                                  (Z[0]+Z[1])/2:(Z[-1]+Z[-2])/2:Zbins*1j]
+
             if sphereMin[0] < Property.EMPTY_DBL:
                 if len(sphereMin)==1:
                     sphereMin = np.repeat(sphereMin, 3)
