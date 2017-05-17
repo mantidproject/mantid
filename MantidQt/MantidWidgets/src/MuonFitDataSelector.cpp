@@ -125,17 +125,13 @@ void MuonFitDataSelector::setStartTime(double start) {
  * Get the user's supplied end time (default 10)
  * @returns :: start time input by user in microseconds
  */
-double MuonFitDataSelector::getEndTime() const {
-  return m_endX; 
-}
+double MuonFitDataSelector::getEndTime() const { return m_endX; }
 
 /**
  * Set the end time in the UI WITHOUT sending signal
  * @param end :: [input] End time in microseconds
  */
-void MuonFitDataSelector::setEndTimeQuietly(double end) {
-  m_endX = end;
-}
+void MuonFitDataSelector::setEndTimeQuietly(double end) { m_endX = end; }
 
 /**
  * Set the end time in the UI, and send signal

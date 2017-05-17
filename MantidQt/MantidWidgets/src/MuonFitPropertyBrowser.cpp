@@ -1333,7 +1333,7 @@ void MuonFitPropertyBrowser::combineBtnPressed() {
 /**
 * sets the label for a single fit and
 * selects the relevant group/pair
-* @param name :: string of the ws 
+* @param name :: string of the ws
 */
 void MuonFitPropertyBrowser::setSingleFitLabel(std::string name) {
   clearChosenGroups();
