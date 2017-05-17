@@ -466,6 +466,12 @@ public:
     EXPECT_CALL(mockMainPresenter, getTimeSlicingType())
         .Times(1)
         .WillOnce(Return("LogValue"));
+    EXPECT_CALL(mockMainPresenter, getPreprocessingValues())
+        .Times(6)
+        .WillRepeatedly(Return(std::map<std::string, std::string>()));
+    EXPECT_CALL(mockMainPresenter, getPreprocessingProperties())
+        .Times(6)
+        .WillRepeatedly(Return(std::map<std::string, std::set<std::string>>()));
     EXPECT_CALL(mockMainPresenter, getPreprocessingOptions())
         .Times(6)
         .WillRepeatedly(Return(std::map<std::string, std::string>()));
