@@ -45,6 +45,7 @@ set ( BOOST_DIST_DLLS
     boost_date_time-mt.dll
     boost_python-mt.dll
     boost_regex-mt.dll
+    boost_serialization-mt.dll
 )
 set ( POCO_DIST_DLLS
     PocoCrypto64.dll
@@ -78,6 +79,8 @@ set ( MISC_CORE_DIST_DLLS
     libeay32.dll
     libNeXus-0.dll
     libNeXusCPP-0.dll
+    librdkafka.dll
+    librdkafkacpp.dll
     ssleay32.dll
     szip.dll
     tbb.dll

@@ -44,9 +44,10 @@ class UnwrappedDetector {
 public:
   UnwrappedDetector();
   UnwrappedDetector(const unsigned char *c,
-                    boost::shared_ptr<const Mantid::Geometry::IDetector> det);
+                    const Mantid::Geometry::IDetector &det);
   UnwrappedDetector(const UnwrappedDetector &other);
   UnwrappedDetector &operator=(const UnwrappedDetector &other);
+  bool isValid() const;
   unsigned char color[3]; ///< red, green, blue colour components (0 - 255)
   double u;               ///< horizontal "unwrapped" coordinate
   double v;               ///< vertical "unwrapped" coordinate
@@ -54,7 +55,12 @@ public:
   double height;          ///< detector height in units of v
   double uscale;          ///< scaling factor in u direction
   double vscale;          ///< scaling factor in v direction
-  Mantid::Geometry::IDetector_const_sptr detector;
+  Mantid::detid_t detID;  ///< Detector ID
+  Mantid::Kernel::V3D position;  ///< Detector position
+  Mantid::Kernel::Quat rotation; ///< Detector orientation
+  boost::shared_ptr<const Mantid::Geometry::Object>
+      shape;                       ///< Shape of the detector
+  Mantid::Kernel::V3D scaleFactor; ///< Detector's scale factor
 };
 
 /**
@@ -137,6 +143,8 @@ protected slots:
   void zoom();
   /// Unzoom view to the previous zoom area or to full view
   void unzoom();
+  /// Reset the zoom to the full screen view
+  void resetZoom();
 
 protected:
   /** @name Implemented protected virtual methods */

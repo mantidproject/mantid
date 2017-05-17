@@ -9,8 +9,8 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/RegisterFileLoader.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidKernel/Quat.h"
 #include "MantidKernel/UnitFactory.h"
-#include "MantidGeometry/Instrument/ComponentHelper.h"
 
 #include <boost/algorithm/string.hpp>
 #include <algorithm>

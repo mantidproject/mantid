@@ -298,6 +298,14 @@ public:
         // ID. Setting this will abort the loading of the bank.
         m_loadError = true;
       }
+      // fixup the minimum pixel id in the case that it's lower than the lowest
+      // 'known' id. We test this by checking that when we add the offset we
+      // would not get a negative index into the vector. Note that m_min_id is
+      // a uint so we have to be cautious about adding it to an int which may be
+      // negative.
+      if (static_cast<int32_t>(m_min_id) + alg->pixelID_to_wi_offset < 0) {
+        m_min_id = static_cast<uint32_t>(abs(alg->pixelID_to_wi_offset));
+      }
       // fixup the maximum pixel id in the case that it's higher than the
       // highest 'known' id
       if (m_max_id > static_cast<uint32_t>(alg->eventid_max))
@@ -1770,7 +1778,7 @@ void LoadEventNexus::deleteBanks(EventWorkspaceCollection_sptr workspace,
     std::string det_name = det->getName();
     for (auto &bankName : bankNames) {
       size_t pos = bankName.find("_events");
-      if (det_name.compare(bankName.substr(0, pos)) == 0)
+      if (det_name == bankName.substr(0, pos))
         keep = true;
       if (keep)
         break;

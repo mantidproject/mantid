@@ -1,7 +1,7 @@
 #include "MantidAPI/LiveListenerFactory.h"
-#include "MantidKernel/Logger.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/InstrumentInfo.h"
+#include "MantidKernel/Logger.h"
 #include <Poco/Net/SocketAddress.h>
 
 using boost::shared_ptr;
@@ -22,8 +22,7 @@ Kernel::Logger g_log("LiveListenerFactory");
  *                       create method).
  * @param connect        Whether to connect the listener to the data stream for
  *                       the given instrument.
- * @param properties     Property manager to copy property values to the
- *                       listener if it has any.
+ * @param callingAlgorithm reference to calling algorithm
  * @param listenerConnectionName Name of LiveListenerInfo connection to use.
  * @return A shared pointer to the created ILiveListener implementation
  * @throws Exception::NotFoundError If the requested listener is not registered
@@ -32,7 +31,7 @@ Kernel::Logger g_log("LiveListenerFactory");
  */
 boost::shared_ptr<ILiveListener> LiveListenerFactoryImpl::create(
     const std::string &instrumentName, bool connect,
-    const Kernel::IPropertyManager *properties,
+    const API::IAlgorithm *callingAlgorithm,
     const std::string &listenerConnectionName) const {
   try {
     // Look up LiveListenerInfo based on given instrument and listener names
@@ -40,14 +39,14 @@ boost::shared_ptr<ILiveListener> LiveListenerFactoryImpl::create(
     auto info = inst.liveListenerInfo(listenerConnectionName);
 
     // Defer creation logic to other create overload
-    return create(info, connect, properties);
+    return create(info, connect, callingAlgorithm);
 
   } catch (Kernel::Exception::NotFoundError &) {
     // Could not determine LiveListenerInfo for instrumentName
     // Attempt to interpret instrumentName as listener class name instead, to
     // support legacy usage in unit tests.
     Kernel::LiveListenerInfo info(instrumentName);
-    return create(info, connect, properties);
+    return create(info, connect, callingAlgorithm);
   }
 }
 
@@ -60,20 +59,21 @@ boost::shared_ptr<ILiveListener> LiveListenerFactoryImpl::create(
  * @param info       LiveListenerInfo based on which to create the LiveListener
  * @param connect    Whether to connect the listener to the data stream for the
  *                   given instrument.
- * @param properties Property manager to copy property values to the listener
+ * @param callingAlgorithm reference to calling algorithm
  *                   if it has any.
  * @return A shared pointer to the created ILiveListener implementation
  */
-boost::shared_ptr<ILiveListener> LiveListenerFactoryImpl::create(
-    const Kernel::LiveListenerInfo &info, bool connect,
-    const Kernel::IPropertyManager *properties) const {
+boost::shared_ptr<ILiveListener>
+LiveListenerFactoryImpl::create(const Kernel::LiveListenerInfo &info,
+                                bool connect,
+                                const API::IAlgorithm *callingAlgorithm) const {
 
   ILiveListener_sptr listener =
       Kernel::DynamicFactory<ILiveListener>::create(info.listener());
 
   // Give LiveListener additional properties if provided
-  if (properties) {
-    listener->updatePropertyValues(*properties);
+  if (callingAlgorithm) {
+    listener->setAlgorithm(*callingAlgorithm);
   }
 
   if (connect) {

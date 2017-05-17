@@ -12,6 +12,7 @@
 #include "MantidAPI/SpectraAxis.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidIndexing/IndexInfo.h"
+#include "MantidTypes/SpectrumDefinition.h"
 
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string/classification.hpp>
@@ -192,14 +193,13 @@ void GeneratePeaks::processAlgProperties(std::string &peakfunctype,
     bkgdfunctype = strs[0];
   }
 
-  if (bkgdfunctype.compare("Auto") == 0) {
+  if (bkgdfunctype == "Auto") {
     m_useAutoBkgd = true;
     bkgdfunctype = "Quadratic";
-  } else if (bkgdfunctype.compare("None") == 0) {
+  } else if (bkgdfunctype == "None") {
     m_useAutoBkgd = false;
     m_genBackground = false;
-  } else if (bkgdfunctype.compare("Linear") == 0 ||
-             bkgdfunctype.compare("Flat") == 0) {
+  } else if (bkgdfunctype == "Linear" || bkgdfunctype == "Flat") {
     m_useAutoBkgd = false;
     bkgdfunctype = bkgdfunctype + "Background";
   }
@@ -517,9 +517,9 @@ void GeneratePeaks::processTableColumnNames() {
   // Initial check
   std::vector<std::string> colnames = m_funcParamWS->getColumnNames();
 
-  if (colnames[0].compare("spectrum") != 0)
+  if (colnames[0] != "spectrum")
     throw std::runtime_error("First column must be 'spectrum' in integer. ");
-  if (colnames.back().compare("chi2") != 0)
+  if (colnames.back() != "chi2")
     throw std::runtime_error("Last column must be 'chi2'.");
 
   // Process column names in case that there are not same as parameter names
@@ -760,7 +760,7 @@ GeneratePeaks::createDataWorkspace(std::vector<double> binparameters) {
       xvalue += fabs(dx) * xvalue;
   }
 
-  std::vector<specnum_t> specNums;
+  std::vector<Indexing::SpectrumNumber> specNums;
   for (const auto &item : m_SpectrumMap) {
     specnum_t specid = item.first;
     g_log.debug() << "Build WorkspaceIndex-Spectrum  " << specNums.size()
@@ -770,6 +770,10 @@ GeneratePeaks::createDataWorkspace(std::vector<double> binparameters) {
 
   Indexing::IndexInfo indices(specNums.size());
   indices.setSpectrumNumbers(std::move(specNums));
+  // There is no instrument, so the automatic build of a 1:1 mapping would fail.
+  // Need to set empty grouping manually.
+  indices.setSpectrumDefinitions(
+      std::vector<SpectrumDefinition>(specNums.size()));
   return create<Workspace2D>(indices, BinEdges(std::move(xarray)));
 }
 

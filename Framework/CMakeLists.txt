@@ -57,6 +57,10 @@ if ( ${CMAKE_SYSTEM_NAME} MATCHES "Linux" )
   endif ( MPI_BUILD )
 endif ()
 
+if ( MPI_EXPERIMENTAL )
+  include ( BoostMPI )
+endif ()
+
 ###########################################################################
 # Now add the packages one-by-one, building up the dependencies as we go
 ###########################################################################
@@ -70,6 +74,9 @@ add_subdirectory (Types)
 include_directories (Kernel/inc)
 add_subdirectory (Kernel)
 
+include_directories (Parallel/inc)
+add_subdirectory (Parallel)
+
 include_directories (HistogramData/inc)
 add_subdirectory (HistogramData)
 
@@ -79,6 +86,7 @@ add_subdirectory (Indexing)
 include_directories (Beamline/inc)
 add_subdirectory (Beamline)
 
+set ( MANTIDLIBS ${MANTIDLIBS} Parallel )
 # HistogramData has header-only dependency on Kernel, so Kernel comes after.
 set ( MANTIDLIBS ${MANTIDLIBS} HistogramData )
 # Indexing has header-only dependency on Kernel, so Kernel comes after.

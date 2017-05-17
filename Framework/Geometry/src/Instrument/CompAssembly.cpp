@@ -1,3 +1,4 @@
+#include "MantidGeometry/Instrument/ComponentVisitor.h"
 #include "MantidGeometry/Instrument/CompAssembly.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidGeometry/Instrument/StructuredDetector.h"
@@ -475,7 +476,7 @@ V3D CompAssembly::getPos() const {
  * creates it if it is not available.
  * @returns A vector of the absolute position
  */
-const Quat CompAssembly::getRotation() const {
+Quat CompAssembly::getRotation() const {
   if (!m_map)
     return Component::getRotation();
   else {
@@ -486,6 +487,10 @@ const Quat CompAssembly::getRotation() const {
     }
     return rot;
   }
+}
+
+void CompAssembly::registerContents(ComponentVisitor &visitor) const {
+  visitor.registerComponentAssembly(*this);
 }
 
 /** Print information about elements in the assembly to a stream
