@@ -320,7 +320,7 @@ def spline_workspaces(focused_vanadium_spectra, num_splines):
     return splined_ws_list
 
 
-def subtract_summed_runs(ws_to_correct, empty_sample_ws_string, instrument):
+def subtract_summed_runs(ws_to_correct, empty_sample_ws_string, instrument, scale_factor=None):
     """
     Loads the list of empty runs specified by the empty_sample_ws_string and subtracts
     them from the workspace specified. Returns the subtracted workspace.
@@ -329,11 +329,18 @@ def subtract_summed_runs(ws_to_correct, empty_sample_ws_string, instrument):
     :param instrument: The instrument object these runs belong to
     :return: The workspace with the empty runs subtracted
     """
-    if empty_sample_ws_string:
-        empty_sample = load_current_normalised_ws_list(run_number_string=empty_sample_ws_string, instrument=instrument,
-                                                       input_batching=INPUT_BATCHING.Summed)
-        mantid.Minus(LHSWorkspace=ws_to_correct, RHSWorkspace=empty_sample[0], OutputWorkspace=ws_to_correct)
-        remove_intermediate_workspace(empty_sample)
+    # If an empty string was not specified just return to skip this step
+    if empty_sample_ws_string is None:
+        return ws_to_correct
+
+    empty_sample = load_current_normalised_ws_list(run_number_string=empty_sample_ws_string, instrument=instrument,
+                                                   input_batching=INPUT_BATCHING.Summed)
+    empty_sample = empty_sample[0]
+    if scale_factor:
+        empty_sample = mantid.Scale(InputWorkspace=empty_sample, OutputWorkspace=empty_sample, Factor=scale_factor,
+                                    Operation="Multiply")
+    mantid.Minus(LHSWorkspace=ws_to_correct, RHSWorkspace=empty_sample, OutputWorkspace=ws_to_correct)
+    remove_intermediate_workspace(empty_sample)
 
     return ws_to_correct
 

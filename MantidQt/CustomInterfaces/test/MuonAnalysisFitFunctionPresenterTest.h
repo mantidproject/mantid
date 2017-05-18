@@ -65,6 +65,7 @@ public:
   MOCK_CONST_METHOD0(getWorkspaceNamesToFit, std::vector<std::string>());
   MOCK_METHOD1(userChangedDatasetIndex, void(int));
   MOCK_METHOD1(setMultiFittingMode, void(bool));
+  MOCK_METHOD1(setTFAsymmMode, void(bool));
   MOCK_METHOD1(fitRawDataClicked, void(bool));
   MOCK_METHOD0(doRemoveGuess, void());
   MOCK_METHOD0(doPlotGuess, void());
@@ -223,7 +224,17 @@ public:
     EXPECT_CALL(*m_fitBrowser, setMultiFittingMode(false)).Times(1);
     m_presenter->setMultiFitState(MultiFitState::Disabled);
   }
+  void test_setTFAsymmMode_On() {
+    EXPECT_CALL(*m_fitBrowser, setTFAsymmMode(true)).Times(1);
+    m_presenter->setTFAsymmState(
+        MantidQt::CustomInterfaces::Muon::TFAsymmState::Enabled);
+  }
 
+  void test_setTFAsymmMode_Off() {
+    EXPECT_CALL(*m_fitBrowser, setTFAsymmMode(false)).Times(1);
+    m_presenter->setTFAsymmState(
+        MantidQt::CustomInterfaces::Muon::TFAsymmState::Disabled);
+  }
   void test_setFunctionInModel_multiFitOn_hasGuess() {
     doTest_setFunctionInModel(MultiFitState::Enabled, true);
   }

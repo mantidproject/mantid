@@ -65,6 +65,9 @@ class HelperTestingClass(object):
         else:
             raise RuntimeError("Invalid name. Name should be a string but it is %s " % type(name))
 
+    def set_cross_section(self, cross_section=None):
+        self._cross_section_factor = cross_section
+
     def case_from_scratch(self):
         """
         User performs calculation from scratch (not loaded from hdf file). All data is calculated.
@@ -312,83 +315,29 @@ class AbinsCASTEPTestScale(stresstesting.MantidStressTest, HelperTestingClass):
         def validate(self):
             return self._output_name, self.ref_result
 
-# ----------------------------------------------------------------------------------------------------------------
-# Tests for 2D S
-# ----------------------------------------------------------------------------------------------------------------
 
+# noinspection PyAttributeOutsideInit,PyPep8Naming
+class AbinsCASTEPNoH(stresstesting.MantidStressTest, HelperTestingClass):
+    """
+    In this benchmark it is tested if calculation for systems without H is correct.
+    """
+    _wrk_1 = None
+    _ref_result = None
 
-# class AbinsCASTEPTestScratchTwoDMap(stresstesting.MantidStressTest, HelperTestingClass):
-#     """
-#     In this benchmark it is tested if calculation from scratch with input data from CASTEP, for 1-2 order quantum
-#     events and for TwoDMap is correct.
-#     """
-#     _ref_result = None
-#     tolerance = None
-#
-#     def runTest(self):
-#
-#         HelperTestingClass.__init__(self)
-#
-#         name = "BenzeneScratchTwoDMapAbins"
-#         AbinsParameters.q_start = 0.0  # beginning of q interval
-#         AbinsParameters.q_end = 30  # end of q interval
-#         AbinsParameters.q_step = 5.0  # sampling of q
-#
-#         self._ref_result = name + ".nxs"
-#         self.set_dft_program("CASTEP")
-#         self.set_name(name)
-#         self.set_instrument_name("TwoDMap")
-#         self.set_order(AbinsConstants.QUANTUM_ORDER_TWO)
-#         self.case_from_scratch()
-#
-#     def validate(self):
-#
-#         self.tolerance = 1e-2
-#
-#         return self._output_name, self._ref_result
-#
-#
-# class AbinsCASTEPTestScaleTwoDMap(stresstesting.MantidStressTest, HelperTestingClass):
-#     """
-#     In this benchmark it is tested if scaling is correct.
-#     """
-#     _wrk_1 = None
-#     _wrk_2 = None
-#
-#     def runTest(self):
-#         HelperTestingClass.__init__(self)
-#
-#         AbinsParameters.q_start = 0.0  # beginning of q interval
-#         AbinsParameters.q_end = 30  # end of q interval
-#         AbinsParameters.q_step = 5.0  # sampling of q
-#
-#         scaling_factor = 2.0
-#
-#         name = "BenzeneNoScaleTwoDMap"
-#         self.set_dft_program("CASTEP")
-#         self.set_name(name)
-#         self.set_instrument_name("TwoDMap")
-#         self.set_order(AbinsConstants.QUANTUM_ORDER_TWO)
-#         self.case_from_scratch()
-#         self._wrk_1 = self._output_name
-#
-#         Scale(InputWorkspace=self._wrk_1,
-#               OutputWorkspace=self._wrk_1,
-#               Operation='Multiply',
-#               Factor=scaling_factor)
-#
-#         self._output_name = ""
-#         name = "BenzeneScaleTwoDMap"
-#         self.set_dft_program("CASTEP")
-#         self.set_name(name)
-#         self.set_instrument_name("TwoDMap")
-#         self.set_order(AbinsConstants.QUANTUM_ORDER_TWO)
-#         self.set_scale(scaling_factor)
-#         self.case_from_scratch()
-#         self._wrk_2 = self._output_name
-#
-#     def validateMethod(self):
-#         return "validateWorkspaceToWorkspace"
-#
-#     def validate(self):
-#         return self._wrk_1, self._wrk_2
+    def skipTests(self):
+        return skip_tests()
+
+    def runTest(self):
+        HelperTestingClass.__init__(self)
+
+        name = "Na2SiF6"
+        self.ref_result = name + ".nxs"
+        self.set_dft_program("CASTEP")
+        self.set_name(name)
+        self.set_order(AbinsConstants.QUANTUM_ORDER_FOUR)
+        self.set_cross_section(cross_section="Total")
+        self.case_from_scratch()
+        self._wrk_1 = self._output_name
+
+    def validate(self):
+        return self._output_name, self.ref_result
