@@ -73,24 +73,31 @@ void FindEPP::exec() {
  */
 void FindEPP::fitGaussian(int64_t index) {
   size_t spectrum = static_cast<size_t>(index);
+  m_outWS->cell<int>(spectrum, 0) = static_cast<int>(spectrum);
+
   const auto &x = m_inWS->x(spectrum).rawData();
   const auto &y = m_inWS->y(spectrum).rawData();
   const auto &e = m_inWS->e(spectrum).rawData();
 
+  // Find the maximum value and it's index
   const auto maxIt = std::max_element(y.begin(), y.end());
   const double height = *maxIt;
   size_t maxIndex = static_cast<size_t>(std::distance(y.begin(), maxIt));
 
-  m_outWS->cell<int>(spectrum, 0) = static_cast<int>(spectrum);
-
   if (height > 0) {
+    // Find how many bins are around maximum, that are above half-maximum
+    // Initialize the distances of the half-maxima bins from maximum
     size_t leftHalf = maxIndex, rightHalf = x.size() - maxIndex - 1;
+
+    // Find the first bin on the right side of maximum, that drops below half-maximum
     for (auto it = maxIt; it != y.end(); ++it) {
       if (*it < 0.5 * height) {
         rightHalf = it - maxIt - 1;
         break;
       }
     }
+
+    // Find the first bin on the left side of maximum, that drops below half-maximum
     for (auto it = maxIt; it != y.begin(); --it) {
       if (*it < 0.5 * height) {
         leftHalf = maxIt - it - 1;
@@ -101,8 +108,11 @@ void FindEPP::fitGaussian(int64_t index) {
                   << " has last bins above 0.5*max at " << leftHalf << "\t"
                   << rightHalf << "\n";
 
+    // We want to fit only if there are at least 3 bins (including the maximum itself)
+    // above half-maximum
     if (rightHalf + leftHalf >= 2) {
 
+      // Prepare the initial parameters for the fit
       double fwhm = x[maxIndex + rightHalf] - x[maxIndex - leftHalf];
       double sigma = fwhm / (2. * sqrt(2. * log(2.)));
       double center = x[maxIndex];
