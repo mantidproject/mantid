@@ -304,8 +304,8 @@ def rebin_workspace_list(workspace_list, bin_width_list, start_x_list=None, end_
         raise ValueError("The number of ending bin values does not match the number of banks")
 
     # Create a list of None types of equal length to make using zip iterator easy
-    start_x_list = [None for _ in range(ws_list_len)] if start_x_list is None else start_x_list
-    end_x_list = [None for _ in range(ws_list_len)] if end_x_list is None else end_x_list
+    start_x_list = [None] * ws_list_len if start_x_list is None else start_x_list
+    end_x_list = [None] * ws_list_len if end_x_list is None else end_x_list
 
     output_list = []
     for ws, bin_width, start_x, end_x in zip(workspace_list, bin_width_list, start_x_list, end_x_list):

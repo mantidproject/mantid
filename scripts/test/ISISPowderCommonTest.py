@@ -291,7 +291,7 @@ class ISISPowderCommonTest(unittest.TestCase):
         new_bin_width = 0.5
         number_of_ws = 10
 
-        ws_bin_widths = [new_bin_width for _ in range(number_of_ws)]
+        ws_bin_widths = [new_bin_width] * number_of_ws
         ws_list = []
         for i in range(number_of_ws):
             out_name = "test_rebin_workspace_list_defaults_" + str(i)
@@ -307,7 +307,7 @@ class ISISPowderCommonTest(unittest.TestCase):
 
         # What about if the lists aren't the same length
         with assertRaisesRegex(self, ValueError, "does not match the number of banks"):
-            incorrect_number_bin_widths = [1 for _ in range(number_of_ws - 1)]
+            incorrect_number_bin_widths = [1] * (number_of_ws - 1)
             common.rebin_workspace_list(workspace_list=ws_list, bin_width_list=incorrect_number_bin_widths)
 
         # Does it return all the workspaces as a list - another unit test checks the implementation
@@ -323,9 +323,9 @@ class ISISPowderCommonTest(unittest.TestCase):
         new_bin_width = 0.5
         number_of_ws = 10
 
-        ws_bin_widths = [new_bin_width for _ in range(number_of_ws)]
-        start_x_list = [new_start_x for _ in range(number_of_ws)]
-        end_x_list = [new_end_x for _ in range(number_of_ws)]
+        ws_bin_widths = [new_bin_width] * number_of_ws
+        start_x_list = [new_start_x] * number_of_ws
+        end_x_list = [new_end_x] * number_of_ws
 
         ws_list = []
         for i in range(number_of_ws):
@@ -334,7 +334,7 @@ class ISISPowderCommonTest(unittest.TestCase):
                                                         NumBanks=1, BankPixelWidth=1, XMax=10, BinWidth=1))
 
         # Are the lengths checked
-        incorrect_length = [1 for _ in range(number_of_ws - 1)]
+        incorrect_length = [1] * (number_of_ws - 1)
         with assertRaisesRegex(self, ValueError, "The number of starting bin values"):
             common.rebin_workspace_list(workspace_list=ws_list, bin_width_list=ws_bin_widths,
                                         start_x_list=incorrect_length, end_x_list=end_x_list)
