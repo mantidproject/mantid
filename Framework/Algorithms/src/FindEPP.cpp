@@ -89,7 +89,8 @@ void FindEPP::fitGaussian(int64_t index) {
     // Initialize the distances of the half-maxima bins from maximum
     size_t leftHalf = maxIndex, rightHalf = x.size() - maxIndex - 1;
 
-    // Find the first bin on the right side of maximum, that drops below half-maximum
+    // Find the first bin on the right side of maximum, that drops below
+    // half-maximum
     for (auto it = maxIt; it != y.end(); ++it) {
       if (*it < 0.5 * height) {
         rightHalf = it - maxIt - 1;
@@ -97,7 +98,8 @@ void FindEPP::fitGaussian(int64_t index) {
       }
     }
 
-    // Find the first bin on the left side of maximum, that drops below half-maximum
+    // Find the first bin on the left side of maximum, that drops below
+    // half-maximum
     for (auto it = maxIt; it != y.begin(); --it) {
       if (*it < 0.5 * height) {
         leftHalf = maxIt - it - 1;
@@ -108,8 +110,8 @@ void FindEPP::fitGaussian(int64_t index) {
                   << " has last bins above 0.5*max at " << leftHalf << "\t"
                   << rightHalf << "\n";
 
-    // We want to fit only if there are at least 3 bins (including the maximum itself)
-    // above half-maximum
+    // We want to fit only if there are at least 3 bins (including the maximum
+    // itself) above half-maximum
     if (rightHalf + leftHalf >= 2) {
 
       // Prepare the initial parameters for the fit
