@@ -177,14 +177,13 @@ public:
     // No monitor normalization
     // Direct beam normalization: 2-3
     // No transmission correction
-    // Processing instructions : 1
+    // Processing instructions : 2
 
     ReflectometryReductionOne2 alg;
     setupAlgorithm(alg, 1.5, 15.0, "2");
     alg.setPropertyValue("RegionOfDirectBeam", "2-3");
     MatrixWorkspace_sptr outLam = runAlgorithmLam(alg);
 
-    // Y counts, should be 0.5 = 1 (from detector ws) / 2 (from direct beam)
     TS_ASSERT_DELTA(outLam->y(0)[0], 0.4991, 0.0001);
   }
 
@@ -226,7 +225,7 @@ public:
     // Monitor normalization
     // No direct beam normalization
     // No transmission correction
-    // Processing instructions : 1
+    // Processing instructions : 2
 
     // I0MonitorIndex: 0
     // MonitorBackgroundWavelengthMin : 0.5
@@ -317,7 +316,6 @@ public:
                                          m_transmissionWS, true);
     MatrixWorkspace_sptr outLam = runAlgorithmLam(alg);
 
-    // Expected values are 1 = m_wavelength / m_wavelength
     TS_ASSERT_DELTA(outLam->y(0)[0], 0.0807, 0.0001);
     TS_ASSERT_DELTA(outLam->y(0)[7], 0.0802, 0.0001);
   }
@@ -345,7 +343,6 @@ public:
     alg.setProperty("StrictSpectrumChecking", "0");
     MatrixWorkspace_sptr outLam = runAlgorithmLam(alg);
 
-    // Expected values are 1 = m_wavelength / m_wavelength
     TS_ASSERT_DELTA(outLam->y(0)[0], 0.0571, 0.0001);
     TS_ASSERT_DELTA(outLam->y(0)[7], 0.0571, 0.0001);
   }
@@ -382,7 +379,7 @@ public:
     // No monitor normalization
     // No direct beam normalization
     // No transmission correction
-    // Processing instructions : 1
+    // Processing instructions : 2
 
     ReflectometryReductionOne2 alg;
     setupAlgorithm(alg, 1.5, 15.0, "2");
