@@ -461,7 +461,7 @@ def _create_intensity_constraint_str(intensity_constraints):
     """
     if intensity_constraints:
         if not isinstance(intensity_constraints[0], list):
-            intensity_constraints = [intensity_constraints, ]
+            intensity_constraints = [intensity_constraints]
         # Make each element a string and then join them together
         intensity_constraints = [str(c) for c in intensity_constraints]
         intensity_constraints_str = ";".join(intensity_constraints)
