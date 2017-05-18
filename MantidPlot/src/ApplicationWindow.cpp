@@ -6051,7 +6051,7 @@ bool ApplicationWindow::saveProject(bool compress) {
   return true;
 }
 
-void ApplicationWindow::prepareSaveProject() {
+int ApplicationWindow::execSaveProjectDialog() {
   std::vector<IProjectSerialisable *> windows;
 
   for (auto window : getSerialisableWindows()) {
@@ -6071,7 +6071,12 @@ void ApplicationWindow::prepareSaveProject() {
       projectname, *serialiser, windows, this);
   connect(m_projectSaveView, SIGNAL(projectSaved()), this,
           SLOT(postSaveProject()));
-  m_projectSaveView->exec();
+  return m_projectSaveView->exec();
+}
+
+void ApplicationWindow::prepareSaveProject() {
+  auto result = execSaveProjectDialog();
+  (void)result;
 }
 
 /**
@@ -9790,7 +9795,11 @@ void ApplicationWindow::closeEvent(QCloseEvent *ce) {
         QMessageBox::information(this, tr("MantidPlot"), savemsg, tr("Yes"),
                                  tr("No"), tr("Cancel"), 0, 2);
     if (result == 0) {
-      prepareSaveProject();
+      auto response = execSaveProjectDialog();
+      if (response != QDialog::Accepted) {
+        ce->ignore();
+        return;
+      }
     } else if (result == 2) {
       // User wanted to cancel, do nothing
       ce->ignore();
