@@ -140,6 +140,39 @@ public:
     TS_ASSERT_THROWS_ANYTHING(alg.execute());
   }
 
+  void test_sum_in_lambda() {
+    // Test IvsLam workspace
+    // No monitor normalization
+    // No direct beam normalization
+    // No transmission correction
+    // SummationType : SumInLambda (same as default)
+
+    ReflectometryReductionOne2 alg;
+    setupAlgorithm(alg, 1.5, 15.0, "1");
+    alg.setProperty("SummationType", "SumInLambda");
+    MatrixWorkspace_sptr outLam = runAlgorithmLam(alg);
+
+    TS_ASSERT(outLam->x(0)[0] >= 1.5);
+    TS_ASSERT(outLam->x(0)[7] <= 15.0);
+    TS_ASSERT_DELTA(outLam->y(0)[0], 2.0000, 0.0001);
+    TS_ASSERT_DELTA(outLam->y(0)[7], 2.0000, 0.0001);
+  }
+
+  void test_sum_in_lambda_with_bad_reduction_type() {
+    // Test IvsLam workspace
+    // No monitor normalization
+    // No direct beam normalization
+    // No transmission correction
+    // SummationType : SumInLambda (same as default)
+    // ReductionType : DivergentBeam (invalid)
+
+    ReflectometryReductionOne2 alg;
+    setupAlgorithm(alg, 1.5, 15.0, "1");
+    alg.setProperty("SummationType", "SumInLambda");
+    alg.setProperty("ReductionType", "DivergentBeam");
+    TS_ASSERT_THROWS_ANYTHING(alg.execute());
+  }
+
   void test_IvsLam_direct_beam() {
     // Test IvsLam workspace
     // No monitor normalization
