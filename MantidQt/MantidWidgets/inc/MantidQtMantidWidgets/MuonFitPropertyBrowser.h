@@ -213,6 +213,9 @@ private:
   QPushButton *m_reselectPeriodBtn;
   QPushButton *m_generateBtn;
   QGroupBox *m_btnGroup;
+  QDialog *m_groupWindow;
+  QDialog *m_periodWindow;
+  QDialog *m_comboWindow;
 
   std::vector<std::string> m_groupsList = {"fwd", "bkwd", "top", "bottom",
                                            "bwd"};

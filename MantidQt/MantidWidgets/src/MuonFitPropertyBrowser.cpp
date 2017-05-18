@@ -195,6 +195,9 @@ void MuonFitPropertyBrowser::init() {
   m_reselectGroupBtn = new QPushButton("Groups/Pairs");
   m_reselectPeriodBtn = new QPushButton("Periods");
   m_generateBtn = new QPushButton("Combine Periods");
+  m_groupWindow = new QDialog(this);
+  m_periodWindow = new QDialog(this);
+  m_comboWindow = new QDialog(this);
 
   m_reselectGroupBtn->setEnabled(false);
   m_reselectPeriodBtn->setEnabled(false);
@@ -1106,22 +1109,23 @@ void MuonFitPropertyBrowser::setAllPairs() {
 * selection of groups/pairs
 */
 void MuonFitPropertyBrowser::genGroupWindow() {
-  QWidget *w = new QWidget;
-  QtGroupPropertyManager *groupManager = new QtGroupPropertyManager(w);
-  QVBoxLayout *layout = new QVBoxLayout(w);
-  QtTreePropertyBrowser *groupBrowser = new QtTreePropertyBrowser();
-  QtProperty *groupSettings = groupManager->addProperty("Group/Pair selection");
-  for (auto iter = m_groupBoxes.constBegin(); iter != m_groupBoxes.constEnd();
-       ++iter) {
-    groupSettings->addSubProperty(m_groupBoxes.value(iter.key()));
-    m_boolManager->setValue(iter.value(), m_boolManager->value(iter.value()));
-  }
-  QtCheckBoxFactory *checkBoxFactory = new QtCheckBoxFactory(w);
-  groupBrowser->setFactoryForManager(m_boolManager, checkBoxFactory);
-  groupBrowser->addProperty(groupSettings);
-  layout->addWidget(groupBrowser);
-  w->setLayout(layout);
-  w->show();
+	
+		QtGroupPropertyManager *groupManager = new QtGroupPropertyManager(m_groupWindow);
+		QVBoxLayout *layout = new QVBoxLayout(m_groupWindow);
+		QtTreePropertyBrowser *groupBrowser = new QtTreePropertyBrowser();
+		QtProperty *groupSettings = groupManager->addProperty("Group/Pair selection");
+		for (auto iter = m_groupBoxes.constBegin(); iter != m_groupBoxes.constEnd();
+			++iter) {
+			groupSettings->addSubProperty(m_groupBoxes.value(iter.key()));
+			m_boolManager->setValue(iter.value(), m_boolManager->value(iter.value()));
+		}
+		QtCheckBoxFactory *checkBoxFactory = new QtCheckBoxFactory(m_groupWindow);
+		groupBrowser->setFactoryForManager(m_boolManager, checkBoxFactory);
+		groupBrowser->addProperty(groupSettings);
+		layout->addWidget(groupBrowser);
+		m_groupWindow->setLayout(layout);
+		m_groupWindow->show();
+	
 }
 /**
 * Sets checkboxes for periods
@@ -1272,9 +1276,8 @@ void MuonFitPropertyBrowser::setChosenPeriods(const QString &period) {
 * selection of periods
 */
 void MuonFitPropertyBrowser::genPeriodWindow() {
-  QWidget *w = new QWidget;
-  QtGroupPropertyManager *groupManager = new QtGroupPropertyManager(w);
-  QVBoxLayout *layout = new QVBoxLayout(w);
+  QtGroupPropertyManager *groupManager = new QtGroupPropertyManager(m_periodWindow);
+  QVBoxLayout *layout = new QVBoxLayout(m_periodWindow);
   QtTreePropertyBrowser *groupBrowser = new QtTreePropertyBrowser();
   QtProperty *groupSettings = groupManager->addProperty("Period selection");
   for (auto iter = m_periodBoxes.constBegin(); iter != m_periodBoxes.constEnd();
@@ -1282,20 +1285,19 @@ void MuonFitPropertyBrowser::genPeriodWindow() {
     groupSettings->addSubProperty(m_periodBoxes.value(iter.key()));
     m_boolManager->setValue(iter.value(), m_boolManager->value(iter.value()));
   }
-  QtCheckBoxFactory *checkBoxFactory = new QtCheckBoxFactory(w);
+  QtCheckBoxFactory *checkBoxFactory = new QtCheckBoxFactory(m_periodWindow);
   groupBrowser->setFactoryForManager(m_boolManager, checkBoxFactory);
   groupBrowser->addProperty(groupSettings);
   layout->addWidget(groupBrowser);
-  w->setLayout(layout);
-  w->show();
+  m_periodWindow->setLayout(layout);
+  m_periodWindow->show();
 }
 /*
 * Create a pop up window to create
 * a combination of periods
 */
 void MuonFitPropertyBrowser::genCombinePeriodWindow() {
-  QWidget *w = new QWidget;
-  QVBoxLayout *layout = new QVBoxLayout(w);
+  QVBoxLayout *layout = new QVBoxLayout(m_comboWindow);
   QFormLayout *formLayout = new QFormLayout;
   m_positiveCombo = new QLineEdit();
   m_negativeCombo = new QLineEdit();
@@ -1308,8 +1310,8 @@ void MuonFitPropertyBrowser::genCombinePeriodWindow() {
   connect(applyBtn, SIGNAL(released()), this, SLOT(combineBtnPressed()));
 
   layout->addWidget(applyBtn);
-  w->setLayout(layout);
-  w->show();
+  m_comboWindow->setLayout(layout);
+  m_comboWindow->show();
 }
 /*
 * Get the positive and negative parts of the
