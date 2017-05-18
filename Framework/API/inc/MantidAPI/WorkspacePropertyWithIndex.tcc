@@ -130,8 +130,14 @@ WorkspacePropertyWithIndex<TYPE>::clone() const {
 template <typename TYPE>
 WorkspacePropertyWithIndex<TYPE>::
 operator const std::tuple<boost::shared_ptr<TYPE>, SpectrumIndexSet>() const {
-  return std::make_pair(boost::dynamic_pointer_cast<TYPE>(getWorkspace()),
-                        getIndices());
+  return std::make_pair(operator()(), getIndices());
+}
+
+template <typename TYPE>
+WorkspacePropertyWithIndex<TYPE>::
+operator const std::tuple<boost::shared_ptr<const TYPE>, SpectrumIndexSet>()
+    const {
+  return std::make_pair(operator()(), getIndices());
 }
 
 template <typename TYPE>

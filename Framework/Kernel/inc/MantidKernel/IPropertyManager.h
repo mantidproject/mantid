@@ -438,9 +438,15 @@ protected:
       return pm.getValue<boost::shared_ptr<T>>(prop);
     }
 
-    /// explicit specialization for std::pair with boost::shared_ptr<T> and S
+    /// explicit specialization for std::tuple with boost::shared_ptr<T> and S
     template <typename T, typename S>
     operator std::tuple<boost::shared_ptr<T>, S>() {
+      return pm.getValue<std::tuple<boost::shared_ptr<T>, S>>(prop);
+    }
+
+    /// explicit specialization for std::tuple with boost::shared_ptr<T> and S
+    template <typename T, typename S>
+    operator std::tuple<boost::shared_ptr<const T>, S>() {
       return pm.getValue<std::tuple<boost::shared_ptr<T>, S>>(prop);
     }
 

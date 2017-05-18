@@ -2015,12 +2015,18 @@ void MatrixWorkspace::updateCachedDetectorGrouping(const size_t index) const {
 namespace Mantid {
 namespace Kernel {
 
+using Mantid::API::MatrixWorkspace;
+using Mantid::API::MatrixWorkspace_sptr;
+using Mantid::API::MatrixWorkspace_const_sptr;
+using Mantid::Indexing::SpectrumIndexSet;
+using Mantid::API::WorkspacePropertyWithIndex;
+
 template <>
-MANTID_API_DLL Mantid::API::MatrixWorkspace_sptr
-IPropertyManager::getValue<Mantid::API::MatrixWorkspace_sptr>(
+MANTID_API_DLL MatrixWorkspace_sptr
+IPropertyManager::getValue<MatrixWorkspace_sptr>(
     const std::string &name) const {
-  PropertyWithValue<Mantid::API::MatrixWorkspace_sptr> *prop =
-      dynamic_cast<PropertyWithValue<Mantid::API::MatrixWorkspace_sptr> *>(
+  PropertyWithValue<MatrixWorkspace_sptr> *prop =
+      dynamic_cast<PropertyWithValue<MatrixWorkspace_sptr> *>(
           getPointerToProperty(name));
   if (prop) {
     return *prop;
@@ -2033,11 +2039,11 @@ IPropertyManager::getValue<Mantid::API::MatrixWorkspace_sptr>(
 }
 
 template <>
-MANTID_API_DLL Mantid::API::MatrixWorkspace_const_sptr
-IPropertyManager::getValue<Mantid::API::MatrixWorkspace_const_sptr>(
+MANTID_API_DLL MatrixWorkspace_const_sptr
+IPropertyManager::getValue<MatrixWorkspace_const_sptr>(
     const std::string &name) const {
   PropertyWithValue<Mantid::API::MatrixWorkspace_sptr> *prop =
-      dynamic_cast<PropertyWithValue<Mantid::API::MatrixWorkspace_sptr> *>(
+      dynamic_cast<PropertyWithValue<MatrixWorkspace_sptr> *>(
           getPointerToProperty(name));
   if (prop) {
     return prop->operator()();
@@ -2050,23 +2056,77 @@ IPropertyManager::getValue<Mantid::API::MatrixWorkspace_const_sptr>(
 }
 
 template <>
-DLLExport
-    std::tuple<Mantid::API::MatrixWorkspace_sptr, Indexing::SpectrumIndexSet>
-    IPropertyManager::getValue<std::tuple<Mantid::API::MatrixWorkspace_sptr,
-                                          Indexing::SpectrumIndexSet>>(
-        const std::string &name) const {
-  Mantid::API::WorkspacePropertyWithIndex<Mantid::API::MatrixWorkspace> *prop =
-      dynamic_cast<Mantid::API::WorkspacePropertyWithIndex<
-          Mantid::API::MatrixWorkspace> *>(getPointerToProperty(name));
+DLLExport std::tuple<MatrixWorkspace_const_sptr, SpectrumIndexSet>
+IPropertyManager::getValue<
+    std::tuple<MatrixWorkspace_const_sptr, SpectrumIndexSet>>(
+    const std::string &name) const {
+  WorkspacePropertyWithIndex<MatrixWorkspace> *prop =
+      dynamic_cast<WorkspacePropertyWithIndex<MatrixWorkspace> *>(
+          getPointerToProperty(name));
   if (prop) {
-    return std::tuple<Mantid::API::MatrixWorkspace_sptr,
-                      Indexing::SpectrumIndexSet>(*prop);
+    return std::tuple<MatrixWorkspace_const_sptr, SpectrumIndexSet>(*prop);
   } else {
     std::string message =
         "Attempt to assign property " + name +
         " to incorrect type. Expected shared_ptr<IEventWorkspace>.";
     throw std::runtime_error(message);
   }
+}
+
+template <>
+DLLExport std::tuple<MatrixWorkspace_sptr, SpectrumIndexSet>
+IPropertyManager::getValue<std::tuple<MatrixWorkspace_sptr, SpectrumIndexSet>>(
+    const std::string &name) const {
+  WorkspacePropertyWithIndex<MatrixWorkspace> *prop =
+      dynamic_cast<WorkspacePropertyWithIndex<MatrixWorkspace> *>(
+          getPointerToProperty(name));
+  if (prop) {
+    return std::tuple<MatrixWorkspace_sptr, SpectrumIndexSet>(*prop);
+  } else {
+    std::string message =
+        "Attempt to assign property " + name +
+        " to incorrect type. Expected shared_ptr<IEventWorkspace>.";
+    throw std::runtime_error(message);
+  }
+}
+
+// Enable setTypedProperty for MatrixWorkspace
+template <>
+DLLExport IPropertyManager *
+IPropertyManager::setTypedProperty<MatrixWorkspace_sptr, API::IndexType,
+                                   std::vector<int>>(
+    const std::string &name,
+    const std::tuple<MatrixWorkspace_sptr, API::IndexType, std::vector<int>>
+        &value) {
+  WorkspacePropertyWithIndex<MatrixWorkspace> *prop =
+      dynamic_cast<WorkspacePropertyWithIndex<MatrixWorkspace> *>(
+          getPointerToProperty(name));
+  if (prop) {
+    *prop = value;
+  } else {
+    throw std::invalid_argument("Attempt to assign to property (" + name +
+                                ") of incorrect type");
+  }
+  return this;
+}
+
+template <>
+DLLExport IPropertyManager *
+IPropertyManager::setTypedProperty<MatrixWorkspace_sptr, API::IndexType,
+                                   std::string>(
+    const std::string &name,
+    const std::tuple<MatrixWorkspace_sptr, API::IndexType, std::string>
+        &value) {
+  WorkspacePropertyWithIndex<MatrixWorkspace> *prop =
+      dynamic_cast<WorkspacePropertyWithIndex<MatrixWorkspace> *>(
+          getPointerToProperty(name));
+  if (prop) {
+    *prop = value;
+  } else {
+    throw std::invalid_argument("Attempt to assign to property (" + name +
+                                ") of incorrect type");
+  }
+  return this;
 }
 
 } // namespace Kernel

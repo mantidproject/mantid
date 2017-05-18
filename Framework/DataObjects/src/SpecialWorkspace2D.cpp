@@ -1,6 +1,7 @@
 #include "MantidDataObjects/SpecialWorkspace2D.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/SpectraAxis.h"
+#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/WorkspacePropertyWithIndex.tcc"
 #include "MantidKernel/IPropertyManager.h"
 
 #include <fstream>
@@ -69,11 +70,11 @@ SpecialWorkspace2D::SpecialWorkspace2D(API::MatrixWorkspace_const_sptr parent) {
 
 //----------------------------------------------------------------------------------------------
 /** Sets the size of the workspace and initializes arrays to zero
-*  @param NVectors :: The number of vectors/histograms/detectors in the
-* workspace
-*  @param XLength :: Must be 1
-*  @param YLength :: Must be 1
-*/
+ *  @param NVectors :: The number of vectors/histograms/detectors in the
+ * workspace
+ *  @param XLength :: Must be 1
+ *  @param YLength :: Must be 1
+ */
 void SpecialWorkspace2D::init(const size_t &NVectors, const size_t &XLength,
                               const size_t &YLength) {
   if ((XLength != 1) || (YLength != 1))
@@ -376,7 +377,7 @@ bool SpecialWorkspace2D::isCompatible(
 
 //----------------------------------------------------------------------------------------------
 /** Duplicate SpecialWorkspace2D
-  */
+ */
 void SpecialWorkspace2D::copyFrom(
     boost::shared_ptr<const SpecialWorkspace2D> sourcews) {
   // Check
@@ -415,21 +416,26 @@ void SpecialWorkspace2D::copyFrom(
   this->detID_to_WI = sourcews->detID_to_WI;
 }
 
-} // namespace Mantid
 } // namespace DataObjects
+} // namespace Mantid
 
 /// @cond TEMPLATE
 
 namespace Mantid {
 namespace Kernel {
 
+using Mantid::DataObjects::SpecialWorkspace2D;
+using Mantid::DataObjects::SpecialWorkspace2D_sptr;
+using Mantid::DataObjects::SpecialWorkspace2D_const_sptr;
+using Mantid::Indexing::SpectrumIndexSet;
+using Mantid::API::WorkspacePropertyWithIndex;
+
 template <>
-DLLExport Mantid::DataObjects::SpecialWorkspace2D_sptr
-IPropertyManager::getValue<Mantid::DataObjects::SpecialWorkspace2D_sptr>(
+DLLExport SpecialWorkspace2D_sptr
+IPropertyManager::getValue<SpecialWorkspace2D_sptr>(
     const std::string &name) const {
-  PropertyWithValue<Mantid::DataObjects::SpecialWorkspace2D_sptr> *prop =
-      dynamic_cast<
-          PropertyWithValue<Mantid::DataObjects::SpecialWorkspace2D_sptr> *>(
+  PropertyWithValue<SpecialWorkspace2D_sptr> *prop =
+      dynamic_cast<PropertyWithValue<SpecialWorkspace2D_sptr> *>(
           getPointerToProperty(name));
   if (prop) {
     return *prop;
@@ -442,12 +448,11 @@ IPropertyManager::getValue<Mantid::DataObjects::SpecialWorkspace2D_sptr>(
 }
 
 template <>
-DLLExport Mantid::DataObjects::SpecialWorkspace2D_const_sptr
-IPropertyManager::getValue<Mantid::DataObjects::SpecialWorkspace2D_const_sptr>(
+DLLExport SpecialWorkspace2D_const_sptr
+IPropertyManager::getValue<SpecialWorkspace2D_const_sptr>(
     const std::string &name) const {
-  PropertyWithValue<Mantid::DataObjects::SpecialWorkspace2D_sptr> *prop =
-      dynamic_cast<
-          PropertyWithValue<Mantid::DataObjects::SpecialWorkspace2D_sptr> *>(
+  PropertyWithValue<SpecialWorkspace2D_sptr> *prop =
+      dynamic_cast<PropertyWithValue<SpecialWorkspace2D_sptr> *>(
           getPointerToProperty(name));
   if (prop) {
     return prop->operator()();
@@ -457,6 +462,81 @@ IPropertyManager::getValue<Mantid::DataObjects::SpecialWorkspace2D_const_sptr>(
         " to incorrect type. Expected const shared_ptr<SpecialWorkspace2D>.";
     throw std::runtime_error(message);
   }
+}
+
+template <>
+DLLExport std::tuple<SpecialWorkspace2D_sptr, SpectrumIndexSet>
+IPropertyManager::getValue<
+    std::tuple<SpecialWorkspace2D_sptr, SpectrumIndexSet>>(
+    const std::string &name) const {
+  WorkspacePropertyWithIndex<SpecialWorkspace2D> *prop =
+      dynamic_cast<WorkspacePropertyWithIndex<SpecialWorkspace2D> *>(
+          getPointerToProperty(name));
+  if (prop) {
+    return std::tuple<SpecialWorkspace2D_sptr, SpectrumIndexSet>(*prop);
+  } else {
+    std::string message =
+        "Attempt to assign property " + name +
+        " to incorrect type. Expected shared_ptr<ISpecialWorkspace2D>.";
+    throw std::runtime_error(message);
+  }
+}
+
+template <>
+DLLExport std::tuple<SpecialWorkspace2D_const_sptr, SpectrumIndexSet>
+IPropertyManager::getValue<
+    std::tuple<SpecialWorkspace2D_const_sptr, SpectrumIndexSet>>(
+    const std::string &name) const {
+  WorkspacePropertyWithIndex<SpecialWorkspace2D> *prop =
+      dynamic_cast<WorkspacePropertyWithIndex<SpecialWorkspace2D> *>(
+          getPointerToProperty(name));
+  if (prop) {
+    return std::tuple<SpecialWorkspace2D_const_sptr, SpectrumIndexSet>(*prop);
+  } else {
+    std::string message =
+        "Attempt to assign property " + name +
+        " to incorrect type. Expected shared_ptr<ISpecialWorkspace2D>.";
+    throw std::runtime_error(message);
+  }
+}
+
+// Enable setTypedProperty for SpecialWorkspace2D
+template <>
+DLLExport IPropertyManager *
+IPropertyManager::setTypedProperty<SpecialWorkspace2D_sptr, API::IndexType,
+                                   std::vector<int>>(
+    const std::string &name,
+    const std::tuple<SpecialWorkspace2D_sptr, API::IndexType, std::vector<int>>
+        &value) {
+  WorkspacePropertyWithIndex<SpecialWorkspace2D> *prop =
+      dynamic_cast<WorkspacePropertyWithIndex<SpecialWorkspace2D> *>(
+          getPointerToProperty(name));
+  if (prop) {
+    *prop = value;
+  } else {
+    throw std::invalid_argument("Attempt to assign to property (" + name +
+                                ") of incorrect type");
+  }
+  return this;
+}
+
+template <>
+DLLExport IPropertyManager *
+IPropertyManager::setTypedProperty<SpecialWorkspace2D_sptr, API::IndexType,
+                                   std::string>(
+    const std::string &name,
+    const std::tuple<SpecialWorkspace2D_sptr, API::IndexType, std::string>
+        &value) {
+  WorkspacePropertyWithIndex<SpecialWorkspace2D> *prop =
+      dynamic_cast<WorkspacePropertyWithIndex<SpecialWorkspace2D> *>(
+          getPointerToProperty(name));
+  if (prop) {
+    *prop = value;
+  } else {
+    throw std::invalid_argument("Attempt to assign to property (" + name +
+                                ") of incorrect type");
+  }
+  return this;
 }
 
 } // namespace Kernel

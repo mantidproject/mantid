@@ -236,6 +236,22 @@ public:
     TS_ASSERT_EQUALS(indexSet[4], 8);
   }
 
+  void testRetrieveConstWorkspace() {
+    auto ws = WorkspaceFactory::Instance().create("WorkspaceTester", 10, 10, 9);
+    MatrixWorkspaceIndexProp prop("InputWorkspaceWithIndex",
+                                  IndexType::WorkspaceIndex);
+    prop = std::tuple<MatrixWorkspace_sptr, IndexType, std::string>(
+        ws, IndexType::WorkspaceIndex, "");
+
+    MatrixWorkspace_const_sptr outWs;
+    SpectrumIndexSet indexSet(0);
+
+    std::tie(outWs, indexSet) =
+        std::tuple<MatrixWorkspace_const_sptr, SpectrumIndexSet>(prop);
+
+    TS_ASSERT_EQUALS(outWs, ws);
+  }
+
   void testRetrievePropertyUsingPropertyManager() {
     PropertyManagerHelper mgr;
     mgr.declareProperty(Mantid::Kernel::make_unique<MatrixWorkspaceIndexProp>(

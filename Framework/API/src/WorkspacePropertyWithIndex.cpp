@@ -15,62 +15,13 @@ namespace Mantid {
 namespace API {
 ///@cond TEMPLATE
 template class MANTID_API_DLL
-    Mantid::API::WorkspacePropertyWithIndex<Mantid::API::Workspace>;
+    Mantid::API::WorkspacePropertyWithIndex<Mantid::API::MatrixWorkspace>;
 template class MANTID_API_DLL
     Mantid::API::WorkspacePropertyWithIndex<Mantid::API::IEventWorkspace>;
 template class MANTID_API_DLL
     Mantid::API::WorkspacePropertyWithIndex<Mantid::API::IMDEventWorkspace>;
 template class MANTID_API_DLL
     Mantid::API::WorkspacePropertyWithIndex<Mantid::API::IMDHistoWorkspace>;
-template class MANTID_API_DLL
-    Mantid::API::WorkspacePropertyWithIndex<Mantid::API::IMDWorkspace>;
-template class MANTID_API_DLL
-    Mantid::API::WorkspacePropertyWithIndex<Mantid::API::MatrixWorkspace>;
-
 ///@endcond TEMPLATE
 } // namespace API
-} // namespace Mantid
-
-namespace Mantid {
-namespace Kernel {
-
-// Enable setTypedProperty for MatrixWorkspace
-template <>
-DLLExport IPropertyManager *
-IPropertyManager::setTypedProperty<API::MatrixWorkspace_sptr, API::IndexType,
-                                   std::vector<int>>(
-    const std::string &name,
-    const std::tuple<API::MatrixWorkspace_sptr, API::IndexType,
-                     std::vector<int>> &value) {
-  API::WorkspacePropertyWithIndex<API::MatrixWorkspace> *prop =
-      dynamic_cast<API::WorkspacePropertyWithIndex<API::MatrixWorkspace> *>(
-          getPointerToProperty(name));
-  if (prop) {
-    *prop = value;
-  } else {
-    throw std::invalid_argument("Attempt to assign to property (" + name +
-                                ") of incorrect type");
-  }
-  return this;
-}
-
-template <>
-DLLExport IPropertyManager *
-IPropertyManager::setTypedProperty<API::MatrixWorkspace_sptr, API::IndexType,
-                                   std::string>(
-    const std::string &name,
-    const std::tuple<API::MatrixWorkspace_sptr, API::IndexType, std::string>
-        &value) {
-  API::WorkspacePropertyWithIndex<API::MatrixWorkspace> *prop =
-      dynamic_cast<API::WorkspacePropertyWithIndex<API::MatrixWorkspace> *>(
-          getPointerToProperty(name));
-  if (prop) {
-    *prop = value;
-  } else {
-    throw std::invalid_argument("Attempt to assign to property (" + name +
-                                ") of incorrect type");
-  }
-  return this;
-}
-} // namespace Kernel
 } // namespace Mantid

@@ -74,6 +74,9 @@ public:
   operator const std::tuple<boost::shared_ptr<TYPE>,
                             Indexing::SpectrumIndexSet>() const;
 
+  operator const std::tuple<boost::shared_ptr<const TYPE>,
+                            Indexing::SpectrumIndexSet>() const;
+
   WorkspacePropertyWithIndex *clone() const override;
 
   const Indexing::SpectrumIndexSet getIndices() const;
