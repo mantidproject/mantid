@@ -1640,7 +1640,8 @@ void FilterEvents::generateSplitterTSP(
     DateAndTime stop_time(m_vecSplitterTime[igrp + 1]);
     split_tsp_vec[itarget]->addValue(start_time, 1);
     split_tsp_vec[itarget]->addValue(stop_time, 0);
-    // g_log.warning() << "Add " << "i_group " << igrp << " to i_target " << itarget << "\n";
+    // g_log.warning() << "Add " << "i_group " << igrp << " to i_target " <<
+    // itarget << "\n";
   }
 
   return;
