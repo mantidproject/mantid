@@ -6074,9 +6074,7 @@ int ApplicationWindow::execSaveProjectDialog() {
   return m_projectSaveView->exec();
 }
 
-void ApplicationWindow::prepareSaveProject() {
-  execSaveProjectDialog();
-}
+void ApplicationWindow::prepareSaveProject() { execSaveProjectDialog(); }
 
 /**
  * The project was just saved. Update the main window.
