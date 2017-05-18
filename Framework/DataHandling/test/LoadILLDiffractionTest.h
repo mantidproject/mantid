@@ -37,7 +37,7 @@ public:
     alg.setChild(true);
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT(alg.isInitialized());
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", "971404.nxs"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", "967100.nxs"));
     TS_ASSERT_THROWS_NOTHING(
         alg.setPropertyValue("OutputWorkspace", "_unused_for_child"));
     TS_ASSERT_THROWS_NOTHING(alg.execute());
@@ -48,8 +48,6 @@ public:
     TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 3073);
     TS_ASSERT_EQUALS(outputWS->blocksize(), 1);
   }
-
-  void _test_Something() { TS_FAIL("You forgot to write a test!"); }
 };
 
 #endif /* MANTID_DATAHANDLING_LOADILLDIFFRACTIONTEST_H_ */
