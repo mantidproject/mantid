@@ -48,6 +48,10 @@ void ReflDataProcessorPresenter::process() {
   // Get selected runs
   const auto items = m_manager->selectedData(true);
 
+  // If selection has changed, set the new selection to be processed
+  if (hasSelectionChanged())
+    m_selectedData = items;
+
   // If uniform slicing is empty process normally, delegating to
   // GenericDataProcessorPresenter
   std::string timeSlicingValues = m_mainPresenter->getTimeSlicingValues();

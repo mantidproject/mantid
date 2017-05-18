@@ -76,7 +76,7 @@ public:
   void expandAll() override;
   void collapseAll() override;
 
-  // Settor methods
+  // Setter methods
   void setSelection(const std::set<int> &groups) override;
   void setSelectionModelConnections() override;
   void setTableList(const std::set<std::string> &tables) override;
@@ -88,6 +88,7 @@ public:
   void setClipboard(const std::string &text) override;
   void setToolbarActionEnabled(int index, bool enabled) override;
   void setContextMenuActionEnabled(int index, bool enabled) override;
+  void setProcessButtonEnabled(bool enabled) override;
 
   // Accessor methods
   std::map<int, std::set<int>> getSelectedChildren() const override;

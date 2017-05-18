@@ -125,6 +125,7 @@ public:
 
   ParentItems selectedParents() const override;
   ChildItems selectedChildren() const override;
+  bool hasSelectionChanged() const override;
   bool askUserYesNo(const std::string &prompt,
                     const std::string &title) const override;
   void giveUserWarning(const std::string &prompt,
@@ -150,6 +151,9 @@ protected:
   std::string findRunInADS(const std::string &run, const std::string &prefix,
                            bool &runFound);
 
+  // The list of selected items to reduce
+  TreeData m_selectedData;
+
   // Process selected rows
   virtual void process();
   // Plotting
@@ -174,8 +178,6 @@ private:
   DataProcessorPostprocessingAlgorithm m_postprocessor;
   // Post-processing map
   std::map<std::string, std::string> m_postprocessMap;
-  // The list of selected items to reduce
-  TreeData m_selectedData;
   // The current queue of groups to be reduced
   GroupQueue m_gqueue;
   // The current group we are reducing row data for

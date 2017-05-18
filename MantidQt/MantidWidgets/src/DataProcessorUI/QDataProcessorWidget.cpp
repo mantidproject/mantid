@@ -367,6 +367,15 @@ void QDataProcessorWidget::setContextMenuActionEnabled(int index,
 }
 
 /**
+Sets the process button enabled or disabled
+@param enabled : Whether to enable or disable the button
+*/
+void QDataProcessorWidget::setProcessButtonEnabled(bool enabled) {
+
+  ui.buttonProcess->setEnabled(enabled);
+}
+
+/**
 Get the selected instrument for processing
 @returns the selected instrument to process with
 */

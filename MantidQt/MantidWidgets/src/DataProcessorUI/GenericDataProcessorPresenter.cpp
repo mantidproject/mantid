@@ -60,7 +60,7 @@ GenericDataProcessorPresenter::GenericDataProcessorPresenter(
       m_whitelist(whitelist), m_preprocessMap(preprocessMap),
       m_processor(processor), m_postprocessor(postprocessor),
       m_postprocessMap(postprocessMap), m_postprocess(true),
-      m_tableDirty(false), m_reductionPaused(true), m_selectionChanged(false) {
+      m_tableDirty(false), m_reductionPaused(true), m_selectionChanged(true) {
 
   // Column Options must be added to the whitelist
   m_whitelist.addElement("Options", "Options",
@@ -202,7 +202,7 @@ Process selected data
 void GenericDataProcessorPresenter::process() {
 
   // Don't bother continuing if there are no items to process
-  if (m_manager->selectedData().size() == 0)
+  if (m_selectedData.size() == 0)
     return;
 
   // If selection unchanged, resume processing the old selection
@@ -211,7 +211,6 @@ void GenericDataProcessorPresenter::process() {
     return;
   }
 
-  m_selectedData = m_manager->selectedData();
   m_selectionChanged = false;
 
   // Progress: each group and each row within count as a progress step.
@@ -1436,6 +1435,7 @@ void GenericDataProcessorPresenter::pause() {
   // Enable process buttons and disable pause buttons
   m_view->setToolbarActionEnabled(0, true);
   m_view->setContextMenuActionEnabled(0, true);
+  m_view->setProcessButtonEnabled(true);
   m_mainPresenter->setRowActionEnabled(0, true);
   m_view->setToolbarActionEnabled(1, false);
   m_view->setContextMenuActionEnabled(1, false);
@@ -1451,6 +1451,7 @@ void GenericDataProcessorPresenter::resume() {
   // Disable process buttons and enable pause buttons
   m_view->setToolbarActionEnabled(0, false);
   m_view->setContextMenuActionEnabled(0, false);
+  m_view->setProcessButtonEnabled(false);
   m_mainPresenter->setRowActionEnabled(0, false);
   m_view->setToolbarActionEnabled(1, true);
   m_view->setContextMenuActionEnabled(1, true);
@@ -1528,6 +1529,13 @@ ParentItems GenericDataProcessorPresenter::selectedParents() const {
  */
 ChildItems GenericDataProcessorPresenter::selectedChildren() const {
   return m_view->getSelectedChildren();
+}
+
+/** Checks if the selected runs have changed
+* @return :: selection changed bool
+*/
+bool GenericDataProcessorPresenter::hasSelectionChanged() const {
+  return m_selectionChanged;
 }
 
 /** Ask user for Yes/No
