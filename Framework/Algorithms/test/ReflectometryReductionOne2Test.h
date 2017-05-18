@@ -35,10 +35,10 @@ public:
     FrameworkManager::Instance();
     // A multi detector ws
     m_multiDetectorWS =
-        create2DWorkspaceWithReflectometryInstrumentMultiDetector();
+        create2DWorkspaceWithReflectometryInstrumentMultiDetector(0, 0.1);
     // A transmission ws with different spectrum numbers to the run
     m_transmissionWS =
-        create2DWorkspaceWithReflectometryInstrumentMultiDetector();
+        create2DWorkspaceWithReflectometryInstrumentMultiDetector(0, 0.1);
     m_transmissionWS->getSpectrum(0).setSpectrumNo(2);
     m_transmissionWS->getSpectrum(1).setSpectrumNo(3);
     m_transmissionWS->getSpectrum(2).setSpectrumNo(4);
@@ -109,21 +109,25 @@ public:
     // No monitor normalization
     // No direct beam normalization
     // No transmission correction
-    // Processing instructions : 1,2-3 (two separate groups)
+    // Processing instructions : 2,1+3 (two separate groups)
 
     ReflectometryReductionOne2 alg;
-    setupAlgorithm(alg, 1.5, 15.0, "1,2-3");
+    setupAlgorithm(alg, 1.5, 15.0, "2,1+3");
     // Run the algorithm. There should be 2 output histograms, one for each
-    // input group
+    // input group. Note that the group order is swapped from the input order
+    // because they are sorted by the first spectrum number in the group,
+    // i.e. as if the input was "1+3,2"
     MatrixWorkspace_sptr outLam = runAlgorithmLam(alg, 14, 2);
 
     TS_ASSERT(outLam->x(0)[0] >= 1.5);
     TS_ASSERT(outLam->x(0)[7] <= 15.0);
-    // Y counts, should be 2.0000 * 1 for first group, 2.0000 * 2 for second
-    TS_ASSERT_DELTA(outLam->y(0)[0], 2.0000, 0.0001);
-    TS_ASSERT_DELTA(outLam->y(0)[7], 2.0000, 0.0001);
-    TS_ASSERT_DELTA(outLam->y(1)[0], 4.0000, 0.0001);
-    TS_ASSERT_DELTA(outLam->y(1)[7], 4.0000, 0.0001);
+    TS_ASSERT(outLam->x(1)[0] >= 1.5);
+    TS_ASSERT(outLam->x(1)[7] <= 15.0);
+    // Y counts, should be 2.0000 * 2 for first group, 2.0000 * 1 for second.
+    TS_ASSERT_DELTA(outLam->y(0)[0], 4.0000, 0.0001);
+    TS_ASSERT_DELTA(outLam->y(0)[7], 4.0000, 0.0001);
+    TS_ASSERT_DELTA(outLam->y(1)[0], 2.0000, 0.0001);
+    TS_ASSERT_DELTA(outLam->y(1)[7], 2.0000, 0.0001);
   }
 
   void test_bad_processing_instructions() {
@@ -176,12 +180,12 @@ public:
     // Processing instructions : 1
 
     ReflectometryReductionOne2 alg;
-    setupAlgorithm(alg, 1.5, 15.0, "1");
+    setupAlgorithm(alg, 1.5, 15.0, "2");
     alg.setPropertyValue("RegionOfDirectBeam", "2-3");
     MatrixWorkspace_sptr outLam = runAlgorithmLam(alg);
 
     // Y counts, should be 0.5 = 1 (from detector ws) / 2 (from direct beam)
-    TS_ASSERT_DELTA(outLam->y(0)[0], 0.5, 0.0001);
+    TS_ASSERT_DELTA(outLam->y(0)[0], 0.4991, 0.0001);
   }
 
   void test_bad_direct_beam() {
@@ -236,7 +240,7 @@ public:
     std::fill(Y.begin(), Y.begin() + 2, 1.0);
 
     ReflectometryReductionOne2 alg;
-    setupAlgorithmMonitorCorrection(alg, 0.0, 15.0, "1", inputWS, false);
+    setupAlgorithmMonitorCorrection(alg, 0.0, 15.0, "2", inputWS, false);
     MatrixWorkspace_sptr outLam = runAlgorithmLam(alg, 10);
 
     TS_ASSERT(outLam->x(0)[0] >= 0.0);
@@ -314,8 +318,8 @@ public:
     MatrixWorkspace_sptr outLam = runAlgorithmLam(alg);
 
     // Expected values are 1 = m_wavelength / m_wavelength
-    TS_ASSERT_DELTA(outLam->y(0)[0], 0.08, 0.0001);
-    TS_ASSERT_DELTA(outLam->y(0)[7], 0.08, 0.0001);
+    TS_ASSERT_DELTA(outLam->y(0)[0], 0.0807, 0.0001);
+    TS_ASSERT_DELTA(outLam->y(0)[7], 0.0802, 0.0001);
   }
 
   void test_transmission_correction_with_bad_mapped_spectra() {
@@ -350,7 +354,7 @@ public:
     // CorrectionAlgorithm: ExponentialCorrection
 
     ReflectometryReductionOne2 alg;
-    setupAlgorithm(alg, 1.5, 15.0, "1");
+    setupAlgorithm(alg, 1.5, 15.0, "2");
     alg.setProperty("CorrectionAlgorithm", "ExponentialCorrection");
     alg.setProperty("C0", 0.2);
     alg.setProperty("C1", 0.1);
@@ -364,7 +368,7 @@ public:
     // CorrectionAlgorithm: PolynomialCorrection
 
     ReflectometryReductionOne2 alg;
-    setupAlgorithm(alg, 1.5, 15.0, "1");
+    setupAlgorithm(alg, 1.5, 15.0, "2");
     alg.setProperty("CorrectionAlgorithm", "PolynomialCorrection");
     alg.setProperty("Polynomial", "0.1,0.3,0.5");
     MatrixWorkspace_sptr outLam = runAlgorithmLam(alg);
@@ -381,7 +385,7 @@ public:
     // Processing instructions : 1
 
     ReflectometryReductionOne2 alg;
-    setupAlgorithm(alg, 1.5, 15.0, "1");
+    setupAlgorithm(alg, 1.5, 15.0, "2");
     MatrixWorkspace_sptr outQ = runAlgorithmQ(alg);
 
     // X range in outQ
@@ -397,22 +401,88 @@ public:
     // No monitor normalization
     // No direct beam normalization
     // No transmission correction
-    // Processing instructions : 1,2-3 (two separate groups)
+    // Processing instructions : 2,1+3 (two separate groups)
 
     ReflectometryReductionOne2 alg;
-    setupAlgorithm(alg, 1.5, 15.0, "1,2-3");
+    setupAlgorithm(alg, 1.5, 15.0, "2,1+3");
     // Run the algorithm. There should be 2 output histograms, one for each
-    // input group
+    // input group. Note that the group order is swapped from the input order
+    // because they are sorted by the first spectrum number in the group,
+    // i.e. as if the input was "1+3,2"
     MatrixWorkspace_sptr outQ = runAlgorithmQ(alg, 14, 2);
 
     // X range in outQ
     TS_ASSERT_DELTA(outQ->x(0)[0], 0.3353, 0.0001);
-    TS_ASSERT_DELTA(outQ->x(0)[7], 0.5962, 0.0001);
-    // Y counts, should be 2.0000 * 1 for first group, 2.0000 * 2 for second
-    TS_ASSERT_DELTA(outQ->y(0)[0], 2.0000, 0.0001);
-    TS_ASSERT_DELTA(outQ->y(0)[7], 2.0000, 0.0001);
-    TS_ASSERT_DELTA(outQ->y(1)[0], 4.0000, 0.0001);
-    TS_ASSERT_DELTA(outQ->y(1)[7], 4.0000, 0.0001);
+    TS_ASSERT_DELTA(outQ->x(0)[7], 0.5961, 0.0001);
+    TS_ASSERT_DELTA(outQ->x(1)[0], 0.3353, 0.0001);
+    TS_ASSERT_DELTA(outQ->x(1)[7], 0.5962, 0.0001);
+    // Y counts, should be 2.0000 * 2 for first group, 2.0000 * 1 for second.
+    TS_ASSERT_DELTA(outQ->y(0)[0], 4.0000, 0.0001);
+    TS_ASSERT_DELTA(outQ->y(0)[7], 4.0000, 0.0001);
+    TS_ASSERT_DELTA(outQ->y(1)[0], 2.0000, 0.0001);
+    TS_ASSERT_DELTA(outQ->y(1)[7], 2.0000, 0.0001);
+  }
+
+  void test_sum_in_q_with_bad_reduction_type() {
+    // Test IvsLam workspace
+    // No monitor normalization
+    // No direct beam normalization
+    // No transmission correction
+    // SummationType : SumInQ
+    // ReductionType : not set (invalid)
+
+    ReflectometryReductionOne2 alg;
+    setupAlgorithm(alg, 1.5, 15.0, "1");
+    alg.setProperty("SummationType", "SumInQ");
+    TS_ASSERT_THROWS_ANYTHING(alg.execute());
+  }
+
+  void test_sum_in_q_divergent_beam() {
+    // Test IvsLam workspace
+    // No monitor normalization
+    // No direct beam normalization
+    // No transmission correction
+    // SummationType : SumInQ
+    // ReductionType : DivergentBeam
+    ReflectometryReductionOne2 alg;
+    setupAlgorithm(alg, 1.5, 15.0, "1");
+    alg.setProperty("SummationType", "SumInQ");
+    alg.setProperty("ReductionType", "DivergentBeam");
+    alg.setProperty("ThetaIn", 25.0);
+    MatrixWorkspace_sptr outLam = runAlgorithmLam(alg, 20);
+
+    TS_ASSERT_DELTA(outLam->x(0)[0], 0.8155, 0.0001);
+    TS_ASSERT_DELTA(outLam->x(0)[7], 5.8439, 0.0001);
+    TS_ASSERT_DELTA(outLam->x(0)[10], 7.9989, 0.0001);
+    TS_ASSERT_DELTA(outLam->x(0)[19], 14.4640, 0.0001);
+    TS_ASSERT_DELTA(outLam->y(0)[0], 1.6553, 0.0001);
+    TS_ASSERT_DELTA(outLam->y(0)[7], 1.9514, 0.0001);
+    TS_ASSERT_DELTA(outLam->y(0)[10], 1.8301, 0.0001);
+    TS_ASSERT_DELTA(outLam->y(0)[19], 2.1424, 0.0001);
+  }
+
+  void test_sum_in_q_non_flat_sample() {
+    // Test IvsLam workspace
+    // No monitor normalization
+    // No direct beam normalization
+    // No transmission correction
+    // SummationType : SumInQ
+    // ReductionType : NonFlatSample
+
+    ReflectometryReductionOne2 alg;
+    setupAlgorithm(alg, 1.5, 15.0, "1");
+    alg.setProperty("SummationType", "SumInQ");
+    alg.setProperty("ReductionType", "NonFlatSample");
+    MatrixWorkspace_sptr outLam = runAlgorithmLam(alg, 20);
+
+    TS_ASSERT_DELTA(outLam->x(0)[0], 0.8229, 0.0001);
+    TS_ASSERT_DELTA(outLam->x(0)[7], 5.8000, 0.0001);
+    TS_ASSERT_DELTA(outLam->x(0)[10], 7.9330, 0.0001);
+    TS_ASSERT_DELTA(outLam->x(0)[19], 14.3321, 0.0001);
+    TS_ASSERT_DELTA(outLam->y(0)[0], 1.6028, 0.0001);
+    TS_ASSERT_DELTA(outLam->y(0)[7], 1.8887, 0.0001);
+    TS_ASSERT_DELTA(outLam->y(0)[10], 1.6764, 0.0001);
+    TS_ASSERT_DELTA(outLam->y(0)[19], 1.9805, 0.0001);
   }
 
 private:
