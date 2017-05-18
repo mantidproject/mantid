@@ -4,33 +4,30 @@
 ISIS Powder Diffraction Scripts
 ================================
 
-.. warning:: These scripts and documentation are still undergoing active development.
-             They can change in any way during these stages and the validity of all
-             data has not been tested.
-
 .. contents:: Table of Contents
     :local:
 
+.. _script_param_overview_isis-powder-diffraction-ref:
 
-Overview and General Information
---------------------------------
-These objective of these scripts are to combine the work-flows of several powder
-diffraction instruments into a single collection of scripts whilst catering to
-their individual requirements. At the most fundamental level it provides the
-functionality to calculate and apply vanadium calibrations and subsequently
-apply these corrections to experimental data.
+General Information
+---------------------
+These scripts provide Mantid users a way to process data captured
+on various diffraction instruments. It aligns the various detectors
+in d-Spacing, focuses the data into banks and applies any relevant
+corrections in the process. The scripts proceed to save the focused
+data into several output files for later use in data analysis packages.
 
-.. _instrument_doc_links_isis-powder-diffraction-ref:
+This documentation assumes the user is familiar with the concepts
+behind diffraction reduction and understand how cycles at ISIS work.
+It also assumes the user has a basic knowledge of Python.
 
-Instrument Specific Documentation
----------------------------------
-- :ref:`isis-powder-diffraction-gem-ref`
-- :ref:`isis-powder-diffraction-pearl-ref`
-- :ref:`isis-powder-diffraction-polaris-ref`
+This documentation also avoids discussing the implementation or design of 
+the scripts as it is beyond the scope of this documentation.
 
+.. _prerequisites_isis-powder-diffraction-ref:
 
-Data Files Setup
-^^^^^^^^^^^^^^^^^
+Prerequisites 
+---------------
 Users must setup their input directories so Mantid can find the input files. Instructions
 on completing this are located `here <http://www.mantidproject.org/ManageUserDirectories>`_.
 *Note: Mantid will not search folders recursively each folder must be added*
@@ -38,7 +35,23 @@ on completing this are located `here <http://www.mantidproject.org/ManageUserDir
 Additionally *Search Data Archive* can be ticked if the device is located on the ISIS
 network to automatically handle finding the files whilst it is on the network.
 
-.. _script_param_overview_isis-powder-diffraction-ref:
+.. _tutorial_links_isis-powder-diffraction-ref:
+
+Tutorials
+----------
+The links below will take you to the relevant part of a tutorial.
+These will help you setup your scripts and get you familiar with 
+their usage.
+
+:ref:`isis-powder-diffraction-Tutorials-ref`
+
+.. _instrument_doc_links_isis-powder-diffraction-ref:
+
+Instrument Reference
+---------------------------------
+- :ref:`isis-powder-diffraction-gem-ref`
+- :ref:`isis-powder-diffraction-pearl-ref`
+- :ref:`isis-powder-diffraction-polaris-ref`
 
 Script Parameters
 ^^^^^^^^^^^^^^^^^
@@ -66,7 +79,7 @@ refer to the respective instrument documentation.
 YAML Configuration Files
 ^^^^^^^^^^^^^^^^^^^^^^^^
 The basic configuration files are written in YAML then can be passed as a parameter whilst configuring the scripts.
-This avoids having to respecify paths or settings which rarely change such as the location of the calibration folder.
+This avoids having to re-enter paths or settings which rarely change such as the location of the calibration folder.
 These use a simple format of key : value pair in YAML syntax. For example:
 
 .. code-block:: yaml
