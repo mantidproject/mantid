@@ -304,6 +304,26 @@ public:
     TS_ASSERT_THROWS_ANYTHING(alg.execute());
   }
 
+  void test_transmission_correction_with_different_spectra() {
+    // Run workspace spectrum numbers are 1,2,3,4.  Transmission workspace has
+    // spectrum numbers 2,3,4,5.  Processing instructions 2,3 are used in the
+    // run and transmission workspaces without any mapping i.e. spectra 3-4 in
+    // the run and spectra 4-5 in the transmission workspace are used.
+    ReflectometryReductionOne2 alg;
+    setupAlgorithm(alg, 1.5, 15.0, "2-3");
+    alg.setProperty("FirstTransmissionRun", m_transmissionWS);
+    alg.setProperty("SecondTransmissionRun", m_transmissionWS);
+    alg.setProperty("StartOverlap", 2.5);
+    alg.setProperty("EndOverlap", 3.0);
+    alg.setProperty("Params", "0.1");
+    alg.setProperty("StrictSpectrumChecking", "0");
+    MatrixWorkspace_sptr outLam = runAlgorithmLam(alg);
+
+    // Expected values are 1 = m_wavelength / m_wavelength
+    TS_ASSERT_DELTA(outLam->y(0)[0], 0.0571, 0.0001);
+    TS_ASSERT_DELTA(outLam->y(0)[7], 0.0571, 0.0001);
+  }
+
   void test_exponential_correction() {
     // CorrectionAlgorithm: ExponentialCorrection
 
