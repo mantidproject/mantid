@@ -204,9 +204,9 @@ MatrixWorkspace_sptr ScanningWorkspaceBuilder::buildWorkspace() const {
 
 void ScanningWorkspaceBuilder::buildOutputDetectorInfo(
     DetectorInfo &outputDetectorInfo) const {
+  auto mergeWorkspace =
+      create<Workspace2D>(m_instrument, m_nDetectors, m_histogram.binEdges());
   for (size_t i = 1; i < m_nTimeIndexes; ++i) {
-    const auto mergeWorkspace =
-        create<Workspace2D>(m_instrument, m_nDetectors, m_histogram.binEdges());
     auto &mergeDetectorInfo = mergeWorkspace->mutableDetectorInfo();
     for (size_t j = 0; j < m_nDetectors; ++j) {
       mergeDetectorInfo.setScanInterval(j, m_timeRanges[i]);
@@ -250,13 +250,13 @@ void ScanningWorkspaceBuilder::buildInstrumentAngles(
 void ScanningWorkspaceBuilder::createTimeOrientedIndexInfo(
     MatrixWorkspace &ws) const {
   auto indexInfo = ws.indexInfo();
-  auto spectrumDefinitions = Kernel::make_cow<std::vector<SpectrumDefinition>>(
-      m_nDetectors * m_nTimeIndexes);
+  auto spectrumDefinitions =
+      std::vector<SpectrumDefinition>(m_nDetectors * m_nTimeIndexes);
 
   for (size_t detIndex = 0; detIndex < m_nDetectors; ++detIndex) {
     for (size_t timeIndex = 0; timeIndex < m_nTimeIndexes; ++timeIndex) {
-      spectrumDefinitions.access()[detIndex * m_nTimeIndexes + timeIndex].add(
-          detIndex, timeIndex);
+      spectrumDefinitions[detIndex * m_nTimeIndexes + timeIndex].add(detIndex,
+                                                                     timeIndex);
     }
   }
 
@@ -267,13 +267,13 @@ void ScanningWorkspaceBuilder::createTimeOrientedIndexInfo(
 void ScanningWorkspaceBuilder::createDetectorOrientedIndexInfo(
     MatrixWorkspace &ws) const {
   auto indexInfo = ws.indexInfo();
-  auto spectrumDefinitions = Kernel::make_cow<std::vector<SpectrumDefinition>>(
-      m_nDetectors * m_nTimeIndexes);
+  auto spectrumDefinitions =
+      std::vector<SpectrumDefinition>(m_nDetectors * m_nTimeIndexes);
 
   for (size_t timeIndex = 0; timeIndex < m_nTimeIndexes; ++timeIndex) {
     for (size_t detIndex = 0; detIndex < m_nDetectors; ++detIndex) {
-      spectrumDefinitions.access()[timeIndex * m_nDetectors + detIndex].add(
-          detIndex, timeIndex);
+      spectrumDefinitions[timeIndex * m_nDetectors + detIndex].add(detIndex,
+                                                                   timeIndex);
     }
   }
 

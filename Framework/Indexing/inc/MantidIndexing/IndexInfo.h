@@ -10,11 +10,7 @@
 #include <vector>
 
 namespace Mantid {
-
-using specnum_t = int32_t;
-using detid_t = int32_t;
 class SpectrumDefinition;
-
 namespace Indexing {
 class GlobalSpectrumIndex;
 class SpectrumIndexSet;
