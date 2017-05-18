@@ -35,9 +35,11 @@ import optimizelatticewindow as ol_window
 import viewspicedialog
 import peak_integration_utility
 import FindUBUtility
+import message_dialog
 
 # import line for the UI python class
 from ui_MainWindow import Ui_MainWindow
+
 
 # define constants
 IndexFromSpice = 'From Spice (pre-defined)'
@@ -70,6 +72,8 @@ class MainWindow(QtGui.QMainWindow):
         self._peakIntegrationInfoWindow = None
         self._addUBPeaksDialog = None
         self._spiceViewer = None
+        self._mySinglePeakIntegrationDialog = None
+        self._singlePeakIntegrationDialogBuffer = ''
 
         # Make UI scrollable
         if NO_SCROLL is False:
@@ -277,9 +281,8 @@ class MainWindow(QtGui.QMainWindow):
                      self.do_integrate_single_scan)
         self.connect(self.ui.comboBox_ptCountType, QtCore.SIGNAL('currentIndexChanged(int)'),
                      self.evt_change_normalization)  # calculate the normalized data again
-        # TODO/FIXME/NOW - Need to find out why I want this!
-        # self.connect(self.ui.pushButton_showIntegrateDetails, QtCore.SIGNAL('clicked()'),
-        #              self.do_show_single_peak_integration)
+        self.connect(self.ui.pushButton_showIntPeakDetails, QtCore.SIGNAL('clicked()'),
+                     self.do_show_single_peak_integration)
         self.connect(self.ui.pushButton_clearPeakIntFigure, QtCore.SIGNAL('clicked()'),
                      self.do_clear_peak_integration_canvas)
 
@@ -1433,6 +1436,10 @@ class MainWindow(QtGui.QMainWindow):
         motor_pos_vec = int_peak_dict['motor positions']
         pt_intensity_vec = int_peak_dict['pt intensities']
         self.ui.graphicsView_integratedPeakView.plot_raw_data(motor_pos_vec, pt_intensity_vec)
+
+        if self._mySinglePeakIntegrationDialog is None:
+            self._mySinglePeakIntegrationDialog = message_dialog.MessageDialog(self)
+        self._mySinglePeakIntegrationDialog.set_peak_integration_details(motor_pos_vec, pt_intensity_vec)
 
         # set calculated values
         try:
@@ -2863,6 +2870,19 @@ class MainWindow(QtGui.QMainWindow):
         # report
         report_dict = self.generate_peaks_integration_report()
         self._peakIntegrationInfoWindow.set_report(report_dict)
+
+        return
+
+    def do_show_single_peak_integration(self):
+        """
+        pop out a dialog box to show the detailed integration information
+        :return:
+        """
+        print '[DB...BAT] Show Dialog!'
+        if self._mySinglePeakIntegrationDialog is None:
+            self._mySinglePeakIntegrationDialog = message_dialog.MessageDialog(self)
+
+        self._mySinglePeakIntegrationDialog.show()
 
         return
 
