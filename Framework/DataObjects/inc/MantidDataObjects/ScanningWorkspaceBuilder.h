@@ -68,7 +68,7 @@ public:
                      const std::vector<double> &durations);
   void setPositions(const std::vector<std::vector<Kernel::V3D>> positions);
   void setRotations(const std::vector<std::vector<Kernel::Quat>> rotations);
-  void setInstrumentAngles(const std::vector<double> &instrumentAngles);
+  void setRelativeRotationsForScans(const std::vector<double> &instrumentAngles);
 
   void setIndexingType(const IndexingType indexingType);
 
@@ -94,7 +94,7 @@ private:
 
   void buildPositions(API::DetectorInfo &outputDetectorInfo) const;
   void buildRotations(API::DetectorInfo &outputDetectorInfo) const;
-  void buildInstrumentAngles(API::DetectorInfo &outputDetectorInfo) const;
+  void buildRelativeRotationsForScans(API::DetectorInfo &outputDetectorInfo) const;
 
   void createTimeOrientedIndexInfo(API::MatrixWorkspace &ws) const;
   void createDetectorOrientedIndexInfo(API::MatrixWorkspace &ws) const;

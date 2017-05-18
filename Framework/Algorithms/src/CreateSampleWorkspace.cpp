@@ -336,7 +336,7 @@ MatrixWorkspace_sptr CreateSampleWorkspace::createScanningWorkspace(
   }
 
   builder.setTimeRanges(Kernel::DateAndTime(0), timeRanges);
-  builder.setInstrumentAngles(angles);
+  builder.setRelativeRotationsForScans(angles);
 
   BinEdges x(numBins + 1, LinearGenerator(x0, binDelta));
 

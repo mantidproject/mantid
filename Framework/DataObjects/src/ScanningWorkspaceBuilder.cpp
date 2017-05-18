@@ -137,7 +137,7 @@ void ScanningWorkspaceBuilder::setRotations(
  * @param instrumentAngles a vector of angles, the size matching the number of
  *time indexes
  */
-void ScanningWorkspaceBuilder::setInstrumentAngles(
+void ScanningWorkspaceBuilder::setRelativeRotationsForScans(
     const std::vector<double> &instrumentAngles) {
 
   if (!m_positions.empty() || !m_rotations.empty())
@@ -184,7 +184,7 @@ MatrixWorkspace_sptr ScanningWorkspaceBuilder::buildWorkspace() const {
     buildRotations(outputDetectorInfo);
 
   if (!m_instrumentAngles.empty())
-    buildInstrumentAngles(outputDetectorInfo);
+    buildRelativeRotationsForScans(outputDetectorInfo);
 
   switch (m_indexingType) {
   case IndexingType::Default:
@@ -233,7 +233,7 @@ void ScanningWorkspaceBuilder::buildPositions(
   }
 }
 
-void ScanningWorkspaceBuilder::buildInstrumentAngles(
+void ScanningWorkspaceBuilder::buildRelativeRotationsForScans(
     DetectorInfo &outputDetectorInfo) const {
   for (size_t i = 0; i < outputDetectorInfo.size(); ++i) {
     for (size_t j = 0; j < outputDetectorInfo.scanCount(i); ++j) {

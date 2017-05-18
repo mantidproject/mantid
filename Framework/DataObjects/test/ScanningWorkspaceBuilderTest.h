@@ -45,7 +45,7 @@ public:
   void tearDown() override {
     positions.clear();
     rotations.clear();
-    instrumentAngles.clear();
+    relativeRotations.clear();
   }
 
   void test_create_scanning_workspace_with_instrument_and_time_ranges() {
@@ -243,13 +243,14 @@ public:
                             "number of time indexes.")
   }
 
-  void test_creating_workspace_with_instrument_angles() {
+  void test_creating_workspace_with_relative_rotations() {
     const auto &instrument = createSimpleInstrument(nDetectors, nBins);
 
     auto builder = ScanningWorkspaceBuilder(instrument, nTimeIndexes, nBins);
     TS_ASSERT_THROWS_NOTHING(builder.setTimeRanges(timeRanges))
-    initialiseInstrumentAngles(nTimeIndexes);
-    TS_ASSERT_THROWS_NOTHING(builder.setInstrumentAngles(instrumentAngles))
+    initialiseRelativeRotations(nTimeIndexes);
+    TS_ASSERT_THROWS_NOTHING(
+        builder.setRelativeRotationsForScans(relativeRotations))
     MatrixWorkspace_const_sptr ws;
     TS_ASSERT_THROWS_NOTHING(ws = builder.buildWorkspace())
 
@@ -293,15 +294,16 @@ public:
   }
 
   void
-  test_creating_workspace_with_instrument_angles_fails_with_wrong_time_index_size() {
+  test_creating_workspace_with_relative_rotations_fails_with_wrong_time_index_size() {
     const auto &instrument = createSimpleInstrument(nDetectors, nBins);
 
     auto builder = ScanningWorkspaceBuilder(instrument, nTimeIndexes, nBins);
-    initialiseInstrumentAngles(nTimeIndexes + 1);
-    TS_ASSERT_THROWS_EQUALS(builder.setInstrumentAngles(instrumentAngles),
-                            const std::logic_error &e, std::string(e.what()),
-                            "Number of instrument angles supplied does not "
-                            "match the number of time indexes.")
+    initialiseRelativeRotations(nTimeIndexes + 1);
+    TS_ASSERT_THROWS_EQUALS(
+        builder.setRelativeRotationsForScans(relativeRotations),
+        const std::logic_error &e, std::string(e.what()),
+        "Number of instrument angles supplied does not "
+        "match the number of time indexes.")
   }
 
   void
@@ -331,12 +333,13 @@ public:
   }
 
   void
-  test_creating_workspace_with_positions_fails_with_instrument_angles_set() {
+  test_creating_workspace_with_positions_fails_with_relative_rotations_set() {
     const auto &instrument = createSimpleInstrument(nDetectors, nBins);
 
     auto builder = ScanningWorkspaceBuilder(instrument, nTimeIndexes, nBins);
-    initialiseInstrumentAngles(nTimeIndexes);
-    TS_ASSERT_THROWS_NOTHING(builder.setInstrumentAngles(instrumentAngles))
+    initialiseRelativeRotations(nTimeIndexes);
+    TS_ASSERT_THROWS_NOTHING(
+        builder.setRelativeRotationsForScans(relativeRotations))
     initalisePositions(nDetectors, nTimeIndexes);
     TS_ASSERT_THROWS_EQUALS(builder.setPositions(std::move(positions)),
                             const std::logic_error &e, std::string(e.what()),
@@ -345,12 +348,13 @@ public:
   }
 
   void
-  test_creating_workspace_with_rotations_fails_with_instrument_angles_set() {
+  test_creating_workspace_with_rotations_fails_with_relative_rotations_set() {
     const auto &instrument = createSimpleInstrument(nDetectors, nBins);
 
     auto builder = ScanningWorkspaceBuilder(instrument, nTimeIndexes, nBins);
-    initialiseInstrumentAngles(nTimeIndexes);
-    TS_ASSERT_THROWS_NOTHING(builder.setInstrumentAngles(instrumentAngles))
+    initialiseRelativeRotations(nTimeIndexes);
+    TS_ASSERT_THROWS_NOTHING(
+        builder.setRelativeRotationsForScans(relativeRotations))
     initaliseRotations(nDetectors, nTimeIndexes);
     TS_ASSERT_THROWS_EQUALS(builder.setRotations(std::move(rotations)),
                             const std::logic_error &e, std::string(e.what()),
@@ -359,31 +363,33 @@ public:
   }
 
   void
-  test_creating_workspace_with_instrument_angles_fails_with_positions_already_set() {
+  test_creating_workspace_with_relative_rotations_fails_with_positions_already_set() {
     const auto &instrument = createSimpleInstrument(nDetectors, nBins);
 
     auto builder = ScanningWorkspaceBuilder(instrument, nTimeIndexes, nBins);
     initalisePositions(nDetectors, nTimeIndexes);
     TS_ASSERT_THROWS_NOTHING(builder.setPositions(std::move(positions)))
-    initialiseInstrumentAngles(nTimeIndexes);
-    TS_ASSERT_THROWS_EQUALS(builder.setInstrumentAngles(instrumentAngles),
-                            const std::logic_error &e, std::string(e.what()),
-                            "Can not set instrument angles, as positions "
-                            "and/or rotations have already been set.")
+    initialiseRelativeRotations(nTimeIndexes);
+    TS_ASSERT_THROWS_EQUALS(
+        builder.setRelativeRotationsForScans(relativeRotations),
+        const std::logic_error &e, std::string(e.what()),
+        "Can not set instrument angles, as positions "
+        "and/or rotations have already been set.")
   }
 
   void
-  test_creating_workspace_with_instrument_angles_fails_with_rotations_already_set() {
+  test_creating_workspace_with_relative_rotations_fails_with_rotations_already_set() {
     const auto &instrument = createSimpleInstrument(nDetectors, nBins);
 
     auto builder = ScanningWorkspaceBuilder(instrument, nTimeIndexes, nBins);
     initaliseRotations(nDetectors, nTimeIndexes);
     TS_ASSERT_THROWS_NOTHING(builder.setRotations(std::move(rotations)))
-    initialiseInstrumentAngles(nTimeIndexes);
-    TS_ASSERT_THROWS_EQUALS(builder.setInstrumentAngles(instrumentAngles),
-                            const std::logic_error &e, std::string(e.what()),
-                            "Can not set instrument angles, as positions "
-                            "and/or rotations have already been set.")
+    initialiseRelativeRotations(nTimeIndexes);
+    TS_ASSERT_THROWS_EQUALS(
+        builder.setRelativeRotationsForScans(relativeRotations),
+        const std::logic_error &e, std::string(e.what()),
+        "Can not set instrument angles, as positions "
+        "and/or rotations have already been set.")
   }
 
   void test_creating_workspace_with_time_oriented_index_info() {
@@ -462,7 +468,7 @@ private:
 
   std::vector<std::vector<V3D>> positions;
   std::vector<std::vector<Quat>> rotations;
-  std::vector<double> instrumentAngles;
+  std::vector<double> relativeRotations;
 
   void initalisePositions(size_t nDetectors, size_t nTimeIndexes) {
     for (size_t i = 0; i < nDetectors; ++i) {
@@ -484,9 +490,9 @@ private:
     }
   }
 
-  void initialiseInstrumentAngles(size_t nTimeIndexes) {
+  void initialiseRelativeRotations(size_t nTimeIndexes) {
     for (size_t i = 0; i < nTimeIndexes; ++i) {
-      instrumentAngles.push_back(double(i) * 30.0);
+      relativeRotations.push_back(double(i) * 30.0);
     }
   }
 
