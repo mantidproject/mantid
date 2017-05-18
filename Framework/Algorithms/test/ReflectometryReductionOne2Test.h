@@ -186,12 +186,7 @@ public:
     std::fill(Y.begin(), Y.begin() + 2, 1.0);
 
     ReflectometryReductionOne2 alg;
-    setupAlgorithm(alg, 0.0, 15.0, "1");
-    alg.setProperty("InputWorkspace", inputWS);
-    alg.setProperty("I0MonitorIndex", "0");
-    alg.setProperty("MonitorBackgroundWavelengthMin", 0.5);
-    alg.setProperty("MonitorBackgroundWavelengthMax", 3.0);
-    alg.setProperty("NormalizeByIntegratedMonitors", "0");
+    setupAlgorithmMonitorCorrection(alg, 0.0, 15.0, "1", inputWS, false);
     MatrixWorkspace_sptr outLam = runAlgorithmLam(alg, 10);
 
     TS_ASSERT(outLam->x(0)[0] >= 0.0);
@@ -221,14 +216,7 @@ public:
     std::fill(Y.begin(), Y.begin() + 2, 1.0);
 
     ReflectometryReductionOne2 alg;
-    setupAlgorithm(alg, 0.0, 15.0, "1");
-    alg.setProperty("InputWorkspace", inputWS);
-    alg.setProperty("I0MonitorIndex", "0");
-    alg.setProperty("MonitorBackgroundWavelengthMin", 0.5);
-    alg.setProperty("MonitorBackgroundWavelengthMax", 3.0);
-    alg.setProperty("NormalizeByIntegratedMonitors", "1");
-    alg.setProperty("MonitorIntegrationWavelengthMin", 1.5);
-    alg.setProperty("MonitorIntegrationWavelengthMax", 15.0);
+    setupAlgorithmMonitorCorrection(alg, 0.0, 15.0, "1", inputWS, true);
     MatrixWorkspace_sptr outLam = runAlgorithmLam(alg, 16);
 
     TS_ASSERT(outLam->x(0)[0] >= 0.0);
@@ -242,8 +230,8 @@ public:
     // Transmission run is the same as input run
 
     ReflectometryReductionOne2 alg;
-    setupAlgorithm(alg, 1.5, 15.0, "1");
-    alg.setProperty("FirstTransmissionRun", m_multiDetectorWS);
+    setupAlgorithmTransmissionCorrection(alg, 1.5, 15.0, "1", m_multiDetectorWS,
+                                         false);
     MatrixWorkspace_sptr outLam = runAlgorithmLam(alg);
 
     // Expected values are 1 = m_wavelength / m_wavelength
@@ -255,12 +243,8 @@ public:
     // Transmission run is the same as input run
 
     ReflectometryReductionOne2 alg;
-    setupAlgorithm(alg, 1.5, 15.0, "1");
-    alg.setProperty("FirstTransmissionRun", m_multiDetectorWS);
-    alg.setProperty("SecondTransmissionRun", m_multiDetectorWS);
-    alg.setProperty("StartOverlap", 2.5);
-    alg.setProperty("EndOverlap", 3.0);
-    alg.setProperty("Params", "0.1");
+    setupAlgorithmTransmissionCorrection(alg, 1.5, 15.0, "1", m_multiDetectorWS,
+                                         true);
     MatrixWorkspace_sptr outLam = runAlgorithmLam(alg);
 
     // Expected values are 1 = m_wavelength / m_wavelength
@@ -275,12 +259,8 @@ public:
     // spectra 3-4, which map to indices 1-2 in the transmission
     // workspace.
     ReflectometryReductionOne2 alg;
-    setupAlgorithm(alg, 1.5, 15.0, "2-3");
-    alg.setProperty("FirstTransmissionRun", m_transmissionWS);
-    alg.setProperty("SecondTransmissionRun", m_transmissionWS);
-    alg.setProperty("StartOverlap", 2.5);
-    alg.setProperty("EndOverlap", 3.0);
-    alg.setProperty("Params", "0.1");
+    setupAlgorithmTransmissionCorrection(alg, 1.5, 15.0, "2-3",
+                                         m_transmissionWS, true);
     MatrixWorkspace_sptr outLam = runAlgorithmLam(alg);
 
     // Expected values are 1 = m_wavelength / m_wavelength
@@ -295,12 +275,8 @@ public:
     // spectrum 1, which doesn't exist in the transmission
     // workspace.
     ReflectometryReductionOne2 alg;
-    setupAlgorithm(alg, 1.5, 15.0, "0");
-    alg.setProperty("FirstTransmissionRun", m_transmissionWS);
-    alg.setProperty("SecondTransmissionRun", m_transmissionWS);
-    alg.setProperty("StartOverlap", 2.5);
-    alg.setProperty("EndOverlap", 3.0);
-    alg.setProperty("Params", "0.1");
+    setupAlgorithmTransmissionCorrection(alg, 1.5, 15.0, "0", m_transmissionWS,
+                                         true);
     TS_ASSERT_THROWS_ANYTHING(alg.execute());
   }
 
@@ -310,12 +286,8 @@ public:
     // run and transmission workspaces without any mapping i.e. spectra 3-4 in
     // the run and spectra 4-5 in the transmission workspace are used.
     ReflectometryReductionOne2 alg;
-    setupAlgorithm(alg, 1.5, 15.0, "2-3");
-    alg.setProperty("FirstTransmissionRun", m_transmissionWS);
-    alg.setProperty("SecondTransmissionRun", m_transmissionWS);
-    alg.setProperty("StartOverlap", 2.5);
-    alg.setProperty("EndOverlap", 3.0);
-    alg.setProperty("Params", "0.1");
+    setupAlgorithmTransmissionCorrection(alg, 1.5, 15.0, "2-3",
+                                         m_transmissionWS, true);
     alg.setProperty("StrictSpectrumChecking", "0");
     MatrixWorkspace_sptr outLam = runAlgorithmLam(alg);
 
@@ -375,6 +347,44 @@ private:
     alg.setPropertyValue("ProcessingInstructions", procInstr);
     alg.setPropertyValue("OutputWorkspace", "IvsQ");
     alg.setPropertyValue("OutputWorkspaceWavelength", "IvsLam");
+  }
+
+  // Do standard algorithm setup for transmission correction
+  void setupAlgorithmTransmissionCorrection(ReflectometryReductionOne2 &alg,
+                                            const double wavelengthMin,
+                                            const double wavelengthMax,
+                                            const std::string &procInstr,
+                                            MatrixWorkspace_sptr transWS,
+                                            const bool multiple_runs) {
+    setupAlgorithm(alg, wavelengthMin, wavelengthMax, procInstr);
+    alg.setProperty("FirstTransmissionRun", transWS);
+    if (multiple_runs) {
+      alg.setProperty("SecondTransmissionRun", transWS);
+      alg.setProperty("StartOverlap", 2.5);
+      alg.setProperty("EndOverlap", 3.0);
+      alg.setProperty("Params", "0.1");
+    }
+  }
+
+  // Do standard algorithm setup for monitor correction
+  void setupAlgorithmMonitorCorrection(ReflectometryReductionOne2 &alg,
+                                       const double wavelengthMin,
+                                       const double wavelengthMax,
+                                       const std::string &procInstr,
+                                       MatrixWorkspace_sptr inputWS,
+                                       const bool integrate) {
+    setupAlgorithm(alg, wavelengthMin, wavelengthMax, procInstr);
+    alg.setProperty("InputWorkspace", inputWS);
+    alg.setProperty("I0MonitorIndex", "0");
+    alg.setProperty("MonitorBackgroundWavelengthMin", 0.5);
+    alg.setProperty("MonitorBackgroundWavelengthMax", 3.0);
+    if (integrate) {
+      alg.setProperty("NormalizeByIntegratedMonitors", "1");
+      alg.setProperty("MonitorIntegrationWavelengthMin", 1.5);
+      alg.setProperty("MonitorIntegrationWavelengthMax", 15.0);
+    } else {
+      alg.setProperty("NormalizeByIntegratedMonitors", "0");
+    }
   }
 
   // Do standard algorithm execution and checks and return IvsLam
