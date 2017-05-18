@@ -125,7 +125,7 @@ double EstimateResolutionDiffraction::getWavelength() {
         "LambdaReqeust is not a TimeSeriesProperty in double. ");
 
   string unit = cwltimeseries->units();
-  if (unit.compare("Angstrom") != 0) {
+  if (unit != "Angstrom") {
     throw runtime_error("Unit is not recognized: " + unit);
   }
 

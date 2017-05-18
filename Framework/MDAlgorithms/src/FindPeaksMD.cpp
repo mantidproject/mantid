@@ -5,6 +5,8 @@
 #include "MantidDataObjects/MDHistoWorkspace.h"
 #include "MantidKernel/VMD.h"
 #include "MantidAPI/Run.h"
+#include "MantidKernel/BoundedValidator.h"
+#include "MantidGeometry/Crystal/EdgePixel.h"
 
 #include <cmath>
 #include <boost/type_traits/integral_constant.hpp>
@@ -147,6 +149,11 @@ void FindPeaksMD::init() {
                   "If checked, then append the peaks in the output workspace "
                   "if it exists. \n"
                   "If unchecked, the output workspace is replaced (Default).");
+
+  auto nonNegativeInt = boost::make_shared<BoundedValidator<int>>();
+  nonNegativeInt->setLower(0);
+  declareProperty("EdgePixels", 0, nonNegativeInt,
+                  "Remove peaks that are at pixels this close to edge. ");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -193,6 +200,10 @@ void FindPeaksMD::readExperimentInfo(const ExperimentInfo_sptr &ei,
 void FindPeaksMD::addPeak(const V3D &Q, const double binCount) {
   try {
     auto p = this->createPeak(Q, binCount);
+    if (m_edge > 0) {
+      if (edgePixel(inst, p->getBankName(), p->getCol(), p->getRow(), m_edge))
+        return;
+    }
     if (p->getDetectorID() != -1)
       peakWS->addPeak(*p);
   } catch (std::exception &e) {
@@ -406,7 +417,14 @@ void FindPeaksMD::findPeaks(typename MDEventWorkspace<MDE, nd>::sptr ws) {
           addDetectors(*p, *mdBox);
         }
         if (p->getDetectorID() != -1) {
-          peakWS->addPeak(*p);
+          if (m_edge > 0) {
+            if (!edgePixel(inst, p->getBankName(), p->getCol(), p->getRow(),
+                           m_edge))
+              peakWS->addPeak(*p);
+            ;
+          } else {
+            peakWS->addPeak(*p);
+          }
           g_log.information() << "Add new peak with Q-center = " << Q[0] << ", "
                               << Q[1] << ", " << Q[2] << "\n";
         }
@@ -584,6 +602,7 @@ void FindPeaksMD::exec() {
 
   DensityThresholdFactor = getProperty("DensityThresholdFactor");
   m_maxPeaks = getProperty("MaxPeaks");
+  m_edge = this->getProperty("EdgePixels");
 
   // Execute the proper algo based on the type of workspace
   if (inMDHW) {

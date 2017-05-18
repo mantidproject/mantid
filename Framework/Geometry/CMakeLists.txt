@@ -9,6 +9,7 @@ set ( SRC_FILES
 	src/Crystal/ConventionalCell.cpp
 	src/Crystal/CrystalStructure.cpp
 	src/Crystal/CyclicGroup.cpp
+	src/Crystal/EdgePixel.cpp
 	src/Crystal/Group.cpp
 	src/Crystal/GroupTransformation.cpp
 	src/Crystal/HKLFilter.cpp
@@ -151,6 +152,7 @@ set ( INC_FILES
 	inc/MantidGeometry/Crystal/ConventionalCell.h
 	inc/MantidGeometry/Crystal/CrystalStructure.h
 	inc/MantidGeometry/Crystal/CyclicGroup.h
+	inc/MantidGeometry/Crystal/EdgePixel.h
 	inc/MantidGeometry/Crystal/Group.h
 	inc/MantidGeometry/Crystal/GroupTransformation.h
 	inc/MantidGeometry/Crystal/HKLFilter.h
