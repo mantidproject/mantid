@@ -142,11 +142,11 @@ def set_single_entry(builder, method_name, tag, all_entries, apply_to_value=None
     Sets a single element on the specified builder via a specified method name.
 
     If several entries were specified by the user, then the last entry is specified and the
-    @param builder: a builder object
-    @param method_name: a method on the builder object
-    @param tag: the tag of an entry which is potentially part of all_entries
-    @param all_entries: all parsed entries
-    @param apply_to_value: a function which should be applied before setting the value. If it is None, then nothing
+    :param builder: a builder object
+    :param method_name: a method on the builder object
+    :param tag: the tag of an entry which is potentially part of all_entries
+    :param all_entries: all parsed entries
+    :param apply_to_value: a function which should be applied before setting the value. If it is None, then nothing
                            happens
     """
     if tag in all_entries:
@@ -228,7 +228,7 @@ class UserFileStateDirectorISIS(object):
         This allows for a usage of the UserFileStateDirector with externally provided user_file_items or internally
         via the set_user_file method.
 
-        @param user_file_items: a list of parsed user file items.
+        :param user_file_items: a list of parsed user file items.
         """
         # ----------------------------------------------------
         # Populate the different sub states from the user file
@@ -1272,8 +1272,8 @@ class UserFileStateDirectorISIS(object):
         """
         Performs a conversion of position 1 of the beam centre. This is forwarded to the move builder.
 
-        @param pos1: the first position (this can be x in mm or for LARMOR and angle)
-        @return: the correctly scaled position
+        :param pos1: the first position (this can be x in mm or for LARMOR and angle)
+        :return: the correctly scaled position
         """
         return self._move_builder.convert_pos1(pos1)
 
@@ -1281,7 +1281,7 @@ class UserFileStateDirectorISIS(object):
         """
         Performs a conversion of position 2 of the beam centre. This is forwarded to the move builder.
 
-        @param pos2: the second position
-        @return: the correctly scaled position
+        :param pos2: the second position
+        :return: the correctly scaled position
         """
         return self._move_builder.convert_pos2(pos2)
