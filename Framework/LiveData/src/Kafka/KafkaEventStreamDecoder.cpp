@@ -319,7 +319,7 @@ void KafkaEventStreamDecoder::captureImplExcept() {
         auto &spectrum = periodBuffer.getSpectrum(
             m_specToIdx[static_cast<int32_t>(detData[i])]);
         spectrum.addEventQuickly(TofEvent(static_cast<double>(tofData[i]) *
-                                              1e-9, // nanoseconds to seconds
+                                              1e-3, // nanoseconds to microseconds
                                           pulseTime));
       }
     }
