@@ -48,7 +48,9 @@ Improved
   :ref:`AddSampleLog <algm-AddSampleLog>` can retrieve automatically.
 - ``ThreadPool`` now respects the value of ``OMP_NUM_THREADS`` environment variable (documented in [gcc](https://gcc.gnu.org/onlinedocs/libgomp/OMP_005fNUM_005fTHREADS.html))
 - Improved parallel scaling of :ref:`MDNormSCD <algm-MDNormSCD>` with > 4 cores.
+- Improved parallel scaling of :ref:`MDNormDirectSCD <algm-MDNormDirectSC>` with > 4 cores.
 - Reduced execution time of ``EventList::sortTof`` by over 2x, improving performance in algorithms such as :ref:`algm-CompressEvents` and :ref:`algm-SortEvents` which call it.
+- :ref:`LoadNexusProcessed <algm-LoadNexusProcessed>` is now approximately 33x faster when loading a ``PeaksWorkspace`` with a large instrument attached.
 
 Bug Fixes
 #########
@@ -58,6 +60,7 @@ Bug Fixes
 - Fixed an issue where the log ``proton_charge_by_period`` was not loaded for :ref:`LoadEventNexus <algm-LoadEventNexus>`.
 - Fixed an issue where :ref:`algm-MonteCarloAbsorption` would use the wavelengths from the first histogram of *InputWorkspace* only making the algorithm unusable for workspaces with varying bins.
 - Fixed an issue with the ``GroupingPattern`` property in :ref:`algm-GroupDetectors`, where incorrect spectra were being used if spectrum numbers are not 1-based indices.
+- Fixed an issue with :ref:`algm-CreateWorkspace` where giving bin edges as ``VerticalAxisValues`` would fail.
 
 Deprecated
 ##########

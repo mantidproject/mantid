@@ -1053,7 +1053,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
     def _save(self, wksp, info, normalized, pdfgetn):
         prefix = str(wksp)
         if len(self._outPrefix) > 0: # non-empty string
-            prefix = self._outPrefix
+            prefix = self._outPrefix + str(wksp)
         filename = os.path.join(self._outDir, prefix)
         if pdfgetn:
             if "pdfgetn" in self._outTypes:

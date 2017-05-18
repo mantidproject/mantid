@@ -97,6 +97,12 @@ public:
   loadDeadTimesFromFile(const std::string &filename) const;
   // empty the cache
   void clearCache();
+  // Find if name is in group/pair collection
+  static bool isContainedIn(const std::string &name,
+                            const std::vector<std::string> &collection) {
+    return std::find(collection.begin(), collection.end(), name) !=
+           collection.end();
+  };
 
 protected:
   /// Set properties of algorithm from options

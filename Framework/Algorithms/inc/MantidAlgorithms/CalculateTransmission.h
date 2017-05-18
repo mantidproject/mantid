@@ -87,7 +87,7 @@ public:
 private:
   /// stores an estimate of the progress so far as a proportion (starts at zero
   /// goes to 1.0)
-  mutable double m_done = 0.0;
+  mutable double m_done{0.0};
 
   /// Initialisation code
   void init() override;
