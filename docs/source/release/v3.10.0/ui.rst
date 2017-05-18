@@ -51,6 +51,7 @@ Algorithm Toolbox
 
 Scripting Window
 ################
+- Fixed a bug where Mantid would crash when trying to select the font for the script window
 
 Documentation
 #############
@@ -66,11 +67,13 @@ Bugs Resolved
 -------------
 
 - Fixed an issue in the Script Window that caused the Convert Tabs to Spaces and vice versa operations to corrupt the script.
+- Fixed an issue where some graphs not associated with a workspace would not be shown in the project save as view.
 
 SliceViewer Improvements
 ------------------------
 - Fixed a bug where the rebin button was toggled when the user switch axes.
 - Changed zoom level on peak. Now when zooming onto a spherical or ellipsoidal peak, the entire peak is visible when using the default window size.
+- Fixed a bug where swapping the dimensions did not rebin the workspace despite having autorebin enabled.
 
 VSI Improvments
 ---------------
