@@ -55,6 +55,8 @@ Improvements
 - OSIRIS diffraction now rebins container workspaces to match the sample workspace
 - :ref:`ISISIndirectDiffractionReduction <algm-ISISIndirectDiffractionReduction>` now fully supports VESUVIO data
 - Inelastic pixel ID's in BASIS instrument definition file grouped into continuous physical pixels.
+- Added SortXAxis to Bayes Quasi and Stretch
+- Removed error bars as default
 
 
 Bugfixes
@@ -64,5 +66,6 @@ Bugfixes
 - *Abins*:  fix setting very small off-diagonal elements of b tensors
 - Fix errors from calling Rebin from VisionReduction.
 - Fixed validation of inputs in *CalculatePaalmanPings*
+- IN16_Definition.xml has been updated with a Monitor ID change from 19 to 29 to fix a duplicate identity issue
 
 `Full list of changes on GitHub <http://github.com/mantidproject/mantid/pulls?q=is%3Apr+milestone%3A%22Release+3.10%22+is%3Amerged+label%3A%22Component%3A+Indirect+Inelastic%22>`_
