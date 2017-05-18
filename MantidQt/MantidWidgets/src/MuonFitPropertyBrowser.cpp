@@ -1087,10 +1087,9 @@ void MuonFitPropertyBrowser::setAllGroups() {
 */
 void MuonFitPropertyBrowser::setAllPairs() {
   clearChosenGroups();
-  bool isItGroup = false;
   for (auto iter = m_groupBoxes.constBegin(); iter != m_groupBoxes.constEnd();
        ++iter) {
-    isItGroup = false;
+    bool isItGroup = false;
     for (auto group : m_groupsList) {
       if (iter.key().toStdString() == group) {
         isItGroup = true;
