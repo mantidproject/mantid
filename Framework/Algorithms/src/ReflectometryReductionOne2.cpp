@@ -89,8 +89,9 @@ double getLambda(const HistogramX &xValues, const int xIdx) {
   return xValues[xIdx] + getLambdaRange(xValues, xIdx) / 2.0;
 }
 
-/** @todo The following translate functions are duplicates of code in
-* GroupDetectors2.cpp. We should move them to a common location if possible */
+/** @todo The following translation functions are duplicates of code in
+* GroupDetectors2.cpp. Longer term, we should move them to a common location if
+* possible */
 
 /* The following functions are used to translate single operators into
 * groups, just like the ones this algorithm loads from .map files.
@@ -271,8 +272,11 @@ std::string createProcessingCommandsFromDetectorWS(
       mapSpectrumIndicesToWorkspace(originWS, hostWS, detectorGroups);
 
   // Add each group to the output, separated by ','
-  /// @todo Add support to separate contiguous groups by ':' to avoid having
-  /// long lists in the processing instructions
+
+  /// @todo Low priority: Add support to separate contiguous groups by ':' to
+  /// avoid having long lists of spectrum indices in the processing
+  /// instructions. This would not make any functional difference but would be
+  /// a cosmetic improvement when you view the history.
   for (auto groupIt = hostGroups.begin(); groupIt != hostGroups.end();
        ++groupIt) {
     const auto &hostDetectors = *groupIt;
@@ -803,8 +807,12 @@ void ReflectometryReductionOne2::findTheta0() {
     if (!thetaIn->isDefault()) {
       m_theta0 = getProperty("ThetaIn");
     } else {
-      /// @todo Find the value of theta using calculateTheta (which could
-      /// be moved to the base class from ReflectometryReductionOneAuto)
+      /// @todo Currently, ThetaIn must be provided via a property. We could
+      /// calculate its value instead using
+      /// ReflectometryReductionOneAuto2::calculateTheta, which could be moved
+      /// to the base class (ReflectometryWorkflowBase2). Users normally use
+      /// ReflectometryReductionOneAuto2 though, so at the moment it isn't a
+      /// high priority to be able to calculate it here.
       throw std::runtime_error(
           "The ThetaIn property is required for the DivergentBeam case");
     }
