@@ -96,11 +96,13 @@ bool SVUtils::FindValidInterval(double &min, double &max) {
   if (max == min) // adjust values so they are not equal
   {
     valuesOK = false;
-    if (min == 0) {
-      min = -1, max = 1;
+    if (min == 0.0) {
+      min = -1.0;
+      max = 1.0;
     } else {
-      max = 1.1 * max;
-      min = 0.9 * min;
+      const double centre = min;
+      min = 0.9 * centre;
+      max = 1.1 * centre;
     }
   } else if (min > max) // fix the order
   {
