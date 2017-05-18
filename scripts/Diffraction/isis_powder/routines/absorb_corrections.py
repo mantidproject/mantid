@@ -44,9 +44,10 @@ def run_cylinder_absorb_corrections(ws_to_correct, multiple_scattering, sample_d
     """
 
     if not isinstance(sample_details_obj, sample_details.SampleDetails):
-        raise RuntimeError("A SampleDetails object was not set or a different object type was found. Please create a"
-                           " SampleDetails object and set the relevant properties it. Then set the new sample by "
-                           "calling set_sample_details()")
+        raise RuntimeError("A SampleDetails object was not set or a different object type was found when sample"
+                           " absorption corrections were requested. If you want sample absorption corrections please "
+                           "create a SampleDetails object and set the relevant properties it. "
+                           "Then set the new sample by calling set_sample_details().")
 
     # Get the underlying material object
     if not sample_details_obj.is_material_set():
