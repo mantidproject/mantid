@@ -570,13 +570,7 @@ class UBMatrixTable(tableBase.NTableWidget):
 UB_Peak_Table_Setup = [('Scan', 'int'),
                        ('Pt', 'int'),
                        ('Spice HKL', 'str'),
-                       # ('H', 'float'),
-                       # ('K', 'float'),
-                       # ('L', 'float'),
                        ('Calculated HKL', 'str'),
-                       # ('Q_x', 'float'),
-                       # ('Q_y', 'float'),
-                       # ('Q_z', 'float'),
                        ('Q-Sample', 'str'),
                        ('Selected', 'checkbox'),
                        ('m1', 'float'),
@@ -674,16 +668,19 @@ class UBMatrixPeakTable(tableBase.NTableWidget):
         Get reflection's miller index
         :param row_index:
         :param is_spice_hkl:
-        :return:
+        :return: 3-tuple as H, K, L
         """
-        assert isinstance(row_index, int), 'Row index {0} must be an integer'
-        # TODO/ISSUE/NOW - clean
+        # check input
+        assert isinstance(row_index, int), 'Row index {0} must be an integer but not a {1}.' \
+                                           ''.format(row_index, type(row_index))
 
+        # get the HKL either parsed from SPICE file or from calculation
         if is_spice_hkl:
             hkl_str = self.get_cell_value(row_index, self._colIndexSpiceHKL)
         else:
             hkl_str = self.get_cell_value(row_index, self._colIndexCalculatedHKL)
 
+        # convert the recorded string to HKL
         status, ret_obj = guiutility.parse_float_array(hkl_str)
         if not status:
             raise RuntimeError(ret_obj)
@@ -805,13 +802,14 @@ class UBMatrixPeakTable(tableBase.NTableWidget):
 
     def set_hkl(self, i_row, hkl, is_spice_hkl, error=None):
         """
-        Set HKL to table
+        Set HKL to a row in the table. Show H/K/L with 4 decimal pionts
         :param i_row:
         :param hkl: HKL is a list of tuple
+        :param is_spice_hkl: If true, then set input to cell for SPICE-imported HKL. Otherwise to calculated HKL.
         :param error: error of HKL
         """
         # Check
-        assert isinstance(i_row, int), 'Row number (index) must be integer but not %s.' % type(i_row)
+        assert isinstance(i_row, int), 'Row number (index) must be integer but not %s.'.format(type(i_row))
 
         if isinstance(hkl, list) or isinstance(hkl, tuple):
             assert len(hkl) == 3, 'In case HKL is list of tuple, its size must be equal to 3 but not %d.' \
@@ -822,19 +820,10 @@ class UBMatrixPeakTable(tableBase.NTableWidget):
         else:
             raise AssertionError('HKL of type %s is not supported. Supported types include list, tuple '
                                  'and numpy array.' % type(hkl))
-        assert isinstance(is_spice_hkl, bool), 'new blabla'
+        assert isinstance(is_spice_hkl, bool), 'Flag {0} for SPICE-HKL must be a boolean but not a {1}.' \
+                                               ''.format(is_spice_hkl, type(is_spice_hkl))
 
-        # get columns
-        # i_col_h = UB_Peak_Table_Setup.index(('H', 'float'))
-        # i_col_k = UB_Peak_Table_Setup.index(('K', 'float'))
-        # i_col_l = UB_Peak_Table_Setup.index(('L', 'float'))
-        #
-        # self.update_cell_value(i_row, i_col_h, hkl[0])
-        # self.update_cell_value(i_row, i_col_k, hkl[1])
-        # self.update_cell_value(i_row, i_col_l, hkl[2])
-
-        # FIXME/TODO/ISSUE/NOW - Clean!
-
+        # convert to a string with 4 decimal points
         hkl_str = '%.4f, %.4f, %.4f' % (hkl[0], hkl[1], hkl[2])
 
         if is_spice_hkl:
@@ -842,6 +831,7 @@ class UBMatrixPeakTable(tableBase.NTableWidget):
         else:
             self.update_cell_value(i_row, self._colIndexCalculatedHKL, hkl_str)
 
+        # set error
         if error is not None:
             i_col_error = UB_Peak_Table_Setup.index(('Error', 'float'))
             self.update_cell_value(i_row, i_col_error, error)
@@ -902,9 +892,8 @@ class UBMatrixPeakTable(tableBase.NTableWidget):
 
 class ProcessTableWidget(tableBase.NTableWidget):
     """
-    Extended table for peaks used to calculate UB matrix
+    Extended table for peaks used to process scans including peak integration, scan merging and etc.
     """
-    # TODO/NOW/ISSUE - Remove Index From and add mask, integration type (gaussian/simple)
     TableSetup = [('Scan', 'int'),
                   ('Status', 'str'),
                   ('Intensity', 'float'),
@@ -912,13 +901,10 @@ class ProcessTableWidget(tableBase.NTableWidget):
                   ('Error', 'float'),
                   ('Integrate', 'str'),  # integration type, Gaussian fit / simple summation
                   ('Mask', 'str'),  # '' for no mask
-                  # ('Peak', 'str'),  # peak center can be either HKL or Q depending on the unit
                   ('HKL', 'str'),
-                  # ('Index From', 'str'),  # source of HKL index, either SPICE or calculation
                   ('Motor', 'str'),
                   ('Motor Step', 'str'),
                   ('Wavelength', 'float'),
-                  # ('Workspace', 'str'),
                   ('K-Index', 'int'),
                   ('Select', 'checkbox')]
 

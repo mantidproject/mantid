@@ -1488,16 +1488,23 @@ class Qt4MplCanvas(FigureCanvas):
 
         return
 
-    def set_title(self, title, color):
+    def set_title(self, title, color, location='center'):
         """
-
+        set title to the figure (canvas) with default location at center
         :param title:
+        :param color:
+        :param location
         :return:
         """
-        # TODO/NOW - doc & etc
+        # check input
+        assert isinstance(title, str), 'Title {0} must be a string but not a {1}.'.format(title, type(title))
+        assert isinstance(color, str) and len(color) > 0, 'Color {0} must be a non-empty string but not a {1}.' \
+                                                          ''.format(color, type(color))
+        assert isinstance(location, str) and len(location) > 0, 'Location {0} must be a non-empty string but not a {1}.' \
+                                                                ''.format(location, type(location))
 
-        self.axes.set_title(title, loc='center', color=color)
-
+        # set title and re-draw to apply
+        self.axes.set_title(title, loc=location, color=color)
         self.draw()
 
         return

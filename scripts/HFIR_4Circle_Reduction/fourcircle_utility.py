@@ -72,7 +72,7 @@ def convert_to_wave_length(m1_position):
     return wave_length
 
 
-def generate_mask_file(file_path, ll_corner, ur_corner, rectangular=True):
+def generate_mask_file(file_path, ll_corner, ur_corner, rectangular=True, num_det_row=None):
     """ Generate a Mantid RIO/Mask XML file
     Requirements:
     1. file_path is writable;
@@ -85,7 +85,10 @@ def generate_mask_file(file_path, ll_corner, ur_corner, rectangular=True):
     """
     # check
     assert isinstance(file_path, str), 'File path must be a string but not a %s.' % str(type(file_path))
-    assert len(ll_corner) == 2 and len(ur_corner) == 2
+    assert len(ll_corner) == 2 and len(ur_corner) == 2, 'blabla'
+
+    if num_det_row is None:
+        num_det_row = NUM_DET_ROW
 
     if rectangular is False:
         raise RuntimeError('Non-rectangular detector is not supported yet.')
@@ -99,19 +102,40 @@ def generate_mask_file(file_path, ll_corner, ur_corner, rectangular=True):
     xml_str += '          <detids>'
 
     # part 2: all the masked detectors
-    start_row = int(ll_corner[0])
-    start_col = int(ll_corner[1])
+    mpl_start_row = int(ll_corner[0])
+    mpl_start_col = int(ll_corner[1])
 
-    end_row = int(ur_corner[0])
-    end_col = int(ur_corner[1])
+    mpl_end_row = int(ur_corner[0])
+    mpl_end_col = int(ur_corner[1])
 
-    assert start_col < end_col
+    # correction:
+    if False:
+	start_row = mpl_start_col
+	start_col = 256 - mpl_end_row
+
+	end_row = mpl_end_col
+	end_col = mpl_start_row
+    else:
+	start_row = mpl_start_row
+	start_col = mpl_start_col
+	end_row =   mpl_end_row 
+	end_col =   mpl_end_col 
+
+    assert start_col < end_col, 'Start column {0} cannot be smaller than end column {1}.'.format(start_col, end_col)
 
     det_sub_xml = ''
-    for col_number in xrange(start_col, end_col+1):
-        start_det_id = 1 + col_number * NUM_DET_ROW + start_row
-        end_det_id = 1 + col_number * NUM_DET_ROW + end_row
-        det_sub_xml += '%d-%d,' % (start_det_id, end_det_id)
+    if False:
+        for col_number in xrange(start_col, end_col+1):
+            start_det_id = 1 + col_number * NUM_DET_ROW + start_row
+            end_det_id = 1 + col_number * NUM_DET_ROW + end_row
+            det_sub_xml += '%d-%d,' % (start_det_id, end_det_id)
+    else:
+        print '[DB...BAT] Row numbers from {0} to {1}'.format(start_row, end_row)
+	print '[DB...BAT] Col numbers from {0} to {1}'.format(start_col, end_col)
+        for row_number in range(start_row, end_row+1):
+            start_det_id = 1 + row_number * num_det_row + start_col
+	    end_det_id = 1 + row_number * num_det_row + end_col
+	    det_sub_xml += '{0}-{1},'.format(start_det_id, end_det_id)
     # END-FOR
     # remove last ','
     det_sub_xml = det_sub_xml[:-1]
