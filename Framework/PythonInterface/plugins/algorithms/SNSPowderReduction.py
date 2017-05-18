@@ -356,10 +356,15 @@ class SNSPowderReduction(DataProcessorAlgorithm):
             for sam_run_number in samRuns:
                 # first round of processing the sample
                 self._info = None
-                returned = self._focusChunks(sam_run_number, sample_time_filter_wall,
-                                             splitwksp=self._splittersWS,
-                                             reload_if_loaded=reload_event_file,
-                                             preserveEvents=preserveEvents)
+                if sample_time_filter_wall[0] == 0. and sample_time_filter_wall[-1] == 0. \
+                        and self._splittersWS is None:
+                    returned = self._focusAndSum([sam_run_number], reload_if_loaded=reload_event_file,
+                                            preserveEvents=preserveEvents)
+                else:
+                    returned = self._focusChunks(sam_run_number, sample_time_filter_wall,
+                                                 splitwksp=self._splittersWS,
+                                                 reload_if_loaded=reload_event_file,
+                                                 preserveEvents=preserveEvents)
 
                 if isinstance(returned, list):
                     # Returned with a list of workspaces
@@ -772,7 +777,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                                          CropWavelengthMax=self._wavelengthMax,
                                          FrequencyLogNames=self.getProperty("FrequencyLogNames").value,
                                          WaveLengthLogNames=self.getProperty("WaveLengthLogNames").value,
-                                         ReductionProperties="__snspowderreduction",
+                                         ReductionProperties="__snspowderreduction_inner",
                                          **self._focusPos)
 
         #TODO make sure that this funny function is called
@@ -1253,7 +1258,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                                  OutputWorkspace=can_run_ws_name,
                                  Target="TOF")
             else:
-                fileArg = can_run_number
+                fileArg = [can_run_number]
                 if self.getProperty("Sum").value:
                     fileArg = can_run_numbers
                 self._focusAndSum(fileArg, preserveEvents, final_name=can_run_ws_name)
