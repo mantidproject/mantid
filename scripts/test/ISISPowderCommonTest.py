@@ -5,7 +5,7 @@ import unittest
 
 from six_shim import assertRaisesRegex
 
-from isis_powder.routines import common
+from isis_powder.routines import common, common_enums
 
 
 class ISISPowderCommonTest(unittest.TestCase):
@@ -66,12 +66,14 @@ class ISISPowderCommonTest(unittest.TestCase):
             common.crop_banks_using_crop_list(bank_list=bank_list[1:], crop_values_list=cropping_value_list)
 
         # Check we can crop a single workspace from the list
-        cropped_single_ws_list = common.crop_banks_using_crop_list(bank_list=[bank_list[0]], crop_values_list=[cropping_value])
+        cropped_single_ws_list = common.crop_banks_using_crop_list(bank_list=[bank_list[0]],
+                                                                   crop_values_list=[cropping_value])
         self.assertEqual(cropped_single_ws_list[0].blocksize(), expected_number_of_bins)
         mantid.DeleteWorkspace(Workspace=cropped_single_ws_list[0])
 
         # Check we can crop a whole list
-        cropped_ws_list = common.crop_banks_using_crop_list(bank_list=bank_list[1:], crop_values_list=cropping_value_list[1:])
+        cropped_ws_list = common.crop_banks_using_crop_list(bank_list=bank_list[1:],
+                                                            crop_values_list=cropping_value_list[1:])
         for ws in cropped_ws_list[1:]:
             self.assertEqual(ws.blocksize(), expected_number_of_bins)
             mantid.DeleteWorkspace(Workspace=ws)
@@ -242,6 +244,76 @@ class ISISPowderCommonTest(unittest.TestCase):
         with assertRaisesRegex(self, ValueError, run_input_sting):
             common.generate_run_numbers(run_number_string=run_input_sting)
 
+    def test_load_current_normalised_workspace(self):
+        run_number_single = 100
+        run_number_range = "100-101"
+
+        bin_index = 8
+        first_run_bin_value = 0.59706224
+        second_run_bin_value = 1.48682782
+
+        # Check it handles a single workspace correctly
+        single_workspace = common.load_current_normalised_ws_list(run_number_string=run_number_single,
+                                                                  instrument=ISISPowderMockInst())
+        # Get the only workspace in the list, ask for the 0th spectrum and the value at the 200th bin
+        self.assertTrue(isinstance(single_workspace, list))
+        self.assertEqual(len(single_workspace), 1)
+        self.assertAlmostEqual(single_workspace[0].readY(0)[bin_index], first_run_bin_value)
+        mantid.DeleteWorkspace(single_workspace[0])
+
+        # Does it return multiple workspaces when instructed
+        multiple_ws = common.load_current_normalised_ws_list(
+            run_number_string=run_number_range, instrument=ISISPowderMockInst(),
+            input_batching=common_enums.INPUT_BATCHING.Individual)
+
+        self.assertTrue(isinstance(multiple_ws, list))
+        self.assertEqual(len(multiple_ws), 2)
+
+        # Check the bins haven't been summed
+        self.assertAlmostEqual(multiple_ws[0].readY(0)[bin_index], first_run_bin_value)
+        self.assertAlmostEqual(multiple_ws[1].readY(0)[bin_index], second_run_bin_value)
+        for ws in multiple_ws:
+            mantid.DeleteWorkspace(ws)
+
+        # Does it sum workspaces when instructed
+        summed_ws = common.load_current_normalised_ws_list(
+            run_number_string=run_number_range, instrument=ISISPowderMockInst(),
+            input_batching=common_enums.INPUT_BATCHING.Summed)
+
+        self.assertTrue(isinstance(summed_ws, list))
+        self.assertEqual(len(summed_ws), 1)
+
+        # Check bins have been summed
+        self.assertAlmostEqual(summed_ws[0].readY(0)[bin_index], (first_run_bin_value + second_run_bin_value))
+        mantid.DeleteWorkspace(summed_ws[0])
+
+    def test_load_current_normalised_ws_respects_ext(self):
+        run_number = "100"
+        file_ext_one = ".s1"
+        file_ext_two = ".s2"
+
+        bin_index = 5
+
+        result_ext_one = 1.25270032
+        result_ext_two = 1.15126361
+
+        # Check that it respects the ext flag - try the first extension of this name
+        returned_ws_one = common.load_current_normalised_ws_list(instrument=ISISPowderMockInst(file_ext=file_ext_one),
+                                                                 run_number_string=run_number)
+        # Have to store result and delete the ws as they share the same name so will overwrite
+        result_ws_one = returned_ws_one[0].readY(0)[bin_index]
+        mantid.DeleteWorkspace(returned_ws_one[0])
+
+        returned_ws_two = common.load_current_normalised_ws_list(instrument=ISISPowderMockInst(file_ext=file_ext_two),
+                                                                 run_number_string=run_number)
+        result_ws_two = returned_ws_two[0].readY(0)[bin_index]
+        mantid.DeleteWorkspace(returned_ws_two[0])
+
+        # Ensure it loaded two different workspaces
+        self.assertAlmostEqual(result_ws_one, result_ext_one)
+        self.assertAlmostEqual(result_ws_two, result_ext_two)
+        self.assertNotAlmostEqual(result_ext_one, result_ext_two)
+
     def test_remove_intermediate_workspace(self):
         ws_list = []
         ws_names_list = []
@@ -293,14 +365,14 @@ class ISISPowderCommonTest(unittest.TestCase):
         no_scale_ws = mantid.CloneWorkspace(InputWorkspace=original_ws, OutputWorkspace="test_subtract_sample_empty_ws")
 
         # Subtracting from self should equal 0
-        returned_ws = common.subtract_summed_runs(ws_to_correct=no_scale_ws, instrument=MockInstrument(),
+        returned_ws = common.subtract_summed_runs(ws_to_correct=no_scale_ws, instrument=ISISPowderMockInst(),
                                                   empty_sample_ws_string=sample_empty_number)
         y_values = returned_ws.readY(0)
         for i in range(0, returned_ws.blocksize()):
             self.assertAlmostEqual(y_values[i], 0)
 
         # Check what happens when we specify scale as a half
-        scaled_ws = common.subtract_summed_runs(ws_to_correct=original_ws, instrument=MockInstrument(),
+        scaled_ws = common.subtract_summed_runs(ws_to_correct=original_ws, instrument=ISISPowderMockInst(),
                                                 scale_factor=0.75, empty_sample_ws_string=sample_empty_number)
         scaled_y_values = scaled_ws.readY(0)
         self.assertAlmostEqual(scaled_y_values[2], 0.20257424)
@@ -328,16 +400,31 @@ class ISISPowderCommonTest(unittest.TestCase):
             mantid.DeleteWorkspace(splined_ws)
 
 
-class MockInstrument(object):
-    def _get_run_details(self, run_number_string):
-        return None
+class ISISPowderMockInst(object):
+    def __init__(self, file_ext=None):
+        self._file_ext = file_ext
+
+    @staticmethod
+    def _get_input_batching_mode(**_):
+        # By default return multiple files as it makes something going wrong easier to spot
+        return common_enums.INPUT_BATCHING.Individual
+
+    def _get_run_details(self, **_):
+        return ISISPowderMockRunDetails(file_ext=self._file_ext)
 
     @staticmethod
     def _generate_input_file_name(run_number):
+        # Mantid will automatically convert this into either POL or POLARIS
         return "POL" + str(run_number)
 
-    def _normalise_ws_current(self, ws_to_correct, run_details=None):
+    @staticmethod
+    def _normalise_ws_current(ws_to_correct, **_):
         return ws_to_correct
+
+
+class ISISPowderMockRunDetails(object):
+    def __init__(self, file_ext):
+        self.file_extension = file_ext
 
 if __name__ == "__main__":
     unittest.main()
