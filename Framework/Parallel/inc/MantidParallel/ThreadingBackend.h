@@ -3,6 +3,7 @@
 
 #include "MantidParallel/DllConfig.h"
 #include "MantidParallel/Request.h"
+#include "MantidKernel/make_unique.h"
 
 #include <boost/archive/binary_oarchive.hpp>
 #include <boost/archive/binary_iarchive.hpp>
@@ -71,16 +72,26 @@ public:
 
 private:
   int m_size{1};
-  std::map<std::tuple<int, int, int>, std::vector<std::stringbuf>> m_buffer;
+  std::map<std::tuple<int, int, int>,
+           std::vector<std::unique_ptr<std::stringbuf>>> m_buffer;
   std::mutex m_mutex;
 };
 
 template <typename... T>
 void ThreadingBackend::send(int source, int dest, int tag, T &&... args) {
-  std::stringbuf buf;
-  std::ostream os(&buf);
-  boost::archive::binary_oarchive oa(os);
-  oa.operator<<(std::forward<T>(args)...);
+  // Must wrap std::stringbuf in a unique_ptr since gcc on RHEL7 does not
+  // support moving a stringbuf (incomplete C++11 support?).
+  auto buf = Kernel::make_unique<std::stringbuf>();
+  std::ostream os(buf.get());
+  {
+    // The binary_oarchive must be scoped to prevent a segmentation fault. I
+    // believe the reason is that otherwise recv() may end up reading from the
+    // buffer while the oarchive is still alive. I do not really understand this
+    // though, since it is *not* writing to the buffer, somehow the oarchive
+    // destructor must be doing something that requires the buffer.
+    boost::archive::binary_oarchive oa(os);
+    oa.operator<<(std::forward<T>(args)...);
+  }
   std::lock_guard<std::mutex> lock(m_mutex);
   m_buffer[std::make_tuple(source, dest, tag)].push_back(std::move(buf));
 }
@@ -88,6 +99,7 @@ void ThreadingBackend::send(int source, int dest, int tag, T &&... args) {
 template <typename... T>
 void ThreadingBackend::recv(int dest, int source, int tag, T &&... args) {
   const auto key = std::make_tuple(source, dest, tag);
+  std::unique_ptr<std::stringbuf> buf;
   while (true) {
     std::lock_guard<std::mutex> lock(m_mutex);
     auto it = m_buffer.find(key);
@@ -96,12 +108,13 @@ void ThreadingBackend::recv(int dest, int source, int tag, T &&... args) {
     auto &queue = it->second;
     if (queue.empty())
       continue;
-    std::istream is(&queue.front());
-    boost::archive::binary_iarchive ia(is);
-    ia.operator>>(std::forward<T>(args)...);
+    buf = std::move(queue.front());
     queue.erase(queue.begin());
-    return;
+    break;
   }
+  std::istream is(buf.get());
+  boost::archive::binary_iarchive ia(is);
+  ia.operator>>(std::forward<T>(args)...);
 }
 
 template <typename... T>
