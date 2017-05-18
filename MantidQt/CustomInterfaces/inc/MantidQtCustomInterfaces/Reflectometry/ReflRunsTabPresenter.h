@@ -73,6 +73,7 @@ public:
   void giveUserWarning(std::string prompt, std::string title) override;
   void giveUserCritical(std::string prompt, std::string title) override;
   std::string runPythonAlgorithm(const std::string &pythonCode) override;
+  void setRowActionEnabled(int index, bool enabled) override;
   std::map<std::string, std::string> getPreprocessingValues() const override;
   std::map<std::string, std::set<std::string>>
   getPreprocessingProperties() const override;

@@ -56,6 +56,7 @@ public:
   virtual void giveUserWarning(std::string prompt, std::string title) = 0;
   virtual void giveUserCritical(std::string prompt, std::string title) = 0;
   virtual std::string runPythonAlgorithm(const std::string &algorithm) = 0;
+  virtual void setRowActionEnabled(int index, bool enabled) = 0;
 
   /// Return values to perform pre-processing on
   virtual std::map<std::string, std::string> getPreprocessingValues() const = 0;

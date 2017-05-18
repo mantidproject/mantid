@@ -87,6 +87,7 @@ public:
                          int column) override;
   void setClipboard(const std::string &text) override;
   void setToolbarActionEnabled(int index, bool enabled) override;
+  void setContextMenuActionEnabled(int index, bool enabled) override;
 
   // Accessor methods
   std::map<int, std::set<int>> getSelectedChildren() const override;
@@ -111,6 +112,8 @@ private:
   Ui::DataProcessorWidget ui;
   // the workspace the user selected to open
   std::string m_toOpen;
+  // the context menu
+  QMenu *m_contextMenu;
   QSignalMapper *m_openMap;
   // Command adapters
   std::vector<std::unique_ptr<DataProcessorCommandAdapter>> m_commands;

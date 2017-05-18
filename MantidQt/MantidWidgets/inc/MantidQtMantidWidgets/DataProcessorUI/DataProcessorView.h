@@ -85,6 +85,7 @@ public:
   virtual void setClipboard(const std::string &text) = 0;
   virtual void setModel(const std::string &name) = 0;
   virtual void setToolbarActionEnabled(int index, bool enabled) = 0;
+  virtual void setContextMenuActionEnabled(int index, bool enabled) = 0;
 
   // Accessor methods
   virtual std::map<int, std::set<int>> getSelectedChildren() const = 0;

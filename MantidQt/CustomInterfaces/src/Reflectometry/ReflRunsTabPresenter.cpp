@@ -507,6 +507,16 @@ ReflRunsTabPresenter::runPythonAlgorithm(const std::string &pythonCode) {
   return m_mainPresenter->runPythonAlgorithm(pythonCode);
 }
 
+/**
+Tells the view to set a specific action in the "Edit" menu enabled or disabled
+* @param index : The index of the action in the "Edit" menu
+* @param enabled : Whether to enable or disable the action
+*/
+void ReflRunsTabPresenter::setRowActionEnabled(int index, bool enabled) {
+
+  m_view->setRowActionEnabled(index, enabled);
+}
+
 /** Changes the current instrument in the data processor widget. Also updates
  * the config service and prints an information message
 */

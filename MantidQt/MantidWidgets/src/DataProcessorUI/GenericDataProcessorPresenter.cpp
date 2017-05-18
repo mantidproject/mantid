@@ -188,8 +188,11 @@ void GenericDataProcessorPresenter::acceptViews(
   // Start with a blank table
   newTable();
 
-  // Disable pause button and setup table selection model connections
+  // Disable pause buttons accessible from view
   m_view->setToolbarActionEnabled(1, false);
+  m_view->setContextMenuActionEnabled(1, false);
+
+  // Setup table selection model connections
   m_view->setSelectionModelConnections();
 }
 
@@ -1430,9 +1433,13 @@ the current thread for reducing a row or group has finished
 */
 void GenericDataProcessorPresenter::pause() {
 
-  // Enable process button and disable pause button
+  // Enable process buttons and disable pause buttons
   m_view->setToolbarActionEnabled(0, true);
+  m_view->setContextMenuActionEnabled(0, true);
+  m_mainPresenter->setRowActionEnabled(0, true);
   m_view->setToolbarActionEnabled(1, false);
+  m_view->setContextMenuActionEnabled(1, false);
+  m_mainPresenter->setRowActionEnabled(1, false);
 
   m_reductionPaused = true;
 }
@@ -1441,9 +1448,13 @@ void GenericDataProcessorPresenter::pause() {
 */
 void GenericDataProcessorPresenter::resume() {
 
-  // Disable process button and enable pause button
+  // Disable process buttons and enable pause buttons
   m_view->setToolbarActionEnabled(0, false);
+  m_view->setContextMenuActionEnabled(0, false);
+  m_mainPresenter->setRowActionEnabled(0, false);
   m_view->setToolbarActionEnabled(1, true);
+  m_view->setContextMenuActionEnabled(1, true);
+  m_mainPresenter->setRowActionEnabled(1, true);
 
   m_reductionPaused = false;
   m_mainPresenter->notify(
@@ -1485,6 +1496,8 @@ void GenericDataProcessorPresenter::accept(
   // Notify workspace receiver with the list of valid workspaces as soon as it
   // is registered
   m_mainPresenter->notify(DataProcessorMainPresenter::ADSChangedFlag);
+  // Disable pause button accessible from main presenter
+  m_mainPresenter->setRowActionEnabled(1, false);
 }
 
 /** Returs the list of valid workspaces currently in the ADS

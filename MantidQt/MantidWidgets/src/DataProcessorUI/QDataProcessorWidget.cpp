@@ -71,6 +71,12 @@ void QDataProcessorWidget::addActions(
             ui.rowToolBar, std::move(command)));
   }
 
+  // Add actions to context menu
+  m_contextMenu = new QMenu(this);
+  for (const auto &command : m_commands) {
+    m_contextMenu->addAction(command->getAction());
+  }
+
   // Add a whats this button
   ui.rowToolBar->addAction(QWhatsThis::createAction(this));
 }
@@ -181,11 +187,7 @@ void QDataProcessorWidget::showContextMenu(const QPoint &pos) {
   if (!ui.viewTable->indexAt(pos).isValid())
     return;
 
-  QMenu *menu = new QMenu(this);
-  for (const auto &command : m_commands) {
-    menu->addAction(command->getAction());
-  }
-  menu->popup(ui.viewTable->viewport()->mapToGlobal(pos));
+  m_contextMenu->popup(ui.viewTable->viewport()->mapToGlobal(pos));
 }
 
 /**
@@ -352,6 +354,16 @@ Sets a specific action in the row toolbar enabled or disabled
 */
 void QDataProcessorWidget::setToolbarActionEnabled(int index, bool enabled) {
   ui.rowToolBar->actions()[index]->setEnabled(enabled);
+}
+
+/**
+Sets a specific action in the context menu enabled or disabled
+@param index : The index of the action in the context menu
+@param enabled : Whether to enable or disable the action
+*/
+void QDataProcessorWidget::setContextMenuActionEnabled(int index,
+                                                       bool enabled) {
+  m_contextMenu->actions()[index]->setEnabled(enabled);
 }
 
 /**
