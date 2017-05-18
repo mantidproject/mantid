@@ -71,7 +71,7 @@ The elements of the SANSState are:
 +--------------------------------+---------------------+------------------------------------------+----------------------------------------------+
 
 
-Note that these settings should be only populated via the GUI or the Python Interface of ISIS SANS.
+**Note that these settings should be only populated via the GUI or the Python Interface of ISIS SANS.**
 
 Optimization Setting: *PublishToCache* and *UseCached*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

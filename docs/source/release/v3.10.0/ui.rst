@@ -62,6 +62,7 @@ Bugs Resolved
 -------------
 
 - Fixed an issue in the Script Window that caused the Convert Tabs to Spaces and vice versa operations to corrupt the script.
+- Fixed an issue where some graphs not associated with a workspace would not be shown in the project save as view.
 
 SliceViewer Improvements
 ------------------------
@@ -75,6 +76,7 @@ VSI Improvments
 - The mapped array vtkMDHWSignalArray has been refactored to use the new vtkGenericDataArray class template. This interface minimizes virtual indirection and allows advanced compiler optimizations such as vectorization.
 - Minimize the number of times the workspace min and max values are calculated.
 - Threshold filter now reports progress to the user.
+- Add option to automatically choose a contrasting color for axes grid and colorbar.
 - Camera toolbar snaps to views along crystallographic axes,
 
 |
