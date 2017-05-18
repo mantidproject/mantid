@@ -22,6 +22,15 @@ using namespace Mantid::HistogramData;
 using namespace Mantid::Kernel;
 using Mantid::DataObjects::ScanningWorkspaceBuilder;
 
+namespace {
+Instrument_const_sptr createSimpleInstrument(size_t nDetectors, size_t nBins) {
+  const auto &wsWithInstrument =
+      WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(
+          int(nDetectors), int(nBins));
+  return wsWithInstrument->getInstrument();
+}
+}
+
 class ScanningWorkspaceBuilderTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
@@ -495,6 +504,35 @@ private:
         TS_ASSERT_EQUALS(detectorInfo.scanInterval({i, j}), timeRanges[j]);
       }
     }
+  }
+};
+
+class ScanningWorkspaceBuilderTestPerformance : public CxxTest::TestSuite {
+public:
+  void test_large_scanning_workspace() {
+    make_scanning_workspace(1000, 500, 1000);
+  }
+
+  void test_lots_of_small_scanning_workspaces() {
+    for (size_t i = 0; i < 200; ++i)
+      make_scanning_workspace(100, 50, 100);
+  }
+
+  void make_scanning_workspace(size_t nDetectors, size_t nTimeIndexes,
+                               size_t nBins) {
+
+    const auto &instrument = createSimpleInstrument(nDetectors, nTimeIndexes);
+
+    std::vector<std::pair<DateAndTime, DateAndTime>> timeRanges;
+    for (size_t i = 0; i < nTimeIndexes; ++i) {
+      timeRanges.push_back(std::pair<DateAndTime, DateAndTime>(
+          DateAndTime(i * 2), DateAndTime(i * 2 + 1)));
+    }
+
+    auto builder = ScanningWorkspaceBuilder(instrument, nTimeIndexes, nBins);
+    builder.setTimeRanges(timeRanges);
+    MatrixWorkspace_const_sptr ws;
+    ws = builder.buildWorkspace();
   }
 };
 
