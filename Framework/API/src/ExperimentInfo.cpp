@@ -305,7 +305,7 @@ void ExperimentInfo::setInstrument(const Instrument_const_sptr &instr) {
   const auto parInstrument = Geometry::ParComponentFactory::createInstrument(
       sptr_instrument, m_parmap);
 
-  m_infoVisitor = makeOrRetrieveVisitor(*sptr_instrument);
+  m_infoVisitor = makeOrRetrieveVisitor(*instr);
 
   m_detectorInfo = makeDetectorInfo(*parInstrument, *instr);
   m_parmap->setDetectorInfo(m_detectorInfo);

@@ -6,6 +6,7 @@
 #include "MantidKernel/Exception.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
+#include "MantidGeometry/Instrument/InfoComponentVisitor.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include <cxxtest/TestSuite.h>
 #include "MantidKernel/DateAndTime.h"
@@ -679,6 +680,14 @@ public:
     TSM_ASSERT("Can only be "
                "available when associated with ExperimentInfo",
                !loneInstrument.hasDetectorInfo());
+  }
+
+  void test_set_InfoVisitor() {
+    Instrument instrument;
+    TS_ASSERT(!instrument.hasInfoVisitor());
+    InfoComponentVisitor visitor(std::vector<detid_t>{});
+    instrument.setInfoVisitor(visitor);
+    TS_ASSERT(instrument.hasInfoVisitor());
   }
 
 private:
