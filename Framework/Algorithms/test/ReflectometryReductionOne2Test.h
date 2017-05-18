@@ -109,6 +109,28 @@ public:
     TS_ASSERT_DELTA(outLam->y(0)[7], 6.0000, 0.0001);
   }
 
+  void test_IvsLam_multiple_detector_groups() {
+    // Test IvsLam workspace
+    // No monitor normalization
+    // No direct beam normalization
+    // No transmission correction
+    // Processing instructions : 1,2-3 (two separate groups)
+
+    ReflectometryReductionOne2 alg;
+    setupAlgorithm(alg, 1.5, 15.0, "1,2-3");
+    // Run the algorithm. There should be 2 output histograms, one for each
+    // input group
+    MatrixWorkspace_sptr outLam = runAlgorithmLam(alg, 14, 2);
+
+    TS_ASSERT(outLam->x(0)[0] >= 1.5);
+    TS_ASSERT(outLam->x(0)[7] <= 15.0);
+    // Y counts, should be 2.0000 * 1 for first group, 2.0000 * 2 for second
+    TS_ASSERT_DELTA(outLam->y(0)[0], 2.0000, 0.0001);
+    TS_ASSERT_DELTA(outLam->y(0)[7], 2.0000, 0.0001);
+    TS_ASSERT_DELTA(outLam->y(1)[0], 4.0000, 0.0001);
+    TS_ASSERT_DELTA(outLam->y(1)[7], 4.0000, 0.0001);
+  }
+
   void test_bad_processing_instructions() {
     // Processing instructions : 5+6
 
@@ -324,6 +346,11 @@ public:
   }
 
   void test_IvsQ() {
+    // Test IvsQ workspace
+    // No monitor normalization
+    // No direct beam normalization
+    // No transmission correction
+    // Processing instructions : 1
 
     ReflectometryReductionOne2 alg;
     setupAlgorithm(alg, 1.5, 15.0, "1");
@@ -332,6 +359,32 @@ public:
     // X range in outQ
     TS_ASSERT_DELTA(outQ->x(0)[0], 0.3353, 0.0001);
     TS_ASSERT_DELTA(outQ->x(0)[7], 0.5962, 0.0001);
+    // Y counts
+    TS_ASSERT_DELTA(outQ->y(0)[0], 2.0000, 0.0001);
+    TS_ASSERT_DELTA(outQ->y(0)[7], 2.0000, 0.0001);
+  }
+
+  void test_IvsQ_multiple_detector_groups() {
+    // Test IvsQ workspace
+    // No monitor normalization
+    // No direct beam normalization
+    // No transmission correction
+    // Processing instructions : 1,2-3 (two separate groups)
+
+    ReflectometryReductionOne2 alg;
+    setupAlgorithm(alg, 1.5, 15.0, "1,2-3");
+    // Run the algorithm. There should be 2 output histograms, one for each
+    // input group
+    MatrixWorkspace_sptr outQ = runAlgorithmQ(alg, 14, 2);
+
+    // X range in outQ
+    TS_ASSERT_DELTA(outQ->x(0)[0], 0.3353, 0.0001);
+    TS_ASSERT_DELTA(outQ->x(0)[7], 0.5962, 0.0001);
+    // Y counts, should be 2.0000 * 1 for first group, 2.0000 * 2 for second
+    TS_ASSERT_DELTA(outQ->y(0)[0], 2.0000, 0.0001);
+    TS_ASSERT_DELTA(outQ->y(0)[7], 2.0000, 0.0001);
+    TS_ASSERT_DELTA(outQ->y(1)[0], 4.0000, 0.0001);
+    TS_ASSERT_DELTA(outQ->y(1)[7], 4.0000, 0.0001);
   }
 
 private:
@@ -389,12 +442,13 @@ private:
 
   // Do standard algorithm execution and checks and return IvsLam
   MatrixWorkspace_sptr runAlgorithmLam(ReflectometryReductionOne2 &alg,
-                                       const size_t blocksize = 14) {
+                                       const size_t blocksize = 14,
+                                       const size_t nHist = 1) {
     alg.execute();
 
     MatrixWorkspace_sptr outLam = alg.getProperty("OutputWorkspaceWavelength");
     TS_ASSERT(outLam);
-    TS_ASSERT_EQUALS(outLam->getNumberHistograms(), 1);
+    TS_ASSERT_EQUALS(outLam->getNumberHistograms(), nHist);
     TS_ASSERT_EQUALS(outLam->blocksize(), blocksize);
 
     return outLam;
@@ -402,12 +456,13 @@ private:
 
   // Do standard algorithm execution and checks and return IvsQ
   MatrixWorkspace_sptr runAlgorithmQ(ReflectometryReductionOne2 &alg,
-                                     const size_t blocksize = 14) {
+                                     const size_t blocksize = 14,
+                                     const size_t nHist = 1) {
     alg.execute();
 
     MatrixWorkspace_sptr outQ = alg.getProperty("OutputWorkspace");
     TS_ASSERT(outQ);
-    TS_ASSERT_EQUALS(outQ->getNumberHistograms(), 1);
+    TS_ASSERT_EQUALS(outQ->getNumberHistograms(), nHist);
     TS_ASSERT_EQUALS(outQ->blocksize(), blocksize);
 
     return outQ;
