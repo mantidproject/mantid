@@ -348,14 +348,14 @@ def create_category_pages(app):
         # Now any additional index pages if required
         if category.name in INDEX_CATEGORIES:
             # index in categories directory
-            category_html_dir = os.path.dirname(category.html_path)
-            category_html_path_noext = category_html_dir + "/index"
+            category_html_dir = os.path.join(category.name.lower(), 'categories')
+            category_html_path_noext = os.path.join(category_html_dir, 'index')
             yield (category_html_path_noext, context, template)
 
             # index in document directory
             document_dir = os.path.dirname(category_html_dir)
-            category_html_path_noext = document_dir + "/index"
-            context["outpath"] = category_html_path_noext + ".html"
+            category_html_path_noext = os.path.join(document_dir, 'index')
+            context['outpath'] = category_html_path_noext + '.html'
             yield (category_html_path_noext, context, template)
 # enddef
 

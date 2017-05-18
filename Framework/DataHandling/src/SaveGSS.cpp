@@ -261,10 +261,10 @@ void SaveGSS::writeGSASFile(const std::string &outfilename, bool append,
     }
 
     // Write data
-    if (RALF.compare(outputFormat) == 0) {
+    if (RALF == outputFormat) {
       this->writeRALFdata(bankid, multiplybybinwidth, tmpbuffer,
                           inputWS->histogram(histoIndex));
-    } else if (SLOG.compare(outputFormat) == 0) {
+    } else if (SLOG == outputFormat) {
       this->writeSLOGdata(bankid, multiplybybinwidth, tmpbuffer,
                           inputWS->histogram(histoIndex));
     } else {
@@ -372,7 +372,7 @@ void SaveGSS::writeHeaders(const std::string &format, std::stringstream &os,
   std::ios::fmtflags fflags(os.flags());
 
   // Run number
-  if (format.compare(SLOG) == 0) {
+  if (format == SLOG) {
     os << "Sample Run: ";
     writeLogValue(os, runinfo, "run_number");
     os << " Vanadium Run: ";
@@ -403,7 +403,7 @@ void SaveGSS::writeHeaders(const std::string &format, std::stringstream &os,
     os << "\n";
   }
 
-  if (format.compare(SLOG) == 0) {
+  if (format == SLOG) {
     os << "# "; // make the next line a comment
   }
   os << inputWS->getTitle() << "\n";
@@ -414,7 +414,7 @@ void SaveGSS::writeHeaders(const std::string &format, std::stringstream &os,
   if (getProperty("MultiplyByBinWidth"))
     os << "# with Y multiplied by the bin widths.\n";
   os << "# Primary flight path " << primaryflightpath << "m \n";
-  if (format.compare(SLOG) == 0) {
+  if (format == SLOG) {
     os << "# Sample Temperature: ";
     writeLogValue(os, runinfo, "SampleTemp");
     os << " Freq: ";
@@ -429,9 +429,9 @@ void SaveGSS::writeHeaders(const std::string &format, std::stringstream &os,
     const Mantid::API::AlgorithmHistories &algohist =
         inputWS->getHistory().getAlgorithmHistories();
     for (const auto &algo : algohist) {
-      if (algo->name().compare("NormaliseByCurrent") == 0)
+      if (algo->name() == "NormaliseByCurrent")
         norm_by_current = true;
-      if (algo->name().compare("NormaliseToMonitor") == 0)
+      if (algo->name() == "NormaliseToMonitor")
         norm_by_monitor = true;
     }
     os << "#";

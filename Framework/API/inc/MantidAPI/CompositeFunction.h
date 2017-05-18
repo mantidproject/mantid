@@ -183,9 +183,9 @@ public:
   /// Get the function index
   std::size_t functionIndex(std::size_t i) const;
   /// Returns the index of parameter i as it declared in its function
-  size_t parameterLocalIndex(size_t i) const;
+  size_t parameterLocalIndex(size_t i, bool recursive = false) const;
   /// Returns the name of parameter i as it declared in its function
-  std::string parameterLocalName(size_t i) const;
+  std::string parameterLocalName(size_t i, bool recursive = false) const;
   /// Check the function.
   void checkFunction();
   /// Remove all member functions

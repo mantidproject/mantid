@@ -132,8 +132,8 @@ def set_up_setter_forwarding_from_director_to_builder(director, builder_name):
 
     The method will look for any set_XXX method in the builder and add an equivalent method set_builder_XXX which is
     forwarded to set_XXX.
-    @param director: a director object
-    @param builder_name: the name of the builder on the director
+    :param director: a director object
+    :param builder_name: the name of the builder on the director
     """
     set_tag = "set"
     builder_instance = getattr(director, builder_name)

@@ -17,7 +17,7 @@ Algorithms
 - :ref:`VesuvioPeakPrediction <algm-VesuvioPeakPrediction>` to predict parameters for Vesuvio peaks
 - :ref:`BASISReduction311 <algm-BASISReduction311>` has been deprecated (2017-03-11). Use :ref:`BASISReduction <algm-BASISReduction>` instead.
 - :ref:`BASISReduction <algm-BASISReduction>` includes now an option to compute and save the dynamic susceptibility.
-- :ref:`VesuvioDiffractionReduction <algm-VesuvioDiffractionReduction>` has been deprecated, use :ref:`ISISIndirectDiffractionReduction <ISISIndirectDiffractionReduction>`
+- :ref:`VesuvioDiffractionReduction <algm-VesuvioDiffractionReduction>` has been deprecated, use :ref:`ISISIndirectDiffractionReduction <algm-ISISIndirectDiffractionReduction>`
 
 QuickRuns
 ~~~~~~~~~
@@ -53,7 +53,7 @@ Improvements
 
 - Bayes interfaces have the functionality to plot the current preview in the miniplot
 - OSIRIS diffraction now rebins container workspaces to match the sample workspace
-- :ref:`ISISIndirectDiffractionReduction <ISISIndirectDiffractionReduction>` now fully supports VESUVIO data
+- :ref:`ISISIndirectDiffractionReduction <algm-ISISIndirectDiffractionReduction>` now fully supports VESUVIO data
 - Inelastic pixel ID's in BASIS instrument definition file grouped into continuous physical pixels.
 
 

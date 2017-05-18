@@ -1778,7 +1778,7 @@ void LoadEventNexus::deleteBanks(EventWorkspaceCollection_sptr workspace,
     std::string det_name = det->getName();
     for (auto &bankName : bankNames) {
       size_t pos = bankName.find("_events");
-      if (det_name.compare(bankName.substr(0, pos)) == 0)
+      if (det_name == bankName.substr(0, pos))
         keep = true;
       if (keep)
         break;

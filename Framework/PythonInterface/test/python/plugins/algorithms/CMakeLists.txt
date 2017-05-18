@@ -22,6 +22,7 @@ set ( TEST_PY_FILES
   CreateWorkspaceTest.py
   CylinderPaalmanPingsCorrection2Test.py
   DakotaChiSquaredTest.py
+  DeltaPDF3DTest.py
   DNSComputeDetEffCorrCoefsTest.py
   DNSMergeRunsTest.py
   DNSFlippingRatioCorrTest.py

@@ -23,10 +23,16 @@ def _focus_one_ws(ws, run_number, instrument, perform_vanadium_norm):
     if perform_vanadium_norm:
         _test_splined_vanadium_exists(instrument, run_details)
 
-    # Subtract and crop to largest acceptable TOF range
-    input_workspace = common.subtract_sample_empty(ws_to_correct=ws, instrument=instrument,
-                                                   empty_sample_ws_string=run_details.empty_runs)
+    # Subtract empty beam runs
+    input_workspace = common.subtract_summed_runs(ws_to_correct=ws, instrument=instrument,
+                                                  empty_sample_ws_string=run_details.empty_runs)
+    # Subtract a sample empty if specified
+    if run_details.sample_empty:
+        input_workspace = common.subtract_summed_runs(ws_to_correct=input_workspace, instrument=instrument,
+                                                      empty_sample_ws_string=run_details.sample_empty,
+                                                      scale_factor=instrument._inst_settings.sample_empty_scale)
 
+    # Crop to largest acceptable TOF range
     input_workspace = instrument._crop_raw_to_expected_tof_range(ws_to_crop=input_workspace)
 
     # Align / Focus
@@ -45,7 +51,7 @@ def _focus_one_ws(ws, run_number, instrument, perform_vanadium_norm):
     # Output
     d_spacing_group, tof_group = instrument._output_focused_ws(cropped_spectra, run_details=run_details)
 
-    common.keep_single_ws_unit(d_spacing_group=d_spacing_group,tof_group=tof_group,
+    common.keep_single_ws_unit(d_spacing_group=d_spacing_group, tof_group=tof_group,
                                unit_to_keep=instrument._get_unit_to_keep())
 
     # Tidy workspaces from Mantid

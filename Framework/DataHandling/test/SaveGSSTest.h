@@ -12,6 +12,8 @@
 
 #include "cxxtest/TestSuite.h"
 
+#include <Poco/File.h>
+#include <Poco/Glob.h>
 #include <Poco/TemporaryFile.h>
 #include <fstream>
 
@@ -188,6 +190,7 @@ public:
 
     m_alg = new SaveGSS();
     m_alg->initialize();
+    m_alg->setProperty("Append", false);
     m_alg->setPropertyValue("InputWorkspace", wsName);
     m_alg->setProperty("Filename", filename);
     m_alg->setRethrows(true);
@@ -199,9 +202,14 @@ public:
     delete m_alg;
     m_alg = nullptr;
     Mantid::API::AnalysisDataService::Instance().remove(wsName);
-    Poco::File gsasfile(filename);
-    if (gsasfile.exists())
-      gsasfile.remove();
+
+    // Use glob to find any files that match the output pattern
+    std::set<std::string> returnedFiles;
+    Poco::Glob::glob(globPattern, returnedFiles);
+    for (const auto &filename : returnedFiles) {
+      Poco::File pocoFile{filename};
+      pocoFile.remove();
+    }
   }
 
 private:
@@ -210,6 +218,7 @@ private:
 
   const std::string wsName = "Test2BankWS";
   const std::string filename = "test_performance.gsa";
+  const std::string globPattern = "test_performance*.gsa";
 
   SaveGSS *m_alg = nullptr;
 };

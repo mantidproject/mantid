@@ -499,14 +499,14 @@ bool ConvertCWSDExpToMomentum::getInputs(bool virtualinstrument,
     errss << "InputWorkspace must have 6 columns.  But now it has "
           << datacolnames.size() << " columns. \n";
   } else {
-    if (datacolnames[m_iColFilename].compare("File Name") != 0 &&
-        datacolnames[m_iColFilename].compare("Filename") != 0)
+    if (datacolnames[m_iColFilename] != "File Name" &&
+        datacolnames[m_iColFilename] != "Filename")
       errss << "Data file name Table (InputWorkspace)'s Column "
             << m_iColFilename << " must be 'File Name' or 'Filename' but not "
             << datacolnames[m_iColFilename] << ". "
             << "\n";
-    if (datacolnames[m_iColStartDetID].compare("Starting DetID") != 0 &&
-        datacolnames[m_iColStartDetID].compare("StartDetID") != 0)
+    if (datacolnames[m_iColStartDetID] != "Starting DetID" &&
+        datacolnames[m_iColStartDetID] != "StartDetID")
       errss << "Data file name Table (InputWorkspace)'s Column "
             << m_iColStartDetID
             << " must be 'Staring DetID' or 'StartDetID' but not "
