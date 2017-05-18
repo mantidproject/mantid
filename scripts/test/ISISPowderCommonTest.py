@@ -474,7 +474,7 @@ class ISISPowderCommonTest(unittest.TestCase):
         returned_ws = common.subtract_summed_runs(ws_to_correct=no_scale_ws, instrument=ISISPowderMockInst(),
                                                   empty_sample_ws_string=sample_empty_number)
         y_values = returned_ws.readY(0)
-        for i in range(0, returned_ws.blocksize()):
+        for i in range(returned_ws.blocksize()):
             self.assertAlmostEqual(y_values[i], 0)
 
         # Check what happens when we specify scale as a half

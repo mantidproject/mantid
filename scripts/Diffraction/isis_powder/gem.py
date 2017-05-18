@@ -29,7 +29,8 @@ class Gem(AbstractInst):
                                      do_absorb_corrections=self._inst_settings.do_absorb_corrections)
 
     def _get_run_details(self, run_number_string):
-        run_number_string_key = run_number_string + str(self._inst_settings.file_extension)
+        run_number_string_key = self._generate_run_details_fingerprint(run_number_string,
+                                                                       self._inst_settings.file_extension)
         if run_number_string_key in self._cached_run_details:
             return self._cached_run_details[run_number_string_key]
 

@@ -226,6 +226,13 @@ class AbstractInst(object):
 
     # Steps applicable to all instruments
 
+    @staticmethod
+    def _generate_run_details_fingerprint(*args):
+        out_key = ""
+        for arg in args:
+            out_key += str(arg)
+        return out_key
+
     def _generate_out_file_paths(self, run_details):
         """
         Generates the various output paths and file names to be used during saving or as workspace names
