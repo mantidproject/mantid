@@ -6060,7 +6060,7 @@ void ApplicationWindow::prepareSaveProject() {
       windows.push_back(win);
   }
 
-  for (auto window : windowsList()) {
+  for (auto window : getAllWindows()) {
     auto win = dynamic_cast<IProjectSerialisable *>(window);
     if (win)
       windows.push_back(win);

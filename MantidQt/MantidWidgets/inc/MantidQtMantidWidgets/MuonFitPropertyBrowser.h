@@ -6,7 +6,11 @@
 #include "MantidQtMantidWidgets/IMuonFitFunctionModel.h"
 
 /* Forward declarations */
-
+class QDockWidget;
+class QLabel;
+class QPushButton;
+class QMenu;
+class QSignalMapper;
 class QtTreePropertyBrowser;
 class QtGroupPropertyManager;
 class QtDoublePropertyManager;
@@ -78,6 +82,8 @@ public:
   }
   /// Set multiple fitting mode on or off
   void setMultiFittingMode(bool enabled) override;
+  void setTFAsymmMode(bool enabled) override;
+
   /// After fit checks done, continue
   void continueAfterChecks(bool sequential) override;
   /// Remove a plotted guess
@@ -87,12 +93,17 @@ public:
   /// Whether a guess is plotted or not
   bool hasGuess() const override;
 
+  /// Enable/disable the Fit button;
+  virtual void setFitEnabled(bool yes) override;
+
+  void doTFAsymmFit(int maxIterations);
+
 public slots:
   /// Perform the fit algorithm
   void fit() override;
   /// Open sequential fit dialog
   void sequentialFit() override;
-
+  void executeFitMenu(const QString &item) override;
 signals:
   /// Emitted when sequential fit is requested by user
   void sequentialFitRequested();
@@ -111,12 +122,17 @@ signals:
 
 protected:
   void showEvent(QShowEvent *e) override;
-
+  double normalization() const;
+  void setNormalization();
 private slots:
   void doubleChanged(QtProperty *prop) override;
   void boolChanged(QtProperty *prop) override;
 
 private:
+  /// new menu option
+  QAction *m_fitActionTFAsymm;
+  /// override populating fit menu
+  void populateFitMenuButton(QSignalMapper *fitMapper, QMenu *fitMenu) override;
   /// Get the registered function names
   void populateFunctionNames() override;
   /// Check if the workspace can be used in the fit
@@ -131,7 +147,11 @@ private:
   std::vector<std::string> m_workspacesToFit;
   /// Label to use for simultaneous fits
   std::string m_simultaneousLabel;
+  QtProperty *m_normalization;
+  mutable QStringList m_normalizationValue;
 };
+
+std::vector<double> readNormalization();
 
 } // MantidQt
 } // API

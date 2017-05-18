@@ -22,8 +22,7 @@ Currently the mask mechanism is implemented for **SANS2D**, **LOQ** and **LARMOR
 Relevant SANSState entries for SANSCreateWavelengthAndPixelAdjustment
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The required information for the creation of the wavelength-adjustment workspace and the pixel-adjustment workspace is
- retrieved from a state object.
+The required information for the creation of the wavelength-adjustment workspace and the pixel-adjustment workspace is retrieved from a state object.
 
 The elements are:
 

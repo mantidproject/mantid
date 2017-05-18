@@ -5,13 +5,12 @@
 #include "AlgorithmHistoryWindow.h"
 #include "AlgorithmMonitor.h"
 #include "ImportWorkspaceDlg.h"
-#include "MantidGroupPlotGenerator.h"
+#include "MantidSurfaceContourPlotGenerator.h"
 #include "MantidMDCurve.h"
 #include "MantidMDCurveDialog.h"
 #include "MantidMatrix.h"
 #include "MantidMatrixCurve.h"
 #include "MantidQtMantidWidgets/FitPropertyBrowser.h"
-#include "MantidQtMantidWidgets/MantidSurfacePlotDialog.h"
 #include "MantidQtMantidWidgets/MantidWSIndexDialog.h"
 #include "MantidSampleLogDialog.h"
 #include "MantidSampleMaterialDialog.h"
@@ -99,7 +98,6 @@ using namespace Mantid::API;
 using namespace MantidQt::API;
 using namespace MantidQt::MantidWidgets;
 using MantidQt::MantidWidgets::MantidWSIndexDialog;
-using MantidQt::MantidWidgets::MantidSurfacePlotDialog;
 using MantidQt::MantidWidgets::MantidTreeWidget;
 using Mantid::Kernel::DateAndTime;
 using MantidQt::SliceViewer::SliceViewerWindow;
@@ -189,6 +187,19 @@ GraphOptions::CurveType getCurveTypeForFitResult(const size_t spectrum) {
   default:
     return GraphOptions::CurveType::Unspecified;
   }
+}
+
+std::vector<Mantid::API::MatrixWorkspace_const_sptr>
+getWorkspacesFromAds(const QList<QString> &workspaceNames) {
+  std::vector<Mantid::API::MatrixWorkspace_const_sptr> workspaces;
+  for (auto &workspaceName : workspaceNames) {
+    Mantid::API::MatrixWorkspace_const_sptr workspace =
+        boost::dynamic_pointer_cast<const Mantid::API::MatrixWorkspace>(
+            Mantid::API::AnalysisDataService::Instance().retrieve(
+                workspaceName.toStdString()));
+    workspaces.push_back(workspace);
+  }
+  return workspaces;
 }
 }
 
@@ -2959,6 +2970,8 @@ MultiLayer *MantidUI::plot1D(const QStringList &ws_names,
 @param clearWindow :: Whether to clear specified plotWindow before plotting.
 Ignored if plotWindow == NULL
 @param waterfallPlot :: If true create a waterfall type plot
+@param log :: log name for advanced plotting
+@param customLogValues :: custom log values for advanced plotting
 @return NULL if failure. Otherwise, if plotWindow == NULL - created window, if
 not NULL - plotWindow
 */
@@ -2966,12 +2979,15 @@ MultiLayer *MantidUI::plot1D(const QMultiMap<QString, set<int>> &toPlot,
                              bool spectrumPlot,
                              MantidQt::DistributionFlag distr, bool errs,
                              MultiLayer *plotWindow, bool clearWindow,
-                             bool waterfallPlot) {
+                             bool waterfallPlot, const QString &log,
+                             const std::set<double> &customLogValues) {
   // Convert the list into a map (with the same workspace as key in each case)
+  bool multipleSpectra = false;
   QMultiMap<QString, int> pairs;
   // Need to iterate through the workspaces
   QMultiMap<QString, std::set<int>>::const_iterator it;
   for (it = toPlot.constBegin(); it != toPlot.constEnd(); ++it) {
+    multipleSpectra = multipleSpectra || (it.value().size() > 1);
     std::set<int>::const_reverse_iterator itSet;
     for (itSet = it->rbegin(); itSet != it->rend(); ++itSet) {
       pairs.insert(it.key(), *itSet);
@@ -2980,7 +2996,8 @@ MultiLayer *MantidUI::plot1D(const QMultiMap<QString, set<int>> &toPlot,
 
   // Pass over to the overloaded method
   return plot1D(pairs, spectrumPlot, distr, errs, GraphOptions::Unspecified,
-                plotWindow, clearWindow, waterfallPlot);
+                plotWindow, clearWindow, waterfallPlot, log, customLogValues,
+                multipleSpectra);
 }
 
 /** Create a 1d graph from the specified spectra in a MatrixWorkspace
@@ -3024,6 +3041,10 @@ MultiLayer *MantidUI::plot1D(const QString &wsName,
 @param clearWindow :: Whether to clear specified plotWindow before plotting.
 Ignored if plotWindow == NULL
 @param waterfallPlot :: If true create a waterfall type plot
+@param log :: log name for advanced plotting
+@param customLogValues :: custom log values for advanced plotting
+@param multipleSpectra :: indicates that there are multiple spectra and
+so spectrum numbers must always be shown in the plot legend.
 @return NULL if failure. Otherwise, if plotWindow == NULL - created window, if
 not NULL - plotWindow
 */
@@ -3032,7 +3053,9 @@ MultiLayer *MantidUI::plot1D(const QMultiMap<QString, int> &toPlot,
                              MantidQt::DistributionFlag distr, bool errs,
                              GraphOptions::CurveType style,
                              MultiLayer *plotWindow, bool clearWindow,
-                             bool waterfallPlot) {
+                             bool waterfallPlot, const QString &log,
+                             const std::set<double> &customLogValues,
+                             bool multipleSpectra) {
   if (toPlot.size() == 0)
     return NULL;
 
@@ -3085,26 +3108,28 @@ MultiLayer *MantidUI::plot1D(const QMultiMap<QString, int> &toPlot,
     plotAsDistribution = (distr == MantidQt::DistributionTrue);
   }
 
-  // Try to add curves to the plot
+  vector<CurveSpec> curveSpecList;
+  putLogsIntoCurveSpecs(curveSpecList, toPlot, log, customLogValues);
+
+  // Add curves to the plot
   Graph *g = ml->activeGraph();
   MantidMatrixCurve::IndexDir indexType =
       (spectrumPlot) ? MantidMatrixCurve::Spectrum : MantidMatrixCurve::Bin;
   MantidMatrixCurve *firstCurve(NULL);
-  for (QMultiMap<QString, int>::const_iterator it = toPlot.begin();
-       it != toPlot.end(); ++it) {
-    try {
-      auto *wsCurve = new MantidMatrixCurve(it.key(), g, it.value(), indexType,
-                                            errs, plotAsDistribution, style);
-      if (!firstCurve) {
-        firstCurve = wsCurve;
-        g->setNormalizable(firstCurve->isNormalizable());
-        g->setDistribution(firstCurve->isDistribution());
-      }
-    } catch (Mantid::Kernel::Exception::NotFoundError &) {
-      g_log.warning() << "Workspace " << it.key().toStdString()
-                      << " not found\n";
-    } catch (std::exception &ex) {
-      g_log.warning() << ex.what() << '\n';
+  QString logValue("");
+  for (size_t i = 0; i < curveSpecList.size(); i++) {
+
+    if (!log.isEmpty()) { // Get log value from workspace
+      logValue = logValue.number(curveSpecList[i].logVal, 'g', 6);
+    }
+
+    auto *wsCurve = new MantidMatrixCurve(
+        logValue, curveSpecList[i].wsName, g, curveSpecList[i].index, indexType,
+        errs, plotAsDistribution, style, multipleSpectra);
+    if (!firstCurve) {
+      firstCurve = wsCurve;
+      g->setNormalizable(firstCurve->isNormalizable());
+      g->setDistribution(firstCurve->isDistribution());
     }
   }
 
@@ -3130,6 +3155,54 @@ MultiLayer *MantidUI::plot1D(const QMultiMap<QString, int> &toPlot,
   ml->maybeNeedToClose();
 
   return ml;
+}
+
+/* Get the log values and put into a curve spec list in preparation of
+*  the creation of the curves
+*  @param curveSpecList :: list of curve specs to recieve the logs
+*  @param toPlot :: workspaces to plot
+*  @param log :: log value
+*  @param customLogValues :: custom log values
+*/
+void MantidUI::putLogsIntoCurveSpecs(std::vector<CurveSpec> &curveSpecList,
+                                     const QMultiMap<QString, int> &toPlot,
+                                     const QString &log,
+                                     const std::set<double> &customLogValues) {
+  // Try to store log values, if needed, and prepare for sorting.
+  int i = 0;
+  for (QMultiMap<QString, int>::const_iterator it = toPlot.begin();
+       it != toPlot.end(); ++it) {
+    CurveSpec curveSpec;
+
+    try {
+      if (!log.isEmpty()) { // Get log value from workspace
+        if (!customLogValues.empty()) {
+          curveSpec.logVal = getSingleWorkspaceLogValue(i++, customLogValues);
+        } else {
+          MatrixWorkspace_const_sptr workspace =
+              AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+                  it.key().toStdString());
+          curveSpec.logVal = getSingleWorkspaceLogValue(1, workspace, log);
+        }
+      } else {
+        curveSpec.logVal = 0.1234; // This should not be used.
+      }
+      curveSpec.wsName = it.key();
+      curveSpec.index = it.value();
+      curveSpecList.push_back(curveSpec);
+
+    } catch (Mantid::Kernel::Exception::NotFoundError &) {
+      g_log.warning() << "Workspace " << it.key().toStdString()
+                      << " not found\n";
+    } catch (std::exception &ex) {
+      g_log.warning() << ex.what() << '\n';
+    }
+  }
+
+  // Sort curves, if log values are used
+  if (!log.isEmpty()) {
+    sort(curveSpecList.begin(), curveSpecList.end(), byLogValue);
+  }
 }
 
 /**
@@ -3935,18 +4008,6 @@ void MantidUI::updateRecentFilesList(const QString &fname) {
   m_appWindow->updateRecentFilesList(fname);
 }
 
-MantidSurfacePlotDialog *
-MantidUI::createSurfacePlotDialog(int flags, QStringList wsNames,
-                                  const QString &plotType) {
-  QList<QString> names;
-
-  for (auto &name : wsNames)
-    names.append(name);
-
-  return new MantidSurfacePlotDialog(this, static_cast<Qt::WFlags>(flags),
-                                     names, plotType);
-}
-
 /**
  * Create a new MantidWSIndexDialog
  * @param flags :: [input] Qt::WindowFlags enum as an integer
@@ -3954,53 +4015,38 @@ MantidUI::createSurfacePlotDialog(int flags, QStringList wsNames,
  * @param showWaterfall :: [input] Whether to show "plot as waterfall" option
  * @param showPlotAll :: [input] Whether to show "plot all" button
  * @param showTiledOpt :: [input] Whether to show "tiled plot" option
+ * @param isAdvanced :: [input] Whether to do advanced plotting
  * @returns :: New dialog
  */
-MantidWSIndexDialog *MantidUI::createWorkspaceIndexDialog(int flags,
-                                                          QStringList wsNames,
-                                                          bool showWaterfall,
-                                                          bool showPlotAll,
-                                                          bool showTiledOpt) {
+MantidWSIndexDialog *
+MantidUI::createWorkspaceIndexDialog(int flags, const QStringList &wsNames,
+                                     bool showWaterfall, bool showPlotAll,
+                                     bool showTiledOpt, bool isAdvanced) {
   return new MantidWSIndexDialog(m_appWindow, static_cast<Qt::WFlags>(flags),
                                  wsNames, showWaterfall, showPlotAll,
-                                 showTiledOpt);
+                                 showTiledOpt, isAdvanced);
 }
 
-void MantidUI::showSurfacePlot() {
-  // find the workspace group clicked on
-  auto wksp = m_exploreMantid->getSelectedWorkspace();
-
-  if (wksp) {
-    const auto wsGroup =
-        boost::dynamic_pointer_cast<const WorkspaceGroup>(wksp);
-    if (wsGroup) {
-      auto options = m_exploreMantid->chooseSurfacePlotOptions(
-          wsGroup->getNumberOfEntries());
-
-      // TODO: Figure out how to get rid of MantidUI dependency here.
-      auto plotter =
-          Mantid::Kernel::make_unique<MantidGroupPlotGenerator>(this);
-      plotter->plotSurface(wsGroup, options);
-    }
-  }
+void MantidUI::plotContour(bool accepted, int plotIndex,
+                           const QString &axisName, const QString &logName,
+                           const std::set<double> &customLogValues,
+                           const QList<QString> &workspaceNames) {
+  auto workspaces = getWorkspacesFromAds(workspaceNames);
+  auto plotter =
+      Mantid::Kernel::make_unique<MantidSurfaceContourPlotGenerator>(this);
+  plotter->plotContour(accepted, plotIndex, axisName, logName, customLogValues,
+                       workspaces);
 }
 
-void MantidUI::showContourPlot() {
-  auto wksp = m_exploreMantid->getSelectedWorkspace();
-
-  if (wksp) {
-    const auto wsGroup =
-        boost::dynamic_pointer_cast<const WorkspaceGroup>(wksp);
-    if (wsGroup) {
-      auto options = m_exploreMantid->chooseContourPlotOptions(
-          wsGroup->getNumberOfEntries());
-
-      // TODO: Figure out how to remove the MantidUI dependency
-      auto plotter =
-          Mantid::Kernel::make_unique<MantidGroupPlotGenerator>(this);
-      plotter->plotContour(wsGroup, options);
-    }
-  }
+void MantidUI::plotSurface(bool accepted, int plotIndex,
+                           const QString &axisName, const QString &logName,
+                           const std::set<double> &customLogValues,
+                           const QList<QString> &workspaceNames) {
+  auto workspaces = getWorkspacesFromAds(workspaceNames);
+  auto plotter =
+      Mantid::Kernel::make_unique<MantidSurfaceContourPlotGenerator>(this);
+  plotter->plotSurface(accepted, plotIndex, axisName, logName, customLogValues,
+                       workspaces);
 }
 
 QWidget *MantidUI::getParent() { return m_appWindow; }
