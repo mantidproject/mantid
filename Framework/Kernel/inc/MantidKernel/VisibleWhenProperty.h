@@ -64,7 +64,7 @@ public:
   bool isVisible(const IPropertyManager *algo) const override;
 
   /// Make a copy of the present type of validator
-  IPropertySettings *clone() override;
+  IPropertySettings *clone() const override;
 
 private:
   /// Hold a copy of any existing VisibleWhenPropertyObjects

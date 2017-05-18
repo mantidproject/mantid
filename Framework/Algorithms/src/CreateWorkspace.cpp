@@ -8,6 +8,7 @@
 #include "MantidAPI/SpectraAxis.h"
 #include "MantidAPI/TextAxis.h"
 #include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/InvisibleProperty.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/PropertyWithValue.h"
@@ -69,7 +70,6 @@ void CreateWorkspace::init() {
                                                    Direction::Input,
                                                    PropertyMode::Optional),
                   "Name of a parent workspace.");
-#ifdef MPI_EXPERIMENTAL
   std::vector<std::string> propOptions{
       Parallel::toString(Parallel::StorageMode::Cloned),
       Parallel::toString(Parallel::StorageMode::Distributed),
@@ -79,7 +79,8 @@ void CreateWorkspace::init() {
       Parallel::toString(Parallel::StorageMode::Distributed),
       boost::make_shared<StringListValidator>(propOptions),
       "The parallel storage mode of the output workspace for MPI builds");
-#endif
+  setPropertySettings("ParallelStorageMode",
+                      Kernel::make_unique<InvisibleProperty>());
 }
 
 /// Input validation

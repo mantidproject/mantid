@@ -257,6 +257,7 @@ void Algorithm::initialize() {
     return;
 
   g_log.setName(this->name());
+  setLoggingOffset(0);
   try {
     try {
       this->init();
@@ -1544,6 +1545,34 @@ void Algorithm::cancel() {
     }
   }
 }
+
+/// Returns the cancellation state
+bool Algorithm::getCancel() const { return m_cancel; }
+
+/// Returns a reference to the logger.
+Kernel::Logger &Algorithm::getLogger() const { return g_log; }
+/// Logging can be disabled by passing a value of false
+void Algorithm::setLogging(const bool value) { g_log.setEnabled(value); }
+/// returns the status of logging, True = enabled
+bool Algorithm::isLogging() const { return g_log.getEnabled(); }
+
+/* Sets the logging priority offset. Values are subtracted from the log level.
+ *
+ * Example value=1 will turn warning into notice
+ * Example value=-1 will turn notice into warning
+ */
+void Algorithm::setLoggingOffset(const int value) {
+  if (m_communicator->rank() == 0)
+    g_log.setLevelOffset(value);
+  else {
+    int offset{1};
+    ConfigService::Instance().getValue("mpi.loggingOffset", offset);
+    g_log.setLevelOffset(value + offset);
+  }
+}
+
+/// returns the logging priority offset
+int Algorithm::getLoggingOffset() const { return g_log.getLevelOffset(); }
 
 //--------------------------------------------------------------------------------------------
 /** This is called during long-running operations,
