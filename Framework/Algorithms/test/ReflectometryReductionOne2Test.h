@@ -19,7 +19,6 @@ using namespace WorkspaceCreationHelper;
 class ReflectometryReductionOne2Test : public CxxTest::TestSuite {
 private:
   MatrixWorkspace_sptr m_multiDetectorWS;
-  MatrixWorkspace_sptr m_wavelengthWS;
   MatrixWorkspace_sptr m_transmissionWS;
 
 public:
@@ -37,10 +36,6 @@ public:
     // A multi detector ws
     m_multiDetectorWS =
         create2DWorkspaceWithReflectometryInstrumentMultiDetector();
-    // A workspace in wavelength
-    m_wavelengthWS =
-        create2DWorkspaceWithReflectometryInstrumentMultiDetector();
-    m_wavelengthWS->getAxis(0)->setUnit("Wavelength");
     // A transmission ws with different spectrum numbers to the run
     m_transmissionWS =
         create2DWorkspaceWithReflectometryInstrumentMultiDetector();
