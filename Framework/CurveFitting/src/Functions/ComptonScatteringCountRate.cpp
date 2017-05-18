@@ -312,7 +312,7 @@ void ComptonScatteringCountRate::cacheComptonProfile(
   auto fixedParams = profile->intensityParameterIndices();
   for (auto fixedParam : fixedParams) {
     const size_t indexOfFixed = paramsOffset + fixedParam;
-    this->fix(indexOfFixed);
+    this->setParameterStatus(indexOfFixed, Tied);
     m_fixedParamIndices.push_back(indexOfFixed);
   }
 }
@@ -334,7 +334,7 @@ void ComptonScatteringCountRate::cacheBackground(
     for (size_t i = npars; i > 0; --i) // i = from npars->1
     {
       const size_t indexOfFixed = paramsOffset + (i - 1);
-      this->fix(indexOfFixed);
+      this->setParameterStatus(indexOfFixed, Tied);
       m_fixedParamIndices.push_back(indexOfFixed);
     }
   } else {
