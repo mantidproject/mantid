@@ -189,23 +189,22 @@ private:
   /// Label to use for simultaneous fits
   std::string m_simultaneousLabel;
   QtProperty *m_normalization;
-  mutable QStringList m_normalizationValue;
+  QStringList m_normalizationValue;
 
   QtBrowserItem *m_multiFitSettingsGroup;
   QtProperty *m_groupsToFit;
-  mutable QStringList m_groupsToFitOptions;
+  QStringList m_groupsToFitOptions;
   /// Map of group names to checkboxes
   QMap<QString, QtProperty *> m_groupBoxes;
-  // QtTreePropertyBrowser *m_groupBrowser;
   QtProperty *m_showGroup;
-  mutable QStringList m_showGroupValue;
+  QStringList m_showGroupValue;
 
   QtProperty *m_periodsToFit;
-  mutable QStringList m_periodsToFitOptions;
+  QStringList m_periodsToFitOptions;
   /// Map of group names to checkboxes
   QMap<QString, QtProperty *> m_periodBoxes;
   QtProperty *m_showPeriods;
-  mutable QStringList m_showPeriodValue;
+  QStringList m_showPeriodValue;
   QLineEdit *m_positiveCombo;
   QLineEdit *m_negativeCombo;
 

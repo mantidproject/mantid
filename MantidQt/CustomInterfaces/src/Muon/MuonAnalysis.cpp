@@ -318,7 +318,6 @@ void MuonAnalysis::initLayout() {
   // Manage User Directories
   connect(m_uiForm.manageDirectoriesBtn, SIGNAL(clicked()), this,
           SLOT(openDirectoryDialog()));
-  // m_uiForm.
   connect(this, SIGNAL(setChosenGroupSignal(QString &)), this,
           SLOT(setChosenGroupSlot(QString &)));
   connect(this, SIGNAL(setChosenPeriodSignal(QString &)), this,
