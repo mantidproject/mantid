@@ -1156,7 +1156,7 @@ void ReflectometryReductionOne2::getProjectedLambdaRange(
 }
 
 /**
-Check whether the spectrum maps for the given workspaces are the same.
+Check whether the spectra for the given workspaces are the same.
 
 @param ws1 : First workspace to compare
 @param ws2 : Second workspace to compare against
@@ -1166,10 +1166,24 @@ exception. Otherwise a warning is generated.
 void ReflectometryReductionOne2::verifySpectrumMaps(
     MatrixWorkspace_const_sptr ws1, MatrixWorkspace_const_sptr ws2,
     const bool severe) {
-  auto indices1 = ws1->indexInfo();
-  auto indices2 = ws2->indexInfo();
-  /// TODO also check actual maps are the same
-  if (indices1.globalSize() != indices2.globalSize()) {
+
+  bool mismatch = false;
+  // Check that the number of histograms is the same
+  if (ws1->getNumberHistograms() != ws2->getNumberHistograms()) {
+    mismatch = true;
+  }
+  // Check that the spectrum numbers match for each histogram
+  if (!mismatch) {
+    for (int i = 0; i < ws1->getNumberHistograms(); ++i) {
+      if (ws1->indexInfo().spectrumNumber(i) !=
+          ws2->indexInfo().spectrumNumber(i)) {
+        mismatch = true;
+        break;
+      }
+    }
+  }
+  // Handle if error
+  if (mismatch) {
     const std::string message =
         "Spectrum maps between workspaces do NOT match up.";
     if (severe) {
