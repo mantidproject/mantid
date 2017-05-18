@@ -576,7 +576,16 @@ MatrixWorkspace_sptr ReflectometryReductionOne2::directBeamCorrection(
   MatrixWorkspace_sptr normalized = detectorWS;
   Property *directBeamProperty = getProperty("RegionOfDirectBeam");
   if (!directBeamProperty->isDefault()) {
-    const auto directBeam = makeDirectBeamWS(m_runWS);
+    auto directBeam = makeDirectBeamWS(m_runWS);
+
+    // Rebin the direct beam workspace to be the same as the input.
+    auto rebinToWorkspaceAlg = this->createChildAlgorithm("RebinToWorkspace");
+    rebinToWorkspaceAlg->initialize();
+    rebinToWorkspaceAlg->setProperty("WorkspaceToMatch", detectorWS);
+    rebinToWorkspaceAlg->setProperty("WorkspaceToRebin", directBeam);
+    rebinToWorkspaceAlg->execute();
+    directBeam = rebinToWorkspaceAlg->getProperty("OutputWorkspace");
+
     normalized = divide(detectorWS, directBeam);
   }
 
