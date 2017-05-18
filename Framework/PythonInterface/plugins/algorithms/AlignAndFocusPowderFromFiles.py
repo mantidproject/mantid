@@ -230,6 +230,10 @@ class AlignAndFocusPowderFromFiles(DataProcessorAlgorithm):
                 if self.kwargs['PreserveEvents']:
                     CompressEvents(InputWorkspace=finalname, OutputWorkspace=finalname)
 
+        # with more than one chunk or file the integrated proton charge is
+        # generically wrong
+        mtd[finalname].integrateProtonCharge()
+
         # set the output workspace
         self.setProperty('OutputWorkspace', mtd[finalname])
 
