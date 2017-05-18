@@ -934,6 +934,11 @@ ReflectometryReductionOne2::constructIvsLamWS(MatrixWorkspace_sptr detectorWS) {
         m_spectrumInfo->detector(twoThetaRIdx).getID();
     outSpec.clearDetectorIDs();
     outSpec.addDetectorID(twoThetaRDetID);
+    // Set the spectrum number from the twoThetaR detector
+    SpectrumNumber specNum = detectorWS->indexInfo().spectrumNumber(twoThetaRIdx);
+    auto indexInf = outputWS->indexInfo();
+    indexInf.setSpectrumNumbers(specNum, specNum);
+    outputWS->setIndexInfo(indexInf);
   }
 
   return outputWS;
