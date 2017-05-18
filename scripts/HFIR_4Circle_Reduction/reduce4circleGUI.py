@@ -1435,7 +1435,14 @@ class MainWindow(QtGui.QMainWindow):
         # plot calculated motor position (or Pt.) - integrated intensity per Pts.
         motor_pos_vec = int_peak_dict['motor positions']
         pt_intensity_vec = int_peak_dict['pt intensities']
-        self.ui.graphicsView_integratedPeakView.plot_raw_data(motor_pos_vec, pt_intensity_vec)
+        # print '[DB...BAT] motor position vector: {0} of type {1}'.format(motor_pos_vec, type(motor_pos_vec))
+        motor_std = motor_pos_vec.std()
+        if motor_std > 0.005:
+            self.ui.graphicsView_integratedPeakView.plot_raw_data(motor_pos_vec, pt_intensity_vec)
+        else:
+            # motor position fixed
+            # TODO/ISSUE/TODAY - Make this an option from 
+            self.ui.graphicsView_integratedPeakView.plot_raw_data(numpy.array(range(1, len(pt_intensity_vec)+1)), pt_intensity_vec)
 
         if self._mySinglePeakIntegrationDialog is None:
             self._mySinglePeakIntegrationDialog = message_dialog.MessageDialog(self)
@@ -1471,8 +1478,10 @@ class MainWindow(QtGui.QMainWindow):
         except KeyError as key_err:
             raise RuntimeError('Peak integration result dictionary has keys {0}. Error is caused by {1}.'
                                ''.format(int_peak_dict.keys(), key_err))
-
-        self.plot_model_data(motor_pos_vec, fit_gauss_dict)
+        except ValueError as value_err:
+            print '[ERROR] Unable to fit by Gaussian due to {0}.'.format(value_err)
+        else:
+            self.plot_model_data(motor_pos_vec, fit_gauss_dict)
 
         return
 
