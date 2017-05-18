@@ -55,6 +55,7 @@ Improvements
 - OSIRIS diffraction now rebins container workspaces to match the sample workspace
 - :ref:`ISISIndirectDiffractionReduction <algm-ISISIndirectDiffractionReduction>` now fully supports VESUVIO data
 - Inelastic pixel ID's in BASIS instrument definition file grouped into continuous physical pixels.
+- Added SortXAxis to Bayes Quasi and Stretch
 - Removed error bars as default
 
 
