@@ -789,6 +789,11 @@ def simple_integrate_peak(pt_intensity_dict, bg_value, motor_step_dict, peak_cen
     sum_intensity = 0.
     error_2 = 0.
     used_pt_list = list()
+
+    # raw intensity
+    sum_raw_int = 0.
+
+    motor_step = 0.
     for pt in pt_list:
         # check the motor position if required
         if peak_center is not None:
@@ -801,12 +806,21 @@ def simple_integrate_peak(pt_intensity_dict, bg_value, motor_step_dict, peak_cen
         intensity = pt_intensity_dict[pt]
         motor_step_i = motor_step_dict[pt]
         sum_intensity += (intensity - bg_value) * motor_step_i
-        error_2 += numpy.sqrt(intensity) * motor_step_i
+        motor_step = motor_step_i
+
+        if 0:
+            pass
+            # error_2 += numpy.sqrt(intensity) * motor_step_i
+        else:
+            sum_raw_int += intensity
 
         used_pt_list.append(pt)
 
-        print '[DB...BAT] Motor step size {0} = {1}'.format(pt, motor_step_i)
+        # print '[DB...BAT] Motor step size {0} = {1}'.format(pt, motor_step_i)
     # END-FOR
+
+    # error = sqrt(sum I_i) * delta
+    error_2 = numpy.sqrt(sum_raw_int) * motor_step
 
     # convert the Pt to list
     if len(used_pt_list) > 0:
