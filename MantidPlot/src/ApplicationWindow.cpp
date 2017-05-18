@@ -6075,8 +6075,7 @@ int ApplicationWindow::execSaveProjectDialog() {
 }
 
 void ApplicationWindow::prepareSaveProject() {
-  auto result = execSaveProjectDialog();
-  (void)result;
+  execSaveProjectDialog();
 }
 
 /**
