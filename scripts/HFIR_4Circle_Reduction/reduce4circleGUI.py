@@ -3670,7 +3670,7 @@ class MainWindow(QtGui.QMainWindow):
         # raw_det_data = numpy.rot90(raw_det_data, 1)
         self.ui.graphicsView_detector2dPlot.clear_canvas()
         # get the configuration of detector from GUI
-        #  FIXME/TODO/ISSUE/NOW - use the detector size wrong!
+        #  FIXME/TODO/ISSUE/NOW/TODAY - use the detector size wrong!
         if 0:
             ret_obj = gutil.parse_integer_list(str(self.ui.lineEdit_detectorGeometry.text()), expected_size=2)
             x_max, y_max = ret_obj

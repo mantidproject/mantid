@@ -92,6 +92,12 @@ class Detector2DView(mpl2dgraphicsview.Mpl2dGraphicsView):
 
         return
 
+    def integrate_roi_linear(self):
+        """
+
+        :return:
+        """
+
     def get_roi(self):
         """
         :return: A list for polygon0
