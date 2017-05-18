@@ -59,16 +59,16 @@ public:
   ScanningWorkspaceBuilder(const size_t nDetectors, const size_t nTimeIndexes,
                            const size_t nBins);
 
-  void setHistogram(const HistogramData::Histogram &histogram);
+  void setHistogram(const HistogramData::Histogram histogram);
 
   void setInstrument(
       const boost::shared_ptr<const Geometry::Instrument> &instrument);
   void setTimeRanges(const std::vector<
-      std::pair<Kernel::DateAndTime, Kernel::DateAndTime>> &timeRanges);
+      std::pair<Kernel::DateAndTime, Kernel::DateAndTime>> timeRanges);
   void setTimeRanges(const Kernel::DateAndTime &startTime,
                      const std::vector<double> &durations);
-  void setPositions(const std::vector<std::vector<Kernel::V3D>> &positions);
-  void setRotations(const std::vector<std::vector<Kernel::Quat>> &rotations);
+  void setPositions(const std::vector<std::vector<Kernel::V3D>> positions);
+  void setRotations(const std::vector<std::vector<Kernel::Quat>> rotations);
   void setInstrumentAngles(const std::vector<double> &instrumentAngles);
 
   void setIndexingType(const IndexingType indexingType);

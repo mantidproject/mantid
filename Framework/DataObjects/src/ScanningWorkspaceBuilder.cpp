@@ -44,13 +44,13 @@ void ScanningWorkspaceBuilder::setInstrument(
  * @param histogram A histogram with bin edges defined
  */
 void ScanningWorkspaceBuilder::setHistogram(
-    const HistogramData::Histogram &histogram) {
+    const HistogramData::Histogram histogram) {
   if ((histogram.counts().size() != m_nBins) ||
       (histogram.binEdges().size() != m_nBins + 1))
     throw std::logic_error(
         "Histogram supplied does not have the correct size.");
 
-  m_histogram = histogram;
+  m_histogram = std::move(histogram);
 }
 
 /**
@@ -60,9 +60,9 @@ void ScanningWorkspaceBuilder::setHistogram(
  *and end times
  */
 void ScanningWorkspaceBuilder::setTimeRanges(const std::vector<
-    std::pair<Kernel::DateAndTime, Kernel::DateAndTime>> &timeRanges) {
+    std::pair<Kernel::DateAndTime, Kernel::DateAndTime>> timeRanges) {
   verifyTimeIndexSize(timeRanges.size(), "start time, end time pairs");
-  m_timeRanges = timeRanges;
+  m_timeRanges = std::move(timeRanges);
 }
 
 /**
@@ -88,7 +88,7 @@ void ScanningWorkspaceBuilder::setTimeRanges(
         newStartTime, endTime));
   }
 
-  setTimeRanges(timeRanges);
+  setTimeRanges(std::move(timeRanges));
 }
 
 /**
@@ -99,7 +99,7 @@ void ScanningWorkspaceBuilder::setTimeRanges(
  * @param positions A vector of vectors containing positions
  */
 void ScanningWorkspaceBuilder::setPositions(
-    const std::vector<std::vector<Kernel::V3D>> &positions) {
+    const std::vector<std::vector<Kernel::V3D>> positions) {
 
   if (!m_positions.empty() || !m_instrumentAngles.empty())
     throw std::logic_error("Can not set positions, as positions or instrument "
@@ -110,7 +110,7 @@ void ScanningWorkspaceBuilder::setPositions(
   }
   verifyDetectorSize(positions.size(), "positions");
 
-  m_positions = positions;
+  m_positions = std::move(positions);
 }
 
 /**
@@ -121,7 +121,7 @@ void ScanningWorkspaceBuilder::setPositions(
  * @param rotations A vector of vectors containing rotations
  */
 void ScanningWorkspaceBuilder::setRotations(
-    const std::vector<std::vector<Kernel::Quat>> &rotations) {
+    const std::vector<std::vector<Kernel::Quat>> rotations) {
 
   if (!m_rotations.empty() || !m_instrumentAngles.empty())
     throw std::logic_error("Can not set rotations, as rotations or instrument "
@@ -132,7 +132,7 @@ void ScanningWorkspaceBuilder::setRotations(
   }
   verifyDetectorSize(rotations.size(), "rotations");
 
-  m_rotations = rotations;
+  m_rotations = std::move(rotations);
 }
 
 /**

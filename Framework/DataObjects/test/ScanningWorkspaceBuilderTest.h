@@ -153,10 +153,11 @@ public:
 
     auto builder = ScanningWorkspaceBuilder(nDetectors, nTimeIndexes, nBins);
     TS_ASSERT_THROWS_NOTHING(builder.setInstrument(instrument))
-    TS_ASSERT_THROWS_EQUALS(builder.setTimeRanges(timeRangesWrongSize),
-                            const std::logic_error &e, std::string(e.what()),
-                            "Number of start time, end time pairs supplied "
-                            "does not match the number of time indexes.")
+    TS_ASSERT_THROWS_EQUALS(
+        builder.setTimeRanges(std::move(timeRangesWrongSize)),
+        const std::logic_error &e, std::string(e.what()),
+        "Number of start time, end time pairs supplied "
+        "does not match the number of time indexes.")
   }
 
   void
@@ -180,7 +181,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(builder.setInstrument(instrument))
     TS_ASSERT_THROWS_NOTHING(builder.setTimeRanges(timeRanges))
     initalisePositions(nDetectors, nTimeIndexes);
-    TS_ASSERT_THROWS_NOTHING(builder.setPositions(positions))
+    TS_ASSERT_THROWS_NOTHING(builder.setPositions(std::move(positions)))
     MatrixWorkspace_const_sptr ws;
     TS_ASSERT_THROWS_NOTHING(ws = builder.buildWorkspace())
 
@@ -198,7 +199,7 @@ public:
     auto builder = ScanningWorkspaceBuilder(nDetectors, nTimeIndexes, nBins);
     initalisePositions(nDetectors + 1, nTimeIndexes);
     TS_ASSERT_THROWS_EQUALS(
-        builder.setPositions(positions), const std::logic_error &e,
+        builder.setPositions(std::move(positions)), const std::logic_error &e,
         std::string(e.what()),
         "Number of positions supplied does not match the number of detectors.")
   }
@@ -206,7 +207,7 @@ public:
   void test_creating_workspace_with_positions_with_too_many_time_indexes() {
     auto builder = ScanningWorkspaceBuilder(nDetectors, nTimeIndexes, nBins);
     initalisePositions(nDetectors, nTimeIndexes + 1);
-    TS_ASSERT_THROWS_EQUALS(builder.setPositions(positions),
+    TS_ASSERT_THROWS_EQUALS(builder.setPositions(std::move(positions)),
                             const std::logic_error &e, std::string(e.what()),
                             "Number of positions supplied does not match the "
                             "number of time indexes.")
@@ -219,7 +220,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(builder.setInstrument(instrument))
     TS_ASSERT_THROWS_NOTHING(builder.setTimeRanges(timeRanges))
     initaliseRotations(nDetectors, nTimeIndexes);
-    TS_ASSERT_THROWS_NOTHING(builder.setRotations(rotations))
+    TS_ASSERT_THROWS_NOTHING(builder.setRotations(std::move(rotations)))
     MatrixWorkspace_const_sptr ws;
     TS_ASSERT_THROWS_NOTHING(ws = builder.buildWorkspace())
 
@@ -238,7 +239,7 @@ public:
     auto builder = ScanningWorkspaceBuilder(nDetectors, nTimeIndexes, nBins);
     initaliseRotations(nDetectors + 1, nTimeIndexes);
     TS_ASSERT_THROWS_EQUALS(
-        builder.setRotations(rotations), const std::logic_error &e,
+        builder.setRotations(std::move(rotations)), const std::logic_error &e,
         std::string(e.what()),
         "Number of rotations supplied does not match the number of detectors.")
   }
@@ -246,7 +247,7 @@ public:
   void test_creating_workspace_with_rotations_with_too_many_time_indexes() {
     auto builder = ScanningWorkspaceBuilder(nDetectors, nTimeIndexes, nBins);
     initaliseRotations(nDetectors, nTimeIndexes + 1);
-    TS_ASSERT_THROWS_EQUALS(builder.setRotations(rotations),
+    TS_ASSERT_THROWS_EQUALS(builder.setRotations(std::move(rotations)),
                             const std::logic_error &e, std::string(e.what()),
                             "Number of rotations supplied does not match the "
                             "number of time indexes.")
@@ -316,8 +317,8 @@ public:
   test_creating_workspace_with_positions_fails_with_positions_already_set() {
     auto builder = ScanningWorkspaceBuilder(nDetectors, nTimeIndexes, nBins);
     initalisePositions(nDetectors, nTimeIndexes);
-    TS_ASSERT_THROWS_NOTHING(builder.setPositions(positions))
-    TS_ASSERT_THROWS_EQUALS(builder.setPositions(positions),
+    TS_ASSERT_THROWS_NOTHING(builder.setPositions(std::move(positions)))
+    TS_ASSERT_THROWS_EQUALS(builder.setPositions(std::move(positions)),
                             const std::logic_error &e, std::string(e.what()),
                             "Can not set positions, as positions "
                             "or instrument angles have already been set.")
@@ -327,8 +328,8 @@ public:
   test_creating_workspace_with_rotations_fails_with_positions_already_set() {
     auto builder = ScanningWorkspaceBuilder(nDetectors, nTimeIndexes, nBins);
     initaliseRotations(nDetectors, nTimeIndexes);
-    TS_ASSERT_THROWS_NOTHING(builder.setRotations(rotations))
-    TS_ASSERT_THROWS_EQUALS(builder.setRotations(rotations),
+    TS_ASSERT_THROWS_NOTHING(builder.setRotations(std::move(rotations)))
+    TS_ASSERT_THROWS_EQUALS(builder.setRotations(std::move(rotations)),
                             const std::logic_error &e, std::string(e.what()),
                             "Can not set rotations, as rotations "
                             "or instrument angles have already been set.")
@@ -340,7 +341,7 @@ public:
     initialiseInstrumentAngles(nTimeIndexes);
     TS_ASSERT_THROWS_NOTHING(builder.setInstrumentAngles(instrumentAngles))
     initalisePositions(nDetectors, nTimeIndexes);
-    TS_ASSERT_THROWS_EQUALS(builder.setPositions(positions),
+    TS_ASSERT_THROWS_EQUALS(builder.setPositions(std::move(positions)),
                             const std::logic_error &e, std::string(e.what()),
                             "Can not set positions, as positions "
                             "or instrument angles have already been set.")
@@ -352,7 +353,7 @@ public:
     initialiseInstrumentAngles(nTimeIndexes);
     TS_ASSERT_THROWS_NOTHING(builder.setInstrumentAngles(instrumentAngles))
     initaliseRotations(nDetectors, nTimeIndexes);
-    TS_ASSERT_THROWS_EQUALS(builder.setRotations(rotations),
+    TS_ASSERT_THROWS_EQUALS(builder.setRotations(std::move(rotations)),
                             const std::logic_error &e, std::string(e.what()),
                             "Can not set rotations, as rotations "
                             "or instrument angles have already been set.")
@@ -362,7 +363,7 @@ public:
   test_creating_workspace_with_instrument_angles_fails_with_positions_already_set() {
     auto builder = ScanningWorkspaceBuilder(nDetectors, nTimeIndexes, nBins);
     initalisePositions(nDetectors, nTimeIndexes);
-    TS_ASSERT_THROWS_NOTHING(builder.setPositions(positions))
+    TS_ASSERT_THROWS_NOTHING(builder.setPositions(std::move(positions)))
     initialiseInstrumentAngles(nTimeIndexes);
     TS_ASSERT_THROWS_EQUALS(builder.setInstrumentAngles(instrumentAngles),
                             const std::logic_error &e, std::string(e.what()),
@@ -374,7 +375,7 @@ public:
   test_creating_workspace_with_instrument_angles_fails_with_rotations_already_set() {
     auto builder = ScanningWorkspaceBuilder(nDetectors, nTimeIndexes, nBins);
     initaliseRotations(nDetectors, nTimeIndexes);
-    TS_ASSERT_THROWS_NOTHING(builder.setRotations(rotations))
+    TS_ASSERT_THROWS_NOTHING(builder.setRotations(std::move(rotations)))
     initialiseInstrumentAngles(nTimeIndexes);
     TS_ASSERT_THROWS_EQUALS(builder.setInstrumentAngles(instrumentAngles),
                             const std::logic_error &e, std::string(e.what()),
@@ -454,7 +455,7 @@ private:
   size_t nTimeIndexes = 4;
   size_t nBins = 10;
 
-  std::vector<std::pair<DateAndTime, DateAndTime>> timeRanges = {
+  const std::vector<std::pair<DateAndTime, DateAndTime>> timeRanges = {
       {0, 1}, {1, 3}, {3, 6}, {6, 10}};
 
   std::vector<double> timeDurations = {1e-9, 2e-9, 3e-9, 4e-9};
