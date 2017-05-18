@@ -138,7 +138,8 @@ void ScanningWorkspaceBuilder::setRotations(
  *time indexes
  */
 void ScanningWorkspaceBuilder::setRelativeRotationsForScans(
-    const std::vector<double> &instrumentAngles) {
+    const std::vector<double> &instrumentAngles,
+    const Kernel::V3D &rotationPosition, const Kernel::V3D &rotationAxis) {
 
   if (!m_positions.empty() || !m_rotations.empty())
     throw std::logic_error("Can not set instrument angles, as positions and/or "
@@ -146,6 +147,8 @@ void ScanningWorkspaceBuilder::setRelativeRotationsForScans(
 
   verifyTimeIndexSize(instrumentAngles.size(), "instrument angles");
   m_instrumentAngles = instrumentAngles;
+  m_rotationPosition = rotationPosition;
+  m_rotationAxis = rotationAxis;
 }
 
 /**
@@ -238,9 +241,10 @@ void ScanningWorkspaceBuilder::buildRelativeRotationsForScans(
   for (size_t i = 0; i < outputDetectorInfo.size(); ++i) {
     for (size_t j = 0; j < outputDetectorInfo.scanCount(i); ++j) {
       auto position = outputDetectorInfo.position({i, j});
-      const auto rotation =
-          Kernel::Quat(m_instrumentAngles[j], Kernel::V3D(0, 1, 0));
+      const auto rotation = Kernel::Quat(m_instrumentAngles[j], m_rotationAxis);
+      position -= m_rotationPosition;
       rotation.rotate(position);
+      position += m_rotationPosition;
       outputDetectorInfo.setPosition({i, j}, position);
       outputDetectorInfo.setRotation({i, j}, rotation);
     }
