@@ -1109,23 +1109,23 @@ void MuonFitPropertyBrowser::setAllPairs() {
 * selection of groups/pairs
 */
 void MuonFitPropertyBrowser::genGroupWindow() {
-	
-		QtGroupPropertyManager *groupManager = new QtGroupPropertyManager(m_groupWindow);
-		QVBoxLayout *layout = new QVBoxLayout(m_groupWindow);
-		QtTreePropertyBrowser *groupBrowser = new QtTreePropertyBrowser();
-		QtProperty *groupSettings = groupManager->addProperty("Group/Pair selection");
-		for (auto iter = m_groupBoxes.constBegin(); iter != m_groupBoxes.constEnd();
-			++iter) {
-			groupSettings->addSubProperty(m_groupBoxes.value(iter.key()));
-			m_boolManager->setValue(iter.value(), m_boolManager->value(iter.value()));
-		}
-		QtCheckBoxFactory *checkBoxFactory = new QtCheckBoxFactory(m_groupWindow);
-		groupBrowser->setFactoryForManager(m_boolManager, checkBoxFactory);
-		groupBrowser->addProperty(groupSettings);
-		layout->addWidget(groupBrowser);
-		m_groupWindow->setLayout(layout);
-		m_groupWindow->show();
-	
+
+  QtGroupPropertyManager *groupManager =
+      new QtGroupPropertyManager(m_groupWindow);
+  QVBoxLayout *layout = new QVBoxLayout(m_groupWindow);
+  QtTreePropertyBrowser *groupBrowser = new QtTreePropertyBrowser();
+  QtProperty *groupSettings = groupManager->addProperty("Group/Pair selection");
+  for (auto iter = m_groupBoxes.constBegin(); iter != m_groupBoxes.constEnd();
+       ++iter) {
+    groupSettings->addSubProperty(m_groupBoxes.value(iter.key()));
+    m_boolManager->setValue(iter.value(), m_boolManager->value(iter.value()));
+  }
+  QtCheckBoxFactory *checkBoxFactory = new QtCheckBoxFactory(m_groupWindow);
+  groupBrowser->setFactoryForManager(m_boolManager, checkBoxFactory);
+  groupBrowser->addProperty(groupSettings);
+  layout->addWidget(groupBrowser);
+  m_groupWindow->setLayout(layout);
+  m_groupWindow->show();
 }
 /**
 * Sets checkboxes for periods
@@ -1276,7 +1276,8 @@ void MuonFitPropertyBrowser::setChosenPeriods(const QString &period) {
 * selection of periods
 */
 void MuonFitPropertyBrowser::genPeriodWindow() {
-  QtGroupPropertyManager *groupManager = new QtGroupPropertyManager(m_periodWindow);
+  QtGroupPropertyManager *groupManager =
+      new QtGroupPropertyManager(m_periodWindow);
   QVBoxLayout *layout = new QVBoxLayout(m_periodWindow);
   QtTreePropertyBrowser *groupBrowser = new QtTreePropertyBrowser();
   QtProperty *groupSettings = groupManager->addProperty("Period selection");
