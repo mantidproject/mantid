@@ -208,11 +208,13 @@ translateInstructions(const std::string &instructions) {
 * @param destWS : the destination workspace
 * @return : the index in the destination workspace
 */
-size_t mapSpectrumIndexToWorkspace(MatrixWorkspace_const_sptr originWS, const size_t originIdx,
+size_t mapSpectrumIndexToWorkspace(MatrixWorkspace_const_sptr originWS,
+                                   const size_t originIdx,
                                    MatrixWorkspace_const_sptr destWS) {
 
   SpectrumNumber specId = originWS->indexInfo().spectrumNumber(originIdx);
-  size_t wsIdx = destWS->getIndexFromSpectrumNumber(static_cast<specnum_t>(specId));
+  size_t wsIdx =
+      destWS->getIndexFromSpectrumNumber(static_cast<specnum_t>(specId));
   return wsIdx;
 }
 
