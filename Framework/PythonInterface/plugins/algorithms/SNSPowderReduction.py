@@ -359,7 +359,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                 if sample_time_filter_wall[0] == 0. and sample_time_filter_wall[-1] == 0. \
                         and self._splittersWS is None:
                     returned = self._focusAndSum([sam_run_number], reload_if_loaded=reload_event_file,
-                                            preserveEvents=preserveEvents)
+                                                 preserveEvents=preserveEvents)
                 else:
                     returned = self._focusChunks(sam_run_number, sample_time_filter_wall,
                                                  splitwksp=self._splittersWS,

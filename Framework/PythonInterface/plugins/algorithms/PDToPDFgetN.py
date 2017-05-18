@@ -101,7 +101,7 @@ class PDToPDFgetN(DataProcessorAlgorithm):
         return issues
 
     def _loadCharacterizations(self):
-        self._focusPos = {}
+        self._alignArgs = {}
         self._iparmFile = None
 
         charFilename = self.getProperty("CharacterizationRunsFile").value
@@ -112,11 +112,11 @@ class PDToPDFgetN(DataProcessorAlgorithm):
         results = PDLoadCharacterizations(Filename=charFilename,
                                           OutputWorkspace="characterizations")
         self._iparmFile = results[1]
-        self._focusPos['PrimaryFlightPath'] = results[2]
-        self._focusPos['SpectrumIDs'] = results[3]
-        self._focusPos['L2'] = results[4]
-        self._focusPos['Polar'] = results[5]
-        self._focusPos['Azimuthal'] = results[6]
+        self._alignArgs['PrimaryFlightPath'] = results[2]
+        self._alignArgs['SpectrumIDs'] = results[3]
+        self._alignArgs['L2'] = results[4]
+        self._alignArgs['Polar'] = results[5]
+        self._alignArgs['Azimuthal'] = results[6]
 
     def PyExec(self):
         self._loadCharacterizations()
@@ -124,25 +124,29 @@ class PDToPDFgetN(DataProcessorAlgorithm):
         if mtd.doesExist("characterizations"):
             charac = "characterizations"
 
+        # arguments for both AlignAndFocusPowder and AlignAndFocusPowderFromFiles
+        self._alignArgs['OutputWorkspace']=self.getPropertyValue("OutputWorkspace")
+        self._alignArgs['RemovePromptPulseWidth']=self.getProperty("RemovePromptPulseWidth").value
+        self._alignArgs['CompressTolerance']=COMPRESS_TOL_TOF
+        self._alignArgs['PreserveEvents'] = False
+        self._alignArgs['CalFileName'] = self.getProperty("CalibrationFile").value
+        self._alignArgs['Params']=self.getProperty("Binning").value
+        self._alignArgs['ResampleX']=self.getProperty("ResampleX").value
+        self._alignArgs['Dspacing']=True
+        self._alignArgs['CropWavelengthMin'] = self.getProperty('CropWavelengthMin').value
+        self._alignArgs['CropWavelengthMax'] = self.getProperty('CropWavelengthMax').value
+        self._alignArgs['ReductionProperties'] = '__snspowderreduction'
+
         wksp = self.getProperty("InputWorkspace").value
         if wksp is None:  # run from file with caching
             wksp = AlignAndFocusPowderFromFiles(Filename=self.getProperty("Filename").value,
-                                                OutputWorkspace=self.getPropertyValue("OutputWorkspace"),
                                                 CacheDir=self.getProperty("CacheDir").value,
                                                 MaxChunkSize=self.getProperty("MaxChunkSize").value,
                                                 FilterBadPulses=self.getProperty("FilterBadPulses").value,
                                                 Characterizations=charac,
-                                                CalFileName=self.getProperty("CalibrationFile").value,
-                                                Params=self.getProperty("Binning").value,
-                                                ResampleX=self.getProperty("ResampleX").value, Dspacing=True,
-                                                PreserveEvents=False,
-                                                RemovePromptPulseWidth=self.getProperty("RemovePromptPulseWidth").value,
-                                                CompressTolerance=COMPRESS_TOL_TOF,
-                                                CropWavelengthMin=self.getProperty("CropWavelengthMin").value,
-                                                CropWavelengthMax=self.getProperty("CropWavelengthMax").value,
                                                 FrequencyLogNames=self.getProperty("FrequencyLogNames").value,
-                                                WaveLengthLogNames=self.getProperty("WaveLengthLogNames").value,                                                ReductionProperties="__snspowderreduction",
-                                                **(self._focusPos))
+                                                WaveLengthLogNames=self.getProperty("WaveLengthLogNames").value,
+                                                **(self._alignArgs))
         else:  # process the input workspace
             self.log().information("Using input workspace. Ignoring properties 'Filename', " +
                                    "'OutputWorkspace', 'MaxChunkSize', and 'FilterBadPulses'")
@@ -154,18 +158,8 @@ class PDToPDFgetN(DataProcessorAlgorithm):
                                          FrequencyLogNames=self.getProperty("FrequencyLogNames").value,
                                          WaveLengthLogNames=self.getProperty("WaveLengthLogNames").value)
 
-            wksp = AlignAndFocusPowder(InputWorkspace=wksp, OutputWorkspace=wksp,
-                                       CalFileName=self.getProperty("CalibrationFile").value,
-                                       Params=self.getProperty("Binning").value,
-                                       ResampleX=self.getProperty("ResampleX").value, Dspacing=True,
-                                       PreserveEvents=False,
-                                       RemovePromptPulseWidth=self.getProperty("RemovePromptPulseWidth").value,
-                                       CompressTolerance=COMPRESS_TOL_TOF,
-                                       CropWavelengthMin=self.getProperty("CropWavelengthMin").value,
-                                       CropWavelengthMax=self.getProperty("CropWavelengthMax").value,
-                                       ReductionProperties="__snspowderreduction",
-                                       **(self._focusPos))
-
+            wksp = AlignAndFocusPowder(InputWorkspace=wksp,
+                                       **(self._alignArgs))
 
         wksp = NormaliseByCurrent(InputWorkspace=wksp, OutputWorkspace=wksp)
         wksp.getRun()['gsas_monitor'] = 1
