@@ -60,14 +60,15 @@ public:
       const boost::shared_ptr<const Geometry::Instrument> &instrument,
       const size_t nTimeIndexes, const size_t nBins);
 
-  void setHistogram(const HistogramData::Histogram histogram);
+  void setHistogram(HistogramData::Histogram histogram);
 
-  void setTimeRanges(const std::vector<
-      std::pair<Kernel::DateAndTime, Kernel::DateAndTime>> timeRanges);
+  void
+  setTimeRanges(std::vector<std::pair<Kernel::DateAndTime, Kernel::DateAndTime>>
+                    timeRanges);
   void setTimeRanges(const Kernel::DateAndTime &startTime,
                      const std::vector<double> &durations);
-  void setPositions(const std::vector<std::vector<Kernel::V3D>> positions);
-  void setRotations(const std::vector<std::vector<Kernel::Quat>> rotations);
+  void setPositions(std::vector<std::vector<Kernel::V3D>> positions);
+  void setRotations(std::vector<std::vector<Kernel::Quat>> rotations);
   void setRelativeRotationsForScans(const std::vector<double> &instrumentAngles,
                                     const Kernel::V3D &rotationPosition,
                                     const Kernel::V3D &rotationAxis);
