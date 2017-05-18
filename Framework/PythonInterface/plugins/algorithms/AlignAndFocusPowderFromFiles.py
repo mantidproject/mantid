@@ -232,7 +232,7 @@ class AlignAndFocusPowderFromFiles(DataProcessorAlgorithm):
 
         # with more than one chunk or file the integrated proton charge is
         # generically wrong
-        mtd[finalname].integrateProtonCharge()
+        mtd[finalname].run().integrateProtonCharge()
 
         # set the output workspace
         self.setProperty('OutputWorkspace', mtd[finalname])
