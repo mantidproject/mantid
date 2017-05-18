@@ -1,11 +1,13 @@
+#include "MantidQtSpectrumViewer/GraphDisplay.h"
+
+#include "MantidQtSpectrumViewer/QtUtils.h"
+#include "MantidQtSpectrumViewer/SVUtils.h"
+
+#include <boost/algorithm/clamp.hpp>
 #include <QtGui>
 #include <QVector>
 #include <QString>
 #include <qwt_scale_engine.h>
-
-#include "MantidQtSpectrumViewer/GraphDisplay.h"
-#include "MantidQtSpectrumViewer/QtUtils.h"
-#include "MantidQtSpectrumViewer/SVUtils.h"
 
 namespace MantidQt {
 namespace SpectrumView {
@@ -131,32 +133,32 @@ void GraphDisplay::clear() {
  */
 void GraphDisplay::setRangeScale(double rangeScale) {
   m_rangeScale = rangeScale;
-  auto validateMinMax = [](double &min, double &max) {
-    if (std::isinf(min)) {
-      min = std::copysign(std::numeric_limits<double>::max(), min);
-    }
-    if (std::isinf(max)) {
-      max = std::copysign(std::numeric_limits<double>::max(), max);
-    }
+
+  // A helper function to limit min and max to finite values.
+  auto clampRange = [](double &min, double &max) {
+    const double low = std::numeric_limits<double>::lowest();
+    const double high = std::numeric_limits<double>::max();
+    min = boost::algorithm::clamp(min, low, high, std::less_equal<double>());
+    max = boost::algorithm::clamp(max, low, high, std::less_equal<double>());
   };
 
   if (m_isVertical) {
     double axis_min = m_minX;
     double axis_max = m_rangeScale * (m_maxX - m_minX) + m_minX;
-    validateMinMax(axis_min, axis_max);
+    clampRange(axis_min, axis_max);
     m_graphPlot->setAxisScale(QwtPlot::xBottom, axis_min, axis_max);
     axis_min = m_minY;
     axis_max = m_maxY;
-    validateMinMax(axis_min, axis_max);
+    clampRange(axis_min, axis_max);
     m_graphPlot->setAxisScale(QwtPlot::yLeft, axis_min, axis_max);
   } else {
     double axis_min = m_minY;
     double axis_max = m_rangeScale * (m_maxY - m_minY) + m_minY;
-    validateMinMax(axis_min, axis_max);
+    clampRange(axis_min, axis_max);
     m_graphPlot->setAxisScale(QwtPlot::yLeft, axis_min, axis_max);
     axis_min = m_minX;
     axis_max = m_maxX;
-    validateMinMax(axis_min, axis_max);
+    clampRange(axis_min, axis_max);
     m_graphPlot->setAxisScale(QwtPlot::xBottom, axis_min, axis_max);
   }
   m_graphPlot->replot();
