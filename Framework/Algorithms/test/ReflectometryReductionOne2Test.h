@@ -482,6 +482,115 @@ public:
     TS_ASSERT_DELTA(outLam->y(0)[19], 1.9805, 0.0001);
   }
 
+  void test_sum_in_q_direct_beam() {
+    // Test IvsLam workspace
+    // No monitor normalization
+    // Direct beam normalization: 2-3
+    // No transmission correction
+    // Processing instructions : 2
+
+    ReflectometryReductionOne2 alg;
+    setupAlgorithm(alg, 1.5, 15.0, "2");
+    alg.setPropertyValue("RegionOfDirectBeam", "2-3");
+    alg.setProperty("SummationType", "SumInQ");
+    alg.setProperty("ReductionType", "DivergentBeam");
+    alg.setProperty("ThetaIn", 25.0);
+    MatrixWorkspace_sptr outLam = runAlgorithmLam(alg, 20);
+
+    TS_ASSERT_DELTA(outLam->y(0)[0], 0.2622, 0.0001);
+  }
+
+  void test_sum_in_q_monitor_normalization() {
+    // Test IvsLam workspace
+    // Monitor normalization
+    // No direct beam normalization
+    // No transmission correction
+    // Processing instructions : 2
+    // SummationType : SumInQ
+    // ReductionType : DivergentBeam
+
+    // I0MonitorIndex: 0
+    // MonitorBackgroundWavelengthMin : 0.5
+    // MonitorBackgroundWavelengthMax : 3.0
+    // Normalize by integrated monitors : No
+
+    // Modify counts in monitor (only for this test)
+    // Modify counts only for range that will be fitted
+    auto inputWS = m_multiDetectorWS;
+    auto &Y = m_multiDetectorWS->mutableY(0);
+    std::fill(Y.begin(), Y.begin() + 2, 1.0);
+
+    ReflectometryReductionOne2 alg;
+    setupAlgorithmMonitorCorrection(alg, 0.0, 15.0, "2", inputWS, false);
+    alg.setProperty("SummationType", "SumInQ");
+    alg.setProperty("ReductionType", "DivergentBeam");
+    alg.setProperty("ThetaIn", 25.0);
+    MatrixWorkspace_sptr outLam = runAlgorithmLam(alg, 20);
+
+    TS_ASSERT_DELTA(outLam->x(0)[0], -0.6637, 0.0001);
+    TS_ASSERT_DELTA(outLam->x(0)[7], 4.8538, 0.0001);
+    TS_ASSERT_DELTA(outLam->x(0)[10], 7.2185, 0.0001);
+    TS_ASSERT_DELTA(outLam->x(0)[19], 14.3126, 0.0001);
+    TS_ASSERT_DELTA(outLam->y(0)[0], 1.0481, 0.0001);
+    TS_ASSERT_DELTA(outLam->y(0)[7], 1.5187, 0.0001);
+    TS_ASSERT_DELTA(outLam->y(0)[10], 1.5957, 0.0001);
+    TS_ASSERT_DELTA(outLam->y(0)[19], 1.6137, 0.0001);
+  }
+
+  void test_sum_in_q_transmission_correction_run() {
+    // Transmission run is the same as input run
+
+    ReflectometryReductionOne2 alg;
+    setupAlgorithmTransmissionCorrection(alg, 1.5, 15.0, "1", m_multiDetectorWS,
+                                         false);
+    alg.setProperty("SummationType", "SumInQ");
+    alg.setProperty("ReductionType", "DivergentBeam");
+    alg.setProperty("ThetaIn", 25.0);
+    MatrixWorkspace_sptr outLam = runAlgorithmLam(alg, 20);
+
+    TS_ASSERT_DELTA(outLam->y(0)[0], 0.1314, 0.0001);
+    TS_ASSERT_DELTA(outLam->y(0)[7], 0.6208, 0.0001);
+  }
+
+  void test_sum_in_q_exponential_correction() {
+    // CorrectionAlgorithm: ExponentialCorrection
+
+    ReflectometryReductionOne2 alg;
+    setupAlgorithm(alg, 1.5, 15.0, "2");
+    alg.setProperty("SummationType", "SumInQ");
+    alg.setProperty("ReductionType", "DivergentBeam");
+    alg.setProperty("ThetaIn", 25.0);
+    alg.setProperty("CorrectionAlgorithm", "ExponentialCorrection");
+    alg.setProperty("C0", 0.2);
+    alg.setProperty("C1", 0.1);
+    MatrixWorkspace_sptr outLam = runAlgorithmLam(alg, 20);
+
+    TS_ASSERT_DELTA(outLam->y(0)[0], 9.1332, 0.0001);
+    TS_ASSERT_DELTA(outLam->y(0)[7], 18.4419, 0.0001);
+  }
+
+  void test_sum_in_q_IvsQ() {
+    // Test IvsQ workspace
+    // No monitor normalization
+    // No direct beam normalization
+    // No transmission correction
+    // Processing instructions : 2
+
+    ReflectometryReductionOne2 alg;
+    setupAlgorithm(alg, 1.5, 15.0, "2");
+    alg.setProperty("SummationType", "SumInQ");
+    alg.setProperty("ReductionType", "DivergentBeam");
+    alg.setProperty("ThetaIn", 25.0);
+    MatrixWorkspace_sptr outQ = runAlgorithmQ(alg, 20);
+
+    // X range in outQ
+    TS_ASSERT_DELTA(outQ->x(0)[0], 0.3169, 0.0001);
+    TS_ASSERT_DELTA(outQ->x(0)[7], 0.4739, 0.0001);
+    // Y counts
+    TS_ASSERT_DELTA(outQ->y(0)[0], 2.1382, 0.0001);
+    TS_ASSERT_DELTA(outQ->y(0)[7], 1.8543, 0.0001);
+  }
+
 private:
   // Do standard algorithm setup
   void setupAlgorithm(ReflectometryReductionOne2 &alg,
