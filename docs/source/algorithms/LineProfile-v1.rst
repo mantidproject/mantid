@@ -112,9 +112,9 @@ Output:
     Average intensity between 5600.0 and 6400.0 microsec: 0.227
     Average intensity between 6200.0 and 6800.0 microsec: 0.1
 
-**Example - Using different modes**
+**Example - The 'Sum' mode**
 
-.. testcode:: Modes
+.. testcode:: SumMode
 
     import numpy
 
@@ -156,10 +156,10 @@ Output:
     e = sumCutWS.readE(0)[iEdge]
     print('Sum profile near NaNs: {} +/- {}'.format(y, e))
 
-.. testoutput:: Modes
+.. testoutput:: SumMode
 
     Sum profile at elastic peak: 103.45916358 +/- 10.1714877761
-    Sum profile near NaNs: 0.400000002549 +/- 0.632455534049
+    Sum profile near NaNs: 1.60000001019 +/- 2.52982213619
 
 .. categories::
 
