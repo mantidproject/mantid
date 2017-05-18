@@ -558,7 +558,6 @@ public:
   virtual ParameterStatus getParameterStatus(size_t i) const = 0;
 
 protected:
-
   /// Function initialization. Declare function parameters in this method.
   virtual void init();
   /// Declare a new parameter
