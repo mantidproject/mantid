@@ -172,7 +172,7 @@ DataArray_const_sptr MatrixWSDataSource::getDataArray(double xMin, double xMax,
   MantidVec err;
   yVals.resize(numCols);
   err.resize(numCols);
-  size_t index = 0;
+  auto newDataIter = newData.begin();
   for (size_t i = 0; i < numRows; i++) {
     double midY = yMin + ((double)i + 0.5) * yStep;
     SVUtils::Interpolate(m_totalYMin, m_totalYMax, midY, 0.0,
@@ -184,11 +184,7 @@ DataArray_const_sptr MatrixWSDataSource::getDataArray(double xMin, double xMax,
     err.resize(numCols, 0);
 
     m_matWs->generateHistogram(sourceRow, xScale, yVals, err, true);
-    for (size_t col = 0; col < numCols; col++) {
-      float value = static_cast<float>(yVals[col]);
-      newData[index] = value;
-      index++;
-    }
+    newDataIter = std::copy(yVals.cbegin(), yVals.cend(), newDataIter);
   }
 
   // The calling code is responsible for deleting the DataArray when it is done
