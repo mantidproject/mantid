@@ -299,10 +299,6 @@ void ScanningWorkspaceBuilder::verifyDetectorSize(
 }
 
 void ScanningWorkspaceBuilder::validateInputs() const {
-  if (!m_instrument)
-    throw std::logic_error("Can not build workspace - instrument has not been "
-                           "set. Please call setInstrument() before building.");
-
   if (m_timeRanges.empty())
     throw std::logic_error("Can not build workspace - time ranges have not "
                            "been set. Please call setTimeRanges() before "
