@@ -236,9 +236,8 @@ void CreateSampleWorkspace::exec() {
     ws = createEventWorkspace(numPixels, numBins, numMonitors, numEvents, xMin,
                               binWidth, inst, functionString, isRandom);
   } else if (numScanPoints > 1) {
-    ws =
-        createScanningWorkspace(numPixels, numBins, numMonitors, xMin, binWidth,
-                                inst, functionString, isRandom, numScanPoints);
+    ws = createScanningWorkspace(numBins, xMin, binWidth, inst, functionString,
+                                 isRandom, numScanPoints);
   } else {
     ws = createHistogramWorkspace(numPixels, numBins, numMonitors, xMin,
                                   binWidth, inst, functionString, isRandom);
@@ -325,12 +324,9 @@ MatrixWorkspace_sptr CreateSampleWorkspace::createHistogramWorkspace(
 /** Create scanning histogram workspace
  */
 MatrixWorkspace_sptr CreateSampleWorkspace::createScanningWorkspace(
-    int numPixels, int numBins, int numMonitors, double x0, double binDelta,
-    Geometry::Instrument_sptr inst, const std::string &functionString,
-    bool isRandom, int numScanPoints) {
-  auto builder =
-      ScanningWorkspaceBuilder(numPixels + numMonitors, numScanPoints, numBins);
-  builder.setInstrument(inst);
+    int numBins, double x0, double binDelta, Geometry::Instrument_sptr inst,
+    const std::string &functionString, bool isRandom, int numScanPoints) {
+  auto builder = ScanningWorkspaceBuilder(inst, numScanPoints, numBins);
 
   auto angles = std::vector<double>();
   auto timeRanges = std::vector<double>();

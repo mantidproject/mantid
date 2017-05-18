@@ -54,15 +54,14 @@ namespace DataObjects {
 */
 class MANTID_DATAOBJECTS_DLL ScanningWorkspaceBuilder {
 public:
-  enum class IndexingType { DEFAULT, TIME_ORIENTED, DETECTOR_ORIENTED };
+  enum class IndexingType { Default, TimeOriented, DetectorOriented };
 
-  ScanningWorkspaceBuilder(const size_t nDetectors, const size_t nTimeIndexes,
-                           const size_t nBins);
+  ScanningWorkspaceBuilder(
+      const boost::shared_ptr<const Geometry::Instrument> &instrument,
+      const size_t nTimeIndexes, const size_t nBins);
 
   void setHistogram(const HistogramData::Histogram histogram);
 
-  void setInstrument(
-      const boost::shared_ptr<const Geometry::Instrument> &instrument);
   void setTimeRanges(const std::vector<
       std::pair<Kernel::DateAndTime, Kernel::DateAndTime>> timeRanges);
   void setTimeRanges(const Kernel::DateAndTime &startTime,
@@ -80,9 +79,10 @@ private:
   size_t m_nTimeIndexes;
   size_t m_nBins;
 
+  boost::shared_ptr<const Geometry::Instrument> m_instrument;
+
   HistogramData::Histogram m_histogram;
 
-  boost::shared_ptr<const Geometry::Instrument> m_instrument;
   std::vector<std::pair<Kernel::DateAndTime, Kernel::DateAndTime>> m_timeRanges;
   std::vector<std::vector<Kernel::V3D>> m_positions;
   std::vector<std::vector<Kernel::Quat>> m_rotations;

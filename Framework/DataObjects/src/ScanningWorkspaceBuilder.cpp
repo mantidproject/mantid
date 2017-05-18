@@ -17,24 +17,14 @@ using namespace Mantid::Indexing;
 namespace Mantid {
 namespace DataObjects {
 
-ScanningWorkspaceBuilder::ScanningWorkspaceBuilder(const size_t nDetectors,
-                                                   const size_t nTimeIndexes,
-                                                   const size_t nBins)
-    : m_nDetectors(nDetectors), m_nTimeIndexes(nTimeIndexes), m_nBins(nBins),
-      m_histogram(BinEdges(nBins + 1, LinearGenerator(0.0, 1.0)),
+ScanningWorkspaceBuilder::ScanningWorkspaceBuilder(
+    const boost::shared_ptr<const Geometry::Instrument> &instrument,
+    const size_t nTimeIndexes, const size_t nBins)
+    : m_nDetectors(instrument->getNumberDetectors()),
+      m_nTimeIndexes(nTimeIndexes), m_nBins(nBins), m_instrument(instrument),
+      m_histogram(BinEdges(nBins + 1, LinearGenerator(1.0, 1.0)),
                   Counts(std::vector<double>(nBins, 0.0))),
-      m_indexingType(IndexingType::DEFAULT) {}
-
-void ScanningWorkspaceBuilder::setInstrument(
-    const boost::shared_ptr<const Geometry::Instrument> &instrument) {
-  if (instrument->getNumberDetectors() < m_nDetectors) {
-    throw std::logic_error("There are not enough detectors in the instrument "
-                           "for the number of detectors set in the scanning "
-                           "workspace builder.");
-  }
-
-  m_instrument = instrument;
-}
+      m_indexingType(IndexingType::Default) {}
 
 /**
  * Set a histogram to be used for all the workspace spectra. This can be used to
@@ -165,7 +155,7 @@ void ScanningWorkspaceBuilder::setInstrumentAngles(
  */
 void ScanningWorkspaceBuilder::setIndexingType(
     const IndexingType indexingType) {
-  if (m_indexingType != IndexingType::DEFAULT)
+  if (m_indexingType != IndexingType::Default)
     throw std::logic_error("Indexing type has been set already.");
 
   m_indexingType = indexingType;
@@ -197,14 +187,14 @@ MatrixWorkspace_sptr ScanningWorkspaceBuilder::buildWorkspace() const {
     buildInstrumentAngles(outputDetectorInfo);
 
   switch (m_indexingType) {
-  case IndexingType::DEFAULT:
+  case IndexingType::Default:
     outputWorkspace->setIndexInfo(
         Indexing::IndexInfo(m_nDetectors * m_nTimeIndexes));
     break;
-  case IndexingType::TIME_ORIENTED:
+  case IndexingType::TimeOriented:
     createTimeOrientedIndexInfo(*outputWorkspace);
     break;
-  case IndexingType::DETECTOR_ORIENTED:
+  case IndexingType::DetectorOriented:
     createDetectorOrientedIndexInfo(*outputWorkspace);
     break;
   }
