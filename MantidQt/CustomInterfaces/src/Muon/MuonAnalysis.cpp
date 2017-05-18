@@ -514,6 +514,13 @@ Workspace_sptr MuonAnalysis::createAnalysisWorkspace(ItemType itemType,
       itemType == ItemType::Group ? m_uiForm.groupTable : m_uiForm.pairTable;
   options.groupPairName = table->item(tableRow, 0)->text().toStdString();
 
+  if (plotType == Muon::PlotType::Asymmetry &&
+      m_dataLoader.isContainedIn(options.groupPairName,
+                                 options.grouping.groupNames)) {
+    setTFAsymm(Muon::TFAsymmState::Enabled); // turn TFAsymm on
+  } else {
+    setTFAsymm(Muon::TFAsymmState::Disabled); // turn TFAsymm off
+  }
   return m_dataLoader.createAnalysisWorkspace(loadedWS, options);
 }
 
@@ -1663,7 +1670,7 @@ void MuonAnalysis::plotSpectrum(const QString &wsName, bool logScale) {
   s << "def plot_data(ws_name,errors, connect, window_to_use):";
   if (parsePlotType(m_uiForm.frontPlotFuncs) == PlotType::Asymmetry) {
     // clang-format off
-    s << "w = plotSpectrum(source = ws_name,"
+    s << "  w = plotSpectrum(source = ws_name,"
          "indices = 0,"
          "distribution = mantidqtpython.MantidQt.DistributionFalse,"
          "error_bars = errors," 
@@ -1672,7 +1679,7 @@ void MuonAnalysis::plotSpectrum(const QString &wsName, bool logScale) {
     // clang-format on
   } else {
     // clang-format off
-    s << "w = plotSpectrum(source = ws_name,"
+    s << "  w = plotSpectrum(source = ws_name,"
          "indices = 0,"
          "distribution = mantidqtpython.MantidQt.DistributionDefault,"
          "error_bars = errors,"
@@ -2123,6 +2130,9 @@ void MuonAnalysis::loadFittings() {
   // Set multi fit mode on/off as appropriate
   const auto &multiFitState = m_optionTab->getMultiFitState();
   m_fitFunctionPresenter->setMultiFitState(multiFitState);
+  // Set TF Asymmetry mode on/off as appropriate
+  const auto &TFAsymmState = m_optionTab->getTFAsymmState();
+  setTFAsymm(TFAsymmState);
 }
 
 /**
@@ -2492,6 +2502,8 @@ void MuonAnalysis::connectAutoUpdate() {
           SLOT(updateCurrentPlotStyle()));
   connect(m_optionTab, SIGNAL(multiFitStateChanged(int)), this,
           SLOT(multiFitCheckboxChanged(int)));
+  connect(m_optionTab, SIGNAL(TFAsymmStateChanged(int)), this,
+          SLOT(changedTFAsymmCheckbox(int)));
 }
 
 /**
@@ -2837,6 +2849,9 @@ MuonAnalysis::groupWorkspace(const std::string &wsName,
         m_dataTimeZero); // won't be used, but property is mandatory
     groupAlg->setPropertyValue("DetectorGroupingTable", groupingName);
     groupAlg->setPropertyValue("OutputWorkspace", outputEntry.name());
+    groupAlg->setProperty("xmin", m_dataSelector->getStartTime());
+    groupAlg->setProperty("xmax", m_dataSelector->getEndTime());
+
     groupAlg->execute();
   } catch (std::exception &e) {
     throw std::runtime_error("Unable to group workspace:\n\n" +
@@ -3039,12 +3054,62 @@ void MuonAnalysis::multiFitCheckboxChanged(int state) {
   const Muon::MultiFitState multiFitState = state == Qt::CheckState::Checked
                                                 ? Muon::MultiFitState::Enabled
                                                 : Muon::MultiFitState::Disabled;
+  // If both multiFit and TFAsymm are checked
+  // uncheck the TFAsymm
+  if (m_uiForm.chkEnableMultiFit->isChecked() && state != 0) {
+    // uncheck the box
+    m_uiForm.chkTFAsymm->setChecked(false);
+    changedTFAsymmCheckbox(0);
+    // reset the view
+    setTFAsymm(Muon::TFAsymmState::Disabled);
+  }
   m_fitFunctionPresenter->setMultiFitState(multiFitState);
   if (multiFitState == Muon::MultiFitState::Disabled) {
     m_dataSelector->clearChosenGroups();
   }
 }
-
+/**
+* Called when the "TF Asymmetry" checkbox is changed (settings tab.)
+* Forward this to the fit function presenter.
+*/
+void MuonAnalysis::changedTFAsymmCheckbox(int state) {
+  const Muon::TFAsymmState TFAsymmState = state == Qt::CheckState::Checked
+                                              ? Muon::TFAsymmState::Enabled
+                                              : Muon::TFAsymmState::Disabled;
+  // If both multiFit and TFAsymm are checked
+  // uncheck the multiFit
+  if (m_uiForm.chkTFAsymm->isChecked() && state != 0) {
+    // uncheck the box
+    m_uiForm.chkEnableMultiFit->setChecked(false);
+    multiFitCheckboxChanged(0);
+    // reset the view
+    m_fitFunctionPresenter->setMultiFitState(Muon::MultiFitState::Disabled);
+  }
+  setTFAsymm(TFAsymmState);
+}
+/**
+* Called when the "TF Asymmetry" is needed (from home tab)
+* Forward this to the fit function presenter.
+*/
+void MuonAnalysis::setTFAsymm(Muon::TFAsymmState TFAsymmState) {
+  // check the TFAsymm box
+  if (TFAsymmState == Muon::TFAsymmState::Enabled) {
+    m_uiForm.chkTFAsymm->setChecked(true);
+  } else {
+    m_uiForm.chkTFAsymm->setChecked(false);
+  }
+  // If both multiFit and TFAsymm are checked
+  // uncheck the multiFit
+  if (m_uiForm.chkEnableMultiFit->isChecked() &&
+      TFAsymmState == Muon::TFAsymmState::Enabled) {
+    // uncheck the box
+    m_uiForm.chkEnableMultiFit->setChecked(false);
+    multiFitCheckboxChanged(0);
+    // reset the view
+    m_fitFunctionPresenter->setMultiFitState(Muon::MultiFitState::Disabled);
+  }
+  m_fitFunctionPresenter->setTFAsymmState(TFAsymmState);
+}
 /**
  * Update the fit data presenter with current overwrite setting
  * @param state :: [input] (not used) Setting of combo box
