@@ -249,8 +249,8 @@ def convert_to_shape(shape_flag):
     """
     Converts a shape flag to a shape object.
 
-    @param shape_flag: a geometry flag which can be 1, 2 or 3
-    @return: a shape object
+    :param shape_flag: a geometry flag which can be 1, 2 or 3
+    :return: a shape object
     """
     if shape_flag == 1:
         shape = SampleShape.CylinderAxisUp
@@ -374,8 +374,8 @@ def get_geometry_information_isis_nexus(file_name):
     """
     Gets geometry information from the sample folder in the nexus file
 
-    @param file_name:
-    @return: height, width, thickness, shape
+    :param file_name:
+    :return: height, width, thickness, shape
     """
     with h5.File(file_name) as h5_file:
         # Open first entry
@@ -407,7 +407,6 @@ def get_geometry_information_isis_nexus(file_name):
 #    file where the first level entry will be named mantid_workspace_X where X=1,2,3,... . Note that the numbers
 #    correspond  to periods.
 # 3. Scenario 2: Added event data, ie files which were added and saved as event data.
-# 3.1 TODO
 
 
 def get_date_and_run_number_added_nexus(file_name):
@@ -564,8 +563,8 @@ def get_geometry_information_isis_added_nexus(file_name):
     """
     Gets geometry information from the sample folder in an added nexus file
 
-    @param file_name: the file name
-    @return: height, width, thickness, shape
+    :param file_name: the file name
+    :return: height, width, thickness, shape
     """
     with h5.File(file_name) as h5_file:
         # Open first entry
@@ -704,8 +703,8 @@ def get_geometry_information_raw(file_name):
     """
     Gets the geometry information form the table workspace with the spb information
 
-    @param file_name: the full file name to an existing raw file.
-    @return: height, width, thickness and shape
+    :param file_name: the full file name to an existing raw file.
+    :return: height, width, thickness and shape
     """
     alg_info = AlgorithmManager.createUnmanaged("RawFileInfo")
     alg_info.initialize()
