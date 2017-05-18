@@ -636,9 +636,9 @@ void MantidEV::loadEventFileEntered_slot() {
  */
 void MantidEV::loadEventFile_slot() {
   QString file_path = getFilePath(last_event_file);
-  QString Qfile_name =
-      QFileDialog::getOpenFileName(this, tr("Load event file"), file_path,
-                                   tr("Nexus Files (*.nxs);; All files(*)"));
+  QString Qfile_name = QFileDialog::getOpenFileName(
+      this, tr("Load event file"), file_path,
+      tr("Nexus Files (*.nxs *.h5);; All files(*)"));
 
   if (Qfile_name.length() > 0) {
     m_uiForm.EventFileName_ledt->setText(Qfile_name);

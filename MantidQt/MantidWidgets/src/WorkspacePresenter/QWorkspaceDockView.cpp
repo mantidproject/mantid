@@ -23,7 +23,6 @@
 #include <Poco/Path.h>
 
 #include <QFileDialog>
-#include <QHash>
 #include <QKeyEvent>
 #include <QMainWindow>
 #include <QMenu>
@@ -40,25 +39,6 @@ namespace {
 Mantid::Kernel::Logger docklog("MantidDockWidget");
 
 WorkspaceIcons WORKSPACE_ICONS = WorkspaceIcons();
-
-bool isAllMatrixWorkspaces(const WorkspaceGroup_const_sptr &wsGroup) {
-  bool allMatrixWSes = false;
-
-  if (wsGroup) {
-    if (!wsGroup->isEmpty()) {
-      allMatrixWSes = true;
-      for (int index = 0; index < wsGroup->getNumberOfEntries(); index++) {
-        if (nullptr == boost::dynamic_pointer_cast<MatrixWorkspace>(
-                           wsGroup->getItem(index))) {
-          allMatrixWSes = false;
-          break;
-        }
-      }
-    }
-  }
-
-  return allMatrixWSes;
-}
 }
 
 namespace MantidQt {
@@ -208,16 +188,6 @@ void QWorkspaceDockView::init() {
 
 WorkspacePresenterWN_wptr QWorkspaceDockView::getPresenterWeakPtr() {
   return boost::dynamic_pointer_cast<WorkspacePresenter>(m_presenter);
-}
-
-MantidSurfacePlotDialog::UserInputSurface
-QWorkspaceDockView::chooseContourPlotOptions(int nWorkspaces) const {
-  return m_tree->chooseContourPlotOptions(nWorkspaces);
-}
-
-MantidSurfacePlotDialog::UserInputSurface
-QWorkspaceDockView::chooseSurfacePlotOptions(int nWorkspaces) const {
-  return m_tree->chooseSurfacePlotOptions(nWorkspaces);
 }
 
 /** Returns the names of the selected workspaces
@@ -606,6 +576,10 @@ void QWorkspaceDockView::createWorkspaceMenuActions() {
   connect(m_plotSpecErr, SIGNAL(triggered()), this,
           SLOT(onClickPlotSpectraErr()));
 
+  m_plotAdvanced = new QAction(tr("Plot Advanced..."), this);
+  connect(m_plotAdvanced, SIGNAL(triggered()), this,
+          SLOT(onClickPlotAdvanced()));
+
   m_colorFill = new QAction(tr("Color Fill Plot"), this);
   connect(m_colorFill, SIGNAL(triggered()), this,
           SLOT(onClickDrawColorFillPlot()));
@@ -688,12 +662,6 @@ void QWorkspaceDockView::createWorkspaceMenuActions() {
 
   m_clearUB = new QAction(tr("Clear UB Matrix"), this);
   connect(m_clearUB, SIGNAL(triggered()), this, SLOT(onClickClearUB()));
-
-  m_plotSurface = new QAction(tr("Plot Surface from Group"), this);
-  connect(m_plotSurface, SIGNAL(triggered()), this, SLOT(onClickPlotSurface()));
-
-  m_plotContour = new QAction(tr("Plot Contour from Group"), this);
-  connect(m_plotContour, SIGNAL(triggered()), this, SLOT(onClickPlotContour()));
 }
 
 /**
@@ -944,10 +912,12 @@ void QWorkspaceDockView::addMatrixWorkspaceMenuItems(
   menu->addSeparator();
   menu->addAction(m_plotSpec);
   menu->addAction(m_plotSpecErr);
+  menu->addAction(m_plotAdvanced);
 
   // Don't plot a spectrum if only one X value
   m_plotSpec->setEnabled(matrixWS->blocksize() > 1);
   m_plotSpecErr->setEnabled(matrixWS->blocksize() > 1);
+  m_plotAdvanced->setEnabled(matrixWS->blocksize() > 1);
 
   menu->addAction(m_showSpectrumViewer); // The 2D spectrum viewer
 
@@ -1029,32 +999,16 @@ void QWorkspaceDockView::addPeaksWorkspaceMenuItems(
 /**
 * Add the actions that are appropriate for a WorkspaceGroup
 * @param menu :: The menu to store the items
-* @param groupWS :: [input] Workspace group related to the menu
 */
-void QWorkspaceDockView::addWorkspaceGroupMenuItems(
-    QMenu *menu, const WorkspaceGroup_const_sptr &groupWS) const {
+void QWorkspaceDockView::addWorkspaceGroupMenuItems(QMenu *menu) const {
   m_plotSpec->setEnabled(true);
   menu->addAction(m_plotSpec);
   m_plotSpecErr->setEnabled(true);
   menu->addAction(m_plotSpecErr);
+  m_plotAdvanced->setEnabled(true);
+  menu->addAction(m_plotAdvanced);
   menu->addAction(m_colorFill);
   m_colorFill->setEnabled(true);
-
-  // If appropriate, add "plot surface" and "plot contour" options
-  // Only add these if:
-  // - there are >2 workspaces in group
-  // - all are MatrixWorkspaces (otherwise they can't be plotted)
-  // - only one group is selected
-  if (m_tree->selectedItems().size() == 1) {
-    if (groupWS && groupWS->getNumberOfEntries() > 2) {
-      if (isAllMatrixWorkspaces(groupWS)) {
-        menu->addAction(m_plotSurface);
-        m_plotSurface->setEnabled(true);
-        menu->addAction(m_plotContour);
-        m_plotContour->setEnabled(true);
-      }
-    }
-  }
 
   menu->addSeparator();
   menu->addAction(m_saveNexus);
@@ -1276,7 +1230,7 @@ void QWorkspaceDockView::popupContextMenu() {
       addPeaksWorkspaceMenuItems(menu, peaksWS);
     } else if (auto groupWS =
                    boost::dynamic_pointer_cast<const WorkspaceGroup>(ws)) {
-      addWorkspaceGroupMenuItems(menu, groupWS);
+      addWorkspaceGroupMenuItems(menu);
     } else if (boost::dynamic_pointer_cast<const Mantid::API::ITableWorkspace>(
                    ws)) {
       addTableWorkspaceMenuItems(menu);
@@ -1509,24 +1463,50 @@ void QWorkspaceDockView::onClickPlotSpectraErr() {
   m_presenter->notifyFromView(ViewNotifiable::Flag::PlotSpectrumWithErrors);
 }
 
+void QWorkspaceDockView::onClickPlotAdvanced() {
+  m_presenter->notifyFromView(ViewNotifiable::Flag::PlotSpectrumAdvanced);
+}
+
 /** Plots one or more spectra from each selected workspace
-* @param showErrors If true, show error bars. Otherwise no error bars are
-* displayed.
+* @param type "Simple", "Errors" show error bars, "Advanced" advanced plotting.
 */
-void QWorkspaceDockView::plotSpectrum(bool showErrors) {
-  const auto userInput = m_tree->chooseSpectrumFromSelected();
+void QWorkspaceDockView::plotSpectrum(std::string type) {
+  const bool isAdvanced = type == "Advanced";
+  const auto userInput =
+      m_tree->chooseSpectrumFromSelected(true, true, true, isAdvanced);
   // An empty map will be returned if the user clicks cancel in the spectrum
   // selection
   if (userInput.plots.empty()) {
     return;
   }
+  bool showErrorBars =
+      ((type == "Errors") || (type == "Advanced" && userInput.errors));
 
+  // mantidUI knows nothing about userInput, hence the long argument lists.
   if (userInput.tiled) {
     m_mantidUI->plotSubplots(userInput.plots, MantidQt::DistributionDefault,
-                             showErrors);
-  } else {
-    m_mantidUI->plot1D(userInput.plots, true, MantidQt::DistributionDefault,
-                       showErrors, nullptr, false, userInput.waterfall);
+                             showErrorBars);
+  } else if (userInput.simple || userInput.waterfall) {
+    if (userInput.isAdvanced) {
+      m_mantidUI->plot1D(userInput.plots, true, MantidQt::DistributionDefault,
+                         showErrorBars, nullptr, false, userInput.waterfall,
+                         userInput.advanced.logName,
+                         userInput.advanced.customLogValues);
+    } else {
+      m_mantidUI->plot1D(userInput.plots, true, MantidQt::DistributionDefault,
+                         showErrorBars, nullptr, false, userInput.waterfall);
+    }
+
+  } else if (userInput.surface) {
+    m_mantidUI->plotSurface(
+        userInput.advanced.accepted, userInput.advanced.plotIndex,
+        userInput.advanced.axisName, userInput.advanced.logName,
+        userInput.advanced.customLogValues, userInput.advanced.workspaceNames);
+  } else if (userInput.contour) {
+    m_mantidUI->plotContour(
+        userInput.advanced.accepted, userInput.advanced.plotIndex,
+        userInput.advanced.axisName, userInput.advanced.logName,
+        userInput.advanced.customLogValues, userInput.advanced.workspaceNames);
   }
 }
 
@@ -1689,24 +1669,6 @@ void QWorkspaceDockView::convertMDHistoToMatrixWorkspace() {
 void QWorkspaceDockView::onClickClearUB() {
   m_presenter->notifyFromView(ViewNotifiable::Flag::ClearUBMatrix);
 }
-
-void QWorkspaceDockView::onClickPlotSurface() {
-  m_presenter->notifyFromView(ViewNotifiable::Flag::ShowSurfacePlot);
-}
-
-/**
-* Create a 3D surface plot from the selected workspace group
-*/
-void QWorkspaceDockView::showSurfacePlot() { m_mantidUI->showSurfacePlot(); }
-
-void QWorkspaceDockView::onClickPlotContour() {
-  m_presenter->notifyFromView(ViewNotifiable::Flag::ShowContourPlot);
-}
-
-/**
-* Create a contour plot from the selected workspace group
-*/
-void QWorkspaceDockView::showContourPlot() { m_mantidUI->showContourPlot(); }
 
 /**
 * Allows asynchronous execution of algorithms. This method is made

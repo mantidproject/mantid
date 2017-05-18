@@ -2,16 +2,14 @@ from __future__ import (absolute_import, division, print_function)
 
 from isis_powder.abstract_inst import AbstractInst
 from isis_powder.gem_routines import gem_advanced_config, gem_algs, gem_param_mapping
-from isis_powder.routines import common, InstrumentSettings, yaml_parser
+from isis_powder.routines import common, instrument_settings
 
 
 class Gem(AbstractInst):
     def __init__(self, **kwargs):
-        basic_config_dict = yaml_parser.open_yaml_file_as_dictionary(kwargs.get("config_file", None))
-
-        self._inst_settings = InstrumentSettings.InstrumentSettings(
+        self._inst_settings = instrument_settings.InstrumentSettings(
             param_map=gem_param_mapping.attr_mapping, adv_conf_dict=gem_advanced_config.get_all_adv_variables(),
-            kwargs=kwargs, basic_conf_dict=basic_config_dict)
+            kwargs=kwargs)
 
         super(Gem, self).__init__(user_name=self._inst_settings.user_name,
                                   calibration_dir=self._inst_settings.calibration_dir,
@@ -27,16 +25,13 @@ class Gem(AbstractInst):
 
     def create_vanadium(self, **kwargs):
         self._inst_settings.update_attributes(kwargs=kwargs)
-        # First get a run_details object to find out the vanadium number
-        run_details = self._get_run_details(run_number_string=self._inst_settings.run_in_range)
-        # Set the run and vanadium run equal
-        run_details.run_number = run_details.vanadium_run_numbers
 
-        return self._create_vanadium(run_details=run_details,
+        return self._create_vanadium(run_number_string=self._inst_settings.run_in_range,
                                      do_absorb_corrections=self._inst_settings.do_absorb_corrections)
 
     def _get_run_details(self, run_number_string):
-        return gem_algs.get_run_details(run_number_string=run_number_string, inst_settings=self._inst_settings)
+        return gem_algs.get_run_details(run_number_string=run_number_string, inst_settings=self._inst_settings,
+                                        is_vanadium_run=self._is_vanadium)
 
     def _generate_auto_vanadium_calibration(self, run_details):
         raise NotImplementedError()
@@ -62,11 +57,8 @@ class Gem(AbstractInst):
     def _crop_van_to_expected_tof_range(self, van_ws_to_crop):
         return common.crop_banks_using_crop_list(van_ws_to_crop, self._inst_settings.vanadium_cropping_values)
 
-    def _get_sample_empty(self):
-        sample_empty = self._inst_settings.sample_empty
-        if sample_empty:
-            raise NotImplementedError("Subtracting s-empty is not implemented yet.")
-        return sample_empty
+    def _get_input_batching_mode(self):
+        return self._inst_settings.input_batching
 
     def _get_unit_to_keep(self):
         return self._inst_settings.unit_to_keep

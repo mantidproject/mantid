@@ -1,4 +1,5 @@
 from __future__ import (absolute_import, division, print_function)
+from six import iterkeys
 
 import mantid.kernel as kernel
 import mantid.simpleapi as mantid
@@ -7,11 +8,12 @@ from isis_powder.routines.common_enums import INPUT_BATCHING, WORKSPACE_UNITS
 
 def cal_map_dictionary_key_helper(dictionary, key, append_to_error_message=None):
     """
-    Provides a light wrapper around the dictionary key helper which provides a generic error
-    message stating the following key could not be found in the calibration mapping file. As
-    several instruments will use this message it makes sense to localise it to common. If a
-    message is passed in append_to_error_message it will append that to the end of the generic
-    error message in its own line when an exception is raised.
+    Provides a light wrapper around the dictionary key helper and uses case insensitive lookup.
+    This also provides a generic error message stating the following key could not be found
+    in the calibration mapping file. As several instruments will use this message it makes
+    sense to localise it to common. If a message is passed in append_to_error_message it
+    will append that to the end of the generic error message in its own line when an
+    exception is raised.
     :param dictionary: The dictionary to search in for the key
     :param key: The key to search for
     :param append_to_error_message: (Optional) The message to append to the end of the error message
@@ -19,7 +21,9 @@ def cal_map_dictionary_key_helper(dictionary, key, append_to_error_message=None)
     """
     err_message = "The field '" + str(key) + "' is required within the calibration file but was not found."
     err_message += '\n' + str(append_to_error_message) if append_to_error_message else ''
-    return dictionary_key_helper(dictionary=dictionary, key=key, throws=True, exception_msg=err_message)
+
+    return dictionary_key_helper(dictionary=dictionary, key=key, throws=True,
+                                 case_insensitive=True, exception_msg=err_message)
 
 
 def crop_banks_using_crop_list(bank_list, crop_values_list):
@@ -67,7 +71,7 @@ def crop_in_tof(ws_to_crop, x_min=None, x_max=None):
     return cropped_ws
 
 
-def dictionary_key_helper(dictionary, key, throws=True, exception_msg=None):
+def dictionary_key_helper(dictionary, key, throws=True, case_insensitive=False, exception_msg=None):
     """
     Checks if the key is in the dictionary and performs various different actions if it is not depending on
     the user parameters. If set to not throw it will return none. Otherwise it will throw a custom user message
@@ -75,12 +79,25 @@ def dictionary_key_helper(dictionary, key, throws=True, exception_msg=None):
     :param dictionary: The dictionary to search for the key
     :param key: The key to search for in the dictionary
     :param throws: (Optional) Defaults to true, whether this should throw on a key not being present
+    :param case_insensitive (Optional) Defaults to false, if set to true it accounts for mixed case but is O(n) time
     :param exception_msg: (Optional) The error message to print in the KeyError instead of the default Python message
     :return: The key if it was found, None if throws was set to false and the key was not found.
     """
     if key in dictionary:
+        # Try to use hashing first
         return dictionary[key]
-    elif not throws:
+
+    # If we still couldn't find it use the O(n) method
+    if case_insensitive:
+        # Convert key to str
+        lower_key = str(key).lower()
+        for dict_key in iterkeys(dictionary):
+            if str(dict_key).lower() == lower_key:
+                # Found it
+                return dictionary[dict_key]
+
+    # It doesn't exist at this point lets go into our error handling
+    if not throws:
         return None
     elif exception_msg:
         # Print user specified message
@@ -143,8 +160,12 @@ def generate_splined_name(vanadium_string, *args):
     :return: The splined vanadium name
     """
     out_name = "VanSplined" + '_' + str(vanadium_string)
-    for value in args:
-        out_name += '_' + str(value)
+    for passed_arg in args:
+        if isinstance(passed_arg, list):
+            for arg in passed_arg:
+                out_name += '_' + str(arg)
+        else:
+            out_name += '_' + (str(passed_arg))
 
     out_name += ".nxs"
     return out_name
@@ -236,6 +257,64 @@ def load_current_normalised_ws_list(run_number_string, instrument, input_batchin
     return normalised_ws_list
 
 
+def rebin_workspace(workspace, new_bin_width, start_x=None, end_x=None):
+    """
+    Rebins the specified workspace with the specified new bin width. Allows the user
+    to also set optionally the first and final bin boundaries of the histogram too.
+    If the bin boundaries are not set they are preserved from the original workspace
+    :param workspace: The workspace to rebin
+    :param new_bin_width: The new bin width to use across the workspace
+    :param start_x: (Optional) The first x bin to crop to
+    :param end_x: (Optional) The final x bin to crop to
+    :return: The rebinned workspace
+    """
+
+    # Find the starting and ending bin boundaries if they were not set
+    if start_x is None:
+        start_x = workspace.readX(0)[0]
+    if end_x is None:
+        end_x = workspace.readX(0)[-1]
+
+    rebin_string = str(start_x) + ',' + str(new_bin_width) + ',' + str(end_x)
+    workspace = mantid.Rebin(InputWorkspace=workspace, OutputWorkspace=workspace, Params=rebin_string)
+    return workspace
+
+
+def rebin_workspace_list(workspace_list, bin_width_list, start_x_list=None, end_x_list=None):
+    """
+    Rebins a list of workspaces with the specified bin widths in the list provided.
+    The number of bin widths and workspaces in the list must match. Additionally if
+    the optional parameters for start_x_list or end_x_list are provided these must
+    have the same length too.
+    :param workspace_list: The list of workspaces to rebin in place
+    :param bin_width_list: The list of new bin widths to apply to each workspace
+    :param start_x_list: The list of starting x boundaries to rebin to
+    :param end_x_list: The list of ending x boundaries to rebin to
+    :return: List of rebinned workspace
+    """
+    if not isinstance(workspace_list, list) or not isinstance(bin_width_list, list):
+        raise RuntimeError("One of the types passed to rebin_workspace_list was not a list")
+
+    ws_list_len = len(workspace_list)
+    if ws_list_len != len(bin_width_list):
+        raise ValueError("The number of bin widths found to rebin to does not match the number of banks")
+    if start_x_list and len(start_x_list) != ws_list_len:
+        raise ValueError("The number of starting bin values does not match the number of banks")
+    if end_x_list and len(end_x_list) != ws_list_len:
+        raise ValueError("The number of ending bin values does not match the number of banks")
+
+    # Create a list of None types of equal length to make using zip iterator easy
+    start_x_list = [None] * ws_list_len if start_x_list is None else start_x_list
+    end_x_list = [None] * ws_list_len if end_x_list is None else end_x_list
+
+    output_list = []
+    for ws, bin_width, start_x, end_x in zip(workspace_list, bin_width_list, start_x_list, end_x_list):
+        output_list.append(rebin_workspace(workspace=ws, new_bin_width=bin_width,
+                                           start_x=start_x, end_x=end_x))
+
+    return output_list
+
+
 def remove_intermediate_workspace(workspaces):
     """
     Removes the specified workspace(s) from the ADS. Can accept lists of workspaces. It
@@ -298,7 +377,7 @@ def spline_workspaces(focused_vanadium_spectra, num_splines):
     return splined_ws_list
 
 
-def subtract_sample_empty(ws_to_correct, empty_sample_ws_string, instrument):
+def subtract_summed_runs(ws_to_correct, empty_sample_ws_string, instrument, scale_factor=None):
     """
     Loads the list of empty runs specified by the empty_sample_ws_string and subtracts
     them from the workspace specified. Returns the subtracted workspace.
@@ -307,11 +386,18 @@ def subtract_sample_empty(ws_to_correct, empty_sample_ws_string, instrument):
     :param instrument: The instrument object these runs belong to
     :return: The workspace with the empty runs subtracted
     """
-    if empty_sample_ws_string:
-        empty_sample = load_current_normalised_ws_list(run_number_string=empty_sample_ws_string, instrument=instrument,
-                                                       input_batching=INPUT_BATCHING.Summed)
-        mantid.Minus(LHSWorkspace=ws_to_correct, RHSWorkspace=empty_sample[0], OutputWorkspace=ws_to_correct)
-        remove_intermediate_workspace(empty_sample)
+    # If an empty string was not specified just return to skip this step
+    if empty_sample_ws_string is None:
+        return ws_to_correct
+
+    empty_sample = load_current_normalised_ws_list(run_number_string=empty_sample_ws_string, instrument=instrument,
+                                                   input_batching=INPUT_BATCHING.Summed)
+    empty_sample = empty_sample[0]
+    if scale_factor:
+        empty_sample = mantid.Scale(InputWorkspace=empty_sample, OutputWorkspace=empty_sample, Factor=scale_factor,
+                                    Operation="Multiply")
+    mantid.Minus(LHSWorkspace=ws_to_correct, RHSWorkspace=empty_sample, OutputWorkspace=ws_to_correct)
+    remove_intermediate_workspace(empty_sample)
 
     return ws_to_correct
 

@@ -2,17 +2,16 @@ from __future__ import (absolute_import, division, print_function)
 
 import os
 
-from isis_powder.routines import common, InstrumentSettings, yaml_parser
+from isis_powder.routines import common, instrument_settings
 from isis_powder.abstract_inst import AbstractInst
 from isis_powder.polaris_routines import polaris_advanced_config, polaris_algs, polaris_param_mapping
 
 
 class Polaris(AbstractInst):
     def __init__(self, **kwargs):
-        basic_config_dict = yaml_parser.open_yaml_file_as_dictionary(kwargs.get("config_file", None))
-        self._inst_settings = InstrumentSettings.InstrumentSettings(
+        self._inst_settings = instrument_settings.InstrumentSettings(
             param_map=polaris_param_mapping.attr_mapping, adv_conf_dict=polaris_advanced_config.variables,
-            basic_conf_dict=basic_config_dict, kwargs=kwargs)
+            kwargs=kwargs)
 
         super(Polaris, self).__init__(user_name=self._inst_settings.user_name,
                                       calibration_dir=self._inst_settings.calibration_dir,
@@ -31,10 +30,7 @@ class Polaris(AbstractInst):
 
     def create_vanadium(self, **kwargs):
         self._inst_settings.update_attributes(kwargs=kwargs)
-        run_details = self._get_run_details(run_number_string=int(self._inst_settings.run_in_range))
-        run_details.run_number = run_details.vanadium_run_numbers
-
-        return self._create_vanadium(run_details=run_details,
+        return self._create_vanadium(run_number_string=self._inst_settings.run_in_range,
                                      do_absorb_corrections=self._inst_settings.do_absorb_corrections)
 
     # Overrides
@@ -92,12 +88,15 @@ class Polaris(AbstractInst):
     def _get_input_batching_mode(self):
         return self._inst_settings.input_mode
 
+    def _get_instrument_bin_widths(self):
+        return self._inst_settings.focused_bin_widths
+
     def _get_run_details(self, run_number_string):
         if self._run_details_last_run_number == run_number_string:
             return self._run_details_cached_obj
 
         run_details = polaris_algs.get_run_details(run_number_string=run_number_string,
-                                                   inst_settings=self._inst_settings)
+                                                   inst_settings=self._inst_settings, is_vanadium_run=self._is_vanadium)
 
         # Hold obj in case same run range is requested
         self._run_details_last_run_number = run_number_string

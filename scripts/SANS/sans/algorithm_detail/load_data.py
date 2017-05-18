@@ -154,8 +154,8 @@ def is_data_transmission_and_event_mode(file_infos):
     """
     Checks if a file is used as a transmission workspace and contains event-mode data. This is not allowed.
 
-    @param file_infos: a dict of DataType vs FileInformation objects
-    @return: True if the file setting is bad else False
+    :param file_infos: a dict of DataType vs FileInformation objects
+    :return: True if the file setting is bad else False
     """
     is_bad_file_setting = False
     for key, value in list(file_infos.items()):
@@ -235,9 +235,9 @@ def is_calibration_correct(workspace, calibration_file):
     Check if the calibration has been applied. If no calibration has been specified then none should be have
     been applied.
 
-    @param workspace: the workspace to check.
-    @param calibration_file: the path to the calibration file.
-    @return: True if the calibration file matches or if none was set and the path is empty, else False
+    :param workspace: the workspace to check.
+    :param calibration_file: the path to the calibration file.
+    :return: True if the calibration file matches or if none was set and the path is empty, else False
     """
     has_calibration = has_tag(CALIBRATION_WORKSPACE_TAG, workspace)
     return (has_calibration and calibration_file == get_tag(CALIBRATION_WORKSPACE_TAG, workspace)) or\
@@ -355,7 +355,7 @@ def run_added_loader(loader, file_information, is_transmission, period, parent_a
     :param is_transmission: if  the set is a transmission
     :param period: the selected period
     :param parent_alg: a handle to the parent algorithm
-    @return: workspaces and monitors
+    :return: workspaces and monitors
     """
     def extract_histogram_data(load_alg, num_periods, selected_period):
         ws_collection = []
@@ -685,7 +685,6 @@ def load_isis(data_type, file_information, period, use_cached, calibration_file_
 # ----------------------------------------------------------------------------------------------------------------------
 class SANSLoadData(with_metaclass(ABCMeta, object)):
     """ Base class for all SANSLoad implementations."""
-
     @abstractmethod
     def do_execute(self, data_info, use_cached, publish_to_ads, progress, parent_alg):
         pass

@@ -877,9 +877,9 @@ void InstrumentDefinitionParser::setValidityRange(
 
 PointingAlong axisNameToAxisType(std::string &input) {
   PointingAlong direction;
-  if (input.compare("x") == 0) {
+  if (input == "x") {
     direction = X;
-  } else if (input.compare("y") == 0) {
+  } else if (input == "y") {
     direction = Y;
   } else {
     direction = Z;
@@ -982,7 +982,7 @@ void InstrumentDefinitionParser::readDefaults(Poco::XML::Element *defaults) {
     // Convert to input types
     PointingAlong alongBeam = axisNameToAxisType(s_alongBeam);
     PointingAlong pointingUp = axisNameToAxisType(s_pointingUp);
-    Handedness handedness = s_handedness.compare("right") == 0 ? Right : Left;
+    Handedness handedness = s_handedness == "right" ? Right : Left;
 
     // Overwrite the default reference frame.
     m_instrument->setReferenceFrame(boost::make_shared<ReferenceFrame>(
@@ -1095,11 +1095,10 @@ void InstrumentDefinitionParser::appendAssembly(
     category = pType->getAttribute("is");
 
   // check if special Component
-  if (category.compare("SamplePos") == 0 ||
-      category.compare("samplePos") == 0) {
+  if (category == "SamplePos" || category == "samplePos") {
     m_instrument->markAsSamplePos(ass);
   }
-  if (category.compare("Source") == 0 || category.compare("source") == 0) {
+  if (category == "Source" || category == "source") {
     m_instrument->markAsSource(ass);
   }
 
@@ -1117,7 +1116,7 @@ void InstrumentDefinitionParser::appendAssembly(
 
   Node *pNode = it.nextNode();
   while (pNode) {
-    if (pNode->nodeName().compare("location") == 0) {
+    if (pNode->nodeName() == "location") {
       // pLocElem is the location of a type. This type is here an assembly and
       // pElem below is a <location> within this type
       const Element *pElem = static_cast<Element *>(pNode);
@@ -1144,7 +1143,7 @@ void InstrumentDefinitionParser::appendAssembly(
         }
       }
     }
-    if (pNode->nodeName().compare("locations") == 0) {
+    if (pNode->nodeName() == "locations") {
       const Element *pLocationsElems = static_cast<Element *>(pNode);
       const Element *pParentLocationsElem =
           InstrumentDefinitionParser::getParentComponent(pLocationsElems);
@@ -1250,14 +1249,14 @@ void InstrumentDefinitionParser::createDetectorOrMonitor(
   }
 
   try {
-    if (category.compare("Monitor") == 0 || category.compare("monitor") == 0)
+    if (category == "Monitor" || category == "monitor")
       m_instrument->markAsMonitor(detector);
     else {
       // for backwards compatebility look for mark-as="monitor"
       if ((pCompElem->hasAttribute("mark-as") &&
-           pCompElem->getAttribute("mark-as").compare("monitor") == 0) ||
+           pCompElem->getAttribute("mark-as") == "monitor") ||
           (pLocElem->hasAttribute("mark-as") &&
-           pLocElem->getAttribute("mark-as").compare("monitor") == 0)) {
+           pLocElem->getAttribute("mark-as") == "monitor")) {
         m_instrument->markAsMonitor(detector);
       } else
         m_instrument->markAsDetectorIncomplete(detector);
@@ -1449,10 +1448,10 @@ void InstrumentDefinitionParser::createStructuredDetector(
 
   while (pNode) {
     Element *check = static_cast<Element *>(pNode);
-    if (pNode->nodeName().compare("type") == 0 && check->hasAttribute("is")) {
+    if (pNode->nodeName() == "type" && check->hasAttribute("is")) {
       std::string is = check->getAttribute("is");
       if (StructuredDetector::compareName(is) &&
-          typeName.compare(check->getAttribute("name")) == 0) {
+          typeName == check->getAttribute("name")) {
         pElem = check;
         break;
       }
@@ -1476,7 +1475,7 @@ void InstrumentDefinitionParser::createStructuredDetector(
   pNode = it.nextNode();
 
   while (pNode) {
-    if (pNode->nodeName().compare("vertex") == 0) {
+    if (pNode->nodeName() == "vertex") {
       Element *pVertElem = static_cast<Element *>(pNode);
 
       if (pVertElem->hasAttribute("x"))
@@ -1604,15 +1603,13 @@ void InstrumentDefinitionParser::appendLeaf(Geometry::ICompAssembly *parent,
     parent->add(comp);
 
     // check if special Source or SamplePos Component
-    if (category.compare("Source") == 0 || category.compare("source") == 0) {
+    if (category == "Source" || category == "source") {
       m_instrument->markAsSource(comp);
     }
-    if (category.compare("SamplePos") == 0 ||
-        category.compare("samplePos") == 0) {
+    if (category == "SamplePos" || category == "samplePos") {
       m_instrument->markAsSamplePos(comp);
     }
-    if (category.compare("ChopperPos") == 0 ||
-        category.compare("chopperPos") == 0) {
+    if (category == "ChopperPos" || category == "chopperPos") {
       m_instrument->markAsChopperPoint(comp);
     }
 
@@ -1714,7 +1711,7 @@ void InstrumentDefinitionParser::populateIdList(Poco::XML::Element *pE,
 
     Node *pNode = it.nextNode();
     while (pNode) {
-      if (pNode->nodeName().compare("id") == 0) {
+      if (pNode->nodeName() == "id") {
         Element *pIDElem = static_cast<Element *>(pNode);
 
         if (pIDElem->hasAttribute("val")) {
@@ -1985,7 +1982,7 @@ void InstrumentDefinitionParser::setLogfile(
     // we are only interest in the top level parameter elements hence
     // the reason for the if statement below
     if (!((pNL_comp->item(i))->nodeType() == Node::ELEMENT_NODE &&
-          ((pNL_comp->item(i))->nodeName()).compare("parameter") == 0))
+          ((pNL_comp->item(i))->nodeName()) == "parameter"))
       continue;
 
     Element *pParamElem = static_cast<Element *>(pNL_comp->item(i));
@@ -1999,7 +1996,7 @@ void InstrumentDefinitionParser::setLogfile(
 
     std::string paramName = pParamElem->getAttribute("name");
 
-    if (paramName.compare("rot") == 0 || paramName.compare("pos") == 0) {
+    if (paramName == "rot" || paramName == "pos") {
       g_log.error()
           << "XML element with name or type = " << comp->getName()
           << " contains <parameter> element with name=\"" << paramName << "\"."
@@ -2101,7 +2098,7 @@ void InstrumentDefinitionParser::setLogfile(
     std::string fittingFunction;
     std::string tie;
 
-    if (type.compare("fitting") == 0) {
+    if (type == "fitting") {
       size_t found = paramName.find(':');
       if (found != std::string::npos) {
         // check that only one : in name

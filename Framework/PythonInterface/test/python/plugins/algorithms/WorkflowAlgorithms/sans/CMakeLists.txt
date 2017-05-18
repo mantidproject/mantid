@@ -3,6 +3,13 @@
 ######################
 
 set ( TEST_PY_FILES
+SANSCalculateTransmissionTest.py
+SANSConvertToQTest.py
+SANSConvertToWavelengthTest.py
+SANSCreateAdjustmentWorkspacesTest.py
+SANSCreateWavelengthAndPixelAdjustmentTest.py
+SANSNormalizeToMonitorTest.py
+SANSScaleTest.py
 SANSSliceEventTest.py
 )
 

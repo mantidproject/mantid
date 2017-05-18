@@ -207,7 +207,7 @@ bool CatalogPublish::isDataFile(const std::string &filePath) {
   std::string extension = Poco::Path(filePath).getExtension();
   std::transform(extension.begin(), extension.end(), extension.begin(),
                  tolower);
-  return extension.compare("raw") == 0 || extension.compare("nxs") == 0;
+  return extension == "raw" || extension == "nxs";
 }
 
 /**

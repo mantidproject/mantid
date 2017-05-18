@@ -179,6 +179,12 @@ class DGSPlannerGUI(QtGui.QWidget):
                 mantid.simpleapi.AddSampleLog(Workspace="__temp_instrument",LogName='s2',
                                               LogText=str(self.masterDict['S2']),LogType='Number Series')
                 mantid.simpleapi.LoadInstrument(Workspace="__temp_instrument", RewriteSpectraMap=True, InstrumentName="HYSPEC")
+            if self.masterDict['instrument']=='EXED':
+                mantid.simpleapi.RotateInstrumentComponent(Workspace="__temp_instrument",
+                                                           ComponentName='Tank',
+                                                           Y=1,
+                                                           Angle=str(self.masterDict['S2']),
+                                                           RelativeRotation=False)
             #masking
             if 'maskFilename' in self.masterDict and len(self.masterDict['maskFilename'].strip())>0:
                 try:
@@ -192,7 +198,7 @@ class DGSPlannerGUI(QtGui.QWidget):
                         return
             if self.masterDict['makeFast']:
                 sp=list(range(mantid.mtd["__temp_instrument"].getNumberHistograms()))
-                tomask=sp[::4]+sp[1::4]+sp[2::4]
+                tomask=sp[1::4]+sp[2::4]+sp[3::4]
                 mantid.simpleapi.MaskDetectors("__temp_instrument",SpectraList=tomask)
             i=0
             groupingStrings=[]
