@@ -1032,8 +1032,9 @@ void PropertyHandler::addTie(const QString &tieStr) {
   try {
     auto &cfun = *m_browser->compositeFunction();
     cfun.tie(name, expr);
+    const bool recursive = true;
     QString parName = QString::fromStdString(
-        cfun.parameterLocalName(cfun.parameterIndex(name)));
+        cfun.parameterLocalName(cfun.parameterIndex(name), recursive));
     foreach (QtProperty *parProp, m_parameters) {
       if (parProp->propertyName() == parName) {
         m_browser->m_changeSlotsEnabled = false;
@@ -1051,6 +1052,8 @@ void PropertyHandler::addTie(const QString &tieStr) {
     }
   } catch (...) {
   }
+  QMessageBox::critical(m_browser, "Mantid - Error",
+                        "Failed to set tie: " + tieStr);
 }
 
 void PropertyHandler::fix(const QString &parName) {

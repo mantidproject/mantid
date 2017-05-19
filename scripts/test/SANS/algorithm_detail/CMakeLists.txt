@@ -3,8 +3,9 @@
 ##
 
 set ( TEST_PY_FILES
-  scale_helper_test.py
+  calculate_transmission_helper_test.py
   q_resolution_calculator_test.py
+  scale_helper_test.py
 )
 
 check_tests_valid ( ${CMAKE_CURRENT_SOURCE_DIR} ${TEST_PY_FILES} )
