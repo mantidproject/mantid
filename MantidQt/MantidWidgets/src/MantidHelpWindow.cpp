@@ -1,3 +1,4 @@
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidQtMantidWidgets/MantidHelpWindow.h"
 #include "MantidQtMantidWidgets/pqHelpWindow.h"
 #include "MantidQtAPI/InterfaceManager.h"
@@ -5,7 +6,6 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/RegistrationHelper.h"
-#include "MantidAPI/AlgorithmManager.h"
 #include <boost/make_shared.hpp>
 #include <boost/lexical_cast.hpp>
 #include <Poco/File.h>
@@ -193,7 +193,6 @@ void MantidHelpWindow::showAlgorithm(const string &name, const int version) {
     auto alg = Mantid::API::AlgorithmManager::Instance().createUnmanaged(name);
     help_url = QString::fromStdString(alg->helpURL());
   }
-
   if (bool(g_helpWindow)) {
     if (help_url.isEmpty()) {
       QString url(BASE_URL);
