@@ -24,6 +24,7 @@ Powder Diffraction
 
 
 - New instrument definition files are added for D1B, D4, and D20 powder/liquid diffractometers at ILL.
+- New loader :ref:`LoadILLDiffraction <algm-LoadILLDiffraction>` has been added to load the data-scan nexus files from ILL diffractometers.
 - :ref:`AlignAndFocusPowder <algm-AlignAndFocusPowder>` Now supports supplying an a second ``.cal`` file for the ``GroupingFilename``.
 - New algorithm :ref:`AlignAndFocusPowderFromFiles <algm-AlignAndFocusPowderFromFiles>` is a wrapper around :ref:`AlignAndFocusPowder <algm-AlignAndFocusPowder>` which supports caching results
 - Bugfix in :ref:`SNAPReduce <algm-SNAPReduce>` with loading previous normalizations
