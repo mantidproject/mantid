@@ -31,6 +31,7 @@ public:
   }
 
   void test_no_scan() {
+    // Tests the no-scan case for D20
 
     LoadILLDiffraction alg;
     // Don't put output in ADS by default
@@ -50,11 +51,16 @@ public:
   }
 
   void test_scan() {
+    // Tests the scanned case for D20
+
     LoadILLDiffraction alg;
     // Don't put output in ADS by default
     alg.setChild(true);
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT(alg.isInitialized());
+    // Note that, this is the older type of file, and is modified manually
+    // to match the final configuration having the custom NX_class attribute
+    // So this will not run with generic Load
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", "000017.nxs"));
     TS_ASSERT_THROWS_NOTHING(
         alg.setPropertyValue("OutputWorkspace", "_unused_for_child"));
