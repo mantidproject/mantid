@@ -51,6 +51,10 @@ public:
                void(const std::vector<std::string> &, const std::string &));
   MOCK_METHOD2(setOptionsHintStrategy,
                void(MantidQt::MantidWidgets::HintStrategy *, int));
+  MOCK_METHOD2(setToolbarActionEnabled, void(int, bool));
+  MOCK_METHOD2(setContextMenuActionEnabled, void(int, bool));
+  MOCK_METHOD1(setProcessButtonEnabled, void(bool));
+  MOCK_METHOD0(setSelectionModelConnections, void());
 
   // Settings
   MOCK_METHOD1(loadSettings, void(std::map<std::string, QVariant> &));
@@ -87,6 +91,7 @@ public:
   MOCK_METHOD2(giveUserWarning, void(std::string, std::string));
   MOCK_METHOD2(giveUserCritical, void(std::string, std::string));
   MOCK_METHOD1(runPythonAlgorithm, std::string(const std::string &));
+  MOCK_METHOD2(setRowActionEnabled, void(int, bool));
   MOCK_CONST_METHOD0(getPreprocessingValues,
                      std::map<std::string, std::string>());
   MOCK_CONST_METHOD0(getPreprocessingProperties,
@@ -101,6 +106,10 @@ public:
   // Event handling
   MOCK_CONST_METHOD0(getTimeSlicingValues, std::string());
   MOCK_CONST_METHOD0(getTimeSlicingType, std::string());
+
+  // Data reduction paused/resumed handling
+  MOCK_CONST_METHOD0(confirmReductionPaused, void());
+  MOCK_CONST_METHOD0(confirmReductionResumed, void());
 };
 
 class MockDataProcessorPresenter : public DataProcessorPresenter {
@@ -114,6 +123,7 @@ public:
   MOCK_METHOD1(accept, void(DataProcessorMainPresenter *));
   MOCK_CONST_METHOD0(selectedParents, std::set<int>());
   MOCK_CONST_METHOD0(selectedChildren, std::map<int, std::set<int>>());
+  MOCK_CONST_METHOD0(newSelectionMade, bool());
   MOCK_CONST_METHOD2(askUserYesNo,
                      bool(const std::string &prompt, const std::string &title));
   MOCK_CONST_METHOD2(giveUserWarning,

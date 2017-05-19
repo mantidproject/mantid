@@ -62,6 +62,7 @@ public:
   MOCK_METHOD0(clearCommands, void());
   MOCK_METHOD2(setInstrumentList,
                void(const std::vector<std::string> &, const std::string &));
+  MOCK_METHOD2(setRowActionEnabled, void(int, bool));
 
   // Calls we don't care about
   void showSearch(ReflSearchModel_sptr) override{};
@@ -229,6 +230,7 @@ public:
   MOCK_CONST_METHOD1(getStitchOptions, std::string(int));
   MOCK_CONST_METHOD1(setInstrumentName, void(const std::string &instName));
   MOCK_CONST_METHOD0(getInstrumentName, std::string());
+  MOCK_CONST_METHOD0(checkIfProcessing, bool());
   MOCK_METHOD3(askUserString,
                std::string(const std::string &, const std::string &,
                            const std::string &));
@@ -239,6 +241,9 @@ public:
   MOCK_METHOD2(giveUserInfo, void(const std::string &, const std::string &));
   MOCK_METHOD1(runPythonAlgorithm, std::string(const std::string &));
   // Other calls we don't care about
+  void notify(IReflMainWindowPresenter::Flag flag) override {
+    UNUSED_ARG(flag);
+  }
   std::string getTimeSlicingValues(int group) const override {
     UNUSED_ARG(group);
     return std::string();
