@@ -43,7 +43,7 @@ public:
     ConfirmReductionPausedFlag,
     ConfirmReductionResumedFlag
   };
-  virtual void notify(IReflMainWindowPresenter::Flag flag) = 0;
+  virtual void notify(Flag flag) = 0;
 
   /// Pre-processing
   virtual std::string getTransmissionRuns(int group) const = 0;

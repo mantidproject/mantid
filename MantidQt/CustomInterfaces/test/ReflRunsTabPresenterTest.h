@@ -99,7 +99,7 @@ public:
     // Expect that the view is populated with the list of row commands
     EXPECT_CALL(mockRunsTabView, setRowCommandsProxy()).Times(Exactly(1));
     // The presenter is notified that something changed in the ADS
-    presenter.notify(DataProcessorMainPresenter::ADSChangedFlag);
+    presenter.notify(DataProcessorMainPresenter::Flag::ADSChangedFlag);
 
     // Verify expectations
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockRunsTabView));
@@ -371,6 +371,54 @@ public:
         giveUserInfo("Error Logging in: Please press 'Search' to try again.",
                      "Login Failed")).Times(1);
     presenter.notify(IReflRunsTabPresenter::SearchFlag);
+  }
+
+  void test_confirmReductionPaused() {
+    NiceMock<MockRunsTabView> mockRunsTabView;
+    MockProgressableView mockProgress;
+    NiceMock<MockDataProcessorPresenter> mockTablePresenter;
+    MockMainWindowPresenter mockMainPresenter;
+    std::vector<DataProcessorPresenter *> tablePresenterVec;
+    tablePresenterVec.push_back(&mockTablePresenter);
+    ReflRunsTabPresenter presenter(&mockRunsTabView, &mockProgress,
+                                   tablePresenterVec);
+    presenter.acceptMainPresenter(&mockMainPresenter);
+
+    // Expect that the main presenter is notified that data reduction is paused
+    EXPECT_CALL(
+        mockMainPresenter,
+        notify(IReflMainWindowPresenter::Flag::ConfirmReductionPausedFlag))
+        .Times(Exactly(1));
+    // The presenter is notified that data reduction is paused
+    presenter.notify(
+        DataProcessorMainPresenter::Flag::ConfirmReductionPausedFlag);
+
+    // Verify expectations
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockRunsTabView));
+  }
+
+  void test_confirmReductionResumed() {
+    NiceMock<MockRunsTabView> mockRunsTabView;
+    MockProgressableView mockProgress;
+    NiceMock<MockDataProcessorPresenter> mockTablePresenter;
+    MockMainWindowPresenter mockMainPresenter;
+    std::vector<DataProcessorPresenter *> tablePresenterVec;
+    tablePresenterVec.push_back(&mockTablePresenter);
+    ReflRunsTabPresenter presenter(&mockRunsTabView, &mockProgress,
+                                   tablePresenterVec);
+    presenter.acceptMainPresenter(&mockMainPresenter);
+
+    // Expect that the main presenter is notified that data reduction is resumed
+    EXPECT_CALL(
+        mockMainPresenter,
+        notify(IReflMainWindowPresenter::Flag::ConfirmReductionResumedFlag))
+        .Times(Exactly(1));
+    // The presenter is notified that data reduction is resumed
+    presenter.notify(
+        DataProcessorMainPresenter::Flag::ConfirmReductionResumedFlag);
+
+    // Verify expectations
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockRunsTabView));
   }
 };
 
