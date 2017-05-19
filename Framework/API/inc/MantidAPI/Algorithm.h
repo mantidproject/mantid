@@ -201,8 +201,8 @@ public:
   const std::string alias() const override { return ""; }
 
   /// function to return URL for algorithm documentation; A default
-  /// implementation
-  /// is provided. Override if algorithm not part of the Mantid distribution.
+  /// implementation is provided.
+  /// Override if the algorithm is not part of the Mantid distribution.
   const std::string helpURL() const override { return ""; }
 
   const std::string workspaceMethodName() const override;

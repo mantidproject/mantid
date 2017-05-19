@@ -80,8 +80,8 @@ public:
   /// function to return any aliases of the algorithm.
   virtual const std::string alias() const = 0;
 
-  /// function to return optional URL for algorithm documentation.
-  /// Override if algorithm not part of the Mantid distribution
+  /// function to return an optional URL for documentation.
+  /// Override if the algorithm is not part of the Mantid distribution
   virtual const std::string helpURL() const = 0;
 
   /** @name Algorithms As Methods */
