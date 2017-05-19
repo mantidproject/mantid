@@ -23,7 +23,7 @@ Relevant SANSState entries for SANSCreateAdjustmentWorkspaces
 
 The required information for the creation of the wavelength-adjustment workspace, the pixel-adjustment workspace
 and the wavelength-and-pixel-adjustment workspace is  retrieved from a state object. Note that this state
-is a composite of states which are consumed in the child algorithms/
+is a composite of states which are consumed in the child algorithms.
 
 The elements are:
 

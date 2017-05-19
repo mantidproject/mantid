@@ -106,6 +106,13 @@ def get_detector_id_for_spectrum_number(workspace, spectrum_number):
 
 
 def get_idf_path_from_workspace(workspace):
+    """
+    Gets the full IDF path from a workspace.
+
+    It queries the workspace for the start time and instrument name. It gets the IDF path from the ExperimentInfo.
+    :param workspace: the workspace for which we want the full IDF path.
+    :return: the full IDF path for the instrument of the workspace.
+    """
     run = workspace.run()
     instrument = workspace.getInstrument()
     instrument_name = instrument.getName()
@@ -126,13 +133,15 @@ def get_masked_det_ids_from_mask_file(mask_file_path, idf_path):
     Given a mask file and the (necessary) path to the corresponding IDF, will
     load in the file and return a list of detector IDs that are masked.
 
-    Is this the best way of doing this? Why not parse the file directly and extract the detector IDs.
-    TODO check if directing parsing is much more performant.
-    @param mask_file_path :: the path of the mask file to read in
-    @param idf_path :: the path to the corresponding IDF. Necessary so that we
+    TODO: Investigate if there is a better way of finding the detector ids from a mask file. This is a minor performance
+          bottleneck and does not seem quite right
+         * Check if parsing the file provides a better performance
+
+    :param mask_file_path: the path of the mask file to read in
+    :param idf_path: the path to the corresponding IDF. Necessary so that we
                        know exactly which instrument to use, and therefore know
                        the correct detector IDs.
-    @returns the list of detector IDs that were masked in the file
+    :return the list of detector IDs that were masked in the file
     """
     mask_name = "LoadMask"
     mask_options = {"Instrument": idf_path,
@@ -150,7 +159,7 @@ def yield_masked_det_ids(masking_workspace):
     We use masking_ws.readY(ws_index)[0] == 1 instead.
 
     :param masking_workspace: a mask workspace
-    :return a list of detector ids
+    :return: a list of detector ids
     """
     for ws_index in range(masking_workspace.getNumberHistograms()):
         if masking_workspace.readY(ws_index)[0] == 1:
@@ -163,7 +172,7 @@ def get_masked_det_ids(workspace):
     detectors that have been masked.
 
     :param workspace : the workspace to extract the det IDs from
-    :returns a list of IDs for masked detectors
+    :return: a list of IDs for masked detectors
     """
     for ws_index in range(workspace.getNumberHistograms()):
         try:

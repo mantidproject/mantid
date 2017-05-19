@@ -122,7 +122,9 @@ class SANSCreateAdjustmentWorkspaces(DataProcessorAlgorithm):
         if wave_length_and_pixel_adjustment_workspace:
             self.setProperty("OutputWorkspaceWavelengthAndPixelAdjustment", wave_length_and_pixel_adjustment_workspace)
 
-        # TODO set diagnostic output workspaces
+        # TODO: Nice to have: Provide diagnostic output workspaces which could be output either directly to the
+        #                     ADS or let it percolate up via SANSCreateAdjustmentWorkspaces->SANSReductionCore->
+        #                     SANSSingleReduction and then add it to the ADS
 
     def _get_wavelength_and_pixel_adjustment_workspaces(self, state,
                                                         monitor_normalization_workspace,
@@ -173,8 +175,8 @@ class SANSCreateAdjustmentWorkspaces(DataProcessorAlgorithm):
 
         Note that this step is not mandatory. If no transmission and direct workspaces are provided, then we
         don't have to do anything here.
-        @param state: a SANSState object.
-        @return: a fitted transmission workspace and the unfitted data.
+        :param state: a SANSState object.
+        :return: a fitted transmission workspace and the unfitted data.
         """
         transmission_workspace = self.getProperty("TransmissionWorkspace").value
         direct_workspace = self.getProperty("DirectWorkspace").value

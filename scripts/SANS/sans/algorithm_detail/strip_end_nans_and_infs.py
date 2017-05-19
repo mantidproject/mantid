@@ -18,8 +18,8 @@ def strip_end_nans(workspace, parent_alg=None):
     data = workspace.readY(0)
     # Find the index at which the first legal value appears
 
-    start_index = next((index for index in range(0, len(data)) if is_valid_data(data[index])), None)
-    end_index = next((index for index in reversed(list(range(0, len(data)))) if is_valid_data(data[index])), None)
+    start_index = next((index for index in range(len(data)) if is_valid_data(data[index])), None)
+    end_index = next((index for index in range(len(data)-1, -1, -1) if is_valid_data(data[index])), None)
 
     # If an index was not found then we return the current workspace. This means that all entries are either INFs
     # or NANs.

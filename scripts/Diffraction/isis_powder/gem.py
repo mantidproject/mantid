@@ -2,16 +2,14 @@ from __future__ import (absolute_import, division, print_function)
 
 from isis_powder.abstract_inst import AbstractInst
 from isis_powder.gem_routines import gem_advanced_config, gem_algs, gem_param_mapping
-from isis_powder.routines import common, instrument_settings, yaml_parser
+from isis_powder.routines import common, instrument_settings
 
 
 class Gem(AbstractInst):
     def __init__(self, **kwargs):
-        basic_config_dict = yaml_parser.open_yaml_file_as_dictionary(kwargs.get("config_file", None))
-
         self._inst_settings = instrument_settings.InstrumentSettings(
             param_map=gem_param_mapping.attr_mapping, adv_conf_dict=gem_advanced_config.get_all_adv_variables(),
-            kwargs=kwargs, basic_conf_dict=basic_config_dict)
+            kwargs=kwargs)
 
         super(Gem, self).__init__(user_name=self._inst_settings.user_name,
                                   calibration_dir=self._inst_settings.calibration_dir,

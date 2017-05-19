@@ -921,6 +921,7 @@ class Abins(PythonAlgorithm):
         self._out_ws_name = self.getPropertyValue('OutputWorkspace')
         self._calc_partial = (len(self._atoms) > 0)
 
+
 try:
     AlgorithmFactory.subscribe(Abins)
 except ImportError:
