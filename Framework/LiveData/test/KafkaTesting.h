@@ -32,19 +32,19 @@ public:
   // adapter method. Users have to use EXPECT_CALL(subscribe_) instead
   MOCK_CONST_METHOD2(subscribe_, IKafkaStreamSubscriber_ptr(
                                      std::vector<std::string>,
-                                     Mantid::LiveData::subscribeAtOption));
+                                     Mantid::LiveData::SubscribeAtOption));
   IKafkaStreamSubscriber_uptr
   subscribe(std::vector<std::string> s,
-            Mantid::LiveData::subscribeAtOption option) const override {
+            Mantid::LiveData::SubscribeAtOption option) const override {
     return std::unique_ptr<Mantid::LiveData::IKafkaStreamSubscriber>(
         this->subscribe_(s, option));
   }
   MOCK_CONST_METHOD3(subscribe_, IKafkaStreamSubscriber_ptr(
                                      std::vector<std::string>, int64_t,
-                                     Mantid::LiveData::subscribeAtOption));
+                                     Mantid::LiveData::SubscribeAtOption));
   IKafkaStreamSubscriber_uptr
   subscribe(std::vector<std::string> s, int64_t offset,
-            Mantid::LiveData::subscribeAtOption option) const override {
+            Mantid::LiveData::SubscribeAtOption option) const override {
     return std::unique_ptr<Mantid::LiveData::IKafkaStreamSubscriber>(
         this->subscribe_(s, offset, option));
   }

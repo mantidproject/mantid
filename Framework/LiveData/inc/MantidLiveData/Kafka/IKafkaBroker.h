@@ -39,10 +39,10 @@ public:
 
   virtual std::unique_ptr<IKafkaStreamSubscriber>
   subscribe(std::vector<std::string> topics,
-            subscribeAtOption subscribeOption) const = 0;
+            SubscribeAtOption subscribeOption) const = 0;
   virtual std::unique_ptr<IKafkaStreamSubscriber>
   subscribe(std::vector<std::string> topics, int64_t offset,
-            subscribeAtOption subscribeOption) const = 0;
+            SubscribeAtOption subscribeOption) const = 0;
 };
 
 } // namespace LiveData

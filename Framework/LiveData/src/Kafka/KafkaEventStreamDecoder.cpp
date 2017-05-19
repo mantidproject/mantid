@@ -80,24 +80,24 @@ void KafkaEventStreamDecoder::startCapture(bool startNow) {
   if (!startNow) {
     // Get last two messages in run topic to ensure we get a runStart message
     m_runStream =
-        m_broker->subscribe({m_runInfoTopic}, subscribeAtOption::LASTTWO);
+        m_broker->subscribe({m_runInfoTopic}, SubscribeAtOption::LASTTWO);
     std::string rawMsgBuffer;
     auto runStartData = getRunStartMessage(rawMsgBuffer);
     auto startTimeMilliseconds =
         runStartData.startTime * 1000; // seconds to milliseconds
     m_eventStream = m_broker->subscribe(
         {m_eventTopic, m_runInfoTopic},
-        static_cast<int64_t>(startTimeMilliseconds), subscribeAtOption::TIME);
+        static_cast<int64_t>(startTimeMilliseconds), SubscribeAtOption::TIME);
   } else {
     m_eventStream = m_broker->subscribe({m_eventTopic, m_runInfoTopic},
-                                        subscribeAtOption::LATEST);
+                                        SubscribeAtOption::LATEST);
   }
 
   // Get last two messages in run topic to ensure we get a runStart message
   m_runStream =
-      m_broker->subscribe({m_runInfoTopic}, subscribeAtOption::LASTTWO);
+      m_broker->subscribe({m_runInfoTopic}, SubscribeAtOption::LASTTWO);
   m_spDetStream =
-      m_broker->subscribe({m_spDetTopic}, subscribeAtOption::LASTONE);
+      m_broker->subscribe({m_spDetTopic}, SubscribeAtOption::LASTONE);
 
   auto m_thread = std::thread([this]() { this->captureImpl(); });
   m_thread.detach();

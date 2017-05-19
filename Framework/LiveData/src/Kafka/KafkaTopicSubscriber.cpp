@@ -71,7 +71,7 @@ const std::string KafkaTopicSubscriber::DET_SPEC_TOPIC_SUFFIX = "_detSpecMap";
  */
 KafkaTopicSubscriber::KafkaTopicSubscriber(std::string broker,
                                            std::vector<std::string> topics,
-                                           subscribeAtOption subscribeOption)
+                                           SubscribeAtOption subscribeOption)
     : IKafkaStreamSubscriber(), m_consumer(), m_brokerAddr(broker),
       m_topicNames(topics), m_subscribeOption(subscribeOption) {}
 
@@ -93,7 +93,7 @@ KafkaTopicSubscriber::~KafkaTopicSubscriber() {
 /**
  * @return The names of the topics subscription
  */
-std::vector<std::string> KafkaTopicSubscriber::topic() const {
+std::vector<std::string> KafkaTopicSubscriber::topics() const {
   return m_topicNames;
 }
 
@@ -270,7 +270,7 @@ void KafkaTopicSubscriber::subscribeAtOffset(int64_t offset) {
   RdKafka::ErrorCode error = RdKafka::ERR_NO_ERROR;
   std::vector<RdKafka::TopicPartition *> topicPartitions;
 
-  if (m_subscribeOption == subscribeAtOption::TIME) {
+  if (m_subscribeOption == SubscribeAtOption::TIME) {
     subscribeAtTime(offset);
     return;
   }
@@ -285,19 +285,19 @@ void KafkaTopicSubscriber::subscribeAtOffset(int64_t offset) {
                                         &highOffset, -1);
 
     switch (m_subscribeOption) {
-    case subscribeAtOption::LATEST:
+    case SubscribeAtOption::LATEST:
       confOffset = highOffset;
       break;
-    case subscribeAtOption::LASTONE:
+    case SubscribeAtOption::LASTONE:
       confOffset = highOffset - 1;
       break;
-    case subscribeAtOption::LASTTWO:
+    case SubscribeAtOption::LASTTWO:
       confOffset = highOffset - 2;
       // unless there is only one message on the topic
       if (confOffset == -1)
         confOffset = 0;
       break;
-    case subscribeAtOption::OFFSET:
+    case SubscribeAtOption::OFFSET:
       confOffset = offset;
       break;
     default:

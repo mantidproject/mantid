@@ -9,7 +9,7 @@
 namespace Mantid {
 namespace LiveData {
 
-enum class subscribeAtOption {
+enum class SubscribeAtOption {
   OFFSET,  // Specify an offset to join at when calling subscribe(), topic must
            // have a single partition
   LATEST,  // Get only messages which the broker receives after the consumer

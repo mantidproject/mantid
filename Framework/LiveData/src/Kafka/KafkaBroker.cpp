@@ -20,7 +20,7 @@ KafkaBroker::KafkaBroker(std::string address)
  */
 std::unique_ptr<IKafkaStreamSubscriber>
 KafkaBroker::subscribe(std::vector<std::string> topics,
-                       subscribeAtOption subscribeOption) const {
+                       SubscribeAtOption subscribeOption) const {
   auto subscriber = Kernel::make_unique<KafkaTopicSubscriber>(m_address, topics,
                                                               subscribeOption);
   subscriber->subscribe();
@@ -29,7 +29,7 @@ KafkaBroker::subscribe(std::vector<std::string> topics,
 
 std::unique_ptr<IKafkaStreamSubscriber>
 KafkaBroker::subscribe(std::vector<std::string> topics, int64_t offset,
-                       subscribeAtOption subscribeOption) const {
+                       SubscribeAtOption subscribeOption) const {
   auto subscriber = Kernel::make_unique<KafkaTopicSubscriber>(m_address, topics,
                                                               subscribeOption);
   subscriber->subscribe(offset);

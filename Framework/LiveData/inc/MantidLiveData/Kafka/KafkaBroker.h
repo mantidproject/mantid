@@ -36,10 +36,10 @@ public:
 
   std::unique_ptr<IKafkaStreamSubscriber>
   subscribe(std::vector<std::string> topics,
-            subscribeAtOption subscribeOption) const override;
+            SubscribeAtOption subscribeOption) const override;
   std::unique_ptr<IKafkaStreamSubscriber>
   subscribe(std::vector<std::string> topics, int64_t offset,
-            subscribeAtOption subscribeOption) const override;
+            SubscribeAtOption subscribeOption) const override;
 
 private:
   std::string m_address;

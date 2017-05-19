@@ -42,10 +42,10 @@ namespace LiveData {
 class DLLExport KafkaTopicSubscriber final : public IKafkaStreamSubscriber {
 public:
   KafkaTopicSubscriber(std::string broker, std::vector<std::string> topics,
-                       subscribeAtOption subscribeOption);
+                       SubscribeAtOption subscribeOption);
   ~KafkaTopicSubscriber();
 
-  std::vector<std::string> topic() const;
+  std::vector<std::string> topics() const;
 
   virtual void subscribe() override;
   virtual void subscribe(int64_t offset) override;
@@ -64,7 +64,7 @@ private:
   std::unique_ptr<RdKafka::KafkaConsumer> m_consumer;
   std::string m_brokerAddr;
   std::vector<std::string> m_topicNames;
-  subscribeAtOption m_subscribeOption = subscribeAtOption::OFFSET;
+  SubscribeAtOption m_subscribeOption = SubscribeAtOption::OFFSET;
 
   void subscribeAtTime(int64_t time);
   void reportSuccessOrFailure(const RdKafka::ErrorCode &error,
