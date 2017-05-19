@@ -443,14 +443,9 @@ void ReflectometryReductionOne2::exec() {
   if (xUnitID == "Wavelength") {
     // Already converted converted to wavelength
     m_convertUnits = false;
-    // Assume it's also already been normalised by monitors
+    // Assume it's also already been normalised by monitors and summed
     m_normaliseMonitors = false;
-    // Assume summation is already done if the number of histograms in the input
-    // is the same as the number of detector groups (which will define the
-    // number of histograms in the output)
-    if (m_runWS->getNumberHistograms() == detectorGroups().size()) {
-      m_sum = false;
-    }
+    m_sum = false;
   }
 
   // Create the output workspace in wavelength
