@@ -27,9 +27,9 @@ void ReflectometryWorkflowBase2::initReductionProperties() {
                   "The type of summation to perform.", Direction::Input);
 
   // Reduction type
-  std::vector<std::string> reductionTypes = {"None", "DivergentBeam",
+  std::vector<std::string> reductionTypes = {"Normal", "DivergentBeam",
                                              "NonFlatSample"};
-  declareProperty("ReductionType", "None",
+  declareProperty("ReductionType", "Normal",
                   boost::make_shared<StringListValidator>(reductionTypes),
                   "The type of reduction to perform.", Direction::Input);
 }
@@ -210,12 +210,12 @@ ReflectometryWorkflowBase2::validateReductionProperties() const {
   const std::string summationType = getProperty("SummationType");
   const std::string reductionType = getProperty("ReductionType");
   if (summationType == "SumInQ") {
-    if (reductionType == "None") {
+    if (reductionType == "Normal") {
       results["ReductionType"] =
           "ReductionType must be set if SummationType is SumInQ";
     }
   } else {
-    if (reductionType != "None") {
+    if (reductionType != "Normal") {
       results["ReductionType"] =
           "ReductionType should not be set unless SummationType is SumInQ";
     }
