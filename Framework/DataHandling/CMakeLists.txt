@@ -101,7 +101,6 @@ set ( SRC_FILES
 	src/LoadSPE.cpp
 	src/LoadSampleDetailsFromRaw.cpp
 	src/LoadSassena.cpp
-	src/LoadSavuTomoConfig.cpp
 	src/LoadSpec.cpp
 	src/LoadSpice2D.cpp
 	src/LoadSpiceAscii.cpp
@@ -271,7 +270,6 @@ set ( INC_FILES
 	inc/MantidDataHandling/LoadSPE.h
 	inc/MantidDataHandling/LoadSampleDetailsFromRaw.h
 	inc/MantidDataHandling/LoadSassena.h
-	inc/MantidDataHandling/LoadSavuTomoConfig.h
 	inc/MantidDataHandling/LoadSpec.h
 	inc/MantidDataHandling/LoadSpice2D.h
 	inc/MantidDataHandling/LoadSpiceAscii.h
@@ -440,7 +438,6 @@ set ( TEST_FILES
 	LoadSampleDetailsFromRawTest.h
 	LoadSassenaTest.h
 	LoadSaveAsciiTest.h
-	LoadSavuTomoConfigTest.h
 	LoadSpice2dTest.h
 	LoadSpiceAsciiTest.h
 	LoadSpiceXML2DDetTest.h

@@ -293,7 +293,6 @@ set ( SRC_FILES
 	src/TimeAtSampleStrategyDirect.cpp
 	src/TimeAtSampleStrategyElastic.cpp
 	src/TimeAtSampleStrategyIndirect.cpp
-	src/Tomography/FBPTomopy.cpp
 	src/Transpose.cpp
 	src/UnGroupWorkspace.cpp
 	src/UnaryOperation.cpp
@@ -309,12 +308,6 @@ set ( SRC_FILES
 	src/WorkflowAlgorithmRunner.cpp
 	src/WorkspaceJoiners.cpp
 	src/XDataConverter.cpp
-)
-
-# C as they originally come from a different project (tomopy)
-set ( C_SRC_FILES
-	src/Tomography/tomopy/fbp.c
-	src/Tomography/tomopy/utils.c
 )
 
 set ( INC_FILES	
@@ -619,9 +612,6 @@ set ( INC_FILES
 	inc/MantidAlgorithms/TimeAtSampleStrategyDirect.h
 	inc/MantidAlgorithms/TimeAtSampleStrategyElastic.h
 	inc/MantidAlgorithms/TimeAtSampleStrategyIndirect.h
-	inc/MantidAlgorithms/Tomography/FBPTomopy.h
-	inc/MantidAlgorithms/Tomography/tomopy/fbp.h
-	inc/MantidAlgorithms/Tomography/tomopy/utils.h
 	inc/MantidAlgorithms/Transpose.h
 	inc/MantidAlgorithms/UnGroupWorkspace.h
 	inc/MantidAlgorithms/UnaryOperation.h
@@ -924,7 +914,6 @@ set ( TEST_FILES
 	TimeAtSampleStrategyDirectTest.h
 	TimeAtSampleStrategyElasticTest.h
 	TimeAtSampleStrategyIndirectTest.h
-	Tomography/FBPTomopyTest.h
 	TransposeTest.h
 	UnGroupWorkspaceTest.h
 	UnaryOperationTest.h
