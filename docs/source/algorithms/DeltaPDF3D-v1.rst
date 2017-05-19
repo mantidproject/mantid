@@ -25,7 +25,11 @@ The input workspace must be a :ref:`MDHistoWorkspace
 The convolution option requires `astropy
 <http://docs.astropy.org/en/stable/index.html>`_ to be installed as it
 uses `astropy.convolution
-<http://docs.astropy.org/en/stable/convolution/>`_.
+<http://docs.astropy.org/en/stable/convolution/>`_. The convolution
+can be very slow for large workspaces, it will attempt to use
+astropy.convolution.convolve_fft (which is fast but only works for
+small workspace) but will use astropy.convolution.convolve (which is
+slow) if the workspace is too large.
 
 References
 ----------
@@ -98,7 +102,7 @@ The IntermediateWorkspace shows the changes to the input workspace.
 .. testcode:: fft2
 
    DeltaPDF3D(InputWorkspace='DeltaPDF3D_MDH',OutputWorkspace='fft2',IntermediateWorkspace='int2',
-              RemoveReflections=True,Size=0.4,Convolution=False)
+              RemoveReflections=True,Size=0.3,Convolution=False)
    print "The value at [1,0,0] is " + str(mtd['fft2'].signalAt(1866))
    print "The value at [0,1,0] is " + str(mtd['fft2'].signalAt(2226))
 
@@ -123,7 +127,7 @@ The IntermediateWorkspace shows the changes to the input workspace.
 .. testcode:: fft3
 
    DeltaPDF3D(InputWorkspace='DeltaPDF3D_MDH',OutputWorkspace='fft3',IntermediateWorkspace='int3',
-              RemoveReflections=True,Size=0.4,CropSphere=True,SphereMax=3,Convolution=False)
+              RemoveReflections=True,Size=0.3,CropSphere=True,SphereMax=3,Convolution=False)
    print "The value at [1,0,0] is " + str(mtd['fft3'].signalAt(1866))
    print "The value at [0,1,0] is " + str(mtd['fft3'].signalAt(2226))
 
@@ -143,12 +147,38 @@ The IntermediateWorkspace shows the changes to the input workspace.
 .. |int3| image:: /images/DeltaPDF3D_int3.png
    :width: 100%
 
+**Removing Reflections and crop to sphere with fill value**
+The fill value should be about the background level
+
+.. testcode:: fft3_2
+
+   DeltaPDF3D(InputWorkspace='DeltaPDF3D_MDH',OutputWorkspace='fft3',IntermediateWorkspace='int3',
+              RemoveReflections=True,Size=0.3,CropSphere=True,SphereMax=3,Convolution=False)
+   print "The value at [1,0,0] is " + str(mtd['fft3'].signalAt(1866))
+   print "The value at [0,1,0] is " + str(mtd['fft3'].signalAt(2226))
+
+.. testoutput:: fft3_2
+
+   The value at [1,0,0] is -477.173658361
+   The value at [0,1,0] is 501.081754175
+
++---------------------------------------------------------------------+---------------------------------------------------------------------+
+| Intermediate workspace after reflections removed and crop to sphere | Resulting 3D-ΔPDF                                                   |
++---------------------------------------------------------------------+---------------------------------------------------------------------+
+| |int3_2|                                                            | |fft3_2|                                                            |
++---------------------------------------------------------------------+---------------------------------------------------------------------+
+
+.. |fft3_2| image:: /images/DeltaPDF3D_fft3_2.png
+   :width: 100%
+.. |int3_2| image:: /images/DeltaPDF3D_int3_2.png
+   :width: 100%
+
 **Applying convolution**
 
 .. code-block:: python
 
    DeltaPDF3D(InputWorkspace='DeltaPDF3D_MDH',OutputWorkspace='fft4',IntermediateWorkspace='int4'
-              RemoveReflections=True,Size=0.4,CropSphere=True,SphereMax=3,Convolution=True)
+              RemoveReflections=True,Size=0.3,CropSphere=True,SphereMax=3,Convolution=True)
    print "The value at [1,0,0] is " + str(mtd['fft4'].signalAt(1866))
    print "The value at [0,1,0] is " + str(mtd['fft4'].signalAt(2226))
 
@@ -166,6 +196,31 @@ The IntermediateWorkspace shows the changes to the input workspace.
 .. |fft4| image:: /images/DeltaPDF3D_fft4.png
    :width: 100%
 .. |int4| image:: /images/DeltaPDF3D_int4.png
+   :width: 100%
+
+**Applying convolution and deconvolution**
+
+.. code-block:: python
+
+   DeltaPDF3D(InputWorkspace='DeltaPDF3D_MDH',OutputWorkspace='fft5',IntermediateWorkspace='int5'
+              RemoveReflections=True,Size=0.3,CropSphere=True,SphereMax=3,Convolution=True,Deconvolution=True)
+   print "The value at [1,0,0] is " + str(mtd['fft5'].signalAt(1866))
+   print "The value at [0,1,0] is " + str(mtd['fft5'].signalAt(2226))
+
+.. code-block:: none
+
+   The value at [1,0,0] is -95.0767841089
+   The value at [0,1,0] is 99.3534883663
+
++--------------------------------------------------------------+--------------------------------------------------------------+
+| The deconvolution array, workspace signal is divided by this | Resulting 3D-ΔPDF                                            |
++--------------------------------------------------------------+--------------------------------------------------------------+
+| |deconv|                                                     | |fft5|                                                       |
++--------------------------------------------------------------+--------------------------------------------------------------+
+
+.. |fft5| image:: /images/DeltaPDF3D_fft5.png
+   :width: 100%
+.. |deconv| image:: /images/DeltaPDF3D_deconv.png
    :width: 100%
 
 .. categories::

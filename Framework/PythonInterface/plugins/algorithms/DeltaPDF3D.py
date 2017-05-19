@@ -40,7 +40,7 @@ class DeltaPDF3D(PythonAlgorithm):
         val_min_zero = FloatArrayBoundedValidator()
         val_min_zero.setLower(0.)
         self.declareProperty(FloatArrayProperty("Size", [0.2], validator=val_min_zero),
-                             "Width of cube/diameter of sphere used to remove reflections, in (HKL)")
+                             "Width of cube/diameter of sphere used to remove reflections, in (HKL) (one or three values)")
         self.setPropertySettings("Size", condition)
         self.declareProperty("SpaceGroup", "",
                              doc="Space group for reflection removal, either full name or number. If empty all HKL's will be removed.")
@@ -48,9 +48,11 @@ class DeltaPDF3D(PythonAlgorithm):
 
         self.declareProperty("CropSphere", False, "Limit min/max q values. Can help with edge effects.")
         condition = EnabledWhenProperty("CropSphere", PropertyCriterion.IsNotDefault)
-        self.declareProperty(FloatArrayProperty("SphereMin", [Property.EMPTY_DBL], validator=val_min_zero), "Min Sphere")
+        self.declareProperty(FloatArrayProperty("SphereMin", [Property.EMPTY_DBL], validator=val_min_zero),
+                             "HKL values below which will be removed (one or three values)")
         self.setPropertySettings("SphereMin", condition)
-        self.declareProperty(FloatArrayProperty("SphereMax", [Property.EMPTY_DBL], validator=val_min_zero), "Max Sphere")
+        self.declareProperty(FloatArrayProperty("SphereMax", [Property.EMPTY_DBL], validator=val_min_zero),
+                             "HKL values above which will be removed (one or three values)")
         self.setPropertySettings("SphereMax", condition)
         self.declareProperty("FillValue", Property.EMPTY_DBL, "Value to replace with outside sphere")
         self.setPropertySettings("FillValue", condition)
