@@ -1053,7 +1053,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
     def _save(self, wksp, info, normalized, pdfgetn):
         prefix = str(wksp)
         if len(self._outPrefix) > 0: # non-empty string
-            prefix = self._outPrefix
+            prefix = self._outPrefix + str(wksp)
         filename = os.path.join(self._outDir, prefix)
         if pdfgetn:
             if "pdfgetn" in self._outTypes:
@@ -1508,15 +1508,35 @@ class SNSPowderReduction(DataProcessorAlgorithm):
             split_ws_name, str(self._splitinfotablews)))
 
         base_name = raw_ws_name
+
+        # find out whether the splitters are relative time or epoch time
+        split_ws = AnalysisDataService.retrieve(split_ws_name)
+        if isinstance(split_ws, SplittersWorkspace):
+            is_relative_time = False
+        else:
+            if isinstance(split_ws, MatrixWorkspace):
+                # matrix workspace case
+                time0 = split_ws.readX(0)[0]
+            else:
+                #  table workspace case
+                time0 = split_ws.cell(0, 0)
+
+            if time0 > 3600. * 24 * 356:
+                # longer than 1 Y. Cannot be relative time.
+                is_relative_time = False
+            else:
+                # even just shorter than 1 year, but there was no experiment in 1991.
+                is_relative_time = True
+
         if self._splitinfotablews is None:
             # split without information table
             api.FilterEvents(InputWorkspace=raw_ws_name, OutputWorkspaceBaseName=base_name,
-                             SplitterWorkspace=split_ws_name, GroupWorkspaces=True)
+                             SplitterWorkspace=split_ws_name, GroupWorkspaces=True, RelativeTime=is_relative_time)
         else:
             # split with information table
             api.FilterEvents(InputWorkspace=raw_ws_name, OutputWorkspaceBaseName=base_name,
                              SplitterWorkspace=split_ws_name, InformationWorkspace=str(self._splitinfotablews),
-                             GroupWorkspaces=True)
+                             GroupWorkspaces=True, RelativeTime=is_relative_time)
         # ENDIF
 
         # Get workspace group for names of split workspace

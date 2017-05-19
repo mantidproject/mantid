@@ -31,8 +31,6 @@ namespace {
 Mantid::Kernel::Logger g_log("EngineeringDiffractionGUI");
 }
 
-const std::string EnggDiffractionPresenter::g_enginxStr = "ENGINX";
-
 const std::string EnggDiffractionPresenter::g_shortMsgRBNumberRequired =
     "A valid RB Number is required";
 const std::string EnggDiffractionPresenter::g_msgRBNumberRequired =
@@ -75,6 +73,8 @@ EnggDiffractionPresenter::EnggDiffractionPresenter(IEnggDiffractionView *view)
         "with an empty/null view (Engineering diffraction interface). "
         "Cannot continue.");
   }
+
+  m_currentInst = m_view->currentInstrument();
 }
 
 EnggDiffractionPresenter::~EnggDiffractionPresenter() { cleanup(); }
@@ -610,9 +610,8 @@ void EnggDiffractionPresenter::processLogMsg() {
 }
 
 void EnggDiffractionPresenter::processInstChange() {
-  const std::string err = "Changing instrument is not supported!";
-  g_log.error() << err << '\n';
-  m_view->userError("Fatal error", err);
+  m_currentInst = m_view->currentInstrument();
+  m_view->updateTabsInstrument(m_currentInst);
 }
 
 void EnggDiffractionPresenter::processRBNumberChange() {
@@ -893,10 +892,10 @@ void EnggDiffractionPresenter::parseCalibrateFilename(const std::string &path,
   }
 
   // check the rules on the file name
-  if (g_enginxStr != parts[0]) {
+  if (m_currentInst != parts[0]) {
     throw std::invalid_argument("The first component of the file name is not "
                                 "the expected instrument name: " +
-                                g_enginxStr + ".\n\n" + explMsg);
+                                m_currentInst + ".\n\n" + explMsg);
   }
   const std::string castMsg =
       "It is not possible to interpret as an integer number ";
@@ -1041,15 +1040,10 @@ std::string EnggDiffractionPresenter::buildCalibrateSuggestedFilename(
     const std::string &vanNo, const std::string &ceriaNo,
     const std::string &bankName) const {
   // default and only one supported instrument for now
-  std::string instStr = g_enginxStr;
+  std::string instStr = m_currentInst;
   std::string nameAppendix = "_all_banks";
   if (!bankName.empty()) {
     nameAppendix = "_" + bankName;
-  }
-  std::string curInst = m_view->currentInstrument();
-  if ("ENGIN-X" != curInst && "ENGINX" != curInst) {
-    instStr = "UNKNOWNINST";
-    nameAppendix = "_calibration";
   }
 
   // default extension for calibration files
@@ -1091,7 +1085,6 @@ void EnggDiffractionPresenter::doCalib(const EnggDiffCalibSettings &cs,
 
   // save vanIntegWS and vanCurvesWS as open genie
   // see where spec number comes from
-
   loadOrCalcVanadiumWorkspaces(vanFileHint, cs.m_inputDirCalib, vanIntegWS,
                                vanCurvesWS, cs.m_forceRecalcOverwrite, specNos);
 
@@ -1275,19 +1268,21 @@ void EnggDiffractionPresenter::appendCalibInstPrefix(
 void EnggDiffractionPresenter::appendCalibInstPrefix(
     const std::string vanNo, const std::string cerNo, std::string &outVanName,
     std::string &outCerName) const {
-  // If the file is numerical only we need to append
-  // it in case the favorite instrument isn't set to ENGINX
-  const std::string currentInst = m_view->currentInstrument();
+
+  // Load uses the default instrument if we don't give it the name of the
+  // instrument as a prefix (m_currentInst), when one isn't set or is set
+  // incorrectly, we prepend the name of the instrument to the vanadium number
+  // so that load can find the file and not cause a crash in Mantid
   // Vanadium file
   if (std::all_of(vanNo.begin(), vanNo.end(), ::isdigit)) {
     // This only has digits - append prefix
-    outVanName = currentInst + vanNo;
+    outVanName = m_currentInst + vanNo;
   }
 
   // Cerium file
   if (std::all_of(cerNo.begin(), cerNo.end(), ::isdigit)) {
     // All digits - append inst prefix
-    outCerName = currentInst + cerNo;
+    outCerName = m_currentInst + cerNo;
   }
 }
 
@@ -1940,7 +1935,7 @@ void EnggDiffractionPresenter::loadOrCalcVanadiumWorkspaces(
   // if pre calculated not found ..
   if (forceRecalc || !foundPrecalc) {
     g_log.notice() << "Calculating Vanadium corrections. This may take a "
-                      "few seconds...\n";
+                      "while...\n";
     try {
       calcVanadiumWorkspaces(vanNo, vanIntegWS, vanCurvesWS);
     } catch (std::invalid_argument &ia) {
@@ -2017,11 +2012,11 @@ void EnggDiffractionPresenter::findPrecalcVanadiumCorrFilenames(
 
   const std::string runNo = std::string(2, '0').append(vanNo);
 
-  preIntegFilename =
-      g_enginxStr + "_precalculated_vanadium_run" + runNo + "_integration.nxs";
+  preIntegFilename = m_currentInst + "_precalculated_vanadium_run" + runNo +
+                     "_integration.nxs";
 
-  preCurvesFilename =
-      g_enginxStr + "_precalculated_vanadium_run" + runNo + "_bank_curves.nxs";
+  preCurvesFilename = m_currentInst + "_precalculated_vanadium_run" + runNo +
+                      "_bank_curves.nxs";
 
   Poco::Path pathInteg(inputDirCalib);
   pathInteg.append(preIntegFilename);
@@ -2627,17 +2622,18 @@ std::string EnggDiffractionPresenter::outFileNameFactory(
 
   // calibration output files
   if (inputWorkspace.std::string::find("curves") != std::string::npos) {
-    fullFilename = "ob+ENGINX_" + runNo + "_" + bank + "_bank" + format;
+    fullFilename =
+        "ob+" + m_currentInst + "_" + runNo + "_" + bank + "_bank" + format;
 
     // focus output files
   } else if (inputWorkspace.std::string::find("texture") != std::string::npos) {
-    fullFilename = "ENGINX_" + runNo + "_texture_" + bank + format;
+    fullFilename = m_currentInst + "_" + runNo + "_texture_" + bank + format;
   } else if (inputWorkspace.std::string::find("cropped") != std::string::npos) {
-    fullFilename = "ENGINX_" + runNo + "_cropped_" +
+    fullFilename = m_currentInst + "_" + runNo + "_cropped_" +
                    boost::lexical_cast<std::string>(g_croppedCounter) + format;
     g_croppedCounter++;
   } else {
-    fullFilename = "ENGINX_" + runNo + "_bank_" + bank + format;
+    fullFilename = m_currentInst + "_" + runNo + "_bank_" + bank + format;
   }
   return fullFilename;
 }
@@ -2904,6 +2900,8 @@ EnggDiffractionPresenter::outFilesGeneralDir(const std::string &addComponent) {
  * Produces the root path where output files are going to be written.
  */
 Poco::Path EnggDiffractionPresenter::outFilesRootDir() {
+  // TODO decide whether to move into settings or use mantid's default directory
+  // after discussion with users
   const std::string rootDir = "EnginX_Mantid";
   Poco::Path dir;
 

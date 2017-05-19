@@ -6,6 +6,11 @@
 
 .. properties::
 
+.. warning::
+
+   This algorithm is deprecated (April-2017). Please, use :ref:`ISISIndirectDiffractionReduction <algm-ISISIndirectDiffractionReduction>` instead.
+
+
 Description
 -----------
 

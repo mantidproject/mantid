@@ -4,7 +4,6 @@
 #include "MantidQtMantidWidgets/WidgetDllOption.h"
 #include <MantidAPI/AnalysisDataService.h>
 #include <MantidAPI/MatrixWorkspace_fwd.h>
-#include <MantidQtMantidWidgets/MantidSurfacePlotDialog.h>
 #include <MantidQtMantidWidgets/MantidWSIndexDialog.h>
 
 #include <QTreeWidget>
@@ -29,8 +28,8 @@ public:
   QStringList getSelectedWorkspaceNames() const;
   MantidWSIndexWidget::UserInput
   chooseSpectrumFromSelected(bool showWaterfallOpt = true,
-                             bool showPlotAll = true,
-                             bool showTiledOpt = true) const;
+                             bool showPlotAll = true, bool showTiledOpt = true,
+                             bool isAdvanced = false) const;
   void setSortScheme(MantidItemSortScheme);
   void setSortOrder(Qt::SortOrder);
   MantidItemSortScheme getSortScheme() const;
@@ -41,16 +40,10 @@ public:
   void dropEvent(QDropEvent *de) override;
   QList<boost::shared_ptr<const Mantid::API::MatrixWorkspace>>
   getSelectedMatrixWorkspaces() const;
-  MantidSurfacePlotDialog::UserInputSurface
-  chooseSurfacePlotOptions(int nWorkspaces) const;
-  MantidSurfacePlotDialog::UserInputSurface
-  chooseContourPlotOptions(int nWorkspaces) const;
 
 protected:
   void dragMoveEvent(QDragMoveEvent *de) override;
   void dragEnterEvent(QDragEnterEvent *de) override;
-  MantidSurfacePlotDialog::UserInputSurface
-  choosePlotOptions(const QString &type, int nWorkspaces) const;
 
 private:
   QPoint m_dragStartPosition;
