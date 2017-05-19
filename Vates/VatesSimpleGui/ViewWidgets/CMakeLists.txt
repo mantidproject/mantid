@@ -20,6 +20,7 @@ set( INCLUDE_FILES
   inc/MantidVatesSimpleGuiViewWidgets/PeaksTabWidget.h
   inc/MantidVatesSimpleGuiViewWidgets/SaveScreenshotReaction.h
   inc/MantidVatesSimpleGuiViewWidgets/RebinnedSourcesManager.h
+  inc/MantidVatesSimpleGuiViewWidgets/VisibleAxesColor.h
   inc/MantidVatesSimpleGuiViewWidgets/StandardView.h
   inc/MantidVatesSimpleGuiViewWidgets/SplatterPlotView.h
   inc/MantidVatesSimpleGuiViewWidgets/ThreesliceView.h
@@ -46,6 +47,7 @@ set( SOURCE_FILES
   src/pqCameraReactionNonOrthogonalAxes.cpp
   src/SaveScreenshotReaction.cpp
   src/RebinnedSourcesManager.cpp
+  src/VisibleAxesColor.cpp
   src/StandardView.cpp
   src/SplatterPlotView.cpp
   src/ThreesliceView.cpp

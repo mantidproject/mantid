@@ -291,10 +291,8 @@ MDNormSCD::findIntergratedDimensions(const std::vector<coord_t> &otherDimValues,
     if (affineMat[row][0] == 1.) {
       m_hIntegrated = false;
       m_hIdx = row;
-      if (m_hmin < dimMin)
-        m_hmin = dimMin;
-      if (m_hmax > dimMax)
-        m_hmax = dimMax;
+      m_hmin = std::max(m_hmin, dimMin);
+      m_hmax = std::min(m_hmax, dimMax);
       if (m_hmin > dimMax || m_hmax < dimMin) {
         skipNormalization = true;
       }
@@ -302,10 +300,8 @@ MDNormSCD::findIntergratedDimensions(const std::vector<coord_t> &otherDimValues,
     if (affineMat[row][1] == 1.) {
       m_kIntegrated = false;
       m_kIdx = row;
-      if (m_kmin < dimMin)
-        m_kmin = dimMin;
-      if (m_kmax > dimMax)
-        m_kmax = dimMax;
+      m_kmin = std::max(m_kmin, dimMin);
+      m_kmax = std::min(m_kmax, dimMax);
       if (m_kmin > dimMax || m_kmax < dimMin) {
         skipNormalization = true;
       }
@@ -313,10 +309,8 @@ MDNormSCD::findIntergratedDimensions(const std::vector<coord_t> &otherDimValues,
     if (affineMat[row][2] == 1.) {
       m_lIntegrated = false;
       m_lIdx = row;
-      if (m_lmin < dimMin)
-        m_lmin = dimMin;
-      if (m_lmax > dimMax)
-        m_lmax = dimMax;
+      m_lmin = std::max(m_lmin, dimMin);
+      m_lmax = std::min(m_lmax, dimMax);
       if (m_lmin > dimMax || m_lmax < dimMin) {
         skipNormalization = true;
       }
@@ -362,16 +356,6 @@ void MDNormSCD::cacheDimensionXValues() {
     }
   }
 }
-
-namespace {
-template <typename T, typename BinaryOp>
-void AtomicOp(std::atomic<T> &f, T d, BinaryOp _Op) {
-  T old = f.load();
-  T desired = _Op(old, d);
-  while (!f.compare_exchange_weak(old, desired))
-    desired = _Op(old, d);
-}
-} // namespace
 
 /**
  * Computed the normalization for the input workspace. Results are stored in
@@ -485,7 +469,8 @@ for (int64_t i = 0; i < ndets; i++) {
     size_t k = static_cast<size_t>(std::distance(intersectionsBegin, it));
     // signal = integral between two consecutive intersections
     signal_t signal = (yValues[k] - yValues[k - 1]) * solid;
-    AtomicOp(signalArray[linIndex], signal, std::plus<signal_t>());
+    Mantid::Kernel::AtomicOp(signalArray[linIndex], signal,
+                             std::plus<signal_t>());
   }
   prog->report();
 

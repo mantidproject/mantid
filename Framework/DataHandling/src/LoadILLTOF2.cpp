@@ -404,7 +404,7 @@ void LoadILLTOF2::loadDataIntoTheWorkSpace(
  */
 void LoadILLTOF2::loadSpectra(size_t &spec, const size_t numberOfTubes,
                               const std::vector<detid_t> &detectorIDs,
-                              NXInt data, Progress progress) {
+                              const NXInt &data, Progress &progress) {
   for (size_t i = 0; i < numberOfTubes; ++i) {
     for (size_t j = 0; j < m_numberOfPixelsPerTube; ++j) {
       int *data_p = &data(static_cast<int>(i), static_cast<int>(j), 0);
