@@ -172,6 +172,8 @@ class MainWindow(QtGui.QMainWindow):
                      self.do_mask_pt_2d)
         self.connect(self.ui.pushButton_saveMask, QtCore.SIGNAL('clicked()'),
                      self.do_save_roi)
+        self.connect(self.ui.pushButton_integrateROI, QtCore.SIGNAL('clicked()'),
+                     self.do_integrate_roi)
 
         # Tab 'calculate ub matrix'
         self.connect(self.ui.pushButton_addUBScans, QtCore.SIGNAL('clicked()'),
@@ -848,7 +850,10 @@ class MainWindow(QtGui.QMainWindow):
         exp_number = par_val_list[0]
         scan_number = par_val_list[1]
 
-        self._myControl.set_roi(exp_number, scan_number, lower_left_c, upper_right_c)
+        try:
+            self._myControl.set_roi(exp_number, scan_number, lower_left_c, upper_right_c)
+        except AssertionError as ass_err:
+            print '[ERROR] Unable to set ROI due to {0}.'.format(ass_err)
 
         return
 
@@ -1512,6 +1517,22 @@ class MainWindow(QtGui.QMainWindow):
 
         # plot the model
         self.ui.graphicsView_integratedPeakView.plot_model(model_x, model_y, title=info_str)
+
+        return
+
+    def do_integrate_roi(self):
+        """
+        blabla
+        :return:
+        """
+        exp_number = str(self.ui.lineEdit_exp.text())
+        scan_number = str(self.ui.lineEdit_run.text())
+        pt_number = str(self.ui.lineEdit_rawDataPtNo.text())
+        working_dir = str(self.ui.lineEdit_workDir.text())
+
+        msg = self.ui.graphicsView_detector2dPlot.integrate_roi_linear(exp_number, scan_number, pt_number, working_dir)
+
+        self.pop_one_button_dialog(msg)
 
         return
 

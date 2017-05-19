@@ -92,11 +92,74 @@ class Detector2DView(mpl2dgraphicsview.Mpl2dGraphicsView):
 
         return
 
-    def integrate_roi_linear(self):
+    def integrate_roi_linear(self, exp_number, scan_number, pt_number, output_dir):
         """
-
+        blabla
         :return:
         """
+        # TODO/ISSUE/NOWNOW/TODAY - Clean the code
+        def save_to_file(base_name, axis, array1d, start_index):
+            """
+
+            :param base_name:
+            :param axis:
+            :param matrix:
+            :return:
+            """
+            file_name = '{0}_axis_{1}.dat'.format(base_name, axis)
+
+            wbuf = ''
+            vec_x = np.array(range(len(array1d))) + start_index
+            for i in range(len(array1d)):
+                wbuf += '{0} \t{1}\n'.format(vec_x[i], array1d[i])
+
+            ofile = open(file_name, 'w')
+            ofile.write(wbuf)
+            ofile.close()
+
+            return
+
+        matrix = self.array2d
+        print '[DB...NOW] 2D Array type = {0}'.format(type(matrix))
+        assert isinstance(matrix, np.ndarray), 'blabla1'
+
+        # get region of interest
+        if self._roiStart is None:
+            self._roiStart = (0, 0)
+        if self._roiEnd is None:
+            self._roiEnd = matrix.shape
+
+        print '[DB...NOW] ROI Start = {0}  End = {1}'.format(self._roiStart, self._roiEnd)
+
+        ll_row = min(self._roiStart[0], self._roiEnd[0])
+        ll_col = min(self._roiStart[1], self._roiEnd[1])
+
+        ur_row = max(self._roiStart[0], self._roiEnd[0])
+        ur_col = max(self._roiStart[1], self._roiEnd[1])
+
+        # Debug:
+        # ll_row = 0
+        # ur_row = 256
+        print 'Row: {0} : {1}  Col: {2} : {3}'.format(ll_row, ur_row, ll_col, ur_col)
+
+        roi_matrix = matrix[ll_col:ur_col, ll_row:ur_row]
+
+        sum_0 = roi_matrix.sum(0)
+        #  print sum_0
+        sum_1 = roi_matrix.sum(1)
+        #  print sum_1
+        print '[SUM 0] Dimension: {0}'.format(sum_0.shape)
+        print '[SUM 1] Dimension: {0}'.format(sum_1.shape)
+
+        # write to file
+        import os
+        base_name = os.path.join(output_dir, 'Exp{0}_Scan{1}_Pt{2}'.format(exp_number, scan_number, pt_number))
+        save_to_file(base_name, 0, sum_0, ll_row)
+        save_to_file(base_name, 1, sum_1, ll_col)
+
+        message = 'Integrated values are saved to {0}...'.format(base_name)
+
+        return message
 
     def get_roi(self):
         """
@@ -154,6 +217,9 @@ class Detector2DView(mpl2dgraphicsview.Mpl2dGraphicsView):
 
             # FUTURE-TO-DO: this should be replaced by some update() method of canvas
             self._myCanvas._flush()
+
+            self._roiStart = None
+            self._roiEnd = None
 
         return
 
