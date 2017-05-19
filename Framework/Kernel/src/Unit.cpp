@@ -614,7 +614,11 @@ void dSpacingOrth::init() {
 }
 
 double dSpacingOrth::singleToTOF(const double x) const {
-  return sqrt(x * x + sfpTo) * factorTo;
+  double sqrtarg = x * x + sfpTo;
+  // consider very small values to be a rounding error
+  if (sqrtarg < 1.0e-17)
+    return 0.0;
+  return sqrt(sqrtarg) * factorTo;
 }
 double dSpacingOrth::singleFromTOF(const double tof) const {
   double temp = tof / factorFrom;
