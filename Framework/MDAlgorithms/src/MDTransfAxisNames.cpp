@@ -83,10 +83,10 @@ std::string makeAxisName(const Kernel::V3D &Dir,
       name += "-";
     }
     if (std::fabs(absDir[i] - 1) < eps) {
-      name += mainName + separator;
+      name.append(mainName).append(separator);
       continue;
     }
-    name += sprintfd(absDir[i], eps) + mainName + separator;
+    name.append(sprintfd(absDir[i], eps)).append(mainName).append(separator);
   }
 
   return name;

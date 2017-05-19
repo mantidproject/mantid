@@ -111,6 +111,11 @@
           <string>ENGINX</string>
          </property>
         </item>
+        <item>
+         <property name="text">
+          <string>IMAT</string>
+         </property>
+        </item>
        </widget>
       </item>
      </layout>

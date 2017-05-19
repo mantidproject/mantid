@@ -142,7 +142,8 @@ void Integration::exec() {
           "Range lists not supported for EventWorkspaces.");
     }
     // Get the eventworkspace rebinned to apply the upper and lowerrange
-    double evntMinRange = std::max(minRange, eventInputWS->getEventXMin());
+    double evntMinRange =
+        isEmpty(minRange) ? eventInputWS->getEventXMin() : minRange;
     double evntMaxRange =
         isEmpty(maxRange) ? eventInputWS->getEventXMax() : maxRange;
     localworkspace =

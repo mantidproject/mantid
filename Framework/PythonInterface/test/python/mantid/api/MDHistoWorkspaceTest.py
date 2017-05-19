@@ -12,6 +12,7 @@ except NameError:
     # Defined for backwards compatability with Python 2
     def long(x): return x
 
+
 class MDHistoWorkspaceTest(unittest.TestCase):
     """
     Test the interface to MDHistoWorkspaces
@@ -61,6 +62,16 @@ class MDHistoWorkspaceTest(unittest.TestCase):
 
         mtd.remove('demo')
 
+    def test_setSignalAt_throws_if_index_is_invalid(self):
+        run_algorithm('CreateMDHistoWorkspace', SignalInput='1,2,3,4,5,6,7,8,9',ErrorInput='1,1,1,1,1,1,1,1,1',
+                      Dimensionality='2',Extents='-1,1,-1,1',NumberOfBins='3,3',Names='A,B',Units='U,T',OutputWorkspace='demo')
+        testWS = mtd['demo']
+        index = testWS.getLinearIndex(3, 3)
+        self.assertRaises(ValueError, testWS.setSignalAt, index, 1.0)
+        index = testWS.getLinearIndex(0, 3)
+        self.assertRaises(ValueError, testWS.setSignalAt, index, 1.0)
+        mtd.remove('demo')
+
     def test_set_signal_array_throws_if_input_array_is_of_incorrect_size(self):
         run_algorithm('CreateMDHistoWorkspace', SignalInput='1,2,3,4,5,6,7,8,9',ErrorInput='1,1,1,1,1,1,1,1,1',
                       Dimensionality='2',Extents='-1,1,-1,1',NumberOfBins='3,3',Names='A,B',Units='U,T',OutputWorkspace='demo')
@@ -77,7 +88,6 @@ class MDHistoWorkspaceTest(unittest.TestCase):
         testWS.setSignalArray(signal)
         new_signal = testWS.getSignalArray()
         self._verify_numpy_data(new_signal, signal)
-
 
     def test_set_error_array_passes_numpy_values_to_workspace(self):
         run_algorithm('CreateMDHistoWorkspace', SignalInput='1,2,3,4,5,6,7,8,9',ErrorInput='1,1,1,1,1,1,1,1,1',
@@ -96,7 +106,6 @@ class MDHistoWorkspaceTest(unittest.TestCase):
         self.assertTrue(len(expected.shape), len(test_array.shape))
         self.assertTrue(not numpy.all(test_array.flags.writeable))
         self.assertTrue(numpy.all(numpy.equal(expected, test_array)))
-
 
     """ Note: Look at each test for PlusMD MinusMD, and MDHistoWorkspaceTest for detailed tests including checking results.
     These tests only check that they do run. """

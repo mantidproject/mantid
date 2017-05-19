@@ -96,6 +96,9 @@ MANTID_GEOMETRY_DLL
 PointGroup::LatticeSystem
 getLatticeSystemFromString(const std::string &latticeSystem);
 
+MANTID_GEOMETRY_DLL std::ostream &operator<<(std::ostream &stream,
+                                             const PointGroup &self);
+
 /// This is necessary to make the map work with older compilers. Can be removed
 /// when GCC 4.4 is not used anymore.
 struct MANTID_GEOMETRY_DLL CrystalSystemComparator {

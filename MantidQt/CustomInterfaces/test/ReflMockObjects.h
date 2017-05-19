@@ -191,6 +191,7 @@ public:
 
 class MockSettingsPresenter : public IReflSettingsPresenter {
 public:
+  MOCK_CONST_METHOD1(getTransmissionRuns, std::string(bool));
   MOCK_CONST_METHOD0(getTransmissionOptions, std::string());
   MOCK_CONST_METHOD0(getReductionOptions, std::string());
   MOCK_CONST_METHOD0(getStitchOptions, std::string());
@@ -201,6 +202,7 @@ public:
 
 class MockSettingsTabPresenter : public IReflSettingsTabPresenter {
 public:
+  MOCK_CONST_METHOD2(getTransmissionRuns, std::string(int, bool));
   MOCK_CONST_METHOD1(getTransmissionOptions, std::string(int));
   MOCK_CONST_METHOD1(getReductionOptions, std::string(int));
   MOCK_CONST_METHOD1(getStitchOptions, std::string(int));
@@ -221,6 +223,7 @@ public:
 
 class MockMainWindowPresenter : public IReflMainWindowPresenter {
 public:
+  MOCK_CONST_METHOD1(getTransmissionRuns, std::string(int));
   MOCK_CONST_METHOD1(getTransmissionOptions, std::string(int));
   MOCK_CONST_METHOD1(getReductionOptions, std::string(int));
   MOCK_CONST_METHOD1(getStitchOptions, std::string(int));

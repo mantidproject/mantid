@@ -12,6 +12,8 @@
 #include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/Unit.h"
+#include "MantidAPI/AnalysisDataService.h"
+#include <boost/algorithm/string/trim.hpp>
 
 using Mantid::Kernel::Strings::readToEndOfLine;
 using Mantid::Kernel::Strings::getWord;
@@ -36,7 +38,7 @@ using namespace Mantid::Geometry;
 int LoadIsawPeaks::confidence(Kernel::FileDescriptor &descriptor) const {
   const std::string &extn = descriptor.extension();
   // If the extension is peaks or integrate then give it a go
-  if (extn.compare(".peaks") != 0 && extn.compare(".integrate") != 0)
+  if (extn != ".peaks" && extn != ".integrate")
     return 0;
 
   int confidence(0);
@@ -49,7 +51,7 @@ int LoadIsawPeaks::confidence(Kernel::FileDescriptor &descriptor) const {
     if (r.length() < 1)
       throw std::logic_error(std::string("No first line of Peaks file"));
 
-    if (r.compare("Version:") != 0)
+    if (r != "Version:")
       throw std::logic_error(
           std::string("No Version: on first line of Peaks file"));
 
@@ -99,6 +101,8 @@ void LoadIsawPeaks::init() {
 void LoadIsawPeaks::exec() {
   // Create the workspace
   PeaksWorkspace_sptr ws(new PeaksWorkspace());
+  std::string outputwsName = getPropertyValue("OutputWorkspace");
+  AnalysisDataService::Instance().addOrReplace(outputwsName, ws);
 
   // This loads (appends) the peaks
   this->appendFile(ws, getPropertyValue("Filename"));
@@ -107,133 +111,6 @@ void LoadIsawPeaks::exec() {
   setProperty("OutputWorkspace", boost::dynamic_pointer_cast<Workspace>(ws));
 
   this->checkNumberPeaks(ws, getPropertyValue("Filename"));
-}
-
-//----------------------------------------------------------------------------------------------
-std::string LoadIsawPeaks::ApplyCalibInfo(std::ifstream &in,
-                                          std::string startChar,
-                                          Geometry::Instrument_const_sptr instr,
-                                          DetectorInfo &detectorInfo,
-                                          double &T0) {
-
-  while (in.good() && (startChar.empty() || startChar != "7")) {
-    readToEndOfLine(in, true);
-    startChar = getWord(in, false);
-  }
-  if (!(in.good())) {
-    throw std::invalid_argument("Peaks file has no time shift and L0 info");
-  }
-  std::string L1s = getWord(in, false);
-  std::string T0s = getWord(in, false);
-  if (L1s.length() < 1 || T0s.length() < 1) {
-    g_log.error() << "Missing L1 or Time offset\n";
-    throw std::invalid_argument("Missing L1 or Time offset");
-  }
-
-  try {
-    std::istringstream iss(L1s + " " + T0s, std::istringstream::in);
-    double L1;
-    iss >> L1;
-    iss >> T0;
-    V3D sampPos = instr->getSample()->getPos();
-    CalibrationHelpers::adjustUpSampleAndSourcePositions(*instr, L1 / 100,
-                                                         sampPos, detectorInfo);
-  } catch (...) {
-    g_log.error() << "Invalid L1 or Time offset\n";
-    throw std::invalid_argument("Invalid L1 or Time offset");
-  }
-
-  readToEndOfLine(in, true);
-  startChar = getWord(in, false);
-  while (in.good() && (startChar.empty() || startChar != "5")) {
-    readToEndOfLine(in, true);
-    startChar = getWord(in, false);
-  }
-
-  if (!(in.good())) {
-    g_log.error() << "Peaks file has no detector panel info\n";
-    throw std::invalid_argument("Peaks file has no detector panel info");
-  }
-
-  while (startChar == "5") {
-
-    std::string line;
-    for (int i = 0; i < 16; i++) {
-      std::string s = getWord(in, false);
-      if (s.empty()) {
-        g_log.error() << "Not enough info to describe panel \n";
-        throw std::length_error("Not enough info to describe panel ");
-      }
-      line += " " + s;
-      ;
-    }
-
-    readToEndOfLine(in, true);
-    startChar = getWord(in, false); // blank lines ?? and # lines ignore
-
-    std::istringstream iss(line, std::istringstream::in);
-    int bankNum;
-    double width, height, Centx, Centy, Centz, Basex, Basey, Basez, Upx, Upy,
-        Upz;
-    try {
-      int nrows, ncols;
-      double depth, detD;
-      iss >> bankNum >> nrows >> ncols >> width >> height >> depth >> detD >>
-          Centx >> Centy >> Centz >> Basex >> Basey >> Basez >> Upx >> Upy >>
-          Upz;
-    } catch (...) {
-
-      g_log.error() << "incorrect type of data for panel \n";
-      throw std::length_error("incorrect type of data for panel ");
-    }
-
-    std::string SbankNum = std::to_string(bankNum);
-    std::string bankName = "bank";
-    if (instr->getName() == "WISH") {
-      if (bankNum < 10)
-        bankName = "WISHpanel0";
-      else
-        bankName = "WISHpanel";
-    }
-    bankName += SbankNum;
-    boost::shared_ptr<const Geometry::IComponent> bank =
-        getCachedBankByName(bankName, instr);
-
-    if (!bank) {
-      g_log.error() << "There is no bank " << bankName
-                    << " in the instrument\n";
-      throw std::length_error("There is no bank " + bankName +
-                              " in the instrument");
-    }
-
-    V3D dPos = V3D(Centx, Centy, Centz) / 100.0 - bank->getPos();
-    V3D Base(Basex, Basey, Basez), Up(Upx, Upy, Upz);
-    V3D ToSamp = Base.cross_prod(Up);
-    Base.normalize();
-    Up.normalize();
-    ToSamp.normalize();
-    Quat thisRot(Base, Up, ToSamp);
-    Quat bankRot(bank->getRotation());
-    bankRot.inverse();
-    Quat dRot = thisRot * bankRot;
-
-    auto bankR =
-        boost::dynamic_pointer_cast<const Geometry::RectangularDetector>(bank);
-
-    if (!bankR)
-      return startChar;
-
-    double DetWScale = 1, DetHtScale = 1;
-    if (bank) {
-      DetWScale = width / bankR->xsize() / 100;
-      DetHtScale = height / bankR->ysize() / 100;
-    }
-    const std::vector<std::string> bankNames{bankName};
-
-    CalibrationHelpers::adjustBankPositionsAndSizes(
-        bankNames, *instr, dPos, dRot, DetWScale, DetHtScale, detectorInfo);
-  }
-  return startChar;
 }
 
 //-----------------------------------------------------------------------------------------------
@@ -251,7 +128,7 @@ std::string LoadIsawPeaks::readHeader(PeaksWorkspace_sptr outWS,
   if (r.length() < 1)
     throw std::logic_error(std::string("No first line of Peaks file"));
 
-  if (r.compare(std::string("Version:")) != 0)
+  if (r != "Version:")
     throw std::logic_error(
         std::string("No Version: on first line of Peaks file"));
 
@@ -297,18 +174,72 @@ std::string LoadIsawPeaks::readHeader(PeaksWorkspace_sptr outWS,
   Geometry::Instrument_const_sptr instr = tempWS->getInstrument();
   outWS->setInstrument(instr);
 
-  auto &detInfo = outWS->mutableDetectorInfo();
-  instr = outWS->getInstrument();
-
-  std::string s = ApplyCalibInfo(in, "", instr, detInfo, T0);
+  IAlgorithm_sptr applyCal = createChildAlgorithm("LoadIsawDetCal");
+  applyCal->initialize();
+  applyCal->setProperty("InputWorkspace", outWS);
+  applyCal->setProperty("Filename", getPropertyValue("Filename"));
+  applyCal->executeAsChildAlg();
+  T0 = applyCal->getProperty("TimeOffset");
 
   // Now skip all lines on L1, detector banks, etc. until we get to a block of
   // peaks. They start with 0.
+  std::string s;
+  std::vector<int> det;
   while (s != "0" && in.good()) {
     readToEndOfLine(in, true);
     s = getWord(in, false);
+    int bank = 0;
+    // Save all bank numbers in header lines
+    Strings::convert(getWord(in, false), bank);
+    if (s == "5")
+      det.push_back(bank);
+  }
+  // Find bank numbers in instument that are not in header lines
+  std::string maskBanks;
+  if (!instr)
+    throw std::runtime_error(
+        "No instrument in the Workspace. Cannot save DetCal file.");
+  // We cannot assume the peaks have bank type detector modules, so we have a
+  // string to check this
+  std::string bankPart = "bank";
+  if (instr->getName().compare("WISH") == 0)
+    bankPart = "WISHpanel";
+  // Get all children
+  std::vector<IComponent_const_sptr> comps;
+  instr->getChildren(comps, true);
+  for (auto &comp : comps) {
+    std::string bankName = comp->getName();
+    boost::trim(bankName);
+    boost::erase_all(bankName, bankPart);
+    int bank = 0;
+    Strings::convert(bankName, bank);
+    for (size_t j = 0; j < det.size(); j++) {
+      if (bank == det[j]) {
+        bank = 0;
+        continue;
+      }
+    }
+    if (bank == 0)
+      continue;
+    // Track unique bank numbers
+    maskBanks += bankName + ",";
   }
 
+  if (!maskBanks.empty()) {
+    // remove last comma
+    maskBanks.resize(maskBanks.size() - 1);
+    // Mask banks that are not in header lines
+    try {
+      Algorithm_sptr alg = createChildAlgorithm("MaskBTP");
+      alg->setProperty<Workspace_sptr>("Workspace", outWS);
+      alg->setProperty("Bank", maskBanks);
+      if (!alg->execute())
+        throw std::runtime_error(
+            "MaskDetectors Child Algorithm has not executed successfully");
+    } catch (...) {
+      g_log.error("Can't execute MaskBTP algorithm");
+    }
+  }
   return s;
 }
 
@@ -350,7 +281,7 @@ DataObjects::Peak LoadIsawPeaks::readPeak(PeaksWorkspace_sptr outWS,
   if (s.length() < 1)
     throw std::runtime_error("Empty peak line encountered.");
 
-  if (s.compare("2") == 0) {
+  if (s == "2") {
     readToEndOfLine(in, true);
     for (s = getWord(in, false); s.length() < 1 && in.good();
          s = getWord(in, true)) {
@@ -361,29 +292,29 @@ DataObjects::Peak LoadIsawPeaks::readPeak(PeaksWorkspace_sptr outWS,
   if (s.length() < 1)
     throw std::runtime_error("Empty peak line encountered.");
 
-  if (s.compare("3") != 0)
+  if (s != "3")
     throw std::runtime_error("Empty peak line encountered.");
 
-  seqNum = atoi(getWord(in, false).c_str());
+  seqNum = std::stoi(getWord(in, false));
 
-  h = strtod(getWord(in, false).c_str(), nullptr);
-  k = strtod(getWord(in, false).c_str(), nullptr);
-  l = strtod(getWord(in, false).c_str(), nullptr);
+  h = std::stod(getWord(in, false), nullptr);
+  k = std::stod(getWord(in, false), nullptr);
+  l = std::stod(getWord(in, false), nullptr);
 
-  col = strtod(getWord(in, false).c_str(), nullptr);
-  row = strtod(getWord(in, false).c_str(), nullptr);
-  strtod(getWord(in, false).c_str(), nullptr); // chan
-  strtod(getWord(in, false).c_str(), nullptr); // L2
-  strtod(getWord(in, false).c_str(), nullptr); // ScatAng
+  col = std::stod(getWord(in, false), nullptr);
+  row = std::stod(getWord(in, false), nullptr);
+  UNUSED_ARG(std::stod(getWord(in, false), nullptr)); // chan
+  UNUSED_ARG(std::stod(getWord(in, false), nullptr)); // L2
+  UNUSED_ARG(std::stod(getWord(in, false), nullptr)); // ScatAng
 
-  strtod(getWord(in, false).c_str(), nullptr); // Az
-  wl = strtod(getWord(in, false).c_str(), nullptr);
-  strtod(getWord(in, false).c_str(), nullptr); // D
-  IPK = strtod(getWord(in, false).c_str(), nullptr);
+  UNUSED_ARG(std::stod(getWord(in, false), nullptr)); // Az
+  wl = std::stod(getWord(in, false), nullptr);
+  UNUSED_ARG(std::stod(getWord(in, false), nullptr)); // D
+  IPK = std::stod(getWord(in, false), nullptr);
 
-  Inti = strtod(getWord(in, false).c_str(), nullptr);
-  SigI = strtod(getWord(in, false).c_str(), nullptr);
-  static_cast<void>(atoi(getWord(in, false).c_str())); // iReflag
+  Inti = std::stod(getWord(in, false), nullptr);
+  SigI = std::stod(getWord(in, false), nullptr);
+  UNUSED_ARG(std::stoi(getWord(in, false))); // iReflag
 
   // Finish the line and get the first word of next line
   readToEndOfLine(in, true);
@@ -413,7 +344,7 @@ int LoadIsawPeaks::findPixelID(Instrument_const_sptr inst, std::string bankName,
   boost::shared_ptr<const IComponent> parent =
       getCachedBankByName(bankName, inst);
 
-  if (parent->type().compare("RectangularDetector") == 0) {
+  if (parent->type() == "RectangularDetector") {
     boost::shared_ptr<const RectangularDetector> RDet =
         boost::dynamic_pointer_cast<const RectangularDetector>(parent);
 
@@ -424,7 +355,7 @@ int LoadIsawPeaks::findPixelID(Instrument_const_sptr inst, std::string bankName,
     boost::shared_ptr<const Geometry::ICompAssembly> asmb =
         boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(parent);
     asmb->getChildren(children, false);
-    if (children[0]->getName().compare("sixteenpack") == 0) {
+    if (children[0]->getName() == "sixteenpack") {
       asmb = boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(
           children[0]);
       children.clear();
@@ -464,7 +395,7 @@ std::string LoadIsawPeaks::readPeakBlockHeader(std::string lastStr,
   if (s.length() < 1)
     return std::string();
 
-  if (s.compare("0") == 0) {
+  if (s == "0") {
     readToEndOfLine(in, true);
     s = getWord(in, false);
     while (s.length() < 1) {
@@ -473,16 +404,16 @@ std::string LoadIsawPeaks::readPeakBlockHeader(std::string lastStr,
     }
   }
 
-  if (s.compare(std::string("1")) != 0)
+  if (s != "1")
     return s;
 
-  run = atoi(getWord(in, false).c_str());
-  detName = atoi(getWord(in, false).c_str());
-  chi = strtod(getWord(in, false).c_str(), nullptr);
-  phi = strtod(getWord(in, false).c_str(), nullptr);
+  run = std::stoi(getWord(in, false));
+  detName = std::stoi(getWord(in, false));
+  chi = std::stod(getWord(in, false), nullptr);
+  phi = std::stod(getWord(in, false), nullptr);
 
-  omega = strtod(getWord(in, false).c_str(), nullptr);
-  monCount = strtod(getWord(in, false).c_str(), nullptr);
+  omega = std::stod(getWord(in, false), nullptr);
+  monCount = std::stod(getWord(in, false), nullptr);
   readToEndOfLine(in, true);
 
   return getWord(in, false);
@@ -520,7 +451,7 @@ void LoadIsawPeaks::appendFile(PeaksWorkspace_sptr outWS,
   if (!in.good() || s.length() < 1)
     throw std::runtime_error("End of Peaks file before peaks");
 
-  if (s.compare(std::string("0")) != 0)
+  if (s != "0")
     throw std::logic_error("No header for Peak segments");
 
   readToEndOfLine(in, true);
