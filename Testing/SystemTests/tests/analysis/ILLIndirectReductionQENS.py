@@ -1,6 +1,6 @@
 import stresstesting
-from mantid.simpleapi import *
-from mantid import config
+from mantid.simpleapi import IndirectILLReductionQENS, Plus, CompareWorkspaces, GroupWorkspaces, Scale
+from mantid import config, mtd
 
 
 class ILLIndirectReductionQENSTest(stresstesting.MantidStressTest):

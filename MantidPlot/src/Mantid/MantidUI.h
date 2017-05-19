@@ -8,6 +8,7 @@
 #include "../Graph.h"
 #include "MantidQtAPI/IProjectSerialisable.h"
 #include "MantidQtMantidWidgets/MantidDisplayBase.h"
+#include "MantidQtMantidWidgets/MantidWSIndexDialog.h"
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/AlgorithmFactory.h"
@@ -22,6 +23,8 @@
 #include "MantidQtAPI/AlgorithmDialog.h"
 #include "MantidQtAPI/MantidAlgorithmMetatype.h"
 #include "MantidQtAPI/QwtWorkspaceSpectrumData.h"
+
+#include "MantidPlotUtilities.h"
 
 #include <Poco/NObserver.h>
 
@@ -209,12 +212,12 @@ public:
   // Table.
   Table *createTableFromSelectedRows(MantidMatrix *m, bool errs = true,
                                      bool binCentres = false);
-  MantidQt::MantidWidgets::MantidSurfacePlotDialog *
-  createSurfacePlotDialog(int flags, QStringList wsNames,
-                          const QString &plotType) override;
+
+  // Create dialog box for what to plot and how
   MantidQt::MantidWidgets::MantidWSIndexDialog *
-  createWorkspaceIndexDialog(int flags, QStringList wsNames, bool showWaterfall,
-                             bool showPlotAll, bool showTiledOpt) override;
+  createWorkspaceIndexDialog(int flags, const QStringList &wsNames,
+                             bool showWaterfall, bool showPlotAll,
+                             bool showTiledOpt, bool isAdvanced) override;
 
   /// Create a 1d graph form a Table
   MultiLayer *createGraphFromTable(Table *t, int type = 0);
@@ -256,9 +259,6 @@ public:
                MantidQt::DistributionFlag distr = MantidQt::DistributionDefault,
                bool errs = false, MultiLayer *plotWindow = nullptr);
 
-  void showSurfacePlot() override;
-  void showContourPlot() override;
-
 #ifdef MAKE_VATES
   bool doesVatesSupportOpenGL() override;
 #endif
@@ -287,13 +287,29 @@ public slots:
          bool errs = false,
          GraphOptions::CurveType style = GraphOptions::Unspecified,
          MultiLayer *plotWindow = NULL, bool clearWindow = false,
-         bool waterfallPlot = false);
+         bool waterfallPlot = false, const QString &log = "",
+         const std::set<double> &customLogValues = std::set<double>(),
+         const bool multipleSpectra = false);
 
   MultiLayer *
   plot1D(const QMultiMap<QString, std::set<int>> &toPlot, bool spectrumPlot,
          MantidQt::DistributionFlag distr = MantidQt::DistributionDefault,
          bool errs = false, MultiLayer *plotWindow = NULL,
-         bool clearWindow = false, bool waterfallPlot = false) override;
+         bool clearWindow = false, bool waterfallPlot = false,
+         const QString &log = "",
+         const std::set<double> &customLogValues = std::set<double>()) override;
+
+  /// Plot contour
+  void plotContour(bool accepted, int plotIndex, const QString &axisName,
+                   const QString &logName,
+                   const std::set<double> &customLogValues,
+                   const QList<QString> &workspaceNames) override;
+
+  /// Plot surface
+  void plotSurface(bool accepted, int plotIndex, const QString &axisName,
+                   const QString &logName,
+                   const std::set<double> &customLogValues,
+                   const QList<QString> &workspaceNames) override;
 
   /// Draw a color fill plot for each of the listed workspaces
   void drawColorFillPlots(
@@ -619,6 +635,12 @@ private:
                              const bool plotDist, int &row, int &col,
                              const QString &wsName,
                              const std::set<int> &spectra);
+
+  /// Get log values and put into a curve spec list
+  void putLogsIntoCurveSpecs(
+      std::vector<CurveSpec> &curveSpecList,
+      const QMultiMap<QString, int> &toPlot, const QString &log,
+      const std::set<double> &customLogValues = std::set<double>());
 
   // Private variables
 
