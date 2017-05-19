@@ -313,6 +313,8 @@ you should have two resulting workspaces for the vanadium run in
 dSpacing and TOF. Additionally there will be another workspace containing
 the splines which will be used when focusing future data.
 
+.. _focusing_data_isis-powder-diffraction-ref:
+
 Focusing a data set
 ^^^^^^^^^^^^^^^^^^^^
 Having successfully processed a vanadium run (see: 
@@ -427,6 +429,12 @@ the same file too:
     output_directory: 'C:\path\to\your\output_dir'
     do_van_normalisation: True
 
+.. warning:: Within the YAML files the most recent value also takes precedence.
+             So if `user_name` appeared twice within a script the value closest
+             to the bottom will be used. This is implementation specific and
+             should not be relied on. Users should strive to ensure each key - value
+             pair appears once to avoid confusion.
+
 Using the configuration file
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -471,4 +479,320 @@ you can still use the original configuration file.
 It is recommended instrument scientists move optimal defaults 
 (such as performing vanadium normalisation) into a configuration
 file which user scripts use.
+
+Cycle mapping files
+--------------------
+The cycle mapping file is used to hold various details about the current
+and past cycles. These details include the empty and vanadium run number(s),
+current label (explained later) and offset filename.
+
+The *label* is used to separate output data into its various cycle numbers,
+Mantid will correctly handle the cycle on input data. The goal of the label
+is to ensure runs end up in the cycle the user wants them to, regardless of
+which cycle ISIS is on.
+
+Examples
+^^^^^^^^^
+These examples explain the layout and concept of yaml files. For
+instrument specific examples please check the mapping file example
+copied from :ref:`copying_example_files_isis-powder-diffraction-ref`
+
+The simplest example of the calibration file is used on Pearl as the
+empty, label and vanadium are the same regardless of mode.
+
+.. code-block:: yaml
+ 
+  # NB this example is not representative of actual run numbers
+  123-200:
+    # Notice how the indentation changes to indicate it belongs
+    # to this section
+    label : "1_2"
+    vanadium_run_numbers : "150"
+    empty_run_numbers : "160"
+    offset_file_name : "pearl_offset_1_2.cal"  
+
+On GEM the two chopper modes *PDF* and *Rietveld* affect the
+empty and vanadium run numbers used. In this case the additional
+indentation underneath the respective mode is used.
+
+Additionally fields can be left blank until a later date
+if runs in different modes have not been collected yet. 
+
+.. code-block:: yaml
+
+    # NB this example is not representative of actual run numbers
+    123-200:
+        label: "1_2"
+        offset_file_name: "offsets.cal"
+        PDF:
+            # Blank entries are allowed provided we do not try to run in PDF mode
+            vanadium_run_numbers: ""
+            empty_run_numbers: ""
+        # Notice it is not case sensitive
+        rietveld:
+            # The indentation indicates these are for Rietveld mode
+            vanadium_run_numbers: "130"
+            empty_run_numbers: "131"
+
+Run numbers
+^^^^^^^^^^^^^
+The run numbers for a cycle use the same syntax as the run number field.
+You can specify ranges of runs, have gaps or individual runs. For example
+*100-103, 105* will specify runs 100, 101, 102, 103 and 105 all pertain
+to those details.
+
+The mapping also allows unbounded runs, this is useful for a cycle that
+is in progress as the final run number of a cycle is unknown
+
+.. code-block:: yaml
+ 
+  1-122:
+    label : "1_1"
+    ...
+
+  123-:
+    label : "1_2"
+    ...
+
+All runs from 1-122 inclusive will go use the details associated with label
+*1_1*, whilst any runs after 123 will use label *1_2*. These values also
+have validation to ensure that there is only one unbounded range and no values
+come after the starting interval. For example in the above example adding a section
+for runs 200- or 200-210 would fail validation. 
+
+Relation to calibration directory
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+The user specified calibration directory directly relates to a cycle mapping
+file, after writing or adapting a cycle mapping file for your instrument 
+you must update the calibration directory. Using the cycle mapping from Peal:
+
+.. code-block:: yaml
+ 
+  # NB this example is not representative of actual run numbers
+  123-200:
+    label : "1_2"
+    vanadium_run_numbers : "150"
+    empty_run_numbers : "160"
+    offset_file_name : "pearl_offset_1_2.cal"  
+
+The relevant fields from the cycle mapping are the *label* and 
+*offset_file_name*. Within the calibration directory a folder
+with the *label* name must exist and contain a cal file with
+the *offset_file_name*.
+
+In this example we need a folder called **1_2** which holds a
+cal file called **pearl_offset_1_2.cal**.
+
+Changing mid-cycle
+^^^^^^^^^^^^^^^^^^^
+The splines of the processed vanadium uses the run number
+and offset file name as a fingerprint to uniquely identify
+it. Because of this we can have two sets of details corresponding
+to the same cycle.
+
+.. code-block:: yaml
+ 
+  # NB this example is not representative of actual run numbers
+  123-150:
+    label : "1_2"
+    vanadium_run_numbers : "150"
+    empty_run_numbers : "152"
+    offset_file_name : "pearl_offset_1_2.cal"  
+
+  # NB this example is not representative of actual run numbers
+  151-200:
+    label : "1_2"
+    # Notice the changed details for runs 151 onwards
+    vanadium_run_numbers : "170"
+    empty_run_numbers : "160"
+    offset_file_name : "pearl_offset_1_2-second.cal"  
+
+Processing partial files
+--------------------------
+The scripts also support processing partial files. This
+tutorial assumes you have successfully focused data
+previously as detailed here: :ref:`focusing_data_isis-powder-diffraction-ref`
+
+To process partial runs for example *.s1* or *.s2* files 
+you must first ensure your user directories are setup to 
+include the folder where these files are located. The
+instructions for this can be found here: :ref:`prerequisites_isis-powder-diffraction-ref`
+*Note: The 'Search Data Archive' option will not locate
+partial runs as only completed runs are published to the data archive.*
+
+To indicate the extension to process the *file_ext* can be specified
+like so:
+
+    from isis_powder import Polaris
+
+    a_pol_obj = Polaris(....)
+
+    a_pol_obj.focus(file_ext="s1", ...)
+    # Or 
+    a_pol_obj.focus(file_ext=".s1", ...)
+
+This will locate a .s1 file for that run number and proceed to focus
+it like a normal run. The output filename will also reflect the fact
+this is a partial file. For run number 123 and file extension s1 
+the output filename will be "s1*InstrumentName*123.nxs" for example.
+This allows users to easily distinguish between full runs and 
+partial runs in the output folder. (For more details about the 
+output folder see TODO)
+
+Absorption corrections on sample
+----------------------------------
+tutorial assumes you have successfully focused data
+previously as detailed here: :ref:`focusing_data_isis-powder-diffraction-ref`.
+
+To perform absorption corrections on a sample we must first specify
+the chemical properties of the sample by creating a sample properties
+object. (See :ref:`intro_to_objects-isis-powder-diffraction-ref`.)
+
+*Note: Not all instruments support sample absorption corrections.
+Please check the instrument reference: 
+:ref:`instrument_doc_links_isis-powder-diffraction-ref`. If the
+instrument has *do_absorb_corrections* (or similar) on the 
+focus method list of parameters it supports sample absorption
+corrections*
+
+.. _create_sampleDetails_isis-powder-diffraction-ref:
+
+Create SampleDetails object
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+First we need to import the sample details object from ISIS Powder
+to be able to use it for setting the sample details. The properties
+required when creating a SampleDetails object is the geometry of the sample.
+
+**Note this assumes a cylinder currently**
+
+- *height* - Cylinder height
+- *radius* - Cylinder radius
+- *center* - List of x, y, z positions of the cylinder
+
+For more details see :ref:`algm-SetSample-v1`.
+
+.. code-block:: python
+
+    from isis_powder import Polaris, SampleDetails
+
+    # Creates a cylinder of height 3.0, radius 2.0
+    # at position 0, 1, 2 (x, y, z)
+    position = [0, 1, 2]
+
+    # Create a new sample details object
+    my_sample = SampleDetails(height=3.0, radius=2.0, center=position)
+
+.. _set_material_sampleDetails_isis-powder-diffraction-ref:
+
+Setting the material details
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Having set the sample geometry we can now set the chemical 
+material and optionally the number density. If the chemical
+formula is not a single element the number density must be
+entered as it cannot be calculated.
+
+For accepted syntax of chemical formulas see
+:ref:`algm-SetSampleMaterial-v1`. Specifically the section
+on specifying chemical composition if you are using isotopes.
+This will allow Mantid to automatically calculate the properties
+except for number density.
+
+*The material must be set before absorption corrections can
+be calculated for a sample.*
+
+.. code-block:: python
+
+    ... snip from previous example ...
+    my_sample = SampleDetails(height=3.0, radius=2.0, center=position)
+    
+    my_sample.set_material(chemical_formula="V")
+    # OR
+    my_sample.set_material(chemical_formula="VNb", number_density=123)
+
+
+Setting material properties
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Advanced material properties can be optionally set instead of letting 
+Mantid calculate them. These properties are:
+
+- *absorption_cross_section* - Attenuation Cross Section
+- *scattering_cross_section* - Scattering Cross Section
+
+*Note: This is purely optional and Mantid will calculate these
+values based on the chemical formula entered if this is not set*
+
+For example:
+.. code-block:: python
+
+    ... snip from previous example ...
+    my_sample = SampleDetails(height=3.0, radius=2.0, center=position)
+    my_sample.set_material(chemical_formula="VNb", number_density=123)
+    
+    # Setting individual properties:
+    my_sample.set_material_properties(absorption_cross_section=123, 
+                                      scattering_cross_section=456)
+
+Using the new SampleDetails object
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Having created a new SampleDetails object 
+(:ref:`create_sampleDetails_isis-powder-diffraction-ref`) and then
+set the chemical material (:ref:`set_material_sampleDetails_isis-powder-diffraction-ref`)
+we can instruct the scripts to use these details whilst focusing. 
+
+This is done by calling *set_sample_details* on the instrument object,
+this will then use those sample details each time absorption corrections
+are applied to the sample. (See :ref:`how_objects_hold_state_isis-powder-diffraction-ref`)
+
+.. code-block:: python
+
+    from isis_powder import Polaris, SampleDetails
+    ... snip from previous examples ...
+    my_sample = SampleDetails(...)
+    my_sample.set_material(...)
+
+    polaris_obj = Polaris(...)
+    polaris_obj.set_sample_details(sample=my_sample)
+
+    # Indicate we want to perform sample absorption corrections whilst focusing
+    polaris_obj.focus(do_absorb_corrections=True, ...)
+
+Changing sample properties
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.. warning:: This method is not recommended for changing multiple samples. 
+             Instead it is recommended you create a new sample details object
+             if you need to change properties mid way through a script. 
+             See :ref:`create_sampleDetails_isis-powder-diffraction-ref`
+             and :ref:`intro_to_objects-isis-powder-diffraction-ref`.
+
+*Note: The geometry of a sample cannot be changed without creating a new 
+sample details object*
+
+Once you have set a material by calling *set_material* or set 
+the properties by calling *set_material_properties* you will 
+not be able to change (or set again) these details without first
+resetting the object. This is to enforce the sample properties 
+being set only once so that users are guaranteed of the state. 
+
+If you wish to change the chemical material or its advanced properties
+without creating a new sample details object you can call 
+*reset_sample_material*. This will reset **all** details (i.e
+advanced properties and chemical properties)
+
+.. code-block:: python
+
+    from isis_powder import Polaris, SampleDetails
+
+    my_sample = SampleDetails(...)
+    my_sample.set_material(...)
+
+    # Next line will throw as it has already been set once
+    my_sample.set_material(...)
+    # This is still ok as its first time
+    my_sample.set_material_properties(...)
+
+    # Reset material
+    my_sample.reset_sample_material()
+    # Now allowed as object does not have a chemical formula associated
+    my_sample.set_material(...)
+
 
