@@ -53,6 +53,9 @@ QwtWorkspaceSpectrumData *QwtWorkspaceSpectrumData::copyWithNewSource(
 /** Size of the data set
  */
 size_t QwtWorkspaceSpectrumData::size() const {
+  if (!isPlottable()) {
+    return 0;
+  }
   if (m_binCentres || m_isHistogram) {
     return m_Y.size();
   }
@@ -94,7 +97,12 @@ double QwtWorkspaceSpectrumData::getE(size_t i) const {
   return ei;
 }
 
-size_t QwtWorkspaceSpectrumData::esize() const { return m_E.size(); }
+size_t QwtWorkspaceSpectrumData::esize() const {
+  if (!isPlottable()) {
+    return 0;
+  }
+  return m_E.size();
+}
 
 /**
  * @return A string containin the text to use as an X axis label
@@ -121,7 +129,6 @@ bool QwtWorkspaceSpectrumData::setAsDistribution(bool on) {
 QwtWorkspaceSpectrumData &QwtWorkspaceSpectrumData::
 operator=(const QwtWorkspaceSpectrumData &rhs) {
   if (this != &rhs) {
-    static_cast<MantidQwtMatrixWorkspaceData &>(*this) = rhs;
     m_wsIndex = rhs.m_wsIndex;
     m_X = rhs.m_X;
     m_Y = rhs.m_Y;
