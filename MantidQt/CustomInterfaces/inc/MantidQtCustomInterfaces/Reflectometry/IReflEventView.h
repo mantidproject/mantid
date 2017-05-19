@@ -47,7 +47,7 @@ public:
   virtual IReflEventPresenter *getPresenter() const = 0;
 
   /// Slice type enums
-  enum SliceType { UniformEven, Uniform, Custom, LogValue };
+  enum class SliceType { UniformEven, Uniform, Custom, LogValue };
 
   virtual std::string getTimeSlicingValues() const = 0;
   virtual std::string getTimeSlicingType() const = 0;
