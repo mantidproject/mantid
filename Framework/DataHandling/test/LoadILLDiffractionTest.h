@@ -30,7 +30,7 @@ public:
     TS_ASSERT(alg.isInitialized());
   }
 
-  void test_Exec() {
+  void test_no_scan() {
 
     LoadILLDiffraction alg;
     // Don't put output in ADS by default
@@ -47,6 +47,24 @@ public:
     TS_ASSERT(outputWS);
     TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 3073);
     TS_ASSERT_EQUALS(outputWS->blocksize(), 1);
+  }
+
+  void test_scan() {
+    LoadILLDiffraction alg;
+    // Don't put output in ADS by default
+    alg.setChild(true);
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    TS_ASSERT(alg.isInitialized());
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", "000017.nxs"));
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setPropertyValue("OutputWorkspace", "_unused_for_child"));
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(alg.isExecuted());
+
+    MatrixWorkspace_sptr outputWS = alg.getProperty("OutputWorkspace");
+    TS_ASSERT(outputWS);
+    TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 3073);
+    TS_ASSERT_EQUALS(outputWS->blocksize(), 21);
   }
 };
 
