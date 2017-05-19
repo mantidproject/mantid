@@ -362,14 +362,14 @@ public:
                                              .getEulerAngles("XYZ")[0]) %
                                  180,
                         1e-12)
-        TS_ASSERT_DELTA(90.0, std::lround(detInfo.rotation({i, j})
-                                              .getEulerAngles("XYZ")[2]) %
-                                  180,
+        TS_ASSERT_DELTA(90.0, detInfo.rotation({i, j}).getEulerAngles("XYZ")[2],
                         1e-12)
       }
 
-      TS_ASSERT_DELTA(0.0, detInfo.rotation({i, 0}).getEulerAngles("XYZ")[1],
-                      1e-12)
+      TS_ASSERT_DELTA(
+          0.0,
+          std::lround(detInfo.rotation({i, 0}).getEulerAngles("XYZ")[1]) % 180,
+          1e-12)
       TS_ASSERT_DELTA(30.0, detInfo.rotation({i, 1}).getEulerAngles("XYZ")[1],
                       1e-12)
       TS_ASSERT_DELTA(60.0, detInfo.rotation({i, 2}).getEulerAngles("XYZ")[1],
