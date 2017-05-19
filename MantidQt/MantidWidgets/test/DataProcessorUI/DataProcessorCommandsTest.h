@@ -8,12 +8,14 @@
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorAppendGroupCommand.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorAppendRowCommand.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorClearSelectedCommand.h"
+#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorCollapseGroupsCommand.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorCopySelectedCommand.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorCutSelectedCommand.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorDeleteGroupCommand.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorDeleteRowCommand.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorExpandCommand.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorExportTableCommand.h"
+#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorExpandGroupsCommand.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorGroupRowsCommand.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorImportTableCommand.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorMockObjects.h"
@@ -21,6 +23,7 @@
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorOpenTableCommand.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorOptionsCommand.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorPasteSelectedCommand.h"
+#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorPauseCommand.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorPlotGroupCommand.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorPlotRowCommand.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorPresenter.h"
@@ -153,6 +156,19 @@ public:
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockPresenter));
   }
 
+  void test_pause_command() {
+    NiceMock<MockDataProcessorPresenter> mockPresenter;
+    DataProcessorPauseCommand command(&mockPresenter);
+
+    // The presenter should be notified with the PauseFlag
+    EXPECT_CALL(mockPresenter, notify(DataProcessorPresenter::PauseFlag))
+        .Times(Exactly(1));
+    // Execute the command
+    command.execute();
+    // Verify expectations
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockPresenter));
+  }
+
   void test_expand_command() {
     NiceMock<MockDataProcessorPresenter> mockPresenter;
     DataProcessorExpandCommand command(&mockPresenter);
@@ -160,6 +176,34 @@ public:
     // The presenter should be notified with the ExpandSelectionFlag
     EXPECT_CALL(mockPresenter,
                 notify(DataProcessorPresenter::ExpandSelectionFlag))
+        .Times(Exactly(1));
+    // Execute the command
+    command.execute();
+    // Verify expectations
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockPresenter));
+  }
+
+  void test_expand_groups_command() {
+    NiceMock<MockDataProcessorPresenter> mockPresenter;
+    DataProcessorExpandGroupsCommand command(&mockPresenter);
+
+    // The presenter should be notified with the ExpandAllGroupsFlag
+    EXPECT_CALL(mockPresenter,
+                notify(DataProcessorPresenter::ExpandAllGroupsFlag))
+        .Times(Exactly(1));
+    // Execute the command
+    command.execute();
+    // Verify expectations
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockPresenter));
+  }
+
+  void test_collapse_groups_command() {
+    NiceMock<MockDataProcessorPresenter> mockPresenter;
+    DataProcessorCollapseGroupsCommand command(&mockPresenter);
+
+    // The presenter should be notified with the CollapseAllGroupsFlag
+    EXPECT_CALL(mockPresenter,
+                notify(DataProcessorPresenter::CollapseAllGroupsFlag))
         .Times(Exactly(1));
     // Execute the command
     command.execute();
