@@ -4,12 +4,14 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidDataHandling/LoadILLDiffraction.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidDataHandling/Load.h"
 #include "MantidKernel/ConfigService.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
-using Mantid::DataHandling::LoadILLDiffraction;
+using namespace Mantid::DataHandling;
 
 class LoadILLDiffractionTest : public CxxTest::TestSuite {
 public:
@@ -22,6 +24,7 @@ public:
 
   void setUp() override {
     ConfigService::Instance().appendDataSearchSubDir("ILL/D20/");
+    ConfigService::Instance().setFacility("ILL");
   }
 
   void test_Init() {
@@ -71,6 +74,26 @@ public:
     TS_ASSERT(outputWS);
     TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 3073);
     TS_ASSERT_EQUALS(outputWS->blocksize(), 21);
+  }
+
+  void test_multifile() {
+    // Tests 2 non-scanned files for D20 with the generic Load on ADS
+    // This tests indirectly the confidence method
+    // (and NexusDescriptor issue therein)
+
+    Load alg;
+    alg.initialize();
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setPropertyValue("Filename", "967100-967101.nxs"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "_outWS"));
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(alg.isExecuted());
+
+    MatrixWorkspace_sptr outputWS =
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("_outWS");
+    TS_ASSERT(outputWS);
+    TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 3073);
+    TS_ASSERT_EQUALS(outputWS->blocksize(), 1);
   }
 };
 
