@@ -829,7 +829,7 @@ class CrystalField(object):
         createWS.initialize()
 
         xArray, yArray = self.getSpectrum(i, workspace, ws_index)
-        ws_name = name if name is not None else 'CrystalField_%s' % self._ion
+        ws_name = name if name is not None else 'CrystalField_%s' % self.Ion
 
         if isinstance(i, int):
             if workspace is None:

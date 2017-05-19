@@ -114,12 +114,12 @@ The new output::
   
 To calculate a spectrum we need to define a shape of each peak (peak profile function) and its default width (`FWHM`).
 The width can be set either via a keyword argument or a property with name `FWHM`. If the peak shape isn't set the default
-of Lorentzian is assumed. To set a different shape use the `setPeaks` method::
+of Lorentzian is assumed. To set a different shape use the `PeakShape` property::
 
-  cf.setPeaks('Gaussian')
+  cf.PeakShape = 'Gaussian'
   cf.FWHM = 0.9
   
-The arguments of `setPeaks` are expected to be names of Mantid peak fit functions. At the moment only `Lorentzian` and
+The values of `PeakShape` are expected to be names of Mantid peak fit functions. At the moment only `Lorentzian` and
 `Gaussian` can be used.
 
 After the peak shape is defined a spectrum can be calculated::
@@ -280,11 +280,11 @@ become lists. Here is an example of defining a `CrystalField` object with two sp
 
     cf = CrystalField('Ce', 'C2v', B20=0.37737, B22=3.9770, B40=-0.031787, B42=-0.11611, B44=-0.12544,
                       Temperature=[44.0, 50], FWHM=[1.1, 0.9])
-    cf.setPeaks('Lorentzian')
+    cf.PeakShape = 'Lorentzian'
     cf.peaks[0].param[0]['FWHM'] = 1.11
     cf.peaks[1].param[1]['FWHM'] = 1.12
-    cf.setBackground(peak=Function('Gaussian', Height=10, Sigma=0.3),
-                     background=Function('FlatBackground', A0=1.0))
+    cf.background = Background(peak=Function('Gaussian', Height=10, Sigma=0.3),
+                               background=Function('FlatBackground', A0=1.0))
     cf.background[1].peak.param['Sigma'] = 0.8
     cf.background[1].background.param['A0'] = 1.1
 
@@ -301,7 +301,7 @@ change::
     cf.background[1].peak.ties(Height=20.2)
     cf.background[1].peak.constraints('Sigma > 0.2')
     cf.peaks[1].tieAll('FWHM=2*f1.FWHM', 2, 5)
-    cf.peaks[0].constrainAll('FWHM < 2.2', 1, 6)
+    cf.peaks[0].constrainAll('FWHM < 2.2', 1, 4)
 
 The resolution model also needs to be initialised from a list::
 
