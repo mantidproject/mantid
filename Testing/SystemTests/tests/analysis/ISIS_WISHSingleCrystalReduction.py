@@ -1,4 +1,3 @@
-
 from mantid.simpleapi import *
 import stresstesting
 import numpy as np

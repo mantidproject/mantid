@@ -505,17 +505,19 @@ void PredictPeaks::calculateQAndAddToOutput(const V3D &hkl,
 
   } else if (useExtendedDetectorSpace) {
     // use extended detector space to try and guess peak position
-    const auto component =
+    const auto returnedComponent =
         m_inst->getComponentByName("extended-detector-space");
-    const auto c = boost::dynamic_pointer_cast<const ObjComponent>(component);
-    if (!c)
+    // Check that the component is valid
+    const auto component =
+        boost::dynamic_pointer_cast<const ObjComponent>(returnedComponent);
+    if (!component)
       throw std::runtime_error("PredictPeaks: user requested use of a extended "
                                "detector space to predict peaks but there is no"
                                "definition in the IDF");
 
     // find where this Q vector should intersect with "extended" space
     Geometry::Track track(detInfo.samplePosition(), detectorDir);
-    if (!c->interceptSurface(track))
+    if (!component->interceptSurface(track))
       return;
 
     // The exit point is the vector to the place that we hit a detector
