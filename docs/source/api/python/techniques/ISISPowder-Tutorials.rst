@@ -18,7 +18,7 @@ completed the steps detailed at the following links:
 
 For these examples we will be using an arbitrary instrument,
 and any differences between other instruments will be
-clearly highlighted and documented.
+clearly documented.
 
 .. _obtaining_example_data_isis-powder-diffraction-ref:
 
@@ -28,8 +28,8 @@ These tutorials will use the data found in the
 ISIS example data sets. The data sets can be downloaded
 from the `Mantid download page <https://download.mantidproject.org/>`_,
 under *Sample datasets* - *ISIS*. Users may also use their own
-data instead however they results may differ and some additional
-configuration may be required which is explained in later tutorial.
+data instead however results will differ. Some additional
+configuration may a;sp be required which is explained in later tutorials.
 
 .. _setup_tutorials_isis-powder-diffraction-ref:
 
@@ -37,16 +37,17 @@ Setting up
 ------------
 This tutorial will help you setup the ISIS Powder
 diffraction scripts for your instrument. It assumes
-no prior knowledge or usage and a fresh install of Mantid.
+no prior knowledge or usage of the scripts and a fresh install of Mantid.
 
 .. _copying_example_files_isis-powder-diffraction-ref:
 
 Copying instrument example files
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Open your Mantid install location, by default on Windows this
-will be `C:\\MantidInstall` on Linux `/opt/Mantid`. Open *scripts*
-*diffraction* and *isis_powder*. For this tutorial we will be using
-Polaris data however you may set-up a different instrument. 
+Open your Mantid install location, by default this
+will be `C:\\MantidInstall` on Windows and `/opt/Mantid` on Linux.
+Open *scripts*, *diffraction*, *isis_powder*. 
+In these tutorials we will be using Polaris examples and data
+however you may set-up a different instrument. 
 
 Open *polaris_routines* (or *'instName'_routines*), there will
 be a folder called *examples*. Copy the contents (all files and folders)
@@ -68,8 +69,8 @@ instrument name:
 
 .. _intro_to_objects-isis-powder-diffraction-ref:
 
-Quick introduction to objects
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+A quick introduction to objects
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 *This section is for script writers who are not familiar or comfortable
 with object orientation. If you feel comfortable with the concept of
 objects holding state you may skip onto the next section.*
@@ -79,20 +80,20 @@ best illustrated with the below example:
 
 .. code-block:: python
 
-   blue_duck = Duck(name="Blue")
-   red_duck = Duck(name="Rubber duck")
+   blue_duck = Duck(type="Blue")
+   red_duck = Duck(type="Rubber duck")
 
-On lines 1 and 2 we create a new object, specifically a duck. Each
-object which can have a name we choose (in this case *blue_duck* and 
-*red_duck*). Each object has separate state, but the same actions we
-can perform on it. For example
+On lines 1 and 2 we create a new duck object. Each
+object has a name we choose (in this case *blue_duck* and 
+*red_duck*) and a separate state, but the same actions we
+can perform on each are the same. For example
 
 .. code-block:: python
 
     blue_duck.feed()
 
-We now have fed *blue_duck* so its state will have changed to no longer
-being hungry. However the *red_duck* was not changed at all so its state
+We now have fed *blue_duck* so its state will have changed so it is no longer
+hungry. However the *red_duck* has not changed at all so its state
 is still hungry in this example.
 
 Because objects have their own state you can create multiple objects
@@ -109,31 +110,33 @@ tutorial :ref:`copying_example_files_isis-powder-diffraction-ref`.
 There should be two files and a folder. If you are using the
 ISIS example data set 
 (see :ref:`obtaining_example_data_isis-powder-diffraction-ref`)
-this will be configured for you.
+you will not need to modify anything at this point.
 
 If you are not using the ISIS example data set you will need to
 modify your calibration directory and cycle mapping as detailed
-here : TODO link to later tutorial section
+here : :ref:`cycle_mapping_files_isis-powder-diffraction-ref`
 
 Take notes of the following paths as we will need them later:
+
 - The path to the folder you are currently in
 - The name of the 'calibration' folder
 - The name of the cycle mapping file 
 
 For example in the POLARIS example folder these filenames will be:
+
 - Name of 'calibration' folder: **Calibration**
-- Name of cycle mapping file: **polaris_cycle_map_example.yaml**
-*Note you may not have file extensions showing, in that case you
-will see **polaris_cycle_map_example** and need to remember to insert 
-**.yaml** after the filename*
+- Name of cycle mapping file: **polaris_cycle_map_example.YAML**
+  *Note: you may not have file extensions showing, in that case you
+  will see 'polaris_cycle_map_example' and need to insert 
+  **.YAML** after the filename still*
 
 .. _creating_inst_object_isis-powder-diffraction-ref:
 
 Creating the instrument object
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-With the understanding of an object described in: 
+Having introduced objects in: 
 :ref:`intro_to_objects-isis-powder-diffraction-ref` we can now
-create an instrument object. 
+go ahead and create an instrument object. 
 
 .. code-block:: python
 
@@ -143,7 +146,7 @@ create an instrument object.
     a_pol_obj = Polaris()
 
 If you try to run this code the script will complain whenever it
-comes across a parameter is requires but has not been set yet.
+comes across a parameter it requires but has not been set.
 The following parameters must be set for all instruments:
 
 - *user_name*
@@ -153,8 +156,8 @@ The following parameters must be set for all instruments:
 There will also be additional instrument specific parameters required,
 a list of these can be found in the relevant instrument reference: 
 :ref:`instrument_doc_links_isis-powder-diffraction-ref` for example
-we require the cycle mapping file. On GEM and POLARIS this is 
-called the *calibration_mapping_file* on PEARL this is the 
+all instruments require a cycle mapping file. On GEM and POLARIS this is 
+called the *calibration_mapping_file*, on PEARL this is the 
 *calibration_config_path*. 
 
 Using the above information we can start to populate the required
@@ -167,11 +170,11 @@ for where these paths came from):
 
     a_pol_obj = Polaris(user_name="Your name here", 
                         calibration_directory=*Path to calibration directory*,
-                        calibration_config_path=*Path to folder*\\*cycle mapping name.yaml*,
+                        calibration_config_path=*Path to folder*\\*cycle mapping name.YAML*,
                         ....etc.)
 
-Each time we execute the code it should inform us which parameter is 
-required at that point and we have forgotten to enter. When you see
+Each time we execute the code it will inform us if a parameter is 
+required at that point and we have forgotten to enter it. When you see
 *script execution finished* it means we have enough information to
 create the instrument object. 
 
@@ -199,8 +202,8 @@ We will use this to create a vanadium run on Polaris:
 
 On line 4 we call the create_vanadium method on the Polaris object,
 all instruments will have this method however the parameters they
-accept and require are bespoke to each instrument. These can be
-found in each individual instrument reference document:
+accept and require are bespoke. Parameters can be
+found for each individual instrument in the reference document:
 :ref:`instrument_doc_links_isis-powder-diffraction-ref`
 
 .. _how_objects_hold_state_isis-powder-diffraction-ref:
@@ -247,7 +250,7 @@ example:
     a_pol_obj.create_vanadium(...) 
 
 For these reasons it is recommended to create multiple objects
-when you needs to have switch between settings within a script:
+when you need to switch between different settings within a script:
 
 .. code-block:: python
 
@@ -266,7 +269,7 @@ when you needs to have switch between settings within a script:
 Creating the vanadium run
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 Because of the way objects hold state in ISIS Powder 
-(discussed here :ref:`how_objects_hold_state_isis-powder-diffraction-ref`)
+(see: :ref:`how_objects_hold_state_isis-powder-diffraction-ref`)
 it is up to the reader of this tutorial where they set different 
 parameters. 
 
@@ -275,9 +278,10 @@ and can be found in the individual instrument reference document:
 :ref:`instrument_doc_links_isis-powder-diffraction-ref`
 
 Additionally as noted previously this tutorial assumes the user
-is using the example ISIS data set (:ref:`obtaining_example_data_isis-powder-diffraction-ref`)
-if they are not they will need to setup their cycle mapping to their 
-data detailed here: TODO
+is using the example ISIS data set (
+see: :ref:`obtaining_example_data_isis-powder-diffraction-ref`).
+If they are not they will need to setup their cycle mapping to their 
+data detailed here: :ref:`cycle_mapping_files_isis-powder-diffraction-ref`
 
 For Polaris we require the following parameters in addition to the
 parameters discussed to create the object (see
@@ -294,8 +298,7 @@ parameters discussed to create the object (see
   as it will increase the script run time from seconds to 10-30 minutes.
 
 *Note: Due to the complexity of the Polaris instrument definition it will take 
-Mantid up to 10 minutes to load your first data set for this instrument.
-Subsequent loads will take seconds so please be patient.*
+Mantid up to 10 minutes to load your first data set for this instrument.*
 
 .. code-block:: python
 
@@ -320,9 +323,9 @@ Focusing a data set
 Having successfully processed a vanadium run (see: 
 :ref:`creating_first_vanadium_run_isis-powder-diffraction-ref`)
 we are now able to focus a data set. For this tutorial we will
-be focusing a standard sample of Silicon.
+be focusing a sample of Silicon.
 
-*It is recommended to create a separate script file for
+*It is highly recommended to create a separate script file for
 focusing data, this ensures the vanadium is not reprocessed
 every time data is focused.*
 
@@ -335,9 +338,9 @@ instrument reference document:
 .. code-block:: python
 
     from isis_powder import Polaris
-
     # This should be set from the previous tutorial. 
     a_pol_obj = Polaris(....)
+
     a_pol_obj.focus(...)
 
 To focus the Si sample included in the ISIS data set we 
@@ -379,6 +382,21 @@ containing the spline(s) used whilst processing the data.
 
 Congratulations you have now focused a data set using ISIS Powder.
 
+.. _output_folder_isis-powder-diffraction-ref:
+
+Output files
+^^^^^^^^^^^^^
+After focusing the data it is saved in a variety of formats which
+suits the instrument. These can be found in the user specified 
+output directory. The scripts will automatically create the
+label for the current cycle (covered in additional detail later
+:ref:`cycle_mapping_files_isis-powder-diffraction-ref`).
+
+Within the label folder a new folder will be created or used
+matching the *user_name* specified. Within that folder will
+be the output data in the various formats that is used on 
+that instrument to perform data analysis.
+
 Using configuration files
 ---------------------------
 This tutorial assumes you have successfully created an instrument
@@ -398,7 +416,7 @@ Creating a configuration file
 Navigate back to the files copied from the example folder (see:
 :ref:`copying_example_files_isis-powder-diffraction-ref`). There is
 a file we have not been using which will be named along the lines of
-*'inst'_config_example.yaml*.
+*'inst'_config_example.YAML*.
 
 This will come pre-configured with some examples of how parameters are
 set in the files. The names always match parameter names which
@@ -416,21 +434,23 @@ For example if we currently have the output directory as follows:
 
 We can instead move it to the YAML file so it reads as follows:
 
-.. code-block:: YAML
-
+.. code-block:: yaml
+    
+    # YAML FILE:
     # Note the single quotes on a path in a YAML file
     output_directory: 'C:\path\to\your\output_dir'
 
 Additionally we can move parameters which should be defaults into
 the same file too:
 
-.. code-block:: YAML
+.. code-block:: yaml
 
+    #YAML FILE:
     output_directory: 'C:\path\to\your\output_dir'
     do_van_normalisation: True
 
 .. warning:: Within the YAML files the most recent value also takes precedence.
-             So if `user_name` appeared twice within a script the value closest
+             So if `user_name` appeared twice the value closest
              to the bottom will be used. This is implementation specific and
              should not be relied on. Users should strive to ensure each key - value
              pair appears once to avoid confusion.
@@ -439,18 +459,18 @@ Using the configuration file
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 You will need to make a note of the full path to the configuration
-file. Note that the filename entered must end with .yaml (even if it
+file. Note that the filename entered must end with .YAML (even if it
 is not shown when browsing the files on your OS).
 
-Setting the configuration file at instrument object creation
-from the previous example we now have a default output directory.
-Additionally we will perform vanadium normalisation by default too. 
+Setting the configuration file from the previous example we 
+now have a default output directory and perform vanadium normalisation
+by default too. 
 
 .. code-block:: python
 
     from isis_powder import Polaris
 
-    config_file_path = r"C:\path\to\your\config_file.yaml"
+    config_file_path = r"C:\path\to\your\config_file.YAML"
     a_pol_obj = Polaris(config_file=config_file_path, ...)
     # Will now divide by the vanadium run by default as this was
     # set in the configuration file
@@ -464,7 +484,7 @@ you can still use the original configuration file.
 
     from isis_powder import Polaris
 
-    config_file_path = r"C:\path\to\your\config_file.yaml"
+    config_file_path = r"C:\path\to\your\config_file.YAML"
 
     # Output directory changed to our own output directory, 
     # and warning emitted informing us this has happened
@@ -478,24 +498,26 @@ you can still use the original configuration file.
 
 It is recommended instrument scientists move optimal defaults 
 (such as performing vanadium normalisation) into a configuration
-file which user scripts use.
+file which the scripts use.
+
+.. _cycle_mapping_files_isis-powder-diffraction-ref:
 
 Cycle mapping files
 --------------------
 The cycle mapping file is used to hold various details about the current
 and past cycles. These details include the empty and vanadium run number(s),
-current label (explained later) and offset filename.
+current label and offset filename.
 
 The *label* is used to separate output data into its various cycle numbers,
 Mantid will correctly handle the cycle on input data. The goal of the label
-is to ensure runs end up in the cycle the user wants them to, regardless of
-which cycle ISIS is on.
+is to ensure runs end up in the output folder the user wants them in, 
+regardless of which cycle ISIS is on.
 
 Examples
 ^^^^^^^^^
-These examples explain the layout and concept of yaml files. For
+These examples explain the layout and concept of YAML files. For
 instrument specific examples please check the mapping file example
-copied from :ref:`copying_example_files_isis-powder-diffraction-ref`
+from :ref:`copying_example_files_isis-powder-diffraction-ref`
 
 The simplest example of the calibration file is used on Pearl as the
 empty, label and vanadium are the same regardless of mode.
@@ -515,7 +537,7 @@ On GEM the two chopper modes *PDF* and *Rietveld* affect the
 empty and vanadium run numbers used. In this case the additional
 indentation underneath the respective mode is used.
 
-Additionally fields can be left blank until a later date
+Fields can be left blank until a later date
 if runs in different modes have not been collected yet. 
 
 .. code-block:: yaml
@@ -538,8 +560,7 @@ Run numbers
 ^^^^^^^^^^^^^
 The run numbers for a cycle use the same syntax as the run number field.
 You can specify ranges of runs, have gaps or individual runs. For example
-*100-103, 105* will specify runs 100, 101, 102, 103 and 105 all pertain
-to those details.
+*100-103, 105* will specify runs 100, 101, 102, 103 and 105.
 
 The mapping also allows unbounded runs, this is useful for a cycle that
 is in progress as the final run number of a cycle is unknown
@@ -558,12 +579,12 @@ All runs from 1-122 inclusive will go use the details associated with label
 *1_1*, whilst any runs after 123 will use label *1_2*. These values also
 have validation to ensure that there is only one unbounded range and no values
 come after the starting interval. For example in the above example adding a section
-for runs 200- or 200-210 would fail validation. 
+for runs *200-* or *200-210* would fail validation. 
 
 Relation to calibration directory
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 The user specified calibration directory directly relates to a cycle mapping
-file, after writing or adapting a cycle mapping file for your instrument 
+file. After writing or adapting a cycle mapping file for your instrument 
 you must update the calibration directory. Using the cycle mapping from Peal:
 
 .. code-block:: yaml
@@ -580,7 +601,8 @@ The relevant fields from the cycle mapping are the *label* and
 with the *label* name must exist and contain a cal file with
 the *offset_file_name*.
 
-In this example we need a folder called **1_2** which holds a
+In this example we need a folder within the calibration 
+directory called **1_2** which holds a
 cal file called **pearl_offset_1_2.cal**.
 
 Changing mid-cycle
@@ -599,7 +621,6 @@ to the same cycle.
     empty_run_numbers : "152"
     offset_file_name : "pearl_offset_1_2.cal"  
 
-  # NB this example is not representative of actual run numbers
   151-200:
     label : "1_2"
     # Notice the changed details for runs 151 onwards
@@ -611,37 +632,41 @@ Processing partial files
 --------------------------
 The scripts also support processing partial files. This
 tutorial assumes you have successfully focused data
-previously as detailed here: :ref:`focusing_data_isis-powder-diffraction-ref`
+previously as detailed here: :ref:`focusing_data_isis-powder-diffraction-ref`.
 
 To process partial runs for example *.s1* or *.s2* files 
-you must first ensure your user directories are setup to 
-include the folder where these files are located. The
-instructions for this can be found here: :ref:`prerequisites_isis-powder-diffraction-ref`
+you must ensure the user directories are setup to 
+include the folder where these files are located. 
+
+The instructions for this can be found here: 
+:ref:`prerequisites_isis-powder-diffraction-ref`.
 *Note: The 'Search Data Archive' option will not locate
 partial runs as only completed runs are published to the data archive.*
 
 To indicate the extension to process the *file_ext* can be specified
 like so:
 
+.. code-block:: python
+
     from isis_powder import Polaris
 
     a_pol_obj = Polaris(....)
 
     a_pol_obj.focus(file_ext="s1", ...)
-    # Or 
+    # Or
     a_pol_obj.focus(file_ext=".s1", ...)
 
-This will locate a .s1 file for that run number and proceed to focus
-it like a normal run. The output filename will also reflect the fact
+This will locate a .s1 file for that run number and focus
+it like a normal run. The output filename will also reflect that
 this is a partial file. For run number 123 and file extension s1 
-the output filename will be "s1*InstrumentName*123.nxs" for example.
+the output filename will be *s1'InstrumentName'123.nxs*.
 This allows users to easily distinguish between full runs and 
 partial runs in the output folder. (For more details about the 
-output folder see TODO)
+output folder see :ref:`output_folder_isis-powder-diffraction-ref`)
 
 Absorption corrections on sample
 ----------------------------------
-tutorial assumes you have successfully focused data
+This tutorial assumes you have successfully focused data
 previously as detailed here: :ref:`focusing_data_isis-powder-diffraction-ref`.
 
 To perform absorption corrections on a sample we must first specify
@@ -651,17 +676,16 @@ object. (See :ref:`intro_to_objects-isis-powder-diffraction-ref`.)
 *Note: Not all instruments support sample absorption corrections.
 Please check the instrument reference: 
 :ref:`instrument_doc_links_isis-powder-diffraction-ref`. If the
-instrument has *do_absorb_corrections* (or similar) on the 
-focus method list of parameters it supports sample absorption
-corrections*
+instrument has a *set_sample_details* method it supports sample 
+absorption corrections*
 
 .. _create_sampleDetails_isis-powder-diffraction-ref:
 
 Create SampleDetails object
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-First we need to import the sample details object from ISIS Powder
-to be able to use it for setting the sample details. The properties
-required when creating a SampleDetails object is the geometry of the sample.
+First we need to import the sample details object from ISIS Powder. 
+The properties required when creating a SampleDetails 
+object is the geometry of the sample.
 
 **Note this assumes a cylinder currently**
 
@@ -768,7 +792,7 @@ sample details object*
 
 Once you have set a material by calling *set_material* or set 
 the properties by calling *set_material_properties* you will 
-not be able to change (or set again) these details without first
+not be able to change (or set) these details without first
 resetting the object. This is to enforce the sample properties 
 being set only once so that users are guaranteed of the state. 
 
@@ -797,8 +821,8 @@ advanced properties and chemical properties)
 Instrument advanced properties
 -------------------------------
 .. warning:: This section is intended for instrument scientists.
-             The advanced configuration distributed for Mantid
-             will use the optimal values for that instrument and
+             The advanced configuration distributed with Mantid
+             use optimal values for each instrument and
              should not be changed unless you understand what you
              are doing.
 
@@ -842,10 +866,10 @@ For example to test a different spline coefficient value
     a_pol_obj = Polaris(spline_coefficient=80, ...)
     a_pol_obj.create_vanadium(...)
 
-Will create a new vanadium run with the spline coefficient
-set to 80. Note that until create_vanadium is created again
-in this example any future data which is focused will implicitly
-use the splines with a coefficient of 80.
+This will create a new vanadium run with the spline coefficient
+set to 80. Note that until create_vanadium is run again
+in this example any future data will implicitly use the 
+splines with a coefficient of 80.
 
 If you wish to change or view the advanced configuration files
 these can be found under 
