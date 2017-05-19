@@ -5129,7 +5129,7 @@ void SANSRunWindow::updateIDFFilePathForBatch() {
   // We base the IDF entry on the sample scatter entry of the first row
   auto *table_item = m_uiForm.batch_table->item(0, 0);
   auto scatter_sample_run = table_item->text();
-  QString getIdf = "i.get_idf_path_for_run(`" + scatter_sample_run + "`)\n";
+  QString getIdf = "i.get_idf_path_for_run(\"" + scatter_sample_run + "\")\n";
   updateIDFInfo(getIdf);
 }
 
