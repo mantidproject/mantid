@@ -399,7 +399,8 @@ public:
     IndexInfo indices(2, Parallel::StorageMode::Distributed);
     indices.setSpectrumDefinitions(std::vector<SpectrumDefinition>(2));
     std::unique_ptr<Workspace2D> ws;
-    TS_ASSERT_THROWS_NOTHING(ws = create<Workspace2D>(indices, BinEdges{1, 2, 4}));
+    TS_ASSERT_THROWS_NOTHING(
+        ws = create<Workspace2D>(indices, BinEdges{1, 2, 4}));
     TS_ASSERT_EQUALS(ws->storageMode(), Parallel::StorageMode::Distributed);
   }
 
