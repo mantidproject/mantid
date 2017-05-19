@@ -19,7 +19,8 @@ class IDetector;
 namespace API {
 class SpectrumInfo;
 /**
- * This class is not intended for direct use. Use NearestNeighbourInfo instead!
+ * This class is not intended for direct use. Use WorkspaceNearestNeighbourInfo
+ * instead!
  *
  * This class is used to find the nearest neighbours of a detector in the
  * instrument geometry. This class can be queried through calls to the
@@ -58,11 +59,11 @@ class SpectrumInfo;
  *  File change history is stored at: <https://github.com/mantidproject/mantid>
  *  Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-class MANTID_API_DLL NearestNeighbours {
+class MANTID_API_DLL WorkspaceNearestNeighbours {
 public:
-  NearestNeighbours(int nNeighbours, const SpectrumInfo &spectrumInfo,
-                    std::vector<specnum_t> spectrumNumbers,
-                    bool ignoreMaskedDetectors = false);
+  WorkspaceNearestNeighbours(int nNeighbours, const SpectrumInfo &spectrumInfo,
+                             std::vector<specnum_t> spectrumNumbers,
+                             bool ignoreMaskedDetectors = false);
 
   // Neighbouring spectra by radius
   std::map<specnum_t, Mantid::Kernel::V3D>

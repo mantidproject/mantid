@@ -1,7 +1,7 @@
 #include "MantidAlgorithms/SmoothNeighbours.h"
 #include "MantidAPI/DetectorInfo.h"
 #include "MantidAPI/InstrumentValidator.h"
-#include "MantidAPI/NearestNeighbourInfo.h"
+#include "MantidAPI/WorkspaceNearestNeighbourInfo.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/EventList.h"
@@ -329,7 +329,8 @@ void SmoothNeighbours::findNeighboursUbiqutious() {
   m_neighbours.resize(inWS->getNumberHistograms());
 
   bool ignoreMaskedDetectors = getProperty("IgnoreMaskedDetectors");
-  NearestNeighbourInfo neighbourInfo(*inWS, ignoreMaskedDetectors, nNeighbours);
+  WorkspaceNearestNeighbourInfo neighbourInfo(*inWS, ignoreMaskedDetectors,
+                                              nNeighbours);
 
   // Cull by radius
   RadiusFilter radiusFilter(Radius);

@@ -4,6 +4,7 @@
 #include <cxxtest/TestSuite.h>
 #include "MantidAlgorithms/CalculateMuonAsymmetry.h"
 #include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/VectorHelper.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/AlgorithmManager.h"
@@ -72,15 +73,6 @@ IAlgorithm_sptr setUpAlg() {
       "FittingFunction",
       "name=UserFunction,Formula=A*cos(omega*x+phi),A=10,omega=3.0,phi=0.0");
   return asymmAlg;
-}
-
-std::vector<double> convertToVec(std::string const &list) {
-  std::vector<double> vec;
-  std::vector<std::string> tmpVec;
-  boost::split(tmpVec, list, boost::is_any_of(","));
-  std::transform(tmpVec.begin(), tmpVec.end(), std::back_inserter(vec),
-                 [](std::string const &element) { return std::stod(element); });
-  return vec;
 }
 
 class CalculateMuonAsymmetryTest : public CxxTest::TestSuite {
@@ -285,7 +277,8 @@ public:
     TS_ASSERT(alg->isExecuted());
     MatrixWorkspace_sptr outFromCounts = alg->getProperty("OutputWorkspace");
     auto normFromCounts =
-        convertToVec(alg->getPropertyValue("NormalizationConstant"));
+        Mantid::Kernel::VectorHelper::splitStringIntoVector<double>(
+            alg->getPropertyValue("NormalizationConstant"));
     // calculate in two parts
     // get estimate for asymmetry
     IAlgorithm_sptr estAlg =
@@ -314,7 +307,8 @@ public:
     TS_ASSERT(alg2->isExecuted());
     MatrixWorkspace_sptr outFromAsymm = alg2->getProperty("OutputWorkspace");
     auto normFromAsymm =
-        convertToVec(alg2->getPropertyValue("NormalizationConstant"));
+        Mantid::Kernel::VectorHelper::splitStringIntoVector<double>(
+            alg2->getPropertyValue("NormalizationConstant"));
 
     // normalization constants should be the same for both methods
     double Delta = 1.e-4;

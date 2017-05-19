@@ -15,6 +15,7 @@ Crystal Improvements
  - :ref:`SaveIsawPeaks <algm-SaveIsawPeaks>` now saves the calibration data for all detector banks in instrument so the header may be longer
  - :ref:`LoadIsawPeaks <algm-LoadIsawPeaks>` now uses the calibration lines to calibrate the detectors banks for CORELLI
  - :ref:SCD Event Data Reduction interface and SCD_Reduction python scripts work with both nxs and h5 extensions for data file.
+ - :ref:`FindSxPeaks <algm-FindSXPeaks>` Resolved an issue where the algorithm failed on instruments with multiple detectors per spectrum.
 
 Engineering Diffraction
 -----------------------
@@ -31,7 +32,8 @@ Powder Diffraction
 Single Crystal Diffraction
 --------------------------
 
-- A new HB3A instrument definition file, for its 512 x 512 detector
+- A new HB3A instrument definition file, for its 512 x 512 detector, is created.  Its valid period is from February 2017 to late April 2017.
+- An IDF for HB3A with 256 by 256 detectors was created.  It was dated from late April 2017 because its original detector has been switched back.
 - New algorithm :ref:`DeltaPDF3D <algm-DeltaPDF3D>` for calculating the 3D-deltaPDF from a HKL MDHistoWorkspace
 
 
