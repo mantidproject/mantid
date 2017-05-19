@@ -22,6 +22,7 @@
 #include "MantidTestHelpers/InstrumentCreationHelper.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidTestHelpers/NexusTestHelper.h"
+#include "MantidTestHelpers/ParallelRunner.h"
 #include "PropertyManagerHelper.h"
 
 #include <cxxtest/TestSuite.h>
@@ -68,6 +69,29 @@ boost::shared_ptr<MatrixWorkspace> makeWorkspaceWithDetectors(size_t numSpectra,
   }
   ws2->setInstrument(inst);
   return ws2;
+}
+
+namespace {
+void run_legacy_setting_spectrum_numbers_with_MPI(
+    const Parallel::Communicator &comm) {
+  using namespace Parallel;
+  for (const auto storageMode : {StorageMode::MasterOnly, StorageMode::Cloned,
+                                 StorageMode::Distributed}) {
+    WorkspaceTester ws;
+    if (comm.rank() == 0 || storageMode != StorageMode::MasterOnly) {
+      Indexing::IndexInfo indexInfo(1000, storageMode, comm);
+      ws.initialize(indexInfo,
+                    HistogramData::Histogram(HistogramData::Points(1)));
+    }
+    if (storageMode == StorageMode::Distributed && comm.size() > 1) {
+      TS_ASSERT_THROWS(ws.getSpectrum(0).setSpectrumNo(42), std::logic_error);
+    } else {
+      if (comm.rank() == 0 || storageMode != StorageMode::MasterOnly) {
+        TS_ASSERT_THROWS_NOTHING(ws.getSpectrum(0).setSpectrumNo(42));
+      }
+    }
+  }
+}
 }
 
 class MatrixWorkspaceTest : public CxxTest::TestSuite {
@@ -1622,6 +1646,11 @@ public:
                      std::runtime_error);
     TS_ASSERT_THROWS(detInfo.setRotation(*det.getParent(), Quat(1, 2, 3, 4)),
                      std::runtime_error);
+  }
+
+  void test_legacy_setting_spectrum_numbers_with_MPI() {
+    ParallelTestHelpers::runParallel(
+        run_legacy_setting_spectrum_numbers_with_MPI);
   }
 
 private:

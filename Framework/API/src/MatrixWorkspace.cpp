@@ -2000,6 +2000,11 @@ void MatrixWorkspace::setImageE(const MantidImage &image, size_t start,
 }
 
 void MatrixWorkspace::invalidateCachedSpectrumNumbers() {
+  if (storageMode() == Parallel::StorageMode::Distributed &&
+      m_indexInfo->communicator().size() > 1)
+    throw std::logic_error("Setting spectrum numbers in MatrixWorkspace via "
+                           "ISpectrum::setSpectrumNo is not possible in MPI "
+                           "runs for distributed workspaces. Use IndexInfo.");
   m_indexInfoNeedsUpdate = true;
 }
 
