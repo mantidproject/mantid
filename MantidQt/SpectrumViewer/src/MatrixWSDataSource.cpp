@@ -184,7 +184,9 @@ DataArray_const_sptr MatrixWSDataSource::getDataArray(double xMin, double xMax,
     err.resize(numCols, 0);
 
     m_matWs->generateHistogram(sourceRow, xScale, yVals, err, true);
-	newDataIter = std::transform(yVals.cbegin(), yVals.cend(), newDataIter, [](const double y) { return static_cast<float>(y); });
+    newDataIter =
+        std::transform(yVals.cbegin(), yVals.cend(), newDataIter,
+                       [](const double y) { return static_cast<float>(y); });
   }
 
   // The calling code is responsible for deleting the DataArray when it is done
