@@ -212,11 +212,11 @@ For the parameters of the background the syntax is the same but the methods are 
 The names of the peak parameters both in ties and constraints must include the index of the peak to which they belong. Here we follow
 the naming convention of the :ref:`func-CompositeFunction`: f<n>.<name>, where <n> stands for an integer index staring at 0 and <name>
 is the name of the parameter. For example, `f1.Sigma`, `f3.FWHM`. Because names now contain the period symbol '.' keyword arguments
-cannot be used. Instead we must pass strings containing ties::
+cannot be used. Instead we must pass a dictionary containing ties. The keys are parameter names and the values are the ties::
 
-    cf.peaks.ties('f2.FWHM=2*f1.FWHM', 'f3.FWHM=2*f2.FWHM')
+    cf.peaks.ties({'f2.FWHM': '2*f1.FWHM', 'f3.FWHM': '2*f2.FWHM'})
     
-and constraints are also a list of strings::
+Constraints are a list of strings::
 
     cf.peaks.constraints('f0.FWHM < 2.2', 'f1.FWHM >= 0.1')
     
@@ -226,13 +226,13 @@ If a parameter of all peaks needs to be tied/constrained with the same expressio
     cf.peaks.constrainAll('0 < Sigma < 0.1', 4)
 
 where the first argument is the general formula of the tie/constraint and the second is the number of peaks to apply to.
-The is also a version for a range of peak indices::
+There is also a version for a range of peak indices::
 
     cf.peaks.tieAll('Sigma=f0.Sigma', 1, 3)
 
 which is equivalent to::
 
-    cf.peaks.ties('f1.Sigma=f0.Sigma', 'f2.Sigma=f0.Sigma', 'f3.Sigma=f0.Sigma')
+    cf.peaks.ties({'f1.Sigma': 'f0.Sigma', 'f2.Sigma': 'f0.Sigma', 'f3.Sigma': 'f0.Sigma'})
 
 
 Setting Resolution Model

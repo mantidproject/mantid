@@ -333,7 +333,7 @@ class CrystalField(object):
     @ToleranceEnergy.setter
     def ToleranceEnergy(self, value):
         """Set energy tolerance"""
-        self.crystalFieldFunction.setAttributeValue('ToleranceEnergy', value)
+        self.crystalFieldFunction.setAttributeValue('ToleranceEnergy', float(value))
         self._dirty_peaks = True
         self._dirty_spectra = True
 
@@ -345,7 +345,7 @@ class CrystalField(object):
     @ToleranceIntensity.setter
     def ToleranceIntensity(self, value):
         """Set intensity tolerance"""
-        self.crystalFieldFunction.setAttributeValue('ToleranceIntensity', value)
+        self.crystalFieldFunction.setAttributeValue('ToleranceIntensity', float(value))
         self._dirty_peaks = True
         self._dirty_spectra = True
 
