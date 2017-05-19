@@ -721,7 +721,6 @@ Mantid calculate them. These properties are:
 *Note: This is purely optional and Mantid will calculate these
 values based on the chemical formula entered if this is not set*
 
-For example:
 .. code-block:: python
 
     ... snip from previous example ...
@@ -795,4 +794,65 @@ advanced properties and chemical properties)
     # Now allowed as object does not have a chemical formula associated
     my_sample.set_material(...)
 
+Instrument advanced properties
+-------------------------------
+.. warning:: This section is intended for instrument scientists.
+             The advanced configuration distributed for Mantid
+             will use the optimal values for that instrument and
+             should not be changed unless you understand what you
+             are doing.
 
+*Note: Parameters should not be changed in the advanced configuration
+for a few runs. If you require a set of values to be changed for a range
+of runs (such as the cropping values) please set the value in the scripting
+window or configuration file instead.*
+
+The advanced configuration file provides optimal defaults for 
+an instrument and applies to all runs unless otherwise specified. If
+this file is modified Mantid will **not** remove it on uninstall or
+reinstall, or upgrade. *(Note: This behavior is not guaranteed and
+should not be relied on)*
+
+It is highly recommended you read the instrument reference 
+found here: :ref:`instrument_doc_links_isis-powder-diffraction-ref`
+to understand the purpose of each property and the effect changing
+it may have.
+
+**If you change any values in your advanced properties file could
+you please forward the new value to the Mantid development team
+to ensure this new value is distributed in future versions of Mantid**
+
+For the purposes of testing a parameter can be overridden at
+script runtime. The hierarchy of scripts is:
+*scripting window* > *config file* > *advanced config*.
+In other words a value set in the configuration file will
+override one found in the advanced configuration file.
+A value set in the scripting window will override one
+found in the configuration file.
+
+A warning will always be emitted when a value is overridden
+so that the user is fully aware when this is happening.
+
+For example to test a different spline coefficient value
+
+.. code-block:: python
+
+    from isis_powder import Polaris
+
+    a_pol_obj = Polaris(spline_coefficient=80, ...)
+    a_pol_obj.create_vanadium(...)
+
+Will create a new vanadium run with the spline coefficient
+set to 80. Note that until create_vanadium is created again
+in this example any future data which is focused will implicitly
+use the splines with a coefficient of 80.
+
+If you wish to change or view the advanced configuration files
+these can be found under 
+*MantidInstall*/scripts/diffraction/isis_powder/**inst** _routines
+and will be called **inst** _advanced_config.py
+
+If you change a value within the advanced config file you will
+need to restart Mantid for it to take effect. If you are happy
+with the new value please ensure you forward it on to the Mantid
+development team to be distributed in future versions.
