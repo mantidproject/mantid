@@ -80,6 +80,9 @@ void export_IFunction() {
       .def("attributeNames", &IFunction::getAttributeNames, arg("self"),
            "The names of all the attributes")
 
+      .def("hasAttribute", &IFunction::hasAttribute, (arg("self"), arg("name")),
+           "Return whether there is an attribute of the given name")
+
       .def("nParams", &IFunction::nParams, arg("self"),
            "Return the number of parameters")
 
