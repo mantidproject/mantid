@@ -69,11 +69,6 @@ see http://www.mantidproject.org/IDF -->
   </component>
 
 
-  <!-- "Camera" -->
-  <component type="old-mcp-definition" idstart="1000000" idfillbyfirst="y" idstep="1" idstepbyrow="1">
-    <location z="10" x="0.0" name="detector-old-mcp"/>
-  </component>
-
   <!-- A cuboid sample holder -->
   <!-- <type name="default-sample-holder" is="SamplePos" /> -->
   <type name="default-sample-holder" is="SamplePos">
@@ -104,12 +99,6 @@ see http://www.mantidproject.org/IDF -->
   ypixels="2" ystart="+0.002" ystep="-0.004" >
   </type>
 
-
-  <!-- Old/now fixed definition of the MCP detector. Here for reference in the future -->
-  <type name="old-mcp-definition" is="RectangularDetector" type="pixel"
-  xpixels="512" xstart="-0.048705" xstep="+0.00051"
-  ypixels="512" ystart="-0.048705" ystep="+0.00051" >
-  </type>
 
   <type name="pixel" is="detector-old-mcp-definition">
     <cuboid id="shape">

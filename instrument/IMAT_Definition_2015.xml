@@ -42,23 +42,6 @@ see http://www.mantidproject.org/IDF -->
     <location />
   </component>
 
-  <component type="detector-bank" idstart="0" idfillbyfirst="y" idstep="1000" idstepbyrow="1">
-    <location z="23.281" x="-0.7" name="detector"/>
-  </component>
-  <type name="detector-bank" is="rectangular_detector" type="pixel"
-  xpixels="512" xstart="-0.48705" xstep="+0.0051"
-  ypixels="512" ystart="-0.48705" ystep="+0.0051" >
-  </type>
-  <type name="pixel" is="detector">
-    <cuboid id="shape">
-      <left-front-bottom-point x="0.005104167" y="-0.005104167" z="0.0" />
-      <left-front-top-point x="0.005104167" y="-0.005104167" z="0.000005" />
-      <left-back-bottom-point x="-0.005104167" y="-0.005104167" z="0.0" />
-      <right-front-bottom-point x="0.005104167" y="0.005104167" z="0.0" />
-    </cuboid>
-    <algebra val="shape" />
-  </type>
-
   <!-- DEFINITION OF TYPES -->
 
   <type name="monitors">
