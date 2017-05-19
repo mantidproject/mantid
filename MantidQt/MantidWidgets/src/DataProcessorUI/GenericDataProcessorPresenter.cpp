@@ -60,7 +60,7 @@ GenericDataProcessorPresenter::GenericDataProcessorPresenter(
       m_whitelist(whitelist), m_preprocessMap(preprocessMap),
       m_processor(processor), m_postprocessor(postprocessor),
       m_postprocessMap(postprocessMap), m_postprocess(true),
-      m_tableDirty(false), m_reductionPaused(true), m_selectionChanged(true) {
+      m_tableDirty(false), m_reductionPaused(true), m_newSelection(true) {
 
   // Column Options must be added to the whitelist
   m_whitelist.addElement("Options", "Options",
@@ -206,12 +206,12 @@ void GenericDataProcessorPresenter::process() {
     return;
 
   // If selection unchanged, resume processing the old selection
-  if (!m_selectionChanged) {
+  if (!m_newSelection) {
     resume();
     return;
   }
 
-  m_selectionChanged = false;
+  m_newSelection = false;
 
   // Progress: each group and each row within count as a progress step.
   int progress = 0;
@@ -353,7 +353,7 @@ void GenericDataProcessorPresenter::endReduction() {
   pause();
   m_mainPresenter->notify(
       DataProcessorMainPresenter::ConfirmReductionPausedFlag);
-  m_selectionChanged = true; // Allow same selection to be processed again
+  m_newSelection = true; // Allow same selection to be processed again
 }
 
 /**
@@ -1012,7 +1012,7 @@ void GenericDataProcessorPresenter::notify(DataProcessorPresenter::Flag flag) {
     pause();
     break;
   case DataProcessorPresenter::SelectionChangedFlag:
-    m_selectionChanged = true;
+    m_newSelection = true;
     break;
   }
   // Not having a 'default' case is deliberate. gcc issues a warning if there's
@@ -1534,8 +1534,8 @@ ChildItems GenericDataProcessorPresenter::selectedChildren() const {
 /** Checks if the selected runs have changed
 * @return :: selection changed bool
 */
-bool GenericDataProcessorPresenter::hasSelectionChanged() const {
-  return m_selectionChanged;
+bool GenericDataProcessorPresenter::newSelectionMade() const {
+  return m_newSelection;
 }
 
 /** Ask user for Yes/No

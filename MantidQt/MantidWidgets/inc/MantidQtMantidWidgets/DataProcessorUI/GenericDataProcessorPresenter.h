@@ -125,7 +125,7 @@ public:
 
   ParentItems selectedParents() const override;
   ChildItems selectedChildren() const override;
-  bool hasSelectionChanged() const override;
+  bool newSelectionMade() const override;
   bool askUserYesNo(const std::string &prompt,
                     const std::string &title) const override;
   void giveUserWarning(const std::string &prompt,
@@ -192,8 +192,8 @@ private:
   int m_columns;
   // stores whether or not the table has changed since it was last saved
   bool m_tableDirty;
-  // stores whether the table selection has changed before attempted processing
-  bool m_selectionChanged;
+  // stores whether a new table selection has been made before processing
+  bool m_newSelection;
   // stores the user options for the presenter
   std::map<std::string, QVariant> m_options;
   // Thread to run reducer worker in

@@ -448,7 +448,7 @@ TreeData DataProcessorTwoLevelTreeManager::selectedData(bool prompt) {
   if (groups.empty() && rows.empty()) {
 
     if (options["WarnProcessAll"].toBool() && prompt &&
-        m_presenter->hasSelectionChanged()) {
+        m_presenter->newSelectionMade()) {
       if (!m_presenter->askUserYesNo(
               "This will process all rows in the table. Continue?",
               "Process all rows?"))
