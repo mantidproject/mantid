@@ -477,8 +477,8 @@ std::string ReflDataProcessorPresenter::loadRun(const std::string &run,
 * @return :: the name of the sliced workspace (without prefix 'TOF_')
 */
 std::string ReflDataProcessorPresenter::takeSlice(
-    const std::string &runNo, const size_t &sliceIndex, const double &startTime,
-    const double &stopTime, const std::string &logFilter) {
+    const std::string &runNo, size_t sliceIndex, double startTime,
+    double stopTime, const std::string &logFilter) {
 
   std::string runName = "TOF_" + runNo;
   std::string sliceName = runName + "_slice_" + std::to_string(sliceIndex);

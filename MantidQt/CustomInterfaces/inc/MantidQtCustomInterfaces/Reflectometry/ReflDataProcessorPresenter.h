@@ -102,8 +102,8 @@ private:
   void loadNonEventRun(const std::string &runNo);
 
   // Take a slice from event workspace
-  std::string takeSlice(const std::string &runNo, const size_t &sliceIndex,
-                        const double &startTime, const double &stopTime,
+  std::string takeSlice(const std::string &runNo, size_t sliceIndex,
+                        double startTime, double stopTime,
                         const std::string &logFilter = "");
 
   // Asks user if they wish to proceed if a type of workspace exists in the ADS

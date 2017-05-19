@@ -65,6 +65,12 @@ private:
 
   /// Current slice type
   mutable SliceType m_sliceType;
+  /// Slice type to string conversion map
+  std::map<SliceType, std::string> m_sliceTypeStrMap = {
+      {SliceType::Uniform, "Uniform"},
+      {SliceType::UniformEven, "UniformEven"},
+      {SliceType::Custom, "Custom"},
+      {SliceType::LogValue, "LogValue"}};
 
   /// List of radio buttons
   std::vector<QRadioButton *> m_buttonList;
