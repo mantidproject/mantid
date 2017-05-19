@@ -1186,7 +1186,7 @@ void ReflectometryReductionOne2::verifySpectrumMaps(
   }
   // Check that the spectrum numbers match for each histogram
   if (!mismatch) {
-    for (auto i = 0; i < ws1->getNumberHistograms(); ++i) {
+    for (size_t i = 0; i < ws1->getNumberHistograms(); ++i) {
       if (ws1->indexInfo().spectrumNumber(i) !=
           ws2->indexInfo().spectrumNumber(i)) {
         mismatch = true;
