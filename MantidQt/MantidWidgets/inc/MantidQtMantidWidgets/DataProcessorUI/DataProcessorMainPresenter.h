@@ -39,7 +39,7 @@ class DataProcessorMainPresenter {
 public:
   virtual ~DataProcessorMainPresenter(){};
 
-  enum Flag {
+  enum class Flag {
     ADSChangedFlag,
     ConfirmReductionPausedFlag,
     ConfirmReductionResumedFlag

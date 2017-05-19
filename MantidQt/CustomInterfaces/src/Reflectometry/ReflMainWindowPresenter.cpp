@@ -44,10 +44,10 @@ Used by the view to tell the presenter something has changed
 void ReflMainWindowPresenter::notify(IReflMainWindowPresenter::Flag flag) {
 
   switch (flag) {
-  case IReflMainWindowPresenter::ConfirmReductionPausedFlag:
+  case Flag::ConfirmReductionPausedFlag:
     m_isProcessing = false;
     break;
-  case IReflMainWindowPresenter::ConfirmReductionResumedFlag:
+  case Flag::ConfirmReductionResumedFlag:
     m_isProcessing = true;
     break;
   }

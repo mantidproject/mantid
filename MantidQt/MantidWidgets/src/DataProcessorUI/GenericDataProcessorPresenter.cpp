@@ -216,7 +216,7 @@ void GenericDataProcessorPresenter::process() {
   // Progress: each group and each row within count as a progress step.
   int progress = 0;
   int maxProgress = (int)(m_selectedData.size());
-  for (const auto subitem : m_selectedData) {
+  for (const auto &subitem : m_selectedData) {
     maxProgress += (int)(subitem.second.size());
   }
   m_progressReporter =
@@ -233,11 +233,11 @@ void GenericDataProcessorPresenter::process() {
       // Add all row items to queue
       rowQueue.push(data);
     }
-    m_gqueue.push(std::make_pair(item.first, rowQueue));
+    m_gqueue.emplace(item.first, rowQueue);
   }
 
   // Start processing the first group
-  m_nextActionFlag = GenericDataProcessorPresenter::ReduceGroupFlag;
+  m_nextActionFlag = ReductionFlag::ReduceGroupFlag;
   resume();
 }
 
@@ -247,10 +247,10 @@ Decide which processing action to take next
 void GenericDataProcessorPresenter::doNextAction() {
 
   switch (m_nextActionFlag) {
-  case GenericDataProcessorPresenter::ReduceRowFlag:
+  case ReductionFlag::ReduceRowFlag:
     nextRow();
     break;
-  case GenericDataProcessorPresenter::ReduceGroupFlag:
+  case ReductionFlag::ReduceGroupFlag:
     nextGroup();
     break;
   }
@@ -268,7 +268,7 @@ void GenericDataProcessorPresenter::nextRow() {
   if (m_reductionPaused) {
     // Notify presenter that reduction is paused
     m_mainPresenter->notify(
-        DataProcessorMainPresenter::ConfirmReductionPausedFlag);
+        DataProcessorMainPresenter::Flag::ConfirmReductionPausedFlag);
     return;
   }
 
@@ -282,7 +282,7 @@ void GenericDataProcessorPresenter::nextRow() {
     m_rowItem = rqueue.front();
     rqueue.pop();
     // Set next action flag
-    m_nextActionFlag = GenericDataProcessorPresenter::ReduceRowFlag;
+    m_nextActionFlag = ReductionFlag::ReduceRowFlag;
 
     auto *worker = new GenericDataProcessorPresenterRowReducerWorker(
         this, &m_rowItem, groupIndex);
@@ -293,7 +293,7 @@ void GenericDataProcessorPresenter::nextRow() {
   } else {
     m_gqueue.pop();
     // Set next action flag
-    m_nextActionFlag = GenericDataProcessorPresenter::ReduceGroupFlag;
+    m_nextActionFlag = ReductionFlag::ReduceGroupFlag;
 
     if (m_groupData.size() > 1) {
       // Multiple rows in containing group, do post-processing on the group
@@ -319,7 +319,7 @@ void GenericDataProcessorPresenter::nextGroup() {
   if (m_reductionPaused) {
     // Notify presenter that reduction is paused
     m_mainPresenter->notify(
-        DataProcessorMainPresenter::ConfirmReductionPausedFlag);
+        DataProcessorMainPresenter::Flag::ConfirmReductionPausedFlag);
     return;
   }
 
@@ -330,7 +330,7 @@ void GenericDataProcessorPresenter::nextGroup() {
     m_rowItem = rqueue.front();
     rqueue.pop();
     // Set next action flag
-    m_nextActionFlag = GenericDataProcessorPresenter::ReduceRowFlag;
+    m_nextActionFlag = ReductionFlag::ReduceRowFlag;
 
     // Prepare a new thread
     auto *worker = new GenericDataProcessorPresenterRowReducerWorker(
@@ -352,7 +352,7 @@ End reduction
 void GenericDataProcessorPresenter::endReduction() {
   pause();
   m_mainPresenter->notify(
-      DataProcessorMainPresenter::ConfirmReductionPausedFlag);
+      DataProcessorMainPresenter::Flag::ConfirmReductionPausedFlag);
   m_newSelection = true; // Allow same selection to be processed again
 }
 
@@ -1158,7 +1158,7 @@ void GenericDataProcessorPresenter::addHandle(
 
   m_workspaceList.insert(name);
   m_view->setTableList(m_workspaceList);
-  m_mainPresenter->notify(DataProcessorMainPresenter::ADSChangedFlag);
+  m_mainPresenter->notify(DataProcessorMainPresenter::Flag::ADSChangedFlag);
 }
 
 /**
@@ -1167,7 +1167,7 @@ Handle ADS remove events
 void GenericDataProcessorPresenter::postDeleteHandle(const std::string &name) {
   m_workspaceList.erase(name);
   m_view->setTableList(m_workspaceList);
-  m_mainPresenter->notify(DataProcessorMainPresenter::ADSChangedFlag);
+  m_mainPresenter->notify(DataProcessorMainPresenter::Flag::ADSChangedFlag);
 }
 
 /**
@@ -1176,7 +1176,7 @@ Handle ADS clear events
 void GenericDataProcessorPresenter::clearADSHandle() {
   m_workspaceList.clear();
   m_view->setTableList(m_workspaceList);
-  m_mainPresenter->notify(DataProcessorMainPresenter::ADSChangedFlag);
+  m_mainPresenter->notify(DataProcessorMainPresenter::Flag::ADSChangedFlag);
 }
 
 /**
@@ -1193,7 +1193,7 @@ void GenericDataProcessorPresenter::renameHandle(const std::string &oldName,
   m_workspaceList.erase(oldName);
   m_workspaceList.insert(newName);
   m_view->setTableList(m_workspaceList);
-  m_mainPresenter->notify(DataProcessorMainPresenter::ADSChangedFlag);
+  m_mainPresenter->notify(DataProcessorMainPresenter::Flag::ADSChangedFlag);
 }
 
 /**
@@ -1459,7 +1459,7 @@ void GenericDataProcessorPresenter::resume() {
 
   m_reductionPaused = false;
   m_mainPresenter->notify(
-      DataProcessorMainPresenter::ConfirmReductionResumedFlag);
+      DataProcessorMainPresenter::Flag::ConfirmReductionResumedFlag);
 
   doNextAction();
 }
@@ -1496,7 +1496,7 @@ void GenericDataProcessorPresenter::accept(
   m_mainPresenter = mainPresenter;
   // Notify workspace receiver with the list of valid workspaces as soon as it
   // is registered
-  m_mainPresenter->notify(DataProcessorMainPresenter::ADSChangedFlag);
+  m_mainPresenter->notify(DataProcessorMainPresenter::Flag::ADSChangedFlag);
   // Disable pause button accessible from main presenter
   m_mainPresenter->setRowActionEnabled(1, false);
 }

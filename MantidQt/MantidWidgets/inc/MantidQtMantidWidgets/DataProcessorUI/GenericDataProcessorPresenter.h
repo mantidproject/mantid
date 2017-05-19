@@ -201,7 +201,7 @@ private:
   // A boolean indicating whether or not data reduction has been paused
   mutable bool m_reductionPaused;
   // Enumeration of the reduction actions that can be taken
-  enum ReductionFlag { ReduceRowFlag, ReduceGroupFlag };
+  enum class ReductionFlag { ReduceRowFlag, ReduceGroupFlag };
   // A flag of the next action due to be carried out
   ReductionFlag m_nextActionFlag;
   // load a run into the ADS, or re-use one in the ADS if possible

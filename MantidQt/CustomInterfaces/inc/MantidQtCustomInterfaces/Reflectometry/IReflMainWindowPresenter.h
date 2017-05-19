@@ -39,7 +39,7 @@ public:
   /// Destructor
   virtual ~IReflMainWindowPresenter(){};
 
-  enum Flag {
+  enum class Flag {
     ConfirmReductionPausedFlag,
     ConfirmReductionResumedFlag
   };

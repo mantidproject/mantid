@@ -348,13 +348,13 @@ Used to tell the presenter something has changed
 void ReflRunsTabPresenter::notify(DataProcessorMainPresenter::Flag flag) {
 
   switch (flag) {
-  case DataProcessorMainPresenter::ADSChangedFlag:
+  case DataProcessorMainPresenter::Flag::ADSChangedFlag:
     pushCommands();
     break;
-  case DataProcessorMainPresenter::ConfirmReductionPausedFlag:
+  case DataProcessorMainPresenter::Flag::ConfirmReductionPausedFlag:
     confirmReductionPaused();
     break;
-  case DataProcessorMainPresenter::ConfirmReductionResumedFlag:
+  case DataProcessorMainPresenter::Flag::ConfirmReductionResumedFlag:
     confirmReductionResumed();
     break;
   }
@@ -437,7 +437,8 @@ std::string ReflRunsTabPresenter::getTimeSlicingType() const {
 */
 void ReflRunsTabPresenter::confirmReductionPaused() const {
 
-  m_mainPresenter->notify(IReflMainWindowPresenter::ConfirmReductionPausedFlag);
+  m_mainPresenter->notify(
+      IReflMainWindowPresenter::Flag::ConfirmReductionPausedFlag);
 }
 
 /** Notifies main presenter that data reduction is confirmed to be resumed
@@ -445,7 +446,7 @@ void ReflRunsTabPresenter::confirmReductionPaused() const {
 void ReflRunsTabPresenter::confirmReductionResumed() const {
 
   m_mainPresenter->notify(
-      IReflMainWindowPresenter::ConfirmReductionResumedFlag);
+      IReflMainWindowPresenter::Flag::ConfirmReductionResumedFlag);
 }
 
 /**
