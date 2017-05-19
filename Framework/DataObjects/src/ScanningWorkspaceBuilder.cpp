@@ -133,19 +133,23 @@ void ScanningWorkspaceBuilder::setRotations(
  *rotation is in the X-Z plane. This corresponds to the common case of moving
  *detectors to increase angular coverage.
  *
- * @param instrumentAngles a vector of angles, the size matching the number of
+ * @param relativeRotations a vector of angles, the size matching the number of
  *time indexes
+ * @param rotationPosition the position to rotate around, e.g. the sample
+ *position
+ * @param rotationAxis the axis to rotate around. e.g. the vertical axis to
+ *rotate the instrument in the horizontal plane
  */
 void ScanningWorkspaceBuilder::setRelativeRotationsForScans(
-    const std::vector<double> &instrumentAngles,
+    const std::vector<double> &relativeRotations,
     const Kernel::V3D &rotationPosition, const Kernel::V3D &rotationAxis) {
 
   if (!m_positions.empty() || !m_rotations.empty())
     throw std::logic_error("Can not set instrument angles, as positions and/or "
                            "rotations have already been set.");
 
-  verifyTimeIndexSize(instrumentAngles.size(), "instrument angles");
-  m_instrumentAngles = instrumentAngles;
+  verifyTimeIndexSize(relativeRotations.size(), "instrument angles");
+  m_instrumentAngles = relativeRotations;
   m_rotationPosition = rotationPosition;
   m_rotationAxis = rotationAxis;
 }
@@ -245,7 +249,8 @@ void ScanningWorkspaceBuilder::buildRelativeRotationsForScans(
       rotation.rotate(position);
       position += m_rotationPosition;
       outputDetectorInfo.setPosition({i, j}, position);
-      outputDetectorInfo.setRotation({i, j}, rotation);
+      const auto &oldRotation = outputDetectorInfo.rotation({i, j});
+      outputDetectorInfo.setRotation({i, j}, rotation * oldRotation);
     }
   }
 }

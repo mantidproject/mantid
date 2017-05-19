@@ -276,14 +276,22 @@ public:
 
     for (size_t i = 0; i < nDetectors; ++i) {
       for (size_t j = 0; j < nTimeIndexes; ++j) {
-        TS_ASSERT_DELTA(0.0, detInfo.rotation({i, j}).getEulerAngles("XYZ")[0],
+        // Rounding to nearest int required to avoid problem of Euler angles
+        // returning -180/0/180
+        TS_ASSERT_DELTA(0.0, std::lround(detInfo.rotation({i, j})
+                                             .getEulerAngles("XYZ")[0]) %
+                                 180,
                         1e-12)
-        TS_ASSERT_DELTA(0.0, detInfo.rotation({i, j}).getEulerAngles("XYZ")[2],
+        TS_ASSERT_DELTA(0.0, std::lround(detInfo.rotation({i, j})
+                                             .getEulerAngles("XYZ")[2]) %
+                                 180,
                         1e-12)
       }
 
-      TS_ASSERT_DELTA(0.0, detInfo.rotation({i, 0}).getEulerAngles("XYZ")[1],
-                      1e-12)
+      TS_ASSERT_DELTA(
+          0.0,
+          std::lround(detInfo.rotation({i, 0}).getEulerAngles("XYZ")[1]) % 180,
+          1e-12)
       TS_ASSERT_DELTA(30.0, detInfo.rotation({i, 1}).getEulerAngles("XYZ")[1],
                       1e-12)
       TS_ASSERT_DELTA(60.0, detInfo.rotation({i, 2}).getEulerAngles("XYZ")[1],
@@ -316,6 +324,58 @@ public:
       for (size_t j = 0; j < nTimeIndexes; ++j) {
         TS_ASSERT_EQUALS(0.0, detInfo.position({double(i) * 0.1, j}).Y())
       }
+    }
+  }
+
+  void
+  test_creating_workspace_with_relative_rotations_on_previously_rotated_detectors() {
+
+    const auto &instWS =
+        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(
+            int(nDetectors), int(nBins));
+    auto &instDetInfo = instWS->mutableDetectorInfo();
+
+    Quat rotation = Quat(10.0, V3D(0, 1, 0));
+
+    for (size_t i = 0; i < instDetInfo.size(); ++i) {
+      instDetInfo.setRotation(i, rotation);
+    }
+
+    const auto &instrument = instWS->getInstrument();
+    TS_ASSERT(instrument->hasDetectorInfo())
+
+    auto builder = ScanningWorkspaceBuilder(instrument, nTimeIndexes, nBins);
+    TS_ASSERT_THROWS_NOTHING(builder.setTimeRanges(timeRanges))
+    initialiseRelativeRotations(nTimeIndexes);
+    TS_ASSERT_THROWS_NOTHING(builder.setRelativeRotationsForScans(
+        relativeRotations, V3D(0, 0, 1), V3D(0, 1, 0)))
+    MatrixWorkspace_const_sptr ws;
+    TS_ASSERT_THROWS_NOTHING(ws = builder.buildWorkspace())
+
+    const auto &detInfo = ws->detectorInfo();
+
+    for (size_t i = 0; i < nDetectors; ++i) {
+      for (size_t j = 0; j < nTimeIndexes; ++j) {
+        // Rounding to nearest int required to avoid problem of Euler angles
+        // returning -180/0/180
+        TS_ASSERT_DELTA(0.0, std::lround(detInfo.rotation({i, j})
+                                             .getEulerAngles("XYZ")[0]) %
+                                 180,
+                        1e-12)
+        TS_ASSERT_DELTA(0.0, std::lround(detInfo.rotation({i, j})
+                                             .getEulerAngles("XYZ")[2]) %
+                                 180,
+                        1e-12)
+      }
+
+      TS_ASSERT_DELTA(10.0, detInfo.rotation({i, 0}).getEulerAngles("XYZ")[1],
+                      1e-12)
+      TS_ASSERT_DELTA(40.0, detInfo.rotation({i, 1}).getEulerAngles("XYZ")[1],
+                      1e-12)
+      TS_ASSERT_DELTA(70.0, detInfo.rotation({i, 2}).getEulerAngles("XYZ")[1],
+                      1e-12)
+      TS_ASSERT_DELTA(80.0, detInfo.rotation({i, 3}).getEulerAngles("XYZ")[1],
+                      1e-12)
     }
   }
 
