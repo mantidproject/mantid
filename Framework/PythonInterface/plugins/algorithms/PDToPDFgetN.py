@@ -125,10 +125,10 @@ class PDToPDFgetN(DataProcessorAlgorithm):
             charac = "characterizations"
 
         # arguments for both AlignAndFocusPowder and AlignAndFocusPowderFromFiles
-        self._alignArgs['OutputWorkspace']=self.getPropertyValue("OutputWorkspace")
-        self._alignArgs['RemovePromptPulseWidth']=self.getProperty("RemovePromptPulseWidth").value
-        self._alignArgs['CompressTolerance']=COMPRESS_TOL_TOF
-        self._alignArgs['PreserveEvents'] = False
+        self._alignArgs['OutputWorkspace'] = self.getPropertyValue("OutputWorkspace")
+        self._alignArgs['RemovePromptPulseWidth'] = self.getProperty("RemovePromptPulseWidth").value
+        self._alignArgs['CompressTolerance'] = COMPRESS_TOL_TOF
+        self._alignArgs['PreserveEvents'] = True
         self._alignArgs['CalFileName'] = self.getProperty("CalibrationFile").value
         self._alignArgs['Params']=self.getProperty("Binning").value
         self._alignArgs['ResampleX']=self.getProperty("ResampleX").value
