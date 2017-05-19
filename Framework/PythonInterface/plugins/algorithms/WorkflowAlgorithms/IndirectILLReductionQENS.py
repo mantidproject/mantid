@@ -1,5 +1,6 @@
 from __future__ import (absolute_import, division, print_function)
 
+import os
 import numpy
 from mantid import mtd
 from mantid.kernel import StringListValidator, Direction, FloatBoundedValidator, \
