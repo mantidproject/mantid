@@ -9,8 +9,8 @@ import unittest
 
 class DirectILLDiagnosticsTest(unittest.TestCase):
     _BKG_LEVEL = 1.42
-    _BKG_WS_NAME = 'bkgWS_'
     _EPP_WS_NAME = 'eppWS_'
+    _RAW_WS_NAME = 'rawWS_'
     _TEST_WS_NAME = 'testWS_'
 
     def __init__(self, methodName='runTest'):
@@ -26,7 +26,7 @@ class DirectILLDiagnosticsTest(unittest.TestCase):
             'InputWorkspace': self._testIN5WS,
             'OutputWorkspace': self._TEST_WS_NAME,
             'OutputEPPWorkspace': self._EPP_WS_NAME,
-            'OutputFlatBkgWorkspace': self._BKG_WS_NAME,
+            'OutputRawWorkspace': self._RAW_WS_NAME
         }
         run_algorithm('DirectILLCollectData', **kwargs)
         mtd.remove(inWSName)
@@ -40,7 +40,7 @@ class DirectILLDiagnosticsTest(unittest.TestCase):
             'InputWorkspace': self._TEST_WS_NAME,
             'OutputWorkspace': outWSName,
             'EPPWorkspace': self._EPP_WS_NAME,
-            'FlatBkgWorkspace': self._BKG_WS_NAME,
+            'RawWorkspace': self._RAW_WS_NAME,
             'rethrow': True
         }
         run_algorithm('DirectILLDiagnostics', **kwargs)
@@ -55,22 +55,23 @@ class DirectILLDiagnosticsTest(unittest.TestCase):
             self.assertFalse(spectrumInfo.isMasked(i))
 
     def testBackgroundDiagnostics(self):
-        bkgWS = mtd[self._BKG_WS_NAME]
-        spectraCount = bkgWS.getNumberHistograms()
+        rawWS = mtd[self._RAW_WS_NAME]
+        spectraCount = rawWS.getNumberHistograms()
         highBkgIndices = [0, int(spectraCount / 3), spectraCount - 1]
         for i in highBkgIndices:
-            ys = bkgWS.dataY(i)
-            ys *= 10.0
+            ys = rawWS.dataY(i)
+            ys += 10.0 * self._BKG_LEVEL
         lowBkgIndices = [int(spectraCount / 4), int(2 * spectraCount / 3)]
         for i in lowBkgIndices:
-            ys = bkgWS.dataY(i)
-            ys *= 0
+            ys = rawWS.dataY(i)
+            ys -= self._BKG_LEVEL
         outWSName = 'diagnosticsWS'
         kwargs = {
             'InputWorkspace': self._TEST_WS_NAME,
             'OutputWorkspace': outWSName,
+            'ElasticPeakDiagnostics': 'Peak Diagnostics OFF',
             'EPPWorkspace': self._EPP_WS_NAME,
-            'FlatBkgWorkspace': self._BKG_WS_NAME,
+            'RawWorkspace': self._RAW_WS_NAME,
             'NoisyBkgLowThreshold': 0.01,
             'NoisyBkgHighThreshold': 9.99,
             'rethrow': True
@@ -106,7 +107,6 @@ class DirectILLDiagnosticsTest(unittest.TestCase):
             'InputWorkspace': self._TEST_WS_NAME,
             'OutputWorkspace': outWSName,
             'EPPWorkspace': self._EPP_WS_NAME,
-            'FlatBkgWorkspace': self._BKG_WS_NAME,
             'ElasticPeakLowThreshold': 0.2,
             'ElasticPeakHighThreshold': 9.7,
             'rethrow': True

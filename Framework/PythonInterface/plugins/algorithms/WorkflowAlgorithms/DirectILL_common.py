@@ -12,14 +12,14 @@ ABSOLUTE_UNITS_ON = 'Absolute Units ON'
 CLEANUP_OFF = 'Cleanup OFF'
 CLEANUP_ON = 'Cleanup ON'
 
-DIAGNOSTICS_OFF = 'Diagnostics OFF'
-DIAGNOSTICS_ON = 'Diagnostics ON'
-
 DWF_OFF = 'Correction OFF'
 DWF_ON = 'Correction ON'
 
 ELASTIC_CHANNEL_SAMPLE_LOG = 'Default Elastic Channel'
 ELASTIC_CHANNEL_FIT = 'Fit Elastic Channel'
+
+ELASTIC_PEAK_DIAGNOSTICS_OFF = 'Peak Diagnostics OFF'
+ELASTIC_PEAK_DIAGNOSTICS_ON = 'Peak Diagnostics ON'
 
 EPP_METHOD_FIT = 'Fit EPP'
 EPP_MEHTOD_CALCULATE = 'Calculate EPP'
@@ -40,12 +40,14 @@ PROP_BINNING_PARAMS_Q = 'QBinningParams'
 PROP_BKG_DIAGNOSTICS_HIGH_THRESHOLD = 'NoisyBkgHighThreshold'
 PROP_BKG_DIAGNOSTICS_LOW_THRESHOLD = 'NoisyBkgLowThreshold'
 PROP_BKG_DIAGNOSTICS_SIGNIFICANCE_TEST = 'NoisyBkgErrorThreshold'
+PROP_BKG_SIGMA_MULTIPLIER = 'NonBkgRegionInSigmas'
 PROP_CLEANUP_MODE = 'Cleanup'
 PROP_DIAGNOSTICS_WS = 'DiagnosticsWorkspace'
 PROP_DET_DIAGNOSTICS = 'Diagnostics'
 PROP_DWF_CORRECTION = 'DebyeWallerCorrection'
 PROP_EC_SCALING = 'EmptyContainerScaling'
 PROP_EC_WS = 'EmptyContainerWorkspace'
+PROP_ELASTIC_PEAK_DIAGNOSTICS = 'ElasticPeakDiagnostics'
 PROP_ELASTIC_CHANNEL_MODE = 'ElasticChannel'
 PROP_ELASTIC_CHANNEL_WS = 'ElasticChannelWorkspace'
 PROP_ELASTIC_PEAK_SIGMA_MULTIPLIER = 'ElasticPeakWidthInSigmas'
@@ -71,12 +73,14 @@ PROP_OUTPUT_ELASTIC_CHANNEL_WS = 'OutputElasticChannelWorkspace'
 PROP_OUTPUT_FLAT_BKG_WS = 'OutputFlatBkgWorkspace'
 PROP_OUTPUT_INCIDENT_ENERGY_WS = 'OutputIncidentEnergyWorkspace'
 PROP_OUTPUT_MON_EPP_WS = 'OutputMonitorEPPWorkspace'
+PROP_OUTPUT_RAW_WS = 'OutputRawWorkspace'
 PROP_OUTPUT_SELF_SHIELDING_CORRECTION_WS = 'OutputSelfShieldingCorrectionWorkspace'
 PROP_OUTPUT_THETA_W_WS = 'OutputSofThetaEnergyWorkspace'
 PROP_OUTPUT_WS = 'OutputWorkspace'
 PROP_PEAK_DIAGNOSTICS_HIGH_THRESHOLD = 'ElasticPeakHighThreshold'
 PROP_PEAK_DIAGNOSTICS_LOW_THRESHOLD = 'ElasticPeakLowThreshold'
 PROP_PEAK_DIAGNOSTICS_SIGNIFICANCE_TEST = 'ElasticPeakErrorThreshold'
+PROP_RAW_WS = 'RawWorkspace'
 PROP_REBINNING_PARAMS_W = 'EnergyRebinningParams'
 PROP_SELF_SHIELDING_CORRECTION_WS = 'SelfShieldingCorrectionWorkspace'
 PROP_SUBALG_LOGGING = 'SubalgorithmLogging'
@@ -142,10 +146,12 @@ class IntermediateWSCleanup:
         """
         if not self._doDelete:
             return
-        ws = str(ws)
+        try:
+            ws = str(ws)
+        except RuntimeError:
+            return
         if ws not in self._protected and mtd.doesExist(ws):
-            DeleteWorkspace(Workspace=ws,
-                            EnableLogging=self._deleteAlgorithmLogging)
+            DeleteWorkspace(Workspace=ws, EnableLogging=self._deleteAlgorithmLogging)
 
 
 class NameSource:

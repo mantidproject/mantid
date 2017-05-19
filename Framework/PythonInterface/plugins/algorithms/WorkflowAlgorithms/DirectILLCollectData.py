@@ -304,6 +304,7 @@ class DirectILLCollectData(DataProcessorAlgorithm):
         # Extract monitors to a separate workspace.
         progress.report('Extracting monitors')
         mainWS, monWS = self._separateMons(mainWS, wsNames, wsCleanup, subalgLogging)
+        self._outputRaw(mainWS)
 
         # Normalisation to monitor/time, if requested.
         progress.report('Normalising to monitor/time')
@@ -479,6 +480,14 @@ class DirectILLCollectData(DataProcessorAlgorithm):
                                  " of 'Sigma' in monitor's EPP table.")
         self.setPropertyGroup(common.PROP_MON_PEAK_SIGMA_MULTIPLIER, common.PROPGROUP_MON_NORMALISATION)
         # Rest of the output properties.
+        self.declareProperty(WorkspaceProperty(
+            name=common.PROP_OUTPUT_RAW_WS,
+            defaultValue='',
+            direction=Direction.Output,
+            optional=PropertyMode.Optional),
+            doc='Output the merged runs or ' + common.PROP_INPUT_WS + ' as is.')
+        self.setPropertyGroup(common.PROP_OUTPUT_RAW_WS,
+                              common.PROPGROUP_OPTIONAL_OUTPUT)
         self.declareProperty(WorkspaceProperty(
             name=common.PROP_OUTPUT_ELASTIC_CHANNEL_WS,
             defaultValue='',
@@ -717,6 +726,11 @@ class DirectILLCollectData(DataProcessorAlgorithm):
             wsCleanup.cleanup(mainWS)
             return normalizedWS
         return mainWS
+
+    def _outputRaw(self, mainWS):
+        """Optionally sets mainWS as the raw output workspace."""
+        if not self.getProperty(common.PROP_OUTPUT_RAW_WS).isDefault:
+            self.setProperty(common.PROP_OUTPUT_RAW_WS, mainWS)
 
     def _separateMons(self, mainWS, wsNames, wsCleanup, subalgLogging):
         """Extract monitors to a separate workspace."""
