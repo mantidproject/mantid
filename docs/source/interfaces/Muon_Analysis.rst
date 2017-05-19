@@ -292,8 +292,7 @@ to select both checkboxes. Loading transverse field asymmetry data into muon ana
 enable TF asymmetry mode. 
 When this is activated, the data analysis tab has two main differences to the pre 3.8 version. Firstly there 
 is an additional row in the Data table (normalization). The second difference is the addition of the "TF
-Asymmetry Fit" button in the fitting tab. Selecting this fitting option will call the :ref:'CaculateMuonAsymmetry <algm-
-CalculateMuonAsymmetry-v1>' algorithm. The user defined function will be the composite function.
+Asymmetry Fit" button in the fitting tab. Selecting this fitting option will call the :ref:`Calculate Muon Asymmetry <algm-CalculateMuonAsymmetry>` algorithm. The user defined function will be the composite function from the interface.
 
 .. image::  ../images/MuonAnalysisTFAsymm.png
    :align: right
@@ -396,6 +395,8 @@ When this option is set to *True*, the fitting process is done using the raw (un
 
 Reselect data
 ^^^^^^^^^^^^^
+
+.. _ReselectData:
 
 At the bottom of the tab is the "Reselect Data" section. This includes three buttons "Groups/Pairs", "Periods" and "Combine Periods". The "Groups/Pairs" and "Periods" 
 buttons are only when the relevant options in the data table are set to custom. Pressing the button will produce a pop-up that will allow the user to modify their selection. 
