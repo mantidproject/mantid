@@ -141,10 +141,11 @@ private:
 
   API::MatrixWorkspace_sptr m_runWS;
   const API::SpectrumInfo *m_spectrumInfo;
-  bool m_convertUnits; // convert the input workspace to lambda
-  bool m_normalise;    // normalise by monitors etc.
-  bool m_sum;          // whether to do summation
-  double m_theta0;     // horizon angle
+  bool m_convertUnits;          // convert the input workspace to lambda
+  bool m_normaliseMonitors;     // normalise by monitors and direct beam
+  bool m_normaliseTransmission; // transmission or algorithmic correction
+  bool m_sum;                   // whether to do summation
+  double m_theta0;              // horizon angle
   // groups of spectrum indices of the detectors of interest
   std::vector<std::vector<size_t>> m_detectorGroups;
 };

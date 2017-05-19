@@ -435,15 +435,16 @@ void ReflectometryReductionOne2::exec() {
   findDetectorGroups();
   findTheta0();
 
-  // Check whether conversion, normalisation and summation has already been done
+  // Check whether conversion, normalisation, summation etc. need to be done
   m_convertUnits = true;
-  m_normalise = true;
+  m_normaliseMonitors = true;
+  m_normaliseTransmission = true;
   m_sum = true;
   if (xUnitID == "Wavelength") {
     // Already converted converted to wavelength
     m_convertUnits = false;
-    // Assume it's also already been normalised
-    m_normalise = false;
+    // Assume it's also already been normalised by monitors
+    m_normaliseMonitors = false;
     // Assume summation is already done if the number of histograms in the input
     // is the same as the number of detector groups (which will define the
     // number of histograms in the output)
@@ -474,40 +475,42 @@ MatrixWorkspace_sptr ReflectometryReductionOne2::makeIvsLam() {
   MatrixWorkspace_sptr result = m_runWS;
 
   if (summingInQ()) {
-    // Convert to lambda
     if (m_convertUnits) {
       g_log.debug("Converting input workspace to wavelength\n");
       result = convertToWavelength(result);
     }
-    // Normalise
-    if (m_normalise) {
-      g_log.debug("Normalising input workspace\n");
+    if (m_normaliseMonitors) {
+      g_log.debug("Normalising input workspace by monitors\n");
       result = directBeamCorrection(result);
       result = monitorCorrection(result);
+    }
+    if (m_normaliseTransmission) {
+      g_log.debug("Normalising input workspace by transmission run\n");
       result = transOrAlgCorrection(result, false);
     }
-    // Do the summation in Q
     if (m_sum) {
       g_log.debug("Summing in Q\n");
       result = sumInQ(result);
     }
   } else {
-    // Do the summation in lambda
     if (m_sum) {
       g_log.debug("Summing in wavelength\n");
       result = makeDetectorWS(result, m_convertUnits);
     }
-    // Normalise the 1D result
-    if (m_normalise) {
-      g_log.debug("Normalising output workspace\n");
+    if (m_normaliseMonitors) {
+      g_log.debug("Normalising output workspace by monitors\n");
       result = directBeamCorrection(result);
       result = monitorCorrection(result);
+    }
+    if (m_normaliseTransmission) {
+      g_log.debug("Normalising output workspace by transmission run\n");
       result = transOrAlgCorrection(result, true);
     }
-    // Crop to wavelength limits
-    g_log.debug("Cropping output workspace\n");
-    result = cropWavelength(result);
   }
+
+  // Crop to wavelength limits
+  g_log.debug("Cropping output workspace\n");
+  result = cropWavelength(result);
 
   return result;
 }

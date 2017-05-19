@@ -57,7 +57,6 @@ public:
     // No monitor normalization
     // No direct beam normalization
     // No transmission correction
-
     ReflectometryReductionOne2 alg;
     setupAlgorithm(alg, 1.5, 15.0, "1");
     MatrixWorkspace_sptr outLam = runAlgorithmLam(alg);
@@ -446,16 +445,16 @@ public:
     alg.setProperty("SummationType", "SumInQ");
     alg.setProperty("ReductionType", "DivergentBeam");
     alg.setProperty("ThetaIn", 25.0);
-    MatrixWorkspace_sptr outLam = runAlgorithmLam(alg, 20);
+    MatrixWorkspace_sptr outLam = runAlgorithmLam(alg, 18);
 
-    TS_ASSERT_DELTA(outLam->x(0)[0], 0.8155, 0.0001);
-    TS_ASSERT_DELTA(outLam->x(0)[7], 5.8439, 0.0001);
-    TS_ASSERT_DELTA(outLam->x(0)[10], 7.9989, 0.0001);
-    TS_ASSERT_DELTA(outLam->x(0)[19], 14.4640, 0.0001);
-    TS_ASSERT_DELTA(outLam->y(0)[0], 1.6553, 0.0001);
-    TS_ASSERT_DELTA(outLam->y(0)[7], 1.9514, 0.0001);
-    TS_ASSERT_DELTA(outLam->y(0)[10], 1.8301, 0.0001);
-    TS_ASSERT_DELTA(outLam->y(0)[19], 2.1424, 0.0001);
+    TS_ASSERT_DELTA(outLam->x(0)[0], 1.5338, 0.0001);
+    TS_ASSERT_DELTA(outLam->x(0)[7], 6.5622, 0.0001);
+    TS_ASSERT_DELTA(outLam->x(0)[10], 8.7173, 0.0001);
+    TS_ASSERT_DELTA(outLam->x(0)[17], 13.7457, 0.0001);
+    TS_ASSERT_DELTA(outLam->y(0)[0], 1.8323, 0.0001);
+    TS_ASSERT_DELTA(outLam->y(0)[7], 1.7985, 0.0001);
+    TS_ASSERT_DELTA(outLam->y(0)[10], 2.0212, 0.0001);
+    TS_ASSERT_DELTA(outLam->y(0)[17], 1.9430, 0.0001);
   }
 
   void test_sum_in_q_non_flat_sample() {
@@ -470,16 +469,16 @@ public:
     setupAlgorithm(alg, 1.5, 15.0, "1");
     alg.setProperty("SummationType", "SumInQ");
     alg.setProperty("ReductionType", "NonFlatSample");
-    MatrixWorkspace_sptr outLam = runAlgorithmLam(alg, 20);
+    MatrixWorkspace_sptr outLam = runAlgorithmLam(alg, 18);
 
-    TS_ASSERT_DELTA(outLam->x(0)[0], 0.8229, 0.0001);
-    TS_ASSERT_DELTA(outLam->x(0)[7], 5.8000, 0.0001);
-    TS_ASSERT_DELTA(outLam->x(0)[10], 7.9330, 0.0001);
-    TS_ASSERT_DELTA(outLam->x(0)[19], 14.3321, 0.0001);
-    TS_ASSERT_DELTA(outLam->y(0)[0], 1.6028, 0.0001);
-    TS_ASSERT_DELTA(outLam->y(0)[7], 1.8887, 0.0001);
-    TS_ASSERT_DELTA(outLam->y(0)[10], 1.6764, 0.0001);
-    TS_ASSERT_DELTA(outLam->y(0)[19], 1.9805, 0.0001);
+    TS_ASSERT_DELTA(outLam->x(0)[0], 1.5339, 0.0001);
+    TS_ASSERT_DELTA(outLam->x(0)[7], 6.5110, 0.0001);
+    TS_ASSERT_DELTA(outLam->x(0)[10], 8.6440, 0.0001);
+    TS_ASSERT_DELTA(outLam->x(0)[17], 13.6211, 0.0001);
+    TS_ASSERT_DELTA(outLam->y(0)[0], 1.8386, 0.0001);
+    TS_ASSERT_DELTA(outLam->y(0)[7], 1.6622, 0.0001);
+    TS_ASSERT_DELTA(outLam->y(0)[10], 1.9205, 0.0001);
+    TS_ASSERT_DELTA(outLam->y(0)[17], 1.7303, 0.0001);
   }
 
   void test_sum_in_q_direct_beam() {
@@ -495,9 +494,9 @@ public:
     alg.setProperty("SummationType", "SumInQ");
     alg.setProperty("ReductionType", "DivergentBeam");
     alg.setProperty("ThetaIn", 25.0);
-    MatrixWorkspace_sptr outLam = runAlgorithmLam(alg, 20);
+    MatrixWorkspace_sptr outLam = runAlgorithmLam(alg, 18);
 
-    TS_ASSERT_DELTA(outLam->y(0)[0], 0.2622, 0.0001);
+    TS_ASSERT_DELTA(outLam->y(0)[0], 0.2911, 0.0001);
   }
 
   void test_sum_in_q_monitor_normalization() {
@@ -525,16 +524,16 @@ public:
     alg.setProperty("SummationType", "SumInQ");
     alg.setProperty("ReductionType", "DivergentBeam");
     alg.setProperty("ThetaIn", 25.0);
-    MatrixWorkspace_sptr outLam = runAlgorithmLam(alg, 20);
+    MatrixWorkspace_sptr outLam = runAlgorithmLam(alg, 18);
 
-    TS_ASSERT_DELTA(outLam->x(0)[0], -0.6637, 0.0001);
-    TS_ASSERT_DELTA(outLam->x(0)[7], 4.8538, 0.0001);
-    TS_ASSERT_DELTA(outLam->x(0)[10], 7.2185, 0.0001);
-    TS_ASSERT_DELTA(outLam->x(0)[19], 14.3126, 0.0001);
-    TS_ASSERT_DELTA(outLam->y(0)[0], 1.0481, 0.0001);
-    TS_ASSERT_DELTA(outLam->y(0)[7], 1.5187, 0.0001);
-    TS_ASSERT_DELTA(outLam->y(0)[10], 1.5957, 0.0001);
-    TS_ASSERT_DELTA(outLam->y(0)[19], 1.6137, 0.0001);
+    TS_ASSERT_DELTA(outLam->x(0)[0], 0.1244, 0.0001);
+    TS_ASSERT_DELTA(outLam->x(0)[7], 5.6420, 0.0001);
+    TS_ASSERT_DELTA(outLam->x(0)[10], 8.0067, 0.0001);
+    TS_ASSERT_DELTA(outLam->x(0)[17], 13.5243, 0.0001);
+    TS_ASSERT_DELTA(outLam->y(0)[0], 7.6861, 0.0001);
+    TS_ASSERT_DELTA(outLam->y(0)[7], 1.4879, 0.0001);
+    TS_ASSERT_DELTA(outLam->y(0)[10], 1.5523, 0.0001);
+    TS_ASSERT_DELTA(outLam->y(0)[17], 1.6371, 0.0001);
   }
 
   void test_sum_in_q_transmission_correction_run() {
@@ -546,10 +545,10 @@ public:
     alg.setProperty("SummationType", "SumInQ");
     alg.setProperty("ReductionType", "DivergentBeam");
     alg.setProperty("ThetaIn", 25.0);
-    MatrixWorkspace_sptr outLam = runAlgorithmLam(alg, 20);
+    MatrixWorkspace_sptr outLam = runAlgorithmLam(alg, 18);
 
-    TS_ASSERT_DELTA(outLam->y(0)[0], 0.1314, 0.0001);
-    TS_ASSERT_DELTA(outLam->y(0)[7], 0.6208, 0.0001);
+    TS_ASSERT_DELTA(outLam->y(0)[0], 0.8015, 0.0001);
+    TS_ASSERT_DELTA(outLam->y(0)[7], 0.5722, 0.0001);
   }
 
   void test_sum_in_q_exponential_correction() {
@@ -563,10 +562,10 @@ public:
     alg.setProperty("CorrectionAlgorithm", "ExponentialCorrection");
     alg.setProperty("C0", 0.2);
     alg.setProperty("C1", 0.1);
-    MatrixWorkspace_sptr outLam = runAlgorithmLam(alg, 20);
+    MatrixWorkspace_sptr outLam = runAlgorithmLam(alg, 18);
 
-    TS_ASSERT_DELTA(outLam->y(0)[0], 9.1332, 0.0001);
-    TS_ASSERT_DELTA(outLam->y(0)[7], 18.4419, 0.0001);
+    TS_ASSERT_DELTA(outLam->y(0)[0], 11.3636, 0.0001);
+    TS_ASSERT_DELTA(outLam->y(0)[7], 17.7963, 0.0001);
   }
 
   void test_sum_in_q_IvsQ() {
@@ -581,14 +580,14 @@ public:
     alg.setProperty("SummationType", "SumInQ");
     alg.setProperty("ReductionType", "DivergentBeam");
     alg.setProperty("ThetaIn", 25.0);
-    MatrixWorkspace_sptr outQ = runAlgorithmQ(alg, 20);
+    MatrixWorkspace_sptr outQ = runAlgorithmQ(alg, 18);
 
     // X range in outQ
-    TS_ASSERT_DELTA(outQ->x(0)[0], 0.3169, 0.0001);
-    TS_ASSERT_DELTA(outQ->x(0)[7], 0.4739, 0.0001);
+    TS_ASSERT_DELTA(outQ->x(0)[0], 0.3327, 0.0001);
+    TS_ASSERT_DELTA(outQ->x(0)[7], 0.5100, 0.0001);
     // Y counts
-    TS_ASSERT_DELTA(outQ->y(0)[0], 2.1382, 0.0001);
-    TS_ASSERT_DELTA(outQ->y(0)[7], 1.8543, 0.0001);
+    TS_ASSERT_DELTA(outQ->y(0)[0], 1.9348, 0.0001);
+    TS_ASSERT_DELTA(outQ->y(0)[7], 2.0204, 0.0001);
   }
 
 private:
