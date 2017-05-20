@@ -76,7 +76,7 @@ def get_final_output_workspaces(output_bundles, parent_alg):
 
     # For each reduction mode, we need to perform a can subtraction (and potential cleaning of the workspace)
     final_output_workspaces = {}
-    for reduction_mode, output_bundles in list(reduction_mode_vs_output_bundles.items()):
+    for reduction_mode, output_bundles in reduction_mode_vs_output_bundles.items():
         # Find the sample and the can in the data collection
         output_sample_workspace = next((output_bundle.output_workspace for output_bundle in output_bundles
                                         if is_sample(output_bundle)), None)

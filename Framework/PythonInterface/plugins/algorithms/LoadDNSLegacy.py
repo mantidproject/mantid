@@ -1,6 +1,7 @@
 from __future__ import (absolute_import, division, print_function)
 import mantid.simpleapi as api
 import numpy as np
+from scipy.constants import m_n, h
 import os
 import sys
 from mantid.api import PythonAlgorithm, AlgorithmFactory, WorkspaceProperty, \
@@ -22,6 +23,7 @@ class LoadDNSLegacy(PythonAlgorithm):
         """
         PythonAlgorithm.__init__(self)
         self.tolerance = 1e-2
+        self.instrument = None
 
     def category(self):
         """
@@ -44,7 +46,7 @@ class LoadDNSLegacy(PythonAlgorithm):
                              "Name of DNS experimental data file.")
 
         self.declareProperty(FileProperty("CoilCurrentsTable", "",
-                                          FileAction.Load, ['.txt']),
+                                          FileAction.OptionalLoad, ['.txt']),
                              "Name of file containing table of coil currents and polarisations.")
 
         self.declareProperty(WorkspaceProperty("OutputWorkspace",
@@ -57,12 +59,23 @@ class LoadDNSLegacy(PythonAlgorithm):
 
     def get_polarisation_table(self):
         # load polarisation table
+        poltable = []
         poltable_name = self.getPropertyValue("CoilCurrentsTable")
+        if not poltable_name:
+            # read the table from IDF
+            for p in ['x', 'y', 'z']:
+                currents = self.instrument.getStringParameter("{}_currents".format(p))[0].split(';')
+                for cur in currents:
+                    row = {'polarisation': p, 'comment': '7'}
+                    row['C_a'], row['C_b'], row['C_c'], row['C_z'] = [float(c) for c in cur.split(',')]
+                    poltable.append(row)
+            self.log().debug("Loaded polarisation table:\n" + str(poltable))
+            return poltable
         try:
-            currents = np.genfromtxt(poltable_name, names=True, dtype=None)
+            currents = np.genfromtxt(poltable_name, names=True, dtype='U2,U2,f8,f8,f8,f8')
+            self.log().debug("Coil currents are: " + str(currents))
         except ValueError as err:
             raise RuntimeError("Invalid coil currents table: " + str(err))
-        poltable = []
         colnames = currents.dtype.names
         poltable = [dict(list(zip(colnames, cur))) for cur in currents]
         self.log().debug("Loaded polarisation table:\n" + str(poltable))
@@ -98,6 +111,8 @@ class LoadDNSLegacy(PythonAlgorithm):
             message = "File " + filename + " does not contain any data!"
             self.log().error(message)
             raise RuntimeError(message)
+        # sample logs
+        logs = {"names": [], "values": [], "units": []}
 
         # load run information
         metadata = DNSdata()
@@ -108,6 +123,10 @@ class LoadDNSLegacy(PythonAlgorithm):
             self.log().error(message)
             raise RuntimeError(message)
 
+        tmp = api.LoadEmptyInstrument(InstrumentName='DNS')
+        self.instrument = tmp.getInstrument()
+        api.DeleteWorkspace(tmp)
+
         # load polarisation table and determine polarisation
         poltable = self.get_polarisation_table()
         pol = self.get_polarisation(metadata, poltable)
@@ -116,10 +135,48 @@ class LoadDNSLegacy(PythonAlgorithm):
             self.log().warning("Failed to determine polarisation for " + filename +
                                ". Values have been set to undefined.")
         ndet = 24
-        # this needed to be able to use ConvertToMD
-        dataX = np.zeros(2*ndet)
-        dataX.fill(metadata.wavelength + 0.00001)
-        dataX[::2] -= 0.000002
+        unitX="Wavelength"
+        if metadata.tof_channel_number < 2:
+            dataX = np.zeros(2*ndet)
+            dataX.fill(metadata.wavelength + 0.00001)
+            dataX[::2] -= 0.000002
+        else:
+            unitX="TOF"
+
+            # get instrument parameters
+            l1 = np.linalg.norm(self.instrument.getSample().getPos() - self.instrument.getSource().getPos())
+            self.log().notice("L1 = {} m".format(l1))
+            dt_factor = float(self.instrument.getStringParameter("channel_width_factor")[0])
+
+            # channel width
+            dt = metadata.tof_channel_width*dt_factor
+            # calculate tof1
+            velocity = h/(m_n*metadata.wavelength*1e-10)   # m/s
+            tof1 = 1e+06*l1/velocity        # microseconds
+            self.log().debug("TOF1 = {} microseconds".format(tof1))
+            self.log().debug("Delay time = {} microsecond".format(metadata.tof_delay_time))
+            # create dataX array
+            x0 = tof1 + metadata.tof_delay_time
+            self.log().debug("TOF1 = {} microseconds".format(tof1))
+            dataX = np.linspace(x0, x0+metadata.tof_channel_number*dt, metadata.tof_channel_number+1)
+
+            # sample logs
+            logs["names"].extend(["channel_width", "TOF1", "delay_time", "tof_channels"])
+            logs["values"].extend([dt, tof1, metadata.tof_delay_time, metadata.tof_channel_number])
+            logs["units"].extend(["microseconds", "microseconds", "microseconds", ""])
+            if metadata.tof_elastic_channel:
+                logs["names"].append("EPP")
+                logs["values"].append(metadata.tof_elastic_channel)
+                logs["units"].append("")
+            if metadata.chopper_rotation_speed:
+                logs["names"].append("chopper_speed")
+                logs["values"].append(metadata.chopper_rotation_speed)
+                logs["units"].append("Hz")
+            if metadata.chopper_slits:
+                logs["names"].append("chopper_slits")
+                logs["values"].append(metadata.chopper_slits)
+                logs["units"].append("")
+
         # data normalization
         factor = 1.0
         yunit = "Counts"
@@ -141,7 +198,7 @@ class LoadDNSLegacy(PythonAlgorithm):
         dataE = np.sqrt(data_array[0:ndet, 1:])/factor
         # create workspace
         api.CreateWorkspace(OutputWorkspace=outws_name, DataX=dataX, DataY=dataY,
-                            DataE=dataE, NSpec=ndet, UnitX="Wavelength")
+                            DataE=dataE, NSpec=ndet, UnitX=unitX)
         outws = api.AnalysisDataService.retrieve(outws_name)
         api.LoadInstrument(outws, InstrumentName='DNS', RewriteSpectraMap=True)
 
@@ -156,68 +213,40 @@ class LoadDNSLegacy(PythonAlgorithm):
         # rotate the detector bank to the proper position
         api.RotateInstrumentComponent(outws, "bank0", X=0, Y=1, Z=0, Angle=metadata.deterota)
         # add sample log Ei and wavelength
-        api.AddSampleLog(outws, LogName='Ei', LogText=str(metadata.incident_energy),
-                         LogType='Number', LogUnit='meV')
-        api.AddSampleLog(outws, LogName='wavelength', LogText=str(metadata.wavelength),
-                         LogType='Number', LogUnit='Angstrom')
+        logs["names"].extend(["Ei", "wavelength"])
+        logs["values"].extend([metadata.incident_energy, metadata.wavelength])
+        logs["units"].extend(["meV", "Angstrom"])
+
         # add other sample logs
-        api.AddSampleLog(outws, LogName='deterota', LogText=str(metadata.deterota),
-                         LogType='Number', LogUnit='Degrees')
-        api.AddSampleLog(outws, 'mon_sum',
-                         LogText=str(float(metadata.monitor_counts)), LogType='Number')
-        api.AddSampleLog(outws, LogName='duration', LogText=str(metadata.duration),
-                         LogType='Number', LogUnit='Seconds')
-        api.AddSampleLog(outws, LogName='huber', LogText=str(metadata.huber),
-                         LogType='Number', LogUnit='Degrees')
-        api.AddSampleLog(outws, LogName='omega', LogText=str(metadata.huber - metadata.deterota),
-                         LogType='Number', LogUnit='Degrees')
-        api.AddSampleLog(outws, LogName='T1', LogText=str(metadata.temp1),
-                         LogType='Number', LogUnit='K')
-        api.AddSampleLog(outws, LogName='T2', LogText=str(metadata.temp2),
-                         LogType='Number', LogUnit='K')
-        api.AddSampleLog(outws, LogName='Tsp', LogText=str(metadata.tsp),
-                         LogType='Number', LogUnit='K')
-        # flipper
-        api.AddSampleLog(outws, LogName='flipper_precession',
-                         LogText=str(metadata.flipper_precession_current),
-                         LogType='Number', LogUnit='A')
-        api.AddSampleLog(outws, LogName='flipper_z_compensation',
-                         LogText=str(metadata.flipper_z_compensation_current),
-                         LogType='Number', LogUnit='A')
+        logs["names"].extend(["deterota", "mon_sum", "duration", "huber", "omega", "T1", "T2", "Tsp"])
+        logs["values"].extend([metadata.deterota, metadata.monitor_counts, metadata.duration,
+                               metadata.huber, metadata.huber - metadata.deterota,
+                               metadata.temp1, metadata.temp2, metadata.tsp])
+        logs["units"].extend(["Degrees", "Counts", "Seconds", "Degrees", "Degrees", "K", "K", "K"])
+
+        # flipper, coil currents and polarisation
         flipper_status = 'OFF'    # flipper OFF
         if abs(metadata.flipper_precession_current) > sys.float_info.epsilon:
             flipper_status = 'ON'    # flipper ON
-        api.AddSampleLog(outws, LogName='flipper',
-                         LogText=flipper_status, LogType='String')
-        # coil currents
-        api.AddSampleLog(outws, LogName='C_a', LogText=str(metadata.a_coil_current),
-                         LogType='Number', LogUnit='A')
-        api.AddSampleLog(outws, LogName='C_b', LogText=str(metadata.b_coil_current),
-                         LogType='Number', LogUnit='A')
-        api.AddSampleLog(outws, LogName='C_c', LogText=str(metadata.c_coil_current),
-                         LogType='Number', LogUnit='A')
-        api.AddSampleLog(outws, LogName='C_z', LogText=str(metadata.z_coil_current),
-                         LogType='Number', LogUnit='A')
-        # type of polarisation
-        api.AddSampleLog(outws, 'polarisation', LogText=pol[0], LogType='String')
-        api.AddSampleLog(outws, 'polarisation_comment', LogText=str(pol[1]), LogType='String')
+        logs["names"].extend(["flipper_precession", "flipper_z_compensation", "flipper",
+                              "C_a", "C_b", "C_c", "C_z", "polarisation", "polarisation_comment"])
+        logs["values"].extend([metadata.flipper_precession_current,
+                               metadata.flipper_z_compensation_current, flipper_status,
+                               metadata.a_coil_current, metadata.b_coil_current,
+                               metadata.c_coil_current, metadata.z_coil_current,
+                               str(pol[0]), str(pol[1])])
+        logs["units"].extend(["A", "A", "", "A", "A", "A", "A", "", ""])
+
         # slits
-        api.AddSampleLog(outws, LogName='slit_i_upper_blade_position',
-                         LogText=str(metadata.slit_i_upper_blade_position),
-                         LogType='Number', LogUnit='mm')
-        api.AddSampleLog(outws, LogName='slit_i_lower_blade_position',
-                         LogText=str(metadata.slit_i_lower_blade_position),
-                         LogType='Number', LogUnit='mm')
-        api.AddSampleLog(outws, LogName='slit_i_left_blade_position',
-                         LogText=str(metadata.slit_i_left_blade_position),
-                         LogType='Number', LogUnit='mm')
-        api.AddSampleLog(outws, 'slit_i_right_blade_position',
-                         LogText=str(metadata.slit_i_right_blade_position),
-                         LogType='Number', LogUnit='mm')
-        # data normalization
+        logs["names"].extend(["slit_i_upper_blade_position", "slit_i_lower_blade_position",
+                              "slit_i_left_blade_position", "slit_i_right_blade_position"])
+        logs["values"].extend([metadata.slit_i_upper_blade_position, metadata.slit_i_lower_blade_position,
+                               metadata.slit_i_left_blade_position, metadata.slit_i_right_blade_position])
+        logs["units"].extend(["mm", "mm", "mm", "mm"])
 
         # add information whether the data are normalized (duration/monitor/no):
         api.AddSampleLog(outws, LogName='normalized', LogText=norm, LogType='String')
+        api.AddSampleLogMultiple(outws, LogNames=logs["names"], LogValues=logs["values"], LogUnits=logs["units"])
 
         outws.setYUnit(yunit)
         outws.setYUnitLabel(ylabel)

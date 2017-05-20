@@ -30,6 +30,16 @@ focused_cropping_values = [
     (1500, 19900),  # Bank 5
     ]
 
+focused_bin_widths = [
+    # Note you want these to be negative for logarithmic (dt / t) binning
+    # else the output file will be larger than 1GB
+    -0.0050,  # Bank 1
+    -0.0010,  # Bank 2
+    -0.0010,  # Bank 3
+    -0.0010,  # Bank 4
+    -0.0005,  # Bank 5
+]
+
 vanadium_cropping_values = [
     (800, 19995),  # Bank 1
     (800, 19995),  # Bank 2
@@ -67,5 +77,6 @@ variables = {
     "file_names_dict": file_names,
     "script_params": script_params,
     "focused_cropping_values": focused_cropping_values,
-    "vanadium_cropping_values": vanadium_cropping_values
+    "vanadium_cropping_values": vanadium_cropping_values,
+    "focused_bin_widths": focused_bin_widths,
 }

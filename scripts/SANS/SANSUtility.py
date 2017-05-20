@@ -1997,7 +1997,7 @@ def get_correct_combinDet_setting(instrument_name, detector_selection):
     detector_selection = detector_selection.upper()
     # If we are dealing with LOQ, then the correct combineDet selection is
     if instrument_name == "LOQ":
-        if detector_selection == "MAIN":
+        if detector_selection == "MAIN" or detector_selection == "MAIN-DETECTOR-BANK":
             new_combine_detector_selection = 'rear'
         elif detector_selection == "HAB":
             new_combine_detector_selection = 'front'
@@ -2012,9 +2012,9 @@ def get_correct_combinDet_setting(instrument_name, detector_selection):
 
     # If we are dealing with SANS2D, then the correct combineDet selection is
     if instrument_name == "SANS2D":
-        if detector_selection == "REAR":
+        if detector_selection == "REAR" or detector_selection == "REAR-DETECTOR":
             new_combine_detector_selection = 'rear'
-        elif detector_selection == "FRONT":
+        elif detector_selection == "FRONT" or detector_selection == "FRONT-DETECTOR":
             new_combine_detector_selection = 'front'
         elif detector_selection == "MERGED":
             new_combine_detector_selection = 'merged'
