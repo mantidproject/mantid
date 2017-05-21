@@ -619,7 +619,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
             outputSpace));
-    TS_ASSERT_EQUALS(output->getAxis(0)->unit()->unitID(), "dSpacingPerpendicular");
+    TS_ASSERT_EQUALS(output->getAxis(0)->unit()->unitID(),
+                     "dSpacingPerpendicular");
     TS_ASSERT_EQUALS(output->blocksize(), 2663);
     // Check EMode has been set
     TS_ASSERT_EQUALS(Mantid::Kernel::DeltaEMode::Direct, output->getEMode());

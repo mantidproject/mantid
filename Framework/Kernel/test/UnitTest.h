@@ -642,13 +642,15 @@ public:
 
     for (size_t i = 0; i < sample.size(); i++) {
       if (std::fabs(sample[i]) < 10 * FLT_EPSILON) {
-        TSM_ASSERT_DELTA("d-spacingPerpendicular limits Failed for conversion N: " +
-                             boost::lexical_cast<std::string>(i),
-                         sample[i], rezult[i], 10 * FLT_EPSILON);
+        TSM_ASSERT_DELTA(
+            "d-spacingPerpendicular limits Failed for conversion N: " +
+                boost::lexical_cast<std::string>(i),
+            sample[i], rezult[i], 10 * FLT_EPSILON);
       } else {
-        TSM_ASSERT_DELTA("d-spacingPerpendicular limits Failed for conversion N: " +
-                             boost::lexical_cast<std::string>(i),
-                         rezult[i] / sample[i], 1., 10 * FLT_EPSILON);
+        TSM_ASSERT_DELTA(
+            "d-spacingPerpendicular limits Failed for conversion N: " +
+                boost::lexical_cast<std::string>(i),
+            rezult[i] / sample[i], 1., 10 * FLT_EPSILON);
       }
     }
   }

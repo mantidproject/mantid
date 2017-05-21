@@ -591,9 +591,12 @@ Unit *dSpacing::clone() const { return new dSpacing(*this); }
  */
 DECLARE_UNIT(dSpacingPerpendicular)
 
-const UnitLabel dSpacingPerpendicular::label() const { return Symbol::Angstrom; }
+const UnitLabel dSpacingPerpendicular::label() const {
+  return Symbol::Angstrom;
+}
 
-dSpacingPerpendicular::dSpacingPerpendicular() : Unit(), factorTo(DBL_MIN), factorFrom(DBL_MIN) {}
+dSpacingPerpendicular::dSpacingPerpendicular()
+    : Unit(), factorTo(DBL_MIN), factorFrom(DBL_MIN) {}
 
 void dSpacingPerpendicular::init() {
   factorTo =
@@ -624,12 +627,16 @@ double dSpacingPerpendicular::singleFromTOF(const double tof) const {
   double temp = tof / factorFrom;
   return sqrt(temp * temp - sfpFrom);
 }
-double dSpacingPerpendicular::conversionTOFMin() const { return sqrt(-1.0 * sfpFrom); }
+double dSpacingPerpendicular::conversionTOFMin() const {
+  return sqrt(-1.0 * sfpFrom);
+}
 double dSpacingPerpendicular::conversionTOFMax() const {
   return sqrt(std::numeric_limits<double>::max()) / factorFrom;
 }
 
-Unit *dSpacingPerpendicular::clone() const { return new dSpacingPerpendicular(*this); }
+Unit *dSpacingPerpendicular::clone() const {
+  return new dSpacingPerpendicular(*this);
+}
 
 // ================================================================================
 /* MOMENTUM TRANSFER

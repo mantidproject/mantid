@@ -413,7 +413,9 @@ protected:
 class MANTID_KERNEL_DLL dSpacingPerpendicular : public Unit {
 public:
   const std::string unitID() const override; ///< "dSpacingPerpendicular"
-  const std::string caption() const override { return "d-SpacingPerpendicular"; }
+  const std::string caption() const override {
+    return "d-SpacingPerpendicular";
+  }
   const UnitLabel label() const override;
 
   double singleToTOF(const double x) const override;
