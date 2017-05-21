@@ -409,11 +409,11 @@ protected:
 };
 
 //=================================================================================================
-/// d-SpacingOrthogonal in Angstrom
-class MANTID_KERNEL_DLL dSpacingOrth : public Unit {
+/// d-SpacingPerpendicular in Angstrom
+class MANTID_KERNEL_DLL dSpacingPerpendicular : public Unit {
 public:
-  const std::string unitID() const override; ///< "dSpacingOrth"
-  const std::string caption() const override { return "d-SpacingOrth"; }
+  const std::string unitID() const override; ///< "dSpacingPerpendicular"
+  const std::string caption() const override { return "d-SpacingPerpendicular"; }
   const UnitLabel label() const override;
 
   double singleToTOF(const double x) const override;
@@ -424,7 +424,7 @@ public:
   double conversionTOFMax() const override;
 
   /// Constructor
-  dSpacingOrth();
+  dSpacingPerpendicular();
 
 protected:
   double factorTo;   ///< Constant factor for to conversion

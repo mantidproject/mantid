@@ -612,14 +612,14 @@ public:
     conv4.initialize();
     conv4.setProperty("InputWorkspace", ws);
     conv4.setPropertyValue("OutputWorkspace", outputSpace);
-    conv4.setPropertyValue("Target", "dSpacingOrth");
+    conv4.setPropertyValue("Target", "dSpacingPerpendicular");
     conv4.setPropertyValue("Emode", "Direct");
     conv4.execute();
 
     TS_ASSERT_THROWS_NOTHING(
         output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
             outputSpace));
-    TS_ASSERT_EQUALS(output->getAxis(0)->unit()->unitID(), "dSpacingOrth");
+    TS_ASSERT_EQUALS(output->getAxis(0)->unit()->unitID(), "dSpacingPerpendicular");
     TS_ASSERT_EQUALS(output->blocksize(), 2663);
     // Check EMode has been set
     TS_ASSERT_EQUALS(Mantid::Kernel::DeltaEMode::Direct, output->getEMode());

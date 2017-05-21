@@ -217,8 +217,8 @@ public:
     unit = dSpacing().clone();
     TS_ASSERT(dynamic_cast<dSpacing *>(unit));
     delete unit;
-    unit = dSpacingOrth().clone();
-    TS_ASSERT(dynamic_cast<dSpacingOrth *>(unit));
+    unit = dSpacingPerpendicular().clone();
+    TS_ASSERT(dynamic_cast<dSpacingPerpendicular *>(unit));
     delete unit;
     unit = MomentumTransfer().clone();
     TS_ASSERT(dynamic_cast<MomentumTransfer *>(unit));
@@ -596,29 +596,29 @@ public:
   }
 
   //----------------------------------------------------------------------
-  // d-SpacingOrth tests
+  // d-SpacingPerpebdicular tests
   //----------------------------------------------------------------------
 
-  void testdSpacingOrth_unitID() {
-    TS_ASSERT_EQUALS(dp.unitID(), "dSpacingOrth")
+  void testdSpacingPerpendicular_unitID() {
+    TS_ASSERT_EQUALS(dp.unitID(), "dSpacingPerpendicular")
   }
 
-  void testdSpacingOrth_caption() {
-    TS_ASSERT_EQUALS(dp.caption(), "d-SpacingOrth")
+  void testdSpacingPerpendicular_caption() {
+    TS_ASSERT_EQUALS(dp.caption(), "d-SpacingPerpendicular")
   }
 
-  void testdSpacingOrth_label() {
+  void testdSpacingPerpendicular_label() {
     TS_ASSERT_EQUALS(dp.label().ascii(), "Angstrom")
     TS_ASSERT_EQUALS(dp.label().utf8(), L"\u212b")
   }
 
-  void testdSpacingOrth_cast() {
+  void testdSpacingPerpendicular_cast() {
     Unit *u = NULL;
     TS_ASSERT_THROWS_NOTHING(u = dynamic_cast<Unit *>(&dp));
-    TS_ASSERT_EQUALS(u->unitID(), "dSpacingOrth");
+    TS_ASSERT_EQUALS(u->unitID(), "dSpacingPerpendicular");
   }
 
-  void testdSpacingOrth_toTOF() {
+  void testdSpacingPerpendicular_toTOF() {
     std::vector<double> x(1, 1.0), y(1, 1.0);
     std::vector<double> yy = y;
     TS_ASSERT_THROWS_NOTHING(dp.toTOF(x, y, 1.0, 1.0, 1.0, 1, 1.0, 1.0))
@@ -626,7 +626,7 @@ public:
     TS_ASSERT(yy == y)
   }
 
-  void testdSpacingOrth_fromTOF() {
+  void testdSpacingPerpendicular_fromTOF() {
     std::vector<double> x(1, 1001.1), y(1, 1.0);
     std::vector<double> yy = y;
     TS_ASSERT_THROWS_NOTHING(dp.fromTOF(x, y, 1.0, 1.0, 1.0, 1, 1.0, 1.0))
@@ -634,7 +634,7 @@ public:
     TS_ASSERT(yy == y)
   }
 
-  void testdSpacingOrthRange() {
+  void testdSpacingPerpendicularRange() {
     std::vector<double> sample, rezult;
 
     std::string err_mess = convert_units_check_range(dp, sample, rezult);
@@ -642,11 +642,11 @@ public:
 
     for (size_t i = 0; i < sample.size(); i++) {
       if (std::fabs(sample[i]) < 10 * FLT_EPSILON) {
-        TSM_ASSERT_DELTA("d-spacingOrth limits Failed for conversion N: " +
+        TSM_ASSERT_DELTA("d-spacingPerpendicular limits Failed for conversion N: " +
                              boost::lexical_cast<std::string>(i),
                          sample[i], rezult[i], 10 * FLT_EPSILON);
       } else {
-        TSM_ASSERT_DELTA("d-spacingOrth limits Failed for conversion N: " +
+        TSM_ASSERT_DELTA("d-spacingPerpendicular limits Failed for conversion N: " +
                              boost::lexical_cast<std::string>(i),
                          rezult[i] / sample[i], 1., 10 * FLT_EPSILON);
       }
@@ -1395,7 +1395,7 @@ private:
   Units::Energy energy;
   Units::Energy_inWavenumber energyk;
   Units::dSpacing d;
-  Units::dSpacingOrth dp;
+  Units::dSpacingPerpendicular dp;
   Units::MomentumTransfer q;
   Units::QSquared q2;
   Units::DeltaE dE;
