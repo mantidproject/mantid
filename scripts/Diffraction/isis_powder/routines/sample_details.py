@@ -171,6 +171,7 @@ def _check_can_convert_to_float(property_name, value):
                          " The input was: '" + str(original_value) + "'")
     return value
 
+
 def convert_to_float(val):
     try:
         val = float(val)
