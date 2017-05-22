@@ -249,7 +249,7 @@ public:
 
 class PredictPeaksTestPerformance : public CxxTest::TestSuite {
 public:
-  void test_many_peaks_rectangular() {
+  void test_manyPeaksRectangular() {
     MatrixWorkspace_sptr inWS =
         WorkspaceCreationHelper::create2DWorkspace(10000, 1);
     Instrument_sptr inst =
@@ -272,7 +272,7 @@ public:
     alg.execute();
   }
 
-  void test_many_peaks() {
+  void test_manyPeaks() {
     MatrixWorkspace_sptr inWS =
         WorkspaceCreationHelper::create2DWorkspace(10000, 1);
     Instrument_sptr inst =
@@ -280,7 +280,7 @@ public:
             3, V3D(0, 0, -1), V3D(0, 0, 0), 1.6, 1.0);
     inWS->setInstrument(inst);
 
-    // Set ub and Goniometer rotation
+    // Set UB matrix and Goniometer rotation
     WorkspaceCreationHelper::setOrientedLattice(inWS, 12.0, 12.0, 12.0);
     WorkspaceCreationHelper::setGoniometer(inWS, 0., 0., 0.);
 

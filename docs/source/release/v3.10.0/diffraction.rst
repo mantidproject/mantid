@@ -34,8 +34,8 @@ Single Crystal Diffraction
 
 - A new HB3A instrument definition file, for its 512 x 512 detector, is created.  Its valid period is from February 2017 to late April 2017.
 - An IDF for HB3A with 256 by 256 detectors was created.  It was dated from late April 2017 because its original detector has been switched back.
+- A Bug fix was added to the WISH instrument parameter file to prevent predicted peaks falling between tube gaps.
 - New algorithm :ref:`DeltaPDF3D <algm-DeltaPDF3D>` for calculating the 3D-deltaPDF from a HKL MDHistoWorkspace
-
 
 Full list of `diffraction <https://github.com/mantidproject/mantid/issues?q=is%3Aclosed+milestone%3A%22Release+3.10%22+label%3A%22Component%3A+Diffraction%22>`_
 and
