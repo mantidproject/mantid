@@ -257,7 +257,12 @@ void ReflectometryReductionOneAuto2::exec() {
   populateMonitorProperties(alg, instrument);
   alg->setPropertyValue("NormalizeByIntegratedMonitors",
                         getPropertyValue("NormalizeByIntegratedMonitors"));
-  populateTransmissionProperties(alg, instrument);
+  bool transRunsFound = populateTransmissionProperties(alg);
+  if (transRunsFound)
+    alg->setProperty("StrictSpectrumChecking",
+                     getPropertyValue("StrictSpectrumChecking"));
+  else
+    populateAlgorithmicCorrectionProperties(alg, instrument);
 
   alg->setProperty("InputWorkspace", inputWS);
   alg->execute();
@@ -404,32 +409,14 @@ void ReflectometryReductionOneAuto2::populateDirectBeamProperties(
                         getPropertyValue("RegionOfDirectBeam"));
 }
 
-/** Set transmission properties
+/** Set algorithmic correction properties
 *
 * @param alg :: ReflectometryReductionOne algorithm
-* @param instrument :: the instrument attached to the workspace
+* @param instrument :: The instrument attached to the workspace
 */
-void ReflectometryReductionOneAuto2::populateTransmissionProperties(
+void ReflectometryReductionOneAuto2::populateAlgorithmicCorrectionProperties(
     IAlgorithm_sptr alg, Instrument_const_sptr instrument) {
 
-  // Transmission run(s)
-
-  MatrixWorkspace_sptr firstWS = getProperty("FirstTransmissionRun");
-  if (firstWS) {
-    alg->setProperty("FirstTransmissionRun", firstWS);
-    alg->setPropertyValue("StrictSpectrumChecking",
-                          getPropertyValue("StrictSpectrumChecking"));
-    MatrixWorkspace_sptr secondWS = getProperty("SecondTransmissionRun");
-    if (secondWS) {
-      alg->setProperty("SecondTransmissionRun", secondWS);
-      alg->setPropertyValue("StartOverlap", getPropertyValue("StartOverlap"));
-      alg->setPropertyValue("EndOverlap", getPropertyValue("EndOverlap"));
-      alg->setPropertyValue("Params", getPropertyValue("Params"));
-    }
-    return;
-  }
-
-  // No transmission runs, try algorithmic corrections
   // With algorithmic corrections, monitors should not be integrated, see below
 
   const std::string correctionAlgorithm = getProperty("CorrectionAlgorithm");

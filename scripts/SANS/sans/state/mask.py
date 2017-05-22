@@ -12,7 +12,6 @@ from sans.state.state_functions import (is_pure_none_or_not_none, validation_mes
 from sans.state.automatic_setters import (automatic_setters)
 from sans.common.file_information import find_full_file_path
 from sans.common.enums import (SANSInstrument, DetectorType)
-from sans.common.file_information import (get_instrument_paths_for_sans_file)
 
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -242,12 +241,12 @@ class StateMask(StateBase):
 # ----------------------------------------------------------------------------------------------------------------------
 def setup_idf_and_ipf_content(move_info, data_info):
     # Get the IDF and IPF path since they contain most of the import information
-    file_name = data_info.sample_scatter
-    idf_path, ipf_path = get_instrument_paths_for_sans_file(file_name)
+    idf_file_path = data_info.idf_file_path
+    ipf_file_path = data_info.ipf_file_path
     # Set the detector names
-    set_detector_names(move_info, ipf_path)
+    set_detector_names(move_info, ipf_file_path)
     # Set the idf path
-    move_info.idf_path = idf_path
+    move_info.idf_path = idf_file_path
 
 
 class StateMaskBuilder(object):

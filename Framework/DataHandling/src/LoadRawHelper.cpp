@@ -1257,7 +1257,6 @@ LoadRawHelper::getLogFilenamesfromADS(const std::string &pathToRawFile) {
 
   std::string str;
   std::string path;
-  std::string logFile;
   std::set<std::string> logfilesList;
   Poco::Path logpath(pathToRawFile);
   size_t pos = pathToRawFile.find_last_of('/');
@@ -1276,10 +1275,7 @@ LoadRawHelper::getLogFilenamesfromADS(const std::string &pathToRawFile) {
     pos = fileName.find("txt");
     if (pos == std::string::npos)
       continue;
-    logFile = path + "/" + fileName;
-    if (logFile.empty())
-      continue;
-    logfilesList.insert(logFile);
+    logfilesList.insert(std::string(path).append("/").append(fileName));
   }
   return (logfilesList);
 }

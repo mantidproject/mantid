@@ -31,6 +31,8 @@ CurveFitting
 - Concept page for :ref:`Comparing fit minimizers <FittingMinimizers>` has been added to provide information on the minimizers supported, and compare how well different minimizers do against different benchmark fitting problems
 - In order to guarantee a complete overlap between resolution and signal in the region of interest, Function :ref:`Convolution <func-Convolution>` can switch between a fast FFT mode for data defined over a symmetric domain, and slower direct calculations for data defined over an asymmetric domain.
 
+The work on benchmarking fitting has received funding from the Horizon 2020 Framework Programme of the European Union under the SINE2020 project Grant No 654000.
+
 Script Repository
 -----------------
 

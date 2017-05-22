@@ -20,6 +20,7 @@ set ( SRC_FILES
 	src/BinaryOperation.cpp
 	src/CalMuonDeadTime.cpp
 	src/CalMuonDetectorPhases.cpp
+	src/CalculateMuonAsymmetry.cpp
 	src/CalculateCountRate.cpp
 	src/CalculateDIFC.cpp
 	src/CalculateEfficiency.cpp
@@ -104,6 +105,7 @@ set ( SRC_FILES
 	src/EQSANSTofStructure.cpp
 	src/EditInstrumentGeometry.cpp
 	src/ElasticWindow.cpp
+	src/EstimateMuonAsymmetryFromCounts.cpp
 	src/EstimateResolutionDiffraction.cpp
 	src/EventWorkspaceAccess.cpp
 	src/Exponential.cpp
@@ -129,6 +131,7 @@ set ( SRC_FILES
 	src/FindCenterOfMassPosition2.cpp
 	src/FindDeadDetectors.cpp
 	src/FindDetectorsOutsideLimits.cpp
+	src/FindEPP.cpp
 	src/FindPeakBackground.cpp
 	src/FindPeaks.cpp
 	src/FitPeak.cpp
@@ -186,6 +189,7 @@ set ( SRC_FILES
 	src/MultipleScatteringCylinderAbsorption.cpp
 	src/Multiply.cpp
 	src/MultiplyRange.cpp
+	src/MuonAsymmetryHelper.cpp
 	src/MuonGroupDetectors.cpp
 	src/NormaliseByCurrent.cpp
 	src/NormaliseByDetector.cpp
@@ -313,7 +317,7 @@ set ( C_SRC_FILES
 	src/Tomography/tomopy/utils.c
 )
 
-set ( INC_FILES
+set ( INC_FILES	
 	inc/MantidAlgorithms/AbsorptionCorrection.h
 	inc/MantidAlgorithms/AddLogDerivative.h
 	inc/MantidAlgorithms/AddNote.h
@@ -336,6 +340,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/BoostOptionalToAlgorithmProperty.h
 	inc/MantidAlgorithms/CalMuonDeadTime.h
 	inc/MantidAlgorithms/CalMuonDetectorPhases.h
+	inc/MantidAlgorithms/CalculateMuonAsymmetry.h
 	inc/MantidAlgorithms/CalculateCountRate.h
 	inc/MantidAlgorithms/CalculateDIFC.h
 	inc/MantidAlgorithms/CalculateEfficiency.h
@@ -420,6 +425,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/EQSANSTofStructure.h
 	inc/MantidAlgorithms/EditInstrumentGeometry.h
 	inc/MantidAlgorithms/ElasticWindow.h
+	inc/MantidAlgorithms/EstimateMuonAsymmetryFromCounts.h
 	inc/MantidAlgorithms/EstimateResolutionDiffraction.h
 	inc/MantidAlgorithms/EventWorkspaceAccess.h
 	inc/MantidAlgorithms/Exponential.h
@@ -445,6 +451,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/FindCenterOfMassPosition2.h
 	inc/MantidAlgorithms/FindDeadDetectors.h
 	inc/MantidAlgorithms/FindDetectorsOutsideLimits.h
+	inc/MantidAlgorithms/FindEPP.h
 	inc/MantidAlgorithms/FindPeakBackground.h
 	inc/MantidAlgorithms/FindPeaks.h
 	inc/MantidAlgorithms/FitPeak.h
@@ -506,6 +513,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/MultipleScatteringCylinderAbsorption.h
 	inc/MantidAlgorithms/Multiply.h
 	inc/MantidAlgorithms/MultiplyRange.h
+	inc/MantidAlgorithms/MuonAsymmetryHelper.h
 	inc/MantidAlgorithms/MuonGroupDetectors.h
 	inc/MantidAlgorithms/NormaliseByCurrent.h
 	inc/MantidAlgorithms/NormaliseByDetector.h
@@ -664,6 +672,7 @@ set ( TEST_FILES
 	BinaryOperationTest.h
 	CalMuonDeadTimeTest.h
 	CalMuonDetectorPhasesTest.h
+	CalculateMuonAsymmetryTest.h
 	CalculateCountRateTest.h
 	CalculateDIFCTest.h
 	CalculateEfficiencyTest.h
@@ -746,6 +755,7 @@ set ( TEST_FILES
 	DivideTest.h
 	EditInstrumentGeometryTest.h
 	ElasticWindowTest.h
+	EstimateMuonAsymmetryFromCountsTest.h
 	EstimateResolutionDiffractionTest.h
 	ExponentialCorrectionTest.h
 	ExponentialTest.h
@@ -769,6 +779,7 @@ set ( TEST_FILES
 	FindCenterOfMassPositionTest.h
 	FindDeadDetectorsTest.h
 	FindDetectorsOutsideLimitsTest.h
+	FindEPPTest.h
 	FindPeakBackgroundTest.h
 	FindPeaksTest.h
 	FitPeakTest.h

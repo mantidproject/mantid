@@ -449,7 +449,8 @@ void SumSpectra::doRebinnedOutput(MatrixWorkspace_sptr outputWorkspace,
  */
 void SumSpectra::execEvent(EventWorkspace_const_sptr localworkspace,
                            std::set<int> &indices) {
-  auto outputWorkspace = create<EventWorkspace>(*localworkspace, 1);
+  auto outputWorkspace =
+      create<EventWorkspace>(*localworkspace, 1, localworkspace->binEdges(0));
 
   Progress progress(this, 0, 1, indices.size());
 

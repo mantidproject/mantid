@@ -2,6 +2,7 @@
 
 """ SANSLoad algorithm which handles loading SANS files"""
 
+from __future__ import (absolute_import, division, print_function)
 from mantid.kernel import (Direction, PropertyManagerProperty, FloatArrayProperty,
                            EnabledWhenProperty, PropertyCriterion)
 from mantid.api import (DataProcessorAlgorithm, MatrixWorkspaceProperty, AlgorithmFactory, PropertyMode, Progress,
@@ -9,7 +10,7 @@ from mantid.api import (DataProcessorAlgorithm, MatrixWorkspaceProperty, Algorit
 
 from sans.state.state_base import create_deserialized_sans_state_from_property_manager
 from sans.common.enums import SANSDataType
-from sans.common.general_functions import create_unmanaged_algorithm
+from sans.common.general_functions import create_child_algorithm
 from sans.algorithm_detail.load_data import SANSLoadDataFactory
 
 
@@ -133,7 +134,8 @@ class SANSLoad(DataProcessorAlgorithm):
         loader = load_factory.create_loader(state)
 
         workspaces, workspace_monitors = loader.execute(data_info=data, use_cached=use_cached,
-                                                        publish_to_ads=publish_to_ads, progress=progress)
+                                                        publish_to_ads=publish_to_ads, progress=progress,
+                                                        parent_alg=self)
         progress.report("Loaded the data.")
 
         # Check if a move has been requested and perform it. This can be useful if scientists want to load the data and
@@ -341,7 +343,7 @@ class SANSLoad(DataProcessorAlgorithm):
         if beam_coordinates:
             move_options.update({"Component": component})
 
-        move_alg = create_unmanaged_algorithm(move_name, **move_options)
+        move_alg = create_child_algorithm(self, move_name, **move_options)
 
         # The workspaces are stored in a dict: workspace_names (sample_scatter, etc) : ListOfWorkspaces
         for key, workspace_list in list(workspaces.items()):

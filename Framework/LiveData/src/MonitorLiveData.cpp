@@ -1,3 +1,4 @@
+#include "MantidLiveData/MonitorLiveData.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -6,7 +7,6 @@
 #include "MantidKernel/System.h"
 #include "MantidKernel/WriteLock.h"
 #include "MantidLiveData/LoadLiveData.h"
-#include "MantidLiveData/MonitorLiveData.h"
 
 #include <Poco/Thread.h>
 

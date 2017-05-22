@@ -180,7 +180,7 @@ void DiffractionFocussing2::exec() {
        outWorkspaceIndex < static_cast<int>(m_validGroups.size());
        outWorkspaceIndex++) {
     PARALLEL_START_INTERUPT_REGION
-    int group = m_validGroups[outWorkspaceIndex];
+    int group = static_cast<int>(m_validGroups[outWorkspaceIndex]);
 
     // Get the group
     auto it = group2xvector.find(group);
@@ -337,7 +337,8 @@ void DiffractionFocussing2::exec() {
  */
 void DiffractionFocussing2::execEvent() {
   // Create a new outputworkspace with not much in it
-  auto out = create<EventWorkspace>(*m_matrixInputW, m_validGroups.size());
+  auto out = create<EventWorkspace>(*m_matrixInputW, m_validGroups.size(),
+                                    m_matrixInputW->binEdges(0));
 
   MatrixWorkspace_const_sptr outputWS = getProperty("OutputWorkspace");
   bool inPlace = (m_matrixInputW == outputWS);
@@ -370,7 +371,7 @@ void DiffractionFocussing2::execEvent() {
 
   // This creates and reserves the space required
   for (size_t iGroup = 0; iGroup < this->m_validGroups.size(); iGroup++) {
-    const int group = this->m_validGroups[iGroup];
+    const int group = static_cast<int>(m_validGroups[iGroup]);
     EventList &groupEL = out->getSpectrum(iGroup);
     groupEL.switchTo(eventWtype);
     groupEL.reserve(size_required[iGroup]);
@@ -455,7 +456,7 @@ void DiffractionFocussing2::execEvent() {
   prog = new Progress(this, 0.9, 1.0, nGroups);
   for (size_t workspaceIndex = 0; workspaceIndex < this->m_validGroups.size();
        workspaceIndex++) {
-    const int group = this->m_validGroups[workspaceIndex];
+    const int group = static_cast<int>(m_validGroups[workspaceIndex]);
     // Now this is the workspace index of that group; simply 1 offset
     prog->reportIncrement(1, "Setting X");
 

@@ -1,3 +1,4 @@
+#include "MantidGeometry/Instrument/ComponentVisitor.h"
 #include "MantidGeometry/Instrument/CompAssembly.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidGeometry/Instrument/StructuredDetector.h"
@@ -486,6 +487,10 @@ Quat CompAssembly::getRotation() const {
     }
     return rot;
   }
+}
+
+void CompAssembly::registerContents(ComponentVisitor &visitor) const {
+  visitor.registerComponentAssembly(*this);
 }
 
 /** Print information about elements in the assembly to a stream

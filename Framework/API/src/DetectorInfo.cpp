@@ -11,6 +11,23 @@
 namespace Mantid {
 namespace API {
 
+/**
+ * Defined conversion from ID to index for detectors
+ * @param detIds : Detector IDs to build the indexes for
+ * @return shared_ptr to const map of detector ID -> detector index.
+ */
+boost::shared_ptr<const std::unordered_map<detid_t, size_t>>
+makeDetIdToIndexMap(const std::vector<detid_t> &detIds) {
+
+  const size_t nDetIds = detIds.size();
+  auto detIdToIndex = boost::make_shared<std::unordered_map<detid_t, size_t>>();
+  detIdToIndex->reserve(nDetIds);
+  for (size_t i = 0; i < nDetIds; ++i) {
+    (*detIdToIndex)[detIds[i]] = i;
+  }
+  return std::move(detIdToIndex);
+}
+
 /** Construct DetectorInfo based on an Instrument.
  *
  * The Instrument reference `instrument` must be the parameterized instrument
@@ -29,11 +46,44 @@ DetectorInfo::DetectorInfo(
   // Note: This does not seem possible currently (the instrument objects is
   // always allocated, even if it is empty), so this will not fail.
   if (!m_instrument)
-    throw std::runtime_error("Workspace does not contain an instrument!");
+    throw std::invalid_argument("DetectorInfo::DetectorInfo: Workspace does "
+                                "not contain an instrument!");
 
   m_detectorIDs = instrument->getDetectorIDs(false /* do not skip monitors */);
-  for (size_t i = 0; i < m_detectorIDs.size(); ++i)
-    m_detIDToIndex[m_detectorIDs[i]] = i;
+  m_detIDToIndex = makeDetIdToIndexMap(m_detectorIDs);
+}
+
+/** Construct DetectorInfo based on an Instrument.
+ *
+ * The Instrument reference `instrument` must be the parameterized instrument
+ * obtained from a workspace. The pointer to the ParameterMap `pmap` can be
+ * null. If it is not null, it must refer to the same map as wrapped in
+ * `instrument`. Non-const methods of DetectorInfo may only be called if `pmap`
+ * is not null. Detector ID -> index map provided as constructor argument.
+ *
+ * */
+DetectorInfo::DetectorInfo(
+    Beamline::DetectorInfo &detectorInfo,
+    boost::shared_ptr<const Geometry::Instrument> instrument,
+    Geometry::ParameterMap *pmap,
+    boost::shared_ptr<const std::unordered_map<detid_t, size_t>>
+        detIdToIndexMap)
+    : m_detectorInfo(detectorInfo), m_pmap(pmap), m_instrument(instrument),
+      m_detIDToIndex(detIdToIndexMap), m_lastDetector(PARALLEL_GET_MAX_THREADS),
+      m_lastAssemblyDetectorIndices(PARALLEL_GET_MAX_THREADS),
+      m_lastIndex(PARALLEL_GET_MAX_THREADS, -1) {
+
+  // Note: This does not seem possible currently (the instrument objects is
+  // always allocated, even if it is empty), so this will not fail.
+  if (!m_instrument)
+    throw std::invalid_argument(
+        "DetectorInfo::DetectorInfo Workspace does not contain an instrument!");
+
+  m_detectorIDs = instrument->getDetectorIDs(false /* do not skip monitors */);
+  if (m_detectorIDs.size() != m_detIDToIndex->size()) {
+    throw std::invalid_argument(
+        "DetectorInfo::DetectorInfo: ID and ID->index map do not match");
+  }
 }
 
 /// Assigns the contents of the non-wrapping part of `rhs` to this.
@@ -64,6 +114,9 @@ bool DetectorInfo::isEquivalent(const DetectorInfo &other) const {
 /// Returns the size of the DetectorInfo, i.e., the number of detectors in the
 /// instrument.
 size_t DetectorInfo::size() const { return m_detectorIDs.size(); }
+
+/// Returns true if the beamline has scanning detectors.
+bool DetectorInfo::isScanning() const { return m_detectorInfo.isScanning(); }
 
 /// Returns true if the detector is a monitor.
 bool DetectorInfo::isMonitor(const size_t index) const {
@@ -523,5 +576,9 @@ void DetectorInfo::doCacheSample() const {
 
 void DetectorInfo::cacheL1() const { m_L1 = m_source->getDistance(*m_sample); }
 
+boost::shared_ptr<const std::unordered_map<detid_t, size_t>>
+DetectorInfo::detIdToIndexMap() const {
+  return m_detIDToIndex;
+}
 } // namespace API
 } // namespace Mantid

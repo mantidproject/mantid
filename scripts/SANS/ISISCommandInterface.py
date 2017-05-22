@@ -1767,14 +1767,13 @@ def is_current_workspace_an_angle_workspace():
     return is_angle
 
 
-def MatchIDFInReducerAndWorkspace(file_name):
-    '''
-    This method checks if the IDF which gets loaded with the workspace associated
-    with the file name and the current instrument in the reducer singleton refer
-    to the same IDF. If not then switch the IDF in the reducer.
-    '''
-    is_matched = True
+def _get_idf_path_for_run(file_name):
+    """
+    This method finds the full file location for a run number
 
+    :param file_name: the file name or run number
+    :return: the full path to the corresponding IDF
+    """
     # Get measurement time from file
     measurement_time = su.get_measurement_time_from_file(file_name)
 
@@ -1783,16 +1782,30 @@ def MatchIDFInReducerAndWorkspace(file_name):
 
     # Get the path to the instrument definition file
     idf_path_workspace = ExperimentInfo.getInstrumentFilename(instrument_name, measurement_time)
-    idf_path_workspace = os.path.normpath(idf_path_workspace)
+    return os.path.normpath(idf_path_workspace)
+
+
+def get_idf_path_for_run(file_name):
+    idf_path_workspace = _get_idf_path_for_run(file_name)
+    print(idf_path_workspace)
+    return idf_path_workspace
+
+
+def MatchIDFInReducerAndWorkspace(file_name):
+    '''
+    This method checks if the IDF which gets loaded with the workspace associated
+    with the file name and the current instrument in the reducer singleton refer
+    to the same IDF. If not then switch the IDF in the reducer.
+    '''
+
+    # Get the IDF path
+    idf_path_workspace = _get_idf_path_for_run(file_name)
 
     # Get the idf from the reducer
     idf_path_reducer = get_current_idf_path_in_reducer()
 
-    if ((idf_path_reducer == idf_path_workspace) and
-            su.are_two_files_identical(idf_path_reducer, idf_path_reducer)):
-        is_matched = True
-    else:
-        is_matched = False
+    is_matched = ((idf_path_reducer == idf_path_workspace) and
+                  su.are_two_files_identical(idf_path_reducer, idf_path_reducer))
 
     return is_matched
 

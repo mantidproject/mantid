@@ -554,14 +554,12 @@ public:
   ///         the output string.
   /// Tied:   Value depends on values of other parameters.
   enum ParameterStatus { Active, Fixed, FixedByDefault, Tied };
-
   /// Change status of parameter
   virtual void setParameterStatus(size_t i, ParameterStatus status) = 0;
   /// Get status of parameter
   virtual ParameterStatus getParameterStatus(size_t i) const = 0;
 
 protected:
-
   /// Function initialization. Declare function parameters in this method.
   virtual void init();
   /// Declare a new parameter

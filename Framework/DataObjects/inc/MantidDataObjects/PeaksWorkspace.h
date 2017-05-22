@@ -93,7 +93,9 @@ public:
   int getNumberPeaks() const override;
   std::string getConvention() const override;
   void removePeak(int peakNum) override;
-  void addPeak(const Geometry::IPeak &ipeak) override;
+  void addPeak(const Geometry::IPeak &peak) override;
+  /// Move a peak object into this peaks workspace
+  void addPeak(Peak &&peak);
   Peak &getPeak(int peakNum) override;
   const Peak &getPeak(int peakNum) const override;
 

@@ -123,11 +123,11 @@ void LoadVulcanCalFile::processInOutProperites() {
   // Grouping
   string grouptypestr = getPropertyValue("Grouping");
   size_t numeffbanks = 6;
-  if (grouptypestr.compare("6Modules") == 0) {
+  if (grouptypestr == "6Modules") {
     m_groupingType = VULCAN_OFFSET_BANK;
-  } else if (grouptypestr.compare("2Banks") == 0) {
+  } else if (grouptypestr == "2Banks") {
     m_groupingType = VULCAN_OFFSET_MODULE;
-  } else if (grouptypestr.compare("1Bank") == 0) {
+  } else if (grouptypestr == "1Bank") {
     m_groupingType = VULCAN_OFFSET_STACK;
   } else {
     stringstream ess;
@@ -383,7 +383,7 @@ void LoadVulcanCalFile::processOffsets(
       boost::split(terms, pname, boost::is_any_of("("));
       vector<string> terms2;
       boost::split(terms2, terms[0], boost::is_any_of("bank"));
-      int bank = atoi(terms2.back().c_str());
+      int bank = std::stoi(terms2.back());
       set_bankID.insert(bank);
 
       map_verify.emplace(pid, make_pair(true, bank));
