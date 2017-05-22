@@ -1,5 +1,5 @@
-#include <sstream>
 #include "MantidKernel/Exception.h"
+#include <sstream>
 
 namespace Mantid {
 namespace Kernel {
@@ -352,6 +352,29 @@ const char *InternetError::what() const noexcept { return outMessage.c_str(); }
   @return the error string
 */
 const int &InternetError::errorCode() const { return m_errorCode; }
+
+//-------------------------
+// FitSizeError Error class
+//-------------------------
+
+/// Constructor.
+/// @param oldSize :: Old number of free fitting parameters
+FitSizeWarning::FitSizeWarning(size_t oldSize)
+    : std::exception(),
+      m_message(
+          "Number of fitting parameters is different from original value of " +
+          std::to_string(oldSize)) {}
+
+/// Constructor.
+/// @param oldSize :: Old number of free fitting parameters
+/// @param newSize :: New number of free fitting parameters
+FitSizeWarning::FitSizeWarning(size_t oldSize, size_t newSize)
+    : std::exception(),
+      m_message("Number of fitting parameters changed from " +
+                std::to_string(oldSize) + " to " + std::to_string(newSize)) {}
+
+/// Get the warning message.
+const char *FitSizeWarning::what() const noexcept { return m_message.c_str(); }
 
 } // namespace Exception
 } // namespace Kernel

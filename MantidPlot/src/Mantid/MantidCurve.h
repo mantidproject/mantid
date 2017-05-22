@@ -107,7 +107,8 @@ private:
   mutable QwtDoubleRect m_boundingRect;
 
   // To ensure that all MantidCurves can work with Mantid Workspaces.
-  virtual void init(Graph *g, bool distr, GraphOptions::CurveType style) = 0;
+  virtual void init(Graph *g, bool distr, GraphOptions::CurveType style,
+                    bool multileSpectra = false) = 0;
 };
 
 #endif

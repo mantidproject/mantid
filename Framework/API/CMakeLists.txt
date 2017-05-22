@@ -46,6 +46,7 @@ set ( SRC_FILES
 	src/FunctionDomainGeneral.cpp
 	src/FunctionDomainMD.cpp
 	src/FunctionFactory.cpp
+	src/FunctionGenerator.cpp
 	src/FunctionParameterDecorator.cpp
 	src/FunctionProperty.cpp
 	src/FunctionValues.cpp
@@ -209,6 +210,7 @@ set ( INC_FILES
 	inc/MantidAPI/FunctionDomainGeneral.h
 	inc/MantidAPI/FunctionDomainMD.h
 	inc/MantidAPI/FunctionFactory.h
+	inc/MantidAPI/FunctionGenerator.h
 	inc/MantidAPI/FunctionParameterDecorator.h
 	inc/MantidAPI/FunctionProperty.h
 	inc/MantidAPI/FunctionValues.h
@@ -427,6 +429,7 @@ set ( TEST_FILES
 	ParameterReferenceTest.h
 	ParameterTieTest.h
 	PeakFunctionIntegratorTest.h
+        ProgressTest.h
 	ProjectionTest.h
 	RawCountValidatorTest.h
 	RemoteJobManagerFactoryTest.h

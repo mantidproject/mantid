@@ -53,19 +53,19 @@ public:
   virtual size_t esize() const;
   virtual double e(size_t i) const;
   virtual double ex(size_t i) const;
+  bool isPlottable() const;
   virtual void setLogScaleY(bool on);
   virtual bool logScaleY() const;
-  virtual void saveLowestPositiveValue(const double v);
+  void setMinimumPositiveValue(const double v);
   virtual double getYMin() const;
   virtual double getYMax() const;
-
   virtual void setXOffset(const double x);
   virtual void setYOffset(const double y);
   virtual void setWaterfallPlot(bool on);
   virtual bool isWaterfallPlot() const;
   double offsetY() const { return m_offsetY; }
 
-  void calculateYMinAndMax(/*const std::vector<double> &yvalues*/) const;
+  void calculateYMinAndMax() const;
 
 protected:
   virtual double getX(size_t i) const = 0;
@@ -74,6 +74,8 @@ protected:
   virtual double getEX(size_t i) const = 0;
 
 private:
+  enum class DataStatus : uint8_t { Undefined, NotPlottable, Plottable };
+
   /// Indicates that the data is plotted on a log y scale
   bool m_logScaleY;
 
@@ -85,6 +87,9 @@ private:
 
   /// highest y value
   mutable double m_maxY;
+
+  /// True if data is 'sensible' to plot
+  mutable DataStatus m_plottable;
 
   /// Indicates whether or not waterfall plots are enabled
   bool m_isWaterfall;
