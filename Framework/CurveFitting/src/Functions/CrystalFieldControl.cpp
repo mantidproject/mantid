@@ -24,7 +24,7 @@ CrystalFieldControl::CrystalFieldControl() : CompositeFunction() {
   // Variation in FWHM of peaks when with model is used (FWHMX and FWHMY)
   declareAttribute("FWHMVariation", Attribute(0.1));
   // Definition of the background function
-  declareAttribute("Background", Attribute(""));
+  declareAttribute("Background", Attribute("", true));
   // Name of a IPeakFunction to use for peaks
   declareAttribute("PeakShape", Attribute("Lorentzian"));
   // Energy tolerance in crystal field calculations
@@ -33,6 +33,8 @@ CrystalFieldControl::CrystalFieldControl() : CompositeFunction() {
   declareAttribute("ToleranceIntensity", Attribute(1.0e-1));
   // A comma-separated list of physical properties
   declareAttribute("PhysicalProperties", Attribute(""));
+  declareAttribute("NPeaks", Attribute(0));
+  declareAttribute("FixAllPeaks", Attribute(false));
 }
 
 /// Set a value to attribute attName
@@ -52,6 +54,9 @@ void CrystalFieldControl::setAttribute(const std::string &name,
       buildControls();
     } else if (name == "FWHMs") {
       m_FWHMs = attr.asVector();
+      if (m_FWHMs.size() == 1 && m_FWHMs.size() != m_temperatures.size()) {
+        m_FWHMs.assign(m_temperatures.size(), m_FWHMs.front());
+      }
     }
     API::IFunction::setAttribute(name, attr);
   }
@@ -76,12 +81,6 @@ void CrystalFieldControl::parseStringListAttribute(
 
 /// Cache function attributes.
 void CrystalFieldControl::cacheAttributes() {
-  //parseStringListAttribute("Ions", m_ions);
-  //parseStringListAttribute("Symmetries", m_symmetries);
-  //parseStringListAttribute("PhysicalProperties", m_physProps);
-  //m_temperatures = getAttribute("Temperatures").asVector();
-  //buildControls();
-  //m_FWHMs = getAttribute("FWHMs").asVector();
   const auto nSpec = m_temperatures.size();
   m_fwhmX.clear();
   m_fwhmY.clear();
@@ -116,6 +115,7 @@ void CrystalFieldControl::checkConsistent()  {
     // Check if the FWHMX and FWHMY attributes of the spectrum
     // control functions are set and if they are they have equal lengths
     bool allXYEmpty = true;
+    bool someXYEmpty = false;
     for(size_t i = 0; i < nSpec; ++i) {
       auto specFun = getFunction(i).get();
       if (!dynamic_cast<CrystalFieldSpectrumControl*>(specFun)) {
@@ -124,6 +124,7 @@ void CrystalFieldControl::checkConsistent()  {
       if (m_fwhmX[i].size() != m_fwhmY[i].size()) {
         throw std::runtime_error("Vectors in each pair of (FWHMX, FWHMY) attributes must have the same size");
       }
+      someXYEmpty = someXYEmpty || m_fwhmX[i].empty() || m_fwhmY[i].empty();
       allXYEmpty = allXYEmpty && m_fwhmX[i].empty() && m_fwhmY[i].empty();
     }
     if (m_FWHMs.empty()) {
@@ -131,6 +132,9 @@ void CrystalFieldControl::checkConsistent()  {
         // No width information given
         throw std::runtime_error("No peak width settings (FWHMs and FWHMX and "
                                  "FWHMY attributes not set).");
+      } else if (someXYEmpty) {
+        // If given they all must be given
+        throw std::runtime_error("FWHMX, FWHMY attributes are not given for all spectra.");
       }
     } else if (m_FWHMs.size() != nSpec) {
       if (m_FWHMs.size() == 1) {
@@ -147,7 +151,17 @@ void CrystalFieldControl::checkConsistent()  {
       // Conflicting width attributes
       throw std::runtime_error("Either FWHMs or (FWHMX and FWHMY) can be set but not all.");
     }
+  } else {
+    throw std::runtime_error("No temperatures are set.");
   }
+}
+
+const std::vector<double> &CrystalFieldControl::temperatures() const {
+  return m_temperatures;
+}
+
+const std::vector<double> &CrystalFieldControl::FWHMs() const {
+  return m_FWHMs;
 }
 
 /// Build control functions for individual spectra.
@@ -182,6 +196,16 @@ bool CrystalFieldControl::isMultiSite() const { return m_ions.size() > 1; }
 
 bool CrystalFieldControl::isMultiSpectrum() const {
   return m_temperatures.size() > 1 || !m_physProps.empty();
+}
+
+/// Any peaks defined?
+bool CrystalFieldControl::hasPeaks() const {
+  return !m_temperatures.empty();
+}
+
+/// Check if there are any phys. properties.
+bool CrystalFieldControl::hasPhysProperties() const {
+  return !m_physProps.empty();
 }
 
 /// Build the source function.
@@ -269,6 +293,7 @@ API::IFunction_sptr CrystalFieldControl::buildMultiSiteMultiSpectrum() {
   }
   return source;
 }
+
 
 // ----------------------------------------------------------------------------------- //
 

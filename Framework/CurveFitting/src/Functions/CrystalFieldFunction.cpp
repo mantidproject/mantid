@@ -76,7 +76,7 @@ public:
 } // namespace
 
 /// Constructor
-CrystalFieldFunction::CrystalFieldFunction() : IFunction(), m_dirtyTarget(true), m_isMultiSpectrum(false), m_hasPeaks(false) {
+CrystalFieldFunction::CrystalFieldFunction() : IFunction(), m_dirtyTarget(true) {
 }
 
 // Evaluates the function
@@ -560,15 +560,14 @@ bool CrystalFieldFunction::hasBackground() const {
   if (!hasAttribute("Background")) {
     return false;
   }
-  auto background = getAttribute("Background").asString();
-  return background != "\"\"";
+  return !getAttribute("Background").isEmpty();
 }
 
 /// Check if there are peaks (there is at least one spectrum).
-bool CrystalFieldFunction::hasPeaks() const { return m_hasPeaks; }
+bool CrystalFieldFunction::hasPeaks() const { return m_control.hasPeaks(); }
 
 /// Check if there are any phys. properties.
-bool CrystalFieldFunction::hasPhysProperties() const { return false; }
+bool CrystalFieldFunction::hasPhysProperties() const { return m_control.hasPhysProperties(); }
 
 /// Test if a name (parameter's or attribute's) belongs to m_source
 /// @param aName :: A name to test.
@@ -687,7 +686,7 @@ void CrystalFieldFunction::buildSingleSiteSingleSpectrum() const {
   //bool hasWidthModel = !m_fwhmX.empty();
   auto xVec = m_control.getFunction(0)->getAttribute("FWHMX").asVector();
   auto yVec = m_control.getFunction(0)->getAttribute("FWHMX").asVector();
-  auto FWHMs = m_control.getAttribute("FWHMs").asVector();
+  auto &FWHMs = m_control.FWHMs();
   auto defaultFWHM = FWHMs.empty() ? 0.0 : FWHMs[0];
 
   auto fwhmVariation = getAttribute("FWHMVariation").asDouble();
@@ -741,8 +740,8 @@ void CrystalFieldFunction::buildSingleSiteMultiSpectrum() const {
   //  m_fwhmX.resize(nSpec);
   //  m_fwhmY.resize(nSpec);
   //}
-  auto temperatures = m_control.getAttribute("Temperatures").asVector();
-  auto FWHMs = m_control.getAttribute("FWHMs").asVector();
+  auto &temperatures = m_control.temperatures();
+  auto &FWHMs = m_control.FWHMs();
   for (size_t i = 0; i < nSpec; ++i) {
     //if (m_fwhmX[i].empty()) {
       // auto suffix = std::to_string(i);
@@ -807,9 +806,9 @@ API::IFunction_sptr CrystalFieldFunction::buildSpectrum(
   auto nPeaks = CrystalFieldUtils::calculateNPeaks(values);
   (void)nPeaks;
   const auto fwhmVariation = getAttribute("FWHMVariation").asDouble();
-  const auto peakShape = IFunction::getAttribute("PeakShape").asString();
-  auto bkgdShape = IFunction::getAttribute("Background").asUnquotedString();
-  const size_t nRequiredPeaks = IFunction::getAttribute("NPeaks").asInt();
+  const auto peakShape = getAttribute("PeakShape").asString();
+  auto bkgdShape = getAttribute("Background").asUnquotedString();
+  const size_t nRequiredPeaks = getAttribute("NPeaks").asInt();
   const bool fixAllPeaks = getAttribute("FixAllPeaks").asBool();
 
   if (!bkgdShape.empty() && bkgdShape.find("name=") != 0 &&
@@ -876,7 +875,7 @@ void CrystalFieldFunction::updateSingleSiteSingleSpectrum() const {
   bool fixAllPeaks = getAttribute("FixAllPeaks").asBool();
   auto xVec = m_control.getFunction(0)->getAttribute("FWHMX").asVector();
   auto yVec = m_control.getFunction(0)->getAttribute("FWHMX").asVector();
-  auto FWHMs = m_control.getAttribute("FWHMs").asVector();
+  auto &FWHMs = m_control.FWHMs();
   auto defaultFWHM = FWHMs.empty() ? 0.0 : FWHMs[0];
 
   FunctionDomainGeneral domain;
@@ -904,8 +903,8 @@ void CrystalFieldFunction::updateSingleSiteMultiSpectrum() const {
 
   auto &fun = dynamic_cast<MultiDomainFunction &>(*m_target);
   try {
-    auto temperatures = m_control.getAttribute("Temperatures").asVector();
-    auto FWHMs = m_control.getAttribute("FWHMs").asVector();
+    auto &temperatures = m_control.temperatures();
+    auto &FWHMs = m_control.FWHMs();
     for (size_t i = 0; i < temperatures.size(); ++i) {
       updateSpectrum(*fun.getFunction(i), nre, en, wf, ham, temperatures[i],
                      FWHMs[i], i);
@@ -930,7 +929,7 @@ void CrystalFieldFunction::updateSpectrum(API::IFunction &spectrum, int nre,
                                           double temperature, double fwhm,
                                           size_t iSpec) const {
   const auto fwhmVariation = getAttribute("FWHMVariation").asDouble();
-  const auto peakShape = IFunction::getAttribute("PeakShape").asString();
+  const auto peakShape = getAttribute("PeakShape").asString();
   const bool fixAllPeaks = getAttribute("FixAllPeaks").asBool();
   auto xVec = m_control.getFunction(iSpec)->getAttribute("FWHMX").asVector();
   auto yVec = m_control.getFunction(iSpec)->getAttribute("FWHMX").asVector();

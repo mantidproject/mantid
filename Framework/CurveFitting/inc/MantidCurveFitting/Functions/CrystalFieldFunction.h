@@ -114,11 +114,10 @@ public:
   bool hasPeaks() const;
   /// Check if there are any phys. properties.
   bool hasPhysProperties() const;
-  /// Check that attributes and parameters are consistent.
-  /// If not excepion is thrown.
-  //void checkConsistent() const;
   //@}
 
+  /// Build the source function
+  void buildSourceFunction() const;
   /// Build target function.
   void buildTargetFunction() const;
   /// Get number of the number of spectra (excluding phys prop data).
@@ -133,8 +132,6 @@ protected:
   /// Get status of parameter
   ParameterStatus getParameterStatus(size_t i) const override;
 
-  /// Build the source function
-  void buildSourceFunction() const;
   /// Update the target function
   void updateTargetFunction() const;
 
@@ -222,8 +219,6 @@ private:
   mutable size_t m_nSourceParams;
   /// Flag indicating that updateTargetFunction() is required.
   mutable bool m_dirtyTarget;
-  mutable bool m_isMultiSpectrum;
-  mutable bool m_hasPeaks;
 };
 
 } // namespace Functions

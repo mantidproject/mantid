@@ -38,9 +38,6 @@ public:
   CrystalFieldControl();
   /// Set a value to attribute attName
   void setAttribute(const std::string &name, const Attribute &) override;
-  /// Are there multiple ions?
-  bool isMultiSite() const;
-  bool isMultiSpectrum() const;
   /// Build control functions for individual spectra.
   void buildControls();
   /// Build the source function.
@@ -57,6 +54,16 @@ public:
   API::IFunction_sptr buildMultiSiteSingleSpectrum();
   /// Build the source function in a multi site - multi spectrum case.
   API::IFunction_sptr buildMultiSiteMultiSpectrum();
+  /// Are there multiple ions?
+  bool isMultiSite() const;
+  /// Is it a multi-spectrum case?
+  bool isMultiSpectrum() const;
+  /// Any peaks defined?
+  bool hasPeaks() const;
+  /// Check if there are any phys. properties.
+  bool hasPhysProperties() const;
+  const std::vector<double> &temperatures() const;
+  const std::vector<double> &FWHMs() const;
 
 private:
   /// Cache the attributes
