@@ -356,13 +356,9 @@ public:
 
     for (size_t i = 0; i < nDetectors; ++i) {
       for (size_t j = 0; j < nTimeIndexes; ++j) {
-        // Rounding to nearest int required to avoid problem of Euler angles
-        // returning -180/0/180
-        TS_ASSERT_DELTA(0.0, std::lround(detInfo.rotation({i, j})
-                                             .getEulerAngles("XYZ")[0]) %
-                                 180,
+        TS_ASSERT_DELTA(0.0, detInfo.rotation({i, j}).getEulerAngles("YXZ")[1],
                         1e-12)
-        TS_ASSERT_DELTA(90.0, detInfo.rotation({i, j}).getEulerAngles("XYZ")[2],
+        TS_ASSERT_DELTA(90.0, detInfo.rotation({i, j}).getEulerAngles("YXZ")[2],
                         1e-12)
       }
 
