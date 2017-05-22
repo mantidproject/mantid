@@ -34,11 +34,12 @@ from __future__ import (absolute_import, division, print_function)
 from ISISCommandInterface import *
 import SANSUtility as su
 from mantid.simpleapi import *
-from mantid.api import WorkspaceGroup
+from mantid.api import WorkspaceGroup, AnalysisDataService, FileFinder
 from mantid.kernel import Logger
 import copy
 import sys
 import re
+import os
 from reduction_settings import REDUCTION_SETTINGS_OBJ_NAME
 from isis_reduction_steps import UserFile
 sanslog = Logger("SANS")
@@ -285,6 +286,7 @@ def BatchReduce(filename, format, plotresults=False, saveAlgs={'SaveRKH':'txt'},
             # wavelength range where the final argument can either be
             # DefaultTrans or CalcTrans:
             reduced = WavRangeReduction(combineDet=combineDet, out_fit_settings=scale_shift)
+            old_reduced_workspace_name = reduced
 
         except SkipEntry as reason:
             #this means that a load step failed, the warning and the fact that the results aren't there is enough for the user
@@ -352,7 +354,10 @@ def BatchReduce(filename, format, plotresults=False, saveAlgs={'SaveRKH':'txt'},
 
         file = run['output_as']
         #saving if optional and doesn't happen if the result workspace is left blank. Is this feature used?
+        transmission_outputter = TransmissionOutputter(old_workspace_name=old_reduced_workspace_name,
+                                                       new_workspace_name=final_name)
         if file:
+            transmission_outputter.save_transmission()
             save_names = []
             for n in names:
                 w = mtd[n]
@@ -400,7 +405,8 @@ def BatchReduce(filename, format, plotresults=False, saveAlgs={'SaveRKH':'txt'},
             # If we performed a zero-error correction, then we should get rid of the cloned workspaces
             if save_as_zero_error_free:
                 delete_cloned_workspaces(save_names_dict)
-
+        else:
+            transmission_outputter.dont_save_transmission()
         if plotresults == 1:
             for final_name in names:
                 PlotResult(final_name)
@@ -605,3 +611,66 @@ def sanitize_name(filename):
     # ensure that most user selections are supported
     keepcharacters = (' ','.','_')
     return "".join(c for c in filename if c.isalnum() or c in keepcharacters).rstrip()
+
+
+class TransmissionWorkspaceProvider(object):
+    def __init__(self, original_name):
+        super(TransmissionWorkspaceProvider, self).__init__()
+        self._original_transmission_name = original_name + TRANSMISSION_SUFFIX
+
+    @staticmethod
+    def _get_transmission_workspace_name(transmission_workspace_name):
+        if AnalysisDataService.doesExist(transmission_workspace_name):
+            transmission_workspace = AnalysisDataService.retrieve(transmission_workspace_name)
+            return transmission_workspace
+        return None
+
+    def get_renamed_transmission_workspace(self, new_name):
+        transmission_workspace = self._get_transmission_workspace_name(self._original_transmission_name)
+        new_transmission_name = new_name + TRANSMISSION_SUFFIX
+        if transmission_workspace:
+            if self._original_transmission_name != new_transmission_name:
+                RenameWorkspace(InputWorkspace=transmission_workspace, OutputWorkspace=new_transmission_name)
+            return new_transmission_name
+
+        return None
+
+
+class TransmissionOutputter(object):
+    def __init__(self, old_workspace_name, new_workspace_name):
+        super(TransmissionOutputter, self).__init__()
+        self._old_workspace_name = old_workspace_name
+        self._new_workspace_name = new_workspace_name
+
+    @staticmethod
+    def _remove_if_file_already_exists(file_name):
+        # If it is a full file path remove it
+        if os.path.exists(file_name):
+            os.remove(file_name)
+        else:
+            full_file_path = FileFinder.getFullPath(file_name)
+            if full_file_path is not None and os.path.exists(full_file_path):
+                os.remove(full_file_path)
+
+    def save_transmission(self):
+        transmission_provider = TransmissionWorkspaceProvider(original_name=self._old_workspace_name)
+        new_transmission_workspace_name = transmission_provider.get_renamed_transmission_workspace(
+            self._new_workspace_name)
+
+        if new_transmission_workspace_name is not None:
+            # Store as RKH
+            file_name_rkh = new_transmission_workspace_name + ".txt"
+            self._remove_if_file_already_exists(file_name_rkh)
+
+            # Store as processed Nexus
+            file_name_nexus = new_transmission_workspace_name + ".nxs"
+            self._remove_if_file_already_exists(file_name_nexus)
+
+            transmission_workspace = AnalysisDataService.retrieve(new_transmission_workspace_name)
+
+            SaveRKH(InputWorkspace=transmission_workspace, Filename=file_name_rkh, Append=True)
+            SaveNexus(InputWorkspace=transmission_workspace, Filename=file_name_nexus, Append=True)
+
+    def dont_save_transmission(self):
+        transmission_provider = TransmissionWorkspaceProvider(original_name=self._old_workspace_name)
+        _ = transmission_provider.get_renamed_transmission_workspace(self._new_workspace_name)  # noqa

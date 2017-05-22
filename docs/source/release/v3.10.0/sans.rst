@@ -5,6 +5,10 @@ SANS Changes
 .. contents:: Table of Contents
    :local:
 
+Features
+--------
+- Add functionality to handle event-mode monitors. This can be used to perform time slicing of the transission measurement.
+
 Bug Fixes
 ---------
 - Fixed wrong first spectrum number for LARMOR. The first non-monitor spectrum number is 11, but it had been set to 10.

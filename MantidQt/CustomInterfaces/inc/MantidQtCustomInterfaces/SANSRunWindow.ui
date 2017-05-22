@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1022</width>
+    <width>1086</width>
     <height>632</height>
    </rect>
   </property>
@@ -257,7 +257,7 @@
            <item>
             <widget class="QRadioButton" name="single_mode_btn">
              <property name="text">
-              <string>Single run mode</string>
+              <string>S&amp;ingle run mode</string>
              </property>
              <property name="checked">
               <bool>true</bool>
@@ -729,6 +729,14 @@
                </property>
               </widget>
              </item>
+             <item row="1" column="0">
+              <widget class="QCheckBox" name="monitor_as_event_checkbox">
+               <property name="text">
+                <string>Monitors 
+as event</string>
+               </property>
+              </widget>
+             </item>
             </layout>
            </widget>
           </item>
@@ -814,16 +822,6 @@
                </property>
               </widget>
              </item>
-             <item row="3" column="7">
-              <widget class="QCheckBox" name="saveCan_check">
-               <property name="toolTip">
-                <string>Select one or more file formats</string>
-               </property>
-               <property name="text">
-                <string>CanSAS  (1D)</string>
-               </property>
-              </widget>
-             </item>
              <item row="4" column="0">
               <widget class="QCheckBox" name="zeroErrorCheckBox">
                <property name="toolTip">
@@ -904,6 +902,16 @@ The NXcanSAS format can be used to save 1D and 2D data. </string>
                 </size>
                </property>
               </spacer>
+             </item>
+             <item row="3" column="7">
+              <widget class="QCheckBox" name="saveCan_check">
+               <property name="toolTip">
+                <string>Select one or more file formats</string>
+               </property>
+               <property name="text">
+                <string>CanSAS  (1D)</string>
+               </property>
+              </widget>
              </item>
             </layout>
            </widget>

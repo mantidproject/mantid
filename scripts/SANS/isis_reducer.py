@@ -387,6 +387,65 @@ class ISISReducer(Reducer):
         # Unwrap monitors
         self._unwrap_monitors = False
 
+        # Load monitors as event
+        self.load_monitors_as_events = False
+        self.transmission_unfitted_slices_sample = []
+        self.transmission_unfitted_slices_can = []
+        self.transmission_fitted_slices_sample = []
+        self.transmission_fitted_slices_can = []
+
+    def record_transmission_workspaces(self, fitted, unfitted, is_fitting_off):
+        """
+        Get a handle on the transmission workspaces if the transmissions are provided in event mode.
+        @param fitted: the fitted workspace
+        @param unfitted: the unfitted workspace
+        @param is_fitting_off: a flag which tells us if the fitted workspace has been produced
+        """
+        if self.load_monitors_as_event:
+            if self.is_can():
+                if not is_fitting_off:
+                    self.transmission_fitted_slices_can.append(fitted)
+                self.transmission_unfitted_slices_can.append(unfitted)
+            else:
+                if not is_fitting_off:
+                    self.transmission_fitted_slices_sample.append(fitted)
+                self.transmission_fitted_slices_sample.append(unfitted)
+
+    def has_time_sliced_transmissions(self):
+        return self.transmission_unfitted_slices_sample or self.transmission_unfitted_slices_can or\
+               self.transmission_fitted_slices_sample or self.transmission_fitted_slices_can  # noqa
+
+    def group_transmission_slices(self, group_name):
+        # If the Workspace Group already exists then we un-group the workspace. This leaves the child workspaces around
+        if AnalysisDataService.doesExist(group_name):
+            group_ws = AnalysisDataService.retrieve(group_name)
+
+            # If the workspace is not a WorkspaceGroup then we might be overriding important data, so don't do anything
+            # but provide a log
+            if not isinstance(group_ws, WorkspaceGroup):
+                logger.warning("There is a non-WorkspaceGroup workspace in the ADS with the name {}. This was going to"
+                               " be used for grouping time sliced transmission workspaces. The grouping has been "
+                               "aborted. To avoid this message, rename your workspace.".format(group_name))
+                return
+
+            # Ungroup the WorkspaceGroup
+            UnGroupWorkspace(InputWorkspace=group_ws)
+
+        # Add the workspaces to the group workspace
+        workspaces_to_add = []
+        workspaces_to_add.extend(self.transmission_fitted_slices_sample)
+        workspaces_to_add.extend(self.transmission_unfitted_slices_sample)
+        workspaces_to_add.extend(self.transmission_fitted_slices_can)
+        workspaces_to_add.extend(self.transmission_unfitted_slices_can)
+        if workspaces_to_add:
+            GroupWorkspaces(InputWorkspaces=workspaces_to_add, OutputWorkspace=group_name)
+
+        # Reset the transmission workspace caches
+        self.transmission_fitted_slices_sample = []
+        self.transmission_unfitted_slices_sample = []
+        self.transmission_fitted_slices_can = []
+        self.transmission_unfitted_slices_can = []
+
     def set_instrument(self, configuration):
         """
             Sets the instrument and put in the default beam center (usually the
@@ -467,13 +526,15 @@ class ISISReducer(Reducer):
         name += '_' + self.to_wavelen.get_range()
         name += self.mask.get_phi_limits_tag()
 
+        return self.add_slice_suffix(name)
+
+    def add_slice_suffix(self, name):
         if self.getNumSlices() > 0:
             limits = self.getCurrSliceLimit()
             if limits[0] != -1:
                 name += '_t%.2f' % limits[0]
             if limits[1] != -1:
                 name += '_T%.2f' % limits[1]
-
         return name
 
     # pylint: disable=global-statement
@@ -989,3 +1050,11 @@ class ISISReducer(Reducer):
         self._unwrap_monitors = value
 
     unwrap_monitors = property(get_unwrap_monitors, set_unwrap_monitors, None, None)
+
+    def get_load_monitors_as_events(self):
+        return self.load_monitors_as_events
+
+    def set_load_monitors_as_events(self, value):
+        self.load_monitors_as_events = value
+
+    load_monitors_as_event = property(get_load_monitors_as_events, set_load_monitors_as_events, None, None)

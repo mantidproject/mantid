@@ -296,18 +296,28 @@ def fromEvent2Histogram(ws_event, ws_monitor, binning = ""):
 
     name = '__monitor_tmp'
 
-    if binning != "":
-        aux_hist = Rebin(ws_event, binning, False)
-        Rebin(ws_monitor, binning, False, OutputWorkspace=name)
+    # Two scenarios can appear here:
+    # 1. The monitor is a histogram-mode workspace.
+    # 2. The monitor is an event worspace
+
+    if isinstance(ws_monitor, IEventWorkspace):
+        if binning != "":
+            aux_hist = Rebin(ws_event, binning, False)
+            Rebin(ws_monitor, binning, False, OutputWorkspace=name)
+        else:
+            raise RuntimeError("Cannot provide binning from event monitor workspace. "
+                               "Make sure that Eventstime has been set.")
     else:
-        aux_hist = RebinToWorkspace(ws_event, ws_monitor, False)
-        ws_monitor.clone(OutputWorkspace=name)
+        if binning != "":
+            aux_hist = Rebin(ws_event, binning, False)
+            Rebin(ws_monitor, binning, False, OutputWorkspace=name)
+        else:
+            aux_hist = RebinToWorkspace(ws_event, ws_monitor, False)
+            ws_monitor.clone(OutputWorkspace=name)
 
     ConjoinWorkspaces(name, aux_hist, CheckOverlapping=True)
     CopyInstrumentParameters(ws_event, OutputWorkspace=name)
-
     ws_hist = RenameWorkspace(name, OutputWorkspace=str(ws_event))
-
     return ws_hist
 
 
@@ -337,7 +347,7 @@ def sliceByTimeWs(ws_event, time_start=None, time_stop=None):
     return sliced_ws
 
 
-def slice2histogram(ws_event, time_start, time_stop, monitor, binning=""):
+def slice2histogram(ws_event, time_start, time_stop, monitor, binning="", is_can=False):
     """Return the histogram of the sliced event and a tuple with the following:
        - total time of the experiment
        - total charge
@@ -348,6 +358,7 @@ def slice2histogram(ws_event, time_start, time_stop, monitor, binning=""):
        @param time_stop: the maximum value to filter. Pass -1 to get the maximum available
        @param monitor: pointer to the monitor workspace
        @param binning: optional binning string to use instead of the binning from the monitor
+       @param is_can: true if is can else false
     """
     if not isEventWorkspace(ws_event):
         raise RuntimeError("The workspace "+str(ws_event)+ " is not a valid Event workspace")
@@ -365,12 +376,70 @@ def slice2histogram(ws_event, time_start, time_stop, monitor, binning=""):
 
     sliced_ws = sliceByTimeWs(ws_event, time_start, time_stop)
     sliced_ws = RenameWorkspace(sliced_ws, OutputWorkspace=ws_event.name())
-
     part_c, part_t = getChargeAndTime(sliced_ws)
-    scaled_monitor = monitor * (part_c/tot_c)
+
+    # If the monitor is an event workspace then we need to slice it too
+    if isinstance(monitor, IEventWorkspace):
+        # If we are dealing with a monitor from a can, then we take the whole can
+        if is_can:
+            time_start = 0.0
+            time_stop = tot_t + 0.001
+        scaled_monitor = sliceByTimeWs(monitor, time_start, time_stop)
+    else:
+        scaled_monitor = monitor * (part_c/tot_c)
 
     hist = fromEvent2Histogram(sliced_ws, scaled_monitor, binning)
+    DeleteWorkspace(Workspace=scaled_monitor)
     return hist, (tot_t, tot_c, part_t, part_c)
+
+
+def get_slice_parameters(reducer):
+    if not reducer.is_can():
+        start_slice_time, stop_slice_time = reducer.getCurrSliceLimit()
+    else:
+        start_slice_time = -1
+        stop_slice_time = -1
+
+    if "events.binning" in reducer.settings:
+        binning = reducer.settings["events.binning"]
+    else:
+        raise RuntimeError("Cannot provide binning from event monitor workspace. "
+                           "Make sure that Eventstime has been set.")
+    return binning, start_slice_time, stop_slice_time
+
+
+def get_sliced_monitor(reducer, monitor, do_scale=True):
+    if isinstance(monitor, IEventWorkspace):
+        binning, start_slice_time, stop_slice_time = get_slice_parameters(reducer)
+        _, tot_t = getChargeAndTime(monitor)
+
+        # If no slice is required then return the monitor
+        if (start_slice_time == -1) and (stop_slice_time == -1):
+            monitor_workspace_name = monitor.name()
+            Rebin(InputWorkspace=monitor, Params=binning, PreserveEvents=False, OutputWorkspace=monitor_workspace_name)
+            return mtd[monitor_workspace_name]
+
+        # If we are dealing with a can then select a full slice, since we don't slice can transmissions
+        if reducer.is_can():
+            start_slice_time = -1
+            stop_slice_time = -1
+
+        # If only one of them is odd, then reset it
+        if start_slice_time == -1:
+            start_slice_time = 0.0
+        if stop_slice_time == -1:
+            stop_slice_time = tot_t + 0.001
+
+        original_monitor_name = monitor.name()
+        sliced_ws = sliceByTimeWs(monitor, start_slice_time, stop_slice_time)
+        sliced_ws_name = sliced_ws.name()
+        Rebin(InputWorkspace=sliced_ws, Params=binning, PreserveEvents=False, OutputWorkspace=sliced_ws_name)
+        RenameWorkspace(mtd[sliced_ws_name], OutputWorkspace=original_monitor_name)
+        return mtd[original_monitor_name]
+    else:
+        if reducer.event2hist.scale != 1. and do_scale:
+            monitor *= reducer.event2hist.scale
+        return monitor
 
 
 def sliceParser(str_to_parser):
