@@ -2,7 +2,7 @@
 from __future__ import (absolute_import, division, print_function)
 import stresstesting
 
-from mantid.api import FileFinder, MatrixWorkspace, mtd
+from mantid.api import  MatrixWorkspace, mtd
 import mantid.simpleapi as ms
 
 import math
@@ -12,8 +12,9 @@ class LoadExedTest(stresstesting.MantidStressTest):
         rawfile = "V15_0000016544_S000_P01.raw"
         print("Rawfilename:"+rawfile)
         ms.LoadEXED(Filename=rawfile, OutputWorkspace='test')
+        # check that it did create a workspace.
         self.assertTrue(mtd.doesExist('test'))
-
-
-if __name__ == '__main__':
-    unittest.main()
+        #check that it has the correct number of histograms
+        self.assertEquals(mtd['test'].getNumberHistograms(),20400)
+        #check that phi sample Log is correct
+        self.assertEquals(mtd['test'].getRun().getLogData('phi').value,'-6.000005')
