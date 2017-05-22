@@ -81,6 +81,8 @@ Bugs Resolved
 - Fixed an issue in the Script Window that caused the Convert Tabs to Spaces and vice versa operations to corrupt the script.
 - Fixed an issue where some graphs not associated with a workspace would not be shown in the project save as view.
 - Fixed an issue where the Spectrum Viewer could crash when a workspace contained infinities.
+- Fixed an issue where contour lines were displayed at the wrong location.
+
 
 SliceViewer Improvements
 ------------------------
