@@ -60,7 +60,8 @@ GenericDataProcessorPresenter::GenericDataProcessorPresenter(
       m_whitelist(whitelist), m_preprocessMap(preprocessMap),
       m_processor(processor), m_postprocessor(postprocessor),
       m_postprocessMap(postprocessMap), m_postprocess(true),
-      m_tableDirty(false), m_reductionPaused(true), m_newSelection(true) {
+      m_tableDirty(false), m_promptUser(true), m_reductionPaused(true),
+      m_newSelection(true) {
 
   // Column Options must be added to the whitelist
   m_whitelist.addElement("Options", "Options",
@@ -201,15 +202,18 @@ Process selected data
 */
 void GenericDataProcessorPresenter::process() {
 
-  // Don't bother continuing if there are no items to process
-  if (m_selectedData.size() == 0)
-    return;
-
   // If selection unchanged, resume processing the old selection
   if (!m_newSelection) {
     resume();
     return;
   }
+
+  // Otherwise obtain new runs
+  m_selectedData = m_manager->selectedData(m_promptUser);
+
+  // Don't continue if there are no items to process
+  if (m_selectedData.size() == 0)
+    return;
 
   m_newSelection = false;
 
@@ -1283,6 +1287,7 @@ void GenericDataProcessorPresenter::plotRow() {
   const auto items = m_manager->selectedData();
 
   for (const auto &item : items) {
+
     for (const auto &run : item.second) {
 
       const std::string wsName =
@@ -1470,6 +1475,14 @@ void GenericDataProcessorPresenter::resume() {
 */
 void GenericDataProcessorPresenter::setModel(std::string name) {
   m_view->setModel(name);
+}
+
+/**
+* Sets whether to prompt user when getting selected runs
+* @param allowPrompt : [input] Enable setting user prompt
+*/
+void GenericDataProcessorPresenter::setPromptUser(bool allowPrompt) {
+  m_promptUser = allowPrompt;
 }
 
 /**

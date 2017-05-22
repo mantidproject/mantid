@@ -46,24 +46,26 @@ ReflDataProcessorPresenter::~ReflDataProcessorPresenter() {}
 void ReflDataProcessorPresenter::process() {
 
   // Get selected runs
-  const auto items = m_manager->selectedData(true);
+  m_selectedData = m_manager->selectedData(true);
 
-  // If selection has changed, set the new selection to be processed
-  if (newSelectionMade())
-    m_selectedData = items;
+  // Don't continue if there are no items to process
+  if (m_selectedData.size() == 0)
+    return;
 
   // If uniform slicing is empty process normally, delegating to
   // GenericDataProcessorPresenter
   std::string timeSlicingValues = m_mainPresenter->getTimeSlicingValues();
   if (timeSlicingValues.empty()) {
     // Check if any input event workspaces still exist in ADS
-    if (proceedIfWSTypeInADS(items, true))
+    if (proceedIfWSTypeInADS(m_selectedData, true)) {
+      setPromptUser(false); // Prevent prompting user twice
       GenericDataProcessorPresenter::process();
+    }
     return;
   }
 
   // Check if any input non-event workspaces exist in ADS
-  if (!proceedIfWSTypeInADS(items, false))
+  if (!proceedIfWSTypeInADS(m_selectedData, false))
     return;
 
   // Get time slicing type
@@ -71,7 +73,7 @@ void ReflDataProcessorPresenter::process() {
 
   // Progress report
   int progress = 0;
-  int maxProgress = (int)(items.size());
+  int maxProgress = (int)(m_selectedData.size());
   ProgressPresenter progressReporter(progress, maxProgress, maxProgress,
                                      m_progressView);
 
@@ -81,7 +83,7 @@ void ReflDataProcessorPresenter::process() {
   bool errors = false;
 
   // Loop in groups
-  for (const auto &item : items) {
+  for (const auto &item : m_selectedData) {
 
     // Group of runs
     GroupData group = item.second;

@@ -142,6 +142,8 @@ protected:
   std::unique_ptr<DataProcessorTreeManager> m_manager;
   // Loader
   std::string m_loader;
+  // The list of selected items to reduce
+  TreeData m_selectedData;
 
   // Post-process some rows
   void postProcessGroup(const GroupData &data);
@@ -150,9 +152,8 @@ protected:
   // Finds a run in the AnalysisDataService
   std::string findRunInADS(const std::string &run, const std::string &prefix,
                            bool &runFound);
-
-  // The list of selected items to reduce
-  TreeData m_selectedData;
+  // Sets whether to prompt user when getting selected runs
+  void setPromptUser(bool allowPrompt);
 
   // Process selected rows
   virtual void process();
@@ -190,6 +191,8 @@ private:
   bool m_postprocess;
   // The number of columns
   int m_columns;
+  // A boolean indicating whether to prompt the user when getting selected runs
+  bool m_promptUser;
   // stores whether or not the table has changed since it was last saved
   bool m_tableDirty;
   // stores whether a new table selection has been made before processing
