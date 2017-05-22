@@ -1697,6 +1697,10 @@ void SliceViewer::changedShownDim(int index, int dim, int oldDim) {
   }
   // Show the new slice. This finds m_dimX and m_dimY
   this->updateDisplay();
+
+  // AutoRebin if required
+  autoRebinIfRequired();
+
   // Send out a signal
   emit changedShownDim(m_dimX, m_dimY);
 }
@@ -2992,6 +2996,7 @@ void SliceViewer::applyOrthogonalAxisScaleDraw() {
   auto *axis1 = new QwtScaleDraw();
   m_plot->setAxisScaleDraw(QwtPlot::xBottom, axis0);
   m_plot->setAxisScaleDraw(QwtPlot::yLeft, axis1);
+  this->updateDisplay();
 }
 
 } // namespace

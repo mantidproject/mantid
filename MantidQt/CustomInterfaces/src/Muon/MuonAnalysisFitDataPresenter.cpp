@@ -401,7 +401,8 @@ MuonAnalysisFitDataPresenter::createWorkspace(const std::string &name,
     if (params.periods.empty()) {
       analysisOptions.summedPeriods = "1";
     } else {
-      std::replace(params.periods.begin(), params.periods.end(), ',', '+');
+      // need a comma seperated list
+      std::replace(params.periods.begin(), params.periods.end(), '+', ',');
       const size_t minus = params.periods.find('-');
       analysisOptions.summedPeriods = params.periods.substr(0, minus);
       if (minus != std::string::npos && minus != params.periods.size()) {
@@ -794,10 +795,10 @@ void MuonAnalysisFitDataPresenter::setUpDataSelector(
   const auto &groups = m_dataSelector->getChosenGroups();
   const auto &periods = m_dataSelector->getPeriodSelections();
   if (!groups.contains(groupToSet)) {
-    m_dataSelector->setChosenGroup(groupToSet);
+    emit setChosenGroupSignal(groupToSet);
   }
   if (!periodToSet.isEmpty() && !periods.contains(periodToSet)) {
-    m_dataSelector->setChosenPeriod(periodToSet);
+    emit setChosenPeriodSignal(periodToSet);
   }
 
   // If given an optional file path to "current run", cache it for later use

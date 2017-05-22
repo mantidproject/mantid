@@ -7,7 +7,9 @@
 #include "MantidAPI/DllConfig.h"
 #include "MantidAPI/FunctionDomain.h"
 #include "MantidAPI/FunctionValues.h"
+#include "MantidAPI/IConstraint.h"
 #include "MantidAPI/Jacobian.h"
+#include "MantidAPI/ParameterTie.h"
 #include "MantidKernel/Matrix.h"
 #include "MantidKernel/Unit.h"
 
@@ -33,9 +35,6 @@ class ProgressBase;
 namespace API {
 class Workspace;
 class MatrixWorkspace;
-class ParameterTie;
-class IConstraint;
-class ParameterReference;
 class FunctionHandler;
 
 /** This is an interface to a fitting function - a semi-abstarct class.
@@ -256,6 +255,8 @@ public:
     /// Create vector attribute
     explicit Attribute(const std::vector<double> &v)
         : m_data(v), m_quoteValue(false) {}
+    /// Copy assignment
+    Attribute &operator=(const Attribute &attr);
 
     /// Apply an attribute visitor
     template <typename T> T apply(AttributeVisitor<T> &v) {
@@ -312,9 +313,7 @@ public:
   //---------------------------------------------------------//
 
   /// Constructor
-  IFunction()
-      : m_isParallel(false), m_handler(nullptr), m_progReporter(nullptr),
-        m_chiSquared(0.0) {}
+  IFunction() : m_isParallel(false), m_handler(nullptr), m_chiSquared(0.0) {}
   /// Virtual destructor
   virtual ~IFunction();
   /// No copying
@@ -344,7 +343,7 @@ public:
   virtual int64_t estimateNoProgressCalls() const { return 1; }
 
   /// Attach a progress reporter
-  void setProgressReporter(Kernel::ProgressBase *reporter);
+  void setProgressReporter(boost::shared_ptr<Kernel::ProgressBase> reporter);
   /// Reports progress with an optional message
   void reportProgress(const std::string &msg = "") const;
   /// Returns true if a progress reporter is set & evalaution has been requested
@@ -412,20 +411,26 @@ public:
   /// Set the fitting error for a parameter
   virtual void setError(size_t i, double err) = 0;
 
-  /// Check if a declared parameter i is fixed
-  virtual bool isFixed(size_t i) const = 0;
-  /// Removes a declared parameter i from the list of active
-  virtual void fix(size_t i) = 0;
+  /// Check if a parameter i is fixed
+  bool isFixed(size_t i) const;
+  /// Check if a parameter i is fixed by default (not by user).
+  bool isFixedByDefault(size_t i) const;
+  /// Removes a parameter i from the list of active
+  void fix(size_t i, bool isDefault = false);
   /// Restores a declared parameter i to the active status
-  virtual void unfix(size_t i) = 0;
+  void unfix(size_t i);
   /// Fix a parameter
-  void fixParameter(const std::string &name);
+  void fixParameter(const std::string &name, bool isDefault = false);
   /// Free a parameter
   void unfixParameter(const std::string &name);
   /// Fix all parameters
-  void fixAll();
+  void fixAll(bool isDefault = false);
   /// Free all parameters
   void unfixAll();
+  /// Free all parameters fixed by default
+  void unfixAllDefault();
+  /// Fix all active parameters
+  void fixAllActive(bool isDefault = false);
 
   /// Return parameter index from a parameter reference. Usefull for constraints
   /// and ties in composite functions
@@ -447,7 +452,7 @@ public:
   /// Returns the name of active parameter i
   virtual std::string descriptionOfActive(size_t i) const;
   /// Check if an active parameter i is actually active
-  virtual bool isActive(size_t i) const { return !isFixed(i); }
+  bool isActive(size_t i) const;
   //@}
 
   /** @name Ties */
@@ -458,17 +463,17 @@ public:
   /// Add several ties
   virtual void addTies(const std::string &ties, bool isDefault = false);
   /// Apply the ties
-  virtual void applyTies() = 0;
+  virtual void applyTies();
   /// Removes the tie off a parameter
   virtual void removeTie(const std::string &parName);
   /// Remove all ties
-  virtual void clearTies() = 0;
+  virtual void clearTies();
   /// Removes i-th parameter's tie
-  virtual bool removeTie(size_t i) = 0;
+  virtual bool removeTie(size_t i);
   /// Get the tie of i-th parameter
-  virtual ParameterTie *getTie(size_t i) const = 0;
-  /// Add a new tie. Derived classes must provide storage for ties
-  virtual void addTie(std::unique_ptr<ParameterTie> tie) = 0;
+  virtual ParameterTie *getTie(size_t i) const;
+  /// Write a parameter tie to a string
+  std::string writeTies() const;
   //@}
 
   /** @name Constraints */
@@ -476,11 +481,15 @@ public:
   /// Add a list of conatraints from a string
   virtual void addConstraints(const std::string &str, bool isDefault = false);
   /// Add a constraint to function
-  virtual void addConstraint(std::unique_ptr<IConstraint> ic) = 0;
+  virtual void addConstraint(std::unique_ptr<IConstraint> ic);
   /// Get constraint of i-th parameter
-  virtual IConstraint *getConstraint(size_t i) const = 0;
+  virtual IConstraint *getConstraint(size_t i) const;
   /// Remove a constraint
-  virtual void removeConstraint(const std::string &parName) = 0;
+  virtual void removeConstraint(const std::string &parName);
+  /// Write a parameter constraint to a string
+  std::string writeConstraints() const;
+  /// Remove all constraints.
+  virtual void clearConstraints();
   //@}
 
   /** @name Attributes */
@@ -505,7 +514,7 @@ public:
   //@}
 
   /// Set up the function for a fit.
-  virtual void setUpForFit() = 0;
+  virtual void setUpForFit();
   /// Get number of values for a given domain.
   virtual size_t getValuesSize(const FunctionDomain &domain) const;
   /// Get number of domains required by this function
@@ -535,6 +544,18 @@ public:
   void setHandler(FunctionHandler *handler);
   /// Return the handler
   FunctionHandler *getHandler() const { return m_handler; }
+
+  /// Describe parameter status in relation to fitting:
+  /// Active: Fit varies such parameter directly.
+  /// Fixed:  Value doesn't change during fit.
+  /// FixedByDefault:  Fixed by default, don't show in ties of
+  ///         the output string.
+  /// Tied:   Value depends on values of other parameters.
+  enum ParameterStatus { Active, Fixed, FixedByDefault, Tied };
+  /// Change status of parameter
+  virtual void setParameterStatus(size_t i, ParameterStatus status) = 0;
+  /// Get status of parameter
+  virtual ParameterStatus getParameterStatus(size_t i) const = 0;
 
 protected:
   /// Function initialization. Declare function parameters in this method.
@@ -566,15 +587,13 @@ protected:
   /// A read-only ("mutable") attribute can be stored in a const method
   void storeReadOnlyAttribute(const std::string &name,
                               const API::IFunction::Attribute &value) const;
-
-  /// Write a parameter tie to a string
-  virtual std::string writeTie(size_t iParam) const;
-  /// Write a parameter constraint to a string
-  virtual std::string writeConstraint(size_t iParam) const;
+  /// Add a new tie. Derived classes must provide storage for ties
+  virtual void addTie(std::unique_ptr<ParameterTie> tie);
 
   friend class ParameterTie;
   friend class CompositeFunction;
   friend class FunctionParameterDecorator;
+  friend class FunctionGenerator;
 
   /// Flag to hint that the function is being used in parallel computations
   bool m_isParallel;
@@ -583,7 +602,7 @@ protected:
   FunctionHandler *m_handler;
 
   /// Pointer to the progress handler
-  Kernel::ProgressBase *m_progReporter;
+  boost::shared_ptr<Kernel::ProgressBase> m_progReporter;
 
 private:
   /// The declared attributes
@@ -592,6 +611,10 @@ private:
   boost::shared_ptr<Kernel::Matrix<double>> m_covar;
   /// The chi-squared of the last fit
   double m_chiSquared;
+  /// Holds parameter ties as <parameter index,tie pointer>
+  std::vector<std::unique_ptr<ParameterTie>> m_ties;
+  /// Holds the constraints added to function
+  std::vector<std::unique_ptr<IConstraint>> m_constraints;
 };
 
 /// shared pointer to the function base class

@@ -31,11 +31,11 @@ def all_list_elements_are_of_specific_type_and_not_empty(value, comparison_type,
     """
     Ensures that all elements of a list are of a specific type and that the list is not empty
 
-    @param value: the list to check
-    @param comparison_type: the expected type of the elements of the list.
-    @param additional_comparison: additional comparison lambda.
-    @param type_check: the method which performs type checking.
-    @return: True if the list is not empty and all types are as expected, else False.
+    :param value: the list to check
+    :param comparison_type: the expected type of the elements of the list.
+    :param additional_comparison: additional comparison lambda.
+    :param type_check: the method which performs type checking.
+    :return: True if the list is not empty and all types are as expected, else False.
     """
     is_of_type = True
     for element in value:
@@ -442,8 +442,8 @@ def convert_state_to_dict(instance):
     """
     Converts the state object to a dictionary.
 
-    @param instance: the instance which is to be converted
-    @return: a serialized state object in the form of a dict
+    :param instance: the instance which is to be converted
+    :return: a serialized state object in the form of a dict
     """
     descriptor_values, descriptor_types = get_descriptor_values(instance)
     # Add the descriptors to a dict
@@ -490,8 +490,8 @@ def set_state_from_property_manager(instance, property_manager):
     """
     Set the State object from the information stored on a property manager object. This is the deserialization step.
 
-    @param instance: the instance which is to be set with a values of the propery manager
-    @param property_manager: the property manager withe the stored setting
+    :param instance: the instance which is to be set with a values of the propery manager
+    :param property_manager: the property manager withe the stored setting
     """
     def _set_element(inst, k_element, v_element):
         if k_element != STATE_NAME and k_element != STATE_MODULE:

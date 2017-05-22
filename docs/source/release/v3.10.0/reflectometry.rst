@@ -39,8 +39,8 @@ ISIS Reflectometry
   - Ctrl+X copies the selected row(s) to the clipboard and deletes them.
 
 - A brief description about the columns in the table can be now accessed by using the *What's this* tool (last tool in the toolbar) and clicking on the column headers.
-- Added two more time slicing options in the 'Event Handling' tab for analysing event data - Uniform Even and Uniform slicing.
-- For custom slicing (and new slicing options), workspace slices are now identified by an index (e.g. ws_slice_0) instead of a start/stop time.
+- Added three more time slicing options in the 'Event Handling' tab for analysing event data - Uniform Even, Uniform and Log Value slicing.
+- For custom slicing (and new slicing options), workspace slices are now identified by an index (e.g. ws_slice_0) instead of a start/stop value.
 - The 'Get Defaults` button for 'Experiment Settings' in the 'Settings' tab now populates `StartOverlap` and `EndOverlap` text boxes with values from the IDF.
 
 ISIS Reflectometry (Old)
