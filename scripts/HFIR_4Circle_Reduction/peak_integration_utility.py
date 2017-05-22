@@ -264,9 +264,9 @@ def fit_motor_intensity_model(motor_pos_dict, integrated_pt_dict):
 
     # fit
     gauss_error, gauss_parameters, cov_matrix = fit_gaussian_linear_background(vec_x, vec_y, vec_e)
-    print '[DB] Overall Gaussian error = ', gauss_error
-    print '[DB] Gaussian fitted parameters = ', gauss_parameters
-    print '[DB] Gaussian covariance matrix = ', cov_matrix
+    # print '[DB] Overall Gaussian error = ', gauss_error
+    # print '[DB] Gaussian fitted parameters = ', gauss_parameters
+    # print '[DB] Gaussian covariance matrix = ', cov_matrix
 
     # function parameters (in order): x0, sigma, a, b
     # construct parameter dictionary and error dictionary
@@ -377,7 +377,7 @@ def gaussian_linear_background(x, x0, sigma, a, b):
     """
     # gaussian + linear background
 
-    print '[DB] Input x0 = ', x0, ', sigma = ', sigma, ', a = ', a, ', b = ', b
+    # print '[DB] Input x0 = ', x0, ', sigma = ', sigma, ', a = ', a, ', b = ', b
     return a * numpy.exp(-(x - x0) ** 2 / (2. * sigma ** 2)) + b
 
 
@@ -411,7 +411,7 @@ def gaussian_peak_intensity(parameter_dict, error_dict):
 
     # I = A\times s\times\sqrt{2 pi}
     peak_intensity = gauss_a * gauss_sigma * numpy.sqrt(2. * numpy.pi)
-    print '[DB] Gaussian Peak Intensity: A * S * sqrt(2 Pi) == ', gauss_a, gauss_sigma, ' --> peak intensity = ', peak_intensity
+    # print '[DB] Gaussian Peak Intensity: A * S * sqrt(2 Pi) == ', gauss_a, gauss_sigma, ' --> peak intensity = ', peak_intensity
 
     # calculate error
     # \sigma_I^2 = 2\pi (A^2\cdot \sigma_s^2 + \sigma_A^2\cdot s^2 + 2\cdot A\cdot s\cdot \sigma_{As})

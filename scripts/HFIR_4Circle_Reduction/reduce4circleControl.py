@@ -1449,10 +1449,6 @@ class CWSCDReductionControl(object):
 
         # load SPICE Pt.  detector file
         pt_ws_name = get_raw_data_workspace_name(exp_no, scan_no, pt_no)
-        # # new_idf_name = '/home/wzz/Projects/HB3A/NewDetector/HB3A_ND_Definition.xml'
-        # new_idf_name = '/SNS/users/wzz/Projects/HB3A/HB3A_ND_Definition.xml'
-        # if os.path.exists(new_idf_name) is False:
-        #     raise RuntimeError('Instrument file {0} cannot be found!'.format(new_idf_name))
         try:
             mantidsimple.LoadSpiceXML2DDet(Filename=xml_file_name,
                                            OutputWorkspace=pt_ws_name,
@@ -1693,13 +1689,6 @@ class CWSCDReductionControl(object):
                 # set up the user-defined wave length
                 if exp_no in self._userWavelengthDict:
                     alg_args['UserDefinedWavelength'] = self._userWavelengthDict[exp_no]
-
-                # TODO/FIXME/NOW - Should get a flexible way to define IDF or no IDF
-                # new_idf_name = '/home/wzz/Projects/HB3A/NewDetector/HB3A_ND_Definition.xml'
-                new_idf_name = '/SNS/users/wzz/Projects/HB3A/HB3A_ND_Definition.xml'
-                if os.path.exists(new_idf_name) is False:
-                    raise RuntimeError('Instrument file {0} cannot be found!'.format(new_idf_name))
-                alg_args['InstrumentFilename'] = new_idf_name
 
                 # call:
                 mantidsimple.ConvertCWSDExpToMomentum(**alg_args)
