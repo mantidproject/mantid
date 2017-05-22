@@ -11,6 +11,7 @@ attr_mapping = \
         ParamMapEntry(ext_name="calibration_config_path",    int_name="cal_mapping_path"),
         ParamMapEntry(ext_name="calibration_directory",      int_name="calibration_dir"),
         ParamMapEntry(ext_name="do_absorb_corrections",      int_name="absorb_corrections"),
+        ParamMapEntry(ext_name="file_ext",                   int_name="file_extension", optional=True),
         ParamMapEntry(ext_name="focus_mode",                 int_name="focus_mode", enum_class=PEARL_FOCUS_MODES),
         ParamMapEntry(ext_name="long_mode",                  int_name="long_mode"),
         ParamMapEntry(ext_name="monitor_lambda_crop_range",  int_name="monitor_lambda"),
