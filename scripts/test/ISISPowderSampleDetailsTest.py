@@ -144,7 +144,7 @@ class ISISPowderSampleDetailsTest(unittest.TestCase):
         chemical_formula_one_char_element = 'V'
         chemical_formula_two_char_element = 'Si'
         chemical_formula_complex = 'V Si'  # Yes, this isn't a sensible input but for our tests it will do
-        numeric_density_sample = 1.234
+        number_density_sample = 1.234
 
         material_obj_one_char = sample_details._Material(chemical_formula=chemical_formula_one_char_element)
         self.assertIsNotNone(material_obj_one_char)
@@ -163,9 +163,9 @@ class ISISPowderSampleDetailsTest(unittest.TestCase):
         self.assertIsNone(material_obj_two_char.number_density)
 
         # Check it stores numeric density if passed
-        material_obj_numeric_density = sample_details._Material(chemical_formula=chemical_formula_two_char_element,
-                                                                numeric_density=numeric_density_sample)
-        self.assertEqual(material_obj_numeric_density.number_density, numeric_density_sample)
+        material_obj_number_density = sample_details._Material(chemical_formula=chemical_formula_two_char_element,
+                                                                number_density=number_density_sample)
+        self.assertEqual(material_obj_number_density.number_density, number_density_sample)
 
         # Check that it raises an error if we have a non-elemental formula without numeric density
         with assertRaisesRegex(self, ValueError, "A numeric density formula must be set on a chemical formula"):
@@ -173,9 +173,9 @@ class ISISPowderSampleDetailsTest(unittest.TestCase):
 
         # Check it constructs if it is given the numeric density too
         material_obj_num_complex_formula = sample_details._Material(chemical_formula=chemical_formula_complex,
-                                                                    numeric_density=numeric_density_sample)
+                                                                    number_density=number_density_sample)
         self.assertEqual(material_obj_num_complex_formula.chemical_formula, chemical_formula_complex)
-        self.assertEqual(material_obj_num_complex_formula.number_density, numeric_density_sample)
+        self.assertEqual(material_obj_num_complex_formula.number_density, number_density_sample)
 
     def test_material_set_properties(self):
         bad_absorb = '-1'
