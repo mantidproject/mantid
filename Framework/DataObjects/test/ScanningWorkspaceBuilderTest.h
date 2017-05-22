@@ -270,7 +270,7 @@ public:
       TS_ASSERT_DELTA(0.0, detInfo.position({i, 3}).Z(), 1e-12)
 
       for (size_t j = 0; j < nTimeIndexes; ++j) {
-        TS_ASSERT_EQUALS(0.0, detInfo.position({double(i) * 0.1, j}).Y())
+        TS_ASSERT_DELTA(double(i) * 0.1, detInfo.position({i, j}).Y(), 1e-12)
       }
     }
 
@@ -322,7 +322,7 @@ public:
       TS_ASSERT_DELTA(1.0, detInfo.position({i, 3}).Z(), 1e-12)
 
       for (size_t j = 0; j < nTimeIndexes; ++j) {
-        TS_ASSERT_EQUALS(0.0, detInfo.position({double(i) * 0.1, j}).Y())
+        TS_ASSERT_DELTA(double(i) * 0.1, detInfo.position({i, j}).Y(), 1e-12)
       }
     }
   }
