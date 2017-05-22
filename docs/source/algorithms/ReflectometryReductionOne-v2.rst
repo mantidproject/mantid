@@ -183,10 +183,10 @@ Output:
 
 .. testoutput:: ExReflRedOneTrans
 
-   0.4588
-   0.4655
-   0.7336
-   1.0156
+   0.4592
+   0.4654
+   0.7278
+   1.0305
 
 .. categories::
 
