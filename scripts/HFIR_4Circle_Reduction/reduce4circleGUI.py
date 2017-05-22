@@ -2526,9 +2526,9 @@ class MainWindow(QtGui.QMainWindow):
         status, ret_obj = gutil.parse_integers_editors([self.ui.lineEdit_iptsNumber])
         if status:
             # a valid IPTS number
-            ipts_number = ret_obj[0]
 
             raise NotImplementedError('The following section commented out now will be implemented when IPTS is ready.')
+            # ipts_number = ret_obj[0]
             # search archive for available experiment number under this IPTS
             # status, ret_obj = self._myControl.check_ipts(ipts_number=ipts_number)
             # if status:
