@@ -12,6 +12,7 @@ set ( SRC_FILES
 	src/CombinePeaksWorkspaces.cpp
 	src/CompositeCluster.cpp
 	src/ConnectedComponentLabeling.cpp
+	src/CountReflections.cpp
 	src/DiffPeaksWorkspaces.cpp
 	src/DisjointElement.cpp
 	src/FilterPeaks.cpp
@@ -43,6 +44,7 @@ set ( SRC_FILES
 	src/PeakHKLErrors.cpp
 	src/PeakIntegration.cpp
 	src/PeakIntensityVsRadius.cpp
+	src/PeakStatisticsTools.cpp
 	src/PeaksInRegion.cpp
 	src/PeaksIntersection.cpp
 	src/PeaksOnSurface.cpp
@@ -84,6 +86,7 @@ set ( INC_FILES
 	inc/MantidCrystal/CombinePeaksWorkspaces.h
 	inc/MantidCrystal/CompositeCluster.h
 	inc/MantidCrystal/ConnectedComponentLabeling.h
+	inc/MantidCrystal/CountReflections.h
 	inc/MantidCrystal/DiffPeaksWorkspaces.h
 	inc/MantidCrystal/DisjointElement.h
 	inc/MantidCrystal/FilterPeaks.h
@@ -117,6 +120,7 @@ set ( INC_FILES
 	inc/MantidCrystal/PeakHKLErrors.h
 	inc/MantidCrystal/PeakIntegration.h
 	inc/MantidCrystal/PeakIntensityVsRadius.h
+	inc/MantidCrystal/PeakStatisticsTools.h
 	inc/MantidCrystal/PeaksInRegion.h
 	inc/MantidCrystal/PeaksIntersection.h
 	inc/MantidCrystal/PeaksOnSurface.h
@@ -156,7 +160,7 @@ set ( TEST_FILES
 	CombinePeaksWorkspacesTest.h
 	CompositeClusterTest.h
 	ConnectedComponentLabelingTest.h
-	DiffPeaksWorkspacesTest.h
+        DiffPeaksWorkspacesTest.h
 	DisjointElementTest.h
 	FilterPeaksTest.h
 	FindClusterFacesTest.h
@@ -186,6 +190,7 @@ set ( TEST_FILES
 	PeakHKLErrorsTest.h
 	PeakIntegrationTest.h
 	PeakIntensityVsRadiusTest.h
+	PeakStatisticsToolsTest.h
 	PeaksInRegionTest.h
 	PeaksOnSurfaceTest.h
 	PredictFractionalPeaksTest.h
