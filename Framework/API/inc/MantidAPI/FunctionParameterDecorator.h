@@ -91,15 +91,6 @@ public:
   /// Set the fitting error for a parameter of decorated function.
   void setError(size_t i, double err) override;
 
-  /// Check if a declared parameter i of decorated function is active.
-  bool isFixed(size_t i) const override;
-  /// Removes a declared parameter i of decorated function from the list of
-  /// active.
-  void fix(size_t i) override;
-  /// Restores a declared parameter i of decorated function to the active
-  /// status.
-  void unfix(size_t i) override;
-
   /// Return parameter index of decorated function from a parameter reference.
   /// Usefull for constraints and ties in composite functions.
   size_t getParameterIndex(const ParameterReference &ref) const override;
@@ -148,6 +139,8 @@ protected:
                         const std::string &description) override;
 
   void addTie(std::unique_ptr<ParameterTie>) override;
+  void setParameterStatus(size_t i, ParameterStatus status) override;
+  ParameterStatus getParameterStatus(size_t i) const override;
 
   virtual void beforeDecoratedFunctionSet(const IFunction_sptr &fn);
   void setDecoratedFunctionPrivate(const IFunction_sptr &fn);

@@ -44,7 +44,7 @@ class SANSCalculateTransmission(DataProcessorAlgorithm):
         self.declareProperty(MatrixWorkspaceProperty("OutputWorkspace", '', direction=Direction.Output),
                              doc='A calculated transmission workspace in units of wavelength.')
         self.declareProperty(MatrixWorkspaceProperty("UnfittedData", '', direction=Direction.Output),
-                             doc='A unfitted data in units of wavelength.')
+                             doc='An unfitted data in units of wavelength.')
 
     def PyExec(self):
         # Read the state
@@ -103,15 +103,15 @@ class SANSCalculateTransmission(DataProcessorAlgorithm):
         """
         This performs the actual transmission calculation.
 
-        @param transmission_workspace: the corrected transmission workspace
-        @param direct_workspace: the corrected direct workspace
-        @param transmission_roi_detector_ids: the roi detector ids
-        @param transmission_monitor_detector_id: the transmission monitor detector id
-        @param transmission_monitor_detector_id_default: the default transmission monitor id
-        @param incident_monitor_detector_id: the incident monitor id
-        @param calculate_transmission_state: the state for the transmission calculation
-        @param data_type: the data type which is currently being investigated, ie if it is a sample or a can run.
-        @return: a fitted workspace and an unfitted workspace
+        :param transmission_workspace: the corrected transmission workspace
+        :param direct_workspace: the corrected direct workspace
+        :param transmission_roi_detector_ids: the roi detector ids
+        :param transmission_monitor_detector_id: the transmission monitor detector id
+        :param transmission_monitor_detector_id_default: the default transmission monitor id
+        :param incident_monitor_detector_id: the incident monitor id
+        :param calculate_transmission_state: the state for the transmission calculation
+        :param data_type: the data type which is currently being investigated, ie if it is a sample or a can run.
+        :return: a fitted workspace and an unfitted workspace
         """
 
         wavelength_low = calculate_transmission_state.wavelength_low

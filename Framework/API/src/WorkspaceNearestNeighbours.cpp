@@ -1,4 +1,4 @@
-#include "MantidAPI/NearestNeighbours.h"
+#include "MantidAPI/WorkspaceNearestNeighbours.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
@@ -24,10 +24,9 @@ using Kernel::V3D;
  * @param ignoreMaskedDetectors :: flag indicating that masked detectors should
  * be ignored.
  */
-NearestNeighbours::NearestNeighbours(int nNeighbours,
-                                     const SpectrumInfo &spectrumInfo,
-                                     std::vector<specnum_t> spectrumNumbers,
-                                     bool ignoreMaskedDetectors)
+WorkspaceNearestNeighbours::WorkspaceNearestNeighbours(
+    int nNeighbours, const SpectrumInfo &spectrumInfo,
+    std::vector<specnum_t> spectrumNumbers, bool ignoreMaskedDetectors)
     : m_spectrumInfo(spectrumInfo),
       m_spectrumNumbers(std::move(spectrumNumbers)),
       m_noNeighbours(nNeighbours), m_cutoff(-DBL_MAX), m_radius(0),
@@ -42,7 +41,7 @@ NearestNeighbours::NearestNeighbours(int nNeighbours,
  * @return map of Detector ID's to distance
  */
 std::map<specnum_t, V3D>
-NearestNeighbours::neighbours(const specnum_t spectrum) const {
+WorkspaceNearestNeighbours::neighbours(const specnum_t spectrum) const {
   return defaultNeighbours(spectrum);
 }
 
@@ -55,8 +54,8 @@ NearestNeighbours::neighbours(const specnum_t spectrum) const {
  * @throw NotFoundError if component is not recognised as a detector
  */
 std::map<specnum_t, V3D>
-NearestNeighbours::neighboursInRadius(const specnum_t spectrum,
-                                      const double radius) const {
+WorkspaceNearestNeighbours::neighboursInRadius(const specnum_t spectrum,
+                                               const double radius) const {
   // If the radius is stupid then don't let it continue as well be stuck forever
   if (radius < 0.0 || radius > 10.0) {
     throw std::invalid_argument(
@@ -71,7 +70,7 @@ NearestNeighbours::neighboursInRadius(const specnum_t spectrum,
       // moment mean that
       // it is necessary.
       // Cast is necessary as the user should see this as a const member
-      const_cast<NearestNeighbours *>(this)->build(eightNearest);
+      const_cast<WorkspaceNearestNeighbours *>(this)->build(eightNearest);
     }
     result = defaultNeighbours(spectrum);
   } else if (radius > m_cutoff && m_radius != radius) {
@@ -79,7 +78,7 @@ NearestNeighbours::neighboursInRadius(const specnum_t spectrum,
     int neighbours = m_noNeighbours + 1;
     while (true) {
       try {
-        const_cast<NearestNeighbours *>(this)->build(neighbours);
+        const_cast<WorkspaceNearestNeighbours *>(this)->build(neighbours);
       } catch (std::invalid_argument &) {
         break;
       }
@@ -109,7 +108,7 @@ NearestNeighbours::neighboursInRadius(const specnum_t spectrum,
  * @param noNeighbours :: The number of nearest neighbours to use to build
  * the graph
  */
-void NearestNeighbours::build(const int noNeighbours) {
+void WorkspaceNearestNeighbours::build(const int noNeighbours) {
   const auto indices = getSpectraDetectors();
   if (indices.empty()) {
     throw std::runtime_error(
@@ -201,7 +200,7 @@ void NearestNeighbours::build(const int noNeighbours) {
  * @throw NotFoundError if detector ID is not recognised
  */
 std::map<specnum_t, V3D>
-NearestNeighbours::defaultNeighbours(const specnum_t spectrum) const {
+WorkspaceNearestNeighbours::defaultNeighbours(const specnum_t spectrum) const {
   auto vertex = m_specToVertex.find(spectrum);
 
   if (vertex != m_specToVertex.end()) {
@@ -224,7 +223,7 @@ NearestNeighbours::defaultNeighbours(const specnum_t spectrum) const {
 }
 
 /// Returns the list of valid spectrum indices
-std::vector<size_t> NearestNeighbours::getSpectraDetectors() {
+std::vector<size_t> WorkspaceNearestNeighbours::getSpectraDetectors() {
   std::vector<size_t> indices;
   for (size_t i = 0; i < m_spectrumNumbers.size(); ++i) {
     // Always ignore monitors and ignore masked detectors if requested.

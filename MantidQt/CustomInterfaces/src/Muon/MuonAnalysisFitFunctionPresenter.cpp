@@ -112,7 +112,6 @@ void MuonAnalysisFitFunctionPresenter::updateFunctionAndFit(bool sequential) {
     m_fitBrowser->runFit();
   }
 }
-
 /**
  * Called when fit finished OR undone.
  * Updates parameters displayed in function browser from the fit results.
@@ -252,7 +251,17 @@ void MuonAnalysisFitFunctionPresenter::setMultiFitState(
   m_fitBrowser->setMultiFittingMode(state == Muon::MultiFitState::Enabled);
   m_multiFitState = state;
 }
-
+/**
+* Turn TF Asymmetry mode on/off.
+* Turning it off hides the function browser and data selector so that
+* the fitting works as it used to pre-Mantid 3.8.
+* @param state :: [input] On/off for TF Asymmetry mode.
+*/
+void MuonAnalysisFitFunctionPresenter::setTFAsymmState(
+    Muon::TFAsymmState state) {
+  m_fitBrowser->setTFAsymmMode(state == Muon::TFAsymmState::Enabled);
+  m_TFAsymmState = state;
+}
 /**
  * Set the given function in the model (fit property browser).
  *

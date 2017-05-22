@@ -1,5 +1,7 @@
 #include "MantidKernel/NexusDescriptor.h"
 
+#include <boost/algorithm/string.hpp>
+
 #include <nexus/NeXusFile.hpp>
 #include <nexus/NeXusException.hpp>
 
@@ -247,7 +249,7 @@ void NexusDescriptor::walkFile(::NeXus::File &file, const std::string &rootPath,
     const std::string &entryClass = it->second;
     const std::string entryPath =
         std::string(rootPath).append("/").append(entryName);
-    if (entryClass == "SDS") {
+    if (entryClass == "SDS" || entryClass == "ILL_data_scan_vars") {
       pmap.emplace(entryPath, entryClass);
     } else if (entryClass == "CDF0.0") {
       // Do nothing with this
