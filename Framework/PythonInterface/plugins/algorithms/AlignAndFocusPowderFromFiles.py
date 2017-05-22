@@ -213,7 +213,8 @@ class AlignAndFocusPowderFromFiles(DataProcessorAlgorithm):
                     prop = self.getProperty(name)
                     if not prop.isDefault:
                         editinstrargs[name] = prop.value
-                EditInstrumentGeometry(Workspace=wkspname, **editinstrargs)
+                if editinstrargs:
+                    EditInstrumentGeometry(Workspace=wkspname, **editinstrargs)
             else:
                 self.__processFile(filename, wkspname, self.prog_per_file*float(i))
                 if cachefile is not None:
