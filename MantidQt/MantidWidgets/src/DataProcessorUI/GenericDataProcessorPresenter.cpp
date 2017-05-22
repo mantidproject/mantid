@@ -311,7 +311,7 @@ void GenericDataProcessorPresenter::postProcessGroup(
 
     // The name of the reduced workspace for this row
     const std::string inputWSName =
-        getReducedWorkspaceName(row.second, m_processor.prefix(0));
+        getReducedWorkspaceName(row.second, m_processor.prefix(1));
 
     if (AnalysisDataService::Instance().doesExist(inputWSName)) {
 
