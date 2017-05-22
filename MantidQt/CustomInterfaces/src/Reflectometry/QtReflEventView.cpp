@@ -13,6 +13,12 @@ QtReflEventView::QtReflEventView(QWidget *parent) {
   UNUSED_ARG(parent);
   initLayout();
 
+  // Insert slice-type to string pairs
+  m_sliceTypeMap[SliceType::UniformEven] = "UniformEven";
+  m_sliceTypeMap[SliceType::Uniform] = "Uniform";
+  m_sliceTypeMap[SliceType::Custom] = "Custom";
+  m_sliceTypeMap[SliceType::LogValue] = "LogValue";
+
   // Add slicing option buttons to list
   m_buttonList.push_back(m_ui.uniformEvenButton);
   m_buttonList.push_back(m_ui.uniformButton);
@@ -81,7 +87,7 @@ std::string QtReflEventView::getTimeSlicingValues() const {
 */
 std::string QtReflEventView::getTimeSlicingType() const {
 
-  return m_sliceTypeStrMap.at(m_sliceType);
+  return m_sliceTypeMap.at(m_sliceType);
 }
 
 /** Enable slicing option entries for checked button and disable all others.
