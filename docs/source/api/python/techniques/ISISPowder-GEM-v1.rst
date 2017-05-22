@@ -25,11 +25,28 @@ using the following parameter:
 
 - :ref:`config_file_gem_isis-powder-diffraction-ref`
 
-See TODO on YAML configuration files for more details
+See :ref:`configuration_files_isis-powder-diffraction-ref`
+on YAML configuration files for more details
 
 Example
 ^^^^^^^
-TODO
+
+.. code-block:: Python
+
+  from isis_powder import Gem
+  
+  calibration_dir = r"C:\path\to\calibration_dir"
+  output_dir = r"C:\path\to\output_dir"
+  
+  gem_example = Gem(calibration_directory=calibration_dir,
+                    output_directory=output_dir,
+                    user_name="Mantid")
+
+  # Optionally we could provide a configuration file like so
+  # Notice how the file name ends with .yaml
+  config_file_path = r"C:\path\to\config_file.yaml
+  gem_example = Gem(config_file=config_file_path,
+                    user_name="Mantid", ...)
 
 Methods
 --------
@@ -65,7 +82,17 @@ above:
 
 Example
 =======
-TODO
+
+.. code-block:: Python
+
+  # Notice how the filename ends with .yaml
+  cal_mapping_file = r"C:\path\to\cal_mapping.yaml"
+
+  gem_example.create_vanadium(calibration_mapping_file=cal_mapping_file,
+                              do_absorb_corrections=True, 
+                              first_cycle_run_no=100,
+                              mode="PDF",
+                              multiple_scattering=False)
 
 .. _focus_gem_isis-powder-diffraction-ref:
 
@@ -78,7 +105,6 @@ On GEM the following parameters are required when executing *focus*:
 
 - :ref:`calibration_mapping_file_gem_isis-powder-diffraction-ref`
 - :ref:`do_absorb_corrections_gem_isis-powder-diffraction-ref`
-- :ref:`file_ext_gem_isis-powder-diffraction-ref`
 - :ref:`input_mode_gem_isis-powder-diffraction-ref`
 - :ref:`mode_gem_isis-powder-diffraction-ref`
 - :ref:`run_number_gem_isis-powder-diffraction-ref`
@@ -98,7 +124,18 @@ The following parameters may also be optionally set:
 
 Example
 =======
-TODO
+
+.. code-block:: Python
+
+  # Notice how the filename ends with .yaml
+  cal_mapping_file = r"C:\path\to\cal_mapping.yaml"
+
+  gem_example.focus(calibration_mapping_file=cal_mapping_file,
+                    do_absorb_corrections=False,
+                    file_ext=".s01", input_mode="Individual",
+                    mode="Rietveld", run_number="100-105",
+                    vanadium_normalisation=True)
+
 
 .. _set_sample_gem_isis-powder-diffraction-ref:
 
@@ -119,7 +156,13 @@ material set already.
 
 Example
 =======
-TODO
+
+.. code-block:: Python
+
+  sample_obj = SampleDetails(...)
+  sample_obj.set_material(...)
+
+  gem_example.set_sample(sample=sample_obj)
 
 .. _calibration_mapping_gem-isis-powder-ref:
 
