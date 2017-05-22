@@ -1,11 +1,10 @@
-#ifndef MANTID_CURVEFITTING_FUNCTIONGENERATOR_H_
-#define MANTID_CURVEFITTING_FUNCTIONGENERATOR_H_
+#ifndef MANTID_API_FUNCTIONGENERATOR_H_
+#define MANTID_API_FUNCTIONGENERATOR_H_
 
 #include "MantidAPI/IFunction.h"
 
 namespace Mantid {
-namespace CurveFitting {
-namespace Functions {
+namespace API {
 /**
 FunctionGenerator is a partial implementation of IFunction that defines a
 function consisting of two parts: the source and the target. The source
@@ -45,10 +44,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport FunctionGenerator : public API::IFunction {
+class DLLExport FunctionGenerator : public IFunction {
 public:
   /// Constructor
-  FunctionGenerator(API::IFunction_sptr source);
+  FunctionGenerator(IFunction_sptr source);
 
   /// @name Overrides implementing composition of two functions:
   /// m_source and m_target.
@@ -83,38 +82,14 @@ public:
   /// Set the fitting error for a parameter
   void setError(size_t i, double err) override;
 
-  /// Check if a declared parameter i is fixed
-  bool isFixed(size_t i) const override;
-  /// Removes a declared parameter i from the list of active
-  void fix(size_t i) override;
-  /// Restores a declared parameter i to the active status
-  void unfix(size_t i) override;
-
   /// Return parameter index from a parameter reference.
-  size_t getParameterIndex(const API::ParameterReference &ref) const override;
-  /// Tie a parameter to other parameters (or a constant)
-  void tie(const std::string &parName, const std::string &expr,
-           bool isDefault = false) override;
-  /// Apply the ties
-  void applyTies() override;
-  /// Remove all ties
-  void clearTies() override;
-  // Unhide base class function: removeTie(string).
-  using IFunction::removeTie;
-  /// Removes i-th parameter's tie
-  bool removeTie(size_t i) override;
-  /// Get the tie of i-th parameter
-  API::ParameterTie *getTie(size_t i) const override;
-
-  /// Add a constraint to function
-  void addConstraint(std::unique_ptr<API::IConstraint> ic) override;
-  /// Get constraint of i-th parameter
-  API::IConstraint *getConstraint(size_t i) const override;
-  /// Remove a constraint
-  void removeConstraint(const std::string &parName) override;
-
+  size_t getParameterIndex(const ParameterReference &ref) const override;
   /// Set up the function for a fit.
   void setUpForFit() override;
+  /// Get the tie for i-th parameter
+  ParameterTie *getTie(size_t i) const override;
+  /// Get the i-th constraint
+  IConstraint *getConstraint(size_t i) const override;
 
   /// Build target function.
   virtual void buildTargetFunction() const = 0;
@@ -123,9 +98,10 @@ protected:
   /// Declare a new parameter
   void declareParameter(const std::string &name, double initValue = 0,
                         const std::string &description = "") override;
-
-  /// Add a new tie. Derived classes must provide storage for ties
-  void addTie(std::unique_ptr<API::ParameterTie> tie) override;
+  /// Change status of parameter
+  void setParameterStatus(size_t i, ParameterStatus status) override;
+  /// Get status of parameter
+  ParameterStatus getParameterStatus(size_t i) const override;
   //@}
 
 public:
@@ -144,8 +120,8 @@ public:
   //@}
 
   /// Evaluate the function
-  void function(const API::FunctionDomain &domain,
-                API::FunctionValues &values) const override;
+  void function(const FunctionDomain &domain,
+                FunctionValues &values) const override;
 
 protected:
   /// overwrite IFunction base class method, which declare function parameters
@@ -158,17 +134,16 @@ protected:
   /// Update target function if necessary.
   void checkTargetFunction() const;
   /// Function that calculates parameters of the target function.
-  API::IFunction_sptr m_source;
+  IFunction_sptr m_source;
   /// Function that actually calculates the output.
-  mutable API::IFunction_sptr m_target;
+  mutable IFunction_sptr m_target;
   /// Cached number of parameters in m_source.
   size_t m_nOwnParams;
   /// Flag indicating that updateTargetFunction() is required.
   mutable bool m_dirty;
 };
 
-} // namespace Functions
-} // namespace CurveFitting
+} // namespace API
 } // namespace Mantid
 
-#endif /*MANTID_CURVEFITTING_FUNCTIONGENERATOR_H_*/
+#endif /*MANTID_API_FUNCTIONGENERATOR_H_*/

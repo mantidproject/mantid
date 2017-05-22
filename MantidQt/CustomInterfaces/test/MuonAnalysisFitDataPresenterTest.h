@@ -48,22 +48,20 @@ operator<<(std::basic_ostream<CharType, CharTrait> &out,
   return out;
 }
 }
-
 /// Mock data selector widget
 class MockDataSelector : public IMuonFitDataSelector {
 public:
   GCC_DIAG_OFF_SUGGEST_OVERRIDE
+
   MOCK_CONST_METHOD0(getFilenames, QStringList());
   MOCK_CONST_METHOD0(getStartTime, double());
   MOCK_CONST_METHOD0(getEndTime, double());
-  MOCK_METHOD1(setNumPeriods, void(size_t));
-  MOCK_METHOD1(setChosenPeriod, void(const QString &));
+  MOCK_METHOD1(setPeriodsSelected, void(const QStringList &));
   MOCK_CONST_METHOD0(getPeriodSelections, QStringList());
   MOCK_METHOD3(setWorkspaceDetails, void(const QString &, const QString &,
                                          const boost::optional<QString> &));
-  MOCK_METHOD1(setAvailableGroups, void(const QStringList &));
   MOCK_CONST_METHOD0(getChosenGroups, QStringList());
-  MOCK_METHOD1(setChosenGroup, void(const QString &));
+  MOCK_METHOD1(setGroupsSelected, void(const QStringList &));
   MOCK_METHOD1(setStartTime, void(double));
   MOCK_METHOD1(setEndTime, void(double));
   MOCK_METHOD1(setStartTimeQuietly, void(double));
@@ -95,6 +93,9 @@ public:
   MOCK_METHOD1(userChangedDataset, void(int));
   MOCK_CONST_METHOD0(rawData, bool());
   MOCK_METHOD1(continueAfterChecks, void(bool));
+  MOCK_METHOD1(setNumPeriods, void(size_t));
+  MOCK_METHOD1(setAvailableGroups, void(const QStringList &));
+  MOCK_METHOD1(setChosenGroup, void(const QString &));
   void preFitChecksRequested(bool sequential) override {
     UNUSED_ARG(sequential);
   }
@@ -205,9 +206,11 @@ public:
     EXPECT_CALL(*m_dataSelector,
                 setWorkspaceDetails(QString("00015189-91"), QString("MUSR"),
                                     Eq(boost::optional<QString>{}))).Times(1);
-    EXPECT_CALL(*m_dataSelector, setChosenGroup(QString("long"))).Times(1);
-    EXPECT_CALL(*m_dataSelector, setChosenPeriod(QString("1"))).Times(1);
-    m_presenter->setAssignedFirstRun(wsName, boost::none);
+    EXPECT_CALL(*m_dataSelector, setPeriodsSelected(QStringList({"1"})))
+        .Times(1);
+    EXPECT_CALL(*m_dataSelector, setGroupsSelected(QStringList({"long"})))
+        .Times(1);
+    localSetAssignedFirstRun(wsName, boost::none);
   }
 
   void test_setAssignedFirstRun_nonContiguousRange() {
@@ -217,9 +220,12 @@ public:
                 setWorkspaceDetails(QString("00015189-91, 15193"),
                                     QString("MUSR"),
                                     Eq(boost::optional<QString>{}))).Times(1);
-    EXPECT_CALL(*m_dataSelector, setChosenGroup(QString("long"))).Times(1);
-    EXPECT_CALL(*m_dataSelector, setChosenPeriod(QString("1"))).Times(1);
-    m_presenter->setAssignedFirstRun(wsName, boost::none);
+    EXPECT_CALL(*m_dataSelector, setGroupsSelected(QStringList({"long"})))
+        .Times(1);
+    EXPECT_CALL(*m_dataSelector, setPeriodsSelected(QStringList({"1"})))
+        .Times(1);
+    // m_presenter->setAssignedFirstRun(wsName, boost::none);
+    localSetAssignedFirstRun(wsName, boost::none);
   }
 
   void test_setAssignedFirstRun_alreadySet() {
@@ -228,9 +234,12 @@ public:
     m_presenter->setAssignedFirstRun(wsName, boost::none);
     EXPECT_CALL(*m_dataSelector, setWorkspaceDetails(_, _, _)).Times(0);
     EXPECT_CALL(*m_fitBrowser, allowSequentialFits(_)).Times(0);
-    EXPECT_CALL(*m_dataSelector, setChosenGroup(QString("long"))).Times(0);
-    EXPECT_CALL(*m_dataSelector, setChosenPeriod(QString("1"))).Times(0);
-    m_presenter->setAssignedFirstRun(wsName, boost::none);
+    EXPECT_CALL(*m_dataSelector, setGroupsSelected(QStringList({"long"})))
+        .Times(1);
+    EXPECT_CALL(*m_dataSelector, setPeriodsSelected(QStringList({"1"})))
+        .Times(1);
+    // m_presenter->setAssignedFirstRun(wsName, boost::none);
+    localSetAssignedFirstRun(wsName, boost::none);
   }
 
   void test_setAssignedFirstRun_loadCurrentRun() {
@@ -241,13 +250,15 @@ public:
     EXPECT_CALL(*m_dataSelector,
                 setWorkspaceDetails(QString("00061335"), QString("MUSR"),
                                     Eq(currentRunPath))).Times(1);
-    m_presenter->setAssignedFirstRun(wsName, currentRunPath);
+    // m_presenter->setAssignedFirstRun(wsName, currentRunPath);
+    localSetAssignedFirstRun(wsName, currentRunPath);
   }
 
   void test_getAssignedFirstRun() {
     setupGroupPeriodSelections();
     const QString wsName("MUSR00015189; Pair; long; Asym; 1; #1");
-    m_presenter->setAssignedFirstRun(wsName, boost::none);
+    // m_presenter->setAssignedFirstRun(wsName, boost::none);
+    localSetAssignedFirstRun(wsName, boost::none);
     TS_ASSERT_EQUALS(wsName, m_presenter->getAssignedFirstRun());
   }
 
@@ -683,42 +694,13 @@ public:
     EXPECT_CALL(*m_dataSelector,
                 setWorkspaceDetails(QString("00015189-91"), QString("MUSR"),
                                     Eq(boost::none))).Times(1);
-    EXPECT_CALL(*m_dataSelector, setChosenGroup(QString("fwd"))).Times(1);
-    EXPECT_CALL(*m_dataSelector, setChosenPeriod(QString("1"))).Times(1);
+    EXPECT_CALL(*m_dataSelector, setGroupsSelected(QStringList({"fwd"})))
+        .Times(1);
+    EXPECT_CALL(*m_dataSelector, setPeriodsSelected(QStringList({"1"})))
+        .Times(1);
 
-    m_presenter->setSelectedWorkspace(wsName, boost::none);
+    localSetSelectedWorkspace(wsName, boost::none);
   }
-
-  void test_setSelectedWorkspace_groupsAlreadySelected_shouldNotUnselect() {
-    const QString wsName("MUSR00015189-91; Group; fwd; Asym; 1; #6");
-
-    // Groups "fwd" and "bwd" are already selected
-    ON_CALL(*m_dataSelector, getChosenGroups())
-        .WillByDefault(Return(QStringList{"fwd", "bwd"}));
-    ON_CALL(*m_dataSelector, getPeriodSelections())
-        .WillByDefault(Return(QStringList{}));
-
-    // It should NOT deselect the already selected groups
-    EXPECT_CALL(*m_dataSelector, setChosenGroup(_)).Times(0);
-
-    m_presenter->setSelectedWorkspace(wsName, boost::none);
-  }
-
-  void test_setSelectedWorkspace_periodsAlreadySelected_shouldNotUnselect() {
-    const QString wsName("MUSR00015189-91; Group; fwd; Asym; 1; #6");
-
-    // Periods 1 and 2 are already selected
-    ON_CALL(*m_dataSelector, getPeriodSelections())
-        .WillByDefault(Return(QStringList{"1", "2"}));
-    ON_CALL(*m_dataSelector, getChosenGroups())
-        .WillByDefault(Return(QStringList{}));
-
-    // It should NOT deselect the already selected periods
-    EXPECT_CALL(*m_dataSelector, setChosenPeriod(_)).Times(0);
-
-    m_presenter->setSelectedWorkspace(wsName, boost::none);
-  }
-
   void test_setSelectedWorkspace_loadCurrentRun() {
     setupGroupPeriodSelections();
     const QString wsName("MUSR00061335; Group; fwd; Asym; 1; #1");
@@ -735,10 +717,12 @@ public:
     EXPECT_CALL(*m_dataSelector,
                 setWorkspaceDetails(QString("00061335"), QString("MUSR"),
                                     Eq(currentRunPath))).Times(1);
-    EXPECT_CALL(*m_dataSelector, setChosenGroup(QString("fwd"))).Times(1);
-    EXPECT_CALL(*m_dataSelector, setChosenPeriod(QString("1"))).Times(1);
+    EXPECT_CALL(*m_dataSelector, setGroupsSelected(QStringList({"fwd"})))
+        .Times(1);
+    EXPECT_CALL(*m_dataSelector, setPeriodsSelected(QStringList({"1"})))
+        .Times(1);
 
-    m_presenter->setSelectedWorkspace(wsName, currentRunPath);
+    localSetSelectedWorkspace(wsName, currentRunPath);
   }
 
   void test_doPreFitChecks_nonSequential_invalidRuns_doesNotFit() {
@@ -1079,6 +1063,36 @@ private:
       EXPECT_CALL(*m_fitBrowser, continueAfterChecks(_)).Times(0);
     }
     m_presenter->doPreFitChecks(sequential);
+  }
+
+  /// method to manually set up workspace
+  /// this is a work around for the signal/slots
+  void localSetAssignedFirstRun(const QString &wsName,
+                                const boost::optional<QString> &filepath) {
+    m_presenter->setAssignedFirstRun(wsName, filepath);
+    // manually replicate signal
+    const auto wsParams =
+        MantidQt::CustomInterfaces::MuonAnalysisHelper::parseWorkspaceName(
+            wsName.toStdString());
+    m_dataSelector->setPeriodsSelected(
+        QStringList{QString::fromStdString(wsParams.periods)});
+    m_dataSelector->setGroupsSelected(
+        QStringList{QString::fromStdString(wsParams.itemName)});
+  }
+
+  /// method to manually set up workspace
+  /// this is a work around for the signal/slots
+  void localSetSelectedWorkspace(const QString &wsName,
+                                 const boost::optional<QString> &filepath) {
+    m_presenter->setSelectedWorkspace(wsName, filepath);
+    // manually replicate signal
+    const auto wsParams =
+        MantidQt::CustomInterfaces::MuonAnalysisHelper::parseWorkspaceName(
+            wsName.toStdString());
+    m_dataSelector->setPeriodsSelected(
+        QStringList{QString::fromStdString(wsParams.periods)});
+    m_dataSelector->setGroupsSelected(
+        QStringList{QString::fromStdString(wsParams.itemName)});
   }
 
   MockDataSelector *m_dataSelector;
