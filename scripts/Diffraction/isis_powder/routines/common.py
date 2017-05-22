@@ -327,6 +327,7 @@ def subtract_summed_runs(ws_to_correct, empty_sample_ws_string, instrument, scal
     :param ws_to_correct: The workspace to subtract the empty instrument runs from
     :param empty_sample_ws_string: The empty run numbers to subtract from the workspace
     :param instrument: The instrument object these runs belong to
+    :param scale_factor: The percentage to scale the loaded runs by
     :return: The workspace with the empty runs subtracted
     """
     # If an empty string was not specified just return to skip this step

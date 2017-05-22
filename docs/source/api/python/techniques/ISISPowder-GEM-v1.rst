@@ -1,8 +1,8 @@
 .. _isis-powder-diffraction-gem-ref:
 
-=======================================
-ISIS Powder Diffraction Scripts - GEM
-=======================================
+================================================
+ISIS Powder Diffraction Scripts - GEM Reference
+================================================
 
 .. contents:: Table of Contents
     :local:
@@ -144,7 +144,7 @@ set_sample
 The *set_sample* method allows a user to specify a SampleDetails
 object which contains the sample properties used when
 :ref:`do_absorb_corrections_gem_isis-powder-diffraction-ref` is **True**
-whilst focussing.
+whilst focusing.
 
 For more details on the SampleDetails object and how to set
 it see: TODO
@@ -152,7 +152,7 @@ it see: TODO
 The following parameter is required when calling *set_sample*
 
 - *sample* - This must be a SampleDetails object with the
-material set already.
+  material set already.
 
 Example
 =======
@@ -192,7 +192,7 @@ substituting the below values for appropriate values:
       empty_run_numbers: "40"
 
 Lines 5 and 6 in this example set the vanadium and empty run numbers for 
-PDF mode respectively. Lines 8 and 9 set the vanadium and empty for
+PDF mode. Lines 8 and 9 set the vanadium and empty for
 Rietveld mode.
 
 Example
@@ -229,9 +229,9 @@ when using the ISIS Powder scripts.
 calibration_directory
 ^^^^^^^^^^^^^^^^^^^^^
 This parameter should be the full path to the calibration folder.
-Within the folder the following should be present
+Within the folder the following should be present:
 
-- Grouping .cal file
+- Grouping .cal file (see: :ref:`grouping_file_name_gem_isis-powder-diffraction-ref`)
 - Folder(s) with the label name specified in mapping file (e.g. "1_1")
   - Inside each folder should be the offset file with name specified in mapping file
 
@@ -441,6 +441,9 @@ of values with the following syntax:
 These can be combined like so:
 *1-3, 5, 8-10* would process run numbers 1, 2, 3, 5, 8, 9, 10.
 
+In addition the :ref:`input_mode_gem_isis-powder-diffraction-ref`
+parameter determines what effect a range of inputs has
+on the data to be processed
 
 Example Input:
 
@@ -611,7 +614,7 @@ On GEM this is set to the following:
 
 .. code-block:: Python
 
-  "grouping_file_name": "GEM_Instrument_grouping.cal",
+  grouping_file_name: "GEM_Instrument_grouping.cal"
 
 .. _raw_tof_cropping_values_gem_isis-powder-diffraction-ref:
 
@@ -629,7 +632,7 @@ On GEM this is set to the following:
 
 .. code-block:: Python
 
-  "raw_tof_cropping_values": (500, 20000)
+  raw_tof_cropping_values: (500, 20000)
 
 .. _spline_coefficient_gem_isis-powder-diffraction-ref:
 
@@ -646,7 +649,7 @@ On GEM this is set to the following:
 
 .. code-block:: Python
   
-  "spline_coefficient": 30
+  spline_coefficient: 30
 
 .. _vanadium_cropping_values_gem_isis-powder-diffraction-ref:
 
