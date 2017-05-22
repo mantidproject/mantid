@@ -554,8 +554,9 @@ class MainWindow(QtGui.QMainWindow):
         self._myControl.save_project(project_file_name, ui_dict)
 
         # TODO/NOW/TODAY - Implement a pop-up dialog for this
-        print '[DB] Project has been saved to {0}'.format(project_file_name)
-        print '[DB...BAT] UI dict keys: {0}'.format(ui_dict)
+        information = 'Project has been saved to {0}\n'.format(project_file_name),
+        information += 'Including dictionary keys: {0}'.format(ui_dict)
+        print '[INFO]\n{0}'.format(information)
 
         return
 
@@ -1446,8 +1447,9 @@ class MainWindow(QtGui.QMainWindow):
             self.ui.graphicsView_integratedPeakView.plot_raw_data(motor_pos_vec, pt_intensity_vec)
         else:
             # motor position fixed
-            # TODO/ISSUE/TODAY - Make this an option from 
-            self.ui.graphicsView_integratedPeakView.plot_raw_data(numpy.array(range(1, len(pt_intensity_vec)+1)), pt_intensity_vec)
+            # KEEP-IN-MIND:  Make this an option from
+            self.ui.graphicsView_integratedPeakView.plot_raw_data(numpy.array(range(1, len(pt_intensity_vec)+1)),
+                                                                  pt_intensity_vec)
 
         if self._mySinglePeakIntegrationDialog is None:
             self._mySinglePeakIntegrationDialog = message_dialog.MessageDialog(self)
@@ -1522,7 +1524,8 @@ class MainWindow(QtGui.QMainWindow):
 
     def do_integrate_roi(self):
         """
-        blabla
+        integrate the detector counts in the region of interest (2D) along axis-0 and axis-1 respectively.
+        and save the result (1D data) to file
         :return:
         """
         exp_number = str(self.ui.lineEdit_exp.text())
@@ -2058,7 +2061,6 @@ class MainWindow(QtGui.QMainWindow):
         """
         # get the selected scans
         scan_run_list = self.ui.tableWidget_surveyTable.get_selected_run_surveyed(required_size=None)
-        print '[DB...BAT] returned scan/run list = ', scan_run_list
         if len(scan_run_list) == 0:
             self.pop_one_button_dialog('There is no run that is selected.')
 
@@ -2163,7 +2165,6 @@ class MainWindow(QtGui.QMainWindow):
             print '[Error] Some field cannot be found.'
 
         # set experiment configurations
-        print '[DB...BAT] ui dictionary keys: {0}'.format(ui_dict.keys())
         # set sample distance
         if 'det_sample_distance' in ui_dict and ui_dict['det_sample_distance'] is not None:
             det_sample_distance = float(ui_dict['det_sample_distance'])
@@ -2499,18 +2500,20 @@ class MainWindow(QtGui.QMainWindow):
         """
         det_size_str = str(self.ui.comboBox_detectorSize.currentText())
 
-        # TODO/ISSUE/NOW - parse whatever from the box from now on!
-        self._myControl.set_detector_geometry(256, 256)
-        #
-        #
-        # try:
-        #     ret_obj = gutil.parse_integer_list(str(self.ui.lineEdit_detectorGeometry.text()), expected_size=2)
-        #     size_x, size_y = ret_obj
-        #     self._myControl.set_detector_geometry(size_x, size_y)
-        #     if size_x != size_y or (size_x != 256 and size_x != 512):
-        #         self.pop_one_button_dialog('Detector geometry should be either 256 x 256 or 512 x 512.')
-        # except RuntimeError as run_err:
-        #     self.pop_one_button_dialog('Detector geometry is not correct! Re-set it!  FYI: {0}'.format(run_err))
+        if det_size_str.count('256') > 0:
+            # 256 by 256 pixels
+            det_size_row = 256
+            det_size_col = 256
+        elif det_size_str.count('512') > 0:
+            # 512 x 512
+            det_size_row = 512
+            det_size_col = 512
+        else:
+            # unsupported case yet
+            raise NotImplementedError('Detector with size {0} is not supported yet.'.format(det_size_str))
+
+        # set to controller
+        self._myControl.set_detector_geometry(det_size_row, det_size_col)
 
         return
 
@@ -2525,17 +2528,18 @@ class MainWindow(QtGui.QMainWindow):
             # a valid IPTS number
             ipts_number = ret_obj[0]
 
+            raise NotImplementedError('The following section commented out now will be implemented when IPTS is ready.')
             # search archive for available experiment number under this IPTS
-            status, ret_obj = self._myControl.check_ipts(ipts_number=ipts_number)
-            if status:
-                exp_number_list = ret_obj
-                self._iptsNumber = ipts_number
-                self.ui.comboBox_expInIPTS.clear()
-                for exp_number in exp_number_list:
-                    self.ui.comboBox_expInIPTS.addItem(str(exp_number))
-            else:
-                self.pop_one_button_dialog('Unable to locate IPTS {0} due to {1}'.format(ipts_number, ret_obj))
-                return
+            # status, ret_obj = self._myControl.check_ipts(ipts_number=ipts_number)
+            # if status:
+            #     exp_number_list = ret_obj
+            #     self._iptsNumber = ipts_number
+            #     self.ui.comboBox_expInIPTS.clear()
+            #     for exp_number in exp_number_list:
+            #         self.ui.comboBox_expInIPTS.addItem(str(exp_number))
+            # else:
+            #     self.pop_one_button_dialog('Unable to locate IPTS {0} due to {1}'.format(ipts_number, ret_obj))
+            #     return
         else:
             # error
             self.pop_one_button_dialog('User specified IPTS number {0} is not correct.'
@@ -2908,7 +2912,6 @@ class MainWindow(QtGui.QMainWindow):
         pop out a dialog box to show the detailed integration information
         :return:
         """
-        print '[DB...BAT] Show Dialog!'
         if self._mySinglePeakIntegrationDialog is None:
             self._mySinglePeakIntegrationDialog = message_dialog.MessageDialog(self)
 
@@ -3757,8 +3760,6 @@ class MainWindow(QtGui.QMainWindow):
         :param mode:
         :return:
         """
-        print '[DB...BAT] Update merged value: ', exp_number, scan_number, sig_value, peak_centre, mode
-
         # Process signals according to mode
         if mode == 0:
             # start of processing one peak

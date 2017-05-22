@@ -10,7 +10,7 @@ class MessageDialog(QtGui.QDialog):
     """
     def __init__(self, parent):
         """
-        blabla
+        initialization of customized dialog box
         :param parent:
         :return:
         """
@@ -35,23 +35,23 @@ class MessageDialog(QtGui.QDialog):
 
     def set_text(self, text):
         """
-        blabla
+        set text to the text editor
         :param text:
         :return:
         """
+        assert isinstance(text, str), 'Input text of type {0} must be a string.'.format(type(text))
         self.ui.plainTextEdit_message.setPlainText(text)
 
         return
 
     def set_peak_integration_details(self, motor_pos_vec, pt_intensity_vec):
         """
-        blabla
+        set the  details information of integrated peak including the peak intensities of
+        each Pt.
         :param motor_pos_vec:
         :param pt_intensity_vec:
         :return:
         """
-        # check TODO/ISSUE/TODAY/NOW
-
         text = '# Pt. \tIntensity \tMotor Position\n'
         num_loops = max(len(motor_pos_vec), len(pt_intensity_vec))
 

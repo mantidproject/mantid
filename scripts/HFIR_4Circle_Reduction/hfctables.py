@@ -1063,7 +1063,8 @@ class ProcessTableWidget(tableBase.NTableWidget):
         :return:
         """
         # Check
-        assert isinstance(target_state, str), 'blabla'
+        assert isinstance(target_state, str), 'State {0} must be a string but not a {1}.' \
+                                              ''.format(target_state, type(target_state))
 
         # Loop around to check
         return_list = list()

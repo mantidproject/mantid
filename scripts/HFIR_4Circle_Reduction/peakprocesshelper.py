@@ -138,8 +138,8 @@ class PeakProcessRecord(object):
         generate a dictionary for this PeakInfo
         :return:
         """
-        print '[DB...BAT] PeakInfo (Scan: {0}, ID: {1}) generate report.  Spice HKL: {2}' \
-              ''.format(self._myScanNumber, hex(id(self)), self._spiceHKL)
+        # print '[DB...BAT] PeakInfo (Scan: {0}, ID: {1}) generate report.  Spice HKL: {2}' \
+        #       ''.format(self._myScanNumber, hex(id(self)), self._spiceHKL)
 
         report = dict()
 
@@ -280,8 +280,8 @@ class PeakProcessRecord(object):
             self.retrieve_hkl_from_spice_table()
             ret_hkl = self._spiceHKL
 
-            print '[DB...BAT] PeakInfo (Scan: {0}, ID: {1}) SPICE HKL: {2}' \
-                  ''.format(self._myScanNumber, hex(id(self)), self._spiceHKL)
+            # print '[DB...BAT] PeakInfo (Scan: {0}, ID: {1}) SPICE HKL: {2}' \
+            #       ''.format(self._myScanNumber, hex(id(self)), self._spiceHKL)
 
         return ret_hkl
 
@@ -517,8 +517,8 @@ class PeakProcessRecord(object):
             'Integrated peak information {0} must be given by a dictionary but not a {1}.' \
             ''.format(peak_integration_dict, type(peak_integration_dict))
 
-        print '[DB...BAT] Exp {0} Scan {1}  ({2} | {3}) has integrated dictionary set up.' \
-              ''.format(self._myExpNumber, self._myScanNumber, self._fingerPrint, hex(id(self)))
+        # print '[DB...BAT] Exp {0} Scan {1}  ({2} | {3}) has integrated dictionary set up.' \
+        #       ''.format(self._myExpNumber, self._myScanNumber, self._fingerPrint, hex(id(self)))
 
         self._integrationDict = peak_integration_dict
 

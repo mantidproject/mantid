@@ -252,7 +252,7 @@ class CWSCDReductionControl(object):
         first_xm_file = os.path.join(exp_directory, 'HB3A_Exp{0}_Scan0001_00001.xml'.format(exp_number))
         if os.path.exists(first_xm_file):
             file_size = os.path.getsize(first_xm_file)
-            if file_size < 136132 * 2: 
+            if file_size < 136132 * 2:
                 det_size = 256, 256
             elif file_size < 529887 * 2:
                 det_size = 512, 512
@@ -458,8 +458,9 @@ class CWSCDReductionControl(object):
         # Check
         assert isinstance(exp_number, int), 'Experiment number {0} must be an integer but not a {1}.' \
                                             ''.format(exp_number, type(exp_number))
-        assert isinstance(scan_number, int), 'blabla'
-        assert isinstance(mask_tag, str), 'blabla'
+        assert isinstance(scan_number, int), 'Scan number {0} ({1}) must be an integer.' \
+                                             ''.format(scan_number, type(scan_number))
+        assert isinstance(mask_tag, str), 'Mask tag {0} ({1}) must be a string.'.format(mask_tag, type(mask_tag))
 
         # MaskWorkspace's name is same as mask's tag
         mask_ws_name = mask_tag
@@ -800,7 +801,6 @@ class CWSCDReductionControl(object):
         raw_ws = self.get_raw_data_workspace(exp_no, scan_no, pt_no)
         if raw_ws is None:
             return False, 'Raw data for Exp %d Scan %d Pt %d is not loaded.' % (exp_no, scan_no, pt_no)
-        print '[DB...BAT] Raw workspace size: ', raw_ws.getNumberHistograms()
 
         # Convert to numpy array
         det_shape = (self._detectorSize[0], self._detectorSize[1])
@@ -831,19 +831,18 @@ class CWSCDReductionControl(object):
         :return: region of interest
         """
         # check
-        assert isinstance(exp_number, int), 'blabla TODAY'
-        assert isinstance(scan_number, int) or scan_number is None, 'blabla TODAY'
+        assert isinstance(exp_number, int), 'Experiment number {0} must be an integer.'.format(exp_number)
+        assert isinstance(scan_number, int) or scan_number is None, 'Scan number {0} must be either an integer or None.' \
+                                                                    ''.format(scan_number)
 
         if (exp_number, scan_number) in self._roiDict:
             # able to find region of interest for this scan
             ret_status = True
             ret_value = self._roiDict[(exp_number, scan_number)]
-            print '[DB...BAT] From this scan: {0}, {1}'.format(ret_value[0], ret_value[1])
         elif exp_number in self._roiDict:
             # able to find region of interest for this experiment
             ret_status = True
             ret_value = self._roiDict[exp_number]
-            print '[DB...BAT] From saved scan: {0}, {1}'.format(ret_value[0], ret_value[1])
         else:
             # region of interest of experiment is not defined
             ret_status = False
@@ -925,8 +924,8 @@ class CWSCDReductionControl(object):
                                                                 'it is of type %s now.' % (str(pt_number),
                                                                                            type(pt_number))
 
-        print '[DB...BAT] Retrieve: Exp {0} Scan {1} Peak Info Object. Current keys are {0}.' \
-              ''.format(exp_number, scan_number, self._myPeakInfoDict.keys())
+        # print '[DB...BAT] Retrieve: Exp {0} Scan {1} Peak Info Object. Current keys are {0}.' \
+        #       ''.format(exp_number, scan_number, self._myPeakInfoDict.keys())
 
         # construct key
         if pt_number is None:
@@ -937,8 +936,8 @@ class CWSCDReductionControl(object):
         # Check for existence
         if p_key in self._myPeakInfoDict:
             ret_value = self._myPeakInfoDict[p_key]
-            print '[DB...BAT] Retrieved: Exp {0} Scan {1} Peak Info Object {2}.'.format(exp_number, scan_number,
-                                                                                        hex(id(ret_value)))
+            # print '[DB...BAT] Retrieved: Exp {0} Scan {1} Peak Info Object {2}.'.format(exp_number, scan_number,
+            #                                                                             hex(id(ret_value)))
         else:
             ret_value = None
 
@@ -995,10 +994,10 @@ class CWSCDReductionControl(object):
         :return:
         """
         # assert ...
-        assert isinstance(exp_number, int), 'blabla'
-        assert isinstance(scan_number, int), 'blabla'
-
-	print '[DB...BAT] RIO start (Lower left corner) = {0}. ROI end (upper right corner) = {1}.'.format(roi_start, roi_end)
+        assert isinstance(exp_number, int), 'Experiment number {0} ({1}) must be an integer.' \
+                                            ''.format(exp_number, type(exp_number))
+        assert isinstance(scan_number, int), 'Scan number {0} ({1}) must be an integer.' \
+                                             ''.format(scan_number, type(scan_number))
 
         # create an xml file
         mask_file_name = get_mask_xml_temp(self._workDir, exp_number, scan_number)
@@ -1224,7 +1223,7 @@ class CWSCDReductionControl(object):
         assert isinstance(scale_factor, float) or isinstance(scale_factor, int),\
             'Scale factor {0} must be a float or integer but not a {1}.'.format(scale_factor, type(scale_factor))
         assert len(peak_centre) == 3, 'Peak center {0} must have 3 elements for (Qx, Qy, Qz).'.format(peak_centre)
-        print '[DB...BAT] Background tuple {0} is of type {1}.'.format(background_pt_tuple, type(background_pt_tuple))
+        # print '[DB...BAT] Background tuple {0} is of type {1}.'.format(background_pt_tuple, type(background_pt_tuple))
         assert len(background_pt_tuple) == 2, 'Background tuple {0} must be of length 2.'.format(background_pt_tuple)
 
         # get input MDEventWorkspace name for merged scan
@@ -1465,13 +1464,14 @@ class CWSCDReductionControl(object):
             return False, str(run_err)
 
         # Add data storage
-        assert AnalysisDataService.doesExist(pt_ws_name), 'blabla'
+        assert AnalysisDataService.doesExist(pt_ws_name), 'Unable to locate workspace {0}.'.format(pt_ws_name)
         raw_matrix_ws = AnalysisDataService.retrieve(pt_ws_name)
         self._add_raw_workspace(exp_no, scan_no, pt_no, raw_matrix_ws)
 
         return True, pt_ws_name
 
-    def merge_multiple_scans(self, scan_md_ws_list, scan_peak_centre_list, merged_ws_name):
+    @staticmethod
+    def merge_multiple_scans(scan_md_ws_list, scan_peak_centre_list, merged_ws_name):
         """
         Merge multiple scans
         :param scan_md_ws_list: List of MDWorkspace, each of which is for a scan.

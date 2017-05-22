@@ -140,8 +140,12 @@ class IntegratePeaksThread(QThread):
         assert isinstance(mask_name, str), 'Name of mask must be a string but not %s.' % str(type(mask_name))
         assert isinstance(norm_type, str), 'Normalization type must be a string but not %s.' \
                                            '' % str(type(norm_type))
-        assert isinstance(num_pt_bg_left, int) and num_pt_bg_left >= 0, 'blalba'
-        assert isinstance(num_pt_bg_right, int) and num_pt_bg_right >= 0, 'blabla'
+        assert isinstance(num_pt_bg_left, int) and num_pt_bg_left >= 0,\
+            'Number of Pt at left for background {0} must be non-negative integers but not of type {1}.' \
+            ''.format(num_pt_bg_left, type(num_pt_bg_left))
+        assert isinstance(num_pt_bg_right, int) and num_pt_bg_right >= 0,\
+            'Number of Pt at right for background {0} must be non-negative integers but not of type {1}.' \
+            ''.format(num_pt_bg_right, type(num_pt_bg_right))
 
         # set values
         self._mainWindow = main_window
@@ -301,8 +305,8 @@ class IntegratePeaksThread(QThread):
         * add motor step information
         :return:
         """
-        print '[DB...BAT] Set Integrated Peak Info is called for exp {0} scan {1}.' \
-              ''.format(self._expNumber, scan_number)
+        # print '[DB...BAT] Set Integrated Peak Info is called for exp {0} scan {1}.' \
+        #       ''.format(self._expNumber, scan_number)
 
         # get peak information
         peak_info_obj = self._mainWindow.controller.get_peak_info(self._expNumber, scan_number)

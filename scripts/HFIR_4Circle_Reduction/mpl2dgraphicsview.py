@@ -40,7 +40,7 @@ class Mpl2dGraphicsView(QtGui.QWidget):
     @property
     def array2d(self):
         """
-        blabla
+        return the matrix (2d-array) plot on the canvas
         :return:
         """
         return self._myCanvas.array2d
@@ -172,7 +172,7 @@ class Qt4Mpl2dCanvas(FigureCanvas):
     @property
     def array2d(self):
         """
-        blabla
+        get the matrix plot now
         :return:
         """
         return self._currentArray2D

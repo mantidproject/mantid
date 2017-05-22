@@ -1,7 +1,7 @@
 #pylint: disable=W0403,R0902,R0903,R0904,W0212
-import mpl2dgraphicsview
-
+import os
 import numpy as np
+import mpl2dgraphicsview
 
 
 class Detector2DView(mpl2dgraphicsview.Mpl2dGraphicsView):
@@ -94,19 +94,21 @@ class Detector2DView(mpl2dgraphicsview.Mpl2dGraphicsView):
 
     def integrate_roi_linear(self, exp_number, scan_number, pt_number, output_dir):
         """
-        blabla
+        integrate the 2D data inside region of interest along both axis-0 and axis-1 individually.
+        and the result (as 1D data) will be saved to ascii file.
+        the X values will be the corresponding pixel index either along axis-0 or axis-1
         :return:
         """
-        # TODO/ISSUE/NOWNOW/TODAY - Clean the code
-        def save_to_file(base_name, axis, array1d, start_index):
+        def save_to_file(base_file_name, axis, array1d, start_index):
             """
-
-            :param base_name:
+            save the result (1D data) to an ASCII file
+            :param base_file_name:
             :param axis:
-            :param matrix:
+            :param array1d:
+            :param start_index:
             :return:
             """
-            file_name = '{0}_axis_{1}.dat'.format(base_name, axis)
+            file_name = '{0}_axis_{1}.dat'.format(base_file_name, axis)
 
             wbuf = ''
             vec_x = np.array(range(len(array1d))) + start_index
@@ -120,8 +122,7 @@ class Detector2DView(mpl2dgraphicsview.Mpl2dGraphicsView):
             return
 
         matrix = self.array2d
-        print '[DB...NOW] 2D Array type = {0}'.format(type(matrix))
-        assert isinstance(matrix, np.ndarray), 'blabla1'
+        assert isinstance(matrix, np.ndarray), 'A matrix must be an ndarray but not {0}.'.format(type(matrix))
 
         # get region of interest
         if self._roiStart is None:
@@ -129,18 +130,13 @@ class Detector2DView(mpl2dgraphicsview.Mpl2dGraphicsView):
         if self._roiEnd is None:
             self._roiEnd = matrix.shape
 
-        print '[DB...NOW] ROI Start = {0}  End = {1}'.format(self._roiStart, self._roiEnd)
-
         ll_row = min(self._roiStart[0], self._roiEnd[0])
         ll_col = min(self._roiStart[1], self._roiEnd[1])
 
         ur_row = max(self._roiStart[0], self._roiEnd[0])
         ur_col = max(self._roiStart[1], self._roiEnd[1])
 
-        # Debug:
-        # ll_row = 0
-        # ur_row = 256
-        print 'Row: {0} : {1}  Col: {2} : {3}'.format(ll_row, ur_row, ll_col, ur_col)
+        # print 'Row: {0} : {1}  Col: {2} : {3}'.format(ll_row, ur_row, ll_col, ur_col)
 
         roi_matrix = matrix[ll_col:ur_col, ll_row:ur_row]
 
@@ -152,7 +148,6 @@ class Detector2DView(mpl2dgraphicsview.Mpl2dGraphicsView):
         print '[SUM 1] Dimension: {0}'.format(sum_1.shape)
 
         # write to file
-        import os
         base_name = os.path.join(output_dir, 'Exp{0}_Scan{1}_Pt{2}'.format(exp_number, scan_number, pt_number))
         save_to_file(base_name, 0, sum_0, ll_row)
         save_to_file(base_name, 1, sum_1, ll_col)
@@ -332,7 +327,7 @@ class Detector2DView(mpl2dgraphicsview.Mpl2dGraphicsView):
         :param parent_window:
         :return:
         """
-        assert parent_window is not None, 'blabla'
+        assert parent_window is not None, 'Parent window cannot be None'
 
         self._myParentWindow = parent_window
 
@@ -345,8 +340,8 @@ class Detector2DView(mpl2dgraphicsview.Mpl2dGraphicsView):
         :return:
         """
         # check
-        assert isinstance(cursor_x, float)
-        assert isinstance(cursor_y, float)
+        assert isinstance(cursor_x, float), 'Cursor x coordination {0} must be a float.'.format(cursor_x)
+        assert isinstance(cursor_y, float), 'Cursor y coordination {0} must be a float.'.format(cursor_y)
 
         # remove the original polygon
         if self._myPolygon is not None:

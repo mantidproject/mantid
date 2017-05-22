@@ -85,7 +85,9 @@ def generate_mask_file(file_path, ll_corner, ur_corner, rectangular=True, num_de
     """
     # check
     assert isinstance(file_path, str), 'File path must be a string but not a %s.' % str(type(file_path))
-    assert len(ll_corner) == 2 and len(ur_corner) == 2, 'blabla'
+    assert len(ll_corner) == 2 and len(ur_corner) == 2,\
+        'Left corner and right corner coordinates must be 2-tuple but not of size {0} or {1}' \
+        ''.format(len(ll_corner), len(ur_corner))
 
     if num_det_row is None:
         num_det_row = NUM_DET_ROW
@@ -110,16 +112,16 @@ def generate_mask_file(file_path, ll_corner, ur_corner, rectangular=True, num_de
 
     # correction:
     if False:
-	start_row = mpl_start_col
-	start_col = 256 - mpl_end_row
+        start_row = mpl_start_col
+        start_col = 256 - mpl_end_row
 
-	end_row = mpl_end_col
-	end_col = mpl_start_row
+        end_row = mpl_end_col
+        end_col = mpl_start_row
     else:
-	start_row = mpl_start_row
-	start_col = mpl_start_col
-	end_row =   mpl_end_row 
-	end_col =   mpl_end_col 
+        start_row = mpl_start_row
+        start_col = mpl_start_col
+        end_row =   mpl_end_row
+        end_col =   mpl_end_col
 
     assert start_col < end_col, 'Start column {0} cannot be smaller than end column {1}.'.format(start_col, end_col)
 
@@ -130,13 +132,14 @@ def generate_mask_file(file_path, ll_corner, ur_corner, rectangular=True, num_de
             end_det_id = 1 + col_number * NUM_DET_ROW + end_row
             det_sub_xml += '%d-%d,' % (start_det_id, end_det_id)
     else:
-        print '[DB...BAT] Row numbers from {0} to {1}'.format(start_row, end_row)
-	print '[DB...BAT] Col numbers from {0} to {1}'.format(start_col, end_col)
+        # print '[DB...BAT] Row numbers from {0} to {1}'.format(start_row, end_row)
+        # print '[DB...BAT] Col numbers from {0} to {1}'.format(start_col, end_col)
         for row_number in range(start_row, end_row+1):
             start_det_id = 1 + row_number * num_det_row + start_col
-	    end_det_id = 1 + row_number * num_det_row + end_col
-	    det_sub_xml += '{0}-{1},'.format(start_det_id, end_det_id)
+            end_det_id = 1 + row_number * num_det_row + end_col
+            det_sub_xml += '{0}-{1},'.format(start_det_id, end_det_id)
     # END-FOR
+
     # remove last ','
     det_sub_xml = det_sub_xml[:-1]
     # add to xml string

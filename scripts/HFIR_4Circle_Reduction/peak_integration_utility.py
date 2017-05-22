@@ -28,42 +28,10 @@ def calculate_lorentz_correction_factor(q_sample, wavelength, motor_step):
     theta = math.asin(sin_theta)
     factor = numpy.sin(2 * theta) * motor_step
 
-    print '[DB...BAT Lorentz] Q-sample = {0}, wavelength = {1}, motor step = {2}, theta = {3} --> factor = {4}.' \
-          ''.format(q_sample, wavelength, motor_step, theta, factor)
+    # print '[DB...BAT Lorentz] Q-sample = {0}, wavelength = {1}, motor step = {2}, theta = {3} --> factor = {4}.' \
+    #       ''.format(q_sample, wavelength, motor_step, theta, factor)
 
     return factor
-
-
-# def calculate_peak_intensity_gauss(gauss_a, gauss_sigma, error_a_sq=None, error_sigma_sq=None,
-#                                    error_a_sigma=None):
-#     """
-#     calculate the peak intensity, which is the area under the peak
-#     if sigma == 1, then the integral is sqrt(pi);
-#     then the value is sqrt(pi) * e^{-1/(2.*sigma**2)}
-#     :param gauss_a:
-#     :param gauss_sigma:
-#     :param error_a_sq: error(a)**2
-#     :param error_sigma_sq: error(sigma)**2
-#     :param error_a_sigma: correlated error for a and sigma
-#     :return:
-#     """
-#     integral = numpy.sqrt(2. * numpy.pi) * gauss_a * gauss_sigma
-#
-#     if error_a_sq is not None:
-#         # calculate integral intensity error by propagation
-#         # check
-#         assert isinstance(error_a_sq, float), 'Error(a)**2 must be a float but not a {0}.'.format(type(error_a_sq))
-#         assert isinstance(error_sigma_sq, float), 'Error(sigma)**2 must be a float but not a {0}.' \
-#                                                   ''.format(type(error_sigma_sq))
-#         assert isinstance(error_a_sigma, float), 'Error(a,sigma) must be a float but not a {0}.' \
-#                                                  ''.format(type(error_a_sigma))
-#         # calculate
-#         error2 = gauss_a**2 * error_sigma_sq + error_a_sq * gauss_sigma**2 + 2. * gauss_a * gauss_sigma * error_a_sq
-#         error = numpy.sqrt(error2)
-#     else:
-#         error = numpy.sqrt(integral)
-#
-#     return integral, error
 
 
 def calculate_motor_step(motor_pos_array, motor_step_tolerance=0.5):
@@ -145,7 +113,8 @@ def estimate_background(pt_intensity_dict, bg_pt_list):
     :return:
     """
     # Check
-    assert isinstance(pt_intensity_dict, dict), 'blabla'
+    assert isinstance(pt_intensity_dict, dict), 'Peak (Pt) intensities {0} must be given by dictionary but not {1}.' \
+                                                ''.format(pt_intensity_dict, type(pt_intensity_dict))
     assert (isinstance(bg_pt_list, tuple) or isinstance(bg_pt_list, list)) and len(bg_pt_list) > 0,\
         'background points {0} must be a 2-element tuple or list but not a {1}.'.format(bg_pt_list, type(bg_pt_list))
 
@@ -543,18 +512,7 @@ def integrate_single_scan_peak(merged_scan_workspace_name, integrated_peak_ws_na
                                                                   '{1}.'.format(peak_radius, type(peak_radius))
     assert len(peak_centre) == 3, 'Peak center {0} of type {1} must have 3 elements but not {2}.' \
                                   ''.format(peak_centre, type(peak_centre), len(peak_centre))
-    assert isinstance(merge_peaks, bool), 'blabla'
-
-    # get spice file
-    # spice_table_name = get_spice_table_name(exp, scan)
-    # if AnalysisDataService.doesExist(spice_table_name) is False:
-    #     self.download_spice_file(exp, scan, False)
-    #     self.load_spice_scan_file(exp, scan)
-
-    # get MD workspace name
-    # status, pt_list = self.get_pt_numbers(exp, scan)
-    # assert status, str(pt_list)
-    # md_ws_name = get_merged_md_name(self._instrumentName, exp, scan, pt_list)
+    assert isinstance(merge_peaks, bool), 'Flag to merge peak must be a boolean but not {0}.'.format(type(merge_peaks))
 
     try:
         peak_centre_str = '%f, %f, %f' % (peak_centre[0], peak_centre[1],
@@ -563,24 +521,6 @@ def integrate_single_scan_peak(merged_scan_workspace_name, integrated_peak_ws_na
         raise RuntimeError('Peak center {0} must have 3 elements.'.format(peak_centre))
     except ValueError:
         raise RuntimeError('Peak center {0} must have floats.'.format(peak_centre))
-
-    # mask workspace
-    # if use_mask:
-    #     if mask_ws_name is None:
-    #         # get default mask workspace name
-    #         mask_ws_name = get_mask_ws_name(exp, scan)
-    #     elif not AnalysisDataService.doesExist(mask_ws_name):
-    #         # the appointed mask workspace has not been loaded
-    #         # then load it from saved mask
-    #         self.check_generate_mask_workspace(exp, scan, mask_ws_name)
-    #
-    #     assert AnalysisDataService.doesExist(mask_ws_name), 'MaskWorkspace %s does not exist.' \
-    #                                                         '' % mask_ws_name
-    #
-    #     integrated_peak_ws_name = get_integrated_peak_ws_name(exp, scan, pt_list, use_mask)
-    # else:
-    #     mask_ws_name = ''
-    #     integrated_peak_ws_name = get_integrated_peak_ws_name(exp, scan, pt_list)
 
     # normalization
     norm_by_mon = False
