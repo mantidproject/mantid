@@ -346,8 +346,6 @@ the run number corresponding to the vanadium. However it
 must be in the correct cycle according to the 
 :ref:`calibration_mapping_gem-isis-powder-ref`.
 
-Additionally the run 
-
 Example Input:
 
 .. code-block:: Python
@@ -422,6 +420,27 @@ Example Input:
   # Or
   gem_example.focus(multiple_scattering=False, ...)
 
+.. _output_directory_gem_isis-powder-diffraction-ref:
+
+output_directory
+^^^^^^^^^^^^^^^^
+Specifies the path to the output directory to save resulting files
+into. The script will automatically create a folder
+with the label determined from the 
+:ref:`calibration_mapping_file_gem_isis-powder-diffraction-ref`
+and within that create another folder for the current
+:ref:`user_name_gem_isis-powder-diffraction-ref`. 
+
+Within this folder processed data will be saved out in
+several formats.
+
+Example Input:
+
+.. code-block:: Python
+
+  output_dir = r"C:\path\to\output_dir"
+  gem_example = Gem(output_directory=output_dir, ...)
+
 .. _run_number_gem_isis-powder-diffraction-ref:
 
 run_number
@@ -478,27 +497,6 @@ Example Input:
   gem_example.focus(sample_empty=100, ...)
   # Or a range of numbers
   gem_example.focus(sample_empty="100-110", ...)
-
-.. _output_directory_gem_isis-powder-diffraction-ref:
-
-output_directory
-^^^^^^^^^^^^^^^^
-Specifies the path to the output directory to save resulting files
-into. The script will automatically create a folder
-with the label determined from the 
-:ref:`calibration_mapping_file_gem_isis-powder-diffraction-ref`
-and within that create another folder for the current
-:ref:`user_name_gem_isis-powder-diffraction-ref`. 
-
-Within this folder processed data will be saved out in
-several formats.
-
-Example Input:
-
-.. code-block:: Python
-
-  output_dir = r"C:\path\to\output_dir"
-  gem_example = Gem(output_directory=output_dir, ...)
 
 .. _unit_to_keep_gem_isis-powder-diffraction-ref:
 

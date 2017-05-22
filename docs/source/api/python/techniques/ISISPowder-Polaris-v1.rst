@@ -124,7 +124,6 @@ set then the following parameter is also required:
 
 - :ref:`sample_empty_scale_polaris_isis-powder-diffraction-ref`
 
-
 Example
 =======
 
@@ -387,8 +386,6 @@ the run number corresponding to the vanadium. However it
 must be in the correct cycle according to the 
 :ref:`calibration_mapping_polaris-isis-powder-ref`.
 
-Additionally the run 
-
 Example Input:
 
 .. code-block:: Python
@@ -442,6 +439,27 @@ Example Input:
   polaris_example.create_vanadium(multiple_scattering=True, ...)
   # Or
   polaris_example.focus(multiple_scattering=False, ...)
+
+.. _output_directory_polaris_isis-powder-diffraction-ref:
+
+output_directory
+^^^^^^^^^^^^^^^^
+Specifies the path to the output directory to save resulting files
+into. The script will automatically create a folder
+with the label determined from the 
+:ref:`calibration_mapping_file_polaris_isis-powder-diffraction-ref`
+and within that create another folder for the current
+:ref:`user_name_polaris_isis-powder-diffraction-ref`. 
+
+Within this folder processed data will be saved out in
+several formats.
+
+Example Input:
+
+.. code-block:: Python
+
+  output_dir = r"C:\path\to\output_dir"
+  polaris_example = Polaris(output_directory=output_dir, ...)
 
 .. _run_number_polaris_isis_powder-diffraction-ref:
 
@@ -523,27 +541,6 @@ Example Input:
 
   # Scale sample empty to 90% of original
   polaris_example.focus(sample_empty_scale=0.9, ...)
-
-.. _output_directory_polaris_isis-powder-diffraction-ref:
-
-output_directory
-^^^^^^^^^^^^^^^^
-Specifies the path to the output directory to save resulting files
-into. The script will automatically create a folder
-with the label determined from the 
-:ref:`calibration_mapping_file_polaris_isis-powder-diffraction-ref`
-and within that create another folder for the current
-:ref:`user_name_polaris_isis-powder-diffraction-ref`. 
-
-Within this folder processed data will be saved out in
-several formats.
-
-Example Input:
-
-.. code-block:: Python
-
-  output_dir = r"C:\path\to\output_dir"
-  polaris_example = Polaris(output_directory=output_dir, ...)
 
 .. _user_name_polaris_isis-powder-diffraction-ref:
 
