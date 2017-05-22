@@ -266,6 +266,10 @@ private:
   void nextRow();
   void nextGroup();
 
+  // start thread for performing reduction on current row/group asynchronously
+  void startAsyncRowReduceThread();
+  void startAsyncGroupReduceThread();
+
   // end reduction
   void endReduction();
 

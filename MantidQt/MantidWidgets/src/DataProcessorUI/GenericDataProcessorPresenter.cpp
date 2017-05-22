@@ -267,8 +267,6 @@ Process a new row
 */
 void GenericDataProcessorPresenter::nextRow() {
 
-  m_workerThread.reset();
-
   if (m_reductionPaused) {
     // Notify presenter that reduction is paused
     m_mainPresenter->notify(
@@ -277,23 +275,17 @@ void GenericDataProcessorPresenter::nextRow() {
   }
 
   // Add processed row data to the group
-  int groupIndex = m_rowItem.first;
+  int groupIndex = m_gqueue.front().first;
   m_groupData[groupIndex] = m_rowItem.second;
   auto &rqueue = m_gqueue.front().second;
 
   if (!rqueue.empty()) {
+    // Set next action flag
+    m_nextActionFlag = ReductionFlag::ReduceRowFlag;
     // Reduce next row
     m_rowItem = rqueue.front();
     rqueue.pop();
-    // Set next action flag
-    m_nextActionFlag = ReductionFlag::ReduceRowFlag;
-
-    auto *worker = new GenericDataProcessorPresenterRowReducerWorker(
-        this, &m_rowItem, groupIndex);
-    m_workerThread =
-        make_unique<GenericDataProcessorPresenterThread>(this, worker);
-    m_workerThread->start();
-
+    startAsyncRowReduceThread();
   } else {
     m_gqueue.pop();
     // Set next action flag
@@ -301,11 +293,7 @@ void GenericDataProcessorPresenter::nextRow() {
 
     if (m_groupData.size() > 1) {
       // Multiple rows in containing group, do post-processing on the group
-      auto *worker = new GenericDataProcessorPresenterGroupReducerWorker(
-          this, m_groupData);
-      m_workerThread =
-          make_unique<GenericDataProcessorPresenterThread>(this, worker);
-      m_workerThread->start();
+      startAsyncGroupReduceThread();
     } else {
       // Single row in containing group, skip to next group
       nextGroup();
@@ -318,8 +306,6 @@ Process a new group
 */
 void GenericDataProcessorPresenter::nextGroup() {
 
-  m_workerThread.reset();
-
   if (m_reductionPaused) {
     // Notify presenter that reduction is paused
     m_mainPresenter->notify(
@@ -328,26 +314,45 @@ void GenericDataProcessorPresenter::nextGroup() {
   }
 
   if (!m_gqueue.empty()) {
+    // Set next action flag
+    m_nextActionFlag = ReductionFlag::ReduceRowFlag;
     // Reduce first row
-    int groupIndex = m_gqueue.front().first;
     auto &rqueue = m_gqueue.front().second;
     m_rowItem = rqueue.front();
     rqueue.pop();
-    // Set next action flag
-    m_nextActionFlag = ReductionFlag::ReduceRowFlag;
-
-    // Prepare a new thread
-    auto *worker = new GenericDataProcessorPresenterRowReducerWorker(
-        this, &m_rowItem, groupIndex);
-    m_workerThread =
-        make_unique<GenericDataProcessorPresenterThread>(this, worker);
-    m_workerThread->start();
+    startAsyncRowReduceThread();
   } else {
     // If "Output Notebook" checkbox is checked then create an ipython notebook
     if (m_view->getEnableNotebook())
       saveNotebook(m_selectedData);
     endReduction();
   }
+}
+
+/*
+Reduce the current row asynchronously
+*/
+void GenericDataProcessorPresenter::startAsyncRowReduceThread() {
+
+  m_workerThread.reset();
+  auto *worker = new GenericDataProcessorPresenterRowReducerWorker(
+      this, &m_rowItem, m_gqueue.front().first);
+  m_workerThread =
+      make_unique<GenericDataProcessorPresenterThread>(this, worker);
+  m_workerThread->start();
+}
+
+/*
+Reduce the current group asynchronously
+*/
+void GenericDataProcessorPresenter::startAsyncGroupReduceThread() {
+
+  m_workerThread.reset();
+  auto *worker =
+      new GenericDataProcessorPresenterGroupReducerWorker(this, m_groupData);
+  m_workerThread =
+      make_unique<GenericDataProcessorPresenterThread>(this, worker);
+  m_workerThread->start();
 }
 
 /**

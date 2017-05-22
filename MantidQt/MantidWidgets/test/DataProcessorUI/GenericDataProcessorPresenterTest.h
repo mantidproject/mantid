@@ -1062,6 +1062,7 @@ public:
     EXPECT_CALL(mockDataProcessorView, requestNotebookPath()).Times(0);
 
     presenter.notify(DataProcessorPresenter::ProcessFlag);
+    presenter.thread()->wait(10);
 
     // Check output workspaces were created as expected
     TS_ASSERT(
