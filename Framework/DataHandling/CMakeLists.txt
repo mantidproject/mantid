@@ -27,7 +27,6 @@ set ( SRC_FILES
 	src/H5Util.cpp
 	src/ISISDataArchive.cpp
 	src/ISISRunLogs.cpp
-	src/ImggAggregateWavelengths.cpp
 	src/Load.cpp
 	src/LoadANSTOHelper.cpp
 	src/LoadAscii.cpp
@@ -159,7 +158,6 @@ set ( SRC_FILES
 	src/SaveTBL.cpp
 	src/SaveReflThreeColumnAscii.cpp
 	src/SaveSPE.cpp
-	src/SaveSavuTomoConfig.cpp
 	src/SaveToSNSHistogramNexus.cpp
 	src/SaveVTK.cpp
 	src/SetBeam.cpp
@@ -201,7 +199,6 @@ set ( INC_FILES
 	inc/MantidDataHandling/H5Util.h
 	inc/MantidDataHandling/ISISDataArchive.h
 	inc/MantidDataHandling/ISISRunLogs.h
-	inc/MantidDataHandling/ImggAggregateWavelengths.h
 	inc/MantidDataHandling/Load.h
 	inc/MantidDataHandling/LoadANSTOHelper.h
 	inc/MantidDataHandling/LoadAscii.h
@@ -329,7 +326,6 @@ set ( INC_FILES
 	inc/MantidDataHandling/SaveTBL.h
 	inc/MantidDataHandling/SaveReflThreeColumnAscii.h
 	inc/MantidDataHandling/SaveSPE.h
-	inc/MantidDataHandling/SaveSavuTomoConfig.h
 	inc/MantidDataHandling/SaveToSNSHistogramNexus.h
 	inc/MantidDataHandling/SaveVTK.h
 	inc/MantidDataHandling/SetBeam.h
@@ -374,7 +370,6 @@ set ( TEST_FILES
 	GroupDetectorsTest.h
 	H5UtilTest.h
 	ISISDataArchiveTest.h
-	ImggAggregateWavelengthsTest.h
 	InstrumentRayTracerTest.h
 	LoadAsciiTest.h
 	LoadAscii2Test.h
@@ -493,7 +488,6 @@ set ( TEST_FILES
 	SaveTBLTest.h
 	SaveReflThreeColumnAsciiTest.h
 	SaveSPETest.h
-	SaveSavuTomoConfigTest.h
 	SaveToSNSHistogramNexusTest.h
 	SetBeamTest.h
 	SetSampleMaterialTest.h

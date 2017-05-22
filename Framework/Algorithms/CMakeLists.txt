@@ -155,7 +155,6 @@ set ( SRC_FILES
 	src/He3TubeEfficiency.cpp
 	src/IQTransform.cpp
 	src/IdentifyNoisyDetectors.cpp
-	src/ImggTomographicReconstruction.cpp
 	src/IntegrateByComponent.cpp
 	src/Integration.cpp
 	src/InterpolatingRebin.cpp
@@ -469,7 +468,6 @@ set ( INC_FILES
 	inc/MantidAlgorithms/He3TubeEfficiency.h
 	inc/MantidAlgorithms/IQTransform.h
 	inc/MantidAlgorithms/IdentifyNoisyDetectors.h
-	inc/MantidAlgorithms/ImggTomographicReconstruction.h
 	inc/MantidAlgorithms/IntegrateByComponent.h
 	inc/MantidAlgorithms/Integration.h
 	inc/MantidAlgorithms/InterpolatingRebin.h
@@ -792,7 +790,6 @@ set ( TEST_FILES
 	He3TubeEfficiencyTest.h
 	IQTransformTest.h
 	IdentifyNoisyDetectorsTest.h
-	ImggTomographicReconstructionTest.h
 	IntegrateByComponentTest.h
 	IntegrationTest.h
 	InterpolatingRebinTest.h

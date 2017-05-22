@@ -457,18 +457,6 @@ set ( UI_FILES inc/MantidQtCustomInterfaces/DataComparison.ui
                inc/MantidQtCustomInterfaces/SANSRunWindow.ui
                inc/MantidQtCustomInterfaces/SANSEventSlicing.ui
                inc/MantidQtCustomInterfaces/StepScan.ui
-               inc/MantidQtCustomInterfaces/Tomography/ImageSelectCoRAndRegions.ui
-               inc/MantidQtCustomInterfaces/Tomography/ImggFormatsConvert.ui
-               inc/MantidQtCustomInterfaces/Tomography/TomographyIfaceQtGUI.ui
-               inc/MantidQtCustomInterfaces/Tomography/TomographyIfaceQtTabEnergy.ui
-               inc/MantidQtCustomInterfaces/Tomography/TomographyIfaceQtTabFiltersSettings.ui
-               inc/MantidQtCustomInterfaces/Tomography/TomographyIfaceQtTabRun.ui
-               inc/MantidQtCustomInterfaces/Tomography/TomographyIfaceQtTabVisualize.ui
-               inc/MantidQtCustomInterfaces/Tomography/TomographyIfaceQtTabSystemSettings.ui
-               inc/MantidQtCustomInterfaces/Tomography/TomoToolConfigAstra.ui
-               inc/MantidQtCustomInterfaces/Tomography/TomoToolConfigCustom.ui
-               inc/MantidQtCustomInterfaces/Tomography/TomoToolConfigSavu.ui
-               inc/MantidQtCustomInterfaces/Tomography/TomoToolConfigTomoPy.ui
 )
 
 set ( TEST_FILES
@@ -481,8 +469,6 @@ set ( TEST_FILES
 	EnggDiffFittingPresenterTest.h
 	EnggDiffractionPresenterTest.h
 	IO_MuonGroupingTest.h
-	TomographyROIPresenterTest.h
-	ImggFormatsConvertPresenterTest.h
 	MDFLogValueFinderTest.h
 	MeasurementItemTest.h
 	MuonAnalysisDataLoaderTest.h
@@ -501,9 +487,6 @@ set ( TEST_FILES
 	ReflSaveTabPresenterTest.h
 	ReflSettingsPresenterTest.h
 	ReflSettingsTabPresenterTest.h
-	StackOfImagesDirsTest.h
-	TomographyIfaceModelTest.h
-	TomographyIfacePresenterTest.h
 	UserInputValidatorTest.h
 )
 
