@@ -1,5 +1,8 @@
 from __future__ import (absolute_import, division, print_function)
 
+# Disable unused import warnings. The import is for user convenience
+# noqa: F401
+
 # Bring instruments into package namespace
 from .gem import Gem
 from .pearl import Pearl
