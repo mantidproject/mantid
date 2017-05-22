@@ -114,7 +114,7 @@ you will not need to modify anything at this point.
 
 If you are not using the ISIS example data set you will need to
 modify your calibration directory and cycle mapping as detailed
-here : :ref:`cycle_mapping_files_isis-powder-diffraction-ref`
+here: :ref:`cycle_mapping_files_isis-powder-diffraction-ref`
 
 Take notes of the following paths as we will need them later:
 
@@ -396,6 +396,8 @@ Within the label folder a new folder will be created or used
 matching the *user_name* specified. Within that folder will
 be the output data in the various formats that is used on 
 that instrument to perform data analysis.
+
+.. _configuration_files_isis-powder-diffraction-ref:
 
 Using configuration files
 ---------------------------
@@ -818,6 +820,8 @@ advanced properties and chemical properties)
     # Now allowed as object does not have a chemical formula associated
     my_sample.set_material(...)
 
+.. _instrument_advanced_properties_isis-powder-diffraction-ref:
+
 Instrument advanced properties
 -------------------------------
 .. warning:: This section is intended for instrument scientists.
@@ -829,7 +833,8 @@ Instrument advanced properties
 *Note: Parameters should not be changed in the advanced configuration
 for a few runs. If you require a set of values to be changed for a range
 of runs (such as the cropping values) please set the value in the scripting
-window or configuration file instead.*
+window or configuration file instead
+(see: :ref:`configuration_files_isis-powder-diffraction-ref`).*
 
 The advanced configuration file provides optimal defaults for 
 an instrument and applies to all runs unless otherwise specified. If
