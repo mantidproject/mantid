@@ -2996,6 +2996,7 @@ void SliceViewer::applyOrthogonalAxisScaleDraw() {
   auto *axis1 = new QwtScaleDraw();
   m_plot->setAxisScaleDraw(QwtPlot::xBottom, axis0);
   m_plot->setAxisScaleDraw(QwtPlot::yLeft, axis1);
+  this->updateDisplay();
 }
 
 } // namespace

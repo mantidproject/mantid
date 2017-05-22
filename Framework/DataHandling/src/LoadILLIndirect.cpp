@@ -32,6 +32,8 @@ LoadILLIndirect::LoadILLIndirect()
       m_numberOfPixelsPerTube(0), m_numberOfChannels(0),
       m_numberOfSimpleDetectors(0), m_numberOfHistograms(0) {
   m_supportedInstruments.emplace_back("IN16B");
+  useAlgorithm("LoadILLIndirect", 2);
+  deprecatedDate("01.04.2017");
 }
 
 //----------------------------------------------------------------------------------------------

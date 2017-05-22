@@ -232,6 +232,20 @@ void ILLEnergyTransfer::run() {
   reductionAlg->setProperty("Reflection",
                             instDetails["reflection"].toStdString());
 
+  std::string target = m_uiForm.cbSpectrumTarget->currentText().toStdString();
+  reductionAlg->setProperty("SpectrumAxis", target);
+
+  // Keep track of the suffix
+  if (target == "SpectrumNumber") {
+    m_suffix = "_red";
+  } else if (target == "2Theta") {
+    m_suffix = "_2theta";
+  } else if (target == "Q") {
+    m_suffix = "_q";
+  } else if (target == "Q2") {
+    m_suffix = "_q2";
+  }
+
   // Handle mapping file
   bool useMapFile = m_uiForm.rdGroupChoose->isChecked();
   if (useMapFile) {
@@ -269,9 +283,6 @@ void ILLEnergyTransfer::algorithmComplete(bool error) {
     if (m_uiForm.ckPlot->isChecked()) {
       plot();
     }
-    if (m_uiForm.ck2Theta->isChecked()) {
-      convertTo2Theta();
-    }
   }
 
   // Nothing to do here
@@ -285,7 +296,8 @@ void ILLEnergyTransfer::plot() {
                     "from IndirectReductionCommon import plot_reduction\n";
   pyInput += "plot_reduction(mtd[\"";
   pyInput += m_uiForm.leOutWS->text();
-  pyInput += "_red\"].getItem(0).getName(),\"Contour\")\n";
+  pyInput += QString::fromStdString(m_suffix);
+  pyInput += "\"].getItem(0).getName(),\"Contour\")\n";
   m_pythonRunner.runPythonCode(pyInput);
 }
 
@@ -296,23 +308,11 @@ void ILLEnergyTransfer::save() {
   QString pyInput;
   pyInput += "SaveNexusProcessed(\"";
   pyInput += m_uiForm.leOutWS->text();
-  pyInput += "_red\",\"";
+  pyInput += QString::fromStdString(m_suffix);
+  pyInput += "\",\"";
   pyInput += m_uiForm.leOutWS->text();
-  pyInput += "_red.nxs\")\n";
-  m_pythonRunner.runPythonCode(pyInput);
-}
-
-/**
- * Handles the conversion of y-axis to 2theta
- */
-void ILLEnergyTransfer::convertTo2Theta() {
-  QString pyInput;
-  QString inputWS = m_uiForm.leOutWS->text();
-  pyInput += "ConvertSpectrumAxis(InputWorkspace=\"";
-  pyInput += inputWS;
-  pyInput += "_red\",EMode=\"Indirect\",Target=\"Theta\",OutputWorkspace=\"";
-  pyInput += inputWS;
-  pyInput += "_2theta\")\n";
+  pyInput += QString::fromStdString(m_suffix);
+  pyInput += ".nxs\")\n";
   m_pythonRunner.runPythonCode(pyInput);
 }
 

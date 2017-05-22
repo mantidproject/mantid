@@ -23,7 +23,7 @@ def _focus_one_ws(ws, run_number, instrument, perform_vanadium_norm):
     if perform_vanadium_norm:
         _test_splined_vanadium_exists(instrument, run_details)
 
-    # Subtract empty beam runs
+    # Subtract empty instrument runs
     input_workspace = common.subtract_summed_runs(ws_to_correct=ws, instrument=instrument,
                                                   empty_sample_ws_string=run_details.empty_runs)
     # Subtract a sample empty if specified
@@ -46,10 +46,16 @@ def _focus_one_ws(ws, run_number, instrument, perform_vanadium_norm):
                                                      input_workspace=focused_ws,
                                                      perform_vanadium_norm=perform_vanadium_norm)
 
-    cropped_spectra = instrument._crop_banks_to_user_tof(calibrated_spectra)
+    output_spectra = instrument._crop_banks_to_user_tof(calibrated_spectra)
+
+    bin_widths = instrument._get_instrument_bin_widths()
+    if bin_widths:
+        # Reduce the bin width if required on this instrument
+        output_spectra = common.rebin_workspace_list(workspace_list=output_spectra,
+                                                     bin_width_list=bin_widths)
 
     # Output
-    d_spacing_group, tof_group = instrument._output_focused_ws(cropped_spectra, run_details=run_details)
+    d_spacing_group, tof_group = instrument._output_focused_ws(output_spectra, run_details=run_details)
 
     common.keep_single_ws_unit(d_spacing_group=d_spacing_group, tof_group=tof_group,
                                unit_to_keep=instrument._get_unit_to_keep())
@@ -58,7 +64,7 @@ def _focus_one_ws(ws, run_number, instrument, perform_vanadium_norm):
     common.remove_intermediate_workspace(input_workspace)
     common.remove_intermediate_workspace(aligned_ws)
     common.remove_intermediate_workspace(focused_ws)
-    common.remove_intermediate_workspace(cropped_spectra)
+    common.remove_intermediate_workspace(output_spectra)
 
     return d_spacing_group
 
