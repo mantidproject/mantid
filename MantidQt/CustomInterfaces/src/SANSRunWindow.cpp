@@ -2483,6 +2483,9 @@ void SANSRunWindow::handleReduceButtonClick(const QString &typeStr) {
       return;
     }
 
+    // Update the IDF file path for batch reductions
+    updateIDFFilePathForBatch();
+
     // check for the detectors combination option
     // transform the SANS Diagnostic gui option in: 'rear', 'front' , 'both',
     // 'merged', None WavRangeReduction option
@@ -5109,17 +5112,30 @@ bool SANSRunWindow::isValidUserFile() {
   return true;
 }
 
-void SANSRunWindow::updateIDFFilePath() {
-  QString getIdf = "i.get_current_idf_path_in_reducer()\n";
-  QString resultIdf(runPythonCode(getIdf, false));
-  auto teset1 = resultIdf.toStdString();
+void SANSRunWindow::updateIDFInfo(const QString &command) {
+  QString resultIdf(runPythonCode(command, false));
   resultIdf = resultIdf.simplified();
-  auto test2 = resultIdf.toStdString();
   if (resultIdf != m_constants.getPythonEmptyKeyword() &&
       !resultIdf.isEmpty()) {
-    auto test = resultIdf.toStdString();
     m_uiForm.current_idf_path->setText(resultIdf);
   }
+}
+
+void SANSRunWindow::updateIDFFilePathForBatch() {
+
+  if (m_uiForm.batch_table->rowCount() == 0) {
+    return;
+  }
+  // We base the IDF entry on the sample scatter entry of the first row
+  auto *table_item = m_uiForm.batch_table->item(0, 0);
+  auto scatter_sample_run = table_item->text();
+  QString getIdf = "i.get_idf_path_for_run(\"" + scatter_sample_run + "\")\n";
+  updateIDFInfo(getIdf);
+}
+
+void SANSRunWindow::updateIDFFilePath() {
+  QString getIdf = "i.get_current_idf_path_in_reducer()\n";
+  updateIDFInfo(getIdf);
 }
 
 void SANSRunWindow::onUpdateGeometryRequest() {

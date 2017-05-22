@@ -379,7 +379,8 @@ class BASISReduction(PythonAlgorithm):
         self._sumRuns(run_set, wsName, wsName_mon, extra_extension)
         self._calibData(wsName, wsName_mon)
         if not self._debugMode:
-            sapi.DeleteWorkspace(wsName_mon)  # delete monitors
+            if not self._noMonNorm:
+                sapi.DeleteWorkspace(wsName_mon)  # delete monitors
         return wsName
 
     def _group_and_SofQW(self, wsName, etRebins, isSample=True):

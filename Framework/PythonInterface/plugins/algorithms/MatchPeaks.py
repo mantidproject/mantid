@@ -228,8 +228,10 @@ class MatchPeaks(PythonAlgorithm):
         @return          :: bin numbers of the peak positions
         """
 
+        fit_table_name = input_ws.getName() + '_epp'
+
         if isinstance(input_ws, MatrixWorkspace):
-            fit_table = FindEPP(InputWorkspace=input_ws)
+            fit_table = FindEPP(InputWorkspace=input_ws, OutputWorkspace=fit_table_name)
         elif isinstance(input_ws, ITableWorkspace):
             fit_table = input_ws
         else:
@@ -277,12 +279,7 @@ class MatchPeaks(PythonAlgorithm):
 
             logger.debug('Spectrum {0} will be shifted to bin {1}'.format(i,peak_bin[i]))
 
-        # Clean-up unused TableWorkspaces in try-catch
-        # Direct deletion causes problems when running in parallel for too many workspaces
-        try:
-            DeleteWorkspace(fit_table)
-        except ValueError:
-            logger.debug('Fit table already deleted')
+        DeleteWorkspace(fit_table)
 
         return peak_bin
 

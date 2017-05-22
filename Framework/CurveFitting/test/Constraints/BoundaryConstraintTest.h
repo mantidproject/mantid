@@ -22,40 +22,6 @@ using namespace Mantid::CurveFitting::Constraints;
 
 class BoundaryConstraintTest : public CxxTest::TestSuite {
 public:
-  void test1() {
-    // set up fitting function
-    Gaussian gaus;
-    gaus.initialize();
-    gaus.setCentre(11.2);
-    gaus.setHeight(100.7);
-    gaus.setParameter("Sigma", 1.1);
-
-    BoundaryConstraint bc;
-    bc.reset(&gaus, 2);
-
-    TS_ASSERT(!bc.hasLower());
-    TS_ASSERT(!bc.hasUpper());
-
-    bc.setLower(1.0);
-    bc.setUpper(2.0);
-
-    TS_ASSERT(bc.hasLower());
-    TS_ASSERT(bc.hasUpper());
-
-    BoundaryConstraint bc2;
-
-    bc2.reset(&gaus, 2);
-    bc2.setBounds(10, 20);
-
-    TS_ASSERT_DELTA(bc2.lower(), 10, 0.0001);
-    TS_ASSERT_DELTA(bc2.upper(), 20, 0.0001);
-
-    TS_ASSERT_DELTA(gaus.getParameter("Sigma"), 1.1, 0.0001);
-
-    bc2.setParamToSatisfyConstraint();
-    TS_ASSERT_DELTA(gaus.getParameter("Sigma"), 10.0, 0.0001);
-  }
-
   void testInitialize1() {
     Gaussian gaus;
     gaus.initialize();
@@ -64,7 +30,7 @@ public:
     expr.parse("10<Sigma<20");
     bc.initialize(&gaus, expr, false);
 
-    TS_ASSERT_EQUALS(bc.getParameterName(), "Sigma");
+    TS_ASSERT_EQUALS(bc.parameterName(), "Sigma");
     TS_ASSERT_DELTA(bc.lower(), 10, 0.0001);
     TS_ASSERT_DELTA(bc.upper(), 20, 0.0001);
   }
@@ -77,7 +43,7 @@ public:
     expr.parse("20>Sigma>10");
     bc.initialize(&gaus, expr, false);
 
-    TS_ASSERT_EQUALS(bc.getParameterName(), "Sigma");
+    TS_ASSERT_EQUALS(bc.parameterName(), "Sigma");
     TS_ASSERT_DELTA(bc.lower(), 10, 0.0001);
     TS_ASSERT_DELTA(bc.upper(), 20, 0.0001);
   }
@@ -90,7 +56,7 @@ public:
     expr.parse("10<Sigma");
     bc.initialize(&gaus, expr, false);
 
-    TS_ASSERT_EQUALS(bc.getParameterName(), "Sigma");
+    TS_ASSERT_EQUALS(bc.parameterName(), "Sigma");
     TS_ASSERT_DELTA(bc.lower(), 10, 0.0001);
     TS_ASSERT(!bc.hasUpper());
   }
@@ -103,7 +69,7 @@ public:
     expr.parse("Sigma<20");
     bc.initialize(&gaus, expr, false);
 
-    TS_ASSERT_EQUALS(bc.getParameterName(), "Sigma");
+    TS_ASSERT_EQUALS(bc.parameterName(), "Sigma");
     TS_ASSERT_DELTA(bc.upper(), 20, 0.0001);
     TS_ASSERT(!bc.hasLower());
   }
@@ -134,8 +100,8 @@ public:
     TS_ASSERT(bc.hasLower());
     TS_ASSERT(!bc.hasUpper());
     TS_ASSERT_EQUALS(bc.lower(), 0.0);
-    TS_ASSERT_EQUALS(bc.getParameterName(), "Sigma");
-    TS_ASSERT_EQUALS(bc.getFunction(), &gaus);
+    TS_ASSERT_EQUALS(bc.parameterName(), "Sigma");
+    TS_ASSERT_EQUALS(bc.getLocalFunction(), &gaus);
   }
 
   void testAsString() {
@@ -147,7 +113,7 @@ public:
       expr.parse("Sigma<20");
       bc->initialize(&gaus, expr, false);
 
-      TS_ASSERT_EQUALS(bc->getParameterName(), "Sigma");
+      TS_ASSERT_EQUALS(bc->parameterName(), "Sigma");
       TS_ASSERT_DELTA(bc->upper(), 20, 0.0001);
       TS_ASSERT(!bc->hasLower());
       gaus.addConstraint(std::move(bc));
@@ -162,7 +128,7 @@ public:
     auto bc = dynamic_cast<BoundaryConstraint *>(c);
     TS_ASSERT(bc);
 
-    TS_ASSERT_EQUALS(bc->getParameterName(), "Sigma");
+    TS_ASSERT_EQUALS(bc->parameterName(), "Sigma");
     TS_ASSERT_DELTA(bc->upper(), 20, 0.0001);
     TS_ASSERT(!bc->hasLower());
   }
@@ -192,7 +158,7 @@ public:
     BoundaryConstraint *bc = dynamic_cast<BoundaryConstraint *>(c);
     TS_ASSERT(bc);
 
-    TS_ASSERT_EQUALS(bc->getParameterName(), "Sigma");
+    TS_ASSERT_EQUALS(bc->parameterName(), "Sigma");
     TS_ASSERT_DELTA(bc->upper(), 20, 0.0001);
     TS_ASSERT(!bc->hasLower());
 
@@ -201,7 +167,7 @@ public:
     bc = dynamic_cast<BoundaryConstraint *>(c);
     TS_ASSERT(bc);
 
-    TS_ASSERT_EQUALS(bc->getParameterName(), "Height");
+    TS_ASSERT_EQUALS(bc->parameterName(), "Height");
     TS_ASSERT_DELTA(bc->lower(), 1.3, 0.0001);
     TS_ASSERT_DELTA(bc->upper(), 3.4, 0.0001);
   }
