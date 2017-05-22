@@ -954,9 +954,6 @@ void AlignAndFocusPowder::loadCalFile(const std::string &calFilename,
     const std::string name = m_instName + "_group";
     AnalysisDataService::Instance().addOrReplace(name, m_groupWS);
     this->setPropertyValue("GroupingWorkspace", name);
-
-    // don't load again from the calibration file
-    loadMask = false;
   }
 
   g_log.information() << "Loading Calibration file \"" << calFilename << "\"\n";
