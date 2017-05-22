@@ -44,7 +44,7 @@ class ISISPowderSampleDetailsTest(unittest.TestCase):
         self.assertEqual(sample_details_obj_str.radius, float(height_radius_string))
         self.assertEqual(sample_details_obj_str.center, [2.0, 3.0, 5.0])
 
-    def test_constructor_non_numeric_input(self):
+    def test_constructor_non_number_input(self):
         good_input = 1.0
         good_center_input = [1.0, 2.0, 3.0]
         empty_input_value = ''
@@ -102,11 +102,6 @@ class ISISPowderSampleDetailsTest(unittest.TestCase):
         with assertRaisesRegex(self, ValueError, "The value set for radius was: -1"):
             sample_details.SampleDetails(height=good_input, radius=negative_string, center=good_center_input)
 
-        # Test center lists correctly detect incorrect values
-        with assertRaisesRegex(self, ValueError, "The value set for center was: 0"):
-            sample_details.SampleDetails(height=good_input, radius=good_input,
-                                         center=[zero_value, good_input, good_input])
-
     def test_set_material(self):
         sample_details_obj = sample_details.SampleDetails(height=1.0, radius=1.0, center=[2, 3, 4])
 
@@ -156,22 +151,22 @@ class ISISPowderSampleDetailsTest(unittest.TestCase):
         self.assertIsNone(material_obj_one_char.scattering_cross_section)
         self.assertFalse(material_obj_one_char._is_material_props_set)
 
-        # Check if it accepts two character elements without numeric density
+        # Check if it accepts two character elements without number density
         material_obj_two_char = sample_details._Material(chemical_formula=chemical_formula_two_char_element)
         self.assertIsNotNone(material_obj_two_char)
         self.assertEqual(material_obj_two_char.chemical_formula, chemical_formula_two_char_element)
         self.assertIsNone(material_obj_two_char.number_density)
 
-        # Check it stores numeric density if passed
+        # Check it stores number density if passed
         material_obj_number_density = sample_details._Material(chemical_formula=chemical_formula_two_char_element,
-                                                                number_density=number_density_sample)
+                                                               number_density=number_density_sample)
         self.assertEqual(material_obj_number_density.number_density, number_density_sample)
 
-        # Check that it raises an error if we have a non-elemental formula without numeric density
-        with assertRaisesRegex(self, ValueError, "A numeric density formula must be set on a chemical formula"):
+        # Check that it raises an error if we have a non-elemental formula without number density
+        with assertRaisesRegex(self, ValueError, "A number density formula must be set on a chemical formula"):
             sample_details._Material(chemical_formula=chemical_formula_complex)
 
-        # Check it constructs if it is given the numeric density too
+        # Check it constructs if it is given the number density too
         material_obj_num_complex_formula = sample_details._Material(chemical_formula=chemical_formula_complex,
                                                                     number_density=number_density_sample)
         self.assertEqual(material_obj_num_complex_formula.chemical_formula, chemical_formula_complex)
@@ -234,23 +229,23 @@ class ISISPowderSampleDetailsTest(unittest.TestCase):
         assertRegex(self, captured_std_out_default, "Center X:" + str(float(expected_center[0])))
         assertRegex(self, captured_std_out_default, "Material has not been set")
 
-        # Test with material set but not numeric density
+        # Test with material set but not number density
         sys.stdout = std_out_buffer = io.BytesIO()
         sample_details_obj.set_material(chemical_formula=chemical_formula)
         sample_details_obj.print_sample_details()
         captured_std_out_material_default = std_out_buffer.getvalue()
         assertRegex(self, captured_std_out_material_default, "Material properties:")
         assertRegex(self, captured_std_out_material_default, "Chemical formula: " + chemical_formula)
-        assertRegex(self, captured_std_out_material_default, "Numeric Density: Set from elemental properties")
+        assertRegex(self, captured_std_out_material_default, "Number Density: Set from elemental properties")
 
-        # Test with material and numeric density
+        # Test with material and number density
         sys.stdout = std_out_buffer = io.BytesIO()
         sample_details_obj.reset_sample_material()
         sample_details_obj.set_material(chemical_formula=chemical_formula_two, number_density=expected_number_density)
         sample_details_obj.print_sample_details()
         captured_std_out_material_set = std_out_buffer.getvalue()
         assertRegex(self, captured_std_out_material_set, "Chemical formula: " + chemical_formula_two)
-        assertRegex(self, captured_std_out_material_set, "Numeric Density: " + str(expected_number_density))
+        assertRegex(self, captured_std_out_material_set, "Number Density: " + str(expected_number_density))
 
         # Test with no material properties set - we can reuse buffer from previous test
         assertRegex(self, captured_std_out_material_default, "Absorption cross section: Calculated by Mantid")

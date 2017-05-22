@@ -91,6 +91,9 @@ class SampleDetails(object):
         if len(center) != 3:
             raise ValueError("The center must have three values corresponding to X, Y, Z position of the sample."
                              " For example [0. ,1., 2.]")
+        for val in center:
+            _check_can_convert_to_float(property_name="center", value=val)
+
         # All properties validated at this point
 
 
@@ -153,15 +156,20 @@ class _Material(object):
 
 def _check_value_is_physical(property_name, value):
     original_value = value
-    value = convert_to_float(value)
-    if value is None:
-        raise ValueError("Could not convert the " + property_name + " to a number."
-                         " The input was: '" + str(original_value) + "'")
+    value = _check_can_convert_to_float(property_name=property_name, value=value)
 
     if value <= 0 or math.isnan(value):
         raise ValueError("The value set for " + property_name + " was: " + str(original_value)
                          + " which is impossible for a physical object")
 
+
+def _check_can_convert_to_float(property_name, value):
+    original_value = value
+    value = convert_to_float(value)
+    if value is None:
+        raise ValueError("Could not convert the " + property_name + " to a number."
+                         " The input was: '" + str(original_value) + "'")
+    return value
 
 def convert_to_float(val):
     try:
