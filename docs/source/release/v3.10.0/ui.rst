@@ -36,6 +36,19 @@ Instrument View
 Plotting Improvements
 #####################
 
+- Surface, Contour, Waterfall, 1D and Tiled plotting of workspaces are now available from one dialog box (Plot Advanced) got from right-click menu of a workspace selection.
+- The log value facilities for Surface and Contour plot are now available for Waterfall and 1D plots, where they appear in the legend.
+
+.. figure:: ../../images/ArtRightGUIWaterfallCustom2sp1.PNG
+
+Here are a couple of plots with "Temp" selected as the log:
+
+.. figure:: ../../images/ArtWaterfallT1.PNG
+
+.. figure:: ../../images/ArtSurfacePlotT1.PNG
+
+More details `here <https://www.mantidproject.org/MBC_Displaying_data_in_multiple_workspaces>`_ .
+
 - Curves where all(Y) <= 0 are now not plotted when the Y-scale is set to logarithmic.
   The previous behaviour assigned an arbitrary value of 0.1 which was confusing.
 
