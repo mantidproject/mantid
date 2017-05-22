@@ -634,6 +634,19 @@ LoadNexusLogs::createTimeSeries(::NeXus::File &file,
     std::transform(time_double.begin(), time_double.end(), time_double.begin(),
                    std::bind2nd(std::multiplies<double>(), 60.0));
   }
+
+  // String logs use offsets to cut the 'value' string into strings
+  // corresponding to each individual time value. Get the offset now
+  // before we have to enter the 'value' element.
+  std::vector<int> str_offsets;
+  try {
+    file.openData("offset");
+    file.getDataCoerce(str_offsets);
+    file.closeData();
+  } catch (::NeXus::Exception &) {
+    // No offsets found
+  }
+
   // Now the values: Could be a string, int or double
   file.openData("value");
   // Get the units of the property
@@ -647,8 +660,11 @@ LoadNexusLogs::createTimeSeries(::NeXus::File &file,
 
   // Now the actual data
   ::NeXus::Info info = file.getInfo();
-  // Check the size
-  if (size_t(info.dims[0]) != time_double.size()) {
+  // Check the size. The size should match the number of time values,
+  // except in the case of string values, which will be split using the
+  // offset information.
+  if (size_t(info.dims[0]) != time_double.size() &&
+      info.type != ::NeXus::CHAR) {
     file.closeData();
     throw ::NeXus::Exception("Invalid value entry for time series");
   }
@@ -670,10 +686,8 @@ LoadNexusLogs::createTimeSeries(::NeXus::File &file,
     return tsp;
   } else if (info.type == ::NeXus::CHAR) {
     std::string values;
-    const int64_t item_length = info.dims[1];
     try {
-      const int64_t nitems = info.dims[0];
-      const int64_t total_length = nitems * item_length;
+      const int64_t total_length = info.dims[0];
       boost::scoped_array<char> val_array(new char[total_length]);
       file.getData(val_array.get());
       file.closeData();
@@ -690,10 +704,21 @@ LoadNexusLogs::createTimeSeries(::NeXus::File &file,
     auto tsp = new TimeSeriesProperty<std::string>(prop_name);
     std::vector<DateAndTime> times;
     DateAndTime::createVector(start_time, time_double, times);
+
     const size_t ntimes = times.size();
+
+    // This string splitting only makes sense of the number of string offsets
+    // is equal to the number of time values.
+    if (ntimes != str_offsets.size()) {
+      throw ::NeXus::Exception(
+          "Number of string offsets does not match number of time values");
+    }
     for (size_t i = 0; i < ntimes; ++i) {
+      // Get the length of the string to extract from the offset values
+      size_t str_length = i == ntimes - 1 ? values.size() : str_offsets[i + 1];
+      str_length -= str_offsets[i];
       std::string value_i =
-          std::string(values.data() + i * item_length, item_length);
+          std::string(values.data() + str_offsets[i], str_length);
       tsp->addValue(times[i], value_i);
     }
     tsp->setUnits(value_units);
