@@ -342,7 +342,7 @@ Data Table
 ^^^^^^^^^^
 
 The data table allows the user to modify the selected data for the fitting. This includes the start and end times, which can also
-be updated by dragging the blue dashed lines in the plot. The "Groups/Pairs to fit" box provides a drop-down menu with three options (all groups, all pairs and custom". 
+be updated by dragging the blue dashed lines in the plot. The "Groups/Pairs to fit" box provides a drop-down menu with three options (all groups, all pairs and custom). 
 Selecting custom will produce a pop-up box with tick boxes for each of the available groups and pairs. If a user wants to update the custom selection the 
 Groups/Pairs button can be pressed from the ReselectData_ section at the bottom ofthe tab (this is only enabled if a custom selection is set). Underneath displays the
 "Selected Groups". 
@@ -387,8 +387,8 @@ Examples/Use cases
    - It is, of course, possible to select several runs, groups, periods all at once and a simultaneous fit will be performed across all the selected datasets.
    - Example: MUSR{15189, 15190, 15191}, groups {*fwd*, *bwd*}, periods {1, 2}: 12 datasets in all.
 
-Settings
-^^^^^^^^
+Additional Options
+^^^^^^^^^^^^^^^^^^
 Near the bottom of the tab contains selected fit options that can be adjusted, just as elsewhere in Mantid.
 The only option specific to the Muon Analysis interface is *Fit To Raw Data*.
 When this option is set to *True*, the fitting process is done using the raw (unbinned) data, even if the DataBinning_ is set.
