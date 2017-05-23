@@ -280,6 +280,30 @@ public:
     TS_ASSERT_THROWS_ANYTHING(alg.setProperty("HalfWidth", -1.0))
   }
 
+  void test_failure_start_smaller_than_end() {
+    const size_t nHist = 13;
+    const size_t nBins = 23;
+    MatrixWorkspace_sptr inputWS = create2DWorkspace154(nHist, nBins);
+
+    LineProfile alg;
+    // Don't put output in ADS by default
+    alg.setChild(true);
+    alg.setRethrows(true);
+    TS_ASSERT_THROWS_NOTHING(alg.initialize())
+    TS_ASSERT(alg.isInitialized())
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", inputWS))
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setPropertyValue("OutputWorkspace", "_unused_for_child"))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Direction", "Horizontal"))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Centre", -10.0))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("HalfWidth", 1.0))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Start", 9.0))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("End", 2.0))
+    const auto issues = alg.validateInputs();
+    const auto it = issues.find("Start");
+    TS_ASSERT_DIFFERS(it, issues.end())
+  }
+
   void test_ignore_special_values() {
     const size_t nHist = 13;
     const size_t nBins = 23;

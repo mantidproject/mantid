@@ -425,6 +425,11 @@ void LineProfile::exec() {
  */
 std::map<std::string, std::string> LineProfile::validateInputs() {
   std::map<std::string, std::string> issues;
+  const double start = getProperty(PropertyNames::START);
+  const double end = getProperty(PropertyNames::END);
+  if (start > end) {
+    issues[PropertyNames::START] = PropertyNames::START + " greater than " + PropertyNames::END + ".";
+  }
   MatrixWorkspace_const_sptr ws = getProperty(PropertyNames::INPUT_WORKSPACE);
   if (ws->getAxis(1)->isText()) {
     issues[PropertyNames::INPUT_WORKSPACE] =

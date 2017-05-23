@@ -37,11 +37,11 @@ public:
   int version() const override;
   const std::string category() const override;
   const std::string summary() const override;
+  std::map<std::string, std::string> validateInputs() override;
 
 private:
   void init() override;
   void exec() override;
-  std::map<std::string, std::string> validateInputs() override;
 };
 
 } // namespace Algorithms
