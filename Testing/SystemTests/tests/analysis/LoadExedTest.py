@@ -2,10 +2,8 @@
 from __future__ import (absolute_import, division, print_function)
 import stresstesting
 
-from mantid.api import  MatrixWorkspace, mtd
 import mantid.simpleapi as ms
 
-import math
 
 class LoadExedTest(stresstesting.MantidStressTest):
     def runTest(self):

@@ -60,10 +60,12 @@ def struct_data_read(fin,nrows,data_type='i',byte_size=4):
     helper function to read binary data_type
     requires the file handle, number of rows and data_type
     """
-    tmp_lst=[]
-    for i in range(nrows):
-        data = struct.unpack(data_type,fin.read(byte_size))[0]
-        tmp_lst.append(data)
+    print(nrows)
+    tmp_lst=[struct.unpack(data_type,fin.read(byte_size))[0] for i in range(nrows)]
+    #for i in range(nrows):
+    #    data = struct.unpack(data_type,fin.read(byte_size))[0]
+    #    tmp_lst.append(data)
+    #print(tmp_lst)
     return tmp_lst
 
 
@@ -80,7 +82,7 @@ class LoadEXED(PythonAlgorithm):
         return "LoadEXED"
 
     def version(self):
-        return 3
+        return 1
 
     def summary(self):
         return """Modifications have been made by Maciej Bartkowiak and Garrett Granroth (ORNL) in 2017,
@@ -130,13 +132,23 @@ class LoadEXED(PythonAlgorithm):
         xdata = np.array(det_tbc)
         xdata_mon = np.linspace(xdata[0],xdata[-1], len(xdata))
         ydata=data.astype(np.float)
+        ydata=ydata.reshape(nrows,-1)
         edata=np.sqrt(ydata)
-        CreateWorkspace(OutputWorkspace=wsn,DataX=xdata,DataY=ydata,DataE=edata,
-                        NSpec=nrows,UnitX='TOF',WorkspaceTitle='Data',YUnitLabel='Counts')
+        #CreateWorkspace(OutputWorkspace=wsn,DataX=xdata,DataY=ydata,DataE=edata,
+        #                NSpec=nrows,UnitX='TOF',WorkspaceTitle='Data',YUnitLabel='Counts')
+        nr,nc=ydata.shape
+        ws = WorkspaceFactory.create("Workspace2D", NVectors=nr,
+                    XLength=nc+1, YLength=nc)
+        for i in range(nrows):
+            ws.setX(i, xdata)
+            ws.setY(i, ydata[i])
+            ws.setE(i, edata[i])
+        ws.getAxis(0).setUnit('tof')
+        AnalysisDataService.addOrReplace(wsn,ws)
 
         #self.setProperty("OutputWorkspace", wsn)
-        print ("ws:", wsn)
-        ws=mtd[wsn]
+        #print ("ws:", wsn)
+        #ws=mtd[wsn]
 
         # fix the x values for the monitor
         for i in range(nrows-2,nrows):
@@ -144,7 +156,7 @@ class LoadEXED(PythonAlgorithm):
         print ("set detector IDs")
         #set detetector IDs
         for i in range(nrows):
-            s = ws.getSpectrum(i).setDetectorID(det_udet[i])
+            ws.getSpectrum(i).setDetectorID(det_udet[i])
 
         #load idf
 
