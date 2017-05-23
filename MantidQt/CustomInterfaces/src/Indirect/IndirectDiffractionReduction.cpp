@@ -301,9 +301,9 @@ void IndirectDiffractionReduction::saveReductions() {
 void IndirectDiffractionReduction::runGenericReduction(QString instName,
                                                        QString mode) {
   // Get rebin string
-  QString rebinStart = m_uiForm.leRebinStart->text();
-  QString rebinWidth = m_uiForm.leRebinWidth->text();
-  QString rebinEnd = m_uiForm.leRebinEnd->text();
+  QString rebinStart = m_uiForm.leRebinStart_CalibOnly->text();
+  QString rebinWidth = m_uiForm.leRebinWidth_CalibOnly->text();
+  QString rebinEnd = m_uiForm.leRebinEnd_CalibOnly->text();
 
   QString rebin = "";
   if (!rebinStart.isEmpty() && !rebinWidth.isEmpty() && !rebinEnd.isEmpty())
