@@ -1,16 +1,11 @@
 from __future__ import (absolute_import, division, print_function)
 
-
-from mantid.simpleapi import *  # noqa
-from mantid.kernel import *  # noqa
-from mantid.api import *  # noqa
-from mantid import mtd
 import numpy as np
 import time
-
-
-def _insert_energy_value(ws_name, energy):
-    return ws_name.replace('_red', '_' + str(energy) + '_red')
+from mantid import mtd
+from mantid.kernel import StringListValidator, Direction, FloatBoundedValidator
+from mantid.api import PythonAlgorithm, MultipleFileProperty, FileProperty, FileAction, WorkspaceGroupProperty, Progress
+from mantid.simpleapi import *  # noqa
 
 
 class IndirectILLReductionFWS(PythonAlgorithm):
@@ -34,7 +29,7 @@ class IndirectILLReductionFWS(PythonAlgorithm):
     _all_runs = None
 
     def category(self):
-        return "Workflow\\MIDAS;Workflow\\Inelastic;Inelastic\\Indirect;Inelastic\\Reduction"
+        return "Workflow\\MIDAS;Workflow\\Inelastic;Inelastic\\Indirect;Inelastic\\Reduction;ILL\\Indirect"
 
     def summary(self):
         return 'Performs fixed-window scan (FWS) multiple file reduction (both elastic and inelastic) ' \
@@ -108,6 +103,10 @@ class IndirectILLReductionFWS(PythonAlgorithm):
                                                     direction=Direction.Output),
                              doc='Output workspace group')
 
+        self.declareProperty(name='SpectrumAxis', defaultValue='SpectrumNumber',
+                             validator=StringListValidator(['SpectrumNumber', '2Theta', 'Q', 'Q2']),
+                             doc='The spectrum axis conversion target.')
+
     def validateInputs(self):
 
         issues = dict()
@@ -124,14 +123,28 @@ class IndirectILLReductionFWS(PythonAlgorithm):
         self._back_scaling = self.getProperty('BackgroundScalingFactor').value
         self._back_option = self.getPropertyValue('BackgroundOption')
         self._calib_option = self.getPropertyValue('CalibrationOption')
+        self._spectrum_axis = self.getPropertyValue('SpectrumAxis')
 
         # arguments to pass to IndirectILLEnergyTransfer
         self._common_args['MapFile'] = self.getPropertyValue('MapFile')
         self._common_args['Analyser'] = self.getPropertyValue('Analyser')
         self._common_args['Reflection'] = self.getPropertyValue('Reflection')
         self._common_args['ManualPSDIntegrationRange'] = self.getProperty('ManualPSDIntegrationRange').value
+        self._common_args['SpectrumAxis'] = self._spectrum_axis
 
-        self._red_ws = self.getPropertyValue('OutputWorkspace') + '_red'
+        self._red_ws = self.getPropertyValue('OutputWorkspace')
+
+        suffix = ''
+        if self._spectrum_axis == 'SpectrumNumber':
+            suffix = '_red'
+        elif self._spectrum_axis == '2Theta':
+            suffix = '_2theta'
+        elif self._spectrum_axis == 'Q':
+            suffix = '_q'
+        elif self._spectrum_axis == 'Q2':
+            suffix = '_q2'
+
+        self._red_ws += suffix
 
         # Nexus metadata criteria for FWS type of data (both EFWS and IFWS)
         self._criteria = '($/entry0/instrument/Doppler/maximum_delta_energy$ == 0. or ' \
@@ -213,9 +226,18 @@ class IndirectILLReductionFWS(PythonAlgorithm):
             right = mtd[groupws].getItem(1).getName()
             sum = '__sum_'+groupws
             Plus(LHSWorkspace=left, RHSWorkspace=right, OutputWorkspace=sum)
+
+            left_monitor = mtd[left].getRun().getLogData('MonitorIntegral').value
+            right_monitor = mtd[right].getRun().getLogData('MonitorIntegral').value
+
+            if left_monitor != 0. and right_monitor != 0.:
+                Scale(InputWorkspace=sum, OutputWorkspace=sum, Factor=0.5)
+
             DeleteWorkspace(left)
             DeleteWorkspace(right)
+
             RenameWorkspace(InputWorkspace=sum, OutputWorkspace=groupws)
+
         else:
             RenameWorkspace(InputWorkspace=mtd[groupws].getItem(0), OutputWorkspace=groupws)
 
@@ -338,7 +360,7 @@ class IndirectILLReductionFWS(PythonAlgorithm):
 
         for energy in self._all_runs[self._SAMPLE]:
             if energy in self._all_runs[label]:
-                ws = _insert_energy_value(self._red_ws, energy) + '_' + label
+                ws = self._insert_energy_value(self._red_ws + '_' + label, energy, label)
                 x_range = mtd[ws].readX(0)[-1] - mtd[ws].readX(0)[0]
                 if mtd[ws].blocksize() > 1:
                     Integration(InputWorkspace=ws, OutputWorkspace=ws)
@@ -353,13 +375,13 @@ class IndirectILLReductionFWS(PythonAlgorithm):
 
         for energy in self._all_runs[self._SAMPLE]:
             if energy in self._all_runs[label]:
-                ref = _insert_energy_value(self._red_ws, energy)
+                ref = self._insert_energy_value(self._red_ws, energy, self._SAMPLE)
                 ws = ref + '_' + label
                 if mtd[ws].blocksize() > 1:
                     SplineInterpolation(WorkspaceToInterpolate=ws,
                                         WorkspaceToMatch=ref,
                                         OutputWorkspace=ws)
-                    # add Linear2Point=True, when ready
+                    # TODO: add Linear2Point=True when ready
 
     def _subtract_background(self):
         '''
@@ -368,7 +390,7 @@ class IndirectILLReductionFWS(PythonAlgorithm):
 
         for energy in self._all_runs[self._SAMPLE]:
             if energy in self._all_runs[self._BACKGROUND]:
-                sample_ws = _insert_energy_value(self._red_ws, energy)
+                sample_ws = self._insert_energy_value(self._red_ws, energy, self._SAMPLE)
                 back_ws = sample_ws + '_' + self._BACKGROUND
                 Minus(LHSWorkspace=sample_ws, RHSWorkspace=back_ws, OutputWorkspace=sample_ws)
             else:
@@ -382,7 +404,7 @@ class IndirectILLReductionFWS(PythonAlgorithm):
 
         for energy in self._all_runs[self._SAMPLE]:
             if energy in self._all_runs[self._CALIBRATION]:
-                sample_ws = _insert_energy_value(self._red_ws, energy)
+                sample_ws = self._insert_energy_value(self._red_ws, energy, self._SAMPLE)
                 calib_ws = sample_ws + '_' + self._CALIBRATION
                 Divide(LHSWorkspace=sample_ws, RHSWorkspace=calib_ws, OutputWorkspace=sample_ws)
                 self._scale_calibration(sample_ws,calib_ws)
@@ -467,7 +489,7 @@ class IndirectILLReductionFWS(PythonAlgorithm):
             ws_list = self._all_runs[label][energy]
             size = len(self._all_runs[label][energy])
 
-            wsname = _insert_energy_value(groupname, energy)
+            wsname = self._insert_energy_value(groupname, energy, label)
 
             togroup.append(wsname)
             nspectra = mtd[ws_list[0]].getNumberHistograms()
@@ -533,6 +555,26 @@ class IndirectILLReductionFWS(PythonAlgorithm):
             axis.setUnit("Label").setLabel('Time', 'seconds')
         else:
             axis.setUnit("Label").setLabel(self._observable, '')
+
+    def _insert_energy_value(self, ws_name, energy, label):
+        '''
+        Inserts the doppler's energy value in the workspace name
+        in between the user input and automatic suffix
+        @param ws_name : workspace name
+        @param energy : energy value
+        @param label : sample, background, or calibration
+        @return : new name with energy value inside
+        Example:
+        user_input_2theta > user_input_1.5_2theta
+        user_input_red_background > user_input_1.5_red_background
+        '''
+        suffix_pos = ws_name.rfind('_')
+
+        if label != self._SAMPLE:
+            # find second to last underscore
+            suffix_pos = ws_name.rfind('_', 0, suffix_pos)
+
+        return ws_name[:suffix_pos] + '_' + str(energy) + ws_name[suffix_pos:]
 
 # Register algorithm with Mantid
 AlgorithmFactory.subscribe(IndirectILLReductionFWS)

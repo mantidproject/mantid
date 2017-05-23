@@ -24,18 +24,19 @@ specific to each instrument and to the specific IDF.
 
 Common elements of the move state object are:
 
-+---------------------------+---------------------------+-------------------------------------+------------+------------------------+
-| Entry                     | Type                      | Description                         | Mandatory  | Default value          |
-+===========================+===========================+=====================================+============+========================+
-| sample_offset             | Float                     | The offset of the sample in m       | No         | 0.0                    |
-+---------------------------+---------------------------+-------------------------------------+------------+------------------------+
-| sample_offset_direction   | CanonicalCoordinates enum | The direction of the sample offset  | No         | CanonicalCoordinates.Z |
-+---------------------------+---------------------------+-------------------------------------+------------+------------------------+
-| detectors                 | Dict                      |  Dictionary of detectors.           | auto setup | auto setup             |
-+---------------------------+---------------------------+-------------------------------------+------------+------------------------+
++---------------------------+---------------------------+-------------------------------------------------+------------+------------------------+
+| Entry                     | Type                      | Description                                     | Mandatory  | Default value          |
++===========================+===========================+=================================================+============+========================+
+| sample_offset             | Float                     | The offset of the sample in m                   | No         | 0.0                    |
++---------------------------+---------------------------+-------------------------------------------------+------------+------------------------+
+| sample_offset_direction   | CanonicalCoordinates enum | The direction of the sample offset              | No         | CanonicalCoordinates.Z |
++---------------------------+---------------------------+-------------------------------------------------+------------+------------------------+
+| detectors                 | Dict                      | Dictionary of detectors.                        | auto setup | auto setup             |
++---------------------------+---------------------------+-------------------------------------------------+------------+------------------------+
+| monitor_names             | Dict                      | A dictionary with monitor index vs monitor name | auto setup | auto setup             |
++---------------------------+---------------------------+-------------------------------------------------+------------+------------------------+
 
-
-The detectors dictionary above maps to a state object for the individual detectors.
+The detectors dictionary above maps to a state object for the individual detectors:
 
 +--------------------------+--------+------------------------------------------------------------------------+------------+---------------+
 | Entry                    | Type   | Description                                                            | Mandatory  | Default value |
@@ -64,34 +65,32 @@ The detectors dictionary above maps to a state object for the individual detecto
 +--------------------------+--------+------------------------------------------------------------------------+------------+---------------+
 | detector_name            | String | Detector name                                                          | auto setup | auto setup    |
 +--------------------------+--------+------------------------------------------------------------------------+------------+---------------+
-| detector_name_short      | String | Short detector name                                                    | No         | auto setup    |
+| detector_name_short      | String | Short detector name                                                    | auto setup | auto setup    |
 +--------------------------+--------+------------------------------------------------------------------------+------------+---------------+
 
 
 The individual instruments have additional settings.
 
 
-For LOQ
+For LOQ:
 
 +-----------------+-------+-------------------------------------------------+--------------+---------------+
 | Entry           | Type  | Description                                     | Mandatory    | Default value |
 +=================+=======+=================================================+==============+===============+
-| monitor_names   | Dict  | A dictionary with monitor index vs monitor name | auto setup   | auto setup    | 
 +-----------------+-------+-------------------------------------------------+--------------+---------------+
 | center_position | Float | The centre position                             | No           | 317.5 / 1000. |
 +-----------------+-------+-------------------------------------------------+--------------+---------------+
 
 
-For SANS2D
+For SANS2D:
 
 +---------------------------+-------+-------------------------------------------------+------------+---------------+
 | Entry                     | Type  | Description                                     | Mandatory  | Default value |
 +===========================+=======+=================================================+============+===============+
-| monitor_names             | Dict  | A dictionary with monitor index vs monitor name | auto setup | auto setup    |
 +---------------------------+-------+-------------------------------------------------+------------+---------------+
 | hab_detector_radius       | Float | Radius for the front detector in m              | auto setup | 306.0 / 1000. |
 +---------------------------+-------+-------------------------------------------------+------------+---------------+
-| hab_detector_default_sd_m | Float | Default sd for front detector in m              | auto setup | 317.5 / 1000. |
+| hab_detector_default_sd_m | Float | Default sd for front detector in m              | auto setup | 4.            |
 +---------------------------+-------+-------------------------------------------------+------------+---------------+
 | hab_detector_default_x_m  | Float | Default x for the front detector in m           | auto setup | 1.1           |
 +---------------------------+-------+-------------------------------------------------+------------+---------------+
@@ -99,7 +98,7 @@ For SANS2D
 +---------------------------+-------+-------------------------------------------------+------------+---------------+
 | hab_detector_x            | Float | X for the front detector in m                   | auto setup | 0.            |
 +---------------------------+-------+-------------------------------------------------+------------+---------------+
-| hab_detector_z            | Float | Z for the front detector in m                   | auto setup | 317.5 / 1000. |
+| hab_detector_z            | Float | Z for the front detector in m                   | auto setup | 0.            |
 +---------------------------+-------+-------------------------------------------------+------------+---------------+
 | hab_detector_rotation     | Float | Rotation for the front detector                 | auto setup | 0.            |
 +---------------------------+-------+-------------------------------------------------+------------+---------------+
@@ -116,13 +115,12 @@ For LARMOR
 +----------------+-------+-------------------------------------------------+------------+---------------+
 | Entry          | Type  | Description                                     | Mandatory  | Default value |
 +================+=======+=================================================+============+===============+
-| monitor_names  | Dict  | A dictionary with monitor index vs monitor name | auto setup | auto setup    |
 +----------------+-------+-------------------------------------------------+------------+---------------+
 | bench_rotation | Float | The angle for the bench rotation                | No         | 0.            |
 +----------------+-------+-------------------------------------------------+------------+---------------+
 
 
-Note that these settings should be only populated via the GUI or the Python Interface of ISIS SANS.
+**Note that these settings should be only populated via the GUI or the Python Interface of ISIS SANS.**
 
 
 Move options: *InitialMove*, *ElementaryDisplacement*, *SetToZero*

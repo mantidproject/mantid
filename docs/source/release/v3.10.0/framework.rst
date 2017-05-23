@@ -11,6 +11,8 @@ API
 
 - The default multiple file limit is now made facility dependent. It is 1000 for ILL, and 100 for all the others.
 - Frequency unit (GHz) included as an option to represent energy transfer.
+- Fixed a bug where certain validators would crash with SingleValuedWorkspaces instead of rejecting them.
+- New unit :math:`d_{\perp}` (Angstrom) is implemented for TOF powder diffraction.
 
 Algorithms
 ----------
@@ -21,6 +23,8 @@ New
 ###
 
 - :ref:`DeleteWorkspaces <algm-DeleteWorkspaces>` will delete a list of workspaces.
+- :ref:`algm-IntegrateEllipsoidsTwoStep` which can be used to integrate weak single crystal peaks by using parameters derived from strong peaks.
+- :ref:`FindEPP-v2 <algm-FindEPP-v2>` reimplements the :ref:`FindEPP-v1 <algm-FindEPP-v1>` in C++, providing an order of magnitude gain in execution time for large workspaces.
 
 Improved
 ########
@@ -33,11 +37,12 @@ Improved
 - :ref:`FilterEvents <algm-FilterEvents-v1>` now splits all the sample logs if the input splitters are given by MatrixWorkspace or a general TableWorkspace.
 - :ref:`FilterEvents <algm-FilterEvents-v1>` now supports to filter by pulse time with input splitters in format of MatrixWorkspace and general TableWorkspace.
 - :ref:`FilterEvents <algm-FilterEvents-v1>` now sorts events before filtering.  There is no need to call :ref:`SortEvents <algm-SortEvents-v1>` before calling ``FilterEvents``.
-- :ref:`FilterEvents <algm-FilterEvents-v1>` now accept splitters from ``TableWorkspace`` and ``MatrixWrokspace`` in both relative time and epoch time.
+- :ref:`FilterEvents <algm-FilterEvents-v1>` now accept splitters from ``TableWorkspace`` and ``MatrixWorkspace`` in both relative time and epoch time.
 - :ref:`FilterEvents <algm-FilterEvents-v1>` now only accept splitters from ``TableWorkspace`` and ``MatrixWrokspace`` in unit as second.
 - Two new properties were added to :ref:`algm-Integration` *RangeLowerList* and *RangeUpperList* can be used to give histogram-specific integration ranges.
 - :ref:`algm-FindEPP` does not output the two extra workspaces from the :ref:`algm-Fit` anymore.
-- :ref:`ApplyDetailedBalance <algm-ApplyDetailedBalance>`: User can select the dynamic susceptibility versus energy or frequency.
+- :ref:`ApplyDetailedBalance <algm-ApplyDetailedBalance>`: User can select the dynamic susceptibility versus energy or frequency. 
+- :ref:`PredictPeaks <algm-PredictPeaks-v1>` is now faster on instruments that do not have rectangular detectors. The speed up with vary from instrument to instrument, but for CORELLI this was shown to reduce execution time from ~64 mins to < 1 min.
 - :ref:`MergeRuns <algm-MergeRuns>` now has a sum option and more control over failure when binning is different or sample logs do not match.
 - Made it possible for LiveListeners to read properties from the calling Algorithm. This gives greater flexiblity for authors of LiveListener plugins.
 - Improved verification of IDFs
@@ -45,7 +50,12 @@ Improved
 - :ref:`ExportTimeSeriesLog <algm-ExportTimeSeriesLog>` now can export the first derivative of the sample log as an opotion.
 - :ref:`ExportTimeSeriesLog <algm-ExportTimeSeriesLog>` now add information of exported log to the output work, which
   :ref:`AddSampleLog <algm-AddSampleLog>` can retrieve automatically.
-- ``ThreadPool`` now respects the value of ``OMP_NUM_THREADS`` environment variable (documented in [msdn](https://msdn.microsoft.com/en-us/library/yw6c0z19.aspx) and [gcc](https://gcc.gnu.org/onlinedocs/libgomp/OMP_005fNUM_005fTHREADS.html))
+- ``ThreadPool`` now respects the value of ``OMP_NUM_THREADS`` environment variable (documented in [gcc](https://gcc.gnu.org/onlinedocs/libgomp/OMP_005fNUM_005fTHREADS.html))
+- Improved parallel scaling of :ref:`MDNormSCD <algm-MDNormSCD>` with > 4 cores.
+- Improved parallel scaling of :ref:`MDNormDirectSCD <algm-MDNormDirectSC>` with > 4 cores.
+- Reduced execution time of ``EventList::sortTof`` by over 2x, improving performance in algorithms such as :ref:`algm-CompressEvents` and :ref:`algm-SortEvents` which call it.
+- :ref:`LoadDNSLegacy <algm-LoadDNSLegacy-v1>` can now read the TOF data. CoilCurrentsTable is now optional. The default coil currents are now in the instrument parameters file.
+- :ref:`LoadNexusProcessed <algm-LoadNexusProcessed>` is now approximately 33x faster when loading a ``PeaksWorkspace`` with a large instrument attached.
 
 Bug Fixes
 #########
@@ -54,6 +64,8 @@ Bug Fixes
 - :ref:`MonteCarloAbsorption <algm-MonteCarloAbsorption>` has been modified to allow ``EventWorkspace`` as input
 - Fixed an issue where the log ``proton_charge_by_period`` was not loaded for :ref:`LoadEventNexus <algm-LoadEventNexus>`.
 - Fixed an issue where :ref:`algm-MonteCarloAbsorption` would use the wavelengths from the first histogram of *InputWorkspace* only making the algorithm unusable for workspaces with varying bins.
+- Fixed an issue with the ``GroupingPattern`` property in :ref:`algm-GroupDetectors`, where incorrect spectra were being used if spectrum numbers are not 1-based indices.
+- Fixed an issue with :ref:`algm-CreateWorkspace` where giving bin edges as ``VerticalAxisValues`` would fail.
 
 Deprecated
 ##########
@@ -72,6 +84,8 @@ Bugs
 ----
 
 - We have fixed a bug where Mantid could crash when deleting a large number of workspaces.
+- Fixed a bug in :ref:`ConvertToMD <algm-ConvertToMD>` causing it to fail with the error "Run::storeEnergyBinBoundaries - Inconsistent start & end values" if monitors were all NaN, Inf, or zero.
+- Fixed a bug in illuminated volume calculation which could make :ref:`MonteCarloAbsorption <algm-MonteCarloAbsorption>` fail.
 
 CurveFitting
 ------------
@@ -82,11 +96,6 @@ Improved
 - :ref:`UserFunction <func-UserFunction>` now supports :math:`erf` and :math:`erfc`.
 
 - :ref:`IkedaCarpenterPV <func-IkedaCarpenterPV>` now constrains all parameters to be non-negative which helps the fits converge faster and produces better fits.
-
-LiveData
---------
-
-- A new live listener for event data, `KafkaEventListener`, has been added. This is in development for the ESS and ISIS. It is only available on IBEX instruments at ISIS.
 
 Python
 ------

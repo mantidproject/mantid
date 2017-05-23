@@ -12,6 +12,7 @@ if ( CXXTEST_FOUND )
                         ../../TestHelpers/src/ScopedFileHelper.cpp
                         ../../TestHelpers/src/InstrumentCreationHelper.cpp
                         ../../TestHelpers/src/WorkspaceCreationHelper.cpp
+                        ../../TestHelpers/src/SingleCrystalDiffractionTestHelper.cpp
                          )
 
   cxxtest_add_test ( MDAlgorithmsTest ${TEST_FILES} ${GMOCK_TEST_FILES})

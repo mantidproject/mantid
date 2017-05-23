@@ -11,6 +11,7 @@ from mantid.kernel import (DateAndTime, time_duration, FloatTimeSeriesProperty,
 import SANSUtility as su
 import re
 import random
+import os
 import numpy as np
 
 
@@ -1597,10 +1598,13 @@ class TestSelectNewDetector(unittest.TestCase):
     def test_that_for_SANS2D_correct_settings_are_selected(self):
         self.assertTrue(su.get_correct_combinDet_setting("SANS2d", "rear") == "rear")
         self.assertTrue(su.get_correct_combinDet_setting("SANS2D", "FRONT") == "front")
+        self.assertTrue(su.get_correct_combinDet_setting("SANS2d", "rear-detector") == "rear")
+        self.assertTrue(su.get_correct_combinDet_setting("SANS2D", "FRONT-DETECTOR") == "front")
         self.assertTrue(su.get_correct_combinDet_setting("sAnS2d", "boTH") == "both")
         self.assertTrue(su.get_correct_combinDet_setting("sans2d", "merged") == "merged")
 
     def test_that_for_LOQ_correct_settings_are_selected(self):
+        self.assertTrue(su.get_correct_combinDet_setting("Loq", "main-detector-bank") == "rear")
         self.assertTrue(su.get_correct_combinDet_setting("Loq", "main") == "rear")
         self.assertTrue(su.get_correct_combinDet_setting("LOQ", "Hab") == "front")
         self.assertTrue(su.get_correct_combinDet_setting("lOQ", "boTH") == "both")
