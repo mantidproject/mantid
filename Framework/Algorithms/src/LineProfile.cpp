@@ -191,7 +191,7 @@ std::vector<double> extractVerticalBins(const Axis &axis,
  */
 template <typename Container, typename Function>
 void profile(std::vector<double> &Xs, std::vector<double> &Ys,
-             std::vector<double> &Es, MatrixWorkspace_const_sptr &ws,
+             std::vector<double> &Es, const MatrixWorkspace &ws,
              const LineDirection dir, const IndexLimits &limits,
              const Container &lineBins, const bool isBinEdges,
              Function modeFunction, const bool ignoreNans,
@@ -208,7 +208,7 @@ void profile(std::vector<double> &Xs, std::vector<double> &Ys,
     for (size_t j = limits.widthStart; j < limits.widthEnd; ++j) {
       const size_t iHor = dir == LineDirection::horizontal ? i : j;
       const size_t iVert = dir == LineDirection::horizontal ? j : i;
-      const double y = ws->y(iVert)[iHor];
+      const double y = ws.y(iVert)[iHor];
       if ((ignoreNans && std::isnan(y)) || (ignoreInfs && std::isinf(y))) {
         continue;
       }
@@ -387,7 +387,7 @@ void LineProfile::exec() {
     limits.lineEnd = horInterval.second;
     limits.widthStart = vertInterval.first;
     limits.widthEnd = vertInterval.second;
-    profile(Xs, profileYs, profileEs, ws, dir, limits, horizontalBins,
+    profile(Xs, profileYs, profileEs, *ws, dir, limits, horizontalBins,
             horizontalIsBinEdges, mode, ignoreNans, ignoreInfs);
   } else {
     IndexLimits limits;
@@ -395,7 +395,7 @@ void LineProfile::exec() {
     limits.lineEnd = vertInterval.second;
     limits.widthStart = horInterval.first;
     limits.widthEnd = horInterval.second;
-    profile(Xs, profileYs, profileEs, ws, dir, limits, verticalBins,
+    profile(Xs, profileYs, profileEs, *ws, dir, limits, verticalBins,
             verticalIsBinEdges, mode, ignoreNans, ignoreInfs);
   }
   // Prepare and set output.
