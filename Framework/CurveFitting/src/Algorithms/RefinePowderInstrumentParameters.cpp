@@ -162,9 +162,9 @@ void RefinePowderInstrumentParameters::exec() {
   m_MaxNumberStoredParameters = static_cast<size_t>(tempint);
 
   string algoption = getProperty("RefinementAlgorithm");
-  if (algoption.compare("DirectFit") == 0)
+  if (algoption == "DirectFit")
     refinealgorithm = DirectFit;
-  else if (algoption.compare("MonteCarlo") == 0)
+  else if (algoption == "MonteCarlo")
     refinealgorithm = MonteCarlo;
   else
     throw runtime_error("RefinementAlgorithm other than DirectFit and "
@@ -400,7 +400,7 @@ bool RefinePowderInstrumentParameters::fitFunction(IFunction_sptr func,
   g_log.debug() << "Function Fit:  Chi^2 = " << gslchi2
                 << "; Fit Status = " << fitstatus << '\n';
 
-  bool fitgood = (fitstatus.compare("success") == 0);
+  bool fitgood = (fitstatus == "success");
 
   return fitgood;
 }
@@ -867,25 +867,25 @@ void RefinePowderInstrumentParameters::genPeaksFromTable(
 
     API::TableRow row = peakparamws->getRow(ir);
     for (auto &colname : colnames) {
-      if (colname.compare("H") == 0)
+      if (colname == "H")
         row >> h;
-      else if (colname.compare("K") == 0)
+      else if (colname == "K")
         row >> k;
-      else if (colname.compare("L") == 0)
+      else if (colname == "L")
         row >> l;
-      else if (colname.compare("Alpha") == 0)
+      else if (colname == "Alpha")
         row >> alpha;
-      else if (colname.compare("Beta") == 0)
+      else if (colname == "Beta")
         row >> beta;
-      else if (colname.compare("Sigma2") == 0)
+      else if (colname == "Sigma2")
         row >> sigma2;
-      else if (colname.compare("Sigma") == 0)
+      else if (colname == "Sigma")
         row >> sigma;
-      else if (colname.compare("Chi2") == 0)
+      else if (colname == "Chi2")
         row >> chi2;
-      else if (colname.compare("Height") == 0)
+      else if (colname == "Height")
         row >> height;
-      else if (colname.compare("TOF_h") == 0)
+      else if (colname == "TOF_h")
         row >> tof_h;
       else {
         try {
@@ -939,7 +939,7 @@ void RefinePowderInstrumentParameters::importParametersFromTable(
     throw std::runtime_error("Input parameter workspace is wrong. ");
   }
 
-  if (colnames[0].compare("Name") != 0 || colnames[1].compare("Value") != 0) {
+  if (colnames[0] != "Name" || colnames[1] != "Value") {
     g_log.error() << "Input parameter table workspace does not have the "
                      "columns in order.  "
                   << " It must be Name, Value, FitOrTie.\n";
@@ -981,11 +981,11 @@ void RefinePowderInstrumentParameters::importMonteCarloParametersFromTable(
   istep = imax;
 
   for (size_t i = 0; i < colnames.size(); ++i) {
-    if (colnames[i].compare("Max") == 0)
+    if (colnames[i] == "Max")
       imax = i;
-    else if (colnames[i].compare("Min") == 0)
+    else if (colnames[i] == "Min")
       imin = i;
-    else if (colnames[i].compare("StepSize") == 0)
+    else if (colnames[i] == "StepSize")
       istep = i;
   }
 
@@ -1080,7 +1080,7 @@ hkl, double lattice)
   */
 void RefinePowderInstrumentParameters::calculateThermalNeutronSpecial(
     IFunction_sptr m_Function, const HistogramX &xVals, vector<double> &vec_n) {
-  if (m_Function->name().compare("ThermalNeutronDtoTOFFunction") != 0) {
+  if (m_Function->name() != "ThermalNeutronDtoTOFFunction") {
     g_log.warning() << "Function (" << m_Function->name()
                     << " is not ThermalNeutronDtoTOFFunction.  And it is not "
                        "required to calculate n.\n";
@@ -1117,9 +1117,9 @@ void RefinePowderInstrumentParameters::genPeakCentersWorkspace(
 
   string stdoption = getProperty("StandardError");
   enum { ConstantValue, InvertedPeakHeight } stderroroption;
-  if (stdoption.compare("ConstantValue") == 0) {
+  if (stdoption == "ConstantValue") {
     stderroroption = ConstantValue;
-  } else if (stdoption.compare("InvertedPeakHeight") == 0) {
+  } else if (stdoption == "InvertedPeakHeight") {
     stderroroption = InvertedPeakHeight;
   } else {
     stringstream errss;

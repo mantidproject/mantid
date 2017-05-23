@@ -5,18 +5,22 @@
 #pragma warning disable 1170
 #endif
 
-#include <pqServer.h>
-#include <pqActiveObjects.h>
-#include <pqServerManagerModel.h>
-#include <pqApplicationCore.h>
-#include <pqOutputPort.h>
-#include <pqPipelineFilter.h>
-#include <pqPipelineSource.h>
-#include <pqPipelineRepresentation.h>
-#include <pqScalarsToColors.h>
-#include <vtkSMPropertyHelper.h>
-#include <vtkSMProxy.h>
-#include <vtkSMDoubleVectorProperty.h>
+#include "pqActiveObjects.h"
+#include "pqApplicationCore.h"
+#include "pqOutputPort.h"
+#include "pqPipelineFilter.h"
+#include "pqPipelineRepresentation.h"
+#include "pqPipelineSource.h"
+#include "pqScalarsToColors.h"
+#include "pqServer.h"
+#include "pqServerManagerModel.h"
+#include "vtkPVArrayInformation.h"
+#include "vtkPVDataInformation.h"
+#include "vtkPVDataSetAttributesInformation.h"
+#include "vtkSMDoubleVectorProperty.h"
+#include "vtkSMPVRepresentationProxy.h"
+#include "vtkSMPropertyHelper.h"
+#include "vtkSMProxy.h"
 
 #if defined(__INTEL_COMPILER)
 #pragma warning enable 1170
@@ -111,40 +115,25 @@ VsiColorScale AutoScaleRangeGenerator::getColorScale() {
  */
 VsiColorScale AutoScaleRangeGenerator::getStandardColorScale() {
   // Select any number larger than 1 to start with
-  double maxValue = this->defaultValue;
-  double maxValueBuffer = this->defaultValue;
-
-  double minValue = this->defaultValue;
-  double minValueBuffer = this->defaultValue;
-
-  bool initialSetting = true;
-
-  const QList<pqPipelineSource *> sources = getAllPVSources();
+  double maxValue = -DBL_MAX;
+  double minValue = DBL_MAX;
 
   pqView *activeView = pqActiveObjects::instance().activeView();
 
   // Check all sources for the maximum and minimum value
-  foreach (pqPipelineSource *source, sources) {
+  const QList<pqPipelineSource *> sources = getAllPVSources();
+  for (pqPipelineSource *source : sources) {
     // Check if the pipeline representation of the source for the active view is
     // visible
-    pqDataRepresentation *representation =
-        source->getRepresentation(activeView);
-
-    if (representation) {
-      bool isVisible = representation->isVisible();
-
-      if (isVisible) {
-        setMinBufferAndMaxBuffer(source, minValueBuffer, maxValueBuffer);
-
-        if (initialSetting || maxValueBuffer > maxValue) {
-          maxValue = maxValueBuffer;
-        }
-
-        if (initialSetting || minValueBuffer < minValue) {
-          minValue = minValueBuffer;
-        }
-
-        initialSetting = false;
+    pqDataRepresentation *drep = source->getRepresentation(activeView);
+    if (drep && drep->isVisible()) {
+      auto info = vtkSMPVRepresentationProxy::GetArrayInformationForColorArray(
+          drep->getProxy());
+      if (info) {
+        double range[2];
+        info->GetComponentFiniteRange(-1, range);
+        minValue = std::min(minValue, range[0]);
+        maxValue = std::max(maxValue, range[1]);
       }
     }
   }
@@ -178,74 +167,6 @@ VsiColorScale AutoScaleRangeGenerator::getStandardColorScale() {
       (maxValue - minValue) * m_mdConstants.getColorScaleStandardMax();
 
   return vsiColorScale;
-}
-
-/**
- * Extract the min and max values of a source. If we are dealing with a filter,
- * then look further upstream for the information. At the end of the pipeline
- * we have to encounter a source with the desired properties.
- * Note that this assumes a unique source.
- * @param source A pointer to a source.
- * @param minValue A reference to a min value buffer.
- * @param maxValue A reference to a max value buffer.
- */
-void AutoScaleRangeGenerator::setMinBufferAndMaxBuffer(pqPipelineSource *source,
-                                                       double &minValue,
-                                                       double &maxValue) {
-  // Make sure that the pipeline properties are up to date
-  vtkSMProxy *proxy = source->getProxy();
-  proxy->UpdateVTKObjects();
-  proxy->UpdatePropertyInformation();
-  source->updatePipeline();
-
-  // Check if source is custom filter
-  if (QString(proxy->GetXMLName()).contains("MantidParaViewScaleWorkspace") ||
-      QString(proxy->GetXMLName()).contains("MDEWRebinningCutter") ||
-      QString(proxy->GetXMLName()).contains("MantidParaViewSplatterPlot") ||
-      QString(proxy->GetXMLName()).contains("MantidParaViewPeaksFilter"))
-
-  {
-    minValue = vtkSMPropertyHelper(proxy, "MinValue").GetAsDouble();
-    maxValue = vtkSMPropertyHelper(proxy, "MaxValue").GetAsDouble();
-
-    return;
-  }
-
-  // Check if source is custom source (MDHisto or MDEvent)
-  if (QString(proxy->GetXMLName()).contains("MDEW Source") ||
-      QString(proxy->GetXMLName()).contains("MDHW Source")) {
-    minValue = vtkSMPropertyHelper(proxy, "MinValue").GetAsDouble();
-    maxValue = vtkSMPropertyHelper(proxy, "MaxValue").GetAsDouble();
-
-    return;
-  }
-
-  // Check if Peak Workspace. This workspace should not contribute to colorscale
-  if (QString(proxy->GetXMLName()).contains("Peaks Source") ||
-      QString(proxy->GetXMLName()).contains("SinglePeakMarkerSource") ||
-      QString(proxy->GetXMLName()).contains("Threshold") ||
-      QString(proxy->GetXMLName()).contains("ProbePoint")) {
-    minValue = DBL_MAX;
-    maxValue = -DBL_MAX;
-
-    return;
-  }
-
-  // Otherwise get the data range of the representation for the active view
-  pqPipelineRepresentation *pipelineRepresentation =
-      qobject_cast<pqPipelineRepresentation *>(
-          source->getRepresentation(pqActiveObjects::instance().activeView()));
-
-  if (pipelineRepresentation) {
-    // The existence of the lookuptable needs to be checked at this point.
-    // ParaView seems to sometimes return NULL for the lookuptable, eg when
-    // a cut is performed along a box boundary
-    if (auto lookuptable = pipelineRepresentation->getLookupTable()) {
-      auto range = lookuptable->getScalarRange();
-      minValue = range.first;
-      maxValue = range.second;
-    }
-  }
 }
 
 /**

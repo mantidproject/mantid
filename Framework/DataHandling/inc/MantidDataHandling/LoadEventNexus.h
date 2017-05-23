@@ -330,10 +330,9 @@ bool LoadEventNexus::runLoadInstrument(const std::string &nexusfilename,
       }
     }
   }
-  if (instrument.compare("POWGEN3") ==
-      0) // hack for powgen b/c of bad long name
+  if (instrument == "POWGEN3") // hack for powgen b/c of bad long name
     instrument = "POWGEN";
-  if (instrument.compare("NOM") == 0) // hack for nomad
+  if (instrument == "NOM") // hack for nomad
     instrument = "NOMAD";
 
   if (instrument.empty())
@@ -508,7 +507,7 @@ void LoadEventNexus::loadEntryMetadata(const std::string &nexusfilename, T WS,
     std::string units;
     for (std::vector< ::NeXus::AttrInfo>::const_iterator it = infos.begin();
          it != infos.end(); ++it) {
-      if (it->name.compare("units") == 0) {
+      if (it->name == "units") {
         units = file.getStrAttr(*it);
         break;
       }

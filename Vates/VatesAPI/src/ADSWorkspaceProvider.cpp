@@ -9,11 +9,6 @@ using namespace Mantid::API;
 
 namespace Mantid {
 namespace VATES {
-template <typename Workspace_Type>
-ADSWorkspaceProvider<Workspace_Type>::ADSWorkspaceProvider() {}
-
-template <typename Workspace_Type>
-ADSWorkspaceProvider<Workspace_Type>::~ADSWorkspaceProvider() {}
 
 template <typename Workspace_Type>
 bool ADSWorkspaceProvider<Workspace_Type>::canProvideWorkspace(

@@ -267,6 +267,9 @@ void QtReflRunsTabView::showSearchContextMenu(const QPoint &pos) {
  * @param index : The index of the combo box
  */
 void QtReflRunsTabView::instrumentChanged(int index) {
+  ui.textSearch->clear();
+  if (m_searchModel)
+    m_searchModel->clear();
   m_calculator->setCurrentInstrumentName(
       ui.comboSearchInstrument->itemText(index).toStdString());
   m_calculator->processInstrumentHasBeenChanged();

@@ -6,6 +6,8 @@
 #include <boost/python/class.hpp>
 #include <boost/python/enum.hpp>
 #include <boost/python/scope.hpp>
+#include <boost/python/self.hpp>
+#include <boost/python/operators.hpp>
 
 using Mantid::Geometry::UnitCell;
 using Mantid::Geometry::AngleUnits;
@@ -24,6 +26,37 @@ using namespace Mantid::PythonInterface;
 void recalculateFromGstar(UnitCell &self, object values) {
   // Create a double matrix and put this in to the unit cell
   self.recalculateFromGstar(Converters::PyObjectToMatrix(values)());
+}
+
+/// Export for python's special __str__ method
+std::string __str__implementation(const UnitCell &self) {
+  std::stringstream ss;
+  ss << "UnitCell with lattice parameters:";
+  ss << " a = " << self.a();
+  ss << " b = " << self.b();
+  ss << " c = " << self.c();
+
+  ss << " alpha = " << self.alpha();
+  ss << " beta = " << self.beta();
+  ss << " gamma = " << self.gamma();
+
+  return ss.str();
+}
+
+/// Export for python's special __repr__ method
+std::string __repr__implementation(const UnitCell &self) {
+  std::stringstream ss;
+  ss << "UnitCell(";
+  ss << self.a() << ", ";
+  ss << self.b() << ", ";
+  ss << self.c() << ", ";
+
+  ss << self.alpha() << ", ";
+  ss << self.beta() << ", ";
+  ss << self.gamma();
+  ss << ")";
+
+  return ss.str();
 }
 }
 
@@ -169,7 +202,9 @@ void export_UnitCell() {
       .def("getB", &UnitCell::getB, arg("self"), return_readonly_numpy())
       .def("getBinv", &UnitCell::getBinv, arg("self"), return_readonly_numpy())
       .def("recalculateFromGstar", &recalculateFromGstar,
-           (arg("self"), arg("NewGstar")));
+           (arg("self"), arg("NewGstar")))
+      .def("__str__", &__str__implementation)
+      .def("__repr__", &__repr__implementation);
 
   scope().attr("deg2rad") = Mantid::Geometry::deg2rad;
   scope().attr("rad2deg") = Mantid::Geometry::rad2deg;

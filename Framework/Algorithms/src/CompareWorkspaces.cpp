@@ -1,5 +1,6 @@
 #include "MantidAlgorithms/CompareWorkspaces.h"
 
+#include "MantidAPI/DetectorInfo.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidAPI/IMDWorkspace.h"
@@ -759,6 +760,12 @@ bool CompareWorkspaces::checkInstrument(API::MatrixWorkspace_const_sptr ws1,
                   << ws1->getInstrument()->getName()
                   << " WS2 = " << ws2->getInstrument()->getName() << "\n";
     recordMismatch("Instrument name mismatch");
+    return false;
+  }
+
+  if (!ws1->detectorInfo().isEquivalent(ws2->detectorInfo())) {
+    recordMismatch("DetectorInfo mismatch (position differences larger than "
+                   "1e-9 m or other difference found)");
     return false;
   }
 

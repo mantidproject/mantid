@@ -10,9 +10,12 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ListValidator.h"
 
+#include <algorithm>
+
 namespace Mantid {
 namespace MDAlgorithms {
 
+using namespace Mantid::HistogramData;
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 
@@ -92,21 +95,21 @@ void GetSpiceDataRawCountsFromMD::exec() {
   std::vector<double> vecX;
   std::vector<double> vecY;
   std::string ylabel;
-  if (mode.compare("Pt.") == 0) {
+  if (mode == "Pt.") {
     // export detector counts for one specific Pt./run number
     int runnumber = getProperty("Pt");
     if (isEmpty(runnumber))
       throw std::runtime_error("For 'Pt.', value of 'Pt.' must be specified.");
     exportDetCountsOfRun(datamdws, monitormdws, runnumber, vecX, vecY, xlabel,
                          ylabel, donormalize);
-  } else if (mode.compare("Detector") == 0) {
+  } else if (mode == "Detector") {
     int detid = getProperty("DetectorID");
     if (isEmpty(detid))
       throw std::runtime_error(
           "For mode 'Detector', value of 'DetectorID' must be specified.");
     exportIndividualDetCounts(datamdws, monitormdws, detid, vecX, vecY, xlabel,
                               ylabel, donormalize);
-  } else if (mode.compare("Sample Log") == 0) {
+  } else if (mode == "Sample Log") {
     std::string samplelogname = getProperty("SampleLogName");
     if (samplelogname.empty())
       throw std::runtime_error(
@@ -499,17 +502,10 @@ MatrixWorkspace_sptr GetSpiceDataRawCountsFromMD::createOutputWorkspace(
     throw std::runtime_error("Failed to create output matrix workspace.");
 
   // Set data
-  MantidVec &dataX = outws->dataX(0);
-  MantidVec &dataY = outws->dataY(0);
-  MantidVec &dataE = outws->dataE(0);
-  for (size_t i = 0; i < sizex; ++i) {
-    dataX[i] = vecX[i];
-    dataY[i] = vecY[i];
-    if (dataY[i] > 1.)
-      dataE[i] = sqrt(dataY[i]);
-    else
-      dataE[i] = 1.;
-  }
+  outws->setHistogram(0, Points(std::move(vecX)), Counts(std::move(vecY)));
+  auto &dataE = outws->mutableE(0);
+  std::replace_if(dataE.begin(), dataE.end(),
+                  [](double val) { return val < 1.0; }, 1.0);
 
   // Set label
   outws->setYUnitLabel(ylabel);

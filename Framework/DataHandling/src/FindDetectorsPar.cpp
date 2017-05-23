@@ -625,7 +625,7 @@ FindDetectorsPar::get_ASCII_header(std::string const &fileName,
     file_descriptor.data_start_position =
         data_stream.tellg(); // if it is PHX or PAR file then the data begin
                              // after the first line;
-    file_descriptor.nData_records = atoi(&BUF[0]);
+    file_descriptor.nData_records = std::stoi(BUF.data());
     file_descriptor.nData_blocks = 0;
 
     // let's ifendify now if is PHX or PAR file;

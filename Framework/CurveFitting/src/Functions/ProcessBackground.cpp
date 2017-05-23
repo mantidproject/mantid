@@ -257,13 +257,13 @@ void ProcessBackground::exec() {
 
   // 2. Do different work
   std::string option = getProperty("Options");
-  if (option.compare("RemovePeaks") == 0) {
+  if (option == "RemovePeaks") {
     removePeaks();
-  } else if (option.compare("DeleteRegion") == 0) {
+  } else if (option == "DeleteRegion") {
     deleteRegion();
-  } else if (option.compare("AddRegion") == 0) {
+  } else if (option == "AddRegion") {
     addRegion();
-  } else if (option.compare("SelectBackgroundPoints") == 0) {
+  } else if (option == "SelectBackgroundPoints") {
 
     selectBkgdPoints();
   } else {
@@ -456,7 +456,7 @@ void ProcessBackground::selectBkgdPoints() {
   // explicitly
   string outbkgdparwsname =
       getPropertyValue("OutputBackgroundParameterWorkspace");
-  if (!outbkgdparwsname.empty() && outbkgdparwsname.compare("_dummy02") != 0) {
+  if (!outbkgdparwsname.empty() && outbkgdparwsname != "_dummy02") {
     // Will fit the selected background
     string bkgdfunctype = getPropertyValue("OutputBackgroundType");
     fitBackgroundFunction(bkgdfunctype);
@@ -525,10 +525,10 @@ void ProcessBackground::selectFromGivenXValues() {
   }
 
   // Select background points according to mode
-  if (mode.compare("All Background Points") == 0) {
+  if (mode == "All Background Points") {
     // Select (possibly) all background points
     m_outputWS = autoBackgroundSelection(bkgdWS);
-  } else if (mode.compare("Input Background Points Only") == 0) {
+  } else if (mode == "Input Background Points Only") {
     // Use the input background points only
     m_outputWS = bkgdWS;
   } else {
@@ -622,7 +622,7 @@ ProcessBackground::autoBackgroundSelection(Workspace2D_sptr bkgdWS) {
   std::string fitStatus = fit->getProperty("OutputStatus");
   bool allowedfailure = (fitStatus.find("cannot") < fitStatus.size()) &&
                         (fitStatus.find("tolerance") < fitStatus.size());
-  if (fitStatus.compare("success") != 0 && !allowedfailure) {
+  if (fitStatus != "success" && !allowedfailure) {
     g_log.error() << "ProcessBackground: Fit Status = " << fitStatus
                   << ".  Not to update fit result\n";
     throw std::runtime_error("Bad Fit");
@@ -646,11 +646,11 @@ BackgroundFunction_sptr
 ProcessBackground::createBackgroundFunction(const string backgroundtype) {
   Functions::BackgroundFunction_sptr bkgdfunction;
 
-  if (backgroundtype.compare("Polynomial") == 0) {
+  if (backgroundtype == "Polynomial") {
     bkgdfunction = boost::dynamic_pointer_cast<Functions::BackgroundFunction>(
         boost::make_shared<Functions::Polynomial>());
     bkgdfunction->initialize();
-  } else if (backgroundtype.compare("Chebyshev") == 0) {
+  } else if (backgroundtype == "Chebyshev") {
     Chebyshev_sptr cheby = boost::make_shared<Functions::Chebyshev>();
     bkgdfunction =
         boost::dynamic_pointer_cast<Functions::BackgroundFunction>(cheby);
@@ -797,7 +797,7 @@ void ProcessBackground::fitBackgroundFunction(std::string bkgdfunctiontype) {
   std::string fitStatus = fit->getProperty("OutputStatus");
   bool allowedfailure = (fitStatus.find("cannot") < fitStatus.size()) &&
                         (fitStatus.find("tolerance") < fitStatus.size());
-  if (fitStatus.compare("success") != 0 && !allowedfailure) {
+  if (fitStatus != "success" && !allowedfailure) {
     g_log.error() << "ProcessBackground: Fit Status = " << fitStatus
                   << ".  Not to update fit result\n";
     throw std::runtime_error("Bad Fit");
@@ -959,9 +959,9 @@ void RemovePeaks::parsePeakTableWorkspace(TableWorkspace_sptr peaktablews,
   int index_fwhm = -1;
   for (int i = 0; i < static_cast<int>(colnames.size()); ++i) {
     string colname = colnames[i];
-    if (colname.compare("TOF_h") == 0)
+    if (colname == "TOF_h")
       index_centre = i;
-    else if (colname.compare("FWHM") == 0)
+    else if (colname == "FWHM")
       index_fwhm = i;
   }
 

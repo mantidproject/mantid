@@ -206,9 +206,7 @@ std::string IFunction::asString() const {
   }
   // print the parameters
   for (size_t i = 0; i < nParams(); i++) {
-    if (!isFixed(i)) {
-      ostr << ',' << parameterName(i) << '=' << getParameter(i);
-    }
+    ostr << ',' << parameterName(i) << '=' << getParameter(i);
   }
 
   // collect non-default constraints
@@ -780,19 +778,19 @@ void IFunction::setMatrixWorkspace(
 
           // check first if this parameter is actually specified for this
           // function
-          if (name().compare(fitParam.getFunction()) == 0) {
+          if (name() == fitParam.getFunction()) {
             // update value
             IFunctionWithLocation *testWithLocation =
                 dynamic_cast<IFunctionWithLocation *>(this);
             if (testWithLocation == nullptr ||
                 (!fitParam.getLookUpTable().containData() &&
-                 fitParam.getFormula().compare("") == 0)) {
+                 fitParam.getFormula().empty())) {
               setParameter(i, fitParam.getValue());
             } else {
               double centreValue = testWithLocation->centre();
               Kernel::Unit_sptr centreUnit; // unit of value used in formula or
                                             // to look up value in lookup table
-              if (fitParam.getFormula().compare("") == 0)
+              if (fitParam.getFormula().empty())
                 centreUnit = fitParam.getLookUpTable().getXUnit(); // from table
               else {
                 if (!fitParam.getFormulaUnit().empty()) {
@@ -829,7 +827,7 @@ void IFunction::setMatrixWorkspace(
               // a unit of its own. If set convert param value
               // See section 'Using fitting parameters in
               // www.mantidproject.org/IDF
-              if (fitParam.getFormula().compare("") == 0) {
+              if (fitParam.getFormula().empty()) {
                 // so from look up table
                 Kernel::Unit_sptr resultUnit =
                     fitParam.getLookUpTable().getYUnit(); // from table
@@ -903,7 +901,7 @@ void IFunction::setMatrixWorkspace(
               if (fitParam.getConstraintPenaltyFactor().compare("")) {
                 try {
                   double penalty =
-                      atof(fitParam.getConstraintPenaltyFactor().c_str());
+                      std::stod(fitParam.getConstraintPenaltyFactor());
                   constraint->setPenaltyFactor(penalty);
                 } catch (...) {
                   g_log.warning()
@@ -933,7 +931,7 @@ double IFunction::convertValue(double value, Kernel::Unit_sptr &outUnit,
                                size_t wsIndex) const {
   // only required if formula or look-up-table different from ws unit
   const auto &wsUnit = ws->getAxis(0)->unit();
-  if (outUnit->unitID().compare(wsUnit->unitID()) == 0)
+  if (outUnit->unitID() == wsUnit->unitID())
     return value;
 
   // first check if it is possible to do a quick conversion and convert
@@ -962,7 +960,7 @@ void IFunction::convertValue(std::vector<double> &values,
                              size_t wsIndex) const {
   // only required if  formula or look-up-table different from ws unit
   const auto &wsUnit = ws->getAxis(0)->unit();
-  if (outUnit->unitID().compare(wsUnit->unitID()) == 0)
+  if (outUnit->unitID() == wsUnit->unitID())
     return;
 
   // first check if it is possible to do a quick conversion convert
