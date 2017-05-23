@@ -20,6 +20,7 @@ PROPS_FOR_ALIGN = ["CalFileName", "GroupFilename", "GroupingWorkspace",
                    "CropWavelengthMin", "CropWavelengthMax",
                    "LowResSpectrumOffset", "ReductionProperties"]
 PROPS_FOR_ALIGN.extend(PROPS_FOR_INSTR)
+PROPS_FOR_PD_CHARACTER = ['FrequencyLogNames', 'WaveLengthLogNames']
 
 
 def determineChunking(filename, chunkSize):
@@ -78,6 +79,7 @@ class AlignAndFocusPowderFromFiles(DataProcessorAlgorithm):
                              'Characterizations table')
 
         self.copyProperties("AlignAndFocusPowder", PROPS_FOR_ALIGN)
+        self.copyProperties('PDDetermineCharacterizations', PROPS_FOR_PD_CHARACTER)
 
     def _getLinearizedFilenames(self, propertyName):
         runnumbers = self.getProperty(propertyName).value
@@ -101,13 +103,18 @@ class AlignAndFocusPowderFromFiles(DataProcessorAlgorithm):
         tempname = '__%s_temp' % wkspname
         Load(Filename=filename, OutputWorkspace=tempname,
              MetaDataOnly=True)
+
+        # put together argument list
+        args = dict(InputWorkspace=tempname,
+                    ReductionProperties=self.getProperty('ReductionProperties').valueAsStr)
+        for name in PROPS_FOR_PD_CHARACTER:
+            prop = self.getProperty(name)
+            if not prop.isDefault:
+                args[name] = prop.value
         if self.charac is not None:
-            PDDetermineCharacterizations(InputWorkspace=tempname,
-                                         Characterizations=self.charac,
-                                         ReductionProperties=self.getProperty('ReductionProperties').valueAsStr)
-        else:
-            PDDetermineCharacterizations(InputWorkspace=tempname,
-                                         ReductionProperties=self.getProperty('ReductionProperties').valueAsStr)
+            args['Characterizations'] = self.charac
+
+        PDDetermineCharacterizations(**args)
         DeleteWorkspace(Workspace=tempname)
 
     def __getCacheName(self, wkspname):
@@ -222,6 +229,10 @@ class AlignAndFocusPowderFromFiles(DataProcessorAlgorithm):
                 DeleteWorkspace(Workspace=wkspname)
                 if self.kwargs['PreserveEvents']:
                     CompressEvents(InputWorkspace=finalname, OutputWorkspace=finalname)
+
+        # with more than one chunk or file the integrated proton charge is
+        # generically wrong
+        mtd[finalname].run().integrateProtonCharge()
 
         # set the output workspace
         self.setProperty('OutputWorkspace', mtd[finalname])

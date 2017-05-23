@@ -154,24 +154,6 @@ void FunctionParameterDecorator::setError(size_t i, double err) {
   return m_wrappedFunction->setError(i, err);
 }
 
-bool FunctionParameterDecorator::isFixed(size_t i) const {
-  throwIfNoFunctionSet();
-
-  return m_wrappedFunction->isFixed(i);
-}
-
-void FunctionParameterDecorator::fix(size_t i) {
-  throwIfNoFunctionSet();
-
-  m_wrappedFunction->fix(i);
-}
-
-void FunctionParameterDecorator::unfix(size_t i) {
-  throwIfNoFunctionSet();
-
-  m_wrappedFunction->unfix(i);
-}
-
 size_t FunctionParameterDecorator::getParameterIndex(
     const ParameterReference &ref) const {
   throwIfNoFunctionSet();
@@ -180,8 +162,8 @@ size_t FunctionParameterDecorator::getParameterIndex(
     return m_wrappedFunction->getParameterIndex(ref);
   }
 
-  if (ref.getFunction() == this && ref.getIndex() < nParams()) {
-    return ref.getIndex();
+  if (ref.getLocalFunction() == this && ref.getLocalIndex() < nParams()) {
+    return ref.getLocalIndex();
   }
 
   return nParams();
@@ -222,11 +204,16 @@ bool FunctionParameterDecorator::hasAttribute(
   return m_wrappedFunction->hasAttribute(attName);
 }
 
-void FunctionParameterDecorator::tie(const std::string &parName,
-                                     const std::string &expr, bool isDefault) {
+void FunctionParameterDecorator::setParameterStatus(
+    size_t i, IFunction::ParameterStatus status) {
   throwIfNoFunctionSet();
+  m_wrappedFunction->setParameterStatus(i, status);
+}
 
-  m_wrappedFunction->tie(parName, expr, isDefault);
+IFunction::ParameterStatus
+FunctionParameterDecorator::getParameterStatus(size_t i) const {
+  throwIfNoFunctionSet();
+  return m_wrappedFunction->getParameterStatus(i);
 }
 
 void FunctionParameterDecorator::applyTies() {
@@ -297,6 +284,12 @@ void FunctionParameterDecorator::declareParameter(
   UNUSED_ARG(name);
   UNUSED_ARG(initValue);
   UNUSED_ARG(description);
+}
+
+void FunctionParameterDecorator::tie(const std::string &parName,
+                                     const std::string &expr, bool isDefault) {
+  throwIfNoFunctionSet();
+  m_wrappedFunction->tie(parName, expr, isDefault);
 }
 
 /// Forwads addTie-call to the decorated function.
