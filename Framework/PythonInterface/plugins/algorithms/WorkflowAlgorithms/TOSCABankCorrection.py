@@ -218,7 +218,7 @@ class TOSCABankCorrection(DataProcessorAlgorithm):
         # Recalculate the sum spectra from corrected banks
         GroupDetectors(InputWorkspace=self._output_ws,
                        OutputWorkspace='__sum',
-                       SpectraList=[0,1],
+                       SpectraList=[1,2],
                        Behaviour='Average')
 
         # Add the new sum spectra to the output workspace

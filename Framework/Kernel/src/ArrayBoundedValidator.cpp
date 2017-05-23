@@ -139,6 +139,7 @@ template <typename TYPE> void ArrayBoundedValidator<TYPE>::clearUpper() {
 template class ArrayBoundedValidator<double>;
 template class ArrayBoundedValidator<int32_t>;
 template class ArrayBoundedValidator<int64_t>;
+template class ArrayBoundedValidator<size_t>;
 #if defined(_WIN32) || defined(__clang__) && defined(__APPLE__)
 template class ArrayBoundedValidator<long>;
 #endif

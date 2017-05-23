@@ -47,6 +47,7 @@ void SetInstrumentParameter::init() {
   declareProperty("ComponentName", "", "The name of the component to attach "
                                        "the parameter to. Default: the whole "
                                        "instrument");
+
   declareProperty(make_unique<ArrayProperty<detid_t>>("DetectorList"),
                   "The detector ID list to attach the parameter to. If set "
                   "this will override any ComponentName");
