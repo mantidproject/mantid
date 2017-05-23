@@ -742,6 +742,8 @@ std::string MuonFitPropertyBrowser::outputName() const {
 void MuonFitPropertyBrowser::setMultiFittingMode(bool enabled) {
   // First, clear whatever model is currently set
   this->clear();
+  modifyFitMenu(m_fitActionEvaluate, !enabled);
+  modifyFitMenu(m_fitActionSeqFit, !enabled);
 
   // Show or hide "Function" and "Data" sections
   m_browser->setItemVisible(m_functionsGroup, !enabled);
@@ -762,8 +764,6 @@ void MuonFitPropertyBrowser::setMultiFittingMode(bool enabled) {
 * @param enabled :: [input] Whether to turn this mode on or off
 */
 void MuonFitPropertyBrowser::setTFAsymmMode(bool enabled) {
-  // First, clear whatever model is currently set
-  this->clear();
   modifyFitMenu(m_fitActionTFAsymm, enabled);
 
   // Show or hide the TFAsymmetry fit
