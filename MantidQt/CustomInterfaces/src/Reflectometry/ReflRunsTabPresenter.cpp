@@ -433,18 +433,22 @@ std::string ReflRunsTabPresenter::getTimeSlicingType() const {
   return m_mainPresenter->getTimeSlicingType(m_view->getSelectedGroup());
 }
 
-/** Tells view to enable the process button when data reduction is paused
+/** Tells view to enable the 'process' button and disable the 'pause' button
+* when data reduction is paused
 */
 void ReflRunsTabPresenter::pause() const {
 
-  m_view->setRowActionEnabled(1, true);
+  m_view->setRowActionEnabled(0, true);
+  m_view->setRowActionEnabled(1, false);
 }
 
-/** Tells view to disable the process button when data reduction is resumed
+/** Tells view to disable the 'process' button and enable the 'pause' button
+* when data reduction is resumed
 */
 void ReflRunsTabPresenter::resume() const {
 
-  m_view->setRowActionEnabled(1, false);
+  m_view->setRowActionEnabled(0, false);
+  m_view->setRowActionEnabled(1, true);
 }
 
 /** Notifies main presenter that data reduction is confirmed to be paused
