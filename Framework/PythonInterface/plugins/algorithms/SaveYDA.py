@@ -1,5 +1,5 @@
 from mantid.api import PythonAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty, WorkspaceUnitValidator, \
-                       InstrumentValidator, FileProperty, FileAction, mtd
+                       InstrumentValidator, FileProperty, FileAction
 from mantid.kernel import Direction, CompositeValidator
 from mantid.dataobjects import Workspace2D
 
