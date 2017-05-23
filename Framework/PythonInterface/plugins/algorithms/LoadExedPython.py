@@ -166,7 +166,8 @@ class LoadEXED(PythonAlgorithm):
 
         SetGoniometer(Workspace=wsn, Goniometers='Universal', Axis0='phi,0,1,0,1')
         # Separate monitors into seperate workspace
-        ExtractSpectra(InputWorkspace = wsn, WorkspaceIndexList = ','.join([str(s) for s in range(nrows-2, nrows)]), OutputWorkspace = wsn + '_Monitors')
+        ExtractSpectra(InputWorkspace = wsn, WorkspaceIndexList = ','.join([str(s) for s in range(nrows-2, nrows)]),
+            OutputWorkspace = wsn + '_Monitors')
         MaskDetectors(Workspace = wsn, WorkspaceIndexList = ','.join([str(s) for s in range(nrows-2, nrows)]))
         RemoveMaskedSpectra(InputWorkspace = wsn, OutputWorkspace = wsn)
 
