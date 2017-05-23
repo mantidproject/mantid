@@ -95,9 +95,8 @@ struct IndexLimits {
  * @param box Line profile constraints.
  * @param dir Line profile orientation.
  */
-void setAxesAndUnits(Workspace2D &outWS,
-                     const MatrixWorkspace &ws, const Box &box,
-                     const LineDirection dir) {
+void setAxesAndUnits(Workspace2D &outWS, const MatrixWorkspace &ws,
+                     const Box &box, const LineDirection dir) {
   // Y units.
   outWS.setYUnit(ws.YUnit());
   outWS.setYUnitLabel(ws.YUnitLabel());
@@ -132,9 +131,9 @@ void setAxesAndUnits(Workspace2D &outWS,
  * @throw std::runtime_error if given constraints don't make sense.
  */
 template <typename Container>
-std::pair<size_t, size_t> startAndEnd(const Container &bins,
-                 const bool isBinEdges, const double lowerLimit,
-                 const double upperLimit) {
+std::pair<size_t, size_t>
+startAndEnd(const Container &bins, const bool isBinEdges,
+            const double lowerLimit, const double upperLimit) {
   auto lowerIt = std::upper_bound(bins.cbegin(), bins.cend(), lowerLimit);
   if (lowerIt == bins.cend()) {
     throw std::runtime_error("Profile completely outside input workspace.");
@@ -372,10 +371,10 @@ void LineProfile::exec() {
     bounds.right = centre + halfWidth;
   }
   // Convert the bounds from workspace units to indices.
-  const auto vertInterval = startAndEnd(verticalBins, verticalIsBinEdges,
-              bounds.top, bounds.bottom);
+  const auto vertInterval =
+      startAndEnd(verticalBins, verticalIsBinEdges, bounds.top, bounds.bottom);
   const auto horInterval = startAndEnd(horizontalBins, horizontalIsBinEdges,
-              bounds.left, bounds.right);
+                                       bounds.left, bounds.right);
   // Choose mode.
   auto mode = createMode(getProperty(PropertyNames::MODE));
   // Build the actual profile.
@@ -428,7 +427,8 @@ std::map<std::string, std::string> LineProfile::validateInputs() {
   const double start = getProperty(PropertyNames::START);
   const double end = getProperty(PropertyNames::END);
   if (start > end) {
-    issues[PropertyNames::START] = PropertyNames::START + " greater than " + PropertyNames::END + ".";
+    issues[PropertyNames::START] =
+        PropertyNames::START + " greater than " + PropertyNames::END + ".";
   }
   MatrixWorkspace_const_sptr ws = getProperty(PropertyNames::INPUT_WORKSPACE);
   if (ws->getAxis(1)->isText()) {

@@ -275,7 +275,8 @@ public:
     alg.setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("HalfWidth", std::numeric_limits<double>::min()))
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setProperty("HalfWidth", std::numeric_limits<double>::min()))
     TS_ASSERT_THROWS_ANYTHING(alg.setProperty("HalfWidth", 0.0))
     TS_ASSERT_THROWS_ANYTHING(alg.setProperty("HalfWidth", -1.0))
   }
