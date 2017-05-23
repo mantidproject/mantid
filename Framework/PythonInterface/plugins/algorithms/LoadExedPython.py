@@ -2,7 +2,6 @@ from __future__ import (absolute_import, division, print_function)
 from mantid.kernel import *
 from mantid.api import *
 
-import os
 import struct
 import numpy as np
 import copy
@@ -127,13 +126,13 @@ class LoadEXED(PythonAlgorithm):
 
         parms_dict, det_udet, det_count, det_tbc, data = read_file(fn)
         nrows=int(parms_dict['NDET'])
-        nbins=int(parms_dict['NTC'])
+        #nbins=int(parms_dict['NTC'])
         xdata = np.array(det_tbc)
         xdata_mon = np.linspace(xdata[0],xdata[-1], len(xdata))
         ydata=data.astype(np.float)
         edata=np.sqrt(ydata)
         CreateWorkspace(OutputWorkspace=wsn,DataX=xdata,DataY=ydata,DataE=edata,
-            NSpec=nrows,UnitX='TOF',WorkspaceTitle='Data',YUnitLabel='Counts')
+                        NSpec=nrows,UnitX='TOF',WorkspaceTitle='Data',YUnitLabel='Counts')
 
         #self.setProperty("OutputWorkspace", wsn)
         print ("ws:", wsn)
@@ -145,7 +144,7 @@ class LoadEXED(PythonAlgorithm):
         print ("set detector IDs")
         #set detetector IDs
         for i in range(nrows):
-    		s = ws.getSpectrum(i).setDetectorID(det_udet[i])
+            s = ws.getSpectrum(i).setDetectorID(det_udet[i])
 
         #load idf
 
@@ -167,11 +166,12 @@ class LoadEXED(PythonAlgorithm):
         SetGoniometer(Workspace=wsn, Goniometers='Universal', Axis0='phi,0,1,0,1')
         # Separate monitors into seperate workspace
         ExtractSpectra(InputWorkspace = wsn, WorkspaceIndexList = ','.join([str(s) for s in range(nrows-2, nrows)]),
-            OutputWorkspace = wsn + '_Monitors')
+                       OutputWorkspace = wsn + '_Monitors')
         MaskDetectors(Workspace = wsn, WorkspaceIndexList = ','.join([str(s) for s in range(nrows-2, nrows)]))
         RemoveMaskedSpectra(InputWorkspace = wsn, OutputWorkspace = wsn)
 
         self.setProperty("OutputWorkspace", wsn)
+
 
 # Register algorthm with Mantid.
 AlgorithmFactory.subscribe(LoadEXED)
