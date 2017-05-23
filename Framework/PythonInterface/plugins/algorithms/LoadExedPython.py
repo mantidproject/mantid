@@ -1,3 +1,4 @@
+from __future__ import (absolute_import, division, print_function)
 from mantid.kernel import *
 from mantid.api import *
 
@@ -37,16 +38,16 @@ def read_file(fn):
                 #print line
     nrows=int(parms_dict['NDET'])
     nbins=int(parms_dict['NTC'])
-    print "read UDET"
+    print ("read UDET")
     det_udet = struct_data_read(fin,nrows)
 
-    print "read Counter"
+    print ("read Counter")
     det_count = struct_data_read(fin,nrows)
 
-    print "read TimeBinBoundaries"
+    print ("read TimeBinBoundaries")
     det_tbc = struct_data_read(fin,nbins+1,'f')
 
-    print "read Data"
+    print ("read Data")
     data = np.fromfile(fin, np.uint32, nrows*nbins, '')
 
     fin.close()
@@ -117,7 +118,7 @@ class LoadEXED(PythonAlgorithm):
 
         fn = self.getPropertyValue("Filename")
         wsn = self.getPropertyValue("OutputWorkspace")
-        print fn, wsn
+        #print (fn, wsn)
 
         self.fxml = self.getPropertyValue("InstrumentXML")
 
@@ -134,14 +135,14 @@ class LoadEXED(PythonAlgorithm):
         NSpec=nrows,UnitX='TOF',WorkspaceTitle='Data',YUnitLabel='Counts')
 
         #self.setProperty("OutputWorkspace", wsn)
-        print "ws:", wsn
+        print ("ws:", wsn)
         ws=mtd[wsn]
 
         # fix the x values for the monitor
         for i in range(nrows-2,nrows):
             ws.setX(i,xdata_mon)
 
-        print "set detector IDs"
+        print ("set detector IDs")
     	#set detetector IDs
     	for i in range(nrows):
     		s = ws.getSpectrum(i).setDetectorID(det_udet[i])
