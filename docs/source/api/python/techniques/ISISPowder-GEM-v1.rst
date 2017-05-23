@@ -638,7 +638,7 @@ spline_coefficient
 ^^^^^^^^^^^^^^^^^^^
 Determines the spline coefficient to use after processing
 the vanadium in :ref:`create_vanadium_gem_isis-powder-diffraction-ref`
-method. For more details see :ref:`SplineBackground <algm-SplineBackground>`
+method. For more details see: :ref:`SplineBackground <algm-SplineBackground>`
 
 *Note that if this value is changed *create_vanadium*
 will need to be called again.*

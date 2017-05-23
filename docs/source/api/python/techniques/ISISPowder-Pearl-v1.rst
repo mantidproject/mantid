@@ -428,10 +428,10 @@ If this is set to **True**
 :ref:`attenuation_file_path_pearl_isis-powder-diffraction-ref`
 must be set too. 
 
-*Note: This correction will only be performed if
-*focus_mode* is in **All* or **Trans**. See:
-:ref:`focus_mode_pearl_isis-powder-diffraction-ref`
-for more details.*
+*Note: This correction will only be performed if 'focus_mode'
+is in* **All** or **Trans**. 
+See: :ref:`focus_mode_pearl_isis-powder-diffraction-ref`
+for more details.
 
 Accepted values are: **True** or **False**
 
@@ -579,58 +579,273 @@ before proceeding to change values within the advanced configuration file.
 
 focused_cropping_values
 ^^^^^^^^^^^^^^^^^^^^^^^
+Indicates a list of TOF values to crop the focused workspace
+which was created by :ref:`focus_pearl_isis-powder-diffraction-ref`
+on a bank by bank basis.
+
+This parameter is a list of bank cropping values with 
+one list entry per bank. The values **must** have a smaller
+TOF window than the :ref:`vanadium_tof_cropping_pearl_isis-powder-diffraction-ref`
+
+*Note: The value passed with the*
+:ref:`long_mode_pearl_isis-powder-diffraction-ref` *parameter
+determines the set of values used.*
+
+On PEARL this is set to the following TOF windows:
+
+.. code-block:: Python
+
+  # Long mode OFF:
+        focused_cropping_values: [
+        (1500, 19900),  # Bank 1
+        (1500, 19900),  # Bank 2
+        (1500, 19900),  # Bank 3
+        (1500, 19900),  # Bank 4
+        (1500, 19900),  # Bank 5
+        (1500, 19900),  # Bank 6
+        (1500, 19900),  # Bank 7
+        (1500, 19900),  # Bank 8
+        (1500, 19900),  # Bank 9
+        (1500, 19900),  # Bank 10
+        (1500, 19900),  # Bank 11
+        (1500, 19900),  # Bank 12
+        (1500, 19900),  # Bank 13
+        (1500, 19900)   # Bank 14
+      ]
+
+  # Long mode ON:
+        focused_cropping_values: [
+        (20300, 39990),  # Bank 1
+        (20300, 39990),  # Bank 2
+        (20300, 39990),  # Bank 3
+        (20300, 39990),  # Bank 4
+        (20300, 39990),  # Bank 5
+        (20300, 39990),  # Bank 6
+        (20300, 39990),  # Bank 7
+        (20300, 39990),  # Bank 8
+        (20300, 39990),  # Bank 9
+        (20300, 39990),  # Bank 10
+        (20300, 39990),  # Bank 11
+        (20300, 39990),  # Bank 12
+        (20300, 39990),  # Bank 13
+        (20300, 39990)   # Bank 14
+      ]
+
 
 .. _monitor_lambda_crop_range_pearl_isis-powder-diffraction-ref:
 
 monitor_lambda_crop_range
 ^^^^^^^^^^^^^^^^^^^^^^^^^
+The range in dSpacing to crop a monitor spectra to when generating a
+spline of the current to the target. This is should be stored as a tuple of 
+both values (lower and upper bound). 
+
+*Note: The value passed with the*
+:ref:`long_mode_pearl_isis-powder-diffraction-ref` *parameter
+determines the set of values used.*
+
+On PEARL this is set to the following:
+
+.. code-block:: Python
+
+  # Long mode OFF:
+    monitor_lambda_crop_range: (0.03, 6.00)
+
+  # Long mode ON:
+    monitor_lambda_crop_range: (5.9, 12.0)
 
 .. _monitor_integration_range_pearl_isis-powder-diffraction-ref:
 
 monitor_integration_range
 ^^^^^^^^^^^^^^^^^^^^^^^^^
+The maximum and minimum values for a bin whilst
+integrating the monitor spectra. 
+Any values that fall outside of this range will not be considered.
+This should be stored as a tuple of both values (lower and upper bound). 
+See: :ref:`Integration<algm-Integration>` for more details.
+
+*Note: The value passed with the*
+:ref:`long_mode_pearl_isis-powder-diffraction-ref` *parameter
+determines the set of values used.*
+
+On PEARL this is set to the following:
+
+.. code-block:: Python
+
+  # Long mode OFF:
+  monitor_integration_range: (0.6, 5.0)
+
+  # Long mode ON:
+  monitor_integration_range: (6, 10)
 
 .. _monitor_spectrum_number_pearl_isis-powder-diffraction-ref:
 
 monitor_spectrum_number
 ^^^^^^^^^^^^^^^^^^^^^^^
+The workspace spectrum number that represents a 
+monitor which can be used to calculate current.
+
+On PEARL this is set to the following:
+
+.. code-block:: Python
+
+  monitor_spectrum_number: 1,
+
 
 .. _monitor_spline_coefficient_pearl_isis-powder-diffraction-ref:
 
 monitor_spline_coefficient
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
+Determines the spline coefficient to use whilst 
+processing the monitor spectra to normalise by 
+current. For more details see: 
+:ref:`SplineBackground <algm-SplineBackground>`
+
+On PEARL this is set to the following:
+
+.. code-block:: Python
+
+  monitor_spline_coefficient: 20
 
 .. _raw_data_tof_cropping_pearl_isis-powder-diffraction-ref:
 
 raw_data_tof_cropping
 ^^^^^^^^^^^^^^^^^^^^^
+Determines the TOF window to crop all spectra down to before any 
+processing in the :ref:`create_vanadium_pearl_isis-powder-diffraction-ref`
+and :ref:`focus_pearl_isis-powder-diffraction-ref` methods. 
+
+This helps remove negative counts where at very low TOF
+the empty counts can exceed the captured neutron counts 
+of the run to process. It also is used
+to crop to the correct TOF window depending on the
+value of the :ref:`long_mode_pearl_isis-powder-diffraction-ref` *parameter.
+
+*Note: The value passed with the*
+:ref:`long_mode_pearl_isis-powder-diffraction-ref` *parameter
+determines the set of values used.*
+
+On PEARL this is set to the following:
+
+.. code-block:: Python
+
+  # Long mode OFF:
+    raw_data_tof_cropping: (0, 19995)
+
+  # Long mode ON:
+    raw_data_tof_cropping: (20280, 39995)
 
 .. _spline_coefficient_pearl_isis-powder-diffraction-ref:
 
 spline_coefficient
 ^^^^^^^^^^^^^^^^^^
+Determines the spline coefficient to use after processing
+the vanadium in :ref:`create_vanadium_pearl_isis-powder-diffraction-ref`
+method. For more details see: :ref:`SplineBackground <algm-SplineBackground>`
+
+*Note that if this value is changed *create_vanadium*
+will need to be called again.*
+
+On PEARL this is set to the following:
+
+.. code-block:: Python
+
+  spline_coefficient: 60
 
 .. _tt35_grouping_filename_pearl_isis-powder-diffraction-ref:
 
 tt35_grouping_filename
 ^^^^^^^^^^^^^^^^^^^^^^
+Determines the name of the grouping cal file which is located
+within top level of the :ref:`calibration_directory_pearl_isis-powder-diffraction-ref`
+if :ref:`tt_mode_pearl_isis-powder-diffraction-ref` is set to **tt35**
+
+The grouping file determines the detector ID to bank mapping to use
+whilst focusing the spectra into banks.
+
+On PEARL this is set to the following:
+
+.. code-block:: Python
+
+  tt35_grouping_filename: "pearl_group_12_1_TT35.cal"
 
 .. _tt70_grouping_filename_pearl_isis-powder-diffraction-ref:
 
 tt70_grouping_filename
 ^^^^^^^^^^^^^^^^^^^^^^
+Determines the name of the grouping cal file which is located
+within top level of the :ref:`calibration_directory_pearl_isis-powder-diffraction-ref`
+if :ref:`tt_mode_pearl_isis-powder-diffraction-ref` is set to **tt70**
+
+The grouping file determines the detector ID to bank mapping to use
+whilst focusing the spectra into banks.
+
+On PEARL this is set to the following:
+
+.. code-block:: Python
+
+  tt70_grouping_filename: "pearl_group_12_1_TT70.cal"
 
 .. _tt88_grouping_filename_pearl_isis-powder-diffraction-ref:
 
 tt88_grouping_filename
 ^^^^^^^^^^^^^^^^^^^^^^
+Determines the name of the grouping cal file which is located
+within top level of the :ref:`calibration_directory_pearl_isis-powder-diffraction-ref`
+if :ref:`tt_mode_pearl_isis-powder-diffraction-ref` is set to **tt88**
+
+The grouping file determines the detector ID to bank mapping to use
+whilst focusing the spectra into banks.
+
+On PEARL this is set to the following:
+
+.. code-block:: Python
+
+  tt88_grouping_filename: "pearl_group_12_1_TT88.cal"
 
 .. _vanadium_absorb_filename_pearl_isis-powder-diffraction-ref:
 
 vanadium_absorb_filename
 ^^^^^^^^^^^^^^^^^^^^^^^^
+Determines the name of the precalculated vanadium absorption 
+correction values to apply when running
+:ref:`create_vanadium_pearl_isis-powder-diffraction-ref`. 
+
+This file must be located within the top level of the 
+:ref:`calibration_directory_pearl_isis-powder-diffraction-ref`
+directory.
+
+On PEARL this is set to the following:
+
+.. code-block:: Python
+
+  vanadium_absorb_filename: "pearl_absorp_sphere_10mm_newinst2_long.nxs"
 
 .. _vanadium_tof_cropping_pearl_isis-powder-diffraction-ref:
 
 vanadium_tof_cropping
 ^^^^^^^^^^^^^^^^^^^^^
+Determines the TOF window to crop all banks to
+within the :ref:`create_vanadium_gem_isis-powder-diffraction-ref`
+method. This is applied after focusing and before a spline is taken.
+
+It is used to remove low counts at the start and end of the vanadium run
+to produce a spline which better matches the data. 
+
+This parameter is stored as a tuple of both values (lower and upper bound). 
+The values **must** have a larger TOF window than the 
+:ref:`focused_cropping_values_gem_isis-powder-diffraction-ref`
+and a smaller window than :ref:`raw_tof_cropping_values_gem_isis-powder-diffraction-ref`.
+
+*Note: The value passed with the*
+:ref:`long_mode_pearl_isis-powder-diffraction-ref` *parameter
+determines the set of values used.*
+
+On PEARL this is set to the following:
+
+.. code-block:: Python
+
+  # Long mode OFF:
+    vanadium_tof_cropping: (1400, 19990)
+  # Long mode ON:
+    vanadium_tof_cropping: (20295, 39993)
