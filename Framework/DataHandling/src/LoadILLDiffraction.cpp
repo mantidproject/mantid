@@ -7,6 +7,7 @@
 #include "MantidDataHandling/H5Util.h"
 #include "MantidGeometry/Instrument/ComponentHelper.h"
 #include "MantidKernel/DateAndTime.h"
+#include "MantidKernel/make_unique.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 
 #include <boost/algorithm/string/predicate.hpp>
@@ -203,11 +204,13 @@ void LoadILLDiffraction::fillStaticInstrumentScan(const NXUInt &data,
   // Assign detector counts
   size_t deadOffset = (m_numberDetectorsRead - m_numberDetectorsActual) / 2;
   for (size_t i = 1; i <= m_numberDetectorsActual; ++i) {
+    auto &spectrum = m_outWorkspace->mutableY(i);
+    auto &errors = m_outWorkspace->mutableE(i);
     for (size_t j = 0; j < m_numberScanPoints; ++j) {
       unsigned int y =
           data(static_cast<int>(j), static_cast<int>(i - 1 + deadOffset));
-      m_outWorkspace->mutableY(i)[j] = y;
-      m_outWorkspace->mutableE(i)[j] = sqrt(y);
+      spectrum[j] = y;
+      errors[j] = sqrt(y);
     }
     m_outWorkspace->mutableX(i) = axis;
   }
@@ -256,7 +259,7 @@ void LoadILLDiffraction::fillDataScanMetaData(const NXDouble &scan) {
     if (m_scanVar[i].axis != 1 &&
         !boost::starts_with(m_scanVar[i].property, "Monitor")) {
       auto property =
-          std::make_unique<TimeSeriesProperty<double>>(m_scanVar[i].name);
+          Kernel::make_unique<TimeSeriesProperty<double>>(m_scanVar[i].name);
       for (size_t j = 0; j < m_numberScanPoints; ++j) {
         property->addValue(absoluteTimes[j],
                            scan(static_cast<int>(i), static_cast<int>(j)));
@@ -329,14 +332,14 @@ LoadILLDiffraction::getDurations(const NXDouble &scan) const {
  */
 std::vector<DateAndTime>
 LoadILLDiffraction::getAbsoluteTimes(const NXDouble &scan) const {
-  std::vector<DateAndTime> times;
+  std::vector<DateAndTime> times; // in units of ns
   std::vector<double> durations = getDurations(scan);
   DateAndTime time = m_startTime;
   times.emplace_back(time);
   size_t timeIndex = 1;
   while (timeIndex < m_numberScanPoints) {
-    time += durations[timeIndex - 1] * 1E9;
-    times.emplace_back(time);
+    time += durations[timeIndex - 1] * 1E9; //from sec to ns
+    times.push_back(time);
     ++timeIndex;
   }
   return times;
