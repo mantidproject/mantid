@@ -213,7 +213,8 @@ void profile(std::vector<double> &Xs, std::vector<double> &Ys,
         continue;
       }
       ySum += y;
-      eSqSum += ws->e(iVert)[iHor] * ws->e(iVert)[iHor];
+      const double e = ws.e(iVert)[iHor];
+      eSqSum += e * e;
       ++n;
     }
     const int nTotal =
