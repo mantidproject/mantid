@@ -2,16 +2,17 @@ from __future__ import (absolute_import, division, print_function)
 
 import os
 
-from isis_powder.routines import common, instrument_settings
+from isis_powder.routines import common, instrument_settings, yaml_parser
 from isis_powder.abstract_inst import AbstractInst
 from isis_powder.polaris_routines import polaris_advanced_config, polaris_algs, polaris_param_mapping
 
 
 class Polaris(AbstractInst):
     def __init__(self, **kwargs):
+        basic_config_dict = yaml_parser.open_yaml_file_as_dictionary(kwargs.get("config_file", None))
         self._inst_settings = instrument_settings.InstrumentSettings(
             param_map=polaris_param_mapping.attr_mapping, adv_conf_dict=polaris_advanced_config.variables,
-            kwargs=kwargs)
+            basic_conf_dict=basic_config_dict, kwargs=kwargs)
 
         super(Polaris, self).__init__(user_name=self._inst_settings.user_name,
                                       calibration_dir=self._inst_settings.calibration_dir,
@@ -87,9 +88,6 @@ class Polaris(AbstractInst):
 
     def _get_input_batching_mode(self):
         return self._inst_settings.input_mode
-
-    def _get_instrument_bin_widths(self):
-        return self._inst_settings.focused_bin_widths
 
     def _get_run_details(self, run_number_string):
         if self._run_details_last_run_number == run_number_string:

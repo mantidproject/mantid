@@ -151,9 +151,8 @@ include_directories ( Framework/HistogramData/inc )
 include_directories ( Framework/Indexing/inc )
 include_directories ( Framework/Geometry/inc )
 include_directories ( Framework/API/inc )
-include_directories ( Framework/Types/inc )
 
-set ( CORE_MANTIDLIBS Kernel HistogramData Indexing Geometry API Types )
+set ( CORE_MANTIDLIBS Kernel HistogramData Indexing Geometry API )
 
 if (ENABLE_MANTIDPLOT)
   # Add a target for all GUI tests

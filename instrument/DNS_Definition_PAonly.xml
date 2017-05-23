@@ -16,9 +16,9 @@
       <handedness val="right" />
     </reference-frame>
   </defaults>
-  <!-- chopper -->
+  <!-- moderator -->
   <component type="moderator">
-    <location z="-0.36325" />
+    <location z="-2.27" />
   </component>
   <type name="moderator" is="Source"></type>
   <!-- monitor -->

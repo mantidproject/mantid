@@ -53,8 +53,7 @@ public:
   MantidMatrixCurve(const QString &name, const QString &wsName, Graph *g,
                     int index, IndexDir indexType, bool err = false,
                     bool distr = false,
-                    GraphOptions::CurveType style = GraphOptions::Unspecified,
-                    bool multipleSpectra = false);
+                    GraphOptions::CurveType style = GraphOptions::Unspecified);
 
   /// More complex constructor setting some defaults for the curve
   MantidMatrixCurve(const QString &wsName, Graph *g, int index,
@@ -130,8 +129,7 @@ private:
   using PlotCurve::draw; // Avoid Intel compiler warning
 
   /// Init the curve
-  void init(Graph *g, bool distr, GraphOptions::CurveType style,
-            bool multipleSpectra = false) override;
+  void init(Graph *g, bool distr, GraphOptions::CurveType style) override;
 
   /// Handles delete notification
   void postDeleteHandle(const std::string &wsName) override {
@@ -159,7 +157,6 @@ private slots:
 private:
   /// Make the curve name
   QString createCurveName(
-      const QString &prefix,
       const boost::shared_ptr<const Mantid::API::MatrixWorkspace> ws);
 
   QString

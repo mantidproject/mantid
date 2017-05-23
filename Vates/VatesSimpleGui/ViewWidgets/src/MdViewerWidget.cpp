@@ -41,6 +41,7 @@
 #if defined(__INTEL_COMPILER)
 #pragma warning disable 1170
 #endif
+#include <pqApplicationCore.h>
 #include <pqActiveObjects.h>
 #include <pqAnimationManager.h>
 #include <pqAnimationScene.h>
@@ -50,32 +51,31 @@
 #include <pqDeleteReaction.h>
 #include <pqLoadDataReaction.h>
 #include <pqObjectBuilder.h>
-#include <pqPVApplicationCore.h>
 #include <pqParaViewBehaviors.h>
-#include <pqPipelineFilter.h>
-#include <pqPipelineRepresentation.h>
 #include <pqPipelineSource.h>
+#include <pqPipelineFilter.h>
+#include <pqPVApplicationCore.h>
 #include <pqRenderView.h>
+#include <pqSettings.h>
 #include <pqServer.h>
 #include <pqServerManagerModel.h>
-#include <pqSettings.h>
 #include <pqStatusBar.h>
 #include <vtkCamera.h>
-#include <vtkCommand.h>
 #include <vtkMathTextUtilities.h>
 #include <vtkPVOrthographicSliceView.h>
 #include <vtkPVXMLElement.h>
 #include <vtkPVXMLParser.h>
 #include <vtkSMDoubleVectorProperty.h>
 #include <vtkSMPropertyHelper.h>
-#include <vtkSMProxy.h>
 #include <vtkSMProxyManager.h>
+#include <vtkSMProxy.h>
 #include <vtkSMReaderFactory.h>
 #include <vtkSMRenderViewProxy.h>
 #include <vtkSMSessionProxyManager.h>
 #include <vtkSMSourceProxy.h>
 #include <vtkSMViewProxy.h>
 #include <vtksys/SystemTools.hxx>
+#include <pqPipelineRepresentation.h>
 
 // Used for plugin mode
 #include <pqAlwaysConnectedBehavior.h>
@@ -693,7 +693,6 @@ void MdViewerWidget::renderWorkspace(QString workspaceName, int workspaceType,
   //             after the window is started again.
   if (this->currentView->getNumSources() == 0) {
     this->setColorForBackground();
-    this->setVisibleAxesColors();
     this->setColorMap();
 
     if (VatesViewerInterface::PEAKS != workspaceType) {
@@ -714,7 +713,7 @@ void MdViewerWidget::renderWorkspace(QString workspaceName, int workspaceType,
     this->useCurrentColorSettings = true;
   }
 
-  QString sourcePlugin;
+  QString sourcePlugin = "";
   if (VatesViewerInterface::PEAKS == workspaceType) {
     sourcePlugin = "Peaks Source";
   } else if (VatesViewerInterface::MDHW == workspaceType) {
@@ -1140,7 +1139,6 @@ std::string MdViewerWidget::getWindowType() { return "VSIWindow"; }
 void MdViewerWidget::renderAndFinalSetup() {
   Mantid::VATES::ColorScaleLockGuard colorScaleLockGuard(&m_colorScaleLock);
   this->setColorForBackground();
-  this->setVisibleAxesColors();
   this->currentView->render();
   this->setColorMap();
   this->currentView->setColorsForView(this->ui.colorSelectionWidget);
@@ -1156,20 +1154,6 @@ void MdViewerWidget::renderAndFinalSetup() {
  */
 void MdViewerWidget::setColorForBackground() {
   this->currentView->setColorForBackground(this->useCurrentColorSettings);
-}
-
-void MdViewerWidget::setVisibleAxesColors() {
-  if (mdSettings.getUserSettingAutoColorAxes()) {
-    // Only add the observer once.
-    if (!m_axesTag) {
-      m_axesTag = this->currentView->setVisibleAxesColors();
-    }
-  } else if (m_axesTag) {
-    this->currentView->getView()
-        ->getViewProxy()
-        ->GetProperty("Background")
-        ->RemoveObserver(*m_axesTag);
-  }
 }
 
 /**
@@ -1249,7 +1233,6 @@ void MdViewerWidget::switchViews(ModeControlWidget::Views v) {
   restoreViewState(this->currentView, v);
   this->currentView->setColorsForView(this->ui.colorSelectionWidget);
   this->setColorForBackground();
-  this->setVisibleAxesColors();
 
   this->currentView->checkViewOnSwitch();
   this->updateAppState();

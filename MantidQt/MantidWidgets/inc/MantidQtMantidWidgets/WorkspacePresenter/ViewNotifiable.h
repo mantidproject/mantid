@@ -52,7 +52,6 @@ public:
     ShowInstrumentView,
     PlotSpectrum,
     PlotSpectrumWithErrors,
-    PlotSpectrumAdvanced,
     ShowColourFillPlot,
     ShowDetectorsTable,
     ShowBoxDataTable,
@@ -68,6 +67,8 @@ public:
     ConvertToMatrixWorkspace,
     ConvertMDHistoToMatrixWorkspace,
     ClearUBMatrix,
+    ShowSurfacePlot,
+    ShowContourPlot,
     RefreshWorkspaces
   };
 

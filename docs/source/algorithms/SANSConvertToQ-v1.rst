@@ -107,9 +107,6 @@ The elements are:
 
 Note that the momentum transfer resolution calculation is only applicable for 1D reductions.
 
-**Note that these settings should be only populated via the GUI or the Python Interface of ISIS SANS.**
-
-
 .. categories::
 
 .. sourcelink::

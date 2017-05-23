@@ -11,10 +11,9 @@
 #include "MantidVatesSimpleGuiViewWidgets/WidgetDllOption.h"
 #include "MantidVatesAPI/ColorScaleGuard.h"
 
-#include "vtkSmartPointer.h"
-
-#include "boost/optional.hpp"
 #include "boost/shared_ptr.hpp"
+
+#include <vtkSmartPointer.h>
 
 // forward declaration of ParaQ classes
 class pqApplicationSettingsReaction;
@@ -103,7 +102,7 @@ public:
   std::string getWindowType() override;
 
 public slots:
-  /// See MantidQt::API::VatesViewerInterface
+  /// Seet MantidQt::API::VatesViewerInterface
   void shutdown() override;
 
 protected slots:
@@ -149,7 +148,6 @@ protected:
 
 private:
   Q_DISABLE_COPY(MdViewerWidget)
-  boost::optional<unsigned long> m_axesTag;
   QString m_widgetName;
 
   ViewBase *currentView; ///< Holder for the current (shown) view
@@ -257,8 +255,6 @@ private:
                                         QStringList &wsNames);
   /// Set up the default color for the background of the view.
   void setColorForBackground();
-  /// Sets axes colors that are visible against the background.
-  void setVisibleAxesColors();
   /// Set the color map
   void setColorMap();
   /// Render the original workspace

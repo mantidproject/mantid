@@ -9,7 +9,7 @@ from isis_powder.polaris_routines import polaris_advanced_config
 
 
 def calculate_absorb_corrections(ws_to_correct, multiple_scattering):
-    mantid.MaskDetectors(ws_to_correct, SpectraList=list(range(1, 55)))
+    mantid.MaskDetectors(ws_to_correct, SpectraList=list(range(0, 55)))
 
     absorb_dict = polaris_advanced_config.absorption_correction_params
     ws_to_correct = absorb_corrections.run_cylinder_absorb_corrections(

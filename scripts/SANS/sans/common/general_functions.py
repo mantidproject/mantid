@@ -23,10 +23,10 @@ def get_log_value(run, log_name, log_type):
 
     There are two options here. Either the log is a scalar or a vector. In the case of a scalar there is not much
     left to do. In the case of a vector we select the first element whose time_stamp is after the start time of the run
-    :param run: a Run object.
-    :param log_name: the name of the log entry
-    :param log_type: the expected type fo the log entry
-    :return: the log entry
+    @param run: a Run object.
+    @param log_name: the name of the log entry
+    @param log_type: the expected type fo the log entry
+    @return: the log entry
     """
     try:
         # Scalar case
@@ -122,10 +122,10 @@ def create_child_algorithm(parent_alg, name, **kwargs):
     """
     Creates a child algorithm from a parent algorithm
 
-    :param parent_alg: a handle to the parent algorithm
-    :param name: the name of the child algorithm
-    :param kwargs: a argument dict
-    :return: the child algorithm
+    @param parent_alg: a handle to the parent algorithm
+    @param name: the name of the child algorithm
+    @param kwargs: a argument dict
+    @return: the child algorithm
     """
     if parent_alg:
         alg = parent_alg.createChildAlgorithm(name)
@@ -142,8 +142,8 @@ def get_input_workspace_as_copy_if_not_same_as_output_workspace(alg):
     This function checks if the input workspace is the same as the output workspace, if so then it returns the
     workspace else it creates a copy of the input in order for it to be consumed.
 
-    :param alg: a handle to the algorithm which has a InputWorkspace property and a OutputWorkspace property
-    :return: a workspace
+    @param alg: a handle to the algorithm which has a InputWorkspace property and a OutputWorkspace property
+    @return: a workspace
     """
     def _clone_input(_ws):
         clone_name = "CloneWorkspace"
@@ -255,7 +255,7 @@ def get_ads_workspace_references():
     """
     Gets a list of handles of available workspaces on the ADS
 
-    :return: the workspaces on the ADS.
+    @return: the workspaces on the ADS.
     """
     for workspace_name in AnalysisDataService.getObjectNames():
         yield AnalysisDataService.retrieve(workspace_name)
@@ -274,8 +274,8 @@ def convert_bank_name_to_detector_type_isis(detector_name):
             but also allowed main
     LARMOR: DetectorBench      -> LAB
 
-    :param detector_name: a string with a valid detector name
-    :return: a detector type depending on the input string, or a runtime exception.
+    @param detector_name: a string with a valid detector name
+    @return: a detector type depending on the input string, or a runtime exception.
     """
     detector_name = detector_name.upper()
     detector_name = detector_name.strip()
@@ -300,8 +300,8 @@ def is_part_of_reduced_output_workspace_group(state):
 
     Note: that this is a hacky solution to for the return value of WavRangeReduction in ISISCommandInterface.
           Improve this!!! (Maybe by getting rid of the return value of WavRangeReduction)
-    :param state: a state object.
-    :return: True if the reduced output is a workspace group else false
+    @param state: a state object.
+    @return: True if the reduced output is a workspace group else false
     """
     # 1. Multi-period input
     data_info = state.data
@@ -426,11 +426,11 @@ def get_bins_for_rebin_setting(min_value, max_value, step_value, step_type):
     """
     Creates a list of bins for the rebin setting.
 
-    :param min_value: the minimum value
-    :param max_value: the maximum value
-    :param step_value: the step value
-    :param step_type: the step type, ie if linear or logarithmic
-    :return: a list of bin values
+    @param min_value: the minimum value
+    @param max_value: the maximum value
+    @param step_value: the step value
+    @param step_type: the step type, ie if linear or logarithmic
+    @return: a list of bin values
     """
     lower_bound = min_value
     bins = []
@@ -462,11 +462,11 @@ def get_ranges_for_rebin_setting(min_value, max_value, step_value, step_type):
     """
     Creates two lists of lower and upper bounds for the
 
-    :param min_value: the minimum value
-    :param max_value: the maximum value
-    :param step_value: the step value
-    :param step_type: the step type, ie if linear or logarithmic
-    :return: two ranges lists, one for the lower and one for the upper bounds.
+    @param min_value: the minimum value
+    @param max_value: the maximum value
+    @param step_value: the step value
+    @param step_type: the step type, ie if linear or logarithmic
+    @return: two ranges lists, one for the lower and one for the upper bounds.
     """
     bins = get_bins_for_rebin_setting(min_value, max_value, step_value, step_type)
     return get_range_lists_from_bin_list(bins)
@@ -476,8 +476,8 @@ def get_ranges_for_rebin_array(rebin_array):
     """
     Converts a rebin string into min, step (+ step_type), max
 
-    :param rebin_array: a simple rebin array, ie min, step, max
-    :return: two ranges lists, one for the lower and one for the upper bounds.
+    @param rebin_array: a simple rebin array, ie min, step, max
+    @return: two ranges lists, one for the lower and one for the upper bounds.
     """
     min_value = rebin_array[0]
     step_value = rebin_array[1]
@@ -633,8 +633,8 @@ def get_base_name_from_multi_period_name(workspace_name):
     """
     Gets a base name from a multiperiod name. The multiperiod name is NAME_xxx and the base name is NAME
 
-    :param workspace_name: a workspace name string
-    :return: the base name
+    @param workspace_name: a workspace name string
+    @return: the base name
     """
     multi_period_workspace_form = "_[0-9]+$"
     if re.search(multi_period_workspace_form, workspace_name) is not None:
@@ -650,8 +650,8 @@ def sanitise_instrument_name(instrument_name):
 
     Unfortunately the instrument names are sometimes truncated or extended. This is possible since they are strings
     and not types.
-    :param instrument_name: a instrument name string
-    :return: a sanitises instrument name string
+    @param instrument_name: a instrument name string
+    @return: a sanitises instrument name string
     """
     instrument_name_upper = instrument_name.upper()
     if re.search(LOQ, instrument_name_upper):
@@ -761,8 +761,8 @@ def does_can_workspace_exist_on_ads(can_workspace):
     """
     Checks if a can workspace already exists on the ADS, based on the stored hash
 
-    :param can_workspace: a handle to the can workspace
-    :return: True if the workspace exists on the ADS else False
+    @param can_workspace: a handle to the can workspace
+    @return: True if the workspace exists on the ADS else False
     """
     if not has_tag(REDUCED_CAN_TAG, can_workspace):
         return False

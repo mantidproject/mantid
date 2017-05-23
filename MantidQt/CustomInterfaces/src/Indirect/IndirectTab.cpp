@@ -259,7 +259,7 @@ void IndirectTab::plotSpectrum(const QStringList &workspaceNames, int wsIndex) {
   pyInput += workspaceNames.join("','");
   pyInput += "'], ";
   pyInput += QString::number(wsIndex);
-  pyInput += ")\n";
+  pyInput += ", error_bars = True)\n";
 
   m_pythonRunner.runPythonCode(pyInput);
 }
@@ -303,7 +303,7 @@ void IndirectTab::plotSpectrum(const QStringList &workspaceNames, int specStart,
   pyInput += QString::number(specStart);
   pyInput += ",";
   pyInput += QString::number(specEnd + 1);
-  pyInput += ")))\n";
+  pyInput += ")), error_bars = True)\n";
 
   m_pythonRunner.runPythonCode(pyInput);
 }
@@ -355,7 +355,7 @@ void IndirectTab::plotSpectra(const QStringList &workspaceNames,
     pyInput += " ,";
     pyInput += QString::number(wsIndices[i]);
   }
-  pyInput += "])\n";
+  pyInput += "], error_bars = True)\n";
   m_pythonRunner.runPythonCode(pyInput);
 }
 
@@ -418,7 +418,7 @@ void IndirectTab::plotTimeBin(const QStringList &workspaceNames, int binIndex) {
   pyInput += workspaceNames.join("','");
   pyInput += "'], ";
   pyInput += QString::number(binIndex);
-  pyInput += ")\n";
+  pyInput += ", error_bars=True)\n";
 
   m_pythonRunner.runPythonCode(pyInput);
 }

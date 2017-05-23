@@ -66,14 +66,12 @@ class ISISPowderCommonTest(unittest.TestCase):
             common.crop_banks_using_crop_list(bank_list=bank_list[1:], crop_values_list=cropping_value_list)
 
         # Check we can crop a single workspace from the list
-        cropped_single_ws_list = common.crop_banks_using_crop_list(bank_list=[bank_list[0]],
-                                                                   crop_values_list=[cropping_value])
+        cropped_single_ws_list = common.crop_banks_using_crop_list(bank_list=[bank_list[0]], crop_values_list=[cropping_value])
         self.assertEqual(cropped_single_ws_list[0].blocksize(), expected_number_of_bins)
         mantid.DeleteWorkspace(Workspace=cropped_single_ws_list[0])
 
         # Check we can crop a whole list
-        cropped_ws_list = common.crop_banks_using_crop_list(bank_list=bank_list[1:],
-                                                            crop_values_list=cropping_value_list[1:])
+        cropped_ws_list = common.crop_banks_using_crop_list(bank_list=bank_list[1:], crop_values_list=cropping_value_list[1:])
         for ws in cropped_ws_list[1:]:
             self.assertEqual(ws.blocksize(), expected_number_of_bins)
             mantid.DeleteWorkspace(Workspace=ws)
@@ -162,7 +160,7 @@ class ISISPowderCommonTest(unittest.TestCase):
 
     def test_extract_ws_spectra(self):
         number_of_expected_banks = 5
-        ws_to_split = mantid.CreateSampleWorkspace(XMin=0, XMax=2, BankPixelWidth=1,
+        ws_to_split = mantid.CreateSampleWorkspace(XMin=0, XMax=1, BankPixelWidth=1,
                                                    NumBanks=number_of_expected_banks)
         input_name = ws_to_split.getName()
 
@@ -244,125 +242,19 @@ class ISISPowderCommonTest(unittest.TestCase):
         with assertRaisesRegex(self, ValueError, run_input_sting):
             common.generate_run_numbers(run_number_string=run_input_sting)
 
-    def test_rebin_bin_boundary_defaults(self):
-        ws = mantid.CreateSampleWorkspace(OutputWorkspace='test_rebin_bin_boundary_default',
-                                          Function='Flat background', NumBanks=1, BankPixelWidth=1, XMax=10, BinWidth=1)
-        new_bin_width = 0.5
-        # Originally had bins at 1 unit each. So binning of 0.5 should give us 2n bins back
-        original_number_bins = ws.getNumberBins()
-        original_first_x_val = ws.readX(0)[0]
-        original_last_x_val = ws.readX(0)[-1]
-
-        expected_bins = original_number_bins * 2
-
-        ws = common.rebin_workspace(workspace=ws, new_bin_width=new_bin_width)
-        self.assertEqual(ws.getNumberBins(), expected_bins)
-
-        # Check bin boundaries were preserved
-        self.assertEqual(ws.readX(0)[0], original_first_x_val)
-        self.assertEqual(ws.readX(0)[-1], original_last_x_val)
-
-        mantid.DeleteWorkspace(ws)
-
-    def test_rebin_bin_boundary_specified(self):
-        ws = mantid.CreateSampleWorkspace(OutputWorkspace='test_rebin_bin_boundary_specified',
-                                          Function='Flat background', NumBanks=1, BankPixelWidth=1, XMax=10, BinWidth=1)
-        # Originally we had 10 bins from 0, 10. Resize from 0, 0.5, 5 so we should have the same number of output
-        # bins with different boundaries
-        new_bin_width = 0.5
-        original_number_bins = ws.getNumberBins()
-
-        expected_start_x = 1
-        expected_end_x = 6
-
-        ws = common.rebin_workspace(workspace=ws, new_bin_width=new_bin_width,
-                                    start_x=expected_start_x, end_x=expected_end_x)
-
-        # Check number of bins is the same as we halved the bin width and interval so we should have n bins
-        self.assertEqual(ws.getNumberBins(), original_number_bins)
-
-        # Check bin boundaries were changed
-        self.assertEqual(ws.readX(0)[0], expected_start_x)
-        self.assertEqual(ws.readX(0)[-1], expected_end_x)
-
-        mantid.DeleteWorkspace(ws)
-
-    def test_rebin_workspace_list_defaults(self):
-        new_bin_width = 0.5
-        number_of_ws = 10
-
-        ws_bin_widths = [new_bin_width] * number_of_ws
-        ws_list = []
-        for i in range(number_of_ws):
-            out_name = "test_rebin_workspace_list_defaults_" + str(i)
-            ws_list.append(mantid.CreateSampleWorkspace(OutputWorkspace=out_name, Function='Flat background',
-                                                        NumBanks=1, BankPixelWidth=1, XMax=10, BinWidth=1))
-        # What if the item passed in is not a list
-        err_msg_not_list = "was not a list"
-        with assertRaisesRegex(self, RuntimeError, err_msg_not_list):
-            common.rebin_workspace_list(workspace_list=ws_list, bin_width_list=None)
-
-        with assertRaisesRegex(self, RuntimeError, err_msg_not_list):
-            common.rebin_workspace_list(workspace_list=None, bin_width_list=[])
-
-        # What about if the lists aren't the same length
-        with assertRaisesRegex(self, ValueError, "does not match the number of banks"):
-            incorrect_number_bin_widths = [1] * (number_of_ws - 1)
-            common.rebin_workspace_list(workspace_list=ws_list, bin_width_list=incorrect_number_bin_widths)
-
-        # Does it return all the workspaces as a list - another unit test checks the implementation
-        output = common.rebin_workspace_list(workspace_list=ws_list, bin_width_list=ws_bin_widths)
-        self.assertEqual(len(output), number_of_ws)
-
-        for ws in output:
-            mantid.DeleteWorkspace(ws)
-
-    def test_rebin_workspace_list_x_start_end(self):
-        new_start_x = 1
-        new_end_x = 5
-        new_bin_width = 0.5
-        number_of_ws = 10
-
-        ws_bin_widths = [new_bin_width] * number_of_ws
-        start_x_list = [new_start_x] * number_of_ws
-        end_x_list = [new_end_x] * number_of_ws
-
-        ws_list = []
-        for i in range(number_of_ws):
-            out_name = "test_rebin_workspace_list_defaults_" + str(i)
-            ws_list.append(mantid.CreateSampleWorkspace(OutputWorkspace=out_name, Function='Flat background',
-                                                        NumBanks=1, BankPixelWidth=1, XMax=10, BinWidth=1))
-
-        # Are the lengths checked
-        incorrect_length = [1] * (number_of_ws - 1)
-        with assertRaisesRegex(self, ValueError, "The number of starting bin values"):
-            common.rebin_workspace_list(workspace_list=ws_list, bin_width_list=ws_bin_widths,
-                                        start_x_list=incorrect_length, end_x_list=end_x_list)
-        with assertRaisesRegex(self, ValueError, "The number of ending bin values"):
-            common.rebin_workspace_list(workspace_list=ws_list, bin_width_list=ws_bin_widths,
-                                        start_x_list=start_x_list, end_x_list=incorrect_length)
-
-        output_list = common.rebin_workspace_list(workspace_list=ws_list, bin_width_list=ws_bin_widths,
-                                                  start_x_list=start_x_list, end_x_list=end_x_list)
-        self.assertEqual(len(output_list), number_of_ws)
-        for ws in output_list:
-            self.assertEqual(ws.readX(0)[0], new_start_x)
-            self.assertEqual(ws.readX(0)[-1], new_end_x)
-            mantid.DeleteWorkspace(ws)
-
     def test_remove_intermediate_workspace(self):
         ws_list = []
         ws_names_list = []
 
         ws_single_name = "remove_intermediate_ws-single"
         ws_single = mantid.CreateSampleWorkspace(OutputWorkspace=ws_single_name, NumBanks=1, BankPixelWidth=1,
-                                                 XMax=10, BinWidth=1)
+                                                 XMax=2, BinWidth=1)
 
         for i in range(0, 3):
             out_name = "remove_intermediate_ws_" + str(i)
             ws_names_list.append(out_name)
             ws_list.append(mantid.CreateSampleWorkspace(OutputWorkspace=out_name, NumBanks=1, BankPixelWidth=1,
-                                                        XMax=10, BinWidth=1))
+                                                        XMax=2, BinWidth=1))
 
         # Check single workspaces are removed
         self.assertEqual(True, mantid.mtd.doesExist(ws_single_name))
@@ -393,31 +285,6 @@ class ISISPowderCommonTest(unittest.TestCase):
         common.run_normalise_by_current(ws)
         self.assertAlmostEqual(expected_value, ws.dataY(0)[0], delta=1e-8)
 
-    def test_subtract_summed_runs(self):
-        # Load a vanadium workspace for this test
-        sample_empty_number = "100"
-        ws_file_name = "POL" + sample_empty_number
-        original_ws = mantid.Load(ws_file_name)
-        no_scale_ws = mantid.CloneWorkspace(InputWorkspace=original_ws, OutputWorkspace="test_subtract_sample_empty_ws")
-
-        # Subtracting from self should equal 0
-        returned_ws = common.subtract_summed_runs(ws_to_correct=no_scale_ws, instrument=MockInstrument(),
-                                                  empty_sample_ws_string=sample_empty_number)
-        y_values = returned_ws.readY(0)
-        for i in range(0, returned_ws.blocksize()):
-            self.assertAlmostEqual(y_values[i], 0)
-
-        # Check what happens when we specify scale as a half
-        scaled_ws = common.subtract_summed_runs(ws_to_correct=original_ws, instrument=MockInstrument(),
-                                                scale_factor=0.75, empty_sample_ws_string=sample_empty_number)
-        scaled_y_values = scaled_ws.readY(0)
-        self.assertAlmostEqual(scaled_y_values[2], 0.20257424)
-        self.assertAlmostEqual(scaled_y_values[4], 0.31700152)
-        self.assertAlmostEqual(scaled_y_values[7], 0.35193970)
-
-        mantid.DeleteWorkspace(returned_ws)
-        mantid.DeleteWorkspace(scaled_ws)
-
     def test_spline_workspaces(self):
         ws_list = []
         for i in range(1, 4):
@@ -435,17 +302,6 @@ class ISISPowderCommonTest(unittest.TestCase):
             mantid.DeleteWorkspace(input_ws)
             mantid.DeleteWorkspace(splined_ws)
 
-
-class MockInstrument(object):
-    def _get_run_details(self, run_number_string):
-        return None
-
-    @staticmethod
-    def _generate_input_file_name(run_number):
-        return "POL" + str(run_number)
-
-    def _normalise_ws_current(self, ws_to_correct, run_details=None):
-        return ws_to_correct
 
 if __name__ == "__main__":
     unittest.main()

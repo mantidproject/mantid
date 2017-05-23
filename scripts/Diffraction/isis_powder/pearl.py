@@ -2,7 +2,7 @@ from __future__ import (absolute_import, division, print_function)
 
 import mantid.simpleapi as mantid
 
-from isis_powder.routines import common, instrument_settings
+from isis_powder.routines import common, instrument_settings, yaml_parser
 from isis_powder.abstract_inst import AbstractInst
 from isis_powder.pearl_routines import pearl_algs, pearl_output, pearl_advanced_config, pearl_param_mapping
 
@@ -10,9 +10,11 @@ from isis_powder.pearl_routines import pearl_algs, pearl_output, pearl_advanced_
 class Pearl(AbstractInst):
 
     def __init__(self, **kwargs):
+        basic_config_dict = yaml_parser.open_yaml_file_as_dictionary(kwargs.get("config_file", None))
+
         self._inst_settings = instrument_settings.InstrumentSettings(
            param_map=pearl_param_mapping.attr_mapping, adv_conf_dict=pearl_advanced_config.get_all_adv_variables(),
-           kwargs=kwargs)
+           basic_conf_dict=basic_config_dict, kwargs=kwargs)
 
         super(Pearl, self).__init__(user_name=self._inst_settings.user_name,
                                     calibration_dir=self._inst_settings.calibration_dir,

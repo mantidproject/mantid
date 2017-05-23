@@ -25,8 +25,7 @@ class StateAdjustmentFiles(StateBase):
 
     def validate(self):
         is_invalid = {}
-        # TODO: It would be nice to have a typed parameter for files which checks if a file input exists or not.
-        #       This is very low priority, but would be nice to have.
+        # TODO if a file was specified then make sure that its existence is checked.
 
         if is_invalid:
             raise ValueError("StateAdjustmentFiles: The provided inputs are illegal. "

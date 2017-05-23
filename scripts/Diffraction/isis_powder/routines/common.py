@@ -257,64 +257,6 @@ def load_current_normalised_ws_list(run_number_string, instrument, input_batchin
     return normalised_ws_list
 
 
-def rebin_workspace(workspace, new_bin_width, start_x=None, end_x=None):
-    """
-    Rebins the specified workspace with the specified new bin width. Allows the user
-    to also set optionally the first and final bin boundaries of the histogram too.
-    If the bin boundaries are not set they are preserved from the original workspace
-    :param workspace: The workspace to rebin
-    :param new_bin_width: The new bin width to use across the workspace
-    :param start_x: (Optional) The first x bin to crop to
-    :param end_x: (Optional) The final x bin to crop to
-    :return: The rebinned workspace
-    """
-
-    # Find the starting and ending bin boundaries if they were not set
-    if start_x is None:
-        start_x = workspace.readX(0)[0]
-    if end_x is None:
-        end_x = workspace.readX(0)[-1]
-
-    rebin_string = str(start_x) + ',' + str(new_bin_width) + ',' + str(end_x)
-    workspace = mantid.Rebin(InputWorkspace=workspace, OutputWorkspace=workspace, Params=rebin_string)
-    return workspace
-
-
-def rebin_workspace_list(workspace_list, bin_width_list, start_x_list=None, end_x_list=None):
-    """
-    Rebins a list of workspaces with the specified bin widths in the list provided.
-    The number of bin widths and workspaces in the list must match. Additionally if
-    the optional parameters for start_x_list or end_x_list are provided these must
-    have the same length too.
-    :param workspace_list: The list of workspaces to rebin in place
-    :param bin_width_list: The list of new bin widths to apply to each workspace
-    :param start_x_list: The list of starting x boundaries to rebin to
-    :param end_x_list: The list of ending x boundaries to rebin to
-    :return: List of rebinned workspace
-    """
-    if not isinstance(workspace_list, list) or not isinstance(bin_width_list, list):
-        raise RuntimeError("One of the types passed to rebin_workspace_list was not a list")
-
-    ws_list_len = len(workspace_list)
-    if ws_list_len != len(bin_width_list):
-        raise ValueError("The number of bin widths found to rebin to does not match the number of banks")
-    if start_x_list and len(start_x_list) != ws_list_len:
-        raise ValueError("The number of starting bin values does not match the number of banks")
-    if end_x_list and len(end_x_list) != ws_list_len:
-        raise ValueError("The number of ending bin values does not match the number of banks")
-
-    # Create a list of None types of equal length to make using zip iterator easy
-    start_x_list = [None] * ws_list_len if start_x_list is None else start_x_list
-    end_x_list = [None] * ws_list_len if end_x_list is None else end_x_list
-
-    output_list = []
-    for ws, bin_width, start_x, end_x in zip(workspace_list, bin_width_list, start_x_list, end_x_list):
-        output_list.append(rebin_workspace(workspace=ws, new_bin_width=bin_width,
-                                           start_x=start_x, end_x=end_x))
-
-    return output_list
-
-
 def remove_intermediate_workspace(workspaces):
     """
     Removes the specified workspace(s) from the ADS. Can accept lists of workspaces. It
@@ -377,7 +319,7 @@ def spline_workspaces(focused_vanadium_spectra, num_splines):
     return splined_ws_list
 
 
-def subtract_summed_runs(ws_to_correct, empty_sample_ws_string, instrument, scale_factor=None):
+def subtract_summed_runs(ws_to_correct, empty_sample_ws_string, instrument):
     """
     Loads the list of empty runs specified by the empty_sample_ws_string and subtracts
     them from the workspace specified. Returns the subtracted workspace.
@@ -386,18 +328,11 @@ def subtract_summed_runs(ws_to_correct, empty_sample_ws_string, instrument, scal
     :param instrument: The instrument object these runs belong to
     :return: The workspace with the empty runs subtracted
     """
-    # If an empty string was not specified just return to skip this step
-    if empty_sample_ws_string is None:
-        return ws_to_correct
-
-    empty_sample = load_current_normalised_ws_list(run_number_string=empty_sample_ws_string, instrument=instrument,
-                                                   input_batching=INPUT_BATCHING.Summed)
-    empty_sample = empty_sample[0]
-    if scale_factor:
-        empty_sample = mantid.Scale(InputWorkspace=empty_sample, OutputWorkspace=empty_sample, Factor=scale_factor,
-                                    Operation="Multiply")
-    mantid.Minus(LHSWorkspace=ws_to_correct, RHSWorkspace=empty_sample, OutputWorkspace=ws_to_correct)
-    remove_intermediate_workspace(empty_sample)
+    if empty_sample_ws_string:
+        empty_sample = load_current_normalised_ws_list(run_number_string=empty_sample_ws_string, instrument=instrument,
+                                                       input_batching=INPUT_BATCHING.Summed)
+        mantid.Minus(LHSWorkspace=ws_to_correct, RHSWorkspace=empty_sample[0], OutputWorkspace=ws_to_correct)
+        remove_intermediate_workspace(empty_sample)
 
     return ws_to_correct
 
