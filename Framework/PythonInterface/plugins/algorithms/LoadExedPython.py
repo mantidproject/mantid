@@ -24,12 +24,12 @@ def read_file(fn):
         if line.find("=")>0:
             line_lst=line.split('=')
             if len(line_lst)==2:
-              parm_val=line_lst[1].strip()
-              if (parm_val.isdigit())&(line_lst[0].find('Run_Number')<0):
+                parm_val=line_lst[1].strip()
+                if (parm_val.isdigit())&(line_lst[0].find('Run_Number')<0):
                     parm_val=eval(parm_val)
-              parms_dict[line_lst[0].strip()]=parm_val
+                parms_dict[line_lst[0].strip()]=parm_val
             if line.find("Comment")>-1:
-               parms_dict['Comment']=line.strip('Comment =')
+                parms_dict['Comment']=line.strip('Comment =')
         if line.find("Following are binary data")>0:
             header=False
             while line.find("DATA=")<0:
@@ -145,7 +145,7 @@ class LoadEXED(PythonAlgorithm):
         #set detetector IDs
         for i in range(nrows):
     		s = ws.getSpectrum(i).setDetectorID(det_udet[i])
-            
+
         #load idf
 
         if (self.fxml == ""):
