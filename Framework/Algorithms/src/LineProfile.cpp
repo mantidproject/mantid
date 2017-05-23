@@ -217,8 +217,7 @@ void profile(std::vector<double> &Xs, std::vector<double> &Ys,
       eSqSum += e * e;
       ++n;
     }
-    const int nTotal =
-        static_cast<int>(limits.widthEnd) - static_cast<int>(limits.widthStart);
+    const size_t nTotal = limits.widthEnd - limits.widthStart;
     Ys[i - limits.lineStart] =
         n == 0 ? std::nan("") : modeFunction(ySum, n, nTotal);
     const double e = modeFunction(std::sqrt(eSqSum), n, nTotal);
@@ -235,8 +234,8 @@ void profile(std::vector<double> &Xs, std::vector<double> &Ys,
  * @param n Number of summed points.
  * @return The average.
  */
-double averageMode(const double sum, const int n, const int) noexcept {
-  return sum / n;
+double averageMode(const double sum, const size_t n, const size_t) noexcept {
+  return sum / static_cast<double>(n);
 }
 
 /**
@@ -247,7 +246,7 @@ double averageMode(const double sum, const int n, const int) noexcept {
  * @param nTot Total number of possible points, including NaNs and infs.
  * @return The weigthed sum.
  */
-double sumMode(const double sum, const int n, const int nTot) noexcept {
+double sumMode(const double sum, const size_t n, const size_t nTot) noexcept {
   return static_cast<double>(nTot) / static_cast<double>(n) * sum;
 }
 
