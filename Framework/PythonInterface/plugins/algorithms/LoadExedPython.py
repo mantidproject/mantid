@@ -141,12 +141,11 @@ class LoadEXED(PythonAlgorithm):
         # fix the x values for the monitor
         for i in range(nrows-2,nrows):
             ws.setX(i,xdata_mon)
-
         print ("set detector IDs")
-    	#set detetector IDs
-    	for i in range(nrows):
+        #set detetector IDs
+        for i in range(nrows):
     		s = ws.getSpectrum(i).setDetectorID(det_udet[i])
-
+            
         #load idf
 
         if (self.fxml == ""):
