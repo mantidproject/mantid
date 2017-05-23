@@ -95,18 +95,18 @@ struct IndexLimits {
  * @param box Line profile constraints.
  * @param dir Line profile orientation.
  */
-void setAxesAndUnits(const Workspace2D_sptr &outWS,
-                     const MatrixWorkspace_const_sptr &ws, const Box &box,
+void setAxesAndUnits(Workspace2D &outWS,
+                     const MatrixWorkspace &ws, const Box &box,
                      const LineDirection dir) {
   // Y units.
-  outWS->setYUnit(ws->YUnit());
-  outWS->setYUnitLabel(ws->YUnitLabel());
+  outWS.setYUnit(ws.YUnit());
+  outWS.setYUnitLabel(ws.YUnitLabel());
   // Horizontal axis.
   auto axisIndex = dir == LineDirection::horizontal ? 0 : 1;
-  if (ws->getAxis(axisIndex)->isSpectra()) {
-    outWS->getAxis(axisIndex)->setUnit("Empty");
+  if (ws.getAxis(axisIndex)->isSpectra()) {
+    outWS.getAxis(axisIndex)->setUnit("Empty");
   } else {
-    outWS->getAxis(0)->setUnit(ws->getAxis(axisIndex)->unit()->unitID());
+    outWS.getAxis(0)->setUnit(ws.getAxis(axisIndex)->unit()->unitID());
   }
   // Vertical axis. We'll use bin edges set to Centre +/- HalfWidth.
   std::vector<double> vertBins(2);
@@ -114,12 +114,12 @@ void setAxesAndUnits(const Workspace2D_sptr &outWS,
   vertBins.back() = dir == LineDirection::horizontal ? box.bottom : box.right;
   auto outVertAxis = make_unique<BinEdgeAxis>(vertBins);
   axisIndex = dir == LineDirection::horizontal ? 1 : 0;
-  if (ws->getAxis(axisIndex)->isSpectra()) {
+  if (ws.getAxis(axisIndex)->isSpectra()) {
     outVertAxis->setUnit("Empty");
   } else {
-    outVertAxis->setUnit(ws->getAxis(axisIndex)->unit()->unitID());
+    outVertAxis->setUnit(ws.getAxis(axisIndex)->unit()->unitID());
   }
-  outWS->replaceAxis(1, outVertAxis.release());
+  outWS.replaceAxis(1, outVertAxis.release());
 }
 
 /**
@@ -420,7 +420,7 @@ void LineProfile::exec() {
   actualBounds.bottom = verticalBins[vertEnd];
   actualBounds.left = horizontalBins[horStart];
   actualBounds.right = horizontalBins[horEnd];
-  setAxesAndUnits(outWS, ws, actualBounds, dir);
+  setAxesAndUnits(*outWS, *ws, actualBounds, dir);
   setProperty(PropertyNames::OUTPUT_WORKSPACE, outWS);
 }
 
