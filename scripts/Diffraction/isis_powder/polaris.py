@@ -18,10 +18,7 @@ class Polaris(AbstractInst):
                                       output_dir=self._inst_settings.output_dir, inst_prefix="POL")
 
         # Hold the last dictionary later to avoid us having to keep parsing the YAML
-        self._run_details_last_run_number = None
-        self._run_details_cached_obj = None
-
-        self._ads_workaround = 0
+        self._run_details_cached_obj = {}
 
     def focus(self, **kwargs):
         self._inst_settings.update_attributes(kwargs=kwargs)
@@ -92,17 +89,15 @@ class Polaris(AbstractInst):
         return self._inst_settings.focused_bin_widths
 
     def _get_run_details(self, run_number_string):
-        if self._run_details_last_run_number == run_number_string:
-            return self._run_details_cached_obj
+        run_number_string_key = self._generate_run_details_fingerprint(run_number_string,
+                                                                       self._inst_settings.file_extension)
+        if run_number_string_key in self._run_details_cached_obj:
+            return self._run_details_cached_obj[run_number_string_key]
 
-        run_details = polaris_algs.get_run_details(run_number_string=run_number_string,
-                                                   inst_settings=self._inst_settings, is_vanadium_run=self._is_vanadium)
+        self._run_details_cached_obj[run_number_string_key] = polaris_algs.get_run_details(
+            run_number_string=run_number_string, inst_settings=self._inst_settings, is_vanadium_run=self._is_vanadium)
 
-        # Hold obj in case same run range is requested
-        self._run_details_last_run_number = run_number_string
-        self._run_details_cached_obj = run_details
-
-        return run_details
+        return self._run_details_cached_obj[run_number_string_key]
 
     def _spline_vanadium_ws(self, focused_vanadium_spectra, instrument_version=''):
         masking_file_name = self._inst_settings.masking_file_name
