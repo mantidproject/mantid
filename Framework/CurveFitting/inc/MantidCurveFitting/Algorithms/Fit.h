@@ -98,21 +98,31 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 class DLLExport Fit : public IFittingAlgorithm {
 public:
   /// Default constructor
-  Fit() : IFittingAlgorithm() {}
+  Fit();
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "Fit"; }
   /// Summary of algorithms purpose
   const std::string summary() const override {
     return "Fits a function to data in a Workspace";
   }
-
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return (1); }
 
-protected:
+private:
   void initConcrete() override;
   void execConcrete() override;
+  void readProperties();
+  void initializeMinimizer(size_t maxIterations);
+  size_t runMinimizer();
+  void finalizeMinimizer(size_t nIterations);
   void copyMinimizerOutput(const API::IFuncMinimizer &minimizer);
+  void createOutput();
+  /// The cost function
+  boost::shared_ptr<CostFunctions::CostFuncFitting> m_costFunction;
+  /// The minimizer
+  boost::shared_ptr<API::IFuncMinimizer> m_minimizer;
+  /// Max number of iterations
+  size_t m_maxIterations;
 };
 
 } // namespace Algorithms

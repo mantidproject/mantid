@@ -12,6 +12,7 @@ API
 - The default multiple file limit is now made facility dependent. It is 1000 for ILL, and 100 for all the others.
 - Frequency unit (GHz) included as an option to represent energy transfer.
 - Fixed a bug where certain validators would crash with SingleValuedWorkspaces instead of rejecting them.
+- New unit :math:`d_{\perp}` (Angstrom) is implemented for TOF powder diffraction.
 
 Algorithms
 ----------
@@ -39,6 +40,7 @@ Improved
 - :ref:`FilterEvents <algm-FilterEvents-v1>` now only accept splitters from ``TableWorkspace`` and ``MatrixWrokspace`` in unit as second.
 - Two new properties were added to :ref:`algm-Integration` *RangeLowerList* and *RangeUpperList* can be used to give histogram-specific integration ranges.
 - :ref:`algm-FindEPP` does not output the two extra workspaces from the :ref:`algm-Fit` anymore.
+- :ref:`ApplyDetailedBalance <algm-ApplyDetailedBalance>`: User can select the dynamic susceptibility versus energy or frequency. 
 - :ref:`PredictPeaks <algm-PredictPeaks-v1>` is now faster on instruments that do not have rectangular detectors. The speed up with vary from instrument to instrument, but for CORELLI this was shown to reduce execution time from ~64 mins to < 1 min.
 - :ref:`MergeRuns <algm-MergeRuns>` now has a sum option and more control over failure when binning is different or sample logs do not match.
 - Made it possible for LiveListeners to read properties from the calling Algorithm. This gives greater flexiblity for authors of LiveListener plugins.
@@ -82,6 +84,7 @@ Bugs
 
 - We have fixed a bug where Mantid could crash when deleting a large number of workspaces.
 - Fixed a bug in :ref:`ConvertToMD <algm-ConvertToMD>` causing it to fail with the error "Run::storeEnergyBinBoundaries - Inconsistent start & end values" if monitors were all NaN, Inf, or zero.
+- Fixed a bug in illuminated volume calculation which could make :ref:`MonteCarloAbsorption <algm-MonteCarloAbsorption>` fail.
 
 CurveFitting
 ------------
@@ -92,11 +95,6 @@ Improved
 - :ref:`UserFunction <func-UserFunction>` now supports :math:`erf` and :math:`erfc`.
 
 - :ref:`IkedaCarpenterPV <func-IkedaCarpenterPV>` now constrains all parameters to be non-negative which helps the fits converge faster and produces better fits.
-
-LiveData
---------
-
-- A new live listener for event data, `KafkaEventListener`, has been added. This is in development for the ESS and ISIS. It is only available on IBEX instruments at ISIS.
 
 Python
 ------

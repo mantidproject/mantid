@@ -244,7 +244,8 @@ def load_current_normalised_ws_list(run_number_string, instrument, input_batchin
         input_batching = instrument._get_input_batching_mode()
 
     run_information = instrument._get_run_details(run_number_string=run_number_string)
-    raw_ws_list = _load_raw_files(run_number_string=run_number_string, instrument=instrument)
+    file_ext = run_information.file_extension
+    raw_ws_list = _load_raw_files(run_number_string=run_number_string, instrument=instrument, file_ext=file_ext)
 
     if input_batching == INPUT_BATCHING.Summed and len(raw_ws_list) > 1:
         summed_ws = _sum_ws_range(ws_list=raw_ws_list)
@@ -451,7 +452,7 @@ def _check_load_range(list_of_runs_to_load):
                          " Found " + str(len(list_of_runs_to_load)) + " Aborting.")
 
 
-def _load_raw_files(run_number_string, instrument):
+def _load_raw_files(run_number_string, instrument, file_ext=None):
     """
     Uses the run number string to generate a list of run numbers to load in
     :param run_number_string: The run number string to generate
@@ -459,11 +460,11 @@ def _load_raw_files(run_number_string, instrument):
     :return: A list of loaded workspaces
     """
     run_number_list = generate_run_numbers(run_number_string=run_number_string)
-    load_raw_ws = _load_list_of_files(run_number_list, instrument)
+    load_raw_ws = _load_list_of_files(run_number_list, instrument, file_ext=file_ext)
     return load_raw_ws
 
 
-def _load_list_of_files(run_numbers_list, instrument):
+def _load_list_of_files(run_numbers_list, instrument, file_ext=None):
     """
     Loads files based on the list passed to it. If the list is
     greater than the maximum range it will raise an exception
@@ -477,6 +478,7 @@ def _load_list_of_files(run_numbers_list, instrument):
 
     for run_number in run_numbers_list:
         file_name = instrument._generate_input_file_name(run_number=run_number)
+        file_name = file_name + str(file_ext) if file_ext else file_name
         read_ws = mantid.Load(Filename=file_name)
         read_ws_list.append(mantid.RenameWorkspace(InputWorkspace=read_ws, OutputWorkspace=file_name))
 

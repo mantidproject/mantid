@@ -18,8 +18,7 @@ class Pearl(AbstractInst):
                                     calibration_dir=self._inst_settings.calibration_dir,
                                     output_dir=self._inst_settings.output_dir, inst_prefix="PEARL")
 
-        self._cached_run_details = None
-        self._cached_run_details_number = None
+        self._cached_run_details = {}
 
     def focus(self, **kwargs):
         self._switch_long_mode_inst_settings(kwargs.get("long_mode"))
@@ -45,16 +44,14 @@ class Pearl(AbstractInst):
                                      do_absorb_corrections=self._inst_settings.absorb_corrections)
 
     def _get_run_details(self, run_number_string):
-        if self._cached_run_details_number == run_number_string:
-            return self._cached_run_details
+        run_number_string_key = self._generate_run_details_fingerprint(run_number_string,
+                                                                       self._inst_settings.file_extension)
+        if run_number_string_key in self._cached_run_details:
+            return self._cached_run_details[run_number_string_key]
 
-        run_details = pearl_algs.get_run_details(run_number_string=run_number_string,
-                                                 inst_settings=self._inst_settings,
-                                                 is_vanadium_run=self._is_vanadium)
-
-        self._cached_run_details_number = run_number_string
-        self._cached_run_details = run_details
-        return run_details
+        self._cached_run_details[run_number_string_key] = pearl_algs.get_run_details(
+            run_number_string=run_number_string, inst_settings=self._inst_settings, is_vanadium_run=self._is_vanadium)
+        return self._cached_run_details[run_number_string_key]
 
     # Params #
 
