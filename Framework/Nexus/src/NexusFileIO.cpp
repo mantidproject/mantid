@@ -1028,7 +1028,7 @@ bool NexusFileIO::checkAttributeName(const std::string &target) const {
   const std::vector< ::NeXus::AttrInfo> infos = m_filehandle->getAttrInfos();
   // clang-format on
   for (const auto &info : infos) {
-    if (target.compare(info.name) == 0)
+    if (target == info.name)
       return true;
   }
 
@@ -1266,7 +1266,7 @@ int getNexusEntryTypes(const std::string &fileName,
   while ((stat = NXgetnextentry(fileH, nxname, nxclass, &nxdatatype)) ==
          NX_OK) {
     std::string nxc(nxclass);
-    if (nxc.compare("NXentry") == 0)
+    if (nxc == "NXentry")
       entryList.push_back(nxname);
   }
   // for each entry found, look for "analysis" or "definition" text data fields
@@ -1279,9 +1279,9 @@ int getNexusEntryTypes(const std::string &fileName,
            NX_OK) {
       std::string nxc(nxclass), nxn(nxname);
       // if a data field
-      if (nxc.compare("SDS") == 0)
+      if (nxc == "SDS")
         // if one of the two names we are looking for
-        if (nxn.compare("definition") == 0 || nxn.compare("analysis") == 0) {
+        if (nxn == "definition" || nxn == "analysis") {
           NXopendata(fileH, nxname);
           stat = NXgetinfo(fileH, &rank, dims, &type);
           if (stat == NX_ERROR)

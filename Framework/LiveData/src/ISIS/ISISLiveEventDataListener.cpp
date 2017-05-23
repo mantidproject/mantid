@@ -80,7 +80,7 @@ bool ISISLiveEventDataListener::connect(
   // If we don't have an address, force a connection to the test server running
   // on
   // localhost on the default port
-  if (address.host().toString().compare("0.0.0.0") == 0) {
+  if (address.host().toString() == "0.0.0.0") {
     Poco::Net::SocketAddress tempAddress("127.0.0.1:10000");
     try {
       m_socket.connect(tempAddress); // BLOCKING connect

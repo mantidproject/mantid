@@ -20,9 +20,6 @@
 
 #include <cmath>
 
-using Mantid::API::IMDWorkspace;
-using Mantid::API::IMDHistoWorkspace;
-using Mantid::Kernel::CPUTimer;
 using namespace Mantid::DataObjects;
 using Mantid::Kernel::ReadLock;
 

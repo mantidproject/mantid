@@ -167,7 +167,6 @@ void MuonProcess::exec() {
 
   // If not analysing, the present WS will be the output
   Workspace_sptr outWS = allPeriodsWS;
-
   if (mode != "CorrectAndGroup") {
     // Correct bin values
     double loadedTimeZero = getProperty("LoadedTimeZero");
@@ -182,7 +181,8 @@ void MuonProcess::exec() {
           allPeriodsWS, summedPeriods, subtractedPeriods, groupIndex);
     } else if (outputType == "GroupAsymmetry") {
       asymCalc = Mantid::Kernel::make_unique<MuonGroupAsymmetryCalculator>(
-          allPeriodsWS, summedPeriods, subtractedPeriods, groupIndex);
+          allPeriodsWS, summedPeriods, subtractedPeriods, groupIndex,
+          getProperty("Xmin"), getProperty("Xmax"));
     } else if (outputType == "PairAsymmetry") {
       int first = getProperty("PairFirstIndex");
       int second = getProperty("PairSecondIndex");

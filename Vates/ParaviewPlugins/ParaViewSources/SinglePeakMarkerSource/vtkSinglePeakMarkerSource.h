@@ -34,8 +34,9 @@
 class VTK_EXPORT vtkSinglePeakMarkerSource : public vtkPolyDataAlgorithm {
 public:
   static vtkSinglePeakMarkerSource *New();
-  vtkSinglePeakMarkerSource(const vtkSinglePeakMarkerSource &);
-  void operator=(const vtkSinglePeakMarkerSource &);
+  vtkSinglePeakMarkerSource(const vtkSinglePeakMarkerSource &) = delete;
+  vtkSinglePeakMarkerSource &
+  operator=(const vtkSinglePeakMarkerSource &) = delete;
   // clang-format off
   vtkTypeMacro(vtkSinglePeakMarkerSource, vtkPolyDataAlgorithm)
   void PrintSelf(ostream &os, vtkIndent indent) override;

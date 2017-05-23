@@ -66,7 +66,8 @@ boost::shared_ptr<IFunction> IFunction::clone() const {
  * @param reporter :: A pointer to a progress reporter that can be called during
  * function evaluation
  */
-void IFunction::setProgressReporter(Kernel::ProgressBase *reporter) {
+void IFunction::setProgressReporter(
+    boost::shared_ptr<Kernel::ProgressBase> reporter) {
   m_progReporter = reporter;
   m_progReporter->setNotifyStep(0.01);
 }
@@ -77,7 +78,7 @@ void IFunction::setProgressReporter(Kernel::ProgressBase *reporter) {
  */
 void IFunction::reportProgress(const std::string &msg) const {
   if (m_progReporter) {
-    const_cast<Kernel::ProgressBase *>(m_progReporter)->report(msg);
+    const_cast<Kernel::ProgressBase *>(m_progReporter.get())->report(msg);
   }
 }
 
@@ -103,6 +104,59 @@ void IFunction::functionDeriv(const FunctionDomain &domain,
   calNumericalDeriv(domain, jacobian);
 }
 
+/** Check if an active parameter i is actually active
+ * @param i :: Index of a parameter.
+ */
+bool IFunction::isActive(size_t i) const {
+  return getParameterStatus(i) == Active;
+}
+
+/**
+ * Query if the parameter is fixed
+ * @param i :: The index of a declared parameter
+ * @return true if parameter i is fixed
+ */
+bool IFunction::isFixed(size_t i) const {
+  auto status = getParameterStatus(i);
+  return status == Fixed || status == FixedByDefault;
+}
+
+/// Check if a parameter i is fixed by default (not by user).
+/// @param i :: The index of a parameter
+/// @return true if parameter i is fixed by default
+bool IFunction::isFixedByDefault(size_t i) const {
+  return getParameterStatus(i) == FixedByDefault;
+}
+
+/// This method doesn't create a tie
+/// @param i :: A declared parameter index to be fixed
+/// @param isDefault :: If true fix it by default
+///
+void IFunction::fix(size_t i, bool isDefault) {
+  auto status = getParameterStatus(i);
+  if (status == Tied) {
+    throw std::runtime_error("Cannot fix parameter " + std::to_string(i) +
+                             " (" + parameterName(i) + "): it has a tie.");
+  }
+  if (isDefault) {
+    setParameterStatus(i, FixedByDefault);
+  } else {
+    setParameterStatus(i, Fixed);
+  }
+}
+
+/** Makes a parameter active again. It doesn't change the parameter's tie.
+ * @param i :: A declared parameter index to be restored to active
+ */
+void IFunction::unfix(size_t i) {
+  auto status = getParameterStatus(i);
+  if (status == Tied) {
+    throw std::runtime_error("Cannot unfix parameter " + std::to_string(i) +
+                             " (" + parameterName(i) + "): it has a tie.");
+  }
+  setParameterStatus(i, Active);
+}
+
 /**
  * Ties a parameter to other parameters
  * @param parName :: The name of the parameter to tie.
@@ -114,13 +168,12 @@ void IFunction::functionDeriv(const FunctionDomain &domain,
 void IFunction::tie(const std::string &parName, const std::string &expr,
                     bool isDefault) {
   auto ti = Kernel::make_unique<ParameterTie>(this, parName, expr, isDefault);
-  this->fix(getParameterIndex(*ti));
   if (!isDefault && ti->isConstant()) {
     setParameter(parName, ti->eval());
+    fix(getParameterIndex(*ti));
   } else {
     addTie(std::move(ti));
   }
-  //  return ti.get();
 }
 
 /**
@@ -158,34 +211,187 @@ void IFunction::removeTie(const std::string &parName) {
   this->removeTie(i);
 }
 
-/// Write a parameter tie to a string
-/// @param iParam :: An index of a parameter.
+/// Write all parameter ties owned by this function to a string
 /// @return A tie string for the parameter.
-std::string IFunction::writeTie(size_t iParam) const {
+std::string IFunction::writeTies() const {
   std::ostringstream tieStream;
-  const ParameterTie *tie = getTie(iParam);
-  if (tie) {
-    if (!tie->isDefault()) {
-      tieStream << tie->asString(this);
+  bool first = true;
+  for (auto &tie : m_ties) {
+    if (tie->isDefault())
+      continue;
+    if (!first) {
+      tieStream << ',';
+    } else {
+      first = false;
     }
-  } else if (isFixed(iParam)) {
-    tieStream << parameterName(iParam) << "=" << getParameter(iParam);
+    tieStream << tie->asString(this);
   }
   return tieStream.str();
 }
 
-/// Write a parameter constraint to a string
-/// @param iParam :: An index of a parameter.
-/// @return A constraint string for the parameter.
-std::string IFunction::writeConstraint(size_t iParam) const {
-  const IConstraint *c = getConstraint(iParam);
-  if (c && !c->isDefault()) {
-    std::string constraint = c->asString();
-    if (!constraint.empty()) {
-      return constraint;
+/**
+ * Attaches a tie to this ParamFunction. The attached tie is owned by the
+ * ParamFunction.
+ * @param tie :: A pointer to a new tie
+ */
+void IFunction::addTie(std::unique_ptr<ParameterTie> tie) {
+
+  auto iPar = getParameterIndex(*tie);
+  bool found = false;
+  for (auto &m_tie : m_ties) {
+    auto mPar = getParameterIndex(*m_tie);
+    if (mPar == iPar) {
+      found = true;
+      m_tie = std::move(tie);
+      break;
     }
   }
-  return "";
+  if (!found) {
+    m_ties.push_back(std::move(tie));
+    setParameterStatus(iPar, Tied);
+  }
+}
+
+/**
+ * Apply the ties.
+ */
+void IFunction::applyTies() {
+  for (auto &m_tie : m_ties) {
+    m_tie->eval();
+  }
+}
+
+/**
+ * Used to find ParameterTie for a parameter i
+ */
+class ReferenceEqual {
+  /// The function that has the tie
+  const IFunction &m_fun;
+  /// index to find
+  const size_t m_i;
+
+public:
+  /// Constructor
+  explicit ReferenceEqual(const IFunction &fun, size_t i)
+      : m_fun(fun), m_i(i) {}
+  /// Bracket operator
+  /// @param p :: the element you are looking for
+  /// @return True if found
+  template <class T> bool operator()(const std::unique_ptr<T> &p) {
+    return m_fun.getParameterIndex(*p) == m_i;
+  }
+};
+
+/** Removes i-th parameter's tie if it is tied or does nothing.
+ * @param i :: The index of the tied parameter.
+ * @return True if successfull
+ */
+bool IFunction::removeTie(size_t i) {
+  if (i >= nParams()) {
+    throw std::out_of_range("Function parameter index out of range.");
+  }
+  auto it =
+      std::find_if(m_ties.begin(), m_ties.end(), ReferenceEqual(*this, i));
+  if (it != m_ties.end()) {
+    m_ties.erase(it);
+    setParameterStatus(i, Active);
+    return true;
+  }
+  unfix(i);
+  return false;
+}
+
+/** Get tie of parameter number i
+ * @param i :: The index of a declared parameter.
+ * @return A pointer to the tie
+ */
+ParameterTie *IFunction::getTie(size_t i) const {
+  auto it =
+      std::find_if(m_ties.cbegin(), m_ties.cend(), ReferenceEqual(*this, i));
+  if (it != m_ties.cend()) {
+    return it->get();
+  }
+  return nullptr;
+}
+
+/** Remove all ties
+ */
+void IFunction::clearTies() {
+  for (size_t i = 0; i < nParams(); ++i) {
+    setParameterStatus(i, Active);
+  }
+  m_ties.clear();
+}
+
+/** Add a constraint
+ *  @param ic :: Pointer to a constraint.
+ */
+void IFunction::addConstraint(std::unique_ptr<IConstraint> ic) {
+  size_t iPar = ic->parameterIndex();
+  bool found = false;
+  for (auto &constraint : m_constraints) {
+    if (constraint->parameterIndex() == iPar) {
+      found = true;
+      constraint = std::move(ic);
+      break;
+    }
+  }
+  if (!found) {
+    m_constraints.push_back(std::move(ic));
+  }
+}
+
+/** Get constraint of parameter number i
+ * @param i :: The index of a declared parameter.
+ * @return A pointer to the constraint or NULL
+ */
+IConstraint *IFunction::getConstraint(size_t i) const {
+  auto it = std::find_if(m_constraints.cbegin(), m_constraints.cend(),
+                         ReferenceEqual(*this, i));
+  if (it != m_constraints.cend()) {
+    return it->get();
+  }
+  return nullptr;
+}
+
+/** Remove a constraint
+ * @param parName :: The name of a parameter which constarint to remove.
+ */
+void IFunction::removeConstraint(const std::string &parName) {
+  size_t iPar = parameterIndex(parName);
+  for (auto it = m_constraints.begin(); it != m_constraints.end(); ++it) {
+    if (iPar == (**it).getLocalIndex()) {
+      m_constraints.erase(it);
+      break;
+    }
+  }
+}
+
+/// Remove all constraints.
+void IFunction::clearConstraints() { m_constraints.clear(); }
+
+void IFunction::setUpForFit() {
+  for (auto &constraint : m_constraints) {
+    constraint->setParamToSatisfyConstraint();
+  }
+}
+
+/// Write all parameter constraints owned by this function to a string
+/// @return A constraint string for the parameter.
+std::string IFunction::writeConstraints() const {
+  std::ostringstream stream;
+  bool first = true;
+  for (auto &constrint : m_constraints) {
+    if (constrint->isDefault())
+      continue;
+    if (!first) {
+      stream << ',';
+    } else {
+      first = false;
+    }
+    stream << constrint->asString();
+  }
+  return stream.str();
 }
 
 /**
@@ -204,33 +410,29 @@ std::string IFunction::asString() const {
       ostr << ',' << attName << '=' << attValue;
     }
   }
+  std::vector<std::string> ties;
   // print the parameters
   for (size_t i = 0; i < nParams(); i++) {
-    ostr << ',' << parameterName(i) << '=' << getParameter(i);
+    std::ostringstream paramOut;
+    paramOut << parameterName(i) << '=' << getParameter(i);
+    ostr << ',' << paramOut.str();
+    // Output non-default ties only.
+    if (getParameterStatus(i) == Fixed) {
+      ties.push_back(paramOut.str());
+    }
   }
 
   // collect non-default constraints
-  std::vector<std::string> constraints;
-  for (size_t i = 0; i < nParams(); i++) {
-    auto constraint = writeConstraint(i);
-    if (!constraint.empty()) {
-      constraints.push_back(constraint);
-    }
-  }
+  std::string constraints = writeConstraints();
   // print constraints
   if (!constraints.empty()) {
-    ostr << ",constraints=("
-         << Kernel::Strings::join(constraints.begin(), constraints.end(), ",")
-         << ")";
+    ostr << ",constraints=(" << constraints << ")";
   }
 
   // collect the non-default ties
-  std::vector<std::string> ties;
-  for (size_t i = 0; i < nParams(); i++) {
-    auto tie = writeTie(i);
-    if (!tie.empty()) {
-      ties.push_back(tie);
-    }
+  auto tiesString = writeTies();
+  if (!tiesString.empty()) {
+    ties.push_back(tiesString);
   }
   // print the ties
   if (!ties.empty()) {
@@ -368,6 +570,13 @@ private:
   /// Flag to quote a string value returned
   bool m_quoteString;
 };
+}
+
+/// Copy assignment. Do not copy m_quoteValue flag.
+/// @param attr :: The attribute to copy from.
+IFunction::Attribute &IFunction::Attribute::operator=(const Attribute &attr) {
+  m_data = attr.m_data;
+  return *this;
 }
 
 std::string IFunction::Attribute::value() const {
@@ -778,19 +987,19 @@ void IFunction::setMatrixWorkspace(
 
           // check first if this parameter is actually specified for this
           // function
-          if (name().compare(fitParam.getFunction()) == 0) {
+          if (name() == fitParam.getFunction()) {
             // update value
             IFunctionWithLocation *testWithLocation =
                 dynamic_cast<IFunctionWithLocation *>(this);
             if (testWithLocation == nullptr ||
                 (!fitParam.getLookUpTable().containData() &&
-                 fitParam.getFormula().compare("") == 0)) {
+                 fitParam.getFormula().empty())) {
               setParameter(i, fitParam.getValue());
             } else {
               double centreValue = testWithLocation->centre();
               Kernel::Unit_sptr centreUnit; // unit of value used in formula or
                                             // to look up value in lookup table
-              if (fitParam.getFormula().compare("") == 0)
+              if (fitParam.getFormula().empty())
                 centreUnit = fitParam.getLookUpTable().getXUnit(); // from table
               else {
                 if (!fitParam.getFormulaUnit().empty()) {
@@ -827,7 +1036,7 @@ void IFunction::setMatrixWorkspace(
               // a unit of its own. If set convert param value
               // See section 'Using fitting parameters in
               // www.mantidproject.org/IDF
-              if (fitParam.getFormula().compare("") == 0) {
+              if (fitParam.getFormula().empty()) {
                 // so from look up table
                 Kernel::Unit_sptr resultUnit =
                     fitParam.getLookUpTable().getYUnit(); // from table
@@ -931,7 +1140,7 @@ double IFunction::convertValue(double value, Kernel::Unit_sptr &outUnit,
                                size_t wsIndex) const {
   // only required if formula or look-up-table different from ws unit
   const auto &wsUnit = ws->getAxis(0)->unit();
-  if (outUnit->unitID().compare(wsUnit->unitID()) == 0)
+  if (outUnit->unitID() == wsUnit->unitID())
     return value;
 
   // first check if it is possible to do a quick conversion and convert
@@ -960,7 +1169,7 @@ void IFunction::convertValue(std::vector<double> &values,
                              size_t wsIndex) const {
   // only required if  formula or look-up-table different from ws unit
   const auto &wsUnit = ws->getAxis(0)->unit();
-  if (outUnit->unitID().compare(wsUnit->unitID()) == 0)
+  if (outUnit->unitID() == wsUnit->unitID())
     return;
 
   // first check if it is possible to do a quick conversion convert
@@ -1149,9 +1358,10 @@ size_t IFunction::getValuesSize(const FunctionDomain &domain) const {
 
 /// Fix a parameter
 /// @param name :: A name of a parameter to fix
-void IFunction::fixParameter(const std::string &name) {
+/// @param isDefault :: If true fix it by default
+void IFunction::fixParameter(const std::string &name, bool isDefault) {
   auto i = parameterIndex(name);
-  fix(i);
+  fix(i, isDefault);
 }
 
 /// Free a parameter
@@ -1162,14 +1372,41 @@ void IFunction::unfixParameter(const std::string &name) {
 }
 
 /// Fix all parameters
-void IFunction::fixAll() {
+/// @param isDefault :: If true fix them by default
+void IFunction::fixAll(bool isDefault) {
   for (size_t i = 0; i < nParams(); ++i) {
-    fix(i);
+    fix(i, isDefault);
   }
 }
 
 /// Free all parameters
-void IFunction::unfixAll() { clearTies(); }
+void IFunction::unfixAll() {
+  for (size_t i = 0; i < nParams(); ++i) {
+    unfix(i);
+  }
+}
+
+/// Free all parameters fixed by default
+void IFunction::unfixAllDefault() {
+  for (size_t i = 0; i < nParams(); ++i) {
+    if (getParameterStatus(i) == FixedByDefault) {
+      unfix(i);
+    }
+  }
+}
+
+/// Fix all active parameters. This method doesn't change
+/// status of a fixed parameter, eg if one was fixed by default
+/// prior to calling this method it will remain default regardless
+/// the value of isDefault argument.
+/// @param isDefault :: If true fix them by default.
+void IFunction::fixAllActive(bool isDefault) {
+  for (size_t i = 0; i < nParams(); ++i) {
+    if (getParameterStatus(i) == Active) {
+      fix(i, isDefault);
+    }
+  }
+}
 
 /// Get number of domains required by this function.
 /// If it returns a number greater than 1 then the domain

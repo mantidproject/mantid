@@ -1,7 +1,7 @@
 #include "MantidAlgorithms/SofQWNormalisedPolygon.h"
 #include "MantidAlgorithms/SofQW.h"
 #include "MantidAPI/BinEdgeAxis.h"
-#include "MantidAPI/NearestNeighbourInfo.h"
+#include "MantidAPI/WorkspaceNearestNeighbourInfo.h"
 #include "MantidAPI/SpectrumDetectorMapping.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
@@ -334,7 +334,8 @@ void SofQWNormalisedPolygon::initAngularCachesPSD(
 
   bool ignoreMasked = true;
   const int numNeighbours = 4;
-  NearestNeighbourInfo neighbourInfo(*workspace, ignoreMasked, numNeighbours);
+  WorkspaceNearestNeighbourInfo neighbourInfo(*workspace, ignoreMasked,
+                                              numNeighbours);
 
   this->m_theta = std::vector<double>(nHistos);
   this->m_thetaWidths = std::vector<double>(nHistos);
