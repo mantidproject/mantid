@@ -82,7 +82,14 @@ class ProjectManager(object):
         for ws_name in self._wsList:
             md_file_name = os.path.join(self._wsDir, ws_name + '.nxs')
             if overwrite or not os.path.exists(md_file_name):
-                mantidsimple.SaveMD(InputWorkspace=ws_name, Filename=md_file_name)
+                try:
+                    mantidsimple.SaveMD(InputWorkspace=ws_name, Filename=md_file_name)
+                except RuntimeError as run_err:
+                    print '[ERROR] Unable to save {0} due to RuntimeError {1}.'.format(ws_name, run_err)
+                except Exception as arb_err:
+                    print '[ERROR] Unable to save {0} due to arbitrary exception {1}.'.format(ws_name, arb_err)
+            # END-IF
+        # END-FOR (ws_name)
 
         with open(self._projectPath, 'w') as pickle_file:
             pickle.dump(self._variableDict, pickle_file, pickle.HIGHEST_PROTOCOL)
@@ -103,7 +110,14 @@ class ProjectManager(object):
         # load data
         for ws_name in self._wsList:
             md_file_path = os.path.join(self._wsDir, ws_name + '.nxs')
-            mantidsimple.LoadMD(Filename=md_file_path, OutputWorkspace=ws_name)
+            try:
+                mantidsimple.LoadMD(Filename=md_file_path, OutputWorkspace=ws_name)
+            except RuntimeError as run_err:
+                print '[DB] Unable to load file {0} due to RuntimeError {1}.'.format(md_file_path, run_err)
+            except OSError as run_err:
+                print '[DB] Unable to load file {0} due to OSError {1}.'.format(md_file_path, run_err)
+            except IOError as run_err:
+                print '[DB] Unable to load file {0} due to IOError {1}.'.format(md_file_path, run_err)
         # END-FOR
 
         return
