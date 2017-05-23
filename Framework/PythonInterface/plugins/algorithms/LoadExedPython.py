@@ -8,6 +8,7 @@ import numpy as np
 import copy
 import types
 
+
 def read_file(fn):
     """
     function to read header and return a dictionary of the parameters parms_dict
@@ -54,6 +55,7 @@ def read_file(fn):
     parms_dict['phi']=copy.deepcopy(parms_dict['CAR_OMEGA_MAG'])
     return parms_dict, det_udet, det_count, det_tbc, data
 
+
 def struct_data_read(fin,nrows,data_type='i',byte_size=4):
     """
     helper function to read binary data_type
@@ -64,6 +66,7 @@ def struct_data_read(fin,nrows,data_type='i',byte_size=4):
         data = struct.unpack(data_type,fin.read(byte_size))[0]
         tmp_lst.append(data)
     return tmp_lst
+
 
 class LoadEXED(PythonAlgorithm):
     __doc__ = """This is the EXED data loader written in Python.
@@ -132,7 +135,7 @@ class LoadEXED(PythonAlgorithm):
         ydata=data.astype(np.float)
         edata=np.sqrt(ydata)
         CreateWorkspace(OutputWorkspace=wsn,DataX=xdata,DataY=ydata,DataE=edata,
-        NSpec=nrows,UnitX='TOF',WorkspaceTitle='Data',YUnitLabel='Counts')
+            NSpec=nrows,UnitX='TOF',WorkspaceTitle='Data',YUnitLabel='Counts')
 
         #self.setProperty("OutputWorkspace", wsn)
         print ("ws:", wsn)
