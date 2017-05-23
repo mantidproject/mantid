@@ -65,7 +65,7 @@ public slots:
     m_worker->deleteLater();
   }
 
-private: 
+private:
   QObject *const m_worker;
 };
 

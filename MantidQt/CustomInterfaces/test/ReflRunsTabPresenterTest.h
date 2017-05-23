@@ -382,7 +382,7 @@ public:
     tablePresenterVec.push_back(&mockTablePresenter);
 
     ReflRunsTabPresenter presenter(&mockRunsTabView, &mockProgress,
-      tablePresenterVec);
+                                   tablePresenterVec);
     presenter.acceptMainPresenter(&mockMainPresenter);
 
     // Expect that the view enables the 'process' button and disables the

@@ -267,8 +267,8 @@ bool ReflDataProcessorPresenter::processGroupAsEventWS(
 * @param group :: the group of event workspaces
 * @return :: true if errors were encountered
 */
-bool ReflDataProcessorPresenter::processGroupAsNonEventWS(
-    int groupID, GroupData &group) {
+bool ReflDataProcessorPresenter::processGroupAsNonEventWS(int groupID,
+                                                          GroupData &group) {
 
   bool errors = false;
 

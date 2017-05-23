@@ -65,7 +65,7 @@ public:
     PlotGroupFlag,
     ExpandAllGroupsFlag,
     CollapseAllGroupsFlag,
-    PauseFlag    
+    PauseFlag
   };
 
   // Tell the presenter something happened

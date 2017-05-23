@@ -69,7 +69,7 @@ class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS GenericDataProcessorPresenter
       public MantidQt::API::WorkspaceObserver {
   // Q_OBJECT for 'connect' with thread/worker
   Q_OBJECT
-  
+
   friend class GenericDataProcessorPresenterRowReducerWorker;
   friend class GenericDataProcessorPresenterGroupReducerWorker;
 
