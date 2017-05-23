@@ -122,6 +122,11 @@ The following parameters may also be optionally set:
 - :ref:`sample_empty_gem_isis-powder-diffraction-ref`
 - :ref:`unit_to_keep_gem_isis-powder-diffraction-ref`
 
+If :ref:`sample_empty_gem_isis_powder-diffraction-ref` is 
+set then the following parameter is also required:
+
+- :ref:`sample_empty_scale_gem_isis-powder-diffraction-ref`
+
 Example
 =======
 
@@ -497,6 +502,25 @@ Example Input:
   gem_example.focus(sample_empty=100, ...)
   # Or a range of numbers
   gem_example.focus(sample_empty="100-110", ...)
+
+.. _sample_empty_scale_gem_isis-powder-diffraction-ref:
+
+sample_empty_scale
+^^^^^^^^^^^^^^^^^^
+Required if :ref:`sample_empty_gem_isis_powder-diffraction-ref` 
+is set to **True**
+
+Sets a factor to scale the sample empty run(s) to before
+subtracting. This value is multiplied after summing the 
+sample empty runs and before subtracting the empty from
+the data set. For more details see: :ref:`Scale <algm-Scale-v1>`.
+
+Example Input:
+
+.. code-block:: Python
+
+  # Scale sample empty to 90% of original
+  gem_example.focus(sample_empty_scale=0.9, ...)
 
 .. _unit_to_keep_gem_isis-powder-diffraction-ref:
 

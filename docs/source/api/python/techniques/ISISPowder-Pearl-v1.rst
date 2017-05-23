@@ -828,7 +828,7 @@ On PEARL this is set to the following:
 vanadium_tof_cropping
 ^^^^^^^^^^^^^^^^^^^^^
 Determines the TOF window to crop all banks to
-within the :ref:`create_vanadium_gem_isis-powder-diffraction-ref`
+within the :ref:`create_vanadium_pearl_isis-powder-diffraction-ref`
 method. This is applied after focusing and before a spline is taken.
 
 It is used to remove low counts at the start and end of the vanadium run
@@ -836,8 +836,8 @@ to produce a spline which better matches the data.
 
 This parameter is stored as a tuple of both values (lower and upper bound). 
 The values **must** have a larger TOF window than the 
-:ref:`focused_cropping_values_gem_isis-powder-diffraction-ref`
-and a smaller window than :ref:`raw_tof_cropping_values_gem_isis-powder-diffraction-ref`.
+:ref:`focused_cropping_values_pearl_isis-powder-diffraction-ref`
+and a smaller window than :ref:`raw_tof_cropping_values_pearl_isis-powder-diffraction-ref`.
 
 *Note: The value passed with the*
 :ref:`long_mode_pearl_isis-powder-diffraction-ref` *parameter
