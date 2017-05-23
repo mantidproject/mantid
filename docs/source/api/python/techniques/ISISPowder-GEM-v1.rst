@@ -147,7 +147,7 @@ object which contains the sample properties used when
 whilst focusing.
 
 For more details on the SampleDetails object and how to set
-it see: TODO
+it see: :ref:`isis-powder-diffraction-sampleDetails-ref`
 
 The following parameter is required when calling *set_sample*
 

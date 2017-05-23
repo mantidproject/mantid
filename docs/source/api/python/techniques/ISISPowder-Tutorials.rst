@@ -689,7 +689,7 @@ First we need to import the sample details object from ISIS Powder.
 The properties required when creating a SampleDetails 
 object is the geometry of the sample.
 
-**Note this assumes a cylinder currently**
+**Note: this assumes a cylinder geometry**
 
 - *height* - Cylinder height
 - *radius* - Cylinder radius
@@ -741,7 +741,7 @@ Setting material properties
 Advanced material properties can be optionally set instead of letting 
 Mantid calculate them. These properties are:
 
-- *absorption_cross_section* - Attenuation Cross Section
+- *absorption_cross_section* - Absorption Cross Section
 - *scattering_cross_section* - Scattering Cross Section
 
 *Note: This is purely optional and Mantid will calculate these

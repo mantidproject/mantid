@@ -7,7 +7,7 @@ ISIS Powder Diffraction Scripts - POLARIS Reference
 .. contents:: Table of Contents
     :local:
 
-.. _creating_polaris_object-isis-powder-diffraction-ref:
+.. _creating_polaris_object_isis-powder-diffraction-ref:
 
 Creating POLARIS Object
 --------------------
@@ -57,7 +57,7 @@ The following methods can be executed on a POLARIS object:
 - :ref:`set_sample_polaris_isis-powder-diffraction-ref`
 
 For information on creating a POLARIS object see: 
-:ref:`creating_polaris_object-isis-powder-diffraction-ref`
+:ref:`creating_polaris_object_isis-powder-diffraction-ref`
 
 .. _create_vanadium_polaris_isis-powder-diffraction-ref:
 
@@ -147,7 +147,7 @@ object which contains the sample properties used when
 whilst focusing.
 
 For more details on the SampleDetails object and how to set
-it see: TODO
+it see: :ref:`isis-powder-diffraction-sampleDetails-ref`
 
 The following parameter is required when calling *set_sample*
 
