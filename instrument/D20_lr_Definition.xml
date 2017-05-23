@@ -37,7 +37,7 @@ valid-to="2100-01-31 23:59:59" last-modified="2017-02-27 17:21:05">
     <algebra val="shape" />
   </type>
   <idlist idname="monitors">
-    <id val="1" />
+    <id val="0" />
   </idlist>
   <!-- Sample position -->
   <component type="sample-position">
@@ -46,7 +46,7 @@ valid-to="2100-01-31 23:59:59" last-modified="2017-02-27 17:21:05">
   <type name="sample-position" is="SamplePos" />
   <!-- Detector IDs -->
   <idlist idname="detectors">
-    <id start="2" end="1537" />
+    <id start="1" end="1536" />
   </idlist>
   <!-- Detector list def -->
   <component type="detector" idlist="detectors">
