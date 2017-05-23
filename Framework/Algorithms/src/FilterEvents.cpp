@@ -1659,7 +1659,6 @@ void FilterEvents::generateSplitterTSP(
     // later than the run start time, then add a new entry
     curr_tsp->addValue(start_time, 1);
 
-
     // add run stop time as a new entry
     DateAndTime stop_time(m_vecSplitterTime[igrp + 1]);
     curr_tsp->addValue(stop_time, 0);
