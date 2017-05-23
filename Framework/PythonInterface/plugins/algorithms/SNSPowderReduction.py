@@ -238,9 +238,6 @@ class SNSPowderReduction(DataProcessorAlgorithm):
         self.declareProperty("CompressTOFTolerance", 0.01, "Tolerance to compress events in TOF.")
 
         self.copyProperties('AlignAndFocusPowderFromFiles', ['FrequencyLogNames', 'WaveLengthLogNames'])
-        # put "FrequencyLogNames" : "skf1.speed"
-        # put "WaveLengthLogNames" : "skf12.lambda"
-        # to  PDDetermineCharacterizations L136 and L142 instead.
 
         return
 
