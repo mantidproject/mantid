@@ -230,7 +230,6 @@ public:
   MOCK_CONST_METHOD1(getStitchOptions, std::string(int));
   MOCK_CONST_METHOD1(setInstrumentName, void(const std::string &instName));
   MOCK_CONST_METHOD0(getInstrumentName, std::string());
-  MOCK_CONST_METHOD0(checkIfProcessing, bool());
   MOCK_METHOD1(notify, void(Flag));
   MOCK_METHOD3(askUserString,
                std::string(const std::string &, const std::string &,
@@ -250,6 +249,7 @@ public:
     UNUSED_ARG(group);
     return std::string();
   }
+  bool checkIfProcessing() const override { return false; }
 
   ~MockMainWindowPresenter() override{};
 };

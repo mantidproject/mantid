@@ -108,9 +108,10 @@ public:
   // Data reduction paused/resumed handling
   MOCK_CONST_METHOD0(pause, void());
   MOCK_CONST_METHOD0(resume, void());
-  // Data reduction paused/resumed confirmation handling
-  MOCK_CONST_METHOD0(confirmReductionPaused, void());
-  MOCK_CONST_METHOD0(confirmReductionResumed, void());
+
+  // Calls we don't care about
+  void confirmReductionPaused() const override {};
+  void confirmReductionResumed() const override {};
 };
 
 class MockDataProcessorPresenter : public DataProcessorPresenter {
