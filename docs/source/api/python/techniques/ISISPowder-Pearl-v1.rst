@@ -205,12 +205,14 @@ This parameter should be the full path to the calibration folder.
 Within the folder the following should be present:
 
 - Grouping .cal files:
+
   - :ref:`tt35_grouping_filename_pearl_isis-powder-diffraction-ref`
   - :ref:`tt70_grouping_filename_pearl_isis-powder-diffraction-ref`
-  - :ref:`tt80_grouping_filename_pearl_isis-powder-diffraction-ref`
+  - :ref:`tt88_grouping_filename_pearl_isis-powder-diffraction-ref`
 - Vanadium Absorption File 
   (see: :ref:`vanadium_absorb_filename_pearl_isis-powder-diffraction-ref`)
 - Folder(s) with the label name specified in mapping file (e.g. "1_1")
+  
   - Inside each folder should be the offset file with name specified in mapping file
 
 The script will also save out vanadium splines into the relevant
@@ -230,7 +232,7 @@ calibration_mapping_file
 ^^^^^^^^^^^^^^^^^^^^^^^^
 This parameter gives the full path to the YAML file containing the 
 calibration mapping. For more details on this file see:
-:ref:`calibration_mapping_pearl-isis-powder-ref`
+:ref:`calibration_mapping_pearl_isis-powder-diffraction-ref`
 
 *Note: This should be the full path to the file including extension*
 
@@ -450,7 +452,7 @@ Indicates a run from the current cycle to use when calling
 This does not have the be the first run of the cycle or
 the run number corresponding to the vanadium. However it
 must be in the correct cycle according to the 
-:ref:`calibration_mapping_pearl-isis-powder-ref`.
+:ref:`calibration_mapping_pearl_isis-powder-diffraction-ref`.
 
 Example Input:
 
@@ -719,7 +721,7 @@ This helps remove negative counts where at very low TOF
 the empty counts can exceed the captured neutron counts 
 of the run to process. It also is used
 to crop to the correct TOF window depending on the
-value of the :ref:`long_mode_pearl_isis-powder-diffraction-ref` *parameter.
+value of the :ref:`long_mode_pearl_isis-powder-diffraction-ref` parameter.
 
 *Note: The value passed with the*
 :ref:`long_mode_pearl_isis-powder-diffraction-ref` *parameter
@@ -743,7 +745,7 @@ Determines the spline coefficient to use after processing
 the vanadium in :ref:`create_vanadium_pearl_isis-powder-diffraction-ref`
 method. For more details see: :ref:`SplineBackground <algm-SplineBackground>`
 
-*Note that if this value is changed *create_vanadium*
+*Note that if this value is changed 'create_vanadium'
 will need to be called again.*
 
 On PEARL this is set to the following:

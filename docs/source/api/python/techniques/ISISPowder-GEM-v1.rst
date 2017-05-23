@@ -297,9 +297,9 @@ method.
 
 Accepted values are: **True** or **False**
 
-*Note: If this is set to 'True'
+*Note: If this is set to 'True'*
 :ref:`multiple_scattering_gem_isis-powder-diffraction-ref`
-must be set*
+*must be set*
 
 
 Example Input:
@@ -511,9 +511,9 @@ in d-spacing will be present.
 
 Accepted values are: **dSpacing** and **TOF**
 
-*Note: All units will still be saved out in the 
+*Note: All units will still be saved out in the*
 :ref:`output_directory_gem_isis-powder-diffraction-ref`
-regardless of this property*
+*regardless of this property*
 
 *Note: This parameter is not case sensitive*
 
@@ -640,7 +640,7 @@ Determines the spline coefficient to use after processing
 the vanadium in :ref:`create_vanadium_gem_isis-powder-diffraction-ref`
 method. For more details see: :ref:`SplineBackground <algm-SplineBackground>`
 
-*Note that if this value is changed *create_vanadium*
+*Note that if this value is changed 'create_vanadium'
 will need to be called again.*
 
 On GEM this is set to the following:

@@ -318,9 +318,9 @@ method.
 
 Accepted values are: **True** or **False**
 
-*Note: If this is set to 'True'
+*Note: If this is set to 'True'*
 :ref:`multiple_scattering_polaris_isis-powder-diffraction-ref`
-must be set*
+*must be set*
 
 Example Input:
 
@@ -399,7 +399,7 @@ Example Input:
 input_mode
 ^^^^^^^^^^
 Indicates how to interpret the parameter 
-:ref:`run_number_polaris_isis-powder-diffraction-ref` whilst
+:ref:`run_number_polaris_isis_powder-diffraction-ref` whilst
 calling the :ref:`focus_polaris_isis-powder-diffraction-ref`
 method.
 If the input_mode is set to *Summed* it will process
@@ -506,12 +506,12 @@ If multiple runs are specified it will sum these runs
 before subtracting the result. 
 
 This input uses the same syntax as
-:ref:`run_number_polaris_isis-powder-diffraction-ref`.
+:ref:`run_number_polaris_isis_powder-diffraction-ref`.
 Please visit the above page for more details.
 
-*Note: If this parameter is set then to **True**
+*Note: If this parameter is set to* **True**
 :ref:`sample_empty_scale_polaris_isis-powder-diffraction-ref`
-must also be set.
+*must also be set.*
 
 Example Input:
 
@@ -655,7 +655,7 @@ Determines the spline coefficient to use after processing
 the vanadium in :ref:`create_vanadium_polaris_isis-powder-diffraction-ref`
 method. For more details see :ref:`SplineBackground <algm-SplineBackground>`
 
-*Note that if this value is changed *create_vanadium*
+*Note that if this value is changed 'create_vanadium'
 will need to be called again.*
 
 On POLARIS this is set to the following:
@@ -679,7 +679,7 @@ to produce a spline which better matches the data.
 This parameter is a list of bank cropping values with 
 one list entry per bank. The values **must** have a larger
 TOF window than the :ref:`focused_cropping_values_polaris_isis-powder-diffraction-ref`
-and a smaller window than :ref:`raw_tof_cropping_values_polaris_isis-powder-diffraction-ref`.
+and a smaller window than :ref:`raw_data_cropping_values_polaris_isis-powder-diffraction-ref`.
 
 On POLARIS this is set to the following:
 
