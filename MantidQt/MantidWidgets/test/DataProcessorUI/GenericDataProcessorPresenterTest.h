@@ -12,6 +12,7 @@
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorMockObjects.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/GenericDataProcessorPresenter.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/ProgressableViewMockObject.h"
+#include "MantidQtMantidWidgets/WidgetDllOption.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace MantidQt::MantidWidgets;
@@ -22,6 +23,69 @@ using namespace testing;
 //=====================================================================================
 // Functional tests
 //=====================================================================================
+
+// Use this mocked presenter for tests that will start the reducing row/group
+// workers/threads. This overrides the async methods to be non-async, allowing
+// them to be tested.
+class GenericDataProcessorPresenterNoThread
+    : public GenericDataProcessorPresenter {
+public:
+  // Standard constructor
+  GenericDataProcessorPresenterNoThread(
+      const DataProcessorWhiteList &whitelist,
+      const std::map<std::string, DataProcessorPreprocessingAlgorithm> &
+          preprocessMap,
+      const DataProcessorProcessingAlgorithm &processor,
+      const DataProcessorPostprocessingAlgorithm &postprocessor,
+      const std::map<std::string, std::string> &postprocessMap =
+          std::map<std::string, std::string>(),
+      const std::string &loader = "Load")
+      : GenericDataProcessorPresenter(whitelist, preprocessMap, processor,
+                                      postprocessor, postprocessMap, loader) {}
+
+  // Delegating constructor (no pre-processing required)
+  GenericDataProcessorPresenterNoThread(
+      const DataProcessorWhiteList &whitelist,
+      const DataProcessorProcessingAlgorithm &processor,
+      const DataProcessorPostprocessingAlgorithm &postprocessor)
+      : GenericDataProcessorPresenter(
+            whitelist,
+            std::map<std::string, DataProcessorPreprocessingAlgorithm>(),
+            processor, postprocessor) {}
+
+  // Destructor
+  ~GenericDataProcessorPresenterNoThread() override {}
+
+private:
+  // non-async row reduce
+  void startAsyncRowReduceThread(RowItem *rowItem, int groupIndex) override {
+    try {
+      reduceRow(&rowItem->second);
+      m_manager->update(groupIndex, rowItem->first, rowItem->second);
+    } catch (std::exception &ex) {
+      reductionError(ex);
+      threadFinished(1);
+    }
+    threadFinished(0);
+  }
+
+  // non-async group reduce
+  void startAsyncGroupReduceThread(GroupData &groupData) override {
+    try {
+      postProcessGroup(groupData);
+    } catch (std::exception &ex) {
+      reductionError(ex);
+      threadFinished(1);
+    }
+    threadFinished(0);
+  }
+
+  // Overriden non-async methods have same implementation as parent class
+  void process() override { GenericDataProcessorPresenter::process(); }
+  void plotRow() override { GenericDataProcessorPresenter::plotRow(); }
+  void plotGroup() override { GenericDataProcessorPresenter::process(); }
+};
+
 class GenericDataProcessorPresenterTest : public CxxTest::TestSuite {
 
 private:
@@ -1013,7 +1077,7 @@ public:
     NiceMock<MockDataProcessorView> mockDataProcessorView;
     NiceMock<MockProgressableView> mockProgress;
     NiceMock<MockMainPresenter> mockMainPresenter;
-    GenericDataProcessorPresenter presenter(
+    GenericDataProcessorPresenterNoThread presenter(
         createReflectometryWhiteList(), createReflectometryPreprocessMap(),
         createReflectometryProcessor(), createReflectometryPostprocessor());
     presenter.acceptViews(&mockDataProcessorView, &mockProgress);
@@ -1062,7 +1126,6 @@ public:
     EXPECT_CALL(mockDataProcessorView, requestNotebookPath()).Times(0);
 
     presenter.notify(DataProcessorPresenter::ProcessFlag);
-    presenter.thread()->wait(10);
 
     // Check output workspaces were created as expected
     TS_ASSERT(
@@ -1098,7 +1161,7 @@ public:
     NiceMock<MockDataProcessorView> mockDataProcessorView;
     NiceMock<MockProgressableView> mockProgress;
     NiceMock<MockMainPresenter> mockMainPresenter;
-    GenericDataProcessorPresenter presenter(
+    GenericDataProcessorPresenterNoThread presenter(
         createReflectometryWhiteList(), createReflectometryPreprocessMap(),
         createReflectometryProcessor(), createReflectometryPostprocessor());
     presenter.acceptViews(&mockDataProcessorView, &mockProgress);
@@ -1194,7 +1257,7 @@ public:
     NiceMock<MockDataProcessorView> mockDataProcessorView;
     NiceMock<MockProgressableView> mockProgress;
     NiceMock<MockMainPresenter> mockMainPresenter;
-    GenericDataProcessorPresenter presenter(
+    GenericDataProcessorPresenterNoThread presenter(
         createReflectometryWhiteList(), createReflectometryPreprocessMap(),
         createReflectometryProcessor(), createReflectometryPostprocessor());
     presenter.acceptViews(&mockDataProcessorView, &mockProgress);
@@ -1286,7 +1349,7 @@ public:
     NiceMock<MockDataProcessorView> mockDataProcessorView;
     NiceMock<MockProgressableView> mockProgress;
     NiceMock<MockMainPresenter> mockMainPresenter;
-    GenericDataProcessorPresenter presenter(
+    GenericDataProcessorPresenterNoThread presenter(
         createReflectometryWhiteList(), createReflectometryPreprocessMap(),
         createReflectometryProcessor(), createReflectometryPostprocessor());
     presenter.acceptViews(&mockDataProcessorView, &mockProgress);
@@ -1376,7 +1439,7 @@ public:
     NiceMock<MockDataProcessorView> mockDataProcessorView;
     NiceMock<MockProgressableView> mockProgress;
     NiceMock<MockMainPresenter> mockMainPresenter;
-    GenericDataProcessorPresenter presenter(
+    GenericDataProcessorPresenterNoThread presenter(
         createReflectometryWhiteList(), createReflectometryPreprocessMap(),
         createReflectometryProcessor(), createReflectometryPostprocessor());
     presenter.acceptViews(&mockDataProcessorView, &mockProgress);
@@ -1500,7 +1563,7 @@ public:
     NiceMock<MockDataProcessorView> mockDataProcessorView;
     NiceMock<MockProgressableView> mockProgress;
     NiceMock<MockMainPresenter> mockMainPresenter;
-    GenericDataProcessorPresenter presenter(
+    GenericDataProcessorPresenterNoThread presenter(
         createReflectometryWhiteList(), createReflectometryPreprocessMap(),
         createReflectometryProcessor(), createReflectometryPostprocessor());
     presenter.acceptViews(&mockDataProcessorView, &mockProgress);
@@ -3181,9 +3244,9 @@ public:
     EXPECT_CALL(mockDataProcessorView, setTableList(_)).Times(0);
     EXPECT_CALL(mockDataProcessorView, setOptionsHintStrategy(_, _)).Times(0);
     // Constructor (no pre-processing)
-    GenericDataProcessorPresenter presenter(createReflectometryWhiteList(),
-                                            createReflectometryProcessor(),
-                                            createReflectometryPostprocessor());
+    GenericDataProcessorPresenterNoThread presenter(
+        createReflectometryWhiteList(), createReflectometryProcessor(),
+        createReflectometryPostprocessor());
     // Verify expectations
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
 
@@ -3404,7 +3467,7 @@ public:
     NiceMock<MockMainPresenter> mockMainPresenter;
 
     std::map<std::string, std::string> postprocesssMap = {{"dQ/Q", "Params"}};
-    GenericDataProcessorPresenter presenter(
+    GenericDataProcessorPresenterNoThread presenter(
         createReflectometryWhiteList(), createReflectometryPreprocessMap(),
         createReflectometryProcessor(), createReflectometryPostprocessor(),
         postprocesssMap);

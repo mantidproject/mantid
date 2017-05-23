@@ -267,8 +267,8 @@ private:
   void nextGroup();
 
   // start thread for performing reduction on current row/group asynchronously
-  void startAsyncRowReduceThread();
-  void startAsyncGroupReduceThread();
+  virtual void startAsyncRowReduceThread(RowItem *rowItem, int groupIndex);
+  virtual void startAsyncGroupReduceThread(GroupData &groupData);
 
   // end reduction
   void endReduction();

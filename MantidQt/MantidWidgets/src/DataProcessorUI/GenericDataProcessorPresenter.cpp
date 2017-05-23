@@ -275,8 +275,8 @@ void GenericDataProcessorPresenter::nextRow() {
   }
 
   // Add processed row data to the group
-  int groupIndex = m_gqueue.front().first;
-  m_groupData[groupIndex] = m_rowItem.second;
+  int rowIndex = m_rowItem.first;
+  m_groupData[rowIndex] = m_rowItem.second;
   auto &rqueue = m_gqueue.front().second;
 
   if (!rqueue.empty()) {
@@ -285,7 +285,7 @@ void GenericDataProcessorPresenter::nextRow() {
     // Reduce next row
     m_rowItem = rqueue.front();
     rqueue.pop();
-    startAsyncRowReduceThread();
+    startAsyncRowReduceThread(&m_rowItem, m_gqueue.front().first);
   } else {
     m_gqueue.pop();
     // Set next action flag
@@ -293,7 +293,7 @@ void GenericDataProcessorPresenter::nextRow() {
 
     if (m_groupData.size() > 1) {
       // Multiple rows in containing group, do post-processing on the group
-      startAsyncGroupReduceThread();
+      startAsyncGroupReduceThread(m_groupData);
     } else {
       // Single row in containing group, skip to next group
       nextGroup();
@@ -320,7 +320,7 @@ void GenericDataProcessorPresenter::nextGroup() {
     auto &rqueue = m_gqueue.front().second;
     m_rowItem = rqueue.front();
     rqueue.pop();
-    startAsyncRowReduceThread();
+    startAsyncRowReduceThread(&m_rowItem, m_gqueue.front().first);
   } else {
     // If "Output Notebook" checkbox is checked then create an ipython notebook
     if (m_view->getEnableNotebook())
@@ -332,11 +332,12 @@ void GenericDataProcessorPresenter::nextGroup() {
 /*
 Reduce the current row asynchronously
 */
-void GenericDataProcessorPresenter::startAsyncRowReduceThread() {
+void GenericDataProcessorPresenter::startAsyncRowReduceThread(RowItem *rowItem,
+                                                              int groupIndex) {
 
   m_workerThread.reset();
   auto *worker = new GenericDataProcessorPresenterRowReducerWorker(
-      this, &m_rowItem, m_gqueue.front().first);
+      this, rowItem, groupIndex);
   m_workerThread =
       make_unique<GenericDataProcessorPresenterThread>(this, worker);
   m_workerThread->start();
@@ -345,7 +346,8 @@ void GenericDataProcessorPresenter::startAsyncRowReduceThread() {
 /*
 Reduce the current group asynchronously
 */
-void GenericDataProcessorPresenter::startAsyncGroupReduceThread() {
+void GenericDataProcessorPresenter::startAsyncGroupReduceThread(
+    GroupData &groupData) {
 
   m_workerThread.reset();
   auto *worker =

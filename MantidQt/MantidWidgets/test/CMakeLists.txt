@@ -10,6 +10,7 @@ if ( CXXTEST_FOUND )
 
   cxxtest_add_test ( MantidWidgetsTest ${TEST_FILES} )
   target_link_libraries( MantidWidgetsTest LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME}
+            MantidQtAPI
             MantidWidgets
             API
             DataObjects
