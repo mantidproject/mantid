@@ -124,16 +124,15 @@ void setAxesAndUnits(Workspace2D &outWS,
 
 /**
  * Find the start and end indices for a line profile.
- * @param start An output parameter for the start index.
- * @param end An output parameter for the end index.
  * @param bins Binning in a std::vector like container.
  * @param isBinEdges Whether bins contains edges or points.
  * @param lowerLimit A lower constraint.
  * @param upperLImit An upper constraint.
+ * @return The interval as pair.
  * @throw std::runtime_error if given constraints don't make sense.
  */
 template <typename Container>
-void startAndEnd(size_t &start, size_t &end, const Container &bins,
+std::pair<size_t, size_t> startAndEnd(const Container &bins,
                  const bool isBinEdges, const double lowerLimit,
                  const double upperLimit) {
   auto lowerIt = std::upper_bound(bins.cbegin(), bins.cend(), lowerLimit);
@@ -150,8 +149,9 @@ void startAndEnd(size_t &start, size_t &end, const Container &bins,
   if (isBinEdges && upperIt == bins.cend()) {
     --upperIt;
   }
-  start = std::distance(bins.cbegin(), lowerIt);
-  end = std::distance(bins.cbegin(), upperIt);
+  const auto start = std::distance(bins.cbegin(), lowerIt);
+  const auto end = std::distance(bins.cbegin(), upperIt);
+  return std::pair<size_t, size_t>{start, end};
 }
 
 /**
@@ -191,7 +191,7 @@ std::vector<double> extractVerticalBins(const Axis &axis,
  */
 template <typename Container, typename Function>
 void profile(std::vector<double> &Xs, std::vector<double> &Ys,
-             std::vector<double> &Es, const MatrixWorkspace_const_sptr &ws,
+             std::vector<double> &Es, MatrixWorkspace_const_sptr &ws,
              const LineDirection dir, const IndexLimits &limits,
              const Container &lineBins, const bool isBinEdges,
              Function modeFunction, const bool ignoreNans,
@@ -371,13 +371,9 @@ void LineProfile::exec() {
     bounds.right = centre + halfWidth;
   }
   // Convert the bounds from workspace units to indices.
-  size_t vertStart;
-  size_t vertEnd;
-  startAndEnd(vertStart, vertEnd, verticalBins, verticalIsBinEdges, bounds.top,
-              bounds.bottom);
-  size_t horStart;
-  size_t horEnd;
-  startAndEnd(horStart, horEnd, horizontalBins, horizontalIsBinEdges,
+  const auto vertInterval = startAndEnd(verticalBins, verticalIsBinEdges,
+              bounds.top, bounds.bottom);
+  const auto horInterval = startAndEnd(horizontalBins, horizontalIsBinEdges,
               bounds.left, bounds.right);
   // Choose mode.
   auto mode = createMode(getProperty(PropertyNames::MODE));
@@ -387,18 +383,18 @@ void LineProfile::exec() {
   std::vector<double> Xs;
   if (dir == LineDirection::horizontal) {
     IndexLimits limits;
-    limits.lineStart = horStart;
-    limits.lineEnd = horEnd;
-    limits.widthStart = vertStart;
-    limits.widthEnd = vertEnd;
+    limits.lineStart = horInterval.first;
+    limits.lineEnd = horInterval.second;
+    limits.widthStart = vertInterval.first;
+    limits.widthEnd = vertInterval.second;
     profile(Xs, profileYs, profileEs, ws, dir, limits, horizontalBins,
             horizontalIsBinEdges, mode, ignoreNans, ignoreInfs);
   } else {
     IndexLimits limits;
-    limits.lineStart = vertStart;
-    limits.lineEnd = vertEnd;
-    limits.widthStart = horStart;
-    limits.widthEnd = horEnd;
+    limits.lineStart = vertInterval.first;
+    limits.lineEnd = vertInterval.second;
+    limits.widthStart = horInterval.first;
+    limits.widthEnd = horInterval.second;
     profile(Xs, profileYs, profileEs, ws, dir, limits, verticalBins,
             verticalIsBinEdges, mode, ignoreNans, ignoreInfs);
   }
@@ -416,10 +412,10 @@ void LineProfile::exec() {
   // The actual profile might be of different size than what user
   // specified.
   Box actualBounds;
-  actualBounds.top = verticalBins[vertStart];
-  actualBounds.bottom = verticalBins[vertEnd];
-  actualBounds.left = horizontalBins[horStart];
-  actualBounds.right = horizontalBins[horEnd];
+  actualBounds.top = verticalBins[vertInterval.first];
+  actualBounds.bottom = verticalBins[vertInterval.second];
+  actualBounds.left = horizontalBins[horInterval.first];
+  actualBounds.right = horizontalBins[horInterval.second];
   setAxesAndUnits(*outWS, *ws, actualBounds, dir);
   setProperty(PropertyNames::OUTPUT_WORKSPACE, outWS);
 }
