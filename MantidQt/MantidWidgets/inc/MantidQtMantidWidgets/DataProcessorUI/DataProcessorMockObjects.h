@@ -42,6 +42,8 @@ public:
   MOCK_METHOD0(getEnableNotebook, bool());
   MOCK_METHOD0(expandAll, void());
   MOCK_METHOD0(collapseAll, void());
+  MOCK_METHOD0(pause, void());
+  MOCK_METHOD0(resume, void());
   MOCK_METHOD1(setSelection, void(const std::set<int> &rows));
   MOCK_METHOD1(setClipboard, void(const std::string &text));
 
@@ -51,10 +53,6 @@ public:
                void(const std::vector<std::string> &, const std::string &));
   MOCK_METHOD2(setOptionsHintStrategy,
                void(MantidQt::MantidWidgets::HintStrategy *, int));
-  MOCK_METHOD2(setToolbarActionEnabled, void(int, bool));
-  MOCK_METHOD2(setContextMenuActionEnabled, void(int, bool));
-  MOCK_METHOD1(setProcessButtonEnabled, void(bool));
-  MOCK_METHOD0(setSelectionModelConnections, void());
 
   // Settings
   MOCK_METHOD1(loadSettings, void(std::map<std::string, QVariant> &));
@@ -70,6 +68,7 @@ public:
   // Calls we don't care about
   void showTable(boost::shared_ptr<QAbstractItemModel>) override{};
   void saveSettings(const std::map<std::string, QVariant> &) override{};
+  void setSelectionModelConnections() override{};
 
   DataProcessorPresenter *getPresenter() const override { return nullptr; }
 };
@@ -91,7 +90,6 @@ public:
   MOCK_METHOD2(giveUserWarning, void(std::string, std::string));
   MOCK_METHOD2(giveUserCritical, void(std::string, std::string));
   MOCK_METHOD1(runPythonAlgorithm, std::string(const std::string &));
-  MOCK_METHOD2(setRowActionEnabled, void(int, bool));
   MOCK_CONST_METHOD0(getPreprocessingValues,
                      std::map<std::string, std::string>());
   MOCK_CONST_METHOD0(getPreprocessingProperties,
@@ -108,6 +106,9 @@ public:
   MOCK_CONST_METHOD0(getTimeSlicingType, std::string());
 
   // Data reduction paused/resumed handling
+  MOCK_CONST_METHOD0(pause, void());
+  MOCK_CONST_METHOD0(resume, void());
+  // Data reduction paused/resumed confirmation handling
   MOCK_CONST_METHOD0(confirmReductionPaused, void());
   MOCK_CONST_METHOD0(confirmReductionResumed, void());
 };

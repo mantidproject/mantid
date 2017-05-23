@@ -73,6 +73,10 @@ public:
   virtual void expandAll() = 0;
   virtual void collapseAll() = 0;
 
+  // Handle pause/resume of data reduction
+  virtual void pause() = 0;
+  virtual void resume() = 0;
+
   // Setter methods
   virtual void setTableList(const std::set<std::string> &tables) = 0;
   virtual void setInstrumentList(const std::vector<std::string> &instruments,
@@ -84,9 +88,6 @@ public:
                          int column) = 0;
   virtual void setClipboard(const std::string &text) = 0;
   virtual void setModel(const std::string &name) = 0;
-  virtual void setToolbarActionEnabled(int index, bool enabled) = 0;
-  virtual void setContextMenuActionEnabled(int index, bool enabled) = 0;
-  virtual void setProcessButtonEnabled(bool enabled) = 0;
 
   // Accessor methods
   virtual std::map<int, std::set<int>> getSelectedChildren() const = 0;

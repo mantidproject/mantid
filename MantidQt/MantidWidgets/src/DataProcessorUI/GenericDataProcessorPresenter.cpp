@@ -189,9 +189,8 @@ void GenericDataProcessorPresenter::acceptViews(
   // Start with a blank table
   newTable();
 
-  // Disable pause buttons accessible from view
-  m_view->setToolbarActionEnabled(1, false);
-  m_view->setContextMenuActionEnabled(1, false);
+  // The view should currently be in the paused state
+  m_view->pause();
 
   // Setup table selection model connections
   m_view->setSelectionModelConnections();
@@ -653,6 +652,16 @@ std::string GenericDataProcessorPresenter::getPostprocessedWorkspaceName(
     outputNames.push_back(getReducedWorkspaceName(data.second));
   }
   return prefix + boost::join(outputNames, "_");
+}
+
+/**
+Sets the state of whether a new table selection has been made
+@param newSelectionMade : Boolean on setting new table selection state
+*/
+void GenericDataProcessorPresenter::setNewSelectionState(
+    bool newSelectionMade) {
+
+  m_newSelection = newSelectionMade;
 }
 
 /** Loads a run found from disk or AnalysisDataService
@@ -1444,14 +1453,8 @@ the current thread for reducing a row or group has finished
 */
 void GenericDataProcessorPresenter::pause() {
 
-  // Enable process buttons and disable pause buttons
-  m_view->setToolbarActionEnabled(0, true);
-  m_view->setContextMenuActionEnabled(0, true);
-  m_view->setProcessButtonEnabled(true);
-  m_mainPresenter->setRowActionEnabled(0, true);
-  m_view->setToolbarActionEnabled(1, false);
-  m_view->setContextMenuActionEnabled(1, false);
-  m_mainPresenter->setRowActionEnabled(1, false);
+  m_view->pause();
+  m_mainPresenter->pause();
 
   m_reductionPaused = true;
 }
@@ -1460,14 +1463,8 @@ void GenericDataProcessorPresenter::pause() {
 */
 void GenericDataProcessorPresenter::resume() {
 
-  // Disable process buttons and enable pause buttons
-  m_view->setToolbarActionEnabled(0, false);
-  m_view->setContextMenuActionEnabled(0, false);
-  m_view->setProcessButtonEnabled(false);
-  m_mainPresenter->setRowActionEnabled(0, false);
-  m_view->setToolbarActionEnabled(1, true);
-  m_view->setContextMenuActionEnabled(1, true);
-  m_mainPresenter->setRowActionEnabled(1, true);
+  m_view->resume();
+  m_mainPresenter->resume();
 
   m_reductionPaused = false;
   m_mainPresenter->notify(
@@ -1517,8 +1514,8 @@ void GenericDataProcessorPresenter::accept(
   // Notify workspace receiver with the list of valid workspaces as soon as it
   // is registered
   m_mainPresenter->notify(DataProcessorMainPresenter::Flag::ADSChangedFlag);
-  // Disable pause button accessible from main presenter
-  m_mainPresenter->setRowActionEnabled(1, false);
+  // Presenter should initially be in the paused state
+  m_mainPresenter->pause();
 }
 
 /** Returs the list of valid workspaces currently in the ADS

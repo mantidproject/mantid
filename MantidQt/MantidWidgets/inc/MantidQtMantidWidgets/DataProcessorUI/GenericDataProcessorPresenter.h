@@ -122,6 +122,8 @@ public:
   // Get the name of a post-processed workspace
   std::string getPostprocessedWorkspaceName(const GroupData &groupData,
                                             const std::string &prefix = "");
+  // Set the state of whether a new selection has been made
+  void setNewSelectionState(bool newSelectionMade);
 
   ParentItems selectedParents() const override;
   ChildItems selectedChildren() const override;

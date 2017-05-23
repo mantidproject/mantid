@@ -229,6 +229,36 @@ Collapse all currently expanded groups
 void QDataProcessorWidget::collapseAll() { ui.viewTable->collapseAll(); }
 
 /**
+Handle interface when data reduction paused
+*/
+void QDataProcessorWidget::pause() {
+
+  // Enable 'resume' buttons
+  ui.rowToolBar->actions()[0]->setEnabled(true);
+  m_contextMenu->actions()[0]->setEnabled(true);
+  ui.buttonProcess->setEnabled(true);
+
+  // Disable 'pause' buttons
+  ui.rowToolBar->actions()[1]->setEnabled(false);
+  m_contextMenu->actions()[1]->setEnabled(false);
+}
+
+/**
+Handle interface when data reduction resumed
+*/
+void QDataProcessorWidget::resume() {
+
+  // Enable 'resume' buttons
+  ui.rowToolBar->actions()[0]->setEnabled(false);
+  m_contextMenu->actions()[0]->setEnabled(false);
+  ui.buttonProcess->setEnabled(false);
+
+  // Disable 'pause' buttons
+  ui.rowToolBar->actions()[1]->setEnabled(true);
+  m_contextMenu->actions()[1]->setEnabled(true);
+}
+
+/**
 Save settings
 @param options : map of user options to save
 */
@@ -345,34 +375,6 @@ Sets the contents of the system's clipboard
 */
 void QDataProcessorWidget::setClipboard(const std::string &text) {
   QApplication::clipboard()->setText(QString::fromStdString(text));
-}
-
-/**
-Sets a specific action in the row toolbar enabled or disabled
-@param index : The index of the action in the toolbar
-@param enabled : Whether to enable or disable the action
-*/
-void QDataProcessorWidget::setToolbarActionEnabled(int index, bool enabled) {
-  ui.rowToolBar->actions()[index]->setEnabled(enabled);
-}
-
-/**
-Sets a specific action in the context menu enabled or disabled
-@param index : The index of the action in the context menu
-@param enabled : Whether to enable or disable the action
-*/
-void QDataProcessorWidget::setContextMenuActionEnabled(int index,
-                                                       bool enabled) {
-  m_contextMenu->actions()[index]->setEnabled(enabled);
-}
-
-/**
-Sets the process button enabled or disabled
-@param enabled : Whether to enable or disable the button
-*/
-void QDataProcessorWidget::setProcessButtonEnabled(bool enabled) {
-
-  ui.buttonProcess->setEnabled(enabled);
 }
 
 /**

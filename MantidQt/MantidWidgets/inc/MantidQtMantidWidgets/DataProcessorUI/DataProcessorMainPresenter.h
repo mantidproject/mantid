@@ -56,7 +56,6 @@ public:
   virtual void giveUserWarning(std::string prompt, std::string title) = 0;
   virtual void giveUserCritical(std::string prompt, std::string title) = 0;
   virtual std::string runPythonAlgorithm(const std::string &algorithm) = 0;
-  virtual void setRowActionEnabled(int index, bool enabled) = 0;
 
   /// Return values to perform pre-processing on
   virtual std::map<std::string, std::string> getPreprocessingValues() const = 0;
@@ -74,7 +73,11 @@ public:
   virtual std::string getTimeSlicingValues() const = 0;
   /// Return time-slicing type
   virtual std::string getTimeSlicingType() const = 0;
-  
+
+  /// Handle data reduction paused/resumed
+  virtual void pause() const = 0;
+  virtual void resume() const = 0;
+
   /// Handle data reduction paused/resumed confirmation
   virtual void confirmReductionPaused() const = 0;
   virtual void confirmReductionResumed() const = 0;

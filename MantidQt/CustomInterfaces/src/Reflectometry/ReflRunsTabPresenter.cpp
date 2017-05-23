@@ -433,6 +433,20 @@ std::string ReflRunsTabPresenter::getTimeSlicingType() const {
   return m_mainPresenter->getTimeSlicingType(m_view->getSelectedGroup());
 }
 
+/** Tells view to enable the process button when data reduction is paused
+*/
+void ReflRunsTabPresenter::pause() const {
+
+  m_view->setRowActionEnabled(1, true);
+}
+
+/** Tells view to disable the process button when data reduction is resumed
+*/
+void ReflRunsTabPresenter::resume() const {
+
+  m_view->setRowActionEnabled(1, false);
+}
+
 /** Notifies main presenter that data reduction is confirmed to be paused
 */
 void ReflRunsTabPresenter::confirmReductionPaused() const {
@@ -506,16 +520,6 @@ std::string
 ReflRunsTabPresenter::runPythonAlgorithm(const std::string &pythonCode) {
 
   return m_mainPresenter->runPythonAlgorithm(pythonCode);
-}
-
-/**
-Tells the view to set a specific action in the "Edit" menu enabled or disabled
-* @param index : The index of the action in the "Edit" menu
-* @param enabled : Whether to enable or disable the action
-*/
-void ReflRunsTabPresenter::setRowActionEnabled(int index, bool enabled) {
-
-  m_view->setRowActionEnabled(index, enabled);
 }
 
 /** Changes the current instrument in the data processor widget. Also updates
