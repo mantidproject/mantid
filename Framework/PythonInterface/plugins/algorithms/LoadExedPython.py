@@ -88,7 +88,6 @@ class LoadEXED(PythonAlgorithm):
         in order to fully replace the C++ version of LoadEXED,
         improve the treatment of the monitor spectra and Bring Exed into the Mantid Distribution."""
 
-
     def PyInit(self):
         self.declareProperty(FileProperty(name="Filename",defaultValue = "",
                                           action=FileAction.Load,
@@ -104,7 +103,6 @@ class LoadEXED(PythonAlgorithm):
                                                      defaultValue = "",
                                                      direction=Direction.Output),
                              doc="Mantid workspace containing the measured data.")
-
 
     def PyExec(self):
         from mantid.simpleapi import LoadInstrument
