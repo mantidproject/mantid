@@ -22,6 +22,9 @@ Engineering Diffraction
 Powder Diffraction
 ------------------
 
+- ISIS Powder diffraction scripts have been released. These include support for
+  GEM, PEARL and POLARIS instruments. For more details see the ISIS Powder documentation
+  under API, Python category. 
 - :ref:`AlignAndFocusPowder <algm-AlignAndFocusPowder>` Now supports supplying an a second ``.cal`` file for the ``GroupingFilename``.
 - New algorithm :ref:`AlignAndFocusPowderFromFiles <algm-AlignAndFocusPowderFromFiles>` is a wrapper around :ref:`AlignAndFocusPowder <algm-AlignAndFocusPowder>` which supports caching results
 - Bugfix in :ref:`SNAPReduce <algm-SNAPReduce>` with loading previous normalizations
