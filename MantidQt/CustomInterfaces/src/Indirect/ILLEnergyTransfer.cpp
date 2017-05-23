@@ -54,7 +54,8 @@ bool ILLEnergyTransfer::validate() {
     m_backScaling = m_uiForm.leBackgroundFactor->text().toDouble(&isDouble);
     if ((!isDouble || m_backScaling <= 0) &&
         !m_uiForm.rfBackgroundRun->getUserInput().toString().isEmpty()) {
-      uiv.addErrorMessage("BackgroundScaleFactor is invalid.");
+      uiv.addErrorMessage("BackgroundScaleFactor is invalid. "
+                          "It has to be a positive number.");
     }
   }
 
@@ -93,8 +94,8 @@ bool ILLEnergyTransfer::validate() {
     m_backCalibScaling = m_uiForm.leBackCalibScale->text().toDouble(&isDouble);
     if ((!isDouble || m_backCalibScaling <= 0) &&
         !m_uiForm.rfBackCalibrationRun->getUserInput().toString().isEmpty()) {
-      uiv.addErrorMessage(
-          "Scale factor for calibration background is invalid.");
+      uiv.addErrorMessage("Scale factor for calibration background is invalid. "
+                          "It has to be a positive number.");
     }
   }
 
