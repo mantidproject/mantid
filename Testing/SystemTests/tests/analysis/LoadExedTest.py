@@ -11,8 +11,8 @@ class LoadExedTest(stresstesting.MantidStressTest):
         print("Rawfilename:"+rawfile)
         ms.LoadEXED(Filename=rawfile, OutputWorkspace='test')
         # check that it did create a workspace.
-        self.assertTrue(mtd.doesExist('test'))
+        self.assertTrue(ms.mtd.doesExist('test'))
         #check that it has the correct number of histograms
-        self.assertEquals(mtd['test'].getNumberHistograms(),20400)
+        self.assertEquals(ms.mtd['test'].getNumberHistograms(),20400)
         #check that phi sample Log is correct
-        self.assertEquals(mtd['test'].getRun().getLogData('phi').value,'-6.000005')
+        self.assertEquals(ms.mtd['test'].getRun().getLogData('phi').value,'-6.000005')

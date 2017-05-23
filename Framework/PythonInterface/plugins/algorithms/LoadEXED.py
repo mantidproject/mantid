@@ -108,13 +108,13 @@ class LoadEXED(PythonAlgorithm):
     def PyExec(self):
         from mantid.simpleapi import LoadInstrument
         #from mantid.simpleapi import LoadExedHelper
-        from mantid.simpleapi import CreateWorkspace
+        #from mantid.simpleapi import CreateWorkspace
         from mantid.simpleapi import AddSampleLog
         from mantid.simpleapi import SetGoniometer
         from mantid.simpleapi import ExtractSpectra
         from mantid.simpleapi import MaskDetectors
         from mantid.simpleapi import RemoveMaskedSpectra
-        from mantid.simpleapi import mtd
+        #from mantid.simpleapi import mtd
 
         #self.LoadRaw()
 
@@ -138,7 +138,7 @@ class LoadEXED(PythonAlgorithm):
         #                NSpec=nrows,UnitX='TOF',WorkspaceTitle='Data',YUnitLabel='Counts')
         nr,nc=ydata.shape
         ws = WorkspaceFactory.create("Workspace2D", NVectors=nr,
-                    XLength=nc+1, YLength=nc)
+                                     XLength=nc+1, YLength=nc)
         for i in range(nrows):
             ws.setX(i, xdata)
             ws.setY(i, ydata[i])
