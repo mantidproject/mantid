@@ -2,6 +2,7 @@ from __future__ import (absolute_import, division, print_function)
 
 import mantid
 import io
+import six
 import sys
 import unittest
 
@@ -216,7 +217,7 @@ class ISISPowderSampleDetailsTest(unittest.TestCase):
         expected_number_density = 1.2345
 
         # Redirect std out to a capture object
-        std_out_buffer = io.StringIO()
+        std_out_buffer = get_std_out_buffer_obj()
         sys.stdout = std_out_buffer
 
         sample_details_obj = sample_details.SampleDetails(height=expected_height, radius=expected_radius,
@@ -230,7 +231,7 @@ class ISISPowderSampleDetailsTest(unittest.TestCase):
         assertRegex(self, captured_std_out_default, "Material has not been set")
 
         # Test with material set but not number density
-        sys.stdout = std_out_buffer = io.StringIO()
+        sys.stdout = std_out_buffer = get_std_out_buffer_obj()
         sample_details_obj.set_material(chemical_formula=chemical_formula)
         sample_details_obj.print_sample_details()
         captured_std_out_material_default = std_out_buffer.getvalue()
@@ -239,7 +240,7 @@ class ISISPowderSampleDetailsTest(unittest.TestCase):
         assertRegex(self, captured_std_out_material_default, "Number Density: Set from elemental properties")
 
         # Test with material and number density
-        sys.stdout = std_out_buffer = io.StringIO()
+        sys.stdout = std_out_buffer = get_std_out_buffer_obj()
         sample_details_obj.reset_sample_material()
         sample_details_obj.set_material(chemical_formula=chemical_formula_two, number_density=expected_number_density)
         sample_details_obj.print_sample_details()
@@ -256,7 +257,7 @@ class ISISPowderSampleDetailsTest(unittest.TestCase):
         expected_scattering_x_section = 5.32
 
         # Test with material set
-        sys.stdout = std_out_buffer = io.StringIO()
+        sys.stdout = std_out_buffer = get_std_out_buffer_obj()
         sample_details_obj.set_material_properties(absorption_cross_section=expected_abs_x_section,
                                                    scattering_cross_section=expected_scattering_x_section)
         sample_details_obj.print_sample_details()
@@ -267,6 +268,16 @@ class ISISPowderSampleDetailsTest(unittest.TestCase):
 
         # Ensure std IO is restored. Do NOT remove this line as all std out will pipe into our buffer otherwise
         sys.stdout = sys.__stdout__
+
+
+def get_std_out_buffer_obj():
+    # Because of the way that strings and bytes
+    # have changed between Python 2/3 we need to
+    # return a buffer which is appropriate to the current version
+    if six.PY2:
+        return io.BytesIO()
+    elif six.PY3:
+        return io.StringIO()
 
 if __name__ == "__main__":
     unittest.main()
