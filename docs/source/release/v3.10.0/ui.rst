@@ -19,6 +19,7 @@ User Interface
 
 - MantidPlot now respects the system scaling on high-resolution displays. All icons and bitmaps will now be sized
   appropriately rather than being too small to be usable (Windows only).
+- Choosing 'Show Detectors' for a workspace will now also show the time indexes for scanning workspaces.
 - A new Print button has been added to the MantidPlot help window.
 - Masked bins are greyed out in the table view of the workspaces (except for EventWorkspaces):
 
