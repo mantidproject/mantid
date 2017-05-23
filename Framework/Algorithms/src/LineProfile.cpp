@@ -287,7 +287,8 @@ const std::string LineProfile::summary() const {
 void LineProfile::init() {
   const auto mandatoryDouble = boost::make_shared<MandatoryValidator<double>>();
   const auto positiveDouble = boost::make_shared<BoundedValidator<double>>();
-  positiveDouble->setLowerExclusive(0.0);
+  positiveDouble->setLower(0.0);
+  positiveDouble->setLowerExclusive(true);
   const auto mandatoryPositiveDouble = boost::make_shared<CompositeValidator>();
   mandatoryPositiveDouble->add(mandatoryDouble);
   mandatoryPositiveDouble->add(positiveDouble);

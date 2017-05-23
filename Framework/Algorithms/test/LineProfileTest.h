@@ -269,6 +269,17 @@ public:
     TS_ASSERT(!alg.isExecuted())
   }
 
+  void test_failure_with_non_positive_width() {
+    LineProfile alg;
+    alg.setChild(true);
+    alg.setRethrows(true);
+    TS_ASSERT_THROWS_NOTHING(alg.initialize())
+    TS_ASSERT(alg.isInitialized())
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("HalfWidth", std::numeric_limits<double>::min()))
+    TS_ASSERT_THROWS_ANYTHING(alg.setProperty("HalfWidth", 0.0))
+    TS_ASSERT_THROWS_ANYTHING(alg.setProperty("HalfWidth", -1.0))
+  }
+
   void test_ignore_special_values() {
     const size_t nHist = 13;
     const size_t nBins = 23;
