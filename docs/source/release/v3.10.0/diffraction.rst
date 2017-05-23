@@ -15,6 +15,7 @@ Crystal Improvements
  - :ref:`SaveIsawPeaks <algm-SaveIsawPeaks>` now saves the calibration data for all detector banks in instrument so the header may be longer
  - :ref:`LoadIsawPeaks <algm-LoadIsawPeaks>` now uses the calibration lines to calibrate the detectors banks for CORELLI
  - :ref:SCD Event Data Reduction interface and SCD_Reduction python scripts work with both nxs and h5 extensions for data file.
+ - New algorithm :ref:`algm-IntegrateEllipsoidsTwoStep` which can be used to integrate weak peaks by using parameters derived from strong peaks.
  - :ref:`FindSxPeaks <algm-FindSXPeaks>` Resolved an issue where the algorithm failed on instruments with multiple detectors per spectrum.
 
 Engineering Diffraction
