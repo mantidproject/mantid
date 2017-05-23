@@ -84,7 +84,7 @@ class SaveYDATest(unittest.TestCase):
         self.assertEqual(coord[0], "Coord:\n")
         self.assertEqual(coord[1], "  x: {name: w, unit: meV}\n")
         self.assertEqual(coord[2], "  y: {name: \'S(q,w)\', unit: meV-1}\n")
-        self.assertEqual(coord[3], "  z: {name: 2th, unit: deg}\n")
+        self.assertEqual(coord[3], "  z: [{name: 2th, unit: deg}]\n")
 
         ws = self._create_workspace(yAxSpec=False)
         f = self._file(ws, "File")
@@ -98,7 +98,7 @@ class SaveYDATest(unittest.TestCase):
         self.assertEqual(coord[0], "Coord:\n")
         self.assertEqual(coord[1], "  x: {name: w, unit: meV}\n")
         self.assertEqual(coord[2], "  y: {name: \'S(q,w)\', unit: meV-1}\n")
-        self.assertEqual(coord[3], "  z: {name: q, unit: A-1}\n")
+        self.assertEqual(coord[3], "  z: [{name: q, unit: A-1}]\n")
 
     def test_rpar(self):
         """ Test save RPar from workspace with and without sample logs
@@ -121,7 +121,7 @@ class SaveYDATest(unittest.TestCase):
         self.assertEqual(r_par[8], "    stdv: 0\n")
 
         r_par = []
-        #workspace with no sample logs
+        # workspace with no sample logs
         for i in range(10):
             s = self._no_sample_file.readline()
             if i >= 9:

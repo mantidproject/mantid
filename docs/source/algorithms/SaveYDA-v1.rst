@@ -73,7 +73,7 @@ Usage
     Coord:
       x: {name: w, unit: meV}
       y: {name: 'S(q,w)', unit: meV-1}
-      z: {name: 2th, unit: deg}
+      z: [{name: 2th, unit: deg}]
 
 .. testcleanup:: SaveYDAExample
 

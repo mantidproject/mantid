@@ -69,12 +69,8 @@ class SaveYDA(PythonAlgorithm):
         """ Main execution body
         """
         # Properties
-        ws = mtd[self.getPropertyValue("InputWorkspace")]
+        ws = self.getProperty("InputWorkspace").value
         filename = self.getProperty("Filename").value
-
-        # check workspace exists
-        if not ws:
-            raise NotImplementedError("InputWorkspace does not exist")
 
         run = ws.getRun()
         ax = ws.getAxis(1)
@@ -124,7 +120,7 @@ class SaveYDA(PythonAlgorithm):
             temp = OrderedDict()
             temp["name"] = "T"
             temp["unit"] = "K"
-            temp["val"] = temperature
+            temp["val"] = round(temperature, 14)
             temp["stdv"] = 0
 
             rpar.append(temp)
@@ -137,7 +133,7 @@ class SaveYDA(PythonAlgorithm):
             ei = OrderedDict()
             ei["name"] = "Ei"
             ei["unit"] = "meV"
-            ei["val"] = eimeV
+            ei["val"] = round(eimeV, 14)
             ei["stdv"] = 0
 
             rpar.append(ei)
@@ -151,9 +147,7 @@ class SaveYDA(PythonAlgorithm):
         x["name"] = "w"
         x["unit"] = "meV"
 
-        # set_flow style is used to keep the Frida 2.0 yaml format
         coord["x"] = x
-        #coord["x"].fa.set_flow_style()
 
         y = FlowOrderedDict()
 
@@ -174,7 +168,8 @@ class SaveYDA(PythonAlgorithm):
         z["name"] = zname
         z["unit"] = zunit
 
-        coord["z"] = z
+        coord["z"] = FlowList()
+        coord["z"].append(z)
 
         slices = []
 
@@ -189,11 +184,13 @@ class SaveYDA(PythonAlgorithm):
                 detector = ws.getDetector(i)
                 # convert radians to degrees
                 twoTheta = detector.getTwoTheta(samplePos, beamPos)*180/math.pi
+                twoTheta = round(twoTheta, 14)
                 bin.append(twoTheta)
         elif ax.length() == nHist:
             # if y axis contains bin centers
             for i in range(ax.length()):
-                bin.append(ax.getValue())
+                xval = round(ax.getValue(), 14)
+                bin.append(xval)
         else:
             # get the bin centers not the bin edges
             bin = self._get_bin_centers(ax)
@@ -221,7 +218,7 @@ class SaveYDA(PythonAlgorithm):
 
             ys = ws.dataY(i)
             # y is dataY of the workspace
-            yy = [float(j) for j in ys]
+            yy = [float(round(j, 14)) for j in ys]
             slicethis["y"] = FlowList(yy)
 
             slices.append(slicethis)
@@ -251,7 +248,8 @@ class SaveYDA(PythonAlgorithm):
         bin = []
 
         for i in range(1, ax.size):
-                bin.append((ax[i]+ax[i-1])/2)
+            axval = round((ax[i]+ax[i-1])/2, 14)
+            bin.append(axval)
 
         return bin
 
