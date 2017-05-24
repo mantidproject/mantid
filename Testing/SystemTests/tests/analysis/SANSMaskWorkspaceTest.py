@@ -144,9 +144,8 @@ class SANSMaskWorkspaceTest(unittest.TestCase):
             expected_spectra.extend(((start_elem + 9) + y * 512 for start_elem in range(start, stop + 1)
                                      for y in range(0, 120)))
 
-        mask_builder.set_single_spectra(single_spectra)
-        mask_builder.set_spectrum_range_start(spectrum_range_start)
-        mask_builder.set_spectrum_range_stop(spectrum_range_stop)
+        mask_builder.set_single_spectra_on_detector(single_spectra)
+        mask_builder.set_spectrum_range_on_detector(spectrum_range_start, spectrum_range_stop)
         mask_builder.set_LAB_single_horizontal_strip_mask(single_horizontal_strip_masks)
         mask_builder.set_LAB_range_horizontal_strip_start(range_horizontal_strip_start)
         mask_builder.set_LAB_range_horizontal_strip_stop(range_horizontal_strip_stop)
