@@ -24,6 +24,7 @@ Engineering Diffraction
 Powder Diffraction
 ------------------
 
+- New instrument definition files are added for D1B, D4, and D20 powder/liquid diffractometers at ILL. The source and monitor positions, as well as detector to sample distance have been corrected for existing D2B.
 - New IDF for the POWGEN upgrade
 - :ref:`AlignAndFocusPowder <algm-AlignAndFocusPowder>` Now supports supplying an a second ``.cal`` file for the ``GroupingFilename``.
 - New algorithm :ref:`AlignAndFocusPowderFromFiles <algm-AlignAndFocusPowderFromFiles>` is a wrapper around :ref:`AlignAndFocusPowder <algm-AlignAndFocusPowder>` which supports caching results. :ref:`SNSPowderReduction <algm-SNSPowderReduction>` and :ref:`PDToPDFgetN <algm-PDToPDFgetN>` have been reworked to take advantage of this.
