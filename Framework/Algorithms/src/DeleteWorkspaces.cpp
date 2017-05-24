@@ -35,7 +35,7 @@ void DeleteWorkspaces::exec() {
       deleteAlg->setPropertyValue("Workspace", wsName);
       bool success = deleteAlg->execute();
       if (!deleteAlg->isExecuted() || !success) {
-        g_log.error() << "Failed to delete " <<  wsName << ".\n";
+        g_log.error() << "Failed to delete " << wsName << ".\n";
       }
     }
     prog.report();

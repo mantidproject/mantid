@@ -81,7 +81,7 @@ public:
     dataStore.clear();
   }
 
-  void test_ignore_group_if_workspaces_inside_get_deleted_first(){
+  void test_ignore_group_if_workspaces_inside_get_deleted_first() {
     using namespace Mantid::API;
     using namespace Mantid::DataObjects;
 
@@ -95,7 +95,8 @@ public:
     const std::string groupName = "DeleteWorkspaces_testGroup";
     Mantid::Algorithms::GroupWorkspaces groupingAlg;
     groupingAlg.initialize();
-    groupingAlg.setPropertyValue("InputWorkspaces", testName1 + "," + testName2);
+    groupingAlg.setPropertyValue("InputWorkspaces",
+                                 testName1 + "," + testName2);
     groupingAlg.setPropertyValue("OutputWorkspace", groupName);
     groupingAlg.execute();
     TS_ASSERT_EQUALS(dataStore.size(), storeSizeAtStart + 3);
@@ -103,7 +104,8 @@ public:
     Mantid::Algorithms::DeleteWorkspaces alg;
     alg.initialize();
     alg.setRethrows(true);
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("WorkspaceList", testName1 + ", " + testName2 + ", " + groupName));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue(
+        "WorkspaceList", testName1 + ", " + testName2 + ", " + groupName));
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
 
