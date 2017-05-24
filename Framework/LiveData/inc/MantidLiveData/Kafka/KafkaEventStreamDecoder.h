@@ -47,7 +47,8 @@ public:
   KafkaEventStreamDecoder(std::shared_ptr<IKafkaBroker> broker,
                           const std::string &eventTopic,
                           const std::string &runInfoTopic,
-                          const std::string &spDetTopic);
+                          const std::string &spDetTopic,
+                          const std::string &sampleEnvTopic);
   ~KafkaEventStreamDecoder();
   KafkaEventStreamDecoder(const KafkaEventStreamDecoder &) = delete;
   KafkaEventStreamDecoder &operator=(const KafkaEventStreamDecoder &) = delete;
@@ -105,6 +106,7 @@ private:
   const std::string m_eventTopic;
   const std::string m_runInfoTopic;
   const std::string m_spDetTopic;
+  const std::string m_sampleEnvTopic;
   /// Flag indicating if user interruption has been requested
   std::atomic<bool> m_interrupt;
   /// Subscriber for the event stream

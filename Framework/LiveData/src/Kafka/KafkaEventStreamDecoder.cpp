@@ -83,11 +83,13 @@ using Kernel::DateAndTime;
  */
 KafkaEventStreamDecoder::KafkaEventStreamDecoder(
     std::shared_ptr<IKafkaBroker> broker, const std::string &eventTopic,
-    const std::string &runInfoTopic, const std::string &spDetTopic)
+    const std::string &runInfoTopic, const std::string &spDetTopic,
+    const std::string &sampleEnvTopic)
     : m_broker(broker), m_eventTopic(eventTopic), m_runInfoTopic(runInfoTopic),
-      m_spDetTopic(spDetTopic), m_interrupt(false), m_localEvents(),
-      m_specToIdx(), m_runStart(), m_runNumber(-1), m_thread(),
-      m_capturing(false), m_exception(), m_extractWaiting(false) {}
+      m_spDetTopic(spDetTopic), m_sampleEnvTopic(sampleEnvTopic),
+      m_interrupt(false), m_localEvents(), m_specToIdx(), m_runStart(),
+      m_runNumber(-1), m_thread(), m_capturing(false), m_exception(),
+      m_extractWaiting(false) {}
 
 /**
  * Destructor.
@@ -111,11 +113,12 @@ void KafkaEventStreamDecoder::startCapture(bool startNow) {
     auto startTimeMilliseconds =
         runStartData.startTime * 1000; // seconds to milliseconds
     m_eventStream = m_broker->subscribe(
-        {m_eventTopic, m_runInfoTopic},
+        {m_eventTopic, m_runInfoTopic, m_sampleEnvTopic},
         static_cast<int64_t>(startTimeMilliseconds), SubscribeAtOption::TIME);
   } else {
-    m_eventStream = m_broker->subscribe({m_eventTopic, m_runInfoTopic},
-                                        SubscribeAtOption::LATEST);
+    m_eventStream =
+        m_broker->subscribe({m_eventTopic, m_runInfoTopic, m_sampleEnvTopic},
+                            SubscribeAtOption::LATEST);
   }
 
   // Get last two messages in run topic to ensure we get a runStart message
