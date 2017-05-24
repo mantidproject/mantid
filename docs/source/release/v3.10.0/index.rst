@@ -7,7 +7,7 @@ Mantid 3.10.0 Release Notes
    :width: 550px
    :align: right
 
-   Surface plot of a temperature rampe from 1.5 to 293 Kelvin, recorded on WISH
+   Surface plot of a temperature ramp from 1.5 to 293 Kelvin, recorded on WISH
 
 .. contents:: Table of Contents
    :local:
