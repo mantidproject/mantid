@@ -15,6 +15,7 @@ Crystal Improvements
  - :ref:`SaveIsawPeaks <algm-SaveIsawPeaks>` now saves the calibration data for all detector banks in instrument so the header may be longer
  - :ref:`LoadIsawPeaks <algm-LoadIsawPeaks>` now uses the calibration lines to calibrate the detectors banks for CORELLI
  - :ref:SCD Event Data Reduction interface and SCD_Reduction python scripts work with both nxs and h5 extensions for data file.
+ - New algorithm :ref:`algm-IntegrateEllipsoidsTwoStep` which can be used to integrate weak peaks by using parameters derived from strong peaks.
  - :ref:`FindSxPeaks <algm-FindSXPeaks>` Resolved an issue where the algorithm failed on instruments with multiple detectors per spectrum.
 
 Engineering Diffraction
@@ -23,6 +24,8 @@ Engineering Diffraction
 Powder Diffraction
 ------------------
 
+- New instrument definition files are added for D1B, D4, and D20 powder/liquid diffractometers at ILL. The source and monitor positions, as well as detector to sample distance have been corrected for existing D2B.
+- New IDF for the POWGEN upgrade
 - :ref:`AlignAndFocusPowder <algm-AlignAndFocusPowder>` Now supports supplying an a second ``.cal`` file for the ``GroupingFilename``.
 - New algorithm :ref:`AlignAndFocusPowderFromFiles <algm-AlignAndFocusPowderFromFiles>` is a wrapper around :ref:`AlignAndFocusPowder <algm-AlignAndFocusPowder>` which supports caching results. :ref:`SNSPowderReduction <algm-SNSPowderReduction>` and :ref:`PDToPDFgetN <algm-PDToPDFgetN>` have been reworked to take advantage of this.
 - Bugfix in :ref:`SNAPReduce <algm-SNAPReduce>` with loading previous normalizations
@@ -40,3 +43,5 @@ Single Crystal Diffraction
 Full list of `diffraction <https://github.com/mantidproject/mantid/issues?q=is%3Aclosed+milestone%3A%22Release+3.10%22+label%3A%22Component%3A+Diffraction%22>`_
 and
 `imaging <https://github.com/mantidproject/mantid/issues?q=is%3Aclosed+milestone%3A%22Release+3.10%22+label%3A%22Component%3A+Imaging%22>`_ changes on GitHub.
+
+- HB3A reduction interface (application) now supports to integrate single crystal peaks by fitting peak intensity with 2D Gaussian with more detailed integraton information for user.

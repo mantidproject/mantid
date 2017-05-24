@@ -20,11 +20,11 @@ set ( SRC_FILES
 	src/BinaryOperation.cpp
 	src/CalMuonDeadTime.cpp
 	src/CalMuonDetectorPhases.cpp
-	src/CalculateMuonAsymmetry.cpp
 	src/CalculateCountRate.cpp
 	src/CalculateDIFC.cpp
 	src/CalculateEfficiency.cpp
 	src/CalculateFlatBackground.cpp
+	src/CalculateMuonAsymmetry.cpp
 	src/CalculateResolution.cpp
 	src/CalculateSlits.cpp
 	src/CalculateTransmission.cpp
@@ -160,6 +160,7 @@ set ( SRC_FILES
 	src/InterpolatingRebin.cpp
 	src/InterpolationOption.cpp
 	src/InvertMask.cpp
+	src/LineProfile.cpp
 	src/Logarithm.cpp
 	src/LorentzCorrection.cpp
 	src/MagFormFactorCorrection.cpp
@@ -309,7 +310,7 @@ set ( SRC_FILES
 	src/XDataConverter.cpp
 )
 
-set ( INC_FILES	
+set ( INC_FILES
 	inc/MantidAlgorithms/AbsorptionCorrection.h
 	inc/MantidAlgorithms/AddLogDerivative.h
 	inc/MantidAlgorithms/AddNote.h
@@ -332,11 +333,11 @@ set ( INC_FILES
 	inc/MantidAlgorithms/BoostOptionalToAlgorithmProperty.h
 	inc/MantidAlgorithms/CalMuonDeadTime.h
 	inc/MantidAlgorithms/CalMuonDetectorPhases.h
-	inc/MantidAlgorithms/CalculateMuonAsymmetry.h
 	inc/MantidAlgorithms/CalculateCountRate.h
 	inc/MantidAlgorithms/CalculateDIFC.h
 	inc/MantidAlgorithms/CalculateEfficiency.h
 	inc/MantidAlgorithms/CalculateFlatBackground.h
+	inc/MantidAlgorithms/CalculateMuonAsymmetry.h
 	inc/MantidAlgorithms/CalculateResolution.h
 	inc/MantidAlgorithms/CalculateSlits.h
 	inc/MantidAlgorithms/CalculateTransmission.h
@@ -473,6 +474,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/InterpolatingRebin.h
 	inc/MantidAlgorithms/InterpolationOption.h
 	inc/MantidAlgorithms/InvertMask.h
+	inc/MantidAlgorithms/LineProfile.h
 	inc/MantidAlgorithms/Logarithm.h
 	inc/MantidAlgorithms/LorentzCorrection.h
 	inc/MantidAlgorithms/MagFormFactorCorrection.h
@@ -660,11 +662,11 @@ set ( TEST_FILES
 	BinaryOperationTest.h
 	CalMuonDeadTimeTest.h
 	CalMuonDetectorPhasesTest.h
-	CalculateMuonAsymmetryTest.h
 	CalculateCountRateTest.h
 	CalculateDIFCTest.h
 	CalculateEfficiencyTest.h
 	CalculateFlatBackgroundTest.h
+	CalculateMuonAsymmetryTest.h
 	CalculateResolutionTest.h
 	CalculateSlitsTest.h
 	CalculateTransmissionBeamSpreaderTest.h
@@ -795,6 +797,7 @@ set ( TEST_FILES
 	InterpolatingRebinTest.h
 	InterpolationOptionTest.h
 	InvertMaskTest.h
+	LineProfileTest.h
 	LogarithmTest.h
 	LorentzCorrectionTest.h
 	MCAbsorptionStrategyTest.h
