@@ -11,8 +11,7 @@ Installation
 Windows
 #######
 
-OS X
-####
+- At RAL administrative 03 accounts have been introduced.  As before Mantid does not need administrator access to be installed into a windows PC, so you do not need to use your 03 account.  Just use your normal account to install Mantid.  The trade off here is that it will only install desktop icons in the account you use to install it, if you need them in another account you can run the installer again from that account.
 
 User Interface
 --------------
@@ -22,7 +21,10 @@ User Interface
 - A new Print button has been added to the MantidPlot help window.
 - Masked bins are greyed out in the table view of the workspaces (except for EventWorkspaces):
 
-.. figure:: ../../images/maskedbins.jpg  
+.. figure:: ../../images/maskedbins.jpg     
+   :class: screenshot
+   :width: 500px
+   :align: right
 
 Instrument View
 ###############
@@ -40,6 +42,9 @@ Plotting Improvements
 - The log value facilities for Surface and Contour plot are now available for Waterfall and 1D plots, where they appear in the legend.
 
 .. figure:: ../../images/ArtRightGUIWaterfallCustom2sp1.PNG
+   :class: screenshot
+   :width: 294px
+   :align: right
 
 Here are a couple of plots with "Temp" selected as the log:
 
