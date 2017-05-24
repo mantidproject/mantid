@@ -402,9 +402,6 @@ void KafkaEventStreamDecoder::sampleDataFromMessage(const std::string &buffer) {
     } else if (seEvent->value_type() == Value_Long) {
       auto value = static_cast<const Long *>(seEvent->value());
       appendToLog<int64_t>(mutableRunInfo, name, time, value->value());
-    } else if (seEvent->value_type() == Value_Float) {
-      auto value = static_cast<const Float *>(seEvent->value());
-      appendToLog<float>(mutableRunInfo, name, time, value->value());
     } else if (seEvent->value_type() == Value_Double) {
       auto value = static_cast<const Double *>(seEvent->value());
       appendToLog<double>(mutableRunInfo, name, time, value->value());
