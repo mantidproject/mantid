@@ -24,6 +24,7 @@ Engineering Diffraction
 Powder Diffraction
 ------------------
 
+- New IDF for the POWGEN upgrade
 - :ref:`AlignAndFocusPowder <algm-AlignAndFocusPowder>` Now supports supplying an a second ``.cal`` file for the ``GroupingFilename``.
 - New algorithm :ref:`AlignAndFocusPowderFromFiles <algm-AlignAndFocusPowderFromFiles>` is a wrapper around :ref:`AlignAndFocusPowder <algm-AlignAndFocusPowder>` which supports caching results. :ref:`SNSPowderReduction <algm-SNSPowderReduction>` and :ref:`PDToPDFgetN <algm-PDToPDFgetN>` have been reworked to take advantage of this.
 - Bugfix in :ref:`SNAPReduce <algm-SNAPReduce>` with loading previous normalizations
