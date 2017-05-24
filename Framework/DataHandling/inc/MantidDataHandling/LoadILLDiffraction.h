@@ -7,6 +7,9 @@
 #include "MantidKernel/DateAndTime.h"
 #include "MantidNexus/NexusClasses.h"
 
+namespace Mantid {
+namespace DataHandling {
+
 namespace {
 
 enum ScanType : size_t { NoScan = 0, DetectorScan = 1, OtherScan = 2 };
@@ -25,9 +28,6 @@ struct ScannedVariables {
   void setScanned(int s) { scanned = s; }
 };
 }
-
-namespace Mantid {
-namespace DataHandling {
 
 /** LoadILLDiffraction : Loads ILL diffraction nexus files.
 
