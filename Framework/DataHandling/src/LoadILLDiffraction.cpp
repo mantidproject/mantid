@@ -24,6 +24,7 @@ using namespace Geometry;
 using namespace H5;
 using namespace Kernel;
 using namespace NeXus;
+using namespace ScannedProperties;
 
 namespace {
 // This defines the number of physical pixels in D20 (low resolution mode)
@@ -207,7 +208,8 @@ void LoadILLDiffraction::fillStaticInstrumentScan(const NXUInt &data,
   m_outWorkspace->mutableX(0) = axis;
   m_outWorkspace->mutableY(0) = monitor;
   std::transform(monitor.begin(), monitor.end(),
-                 m_outWorkspace->mutableE(0).begin(), sqrt);
+                 m_outWorkspace->mutableE(0).begin(),
+                 [](double e) { return sqrt(e); });
 
   // Assign detector counts
   size_t deadOffset = (m_numberDetectorsRead - m_numberDetectorsActual) / 2;

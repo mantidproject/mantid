@@ -10,7 +10,7 @@
 namespace Mantid {
 namespace DataHandling {
 
-namespace {
+namespace ScannedProperties{
 
 enum ScanType : size_t { NoScan = 0, DetectorScan = 1, OtherScan = 2 };
 
@@ -28,6 +28,7 @@ struct ScannedVariables {
   void setScanned(int s) { scanned = s; }
 };
 }
+
 
 /** LoadILLDiffraction : Loads ILL diffraction nexus files.
 
@@ -97,9 +98,9 @@ private:
   std::set<std::string> m_instNames; ///< supported instruments
   std::string m_fileName;            ///< file name to load
   Kernel::DateAndTime m_startTime;   ///< start time of acquisition
-  ScanType m_scanType;               ///< NoScan, DetectorScan or OtherScan
+  ScannedProperties::ScanType m_scanType;               ///< NoScan, DetectorScan or OtherScan
 
-  std::vector<ScannedVariables> m_scanVar;  ///< holds the scan info
+  std::vector<ScannedProperties::ScannedVariables> m_scanVar;  ///< holds the scan info
   LoadHelper m_loadHelper;                  ///< a helper for metadata
   API::MatrixWorkspace_sptr m_outWorkspace; ///< output workspace
 };
