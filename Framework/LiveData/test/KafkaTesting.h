@@ -12,6 +12,7 @@ GCC_DIAG_OFF(conversion)
 #include "Kafka/private/Schema/df12_det_spec_map_generated.h"
 #include "Kafka/private/Schema/ev42_events_generated.h"
 #include "Kafka/private/Schema/is84_isis_events_generated.h"
+#include "Kafka/private/Schema/f142_logdata_generated.h"
 GCC_DIAG_ON(conversion)
 
 #include <ctime>
@@ -98,39 +99,64 @@ public:
   }
 };
 
+void fakeReceiveAnEventMessage(std::string *buffer, int32_t nextPeriod) {
+  flatbuffers::FlatBufferBuilder builder;
+  std::vector<uint32_t> spec = {5, 4, 3, 2, 1, 2};
+  std::vector<uint32_t> tof = {11000, 10000, 9000, 8000, 7000, 6000};
+
+  uint64_t frameTime = 1;
+  float protonCharge(0.5f);
+
+  auto messageFlatbuf = CreateEventMessage(
+      builder, builder.CreateString("KafkaTesting"), 0, frameTime,
+      builder.CreateVector(tof), builder.CreateVector(spec),
+      FacilityData_ISISData,
+      CreateISISData(builder, static_cast<uint32_t>(nextPeriod),
+                     RunState_RUNNING, protonCharge).Union());
+  builder.Finish(messageFlatbuf);
+
+  // Copy to provided buffer
+  buffer->assign(reinterpret_cast<const char *>(builder.GetBufferPointer()),
+                 builder.GetSize());
+}
+
+void fakeReceiveASampleEnvMessage(std::string *buffer) {
+  flatbuffers::FlatBufferBuilder builder;
+  // Sample environment log
+  auto logDataMessage =
+      CreateLogData(builder, builder.CreateString("fake source"), Value_Int,
+                    CreateInt(builder, 42).Union(), 1495618188000000000L);
+  FinishLogDataBuffer(builder, logDataMessage);
+
+  // Copy to provided buffer
+  buffer->assign(reinterpret_cast<const char *>(builder.GetBufferPointer()),
+                 builder.GetSize());
+}
+
 // -----------------------------------------------------------------------------
-// Fake ISIS event stream to provide event data
+// Fake ISIS event stream to provide event and sample environment data
 // -----------------------------------------------------------------------------
 class FakeISISEventSubscriber
     : public Mantid::LiveData::IKafkaStreamSubscriber {
 public:
   FakeISISEventSubscriber(int32_t nperiods)
-      : m_nperiods(nperiods), m_nextPeriod(0) {}
+      : m_nperiods(nperiods), m_nextPeriod(0), m_callNumber(0) {}
   void subscribe() override {}
   void subscribe(int64_t offset) override { UNUSED_ARG(offset) }
   void consumeMessage(std::string *buffer, int64_t &offset, int32_t &partition,
                       std::string &topic) override {
     assert(buffer);
 
-    flatbuffers::FlatBufferBuilder builder;
-    std::vector<uint32_t> spec = {5, 4, 3, 2, 1, 2};
-    std::vector<uint32_t> tof = {11000, 10000, 9000, 8000, 7000, 6000};
+    // Return an event message on the first call and a sample environment log
+    // message on any subsequent calls
+    if (m_callNumber == 0) {
+      fakeReceiveAnEventMessage(buffer, m_nextPeriod);
+      m_nextPeriod = ((m_nextPeriod + 1) % m_nperiods);
+    } else {
+      fakeReceiveASampleEnvMessage(buffer);
+    }
 
-    uint64_t frameTime = 1;
-    float protonCharge(0.5f);
-
-    auto messageFlatbuf = CreateEventMessage(
-        builder, builder.CreateString("KafkaTesting"), 0, frameTime,
-        builder.CreateVector(tof), builder.CreateVector(spec),
-        FacilityData_ISISData,
-        CreateISISData(builder, static_cast<uint32_t>(m_nextPeriod),
-                       RunState_RUNNING, protonCharge).Union());
-    builder.Finish(messageFlatbuf);
-
-    // Copy to provided buffer
-    buffer->assign(reinterpret_cast<const char *>(builder.GetBufferPointer()),
-                   builder.GetSize());
-    m_nextPeriod = ((m_nextPeriod + 1) % m_nperiods);
+    m_callNumber++;
 
     UNUSED_ARG(offset);
     UNUSED_ARG(partition);
@@ -146,6 +172,7 @@ public:
 private:
   const int32_t m_nperiods;
   int32_t m_nextPeriod;
+  int32_t m_callNumber; // number of times consumeMessage has been called
 };
 
 // -----------------------------------------------------------------------------

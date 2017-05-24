@@ -129,6 +129,42 @@ public:
     }
   }
 
+  void test_Sample_Log_From_Event_Stream() {
+    using namespace ::testing;
+    using namespace ISISKafkaTesting;
+    using Mantid::API::Workspace_sptr;
+    using Mantid::DataObjects::EventWorkspace;
+    using namespace Mantid::LiveData;
+
+    auto mockBroker = std::make_shared<MockKafkaBroker>();
+    EXPECT_CALL(*mockBroker, subscribe_(_, _))
+      .Times(Exactly(3))
+      .WillOnce(Return(new FakeISISEventSubscriber(1)))
+      .WillOnce(Return(new FakeISISRunInfoStreamSubscriber(1)))
+      .WillOnce(Return(new FakeISISSpDetStreamSubscriber));
+    auto decoder = createTestDecoder(mockBroker);
+    TSM_ASSERT("Decoder should not have create data buffers yet",
+               !decoder->hasData());
+    TS_ASSERT_THROWS_NOTHING(decoder->startCapture());
+    std::this_thread::sleep_for(std::chrono::milliseconds(500));
+    Workspace_sptr workspace;
+    TSM_ASSERT("Decoder's data buffers should be created now",
+               decoder->hasData());
+    TS_ASSERT_THROWS_NOTHING(workspace = decoder->extractData());
+    TS_ASSERT_THROWS_NOTHING(decoder->stopCapture());
+    TS_ASSERT(!decoder->isCapturing());
+
+    // -- Workspace checks --
+    TSM_ASSERT("Expected non-null workspace pointer from extractData()",
+               workspace);
+    auto eventWksp = boost::dynamic_pointer_cast<EventWorkspace>(workspace);
+    TSM_ASSERT(
+      "Expected an EventWorkspace from extractData(). Found something else",
+      eventWksp);
+
+    checkWorkspaceLogData(*eventWksp);
+  }
+
   void test_Empty_Event_Stream_Waits() {
     using namespace ::testing;
     using namespace ISISKafkaTesting;
@@ -235,6 +271,17 @@ private:
     // A timer-based test and each message contains 6 events so the total should
     // be divisible by 6
     TS_ASSERT(eventWksp.getNumberEvents() % 6 == 0);
+  }
+
+  void checkWorkspaceLogData(
+    const Mantid::DataObjects::EventWorkspace &eventWksp) {
+    // We should find a sample log with this name
+    Mantid::Kernel::Property *log = nullptr;
+    TS_ASSERT_THROWS_NOTHING(log = eventWksp.getLog("fake source"));
+    if (log) {
+      TS_ASSERT_EQUALS(log->type(), "Int")
+      TS_ASSERT_EQUALS(log->value(), "42")
+    }
   }
 };
 
