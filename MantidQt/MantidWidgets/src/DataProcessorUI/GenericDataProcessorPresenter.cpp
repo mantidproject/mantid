@@ -334,11 +334,9 @@ Reduce the current row asynchronously
 void GenericDataProcessorPresenter::startAsyncRowReduceThread(RowItem *rowItem,
                                                               int groupIndex) {
 
-  m_workerThread.reset();
   auto *worker = new GenericDataProcessorPresenterRowReducerWorker(
       this, rowItem, groupIndex);
-  m_workerThread =
-      make_unique<GenericDataProcessorPresenterThread>(this, worker);
+  m_workerThread.reset(new GenericDataProcessorPresenterThread(this, worker));
   m_workerThread->start();
 }
 
@@ -348,11 +346,9 @@ Reduce the current group asynchronously
 void GenericDataProcessorPresenter::startAsyncGroupReduceThread(
     GroupData &groupData) {
 
-  m_workerThread.reset();
   auto *worker =
       new GenericDataProcessorPresenterGroupReducerWorker(this, m_groupData);
-  m_workerThread =
-      make_unique<GenericDataProcessorPresenterThread>(this, worker);
+  m_workerThread.reset(new GenericDataProcessorPresenterThread(this, worker));
   m_workerThread->start();
 }
 
@@ -360,6 +356,7 @@ void GenericDataProcessorPresenter::startAsyncGroupReduceThread(
 End reduction
 */
 void GenericDataProcessorPresenter::endReduction() {
+
   pause();
   m_mainPresenter->notify(
       DataProcessorMainPresenter::Flag::ConfirmReductionPausedFlag);
@@ -370,6 +367,7 @@ void GenericDataProcessorPresenter::endReduction() {
 Handle reduction error
 */
 void GenericDataProcessorPresenter::reductionError(std::exception ex) {
+
   m_mainPresenter->giveUserCritical(ex.what(), "Error");
 }
 
@@ -377,6 +375,8 @@ void GenericDataProcessorPresenter::reductionError(std::exception ex) {
 Handle thread completion
 */
 void GenericDataProcessorPresenter::threadFinished(const int exitCode) {
+
+  m_workerThread.release();
 
   if (exitCode == 0) { // Success
     m_progressReporter->report();

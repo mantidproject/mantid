@@ -47,11 +47,11 @@ private slots:
   void startWorker() {
     try {
       m_presenter->postProcessGroup(m_groupData);
+      emit finished(0);
     } catch (std::exception &ex) {
       emit reductionErrorSignal(ex);
       emit finished(1);
     }
-    emit finished(0);
   }
 
 signals:

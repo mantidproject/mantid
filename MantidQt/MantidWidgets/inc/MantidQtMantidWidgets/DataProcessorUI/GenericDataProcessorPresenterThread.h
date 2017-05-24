@@ -46,20 +46,22 @@ public:
       : QThread(parent), m_worker(worker) {
     // Establish connections between parent and worker
     connect(this, SIGNAL(started()), worker, SLOT(startWorker()));
+    connect(worker, SIGNAL(finished(int)), this, SLOT(workerFinished(int)));
     connect(worker, SIGNAL(finished(int)), parent, SLOT(threadFinished(int)));
     qRegisterMetaType<std::exception>("std::exception");
     connect(worker, SIGNAL(reductionErrorSignal(std::exception)), parent,
             SLOT(reductionError(std::exception)), Qt::QueuedConnection);
     // Early deletion of thread and worker
-    connect(worker, SIGNAL(finished(int)), this, SLOT(finished(int)));
     connect(this, SIGNAL(finished()), this, SLOT(deleteLater()),
             Qt::DirectConnection);
 
     worker->moveToThread(this);
   }
 
+  ~GenericDataProcessorPresenterThread() override { emit finished(); }
+
 public slots:
-  void finished(const int exitCode) {
+  void workerFinished(const int exitCode) {
     Q_UNUSED(exitCode);
     // queue worker for deletion
     m_worker->deleteLater();
