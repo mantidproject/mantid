@@ -8,6 +8,7 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataHandling/LoadDetectorsGroupingFile.h"
 #include "MantidHistogramData/HistogramMath.h"
+#include "MantidIndexing/IndexInfo.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/ListValidator.h"
@@ -1044,6 +1045,7 @@ size_t GroupDetectors2::formGroups(API::MatrixWorkspace_const_sptr inputWS,
   // would be waste as it would be just dividing by 1
   bool requireDivide(false);
   const auto &spectrumInfo = inputWS->spectrumInfo();
+  std::vector<SpectrumDefinition> spectrumDefinitions;
   for (storage_map::const_iterator it = m_GroupWsInds.begin();
        it != m_GroupWsInds.end(); ++it) {
     // This is the grouped spectrum
@@ -1061,17 +1063,25 @@ size_t GroupDetectors2::formGroups(API::MatrixWorkspace_const_sptr inputWS,
 
     // Keep track of number of detectors required for masking
     size_t nonMaskedSpectra(0);
+    SpectrumDefinition spectrumDefinition;
+
+    const auto &oldSpectrumDefinitions =
+        *(inputWS->indexInfo().spectrumDefinitions());
 
     for (auto originalWI : it->second) {
       // detectors to add to firstSpecNum
       const auto &inputSpectrum = inputWS->getSpectrum(originalWI);
 
+      auto oldSpectrumDefinition = oldSpectrumDefinitions[originalWI];
+
       outputHistogram += inputSpectrum.histogram();
       outSpec.addDetectorIDs(inputSpectrum.getDetectorIDs());
 
-      if (!isMaskedDetector(spectrumInfo, originalWI)) {
+      if (!isMaskedDetector(spectrumInfo, originalWI))
         ++nonMaskedSpectra;
-      }
+
+      for (const auto &item : oldSpectrumDefinition)
+        spectrumDefinition.add(item.first, item.second);
     }
 
     outSpec.setHistogram(outputHistogram);
@@ -1090,8 +1100,16 @@ size_t GroupDetectors2::formGroups(API::MatrixWorkspace_const_sptr inputWS,
       progress(m_FracCompl);
       interruption_point();
     }
+
+    spectrumDefinitions.push_back(spectrumDefinition);
+
     outIndex++;
   }
+
+  Indexing::IndexInfo indexInfo =
+      Indexing::IndexInfo(spectrumDefinitions.size());
+  indexInfo.setSpectrumDefinitions(std::move(spectrumDefinitions));
+  outputWS->setIndexInfo(indexInfo);
 
   if (bhv == 1 && requireDivide) {
     g_log.debug() << "Running Divide algorithm to perform averaging.\n";
