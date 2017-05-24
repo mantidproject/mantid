@@ -27,7 +27,7 @@ void DeleteWorkspaces::exec() {
   for (auto wsName : wsNames) {
     // run delete workspace as a child algorithm
     if (Mantid::API::AnalysisDataService::Instance().doesExist(wsName)) {
-      // The existense of input workspaces should have been verified when
+      // The existence of input workspaces should have been verified when
       // properties were set. If a workspace is missing, it was probably
       // a group workspace whose contents were deleted before the group
       // itself.
@@ -36,7 +36,7 @@ void DeleteWorkspaces::exec() {
       deleteAlg->setPropertyValue("Workspace", wsName);
       bool success = deleteAlg->execute();
       if (!deleteAlg->isExecuted() || !success) {
-        g_log.error() << "Failed to delete wsName. \n";
+        g_log.error() << "Failed to delete " <<  wsName << ".\n";
       }
     }
     prog.report();
