@@ -18,6 +18,8 @@ Algorithms
 ----------
 
 - Removed the optional flag ``LocationParameters`` from ``ClearInstrumentParameters``.
+- New method `IAlgorithm::helpURL` returns an optional documentation webpage. Useful when registering Python
+  algorithms at runtime that are not part of the Mantid distribution.
 
 New
 ###
