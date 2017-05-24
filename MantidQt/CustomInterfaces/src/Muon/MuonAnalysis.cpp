@@ -1503,18 +1503,18 @@ void MuonAnalysis::updateFrontAndCombo() {
   for (int i = 0; i < numG; i++) {
     m_uiForm.frontGroupGroupPairComboBox->addItem(
         m_uiForm.groupTable->item(m_groupToRow[i], 0)->text());
-	auto groupName=m_uiForm.groupTable->item(m_groupToRow[i], 0)->text();
-	if (groupName.toStdString() != "") {
-		groupsAndPairs << groupName;
-	}
+    auto groupName = m_uiForm.groupTable->item(m_groupToRow[i], 0)->text();
+    if (groupName.toStdString() != "") {
+      groupsAndPairs << groupName;
+    }
   }
   for (int i = 0; i < numP; i++) {
     m_uiForm.frontGroupGroupPairComboBox->addItem(
         m_uiForm.pairTable->item(m_pairToRow[i], 0)->text());
-	auto pairName= m_uiForm.groupTable->item(m_pairToRow[i], 0)->text();
-	if (pairName.toStdString() != "") {
-		groupsAndPairs << pairName;
-	}
+    auto pairName = m_uiForm.groupTable->item(m_pairToRow[i], 0)->text();
+    if (pairName.toStdString() != "") {
+      groupsAndPairs << pairName;
+    }
   }
   // If it doesn't match then reset
   if (currentI >= m_uiForm.frontGroupGroupPairComboBox->count()) {
