@@ -26,6 +26,7 @@ New
 - :ref:`algm-IntegrateEllipsoidsTwoStep` which can be used to integrate weak single crystal peaks by using parameters derived from strong peaks.
 - :ref:`FindEPP-v2 <algm-FindEPP-v2>` reimplements the :ref:`FindEPP-v1 <algm-FindEPP-v1>` in C++, providing an order of magnitude gain in execution time for large workspaces.
 - :ref:`LineProfile <algm-LineProfile>` will give a horizontal or vertical line profile over a workspace.
+- :ref:`SaveYDA <algm-SaveYDA>` do export :ref:`Workspace2D <Workspace2D>` to `Frida 2.0 <http://apps.jcns.fz-juelich.de/doku/frida/start>`_ YAML format.
 
 Improved
 ########
@@ -42,7 +43,7 @@ Improved
 - :ref:`FilterEvents <algm-FilterEvents-v1>` now only accept splitters from ``TableWorkspace`` and ``MatrixWrokspace`` in unit as second.
 - Two new properties were added to :ref:`algm-Integration` *RangeLowerList* and *RangeUpperList* can be used to give histogram-specific integration ranges.
 - :ref:`algm-FindEPP` does not output the two extra workspaces from the :ref:`algm-Fit` anymore.
-- :ref:`ApplyDetailedBalance <algm-ApplyDetailedBalance>`: User can select the dynamic susceptibility versus energy or frequency. 
+- :ref:`ApplyDetailedBalance <algm-ApplyDetailedBalance>`: User can select the dynamic susceptibility versus energy or frequency.
 - :ref:`PredictPeaks <algm-PredictPeaks-v1>` is now faster on instruments that do not have rectangular detectors. The speed up with vary from instrument to instrument, but for CORELLI this was shown to reduce execution time from ~64 mins to < 1 min.
 - :ref:`MergeRuns <algm-MergeRuns>` now has a sum option and more control over failure when binning is different or sample logs do not match.
 - Made it possible for LiveListeners to read properties from the calling Algorithm. This gives greater flexiblity for authors of LiveListener plugins.
