@@ -102,7 +102,6 @@ class Polaris(AbstractInst):
     def _get_input_batching_mode(self):
         return self._inst_settings.input_mode
 
-
     def _get_instrument_bin_widths(self):
         return self._inst_settings.focused_bin_widths
 
