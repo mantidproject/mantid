@@ -391,8 +391,8 @@ void KafkaEventStreamDecoder::sampleDataFromMessage(const std::string &buffer) {
     // Convert time from nanoseconds since 1 Jan 1970 to nanoseconds since 1 Jan
     // 1990 to create a Mantid timestamp
     const int64_t nanoseconds1970To1990 = 631152000000000000L;
-    auto time = Mantid::Kernel::DateAndTime(
-        seEvent->timestamp() - nanoseconds1970To1990);
+    auto time = Mantid::Kernel::DateAndTime(seEvent->timestamp() -
+                                            nanoseconds1970To1990);
 
     // If sample log with this name already exists then append to it
     // otherwise create a new log
