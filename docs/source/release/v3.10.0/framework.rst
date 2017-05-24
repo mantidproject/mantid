@@ -57,7 +57,21 @@ Improved
   :ref:`AddSampleLog <algm-AddSampleLog>` can retrieve automatically.
 - ``ThreadPool`` now respects the value of ``OMP_NUM_THREADS`` environment variable (documented in [gcc](https://gcc.gnu.org/onlinedocs/libgomp/OMP_005fNUM_005fTHREADS.html))
 - Improved parallel scaling of :ref:`MDNormSCD <algm-MDNormSCD>` with > 4 cores.
+
+.. figure:: ../../images/MDNormSCDv3.10.png
+   :class: screenshot
+   :width: 550px
+
+   Benchmark machine: 4 x Intel Xeon E5-4650 @ 2.7GHz (32 cores / 64 threads)
+
 - Improved parallel scaling of :ref:`MDNormDirectSCD <algm-MDNormDirectSC>` with > 4 cores.
+
+.. figure:: ../../images/MDNormDirectSCv3.10.png
+   :class: screenshot
+   :width: 550px
+
+   Benchmark machine: 4 x Intel Xeon E5-4650 @ 2.7GHz (32 cores / 64 threads)
+
 - Reduced execution time of ``EventList::sortTof`` by over 2x, improving performance in algorithms such as :ref:`algm-CompressEvents` and :ref:`algm-SortEvents` which call it.
 - :ref:`LoadDNSLegacy <algm-LoadDNSLegacy-v1>` can now read the TOF data. CoilCurrentsTable is now optional. The default coil currents are now in the instrument parameters file.
 - :ref:`LoadNexusProcessed <algm-LoadNexusProcessed>` is now approximately 33x faster when loading a ``PeaksWorkspace`` with a large instrument attached.
