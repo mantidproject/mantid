@@ -23,8 +23,7 @@ void DeleteWorkspaces::exec() {
   // Set up progress reporting
   API::Progress prog(this, 0.0, 1.0, wsNames.size());
 
-  // TODO: use const ref
-  for (auto wsName : wsNames) {
+  for (const auto &wsName : wsNames) {
     // run delete workspace as a child algorithm
     if (Mantid::API::AnalysisDataService::Instance().doesExist(wsName)) {
       // The existence of input workspaces should have been verified when
