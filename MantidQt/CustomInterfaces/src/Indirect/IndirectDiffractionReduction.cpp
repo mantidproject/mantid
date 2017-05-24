@@ -77,9 +77,9 @@ void IndirectDiffractionReduction::initLayout() {
   m_uiForm.leRebinStart->setValidator(m_valDbl);
   m_uiForm.leRebinWidth->setValidator(m_valDbl);
   m_uiForm.leRebinEnd->setValidator(m_valDbl);
-  m_uiForm.leRebinStart_CalibOnly->setValidator(m_valDbl);
-  m_uiForm.leRebinWidth_CalibOnly->setValidator(m_valDbl);
-  m_uiForm.leRebinEnd_CalibOnly->setValidator(m_valDbl);
+  //m_uiForm.leRebinStart_CalibOnly->setValidator(m_valDbl);
+  //m_uiForm.leRebinWidth_CalibOnly->setValidator(m_valDbl);
+  //m_uiForm.leRebinEnd_CalibOnly->setValidator(m_valDbl);
 
   // Update the list of plot options when individual grouping is toggled
   connect(m_uiForm.ckIndividualGrouping, SIGNAL(stateChanged(int)), this,
@@ -301,9 +301,9 @@ void IndirectDiffractionReduction::saveReductions() {
 void IndirectDiffractionReduction::runGenericReduction(QString instName,
                                                        QString mode) {
   // Get rebin string
-  QString rebinStart = m_uiForm.leRebinStart_CalibOnly->text();
-  QString rebinWidth = m_uiForm.leRebinWidth_CalibOnly->text();
-  QString rebinEnd = m_uiForm.leRebinEnd_CalibOnly->text();
+  QString rebinStart = m_uiForm.leRebinStart->text();
+  QString rebinWidth = m_uiForm.leRebinWidth->text();
+  QString rebinEnd = m_uiForm.leRebinEnd->text();
 
   QString rebin = "";
   if (!rebinStart.isEmpty() && !rebinWidth.isEmpty() && !rebinEnd.isEmpty())
@@ -335,13 +335,13 @@ void IndirectDiffractionReduction::runGenericReduction(QString instName,
   // Check if Cal file is used
   if (instName == "OSIRIS" && mode == "diffspec") {
     if (m_uiForm.ckUseCalib->isChecked()) {
-      const auto calFile = m_uiForm.rfCalFile_only->getText().toStdString();
+      const auto calFile = m_uiForm.rfCalFile->getText().toStdString();
       msgDiffReduction->setProperty("CalFile", calFile);
     }
   }
   if (mode == "diffspec") {
     const auto vanFile =
-        m_uiForm.rfVanFile_only->getFilenames().join(",").toStdString();
+        m_uiForm.rfVanFile->getFilenames().join(",").toStdString();
     msgDiffReduction->setProperty("VanadiumFiles", vanFile);
   }
   msgDiffReduction->setProperty("SumFiles", m_uiForm.ckSumFiles->isChecked());
@@ -414,7 +414,7 @@ void IndirectDiffractionReduction::runOSIRISdiffonlyReduction() {
       "Sample", m_uiForm.rfSampleFiles->getFilenames().join(",").toStdString());
   osirisDiffReduction->setProperty(
       "Vanadium",
-      m_uiForm.rfVanadiumFile->getFilenames().join(",").toStdString());
+      m_uiForm.rfVanFile->getFilenames().join(",").toStdString());
   osirisDiffReduction->setProperty(
       "CalFile", m_uiForm.rfCalFile->getFirstFilename().toStdString());
   osirisDiffReduction->setProperty("LoadLogFiles",
@@ -524,7 +524,7 @@ void IndirectDiffractionReduction::instrumentSelected(
   // Set the search instrument for runs
   m_uiForm.rfSampleFiles->setInstrumentOverride(instrumentName);
   m_uiForm.rfCanFiles->setInstrumentOverride(instrumentName);
-  m_uiForm.rfVanFile_only->setInstrumentOverride(instrumentName);
+  m_uiForm.rfVanFile->setInstrumentOverride(instrumentName);
 
   MatrixWorkspace_sptr instWorkspace = loadInstrument(
       instrumentName.toStdString(), reflectionName.toStdString());
@@ -537,44 +537,29 @@ void IndirectDiffractionReduction::instrumentSelected(
   m_uiForm.spSpecMin->setValue(static_cast<int>(specMin));
   m_uiForm.spSpecMax->setValue(static_cast<int>(specMax));
 
-  // Determine whether we need vanadium input
-  std::vector<std::string> correctionVector =
-      instrument->getStringParameter("Workflow.Diffraction.Correction");
-  bool vanadiumNeeded = false;
-  bool calibNeeded = false;
-  if (correctionVector.size() > 0) {
-    vanadiumNeeded = (correctionVector[0] == "Vanadium");
-    calibNeeded = (correctionVector[0] == "Calibration");
-  }
 
-  if (vanadiumNeeded)
-    m_uiForm.swVanadium->setCurrentIndex(0);
-  else if (calibNeeded)
-    m_uiForm.swVanadium->setCurrentIndex(1);
-  else if (reflectionName != "diffspec")
-    m_uiForm.swVanadium->setCurrentIndex(2);
-  else
-    m_uiForm.swVanadium->setCurrentIndex(1);
-
-  // Hide options that the current instrument config cannot process
 
   // Disable calibration for IRIS
   if (instrumentName == "IRIS") {
-    m_uiForm.ckUseCalib->setEnabled(false);
-    m_uiForm.ckUseCalib->setToolTip("IRIS does not support calibration files");
-    m_uiForm.ckUseCalib->setChecked(false);
+    m_uiForm.ckUseCalib->setVisible(false);
+    m_uiForm.rfCalFile->setVisible(false);
   } else {
-    m_uiForm.ckUseCalib->setEnabled(true);
-    m_uiForm.ckUseCalib->setToolTip("");
-    m_uiForm.ckUseCalib->setChecked(true);
+    m_uiForm.ckUseCalib->setVisible(true);
+    m_uiForm.rfCalFile->setVisible(true);
   }
 
   if (instrumentName == "OSIRIS" && reflectionName == "diffonly") {
     // Disable individual grouping
-    m_uiForm.ckIndividualGrouping->setToolTip(
-        "OSIRIS cannot group detectors individually in diffonly mode");
-    m_uiForm.ckIndividualGrouping->setEnabled(false);
-    m_uiForm.ckIndividualGrouping->setChecked(false);
+    m_uiForm.gbGeneralOptions->setVisible(false);
+    // Disable rebin
+    m_uiForm.gbDspaceRebin->setVisible(false);
+    // needs both vanadium & calib files, no need for checkboxes
+    m_uiForm.ckUseCan->setVisible(false);
+    m_uiForm.rfCalFile->setEnabled(true);
+    m_uiForm.ckUseVanadium->setVisible(false);
+    m_uiForm.rfVanFile->setEnabled(true);
+
+
 
     // Disable sum files
     m_uiForm.ckSumFiles->setToolTip("OSIRIS cannot sum files in diffonly mode");
@@ -628,7 +613,7 @@ void IndirectDiffractionReduction::loadSettings() {
   m_uiForm.rfSampleFiles->readSettings(settings.group());
   m_uiForm.rfCalFile->readSettings(settings.group());
   m_uiForm.rfCalFile->setUserInput(settings.value("last_cal_file").toString());
-  m_uiForm.rfVanadiumFile->setUserInput(
+  m_uiForm.rfVanFile->setUserInput(
       settings.value("last_van_files").toString());
   settings.endGroup();
 }
@@ -638,7 +623,7 @@ void IndirectDiffractionReduction::saveSettings() {
 
   settings.beginGroup(m_settingsGroup);
   settings.setValue("last_cal_file", m_uiForm.rfCalFile->getText());
-  settings.setValue("last_van_files", m_uiForm.rfVanadiumFile->getText());
+  settings.setValue("last_van_files", m_uiForm.rfVanFile->getText());
   settings.endGroup();
 }
 
@@ -691,7 +676,7 @@ bool IndirectDiffractionReduction::validateVanCal() {
   if (!m_uiForm.rfCalFile->isValid())
     return false;
 
-  if (!m_uiForm.rfVanadiumFile->isValid())
+  if (!m_uiForm.rfVanFile->isValid())
     return false;
 
   return true;
@@ -704,31 +689,31 @@ bool IndirectDiffractionReduction::validateVanCal() {
 */
 bool IndirectDiffractionReduction::validateCalOnly() {
   // Check Calib file valid
-  if (m_uiForm.ckUseCalib->isChecked() && !m_uiForm.rfCalFile_only->isValid())
+  if (m_uiForm.ckUseCalib->isChecked() && !m_uiForm.rfCalFile->isValid())
     return false;
 
   // Check rebin values valid
-  QString rebStartTxt = m_uiForm.leRebinStart_CalibOnly->text();
-  QString rebStepTxt = m_uiForm.leRebinWidth_CalibOnly->text();
-  QString rebEndTxt = m_uiForm.leRebinEnd_CalibOnly->text();
+  QString rebStartTxt = m_uiForm.leRebinStart->text();
+  QString rebStepTxt = m_uiForm.leRebinWidth->text();
+  QString rebEndTxt = m_uiForm.leRebinEnd->text();
 
   bool rebinValid = true;
   // Need all or none
   if (rebStartTxt.isEmpty() && rebStepTxt.isEmpty() && rebEndTxt.isEmpty()) {
     rebinValid = true;
-    m_uiForm.valRebinStart_CalibOnly->setText("");
-    m_uiForm.valRebinWidth_CalibOnly->setText("");
-    m_uiForm.valRebinEnd_CalibOnly->setText("");
+    m_uiForm.valRebinStart->setText("");
+    m_uiForm.valRebinWidth->setText("");
+    m_uiForm.valRebinEnd->setText("");
   } else {
 
-    CHECK_VALID(rebStartTxt, m_uiForm.valRebinStart_CalibOnly);
-    CHECK_VALID(rebStepTxt, m_uiForm.valRebinWidth_CalibOnly);
-    CHECK_VALID(rebEndTxt, m_uiForm.valRebinEnd_CalibOnly);
+    CHECK_VALID(rebStartTxt, m_uiForm.valRebinStart);
+    CHECK_VALID(rebStepTxt, m_uiForm.valRebinWidth);
+    CHECK_VALID(rebEndTxt, m_uiForm.valRebinEnd);
 
     if (rebinValid && rebStartTxt.toDouble() >= rebEndTxt.toDouble()) {
       rebinValid = false;
-      m_uiForm.valRebinStart_CalibOnly->setText("*");
-      m_uiForm.valRebinEnd_CalibOnly->setText("*");
+      m_uiForm.valRebinStart->setText("*");
+      m_uiForm.valRebinEnd->setText("*");
     }
   }
 
