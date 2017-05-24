@@ -537,16 +537,11 @@ void IndirectDiffractionReduction::instrumentSelected(
   m_uiForm.spSpecMin->setValue(static_cast<int>(specMin));
   m_uiForm.spSpecMax->setValue(static_cast<int>(specMax));
 
+  // manual d-range is disabled by default
+  m_uiForm.ckManualDRange->setVisible(false);
+  m_uiForm.spDRange->setVisible(false);
 
 
-  // Disable calibration for IRIS
-  if (instrumentName == "IRIS") {
-    m_uiForm.ckUseCalib->setVisible(false);
-    m_uiForm.rfCalFile->setVisible(false);
-  } else {
-    m_uiForm.ckUseCalib->setVisible(true);
-    m_uiForm.rfCalFile->setVisible(true);
-  }
 
   if (instrumentName == "OSIRIS" && reflectionName == "diffonly") {
     // Disable individual grouping
@@ -554,12 +549,14 @@ void IndirectDiffractionReduction::instrumentSelected(
     // Disable rebin
     m_uiForm.gbDspaceRebin->setVisible(false);
     // needs both vanadium & calib files, no need for checkboxes
-    m_uiForm.ckUseCan->setVisible(false);
+    m_uiForm.ckUseCalib->setVisible(false);
     m_uiForm.rfCalFile->setEnabled(true);
     m_uiForm.ckUseVanadium->setVisible(false);
     m_uiForm.rfVanFile->setEnabled(true);
 
-
+    // enable manual d-range
+    m_uiForm.ckManualDRange->setVisible(true);
+    m_uiForm.spDRange->setVisible(true);
 
     // Disable sum files
     m_uiForm.ckSumFiles->setToolTip("OSIRIS cannot sum files in diffonly mode");
@@ -573,13 +570,39 @@ void IndirectDiffractionReduction::instrumentSelected(
     m_uiForm.ckSumFiles->setChecked(true);
 
     // Re-enable individual grouping
-    m_uiForm.ckIndividualGrouping->setToolTip("");
-    m_uiForm.ckIndividualGrouping->setEnabled(true);
+    m_uiForm.gbGeneralOptions->setVisible(true);
+
+    // Re-enable rebin
+    m_uiForm.gbDspaceRebin->setVisible(true);
+    // re-enable checkboxes
+    m_uiForm.ckUseCalib->setVisible(true);
+    m_uiForm.rfCalFile->setEnabled(m_uiForm.ckUseCalib->isChecked());
+    m_uiForm.ckUseVanadium->setVisible(true);
+    m_uiForm.rfVanFile->setEnabled(m_uiForm.ckUseVanadium->isChecked());
 
     // Re-enable spectra range
     m_uiForm.spSpecMin->setEnabled(true);
     m_uiForm.spSpecMax->setEnabled(true);
   }
+
+  // Disable calibration for IRIS
+  if (instrumentName == "IRIS") {
+    m_uiForm.ckUseCalib->setVisible(false);
+    m_uiForm.rfCalFile->setVisible(false);
+  }
+  else {
+    m_uiForm.ckUseCalib->setVisible(true);
+    m_uiForm.rfCalFile->setVisible(true);
+  }
+
+  // Disable calibration for diffonly
+  if (instrumentName != "OSIRIS" && reflectionName == "diffonly") {
+    m_uiForm.gbCalib->setVisible(false);
+  }
+  else {
+    m_uiForm.gbCalib->setVisible(true);
+  }
+
 }
 
 /**
