@@ -60,7 +60,7 @@ public:
    * @return true if fulfilled or if any problem was found (missing property,
    * e.g.).
    */
-  virtual bool fulfillsCriterion(const Kernel::IPropertyManager *algo) const {
+  virtual bool checkCriterion(const Kernel::IPropertyManager *algo) const {
     // Find the property
     if (!algo)
       return true;
@@ -96,7 +96,7 @@ public:
   /// Return true/false based on whether the other property satisfies the
   /// criterion
   bool isEnabled(const Kernel::IPropertyManager *algo) const override {
-    return fulfillsCriterion(algo);
+    return checkCriterion(algo);
   }
 
   //--------------------------------------------------------------------------------------------

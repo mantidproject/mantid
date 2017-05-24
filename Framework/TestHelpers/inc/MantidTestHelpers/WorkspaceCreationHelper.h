@@ -372,7 +372,8 @@ create2DWorkspaceWithReflectometryInstrument(double startX = 0);
 /// Create a 2D workspace with one monitor and three detectors based around
 /// a virtual reflectometry instrument.
 Mantid::API::MatrixWorkspace_sptr
-create2DWorkspaceWithReflectometryInstrumentMultiDetector(double startX = 0);
+create2DWorkspaceWithReflectometryInstrumentMultiDetector(
+    double startX = 0, const double detSize = 0.0);
 
 void createInstrumentForWorkspaceWithDistances(
     Mantid::API::MatrixWorkspace_sptr workspace,

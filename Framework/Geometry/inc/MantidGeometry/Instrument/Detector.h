@@ -95,6 +95,7 @@ private:
 protected:
   /// Constructor for parametrized version
   Detector(const Detector *base, const ParameterMap *map);
+  bool hasDetectorInfo() const;
 };
 
 } // namespace Geometry

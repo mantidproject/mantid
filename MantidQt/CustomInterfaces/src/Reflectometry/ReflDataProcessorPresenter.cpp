@@ -5,6 +5,7 @@
 #include "MantidAPI/Run.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorTreeManager.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorView.h"
+#include "MantidQtMantidWidgets/DataProcessorUI/ParseKeyValueString.h"
 #include "MantidQtMantidWidgets/ProgressPresenter.h"
 
 using namespace MantidQt::MantidWidgets;
@@ -45,19 +46,25 @@ ReflDataProcessorPresenter::~ReflDataProcessorPresenter() {}
 */
 void ReflDataProcessorPresenter::process() {
 
+  // Get selected runs
+  const auto items = m_manager->selectedData(true);
+
   // If uniform slicing is empty process normally, delegating to
   // GenericDataProcessorPresenter
   std::string timeSlicingValues = m_mainPresenter->getTimeSlicingValues();
   if (timeSlicingValues.empty()) {
-    GenericDataProcessorPresenter::process();
+    // Check if any input event workspaces still exist in ADS
+    if (proceedIfWSTypeInADS(items, true))
+      GenericDataProcessorPresenter::process();
     return;
   }
 
+  // Check if any input non-event workspaces exist in ADS
+  if (!proceedIfWSTypeInADS(items, false))
+    return;
+
   // Get time slicing type
   std::string timeSlicingType = m_mainPresenter->getTimeSlicingType();
-
-  // Get selected runs
-  const auto items = m_manager->selectedData(true);
 
   // Progress report
   int progress = 0;
@@ -177,10 +184,13 @@ bool ReflDataProcessorPresenter::processGroupAsEventWS(
   size_t numGroupSlices = INT_MAX;
 
   std::vector<double> startTimes, stopTimes;
+  std::string logFilter; // Set if we are slicing by log value
 
-  // For custom slicing, the start/stop times are the same for all rows
+  // For custom/log value slicing the start/stop times are the same for all rows
   if (timeSlicingType == "Custom")
     parseCustom(timeSlicingValues, startTimes, stopTimes);
+  if (timeSlicingType == "LogValue")
+    parseLogValue(timeSlicingValues, logFilter, startTimes, stopTimes);
 
   for (const auto &row : group) {
 
@@ -188,7 +198,7 @@ bool ReflDataProcessorPresenter::processGroupAsEventWS(
     const auto data = row.second;         // Vector containing data for this row
     std::string runNo = row.second.at(0); // The run number
 
-    if (timeSlicingType != "Custom") {
+    if (timeSlicingType == "UniformEven" || timeSlicingType == "Uniform") {
       const std::string runName = "TOF_" + runNo;
       parseUniform(timeSlicingValues, timeSlicingType, runName, startTimes,
                    stopTimes);
@@ -199,8 +209,9 @@ bool ReflDataProcessorPresenter::processGroupAsEventWS(
 
     for (size_t i = 0; i < numSlices; i++) {
       try {
-        auto wsName = takeSlice(runNo, i, startTimes[i], stopTimes[i]);
         std::vector<std::string> slice(data);
+        std::string wsName =
+            takeSlice(runNo, i, startTimes[i], stopTimes[i], logFilter);
         slice[0] = wsName;
         auto newData = reduceRow(slice);
         newData[0] = data[0];
@@ -219,8 +230,8 @@ bool ReflDataProcessorPresenter::processGroupAsEventWS(
   // Post-process (if needed)
   if (multiRow) {
 
-    // All slices are common for uniform even or custom slicing
-    if (timeSlicingType == "UniformEven" || timeSlicingType == "Custom")
+    // All slices are common for uniform even, custom and log value slicing
+    if (timeSlicingType != "Uniform")
       numGroupSlices = startTimes.size();
 
     addNumGroupSlicesEntry(groupID, numGroupSlices);
@@ -345,96 +356,165 @@ void ReflDataProcessorPresenter::parseCustom(const std::string &timeSlicing,
   std::transform(timesStr.begin(), timesStr.end(), std::back_inserter(times),
                  [](const std::string &astr) { return std::stod(astr); });
 
-  size_t numTimes = times.size();
+  size_t numSlices = times.size() > 1 ? times.size() - 1 : 1;
 
   // Add the start/stop times
-  startTimes = std::vector<double>(numTimes - 1);
-  stopTimes = std::vector<double>(numTimes - 1);
+  startTimes = std::vector<double>(numSlices);
+  stopTimes = std::vector<double>(numSlices);
 
-  if (numTimes == 1) {
+  if (times.size() == 1) {
     startTimes[0] = 0;
     stopTimes[0] = times[0];
   } else {
-    for (size_t i = 0; i < numTimes - 1; i++) {
+    for (size_t i = 0; i < numSlices; i++) {
       startTimes[i] = times[i];
       stopTimes[i] = times[i + 1];
     }
   }
 }
 
+/** Parses a string to extract log value filter and time slicing
+ *
+ * @param inputStr :: The string to parse
+ * @param logFilter :: The log filter to use
+ * @param startTimes :: Start times for the set of slices
+ * @param stopTimes :: Stop times for the set of slices
+ */
+void ReflDataProcessorPresenter::parseLogValue(const std::string &inputStr,
+                                               std::string &logFilter,
+                                               std::vector<double> &startTimes,
+                                               std::vector<double> &stopTimes) {
+
+  auto strMap = parseKeyValueString(inputStr);
+  std::string timeSlicing = strMap.at("Slicing");
+  logFilter = strMap.at("LogFilter");
+
+  parseCustom(timeSlicing, startTimes, stopTimes);
+}
+
 /** Loads an event workspace and puts it into the ADS
 *
-* @param runNo :: the run number as a string
+* @param runNo :: The run number as a string
 * @return :: True if algorithm was executed. False otherwise
 */
 bool ReflDataProcessorPresenter::loadEventRun(const std::string &runNo) {
 
-  std::string runName = "TOF_" + runNo;
+  bool runFound;
+  std::string outName;
+  std::string prefix = "TOF_";
+  std::string instrument = m_view->getProcessInstrument();
 
-  IAlgorithm_sptr algLoadRun =
-      AlgorithmManager::Instance().create("LoadEventNexus");
-  algLoadRun->initialize();
-  algLoadRun->setProperty("Filename", m_view->getProcessInstrument() + runNo);
-  algLoadRun->setProperty("OutputWorkspace", runName);
-  algLoadRun->setProperty("LoadMonitors", true);
-  algLoadRun->execute();
-  return algLoadRun->isExecuted();
+  outName = findRunInADS(runNo, prefix, runFound);
+  if (!runFound ||
+      AnalysisDataService::Instance().doesExist(outName + "_monitors") ==
+          false ||
+      AnalysisDataService::Instance().retrieveWS<IEventWorkspace>(outName) ==
+          NULL) {
+    // Monitors must be loaded first and workspace must be an event workspace
+    loadRun(runNo, instrument, prefix, "LoadEventNexus", runFound);
+  }
+
+  return runFound;
 }
 
 /** Loads a non-event workspace and puts it into the ADS
 *
-* @param runNo :: the run number as a string
+* @param runNo :: The run number as a string
 */
 void ReflDataProcessorPresenter::loadNonEventRun(const std::string &runNo) {
 
-  std::string runName = "TOF_" + runNo;
+  bool runFound; // unused but required
+  std::string prefix = "TOF_";
+  std::string instrument = m_view->getProcessInstrument();
 
-  IAlgorithm_sptr algLoadRun =
-      AlgorithmManager::Instance().create("LoadISISNexus");
+  findRunInADS(runNo, prefix, runFound);
+  if (!runFound)
+    loadRun(runNo, instrument, prefix, m_loader, runFound);
+}
+
+/** Tries loading a run from disk
+ *
+ * @param run : The name of the run
+ * @param instrument : The instrument the run belongs to
+ * @param prefix : The prefix to be prepended to the run number
+ * @param loader : The algorithm used for loading runs
+ * @param runFound : Whether or not the run was actually found
+ * @returns string name of the run
+ */
+std::string ReflDataProcessorPresenter::loadRun(const std::string &run,
+                                                const std::string &instrument,
+                                                const std::string &prefix,
+                                                const std::string &loader,
+                                                bool &runFound) {
+
+  runFound = true;
+  const std::string fileName = instrument + run;
+  const std::string outputName = prefix + run;
+
+  IAlgorithm_sptr algLoadRun = AlgorithmManager::Instance().create(loader);
   algLoadRun->initialize();
-  algLoadRun->setProperty("Filename", m_view->getProcessInstrument() + runNo);
-  algLoadRun->setProperty("OutputWorkspace", runName);
+  algLoadRun->setProperty("Filename", fileName);
+  algLoadRun->setProperty("OutputWorkspace", outputName);
+  if (loader == "LoadEventNexus")
+    algLoadRun->setProperty("LoadMonitors", true);
   algLoadRun->execute();
+  if (!algLoadRun->isExecuted()) {
+    // Run not loaded from disk
+    runFound = false;
+    return "";
+  }
+
+  return outputName;
 }
 
 /** Takes a slice from a run and puts the 'sliced' workspace into the ADS
 *
-* @param runNo :: the run number as a string
-* @param sliceIndex :: the index of the slice being taken
-* @param startTime :: start time
-* @param stopTime :: stop time
+* @param runNo :: The run number as a string
+* @param sliceIndex :: The index of the slice being taken
+* @param startTime :: Start time
+* @param stopTime :: Stop time
+* @param logFilter :: The log filter to use if slicing by log value
 * @return :: the name of the sliced workspace (without prefix 'TOF_')
 */
-std::string ReflDataProcessorPresenter::takeSlice(const std::string &runNo,
-                                                  size_t sliceIndex,
-                                                  double startTime,
-                                                  double stopTime) {
+std::string ReflDataProcessorPresenter::takeSlice(
+    const std::string &runNo, size_t sliceIndex, double startTime,
+    double stopTime, const std::string &logFilter) {
 
   std::string runName = "TOF_" + runNo;
   std::string sliceName = runName + "_slice_" + std::to_string(sliceIndex);
   std::string monName = runName + "_monitors";
+  std::string filterAlg =
+      logFilter.empty() ? "FilterByTime" : "FilterByLogValue";
 
-  // Filter by time
-  IAlgorithm_sptr filter = AlgorithmManager::Instance().create("FilterByTime");
+  // Filter the run using the appropriate filter algorithm
+  IAlgorithm_sptr filter = AlgorithmManager::Instance().create(filterAlg);
   filter->initialize();
   filter->setProperty("InputWorkspace", runName);
   filter->setProperty("OutputWorkspace", sliceName);
-  filter->setProperty("StartTime", startTime);
-  filter->setProperty("StopTime", stopTime);
+  if (filterAlg == "FilterByTime") {
+    filter->setProperty("StartTime", startTime);
+    filter->setProperty("StopTime", stopTime);
+  } else { // FilterByLogValue
+    filter->setProperty("MinimumValue", startTime);
+    filter->setProperty("MaximumValue", stopTime);
+    filter->setProperty("TimeTolerance", 1.0);
+    filter->setProperty("LogName", logFilter);
+  }
+
   filter->execute();
 
-  // Get the normalization constant for this slice
-  MatrixWorkspace_sptr mws =
-      AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(runName);
+  // Obtain the normalization constant for this slice
+  IEventWorkspace_sptr mws =
+      AnalysisDataService::Instance().retrieveWS<IEventWorkspace>(runName);
   double total = mws->run().getProtonCharge();
-  mws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(sliceName);
+  mws = AnalysisDataService::Instance().retrieveWS<IEventWorkspace>(sliceName);
   double slice = mws->run().getProtonCharge();
-  double fraction = slice / total;
+  double scaleFactor = slice / total;
 
   IAlgorithm_sptr scale = AlgorithmManager::Instance().create("Scale");
   scale->initialize();
   scale->setProperty("InputWorkspace", monName);
-  scale->setProperty("Factor", fraction);
+  scale->setProperty("Factor", scaleFactor);
   scale->setProperty("OutputWorkspace", "__" + monName + "_temp");
   scale->execute();
 
@@ -578,6 +658,63 @@ void ReflDataProcessorPresenter::plotGroup() {
         "Error plotting groups.");
 
   plotWorkspaces(workspaces);
+}
+
+/** Asks user if they wish to proceed if the AnalysisDataService contains input
+ * workspaces of a specific type
+ *
+ * @param data :: The data selected in the table
+ * @param findEventWS :: Whether or not we are searching for event workspaces
+ * @return :: Boolean - true if user wishes to proceed, false if not
+ */
+bool ReflDataProcessorPresenter::proceedIfWSTypeInADS(const TreeData &data,
+                                                      const bool findEventWS) {
+
+  std::vector<std::string> foundInputWorkspaces;
+
+  for (const auto &item : data) {
+    const auto group = item.second;
+
+    for (const auto &row : group) {
+      bool runFound = false;
+      std::string runNo = row.second.at(0);
+      std::string outName = findRunInADS(runNo, "TOF_", runFound);
+
+      if (runFound) {
+        bool isEventWS =
+            AnalysisDataService::Instance().retrieveWS<IEventWorkspace>(
+                outName) != NULL;
+        if (findEventWS == isEventWS) {
+          foundInputWorkspaces.push_back(outName);
+        } else if (isEventWS) { // monitors must be loaded
+          std::string monName = outName + "_monitors";
+          if (AnalysisDataService::Instance().doesExist(monName) == false)
+            foundInputWorkspaces.push_back(outName);
+        }
+      }
+    }
+  }
+
+  if (foundInputWorkspaces.size() > 0) {
+    // Input workspaces of type found, ask user if they wish to process
+    std::string foundStr = boost::algorithm::join(foundInputWorkspaces, "\n");
+    bool process = m_mainPresenter->askUserYesNo(
+        "Processing selected rows will replace the following workspaces:\n\n" +
+            foundStr + "\n\nDo you wish to continue?",
+        "Process selected rows?");
+
+    if (process) {
+      // Remove all found workspaces
+      for (auto &wsName : foundInputWorkspaces) {
+        AnalysisDataService::Instance().remove(wsName);
+      }
+    }
+
+    return process;
+  }
+
+  // No input workspaces of type found, proceed with reduction automatically
+  return true;
 }
 
 /** Add entry for the number of slices for a row in a group

@@ -517,7 +517,7 @@ void vtkSplatterPlotFactory::addMetadata() const {
     // Add metadata to dataset.
     MetadataToFieldData convert;
     convert(outputFD.GetPointer(), jsonString,
-            m_vatesConfigurations->getMetadataIdJson().c_str());
+            m_vatesConfigurations->getMetadataIdJson());
     dataSet->SetFieldData(outputFD.GetPointer());
   }
 }
@@ -533,18 +533,16 @@ void vtkSplatterPlotFactory::setMetadata(vtkFieldData *fieldData,
   // the dataset
   FieldDataToMetadata convertFtoM;
   std::string xmlString = convertFtoM(fieldData, XMLDefinitions::metaDataId());
-  std::string jsonString =
-      convertFtoM(dataSet->GetFieldData(),
-                  m_vatesConfigurations->getMetadataIdJson().c_str());
+  std::string jsonString = convertFtoM(
+      dataSet->GetFieldData(), m_vatesConfigurations->getMetadataIdJson());
 
   // Create a new field data array
   MetadataToFieldData convertMtoF;
   vtkNew<vtkFieldData> outputFD;
   outputFD->ShallowCopy(fieldData);
-  convertMtoF(outputFD.GetPointer(), xmlString,
-              XMLDefinitions::metaDataId().c_str());
+  convertMtoF(outputFD.GetPointer(), xmlString, XMLDefinitions::metaDataId());
   convertMtoF(outputFD.GetPointer(), jsonString,
-              m_vatesConfigurations->getMetadataIdJson().c_str());
+              m_vatesConfigurations->getMetadataIdJson());
   dataSet->SetFieldData(outputFD.GetPointer());
 }
 

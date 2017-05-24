@@ -3,6 +3,7 @@
 
 #include "MantidQtMantidWidgets/DataProcessorUI/GenericDataProcessorPresenter.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorMainPresenter.h"
+#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorTreeManager.h"
 
 #include "MantidQtCustomInterfaces/DllConfig.h"
 
@@ -64,6 +65,10 @@ private:
   // Plotting
   void plotRow() override;
   void plotGroup() override;
+  // Loads a run from disk
+  std::string loadRun(const std::string &run, const std::string &instrument,
+                      const std::string &prefix, const std::string &loader,
+                      bool &runFound);
   // Get the name of a post-processed workspace
   std::string getPostprocessedWorkspaceName(const GroupData &groupData,
                                             const std::string &prefix,
@@ -86,14 +91,24 @@ private:
   void parseCustom(const std::string &timeSlicing,
                    std::vector<double> &startTimes,
                    std::vector<double> &stopTimes);
+  // Parse log value slicing and filter from input string
+  void parseLogValue(const std::string &inputStr, std::string &logFilter,
+                     std::vector<double> &minValues,
+                     std::vector<double> &maxValues);
 
   // Load a run as event workspace
   bool loadEventRun(const std::string &runNo);
   // Load a run (non-event workspace)
   void loadNonEventRun(const std::string &runNo);
+
   // Take a slice from event workspace
   std::string takeSlice(const std::string &runNo, size_t sliceIndex,
-                        double startTime, double stopTime);
+                        double startTime, double stopTime,
+                        const std::string &logFilter = "");
+
+  // Asks user if they wish to proceed if a type of workspace exists in the ADS
+  bool proceedIfWSTypeInADS(const MantidQt::MantidWidgets::TreeData &data,
+                            const bool findEventWS);
 
   std::map<int, std::map<int, size_t>> m_numSlicesMap;
   std::map<int, size_t> m_numGroupSlicesMap;
