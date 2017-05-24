@@ -66,11 +66,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 File change history is stored at: <https://github.com/mantidproject/mantid>
 */
-enum class GLActorVisiblity : char {
-	VISIBLE,
-	HIDDEN,
-	ALWAYS_HIDDEN
-};
+enum class GLActorVisiblity : char { VISIBLE, HIDDEN, ALWAYS_HIDDEN };
 
 class GLActor : public QObject {
 public:
