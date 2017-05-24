@@ -25,6 +25,11 @@ using namespace H5;
 using namespace Kernel;
 using namespace NeXus;
 
+namespace {
+constexpr size_t D20_NUMBER_PIXELS[3] = {1600, 3200, 4800};
+constexpr size_t D20_NUMBER_DEAD_PIXELS = 32;
+}
+
 // Register the algorithm into the AlgorithmFactory
 DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadILLDiffraction)
 
@@ -376,21 +381,26 @@ void LoadILLDiffraction::resolveInstrument() {
       // Here we have to hardcode the numbers of pixels.
       // The only way is to read the size of the detectors read from the files
       // and based on it decide which of the 3 alternative IDFs to load.
-      case 1600: {
+      // Some amount of pixels are dead on each end, these has to be subtracted
+      // correspondingly dependent on the resolution mode
+      case D20_NUMBER_PIXELS[0]: {
         // low resolution mode
         m_instName += "_lr";
-        m_numberDetectorsActual = 1536;
+        m_numberDetectorsActual =
+            D20_NUMBER_PIXELS[0] - 2 * D20_NUMBER_DEAD_PIXELS;
         break;
       }
-      case 3200: {
+      case D20_NUMBER_PIXELS[1]: {
         // nominal resolution
-        m_numberDetectorsActual = 3072;
+        m_numberDetectorsActual =
+            D20_NUMBER_PIXELS[1] - 4 * D20_NUMBER_DEAD_PIXELS;
         break;
       }
-      case 4800: {
+      case D20_NUMBER_PIXELS[2]: {
         // high resolution mode
         m_instName += "_hr";
-        m_numberDetectorsActual = 4608;
+        m_numberDetectorsActual =
+            D20_NUMBER_PIXELS[2] - 6 * D20_NUMBER_DEAD_PIXELS;
         break;
       }
       default:
