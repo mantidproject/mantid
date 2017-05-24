@@ -338,7 +338,7 @@ LoadILLDiffraction::getAbsoluteTimes(const NXDouble &scan) const {
   times.emplace_back(time);
   size_t timeIndex = 1;
   while (timeIndex < m_numberScanPoints) {
-    time += durations[timeIndex - 1] * 1E9; //from sec to ns
+    time += durations[timeIndex - 1] * 1E9; // from sec to ns
     times.push_back(time);
     ++timeIndex;
   }
@@ -373,7 +373,7 @@ void LoadILLDiffraction::resolveInstrument() {
     m_numberDetectorsActual = m_numberDetectorsRead;
     if (m_instName == "D20") {
       switch (m_numberDetectorsRead) {
-      // Here we have to hardcode the numbers of active pixels.
+      // Here we have to hardcode the numbers of pixels.
       // The only way is to read the size of the detectors read from the files
       // and based on it decide which of the 3 alternative IDFs to load.
       case 1600: {
