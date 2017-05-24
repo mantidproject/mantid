@@ -1358,7 +1358,8 @@ Table *MantidUI::createDetectorTable(
       // R and theta used as dummy variables
       // Note: phi is the angle around Z, not necessarily the beam direction.
       spectrumInfo.position(wsIndex).getSpherical(R, theta, phi);
-      // R is actually L2 (same as R if sample is at (0,0,0))
+      // R is actually L2 (same as R if sample is at (0,0,0)), except for
+      // monitors which are handled below.
       R = spectrumInfo.l2(wsIndex);
       // Theta is actually 'twoTheta' for detectors (twice the scattering
       // angle), if Z is the beam direction this corresponds to theta in
@@ -1381,21 +1382,31 @@ Table *MantidUI::createDetectorTable(
       if (include_data) {
         colValues << QVariant(dataY0) << QVariant(dataE0); // data
       }
+      // If monitors are before the sample in the beam, DetectorInfo
+      // returns a negative l2 distance.
+      if (isMonitor && theta == 180.0) {
+          R = -R;
+      }
       colValues << QVariant(R) << QVariant(theta);
 
       if (calcQ) {
+        if(isMonitor) {
+          // twoTheta is not defined for monitors.
+          colValues << QVariant(std::nan(""));
+        } else {
+          try {
 
-        try {
-          // Get unsigned theta and efixed value
-          IDetector_const_sptr det(&spectrumInfo.detector(wsIndex),
-                                   Mantid::NoDeleting());
-          double efixed = ws->getEFixed(det);
-          double usignTheta = spectrumInfo.twoTheta(wsIndex) * 0.5;
+            // Get unsigned theta and efixed value
+            IDetector_const_sptr det(&spectrumInfo.detector(wsIndex),
+                                     Mantid::NoDeleting());
+            double efixed = ws->getEFixed(det);
+            double usignTheta = spectrumInfo.twoTheta(wsIndex) * 0.5;
 
-          double q = Mantid::Kernel::UnitConversion::run(usignTheta, efixed);
-          colValues << QVariant(q);
-        } catch (std::runtime_error &) {
-          colValues << QVariant("No Efixed");
+            double q = Mantid::Kernel::UnitConversion::run(usignTheta, efixed);
+            colValues << QVariant(q);
+          } catch (std::runtime_error &) {
+            colValues << QVariant("No Efixed");
+          }
         }
       }
 
