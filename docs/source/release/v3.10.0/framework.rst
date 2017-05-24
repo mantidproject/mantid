@@ -68,12 +68,6 @@ Bug Fixes
 - Fixed an issue with the ``GroupingPattern`` property in :ref:`algm-GroupDetectors`, where incorrect spectra were being used if spectrum numbers are not 1-based indices.
 - Fixed an issue with :ref:`algm-CreateWorkspace` where giving bin edges as ``VerticalAxisValues`` would fail.
 
-Deprecated
-##########
-
-MD Algorithms (VATES CLI)
-#########################
-
 Performance
 -----------
 
@@ -131,14 +125,6 @@ Python
 
 - ``CrystalStructure``, ``UnitCell``, ``PointGroup``, and ``SpaceGroup`` all have better console printing
 - Fixed a bug on MDHistogramWorkspaces where passing an index larger than the size of the dimensions of the workspace to ``setSignalAt`` would crash Mantid.
-
-
-Python Algorithms
-#################
-
-- :class:`mantid.api.DataProcessorAlgorithm` now have a new method
-  ``copyProperties()`` which allow them to copy properties (with
-  defaults, validators, and documentation) from other algorithms.
 
 Full list of
 `Framework <http://github.com/mantidproject/mantid/pulls?q=is%3Apr+milestone%3A%22Release+3.10%22+is%3Amerged+label%3A%22Component%3A+Framework%22>`__
