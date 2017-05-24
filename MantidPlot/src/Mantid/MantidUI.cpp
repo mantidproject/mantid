@@ -396,9 +396,25 @@ void MantidUI::shutdown() {
       Poco::Thread::sleep(100);
     }
   }
+  // Close any open algorithm dialogs. They contain alorithm references so
+  // should be cleaned up before the framework (and the Python environment)
+  // is destroyed. We traverse the object tree rather than tracking the
+  // creation as it is possible to create a dialog without going through
+  // factory methods.
+  const auto &childWidgets = m_appWindow->children();
+  for (auto child : childWidgets) {
+    if (auto *widget = qobject_cast<MantidQt::API::AlgorithmDialog *>(child)) {
+      // We want to delete this now and not defer it to later in the
+      // event loop
+      widget->setAttribute(Qt::WA_DeleteOnClose, false);
+      widget->close();
+      delete widget;
+      child = nullptr;
+    }
+  }
+
   // If any python objects need to be cleared away then the GIL needs to be
-  // held. This doesn't feel like
-  // it is in the right place but it will do no harm
+  // held.
   ScopedPythonGIL gil;
   // Relevant notifications are connected to signals that will close all
   // dependent windows

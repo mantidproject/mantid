@@ -11,6 +11,7 @@ API
 
 - The default multiple file limit is now made facility dependent. It is 1000 for ILL, and 100 for all the others.
 - Frequency unit (GHz) included as an option to represent energy transfer.
+- Framework changes now mean scanning workspaces (workspaces with moving detectors) can be created. Currently this can be tested using a new option in :ref:`CreateSampleWorkspace <algm-CreateSampleWorkspace-v1>`, by setting `NumScanPoints`. This is still experimental, as such the instrument view, saving workspaces and some algorithms will not work correctly with the scanning workspaces.
 - Fixed a bug where certain validators would crash with SingleValuedWorkspaces instead of rejecting them.
 - New unit :math:`d_{\perp}` (Angstrom) is implemented for TOF powder diffraction.
 
@@ -18,6 +19,8 @@ Algorithms
 ----------
 
 - Removed the optional flag ``LocationParameters`` from ``ClearInstrumentParameters``.
+- New method `IAlgorithm::helpURL` returns an optional documentation webpage. Useful when registering Python
+  algorithms at runtime that are not part of the Mantid distribution.
 
 New
 ###
@@ -26,6 +29,7 @@ New
 - :ref:`algm-IntegrateEllipsoidsTwoStep` which can be used to integrate weak single crystal peaks by using parameters derived from strong peaks.
 - :ref:`FindEPP-v2 <algm-FindEPP-v2>` reimplements the :ref:`FindEPP-v1 <algm-FindEPP-v1>` in C++, providing an order of magnitude gain in execution time for large workspaces.
 - :ref:`LineProfile <algm-LineProfile>` will give a horizontal or vertical line profile over a workspace.
+- :ref:`SaveYDA <algm-SaveYDA>` do export :ref:`Workspace2D <Workspace2D>` to `Frida 2.0 <http://apps.jcns.fz-juelich.de/doku/frida/start>`_ YAML format.
 
 Improved
 ########
@@ -42,7 +46,7 @@ Improved
 - :ref:`FilterEvents <algm-FilterEvents-v1>` now only accept splitters from ``TableWorkspace`` and ``MatrixWrokspace`` in unit as second.
 - Two new properties were added to :ref:`algm-Integration` *RangeLowerList* and *RangeUpperList* can be used to give histogram-specific integration ranges.
 - :ref:`algm-FindEPP` does not output the two extra workspaces from the :ref:`algm-Fit` anymore.
-- :ref:`ApplyDetailedBalance <algm-ApplyDetailedBalance>`: User can select the dynamic susceptibility versus energy or frequency. 
+- :ref:`ApplyDetailedBalance <algm-ApplyDetailedBalance>`: User can select the dynamic susceptibility versus energy or frequency.
 - :ref:`PredictPeaks <algm-PredictPeaks-v1>` is now faster on instruments that do not have rectangular detectors. The speed up with vary from instrument to instrument, but for CORELLI this was shown to reduce execution time from ~64 mins to < 1 min.
 - :ref:`MergeRuns <algm-MergeRuns>` now has a sum option and more control over failure when binning is different or sample logs do not match.
 - Made it possible for LiveListeners to read properties from the calling Algorithm. This gives greater flexiblity for authors of LiveListener plugins.
@@ -67,12 +71,6 @@ Bug Fixes
 - Fixed an issue where :ref:`algm-MonteCarloAbsorption` would use the wavelengths from the first histogram of *InputWorkspace* only making the algorithm unusable for workspaces with varying bins.
 - Fixed an issue with the ``GroupingPattern`` property in :ref:`algm-GroupDetectors`, where incorrect spectra were being used if spectrum numbers are not 1-based indices.
 - Fixed an issue with :ref:`algm-CreateWorkspace` where giving bin edges as ``VerticalAxisValues`` would fail.
-
-Deprecated
-##########
-
-MD Algorithms (VATES CLI)
-#########################
 
 Performance
 -----------
@@ -131,14 +129,6 @@ Python
 
 - ``CrystalStructure``, ``UnitCell``, ``PointGroup``, and ``SpaceGroup`` all have better console printing
 - Fixed a bug on MDHistogramWorkspaces where passing an index larger than the size of the dimensions of the workspace to ``setSignalAt`` would crash Mantid.
-
-
-Python Algorithms
-#################
-
-- :class:`mantid.api.DataProcessorAlgorithm` now have a new method
-  ``copyProperties()`` which allow them to copy properties (with
-  defaults, validators, and documentation) from other algorithms.
 
 Full list of
 `Framework <http://github.com/mantidproject/mantid/pulls?q=is%3Apr+milestone%3A%22Release+3.10%22+is%3Amerged+label%3A%22Component%3A+Framework%22>`__
