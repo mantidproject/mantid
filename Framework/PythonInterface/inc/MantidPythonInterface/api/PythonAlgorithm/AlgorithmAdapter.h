@@ -59,6 +59,8 @@ public:
   const std::string summary() const override;
   /// Returns a category of the algorithm.
   const std::string category() const override;
+  /// Returns optional documentation URL of the algorithm
+  const std::string helpURL() const override;
   /// Allow the isRunning method to be overridden
   bool isRunning() const override;
   /// Allow the cancel method to be overridden
