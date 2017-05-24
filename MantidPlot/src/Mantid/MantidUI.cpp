@@ -1268,7 +1268,7 @@ Table *MantidUI::createDetectorTable(
            << "Spectrum No"
            << "Detector ID(s)";
   if (isScanning)
-    colNames << "Time Index";
+    colNames << "Time Indexes";
   if (include_data) {
     colNames << "Data Value"
              << "Data Error";
@@ -1297,6 +1297,8 @@ Table *MantidUI::createDetectorTable(
   }
   t->setHeaderColType();
   t->setTextFormat(2);
+  if (isScanning)
+    t->setTextFormat(3);
   t->setTextFormat(ncols - 1);
 
   // Cache some frequently used values
