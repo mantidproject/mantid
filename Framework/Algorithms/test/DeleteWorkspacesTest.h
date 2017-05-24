@@ -2,6 +2,7 @@
 // Includes
 //------------------------------------------------------------------------------
 #include "MantidAlgorithms/DeleteWorkspaces.h"
+#include "MantidAlgorithms/GroupWorkspaces.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidAPI/WorkspaceGroup.h"
 
@@ -80,6 +81,36 @@ public:
     dataStore.clear();
   }
 
+  void test_ignore_group_if_workspaces_inside_get_deleted_first(){
+    using namespace Mantid::API;
+    using namespace Mantid::DataObjects;
+
+    // Need a test workspace registered within the ADS
+    AnalysisDataServiceImpl &dataStore = AnalysisDataService::Instance();
+    const size_t storeSizeAtStart(dataStore.size());
+    const std::string testName1 = "DeleteWorkspaces_testWS1";
+    const std::string testName2 = "DeleteWorkspaces_testWS2";
+    createAndStoreWorspace(testName1);
+    createAndStoreWorspace(testName2);
+    const std::string groupName = "DeleteWorkspaces_testGroup";
+    Mantid::Algorithms::GroupWorkspaces groupingAlg;
+    groupingAlg.initialize();
+    groupingAlg.setPropertyValue("InputWorkspaces", testName1 + "," + testName2);
+    groupingAlg.setPropertyValue("OutputWorkspace", groupName);
+    groupingAlg.execute();
+    TS_ASSERT_EQUALS(dataStore.size(), storeSizeAtStart + 3);
+
+    Mantid::Algorithms::DeleteWorkspaces alg;
+    alg.initialize();
+    alg.setRethrows(true);
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("WorkspaceList", testName1 + ", " + testName2 + ", " + groupName));
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(alg.isExecuted());
+
+    TS_ASSERT_EQUALS(dataStore.size(), storeSizeAtStart);
+  }
+
+  // TODO: fix typo in name
   void createAndStoreWorspace(std::string name, int ylength = 10) {
     using namespace Mantid::API;
     using namespace Mantid::DataObjects;
