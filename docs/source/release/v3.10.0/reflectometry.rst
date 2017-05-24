@@ -49,6 +49,7 @@ ISIS Reflectometry (Old)
 ########################
 
 - Interface `ISIS Reflectometry` has been renamed to `ISIS Reflectometry (Old)`.
+- Fixed a bug where the stitched output was not scaled correctly.
 
 |
 
