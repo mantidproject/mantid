@@ -94,6 +94,9 @@ private:
   void getRunInfoMessage(std::string &rawMsgBuffer);
   RunStartStruct getRunStartMessage(std::string &rawMsgBuffer);
 
+  void eventDataFromMessage(const std::string &buffer);
+  void sampleDataFromMessage(const std::string &buffer);
+
   API::Workspace_sptr extractDataImpl();
 
   /// Broker to use to subscribe to topics

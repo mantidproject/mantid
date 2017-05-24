@@ -138,10 +138,10 @@ public:
 
     auto mockBroker = std::make_shared<MockKafkaBroker>();
     EXPECT_CALL(*mockBroker, subscribe_(_, _))
-      .Times(Exactly(3))
-      .WillOnce(Return(new FakeISISEventSubscriber(1)))
-      .WillOnce(Return(new FakeISISRunInfoStreamSubscriber(1)))
-      .WillOnce(Return(new FakeISISSpDetStreamSubscriber));
+        .Times(Exactly(3))
+        .WillOnce(Return(new FakeISISEventSubscriber(1)))
+        .WillOnce(Return(new FakeISISRunInfoStreamSubscriber(1)))
+        .WillOnce(Return(new FakeISISSpDetStreamSubscriber));
     auto decoder = createTestDecoder(mockBroker);
     TSM_ASSERT("Decoder should not have create data buffers yet",
                !decoder->hasData());
@@ -159,8 +159,8 @@ public:
                workspace);
     auto eventWksp = boost::dynamic_pointer_cast<EventWorkspace>(workspace);
     TSM_ASSERT(
-      "Expected an EventWorkspace from extractData(). Found something else",
-      eventWksp);
+        "Expected an EventWorkspace from extractData(). Found something else",
+        eventWksp);
 
     checkWorkspaceLogData(*eventWksp);
   }
@@ -273,14 +273,17 @@ private:
     TS_ASSERT(eventWksp.getNumberEvents() % 6 == 0);
   }
 
-  void checkWorkspaceLogData(
-    const Mantid::DataObjects::EventWorkspace &eventWksp) {
+  void checkWorkspaceLogData(Mantid::DataObjects::EventWorkspace &eventWksp) {
     // We should find a sample log with this name
-    Mantid::Kernel::Property *log = nullptr;
-    TS_ASSERT_THROWS_NOTHING(log = eventWksp.getLog("fake source"));
+    // Mantid::Kernel::Property *log = nullptr;
+    Mantid::Kernel::TimeSeriesProperty<int32_t> *log = nullptr;
+    auto run = eventWksp.mutableRun();
+    TS_ASSERT_THROWS_NOTHING(
+        log = run.getTimeSeriesProperty<int32_t>("fake source"));
     if (log) {
-      TS_ASSERT_EQUALS(log->type(), "Int")
-      TS_ASSERT_EQUALS(log->value(), "42")
+      TS_ASSERT_EQUALS(log->firstTime().toISO8601String(),
+                       "2017-05-24T09:29:48")
+      TS_ASSERT_EQUALS(log->firstValue(), 42)
     }
   }
 };

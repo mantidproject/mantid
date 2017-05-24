@@ -17,6 +17,7 @@ GCC_DIAG_OFF(conversion)
 #include "private/Schema/df12_det_spec_map_generated.h"
 #include "private/Schema/ev42_events_generated.h"
 #include "private/Schema/is84_isis_events_generated.h"
+#include "private/Schema/f142_logdata_generated.h"
 GCC_DIAG_ON(conversion)
 
 #include <boost/make_shared.hpp>
@@ -37,8 +38,32 @@ static const std::string RUN_START_PROPERTY = "run_start";
 // File identifiers from flatbuffers schema
 static const std::string RUN_MESSAGE_ID = "ba57";
 static const std::string EVENT_MESSAGE_ID = "ev42";
+static const std::string SAMPLE_MESSAGE_ID = "f142";
 
 static const std::chrono::seconds MAX_LATENCY(1);
+
+/**
+ * Append sample log data to existing log or create a new log if one with
+ * specified name does not already exist
+ *
+ * @tparam T : Type of the log value
+ * @param mutableRunInfo : Log manager containing the existing sample logs
+ * @param name : Name of the sample log
+ * @param time : Time at which the value was measured
+ * @param value : Sample log measured value
+ */
+template <typename T>
+void appendToLog(Mantid::API::Run &mutableRunInfo, const std::string &name,
+                 const Mantid::Kernel::DateAndTime &time, T value) {
+  if (mutableRunInfo.hasProperty(name)) {
+    auto property = mutableRunInfo.getTimeSeriesProperty<T>(name);
+    property->addValue(time, value);
+  } else {
+    auto property = new Mantid::Kernel::TimeSeriesProperty<T>(name);
+    property->addValue(time, value);
+    mutableRunInfo.addLogData(property);
+  }
+}
 }
 
 namespace Mantid {
@@ -294,35 +319,14 @@ void KafkaEventStreamDecoder::captureImplExcept() {
     if (flatbuffers::BufferHasIdentifier(
             reinterpret_cast<const uint8_t *>(buffer.c_str()),
             EVENT_MESSAGE_ID.c_str())) {
-      auto eventMsg =
-          GetEventMessage(reinterpret_cast<const uint8_t *>(buffer.c_str()));
+      eventDataFromMessage(buffer);
+    }
 
-      DateAndTime pulseTime = static_cast<int64_t>(eventMsg->pulse_time());
-      const auto &tofData = *(eventMsg->time_of_flight());
-      const auto &detData = *(eventMsg->detector_id());
-      auto nEvents = tofData.size();
-
-      if (eventMsg->facility_specific_data_type() != FacilityData_ISISData) {
-        throw std::runtime_error("KafkaEventStreamDecoder only knows how to "
-                                 "deal with ISIS facility specific data");
-      }
-      auto ISISMsg =
-          static_cast<const ISISData *>(eventMsg->facility_specific_data());
-
-      std::lock_guard<std::mutex> lock(m_mutex);
-      auto &periodBuffer =
-          *m_localEvents[static_cast<size_t>(ISISMsg->period_number())];
-      auto &mutableRunInfo = periodBuffer.mutableRun();
-      mutableRunInfo.getTimeSeriesProperty<double>(PROTON_CHARGE_PROPERTY)
-          ->addValue(pulseTime, ISISMsg->proton_charge());
-      for (decltype(nEvents) i = 0; i < nEvents; ++i) {
-        auto &spectrum = periodBuffer.getSpectrum(
-            m_specToIdx[static_cast<int32_t>(detData[i])]);
-        spectrum.addEventQuickly(
-            TofEvent(static_cast<double>(tofData[i]) *
-                         1e-3, // nanoseconds to microseconds
-                     pulseTime));
-      }
+    // Check if we have a sample environment log message
+    if (flatbuffers::BufferHasIdentifier(
+            reinterpret_cast<const uint8_t *>(buffer.c_str()),
+            SAMPLE_MESSAGE_ID.c_str())) {
+      sampleDataFromMessage(buffer);
     }
 
     // Check if we have a runMessage
@@ -362,6 +366,81 @@ void KafkaEventStreamDecoder::captureImplExcept() {
     }
   }
   g_log.debug("Event capture finished");
+}
+
+/**
+ * Get sample environment log data from the flatbuffer and append it to the
+ * workspace
+ *
+ * @param seData : flatbuffer offset of the sample environment log data
+ * @param nSEEvents : number of sample environment log values in the flatbuffer
+ * @param mutableRunInfo : Log manager containing the existing sample logs
+ */
+void KafkaEventStreamDecoder::sampleDataFromMessage(const std::string &buffer) {
+
+  std::lock_guard<std::mutex> lock(m_mutex);
+  // Add sample log values to every the workspace for every period
+  for (auto periodBuffer : m_localEvents) {
+    auto &mutableRunInfo = periodBuffer->mutableRun();
+
+    auto seEvent =
+        GetLogData(reinterpret_cast<const uint8_t *>(buffer.c_str()));
+
+    auto name = seEvent->source_name()->str();
+
+    // Convert time from nanoseconds since 1 Jan 1970 to nanoseconds since 1 Jan
+    // 1990 to create a Mantid timestamp
+    const int64_t nanoseconds1970To1990 = 631152000000000000L;
+    auto time = Mantid::Kernel::DateAndTime(
+        seEvent->timestamp() - nanoseconds1970To1990);
+
+    // If sample log with this name already exists then append to it
+    // otherwise create a new log
+    if (seEvent->value_type() == Value_Int) {
+      auto value = static_cast<const Int *>(seEvent->value());
+      appendToLog<int32_t>(mutableRunInfo, name, time, value->value());
+    } else if (seEvent->value_type() == Value_Long) {
+      auto value = static_cast<const Long *>(seEvent->value());
+      appendToLog<int64_t>(mutableRunInfo, name, time, value->value());
+    } else if (seEvent->value_type() == Value_Double) {
+      auto value = static_cast<const Double *>(seEvent->value());
+      appendToLog<double>(mutableRunInfo, name, time, value->value());
+    } else {
+      g_log.warning() << "Value for sample log named '" << name
+                      << "' was not of recognised type" << std::endl;
+    }
+  }
+}
+
+void KafkaEventStreamDecoder::eventDataFromMessage(const std::string &buffer) {
+  auto eventMsg =
+      GetEventMessage(reinterpret_cast<const uint8_t *>(buffer.c_str()));
+
+  DateAndTime pulseTime = static_cast<int64_t>(eventMsg->pulse_time());
+  const auto &tofData = *(eventMsg->time_of_flight());
+  const auto &detData = *(eventMsg->detector_id());
+  auto nEvents = tofData.size();
+
+  if (eventMsg->facility_specific_data_type() != FacilityData_ISISData) {
+    throw std::runtime_error("KafkaEventStreamDecoder only knows how to "
+                             "deal with ISIS facility specific data");
+  }
+  auto ISISMsg =
+      static_cast<const ISISData *>(eventMsg->facility_specific_data());
+
+  std::lock_guard<std::mutex> lock(m_mutex);
+  auto &periodBuffer =
+      *m_localEvents[static_cast<size_t>(ISISMsg->period_number())];
+  auto &mutableRunInfo = periodBuffer.mutableRun();
+  mutableRunInfo.getTimeSeriesProperty<double>(PROTON_CHARGE_PROPERTY)
+      ->addValue(pulseTime, ISISMsg->proton_charge());
+  for (decltype(nEvents) i = 0; i < nEvents; ++i) {
+    auto &spectrum =
+        periodBuffer.getSpectrum(m_specToIdx[static_cast<int32_t>(detData[i])]);
+    spectrum.addEventQuickly(TofEvent(static_cast<double>(tofData[i]) *
+                                          1e-3, // nanoseconds to microseconds
+                                      pulseTime));
+  }
 }
 
 KafkaEventStreamDecoder::RunStartStruct
