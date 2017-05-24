@@ -22,9 +22,9 @@ public:
     const std::string testName1 = "DeleteWorkspaces_testWS1";
     const std::string testName2 = "DeleteWorkspaces_testWS2";
     const std::string testName3 = "DeleteWorkspaces_testWS3";
-    createAndStoreWorspace(testName1);
-    createAndStoreWorspace(testName2);
-    createAndStoreWorspace(testName3, yLength);
+    createAndStoreWorkspace(testName1);
+    createAndStoreWorkspace(testName2);
+    createAndStoreWorkspace(testName3, yLength);
     TS_ASSERT_EQUALS(dataStore.size(), storeSizeAtStart + 3);
 
     Mantid::Algorithms::DeleteWorkspaces alg;
@@ -59,8 +59,8 @@ public:
     const std::string testName1 = "DeleteWorkspaces_testWS1";
     const std::string testName2 = "DeleteWorkspaces_testWS2";
 
-    createAndStoreWorspace(testName1);
-    createAndStoreWorspace(testName2);
+    createAndStoreWorkspace(testName1);
+    createAndStoreWorkspace(testName2);
 
     auto group = WorkspaceGroup_sptr(new WorkspaceGroup);
     dataStore.add("group", group);
@@ -90,8 +90,8 @@ public:
     const size_t storeSizeAtStart(dataStore.size());
     const std::string testName1 = "DeleteWorkspaces_testWS1";
     const std::string testName2 = "DeleteWorkspaces_testWS2";
-    createAndStoreWorspace(testName1);
-    createAndStoreWorspace(testName2);
+    createAndStoreWorkspace(testName1);
+    createAndStoreWorkspace(testName2);
     const std::string groupName = "DeleteWorkspaces_testGroup";
     Mantid::Algorithms::GroupWorkspaces groupingAlg;
     groupingAlg.initialize();
@@ -110,8 +110,7 @@ public:
     TS_ASSERT_EQUALS(dataStore.size(), storeSizeAtStart);
   }
 
-  // TODO: fix typo in name
-  void createAndStoreWorspace(std::string name, int ylength = 10) {
+  void createAndStoreWorkspace(std::string name, int ylength = 10) {
     using namespace Mantid::API;
     using namespace Mantid::DataObjects;
 
