@@ -951,15 +951,15 @@ void FunctionBrowser::addTieProperty(QtProperty *prop, QString tie) {
     }
   }
 
-  // check that tie has form <paramName>=<expression>
-  //if (expr.name() != "=") { // prepend "<paramName>="
-  //  if (!isComposite) {
-  //    tie.prepend(prop->propertyName() + "=");
-  //  } else {
-  //    QString index = getIndex(prop);
-  //    tie.prepend(index + prop->propertyName() + "=");
-  //  }
-  //}
+  //check that tie has form <paramName>=<expression>
+  if (expr.name() != "=") { // prepend "<paramName>="
+    if (!isComposite) {
+     tie.prepend(prop->propertyName() + "=");
+   } else {
+      QString index = getIndex(prop);
+      tie.prepend(index + prop->propertyName() + "=");
+    }
+  }
 
   // find the property of the function
   QtProperty *funProp =
