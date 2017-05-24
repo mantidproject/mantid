@@ -180,13 +180,13 @@
      </widget>
     </item>
     <item>
-     <widget class="QGroupBox" name="gbCalibOnly">
+     <widget class="QGroupBox" name="gbCalib">
       <property name="title">
        <string>Calibration</string>
       </property>
       <layout class="QGridLayout" name="gridLayout_3">
        <item row="1" column="0">
-        <widget class="MantidQt::API::MWRunFiles" name="rfVanFile_only" native="true">
+        <widget class="MantidQt::API::MWRunFiles" name="rfVanFile" native="true">
          <property name="enabled">
           <bool>false</bool>
          </property>
@@ -237,7 +237,7 @@
         </widget>
        </item>
        <item row="3" column="0">
-        <widget class="MantidQt::API::MWRunFiles" name="rfCalFile_only" native="true">
+        <widget class="MantidQt::API::MWRunFiles" name="rfCalFile" native="true">
          <property name="enabled">
           <bool>false</bool>
          </property>
@@ -286,15 +286,15 @@
        </item>
       </layout>
       <zorder>ckUseCalib</zorder>
-      <zorder>rfCalFile_only</zorder>
-      <zorder>rfVanFile_only</zorder>
+      <zorder>rfCalFile</zorder>
+      <zorder>rfVanFile</zorder>
       <zorder>ckUseVanadium</zorder>
       <zorder>ckManualDRange</zorder>
       <zorder>spDRange</zorder>
      </widget>
     </item>
     <item>
-     <widget class="QGroupBox" name="gbDspaceRebinCalibOnly">
+     <widget class="QGroupBox" name="gbDspaceRebin">
       <property name="title">
        <string>Rebin in D-Spacing (optional)</string>
       </property>
@@ -306,17 +306,17 @@
         <number>6</number>
        </property>
        <item>
-        <widget class="QLabel" name="lbRebinStart_calibOnly">
+        <widget class="QLabel" name="lbRebinStart">
          <property name="text">
           <string>Start:</string>
          </property>
         </widget>
        </item>
        <item>
-        <widget class="QLineEdit" name="leRebinStart_CalibOnly"/>
+        <widget class="QLineEdit" name="leRebinStart"/>
        </item>
        <item>
-        <widget class="QLabel" name="valRebinStart_CalibOnly">
+        <widget class="QLabel" name="valRebinStart">
          <property name="styleSheet">
           <string notr="true">color: rgb(170, 0, 0);</string>
          </property>
@@ -326,17 +326,17 @@
         </widget>
        </item>
        <item>
-        <widget class="QLabel" name="lbRebinWidth_CalibOnly">
+        <widget class="QLabel" name="lbRebinWidth">
          <property name="text">
           <string>Width:</string>
          </property>
         </widget>
        </item>
        <item>
-        <widget class="QLineEdit" name="leRebinWidth_CalibOnly"/>
+        <widget class="QLineEdit" name="leRebinWidth"/>
        </item>
        <item>
-        <widget class="QLabel" name="valRebinWidth_CalibOnly">
+        <widget class="QLabel" name="valRebinWidth">
          <property name="styleSheet">
           <string notr="true">color: rgb(170, 0, 0);</string>
          </property>
@@ -346,17 +346,17 @@
         </widget>
        </item>
        <item>
-        <widget class="QLabel" name="lbRebinEnd_CalibOnly">
+        <widget class="QLabel" name="lbRebinEnd">
          <property name="text">
           <string>End:</string>
          </property>
         </widget>
        </item>
        <item>
-        <widget class="QLineEdit" name="leRebinEnd_CalibOnly"/>
+        <widget class="QLineEdit" name="leRebinEnd"/>
        </item>
        <item>
-        <widget class="QLabel" name="valRebinEnd_CalibOnly">
+        <widget class="QLabel" name="valRebinEnd">
          <property name="styleSheet">
           <string notr="true">color: rgb(170, 0, 0);</string>
          </property>
@@ -573,9 +573,9 @@
   <tabstop>ckUseCan</tabstop>
   <tabstop>ckCanScale</tabstop>
   <tabstop>spCanScale</tabstop>
-  <tabstop>leRebinStart_CalibOnly</tabstop>
-  <tabstop>leRebinWidth_CalibOnly</tabstop>
-  <tabstop>leRebinEnd_CalibOnly</tabstop>
+  <tabstop>leRebinStart</tabstop>
+  <tabstop>leRebinWidth</tabstop>
+  <tabstop>leRebinEnd</tabstop>
   <tabstop>ckIndividualGrouping</tabstop>
   <tabstop>cbPlotType</tabstop>
   <tabstop>ckGSS</tabstop>
@@ -638,7 +638,7 @@
   <connection>
    <sender>ckUseCalib</sender>
    <signal>toggled(bool)</signal>
-   <receiver>rfCalFile_only</receiver>
+   <receiver>rfCalFile</receiver>
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
@@ -670,7 +670,7 @@
   <connection>
    <sender>ckUseVanadium</sender>
    <signal>toggled(bool)</signal>
-   <receiver>rfVanFile_only</receiver>
+   <receiver>rfVanFile</receiver>
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
