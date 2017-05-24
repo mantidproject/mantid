@@ -1296,7 +1296,8 @@ Table *MantidUI::createDetectorTable(
 
   // Cache some frequently used values
   IComponent_const_sptr sample = ws->getInstrument()->getSample();
-  const auto beamAxisIndex = ws->getInstrument()->getReferenceFrame()->pointingAlongBeam();
+  const auto beamAxisIndex =
+      ws->getInstrument()->getReferenceFrame()->pointingAlongBeam();
   const auto sampleDist = sample->getPos()[beamAxisIndex];
   bool signedThetaParamRetrieved(false),
       showSignedTwoTheta(false); // If true,  signedVersion of the two theta
