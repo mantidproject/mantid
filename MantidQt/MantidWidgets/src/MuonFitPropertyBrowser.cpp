@@ -1109,7 +1109,7 @@ void MuonFitPropertyBrowser::setAllPairs() {
 */
 void MuonFitPropertyBrowser::genGroupWindow() {
 	//reset group window
-	m_groupWindow = new QDialog; 
+	m_groupWindow = new QDialog(this); 
   QtGroupPropertyManager *groupManager =
       new QtGroupPropertyManager(m_groupWindow);
   QVBoxLayout *layout = new QVBoxLayout(m_groupWindow);
@@ -1277,7 +1277,7 @@ void MuonFitPropertyBrowser::setChosenPeriods(const QString &period) {
 */
 void MuonFitPropertyBrowser::genPeriodWindow() {
 	//reset period window
-	m_periodWindow = new QDialog;
+	m_periodWindow = new QDialog(this);
   QtGroupPropertyManager *groupManager =
       new QtGroupPropertyManager(m_periodWindow);
   QVBoxLayout *layout = new QVBoxLayout(m_periodWindow);
@@ -1301,7 +1301,7 @@ void MuonFitPropertyBrowser::genPeriodWindow() {
 */
 void MuonFitPropertyBrowser::genCombinePeriodWindow() {
 	//reset combine window
-	m_comboWindow = new QDialog;
+	m_comboWindow = new QDialog(this);
   QVBoxLayout *layout = new QVBoxLayout(m_comboWindow);
   QFormLayout *formLayout = new QFormLayout;
   m_positiveCombo = new QLineEdit();
