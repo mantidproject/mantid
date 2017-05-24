@@ -10,6 +10,7 @@ from isis_powder.routines import sample_details
 
 from six_shim import assertRaisesRegex, assertRegex
 
+
 class ISISPowderSampleDetailsTest(unittest.TestCase):
     def test_constructor(self):
         expected_height = 1.1
@@ -44,7 +45,6 @@ class ISISPowderSampleDetailsTest(unittest.TestCase):
         self.assertEqual(sample_details_obj_str.height, float(height_radius_string))
         self.assertEqual(sample_details_obj_str.radius, float(height_radius_string))
         self.assertEqual(sample_details_obj_str.center, [2.0, 3.0, 5.0])
-
 
     def test_constructor_non_number_input(self):
         good_input = 1.0
@@ -109,7 +109,7 @@ class ISISPowderSampleDetailsTest(unittest.TestCase):
             sample_details.SampleDetails(height=good_input, radius=good_input,
                                          center=[zero_value, good_input, good_input])
 
-        def test_set_material(self):
+    def test_set_material(self):
         sample_details_obj = sample_details.SampleDetails(height=1.0, radius=1.0, center=[2, 3, 4])
 
         # Check that we can only set a material once. We will test the underlying class elsewhere
