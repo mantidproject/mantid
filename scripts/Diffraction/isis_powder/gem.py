@@ -2,7 +2,7 @@ from __future__ import (absolute_import, division, print_function)
 
 from isis_powder.abstract_inst import AbstractInst
 from isis_powder.gem_routines import gem_advanced_config, gem_algs, gem_param_mapping
-from isis_powder.routines import absorb_corrections, common, instrument_settings, sample_details
+from isis_powder.routines import absorb_corrections, common, instrument_settings
 
 
 class Gem(AbstractInst):
@@ -43,7 +43,8 @@ class Gem(AbstractInst):
     # Private methods
 
     def _get_run_details(self, run_number_string):
-        run_number_string_key = str(run_number_string) + str(self._inst_settings.file_extension)
+        run_number_string_key = self._generate_run_details_fingerprint(run_number_string,
+                                                                       self._inst_settings.file_extension)
         if run_number_string_key in self._cached_run_details:
             return self._cached_run_details[run_number_string_key]
 

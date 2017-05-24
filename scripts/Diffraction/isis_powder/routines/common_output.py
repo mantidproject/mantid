@@ -18,9 +18,10 @@ def split_into_tof_d_spacing_groups(run_details, processed_spectra):
     tof_output = []
     run_number = str(run_details.output_run_string)
     ext = run_details.file_extension if run_details.file_extension else ""
-    for name_index, ws in enumerate(processed_spectra):
-        d_spacing_out_name = run_number + ext + "-ResultD-" + str(name_index + 1)
-        tof_out_name = run_number + ext + "-ResultTOF-" + str(name_index + 1)
+
+    for name_index, ws in enumerate(processed_spectra, start=1):
+        d_spacing_out_name = run_number + ext + "-ResultD-" + str(name_index)
+        tof_out_name = run_number + ext + "-ResultTOF-" + str(name_index)
 
         d_spacing_output.append(mantid.ConvertUnits(InputWorkspace=ws, OutputWorkspace=d_spacing_out_name,
                                                     Target="dSpacing"))

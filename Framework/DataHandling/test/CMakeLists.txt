@@ -21,6 +21,7 @@ if ( CXXTEST_FOUND )
             DataObjects
             Geometry
             HistogramData
+            Indexing
             Kernel
             Nexus
             ${NEXUS_LIBRARIES}

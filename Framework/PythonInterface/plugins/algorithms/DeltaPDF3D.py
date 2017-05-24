@@ -34,13 +34,13 @@ class DeltaPDF3D(PythonAlgorithm):
 
         self.declareProperty("RemoveReflections", True, "Remove HKL reflections")
         condition = EnabledWhenProperty("RemoveReflections", PropertyCriterion.IsDefault)
-        self.declareProperty("Shape", "cube", doc="Shape to cut out reflections",
+        self.declareProperty("Shape", "sphere", doc="Shape to cut out reflections",
                              validator=StringListValidator(['sphere', 'cube']))
         self.setPropertySettings("Shape", condition)
         val_min_zero = FloatArrayBoundedValidator()
         val_min_zero.setLower(0.)
         self.declareProperty(FloatArrayProperty("Size", [0.2], validator=val_min_zero),
-                             "Width of cube/diameter of sphere used to remove reflections, in (HKL)")
+                             "Width of cube/diameter of sphere used to remove reflections, in (HKL) (one or three values)")
         self.setPropertySettings("Size", condition)
         self.declareProperty("SpaceGroup", "",
                              doc="Space group for reflection removal, either full name or number. If empty all HKL's will be removed.")
@@ -48,16 +48,22 @@ class DeltaPDF3D(PythonAlgorithm):
 
         self.declareProperty("CropSphere", False, "Limit min/max q values. Can help with edge effects.")
         condition = EnabledWhenProperty("CropSphere", PropertyCriterion.IsNotDefault)
-        self.declareProperty(FloatArrayProperty("SphereMin", [Property.EMPTY_DBL], validator=val_min_zero), "Min Sphere")
+        self.declareProperty(FloatArrayProperty("SphereMin", [Property.EMPTY_DBL], validator=val_min_zero),
+                             "HKL values below which will be removed (one or three values)")
         self.setPropertySettings("SphereMin", condition)
-        self.declareProperty(FloatArrayProperty("SphereMax", [Property.EMPTY_DBL], validator=val_min_zero), "Max Sphere")
+        self.declareProperty(FloatArrayProperty("SphereMax", [Property.EMPTY_DBL], validator=val_min_zero),
+                             "HKL values above which will be removed (one or three values)")
         self.setPropertySettings("SphereMax", condition)
+        self.declareProperty("FillValue", Property.EMPTY_DBL, "Value to replace with outside sphere")
+        self.setPropertySettings("FillValue", condition)
 
         self.declareProperty("Convolution", True, "Apply convolution to fill in removed reflections")
         condition = EnabledWhenProperty("Convolution", PropertyCriterion.IsDefault)
         self.declareProperty("ConvolutionWidth", 2.0, validator=FloatBoundedValidator(0.),
                              doc="Width of gaussian convolution in pixels")
         self.setPropertySettings("ConvolutionWidth", condition)
+        self.declareProperty("Deconvolution", False, "Apply deconvolution after fourier transform")
+        self.setPropertySettings("Deconvolution", condition)
 
         # Reflections
         self.setPropertyGroup("RemoveReflections","Reflection Removal")
@@ -69,10 +75,12 @@ class DeltaPDF3D(PythonAlgorithm):
         self.setPropertyGroup("CropSphere","Cropping to a sphere")
         self.setPropertyGroup("SphereMin","Cropping to a sphere")
         self.setPropertyGroup("SphereMax","Cropping to a sphere")
+        self.setPropertyGroup("FillValue","Cropping to a sphere")
 
         # Convolution
         self.setPropertyGroup("Convolution","Convolution")
         self.setPropertyGroup("ConvolutionWidth","Convolution")
+        self.setPropertyGroup("Deconvolution","Convolution")
 
     def validateInputs(self):
         issues = dict()
@@ -85,10 +93,10 @@ class DeltaPDF3D(PythonAlgorithm):
         if dimX.name != '[H,0,0]' or dimY.name != '[0,K,0]' or dimZ.name != '[0,0,L]':
             issues['InputWorkspace'] = 'dimensions must be [H,0,0], [0,K,0] and [0,0,L]'
 
-        if (dimX.getMaximum() != -dimX.getMinimum() or
-                dimY.getMaximum() != -dimY.getMinimum() or
-                dimZ.getMaximum() != -dimZ.getMinimum()):
-            issues['InputWorkspace'] = 'dimensions must be centered on zero'
+        for d in range(inWS.getNumDims()):
+            dim = inWS.getDimension(d)
+            if not np.isclose(dim.getMaximum(), -dim.getMinimum()):
+                issues['InputWorkspace'] = 'dimensions must be centered on zero'
 
         if self.getProperty("Convolution").value:
             try:
@@ -145,6 +153,10 @@ class DeltaPDF3D(PythonAlgorithm):
         Y=np.linspace(Ymin,Ymax,Ybins+1)
         Z=np.linspace(Zmin,Zmax,Zbins+1)
 
+        X, Y, Z = np.ogrid[(dimX.getX(0)+dimX.getX(1))/2:(dimX.getX(Xbins)+dimX.getX(Xbins-1))/2:Xbins*1j,
+                           (dimY.getX(0)+dimY.getX(1))/2:(dimY.getX(Ybins)+dimY.getX(Ybins-1))/2:Ybins*1j,
+                           (dimZ.getX(0)+dimZ.getX(1))/2:(dimZ.getX(Zbins)+dimZ.getX(Zbins-1))/2:Zbins*1j]
+
         if self.getProperty("RemoveReflections").value:
             progress.report("Removing Reflections")
             size = self.getProperty("Size").value
@@ -173,33 +185,39 @@ class DeltaPDF3D(PythonAlgorithm):
                                        int((k-size[1]-Ymin)/Ywidth+1):int((k+size[1]-Ymin)/Ywidth),
                                        int((l-size[2]-Zmin)/Zwidth+1):int((l+size[2]-Zmin)/Zwidth)]=np.nan
             else:  # sphere
-                Xst = ((X[:-1]+X[1:])/2).reshape((Xbins, 1, 1))
-                Yst = ((Y[:-1]+Y[1:])/2).reshape((1, Ybins, 1))
-                Zst = ((Z[:-1]+Z[1:])/2).reshape((1, 1, Zbins))
+                mask=((X-np.round(X))**2/size[0]**2 + (Y-np.round(Y))**2/size[1]**2 + (Z-np.round(Z))**2/size[2]**2 < 1)
 
-                for h in range(int(np.ceil(Xmin)), int(Xmax)+1):
-                    for k in range(int(np.ceil(Ymin)), int(Ymax)+1):
-                        for l in range(int(np.ceil(Zmin)), int(Zmax)+1):
-                            if not check_space_group or sg.isAllowedReflection([h,k,l]):
-                                signal[(Xst-h)**2/size[0]**2 + (Yst-k)**2/size[1]**2 + (Zst-l)**2/size[2]**2 < 1]=np.nan
+                # Unmask invalid reflections
+                if check_space_group:
+                    for h in range(int(np.ceil(Xmin)), int(Xmax)+1):
+                        for k in range(int(np.ceil(Ymin)), int(Ymax)+1):
+                            for l in range(int(np.ceil(Zmin)), int(Zmax)+1):
+                                if not sg.isAllowedReflection([h,k,l]):
+                                    mask[int((h-0.5-Xmin)/Xwidth+1):int((h+0.5-Xmin)/Xwidth),
+                                         int((k-0.5-Ymin)/Ywidth+1):int((k+0.5-Ymin)/Ywidth),
+                                         int((l-0.5-Zmin)/Zwidth+1):int((l+0.5-Zmin)/Zwidth)]=False
+
+                signal[mask]=np.nan
 
         if self.getProperty("CropSphere").value:
             progress.report("Cropping to sphere")
             sphereMin = self.getProperty("SphereMin").value
 
-            Xs, Ys, Zs = np.mgrid[(X[0]+X[1])/2:(X[-1]+X[-2])/2:Xbins*1j,
-                                  (Y[0]+Y[1])/2:(Y[-1]+Y[-2])/2:Ybins*1j,
-                                  (Z[0]+Z[1])/2:(Z[-1]+Z[-2])/2:Zbins*1j]
-
             if sphereMin[0] < Property.EMPTY_DBL:
                 if len(sphereMin)==1:
                     sphereMin = np.repeat(sphereMin, 3)
-                signal[Xs**2/sphereMin[0]**2 + Ys**2/sphereMin[1]**2 + Zs**2/sphereMin[2]**2 < 1]=np.nan
+                signal[X**2/sphereMin[0]**2 + Y**2/sphereMin[1]**2 + Z**2/sphereMin[2]**2 < 1]=np.nan
+
             sphereMax = self.getProperty("SphereMax").value
+
             if sphereMax[0] < Property.EMPTY_DBL:
                 if len(sphereMax)==1:
                     sphereMax = np.repeat(sphereMax, 3)
-                signal[Xs**2/sphereMax[0]**2 + Ys**2/sphereMax[1]**2 + Zs**2/sphereMax[2]**2 > 1]=np.nan
+                if self.getProperty("FillValue").value == Property.EMPTY_DBL:
+                    fill_value = np.nan
+                else:
+                    fill_value = self.getProperty("FillValue").value
+                signal[X**2/sphereMax[0]**2 + Y**2/sphereMax[1]**2 + Z**2/sphereMax[2]**2 > 1]=fill_value
 
         if self.getProperty("Convolution").value:
             progress.report("Convoluting signal")
@@ -220,11 +238,15 @@ class DeltaPDF3D(PythonAlgorithm):
         signal[np.isnan(signal)]=0
         signal[np.isinf(signal)]=0
 
-        signal=np.fft.fftshift(np.fft.fftn(np.fft.ifftshift(signal))).real
+        signal=np.fft.fftshift(np.fft.fftn(np.fft.ifftshift(signal)))
         number_of_bins = signal.shape
 
+        # Do deconvolution
+        if self.getProperty("Convolution").value and self.getProperty("Deconvolution").value:
+            signal /= self._deconvolution(np.array(signal.shape))
+
         # CreateMDHistoWorkspace expects Fortan `column-major` ordering
-        signal = signal.flatten('F')
+        signal = signal.real.flatten('F')
 
         createWS_alg = self.createChildAlgorithm("CreateMDHistoWorkspace", enableLogging=False)
         createWS_alg.setProperty("SignalInput", signal)
@@ -247,7 +269,7 @@ class DeltaPDF3D(PythonAlgorithm):
 
     def _convolution(self, signal):
         from astropy.convolution import convolve, convolve_fft, Gaussian1DKernel
-        G1D = Gaussian1DKernel(2).array
+        G1D = Gaussian1DKernel(self.getProperty("ConvolutionWidth").value).array
         G3D = G1D * G1D.reshape((-1,1)) * G1D.reshape((-1,1,1))
         try:
             logger.debug('Trying astropy.convolution.convolve_fft for convolution')
@@ -255,6 +277,18 @@ class DeltaPDF3D(PythonAlgorithm):
         except ValueError:
             logger.debug('Using astropy.convolution.convolve for convolution')
             return convolve(signal, G3D)
+
+    def _deconvolution(self, shape):
+        from astropy.convolution import Gaussian1DKernel
+        G1D = Gaussian1DKernel(self.getProperty("ConvolutionWidth").value).array
+        G3D = G1D * G1D.reshape((-1,1)) * G1D.reshape((-1,1,1))
+        G3D_shape = np.array(G3D.shape)
+        G3D = np.pad(G3D,pad_width=np.array([np.maximum(np.floor((shape-G3D_shape)/2),np.zeros(len(shape))),
+                                             np.maximum(np.ceil((shape-G3D_shape)/2),np.zeros(len(shape)))],
+                                            dtype=np.int).transpose(),mode='constant')
+        deconv = np.fft.fftshift(np.fft.fftn(np.fft.ifftshift(G3D)))
+        iarr = (deconv.shape-shape)//2
+        return deconv[iarr[0]:shape[0]+iarr[0],iarr[1]:shape[1]+iarr[1],iarr[2]:shape[2]+iarr[2]]
 
     def _calc_new_extents(self, inWS):
         # Calculate new extents for fft space

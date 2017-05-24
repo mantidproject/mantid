@@ -10,7 +10,7 @@ Description
 -----------
 
 A NOT operation will be conducted on the input masking workspace
-(SpecialWorkspace2D)
+(SpecialWorkspace2D).
 
 Output
 ######
@@ -27,7 +27,8 @@ Usage
 .. testcode:: ExInvertPG3
 
   # Load data
-  maskws = LoadMask(Instrument="POWGEN", InputFile="Mask-PG3-19884.xml")
+  maskws = LoadMask(Instrument="POWGEN_Definition_2015-08-01.xml",
+                    InputFile="Mask-PG3-19884.xml")
 
   # Check source mask workspace
   nummasked = 0

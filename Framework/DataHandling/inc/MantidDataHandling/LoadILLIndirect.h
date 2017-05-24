@@ -2,6 +2,7 @@
 #define MANTID_DATAHANDLING_LOADILLINDIRECT_H_
 
 #include "MantidAPI/IFileLoader.h"
+#include "MantidAPI/DeprecatedAlgorithm.h"
 #include "MantidNexus/NexusClasses.h"
 #include "MantidDataHandling/LoadHelper.h"
 
@@ -33,7 +34,8 @@ namespace DataHandling {
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class DLLExport LoadILLIndirect
-    : public API::IFileLoader<Kernel::NexusDescriptor> {
+    : public API::IFileLoader<Kernel::NexusDescriptor>,
+      public API::DeprecatedAlgorithm {
 public:
   LoadILLIndirect();
   /// Returns a confidence value that this algorithm can load a file
