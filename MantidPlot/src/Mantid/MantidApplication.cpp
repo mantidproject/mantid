@@ -33,9 +33,9 @@ MantidApplication::MantidApplication(int &argc, char **argv)
 
 bool MantidApplication::notify(QObject *receiver, QEvent *event) {
   bool res = false;
-  try {
+ // try {
     res = QApplication::notify(receiver, event);
-  } catch (std::exception &e) {
+  /*} catch (std::exception &e) {
     if (MantidQt::API::MantidDialog::handle(receiver, e))
       return true; // stops event propagation
 
@@ -79,7 +79,7 @@ bool MantidApplication::notify(QObject *receiver, QEvent *event) {
       quit();
     } else
       g_log.fatal("Continue working.");
-  }
+  }*/
   return res;
 }
 

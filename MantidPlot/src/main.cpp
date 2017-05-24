@@ -199,7 +199,7 @@ int main(int argc, char **argv) {
   QStringList args = app.arguments();
   args.removeFirst(); // remove application name
 
-  try {
+  //try {
     // Splash
     QPixmap pixmap;
     if (!pixmap.load(":/MantidSplashScreen.png"))
@@ -237,7 +237,7 @@ int main(int argc, char **argv) {
                 SLOT(exitWithPresetCode()));
     QTimer::singleShot(0, mw, SLOT(onAboutToStart()));
     return app.exec();
-  } catch (std::exception &e) {
+  /*} catch (std::exception &e) {
     QMessageBox::critical(
         0, "Mantid - Error",
         QString("An unhandled exception has been caught. MantidPlot will have "
@@ -247,5 +247,5 @@ int main(int argc, char **argv) {
     QMessageBox::critical(0, "Mantid - Error", "An unhandled exception has "
                                                "been caught. MantidPlot will "
                                                "have to close.");
-  }
+  }*/
 }
