@@ -1,0 +1,43 @@
+digraph ReflectometryReductionOne {
+label = "\n"
+ $global_style
+
+subgraph params {
+ $param_style
+  inputWorkspace     [label="OutputWorkspaceWavelength", group=g1]
+  outputWorkspaceWav [label="OutputWorkspaceWavelength"]
+  wavMin             [label="WavelengthMin", group=gwav]
+  wavMax             [label="WavelengthMax", group=gwav]
+}
+
+subgraph decisions {
+ $decision_style
+  checkSumInQ        [label="Sum in Q?"]
+}
+
+subgraph algorithms {
+ $algorithm_style
+  cropWav           [label="CropWorkspace"]
+}
+
+subgraph processes {
+ $process_style
+  projectCounts      [label=<Project input counts to &lambda;<sub>v</sub> at 2&theta;<sub>R</sub>>]
+  sumInQ             [label=<Sum in &lambda;<sub>v</sub>>]
+}
+
+subgraph values {
+ $value_style
+}
+
+inputWorkspace     -> checkSumInQ
+checkSumInQ        -> projectCounts      [label="Yes"]
+checkSumInQ        -> cropWav            [label="No"]
+projectCounts      -> sumInQ
+sumInQ             -> cropWav
+wavMin             -> cropWav
+wavMax             -> cropWav
+cropWav            -> outputWorkspaceWav
+
+}
+

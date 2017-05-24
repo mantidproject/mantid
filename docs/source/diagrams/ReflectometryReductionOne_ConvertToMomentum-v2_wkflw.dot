@@ -4,8 +4,8 @@ label = "\n"
 
 subgraph params {
  $param_style
-  inputWorkspace    [label="OutputWorkspaceWavelength", group=g1]
-  outputWorkspace   [label="OutputWorkspace"]
+  inputWorkspace     [label="OutputWorkspaceWavelength", group=g1]
+  outputWorkspace    [label="OutputWorkspace"]
 }
 
 subgraph decisions {
@@ -25,6 +25,8 @@ subgraph values {
  $value_style
 }
 
-inputWorkspace    -> convertUnits
-convertUnits      ->  outputWorkspace
+inputWorkspace     -> convertUnits
+convertUnits       ->  outputWorkspace
+
 }
+

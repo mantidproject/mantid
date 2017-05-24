@@ -105,6 +105,8 @@ void IntegratePeaksCWSD::exec() {
   // Merge peak if necessary
   if (m_doMergePeak)
     mergePeaks();
+  else
+    normalizePeaksIntensities(); // normalize the intensity of each Pt.
 
   // Output
   DataObjects::PeaksWorkspace_sptr outws =
@@ -161,6 +163,7 @@ void IntegratePeaksCWSD::processInputs() {
         "Either being normalized by time or being normalized "
         "by monitor must be selected if merge-peak is selected.");
   m_scaleFactor = getProperty("ScaleFactor");
+  g_log.warning() << "[DB...BAT] Scale factor = " << m_scaleFactor << "\n";
 
   // monitor counts
   if (m_normalizeByMonitor)
@@ -544,9 +547,8 @@ std::map<int, double> IntegratePeaksCWSD::getMeasureTime() {
     std::string duration_str = expinfo->run().getProperty("duration")->value();
     double duration = std::stod(duration_str);
     run_time_map.insert(std::make_pair(run_number, duration));
-    g_log.information() << "MD workspace exp info " << iexpinfo << ": run "
-                        << run_number << ", measuring time = " << duration
-                        << "\n";
+    g_log.warning() << "MD workspace exp info " << iexpinfo << ": run "
+                    << run_number << ", measuring time = " << duration << "\n";
   }
 
   return run_time_map;
@@ -571,6 +573,29 @@ void IntegratePeaksCWSD::getPeakInformation() {
     g_log.information() << "From peak workspace: peak " << ipeak
                         << " Center (Qsample) = " << qsample.toString() << "\n";
   }
+}
+
+//----------------------------------------------------------------------------------------------
+/** Normalize the peak's intensities per Pt. to either time or monitor counts
+ * @brief IntegratePeaksCSWD::normalizePeaksIntensities
+ */
+void IntegratePeaksCWSD::normalizePeaksIntensities() {
+  // go over each peak (of run)
+  std::map<int, double>::iterator count_iter;
+  for (count_iter = m_runPeakCountsMap.begin();
+       count_iter != m_runPeakCountsMap.end(); ++count_iter) {
+    int run_number_i = count_iter->first;
+    // get monitor value
+    std::map<int, signal_t>::iterator mon_iter =
+        m_runNormMap.find(run_number_i);
+    // normalize peak intensities stored in m_runNormMap
+    if (mon_iter != m_runNormMap.end()) {
+      signal_t monitor_i = mon_iter->second;
+      count_iter->second /= monitor_i;
+    }
+  } // END-FOR
+
+  return;
 }
 
 } // namespace Mantid
