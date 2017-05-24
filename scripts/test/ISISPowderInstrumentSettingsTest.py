@@ -25,7 +25,7 @@ class ISISPowderInstrumentSettingsTest(unittest.TestCase):
         inst_settings_obj = instrument_settings.InstrumentSettings(param_map=[param_entry])
 
         # Check it still prints the acceptable values when it fails
-        with assertRaisesRegex(self, AttributeError, "a foo, A BAR"):
+        with assertRaisesRegex(self, AttributeError, "A BAR"):
             foo = inst_settings_obj.script_facing_name
             del foo
 

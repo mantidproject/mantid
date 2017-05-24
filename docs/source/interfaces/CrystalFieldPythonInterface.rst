@@ -114,12 +114,12 @@ The new output::
   
 To calculate a spectrum we need to define a shape of each peak (peak profile function) and its default width (`FWHM`).
 The width can be set either via a keyword argument or a property with name `FWHM`. If the peak shape isn't set the default
-of Lorentzian is assumed. To set a different shape use the `setPeaks` method::
+of Lorentzian is assumed. To set a different shape use the `PeakShape` property::
 
-  cf.setPeaks('Gaussian')
+  cf.PeakShape = 'Gaussian'
   cf.FWHM = 0.9
   
-The arguments of `setPeaks` are expected to be names of Mantid peak fit functions. At the moment only `Lorentzian` and
+The values of `PeakShape` are expected to be names of Mantid peak fit functions. At the moment only `Lorentzian` and
 `Gaussian` can be used.
 
 After the peak shape is defined a spectrum can be calculated::
@@ -212,11 +212,11 @@ For the parameters of the background the syntax is the same but the methods are 
 The names of the peak parameters both in ties and constraints must include the index of the peak to which they belong. Here we follow
 the naming convention of the :ref:`func-CompositeFunction`: f<n>.<name>, where <n> stands for an integer index staring at 0 and <name>
 is the name of the parameter. For example, `f1.Sigma`, `f3.FWHM`. Because names now contain the period symbol '.' keyword arguments
-cannot be used. Instead we must pass strings containing ties::
+cannot be used. Instead we must pass a dictionary containing ties. The keys are parameter names and the values are the ties::
 
-    cf.peaks.ties('f2.FWHM=2*f1.FWHM', 'f3.FWHM=2*f2.FWHM')
+    cf.peaks.ties({'f2.FWHM': '2*f1.FWHM', 'f3.FWHM': '2*f2.FWHM'})
     
-and constraints are also a list of strings::
+Constraints are a list of strings::
 
     cf.peaks.constraints('f0.FWHM < 2.2', 'f1.FWHM >= 0.1')
     
@@ -226,13 +226,13 @@ If a parameter of all peaks needs to be tied/constrained with the same expressio
     cf.peaks.constrainAll('0 < Sigma < 0.1', 4)
 
 where the first argument is the general formula of the tie/constraint and the second is the number of peaks to apply to.
-The is also a version for a range of peak indices::
+There is also a version for a range of peak indices::
 
     cf.peaks.tieAll('Sigma=f0.Sigma', 1, 3)
 
 which is equivalent to::
 
-    cf.peaks.ties('f1.Sigma=f0.Sigma', 'f2.Sigma=f0.Sigma', 'f3.Sigma=f0.Sigma')
+    cf.peaks.ties({'f1.Sigma': 'f0.Sigma', 'f2.Sigma': 'f0.Sigma', 'f3.Sigma': 'f0.Sigma'})
 
 
 Setting Resolution Model
@@ -280,11 +280,11 @@ become lists. Here is an example of defining a `CrystalField` object with two sp
 
     cf = CrystalField('Ce', 'C2v', B20=0.37737, B22=3.9770, B40=-0.031787, B42=-0.11611, B44=-0.12544,
                       Temperature=[44.0, 50], FWHM=[1.1, 0.9])
-    cf.setPeaks('Lorentzian')
+    cf.PeakShape = 'Lorentzian'
     cf.peaks[0].param[0]['FWHM'] = 1.11
     cf.peaks[1].param[1]['FWHM'] = 1.12
-    cf.setBackground(peak=Function('Gaussian', Height=10, Sigma=0.3),
-                     background=Function('FlatBackground', A0=1.0))
+    cf.background = Background(peak=Function('Gaussian', Height=10, Sigma=0.3),
+                               background=Function('FlatBackground', A0=1.0))
     cf.background[1].peak.param['Sigma'] = 0.8
     cf.background[1].background.param['A0'] = 1.1
 
@@ -301,7 +301,7 @@ change::
     cf.background[1].peak.ties(Height=20.2)
     cf.background[1].peak.constraints('Sigma > 0.2')
     cf.peaks[1].tieAll('FWHM=2*f1.FWHM', 2, 5)
-    cf.peaks[0].constrainAll('FWHM < 2.2', 1, 6)
+    cf.peaks[0].constrainAll('FWHM < 2.2', 1, 4)
 
 The resolution model also needs to be initialised from a list::
 
@@ -327,6 +327,16 @@ To calculate a spectrum call the same method `getSpectrum` but pass the spectrum
   
   # Calculate first spectrum, use the i-th spectrum of a workspace
   sp = cf.getSpectrum(0, ws, i)
+
+Note that the attributes `Temperature`, `FWHM`, `peaks` and `background` may be set separately from the constructor, e.g.::
+
+    cf = CrystalField('Ce', 'C2v', B20=0.37737, B22=3.9770, B40=-0.031787, B42=-0.11611, B44=-0.12544)
+    cf.Temperature = [5, 50]
+
+However, each time that `Temperature` is set, if it defines a different number of spectra from the previous value
+(e.g. if `Temperature` was initially empty or `None` and is then defined as in the example above, or if `Temperature`
+was initially a scalar value but is then redefined to be a list or vice versa), then all `Ties`, `Constraints`,
+`FWHM` and `peaks` parameters are cleared. Any crystal field parameters previously defined will be retained, however.
 
 
 Multiple Ions
@@ -652,7 +662,11 @@ or separately after construction::
     fit_moment.fit()
 
 Unfortunately only 1D datasets can be fitted (e.g. M(H, T) cannot be fitted as a simultaneous function of field and
-temperature).
+temperature). Also, note that setting the `PhysicalProperty` attribute after constructing the `CrystalField` object
+(e.g. running `cf.PhysicalProperty = PhysicalProperties('Cv')`) causes the number of datasets to change and will 
+clear all `Ties` and `Constraints` previously set, and also reset all `FWHM` and `peaks` to the default values (zero 
+for `FWHM` and `Lorentzian` for `peaks`). 
+
 
 Simultaneous Fitting of Physical Properties and Inelastic Neutron Spectra
 -------------------------------------------------------------------------
