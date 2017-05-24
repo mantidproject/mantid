@@ -405,6 +405,10 @@ void KafkaEventStreamDecoder::sampleDataFromMessage(const std::string &buffer) {
     } else if (seEvent->value_type() == Value_Double) {
       auto value = static_cast<const Double *>(seEvent->value());
       appendToLog<double>(mutableRunInfo, name, time, value->value());
+    } else if (seEvent->value_type() == Value_Float) {
+      auto value = static_cast<const Float *>(seEvent->value());
+      appendToLog<double>(mutableRunInfo, name, time,
+                          static_cast<double>(value->value()));
     } else {
       g_log.warning() << "Value for sample log named '" << name
                       << "' was not of recognised type" << std::endl;
