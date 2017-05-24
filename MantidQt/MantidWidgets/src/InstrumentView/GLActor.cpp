@@ -5,6 +5,18 @@ namespace MantidQt {
 namespace MantidWidgets {
 GLActor::~GLActor() {}
 
+void GLActor::setVisibility(bool on)
+{
+	if (m_visible != GLActorVisiblity::ALWAYS_HIDDEN) {
+		if (on) {
+			m_visible = GLActorVisiblity::VISIBLE;
+		}
+		else {
+			m_visible = GLActorVisiblity::HIDDEN;
+		}
+	}
+}
+
 bool GLActor::accept(GLActorVisitor &visitor, VisitorAcceptRule) {
   return visitor.visit(this);
 }

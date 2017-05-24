@@ -5,12 +5,33 @@
 #include "MantidKernel/V3D.h"
 #include "MantidKernel/Quat.h"
 #include "MantidGeometry/IObjComponent.h"
+#include "MantidGeometry/IComponent.h"
 #include "MantidKernel/Exception.h"
 #include "MantidGeometry/IDetector.h"
+#include "MantidGeometry/Objects/Object.h"
 #include "MantidGeometry/Objects/BoundingBox.h"
 
 using namespace Mantid;
 using namespace Geometry;
+
+namespace {
+	// Anonymous namespace
+	bool isComponentFinite(const Mantid::Geometry::ComponentID &compID) {
+		Geometry::BoundingBox boundedBox;
+		compID->getBoundingBox(boundedBox);
+		const auto width = boundedBox.width();
+		const double x = width[0];
+		const double y = width[1];
+		const double z = width[2];
+
+		if (x > 999 || y > 999 || z > 999) {
+			return false;
+		}
+		else {
+			return true;
+		}
+	}
+}
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -20,6 +41,11 @@ ObjComponentActor::ObjComponentActor(const InstrumentActor &instrActor,
     : ComponentActor(instrActor, compID) {
   // set the displayed colour
   setColors();
+
+  if (!isComponentFinite(compID)) {
+	  setAlwaysHidden();
+  }
+
   // register the component with InstrumentActor and set the pick colour
   IDetector_const_sptr det = getDetector();
   if (det) {
@@ -70,10 +96,17 @@ void ObjComponentActor::setColors() {
 */
 void ObjComponentActor::getBoundingBox(Mantid::Kernel::V3D &minBound,
                                        Mantid::Kernel::V3D &maxBound) const {
-  Mantid::Geometry::BoundingBox boundBox;
-  getComponent()->getBoundingBox(boundBox);
-  minBound = boundBox.minPoint();
-  maxBound = boundBox.maxPoint();
+  if (!isVisible()) {
+    // If this is not visible
+    minBound = Kernel::V3D();
+    maxBound = Kernel::V3D();
+  } else {
+
+    Mantid::Geometry::BoundingBox boundBox;
+    getComponent()->getBoundingBox(boundBox);
+    minBound = boundBox.minPoint();
+    maxBound = boundBox.maxPoint();
+  }
 }
 
 } // MantidWidgets
