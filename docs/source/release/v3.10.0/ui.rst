@@ -11,8 +11,7 @@ Installation
 Windows
 #######
 
-OS X
-####
+- At RAL administrative 03 accounts have been introduced.  As before Mantid does not need administrator access to be installed into a windows PC, so you do not need to use your 03 account.  Just use your normal account to install Mantid.  The trade off here is that it will only install desktop icons in the account you use to install it, if you need them in another account you can run the installer again from that account.
 
 User Interface
 --------------
@@ -23,7 +22,10 @@ User Interface
 - A new Print button has been added to the MantidPlot help window.
 - Masked bins are greyed out in the table view of the workspaces (except for EventWorkspaces):
 
-.. figure:: ../../images/maskedbins.jpg  
+.. figure:: ../../images/maskedbins.jpg     
+   :class: screenshot
+   :width: 500px
+   :align: right
 
 Instrument View
 ###############
@@ -36,6 +38,22 @@ Instrument View
 
 Plotting Improvements
 #####################
+
+- Surface, Contour, Waterfall, 1D and Tiled plotting of workspaces are now available from one dialog box (Plot Advanced) got from right-click menu of a workspace selection.
+- The log value facilities for Surface and Contour plot are now available for Waterfall and 1D plots, where they appear in the legend.
+
+.. figure:: ../../images/ArtRightGUIWaterfallCustom2sp1.PNG
+   :class: screenshot
+   :width: 294px
+   :align: right
+
+Here are a couple of plots with "Temp" selected as the log:
+
+.. figure:: ../../images/ArtWaterfallT1.PNG
+
+.. figure:: ../../images/ArtSurfacePlotT1.PNG
+
+More details `here <https://www.mantidproject.org/MBC_Displaying_data_in_multiple_workspaces>`_ .
 
 - Curves where all(Y) <= 0 are now not plotted when the Y-scale is set to logarithmic.
   The previous behaviour assigned an arbitrary value of 0.1 which was confusing.
@@ -53,8 +71,22 @@ Scripting Window
 ################
 - Fixed a bug where Mantid would crash when trying to select the font for the script window
 
-Documentation
-#############
+SliceViewer Improvements
+########################
+- Fixed a bug where the rebin button was toggled when the user switch axes.
+- Changed zoom level on peak. Now when zooming onto a spherical or ellipsoidal peak, the entire peak is visible when using the default window size.
+- Fixed a bug where swapping the dimensions did not rebin the workspace despite having autorebin enabled.
+- Fixed a bug where swapping the dimensions did not draw the axis scale correctly.
+
+
+VSI Improvments
+###############
+- ParaView was updated to to `v5.3.0 <https://blog.kitware.com/paraview-5-3-0-release-notes/>`_.
+- The mapped array vtkMDHWSignalArray has been refactored to use the new vtkGenericDataArray class template. This interface minimizes virtual indirection and allows advanced compiler optimizations such as vectorization.
+- Minimize the number of times the workspace min and max values are calculated.
+- Threshold filter now reports progress to the user.
+- Add option to automatically choose a contrasting color for axes grid and colorbar.
+- Camera toolbar snaps to views along crystallographic axes,
 
 Custom Interfaces
 #################
@@ -68,21 +100,9 @@ Bugs Resolved
 
 - Fixed an issue in the Script Window that caused the Convert Tabs to Spaces and vice versa operations to corrupt the script.
 - Fixed an issue where some graphs not associated with a workspace would not be shown in the project save as view.
+- Fixed an issue where the Spectrum Viewer could crash when a workspace contained infinities.
+- Fixed an issue where contour lines were displayed at the wrong location.
 
-SliceViewer Improvements
-------------------------
-- Fixed a bug where the rebin button was toggled when the user switch axes.
-- Changed zoom level on peak. Now when zooming onto a spherical or ellipsoidal peak, the entire peak is visible when using the default window size.
-- Fixed a bug where swapping the dimensions did not rebin the workspace despite having autorebin enabled.
-
-VSI Improvments
----------------
-- ParaView was updated to to `v5.3.0 <https://blog.kitware.com/paraview-5-3-0-release-notes/>`_.
-- The mapped array vtkMDHWSignalArray has been refactored to use the new vtkGenericDataArray class template. This interface minimizes virtual indirection and allows advanced compiler optimizations such as vectorization.
-- Minimize the number of times the workspace min and max values are calculated.
-- Threshold filter now reports progress to the user.
-- Add option to automatically choose a contrasting color for axes grid and colorbar.
-- Camera toolbar snaps to views along crystallographic axes,
 
 |
 

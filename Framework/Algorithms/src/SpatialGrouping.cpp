@@ -82,7 +82,7 @@ void SpatialGrouping::exec() {
   Mantid::API::Progress prog(this, 0.0, 1.0, m_positions.size());
 
   bool ignoreMaskedDetectors = false;
-  m_neighbourInfo = Kernel::make_unique<API::NearestNeighbourInfo>(
+  m_neighbourInfo = Kernel::make_unique<API::WorkspaceNearestNeighbourInfo>(
       *inputWorkspace, ignoreMaskedDetectors);
 
   for (size_t i = 0; i < inputWorkspace->getNumberHistograms(); ++i) {

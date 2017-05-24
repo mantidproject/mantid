@@ -107,14 +107,16 @@ void Gaussian::setIntensity(const double i) {
   }
 }
 
-void Gaussian::fixCentre() { fixParameter("PeakCentre"); }
+void Gaussian::fixCentre(bool isDefault) {
+  fixParameter("PeakCentre", isDefault);
+}
 
 void Gaussian::unfixCentre() { unfixParameter("PeakCentre"); }
 
-void Gaussian::fixIntensity() {
+void Gaussian::fixIntensity(bool isDefault) {
   std::string formula =
       std::to_string(intensity() / sqrt(2.0 * M_PI)) + "/Sigma";
-  tie("Height", formula, true);
+  tie("Height", formula, isDefault);
 }
 
 void Gaussian::unfixIntensity() { removeTie("Height"); }

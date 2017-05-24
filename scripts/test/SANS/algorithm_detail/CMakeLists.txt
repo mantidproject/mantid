@@ -4,8 +4,10 @@
 
 set ( TEST_PY_FILES
   calculate_transmission_helper_test.py
+  merge_reductions_test.py
   q_resolution_calculator_test.py
   scale_helper_test.py
+  strip_end_nans_test.py
 )
 
 check_tests_valid ( ${CMAKE_CURRENT_SOURCE_DIR} ${TEST_PY_FILES} )
