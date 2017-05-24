@@ -1385,12 +1385,12 @@ Table *MantidUI::createDetectorTable(
       // If monitors are before the sample in the beam, DetectorInfo
       // returns a negative l2 distance.
       if (isMonitor && theta == 180.0) {
-          R = -R;
+        R = -R;
       }
       colValues << QVariant(R) << QVariant(theta);
 
       if (calcQ) {
-        if(isMonitor) {
+        if (isMonitor) {
           // twoTheta is not defined for monitors.
           colValues << QVariant(std::nan(""));
         } else {
