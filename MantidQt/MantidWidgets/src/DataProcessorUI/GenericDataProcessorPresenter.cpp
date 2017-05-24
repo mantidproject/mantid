@@ -56,12 +56,11 @@ GenericDataProcessorPresenter::GenericDataProcessorPresenter(
     const std::map<std::string, std::string> &postprocessMap,
     const std::string &loader)
     : WorkspaceObserver(), m_view(nullptr), m_progressView(nullptr),
-      m_mainPresenter(), m_progressReporter(nullptr), m_loader(loader),
-      m_whitelist(whitelist), m_preprocessMap(preprocessMap),
-      m_processor(processor), m_postprocessor(postprocessor),
-      m_postprocessMap(postprocessMap), m_postprocess(true),
-      m_tableDirty(false), m_promptUser(true), m_reductionPaused(true),
-      m_newSelection(true) {
+      m_mainPresenter(), m_loader(loader), m_whitelist(whitelist),
+      m_preprocessMap(preprocessMap), m_processor(processor),
+      m_postprocessor(postprocessor), m_postprocessMap(postprocessMap),
+      m_progressReporter(nullptr), m_postprocess(true), m_promptUser(true),
+      m_tableDirty(false), m_newSelection(true), m_reductionPaused(true) {
 
   // Column Options must be added to the whitelist
   m_whitelist.addElement("Options", "Options",
@@ -268,8 +267,7 @@ void GenericDataProcessorPresenter::nextRow() {
 
   if (m_reductionPaused) {
     // Notify presenter that reduction is paused
-    m_mainPresenter->notify(
-        DataProcessorMainPresenter::Flag::ConfirmReductionPausedFlag);
+    m_mainPresenter->confirmReductionPaused();
     return;
   }
 
@@ -307,8 +305,7 @@ void GenericDataProcessorPresenter::nextGroup() {
 
   if (m_reductionPaused) {
     // Notify presenter that reduction is paused
-    m_mainPresenter->notify(
-        DataProcessorMainPresenter::Flag::ConfirmReductionPausedFlag);
+    m_mainPresenter->confirmReductionPaused();
     return;
   }
 
@@ -347,7 +344,7 @@ void GenericDataProcessorPresenter::startAsyncGroupReduceThread(
     GroupData &groupData) {
 
   auto *worker =
-      new GenericDataProcessorPresenterGroupReducerWorker(this, m_groupData);
+      new GenericDataProcessorPresenterGroupReducerWorker(this, groupData);
   m_workerThread.reset(new GenericDataProcessorPresenterThread(this, worker));
   m_workerThread->start();
 }
@@ -358,8 +355,7 @@ End reduction
 void GenericDataProcessorPresenter::endReduction() {
 
   pause();
-  m_mainPresenter->notify(
-      DataProcessorMainPresenter::Flag::ConfirmReductionPausedFlag);
+  m_mainPresenter->confirmReductionPaused();
   m_newSelection = true; // Allow same selection to be processed again
 }
 
@@ -1467,8 +1463,7 @@ void GenericDataProcessorPresenter::resume() {
   m_mainPresenter->resume();
 
   m_reductionPaused = false;
-  m_mainPresenter->notify(
-      DataProcessorMainPresenter::Flag::ConfirmReductionResumedFlag);
+  m_mainPresenter->confirmReductionResumed();
 
   doNextAction();
 }

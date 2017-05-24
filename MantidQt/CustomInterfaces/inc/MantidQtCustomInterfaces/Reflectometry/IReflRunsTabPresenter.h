@@ -43,11 +43,7 @@ public:
     ICATSearchCompleteFlag,
     TransferFlag,
     InstrumentChangedFlag,
-    GroupChangedFlag,
-    PauseReductionFlag,
-    ResumeReductionFlag,
-    ConfirmReductionPausedFlag,
-    ConfirmReductionResumedFlag
+    GroupChangedFlag
   };
 
   // Tell the presenter something happened
