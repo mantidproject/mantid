@@ -77,9 +77,9 @@ void IndirectDiffractionReduction::initLayout() {
   m_uiForm.leRebinStart->setValidator(m_valDbl);
   m_uiForm.leRebinWidth->setValidator(m_valDbl);
   m_uiForm.leRebinEnd->setValidator(m_valDbl);
-  //m_uiForm.leRebinStart_CalibOnly->setValidator(m_valDbl);
-  //m_uiForm.leRebinWidth_CalibOnly->setValidator(m_valDbl);
-  //m_uiForm.leRebinEnd_CalibOnly->setValidator(m_valDbl);
+  // m_uiForm.leRebinStart_CalibOnly->setValidator(m_valDbl);
+  // m_uiForm.leRebinWidth_CalibOnly->setValidator(m_valDbl);
+  // m_uiForm.leRebinEnd_CalibOnly->setValidator(m_valDbl);
 
   // Update the list of plot options when individual grouping is toggled
   connect(m_uiForm.ckIndividualGrouping, SIGNAL(stateChanged(int)), this,
@@ -413,8 +413,7 @@ void IndirectDiffractionReduction::runOSIRISdiffonlyReduction() {
   osirisDiffReduction->setProperty(
       "Sample", m_uiForm.rfSampleFiles->getFilenames().join(",").toStdString());
   osirisDiffReduction->setProperty(
-      "Vanadium",
-      m_uiForm.rfVanFile->getFilenames().join(",").toStdString());
+      "Vanadium", m_uiForm.rfVanFile->getFilenames().join(",").toStdString());
   osirisDiffReduction->setProperty(
       "CalFile", m_uiForm.rfCalFile->getFirstFilename().toStdString());
   osirisDiffReduction->setProperty("LoadLogFiles",
@@ -541,8 +540,6 @@ void IndirectDiffractionReduction::instrumentSelected(
   m_uiForm.ckManualDRange->setVisible(false);
   m_uiForm.spDRange->setVisible(false);
 
-
-
   if (instrumentName == "OSIRIS" && reflectionName == "diffonly") {
     // Disable individual grouping
     m_uiForm.gbGeneralOptions->setVisible(false);
@@ -589,8 +586,7 @@ void IndirectDiffractionReduction::instrumentSelected(
   if (instrumentName == "IRIS") {
     m_uiForm.ckUseCalib->setVisible(false);
     m_uiForm.rfCalFile->setVisible(false);
-  }
-  else {
+  } else {
     m_uiForm.ckUseCalib->setVisible(true);
     m_uiForm.rfCalFile->setVisible(true);
   }
@@ -598,11 +594,9 @@ void IndirectDiffractionReduction::instrumentSelected(
   // Disable calibration for diffonly
   if (instrumentName != "OSIRIS" && reflectionName == "diffonly") {
     m_uiForm.gbCalib->setVisible(false);
-  }
-  else {
+  } else {
     m_uiForm.gbCalib->setVisible(true);
   }
-
 }
 
 /**
@@ -636,8 +630,7 @@ void IndirectDiffractionReduction::loadSettings() {
   m_uiForm.rfSampleFiles->readSettings(settings.group());
   m_uiForm.rfCalFile->readSettings(settings.group());
   m_uiForm.rfCalFile->setUserInput(settings.value("last_cal_file").toString());
-  m_uiForm.rfVanFile->setUserInput(
-      settings.value("last_van_files").toString());
+  m_uiForm.rfVanFile->setUserInput(settings.value("last_van_files").toString());
   settings.endGroup();
 }
 
