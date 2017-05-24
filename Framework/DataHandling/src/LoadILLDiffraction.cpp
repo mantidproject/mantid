@@ -26,7 +26,10 @@ using namespace Kernel;
 using namespace NeXus;
 
 namespace {
-constexpr size_t D20_NUMBER_PIXELS[3] = {1600, 3200, 4800};
+// This defines the number of physical pixels in D20 (low resolution mode)
+// Then each pixel can be split into 2 (nominal) or 3 (high resolution) by DAQ
+constexpr size_t D20_NUMBER_PIXELS = 1600;
+// This defines the number of dead pixels on each side in low resolution mode
 constexpr size_t D20_NUMBER_DEAD_PIXELS = 32;
 }
 
@@ -383,24 +386,24 @@ void LoadILLDiffraction::resolveInstrument() {
       // and based on it decide which of the 3 alternative IDFs to load.
       // Some amount of pixels are dead on each end, these has to be subtracted
       // correspondingly dependent on the resolution mode
-      case D20_NUMBER_PIXELS[0]: {
+      case D20_NUMBER_PIXELS: {
         // low resolution mode
         m_instName += "_lr";
         m_numberDetectorsActual =
-            D20_NUMBER_PIXELS[0] - 2 * D20_NUMBER_DEAD_PIXELS;
+            D20_NUMBER_PIXELS - 2 * D20_NUMBER_DEAD_PIXELS;
         break;
       }
-      case D20_NUMBER_PIXELS[1]: {
+      case 2 * D20_NUMBER_PIXELS: {
         // nominal resolution
         m_numberDetectorsActual =
-            D20_NUMBER_PIXELS[1] - 4 * D20_NUMBER_DEAD_PIXELS;
+            2 * (D20_NUMBER_PIXELS - 2 * D20_NUMBER_DEAD_PIXELS);
         break;
       }
-      case D20_NUMBER_PIXELS[2]: {
+      case 3 * D20_NUMBER_PIXELS: {
         // high resolution mode
         m_instName += "_hr";
         m_numberDetectorsActual =
-            D20_NUMBER_PIXELS[2] - 6 * D20_NUMBER_DEAD_PIXELS;
+            3 * (D20_NUMBER_PIXELS - 2 * D20_NUMBER_DEAD_PIXELS);
         break;
       }
       default:
