@@ -321,21 +321,20 @@ void MuonAnalysis::initLayout() {
 }
 
 void MuonAnalysis::setChosenGroupAndPeriods(const QString &wsName) {
-	const auto wsParams =
-		MuonAnalysisHelper::parseWorkspaceName(wsName.toStdString());
+  const auto wsParams =
+      MuonAnalysisHelper::parseWorkspaceName(wsName.toStdString());
 
-	const QString &groupToSet = QString::fromStdString(wsParams.itemName);
-	const QString &periodToSet = QString::fromStdString(wsParams.periods);
-	const auto &groups = m_dataSelector->getChosenGroups();
-	const auto &periods = m_dataSelector->getPeriodSelections();
-	if (!groups.contains(groupToSet)) {
-		m_uiForm.fitBrowser->setChosenGroup(groupToSet);
-	}
-	if (!periodToSet.isEmpty() && !periods.contains(periodToSet)) {
-		m_uiForm.fitBrowser->setChosenPeriods(periodToSet);
-	}
+  const QString &groupToSet = QString::fromStdString(wsParams.itemName);
+  const QString &periodToSet = QString::fromStdString(wsParams.periods);
+  const auto &groups = m_dataSelector->getChosenGroups();
+  const auto &periods = m_dataSelector->getPeriodSelections();
+  if (!groups.contains(groupToSet)) {
+    m_uiForm.fitBrowser->setChosenGroup(groupToSet);
+  }
+  if (!periodToSet.isEmpty() && !periods.contains(periodToSet)) {
+    m_uiForm.fitBrowser->setChosenPeriods(periodToSet);
+  }
 }
-
 
 /**
 * Muon Analysis help (slot)
@@ -1500,17 +1499,16 @@ void MuonAnalysis::updateFrontAndCombo() {
 
   int numG = numGroups();
   int numP = numPairs();
-  QStringList groupsAndPairs; 
+  QStringList groupsAndPairs;
   for (int i = 0; i < numG; i++) {
-	  m_uiForm.frontGroupGroupPairComboBox->addItem(
-		  m_uiForm.groupTable->item(m_groupToRow[i], 0)->text());
-	  groupsAndPairs << m_uiForm.groupTable->item(m_groupToRow[i], 0)->text();
+    m_uiForm.frontGroupGroupPairComboBox->addItem(
+        m_uiForm.groupTable->item(m_groupToRow[i], 0)->text());
+    groupsAndPairs << m_uiForm.groupTable->item(m_groupToRow[i], 0)->text();
   }
   for (int i = 0; i < numP; i++) {
-	  m_uiForm.frontGroupGroupPairComboBox->addItem(
-		  m_uiForm.pairTable->item(m_pairToRow[i], 0)->text());
-	  groupsAndPairs << m_uiForm.groupTable->item(m_pairToRow[i], 0)->text();
-
+    m_uiForm.frontGroupGroupPairComboBox->addItem(
+        m_uiForm.pairTable->item(m_pairToRow[i], 0)->text());
+    groupsAndPairs << m_uiForm.groupTable->item(m_pairToRow[i], 0)->text();
   }
   m_uiForm.fitBrowser->setAvailableGroups(groupsAndPairs);
   // If it doesn't match then reset
@@ -1875,7 +1873,7 @@ void MuonAnalysis::selectMultiPeak(const QString &wsName,
 
     // Set the selected run, group/pair and period
     m_fitDataPresenter->setAssignedFirstRun(wsName, filePath);
-	setChosenGroupAndPeriods(wsName);
+    setChosenGroupAndPeriods(wsName);
   }
 
   QString code;
@@ -2512,7 +2510,7 @@ void MuonAnalysis::changeTab(int newTabIndex) {
       const boost::optional<QString> filePath =
           m_uiForm.mwRunFiles->getUserInput().toString();
       m_fitDataPresenter->setSelectedWorkspace(m_currentDataName, filePath);
-	  setChosenGroupAndPeriods(m_currentDataName);
+      setChosenGroupAndPeriods(m_currentDataName);
       selectMultiPeak(m_currentDataName, filePath);
     }
 
