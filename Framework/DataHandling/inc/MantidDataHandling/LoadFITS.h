@@ -9,6 +9,7 @@
 #include <string>
 #include <vector>
 
+#include "MantidAPI/DeprecatedAlgorithm.h"
 #include "MantidAPI/IFileLoader.h"
 #include "MantidDataObjects/Workspace2D.h"
 
@@ -47,7 +48,8 @@ File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
-class DLLExport LoadFITS : public API::IFileLoader<Kernel::FileDescriptor> {
+class DLLExport LoadFITS : public API::IFileLoader<Kernel::FileDescriptor>,
+                           public API::DeprecatedAlgorithm {
 public:
   LoadFITS();
 
@@ -110,7 +112,7 @@ private:
                           const FITSInfo &fileInfo, int binSize, double cmpp);
 
   // Reads the data from a single FITS file into a workspace (directly, fast)
-  void readDataToWorkspace(const FITSInfo &fileInfo, double cmpp,
+  void readDataToWorkspace(const FITSInfo &fileInfo,
                            DataObjects::Workspace2D_sptr ws,
                            std::vector<char> &buffer);
 
