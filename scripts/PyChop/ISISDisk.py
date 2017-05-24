@@ -451,5 +451,5 @@ class ISISDisk:
             idx1 = (np.abs(Eis - Ei) / np.abs(Eis)) < 0.1
             idx += idx1
         Eis = np.array([Eis[i] for i in range(len(Eis)) if idx[i]])
-        lines = np.array([lines[i] for i in range(len(Eis)) if idx[i]])
+        lines = np.array([lines[i] for i in range(len(lines)) if idx[i]])
         return Eis, lines
