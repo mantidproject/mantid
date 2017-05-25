@@ -2,6 +2,7 @@
 #include "MantidQtCustomInterfaces/Reflectometry/IReflSaveTabView.h"
 #include "MantidQtCustomInterfaces/Reflectometry/IReflMainWindowPresenter.h"
 #include "MantidKernel/ConfigService.h"
+#include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/FrameworkManager.h"
@@ -191,19 +192,27 @@ void ReflSaveTabPresenter::suggestSaveDir() {
   m_view->setSavePath(path);
 }
 
+/** Predicate to checks if a workspace is either of group or table types or not
+*/
+struct ReflSaveTabPresenter::isGroupOrTable {
+
+  bool operator()(const std::string &wsName) {
+    return AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(wsName) ||
+           AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(wsName);
+  }
+};
+
 /** Obtains all available workspace names to save
 * @return :: list of workspace names
 */
-std::vector<std::string> ReflSaveTabPresenter::getAvailableWorkspaceNames() {
+std::vector<std::string>
+ReflSaveTabPresenter::getAvailableWorkspaceNames() {
   auto allNames = AnalysisDataService::Instance().getObjectNames();
-  // Exclude workspace groups as they cannot be saved to ascii
-  std::vector<std::string> validNames(allNames.size());
-  auto it = std::copy_if(
-      allNames.begin(), allNames.end(), validNames.begin(), [](std::string s) {
-        return (AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(s) ==
-                NULL);
-      });
-  validNames.resize(std::distance(validNames.begin(), it));
+  // Exclude workspace groups and table workspaces as they cannot be saved to
+  // ascii
+  std::vector<std::string> validNames;
+  std::remove_copy_if(allNames.begin(), allNames.end(),
+                      std::back_inserter(validNames), isGroupOrTable());
 
   return validNames;
 }
