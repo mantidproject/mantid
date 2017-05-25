@@ -94,7 +94,7 @@ class LoadEXED(PythonAlgorithm):
         # fix the x values for the monitor
         for i in range(nrows-2,nrows):
             ws.setX(i,xdata_mon)
-        print ("set detector IDs")
+        self.log().information("set detector IDs")
         #set detetector IDs
         for i in range(nrows):
             ws.getSpectrum(i).setDetectorID(det_udet[i])
@@ -160,13 +160,13 @@ class LoadEXED(PythonAlgorithm):
             #print ("read UDET")
             det_udet = self.struct_data_read(fin,nrows)
 
-            print ("read Counter")
+            self.log().information("read Counter")
             det_count = self.struct_data_read(fin,nrows)
 
-            print ("read TimeBinBoundaries")
+            self.log().information("read TimeBinBoundaries")
             det_tbc = self.struct_data_read(fin,nbins+1,'f')
 
-            print ("read Data")
+            self.log().information("read Data")
             data = np.fromfile(fin, np.uint32, nrows*nbins, '')
 
             fin.close()
@@ -179,7 +179,7 @@ class LoadEXED(PythonAlgorithm):
                 helper function to read binary data_type
                 requires the file handle, number of rows and data_type
                 """
-                print(nrows)
+                self.log().debug(nrows)
                 tmp_lst=[struct.unpack(data_type,fin.read(byte_size))[0] for i in range(nrows)]
                 #for i in range(nrows):
                 #    data = struct.unpack(data_type,fin.read(byte_size))[0]
