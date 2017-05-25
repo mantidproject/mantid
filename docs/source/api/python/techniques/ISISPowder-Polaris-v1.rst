@@ -10,7 +10,7 @@ ISIS Powder Diffraction Scripts - POLARIS Reference
 .. _creating_polaris_object_isis-powder-diffraction-ref:
 
 Creating POLARIS Object
---------------------
+------------------------
 This method assumes you are familiar with the concept of objects in Python.
 If not more details can be read here: :ref:`intro_to_objects-isis-powder-diffraction-ref`
 

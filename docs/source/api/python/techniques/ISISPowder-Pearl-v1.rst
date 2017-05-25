@@ -10,7 +10,7 @@ ISIS Powder Diffraction Scripts - PEARL Reference
 .. _creating_pearl_object-isis-powder-diffraction-ref:
 
 Creating PEARL Object
---------------------
+----------------------
 This method assumes you are familiar with the concept of objects in Python.
 If not more details can be read here: :ref:`intro_to_objects-isis-powder-diffraction-ref`
 
