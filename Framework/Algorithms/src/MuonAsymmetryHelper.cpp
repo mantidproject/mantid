@@ -95,7 +95,7 @@ double estimateNormalisationConst(const HistogramData::Histogram &histogram,
   for (size_t k = i0; k < iN; k++) {
 	  denominator += exp(-xData[k] / MUON_LIFETIME_MICROSECONDS);
   }
-  return summation  / (denominator *= numGoodFrames);
+  return summation  / (denominator * numGoodFrames);
 }
 /**
 * Finds the first index in bin edges that is after
