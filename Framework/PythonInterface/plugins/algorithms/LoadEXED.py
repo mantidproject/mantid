@@ -8,51 +8,7 @@ import copy
 import types
 
 
-def read_file(fn):
-    """
-    function to read header and return a dictionary of the parameters parms_dict
-    the read the data and return it in det_udet, det_count, det_tbc, and data
-    """
-    fin = open(fn,'rb')
-    header = True
-    parms_dict={}
-    parms_dict['omega']= '0.0'
-    parms_dict['chi']='0.0'
-    while (header):
-        b_line = fin.readline()
-        line=b_line.decode('ascii')
-        if line.find("=")>0:
-            line_lst=line.split('=')
-            if len(line_lst)==2:
-                parm_val=line_lst[1].strip()
-                if (parm_val.isdigit())&(line_lst[0].find('Run_Number')<0):
-                    parm_val=eval(parm_val)
-                parms_dict[line_lst[0].strip()]=parm_val
-            if line.find("Comment")>-1:
-                parms_dict['Comment']=line.strip('Comment =')
-        if line.find("Following are binary data")>0:
-            header=False
-            while line.find("DATA=")<0:
-                b_line = fin.readline()
-                line=b_line.decode('ascii')
-                #print line
-    nrows=int(parms_dict['NDET'])
-    nbins=int(parms_dict['NTC'])
-    print ("read UDET")
-    det_udet = struct_data_read(fin,nrows)
 
-    print ("read Counter")
-    det_count = struct_data_read(fin,nrows)
-
-    print ("read TimeBinBoundaries")
-    det_tbc = struct_data_read(fin,nbins+1,'f')
-
-    print ("read Data")
-    data = np.fromfile(fin, np.uint32, nrows*nbins, '')
-
-    fin.close()
-    parms_dict['phi']=copy.deepcopy(parms_dict['CAR_OMEGA_MAG'])
-    return parms_dict, det_udet, det_count, det_tbc, data
 
 
 def struct_data_read(fin,nrows,data_type='i',byte_size=4):
@@ -126,7 +82,7 @@ class LoadEXED(PythonAlgorithm):
 
         #load data
 
-        parms_dict, det_udet, det_count, det_tbc, data = read_file(fn)
+        parms_dict, det_udet, det_count, det_tbc, data = self.read_file(fn)
         nrows=int(parms_dict['NDET'])
         #nbins=int(parms_dict['NTC'])
         xdata = np.array(det_tbc)
@@ -183,6 +139,53 @@ class LoadEXED(PythonAlgorithm):
         RemoveMaskedSpectra(InputWorkspace = wsn, OutputWorkspace = wsn)
 
         self.setProperty("OutputWorkspace", wsn)
+
+
+    def read_file(self,fn):
+            """
+            function to read header and return a dictionary of the parameters parms_dict
+            the read the data and return it in det_udet, det_count, det_tbc, and data
+            """
+            fin = open(fn,'rb')
+            header = True
+            parms_dict={}
+            parms_dict['omega']= '0.0'
+            parms_dict['chi']='0.0'
+            while (header):
+                b_line = fin.readline()
+                line=b_line.decode('ascii')
+                if line.find("=")>0:
+                    line_lst=line.split('=')
+                    if len(line_lst)==2:
+                        parm_val=line_lst[1].strip()
+                        if (parm_val.isdigit())&(line_lst[0].find('Run_Number')<0):
+                            parm_val=eval(parm_val)
+                        parms_dict[line_lst[0].strip()]=parm_val
+                    if line.find("Comment")>-1:
+                        parms_dict['Comment']=line.strip('Comment =')
+                if line.find("Following are binary data")>0:
+                    header=False
+                    while line.find("DATA=")<0:
+                        b_line = fin.readline()
+                        line=b_line.decode('ascii')
+                        #print line
+            nrows=int(parms_dict['NDET'])
+            nbins=int(parms_dict['NTC'])
+            print ("read UDET")
+            det_udet = struct_data_read(fin,nrows)
+
+            print ("read Counter")
+            det_count = struct_data_read(fin,nrows)
+
+            print ("read TimeBinBoundaries")
+            det_tbc = struct_data_read(fin,nbins+1,'f')
+
+            print ("read Data")
+            data = np.fromfile(fin, np.uint32, nrows*nbins, '')
+
+            fin.close()
+            parms_dict['phi']=copy.deepcopy(parms_dict['CAR_OMEGA_MAG'])
+            return parms_dict, det_udet, det_count, det_tbc, data
 
 
 # Register algorthm with Mantid.
