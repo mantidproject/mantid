@@ -910,7 +910,6 @@ public:
     TS_ASSERT_THROWS_NOTHING(expInfo.setInstrument(instrument));
   }
 
-
   void test_component_info_component_index_tree() {
 
     const int nPixels = 10;
@@ -936,7 +935,8 @@ public:
     auto bankId = inst->getComponentByName("bank1")->getComponentID();
     TSM_ASSERT_EQUALS(
         "Bank should yield entire sub-tree of component indices",
-        compInfo.componentIndices(compInfo.indexOf(bankId)).size(), (nPixels*nPixels)+nPixels);
+        compInfo.componentIndices(compInfo.indexOf(bankId)).size(),
+        (nPixels * nPixels) + nPixels);
 
     auto instrumentId = inst->getComponentID();
     size_t nComponents = nPixels * nPixels;
@@ -946,8 +946,8 @@ public:
     nComponents += 1;       // sample
     TSM_ASSERT_EQUALS(
         "Instrument should yield entire tree of component indices",
-        compInfo.componentIndices(compInfo.indexOf(instrumentId)).size(), nComponents);
-
+        compInfo.componentIndices(compInfo.indexOf(instrumentId)).size(),
+        nComponents);
   }
 
 private:

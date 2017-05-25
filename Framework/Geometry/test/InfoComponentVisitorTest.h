@@ -233,7 +233,8 @@ public:
     visitee->registerContents(visitor);
 
     auto detectorRanges = visitor.componentDetectorRanges();
-    TSM_ASSERT_EQUALS("There are 3 non-detector components", detectorRanges->size(), 3);
+    TSM_ASSERT_EQUALS("There are 3 non-detector components",
+                      detectorRanges->size(), 3);
 
     /*
      * In this instrument there is only a single assembly (the instrument
@@ -269,11 +270,13 @@ public:
     visitee->registerContents(visitor);
 
     auto componentRanges = visitor.componentChildComponentRanges();
-    TSM_ASSERT_EQUALS("There are 3 non-detector components", componentRanges->size(), 3);
+    TSM_ASSERT_EQUALS("There are 3 non-detector components",
+                      componentRanges->size(), 3);
 
     /*
      * In this instrument there is only a single assembly (the instrument
-     * itself). We therefore EXPECT that the ranges provided are all from 0 to 0 for
+     * itself). We therefore EXPECT that the ranges provided are all from 0 to 0
+     * for
      * those non-assembly components. This is important for subsequent correct
      * working on ComponentInfo.
      */
@@ -342,7 +345,6 @@ public:
     // Note no detector counted
     TS_ASSERT_EQUALS(visitor.size(), expectedSize);
   }
-
 };
 
 class InfoComponentVisitorTestPerformance : public CxxTest::TestSuite {

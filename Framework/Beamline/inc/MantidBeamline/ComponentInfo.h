@@ -43,9 +43,11 @@ private:
   boost::shared_ptr<const std::vector<size_t>> m_assemblySortedDetectorIndices;
   boost::shared_ptr<const std::vector<size_t>> m_assemblySortedComponentIndices;
   /// Ranges of component ids that are contiguous blocks of detectors.
-  boost::shared_ptr<const std::vector<std::pair<size_t, size_t>>> m_detectorRanges;
+  boost::shared_ptr<const std::vector<std::pair<size_t, size_t>>>
+      m_detectorRanges;
   /// Ranges of component ids that are contiguous blocks of components.
-  boost::shared_ptr<const std::vector<std::pair<size_t, size_t>>> m_componentRanges;
+  boost::shared_ptr<const std::vector<std::pair<size_t, size_t>>>
+      m_componentRanges;
   Mantid::Kernel::cow_ptr<std::vector<Eigen::Vector3d>> m_positions;
   Mantid::Kernel::cow_ptr<std::vector<Eigen::Quaterniond>> m_rotations;
   const size_t m_size = 0;
@@ -53,16 +55,17 @@ private:
 
 public:
   ComponentInfo();
-  ComponentInfo(
-      boost::shared_ptr<const std::vector<size_t>>
-          assemblySortedDetectorIndices,
-      boost::shared_ptr<const std::vector<std::pair<size_t, size_t>>> detectorRanges,
-          boost::shared_ptr<const std::vector<size_t>>
-              assemblySortedComponentIndices,
-      boost::shared_ptr<const std::vector<std::pair<size_t, size_t>>> componentRanges,
-  boost::shared_ptr<std::vector<Eigen::Vector3d>> positions,
-                  boost::shared_ptr<std::vector<Eigen::Quaterniond>> rotations,
-                  boost::shared_ptr<DetectorInfo> detectorInfo);
+  ComponentInfo(boost::shared_ptr<const std::vector<size_t>>
+                    assemblySortedDetectorIndices,
+                boost::shared_ptr<const std::vector<std::pair<size_t, size_t>>>
+                    detectorRanges,
+                boost::shared_ptr<const std::vector<size_t>>
+                    assemblySortedComponentIndices,
+                boost::shared_ptr<const std::vector<std::pair<size_t, size_t>>>
+                    componentRanges,
+                boost::shared_ptr<std::vector<Eigen::Vector3d>> positions,
+                boost::shared_ptr<std::vector<Eigen::Quaterniond>> rotations,
+                boost::shared_ptr<DetectorInfo> detectorInfo);
 
   std::vector<size_t> detectorIndices(const size_t componentIndex) const;
   std::vector<size_t> componentIndices(const size_t componentIndex) const;

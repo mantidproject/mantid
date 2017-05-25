@@ -15,42 +15,48 @@ ComponentInfo::ComponentInfo()
 
 ComponentInfo::ComponentInfo(
     boost::shared_ptr<const std::vector<size_t>> assemblySortedDetectorIndices,
-    boost::shared_ptr<const std::vector<std::pair<size_t, size_t>>> detectorRanges,
+    boost::shared_ptr<const std::vector<std::pair<size_t, size_t>>>
+        detectorRanges,
     boost::shared_ptr<const std::vector<size_t>> assemblySortedComponentIndices,
-    boost::shared_ptr<const std::vector<std::pair<size_t, size_t>>> componentRanges,
+    boost::shared_ptr<const std::vector<std::pair<size_t, size_t>>>
+        componentRanges,
     boost::shared_ptr<std::vector<Eigen::Vector3d>> positions,
     boost::shared_ptr<std::vector<Eigen::Quaterniond>> rotations,
     boost::shared_ptr<DetectorInfo> detectorInfo)
     : m_assemblySortedDetectorIndices(std::move(assemblySortedDetectorIndices)),
-      m_assemblySortedComponentIndices(std::move(assemblySortedComponentIndices)),
+      m_assemblySortedComponentIndices(
+          std::move(assemblySortedComponentIndices)),
       m_detectorRanges(std::move(detectorRanges)),
       m_componentRanges(std::move(componentRanges)),
       m_positions(std::move(positions)), m_rotations(std::move(rotations)),
-      m_size(m_assemblySortedDetectorIndices->size() + m_detectorRanges->size()),
-      m_detectorInfo(detectorInfo)
-{
-      if (m_rotations->size() != m_positions->size()) {
+      m_size(m_assemblySortedDetectorIndices->size() +
+             m_detectorRanges->size()),
+      m_detectorInfo(detectorInfo) {
+  if (m_rotations->size() != m_positions->size()) {
         throw std::invalid_argument("ComponentInfo should have been provided same "
                                     "number of postions and rotations");
       }
       if (m_rotations->size() != m_detectorRanges->size()) {
-        throw std::invalid_argument("ComponentInfo should have as many positions "
-                                    "and rotations as assembly sorted detector component "
-                                    "ranges");
+        throw std::invalid_argument(
+            "ComponentInfo should have as many positions "
+            "and rotations as assembly sorted detector component "
+            "ranges");
       }
       if (m_detectorInfo->size() != m_assemblySortedDetectorIndices->size()) {
         throw std::invalid_argument("ComponentInfo must have detector indices "
                                     "input of same size as size of DetectorInfo");
       }
-      if(m_rotations->size() != m_componentRanges->size()){
-        throw std::invalid_argument("ComponentInfo should have as many positions "
-                                    "and rotations as assembly sorted component "
-                                    "ranges");
+      if (m_rotations->size() != m_componentRanges->size()) {
+        throw std::invalid_argument(
+            "ComponentInfo should have as many positions "
+            "and rotations as assembly sorted component "
+            "ranges");
       }
-      if(m_assemblySortedComponentIndices->size() != m_size) {
-         throw std::invalid_argument("ComponentInfo must have component indices input of same size as the sum of non-detector and detector components");
+      if (m_assemblySortedComponentIndices->size() != m_size) {
+        throw std::invalid_argument("ComponentInfo must have component indices "
+                                    "input of same size as the sum of "
+                                    "non-detector and detector components");
       }
-
 }
 
 bool ComponentInfo::isDetector(const size_t componentIndex) const {
@@ -72,11 +78,11 @@ ComponentInfo::detectorIndices(const size_t componentIndex) const {
   // Extract as a block
   return std::vector<size_t>(
       m_assemblySortedDetectorIndices->begin() + range.first,
-              m_assemblySortedDetectorIndices->begin() + range.second);
+      m_assemblySortedDetectorIndices->begin() + range.second);
 }
 
-std::vector<size_t> ComponentInfo::componentIndices(const size_t componentIndex) const
-{
+std::vector<size_t>
+ComponentInfo::componentIndices(const size_t componentIndex) const {
   if (isDetector(componentIndex)) {
     /* This is a single detector. Just return the corresponding index.
      * detectorIndex == componentIndex. Never any sub-components for detectors.
@@ -91,7 +97,7 @@ std::vector<size_t> ComponentInfo::componentIndices(const size_t componentIndex)
   // Extract as a block
   return std::vector<size_t>(
       m_assemblySortedComponentIndices->begin() + range.first,
-              m_assemblySortedComponentIndices->begin() + range.second);
+      m_assemblySortedComponentIndices->begin() + range.second);
 }
 
 size_t ComponentInfo::size() const { return m_size; }
@@ -125,12 +131,12 @@ Eigen::Quaterniond ComponentInfo::rotation(const size_t componentIndex) const {
 
 void ComponentInfo::setPosition(const size_t componentIndex,
                                 const Eigen::Vector3d &position) {
- throw std::runtime_error("Not yet implemented");
+  throw std::runtime_error("Not yet implemented");
 }
 
 void ComponentInfo::setRotation(const size_t componentIndex,
                                 const Eigen::Quaterniond &rotation) {
- throw std::runtime_error("Not yet implemented");
+  throw std::runtime_error("Not yet implemented");
 }
 
 } // namespace Beamline
