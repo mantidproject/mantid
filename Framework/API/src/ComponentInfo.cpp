@@ -1,6 +1,7 @@
 #include "MantidAPI/ComponentInfo.h"
 #include "MantidGeometry/IComponent.h"
 #include "MantidBeamline/ComponentInfo.h"
+#include "MantidKernel/EigenConversionHelpers.h"
 #include <boost/make_shared.hpp>
 #include <exception>
 #include <string>
@@ -55,6 +56,14 @@ bool ComponentInfo::operator==(const ComponentInfo &other) const {
 
 bool ComponentInfo::operator!=(const ComponentInfo &other) const {
   return !this->operator==(other);
+}
+
+Kernel::V3D ComponentInfo::position(const size_t componentIndex) const {
+  return Kernel::toV3D(m_componentInfo.position(componentIndex));
+}
+
+Kernel::Quat ComponentInfo::rotation(const size_t componentIndex) const {
+  return Kernel::toQuat(m_componentInfo.rotation(componentIndex));
 }
 } // namespace API
 } // namespace Mantid

@@ -6,6 +6,7 @@
 #include "MantidKernel/EigenConversionHelpers.h"
 #include "MantidKernel/make_unique.h"
 #include "MantidBeamline/ComponentInfo.h"
+#include "MantidBeamline/DetectorInfo.h"
 
 #include <numeric>
 #include <algorithm>
@@ -30,8 +31,8 @@ makeDetIdToIndexMap(const std::vector<detid_t> &detIds) {
   return std::move(detIdToIndex);
 }
 
-void clearPositionAndRotationsParameters(ParameterMap &pmap,
-                                         const IComponent &comp) {
+void clearPositionAndRotationParameters(ParameterMap &pmap,
+                                        const IComponent &comp) {
   pmap.clearParametersByName(ParameterMap::pos(), &comp);
   pmap.clearParametersByName(ParameterMap::posx(), &comp);
   pmap.clearParametersByName(ParameterMap::posy(), &comp);
@@ -89,7 +90,7 @@ void InfoComponentVisitor::registerComponentAssembly(
   m_componentIds->emplace_back(assembly.getComponentID());
   m_positions->emplace_back(Kernel::toVector3d(assembly.getPos()));
   m_rotations->emplace_back(Kernel::toQuaterniond(assembly.getRotation()));
-  clearPositionAndRotationsParameters(m_pmap, assembly);
+  clearPositionAndRotationParameters(m_pmap, assembly);
 }
 
 /**
@@ -109,7 +110,7 @@ void InfoComponentVisitor::registerGenericComponent(
   m_componentIds->emplace_back(component.getComponentID());
   m_positions->emplace_back(Kernel::toVector3d(component.getPos()));
   m_rotations->emplace_back(Kernel::toQuaterniond(component.getRotation()));
-  clearPositionAndRotationsParameters(m_pmap, component);
+  clearPositionAndRotationParameters(m_pmap, component);
 }
 
 /**
@@ -206,10 +207,11 @@ InfoComponentVisitor::detectorIdToIndexMap() const {
   return m_detectorIdToIndexMap;
 }
 
-std::unique_ptr<Beamline::ComponentInfo>
-InfoComponentVisitor::componentInfo() const {
+std::unique_ptr<Beamline::ComponentInfo> InfoComponentVisitor::componentInfo(
+    boost::shared_ptr<Beamline::DetectorInfo> detectorInfo) const {
   return Kernel::make_unique<Mantid::Beamline::ComponentInfo>(
-      m_assemblySortedDetectorIndices, m_ranges);
+      m_assemblySortedDetectorIndices, m_ranges, m_positions, m_rotations,
+      std::move(detectorInfo));
 }
 
 boost::shared_ptr<std::vector<detid_t>>

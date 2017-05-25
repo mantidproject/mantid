@@ -2,6 +2,8 @@
 #define MANTID_API_COMPONENTINFO_H_
 
 #include "MantidAPI/DllConfig.h"
+#include "MantidKernel/V3D.h"
+#include "MantidKernel/Quat.h"
 #include <unordered_map>
 #include <vector>
 #include <boost/shared_ptr.hpp>
@@ -66,6 +68,8 @@ public:
   size_t indexOf(Geometry::IComponent *id) const;
   bool operator==(const ComponentInfo &other) const;
   bool operator!=(const ComponentInfo &other) const;
+  Kernel::V3D position(const size_t componentIndex) const;
+  Kernel::Quat rotation(const size_t componentIndex) const;
 };
 
 } // namespace API
