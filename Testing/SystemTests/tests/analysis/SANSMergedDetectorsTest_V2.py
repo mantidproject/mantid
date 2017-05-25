@@ -36,8 +36,6 @@ class SANSMergedDetectorsTest_V2(stresstesting.MantidStressTest):
 
         # Run the reduction and request FRONT and BACK to be merged
         WavRangeReduction(combineDet="merged")
-        from mantid.simpleapi import SaveNexus
-        SaveNexus(Filename="C:/Sandbox/merged_event.nxs", InputWorkspace="28797merged_1D_1.75_16.5")
 
     def validate(self):
         self.disableChecking.append('SpectraMap')
