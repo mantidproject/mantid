@@ -249,6 +249,11 @@ void QwtRasterDataMD::setSliceParams(
   }
 }
 
+void QwtRasterDataMD::transferSettingsTo(QwtRasterDataMD* dest) const {
+  this->copyFrom(*this, *dest);
+}
+
+
 //-----------------------------------------------------------------------------
 // Protected members
 //-----------------------------------------------------------------------------
