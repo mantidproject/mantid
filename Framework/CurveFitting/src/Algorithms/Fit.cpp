@@ -188,7 +188,7 @@ size_t Fit::runMinimizer() {
       break;
     }
   }
-  g_log.debug() << "Number of minimizer iterations=" << iter  << "\n";
+  g_log.debug() << "Number of minimizer iterations=" << iter << "\n";
   return iter;
 }
 
