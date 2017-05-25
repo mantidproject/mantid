@@ -940,8 +940,8 @@ def set_properties(alg_object, *args, **kwargs):
             spec = prop.name + "Spectra"
             ind = prop.name + "Indices"
 
-            if [kwargs.get(itype) for itype in [spec, ind]].count(None) < 2:
-                raise Exception("Must only have one index type " + spec + ", " + ind + " or " + ids)
+            if [kwargs.get(itype) for itype in [spec, ind]].count(None) < 1:
+                raise Exception("Must only have one index type " + spec + " or " + ind)
             elif kwargs.get(spec):
                 prop.setIndexType(_api.IndexType.SpectrumNumber)
                 prop.setIndexList(kwargs.pop(spec))
