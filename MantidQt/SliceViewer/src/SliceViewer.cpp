@@ -699,7 +699,7 @@ void SliceViewer::switchQWTRaster(bool useNonOrthogonal) {
 
   if (useNonOrthogonal && ui.btnNonOrthogonalToggle->isChecked()) {
     // Transfer the current settings
-    auto tempData =  Kernel::make_unique<API::QwtRasterDataMDNonOrthogonal>();
+    auto tempData = Kernel::make_unique<API::QwtRasterDataMDNonOrthogonal>();
     transferSettings(m_data.get(), tempData.get());
     m_data = std::move(tempData);
     applyNonOrthogonalAxisScaleDraw();
@@ -707,7 +707,7 @@ void SliceViewer::switchQWTRaster(bool useNonOrthogonal) {
     applyOrthogonalAxisScaleDraw();
 
     // Transfer the current settings
-    auto tempData =  Kernel::make_unique<API::QwtRasterDataMD>();
+    auto tempData = Kernel::make_unique<API::QwtRasterDataMD>();
     transferSettings(m_data.get(), tempData.get());
     m_data = std::move(tempData);
   }
@@ -3010,11 +3010,10 @@ void SliceViewer::applyOrthogonalAxisScaleDraw() {
 }
 
 /// Transfer data between QwtRasterDataMD instances
-void SliceViewer::transferSettings(const API::QwtRasterDataMD* const from,
-                                   API::QwtRasterDataMD* to) const {
+void SliceViewer::transferSettings(const API::QwtRasterDataMD *const from,
+                                   API::QwtRasterDataMD *to) const {
   from->transferSettingsTo(to);
 }
-
 
 } // namespace
 }

@@ -59,7 +59,7 @@ public:
   void setNormalization(Mantid::API::MDNormalization normalization);
   Mantid::API::MDNormalization getNormalization() const;
 
-  void transferSettingsTo(QwtRasterDataMD* dest) const;
+  void transferSettingsTo(QwtRasterDataMD *dest) const;
 
 protected:
   void copyFrom(const QwtRasterDataMD &source, QwtRasterDataMD &dest) const;

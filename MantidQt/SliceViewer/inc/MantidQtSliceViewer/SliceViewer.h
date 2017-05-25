@@ -271,7 +271,8 @@ private:
   void applyOrthogonalAxisScaleDraw();
 
   /// Transfer data between QwtRasterDataMD
-  void transferSettings(const API::QwtRasterDataMD* const from, API::QwtRasterDataMD* to) const;
+  void transferSettings(const API::QwtRasterDataMD *const from,
+                        API::QwtRasterDataMD *to) const;
 
 private:
   // -------------------------- Widgets ----------------------------
