@@ -439,9 +439,8 @@ public:
         mockMainPresenter,
         notify(IReflMainWindowPresenter::Flag::ConfirmReductionPausedFlag))
         .Times(Exactly(1));
-    // The presenter is notified that data reduction is paused
-    presenter.notify(
-        DataProcessorMainPresenter::Flag::ConfirmReductionPausedFlag);
+
+    presenter.confirmReductionPaused();
 
     // Verify expectations
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockRunsTabView));
@@ -463,9 +462,8 @@ public:
         mockMainPresenter,
         notify(IReflMainWindowPresenter::Flag::ConfirmReductionResumedFlag))
         .Times(Exactly(1));
-    // The presenter is notified that data reduction is resumed
-    presenter.notify(
-        DataProcessorMainPresenter::Flag::ConfirmReductionResumedFlag);
+
+    presenter.confirmReductionResumed();
 
     // Verify expectations
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockRunsTabView));

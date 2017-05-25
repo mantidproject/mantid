@@ -39,11 +39,7 @@ class DataProcessorMainPresenter {
 public:
   virtual ~DataProcessorMainPresenter(){};
 
-  enum class Flag {
-    ADSChangedFlag,
-    ConfirmReductionPausedFlag,
-    ConfirmReductionResumedFlag
-  };
+  enum class Flag { ADSChangedFlag };
 
   /// Notify this receiver that something has changed
   virtual void notify(DataProcessorMainPresenter::Flag flag) = 0;
