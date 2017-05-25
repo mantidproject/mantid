@@ -951,20 +951,15 @@ void FunctionBrowser::addTieProperty(QtProperty *prop, QString tie) {
     }
   }
 
-  //check that tie has form <paramName>=<expression>
-  if (expr.name() != "=") { // prepend "<paramName>="
-    if (!isComposite) {
-     tie.prepend(prop->propertyName() + "=");
-   } else {
-      QString index = getIndex(prop);
-      tie.prepend(index + prop->propertyName() + "=");
-    }
-  }
-
-  // find the property of the function
+  // Find the property of the function that this tie will be set to:
+  // If the tie has variables that contain function indices (f0.f1. ...)
+  // then it will be set to the topmost composite function.
+  // If the tie is a number or has only simple variable names then it belongs
+  // to the local function (the one that has the tied parameter)
   QtProperty *funProp =
       isComposite ? getFunctionProperty().prop : m_properties[prop].parent;
 
+  // Create and add a QtProperty for the tie.
   m_tieManager->blockSignals(true);
   QtProperty *tieProp = m_tieManager->addProperty("Tie");
   m_tieManager->setValue(tieProp, tie);
@@ -972,15 +967,17 @@ void FunctionBrowser::addTieProperty(QtProperty *prop, QString tie) {
   tieProp->setEnabled(false);
   m_tieManager->blockSignals(false);
 
+  // Store tie information for easier access
   ATie atie;
   atie.paramProp = prop;
   atie.tieProp = tieProp;
   m_ties.insert(funProp, atie);
 
+  // In case of multi-dataset fitting store the tie for a local parameter
   if (prop->hasOption(globalOptionName) &&
       !prop->checkOption(globalOptionName)) {
     auto parName = getParameterName(prop);
-	auto t = parName.toStdString();
+    auto t = parName.toStdString();
     auto &localValues = m_localParameterValues[parName];
     if (m_currentDataset >= localValues.size()) {
       initLocalParameter(parName);
@@ -1383,7 +1380,7 @@ Mantid::API::IFunction_sptr FunctionBrowser::getFunction(QtProperty *prop,
     QList<QtProperty *> filedTies; // ties can become invalid after some editing
     for (auto it = from; it != to; ++it) {
       try {
-        QString tie = m_tieManager->value(it.value().tieProp);
+        QString tie = it->paramProp->propertyName() + "=" + m_tieManager->value(it.value().tieProp);
         fun->addTies(tie.toStdString());
       } catch (...) {
         filedTies << it.value().tieProp;
