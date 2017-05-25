@@ -13,7 +13,7 @@ import types
 
 
 class LoadEXED(PythonAlgorithm):
-    __doc__ = """his algorithm reads Exed raw files and creates two workspaces.
+    __doc__ = """This algorithm reads Exed raw files and creates two workspaces.
     One for the detectors and another for the monitor.
     """
 
@@ -104,7 +104,8 @@ class LoadEXED(PythonAlgorithm):
             else:
                 AddSampleLog(Workspace=wsn, LogName=key_in, LogText=str(parms_dict[sl]))#, LogType='Number')
 
-        SetGoniometer(Workspace=wsn, Goniometers='Universal', Axis0='phi,0,1,0,1')
+        #SetGoniometer(Workspace=wsn, Goniometers='Universal', Axis0='phi,0,1,0,1')
+        SetGoniometer(Workspace=wsn, Goniometers='Universal')
         # Separate monitors into seperate workspace
         ExtractSpectra(InputWorkspace = wsn, WorkspaceIndexList = ','.join([str(s) for s in range(nrows-2, nrows)]),
                        OutputWorkspace = wsn + '_Monitors')
