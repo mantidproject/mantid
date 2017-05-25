@@ -27,6 +27,7 @@ ISIS Reflectometry
 ##################
 
 - Interface `ISIS Reflectometry (Polref)` has been renamed to `ISIS Reflectometry`.
+- Fixed a bug that incorrectly allowed table workspaces to appear in the list of workspaces in the `Save ASCII` tab.
 - Fixed a bug where the contents of the processing table where not saved to the selected table workspace.
 - Added two new buttons `Expand Groups` and `Collapse Groups` which expand and collapse all groups in the table respectively.
 - Fixed a bug when removing rows from the processing table.
