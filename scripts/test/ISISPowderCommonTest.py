@@ -311,6 +311,7 @@ class ISISPowderCommonTest(unittest.TestCase):
 
         # Ensure it loaded two different workspaces
         self.assertAlmostEqual(result_ws_one, result_ext_one)
+
         # If this next line fails it means it loaded the .s1 file INSTEAD of the .s2 file
         self.assertAlmostEqual(result_ws_two, result_ext_two)
         self.assertNotAlmostEqual(result_ext_one, result_ext_two)
