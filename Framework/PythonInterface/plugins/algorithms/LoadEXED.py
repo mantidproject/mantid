@@ -10,21 +10,6 @@ import types
 
 
 
-
-def struct_data_read(fin,nrows,data_type='i',byte_size=4):
-    """
-    helper function to read binary data_type
-    requires the file handle, number of rows and data_type
-    """
-    print(nrows)
-    tmp_lst=[struct.unpack(data_type,fin.read(byte_size))[0] for i in range(nrows)]
-    #for i in range(nrows):
-    #    data = struct.unpack(data_type,fin.read(byte_size))[0]
-    #    tmp_lst.append(data)
-    #print(tmp_lst)
-    return tmp_lst
-
-
 class LoadEXED(PythonAlgorithm):
     __doc__ = """This is the EXED data loader written in Python.
     Based off code was written by Wolf-Dieter Stein and  Maciej Bartkowiak.
@@ -172,13 +157,13 @@ class LoadEXED(PythonAlgorithm):
             nrows=int(parms_dict['NDET'])
             nbins=int(parms_dict['NTC'])
             print ("read UDET")
-            det_udet = struct_data_read(fin,nrows)
+            det_udet = self.struct_data_read(fin,nrows)
 
             print ("read Counter")
-            det_count = struct_data_read(fin,nrows)
+            det_count = self.struct_data_read(fin,nrows)
 
             print ("read TimeBinBoundaries")
-            det_tbc = struct_data_read(fin,nbins+1,'f')
+            det_tbc = self.struct_data_read(fin,nbins+1,'f')
 
             print ("read Data")
             data = np.fromfile(fin, np.uint32, nrows*nbins, '')
@@ -186,6 +171,21 @@ class LoadEXED(PythonAlgorithm):
             fin.close()
             parms_dict['phi']=copy.deepcopy(parms_dict['CAR_OMEGA_MAG'])
             return parms_dict, det_udet, det_count, det_tbc, data
+
+
+    def struct_data_read(self,fin,nrows,data_type='i',byte_size=4):
+                """
+                helper function to read binary data_type
+                requires the file handle, number of rows and data_type
+                """
+                print(nrows)
+                tmp_lst=[struct.unpack(data_type,fin.read(byte_size))[0] for i in range(nrows)]
+                #for i in range(nrows):
+                #    data = struct.unpack(data_type,fin.read(byte_size))[0]
+                #    tmp_lst.append(data)
+                #print(tmp_lst)
+                return tmp_lst
+
 
 
 # Register algorthm with Mantid.
