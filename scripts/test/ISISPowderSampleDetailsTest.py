@@ -104,11 +104,6 @@ class ISISPowderSampleDetailsTest(unittest.TestCase):
         with assertRaisesRegex(self, ValueError, "The value set for radius was: -1"):
             sample_details.SampleDetails(height=good_input, radius=negative_string, center=good_center_input)
 
-        # Test center lists correctly detect incorrect values
-        with assertRaisesRegex(self, ValueError, "The value set for center was: 0"):
-            sample_details.SampleDetails(height=good_input, radius=good_input,
-                                         center=[zero_value, good_input, good_input])
-
     def test_set_material(self):
         sample_details_obj = sample_details.SampleDetails(height=1.0, radius=1.0, center=[2, 3, 4])
 
