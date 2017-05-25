@@ -217,7 +217,7 @@ public:
         componentIds.size() - 1);
   }
 
-  void test_visitor_ranges_check() {
+  void test_visitor_detector_ranges_check() {
     // Create a very basic instrument to visit
     auto visitee = createMinimalInstrument(V3D(0, 0, 0) /*source pos*/,
                                            V3D(10, 0, 0) /*sample pos*/
@@ -232,8 +232,8 @@ public:
     // Visit everything
     visitee->registerContents(visitor);
 
-    auto ranges = visitor.componentDetectorRanges();
-    TSM_ASSERT_EQUALS("There are 3 non-detector components", ranges->size(), 3);
+    auto detectorRanges = visitor.componentDetectorRanges();
+    TSM_ASSERT_EQUALS("There are 3 non-detector components", detectorRanges->size(), 3);
 
     /*
      * In this instrument there is only a single assembly (the instrument
@@ -243,16 +243,50 @@ public:
      * working on ComponentInfo.
      */
     // Source has no detectors
-    TS_ASSERT_EQUALS((*ranges)[0].first, 0);
-    TS_ASSERT_EQUALS((*ranges)[0].second, 0);
+    TS_ASSERT_EQUALS((*detectorRanges)[0].first, 0);
+    TS_ASSERT_EQUALS((*detectorRanges)[0].second, 0);
     // Sample has no detectors
-    TS_ASSERT_EQUALS((*ranges)[1].first, 0);
-    TS_ASSERT_EQUALS((*ranges)[1].second, 0);
-    // Instrument has 1 detector.
-    TS_ASSERT_EQUALS((*ranges)[2].first, 0);
-    TS_ASSERT_EQUALS((*ranges)[2].second, 1);
+    TS_ASSERT_EQUALS((*detectorRanges)[1].first, 0);
+    TS_ASSERT_EQUALS((*detectorRanges)[1].second, 0);
+    // Instrument has 1 detector
+    TS_ASSERT_EQUALS((*detectorRanges)[2].first, 0);
+    TS_ASSERT_EQUALS((*detectorRanges)[2].second, 1);
   }
 
+  void test_visitor_component_ranges_check() {
+    // Create a very basic instrument to visit
+    auto visitee = createMinimalInstrument(V3D(0, 0, 0) /*source pos*/,
+                                           V3D(10, 0, 0) /*sample pos*/
+                                           ,
+                                           V3D(11, 0, 0) /*detector position*/);
+
+    Mantid::Geometry::ParameterMap pmap;
+    // Create the visitor.
+    InfoComponentVisitor visitor(std::vector<detid_t>{1} /*detector ids*/,
+                                 pmap);
+
+    // Visit everything
+    visitee->registerContents(visitor);
+
+    auto componentRanges = visitor.componentChildComponentRanges();
+    TSM_ASSERT_EQUALS("There are 3 non-detector components", componentRanges->size(), 3);
+
+    /*
+     * In this instrument there is only a single assembly (the instrument
+     * itself). We therefore EXPECT that the ranges provided are all from 0 to 0 for
+     * those non-assembly components. This is important for subsequent correct
+     * working on ComponentInfo.
+     */
+    // Source has no sub-components
+    TS_ASSERT_EQUALS((*componentRanges)[0].first, 0);
+    TS_ASSERT_EQUALS((*componentRanges)[0].second, 0);
+    // Sample has no sub-components
+    TS_ASSERT_EQUALS((*componentRanges)[1].first, 0);
+    TS_ASSERT_EQUALS((*componentRanges)[1].second, 0);
+    // Instrument has 1 detector.
+    TS_ASSERT_EQUALS((*componentRanges)[2].first, 0);
+    TS_ASSERT_EQUALS((*componentRanges)[2].second, 3);
+  }
   void test_visitor_collects_detector_id_to_index_mappings() {
 
     // Create a very basic instrument to visit
@@ -308,6 +342,7 @@ public:
     // Note no detector counted
     TS_ASSERT_EQUALS(visitor.size(), expectedSize);
   }
+
 };
 
 class InfoComponentVisitorTestPerformance : public CxxTest::TestSuite {

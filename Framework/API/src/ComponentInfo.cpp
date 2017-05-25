@@ -40,7 +40,12 @@ ComponentInfo::ComponentInfo(
 
 std::vector<size_t>
 ComponentInfo::detectorIndices(size_t componentIndex) const {
-  return m_componentInfo.detectorIndices(componentIndex);
+    return m_componentInfo.detectorIndices(componentIndex);
+}
+
+std::vector<size_t> ComponentInfo::componentIndices(size_t componentIndex) const
+{
+ return m_componentInfo.componentIndices(componentIndex);
 }
 
 size_t ComponentInfo::size() const { return m_componentInfo.size(); }

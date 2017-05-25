@@ -910,6 +910,46 @@ public:
     TS_ASSERT_THROWS_NOTHING(expInfo.setInstrument(instrument));
   }
 
+
+  void test_component_info_component_index_tree() {
+
+    const int nPixels = 10;
+    auto inst = ComponentCreationHelper::createTestInstrumentRectangular(
+        1 /*n banks*/, nPixels /*10 by 10 dets in bank*/,
+        1 /*sample-bank distance*/);
+
+    ExperimentInfo expInfo;
+    expInfo.setInstrument(inst);
+    const Mantid::API::ComponentInfo &compInfo = expInfo.componentInfo();
+
+    // Test non-detector, non-assembly components
+    auto sampleId = inst->getComponentByName("sample")->getComponentID();
+    TSM_ASSERT_EQUALS(
+        "Sample should not report any nested component indices",
+        compInfo.componentIndices(compInfo.indexOf(sampleId)).size(), 0);
+
+    auto sourceId = inst->getComponentByName("source")->getComponentID();
+    TSM_ASSERT_EQUALS(
+        "Source should not report any nested detector indices",
+        compInfo.componentIndices(compInfo.indexOf(sourceId)).size(), 0);
+
+    auto bankId = inst->getComponentByName("bank1")->getComponentID();
+    TSM_ASSERT_EQUALS(
+        "Bank should yield entire sub-tree of component indices",
+        compInfo.componentIndices(compInfo.indexOf(bankId)).size(), (nPixels*nPixels)+nPixels);
+
+    auto instrumentId = inst->getComponentID();
+    size_t nComponents = nPixels * nPixels;
+    nComponents += nPixels; // One additional CompAssembly per row.
+    nComponents += 1;       // Rectangular Detector (bank)
+    nComponents += 1;       // source
+    nComponents += 1;       // sample
+    TSM_ASSERT_EQUALS(
+        "Instrument should yield entire tree of component indices",
+        compInfo.componentIndices(compInfo.indexOf(instrumentId)).size(), nComponents);
+
+  }
+
 private:
   void addInstrumentWithParameter(ExperimentInfo &expt, const std::string &name,
                                   const std::string &value) {

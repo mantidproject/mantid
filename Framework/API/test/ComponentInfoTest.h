@@ -44,17 +44,20 @@ public:
 
     auto detectorIndices = boost::make_shared<
         std::vector<size_t>>(); // No detectors in this example
-    auto ranges = boost::make_shared<std::vector<std::pair<size_t, size_t>>>();
-    ranges->push_back(std::make_pair(0, 0)); // One component with no detectors
-    ranges->push_back(
+    auto detectorRanges = boost::make_shared<std::vector<std::pair<size_t, size_t>>>();
+    detectorRanges->push_back(std::make_pair(0, 0)); // One component with no detectors
+    detectorRanges->push_back(
         std::make_pair(0, 0)); // Another component with no detectors
+
+    auto componentIndices = boost::make_shared<
+        std::vector<size_t>>(); // No detectors in this example
 
     auto positions = boost::make_shared<std::vector<Eigen::Vector3d>>(2);
     auto rotations = boost::make_shared<std::vector<Eigen::Quaterniond>>(2);
     auto detectorInfo = boost::make_shared<Mantid::Beamline::DetectorInfo>();
 
     Mantid::Beamline::ComponentInfo internalInfo(
-        detectorIndices, ranges, positions, rotations, detectorInfo);
+        detectorIndices, detectorRanges, componentIndices, componentRanges, positions, rotations, detectorInfo);
     Mantid::Geometry::ObjComponent comp1("component1");
     Mantid::Geometry::ObjComponent comp2("component2");
     auto componentIds =

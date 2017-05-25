@@ -61,11 +61,17 @@ private:
   /// Detectors components always specified first
   boost::shared_ptr<std::vector<Mantid::Geometry::IComponent *>> m_componentIds;
 
-  /// Detector indexes
+  /// Detector indexes sorted by assembly
   boost::shared_ptr<std::vector<size_t>> m_assemblySortedDetectorIndices;
 
-  /// Only Assemblies and other NON-detectors yield ranges
-  boost::shared_ptr<std::vector<std::pair<size_t, size_t>>> m_ranges;
+  /// Component indexes sorted by assembly
+  boost::shared_ptr<std::vector<size_t>> m_assemblySortedComponentIndices;
+
+  /// Only Assemblies and other NON-detectors yield detector ranges
+  boost::shared_ptr<std::vector<std::pair<size_t, size_t>>> m_detectorRanges;
+
+  /// Component ranges.
+  boost::shared_ptr<std::vector<std::pair<size_t, size_t>>> m_componentRanges;
 
   /// Component ID -> Component Index map
   boost::shared_ptr<std::unordered_map<Mantid::Geometry::IComponent *, size_t>>
@@ -108,8 +114,14 @@ public:
   boost::shared_ptr<const std::vector<std::pair<size_t, size_t>>>
   componentDetectorRanges() const;
 
+  boost::shared_ptr<const std::vector<std::pair<size_t, size_t>>>
+  componentChildComponentRanges() const;
+
   boost::shared_ptr<const std::vector<size_t>>
   assemblySortedDetectorIndices() const;
+
+  boost::shared_ptr<const std::vector<size_t>>
+  assemblySortedComponentIndices() const;
 
   boost::shared_ptr<
       const std::unordered_map<Mantid::Geometry::IComponent *, size_t>>
