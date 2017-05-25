@@ -17,7 +17,6 @@
 #include "MantidKernel/ThreadPool.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include <MantidAPI/IndexTypeProperty.h>
-#include <MantidAPI/WorkspacePropertyWithIndex.h>
 #include <MantidAPI/WorkspacePropertyWithIndex.tcc>
 #include <MantidIndexing/SpectrumIndexSet.h>
 #include <limits>

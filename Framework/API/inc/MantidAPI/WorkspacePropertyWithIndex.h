@@ -1,6 +1,7 @@
 #ifndef MANTID_API_WORKSPACEPROPERTYWITHINDEX_H_
 #define MANTID_API_WORKSPACEPROPERTYWITHINDEX_H_
 
+#include "MantidAPI/IWorkspacePropertyWithIndex.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include <MantidAPI/IndexTypeProperty.h>
 #include <MantidIndexing/GlobalSpectrumIndex.h>
@@ -44,14 +45,29 @@ class MatrixWorkspace;
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 template <typename TYPE = MatrixWorkspace>
-class WorkspacePropertyWithIndex : public WorkspaceProperty<TYPE> {
+class WorkspacePropertyWithIndex : public WorkspaceProperty<TYPE>,
+                                   public IWorkspacePropertyWithIndex {
+  static_assert(std::is_convertible<TYPE *, MatrixWorkspace *>::value,
+                "Workspace type must be convertible to API::MatrixWorkspace.");
 public:
   explicit WorkspacePropertyWithIndex(
       const std::string &name = "InputWorkspaceWithIndex",
-      const int indexType = IndexType::WorkspaceIndex,
+      const int indexTypes = IndexType::WorkspaceIndex,
       const std::string &wsName = "",
       Kernel::IValidator_sptr validator =
-          Kernel::IValidator_sptr(new NullValidator));
+          Kernel::IValidator_sptr(new Kernel::NullValidator));
+
+  explicit WorkspacePropertyWithIndex(
+      const std::string &name, const int indexTypes, const std::string &wsName,
+      API::PropertyMode::Type optional,
+      Kernel::IValidator_sptr validator =
+          Kernel::IValidator_sptr(new Kernel::NullValidator));
+
+  explicit WorkspacePropertyWithIndex(
+      const std::string &name, const int indexTypes, const std::string &wsName,
+      API::PropertyMode::Type optional, API::LockMode::Type locking,
+      Kernel::IValidator_sptr validator =
+          Kernel::IValidator_sptr(new Kernel::NullValidator));
 
   WorkspacePropertyWithIndex(const WorkspacePropertyWithIndex<TYPE> &right);
 
@@ -79,8 +95,6 @@ public:
 
   WorkspacePropertyWithIndex *clone() const override;
 
-  const Indexing::SpectrumIndexSet getIndices() const;
-
   Kernel::ArrayProperty<int> &mutableIndexListProperty() {
     return *m_indexListProp.get();
   }
@@ -100,12 +114,7 @@ private:
   std::unique_ptr<Kernel::ArrayProperty<int>> m_indexListProp;
   std::unique_ptr<IndexTypeProperty> m_indexTypeProp;
 
-  /// MatrixWorkspace required in order to use IndexInfo::makeIndexset
-  const void checkWorkspace() const {
-    if (!std::is_convertible<TYPE *, MatrixWorkspace *>::value)
-      throw std::runtime_error(
-          "Workspace type must be convertible to API::MatrixWorkspace.");
-  }
+  const Indexing::SpectrumIndexSet getIndices() const;
 };
 } // namespace API
 } // namespace Mantid

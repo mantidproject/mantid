@@ -28,10 +28,10 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 #include <MantidIndexing/SpectrumIndexSet.h>
 #include <boost/python/args.hpp>
 #include <boost/python/handle.hpp>
+#include <boost/python/list.hpp>
 #include <boost/python/make_constructor.hpp>
 #include <boost/python/module.hpp>
 #include <boost/python/object.hpp>
-#include <boost/python/list.hpp>
 #include <boost/python/register_ptr_to_python.hpp>
 #include <boost/python/tuple.hpp>
 
@@ -48,6 +48,28 @@ template <typename WorkspaceType> struct WorkspacePropertyWithIndexExporter {
       TypedWorkspacePropertyWithIndex;
   /// Shared pointer to Worksapce type
   typedef boost::shared_ptr<WorkspaceType> WorkspaceType_sptr;
+
+  /**
+   * Factory function to act as a constructor
+   * rather than passing in the python owned object
+   * @param name :: The name of the property
+   */
+  static TypedWorkspacePropertyWithIndex *
+  createPropertyWithName(const std::string &name) {
+    return new TypedWorkspacePropertyWithIndex(name);
+  }
+
+  /**
+   * Factory function to act as a constructor
+   * rather than passing in the python owned object
+   * @param name :: The name of the property
+   * @param indexTypes :: Allowed indexTypes, @see IndexType enum
+   */
+  static TypedWorkspacePropertyWithIndex *
+  createPropertyWithIndexType(const std::string &name,
+                              const unsigned int indexTypes) {
+    return new TypedWorkspacePropertyWithIndex(name, indexTypes);
+  }
 
   /**
    * Factory function to act as a constructor so that the validator can be
@@ -120,15 +142,15 @@ template <typename WorkspaceType> struct WorkspacePropertyWithIndexExporter {
     std::tie(wksp, indices) =
         std::tuple<WorkspaceType_sptr, Indexing::SpectrumIndexSet>(self);
 
-	boost::python::list indexList;
-	for (auto i : indices)
-		indexList.append<size_t>(i);
+    boost::python::list indexList;
+    for (auto i : indices)
+      indexList.append<size_t>(i);
 
     return boost::python::make_tuple(wksp, indexList);
   }
 
   static void setIndexListString(TypedWorkspacePropertyWithIndex &self,
-                    const std::string &indexList) {
+                                 const std::string &indexList) {
     self.mutableIndexListProperty().setValue(indexList);
   }
 
@@ -142,7 +164,7 @@ template <typename WorkspaceType> struct WorkspacePropertyWithIndexExporter {
   }
 
   static void setIndexType(TypedWorkspacePropertyWithIndex &self,
-                    const API::IndexType &indexType) {
+                           const API::IndexType &indexType) {
     self.mutableIndexTypeProperty() = indexType;
   }
 
@@ -157,11 +179,14 @@ template <typename WorkspaceType> struct WorkspacePropertyWithIndexExporter {
     using Mantid::API::WorkspaceProperty;
     using Mantid::API::IWorkspacePropertyWithIndex;
 
-	register_ptr_to_python<TypedWorkspacePropertyWithIndex *>();
+    register_ptr_to_python<TypedWorkspacePropertyWithIndex *>();
 
     class_<TypedWorkspacePropertyWithIndex,
            bases<IWorkspacePropertyWithIndex, WorkspaceProperty<WorkspaceType>>,
            boost::noncopyable>(pythonClassName, no_init)
+        .def(init<const std::string &>(args("name")))
+        .def(init<const std::string &, const unsigned int>(
+            args("name", "indexTypes")))
         .def(init<const std::string &, const unsigned int, const std::string &>(
             args("name", "indexTypes", "defaultValue")))
         .def(init<const std::string &, const unsigned int, const std::string &,
@@ -171,6 +196,12 @@ template <typename WorkspaceType> struct WorkspacePropertyWithIndexExporter {
                   API::PropertyMode::Type, API::LockMode::Type>(
             args("name", "indexTypes", "defaultValue", "optional", "locking")))
         // These variants require the validator object to be cloned
+        .def("__init__",
+             make_constructor(&createPropertyWithName, default_call_policies(),
+                              (arg("name"))))
+        .def("__init__", make_constructor(&createPropertyWithIndexType,
+                                          default_call_policies(),
+                                          (arg("name"), arg("indexType"))))
         .def("__init__",
              make_constructor(&createPropertyWithValidator,
                               default_call_policies(),
@@ -189,9 +220,11 @@ template <typename WorkspaceType> struct WorkspacePropertyWithIndexExporter {
         .def("isOptional", &TypedWorkspacePropertyWithIndex::isOptional,
              arg("self"),
              "Returns true if the property has been marked as optional")
-		.def("setIndexType", &setIndexType, (arg("self"), arg("indexType")))
-		.def("setIndexList", &setIndexListString, (arg("self"), arg("indexList")))
-		.def("setIndexList", &setIndexListVector, (arg("self"), arg("indexList")))
+        .def("setIndexType", &setIndexType, (arg("self"), arg("indexType")))
+        .def("setIndexList", &setIndexListString,
+             (arg("self"), arg("indexList")))
+        .def("setIndexList", &setIndexListVector,
+             (arg("self"), arg("indexList")))
         .add_property("value", &value)
         .add_property("valueWithIndex", &valueWithIndex);
   }

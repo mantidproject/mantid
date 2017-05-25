@@ -30,6 +30,7 @@ set ( EXPORT_FILES
   src/Exports/MultipleExperimentInfos.cpp
   src/Exports/Workspace.cpp
   src/Exports/IWorkspaceProperty.cpp
+  src/Exports/IWorkspacePropertyWithIndex.cpp
   src/Exports/WorkspaceProperty.cpp
   src/Exports/ITableWorkspace.cpp
   src/Exports/ITableWorkspaceProperty.cpp
@@ -43,6 +44,8 @@ set ( EXPORT_FILES
   src/Exports/IMDEventWorkspaceProperty.cpp
   src/Exports/MatrixWorkspace.cpp
   src/Exports/MatrixWorkspaceProperty.cpp
+  src/Exports/MatrixWorkspacePropertyWithIndex.cpp
+  src/Exports/IEventWorkspacePropertyWithIndex.cpp
   src/Exports/IEventWorkspace.cpp
   src/Exports/IEventWorkspaceProperty.cpp
   src/Exports/IMaskWorkspace.cpp
@@ -105,6 +108,7 @@ set ( INC_FILES
   ${HEADER_DIR}/api/CloneMatrixWorkspace.h
   ${HEADER_DIR}/api/ExtractWorkspace.h
   ${HEADER_DIR}/api/WorkspacePropertyExporter.h
+  ${HEADER_DIR}/api/WorkspacePropertyWithIndexExporter.h
 )
 
 set ( PY_FILES
@@ -146,6 +150,7 @@ target_link_libraries ( PythonAPIModule LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTI
             Kernel
             HistogramData
             Geometry
+            Indexing
             ${PYTHON_LIBRARIES}
             ${POCO_LIBRARIES}
             ${Boost_LIBRARIES} )

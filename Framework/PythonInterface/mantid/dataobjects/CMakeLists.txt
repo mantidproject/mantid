@@ -10,6 +10,7 @@ set ( MODULE_TEMPLATE src/dataobjects.cpp.in )
 set ( EXPORT_FILES
   src/Exports/EventList.cpp
   src/Exports/EventWorkspace.cpp
+  src/Exports/EventWorkspacePropertyWithIndex.cpp
   src/Exports/Workspace2D.cpp
   src/Exports/RebinnedOutput.cpp
   src/Exports/SpecialWorkspace2D.cpp
@@ -72,6 +73,7 @@ target_link_libraries ( PythonDataObjectsModule LINK_PRIVATE ${TCMALLOC_LIBRARIE
             Kernel
             HistogramData
             Geometry
+            Indexing
             ${PYTHON_LIBRARIES}
             ${POCO_LIBRARIES}
             ${Boost_LIBRARIES} )

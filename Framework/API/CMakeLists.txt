@@ -337,6 +337,7 @@ set ( INC_FILES
 	inc/MantidAPI/WorkspaceOpOverloads.h
 	inc/MantidAPI/WorkspaceProperty.h
 	inc/MantidAPI/WorkspaceProperty.tcc
+    inc/MantidAPI/IWorkspacePropertyWithIndex.h
 	inc/MantidAPI/WorkspacePropertyWithIndex.h
 	inc/MantidAPI/WorkspacePropertyWithIndex.tcc
 	inc/MantidAPI/WorkspaceUnitValidator.h

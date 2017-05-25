@@ -18,10 +18,6 @@ template class MANTID_API_DLL
     Mantid::API::WorkspacePropertyWithIndex<Mantid::API::MatrixWorkspace>;
 template class MANTID_API_DLL
     Mantid::API::WorkspacePropertyWithIndex<Mantid::API::IEventWorkspace>;
-template class MANTID_API_DLL
-    Mantid::API::WorkspacePropertyWithIndex<Mantid::API::IMDEventWorkspace>;
-template class MANTID_API_DLL
-    Mantid::API::WorkspacePropertyWithIndex<Mantid::API::IMDHistoWorkspace>;
 ///@endcond TEMPLATE
 } // namespace API
 } // namespace Mantid

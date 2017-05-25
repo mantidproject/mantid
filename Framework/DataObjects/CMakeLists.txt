@@ -47,6 +47,7 @@ set ( SRC_FILES
 	src/Workspace2D.cpp
 	src/WorkspaceCreation.cpp
 	src/WorkspaceProperty.cpp
+    src/WorkspacePropertyWithIndex.cpp
 	src/WorkspaceSingleValue.cpp
 )
 

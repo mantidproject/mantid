@@ -43,15 +43,6 @@ public:
     TS_ASSERT_THROWS_NOTHING((MatrixWorkspaceIndexProp()));
   }
 
-  void testContructorFailsWithoutMatrixWorkspace() {
-    // MatrixWorkspace needed for indexInfo.
-    TS_ASSERT_THROWS(WorkspacePropertyWithIndex<Workspace>(),
-                     std::runtime_error);
-
-    TS_ASSERT_THROWS(WorkspacePropertyWithIndex<ITableWorkspace>(),
-                     std::runtime_error);
-  }
-
   void testConstructorFailsWithInvalidIndexType() {
     TS_ASSERT_THROWS(MatrixWorkspaceIndexProp("InputWorkspaceWithIndex", 0),
                      std::invalid_argument);

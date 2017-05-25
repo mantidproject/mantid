@@ -18,23 +18,39 @@ namespace API {
 
 template <typename TYPE>
 WorkspacePropertyWithIndex<TYPE>::WorkspacePropertyWithIndex(
-    const std::string &name, int indexType, const std::string &wsName,
+    const std::string &name, int indexTypes, const std::string &wsName,
     IValidator_sptr validator)
     : WorkspaceProperty<TYPE>(name, wsName, Direction::Input),
       m_indexListProp(
           make_unique<ArrayProperty<int>>("indices", Direction::Output)),
-      m_indexTypeProp(make_unique<IndexTypeProperty>(indexType)) {
-  checkWorkspace();
-}
+      m_indexTypeProp(make_unique<IndexTypeProperty>(indexTypes)) {}
+
+template <typename TYPE>
+WorkspacePropertyWithIndex<TYPE>::WorkspacePropertyWithIndex(
+    const std::string &name, const int indexTypes, const std::string &wsName,
+    API::PropertyMode::Type optional, Kernel::IValidator_sptr validator)
+    : WorkspaceProperty<TYPE>(name, wsName, Direction::Input, optional),
+      m_indexListProp(
+          make_unique<ArrayProperty<int>>("indices", Direction::Output)),
+      m_indexTypeProp(make_unique<IndexTypeProperty>(indexTypes)) {}
+
+template <typename TYPE>
+WorkspacePropertyWithIndex<TYPE>::WorkspacePropertyWithIndex(
+    const std::string &name, const int indexTypes, const std::string &wsName,
+    API::PropertyMode::Type optional, API::LockMode::Type locking,
+    Kernel::IValidator_sptr validator)
+    : WorkspaceProperty<TYPE>(name, wsName, Direction::Input, optional,
+                              locking),
+      m_indexListProp(
+          make_unique<ArrayProperty<int>>("indices", Direction::Output)),
+      m_indexTypeProp(make_unique<IndexTypeProperty>(indexTypes)) {}
 
 template <typename TYPE>
 WorkspacePropertyWithIndex<TYPE>::WorkspacePropertyWithIndex(
     const WorkspacePropertyWithIndex<TYPE> &right)
     : WorkspaceProperty<TYPE>(right),
       m_indexListProp(make_unique<ArrayProperty<int>>(*right.m_indexListProp)),
-      m_indexTypeProp(make_unique<IndexTypeProperty>(*right.m_indexTypeProp)) {
-  checkWorkspace();
-}
+      m_indexTypeProp(make_unique<IndexTypeProperty>(*right.m_indexTypeProp)) {}
 
 template <typename TYPE>
 std::string WorkspacePropertyWithIndex<TYPE>::isValid() const {

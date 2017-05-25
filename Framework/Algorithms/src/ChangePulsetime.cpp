@@ -20,7 +20,7 @@ using std::size_t;
 /** Initialize the algorithm's properties.
  */
 void ChangePulsetime::init() {
-  declareProperty(createWithWorkspaceIndices<EventWorkspace>("InputWorkspaceWithIndex"),
+  declareProperty(createWithWorkspaceIndices<EventWorkspace>("InputWorkspace"),
                   "An input event workspace.");
   declareProperty(
       make_unique<PropertyWithValue<double>>("TimeOffset", Direction::Input),
@@ -40,7 +40,7 @@ void ChangePulsetime::exec() {
   SpectrumIndexSet indexSet(0);
 
   std::tie(in_ws, indexSet) = std::tuple<EventWorkspace_sptr, SpectrumIndexSet>(
-      getProperty("InputWorkspaceWithIndex"));
+      getProperty("InputWorkspace"));
 
   EventWorkspace_sptr out_ws = getProperty("OutputWorkspace");
   if (!out_ws) {
