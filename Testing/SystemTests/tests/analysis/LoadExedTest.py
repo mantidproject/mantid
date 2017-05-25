@@ -15,4 +15,4 @@ class LoadExedTest(stresstesting.MantidStressTest):
         #check that it has the correct number of histograms
         self.assertEquals(ms.mtd['test'].getNumberHistograms(),20400)
         #check that phi sample Log is correct
-        self.assertEquals(ms.mtd['test'].getRun().getLogData('phi').value,'-6.000005')
+        self.assertEquals(ms.mtd['test'].getRun().getLogData('phi').value,-6.000005)

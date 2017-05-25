@@ -1,9 +1,9 @@
 from __future__ import (absolute_import, division, print_function)
 from mantid.kernel import *
 from mantid.api import *
-from mantid.simpleapi import LoadInstrument, AddSampleLog, SetGoniometer
+from mantid.simpleapi import LoadInstrument, AddSampleLogMultiple, SetGoniometer
 from mantid.simpleapi import ExtractSpectra, MaskDetectors, RemoveMaskedSpectra
-
+from mantid.simpleapi import RotateInstrumentComponent
 import struct
 import numpy as np
 import copy
@@ -89,23 +89,28 @@ class LoadEXED(PythonAlgorithm):
 
         #load idf
 
+
+
+        #Sample_logs the header values are written into the sample logs
+        log_names=[sl.encode('ascii','ignore') for sl in parms_dict.keys()]
+        log_values=[sl.encode('ascii','ignore') if isinstance(sl,types.UnicodeType) else str(sl) for sl in parms_dict.values()]
+        AddSampleLogMultiple(Workspace=wsn, LogNames=log_names,LogValues=log_values)
+        # for sl in parms_dict.keys():
+        #     #print (sl.encode('ascii','ignore'), parms_dict[sl].encode('ascii','ignore'))
+        #     key_in=sl.encode('ascii','ignore')
+        #     if isinstance(parms_dict[sl],types.UnicodeType):
+        #         AddSampleLog(Workspace=wsn, LogName=key_in, LogText=parms_dict[sl].encode('ascii','ignore'))#, LogType='Number')
+        #     else:
+        #         AddSampleLog(Workspace=wsn, LogName=key_in, LogText=str(parms_dict[sl]))#, LogType='Number')
+
+        #SetGoniometer(Workspace=wsn, Goniometers='Universal', Axis0='phi,0,1,0,1')
+        SetGoniometer(Workspace=wsn, Goniometers='Universal')
         if (self.fxml == ""):
             LoadInstrument(Workspace=wsn, InstrumentName = "Exed", RewriteSpectraMap= True)
         else:
             LoadInstrument(Workspace=wsn, Filename = self.fxml, RewriteSpectraMap= True)
-
-        #Sample_logs the header values are written into the sample logs
-
-        for sl in parms_dict.keys():
-            #print (sl.encode('ascii','ignore'), parms_dict[sl].encode('ascii','ignore'))
-            key_in=sl.encode('ascii','ignore')
-            if isinstance(parms_dict[sl],types.UnicodeType):
-                AddSampleLog(Workspace=wsn, LogName=key_in, LogText=parms_dict[sl].encode('ascii','ignore'))#, LogType='Number')
-            else:
-                AddSampleLog(Workspace=wsn, LogName=key_in, LogText=str(parms_dict[sl]))#, LogType='Number')
-
-        #SetGoniometer(Workspace=wsn, Goniometers='Universal', Axis0='phi,0,1,0,1')
-        SetGoniometer(Workspace=wsn, Goniometers='Universal')
+        RotateInstrumentComponent(Workspace=wsn,ComponentName='Tank',Y=1,
+                                  Angle=-float(parms_dict['phi'].encode('ascii','ignore')), RelativeRotation=False)
         # Separate monitors into seperate workspace
         ExtractSpectra(InputWorkspace = wsn, WorkspaceIndexList = ','.join([str(s) for s in range(nrows-2, nrows)]),
                        OutputWorkspace = wsn + '_Monitors')
