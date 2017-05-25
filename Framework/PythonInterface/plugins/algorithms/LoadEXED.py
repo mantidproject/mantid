@@ -1,7 +1,7 @@
 from __future__ import (absolute_import, division, print_function)
 from mantid.kernel import *
 from mantid.api import *
-from mantid.simpleapi import LoadInstrument, AddSampleLog, SetGoniometer 
+from mantid.simpleapi import LoadInstrument, AddSampleLog, SetGoniometer
 from mantid.simpleapi import ExtractSpectra, MaskDetectors, RemoveMaskedSpectra
 
 import struct
@@ -13,9 +13,8 @@ import types
 
 
 class LoadEXED(PythonAlgorithm):
-    __doc__ = """This is the EXED data loader written in Python.
-    Based off code was written by Wolf-Dieter Stein and  Maciej Bartkowiak.
-    Garrett Granroth (ORNL)
+    __doc__ = """his algorithm reads Exed raw files and creates two workspaces.
+    One for the detectors and another for the monitor.
     """
 
     def category(self):
@@ -28,9 +27,8 @@ class LoadEXED(PythonAlgorithm):
         return 1
 
     def summary(self):
-        return """Modifications have been made by Maciej Bartkowiak and Garrett Granroth (ORNL) in 2017,
-        in order to fully replace the C++ version of LoadEXED,
-        improve the treatment of the monitor spectra and Bring Exed into the Mantid Distribution."""
+        return """This algorithm reads Exed raw files and creates two workspaces.
+        One for the detectors and another for the monitor."""
 
     def PyInit(self):
         self.declareProperty(FileProperty(name="Filename",defaultValue = "",
@@ -49,13 +47,6 @@ class LoadEXED(PythonAlgorithm):
                              doc="Mantid workspace containing the measured data.")
 
     def PyExec(self):
-        #from mantid.simpleapi import LoadInstrument
-        #from mantid.simpleapi import AddSampleLog
-        #from mantid.simpleapi import SetGoniometer
-        #from mantid.simpleapi import ExtractSpectra
-        #from mantid.simpleapi import MaskDetectors
-        #from mantid.simpleapi import RemoveMaskedSpectra
-
         fn = self.getPropertyValue("Filename")
         wsn = self.getPropertyValue("OutputWorkspace")
         #print (fn, wsn)
