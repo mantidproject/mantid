@@ -40,10 +40,12 @@ already reduced using this algorithm.
 If summation is to be done in wavelength, then this is done first. The the
 conversion to wavelength and normalisation by monitors and direct beam is done,
 followed by the transmission correction. Transmission correction is always
-done, even if the input was already in wavelength.
+done, even if the input was already in wavelength. The resulting workspace is
+cropped in wavelength according to :literal:`WavelengthMin` and
+:literal:`WavelengthMax`, which are both mandatory properties.
 
-If summation is to be done in Q, this is done after the normalisations, but
-again, only if the original input was not already in wavelength.
+If summation is to be done in Q, this is done after the normalisations and
+cropping, but again, only if the original input was not already in wavelength.
 
 Finally, the output workspace in wavelength is converted to momentum transfer
 (Q).
@@ -120,11 +122,15 @@ property. If the :literal:`CorrectionAlgorithm` property is set to
 algorithm is used, with *C0* and *C1* taken from the :literal:`C0` and :literal:`C1`
 properties.
 
-Sum in Q and crop
-#################
+Sum in Q
+########
 
-If summing in Q, the summation is done now, after all normalisations have been
-done. The summation is done using the algorithm proposed by Cubitt et al
+If summing in Q, the summation is done now, after all normalisations and
+cropping have been done. As with summation in :math:`\lambda`, the summation is
+only done if the original workspace was not in :math:`\lambda` (otherwise we
+assume the reduction has already been done).
+
+The summation is done using the algorithm proposed by Cubitt et al
 (J. Appl. Crystallogr., 48 (6) (2015)). This involves a projection to an
 arbitrary reference angle, :math:`2\theta_R`, with a "virtual" wavelength,
 :math:`\lambda_v`. This is the wavelength the neutron would have had if it had
@@ -133,9 +139,8 @@ arrived at :math:`2\theta_R` with the same momentum transfer
 :math:`\lambda_v` and the projections from all pixels are summed in
 :math:`\lambda_v`.
 
-In all cases, the 1D array in :math:`\lambda` is then cropped in wavelength
-according to :literal:`WavelengthMin` and :literal:`WavelengthMax`, which are
-both mandatory properties.
+The resulting 1D workspace in :math:`\lambda_v` at :math:`2\theta_R` becomes
+the output workspace in wavelength.
 
 .. diagram:: ReflectometryReductionOne_SumInQ-v2_wkflw.dot
 

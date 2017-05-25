@@ -2,10 +2,10 @@ digraph ReflectometryReductionOne {
 splines=line
 label = "\n"
 rankdir = TB;
- $global_style
+ //$global_style
 
 subgraph params {
- $param_style
+ //$param_style
   inputWS             [label="InputWorkspace"]
   outputWS            [label="OutputWorkspaceWavelength"]
   procCommands        [label="ProcessingInstructions"]
@@ -18,12 +18,12 @@ subgraph params {
 }
 
 subgraph decisions {
- $decision_style
+ //$decision_style
   checkSumInLam   [label="Sum in &lambda;?"]
 }
 
 subgraph algorithms {
- $algorithm_style
+ //$algorithm_style
   convertDet    [label="ConvertUnits\n(AlignBins = True)"]
   convertDB     [label="ConvertUnits\n(AlignBins = True)"]
   convertMon    [label="ConvertUnits\n(AlignBins = True)", group=g11]
@@ -37,11 +37,11 @@ subgraph algorithms {
 }
 
 subgraph processes {
- $process_style
+ //$process_style
 }
 
 subgraph values {
- $value_style
+ //$value_style
 }
 
 inputWS			-> checkSumInLam	[label="Detectors"]
@@ -72,7 +72,6 @@ monIntWavMax        -> intMon
 
 divideDetRDB        -> divideDetMon
 intMon              -> divideDetMon
-
 divideDetMon        -> outputWS
 
 {rank=same; groupDet; groupDetRDB; cropMonWS}
