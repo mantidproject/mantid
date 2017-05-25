@@ -307,19 +307,19 @@ class StateMaskBuilder(object):
                                  "Make sure that all spectra in the range are on a single detector".format(start, stop))
             else:
                 detector_mask_state = self.state.detectors[DetectorType.to_string(detector_bank_start)]
-                spec_range_start = detector_mask_state.spectra_range_start
-                spec_range_stop = detector_mask_state.spectra_range_stop
+                spec_range_start = detector_mask_state.spectrum_range_start
+                spec_range_stop = detector_mask_state.spectrum_range_stop
                 # Set the start spectrum range
                 if spec_range_start is not None:
                     spec_range_start.append(start)
                 else:
-                    self.state.detectors[DetectorType.to_string(detector_bank_start)].spectra_range_start = [start]
+                    self.state.detectors[DetectorType.to_string(detector_bank_start)].spectrum_range_start = [start]
 
                 # Set the stop spectrum range
                 if spec_range_stop is not None:
-                    spec_range_start.append(start)
+                    spec_range_stop.append(stop)
                 else:
-                    self.state.detectors[DetectorType.to_string(detector_bank_start)].spectra_range_start = [start]
+                    self.state.detectors[DetectorType.to_string(detector_bank_start)].spectrum_range_stop = [stop]
 
     def build(self):
         self.state.validate()

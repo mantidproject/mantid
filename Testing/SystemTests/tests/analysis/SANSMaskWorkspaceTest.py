@@ -78,8 +78,8 @@ class SANSMaskWorkspaceTest(unittest.TestCase):
     def _do_assert(self, workspace, expected_spectra):
         # Remove duplicate masks from expected
         expected_spectra = list(set(expected_spectra))
-
         masked_spectra = list(get_masked_spectrum_numbers(workspace))
+
         self.assertTrue(len(expected_spectra) == len(masked_spectra))
         for expected, actual in zip(sorted(expected_spectra), sorted(masked_spectra)):
             self.assertTrue(expected == actual)
@@ -493,7 +493,7 @@ class SANSMaskWorkspaceTest(unittest.TestCase):
         self._do_assert(workspace, expected_spectra)
 
 
-class SANSLoadDataRunnerTest(stresstesting.MantidStressTest):
+class SANSMaskWorkspaceRunnerTest(stresstesting.MantidStressTest):
     def __init__(self):
         stresstesting.MantidStressTest.__init__(self)
         self._success = False
