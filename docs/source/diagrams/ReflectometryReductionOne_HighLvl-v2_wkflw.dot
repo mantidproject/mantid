@@ -1,9 +1,9 @@
 digraph ReflectometryReductionOne {
 label = "\n"
- //$global_style
+ $global_style
 
 subgraph params {
- //$param_style
+ $param_style
   inputWS       [label="InputWorkspace"]
   wavMin        [label="WavelengthMin", group=gwav]
   wavMax        [label="WavelengthMax", group=gwav]
@@ -12,17 +12,17 @@ subgraph params {
 }
 
 subgraph decisions {
- //$decision_style
+ $decision_style
   checkXUnit      [label="X axis in &lambda;?"]
 }
 
 subgraph algorithms {
- //$algorithm_style
+ $algorithm_style
   cropWav       [label="CropWorkspace", group=g1]
 }
 
 subgraph processes {
- //$process_style
+ $process_style
   convertUnits    [label="Convert to &lambda;,\noptionally sum in &lambda;, and\nnormalize by monitors"]
   applyCorrTrans  [label="Apply transmission\n corrections"]
   sumInQ          [label="Optionally sum in Q"]
@@ -30,7 +30,7 @@ subgraph processes {
 }
 
 subgraph values {
- //$value_style
+ $value_style
 }
 
 inputWS         -> checkXUnit
