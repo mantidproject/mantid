@@ -689,7 +689,8 @@ class UserFileStateDirectorISIS(object):
         # ---------------------------------
         if MaskId.single_spectrum_mask in user_file_items:
             single_spectra = user_file_items[MaskId.single_spectrum_mask]
-            self._mask_builder.set_single_spectra(single_spectra)
+            # Note that we are using an unusual setter here. Check mask.py for why we are doing this.
+            self._mask_builder.set_single_spectra_on_detector(single_spectra)
 
         # ---------------------------------
         # 7. Spectrum Range
@@ -705,8 +706,8 @@ class UserFileStateDirectorISIS(object):
                                        " valid.".format(spectrum_range.start, spectrum_range.stop))
                 start_range.append(spectrum_range.start)
                 stop_range.append(spectrum_range.stop)
-            self._mask_builder.set_spectrum_range_start(start_range)
-            self._mask_builder.set_spectrum_range_stop(stop_range)
+            # Note that we are using an unusual setter here. Check mask.py for why we are doing this.
+            self._mask_builder.set_spectrum_range_on_detector(start_range, stop_range)
 
         # ---------------------------------
         # 8. Vertical single strip
