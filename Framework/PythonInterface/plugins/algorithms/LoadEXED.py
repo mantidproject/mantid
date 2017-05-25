@@ -1,6 +1,8 @@
 from __future__ import (absolute_import, division, print_function)
 from mantid.kernel import *
 from mantid.api import *
+from mantid.simpleapi import LoadInstrument, AddSampleLog, SetGoniometer 
+from mantid.simpleapi import ExtractSpectra, MaskDetectors, RemoveMaskedSpectra
 
 import struct
 import numpy as np
@@ -47,17 +49,12 @@ class LoadEXED(PythonAlgorithm):
                              doc="Mantid workspace containing the measured data.")
 
     def PyExec(self):
-        from mantid.simpleapi import LoadInstrument
-        #from mantid.simpleapi import LoadExedHelper
-        #from mantid.simpleapi import CreateWorkspace
-        from mantid.simpleapi import AddSampleLog
-        from mantid.simpleapi import SetGoniometer
-        from mantid.simpleapi import ExtractSpectra
-        from mantid.simpleapi import MaskDetectors
-        from mantid.simpleapi import RemoveMaskedSpectra
-        #from mantid.simpleapi import mtd
-
-        #self.LoadRaw()
+        #from mantid.simpleapi import LoadInstrument
+        #from mantid.simpleapi import AddSampleLog
+        #from mantid.simpleapi import SetGoniometer
+        #from mantid.simpleapi import ExtractSpectra
+        #from mantid.simpleapi import MaskDetectors
+        #from mantid.simpleapi import RemoveMaskedSpectra
 
         fn = self.getPropertyValue("Filename")
         wsn = self.getPropertyValue("OutputWorkspace")
@@ -179,7 +176,7 @@ class LoadEXED(PythonAlgorithm):
                 helper function to read binary data_type
                 requires the file handle, number of rows and data_type
                 """
-                self.log().debug(nrows)
+                self.log().debug("nrows %d" %nrows)
                 tmp_lst=[struct.unpack(data_type,fin.read(byte_size))[0] for i in range(nrows)]
                 #for i in range(nrows):
                 #    data = struct.unpack(data_type,fin.read(byte_size))[0]
