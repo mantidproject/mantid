@@ -156,7 +156,8 @@ class LoadEXED(PythonAlgorithm):
                         #print line
             nrows=int(parms_dict['NDET'])
             nbins=int(parms_dict['NTC'])
-            print ("read UDET")
+            self.log().information("read UDET")
+            #print ("read UDET")
             det_udet = self.struct_data_read(fin,nrows)
 
             print ("read Counter")
