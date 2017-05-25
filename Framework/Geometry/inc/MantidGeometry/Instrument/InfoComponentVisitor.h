@@ -1,13 +1,13 @@
-#ifndef MANTID_API_INFOCOMPONENTVISITOR_H_
-#define MANTID_API_INFOCOMPONENTVISITOR_H_
+#ifndef MANTID_GEOMETRY_INFOCOMPONENTVISITOR_H_
+#define MANTID_GEOMETRY_INFOCOMPONENTVISITOR_H_
 
-#include "MantidAPI/DllConfig.h"
+#include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/Instrument/ComponentVisitor.h"
 #include <cstddef>
 #include <utility>
 #include <vector>
-#include <functional>
 #include <unordered_map>
+#include <boost/shared_ptr.hpp>
 
 namespace Mantid {
 using detid_t = int32_t;
@@ -16,8 +16,11 @@ class IComponent;
 class ICompAssembly;
 class IDetector;
 }
+namespace Beamline {
+class ComponentInfo;
+}
 
-namespace API {
+namespace Geometry {
 
 /** InfoComponentVisitor : Visitor for components with access to Info wrapping
   features.
@@ -49,32 +52,34 @@ namespace API {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTID_API_DLL InfoComponentVisitor
+class MANTID_GEOMETRY_DLL InfoComponentVisitor
     : public Mantid::Geometry::ComponentVisitor {
 private:
   /// Detectors components always specified first
-  std::vector<Mantid::Geometry::IComponent *> m_componentIds;
+  boost::shared_ptr<std::vector<Mantid::Geometry::IComponent *>> m_componentIds;
 
   /// Detector indexes
-  std::vector<size_t> m_assemblySortedDetectorIndices;
-
-  /// Mapping function to allow us to go from detector id to detecor index
-  std::function<size_t(const Mantid::detid_t)>
-      m_detectorIdToIndexMapperFunction;
+  boost::shared_ptr<std::vector<size_t>> m_assemblySortedDetectorIndices;
 
   /// Only Assemblies and other NON-detectors yield ranges
-  std::vector<std::pair<size_t, size_t>> m_ranges;
+  boost::shared_ptr<std::vector<std::pair<size_t, size_t>>> m_ranges;
+
+  /// Component ID -> Component Index map
+  boost::shared_ptr<std::unordered_map<Mantid::Geometry::IComponent *, size_t>>
+      m_componentIdToIndexMap;
 
   /// Counter for dropped detectors
   size_t m_droppedDetectors = 0;
 
-  /// Component ID -> Component Index map
-  std::unordered_map<Mantid::Geometry::IComponent *, size_t>
-      m_componentIdToIndexMap;
+  /// Detector ID -> index mappings
+  boost::shared_ptr<const std::unordered_map<detid_t, size_t>>
+      m_detectorIdToIndexMap;
+
+  /// Detector indices
+  boost::shared_ptr<std::vector<detid_t>> m_orderedDetectorIds;
 
 public:
-  InfoComponentVisitor(const size_t nDetectors,
-                       std::function<size_t(Mantid::detid_t)> mapperFunc);
+  InfoComponentVisitor(std::vector<detid_t> orderedDetectorIds);
 
   virtual void registerComponentAssembly(
       const Mantid::Geometry::ICompAssembly &assembly) override;
@@ -84,18 +89,30 @@ public:
   virtual void
   registerDetector(const Mantid::Geometry::IDetector &detector) override;
 
-  const std::vector<Mantid::Geometry::IComponent *> &componentIds() const;
+  boost::shared_ptr<const std::vector<Mantid::Geometry::IComponent *>>
+  componentIds() const;
 
-  const std::vector<std::pair<size_t, size_t>> &componentDetectorRanges() const;
+  boost::shared_ptr<const std::vector<std::pair<size_t, size_t>>>
+  componentDetectorRanges() const;
 
-  const std::vector<size_t> &assemblySortedDetectorIndices() const;
+  boost::shared_ptr<const std::vector<size_t>>
+  assemblySortedDetectorIndices() const;
 
-  const std::unordered_map<Mantid::Geometry::IComponent *, size_t> &
+  boost::shared_ptr<
+      const std::unordered_map<Mantid::Geometry::IComponent *, size_t>>
   componentIdToIndexMap() const;
 
+  boost::shared_ptr<const std::unordered_map<detid_t, size_t>>
+  detectorIdToIndexMap() const;
   size_t size() const;
+
+  bool isEmpty() const;
+
+  std::unique_ptr<Beamline::ComponentInfo> componentInfo() const;
+
+  boost::shared_ptr<std::vector<detid_t>> detectorIds() const;
 };
-} // namespace API
+} // namespace Geometry
 } // namespace Mantid
 
-#endif /* MANTID_API_INFOCOMPONENTVISITOR_H_ */
+#endif /* MANTID_GEOMETRY_INFOCOMPONENTVISITOR_H_ */

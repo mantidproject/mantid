@@ -1,24 +1,49 @@
-#include "MantidAPI/InfoComponentVisitor.h"
-#include "MantidAPI/DetectorInfo.h"
+#include "MantidGeometry/Instrument/InfoComponentVisitor.h"
 #include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/ICompAssembly.h"
 #include "MantidGeometry/IDetector.h"
+#include "MantidBeamline/ComponentInfo.h"
+#include "MantidKernel/make_unique.h"
 
 #include <numeric>
 #include <algorithm>
+#include <boost/make_shared.hpp>
 
 namespace Mantid {
-namespace API {
+
+namespace Geometry {
 
 using namespace Mantid::Geometry;
 
+namespace {
+boost::shared_ptr<const std::unordered_map<detid_t, size_t>>
+makeDetIdToIndexMap(const std::vector<detid_t> &detIds) {
+
+  const size_t nDetIds = detIds.size();
+  auto detIdToIndex = boost::make_shared<std::unordered_map<detid_t, size_t>>();
+  detIdToIndex->reserve(nDetIds);
+  for (size_t i = 0; i < nDetIds; ++i) {
+    (*detIdToIndex)[detIds[i]] = i;
+  }
+  return std::move(detIdToIndex);
+}
+}
+
 InfoComponentVisitor::InfoComponentVisitor(
-    const size_t nDetectors,
-    std::function<size_t(const Mantid::detid_t)> mapperFunc)
-    : m_componentIds(nDetectors, nullptr),
-      m_detectorIdToIndexMapperFunction(mapperFunc) {
-  m_assemblySortedDetectorIndices.reserve(nDetectors);
-  m_componentIdToIndexMap.reserve(nDetectors);
+    std::vector<detid_t> orderedDetectorIds)
+    : m_componentIds(boost::make_shared<std::vector<ComponentID>>(
+          orderedDetectorIds.size(), nullptr)),
+      m_assemblySortedDetectorIndices(
+          boost::make_shared<std::vector<size_t>>()),
+      m_ranges(boost::make_shared<std::vector<std::pair<size_t, size_t>>>()),
+      m_componentIdToIndexMap(boost::make_shared<
+          std::unordered_map<Mantid::Geometry::IComponent *, size_t>>()),
+      m_detectorIdToIndexMap(makeDetIdToIndexMap(orderedDetectorIds)),
+      m_orderedDetectorIds(boost::make_shared<std::vector<detid_t>>(
+          std::move(orderedDetectorIds))) {
+  const auto nDetectors = m_orderedDetectorIds->size();
+  m_assemblySortedDetectorIndices->reserve(nDetectors);
+  m_componentIdToIndexMap->reserve(nDetectors);
 }
 
 /**
@@ -31,19 +56,20 @@ void InfoComponentVisitor::registerComponentAssembly(
   std::vector<IComponent_const_sptr> assemblyChildren;
   assembly.getChildren(assemblyChildren, false /*is recursive*/);
 
-  const size_t detectorStart = m_assemblySortedDetectorIndices.size();
+  const size_t detectorStart = m_assemblySortedDetectorIndices->size();
   for (const auto &child : assemblyChildren) {
     // register everything under this assembly
     child->registerContents(*this);
   }
-  const size_t detectorStop = m_assemblySortedDetectorIndices.size();
+  const size_t detectorStop = m_assemblySortedDetectorIndices->size();
 
-  m_ranges.emplace_back(std::make_pair(detectorStart, detectorStop));
+  m_ranges->emplace_back(std::make_pair(detectorStart, detectorStop));
 
   // Record the ID -> index mapping
-  m_componentIdToIndexMap[assembly.getComponentID()] = m_componentIds.size();
+  (*m_componentIdToIndexMap)[assembly.getComponentID()] =
+      m_componentIds->size();
   // For any non-detector we extend the m_componetIds from the back
-  m_componentIds.emplace_back(assembly.getComponentID());
+  m_componentIds->emplace_back(assembly.getComponentID());
 }
 
 /**
@@ -56,10 +82,11 @@ void InfoComponentVisitor::registerGenericComponent(
    * For a generic leaf component we extend the component ids list, but
    * the detector indexes entries will of course be empty
    */
-  m_ranges.emplace_back(std::make_pair(0, 0)); // Represents an empty range
+  m_ranges->emplace_back(std::make_pair(0, 0)); // Represents an empty range
   // Record the ID -> index mapping
-  m_componentIdToIndexMap[component.getComponentID()] = m_componentIds.size();
-  m_componentIds.emplace_back(component.getComponentID());
+  (*m_componentIdToIndexMap)[component.getComponentID()] =
+      m_componentIds->size();
+  m_componentIds->emplace_back(component.getComponentID());
 }
 
 /**
@@ -70,7 +97,7 @@ void InfoComponentVisitor::registerDetector(const IDetector &detector) {
 
   size_t detectorIndex = 0;
   try {
-    detectorIndex = m_detectorIdToIndexMapperFunction(detector.getID());
+    detectorIndex = m_detectorIdToIndexMap->at(detector.getID());
   } catch (std::out_of_range &) {
     /*
      Do not register a detector with an invalid id. if we can't determine
@@ -79,12 +106,7 @@ void InfoComponentVisitor::registerDetector(const IDetector &detector) {
     ++m_droppedDetectors;
     return;
   }
-
-  /* Unfortunately Mantid supports having detectors attached to an
-   * instrument that have an an invalid or duplicate detector id.
-   * We do not register detectors with the same id twice.
-   */
-  if (m_componentIds[detectorIndex] == nullptr) {
+  if (m_componentIds->at(detectorIndex) == nullptr) {
 
     /* Already allocated we just need to index into the inital front-detector
     * part of the collection.
@@ -94,13 +116,10 @@ void InfoComponentVisitor::registerDetector(const IDetector &detector) {
     * 2. Guarantee on ordering such that the
     * detectorIndex == componentIndex for all detectors.
     */
-    // Record the ID -> index mapping
-    m_componentIdToIndexMap[detector.getComponentID()] =
-        m_assemblySortedDetectorIndices.size();
-    m_componentIds[detectorIndex] = detector.getComponentID();
-
-    // register the detector index
-    m_assemblySortedDetectorIndices.push_back(detectorIndex);
+    // Record the ID -> component index mapping
+    (*m_componentIdToIndexMap)[detector.getComponentID()] = detectorIndex;
+    (*m_componentIds)[detectorIndex] = detector.getComponentID();
+    m_assemblySortedDetectorIndices->push_back(detectorIndex);
   }
 }
 
@@ -109,7 +128,7 @@ void InfoComponentVisitor::registerDetector(const IDetector &detector) {
  * @return index ranges into the detectorIndices vector. Gives the
  * intervals of detectors indices for non-detector components such as banks
  */
-const std::vector<std::pair<size_t, size_t>> &
+boost::shared_ptr<const std::vector<std::pair<size_t, size_t>>>
 InfoComponentVisitor::componentDetectorRanges() const {
   return m_ranges;
 }
@@ -119,7 +138,7 @@ InfoComponentVisitor::componentDetectorRanges() const {
  * @return detector indices in the order in which they have been visited
  * thus grouped by assembly to form a contiguous range for levels of assemblies.
  */
-const std::vector<size_t> &
+boost::shared_ptr<const std::vector<size_t>>
 InfoComponentVisitor::assemblySortedDetectorIndices() const {
   return m_assemblySortedDetectorIndices;
 }
@@ -131,21 +150,9 @@ InfoComponentVisitor::assemblySortedDetectorIndices() const {
  * indices
  * since all detectors are components but not all components are detectors
  */
-const std::vector<Mantid::Geometry::ComponentID> &
+boost::shared_ptr<const std::vector<Mantid::Geometry::ComponentID>>
 InfoComponentVisitor::componentIds() const {
   return m_componentIds;
-  /*
-   * TODO. There is an issue here that will need to be addressed.
-   * Detectors can be dropped (see above). This is a workaround of Instrument
-   * 1.0 for
-   * the fact that in some cases we have IDFs that provide an invalid ID for a
-   * detector.
-   * However, we use a fixed offset for the non-detector component indexes
-   * calculated to be the
-   * exact size of the number of detectors we expect to get. When we drop
-   * detectors we introduce gaps in
-   * an otherwise contiguous range.
-  */
 }
 
 /**
@@ -154,12 +161,32 @@ InfoComponentVisitor::componentIds() const {
  * This will be the same as the number of IDs.
  */
 size_t InfoComponentVisitor::size() const {
-  return m_componentIds.size() - m_droppedDetectors;
+  return m_componentIds->size() - m_droppedDetectors;
 }
 
-const std::unordered_map<Mantid::Geometry::IComponent *, size_t> &
+bool InfoComponentVisitor::isEmpty() const { return size() == 0; }
+
+boost::shared_ptr<
+    const std::unordered_map<Mantid::Geometry::IComponent *, size_t>>
 InfoComponentVisitor::componentIdToIndexMap() const {
   return m_componentIdToIndexMap;
 }
-} // namespace API
+
+boost::shared_ptr<const std::unordered_map<detid_t, size_t>>
+InfoComponentVisitor::detectorIdToIndexMap() const {
+  return m_detectorIdToIndexMap;
+}
+
+std::unique_ptr<Beamline::ComponentInfo>
+InfoComponentVisitor::componentInfo() const {
+  return Kernel::make_unique<Mantid::Beamline::ComponentInfo>(
+      m_assemblySortedDetectorIndices, m_ranges);
+}
+
+boost::shared_ptr<std::vector<detid_t>>
+InfoComponentVisitor::detectorIds() const {
+  return m_orderedDetectorIds;
+}
+
+} // namespace Geometry
 } // namespace Mantid
