@@ -205,8 +205,7 @@ struct ReflSaveTabPresenter::isGroupOrTable {
 /** Obtains all available workspace names to save
 * @return :: list of workspace names
 */
-std::vector<std::string>
-ReflSaveTabPresenter::getAvailableWorkspaceNames() {
+std::vector<std::string> ReflSaveTabPresenter::getAvailableWorkspaceNames() {
   auto allNames = AnalysisDataService::Instance().getObjectNames();
   // Exclude workspace groups and table workspaces as they cannot be saved to
   // ascii
