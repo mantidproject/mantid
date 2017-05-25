@@ -64,9 +64,6 @@ private:
   /// Obtains all available workspace names
   std::vector<std::string> getAvailableWorkspaceNames();
 
-  /// Predicate to checks if a workspace is of a group or table workspace type
-  struct isGroupOrTable;
-
   /// The view
   IReflSaveTabView *m_view;
   /// The main presenter

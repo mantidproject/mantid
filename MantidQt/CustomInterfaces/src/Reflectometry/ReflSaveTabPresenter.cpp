@@ -192,16 +192,6 @@ void ReflSaveTabPresenter::suggestSaveDir() {
   m_view->setSavePath(path);
 }
 
-/** Predicate to checks if a workspace is either of group or table types or not
-*/
-struct ReflSaveTabPresenter::isGroupOrTable {
-
-  bool operator()(const std::string &wsName) {
-    return AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(wsName) ||
-           AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(wsName);
-  }
-};
-
 /** Obtains all available workspace names to save
 * @return :: list of workspace names
 */
@@ -210,8 +200,14 @@ std::vector<std::string> ReflSaveTabPresenter::getAvailableWorkspaceNames() {
   // Exclude workspace groups and table workspaces as they cannot be saved to
   // ascii
   std::vector<std::string> validNames;
-  std::remove_copy_if(allNames.begin(), allNames.end(),
-                      std::back_inserter(validNames), isGroupOrTable());
+  std::remove_copy_if(
+      allNames.begin(), allNames.end(), std::back_inserter(validNames),
+      [](const std::string &wsName) {
+        return AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
+                   wsName) ||
+               AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(
+                   wsName);
+      });
 
   return validNames;
 }
