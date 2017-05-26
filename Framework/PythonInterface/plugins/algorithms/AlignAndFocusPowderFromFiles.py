@@ -104,7 +104,7 @@ class AlignAndFocusPowderFromFiles(DataProcessorAlgorithm):
     def __updateAlignAndFocusArgs(self, wkspname):
         self.log().warning('__updateAlignAndFocusArgs(%s)!!!!!!!' % wkspname)
         # if the files are missing, there is nothing to do
-        if (not CAL_FILE in self.kwargs) and (not GROUP_FILE in self.kwargs):
+        if (CAL_FILE not in self.kwargs) and (GROUP_FILE not in self.kwargs):
             self.log().warning('--> Nothing to do')
         self.log().warning('--> Updating')
 
@@ -121,7 +121,7 @@ class AlignAndFocusPowderFromFiles(DataProcessorAlgorithm):
         # use the canonical names if they weren't specifed
         for key, ext in zip((CAL_WKSP, GRP_WKSP, MASK_WKSP),
                             ('_cal', '_group', '_mask')):
-            if not key in self.kwargs:
+            if key not in self.kwargs:
                 self.kwargs[key] = instr + ext
 
     def __determineCharacterizations(self, filename, wkspname):
