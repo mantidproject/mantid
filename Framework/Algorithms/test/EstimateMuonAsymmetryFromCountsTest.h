@@ -4,6 +4,7 @@
 #include <cxxtest/TestSuite.h>
 #include "MantidAlgorithms/EstimateMuonAsymmetryFromCounts.h"
 #include "MantidKernel/PhysicalConstants.h"
+#include "MantidKernel/VectorHelper.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidHistogramData/LinearGenerator.h"
@@ -226,7 +227,7 @@ public:
     IAlgorithm_sptr alg = setUpAlg();
     alg->setProperty("InputWorkspace", ws);
     alg->setPropertyValue("OutputWorkspace", outputName);
-    alg->setPropertyValue("NormalizationIn", userNorm);
+    alg->setProperty("NormalizationIn", userNorm);
     TS_ASSERT_THROWS_NOTHING(alg->execute());
     TS_ASSERT(alg->isExecuted());
 

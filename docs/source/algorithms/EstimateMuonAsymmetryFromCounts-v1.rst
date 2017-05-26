@@ -6,7 +6,7 @@
 
 .. properties::
 
-The NormalizationIn property is greater than zero, the algorithm will apply the user defined normalization to the data instead of calculating an estimate.
+If the NormalizationIn property is greater than zero, the algorithm will apply the user defined normalization to the data instead of calculating an estimate.
 
 Description
 -----------
