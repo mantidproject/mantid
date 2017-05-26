@@ -179,9 +179,6 @@ void MuonFitPropertyBrowser::init() {
   multiFitSettingsGroup->addSubProperty(m_showPeriods);
   m_enumManager->setEnumNames(m_showPeriods, m_showPeriodValue);
 
-  connect(m_browser, SIGNAL(currentItemChanged(QtBrowserItem *)), this,
-          SLOT(currentItemChanged(QtBrowserItem *)));
-
   /* Create editors and assign them to the managers */
   createEditors(w);
 
@@ -190,6 +187,8 @@ void MuonFitPropertyBrowser::init() {
   m_functionsGroup = m_browser->addProperty(functionsGroup);
   m_settingsGroup = m_browser->addProperty(settingsGroup);
   m_multiFitSettingsGroup = m_browser->addProperty(multiFitSettingsGroup);
+  connect(m_browser, SIGNAL(currentItemChanged(QtBrowserItem *)), this,
+          SLOT(currentItemChanged(QtBrowserItem *)));
 
   m_btnGroup = new QGroupBox(tr("Reselect Data"));
   QHBoxLayout *btnLayout = new QHBoxLayout;
@@ -355,6 +354,7 @@ void MuonFitPropertyBrowser::enumChanged(QtProperty *prop) {
     }
 	else if (option == "All Periods") {
 		setAllPeriods();
+		m_reselectPeriodBtn->setEnabled(false);
 	}
 	else {
       for (auto iter = m_periodBoxes.constBegin();
@@ -1018,7 +1018,7 @@ void MuonFitPropertyBrowser::setAvailableGroups(const QStringList &groups) {
 * Selects a single group/pair
 * @param group :: [input] Group/pair to select
 */
-void MuonFitPropertyBrowser::setChosenGroup(QString &group) {
+void MuonFitPropertyBrowser::setChosenGroup(const QString &group) {
   clearChosenGroups();
   for (auto iter = m_groupBoxes.constBegin(); iter != m_groupBoxes.constEnd();
        ++iter) {
@@ -1115,7 +1115,8 @@ void MuonFitPropertyBrowser::setAllPairs() {
 * selection of groups/pairs
 */
 void MuonFitPropertyBrowser::genGroupWindow() {
-
+  // reset group window
+  m_groupWindow = new QDialog(this);
   QtGroupPropertyManager *groupManager =
       new QtGroupPropertyManager(m_groupWindow);
   QVBoxLayout *layout = new QVBoxLayout(m_groupWindow);
@@ -1301,6 +1302,8 @@ void MuonFitPropertyBrowser::setChosenPeriods(const QString &period) {
 * selection of periods
 */
 void MuonFitPropertyBrowser::genPeriodWindow() {
+  // reset period window
+  m_periodWindow = new QDialog(this);
   QtGroupPropertyManager *groupManager =
       new QtGroupPropertyManager(m_periodWindow);
   QVBoxLayout *layout = new QVBoxLayout(m_periodWindow);
@@ -1323,6 +1326,8 @@ void MuonFitPropertyBrowser::genPeriodWindow() {
 * a combination of periods
 */
 void MuonFitPropertyBrowser::genCombinePeriodWindow() {
+  // reset combine window
+  m_comboWindow = new QDialog(this);
   QVBoxLayout *layout = new QVBoxLayout(m_comboWindow);
   QFormLayout *formLayout = new QFormLayout;
   m_positiveCombo = new QLineEdit();

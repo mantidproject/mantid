@@ -8,6 +8,9 @@ Diffraction Changes
 Powder Diffraction
 ------------------
 
+- ISIS Powder diffraction scripts have been released. These include support for
+  GEM, PEARL and POLARIS instruments. For more details see the ISIS Powder documentation
+  under API, Python category. 
 - New instrument definition files are added for D1B, D4, and D20 powder/liquid diffractometers at ILL. The source and monitor positions, as well as detector to sample distance have been corrected for existing D2B.
 - New IDF for the POWGEN upgrade
 - :ref:`AlignAndFocusPowder <algm-AlignAndFocusPowder>` Now supports supplying an a second ``.cal`` file for the ``GroupingFilename``.
@@ -32,6 +35,7 @@ Single Crystal Diffraction
 - An IDF for HB3A with 256 by 256 detectors was created.  It was dated from late April 2017 because its original detector has been switched back.
 - A Bug fix was added to the WISH instrument parameter file to prevent predicted peaks falling between tube gaps.
 - New algorithm :ref:`DeltaPDF3D <algm-DeltaPDF3D>` for calculating the 3D-deltaPDF from a HKL MDHistoWorkspace
+- Resolved an issue with instrument viewer where the instrument could not be viewed in 3D mode with the new IDF for wish.
 - HB3A reduction interface (application) now supports to integrate single crystal peaks by fitting peak intensity with 2D Gaussian with more detailed integraton information for user.
 
 Full list of `diffraction <https://github.com/mantidproject/mantid/issues?q=is%3Aclosed+milestone%3A%22Release+3.10%22+label%3A%22Component%3A+Diffraction%22>`_
