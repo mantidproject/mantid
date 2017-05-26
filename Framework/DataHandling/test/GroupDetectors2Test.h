@@ -10,9 +10,11 @@
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidDataHandling/LoadMuonNexus1.h"
 #include "MantidDataHandling/MaskDetectors.h"
+#include "MantidDataObjects/ScanningWorkspaceBuilder.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidHistogramData/LinearGenerator.h"
 #include "MantidIndexing/IndexInfo.h"
+#include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidTestHelpers/HistogramDataTestHelper.h"
 #include "MantidTypes/SpectrumDefinition.h"
@@ -880,6 +882,37 @@ public:
     TS_ASSERT_THROWS(groupAlg.execute(), std::runtime_error);
   }
 
+  void test_grouping_with_time_indexes() {
+
+    auto scanWorkspace = createTestScanWorkspace();
+
+    GroupDetectors2 groupDetsAlg;
+    groupDetsAlg.initialize();
+    groupDetsAlg.setProperty("InputWorkspace", scanWorkspace);
+    groupDetsAlg.setPropertyValue("GroupingPattern", "0-1, 2-5");
+    groupDetsAlg.setPropertyValue("OutputWorkspace", outputBase);
+
+    TS_ASSERT_THROWS_NOTHING(groupDetsAlg.execute());
+    TS_ASSERT(groupDetsAlg.isExecuted());
+
+    MatrixWorkspace_sptr outputWS =
+        boost::dynamic_pointer_cast<MatrixWorkspace>(
+            AnalysisDataService::Instance().retrieve(outputBase));
+
+    const auto &indexInfo = outputWS->indexInfo();
+    const auto &spectrumDefinitions = *(indexInfo.spectrumDefinitions());
+
+    TS_ASSERT_EQUALS(spectrumDefinitions[0][0].second, 0);
+    TS_ASSERT_EQUALS(spectrumDefinitions[0][1].second, 1);
+
+    TS_ASSERT_EQUALS(spectrumDefinitions[1][0].second, 2);
+    TS_ASSERT_EQUALS(spectrumDefinitions[1][1].second, 3);
+    TS_ASSERT_EQUALS(spectrumDefinitions[1][2].second, 4);
+    TS_ASSERT_EQUALS(spectrumDefinitions[1][3].second, 5);
+
+    AnalysisDataService::Instance().remove(outputBase);
+  }
+
 private:
   const std::string inputWSName, offsetWSName, outputBase, inputFile;
   enum constants { NHIST = 6, NBINS = 4 };
@@ -901,7 +934,7 @@ private:
     }
 
     Instrument_sptr instr(new Instrument);
-    for (detid_t i = 0; i < 6; i++) {
+    for (detid_t i = 0; i < NHIST; i++) {
       Detector *d = new Detector("det", i, 0);
       instr->add(d);
       instr->markAsDetector(d);
@@ -910,6 +943,22 @@ private:
 
     // Register the workspace in the data service
     AnalysisDataService::Instance().add(name, space2D);
+  }
+
+  MatrixWorkspace_sptr createTestScanWorkspace() {
+    MatrixWorkspace_sptr inputWS = boost::dynamic_pointer_cast<MatrixWorkspace>(
+        AnalysisDataService::Instance().retrieve(inputWSName));
+
+    auto builder =
+        ScanningWorkspaceBuilder(inputWS->getInstrument(), NHIST, 20);
+
+    std::vector<double> timeRanges;
+    for (size_t i = 0; i < NHIST; ++i) {
+      timeRanges.push_back(double(i + 1));
+    }
+
+    builder.setTimeRanges(Mantid::Kernel::DateAndTime(0), timeRanges);
+    return builder.buildWorkspace();
   }
 
   void writeFileList() {
