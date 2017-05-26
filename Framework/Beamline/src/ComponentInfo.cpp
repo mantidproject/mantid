@@ -130,14 +130,29 @@ Eigen::Quaterniond ComponentInfo::rotation(const size_t componentIndex) const {
 }
 
 void ComponentInfo::setPosition(const size_t componentIndex,
-                                const Eigen::Vector3d &position) {
-  throw std::runtime_error("Not yet implemented");
+                                const Eigen::Vector3d &newPosition) {
+
+  const Eigen::Vector3d offset = newPosition - position(componentIndex);
+  const auto subTreeIndexes = this->componentIndices(componentIndex);
+  for(auto &childCompIndex : subTreeIndexes){
+      if(isDetector(childCompIndex)){
+          m_detectorInfo->setPosition(childCompIndex, m_detectorInfo->position(childCompIndex)+offset);
+      } else {
+          const size_t positionIndex = childCompIndex - m_assemblySortedDetectorIndices->size();
+          m_positions.access()[positionIndex] += offset;
+      }
+  }
+  if(isDetector(componentIndex)){
+          m_detectorInfo->setPosition(componentIndex, m_detectorInfo->position(componentIndex)+offset);
+  } else {
+          const size_t positionIndex = componentIndex - m_assemblySortedDetectorIndices->size();
+          m_positions.access()[positionIndex] += offset;
+  }
 }
 
 void ComponentInfo::setRotation(const size_t componentIndex,
                                 const Eigen::Quaterniond &rotation) {
   throw std::runtime_error("Not yet implemented");
 }
-
 } // namespace Beamline
 } // namespace Mantid

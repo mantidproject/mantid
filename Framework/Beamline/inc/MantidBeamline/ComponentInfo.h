@@ -76,9 +76,9 @@ public:
   Eigen::Vector3d position(const size_t componentIndex) const;
   Eigen::Quaterniond rotation(const size_t componentIndex) const;
   void setPosition(const size_t componentIndex,
-                    const Eigen::Vector3d &position);
+                    const Eigen::Vector3d &abslPosition);
   void setRotation(const size_t componentIndex,
-                    const Eigen::Quaterniond &rotation);
+                    const Eigen::Quaterniond &abslRotation);
 };
 } // namespace Beamline
 } // namespace Mantid
