@@ -57,11 +57,6 @@ find_program ( PYUNITTEST_GEN_EXEC pyunit_gen.py
                PATHS ${PROJECT_SOURCE_DIR}/Testing/Tools/pyunit_gen
                      ${PROJECT_SOURCE_DIR}/../Testing/Tools/pyunit_gen )
 
-# determine where the xmlrunner lives
-find_path ( PYUNITTEST_XMLRUNNER xmlrunner/__init__.py
-            PATHS ${PROJECT_SOURCE_DIR}/Testing/Tools/unittest-xml-reporting/src/
-                  ${PROJECT_SOURCE_DIR}/../Testing/Tools/unittest-xml-reporting/src/ )
-
 # let people know whether or not it was found
 if (PYUNITTEST_GEN_EXEC)
   set ( PYUNITTEST_FOUND TRUE )
@@ -69,4 +64,4 @@ else ()
   set ( PYUNITTEST_FOUND FALSE )
 endif ()
 
-mark_as_advanced ( PYUNITTEST_GEN_EXEC PYUNITTEST_XMLRUNNER )
+mark_as_advanced ( PYUNITTEST_GEN_EXEC )
