@@ -59,10 +59,6 @@ ComponentInfo::ComponentInfo(
       }
 }
 
-bool ComponentInfo::isDetector(const size_t componentIndex) const {
-  return componentIndex < m_assemblySortedDetectorIndices->size();
-}
-
 std::vector<size_t>
 ComponentInfo::detectorIndices(const size_t componentIndex) const {
   if (isDetector(componentIndex)) {
@@ -72,8 +68,7 @@ ComponentInfo::detectorIndices(const size_t componentIndex) const {
     return std::vector<size_t>{componentIndex};
   }
   // Calculate index into our ranges (non-detector) component items.
-  const auto rangesIndex =
-      componentIndex - m_assemblySortedDetectorIndices->size();
+  const auto rangesIndex = compOffsetIndex(componentIndex);
   const auto range = (*m_detectorRanges)[rangesIndex];
   // Extract as a block
   return std::vector<size_t>(
@@ -90,8 +85,7 @@ ComponentInfo::componentIndices(const size_t componentIndex) const {
     return std::vector<size_t>{componentIndex};
   }
   // Calculate index into our ranges (non-detector) component items.
-  const auto rangesIndex =
-      componentIndex - m_assemblySortedDetectorIndices->size();
+  const auto rangesIndex = compOffsetIndex(componentIndex);
   const auto range = (*m_componentRanges)[rangesIndex];
 
   // Extract as a block
@@ -115,8 +109,7 @@ Eigen::Vector3d ComponentInfo::position(const size_t componentIndex) const {
   if (isDetector(componentIndex)) {
     return m_detectorInfo->position(componentIndex);
   }
-  const auto rangesIndex =
-      componentIndex - m_assemblySortedDetectorIndices->size();
+  const auto rangesIndex = compOffsetIndex(componentIndex);
   return (*m_positions)[rangesIndex];
 }
 
@@ -124,8 +117,7 @@ Eigen::Quaterniond ComponentInfo::rotation(const size_t componentIndex) const {
   if (isDetector(componentIndex)) {
     return m_detectorInfo->rotation(componentIndex);
   }
-  const auto rangesIndex =
-      componentIndex - m_assemblySortedDetectorIndices->size();
+  const auto rangesIndex = compOffsetIndex(componentIndex);
   return (*m_rotations)[rangesIndex];
 }
 
@@ -134,19 +126,19 @@ void ComponentInfo::setPosition(const size_t componentIndex,
 
   const Eigen::Vector3d offset = newPosition - position(componentIndex);
   const auto subTreeIndexes = this->componentIndices(componentIndex);
-  for(auto &childCompIndex : subTreeIndexes){
-      if(isDetector(childCompIndex)){
-          m_detectorInfo->setPosition(childCompIndex, m_detectorInfo->position(childCompIndex)+offset);
-      } else {
-          const size_t positionIndex = childCompIndex - m_assemblySortedDetectorIndices->size();
-          m_positions.access()[positionIndex] += offset;
-      }
+  for (auto &childCompIndex : subTreeIndexes) {
+    if (isDetector(childCompIndex)) {
+      m_detectorInfo->setPosition(
+          childCompIndex, m_detectorInfo->position(childCompIndex) + offset);
+    } else {
+      m_positions.access()[compOffsetIndex(childCompIndex)] += offset;
+    }
   }
-  if(isDetector(componentIndex)){
-          m_detectorInfo->setPosition(componentIndex, m_detectorInfo->position(componentIndex)+offset);
+  if (isDetector(componentIndex)) {
+    m_detectorInfo->setPosition(
+        componentIndex, m_detectorInfo->position(componentIndex) + offset);
   } else {
-          const size_t positionIndex = componentIndex - m_assemblySortedDetectorIndices->size();
-          m_positions.access()[positionIndex] += offset;
+    m_positions.access()[compOffsetIndex(componentIndex)] += offset;
   }
 }
 
