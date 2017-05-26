@@ -60,41 +60,6 @@ def _createDiagnosticsReportTable(reportWSName, numberHistograms, algorithmLoggi
     return reportWS
 
 
-def _createGroupedWS(ws, componentPrefix, detsPerComponent, nameTag, wsNames, wsCleanup, algorithmLogging):
-    """Return a workspace with detectors grouped by a component higher in the component tree."""
-    groups = ''
-    for i in range(detsPerComponent):
-        groups += componentPrefix + str(i + 1) + ','
-    groups = groups[:-1]  # Remove last comma.
-    groupingWSName = wsNames.withSuffix(nameTag + '_grouping_by_component')
-    groupingWS, spectraPerGroup, groupCount = CreateGroupingWorkspace(InputWorkspace=ws,
-                                                                      OutputWorkspace=groupingWSName,
-                                                                      GroupNames=groups,
-                                                                      EnableLogging=algorithmLogging)
-    commonBinsWSName = wsNames.withSuffix(nameTag + '_common_bins')
-    commonBinsWS = CloneWorkspace(InputWorkspace=ws,
-                                  OutputWorkspace=commonBinsWSName,
-                                  EnableLogging=algorithmLogging)
-    spectrumInfo = commonBinsWS.spectrumInfo()
-    for i in range(commonBinsWS.getNumberHistograms()):
-        xs = commonBinsWS.dataX(i)
-        xs[0] = 0
-        xs[1] = 1
-        if spectrumInfo.isMasked(i):
-            grouping = groupingWS.dataY(i)
-            grouping[0] = 0
-    # Common bin boundaries are needed for grouping.
-    groupedWSName = wsNames.withSuffix(nameTag + '_grouped_by_component')
-    groupedWS = GroupDetectors(InputWorkspace=commonBinsWS,
-                               OutputWorkspace=groupedWSName,
-                               Behaviour='Average',
-                               CopyGroupingFromWorkspace=groupingWS,
-                               EnableLogging=algorithmLogging)
-    wsCleanup.cleanup(groupingWS)
-    wsCleanup.cleanup(commonBinsWS)
-    return groupedWS
-
-
 def _elasticPeakDiagnostics(ws, peakSettings, wsNames, algorithmLogging):
     """Diagnose elastic peaks and return a mask workspace"""
     elasticPeakDiagnosticsWSName = wsNames.withSuffix('diagnostics_elastic_peak')
@@ -134,10 +99,11 @@ def _extractUserMask(ws, wsNames, algorithmLogging):
 def _integrateBkgs(ws, eppWS, sigmaMultiplier, wsNames, wsCleanup, algorithmLogging):
     """Return a workspace integrated around flat background areas."""
     histogramCount = ws.getNumberHistograms()
-    leftBegins = numpy.empty(histogramCount)
+    binMatrix = ws.extractX()
+    leftBegins = binMatrix[:, 0]
     leftEnds = numpy.empty(histogramCount)
     rightBegins = numpy.empty(histogramCount)
-    rightEnds = numpy.empty(histogramCount)
+    rightEnds = binMatrix[:, -1]
     for i in range(histogramCount):
         eppRow = eppWS.row(i)
         if eppRow['FitStatus'] != 'success':
@@ -148,12 +114,10 @@ def _integrateBkgs(ws, eppWS, sigmaMultiplier, wsNames, wsCleanup, algorithmLogg
             continue
         peakCentre = eppRow['PeakCentre']
         sigma = eppRow['Sigma']
-        leftBegins[i] = ws.readX(i)[0]
         leftEnds[i] = peakCentre - sigmaMultiplier * sigma
         if leftBegins[i] > leftEnds[i]:
             leftBegins[i] = leftEnds[i]
         rightBegins[i] = peakCentre + sigmaMultiplier * sigma
-        rightEnds[i] = ws.readX(i)[-1]
         if rightBegins[i] > rightEnds[i]:
             rightBegins[i] = rightEnds[i]
     leftWSName =  wsNames.withSuffix('integrated_left_bkgs')
