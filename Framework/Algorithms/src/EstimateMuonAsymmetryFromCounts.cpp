@@ -47,9 +47,9 @@ void EstimateMuonAsymmetryFromCounts::init() {
   declareProperty(
       "EndX", 15.0,
       "The upper limit for calculating the asymmetry  (an X value).");
-  declareProperty(
-	  "NormalizationIn", 0.0,
-	  "If this value is non-zero then this is used for the normalization, instead of being estimated.");
+  declareProperty("NormalizationIn", 0.0, "If this value is non-zero then this "
+                                          "is used for the normalization, "
+                                          "instead of being estimated.");
   declareProperty(Kernel::make_unique<Kernel::ArrayProperty<double>>(
       "NormalizationConstant", Direction::Output));
 }
@@ -74,7 +74,8 @@ EstimateMuonAsymmetryFromCounts::validateInputs() {
   }
   double norm = getProperty("NormalizationIn");
   if (norm < 0.0) {
-	  validationOutput["NormalizationIn"] = "Normalization to use must be positive.";
+    validationOutput["NormalizationIn"] =
+        "Normalization to use must be positive.";
   }
   return validationOutput;
 }
@@ -141,11 +142,11 @@ void EstimateMuonAsymmetryFromCounts::exec() {
                                   " is greater than the number of spectra!");
     }
     // Calculate the normalised counts
-	double normConst = getProperty("NormalizationIn");
-	if (normConst == 0.0) {
-		normConst=estimateNormalisationConst(
-			inputWS->histogram(specNum), numGoodFrames, startX, endX);
-	}
+    double normConst = getProperty("NormalizationIn");
+    if (normConst == 0.0) {
+      normConst = estimateNormalisationConst(inputWS->histogram(specNum),
+                                             numGoodFrames, startX, endX);
+    }
     // Calculate the asymmetry
     outputWS->setHistogram(
         specNum, normaliseCounts(inputWS->histogram(specNum), numGoodFrames));

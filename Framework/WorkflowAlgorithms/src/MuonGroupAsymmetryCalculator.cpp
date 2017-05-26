@@ -154,20 +154,18 @@ MuonGroupAsymmetryCalculator::estimateAsymmetry(const Workspace_sptr &inputWS,
 /*
 * Reads in the stored normalization
 * if >0 then it is used instead of
-* estimating the norm. 
+* estimating the norm.
 */
 double getStoredNorm() {
-	if (!API::AnalysisDataService::Instance().doesExist("__keepNorm__")) {
-		return 0.0;
-	}
-	else {
-		API::ITableWorkspace_sptr table =
-			boost::dynamic_pointer_cast<API::ITableWorkspace>(
-				API::AnalysisDataService::Instance().retrieve("__keepNorm__"));
-		auto colNorm = table->getColumn("norm");
-		return(*colNorm)[0]; 
-
-	}
+  if (!API::AnalysisDataService::Instance().doesExist("__keepNorm__")) {
+    return 0.0;
+  } else {
+    API::ITableWorkspace_sptr table =
+        boost::dynamic_pointer_cast<API::ITableWorkspace>(
+            API::AnalysisDataService::Instance().retrieve("__keepNorm__"));
+    auto colNorm = table->getColumn("norm");
+    return (*colNorm)[0];
+  }
 }
 
 } // namespace WorkflowAlgorithms

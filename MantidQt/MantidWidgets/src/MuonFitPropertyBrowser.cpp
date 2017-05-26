@@ -311,9 +311,9 @@ void MuonFitPropertyBrowser::populateFitMenuButton(QSignalMapper *fitMapper,
 void MuonFitPropertyBrowser::setFitEnabled(bool yes) {
   m_fitActionFit->setEnabled(yes);
   m_fitActionSeqFit->setEnabled(yes);
-  //only allow TFAsymm fit if not keeping norm
+  // only allow TFAsymm fit if not keeping norm
   if (!m_boolManager->value(m_keepNorm) && yes) {
-	  m_fitActionTFAsymm->setEnabled(yes);
+    m_fitActionTFAsymm->setEnabled(yes);
   }
 }
 /**
@@ -464,31 +464,29 @@ void MuonFitPropertyBrowser::boolChanged(QtProperty *prop) {
   if (prop == m_rawData) {
     const bool val = m_boolManager->value(prop);
     emit fitRawDataClicked(val);
-  } if (prop == m_keepNorm) {
-	  const bool val = m_boolManager->value(prop);
-	  if(val){ //record data for later
-		  double norm = readNormalization()[0];
-		  ITableWorkspace_sptr table = WorkspaceFactory::Instance().createTable();
-		  AnalysisDataService::Instance().addOrReplace("__keepNorm__", table);
-	      table->addColumn("double", "norm");
-	      table->addColumn("int", "spectra");
-		  TableRow row = table->appendRow();
-		  row << norm << 0;
-		  //remove TFAsymm fit
-		  m_fitActionTFAsymm->setEnabled(false);
-		  
-	  }
-	  else {//remove data so it is not used later
-		  AnalysisDataService::Instance().remove("__keepNorm__");			 
-
-		  // if fit is enabled so should TFAsymm
-		  if (m_fitActionSeqFit->isEnabled()) {
-			  m_fitActionTFAsymm->setEnabled(true);
-		  }
-
-	  }
   }
-  else {
+  if (prop == m_keepNorm) {
+    const bool val = m_boolManager->value(prop);
+    if (val) { // record data for later
+      double norm = readNormalization()[0];
+      ITableWorkspace_sptr table = WorkspaceFactory::Instance().createTable();
+      AnalysisDataService::Instance().addOrReplace("__keepNorm__", table);
+      table->addColumn("double", "norm");
+      table->addColumn("int", "spectra");
+      TableRow row = table->appendRow();
+      row << norm << 0;
+      // remove TFAsymm fit
+      m_fitActionTFAsymm->setEnabled(false);
+
+    } else { // remove data so it is not used later
+      AnalysisDataService::Instance().remove("__keepNorm__");
+
+      // if fit is enabled so should TFAsymm
+      if (m_fitActionSeqFit->isEnabled()) {
+        m_fitActionTFAsymm->setEnabled(true);
+      }
+    }
+  } else {
     // search map for group/pair change
     bool done = false;
     for (auto iter = m_groupBoxes.constBegin(); iter != m_groupBoxes.constEnd();
@@ -986,11 +984,11 @@ void MuonFitPropertyBrowser::setTFAsymmMode(bool enabled) {
   // Show or hide the TFAsymmetry fit
   if (enabled) {
     m_settingsGroup->property()->addSubProperty(m_normalization);
-	m_settingsGroup->property()->addSubProperty(m_keepNorm);
+    m_settingsGroup->property()->addSubProperty(m_keepNorm);
     setNormalization();
   } else {
     m_settingsGroup->property()->removeSubProperty(m_normalization);
-	m_settingsGroup->property()->removeSubProperty(m_keepNorm);
+    m_settingsGroup->property()->removeSubProperty(m_keepNorm);
   }
 }
 /**

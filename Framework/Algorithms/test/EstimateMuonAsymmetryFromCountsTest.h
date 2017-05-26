@@ -223,7 +223,7 @@ public:
   void test_UserDefinedNorm() {
 
     auto ws = createWorkspace(1, 50);
-    double userNorm= 10.2;
+    double userNorm = 10.2;
     IAlgorithm_sptr alg = setUpAlg();
     alg->setProperty("InputWorkspace", ws);
     alg->setPropertyValue("OutputWorkspace", outputName);
@@ -235,19 +235,18 @@ public:
     auto normFromAlg =
         Mantid::Kernel::VectorHelper::splitStringIntoVector<double>(
             alg->getPropertyValue("NormalizationConstant"));
- 
+
     double Delta = 0.0001;
-      TS_ASSERT_DELTA(normFromAlg[0], userNorm,Delta);	
-      // Test some X values
-      TS_ASSERT_DELTA(outWS->x(0)[10], 0.2000, Delta);
-      TS_ASSERT_DELTA(outWS->x(0)[19], 0.3800, Delta);
-      TS_ASSERT_DELTA(outWS->x(0)[49], 0.9800, Delta);
-      // Test some Y values
-      TS_ASSERT_DELTA(outWS->y(0)[10], -0.7974, Delta);
-      TS_ASSERT_DELTA(outWS->y(0)[19], -0.8233, Delta);
-      TS_ASSERT_DELTA(outWS->y(0)[49], -0.7875, Delta);
+    TS_ASSERT_DELTA(normFromAlg[0], userNorm, Delta);
+    // Test some X values
+    TS_ASSERT_DELTA(outWS->x(0)[10], 0.2000, Delta);
+    TS_ASSERT_DELTA(outWS->x(0)[19], 0.3800, Delta);
+    TS_ASSERT_DELTA(outWS->x(0)[49], 0.9800, Delta);
+    // Test some Y values
+    TS_ASSERT_DELTA(outWS->y(0)[10], -0.7974, Delta);
+    TS_ASSERT_DELTA(outWS->y(0)[19], -0.8233, Delta);
+    TS_ASSERT_DELTA(outWS->y(0)[49], -0.7875, Delta);
   }
- 
 };
 // turn clang off, otherwise this does not compile
 // clang-format off
