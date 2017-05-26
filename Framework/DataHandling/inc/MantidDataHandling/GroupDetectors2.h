@@ -205,7 +205,8 @@ private:
   /// Copy the and combine the histograms that the user requested from the input
   /// into the output workspace
   size_t formGroups(API::MatrixWorkspace_const_sptr inputWS,
-                    API::MatrixWorkspace_sptr outputWS, const double prog4Copy);
+                    API::MatrixWorkspace_sptr outputWS, const double prog4Copy,
+                    bool keepAll, const std::set<int64_t> &unGroupedSet);
   /// Copy the and combine the event lists that the user requested from the
   /// input into the output workspace
   size_t formGroupsEvent(DataObjects::EventWorkspace_const_sptr inputWS,

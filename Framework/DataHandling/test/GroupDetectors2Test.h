@@ -12,8 +12,10 @@
 #include "MantidDataHandling/MaskDetectors.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidHistogramData/LinearGenerator.h"
+#include "MantidIndexing/IndexInfo.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidTestHelpers/HistogramDataTestHelper.h"
+#include "MantidTypes/SpectrumDefinition.h"
 
 #include <Poco/Path.h>
 
@@ -39,20 +41,20 @@ public:
   static void destroySuite(GroupDetectors2Test *suite) { delete suite; }
 
   GroupDetectors2Test()
-      : inputWS("groupdetectorstests_input_workspace"),
-        offsetWS("groupdetectorstests_offset_workspace"),
+      : inputWSName("groupdetectorstests_input_workspace"),
+        offsetWSName("groupdetectorstests_offset_workspace"),
         outputBase("groupdetectorstests_output_basename"),
         inputFile(Poco::Path::current() +
                   "GroupDetectors2Test_mapfile_example") {
     // This is needed to load in the plugin algorithms (specifically Divide,
     // which is a Child Algorithm of GroupDetectors)
     FrameworkManager::Instance();
-    createTestWorkspace(inputWS, 0);
-    createTestWorkspace(offsetWS, 1);
+    createTestWorkspace(inputWSName, 0);
+    createTestWorkspace(offsetWSName, 1);
   }
 
   ~GroupDetectors2Test() override {
-    AnalysisDataService::Instance().remove(inputWS);
+    AnalysisDataService::Instance().remove(inputWSName);
   }
 
   void testSetup() {
@@ -62,7 +64,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(gd.initialize());
     TS_ASSERT(gd.isInitialized());
 
-    gd.setPropertyValue("InputWorkspace", inputWS);
+    gd.setPropertyValue("InputWorkspace", inputWSName);
     gd.setPropertyValue("OutputWorkspace", outputBase);
     TS_ASSERT_THROWS_NOTHING(gd.execute());
     TS_ASSERT(!gd.isExecuted());
@@ -92,7 +94,7 @@ public:
   void testSpectraList() {
     GroupDetectors2 grouper3;
     grouper3.initialize();
-    grouper3.setPropertyValue("InputWorkspace", inputWS);
+    grouper3.setPropertyValue("InputWorkspace", inputWSName);
     std::string output(outputBase + "Specs");
     grouper3.setPropertyValue("OutputWorkspace", output);
     grouper3.setPropertyValue("SpectraList", "1,4");
@@ -123,7 +125,7 @@ public:
   void testIndexList() {
     GroupDetectors2 grouper3;
     grouper3.initialize();
-    grouper3.setPropertyValue("InputWorkspace", inputWS);
+    grouper3.setPropertyValue("InputWorkspace", inputWSName);
     std::string output(outputBase + "Indices");
     grouper3.setPropertyValue("OutputWorkspace", output);
 
@@ -157,7 +159,7 @@ public:
   void testGroupingPattern() {
     GroupDetectors2 grouper3;
     grouper3.initialize();
-    grouper3.setPropertyValue("InputWorkspace", inputWS);
+    grouper3.setPropertyValue("InputWorkspace", inputWSName);
     std::string output(outputBase + "Indices");
     grouper3.setPropertyValue("OutputWorkspace", output);
 
@@ -192,7 +194,7 @@ public:
     // Check that the algorithm still works if spectrum numbers are not 1-based
     GroupDetectors2 grouper3;
     grouper3.initialize();
-    grouper3.setPropertyValue("InputWorkspace", offsetWS);
+    grouper3.setPropertyValue("InputWorkspace", offsetWSName);
     std::string output(outputBase + "Indices");
     grouper3.setPropertyValue("OutputWorkspace", output);
 
@@ -227,7 +229,7 @@ public:
     // Check that the algorithm still works if spectrum numbers are not 1-based
     GroupDetectors2 grouper3;
     grouper3.initialize();
-    grouper3.setPropertyValue("InputWorkspace", offsetWS);
+    grouper3.setPropertyValue("InputWorkspace", offsetWSName);
     std::string output(outputBase + "Indices");
     grouper3.setPropertyValue("OutputWorkspace", output);
 
@@ -261,7 +263,7 @@ public:
   void testDetectorList() {
     GroupDetectors2 grouper3;
     grouper3.initialize();
-    grouper3.setPropertyValue("InputWorkspace", inputWS);
+    grouper3.setPropertyValue("InputWorkspace", inputWSName);
     std::string output(outputBase + "Detects");
     grouper3.setPropertyValue("OutputWorkspace", output);
     grouper3.setPropertyValue("DetectorList", "3,1,4,0,2,5");
@@ -298,7 +300,7 @@ public:
 
     GroupDetectors2 grouper;
     grouper.initialize();
-    grouper.setPropertyValue("InputWorkspace", inputWS);
+    grouper.setPropertyValue("InputWorkspace", inputWSName);
     std::string output(outputBase + "File");
     grouper.setPropertyValue("OutputWorkspace", output);
     grouper.setPropertyValue("MapFile", inputFile);
@@ -372,7 +374,7 @@ public:
 
     GroupDetectors2 grouper;
     grouper.initialize();
-    grouper.setPropertyValue("InputWorkspace", inputWS);
+    grouper.setPropertyValue("InputWorkspace", inputWSName);
     std::string output(outputBase + "File");
     grouper.setPropertyValue("OutputWorkspace", output);
     grouper.setPropertyValue("MapFile", inputFile);
@@ -582,12 +584,12 @@ public:
   void testAverageBehaviour() {
     Mantid::DataHandling::MaskDetectors mask;
     mask.initialize();
-    mask.setPropertyValue("Workspace", inputWS);
+    mask.setPropertyValue("Workspace", inputWSName);
     mask.setPropertyValue("WorkspaceIndexList", "2");
     mask.execute();
     GroupDetectors2 gd2;
     gd2.initialize();
-    gd2.setPropertyValue("InputWorkspace", inputWS);
+    gd2.setPropertyValue("InputWorkspace", inputWSName);
     gd2.setPropertyValue("OutputWorkspace",
                          "GroupDetectors2_testAverageBehaviour_Output");
     gd2.setPropertyValue("WorkspaceIndexList", "0-2");
@@ -869,7 +871,7 @@ public:
     GroupDetectors2 groupAlg;
     groupAlg.initialize();
     groupAlg.setRethrows(true);
-    groupAlg.setPropertyValue("InputWorkspace", inputWS);
+    groupAlg.setPropertyValue("InputWorkspace", inputWSName);
     groupAlg.setPropertyValue("OutputWorkspace", outputBase);
     groupAlg.setPropertyValue("GroupingPattern", "-1, 0");
     // Check that the GroupingPattern was recognised as invalid
@@ -879,7 +881,7 @@ public:
   }
 
 private:
-  const std::string inputWS, offsetWS, outputBase, inputFile;
+  const std::string inputWSName, offsetWSName, outputBase, inputFile;
   enum constants { NHIST = 6, NBINS = 4 };
 
   void createTestWorkspace(std::string name, const int offset) {

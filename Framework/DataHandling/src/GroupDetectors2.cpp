@@ -308,7 +308,8 @@ void GroupDetectors2::exec() {
            : 1.);
 
   // Build a new map
-  const size_t outIndex = formGroups(inputWS, outputWS, prog4Copy);
+  const size_t outIndex =
+      formGroups(inputWS, outputWS, prog4Copy, keepAll, unGroupedSet);
 
   // If we're keeping ungrouped spectra
   if (keepAll) {
@@ -1025,7 +1026,8 @@ double GroupDetectors2::fileReadProg(
 */
 size_t GroupDetectors2::formGroups(API::MatrixWorkspace_const_sptr inputWS,
                                    API::MatrixWorkspace_sptr outputWS,
-                                   const double prog4Copy) {
+                                   const double prog4Copy, bool keepAll,
+                                   const std::set<int64_t> &unGroupedSet) {
   // get "Behaviour" string
   const std::string behaviour = getProperty("Behaviour");
   int bhv = 0;
@@ -1045,7 +1047,11 @@ size_t GroupDetectors2::formGroups(API::MatrixWorkspace_const_sptr inputWS,
   // would be waste as it would be just dividing by 1
   bool requireDivide(false);
   const auto &spectrumInfo = inputWS->spectrumInfo();
+
   std::vector<SpectrumDefinition> spectrumDefinitions;
+  const auto &oldSpectrumDefinitions =
+      *(inputWS->indexInfo().spectrumDefinitions());
+
   for (storage_map::const_iterator it = m_GroupWsInds.begin();
        it != m_GroupWsInds.end(); ++it) {
     // This is the grouped spectrum
@@ -1064,9 +1070,6 @@ size_t GroupDetectors2::formGroups(API::MatrixWorkspace_const_sptr inputWS,
     // Keep track of number of detectors required for masking
     size_t nonMaskedSpectra(0);
     SpectrumDefinition spectrumDefinition;
-
-    const auto &oldSpectrumDefinitions =
-        *(inputWS->indexInfo().spectrumDefinitions());
 
     for (auto originalWI : it->second) {
       // detectors to add to firstSpecNum
@@ -1104,6 +1107,20 @@ size_t GroupDetectors2::formGroups(API::MatrixWorkspace_const_sptr inputWS,
     spectrumDefinitions.push_back(spectrumDefinition);
 
     outIndex++;
+  }
+
+  // Add the ungrouped spectra to IndexInfo, if they are being kept
+  if (keepAll) {
+    for (const auto originalWI : unGroupedSet) {
+      // Negative WIs are intended to be invalid
+      if (originalWI < 0)
+        continue;
+
+      SpectrumDefinition spectrumDefinition;
+      for (const auto &item : oldSpectrumDefinitions[originalWI])
+        spectrumDefinition.add(item.first, item.second);
+      spectrumDefinitions.push_back(spectrumDefinition);
+    }
   }
 
   Indexing::IndexInfo indexInfo =
