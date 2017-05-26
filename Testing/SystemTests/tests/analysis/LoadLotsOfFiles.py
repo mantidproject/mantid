@@ -97,7 +97,8 @@ BANNED_FILES = ['80_tubes_Top_and_Bottom_April_2015.xml',
                 'USER_Larmor_163F_HePATest_r13038.txt',
                 'Vesuvio_IP_file_test.par',
                 'IP0004_10.par',
-                'Crystalb3lypScratchAbins.out']
+                'Crystalb3lypScratchAbins.out',
+                'V15_0000016544_S000_P01.raw']
 
 EXPECTED_EXT = '.expected'
 
