@@ -4,22 +4,23 @@ digraph DirectILLDiagnostics {
 
   subgraph params {
     $param_style
-    bkgThresholds [label="BkgDiagnostics thresholds"]
+    bkgExcludeWidth [label="NonBkgRegionInSigmas"]
+    bkgThresholds [label="Bkg thresholds"]
     elasticPeakWidth [label="ElasticPeakWidthInSigmas"]
-    inputBkg [label="FlatBkgWorkspace"]
     inputEPP [label="EPPWorkspace"]
     inputWS [label="InputWorkspace"]
     maskIndices [label="MaskedDetectors"]
     maskComponents [label="MaskedComponents"]
     outputDiagnostics [label="OutputWorkspace"]
-    peakThresholds [label="PeakDiagnostics thresholds"]
+    peakThresholds [label="Peak thresholds"]
   }
 
   subgraph algorithms {
     $algorithm_style
     DiagnoseBkg [label="Diagnose flat backgrounds"]
     DiagnosePeaks [label="Diagnose elastic peaks"]
-    Integrate [label="Integrate elastic peak"]
+    IntegrateBkg [label="Integrate backgrounds"]
+    IntegratePeaks [label="Integrate elastic peak"]
     Plus [label="Plus"]
   }
 
@@ -33,13 +34,16 @@ digraph DirectILLDiagnostics {
     $decision_style
   }
 
-  inputWS -> Integrate
-  inputEPP -> Integrate
-  elasticPeakWidth -> Integrate
-  Integrate -> DiagnosePeaks
+  inputWS -> IntegratePeaks
+  inputEPP -> IntegratePeaks
+  elasticPeakWidth -> IntegratePeaks
+  inputWS -> IntegrateBkg
+  inputEPP -> IntegrateBkg
+  bkgExcludeWidth -> IntegrateBkg
+  IntegratePeaks -> DiagnosePeaks
   peakThresholds -> DiagnosePeaks
   DiagnosePeaks -> peakDiagnostics
-  inputBkg -> DiagnoseBkg
+  IntegrateBkg -> DiagnoseBkg
   bkgThresholds -> DiagnoseBkg
   DiagnoseBkg -> bkgDiagnostics
   peakDiagnostics -> Plus

@@ -5,7 +5,7 @@ digraph DirectILLCollectData {
   subgraph params {
     $param_style
     bkgScaling [label="FlatBkgScaling"]
-    inputFile [label="InputFile"]
+    inputFile [label="Run"]
     inputWS [label="InputWorkspace"]
     inputEPP [label="EPPWorkspace"]
     inputBkg [label="FlatBkgWorkspace"]
@@ -13,6 +13,7 @@ digraph DirectILLCollectData {
     outputBkg [label="OutputFlatBkgWorkspace"]
     outputEi [label="OutputIncidentEnergyWorkspace"]
     outputEPP [label="OutputEPPWorkspace"]
+    outputRaw [label="OutputRawWorkspace"]
     outputWS [label="OutputWorkspace"]
   }
 
@@ -21,6 +22,7 @@ digraph DirectILLCollectData {
     CalculateFlatBackground [label="CalculateFlatBackground"]
     CalibrateEi [label="Calibrate incident energy"]
     CorrectTOFAxis [label="CorrectTOFAxis"]
+    CorrectTOFAxisRaw [label="CorrectTOFAxis"]
     ExtractMonitors [label="ExtractMonitors"]
     FindEPP [label="FindEPP \n or \n CreateEPP"]
     FindEPPAgain [label="FindEPP \n or \n CreateEPP"]
@@ -45,7 +47,7 @@ digraph DirectILLCollectData {
     inputBkgGiven [label="FlatBkgWorkspace given?"]
     inputEiGiven [label="IncidentEnergyWorkspace given?"]
     inputEPPGiven [label="EPPWorkspace given?"]
-    inputFileGiven [label="InputFile given?"]
+    inputFileGiven [label="Run given?"]
   }
 
   inputFileGiven -> inputFile [label="yes"]
@@ -60,6 +62,7 @@ digraph DirectILLCollectData {
   IntegrateMonitor -> Normalize
   ExtractMonitors -> detectors
   detectors -> Normalize
+  detectors -> CorrectTOFAxisRaw
   Normalize -> ScaleAfterNormalization
   ScaleAfterNormalization -> inputBkgGiven
   inputBkgGiven -> CalculateFlatBackground [label="no"]
@@ -81,6 +84,8 @@ digraph DirectILLCollectData {
   inputEiGiven -> inputEi [label="yes"]
   inputEi -> CalibrateEi
   CalibrateEi -> CorrectTOFAxis
+  CalibrateEi -> CorrectTOFAxisRaw [label="as reference workspace"]
+  CorrectTOFAxisRaw -> outputRaw
   CorrectTOFAxis -> FindEPPAgain
   CorrectTOFAxis ->outputWS
   FindEPPAgain -> outputEPP

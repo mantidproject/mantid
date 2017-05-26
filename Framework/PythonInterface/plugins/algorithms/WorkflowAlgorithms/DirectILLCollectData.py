@@ -304,7 +304,12 @@ class DirectILLCollectData(DataProcessorAlgorithm):
         # Extract monitors to a separate workspace.
         progress.report('Extracting monitors')
         mainWS, monWS = self._separateMons(mainWS, wsNames, wsCleanup, subalgLogging)
-        self._outputRaw(mainWS)
+
+        # Save the main workspace for later use, if needed.
+        rawWS = None
+        if not self.getProperty(common.PROP_OUTPUT_RAW_WS).isDefault:
+            rawWS = mainWS
+            wsCleanup.protect(rawWS)
 
         # Normalisation to monitor/time, if requested.
         progress.report('Normalising to monitor/time')
@@ -331,6 +336,7 @@ class DirectILLCollectData(DataProcessorAlgorithm):
 
         progress.report('Correcting TOF')
         mainWS = self._correctTOFAxis(mainWS, wsNames, wsCleanup, report, subalgLogging)
+        self._outputRaw(mainWS, rawWS, subalgLogging)
 
         # Find elastic peak positions.
         progress.report('Recalculating EPPs')
@@ -727,10 +733,14 @@ class DirectILLCollectData(DataProcessorAlgorithm):
             return normalizedWS
         return mainWS
 
-    def _outputRaw(self, mainWS):
+    def _outputRaw(self, mainWS, rawWS, subalgLogging):
         """Optionally sets mainWS as the raw output workspace."""
         if not self.getProperty(common.PROP_OUTPUT_RAW_WS).isDefault:
-            self.setProperty(common.PROP_OUTPUT_RAW_WS, mainWS)
+            CorrectTOFAxis(InputWorkspace=rawWS,
+                           OutputWorkspace=rawWS,
+                           ReferenceWorkspace=mainWS,
+                           EnableLogging=subalgLogging)
+            self.setProperty(common.PROP_OUTPUT_RAW_WS, rawWS)
 
     def _separateMons(self, mainWS, wsNames, wsCleanup, subalgLogging):
         """Extract monitors to a separate workspace."""

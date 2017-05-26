@@ -9,7 +9,7 @@
 Description
 -----------
 
-This algorithm performs detector diagnostics for the workspace provided by *InputWorkspace*. The output is a mask workspace which can be further fed to :ref:`DirectILLReduction <algm-DirectILLReduction>` to mask the detectors diagnosed as bad. Optionally, a user specified hard mask given by *MaskedDetectors* or *MaskedComponents* can be added to the diagnostics mask. Algorithm's workflow diagram is shown below:
+This algorithm performs detector diagnostics for the workspace provided by *InputWorkspace*, preferably the raw workspace provided by the *OutputRawWorkspace* property in :ref:`DirectILLCollectData <algm-DirectILLCollectData>`. The output is a mask workspace which can be further fed to :ref:`DirectILLReduction <algm-DirectILLReduction>` to mask the detectors diagnosed as bad. Optionally, a user specified hard mask given by *MaskedDetectors* or *MaskedComponents* can be added to the diagnostics mask. Algorithm's workflow diagram is shown below:
 
 .. diagram:: DirectILLDiagnostics-v1_wkflw.dot
 
@@ -26,24 +26,23 @@ The EPP table given in *EPPWorkspace* and the value of *ElasticPeakWidthInSigmas
 Flat background diagnostics
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Flat backgrounds in *FlatBkgWorkspace* are used for the diagnostics as-is.
-
-Input workspaces
-################
-
-The workspace in *InputWorkspace* should be loaded using the :ref:`DirectILLCollectData <algm-DirectILLCollectData>` algorithm. It also provides the data needed for *EPPWorkspace* and *FlatBkgWorkspace*.
+Similarly to elastic peak diagnostics, *EPPWorkspace* and *NonBgkRegionInSigmas* are used to integrate the time-independent background regions of *InputWorkspace*. *NonBkgRegionInSigmas* is a factor applied to the 'Sigma' column in *EPPWorkspace* and this interval around the elastic peak positions is excluded from the integration. No opening angle corrections are applied to the background diagnostics.
 
 Diagnostics reporting
 #####################
 
-The optional *OutputReportWorkspace* property returns a table workspace summarizing the diagnostics. The table has three columns:
+The optional *OutputReportWorkspace* property returns a table workspace summarizing the diagnostics. The table has six columns:
 
 #. 'WorkspaceIndex'
+#. 'UserMask': Holds non-zero values for spectra masked by *MaskedDetectors* and *MaskedComponents*.
 #. 'ElasticIntensity': Holds the value of integrated elastic peaks used for the diagnostics.
+#. 'IntensityDiagnosed': Holds non-zero values for spectra diagnosed as 'bad' in elastic peak diagnostics.
 #. 'FlagBkg': Holds the value of the flat backgrounds used for the diagnostics.
-#. 'Diagnosed': Non-zero values in this column indicate that the spectrum did not pass the diagnostics.
+#. 'FlatBkgDiagnosed': Non-zero values in this column indicate that the spectrum did not pass the background diagnostics.
 
 The columns can be plotted to get an overview of the diagnostics.
+
+Additionally, a string listing the masked and diagnosed detectors can be accessed via the *OutputReport* property.
 
 Usage
 -----

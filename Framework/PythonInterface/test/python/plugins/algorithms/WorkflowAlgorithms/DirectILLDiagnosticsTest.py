@@ -37,15 +37,14 @@ class DirectILLDiagnosticsTest(unittest.TestCase):
     def testAllDetectorsPass(self):
         outWSName = 'diagnosticsWS'
         kwargs = {
-            'InputWorkspace': self._TEST_WS_NAME,
+            'InputWorkspace': self._RAW_WS_NAME,
             'OutputWorkspace': outWSName,
             'EPPWorkspace': self._EPP_WS_NAME,
-            'RawWorkspace': self._RAW_WS_NAME,
             'rethrow': True
         }
         run_algorithm('DirectILLDiagnostics', **kwargs)
         self.assertTrue(mtd.doesExist(outWSName))
-        inWS = mtd[self._TEST_WS_NAME]
+        inWS = mtd[self._RAW_WS_NAME]
         outWS = mtd[outWSName]
         self.assertEquals(outWS.getNumberHistograms(), inWS.getNumberHistograms())
         self.assertEquals(outWS.blocksize(), 1)
@@ -67,18 +66,17 @@ class DirectILLDiagnosticsTest(unittest.TestCase):
             ys -= self._BKG_LEVEL
         outWSName = 'diagnosticsWS'
         kwargs = {
-            'InputWorkspace': self._TEST_WS_NAME,
+            'InputWorkspace': self._RAW_WS_NAME,
             'OutputWorkspace': outWSName,
             'ElasticPeakDiagnostics': 'Peak Diagnostics OFF',
             'EPPWorkspace': self._EPP_WS_NAME,
-            'RawWorkspace': self._RAW_WS_NAME,
             'NoisyBkgLowThreshold': 0.01,
             'NoisyBkgHighThreshold': 9.99,
             'rethrow': True
         }
         run_algorithm('DirectILLDiagnostics', **kwargs)
         self.assertTrue(mtd.doesExist(outWSName))
-        inWS = mtd[self._TEST_WS_NAME]
+        inWS = mtd[self._RAW_WS_NAME]
         outWS = mtd[outWSName]
         self.assertEquals(outWS.getNumberHistograms(), spectraCount)
         self.assertEquals(outWS.blocksize(), 1)
@@ -92,7 +90,7 @@ class DirectILLDiagnosticsTest(unittest.TestCase):
                 self.assertEquals(ys[0], 0)
 
     def testElasticPeakDiagnostics(self):
-        inWS = mtd[self._TEST_WS_NAME]
+        inWS = mtd[self._RAW_WS_NAME]
         spectraCount = inWS.getNumberHistograms()
         highPeakIndices = [0, int(spectraCount / 3), spectraCount - 1]
         for i in highPeakIndices:
@@ -104,11 +102,12 @@ class DirectILLDiagnosticsTest(unittest.TestCase):
             ys *= 0.1
         outWSName = 'diagnosticsWS'
         kwargs = {
-            'InputWorkspace': self._TEST_WS_NAME,
+            'InputWorkspace': self._RAW_WS_NAME,
             'OutputWorkspace': outWSName,
             'EPPWorkspace': self._EPP_WS_NAME,
             'ElasticPeakLowThreshold': 0.2,
             'ElasticPeakHighThreshold': 9.7,
+            'BkgDiagnostics': 'Bkg Diagnostics OFF',
             'rethrow': True
         }
         run_algorithm('DirectILLDiagnostics', **kwargs)

@@ -8,9 +8,8 @@ from mantid.api import (AlgorithmFactory, DataProcessorAlgorithm, InstrumentVali
                         WorkspaceUnitValidator)
 from mantid.kernel import (CompositeValidator, Direction, FloatBoundedValidator, IntArrayBoundedValidator,
                            IntArrayProperty, StringArrayProperty, StringListValidator)
-from mantid.simpleapi import (ChangeBinOffset, ClearMaskFlag, CloneWorkspace, CreateEmptyTableWorkspace,
-                              CreateGroupingWorkspace, Divide, ExtractMask, GroupDetectors, Integration, MaskDetectors,
-                              MedianDetectorTest, Plus, SolidAngle)
+from mantid.simpleapi import (ClearMaskFlag, CloneWorkspace, CreateEmptyTableWorkspace, Divide, ExtractMask, Integration,
+                              MaskDetectors, MedianDetectorTest, Plus, SolidAngle)
 import numpy
 
 
@@ -75,24 +74,12 @@ def _elasticPeakDiagnostics(ws, peakSettings, wsNames, algorithmLogging):
     return elasticPeakDiagnostics
 
 
-def _ensureCommonBinning(ws, referenceWS, wsNames, wsCleanup, algorithmLogging):
-    """Rebins ws to the binning in referenceWS."""
-    offset = referenceWS.readX(0)[0] - ws.readX(0)[0]
-    offsetWSName = wsNames.withSuffix('bins_offset')
-    offsetWS = ChangeBinOffset(InputWorkspace=ws,
-                               OutputWorkspace=offsetWSName,
-                               Offset=offset,
-                               EnableLogging=algorithmLogging)
-    wsCleanup.cleanup(ws)
-    return offsetWS
-
-
 def _extractUserMask(ws, wsNames, algorithmLogging):
     """Extracts user specified mask from a workspace."""
     maskWSName = wsNames.withSuffix('user_mask_extracted')
     maskWS, detectorIDs = ExtractMask(InputWorkspace=ws,
                                       OutputWorkspace=maskWSName,
-                                      EnableLogging=algorithmLogging)
+                                      EnableLogging=True)
     return maskWS
 
 
@@ -339,7 +326,7 @@ class DirectILLDiagnostics(DataProcessorAlgorithm):
             defaultValue='',
             validator=inputWorkspaceValidator,
             direction=Direction.Input),
-            doc='Input workspace.')
+            doc='Raw input workspace.')
         self.declareProperty(WorkspaceProperty(name=common.PROP_OUTPUT_WS,
                                                defaultValue='',
                                                direction=Direction.Output),
@@ -406,12 +393,14 @@ class DirectILLDiagnostics(DataProcessorAlgorithm):
                                  'test in the elastic peak diagnostics.')
         self.setPropertyGroup(common.PROP_PEAK_DIAGNOSTICS_SIGNIFICANCE_TEST,
                               common.PROPGROUP_PEAK_DIAGNOSTICS)
-        self.declareProperty(WorkspaceProperty(name=common.PROP_RAW_WS,
-                                               defaultValue='',
-                                               optional=PropertyMode.Optional,
-                                               direction=Direction.Output),
-                             doc='A raw workspace needed for flat background diagnostics.')
-        self.setPropertyGroup(common.PROP_RAW_WS, common.PROPGROUP_BKG_DIAGNOSTICS)
+        self.declareProperty(name=common.PROP_BKG_DIAGNOSTICS,
+                             defaultValue=common.BKG_DIAGNOSTICS_ON,
+                             validator=StringListValidator([
+                                 common.BKG_DIAGNOSTICS_ON,
+                                 common.BKG_DIAGNOSTICS_OFF]),
+                             direction=Direction.Input,
+                             doc='Enable or disable background diagnostics.')
+        self.setPropertyGroup(common.PROP_BKG_DIAGNOSTICS, common.PROPGROUP_BKG_DIAGNOSTICS)
         self.declareProperty(name=common.PROP_BKG_SIGMA_MULTIPLIER,
                              defaultValue=10.0,
                              validator=positiveFloat,
@@ -527,12 +516,10 @@ class DirectILLDiagnostics(DataProcessorAlgorithm):
                                  OutputWorkspace=diagnosticsWSName,
                                  EnableLogging=subalgLogging)
             wsCleanup.cleanup(peakDiagnosticsWS)
-        if not self.getProperty(common.PROP_RAW_WS).isDefault:
-            rawWS = self.getProperty(common.PROP_RAW_WS).value
-            rawWS = _ensureCommonBinning(rawWS, mainWS, wsNames, wsCleanup, subalgLogging)
+        if self.getProperty(common.PROP_BKG_DIAGNOSTICS).value == common.BKG_DIAGNOSTICS_ON:
             eppWS = self.getProperty(common.PROP_EPP_WS).value
             sigmaMultiplier = self.getProperty(common.PROP_BKG_SIGMA_MULTIPLIER).value
-            integratedBkgs = _integrateBkgs(rawWS, eppWS, sigmaMultiplier, wsNames, wsCleanup, subalgLogging)
+            integratedBkgs = _integrateBkgs(mainWS, eppWS, sigmaMultiplier, wsNames, wsCleanup, subalgLogging)
             lowThreshold = self.getProperty(common.PROP_BKG_DIAGNOSTICS_LOW_THRESHOLD).value
             highThreshold = self.getProperty(common.PROP_BKG_DIAGNOSTICS_HIGH_THRESHOLD).value
             significanceTest = self.getProperty(common.PROP_BKG_DIAGNOSTICS_SIGNIFICANCE_TEST).value

@@ -80,10 +80,14 @@ The algorithm has some optional input and output workspaces. Their purpose is to
 
 The optional input and output workspaces come in pairs. If the input workspace is specified, it will be used in the reduction and returned as the corresponding output workspace. If the input workspace is not specified, the needed information is calculated from the current spectra, and returned in the output workspace.
 
-* *EPPWorkspace* --- *OutputEPPWorkspace*: elastic peak position table, used for incident energy calibration, but also in :ref:`DirectILLDetectorDiagnostics <algm-DirectILLDetectorDiagnostics>` and :ref:`DirectILLIntegrateVanadium <algm-DirectILLIntegrateVanadium>`.
+* *EPPWorkspace* --- *OutputEPPWorkspace*: elastic peak position table, used for incident energy calibration, but also in :ref:`DirectILLDiagnostics <algm-DirectILLDiagnostics>` and :ref:`DirectILLIntegrateVanadium <algm-DirectILLIntegrateVanadium>`.
 * *IncidentEnergyWorkspace* --- *OutputIncidentEnergyWorkspace*: single-valued workspace containing calibrated incident energy, used for incident energy calibration.
-* *FlatBkgWorkspace* --- *OutputFlatBkgWorkspace*: a MatrixWorkspace containing the flat backgrounds. Used for flat background subtraction and in :ref:`DirectILLDetectorDiagnostics <algm-DirectILLDetectorDiagnostics>`. Note that *FlatBkgScaling* is not applied to *OutputFlatBkgWorkspace*.
+* *FlatBkgWorkspace* --- *OutputFlatBkgWorkspace*: a MatrixWorkspace containing the flat backgrounds. Used for flat background subtraction. Note that *FlatBkgScaling* is not applied to *OutputFlatBkgWorkspace*.
 
+Raw output workspace
+^^^^^^^^^^^^^^^^^^^^
+
+The *OutputRawWorkspace* property provides an access to a 'raw' data workspace in the sense that no normalisation or background subtraction is applied to this workspace. The raw workspace is useful as an input workspace for the :ref:`DirectILLDiagnostics <algm-DirectILLDiagnostics>` algorithm.
 
 Usage
 -----
