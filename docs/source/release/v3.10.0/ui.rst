@@ -110,6 +110,7 @@ Bugs Resolved
 - Fixed an issue where some graphs not associated with a workspace would not be shown in the project save as view.
 - Fixed an issue where the Spectrum Viewer could crash when a workspace contained infinities.
 - Fixed an issue where contour lines were displayed at the wrong location.
+- Fixed an issue where some workspaces might not get deleted from the workspace dock if group workspaces were present.
 
 
 |
