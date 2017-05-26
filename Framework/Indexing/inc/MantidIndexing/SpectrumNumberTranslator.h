@@ -10,6 +10,7 @@
 #include <algorithm>
 #include <map>
 #include <memory>
+#include <mutex>
 #include <unordered_map>
 
 namespace Mantid {
@@ -67,6 +68,8 @@ public:
 private:
   bool isPartitioned() const;
   void checkUniqueSpectrumNumbers() const;
+  // Not thread-safe! Use only in combination with std::call_once!
+  void setupSpectrumNumberToIndexMap() const;
 
   struct SpectrumNumberHash {
     std::size_t operator()(const SpectrumNumber &spectrumNumber) const {
@@ -78,10 +81,13 @@ private:
   const PartitionIndex m_partition;
   std::unordered_map<SpectrumNumber, PartitionIndex, SpectrumNumberHash>
       m_spectrumNumberToPartition;
-  std::map<SpectrumNumber, size_t> m_spectrumNumberToIndex;
-  std::map<GlobalSpectrumIndex, size_t> m_globalToLocal;
+  mutable std::vector<std::pair<SpectrumNumber, size_t>>
+      m_spectrumNumberToIndex;
+  std::vector<std::pair<GlobalSpectrumIndex, size_t>> m_globalToLocal;
   std::vector<SpectrumNumber> m_spectrumNumbers;
   std::vector<SpectrumNumber> m_globalSpectrumNumbers;
+
+  mutable std::once_flag m_mapSetup;
 };
 
 } // namespace Indexing

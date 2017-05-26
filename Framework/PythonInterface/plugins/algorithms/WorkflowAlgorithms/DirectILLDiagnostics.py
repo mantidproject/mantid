@@ -2,15 +2,15 @@
 
 from __future__ import (absolute_import, division, print_function)
 
-import collections
 import DirectILL_common as common
 from mantid.api import (AlgorithmFactory, DataProcessorAlgorithm, InstrumentValidator,
                         ITableWorkspaceProperty, MatrixWorkspaceProperty, mtd, Progress, PropertyMode, WorkspaceProperty,
                         WorkspaceUnitValidator)
 from mantid.kernel import (CompositeValidator, Direction, FloatBoundedValidator, IntArrayBoundedValidator,
-                           IntArrayProperty, PropertyManagerProperty, StringArrayProperty, StringListValidator)
-from mantid.simpleapi import (ClearMaskFlag, CloneWorkspace, CreateEmptyTableWorkspace, Divide,
-                              ExtractMask, Integration, MaskDetectors, MedianDetectorTest, Plus, SolidAngle)
+                           IntArrayProperty, StringArrayProperty, StringListValidator)
+from mantid.simpleapi import (ChangeBinOffset, ClearMaskFlag, CloneWorkspace, CreateEmptyTableWorkspace,
+                              CreateGroupingWorkspace, Divide, ExtractMask, GroupDetectors, Integration, MaskDetectors,
+                              MedianDetectorTest, Plus, SolidAngle)
 import numpy
 
 
@@ -28,7 +28,7 @@ class _DiagnosticsSettings:
         self.significanceTest = significanceTest
 
 
-def _bkgDiagnostics(bkgWS, noisyBkgSettings, reportWS, wsNames, algorithmLogging):
+def _bkgDiagnostics(bkgWS, noisyBkgSettings, wsNames, algorithmLogging):
     """Diagnose noisy flat backgrounds and return a mask workspace."""
     noisyBkgWSName = wsNames.withSuffix('diagnostics_noisy_bkg')
     noisyBkgDiagnostics, nFailures = \
@@ -41,8 +41,7 @@ def _bkgDiagnostics(bkgWS, noisyBkgSettings, reportWS, wsNames, algorithmLogging
                            EnableLogging=algorithmLogging)
     ClearMaskFlag(Workspace=noisyBkgDiagnostics,
                   EnableLogging=algorithmLogging)
-    maskedSpectra = _reportBkgDiagnostics(reportWS, bkgWS, noisyBkgDiagnostics)
-    return noisyBkgDiagnostics, maskedSpectra
+    return noisyBkgDiagnostics
 
 
 def _createDiagnosticsReportTable(reportWSName, numberHistograms, algorithmLogging):
@@ -61,9 +60,90 @@ def _createDiagnosticsReportTable(reportWSName, numberHistograms, algorithmLoggi
     return reportWS
 
 
-def _elasticPeakDiagnostics(ws, eppWS, peakSettings, sigmaMultiplier, reportWS,
-                            wsNames, wsCleanup, algorithmLogging):
+def _elasticPeakDiagnostics(ws, peakSettings, wsNames, algorithmLogging):
     """Diagnose elastic peaks and return a mask workspace"""
+    elasticPeakDiagnosticsWSName = wsNames.withSuffix('diagnostics_elastic_peak')
+    elasticPeakDiagnostics, nFailures = \
+        MedianDetectorTest(InputWorkspace=ws,
+                           OutputWorkspace=elasticPeakDiagnosticsWSName,
+                           SignificanceTest=peakSettings.significanceTest,
+                           LowThreshold=peakSettings.lowThreshold,
+                           HighThreshold=peakSettings.highThreshold,
+                           EnableLogging=algorithmLogging)
+    ClearMaskFlag(Workspace=elasticPeakDiagnostics,
+                  EnableLogging=algorithmLogging)
+    return elasticPeakDiagnostics
+
+
+def _ensureCommonBinning(ws, referenceWS, wsNames, wsCleanup, algorithmLogging):
+    """Rebins ws to the binning in referenceWS."""
+    offset = referenceWS.readX(0)[0] - ws.readX(0)[0]
+    offsetWSName = wsNames.withSuffix('bins_offset')
+    offsetWS = ChangeBinOffset(InputWorkspace=ws,
+                               OutputWorkspace=offsetWSName,
+                               Offset=offset,
+                               EnableLogging=algorithmLogging)
+    wsCleanup.cleanup(ws)
+    return offsetWS
+
+
+def _extractUserMask(ws, wsNames, algorithmLogging):
+    """Extracts user specified mask from a workspace."""
+    maskWSName = wsNames.withSuffix('user_mask_extracted')
+    maskWS, detectorIDs = ExtractMask(InputWorkspace=ws,
+                                      OutputWorkspace=maskWSName,
+                                      EnableLogging=algorithmLogging)
+    return maskWS
+
+
+def _integrateBkgs(ws, eppWS, sigmaMultiplier, wsNames, wsCleanup, algorithmLogging):
+    """Return a workspace integrated around flat background areas."""
+    histogramCount = ws.getNumberHistograms()
+    binMatrix = ws.extractX()
+    leftBegins = binMatrix[:, 0]
+    leftEnds = numpy.empty(histogramCount)
+    rightBegins = numpy.empty(histogramCount)
+    rightEnds = binMatrix[:, -1]
+    for i in range(histogramCount):
+        eppRow = eppWS.row(i)
+        if eppRow['FitStatus'] != 'success':
+            leftBegins[i] = 0
+            leftEnds[i] = 0
+            rightBegins[i] = 0
+            rightEnds[i] = 0
+            continue
+        peakCentre = eppRow['PeakCentre']
+        sigma = eppRow['Sigma']
+        leftEnds[i] = peakCentre - sigmaMultiplier * sigma
+        if leftBegins[i] > leftEnds[i]:
+            leftBegins[i] = leftEnds[i]
+        rightBegins[i] = peakCentre + sigmaMultiplier * sigma
+        if rightBegins[i] > rightEnds[i]:
+            rightBegins[i] = rightEnds[i]
+    leftWSName =  wsNames.withSuffix('integrated_left_bkgs')
+    leftWS = Integration(InputWorkspace=ws,
+                         OutputWorkspace=leftWSName,
+                         RangeLowerList=leftBegins,
+                         RangeUpperList=leftEnds,
+                         EnableLogging=algorithmLogging)
+    rightWSName = wsNames.withSuffix('integrated_right_bkgs')
+    rightWS = Integration(InputWorkspace=ws,
+                          OutputWorkspace=rightWSName,
+                          RangeLowerList=rightBegins,
+                          RangeUpperList=rightEnds,
+                          EnableLogging=algorithmLogging)
+    sumWSName = wsNames.withSuffix('integrated_bkgs_sum')
+    sumWS = Plus(LHSWorkspace=leftWS,
+                 RHSWorkspace=rightWS,
+                 OutputWorkspace=sumWSName,
+                 EnableLogging=algorithmLogging)
+    wsCleanup.cleanup(leftWS)
+    wsCleanup.cleanup(rightWS)
+    return sumWS
+
+
+def _integrateElasticPeaks(ws, eppWS, sigmaMultiplier, wsNames, wsCleanup, algorithmLogging):
+    """Return a workspace integrated around the elastic peak."""
     histogramCount = ws.getNumberHistograms()
     integrationBegins = numpy.empty(histogramCount)
     integrationEnds = numpy.empty(histogramCount)
@@ -99,29 +179,7 @@ def _elasticPeakDiagnostics(ws, eppWS, peakSettings, sigmaMultiplier, reportWS,
                EnableLogging=algorithmLogging)
     wsCleanup.cleanup(integratedElasticPeaksWS)
     wsCleanup.cleanup(solidAngleWS)
-    elasticPeakDiagnosticsWSName = \
-        wsNames.withSuffix('diagnostics_elastic_peak')
-    elasticPeakDiagnostics, nFailures = \
-        MedianDetectorTest(InputWorkspace=solidAngleCorrectedElasticPeaksWS,
-                           OutputWorkspace=elasticPeakDiagnosticsWSName,
-                           SignificanceTest=peakSettings.significanceTest,
-                           LowThreshold=peakSettings.lowThreshold,
-                           HighThreshold=peakSettings.highThreshold,
-                           EnableLogging=algorithmLogging)
-    ClearMaskFlag(Workspace=elasticPeakDiagnostics,
-                  EnableLogging=algorithmLogging)
-    maskedSpectra = _reportPeakDiagnostics(reportWS, solidAngleCorrectedElasticPeaksWS, elasticPeakDiagnostics)
-    wsCleanup.cleanup(solidAngleCorrectedElasticPeaksWS)
-    return elasticPeakDiagnostics, maskedSpectra
-
-
-def _extractUserMask(ws, wsNames, algorithmLogging):
-    """Extracts user specified mask from a workspace."""
-    maskWSName = wsNames.withSuffix('user_mask_extracted')
-    maskWS, detectorIDs = ExtractMask(InputWorkspace=ws,
-                                      OutputWorkspace=maskWSName,
-                                      EnableLogging=algorithmLogging)
-    return maskWS
+    return solidAngleCorrectedElasticPeaksWS
 
 
 def _maskDiagnosedDetectors(ws, diagnosticsWS, wsNames, algorithmLogging):
@@ -140,12 +198,14 @@ def _maskedListToStr(masked):
     """Return a string presentation of a list of spectrum numbers."""
     if not masked:
         return ''
+
     def addBlock(string, begin, end):
         if blockBegin == blockEnd:
             string += str(blockEnd) + ', '
         else:
             string += str(blockBegin) + '-' + str(blockEnd) + ', '
-        return string       
+        return string
+
     string = str()
     blockBegin = None
     blockEnd = None
@@ -196,6 +256,7 @@ def _reportDiagnostics(reportWS, dataWS, diagnosticsWS, dataColumn, diagnosedCol
 def _reportPeakDiagnostics(reportWS, peakIntensityWS, diagnosticsWS):
     """Return masked spectrum numbers and add elastic peak diagnostics information to a report workspace."""
     return _reportDiagnostics(reportWS, peakIntensityWS, diagnosticsWS, 'ElasticIntensity', 'IntensityDiagnosed')
+
 
 def _reportUserMask(reportWS, maskWS):
     """Return masked spectrum numbers and add user mask information to a report workspace."""
@@ -252,8 +313,7 @@ class DirectILLDiagnostics(DataProcessorAlgorithm):
 
         # Apply user mask.
         progress.report('Applying hard mask')
-        mainWS = self._applyUserMask(mainWS, wsNames,
-                                     wsCleanup, subalgLogging)
+        mainWS = self._applyUserMask(mainWS, wsNames, wsCleanup, subalgLogging)
 
         # Detector diagnostics, if requested.
         progress.report('Diagnosing detectors')
@@ -304,9 +364,15 @@ class DirectILLDiagnostics(DataProcessorAlgorithm):
             defaultValue='',
             direction=Direction.Input,
             optional=PropertyMode.Optional),
-            doc='Table workspace containing results from the FindEPP ' +
-                'algorithm.')
-        self.setPropertyGroup(common.PROP_EPP_WS,
+            doc='Table workspace containing results from the FindEPP algorithm.')
+        self.declareProperty(name=common.PROP_ELASTIC_PEAK_DIAGNOSTICS,
+                             defaultValue=common.ELASTIC_PEAK_DIAGNOSTICS_ON,
+                             validator=StringListValidator([
+                                 common.ELASTIC_PEAK_DIAGNOSTICS_ON,
+                                 common.ELASTIC_PEAK_DIAGNOSTICS_OFF]),
+                             direction=Direction.Input,
+                             doc='Enable or disable elastic peak diagnostics.')
+        self.setPropertyGroup(common.PROP_ELASTIC_PEAK_DIAGNOSTICS,
                               common.PROPGROUP_PEAK_DIAGNOSTICS)
         self.declareProperty(name=common.PROP_ELASTIC_PEAK_SIGMA_MULTIPLIER,
                              defaultValue=3.0,
@@ -340,16 +406,22 @@ class DirectILLDiagnostics(DataProcessorAlgorithm):
                                  'test in the elastic peak diagnostics.')
         self.setPropertyGroup(common.PROP_PEAK_DIAGNOSTICS_SIGNIFICANCE_TEST,
                               common.PROPGROUP_PEAK_DIAGNOSTICS)
-        self.declareProperty(MatrixWorkspaceProperty(
-            name=common.PROP_FLAT_BKG_WS,
-            defaultValue='',
-            direction=Direction.Input,
-            optional=PropertyMode.Optional),
-            doc='Workspace from which to get flat background data.')
-        self.setPropertyGroup(common.PROP_FLAT_BKG_WS,
+        self.declareProperty(WorkspaceProperty(name=common.PROP_RAW_WS,
+                                               defaultValue='',
+                                               optional=PropertyMode.Optional,
+                                               direction=Direction.Output),
+                             doc='A raw workspace needed for flat background diagnostics.')
+        self.setPropertyGroup(common.PROP_RAW_WS, common.PROPGROUP_BKG_DIAGNOSTICS)
+        self.declareProperty(name=common.PROP_BKG_SIGMA_MULTIPLIER,
+                             defaultValue=10.0,
+                             validator=positiveFloat,
+                             direction=Direction.Input,
+                             doc="Width of the range excluded from background integration around " +
+                                 "the elastic peaks in multiplies of 'Sigma' in the EPP table")
+        self.setPropertyGroup(common.PROP_BKG_SIGMA_MULTIPLIER,
                               common.PROPGROUP_BKG_DIAGNOSTICS)
         self.declareProperty(name=common.PROP_BKG_DIAGNOSTICS_LOW_THRESHOLD,
-                             defaultValue=0.0,
+                             defaultValue=0.1,
                              validator=scalingFactor,
                              direction=Direction.Input,
                              doc='Multiplier for lower acceptance limit ' +
@@ -357,7 +429,7 @@ class DirectILLDiagnostics(DataProcessorAlgorithm):
         self.setPropertyGroup(common.PROP_BKG_DIAGNOSTICS_LOW_THRESHOLD,
                               common.PROPGROUP_BKG_DIAGNOSTICS)
         self.declareProperty(name=common.PROP_BKG_DIAGNOSTICS_HIGH_THRESHOLD,
-                             defaultValue=33.3,
+                             defaultValue=3.3,
                              validator=greaterThanUnityFloat,
                              direction=Direction.Input,
                              doc='Multiplier for higher acceptance limit ' +
@@ -402,8 +474,13 @@ class DirectILLDiagnostics(DataProcessorAlgorithm):
 
     def validateInputs(self):
         """Check for issues with user input."""
-        # TODO implement this.
-        return dict()
+        issues = dict()
+        if self.getProperty(common.PROP_EPP_WS).isDefault:
+            if self.getProperty(common.PROP_ELASTIC_PEAK_DIAGNOSTICS).value == common.ELASTIC_PEAK_DIAGNOSTICS_ON:
+                issues[common.PROP_EPP_WS] = 'An EPP table is needed for elastic peak diagnostics.'
+            if not self.getProperty(common.PROP_RAW_WS).isDefault:
+                issues[common.PROP_EPP_WS] = 'An EPP table is needed for background diagnostics.'
+        return issues
 
     def _applyUserMask(self, mainWS, wsNames, wsCleanup, algorithmLogging):
         """Apply user mask to a workspace."""
@@ -431,28 +508,38 @@ class DirectILLDiagnostics(DataProcessorAlgorithm):
                                        OutputWorkspace=diagnosticsWSName,
                                        EnableLogging=subalgLogging)
         userMaskedSpectra = _reportUserMask(reportWS, userMaskWS)
+        peakMaskedSpectra = None
+        bkgMaskedSpectra = None
         wsCleanup.cleanup(userMaskWS)
-        if not self.getProperty(common.PROP_EPP_WS).isDefault:
+        if self.getProperty(common.PROP_ELASTIC_PEAK_DIAGNOSTICS).value == common.ELASTIC_PEAK_DIAGNOSTICS_ON:
             eppWS = self.getProperty(common.PROP_EPP_WS).value
+            sigmaMultiplier = self.getProperty(common.PROP_ELASTIC_PEAK_SIGMA_MULTIPLIER).value
+            integratedPeaksWS = _integrateElasticPeaks(mainWS, eppWS, sigmaMultiplier, wsNames, wsCleanup, subalgLogging)
             lowThreshold = self.getProperty(common.PROP_PEAK_DIAGNOSTICS_LOW_THRESHOLD).value
             highThreshold = self.getProperty(common.PROP_PEAK_DIAGNOSTICS_HIGH_THRESHOLD).value
             significanceTest = self.getProperty(common.PROP_PEAK_DIAGNOSTICS_SIGNIFICANCE_TEST).value
             settings = _DiagnosticsSettings(lowThreshold, highThreshold, significanceTest)
-            sigmaMultiplier = self.getProperty(common.PROP_ELASTIC_PEAK_SIGMA_MULTIPLIER).value
-            peakDiagnosticsWS, peakMaskedSpectra = _elasticPeakDiagnostics(mainWS, eppWS, settings, sigmaMultiplier,
-                                                                           reportWS, wsNames, wsCleanup, subalgLogging)
+            peakDiagnosticsWS = _elasticPeakDiagnostics(integratedPeaksWS, settings, wsNames, subalgLogging)
+            peakMaskedSpectra = _reportPeakDiagnostics(reportWS, integratedPeaksWS, peakDiagnosticsWS)
+            wsCleanup.cleanup(integratedPeaksWS)
             diagnosticsWS = Plus(LHSWorkspace=diagnosticsWS,
                                  RHSWorkspace=peakDiagnosticsWS,
                                  OutputWorkspace=diagnosticsWSName,
                                  EnableLogging=subalgLogging)
             wsCleanup.cleanup(peakDiagnosticsWS)
-        if not self.getProperty(common.PROP_FLAT_BKG_WS).isDefault:
-            bkgWS = self.getProperty(common.PROP_FLAT_BKG_WS).value
+        if not self.getProperty(common.PROP_RAW_WS).isDefault:
+            rawWS = self.getProperty(common.PROP_RAW_WS).value
+            rawWS = _ensureCommonBinning(rawWS, mainWS, wsNames, wsCleanup, subalgLogging)
+            eppWS = self.getProperty(common.PROP_EPP_WS).value
+            sigmaMultiplier = self.getProperty(common.PROP_BKG_SIGMA_MULTIPLIER).value
+            integratedBkgs = _integrateBkgs(rawWS, eppWS, sigmaMultiplier, wsNames, wsCleanup, subalgLogging)
             lowThreshold = self.getProperty(common.PROP_BKG_DIAGNOSTICS_LOW_THRESHOLD).value
             highThreshold = self.getProperty(common.PROP_BKG_DIAGNOSTICS_HIGH_THRESHOLD).value
             significanceTest = self.getProperty(common.PROP_BKG_DIAGNOSTICS_SIGNIFICANCE_TEST).value
             settings = _DiagnosticsSettings(lowThreshold, highThreshold, significanceTest)
-            bkgDiagnosticsWS, bkgMaskedSpectra = _bkgDiagnostics(bkgWS, settings, reportWS, wsNames, subalgLogging)
+            bkgDiagnosticsWS = _bkgDiagnostics(integratedBkgs, settings, wsNames, subalgLogging)
+            bkgMaskedSpectra = _reportBkgDiagnostics(reportWS, integratedBkgs, bkgDiagnosticsWS)
+            wsCleanup.cleanup(integratedBkgs)
             diagnosticsWS = Plus(LHSWorkspace=diagnosticsWS,
                                  RHSWorkspace=bkgDiagnosticsWS,
                                  OutputWorkspace=diagnosticsWSName,

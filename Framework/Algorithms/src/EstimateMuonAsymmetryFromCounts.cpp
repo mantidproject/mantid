@@ -126,6 +126,7 @@ void EstimateMuonAsymmetryFromCounts::exec() {
   for (int i = 0; i < specLength; ++i) {
     PARALLEL_START_INTERUPT_REGION
     const auto specNum = static_cast<size_t>(spectra[i]);
+
     if (spectra[i] > static_cast<int>(numSpectra)) {
       g_log.error("The spectral index " + std::to_string(spectra[i]) +
                   " is greater than the number of spectra!");

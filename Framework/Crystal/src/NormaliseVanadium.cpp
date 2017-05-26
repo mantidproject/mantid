@@ -89,7 +89,7 @@ void NormaliseVanadium::exec() {
 
     Mantid::Kernel::Units::Wavelength wl;
     auto timeflight = inSpec.points();
-    if (unitStr.compare("TOF") == 0)
+    if (unitStr == "TOF")
       wl.fromTOF(timeflight.mutableRawData(), timeflight.mutableRawData(), L1,
                  L2, scattering, 0, 0, 0);
 

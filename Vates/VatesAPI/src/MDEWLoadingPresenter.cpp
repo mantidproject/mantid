@@ -157,10 +157,9 @@ void MDEWLoadingPresenter::appendMetadata(vtkDataSet *visualDataSet,
 
   // Add metadata to dataset.
   MetadataToFieldData convert;
-  convert(outputFD.GetPointer(), xmlString,
-          XMLDefinitions::metaDataId().c_str());
+  convert(outputFD.GetPointer(), xmlString, XMLDefinitions::metaDataId());
   convert(outputFD.GetPointer(), jsonString,
-          m_vatesConfigurations->getMetadataIdJson().c_str());
+          m_vatesConfigurations->getMetadataIdJson());
   visualDataSet->SetFieldData(outputFD.GetPointer());
 }
 

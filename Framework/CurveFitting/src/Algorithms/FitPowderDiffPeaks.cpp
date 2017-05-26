@@ -295,9 +295,9 @@ void FitPowderDiffPeaks::processInputProperties() {
 
   // fitting algorithm option
   string fitmode = getProperty("FittingMode");
-  if (fitmode.compare("Robust") == 0) {
+  if (fitmode == "Robust") {
     m_fitMode = ROBUSTFIT;
-  } else if (fitmode.compare("Confident") == 0) {
+  } else if (fitmode == "Confident") {
     m_fitMode = TRUSTINPUTFIT;
   } else {
     throw runtime_error(
@@ -310,9 +310,9 @@ void FitPowderDiffPeaks::processInputProperties() {
 
   // peak parameter generation option
   string genpeakparamalg = getProperty("PeakParametersStartingValueFrom");
-  if (genpeakparamalg.compare("(HKL) & Calculation") == 0) {
+  if (genpeakparamalg == "(HKL) & Calculation") {
     m_genPeakStartingValue = HKLCALCULATION;
-  } else if (genpeakparamalg.compare("From Bragg Peak Table") == 0) {
+  } else if (genpeakparamalg == "From Bragg Peak Table") {
     m_genPeakStartingValue = FROMBRAGGTABLE;
   } else {
     throw runtime_error(
@@ -1288,7 +1288,7 @@ bool FitPowderDiffPeaks::fitSinglePeakConfident(
   // a) Fit peak height
   for (size_t iparam = 0; iparam < peakparamnames.size(); ++iparam) {
     string &parname = peakparams[iparam];
-    if (parname.compare("I") == 0)
+    if (parname == "I")
       peak->unfix(iparam);
     else
       peak->fix(iparam);
@@ -1333,7 +1333,7 @@ bool FitPowderDiffPeaks::fitSinglePeakConfident(
   double chi2planB;
   for (size_t iparam = 0; iparam < peakparamnames.size(); ++iparam) {
     string parname = peakparams[iparam];
-    if (parname.compare("A") == 0)
+    if (parname == "A")
       peak->fix(iparam);
     else
       peak->unfix(iparam);
@@ -1344,7 +1344,7 @@ bool FitPowderDiffPeaks::fitSinglePeakConfident(
   // iii. Fit "A" only
   for (size_t iparam = 0; iparam < peakparamnames.size(); ++iparam) {
     string parname = peakparams[iparam];
-    if (parname.compare("A") == 0 || parname.compare("I") == 0)
+    if (parname == "A" || parname == "I")
       peak->unfix(iparam);
     else
       peak->fix(iparam);
@@ -1368,7 +1368,7 @@ bool FitPowderDiffPeaks::fitSinglePeakConfident(
   double chi2planC;
   for (size_t iparam = 0; iparam < peakparamnames.size(); ++iparam) {
     string parname = peakparams[iparam];
-    if (parname.compare("A") != 0)
+    if (parname != "A")
       peak->fix(iparam);
     else
       peak->unfix(iparam);
@@ -1379,7 +1379,7 @@ bool FitPowderDiffPeaks::fitSinglePeakConfident(
   // iii. Fit peak height and everything else but "A"
   for (size_t iparam = 0; iparam < peakparamnames.size(); ++iparam) {
     string parname = peakparams[iparam];
-    if (parname.compare("A") == 0)
+    if (parname == "A")
       peak->fix(iparam);
     else
       peak->unfix(iparam);
@@ -1961,7 +1961,7 @@ bool FitPowderDiffPeaks::doFitMultiplePeaks(
   // a) Set up fit/fix
   vector<string> peakparnames = peakfuncs[0]->getParameterNames();
   for (size_t ipn = 0; ipn < peakparnames.size(); ++ipn) {
-    bool isI = peakparnames[ipn].compare("I") == 0;
+    bool isI = peakparnames[ipn] == "I";
 
     for (size_t ipk = 0; ipk < numpeaks; ++ipk) {
       BackToBackExponential_sptr thispeak = peakfuncs[ipk];
@@ -2195,7 +2195,7 @@ std::string FitPowderDiffPeaks::parseFitResult(API::IAlgorithm_sptr fitalg,
   chi2 = fitalg->getProperty("OutputChi2overDoF");
   string fitstatus = fitalg->getProperty("OutputStatus");
 
-  fitsuccess = (fitstatus.compare("success") == 0);
+  fitsuccess = (fitstatus == "success");
 
   rss << "  [Algorithm Fit]:  Chi^2 = " << chi2
       << "; Fit Status = " << fitstatus;
@@ -2250,7 +2250,7 @@ void FitPowderDiffPeaks::importInstrumentParameterFromTable(
     throw std::runtime_error(errss.str());
   }
 
-  if (colnames[0].compare("Name") != 0 || colnames[1].compare("Value") != 0) {
+  if (colnames[0] != "Name" || colnames[1] != "Value") {
     stringstream errss;
     errss << "Input parameter table workspace does not have the columns in "
              "order as  "
@@ -2306,11 +2306,11 @@ void FitPowderDiffPeaks::parseBraggPeakTable(
       string coltype = coltypes[icol];
       string colname = paramnames[icol];
 
-      if (coltype.compare("int") == 0) {
+      if (coltype == "int") {
         // Integer
         int temp = peakws->cell<int>(irow, icol);
         intmap.emplace(colname, temp);
-      } else if (coltype.compare("double") == 0) {
+      } else if (coltype == "double") {
         // Double
         double temp = peakws->cell<double>(irow, icol);
         doublemap.emplace(colname, temp);
@@ -2826,7 +2826,7 @@ FitPowderDiffPeaks::genPeak(map<string, int> hklmap,
 
       // Set peak parameters
       for (const auto &parname : tnb2bfuncparnames) {
-        if (parname.compare("Height") != 0) {
+        if (parname != "Height") {
           auto miter = m_instrumentParmaeters.find(parname);
           if (miter == m_instrumentParmaeters.end()) {
             stringstream errss;
@@ -2878,7 +2878,7 @@ FitPowderDiffPeaks::genPeak(map<string, int> hklmap,
       if (miter != parammap.end()) {
         // Parameter exist in input
         double parvalue = miter->second;
-        if (b2bexpname.compare("S2") == 0) {
+        if (b2bexpname == "S2") {
           newpeakptr->setParameter("S", sqrt(parvalue));
         } else {
           newpeakptr->setParameter(b2bexpname, parvalue);
@@ -3102,7 +3102,7 @@ string getFunctionInfo(IFunction_sptr function) {
   outss << "Number of Parameters = " << numpars << '\n';
   for (size_t i = 0; i < numpars; ++i)
     outss << parnames[i] << " = " << function->getParameter(i)
-          << ", \t\tFitted = " << !function->isFixed(i) << '\n';
+          << ", \t\tFitted = " << function->isActive(i) << '\n';
 
   return outss.str();
 }

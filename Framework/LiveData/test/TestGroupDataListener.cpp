@@ -1,5 +1,6 @@
 #include "TestGroupDataListener.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/LiveListenerFactory.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidGeometry/Instrument.h"
@@ -56,6 +57,10 @@ boost::shared_ptr<Workspace> TestGroupDataListener::extractData() {
   this->createWorkspace();
 
   return extracted;
+}
+
+void TestGroupDataListener::setAlgorithm(const IAlgorithm &callingAlgorithm) {
+  this->updatePropertyValues(callingAlgorithm);
 }
 
 } // namespace LiveData
