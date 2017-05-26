@@ -469,7 +469,7 @@ void MuonFitPropertyBrowser::boolChanged(QtProperty *prop) {
 	  if(val){ //record data for later
 		  double norm = readNormalization()[0];
 		  ITableWorkspace_sptr table = WorkspaceFactory::Instance().createTable();
-		  AnalysisDataService::Instance().addOrReplace("keepNorm", table);
+		  AnalysisDataService::Instance().addOrReplace("__keepNorm__", table);
 	      table->addColumn("double", "norm");
 	      table->addColumn("int", "spectra");
 		  TableRow row = table->appendRow();
@@ -479,7 +479,7 @@ void MuonFitPropertyBrowser::boolChanged(QtProperty *prop) {
 		  
 	  }
 	  else {//remove data so it is not used later
-		  AnalysisDataService::Instance().remove("keepNorm");			 
+		  AnalysisDataService::Instance().remove("__keepNorm__");			 
 
 		  // if fit is enabled so should TFAsymm
 		  if (m_fitActionSeqFit->isEnabled()) {

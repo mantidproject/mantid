@@ -157,13 +157,13 @@ MuonGroupAsymmetryCalculator::estimateAsymmetry(const Workspace_sptr &inputWS,
 * estimating the norm. 
 */
 double getStoredNorm() {
-	if (!API::AnalysisDataService::Instance().doesExist("keepNorm")) {
+	if (!API::AnalysisDataService::Instance().doesExist("__keepNorm__")) {
 		return 0.0;
 	}
 	else {
 		API::ITableWorkspace_sptr table =
 			boost::dynamic_pointer_cast<API::ITableWorkspace>(
-				API::AnalysisDataService::Instance().retrieve("keepNorm"));
+				API::AnalysisDataService::Instance().retrieve("__keepNorm__"));
 		auto colNorm = table->getColumn("norm");
 		return(*colNorm)[0]; 
 
