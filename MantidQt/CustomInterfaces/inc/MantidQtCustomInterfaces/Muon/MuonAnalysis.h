@@ -103,8 +103,6 @@ private slots:
   void guessAlphaClicked();
   void handleGroupBox();
   void handlePeriodBox();
-  void setChosenGroupSlot(QString &group);
-  void setChosenPeriodSlot(QString &period);
   /// Checks whether two specified periods are equal and, if they are, sets
   /// second one to None
   void checkForEqualPeriods();
@@ -569,6 +567,8 @@ private:
 
   /// Set the Grouping and Data Analysis tabs enabled/disabled
   void setAnalysisTabsEnabled(const bool enabled);
+
+  void setChosenGroupAndPeriods(const QString &wsName);
 };
 }
 }

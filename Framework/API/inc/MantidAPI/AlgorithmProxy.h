@@ -86,6 +86,8 @@ public:
   }
   /// Aliases to the algorithm
   const std::string alias() const override { return m_alias; }
+  /// Optional documentation URL for the real algorithm
+  const std::string helpURL() const override { return m_helpURL; }
   /// function returns a summary message that will be displayed in the default
   /// GUI, and in the help.
   const std::string summary() const override { return m_summary; }
@@ -176,6 +178,7 @@ private:
   const std::string
       m_categorySeparator;     ///< category seperator of the real algorithm
   const std::string m_alias;   ///< alias to the algorithm
+  const std::string m_helpURL; ///< Optional documentation URL
   const std::string m_summary; ///<Message to display in GUI and help.
   const int m_version;         ///< version of the real algorithm
 

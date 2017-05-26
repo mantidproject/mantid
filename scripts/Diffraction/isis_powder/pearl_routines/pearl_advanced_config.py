@@ -6,10 +6,10 @@ general_params = {
     "spline_coefficient": 60,
 
     "file_names": {
-        "vanadium_absorb_file": "pearl_absorp_sphere_10mm_newinst2_long.nxs",
-        "tt88_grouping": "pearl_group_12_1_TT88.cal",
-        "tt70_grouping": "pearl_group_12_1_TT70.cal",
-        "tt35_grouping": "pearl_group_12_1_TT35.cal"
+        "vanadium_absorb_filename": "pearl_absorp_sphere_10mm_newinst2_long.nxs",
+        "tt88_grouping_filename": "pearl_group_12_1_TT88.cal",
+        "tt70_grouping_filename": "pearl_group_12_1_TT70.cal",
+        "tt35_grouping_filename": "pearl_group_12_1_TT35.cal"
     },
 }
 
@@ -19,7 +19,7 @@ long_mode_off_params = {
     # This needs to be greater than the bank TOF cropping values or you will get data that divides to 0/inf
     "raw_data_tof_cropping": (0, 19995),
     "vanadium_tof_cropping": (1400, 19990),
-    "tof_cropping_ranges": [
+    "focused_cropping_values": [
         (1500, 19900),  # Bank 1
         (1500, 19900),  # Bank 2
         (1500, 19900),  # Bank 3
@@ -44,7 +44,7 @@ long_mode_on_params = {
     # you will get data that divides to 0 or inf
     "raw_data_tof_cropping": (20280, 39995),
     "vanadium_tof_cropping": (20295, 39993),
-    "tof_cropping_ranges": [
+    "focused_cropping_values": [
         (20300, 39990),  # Bank 1
         (20300, 39990),  # Bank 2
         (20300, 39990),  # Bank 3
@@ -66,17 +66,17 @@ long_mode_on_params = {
 variable_help = {
     "long_mode_<on/off>_params": {
         "file_names": {
-            "vanadium_absorb_file_name": "Takes the name of the calculated vanadium absorption corrections. This file "
-                                         " must be located in the top level of the calibration folder",
+            "vanadium_absorb_filename": "Takes the name of the calculated vanadium absorption corrections. This file "
+                                        " must be located in the top level of the calibration folder",
 
-            "tt88_grouping_name": "The name of the .cal file that defines the grouping of detectors in banks for TT88. "
-                                  "This file must be located in the top level of the calibration folder.",
+            "tt88_grouping_filename": "The name of the .cal file that defines the grouping of detectors in banks for "
+                                      "TT88. This file must be located in the top level of the calibration folder.",
 
-            "tt70_grouping_name": "The name of the .cal file that defines the grouping of detectors in banks for TT70. "
-                                  "This file must be located in the top level of the calibration folder.",
+            "tt70_grouping_filename": "The name of the .cal file that defines the grouping of detectors in banks for "
+                                      "TT70. This file must be located in the top level of the calibration folder.",
 
-            "tt35_grouping_name": "The name of the .cal file that defines the grouping of detectors in banks for TT35. "
-                                  "This file must be located in the top level of the calibration folder.",
+            "tt35_grouping_filename": "The name of the .cal file that defines the grouping of detectors in banks for "
+                                      "TT35. This file must be located in the top level of the calibration folder.",
         },
 
         "monitor_lambda_crop_range": "The range in wavelength to crop a monitor workspace to before calculating "
@@ -86,9 +86,9 @@ variable_help = {
         "raw_data_tof_cropping": "The crop values for to apply when loading raw data. This step is applied before any "
                                  "processing takes place. This is to crop from 40,000 microseconds in the "
                                  "raw data to 20,000 microseconds worth of data",
-        "tof_cropping_ranges": "These values are used to determine the TOF range to crop a focused (not Vanadium "
-                               "calibration) workspace to. These are applied on a bank by bank basis. They must be "
-                               "less than the values specified for raw_data_tof_cropping."
+        "focused_cropping_values": "These values are used to determine the TOF range to crop a focused (not Vanadium "
+                                   "calibration) workspace to. These are applied on a bank by bank basis. They must "
+                                   "be less than the values specified for raw_data_tof_cropping."
     },
 
     "general_params": {
