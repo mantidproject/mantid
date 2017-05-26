@@ -430,7 +430,7 @@ void ImggAggregateWavelengths::processDirectory(
   auto imgFiles = findInputImages(inDir);
 
   const size_t maxProgress = imgFiles.size() + 1;
-  API::Progress prog(this, 0, 1, maxProgress);
+  API::Progress prog(this, 0.0, 1.0, maxProgress);
 
   const std::string wsName = "__ImggAggregateWavelengths_fits_seq";
   const std::string wsNameFirst = wsName + "_first";

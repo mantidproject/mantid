@@ -120,7 +120,7 @@ void LoadILLAscii::exec() {
   std::vector<std::map<std::string, std::string>>::const_iterator
       iSpectraHeader;
 
-  Progress progress(this, 0, 1, spectraList.size());
+  Progress progress(this, 0.0, 1.0, spectraList.size());
   for (iSpectra = spectraList.begin(),
       iSpectraHeader = spectraHeaderList.begin();
        iSpectra < spectraList.end() && iSpectraHeader < spectraHeaderList.end();
@@ -275,7 +275,7 @@ IMDEventWorkspace_sptr LoadILLAscii::mergeWorkspaces(
   myfile << "MDEVENTS\n";
 
   if (!workspaceList.empty()) {
-    Progress progress(this, 0, 1, workspaceList.size());
+    Progress progress(this, 0.0, 1.0, workspaceList.size());
 
     for (size_t pos = 0; pos < workspaceList.size(); ++pos) {
       const auto &workspace = workspaceList[pos];

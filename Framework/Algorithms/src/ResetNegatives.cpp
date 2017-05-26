@@ -89,7 +89,7 @@ void ResetNegatives::exec() {
   if (eventWS)
     eventWS->sortAll(DataObjects::TOF_SORT, nullptr);
 
-  Progress prog(this, .1, 1., 2 * nHist);
+  Progress prog(this, 0.1, 1.0, 2 * nHist);
 
   // generate output workspace - copy X and dY
   outputWS = API::WorkspaceFactory::Instance().create(inputWS);

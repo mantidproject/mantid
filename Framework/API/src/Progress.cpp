@@ -48,13 +48,13 @@ Progress::Progress(Algorithm *alg, double start, double end, size_t numSteps)
  */
 void Progress::doReport(const std::string &msg) {
   // Progress as a float
+  // must be between 0 and 1
   double p = m_start + m_step * double(m_i - m_ifirst);
   if (p > m_end)
     p = m_end;
   if (!m_alg)
     return;
-  // progress must be between 0 and 1
-  m_alg->progress(p / (m_end - m_start), msg, this->getEstimatedTime(),
+  m_alg->progress(p, msg, this->getEstimatedTime(),
                   this->m_notifyStepPrecision);
   m_alg->interruption_point();
 }
