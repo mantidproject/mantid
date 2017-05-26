@@ -85,7 +85,7 @@ SliceViewer Improvements
 - Changed zoom level on peak. Now when zooming onto a spherical or ellipsoidal peak, the entire peak is visible when using the default window size.
 - Fixed a bug where swapping the dimensions did not rebin the workspace despite having autorebin enabled.
 - Fixed a bug where swapping the dimensions did not draw the axis scale correctly.
-
+- Fixed a bug where the normalization selection was not respected.
 
 VSI Improvments
 ###############
@@ -110,6 +110,8 @@ Bugs Resolved
 - Fixed an issue where some graphs not associated with a workspace would not be shown in the project save as view.
 - Fixed an issue where the Spectrum Viewer could crash when a workspace contained infinities.
 - Fixed an issue where contour lines were displayed at the wrong location.
+- Fixed an issue where some workspaces might not get deleted from the workspace dock if group workspaces were present.
+- Fixed an issues in the Detectors table where monitor information did not show up correctly.
 
 
 |

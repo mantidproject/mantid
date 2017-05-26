@@ -134,12 +134,13 @@ void PDDetermineCharacterizations::init() {
       "Empty instrument" + defaultMsg);
 
   std::vector<std::string> defaultFrequencyNames{"SpeedRequest1", "Speed1",
-                                                 "frequency"};
+                                                 "frequency", "skf1.speed"};
   declareProperty(Kernel::make_unique<Kernel::ArrayProperty<std::string>>(
                       FREQ_PROP_NAME, defaultFrequencyNames),
                   "Candidate log names for frequency");
 
-  std::vector<std::string> defaultWavelengthNames{"LambdaRequest", "lambda"};
+  std::vector<std::string> defaultWavelengthNames{"LambdaRequest", "lambda",
+                                                  "skf12.lambda"};
   declareProperty(Kernel::make_unique<Kernel::ArrayProperty<std::string>>(
                       WL_PROP_NAME, defaultWavelengthNames),
                   "Candidate log names for wave length");

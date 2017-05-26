@@ -18,14 +18,15 @@ Powder Diffraction
 - Bugfix in :ref:`SNAPReduce <algm-SNAPReduce>` with loading previous normalizations
 - :ref:`SNSPowderReduction <algm-SNSPowderReduction>` now supports splitters in format of ``MatrixWorkspace`` and general ``TableWorkspace``.
 - A new NOMAD instrument definition file with corrected values.
+- Add default sample logs names of wavelength and frequency to PDDetermineCharacterizations for Vulcan.
 
 Single Crystal Diffraction
 --------------------------
 
 - :ref:`algm-PredictPeaks` has a new option ``PredictPeaksOutsideDetectors`` which will predict peaks which fall outside of any defined detectors. This feature requires an extended detector space definition and will do nothing if this is not present in the IDF.
-- :ref:`algm-PredictPeaks` and `algm-FindPeaksMD` have a new option ``EdgePixels`` which will not predict or find peaks which fall in the input number of pixels from the edge of detectors.
+- :ref:`algm-PredictPeaks` and :ref:`algm-FindPeaksMD` have a new option ``EdgePixels`` which will not predict or find peaks which fall in the input number of pixels from the edge of detectors.
 - :ref:`StartLiveData <algm-StartLiveData>` will load "live" data streaming from MaNDi data server.
-- :ref:`algm-PDCalibration <algm-PDCalibration>` is better at giving out physically meaningful results. It will no longer create calibrations that will convert time-of-flight to negative or imaginary d-spacing.
+- :ref:`PDCalibration <algm-PDCalibration>` is better at giving out physically meaningful results. It will no longer create calibrations that will convert time-of-flight to negative or imaginary d-spacing.
 - :ref:`SaveIsawPeaks <algm-SaveIsawPeaks>` now saves the calibration data for all detector banks in instrument so the header may be longer
 - :ref:`LoadIsawPeaks <algm-LoadIsawPeaks>` now uses the calibration lines to calibrate the detectors banks for CORELLI
 - :ref:SCD Event Data Reduction interface and SCD_Reduction python scripts work with both nxs and h5 extensions for data file.
