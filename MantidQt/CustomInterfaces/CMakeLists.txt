@@ -123,29 +123,6 @@ set ( SRC_FILES
 	src/SANSRunWindow.cpp
 	src/SampleTransmission.cpp
 	src/StepScan.cpp
-	src/Tomography/EnergyBandsViewQtGUI.cpp
-	src/Tomography/TomographyROIPresenter.cpp
-	src/Tomography/TomographyROIViewQtWidget.cpp
-	src/Tomography/ImageStackPreParams.cpp
-	src/Tomography/ImggFormats.cpp
-	src/Tomography/ImggFormatsConvertPresenter.cpp
-	src/Tomography/ImggFormatsConvertViewQtWidget.cpp
-	src/Tomography/StackOfImagesDirs.cpp
-	src/Tomography/TomoPathsConfig.cpp
-	src/Tomography/TomoReconPostprocSettings.cpp
-	src/Tomography/TomoReconPreprocSettings.cpp
-	src/Tomography/TomoSystemSettings.cpp
-	src/Tomography/TomoSystemSettingsLocal.cpp
-	src/Tomography/TomoSystemSettingsRemote.cpp
-	src/Tomography/TomoToolConfigDialogBase.cpp
-	src/Tomography/TomoToolConfigDialogTomoPy.cpp
-	src/Tomography/TomoToolConfigDialogCustom.cpp
-	src/Tomography/TomoToolConfigDialogSavu.cpp
-	src/Tomography/TomoToolConfigDialogAstra.cpp
-	src/Tomography/TomographyIfaceModel.cpp
-	src/Tomography/TomographyIfacePresenter.cpp
-	src/Tomography/TomographyIfaceViewQtGUI.cpp
-	src/Tomography/ToolConfig.cpp
 	src/UserInputValidator.cpp
 	src/background.cpp
 	src/deltaECalc.cpp
@@ -300,40 +277,6 @@ set ( INC_FILES
 	inc/MantidQtCustomInterfaces/SANSRunWindow.h
 	inc/MantidQtCustomInterfaces/SampleTransmission.h
 	inc/MantidQtCustomInterfaces/StepScan.h
-	inc/MantidQtCustomInterfaces/Tomography/ITomographyROIPresenter.h
-	inc/MantidQtCustomInterfaces/Tomography/ITomographyROIView.h
-	inc/MantidQtCustomInterfaces/Tomography/IImggFormatsConvertPresenter.h
-	inc/MantidQtCustomInterfaces/Tomography/IImggFormatsConvertView.h
-	inc/MantidQtCustomInterfaces/Tomography/ITomographyIfacePresenter.h
-	inc/MantidQtCustomInterfaces/Tomography/ITomographyIfaceView.h
-	inc/MantidQtCustomInterfaces/Tomography/TomographyROIPresenter.h
-	inc/MantidQtCustomInterfaces/Tomography/TomographyROIViewQtWidget.h
-	inc/MantidQtCustomInterfaces/Tomography/ImageStackPreParams.h
-	inc/MantidQtCustomInterfaces/Tomography/ImggFormats.h
-	inc/MantidQtCustomInterfaces/Tomography/ImggFormatsConvertPresenter.h
-	inc/MantidQtCustomInterfaces/Tomography/ImggFormatsConvertViewQtWidget.h
-	inc/MantidQtCustomInterfaces/Tomography/StackOfImagesDirs.h
-	inc/MantidQtCustomInterfaces/Tomography/TomoPathsConfig.h
-	inc/MantidQtCustomInterfaces/Tomography/TomoRecToolConfig.h
-	inc/MantidQtCustomInterfaces/Tomography/TomoReconPostprocSettings.h
-	inc/MantidQtCustomInterfaces/Tomography/TomoReconPreprocSettings.h
-	inc/MantidQtCustomInterfaces/Tomography/TomoReconToolsUserSettings.h
-	inc/MantidQtCustomInterfaces/Tomography/TomoSystemSettings.h
-	inc/MantidQtCustomInterfaces/Tomography/TomoSystemSettingsLocal.h
-	inc/MantidQtCustomInterfaces/Tomography/TomoSystemSettingsRemote.h
-	inc/MantidQtCustomInterfaces/Tomography/TomoToolConfigDialogBase.h
-	inc/MantidQtCustomInterfaces/Tomography/TomoToolConfigDialogTomoPy.h
-	inc/MantidQtCustomInterfaces/Tomography/TomoToolConfigDialogCustom.h
-	inc/MantidQtCustomInterfaces/Tomography/TomoToolConfigDialogSavu.h
-	inc/MantidQtCustomInterfaces/Tomography/TomoToolConfigDialogAstra.h
-	inc/MantidQtCustomInterfaces/Tomography/TomographyIfaceModel.h
-	inc/MantidQtCustomInterfaces/Tomography/TomographyIfacePresenter.h
-	inc/MantidQtCustomInterfaces/Tomography/TomographyIfaceViewQtGUI.h
-	inc/MantidQtCustomInterfaces/Tomography/TomographyThread.h
-	inc/MantidQtCustomInterfaces/Tomography/TomographyProcess.h
-	inc/MantidQtCustomInterfaces/Tomography/ToolConfigAstraToolbox.h
-	inc/MantidQtCustomInterfaces/Tomography/ToolConfigCustom.h
-	inc/MantidQtCustomInterfaces/Tomography/ToolConfigTomoPy.h
 	inc/MantidQtCustomInterfaces/Updateable.h
 	inc/MantidQtCustomInterfaces/UserInputValidator.h
 	inc/MantidQtCustomInterfaces/deltaECalc.h
@@ -441,14 +384,6 @@ set ( MOC_FILES inc/MantidQtCustomInterfaces/Background.h
                 inc/MantidQtCustomInterfaces/SANSEventSlicing.h
                 inc/MantidQtCustomInterfaces/SANSDiagnostics.h
                 inc/MantidQtCustomInterfaces/StepScan.h
-                inc/MantidQtCustomInterfaces/Tomography/TomographyROIViewQtWidget.h
-                inc/MantidQtCustomInterfaces/Tomography/TomographyROIPresenter.h
-                inc/MantidQtCustomInterfaces/Tomography/ImggFormatsConvertViewQtWidget.h
-                inc/MantidQtCustomInterfaces/Tomography/TomographyIfacePresenter.h
-                inc/MantidQtCustomInterfaces/Tomography/TomographyIfaceViewQtGUI.h
-                inc/MantidQtCustomInterfaces/Tomography/TomoToolConfigDialogSavu.h								
-                inc/MantidQtCustomInterfaces/Tomography/TomographyProcess.h								
-                inc/MantidQtCustomInterfaces/Tomography/TomographyThread.h
 )
 
 set ( UI_FILES inc/MantidQtCustomInterfaces/DataComparison.ui
@@ -522,18 +457,6 @@ set ( UI_FILES inc/MantidQtCustomInterfaces/DataComparison.ui
                inc/MantidQtCustomInterfaces/SANSRunWindow.ui
                inc/MantidQtCustomInterfaces/SANSEventSlicing.ui
                inc/MantidQtCustomInterfaces/StepScan.ui
-               inc/MantidQtCustomInterfaces/Tomography/ImageSelectCoRAndRegions.ui
-               inc/MantidQtCustomInterfaces/Tomography/ImggFormatsConvert.ui
-               inc/MantidQtCustomInterfaces/Tomography/TomographyIfaceQtGUI.ui
-               inc/MantidQtCustomInterfaces/Tomography/TomographyIfaceQtTabEnergy.ui
-               inc/MantidQtCustomInterfaces/Tomography/TomographyIfaceQtTabFiltersSettings.ui
-               inc/MantidQtCustomInterfaces/Tomography/TomographyIfaceQtTabRun.ui
-               inc/MantidQtCustomInterfaces/Tomography/TomographyIfaceQtTabVisualize.ui
-               inc/MantidQtCustomInterfaces/Tomography/TomographyIfaceQtTabSystemSettings.ui
-               inc/MantidQtCustomInterfaces/Tomography/TomoToolConfigAstra.ui
-               inc/MantidQtCustomInterfaces/Tomography/TomoToolConfigCustom.ui
-               inc/MantidQtCustomInterfaces/Tomography/TomoToolConfigSavu.ui
-               inc/MantidQtCustomInterfaces/Tomography/TomoToolConfigTomoPy.ui
 )
 
 set ( TEST_FILES
@@ -546,8 +469,6 @@ set ( TEST_FILES
 	EnggDiffFittingPresenterTest.h
 	EnggDiffractionPresenterTest.h
 	IO_MuonGroupingTest.h
-	TomographyROIPresenterTest.h
-	ImggFormatsConvertPresenterTest.h
 	MDFLogValueFinderTest.h
 	MeasurementItemTest.h
 	MuonAnalysisDataLoaderTest.h
@@ -566,9 +487,6 @@ set ( TEST_FILES
 	ReflSaveTabPresenterTest.h
 	ReflSettingsPresenterTest.h
 	ReflSettingsTabPresenterTest.h
-	StackOfImagesDirsTest.h
-	TomographyIfaceModelTest.h
-	TomographyIfacePresenterTest.h
 	UserInputValidatorTest.h
 )
 
