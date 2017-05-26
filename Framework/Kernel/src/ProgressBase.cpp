@@ -27,7 +27,7 @@ ProgressBase::ProgressBase(double start, double end, int64_t numSteps)
     : m_start(start), m_end(end), m_ifirst(0), m_numSteps(numSteps),
       m_notifyStep(1), m_notifyStepPct(1), m_step(1), m_i(0),
       m_last_reported(-1), m_timeElapsed(new Timer), m_notifyStepPrecision(0) {
-  if (start < 0. || start >= end || end > 1.) {
+  if (start < 0. || start >= end) {
     std::stringstream msg;
     msg << "Progress range invalid 0 <= start=" << start << " <= end=" << end;
     throw std::invalid_argument(msg.str());
