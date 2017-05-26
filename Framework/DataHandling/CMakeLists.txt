@@ -28,7 +28,6 @@ set ( SRC_FILES
 	src/H5Util.cpp
 	src/ISISDataArchive.cpp
 	src/ISISRunLogs.cpp
-	src/ImggAggregateWavelengths.cpp
 	src/Load.cpp
 	src/LoadANSTOHelper.cpp
 	src/LoadAscii.cpp
@@ -55,7 +54,7 @@ set ( SRC_FILES
 	src/LoadILLIndirect.cpp
 	src/LoadILLIndirect2.cpp
 	src/LoadILLReflectometry.cpp
-        src/LoadILLSANS.cpp
+  src/LoadILLSANS.cpp
 	src/LoadILLTOF2.cpp
 	src/LoadISISNexus2.cpp
 	src/LoadInstrument.cpp
@@ -100,7 +99,6 @@ set ( SRC_FILES
 	src/LoadSPE.cpp
 	src/LoadSampleDetailsFromRaw.cpp
 	src/LoadSassena.cpp
-	src/LoadSavuTomoConfig.cpp
 	src/LoadSpec.cpp
 	src/LoadSpice2D.cpp
 	src/LoadSpiceAscii.cpp
@@ -204,7 +202,6 @@ set ( INC_FILES
 	inc/MantidDataHandling/H5Util.h
 	inc/MantidDataHandling/ISISDataArchive.h
 	inc/MantidDataHandling/ISISRunLogs.h
-	inc/MantidDataHandling/ImggAggregateWavelengths.h
 	inc/MantidDataHandling/Load.h
 	inc/MantidDataHandling/LoadANSTOHelper.h
 	inc/MantidDataHandling/LoadAscii.h
@@ -231,7 +228,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/LoadILLIndirect.h
 	inc/MantidDataHandling/LoadILLIndirect2.h
 	inc/MantidDataHandling/LoadILLReflectometry.h
-        inc/MantidDataHandling/LoadILLSANS.h
+  inc/MantidDataHandling/LoadILLSANS.h
 	inc/MantidDataHandling/LoadILLTOF2.h
 	inc/MantidDataHandling/LoadISISNexus2.h
 	inc/MantidDataHandling/LoadInstrument.h
@@ -271,7 +268,6 @@ set ( INC_FILES
 	inc/MantidDataHandling/LoadSPE.h
 	inc/MantidDataHandling/LoadSampleDetailsFromRaw.h
 	inc/MantidDataHandling/LoadSassena.h
-	inc/MantidDataHandling/LoadSavuTomoConfig.h
 	inc/MantidDataHandling/LoadSpec.h
 	inc/MantidDataHandling/LoadSpice2D.h
 	inc/MantidDataHandling/LoadSpiceAscii.h
@@ -378,7 +374,6 @@ set ( TEST_FILES
 	GroupDetectorsTest.h
 	H5UtilTest.h
 	ISISDataArchiveTest.h
-	ImggAggregateWavelengthsTest.h
 	InstrumentRayTracerTest.h
 	LoadAscii2Test.h
 	LoadAsciiTest.h
@@ -403,7 +398,7 @@ set ( TEST_FILES
 	LoadILLIndirectTest.h
 	LoadILLReflectometryTest.h
 	LoadILLSANSTest.h
-        LoadILLTOF2Test.h
+  LoadILLTOF2Test.h
 	LoadISISNexusTest.h
 	LoadInstrumentFromNexusTest.h
 	LoadInstrumentFromRawTest.h
@@ -442,7 +437,6 @@ set ( TEST_FILES
 	LoadSampleDetailsFromRawTest.h
 	LoadSassenaTest.h
 	LoadSaveAsciiTest.h
-	LoadSavuTomoConfigTest.h
 	LoadSpice2dTest.h
 	LoadSpiceAsciiTest.h
 	LoadSpiceXML2DDetTest.h

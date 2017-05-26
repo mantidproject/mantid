@@ -318,17 +318,22 @@ void MuonAnalysis::initLayout() {
   // Manage User Directories
   connect(m_uiForm.manageDirectoriesBtn, SIGNAL(clicked()), this,
           SLOT(openDirectoryDialog()));
-  connect(this, SIGNAL(setChosenGroupSignal(QString &)), this,
-          SLOT(setChosenGroupSlot(QString &)));
-  connect(this, SIGNAL(setChosenPeriodSignal(QString &)), this,
-          SLOT(setChosenPeriodSlot(QString &)));
 }
 
-void MuonAnalysis::setChosenGroupSlot(QString &group) {
-  m_uiForm.fitBrowser->setChosenGroup(group);
-}
-void MuonAnalysis::setChosenPeriodSlot(QString &period) {
-  m_uiForm.fitBrowser->setChosenPeriods(period);
+void MuonAnalysis::setChosenGroupAndPeriods(const QString &wsName) {
+  const auto wsParams =
+      MuonAnalysisHelper::parseWorkspaceName(wsName.toStdString());
+
+  const QString &groupToSet = QString::fromStdString(wsParams.itemName);
+  const QString &periodToSet = QString::fromStdString(wsParams.periods);
+  const auto &groups = m_dataSelector->getChosenGroups();
+  const auto &periods = m_dataSelector->getPeriodSelections();
+  if (!groups.contains(groupToSet)) {
+    m_uiForm.fitBrowser->setChosenGroup(groupToSet);
+  }
+  if (!periodToSet.isEmpty() && !periods.contains(periodToSet)) {
+    m_uiForm.fitBrowser->setChosenPeriods(periodToSet);
+  }
 }
 
 /**
@@ -1480,6 +1485,7 @@ void MuonAnalysis::updateFront() {
 
 /**
  * Update front including first re-populate pair list combo box
+ * Also update multiple fitting
  */
 void MuonAnalysis::updateFrontAndCombo() {
   // for now brute force clearing and adding new context
@@ -1493,17 +1499,28 @@ void MuonAnalysis::updateFrontAndCombo() {
 
   int numG = numGroups();
   int numP = numPairs();
-  for (int i = 0; i < numG; i++)
+  QStringList groupsAndPairs;
+  for (int i = 0; i < numG; i++) {
     m_uiForm.frontGroupGroupPairComboBox->addItem(
         m_uiForm.groupTable->item(m_groupToRow[i], 0)->text());
-  for (int i = 0; i < numP; i++)
+    auto groupName = m_uiForm.groupTable->item(m_groupToRow[i], 0)->text();
+    if (groupName.toStdString() != "") {
+      groupsAndPairs << groupName;
+    }
+  }
+  for (int i = 0; i < numP; i++) {
     m_uiForm.frontGroupGroupPairComboBox->addItem(
         m_uiForm.pairTable->item(m_pairToRow[i], 0)->text());
-
+    auto pairName = m_uiForm.groupTable->item(m_pairToRow[i], 0)->text();
+    if (pairName.toStdString() != "") {
+      groupsAndPairs << pairName;
+    }
+  }
   // If it doesn't match then reset
   if (currentI >= m_uiForm.frontGroupGroupPairComboBox->count()) {
     currentI = 0;
   }
+  m_uiForm.fitBrowser->setAvailableGroups(groupsAndPairs);
 
   setGroupOrPairAndReplot(currentI);
 }
@@ -1862,6 +1879,7 @@ void MuonAnalysis::selectMultiPeak(const QString &wsName,
 
     // Set the selected run, group/pair and period
     m_fitDataPresenter->setAssignedFirstRun(wsName, filePath);
+    setChosenGroupAndPeriods(wsName);
   }
 
   QString code;
@@ -2131,10 +2149,6 @@ void MuonAnalysis::loadFittings() {
       Mantid::Kernel::make_unique<MuonAnalysisFitFunctionPresenter>(
           nullptr, m_uiForm.fitBrowser, m_functionBrowser);
   // Connect signals
-  connect(m_dataSelector, SIGNAL(selectedGroupsChanged()), this,
-          SLOT(dataToFitChanged()));
-  connect(m_dataSelector, SIGNAL(selectedPeriodsChanged()), this,
-          SLOT(dataToFitChanged()));
   connect(m_dataSelector, SIGNAL(workspaceChanged()), this,
           SLOT(dataToFitChanged()));
   connect(m_uiForm.plotCreation, SIGNAL(currentIndexChanged(int)), this,
@@ -2502,6 +2516,7 @@ void MuonAnalysis::changeTab(int newTabIndex) {
       const boost::optional<QString> filePath =
           m_uiForm.mwRunFiles->getUserInput().toString();
       m_fitDataPresenter->setSelectedWorkspace(m_currentDataName, filePath);
+      setChosenGroupAndPeriods(m_currentDataName);
       selectMultiPeak(m_currentDataName, filePath);
     }
 

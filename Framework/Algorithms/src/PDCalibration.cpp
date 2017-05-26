@@ -221,10 +221,10 @@ void PDCalibration::init() {
   declareProperty("HighBackground", true,
                   "Relatively weak peak in high background");
   declareProperty(
-      "MinGuessedPeakWidth", 4, min,
+      "MinGuessedPeakWidth", 2, min,
       "Minimum guessed peak width for fit. It is in unit of number of pixels.");
   declareProperty(
-      "MaxGuessedPeakWidth", 4, min,
+      "MaxGuessedPeakWidth", 10, min,
       "Maximum guessed peak width for fit. It is in unit of number of pixels.");
   declareProperty("MinimumPeakHeight", 2., "Minimum allowed peak height. ");
   declareProperty(

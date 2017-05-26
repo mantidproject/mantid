@@ -82,8 +82,8 @@ Output:
             InputWorkspace=wsInTheta,
             OutputWorkspace='cut-at-{}-us'.format(tof),
             Direction='Vertical',
-            Centre=tof,
-            HalfWidth=250,
+            Centre=float(tof),
+            HalfWidth=250.0,
             Start=0.5,  # Degrees
             End=0.9
         )
