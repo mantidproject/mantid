@@ -159,8 +159,7 @@ set ( SRC_FILES
 	src/SaveRKH.cpp
 	src/SaveReflCustomAscii.cpp
 	src/SaveReflThreeColumnAscii.cpp
-	src/SaveSPE.cpp
-	src/SaveSavuTomoConfig.cpp
+        src/SaveSPE.cpp
 	src/SaveTBL.cpp
 	src/SaveToSNSHistogramNexus.cpp
 	src/SaveVTK.cpp
@@ -331,8 +330,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/SaveRKH.h
 	inc/MantidDataHandling/SaveReflCustomAscii.h
 	inc/MantidDataHandling/SaveReflThreeColumnAscii.h
-	inc/MantidDataHandling/SaveSPE.h
-	inc/MantidDataHandling/SaveSavuTomoConfig.h
+        inc/MantidDataHandling/SaveSPE.h
 	inc/MantidDataHandling/SaveTBL.h
 	inc/MantidDataHandling/SaveToSNSHistogramNexus.h
 	inc/MantidDataHandling/SaveVTK.h
@@ -497,8 +495,7 @@ set ( TEST_FILES
 	SaveRKHTest.h
 	SaveReflCustomAsciiTest.h
 	SaveReflThreeColumnAsciiTest.h
-	SaveSPETest.h
-	SaveSavuTomoConfigTest.h
+        SaveSPETest.h
 	SaveTBLTest.h
 	SaveToSNSHistogramNexusTest.h
 	SetBeamTest.h
