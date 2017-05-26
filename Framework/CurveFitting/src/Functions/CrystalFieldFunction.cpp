@@ -121,8 +121,11 @@ CrystalFieldFunction::createEquivalentFunctions() const {
 void CrystalFieldFunction::setParameter(size_t i, const double &value,
                                         bool explicitlySet) {
   checkSourceFunction();
-  if (i < m_nSourceParams) {
-    m_source->setParameter(i, value, explicitlySet);
+  if (i < m_nControlParams) {
+    m_control.setParameter(i, value, explicitlySet);
+    m_dirtyTarget = true;
+  } else if (i < m_nSourceParams) {
+    m_source->setParameter(i - m_nControlParams, value, explicitlySet);
     m_dirtyTarget = true;
   } else {
     checkTargetFunction();
@@ -134,8 +137,10 @@ void CrystalFieldFunction::setParameter(size_t i, const double &value,
 void CrystalFieldFunction::setParameterDescription(
     size_t i, const std::string &description) {
   checkSourceFunction();
-  if (i < m_nSourceParams) {
-    m_source->setParameterDescription(i, description);
+  if (i < m_nControlParams) {
+    m_control.setParameterDescription(i, description);
+  } else if (i < m_nSourceParams) {
+    m_source->setParameterDescription(i - m_nControlParams, description);
   } else {
     checkTargetFunction();
     m_target->setParameterDescription(i - m_nSourceParams, description);
@@ -146,8 +151,13 @@ void CrystalFieldFunction::setParameterDescription(
 double CrystalFieldFunction::getParameter(size_t i) const {
   checkSourceFunction();
   checkTargetFunction();
-  return i < m_nSourceParams ? m_source->getParameter(i)
-                          : m_target->getParameter(i - m_nSourceParams);
+  if (i < m_nControlParams) {
+    return m_control.getParameter(i);
+  } else if (i < m_nSourceParams) {
+    return m_source->getParameter(i - m_nControlParams);
+  } else {
+    return m_target->getParameter(i - m_nSourceParams);
+  }
 }
 
 /// Set parameter by name.
@@ -179,17 +189,22 @@ double CrystalFieldFunction::getParameter(const std::string &name) const {
 size_t CrystalFieldFunction::nParams() const {
   checkSourceFunction();
   checkTargetFunction();
-  return m_source->nParams() + m_target->nParams();
+  return m_nSourceParams + m_target->nParams();
 }
 
 /// Returns the index of parameter name
 size_t CrystalFieldFunction::parameterIndex(const std::string &name) const {
   checkSourceFunction();
-  if (isSourceName(name)) {
-    return m_source->parameterIndex(name);
+  auto ref = getParameterReference(name);
+  auto fun = ref.ownerFunction();
+  auto index = ref.parameterIndex();
+  if (fun == &m_control) {
+    return index;
+  } else if (fun == m_source.get()) {
+    return m_nControlParams + index;
   } else {
     checkTargetFunction();
-    return m_target->parameterIndex(name) + m_nSourceParams;
+    return m_nSourceParams + index;
   }
 }
 
@@ -340,33 +355,6 @@ bool CrystalFieldFunction::hasAttribute(const std::string &attName) const {
     return false;
   }
   return attRef.first->hasAttribute(attRef.second);
-
-  //------------------------------------------------//
-  std::smatch match;
-  if (std::regex_match(attName, match, SPECTRUM_ATTR_REGEX)) {
-    auto i = std::stoul(match[1]);
-    return hasSpectrumAttribute(i, match[2]);
-  }
-
-  if (IFunction::hasAttribute(attName)) {
-    return true;
-  }
-
-  if (isSourceName(attName)) {
-    checkSourceFunction();
-    if (isMultiSite()) {
-      if (attName == "Temperature" && !isMultiSpectrum()) {
-        return true;
-      } else {
-        throw std::logic_error("Attributes of multi-site source are not implemented yet.");
-      }
-    } else {
-      return m_source->hasAttribute(attName);
-    }
-  } else {
-    checkTargetFunction();
-    return m_target->hasAttribute(attName);
-  }
 }
 
 /// Get a reference to an attribute.
@@ -394,6 +382,12 @@ CrystalFieldFunction::getAttributeReference(const std::string &attName) const {
     return std::make_pair(nullptr, "");
   }
   return std::make_pair(&m_control, attName);
+}
+
+/// Get a reference to a parameter
+API::ParameterReference CrystalFieldFunction::getParameterReference(
+    const std::string &paramName) const {
+  return API::ParameterReference(&m_control, m_control.parameterIndex(paramName));
 }
 
 /// Get number of the number of spectra (excluding phys prop data).
@@ -619,7 +613,8 @@ void CrystalFieldFunction::checkSourceFunction() const {
 /// Build the source function
 void CrystalFieldFunction::buildSourceFunction() const {
   setSource(m_control.buildSource());
-  m_nSourceParams = m_source->nParams();
+  m_nControlParams = m_control.nParams();
+  m_nSourceParams = m_nControlParams + m_source->nParams();
 }
 
 

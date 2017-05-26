@@ -208,6 +208,8 @@ private:
   void setSpectrumAttribute(size_t iSpec, const std::string &name, const Attribute &);
   /// Get a reference to an attribute
   std::pair<API::IFunction*, std::string> getAttributeReference(const std::string& attName) const;
+  /// Get a reference to a parameter
+  API::ParameterReference getParameterReference(const std::string &paramName) const;
 
   /// Function that creates the source function.
   mutable CrystalFieldControl m_control;
@@ -215,6 +217,8 @@ private:
   mutable API::IFunction_sptr m_source;
   /// Function that actually calculates the output.
   mutable API::IFunction_sptr m_target;
+  /// Cached number of parameters in m_control.
+  mutable size_t m_nControlParams;
   /// Cached number of parameters in m_source.
   mutable size_t m_nSourceParams;
   /// Flag indicating that updateTargetFunction() is required.
