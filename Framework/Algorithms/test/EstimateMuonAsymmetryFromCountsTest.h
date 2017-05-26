@@ -219,6 +219,38 @@ public:
       TS_ASSERT_DELTA(fineOutWS->e(0)[1 + j * 3], coarseOutWS->e(0)[j], Delta);
     }
   }
+  void test_UserDefinedNorm() {
+
+    auto ws = createWorkspace(1, 50);
+    double userNorm= 10.2;
+    IAlgorithm_sptr alg = setUpAlg();
+    alg->setProperty("InputWorkspace", ws);
+    alg->setPropertyValue("OutputWorkspace", outputName);
+    alg->setPropertyValue("NormalizationIn", userNorm);
+    TS_ASSERT_THROWS_NOTHING(alg->execute());
+    TS_ASSERT(alg->isExecuted());
+
+    MatrixWorkspace_sptr outWS = alg->getProperty("OutputWorkspace");
+    auto normFromAlg =
+        Mantid::Kernel::VectorHelper::splitStringIntoVector<double>(
+            alg->getPropertyValue("NormalizationConstant"));
+ 
+    double Delta = 0.0001;
+      TS_ASSERT_DELTA(normFromAlg, userNorm,Delta);	
+      // Test some X values
+      TS_ASSERT_DELTA(outWS->x(0)[10], 0.2000, Delta);
+      TS_ASSERT_DELTA(outWS->x(0)[19], 0.3800, Delta);
+      TS_ASSERT_DELTA(outWS->x(0)[49], 0.9800, Delta);
+      // Test some Y values
+      TS_ASSERT_DELTA(outWS->y(0)[10], 0.0635, Delta);
+      TS_ASSERT_DELTA(outWS->y(0)[19], -0.0727, Delta);
+      TS_ASSERT_DELTA(outWS->y(0)[49], 0.1153, Delta);
+      // Test some E values
+      TS_ASSERT_DELTA(outWS->e(0)[10], 0.0002, Delta);
+      TS_ASSERT_DELTA(outWS->e(0)[19], 0.0003, Delta);
+      TS_ASSERT_DELTA(outWS->e(0)[49], 0.0004, Delta);
+  }
+ 
 };
 // turn clang off, otherwise this does not compile
 // clang-format off
