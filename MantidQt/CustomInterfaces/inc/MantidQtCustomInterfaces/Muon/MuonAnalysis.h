@@ -570,9 +570,8 @@ private:
 
   void setChosenGroupAndPeriods(const QString &wsName);
 
-  ///set the group/pair name
+  /// set the group/pair name
   std::string m_groupPairName;
-
 };
 }
 }

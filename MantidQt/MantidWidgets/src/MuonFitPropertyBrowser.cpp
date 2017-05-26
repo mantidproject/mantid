@@ -1364,24 +1364,23 @@ void MuonFitPropertyBrowser::setSingleFitLabel(std::string name) {
   }
 }
 /**
-* Sets the multifit mode to all groups 
+* Sets the multifit mode to all groups
 * or all pairs depending on if a  group
 * or pair is selected in the home tab
 * @param isItGroup :: [input] if it is a group (true)
 */
 void MuonFitPropertyBrowser::setAllGroupsOrPairs(const bool isItGroup) {
-	if (isItGroup) {
-		//all groups is index 0
-		m_enumManager->setValue(m_groupsToFit, 0);
-	}
-	else {
-		//all pairs is index 1
-		m_enumManager->setValue(m_groupsToFit, 1);
-
-	}
+  if (isItGroup) {
+    // all groups is index 0
+    m_enumManager->setValue(m_groupsToFit, 0);
+  } else {
+    // all pairs is index 1
+    m_enumManager->setValue(m_groupsToFit, 1);
+  }
 }
-void MuonFitPropertyBrowser::setGroupNames(std::vector<std::string> groupNames) {
-	m_groupsList = groupNames;
+void MuonFitPropertyBrowser::setGroupNames(
+    std::vector<std::string> groupNames) {
+  m_groupsList = groupNames;
 }
 
 } // MantidQt

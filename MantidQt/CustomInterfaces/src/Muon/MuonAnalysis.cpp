@@ -2532,11 +2532,11 @@ void MuonAnalysis::changeTab(int newTabIndex) {
     if (m_optionTab->getMultiFitState() == Muon::MultiFitState::Disabled) {
       m_uiForm.fitBrowser->setSingleFitLabel(m_currentDataName.toStdString());
     } else {
-		Muon::AnalysisOptions options(m_groupingHelper.parseGroupingTable());
-		m_uiForm.fitBrowser->setGroupNames(options.grouping.groupNames);
-		auto isItGroup = m_dataLoader.isContainedIn(m_groupPairName,
-			options.grouping.groupNames);
-	  m_uiForm.fitBrowser->setAllGroupsOrPairs(isItGroup);
+      Muon::AnalysisOptions options(m_groupingHelper.parseGroupingTable());
+      m_uiForm.fitBrowser->setGroupNames(options.grouping.groupNames);
+      auto isItGroup = m_dataLoader.isContainedIn(m_groupPairName,
+                                                  options.grouping.groupNames);
+      m_uiForm.fitBrowser->setAllGroupsOrPairs(isItGroup);
       m_uiForm.fitBrowser->setChosenPeriods("1");
     }
   } else if (newTab == m_uiForm.ResultsTable) {
