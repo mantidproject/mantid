@@ -569,6 +569,10 @@ private:
   void setAnalysisTabsEnabled(const bool enabled);
 
   void setChosenGroupAndPeriods(const QString &wsName);
+
+  ///set the group/pair name
+  std::string m_groupPairName;
+
 };
 }
 }

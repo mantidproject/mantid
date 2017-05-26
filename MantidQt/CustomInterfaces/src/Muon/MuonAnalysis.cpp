@@ -531,7 +531,7 @@ Workspace_sptr MuonAnalysis::createAnalysisWorkspace(ItemType itemType,
   const auto *table =
       itemType == ItemType::Group ? m_uiForm.groupTable : m_uiForm.pairTable;
   options.groupPairName = table->item(tableRow, 0)->text().toStdString();
-
+  m_groupPairName = table->item(tableRow, 0)->text().toStdString();
   if (plotType == Muon::PlotType::Asymmetry &&
       m_dataLoader.isContainedIn(options.groupPairName,
                                  options.grouping.groupNames)) {
@@ -2532,7 +2532,11 @@ void MuonAnalysis::changeTab(int newTabIndex) {
     if (m_optionTab->getMultiFitState() == Muon::MultiFitState::Disabled) {
       m_uiForm.fitBrowser->setSingleFitLabel(m_currentDataName.toStdString());
     } else {
-      m_uiForm.fitBrowser->setAllGroups();
+		Muon::AnalysisOptions options(m_groupingHelper.parseGroupingTable());
+		m_uiForm.fitBrowser->setGroupNames(options.grouping.groupNames);
+		auto isItGroup = m_dataLoader.isContainedIn(m_groupPairName,
+			options.grouping.groupNames);
+	  m_uiForm.fitBrowser->setAllGroupsOrPairs(isItGroup);
       m_uiForm.fitBrowser->setChosenPeriods("1");
     }
   } else if (newTab == m_uiForm.ResultsTable) {
