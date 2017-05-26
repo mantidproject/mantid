@@ -237,19 +237,15 @@ public:
             alg->getPropertyValue("NormalizationConstant"));
  
     double Delta = 0.0001;
-      TS_ASSERT_DELTA(normFromAlg, userNorm,Delta);	
+      TS_ASSERT_DELTA(normFromAlg[0], userNorm,Delta);	
       // Test some X values
       TS_ASSERT_DELTA(outWS->x(0)[10], 0.2000, Delta);
       TS_ASSERT_DELTA(outWS->x(0)[19], 0.3800, Delta);
       TS_ASSERT_DELTA(outWS->x(0)[49], 0.9800, Delta);
       // Test some Y values
-      TS_ASSERT_DELTA(outWS->y(0)[10], 0.0635, Delta);
-      TS_ASSERT_DELTA(outWS->y(0)[19], -0.0727, Delta);
-      TS_ASSERT_DELTA(outWS->y(0)[49], 0.1153, Delta);
-      // Test some E values
-      TS_ASSERT_DELTA(outWS->e(0)[10], 0.0002, Delta);
-      TS_ASSERT_DELTA(outWS->e(0)[19], 0.0003, Delta);
-      TS_ASSERT_DELTA(outWS->e(0)[49], 0.0004, Delta);
+      TS_ASSERT_DELTA(outWS->y(0)[10], -0.7974, Delta);
+      TS_ASSERT_DELTA(outWS->y(0)[19], -0.8233, Delta);
+      TS_ASSERT_DELTA(outWS->y(0)[49], -0.7875, Delta);
   }
  
 };

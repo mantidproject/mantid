@@ -132,8 +132,7 @@ MuonGroupAsymmetryCalculator::estimateAsymmetry(const Workspace_sptr &inputWS,
     asym->setProperty("OutputWorkspace", "__NotUsed__");
     asym->setProperty("StartX", m_startX);
     asym->setProperty("EndX", m_endX);
-	double norm = getStoredNorm();
-	asym->setProperty("NormalizationIn", getStoredNorm());
+    asym->setProperty("NormalizationIn", getStoredNorm());
     asym->execute();
     outWS = asym->getProperty("OutputWorkspace");
     auto tmp = asym->getPropertyValue("NormalizationConstant");
