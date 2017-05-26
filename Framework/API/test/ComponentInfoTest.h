@@ -18,6 +18,10 @@ using namespace Mantid::Kernel;
 
 namespace {
 
+/*
+ Helper function to create an ID -> index map from an ordered collection of IDs.
+ First ID gets index of 0, subsequent ID entries increment index by 1.
+*/
 boost::shared_ptr<
     const std::unordered_map<Mantid::Geometry::ComponentID, size_t>>
 makeComponentIDMap(const boost::shared_ptr<
@@ -40,10 +44,7 @@ public:
   static ComponentInfoTest *createSuite() { return new ComponentInfoTest(); }
   static void destroySuite(ComponentInfoTest *suite) { delete suite; }
 
-
-
   void test_indexOf() {
-
     auto detectorIndices = boost::make_shared<
         std::vector<size_t>>(); // No detectors in this example
     auto detectorRanges = boost::make_shared<std::vector<std::pair<size_t, size_t>>>();
@@ -51,10 +52,12 @@ public:
     detectorRanges->push_back(
         std::make_pair(0, 0)); // Another component with no detectors
 
-    auto componentIndices = boost::make_shared<
-            std::vector<size_t>>(std::vector<size_t>{0, 1}); // No detectors in this example
-    auto componentRanges = boost::make_shared<std::vector<std::pair<size_t, size_t>>>();
-    componentRanges->push_back(std::make_pair(0, 0)); // One component with no sub-components
+    auto componentIndices = boost::make_shared<std::vector<size_t>>(
+        std::vector<size_t>{0, 1}); // No detectors in this example
+    auto componentRanges =
+        boost::make_shared<std::vector<std::pair<size_t, size_t>>>();
+    componentRanges->push_back(
+        std::make_pair(0, 0)); // One component with no sub-components
     componentRanges->push_back(
         std::make_pair(0, 0)); // Another component with no subcomponents
 
@@ -63,7 +66,8 @@ public:
     auto detectorInfo = boost::make_shared<Beamline::DetectorInfo>();
 
     Mantid::Beamline::ComponentInfo internalInfo(
-        detectorIndices, detectorRanges, componentIndices, componentRanges, positions, rotations, detectorInfo);
+        detectorIndices, detectorRanges, componentIndices, componentRanges,
+        positions, rotations, detectorInfo);
     Mantid::Geometry::ObjComponent comp1("component1");
     Mantid::Geometry::ObjComponent comp2("component2");
 
