@@ -44,10 +44,6 @@ ConvFit
 
 - The Delta Function option can now be used with StretchedExpFT mode
 
-
-Jump Fit
-~~~~~~~~
-
 Improvements
 ------------
 

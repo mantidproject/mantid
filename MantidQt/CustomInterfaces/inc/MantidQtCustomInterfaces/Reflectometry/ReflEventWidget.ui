@@ -42,14 +42,7 @@
                   </widget>
                 </item>
                 <item row="0" column="1">
-                  <widget class="QLineEdit" name="uniformEvenEdit">
-                    <property name="sizeHint" stdset="0">
-                      <size>
-                        <width>10</width>
-                        <height>10</height>
-                      </size>
-                    </property>
-                  </widget>
+                  <widget class="QLineEdit" name="uniformEvenEdit"/>
                 </item>
                 <item row="0" column="2">
                   <widget class="QLabel" name="uniformEvenLabel">
@@ -79,14 +72,7 @@
                   </widget>
                 </item>
                 <item row="1" column="1">
-                  <widget class="QLineEdit" name="uniformEdit">
-                    <property name="sizeHint" stdset="0">
-                      <size>
-                        <width>10</width>
-                        <height>10</height>
-                      </size>
-                    </property>
-                  </widget>
+                  <widget class="QLineEdit" name="uniformEdit"/>
                 </item>
                 <item row="1" column="2">
                   <widget class="QLabel" name="uniformLabel">
@@ -134,14 +120,7 @@
               </widget>
             </item>
             <item>
-              <widget class="QLineEdit" name="customEdit">
-                <property name="sizeHint" stdset="0">
-                  <size>
-                    <width>10</width>
-                    <height>10</height>
-                  </size>
-                </property>
-              </widget>
+              <widget class="QLineEdit" name="customEdit"/>
             </item>
             <item>
               <spacer name="customSpacer">
@@ -180,14 +159,7 @@
               </widget>
             </item>
             <item>
-              <widget class="QLineEdit" name="logValueEdit">
-                <property name="sizeHint" stdset="0">
-                  <size>
-                    <width>10</width>
-                    <height>10</height>
-                  </size>
-                </property>
-              </widget>
+              <widget class="QLineEdit" name="logValueEdit"/>
             </item>
             <item>
               <widget class="QLabel" name="logValueTypeLabel">
@@ -197,14 +169,7 @@
               </widget>
             </item>
             <item>
-              <widget class="QLineEdit" name="logValueTypeEdit">
-                <property name="sizeHint" stdset="0">
-                  <size>
-                    <width>10</width>
-                    <height>10</height>
-                  </size>
-                </property>
-              </widget>
+              <widget class="QLineEdit" name="logValueTypeEdit"/>
             </item>
             <item>
               <spacer name="logValueSpacer1">
