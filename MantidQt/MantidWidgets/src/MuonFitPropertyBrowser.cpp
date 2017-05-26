@@ -169,7 +169,7 @@ void MuonFitPropertyBrowser::init() {
   addGroupCheckbox(tmp);
   m_periodsToFit = m_enumManager->addProperty("Periods to fit");
   m_periodsToFitOptions << "All Periods"
-						<< "1"
+                        << "1"
                         << "2"
                         << "Custom";
   m_showPeriodValue << "1";
@@ -351,12 +351,10 @@ void MuonFitPropertyBrowser::enumChanged(QtProperty *prop) {
     if (option == "Custom") {
       m_reselectPeriodBtn->setEnabled(true);
       genPeriodWindow();
-    }
-	else if (option == "All Periods") {
-		setAllPeriods();
-		m_reselectPeriodBtn->setEnabled(false);
-	}
-	else {
+    } else if (option == "All Periods") {
+      setAllPeriods();
+      m_reselectPeriodBtn->setEnabled(false);
+    } else {
       for (auto iter = m_periodBoxes.constBegin();
            iter != m_periodBoxes.constEnd(); ++iter) {
         if (option == iter.key().toStdString()) {
@@ -932,7 +930,7 @@ void MuonFitPropertyBrowser::setMultiFittingMode(bool enabled) {
   // set default selection (all groups)
   if (enabled) {
     setAllGroups();
-	setAllPeriods();
+    setAllPeriods();
   } else { // clear current selection
     clearChosenGroups();
     clearChosenPeriods();
@@ -1139,11 +1137,11 @@ void MuonFitPropertyBrowser::genGroupWindow() {
 */
 void MuonFitPropertyBrowser::setAllPeriods() {
 
-	clearChosenPeriods();
-	for (auto iter = m_periodBoxes.constBegin(); iter != m_periodBoxes.constEnd();
-		++iter) {
-				m_boolManager->setValue(iter.value(), true);
-	}
+  clearChosenPeriods();
+  for (auto iter = m_periodBoxes.constBegin(); iter != m_periodBoxes.constEnd();
+       ++iter) {
+    m_boolManager->setValue(iter.value(), true);
+  }
 }
 
 /**
@@ -1153,7 +1151,7 @@ void MuonFitPropertyBrowser::setAllPeriods() {
 void MuonFitPropertyBrowser::setNumPeriods(size_t numPeriods) {
   m_periodsToFitOptions.clear();
   if (numPeriods > 1) {
-	  m_periodsToFitOptions << "All Periods";
+    m_periodsToFitOptions << "All Periods";
   }
   // create more boxes
   for (size_t i = 0; i != numPeriods; i++) {
@@ -1237,14 +1235,14 @@ void MuonFitPropertyBrowser::addPeriodCheckbox(const QString &name) {
   int j = m_enumManager->value(m_periodsToFit);
   // add new period to list will go after inital list
   m_periodsToFitOptions << name;
-  
+
   auto active = getChosenPeriods();
   m_enumManager->setEnumNames(m_periodsToFit, m_periodsToFitOptions);
   setChosenPeriods(active);
-  m_enumManager->setValue(m_periodsToFit, j);  
+  m_enumManager->setValue(m_periodsToFit, j);
   auto option = m_periodsToFitOptions[j].toStdString();
   if (option == "All Periods") {
-	  setAllPeriods();
+    setAllPeriods();
   }
 }
 /**
