@@ -179,6 +179,7 @@ Output:
 .. testoutput:: ExGroupAsymmetryMultiPeriod
 
    Output: [-0.6449185   0.78829245  0.36003367]
+
 .. categories::
 
 .. sourcelink::
