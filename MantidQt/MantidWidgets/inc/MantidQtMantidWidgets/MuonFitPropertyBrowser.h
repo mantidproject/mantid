@@ -113,6 +113,7 @@ public:
   void setAllPairs();
   void clearChosenPeriods() const;
   void setChosenGroup(const QString &group);
+  void setAllPeriods();
   void setChosenPeriods(const QString &period);
   void setSingleFitLabel(std::string name);
 public slots:
