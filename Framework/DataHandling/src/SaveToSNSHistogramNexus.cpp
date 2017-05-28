@@ -717,7 +717,8 @@ void SaveToSNSHistogramNexus::exec() {
   map = inputWorkspace->getDetectorIDToWorkspaceIndexMap();
 
   // Start the progress bar. 3 reports per histogram.
-  prog = new Progress(this, 0, 1.0, inputWorkspace->getNumberHistograms() * 3);
+  prog =
+      new Progress(this, 0.0, 1.0, inputWorkspace->getNumberHistograms() * 3);
 
   EventWorkspace_const_sptr eventWorkspace =
       boost::dynamic_pointer_cast<const EventWorkspace>(inputWorkspace);
