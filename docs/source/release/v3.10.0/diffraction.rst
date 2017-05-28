@@ -8,6 +8,7 @@ Diffraction Changes
 Powder Diffraction
 ------------------
 
+- New loader :ref:`LoadILLDiffraction <algm-LoadILLDiffraction>` has been added to load the data-scan nexus files from ILL diffractometers.
 - ISIS Powder diffraction scripts have been released. These include support for
   GEM, PEARL and POLARIS instruments. For more details see the ISIS Powder documentation
   under API, Python category. 
@@ -19,6 +20,7 @@ Powder Diffraction
 - :ref:`SNSPowderReduction <algm-SNSPowderReduction>` now supports splitters in format of ``MatrixWorkspace`` and general ``TableWorkspace``.
 - A new NOMAD instrument definition file with corrected values.
 - Add default sample logs names of wavelength and frequency to PDDetermineCharacterizations for Vulcan.
+
 
 Single Crystal Diffraction
 --------------------------
