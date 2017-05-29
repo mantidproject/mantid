@@ -16,11 +16,11 @@ If not more details can be read here: :ref:`intro_to_objects-isis-powder-diffrac
 
 To create a GEM object the following parameters are required:
 
-- :ref:`calibration_directory_gem_isis-powder-diffraction-ref` 
-- :ref:`output_directory_gem_isis-powder-diffraction-ref` 
-- :ref:`user_name_gem_isis-powder-diffraction-ref` 
+- :ref:`calibration_directory_gem_isis-powder-diffraction-ref`
+- :ref:`output_directory_gem_isis-powder-diffraction-ref`
+- :ref:`user_name_gem_isis-powder-diffraction-ref`
 
-Optionally a configuration file may be specified if one exists 
+Optionally a configuration file may be specified if one exists
 using the following parameter:
 
 - :ref:`config_file_gem_isis-powder-diffraction-ref`
@@ -31,13 +31,13 @@ on YAML configuration files for more details
 Example
 ^^^^^^^
 
-.. code-block:: Python
+..  code-block:: python
 
   from isis_powder import Gem
-  
+
   calibration_dir = r"C:\path\to\calibration_dir"
   output_dir = r"C:\path\to\output_dir"
-  
+
   gem_example = Gem(calibration_directory=calibration_dir,
                     output_directory=output_dir,
                     user_name="Mantid")
@@ -56,7 +56,7 @@ The following methods can be executed on a GEM object:
 - :ref:`focus_gem_isis-powder-diffraction-ref`
 - :ref:`set_sample_gem_isis-powder-diffraction-ref`
 
-For information on creating a GEM object see: 
+For information on creating a GEM object see:
 :ref:`creating_gem_object-isis-powder-diffraction-ref`
 
 .. _create_vanadium_gem_isis-powder-diffraction-ref:
@@ -74,8 +74,8 @@ On GEM the following parameters are required when executing *create_vanadium*:
 - :ref:`first_cycle_run_no_gem_isis-powder-diffraction-ref`
 - :ref:`mode_gem_isis-powder-diffraction-ref`
 
-If :ref:`do_absorb_corrections_gem_isis-powder-diffraction-ref` is 
-set to **True** the following parameter is required in addition to the 
+If :ref:`do_absorb_corrections_gem_isis-powder-diffraction-ref` is
+set to **True** the following parameter is required in addition to the
 above:
 
 - :ref:`multiple_scattering_gem_isis-powder-diffraction-ref`
@@ -83,13 +83,13 @@ above:
 Example
 =======
 
-.. code-block:: Python
+..  code-block:: python
 
   # Notice how the filename ends with .yaml
   cal_mapping_file = r"C:\path\to\cal_mapping.yaml"
 
   gem_example.create_vanadium(calibration_mapping_file=cal_mapping_file,
-                              do_absorb_corrections=True, 
+                              do_absorb_corrections=True,
                               first_cycle_run_no=100,
                               mode="PDF",
                               multiple_scattering=False)
@@ -110,8 +110,8 @@ On GEM the following parameters are required when executing *focus*:
 - :ref:`run_number_gem_isis-powder-diffraction-ref`
 - :ref:`vanadium_normalisation_gem_isis-powder-diffraction-ref`
 
-If :ref:`do_absorb_corrections_gem_isis-powder-diffraction-ref` is 
-set to **True** the following parameter is required in addition to the 
+If :ref:`do_absorb_corrections_gem_isis-powder-diffraction-ref` is
+set to **True** the following parameter is required in addition to the
 above:
 
 - :ref:`multiple_scattering_gem_isis-powder-diffraction-ref`
@@ -122,7 +122,7 @@ The following parameters may also be optionally set:
 - :ref:`sample_empty_gem_isis-powder-diffraction-ref`
 - :ref:`unit_to_keep_gem_isis-powder-diffraction-ref`
 
-If :ref:`sample_empty_gem_isis_powder-diffraction-ref` is 
+If :ref:`sample_empty_gem_isis-powder-diffraction-ref` is
 set then the following parameter is also required:
 
 - :ref:`sample_empty_scale_gem_isis-powder-diffraction-ref`
@@ -130,7 +130,7 @@ set then the following parameter is also required:
 Example
 =======
 
-.. code-block:: Python
+..  code-block:: python
 
   # Notice how the filename ends with .yaml
   cal_mapping_file = r"C:\path\to\cal_mapping.yaml"
@@ -162,7 +162,7 @@ The following parameter is required when calling *set_sample*
 Example
 =======
 
-.. code-block:: Python
+..  code-block:: python
 
   sample_obj = SampleDetails(...)
   sample_obj.set_material(...)
@@ -174,7 +174,7 @@ Example
 Calibration Mapping File
 -------------------------
 The calibration mapping file holds the mapping between
-run numbers, current label, offset filename and the empty 
+run numbers, current label, offset filename and the empty
 and vanadium numbers.
 
 For more details on the calibration mapping file see:
@@ -196,7 +196,7 @@ substituting the below values for appropriate values:
       vanadium_run_numbers: "30"
       empty_run_numbers: "40"
 
-Lines 5 and 6 in this example set the vanadium and empty run numbers for 
+Lines 5 and 6 in this example set the vanadium and empty run numbers for
 PDF mode. Lines 8 and 9 set the vanadium and empty for
 Rietveld mode.
 
@@ -242,11 +242,11 @@ Within the folder the following should be present:
 
 The script will also save out vanadium splines into the relevant
 label folder which are subsequently loaded and used within the
-:ref:`focus_gem_isis-powder-diffraction-ref` method. 
+:ref:`focus_gem_isis-powder-diffraction-ref` method.
 
 Example Input:
 
-.. code-block:: Python
+..  code-block:: python
 
   calibration_dir = r"C:\path\to\calibration_dir"
   gem_example = Gem(calibration_directory=calibration_dir, ...)
@@ -255,7 +255,7 @@ Example Input:
 
 calibration_mapping_file
 ^^^^^^^^^^^^^^^^^^^^^^^^
-This parameter gives the full path to the YAML file containing the 
+This parameter gives the full path to the YAML file containing the
 calibration mapping. For more details on this file see:
 :ref:`calibration_mapping_gem-isis-powder-ref`
 
@@ -263,7 +263,7 @@ calibration mapping. For more details on this file see:
 
 Example Input:
 
-.. code-block:: Python
+..  code-block:: python
 
   # Notice the filename always ends in .yaml
   cal_mapping_file = r"C:\path\to\file\calibration_mapping.yaml"
@@ -273,17 +273,17 @@ Example Input:
 
 config_file
 ^^^^^^^^^^^^
-The full path to the YAML configuration file. This file is 
+The full path to the YAML configuration file. This file is
 described in detail here: :ref:`configuration_files_isis-powder-diffraction-ref`
 It is recommended to set this parameter at object creation instead
-of on a method as it will warn if any parameters are overridden 
+of on a method as it will warn if any parameters are overridden
 in the scripting window.
 
 *Note: This should be the full path to the file including extension*
 
 Example Input:
 
-.. code-block:: Python
+..  code-block:: python
 
   # Notice the filename always ends in .yaml
   configuration_file = r"C:\path\to\file\configuration.yaml"
@@ -293,12 +293,12 @@ Example Input:
 
 do_absorb_corrections
 ^^^^^^^^^^^^^^^^^^^^^
-Indicates whether to perform vanadium absorption corrections 
+Indicates whether to perform vanadium absorption corrections
 in :ref:`create_vanadium_gem_isis-powder-diffraction-ref` mode.
 In :ref:`focus_gem_isis-powder-diffraction-ref` mode
 sample absorption corrections require the sample be
 set first with the :ref:`set_sample_gem_isis-powder-diffraction-ref`
-method. 
+method.
 
 Accepted values are: **True** or **False**
 
@@ -309,7 +309,7 @@ Accepted values are: **True** or **False**
 
 Example Input:
 
-.. code-block:: Python
+..  code-block:: python
 
   gem_example.create_vanadium(do_absorb_corrections=True, ...)
 
@@ -323,20 +323,20 @@ file_ext
 ^^^^^^^^^
 *Optional*
 
-Specifies a file extension to use when using the 
+Specifies a file extension to use when using the
 :ref:`focus_gem_isis-powder-diffraction-ref` method.
 
-This should be used to process partial runs. When 
+This should be used to process partial runs. When
 processing full runs (i.e. completed runs) it should not
 be specified as Mantid will automatically determine the
 best extension to use.
 
-*Note: A leading dot (.) is not required but 
+*Note: A leading dot (.) is not required but
 is preferred for readability*
 
 Example Input:
 
-.. code-block:: Python
+..  code-block:: python
 
   gem_example.focus(file_ext=".s01", ...)
 
@@ -348,12 +348,12 @@ Indicates a run from the current cycle to use when calling
 :ref:`create_vanadium_gem_isis-powder-diffraction-ref`.
 This does not have the be the first run of the cycle or
 the run number corresponding to the vanadium. However it
-must be in the correct cycle according to the 
+must be in the correct cycle according to the
 :ref:`calibration_mapping_gem-isis-powder-ref`.
 
 Example Input:
 
-.. code-block:: Python
+..  code-block:: python
 
   # In this example assume we mean a cycle with run numbers 100-200
   gem_example.create_vanadium(first_cycle_run_no=100, ...)
@@ -362,7 +362,7 @@ Example Input:
 
 input_mode
 ^^^^^^^^^^
-Indicates how to interpret the parameter 
+Indicates how to interpret the parameter
 :ref:`run_number_gem_isis-powder-diffraction-ref` whilst
 calling the :ref:`focus_gem_isis-powder-diffraction-ref`
 method.
@@ -376,7 +376,7 @@ Accepted values are: **Summed** and **Individual**
 
 Example Input:
 
-.. code-block:: Python
+..  code-block:: python
 
   gem_example.focus(input_mode="Summed", ...)
 
@@ -396,7 +396,7 @@ Accepted values are: **PDF** and **Rietveld**
 
 Example Input:
 
-.. code-block:: Python
+..  code-block:: python
 
   gem_example.create_vanadium(mode="PDF", ...)
   # Or
@@ -407,7 +407,7 @@ Example Input:
 multiple_scattering
 ^^^^^^^^^^^^^^^^^^^^
 Indicates whether to account for the effects of multiple scattering
-when calculating absorption corrections. If 
+when calculating absorption corrections. If
 :ref:`do_absorb_corrections_gem_isis-powder-diffraction-ref` is
 set to **True** this parameter must be set.
 
@@ -419,7 +419,7 @@ the computer you are using*
 
 Example Input:
 
-.. code-block:: Python
+..  code-block:: python
 
   gem_example.create_vanadium(multiple_scattering=True, ...)
   # Or
@@ -431,17 +431,17 @@ output_directory
 ^^^^^^^^^^^^^^^^
 Specifies the path to the output directory to save resulting files
 into. The script will automatically create a folder
-with the label determined from the 
+with the label determined from the
 :ref:`calibration_mapping_file_gem_isis-powder-diffraction-ref`
 and within that create another folder for the current
-:ref:`user_name_gem_isis-powder-diffraction-ref`. 
+:ref:`user_name_gem_isis-powder-diffraction-ref`.
 
 Within this folder processed data will be saved out in
 several formats.
 
 Example Input:
 
-.. code-block:: Python
+..  code-block:: python
 
   output_dir = r"C:\path\to\output_dir"
   gem_example = Gem(output_directory=output_dir, ...)
@@ -453,13 +453,13 @@ run_number
 Specifies the run number(s) to process when calling the
 :ref:`focus_gem_isis-powder-diffraction-ref` method.
 
-This parameter accepts a single value or a range 
+This parameter accepts a single value or a range
 of values with the following syntax:
 
-**-** : Indicates a range of runs inclusive 
+**-** : Indicates a range of runs inclusive
 (e.g. *1-10* would process 1, 2, 3....8, 9, 10)
 
-**,** : Indicates a gap between runs 
+**,** : Indicates a gap between runs
 (e.g. *1, 3, 5, 7* would process run numbers 1, 3, 5, 7)
 
 These can be combined like so:
@@ -471,7 +471,7 @@ on the data to be processed
 
 Example Input:
 
-.. code-block:: Python
+..  code-block:: python
 
   # Process run number 1, 3, 5, 6, 7
   gem_example.focus(run_number="1, 3, 5-7", ...)
@@ -485,10 +485,10 @@ sample_empty
 *Optional*
 
 This parameter specifies a/several sample empty run(s)
-to subtract from the run in the 
-:ref:`focus_gem_isis-powder-diffraction-ref` method. 
+to subtract from the run in the
+:ref:`focus_gem_isis-powder-diffraction-ref` method.
 If multiple runs are specified it will sum these runs
-before subtracting the result. 
+before subtracting the result.
 
 This input uses the same syntax as
 :ref:`run_number_gem_isis-powder-diffraction-ref`.
@@ -496,7 +496,7 @@ Please visit the above page for more details.
 
 Example Input:
 
-.. code-block:: Python
+..  code-block:: python
 
   # Our sample empty is a single number
   gem_example.focus(sample_empty=100, ...)
@@ -507,17 +507,18 @@ Example Input:
 
 sample_empty_scale
 ^^^^^^^^^^^^^^^^^^
-Required if :ref:`sample_empty_gem_isis_powder-diffraction-ref` 
+
+Required if :ref:`sample_empty_gem_isis-powder-diffraction-ref`
 is set to **True**
 
 Sets a factor to scale the sample empty run(s) to before
-subtracting. This value is multiplied after summing the 
+subtracting. This value is multiplied after summing the
 sample empty runs and before subtracting the empty from
 the data set. For more details see: :ref:`Scale <algm-Scale-v1>`.
 
 Example Input:
 
-.. code-block:: Python
+..  code-block:: python
 
   # Scale sample empty to 90% of original
   gem_example.focus(sample_empty_scale=0.9, ...)
@@ -543,7 +544,7 @@ Accepted values are: **dSpacing** and **TOF**
 
 Example Input:
 
-.. code-block:: Python
+..  code-block:: python
 
   gem_example.focus(unit_to_keep="dSpacing", ...)
 
@@ -551,15 +552,15 @@ Example Input:
 
 user_name
 ^^^^^^^^^
-Specifies the name of the current user when creating a 
+Specifies the name of the current user when creating a
 new GEM object. This is only used when saving data to
-sort data into respective user folders. 
+sort data into respective user folders.
 See :ref:`output_directory_gem_isis-powder-diffraction-ref`
 for more details.
 
 Example Input:
 
-.. code-block:: Python
+..  code-block:: python
 
   gem_example = Gem(user_name="Mantid", ...)
 
@@ -567,9 +568,9 @@ Example Input:
 
 vanadium_normalisation
 ^^^^^^^^^^^^^^^^^^^^^^
-Indicates whether to divide the focused workspace within 
+Indicates whether to divide the focused workspace within
 :ref:`focus_gem_isis-powder-diffraction-ref` mode with a
-previously generated vanadium spline. 
+previously generated vanadium spline.
 
 This requires a vanadium to have been previously created
 with the :ref:`create_vanadium_gem_isis-powder-diffraction-ref`
@@ -579,7 +580,7 @@ Accepted values are: **True** or **False**
 
 Example Input:
 
-.. code-block:: Python
+..  code-block:: python
 
   gem_example.focus(vanadium_normalisation=True, ...)
 
@@ -587,14 +588,14 @@ Advanced Parameters
 --------------------
 .. warning:: These values are not intended to be changed and should
              reflect optimal defaults for the instrument. For more
-             details please read: 
+             details please read:
              :ref:`instrument_advanced_properties_isis-powder-diffraction-ref`
-             
+
              This section is mainly intended to act as reference of the
              current settings distributed with Mantid
 
 All values changed in the advanced configuration file
-requires the user to restart Mantid for the new values to take effect. 
+requires the user to restart Mantid for the new values to take effect.
 Please read :ref:`instrument_advanced_properties_isis-powder-diffraction-ref`
 before proceeding to change values within the advanced configuration file.
 
@@ -606,13 +607,13 @@ Indicates a list of TOF values to crop the focused workspace
 which was created by :ref:`focus_gem_isis-powder-diffraction-ref`
 on a bank by bank basis.
 
-This parameter is a list of bank cropping values with 
+This parameter is a list of bank cropping values with
 one list entry per bank. The values **must** have a smaller
 TOF window than the :ref:`vanadium_cropping_values_gem_isis-powder-diffraction-ref`
 
 On GEM this is set to the following TOF windows:
 
-.. code-block:: Python
+..  code-block:: python
 
   focused_cropping_values = [(550, 19900),  # Bank 1
                              (550, 19900),  # Bank 2
@@ -634,7 +635,7 @@ whilst focusing the spectra into banks.
 
 On GEM this is set to the following:
 
-.. code-block:: Python
+..  code-block:: python
 
   grouping_file_name: "GEM_Instrument_grouping.cal"
 
@@ -642,17 +643,17 @@ On GEM this is set to the following:
 
 raw_tof_cropping_values
 ^^^^^^^^^^^^^^^^^^^^^^^
-Determines the TOF window to crop all spectra down to before any 
+Determines the TOF window to crop all spectra down to before any
 processing in the :ref:`create_vanadium_gem_isis-powder-diffraction-ref`
-and :ref:`focus_gem_isis-powder-diffraction-ref` methods. 
+and :ref:`focus_gem_isis-powder-diffraction-ref` methods.
 
 This helps remove negative counts where at very low TOF
-the empty counts can exceed the captured neutron counts 
+the empty counts can exceed the captured neutron counts
 of the run to process.
 
 On GEM this is set to the following:
 
-.. code-block:: Python
+..  code-block:: python
 
   raw_tof_cropping_values: (500, 20000)
 
@@ -669,29 +670,29 @@ will need to be called again.*
 
 On GEM this is set to the following:
 
-.. code-block:: Python
-  
+..  code-block:: python
+
   spline_coefficient: 30
 
 .. _vanadium_cropping_values_gem_isis-powder-diffraction-ref:
 
 vanadium_cropping_values
 ^^^^^^^^^^^^^^^^^^^^^^^^
-Determines the TOF windows to crop to on a bank by bank basis 
+Determines the TOF windows to crop to on a bank by bank basis
 within the :ref:`create_vanadium_gem_isis-powder-diffraction-ref`
 method. This is applied after focusing and before a spline is taken.
 
 It is used to remove low counts at the start and end of the vanadium run
-to produce a spline which better matches the data. 
+to produce a spline which better matches the data.
 
-This parameter is a list of bank cropping values with 
+This parameter is a list of bank cropping values with
 one list entry per bank. The values **must** have a larger
 TOF window than the :ref:`focused_cropping_values_gem_isis-powder-diffraction-ref`
 and a smaller window than :ref:`raw_tof_cropping_values_gem_isis-powder-diffraction-ref`.
 
 On GEM this is set to the following:
 
-.. code-block:: Python
+..  code-block:: python
 
   vanadium_cropping_values = [(510, 19997),  # Bank 1
                               (510, 19997),  # Bank 2

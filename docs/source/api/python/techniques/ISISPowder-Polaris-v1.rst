@@ -31,7 +31,7 @@ on YAML configuration files for more details
 Example
 ^^^^^^^
 
-.. code-block:: Python
+..  code-block:: python
 
   from isis_powder import Polaris
   
@@ -83,7 +83,7 @@ above:
 Example
 =======
 
-.. code-block:: Python
+..  code-block:: python
 
   # Notice how the filename ends with .yaml
   cal_mapping_file = r"C:\path\to\cal_mapping.yaml"
@@ -127,7 +127,7 @@ set then the following parameter is also required:
 Example
 =======
 
-.. code-block:: Python
+..  code-block:: python
 
   # Notice how the filename ends with .yaml
   cal_mapping_file = r"C:\path\to\cal_mapping.yaml"
@@ -157,7 +157,7 @@ The following parameter is required when calling *set_sample*
 Example
 =======
 
-.. code-block:: Python
+..  code-block:: python
 
   sample_obj = SampleDetails(...)
   sample_obj.set_material(...)
@@ -242,7 +242,7 @@ label folder which are subsequently loaded and used within the
 
 Example Input:
 
-.. code-block:: Python
+..  code-block:: python
 
   calibration_dir = r"C:\path\to\calibration_dir"
   polaris_example = Polaris(calibration_directory=calibration_dir, ...)
@@ -259,7 +259,7 @@ calibration mapping. For more details on this file see:
 
 Example Input:
 
-.. code-block:: Python
+..  code-block:: python
 
   # Notice the filename always ends in .yaml
   cal_mapping_file = r"C:\path\to\file\calibration_mapping.yaml"
@@ -279,7 +279,7 @@ Accepted values are: **True** or **False**
 
 Example Input:
 
-.. code-block:: Python
+..  code-block:: python
 
   polaris_example.create_vanadium(chopper_on=True, ...)
   # Or
@@ -299,7 +299,7 @@ in the scripting window.
 
 Example Input:
 
-.. code-block:: Python
+..  code-block:: python
 
   # Notice the filename always ends in .yaml
   configuration_file = r"C:\path\to\file\configuration.yaml"
@@ -324,7 +324,7 @@ Accepted values are: **True** or **False**
 
 Example Input:
 
-.. code-block:: Python
+..  code-block:: python
 
   polaris_example.create_vanadium(do_absorb_corrections=True, ...)
 
@@ -347,7 +347,7 @@ Accepted values are: **True** or **False**
 
 Example Input:
 
-.. code-block:: Python
+..  code-block:: python
 
   polaris_example.focus(do_van_normalisation=True, ...)
 
@@ -370,7 +370,7 @@ is preferred for readability*
 
 Example Input:
 
-.. code-block:: Python
+..  code-block:: python
 
   polaris_example.focus(file_ext=".s01", ...)
 
@@ -388,7 +388,7 @@ must be in the correct cycle according to the
 
 Example Input:
 
-.. code-block:: Python
+..  code-block:: python
 
   # In this example assume we mean a cycle with run numbers 100-200
   polaris_example.create_vanadium(first_cycle_run_no=100, ...)
@@ -412,7 +412,7 @@ Accepted values are: **Summed** and **Individual**
 
 Example Input:
 
-.. code-block:: Python
+..  code-block:: python
 
   polaris_example.focus(input_mode="Summed", ...)
 
@@ -434,7 +434,7 @@ the computer you are using*
 
 Example Input:
 
-.. code-block:: Python
+..  code-block:: python
 
   polaris_example.create_vanadium(multiple_scattering=True, ...)
   # Or
@@ -456,7 +456,7 @@ several formats.
 
 Example Input:
 
-.. code-block:: Python
+..  code-block:: python
 
   output_dir = r"C:\path\to\output_dir"
   polaris_example = Polaris(output_directory=output_dir, ...)
@@ -486,7 +486,7 @@ on the data to be processed
 
 Example Input:
 
-.. code-block:: Python
+..  code-block:: python
 
   # Process run number 1, 3, 5, 6, 7
   polaris_example.focus(run_number="1, 3, 5-7", ...)
@@ -515,7 +515,7 @@ Please visit the above page for more details.
 
 Example Input:
 
-.. code-block:: Python
+..  code-block:: python
 
   # Our sample empty is a single number
   polaris_example.focus(sample_empty=100, ...)
@@ -537,7 +537,7 @@ the data set. For more details see: :ref:`Scale <algm-Scale-v1>`.
 
 Example Input:
 
-.. code-block:: Python
+..  code-block:: python
 
   # Scale sample empty to 90% of original
   polaris_example.focus(sample_empty_scale=0.9, ...)
@@ -554,7 +554,7 @@ for more details.
 
 Example Input:
 
-.. code-block:: Python
+..  code-block:: python
 
   polaris_example = Polaris(user_name="Mantid", ...)
 
@@ -588,7 +588,7 @@ TOF window than the :ref:`vanadium_cropping_values_polaris_isis-powder-diffracti
 
 On POLARIS this is set to the following TOF windows:
 
-.. code-block:: Python
+..  code-block:: python
 
   focused_cropping_values = [
       (1500, 19900),  # Bank 1
@@ -610,7 +610,7 @@ whilst focusing the spectra into banks.
 
 On POLARIS this is set to the following:
 
-.. code-block:: Python
+..  code-block:: python
 
   grouping_file_name: "Master_copy_of_grouping_file_with_essential_masks.cal"
 
@@ -625,7 +625,7 @@ be located within the top level of the
 
 On POLARIS this is set to the following:
 
-.. code-block:: Python
+..  code-block:: python
 
   masking_file_name: "VanaPeaks.dat"
 
@@ -643,7 +643,7 @@ of the run to process.
 
 On POLARIS this is set to the following:
 
-.. code-block:: Python
+..  code-block:: python
 
   raw_data_cropping_values: (750, 20000)
 
@@ -660,7 +660,7 @@ will need to be called again.*
 
 On POLARIS this is set to the following:
 
-.. code-block:: Python
+..  code-block:: python
   
   spline_coefficient: 100
 
@@ -683,7 +683,7 @@ and a smaller window than :ref:`raw_data_cropping_values_polaris_isis-powder-dif
 
 On POLARIS this is set to the following:
 
-.. code-block:: Python
+..  code-block:: python
 
   vanadium_cropping_values = [(800, 19995),  # Bank 1
                               (800, 19995),  # Bank 2
