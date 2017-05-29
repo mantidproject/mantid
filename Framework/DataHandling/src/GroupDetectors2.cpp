@@ -1022,11 +1022,13 @@ double GroupDetectors2::fileReadProg(
 *  @param outputWS :: user selected output workspace for the algorithm
 *  @param prog4Copy :: the amount of algorithm progress to attribute to moving a
 * single spectra
+*  @param keepAll :: whether or not to keep ungrouped spectra
+*  @param unGroupedSet :: the set of workspace indexes that are left ungrouped
 *  @return number of new grouped spectra
 */
 size_t GroupDetectors2::formGroups(API::MatrixWorkspace_const_sptr inputWS,
                                    API::MatrixWorkspace_sptr outputWS,
-                                   const double prog4Copy, bool keepAll,
+                                   const double prog4Copy, const bool keepAll,
                                    const std::set<int64_t> &unGroupedSet) {
   // get "Behaviour" string
   const std::string behaviour = getProperty("Behaviour");
@@ -1075,7 +1077,7 @@ size_t GroupDetectors2::formGroups(API::MatrixWorkspace_const_sptr inputWS,
       // detectors to add to firstSpecNum
       const auto &inputSpectrum = inputWS->getSpectrum(originalWI);
 
-      auto oldSpectrumDefinition = oldSpectrumDefinitions[originalWI];
+      const auto &oldSpectrumDefinition = oldSpectrumDefinitions[originalWI];
 
       outputHistogram += inputSpectrum.histogram();
       outSpec.addDetectorIDs(inputSpectrum.getDetectorIDs());
