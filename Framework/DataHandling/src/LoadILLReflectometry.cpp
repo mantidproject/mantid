@@ -322,7 +322,7 @@ void LoadILLReflectometry::convertTofToWavelength() {
  * @param monitorsData :: Monitors data already loaded
  */
 void LoadILLReflectometry::initWorkspace(
-    std::vector<std::vector<int>> monitorsData) {
+    const std::vector<std::vector<int>> &monitorsData) {
 
   debugLog("Number of monitors: ", monitorsData.size());
   for (size_t i = 0; i < monitorsData.size(); ++i) {
@@ -413,7 +413,7 @@ void LoadILLReflectometry::loadDataDetails(NeXus::NXEntry &entry) {
  */
 std::vector<int>
 LoadILLReflectometry::loadSingleMonitor(NeXus::NXEntry &entry,
-                                        std::string monitor_data) {
+                                        const std::string &monitor_data) {
   NXData dataGroup = entry.openNXData(monitor_data);
   NXInt data = dataGroup.openIntData();
   // load counts
@@ -510,8 +510,8 @@ std::vector<double> LoadILLReflectometry::getXValues() {
  * @param xVals :: X values
  */
 void LoadILLReflectometry::loadData(NeXus::NXEntry &entry,
-                                    std::vector<std::vector<int>> &monitorsData,
-                                    std::vector<double> xVals) {
+                                    const std::vector<std::vector<int>> &monitorsData,
+                                    const std::vector<double> &xVals) {
   g_log.debug("Loading data...");
   NXData dataGroup = entry.openNXData("data");
   NXInt data = dataGroup.openIntData();
@@ -524,14 +524,14 @@ void LoadILLReflectometry::loadData(NeXus::NXEntry &entry,
   if (!xVals.empty()) {
     HistogramData::BinEdges binEdges(xVals);
     for (size_t im = 0; im < nb_monitors; im++) {
-      int *monitor_p = monitorsData[im].data();
+      const int *monitor_p = monitorsData[im].data();
       const Counts counts(monitor_p, monitor_p + m_numberOfChannels);
       m_localWorkspace->setHistogram(im, binEdges, std::move(counts));
       progress.report();
     }
     // write data
     for (size_t j = 0; j < m_numberOfHistograms; ++j) {
-      int *data_p = &data(0, static_cast<int>(j), 0);
+      const int *data_p = &data(0, static_cast<int>(j), 0);
       const Counts counts(data_p, data_p + m_numberOfChannels);
       m_localWorkspace->setHistogram((j + nb_monitors), binEdges,
                                      std::move(counts));
@@ -565,7 +565,7 @@ void LoadILLReflectometry::loadNexusEntriesIntoProperties() {
   * @params angleDirectBeam :: Name of the detector angle of the direct beam
   */
 void LoadILLReflectometry::loadBeam(MatrixWorkspace_sptr &beamWS,
-                                    const std::string beam,
+                                    const std::string &beam,
                                     std::string angleDirectBeam) {
   if (!beam.empty()) {
     // init beam workspace, we do not need its monitor counts
@@ -654,8 +654,8 @@ void LoadILLReflectometry::loadBeam(MatrixWorkspace_sptr &beamWS,
   *of the maximum (serves as start value for the optimization)
   */
 std::vector<double>
-LoadILLReflectometry::fitReflectometryPeak(const std::string beam,
-                                           const std::string angleDirectBeam) {
+LoadILLReflectometry::fitReflectometryPeak(const std::string &beam,
+                                           const std::string &angleDirectBeam) {
   std::vector<double> centre{0.0, 0.0};
   if ((beam == "DirectBeam") || (beam == "Filename")) {
     MatrixWorkspace_sptr beamWS;

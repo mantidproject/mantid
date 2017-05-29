@@ -51,29 +51,29 @@ public:
   std::map<std::string, std::string> validateInputs() override;
   /// Return the detector position of the peak
   std::vector<double>
-  fitReflectometryPeak(const std::__cxx11::string beam = "ReflectedBeam",
-                       const std::__cxx11::string angleDirectBeam = "");
+  fitReflectometryPeak(const std::string &beam = "ReflectedBeam",
+                       const std::string &angleDirectBeam = "");
 
 private:
   void init() override;
   void exec() override;
 
-  void initWorkspace(std::vector<std::vector<int>> monitorsData);
+  void initWorkspace(const std::vector<std::vector<int>> &monitorsData);
   void initNames(NeXus::NXEntry &entry);
   void loadDataDetails(NeXus::NXEntry &entry);
   std::vector<double> getXValues();
   void convertTofToWavelength();
   void loadData(NeXus::NXEntry &entry,
-                std::vector<std::vector<int> > &monitorsData,
-                std::vector<double> xVals);
+                const std::vector<std::vector<int> > &monitorsData,
+                const std::vector<double> &xVals);
   void loadNexusEntriesIntoProperties();
   std::vector<int> loadSingleMonitor(NeXus::NXEntry &entry,
-                                     std::string monitor_data);
+                                     const std::string &monitor_data);
   std::vector<std::vector<int>> loadMonitors(NeXus::NXEntry &entry);
   void loadInstrument();
   void loadBeam(API::MatrixWorkspace_sptr &beamWS,
-                const std::__cxx11::string beam,
-                std::__cxx11::string angleDirectBeam);
+                const std::string &beam,
+                std::string angleDirectBeam);
   double computeBraggAngle();
   void placeDetector();
 
