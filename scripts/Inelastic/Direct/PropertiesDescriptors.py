@@ -10,13 +10,13 @@ import math
 from collections import Iterable
 
 from mantid.simpleapi import *
-#pylint: disable=unused-import
+#pylint: disable=unused-import # used by children
 from mantid.kernel import funcinspect
-#pylint: disable=unused-import
+#pylint: disable=unused-import # used by children
 from mantid import api,geometry,config
 
 import Direct.ReductionHelpers as prop_helpers
-#pylint: disable=unused-import
+#pylint: disable=unused-import  # used by children
 import Direct.CommonFunctions as common
 import collections
 

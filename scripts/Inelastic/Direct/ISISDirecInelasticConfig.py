@@ -615,13 +615,13 @@ class MantidConfigDirectInelastic(object):
         # what should be replaced in the file
         source = repl_info.getAttribute("var")
         if len(source) == 0:
-            raise InvalidArgument(
+            raise ValueError (
                 '"replace" field of {0} file for instrument {1} has to contain attribute "var" and its value'
                 .format(self._user_files_descr, self._user.instrument))
         # what should be placed instead of the replacement
         dest = repl_info.getAttribute("by_var")
         if len(dest) == 0:
-            raise InvalidArgument(
+            raise ValueError(
                 '"replace" field of {0} file for instrument {1} has to contain attribute "by_var" and its value'
                 .format(self._user_files_descr, self._user.instrument))
 
@@ -715,7 +715,7 @@ class MantidConfigDirectInelastic(object):
         users_instruments = theUser.get_all_instruments()
         for instr in users_instruments:
             if not self.is_inelastic(instr):
-                raise RuntimeError('Instrument {0} is not among acceptable instruments'.format(instrument))
+                raise RuntimeError('Instrument {0} is not among acceptable instruments'.format(instr))
         self._user = theUser
 
         # pylint: disable=W0201
