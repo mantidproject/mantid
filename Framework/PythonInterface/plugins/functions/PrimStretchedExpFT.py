@@ -33,14 +33,14 @@ from scipy.special import gamma
 from mantid.api import IFunction1D, FunctionFactory
 
 
-class StretchedExpFT(IFunction1D):
+class PrimStretchedExpFT(IFunction1D):
     # Class variables
     _planck_constant = scipy.constants.Planck/scipy.constants.e*1E15  # meV*psec
 
     # pylint: disable=super-on-old-class
     def __init__(self):
         """declare some constants"""
-        super(StretchedExpFT, self).__init__()
+        super(PrimStretchedExpFT, self).__init__()
         self._parmList = list()
 
     def category(self):
@@ -71,8 +71,9 @@ class StretchedExpFT(IFunction1D):
         return {'Height': height, 'Tau': tau, 'Beta': beta, 'Centre': Centre}
 
     def function1D(self, xvals, **optparms):
-        """ Fourier transform of the Symmetrized Stretched Exponential
-
+        """ Fourier transform of the symmetrized stretched exponential integrated
+        within each energy bin.
+        
         The Symmetrized Stretched Exponential:
                 height * exp( - |t/tau|**beta )
 
@@ -80,6 +81,14 @@ class StretchedExpFT(IFunction1D):
             F(E) \int_{-infty}^{infty} (dt/h) e^{-i2\pi Et/h} f(t)
             F(E) is normalized:
                 \int_{-infty}^{infty} dE F(E) = 1
+
+        Let P(E) be the primitive of F(E) from minus infinity to E, then for element i of
+        xvals we compute:
+            1. bin_boundaries[i] = (xvals[i]+xvals[i+1])/2
+            3. P(bin_boundaries[i+1])- P(bin_boundaries[i])
+        :param xvals: list of values where to evaluate the function
+        :param optparms: alternate list of function parameters
+        :return: P(bin_boundaries[i+1])- P(bin_boundaries[i]), the difference of the primitive
         """
         p = self.validateParams()
         if not p:
@@ -93,11 +102,11 @@ class StretchedExpFT(IFunction1D):
         ne = len(xvals)
         # energy spacing. Assumed xvals is a single-segment grid
         # of increasing energy values
-        refine_factor = 16
+        refine_factor = 16.0
         de = (xvals[-1] - xvals[0]) / (refine_factor*(ne-1))
         erange = 2*max(abs(xvals))
-        dt = 0.5*StretchedExpFT._planck_constant/erange  # spacing in time
-        tmax = StretchedExpFT._planck_constant/de  # maximum reciprocal time
+        dt = 0.5*PrimStretchedExpFT._planck_constant/erange  # spacing in time
+        tmax = PrimStretchedExpFT._planck_constant/de  # maximum reciprocal time
         # round to an upper power of two
         nt = 2**(1+int(np.log(tmax/dt)/np.log(2)))
         sampled_times = dt * np.arange(-nt, nt)
@@ -108,14 +117,21 @@ class StretchedExpFT(IFunction1D):
         fourier = np.abs(fft(decay).real)  # notice the reverse of decay array
         fourier /= fourier[0]  # set maximum to unity
         # Normalize the integral in energies to unity
-        fourier *= 2*p['Tau']*gamma(1./p['Beta'])/(p['Beta']*StretchedExpFT._planck_constant)
+        fourier *= 2*p['Tau']*gamma(1./p['Beta'])/(p['Beta']*PrimStretchedExpFT._planck_constant)
         # symmetrize to negative energies
         fourier = np.concatenate([fourier[nt:], fourier[:nt]])  # increasing ordering
         # Find corresponding energies
-        energies = StretchedExpFT._planck_constant * fftfreq(2*nt, d=dt)  # standard ordering
+        energies = PrimStretchedExpFT._planck_constant * fftfreq(2*nt, d=dt)  # standard ordering
         energies = np.concatenate([energies[nt:], energies[:nt]])  # increasing ordering
-        transform = p['Height'] * np.interp(xvals-p['Centre'], energies, fourier)
-        return transform
+        denergies = (energies[-1] - energies[0]) / (len(energies)-1)
+        # Find bin boundaries
+        boundaries = (xvals[1:]+xvals[:-1])/2  # internal bin boundaries
+        boundaries = np.insert(boundaries, 0, 2*xvals[0]-boundaries[0])  # external lower boundary
+        boundaries = np.append(boundaries, 2*xvals[-1]-boundaries[-1])  # external upper boundary
+        primitive = np.cumsum(fourier) * (denergies/(refine_factor*de))  # running Riemann sum
+        transform = np.interp(boundaries[1:]-p['Centre'], energies, primitive) - \
+                    np.interp(boundaries[:-1]-p['Centre'], energies, primitive)
+        return transform*p['Height']
 
     def fillJacobian(self, xvals, jacobian, partials):
         """Fill the jacobian object with the dictionary of partial derivatives
@@ -162,4 +178,4 @@ class StretchedExpFT(IFunction1D):
         self.fillJacobian(xvals, jacobian, partials)
 
 # Required to have Mantid recognise the new function
-FunctionFactory.subscribe(StretchedExpFT)
+FunctionFactory.subscribe(PrimStretchedExpFT)
