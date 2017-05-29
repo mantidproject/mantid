@@ -1,0 +1,54 @@
+# >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> 500 STACK RUN <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+matt@matt-OptiPlex-7010:~/Documents/mantid/scripts/Imaging((HEAD detached at 65a8969a9d))$ drop_caches 
+3
+matt@matt-OptiPlex-7010:~/Documents/mantid/scripts/Imaging((HEAD detached at 65a8969a9d))$ python main.py -i /media/matt/Windows/Documents/mantid_workspaces/imaging/chamber/temp/500_s_fits/pre_processed/ -o /home/matt/temp/100_rotated_parallel -w --only-preproc --data-as-stack -r 1 --pre-median-size 3
+ > Note: Running reconstruction on 8 cores.
+ --- Generating reconstruction script beginning... Memory usage before execution:  29724 KB, 29.02734375 MB
+ --- Finished generating script beginning. Elapsed time: 0.00824999809265 sec. Memory usage after execution:  29768 KB, 29.0703125 MB. Memory change: 0.04296875 MB
+ --- Importing tool tomopy Memory usage before execution:  29768 KB, 29.0703125 MB
+WARNING:tomopy.io.writer:dxtomo module not found
+ --- Tool loaded. Elapsed time: 6.61074113846 sec. Memory usage after execution:  86508 KB, 84.48046875 MB. Memory change: 55.41015625 MB
+ --- Loading data... Memory usage before execution:  86508 KB, 84.48046875 MB
+ --- Data loaded. Shape of raw data: (500, 2048, 2048), dtype: >f4. Elapsed time: 0.0364780426025 sec. Memory usage after execution:  86508 KB, 84.48046875 MB. Memory change: 0.0 MB
+ --- Starting PARALLEL rotation step (270 degrees clockwise), with pixel data type: >f4... Memory usage before execution:  86508 KB, 84.48046875 MB
+Rotation 8c 1chs: 100%|████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 500/500 [01:19<00:00,  6.27images/s]
+ --- Finished PARALLEL rotation step (270 degrees clockwise), with pixel data type: >f4. Elapsed time: 79.7863910198 sec. Memory usage after execution:  8375504 KB, 8179.203125 MB. Memory change: 8094.72265625 MB
+ > Note: Cannot apply normalization by flat/dark images because no valid flat image has been provided with -l/--input-path-flat and -k/--input-path-dark.
+ > Note: NOT normalizing by air region, because no --air-region coordinates were given.
+ > Note: NOT applying cropping to region of interest on data volume, because no --region-of-interest coordinates were given.
+ > Note: NOT applying outliers, because no --pre-outliers, --pre-outliers-mode, --post-outliers or --post-outliers-mode was specified.
+ > Note: Not applying any rebinning.
+ --- Starting PARALLEL median filter, with pixel data type: >f4, filter size/width: 3. Memory usage before execution:  8375504 KB, 8179.203125 MB
+Median Filter 8c 1chs: 100%|███████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 500/500 [00:48<00:00, 13.19images/s]
+ --- Finished PARALLEL median filter, with pixel data type: >f4, filter size/width: 3. Elapsed time: 48.2684009075 sec. Memory usage after execution:  8424692 KB, 8227.23828125 MB. Memory change: 48.03515625 MB
+ > Note: NOT applying gaussian filter.
+Total execution time was 134.964854002 sec
+
+# >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> 500 FILES RUN <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+matt@matt-OptiPlex-7010:~/Documents/mantid/scripts/Imaging((HEAD detached at 65a8969a9d))$ drop_caches 
+3
+matt@matt-OptiPlex-7010:~/Documents/mantid/scripts/Imaging((HEAD detached at 65a8969a9d))$ python main.py -i /media/matt/Windows/Documents/mantid_workspaces/imaging/chamber/fits/500_f_fits/ -o /home/matt/temp/100_rotated_parallel -w --only-preproc --data-as-stack -r 1 --pre-median-size 3
+ > Note: Running reconstruction on 8 cores.
+ --- Generating reconstruction script beginning... Memory usage before execution:  29372 KB, 28.68359375 MB
+ --- Finished generating script beginning. Elapsed time: 0.000808954238892 sec. Memory usage after execution:  29420 KB, 28.73046875 MB. Memory change: 0.046875 MB
+ --- Importing tool tomopy Memory usage before execution:  29420 KB, 28.73046875 MB
+WARNING:tomopy.io.writer:dxtomo module not found
+ --- Tool loaded. Elapsed time: 0.429020166397 sec. Memory usage after execution:  86244 KB, 84.22265625 MB. Memory change: 55.4921875 MB
+ --- Loading data... Memory usage before execution:  86244 KB, 84.22265625 MB
+Sample: 100%|██████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 500/500 [00:37<00:00, 13.68images/s]
+ --- Data loaded. Shape of raw data: (500, 2048, 2048), dtype: float32. Elapsed time: 37.8078069687 sec. Memory usage after execution:  8293344 KB, 8098.96875 MB. Memory change: 8014.74609375 MB
+ --- Starting PARALLEL rotation step (270 degrees clockwise), with pixel data type: float32... Memory usage before execution:  8293344 KB, 8098.96875 MB
+Rotation 8c 1chs: 100%|████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 500/500 [00:29<00:00, 16.73images/s]
+ --- Finished PARALLEL rotation step (270 degrees clockwise), with pixel data type: float32. Elapsed time: 29.981981039 sec. Memory usage after execution:  8483752 KB, 8284.9140625 MB. Memory change: 185.9453125 MB
+ > Note: Cannot apply normalization by flat/dark images because no valid flat image has been provided with -l/--input-path-flat and -k/--input-path-dark.
+ > Note: NOT normalizing by air region, because no --air-region coordinates were given.
+ > Note: NOT applying cropping to region of interest on data volume, because no --region-of-interest coordinates were given.
+ > Note: NOT applying outliers, because no --pre-outliers, --pre-outliers-mode, --post-outliers or --post-outliers-mode was specified.
+ > Note: Not applying any rebinning.
+ --- Starting PARALLEL median filter, with pixel data type: float32, filter size/width: 3. Memory usage before execution:  8483752 KB, 8284.9140625 MB
+Median Filter 8c 1chs: 100%|███████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 500/500 [00:48<00:00, 11.61images/s]
+ --- Finished PARALLEL median filter, with pixel data type: float32, filter size/width: 3. Elapsed time: 49.076625824 sec. Memory usage after execution:  8483752 KB, 8284.9140625 MB. Memory change: 0.0 MB
+ > Note: NOT applying gaussian filter.
+Total execution time was 117.364814043 sec
