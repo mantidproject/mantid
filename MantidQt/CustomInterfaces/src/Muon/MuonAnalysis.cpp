@@ -377,13 +377,13 @@ void MuonAnalysis::runFrontPlotButton() {
     return;
   }
 
-  plotSelectedItem();
+  plotSelectedGroupPair();
 }
 
 /**
  * Creates a plot of selected group/pair.
  */
-void MuonAnalysis::plotSelectedItem() {
+void MuonAnalysis::plotSelectedGroupPair() {
   ItemType itemType;
   int tableRow;
 
@@ -911,8 +911,13 @@ void MuonAnalysis::groupTableChanged(int row, int column) {
     }
   }
 
-  // Put this call after grouping so that correct data is replotted
-  updateFrontAndCombo();
+  // Put this call after grouping. Don't update the current index
+  // or replot though (false flag).
+  // Note: A bug current exists where if we are re-plotting
+  // and the user calls the table changed method before plotting finishes
+  // (by clicking the table again) Qt will later crash.
+  // This false flag also prevents this (issue: #19701)
+  updateFrontAndCombo(false);
 }
 
 /**
@@ -940,7 +945,8 @@ void MuonAnalysis::pairTableChanged(int row, int column) {
       }
     }
     m_pairToRow = m_groupingHelper.whichPairToWhichRow();
-    updateFrontAndCombo();
+    // Don't replot if the pair table has been modified
+    updateFrontAndCombo(false);
   }
 
   // pair name been modified
@@ -972,7 +978,7 @@ void MuonAnalysis::pairTableChanged(int row, int column) {
     }
 
     m_pairToRow = m_groupingHelper.whichPairToWhichRow();
-    updateFrontAndCombo();
+    updateFrontAndCombo(false);
 
     // check to see if alpha is specified (if name!="") and if not
     // assign a default of 1.0
@@ -1002,7 +1008,7 @@ void MuonAnalysis::updatePairTable() {
       m_uiForm.pairTable->setCellWidget(i, 1, new QComboBox);
       m_uiForm.pairTable->setCellWidget(i, 2, new QComboBox);
     }
-    updateFrontAndCombo();
+    updateFrontAndCombo(false);
     return;
   } else if (numGroups() < 2 && numPairs() <= 0) {
     return;
@@ -1339,7 +1345,7 @@ void MuonAnalysis::inputFileChanged(const QStringList &files) {
   m_currentLabel = loadResult->label;
 
   if (m_uiForm.frontPlotButton->isEnabled())
-    plotSelectedItem();
+    plotSelectedGroupPair();
 }
 
 /**
@@ -1486,8 +1492,10 @@ void MuonAnalysis::updateFront() {
 /**
  * Update front including first re-populate pair list combo box
  * Also update multiple fitting
+ * Plots changes if requested
+ * @param updateIndexAndPlot :: If true updates and plots the current group/pair
  */
-void MuonAnalysis::updateFrontAndCombo() {
+void MuonAnalysis::updateFrontAndCombo(bool updateIndexAndPlot) {
   // for now brute force clearing and adding new context
   // could go for softer approach and check if is necessary
   // to completely reset this combo box
@@ -1522,7 +1530,10 @@ void MuonAnalysis::updateFrontAndCombo() {
   }
   m_uiForm.fitBrowser->setAvailableGroups(groupsAndPairs);
 
-  setGroupOrPairAndReplot(currentI);
+  if (updateIndexAndPlot) {
+    setGroupOrPairIndexToPlot(currentI);
+    plotCurrentGroupAndPairs();
+  }
 }
 
 /**
@@ -2736,7 +2747,8 @@ void MuonAnalysis::syncGroupTablePlotTypeWithHome() {
     // This is not the best solution, but I don't have anything brighter at the
     // moment and it
     // was working like that for some time without anybody complaining.
-    setGroupOrPairAndReplot(0);
+    setGroupOrPairIndexToPlot(0);
+    plotCurrentGroupAndPairs();
   }
 
   m_uiForm.frontPlotFuncs->setCurrentIndex(plotTypeIndex);
@@ -3019,8 +3031,11 @@ void MuonAnalysis::openDirectoryDialog() {
  * The point of using this function is so that the UI is never out of sync
  * @param index :: [input] Index of which group/pair to plot
  */
-void MuonAnalysis::setGroupOrPairAndReplot(int index) {
+void MuonAnalysis::setGroupOrPairIndexToPlot(int index) {
   m_uiForm.frontGroupGroupPairComboBox->setCurrentIndex(index);
+}
+
+void MuonAnalysis::plotCurrentGroupAndPairs() {
   // Replot, whichever tab we're currently on
   if (m_loaded && isAutoUpdateEnabled()) {
     runFrontPlotButton();
@@ -3041,7 +3056,8 @@ int MuonAnalysis::getGroupOrPairToPlot() const {
  */
 void MuonAnalysis::fillGroupingTable(const Grouping &grouping) {
   int defaultIndex = m_groupingHelper.fillGroupingTable(grouping);
-  setGroupOrPairAndReplot(defaultIndex);
+  setGroupOrPairIndexToPlot(defaultIndex);
+  plotCurrentGroupAndPairs();
 }
 
 /**
