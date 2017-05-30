@@ -38,6 +38,7 @@ public:
 
     // Build some diffraction data
     WorkspaceBuilder builder;
+    builder.setRandomSeed(1.0);
     builder.setNumPixels(100);
     builder.addBackground(false);
     builder.addPeakByHKL(V3D(1, -5, -3), numEventsPerPeak, sigmas);
@@ -94,6 +95,7 @@ public:
     const std::vector<double> rebinParams = {800, 5, 10000};
 
     WorkspaceBuilder builder;
+    builder.setRandomSeed(1.0);
     builder.setNumPixels(100);
     builder.addBackground(false);
     builder.outputAsHistogram(true);
@@ -146,6 +148,7 @@ public:
 
     // Build some diffraction data
     WorkspaceBuilder builder;
+    builder.setRandomSeed(1.0);
     builder.setNumPixels(100);
     builder.addBackground(true);
     builder.setBackgroundParameters(nBackgroundEvents, backgroundDetSize,
@@ -161,6 +164,8 @@ public:
     auto data = builder.build();
     auto eventWS = std::get<0>(data);
     auto peaksWS = std::get<1>(data);
+    builder.setRandomSeed(1.0);
+    builder.setRandomSeed(1.0);
 
     // Run algorithm
     IntegrateEllipsoidsTwoStep alg;
@@ -208,6 +213,7 @@ public:
     const auto nBackgroundEvents = 1000;
 
     WorkspaceBuilder builder;
+    builder.setRandomSeed(1.0);
     builder.setNumPixels(100);
     builder.addBackground(true);
     builder.setBackgroundParameters(nBackgroundEvents, backgroundDetSize,
@@ -263,6 +269,7 @@ public:
 
     // Build some diffraction data
     WorkspaceBuilder builder;
+    builder.setRandomSeed(1.0);
     builder.setNumPixels(100);
     builder.addBackground(true);
     builder.setBackgroundParameters(nBackgroundEvents, backgroundDetSize,
@@ -343,6 +350,7 @@ public:
 
     // Build some diffraction data
     WorkspaceBuilder builder;
+    builder.setRandomSeed(1.0);
     builder.setNumPixels(100);
     builder.addBackground(true);
     builder.setBackgroundParameters(nBackgroundEvents, backgroundDetSize,
