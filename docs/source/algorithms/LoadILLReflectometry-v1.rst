@@ -11,20 +11,20 @@ Description
 
 Loads data of a Nexus file obtained from an ILL reflectometry instrument `D17 <https://www.ill.eu/instruments-support/instruments-groups/instruments/d17/description/instrument-layout/>`_ or `Figaro <https://www.ill.eu/instruments-support/instruments-groups/instruments/figaro/description/instrument-layout/>`_ into a `Workspace2D <http://www.mantidproject.org/Workspace2D>`_.
 In general, this loader reads detector and monitor counts and adds x-axis and error values. The output workspace contains histogram data. The x-axis can have units in time-of-flight or wavelength with non-varying and varying bins, respectively. The conversion to wavelength uses the algorithm :ref:`algm-ConvertUnits`.
-The sample logs associated to the output workspace contain two additional entries, :literal:`Facility` and :literal:`stheta` (unit radiant). While :literal:`Facility` is the ILL, the variable :literal:`stheta` is the computed Bragg angle and can serve directly as input for the algorithm :ref:`algm-ConvertToReflectometryQ` if desired.
+The sample logs associated to the output workspace contain two additional entries, :literal:`Facility` and :literal:`stheta` (unit radian). While :literal:`Facility` is the ILL, the variable :literal:`stheta` is the computed Bragg angle and can serve directly as input for the algorithm :ref:`algm-ConvertToReflectometryQ` if desired.
 The computation of the Bragg angle requires an input file :literal:`DirectBeam`, if :literal:`InputAngle` is the :literal:`detector angle`. In this case, an initial offset :math:`\Delta_{o}` of the direct beam will be considered to determine the detector position:
 
-.. math:: \Delta_{o} = \phi_{\mbox{detector}, d} - 2 \cdot \phi_{\mbox{sample}, d},
+.. math:: \Delta_{o} = \phi_{\mathrm{detector}, d} - 2 \cdot \phi_{\mathrm{sample}, d},
 
-where :math:`\phi_{\mbox{detector}, d}`, and :math:`\phi_{\mbox{sample}, d}` are the detector and sample angle, respectively.
+where :math:`\phi_{\mathrm{detector}, d}`, and :math:`\phi_{\mathrm{sample}, d}` are the detector and sample angle, respectively.
 These options and the option :literal:`sample angle` with :literal:`ScatteringType` is :literal:`coherent` require an estimation of the peak position of the beam(s). This will be realised by curve fitting using a Gaussian peak as initial guess via the algorithm :ref:`algm-Fit`.
 Please note that input properties of :literal:`LoadILLReflectometry` are enabled and disabled where necessary only when calling this algorithm via the graphical user interface. This algorithm can be called via the generic load algorithm :ref:`algm-Load`.
 Both, time-of-flight (and monochromatic) instrument configurations are supported.
 The chopper values are used for computing the time-of-flight axis :math:`x` according to the following equation:
 
-.. math:: x_{i} = \left( i + 0.5 \right) w_{\mbox{channel}} + \Delta_{t, \mbox{tof}} -  60.0^{\circ} \cdot \frac{ p_{\mbox{off}} - 45.0^{\circ} + \Omega_{c2} - \Omega_{c1} + \Delta_{\mbox{open}} }{ 2 \cdot 360^{\circ} \cdot v_{c1} } \cdot 1e^{+6},
+.. math:: x_{i} = \left( i + 0.5 \right) w_{\mathrm{channel}} + \Delta_{t, \mathrm{tof}} -  60^{\circ} \cdot \frac{ p_{\mathrm{off}} - 45^{\circ} + \Omega_{c2} - \Omega_{c1} + \Delta_{\mathrm{open}} }{ 2 \cdot 360^{\circ} \cdot v_{c1} } \cdot 10^{6},
 
-with the following variables: channel width :math:`w_{\mbox{channel}}`, time-of-flight delay :math:`\Delta_{t, \mbox{tof}}`, offset :math:`p_{\mbox{off}}`, phase of second chopper :math:`\Omega_{c2}`, phase of first chopper :math:`\Omega_{c1}`, open offset :math:`\Delta_{\mbox{open}}`, velocity of first chopper :math:`v_{c1}`. 
+with the following variables: channel width :math:`w_{\mathrm{channel}}`, time-of-flight delay :math:`\Delta_{t, \mathrm{tof}}`, offset :math:`p_{\mathrm{off}}`, phase of second chopper :math:`\Omega_{c2}`, phase of first chopper :math:`\Omega_{c1}`, open offset :math:`\Delta_{\mathrm{open}}`, velocity of first chopper :math:`v_{c1}`. 
 
 Detector position
 -----------------
@@ -39,36 +39,36 @@ A user defined rotation of the detector should be realised via the option :liter
 Bragg angle computation
 -----------------------
 
-The following equation is implemented in order to calculate the Bragg angle :math:`\rho` (unit radiant) to take into account :literal:`incoherent` and :literal:`coherent` scattering:
+The following equation is implemented in order to calculate the Bragg angle :math:`\rho` (unit radian) to take into account :literal:`incoherent` and :literal:`coherent` scattering:
 
-.. math:: \rho = \gamma - s \cdot \frac{ atan ( \alpha ) + s \cdot  atan ( \beta ) }{2},
+.. math:: \rho = \gamma - s \cdot \frac{ \arctan ( \alpha ) + s \cdot  \arctan ( \beta ) }{2},
 
 where :math:`\gamma, s, \alpha, \beta`, are placeholders for an angle, a signed factor, an angle depending on the direct or reflected beam, an angle depending on the reflected beam, respectively. The angles can be calculated via:
 
-.. math:: \alpha, \beta = \left( \omega - c_{\mbox{pixel}} \right)  \frac{w_{\mbox{pixel}}}{d_{\mbox{detector}}},
+.. math:: \alpha, \beta = \left( \omega - c_{\mathrm{pixel}} \right)  \frac{w_{\mathrm{pixel}}}{d_{\mathrm{detector}}},
 
-depending on a detector peak position :math:`\omega`, the centre pixel :math:`c_{\mbox{pixel}}`, the pixel width :math:`w_{\mbox{pixel}}` and the detector distance :math:`d_{\mbox{detector}}`.
+depending on a detector peak position :math:`\omega`, the centre pixel :math:`c_{\mathrm{pixel}}`, the pixel width :math:`w_{\mathrm{pixel}}` and the detector distance :math:`d_{\mathrm{detector}}`.
 
 The following table explains the different options for :math:`\gamma, s, \alpha, \beta`.
 
 For the input option :literal:`InputAngle` is :literal:`detector angle`, the centre angle :math:`\phi_{c}` is defined as 
 
-.. math:: \phi_{c} = \pm \frac{\phi_{\mbox{detector}, r} - \phi_{\mbox{detector}, d}}{2},
+.. math:: \phi_{c} = \pm \frac{\phi_{\mathrm{detector}, r} - \phi_{\mathrm{detector}, d}}{2},
 
-where the beginning sign is positive for :literal:`D17`. It depends on the reflection (up (+) or down (-)) for :literal:`Figaro`. Furthermore, :math:`\phi_{\mbox{detector}, r}` is the input detector angle of the reflected beam and :math:`\phi_{\mbox{detector}, d}` is the detector angle of the direct beam. Other entries of the table describe the sample angle of the reflected beam :math:`\phi_{\mbox{sample}, r}`, the fitted detector peak position of the reflected beam (fittedR) and the direct beam (fittedD), the maximum detector peak position of the reflected beam (peakR) and the direct beam (peakD).
+where the beginning sign is positive for :literal:`D17`. It depends on the reflection (up (+) or down (-)) for :literal:`Figaro`. Furthermore, :math:`\phi_{\mathrm{detector}, r}` is the input detector angle of the reflected beam and :math:`\phi_{\mathrm{detector}, d}` is the detector angle of the direct beam. Other entries of the table describe the sample angle of the reflected beam :math:`\phi_{\mathrm{sample}, r}`, the fitted detector peak position of the reflected beam (fittedR) and the direct beam (fittedD), the maximum detector peak position of the reflected beam (peakR) and the direct beam (peakD).
 
-The sample-detector distance :math:`d_{\mbox{detector}}` for each instrument. While :literal:`D17` takes the :literal:`det/value`, we calculate the difference :literal:`DTR/value - DTR/offset_value` for :literal:`Figaro`.
+The sample-detector distance :math:`d_{\mathrm{detector}}` for each instrument. While :literal:`D17` takes the :literal:`det/value`, we calculate the difference :literal:`DTR/value - DTR/offset_value` for :literal:`Figaro`.
 
 +-----------+-----------------+---------------------------------------------------------------+------------------------------------------------------------------------------+
 |           | Scattering type | incoherent                                                    | coherent                                                                     |
 +-----------+-----------------+-----------------+----------------+--------------+-------------+--------------------------------+----------------+--------------+-------------+
 |           |                 | :math:`\gamma`  |:math:`s`       |:math:`\alpha`|:math:`\beta`| :math:`\gamma`                 |:math:`s`       |:math:`\alpha`|:math:`\beta`| 
 +===========+=================+=================+================+==============+=============+================================+================+==============+=============+
-| D17       | sample angle    | \-              |  \-            | \-           | \-          | :math:`\phi_{\mbox{sample}, r}`| -1.0           | peakR        | fittedR     |
+| D17       | sample angle    | \-              |  \-            | \-           | \-          | :math:`\phi_{\mathrm{sample}, r}`| -1.0           | peakR        | fittedR     |
 +-----------+-----------------+-----------------+----------------+--------------+-------------+--------------------------------+----------------+--------------+-------------+
 |           | detector angle  | :math:`\phi_{c}`| -1.0           | fittedD      | fittedR     | :math:`\phi_{c}`               | -1.0           | fittedD      | peakR       |
 +-----------+-----------------+-----------------+----------------+--------------+-------------+--------------------------------+----------------+--------------+-------------+
-| Figaro    | sample angle    | \-              |  \-            | \-           | \-          | :math:`\phi_{\mbox{sample}, r}`| +/- 1.0        | peakR        | fittedR     |
+| Figaro    | sample angle    | \-              |  \-            | \-           | \-          | :math:`\phi_{\mathrm{sample}, r}`| +/- 1.0        | peakR        | fittedR     |
 +-----------+-----------------+-----------------+----------------+--------------+-------------+--------------------------------+----------------+--------------+-------------+
 |           | detector angle  | :math:`\phi_{c}`| +/- 1.0        | fittedD      | fittedR     | :math:`\phi_{c}`               | +/- 1.0        | fittedD      | peakR       |
 +-----------+-----------------+-----------------+----------------+--------------+-------------+--------------------------------+----------------+--------------+-------------+
@@ -152,7 +152,7 @@ A new :literal:`SampleLog` entry for the incident energy :literal:`Ei` with unit
 +-------------------+---------------------------------------+-----------------------------+----------------------------------------------------+-------------+
 | monitor2          | data                                  | data                        |                                                    | \-          |
 +-------------------+---------------------------------------+-----------------------------+----------------------------------------------------+-------------+
-| wavelength (D17)  |                                       |                             | **new** SampleLog entry incident energy Ei in meV  |:math:`\r{A}`|
+| wavelength (D17)  |                                       |                             | **new** SampleLog entry incident energy Ei in meV  | Å           |
 +-------------------+---------------------------------------+-----------------------------+----------------------------------------------------+-------------+
 | theta (Figaro)    |                                       |                             | sign determines reflection up/down                 | degree      |
 +-------------------+---------------------------------------+-----------------------------+----------------------------------------------------+-------------+
