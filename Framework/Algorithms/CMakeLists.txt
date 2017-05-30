@@ -156,6 +156,7 @@ set ( SRC_FILES
 	src/IQTransform.cpp
 	src/IdentifyNoisyDetectors.cpp
 	src/IntegrateByComponent.cpp
+	src/IntegrateEPP.cpp
 	src/Integration.cpp
 	src/InterpolatingRebin.cpp
 	src/InterpolationOption.cpp
@@ -470,6 +471,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/IQTransform.h
 	inc/MantidAlgorithms/IdentifyNoisyDetectors.h
 	inc/MantidAlgorithms/IntegrateByComponent.h
+	inc/MantidAlgorithms/IntegrateEPP.h
 	inc/MantidAlgorithms/Integration.h
 	inc/MantidAlgorithms/InterpolatingRebin.h
 	inc/MantidAlgorithms/InterpolationOption.h
@@ -793,6 +795,7 @@ set ( TEST_FILES
 	IQTransformTest.h
 	IdentifyNoisyDetectorsTest.h
 	IntegrateByComponentTest.h
+	IntegrateEPPTest.h
 	IntegrationTest.h
 	InterpolatingRebinTest.h
 	InterpolationOptionTest.h
