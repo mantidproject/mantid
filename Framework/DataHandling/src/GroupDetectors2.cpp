@@ -9,6 +9,7 @@
 #include "MantidDataHandling/LoadDetectorsGroupingFile.h"
 #include "MantidHistogramData/HistogramMath.h"
 #include "MantidIndexing/IndexInfo.h"
+#include "MantidIndexing/SpectrumNumber.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/ListValidator.h"
@@ -1054,13 +1055,15 @@ size_t GroupDetectors2::formGroups(API::MatrixWorkspace_const_sptr inputWS,
   const auto &oldSpectrumDefinitions =
       *(inputWS->indexInfo().spectrumDefinitions());
 
+  auto spectrumNumbers = std::vector<Indexing::SpectrumNumber>();
+
   for (storage_map::const_iterator it = m_GroupWsInds.begin();
        it != m_GroupWsInds.end(); ++it) {
     // This is the grouped spectrum
     auto &outSpec = outputWS->getSpectrum(outIndex);
 
     // The spectrum number of the group is the key
-    outSpec.setSpectrumNo(it->first);
+    spectrumNumbers.push_back(it->first);
     // Start fresh with no detector IDs
     outSpec.clearDetectorIDs();
 
@@ -1121,12 +1124,16 @@ size_t GroupDetectors2::formGroups(API::MatrixWorkspace_const_sptr inputWS,
       SpectrumDefinition spectrumDefinition;
       for (const auto &item : oldSpectrumDefinitions[originalWI])
         spectrumDefinition.add(item.first, item.second);
+
       spectrumDefinitions.push_back(spectrumDefinition);
+      auto spectrumNumber = inputWS->getSpectrum(originalWI).getSpectrumNo();
+      spectrumNumbers.push_back(spectrumNumber);
     }
   }
 
   Indexing::IndexInfo indexInfo =
       Indexing::IndexInfo(spectrumDefinitions.size());
+  indexInfo.setSpectrumNumbers(std::move(spectrumNumbers));
   indexInfo.setSpectrumDefinitions(std::move(spectrumDefinitions));
   outputWS->setIndexInfo(indexInfo);
 
