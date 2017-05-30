@@ -381,7 +381,7 @@ void PDCalibration::exec() {
   setProperty("MaskWorkspace", maskWS);
 
   int NUMHIST = static_cast<int>(m_uncalibratedWS->getNumberHistograms());
-  API::Progress prog(this, 0, 1.0, NUMHIST);
+  API::Progress prog(this, 0.0, 1.0, NUMHIST);
 
   // cppcheck-suppress syntaxError
   PRAGMA_OMP(parallel for schedule(dynamic, 1) )

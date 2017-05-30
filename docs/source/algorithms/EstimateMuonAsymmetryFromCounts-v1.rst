@@ -46,8 +46,8 @@ Output:
 
 .. testoutput:: ExSimple
 
-   Asymmetry:  ['-0.12', '1.07', '0.09', '-0.66', '-0.73']   
-   Normalization constant: 17.98
+   Asymmetry:  ['-0.38', '0.45', '-0.24', '-0.76', '-0.81']   
+   Normalization constant: 25.62
 
 .. categories::
 

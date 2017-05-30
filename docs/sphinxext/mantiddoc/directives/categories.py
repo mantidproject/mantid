@@ -70,7 +70,7 @@ class LinkItem(object):
         Returns:
           str: A string containing the link to reach this item
         """
-        link = relative_uri(base=base, to=self.location)
+        link = relative_uri(base=to_unix_style_path(base), to=self.location)
         if not link.endswith(ext):
             link += ext
         return link
@@ -106,12 +106,11 @@ class Category(LinkItem):
           name (str): The name of the category
           docname (str): Relative path to document from root directory
         """
+        docname = to_unix_style_path(docname)
 
-        if "\\" in docname:
-            docname = docname.replace("\\", "/")
         dirpath, filename = os.path.split(docname)
         html_dir = dirpath + "/" + CATEGORIES_DIR
-        self.html_path = html_dir + "/" + name.replace("\\\\", "/") + ".html"
+        self.html_path = html_dir + "/" + to_unix_style_path(name) + ".html"
         super(Category, self).__init__(name, self.html_path)
         self.pages = set([])
         self.subcategories = set([])
@@ -288,6 +287,18 @@ class CategoriesDirective(AlgorithmBaseDirective):
             category = env.categories[categ_name]
         return category
 
+
+#---------------------------------------------------------------------------------
+
+def to_unix_style_path(path):
+    """
+    Replaces any backslashes in the given string with forward slashes
+    and replace consecutive forward slashes with a single forward slash.
+
+    Arguments:
+      path: A string possibly containing backslashes
+    """
+    return path.replace("\\", "/").replace("//", "/")
 
 #---------------------------------------------------------------------------------
 

@@ -2537,8 +2537,8 @@ void MuonAnalysis::changeTab(int newTabIndex) {
       auto isItGroup = m_dataLoader.isContainedIn(m_groupPairName,
                                                   options.grouping.groupNames);
       m_uiForm.fitBrowser->setAllGroupsOrPairs(isItGroup);
-      m_uiForm.fitBrowser->setChosenPeriods("1");
-    }
+      m_uiForm.fitBrowser->setAllPeriods();
+	}
   } else if (newTab == m_uiForm.ResultsTable) {
     m_resultTableTab->refresh();
   }

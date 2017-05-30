@@ -8,6 +8,7 @@ Diffraction Changes
 Powder Diffraction
 ------------------
 
+- New loader :ref:`LoadILLDiffraction <algm-LoadILLDiffraction>` has been added to load the data-scan nexus files from ILL diffractometers.
 - ISIS Powder diffraction scripts have been released. These include support for
   GEM, PEARL and POLARIS instruments. For more details see the ISIS Powder documentation
   under API, Python category. 
@@ -18,17 +19,19 @@ Powder Diffraction
 - Bugfix in :ref:`SNAPReduce <algm-SNAPReduce>` with loading previous normalizations
 - :ref:`SNSPowderReduction <algm-SNSPowderReduction>` now supports splitters in format of ``MatrixWorkspace`` and general ``TableWorkspace``.
 - A new NOMAD instrument definition file with corrected values.
+- Add default sample logs names of wavelength and frequency to PDDetermineCharacterizations for Vulcan.
+
 
 Single Crystal Diffraction
 --------------------------
 
 - :ref:`algm-PredictPeaks` has a new option ``PredictPeaksOutsideDetectors`` which will predict peaks which fall outside of any defined detectors. This feature requires an extended detector space definition and will do nothing if this is not present in the IDF.
-- :ref:`algm-PredictPeaks` and `algm-FindPeaksMD` have a new option ``EdgePixels`` which will not predict or find peaks which fall in the input number of pixels from the edge of detectors.
+- :ref:`algm-PredictPeaks` and :ref:`algm-FindPeaksMD` have a new option ``EdgePixels`` which will not predict or find peaks which fall in the input number of pixels from the edge of detectors.
 - :ref:`StartLiveData <algm-StartLiveData>` will load "live" data streaming from MaNDi data server.
-- :ref:`algm-PDCalibration <algm-PDCalibration>` is better at giving out physically meaningful results. It will no longer create calibrations that will convert time-of-flight to negative or imaginary d-spacing.
+- :ref:`PDCalibration <algm-PDCalibration>` is better at giving out physically meaningful results. It will no longer create calibrations that will convert time-of-flight to negative or imaginary d-spacing.
 - :ref:`SaveIsawPeaks <algm-SaveIsawPeaks>` now saves the calibration data for all detector banks in instrument so the header may be longer
 - :ref:`LoadIsawPeaks <algm-LoadIsawPeaks>` now uses the calibration lines to calibrate the detectors banks for CORELLI
-- :ref:SCD Event Data Reduction interface and SCD_Reduction python scripts work with both nxs and h5 extensions for data file.
+- :ref:`SCD_Event_Data_Reduction_Interface<SCD_Event_Data_Reduction_Interface>` and SCD_Reduction python scripts work with both nxs and h5 extensions for data file.
 - New algorithm :ref:`algm-IntegrateEllipsoidsTwoStep` which can be used to integrate weak peaks by using parameters derived from strong peaks.
 - :ref:`FindSxPeaks <algm-FindSXPeaks>` Resolved an issue where the algorithm failed on instruments with multiple detectors per spectrum.
 - A new HB3A instrument definition file, for its 512 x 512 detector, is created.  Its valid period is from February 2017 to late April 2017.

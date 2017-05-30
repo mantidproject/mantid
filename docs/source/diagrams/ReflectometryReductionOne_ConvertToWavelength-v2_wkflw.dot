@@ -72,7 +72,6 @@ monIntWavMax        -> intMon
 
 divideDetRDB        -> divideDetMon
 intMon              -> divideDetMon
-
 divideDetMon        -> outputWS
 
 {rank=same; groupDet; groupDetRDB; cropMonWS}

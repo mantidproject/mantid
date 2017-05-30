@@ -131,7 +131,7 @@ void IntegratePeaksUsingClusters::exec() {
   // CCL. Multi-processor version.
   ConnectedComponentLabeling analysis;
 
-  Progress progress(this, 0, 1, 1);
+  Progress progress(this, 0.0, 1.0, 1);
   // Perform CCL.
   ClusterTuple clusters =
       analysis.executeAndFetchClusters(mdWS, &backgroundStrategy, progress);

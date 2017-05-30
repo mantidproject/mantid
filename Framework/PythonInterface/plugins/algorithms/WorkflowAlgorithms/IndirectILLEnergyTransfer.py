@@ -405,7 +405,8 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
                 Scale(InputWorkspace=ws, OutputWorkspace=ws, Factor=1. / mtd[int].readY(0)[0])
 
             # remember the integral of the monitor
-            AddSampleLog(Workspace=ws, LogName="MonitorIntegral", LogType="Number", LogText=str(mtd[int].readY(0)[0]))
+            AddSampleLog(Workspace=ws, LogName="MonitorIntegral", LogType="Number",
+                         LogText=str(mtd[int].readY(0)[0]), EnableLogging = False)
 
             DeleteWorkspace(int)
 
@@ -430,7 +431,8 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
                 Scale(InputWorkspace = ws, OutputWorkspace = ws, Factor = 1./mtd[int].readY(0)[0])
 
             # remember the integral of the monitor
-            AddSampleLog(Workspace=ws, LogName="MonitorIntegral", LogType="Number", LogText=str(mtd[int].readY(0)[0]))
+            AddSampleLog(Workspace=ws, LogName="MonitorIntegral", LogType="Number",
+                         LogText=str(mtd[int].readY(0)[0]), EnableLogging = False)
 
             DeleteWorkspace(i1)
             DeleteWorkspace(i2)
