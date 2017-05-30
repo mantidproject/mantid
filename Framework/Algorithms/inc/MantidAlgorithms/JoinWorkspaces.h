@@ -9,7 +9,7 @@ namespace Mantid {
 namespace Algorithms {
 
 /** JoinWorkspaces : This algorithms joins/merges the input workspaces horizontally,
- * i.e. appending their columns.
+* i.e. appending their columns.
 
   Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source
@@ -40,19 +40,20 @@ public:
   const std::string summary() const override;
   std::map<std::string,std::string> validateInputs() override;
 
-
 private:
   void init() override;
   void exec() override;
-  bool testCompatibility(API::MatrixWorkspace_const_sptr, const size_t,
+  bool checkCompatibility(API::MatrixWorkspace_sptr, const size_t,
                          const std::string &, const std::string &,
                          const std::string &, const std::string &);
-  bool testLogEntry(API::MatrixWorkspace_const_sptr, const std::string &log);
+  bool checkLogEntry(API::MatrixWorkspace_sptr, const std::string &);
+  std::vector<std::string> unWrapGroups(const std::vector<std::string> &);
+  std::vector<double> getXAxis(API::MatrixWorkspace_sptr, const std::string &);
+  void joinSpectrum(std::list<API::MatrixWorkspace_sptr>, long int, API::MatrixWorkspace_sptr);
 
   /// Progress reporting
   std::unique_ptr<API::Progress> m_progress;
-  /// List of input matrix workspace
-  std::list<API::MatrixWorkspace_sptr> m_inputWS;
+
 };
 
 } // namespace Algorithms
