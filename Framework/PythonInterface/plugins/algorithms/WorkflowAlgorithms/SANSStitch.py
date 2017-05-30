@@ -161,7 +161,8 @@ class SANSStitch(DataProcessorAlgorithm):
         # We want: (Cf+shift*Nf+Cr)/(Nf/scale + Nr)
         shifted_norm_front = self._scale(nF, shift_factor)
         scaled_norm_front = self._scale(nF, 1.0 / scale_factor)
-        numerator = self._add(self._add(cF, shifted_norm_front), cR)
+        add_counts_and_shift = self._add(cF, shifted_norm_front)
+        numerator = self._add(add_counts_and_shift, cR)
         denominator = self._add(scaled_norm_front, nR)
         merged_q = self._divide(numerator, denominator)
         return merged_q
@@ -199,7 +200,10 @@ class SANSStitch(DataProcessorAlgorithm):
         x_vals = ws.readX(0)
         start_x = x_vals[start]
         # Make sure we're inside the bin that we want to crop
-        end_x = x_vals[stop + 1]
+        if len(y_vals) == len(x_vals):
+            end_x = x_vals[stop]
+        else:
+            end_x = x_vals[stop + 1]
         return self._crop_to_x_range(ws=ws,x_min=start_x, x_max=end_x)
 
     def _run_fit(self, q_high_angle, q_low_angle, scale_factor, shift_factor):

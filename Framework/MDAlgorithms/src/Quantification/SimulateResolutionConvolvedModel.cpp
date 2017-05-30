@@ -13,6 +13,7 @@
 #include "MantidMDAlgorithms/Quantification/ForegroundModelFactory.h"
 #include "MantidMDAlgorithms/Quantification/MDResolutionConvolutionFactory.h"
 #include "MantidMDAlgorithms/Quantification/ResolutionConvolvedCrossSection.h"
+#include <boost/make_shared.hpp>
 
 namespace Mantid {
 namespace MDAlgorithms {
@@ -91,15 +92,15 @@ void SimulateResolutionConvolvedModel::init() {
 void SimulateResolutionConvolvedModel::exec() {
   m_inputWS = getProperty("InputWorkspace");
   // First estimate of progress calls
-  API::Progress progress(this, 0.0, 1.0,
-                         static_cast<size_t>(m_inputWS->getNPoints()));
-  progress.report("Caching simulation input");
+  auto progress = boost::make_shared<API::Progress>(
+      this, 0.0, 1.0, static_cast<size_t>(m_inputWS->getNPoints()));
+  progress->report("Caching simulation input");
   auto resolution = createFunction();
   createDomains();
 
   // Do the real work
-  progress.setNumSteps(resolution->estimateNoProgressCalls());
-  resolution->setProgressReporter(&progress);
+  progress->setNumSteps(resolution->estimateNoProgressCalls());
+  resolution->setProgressReporter(progress);
   resolution->function(*m_domain, *m_calculatedValues);
 
   // If output workspace exists just add the events to that
