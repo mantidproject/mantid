@@ -57,8 +57,8 @@ public:
                   const std::vector<double> &startOverlaps,
                   const std::vector<double> &endOverlaps,
                   const std::vector<double> &params, const bool scaleRhsWS,
-                  const bool useManualScaleFactor,
-                  const double manualScaleFactor,
+                  const bool useManualScaleFactors,
+                  const std::vector<double> manualScaleFactors,
                   API::MatrixWorkspace_sptr &outWS, double &outScaleFactor);
 
   /// Performs the Stitch1DMany algorithm at a specific period
@@ -67,8 +67,9 @@ public:
                       const std::vector<double> &startOverlaps,
                       const std::vector<double> &endOverlaps,
                       const std::vector<double> &params, const bool scaleRhsWS,
-                      const bool useManualScaleFactor,
-                      const double manualScaleFactor, std::string &outName,
+                      const bool useManualScaleFactors,
+                      const std::vector<double> manualScaleFactors,
+                      std::string &outName,
                       std::vector<double> &outScaleFactors);
 
 private:
@@ -94,13 +95,13 @@ private:
   std::vector<double> m_endOverlaps;
   std::vector<double> m_params;
   std::vector<double> m_scaleFactors;
+  std::vector<double> m_manualScaleFactors;
   API::Workspace_sptr m_outputWorkspace;
 
   size_t m_numWSPerPeriod = 0;
   size_t m_numWSPerGroup = 0;
-  double m_manualScaleFactor = 1.0;
   bool m_scaleRHSWorkspace = true;
-  bool m_useManualScaleFactor = false;
+  bool m_useManualScaleFactors = false;
   size_t m_scaleFactorFromPeriod = 0;
 };
 

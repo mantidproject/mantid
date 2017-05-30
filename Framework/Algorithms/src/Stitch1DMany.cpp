@@ -51,18 +51,13 @@ void Stitch1DMany::init() {
                                                        true, Direction::Input),
                   "Scaling either with respect to workspace 1 or workspace 2");
 
-  declareProperty(make_unique<PropertyWithValue<bool>>("UseManualScaleFactor",
+  declareProperty(make_unique<PropertyWithValue<bool>>("UseManualScaleFactors",
                                                        false, Direction::Input),
-                  "True to use a provided value for the scale factor.");
+                  "True to use provided values for the scale factor.");
 
-  auto manualScaleFactorValidator =
-      boost::make_shared<BoundedValidator<double>>();
-  manualScaleFactorValidator->setLower(0);
-  manualScaleFactorValidator->setExclusive(true);
-  declareProperty(make_unique<PropertyWithValue<double>>(
-                      "ManualScaleFactor", 1.0, manualScaleFactorValidator,
-                      Direction::Input),
-                  "Provided value for the scale factor.");
+  declareProperty(make_unique<ArrayProperty<double>>("ManualScaleFactors",
+                                                     Direction::Input),
+                  "Provided values for the scale factors");
 
   declareProperty(
       make_unique<ArrayProperty<double>>("OutScaleFactors", Direction::Output),
@@ -76,8 +71,8 @@ void Stitch1DMany::init() {
                       scaleFactorFromPeriodValidator, Direction::Input),
                   "Provided index of period to obtain scale factor from. "
                   "Periods are indexed from 1. Used only if stitching group "
-                  "workspaces, UseManualScaleFactor is true and "
-                  "ManualScaleFactor is set to default.");
+                  "workspaces, UseManualScaleFactors is true and "
+                  "ManualScaleFactors is set to default.");
 }
 
 /** Load and validate the algorithm's properties.
@@ -192,8 +187,8 @@ void Stitch1DMany::validateCommonInputs(
     errors["EndOverlaps"] =
         "EndOverlaps must have the same number of entries as StartOverlaps.";
 
-  m_useManualScaleFactor = this->getProperty("UseManualScaleFactor");
-  m_manualScaleFactor = this->getProperty("ManualScaleFactor");
+  m_useManualScaleFactors = this->getProperty("UseManualScaleFactors");
+  m_manualScaleFactors = this->getProperty("ManualScaleFactors");
 }
 
 /** Execute the algorithm.
@@ -208,8 +203,8 @@ void Stitch1DMany::exec() {
     double outScaleFactor;
 
     doStitch1D(lhsWS, rhsWS, i, m_startOverlaps, m_endOverlaps, m_params,
-               m_scaleRHSWorkspace, m_useManualScaleFactor, m_manualScaleFactor,
-               lhsWS, outScaleFactor);
+               m_scaleRHSWorkspace, m_useManualScaleFactors,
+               m_manualScaleFactors, lhsWS, outScaleFactor);
 
     m_scaleFactors.push_back(outScaleFactor);
   }
@@ -228,8 +223,8 @@ void Stitch1DMany::exec() {
  * @param endOverlaps :: End overlaps for stitched workspaces
  * @param params :: Rebinning parameters
  * @param scaleRhsWS :: Scaling either with respect to left or right workspaces
- * @param useManualScaleFactor :: True to use a provided value for scale factor
- * @param manualScaleFactor :: Provided value for scaling factor
+ * @param useManualScaleFactors :: True to use provided values for scale factors
+ * @param manualScaleFactors :: Provided values for scaling factors
  * @param outWS :: Output stitched workspace
  * @param outScaleFactor :: Actual value used for scale factor
  */
@@ -237,8 +232,8 @@ void Stitch1DMany::doStitch1D(
     MatrixWorkspace_sptr lhsWS, MatrixWorkspace_sptr rhsWS,
     const size_t wsIndex, const std::vector<double> &startOverlaps,
     const std::vector<double> &endOverlaps, const std::vector<double> &params,
-    const bool scaleRhsWS, const bool useManualScaleFactor,
-    const double manualScaleFactor, MatrixWorkspace_sptr &outWS,
+    const bool scaleRhsWS, const bool useManualScaleFactors,
+    const std::vector<double> manualScaleFactors, MatrixWorkspace_sptr &outWS,
     double &outScaleFactor) {
 
   IAlgorithm_sptr alg = createChildAlgorithm("Stitch1D");
@@ -251,9 +246,9 @@ void Stitch1DMany::doStitch1D(
   }
   alg->setProperty("Params", params);
   alg->setProperty("ScaleRHSWorkspace", scaleRhsWS);
-  alg->setProperty("UseManualScaleFactor", useManualScaleFactor);
-  if (useManualScaleFactor)
-    alg->setProperty("ManualScaleFactor", manualScaleFactor);
+  alg->setProperty("UseManualScaleFactor", useManualScaleFactors);
+  if (useManualScaleFactors)
+    alg->setProperty("ManualScaleFactor", manualScaleFactors[wsIndex - 1]);
   alg->execute();
 
   outWS = alg->getProperty("OutputWorkspace");
@@ -275,8 +270,8 @@ void Stitch1DMany::doStitch1D(
  * @param endOverlaps :: End overlaps for stitched workspaces
  * @param params :: Rebinning parameters
  * @param scaleRhsWS :: Scaling either with respect to left or right workspaces
- * @param useManualScaleFactor :: True to use a provided value for scale factor
- * @param manualScaleFactor :: Provided value for scaling factor
+ * @param useManualScaleFactors :: True to use provided values for scale factors
+ * @param manualScaleFactors :: Provided values for scaling factors
  * @param outName :: Output stitched workspace name
  * @param outScaleFactors :: Actual values used for scale factors
  */
@@ -284,8 +279,8 @@ void Stitch1DMany::doStitch1DMany(
     std::vector<WorkspaceGroup_sptr> inputWSGroups, const size_t period,
     const bool storeInADS, const std::vector<double> &startOverlaps,
     const std::vector<double> &endOverlaps, const std::vector<double> &params,
-    const bool scaleRhsWS, const bool useManualScaleFactor,
-    const double manualScaleFactor, std::string &outName,
+    const bool scaleRhsWS, const bool useManualScaleFactors,
+    const std::vector<double> manualScaleFactors, std::string &outName,
     std::vector<double> &outScaleFactors) {
 
   // List of workspaces to stitch
@@ -307,9 +302,9 @@ void Stitch1DMany::doStitch1DMany(
   alg->setProperty("EndOverlaps", endOverlaps);
   alg->setProperty("Params", params);
   alg->setProperty("ScaleRHSWorkspace", scaleRhsWS);
-  alg->setProperty("UseManualScaleFactor", useManualScaleFactor);
-  if (useManualScaleFactor)
-    alg->setProperty("ManualScaleFactor", manualScaleFactor);
+  alg->setProperty("UseManualScaleFactors", useManualScaleFactors);
+  if (useManualScaleFactors)
+    alg->setProperty("ManualScaleFactors", manualScaleFactors);
   alg->execute();
 
   outScaleFactors = alg->getProperty("OutScaleFactors");
@@ -336,15 +331,15 @@ bool Stitch1DMany::processGroups() {
   // Determine whether or not we are scaling workspaces using scale factors from
   // a specific period
   Property *manualSF = this->getProperty("ManualScaleFactor");
-  bool usingScaleFromPeriod = m_useManualScaleFactor && manualSF->isDefault();
+  bool usingScaleFromPeriod = m_useManualScaleFactors && manualSF->isDefault();
 
   if (!usingScaleFromPeriod) {
     for (size_t i = 0; i < m_numWSPerGroup; ++i) {
       outName = groupName;
       std::vector<double> scaleFactors;
       doStitch1DMany(m_inputWSGroups, i, true, m_startOverlaps, m_endOverlaps,
-                     m_params, m_scaleRHSWorkspace, m_useManualScaleFactor,
-                     m_manualScaleFactor, outName, scaleFactors);
+                     m_params, m_scaleRHSWorkspace, m_useManualScaleFactors,
+                     m_manualScaleFactors, outName, scaleFactors);
 
       // Add the resulting workspace to the list to be grouped together
       toGroup.push_back(outName);
@@ -359,7 +354,7 @@ bool Stitch1DMany::processGroups() {
     std::vector<double> periodScaleFactors;
     doStitch1DMany(m_inputWSGroups, m_scaleFactorFromPeriod, false,
                    m_startOverlaps, m_endOverlaps, m_params,
-                   m_scaleRHSWorkspace, false, m_manualScaleFactor, outName,
+                   m_scaleRHSWorkspace, false, m_manualScaleFactors, outName,
                    periodScaleFactors);
 
     // Iterate over each period
@@ -376,8 +371,8 @@ bool Stitch1DMany::processGroups() {
         double outScaleFactor;
 
         doStitch1D(lhsWS, rhsWS, j, m_startOverlaps, m_endOverlaps, m_params,
-                   m_scaleRHSWorkspace, m_useManualScaleFactor,
-                   periodScaleFactors[j - 1], lhsWS, outScaleFactor);
+                   m_scaleRHSWorkspace, m_useManualScaleFactors,
+                   periodScaleFactors, lhsWS, outScaleFactor);
 
         m_scaleFactors.push_back(outScaleFactor);
       }
