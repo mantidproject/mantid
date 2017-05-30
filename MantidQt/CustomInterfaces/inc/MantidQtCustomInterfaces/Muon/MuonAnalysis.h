@@ -87,11 +87,13 @@ public:
   /// Destructor
   ~MuonAnalysis();
 
-  /// Gets current index of group or pair to plot
+  /// Gets current index of the group or pair to plot
   int getGroupOrPairToPlot() const;
 
+  /// Sets the current index of the group or pair to plot
   void setGroupOrPairIndexToPlot(int index);
 
+  /// Plots the currently selected group or pair
   void plotCurrentGroupAndPairs();
 
 signals:
