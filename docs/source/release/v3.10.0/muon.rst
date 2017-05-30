@@ -19,6 +19,11 @@ Algorithms
 -  :ref:`EstimateMuonAsymmetryFromCounts <algm-EstimateMuonAsymmetryFromCounts-v1>`: new algorithm to estimate the asymmetry.
 -  :ref:`CalculateMuonAsymmetry <algm-CalculateMuonAsymmetry-v1>`: new algorithm to calculate the asymmetry by using a fitting function.
 
+Bug Fixes
+---------
+- Mantid would sometimes crash when the user was adding groups/pairs. This has been fixed by removing the automatic plotting from the group/pairs tab.
+
+
 |
 
 `Full list of changes <http://github.com/mantidproject/mantid/pulls?q=is%3Apr+milestone%3A%22Release+3.10%22+is%3Amerged+label%3A%22Component%3A+Muon%22>`_
