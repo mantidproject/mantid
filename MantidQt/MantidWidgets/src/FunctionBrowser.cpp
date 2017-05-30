@@ -1373,7 +1373,8 @@ Mantid::API::IFunction_sptr FunctionBrowser::getFunction(QtProperty *prop,
     QList<QtProperty *> filedTies; // ties can become invalid after some editing
     for (auto it = from; it != to; ++it) {
       try {
-        QString tie = it->paramProp->propertyName() + "=" + m_tieManager->value(it.value().tieProp);
+        QString tie = it->paramProp->propertyName() + "=" +
+                      m_tieManager->value(it.value().tieProp);
         fun->addTies(tie.toStdString());
       } catch (...) {
         filedTies << it.value().tieProp;
