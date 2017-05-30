@@ -524,7 +524,7 @@ void KafkaEventStreamDecoder::initLocalCaches() {
   // Run start. Cache locally for computing frame times
   auto runStartTime = static_cast<time_t>(runStartData.startTime);
   char timeString[32];
-  strftime(timeString, 32, "%Y-%m-%dT%H:%M:%S", localtime(&runStartTime));
+  strftime(timeString, 32, "%Y-%m-%dT%H:%M:%S", gmtime(&runStartTime));
   m_runStart.setFromISO8601(timeString, false);
   // Run number
   mutableRun.addProperty(RUN_START_PROPERTY, std::string(timeString));
