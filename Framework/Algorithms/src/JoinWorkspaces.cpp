@@ -1,6 +1,7 @@
 #include "MantidAlgorithms/JoinWorkspaces.h"
 
-#include "MantidAlgorithms/MergeRuns/SampleLogsBehaviour.h"
+#include "MantidAlgorithms/RunCombinationHelpers/RunCombinationHelper.h"
+#include "MantidAlgorithms/RunCombinationHelpers/SampleLogsBehaviour.h"
 #include "MantidAPI/ADSValidator.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
@@ -70,6 +71,9 @@ void JoinWorkspaces::init() {
   declareProperty(Kernel::make_unique<WorkspaceProperty<API::Workspace>>(
                       OUTPUTWORKSPACEPROPERTY, "", Direction::Output),
                   "The output workspace.");
+
+  RunCombinationHelper::declareSampleLogOverrideProperties(this);
+
 }
 
 std::map<std::string, std::string> JoinWorkspaces::validateInputs() {
@@ -132,7 +136,7 @@ std::map<std::string, std::string> JoinWorkspaces::validateInputs() {
 }
 
 //----------------------------------------------------------------------------------------------
-/** Tests the compatibility of the input workspaces
+/** Check if the log entry is valid
 * @param ws : input workspace to test
 * @param log : the sample log entry name
 * @return : true if the log exists, is numeric, and matches the size of the
@@ -262,8 +266,8 @@ std::vector<double> JoinWorkspaces::getXAxis(MatrixWorkspace_sptr ws, const std:
 }
 
 //----------------------------------------------------------------------------------------------
-/** Return the to-be axis of the workspace dependent on the log entry
-* @param inputs : list of input workspace
+/** Joins the given spectrum for the list of workspaces
+* @param inputs : list of input workspaces
 * @param wsIndex : the workspace index
 * @param out : the output workspace
 */
@@ -313,8 +317,7 @@ void JoinWorkspaces::exec() {
   auto outWS = WorkspaceFactory::Instance().create(
       first, first->getNumberHistograms(), outBlockSize, outBlockSize);
 
-  SampleLogsBehaviour sampleLogsBehaviour =
-      SampleLogsBehaviour(*first, g_log, "", "", "", "", "", "", "");
+  SampleLogsBehaviour sampleLogsBehaviour = SampleLogsBehaviour(*first, g_log);
 
   auto it = inputWS.begin();
 
@@ -336,12 +339,9 @@ void JoinWorkspaces::exec() {
     outWS->mutableX(static_cast<size_t>(index)) = xAxis;
     // TODO: think about the x-axis unit here
     joinSpectrum(inputWS, index, outWS);
-    // TODO: think more about paralelization here
     PARALLEL_END_INTERUPT_REGION
   }
   PARALLEL_CHECK_INTERUPT_REGION
-
-  // TODO: think about history
 
   setProperty("OutputWorkspace", outWS);
   }

@@ -1,9 +1,10 @@
 #include "MantidAlgorithms/MergeRuns.h"
 
+#include "MantidAlgorithms/RunCombinationHelpers/RunCombinationHelper.h"
+#include "MantidAlgorithms/RunCombinationHelpers/SampleLogsBehaviour.h"
 #include "MantidAPI/ADSValidator.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/Axis.h"
-#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidGeometry/Instrument.h"
@@ -11,8 +12,6 @@
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/make_unique.h"
-#include "MantidAPI/ADSValidator.h"
-#include "MantidAlgorithms/MergeRuns/SampleLogsBehaviour.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
 
 using Mantid::HistogramData::HistogramX;

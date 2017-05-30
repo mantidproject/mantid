@@ -1,17 +1,12 @@
 #ifndef MANTID_ALGORITHMS_MERGERUNS_H_
 #define MANTID_ALGORITHMS_MERGERUNS_H_
 
-#include <list>
-#include <vector>
-#include <boost/shared_ptr.hpp>
+
 #include <MantidAPI/MatrixWorkspace.h>
 #include "MantidAPI/MultiPeriodGroupAlgorithm.h"
 #include "MantidAPI/WorkspaceHistory.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidKernel/System.h"
-#include <boost/shared_ptr.hpp>
-#include <list>
-#include <vector>
 
 namespace Mantid {
 namespace API {
@@ -66,12 +61,6 @@ namespace Algorithms {
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-namespace MergeRunsOptions {
-const std::string SKIP_BEHAVIOUR = "Skip File";
-const std::string STOP_BEHAVIOUR = "Stop";
-const std::string REBIN_BEHAVIOUR = "Rebin";
-const std::string FAIL_BEHAVIOUR = "Fail";
-}
 
 class DLLExport MergeRuns : public API::MultiPeriodGroupAlgorithm {
 public:

@@ -1,4 +1,4 @@
-#include "MantidAlgorithms/MergeRuns/SampleLogsBehaviour.h"
+#include "MantidAlgorithms/RunCombinationHelpers/SampleLogsBehaviour.h"
 #include "MantidAPI/Run.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/Strings.h"
