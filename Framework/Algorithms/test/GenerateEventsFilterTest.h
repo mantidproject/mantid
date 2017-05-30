@@ -1110,7 +1110,7 @@ public:
     // Create input Workspace & initial setup
     DataObjects::EventWorkspace_sptr eventWS = createEventWorkspace();
     AnalysisDataService::Instance().addOrReplace("TestEventWorkspace08",
-      eventWS);
+                                                 eventWS);
 
     // Init and set property
     GenerateEventsFilter alg;
@@ -1118,11 +1118,11 @@ public:
     alg.setRethrows(true);
 
     TS_ASSERT_THROWS_NOTHING(
-      alg.setPropertyValue("InputWorkspace", "TestEventWorkspace08"));
+        alg.setPropertyValue("InputWorkspace", "TestEventWorkspace08"));
     TS_ASSERT_THROWS_NOTHING(
-      alg.setPropertyValue("OutputWorkspace", "Splitters08"));
+        alg.setPropertyValue("OutputWorkspace", "Splitters08"));
     TS_ASSERT_THROWS_NOTHING(
-      alg.setPropertyValue("InformationWorkspace", "InfoWS08"));
+        alg.setPropertyValue("InformationWorkspace", "InfoWS08"));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("TimeInterval", "0, 0, 0"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("UnitOfTime", "Nanoseconds"));
 
