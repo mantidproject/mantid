@@ -2538,7 +2538,7 @@ void MuonAnalysis::changeTab(int newTabIndex) {
                                                   options.grouping.groupNames);
       m_uiForm.fitBrowser->setAllGroupsOrPairs(isItGroup);
       m_uiForm.fitBrowser->setAllPeriods();
-	}
+    }
   } else if (newTab == m_uiForm.ResultsTable) {
     m_resultTableTab->refresh();
   }
