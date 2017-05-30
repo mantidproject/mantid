@@ -622,6 +622,7 @@ void FunctionBrowser::addAttributeAndParameterProperties(
     QtProperty *prop, Mantid::API::IFunction_sptr fun) {
   // add the function index property
   addIndexProperty(prop);
+
   // add attribute properties
   auto attributeNames = fun->getAttributeNames();
   for (auto att = attributeNames.begin(); att != attributeNames.end(); ++att) {
@@ -646,10 +647,8 @@ void FunctionBrowser::addAttributeAndParameterProperties(
       if (!fun->isActive(i)) {
         auto tie = fun->getTie(i);
         if (tie) {
-          updateFunctionIndices();
           addTieProperty(ap.prop, QString::fromStdString(tie->asString()));
         } else {
-          updateFunctionIndices();
           addTieProperty(ap.prop, QString::number(fun->getParameter(i)));
         }
       }
@@ -684,7 +683,9 @@ FunctionBrowser::AProperty FunctionBrowser::addIndexProperty(QtProperty *prop) {
   QtProperty *ip = m_indexManager->addProperty("Index");
   ip->setEnabled(false);
   m_indexManager->setValue(ip, index);
-  return addProperty(prop, ip);
+  auto retval = addProperty(prop, ip);
+  updateFunctionIndices();
+  return retval;
 }
 
 /**
