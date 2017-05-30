@@ -240,7 +240,7 @@ void PreprocessDetectorsToMD::processDetectorsPositions(
   //// progress message appearance
   size_t div = 100;
   size_t nHist = targWS->rowCount();
-  Mantid::API::Progress theProgress(this, 0, 1, nHist);
+  Mantid::API::Progress theProgress(this, 0.0, 1.0, nHist);
   //// Loop over the spectra
   uint32_t liveDetectorsCount(0);
   const auto &spectrumInfo = inputWS->spectrumInfo();

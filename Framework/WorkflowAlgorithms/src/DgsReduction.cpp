@@ -698,7 +698,7 @@ void DgsReduction::exec() {
     }
   }
 
-  Progress progress(this, 0, 1, 7);
+  Progress progress(this, 0.0, 1.0, 7);
 
   progress.report();
 

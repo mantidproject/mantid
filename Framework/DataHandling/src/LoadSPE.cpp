@@ -157,7 +157,7 @@ void LoadSPE::exec() {
   workspace->replaceAxis(1, phiAxis);
 
   // Now read in the data spectrum-by-spectrum
-  Progress progress(this, 0, 1, nhist);
+  Progress progress(this, 0.0, 1.0, nhist);
   for (size_t j = 0; j < nhist; ++j) {
     // Set the common X vector
     workspace->setBinEdges(j, XValues);

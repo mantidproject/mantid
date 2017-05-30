@@ -1,3 +1,5 @@
+.. _SCD_Event_Data_Reduction_Interface:
+
 SCD Event Data Reduction interface(MantidEV)
 ============================================
 

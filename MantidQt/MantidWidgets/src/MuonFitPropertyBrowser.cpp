@@ -173,7 +173,8 @@ void MuonFitPropertyBrowser::init() {
   tmp = "bwd";
   addGroupCheckbox(tmp);
   m_periodsToFit = m_enumManager->addProperty("Periods to fit");
-  m_periodsToFitOptions << "1"
+  m_periodsToFitOptions << "All Periods"
+                        << "1"
                         << "2"
                         << "Custom";
   m_showPeriodValue << "1";
@@ -358,6 +359,9 @@ void MuonFitPropertyBrowser::enumChanged(QtProperty *prop) {
     if (option == "Custom") {
       m_reselectPeriodBtn->setEnabled(true);
       genPeriodWindow();
+    } else if (option == "All Periods") {
+      setAllPeriods();
+      m_reselectPeriodBtn->setEnabled(false);
     } else {
       for (auto iter = m_periodBoxes.constBegin();
            iter != m_periodBoxes.constEnd(); ++iter) {
@@ -955,6 +959,7 @@ void MuonFitPropertyBrowser::setMultiFittingMode(bool enabled) {
   // set default selection (all groups)
   if (enabled) {
     setAllGroups();
+    setAllPeriods();
   } else { // clear current selection
     clearChosenGroups();
     clearChosenPeriods();
@@ -1159,11 +1164,26 @@ void MuonFitPropertyBrowser::genGroupWindow() {
   m_groupWindow->show();
 }
 /**
+* Selects all periods
+*/
+void MuonFitPropertyBrowser::setAllPeriods() {
+
+  clearChosenPeriods();
+  for (auto iter = m_periodBoxes.constBegin(); iter != m_periodBoxes.constEnd();
+       ++iter) {
+    m_boolManager->setValue(iter.value(), true);
+  }
+}
+
+/**
 * Sets checkboxes for periods
 * @param numPeriods :: [input] Number of periods
 */
 void MuonFitPropertyBrowser::setNumPeriods(size_t numPeriods) {
   m_periodsToFitOptions.clear();
+  if (numPeriods > 1) {
+    m_periodsToFitOptions << "All Periods";
+  }
   // create more boxes
   for (size_t i = 0; i != numPeriods; i++) {
     QString name = QString::number(i + 1);
@@ -1244,13 +1264,17 @@ void MuonFitPropertyBrowser::clearChosenPeriods() const {
 void MuonFitPropertyBrowser::addPeriodCheckbox(const QString &name) {
   m_periodBoxes.insert(name, m_boolManager->addProperty(name));
   int j = m_enumManager->value(m_periodsToFit);
-
   // add new period to list will go after inital list
   m_periodsToFitOptions << name;
+
   auto active = getChosenPeriods();
   m_enumManager->setEnumNames(m_periodsToFit, m_periodsToFitOptions);
   setChosenPeriods(active);
   m_enumManager->setValue(m_periodsToFit, j);
+  auto option = m_periodsToFitOptions[j].toStdString();
+  if (option == "All Periods") {
+    setAllPeriods();
+  }
 }
 /**
 * Returns a list of the selected periods (checked boxes)

@@ -751,7 +751,8 @@ Algorithm_sptr Algorithm::createChildAlgorithm(const std::string &name,
     }
   }
 
-  if (startProgress >= 0 && endProgress > startProgress && endProgress <= 1.) {
+  if (startProgress >= 0.0 && endProgress > startProgress &&
+      endProgress <= 1.0) {
     alg->addObserver(this->progressObserver());
     m_startChildProgress = startProgress;
     m_endChildProgress = endProgress;
