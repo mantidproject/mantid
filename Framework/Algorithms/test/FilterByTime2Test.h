@@ -16,6 +16,7 @@
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidKernel/DateAndTime.h"
+#include "MantidKernel/TimeSeriesProperty.h"
 
 using namespace Mantid::Algorithms;
 using namespace Mantid::DataHandling;
@@ -42,7 +43,7 @@ public:
 
   /** In this test, only a very simple event workspace is used
    */
-  void NtestTooManyParams() {
+  void testTooManyParams() {
     EventWorkspace_sptr ws =
         WorkspaceCreationHelper::createEventWorkspace(1, 1);
     AnalysisDataService::Instance().addOrReplace("eventWS", ws);
@@ -88,6 +89,7 @@ public:
 
     // Retrieve Workspace
     WS = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(inputWS);
+    WS->mutableRun().integrateProtonCharge();
     TS_ASSERT(WS); // workspace is loaded
 
     // Do the filtering now.
