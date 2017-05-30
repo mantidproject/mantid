@@ -76,7 +76,7 @@ void ConvertSpectrumAxis2::exec() {
   // The unit to convert to.
   const std::string unitTarget = getProperty("Target");
 
-  Progress progress(this, 0, 1, inputWS->getNumberHistograms());
+  Progress progress(this, 0.0, 1.0, inputWS->getNumberHistograms());
 
   // Call the functions to convert to the different forms of theta or Q.
   if (unitTarget == "theta" || unitTarget == "Theta" ||

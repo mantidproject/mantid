@@ -7,7 +7,7 @@ import warnings
 
 # Have to patch warnings at runtime to not print the source code. This is even advertised as a 'feature' of
 # the warnings library in the documentation: https://docs.python.org/3/library/warnings.html#warnings.showwarning
-def _warning_no_source(msg, *_):
+def _warning_no_source(msg, *_, **__):
     return str(msg) + '\n'
 
 warnings.formatwarning = _warning_no_source
@@ -26,8 +26,8 @@ class InstrumentSettings(object):
         if kwargs:
             config_file_path = kwargs.get("config_file", None)
             if not config_file_path:
-                warnings.warn("No config file was specified. If one was meant to be used the path to a YAML config file"
-                              " is set with the 'config_file' parameter.")
+                warnings.warn("No config file was specified. If a configuration file  was meant to be used "
+                              "the path to the file is set with the 'config_file' parameter.\n")
             # Always do this so we have a known state of the internal variable
             self._basic_conf_dict = yaml_parser.open_yaml_file_as_dictionary(config_file_path)
 

@@ -16,6 +16,8 @@ from fourcircle_utility import *
 from peakprocesshelper import PeakProcessRecord
 import fputility
 import project_manager
+import peak_integration_utility
+import absorption
 
 import mantid
 import mantid.simpleapi as mantidsimple
@@ -25,9 +27,8 @@ from mantid.kernel import V3D
 
 DebugMode = True
 
-# TODO - changed without configuration
-DET_X_SIZE = 512
-DET_Y_SIZE = 512
+# DET_X_SIZE = 512
+# DET_Y_SIZE = 512
 
 MAX_SCAN_NUMBER = 100000
 
@@ -107,6 +108,12 @@ class CWSCDReductionControl(object):
         self._detSampleDistanceDict = dict()
         self._detCenterDict = dict()
 
+        # detector geometry: initialized to unphysical value
+        self._detectorSize = [-1, -1]
+
+        # reference workspace for LoadMask
+        self._refWorkspaceForMask = None
+
         # register startup
         mantid.UsageService.registerFeatureUsage("Interface","4-Circle Reduction",False)
 
@@ -142,9 +149,9 @@ class CWSCDReductionControl(object):
         :return: k_index of the (k_x, k_y, k_z)
         """
         # check
-        assert isinstance(k_x, float)
-        assert isinstance(k_y, float)
-        assert isinstance(k_z, float)
+        assert isinstance(k_x, float), 'Kx is wrong'
+        assert isinstance(k_y, float), 'Ky is wrong'
+        assert isinstance(k_z, float), 'Kz is wrong'
 
         k_shift_vector = (k_x, k_y, k_z)
         self._kShiftDict[self._kVectorIndex] = [k_shift_vector, []]
@@ -189,16 +196,6 @@ class CWSCDReductionControl(object):
 
         return
 
-    @staticmethod
-    def apply_lorentz_correction(peak_intensity, q, wavelength, step_omega):
-        """ Apply lorentz correction to intensity """
-        # calculate theta
-        sin_theta = q * wavelength/(4*math.pi)
-        theta = math.asin(sin_theta)
-        corrected_intensity = peak_intensity * math.sin(2*theta) * step_omega
-
-        return corrected_intensity
-
     def find_peak(self, exp_number, scan_number, pt_number_list=None):
         """ Find 1 peak in sample Q space for UB matrix
         :param exp_number:
@@ -230,7 +227,8 @@ class CWSCDReductionControl(object):
                                  PeakDistanceThreshold=5.,
                                  DensityThresholdFactor=0.1,
                                  OutputWorkspace=peak_ws_name)
-        assert AnalysisDataService.doesExist(peak_ws_name)
+        assert AnalysisDataService.doesExist(peak_ws_name), 'PeaksWorkspace {0} does not exist in ADS.' \
+                                                            ''.format(peak_ws_name)
 
         # add peak to UB matrix workspace to manager
         self._set_peak_info(exp_number, scan_number, peak_ws_name, merged_ws_name)
@@ -241,6 +239,29 @@ class CWSCDReductionControl(object):
         peak_center = self._myPeakInfoDict[(exp_number, scan_number)].get_peak_centre()
 
         return True, peak_center
+
+    @staticmethod
+    def find_detector_size(exp_directory, exp_number):
+        """
+        find detector size from experiment directory
+        :param exp_directory:
+        :param exp_number
+        :return:
+        """
+        # guess the file name
+        first_xm_file = os.path.join(exp_directory, 'HB3A_Exp{0}_Scan0001_00001.xml'.format(exp_number))
+        if os.path.exists(first_xm_file):
+            file_size = os.path.getsize(first_xm_file)
+            if file_size < 136132 * 2:
+                det_size = 256, 256
+            elif file_size < 529887 * 2:
+                det_size = 512, 512
+            else:
+                raise RuntimeError('File size is over {0}.  It is not supported.')
+
+            return True, det_size
+
+        return False, 'Unable to find first Pt file {0}'.format(first_xm_file)
 
     def calculate_ub_matrix(self, peak_info_list, a, b, c, alpha, beta, gamma):
         """
@@ -420,20 +441,28 @@ class CWSCDReductionControl(object):
 
         return True, error_message
 
-    def check_generate_mask_workspace(self, exp_number, scan_number, mask_tag):
+    def check_generate_mask_workspace(self, exp_number, scan_number, mask_tag, check_throw):
         """
-        Check whether a workspace does exist.
+        Check whether a MaskWorkspace exists according to the tag
         If it does not, then generate one according to the tag
+
+        A MaskWorkspace's name is exactly the same as the tag of the mask specified by user in
+        reduction GUI.
+
         :param exp_number:
         :param scan_number:
-        :param mask_tag:
+        :param mask_tag: string as the tag of the mask.
+        :param check_throw
         :return:
         """
         # Check
-        assert isinstance(exp_number, int)
-        assert isinstance(scan_number, int)
-        assert isinstance(mask_tag, str)
+        assert isinstance(exp_number, int), 'Experiment number {0} must be an integer but not a {1}.' \
+                                            ''.format(exp_number, type(exp_number))
+        assert isinstance(scan_number, int), 'Scan number {0} ({1}) must be an integer.' \
+                                             ''.format(scan_number, type(scan_number))
+        assert isinstance(mask_tag, str), 'Mask tag {0} ({1}) must be a string.'.format(mask_tag, type(mask_tag))
 
+        # MaskWorkspace's name is same as mask's tag
         mask_ws_name = mask_tag
 
         if AnalysisDataService.doesExist(mask_ws_name) is False:
@@ -444,7 +473,11 @@ class CWSCDReductionControl(object):
             ur = region_of_interest[1]
             self.generate_mask_workspace(exp_number, scan_number, ll, ur, mask_ws_name)
 
-        return
+        if check_throw:
+            assert AnalysisDataService.doesExist(mask_ws_name), 'MaskWorkspace %s does not exist.' \
+                                                                 '' % mask_ws_name
+
+        return mask_ws_name
 
     def does_file_exist(self, exp_number, scan_number, pt_number=None):
         """
@@ -553,8 +586,10 @@ class CWSCDReductionControl(object):
         :return:
         """
         # check
-        assert isinstance(exp_number, int)
-        assert isinstance(scan_number, int)
+        assert isinstance(exp_number, int), 'Experiment number {0} must be an integer but not a {1}.' \
+                                            ''.format(exp_number, type(scan_number))
+        assert isinstance(scan_number, int), 'Scan number {0} must be an integer but not a {1}.' \
+                                             ''.format(scan_number, type(scan_number))
 
         # get SPICE table
         spice_table_name = get_spice_table_name(exp_number, scan_number)
@@ -625,49 +660,65 @@ class CWSCDReductionControl(object):
         assert len(scan_kindex_dict) == 0 or len(scan_kindex_dict) >= len(scan_number_list), error_message
 
         # form peaks
-        peaks = list()
         no_shift = len(scan_kindex_dict) == 0
 
         # get ub matrix
         ub_matrix = self.get_ub_matrix(exp_number)
 
-        for scan_number in scan_number_list:
-            peak_dict = dict()
+        for algorithm_type in ['simple', 'mixed', 'gauss']:
+            # set list of peaks for exporting
+            peaks = list()
+            for scan_number in scan_number_list:
+                peak_dict = dict()
+                try:
+                    peak_dict['hkl'] = self._myPeakInfoDict[(exp_number, scan_number)].get_hkl(user_hkl=True)
+                except RuntimeError as run_err:
+                    return False, str('Peak index error: %s.' % run_err)
+
+                intensity, std_dev = self._myPeakInfoDict[(exp_number, scan_number)].get_intensity(
+                    algorithm_type, lorentz_corrected=True)
+
+                if intensity < std_dev:
+                    # error is huge, very likely bad gaussian fit
+                    print '[INFO] Integration Type {0}: Scan {1} Intensity {2} < Std Dev {2} Excluded from exporting.' \
+                          ''.format(algorithm_type, scan_number, intensity, std_dev)
+                    continue
+                # END-IF
+
+                peak_dict['intensity'] = intensity
+                peak_dict['sigma'] = std_dev
+                if no_shift:
+                    peak_dict['kindex'] = 0
+                else:
+                    peak_dict['kindex'] = scan_kindex_dict[scan_number]
+
+                if export_absorption:
+                    # calculate absorption correction
+                    spice_ub = convert_mantid_ub_to_spice(ub_matrix)
+                    up_cart, us_cart = absorption.calculate_absorption_correction_2(
+                        exp_number, scan_number, spice_ub)
+                    peak_dict['up'] = up_cart
+                    peak_dict['us'] = us_cart
+
+                # append peak (in dict) to peaks
+                peaks.append(peak_dict)
+            # END-FOR (scan_number)
+
+            # get file name for this type
+            this_file_name = fullprof_file_name.split('.')[0] + '_' + algorithm_type + '.dat'
+
             try:
-                peak_dict['hkl'] = self._myPeakInfoDict[(exp_number, scan_number)]. get_hkl(user_hkl=True)
-            except RuntimeError as run_err:
-                return False, str('Peak index error: %s.' % run_err)
+                file_content = fputility.write_scd_fullprof_kvector(
+                    user_header=user_header, wave_length=exp_wave_length,
+                    k_vector_dict=k_shift_dict, peak_dict_list=peaks,
+                    fp_file_name=this_file_name, with_absorption=export_absorption)
+            except AssertionError as error:
+                return False, 'AssertionError: %s.' % str(error)
+            except RuntimeError as error:
+                return False, 'RuntimeError: %s.' % str(error)
 
-            peak_dict['intensity'] = self._myPeakInfoDict[(exp_number, scan_number)].get_intensity()
-            peak_dict['sigma'] = self._myPeakInfoDict[(exp_number, scan_number)].get_sigma()
-            if no_shift:
-                peak_dict['kindex'] = 0
-            else:
-                peak_dict['kindex'] = scan_kindex_dict[scan_number]
-
-            if export_absorption:
-                # calculate absorption correction
-                import absorption
-
-                spice_ub = convert_mantid_ub_to_spice(ub_matrix)
-                up_cart, us_cart = absorption.calculate_absorption_correction_2(
-                    exp_number, scan_number, spice_ub)
-                peak_dict['up'] = up_cart
-                peak_dict['us'] = us_cart
-
-            # append peak (in dict) to peaks
-            peaks.append(peak_dict)
-        # END-FOR (scan_number)
-
-        try:
-            file_content = fputility.write_scd_fullprof_kvector(
-                user_header=user_header, wave_length=exp_wave_length,
-                k_vector_dict=k_shift_dict, peak_dict_list=peaks,
-                fp_file_name=fullprof_file_name, with_absorption=export_absorption)
-        except AssertionError as error:
-            return False, 'AssertionError: %s.' % str(error)
-        except RuntimeError as error:
-            return False, 'RuntimeError: %s.' % str(error)
+            continue
+        # END-FOR
 
         return True, file_content
 
@@ -750,13 +801,13 @@ class CWSCDReductionControl(object):
         raw_ws = self.get_raw_data_workspace(exp_no, scan_no, pt_no)
         if raw_ws is None:
             return False, 'Raw data for Exp %d Scan %d Pt %d is not loaded.' % (exp_no, scan_no, pt_no)
-        print '[DB...BAT] Raw workspace size: ', raw_ws.getNumberHistograms()
 
         # Convert to numpy array
-        array2d = numpy.ndarray(shape=(DET_X_SIZE, DET_Y_SIZE), dtype='float')
-        for i in xrange(DET_X_SIZE):
-            for j in xrange(DET_Y_SIZE):
-                array2d[i][j] = raw_ws.readY(j * DET_X_SIZE + i)[0]
+        det_shape = (self._detectorSize[0], self._detectorSize[1])
+        array2d = numpy.ndarray(shape=det_shape, dtype='float')
+        for i in xrange(det_shape[0]):
+            for j in xrange(det_shape[1]):
+                array2d[i][j] = raw_ws.readY(j * det_shape[0] + i)[0]
 
         # Flip the 2D array to look detector from sample
         array2d = numpy.flipud(array2d)
@@ -777,11 +828,12 @@ class CWSCDReductionControl(object):
         """ Get region of interest
         :param exp_number:
         :param scan_number:
-        :return:
+        :return: region of interest
         """
         # check
-        assert isinstance(exp_number, int)
-        assert isinstance(scan_number, int) or scan_number is None
+        assert isinstance(exp_number, int), 'Experiment number {0} must be an integer.'.format(exp_number)
+        assert isinstance(scan_number, int) or scan_number is None, 'Scan number {0} must be either an integer or None.' \
+                                                                    ''.format(scan_number)
 
         if (exp_number, scan_number) in self._roiDict:
             # able to find region of interest for this scan
@@ -872,6 +924,9 @@ class CWSCDReductionControl(object):
                                                                 'it is of type %s now.' % (str(pt_number),
                                                                                            type(pt_number))
 
+        # print '[DB...BAT] Retrieve: Exp {0} Scan {1} Peak Info Object. Current keys are {0}.' \
+        #       ''.format(exp_number, scan_number, self._myPeakInfoDict.keys())
+
         # construct key
         if pt_number is None:
             p_key = (exp_number, scan_number)
@@ -881,6 +936,8 @@ class CWSCDReductionControl(object):
         # Check for existence
         if p_key in self._myPeakInfoDict:
             ret_value = self._myPeakInfoDict[p_key]
+            # print '[DB...BAT] Retrieved: Exp {0} Scan {1} Peak Info Object {2}.'.format(exp_number, scan_number,
+            #                                                                             hex(id(ret_value)))
         else:
             ret_value = None
 
@@ -937,8 +994,10 @@ class CWSCDReductionControl(object):
         :return:
         """
         # assert ...
-        assert isinstance(exp_number, int)
-        assert isinstance(scan_number, int)
+        assert isinstance(exp_number, int), 'Experiment number {0} ({1}) must be an integer.' \
+                                            ''.format(exp_number, type(exp_number))
+        assert isinstance(scan_number, int), 'Scan number {0} ({1}) must be an integer.' \
+                                             ''.format(scan_number, type(scan_number))
 
         # create an xml file
         mask_file_name = get_mask_xml_temp(self._workDir, exp_number, scan_number)
@@ -954,9 +1013,14 @@ class CWSCDReductionControl(object):
             # use given name
             mask_ws_name = str(mask_tag)
 
+        if self._refWorkspaceForMask is None:
+            return False, 'There is no reference workspace. Plot a Pt. first!'
+        elif AnalysisDataService.doesExist(self._refWorkspaceForMask) is False:
+            return False, 'Previous reference workspace has been deleted. Plot a Pt. first'
         mantidsimple.LoadMask(Instrument='HB3A',
                               InputFile=mask_file_name,
-                              OutputWorkspace=mask_ws_name)
+                              OutputWorkspace=mask_ws_name,
+                              RefWorkspace=self._refWorkspaceForMask)
         mantidsimple.InvertMask(InputWorkspace=mask_ws_name,
                                 OutputWorkspace=mask_ws_name)
 
@@ -1117,7 +1181,7 @@ class CWSCDReductionControl(object):
         temp_index_ws = AnalysisDataService.retrieve(temp_index_ws_name)
 
         if num_peak_index == 0:
-            return False, 'No peak can be indexed.'
+            return False, 'No peak can be indexed: {0}.'.format(error)
         elif num_peak_index > 1:
             raise RuntimeError('Case for PeaksWorkspace containing more than 1 peak is not '
                                'considered. Contact developer for this issue.')
@@ -1133,10 +1197,70 @@ class CWSCDReductionControl(object):
 
         return True, (hkl, error)
 
+    def integrate_scan_peak(self, exp_number, scan_number, peak_centre, mask_name, normalization,
+                            scale_factor, background_pt_tuple):
+        """
+        new way to integrate a peak in a scan
+        Note: it is going to replace "integrate_scan_peaks()"
+        :param exp_number:
+        :param scan_number:
+        :param peak_centre:
+        :param mask_name:
+        :param normalization:
+        :param scale_factor:
+        :param background_pt_tuple:
+        :return:
+        """
+        # check inputs
+        assert isinstance(exp_number, int), 'Experiment number {0} must be an integer but not a {1}.' \
+                                            ''.format(exp_number, type(exp_number))
+        assert isinstance(scan_number, int), 'Scan number {0} must be an integer but not a {1}.' \
+                                             ''.format(scan_number, type(scan_number))
+        assert isinstance(mask_name, str), 'Mask name {0} must be a string but not a {1}.' \
+                                           ''.format(mask_name, type(mask_name))
+        assert isinstance(normalization, str), 'Normalization type {0} must be a string but not a {1}.' \
+                                               ''.format(normalization, type(normalization))
+        assert isinstance(scale_factor, float) or isinstance(scale_factor, int),\
+            'Scale factor {0} must be a float or integer but not a {1}.'.format(scale_factor, type(scale_factor))
+        assert len(peak_centre) == 3, 'Peak center {0} must have 3 elements for (Qx, Qy, Qz).'.format(peak_centre)
+        # print '[DB...BAT] Background tuple {0} is of type {1}.'.format(background_pt_tuple, type(background_pt_tuple))
+        assert len(background_pt_tuple) == 2, 'Background tuple {0} must be of length 2.'.format(background_pt_tuple)
+
+        # get input MDEventWorkspace name for merged scan
+        status, ret_obj = self.get_pt_numbers(exp_number, scan_number)
+        if status:
+            pt_list = ret_obj
+        else:
+            raise RuntimeError('Unable to get Pt. list from Exp {0} Scan {1} due to {2}'
+                               ''.format(exp_number,scan_number, ret_obj))
+        md_ws_name = get_merged_md_name(self._instrumentName, exp_number, scan_number, pt_list)
+
+        # get the TableWorkspace name for Spice
+        spice_table_ws = get_spice_table_name(exp_number, scan_number)
+
+        # output PeaksWorkspace name and MaskWorkspace
+        if len(mask_name) > 0:
+            mask_ws_name = self.check_generate_mask_workspace(exp_number, scan_number, mask_name, check_throw=True)
+        else:
+            mask_ws_name = None
+        peak_ws_name = get_integrated_peak_ws_name(exp_number, scan_number, pt_list, mask_name)
+
+        # peak center
+        int_peak_dict = peak_integration_utility.integrate_peak_full_version(scan_md_ws_name=md_ws_name,
+                                                                             spice_table_name=spice_table_ws,
+                                                                             output_peak_ws_name=peak_ws_name,
+                                                                             peak_center=peak_centre,
+                                                                             mask_workspace_name=mask_ws_name,
+                                                                             norm_type=normalization,
+                                                                             intensity_scale_factor=scale_factor,
+                                                                             background_pt_tuple=background_pt_tuple)
+
+        return int_peak_dict
+
     def integrate_scan_peaks(self, exp, scan, peak_radius, peak_centre,
                              merge_peaks=True, use_mask=False,
                              normalization='', mask_ws_name=None,
-                             scale_factor=1):
+                             scale_factor=1.00, background_pt_tuple=None):
         """
         :param exp:
         :param scan:
@@ -1148,7 +1272,7 @@ class CWSCDReductionControl(object):
         :param normalization: normalization set up (by time or ...)
         :param mask_ws_name: mask workspace name or None
         :param scale_factor: integrated peaks' scaling factor
-        :return:
+        :return: dictionary of Pts.
         """
         # check
         assert isinstance(exp, int)
@@ -1157,208 +1281,58 @@ class CWSCDReductionControl(object):
         assert len(peak_centre) == 3
         assert isinstance(merge_peaks, bool)
 
-        # VZ-FUTURE - combine the download and naming for common use
-        # get spice file
-        spice_table_name = get_spice_table_name(exp, scan)
-        if AnalysisDataService.doesExist(spice_table_name) is False:
-            self.download_spice_file(exp, scan, False)
-            self.load_spice_scan_file(exp, scan)
+        peak_int_dict = self.integrate_scan_peak(exp_number=exp, scan_number=scan, peak_centre=peak_centre,
+                                                 mask_name=mask_ws_name, normalization=normalization,
+                                                 scale_factor=scale_factor, background_pt_tuple=background_pt_tuple)
 
-        # get MD workspace name
-        status, pt_list = self.get_pt_numbers(exp, scan)
-        assert status, str(pt_list)
-        md_ws_name = get_merged_md_name(self._instrumentName, exp, scan, pt_list)
-
-        peak_centre_str = '%f, %f, %f' % (peak_centre[0], peak_centre[1],
-                                          peak_centre[2])
-
-        # mask workspace
-        if use_mask:
-            if mask_ws_name is None:
-                # get default mask workspace name
-                mask_ws_name = get_mask_ws_name(exp, scan)
-            elif not AnalysisDataService.doesExist(mask_ws_name):
-                # the appointed mask workspace has not been loaded
-                # then load it from saved mask
-                self.check_generate_mask_workspace(exp, scan, mask_ws_name)
-
-            assert AnalysisDataService.doesExist(mask_ws_name), 'MaskWorkspace %s does not exist.' \
-                                                                '' % mask_ws_name
-
-            integrated_peak_ws_name = get_integrated_peak_ws_name(exp, scan, pt_list, use_mask)
-        else:
-            mask_ws_name = ''
-            integrated_peak_ws_name = get_integrated_peak_ws_name(exp, scan, pt_list)
-
-        # normalization
-        norm_by_mon = False
-        norm_by_time = False
-        if normalization == 'time':
-            norm_by_time = True
-        elif normalization == 'monitor':
-            norm_by_mon = True
-
-        # integrate peak of a scan
-        mantidsimple.IntegratePeaksCWSD(InputWorkspace=md_ws_name,
-                                        OutputWorkspace=integrated_peak_ws_name,
-                                        PeakRadius=peak_radius,
-                                        PeakCentre=peak_centre_str,
-                                        MergePeaks=merge_peaks,
-                                        NormalizeByMonitor=norm_by_mon,
-                                        NormalizeByTime=norm_by_time,
-                                        MaskWorkspace=mask_ws_name,
-                                        ScaleFactor=scale_factor)
-
-        # process the output workspace
-        pt_dict = dict()
-        out_peak_ws = AnalysisDataService.retrieve(integrated_peak_ws_name)
-        num_peaks = out_peak_ws.rowCount()
-
-        for i_peak in xrange(num_peaks):
-            peak_i = out_peak_ws.getPeak(i_peak)
-            run_number_i = peak_i.getRunNumber() % 1000
-            intensity_i = peak_i.getIntensity()
-            pt_dict[run_number_i] = intensity_i
-        # END-FOR
-
+        #
         # store the data into peak info
         if (exp, scan) not in self._myPeakInfoDict:
             raise RuntimeError('Exp %d Scan %d is not recorded in PeakInfo-Dict' % (exp, scan))
-        self._myPeakInfoDict[(exp, scan)].set_pt_intensity(pt_dict)
+        self._myPeakInfoDict[(exp, scan)].set_pt_intensity(peak_int_dict)
 
-        return True, pt_dict
+        return True, peak_int_dict
 
-    def integrate_peaks_q(self, exp_no, scan_no):
+    @staticmethod
+    def gauss_correction_peak_intensity(pt_dict):
         """
-        Integrate peaks in Q-space
-        :param exp_no:
-        :param scan_no:
-        :return:
+        fit a peak along Pt. with Gaussian and thus calculate background automatically
+        :param pt_dict:
+        :return: 3-tuple (intensity, background and information string)
         """
-        # Check inputs
-        assert isinstance(exp_no, int)
-        assert isinstance(scan_no, int)
+        # check
+        assert isinstance(pt_dict, dict), 'Input must be a dictionary but not {0}'.format(type(pt_dict))
 
-        # Get the SPICE file
-        spice_table_name = get_spice_table_name(exp_no, scan_no)
-        if AnalysisDataService.doesExist(spice_table_name) is False:
-            self.download_spice_file(exp_no, scan_no, False)
-            self.load_spice_scan_file(exp_no, scan_no)
+        # convert to vector
+        tup_list = list()
+        for pt in pt_dict.keys():
+            tup_list.append((pt, pt_dict[pt]))
+        tup_list.sort()
+        list_x = list()
+        list_y = list()
+        for tup in tup_list:
+            list_x.append(float(tup[0]))
+            list_y.append(float(tup[1]))
+        vec_x = numpy.array(list_x)
+        vec_y = numpy.array(list_y)
+        vec_e = numpy.sqrt(vec_y)
 
-        # Find peaks & get the peak centers
-        spice_table = AnalysisDataService.retrieve(spice_table_name)
-        num_rows = spice_table.rowCount()
+        # do fit
+        error, gauss_params, model_vec_y = peak_integration_utility.fit_gaussian_linear_background(vec_x, vec_y, vec_e)
+        x0, gauss_sigma, gauss_a, gauss_bkgd = gauss_params
+        if not (0 < x0 < vec_x[-1]):
+            raise RuntimeError('Fitted center of the peak {0} is out of range, which is not correct'.format(x0))
+        if gauss_a <= 0.:
+            raise RuntimeError('Fitted peak height {0} is negative!'.format(gauss_a))
 
-        sum_peak_center = [0., 0., 0.]
-        sum_bin_counts = 0.
+        # calculate the peak intensity
+        peak_intensity = peak_integration_utility.calculate_peak_intensity_gauss(gauss_a, gauss_sigma)
 
-        for i_row in xrange(num_rows):
-            pt_no = spice_table.cell(i_row, 0)
-            self.download_spice_xml_file(scan_no, pt_no, exp_no)
-            # self.load_spice_xml_file(exp_no, scan_no, pt_no)
-            self.find_peak(exp_no, scan_no, pt_no)
-            peak_ws_name = get_peak_ws_name(exp_no, scan_no, pt_no)
-            peak_ws = AnalysisDataService.retrieve(peak_ws_name)
-            if peak_ws.getNumberPeaks() == 1:
-                peak = peak_ws.getPeak(0)
-                peak_center = peak.getQSampleFrame()
-                bin_count = peak.getBinCount()
+        # information
+        info_str = 'Fit error = {0}: a = {1}, x0 = {2}, sigma = {3}, b = {4}'.format(error, gauss_a, x0, gauss_sigma,
+                                                                                     gauss_bkgd)
 
-                sum_peak_center[0] += bin_count * peak_center.X()
-                sum_peak_center[1] += bin_count * peak_center.Y()
-                sum_peak_center[2] += bin_count * peak_center.Z()
-
-                sum_bin_counts += bin_count
-
-            elif peak_ws.getNumberPeaks() > 1:
-                raise NotImplementedError('More than 1 peak???')
-        # END-FOR
-
-        final_peak_center = [0., 0., 0.]
-        for i in xrange(3):
-            final_peak_center[i] = sum_peak_center[i] * (1./sum_bin_counts)
-        #final_peak_center = sum_peak_center * (1./sum_bin_counts)
-
-        print '[INFO] Avg peak center = ', final_peak_center, 'Total counts = ', sum_bin_counts
-
-        # Integrate peaks
-        total_intensity = 0.
-        for i_row in xrange(num_rows):
-            pt_no = spice_table.cell(i_row, 0)
-            md_ws_name = get_single_pt_md_name(exp_no, scan_no, pt_no)
-            peak_ws_name = get_peak_ws_name(exp_no, scan_no, pt_no)
-            out_ws_name = peak_ws_name + '_integrated'
-            mantidsimple.IntegratePeaksCWSD(InputWorkspace=md_ws_name,
-                                            PeaksWorkspace=peak_ws_name,
-                                            OutputWorkspace=out_ws_name)
-            out_peak_ws = AnalysisDataService.retrieve(out_ws_name)
-            peak = out_peak_ws.getPeak(0)
-            intensity = peak.getIntensity()
-            total_intensity += intensity
-        # END-FOR
-
-        return total_intensity
-
-    def integrate_peaks(self, exp_no, scan_no, pt_list, md_ws_name,
-                        peak_radius, bkgd_inner_radius, bkgd_outer_radius,
-                        is_cylinder):
-        """
-        Integrate peaks
-        :return: Boolean as successful or failed
-        """
-        # Check input
-        if is_cylinder is True:
-            raise RuntimeError('Cylinder peak shape has not been implemented yet!')
-
-        if exp_no is None:
-            exp_no = self._expNumber
-        assert isinstance(exp_no, int)
-        assert isinstance(scan_no, int)
-        assert isinstance(peak_radius, float)
-        assert isinstance(bkgd_inner_radius, float)
-        assert isinstance(bkgd_outer_radius, float)
-        assert bkgd_inner_radius >= peak_radius
-        assert bkgd_outer_radius >= bkgd_inner_radius
-
-        # NEXT - Need to re-write this method according to documentation of IntegratePeaksCWSD()
-
-        # Get MD WS
-        if md_ws_name is None:
-            raise RuntimeError('Implement how to locate merged MD workspace name from '
-                               'Exp %d Scan %d Pt %s' % (exp_no, scan_no, str(pt_list)))
-        # Peak workspace
-        # create an empty peak workspace
-        if AnalysisDataService.doesExist('spicematrixws') is False:
-            raise RuntimeError('Workspace spicematrixws does not exist.')
-        mantidsimple.LoadInstrument(Workspace='', InstrumentName='HB3A')
-        target_peak_ws_name = 'MyPeakWS'
-        mantidsimple.CreatePeaksWorkspace(InstrumentWorkspace='spicematrixws', OutputWorkspace=target_peak_ws_name)
-        target_peak_ws = AnalysisDataService.retrieve(target_peak_ws_name)
-        # copy a peak
-        temp_peak_ws_name = 'peak1'
-        mantidsimple.FindPeaksMD(InputWorkspace='MergedSan0017_QSample',
-                                 PeakDistanceThreshold=0.5,
-                                 MaxPeaks=10,
-                                 DensityThresholdFactor=100,
-                                 OutputWorkspace=temp_peak_ws_name)
-
-        src_peak_ws = AnalysisDataService.retrieve(temp_peak_ws_name)
-        centre_peak = src_peak_ws.getPeak(0)
-        target_peak_ws.addPeak(centre_peak)
-        target_peak_ws.removePeak(0)
-
-        # Integrate peak
-        mantidsimple.IntegratePeaksMD(InputWorkspace='MergedSan0017_QSample',
-                                      PeakRadius=1.5,
-                                      BackgroundInnerRadius=1.5,
-                                      BackgroundOuterRadius=3,
-                                      PeaksWorkspace=target_peak_ws_name,
-                                      OutputWorkspace='SinglePeak1',
-                                      IntegrateIfOnEdge=False,
-                                      AdaptiveQBackground=True,
-                                      Cylinder=False)
-
-        raise RuntimeError('Implement ASAP!')
+        return peak_intensity, gauss_bkgd, info_str
 
     @staticmethod
     def load_scan_survey_file(csv_file_name):
@@ -1475,29 +1449,25 @@ class CWSCDReductionControl(object):
 
         # load SPICE Pt.  detector file
         pt_ws_name = get_raw_data_workspace_name(exp_no, scan_no, pt_no)
-        # new_idf_name = '/home/wzz/Projects/HB3A/NewDetector/HB3A_ND_Definition.xml'
-        new_idf_name = '/SNS/users/wzz/Projects/HB3A/HB3A_ND_Definition.xml'
-        if os.path.exists(new_idf_name) is False:
-            raise RuntimeError('Instrument file {0} cannot be found!'.format(new_idf_name))
         try:
             mantidsimple.LoadSpiceXML2DDet(Filename=xml_file_name,
                                            OutputWorkspace=pt_ws_name,
-                                           # FIXME - Need UI input
-                                           DetectorGeometry='512,512',
-                                           InstrumentFilename=new_idf_name,
                                            SpiceTableWorkspace=spice_table_name,
                                            PtNumber=pt_no)
+            if self._refWorkspaceForMask is None or AnalysisDataService.doesExist(pt_ws_name) is False:
+                self._refWorkspaceForMask = pt_ws_name
         except RuntimeError as run_err:
             return False, str(run_err)
 
         # Add data storage
-        assert AnalysisDataService.doesExist(pt_ws_name), 'blabla'
+        assert AnalysisDataService.doesExist(pt_ws_name), 'Unable to locate workspace {0}.'.format(pt_ws_name)
         raw_matrix_ws = AnalysisDataService.retrieve(pt_ws_name)
         self._add_raw_workspace(exp_no, scan_no, pt_no, raw_matrix_ws)
 
         return True, pt_ws_name
 
-    def merge_multiple_scans(self, scan_md_ws_list, scan_peak_centre_list, merged_ws_name):
+    @staticmethod
+    def merge_multiple_scans(scan_md_ws_list, scan_peak_centre_list, merged_ws_name):
         """
         Merge multiple scans
         :param scan_md_ws_list: List of MDWorkspace, each of which is for a scan.
@@ -1720,13 +1690,6 @@ class CWSCDReductionControl(object):
                 if exp_no in self._userWavelengthDict:
                     alg_args['UserDefinedWavelength'] = self._userWavelengthDict[exp_no]
 
-                # TODO/FIXME/NOW - Should get a flexible way to define IDF or no IDF
-                # new_idf_name = '/home/wzz/Projects/HB3A/NewDetector/HB3A_ND_Definition.xml'
-                new_idf_name = '/SNS/users/wzz/Projects/HB3A/HB3A_ND_Definition.xml'
-                if os.path.exists(new_idf_name) is False:
-                    raise RuntimeError('Instrument file {0} cannot be found!'.format(new_idf_name))
-                alg_args['InstrumentFilename'] = new_idf_name
-
                 # call:
                 mantidsimple.ConvertCWSDExpToMomentum(**alg_args)
 
@@ -1801,7 +1764,7 @@ class CWSCDReductionControl(object):
         ur_x = int(upper_right_corner[0])
         ur_y = int(upper_right_corner[1])
         assert ll_x < ur_x and ll_y < ur_y, 'Lower left corner (%.5f, %.5f) vs. upper right corner ' \
-                                            '(%.5f, %.5f)' % (ll_x, ll_y, ur_x, ur_y)
+                                            '(%.5f, %.5f) ' % (ll_x, ll_y, ur_x, ur_y)
 
         # Add to dictionary.  Because usually one ROI is defined for all scans in an experiment,
         # then it is better and easier to support client to search this ROI by experiment number
@@ -1831,6 +1794,24 @@ class CWSCDReductionControl(object):
             self._defaultDetectorCenter = (center_row, center_col)
         else:
             self._detCenterDict[exp_number] = (center_row, center_col)
+
+        return
+
+    def set_detector_geometry(self, size_x, size_y):
+        """
+        set the detector's geometry, i.e., size
+        :param size_x:
+        :param size_y:
+        :return:
+        """
+        # check inputs
+        assert isinstance(size_x, int) and size_x > 0, 'Input detector size-X {0} must be a positive integer.' \
+                                                       ''.format(size_x)
+        assert isinstance(size_y, int) and size_y > 0, 'Input detector size-Y {0} must be a positive integer.' \
+                                                       ''.format(size_y)
+
+        self._detectorSize[0] = size_x
+        self._detectorSize[1] = size_y
 
         return
 
@@ -2304,6 +2285,10 @@ class CWSCDReductionControl(object):
             if k_index > 0 and scan_number not in self._kShiftDict[k_index][1]:
                 self._kShiftDict[k_index][1].append(scan_number)
 
+            # add to the peak info
+            peak_info = self.get_peak_info(self._expNumber, scan_number)
+            peak_info.set_k_vector(self._kShiftDict[k_index][0])
+
             # remove from the previous placeholder
             for k_i in self._kShiftDict.keys():
                 # skip current one
@@ -2352,10 +2337,22 @@ class CWSCDReductionControl(object):
         :return: (boolean, PeakInfo/string)
         """
         # check
-        assert isinstance(exp_number, int)
-        assert isinstance(scan_number, int)
-        assert isinstance(peak_ws_name, str)
-        assert isinstance(md_ws_name, str)
+        assert isinstance(exp_number, int), 'Experiment number must be an integer.'
+        assert isinstance(scan_number, int), 'Scan number must an be integer.'
+        assert isinstance(peak_ws_name, str), 'PeaksWorkspace must be a string.'
+        assert isinstance(md_ws_name, str), 'MDEventWorkspace name must be a string.'
+
+        # check whether there is a redundant creation of PeakProcessRecord for the same (exp, scan) combination
+        if (exp_number, scan_number) in self._myPeakInfoDict:
+            peak_info = self._myPeakInfoDict[(exp_number, scan_number)]
+            print '[ERROR] PeakProcessRecord for Exp {0} Scan {1} shall not be created twice!' \
+                  ''.format(exp_number, scan_number)
+            print '[CONTINUE] New PeaksWorkspace = {0} vs Existing PeaksWorkspace = {1}.' \
+                  ''.format(peak_ws_name, peak_info.peaks_workspace)
+            print '[CONTINUE] New MDEventWorkspace = {0} vs Existing MDEventWorkspace = {1}.' \
+                  ''.format(md_ws_name, peak_info.md_workspace)
+            return False, peak_info
+        # END-IF
 
         # create a PeakInfo instance if it does not exist
         peak_info = PeakProcessRecord(exp_number, scan_number, peak_ws_name)
@@ -2422,7 +2419,7 @@ class CWSCDReductionControl(object):
 
         return ptlist
 
-    def set_peak_intensity(self, exp_number, scan_number, intensity):
+    def set_zero_peak_intensity(self, exp_number, scan_number):
         """
         Set peak intensity to a scan and set to PeakInfo
         :param exp_number:
@@ -2433,7 +2430,6 @@ class CWSCDReductionControl(object):
         # check
         assert isinstance(exp_number, int)
         assert isinstance(scan_number, int)
-        assert isinstance(intensity, float)
 
         # get dictionary item
         err_msg = 'Exp %d Scan %d does not exist in peak information' \
@@ -2442,17 +2438,7 @@ class CWSCDReductionControl(object):
         peak_info = self._myPeakInfoDict[(exp_number, scan_number)]
 
         # set intensity
-        try:
-            peak_info.set_intensity(intensity)
-        except AssertionError as ass_error:
-            return False, 'Unable to set peak intensity due to %s.' % str(ass_error)
-
-        # calculate sigma by simple square root
-        if intensity > 0:
-            sigma = math.sqrt(intensity)
-        else:
-            sigma = 1.
-        peak_info.set_sigma(sigma)
+        peak_info.set_intensity_to_zero()
 
         return True, ''
 
@@ -2496,7 +2482,7 @@ class CWSCDReductionControl(object):
         error_message = ''
 
         # Download and
-        for scan_number in xrange(start_scan, end_scan):
+        for scan_number in range(start_scan, end_scan+1):
             # check whether file exists
             if self.does_file_exist(exp_number, scan_number) is False:
                 # SPICE file does not exist in data directory. Download!
@@ -2570,6 +2556,7 @@ class CWSCDReductionControl(object):
                 wavelength = get_hb3a_wavelength(m1)
                 if wavelength is None:
                     q_range = 0.
+                    print '[ERROR] Scan number {0} has invalid m1 for wavelength.'.format(scan_number)
                 else:
                     q_range = 4.*math.pi*math.sin(two_theta/180.*math.pi*0.5)/wavelength
 
@@ -2591,7 +2578,7 @@ class CWSCDReductionControl(object):
 
         return True, scan_sum_list, error_message
 
-    def export_project(self, project_file_name, ui_dict):
+    def save_project(self, project_file_name, ui_dict):
         """ Export project
         - the data structure and information will be written to a ProjectManager file
         :param project_file_name:

@@ -2,7 +2,7 @@ from __future__ import (absolute_import, division, print_function)
 
 import os
 
-from isis_powder.routines import common, instrument_settings
+from isis_powder.routines import absorb_corrections, common, instrument_settings
 from isis_powder.abstract_inst import AbstractInst
 from isis_powder.polaris_routines import polaris_advanced_config, polaris_algs, polaris_param_mapping
 
@@ -18,25 +18,39 @@ class Polaris(AbstractInst):
                                       output_dir=self._inst_settings.output_dir, inst_prefix="POL")
 
         # Hold the last dictionary later to avoid us having to keep parsing the YAML
-        self._run_details_last_run_number = None
-        self._run_details_cached_obj = None
+        self._run_details_cached_obj = {}
+        self._sample_details = None
 
-        self._ads_workaround = 0
+    # Public API
 
     def focus(self, **kwargs):
         self._inst_settings.update_attributes(kwargs=kwargs)
         return self._focus(run_number_string=self._inst_settings.run_number,
-                           do_van_normalisation=self._inst_settings.do_van_normalisation)
+                           do_van_normalisation=self._inst_settings.do_van_normalisation,
+                           do_absorb_corrections=self._inst_settings.do_absorb_corrections)
 
     def create_vanadium(self, **kwargs):
         self._inst_settings.update_attributes(kwargs=kwargs)
         return self._create_vanadium(run_number_string=self._inst_settings.run_in_range,
                                      do_absorb_corrections=self._inst_settings.do_absorb_corrections)
 
+    def set_sample_details(self, **kwargs):
+        kwarg_name = "sample"
+        sample_details_obj = common.dictionary_key_helper(
+            dictionary=kwargs, key=kwarg_name,
+            exception_msg="The argument containing sample details was not found. Please"
+                          " set the following argument: " + kwarg_name)
+        self._sample_details = sample_details_obj
+
     # Overrides
-    def _apply_absorb_corrections(self, run_details, van_ws):
-        return polaris_algs.calculate_absorb_corrections(ws_to_correct=van_ws,
-                                                         multiple_scattering=self._inst_settings.multiple_scattering)
+    def _apply_absorb_corrections(self, run_details, ws_to_correct):
+        if self._is_vanadium:
+            return polaris_algs.calculate_van_absorb_corrections(
+                ws_to_correct=ws_to_correct, multiple_scattering=self._inst_settings.multiple_scattering)
+        else:
+            return absorb_corrections.run_cylinder_absorb_corrections(
+                ws_to_correct=ws_to_correct, multiple_scattering=self._inst_settings.multiple_scattering,
+                sample_details_obj=self._sample_details)
 
     @staticmethod
     def _can_auto_gen_vanadium_cal():
@@ -92,17 +106,16 @@ class Polaris(AbstractInst):
         return self._inst_settings.focused_bin_widths
 
     def _get_run_details(self, run_number_string):
-        if self._run_details_last_run_number == run_number_string:
-            return self._run_details_cached_obj
+        run_number_string_key = self._generate_run_details_fingerprint(run_number_string,
+                                                                       self._inst_settings.file_extension)
 
-        run_details = polaris_algs.get_run_details(run_number_string=run_number_string,
-                                                   inst_settings=self._inst_settings, is_vanadium_run=self._is_vanadium)
+        if run_number_string_key in self._run_details_cached_obj:
+            return self._run_details_cached_obj[run_number_string_key]
 
-        # Hold obj in case same run range is requested
-        self._run_details_last_run_number = run_number_string
-        self._run_details_cached_obj = run_details
+        self._run_details_cached_obj[run_number_string_key] = polaris_algs.get_run_details(
+            run_number_string=run_number_string, inst_settings=self._inst_settings, is_vanadium_run=self._is_vanadium)
 
-        return run_details
+        return self._run_details_cached_obj[run_number_string_key]
 
     def _spline_vanadium_ws(self, focused_vanadium_spectra, instrument_version=''):
         masking_file_name = self._inst_settings.masking_file_name

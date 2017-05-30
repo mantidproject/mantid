@@ -392,21 +392,23 @@ Event Handling tab
 .. figure:: /images/ISISReflectometryPolref_event_handling_tab.png
    :alt: Showing view of the settings tab.
 
-The *Event Handling* tab can be used to analyze event workspaces. It contains three text boxes for
-specifying uniform even, uniform and custom slicing respectively. Each of these slicing options are
-exclusive, no more than one can be applied. If the text box for the selected slicing method is empty
-no event analysis will be performed, runs will be loaded using
+The *Event Handling* tab can be used to analyze event workspaces. It contains four text boxes for
+specifying uniform even, uniform, custom and log value slicing respectively. Each of these slicing
+options are exclusive, no more than one can be applied. If the text box for the selected slicing
+method is empty no event analysis will be performed, runs will be loaded using
 :ref:`LoadISISNexus <algm-LoadISISNexus>` and analyzed as histogram workspaces. When this text box
 is not empty, runs will be loaded using :ref:`LoadEventNexus <algm-LoadEventNexus>` and the
-interface will try to parse the user input to obtain a set of start times and stop times. These
-define different time slices that will bepassed on to :ref:`FilterByTime <algm-FilterByTime>`. Each
-time slice will be normalized by the total proton charge and reduced as described in the previous
-section. Note that, if any of the runs in a group could not be loaded as an event workspace, the
-interface will load the runs within that group as histogram workspaces and no event analysis will
-be performed for that group. A warning message will be shown when the reduction is complete
-indicating that some groups could not be processed as event data.
+interface will try to parse the user input to obtain a set of start and stop values. These define
+different time slices that will be passed on to an appropriate filtering algorithm
+(:ref:`FilterByTime <algm-FilterByTime>` for uniform even, uniform and custom slicing,
+:ref:`FilterByLogValue <algm-FilterByLogValue>` for log value slicing). Each time slice will be
+normalized by the total proton charge and reduced as described in the previous section. Note that,
+if any of the runs in a group could not be loaded as an event workspace, the interface will load
+the runs within that group as histogram workspaces and no event analysis will be performed for that
+group. A warning message will be shown when the reduction is complete indicating that some groups
+could not be processed as event data.
 
-The three slicing options are described in more detail below:
+The four slicing options are described in more detail below:
 
 - **Uniform Even** - The interface obtains the start and end times of the run and divides it into
   a specified number of evenly-sized slices. For example given a run of duration 100 seconds,
@@ -429,6 +431,14 @@ The three slicing options are described in more detail below:
     slices, the first one starting at ``100`` seconds after the start of the run and ending at
     ``200`` seconds after the start of the run, and the second one starting at ``200`` seconds
     and ending at ``300`` seconds.
+
+- **LogValue** - Like custom slicing this takes a list of comma-separated numbers and are parsed
+  in the same manner as shown above. The values however indicate the minimum and maximum values of
+  the logs we wish to filter rather than times. In addition, this takes a second entry 'Log Name'
+  which is the name of the log we wish to filter the run for. For example, given a run and entries
+  of ``100, 200, 300`` and ``proton_charge`` for slicing values and log name respectively, we would
+  produce two slices - the first containing all log values between ``100`` and ``200`` seconds, the
+  second containing all log values between ``200`` and ``300`` seconds.
 
 Workspaces will be named according to the index of the slice, e.g ``IvsQ_13460_slice_0``, ``IvsQ_13460_slice_1``, etc.
 
@@ -500,11 +510,12 @@ ASCII formats. The filenames are saved in the form [Prefix][Workspace Name].[ext
 |                               | to be used for filtering workspace names.            |
 +-------------------------------+------------------------------------------------------+
 | List Of Workspaces            | The left listbox will contain any workspaces loaded  |
-|                               | into mantid. Double clicking on one will fill        |
-|                               | the right list box with the parameters it contains.  |
-|                               | This listbox supports multi-select in order to       |
-|                               | allow for multiple workspaces to be saved out        |
-|                               | at the same time with the same settings.             |
+|                               | into mantid (excluding group and table workspaces).  |
+|                               | Double clicking on one will fill the right list box  |
+|                               | with the parameters it contains. This listbox        |
+|                               | supports multi-select in order to allow for multiple |
+|                               | workspaces to be saved out at the same time with the |
+|                               | same settings.                                       |
 +-------------------------------+------------------------------------------------------+
 | List Of Logged Parameters     | The right listbox starts out empty, but will fill    |
 |                               | with parameter names when a workspace in the left    |

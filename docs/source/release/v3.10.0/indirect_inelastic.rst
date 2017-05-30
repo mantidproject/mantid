@@ -18,6 +18,7 @@ Algorithms
 - :ref:`BASISReduction311 <algm-BASISReduction311>` has been deprecated (2017-03-11). Use :ref:`BASISReduction <algm-BASISReduction>` instead.
 - :ref:`BASISReduction <algm-BASISReduction>` includes now an option to compute and save the dynamic susceptibility.
 - :ref:`VesuvioDiffractionReduction <algm-VesuvioDiffractionReduction>` has been deprecated, use :ref:`ISISIndirectDiffractionReduction <algm-ISISIndirectDiffractionReduction>`
+- :ref:`IndirectILLReductionQENS <algm-IndirectILLReductionQENS>` and :ref:`IndirectILLReductionFWS <algm-IndirectILLReductionFWS>` will now have an option to subtract a background also from the calibration runs.
 
 QuickRuns
 ~~~~~~~~~
@@ -44,10 +45,6 @@ ConvFit
 
 - The Delta Function option can now be used with StretchedExpFT mode
 
-
-Jump Fit
-~~~~~~~~
-
 Improvements
 ------------
 
@@ -55,8 +52,10 @@ Improvements
 - OSIRIS diffraction now rebins container workspaces to match the sample workspace
 - :ref:`ISISIndirectDiffractionReduction <algm-ISISIndirectDiffractionReduction>` now fully supports VESUVIO data
 - Inelastic pixel ID's in BASIS instrument definition file grouped into continuous physical pixels.
+- Reduced number of workspaces produced by VESUVIO scripts
 - Added SortXAxis to Bayes Quasi and Stretch
 - Removed error bars as default
+
 
 
 Bugfixes

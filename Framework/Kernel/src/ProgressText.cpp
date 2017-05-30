@@ -68,7 +68,7 @@ void ProgressText::doReport(const std::string &msg) {
   m_lastMsgLength = msg.size();
 
   // Save where we last reported to avoid notifying too often.
-  this->m_last_reported = m_i;
+  this->m_last_reported.store(m_i.load());
 }
 
 } // namespace Mantid

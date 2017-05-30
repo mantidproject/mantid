@@ -44,6 +44,7 @@ public:
     createWS(wsNames[0]);
     createWS(wsNames[1]);
     createWS(wsNames[2]);
+    createTableWS("tableWS");
 
     // Group workspaces 1 and 2 together
     IAlgorithm_sptr groupAlg =
@@ -53,7 +54,8 @@ public:
     groupAlg->execute();
 
     EXPECT_CALL(mockView, clearWorkspaceList()).Times(Exactly(1));
-    // Workspace 'groupWs' should not be included in the workspace list
+    // Workspaces 'groupWs' and 'tableWS' should not be included in the
+    // workspace list
     EXPECT_CALL(mockView, setWorkspaceList(wsNames)).Times(Exactly(1));
     presenter.notify(IReflSaveTabPresenter::populateWorkspaceListFlag);
     AnalysisDataService::Instance().clear();
@@ -210,6 +212,12 @@ public:
 private:
   void createWS(std::string name) {
     Workspace2D_sptr ws = WorkspaceCreationHelper::create2DWorkspace(10, 10);
+    AnalysisDataService::Instance().addOrReplace(name, ws);
+  }
+
+  void createTableWS(std::string name) {
+    ITableWorkspace_sptr ws =
+        WorkspaceFactory::Instance().createTable("TableWorkspace");
     AnalysisDataService::Instance().addOrReplace(name, ws);
   }
 
