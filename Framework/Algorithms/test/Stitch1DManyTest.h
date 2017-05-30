@@ -418,8 +418,8 @@ public:
     alg.setProperty("StartOverlaps", "0.8, 1.6");
     alg.setProperty("EndOverlaps", "1.1, 1.8");
     alg.setPropertyValue("OutputWorkspace", "outws");
-    alg.setProperty("UseManualScaleFactor", "1");
-    alg.setProperty("ManualScaleFactor", 0.5);
+    alg.setProperty("UseManualScaleFactors", "1");
+    alg.setProperty("ManualScaleFactors", std::vector<double>{0.5});
     alg.execute();
 
     // Test output ws
@@ -675,8 +675,8 @@ public:
     alg.setProperty("Params", "0.1");
     alg.setProperty("StartOverlaps", "0.8");
     alg.setProperty("EndOverlaps", "1.1");
-    alg.setProperty("UseManualScaleFactor", "1");
-    alg.setProperty("ManualScaleFactor", 0.5);
+    alg.setProperty("UseManualScaleFactors", "1");
+    alg.setProperty("ManualScaleFactors", std::vector<double>{0.5});
     alg.setPropertyValue("OutputWorkspace", "outws");
     alg.execute();
 
@@ -780,13 +780,12 @@ public:
     alg.setProperty("Params", "0.1, 0.1, 2.6");
     alg.setProperty("StartOverlaps", "0.8, 1.6");
     alg.setProperty("EndOverlaps", "1.1, 1.9");
-    alg.setProperty("UseManualScaleFactor", "1");
-    alg.setProperty("ManualScaleFactor", 1.0);
+    alg.setProperty("UseManualScaleFactors", "1");
     alg.setProperty("ScaleFactorFromPeriod", 2);
     alg.setPropertyValue("OutputWorkspace", "outws");
     alg.execute();
 
-    // By setting ManualScaleFactor to 1.0 (default value) it allows workspaces
+    // By keeping ManualScaleFactors empty (default value) it allows workspaces
     // in other periods to be scaled by scale factors from a specific period.
     // Periods 0 and 2 workspaces will be scaled by scale factors from period 1.
 
@@ -972,8 +971,7 @@ public:
     alg.setProperty("Params", "0.1, 0.1, 2.6");
     alg.setProperty("StartOverlaps", "0.8, 1.6");
     alg.setProperty("EndOverlaps", "1.1, 1.9");
-    alg.setProperty("UseManualScaleFactor", "1");
-    alg.setProperty("ManualScaleFactor", 1.0);
+    alg.setProperty("UseManualScaleFactors", "1");
     alg.setProperty("ScaleFactorFromPeriod", 2);
     alg.setPropertyValue("OutputWorkspace", "outws");
     alg.execute();

@@ -188,7 +188,13 @@ void Stitch1DMany::validateCommonInputs(
         "EndOverlaps must have the same number of entries as StartOverlaps.";
 
   m_useManualScaleFactors = this->getProperty("UseManualScaleFactors");
-  m_manualScaleFactors = this->getProperty("ManualScaleFactors");
+
+  std::vector<double> manualScaleFactors =
+      this->getProperty("ManualScaleFactors");
+  m_manualScaleFactors =
+      (manualScaleFactors.size() == 1)
+          ? std::vector<double>(numStitchableWS, manualScaleFactors[0])
+          : manualScaleFactors;
 }
 
 /** Execute the algorithm.
@@ -330,7 +336,7 @@ bool Stitch1DMany::processGroups() {
 
   // Determine whether or not we are scaling workspaces using scale factors from
   // a specific period
-  Property *manualSF = this->getProperty("ManualScaleFactor");
+  Property *manualSF = this->getProperty("ManualScaleFactors");
   bool usingScaleFromPeriod = m_useManualScaleFactors && manualSF->isDefault();
 
   if (!usingScaleFromPeriod) {
