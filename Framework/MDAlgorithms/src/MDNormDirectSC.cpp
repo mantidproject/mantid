@@ -109,12 +109,16 @@ void MDNormDirectSC::init() {
   declareProperty(make_unique<WorkspaceProperty<IMDHistoWorkspace>>(
                       "TemporaryNormalizationWorkspace", "", Direction::Input,
                       PropertyMode::Optional),
-                  "Input normalization MDHistoWorkspace.");
+                  "An input MDHistoWorkspace used to accumulate normalization "
+                  "from multiple MDEventWorkspaces. If unspecified a blank "
+                  "MDHistoWorkspace will be created.");
 
   declareProperty(make_unique<WorkspaceProperty<IMDHistoWorkspace>>(
                       "TemporaryDataWorkspace", "", Direction::Input,
                       PropertyMode::Optional),
-                  "An input MDWorkspace.");
+                  "An input MDHistoWorkspace used to accumulate data from "
+                  "multiple MDEventWorkspaces. If unspecified a blank "
+                  "MDHistoWorkspace will be created.");
 
   declareProperty(make_unique<WorkspaceProperty<Workspace>>(
                       "OutputWorkspace", "", Direction::Output),
