@@ -6,18 +6,15 @@ subgraph params {
  $param_style
   inputWorkspace     [label="OutputWorkspaceWavelength", group=g1]
   outputWorkspaceWav [label="OutputWorkspaceWavelength"]
-  wavMin             [label="WavelengthMin", group=gwav]
-  wavMax             [label="WavelengthMax", group=gwav]
 }
 
 subgraph decisions {
  $decision_style
-  checkSumInQ        [label="Sum in Q?"]
+  checkSumInQ        [label="Sum in Q and input X axis was not in &lambda;?"]
 }
 
 subgraph algorithms {
  $algorithm_style
-  cropWav           [label="CropWorkspace"]
 }
 
 subgraph processes {
@@ -32,12 +29,9 @@ subgraph values {
 
 inputWorkspace     -> checkSumInQ
 checkSumInQ        -> projectCounts      [label="Yes"]
-checkSumInQ        -> cropWav            [label="No"]
+checkSumInQ        -> outputWorkspaceWav [label="No"]
 projectCounts      -> sumInQ
-sumInQ             -> cropWav
-wavMin             -> cropWav
-wavMax             -> cropWav
-cropWav            -> outputWorkspaceWav
+sumInQ             -> outputWorkspaceWav
 
 }
 

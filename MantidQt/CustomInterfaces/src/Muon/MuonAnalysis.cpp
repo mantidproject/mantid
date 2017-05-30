@@ -2533,7 +2533,7 @@ void MuonAnalysis::changeTab(int newTabIndex) {
       m_uiForm.fitBrowser->setSingleFitLabel(m_currentDataName.toStdString());
     } else {
       m_uiForm.fitBrowser->setAllGroups();
-      m_uiForm.fitBrowser->setChosenPeriods("1");
+      m_uiForm.fitBrowser->setAllPeriods();
     }
   } else if (newTab == m_uiForm.ResultsTable) {
     m_resultTableTab->refresh();

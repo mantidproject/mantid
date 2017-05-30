@@ -49,8 +49,7 @@ void ChopData::exec() {
   std::map<int, double> intMap;
   int prelow = -1;
   std::vector<MatrixWorkspace_sptr> workspaces;
-
-  boost::shared_ptr<Progress> progress;
+  std::unique_ptr<Progress> progress;
 
   if (maxX < step) {
     throw std::invalid_argument(
@@ -60,7 +59,7 @@ void ChopData::exec() {
   if (rLower != EMPTY_DBL() && rUpper != EMPTY_DBL() &&
       monitorWi != EMPTY_INT()) {
 
-    progress = boost::make_shared<Progress>(this, 0, 1, chops * 2);
+    progress = Kernel::make_unique<Progress>(this, 0.0, 1.0, chops * 2);
 
     // Select the spectrum that is to be used to compare the sections of the
     // workspace
@@ -94,10 +93,11 @@ void ChopData::exec() {
     if (nlow != intMap.end() && intMap[lowest] < (0.1 * nlow->second)) {
       prelow = nlow->first;
     }
-  } else
-    progress = boost::make_shared<Progress>(this, 0, 1, chops);
+  } else {
+    progress = Kernel::make_unique<Progress>(this, 0.0, 1.0, chops);
+  }
 
-  int wsCounter(1);
+  int wsCounter{1};
 
   for (int i = 0; i < chops; i++) {
     const double stepDiff = (i * step);

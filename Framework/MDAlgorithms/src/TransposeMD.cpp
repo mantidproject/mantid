@@ -118,7 +118,7 @@ void TransposeMD::exec() {
                                        scaling);
 
   uint64_t nPoints = inWS->getNPoints();
-  Progress progress(this, 0, 1, size_t(nPoints));
+  Progress progress(this, 0.0, 1.0, size_t(nPoints));
 
   progress.reportIncrement(
       size_t(double(nPoints) * 0.1)); // Report ~10% progress

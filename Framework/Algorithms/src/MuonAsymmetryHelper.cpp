@@ -65,7 +65,6 @@ normaliseCounts(const HistogramData::Histogram &histogram,
 
   return result;
 }
-
 /**
 * Estimates normalisation constant via
 * N_0 = (Delta/f)*(sum_i W_i)/(int_a^b exp(-t/tau)dt )
@@ -89,14 +88,14 @@ double estimateNormalisationConst(const HistogramData::Histogram &histogram,
   size_t i0 = startIndexFromTime(xData, startX);
   size_t iN = endIndexFromTime(xData, endX);
   // remove an extra index as XData is bin boundaries and not point data
-  auto it0 = std::next(yData.rawData().begin(), i0);
-  auto itN = std::next(yData.rawData().begin(), iN);
-  double summation = std::accumulate(it0, itN, 0.0);
-  double Delta = xData[1] - xData[0];
-  double denominator = MUON_LIFETIME_MICROSECONDS * numGoodFrames *
-                       (exp(-startX / MUON_LIFETIME_MICROSECONDS) -
-                        exp(-endX / MUON_LIFETIME_MICROSECONDS));
-  return summation * Delta / denominator;
+  auto iy0 = std::next(yData.rawData().begin(), i0);
+  auto iyN = std::next(yData.rawData().begin(), iN);
+  double summation = std::accumulate(iy0, iyN, 0.0);
+  double denominator = 0.0;
+  for (size_t k = i0; k < iN; k++) {
+    denominator += exp(-xData[k] / MUON_LIFETIME_MICROSECONDS);
+  }
+  return summation / (denominator * numGoodFrames);
 }
 /**
 * Finds the first index in bin edges that is after
@@ -124,5 +123,4 @@ size_t endIndexFromTime(const HistogramData::BinEdges &xData,
       std::upper_bound(xData.rawData().begin(), xData.rawData().end(), endX);
   return std::distance(xData.rawData().begin(), lower - 1);
 }
-
 } // namespace Mantid
