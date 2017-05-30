@@ -111,8 +111,6 @@ void MatrixWorkspace::setIndexInfo(const Indexing::IndexInfo &indexInfo) {
     throw std::invalid_argument("MatrixWorkspace::setIndexInfo: "
                                 "Parallel::StorageMode in IndexInfo does not "
                                 "match storage mode in workspace");
-  else
-    setStorageMode(indexInfo.storageMode());
 
   // Comparing the *local* size of the indexInfo.
   if (indexInfo.size() != getNumberHistograms())
@@ -124,6 +122,7 @@ void MatrixWorkspace::setIndexInfo(const Indexing::IndexInfo &indexInfo) {
     getSpectrum(i)
         .setSpectrumNo(static_cast<specnum_t>(indexInfo.spectrumNumber(i)));
   }
+  setStorageMode(indexInfo.storageMode());
   *m_indexInfo = indexInfo;
   m_indexInfoNeedsUpdate = false;
   if (!m_indexInfo->spectrumDefinitions())
