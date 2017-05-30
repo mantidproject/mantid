@@ -1,7 +1,11 @@
 from __future__ import (absolute_import, division, print_function)
 #pylint: disable=invalid-name,no-init
 import os
-from io import open
+#python 2 to 3 changes
+#---------------------
+#from io import open
+#from builtins import str
+#---------------------
 from stresstesting import MantidStressTest
 from mantid.simpleapi import *
 from mantid.kernel import PropertyManager
