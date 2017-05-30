@@ -14,18 +14,15 @@ public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
   static IntegrateEPPTest *createSuite() { return new IntegrateEPPTest(); }
-  static void destroySuite( IntegrateEPPTest *suite ) { delete suite; }
+  static void destroySuite(IntegrateEPPTest *suite) { delete suite; }
 
-
-  void test_Init()
-  {
+  void test_Init() {
     IntegrateEPP alg;
-    TS_ASSERT_THROWS_NOTHING( alg.initialize() )
-    TS_ASSERT( alg.isInitialized() )
+    TS_ASSERT_THROWS_NOTHING(alg.initialize())
+    TS_ASSERT(alg.isInitialized())
   }
 
-  void test_normal_operation()
-  {
+  void test_normal_operation() {
     using namespace Mantid::API;
     using namespace WorkspaceCreationHelper;
     const size_t nHist = 3;
@@ -43,7 +40,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", inputWS))
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "_unused_for_child"))
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setPropertyValue("OutputWorkspace", "_unused_for_child"))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("EPPWorkspace", eppWS))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("HalfWidthInSigmas", 1.0))
     TS_ASSERT_THROWS_NOTHING(alg.execute())
@@ -71,8 +69,10 @@ public:
     std::vector<EPPTableRow> eppRows;
     const double centre = static_cast<double>(nBins + 1) / 2.0;
     const double sigma = 1.0;
-    eppRows.emplace_back(2, centre, sigma, 0.0, EPPTableRow::FitStatus::SUCCESS);
-    eppRows.emplace_back(0, centre, sigma, 0.0, EPPTableRow::FitStatus::SUCCESS);
+    eppRows.emplace_back(2, centre, sigma, 0.0,
+                         EPPTableRow::FitStatus::SUCCESS);
+    eppRows.emplace_back(0, centre, sigma, 0.0,
+                         EPPTableRow::FitStatus::SUCCESS);
     auto eppWS = createEPPTableWorkspace(eppRows);
     IntegrateEPP alg;
     alg.setChild(true);
@@ -80,7 +80,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", inputWS))
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "_unused_for_child"))
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setPropertyValue("OutputWorkspace", "_unused_for_child"))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("EPPWorkspace", eppWS))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("HalfWidthInSigmas", 1.0))
     TS_ASSERT_THROWS_NOTHING(alg.execute())
@@ -119,7 +120,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", inputWS))
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "_unused_for_child"))
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setPropertyValue("OutputWorkspace", "_unused_for_child"))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("EPPWorkspace", eppWS))
     TS_ASSERT_THROWS_ANYTHING(alg.execute())
     TS_ASSERT(!alg.isExecuted())
@@ -134,7 +136,8 @@ public:
     std::vector<EPPTableRow> eppRows;
     const double centre = static_cast<double>(nBins + 1) / 2.0;
     const double sigma = 1.0;
-    eppRows.emplace_back(3, centre, sigma, 0.0, EPPTableRow::FitStatus::SUCCESS);
+    eppRows.emplace_back(3, centre, sigma, 0.0,
+                         EPPTableRow::FitStatus::SUCCESS);
     auto eppWS = createEPPTableWorkspace(eppRows);
     IntegrateEPP alg;
     alg.setChild(true);
@@ -142,12 +145,12 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", inputWS))
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "_unused_for_child"))
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setPropertyValue("OutputWorkspace", "_unused_for_child"))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("EPPWorkspace", eppWS))
     TS_ASSERT_THROWS_ANYTHING(alg.execute())
     TS_ASSERT(!alg.isExecuted())
   }
 };
-
 
 #endif /* MANTID_ALGORITHMS_INTEGRATEEPPTEST_H_ */

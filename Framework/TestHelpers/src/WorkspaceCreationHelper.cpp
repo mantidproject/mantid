@@ -57,13 +57,14 @@ MockAlgorithm::MockAlgorithm(size_t nSteps) {
 
 EPPTableRow::EPPTableRow(const double peakCentre_, const double sigma_,
                          const double height_, const FitStatus fitStatus_)
-    : peakCentre(peakCentre_), sigma(sigma_),
-      height(height_), fitStatus(fitStatus_) {}
+    : peakCentre(peakCentre_), sigma(sigma_), height(height_),
+      fitStatus(fitStatus_) {}
 
-EPPTableRow::EPPTableRow(const int index, const double peakCentre_, const double sigma_,
-const double height_, const FitStatus fitStatus_)
-: workspaceIndex(index), peakCentre(peakCentre_), sigma(sigma_),
-height(height_), fitStatus(fitStatus_) {}
+EPPTableRow::EPPTableRow(const int index, const double peakCentre_,
+                         const double sigma_, const double height_,
+                         const FitStatus fitStatus_)
+    : workspaceIndex(index), peakCentre(peakCentre_), sigma(sigma_),
+      height(height_), fitStatus(fitStatus_) {}
 
 /**
  * @param name :: The name of the workspace
