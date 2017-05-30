@@ -59,14 +59,18 @@ class SofQWMomentsScan(DataProcessorAlgorithm):
         self.declareProperty(name='Reflection', defaultValue='',
                              validator=StringListValidator(['002', '004', '006']),
                              doc='Reflection number for instrument setup during run.')
-
         self.declareProperty(IntArrayProperty(name='SpectraRange', values=[0, 1],
                                               validator=IntArrayMandatoryValidator()),
                              doc='Comma separated range of spectra number to use.')
-        self.declareProperty(FloatArrayProperty(name='QRange'),
-                             doc='Range of background to subtract from raw data in time of flight.')
-        self.declareProperty(FloatArrayProperty(name='EnergyRange'),
-                             doc='Range of background to subtract from raw data in time of flight.')
+
+        rangeVal = FloatArrayLengthValidator(3)
+
+        self.declareProperty(FloatArrayProperty(name='QRange',
+                                                validator=rangeVal),
+                             doc='Range of background to subtract from raw data in time of flight. Start, Width, End')
+        self.declareProperty(FloatArrayProperty(name='EnergyRange',
+                                                validator=rangeVal),
+                             doc='Range of background to subtract from raw data in time of flight. Start, Width, End')
         self.declareProperty(name='DetailedBalance', defaultValue=Property.EMPTY_DBL,
                              doc='Apply the detailed balance correction')
 
@@ -326,6 +330,7 @@ class SofQWMomentsScan(DataProcessorAlgorithm):
             issues['SpectraRange'] = 'Range must be in format: lower,upper'
 
         # Validate ranges
+        """
         q_range = self.getProperty('QRange').value
         if q_range is not None:
             if len(q_range) != 3:
@@ -338,7 +343,7 @@ class SofQWMomentsScan(DataProcessorAlgorithm):
                 issues['EnergyRange'] = 'Range must contain exactly two items'
             elif energy_range[0] > energy_range[2]:
                 issues['EnergyRange'] = 'Range must be in format: lower,upper'
-
+        """
         return issues
 
     def _setup(self):
