@@ -622,11 +622,9 @@ void FunctionBrowser::addAttributeAndParameterProperties(
     QtProperty *prop, Mantid::API::IFunction_sptr fun) {
   // add the function index property
   addIndexProperty(prop);
- 
   // add attribute properties
   auto attributeNames = fun->getAttributeNames();
   for (auto att = attributeNames.begin(); att != attributeNames.end(); ++att) {
-	  auto a = *att;
     QString attName = QString::fromStdString(*att);
     addAttributeProperty(prop, attName, fun->getAttribute(*att));
   }
@@ -636,7 +634,6 @@ void FunctionBrowser::addAttributeAndParameterProperties(
     for (size_t i = 0; i < cf->nFunctions(); ++i) {
       AProperty ap = addFunctionProperty(
           prop, QString::fromStdString(cf->getFunction(i)->name()));
-	  auto b = cf->getFunction(i)->name();
       addAttributeAndParameterProperties(ap.prop, cf->getFunction(i));
     }
   } else { // if simple add parameters
@@ -644,18 +641,15 @@ void FunctionBrowser::addAttributeAndParameterProperties(
       QString name = QString::fromStdString(fun->parameterName(i));
       QString desc = QString::fromStdString(fun->parameterDescription(i));
       double value = fun->getParameter(i);
-	  auto b = fun->parameterName(i);
-	  auto bw = fun->parameterDescription(i);
-
       AProperty ap = addParameterProperty(prop, name, desc, value);
       // if parameter has a tie
       if (!fun->isActive(i)) {
         auto tie = fun->getTie(i);
         if (tie) {
-			updateFunctionIndices();
+          updateFunctionIndices();
           addTieProperty(ap.prop, QString::fromStdString(tie->asString()));
         } else {
-			updateFunctionIndices();
+          updateFunctionIndices();
           addTieProperty(ap.prop, QString::number(fun->getParameter(i)));
         }
       }
@@ -882,7 +876,6 @@ QString FunctionBrowser::getIndex(QtProperty *prop) const {
       return "";
     for (auto it = props.begin(); it != props.end(); ++it) {
       if (isIndex(*it)) {
-		auto tt = m_indexManager->value(*it).toStdString();
         return m_indexManager->value(*it);
       }
     }
@@ -977,7 +970,6 @@ void FunctionBrowser::addTieProperty(QtProperty *prop, QString tie) {
   if (prop->hasOption(globalOptionName) &&
       !prop->checkOption(globalOptionName)) {
     auto parName = getParameterName(prop);
-    auto t = parName.toStdString();
     auto &localValues = m_localParameterValues[parName];
     if (m_currentDataset >= localValues.size()) {
       initLocalParameter(parName);
