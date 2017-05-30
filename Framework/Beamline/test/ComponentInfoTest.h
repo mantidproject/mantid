@@ -7,8 +7,124 @@
 #include "MantidBeamline/DetectorInfo.h"
 #include <boost/make_shared.hpp>
 #include <tuple>
+#include <Eigen/Geometry>
 
 using namespace Mantid::Beamline;
+
+namespace {
+
+std::tuple<ComponentInfo, std::vector<Eigen::Vector3d>,
+           std::vector<Eigen::Quaterniond>, std::vector<Eigen::Vector3d>,
+           std::vector<Eigen::Quaterniond>>
+makeTreeExampleAndReturnGeometricArguments() {
+
+  /*
+         |
+   ------------
+   |         | 1
+  -------
+  | 0  | 2
+  */
+
+  // Set detectors at different positions
+  std::vector<Eigen::Vector3d> detPositions;
+  detPositions.emplace_back(1, -1, 0);
+  detPositions.emplace_back(2, -1, 0);
+  detPositions.emplace_back(3, -1, 0);
+  // Set all Detectors rotated 45 degrees around Y
+  std::vector<Eigen::Quaterniond> detRotations(
+      3, Eigen::Quaterniond(
+             Eigen::AngleAxisd(M_PI / 4, Eigen::Vector3d::UnitY())));
+  auto detectorInfo =
+      boost::make_shared<DetectorInfo>(detPositions, detRotations);
+  auto bankSortedDetectorIndices =
+      boost::make_shared<const std::vector<size_t>>(
+          std::vector<size_t>{0, 2, 1});
+  auto bankSortedComponentIndices =
+      boost::make_shared<const std::vector<size_t>>(
+          std::vector<size_t>{0, 1, 3, 2, 4});
+
+  std::vector<std::pair<size_t, size_t>> detectorRanges;
+  detectorRanges.push_back(
+      std::make_pair(0, 2)); // sub-assembly (registered first)
+  detectorRanges.push_back(
+      std::make_pair(0, 3)); // instrument-assembly (with 3 detectors)
+
+  std::vector<std::pair<size_t, size_t>> componentRanges;
+  componentRanges.push_back(
+      std::make_pair(0, 3)); // sub-assembly (contains two detectors and self)
+  componentRanges.push_back(std::make_pair(
+      0, 5)); // instrument assembly (with 4 sub-components and self)
+
+  // Set non-detectors at different positions
+  auto compPositions = boost::make_shared<std::vector<Eigen::Vector3d>>();
+  compPositions->emplace_back(1, 0, 0);
+  compPositions->emplace_back(1, -0.5, 0);
+
+  // Set non-detectors at different rotations
+  auto compRotations = boost::make_shared<std::vector<Eigen::Quaterniond>>();
+  compRotations->emplace_back(Eigen::AngleAxisd(0, Eigen::Vector3d::UnitZ()));
+  compRotations->emplace_back(Eigen::AngleAxisd(0, Eigen::Vector3d::UnitZ()));
+
+  return std::make_tuple(
+      ComponentInfo(
+          bankSortedDetectorIndices,
+          boost::make_shared<const std::vector<std::pair<size_t, size_t>>>(
+              detectorRanges),
+          bankSortedComponentIndices,
+          boost::make_shared<const std::vector<std::pair<size_t, size_t>>>(
+              componentRanges),
+          compPositions, compRotations, detectorInfo),
+      detPositions, detRotations, *compPositions, *compRotations);
+}
+
+ComponentInfo makeTreeExample() {
+  /*
+   Detectors are marked with detector indices below.
+   There are 3 detectors.
+   There are 2 assemblies, including the root
+
+         |
+   ------------
+   |         | 1
+  -------
+  | 0  | 2
+  */
+
+  std::vector<Eigen::Vector3d> detPositions(3);
+  std::vector<Eigen::Quaterniond> detRotations(3);
+  auto bankSortedDetectorIndices =
+      boost::make_shared<const std::vector<size_t>>(
+          std::vector<size_t>{0, 2, 1});
+  auto bankSortedComponentIndices =
+      boost::make_shared<const std::vector<size_t>>(
+          std::vector<size_t>{0, 2, 3, 1, 4});
+  std::vector<std::pair<size_t, size_t>> detectorRanges;
+  detectorRanges.push_back(std::make_pair(0, 2));
+  detectorRanges.push_back(std::make_pair(0, 3));
+
+  std::vector<std::pair<size_t, size_t>> componentRanges;
+  componentRanges.push_back(
+      std::make_pair(0, 3)); // sub-assembly (contains two detectors and self)
+  componentRanges.push_back(std::make_pair(
+      0, 5)); // instrument assembly (with 4 sub-components and self)
+
+  auto positions = boost::make_shared<std::vector<Eigen::Vector3d>>(
+      2); // 2 positions provided. 2 non-detectors
+  auto rotations = boost::make_shared<std::vector<Eigen::Quaterniond>>(
+      2); // 2 rotations provided. 2 non-detectors
+
+  return ComponentInfo(
+      bankSortedDetectorIndices,
+      boost::make_shared<const std::vector<std::pair<size_t, size_t>>>(
+          detectorRanges),
+      bankSortedComponentIndices,
+      boost::make_shared<const std::vector<std::pair<size_t, size_t>>>(
+          componentRanges),
+      positions, rotations,
+      boost::make_shared<DetectorInfo>(detPositions, detRotations));
+}
+}
 
 class ComponentInfoTest : public CxxTest::TestSuite {
 public:
@@ -208,123 +324,101 @@ public:
     TS_ASSERT(info.rotation(2).isApprox(originalDetRotations.at(2)));
   }
 
-  std::tuple<ComponentInfo, std::vector<Eigen::Vector3d>,
-             std::vector<Eigen::Quaterniond>, std::vector<Eigen::Vector3d>,
-             std::vector<Eigen::Quaterniond>>
-  makeTreeExampleAndReturnGeometricArguments() {
+  void test_write_rotation() {
+    using namespace Eigen;
+    auto allOutputs = makeTreeExampleAndReturnGeometricArguments();
 
-    /*
-           |
-     ------------
-     |         | 1
-    -------
-    | 0  | 2
-    */
+    // Resulting ComponentInfo
+    ComponentInfo info = std::get<0>(allOutputs);
+    // Arguments to ComponentInfo for geometric aspects
 
-    // Set detectors at different positions
-    std::vector<Eigen::Vector3d> detPositions;
-    detPositions.emplace_back(1, 0, 0);
-    detPositions.emplace_back(2, 0, 0);
-    detPositions.emplace_back(3, 0, 0);
-    // Set detectors at different rotations
-    std::vector<Eigen::Quaterniond> detRotations;
-    detRotations.emplace_back(
-        Eigen::AngleAxisd(M_PI / 5, Eigen::Vector3d::UnitZ()));
-    detRotations.emplace_back(
-        Eigen::AngleAxisd(M_PI / 4, Eigen::Vector3d::UnitZ()));
-    detRotations.emplace_back(
-        Eigen::AngleAxisd(M_PI / 3, Eigen::Vector3d::UnitZ()));
-    auto detectorInfo =
-        boost::make_shared<DetectorInfo>(detPositions, detRotations);
-    auto bankSortedDetectorIndices =
-        boost::make_shared<const std::vector<size_t>>(
-            std::vector<size_t>{0, 2, 1});
-    auto bankSortedComponentIndices =
-        boost::make_shared<const std::vector<size_t>>(
-            std::vector<size_t>{0, 1, 3, 2, 4});
+    const size_t rootIndex = 4;
+    const size_t detectorIndex = 1;
+    const auto theta = M_PI / 2;      // 90 degree rotation
+    Eigen::Vector3d axis = {0, 1, 0}; // rotate around y axis
+    const auto center =
+        info.position(rootIndex); // rotate around target component center.
 
-    std::vector<std::pair<size_t, size_t>> detectorRanges;
-    detectorRanges.push_back(
-        std::make_pair(0, 2)); // sub-assembly (registered first)
-    detectorRanges.push_back(
-        std::make_pair(0, 3)); // instrument-assembly (with 3 detectors)
+    const auto transform = Translation3d(center) * AngleAxisd(theta, axis) *
+                           Translation3d(-center);
 
-    std::vector<std::pair<size_t, size_t>> componentRanges;
-    componentRanges.push_back(
-        std::make_pair(0, 2)); // sub-assembly (contains two detectors)
-    componentRanges.push_back(
-        std::make_pair(0, 4)); // instrument assembly (with 4 sub-components)
+    // Define new rotation
+    const Quaterniond requestedRotation(transform.rotation());
+    // Detector original rotation
+    const auto detOriginalRotation = info.rotation(detectorIndex);
 
-    // Set non-detectors at different positions
-    auto compPositions = boost::make_shared<std::vector<Eigen::Vector3d>>();
-    compPositions->emplace_back(1, 0, 0);
-    compPositions->emplace_back(1, 1, 0);
+    // Perform 90 rotation of root
+    info.setRotation(rootIndex, requestedRotation);
 
-    // Set non-detectors at different rotations
-    auto compRotations = boost::make_shared<std::vector<Eigen::Quaterniond>>();
-    compRotations->emplace_back(
-        Eigen::AngleAxisd(M_PI, Eigen::Vector3d::UnitZ()));
-    compRotations->emplace_back(
-        Eigen::AngleAxisd(M_PI / 2, Eigen::Vector3d::UnitZ()));
+    // Fetch root rotation
+    auto actualRootRotation = info.rotation(rootIndex);
+    TSM_ASSERT("Rotations should exactly match as we are overwriting with an "
+               "abs rotation",
+               actualRootRotation.isApprox(requestedRotation));
+    TSM_ASSERT_DELTA("Acutal rotation should be 90 deg around y",
+                     std::asin(actualRootRotation.y()) * 2, theta, 1e-4);
 
-    return std::make_tuple(
-        ComponentInfo(
-            bankSortedDetectorIndices,
-            boost::make_shared<const std::vector<std::pair<size_t, size_t>>>(
-                detectorRanges),
-            bankSortedComponentIndices,
-            boost::make_shared<const std::vector<std::pair<size_t, size_t>>>(
-                componentRanges),
-            compPositions, compRotations, detectorInfo),
-        detPositions, detRotations, *compPositions, *compRotations);
+    auto actualDetRotation = info.rotation(detectorIndex);
+    TSM_ASSERT_DELTA("Detector rotation should be accumulation existing 45 + "
+                     "new 90 rotation",
+                     std::asin(actualDetRotation.y()) * 2,
+                     theta + std::asin(detOriginalRotation.y()) * 2, 1e-4);
   }
 
-  ComponentInfo makeTreeExample() {
-    /*
-     Detectors are marked with detector indices below.
-     There are 3 detectors.
-     There are 2 assemblies, including the root
+  void test_write_rotation_updates_positions_correctly() {
+    using namespace Eigen;
+    auto allOutputs = makeTreeExampleAndReturnGeometricArguments();
 
-           |
-     ------------
-     |         | 1
-    -------
-    | 0  | 2
-    */
+    // Resulting ComponentInfo
+    ComponentInfo info = std::get<0>(allOutputs);
+    // Arguments to ComponentInfo for geometric aspects
 
-    std::vector<Eigen::Vector3d> detPositions(3);
-    std::vector<Eigen::Quaterniond> detRotations(3);
-    auto bankSortedDetectorIndices =
-        boost::make_shared<const std::vector<size_t>>(
-            std::vector<size_t>{0, 2, 1});
-    auto bankSortedComponentIndices =
-        boost::make_shared<const std::vector<size_t>>(
-            std::vector<size_t>{0, 2, 3, 1, 4});
-    std::vector<std::pair<size_t, size_t>> detectorRanges;
-    detectorRanges.push_back(std::make_pair(0, 2));
-    detectorRanges.push_back(std::make_pair(0, 3));
+    const size_t rootIndex = 4;
+    const size_t detectorIndex = 1;
+    const auto theta = M_PI / 2;                  // 90 degree rotation
+    Eigen::Vector3d axis = {0, 1, 0};             // rotate around y axis
+    const auto center = info.position(rootIndex); // rotate around root center.
 
-    std::vector<std::pair<size_t, size_t>> componentRanges;
-    componentRanges.push_back(
-        std::make_pair(0, 2)); // sub-assembly (contains two detectors)
-    componentRanges.push_back(
-        std::make_pair(0, 4)); // instrument assembly (with 4 sub-components)
+    const auto transform = Translation3d(center) * AngleAxisd(theta, axis) *
+                           Translation3d(-center);
 
-    auto positions = boost::make_shared<std::vector<Eigen::Vector3d>>(
-        2); // 2 positions provided. 2 non-detectors
-    auto rotations = boost::make_shared<std::vector<Eigen::Quaterniond>>(
-        2); // 2 rotations provided. 2 non-detectors
+    // Just the rotation part.
+    const Quaterniond rootRotation(transform.rotation());
 
-    return ComponentInfo(
-        bankSortedDetectorIndices,
-        boost::make_shared<const std::vector<std::pair<size_t, size_t>>>(
-            detectorRanges),
-        bankSortedComponentIndices,
-        boost::make_shared<const std::vector<std::pair<size_t, size_t>>>(
-            componentRanges),
-        positions, rotations,
-        boost::make_shared<DetectorInfo>(detPositions, detRotations));
+    const auto rootOriginalPosition = info.position(rootIndex);
+    // Perform rotation
+    info.setRotation(rootIndex, rootRotation);
+    const auto rootUpdatedPosition = info.position(rootIndex);
+    const auto detector2UpdatedPosition = info.position(detectorIndex);
+    TSM_ASSERT("Rotate root around origin = root centre. It should not move!",
+               rootOriginalPosition.isApprox(rootUpdatedPosition));
+
+    /* Detector 2
+     * originally at {2, -1, 0}. Rotated 90 deg around {0, 1, 0} with centre {1,
+     *0, 0} should
+     * put it exactly at {1, -1, -1,}
+     *
+     *     view down y.
+     *      z
+     *      ^
+     *      |
+     *      |--> x
+     *
+     * before rotation:
+     *
+     *      p (center p at {1, -1, 0})       d (at {2, -1, 0})
+     *
+     * after rotation:
+     *
+     *      d (now at {1, -1, -1})
+     *
+     *      p (centre p at {1,0,0})
+     */
+    TSM_ASSERT(
+        "Rotate detector around origin = root centre. It should reposition!",
+        detector2UpdatedPosition.isApprox(Vector3d{1, -1, -1}));
   }
+
 
   void test_detector_indexes() {
 
@@ -357,11 +451,12 @@ public:
 
     // Now we have non-detector components
     TS_ASSERT_EQUALS(info.componentIndices(4 /*component index of root*/),
-                     std::vector<size_t>({0, 2, 3, 1}));
+                     std::vector<size_t>(
+                         {0, 2, 3, 1, 4})); // Note inclusion of self comp index
 
     TS_ASSERT_EQUALS(
         info.componentIndices(3 /*component index of sub-assembly*/),
-        std::vector<size_t>({0, 2}));
+        std::vector<size_t>({0, 2, 3})); // Note inclusion of self comp index
   }
 };
 #endif /* MANTID_BEAMLINE_COMPONENTINFOTEST_H_ */

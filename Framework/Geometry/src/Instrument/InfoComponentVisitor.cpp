@@ -87,6 +87,8 @@ void InfoComponentVisitor::registerComponentAssembly(
     child->registerContents(*this);
   }
   const size_t detectorStop = m_assemblySortedDetectorIndices->size();
+  const size_t componentIndex = m_componentIds->size();
+  m_assemblySortedComponentIndices->push_back(componentIndex);
   const size_t componentStop = m_assemblySortedComponentIndices->size();
 
   m_detectorRanges->emplace_back(std::make_pair(detectorStart, detectorStop));
@@ -94,13 +96,11 @@ void InfoComponentVisitor::registerComponentAssembly(
       std::make_pair(componentStart, componentStop));
 
   // Record the ID -> index mapping
-  const size_t componentIndex = m_componentIds->size();
   (*m_componentIdToIndexMap)[assembly.getComponentID()] = componentIndex;
   // For any non-detector we extend the m_componentIds from the back
   m_componentIds->emplace_back(assembly.getComponentID());
   m_positions->emplace_back(Kernel::toVector3d(assembly.getPos()));
   m_rotations->emplace_back(Kernel::toQuaterniond(assembly.getRotation()));
-  m_assemblySortedComponentIndices->push_back(componentIndex);
   clearPositionAndRotationParameters(m_pmap, assembly);
 }
 

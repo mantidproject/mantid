@@ -121,30 +121,73 @@ Eigen::Quaterniond ComponentInfo::rotation(const size_t componentIndex) const {
   return (*m_rotations)[rangesIndex];
 }
 
+/**
+ * Sets the rotation for a component described by target component index
+ *
+ * This will propagate and apply the derived position offsets to all known
+ *sub-components
+ *
+ * @param componentIndex : Component index to update at
+ * @param newPosition : Absolute position to set
+ */
 void ComponentInfo::setPosition(const size_t componentIndex,
                                 const Eigen::Vector3d &newPosition) {
 
   const Eigen::Vector3d offset = newPosition - position(componentIndex);
-  const auto subTreeIndexes = this->componentIndices(componentIndex);
-  for (auto &childCompIndex : subTreeIndexes) {
-    if (isDetector(childCompIndex)) {
-      m_detectorInfo->setPosition(
-          childCompIndex, m_detectorInfo->position(childCompIndex) + offset);
+  const auto indices = this->componentIndices(
+      componentIndex); // Includes requested component index
+  for (auto &index : indices) {
+    if (isDetector(index)) {
+      m_detectorInfo->setPosition(index,
+                                  m_detectorInfo->position(index) + offset);
     } else {
-      m_positions.access()[compOffsetIndex(childCompIndex)] += offset;
+      m_positions.access()[compOffsetIndex(index)] += offset;
+      // TODO. This could change L1/L2. Is that being detected?
     }
-  }
-  if (isDetector(componentIndex)) {
-    m_detectorInfo->setPosition(
-        componentIndex, m_detectorInfo->position(componentIndex) + offset);
-  } else {
-    m_positions.access()[compOffsetIndex(componentIndex)] += offset;
   }
 }
 
+/**
+ * Sets the rotation for a component described by target component index.
+ *
+ * This will propagate and apply the derived rotation to all known
+ *sub-components
+ * This will also update derived positions for target component and all
+ *sub-components
+ *
+ * @param componentIndex : Component index to update at
+ * @param newRotation : Absolute rotation to set
+ */
 void ComponentInfo::setRotation(const size_t componentIndex,
-                                const Eigen::Quaterniond &rotation) {
-  throw std::runtime_error("Not yet implemented");
+                                const Eigen::Quaterniond &newRotation) {
+
+  using namespace Eigen;
+  const Eigen::Vector3d compPos = position(componentIndex);
+  const Eigen::Quaterniond currentRotInv = rotation(componentIndex).inverse();
+  const Eigen::Quaterniond rotDelta =
+      (newRotation * currentRotInv).normalized();
+
+  const Affine3d transform =
+      Translation3d(compPos) * rotDelta * Translation3d(-compPos);
+
+  const auto indices = this->componentIndices(
+      componentIndex); // Includes requested component index
+  for (auto &index : indices) {
+
+    auto newPos = transform * position(index);
+    auto newRot = rotDelta * rotation(index);
+    if (isDetector(index)) {
+      m_detectorInfo->setPosition(index, newPos);
+      m_detectorInfo->setRotation(index, newRot);
+
+    } else {
+      const size_t childCompIndexOffset = compOffsetIndex(index);
+      m_positions.access()[childCompIndexOffset] = newPos;
+      m_rotations.access()[childCompIndexOffset] = newRot;
+
+      // TODO. This could change L1/L2. Is that being detected?
+    }
+  }
 }
 } // namespace Beamline
 } // namespace Mantid

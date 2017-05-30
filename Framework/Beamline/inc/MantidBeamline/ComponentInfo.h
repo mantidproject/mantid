@@ -80,13 +80,12 @@ public:
     return componentIndex - m_assemblySortedDetectorIndices->size();
   }
 
-
   Eigen::Vector3d position(const size_t componentIndex) const;
   Eigen::Quaterniond rotation(const size_t componentIndex) const;
   void setPosition(const size_t componentIndex,
-                   const Eigen::Vector3d &abslPosition);
+                   const Eigen::Vector3d &newPosition);
   void setRotation(const size_t componentIndex,
-                   const Eigen::Quaterniond &abslRotation);
+                   const Eigen::Quaterniond &newRotation);
 };
 } // namespace Beamline
 } // namespace Mantid

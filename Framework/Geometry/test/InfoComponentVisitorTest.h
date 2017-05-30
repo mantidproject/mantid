@@ -288,7 +288,7 @@ public:
     TS_ASSERT_EQUALS((*componentRanges)[1].second, 0);
     // Instrument has 1 detector.
     TS_ASSERT_EQUALS((*componentRanges)[2].first, 0);
-    TS_ASSERT_EQUALS((*componentRanges)[2].second, 3);
+    TS_ASSERT_EQUALS((*componentRanges)[2].second, 4);
   }
   void test_visitor_collects_detector_id_to_index_mappings() {
 
