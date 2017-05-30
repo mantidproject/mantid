@@ -104,7 +104,7 @@ void PeaksIntersection::executePeaksIntersection(const bool checkPeakExtents) {
   if (frequency > 100) {
     frequency = nPeaks / 100;
   }
-  Progress prog(this, 0, 1, 100);
+  Progress prog(this, 0.0, 1.0, 100);
 
   PARALLEL_FOR_IF(Kernel::threadSafe(*ws, *outputWorkspace))
   for (int i = 0; i < nPeaks; ++i) {

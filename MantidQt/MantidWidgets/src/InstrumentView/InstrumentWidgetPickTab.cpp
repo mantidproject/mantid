@@ -899,17 +899,17 @@ QString ComponentInfoController::displayDetectorInfo(Mantid::detid_t detid) {
 */
 QString ComponentInfoController::displayNonDetectorInfo(
     Mantid::Geometry::ComponentID compID) {
-  auto &component = *m_instrActor->getInstrument()->getComponentByID(compID);
+  auto component = m_instrActor->getInstrument()->getComponentByID(compID);
   QString text = "Selected component: ";
-  text += QString::fromStdString(component.getName()) + '\n';
-  Mantid::Kernel::V3D pos = component.getPos();
+  text += QString::fromStdString(component->getName()) + '\n';
+  Mantid::Kernel::V3D pos = component->getPos();
   text += "xyz: " + QString::number(pos.X()) + "," + QString::number(pos.Y()) +
           "," + QString::number(pos.Z()) + '\n';
   double r, t, p;
   pos.getSpherical(r, t, p);
   text += "rtp: " + QString::number(r) + "," + QString::number(t) + "," +
           QString::number(p) + '\n';
-  text += getParameterInfo(component);
+  text += getParameterInfo(*component);
   return text;
 }
 

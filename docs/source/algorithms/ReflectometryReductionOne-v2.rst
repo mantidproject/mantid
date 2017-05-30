@@ -9,8 +9,9 @@
 Description
 -----------
 
-This algorithm is not meant to be used directly by users. Please see :ref:`algm-ReflectometryReductionOneAuto`
-which is a facade over this algorithm.
+This algorithm is not meant to be used directly by users. Please see
+:ref:`algm-ReflectometryReductionOneAuto` which is a facade over this
+algorithm.
 
 This algorithm reduces a single reflectometry run into a mod Q vs I/I0 workspace.
 The mandatory input properties, :literal:`WavelengthMin`, :literal:`WavelengthMax`
@@ -31,30 +32,53 @@ steps taking place in the reduction.
 
 .. diagram:: ReflectometryReductionOne_HighLvl-v2_wkflw.dot
 
+First, the algorithm checks the X units of the input workspace. If the input
+workspace is already in wavelength, summation and normalization by monitors and
+direct beam are not performed, as it is considered that the input run was
+already reduced using this algorithm.
+
+If summation is to be done in wavelength, then this is done first. The the
+conversion to wavelength and normalisation by monitors and direct beam is done,
+followed by the transmission correction. Transmission correction is always
+done, even if the input was already in wavelength. The resulting workspace is
+cropped in wavelength according to :literal:`WavelengthMin` and
+:literal:`WavelengthMax`, which are both mandatory properties.
+
+If summation is to be done in Q, this is done after the normalisations and
+cropping, but again, only if the original input was not already in wavelength.
+
+Finally, the output workspace in wavelength is converted to momentum transfer
+(Q).
 
 Conversion to Wavelength
 ########################
 
-First, the algorithm checks the X units of
-the input workspace. If the input workspace is already in wavelength, normalization by
-monitors and direct beam are not performed, as it is considered that the input run was
-already reduced using this algorithm. If the input workspace is in TOF, monitors, detectors of
-interest and region of direct beam are extracted by running :ref:`algm-GroupDetectors` with
-``ProcessingInstructions`` as input, :ref:`algm-GroupDetectors` with ``RegionOfDirectBeam`` as input,
-and :ref:`algm-CropWorkspace` with ``I0MonitorIndex`` as input respectively, and each of
-the resulting workspaces is converted to wavelength (note that :literal:`AlignBins` is set
-to :literal:`True` in all the three cases). Note that the normalization by a direct beam
-is optional, and only happens if ``RegionOfDirectBeam`` is provided. In the same way,
-monitor normalization is also optional, and only takes place if ``I0MonitorIndex``,
-``MonitorBackgroundWavelengthMin`` and ``MonitorBackgroundWavelengthMax`` are all
-specified. Detectors can be normalized by integrated monitors by setting
+If the input workspace is in TOF, monitors are extracted using
+:ref:`algm-GroupDetectors` with ``RegionOfDirectBeam`` as input, and region of
+direct beam using :ref:`algm-CropWorkspace` with ``I0MonitorIndex`` as
+input. If summing in wavelength, detectors of interest are extracted and summed
+in TOF using :ref:`algm-GroupDetectors` with ``ProcessingInstructions`` as
+input. If summing in Q, summation is not done yet as it is done in a later step
+after all normalisations have been done.
+
+Each of the resulting workspaces is converted to wavelength (note that
+:literal:`AlignBins` is set to :literal:`True` in all the three cases). Note
+that the normalization by a direct beam is optional, and only happens if
+``RegionOfDirectBeam`` is provided. In the same way, monitor normalization is
+also optional, and only takes place if ``I0MonitorIndex``,
+``MonitorBackgroundWavelengthMin`` and ``MonitorBackgroundWavelengthMax`` are
+all specified.
+
+Detectors can be normalized by integrated monitors by setting
 :literal:`NormalizeByIntegratedMonitors` to true, in which case
-:literal:`MonitorIntegrationWavelengthMin` and :literal:`MonitorIntegrationWavelengthMax` are
-used as the integration range. If monitors are not integrated, detectors are rebinned to
-monitors using :ref:`algm-RebinToWorkspace` so that the normalization by monitors can take place.
-Finally, the resulting workspace is cropped in wavelength according to :literal:`WavelengthMin`
-and :literal:`WavelengthMax`, which are both mandatory properties. A summary of the steps
-is shown in the workflow diagram below. For the sake of clarity, all possible steps are illustrated, even if some of them are optional.
+:literal:`MonitorIntegrationWavelengthMin` and
+:literal:`MonitorIntegrationWavelengthMax` are used as the integration
+range. If monitors are not integrated, detectors are rebinned to monitors using
+:ref:`algm-RebinToWorkspace` so that the normalization by monitors can take
+place.
+
+A summary of the steps is shown in the workflow diagram below. For the sake of
+clarity, all possible steps are illustrated, even if some of them are optional.
 
 .. diagram:: ReflectometryReductionOne_ConvertToWavelength-v2_wkflw.dot
 
@@ -98,12 +122,35 @@ property. If the :literal:`CorrectionAlgorithm` property is set to
 algorithm is used, with *C0* and *C1* taken from the :literal:`C0` and :literal:`C1`
 properties.
 
+Sum in Q
+########
+
+If summing in Q, the summation is done now, after all normalisations and
+cropping have been done. As with summation in :math:`\lambda`, the summation is
+only done if the original workspace was not in :math:`\lambda` (otherwise we
+assume the reduction has already been done).
+
+The summation is done using the algorithm proposed by Cubitt et al
+(J. Appl. Crystallogr., 48 (6) (2015)). This involves a projection to an
+arbitrary reference angle, :math:`2\theta_R`, with a "virtual" wavelength,
+:math:`\lambda_v`. This is the wavelength the neutron would have had if it had
+arrived at :math:`2\theta_R` with the same momentum transfer
+(:math:`Q`). Counts are shared out proportionally into the output array in
+:math:`\lambda_v` and the projections from all pixels are summed in
+:math:`\lambda_v`.
+
+The resulting 1D workspace in :math:`\lambda_v` at :math:`2\theta_R` becomes
+the output workspace in wavelength.
+
+.. diagram:: ReflectometryReductionOne_SumInQ-v2_wkflw.dot
+
 Conversion to Momentum Transfer (Q)
 ###################################
 
-Finally, the output workspace in wavelength is converted to momentum transfer (Q) using
-:ref:`algm-ConvertUnits`. Note that the output workspace in Q is therefore a workspace
-with native binning, and no rebin step is applied to it.
+Finally, the output workspace in wavelength is converted to momentum transfer
+(:math:`Q`) using :ref:`algm-ConvertUnits`. Note that the output workspace in Q
+is therefore a workspace with native binning, and no rebin step is applied to
+it.
 
 .. diagram:: ReflectometryReductionOne_ConvertToMomentum-v2_wkflw.dot
 
@@ -183,10 +230,10 @@ Output:
 
 .. testoutput:: ExReflRedOneTrans
 
-   0.4588
-   0.4655
-   0.7336
-   1.0156
+   0.4592
+   0.4654
+   0.7278
+   1.0305
 
 .. categories::
 

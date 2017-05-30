@@ -9,7 +9,7 @@ Interfaces
 ----------
 Muon Analysis
 -  The new algorithms :ref:`EstimateMuonAsymmetryFromCounts <algm-EstimateMuonAsymmetryFromCounts-v1>`: and :ref:`CalculateMuonAsymmetry <algm-CalculateMuonAsymmetry-v1>` are now used in the muon analysis GUI.
-
+-  The main part of the multiple fitting GUI has been upgraded to be more user friendly.
 
 
 - Fixed a bug that meant transverse field asymmetry data was normalized to bin width. 

@@ -122,7 +122,7 @@ void MuonProcess::init() {
  * Execute the algorithm.
  */
 void MuonProcess::exec() {
-  Progress progress(this, 0, 1, 5);
+  Progress progress(this, 0.0, 1.0, 5);
 
   // Supplied input workspace
   Workspace_sptr inputWS = getProperty("InputWorkspace");

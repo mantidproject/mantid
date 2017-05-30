@@ -101,7 +101,8 @@ signals:
 private slots:
   /// Guess Alpha clicked
   void guessAlphaClicked();
-
+  void handleGroupBox();
+  void handlePeriodBox();
   /// Checks whether two specified periods are equal and, if they are, sets
   /// second one to None
   void checkForEqualPeriods();
@@ -334,6 +335,9 @@ private:
   /// Plots specific WS spectrum (used by plotPair and plotGroup)
   void plotSpectrum(const QString &wsName, bool logScale = false);
 
+  /// set labels for a single data set
+  void updateLabels(std::string &name);
+
   /// Get current plot style parameters. wsName and wsIndex are used to get
   /// default values if
   /// something is not specified
@@ -563,6 +567,8 @@ private:
 
   /// Set the Grouping and Data Analysis tabs enabled/disabled
   void setAnalysisTabsEnabled(const bool enabled);
+
+  void setChosenGroupAndPeriods(const QString &wsName);
 };
 }
 }

@@ -68,10 +68,11 @@ class SANSCrop(DataProcessorAlgorithm):
         else:
             component = DetectorType.LAB
 
-        # TODO: Make this nicer
         instrument = workspace.getInstrument()
         instrument_name = instrument.getName().strip()
 
+        # TODO: Can clean up here: The detector bank selection could be made nicer here, but it is currently not
+        #                          essential.
         if instrument_name == "SANS2D":
             component = "front-detector" if component is DetectorType.HAB else "rear-detector"
         elif instrument_name == "LOQ":

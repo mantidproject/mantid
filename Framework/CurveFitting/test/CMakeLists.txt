@@ -6,6 +6,7 @@ if ( CXXTEST_FOUND )
   # It will go out of scope at the end of this file so doesn't need un-setting
   set ( TESTHELPER_SRCS ../../TestHelpers/src/ComponentCreationHelper.cpp
                         ../../TestHelpers/src/InstrumentCreationHelper.cpp
+                        ../../TestHelpers/src/FunctionCreationHelper.cpp
                         ../../TestHelpers/src/MultiDomainFunctionHelper.cpp
                         ../../TestHelpers/src/StartFrameworkManager.cpp
                         ../../TestHelpers/src/TearDownWorld.cpp

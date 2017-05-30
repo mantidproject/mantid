@@ -1531,7 +1531,6 @@ void FitPropertyBrowser::setCurrentFunction(
   setCurrentFunction(getHandler()->findHandler(f));
 }
 
-//#include "../FitDialog.h"
 /**
  * Creates an instance of Fit algorithm, sets its properties and launches it.
  */
@@ -1984,10 +1983,10 @@ void FitPropertyBrowser::addTieToFunction() {
   int iPar = -1;
   for (size_t i = 0; i < m_compositeFunction->nParams(); i++) {
     Mantid::API::ParameterReference ref(m_compositeFunction.get(), i);
-    Mantid::API::IFunction *fun = ref.getFunction();
+    Mantid::API::IFunction *fun = ref.getLocalFunction();
 
     // Pick out parameters with the same name as the one we're tying from
-    if (fun->parameterName(static_cast<int>(ref.getIndex())) == parName) {
+    if (fun->parameterName(static_cast<int>(ref.getLocalIndex())) == parName) {
       if (iPar == -1 &&
           fun ==
               h->function()

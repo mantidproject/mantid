@@ -53,7 +53,7 @@ void LoadDetectorsGroupingFile::exec() {
 
   // The number of steps depends on the type of input file
   // Set them to zero for the moment
-  Progress progress(this, 0, 1, 0);
+  Progress progress(this, 0.0, 1.0, 0);
 
   if (ext == "xml") {
     // Deal with file as xml

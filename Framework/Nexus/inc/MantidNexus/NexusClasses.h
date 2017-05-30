@@ -480,6 +480,8 @@ typedef NXDataSetTyped<double> NXDouble;
 typedef NXDataSetTyped<char> NXChar;
 /// The size_t dataset type
 typedef NXDataSetTyped<std::size_t> NXSize;
+/// The size_t dataset type
+typedef NXDataSetTyped<unsigned int> NXUInt;
 
 //-------------------- classes --------------------------//
 
@@ -866,6 +868,10 @@ public:
   NXFloat openFloatData() { return openData<float>(); }
   /// Opens data of int type
   NXInt openIntData() { return openData<int>(); }
+  /// Opens data of size type
+  NXSize openSizeData() { return openData<std::size_t>(); }
+  /// Opens data of unsigned int type
+  NXUInt openUIntData() { return openData<unsigned int>(); }
 };
 
 /**  Implements NXdetector Nexus class.

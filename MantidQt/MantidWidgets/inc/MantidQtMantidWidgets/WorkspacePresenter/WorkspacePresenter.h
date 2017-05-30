@@ -75,6 +75,7 @@ private:
   void saveToProgram();
   void plotSpectrum();
   void plotSpectrumWithErrors();
+  void plotSpectrumAdvanced();
   void showColourFillPlot();
   void showDetectorsTable();
   void showBoxDataTable();
@@ -90,8 +91,6 @@ private:
   void convertToMatrixWorkspace();
   void convertMDHistoToMatrixWorkspace();
   void clearUBMatrix();
-  void showSurfacePlot();
-  void showContourPlot();
   void refreshWorkspaces();
 
   void workspaceLoaded();
