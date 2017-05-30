@@ -71,7 +71,7 @@ Output:
 .. testoutput:: ExNorm
 
    Asymmetry:  ['-0.21', '0.86', '-0.02', '-0.69', '-0.76']   
-   Normalization constant: 20.0
+   Normalization constant: 20.00
 
 
 .. categories::
