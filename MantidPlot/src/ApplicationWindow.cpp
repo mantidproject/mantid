@@ -224,7 +224,8 @@
 #include "vtkPVDisplayInformation.h"
 #endif
 
-#define LOG_POPUP g_log.error() << "Popup at " __FILE__ ": " << __LINE__ << '\n';
+#define LOG_POPUP                                                              \
+  g_log.error() << "Popup at " __FILE__ ": " << __LINE__ << '\n';
 
 using namespace Qwt3D;
 using namespace MantidQt::API;
@@ -1743,9 +1744,8 @@ void ApplicationWindow::plot3DRibbon() {
     plotXYZ(table, table->colName(table->selectedColumn()), Graph3D::Ribbon);
   } else
     LOG_POPUP
-    QMessageBox::warning(
-        this, tr("MantidPLot - Plot error"),
-        tr("You must select exactly one column for plotting!"));
+  QMessageBox::warning(this, tr("MantidPLot - Plot error"),
+                       tr("You must select exactly one column for plotting!"));
 }
 
 void ApplicationWindow::plot3DWireframe() { plot3DMatrix(0, Qwt3D::WIREFRAME); }
@@ -4539,8 +4539,7 @@ ApplicationWindow *ApplicationWindow::open(const QString &fn,
           QMessageBox::No | QMessageBox::Escape);
       if (choice == QMessageBox::Yes)
         return open(fname + "~");
-      else
-      {
+      else {
         LOG_POPUP
         QMessageBox::critical(
             this, tr("MantidPlot - File opening error"),
@@ -9716,8 +9715,7 @@ void ApplicationWindow::showMoreWindows() {
     QMessageBox::information(
         this, "MantidPlot",
         tr("Please use the project explorer to select a window!")); // Mantid
-  }
-  else
+  } else
     explorerWindow->show();
 }
 
