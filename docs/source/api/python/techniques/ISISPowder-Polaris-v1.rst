@@ -244,8 +244,7 @@ Example Input:
 
 ..  code-block:: python
 
-  calibration_dir = r"C:\path\to\calibration_dir"
-  polaris_example = Polaris(calibration_directory=calibration_dir, ...)
+  polaris_example = Polaris(calibration_directory=r"C:\path\to\calibration_dir", ...)
 
 .. _calibration_mapping_file_polaris_isis-powder-diffraction-ref:
 
@@ -262,8 +261,7 @@ Example Input:
 ..  code-block:: python
 
   # Notice the filename always ends in .yaml
-  cal_mapping_file = r"C:\path\to\file\calibration_mapping.yaml"
-  polaris_example = Polaris(calibration_mapping_file=cal_mapping_file, ...)
+  polaris_example = Polaris(calibration_mapping_file=r"C:\path\to\file\calibration_mapping.yaml", ...)
 
 .. _chopper_on_polaris_isis-powder-diffraction-ref:
 
@@ -302,8 +300,7 @@ Example Input:
 ..  code-block:: python
 
   # Notice the filename always ends in .yaml
-  configuration_file = r"C:\path\to\file\configuration.yaml"
-  polaris_example = Polaris(config_file=configuration_file, ...)
+  polaris_example = Polaris(config_file=r"C:\path\to\file\configuration.yaml", ...)
 
 .. _do_absorb_corrections_polaris_isis-powder-diffraction-ref:
 
@@ -458,8 +455,7 @@ Example Input:
 
 ..  code-block:: python
 
-  output_dir = r"C:\path\to\output_dir"
-  polaris_example = Polaris(output_directory=output_dir, ...)
+  polaris_example = Polaris(output_directory=r"C:\path\to\output_dir", ...)
 
 .. _run_number_polaris_isis_powder-diffraction-ref:
 
