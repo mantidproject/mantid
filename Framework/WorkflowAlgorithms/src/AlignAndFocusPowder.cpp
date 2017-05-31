@@ -323,11 +323,17 @@ void AlignAndFocusPowder::exec() {
   // Now setup the output workspace
   m_outputW = getProperty("OutputWorkspace");
   if (m_inputEW) {
+    // event workspace
     if (m_outputW != m_inputW) {
+      // out-of-place: clone the input EventWorkspace
       m_outputEW = m_inputEW->clone();
+      m_outputW = boost::dynamic_pointer_cast<MatrixWorkspace>(m_outputEW);
+    } else {
+      // in-place
+      m_outputEW = boost::dynamic_pointer_cast<EventWorkspace>(m_outputW);
     }
-    m_outputEW = boost::dynamic_pointer_cast<EventWorkspace>(m_outputW);
   } else {
+    // workspace2D
     if (m_outputW != m_inputW) {
       m_outputW = WorkspaceFactory::Instance().create(m_inputW);
     }
