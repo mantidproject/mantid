@@ -685,7 +685,8 @@ public:
   void test_set_InfoVisitor() {
     Instrument instrument;
     TS_ASSERT(!instrument.hasInfoVisitor());
-    InfoComponentVisitor visitor(std::vector<detid_t>{});
+    Geometry::ParameterMap paramMap;
+    InfoComponentVisitor visitor(std::vector<detid_t>{}, paramMap);
     instrument.setInfoVisitor(visitor);
     TS_ASSERT(instrument.hasInfoVisitor());
   }

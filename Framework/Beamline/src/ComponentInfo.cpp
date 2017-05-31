@@ -95,15 +95,6 @@ ComponentInfo::componentIndices(const size_t componentIndex) const {
 
 size_t ComponentInfo::size() const { return m_size; }
 
-bool ComponentInfo::operator==(const ComponentInfo &other) const {
-  return m_size == other.m_size && m_detectorRanges == other.m_detectorRanges &&
-         *m_assemblySortedDetectorIndices ==
-             *other.m_assemblySortedDetectorIndices;
-}
-bool ComponentInfo::operator!=(const ComponentInfo &other) const {
-  return !(this->operator==(other));
-}
-
 Eigen::Vector3d ComponentInfo::position(const size_t componentIndex) const {
   if (isDetector(componentIndex)) {
     return m_detectorInfo->position(componentIndex);

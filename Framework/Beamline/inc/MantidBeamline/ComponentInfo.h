@@ -70,9 +70,6 @@ public:
   std::vector<size_t> detectorIndices(const size_t componentIndex) const;
   std::vector<size_t> componentIndices(const size_t componentIndex) const;
   size_t size() const;
-  bool operator==(const ComponentInfo &other) const;
-  bool operator!=(const ComponentInfo &other) const;
-
   inline bool isDetector(const size_t componentIndex) const {
     return componentIndex < m_assemblySortedDetectorIndices->size();
   }
