@@ -111,6 +111,10 @@ void MuonFitPropertyBrowser::init() {
   m_normalization = m_enumManager->addProperty("Normalization");
   setNormalization();
 
+  m_keepNorm = m_boolManager->addProperty("Fix Normalization");
+  bool keepNorm = settings.value("Fix Normalization", QVariant(false)).toBool();
+  m_boolManager->setValue(m_keepNorm, keepNorm);
+
   m_workspace = m_enumManager->addProperty("Workspace");
   m_workspaceIndex = m_intManager->addProperty("Workspace Index");
   m_output = m_stringManager->addProperty("Output");
@@ -145,6 +149,7 @@ void MuonFitPropertyBrowser::init() {
   settingsGroup->addSubProperty(m_startX);
   settingsGroup->addSubProperty(m_endX);
   settingsGroup->addSubProperty(m_normalization);
+  settingsGroup->addSubProperty(m_keepNorm);
 
   // Disable "Browse" button - use case is that first run will always be the one
   // selected on front tab. User will type in the runs they want rather than
@@ -307,7 +312,10 @@ void MuonFitPropertyBrowser::populateFitMenuButton(QSignalMapper *fitMapper,
 void MuonFitPropertyBrowser::setFitEnabled(bool yes) {
   m_fitActionFit->setEnabled(yes);
   m_fitActionSeqFit->setEnabled(yes);
-  m_fitActionTFAsymm->setEnabled(yes);
+  // only allow TFAsymm fit if not keeping norm
+  if (!m_boolManager->value(m_keepNorm) && yes) {
+    m_fitActionTFAsymm->setEnabled(yes);
+  }
 }
 /**
 * Set the input workspace name
@@ -460,6 +468,28 @@ void MuonFitPropertyBrowser::boolChanged(QtProperty *prop) {
   if (prop == m_rawData) {
     const bool val = m_boolManager->value(prop);
     emit fitRawDataClicked(val);
+  }
+  if (prop == m_keepNorm) {
+    const bool val = m_boolManager->value(prop);
+    if (val) { // record data for later
+      double norm = readNormalization()[0];
+      ITableWorkspace_sptr table = WorkspaceFactory::Instance().createTable();
+      AnalysisDataService::Instance().addOrReplace("__keepNorm__", table);
+      table->addColumn("double", "norm");
+      table->addColumn("int", "spectra");
+      TableRow row = table->appendRow();
+      row << norm << 0;
+      // remove TFAsymm fit
+      m_fitActionTFAsymm->setEnabled(false);
+
+    } else { // remove data so it is not used later
+      AnalysisDataService::Instance().remove("__keepNorm__");
+
+      // if fit is enabled so should TFAsymm
+      if (m_fitActionSeqFit->isEnabled()) {
+        m_fitActionTFAsymm->setEnabled(true);
+      }
+    }
   } else {
     // search map for group/pair change
     bool done = false;
@@ -646,7 +676,6 @@ std::vector<double> readNormalization() {
   }
   return norm;
 }
-
 /**
  * Requests checks and updates prior to running a fit
  */
@@ -960,9 +989,11 @@ void MuonFitPropertyBrowser::setTFAsymmMode(bool enabled) {
   // Show or hide the TFAsymmetry fit
   if (enabled) {
     m_settingsGroup->property()->addSubProperty(m_normalization);
+    m_settingsGroup->property()->addSubProperty(m_keepNorm);
     setNormalization();
   } else {
     m_settingsGroup->property()->removeSubProperty(m_normalization);
+    m_settingsGroup->property()->removeSubProperty(m_keepNorm);
   }
 }
 /**
