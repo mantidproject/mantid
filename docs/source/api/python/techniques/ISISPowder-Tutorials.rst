@@ -29,7 +29,7 @@ ISIS example data sets. The data sets can be downloaded
 from the `Mantid download page <https://download.mantidproject.org/>`_,
 under *Sample datasets* - *ISIS*. Users may also use their own
 data instead however results will differ. Some additional
-configuration may a;sp be required which is explained in later tutorials.
+configuration may also be required which is explained in later tutorials.
 
 .. _setup_tutorials_isis-powder-diffraction-ref:
 
@@ -523,14 +523,17 @@ regardless of which cycle ISIS is on.
 Examples
 ^^^^^^^^^
 These examples explain the layout and concept of YAML files. For
-instrument specific examples please check the mapping file example
-from :ref:`copying_example_files_isis-powder-diffraction-ref`
+instrument specific examples please look at the individual
+instrument reference document:
+:ref:`instrument_doc_links_isis-powder-diffraction-ref` for
+an example specific to your instrument.
 
 The simplest example of the calibration file is used on Pearl as the
 empty, label and vanadium are the same regardless of mode.
 
 .. code-block:: yaml
  
+  # This is the layout used on PEARL
   # NB this example is not representative of actual run numbers
   123-200:
     # Notice how the indentation changes to indicate it belongs
@@ -549,6 +552,7 @@ if runs in different modes have not been collected yet.
 
 .. code-block:: yaml
 
+    # This is the layout used on GEM
     # NB this example is not representative of actual run numbers
     123-200:
         label: "1_2"
@@ -635,20 +639,20 @@ to the same cycle.
     empty_run_numbers : "160"
     offset_file_name : "pearl_offset_1_2-second.cal"  
 
-Processing partial files
+Processing intermediate files
 --------------------------
-The scripts also support processing partial files. This
+The scripts also support processing intermediate files. This
 tutorial assumes you have successfully focused data
 previously as detailed here: :ref:`focusing_data_isis-powder-diffraction-ref`.
 
-To process partial runs for example *.s1* or *.s2* files 
+To process intermediate runs for example *.s01* or *.s02* files
 you must ensure the user directories are setup to 
 include the folder where these files are located. 
 
 The instructions for this can be found here: 
 :ref:`prerequisites_isis-powder-diffraction-ref`.
 *Note: The 'Search Data Archive' option will not locate
-partial runs as only completed runs are published to the data archive.*
+intermediate runs as only completed runs are published to the data archive.*
 
 To indicate the extension to process the *file_ext* can be specified
 like so:
@@ -659,14 +663,14 @@ like so:
 
     a_pol_obj = Polaris(....)
 
-    a_pol_obj.focus(file_ext="s1", ...)
+    a_pol_obj.focus(file_ext="s01", ...)
     # Or
-    a_pol_obj.focus(file_ext=".s1", ...)
+    a_pol_obj.focus(file_ext=".s01", ...)
 
-This will locate a .s1 file for that run number and focus
+This will locate a .s01 file for that run number and focus
 it like a normal run. The output filename will also reflect that
 this is a partial file. For run number 123 and file extension s1 
-the output filename will be *s1'InstrumentName'123.nxs*.
+the output filename will be *s01'InstrumentName'123.nxs*.
 This allows users to easily distinguish between full runs and 
 partial runs in the output folder. (For more details about the 
 output folder see :ref:`output_folder_isis-powder-diffraction-ref`)
