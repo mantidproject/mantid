@@ -457,6 +457,10 @@ std::vector<double> LoadILLReflectometry::getXValues() {
       }
       // use phase of first chopper
       double chop1Phase = getDouble(StringConcat(m_chopper1Name, ".phase"));
+      if (m_instrumentName == "Figaro" && chop1Phase > 360.0) {
+        // Chopper 1 phase on Figaro is set to an arbitrary value (999.9)
+        chop1Phase = 0.0;
+      }
       double POFF = getDouble(StringConcat(m_offsetFrom, ".poff"));
       double openOffset =
           getDouble(StringConcat(m_offsetFrom, ".").append(m_offsetName));
