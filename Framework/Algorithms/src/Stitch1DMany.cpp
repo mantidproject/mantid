@@ -57,7 +57,10 @@ void Stitch1DMany::init() {
 
   declareProperty(make_unique<ArrayProperty<double>>("ManualScaleFactors",
                                                      Direction::Input),
-                  "Provided values for the scale factors");
+                  "Provided values for the scale factors. If specified, the "
+                  "number of ManualScaleFactors must either be one (in which "
+                  "case the provided value is applied to each input workspace) "
+                  "or 1 less than the number of input workspaces");
 
   declareProperty(
       make_unique<ArrayProperty<double>>("OutScaleFactors", Direction::Output),

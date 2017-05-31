@@ -862,7 +862,7 @@ public:
 
     // First item in the output group
     auto stitched =
-      boost::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(0));
+        boost::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(0));
 
     TS_ASSERT_EQUALS(stitched->getNumberHistograms(), 2);
     TS_ASSERT_EQUALS(stitched->blocksize(), 25);
