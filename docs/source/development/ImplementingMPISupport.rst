@@ -388,21 +388,21 @@ A typical example could look as follows:
 .. code-block:: c++
   :linenos:
 
+  #include "MantidTestHelpers/ParallelAlgorithmCreation.h"
   #include "MantidTestHelpers/ParallelRunner.h"
 
   namespace {
   void run_algorithm(const Parallel::Communicator &comm,
                      const MyType1 &arbitrary, const MyType2 &arguments) {
-    Mantid::Algorithms::MyAlg alg;
-    alg.setCommunicator(comm);
-    alg.initialize();
-    // In a true MPI run we could simply use "out", but in the threaded
-    // fake-runner we have only one ADS, so we have to avoid clashes.
-    std::string outName("out" + std::to_string(comm.rank()));
-    alg.setProperty("OutputWorkspace", outName);
-    alg.execute();
-    auto ws = boost::dynamic_pointer_cast<const MatrixWorkspace>(
-        AnalysisDataService::Instance().retrieve(outName));
+    // Creating the algorithm with this helper function is the recommended way,
+    // otherwise the communicator has to be set by hand and the name of the
+    // output workspace must be set to a different value depending on comm.rank()
+    // to avoid clashes, since the threading backend in ParallelRunner shares the
+    // ADS for all 'ranks'.
+    auto alg = ParallelTestHelpers::create<Mantid::Algorithms::MyAlg>(comm);
+    alg->setProperty("InputWorkspace", boost::make_shared<WorkspaceTester>());
+    alg->execute();
+    Workspace_const_sptr ws = alg->getProperty("OutputWorkspace");
     TS_ASSERT_EQUALS(ws->storageMode(), Parallel::StorageMode::Distributed);
   }
   
@@ -419,6 +419,8 @@ A typical example could look as follows:
     }
   };
 
+Here ``MantidTestHelpers/ParallelAlgorithmCreation.h`` provides the algorithm factory method ``ParallelTestHelpers::create<WorkspaceType>``.
+``MantidTestHelpers/ParallelRunner.h`` provides ``ParallelTestHelpers::runParallel``, which uses ``ParallelRunner`` with a reasonable default choice for the number of ranks.
 
 .. rubric:: Footnotes
 
