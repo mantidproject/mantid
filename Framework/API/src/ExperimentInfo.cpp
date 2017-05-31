@@ -256,6 +256,8 @@ makeDetectorInfo(const Instrument &oldInstr, const Instrument &newInstr) {
  * Make the beamline and API ComponentInfo
  * @param visitor : Component visitor to query. Visitor MUST have been filled
  * via registerContents.
+ * @param detectorInfo : DetectorInfo to consult internally when dealing with
+ * detector components.
  */
 void ExperimentInfo::makeAPIComponentInfo(
     const InfoComponentVisitor &visitor,

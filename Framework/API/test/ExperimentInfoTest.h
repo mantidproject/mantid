@@ -937,7 +937,7 @@ public:
     TSM_ASSERT_EQUALS(
         "Bank should yield entire sub-tree of component indices",
         compInfo.componentsInSubTree(compInfo.indexOf(bankId)).size(),
-        (nPixels * nPixels) + nPixels);
+        (nPixels * nPixels) + nPixels + 1);
 
     auto instrumentId = inst->getComponentID();
     size_t nComponents = nPixels * nPixels;
@@ -945,6 +945,7 @@ public:
     nComponents += 1;       // Rectangular Detector (bank)
     nComponents += 1;       // source
     nComponents += 1;       // sample
+    nComponents += 1;       // self
     TSM_ASSERT_EQUALS(
         "Instrument should yield entire tree of component indices",
         compInfo.componentsInSubTree(compInfo.indexOf(instrumentId)).size(),
