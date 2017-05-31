@@ -98,7 +98,10 @@ class AlignAndFocusPowderFromFiles(DataProcessorAlgorithm):
         for name in PROPS_FOR_ALIGN:
             prop = self.getProperty(name)
             if name == 'PreserveEvents' or not prop.isDefault:
-                args[name] = prop.value
+                if 'Workspace' in name:
+                    args[name] = prop.valueAsStr
+                else:
+                    args[name] = prop.value
         return args
 
     def __updateAlignAndFocusArgs(self, wkspname):
