@@ -538,7 +538,7 @@ public:
     //TemporaryRenamer renamedFile(middleFile);
 
     alg.setPropertyValue("FirstRun", "MUSR00015193.nxs");
-    alg.setPropertyValue("LastRun", "MUSR00015195 .nxs");
+    alg.setPropertyValue("LastRun", "MUSR00015195.nxs");
     alg.setPropertyValue("OutputWorkspace", "PlotAsymmetryByLogValueTest_WS");
     alg.setPropertyValue("LogValue", "run_number");
     alg.setPropertyValue("Red", "2");
