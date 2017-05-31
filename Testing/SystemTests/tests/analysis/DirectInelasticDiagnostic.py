@@ -48,7 +48,7 @@ class DirectInelasticDiagnostic(MantidStressTest):
 
         # Save the masked spectra nmubers to a simple ASCII file for comparison
         self.saved_diag_file = os.path.join(ms.config['defaultsave.directory'], 'CurrentDirectInelasticDiag.txt')
-        handle = file(self.saved_diag_file, 'w')
+        handle = open(self.saved_diag_file, 'w')
         spectrumInfo = sample_ws.spectrumInfo()
         for index in range(sample_ws.getNumberHistograms()):
             if spectrumInfo.isMasked(index):
