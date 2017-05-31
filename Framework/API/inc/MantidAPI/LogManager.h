@@ -192,6 +192,10 @@ public:
   void clearLogs();
 
 protected:
+  /// Load the run from a NeXus file with a given group name
+  void loadNexus(::NeXus::File *file, const std::string &group,
+                 const std::map<std::string, std::string> &entries,
+                 bool keepOpen = false);
   /// A pointer to a property manager
   Kernel::PropertyManager m_manager;
   /// Name of the log entry containing the proton charge when retrieved using

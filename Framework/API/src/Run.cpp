@@ -387,10 +387,10 @@ void Run::saveNexus(::NeXus::File *file, const std::string &group,
  */
 void Run::loadNexus(::NeXus::File *file, const std::string &group,
                     bool keepOpen) {
-  LogManager::loadNexus(file, group, true);
 
   std::map<std::string, std::string> entries;
   file->getEntries(entries);
+  LogManager::loadNexus(file, group, entries, true);
   for (const auto &name_class : entries) {
     if (name_class.second == "NXpositioner") {
       // Goniometer class
