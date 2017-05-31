@@ -11,7 +11,8 @@ from mantid.api import (AlgorithmManager, AnalysisDataService, isSameWorkspaceOb
 from sans.common.constants import (SANS_FILE_TAG, ALL_PERIODS, SANS2D, LOQ, LARMOR, EMPTY_NAME,
                                    REDUCED_CAN_TAG)
 from sans.common.log_tagger import (get_tag, has_tag, set_tag, has_hash, get_hash_value, set_hash)
-from sans.common.enums import (DetectorType, RangeStepType, ReductionDimensionality, OutputParts, ISISReductionMode)
+from sans.common.enums import (DetectorType, RangeStepType, ReductionDimensionality, OutputParts, ISISReductionMode,
+                               SANSInstrument)
 
 
 # -------------------------------------------
@@ -773,3 +774,24 @@ def does_can_workspace_exist_on_ads(can_workspace):
         if has_hash(REDUCED_CAN_TAG, hash_value_to_compare, workspace):
             return True
     return False
+
+
+def get_bank_for_spectrum_number(spectrum_number, instrument):
+    """
+    This is not very nice since we have to hard-code some instrument information here. But at the moment there is no
+    other (efficient and easy) way to check on which detector the spectrum is living.
+
+    The solution here is ugly and should be improved in the future. It is uses the same approach as in the old
+    framework.
+    :param spectrum_number: The spectrum number to check
+    :param instrument: the SANS instrument
+    :returns: either LAB or HAB
+    """
+    detector = DetectorType.LAB
+    if instrument is SANSInstrument.LOQ:
+        if 16387 <= spectrum_number <= 17784:
+            detector = DetectorType.HAB
+    elif instrument is SANSInstrument.LOQ:
+        if 36873 <= spectrum_number <= 73736:
+            detector = DetectorType.HAB
+    return detector

@@ -787,20 +787,6 @@ void MuonAnalysisFitDataPresenter::setUpDataSelector(
   m_dataSelector->setWorkspaceDetails(
       numberString, QString::fromStdString(wsParams.instrument), filePath);
 
-  // Set selected groups/pairs and periods here too
-  // (unless extra groups/periods are already selected, in which case don't
-  // unselect them)
-  const QString &groupToSet = QString::fromStdString(wsParams.itemName);
-  const QString &periodToSet = QString::fromStdString(wsParams.periods);
-  const auto &groups = m_dataSelector->getChosenGroups();
-  const auto &periods = m_dataSelector->getPeriodSelections();
-  if (!groups.contains(groupToSet)) {
-    emit setChosenGroupSignal(groupToSet);
-  }
-  if (!periodToSet.isEmpty() && !periods.contains(periodToSet)) {
-    emit setChosenPeriodSignal(periodToSet);
-  }
-
   // If given an optional file path to "current run", cache it for later use
   if (filePath && !wsParams.runs.empty()) {
     m_currentRun = Muon::CurrentRun(wsParams.runs.front(), filePath.get());

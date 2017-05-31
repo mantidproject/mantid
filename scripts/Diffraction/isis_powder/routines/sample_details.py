@@ -91,6 +91,7 @@ class SampleDetails(object):
         if len(center) != 3:
             raise ValueError("The center must have three values corresponding to X, Y, Z position of the sample."
                              " For example [0. ,1., 2.]")
+
         for val in center:
             _check_can_convert_to_float(property_name="center", value=val)
 

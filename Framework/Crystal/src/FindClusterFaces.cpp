@@ -326,7 +326,7 @@ void FindClusterFaces::exec() {
   }
   const bool usingFiltering = optionalAllowedLabels.is_initialized();
 
-  Progress progress(this, 0, 1, nSteps);
+  Progress progress(this, 0.0, 1.0, nSteps);
   PARALLEL_FOR_NO_WSP_CHECK()
   for (int it = 0; it < nIterators; ++it) {
     PARALLEL_START_INTERUPT_REGION

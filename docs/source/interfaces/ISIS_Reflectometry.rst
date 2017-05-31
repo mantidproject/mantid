@@ -510,11 +510,12 @@ ASCII formats. The filenames are saved in the form [Prefix][Workspace Name].[ext
 |                               | to be used for filtering workspace names.            |
 +-------------------------------+------------------------------------------------------+
 | List Of Workspaces            | The left listbox will contain any workspaces loaded  |
-|                               | into mantid. Double clicking on one will fill        |
-|                               | the right list box with the parameters it contains.  |
-|                               | This listbox supports multi-select in order to       |
-|                               | allow for multiple workspaces to be saved out        |
-|                               | at the same time with the same settings.             |
+|                               | into mantid (excluding group and table workspaces).  |
+|                               | Double clicking on one will fill the right list box  |
+|                               | with the parameters it contains. This listbox        |
+|                               | supports multi-select in order to allow for multiple |
+|                               | workspaces to be saved out at the same time with the |
+|                               | same settings.                                       |
 +-------------------------------+------------------------------------------------------+
 | List Of Logged Parameters     | The right listbox starts out empty, but will fill    |
 |                               | with parameter names when a workspace in the left    |

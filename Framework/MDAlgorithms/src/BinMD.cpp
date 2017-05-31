@@ -373,7 +373,7 @@ void BinMD::exec() {
             ImplicitFunctionXML);
 
   // This gets deleted by the thread pool; don't delete it in here.
-  prog = new Progress(this, 0, 1.0, 1);
+  prog = new Progress(this, 0.0, 1.0, 1);
 
   // Create the dense histogram. This allocates the memory
   outWS = MDHistoWorkspace_sptr(new MDHistoWorkspace(m_binDimensions));

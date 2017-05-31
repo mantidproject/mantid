@@ -210,6 +210,9 @@ Background Subtraction
 Detector Calibration
   Used to specify the calibration (i.e. vanadium) runs to divide by.
 
+Background Subtraction for Calibration
+  Used to specify the background (i.e. empty can) runs to subtract from the vanadium calibration runs.
+
 Output Name
   This will be the name of the resulting reduced workspace group.
 

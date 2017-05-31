@@ -64,7 +64,7 @@ class Pearl(AbstractInst):
 
     def _generate_output_file_name(self, run_number_string):
         inst = self._inst_settings
-        return pearl_algs.generate_out_name(run_number_string=run_number_string, absorb_on=inst.absorb_corrections,
+        return pearl_algs.generate_out_name(run_number_string=run_number_string,
                                             long_mode_on=inst.long_mode, tt_mode=inst.tt_mode)
 
     def _attenuate_workspace(self, input_workspace):
