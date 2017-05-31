@@ -1,3 +1,4 @@
+from __future__ import (absolute_import, division, print_function)
 #pylint: disable=invalid-name
 """
     Simple local data catalog for Mantid
@@ -213,7 +214,7 @@ class DataCatalog(object):
             Pretty print the whole list of data
         """
         output = "%s\n" % self.data_set_cls.header()
-        for r in self.catalog:
+        for r in self.catalog:data_cat
             output += "%s\n" % str(r)
         return output
 
@@ -292,6 +293,6 @@ class DataCatalog(object):
 
             self.db.commit()
             c.close()
-        except Exception, msg:
+        except Exception as msg:
             logger.error("DataCatalog: Error working with the local data catalog\n%s" % str(traceback.format_exc()))
             logger.exception(msg)
