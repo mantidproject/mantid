@@ -187,7 +187,7 @@ public:
   }
 
   void test_throw_if_positions_rotation_inputs_different_sizes() {
-    auto detectorIndices = boost::make_shared<
+    auto detectorsInSubTree = boost::make_shared<
         const std::vector<size_t>>(); // No detector indices in this example!
 
     auto bankSortedComponentIndices =
@@ -208,7 +208,7 @@ public:
     auto rotations = boost::make_shared<std::vector<Eigen::Quaterniond>>(
         0); // 0 rotations provided
 
-    TS_ASSERT_THROWS(ComponentInfo(detectorIndices, detectorRanges,
+    TS_ASSERT_THROWS(ComponentInfo(detectorsInSubTree, detectorRanges,
                                    bankSortedComponentIndices, componentRanges,
                                    positions, rotations,
                                    boost::make_shared<DetectorInfo>()),
@@ -223,10 +223,10 @@ public:
      * too.
      * All vectors should be the same size.
      */
-    auto detectorIndices = boost::make_shared<
+    auto detectorsInSubTree = boost::make_shared<
         const std::vector<size_t>>(); // No detector indices in this example!
 
-    auto componentIndices =
+    auto componentsInSubTree =
         boost::make_shared<const std::vector<size_t>>(std::vector<size_t>{0});
 
     auto detectorRanges = boost::make_shared<
@@ -242,9 +242,9 @@ public:
         boost::make_shared<const std::vector<std::pair<size_t, size_t>>>(
             std::vector<std::pair<size_t, size_t>>{{0, 0}});
 
-    TS_ASSERT_THROWS(ComponentInfo(detectorIndices, detectorRanges,
-                                   componentIndices, componentRanges, positions,
-                                   rotations,
+    TS_ASSERT_THROWS(ComponentInfo(detectorsInSubTree, detectorRanges,
+                                   componentsInSubTree, componentRanges,
+                                   positions, rotations,
                                    boost::make_shared<DetectorInfo>()),
                      std::invalid_argument &);
   }
@@ -426,15 +426,15 @@ public:
     /*
     Note that detectors are always the first n component indexes!
     */
-    TS_ASSERT_EQUALS(info.detectorIndices(0), std::vector<size_t>{0});
-    TS_ASSERT_EQUALS(info.detectorIndices(1), std::vector<size_t>{1});
-    TS_ASSERT_EQUALS(info.detectorIndices(2), std::vector<size_t>{2});
+    TS_ASSERT_EQUALS(info.detectorsInSubTree(0), std::vector<size_t>{0});
+    TS_ASSERT_EQUALS(info.detectorsInSubTree(1), std::vector<size_t>{1});
+    TS_ASSERT_EQUALS(info.detectorsInSubTree(2), std::vector<size_t>{2});
 
     // Now we have non-detector components
-    TS_ASSERT_EQUALS(info.detectorIndices(4 /*component index of root*/),
+    TS_ASSERT_EQUALS(info.detectorsInSubTree(4 /*component index of root*/),
                      std::vector<size_t>({0, 2, 1}));
     TS_ASSERT_EQUALS(
-        info.detectorIndices(3 /*component index of sub-assembly*/),
+        info.detectorsInSubTree(3 /*component index of sub-assembly*/),
         std::vector<size_t>({0, 2}));
   }
 
@@ -444,17 +444,17 @@ public:
     /*
     Note that detectors are always the first n component indexes!
     */
-    TS_ASSERT_EQUALS(info.componentIndices(0), std::vector<size_t>{0});
-    TS_ASSERT_EQUALS(info.componentIndices(1), std::vector<size_t>{1});
-    TS_ASSERT_EQUALS(info.componentIndices(2), std::vector<size_t>{2});
+    TS_ASSERT_EQUALS(info.componentsInSubTree(0), std::vector<size_t>{0});
+    TS_ASSERT_EQUALS(info.componentsInSubTree(1), std::vector<size_t>{1});
+    TS_ASSERT_EQUALS(info.componentsInSubTree(2), std::vector<size_t>{2});
 
     // Now we have non-detector components
-    TS_ASSERT_EQUALS(info.componentIndices(4 /*component index of root*/),
+    TS_ASSERT_EQUALS(info.componentsInSubTree(4 /*component index of root*/),
                      std::vector<size_t>(
                          {0, 2, 3, 1, 4})); // Note inclusion of self comp index
 
     TS_ASSERT_EQUALS(
-        info.componentIndices(3 /*component index of sub-assembly*/),
+        info.componentsInSubTree(3 /*component index of sub-assembly*/),
         std::vector<size_t>({0, 2, 3})); // Note inclusion of self comp index
   }
 };

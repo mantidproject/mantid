@@ -39,28 +39,19 @@ ComponentInfo::ComponentInfo(
 }
 
 std::vector<size_t>
-ComponentInfo::detectorIndices(size_t componentIndex) const {
-  return m_componentInfo.detectorIndices(componentIndex);
+ComponentInfo::detectorsInSubTree(size_t componentIndex) const {
+  return m_componentInfo.detectorsInSubTree(componentIndex);
 }
 
 std::vector<size_t>
-ComponentInfo::componentIndices(size_t componentIndex) const {
-  return m_componentInfo.componentIndices(componentIndex);
+ComponentInfo::componentsInSubTree(size_t componentIndex) const {
+  return m_componentInfo.componentsInSubTree(componentIndex);
 }
 
 size_t ComponentInfo::size() const { return m_componentInfo.size(); }
 
 size_t ComponentInfo::indexOf(Geometry::IComponent *id) const {
   return m_compIDToIndex->at(id);
-}
-
-bool ComponentInfo::operator==(const ComponentInfo &other) const {
-  return this->m_componentInfo == other.m_componentInfo &&
-         m_compIDToIndex == other.m_compIDToIndex;
-}
-
-bool ComponentInfo::operator!=(const ComponentInfo &other) const {
-  return !this->operator==(other);
 }
 
 Kernel::V3D ComponentInfo::position(const size_t componentIndex) const {

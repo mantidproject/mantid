@@ -63,12 +63,10 @@ public:
           componentIds,
       boost::shared_ptr<const std::unordered_map<
           Geometry::IComponent *, size_t>> componentIdToIndexMap);
-  std::vector<size_t> detectorIndices(size_t componentIndex) const;
-  std::vector<size_t> componentIndices(size_t componentIndex) const;
+  std::vector<size_t> detectorsInSubTree(size_t componentIndex) const;
+  std::vector<size_t> componentsInSubTree(size_t componentIndex) const;
   size_t size() const;
   size_t indexOf(Geometry::IComponent *id) const;
-  bool operator==(const ComponentInfo &other) const;
-  bool operator!=(const ComponentInfo &other) const;
   Kernel::V3D position(const size_t componentIndex) const;
   Kernel::Quat rotation(const size_t componentIndex) const;
 };

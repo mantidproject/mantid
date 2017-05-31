@@ -59,7 +59,7 @@ ComponentInfo::ComponentInfo(
 }
 
 std::vector<size_t>
-ComponentInfo::detectorIndices(const size_t componentIndex) const {
+ComponentInfo::detectorsInSubTree(const size_t componentIndex) const {
   if (isDetector(componentIndex)) {
     /* This is a single detector. Just return the corresponding index.
      * detectorIndex == componentIndex
@@ -76,7 +76,7 @@ ComponentInfo::detectorIndices(const size_t componentIndex) const {
 }
 
 std::vector<size_t>
-ComponentInfo::componentIndices(const size_t componentIndex) const {
+ComponentInfo::componentsInSubTree(const size_t componentIndex) const {
   if (isDetector(componentIndex)) {
     /* This is a single detector. Just return the corresponding index.
      * detectorIndex == componentIndex. Never any sub-components for detectors.
@@ -124,7 +124,7 @@ void ComponentInfo::setPosition(const size_t componentIndex,
                                 const Eigen::Vector3d &newPosition) {
 
   const Eigen::Vector3d offset = newPosition - position(componentIndex);
-  const auto indices = this->componentIndices(
+  const auto indices = this->componentsInSubTree(
       componentIndex); // Includes requested component index
   for (auto &index : indices) {
     if (isDetector(index)) {
@@ -160,7 +160,7 @@ void ComponentInfo::setRotation(const size_t componentIndex,
   const Affine3d transform =
       Translation3d(compPos) * rotDelta * Translation3d(-compPos);
 
-  const auto indices = this->componentIndices(
+  const auto indices = this->componentsInSubTree(
       componentIndex); // Includes requested component index
   for (auto &index : indices) {
 

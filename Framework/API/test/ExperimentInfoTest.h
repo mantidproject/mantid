@@ -806,7 +806,7 @@ public:
     auto bank = inst->getComponentByName("bank1");
     auto bankID = bank->getComponentID();
     auto allBankDetectorIndexes =
-        compInfo.detectorIndices(compInfo.indexOf(bankID));
+        compInfo.detectorsInSubTree(compInfo.indexOf(bankID));
 
     TSM_ASSERT_EQUALS("Should have all detectors under this bank",
                       allBankDetectorIndexes.size(),
@@ -818,7 +818,7 @@ public:
             ->getChild(0)
             ->getComponentID();
     auto allRowDetectorIndexes =
-        compInfo.detectorIndices(compInfo.indexOf(bankRowID));
+        compInfo.detectorsInSubTree(compInfo.indexOf(bankRowID));
 
     TSM_ASSERT_EQUALS("Should have all detectors under this row",
                       allRowDetectorIndexes.size(),
@@ -841,19 +841,20 @@ public:
         detInfo.detector(targetDetectorIndex).getComponentID();
     TSM_ASSERT_EQUALS(
         "Detector should report the detector index of itself",
-        compInfo.detectorIndices(compInfo.indexOf(detCompId)).size(), 1);
-    TS_ASSERT_EQUALS(compInfo.detectorIndices(compInfo.indexOf(detCompId))[0],
-                     targetDetectorIndex);
+        compInfo.detectorsInSubTree(compInfo.indexOf(detCompId)).size(), 1);
+    TS_ASSERT_EQUALS(
+        compInfo.detectorsInSubTree(compInfo.indexOf(detCompId))[0],
+        targetDetectorIndex);
 
     size_t detectorIndex =
         0; // interchangeable as either component or detector index
     TSM_ASSERT_EQUALS("Gurantee violated of detectorindex == componentIndex",
-                      compInfo.detectorIndices(detectorIndex),
+                      compInfo.detectorsInSubTree(detectorIndex),
                       std::vector<size_t>{detectorIndex});
 
     detectorIndex = 99; // interchangeable as either component or detector index
     TSM_ASSERT_EQUALS("Gurantee violated of detectorindex == componentIndex",
-                      compInfo.detectorIndices(detectorIndex),
+                      compInfo.detectorsInSubTree(detectorIndex),
                       std::vector<size_t>{detectorIndex});
   }
 
@@ -871,12 +872,12 @@ public:
     auto sampleId = inst->getComponentByName("sample")->getComponentID();
     TSM_ASSERT_EQUALS(
         "Sample should not report any nested detector indexes",
-        compInfo.detectorIndices(compInfo.indexOf(sampleId)).size(), 0);
+        compInfo.detectorsInSubTree(compInfo.indexOf(sampleId)).size(), 0);
 
     auto sourceId = inst->getComponentByName("source")->getComponentID();
     TSM_ASSERT_EQUALS(
         "Source should not report any nested detector indexes",
-        compInfo.detectorIndices(compInfo.indexOf(sourceId)).size(), 0);
+        compInfo.detectorsInSubTree(compInfo.indexOf(sourceId)).size(), 0);
   }
 
   void test_component_info_stripped_of_invalid_detectors() {
@@ -925,17 +926,17 @@ public:
     auto sampleId = inst->getComponentByName("sample")->getComponentID();
     TSM_ASSERT_EQUALS(
         "Sample should not report any nested component indices",
-        compInfo.componentIndices(compInfo.indexOf(sampleId)).size(), 0);
+        compInfo.componentsInSubTree(compInfo.indexOf(sampleId)).size(), 0);
 
     auto sourceId = inst->getComponentByName("source")->getComponentID();
     TSM_ASSERT_EQUALS(
         "Source should not report any nested detector indices",
-        compInfo.componentIndices(compInfo.indexOf(sourceId)).size(), 0);
+        compInfo.componentsInSubTree(compInfo.indexOf(sourceId)).size(), 0);
 
     auto bankId = inst->getComponentByName("bank1")->getComponentID();
     TSM_ASSERT_EQUALS(
         "Bank should yield entire sub-tree of component indices",
-        compInfo.componentIndices(compInfo.indexOf(bankId)).size(),
+        compInfo.componentsInSubTree(compInfo.indexOf(bankId)).size(),
         (nPixels * nPixels) + nPixels);
 
     auto instrumentId = inst->getComponentID();
@@ -946,7 +947,7 @@ public:
     nComponents += 1;       // sample
     TSM_ASSERT_EQUALS(
         "Instrument should yield entire tree of component indices",
-        compInfo.componentIndices(compInfo.indexOf(instrumentId)).size(),
+        compInfo.componentsInSubTree(compInfo.indexOf(instrumentId)).size(),
         nComponents);
   }
 

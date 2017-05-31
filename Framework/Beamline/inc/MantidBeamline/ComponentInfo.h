@@ -67,8 +67,8 @@ public:
                 boost::shared_ptr<std::vector<Eigen::Quaterniond>> rotations,
                 boost::shared_ptr<DetectorInfo> detectorInfo);
 
-  std::vector<size_t> detectorIndices(const size_t componentIndex) const;
-  std::vector<size_t> componentIndices(const size_t componentIndex) const;
+  std::vector<size_t> detectorsInSubTree(const size_t componentIndex) const;
+  std::vector<size_t> componentsInSubTree(const size_t componentIndex) const;
   size_t size() const;
   inline bool isDetector(const size_t componentIndex) const {
     return componentIndex < m_assemblySortedDetectorIndices->size();
