@@ -472,7 +472,7 @@ void LogManager::saveNexus(::NeXus::File *file, const std::string &group,
 /** Load the object from an open NeXus file.
  * @param file :: open NeXus file
  * @param group :: name of the group to open. Pass an empty string to NOT open a
- * group,
+ * group
  * @param keepOpen :: do not close group on exit to allow overloading and child
  * classes reading from the same group
  * load any NXlog in the current open group.
@@ -486,7 +486,7 @@ void LogManager::loadNexus(::NeXus::File *file, const std::string &group,
 
 //--------------------------------------------------------------------------------------------
 /** Load the object from an open NeXus file. Avoid multiple expensive calls to
- * ::NeXus::File::getEntries().
+ * getEntries().
  * @param file :: open NeXus file
  * @param group :: name of the group to open. Pass an empty string to NOT open a
  * group
