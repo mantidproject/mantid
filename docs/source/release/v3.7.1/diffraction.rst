@@ -29,10 +29,10 @@ Powder Diffraction Scripts
 - PowderISIS script has been renamed to CryPowderISIS and can be found within
   the following folder `scripts/CryPowderISIS`
 
-- `Pearl Powder Diffraction Script <http://docs.mantidproject.org/v3.7.1/api/python/techniques/PearlPowderDiffractionISIS-v1.html>`_ 
+- *Pearl Powder Diffraction Script* 
   documentation has been implemented and
   PowderISIS script documentation has been renamed to
-  `Crystallography Powder Diffraction Script <http://docs.mantidproject.org/v3.7.1/api/python/techniques/CryPowderDiffractionISIS-v1.html>`_
+  *Crystallography Powder Diffraction Script*
 
 Single Crystal Improvements
 ---------------------------
