@@ -204,8 +204,14 @@ void Stitch1DMany::validateCommonInputs(
       this->getProperty("ManualScaleFactors");
   m_manualScaleFactors =
       (manualScaleFactors.size() == 1)
-          ? std::vector<double>(numStitchableWS, manualScaleFactors[0])
+          ? std::vector<double>(numStitchableWS - 1, manualScaleFactors[0])
           : manualScaleFactors;
+
+  if (m_manualScaleFactors.size() > 0 &&
+      m_manualScaleFactors.size() != numStitchableWS - 1)
+    errors["ManualScaleFactors"] = "If given, ManualScaleFactors must either "
+                                   "consist of one entry or one fewer entries "
+                                   "than the number of input workspaces";
 }
 
 /** Execute the algorithm.
