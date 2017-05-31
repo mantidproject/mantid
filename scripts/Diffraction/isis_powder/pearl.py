@@ -87,13 +87,23 @@ class Pearl(AbstractInst):
         # instead we don't try to run this automatically
         raise NotImplementedError("You must run the create_vanadium method manually on Pearl")
 
+    def _get_current_tt_mode(self):
+        return self._inst_settings.tt_mode
+
     def _get_monitor_spectra_index(self, run_number):
         return self._inst_settings.monitor_spec_no
 
     def _spline_vanadium_ws(self, focused_vanadium_spectra):
         focused_vanadium_spectra = pearl_algs.strip_bragg_peaks(focused_vanadium_spectra)
-        return common.spline_workspaces(focused_vanadium_spectra=focused_vanadium_spectra,
-                                        num_splines=self._inst_settings.spline_coefficient)
+        splined_list = common.spline_workspaces(focused_vanadium_spectra=focused_vanadium_spectra,
+                                                num_splines=self._inst_settings.spline_coefficient)
+        # Ensure the name is unique if we are in tt_mode all
+        new_workspace_names = []
+        for ws in splined_list:
+            new_name = ws.getName() + '_' + self._inst_settings.tt_mode
+            new_workspace_names.append(mantid.RenameWorkspace(InputWorkspace=ws, OutputWorkspace=new_name))
+
+        return new_workspace_names
 
     def _output_focused_ws(self, processed_spectra, run_details, output_mode=None):
         if not output_mode:
