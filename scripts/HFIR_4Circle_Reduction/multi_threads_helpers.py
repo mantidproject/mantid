@@ -1,9 +1,9 @@
 #pylint: disable=W0403,R0913,R0902
-
 from PyQt4 import QtCore
 from PyQt4.QtCore import QThread
 
 import reduce4circleControl as r4c
+import peak_integration_utility
 
 
 class AddPeaksThread(QThread):
@@ -115,7 +115,7 @@ class IntegratePeaksThread(QThread):
     mergeMsgSignal = QtCore.pyqtSignal(int, int, int, str)
 
     def __init__(self, main_window, exp_number, scan_tuple_list, mask_det, mask_name, norm_type, num_pt_bg_left,
-                 num_pt_bg_right):
+                 num_pt_bg_right, scale_factor=1.000):
         """
 
         :param main_window:
@@ -140,8 +140,12 @@ class IntegratePeaksThread(QThread):
         assert isinstance(mask_name, str), 'Name of mask must be a string but not %s.' % str(type(mask_name))
         assert isinstance(norm_type, str), 'Normalization type must be a string but not %s.' \
                                            '' % str(type(norm_type))
-        assert isinstance(num_pt_bg_left, int) and num_pt_bg_left >= 0
-        assert isinstance(num_pt_bg_right, int) and num_pt_bg_right >= 0
+        assert isinstance(num_pt_bg_left, int) and num_pt_bg_left >= 0,\
+            'Number of Pt at left for background {0} must be non-negative integers but not of type {1}.' \
+            ''.format(num_pt_bg_left, type(num_pt_bg_left))
+        assert isinstance(num_pt_bg_right, int) and num_pt_bg_right >= 0,\
+            'Number of Pt at right for background {0} must be non-negative integers but not of type {1}.' \
+            ''.format(num_pt_bg_right, type(num_pt_bg_right))
 
         # set values
         self._mainWindow = main_window
@@ -152,6 +156,7 @@ class IntegratePeaksThread(QThread):
         self._selectedMaskName = mask_name
         self._numBgPtLeft = num_pt_bg_left
         self._numBgPtRight = num_pt_bg_right
+        self._scaleFactor = scale_factor
 
         # link signals
         self.peakMergeSignal.connect(self._mainWindow.update_merge_value)
@@ -238,8 +243,9 @@ class IntegratePeaksThread(QThread):
             # check given mask workspace
             if self._maskDetector:
                 self._mainWindow.controller.check_generate_mask_workspace(self._expNumber, scan_number,
-                                                                          self._selectedMaskName)
+                                                                          self._selectedMaskName, check_throw=True)
 
+            bkgd_pt_list = (self._numBgPtLeft, self._numBgPtRight)
             # integrate peak
             try:
                 status, ret_obj = self._mainWindow.controller.integrate_scan_peaks(exp=self._expNumber,
@@ -249,38 +255,84 @@ class IntegratePeaksThread(QThread):
                                                                                    merge_peaks=False,
                                                                                    use_mask=self._maskDetector,
                                                                                    normalization=self._normalizeType,
-                                                                                   mask_ws_name=self._selectedMaskName)
+                                                                                   mask_ws_name=self._selectedMaskName,
+                                                                                   scale_factor=self._scaleFactor,
+                                                                                   background_pt_tuple=bkgd_pt_list)
             except ValueError as val_err:
                 status = False
                 ret_obj = 'Unable to integrate scan {0} due to {1}.'.format(scan_number, str(val_err))
+            except RuntimeError as run_err:
+                status = False
+                ret_obj = 'Unable to integrate scan {0}: {1}.'.format(scan_number, run_err)
 
             # handle integration error
             if status:
                 # get PT dict
                 pt_dict = ret_obj
+                assert isinstance(pt_dict, dict), 'dictionary must'
+                self.set_integrated_peak_info(scan_number, pt_dict)
+                # information setup include
+                # - lorentz correction factor
+                # - peak integration dictionary
+                # - motor information: peak_info_obj.set_motor(motor_name, motor_step, motor_std_dev)
             else:
                 # integration failed
                 error_msg = str(ret_obj)
                 self.mergeMsgSignal.emit(self._expNumber, scan_number, 0, error_msg)
                 continue
 
-            # calculate background value
-            background_pt_list = pt_number_list[:self._numBgPtLeft] + pt_number_list[-self._numBgPtRight:]
-            avg_bg_value = self._mainWindow.controller.estimate_background(pt_dict, background_pt_list)
-
-            # correct intensity by background value
-            intensity_i = self._mainWindow.controller.simple_integrate_peak(pt_dict, avg_bg_value)
+            intensity1 = pt_dict['simple intensity']
             peak_centre = self._mainWindow.controller.get_peak_info(self._expNumber, scan_number).get_peak_centre()
 
             # emit signal to main app for peak intensity value
             mode = 1
             # center_i
-            self.peakMergeSignal.emit(self._expNumber, scan_number, float(intensity_i), list(peak_centre), mode)
+            self.peakMergeSignal.emit(self._expNumber, scan_number, float(intensity1), list(peak_centre), mode)
         # END-FOR
 
         # terminate the process
         mode = int(2)
         self.peakMergeSignal.emit(self._expNumber, -1, len(self._scanTupleList), [0, 0, 0], mode)
         # self._mainWindow.ui.tableWidget_mergeScans.select_all_rows(False)
+
+        return
+
+    def set_integrated_peak_info(self, scan_number, peak_integration_dict):
+        """
+        set the integrated peak information including
+        * calculate Lorentz correction
+        * add the integration result dictionary
+        * add motor step information
+        :return:
+        """
+        # print '[DB...BAT] Set Integrated Peak Info is called for exp {0} scan {1}.' \
+        #       ''.format(self._expNumber, scan_number)
+
+        # get peak information
+        peak_info_obj = self._mainWindow.controller.get_peak_info(self._expNumber, scan_number)
+
+        # get Q-vector of the peak center and calculate |Q| from it
+        peak_center_q = peak_info_obj.get_peak_centre_v3d().norm()
+        # get wave length
+        wavelength = self._mainWindow.controller.get_wave_length(self._expNumber, [scan_number])
+
+        # get motor step (choose from omega, phi and chi)
+        try:
+            motor_move_tup = self._mainWindow.controller.get_motor_step(self._expNumber, scan_number)
+            motor_name, motor_step, motor_std_dev = motor_move_tup
+        except RuntimeError as run_err:
+            return str(run_err)
+        except AssertionError as ass_err:
+            return str(ass_err)
+
+        # calculate lorentz correction
+        lorentz_factor = peak_integration_utility.calculate_lorentz_correction_factor(peak_center_q, wavelength,
+                                                                                      motor_step)
+
+        peak_info_obj.lorentz_correction_factor = lorentz_factor
+        # set motor
+        peak_info_obj.set_motor(motor_name, motor_step, motor_std_dev)
+        # set peak integration dictionary
+        peak_info_obj.set_integration(peak_integration_dict)
 
         return

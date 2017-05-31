@@ -11,6 +11,7 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include <fstream>
 #include <Poco/File.h>
+#include <boost/algorithm/string/trim.hpp>
 
 using namespace Mantid::Geometry;
 using namespace Mantid::DataObjects;
@@ -57,16 +58,39 @@ void SaveIsawPeaks::exec() {
   PeaksWorkspace_sptr ws = getProperty("InputWorkspace");
   std::vector<Peak> peaks = ws->getPeaks();
   inst = ws->getInstrument();
-
-  // We cannot assume the peaks have bank type detector modules, so we have a
-  // string to check this
-  std::string bankPart = "?";
+  const DetectorInfo &detectorInfo = ws->detectorInfo();
 
   // We must sort the peaks first by run, then bank #, and save the list of
   // workspace indices of it
   typedef std::map<int, std::vector<size_t>> bankMap_t;
   typedef std::map<int, bankMap_t> runMap_t;
   std::set<int, std::less<int>> uniqueBanks;
+  if (!inst)
+    throw std::runtime_error(
+        "No instrument in the Workspace. Cannot save DetCal file.");
+  // We cannot assume the peaks have bank type detector modules, so we have a
+  // string to check this
+  std::string bankPart = "bank";
+  if (inst->getName().compare("WISH") == 0)
+    bankPart = "WISHpanel";
+
+  // Get all children
+  std::vector<IComponent_const_sptr> comps;
+  inst->getChildren(comps, true);
+
+  for (auto &comp : comps) {
+    std::string bankName = comp->getName();
+    boost::trim(bankName);
+    boost::erase_all(bankName, bankPart);
+    int bank = 0;
+    Strings::convert(bankName, bank);
+    if (bank == 0)
+      continue;
+    if (bankMasked(comp, detectorInfo))
+      continue;
+    // Track unique bank numbers
+    uniqueBanks.insert(bank);
+  }
   runMap_t runMap;
   for (size_t i = 0; i < peaks.size(); ++i) {
     Peak &p = peaks[i];
@@ -90,8 +114,6 @@ void SaveIsawPeaks::exec() {
 
     // Save in the map
     runMap[run][bank].push_back(i);
-    // Track unique bank numbers
-    uniqueBanks.insert(bank);
   }
 
   if (!inst)
@@ -371,6 +393,41 @@ void SaveIsawPeaks::exec() {
 
   out.flush();
   out.close();
+}
+
+bool SaveIsawPeaks::bankMasked(IComponent_const_sptr parent,
+                               const DetectorInfo &detectorInfo) {
+  std::vector<Geometry::IComponent_const_sptr> children;
+  boost::shared_ptr<const Geometry::ICompAssembly> asmb =
+      boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(parent);
+  asmb->getChildren(children, false);
+  if (children[0]->getName().compare("sixteenpack") == 0) {
+    asmb =
+        boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(children[0]);
+    children.clear();
+    asmb->getChildren(children, false);
+  }
+
+  for (auto &col : children) {
+    boost::shared_ptr<const Geometry::ICompAssembly> asmb2 =
+        boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(col);
+    std::vector<Geometry::IComponent_const_sptr> grandchildren;
+    asmb2->getChildren(grandchildren, false);
+
+    for (auto &row : grandchildren) {
+      Detector *d =
+          dynamic_cast<Detector *>(const_cast<IComponent *>(row.get()));
+      if (d) {
+        auto detID = d->getID();
+        if (detID < 0)
+          continue;
+        const auto index = detectorInfo.indexOf(detID);
+        if (!detectorInfo.isMasked(index))
+          return false;
+      }
+    }
+  }
+  return true;
 }
 
 V3D SaveIsawPeaks::findPixelPos(std::string bankName, int col, int row) {

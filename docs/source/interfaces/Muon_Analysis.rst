@@ -264,7 +264,8 @@ Data Analysis
 .. _DataAnalysis:
 
 This tab is designed for the user to make a fit against the data just plotted.
-Since Mantid 3.8, this tab has been enhanced to include fits of multiple datasets at once.
+Since Mantid 3.8 (upgraded in 3.10), this tab has been enhanced to include fits of multiple datasets at once.
+Since Mantid 3.10 a Transverse field (TF) Asymmetry mode has been added. 
 
 Default: multiple fitting disabled
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -281,13 +282,29 @@ When the tab is open, this fit property browser is used by default within Mantid
 Note that, in this mode, simultaneous fits are not possible.
 The intention is that this mode could be useful for users who are accustomed to the existing UI, or if a bug is found in the new UI.
 
+
+TF asymmetry enabled
+^^^^^^^^^^^^^^^^^^^^^^^^
+
+The TF asymmetry mode can be enabled by checking the "TF Asymmetry" checkbox on the Settings_ tab.
+At present it is not possible to use multiple fitting and TF asymmetry, therefore it is not possible 
+to select both checkboxes. Loading transverse field asymmetry data into muon analysis will automatically
+enable TF asymmetry mode. 
+When this is activated, the data analysis tab has two main differences to the pre 3.8 version. Firstly there 
+is an additional row in the Data table (normalization). The second difference is the addition of the "TF
+Asymmetry Fit" button in the fitting tab. Selecting this fitting option will call the :ref:`Calculate Muon Asymmetry <algm-CalculateMuonAsymmetry>` algorithm. The user defined function will be the composite function from the interface.
+
+.. image::  ../images/MuonAnalysisTFAsymm.png
+   :align: right
+
+
 Multiple fitting enabled
 ^^^^^^^^^^^^^^^^^^^^^^^^
 
-The new multiple fitting functionality can be enabled by checking the "Enable multiple fitting" checkbox on the Settings_ tab.
-When this is activated, the tab is divided into three sections vertically.
+The multiple fitting functionality can be enabled by checking the "Enable multiple fitting" checkbox on the Settings_ tab.
+When this is activated, the tab is divided into multiple sections vertically.
 
-.. image::  ../images/MuonAnalysisDataAnalysis3.8.png
+.. image::  ../images/MuonAnalysisDataAnalysis3.10.png
    :align: right
 
 Fit Function
@@ -306,36 +323,34 @@ This button will open the "Edit local parameter values" dialog, which offers gre
 
 Data
 ^^^^
-The central section of the tab is the data selector, which controls the dataset(s) that will be fitted.
+The next section of the tab is the data selector, which controls the dataset(s) that will be fitted.
 By default, this will be a single dataset, the same as the data loaded on the Home_ tab.
 The dataset(s) can be changed here and, if more than one is selected, they will all be fitted simultaneously.
 
+The "Display Parameters For" boxes consist of a backwards button, a drop-down selection and a forward button. The drop-down list shows all datasets currently selected,
+and the left and right buttons cycle through them. The currently selected dataset has its parameters shown in the *Fit Function* (upper) widget, and will be plotted.
+
 For a multi-dataset fit, the "Label" box is enabled.
 This allows the user to input a label for the simultaneous fit.
-
-The drop-down list shows all datasets currently selected, and the left and right buttons cycle through them.
-The currently selected dataset has its parameters shown in the *Fit Function* (upper) widget, and will be plotted.
-
-Fits can be done across runs, groups, periods or all three.
-From left to right, the options to select are:
 
 Runs
 """"
 A single run, or range (*e.g. 15189-91, 15193*) can be typed into the box here.
 The radio buttons below control whether the runs should be co-added together or fitted separately in a simultaneous fit.
-It is also possible to adjust the start and end time here.
 
-Groups
-""""""
-There is a checkbox in this section for each group defined in the GroupingOptions_ tab.
-One or multiple groups can be selected.
+Data Table
+^^^^^^^^^^
 
-Periods
-"""""""
-There is a checkbox in this section for each period of the data.
-(This section is only visible for multi-period data).
-One or multiple periods can be selected.
-In addition, the "Combination" option can be used to fit a sum or difference of periods.
+The data table allows the user to modify the selected data for the fitting. This includes the start and end times, which can also
+be updated by dragging the blue dashed lines in the plot. The "Groups/Pairs to fit" box provides a drop-down menu with three options (all groups, all pairs and custom). 
+Selecting custom will produce a pop-up box with tick boxes for each of the available groups and pairs. If a user wants to update the custom selection the 
+Groups/Pairs button can be pressed from the ReselectData_ section at the bottom ofthe tab (this is only enabled if a custom selection is set). Underneath displays the
+"Selected Groups". 
+
+The next row is the "Periods to fit" option, which is only displayed for multiple period data. This will automatically be populated with
+each of the periods (e.g. 1,2,3) and a custom option. Selecting custom will produce a pop-up with checkboxes for all of the periods. Selecting custom will also enable the 
+"Periods" button in the ReselectData_ section
+and pressing this button will allow the user to alter their custom selection. 
 
 Examples/Use cases
 """"""""""""""""""
@@ -372,11 +387,26 @@ Examples/Use cases
    - It is, of course, possible to select several runs, groups, periods all at once and a simultaneous fit will be performed across all the selected datasets.
    - Example: MUSR{15189, 15190, 15191}, groups {*fwd*, *bwd*}, periods {1, 2}: 12 datasets in all.
 
-Options
-^^^^^^^
-The bottom of the tab contains selected fit options that can be adjusted, just as elsewhere in Mantid.
+Additional Options
+^^^^^^^^^^^^^^^^^^
+Near the bottom of the tab contains selected fit options that can be adjusted, just as elsewhere in Mantid.
 The only option specific to the Muon Analysis interface is *Fit To Raw Data*.
 When this option is set to *True*, the fitting process is done using the raw (unbinned) data, even if the DataBinning_ is set.
+
+Reselect data
+^^^^^^^^^^^^^
+
+.. _ReselectData:
+
+At the bottom of the tab is the "Reselect Data" section. This includes three buttons "Groups/Pairs", "Periods" and "Combine Periods". The "Groups/Pairs" and "Periods" 
+buttons are only when the relevant options in the data table are set to custom. Pressing the button will produce a pop-up that will allow the user to modify their selection. 
+
+The "Combine Periods" button is only enabled if multiple periods are available. Pressing the button will generate a pop-up with two boxes. The top one is for adding periods 
+(as a comma seperated list or with "+") and the bottom box is for subtraction (as a comma sepearted list). Everything in the top and bottom boxes are summed seperatley 
+and the results are then used in the subtraction. 
+
+.. image::  ../images/MuonAnalysisCombinePeriods.png
+   :align: right
 
 Sequential fitting
 ^^^^^^^^^^^^^^^^^^

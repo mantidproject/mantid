@@ -4,6 +4,7 @@
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidAPI/DetectorInfo.h"
 
 namespace Mantid {
 
@@ -43,6 +44,8 @@ private:
   Kernel::V3D findPixelPos(std::string bankName, int col, int row);
   void sizeBanks(std::string bankName, int &NCOLS, int &NROWS, double &xsize,
                  double &ysize);
+  bool bankMasked(Geometry::IComponent_const_sptr parent,
+                  const API::DetectorInfo &detectorInfo);
   Geometry::Instrument_const_sptr inst;
 };
 

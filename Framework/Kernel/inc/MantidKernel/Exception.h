@@ -4,9 +4,9 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
+#include "MantidKernel/DllConfig.h"
 #include <stdexcept>
 #include <string>
-#include "MantidKernel/DllConfig.h"
 
 namespace Mantid {
 namespace Kernel {
@@ -345,6 +345,17 @@ public:
   /// Overloaded reporting method
   const char *what() const noexcept override;
   const int &errorCode() const;
+};
+
+/// Exception thrown when a fitting function changes number of parameters
+/// during fit.
+class MANTID_KERNEL_DLL FitSizeWarning final : public std::exception {
+  std::string m_message;
+
+public:
+  explicit FitSizeWarning(size_t oldSize);
+  FitSizeWarning(size_t oldSize, size_t newSize);
+  const char *what() const noexcept override;
 };
 
 } // namespace Exception

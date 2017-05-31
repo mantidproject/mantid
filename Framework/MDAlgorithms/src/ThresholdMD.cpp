@@ -103,7 +103,7 @@ void ThresholdMD::exec() {
     comparitor = boost::bind(std::greater<double>(), _1, referenceValue);
   }
 
-  Progress prog(this, 0, 1, 100);
+  Progress prog(this, 0.0, 1.0, 100);
   int64_t frequency = nPoints;
   if (nPoints > 100) {
     frequency = nPoints / 100;

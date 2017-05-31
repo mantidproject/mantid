@@ -165,6 +165,9 @@ public:
    */
   bool getLastSessionLogScale();
 
+  bool getUserSettingAutoColorAxes();
+  void setUserSettingAutoColorAxes(bool autoScale);
+
 private:
   MdConstants m_mdConstants;
 
@@ -186,6 +189,7 @@ private:
 
   QString m_lblUserSettingInitialView;
   QString m_lblLastSessionLogScale;
+  QString m_lblUserSettingAutoColorAxes;
 };
 }
 }

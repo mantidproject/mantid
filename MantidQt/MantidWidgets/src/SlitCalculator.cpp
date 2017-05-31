@@ -48,9 +48,8 @@ void SlitCalculator::setInstrument(std::string instrumentName) {
         instrumentNameMangled);
   } else {
     // We set the instrument from XML that we have found.
-    Mantid::API::Progress *prog = new Mantid::API::Progress();
-    this->instrument = parser.parseXML(prog);
-    delete prog;
+    Mantid::API::Progress prog;
+    this->instrument = parser.parseXML(&prog);
   }
   setupSlitCalculatorWithInstrumentValues(instrument);
 }

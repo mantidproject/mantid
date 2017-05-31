@@ -51,3 +51,4 @@ check_tests_valid ( ${CMAKE_CURRENT_SOURCE_DIR} ${TEST_PY_FILES} )
 
 # Prefix for test name=PythonWorkflowAlgorithms
 pyunittest_add_test ( ${CMAKE_CURRENT_SOURCE_DIR} PythonWorkflowAlgorithms ${TEST_PY_FILES} )
+add_subdirectory( sans )
