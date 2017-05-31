@@ -4,9 +4,6 @@
 #include "MantidQtMantidWidgets/InstrumentView/InstrumentWidget.h"
 
 #include <QAbstractItemModel>
-//#include <QModelIndex>
-
-//#include <boost/shared_ptr.hpp>
 
 namespace MantidQt {
 namespace MantidWidgets {
