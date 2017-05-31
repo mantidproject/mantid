@@ -115,7 +115,9 @@ public:
   void setScaleType(GraphOptions::ScaleType type);
   void setExponent(double nth_power);
   void setViewType(const QString &type);
-  const InstrumentActor &getInstrumentActor() const { return *m_instrumentActor; }
+  const InstrumentActor &getInstrumentActor() const {
+    return *m_instrumentActor;
+  }
   InstrumentActor &getInstrumentActor() { return *m_instrumentActor; }
   void resetInstrument(bool resetGeometry);
   void selectTab(int tab);

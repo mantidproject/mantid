@@ -785,8 +785,8 @@ void InstrumentWidgetMaskTab::saveExcludeGroupToFile() {
   if (!fname.isEmpty()) {
     QList<int> dets;
     m_instrWidget->getSurface()->getMaskedDetectors(dets);
-    DetXMLFile mapFile(m_instrWidget->getInstrumentActor().getAllDetIDs(),
-                       dets, fname);
+    DetXMLFile mapFile(m_instrWidget->getInstrumentActor().getAllDetIDs(), dets,
+                       fname);
   }
 }
 

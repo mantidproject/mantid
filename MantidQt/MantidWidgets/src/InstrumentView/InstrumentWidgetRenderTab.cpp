@@ -644,8 +644,7 @@ void InstrumentWidgetRenderTab::surfaceTypeChanged(int index) {
 void InstrumentWidgetRenderTab::colorMapChanged() {
   const auto &instrumentActor = m_instrWidget->getInstrumentActor();
   setupColorBar(instrumentActor.getColorMap(), instrumentActor.minValue(),
-                instrumentActor.maxValue(),
-                instrumentActor.minPositiveValue(),
+                instrumentActor.maxValue(), instrumentActor.minPositiveValue(),
                 instrumentActor.autoscaling());
 }
 

@@ -188,7 +188,8 @@ class ComponentInfoController : public QObject {
 public:
   /// Constructor.
   ComponentInfoController(InstrumentWidgetPickTab *tab,
-                          const InstrumentWidget *instrWidget, QTextEdit *infoDisplay);
+                          const InstrumentWidget *instrWidget,
+                          QTextEdit *infoDisplay);
 public slots:
   void displayInfo(size_t pickID);
   void displayComparePeaksInfo(

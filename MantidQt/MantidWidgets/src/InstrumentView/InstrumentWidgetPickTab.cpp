@@ -575,10 +575,9 @@ void InstrumentWidgetPickTab::initSurface() {
     connect(p3d, SIGNAL(finishedMove()), this,
             SLOT(updatePlotMultipleDetectors()));
   }
-  m_infoController = new ComponentInfoController(
-      this, m_instrWidget, m_selectionInfoDisplay);
-  m_plotController = new DetectorPlotController(
-      this, m_instrWidget, m_plot);
+  m_infoController =
+      new ComponentInfoController(this, m_instrWidget, m_selectionInfoDisplay);
+  m_plotController = new DetectorPlotController(this, m_instrWidget, m_plot);
   m_plotController->setTubeXUnits(
       static_cast<DetectorPlotController::TubeXUnits>(m_tubeXUnitsCache));
   m_plotController->setPlotType(
@@ -800,9 +799,9 @@ std::string InstrumentWidgetPickTab::saveToProject() const {
 * @param instrActor :: A pointer to the InstrumentActor instance.
 * @param infoDisplay :: Widget on which to display the information.
 */
-ComponentInfoController::ComponentInfoController(InstrumentWidgetPickTab *tab,
-                                                 const InstrumentWidget *instrWidget,
-                                                 QTextEdit *infoDisplay)
+ComponentInfoController::ComponentInfoController(
+    InstrumentWidgetPickTab *tab, const InstrumentWidget *instrWidget,
+    QTextEdit *infoDisplay)
     : QObject(tab), m_tab(tab), m_instrWidget(instrWidget),
       m_selectionInfoDisplay(infoDisplay), m_freezePlot(false),
       m_instrWidgetBlocked(false), m_currentPickID(-1) {}
@@ -901,7 +900,9 @@ QString ComponentInfoController::displayDetectorInfo(Mantid::detid_t detid) {
 */
 QString ComponentInfoController::displayNonDetectorInfo(
     Mantid::Geometry::ComponentID compID) {
-  auto component = m_instrWidget->getInstrumentActor().getInstrument()->getComponentByID(compID);
+  auto component =
+      m_instrWidget->getInstrumentActor().getInstrument()->getComponentByID(
+          compID);
   QString text = "Selected component: ";
   text += QString::fromStdString(component->getName()) + '\n';
   Mantid::Kernel::V3D pos = component->getPos();
@@ -1170,8 +1171,7 @@ void DetectorPlotController::setPlotData(QList<int> detIDs) {
   std::vector<double> x, y;
   QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
   const auto &actor = m_instrWidget->getInstrumentActor();
-  actor.sumDetectors(detIDs, x, y,
-                             static_cast<size_t>(m_plot->width()));
+  actor.sumDetectors(detIDs, x, y, static_cast<size_t>(m_plot->width()));
   QApplication::restoreOverrideCursor();
   if (!x.empty()) {
     m_plot->setData(&x[0], &y[0], static_cast<int>(y.size()),
@@ -1210,7 +1210,11 @@ void DetectorPlotController::plotSingle(int detid) {
 
   // set the data
   m_plot->setData(&x[0], &y[0], static_cast<int>(y.size()),
-                  m_instrWidget->getInstrumentActor().getWorkspace()->getAxis(0)->unit()->unitID());
+                  m_instrWidget->getInstrumentActor()
+                      .getWorkspace()
+                      ->getAxis(0)
+                      ->unit()
+                      ->unitID());
   m_plot->setLabel("Detector " + QString::number(detid));
 
   // find any markers
@@ -1467,8 +1471,7 @@ void DetectorPlotController::prepareDataForIntegralsPlot(
   size_t imin, imax;
   actor.getBinMinMaxIndex(wi, imin, imax);
 
-  Mantid::Kernel::V3D samplePos =
-      actor.getInstrument()->getSample()->getPos();
+  Mantid::Kernel::V3D samplePos = actor.getInstrument()->getSample()->getPos();
 
   const int n = ass->nelements();
   if (n == 0) {
@@ -1799,8 +1802,7 @@ void DetectorPlotController::addPeak(double x, double y) {
     alg->setPropertyValue("PeaksWorkspace", peakTableName);
     alg->setProperty("DetectorID", m_currentDetID);
     alg->setProperty("TOF", x);
-    alg->setProperty("Height",
-                     actor.getIntegratedCounts(m_currentDetID));
+    alg->setProperty("Height", actor.getIntegratedCounts(m_currentDetID));
     alg->setProperty("BinCount", y);
     alg->execute();
 
