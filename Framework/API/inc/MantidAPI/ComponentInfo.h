@@ -2,13 +2,16 @@
 #define MANTID_API_COMPONENTINFO_H_
 
 #include "MantidAPI/DllConfig.h"
-#include "MantidKernel/V3D.h"
-#include "MantidKernel/Quat.h"
 #include <unordered_map>
 #include <vector>
 #include <boost/shared_ptr.hpp>
 
 namespace Mantid {
+
+namespace Kernel {
+class Quat;
+class V3D;
+}
 
 namespace Geometry {
 
