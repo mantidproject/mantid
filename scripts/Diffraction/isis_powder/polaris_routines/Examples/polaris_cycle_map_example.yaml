@@ -14,10 +14,10 @@
     empty_run_numbers : "78339"
 
 # Used in ISIS Powder tutorial
-95597-95599:
+98531-98534:
   # Calibration run
-  offset_file_name : "cycle_16_3_silicon_all_spectra.cal"
-  label : "16_4"
+  offset_file_name : "cycle_16_5_silicon_all_spectra.cal"
+  label : "17_1"
   chopper_off:
-    vanadium_run_numbers : "95598"
-    empty_run_numbers : "95597"
+    vanadium_run_numbers : "98532"
+    empty_run_numbers : "98531"

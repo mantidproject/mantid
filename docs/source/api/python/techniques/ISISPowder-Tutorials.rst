@@ -300,7 +300,7 @@ parameters discussed to create the object (see
 *Note: Due to the complexity of the Polaris instrument definition it will take 
 Mantid up to 10 minutes to load your first data set for this instrument.*
 
-As we will be later focusing run number 95599 we can use that to ensure
+As we will be later focusing run number 98533 we can use that to ensure
 the correct cycle is selected for the *first_cycle_run_no* input.
 
 .. code-block:: python
@@ -310,7 +310,7 @@ the correct cycle is selected for the *first_cycle_run_no* input.
     # This should be set from the previous tutorial. 
     a_pol_obj = Polaris(....)
     a_pol_obj.create_vanadium(chopper_on=False,
-                              first_cycle_run_no=95599,
+                              first_cycle_run_no=98533,
                               do_absorb_corrections=True,
                               multiple_scattering=False)
 
@@ -367,8 +367,9 @@ require the following parameters:
   set by the processed vanadium splines. This should be set to 
   *True*.
 
-For this tutorial the run number will be 95599, and *input_mode*
-will not affect the result as it is a single run.
+For this tutorial the run number will be 98533, and *input_mode*
+will not affect the result as it is a single run. Additionally in
+the example data you could focus 98534 (YAG sample) too.
 
 .. code-block:: python
 
@@ -377,7 +378,7 @@ will not affect the result as it is a single run.
     # This should be set from the previous tutorial. 
     a_pol_obj = Polaris(....)
     a_pol_obj.focus(chopper_on=False,
-                    input_mode="Individual", run_number=95599,
+                    input_mode="Individual", run_number=98533,
                     do_absorb_corrections=False,
                     do_van_normalisation=True)
 
