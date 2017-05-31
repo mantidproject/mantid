@@ -796,7 +796,7 @@ std::string InstrumentWidgetPickTab::saveToProject() const {
 /**
 * Create and setup iteself.
 * @param tab :: QObject parent - the tab.
-* @param instrActor :: A pointer to the InstrumentActor instance.
+* @param instrWidget :: A pointer to an InstrumentWidget instance.
 * @param infoDisplay :: Widget on which to display the information.
 */
 ComponentInfoController::ComponentInfoController(
@@ -1115,7 +1115,7 @@ void ComponentInfoController::clear() { m_selectionInfoDisplay->clear(); }
 /**
 * Constructor.
 * @param tab :: The parent tab.
-* @param instrActor :: A pointer to the InstrumentActor.
+* @param instrWidget :: A pointer to a InstrumentWidget instance.
 * @param plot :: The plot widget.
 */
 DetectorPlotController::DetectorPlotController(InstrumentWidgetPickTab *tab,
