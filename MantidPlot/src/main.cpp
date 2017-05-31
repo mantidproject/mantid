@@ -51,8 +51,6 @@ namespace {
 Mantid::Kernel::Logger g_log("Main");
 }
 
-
-
 // The following stuff is for the doxygen title page
 /**  \mainpage QtiPlot - Data analysis and scientific plotting - API
 documentation
