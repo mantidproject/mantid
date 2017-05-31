@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<parameter-file instrument="DNS" valid-from="2013-10-01T00:00:00">
+
+        <component-link name="DNS">
+
+		<parameter name="deltaE-mode" type="string">
+			<value val="direct" />
+		</parameter>
+
+                <!-- Coil currents Ca, Cb, Cc, Cz to determine the neutron polarisation -->
+                <parameter name="x_currents" type="string">
+                        <value val="0,-2,-0.77,-2.21; -0.5,-1.5,-1.2,-2.15" />
+		</parameter>
+                <parameter name="y_currents" type="string">
+                        <value val="0,1.60,-2.77,-2.21; 0,-1.4,1.65,-2.15" />
+                </parameter>
+                <parameter name="z_currents" type="string">
+                        <value val="0,0.11,-0.5,0; 0,0.15,-0.5,0" />
+                </parameter>
+
+                <!-- Scaling factor to calculate the channel width in microseconds -->
+                <parameter name="channel_width_factor" type="string">
+                        <value val="20.0" />
+                </parameter>
+
+                <!-- 2theta tolerance, degrees -->
+                <parameter name="two_theta_tolerance" type="string">
+                        <value val="0.1" />
+                </parameter>
+
+                <!-- file suffixes to lookup for the standard data -->
+                <!-- Vanadium -->
+                <parameter name="vana" type="string">
+                        <value val="vana"/>
+                </parameter>
+                <!-- NiCr -->
+                <parameter name="nicr" type="string">
+                        <value val="nicr"/>
+                </parameter>
+                <!-- Instrument background -->
+                <parameter name="bkg" type="string">
+                        <value val="leer"/>
+                </parameter>
+
+                <!-- Normalization workspace name suffix -->
+                <parameter name="normws_suffix" type="string">
+                        <value val="_n"/>
+                </parameter>
+
+                <!-- formula for Monitor efficiency calculation. Algorithm: MonitorEfficiencyCorUser  -->
+                <parameter name="formula_mon_eff" type="string">
+                        <value val="sqrt(e/25.3)" />
+                </parameter>
+
+                <!-- Distance [m] between sample and equatorial line of the detector. Mandatory
+                        if you want to correct the flight paths. -->
+                <parameter name="l2" type="string">
+                        <value val="0.80" />
+                </parameter>
+
+	</component-link>
+
+</parameter-file>

@@ -70,7 +70,7 @@ public:
     TS_ASSERT(elist.hasDetectorID(1));
 
     SplittersWorkspace_sptr splittersws =
-        createSplitter(runstart_i64, pulsedt, tofdt);
+        createSplittersWorkspace(runstart_i64, pulsedt, tofdt);
     TS_ASSERT_EQUALS(splittersws->getNumberSplitters(), 5);
 
     return;
@@ -113,7 +113,7 @@ public:
     AnalysisDataService::Instance().addOrReplace("Test02", inpWS);
 
     SplittersWorkspace_sptr splws =
-        createSplitter(runstart_i64, pulsedt, tofdt);
+        createSplittersWorkspace(runstart_i64, pulsedt, tofdt);
     AnalysisDataService::Instance().addOrReplace("Splitter02", splws);
 
     FilterEvents filter;
@@ -264,7 +264,7 @@ public:
     AnalysisDataService::Instance().addOrReplace("Test02", inpWS);
 
     SplittersWorkspace_sptr splws =
-        createSplitter(runstart_i64, pulsedt, tofdt);
+        createSplittersWorkspace(runstart_i64, pulsedt, tofdt);
     AnalysisDataService::Instance().addOrReplace("Splitter02", splws);
 
     FilterEvents filter;
@@ -1171,8 +1171,9 @@ public:
    * int64_t format of unit nanosecond
     * @param numpulses : number of pulses in the event workspace
    */
-  SplittersWorkspace_sptr createSplitter(int64_t runstart_i64, int64_t pulsedt,
-                                         int64_t tofdt) {
+  SplittersWorkspace_sptr createSplittersWorkspace(int64_t runstart_i64,
+                                                   int64_t pulsedt,
+                                                   int64_t tofdt) {
     SplittersWorkspace_sptr splitterws =
         boost::shared_ptr<SplittersWorkspace>(new SplittersWorkspace);
 

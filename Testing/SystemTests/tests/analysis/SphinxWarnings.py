@@ -20,6 +20,7 @@ class SphinxWarnings(stresstesting.MantidStressTest):
                                 'Diffraction',
                                 'Events',
                                 'Examples',
+                                'ILL',
                                 'ISIS',
                                 'Inelastic',
                                 'MDAlgorithms',

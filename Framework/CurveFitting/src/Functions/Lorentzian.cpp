@@ -56,11 +56,15 @@ void Lorentzian::setFwhm(const double w) {
   setParameter("FWHM", w);
 }
 
-void Lorentzian::fixCentre() { fixParameter("PeakCentre"); }
+void Lorentzian::fixCentre(bool isDefault) {
+  fixParameter("PeakCentre", isDefault);
+}
 
 void Lorentzian::unfixCentre() { unfixParameter("PeakCentre"); }
 
-void Lorentzian::fixIntensity() { fixParameter("Amplitude"); }
+void Lorentzian::fixIntensity(bool isDefault) {
+  fixParameter("Amplitude", isDefault);
+}
 
 void Lorentzian::unfixIntensity() { unfixParameter("Amplitude"); }
 

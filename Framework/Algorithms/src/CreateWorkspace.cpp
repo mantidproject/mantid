@@ -106,9 +106,16 @@ void CreateWorkspace::exec() {
   const std::string vUnit = getProperty("VerticalAxisUnit");
   const std::vector<std::string> vAxis = getProperty("VerticalAxisValues");
 
-  if ((vUnit != "SpectraNumber") && (static_cast<int>(vAxis.size()) != nSpec)) {
-    throw std::invalid_argument(
-        "Number of y-axis labels must match number of histograms.");
+  // Verify the size of the vertical axis.
+  const int vAxisSize = static_cast<int>(vAxis.size());
+  if (vUnit != "SpectraNumber") {
+    // In the case of numerical axis, the vertical axis can represent either
+    // point data or bin edges.
+    if ((vUnit == "Text" && vAxisSize != nSpec) ||
+        (vAxisSize != nSpec && vAxisSize != nSpec + 1)) {
+      throw std::invalid_argument("The number of vertical axis values doesn't "
+                                  "match the number of histograms.");
+    }
   }
 
   // Verify length of vectors makes sense with NSpec
@@ -156,7 +163,7 @@ void CreateWorkspace::exec() {
         WorkspaceFactory::Instance().create("Workspace2D", nSpec, xSize, ySize);
   }
 
-  Progress progress(this, 0, 1, nSpec);
+  Progress progress(this, 0.0, 1.0, nSpec);
 
   PARALLEL_FOR_IF(Kernel::threadSafe(*outputWS))
   for (int i = 0; i < nSpec; i++) {
@@ -208,12 +215,11 @@ void CreateWorkspace::exec() {
         newAxis->setLabel(i, vAxis[i]);
       }
     } else {
-      const size_t vAxisLength = vAxis.size();
       NumericAxis *newAxis(nullptr);
-      if (vAxisLength == static_cast<size_t>(nSpec))
-        newAxis = new NumericAxis(vAxisLength); // treat as points
-      else if (vAxisLength == static_cast<size_t>(nSpec + 1))
-        newAxis = new BinEdgeAxis(vAxisLength); // treat as bin edges
+      if (vAxisSize == nSpec)
+        newAxis = new NumericAxis(vAxisSize); // treat as points
+      else if (vAxisSize == nSpec + 1)
+        newAxis = new BinEdgeAxis(vAxisSize); // treat as bin edges
       else
         throw std::range_error("Invalid vertical axis length. It must be the "
                                "same length as NSpec or 1 longer.");

@@ -53,7 +53,7 @@ void LoadDetectorsGroupingFile::exec() {
 
   // The number of steps depends on the type of input file
   // Set them to zero for the moment
-  Progress progress(this, 0, 1, 0);
+  Progress progress(this, 0.0, 1.0, 0);
 
   if (ext == "xml") {
     // Deal with file as xml
@@ -438,7 +438,7 @@ void LoadGroupXMLFile::parseXML() {
 
     const Poco::XML::XMLString value = pNode->innerText();
 
-    if (pNode->nodeName().compare("detector-grouping") == 0) {
+    if (pNode->nodeName() == "detector-grouping") {
       // Node "detector-grouping" (first level)
 
       // Optional instrument name
@@ -453,7 +453,7 @@ void LoadGroupXMLFile::parseXML() {
           getAttributeValueByName(pNode, "description", m_userGiveDescription);
 
     } // "detector-grouping"
-    else if (pNode->nodeName().compare("group") == 0) {
+    else if (pNode->nodeName() == "group") {
       // Group Node:  get ID, set map
       // a) Find group ID
       bool foundid;
@@ -498,7 +498,7 @@ void LoadGroupXMLFile::parseXML() {
         m_groupSpectraMap[curgroupid] = tempspectrumids;
       }
     } // "group"
-    else if (pNode->nodeName().compare("component") == 0) {
+    else if (pNode->nodeName() == "component") {
       // Node "component" = value
       auto it = m_groupComponentsMap.find(curgroupid);
       if (it == m_groupComponentsMap.end()) {
@@ -521,7 +521,7 @@ void LoadGroupXMLFile::parseXML() {
       }
 
     } // Component
-    else if (pNode->nodeName().compare("detids") == 0) {
+    else if (pNode->nodeName() == "detids") {
       // Node "detids"
       auto it = m_groupDetectorsMap.find(curgroupid);
       if (it == m_groupDetectorsMap.end()) {
@@ -546,7 +546,7 @@ void LoadGroupXMLFile::parseXML() {
                           parsedRange.end());
       }
     } // "detids"
-    else if (pNode->nodeName().compare("ids") == 0) {
+    else if (pNode->nodeName() == "ids") {
       // Node ids: for spectrum number
       auto it = m_groupSpectraMap.find(curgroupid);
       if (it == m_groupSpectraMap.end()) {
@@ -592,7 +592,7 @@ std::string LoadGroupXMLFile::getAttributeValueByName(Poco::XML::Node *pNode,
   // 2. Loop to find
   for (unsigned long i = 0; i < att->length(); ++i) {
     Poco::XML::Node *cNode = att->item(i);
-    if (cNode->localName().compare(attributename) == 0) {
+    if (cNode->localName() == attributename) {
       value = cNode->getNodeValue();
       found = true;
       break;

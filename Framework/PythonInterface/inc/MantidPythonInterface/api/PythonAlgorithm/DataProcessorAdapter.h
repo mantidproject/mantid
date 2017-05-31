@@ -25,8 +25,11 @@
 //-----------------------------------------------------------------------------
 // Includes
 //-----------------------------------------------------------------------------
-#include "MantidPythonInterface/api/PythonAlgorithm/AlgorithmAdapter.h"
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/DataProcessorAlgorithm.h"
+#include "MantidPythonInterface/api/PythonAlgorithm/AlgorithmAdapter.h"
+#include "MantidPythonInterface/kernel/Converters/PySequenceToVector.h"
+#include "MantidPythonInterface/kernel/IsNone.h"
 
 namespace Mantid {
 namespace PythonInterface {
@@ -67,6 +70,37 @@ public:
   }
 
   void loadChunkProxy(const size_t rowIndex) { this->loadChunk(rowIndex); }
+
+  void copyPropertiesProxy(const std::string &algName,
+                           const boost::python::object &propNames,
+                           const int version = -1) {
+    if (algName.empty()) {
+      throw std::invalid_argument("Failed to specify algorithm name");
+    }
+
+    std::vector<std::string> names;
+    if (!Mantid::PythonInterface::isNone(propNames)) {
+      boost::python::extract<std::string> extractor(propNames);
+      if (extractor.check()) {
+        names = std::vector<std::string>(1, extractor());
+      } else {
+        names = PythonInterface::Converters::PySequenceToVector<std::string>(
+            propNames)();
+      }
+
+      auto algorithm =
+          API::AlgorithmManager::Instance().createUnmanaged(algName, version);
+      algorithm->initialize();
+
+      for (const auto &name : names) {
+        this->copyProperty(algorithm, name);
+      }
+    } else {
+      std::string msg("Failed to specify properties to copy from \"");
+      msg.append(algName).append("\"");
+      throw std::invalid_argument(msg);
+    }
+  }
 
   API::Workspace_sptr loadProxy(const std::string &inputData,
                                 const bool loadQuiet = false) {

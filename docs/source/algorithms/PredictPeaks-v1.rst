@@ -75,7 +75,7 @@ with predicted structure factor very close to 0, which are absent:
 
 .. testoutput:: ExPredictPeaksCrystalStructure
 
-    There are 294 detectable peaks.
+    There are 295 detectable peaks.
     Maximum intensity: 6101.93
     Peaks with relative intensity < 1%: 94
     Number of absences: 16

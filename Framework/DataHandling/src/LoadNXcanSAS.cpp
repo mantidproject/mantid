@@ -453,7 +453,7 @@ LoadNXcanSAS::LoadNXcanSAS() {}
 
 int LoadNXcanSAS::confidence(Kernel::NexusDescriptor &descriptor) const {
   const std::string &extn = descriptor.extension();
-  if (extn.compare(".nxs") != 0 && extn.compare(".h5") != 0) {
+  if (extn != ".nxs" && extn != ".h5") {
     return 0;
   }
 

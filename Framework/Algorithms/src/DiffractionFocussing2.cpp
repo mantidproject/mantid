@@ -172,7 +172,7 @@ void DiffractionFocussing2::exec() {
   MantidVec weights_default(1, 1.0), emptyVec(1, 0.0), EOutDummy(nPoints);
 
   Progress *prog;
-  prog = new API::Progress(this, 0.2, 1.00,
+  prog = new API::Progress(this, 0.2, 1.0,
                            static_cast<int>(totalHistProcess) + nGroups);
 
   PARALLEL_FOR_IF(Kernel::threadSafe(*m_matrixInputW, *out))

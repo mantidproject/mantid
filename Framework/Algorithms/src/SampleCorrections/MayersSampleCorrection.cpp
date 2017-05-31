@@ -110,7 +110,7 @@ void MayersSampleCorrection::exec() {
   const auto &sampleMaterial = sampleShape.material();
 
   const size_t nhist(inputWS->getNumberHistograms());
-  Progress prog(this, 0., 1., nhist);
+  Progress prog(this, 0.0, 1.0, nhist);
   prog.setNotifyStep(0.01);
 
   const auto &spectrumInfo = inputWS->spectrumInfo();

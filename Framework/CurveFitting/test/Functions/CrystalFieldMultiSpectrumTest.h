@@ -94,6 +94,29 @@ public:
     TS_ASSERT_DELTA(fun.getParameter("f0.f3.FWHM"), 1.5, 1e-3);
   }
 
+  void test_evaluate_1() {
+    auto funStr = "name=CrystalFieldSpectrum,Ion=Ce,Temperature=44,"
+                  "ToleranceIntensity=0.001,B20=0.37737,B22=3.9770,"
+                  "B40=-0.031787,B42=-0.11611,B44=-0.12544,"
+                  "f0.FWHM=1.6,f1.FWHM=2.0,f2.FWHM=2.3";
+    auto ws = createWorkspace();
+    auto alg = AlgorithmFactory::Instance().create("EvaluateFunction", -1);
+    alg->initialize();
+    alg->setPropertyValue("Function", funStr);
+    alg->setProperty("InputWorkspace", ws);
+    alg->setProperty("OutputWorkspace", "out");
+    alg->execute();
+
+    auto out =
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("out");
+    TS_ASSERT(out);
+    TS_ASSERT_EQUALS(out->getNumberHistograms(), 3);
+    TS_ASSERT_DELTA(out->readY(1)[0], 1.094 * c_mbsr, 0.001 * c_mbsr);
+    TS_ASSERT_DELTA(out->readY(1)[1], 0.738 * c_mbsr, 0.001 * c_mbsr);
+    TS_ASSERT_DELTA(out->readY(1)[2], 0.373 * c_mbsr, 0.001 * c_mbsr);
+    AnalysisDataService::Instance().clear();
+  }
+
   void test_evaluate() {
     auto funStr = "name=CrystalFieldMultiSpectrum,Ion=Ce,Temperatures=(44, "
                   "50),ToleranceIntensity=0.001,B20=0.37737,B22=3.9770,"

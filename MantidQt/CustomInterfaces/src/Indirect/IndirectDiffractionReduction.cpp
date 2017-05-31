@@ -191,8 +191,7 @@ void IndirectDiffractionReduction::plotResults() {
       const auto workspaceExists =
           AnalysisDataService::Instance().doesExist(it);
       if (workspaceExists)
-        pyInput += "plotSpectrum('" + QString::fromStdString(it) +
-                   "', 0, error_bars = True)\n";
+        pyInput += "plotSpectrum('" + QString::fromStdString(it) + "', 0)\n";
       else
         showInformationBox(QString::fromStdString(
             "Workspace '" + it + "' not found\nUnable to plot workspace"));
@@ -301,10 +300,21 @@ void IndirectDiffractionReduction::saveReductions() {
  */
 void IndirectDiffractionReduction::runGenericReduction(QString instName,
                                                        QString mode) {
+
+  QString rebinStart = "";
+  QString rebinWidth = "";
+  QString rebinEnd = "";
+
   // Get rebin string
-  QString rebinStart = m_uiForm.leRebinStart->text();
-  QString rebinWidth = m_uiForm.leRebinWidth->text();
-  QString rebinEnd = m_uiForm.leRebinEnd->text();
+  if (mode == "diffspec") {
+    rebinStart = m_uiForm.leRebinStart_CalibOnly->text();
+    rebinWidth = m_uiForm.leRebinWidth_CalibOnly->text();
+    rebinEnd = m_uiForm.leRebinEnd_CalibOnly->text();
+  } else if (mode == "diffonly") {
+    rebinStart = m_uiForm.leRebinStart->text();
+    rebinWidth = m_uiForm.leRebinWidth->text();
+    rebinEnd = m_uiForm.leRebinEnd->text();
+  }
 
   QString rebin = "";
   if (!rebinStart.isEmpty() && !rebinWidth.isEmpty() && !rebinEnd.isEmpty())

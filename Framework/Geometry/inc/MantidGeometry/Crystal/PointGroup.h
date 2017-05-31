@@ -63,7 +63,7 @@ public:
   Kernel::V3D getReflectionFamily(const Kernel::V3D &hkl) const;
 
 protected:
-  std::vector<Kernel::V3D> getEquivalentSet(const Kernel::V3D &hkl) const;
+  std::vector<Kernel::V3D> getAllEquivalents(const Kernel::V3D &hkl) const;
 
   CrystalSystem getCrystalSystemFromGroup() const;
   LatticeSystem getLatticeSystemFromCrystalSystemAndGroup(
@@ -95,6 +95,9 @@ getLatticeSystemAsString(const PointGroup::LatticeSystem &latticeSystem);
 MANTID_GEOMETRY_DLL
 PointGroup::LatticeSystem
 getLatticeSystemFromString(const std::string &latticeSystem);
+
+MANTID_GEOMETRY_DLL std::ostream &operator<<(std::ostream &stream,
+                                             const PointGroup &self);
 
 /// This is necessary to make the map work with older compilers. Can be removed
 /// when GCC 4.4 is not used anymore.
