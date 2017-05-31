@@ -159,7 +159,7 @@ operator=(const cow_ptr<DataType> &A) noexcept {
 template <typename DataType>
 cow_ptr<DataType> &cow_ptr<DataType>::operator=(const ptr_type &A) noexcept {
   if (this->Data != A) {
-    boost::atomic_store(&Data, boost::atomic_load(&A.Data));
+    boost::atomic_store(&Data, boost::atomic_load(&A));
   }
   return *this;
 }
