@@ -43,7 +43,7 @@
   </defaults>
   <!--SOURCE-->
   <component type="chopper1">
-    <location x="0.0" y="0.0" z="-0.338"/>
+    <location x="0.0" y="0.0" z="-5.497"/>
   </component>
   <type is="Source" name="chopper1"/>
   <!--Sample position-->
