@@ -39,13 +39,13 @@ ComponentInfo::ComponentInfo(
 }
 
 std::vector<size_t>
-ComponentInfo::detectorsInSubTree(size_t componentIndex) const {
-  return m_componentInfo.detectorsInSubTree(componentIndex);
+ComponentInfo::detectorsInSubtree(size_t componentIndex) const {
+  return m_componentInfo.detectorsInSubtree(componentIndex);
 }
 
 std::vector<size_t>
-ComponentInfo::componentsInSubTree(size_t componentIndex) const {
-  return m_componentInfo.componentsInSubTree(componentIndex);
+ComponentInfo::componentsInSubtree(size_t componentIndex) const {
+  return m_componentInfo.componentsInSubtree(componentIndex);
 }
 
 size_t ComponentInfo::size() const { return m_componentInfo.size(); }

@@ -187,7 +187,7 @@ public:
   }
 
   void test_throw_if_positions_rotation_inputs_different_sizes() {
-    auto detectorsInSubTree = boost::make_shared<
+    auto detectorsInSubtree = boost::make_shared<
         const std::vector<size_t>>(); // No detector indices in this example!
 
     auto bankSortedComponentIndices =
@@ -208,7 +208,7 @@ public:
     auto rotations = boost::make_shared<std::vector<Eigen::Quaterniond>>(
         0); // 0 rotations provided
 
-    TS_ASSERT_THROWS(ComponentInfo(detectorsInSubTree, detectorRanges,
+    TS_ASSERT_THROWS(ComponentInfo(detectorsInSubtree, detectorRanges,
                                    bankSortedComponentIndices, componentRanges,
                                    positions, rotations,
                                    boost::make_shared<DetectorInfo>()),
@@ -223,10 +223,10 @@ public:
      * too.
      * All vectors should be the same size.
      */
-    auto detectorsInSubTree = boost::make_shared<
+    auto detectorsInSubtree = boost::make_shared<
         const std::vector<size_t>>(); // No detector indices in this example!
 
-    auto componentsInSubTree =
+    auto componentsInSubtree =
         boost::make_shared<const std::vector<size_t>>(std::vector<size_t>{0});
 
     auto detectorRanges = boost::make_shared<
@@ -242,8 +242,8 @@ public:
         boost::make_shared<const std::vector<std::pair<size_t, size_t>>>(
             std::vector<std::pair<size_t, size_t>>{{0, 0}});
 
-    TS_ASSERT_THROWS(ComponentInfo(detectorsInSubTree, detectorRanges,
-                                   componentsInSubTree, componentRanges,
+    TS_ASSERT_THROWS(ComponentInfo(detectorsInSubtree, detectorRanges,
+                                   componentsInSubtree, componentRanges,
                                    positions, rotations,
                                    boost::make_shared<DetectorInfo>()),
                      std::invalid_argument &);
@@ -426,15 +426,15 @@ public:
     /*
     Note that detectors are always the first n component indexes!
     */
-    TS_ASSERT_EQUALS(info.detectorsInSubTree(0), std::vector<size_t>{0});
-    TS_ASSERT_EQUALS(info.detectorsInSubTree(1), std::vector<size_t>{1});
-    TS_ASSERT_EQUALS(info.detectorsInSubTree(2), std::vector<size_t>{2});
+    TS_ASSERT_EQUALS(info.detectorsInSubtree(0), std::vector<size_t>{0});
+    TS_ASSERT_EQUALS(info.detectorsInSubtree(1), std::vector<size_t>{1});
+    TS_ASSERT_EQUALS(info.detectorsInSubtree(2), std::vector<size_t>{2});
 
     // Now we have non-detector components
-    TS_ASSERT_EQUALS(info.detectorsInSubTree(4 /*component index of root*/),
+    TS_ASSERT_EQUALS(info.detectorsInSubtree(4 /*component index of root*/),
                      std::vector<size_t>({0, 2, 1}));
     TS_ASSERT_EQUALS(
-        info.detectorsInSubTree(3 /*component index of sub-assembly*/),
+        info.detectorsInSubtree(3 /*component index of sub-assembly*/),
         std::vector<size_t>({0, 2}));
   }
 
@@ -444,17 +444,17 @@ public:
     /*
     Note that detectors are always the first n component indexes!
     */
-    TS_ASSERT_EQUALS(info.componentsInSubTree(0), std::vector<size_t>{0});
-    TS_ASSERT_EQUALS(info.componentsInSubTree(1), std::vector<size_t>{1});
-    TS_ASSERT_EQUALS(info.componentsInSubTree(2), std::vector<size_t>{2});
+    TS_ASSERT_EQUALS(info.componentsInSubtree(0), std::vector<size_t>{0});
+    TS_ASSERT_EQUALS(info.componentsInSubtree(1), std::vector<size_t>{1});
+    TS_ASSERT_EQUALS(info.componentsInSubtree(2), std::vector<size_t>{2});
 
     // Now we have non-detector components
-    TS_ASSERT_EQUALS(info.componentsInSubTree(4 /*component index of root*/),
+    TS_ASSERT_EQUALS(info.componentsInSubtree(4 /*component index of root*/),
                      std::vector<size_t>(
                          {0, 2, 3, 1, 4})); // Note inclusion of self comp index
 
     TS_ASSERT_EQUALS(
-        info.componentsInSubTree(3 /*component index of sub-assembly*/),
+        info.componentsInSubtree(3 /*component index of sub-assembly*/),
         std::vector<size_t>({0, 2, 3})); // Note inclusion of self comp index
   }
 };

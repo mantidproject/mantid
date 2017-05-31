@@ -66,8 +66,8 @@ public:
           componentIds,
       boost::shared_ptr<const std::unordered_map<
           Geometry::IComponent *, size_t>> componentIdToIndexMap);
-  std::vector<size_t> detectorsInSubTree(size_t componentIndex) const;
-  std::vector<size_t> componentsInSubTree(size_t componentIndex) const;
+  std::vector<size_t> detectorsInSubtree(size_t componentIndex) const;
+  std::vector<size_t> componentsInSubtree(size_t componentIndex) const;
   size_t size() const;
   size_t indexOf(Geometry::IComponent *id) const;
   Kernel::V3D position(const size_t componentIndex) const;
