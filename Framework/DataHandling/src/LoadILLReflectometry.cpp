@@ -224,6 +224,8 @@ void LoadILLReflectometry::exec() {
   loadData(firstEntry, monitorsData, getXValues());
   root.close();
   firstEntry.close();
+  // position the source
+  placeSource();
   // position the detector
   placeDetector();
   convertTofToWavelength();
@@ -372,6 +374,11 @@ void LoadILLReflectometry::loadDataDetails(NeXus::NXEntry &entry) {
     m_channelWidth = static_cast<double>(timeOfFlight[0]);
     m_numberOfChannels = size_t(timeOfFlight[1]);
     m_tofDelay = timeOfFlight[2];
+    if (m_instrumentName == "Figaro") {
+      NXFloat eDelay = entry.openNXFloat("instrument/Theta/edelay_delay");
+      eDelay.load();
+      m_tofDelay += static_cast<double>(eDelay[0]);
+    }
   } else { // monochromatic mode
     m_numberOfChannels = 1;
   }
@@ -464,7 +471,7 @@ std::vector<double> LoadILLReflectometry::getXValues() {
       double POFF = getDouble(StringConcat(m_offsetFrom, ".poff"));
       double openOffset =
           getDouble(StringConcat(m_offsetFrom, ".").append(m_offsetName));
-      if (chop1Speed && chop2Speed && chop2Phase) { // only D17
+      if (m_instrumentName == "D17" && chop1Speed != 0.0 && chop2Speed != 0.0 && chop2Phase != 0.0) {
         // virtual chopper entries are valid
         chopper = "Virtual chopper";
       } else {
@@ -481,13 +488,12 @@ std::vector<double> LoadILLReflectometry::getXValues() {
       debugLog(StringConcat(chopper, " 2 phase : "), chop2Phase);
       debugLog(StringConcat(chopper, " 2 speed : "), chop2Speed);
 
-      double t_TOF2{0.0};
-      if (chop1Speed && chop1Phase && chop2Phase && openOffset && POFF)
-        t_TOF2 = -1.e+6 * 60.0 *
+      if (chop1Speed <= 0.0) {
+        g_log.error() << "First chopper velocity " << chop1Speed << ". Check you NeXus file.\n";
+      }
+      const double t_TOF2 = -1.e+6 * 60.0 *
                  (POFF - 45.0 + chop2Phase - chop1Phase + openOffset) /
                  (2.0 * 360 * chop1Speed);
-      if (!t_TOF2)
-        g_log.warning("TOF values may be incorrect, check chopper values\n");
       debugLog("t_TOF2 : ", t_TOF2);
       // compute tof values
       for (int channelIndex = 0; channelIndex <= int(m_numberOfChannels);
@@ -799,6 +805,18 @@ void LoadILLReflectometry::placeDetector() {
   const V3D axis(0.0, 1.0, 0.0);
   const Quat rotation(2. * rho, axis);
   m_loader.rotateComponent(m_localWorkspace, componentName, rotation);
+}
+
+/// Update source position.
+void LoadILLReflectometry::placeSource() {
+  if (m_instrumentName != "Figaro") {
+    return;
+  }
+  const double dist = getDouble("ChopperSetting.chopperpair_sample_distance");
+  debugLogWithUnitMeter("Source-sample distance ", dist);
+  const std::string source = "chopper1";
+  const V3D newPos{0.0, 0.0, -dist inMeter};
+  m_loader.moveComponent(m_localWorkspace, source, newPos);
 }
 } // namespace DataHandling
 } // namespace Mantid

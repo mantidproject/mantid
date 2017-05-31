@@ -76,6 +76,7 @@ private:
                 std::string angleDirectBeam);
   double computeBraggAngle();
   void placeDetector();
+  void placeSource();
 
   API::MatrixWorkspace_sptr m_localWorkspace;
 
