@@ -84,12 +84,17 @@ std::map<std::string, std::string> Stitch1DMany::validateInputs() {
       this->getProperty("InputWorkspaces");
 
   // Add all input workspaces to the matrix
+  // Each 'row' are the workspaces belonging to a specific group
+  // Each 'column' are the workspaces belonging to a specific row
   std::vector<Workspace_sptr> inputWorkspaces;
   for (const auto &ws : inputWorkspacesStr) {
     inputWorkspaces.push_back(
         AnalysisDataService::Instance().retrieveWS<Workspace>(ws));
   }
   m_inputWSMatrix.push_back(inputWorkspaces);
+
+  m_numWSPerGroup = inputWorkspaces.size();
+  m_numWSPerPeriod = 1;
 
   // Add common errors
   validateCommonInputs(errors);
@@ -111,20 +116,29 @@ void Stitch1DMany::validateGroupWorkspacesInputs() {
   for (const auto &groupWSName : inputWorkspacesStr) {
     auto groupWS =
         AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(groupWSName);
-    std::vector<Workspace_sptr> inputWorkspaces;
-    for (size_t i = 0; i < groupWS->size(); i++) {
-      inputWorkspaces.push_back(groupWS->getItem(i));
-    }
-
-    m_inputWSMatrix.push_back(inputWorkspaces);
     m_inputWSGroups.push_back(groupWS);
   }
 
-  size_t numWSInGroup = m_inputWSMatrix[0].size();
+  m_numWSPerGroup = m_inputWSGroups[0]->size();
+  m_numWSPerPeriod = m_inputWSGroups.size();
+
+  // Each 'row' are the workspaces belonging to a specific period
+  // Each 'column' are the workspaces belonging to a specific group
+  for (size_t i = 0; i < m_numWSPerGroup; i++) {
+
+    std::vector<Workspace_sptr> inputWorkspaces;
+    for (auto &groupWS : m_inputWSGroups) {
+      // Group ws may have less workspaces than its supposed to, but we still
+      // add them so further validation can be done
+      if (i < groupWS->getNumberOfEntries())
+        inputWorkspaces.push_back(groupWS->getItem(i));
+    }
+    m_inputWSMatrix.push_back(inputWorkspaces);
+  }
 
   // Check all workspace groups are the same size
   for (auto &inputWsGroup : m_inputWSGroups) {
-    if (inputWsGroup->size() != numWSInGroup) {
+    if (inputWsGroup->size() != m_numWSPerGroup) {
       errors["InputWorkspaces"] = "All workspace groups must be the same size.";
       break;
     }
@@ -159,9 +173,9 @@ void Stitch1DMany::validateCommonInputs(
 
   // Check that all the workspaces are of the same type
   const std::string id = m_inputWSMatrix[0][0]->id();
-  for (auto &period : m_inputWSMatrix) {
-    for (auto &inputWS : period) {
-      if (inputWS->id() != id) {
+  for (auto &row : m_inputWSMatrix) {
+    for (auto &ws : row) {
+      if (ws->id() != id) {
         errors["InputWorkspaces"] = "All workspaces must be the same type.";
         break;
       }
@@ -172,9 +186,6 @@ void Stitch1DMany::validateCommonInputs(
   m_endOverlaps = this->getProperty("EndOverlaps");
   m_scaleRHSWorkspace = this->getProperty("ScaleRHSWorkspace");
   m_params = this->getProperty("Params");
-
-  m_numWSPerGroup = m_inputWSMatrix[0].size();
-  m_numWSPerPeriod = m_inputWSMatrix.size();
 
   size_t numStitchableWS =
       (m_numWSPerPeriod > 1) ? m_numWSPerPeriod : m_numWSPerGroup;
@@ -372,15 +383,10 @@ bool Stitch1DMany::processGroups() {
     // Iterate over each period
     for (size_t i = 0; i < m_numWSPerGroup; i++) {
 
-      std::vector<Workspace_sptr> periodCol;
-      for (size_t j = 0; j < m_numWSPerPeriod; j++) {
-        periodCol.push_back(m_inputWSMatrix[j][i]);
-      }
-
       outName = groupName;
       Workspace_sptr outStitchedWS;
 
-      doStitch1D(periodCol, m_startOverlaps, m_endOverlaps, m_params,
+      doStitch1D(m_inputWSMatrix[i], m_startOverlaps, m_endOverlaps, m_params,
                  m_scaleRHSWorkspace, m_useManualScaleFactors,
                  periodScaleFactors, outStitchedWS, outName, m_scaleFactors);
 

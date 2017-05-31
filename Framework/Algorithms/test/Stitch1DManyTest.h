@@ -991,8 +991,11 @@ public:
     }
 
     TS_ASSERT_EQUALS(histNames[0], "CreateWorkspace");
-    TS_ASSERT_EQUALS(histNames[1], "CreateWorkspace");
-    TS_ASSERT_EQUALS(histNames[2], "GroupWorkspaces");
+    TS_ASSERT_EQUALS(histNames[1], "GroupWorkspaces");
+    TS_ASSERT_EQUALS(histNames[2], "CreateWorkspace");
+    TS_ASSERT_EQUALS(histNames[3], "GroupWorkspaces");
+    TS_ASSERT_EQUALS(histNames[4], "CreateWorkspace");
+    TS_ASSERT_EQUALS(histNames[5], "GroupWorkspaces");
 
     // Clear the ADS
     AnalysisDataService::Instance().clear();

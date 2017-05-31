@@ -84,8 +84,6 @@ private:
   // Data
 
   // A 2D matrix holding workspaces obtained from each workspace list/group
-  // First index is the period number
-  // Second index is the index of the workspace to stitch
   std::vector<std::vector<API::Workspace_sptr>> m_inputWSMatrix;
 
   // List holding each workspace group
