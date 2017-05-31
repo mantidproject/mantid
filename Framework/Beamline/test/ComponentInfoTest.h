@@ -419,7 +419,6 @@ public:
         detector2UpdatedPosition.isApprox(Vector3d{1, -1, -1}));
   }
 
-
   void test_detector_indexes() {
 
     auto info = makeTreeExample();

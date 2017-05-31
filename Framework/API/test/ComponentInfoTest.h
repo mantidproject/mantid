@@ -47,8 +47,10 @@ public:
   void test_indexOf() {
     auto detectorIndices = boost::make_shared<
         std::vector<size_t>>(); // No detectors in this example
-    auto detectorRanges = boost::make_shared<std::vector<std::pair<size_t, size_t>>>();
-    detectorRanges->push_back(std::make_pair(0, 0)); // One component with no detectors
+    auto detectorRanges =
+        boost::make_shared<std::vector<std::pair<size_t, size_t>>>();
+    detectorRanges->push_back(
+        std::make_pair(0, 0)); // One component with no detectors
     detectorRanges->push_back(
         std::make_pair(0, 0)); // Another component with no detectors
 

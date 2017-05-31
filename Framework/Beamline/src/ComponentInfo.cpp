@@ -33,30 +33,29 @@ ComponentInfo::ComponentInfo(
              m_detectorRanges->size()),
       m_detectorInfo(detectorInfo) {
   if (m_rotations->size() != m_positions->size()) {
-        throw std::invalid_argument("ComponentInfo should have been provided same "
-                                    "number of postions and rotations");
-      }
-      if (m_rotations->size() != m_detectorRanges->size()) {
-        throw std::invalid_argument(
-            "ComponentInfo should have as many positions "
-            "and rotations as assembly sorted detector component "
-            "ranges");
-      }
-      if (m_detectorInfo->size() != m_assemblySortedDetectorIndices->size()) {
-        throw std::invalid_argument("ComponentInfo must have detector indices "
-                                    "input of same size as size of DetectorInfo");
-      }
-      if (m_rotations->size() != m_componentRanges->size()) {
-        throw std::invalid_argument(
-            "ComponentInfo should have as many positions "
-            "and rotations as assembly sorted component "
-            "ranges");
-      }
-      if (m_assemblySortedComponentIndices->size() != m_size) {
-        throw std::invalid_argument("ComponentInfo must have component indices "
-                                    "input of same size as the sum of "
-                                    "non-detector and detector components");
-      }
+    throw std::invalid_argument("ComponentInfo should have been provided same "
+                                "number of postions and rotations");
+  }
+  if (m_rotations->size() != m_detectorRanges->size()) {
+    throw std::invalid_argument(
+        "ComponentInfo should have as many positions "
+        "and rotations as assembly sorted detector component "
+        "ranges");
+  }
+  if (m_detectorInfo->size() != m_assemblySortedDetectorIndices->size()) {
+    throw std::invalid_argument("ComponentInfo must have detector indices "
+                                "input of same size as size of DetectorInfo");
+  }
+  if (m_rotations->size() != m_componentRanges->size()) {
+    throw std::invalid_argument("ComponentInfo should have as many positions "
+                                "and rotations as assembly sorted component "
+                                "ranges");
+  }
+  if (m_assemblySortedComponentIndices->size() != m_size) {
+    throw std::invalid_argument("ComponentInfo must have component indices "
+                                "input of same size as the sum of "
+                                "non-detector and detector components");
+  }
 }
 
 std::vector<size_t>
