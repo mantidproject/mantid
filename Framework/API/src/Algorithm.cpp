@@ -1697,9 +1697,12 @@ void Algorithm::execMasterOnly() {
  * support execution with multiple MPI ranks and require a special behavior on
  * non-master ranks in master-only execution. */
 void Algorithm::execNonMaster() {
+  // If there is no output we can simply do nothing.
+  if (m_pureOutputWorkspaceProps.size() == 0)
+    return;
   // Does Algorithm have exactly one input and one output workspace property?
   if (m_inputWorkspaceProps.size() == 1 &&
-      m_pureOutputWorkspaceProps.size() == 1) {
+        m_pureOutputWorkspaceProps.size() == 1) {
     // Does the input workspace property point to an actual workspace?
     if (const auto &ws = m_inputWorkspaceProps.front()->getWorkspace()) {
       if (ws->storageMode() == Parallel::StorageMode::MasterOnly) {
