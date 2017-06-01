@@ -73,7 +73,7 @@ class PrimStretchedExpFT(IFunction1D):
     def function1D(self, xvals, **optparms):
         """ Fourier transform of the symmetrized stretched exponential integrated
         within each energy bin.
-        
+
         The Symmetrized Stretched Exponential:
                 height * exp( - |t/tau|**beta )
 
@@ -129,8 +129,8 @@ class PrimStretchedExpFT(IFunction1D):
         boundaries = np.insert(boundaries, 0, 2*xvals[0]-boundaries[0])  # external lower boundary
         boundaries = np.append(boundaries, 2*xvals[-1]-boundaries[-1])  # external upper boundary
         primitive = np.cumsum(fourier) * (denergies/(refine_factor*de))  # running Riemann sum
-        transform = np.interp(boundaries[1:]-p['Centre'], energies, primitive) - \
-                    np.interp(boundaries[:-1]-p['Centre'], energies, primitive)
+        transform = np.interp(boundaries[1:] - p['Centre'], energies, primitive) - \
+                    np.interp(boundaries[:-1] - p['Centre'], energies, primitive)
         return transform*p['Height']
 
     def fillJacobian(self, xvals, jacobian, partials):
