@@ -130,7 +130,7 @@ class PrimStretchedExpFT(IFunction1D):
         boundaries = np.append(boundaries, 2*xvals[-1]-boundaries[-1])  # external upper boundary
         primitive = np.cumsum(fourier) * (denergies/(refine_factor*de))  # running Riemann sum
         transform = np.interp(boundaries[1:] - p['Centre'], energies, primitive) - \
-                    np.interp(boundaries[:-1] - p['Centre'], energies, primitive)
+            np.interp(boundaries[:-1] - p['Centre'], energies, primitive)
         return transform*p['Height']
 
     def fillJacobian(self, xvals, jacobian, partials):
