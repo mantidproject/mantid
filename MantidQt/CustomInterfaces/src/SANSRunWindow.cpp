@@ -201,18 +201,19 @@ void setTransmissionOnSaveCommand(
   }
 }
 
-
-bool checkSaveOptions(QString& message, bool is1D, bool isCanSAS, bool isNistQxy) {
+bool checkSaveOptions(QString &message, bool is1D, bool isCanSAS,
+                      bool isNistQxy) {
   // Check we are dealing with 1D or 2D data
   bool isValid = true;
   if (is1D && isNistQxy) {
-      isValid = false;
-      message += "Save option issue: Cannot save in NistQxy format for 1D data.\n";
+    isValid = false;
+    message +=
+        "Save option issue: Cannot save in NistQxy format for 1D data.\n";
   }
 
   if (!is1D && isCanSAS) {
-      isValid = false;
-      message += "Save option issue: Cannot save in CanSAS format for 2D data.\n";
+    isValid = false;
+    message += "Save option issue: Cannot save in CanSAS format for 2D data.\n";
   }
   return isValid;
 }
@@ -3019,9 +3020,10 @@ void SANSRunWindow::handleDefSaveClick() {
 /**
  * Checks if the save options are valid
  */
-bool SANSRunWindow::areSaveSettingsValid(const QString& workspaceName) {
+bool SANSRunWindow::areSaveSettingsValid(const QString &workspaceName) {
   Mantid::API::MatrixWorkspace_sptr ws =
-      AnalysisDataService::Instance().retrieveWS<Mantid::API::MatrixWorkspace>(workspaceName.toStdString());
+      AnalysisDataService::Instance().retrieveWS<Mantid::API::MatrixWorkspace>(
+          workspaceName.toStdString());
   auto is1D = ws->getNumberHistograms() == 1;
   auto isNistQxy = m_uiForm.saveNIST_Qxy_check->isChecked();
   auto isCanSAS = m_uiForm.saveCan_check->isChecked();
@@ -3038,7 +3040,6 @@ bool SANSRunWindow::areSaveSettingsValid(const QString& workspaceName) {
   }
   return isValid;
 }
-
 
 /**
  * Set up controls based on the users selection in the combination box
@@ -4560,23 +4561,22 @@ bool SANSRunWindow::areSettingsValid(States type) {
     message += "Sample width issue: Only values > 0 are allowed.\n";
   }
 
-
   // Check save format consistency for batch mode reduction
   // 1D --> cannot be Nist Qxy
   // 2D --> cannot be CanSAS
   auto isBatchMode = !m_uiForm.single_mode_btn->isChecked();
   if (isBatchMode) {
-      auto is1D = type == OneD;
-      auto isCanSAS =  m_uiForm.saveCan_check->isChecked();
-      auto isNistQxy = m_uiForm.saveNIST_Qxy_check->isChecked();
-      QString saveMessage;
-      auto isValidSaveOption = checkSaveOptions(saveMessage, is1D, isCanSAS, isNistQxy);
-      if (!isValidSaveOption) {
-        isValid = false;
-        message += saveMessage;
-      }
+    auto is1D = type == OneD;
+    auto isCanSAS = m_uiForm.saveCan_check->isChecked();
+    auto isNistQxy = m_uiForm.saveNIST_Qxy_check->isChecked();
+    QString saveMessage;
+    auto isValidSaveOption =
+        checkSaveOptions(saveMessage, is1D, isCanSAS, isNistQxy);
+    if (!isValidSaveOption) {
+      isValid = false;
+      message += saveMessage;
+    }
   }
-
 
   // Print the error message if there are any
   if (!message.isEmpty()) {
@@ -4584,8 +4584,6 @@ bool SANSRunWindow::areSettingsValid(States type) {
     warning += message;
     QMessageBox::warning(this, "Inconsistent input", warning);
   }
-
-
 
   return isValid;
 }

@@ -461,7 +461,7 @@ private:
                                  QLineEdit *min, QLineEdit *max,
                                  QComboBox *selection, QString type);
   /// Checks if the save settings are valid for a particular workspace
-  bool areSaveSettingsValid(const QString& workspaceName);
+  bool areSaveSettingsValid(const QString &workspaceName);
   /// Update the beam center fields
   void updateBeamCenterCoordinates();
   /// Set the beam finder details

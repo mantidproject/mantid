@@ -357,8 +357,10 @@ void SaveWorkspaces::saveSel() {
 }
 
 /**
- * Checks if the save option selection is compatible with the dimensionality selection
- * @return true if the save option selection is compatible with the dimensionality selection else false
+ * Checks if the save option selection is compatible with the dimensionality
+ * selection
+ * @return true if the save option selection is compatible with the
+ * dimensionality selection else false
  */
 bool SaveWorkspaces::isValid() {
   // Get the dimensionality of the workspaces
@@ -368,9 +370,11 @@ bool SaveWorkspaces::isValid() {
   auto workspacesList = m_workspaces->selectedItems();
   for (auto it = workspacesList.begin(); it != workspacesList.end(); ++it) {
     auto wsName = (*it)->text();
-    auto workspace = AnalysisDataService::Instance().retrieveWS<Mantid::API::MatrixWorkspace>(wsName.toStdString());
+    auto workspace =
+        AnalysisDataService::Instance()
+            .retrieveWS<Mantid::API::MatrixWorkspace>(wsName.toStdString());
     if (workspace->getNumberHistograms() == 1) {
-      is1D = true;    
+      is1D = true;
     } else {
       is2D = true;
     }
@@ -384,11 +388,11 @@ bool SaveWorkspaces::isValid() {
               // clicked
     if (i.key()->isChecked()) { // we need to save in this format
       if (i.value() == "SaveNISTDAT") {
-            isNistQxy = true;
+        isNistQxy = true;
       }
 
       if (i.value() == "SaveCanSAS1D") {
-            isCanSAS = true;
+        isCanSAS = true;
       }
     }
   }
@@ -398,14 +402,14 @@ bool SaveWorkspaces::isValid() {
   auto isValidOption = true;
   if (is1D && isNistQxy) {
     isValidOption = false;
-    message += "Save option issue: Cannot save in NistQxy format for 1D data.\n";
+    message +=
+        "Save option issue: Cannot save in NistQxy format for 1D data.\n";
   }
 
   if (is2D && isCanSAS) {
     isValidOption = false;
     message += "Save option issue: Cannot save in CanSAS format for 2D data.\n";
   }
-
 
   // Print the error message if there are any
   if (!message.isEmpty()) {
