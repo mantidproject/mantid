@@ -25,7 +25,7 @@ public:
   void setUp() override {
     const std::string TEST_SUFFIX = "TEMPORARY_ClearCacheUnitTest";
     m_originalInstDir =
-      Mantid::Kernel::ConfigService::Instance().getInstrumentDirectories();
+        Mantid::Kernel::ConfigService::Instance().getInstrumentDirectories();
 
     // change the local download directory by adding a unittest subdirectory
     auto testDirectories = m_originalInstDir;
@@ -36,7 +36,7 @@ public:
     testDirectories[0] = m_localInstDir;
 
     Mantid::Kernel::ConfigService::Instance().setInstrumentDirectories(
-      testDirectories);
+        testDirectories);
 
     // create a geometryCache subdirectory
     Poco::Path GeomPath = localDownloadPath;
@@ -66,7 +66,7 @@ public:
 
   void tearDown() override {
     Mantid::Kernel::ConfigService::Instance().setInstrumentDirectories(
-      m_originalInstDir);
+        m_originalInstDir);
     removeDirectories();
   }
 
