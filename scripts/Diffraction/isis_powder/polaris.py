@@ -108,6 +108,7 @@ class Polaris(AbstractInst):
     def _get_run_details(self, run_number_string):
         run_number_string_key = self._generate_run_details_fingerprint(run_number_string,
                                                                        self._inst_settings.file_extension)
+
         if run_number_string_key in self._run_details_cached_obj:
             return self._run_details_cached_obj[run_number_string_key]
 

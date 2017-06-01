@@ -222,7 +222,7 @@ void CreateSampleWorkspace::exec() {
 
   int numPixels = numBanks * bankPixelWidth * bankPixelWidth;
 
-  Progress progress(this, 0, 1, numBanks);
+  Progress progress(this, 0.0, 1.0, numBanks);
 
   // Create an instrument with one or more rectangular banks.
   Instrument_sptr inst = createTestInstrumentRectangular(

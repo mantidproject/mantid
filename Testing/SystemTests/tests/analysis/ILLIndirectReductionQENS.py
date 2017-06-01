@@ -123,6 +123,8 @@ class ILLIndirectReductionQENSTest(stresstesting.MantidStressTest):
 
         self.test_unmirror_6_7()
 
+        self.runTestBackgroundCalibration()
+
         self.tolerance = 1e-3
 
         self.disableChecking = ['Instrument']
@@ -136,6 +138,18 @@ class ILLIndirectReductionQENSTest(stresstesting.MantidStressTest):
                                  OutputWorkspace='out')
 
         self.tearDown()
+
+    def runTestBackgroundCalibration(self):
+
+        IndirectILLReductionQENS(Run="136558",
+                                 CalibrationRun="136553",
+                                 CalibrationBackgroundRun="136599",
+                                 CalibrationBackgroundScalingFactor=0.1,
+                                 OutputWorkspace='out_calib_bg')
+
+        self.assertEquals(mtd['out_calib_bg_red'].getItem(0).getNumberHistograms(), 18)
+
+        self.assertDelta(mtd['out_calib_bg_red'].getItem(0).readY(0)[580], 0.0035, 0.0001)
 
     def validate(self):
         return ['136558_multiple_out_red','ILLIN16B_QENS.nxs']

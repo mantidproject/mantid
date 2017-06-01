@@ -120,7 +120,7 @@ void FindPeakBackground::exec() {
   m_outPeakTableWS->appendRow();
 
   // 3. Get Y values
-  Progress prog(this, 0, 1.0, 1);
+  Progress prog(this, 0.0, 1.0, 1);
 
   // Find background
 

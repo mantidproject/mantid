@@ -51,7 +51,8 @@ using Mantid::MantidVec;
 using Mantid::MantidVecPtr;
 
 MockAlgorithm::MockAlgorithm(size_t nSteps) {
-  m_Progress = Mantid::Kernel::make_unique<API::Progress>(this, 0, 1, nSteps);
+  m_Progress =
+      Mantid::Kernel::make_unique<API::Progress>(this, 0.0, 1.0, nSteps);
 }
 
 EPPTableRow::EPPTableRow(const double peakCentre_, const double sigma_,
