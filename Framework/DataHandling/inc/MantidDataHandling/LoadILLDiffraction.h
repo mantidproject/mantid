@@ -73,16 +73,21 @@ private:
   std::string getInstrumentFilePath(const std::string &) const;
 
   void fillDataScanMetaData(const NeXus::NXDouble &);
+  std::vector<double>
+  getScannedVaribleByPropertyName(const NeXus::NXDouble &scan,
+                                  const std::string &propertyName) const;
   void fillMovingInstrumentScan(const NeXus::NXUInt &,
-                                const NeXus::NXDouble &) {}
+                                         const NeXus::NXDouble &);
   void fillStaticInstrumentScan(const NeXus::NXUInt &, const NeXus::NXDouble &,
                                 const NeXus::NXFloat &);
 
-  void initWorkspace();
+  void initStaticWorkspace();
+  void initMovingWorkspace(const NeXus::NXDouble &scan);
   void loadDataScan();
   void loadMetaData();
   void loadScanVars();
   void loadStaticInstrument();
+  API::MatrixWorkspace_sptr loadEmptyInstrument();
   void moveTwoThetaZero(double);
   void resolveInstrument();
   void resolveScanType();
