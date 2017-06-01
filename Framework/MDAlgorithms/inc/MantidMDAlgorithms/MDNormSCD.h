@@ -63,8 +63,8 @@ private:
                                      const API::MatrixWorkspace &integrFlux,
                                      size_t sp,
                                      std::vector<double> &yValues) const;
-  std::vector<Kernel::VMD> calculateIntersections(const double theta,
-                                                  const double phi);
+  void calculateIntersections(std::vector<std::array<double, 4>> &intersections,
+                              const double theta, const double phi);
 
   /// Normalization workspace
   DataObjects::MDHistoWorkspace_sptr m_normWS;

@@ -22,13 +22,23 @@ script_params = {
     "spline_coefficient": 100,
 }
 
-tof_cropping_ranges = [
+focused_cropping_values = [
     (1500, 19900),  # Bank 1
     (1500, 19900),  # Bank 2
     (1500, 19900),  # Bank 3
     (1500, 19900),  # Bank 4
     (1500, 19900),  # Bank 5
     ]
+
+focused_bin_widths = [
+    # Note you want these to be negative for logarithmic (dt / t) binning
+    # else the output file will be larger than 1GB
+    -0.0050,  # Bank 1
+    -0.0010,  # Bank 2
+    -0.0010,  # Bank 3
+    -0.0010,  # Bank 4
+    -0.0005,  # Bank 5
+]
 
 vanadium_cropping_values = [
     (800, 19995),  # Bank 1
@@ -52,15 +62,21 @@ variable_help = {
                               "step."
     },
 
-    "tof_cropping_ranges": "These values are used to determine the TOF range to crop a focused (not Vanadium Cal.) "
-                           "workspace to. These are applied on a bank by bank basis. They must be less than "
-                           "the values specified for raw_data_cropping_values."
+    "focused_cropping_values": "These values are used to determine the TOF range to crop a focused (not Vanadium Cal.) "
+                               "workspace to. These are applied on a bank by bank basis. They must be less than "
+                               "the values specified for raw_data_cropping_values.",
+
+    "vanadium_cropping_values": "These values are use to determine the TOF range to crop a vanadium workspace to during"
+                                " calibration step. These are applied on a bank by bank basis and must be smaller than"
+                                " the range specified in raw_data_cropping_values and larger than the values specified"
+                                " in focused_cropping_values."
 }
 
 variables = {
     # Used by the script to find the dictionaries in advanced config.
     "file_names_dict": file_names,
     "script_params": script_params,
-    "tof_cropping_ranges": tof_cropping_ranges,
-    "vanadium_cropping_values": vanadium_cropping_values
+    "focused_cropping_values": focused_cropping_values,
+    "vanadium_cropping_values": vanadium_cropping_values,
+    "focused_bin_widths": focused_bin_widths,
 }

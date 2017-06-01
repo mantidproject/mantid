@@ -1697,6 +1697,10 @@ void SliceViewer::changedShownDim(int index, int dim, int oldDim) {
   }
   // Show the new slice. This finds m_dimX and m_dimY
   this->updateDisplay();
+
+  // AutoRebin if required
+  autoRebinIfRequired();
+
   // Send out a signal
   emit changedShownDim(m_dimX, m_dimY);
 }
@@ -2423,13 +2427,19 @@ void SliceViewer::setNonOrthogonalbtn() {
 }
 
 void SliceViewer::disableOrthogonalAnalysisTools(bool checked) {
-  if (ui.btnDoLine->isChecked()) {
-    ui.btnDoLine->toggle();
-  }
-  if (ui.btnRebinMode->isChecked()) {
-    ui.btnRebinMode->toggle();
+  if (checked) {
+    // ---------------------------------------------------------------------------
+    // If non-orthogonal is enabled, then turn off
+    // 1. The cut line tool
+    if (ui.btnDoLine->isChecked()) {
+      ui.btnDoLine->toggle();
+    }
   }
 
+  // ---------------------------------------------------------------------------
+  // If non-orthogonal is enabled, then turn off
+  // 1. The cut line tool
+  // 2. The rebin tool
   if (checked) {
     m_nonOrthogonalOverlay->enable();
     adjustSize();
@@ -2437,6 +2447,10 @@ void SliceViewer::disableOrthogonalAnalysisTools(bool checked) {
     m_nonOrthogonalOverlay->disable();
   }
 
+  // ---------------------------------------------------------------------------
+  // If we are in the orthogonal mode, then we turn off
+  // 1. Cut line feature
+  // 2. Peak overlay feature
   if (checked) { // change tooltips to explain why buttons are disabled
     ui.btnDoLine->setToolTip(
         QString("Cut line is disabled in NonOrthogonal view"));
@@ -2459,6 +2473,8 @@ void SliceViewer::disableOrthogonalAnalysisTools(bool checked) {
   ui.btnClearLine->setDisabled(checked);
   ui.btnPeakOverlay->setDisabled(checked);
 
+  // ---------------------------------------------------------------------------
+  // Change aspect ratio depending on non-orthogonal enabled or not.
   if (m_lockAspectRatiosActionAll->isChecked() && checked) {
     m_lastRatioState = All;
   }
@@ -2980,6 +2996,7 @@ void SliceViewer::applyOrthogonalAxisScaleDraw() {
   auto *axis1 = new QwtScaleDraw();
   m_plot->setAxisScaleDraw(QwtPlot::xBottom, axis0);
   m_plot->setAxisScaleDraw(QwtPlot::yLeft, axis1);
+  this->updateDisplay();
 }
 
 } // namespace

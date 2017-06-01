@@ -22,9 +22,9 @@
 from __future__ import (absolute_import, division,
                         print_function)
 
-import os
 from six import iteritems
 from collections import OrderedDict, namedtuple
+import os
 
 from . import api as _api
 from . import kernel as _kernel
@@ -67,7 +67,7 @@ def extract_progress_kwargs(kwargs):
     for item in ('startProgress', 'endProgress'):
         if item in kwargs:
             del kwargs[item]
-    return (start, end, kwargs)
+    return start, end, kwargs
 
 
 def _create_generic_signature(algm_object):
@@ -111,7 +111,7 @@ def _create_generic_signature(algm_object):
     arg_str = ','.join(arg_list)
     # Calling help(...) will put a * in front of the first parameter name,
     # so we use \b to delete it
-    return ("\b%s" % arg_str, "\b\bVersion=%d" % algm_object.version())
+    return "\b%s" % arg_str, "\b\bVersion=%d" % algm_object.version()
 
 
 def Load(*args, **kwargs):
@@ -150,6 +150,12 @@ def Load(*args, **kwargs):
       Load('INSTR00001000.nxs',OutputWorkspace='run_ws')
     """
     filename, = _get_mandatory_args('Load', ["Filename"], *args, **kwargs)
+    if not filename:
+        # If we try to set property with a None type we get a unhelpful error about allocators
+        # so check up front here
+        raise ValueError("Problem with supplied Filename. The value given was a 'None' "
+                         "type and cannot be used. Please ensure the Filename is set"
+                         " to the path of the file.")
 
     # Create and execute
     (_startProgress, _endProgress, kwargs) = extract_progress_kwargs(kwargs)
@@ -194,6 +200,7 @@ def Load(*args, **kwargs):
 
 ######################################################################
 
+
 def LoadDialog(*args, **kwargs):
     """Popup a dialog for the Load algorithm. More help on the Load function
     is available via help(Load).
@@ -219,17 +226,21 @@ def LoadDialog(*args, **kwargs):
     arguments['Filename'] = filename
     arguments['OutputWorkspace'] = wkspace
     arguments.update(kwargs)
-    if 'Enable' not in arguments: arguments['Enable'] = ''
-    if 'Disable' not in arguments: arguments['Disable'] = ''
-    if 'Message' not in arguments: arguments['Message'] = ''
+
+    if 'Enable' not in arguments:
+        arguments['Enable'] = ''
+    if 'Disable' not in arguments:
+        arguments['Disable'] = ''
+    if 'Message' not in arguments:
+        arguments['Message'] = ''
 
     algm = _create_algorithm_object('Load')
     set_properties_dialog(algm, **arguments)
     algm.execute()
     return algm
 
-
 # ------------------------------------------------------------------------------
+
 
 def StartLiveData(*args, **kwargs):
     """
@@ -281,8 +292,8 @@ def StartLiveData(*args, **kwargs):
     # Check for any properties that aren't known and warn they will not be used
     for key in list(final_keywords.keys()):
         if key not in algm:
-            logger.warning(
-                "You've passed a property (%s) to StartLiveData() that doesn't apply to this Instrument." % key)
+            logger.warning("You've passed a property (%s) to StartLiveData() "
+                           "that doesn't apply to this Instrument." % key)
             del final_keywords[key]
 
     set_properties(algm, **final_keywords)
@@ -301,7 +312,7 @@ def fitting_algorithm(f):
     """
 
     def wrapper(*args, **kwargs):
-        Function, InputWorkspace = _get_mandatory_args(function_name, ["Function", "InputWorkspace"], *args, **kwargs)
+        function, input_workspace = _get_mandatory_args(function_name, ["Function", "InputWorkspace"], *args, **kwargs)
         # Remove from keywords so it is not set twice
         if "Function" in kwargs:
             del kwargs['Function']
@@ -309,18 +320,18 @@ def fitting_algorithm(f):
             del kwargs['InputWorkspace']
 
         # Check for behaviour consistent with old API
-        if type(Function) == str and Function in _api.AnalysisDataService:
-            raise ValueError(
-                "Fit API has changed. The function must now come first in the argument list and the workspace second.")
+        if type(function) == str and function in _api.AnalysisDataService:
+            raise ValueError("Fit API has changed. The function must now come "
+                             "first in the argument list and the workspace second.")
         # Create and execute
         algm = _create_algorithm_object(function_name)
         _set_logging_option(algm, kwargs)
         if 'EvaluationType' in kwargs:
             algm.setProperty('EvaluationType', kwargs['EvaluationType'])
             del kwargs['EvaluationType']
-        algm.setProperty('Function', Function)  # Must be set first
-        if InputWorkspace is not None:
-            algm.setProperty('InputWorkspace', InputWorkspace)
+        algm.setProperty('Function', function)  # Must be set first
+        if input_workspace is not None:
+            algm.setProperty('InputWorkspace', input_workspace)
         else:
             del algm['InputWorkspace']
 
@@ -334,21 +345,19 @@ def fitting_algorithm(f):
         # Check for any properties that aren't known and warn they will not be used
         for key in list(kwargs.keys()):
             if key not in algm:
-                logger.warning(
-                    "You've passed a property (%s) to %s() that doesn't apply to any of the input workspaces." % (
-                        key, function_name))
+                logger.warning("You've passed a property (%s) to %s() that doesn't"
+                               " apply to any of the input workspaces." % (key, function_name))
                 del kwargs[key]
         set_properties(algm, **kwargs)
         algm.execute()
 
         return _gather_returns(function_name, lhs, algm)
-
     # end
     function_name = f.__name__
     signature = ("\bFunction, InputWorkspace", "**kwargs")
     fwrapper = _customise_func(wrapper, function_name, signature,
                                f.__doc__)
-    if not function_name in __SPECIALIZED_FUNCTIONS__:
+    if function_name not in __SPECIALIZED_FUNCTIONS__:
         __SPECIALIZED_FUNCTIONS__.append(function_name)
     return fwrapper
 
@@ -418,9 +427,12 @@ def FitDialog(*args, **kwargs):
     except RuntimeError:
         pass
     arguments.update(kwargs)
-    if 'Enable' not in arguments: arguments['Enable'] = ''
-    if 'Disable' not in arguments: arguments['Disable'] = ''
-    if 'Message' not in arguments: arguments['Message'] = ''
+    if 'Enable' not in arguments:
+        arguments['Enable'] = ''
+    if 'Disable' not in arguments:
+        arguments['Disable'] = ''
+    if 'Message' not in arguments:
+        arguments['Message'] = ''
 
     (_startProgress, _endProgress, kwargs) = extract_progress_kwargs(kwargs)
 
@@ -430,8 +442,8 @@ def FitDialog(*args, **kwargs):
     algm.execute()
     return algm
 
-
 # --------------------------------------------------- --------------------------
+
 
 def CutMD(*args, **kwargs):
     """
@@ -466,10 +478,10 @@ def CutMD(*args, **kwargs):
     # Ensure the output names we were given are valid
     if handling_multiple_workspaces:
         if not isinstance(out_names, list):
-            raise RuntimeError(
-                "Multiple OutputWorkspaces must be given as a list when processing multiple InputWorkspaces.")
+            raise RuntimeError("Multiple OutputWorkspaces must be given as a list when"
+                               " processing multiple InputWorkspaces.")
     else:
-        # We wrap in a list for our convenience. The user musn't pass us one though.
+        # We wrap in a list for our convenience. The user must not pass us one though.
         if not isinstance(out_names, list):
             out_names = [out_names]
         elif len(out_names) != 1:
@@ -483,8 +495,8 @@ def CutMD(*args, **kwargs):
         bins = kwargs["PBins"]
         del kwargs["PBins"]
         if isinstance(bins, tuple) or isinstance(bins, list):
-            for bin in range(len(bins)):
-                kwargs["P{0}Bin".format(bin + 1)] = bins[bin]
+            for bin_index in range(len(bins)):
+                kwargs["P{0}Bin".format(bin_index+1)] = bins[bin_index]
 
     # Create and execute
     (_startProgress, _endProgress, kwargs) = extract_progress_kwargs(kwargs)
@@ -540,6 +552,7 @@ def CutMD(*args, **kwargs):
         return out_names
     else:
         return out_names[0]
+# enddef
 
 
 # enddef
@@ -569,8 +582,8 @@ def RenameWorkspace(*args, **kwargs):
     for key, val in kwargs.items():
         arguments[key] = val
     if 'OutputWorkspace' not in arguments:
-        raise RuntimeError("Unable to set output workspace name." \
-                           " Please either assign the output of " \
+        raise RuntimeError("Unable to set output workspace name."
+                           " Please either assign the output of "
                            "RenameWorkspace to a variable or use the OutputWorkspace keyword.")
 
     # Create and execute
@@ -584,14 +597,11 @@ def RenameWorkspace(*args, **kwargs):
     algm.execute()
 
     return _gather_returns("RenameWorkspace", lhs, algm)
-
-
 # enddef
-_replace_signature(RenameWorkspace,
-                   ("\bInputWorkspace,[OutputWorkspace],[True||False]", "**kwargs"))
-
+_replace_signature(RenameWorkspace, ("\bInputWorkspace,[OutputWorkspace],[True||False]", "**kwargs"))
 
 # --------------------------------------------------- --------------------------
+
 
 def _get_function_spec(func):
     """Get the python function signature for the given function object
@@ -609,7 +619,7 @@ def _get_function_spec(func):
         return ''
     # Algorithm functions have varargs set not args
     args = argspec[0]
-    if args != []:
+    if args:
         # For methods strip the self argument
         if hasattr(func, 'im_func'):
             args = args[1:]
@@ -635,7 +645,8 @@ def _get_function_spec(func):
                 defs.append(arg_token[1])
             else:
                 args.append(arg)
-        if len(defs) == 0: defs = None
+        if len(defs) == 0:
+            defs = None
     else:
         return ''
 
@@ -655,8 +666,8 @@ def _get_function_spec(func):
         calltip = '(' + calltip.rstrip(',') + ')'
     return calltip
 
-
 # --------------------------------------------------- --------------------------
+
 
 def _get_mandatory_args(func_name, required_args, *args, **kwargs):
     """Given a list of required arguments, parse them
@@ -673,11 +684,10 @@ def _get_mandatory_args(func_name, required_args, *args, **kwargs):
     :type dict.
     :returns: A tuple of provided mandatory arguments
     """
-
-    def get_argument_value(key, kwargs):
+    def get_argument_value(key, dict_containing_key):
         try:
-            value = kwargs[key]
-            return value
+            val = dict_containing_key[key]
+            return val
         except KeyError:
             raise RuntimeError('%s argument not supplied to %s function' % (str(key), func_name))
 
@@ -730,10 +740,11 @@ def _check_mandatory_args(algorithm, _algm_object, error, *args, **kwargs):
     else:
         raise RuntimeError(str(error))
 
-
 # ------------------------ General simple function calls ----------------------
 
+
 def _is_workspace_property(prop):
+
     """
         Returns true if the property is a workspace property.
 
@@ -775,7 +786,8 @@ def _get_args_from_lhs(lhs, algm_obj):
         workspace property an entry is added to the returned dictionary
         that contains {PropertyName:lhs_name}.
 
-        :param lhs: A 2-tuple that contains the number of variables supplied on the lhs of the function call and the names of these variables
+        :param lhs: A 2-tuple that contains the number of variables supplied on the lhs of the
+        function call and the names of these variables
         :param algm_obj: An initialised algorithm object
         :returns: A dictionary mapping property names to the values extracted from the lhs variables
     """
@@ -792,7 +804,8 @@ def _get_args_from_lhs(lhs, algm_obj):
 
     for p in output_props:
         if _is_workspace_property(p):
-            if nnames > 0 and nprops > nnames:
+            # Check nnames is greater than 0 and less than nprops
+            if 0 < nnames < nprops:
                 extra_args[p.name] = ret_names[0]  # match argument to property name
                 ret_names = ret_names[1:]
                 nnames -= 1
@@ -826,16 +839,20 @@ def _gather_returns(func_name, lhs, algm_obj, ignore_regex=None):
        value it is returned on its own
 
        :param func_name: The name of the calling function.
-       :param lhs: A 2-tuple that contains the number of variables supplied on the lhs of the function call and the names of these variables.
+       :param lhs: A 2-tuple that contains the number of variables supplied on the
+       lhs of the function call and the names of these variables.
        :param algm_obj: An executed algorithm object.
-       :param ignore_regex: A list of strings containing regex expressions to match against property names that will be ignored & not returned.
+       :param ignore_regex: A list of strings containing regex expressions to match
+       against property names that will be ignored & not returned.
     """
-    if ignore_regex is None: ignore_regex = []
+    if ignore_regex is None:
+        ignore_regex = []
 
     import re
-    def ignore_property(name, ignore_regex):
-        for regex in ignore_regex:
-            if regex.match(name) is not None:
+
+    def ignore_property(name_to_check, regex_to_ignore):
+        for regex in regex_to_ignore:
+            if regex.match(name_to_check) is not None:
                 return True
         # Matched nothing
         return False
@@ -861,28 +878,35 @@ def _gather_returns(func_name, lhs, algm_obj, ignore_regex=None):
                 retvals[name] = _api.AnalysisDataService[value_str]
             except KeyError:
                 if not prop.isOptional():
-                    raise RuntimeError(
-                        "Internal error. Output workspace property '%s' on algorithm '%s' has not been stored correctly."
-                        "Please contact development team." % (name, algm_obj.name()))
+                    raise RuntimeError("Internal error. Output workspace property '%s' on "
+                                       "algorithm '%s' has not been stored correctly."
+                                       "Please contact development team." % (name,  algm_obj.name()))
         else:
             if hasattr(prop, 'value'):
                 retvals[name] = prop.value
             else:
-                raise RuntimeError(
-                    'Internal error. Unknown property type encountered. "%s" on algorithm "%s" is not understood by '
-                    'Python. Please contact development team' % (name, algm_obj.name()))
+                raise RuntimeError('Internal error. Unknown property type encountered. "%s" '
+                                   'on algorithm "%s" is not understood by '
+                                   'Python. Please contact development team' % (name, algm_obj.name()))
 
-    nvals = len(retvals)
-    nlhs = lhs[0]
-    if nlhs > 1 and nvals != nlhs:
+    # If there is a snippet of code as follows
+    # foo, bar, baz = simpleAPI.myFunc(...)
+    # The number of values on LHS is 3 (foo, bar baz) and the number of
+    # returned values is the number of values myFunc(...) returns
+    number_of_returned_values = len(retvals)
+    number_of_values_on_lhs = lhs[0]
+
+    # If we have more than one value but not the same number of values throw
+    if number_of_values_on_lhs > 1 and number_of_returned_values != number_of_values_on_lhs:
         # There is a discrepancy in the number are unpacking variables
         # Let's not have the more cryptic unpacking error raised
         raise RuntimeError("%s is trying to return %d output(s) but you have provided %d variable(s). "
-                           "These numbers must match." % (func_name, nvals, nlhs))
-    if nvals > 0:
-        ret_type = namedtuple(func_name + "_returns", retvals.keys())
+                           "These numbers must match." % (func_name,
+                                                          number_of_returned_values, number_of_values_on_lhs))
+    if number_of_returned_values > 0:
+        ret_type = namedtuple(func_name+"_returns", retvals.keys())
         ret_value = ret_type(**retvals)
-        if nvals == 1:
+        if number_of_returned_values == 1:
             return ret_value[0]
         else:
             return ret_value
@@ -896,7 +920,7 @@ def _set_logging_option(algm_obj, kwargs):
         algorithm logging accordingly and removes the value from the dictionary. If the keyword
         does not exist then it does nothing.
 
-        :param alg_object: An initialised algorithm object
+        :param algm_obj: An initialised algorithm object
         :param **kwargs: A dictionary of the keyword arguments passed to the simple function call
     """
     if __LOGGING_KEYWORD__ in kwargs:
@@ -909,21 +933,20 @@ def set_properties(alg_object, *args, **kwargs):
         Set all of the properties of the algorithm. There is no guarantee of
         the order the properties will be set
         :param alg_object: An initialised algorithm object
-        :param *args: Positional arguments
-        :param **kwargs: Keyword arguments
+        :param args: Positional arguments
+        :param kwargs: Keyword arguments
     """
-
-    def do_set_property(name, value):
-        if value is None:
+    def do_set_property(name, new_value):
+        if new_value is None:
             return
         # The correct parent/child relationship is not quite set up yet: #5157
         # ChildAlgorithms in Python are marked as children but their output is in the
-        # ADS meaning we cannot just set DataItem properties by value. At the moment
+        # ADS meaning we cannot just set DataItem properties by new_value. At the moment
         # they are just set with strings
-        if isinstance(value, _kernel.DataItem):
-            alg_object.setPropertyValue(key, value.name())
+        if isinstance(new_value, _kernel.DataItem):
+            alg_object.setPropertyValue(key, new_value.name())
         else:
-            alg_object.setProperty(key, value)
+            alg_object.setProperty(key, new_value)
 
     # end
     if len(args) > 0:
@@ -965,7 +988,8 @@ def _create_algorithm_function(name, version, algm_object):
     """
         Create a function that will set up and execute an algorithm.
         The help that will be displayed is that of the most recent version.
-        :param algorithm: name of the algorithm
+        :param name: name of the algorithm
+        :param version: The version of the algorithm
         :param algm_object: the created algorithm object.
     """
 
@@ -1017,9 +1041,7 @@ def _create_algorithm_function(name, version, algm_object):
                 raise
 
         return _gather_returns(name, lhs, algm)
-
     # enddef
-
     # Insert definition in to global dict
     algm_wrapper = _customise_func(algorithm_wrapper, name,
                                    _create_generic_signature(algm_object),
@@ -1032,9 +1054,8 @@ def _create_algorithm_function(name, version, algm_object):
             globals()[alias] = algm_wrapper
     # endfor
     return algm_wrapper
-
-
 # -------------------------------------------------------------------------------------------------------------
+
 
 def _create_algorithm_object(name, version=-1, startProgress=None, endProgress=None):
     """
@@ -1067,8 +1088,8 @@ def _create_algorithm_object(name, version=-1, startProgress=None, endProgress=N
     alg.setRethrows(True)
     return alg
 
-
 # -------------------------------------------------------------------------------------------------------------
+
 
 def _find_parent_pythonalgorithm(frame):
     """
@@ -1083,8 +1104,8 @@ def _find_parent_pythonalgorithm(frame):
     fn_name = "PyExec"
 
     # Return the 'self' object of a given frame
-    def get_self(frame):
-        return frame.f_locals['self']
+    def get_self(frame_arg):
+        return frame_arg.f_locals['self']
 
     # Look recursively for the PyExec method in the stack
     if frame.f_code.co_name == fn_name:
@@ -1101,8 +1122,8 @@ def _find_parent_pythonalgorithm(frame):
     else:
         return None
 
-
 # -------------------------------------------------------------------------------------------------------------
+
 
 def set_properties_dialog(algm_object, *args, **kwargs):
     """
@@ -1125,28 +1146,28 @@ def set_properties_dialog(algm_object, *args, **kwargs):
     presets = '|'
 
     # -------------------------------------------------------------------------------
-    def make_str(value):
-        """Make a string out of a value such that the Mantid properties can understand it
+    def make_str(value_to_use):
+        """Make a string out of a value_to_use such that the Mantid properties can understand it
         """
         import numpy
 
-        if isinstance(value, numpy.ndarray):
-            value = list(value)  # Temp until more complete solution available (#2340)
-        if isinstance(value, list) or \
-                isinstance(value, _kernel.std_vector_dbl) or \
-                isinstance(value, _kernel.std_vector_int) or \
-                isinstance(value, _kernel.std_vector_long) or \
-                isinstance(value, _kernel.std_vector_size_t):
-            return str(value).lstrip('[').rstrip(']')
-        elif isinstance(value, tuple):
-            return str(value).lstrip('(').rstrip(')')
-        elif isinstance(value, bool):
-            if value:
+        if isinstance(value_to_use, numpy.ndarray):
+            value_to_use = list(value_to_use)  # Temp until more complete solution available (#2340)
+        if isinstance(value_to_use, list) or \
+           isinstance(value_to_use, _kernel.std_vector_dbl) or \
+           isinstance(value_to_use, _kernel.std_vector_int) or \
+           isinstance(value_to_use, _kernel.std_vector_long) or \
+           isinstance(value_to_use, _kernel.std_vector_size_t):
+            return str(value_to_use).lstrip('[').rstrip(']')
+        elif isinstance(value_to_use, tuple):
+            return str(value_to_use).lstrip('(').rstrip(')')
+        elif isinstance(value_to_use, bool):
+            if value_to_use:
                 return '1'
             else:
                 return '0'
         else:
-            return str(value)
+            return str(value_to_use)
 
     # Translate positional arguments and add them to the keyword list
     ordered_props = algm_object.orderedProperties()
@@ -1162,13 +1183,13 @@ def set_properties_dialog(algm_object, *args, **kwargs):
 
     # finally run the configured dialog
     import mantidplot
-    dialog_accepted = mantidplot.createScriptInputDialog(algm_object.name(), presets, message, enabled_list,
-                                                         disabled_list)
+    dialog_accepted = mantidplot.createScriptInputDialog(algm_object.name(), presets, message,
+                                                         enabled_list, disabled_list)
     if not dialog_accepted:
         raise RuntimeError('Algorithm input cancelled')
 
-
 # ----------------------------------------------------------------------------------------------------------------------
+
 
 def _create_algorithm_dialog(algorithm, version, _algm_object):
     """
@@ -1191,7 +1212,6 @@ def _create_algorithm_dialog(algorithm, version, _algm_object):
         set_properties_dialog(algm, *args, **kwargs)  # throws if input cancelled
         algm.execute()
         return algm
-
     # enddef
     arg_list = []
     for p in _algm_object.orderedProperties():
@@ -1208,25 +1228,24 @@ def _create_algorithm_dialog(algorithm, version, _algm_object):
         if len(alias) > 0:
             globals()["%sDialog" % alias] = algm_wrapper
 
-
 # --------------------------------------------------------------------------------------------------
+
 
 def _create_fake_function(name):
     """Create fake functions for the given name
     """
-
     # ------------------------------------------------------------------------------------------------
     def fake_function(*args, **kwargs):
         raise RuntimeError("Mantid import error. The mock simple API functions have not been replaced!" +
-                           " This is an error in the core setup logic of the mantid module, please contact the development team.")
-
+                           " This is an error in the core setup logic of the mantid module, "
+                           "please contact the development team.")
     # ------------------------------------------------------------------------------------------------
     fake_function.__name__ = name
     _replace_signature(fake_function, ("", ""))
     globals()[name] = fake_function
 
-
 # ------------------------------------------------------------------------------------------------------------
+
 
 def _mockup(plugins):
     """
@@ -1244,31 +1263,30 @@ def _mockup(plugins):
         function definitions can overwrite the "fake" ones.
         :param plugins: A list of  modules that have been loaded
     """
-
     # --------------------------------------------------------------------------------------------------------
-    def create_fake_function(name):
-        """Create fake functions for the given name
+    def create_fake_function(func_name):
+        """Create fake functions for the given func_name
         """
-
         # ------------------------------------------------------------------------------------------------
         def fake_function(*args, **kwargs):
             raise RuntimeError("Mantid import error. The mock simple API functions have not been replaced!" +
-                               " This is an error in the core setup logic of the mantid module, please contact the development team.")
-
+                               " This is an error in the core setup logic of the mantid module, "
+                               "please contact the development team.")
         # ------------------------------------------------------------------------------------------------
-        if "." in name:
-            name = name.rstrip('.py')
-        if specialization_exists(name):
+        if "." in func_name:
+            func_name = func_name.rstrip('.py')
+        if specialization_exists(func_name):
             return
-        fake_function.__name__ = name
-        globals()[name] = fake_function
-
+        fake_function.__name__ = func_name
+        globals()[func_name] = fake_function
     # --------------------------------------------------------
+
     def create_fake_functions(alg_names):
         """Create fake functions for all of the listed names
         """
         for alg_name in alg_names:
             create_fake_function(alg_name)
+    # -------------------------------------
 
     # -------------------------------------
 
@@ -1284,8 +1302,8 @@ def _mockup(plugins):
         name = os.path.splitext(name)[0]
         create_fake_function(name)
 
-
 # ------------------------------------------------------------------------------------------------------------
+
 
 def _translate():
     """
@@ -1295,9 +1313,11 @@ def _translate():
     """
     from mantid.api import AlgorithmFactory, AlgorithmManager
 
-    new_functions = []  # Names of new functions added to the global namespace
-    new_methods = {}  # Method names mapped to their algorithm names. Used to detect multiple copies of same method name
+    # Names of new functions added to the global namespace
+    new_functions = []
+    # Method names mapped to their algorithm names. Used to detect multiple copies of same method name
     # on different algorithms, which is an error
+    new_methods = {}
 
     algs = AlgorithmFactory.getRegisteredAlgorithms(True)
     algorithm_mgr = AlgorithmManager
@@ -1320,8 +1340,8 @@ def _translate():
                 raise RuntimeError("simpleapi: Trying to attach '%s' as method to point to '%s' algorithm but "
                                    "it has already been attached to point to the '%s' algorithm.\n"
                                    "Does one inherit from the other? "
-                                   "Please check and update one of the algorithms accordingly." % (
-                                       method_name, algm_object.name(), other_alg))
+                                   "Please check and update one of the algorithms accordingly."
+                                   % (method_name, algm_object.name(), other_alg))
             _attach_algorithm_func_as_method(method_name, algorithm_wrapper, algm_object)
             new_methods[method_name] = algm_object.name()
 
@@ -1331,8 +1351,8 @@ def _translate():
 
     return new_functions
 
-
 # -------------------------------------------------------------------------------------------------------------
+
 
 def _attach_algorithm_func_as_method(method_name, algorithm_wrapper, algm_object):
     """
@@ -1346,7 +1366,8 @@ def _attach_algorithm_func_as_method(method_name, algorithm_wrapper, algm_object
     if input_prop == "":
         raise RuntimeError("simpleapi: '%s' has requested to be attached as a workspace method but "
                            "Algorithm::workspaceMethodInputProperty() has returned an empty string."
-                           "This method is required to map the calling object to the correct property." % algm_object.name())
+                           "This method is required to map the calling object to the correct property."
+                           % algm_object.name())
     if input_prop not in algm_object:
         raise RuntimeError("simpleapi: '%s' has requested to be attached as a workspace method but "
                            "Algorithm::workspaceMethodInputProperty() has returned a property name that "

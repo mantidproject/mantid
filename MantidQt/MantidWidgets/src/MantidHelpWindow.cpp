@@ -1,3 +1,4 @@
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidQtMantidWidgets/MantidHelpWindow.h"
 #include "MantidQtMantidWidgets/pqHelpWindow.h"
 #include "MantidQtAPI/InterfaceManager.h"
@@ -183,23 +184,38 @@ void MantidHelpWindow::showWikiPage(const QString &page) {
  */
 void MantidHelpWindow::showAlgorithm(const string &name, const int version) {
   auto versionStr("-v" + boost::lexical_cast<string>(version));
-  if (version <= 0)
+  if (version <= 0) {
     versionStr = ""; // let the redirect do its thing
+  }
 
+  QString help_url("");
+  if (!name.empty()) {
+    auto alg = Mantid::API::AlgorithmManager::Instance().createUnmanaged(name);
+    help_url = QString::fromStdString(alg->helpURL());
+  }
   if (bool(g_helpWindow)) {
-    QString url(BASE_URL);
-    url += "algorithms/";
-    if (name.empty())
-      url += "index.html";
-    else
-      url += QString(name.c_str()) + QString(versionStr.c_str()) + ".html";
-    this->showHelp(url);
-  } else // qt-assistant disabled
-  {
-    if (name.empty())
-      this->showWikiPage(std::string("Category:Algorithms"));
-    else
-      this->showWikiPage(name);
+    if (help_url.isEmpty()) {
+      QString url(BASE_URL);
+      url += "algorithms/";
+      if (name.empty()) {
+        url += "index.html";
+      } else {
+        url += QString(name.c_str()) + QString(versionStr.c_str()) + ".html";
+      }
+      this->showHelp(url);
+    } else {
+      this->showHelp(help_url);
+    }
+  } else { // qt-assistant disabled
+    if (help_url.isEmpty()) {
+      if (name.empty()) {
+        this->showWikiPage(std::string("Category:Algorithms"));
+      } else {
+        this->showWikiPage(name);
+      }
+    } else {
+      this->openWebpage(help_url);
+    }
   }
 }
 

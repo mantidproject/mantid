@@ -38,6 +38,7 @@ class IReflSettingsTabPresenter {
 public:
   virtual ~IReflSettingsTabPresenter(){};
   /// Pre-processing
+  virtual std::string getTransmissionRuns(int group, bool loadRuns) const = 0;
   virtual std::string getTransmissionOptions(int group) const = 0;
   /// Processing
   virtual std::string getReductionOptions(int group) const = 0;

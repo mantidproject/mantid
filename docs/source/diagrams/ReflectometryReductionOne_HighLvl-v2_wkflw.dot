@@ -20,8 +20,9 @@ subgraph algorithms {
 
 subgraph processes {
  $process_style
-  convertUnits    [label="Convert to &lambda; and\nnormalize\nby monitors"]
+  convertUnits    [label="Convert to &lambda;,\noptionally sum in &lambda;, and\nnormalize by monitors"]
   applyCorrTrans  [label="Apply transmission\n corrections"]
+  sumInQ          [label="Optionally sum in Q,\nand crop"]
   convertMom      [label="Convert to momentum\ntransfer"]
 }
 
@@ -33,7 +34,9 @@ inputWS         -> checkXUnit
 checkXUnit      -> applyCorrTrans [label="Yes"]
 checkXUnit      -> convertUnits   [label="No"]
 convertUnits    -> applyCorrTrans
-applyCorrTrans  -> outputWSWL
+
+applyCorrTrans  -> sumInQ
+sumInQ          -> outputWSWL
 
 outputWSWL      -> convertMom
 convertMom      -> outputWSFinal

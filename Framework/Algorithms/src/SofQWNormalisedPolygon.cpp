@@ -1,7 +1,7 @@
 #include "MantidAlgorithms/SofQWNormalisedPolygon.h"
 #include "MantidAlgorithms/SofQW.h"
 #include "MantidAPI/BinEdgeAxis.h"
-#include "MantidAPI/NearestNeighbourInfo.h"
+#include "MantidAPI/WorkspaceNearestNeighbourInfo.h"
 #include "MantidAPI/SpectrumDetectorMapping.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
@@ -15,6 +15,7 @@
 #include "MantidIndexing/IndexInfo.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/VectorHelper.h"
+#include "MantidTypes/SpectrumDefinition.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -79,8 +80,7 @@ void SofQWNormalisedPolygon::exec() {
   const size_t nHistos = inputWS->getNumberHistograms();
 
   // Holds the spectrum-detector mapping
-  std::vector<std::vector<Indexing::DetectorID>> detIDMapping(
-      outputWS->getNumberHistograms());
+  std::vector<SpectrumDefinition> detIDMapping(outputWS->getNumberHistograms());
 
   // Progress reports & cancellation
   const size_t nreports(nHistos * nEnergyBins);
@@ -170,7 +170,11 @@ void SofQWNormalisedPolygon::exec() {
       if (qIndex != 0 && qIndex < static_cast<int>(m_Qout.size())) {
         // Add this spectra-detector pair to the mapping
         PARALLEL_CRITICAL(SofQWNormalisedPolygon_spectramap) {
-          detIDMapping[qIndex - 1].push_back(spectrumInfo.detector(i).getID());
+          // Could do a more complete merge of spectrum definitions here, but
+          // historically only the ID of the first detector in the spectrum is
+          // used, so I am keeping that for now.
+          detIDMapping[qIndex - 1].add(
+              spectrumInfo.spectrumDefinition(i)[0].first);
         }
       }
     }
@@ -187,7 +191,7 @@ void SofQWNormalisedPolygon::exec() {
 
   // Set the output spectrum-detector mapping
   auto outputIndices = outputWS->indexInfo();
-  outputIndices.setDetectorIDs(std::move(detIDMapping));
+  outputIndices.setSpectrumDefinitions(std::move(detIDMapping));
   outputWS->setIndexInfo(outputIndices);
 
   // Replace any NaNs in outputWorkspace with zeroes
@@ -330,7 +334,8 @@ void SofQWNormalisedPolygon::initAngularCachesPSD(
 
   bool ignoreMasked = true;
   const int numNeighbours = 4;
-  NearestNeighbourInfo neighbourInfo(*workspace, ignoreMasked, numNeighbours);
+  WorkspaceNearestNeighbourInfo neighbourInfo(*workspace, ignoreMasked,
+                                              numNeighbours);
 
   this->m_theta = std::vector<double>(nHistos);
   this->m_thetaWidths = std::vector<double>(nHistos);

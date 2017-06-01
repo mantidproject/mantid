@@ -942,11 +942,9 @@ void LoadFITS::readDataToImgs(const FITSInfo &fileInfo, MantidImage &imageY,
         val = static_cast<double>(*reinterpret_cast<uint64_t *>(tmp));
       // cppcheck doesn't realise that these are safe casts
       if (fileInfo.bitsPerPixel == 32 && fileInfo.isFloat) {
-        // cppcheck-suppress invalidPointerCast
         val = static_cast<double>(*reinterpret_cast<float *>(tmp));
       }
       if (fileInfo.bitsPerPixel == 64 && fileInfo.isFloat) {
-        // cppcheck-suppress invalidPointerCast
         val = *reinterpret_cast<double *>(tmp);
       }
       val = fileInfo.scale * val - fileInfo.offset;

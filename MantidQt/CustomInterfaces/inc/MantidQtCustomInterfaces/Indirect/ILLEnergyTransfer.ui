@@ -53,7 +53,7 @@
          <string>Input files</string>
         </property>
         <property name="label" stdset="0">
-         <string>Run File</string>
+         <string>Sample Run</string>
         </property>
         <property name="multipleFiles" stdset="0">
          <bool>true</bool>
@@ -467,7 +467,7 @@
          <string>IndirectILLReductionQENS|BackgroundRun</string>
         </property>
         <property name="label" stdset="0">
-         <string>Background File</string>
+         <string>Empty Container Run</string>
         </property>
         <property name="multipleFiles" stdset="0">
          <bool>true</bool>
@@ -556,7 +556,7 @@
          <string>Calibration files (vanadium)</string>
         </property>
         <property name="label" stdset="0">
-         <string>Calibration File </string>
+         <string>Vanadium Run</string>
         </property>
         <property name="algorithmAndProperty" stdset="0">
          <string>IndirectILLReductionQENS|CalibrationRun</string>
@@ -696,7 +696,7 @@
          <string>Plot the reduced workspace</string>
         </property>
         <property name="text">
-         <string>Plot Result</string>
+         <string>Plot</string>
         </property>
        </widget>
       </item>
@@ -746,13 +746,37 @@
        </widget>
       </item>
       <item>
-       <widget class="QCheckBox" name="ck2Theta">
-        <property name="toolTip">
-         <string>Convert the y-axis of the output also to 2theta.</string>
-        </property>
+       <widget class="QLabel" name="lbSpectrumAxis">
         <property name="text">
-         <string>Convert to 2Theta</string>
+         <string>Spectrum Axis:</string>
         </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QComboBox" name="cbSpectrumTarget">
+        <property name="toolTip">
+         <string>Choose the target for spectrum axis.</string>
+        </property>
+        <item>
+         <property name="text">
+          <string>SpectrumNumber</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>2Theta</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Q</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Q2</string>
+         </property>
+        </item>
        </widget>
       </item>
       <item>
@@ -774,7 +798,7 @@
          <string>Save the reduced workspace</string>
         </property>
         <property name="text">
-         <string>Save Result</string>
+         <string>Save</string>
         </property>
        </widget>
       </item>
@@ -1288,7 +1312,7 @@
   </connection>
  </connections>
  <buttongroups>
-  <buttongroup name="buttonGroup_2"/>
   <buttongroup name="buttonGroup"/>
+  <buttongroup name="buttonGroup_2"/>
  </buttongroups>
 </ui>

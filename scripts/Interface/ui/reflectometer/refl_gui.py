@@ -784,13 +784,14 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
                         # Populate runlist
                         first_wq = None
                         for i in range(0, len(runno)):
-                            theta, qmin, qmax, _wlam, _wqBinned, wq = self._do_run(runno[i], row, i)
+                            theta, qmin, qmax, _wlam, wqBinnedAndScaled, _wqUnBinnedAndUnScaled = \
+                                self._do_run(runno[i], row, i)
                             if not first_wq:
-                                first_wq = wq # Cache the first Q workspace
+                                first_wq = wqBinnedAndScaled # Cache the first Q workspace
                             theta = round(theta, 3)
                             qmin = round(qmin, 3)
                             qmax = round(qmax, 3)
-                            wksp.append(wq.name())
+                            wksp.append(wqBinnedAndScaled.name())
                             if self.tableMain.item(row, i * 5 + 1).text() == '':
                                 item = QtGui.QTableWidgetItem()
                                 item.setText(str(theta))

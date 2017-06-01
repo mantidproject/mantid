@@ -217,6 +217,9 @@ public:
     unit = dSpacing().clone();
     TS_ASSERT(dynamic_cast<dSpacing *>(unit));
     delete unit;
+    unit = dSpacingPerpendicular().clone();
+    TS_ASSERT(dynamic_cast<dSpacingPerpendicular *>(unit));
+    delete unit;
     unit = MomentumTransfer().clone();
     TS_ASSERT(dynamic_cast<MomentumTransfer *>(unit));
     delete unit;
@@ -588,6 +591,66 @@ public:
         TSM_ASSERT_DELTA("d-spacing limits Failed for conversion N: " +
                              boost::lexical_cast<std::string>(i),
                          rezult[i] / sample[i], 1., 10 * FLT_EPSILON);
+      }
+    }
+  }
+
+  //----------------------------------------------------------------------
+  // d-SpacingPerpebdicular tests
+  //----------------------------------------------------------------------
+
+  void testdSpacingPerpendicular_unitID() {
+    TS_ASSERT_EQUALS(dp.unitID(), "dSpacingPerpendicular")
+  }
+
+  void testdSpacingPerpendicular_caption() {
+    TS_ASSERT_EQUALS(dp.caption(), "d-SpacingPerpendicular")
+  }
+
+  void testdSpacingPerpendicular_label() {
+    TS_ASSERT_EQUALS(dp.label().ascii(), "Angstrom")
+    TS_ASSERT_EQUALS(dp.label().utf8(), L"\u212b")
+  }
+
+  void testdSpacingPerpendicular_cast() {
+    Unit *u = NULL;
+    TS_ASSERT_THROWS_NOTHING(u = dynamic_cast<Unit *>(&dp));
+    TS_ASSERT_EQUALS(u->unitID(), "dSpacingPerpendicular");
+  }
+
+  void testdSpacingPerpendicular_toTOF() {
+    std::vector<double> x(1, 1.0), y(1, 1.0);
+    std::vector<double> yy = y;
+    TS_ASSERT_THROWS_NOTHING(dp.toTOF(x, y, 1.0, 1.0, 1.0, 1, 1.0, 1.0))
+    TS_ASSERT_DELTA(x[0], 434.5529, 0.0001)
+    TS_ASSERT(yy == y)
+  }
+
+  void testdSpacingPerpendicular_fromTOF() {
+    std::vector<double> x(1, 1001.1), y(1, 1.0);
+    std::vector<double> yy = y;
+    TS_ASSERT_THROWS_NOTHING(dp.fromTOF(x, y, 1.0, 1.0, 1.0, 1, 1.0, 1.0))
+    TS_ASSERT_DELTA(x[0], 2.045075, 0.000001)
+    TS_ASSERT(yy == y)
+  }
+
+  void testdSpacingPerpendicularRange() {
+    std::vector<double> sample, rezult;
+
+    std::string err_mess = convert_units_check_range(dp, sample, rezult);
+    TSM_ASSERT(" ERROR:" + err_mess, err_mess.size() == 0);
+
+    for (size_t i = 0; i < sample.size(); i++) {
+      if (std::fabs(sample[i]) < 10 * FLT_EPSILON) {
+        TSM_ASSERT_DELTA(
+            "d-spacingPerpendicular limits Failed for conversion N: " +
+                boost::lexical_cast<std::string>(i),
+            sample[i], rezult[i], 10 * FLT_EPSILON);
+      } else {
+        TSM_ASSERT_DELTA(
+            "d-spacingPerpendicular limits Failed for conversion N: " +
+                boost::lexical_cast<std::string>(i),
+            rezult[i] / sample[i], 1., 10 * FLT_EPSILON);
       }
     }
   }
@@ -1334,6 +1397,7 @@ private:
   Units::Energy energy;
   Units::Energy_inWavenumber energyk;
   Units::dSpacing d;
+  Units::dSpacingPerpendicular dp;
   Units::MomentumTransfer q;
   Units::QSquared q2;
   Units::DeltaE dE;

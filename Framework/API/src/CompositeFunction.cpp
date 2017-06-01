@@ -7,6 +7,7 @@
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Logger.h"
+#include "MantidKernel/Strings.h"
 
 #include <boost/lexical_cast.hpp>
 #include <boost/shared_array.hpp>
@@ -89,26 +90,21 @@ std::string CompositeFunction::asString() const {
       ostr << ';';
     }
   }
-  std::string ties;
-  for (size_t i = 0; i < nParams(); i++) {
-    const ParameterTie *tie = getTie(i);
-    if (tie) {
-      IFunction_sptr fun = getFunction(functionIndex(i));
-      std::string tmp = tie->asString(fun.get());
-      if (tmp.empty()) {
-        tmp = tie->asString(this);
-        if (!tmp.empty()) {
-          if (!ties.empty()) {
-            ties += ",";
-          }
-          ties += tmp;
-        }
-      }
-    }
+
+  // collect non-default constraints
+  std::string constraints = writeConstraints();
+  // print constraints
+  if (!constraints.empty()) {
+    ostr << ";constraints=(" << constraints << ")";
   }
+
+  // collect the non-default ties
+  std::string ties = writeTies();
+  // print the ties
   if (!ties.empty()) {
     ostr << ";ties=(" << ties << ")";
   }
+
   return ostr.str();
 }
 
@@ -329,40 +325,18 @@ std::string CompositeFunction::descriptionOfActive(size_t i) const {
   return ostr.str();
 }
 
-/**
- * query to see in the function is active
- * @param i :: The index of a declared parameter
- * @return true if parameter i is active
- */
-bool CompositeFunction::isActive(size_t i) const {
+/// Change status of parameter
+void CompositeFunction::setParameterStatus(size_t i,
+                                           IFunction::ParameterStatus status) {
   size_t iFun = functionIndex(i);
-  return m_functions[iFun]->isActive(i - m_paramOffsets[iFun]);
+  m_functions[iFun]->setParameterStatus(i - m_paramOffsets[iFun], status);
 }
 
-/**
- * query to see in the function is active
- * @param i :: The index of a declared parameter
- * @return true if parameter i is active
- */
-bool CompositeFunction::isFixed(size_t i) const {
+/// Get status of parameter
+IFunction::ParameterStatus
+CompositeFunction::getParameterStatus(size_t i) const {
   size_t iFun = functionIndex(i);
-  return m_functions[iFun]->isFixed(i - m_paramOffsets[iFun]);
-}
-
-/**
- * @param i :: A declared parameter index to be removed from active
- */
-void CompositeFunction::fix(size_t i) {
-  size_t iFun = functionIndex(i);
-  m_functions[iFun]->fix(i - m_paramOffsets[iFun]);
-}
-
-/** Makes a parameter active again. It doesn't change the parameter's tie.
- * @param i :: A declared parameter index to be restored to active
- */
-void CompositeFunction::unfix(size_t i) {
-  size_t iFun = functionIndex(i);
-  m_functions[iFun]->unfix(i - m_paramOffsets[iFun]);
+  return m_functions[iFun]->getParameterStatus(i - m_paramOffsets[iFun]);
 }
 
 /** Makes sure that the function is consistent.
@@ -423,7 +397,7 @@ void CompositeFunction::removeFunction(size_t i) {
   }
 
   IFunction_sptr fun = getFunction(i);
-
+  // Reduction in parameters
   size_t dnp = fun->nParams();
 
   for (size_t j = 0; j < nParams();) {
@@ -577,20 +551,40 @@ void CompositeFunction::parseName(const std::string &varName, size_t &index,
 
 /** Returns the index of parameter i as it declared in its function
  * @param i :: The parameter index
+ * @param recursive :: If true call parameterLocalName recusively until
+ *    a non-composite function is reached.
  * @return The local index of the parameter
  */
-size_t CompositeFunction::parameterLocalIndex(size_t i) const {
+size_t CompositeFunction::parameterLocalIndex(size_t i, bool recursive) const {
   size_t iFun = functionIndex(i);
-  return i - m_paramOffsets[iFun];
+  auto localIndex = i - m_paramOffsets[iFun];
+  if (recursive) {
+    auto cf = dynamic_cast<const CompositeFunction *>(m_functions[iFun].get());
+    if (cf) {
+      return cf->parameterLocalIndex(localIndex, recursive);
+    }
+  }
+  return localIndex;
 }
 
 /** Returns the name of parameter i as it declared in its function
  * @param i :: The parameter index
+ * @param recursive :: If true call parameterLocalName recusively until
+ *    a non-composite function is reached.
  * @return The pure parameter name (without the function identifier f#.)
  */
-std::string CompositeFunction::parameterLocalName(size_t i) const {
+std::string CompositeFunction::parameterLocalName(size_t i,
+                                                  bool recursive) const {
   size_t iFun = functionIndex(i);
-  return m_functions[iFun]->parameterName(i - m_paramOffsets[iFun]);
+  auto localIndex = i - m_paramOffsets[iFun];
+  auto localFunction = m_functions[iFun].get();
+  if (recursive) {
+    auto cf = dynamic_cast<const CompositeFunction *>(localFunction);
+    if (cf) {
+      return cf->parameterLocalName(localIndex, recursive);
+    }
+  }
+  return localFunction->parameterName(localIndex);
 }
 
 /**
@@ -600,12 +594,14 @@ void CompositeFunction::applyTies() {
   for (size_t i = 0; i < nFunctions(); i++) {
     getFunction(i)->applyTies();
   }
+  IFunction::applyTies();
 }
 
 /**
  * Clear the ties.
  */
 void CompositeFunction::clearTies() {
+  IFunction::clearTies();
   for (size_t i = 0; i < nFunctions(); i++) {
     getFunction(i)->clearTies();
   }
@@ -616,9 +612,13 @@ void CompositeFunction::clearTies() {
  * @return True if successfull
  */
 bool CompositeFunction::removeTie(size_t i) {
-  size_t iFun = functionIndex(i);
-  bool res = m_functions[iFun]->removeTie(i - m_paramOffsets[iFun]);
-  return res;
+  bool foundAndRemovedTie = IFunction::removeTie(i);
+  if (!foundAndRemovedTie) {
+    size_t iFun = functionIndex(i);
+    bool res = m_functions[iFun]->removeTie(i - m_paramOffsets[iFun]);
+    return res;
+  }
+  return foundAndRemovedTie;
 }
 
 /** Get the tie of i-th parameter
@@ -626,18 +626,12 @@ bool CompositeFunction::removeTie(size_t i) {
  * @return A pointer to the tie.
  */
 ParameterTie *CompositeFunction::getTie(size_t i) const {
-  size_t iFun = functionIndex(i);
-  return m_functions[iFun]->getTie(i - m_paramOffsets[iFun]);
-}
-
-/**
- * Attaches a tie to this function. The attached tie is owned by the function.
- * @param tie :: A pointer to a new tie
- */
-void CompositeFunction::addTie(std::unique_ptr<ParameterTie> tie) {
-  size_t i = getParameterIndex(*tie);
-  size_t iFun = functionIndex(i);
-  m_functions[iFun]->addTie(std::move(tie));
+  auto tie = IFunction::getTie(i);
+  if (tie == nullptr) {
+    size_t iFun = functionIndex(i);
+    tie = m_functions[iFun]->getTie(i - m_paramOffsets[iFun]);
+  }
+  return tie;
 }
 
 /**
@@ -656,19 +650,11 @@ void CompositeFunction::declareParameter(const std::string &name,
       "CompositeFunction cannot not have its own parameters.");
 }
 
-/** Add a constraint
- *  @param ic :: Pointer to a constraint.
- */
-void CompositeFunction::addConstraint(std::unique_ptr<IConstraint> ic) {
-  size_t i = getParameterIndex(*ic);
-  size_t iFun = functionIndex(i);
-  getFunction(iFun)->addConstraint(std::move(ic));
-}
-
 /**
  * Prepare the function for a fit.
  */
 void CompositeFunction::setUpForFit() {
+  IFunction::setUpForFit();
   // set up the member functions
   for (size_t i = 0; i < nFunctions(); i++) {
     getFunction(i)->setUpForFit();
@@ -706,17 +692,27 @@ void CompositeFunction::setUpForFit() {
 /// @param i :: the index
 /// @return A pointer to the constraint
 IConstraint *CompositeFunction::getConstraint(size_t i) const {
-  size_t iFun = functionIndex(i);
-  return m_functions[iFun]->getConstraint(i - m_paramOffsets[iFun]);
+  auto constraint = IFunction::getConstraint(i);
+  if (constraint == nullptr) {
+    size_t iFun = functionIndex(i);
+    constraint = m_functions[iFun]->getConstraint(i - m_paramOffsets[iFun]);
+  }
+  return constraint;
 }
 
 /** Remove a constraint
  * @param parName :: The name of a parameter which constarint to remove.
  */
 void CompositeFunction::removeConstraint(const std::string &parName) {
-  size_t iPar = parameterIndex(parName);
-  size_t iFun = functionIndex(iPar);
-  getFunction(iFun)->removeConstraint(parameterLocalName(iPar));
+  auto i = parameterIndex(parName);
+  auto constraint = IFunction::getConstraint(i);
+  if (constraint != nullptr) {
+    IFunction::removeConstraint(parName);
+  } else {
+    size_t iPar = parameterIndex(parName);
+    size_t iFun = functionIndex(iPar);
+    getFunction(iFun)->removeConstraint(parameterLocalName(iPar));
+  }
 }
 
 /** Checks if a constraint has been explicitly set
@@ -736,8 +732,8 @@ bool CompositeFunction::isExplicitlySet(size_t i) const {
  */
 size_t
 CompositeFunction::getParameterIndex(const ParameterReference &ref) const {
-  if (ref.getFunction() == this && ref.getIndex() < nParams()) {
-    return ref.getIndex();
+  if (ref.getLocalFunction() == this && ref.getLocalIndex() < nParams()) {
+    return ref.getLocalIndex();
   }
   for (size_t iFun = 0; iFun < nFunctions(); iFun++) {
     IFunction_sptr fun = getFunction(iFun);

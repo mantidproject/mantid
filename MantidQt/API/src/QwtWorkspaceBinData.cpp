@@ -32,7 +32,12 @@ QwtWorkspaceBinData *QwtWorkspaceBinData::copyWithNewSource(
 
 /** Size of the data set
  */
-size_t QwtWorkspaceBinData::size() const { return m_Y.size(); }
+size_t QwtWorkspaceBinData::size() const {
+  if (!isPlottable()) {
+    return 0;
+  }
+  return m_Y.size();
+}
 
 /**
 Return the x value of data point i
@@ -52,6 +57,8 @@ double QwtWorkspaceBinData::getEX(size_t i) const { return m_X[i]; }
 
 double QwtWorkspaceBinData::getE(size_t i) const { return m_E[i]; }
 
+// size_t QwtWorkspaceBinData::esize() const { return this->size(); }
+
 /**
  * @return A string containin the text to use as an X axis label
  */
@@ -69,7 +76,6 @@ QString QwtWorkspaceBinData::getYAxisLabel() const { return m_yTitle; }
 QwtWorkspaceBinData &QwtWorkspaceBinData::
 operator=(const QwtWorkspaceBinData &rhs) {
   if (this != &rhs) {
-    static_cast<MantidQwtMatrixWorkspaceData &>(*this) = rhs;
     m_binIndex = rhs.m_binIndex;
     m_X = rhs.m_X;
     m_Y = rhs.m_Y;
@@ -110,8 +116,8 @@ void QwtWorkspaceBinData::init(const Mantid::API::MatrixWorkspace &workspace) {
   m_E.resize(nhist);
   for (size_t i = 0; i < nhist; ++i) {
     m_X[i] = vertAxis->getValue(i);
-    m_Y[i] = workspace.y(i)[m_binIndex];
-    m_E[i] = workspace.e(i)[m_binIndex];
+    m_Y[i] = workspace.readY(i)[m_binIndex];
+    m_E[i] = workspace.readE(i)[m_binIndex];
   }
 
   // meta data

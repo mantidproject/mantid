@@ -583,6 +583,61 @@ double dSpacing::conversionTOFMax() const { return DBL_MAX / factorTo; }
 
 Unit *dSpacing::clone() const { return new dSpacing(*this); }
 
+// ==================================================================================================
+/* D-SPACING Perpendicular
+ * ==================================================================================================
+ *
+ * Conversion uses equation: dp^2 = lambda^2 - 2[Angstrom^2]*ln(cos(theta))
+ */
+DECLARE_UNIT(dSpacingPerpendicular)
+
+const UnitLabel dSpacingPerpendicular::label() const {
+  return Symbol::Angstrom;
+}
+
+dSpacingPerpendicular::dSpacingPerpendicular()
+    : Unit(), factorTo(DBL_MIN), factorFrom(DBL_MIN) {}
+
+void dSpacingPerpendicular::init() {
+  factorTo =
+      (PhysicalConstants::NeutronMass * (l1 + l2)) / PhysicalConstants::h;
+
+  // Now adjustments for the scale of units used
+  const double TOFisinMicroseconds = 1e6;
+  const double toAngstroms = 1e10;
+  factorTo *= TOFisinMicroseconds / toAngstroms;
+  factorFrom = factorTo;
+  if (factorFrom == 0.0)
+    factorFrom = DBL_MIN; // Protect against divide by zero
+  double cos_theta = cos(twoTheta / 2.0);
+  sfpTo = 0.0;
+  if (cos_theta > 0)
+    sfpTo = 2.0 * log(cos_theta);
+  sfpFrom = sfpTo;
+}
+
+double dSpacingPerpendicular::singleToTOF(const double x) const {
+  double sqrtarg = x * x + sfpTo;
+  // consider very small values to be a rounding error
+  if (sqrtarg < 1.0e-17)
+    return 0.0;
+  return sqrt(sqrtarg) * factorTo;
+}
+double dSpacingPerpendicular::singleFromTOF(const double tof) const {
+  double temp = tof / factorFrom;
+  return sqrt(temp * temp - sfpFrom);
+}
+double dSpacingPerpendicular::conversionTOFMin() const {
+  return sqrt(-1.0 * sfpFrom);
+}
+double dSpacingPerpendicular::conversionTOFMax() const {
+  return sqrt(std::numeric_limits<double>::max()) / factorFrom;
+}
+
+Unit *dSpacingPerpendicular::clone() const {
+  return new dSpacingPerpendicular(*this);
+}
+
 // ================================================================================
 /* MOMENTUM TRANSFER
  * ================================================================================

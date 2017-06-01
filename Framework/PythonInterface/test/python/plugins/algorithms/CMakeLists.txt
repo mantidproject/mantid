@@ -22,6 +22,7 @@ set ( TEST_PY_FILES
   CreateWorkspaceTest.py
   CylinderPaalmanPingsCorrection2Test.py
   DakotaChiSquaredTest.py
+  DeltaPDF3DTest.py
   DNSComputeDetEffCorrCoefsTest.py
   DNSMergeRunsTest.py
   DNSFlippingRatioCorrTest.py
@@ -86,12 +87,14 @@ set ( TEST_PY_FILES
   VelocityCrossCorrelationsTest.py
   VelocityAutoCorrelationsTest.py
   SelectNexusFilesByMetadataTest.py
+  VesuvioPeakPredictionTest.py
   VesuvioPreFitTest.py
   VesuvioResolutionTest.py
   VesuvioThicknessTest.py
   VesuvioTOFFitTest.py
   PoldiCreatePeaksFromFileTest.py
   LoadCIFTest.py
+  SaveYDATest.py
 )
 
 check_tests_valid ( ${CMAKE_CURRENT_SOURCE_DIR} ${TEST_PY_FILES} )

@@ -499,14 +499,14 @@ bool ConvertCWSDExpToMomentum::getInputs(bool virtualinstrument,
     errss << "InputWorkspace must have 6 columns.  But now it has "
           << datacolnames.size() << " columns. \n";
   } else {
-    if (datacolnames[m_iColFilename].compare("File Name") != 0 &&
-        datacolnames[m_iColFilename].compare("Filename") != 0)
+    if (datacolnames[m_iColFilename] != "File Name" &&
+        datacolnames[m_iColFilename] != "Filename")
       errss << "Data file name Table (InputWorkspace)'s Column "
             << m_iColFilename << " must be 'File Name' or 'Filename' but not "
             << datacolnames[m_iColFilename] << ". "
             << "\n";
-    if (datacolnames[m_iColStartDetID].compare("Starting DetID") != 0 &&
-        datacolnames[m_iColStartDetID].compare("StartDetID") != 0)
+    if (datacolnames[m_iColStartDetID] != "Starting DetID" &&
+        datacolnames[m_iColStartDetID] != "StartDetID")
       errss << "Data file name Table (InputWorkspace)'s Column "
             << m_iColStartDetID
             << " must be 'Staring DetID' or 'StartDetID' but not "
@@ -612,21 +612,21 @@ ConvertCWSDExpToMomentum::loadSpiceData(const std::string &filename,
     IAlgorithm_sptr loader = createChildAlgorithm("LoadSpiceXML2DDet");
     loader->initialize();
     loader->setProperty("Filename", filename);
-    std::vector<size_t> sizelist(2);
-    sizelist[0] = 256;
-    sizelist[1] = 256;
-    loader->setProperty("DetectorGeometry", sizelist);
+    // std::vector<size_t> sizelist(2);
+    // sizelist[0] = 256;
+    // sizelist[1] = 256;
+    // loader->setProperty("DetectorGeometry", sizelist);
     loader->setProperty("LoadInstrument", true);
     loader->setProperty("ShiftedDetectorDistance", m_detSampleDistanceShift);
     loader->setProperty("DetectorCenterXShift", m_detXShift);
     loader->setProperty("DetectorCenterYShift", m_detYShift);
 
     // TODO/FIXME - This is not a nice solution for detector geometry
-    std::string idffile = getPropertyValue("InstrumentFilename");
-    if (idffile.size() > 0) {
-      loader->setProperty("InstrumentFilename", idffile);
-      loader->setProperty("DetectorGeometry", "512, 512");
-    }
+    // std::string idffile = getPropertyValue("InstrumentFilename");
+    // if (idffile.size() > 0) {
+    //   loader->setProperty("InstrumentFilename", idffile);
+    //   loader->setProperty("DetectorGeometry", "512, 512");
+    // }
 
     double wavelength = getProperty("UserDefinedWavelength");
 

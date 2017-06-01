@@ -20,5 +20,8 @@ void export_Object() {
            "Return the axis-aligned bounding box for this shape")
 
       .def("getShapeXML", &Object::getShapeXML, arg("self"),
-           "Returns the XML that was used to create this shape.");
+           "Returns the XML that was used to create this shape.")
+
+      .def("volume", &Object::volume, arg("self"),
+           "Returns the volume of this shape.");
 }

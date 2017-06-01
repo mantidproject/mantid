@@ -78,22 +78,21 @@ void CrystalFieldSpectrum::updateTargetFunction() const {
     return;
   }
   m_dirty = false;
+  auto peakShape = getAttribute("PeakShape").asString();
   auto xVec = getAttribute("FWHMX").asVector();
   auto yVec = getAttribute("FWHMY").asVector();
   auto fwhmVariation = getAttribute("FWHMVariation").asDouble();
+  auto defaultFWHM = getAttribute("FWHM").asDouble();
+  bool fixAllPeaks = getAttribute("FixAllPeaks").asBool();
   FunctionDomainGeneral domain;
   FunctionValues values;
   m_source->function(domain, values);
   m_target->setAttribute("NumDeriv", this->getAttribute("NumDeriv"));
   auto &spectrum = dynamic_cast<CompositeFunction &>(*m_target);
   m_nPeaks = CrystalFieldUtils::calculateNPeaks(values);
-  auto maxNPeaks = CrystalFieldUtils::calculateMaxNPeaks(m_nPeaks);
-  if (maxNPeaks > spectrum.nFunctions()) {
-    buildTargetFunction();
-  } else {
-    CrystalFieldUtils::updateSpectrumFunction(spectrum, values, m_nPeaks, 0,
-                                              xVec, yVec, fwhmVariation);
-  }
+  CrystalFieldUtils::updateSpectrumFunction(spectrum, peakShape, values, 0,
+                                            xVec, yVec, fwhmVariation,
+                                            defaultFWHM, fixAllPeaks);
   storeReadOnlyAttribute("NPeaks", Attribute(static_cast<int>(m_nPeaks)));
 }
 
@@ -109,29 +108,15 @@ std::string CrystalFieldSpectrum::asString() const {
       ostr << ',' << attName << '=' << attValue;
     }
   }
+  std::vector<std::string> ties;
   // Print own parameters
   for (size_t i = 0; i < m_nOwnParams; i++) {
-    const ParameterTie *tie = getTie(i);
-    if (!tie || !tie->isDefault()) {
-      ostr << ',' << parameterName(i) << '=' << getParameter(i);
-    }
-  }
-
-  // collect non-default constraints
-  std::vector<std::string> constraints;
-  for (size_t i = 0; i < m_nOwnParams; i++) {
-    auto constraint = writeConstraint(i);
-    if (!constraint.empty()) {
-      constraints.push_back(constraint);
-    }
-  }
-
-  // collect the non-default ties
-  std::vector<std::string> ties;
-  for (size_t i = 0; i < m_nOwnParams; i++) {
-    auto tie = writeTie(i);
-    if (!tie.empty()) {
-      ties.push_back(tie);
+    std::ostringstream paramOut;
+    paramOut << parameterName(i) << '=' << getParameter(i);
+    if (isActive(i)) {
+      ostr << ',' << paramOut.str();
+    } else if (isFixed(i)) {
+      ties.push_back(paramOut.str());
     }
   }
 
@@ -155,24 +140,21 @@ std::string CrystalFieldSpectrum::asString() const {
         ostr << ",f" << ip << "." << peak.parameterName(i) << '='
              << peak.getParameter(i);
       }
-      auto constraint = writeConstraint(i);
-      if (!constraint.empty()) {
-        constraints.push_back(constraint);
-      }
-      auto tieStr = writeTie(i);
-      if (!tieStr.empty()) {
-        ties.push_back(tieStr);
-      }
     }
   } // for peaks
 
+  // collect non-default constraints
+  std::string constraints = writeConstraints();
   // print constraints
   if (!constraints.empty()) {
-    ostr << ",constraints=("
-         << Kernel::Strings::join(constraints.begin(), constraints.end(), ",")
-         << ")";
+    ostr << ",constraints=(" << constraints << ")";
   }
 
+  // collect the non-default ties
+  auto tiesString = writeTies();
+  if (!tiesString.empty()) {
+    ties.push_back(tiesString);
+  }
   // print the ties
   if (!ties.empty()) {
     ostr << ",ties=(" << Kernel::Strings::join(ties.begin(), ties.end(), ",")
