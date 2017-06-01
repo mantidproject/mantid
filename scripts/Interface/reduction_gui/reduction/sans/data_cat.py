@@ -191,7 +191,7 @@ class DataCatalog(object):
 
         try:
             self._create_db(db_path, replace_db)
-        except Exception, msg:
+        except Exception as msg:
             logger.error("DataCatalog: Could not access local data catalog\n%s" % sys.exc_value)
             logger.exception(msg)
 
@@ -214,7 +214,8 @@ class DataCatalog(object):
             Pretty print the whole list of data
         """
         output = "%s\n" % self.data_set_cls.header()
-        for r in self.catalog:data_cat
+        for r in self.catalog:
+            #data_cat
             output += "%s\n" % str(r)
         return output
 
@@ -246,7 +247,7 @@ class DataCatalog(object):
 
     def add_type(self, run, type):
         if self.db is None:
-            print "DataCatalog: Could not access local data catalog"
+            print ("DataCatalog: Could not access local data catalog")
             return
 
         c = self.db.cursor()
@@ -264,7 +265,7 @@ class DataCatalog(object):
         self.catalog = []
 
         if self.db is None:
-            print "DataCatalog: Could not access local data catalog"
+            print ("DataCatalog: Could not access local data catalog")
             return
 
         c = self.db.cursor()
