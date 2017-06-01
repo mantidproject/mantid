@@ -5,11 +5,11 @@
 78334-82415:
   offset_file_name : "offsets_2011_cycle111b.cal"
   label : "15_2"
-  chopper_on:
+  PDF:
     vanadium_run_numbers : "78338"
     empty_run_numbers : "78339"
 
-  chopper_off:
+  Rietveld:
     vanadium_run_numbers : "78338"
     empty_run_numbers : "78339"
 
@@ -18,6 +18,6 @@
   # Calibration run
   offset_file_name : "cycle_16_5_silicon_all_spectra.cal"
   label : "17_1"
-  chopper_off:
+  Rietveld:
     vanadium_run_numbers : "98532"
     empty_run_numbers : "98531"

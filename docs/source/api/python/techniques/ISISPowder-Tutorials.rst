@@ -211,7 +211,7 @@ found for each individual instrument in the reference document:
 How objects hold state in ISIS Powder
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Additionally as the objects hold state we can set a parameter
-anywhere. For example on Polaris that have a *chopper_on* indicates
+anywhere. For example on Polaris the *mode* indicates
 the chopper state for this/these run(s). This can either be set 
 when we create the object like this:
 
@@ -219,7 +219,7 @@ when we create the object like this:
 
     from isis_powder import Polaris
 
-    a_pol_obj = Polaris(chopper_on=True, ....)
+    a_pol_obj = Polaris(mode="PDF", ....)
     a_pol_obj.create_vanadium(...)
 
 Or set whilst calling a method like this:
@@ -229,7 +229,7 @@ Or set whilst calling a method like this:
     from isis_powder import Polaris
 
     a_pol_obj = Polaris(...)
-    a_pol_obj.create_vanadium(chopper_on=True, ...)
+    a_pol_obj.create_vanadium(mode="PDF", ...)
 
 Both of the above are equivalent. Additionally if we change the value
 the scripts will warn us. This can be demonstrated with the following
@@ -239,14 +239,14 @@ example:
 
     from isis_powder import Polaris
 
-    a_pol_obj = Polaris(chopper_on=True, ...)
+    a_pol_obj = Polaris(mode="PDF", ...)
 
     # The following line will warn us we changed the chopper
-    # status from True to False. It will also remain False
-    # from now on
-    a_pol_obj.create_vanadium(chopper_on=False, ...)
+    # status from PDF to Rietveld. It will also remain 
+    # in Rietveld mode from now on till we change it again
+    a_pol_obj.create_vanadium(mode="Rietveld", ...)
     
-    # Chopper_on is still False on the following line
+    # Mode is still Rietveld on the following line
     a_pol_obj.create_vanadium(...) 
 
 For these reasons it is recommended to create multiple objects
@@ -256,13 +256,13 @@ when you need to switch between different settings within a script:
 
     from isis_powder import Polaris
 
-    pol_chopper_on = Polaris(chopper_on=True, ...)
-    pol_chopper_off = Polaris(chopper_on=False, ...)
+    pol_PDF = Polaris(mode="PDF", ...)
+    pol_Rietveld = Polaris(mode="Rietveld", ...)
 
-    # Runs with chopper on:
-    pol_chopper_on.create_vanadium(...)
-    # Runs with chopper off:
-    pol_chopper_off.create_vanadium(...) 
+    # Runs with the chopper set to PDF mode:
+    pol_PDF.create_vanadium(...)
+    # Runs with the chopper set to Rietveld mode:
+    pol_Rietveld.create_vanadium(...) 
 
 .. _creating_first_vanadium_run_isis-powder-diffraction-ref:
 
@@ -287,12 +287,12 @@ For Polaris we require the following parameters in addition to the
 parameters discussed to create the object (see
 :ref:`creating_inst_object_isis-powder-diffraction-ref`):
 
-- *chopper_on* - Indicates what the chopper state was for this run
+- *do_absorb_corrections* - Indicates whether to account for absorption when processing
+  the vanadium data. It is recommended to have this set to *True*
 - *first_cycle_run_no* - Used to determine which cycle to create a vanadium for.
   For example on a cycle with runs 100-120 this value can be any value from 100-120 
   (e.g. 111)
-- *do_absorb_corrections* - Indicates whether to account for absorption when processing
-  the vanadium data. It is recommended to have this set to *True*
+- *mode* - Indicates what the chopper state was for this run
 - *multiple_scattering* - Indicates whether to account for the effects of
   multiple scattering. For the tutorial it is highly **recommended to set this to False**
   as it will increase the script run time from seconds to 10-30 minutes.
@@ -309,9 +309,9 @@ the correct cycle is selected for the *first_cycle_run_no* input.
 
     # This should be set from the previous tutorial. 
     a_pol_obj = Polaris(....)
-    a_pol_obj.create_vanadium(chopper_on=False,
-                              first_cycle_run_no=98533,
+    a_pol_obj.create_vanadium(first_cycle_run_no=98533,
                               do_absorb_corrections=True,
+                              mode="Rietveld",
                               multiple_scattering=False)
 
 Executing the above should now successfully process the vanadium run,
@@ -349,16 +349,6 @@ instrument reference document:
 To focus the Si sample included in the ISIS data set we 
 require the following parameters:
 
-- *chopper_on* - Indicates what the chopper state was for this run
-- *input_mode* - Some instruments will not have this 
-  (in which case the data will always be summed). Acceptable values
-  are **Individual** or **Summed**. When set to individual each run
-  will be loaded and processed separately, in summed all runs specified
-  will be summed.
-- *run_number* - The run number or range of run numbers. This can
-  either be a string or integer (plain number). For example 
-  *"100-105, 107, 109-111"* will process 
-  100, 101, 102..., 105, 107, 109, 110, 111.
 - *do_absorb_corrections* - This will be covered in a later tutorial
   it determines whether to perform sample absorption corrections on
   instruments which support this correction. For this tutorial please
@@ -366,6 +356,17 @@ require the following parameters:
 - *do_van_normalisation* - Determines whether to divide the data
   set by the processed vanadium splines. This should be set to 
   *True*.
+- *input_mode* - Some instruments will not have this 
+  (in which case the data will always be summed). Acceptable values
+  are **Individual** or **Summed**. When set to individual each run
+  will be loaded and processed separately, in summed all runs specified
+  will be summed.
+- *mode* - Indicates what the chopper state was for this run ("Rietveld")
+- *run_number* - The run number or range of run numbers. This can
+  either be a string or integer (plain number). For example 
+  *"100-105, 107, 109-111"* will process 
+  100, 101, 102..., 105, 107, 109, 110, 111.
+
 
 For this tutorial the run number will be 98533, and *input_mode*
 will not affect the result as it is a single run. Additionally in
@@ -377,8 +378,8 @@ the example data you could focus 98534 (YAG sample) too.
 
     # This should be set from the previous tutorial. 
     a_pol_obj = Polaris(....)
-    a_pol_obj.focus(chopper_on=False,
-                    input_mode="Individual", run_number=98533,
+    a_pol_obj.focus(input_mode="Individual", run_number=98533,
+                    mode="Rietveld",
                     do_absorb_corrections=False,
                     do_van_normalisation=True)
 
