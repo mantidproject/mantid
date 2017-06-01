@@ -49,17 +49,19 @@ public:
 
 private:
   boost::shared_ptr<Mantid::Parallel::detail::ThreadingBackend> m_backend;
+  boost::shared_ptr<Mantid::Parallel::detail::ThreadingBackend> m_serialBackend;
 };
 
 template <class Function, class... Args>
 void ParallelRunner::run(Function &&f, Args &&... args) {
+  // 1. Run serial
+  f(Mantid::Parallel::Communicator(m_serialBackend, 0),
+    std::forward<Args>(args)...);
+  // 2. Run parallel
   if (!m_backend) {
     Mantid::Parallel::Communicator comm;
     f(comm, std::forward<Args>(args)...);
   } else {
-    // 1. Run serial
-    f(Mantid::Parallel::Communicator{}, std::forward<Args>(args)...);
-    // 2. Run parallel
     std::vector<std::thread> threads;
     for (int t = 0; t < m_backend->size(); ++t) {
       Mantid::Parallel::Communicator comm(m_backend, t);
