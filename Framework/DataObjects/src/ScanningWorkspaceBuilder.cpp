@@ -141,7 +141,7 @@ void ScanningWorkspaceBuilder::setRotations(
  *rotate the instrument in the horizontal plane
  */
 void ScanningWorkspaceBuilder::setRelativeRotationsForScans(
-    const std::vector<double> &relativeRotations,
+    const std::vector<double> relativeRotations,
     const Kernel::V3D &rotationPosition, const Kernel::V3D &rotationAxis) {
 
   if (!m_positions.empty() || !m_rotations.empty())
@@ -149,7 +149,7 @@ void ScanningWorkspaceBuilder::setRelativeRotationsForScans(
                            "rotations have already been set.");
 
   verifyTimeIndexSize(relativeRotations.size(), "instrument angles");
-  m_instrumentAngles = relativeRotations;
+  m_instrumentAngles = std::move(relativeRotations);
   m_rotationPosition = rotationPosition;
   m_rotationAxis = rotationAxis;
 }
