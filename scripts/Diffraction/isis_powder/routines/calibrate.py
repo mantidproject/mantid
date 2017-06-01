@@ -65,5 +65,7 @@ def _create_vanadium_splines(focused_spectra, instrument, run_details):
     # Group for user convenience
     group_name = "Van_spline_data"
     tt_mode = instrument._get_current_tt_mode()
-    group_name = group_name + '_' + tt_mode if tt_mode else group_name
+    if tt_mode:
+        group_name = group_name + '_' + tt_mode
+
     mantid.GroupWorkspaces(InputWorkspaces=splined_ws_list, OutputWorkspace=group_name)
