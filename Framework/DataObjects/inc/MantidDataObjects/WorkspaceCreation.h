@@ -221,7 +221,7 @@ std::unique_ptr<T> create(const P &parent) {
 }
 
 /** create a new workspace with empty run
- *
+ *  this is for initializeFromParentWithoutLogs
  */
 template <class T, class P,
           typename std::enable_if<std::is_base_of<API::MatrixWorkspace,
