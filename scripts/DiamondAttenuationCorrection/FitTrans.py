@@ -236,9 +236,10 @@ def getISAWub(fullfilename):
         UB[i][0], UB[i][1], UB[i][2] = lines[i].split()
     UB = UB.transpose()
     for i in range(3, 5):
-        lattice[i - 3][0], lattice[i - 3][1], lattice[i - 3][2], lattice[i - 3][3], lattice[i - 3][4], lattice[i - 3][
-            5], \
-        non = lines[i].split()
+        lattice[i - 3][0], lattice[i - 3][1], \
+            lattice[i - 3][2], lattice[i - 3][3], \
+            lattice[i - 3][4], lattice[i - 3][5], \
+            non = lines[i].split()
 
     print('Successfully got UB and lattice')
 
@@ -682,8 +683,7 @@ def SimTransOutput3(name, x):
     for i in range(nref1):
         if pktype == 1:
             pkpars1[i][0] = pkpars1[i][0] * delam  # linear lambda shift
-            sig = pkwid1 * pkpars1[i][0] + pkwid2 * \
-                                           (pkpars1[i][0] ** 2.)  # const del(lambda)/lambda
+            sig = pkwid1 * pkpars1[i][0] + pkwid2 * (pkpars1[i][0] ** 2.)  # const del(lambda)/lambda
             extScl = pkpars1[i][0] ** 0  # lambda dependent extinction effect
             t1 = t1 - extScl * pkmult1[int(eqvlab1[i])] * pkcalcint1[i] * (
                 np.exp(-((shftlam - pkpars1[i][0]) ** 2.) / (2 * (sig ** 2))))
@@ -693,8 +693,7 @@ def SimTransOutput3(name, x):
     for i in range(nref2):
         if pktype == 1:
             pkpars2[i][0] = pkpars2[i][0] * delam  # linear lambda shift
-            sig = pkwid1 * pkpars2[i][0] + pkwid2 * \
-                                           (pkpars2[i][0] ** 2.)  # const del(lambda)/lambda
+            sig = pkwid1 * pkpars2[i][0] + pkwid2 * (pkpars2[i][0] ** 2.)  # const del(lambda)/lambda
             extScl = pkpars2[i][0] ** 0  # lambda dependent extinction effect
             t2 = t2 - extScl * pkmult2[int(eqvlab2[i])] * pkcalcint2[i] * (
                 np.exp(-(shftlam - pkpars2[i][0]) ** 2. / (2 * (sig ** 2))))
@@ -846,8 +845,7 @@ def SimTrans3(x):
     for i in range(nref1):
         if pktype == 1:
             pkpars1[i][0] = pkpars1[i][0] * delam  # linear lambda shift
-            sig = pkwid1 * pkpars1[i][0] + pkwid2 * \
-                                           (pkpars1[i][0] ** 2.)  # const del(lambda)/lambda
+            sig = pkwid1 * pkpars1[i][0] + pkwid2 * (pkpars1[i][0] ** 2.)  # const del(lambda)/lambda
             extScl = pkpars1[i][0] ** 0  # lambda dependent extinction effect
             t1 = t1 - extScl * pkmult1[int(eqvlab1[i])] * pkcalcint1[i] * (
                 np.exp(-((shftlam - pkpars1[i][0]) ** 2.) / (2 * (sig ** 2))))
@@ -857,8 +855,7 @@ def SimTrans3(x):
     for i in range(nref2):
         if pktype == 1:
             pkpars2[i][0] = pkpars2[i][0] * delam  # linear lambda shift
-            sig = pkwid1 * pkpars2[i][0] + pkwid2 * \
-                                           (pkpars2[i][0] ** 2.)  # const del(lambda)/lambda
+            sig = pkwid1 * pkpars2[i][0] + pkwid2 * (pkpars2[i][0] ** 2.)  # const del(lambda)/lambda
             extScl = pkpars2[i][0] ** 0  # lambda dependent extinction effect
             t2 = t2 - extScl * pkmult2[int(eqvlab2[i])] * pkcalcint2[i] * (
                 np.exp(-(shftlam - pkpars2[i][0]) ** 2. / (2 * (sig ** 2))))
@@ -1096,8 +1093,7 @@ def FitTrans():
     # to avoid a double multiplication by relsf
 
     if fxsamediam == 1 and x0[neqv1 + neqv2 + 11] != 1:
-        x0[6 + neqv1:7 + neqv1 + neqv2 - 1] = x0[3:4 +
-                                                   neqv2 - 1] / x0[neqv1 + neqv2 + 11]
+        x0[6 + neqv1:7 + neqv1 + neqv2 - 1] = x0[3:4 + neqv2 - 1] / x0[neqv1 + neqv2 + 11]
         print(('Diam 2 peak multipliers reset: ' + str(x0[neqv1 + neqv2 + 11])))
 
     # check starting point
@@ -1245,10 +1241,8 @@ def FitTrans():
         # len(x)
         # neqv1+neqv2+11
         # x[neqv1+neqv2+11]
-        x[6 + neqv1:7 + neqv1 + neqv2 - 1] = x[3:4 +
-                                                 neqv2 - 1] * x[neqv1 + neqv2 + 11]
-        print(('Diam 2 peak multipliers reset with factor: ' +
-               str(x[neqv1 + neqv2 + 11])))
+        x[6 + neqv1:7 + neqv1 + neqv2 - 1] = x[3:4 + neqv2 - 1] * x[neqv1 + neqv2 + 11]
+        print(('Diam 2 peak multipliers reset with factor: ' + str(x[neqv1 + neqv2 + 11])))
     else:
         # label ensuring I know that run did not use fxsamediam
         x[neqv1 + neqv2 + 11] = 1.0

@@ -5,6 +5,7 @@
 
 from reduction_workflow.reducer import Reducer
 
+
 class ReductionSingleton(object):
     """ Singleton reduction class """
     # storage for the instance reference

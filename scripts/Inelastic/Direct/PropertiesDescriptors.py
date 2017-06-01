@@ -665,8 +665,7 @@ class mon2NormalizationEnergyRange(PropDescriptor):
         if val1 < 0.1 or val1 > 0.9:
             message = "Lower mon2_norm_energy_range describes lower limit of energy to integrate neutron signal after" \
                       " the chopper.\nThe limit is defined as (this value)*incident_energy." \
-                      " Are you sure you want to set this_value to {0}?\n".format(
-                      val1)
+                      " Are you sure you want to set this_value to {0}?\n".format(val1)
             if val1 > 1:
                 return (False, 2, message)
             else:
@@ -676,8 +675,7 @@ class mon2NormalizationEnergyRange(PropDescriptor):
         if val2 < 1.1 or val2 > 1.9:
             message = "Upper mon2_norm_energy_range describes upper limit of energy to integrate neutron signal after" \
                       " the chopper.\nThe limit is defined as (this value)*incident_energy." \
-                      " Are you sure you want to set this_value to {0}?\n".format(
-                      val2)
+                      " Are you sure you want to set this_value to {0}?\n".format(val2)
             if val2 > 1:
                 if result[0]:
                     result = (False, 1, message)
@@ -1066,12 +1064,11 @@ class MonovanIntegrationRange(prop_helpers.ComplexProperty):
         the_range = self.__get__(instance, owner)
         ei = instance.incident_energy
         if the_range[0] >= the_range[1]:
-            return (
-            False, 2, 'monovan integration range limits = [{0}:{1}] are wrong'.format(the_range[0], the_range[1]))
+            return False, 2, 'monovan integration range limits = [{0}:{1}] are wrong'.format(the_range[0], the_range[1])
         if the_range[0] < -100 * ei or the_range[0] > 100 * ei:
-            return (False, 1, 'monovan integration is suspiciously wide: [{0}:{1}]. This may be incorrect'
-                    .format(the_range[0], the_range[1]))
-        return (True, 0, '')
+            return False, 1, 'monovan integration is suspiciously wide: [{0}:{1}]. ' \
+                             'This may be incorrect'.format(the_range[0], the_range[1])
+        return True, 0, ''
 
 
 # end MonovanIntegrationRange
