@@ -127,7 +127,7 @@ void Stitch1DMany::validateGroupWorkspacesInputs() {
 
   // Each 'row' are the workspaces belonging to a specific period
   // Each 'column' are the workspaces belonging to a specific group
-  for (size_t i = 0; i < m_numWSPerGroup; i++) {
+  for (int i = 0; i < m_numWSPerGroup; i++) {
 
     std::vector<Workspace_sptr> inputWorkspaces;
     for (auto &groupWS : m_inputWSGroups) {
@@ -242,7 +242,7 @@ void Stitch1DMany::exec() {
  * @param manualScaleFactors :: Provided values for scaling factors
  * @param outWS :: Output stitched workspace
  * @param outName :: Output stitched workspace name
- * @param outScaleFactor :: Actual value used for scale factor
+ * @param outScaleFactors :: Actual values used for scale factors
  */
 void Stitch1DMany::doStitch1D(const std::vector<Workspace_sptr> &toStitch,
                               const std::vector<double> &startOverlaps,
