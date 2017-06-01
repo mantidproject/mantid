@@ -15,6 +15,7 @@ New
 Improved
 ########
 
+- :ref:`GroupDetectors <algm-GroupDetectors-v2>` now supports workspaces with time indexes.
 
 Deprecated
 ##########
