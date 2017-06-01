@@ -67,6 +67,7 @@ public:
   int result;
 
   bool synchronise = false;
+
 protected:
   bool throw_exception;
 };
