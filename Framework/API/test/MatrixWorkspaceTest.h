@@ -387,6 +387,14 @@ public:
     TS_ASSERT_EQUALS(expected, testWS->toString());
   }
 
+  void test_initialize_with_IndexInfo_does_not_set_default_detectorIDs() {
+    WorkspaceTester ws;
+    Indexing::IndexInfo indexInfo(1);
+    ws.initialize(indexInfo,
+                  HistogramData::Histogram(HistogramData::Points(1)));
+    TS_ASSERT_EQUALS(ws.getSpectrum(0).getDetectorIDs().size(), 0);
+  }
+
   void testGetSetTitle() {
     TS_ASSERT_EQUALS(ws->getTitle(), "");
     ws->setTitle("something");
