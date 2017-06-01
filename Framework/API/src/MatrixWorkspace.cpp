@@ -49,7 +49,9 @@ const std::string MatrixWorkspace::yDimensionId = "yDimension";
 MatrixWorkspace::MatrixWorkspace()
     : IMDWorkspace(), ExperimentInfo(), m_axes(), m_isInitialized(false),
       m_YUnit(), m_YUnitLabel(), m_isCommonBinsFlagSet(false),
-      m_isCommonBinsFlag(false), m_masks() {}
+      m_isCommonBinsFlag(false), m_masks() {
+  setStorageMode(Parallel::StorageMode::Distributed);
+}
 
 MatrixWorkspace::MatrixWorkspace(const MatrixWorkspace &other)
     : IMDWorkspace(other), ExperimentInfo(other) {
@@ -224,7 +226,6 @@ void MatrixWorkspace::initialize(const std::size_t &NVectors,
 
   setNumberOfDetectorGroups(NVectors);
   m_indexInfo = Kernel::make_unique<Indexing::IndexInfo>(NVectors);
-  setStorageMode(m_indexInfo->storageMode());
 
   // Invoke init() method of the derived class inside a try/catch clause
   try {
@@ -252,7 +253,6 @@ void MatrixWorkspace::initialize(const std::size_t &NVectors,
 
   setNumberOfDetectorGroups(NVectors);
   m_indexInfo = Kernel::make_unique<Indexing::IndexInfo>(NVectors);
-  setStorageMode(m_indexInfo->storageMode());
 
   // Invoke init() method of the derived class inside a try/catch clause
   try {
