@@ -8,10 +8,11 @@
 #include "MantidKernel/make_unique.h"
 #include "MantidTestHelpers/FakeObjects.h"
 #include <Poco/ActiveResult.h>
-#include "Poco/Condition.h"
-#include "Poco/Mutex.h"
 #include <Poco/NObserver.h>
 #include <Poco/Thread.h>
+
+#include <condition_variable>
+#include <mutex>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -19,9 +20,9 @@ using namespace std;
 
 namespace {
 constexpr int NO_OF_LOOPS = 10;
-Poco::Condition condition1;
-Poco::Condition condition2;
-Poco::Mutex mtx;
+std::condition_variable condition1;
+std::condition_variable condition2;
+std::mutex mtx;
 }
 
 class AsyncAlgorithm : public Algorithm {
@@ -48,12 +49,11 @@ public:
 
   void exec() override {
     if (synchronise) {
-      mtx.lock();
-      condition1.wait(mtx);
-      mtx.unlock();
+      std::unique_lock<std::mutex> lock(mtx);
+      condition1.wait(lock);
     }
     Poco::Thread *thr = Poco::Thread::current();
-    condition2.broadcast();
+    condition2.notify_all();
     for (int i = 0; i < NO_OF_LOOPS; i++) {
       result = i;
       if (thr)
@@ -156,13 +156,15 @@ public:
   void testCancelGroupWS() {
     WorkspaceGroup_sptr groupWS = makeGroupWorkspace();
     AsyncAlgorithm alg;
+    alg.synchronise = true;
     setupTest(alg);
     alg.setPropertyValue("InputWorkspace", "groupWS");
     Poco::ActiveResult<bool> result = alg.executeAsync();
-    mtx.lock();
-    condition1.broadcast();
-    condition2.wait(mtx);
-    mtx.unlock();
+    {
+      std::unique_lock<std::mutex> lock(mtx);
+      condition1.notify_all();
+      condition2.wait(lock);
+    }
     alg.cancel();
     result.wait();
     generalChecks(alg, false, true, false, true);
