@@ -641,7 +641,7 @@ to the same cycle.
     offset_file_name : "pearl_offset_1_2-second.cal"  
 
 Processing intermediate files
---------------------------
+------------------------------
 The scripts also support processing intermediate files. This
 tutorial assumes you have successfully focused data
 previously as detailed here: :ref:`focusing_data_isis-powder-diffraction-ref`.
