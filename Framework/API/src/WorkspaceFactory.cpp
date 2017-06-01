@@ -77,10 +77,9 @@ WorkspaceFactoryImpl::create(const MatrixWorkspace_const_sptr &parent,
   return ws;
 }
 
-void WorkspaceFactoryImpl::initializeFromParentWithoutLogs(const MatrixWorkspace &parent,
-                                                           MatrixWorkspace &child,
-                                                           const bool differentSize) const
-{
+void WorkspaceFactoryImpl::initializeFromParentWithoutLogs(
+    const MatrixWorkspace &parent, MatrixWorkspace &child,
+    const bool differentSize) const {
   child.setTitle(parent.getTitle());
   child.setComment(parent.getComment());
   child.setInstrument(parent.getInstrument()); // This call also copies the
@@ -93,10 +92,10 @@ void WorkspaceFactoryImpl::initializeFromParentWithoutLogs(const MatrixWorkspace
   child.instrumentParameters();
   child.m_sample = parent.m_sample;
   child.m_run = boost::make_shared<API::Run>();
-//  if (!noproperty)
-//    child.m_run = parent.m_run;
-//  else
-//    child.m_run = boost::make_shared<API::Run>();
+  //  if (!noproperty)
+  //    child.m_run = parent.m_run;
+  //  else
+  //    child.m_run = boost::make_shared<API::Run>();
   child.setYUnit(parent.m_YUnit);
   child.setYUnitLabel(parent.m_YUnitLabel);
   child.setDistribution(parent.isDistribution());
@@ -150,9 +149,9 @@ void WorkspaceFactoryImpl::initializeFromParentWithoutLogs(const MatrixWorkspace
  *different sizes
  * @param noproperty :: A flag for not cloning Run object
  */
-void WorkspaceFactoryImpl::initializeFromParent(const MatrixWorkspace &parent,
-                                                MatrixWorkspace &child,
-                                                const bool differentSize) const {
+void WorkspaceFactoryImpl::initializeFromParent(
+    const MatrixWorkspace &parent, MatrixWorkspace &child,
+    const bool differentSize) const {
   initializeFromParentWithoutLogs(parent, child, differentSize);
   child.m_run = parent.m_run;
 }

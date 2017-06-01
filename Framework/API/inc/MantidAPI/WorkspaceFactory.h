@@ -79,10 +79,12 @@ public:
                               const size_t &YLength) const;
 
   void initializeFromParent(const MatrixWorkspace &parent,
-                            MatrixWorkspace &child, const bool differentSize) const;
+                            MatrixWorkspace &child,
+                            const bool differentSize) const;
 
   void initializeFromParentWithoutLogs(const MatrixWorkspace &parent,
-                                       MatrixWorkspace &child, const bool differentSize) const;
+                                       MatrixWorkspace &child,
+                                       const bool differentSize) const;
 
   /// Create a ITableWorkspace
   boost::shared_ptr<ITableWorkspace>

@@ -140,7 +140,7 @@ initializeFromParent(const API::MatrixWorkspace &parent,
 
 MANTID_DATAOBJECTS_DLL void
 initializeFromParentWithoutLogs(const API::MatrixWorkspace &parent,
-                     API::MatrixWorkspace &ws);
+                                API::MatrixWorkspace &ws);
 }
 
 /** This is the create() method that all the other create() methods call
