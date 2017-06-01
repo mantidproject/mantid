@@ -58,18 +58,21 @@ Usage
     mdout = None
     mdnorm = None
     for run in runs:
-        data=Load(Filename=r'TOPAZ_'+str(run)+'_event.nxs')
-        data=ConvertUnits(InputWorkspace=data,Target='Momentum')
-        MaskBTP(Workspace=data,Bank="10-16,19-21,23-25,29-35,40-46,49-57,59")
-        MaskBTP(Workspace=data,Pixel="0-9,246-255")
-        MaskBTP(Workspace=data,Tube="0-9,246-255")
-        data=CropWorkspace(InputWorkspace=data,XMin='1.85',XMax='10')
-        data=Rebin(InputWorkspace=data,Params='1.85,10,10')
-        LoadIsawUB(InputWorkspace=data,Filename=r'7995.mat')
-        MDdata=ConvertToMD(InputWorkspace=data,QDimensions="Q3D",dEAnalysisMode="Elastic",
-            Q3DFrames="HKL",QConversionScales="HKL",
-            MinValues="-10,-10,-10",Maxvalues="10,10,10")
-        SaveMD(InputWorkspace=MDdata, Filename="/home/3y9/Desktop/TOPAZ/MDdata_"+str(run)+".nxs")
+        try:
+            MDdata = LoadMD(Filename="/home/3y9/Desktop/TOPAZ/MDdata_"+str(run)+".nxs")
+        except:
+            data=Load(Filename='TOPAZ_'+str(run)+'_event.nxs')
+            data=ConvertUnits(InputWorkspace=data,Target='Momentum')
+            MaskBTP(Workspace=data,Bank="10-16,19-21,23-25,29-35,40-46,49-57,59")
+            MaskBTP(Workspace=data,Pixel="0-9,246-255")
+            MaskBTP(Workspace=data,Tube="0-9,246-255")
+            data=CropWorkspace(InputWorkspace=data,XMin='1.85',XMax='10')
+            data=Rebin(InputWorkspace=data,Params='1.85,10,10')
+            LoadIsawUB(InputWorkspace=data,Filename=r'7995.mat')
+            MDdata=ConvertToMD(InputWorkspace=data,QDimensions="Q3D",dEAnalysisMode="Elastic",
+                Q3DFrames="HKL",QConversionScales="HKL",
+                MinValues="-10,-10,-10",Maxvalues="10,10,10")
+            SaveMD(InputWorkspace=MDdata, Filename="/home/3y9/Desktop/TOPAZ/MDdata_"+str(run)+".nxs")
     
         #running the algorithm
         mdout, mdnorm = MDNormSCD(InputWorkspace='MDdata',
