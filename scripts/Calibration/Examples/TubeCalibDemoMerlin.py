@@ -149,11 +149,11 @@ def calibrateMerlin(filename):
     CalibratedComponent = ['MERLIN/door3/tube_1_%d' % (i) for i in range(1, 9)]
 
     half_diff_center = (
-                       2.92713867188 - 1.22879882813) / 2  # difference among the expected center position for both tubes
-
-    # here a little bit of attempts is necessary. The efective center position and lengh is different for the calibrated tube, that
-    # is the reason, the calibrated values of the smaller tube does not seems aligned with the others. By, finding the 'best' half_diff_center
-    # value, the alignment occurs nicely.
+                           2.92713867188 - 1.22879882813) / 2  # difference among the expected center position for
+    # both tubes here a little bit of attempts is necessary.
+    # The effective center position and lengh is different for the calibrated tube, that is the reason,
+    # the calibrated values of the smaller tube does not seems aligned with the others. By, finding the
+    # 'best' half_diff_center value, the alignment occurs nicely.
     half_diff_center = 0.835  #
 
     # the knownpositions were given with the center of the bigger tube as origin, to convert

@@ -515,11 +515,7 @@ class BaseRefWidget(BaseWidget):
             data_y = mantid.mtd[ws].dataY(0)
 
             # cleanup data 0-> NAN
-            for y_val in data_y:
-                # print '-> data_y[j]: ' , data_y[j] , ' data_e[j]: ' , data_y[j]
-                if y_val < 1e-12:
-                    _y_val = np.nan
-
+            data_y = [np.nan if y_val < 1e-12 else y_val for y_val in data_y]
             _file_number += 1
 
         # END OF DEBUGGING ONLY

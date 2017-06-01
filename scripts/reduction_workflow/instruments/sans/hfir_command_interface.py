@@ -8,7 +8,7 @@ List of common user commands for HFIR SANS
 import os.path
 import mantid
 
-from reduction_workflow.command_interface import ReductionSingleton, Clear, OutputPath, Reduce1D, Reduce, AppendDataFile, ClearDataFiles
+from reduction_workflow.command_interface import ReductionSingleton, Clear
 from reduction_workflow.find_data import find_data
 from reduction_workflow.instruments.sans import hfir_instrument
 

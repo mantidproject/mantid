@@ -6,7 +6,9 @@
 #
 ############################################################################
 import os
-import urllib.request, urllib.error, urllib.parse
+import urllib.request
+import urllib.error
+import urllib.parse
 import math
 
 import numpy
@@ -813,7 +815,7 @@ class HFIRPDRedControl(object):
         if excludeddetlist is None:
             excludeddetlist = []
         else:
-            print("[DB] Excluded detectors: %s" % (excludeddetlist), "Convert to numpy array", \
+            print("[DB] Excluded detectors: %s" % (excludeddetlist), "Convert to numpy array",
                   numpy.array(excludeddetlist))
 
         basewsname = datamdws.name().split("_DataMD")[0]

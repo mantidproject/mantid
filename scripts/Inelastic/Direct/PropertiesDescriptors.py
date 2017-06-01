@@ -10,7 +10,7 @@ import math
 from collections import Iterable
 
 import mantid.simpleapi as mantid
-from mantid import api, geometry, config
+from mantid import api
 
 import Direct.ReductionHelpers as prop_helpers
 import collections
@@ -663,9 +663,10 @@ class mon2NormalizationEnergyRange(PropDescriptor):
 
         val1 = float(en_range[0])
         if val1 < 0.1 or val1 > 0.9:
-            message = "Lower mon2_norm_energy_range describes lower limit of energy to integrate neutron signal after the chopper.\n" \
-                      "The limit is defined as (this value)*incident_energy. Are you sure you want to set this_value to {0}?\n".format(
-                val1)
+            message = "Lower mon2_norm_energy_range describes lower limit of energy to integrate neutron signal after" \
+                      " the chopper.\nThe limit is defined as (this value)*incident_energy." \
+                      " Are you sure you want to set this_value to {0}?\n".format(
+                      val1)
             if val1 > 1:
                 return (False, 2, message)
             else:
@@ -673,9 +674,10 @@ class mon2NormalizationEnergyRange(PropDescriptor):
 
         val2 = float(en_range[1])
         if val2 < 1.1 or val2 > 1.9:
-            message = "Upper mon2_norm_energy_range describes upper limit of energy to integrate neutron signal after the chopper.\n" \
-                      "The limit is defined as (this value)*incident_energy. Are you sure you want to set this_value to {0}?\n".format(
-                val2)
+            message = "Upper mon2_norm_energy_range describes upper limit of energy to integrate neutron signal after" \
+                      " the chopper.\nThe limit is defined as (this value)*incident_energy." \
+                      " Are you sure you want to set this_value to {0}?\n".format(
+                      val2)
             if val2 > 1:
                 if result[0]:
                     result = (False, 1, message)
@@ -1050,7 +1052,9 @@ class MonovanIntegrationRange(prop_helpers.ComplexProperty):
                 value = result
             if len(value) != 2:
                 raise KeyError("monovan_integr_range has to be list of two values, "
-                               "defining min/max values of integration range or None to use relative to incident energy limits")
+                               "defining min/max values of integration range or None "
+                               "to use relative to incident energy limits")
+
             prop_helpers.ComplexProperty.__set__(self, tDict, value)
 
     def validate(self, instance, owner):
@@ -1387,16 +1391,15 @@ class BackbgroundTestRange(PropDescriptor):
         """ validate background test range """
         test_range = self.__get__(instance, owner)
         if test_range is None:
-            return (True, 0, '')
+            return True, 0, ''
         if test_range[0] >= test_range[1]:
-            return (False, 2, ' Background test range: [{0}:{1}] is incorrect '.format(test_range[0], test_range[1]))
+            return False, 2, ' Background test range: [{0}:{1}] is incorrect '.format(test_range[0], test_range[1])
         if test_range[0] < 0:
-            return (
-            False, 2, ' Background test range is TOF range, so it can not be negative={0}'.format(test_range[0]))
+            return False, 2, ' Background test range is TOF range, so it can not be negative={0}'.format(test_range[0])
         if test_range[1] > 20000:
-            return (False, 1, ' Background test range is TOF range, its max value looks suspiciously big={0}'.format(
-                test_range[1]))
-        return (True, 0, '')
+            return False, 1, ' Background test range is TOF range, its max value looks suspiciously big={0}'.format(
+                   test_range[1])
+        return True, 0, ''
 
 
 # end BackbgroundTestRange
