@@ -160,7 +160,7 @@ set ( SRC_FILES
 	src/InterpolatingRebin.cpp
 	src/InterpolationOption.cpp
 	src/InvertMask.cpp
-	src/JoinWorkspaces.cpp
+        src/JoinRuns.cpp
 	src/LineProfile.cpp
 	src/Logarithm.cpp
 	src/LorentzCorrection.cpp
@@ -476,7 +476,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/InterpolatingRebin.h
 	inc/MantidAlgorithms/InterpolationOption.h
 	inc/MantidAlgorithms/InvertMask.h
-	inc/MantidAlgorithms/JoinWorkspaces.h
+        inc/MantidAlgorithms/JoinRuns.h
 	inc/MantidAlgorithms/LineProfile.h
 	inc/MantidAlgorithms/Logarithm.h
 	inc/MantidAlgorithms/LorentzCorrection.h
@@ -801,7 +801,7 @@ set ( TEST_FILES
 	InterpolatingRebinTest.h
 	InterpolationOptionTest.h
 	InvertMaskTest.h
-	JoinWorkspacesTest.h
+        JoinRunsTest.h
 	LineProfileTest.h
 	LogarithmTest.h
 	LorentzCorrectionTest.h

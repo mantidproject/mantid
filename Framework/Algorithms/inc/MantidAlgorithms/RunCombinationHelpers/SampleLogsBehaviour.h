@@ -67,13 +67,13 @@ public:
   };
 
   SampleLogsBehaviour(API::MatrixWorkspace &ws, Kernel::Logger &logger,
-                      const std::string &sampleLogsSum="",
-                      const std::string &sampleLogsTimeSeries="",
-                      const std::string &sampleLogsList="",
-                      const std::string &sampleLogsWarn="",
-                      const std::string &sampleLogsWarnTolerances="",
-                      const std::string &sampleLogsFail="",
-                      const std::string &sampleLogsFailTolerances="");
+                      const std::string &sampleLogsSum = "",
+                      const std::string &sampleLogsTimeSeries = "",
+                      const std::string &sampleLogsList = "",
+                      const std::string &sampleLogsWarn = "",
+                      const std::string &sampleLogsWarnTolerances = "",
+                      const std::string &sampleLogsFail = "",
+                      const std::string &sampleLogsFailTolerances = "");
 
   /// Create and update sample logs according to instrument parameters
   void mergeSampleLogs(API::MatrixWorkspace &addeeWS,
