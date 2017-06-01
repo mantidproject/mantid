@@ -127,13 +127,13 @@ void Stitch1DMany::validateGroupWorkspacesInputs() {
 
   // Each 'row' are the workspaces belonging to a specific period
   // Each 'column' are the workspaces belonging to a specific group
-  for (int i = 0; i < m_numWSPerGroup; i++) {
+  for (size_t i = 0; i < m_numWSPerGroup; i++) {
 
     std::vector<Workspace_sptr> inputWorkspaces;
     for (auto &groupWS : m_inputWSGroups) {
       // Group ws may have less workspaces than its supposed to, but we still
       // add them so further validation can be done
-      if (i < groupWS->getNumberOfEntries())
+      if (i < (size_t)groupWS->getNumberOfEntries())
         inputWorkspaces.push_back(groupWS->getItem(i));
     }
     m_inputWSMatrix.push_back(inputWorkspaces);
