@@ -7,6 +7,7 @@
 #
 import tube
 from tube_calib_fit_params import TubeCalibFitParams
+import mantid.simpleapi as mantid
 
 # == Set parameters for calibration ==
 
@@ -15,13 +16,13 @@ filename = 'MAP14919.raw' # Calibration run ( found in \\isis\inst$\NDXMAPS\Inst
 CalibratedComponent = 'D4_window'  # Calibrate D4 window
 
 # Get calibration raw file and integrate it
-rawCalibInstWS = Load(filename)  #'raw' in 'rawCalibInstWS' means unintegrated.
-print "Integrating Workspace"
+rawCalibInstWS = mantid.Load(filename)  #'raw' in 'rawCalibInstWS' means unintegrated.
+print("Integrating Workspace")
 rangeLower = 2000 # Integrate counts in each spectra from rangeLower to rangeUpper
 rangeUpper = 10000 #
-CalibInstWS = Integration( rawCalibInstWS, RangeLower=rangeLower, RangeUpper=rangeUpper )
-DeleteWorkspace(rawCalibInstWS)
-print "Created workspace (CalibInstWS) with integrated data from run and instrument to calibrate"
+CalibInstWS = mantid.Integration( rawCalibInstWS, RangeLower=rangeLower, RangeUpper=rangeUpper )
+mantid.DeleteWorkspace(rawCalibInstWS)
+print("Created workspace (CalibInstWS) with integrated data from run and instrument to calibrate")
 
 # == Create Objects needed for calibration ==
 
@@ -39,18 +40,18 @@ ExpectedPositions = [4.0, 85.0, 128.0, 165.0, 252.0] # Expected positions of the
 fitPar = TubeCalibFitParams( ExpectedPositions, ExpectedHeight, ExpectedWidth)
 fitPar.setAutomatic(True)
 
-print "Created objects needed for calibration."
+print("Created objects needed for calibration.")
 
 # == Get the calibration and put results into calibration table ==
 calibrationTable = tube.calibrate(CalibInstWS, CalibratedComponent, knownPos, funcForm,
                                   fitPar = fitPar)
-print "Got calibration (new positions of detectors) "
+print("Got calibration (new positions of detectors) ")
 
 # == Apply the Calibation ==
-ApplyCalibration( Workspace=CalibInstWS, PositionTable=calibrationTable)
-print "Applied calibration"
+mantid.ApplyCalibration( Workspace=CalibInstWS, PositionTable=calibrationTable)
+print("Applied calibration")
 
 
 # == Save workspace ==
-SaveNexusProcessed( CalibInstWS, 'TubeCalibDemoMapsResult.nxs',"Result of Running TCDemoMaps.py")
-print "saved calibrated workspace (CalibInstWS) into Nexus file TubeCalibDemoMapsResult.nxs"
+mantid.SaveNexusProcessed( CalibInstWS, 'TubeCalibDemoMapsResult.nxs',"Result of Running TCDemoMaps.py")
+print("saved calibrated workspace (CalibInstWS) into Nexus file TubeCalibDemoMapsResult.nxs")
