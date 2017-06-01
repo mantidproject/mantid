@@ -38,6 +38,7 @@ public:
 
     // Build some diffraction data
     WorkspaceBuilder builder;
+    builder.setRandomSeed(1);
     builder.setNumPixels(100);
     builder.addBackground(false);
     builder.addPeakByHKL(V3D(1, -5, -3), numEventsPerPeak, sigmas);
@@ -94,6 +95,7 @@ public:
     const std::vector<double> rebinParams = {800, 5, 10000};
 
     WorkspaceBuilder builder;
+    builder.setRandomSeed(1);
     builder.setNumPixels(100);
     builder.addBackground(false);
     builder.outputAsHistogram(true);
@@ -146,6 +148,7 @@ public:
 
     // Build some diffraction data
     WorkspaceBuilder builder;
+    builder.setRandomSeed(1);
     builder.setNumPixels(100);
     builder.addBackground(true);
     builder.setBackgroundParameters(nBackgroundEvents, backgroundDetSize,
@@ -208,6 +211,7 @@ public:
     const auto nBackgroundEvents = 1000;
 
     WorkspaceBuilder builder;
+    builder.setRandomSeed(1);
     builder.setNumPixels(100);
     builder.addBackground(true);
     builder.setBackgroundParameters(nBackgroundEvents, backgroundDetSize,
@@ -263,6 +267,7 @@ public:
 
     // Build some diffraction data
     WorkspaceBuilder builder;
+    builder.setRandomSeed(1);
     builder.setNumPixels(100);
     builder.addBackground(true);
     builder.setBackgroundParameters(nBackgroundEvents, backgroundDetSize,
@@ -343,6 +348,7 @@ public:
 
     // Build some diffraction data
     WorkspaceBuilder builder;
+    builder.setRandomSeed(1);
     builder.setNumPixels(100);
     builder.addBackground(true);
     builder.setBackgroundParameters(nBackgroundEvents, backgroundDetSize,
