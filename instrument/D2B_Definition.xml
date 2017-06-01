@@ -32,7 +32,7 @@ name="D2B" valid-from="1900-01-31 23:59:59" valid-to="2100-01-31 23:59:59" last-
     <algebra val="shape" />
   </type>
   <idlist idname="monitors">
-    <id val="1" />
+    <id val="0" />
   </idlist>
   <!-- Sample position -->
   <component type="sample-position">
@@ -40,7 +40,7 @@ name="D2B" valid-from="1900-01-31 23:59:59" valid-to="2100-01-31 23:59:59" last-
   </component>
   <type name="sample-position" is="SamplePos" />
   <idlist idname="detectors">
-    <id start="2" end="16385" />
+    <id start="1" end="16384" />
   </idlist>
   <!-- Detector list def -->
   <component type="detectors" idlist="detectors">
