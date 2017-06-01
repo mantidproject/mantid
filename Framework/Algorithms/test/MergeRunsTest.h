@@ -20,7 +20,8 @@
 #include <boost/make_shared.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/make_shared.hpp>
-#include <MantidAlgorithms/MergeRuns/SampleLogsBehaviour.h>
+#include <MantidAlgorithms/RunCombinationHelpers/RunCombinationHelper.h>
+#include <MantidAlgorithms/RunCombinationHelpers/SampleLogsBehaviour.h>
 
 using namespace Mantid::API;
 using namespace Mantid::Algorithms;

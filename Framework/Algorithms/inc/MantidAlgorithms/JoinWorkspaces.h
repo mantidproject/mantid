@@ -1,15 +1,17 @@
 #ifndef MANTID_ALGORITHMS_JOINWORKSPACES_H_
 #define MANTID_ALGORITHMS_JOINWORKSPACES_H_
 
-#include "MantidAlgorithms/DllConfig.h"
 #include "MantidAPI/Algorithm.h"
-#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidAlgorithms/DllConfig.h"
+
+#include <list>
 
 namespace Mantid {
 namespace Algorithms {
 
-/** JoinWorkspaces : This algorithms joins/merges the input workspaces horizontally,
-* i.e. appending their columns.
+/** JoinWorkspaces : This algorithms joins the input workspaces horizontally,
+* i.e. by appending (concatenating) their columns.
 
   Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source
@@ -38,22 +40,28 @@ public:
   int version() const override;
   const std::string category() const override;
   const std::string summary() const override;
-  std::map<std::string,std::string> validateInputs() override;
+  std::map<std::string, std::string> validateInputs() override;
+
+protected:
+  void fillHistory() override { copyHistoryFromWorkspaces(); }
 
 private:
   void init() override;
   void exec() override;
-  bool checkCompatibility(API::MatrixWorkspace_sptr, const size_t,
-                         const std::string &, const std::string &,
-                         const std::string &, const std::string &);
-  bool checkLogEntry(API::MatrixWorkspace_sptr, const std::string &);
-  std::vector<std::string> unWrapGroups(const std::vector<std::string> &);
-  std::vector<double> getXAxis(API::MatrixWorkspace_sptr, const std::string &);
-  void joinSpectrum(std::list<API::MatrixWorkspace_sptr>, long int, API::MatrixWorkspace_sptr);
 
+  std::string checkLogEntry(API::MatrixWorkspace_sptr) const;
+  std::vector<double> getXAxis(API::MatrixWorkspace_sptr) const;
+  void joinSpectrum(long);
+  void copyHistoryFromWorkspaces();
+
+  /// Sample log entry name
+  std::string m_logEntry;
   /// Progress reporting
   std::unique_ptr<API::Progress> m_progress;
-
+  /// List of input matrix workspaces
+  std::list<API::MatrixWorkspace_sptr> m_inputWS;
+  /// Output workspace
+  API::MatrixWorkspace_sptr m_outWS;
 };
 
 } // namespace Algorithms

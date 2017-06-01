@@ -1,59 +1,74 @@
 #include "MantidAlgorithms/RunCombinationHelpers/RunCombinationHelper.h"
 
-#include "MantidKernel/ListValidator.h"
+#include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/Axis.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/WorkspaceGroup.h"
+#include "MantidGeometry/Instrument.h"
+#include "MantidKernel/Unit.h"
 
 namespace Mantid {
 namespace Algorithms {
 
-using namespace MergeRunsOptions;
+using namespace API;
+using namespace Geometry;
 using namespace Kernel;
 
-bool RunCombinationHelper::checkCompatibility(API::Workspace_sptr,
-                                              API::Workspace_sptr) {
-  return true;
+//----------------------------------------------------------------------------------------------
+/** Flattens the list of group workspaces (if any) into list of workspaces
+* @param inputs : input workspaces vector [including] group workspaces (all must be on ADS)
+* @return : the flat vector of the input workspaces
+*/
+std::vector<std::string>
+RunCombinationHelper::unWrapGroups(const std::vector<std::string> &inputs) {
+  std::vector<std::string> outputs;
+  for (const auto &input : inputs) {
+    WorkspaceGroup_sptr wsgroup =
+        AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(input);
+    if (wsgroup) {
+      // workspace group
+      std::vector<std::string> group = wsgroup->getNames();
+      outputs.insert(outputs.end(), group.begin(), group.end());
+    } else {
+      // single workspace
+      outputs.push_back(input);
+    }
+  }
+  return outputs;
 }
 
-void RunCombinationHelper::declareSampleLogOverrideProperties(API::Algorithm* alg) {
-    alg->declareProperty("SampleLogsTimeSeries", "",
-                    "A comma separated list of the sample logs to merge into a "
-                    "time series. The initial times are taken as the start times "
-                    "for the run. Sample logs must be numeric.");
-    alg->declareProperty("SampleLogsList", "",
-                    "A comma separated list of the sample logs to merge into a "
-                    "list. ");
-    alg->declareProperty("SampleLogsWarn", "", "A comma separated list of the sample "
-                                          "logs to generate a warning if "
-                                          "different when merging.");
-    alg->declareProperty("SampleLogsWarnTolerances", "",
-                    "The tolerances for warning if sample logs are different. "
-                    "Can either be empty for a comparison of the strings, a "
-                    "single value for all warn sample logs, or a comma "
-                    "separated list of values (must be the same length as "
-                    "SampleLogsWarn).");
-    alg->declareProperty("SampleLogsFail", "", "The sample logs to fail if different "
-                                          "when merging. If there is a "
-                                          "difference the run is skipped.");
-    alg->declareProperty("SampleLogsFailTolerances", "",
-                    "The tolerances for failing if sample logs are different. "
-                    "Can either be empty for a comparison of the strings, a "
-                    "single value for all fail sample logs, or a comma "
-                    "separated list of values (must be the same length as "
-                    "SampleLogsFail).");
-    alg->declareProperty("SampleLogsSum", "", "A comma separated list of the sample "
-                                         "logs to sum into a single entry.  "
-                                         "Sample logs must be numeric.");
-    const std::vector<std::string> rebinOptions = {REBIN_BEHAVIOUR,
-                                                   FAIL_BEHAVIOUR};
-    alg->declareProperty("RebinBehaviour", REBIN_BEHAVIOUR,
-                    boost::make_shared<StringListValidator>(rebinOptions),
-                    "Choose whether to rebin when bins are different, or fail "
-                    "(fail behaviour defined in FailBehaviour option).");
-    const std::vector<std::string> failBehaviourOptions = {SKIP_BEHAVIOUR,
-                                                           STOP_BEHAVIOUR};
-    alg->declareProperty("FailBehaviour", SKIP_BEHAVIOUR,
-                    boost::make_shared<StringListValidator>(failBehaviourOptions),
-                    "Choose whether to skip the file and continue, or stop and "
-                    "throw and error, when encountering a failure.");
+//----------------------------------------------------------------------------------------------
+/** Sets the properties of the reference (usually first) workspace,
+ * to later check the compatibility of the others with the reference
+ * @param ref : the reference workspace
+ */
+void RunCombinationHelper::setReferenceProperties(MatrixWorkspace_sptr ref) {
+    m_numberSpectra = ref->getNumberHistograms();
+    m_xUnit = ref->getAxis(0)->unit()->unitID();
+    m_spectrumAxisUnit = ref->getAxis(1)->unit()->unitID();
+    m_yUnit = ref->YUnit();
+    m_isDistribution = ref->isDistribution();
+    m_instrumentName = ref->getInstrument()->getName();
+}
+
+//----------------------------------------------------------------------------------------------
+/** Compares the properties of the input workspace with the reference
+ * @param ws : the testee workspace
+ * @return : empty if compatible, error message otherwises
+ */
+std::string RunCombinationHelper::checkCompatibility(MatrixWorkspace_sptr ws) {
+    std::string errors;
+    if (ws->getAxis(0)->unit()->unitID() != m_xUnit)
+      errors += "different X units; ";
+    if (ws->getAxis(1)->unit()->unitID() != m_spectrumAxisUnit)
+      errors += "different spectrum axis units; ";
+    if (ws->YUnit() != m_yUnit)
+      errors += "different Y units; ";
+    if (ws->isDistribution() != m_isDistribution)
+      errors += "different distribution or histogram type; ";
+    if (ws->getInstrument()->getName() != m_instrumentName)
+      errors += "different instrument names; ";
+    return errors;
 }
 
 } // namespace Algorithms

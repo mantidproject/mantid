@@ -44,6 +44,22 @@ public:
   static const std::string WARN_MERGE_TOLERANCES;
   static const std::string FAIL_MERGE_TOLERANCES;
 
+  // the names and docs of the override properties
+  static const std::string TIME_SERIES_PROP;
+  static const std::string TIME_SERIES_DOC;
+  static const std::string LIST_PROP;
+  static const std::string LIST_DOC;
+  static const std::string WARN_PROP;
+  static const std::string WARN_DOC;
+  static const std::string WARN_TOL_PROP;
+  static const std::string WARN_TOL_DOC;
+  static const std::string FAIL_PROP;
+  static const std::string FAIL_DOC;
+  static const std::string FAIL_TOL_PROP;
+  static const std::string FAIL_TOL_DOC;
+  static const std::string SUM_PROP;
+  static const std::string SUM_DOC;
+
   struct SampleLogBehaviour {
     std::shared_ptr<Kernel::Property> property;
     double tolerance;

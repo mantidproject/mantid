@@ -2,8 +2,9 @@
 #define MANTID_ALGORITHMS_RUNCOMBINATIONHELPER_H_
 
 #include "MantidAlgorithms/DllConfig.h"
-#include "MantidAPI/Algorithm.h"
-#include "MantidAPI/Workspace_fwd.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
+
+#include <vector>
 
 namespace Mantid {
 namespace Algorithms {
@@ -43,13 +44,18 @@ static const std::string FAIL_BEHAVIOUR = "Fail";
 
 class MANTID_ALGORITHMS_DLL RunCombinationHelper {
 public:
-  template <typename Container>
-  static Container unWrapGroups(const Container &);
-  static bool checkCompatibility(API::Workspace_sptr, API::Workspace_sptr);
-  template <typename Container>
-  static void copyHistoryFromInputWorkspaces(const Container &,
-                                             API::Algorithm*);
-  static void declareSampleLogOverrideProperties(API::Algorithm*);
+  std::string checkCompatibility(API::MatrixWorkspace_sptr);
+  void setReferenceProperties(API::MatrixWorkspace_sptr);
+  static std::vector<std::string>
+  unWrapGroups(const std::vector<std::string> &);
+
+private:
+  size_t m_numberSpectra;
+  std::string m_xUnit;
+  std::string m_yUnit;
+  std::string m_spectrumAxisUnit;
+  std::string m_instrumentName;
+  bool m_isDistribution;
 };
 
 } // namespace Algorithms
