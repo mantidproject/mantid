@@ -273,7 +273,7 @@ and :ref:`focus_polaris_isis-powder-diffraction-ref` method.
 This determines which vanadium and empty run numbers
 to use whilst processing.
 
-Accepted values are: **True** or **False**
+Accepted values are: **PDF** or **Rietveld**
 
 *Note: This parameter is not case sensitive*
 
