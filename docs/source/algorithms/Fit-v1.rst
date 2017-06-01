@@ -428,6 +428,7 @@ Output:
 **Example - Fit to two data sets simultaneously:**
 
 .. testcode:: simFit
+
 	import math
 	import numpy as np
 
