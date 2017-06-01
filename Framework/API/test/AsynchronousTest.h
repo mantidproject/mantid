@@ -8,6 +8,8 @@
 #include "MantidKernel/make_unique.h"
 #include "MantidTestHelpers/FakeObjects.h"
 #include <Poco/ActiveResult.h>
+#include "Poco/Condition.h"
+#include "Poco/Mutex.h"
 #include <Poco/NObserver.h>
 #include <Poco/Thread.h>
 
@@ -17,6 +19,9 @@ using namespace std;
 
 namespace {
 constexpr int NO_OF_LOOPS = 10;
+Poco::Condition condition1;
+Poco::Condition condition2;
+Poco::Mutex mtx;
 }
 
 class AsyncAlgorithm : public Algorithm {
@@ -42,7 +47,13 @@ public:
   }
 
   void exec() override {
+    if (synchronise) {
+      mtx.lock();
+      condition1.wait(mtx);
+      mtx.unlock();
+    }
     Poco::Thread *thr = Poco::Thread::current();
+    condition2.broadcast();
     for (int i = 0; i < NO_OF_LOOPS; i++) {
       result = i;
       if (thr)
@@ -55,6 +66,7 @@ public:
   }
   int result;
 
+  bool synchronise = false;
 protected:
   bool throw_exception;
 };
@@ -146,9 +158,13 @@ public:
     setupTest(alg);
     alg.setPropertyValue("InputWorkspace", "groupWS");
     Poco::ActiveResult<bool> result = alg.executeAsync();
+    mtx.lock();
+    condition1.broadcast();
+    condition2.wait(mtx);
+    mtx.unlock();
     alg.cancel();
     result.wait();
-    generalChecks(alg, false, true, false, false);
+    generalChecks(alg, false, true, false, true);
     // The parent algorithm is not executed directly, so the result remains 0
     TS_ASSERT_EQUALS(alg.result, 0)
   }
