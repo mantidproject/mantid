@@ -136,7 +136,11 @@ createConcreteHelper();
 
 MANTID_DATAOBJECTS_DLL void
 initializeFromParent(const API::MatrixWorkspace &parent,
-                     API::MatrixWorkspace &ws, const bool noproperty = false);
+                     API::MatrixWorkspace &ws);
+
+MANTID_DATAOBJECTS_DLL void
+initializeFromParentWithoutLogs(const API::MatrixWorkspace &parent,
+                     API::MatrixWorkspace &ws);
 }
 
 /** This is the create() method that all the other create() methods call
@@ -173,7 +177,10 @@ std::unique_ptr<T> create(const P &parent, const IndexArg &indexArg,
   // future of WorkspaceFactory.
   ws->setInstrument(parent.getInstrument());
   ws->initialize(indexArg, HistogramData::Histogram(histArg));
-  detail::initializeFromParent(parent, *ws, no_property);
+  if (no_property)
+    detail::initializeFromParentWithoutLogs(parent, *ws);
+  else
+    detail::initializeFromParent(parent, *ws);
   return ws;
 }
 
