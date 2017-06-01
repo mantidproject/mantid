@@ -19,7 +19,7 @@ namespace API {
  * index
  */
 ComponentInfo::ComponentInfo(
-    const Mantid::Beamline::ComponentInfo &componentInfo,
+    Mantid::Beamline::ComponentInfo &componentInfo,
     boost::shared_ptr<const std::vector<Mantid::Geometry::IComponent *>>
         componentIds,
     boost::shared_ptr<const std::unordered_map<Geometry::IComponent *, size_t>>
@@ -54,12 +54,27 @@ size_t ComponentInfo::indexOf(Geometry::IComponent *id) const {
   return m_compIDToIndex->at(id);
 }
 
+bool ComponentInfo::isDetector(const size_t componentIndex) const {
+  return m_componentInfo.isDetector(componentIndex);
+}
+
 Kernel::V3D ComponentInfo::position(const size_t componentIndex) const {
   return Kernel::toV3D(m_componentInfo.position(componentIndex));
 }
 
 Kernel::Quat ComponentInfo::rotation(const size_t componentIndex) const {
   return Kernel::toQuat(m_componentInfo.rotation(componentIndex));
+}
+
+void ComponentInfo::setPosition(const size_t componentIndex,
+                                const Kernel::V3D &newPosition) {
+  m_componentInfo.setPosition(componentIndex, Kernel::toVector3d(newPosition));
+}
+
+void ComponentInfo::setRotation(const size_t componentIndex,
+                                const Kernel::Quat &newRotation) {
+  m_componentInfo.setRotation(componentIndex,
+                              Kernel::toQuaterniond(newRotation));
 }
 } // namespace API
 } // namespace Mantid

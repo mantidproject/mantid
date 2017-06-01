@@ -179,5 +179,6 @@ void ComponentInfo::setRotation(const size_t componentIndex,
     }
   }
 }
+
 } // namespace Beamline
 } // namespace Mantid

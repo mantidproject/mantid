@@ -166,6 +166,7 @@ public:
   SpectrumInfo &mutableSpectrumInfo();
 
   const ComponentInfo &componentInfo() const;
+  ComponentInfo &mutableComponentInfo();
 
   void invalidateSpectrumDefinition(const size_t index);
   void updateSpectrumDefinitionIfNecessary(const size_t index) const;

@@ -345,6 +345,20 @@ public:
     // Note no detector counted
     TS_ASSERT_EQUALS(visitor.size(), expectedSize);
   }
+
+  void test_visitation_of_rectangular_detector() {
+
+    // Need confidence that this works properly for RectangularDetectors
+    const int nPixelsWide = 10; // Gives 10*10 detectors in total
+    auto instrument = ComponentCreationHelper::createTestInstrumentRectangular(
+        1 /*n banks*/, nPixelsWide, 1 /*sample-bank distance*/);
+    Mantid::Geometry::ParameterMap pmap;
+    InfoComponentVisitor visitor(instrument->getDetectorIDs(), pmap);
+    instrument->registerContents(visitor);
+
+    TSM_ASSERT_EQUALS("Wrong number of detectors registered",
+                      visitor.detectorIds()->size(), nPixelsWide * nPixelsWide);
+  }
 };
 
 class InfoComponentVisitorTestPerformance : public CxxTest::TestSuite {

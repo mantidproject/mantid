@@ -51,7 +51,7 @@ namespace API {
 class MANTID_API_DLL ComponentInfo {
 private:
   /// Reference to the actual ComponentInfo object (non-wrapping part).
-  const Beamline::ComponentInfo &m_componentInfo;
+  Beamline::ComponentInfo &m_componentInfo;
   /// Collection of component ids
   boost::shared_ptr<const std::vector<Mantid::Geometry::IComponent *>>
       m_componentIds;
@@ -61,7 +61,7 @@ private:
 
 public:
   ComponentInfo(
-      const Mantid::Beamline::ComponentInfo &componentInfo,
+      Mantid::Beamline::ComponentInfo &componentInfo,
       boost::shared_ptr<const std::vector<Mantid::Geometry::IComponent *>>
           componentIds,
       boost::shared_ptr<const std::unordered_map<
@@ -70,8 +70,11 @@ public:
   std::vector<size_t> componentsInSubtree(size_t componentIndex) const;
   size_t size() const;
   size_t indexOf(Geometry::IComponent *id) const;
+  bool isDetector(const size_t componentIndex) const;
   Kernel::V3D position(const size_t componentIndex) const;
   Kernel::Quat rotation(const size_t componentIndex) const;
+  void setPosition(size_t componentIndex, const Kernel::V3D &newPosition);
+  void setRotation(size_t componentIndex, const Kernel::Quat &newRotation);
 };
 
 } // namespace API
