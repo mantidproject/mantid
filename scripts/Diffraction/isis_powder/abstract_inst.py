@@ -196,6 +196,14 @@ class AbstractInst(object):
         """
         return str()
 
+    def _get_current_tt_mode(self):
+        """
+        Returns the current tt_mode this is only applicable
+        to PEARL. Otherwise returns None
+        :return: Current tt_mode on PEARL, otherwise None
+        """
+        return None
+
     def _normalise_ws_current(self, ws_to_correct, run_details=None):
         """
         Normalises the workspace by the beam current at the time it was taken using
