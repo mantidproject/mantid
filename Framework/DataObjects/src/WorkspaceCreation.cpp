@@ -35,11 +35,10 @@ template <> std::unique_ptr<API::HistoWorkspace> createConcreteHelper() {
 }
 
 /** Initialize a MatrixWorkspace from its parent including instrument, unit,
- * number of spectra and possibly Run
+ * number of spectra and Run
  * @brief initializeFromParent
  * @param parent
  * @param ws
- * @param noproperty
  */
 void initializeFromParent(const API::MatrixWorkspace &parent,
                           API::MatrixWorkspace &ws) {
@@ -53,6 +52,12 @@ void initializeFromParent(const API::MatrixWorkspace &parent,
   static_cast<void>(ws.mutableX(0));
 }
 
+/** Initialize a MatrixWorkspace from its parent including instrument, unit,
+ * number of spectra but without Run (i.e., logs)
+ * @brief initializeFromParentWithoutLogs
+ * @param parent
+ * @param ws
+ */
 void initializeFromParentWithoutLogs(const API::MatrixWorkspace &parent,
                                      API::MatrixWorkspace &ws) {
   bool differentSize = (parent.x(0).size() != ws.x(0).size()) ||
