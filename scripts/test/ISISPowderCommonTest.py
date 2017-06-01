@@ -288,7 +288,7 @@ class ISISPowderCommonTest(unittest.TestCase):
         mantid.DeleteWorkspace(summed_ws[0])
 
     def test_load_current_normalised_ws_respects_ext(self):
-        run_number = "100"
+        run_number = "102"
         file_ext_one = ".s1"
         file_ext_two = ".s2"
 
@@ -311,6 +311,8 @@ class ISISPowderCommonTest(unittest.TestCase):
 
         # Ensure it loaded two different workspaces
         self.assertAlmostEqual(result_ws_one, result_ext_one)
+
+        # If this next line fails it means it loaded the .s1 file INSTEAD of the .s2 file
         self.assertAlmostEqual(result_ws_two, result_ext_two)
         self.assertNotAlmostEqual(result_ext_one, result_ext_two)
 

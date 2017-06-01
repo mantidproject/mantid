@@ -59,6 +59,8 @@
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidTypes/SpectrumDefinition.h"
 
+#include "MantidGeometry/Instrument/ReferenceFrame.h"
+
 #include <QListWidget>
 #include <QMdiArea>
 #include <QMenu>
@@ -1319,6 +1321,9 @@ Table *MantidUI::createDetectorTable(
 
   // Cache some frequently used values
   IComponent_const_sptr sample = ws->getInstrument()->getSample();
+  const auto beamAxisIndex =
+      ws->getInstrument()->getReferenceFrame()->pointingAlongBeam();
+  const auto sampleDist = sample->getPos()[beamAxisIndex];
   bool signedThetaParamRetrieved(false),
       showSignedTwoTheta(false); // If true,  signedVersion of the two theta
                                  // value should be displayed
@@ -1356,11 +1361,13 @@ Table *MantidUI::createDetectorTable(
                                    "Always") != parameters.end());
         signedThetaParamRetrieved = true;
       }
+
       double R(0.0), theta(0.0), phi(0.0);
-      // R and theta used as dummy variables
+      // theta used as a dummy variable
       // Note: phi is the angle around Z, not necessarily the beam direction.
       spectrumInfo.position(wsIndex).getSpherical(R, theta, phi);
-      // R is actually L2 (same as R if sample is at (0,0,0))
+      // R is actually L2 (same as R if sample is at (0,0,0)), except for
+      // monitors which are handled below.
       R = spectrumInfo.l2(wsIndex);
       // Theta is actually 'twoTheta' for detectors (twice the scattering
       // angle), if Z is the beam direction this corresponds to theta in
@@ -1376,6 +1383,9 @@ Table *MantidUI::createDetectorTable(
           // Log the error and leave theta as it is
           g_log.error(ex.what());
         }
+      } else {
+        const auto dist = spectrumInfo.position(wsIndex)[beamAxisIndex];
+        theta = sampleDist > dist ? 180.0 : 0.0;
       }
       const QString isMonitorDisplay = isMonitor ? "yes" : "no";
       colValues << QVariant(specNo) << QVariant(detIds);
@@ -1392,21 +1402,31 @@ Table *MantidUI::createDetectorTable(
       if (include_data) {
         colValues << QVariant(dataY0) << QVariant(dataE0); // data
       }
+      // If monitors are before the sample in the beam, DetectorInfo
+      // returns a negative l2 distance.
+      if (isMonitor) {
+        R = std::abs(R);
+      }
       colValues << QVariant(R) << QVariant(theta);
 
       if (calcQ) {
+        if (isMonitor) {
+          // twoTheta is not defined for monitors.
+          colValues << QVariant(std::nan(""));
+        } else {
+          try {
 
-        try {
-          // Get unsigned theta and efixed value
-          IDetector_const_sptr det(&spectrumInfo.detector(wsIndex),
-                                   Mantid::NoDeleting());
-          double efixed = ws->getEFixed(det);
-          double usignTheta = spectrumInfo.twoTheta(wsIndex) * 0.5;
+            // Get unsigned theta and efixed value
+            IDetector_const_sptr det(&spectrumInfo.detector(wsIndex),
+                                     Mantid::NoDeleting());
+            double efixed = ws->getEFixed(det);
+            double usignTheta = spectrumInfo.twoTheta(wsIndex) * 0.5;
 
-          double q = Mantid::Kernel::UnitConversion::run(usignTheta, efixed);
-          colValues << QVariant(q);
-        } catch (std::runtime_error &) {
-          colValues << QVariant("No Efixed");
+            double q = Mantid::Kernel::UnitConversion::run(usignTheta, efixed);
+            colValues << QVariant(q);
+          } catch (std::runtime_error &) {
+            colValues << QVariant("No Efixed");
+          }
         }
       }
 

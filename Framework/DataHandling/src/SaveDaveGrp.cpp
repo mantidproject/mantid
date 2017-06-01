@@ -101,7 +101,7 @@ void SaveDaveGrp::exec() {
       file << yvalue << '\n';
     }
   }
-  Progress progress(this, 0, 1, nSpectra);
+  Progress progress(this, 0.0, 1.0, nSpectra);
   for (std::size_t i = 0; i < nSpectra; i++) {
     file << "# Group " << i << '\n';
     auto &Y = ws->y(i);

@@ -6,6 +6,8 @@
 
 .. properties::
 
+If the NormalizationIn property is greater than zero, the algorithm will apply the user defined normalization to the data instead of calculating an estimate.
+
 Description
 -----------
 
@@ -46,8 +48,31 @@ Output:
 
 .. testoutput:: ExSimple
 
-   Asymmetry:  ['-0.12', '1.07', '0.09', '-0.66', '-0.73']   
-   Normalization constant: 17.98
+   Asymmetry:  ['-0.38', '0.45', '-0.24', '-0.76', '-0.81']   
+   Normalization constant: 25.62
+
+**Example - Setting the normalization:**
+
+.. testcode:: ExNorm
+
+   import math
+   import numpy as np
+   y = [100, 150, 50, 10, 5]
+   x = [1,2,3,4,5,6]
+   input = CreateWorkspace(x,y)
+   run = input.getRun()
+   run.addProperty("goodfrm","10","None",True)
+   output,norm=EstimateMuonAsymmetryFromCounts(InputWorkspace=input,spectra=0,StartX=1,EndX=5,NormalizationIn=20.0)
+   print  "Asymmetry: ",['{0:.2f}'.format(value)  for value in output.readY(0)]
+   print "Normalization constant: {0:.2f}".format(norm[0])
+   
+Output:
+
+.. testoutput:: ExNorm
+
+   Asymmetry:  ['-0.21', '0.86', '-0.02', '-0.69', '-0.76']   
+   Normalization constant: 20.00
+
 
 .. categories::
 

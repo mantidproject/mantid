@@ -20,12 +20,13 @@ User Interface
   appropriately rather than being too small to be usable (Windows only).
 - Choosing 'Show Detectors' for a workspace will now also show the time indexes for scanning workspaces.
 - A new Print button has been added to the MantidPlot help window.
-- Masked bins are greyed out in the table view of the workspaces (except for EventWorkspaces):
 
 .. figure:: ../../images/maskedbins.jpg     
    :class: screenshot
    :width: 500px
    :align: right
+
+- Masked bins are greyed out in the table view of the workspaces (except for EventWorkspaces):
 
 Instrument View
 ###############
@@ -34,29 +35,37 @@ Instrument View
 - Added the ability to zoom out on an unwrapped view.
 - Fixed a bug preventing the some of the banks from being visible when using a U correction.
 - Fixed a bug where pressing delete would delete a workspace even when the dock was not focused.
-- Fixed a bug where the user would not be prompted before deleting workspaces even if confirmations were turned on.
-
-Plotting Improvements
-#####################
-
-- Surface, Contour, Waterfall, 1D and Tiled plotting of workspaces are now available from one dialog box (Plot Advanced) got from right-click menu of a workspace selection.
-- The log value facilities for Surface and Contour plot are now available for Waterfall and 1D plots, where they appear in the legend.
+- Fixed a bug where the user would not be prompted before deleting workspaces even if confirmations were turned on
 
 .. figure:: ../../images/ArtRightGUIWaterfallCustom2sp1.PNG
    :class: screenshot
    :width: 294px
    :align: right
 
-Here are a couple of plots with "Temp" selected as the log:
+Plotting Improvements
+#####################
 
-.. figure:: ../../images/ArtWaterfallT1.PNG
+- There is now a Plot Advanced right click option on workspaces
 
-.. figure:: ../../images/ArtSurfacePlotT1.PNG
-
-More details `here <https://www.mantidproject.org/MBC_Displaying_data_in_multiple_workspaces>`_ .
-
+  + This allows a wider selection of plot types: Surface, Contour, Waterfall, 1D and Tiled plotting
+  + If you have more than one workspace selected, either by using ctrl or shift, or by selecting a group workspace this enables multiple workspaces to be included in the plots
+  + This interface also give you much better control over the labelling of the data in the plots
+  
+    * Log values can be used as labels, which is good for temperature or pressure ramps
+    * Custom labels can be input if log data is not available
+    * For Waterfall and 1D plots, the labelling appears in the legend
+    * For Surface plots the labels form the Z axis   
+    
 - Curves where all(Y) <= 0 are now not plotted when the Y-scale is set to logarithmic.
   The previous behaviour assigned an arbitrary value of 0.1 which was confusing.
+
++----------------------------------------------+-------------------------------------------------+
+|Plots of a temperature ramp on WISH using "Temp" selected as the log:                           |
+|More details `here <https://www.mantidproject.org/MBC_Displaying_data_in_multiple_workspaces>`_ |
++----------------------------------------------+-------------------------------------------------+
+| .. image:: ../../images/ArtWaterfallT1.PNG   |   .. image:: ../../images/ArtSurfacePlotT1.PNG  |
++----------------------------------------------+-------------------------------------------------+
+
 
 Algorithm Toolbox
 #################
@@ -77,7 +86,7 @@ SliceViewer Improvements
 - Changed zoom level on peak. Now when zooming onto a spherical or ellipsoidal peak, the entire peak is visible when using the default window size.
 - Fixed a bug where swapping the dimensions did not rebin the workspace despite having autorebin enabled.
 - Fixed a bug where swapping the dimensions did not draw the axis scale correctly.
-
+- Fixed a bug where the normalization selection was not respected.
 
 VSI Improvments
 ###############
@@ -102,6 +111,8 @@ Bugs Resolved
 - Fixed an issue where some graphs not associated with a workspace would not be shown in the project save as view.
 - Fixed an issue where the Spectrum Viewer could crash when a workspace contained infinities.
 - Fixed an issue where contour lines were displayed at the wrong location.
+- Fixed an issue where some workspaces might not get deleted from the workspace dock if group workspaces were present.
+- Fixed an issues in the Detectors table where monitor information did not show up correctly.
 
 
 |
