@@ -1069,9 +1069,12 @@ public:
       histNames.push_back(hist->name());
     }
 
-    TS_ASSERT_EQUALS(histNames[0], "CreateWorkspace");
-    TS_ASSERT_EQUALS(histNames[1], "CreateWorkspace");
-    TS_ASSERT_EQUALS(histNames[2], "Stitch1DMany");
+    const std::string createWsName = "CreateWorkspace";
+    const std::string s1dmName = "Stitch1DMany";
+
+    TS_ASSERT_EQUALS(histNames[0], createWsName);
+    TS_ASSERT_EQUALS(histNames[1], createWsName);
+    TS_ASSERT_EQUALS(histNames[2], s1dmName);
 
     // Remove workspaces from ADS
     AnalysisDataService::Instance().clear();
@@ -1119,11 +1122,15 @@ public:
       histNames.push_back(hist->name());
     }
 
-    TS_ASSERT_EQUALS(histNames[0], "CreateWorkspace");
-    TS_ASSERT_EQUALS(histNames[1], "GroupWorkspaces");
-    TS_ASSERT_EQUALS(histNames[2], "CreateWorkspace");
-    TS_ASSERT_EQUALS(histNames[3], "GroupWorkspaces");
-    TS_ASSERT_EQUALS(histNames[4], "Stitch1DMany");
+    const std::string createWsName = "CreateWorkspace";
+    const std::string groupWsName = "GroupWorkspaces";
+    const std::string s1dmName = "Stitch1DMany";
+
+    TS_ASSERT_EQUALS(histNames[0], createWsName);
+    TS_ASSERT_EQUALS(histNames[1], groupWsName);
+    TS_ASSERT_EQUALS(histNames[2], createWsName);
+    TS_ASSERT_EQUALS(histNames[3], groupWsName);
+    TS_ASSERT_EQUALS(histNames[4], s1dmName);
 
     // Remove workspaces from ADS
     AnalysisDataService::Instance().clear();
@@ -1174,12 +1181,15 @@ public:
       histNames.push_back(hist->name());
     }
 
-    TS_ASSERT_EQUALS(histNames[0], "CreateWorkspace");
-    TS_ASSERT_EQUALS(histNames[1], "GroupWorkspaces");
-    TS_ASSERT_EQUALS(histNames[2], "CreateWorkspace");
-    TS_ASSERT_EQUALS(histNames[3], "GroupWorkspaces");
-    TS_ASSERT_EQUALS(histNames[4], "CreateWorkspace");
-    TS_ASSERT_EQUALS(histNames[5], "GroupWorkspaces");
+    const std::string createWsName = "CreateWorkspace";
+    const std::string groupWsName = "GroupWorkspaces";
+
+    TS_ASSERT_EQUALS(histNames[0], createWsName);
+    TS_ASSERT_EQUALS(histNames[1], groupWsName);
+    TS_ASSERT_EQUALS(histNames[2], createWsName);
+    TS_ASSERT_EQUALS(histNames[3], groupWsName);
+    TS_ASSERT_EQUALS(histNames[4], createWsName);
+    TS_ASSERT_EQUALS(histNames[5], groupWsName);
 
     // Clear the ADS
     AnalysisDataService::Instance().clear();

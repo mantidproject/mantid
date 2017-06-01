@@ -57,7 +57,7 @@ public:
                   const std::vector<double> &endOverlaps,
                   const std::vector<double> &params, const bool scaleRhsWS,
                   const bool useManualScaleFactors,
-                  const std::vector<double> manualScaleFactors,
+                  const std::vector<double> &manualScaleFactors,
                   API::Workspace_sptr &outWS, std::string &outName,
                   std::vector<double> &outScaleFactors);
 
@@ -68,7 +68,7 @@ public:
                       const std::vector<double> &endOverlaps,
                       const std::vector<double> &params, const bool scaleRhsWS,
                       const bool useManualScaleFactors,
-                      const std::vector<double> manualScaleFactors,
+                      const std::vector<double> &manualScaleFactors,
                       std::string &outName,
                       std::vector<double> &outScaleFactors);
 
