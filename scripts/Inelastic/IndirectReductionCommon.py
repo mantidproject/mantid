@@ -740,7 +740,7 @@ def rebin_reduction(workspace_name, rebin_string, multi_frame_rebin_string, num_
     @param multi_frame_rebin_string Rebin string for multiple frame rebinning
     @param num_bins Max number of bins in input frames
     """
-    from mantid.simpleapi import (Rebin, RebinToWorkspace)
+    from mantid.simpleapi import (Rebin, RebinToWorkspace, SortXAxis)
 
     if rebin_string is not None:
         if multi_frame_rebin_string is not None and num_bins is not None:
@@ -755,6 +755,8 @@ def rebin_reduction(workspace_name, rebin_string, multi_frame_rebin_string, num_
                       Params=multi_frame_rebin_string)
         else:
             # Regular data
+            SortXAxis(InputWorkspace=workspace_name,
+                  OutputWorkspace=workspace_name)
             Rebin(InputWorkspace=workspace_name,
                   OutputWorkspace=workspace_name,
                   Params=rebin_string)
