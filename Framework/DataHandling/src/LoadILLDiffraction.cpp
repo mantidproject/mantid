@@ -36,7 +36,8 @@ constexpr size_t D20_NUMBER_PIXELS = 1600;
 constexpr size_t D20_NUMBER_DEAD_PIXELS = 32;
 // This defines the number of monitors in the instrument. If there are cases
 // where this is no longer one this decleration should be moved.
-constexpr size_t NUMBER_MONITORS = 1; ///< number of monitors in instrument
+constexpr size_t NUMBER_MONITORS = 1;
+constexpr double rad2deg = 180. / M_PI;
 }
 
 // Register the algorithm into the AlgorithmFactory
@@ -238,11 +239,23 @@ void LoadILLDiffraction::initMovingWorkspace(const NXDouble &scan) {
   std::vector<double> instrumentAngles =
       getScannedVaribleByPropertyName(scan, "Position");
   if (m_instName == "D2B") {
-    double offsetAngle = 50; // TODO: What should this offset be?
+    // The rotations in the NeXus file are the absolute rotation of tube_1, here
+    // we get the home angle of tube_1
+    const auto &tube1Position =
+        instrument->getComponentByName("tube_1")->getPos();
+    const double tube1RotationAngle =
+        tube1Position.angle(V3D(0, 0, 1)) * rad2deg;
+    g_log.debug() << "Tube 1 rotation:" << tube1RotationAngle << "\n";
+
+    // Now pass calculate the rotations to apply for each time index.
     std::transform(instrumentAngles.begin(), instrumentAngles.end(),
                    instrumentAngles.begin(),
-                   [&](double angle) { return (angle - offsetAngle); });
+                   [&](double angle) { return (angle - tube1RotationAngle); });
   }
+
+  g_log.debug() << "Instrument rotations to be applied : "
+                << instrumentAngles.front() << " to " << instrumentAngles.back()
+                << "\n";
 
   auto rotationCentre = V3D(0, 0, 0);
   auto rotationAxis = V3D(0, 1, 0);
