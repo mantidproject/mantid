@@ -52,7 +52,7 @@ public:
   void validateCommonInputs(std::map<std::string, std::string> &errors);
 
   /// Performs the Stitch1D algorithm at a specific workspace index
-  void doStitch1D(const std::vector<API::Workspace_sptr> &toStitch,
+  void doStitch1D(const std::vector<API::MatrixWorkspace_sptr> &toStitch,
                   const std::vector<double> &startOverlaps,
                   const std::vector<double> &endOverlaps,
                   const std::vector<double> &params, const bool scaleRhsWS,
@@ -84,7 +84,7 @@ private:
   // Data
 
   // A 2D matrix holding workspaces obtained from each workspace list/group
-  std::vector<std::vector<API::Workspace_sptr>> m_inputWSMatrix;
+  std::vector<std::vector<API::MatrixWorkspace_sptr>> m_inputWSMatrix;
 
   // List holding each workspace group
   std::vector<API::WorkspaceGroup_sptr> m_inputWSGroups;

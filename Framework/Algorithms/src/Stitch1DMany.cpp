@@ -103,14 +103,26 @@ std::map<std::string, std::string> Stitch1DMany::validateInputs() {
   // Add all input workspaces to a single row in the matrix
   // Each 'row' are the workspaces belonging to a specific group
   // Each 'column' are the workspaces belonging to a specific period
-  std::vector<Workspace_sptr> inputWorkspaces;
+  std::vector<MatrixWorkspace_sptr> inputWorkspaces;
   for (const auto &ws : inputWorkspacesStr) {
-    inputWorkspaces.push_back(
-        AnalysisDataService::Instance().retrieveWS<Workspace>(ws));
-  }
-  m_inputWSMatrix.push_back(inputWorkspaces);
 
-  m_numWSPerGroup = inputWorkspaces.size();
+    auto inputMatrixWs = boost::dynamic_pointer_cast<MatrixWorkspace>(
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(ws));
+
+    if (inputMatrixWs) {
+      inputWorkspaces.push_back(inputMatrixWs);
+    } else {
+      errors["InputWorkspaces"] = "Input workspaces must either be matrix "
+                                  "workspaces or group workspaces containing "
+                                  "matrix workspaces only";
+      break;
+    }
+  }
+  // Do not add workspaces if an error was found
+  if (!errors.count("InputWorkspaces"))
+    m_inputWSMatrix.push_back(inputWorkspaces);
+
+  m_numWSPerGroup = inputWorkspacesStr.size();
   m_numWSPerPeriod = 1;
 
   // Add common errors
@@ -131,33 +143,57 @@ void Stitch1DMany::validateGroupWorkspacesInputs() {
   // Add all group workspaces and their constituent workspaces to their
   // respective containers
   for (const auto &groupWSName : inputWorkspacesStr) {
-    auto groupWS =
-        AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(groupWSName);
-    m_inputWSGroups.push_back(groupWS);
+
+    auto groupWS = boost::dynamic_pointer_cast<WorkspaceGroup>(
+        AnalysisDataService::Instance().retrieveWS<Workspace>(groupWSName));
+    if (groupWS) {
+      m_inputWSGroups.push_back(groupWS);
+    } else {
+      errors["InputWorkspaces"] =
+          "Input workspaces must either be matrix workspaces or group "
+          "workspaces containing matrix workspaces only";
+      break;
+    }
   }
 
   m_numWSPerGroup = m_inputWSGroups.front()->size();
-  m_numWSPerPeriod = m_inputWSGroups.size();
-
-  // Each 'row' are the workspaces belonging to a specific period
-  // Each 'column' are the workspaces belonging to a specific group
-  for (size_t i = 0; i < m_numWSPerGroup; i++) {
-
-    std::vector<Workspace_sptr> inputWorkspaces;
-    for (const auto &groupWS : m_inputWSGroups) {
-      // Group ws may have less workspaces than its supposed to, but we still
-      // add them so further validation can be done
-      if (i < static_cast<size_t>(groupWS->getNumberOfEntries()))
-        inputWorkspaces.push_back(groupWS->getItem(i));
-    }
-    m_inputWSMatrix.push_back(inputWorkspaces);
-  }
+  m_numWSPerPeriod = inputWorkspacesStr.size();
 
   // Check all workspace groups are the same size
-  for (const auto &inputWsGroup : m_inputWSGroups) {
-    if (inputWsGroup->size() != m_numWSPerGroup) {
-      errors["InputWorkspaces"] = "All workspace groups must be the same size.";
-      break;
+  if (!errors.count("InputWorkspaces")) {
+    for (const auto &inputWsGroup : m_inputWSGroups) {
+      if (inputWsGroup->size() != m_numWSPerGroup) {
+        errors["InputWorkspaces"] =
+            "All workspace groups must be the same size.";
+        break;
+      }
+    }
+  }
+
+  if (!errors.count("InputWorkspaces")) {
+    // Each 'row' are the workspaces belonging to a specific period
+    // Each 'column' are the workspaces belonging to a specific group
+    for (size_t i = 0; i < m_numWSPerGroup; i++) {
+
+      std::vector<MatrixWorkspace_sptr> inputWorkspaces;
+      for (const auto &groupWS : m_inputWSGroups) {
+
+        auto inputMatrixWs =
+            boost::dynamic_pointer_cast<MatrixWorkspace>(groupWS->getItem(i));
+        if (inputMatrixWs) {
+          inputWorkspaces.push_back(inputMatrixWs);
+        } else {
+          errors["InputWorkspaces"] =
+              "Input workspaces must either be matrix workspaces or group "
+              "workspaces containing matrix workspaces only";
+          break;
+        }
+      }
+
+      if (errors.count("InputWorkspaces"))
+        break; // error found, stop adding workspaces
+
+      m_inputWSMatrix.push_back(inputWorkspaces);
     }
   }
 
@@ -183,29 +219,16 @@ void Stitch1DMany::validateGroupWorkspacesInputs() {
 */
 void Stitch1DMany::validateCommonInputs(
     std::map<std::string, std::string> &errors) {
-  const std::vector<std::string> inputWorkspacesStr =
-      this->getProperty("InputWorkspaces");
-  if (inputWorkspacesStr.size() < 2)
-    errors["InputWorkspaces"] = "At least 2 input workspaces required.";
 
-  // Check that all the workspaces are of the same type
-  const std::string id = m_inputWSMatrix.front().front()->id();
-  for (const auto &row : m_inputWSMatrix) {
-    for (const auto &ws : row) {
-      if (ws->id() != id) {
-        errors["InputWorkspaces"] = "All workspaces must be the same type.";
-        break;
-      }
-    }
-  }
+  size_t numStitchableWS =
+      (m_numWSPerPeriod > 1) ? m_numWSPerPeriod : m_numWSPerGroup;
+  if (numStitchableWS < 2)
+    errors["InputWorkspaces"] = "At least 2 input workspaces required.";
 
   m_startOverlaps = this->getProperty("StartOverlaps");
   m_endOverlaps = this->getProperty("EndOverlaps");
   m_scaleRHSWorkspace = this->getProperty("ScaleRHSWorkspace");
   m_params = this->getProperty("Params");
-
-  size_t numStitchableWS =
-      (m_numWSPerPeriod > 1) ? m_numWSPerPeriod : m_numWSPerGroup;
 
   if (!m_startOverlaps.empty() && m_startOverlaps.size() != numStitchableWS - 1)
     errors["StartOverlaps"] = "If given, StartOverlaps must have one fewer "
@@ -259,7 +282,7 @@ void Stitch1DMany::exec() {
  * @param outName :: Output stitched workspace name
  * @param outScaleFactors :: Actual values used for scale factors
  */
-void Stitch1DMany::doStitch1D(const std::vector<Workspace_sptr> &toStitch,
+void Stitch1DMany::doStitch1D(const std::vector<MatrixWorkspace_sptr> &toStitch,
                               const std::vector<double> &startOverlaps,
                               const std::vector<double> &endOverlaps,
                               const std::vector<double> &params,
@@ -269,12 +292,12 @@ void Stitch1DMany::doStitch1D(const std::vector<Workspace_sptr> &toStitch,
                               Workspace_sptr &outWS, std::string &outName,
                               std::vector<double> &outScaleFactors) {
 
-  auto lhsWS = boost::dynamic_pointer_cast<MatrixWorkspace>(toStitch.front());
+  auto lhsWS = toStitch.front();
   outName += "_" + lhsWS->getName();
 
   for (size_t i = 1; i < toStitch.size(); i++) {
 
-    auto rhsWS = boost::dynamic_pointer_cast<MatrixWorkspace>(toStitch[i]);
+    auto rhsWS = toStitch[i];
     outName += "_" + rhsWS->getName();
 
     IAlgorithm_sptr alg = createChildAlgorithm("Stitch1D");
