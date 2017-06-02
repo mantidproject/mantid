@@ -29,6 +29,11 @@ QuickRuns
 Data Reduction
 ##############
 
+Energy Transfer
+~~~~~~~~~~~~~~~
+
+- Now sorts the x axis before rebinning
+
 Calibration
 ~~~~~~~~~~~
 
