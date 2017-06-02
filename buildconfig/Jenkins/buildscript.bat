@@ -19,6 +19,8 @@ set VS_VERSION=14
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: Source the VS setup script
 set VS_VERSION=14
+:: Ask MSVC to use x64 tool-set when available 
+set PreferredToolArchitecture=x64
 call "%VS140COMNTOOLS%\..\..\VC\vcvarsall.bat" amd64
 set CM_GENERATOR=Visual Studio 14 2015 Win64
 ::set PARAVIEW_DIR=%PARAVIEW_NEXT_DIR%

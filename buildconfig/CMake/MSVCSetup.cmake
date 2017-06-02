@@ -40,6 +40,26 @@ set ( CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /Zm${VISUALSTUDIO_COMPILERHEAPLIMIT}" )
 set ( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /Zm${VISUALSTUDIO_COMPILERHEAPLIMIT}" )
 endif()
 
+##########################################################################
+# Enable Link Time Code Generation (LTCG) whilst in Release Mode
+##########################################################################
+# Add /GL option to compiler to postpone code generation to link time
+set( CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /GL " CACHE STRING "" FORCE)
+set( CMAKE_CXX_FLAGS_MINSIZEREL "${CMAKE_CXX_FLAGS_MINSIZEREL} /GL" CACHE STRING "" FORCE)
+set( CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} /GL" CACHE STRING "" FORCE)
+set( CMAKE_C_FLAGS_MINSIZEREL "${CMAKE_C_FLAGS_MINSIZEREL} /GL" CACHE STRING "" FORCE)
+
+# Inform the linker in advance we will be using LTCG so we don't accidentally
+# link twice during compilation wasting time
+set( CMAKE_EXE_LINKER_FLAGS_RELEASE "${CMAKE_EXE_LINKER_FLAGS_RELEASE} /LTCG" CACHE STRING "" FORCE)
+set( CMAKE_EXE_LINKER_FLAGS_MINSIZEREL "${CMAKE_EXE_LINKER_FLAGS_MINSIZEREL} /LTCG" CACHE STRING "" FORCE)
+
+set( CMAKE_MODULE_LINKER_RELEASE "${CMAKE_MODULE_LINKER_RELEASE} /LTCG" CACHE STRING "" FORCE)
+set( CMAKE_MODULE_LINKER_MINSIZEREL "${CMAKE_MODULE_LINKER_MINSIZEREL} /LTCG" CACHE STRING "" FORCE)
+
+set( CMAKE_SHARED_LINKER_FLAGS_RELEASE "${CMAKE_SHARED_LINKER_FLAGS_RELEASE} /LTCG" CACHE STRING "" FORCE)
+set( CMAKE_SHARED_LINKER_FLAGS_MINSIZEREL "${CMAKE_SHARED_LINKER_FLAGS_MINSIZEREL} /LTCG" CACHE STRING "" FORCE)
+
 ###########################################################################
 # On Windows we want to bundle Python.
 ###########################################################################
