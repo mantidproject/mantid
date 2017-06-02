@@ -7,6 +7,7 @@
 #include "MantidAPI/TextAxis.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/IPeaksWorkspace.h"
+#include "MantidAPI/Run.h"
 
 namespace Mantid {
 namespace API {
@@ -76,16 +77,7 @@ WorkspaceFactoryImpl::create(const MatrixWorkspace_const_sptr &parent,
   return ws;
 }
 
-/** Initialize a workspace from its parent
- * This sets values such as title, instrument, units, sample, spectramap.
- * This does NOT copy any data.
- *
- * @param parent :: the parent workspace
- * @param child :: the child workspace
- * @param differentSize :: A flag to indicate if the two workspace will be
- *different sizes
- */
-void WorkspaceFactoryImpl::initializeFromParent(
+void WorkspaceFactoryImpl::initializeFromParentWithoutLogs(
     const MatrixWorkspace &parent, MatrixWorkspace &child,
     const bool differentSize) const {
   child.setTitle(parent.getTitle());
@@ -93,10 +85,17 @@ void WorkspaceFactoryImpl::initializeFromParent(
   child.setInstrument(parent.getInstrument()); // This call also copies the
                                                // SHARED POINTER to the
                                                // parameter map
+
+  //  g_log.warning() << child.run().getProperites() << "\n";
+
   // This call will (should) perform a COPY of the parameter map.
   child.instrumentParameters();
   child.m_sample = parent.m_sample;
-  child.m_run = parent.m_run;
+  child.m_run = boost::make_shared<API::Run>();
+  //  if (!noproperty)
+  //    child.m_run = parent.m_run;
+  //  else
+  //    child.m_run = boost::make_shared<API::Run>();
   child.setYUnit(parent.m_YUnit);
   child.setYUnitLabel(parent.m_YUnitLabel);
   child.setDistribution(parent.isDistribution());
@@ -138,6 +137,22 @@ void WorkspaceFactoryImpl::initializeFromParent(
       }
     }
   }
+}
+
+/** Initialize a workspace from its parent
+ * This sets values such as title, instrument, units, sample, spectramap.
+ * This does NOT copy any data.
+ *
+ * @param parent :: the parent workspace
+ * @param child :: the child workspace
+ * @param differentSize :: A flag to indicate if the two workspace will be
+ *different sizes
+ */
+void WorkspaceFactoryImpl::initializeFromParent(
+    const MatrixWorkspace &parent, MatrixWorkspace &child,
+    const bool differentSize) const {
+  initializeFromParentWithoutLogs(parent, child, differentSize);
+  child.m_run = parent.m_run;
 }
 
 /** Creates a new instance of the class with the given name, and allocates
