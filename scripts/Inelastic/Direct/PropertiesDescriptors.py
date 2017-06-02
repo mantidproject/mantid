@@ -425,7 +425,7 @@ class EnergyBins(PropDescriptor):
                     if instance:
                         instance.log("*** WARNING! Got energy_bins specified as absolute values in multirep mode.\n"
                                      "          Will normalize these values by max value and treat as relative values",
-                                     " warning")
+                                     "warning")
                     mult = self._range / self._energy_bins[2]
                     rez = self._calc_relative_range(ei, mult)
                 if self._incident_energy.autoEi_mode():
