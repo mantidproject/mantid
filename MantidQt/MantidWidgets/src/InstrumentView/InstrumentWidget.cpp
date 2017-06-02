@@ -1301,8 +1301,10 @@ void InstrumentWidget::clearADSHandle() {
  */
 void InstrumentWidget::overlayPeaksWorkspace(IPeaksWorkspace_sptr ws) {
   auto surface = getUnwrappedSurface();
-  surface->setPeaksWorkspace(ws);
-  updateInstrumentView();
+  if (surface) {
+    surface->setPeaksWorkspace(ws);
+    updateInstrumentView();
+  }
 }
 
 /**
