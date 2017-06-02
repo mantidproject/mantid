@@ -25,8 +25,9 @@ void Stitch1DMany::init() {
       Kernel::make_unique<ArrayProperty<std::string>>(
           "InputWorkspaces", boost::make_shared<ADSValidator>()),
       "Input Workspaces. List of histogram workspaces to stitch together. At "
-      "least 2 workspaces must be supplied for stitching and all must be of "
-      "the same type.");
+      "least 2 workspaces must be supplied for stitching and all must be "
+      "either Matrix Workspaces or Workspace Groups containing Matrix "
+      "Workspaces only.");
 
   declareProperty(make_unique<WorkspaceProperty<Workspace>>(
                       "OutputWorkspace", "", Direction::Output),
@@ -106,9 +107,8 @@ std::map<std::string, std::string> Stitch1DMany::validateInputs() {
   std::vector<MatrixWorkspace_sptr> inputWorkspaces;
   for (const auto &ws : inputWorkspacesStr) {
 
-    auto inputMatrixWs = boost::dynamic_pointer_cast<MatrixWorkspace>(
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(ws));
-
+    auto inputMatrixWs =
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(ws);
     if (inputMatrixWs) {
       inputWorkspaces.push_back(inputMatrixWs);
     } else {
@@ -144,8 +144,8 @@ void Stitch1DMany::validateGroupWorkspacesInputs() {
   // respective containers
   for (const auto &groupWSName : inputWorkspacesStr) {
 
-    auto groupWS = boost::dynamic_pointer_cast<WorkspaceGroup>(
-        AnalysisDataService::Instance().retrieveWS<Workspace>(groupWSName));
+    auto groupWS =
+        AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(groupWSName);
     if (groupWS) {
       m_inputWSGroups.push_back(groupWS);
     } else {

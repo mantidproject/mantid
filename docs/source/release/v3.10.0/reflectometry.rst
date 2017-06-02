@@ -15,7 +15,6 @@ Algorithms
   which specifies whether detector positions should be corrected by a vertical  shift (default) or by a rotation around the sample position.
 - :ref:`algm-ReflectometryReductionOneAuto-v2` and :ref:`algm-CreateTransmissionWorkspaceAuto-v2` attempts to populate properties `StartOverlap` and `EndOverlap` with values from the IDF.
 - :ref:`algm-GroupDetectors-v2` peforms a more resilient validation of grouping pattern that is less likely to throw an exception.
-- :ref:`algm-Stitch1DMany` - properties ``UseManualScaleFactor`` and ``ManualScaleFactor`` are now ``UseManualScaleFactors`` and ``ManualScaleFactors`` respectively. ``ManualScaleFactors`` can now take multiple scaling factors instead of just one.
 
 ConvertToReflectometryQ
 -----------------------
