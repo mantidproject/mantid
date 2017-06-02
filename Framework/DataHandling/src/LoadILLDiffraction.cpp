@@ -100,7 +100,7 @@ void LoadILLDiffraction::exec() {
   m_fileName = getPropertyValue("Filename");
 
   loadScanVars();
-  progress.report("Loaded the scanned variables");
+  progress.report("Loading the scanned variables");
 
   loadDataScan();
   progress.report("Loaded the detector scan data");
@@ -170,9 +170,10 @@ void LoadILLDiffraction::loadDataScan() {
     fillMovingInstrumentScan(data, scan);
   } else {
     initStaticWorkspace();
-    fillDataScanMetaData(scan);
     fillStaticInstrumentScan(data, scan, twoTheta0);
   }
+
+  fillDataScanMetaData(scan);
 
   scanGroup.close();
   dataGroup.close();
@@ -274,7 +275,7 @@ void LoadILLDiffraction::initMovingWorkspace(const NXDouble &scan) {
 void LoadILLDiffraction::fillMovingInstrumentScan(const NXUInt &data,
                                                   const NXDouble &scan) {
 
-  std::vector<double> axis = getAxis(scan);
+  std::vector<double> axis = {-0.5, 0.5};
   std::vector<double> monitor = getMonitor(scan);
 
   // First load the monitors
@@ -283,6 +284,7 @@ void LoadILLDiffraction::fillMovingInstrumentScan(const NXUInt &data,
       m_outWorkspace->mutableY(j + i * m_numberScanPoints) = monitor[j];
       m_outWorkspace->mutableE(j + i * m_numberScanPoints) = sqrt(monitor[j]);
       m_outWorkspace->mutableX(j + i * m_numberScanPoints) = axis;
+      g_log.warning() << i << "::" << j << "::" << monitor[j] << std::endl;
     }
   }
 
@@ -421,13 +423,14 @@ std::vector<double> LoadILLDiffraction::getMonitor(const NXDouble &scan) const {
 
   std::vector<double> monitor = {0.};
   for (size_t i = 0; i < m_scanVar.size(); ++i) {
-    if (m_scanVar[i].name == "Monitor1") {
+    if ((m_scanVar[i].name == "Monitor1") ||
+        (m_scanVar[i].name == "Monitor_1")) {
       monitor.assign(scan() + m_numberScanPoints * i,
                      scan() + m_numberScanPoints * (i + 1));
-      break;
+      return monitor;
     }
   }
-  return monitor;
+  throw std::runtime_error("Monitors not found in scanned variables");
 }
 
 /**
@@ -437,7 +440,7 @@ std::vector<double> LoadILLDiffraction::getMonitor(const NXDouble &scan) const {
  */
 std::vector<double> LoadILLDiffraction::getAxis(const NXDouble &scan) const {
 
-  std::vector<double> axis = {-0.5, 0.5};
+  std::vector<double> axis = {0.};
   if (m_scanType == OtherScan) {
     for (size_t i = 0; i < m_scanVar.size(); ++i) {
       if (m_scanVar[i].axis == 1) {

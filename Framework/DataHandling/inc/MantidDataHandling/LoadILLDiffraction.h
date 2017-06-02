@@ -76,8 +76,7 @@ private:
   std::vector<double>
   getScannedVaribleByPropertyName(const NeXus::NXDouble &scan,
                                   const std::string &propertyName) const;
-  void fillMovingInstrumentScan(const NeXus::NXUInt &,
-                                         const NeXus::NXDouble &);
+  void fillMovingInstrumentScan(const NeXus::NXUInt &, const NeXus::NXDouble &);
   void fillStaticInstrumentScan(const NeXus::NXUInt &, const NeXus::NXDouble &,
                                 const NeXus::NXFloat &);
 
