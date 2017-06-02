@@ -115,6 +115,7 @@ set ( SRC_FILES
 	src/ExtractMask.cpp
 	src/ExtractMaskToTable.cpp
 	src/ExtractSingleSpectrum.cpp
+	src/ExtractSingleTimeIndex.cpp
 	src/ExtractSpectra.cpp
 	src/ExtractUnmaskedSpectra.cpp
 	src/FFT.cpp
@@ -428,6 +429,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/ExtractMask.h
 	inc/MantidAlgorithms/ExtractMaskToTable.h
 	inc/MantidAlgorithms/ExtractSingleSpectrum.h
+	inc/MantidAlgorithms/ExtractSingleTimeIndex.h
 	inc/MantidAlgorithms/ExtractSpectra.h
 	inc/MantidAlgorithms/ExtractUnmaskedSpectra.h
 	inc/MantidAlgorithms/FFT.h
@@ -754,6 +756,7 @@ set ( TEST_FILES
 	ExtractMaskTest.h
 	ExtractMaskToTableTest.h
 	ExtractSingleSpectrumTest.h
+	ExtractSingleTimeIndexTest.h
 	ExtractSpectraTest.h
 	ExtractUnmaskedSpectraTest.h
 	FFTDerivativeTest.h
