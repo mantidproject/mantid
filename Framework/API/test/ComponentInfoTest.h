@@ -63,13 +63,17 @@ public:
     componentRanges->push_back(
         std::make_pair(0, 0)); // Another component with no subcomponents
 
+    auto parentIndices = boost::make_shared<const std::vector<size_t>>(
+        std::vector<size_t>{9, 9, 9}); // These indices are invalid, but that's
+                                       // ok as not being tested here
+
     auto positions = boost::make_shared<std::vector<Eigen::Vector3d>>(2);
     auto rotations = boost::make_shared<std::vector<Eigen::Quaterniond>>(2);
     auto detectorInfo = boost::make_shared<Beamline::DetectorInfo>();
 
     Mantid::Beamline::ComponentInfo internalInfo(
         detectorIndices, detectorRanges, componentIndices, componentRanges,
-        positions, rotations, detectorInfo);
+        parentIndices, positions, rotations, detectorInfo);
     Mantid::Geometry::ObjComponent comp1("component1");
     Mantid::Geometry::ObjComponent comp2("component2");
 

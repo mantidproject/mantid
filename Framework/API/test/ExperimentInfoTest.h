@@ -950,6 +950,9 @@ public:
         "Instrument should yield entire tree of component indices",
         compInfo.componentsInSubtree(compInfo.indexOf(instrumentId)).size(),
         nComponents);
+
+    TS_ASSERT_EQUALS(compInfo.indexOf(inst->getComponentID()),
+                     compInfo.parentComponentIndex(compInfo.indexOf(bankId)));
   }
 
 private:

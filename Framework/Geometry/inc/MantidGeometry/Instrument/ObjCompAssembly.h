@@ -102,7 +102,7 @@ public:
       Track & /*testRay*/,
       std::deque<IComponent_const_sptr> & /*searchQueue*/) const override;
 
-  void registerContents(
+  size_t registerContents(
       class Mantid::Geometry::ComponentVisitor &visitor) const override;
 
 private:

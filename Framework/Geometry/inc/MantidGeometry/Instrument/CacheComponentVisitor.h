@@ -36,11 +36,11 @@ class MANTID_GEOMETRY_DLL CacheComponentVisitor
     : public Mantid::Geometry::ComponentVisitor {
 public:
   CacheComponentVisitor() = default;
-  virtual void registerComponentAssembly(
+  virtual size_t registerComponentAssembly(
       const class Geometry::ICompAssembly &assembly) override;
-  virtual void registerGenericComponent(
+  virtual size_t registerGenericComponent(
       const class Geometry::IComponent &component) override;
-  virtual void
+  virtual size_t
   registerDetector(const class Geometry::IDetector &detector) override;
   std::vector<class Geometry::IComponent *> componentIds() const;
 

@@ -359,6 +359,37 @@ public:
     TSM_ASSERT_EQUALS("Wrong number of detectors registered",
                       visitor.detectorIds()->size(), nPixelsWide * nPixelsWide);
   }
+
+  void test_parent_indices() {
+
+    const int nPixelsWide = 10; // Gives 10*10 detectors in total
+    auto instrument = ComponentCreationHelper::createTestInstrumentRectangular(
+        1 /*n banks*/, nPixelsWide, 1 /*sample-bank distance*/);
+
+    Mantid::Geometry::ParameterMap pmap;
+    InfoComponentVisitor visitor(instrument->getDetectorIDs() /*detector ids*/,
+                                 pmap);
+
+    // Visit everything
+    instrument->registerContents(visitor);
+
+    const auto parentComponentIndices = visitor.parentComponentIndices();
+
+    TSM_ASSERT_EQUALS("Root component will not have a parent index record",
+                      parentComponentIndices->size(), visitor.size() - 1);
+
+    size_t testIndex =
+        visitor.size() -
+        2; // One component down from root. (Has parent of the root itself)
+    TS_ASSERT_EQUALS((*parentComponentIndices)[testIndex], visitor.size() - 1);
+
+    testIndex = 0; // Check a detector
+    const auto rowAssemblyIndex = (*parentComponentIndices)[testIndex];
+    const auto bankIndex = (*parentComponentIndices)[rowAssemblyIndex];
+    const auto instrumentIndex = (*parentComponentIndices)[bankIndex];
+    // Walk all the way up to the instrument
+    TS_ASSERT_EQUALS(instrumentIndex, visitor.size() - 1);
+  }
 };
 
 class InfoComponentVisitorTestPerformance : public CxxTest::TestSuite {

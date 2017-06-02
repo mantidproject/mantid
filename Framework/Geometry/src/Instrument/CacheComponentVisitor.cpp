@@ -6,7 +6,7 @@
 namespace Mantid {
 namespace Geometry {
 
-void CacheComponentVisitor::registerComponentAssembly(
+size_t CacheComponentVisitor::registerComponentAssembly(
     const Geometry::ICompAssembly &assembly) {
 
   std::vector<IComponent_const_sptr> assemblyChildren;
@@ -17,17 +17,20 @@ void CacheComponentVisitor::registerComponentAssembly(
     child->registerContents(*this);
   }
   m_componentIds.emplace_back(assembly.getComponentID());
+  return m_componentIds.size() - 1;
 }
 
-void CacheComponentVisitor::registerGenericComponent(
+size_t CacheComponentVisitor::registerGenericComponent(
     const Geometry::IComponent &component) {
 
   m_componentIds.emplace_back(component.getComponentID());
+  return m_componentIds.size() - 1;
 }
 
-void CacheComponentVisitor::registerDetector(
-    const Geometry::IDetector &detector) {
+size_t
+CacheComponentVisitor::registerDetector(const Geometry::IDetector &detector) {
   m_componentIds.emplace_back(detector.getComponentID());
+  return m_componentIds.size() - 1;
 }
 
 std::vector<Geometry::IComponent *>

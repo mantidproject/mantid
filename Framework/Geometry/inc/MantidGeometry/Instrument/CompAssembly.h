@@ -108,7 +108,7 @@ public:
       Track &testRay,
       std::deque<IComponent_const_sptr> &searchQueue) const override;
 
-  virtual void
+  virtual size_t
   registerContents(class ComponentVisitor &componentVisitor) const override;
 
 private:

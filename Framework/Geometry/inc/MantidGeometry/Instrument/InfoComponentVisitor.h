@@ -67,6 +67,9 @@ private:
   /// Component indexes sorted by assembly
   boost::shared_ptr<std::vector<size_t>> m_assemblySortedComponentIndices;
 
+  /// Index of the parent component
+  boost::shared_ptr<std::vector<size_t>> m_parentComponentIndices;
+
   /// Only Assemblies and other NON-detectors yield detector ranges
   boost::shared_ptr<std::vector<std::pair<size_t, size_t>>> m_detectorRanges;
 
@@ -100,12 +103,12 @@ public:
   InfoComponentVisitor(std::vector<detid_t> orderedDetectorIds,
                        ParameterMap &pmap);
 
-  virtual void registerComponentAssembly(
+  virtual size_t registerComponentAssembly(
       const Mantid::Geometry::ICompAssembly &assembly) override;
 
-  virtual void registerGenericComponent(
+  virtual size_t registerGenericComponent(
       const Mantid::Geometry::IComponent &component) override;
-  virtual void
+  virtual size_t
   registerDetector(const Mantid::Geometry::IDetector &detector) override;
 
   boost::shared_ptr<const std::vector<Mantid::Geometry::IComponent *>>
@@ -122,6 +125,8 @@ public:
 
   boost::shared_ptr<const std::vector<size_t>>
   assemblySortedComponentIndices() const;
+
+  boost::shared_ptr<const std::vector<size_t>> parentComponentIndices() const;
 
   boost::shared_ptr<
       const std::unordered_map<Mantid::Geometry::IComponent *, size_t>>

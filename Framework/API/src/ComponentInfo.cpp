@@ -66,6 +66,10 @@ Kernel::Quat ComponentInfo::rotation(const size_t componentIndex) const {
   return Kernel::toQuat(m_componentInfo.rotation(componentIndex));
 }
 
+size_t ComponentInfo::parentComponentIndex(const size_t componentIndex) const {
+  return m_componentInfo.parentComponentIndex(componentIndex);
+}
+
 void ComponentInfo::setPosition(const size_t componentIndex,
                                 const Kernel::V3D &newPosition) {
   m_componentInfo.setPosition(componentIndex, Kernel::toVector3d(newPosition));

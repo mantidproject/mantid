@@ -643,10 +643,10 @@ void Component::setDescription(const std::string &descr) {
                                                  "non-Parametrized Component)");
 }
 
-void Component::registerContents(
-    class ComponentVisitor &componentVisitor) const {
+size_t
+Component::registerContents(class ComponentVisitor &componentVisitor) const {
 
-  componentVisitor.registerGenericComponent(*this);
+  return componentVisitor.registerGenericComponent(*this);
 }
 
 } // Namespace Geometry

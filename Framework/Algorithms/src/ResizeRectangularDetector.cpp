@@ -1,6 +1,6 @@
 #include "MantidAlgorithms/ResizeRectangularDetector.h"
 #include "MantidKernel/System.h"
-#include "MantidAPI/DetectorInfo.h"
+#include "MantidAPI/ComponentInfo.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/ResizeRectangularDetectorHelper.h"
@@ -97,9 +97,9 @@ void ResizeRectangularDetector::exec() {
     throw std::runtime_error("Component with name " + ComponentName +
                              " was not found.");
 
-  RectangularDetector_const_sptr det =
-      boost::dynamic_pointer_cast<const RectangularDetector>(comp);
-  if (!det)
+  auto componentInfo = input->mutableComponentInfo();
+  const auto componentIndex = componentInfo.indexOf(comp->getComponentID());
+  if (!componentInfo.isDetector(componentIndex))
     throw std::runtime_error("Component with name " + ComponentName +
                              " is not a RectangularDetector.");
 
@@ -122,8 +122,8 @@ void ResizeRectangularDetector::exec() {
     relscalex /= oldscalex[0];
   if (!oldscaley.empty())
     relscaley /= oldscaley[0];
-  applyRectangularDetectorScaleToDetectorInfo(input->mutableDetectorInfo(),
-                                              *det, relscalex, relscaley);
+  applyRectangularDetectorScaleToDetectorInfo(
+      *componentInfo, comp->getComponentID(), relscalex, relscaley);
 }
 
 } // namespace Mantid

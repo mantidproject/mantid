@@ -302,7 +302,7 @@ public:
 
   bool isParametrized() const override;
 
-  virtual void
+  virtual size_t
   registerContents(class ComponentVisitor &componentVisitor) const override;
 
 protected:

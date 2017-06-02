@@ -48,6 +48,7 @@ private:
   /// Ranges of component ids that are contiguous blocks of components.
   boost::shared_ptr<const std::vector<std::pair<size_t, size_t>>>
       m_componentRanges;
+  boost::shared_ptr<const std::vector<size_t>> m_parentIndices;
   Mantid::Kernel::cow_ptr<std::vector<Eigen::Vector3d>> m_positions;
   Mantid::Kernel::cow_ptr<std::vector<Eigen::Quaterniond>> m_rotations;
   const size_t m_size = 0;
@@ -63,6 +64,7 @@ public:
                     assemblySortedComponentIndices,
                 boost::shared_ptr<const std::vector<std::pair<size_t, size_t>>>
                     componentRanges,
+                boost::shared_ptr<const std::vector<size_t>> parentIndices,
                 boost::shared_ptr<std::vector<Eigen::Vector3d>> positions,
                 boost::shared_ptr<std::vector<Eigen::Quaterniond>> rotations,
                 boost::shared_ptr<DetectorInfo> detectorInfo);
@@ -83,6 +85,8 @@ public:
                    const Eigen::Vector3d &newPosition);
   void setRotation(const size_t componentIndex,
                    const Eigen::Quaterniond &newRotation);
+
+  size_t parentComponentIndex(const size_t componentIndex) const;
 };
 } // namespace Beamline
 } // namespace Mantid

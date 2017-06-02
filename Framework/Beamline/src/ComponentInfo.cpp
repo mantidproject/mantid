@@ -20,6 +20,7 @@ ComponentInfo::ComponentInfo(
     boost::shared_ptr<const std::vector<size_t>> assemblySortedComponentIndices,
     boost::shared_ptr<const std::vector<std::pair<size_t, size_t>>>
         componentRanges,
+    boost::shared_ptr<const std::vector<size_t>> parentIndices,
     boost::shared_ptr<std::vector<Eigen::Vector3d>> positions,
     boost::shared_ptr<std::vector<Eigen::Quaterniond>> rotations,
     boost::shared_ptr<DetectorInfo> detectorInfo)
@@ -28,6 +29,7 @@ ComponentInfo::ComponentInfo(
           std::move(assemblySortedComponentIndices)),
       m_detectorRanges(std::move(detectorRanges)),
       m_componentRanges(std::move(componentRanges)),
+      m_parentIndices(std::move(parentIndices)),
       m_positions(std::move(positions)), m_rotations(std::move(rotations)),
       m_size(m_assemblySortedDetectorIndices->size() +
              m_detectorRanges->size()),
@@ -55,6 +57,11 @@ ComponentInfo::ComponentInfo(
     throw std::invalid_argument("ComponentInfo must have component indices "
                                 "input of same size as the sum of "
                                 "non-detector and detector components");
+  }
+  if (!m_parentIndices->empty() && (m_parentIndices->size() != (m_size - 1))) {
+    throw std::invalid_argument("ComponentInfo expects n-1 parent component "
+                                "indices since the root component can never "
+                                "have a parent");
   }
 }
 
@@ -177,6 +184,14 @@ void ComponentInfo::setRotation(const size_t componentIndex,
 
       // TODO. This could change L1/L2. Is that being detected?
     }
+  }
+}
+
+size_t ComponentInfo::parentComponentIndex(const size_t componentIndex) const {
+  if (componentIndex < m_parentIndices->size()) {
+    return (*m_parentIndices)[componentIndex];
+  } else {
+    return componentIndex; // Root gets root as parent
   }
 }
 
