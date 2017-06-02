@@ -1232,6 +1232,11 @@ void InstrumentWidget::handleWorkspaceReplacement(
       // the same name)
       auto matrixWS =
           boost::dynamic_pointer_cast<const MatrixWorkspace>(workspace);
+      if (!matrixWS) {
+        emit preDeletingHandle();
+        close();
+        return;
+      }
       bool sameWS = false;
       try {
         sameWS = (matrixWS == m_instrumentActor->getWorkspace());
