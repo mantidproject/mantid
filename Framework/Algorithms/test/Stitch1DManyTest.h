@@ -134,8 +134,8 @@ public:
   static void destroySuite(Stitch1DManyTest *suite) { delete suite; }
 
   Stitch1DManyTest() {
-    auto ws1 = WorkspaceFactory::Instance().createTable();
-    auto ws2 = WorkspaceFactory::Instance().createTable();
+    auto ws1 = createUniformWorkspace(0.1, 0.1, 1., 2.);
+    auto ws2 = createUniformWorkspace(0.8, 0.1, 1.1, 2.1);
     AnalysisDataService::Instance().addOrReplace("ws1", ws1);
     AnalysisDataService::Instance().addOrReplace("ws2", ws2);
   }
@@ -192,8 +192,8 @@ public:
     TS_ASSERT_THROWS(alg.execute(), std::runtime_error);
   }
 
-  void test_workspace_types_differ_throws() {
-    // One table workspace, one matrix workspace
+  void test_matrix_and_non_matrix_workspace_types_throws() {
+    // One matrix workspace, one table workspace
     auto ws1 = createUniformWorkspace(0.1, 0.1, 1., 2.);
     auto ws2 = WorkspaceFactory::Instance().createTable();
     AnalysisDataService::Instance().addOrReplace("ws1", ws1);
@@ -202,6 +202,42 @@ public:
     alg.setChild(true);
     alg.initialize();
     alg.setProperty("InputWorkspaces", "ws1, ws2");
+    alg.setProperty("Params", "0.1");
+    alg.setPropertyValue("OutputWorkspace", "outws");
+    TS_ASSERT_THROWS(alg.execute(), std::runtime_error);
+  }
+
+  void test_group_and_non_group_workspace_types_throws() {
+    // One group workspace, one matrix workspace
+    auto ws1 = createUniformWorkspace(0.1, 0.1, 1., 2.);
+    auto ws2 = createUniformWorkspace(0.8, 0.1, 1.1, 2.1);
+    WorkspaceGroup_sptr group1 = boost::make_shared<WorkspaceGroup>();
+    group1->addWorkspace(ws1);
+    AnalysisDataService::Instance().addOrReplace("group1", group1);
+    AnalysisDataService::Instance().addOrReplace("ws1", ws1);
+    Stitch1DMany alg;
+    alg.setChild(true);
+    alg.initialize();
+    alg.setProperty("InputWorkspaces", "group1, ws1");
+    alg.setProperty("Params", "0.1");
+    alg.setPropertyValue("OutputWorkspace", "outws");
+    TS_ASSERT_THROWS(alg.execute(), std::runtime_error);
+  }
+
+  void test_group_containing_non_matrix_workspace_types_throws() {
+    // One group workspace, one group workspace of non-matrix workspace types
+    auto ws1 = createUniformWorkspace(0.1, 0.1, 1., 2.);
+    auto ws2 = WorkspaceFactory::Instance().createTable();
+    WorkspaceGroup_sptr group1 = boost::make_shared<WorkspaceGroup>();
+    group1->addWorkspace(ws1);
+    WorkspaceGroup_sptr group2 = boost::make_shared<WorkspaceGroup>();
+    group2->addWorkspace(ws2);
+    AnalysisDataService::Instance().addOrReplace("group1", group1);
+    AnalysisDataService::Instance().addOrReplace("group2", group2);
+    Stitch1DMany alg;
+    alg.setChild(true);
+    alg.initialize();
+    alg.setProperty("InputWorkspaces", "group1, group2");
     alg.setProperty("Params", "0.1");
     alg.setPropertyValue("OutputWorkspace", "outws");
     TS_ASSERT_THROWS(alg.execute(), std::runtime_error);
