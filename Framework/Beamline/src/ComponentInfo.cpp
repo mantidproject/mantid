@@ -58,11 +58,6 @@ ComponentInfo::ComponentInfo(
                                 "input of same size as the sum of "
                                 "non-detector and detector components");
   }
-  if (!m_parentIndices->empty() && (m_parentIndices->size() != (m_size - 1))) {
-    throw std::invalid_argument("ComponentInfo expects n-1 parent component "
-                                "indices since the root component can never "
-                                "have a parent");
-  }
 }
 
 std::vector<size_t>

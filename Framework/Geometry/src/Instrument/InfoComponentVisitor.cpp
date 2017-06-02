@@ -69,7 +69,7 @@ InfoComponentVisitor::InfoComponentVisitor(
   m_assemblySortedDetectorIndices->reserve(nDetectors);  // Exact
   m_assemblySortedComponentIndices->reserve(nDetectors); // Approximation
   m_parentComponentIndices->reserve(nDetectors);         // Approximation
-  m_componentIdToIndexMap->reserve(nDetectors);          // Approximation
+  // m_componentIdToIndexMap->reserve(nDetectors);          // Approximation
 }
 
 /**
