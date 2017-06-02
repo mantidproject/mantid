@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- For help on the notation used to specify an Instrument Definition File see http://www.mantidproject.org/IDF -->
 <instrument  xmlns="http://www.mantidproject.org/IDF/1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mantidproject.org/IDF/1.0 http://schema.mantidproject.org/IDF/1.0/IDFSchema.xsd"
-name="D2B" valid-from="1900-01-31 23:59:59" valid-to="2100-01-31 23:59:59" last-modified="2013-11-28 14:18:50">
-  <!-- Author: ricardo.leal@ill.fr -->
+name="D2B" valid-from="1900-01-31 23:59:59" valid-to="2100-01-31 23:59:59" last-modified="2016-06-02 10:58:00">
+  <!-- Author: ricardo.leal@ill.fr, bush@ill.fr -->
   <defaults>
     <length unit="meter" />
     <angle unit="degree" />
@@ -36,7 +36,7 @@ name="D2B" valid-from="1900-01-31 23:59:59" valid-to="2100-01-31 23:59:59" last-
   </idlist>
   <!-- Sample position -->
   <component type="sample-position">
-    <location y="0.0" x="0.0" z="0.0" />
+    <location x="0.0" y="0.0" z="0.0" />
   </component>
   <type name="sample-position" is="SamplePos" />
   <idlist idname="detectors">
@@ -44,37 +44,10 @@ name="D2B" valid-from="1900-01-31 23:59:59" valid-to="2100-01-31 23:59:59" last-
   </idlist>
   <!-- Detector list def -->
   <component type="detectors" idlist="detectors">
-    <location />
+    <location x="0.0" y="0.0" z="0.0" />
   </component>
-  <!-- Detector Banks -->
-  <type name="detectors">
-    <component type="bank_uniq">
-    <location>
-      <parameter name="r-position">
-        <value val="0"/>
-      </parameter>
-      <parameter name="t-position">
-        <logfile id="rotangle"  eq="0.0+value"/>
-        <!--  <value val="90"/> -->
-      </parameter>
-      <parameter name="p-position">
-        <value val="0"/>
-      </parameter>
-      <parameter name="rotx">
-        <value val="0"/>
-      </parameter>
-      <parameter name="roty">
-        <logfile id="rotangle"  eq="0.0+value"/>
-        <!--   <value val="90"/> -->
-      </parameter>
-      <parameter name="rotz">
-        <value val="0"/>
-      </parameter>
-    </location>
-    </component>
-  </type>
   <!-- Definition of the unique existent bank (made of tubes) -->
-  <type name="bank_uniq">
+  <type name="detectors">
     <component type="standard_tube">
       <location r="1.296" t="165.000000" name="tube_1" />
       <location r="1.296" t="163.740157" name="tube_2" />
