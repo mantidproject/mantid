@@ -156,7 +156,7 @@ void CalculateFlatBackground::exec() {
       std::string(getProperty("outputMode")) == "Subtract Background";
 
   // Initialize the progress reporting object
-  m_progress.reset(new Progress(this, 0.0, 0.2, numHists));
+  m_progress = Kernel::make_unique<Progress>(this, 0.0, 0.2, numHists);
 
   MatrixWorkspace_sptr outputWS = getProperty("OutputWorkspace");
   // If input and output workspaces are not the same, create a new workspace for

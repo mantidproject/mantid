@@ -6,7 +6,7 @@ namespace MantidWidgets {
 GLActor::~GLActor() {}
 
 void GLActor::setVisibility(bool on) {
-  if (m_visible != GLActorVisiblity::ALWAYS_HIDDEN) {
+  if (m_visible == GLActorVisiblity::ALWAYS_HIDDEN) {
     // If we are always hidden do not change the visibility
     return;
   }

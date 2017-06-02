@@ -1104,6 +1104,38 @@ public:
   }
 
   //----------------------------------------------------------------------------------------------
+  /** Test that time intervals consisting solely of zero-values throws
+  */
+  void test_timeIntervalsOnlyZeroValuesThrows() {
+    // Create input Workspace & initial setup
+    DataObjects::EventWorkspace_sptr eventWS = createEventWorkspace();
+    AnalysisDataService::Instance().addOrReplace("TestEventWorkspace08",
+                                                 eventWS);
+
+    // Init and set property
+    GenerateEventsFilter alg;
+    alg.initialize();
+    alg.setRethrows(true);
+
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setPropertyValue("InputWorkspace", "TestEventWorkspace08"));
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setPropertyValue("OutputWorkspace", "Splitters08"));
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setPropertyValue("InformationWorkspace", "InfoWS08"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("TimeInterval", "0, 0, 0"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("UnitOfTime", "Nanoseconds"));
+
+    // Running and check this throws
+    TS_ASSERT_THROWS(alg.execute(), std::invalid_argument);
+    TS_ASSERT(!alg.isExecuted());
+
+    // Clean
+    AnalysisDataService::Instance().remove("Splitters08");
+    AnalysisDataService::Instance().remove("TestEventWorkspace08");
+  }
+
+  //----------------------------------------------------------------------------------------------
   /** Convert the splitters stored in a matrix workspace to a vector of
    * SplittingInterval objects
     */

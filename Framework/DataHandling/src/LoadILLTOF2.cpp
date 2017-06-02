@@ -356,7 +356,7 @@ void LoadILLTOF2::loadDataIntoTheWorkSpace(
 
   const std::vector<detid_t> detectorIDs = instrument->getDetectorIDs(true);
 
-  Progress progress(this, 0, 1, m_numberOfTubes * m_numberOfPixelsPerTube);
+  Progress progress(this, 0.0, 1.0, m_numberOfTubes * m_numberOfPixelsPerTube);
 
   loadSpectra(spec, m_numberOfTubes, detectorIDs, data, progress);
 
@@ -375,7 +375,7 @@ void LoadILLTOF2::loadDataIntoTheWorkSpace(
     // load the counts from the file into memory
     dataRosace.load();
 
-    Progress progressRosace(this, 0, 1,
+    Progress progressRosace(this, 0.0, 1.0,
                             numberOfTubes * m_numberOfPixelsPerTube);
 
     loadSpectra(spec, numberOfTubes, detectorIDs, dataRosace, progressRosace);

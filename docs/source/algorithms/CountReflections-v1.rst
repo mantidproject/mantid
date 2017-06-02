@@ -30,7 +30,7 @@ From this assignment it is possible to calculate the following indicators:
 
 Furthermore, the algorithm optionally produces a list of missing reflections. In this list,
 each missing unique reflection is expanded to all symmetry equivalents according to the point
-group. For example, if the reflection family :math:`\left{001\right}` was missing
+group. For example, if the reflection family :math:`\{001\}` was missing
 with point group :math:`\bar{1}`, the list would contain :math:`(001)` and :math:`(00\bar{1})`.
 
 The reason for expanding the unique reflections is to make the list more useful as an input

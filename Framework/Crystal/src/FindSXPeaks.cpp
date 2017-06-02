@@ -142,7 +142,7 @@ void FindSXPeaks::exec() {
     m_MaxRange = 0.0;
   }
 
-  Progress progress(this, 0, 1, (m_MaxWsIndex - m_MinWsIndex + 1));
+  Progress progress(this, 0.0, 1.0, m_MaxWsIndex - m_MinWsIndex + 1);
 
   // Calculate the primary flight path.
   const auto &spectrumInfo = localworkspace->spectrumInfo();

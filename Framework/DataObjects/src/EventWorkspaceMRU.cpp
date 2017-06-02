@@ -139,14 +139,20 @@ void EventWorkspaceMRU::insertE(size_t thread_num, EType data,
  * @param index :: index to delete.
  */
 void EventWorkspaceMRU::deleteIndex(const EventList *index) {
-  std::lock_guard<std::mutex> _lock1(m_changeMruListsMutexE);
-  for (auto &data : m_bufferedDataE)
-    if (data)
-      data->deleteIndex(reinterpret_cast<const std::uintptr_t>(index));
+  {
+    std::lock_guard<std::mutex> _lock1(m_changeMruListsMutexE);
+    for (auto &data : m_bufferedDataE) {
+      if (data) {
+        data->deleteIndex(reinterpret_cast<const std::uintptr_t>(index));
+      }
+    }
+  }
   std::lock_guard<std::mutex> _lock2(m_changeMruListsMutexY);
-  for (auto &data : m_bufferedDataY)
-    if (data)
+  for (auto &data : m_bufferedDataY) {
+    if (data) {
       data->deleteIndex(reinterpret_cast<const std::uintptr_t>(index));
+    }
+  }
 }
 
 } // namespace Mantid

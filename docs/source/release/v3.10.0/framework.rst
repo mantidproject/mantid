@@ -86,6 +86,9 @@ Bug Fixes
 - Fixed an issue where :ref:`algm-MonteCarloAbsorption` would use the wavelengths from the first histogram of *InputWorkspace* only making the algorithm unusable for workspaces with varying bins.
 - Fixed an issue with the ``GroupingPattern`` property in :ref:`algm-GroupDetectors`, where incorrect spectra were being used if spectrum numbers are not 1-based indices.
 - Fixed an issue with :ref:`algm-CreateWorkspace` where giving bin edges as ``VerticalAxisValues`` would fail.
+- Fixed an issue with the `TimeInterval` property in :ref:`GenerateEventsFilter <algm-GenerateEventsFilter>`, where the algorithm would get stuck in an infinite loop if no non-zero values were provided to the property.
+- Fixed progress reporting in :ref:`LoadNexusProcessed <algm-LoadNexusProcessed>`.
+
 
 Performance
 -----------
