@@ -321,7 +321,7 @@ void Stitch1DMany::doStitch1D(const std::vector<MatrixWorkspace_sptr> &toStitch,
 
     if (!isChild()) {
       // Copy each input workspace's history into our output workspace's history
-      for (auto &inputWS : toStitch) {
+      for (const auto &inputWS : toStitch) {
         lhsWS->history().addHistory(inputWS->getHistory());
       }
     }
