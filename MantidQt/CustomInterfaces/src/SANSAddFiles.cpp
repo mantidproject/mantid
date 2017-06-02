@@ -215,16 +215,15 @@ void SANSAddFiles::add2Runs2Add() {
          ++k) {
       // Check the file property
       FileProperty search("dummy", k->toStdString(), FileProperty::Load,
-        std::vector<std::string>(), Direction::Input);
+                          std::vector<std::string>(), Direction::Input);
 
       std::string isValid;
       try {
         isValid = search.isValid();
-      }
-      catch (Poco::PathSyntaxException) {
-        QString message = QString("The file entry ")
-                           + *k +
-                          QString(" is not a valid file path on your operating system");
+      } catch (Poco::PathSyntaxException) {
+        QString message =
+            QString("The file entry ") + *k +
+            QString(" is not a valid file path on your operating system");
         QMessageBox::critical(this, "Invalid entry for file path", message);
         m_SANSForm->new2Add_edit->clear();
         return;
