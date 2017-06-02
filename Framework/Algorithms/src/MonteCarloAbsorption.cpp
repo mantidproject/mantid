@@ -1,5 +1,6 @@
 #include "MantidAlgorithms/MonteCarloAbsorption.h"
 #include "MantidAlgorithms/InterpolationOption.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/Sample.h"
@@ -12,9 +13,11 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidGeometry/Instrument/SampleEnvironment.h"
-
+#include "MantidGeometry/Objects/ShapeFactory.h"
+#include "MantidHistogramData/Histogram.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/DeltaEMode.h"
@@ -25,10 +28,15 @@
 #include "MantidHistogramData/HistogramX.h"
 #include "MantidHistogramData/Interpolate.h"
 
+#include <Poco/DOM/AutoPtr.h>
+#include <Poco/DOM/Document.h>
+
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
+using Mantid::HistogramData::Histogram;
 using Mantid::HistogramData::HistogramX;
+using Mantid::HistogramData::Points;
 using Mantid::HistogramData::interpolateLinearInplace;
 using Mantid::DataObjects::Workspace2D;
 namespace PhysicalConstants = Mantid::PhysicalConstants;
@@ -67,6 +75,207 @@ private:
   const DeltaEMode::Type m_emode;
   double m_value;
 };
+
+std::pair<double, double> geographicalAngles(const V3D &p) {
+  const double lat = std::atan2(p.Y(), std::hypot(p.X() , p.Z()));
+  const double lon = std::atan2(p.X(), p.Z());
+  return std::pair<double, double>(lat, lon);
+}
+
+std::tuple<double, double, double, double> extremeAngles(const MatrixWorkspace &ws) {
+  const auto &spectrumInfo = ws.spectrumInfo();
+  double minLat = std::numeric_limits<double>::max();
+  double maxLat = std::numeric_limits<double>::lowest();
+  double minLong = std::numeric_limits<double>::max();
+  double maxLong = std::numeric_limits<double>::lowest();
+  for (size_t i = 0; i < ws.getNumberHistograms(); ++i) {
+    double lat, lon;
+    std::tie(lat, lon) = geographicalAngles(spectrumInfo.position(i));
+    if (lat < minLat) {
+      minLat = lat;
+    } else if (lat > maxLat) {
+      maxLat = lat;
+    }
+    if (lon < minLong) {
+      minLong = lon;
+    } else if (lon > maxLong) {
+      maxLong = lon;
+    }
+  }
+  return std::tie(minLat, maxLat, minLong, maxLong);
+}
+
+Object_sptr makeCubeShape() {
+  using namespace Poco::XML;
+  const double dimension = 0.02;
+  AutoPtr<Document> shapeDescription = new Document;
+  AutoPtr<Element> typeElement = shapeDescription->createElement("type");
+  typeElement->setAttribute("name", "detector");
+  AutoPtr<Element> shapeElement = shapeDescription->createElement("cuboid");
+  shapeElement->setAttribute("id", "cube");
+  const std::string posCoord = std::to_string(dimension / 2);
+  const std::string negCoord = std::to_string(-dimension / 2);
+  AutoPtr<Element> element =
+      shapeDescription->createElement("left-front-bottom-point");
+  element->setAttribute("x", negCoord);
+  element->setAttribute("y", negCoord);
+  element->setAttribute("z", posCoord);
+  shapeElement->appendChild(element);
+  element = shapeDescription->createElement("left-front-top-point");
+  element->setAttribute("x", negCoord);
+  element->setAttribute("y", posCoord);
+  element->setAttribute("z", posCoord);
+  shapeElement->appendChild(element);
+  element = shapeDescription->createElement("left-back-bottom-point");
+  element->setAttribute("x", negCoord);
+  element->setAttribute("y", negCoord);
+  element->setAttribute("z", negCoord);
+  shapeElement->appendChild(element);
+  element = shapeDescription->createElement("right-front-bottom-point");
+  element->setAttribute("x", posCoord);
+  element->setAttribute("y", negCoord);
+  element->setAttribute("z", posCoord);
+  shapeElement->appendChild(element);
+  typeElement->appendChild(shapeElement);
+  AutoPtr<Element> algebraElement =
+      shapeDescription->createElement("algebra");
+  algebraElement->setAttribute("val", "cube");
+  typeElement->appendChild(algebraElement);
+  ShapeFactory shapeFactory;
+  return shapeFactory.createShape(typeElement);
+}
+
+std::array<size_t, 4> nearestNeighbourIndices(const double lat, const double lon, const std::set<double> &lats, const std::set<double> &longs) {
+  if (lats.upper_bound(lat) == lats.cbegin() || lats.upper_bound(lat) == lats.cend() || longs.upper_bound(lon) == longs.cbegin() || longs.upper_bound(lon) == longs.cend()) {
+    throw std::runtime_error("BUG: Simulation instrument was to small to accommodate all detectors.");
+  }
+  const auto lowerLatBound = std::lower_bound(lats.cbegin(), lats.cend(), lat);
+  auto latIndex = static_cast<size_t>(std::distance(lats.cbegin(), lowerLatBound));
+  if (latIndex == 0) {
+    latIndex = 1;
+  } else if (latIndex == lats.size()) {
+    --latIndex;
+  }
+  const auto lowerLongBound = std::lower_bound(longs.cbegin(), longs.cend(), lon);
+  auto longIndex = static_cast<size_t>(std::distance(longs.cbegin(), lowerLongBound));
+  if (longIndex == 0) {
+    longIndex = 1;
+  } else if (longIndex == longs.size()) {
+    --longIndex;
+  }
+  std::array<size_t, 4> ids;
+  ids[0] = (latIndex - 1) * lats.size() + longIndex - 1;
+  ids[1] = ids[0] + 1;
+  ids[2] = ids[0] + lats.size();
+  ids[3] = ids[2] + 1;
+  return ids;
+}
+
+double greatCircleDistance(const double lat1, const double long1, const double lat2, const double long2) {
+  const double latD = std::sin((lat2 - lat1) / 2.0);
+  const double longD = std::sin((long2 - long1) / 2.0);
+  const double S = latD * latD + std::cos(lat1) * std::cos(lat2) * longD * longD;
+  return 2.0 * std::asin(std::sqrt(S));
+}
+
+std::array<double, 4> inverseDistanceWeights(const std::array<double, 4> &distances) {
+  std::array<double, 4> weights;
+  for (size_t i = 0; i < weights.size(); ++i) {
+    if (distances[i] == 0.0) {
+      weights.fill(0.0);
+      weights[i] = 1.0;
+      return weights;
+    }
+    weights[i] = 1.0 / distances[i] / distances[i];
+  }
+  return weights;
+}
+
+Mantid::HistogramData::HistogramY interpolateY(const double lat, const double lon, const MatrixWorkspace &ws, const std::array<size_t, 4> &indices) {
+  const auto &spectrumInfo = ws.spectrumInfo();
+  std::array<double, 4> distances;
+  for (size_t i = 0; i < 4; ++i) {
+    double detLat, detLong;
+    std::tie(detLat, detLong) = geographicalAngles(spectrumInfo.position(indices[i]));
+    distances[i] = greatCircleDistance(lat, lon, detLat, detLong);
+  }
+  const auto weights = inverseDistanceWeights(distances);
+  auto weightSum = weights[0];
+  auto ys = weights[0] * ws.y(indices[0]);
+  for (size_t i = 1; i < 4; ++i) {
+    weightSum += weights[i];
+    ys += weights[i] * ws.y(indices[i]);
+  }
+  ys /= weightSum;
+  return ys;
+}
+
+
+MatrixWorkspace_uptr createInterpolatedWS(MatrixWorkspace &ws, MatrixWorkspace &simulationWS, const std::set<double> &lats, const std::set<double> &longs) {
+  auto interpWS = Mantid::DataObjects::create<Workspace2D>(ws, simulationWS.histogram(0));
+  const auto &spectrumInfo = interpWS->spectrumInfo();
+  for (size_t i = 0; i < interpWS->getNumberHistograms(); ++i) {
+    double lat, lon;
+    std::tie(lat, lon) = geographicalAngles(spectrumInfo.position(i));
+    const auto nearestIndices = nearestNeighbourIndices(lat, lon, lats, longs);
+    interpWS->mutableY(i) = interpolateY(lat, lon, simulationWS, nearestIndices);
+  }
+  return MatrixWorkspace_uptr(interpWS.release());
+}
+
+std::tuple<std::set<double>, std::set<double>> latitudeLongitudeGrid(const double minLat, const double maxLat, const size_t latPoints, const double minLong, const double maxLong, const size_t longPoints) {
+  const double latStep = (maxLat - minLat) / static_cast<double>(latPoints - 1);
+  std::set<double> lats;
+  for (size_t i = 0; i < latPoints; ++i) {
+    lats.emplace_hint(lats.cend(), minLat + static_cast<double>(i) * latStep);
+  }
+  const double longStep = (maxLong - minLong) / static_cast<double>(longPoints - 1);
+  std::set<double> longs;
+  for (size_t i = 0; i < longPoints; ++i) {
+    longs.emplace_hint(longs.cend(), minLong + static_cast<double>(i) * longStep);
+  }
+  return std::tie(lats, longs);
+}
+
+MatrixWorkspace_uptr createWSWithSimulationInstrument(const Histogram &modelHistogram, const std::set<double> &lats, const std::set<double> &longs) {
+  auto instrument = boost::make_shared<Instrument>("MC_simulation_instrument");
+  instrument->setReferenceFrame(
+      boost::make_shared<ReferenceFrame>(Y, Z, Right, ""));
+  const V3D samplePos{0.0, 0.0, 0.0};
+  auto sample = Mantid::Kernel::make_unique<ObjComponent>("sample", nullptr, instrument.get());
+  sample->setPos(samplePos);
+  instrument->add(sample.get());
+  instrument->markAsSamplePos(sample.release());
+  const double R = 1.0;
+  const V3D sourcePos{0.0, 0.0, -2.0 * R};
+  auto source = Mantid::Kernel::make_unique<ObjComponent>("source", nullptr, instrument.get());
+  source->setPos(sourcePos);
+  instrument->add(source.get());
+  instrument->markAsSource(source.release());
+  const size_t numSpectra = lats.size() * longs.size();
+  auto ws = Mantid::DataObjects::create<Workspace2D>(numSpectra, modelHistogram);
+  auto detShape = makeCubeShape();
+  size_t index = 0;
+  for (const auto lat : lats) {
+    for (const auto lon : longs) {
+      const int detID = static_cast<int>(index);
+      std::ostringstream detName;
+      detName << "det-" << detID;
+      auto det = Mantid::Kernel::make_unique<Detector>(detName.str(), detID, detShape, instrument.get());
+      const double x = R * std::sin(lon) * std::cos(lat);
+      const double y = R * std::sin(lat);
+      const double z = R * std::cos(lon) * std::cos(lat);
+      det->setPos(x, y, z);
+      ws->getSpectrum(index).setDetectorID(detID);
+      instrument->add(det.get());
+      instrument->markAsDetector(det.release());
+      ++index;
+    }
+  }
+  ws->setInstrument(instrument);
+  return MatrixWorkspace_uptr(ws.release());
+}
+
 }
 /// @endcond
 
@@ -115,6 +324,12 @@ void MonteCarloAbsorption::init() {
  */
 void MonteCarloAbsorption::exec() {
   const MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
+  double minLat, maxLat, minLong, maxLong;
+  std::tie(minLat, maxLat, minLong, maxLong) = extremeAngles(*inputWS);
+  std::set<double> lats, longs;
+  std::tie(lats, longs) = latitudeLongitudeGrid(minLat, maxLat, 4, minLong, maxLong, 10);
+  MatrixWorkspace_sptr sparseWS(createWSWithSimulationInstrument(inputWS->histogram(0), lats, longs).release());
+  Mantid::API::AnalysisDataService::Instance().addOrReplace("magick_output_ws", sparseWS);
   const int nevents = getProperty("EventsPerPoint");
   const int nlambda = getProperty("NumberOfWavelengthPoints");
   const int seed = getProperty("SeedValue");
