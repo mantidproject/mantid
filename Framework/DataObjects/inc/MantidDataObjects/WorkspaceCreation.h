@@ -187,7 +187,7 @@ std::unique_ptr<T> create(const P &parent, const IndexArg &indexArg,
 template <class T, class P, class IndexArg, class HistArg,
           class = typename std::enable_if<
               std::is_base_of<API::MatrixWorkspace, P>::value>::type>
-std::unique_ptr<T> createWithoutLogs(const P &parent,  const IndexArg &indexArg,
+std::unique_ptr<T> createWithoutLogs(const P &parent, const IndexArg &indexArg,
                                      const HistArg &histArg) {
   // Figure out (dynamic) target type:
   // - Type is same as parent if T is base of parent
@@ -261,8 +261,8 @@ template <class T, class P,
                                                   P>::value>::type * = nullptr>
 std::unique_ptr<T> createWithoutLogs(const P &parent) {
   const auto numHistograms = parent.getNumberHistograms();
-  auto ws =
-      createWithoutLogs<T>(parent, numHistograms, detail::stripData(parent.histogram(0)));
+  auto ws = createWithoutLogs<T>(parent, numHistograms,
+                                 detail::stripData(parent.histogram(0)));
   for (size_t i = 0; i < numHistograms; ++i) {
     ws->setSharedX(i, parent.sharedX(i));
   }
