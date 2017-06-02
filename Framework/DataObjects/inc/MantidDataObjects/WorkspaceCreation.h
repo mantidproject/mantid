@@ -149,8 +149,7 @@ template <class T, class P, class IndexArg, class HistArg,
           class = typename std::enable_if<
               std::is_base_of<API::MatrixWorkspace, P>::value>::type>
 std::unique_ptr<T> create(const P &parent, const IndexArg &indexArg,
-                          const HistArg &histArg,
-                          const bool &no_property = false) {
+                          const HistArg &histArg) {
   // Figure out (dynamic) target type:
   // - Type is same as parent if T is base of parent
   // - If T is not base of parent, conversion may occur. Currently only
@@ -178,10 +177,46 @@ std::unique_ptr<T> create(const P &parent, const IndexArg &indexArg,
   // future of WorkspaceFactory.
   ws->setInstrument(parent.getInstrument());
   ws->initialize(indexArg, HistogramData::Histogram(histArg));
-  if (no_property)
-    detail::initializeFromParentWithoutLogs(parent, *ws);
-  else
-    detail::initializeFromParent(parent, *ws);
+  detail::initializeFromParent(parent, *ws);
+  return ws;
+}
+
+/** create a new workspace with empty run, i.e., without logs
+ *  this is for initializeFromParentWithoutLogs
+ */
+template <class T, class P, class IndexArg, class HistArg,
+          class = typename std::enable_if<
+              std::is_base_of<API::MatrixWorkspace, P>::value>::type>
+std::unique_ptr<T> createWithoutLogs(const P &parent,  const IndexArg &indexArg,
+                                     const HistArg &histArg) {
+  // Figure out (dynamic) target type:
+  // - Type is same as parent if T is base of parent
+  // - If T is not base of parent, conversion may occur. Currently only
+  //   supported for EventWorkspace
+  std::unique_ptr<T> ws;
+  if (std::is_base_of<API::HistoWorkspace, T>::value &&
+      parent.id() == "EventWorkspace") {
+    // Drop events, create Workspace2D or T whichever is more derived.
+    ws = detail::createHelper<T>();
+  } else {
+    try {
+      // If parent is more derived than T: create type(parent)
+      ws = dynamic_cast<const T &>(parent).cloneEmpty();
+    } catch (std::bad_cast &) {
+      // If T is more derived than parent: create T
+      ws = detail::createConcreteHelper<T>();
+    }
+  }
+
+  // The instrument is also copied by initializeFromParentWithoutLogs,
+  // but if indexArg is
+  // IndexInfo and contains non-empty spectrum definitions the initialize call
+  // will fail due to invalid indices in the spectrum definitions. Therefore, we
+  // copy the instrument first. This should be cleaned up once we figure out the
+  // future of WorkspaceFactory.
+  ws->setInstrument(parent.getInstrument());
+  ws->initialize(indexArg, HistogramData::Histogram(histArg));
+  detail::initializeFromParentWithoutLogs(parent, *ws);
   return ws;
 }
 
@@ -221,17 +256,13 @@ std::unique_ptr<T> create(const P &parent) {
   return ws;
 }
 
-/** create a new workspace with empty run
- *  this is for initializeFromParentWithoutLogs
- */
 template <class T, class P,
           typename std::enable_if<std::is_base_of<API::MatrixWorkspace,
                                                   P>::value>::type * = nullptr>
-std::unique_ptr<T> createWithEmptyRun(const P &parent) {
+std::unique_ptr<T> createWithoutLogs(const P &parent) {
   const auto numHistograms = parent.getNumberHistograms();
-  const bool no_property = true;
-  auto ws = create<T>(parent, numHistograms,
-                      detail::stripData(parent.histogram(0)), no_property);
+  auto ws =
+      createWithoutLogs<T>(parent, numHistograms, detail::stripData(parent.histogram(0)));
   for (size_t i = 0; i < numHistograms; ++i) {
     ws->setSharedX(i, parent.sharedX(i));
   }
