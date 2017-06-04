@@ -1539,7 +1539,7 @@ def can_load_as_event_workspace(filename):
                     rootKeys = h5f.keys()
                     entry0 = h5f[rootKeys[0]]
                     ew = entry0['event_workspace']
-                    is_event_workspace = True
+                    is_event_workspace = ew is not None
                 except:
                     pass
         except IOError:
