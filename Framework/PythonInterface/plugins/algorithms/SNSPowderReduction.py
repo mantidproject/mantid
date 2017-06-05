@@ -704,7 +704,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
             if sample_ws_name is None:
                 # sample run workspace is not set up.
                 sample_ws_name = ws_name
-                info = tempinfo
+                self._info = tempinfo
             else:
                 # there is sample run workspace set up previously, then add current one to previous for summation
                 self.checkInfoMatch(info, tempinfo)
