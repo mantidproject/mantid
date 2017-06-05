@@ -999,6 +999,10 @@ class SNSPowderReduction(DataProcessorAlgorithm):
         assert isinstance(wksp_name, str)
         assert self.does_workspace_exist(wksp_name)
 
+        # Reset characterization run numbers in the property manager
+        if PropertyManagerDataService.doesExist('__snspowderreduction'):
+            PropertyManagerDataService.remove('__snspowderreduction')
+
         # Determine characterization
         api.PDDetermineCharacterizations(InputWorkspace=wksp_name,
                                          Characterizations=self._charTable,
