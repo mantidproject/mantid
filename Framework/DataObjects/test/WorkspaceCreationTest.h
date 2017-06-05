@@ -172,6 +172,15 @@ public:
     check_instrument(*ws);
   }
 
+  void test_create_parent_without_logs() {
+    const auto parent = create<Workspace2D>(m_instrument, make_indices(),
+                                            Histogram(BinEdges{1, 2, 4}));
+    const auto ws = createWithoutLogs<Workspace2D>(*parent);
+    check_indices(*ws);
+    check_zeroed_data(*ws);
+    check_instrument(*ws);
+  }
+
   void test_create_parent_varying_bins() {
     auto parent = create<Workspace2D>(make_indices_no_detectors(), make_data());
     const double binShift = -0.54;

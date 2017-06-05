@@ -80,6 +80,7 @@ private:
   signal_t *signals;
   signal_t *errors;
   signal_t *numEvents;
+  bool m_accumulate{false};
 };
 
 } // namespace Mantid

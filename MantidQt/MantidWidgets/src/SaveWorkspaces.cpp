@@ -313,6 +313,11 @@ QString SaveWorkspaces::getSaveAlgExt(const QString &algName) {
 *  have been selected to be saved
 */
 void SaveWorkspaces::saveSel() {
+  // Check if the save selection is valid
+  if (!isValid()) {
+    return;
+  }
+
   // For each selected workspace, provide an zero-error free clone
   QHash<QString, QString> workspaceMap =
       provideZeroFreeWorkspaces(m_workspaces);
@@ -350,6 +355,72 @@ void SaveWorkspaces::saveSel() {
                           "the selected formats");
   }
 }
+
+/**
+ * Checks if the save option selection is compatible with the dimensionality
+ * selection
+ * @return true if the save option selection is compatible with the
+ * dimensionality selection else false
+ */
+bool SaveWorkspaces::isValid() {
+  // Get the dimensionality of the workspaces
+  auto is1D = false;
+  auto is2D = false;
+
+  auto workspacesList = m_workspaces->selectedItems();
+  for (auto it = workspacesList.begin(); it != workspacesList.end(); ++it) {
+    auto wsName = (*it)->text();
+    auto workspace =
+        AnalysisDataService::Instance()
+            .retrieveWS<Mantid::API::MatrixWorkspace>(wsName.toStdString());
+    if (workspace->getNumberHistograms() == 1) {
+      is1D = true;
+    } else {
+      is2D = true;
+    }
+  }
+
+  // Check if the NistQxy or CanSAS were selected
+  auto isCanSAS = false;
+  auto isNistQxy = false;
+  for (SavFormatsConstIt i = m_savFormats.begin(); i != m_savFormats.end();
+       ++i) { // the key to a pointer to the check box that the user may have
+              // clicked
+    if (i.key()->isChecked()) { // we need to save in this format
+      if (i.value() == "SaveNISTDAT") {
+        isNistQxy = true;
+      }
+
+      if (i.value() == "SaveCanSAS1D") {
+        isCanSAS = true;
+      }
+    }
+  }
+
+  // Check for errors
+  QString message;
+  auto isValidOption = true;
+  if (is1D && isNistQxy) {
+    isValidOption = false;
+    message +=
+        "Save option issue: Cannot save in NistQxy format for 1D data.\n";
+  }
+
+  if (is2D && isCanSAS) {
+    isValidOption = false;
+    message += "Save option issue: Cannot save in CanSAS format for 2D data.\n";
+  }
+
+  // Print the error message if there are any
+  if (!message.isEmpty()) {
+    QString warning = "Please correct these save settings before proceeding:\n";
+    warning += message;
+    QMessageBox::warning(this, "Inconsistent input", warning);
+  }
+
+  return isValidOption;
+}
+
 /** Sets the filename to the name of the selected workspace
 *  @param row number of the row that is selected
 */

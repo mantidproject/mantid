@@ -112,6 +112,7 @@ Bugs Resolved
 - Fixed an issue where contour lines were displayed at the wrong location.
 - Fixed an issue where some workspaces might not get deleted from the workspace dock if group workspaces were present.
 - Fixed an issues in the Detectors table where monitor information did not show up correctly.
+- Fixed an issue where MantidPlot could crash if a workspace's instrument was changed while the Instrument Window was open.
 
 
 |

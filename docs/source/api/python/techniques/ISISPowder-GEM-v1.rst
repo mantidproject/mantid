@@ -248,8 +248,7 @@ Example Input:
 
 ..  code-block:: python
 
-  calibration_dir = r"C:\path\to\calibration_dir"
-  gem_example = Gem(calibration_directory=calibration_dir, ...)
+  gem_example = Gem(calibration_directory=r"C:\path\to\calibration_dir", ...)
 
 .. _calibration_mapping_file_gem_isis-powder-diffraction-ref:
 
@@ -266,8 +265,7 @@ Example Input:
 ..  code-block:: python
 
   # Notice the filename always ends in .yaml
-  cal_mapping_file = r"C:\path\to\file\calibration_mapping.yaml"
-  gem_example = Gem(calibration_mapping_file=cal_mapping_file, ...)
+  gem_example = Gem(calibration_mapping_file=r"C:\path\to\file\calibration_mapping.yaml", ...)
 
 .. _config_file_gem_isis-powder-diffraction-ref:
 
@@ -286,8 +284,7 @@ Example Input:
 ..  code-block:: python
 
   # Notice the filename always ends in .yaml
-  configuration_file = r"C:\path\to\file\configuration.yaml"
-  gem_example = Gem(config_file=configuration_file, ...)
+  gem_example = Gem(config_file=r"C:\path\to\file\configuration.yaml", ...)
 
 .. _do_absorb_corrections_gem_isis-powder-diffraction-ref:
 
@@ -443,8 +440,7 @@ Example Input:
 
 ..  code-block:: python
 
-  output_dir = r"C:\path\to\output_dir"
-  gem_example = Gem(output_directory=output_dir, ...)
+  gem_example = Gem(output_directory=r"C:\path\to\output_dir", ...)
 
 .. _run_number_gem_isis-powder-diffraction-ref:
 
