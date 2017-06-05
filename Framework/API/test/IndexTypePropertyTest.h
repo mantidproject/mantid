@@ -60,11 +60,11 @@ public:
 
     prop = "SpectrumNumber";
 
-    TS_ASSERT(prop.selectedType() & IndexType::SpectrumNumber);
+    TS_ASSERT_EQUALS(prop.selectedType(), IndexType::SpectrumNumber);
 
     prop = "WorkspaceIndex";
 
-    TS_ASSERT(prop.selectedType() & IndexType::WorkspaceIndex);
+    TS_ASSERT_EQUALS(prop.selectedType(), IndexType::WorkspaceIndex);
   }
 
   void testCorrectTypeReturnedWhenSetWithIndexType() {
@@ -72,11 +72,11 @@ public:
 
     prop = IndexType::SpectrumNumber;
 
-    TS_ASSERT(prop.selectedType() & IndexType::SpectrumNumber);
+    TS_ASSERT_EQUALS(prop.selectedType(), IndexType::SpectrumNumber);
 
     prop = IndexType::WorkspaceIndex;
 
-    TS_ASSERT(prop.selectedType() & IndexType::WorkspaceIndex);
+    TS_ASSERT_EQUALS(prop.selectedType(), IndexType::WorkspaceIndex);
   }
 };
 

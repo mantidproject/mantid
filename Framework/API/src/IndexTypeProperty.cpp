@@ -48,7 +48,7 @@ std::vector<std::string> IndexTypeProperty::allowedValues() const {
   return m_allowedValues;
 }
 
-bool IndexTypeProperty::isMultipleSelectionAllowed() { return true; }
+bool IndexTypeProperty::isMultipleSelectionAllowed() { return false; }
 
 std::string &IndexTypeProperty::operator=(API::IndexType type) {
   std::string val;

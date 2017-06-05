@@ -6,8 +6,6 @@
 #include <boost/shared_ptr.hpp>
 #include <cxxtest/TestSuite.h>
 
-#include "MantidAPI/WorkspaceProperty.tcc"
-#include "MantidAPI/WorkspacePropertyWithIndex.h"
 #include "MantidAPI/WorkspacePropertyWithIndex.tcc"
 #include "MantidKernel/PropertyManager.h"
 #include "MantidKernel/make_unique.h"

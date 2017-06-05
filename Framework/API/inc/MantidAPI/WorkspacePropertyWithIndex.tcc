@@ -1,6 +1,3 @@
-#ifndef MANTIDAPI_WORKSPACEPROPERTYWITHINDEX_TCC
-#define MANTIDAPI_WORKSPACEPROPERTYWITHINDEX_TCC
-
 #include "MantidAPI/IndexTypeProperty.h"
 #include "MantidAPI/WorkspacePropertyWithIndex.h"
 #include <MantidAPI/MatrixWorkspace.h>
@@ -144,6 +141,12 @@ WorkspacePropertyWithIndex<TYPE>::clone() const {
 }
 
 template <typename TYPE>
+std::string WorkspacePropertyWithIndex<TYPE>::value() const {
+  return WorkspaceProperty<TYPE>::value() + "," + m_indexTypeProp->value() +
+         "," + m_indexListProp->value();
+}
+
+template <typename TYPE>
 WorkspacePropertyWithIndex<TYPE>::
 operator const std::tuple<boost::shared_ptr<TYPE>, SpectrumIndexSet>() const {
   return std::make_pair(operator()(), getIndices());
@@ -170,21 +173,39 @@ const SpectrumIndexSet WorkspacePropertyWithIndex<TYPE>::getIndices() const {
   if (list.size() == 0)
     return indexInfo.makeIndexSet();
 
-  switch (m_indexTypeProp->selectedType()) {
-  case IndexType::SpectrumNumber:
-    return indexInfo.makeIndexSet(std::vector<Mantid::Indexing::SpectrumNumber>(
-        list.begin(), list.end()));
-    break;
-  case IndexType::WorkspaceIndex:
-    return indexInfo.makeIndexSet(
-        std::vector<Mantid::Indexing::GlobalSpectrumIndex>(list.begin(),
-                                                           list.end()));
-    break;
+  // Determine if input is a pure range or just a list of numbers
+  auto res = std::minmax_element(list.begin(), list.end());
+  auto minIndex = res.first - list.begin();
+  auto maxIndex = res.second - list.begin();
+  bool isPureRange = (list[maxIndex] - list[minIndex] + 1) == list.size();
+
+  if (isPureRange) {
+    auto min = list[minIndex];
+    auto max = list[maxIndex];
+    switch (m_indexTypeProp->selectedType()) {
+    case IndexType::SpectrumNumber:
+      return indexInfo.makeIndexSet(Indexing::SpectrumNumber(min),
+                                    Indexing::SpectrumNumber(max));
+      break;
+    case IndexType::WorkspaceIndex:
+      return indexInfo.makeIndexSet(Indexing::GlobalSpectrumIndex(min),
+                                    Indexing::GlobalSpectrumIndex(max));
+      break;
+    }
+  } else { // Only make a vector if we don't have a pure range
+    switch (m_indexTypeProp->selectedType()) {
+    case IndexType::SpectrumNumber:
+      return indexInfo.makeIndexSet(
+          std::vector<Indexing::SpectrumNumber>(list.begin(), list.end()));
+      break;
+    case IndexType::WorkspaceIndex:
+      return indexInfo.makeIndexSet(
+          std::vector<Indexing::GlobalSpectrumIndex>(list.begin(), list.end()));
+      break;
+    }
   }
 
   return Mantid::Indexing::SpectrumIndexSet(0);
 }
 } // namespace API
 } // namespace Mantid
-
-#endif // MANTIDAPI_WORKSPACEPROPERTYWITHINDEX_TCC

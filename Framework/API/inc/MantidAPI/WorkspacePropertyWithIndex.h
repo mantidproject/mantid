@@ -95,6 +95,8 @@ public:
 
   WorkspacePropertyWithIndex *clone() const override;
 
+  std::string value() const override;
+
   Kernel::ArrayProperty<int> &mutableIndexListProperty() {
     return *m_indexListProp.get();
   }

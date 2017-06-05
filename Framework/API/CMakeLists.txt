@@ -348,7 +348,6 @@ set ( INC_FILES
 	inc/MantidAPI/WorkspacePropertyWithIndex.h
 	inc/MantidAPI/WorkspacePropertyWithIndex.tcc
 	inc/MantidAPI/WorkspaceUnitValidator.h
-	inc/MantidAPI/WorkspacePropertyWithIndexHelper.h
 	inc/MantidAPI/Workspace_fwd.h
 )
 
@@ -460,7 +459,6 @@ set ( TEST_FILES
 	WorkspacePropertyTest.h
 	WorkspacePropertyWithIndexTest.h
 	WorkspaceUnitValidatorTest.h
-	WorkspacePropertyWithIndexHelperTest.h
 )
 
 set ( GMOCK_TEST_FILES
