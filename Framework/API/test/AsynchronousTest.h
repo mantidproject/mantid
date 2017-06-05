@@ -20,9 +20,12 @@ using namespace std;
 
 namespace {
 constexpr int NO_OF_LOOPS = 10;
+bool synchronise = false;
 std::condition_variable condition1;
 std::condition_variable condition2;
 std::mutex mtx;
+bool testStarted = false;
+bool execStarted = false;
 }
 
 class AsyncAlgorithm : public Algorithm {
@@ -50,10 +53,13 @@ public:
   void exec() override {
     if (synchronise) {
       std::unique_lock<std::mutex> lock(mtx);
-      condition1.wait(lock);
+      execStarted = true;
+      condition1.notify_all();
+      if (!testStarted) {
+        condition2.wait(lock);
+      }
     }
     Poco::Thread *thr = Poco::Thread::current();
-    condition2.notify_all();
     for (int i = 0; i < NO_OF_LOOPS; i++) {
       result = i;
       if (thr)
@@ -65,8 +71,6 @@ public:
     }
   }
   int result;
-
-  bool synchronise = false;
 
 protected:
   bool throw_exception;
@@ -154,18 +158,26 @@ public:
   }
 
   void testCancelGroupWS() {
+    synchronise = true;
+    testStarted = false;
+    execStarted = false;
     WorkspaceGroup_sptr groupWS = makeGroupWorkspace();
     AsyncAlgorithm alg;
-    alg.synchronise = true;
     setupTest(alg);
     alg.setPropertyValue("InputWorkspace", "groupWS");
     Poco::ActiveResult<bool> result = alg.executeAsync();
     {
       std::unique_lock<std::mutex> lock(mtx);
-      condition1.notify_all();
-      condition2.wait(lock);
+      if (!execStarted) {
+        condition1.wait(lock);
+      }
     }
     alg.cancel();
+    {
+      std::unique_lock<std::mutex> lock(mtx);
+      testStarted = true;
+    }
+    condition2.notify_all();
     result.wait();
     generalChecks(alg, false, true, false, true);
     // The parent algorithm is not executed directly, so the result remains 0
