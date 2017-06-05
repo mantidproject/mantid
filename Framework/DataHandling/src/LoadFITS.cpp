@@ -47,12 +47,8 @@ struct FITSInfo {
   int offset;
   int headerSizeMultiplier;
   std::vector<size_t> axisPixelLengths;
-  double tof;
-  double timeBin;
   double scale;
   std::string imageKey;
-  long int countsInImage;
-  long int numberOfTriggers;
   std::string extension;
   std::string filePath;
   bool isFloat;
