@@ -78,7 +78,7 @@ class IndirectDiffScan(DataProcessorAlgorithm):
         process_prog = Progress(self, start=0.1, end=0.9, nreports=len(self._workspace_names))
         process_prog.report("Running diffraction")
         scan_alg = self.createChildAlgorithm("ISISIndirectDiffractionReduction", 0.05, 0.95)
-        scan_alg.setProperty('InputFiles', self._data_files)
+        scan_alg.setProperty('InputFiles', self._format_runs(self._data_files))
         scan_alg.setProperty('ContainerFiles', self._can_files)
         scan_alg.setProperty('ContainerScaleFactor', self._can_scale)
         scan_alg.setProperty('CalFile', self._calib_file)
@@ -258,6 +258,7 @@ class IndirectDiffScan(DataProcessorAlgorithm):
         self._load_logs = self.getProperty('LoadLogFiles').value
 
         self._instrument_name = self.getPropertyValue('Instrument')
+        print(self._instrument_name)
         self._mode = 'diffspec'
 
         self._spectra_range = self.getProperty('SpectraRange').value
@@ -279,6 +280,22 @@ class IndirectDiffScan(DataProcessorAlgorithm):
         # The list of workspaces being processed
         self._workspace_names = []
 
+    def _format_runs(self, runs):
+        run_list = []
+        for run in runs:
+            if '-' in run:
+                a, b = run.split('-')
+                run_list.extend(range(int(a), int(b)+1))
+            else:
+                try:
+                    run_list.append(int(run))
+                except:
+                    # run already has instrument eg 'osi1000'
+                    run_list.append(run)
+        for idx, run in enumerate(run_list):
+            if (type(run) == int):
+                run_list[idx] = self._instrument_name + str(run)
+        return run_list
 
 # Register algorithm with Mantid
 AlgorithmFactory.subscribe(IndirectDiffScan)
