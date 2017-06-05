@@ -135,19 +135,21 @@ void SmoothNeighbours::init() {
   declareProperty(
       "RadiusUnits", "Meters",
       boost::make_shared<StringListValidator>(radiusPropOptions),
-      "Units used to specify the radius?\n"
+      "Units used to specify the radius.\n"
       "  Meters : Radius is in meters.\n"
       "  NumberOfPixels : Radius is in terms of the number of pixels.");
 
   declareProperty(
       "Radius", 0.0, mustBePositiveDouble,
-      "The radius around a pixel to look for nearest neighbours to average. \n"
+      "The radius cut-off around a pixel to look for nearest neighbours to average. \n"
+      "This radius cut-off is applied to a set of nearest neighbours whose number is "
+      "defined in the NumberOfNeighbours property. See below for more details. \n"
       "If 0, will use the AdjX and AdjY parameters for rectangular detectors "
       "instead.");
 
   declareProperty("NumberOfNeighbours", 8, mustBePositive,
                   "Number of nearest neighbouring pixels.\n"
-                  "Alternative to providing the radius. The default is 8.");
+                  "The default is 8.");
 
   declareProperty("SumNumberOfNeighbours", 1,
                   "Sum nearest neighbouring pixels with same parent.\n"
