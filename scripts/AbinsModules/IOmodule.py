@@ -25,7 +25,9 @@ class IOmodule(object):
             self._input_filename = input_filename
             try:
                 self._hash_input_filename = self.calculate_dft_file_hash()
-            except (IOError, ValueError) as err:
+            except IOError as err:
+                logger.error(str(err))
+            except ValueError as err:
                 logger.error(str(err))
 
             # extract name of file from the full path in the platform independent way
@@ -47,7 +49,9 @@ class IOmodule(object):
 
         try:
             self._advanced_parameters = self._get_advanced_parameters()
-        except (IOError, ValueError) as err:
+        except IOError as err:
+            logger.error(str(err))
+        except ValueError as err:
             logger.error(str(err))
 
         self._attributes = {}  # attributes for group
@@ -219,8 +223,12 @@ class IOmodule(object):
                                    " -o " + os.path.join(path, temp_file)])
 
             shutil.move(os.path.join(path, temp_file), os.path.join(path, self._hdf_filename))
-        except (OSError, IOError, RuntimeError):
+        except OSError:
             pass  # repacking failed: no h5repack installed in the system... but we proceed
+        except IOError:
+            pass
+        except RuntimeError:
+            pass
 
     # noinspection PyMethodMayBeStatic
     def _list_of_str(self, list_str=None):
