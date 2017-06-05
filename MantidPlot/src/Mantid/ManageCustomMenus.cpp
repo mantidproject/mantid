@@ -133,8 +133,9 @@ void ManageCustomMenus::remScriptClicked() {
         this, "MantidPlot",
         "No item selected - please select a script from the left-hand list.");
   } else {
-    QTreeWidgetItem *item;
-    foreach (item, m_scriptsTree->selectedItems()) { delete item; }
+    foreach (QTreeWidgetItem *item, m_scriptsTree->selectedItems()) {
+      delete item;
+    }
   }
 }
 /**
@@ -162,8 +163,7 @@ void ManageCustomMenus::addItemClicked() {
       menu = menu->parent();
     }
 
-    QTreeWidgetItem *item;
-    foreach (item, selection) { // foreach is a Qt macro (
+    foreach (QTreeWidgetItem *item, selection) { // foreach is a Qt macro (
       // http://doc.qt.nokia.com/4.4/containers.html#the-foreach-keyword
       // )
       menu->addChild(item);
