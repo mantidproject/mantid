@@ -40,7 +40,7 @@ void CreatePeaksWorkspace::exec() {
   int NumberOfPeaks = getProperty("NumberOfPeaks");
 
   if (instWS) {
-    Progress progress(this, 0, 1, NumberOfPeaks);
+    Progress progress(this, 0.0, 1.0, NumberOfPeaks);
 
     out->setInstrument(instWS->getInstrument());
     out->mutableRun().setGoniometer(instWS->run().getGoniometer().getR(),

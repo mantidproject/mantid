@@ -115,26 +115,26 @@ private:
   API::ITableWorkspace_sptr m_calibrationWS;
   DataObjects::MaskWorkspace_sptr m_maskWS;
   DataObjects::GroupingWorkspace_sptr m_groupWS;
-  double m_l1;
+  double m_l1{0.0};
   std::vector<int32_t> specids;
   std::vector<double> l2s;
   std::vector<double> tths;
   std::vector<double> phis;
   std::string m_instName;
   std::vector<double> m_params;
-  int m_resampleX;
+  int m_resampleX{0};
   std::vector<double> m_dmins;
   std::vector<double> m_dmaxs;
-  bool dspace;
-  double xmin;
-  double xmax;
-  double LRef;
-  double DIFCref;
-  double minwl;
-  double maxwl;
-  double tmin;
-  double tmax;
-  bool m_preserveEvents;
+  bool dspace{false};
+  double xmin{0.0};
+  double xmax{0.0};
+  double LRef{0.0};
+  double DIFCref{0.0};
+  double minwl{0.0};
+  double maxwl{0.0};
+  double tmin{0.0};
+  double tmax{0.0};
+  bool m_preserveEvents{false};
   void doSortEvents(Mantid::API::Workspace_sptr ws);
 
   /// Low resolution TOF matrix workspace
@@ -142,11 +142,11 @@ private:
   /// Low resolution TOF event workspace
   DataObjects::EventWorkspace_sptr m_lowResEW;
   /// Flag to process low resolution workspace
-  bool m_processLowResTOF;
+  bool m_processLowResTOF{false};
   /// Offset to low resolution TOF spectra
-  size_t m_lowResSpecOffset;
+  size_t m_lowResSpecOffset{0};
 
-  API::Progress *m_progress; ///< Progress reporting
+  API::Progress *m_progress{nullptr}; ///< Progress reporting
 };
 
 } // namespace WorkflowAlgorithm

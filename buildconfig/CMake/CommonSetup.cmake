@@ -40,7 +40,7 @@ set ( TESTING_TIMEOUT 300 CACHE INTEGER
 ###########################################################################
 
 set ( Boost_NO_BOOST_CMAKE TRUE )
-find_package ( Boost 1.53.0 REQUIRED date_time regex )
+find_package ( Boost 1.53.0 REQUIRED date_time regex serialization )
 include_directories( SYSTEM ${Boost_INCLUDE_DIRS} )
 add_definitions ( -DBOOST_ALL_DYN_LINK -DBOOST_ALL_NO_LIB )
 # Need this defined globally for our log time values

@@ -698,11 +698,18 @@ void SliceViewer::switchQWTRaster(bool useNonOrthogonal) {
   m_coordinateTransform = createCoordinateTransform(m_ws, m_dimX, m_dimY);
 
   if (useNonOrthogonal && ui.btnNonOrthogonalToggle->isChecked()) {
-    m_data = Kernel::make_unique<API::QwtRasterDataMDNonOrthogonal>();
+    // Transfer the current settings
+    auto tempData = Kernel::make_unique<API::QwtRasterDataMDNonOrthogonal>();
+    transferSettings(m_data.get(), tempData.get());
+    m_data = std::move(tempData);
     applyNonOrthogonalAxisScaleDraw();
   } else {
     applyOrthogonalAxisScaleDraw();
-    m_data = Kernel::make_unique<API::QwtRasterDataMD>();
+
+    // Transfer the current settings
+    auto tempData = Kernel::make_unique<API::QwtRasterDataMD>();
+    transferSettings(m_data.get(), tempData.get());
+    m_data = std::move(tempData);
   }
 
   m_coordinateTransform = createCoordinateTransform(m_ws, m_dimX, m_dimY);
@@ -738,8 +745,11 @@ void SliceViewer::setWorkspace(Mantid::API::IMDWorkspace_sptr ws) {
   m_data->setWorkspace(ws);
   m_plot->setWorkspace(ws);
   autoRebinIfRequired();
-  // Set the normalization appropriate
-  this->setNormalization(ws->displayNormalization(), false);
+
+  // Set the appropriate normalization
+  auto initialDisplayNormalization = ws->displayNormalization();
+  this->setNormalization(initialDisplayNormalization, false);
+  m_data->setNormalization(initialDisplayNormalization);
 
   // Only allow perpendicular lines if looking at a matrix workspace.
   bool matrix = bool(boost::dynamic_pointer_cast<MatrixWorkspace>(m_ws));
@@ -1697,6 +1707,10 @@ void SliceViewer::changedShownDim(int index, int dim, int oldDim) {
   }
   // Show the new slice. This finds m_dimX and m_dimY
   this->updateDisplay();
+
+  // AutoRebin if required
+  autoRebinIfRequired();
+
   // Send out a signal
   emit changedShownDim(m_dimX, m_dimY);
 }
@@ -2423,13 +2437,19 @@ void SliceViewer::setNonOrthogonalbtn() {
 }
 
 void SliceViewer::disableOrthogonalAnalysisTools(bool checked) {
-  if (ui.btnDoLine->isChecked()) {
-    ui.btnDoLine->toggle();
-  }
-  if (ui.btnRebinMode->isChecked()) {
-    ui.btnRebinMode->toggle();
+  if (checked) {
+    // ---------------------------------------------------------------------------
+    // If non-orthogonal is enabled, then turn off
+    // 1. The cut line tool
+    if (ui.btnDoLine->isChecked()) {
+      ui.btnDoLine->toggle();
+    }
   }
 
+  // ---------------------------------------------------------------------------
+  // If non-orthogonal is enabled, then turn off
+  // 1. The cut line tool
+  // 2. The rebin tool
   if (checked) {
     m_nonOrthogonalOverlay->enable();
     adjustSize();
@@ -2437,6 +2457,10 @@ void SliceViewer::disableOrthogonalAnalysisTools(bool checked) {
     m_nonOrthogonalOverlay->disable();
   }
 
+  // ---------------------------------------------------------------------------
+  // If we are in the orthogonal mode, then we turn off
+  // 1. Cut line feature
+  // 2. Peak overlay feature
   if (checked) { // change tooltips to explain why buttons are disabled
     ui.btnDoLine->setToolTip(
         QString("Cut line is disabled in NonOrthogonal view"));
@@ -2459,6 +2483,8 @@ void SliceViewer::disableOrthogonalAnalysisTools(bool checked) {
   ui.btnClearLine->setDisabled(checked);
   ui.btnPeakOverlay->setDisabled(checked);
 
+  // ---------------------------------------------------------------------------
+  // Change aspect ratio depending on non-orthogonal enabled or not.
   if (m_lockAspectRatiosActionAll->isChecked() && checked) {
     m_lastRatioState = All;
   }
@@ -2980,6 +3006,13 @@ void SliceViewer::applyOrthogonalAxisScaleDraw() {
   auto *axis1 = new QwtScaleDraw();
   m_plot->setAxisScaleDraw(QwtPlot::xBottom, axis0);
   m_plot->setAxisScaleDraw(QwtPlot::yLeft, axis1);
+  this->updateDisplay();
+}
+
+/// Transfer data between QwtRasterDataMD instances
+void SliceViewer::transferSettings(const API::QwtRasterDataMD *const from,
+                                   API::QwtRasterDataMD *to) const {
+  from->transferSettingsTo(to);
 }
 
 } // namespace

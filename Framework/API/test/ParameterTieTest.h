@@ -118,8 +118,8 @@ public:
     TS_ASSERT_EQUALS(tie.asString(&mfun), "f1.sig=f2.sig^2+f0.a+1");
 
     TS_ASSERT_DELTA(tie.eval(), 5.8, 0.00001);
-    TS_ASSERT_EQUALS(tie.getFunction(), g1.get());
-    TS_ASSERT_EQUALS(tie.getIndex(), 2);
+    TS_ASSERT_EQUALS(tie.getLocalFunction(), g1.get());
+    TS_ASSERT_EQUALS(tie.getLocalIndex(), 2);
 
     TS_ASSERT_THROWS(mustThrow1(&mfun), std::invalid_argument);
     TS_ASSERT_THROWS(mustThrow2(&mfun), std::invalid_argument);
@@ -144,8 +144,8 @@ public:
     TS_ASSERT_EQUALS(tie.asString(&mfun), "f0.b=f3.sig^2+f1.a+1");
 
     TS_ASSERT_DELTA(tie.eval(), 2, 0.00001);
-    TS_ASSERT_EQUALS(tie.getFunction(), bk1.get());
-    TS_ASSERT_EQUALS(tie.getIndex(), 1);
+    TS_ASSERT_EQUALS(tie.getLocalFunction(), bk1.get());
+    TS_ASSERT_EQUALS(tie.getLocalIndex(), 1);
 
     mfun.removeFunction(2);
     TS_ASSERT_EQUALS(tie.asString(&mfun), "f0.b=f2.sig^2+f1.a+1");
@@ -213,7 +213,7 @@ public:
 
     ParameterTie tie(&bk, "b", "2*a-1");
 
-    TS_ASSERT_EQUALS(tie.getIndex(), 1);
+    TS_ASSERT_EQUALS(tie.getLocalIndex(), 1);
     TS_ASSERT_DELTA(tie.eval(), 0.6, 0.00001);
     TS_ASSERT_THROWS(mustThrow4(&bk), std::invalid_argument);
     TS_ASSERT_THROWS(mustThrow5(&bk), std::invalid_argument);

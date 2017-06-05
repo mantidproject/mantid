@@ -152,6 +152,19 @@ public:
     TSM_ASSERT_DIFFERS("Value should now have changed", original->value,
                        copyResource.value);
   }
+
+  void test_equals_not_equals() {
+    cow_ptr<MyType> cow{nullptr};
+    TS_ASSERT(cow == cow);
+    const auto cow2 = boost::make_shared<MyType>(42);
+    TS_ASSERT(cow2 == cow2);
+    TS_ASSERT(cow != cow2);
+    cow = boost::make_shared<MyType>(42);
+    TS_ASSERT(cow == cow);
+    TS_ASSERT(cow != cow2);
+    cow = cow2;
+    TS_ASSERT(cow == cow2);
+  }
 };
 
 #endif /*COW_PTR_TEST_H_*/

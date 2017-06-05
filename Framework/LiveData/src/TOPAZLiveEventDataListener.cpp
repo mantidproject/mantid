@@ -140,7 +140,7 @@ Kernel::Logger g_log("SNSLiveEventDataListener");
 
 /// Constructor
 TOPAZLiveEventDataListener::TOPAZLiveEventDataListener()
-    : ILiveListener(), m_workspaceInitialized(false), m_eventBuffer(),
+    : LiveListener(), m_workspaceInitialized(false), m_eventBuffer(),
       m_monitorLogs(), m_wsName(), m_indexMap(), m_monitorIndexMap(),
       m_tcpSocket(), m_dataSocket(), m_dataAddr(), m_isConnected(false),
       m_udpBuf(nullptr), m_udpBufSize(32768), m_runNumber(0), m_mutex(),
@@ -185,6 +185,8 @@ TOPAZLiveEventDataListener::~TOPAZLiveEventDataListener() {
 /// Connect to the TOPAZ event_catcher util (which will supply us with
 /// events).
 /// @param address The address to attempt to connect to
+/// @param args A ConnectionArgs object used to supply additional arguments
+/// required for the connection
 /// @return Returns true if the connection succeeds.  False otherwise.
 bool TOPAZLiveEventDataListener::connect(
     const Poco::Net::SocketAddress &address)

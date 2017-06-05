@@ -27,8 +27,8 @@ using namespace Mantid::Kernel;
 
 namespace {
 // function to  compare two intersections (h,k,l,Momentum) by Momentum
-bool compareMomentum(const Mantid::Kernel::VMD &v1,
-                     const Mantid::Kernel::VMD &v2) {
+bool compareMomentum(const std::array<double, 4> &v1,
+                     const std::array<double, 4> &v2) {
   return (v1[3] < v2[3]);
 }
 }
@@ -101,6 +101,20 @@ void MDNormSCD::init() {
                                                    solidAngleValidator),
                   "An input workspace containing momentum integrated vanadium "
                   "(a measure of the solid angle).");
+
+  declareProperty(make_unique<WorkspaceProperty<IMDHistoWorkspace>>(
+                      "TemporaryNormalizationWorkspace", "", Direction::Input,
+                      PropertyMode::Optional),
+                  "An input MDHistoWorkspace used to accumulate normalization "
+                  "from multiple MDEventWorkspaces. "
+                  "If unspecified a blank MDHistoWorkspace will be created.");
+
+  declareProperty(make_unique<WorkspaceProperty<IMDHistoWorkspace>>(
+                      "TemporaryDataWorkspace", "", Direction::Input,
+                      PropertyMode::Optional),
+                  "An input MDHistoWorkspace used to accumulate data from "
+                  "multiple MDEventWorkspaces. If "
+                  "unspecified a blank MDHistoWorkspace will be created.");
 
   declareProperty(make_unique<WorkspaceProperty<Workspace>>(
                       "OutputWorkspace", "", Direction::Output),
@@ -215,6 +229,7 @@ MDHistoWorkspace_sptr MDNormSCD::binInputWS() {
   for (auto prop : props) {
     const auto &propName = prop->name();
     if (propName != "FluxWorkspace" && propName != "SolidAngleWorkspace" &&
+        propName != "TemporaryNormalizationWorkspace" &&
         propName != "OutputNormalizationWorkspace") {
       binMD->setPropertyValue(propName, prop->value());
     }
@@ -230,8 +245,15 @@ MDHistoWorkspace_sptr MDNormSCD::binInputWS() {
  */
 void MDNormSCD::createNormalizationWS(const MDHistoWorkspace &dataWS) {
   // Copy the MDHisto workspace, and change signals and errors to 0.
-  m_normWS = dataWS.clone();
-  m_normWS->setTo(0., 0., 0.);
+  boost::shared_ptr<IMDHistoWorkspace> tmp =
+      this->getProperty("TemporaryNormalizationWorkspace");
+  m_normWS = boost::dynamic_pointer_cast<MDHistoWorkspace>(tmp);
+  if (!m_normWS) {
+    m_normWS = dataWS.clone();
+    m_normWS->setTo(0., 0., 0.);
+  } else {
+    m_accumulate = true;
+  }
 }
 
 /**
@@ -291,10 +313,8 @@ MDNormSCD::findIntergratedDimensions(const std::vector<coord_t> &otherDimValues,
     if (affineMat[row][0] == 1.) {
       m_hIntegrated = false;
       m_hIdx = row;
-      if (m_hmin < dimMin)
-        m_hmin = dimMin;
-      if (m_hmax > dimMax)
-        m_hmax = dimMax;
+      m_hmin = std::max(m_hmin, dimMin);
+      m_hmax = std::min(m_hmax, dimMax);
       if (m_hmin > dimMax || m_hmax < dimMin) {
         skipNormalization = true;
       }
@@ -302,10 +322,8 @@ MDNormSCD::findIntergratedDimensions(const std::vector<coord_t> &otherDimValues,
     if (affineMat[row][1] == 1.) {
       m_kIntegrated = false;
       m_kIdx = row;
-      if (m_kmin < dimMin)
-        m_kmin = dimMin;
-      if (m_kmax > dimMax)
-        m_kmax = dimMax;
+      m_kmin = std::max(m_kmin, dimMin);
+      m_kmax = std::min(m_kmax, dimMax);
       if (m_kmin > dimMax || m_kmax < dimMin) {
         skipNormalization = true;
       }
@@ -313,10 +331,8 @@ MDNormSCD::findIntergratedDimensions(const std::vector<coord_t> &otherDimValues,
     if (affineMat[row][2] == 1.) {
       m_lIntegrated = false;
       m_lIdx = row;
-      if (m_lmin < dimMin)
-        m_lmin = dimMin;
-      if (m_lmax > dimMax)
-        m_lmax = dimMax;
+      m_lmin = std::max(m_lmin, dimMin);
+      m_lmax = std::min(m_lmax, dimMax);
       if (m_lmin > dimMax || m_lmax < dimMin) {
         skipNormalization = true;
       }
@@ -402,90 +418,96 @@ void MDNormSCD::calculateNormalization(
   const detid2index_map solidAngDetToIdx =
       solidAngleWS->getDetectorIDToWorkspaceIndexMap();
 
+  const size_t vmdDims = 4;
+  std::vector<std::atomic<signal_t>> signalArray(m_normWS->getNPoints());
+  std::vector<std::array<double, 4>> intersections;
+  std::vector<double> xValues, yValues;
+  std::vector<coord_t> pos, posNew;
   auto prog = make_unique<API::Progress>(this, 0.3, 1.0, ndets);
-  PARALLEL_FOR_IF(Kernel::threadSafe(*integrFlux))
-  for (int64_t i = 0; i < ndets; i++) {
-    PARALLEL_START_INTERUPT_REGION
+PRAGMA_OMP(parallel for private(intersections, xValues, yValues, pos, posNew) if (Kernel::threadSafe(*integrFlux)))
+for (int64_t i = 0; i < ndets; i++) {
+  PARALLEL_START_INTERUPT_REGION
 
-    if (!spectrumInfo.hasDetectors(i) || spectrumInfo.isMonitor(i) ||
-        spectrumInfo.isMasked(i)) {
-      continue;
-    }
-    const auto &detector = spectrumInfo.detector(i);
-    double theta = detector.getTwoTheta(m_samplePos, m_beamDir);
-    double phi = detector.getPhi();
-    // If the dtefctor is a group, this should be the ID of the first detector
-    const auto detID = detector.getID();
-
-    // Intersections
-    auto intersections = calculateIntersections(theta, phi);
-    if (intersections.empty())
-      continue;
-
-    // get the flux spetrum number
-    size_t wsIdx = fluxDetToIdx.find(detID)->second;
-    // Get solid angle for this contribution
-    double solid =
-        solidAngleWS->y(solidAngDetToIdx.find(detID)->second)[0] * protonCharge;
-
-    // -- calculate integrals for the intersection --
-    // momentum values at intersections
-    auto intersectionsBegin = intersections.begin();
-    std::vector<double> xValues(intersections.size()),
-        yValues(intersections.size());
-    {
-      // copy momenta to xValues
-      auto x = xValues.begin();
-      for (auto it = intersectionsBegin; it != intersections.end(); ++it, ++x) {
-        *x = (*it)[3];
-      }
-    }
-    // calculate integrals at momenta from xValues by interpolating between
-    // points in spectrum sp
-    // of workspace integrFlux. The result is stored in yValues
-    calcIntegralsForIntersections(xValues, *integrFlux, wsIdx, yValues);
-
-    // Compute final position in HKL
-    const size_t vmdDims = intersections.front().size();
-    // pre-allocate for efficiency and copy non-hkl dim values into place
-    std::vector<coord_t> pos(vmdDims + otherValues.size());
-    std::copy(otherValues.begin(), otherValues.end(),
-              pos.begin() + vmdDims - 1);
-    pos.push_back(1.);
-
-    for (auto it = intersectionsBegin + 1; it != intersections.end(); ++it) {
-      const auto &curIntSec = *it;
-      const auto &prevIntSec = *(it - 1);
-      // the full vector isn't used so compute only what is necessary
-      double delta = curIntSec[3] - prevIntSec[3];
-      if (delta < 1e-07)
-        continue; // Assume zero contribution if difference is small
-
-      // Average between two intersections for final position
-      std::transform(curIntSec.getBareArray(),
-                     curIntSec.getBareArray() + vmdDims - 1,
-                     prevIntSec.getBareArray(), pos.begin(),
-                     VectorHelper::SimpleAverage<coord_t>());
-      std::vector<coord_t> posNew = affineTrans * pos;
-      size_t linIndex = m_normWS->getLinearIndexAtCoord(posNew.data());
-      if (linIndex == size_t(-1))
-        continue;
-
-      // index of the current intersection
-      size_t k = static_cast<size_t>(std::distance(intersectionsBegin, it));
-      // signal = integral between two consecutive intersections
-      double signal = (yValues[k] - yValues[k - 1]) * solid;
-
-      PARALLEL_CRITICAL(updateMD) {
-        signal += m_normWS->getSignalAt(linIndex);
-        m_normWS->setSignalAt(linIndex, signal);
-      }
-    }
-    prog->report();
-
-    PARALLEL_END_INTERUPT_REGION
+  if (!spectrumInfo.hasDetectors(i) || spectrumInfo.isMonitor(i) ||
+      spectrumInfo.isMasked(i)) {
+    continue;
   }
-  PARALLEL_CHECK_INTERUPT_REGION
+  const auto &detector = spectrumInfo.detector(i);
+  double theta = detector.getTwoTheta(m_samplePos, m_beamDir);
+  double phi = detector.getPhi();
+  // If the dtefctor is a group, this should be the ID of the first detector
+  const auto detID = detector.getID();
+
+  // Intersections
+  this->calculateIntersections(intersections, theta, phi);
+  if (intersections.empty())
+    continue;
+
+  // get the flux spetrum number
+  size_t wsIdx = fluxDetToIdx.find(detID)->second;
+  // Get solid angle for this contribution
+  double solid =
+      solidAngleWS->y(solidAngDetToIdx.find(detID)->second)[0] * protonCharge;
+
+  // -- calculate integrals for the intersection --
+  // momentum values at intersections
+  auto intersectionsBegin = intersections.begin();
+  // copy momenta to xValues
+  xValues.resize(intersections.size());
+  yValues.resize(intersections.size());
+  auto x = xValues.begin();
+  for (auto it = intersectionsBegin; it != intersections.end(); ++it, ++x) {
+    *x = (*it)[3];
+  }
+  // calculate integrals at momenta from xValues by interpolating between
+  // points in spectrum sp
+  // of workspace integrFlux. The result is stored in yValues
+  calcIntegralsForIntersections(xValues, *integrFlux, wsIdx, yValues);
+
+  // Compute final position in HKL
+  // pre-allocate for efficiency and copy non-hkl dim values into place
+  pos.resize(vmdDims + otherValues.size());
+  std::copy(otherValues.begin(), otherValues.end(), pos.begin() + vmdDims - 1);
+  pos.push_back(1.);
+
+  for (auto it = intersectionsBegin + 1; it != intersections.end(); ++it) {
+    const auto &curIntSec = *it;
+    const auto &prevIntSec = *(it - 1);
+    // the full vector isn't used so compute only what is necessary
+    double delta = curIntSec[3] - prevIntSec[3];
+    if (delta < 1e-07)
+      continue; // Assume zero contribution if difference is small
+
+    // Average between two intersections for final position
+    std::transform(curIntSec.begin(), curIntSec.begin() + vmdDims - 1,
+                   prevIntSec.begin(), pos.begin(),
+                   VectorHelper::SimpleAverage<coord_t>());
+    affineTrans.multiplyPoint(pos, posNew);
+    size_t linIndex = m_normWS->getLinearIndexAtCoord(posNew.data());
+    if (linIndex == size_t(-1))
+      continue;
+
+    // index of the current intersection
+    size_t k = static_cast<size_t>(std::distance(intersectionsBegin, it));
+    // signal = integral between two consecutive intersections
+    signal_t signal = (yValues[k] - yValues[k - 1]) * solid;
+    Mantid::Kernel::AtomicOp(signalArray[linIndex], signal,
+                             std::plus<signal_t>());
+  }
+  prog->report();
+
+  PARALLEL_END_INTERUPT_REGION
+}
+PARALLEL_CHECK_INTERUPT_REGION
+if (m_accumulate) {
+  std::transform(
+      signalArray.cbegin(), signalArray.cend(), m_normWS->getSignalArray(),
+      m_normWS->getSignalArray(),
+      [](const std::atomic<signal_t> &a, const signal_t &b) { return a + b; });
+} else {
+  std::copy(signalArray.cbegin(), signalArray.cend(),
+            m_normWS->getSignalArray());
+}
 }
 
 /**
@@ -568,12 +590,13 @@ void MDNormSCD::calcIntegralsForIntersections(
  * Calculate the points of intersection for the given detector with cuboid
  * surrounding the
  * detector position in HKL
+ * @param intersections A list of intersections in HKL space
  * @param theta Polar angle withd detector
  * @param phi Azimuthal angle with detector
- * @return A list of intersections in HKL space
  */
-std::vector<Kernel::VMD> MDNormSCD::calculateIntersections(const double theta,
-                                                           const double phi) {
+void MDNormSCD::calculateIntersections(
+    std::vector<std::array<double, 4>> &intersections, const double theta,
+    const double phi) {
   V3D q(-sin(theta) * cos(phi), -sin(theta) * sin(phi), 1. - cos(theta));
   q = m_rubw * q;
   if (convention == "Crystallography") {
@@ -589,7 +612,7 @@ std::vector<Kernel::VMD> MDNormSCD::calculateIntersections(const double theta,
   auto hNBins = m_hX.size();
   auto kNBins = m_kX.size();
   auto lNBins = m_lX.size();
-  std::vector<Kernel::VMD> intersections;
+  intersections.clear();
   intersections.reserve(hNBins + kNBins + lNBins + 8);
 
   // calculate intersections with planes perpendicular to h
@@ -610,8 +633,7 @@ std::vector<Kernel::VMD> MDNormSCD::calculateIntersections(const double theta,
           if ((ki >= m_kmin) && (ki <= m_kmax) && (li >= m_lmin) &&
               (li <= m_lmax)) {
             double momi = fmom * (hi - hStart) + m_kiMin;
-            Mantid::Kernel::VMD v(hi, ki, li, momi);
-            intersections.push_back(v);
+            intersections.push_back({{hi, ki, li, momi}});
           }
         }
       }
@@ -624,8 +646,7 @@ std::vector<Kernel::VMD> MDNormSCD::calculateIntersections(const double theta,
       double lhmin = fl * (m_hmin - hStart) + lStart;
       if ((khmin >= m_kmin) && (khmin <= m_kmax) && (lhmin >= m_lmin) &&
           (lhmin <= m_lmax)) {
-        Mantid::Kernel::VMD v(m_hmin, khmin, lhmin, momhMin);
-        intersections.push_back(v);
+        intersections.push_back({{m_hmin, khmin, lhmin, momhMin}});
       }
     }
     double momhMax = fmom * (m_hmax - hStart) + m_kiMin;
@@ -635,8 +656,7 @@ std::vector<Kernel::VMD> MDNormSCD::calculateIntersections(const double theta,
       double lhmax = fl * (m_hmax - hStart) + lStart;
       if ((khmax >= m_kmin) && (khmax <= m_kmax) && (lhmax >= m_lmin) &&
           (lhmax <= m_lmax)) {
-        Mantid::Kernel::VMD v(m_hmax, khmax, lhmax, momhMax);
-        intersections.push_back(v);
+        intersections.push_back({{m_hmax, khmax, lhmax, momhMax}});
       }
     }
   }
@@ -658,8 +678,7 @@ std::vector<Kernel::VMD> MDNormSCD::calculateIntersections(const double theta,
           if ((hi >= m_hmin) && (hi <= m_hmax) && (li >= m_lmin) &&
               (li <= m_lmax)) {
             double momi = fmom * (ki - kStart) + m_kiMin;
-            Mantid::Kernel::VMD v(hi, ki, li, momi);
-            intersections.push_back(v);
+            intersections.push_back({{hi, ki, li, momi}});
           }
         }
       }
@@ -672,8 +691,7 @@ std::vector<Kernel::VMD> MDNormSCD::calculateIntersections(const double theta,
       double lkmin = fl * (m_kmin - kStart) + lStart;
       if ((hkmin >= m_hmin) && (hkmin <= m_hmax) && (lkmin >= m_lmin) &&
           (lkmin <= m_lmax)) {
-        Mantid::Kernel::VMD v(hkmin, m_kmin, lkmin, momkMin);
-        intersections.push_back(v);
+        intersections.push_back({{hkmin, m_kmin, lkmin, momkMin}});
       }
     }
     double momkMax = fmom * (m_kmax - kStart) + m_kiMin;
@@ -683,8 +701,7 @@ std::vector<Kernel::VMD> MDNormSCD::calculateIntersections(const double theta,
       double lkmax = fl * (m_kmax - kStart) + lStart;
       if ((hkmax >= m_hmin) && (hkmax <= m_hmax) && (lkmax >= m_lmin) &&
           (lkmax <= m_lmax)) {
-        Mantid::Kernel::VMD v(hkmax, m_kmax, lkmax, momkMax);
-        intersections.push_back(v);
+        intersections.push_back({{hkmax, m_kmax, lkmax, momkMax}});
       }
     }
   }
@@ -706,8 +723,7 @@ std::vector<Kernel::VMD> MDNormSCD::calculateIntersections(const double theta,
           if ((hi >= m_hmin) && (hi <= m_hmax) && (ki >= m_kmin) &&
               (ki <= m_kmax)) {
             double momi = fmom * (li - lStart) + m_kiMin;
-            Mantid::Kernel::VMD v(hi, ki, li, momi);
-            intersections.push_back(v);
+            intersections.push_back({{hi, ki, li, momi}});
           }
         }
       }
@@ -720,8 +736,7 @@ std::vector<Kernel::VMD> MDNormSCD::calculateIntersections(const double theta,
       double klmin = fk * (m_lmin - lStart) + kStart;
       if ((hlmin >= m_hmin) && (hlmin <= m_hmax) && (klmin >= m_kmin) &&
           (klmin <= m_kmax)) {
-        Mantid::Kernel::VMD v(hlmin, klmin, m_lmin, momlMin);
-        intersections.push_back(v);
+        intersections.push_back({{hlmin, klmin, m_lmin, momlMin}});
       }
     }
     double momlMax = fmom * (m_lmax - lStart) + m_kiMin;
@@ -731,8 +746,7 @@ std::vector<Kernel::VMD> MDNormSCD::calculateIntersections(const double theta,
       double klmax = fk * (m_lmax - lStart) + kStart;
       if ((hlmax >= m_hmin) && (hlmax <= m_hmax) && (klmax >= m_kmin) &&
           (klmax <= m_kmax)) {
-        Mantid::Kernel::VMD v(hlmax, klmax, m_lmax, momlMax);
-        intersections.push_back(v);
+        intersections.push_back({{hlmax, klmax, m_lmax, momlMax}});
       }
     }
   }
@@ -740,22 +754,15 @@ std::vector<Kernel::VMD> MDNormSCD::calculateIntersections(const double theta,
   // add endpoints
   if ((hStart >= m_hmin) && (hStart <= m_hmax) && (kStart >= m_kmin) &&
       (kStart <= m_kmax) && (lStart >= m_lmin) && (lStart <= m_lmax)) {
-    Mantid::Kernel::VMD v(hStart, kStart, lStart, m_kiMin);
-    intersections.push_back(v);
+    intersections.push_back({{hStart, kStart, lStart, m_kiMin}});
   }
   if ((hEnd >= m_hmin) && (hEnd <= m_hmax) && (kEnd >= m_kmin) &&
       (kEnd <= m_kmax) && (lEnd >= m_lmin) && (lEnd <= m_lmax)) {
-    Mantid::Kernel::VMD v(hEnd, kEnd, lEnd, m_kiMax);
-    intersections.push_back(v);
+    intersections.push_back({{hEnd, kEnd, lEnd, m_kiMax}});
   }
 
   // sort intersections by momentum
-  typedef std::vector<Mantid::Kernel::VMD>::iterator IterType;
-  std::stable_sort<IterType, bool (*)(const Mantid::Kernel::VMD &,
-                                      const Mantid::Kernel::VMD &)>(
-      intersections.begin(), intersections.end(), compareMomentum);
-
-  return intersections;
+  std::stable_sort(intersections.begin(), intersections.end(), compareMomentum);
 }
 
 } // namespace MDAlgorithms

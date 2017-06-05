@@ -38,6 +38,19 @@ ReflMainWindowPresenter::ReflMainWindowPresenter(
 */
 ReflMainWindowPresenter::~ReflMainWindowPresenter() {}
 
+/** Returns values passed for 'Transmission run(s)'
+*
+* @param group :: Index of the group in 'Settings' tab from which to get the
+*values
+* @return :: Values passed for 'Transmission run(s)'
+*/
+std::string ReflMainWindowPresenter::getTransmissionRuns(int group) const {
+
+  checkSettingsPtrValid(m_settingsPresenter);
+
+  return m_settingsPresenter->getTransmissionRuns(group, false);
+}
+
 /** Returns global options for 'CreateTransmissionWorkspaceAuto'
 *
 * @param group :: Index of the group in 'Settings' tab from which to get the
@@ -79,18 +92,32 @@ std::string ReflMainWindowPresenter::getStitchOptions(int group) const {
   return m_settingsPresenter->getStitchOptions(group);
 }
 
-/** Returns global time-slicing options
+/** Returns time-slicing values
 *
 * @param group :: Index of the group in 'Event Handling' tab from which to get
-*the options
-* @return :: Global time-slicing options
+*the values
+* @return :: Time-slicing values
 */
-std::string ReflMainWindowPresenter::getTimeSlicingOptions(int group) const {
+std::string ReflMainWindowPresenter::getTimeSlicingValues(int group) const {
 
   checkEventPtrValid(m_eventPresenter);
 
-  // Request global time-slicing options to 'Event Handling' presenter
-  return m_eventPresenter->getTimeSlicingOptions(group);
+  // Request global time-slicing values to 'Event Handling' presenter
+  return m_eventPresenter->getTimeSlicingValues(group);
+}
+
+/** Returns time-slicing type
+*
+* @param group :: Index of the group in 'Event Handling' tab from which to get
+*the type
+* @return :: Time-slicing type
+*/
+std::string ReflMainWindowPresenter::getTimeSlicingType(int group) const {
+
+  checkEventPtrValid(m_eventPresenter);
+
+  // Request time-slicing type to 'Event Handling' presenter
+  return m_eventPresenter->getTimeSlicingType(group);
 }
 
 /**

@@ -183,9 +183,10 @@ set ( MANTID_SRCS  src/Mantid/AlgorithmDockWidget.cpp
                    src/Mantid/MantidMDCurve.cpp
                    src/Mantid/MantidMDCurveDialog.cpp
                    src/Mantid/MantidMatrixDialog.cpp
+                   src/Mantid/MantidPlotUtilities.cpp
                    src/Mantid/MantidSampleLogDialog.cpp
                    src/Mantid/MantidSampleMaterialDialog.cpp
-				   src/Mantid/MantidGroupPlotGenerator.cpp
+                   src/Mantid/MantidSurfaceContourPlotGenerator.cpp
                    src/Mantid/MantidUI.cpp
                    src/Mantid/MantidTable.cpp
                    src/Mantid/PeakPickerTool.cpp
@@ -375,9 +376,10 @@ set ( MANTID_HDRS  src/Mantid/AlgorithmMonitor.h
                    src/Mantid/MantidMatrixDialog.h
                    src/Mantid/MantidMatrix.h
                    src/Mantid/MantidMatrixFunction.h
+                   src/Mantid/MantidPlotUtilities.h
                    src/Mantid/MantidSampleLogDialog.h
                    src/Mantid/MantidSampleMaterialDialog.h
-				   src/Mantid/MantidGroupPlotGenerator.h
+		   src/Mantid/MantidSurfaceContourPlotGenerator.h
                    src/Mantid/MantidUI.h
                    src/Mantid/MantidTable.h
                    src/Mantid/PeakPickerTool.h
@@ -637,7 +639,11 @@ set ( MOCCED_FILES ${MOCCED_FILES} ${CMAKE_CURRENT_BINARY_DIR}/qtcolorpicker.moc
 
 set ( SRC_FILES ${QTIPLOT_SRCS} ${MANTID_SRCS} ${SIP_SRC} )
 set ( INC_FILES ${QTIPLOT_HDRS} ${MANTID_HDRS} )
-set ( ALL_SRC ${SRC_FILES} ${MOCCED_FILES} )
+if ( WIN32 )
+  set ( MANIFEST_FILES MantidPlot.manifest )
+endif ()
+
+set ( ALL_SRC ${SRC_FILES} ${MOCCED_FILES} ${MANIFEST_FILES} )
 
 # Use a precompiled header where they are supported
 enable_precompiled_headers( src/PrecompiledHeader.h ALL_SRC )

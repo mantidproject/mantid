@@ -6,6 +6,7 @@
 #include "MantidAPI/FunctionProperty.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidDataObjects/ScanningWorkspaceBuilder.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
@@ -17,7 +18,7 @@
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/MersenneTwister.h"
 #include "MantidIndexing/IndexInfo.h"
-#include "MantidIndexing/MakeRange.h"
+#include "MantidTypes/SpectrumDefinition.h"
 
 #include <cmath>
 #include <ctime>
@@ -159,6 +160,13 @@ void CreateSampleWorkspace::init() {
                   boost::make_shared<BoundedValidator<double>>(0, 1000, true),
                   "The distance along the beam direction from the source to "
                   "the sample in M (default:10.0)");
+  declareProperty("NumScanPoints", 1,
+                  boost::make_shared<BoundedValidator<int>>(0, 360, true),
+                  "Add a number of time indexed detector scan points to the "
+                  "instrument. The detectors are rotated in 1 degree "
+                  "increments around the the sample position in the x-z plane. "
+                  "Minimum (default) is 1 scan point, which gives a "
+                  "non-scanning workspace.");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -180,6 +188,7 @@ void CreateSampleWorkspace::exec() {
   const double pixelSpacing = getProperty("PixelSpacing");
   const double bankDistanceFromSample = getProperty("BankDistanceFromSample");
   const double sourceSampleDistance = getProperty("SourceDistanceFromSample");
+  const int numScanPoints = getProperty("NumScanPoints");
 
   if (xMax <= xMin) {
     throw std::invalid_argument("XMax must be larger than XMin");
@@ -213,7 +222,7 @@ void CreateSampleWorkspace::exec() {
 
   int numPixels = numBanks * bankPixelWidth * bankPixelWidth;
 
-  Progress progress(this, 0, 1, numBanks);
+  Progress progress(this, 0.0, 1.0, numBanks);
 
   // Create an instrument with one or more rectangular banks.
   Instrument_sptr inst = createTestInstrumentRectangular(
@@ -225,12 +234,13 @@ void CreateSampleWorkspace::exec() {
   MatrixWorkspace_sptr ws;
   if (wsType == "Event") {
     ws = createEventWorkspace(numPixels, numBins, numMonitors, numEvents, xMin,
-                              binWidth, bankPixelWidth * bankPixelWidth, inst,
-                              functionString, isRandom);
+                              binWidth, inst, functionString, isRandom);
+  } else if (numScanPoints > 1) {
+    ws = createScanningWorkspace(numBins, xMin, binWidth, inst, functionString,
+                                 isRandom, numScanPoints);
   } else {
     ws = createHistogramWorkspace(numPixels, numBins, numMonitors, xMin,
-                                  binWidth, bankPixelWidth * bankPixelWidth,
-                                  inst, functionString, isRandom);
+                                  binWidth, inst, functionString, isRandom);
   }
   // add chopper
   this->addChopperParameters(ws);
@@ -295,47 +305,69 @@ void CreateSampleWorkspace::addChopperParameters(
  */
 MatrixWorkspace_sptr CreateSampleWorkspace::createHistogramWorkspace(
     int numPixels, int numBins, int numMonitors, double x0, double binDelta,
-    int start_at_pixelID, Geometry::Instrument_sptr inst,
-    const std::string &functionString, bool isRandom) {
+    Geometry::Instrument_sptr inst, const std::string &functionString,
+    bool isRandom) {
   BinEdges x(numBins + 1, LinearGenerator(x0, binDelta));
 
   std::vector<double> xValues(cbegin(x), cend(x) - 1);
   Counts y(evalFunction(functionString, xValues, isRandom ? 1 : 0));
-  CountStandardDeviations e(CountVariances(y.cbegin(), y.cend()));
 
-  std::vector<detid_t> detIDs;
+  std::vector<SpectrumDefinition> specDefs(numPixels + numMonitors);
   for (int wi = 0; wi < numMonitors + numPixels; wi++)
-    detIDs.push_back(wi < numMonitors ? start_at_pixelID + numPixels + wi
-                                      : start_at_pixelID + wi - numMonitors);
+    specDefs[wi].add(wi < numMonitors ? numPixels + wi : wi - numMonitors);
   Indexing::IndexInfo indexInfo(numPixels + numMonitors);
-  indexInfo.setDetectorIDs(std::move(detIDs));
+  indexInfo.setSpectrumDefinitions(std::move(specDefs));
 
-  auto retVal = create<Workspace2D>(indexInfo, Histogram(x, y, e));
-  retVal->setInstrument(inst);
-  return std::move(retVal);
+  return create<Workspace2D>(inst, indexInfo, Histogram(x, y));
+}
+
+/** Create scanning histogram workspace
+ */
+MatrixWorkspace_sptr CreateSampleWorkspace::createScanningWorkspace(
+    int numBins, double x0, double binDelta, Geometry::Instrument_sptr inst,
+    const std::string &functionString, bool isRandom, int numScanPoints) {
+  auto builder = ScanningWorkspaceBuilder(inst, numScanPoints, numBins);
+
+  auto angles = std::vector<double>();
+  auto timeRanges = std::vector<double>();
+  for (int i = 0; i < numScanPoints; ++i) {
+    angles.push_back(double(i));
+    timeRanges.push_back(double(i + 1));
+  }
+
+  builder.setTimeRanges(Kernel::DateAndTime(0), timeRanges);
+  builder.setRelativeRotationsForScans(angles, inst->getSample()->getPos(),
+                                       V3D(0, 1, 0));
+
+  BinEdges x(numBins + 1, LinearGenerator(x0, binDelta));
+
+  std::vector<double> xValues(cbegin(x), cend(x) - 1);
+  Counts y(evalFunction(functionString, xValues, isRandom ? 1 : 0));
+
+  builder.setHistogram(Histogram(x, y));
+
+  return builder.buildWorkspace();
 }
 
 /** Create event workspace
  */
 EventWorkspace_sptr CreateSampleWorkspace::createEventWorkspace(
     int numPixels, int numBins, int numMonitors, int numEvents, double x0,
-    double binDelta, int start_at_pixelID, Geometry::Instrument_sptr inst,
+    double binDelta, Geometry::Instrument_sptr inst,
     const std::string &functionString, bool isRandom) {
   DateAndTime run_start("2010-01-01T00:00:00");
 
-  std::vector<detid_t> detIDs;
-  for (int wi = 0; wi < numPixels + numMonitors; wi++)
-    detIDs.push_back(wi < numMonitors ? start_at_pixelID + numPixels + wi
-                                      : start_at_pixelID + wi - numMonitors);
+  std::vector<SpectrumDefinition> specDefs(numPixels + numMonitors);
+  for (int wi = 0; wi < numMonitors + numPixels; wi++)
+    specDefs[wi].add(wi < numMonitors ? numPixels + wi : wi - numMonitors);
   Indexing::IndexInfo indexInfo(numPixels + numMonitors);
-  indexInfo.setDetectorIDs(std::move(detIDs));
+  indexInfo.setSpectrumDefinitions(std::move(specDefs));
 
   // add one to the number of bins as this is histogram
   int numXBins = numBins + 1;
   BinEdges x(numXBins, LinearGenerator(x0, binDelta));
 
-  auto retVal = create<EventWorkspace>(indexInfo, x);
-  retVal->setInstrument(inst);
+  auto retVal = create<EventWorkspace>(inst, indexInfo, x);
 
   std::vector<double> xValues(x.cbegin(), x.cend() - 1);
   std::vector<double> yValues =

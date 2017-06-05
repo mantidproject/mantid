@@ -38,7 +38,10 @@ public:
   MOCK_CONST_METHOD0(getSelectedChildren, std::map<int, std::set<int>>());
   MOCK_CONST_METHOD0(getSelectedParents, std::set<int>());
   MOCK_CONST_METHOD0(getClipboard, std::string());
+  MOCK_CONST_METHOD0(getProcessInstrument, std::string());
   MOCK_METHOD0(getEnableNotebook, bool());
+  MOCK_METHOD0(expandAll, void());
+  MOCK_METHOD0(collapseAll, void());
   MOCK_METHOD1(setSelection, void(const std::set<int> &rows));
   MOCK_METHOD1(setClipboard, void(const std::string &text));
 
@@ -52,7 +55,7 @@ public:
   // Settings
   MOCK_METHOD1(loadSettings, void(std::map<std::string, QVariant> &));
 
-  // Acctions/commands
+  // Actions/commands
   // Gmock requires parameters and return values of mocked methods to be
   // copyable which means we have to mock addActions() via a proxy method
   void addActions(std::vector<DataProcessorCommand_uptr>) override {
@@ -63,7 +66,6 @@ public:
   // Calls we don't care about
   void showTable(boost::shared_ptr<QAbstractItemModel>) override{};
   void saveSettings(const std::map<std::string, QVariant> &) override{};
-  std::string getProcessInstrument() const override { return "FAKE"; }
 
   DataProcessorPresenter *getPresenter() const override { return nullptr; }
 };
@@ -85,6 +87,10 @@ public:
   MOCK_METHOD2(giveUserWarning, void(std::string, std::string));
   MOCK_METHOD2(giveUserCritical, void(std::string, std::string));
   MOCK_METHOD1(runPythonAlgorithm, std::string(const std::string &));
+  MOCK_CONST_METHOD0(getPreprocessingValues,
+                     std::map<std::string, std::string>());
+  MOCK_CONST_METHOD0(getPreprocessingProperties,
+                     std::map<std::string, std::set<std::string>>());
 
   // Global options
   MOCK_CONST_METHOD0(getPreprocessingOptions,
@@ -92,8 +98,9 @@ public:
   MOCK_CONST_METHOD0(getProcessingOptions, std::string());
   MOCK_CONST_METHOD0(getPostprocessingOptions, std::string());
 
-  // Methods we don't care about
-  std::string getTimeSlicingOptions() const override { return std::string(); };
+  // Event handling
+  MOCK_CONST_METHOD0(getTimeSlicingValues, std::string());
+  MOCK_CONST_METHOD0(getTimeSlicingType, std::string());
 };
 
 class MockDataProcessorPresenter : public DataProcessorPresenter {
@@ -121,7 +128,7 @@ private:
 
   std::vector<DataProcessorCommand_uptr> publishCommands() override {
     std::vector<DataProcessorCommand_uptr> commands;
-    for (size_t i = 0; i < 27; i++)
+    for (size_t i = 0; i < 29; i++)
       commands.push_back(
           Mantid::Kernel::make_unique<DataProcessorAppendRowCommand>(this));
     publishCommandsMocked();

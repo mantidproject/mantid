@@ -76,7 +76,7 @@ void ConvertSpectrumAxis2::exec() {
   // The unit to convert to.
   const std::string unitTarget = getProperty("Target");
 
-  Progress progress(this, 0, 1, inputWS->getNumberHistograms());
+  Progress progress(this, 0.0, 1.0, inputWS->getNumberHistograms());
 
   // Call the functions to convert to the different forms of theta or Q.
   if (unitTarget == "theta" || unitTarget == "Theta" ||
@@ -102,8 +102,7 @@ void ConvertSpectrumAxis2::createThetaMap(API::Progress &progress,
                                           API::MatrixWorkspace_sptr &inputWS) {
   // Not sure about default, previously there was a call to a null function?
   bool signedTheta = false;
-  if (targetUnit.compare("signed_theta") == 0 ||
-      targetUnit.compare("SignedTheta") == 0) {
+  if (targetUnit == "signed_theta" || targetUnit == "SignedTheta") {
     signedTheta = true;
   } else if (targetUnit == "theta" || targetUnit == "Theta") {
     signedTheta = false;

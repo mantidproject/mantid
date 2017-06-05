@@ -224,6 +224,7 @@ void makeTestWorkspace(const int ndets, const int nbins,
     std::ostringstream os;
     os << "det-" << i;
     Detector *d = new Detector(os.str(), i, 0);
+    instr->add(d);
     instr->markAsDetector(d);
   }
   space2D->setInstrument(instr);

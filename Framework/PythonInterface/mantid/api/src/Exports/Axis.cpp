@@ -1,5 +1,6 @@
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/BinEdgeAxis.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/SpectraAxis.h"
 #include "MantidAPI/TextAxis.h"
@@ -125,6 +126,28 @@ void export_Axis() {
 }
 
 // --------------------------------------------------------------------------------------------
+// SpectraAxis
+// --------------------------------------------------------------------------------------------
+/**
+* Creates a SpectraAxis referencing a given workspace
+* @param ws A pointer to the parent workspace
+* @return pointer to the axis object
+*/
+Axis *createSpectraAxis(const MatrixWorkspace *const ws) {
+  return new SpectraAxis(ws);
+}
+
+void export_SpectraAxis() {
+  /// Exported so that Boost.Python can give back a SpectraAxis class when an
+  /// Axis* is returned
+  class_<SpectraAxis, bases<Axis>, boost::noncopyable>("SpectraAxis", no_init)
+      .def("create", &createSpectraAxis, arg("workspace"),
+           return_internal_reference<>(),
+           "Creates a new SpectraAxis referencing the given workspace")
+      .staticmethod("create");
+}
+
+// --------------------------------------------------------------------------------------------
 // NumericAxis
 // --------------------------------------------------------------------------------------------
 /**
@@ -132,9 +155,7 @@ void export_Axis() {
 * @param length The length of the new axis
 * @return pointer to the axis object
 */
-Axis *createNumericAxis(int length) {
-  return new Mantid::API::NumericAxis(length);
-}
+Axis *createNumericAxis(int length) { return new NumericAxis(length); }
 
 void export_NumericAxis() {
   /// Exported so that Boost.Python can give back a NumericAxis class when an
@@ -155,9 +176,7 @@ void export_NumericAxis() {
 * @param length The length of the new axis
 * @return pointer to the axis object
 */
-Axis *createBinEdgeAxis(int length) {
-  return new Mantid::API::BinEdgeAxis(length);
-}
+Axis *createBinEdgeAxis(int length) { return new BinEdgeAxis(length); }
 
 void export_BinEdgeAxis() {
   /// Exported so that Boost.Python can give back a BinEdgeAxis class when an
@@ -179,7 +198,7 @@ void export_BinEdgeAxis() {
 * @param length The length of the new axis
 * @return pointer to the axis object
 */
-Axis *createTextAxis(int length) { return new Mantid::API::TextAxis(length); }
+Axis *createTextAxis(int length) { return new TextAxis(length); }
 
 void export_TextAxis() {
   class_<TextAxis, bases<Axis>, boost::noncopyable>("TextAxis", no_init)

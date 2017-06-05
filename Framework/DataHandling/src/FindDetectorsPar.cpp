@@ -98,7 +98,7 @@ void FindDetectorsPar::exec() {
   DetParameters AverageDetector;
   this->m_nDetectors = 0;
 
-  Progress progress(this, 0, 1, 100);
+  Progress progress(this, 0.0, 1.0, 100);
   const int progStep = static_cast<int>(ceil(double(nHist) / 100.0));
 
   const auto &spectrumInfo = inputWS->spectrumInfo();
@@ -625,7 +625,7 @@ FindDetectorsPar::get_ASCII_header(std::string const &fileName,
     file_descriptor.data_start_position =
         data_stream.tellg(); // if it is PHX or PAR file then the data begin
                              // after the first line;
-    file_descriptor.nData_records = atoi(&BUF[0]);
+    file_descriptor.nData_records = std::stoi(BUF.data());
     file_descriptor.nData_blocks = 0;
 
     // let's ifendify now if is PHX or PAR file;

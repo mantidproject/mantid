@@ -27,7 +27,7 @@ InstrumentWidgetTreeTab::InstrumentWidgetTreeTab(InstrumentWidget *instrWidget)
 }
 
 void InstrumentWidgetTreeTab::initSurface() {
-  m_instrumentTree->setInstrumentActor(m_instrWidget->getInstrumentActor());
+  m_instrumentTree->setInstrumentWidget(m_instrWidget);
 }
 
 /**

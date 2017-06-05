@@ -34,11 +34,7 @@ using API::FileProperty;
 // Register the class into the algorithm factory
 DECLARE_ALGORITHM(AlignAndFocusPowder)
 
-AlignAndFocusPowder::AlignAndFocusPowder()
-    : API::DataProcessorAlgorithm(), m_l1(0.0), m_resampleX(0), dspace(false),
-      xmin(0.0), xmax(0.0), LRef(0.0), DIFCref(0.0), minwl(0.0), maxwl(0.),
-      tmin(0.0), tmax(0.0), m_preserveEvents(false), m_processLowResTOF(false),
-      m_lowResSpecOffset(0), m_progress(nullptr) {}
+AlignAndFocusPowder::AlignAndFocusPowder() : API::DataProcessorAlgorithm() {}
 
 AlignAndFocusPowder::~AlignAndFocusPowder() {
   if (m_progress)
@@ -77,7 +73,7 @@ void AlignAndFocusPowder::init() {
                   "grouping data");
   declareProperty(Kernel::make_unique<FileProperty>(
                       "GroupFilename", "", FileProperty::OptionalLoad,
-                      std::vector<std::string>{".xml"}),
+                      std::vector<std::string>{".xml", ".cal"}),
                   "Overrides grouping from CalFileName");
   declareProperty(
       make_unique<WorkspaceProperty<GroupingWorkspace>>(
@@ -327,11 +323,17 @@ void AlignAndFocusPowder::exec() {
   // Now setup the output workspace
   m_outputW = getProperty("OutputWorkspace");
   if (m_inputEW) {
+    // event workspace
     if (m_outputW != m_inputW) {
+      // out-of-place: clone the input EventWorkspace
       m_outputEW = m_inputEW->clone();
+      m_outputW = boost::dynamic_pointer_cast<MatrixWorkspace>(m_outputEW);
+    } else {
+      // in-place
+      m_outputEW = boost::dynamic_pointer_cast<EventWorkspace>(m_outputW);
     }
-    m_outputEW = boost::dynamic_pointer_cast<EventWorkspace>(m_outputW);
   } else {
+    // workspace2D
     if (m_outputW != m_inputW) {
       m_outputW = WorkspaceFactory::Instance().create(m_inputW);
     }
@@ -933,18 +935,31 @@ void AlignAndFocusPowder::loadCalFile(const std::string &calFilename,
   if (loadMask && !groupFilename.empty()) {
     g_log.information() << "Loading Grouping file \"" << groupFilename
                         << "\"\n";
-    IAlgorithm_sptr alg = createChildAlgorithm("LoadDetectorsGroupingFile");
-    alg->setProperty("InputFile", groupFilename);
-    alg->executeAsChildAlg();
+    if (groupFilename.find(".cal") != std::string::npos) {
+      IAlgorithm_sptr alg = createChildAlgorithm("LoadDiffCal");
+      alg->setProperty("InputWorkspace", m_inputW);
+      alg->setPropertyValue("Filename", groupFilename);
+      alg->setProperty<bool>("MakeCalWorkspace", false);
+      alg->setProperty<bool>("MakeGroupingWorkspace", true);
+      alg->setProperty<bool>("MakeMaskWorkspace", false);
+      alg->setPropertyValue("WorkspaceName", m_instName);
+      alg->executeAsChildAlg();
 
-    // get and rename the workspace
-    m_groupWS = alg->getProperty("OutputWorkspace");
+      // get the workspace
+      m_groupWS = alg->getProperty("OutputGroupingWorkspace");
+    } else {
+      IAlgorithm_sptr alg = createChildAlgorithm("LoadDetectorsGroupingFile");
+      alg->setProperty("InputFile", groupFilename);
+      alg->executeAsChildAlg();
+
+      // get the workspace
+      m_groupWS = alg->getProperty("OutputWorkspace");
+    }
+
+    // register the workspace with the ADS
     const std::string name = m_instName + "_group";
     AnalysisDataService::Instance().addOrReplace(name, m_groupWS);
     this->setPropertyValue("GroupingWorkspace", name);
-
-    // don't load again from the calibration file
-    loadMask = false;
   }
 
   g_log.information() << "Loading Calibration file \"" << calFilename << "\"\n";

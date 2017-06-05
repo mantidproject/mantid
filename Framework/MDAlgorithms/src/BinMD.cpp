@@ -75,6 +75,13 @@ void BinMD::init() {
       "due to disk thrashing.");
   setPropertyGroup("Parallel", grp);
 
+  declareProperty(make_unique<WorkspaceProperty<IMDHistoWorkspace>>(
+                      "TemporaryDataWorkspace", "", Direction::Input,
+                      PropertyMode::Optional),
+                  "An input MDHistoWorkspace used to accumulate results from "
+                  "multiple MDEventWorkspaces. If unspecified a blank "
+                  "MDHistoWorkspace will be created.");
+
   declareProperty(make_unique<WorkspaceProperty<Workspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "A name for the output MDHistoWorkspace.");
@@ -245,8 +252,10 @@ void BinMD::binByIterating(typename MDEventWorkspace<MDE, nd>::sptr ws) {
   errors = outWS->getErrorSquaredArray();
   numEvents = outWS->getNumEventsArray();
 
-  // Start with signal/error/numEvents at 0.0
-  outWS->setTo(0.0, 0.0, 0.0);
+  if (!m_accumulate) {
+    // Start with signal/error/numEvents at 0.0
+    outWS->setTo(0.0, 0.0, 0.0);
+  }
 
   // The dimension (in the output workspace) along which we chunk for parallel
   // processing
@@ -270,10 +279,10 @@ void BinMD::binByIterating(typename MDEventWorkspace<MDE, nd>::sptr ws) {
 
   // Total number of steps
   size_t progNumSteps = 0;
-  if (prog)
+  if (prog) {
     prog->setNotifyStep(0.1);
-  if (prog)
     prog->resetNumSteps(100, 0.00, 1.0);
+  }
 
   // Run the chunks in parallel. There is no overlap in the output workspace so
   // it is thread safe to write to it..
@@ -373,10 +382,17 @@ void BinMD::exec() {
             ImplicitFunctionXML);
 
   // This gets deleted by the thread pool; don't delete it in here.
-  prog = new Progress(this, 0, 1.0, 1);
+  prog = new Progress(this, 0.0, 1.0, 1);
 
   // Create the dense histogram. This allocates the memory
-  outWS = MDHistoWorkspace_sptr(new MDHistoWorkspace(m_binDimensions));
+  boost::shared_ptr<IMDHistoWorkspace> tmp =
+      this->getProperty("TemporaryDataWorkspace");
+  outWS = boost::dynamic_pointer_cast<MDHistoWorkspace>(tmp);
+  if (!outWS) {
+    outWS = boost::make_shared<MDHistoWorkspace>(m_binDimensions);
+  } else {
+    m_accumulate = true;
+  }
 
   // Saves the geometry transformation from original to binned in the workspace
   outWS->setTransformFromOriginal(this->m_transformFromOriginal, 0);

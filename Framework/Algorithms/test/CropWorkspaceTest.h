@@ -8,6 +8,7 @@
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
+#include "MantidTestHelpers/InstrumentCreationHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <cxxtest/TestSuite.h>
 #include <limits>
@@ -46,6 +47,8 @@ public:
         space2D->dataY(j) = std::vector<double>(a + (5 * j), a + (5 * j) + 5);
         space2D->dataE(j) = std::vector<double>(e + (5 * j), e + (5 * j) + 5);
       }
+      InstrumentCreationHelper::addFullInstrumentToWorkspace(*space2D, false,
+                                                             false, "");
       // Register the workspace in the data service
       AnalysisDataService::Instance().add(name, space);
     }
