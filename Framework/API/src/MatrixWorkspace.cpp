@@ -513,8 +513,8 @@ std::vector<size_t> MatrixWorkspace::getDetectorIDToWorkspaceIndexVector(
       int index = det + offset;
       if (index < 0 || index >= outSize) {
         g_log.debug() << "MatrixWorkspace::getDetectorIDToWorkspaceIndexVector("
-                         "): detector ID found ("
-                      << det << " at workspace index " << workspaceIndex
+                         "): detector ID found (" << det
+                      << " at workspace index " << workspaceIndex
                       << ") is invalid.\n";
       } else
         // Save it at that point.
@@ -2153,8 +2153,8 @@ DLLExport IPropertyManager *
 IPropertyManager::setTypedProperty<MatrixWorkspace_sptr, API::IndexType,
                                    std::vector<int>>(
     const std::string &name,
-    const std::tuple<MatrixWorkspace_sptr, API::IndexType, std::vector<int>>
-        &value) {
+    const std::tuple<MatrixWorkspace_sptr, API::IndexType, std::vector<int>> &
+        value) {
   WorkspacePropertyWithIndex<MatrixWorkspace> *prop =
       dynamic_cast<WorkspacePropertyWithIndex<MatrixWorkspace> *>(
           getPointerToProperty(name));
@@ -2172,8 +2172,8 @@ DLLExport IPropertyManager *
 IPropertyManager::setTypedProperty<MatrixWorkspace_sptr, API::IndexType,
                                    std::string>(
     const std::string &name,
-    const std::tuple<MatrixWorkspace_sptr, API::IndexType, std::string>
-        &value) {
+    const std::tuple<MatrixWorkspace_sptr, API::IndexType, std::string> &
+        value) {
   WorkspacePropertyWithIndex<MatrixWorkspace> *prop =
       dynamic_cast<WorkspacePropertyWithIndex<MatrixWorkspace> *>(
           getPointerToProperty(name));

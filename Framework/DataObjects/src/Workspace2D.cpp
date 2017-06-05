@@ -431,9 +431,8 @@ template <>
 DLLExport IPropertyManager *
 IPropertyManager::setTypedProperty<Workspace2D_sptr, API::IndexType,
                                    std::vector<int>>(
-    const std::string &name,
-    const std::tuple<Workspace2D_sptr, API::IndexType, std::vector<int>>
-        &value) {
+    const std::string &name, const std::tuple<Workspace2D_sptr, API::IndexType,
+                                              std::vector<int>> &value) {
   WorkspacePropertyWithIndex<Workspace2D> *prop =
       dynamic_cast<WorkspacePropertyWithIndex<Workspace2D> *>(
           getPointerToProperty(name));

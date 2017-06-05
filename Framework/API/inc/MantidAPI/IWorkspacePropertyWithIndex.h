@@ -7,7 +7,13 @@
 #include "MantidAPI/Workspace_fwd.h"
 
 namespace Mantid {
+namespace Kernel {
+template <class T> class ArrayProperty;
+}
 namespace API {
+
+class IndexTypeProperty;
+
 /** An interface that is implemented by WorkspacePropertyWithIndex.
 Used for non templated workspace operations.
 
@@ -37,6 +43,13 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class IWorkspacePropertyWithIndex {
 public:
+  virtual Kernel::ArrayProperty<int> &mutableIndexListProperty() = 0;
+
+  virtual const Kernel::ArrayProperty<int> &indexListProperty() const = 0;
+
+  virtual IndexTypeProperty &mutableIndexTypeProperty() = 0;
+
+  virtual const IndexTypeProperty &indexTypeProperty() const = 0;
   /// Virtual destructor
   virtual ~IWorkspacePropertyWithIndex() = default;
 };

@@ -110,8 +110,8 @@ DLLExport IPropertyManager *
 IPropertyManager::setTypedProperty<OffsetsWorkspace_sptr, API::IndexType,
                                    std::vector<int>>(
     const std::string &name,
-    const std::tuple<OffsetsWorkspace_sptr, API::IndexType, std::vector<int>>
-        &value) {
+    const std::tuple<OffsetsWorkspace_sptr, API::IndexType, std::vector<int>> &
+        value) {
   WorkspacePropertyWithIndex<OffsetsWorkspace> *prop =
       dynamic_cast<WorkspacePropertyWithIndex<OffsetsWorkspace> *>(
           getPointerToProperty(name));
@@ -129,8 +129,8 @@ DLLExport IPropertyManager *
 IPropertyManager::setTypedProperty<OffsetsWorkspace_sptr, API::IndexType,
                                    std::string>(
     const std::string &name,
-    const std::tuple<OffsetsWorkspace_sptr, API::IndexType, std::string>
-        &value) {
+    const std::tuple<OffsetsWorkspace_sptr, API::IndexType, std::string> &
+        value) {
   WorkspacePropertyWithIndex<OffsetsWorkspace> *prop =
       dynamic_cast<WorkspacePropertyWithIndex<OffsetsWorkspace> *>(
           getPointerToProperty(name));

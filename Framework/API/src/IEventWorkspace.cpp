@@ -1,5 +1,5 @@
 #include "MantidAPI/IEventWorkspace.h"
-#include "MantidAPI/WorkspacePropertyWithIndex.tcc"
+#include "MantidAPI/WorkspacePropertyWithIndex.h"
 #include "MantidKernel/IPropertyManager.h"
 #include <MantidIndexing/SpectrumIndexSet.h>
 
@@ -118,8 +118,8 @@ DLLExport IPropertyManager *
 IPropertyManager::setTypedProperty<IEventWorkspace_sptr, API::IndexType,
                                    std::vector<int>>(
     const std::string &name,
-    const std::tuple<IEventWorkspace_sptr, API::IndexType, std::vector<int>>
-        &value) {
+    const std::tuple<IEventWorkspace_sptr, API::IndexType, std::vector<int>> &
+        value) {
   WorkspacePropertyWithIndex<IEventWorkspace> *prop =
       dynamic_cast<WorkspacePropertyWithIndex<IEventWorkspace> *>(
           getPointerToProperty(name));
@@ -137,8 +137,8 @@ DLLExport IPropertyManager *
 IPropertyManager::setTypedProperty<IEventWorkspace_sptr, API::IndexType,
                                    std::string>(
     const std::string &name,
-    const std::tuple<IEventWorkspace_sptr, API::IndexType, std::string>
-        &value) {
+    const std::tuple<IEventWorkspace_sptr, API::IndexType, std::string> &
+        value) {
   WorkspacePropertyWithIndex<IEventWorkspace> *prop =
       dynamic_cast<WorkspacePropertyWithIndex<IEventWorkspace> *>(
           getPointerToProperty(name));

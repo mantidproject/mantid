@@ -3,12 +3,15 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/AlgorithmHistory.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/WorkspacePropertyWithIndex.h"
 #include <sstream>
 
 namespace Mantid {
 namespace API {
 
 using Kernel::Property;
+using API::IWorkspacePropertyWithIndex;
+using API::IndexType;
 using Kernel::DateAndTime;
 using Kernel::PropertyHistory;
 using Kernel::PropertyHistory_sptr;
@@ -70,6 +73,25 @@ void AlgorithmHistory::setProperties(const Algorithm *const alg) {
   for (const auto &property : properties) {
     m_properties.push_back(
         boost::make_shared<PropertyHistory>(property->createHistory()));
+
+    // Special additional handling of WorkspacePropertyWithIndex type
+    auto wProp = dynamic_cast<IWorkspacePropertyWithIndex *>(property);
+
+    if (wProp != nullptr) {
+      auto name = property->name();
+      switch (wProp->indexTypeProperty().selectedType()) {
+      case IndexType::SpectrumNumber:
+        name += "Spectra";
+        break;
+      case IndexType::WorkspaceIndex:
+        name += "Indices";
+        break;
+      }
+      auto indexProp = wProp->indexListProperty();
+      m_properties.push_back(boost::make_shared<PropertyHistory>(
+          name, indexProp.value(), indexProp.type(), false,
+          Kernel::Direction::Output));
+    }
   }
 }
 
@@ -149,11 +171,11 @@ size_t AlgorithmHistory::childHistorySize() const {
 }
 
 /**
-  * Retrieve a child algorithm history by index
-  * @param index ::  An index within the child algorithm history set
-  * @returns A pointer to an AlgorithmHistory object
-  * @throws std::out_of_range error if the index is invalid
-  */
+ * Retrieve a child algorithm history by index
+ * @param index ::  An index within the child algorithm history set
+ * @returns A pointer to an AlgorithmHistory object
+ * @throws std::out_of_range error if the index is invalid
+ */
 AlgorithmHistory_sptr
 AlgorithmHistory::getChildAlgorithmHistory(const size_t index) const {
   if (index >= this->getChildHistories().size()) {
@@ -174,11 +196,11 @@ AlgorithmHistory_sptr AlgorithmHistory::operator[](const size_t index) const {
 }
 
 /**
-* Gets the value of a specified algorithm property
-* @param name ::  The property to find
-* @returns The string value of the property
-* @throw Exception::NotFoundError if the named property is unknown
-*/
+ * Gets the value of a specified algorithm property
+ * @param name ::  The property to find
+ * @returns The string value of the property
+ * @throw Exception::NotFoundError if the named property is unknown
+ */
 const std::string &
 AlgorithmHistory::getPropertyValue(const std::string &name) const {
   for (const auto &hist : m_properties) {

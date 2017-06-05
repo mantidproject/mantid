@@ -753,8 +753,8 @@ DLLExport IPropertyManager *
 IPropertyManager::setTypedProperty<EventWorkspace_sptr, API::IndexType,
                                    std::vector<int>>(
     const std::string &name,
-    const std::tuple<EventWorkspace_sptr, API::IndexType, std::vector<int>>
-        &value) {
+    const std::tuple<EventWorkspace_sptr, API::IndexType, std::vector<int>> &
+        value) {
   WorkspacePropertyWithIndex<EventWorkspace> *prop =
       dynamic_cast<WorkspacePropertyWithIndex<EventWorkspace> *>(
           getPointerToProperty(name));

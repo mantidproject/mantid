@@ -49,6 +49,7 @@ class WorkspacePropertyWithIndex : public WorkspaceProperty<TYPE>,
                                    public IWorkspacePropertyWithIndex {
   static_assert(std::is_convertible<TYPE *, MatrixWorkspace *>::value,
                 "Workspace type must be convertible to API::MatrixWorkspace.");
+
 public:
   explicit WorkspacePropertyWithIndex(
       const std::string &name = "InputWorkspaceWithIndex",
@@ -79,9 +80,9 @@ public:
   WorkspacePropertyWithIndex &
   operator=(const std::tuple<boost::shared_ptr<TYPE>, API::IndexType,
                              std::vector<int>> &rhs);
-  WorkspacePropertyWithIndex &operator=(
-      const std::tuple<boost::shared_ptr<TYPE>, API::IndexType, std::string>
-          &rhs);
+  WorkspacePropertyWithIndex &
+  operator=(const std::tuple<boost::shared_ptr<TYPE>, API::IndexType,
+                             std::string> &rhs);
   WorkspacePropertyWithIndex &
   operator=(const WorkspacePropertyWithIndex<TYPE> &rhs);
   WorkspacePropertyWithIndex &
@@ -97,18 +98,18 @@ public:
 
   std::string value() const override;
 
-  Kernel::ArrayProperty<int> &mutableIndexListProperty() {
+  Kernel::ArrayProperty<int> &mutableIndexListProperty() override {
     return *m_indexListProp.get();
   }
 
-  const Kernel::ArrayProperty<int> &indexListProperty() const {
+  const Kernel::ArrayProperty<int> &indexListProperty() const override{
     return *m_indexListProp;
   }
 
-  IndexTypeProperty &mutableIndexTypeProperty() {
+  IndexTypeProperty &mutableIndexTypeProperty() override {
     return *m_indexTypeProp.get();
   }
-  const IndexTypeProperty &indexTypeProperty() const {
+  const IndexTypeProperty &indexTypeProperty() const override {
     return *m_indexTypeProp;
   }
 
