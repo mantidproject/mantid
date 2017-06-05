@@ -1738,22 +1738,22 @@ class MeasurementTimeFromNexusFileExtractor(object):
     def __init__(self):
         super(MeasurementTimeFromNexusFileExtractor, self).__init__()
 
+    def _get_str(self, v):
+        return v.tostring().decode('UTF-8')
+
     def _get_measurement_time_processed_file(self, h5entry):
         logs = h5entry['logs']
         end_time = logs['end_time']
         value = end_time['value']
-        print("value=", value)
-        return value[0]
+        return self._get_str(value[0])
 
     def _get_measurement_time_for_non_processed_file(self, h5entry):
         end_time = h5entry['end_time']
-        print("end_time=", end_time)
-        return end_time[0]
+        return self._get_str(end_time[0])
 
     def _check_if_processed_nexus_file(self, h5entry):
         definition = h5entry['definition']
-        mantid_definition = definition[0]
-        print("mantid_definition=", mantid_definition)
+        mantid_definition = self._get_str(definition[0])
         is_processed = True if MANTID_PROCESSED_WORKSPACE_TAG in mantid_definition else False
         return is_processed
 
@@ -1762,7 +1762,7 @@ class MeasurementTimeFromNexusFileExtractor(object):
         try:
             with h5.File(filename_full) as h5f:
                 try:
-                    rootKeys =  h5f.keys()
+                    rootKeys =  list(h5f.keys())
                     entry0 = h5f[rootKeys[0]]
                     is_processed_file = self._check_if_processed_nexus_file(entry0)
                     if is_processed_file:
