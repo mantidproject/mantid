@@ -140,7 +140,7 @@ public:
     TS_ASSERT(filteredws0);
     TS_ASSERT_EQUALS(filteredws0->getNumberHistograms(), 10);
     TS_ASSERT_EQUALS(filteredws0->getSpectrum(0).getNumberEvents(), 4);
-    TS_ASSERT_EQUALS(filteredws0->run().getProtonCharge(), 10);
+    TS_ASSERT_EQUALS(filteredws0->run().getProtonCharge(), 2);
 
     // check splitter log
     TS_ASSERT(filteredws0->run().hasProperty("splitter"));
@@ -160,7 +160,7 @@ public:
             AnalysisDataService::Instance().retrieve("FilteredWS01_1"));
     TS_ASSERT(filteredws1);
     TS_ASSERT_EQUALS(filteredws1->getSpectrum(1).getNumberEvents(), 16);
-    TS_ASSERT_EQUALS(filteredws1->run().getProtonCharge(), 11);
+    TS_ASSERT_EQUALS(filteredws1->run().getProtonCharge(), 3);
 
     // check splitter log
     TS_ASSERT(filteredws0->run().hasProperty("splitter"));
@@ -182,7 +182,7 @@ public:
             AnalysisDataService::Instance().retrieve("FilteredWS01_2"));
     TS_ASSERT(filteredws2);
     TS_ASSERT_EQUALS(filteredws2->getSpectrum(1).getNumberEvents(), 21);
-    TS_ASSERT_EQUALS(filteredws2->run().getProtonCharge(), 21);
+    TS_ASSERT_EQUALS(filteredws2->run().getProtonCharge(), 3);
 
     EventList elist3 = filteredws2->getSpectrum(3);
     elist3.sortPulseTimeTOF();
@@ -965,14 +965,13 @@ public:
   EventWorkspace_sptr createEventWorkspace(int64_t runstart_i64,
                                            int64_t pulsedt, int64_t tofdt,
                                            size_t numpulses) {
-    // 1. Create an EventWorkspace with 10 detectors
+    // Create an EventWorkspace with 10 detectors
     EventWorkspace_sptr eventWS =
         WorkspaceCreationHelper::createEventWorkspaceWithFullInstrument(10, 1,
                                                                         true);
 
     Kernel::DateAndTime runstart(runstart_i64);
 
-    // 2. Set run_start time
     eventWS->mutableRun().addProperty("run_start", runstart.toISO8601String(),
                                       true);
 
@@ -986,7 +985,8 @@ public:
       for (int64_t pid = 0; pid < static_cast<int64_t>(numpulses); pid++) {
         int64_t pulsetime_i64 = pid * pulsedt + runstart.totalNanoseconds();
         Kernel::DateAndTime pulsetime(pulsetime_i64);
-        pchargeLog->addValue(pulsetime, 1.);
+        if (i == 0)
+          pchargeLog->addValue(pulsetime, 1.);
         for (size_t e = 0; e < 10; e++) {
           double tof = static_cast<double>(e * tofdt / 1000);
           TofEvent event(tof, pulsetime);
