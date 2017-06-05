@@ -258,7 +258,6 @@ class IndirectDiffScan(DataProcessorAlgorithm):
         self._load_logs = self.getProperty('LoadLogFiles').value
 
         self._instrument_name = self.getPropertyValue('Instrument')
-        print(self._instrument_name)
         self._mode = 'diffspec'
 
         self._spectra_range = self.getProperty('SpectraRange').value
