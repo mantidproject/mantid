@@ -57,6 +57,7 @@ Changes
    Diffraction <diffraction>
    Muon Analysis <muon>
    Reflectometry <reflectometry>
+   Imaging <imaging>
 
 Full Change Listings
 --------------------
