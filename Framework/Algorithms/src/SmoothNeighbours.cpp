@@ -141,9 +141,12 @@ void SmoothNeighbours::init() {
 
   declareProperty(
       "Radius", 0.0, mustBePositiveDouble,
-      "The radius cut-off around a pixel to look for nearest neighbours to average. \n"
-      "This radius cut-off is applied to a set of nearest neighbours whose number is "
-      "defined in the NumberOfNeighbours property. See below for more details. \n"
+      "The radius cut-off around a pixel to look for nearest neighbours to "
+      "average. \n"
+      "This radius cut-off is applied to a set of nearest neighbours whose "
+      "number is "
+      "defined in the NumberOfNeighbours property. See below for more details. "
+      "\n"
       "If 0, will use the AdjX and AdjY parameters for rectangular detectors "
       "instead.");
 
