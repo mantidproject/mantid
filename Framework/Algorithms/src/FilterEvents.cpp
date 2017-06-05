@@ -168,7 +168,6 @@ void FilterEvents::init() {
                   "If true, all the TimeSeriesProperty logs listed will be "
                   "excluded from duplicating. "
                   "Otherwise, only those specified logs will be split.");
-
 }
 
 /** Execution body
@@ -249,43 +248,6 @@ void FilterEvents::exec() {
 
   m_progress = 1.0;
   progress(m_progress, "Completed");
-
-  /*
-  // Optional to group detector
-  // TODO:FIXME - move this part to a method
-  if (m_toGroupWS) {
-    m_progress = 0.9;
-    progress(m_progress, "Group workspaces");
-
-    std::string groupname = m_outputWSNameBase;
-    API::IAlgorithm_sptr groupws =
-        createChildAlgorithm("GroupWorkspaces", 0.99, 1.00, true);
-    // groupws->initialize();
-    groupws->setAlwaysStoreInADS(true);
-    groupws->setProperty("InputWorkspaces", m_wsNames);
-    groupws->setProperty("OutputWorkspace", groupname);
-    groupws->execute();
-    if (!groupws->isExecuted()) {
-      g_log.error() << "Grouping all output workspaces fails.\n";
-    }
-  }
-
-  // TODO:FIXME - move this part to a method
-  // Form the names of output workspaces
-  std::vector<std::string> outputwsnames;
-  std::map<int, DataObjects::EventWorkspace_sptr>::iterator miter;
-  // for (miter = m_outputWorkspacesMap.begin();
-  //     miter != m_outputWorkspacesMap.end(); ++miter) {
-  //  outputwsnames.push_back(miter->second->name());
-  for (miter = m_outputWorkspacesMap.begin();
-       miter != m_outputWorkspacesMap.end(); ++miter) {
-    outputwsnames.push_back(miter->second->getName());
-  }
-  setProperty("OutputWorkspaceNames", outputwsnames);
-
-  m_progress = 1.0;
-  progress(m_progress, "Completed");
-  */
 }
 
 //----------------------------------------------------------------------------------------------
@@ -480,23 +442,27 @@ void FilterEvents::processAlgorithmProperties() {
  * @brief FilterEvents::groupOutputWorkspace
  */
 void FilterEvents::groupOutputWorkspace() {
-  // TODO:FIXME - move this part to a method
-  if (m_toGroupWS) {
-    m_progress = 0.9;
-    progress(m_progress, "Group workspaces");
+  // return if there is no such need
+  if (!m_toGroupWS)
+    return;
 
-    std::string groupname = m_outputWSNameBase;
-    API::IAlgorithm_sptr groupws =
-        createChildAlgorithm("GroupWorkspaces", 0.99, 1.00, true);
-    // groupws->initialize();
-    groupws->setAlwaysStoreInADS(true);
-    groupws->setProperty("InputWorkspaces", m_wsNames);
-    groupws->setProperty("OutputWorkspace", groupname);
-    groupws->execute();
-    if (!groupws->isExecuted()) {
-      g_log.error() << "Grouping all output workspaces fails.\n";
-    }
+  // set progress
+  m_progress = 0.95;
+  progress(m_progress, "Group workspaces");
+
+  std::string groupname = m_outputWSNameBase;
+  API::IAlgorithm_sptr groupws =
+      createChildAlgorithm("GroupWorkspaces", 0.95, 1.00, true);
+  // groupws->initialize();
+  groupws->setAlwaysStoreInADS(true);
+  groupws->setProperty("InputWorkspaces", m_wsNames);
+  groupws->setProperty("OutputWorkspace", groupname);
+  groupws->execute();
+  if (!groupws->isExecuted()) {
+    g_log.error() << "Grouping all output workspaces fails.\n";
   }
+
+  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -724,7 +690,7 @@ void FilterEvents::splitTimeSeriesProperty(
 // * Warning message will be written out
 // * @brief FilterEvents::examineEventWS
 // */
-//void FilterEvents::examineAndSortEventWS() {
+// void FilterEvents::examineAndSortEventWS() {
 //  // get event workspace information
 //  size_t numhist = m_eventWS->getNumberHistograms();
 //  m_vecSkip.resize(numhist, false);
@@ -1160,7 +1126,7 @@ void FilterEvents::createOutputWorkspaces() {
     }
 
     boost::shared_ptr<EventWorkspace> optws =
-        create<DataObjects::EventWorkspace>(*m_eventWS);
+        createWithoutLogs<DataObjects::EventWorkspace>(*m_eventWS);
     m_outputWorkspacesMap.emplace(wsgroup, optws);
 
     // Add information, including title and comment, to output workspace
@@ -1196,6 +1162,8 @@ void FilterEvents::createOutputWorkspaces() {
       m_wsNames.push_back(wsname.str());
 
       // Set (property) to output workspace and set to ADS
+      // TODO/ISSUE/NOW - If grouping workspace later, then there is no need to
+      // create these output properties
       declareProperty(
           Kernel::make_unique<
               API::WorkspaceProperty<DataObjects::EventWorkspace>>(
@@ -1267,8 +1235,11 @@ void FilterEvents::createOutputWorkspacesMatrixCase() {
     // create new workspace from input EventWorkspace and all the sample logs
     // are copied to the new one
     boost::shared_ptr<EventWorkspace> optws =
-        create<DataObjects::EventWorkspace>(*m_eventWS);
+        createWithoutLogs<DataObjects::EventWorkspace>(*m_eventWS);
     m_outputWorkspacesMap.emplace(wsgroup, optws);
+
+    // TODO/ISSUE/NOW - How about comment and info similar to
+    // createOutputWorkspaces()?
 
     // add to output workspace property
     std::stringstream propertynamess;
@@ -1348,8 +1319,10 @@ void FilterEvents::createOutputWorkspacesTableSplitterCase() {
 
     // create new workspace
     boost::shared_ptr<EventWorkspace> optws =
-        create<DataObjects::EventWorkspace>(*m_eventWS);
+        createWithoutLogs<DataObjects::EventWorkspace>(*m_eventWS);
     m_outputWorkspacesMap.emplace(wsgroup, optws);
+
+    // TODO/NOW/ISSUE -- How about comment and info?
 
     // add to output workspace property
     std::stringstream propertynamess;
@@ -1662,6 +1635,8 @@ void FilterEvents::filterEventsBySplitters(double progressamount) {
 
   // Split the sample logs in each target workspace.
   progress(0.1 + progressamount, "Splitting logs");
+
+  return;
 }
 
 /** Split events by splitters represented by vector
@@ -1676,23 +1651,20 @@ void FilterEvents::filterEventsByVectorSplitters(double progressamount) {
                     "input/source EventWorkspace = " << numberOfSpectra
                  << ".\n";
 
+  // check for option FilterByTime
   if (m_filterByPulseTime) {
     size_t num_proton_charges =
         m_eventWS->run().getProperty("proton_charge")->size();
-    if (num_proton_charges < m_vecSplitterTime.size())
-      throw runtime_error("It is not a good practice to split fast event by "
+    if (num_proton_charges < m_vecSplitterTime.size()) {
+      // TODO/ISSUE/NOW - Better error message!
+      throw runtime_error("It is not a good choice to split fast event by "
                           "pulse time when there are more splitters than pulse "
                           "times.");
-    else
+    } else
       g_log.warning("User should understand the inaccurancy to filter events "
                     "by pulse time.");
   }
 
-  /*
-  for (size_t i = 0; i < m_vecSplitterGroup.size(); ++i)
-    std::cout << "splitter " << i << ": " << m_vecSplitterTime[i] << ", "
-              << m_vecSplitterGroup[i] << "\n";
-  */
 
   PARALLEL_FOR_NO_WSP_CHECK()
   for (int64_t iws = 0; iws < int64_t(numberOfSpectra); ++iws) {
@@ -1755,149 +1727,8 @@ void FilterEvents::filterEventsByVectorSplitters(double progressamount) {
       max_target_index = *target_iter;
   }
 
-  // convert vector of int64 to Time
-  std::vector<Kernel::DateAndTime> split_datetime_vec(m_vecSplitterTime.size());
-  for (size_t i = 0; i < m_vecSplitterTime.size(); ++i) {
-    DateAndTime split_time(m_vecSplitterTime[i]);
-    split_datetime_vec[i] = split_time;
-  }
-
-  for (auto property : m_eventWS->run().getProperties()) {
-    // insert 0 even if it is empty for contructing a vector
-    g_log.debug() << "Process sample log" << property->name() << "\n";
-    TimeSeriesProperty<double> *dbl_prop =
-        dynamic_cast<TimeSeriesProperty<double> *>(property);
-    TimeSeriesProperty<int> *int_prop =
-        dynamic_cast<TimeSeriesProperty<int> *>(property);
-    if (dbl_prop) {
-      std::vector<TimeSeriesProperty<double> *> output_vector;
-      for (int tindex = 0; tindex <= max_target_index; ++tindex) {
-        TimeSeriesProperty<double> *new_property =
-            new TimeSeriesProperty<double>(dbl_prop->name());
-        output_vector.push_back(new_property);
-      }
-
-      // split
-      dbl_prop->splitByTimeVector(split_datetime_vec, m_vecSplitterGroup,
-                                  output_vector);
-
-      // set to output workspace
-      for (int tindex = 0; tindex <= max_target_index; ++tindex) {
-        // find output workspace
-        std::map<int, DataObjects::EventWorkspace_sptr>::iterator wsiter;
-        wsiter = m_outputWorkspacesMap.find(tindex);
-        if (wsiter == m_outputWorkspacesMap.end()) {
-          ;
-          //  g_log.error() << "Workspace target (" << tindex
-          //          << ") does not have workspace associated."
-          //        << "\n";
-        } else {
-          DataObjects::EventWorkspace_sptr ws_i = wsiter->second;
-          ws_i->mutableRun().addProperty(output_vector[tindex], true);
-        }
-      }
-
-    } else if (int_prop) {
-      // integer log
-      std::vector<TimeSeriesProperty<int> *> output_vector;
-      for (int tindex = 0; tindex <= max_target_index; ++tindex) {
-        TimeSeriesProperty<int> *new_property =
-            new TimeSeriesProperty<int>(int_prop->name());
-        output_vector.push_back(new_property);
-      }
-
-      // split
-      int_prop->splitByTimeVector(split_datetime_vec, m_vecSplitterGroup,
-                                  output_vector);
-
-      // set to output workspace
-      for (int tindex = 0; tindex <= max_target_index; ++tindex) {
-        // find output workspace
-        std::map<int, DataObjects::EventWorkspace_sptr>::iterator wsiter;
-        wsiter = m_outputWorkspacesMap.find(tindex);
-        if (wsiter == m_outputWorkspacesMap.end()) {
-          g_log.error() << "Workspace target (" << tindex
-                        << ") does not have workspace associated."
-                        << "\n";
-        } else {
-          DataObjects::EventWorkspace_sptr ws_i = wsiter->second;
-          ws_i->mutableRun().addProperty(output_vector[tindex], true);
-        }
-      }
-    } else {
-      // TODO:FIXME - Copy the prperty!
-      // set to output workspace ??? -- may not be needed! as the way how output
-      // workspace is created
-    }
-  }
-
-  for (int tindex = 0; tindex <= max_target_index; ++tindex) {
-    // set to output workspace
-    for (int tindex = 0; tindex <= max_target_index; ++tindex) {
-      // find output workspace
-      std::map<int, DataObjects::EventWorkspace_sptr>::iterator wsiter;
-      wsiter = m_outputWorkspacesMap.find(tindex);
-      if (wsiter == m_outputWorkspacesMap.end()) {
-        g_log.error() << "Workspace target (" << tindex
-                      << ") does not have workspace associated."
-                      << "\n";
-      } else {
-        DataObjects::EventWorkspace_sptr ws_i = wsiter->second;
-        ws_i->mutableRun().integrateProtonCharge();
-      }
-    }
-  }
-
   return;
 }
-
-///** Generate splitters for specified workspace index as a subset of
-// * m_splitters
-// */
-//Kernel::TimeSplitterType FilterEvents::generateSplitters(int wsindex) {
-//  Kernel::TimeSplitterType splitters;
-//  for (const auto &splitter : m_splitters) {
-//    int index = splitter.index();
-//    if (index == wsindex) {
-//      splitters.push_back(splitter);
-//    }
-//  }
-//  return splitters;
-//}
-
-///** Split a log by splitters
-// */
-//void FilterEvents::splitLog(EventWorkspace_sptr eventws, std::string logname,
-//                            TimeSplitterType &splitters) {
-//  // cast property to both double TimeSeriesProperty and IntSeriesProperty
-//  Kernel::TimeSeriesProperty<double> *dbl_prop =
-//      dynamic_cast<Kernel::TimeSeriesProperty<double> *>(
-//          eventws->mutableRun().getProperty(logname));
-//  Kernel::TimeSeriesProperty<int> *int_prop =
-//      dynamic_cast<Kernel::TimeSeriesProperty<int> *>(
-//          eventws->mutableRun().getProperty(logname));
-
-//  if (!dbl_prop && !int_prop) {
-//    std::stringstream errmsg;
-//    errmsg << "Log " << logname
-//           << " is not TimeSeriesProperty<int> or TimeSeriesProperty<double>. "
-//           << "Unable to split.";
-//    throw std::runtime_error(errmsg.str());
-//  } else {
-//    for (const auto &split : splitters) {
-//      g_log.debug() << "Workspace " << eventws->getName() << ": "
-//                    << "log name = " << logname
-//                    << ", duration = " << split.duration() << " from "
-//                    << split.start() << " to " << split.stop() << ".\n";
-//    }
-
-//    // split log
-//    if (dbl_prop)
-//      dbl_prop->filterByTimes(splitters);
-//    else
-//      int_prop->filterByTimes(splitters);
-//  }
-//}
 
 //----------------------------------------------------------------------------------------------
 /** Generate a vector of integer time series property for each splitter
@@ -1968,9 +1799,6 @@ void FilterEvents::generateSplitterTSP(
     // add run stop time as a new entry
     DateAndTime stop_time(m_vecSplitterTime[igrp + 1]);
     curr_tsp->addValue(stop_time, 0);
-
-    // g_log.warning() << "Add " << "i_group " << igrp << " to i_target " <<
-    // itarget << "\n";
   }
 
   return;
@@ -2078,9 +1906,11 @@ std::vector<std::string> FilterEvents::getTimeSeriesLogNames() {
         dynamic_cast<Kernel::TimeSeriesProperty<double> *>(ip);
     Kernel::TimeSeriesProperty<int> *inttimeprop =
         dynamic_cast<Kernel::TimeSeriesProperty<int> *>(ip);
+    Kernel::TimeSeriesProperty<bool> *booltimeprop =
+        dynamic_cast<Kernel::TimeSeriesProperty<bool> *>(ip);
 
     // append to vector if it is either double TimeSeries or int TimeSeries
-    if (dbltimeprop || inttimeprop) {
+    if (dbltimeprop || inttimeprop || booltimeprop) {
       std::string pname = ip->name();
       lognames.push_back(pname);
     }
