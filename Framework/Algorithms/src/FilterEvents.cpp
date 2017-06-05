@@ -1665,7 +1665,6 @@ void FilterEvents::filterEventsByVectorSplitters(double progressamount) {
                     "by pulse time.");
   }
 
-
   PARALLEL_FOR_NO_WSP_CHECK()
   for (int64_t iws = 0; iws < int64_t(numberOfSpectra); ++iws) {
     PARALLEL_START_INTERUPT_REGION
