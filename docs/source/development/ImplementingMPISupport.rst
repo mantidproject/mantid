@@ -130,8 +130,14 @@ The use of the word 'typically' above is intentional and indicates that there ma
 In particular, an algorithm may cause a transition from one storage mode to another, or may take inputs with different storage modes.
 Examples are given in the series of figures on the right.
 
-Running Mantid with MPI Support
+Building and Running Mantid with MPI Support
 ###############################
+
+Build with MPI support
+----------------------
+
+To build Mantid with MPI support as described in this document run ``cmake`` with the additional option ``-DMPI_EXPERIMENTAL=ON``.
+This requires ``boost-mpi`` and a working MPI installation.
 
 Writing and running Python scripts
 ----------------------------------
@@ -148,8 +154,8 @@ For example:
   dataE = [1,1,1,1,1,1,1,1,1,1,1,1]
 
   # CreateWorkspace has a new property called ParallelStorageMode that allows setting the
-  # desired storage mode. It defaults to "Parallel::StorageMode::Distributed".
-  dataWS = CreateWorkspace(DataX=dataX, DataY=dataY, DataE=dataE, NSpec=4, UnitX="Wavelength")
+  # desired storage mode. It defaults to "Parallel::StorageMode::Cloned".
+  dataWS = CreateWorkspace(DataX=dataX, DataY=dataY, DataE=dataE, NSpec=4, UnitX="Wavelength", ParallelStorageMode="Parallel::StorageMode::Distributed")
   ws = Rebin(dataWS, "1,1,7");
 
   print("Histograms: " + str(ws.getNumberHistograms()))
@@ -315,10 +321,19 @@ By default this simply calls ``Algorithm::exec()`` on rank 0 and ``Algorithm::ex
 
 To support running existing Python scripts without significant modification, and to be able to automatically determine execution modes based on input workspaces, workspaces with storage mode ``StorageMode::MasterOnly`` also exist on the non-master ranks.
 The default implementation of ``Algorithm::execNonMaster()`` creates an **uninitialized** (in the case of ``MatrixWorkspace``) workspace of the same type as the input workspace.
-If ``Algorithm::execNonMaster()`` is overridden, any workspaces that are created shall also be uninitialized and shall have storage mode ``StorageMode::MasterOnly``.
+If ``Algorithm::execNonMaster()`` is overridden, any workspaces that are created shall also be uninitialized and should have storage mode ``StorageMode::MasterOnly``.
 
 Given that the workspace on non-master ranks are not initialized, no methods of the workspace should be called, apart from ``Workspace::storageMode()``.
 Validators on the non-master ranks are thus also disabled.
+
+A typical implementation could look as follows:
+
+.. code-block:: c++
+
+  void MyAlg::execNonMaster() {
+    setProperty("OutputWorkspace", Kernel::make_unique<Workspace2D>(
+                                       Parallel::StorageMode::MasterOnly));
+  }
 
 
 Setting spectrum numbers
@@ -421,6 +436,17 @@ A typical example could look as follows:
 
 Here ``MantidTestHelpers/ParallelAlgorithmCreation.h`` provides the algorithm factory method ``ParallelTestHelpers::create<WorkspaceType>``.
 ``MantidTestHelpers/ParallelRunner.h`` provides ``ParallelTestHelpers::runParallel``, which uses ``ParallelRunner`` with a reasonable default choice for the number of ranks.
+
+
+Supported Algorithms
+####################
+
+=============== =============== ========
+Algorithm       Supported modes Comments
+=============== =============== ========
+CreateWorkspace all
+Rebin           all             min and max bin boundaries must be given explicitly
+=============== =============== ========
 
 .. rubric:: Footnotes
 
