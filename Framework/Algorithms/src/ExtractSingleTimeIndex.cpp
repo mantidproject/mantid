@@ -1,5 +1,6 @@
 #include "MantidAlgorithms/ExtractSingleTimeIndex.h"
 
+#include "MantidAPI/DetectorInfo.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceProperty.h"
@@ -37,27 +38,45 @@ void ExtractSingleTimeIndex::exec() {
   int timeIndex = getProperty("TimeIndex");
   MatrixWorkspace_sptr outputWS = getProperty("OutputWorkspace");
 
-  const auto &instrument = inputWS->getInstrument();
-  const auto numDet = instrument->getNumberDetectors();
+  //  const auto &instrument = inputWS->getInstrument();
+  //  const auto numDet = instrument->getNumberDetectors();
 
-  outputWS = WorkspaceFactory::Instance().create("Workspace2D", numDet, 2, 1);
+  IAlgorithm_sptr loadInst = createChildAlgorithm("LoadEmptyInstrument");
+  loadInst->setPropertyValue("InstrumentName", "D2B");
+  loadInst->execute();
+
+  outputWS = loadInst->getProperty("OutputWorkspace");
+
+  //  outputWS = WorkspaceFactory::Instance().create("Workspace2D", numDet, 2,
+  //  1);
+  //  outputWS->setInstrument(instrument->baseInstrument());
 
   const auto &indexInfo = inputWS->indexInfo();
   const auto &spectrumDefs = *(indexInfo.spectrumDefinitions());
 
-  for (size_t i = 0; i < numDet; ++i) {
-    auto hist = inputWS->histogram(0);
+  const auto &inputDetInfo = inputWS->detectorInfo();
+  auto &outputDetInfo = outputWS->mutableDetectorInfo();
 
-    for (auto spectraDef : spectrumDefs) {
-      for (auto item : spectraDef) {
-        if (item.first == i && item.second == timeIndex) {
-          hist = inputWS->histogram(i);
-        }
+  size_t workspaceIndex = 0;
+
+  for (auto spectraDef : spectrumDefs) {
+    for (auto item : spectraDef) {
+      if (int(item.second) == timeIndex) {
+        auto hist = inputWS->histogram(workspaceIndex);
+        outputWS->setHistogram(item.first, hist);
+        auto position = inputDetInfo.position(
+            std::pair<size_t, size_t>(item.first, item.second));
+        outputDetInfo.setPosition(item.first, position);
+        auto rotation = inputDetInfo.rotation(
+            std::pair<size_t, size_t>(item.first, item.second));
+        outputDetInfo.setRotation(item.first, rotation);
       }
     }
-
-    outputWS->setHistogram(i, hist);
+    workspaceIndex++;
   }
+
+  // Assign it to the output workspace property
+  setProperty("OutputWorkspace", outputWS);
 }
 
 } // namespace Algorithms
