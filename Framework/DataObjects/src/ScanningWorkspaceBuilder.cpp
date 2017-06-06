@@ -243,6 +243,8 @@ void ScanningWorkspaceBuilder::buildRelativeRotationsForScans(
     DetectorInfo &outputDetectorInfo) const {
   for (size_t i = 0; i < outputDetectorInfo.size(); ++i) {
     for (size_t j = 0; j < outputDetectorInfo.scanCount(i); ++j) {
+      if (outputDetectorInfo.isMonitor({i, j}))
+        continue;
       auto position = outputDetectorInfo.position({i, j});
       const auto rotation = Kernel::Quat(m_instrumentAngles[j], m_rotationAxis);
       position -= m_rotationPosition;
