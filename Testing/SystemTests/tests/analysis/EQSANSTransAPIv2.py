@@ -2,8 +2,7 @@
 import stresstesting
 from mantid.simpleapi import *
 from reduction_workflow.instruments.sans.sns_command_interface import *
-from reduction_workflow.instruments.sans.hfir_command_interface import DarkCurrent, \
-    DirectBeamTransmission, SetTransmission, ThetaDependentTransmission
+from reduction_workflow.instruments.sans.hfir_command_interface import *
 from mantid.api import *
 
 import os
