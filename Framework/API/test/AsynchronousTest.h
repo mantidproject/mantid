@@ -24,7 +24,7 @@ public:
   static AsynchronousTest *createSuite() { return new AsynchronousTest(); }
   static void destroySuite(AsynchronousTest *suite) { delete suite; }
 
-    class AsyncAlgorithm : public Algorithm {
+  class AsyncAlgorithm : public Algorithm {
   public:
     AsyncAlgorithm() : Algorithm(), result(0), throw_exception(false) {}
     AsyncAlgorithm(const bool throw_default)
@@ -47,12 +47,12 @@ public:
     }
 
     void exec() override {
-      if (synchronise) {
-        std::unique_lock<std::mutex> lock(mtx);
-        execStarted = true;
-        condition1.notify_all();
-        if (!testStarted) {
-          condition2.wait(lock);
+      if (g_synchronise) {
+        std::unique_lock<std::mutex> lock(g_mtx);
+        g_execStarted = true;
+        g_condition1.notify_all();
+        if (!g_testStarted) {
+          g_condition2.wait(lock);
         }
       }
       Poco::Thread *thr = Poco::Thread::current();
@@ -92,7 +92,8 @@ public:
         errorNotificationReseived(false), errorNotificationMessage(""),
         m_progressObserver(*this, &AsynchronousTest::handleProgress), count(0) {
     // DECLARE_ALGORITHM macro doesn't work because the class name contains '::'
-    // The algorithms need to be registered because cloning is done through AlgorithmFactory
+    // The algorithms need to be registered because cloning is done through
+    // AlgorithmFactory
     if (!AlgorithmFactory::Instance().exists("AsyncAlgorithm")) {
       AlgorithmFactory::Instance().subscribe<AsyncAlgorithm>();
       AlgorithmFactory::Instance().subscribe<AsyncAlgorithmThrows>();
@@ -149,26 +150,26 @@ public:
   }
 
   void testCancelGroupWS() {
-    synchronise = true;
-    testStarted = false;
-    execStarted = false;
+    g_synchronise = true;
+    g_testStarted = false;
+    g_execStarted = false;
     WorkspaceGroup_sptr groupWS = makeGroupWorkspace();
     AsyncAlgorithm alg;
     setupTest(alg);
     alg.setPropertyValue("InputWorkspace", "groupWS");
     auto result = alg.executeAsync();
     {
-      std::unique_lock<std::mutex> lock(mtx);
-      if (!execStarted) {
-        condition1.wait(lock);
+      std::unique_lock<std::mutex> lock(g_mtx);
+      if (!g_execStarted) {
+        g_condition1.wait(lock);
       }
     }
     alg.cancel();
     {
-      std::unique_lock<std::mutex> lock(mtx);
-      testStarted = true;
+      std::unique_lock<std::mutex> lock(g_mtx);
+      g_testStarted = true;
     }
-    condition2.notify_all();
+    g_condition2.notify_all();
     result.wait();
     generalChecks(alg, false, true, false, true);
     // The parent algorithm is not executed directly, so the result remains 0
@@ -272,22 +273,19 @@ private:
   }
 
   static const int NO_OF_LOOPS = 10;
-  static bool synchronise;
-  static std::condition_variable condition1;
-  static std::condition_variable condition2;
-  static std::mutex mtx;
-  static bool testStarted;
-  static bool execStarted;
-
+  static bool g_synchronise;
+  static std::condition_variable g_condition1;
+  static std::condition_variable g_condition2;
+  static std::mutex g_mtx;
+  static bool g_testStarted;
+  static bool g_execStarted;
 };
 
-bool AsynchronousTest::synchronise = false;
-std::condition_variable AsynchronousTest::condition1;
-std::condition_variable AsynchronousTest::condition2;
-std::mutex AsynchronousTest::mtx;
-bool AsynchronousTest::testStarted = false;
-bool AsynchronousTest::execStarted = false;
-
-
+bool AsynchronousTest::g_synchronise = false;
+std::condition_variable AsynchronousTest::g_condition1;
+std::condition_variable AsynchronousTest::g_condition2;
+std::mutex AsynchronousTest::g_mtx;
+bool AsynchronousTest::g_testStarted = false;
+bool AsynchronousTest::g_execStarted = false;
 
 #endif /*ASYNCHRONOUSTEST_H_*/
