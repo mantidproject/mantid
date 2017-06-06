@@ -306,7 +306,7 @@ class IOmodule(object):
         @param item: converts unicode to item
         @return: converted element
         """
-        assert isinstance(item, unicode)
+        assert isinstance(item, six.text_type)
         return item.encode('utf-8')
 
     def _convert_unicode_to_str(self, object_to_check=None):
@@ -323,7 +323,7 @@ class IOmodule(object):
 
             elif isinstance(object_to_check, dict):
                 for item in object_to_check:
-                    if isinstance(item, unicode):
+                    if isinstance(item, six.text_type):
 
                         decoded_item = self._convert_unicode_to_string_core(item)
                         item_dict = object_to_check[item]
@@ -334,7 +334,7 @@ class IOmodule(object):
                     object_to_check[item] = self._convert_unicode_to_str(object_to_check[item])
 
             # unicode element
-            elif isinstance(object_to_check, unicode):
+            elif isinstance(object_to_check, six.text_type):
                 object_to_check = self._convert_unicode_to_string_core(object_to_check)
 
         return object_to_check

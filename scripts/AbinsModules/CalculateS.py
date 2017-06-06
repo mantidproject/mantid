@@ -563,7 +563,8 @@ class CalculateS(object):
             inds = np.digitize(x=array_x, bins=self._bins)
             output_array_x = self._bins[AbinsModules.AbinsConstants.FIRST_BIN_INDEX:]
             output_array_y = np.asarray(a=[array_y[inds == i].sum()
-                                           for i in range(AbinsModules.AbinsConstants.FIRST_BIN_INDEX, self._bins.size)],
+                                           for i in range(AbinsModules.AbinsConstants.FIRST_BIN_INDEX,
+                                                          self._bins.size)],
                                         dtype=AbinsModules.AbinsConstants.FLOAT_TYPE)
 
         return output_array_x, output_array_y
