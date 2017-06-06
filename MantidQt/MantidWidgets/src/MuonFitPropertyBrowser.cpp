@@ -177,10 +177,8 @@ void MuonFitPropertyBrowser::init() {
   tmp = "bwd";
   addGroupCheckbox(tmp);
   m_periodsToFit = m_enumManager->addProperty("Periods to fit");
-  m_periodsToFitOptions << QString::fromStdString(ALL_PERIODS_LABEL)
-                        << "1"
-                        << "2"
-                        << QString::fromStdString(CUSTOM_LABEL);
+  m_periodsToFitOptions << QString::fromStdString(ALL_PERIODS_LABEL) << "1"
+                        << "2" << QString::fromStdString(CUSTOM_LABEL);
   m_showPeriodValue << "1";
   m_showPeriods = m_enumManager->addProperty("Selected Periods");
   m_enumManager->setEnumNames(m_periodsToFit, m_periodsToFitOptions);
@@ -1276,7 +1274,7 @@ void MuonFitPropertyBrowser::addPeriodCheckbox(const QString &name) {
   setChosenPeriods(active);
   m_enumManager->setValue(m_periodsToFit, j);
   auto option = m_periodsToFitOptions[j].toStdString();
-  if (option ==ALL_PERIODS_LABEL) {
+  if (option == ALL_PERIODS_LABEL) {
     setAllPeriods();
   }
 }
