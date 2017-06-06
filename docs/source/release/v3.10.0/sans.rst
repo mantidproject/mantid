@@ -28,5 +28,6 @@ Bug Fixes
 - Fixed Batch mode bug where merged reductions set in the GUI were not respected.
 - Fixed display of current IDF, which was not updated when operating in batch mode.
 - Fixed a bug where the user could try to save 1D data in the CanSAS format and caused a crash.
+- Enabled wavelength-range based reductions in 2D.
 
 `Full list of changes on github <http://github.com/mantidproject/mantid/pulls?q=is%3Apr+milestone%3A%22Release+3.10%22+is%3Amerged+label%3A%22Component%3A+SANS%22>`__
