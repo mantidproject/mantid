@@ -101,9 +101,7 @@ class AxeslessWorkspaceTester : public MatrixWorkspace {
 public:
   AxeslessWorkspaceTester(
       const Parallel::StorageMode storageMode = Parallel::StorageMode::Cloned)
-      : MatrixWorkspace(), m_spec(0) {
-    setStorageMode(storageMode);
-  }
+      : MatrixWorkspace(storageMode), m_spec(0) {}
 
   // Empty overrides of virtual methods
   size_t getNumberHistograms() const override { return m_spec; }
