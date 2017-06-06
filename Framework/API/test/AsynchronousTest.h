@@ -93,8 +93,10 @@ public:
         m_progressObserver(*this, &AsynchronousTest::handleProgress), count(0) {
     // DECLARE_ALGORITHM macro doesn't work because the class name contains '::'
     // The algorithms need to be registered because cloning is done through AlgorithmFactory
-    AlgorithmFactory::Instance().subscribe<AsyncAlgorithm>();
-    AlgorithmFactory::Instance().subscribe<AsyncAlgorithmThrows>();
+    if (!AlgorithmFactory::Instance().exists("AsyncAlgorithm")) {
+      AlgorithmFactory::Instance().subscribe<AsyncAlgorithm>();
+      AlgorithmFactory::Instance().subscribe<AsyncAlgorithmThrows>();
+    }
   }
 
   void testExecution() {
