@@ -1,8 +1,8 @@
-.. _ImplementingMPISupport:
+.. _AlgorithmMPISupport:
 
-=========================================
-Implementing MPI Support for an Algorithm
-=========================================
+==========================
+MPI Support for Algorithms
+==========================
 
 .. contents::
   :local:
