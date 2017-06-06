@@ -95,7 +95,7 @@ void SumSpectra::exec() {
   this->m_yLength = static_cast<int>(localworkspace->blocksize());
 
   // Check 'StartSpectrum' is in range 0-m_numberOfSpectra
-  if (m_minWsInd > m_numberOfSpectra) {
+  if (m_minWsInd >= m_numberOfSpectra) {
     g_log.warning("StartWorkspaceIndex out of range! Set to 0.");
     m_minWsInd = 0;
   }
@@ -110,7 +110,7 @@ void SumSpectra::exec() {
   if (!isEmpty(m_maxWsInd) &&
       (m_maxWsInd > m_numberOfSpectra - 1 || m_maxWsInd < m_minWsInd)) {
     g_log.warning("EndWorkspaceIndex out of range! Set to max Workspace Index");
-    m_maxWsInd = m_numberOfSpectra;
+    m_maxWsInd = m_numberOfSpectra - 1;
   }
 
   // Make the set of indices to sum up from the list
