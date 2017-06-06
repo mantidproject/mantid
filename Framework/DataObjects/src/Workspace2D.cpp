@@ -18,7 +18,8 @@ using std::size_t;
 DECLARE_WORKSPACE(Workspace2D)
 
 /// Constructor
-Workspace2D::Workspace2D() : m_noVectors(0) {}
+Workspace2D::Workspace2D(const Parallel::StorageMode storageMode)
+    : HistoWorkspace(storageMode), m_noVectors(0) {}
 
 Workspace2D::Workspace2D(const Workspace2D &other)
     : HistoWorkspace(other), m_noVectors(other.m_noVectors),

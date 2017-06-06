@@ -46,12 +46,10 @@ const std::string MatrixWorkspace::xDimensionId = "xDimension";
 const std::string MatrixWorkspace::yDimensionId = "yDimension";
 
 /// Default constructor
-MatrixWorkspace::MatrixWorkspace()
-    : IMDWorkspace(), ExperimentInfo(), m_axes(), m_isInitialized(false),
-      m_YUnit(), m_YUnitLabel(), m_isCommonBinsFlagSet(false),
-      m_isCommonBinsFlag(false), m_masks() {
-  setStorageMode(Parallel::StorageMode::Distributed);
-}
+MatrixWorkspace::MatrixWorkspace(const Parallel::StorageMode storageMode)
+    : IMDWorkspace(storageMode), ExperimentInfo(), m_axes(),
+      m_isInitialized(false), m_YUnit(), m_YUnitLabel(),
+      m_isCommonBinsFlagSet(false), m_isCommonBinsFlag(false), m_masks() {}
 
 MatrixWorkspace::MatrixWorkspace(const MatrixWorkspace &other)
     : IMDWorkspace(other), ExperimentInfo(other) {

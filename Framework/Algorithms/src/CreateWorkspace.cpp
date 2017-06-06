@@ -75,8 +75,7 @@ void CreateWorkspace::init() {
       Parallel::toString(Parallel::StorageMode::Distributed),
       Parallel::toString(Parallel::StorageMode::MasterOnly)};
   declareProperty(
-      "ParallelStorageMode",
-      Parallel::toString(Parallel::StorageMode::Distributed),
+      "ParallelStorageMode", Parallel::toString(Parallel::StorageMode::Cloned),
       boost::make_shared<StringListValidator>(propOptions),
       "The parallel storage mode of the output workspace for MPI builds");
   setPropertySettings("ParallelStorageMode",
@@ -294,7 +293,8 @@ void CreateWorkspace::execNonMaster() {
   MatrixWorkspace_const_sptr parentWS = getProperty("ParentWorkspace");
   if (parentWS)
     return Algorithm::execNonMaster();
-  setProperty("OutputWorkspace", Kernel::make_unique<Workspace2D>());
+  setProperty("OutputWorkspace", Kernel::make_unique<Workspace2D>(
+                                     Parallel::StorageMode::MasterOnly));
 }
 
 } // Algorithms
