@@ -6,6 +6,8 @@ from mantid import config
 import os
 import numpy as np
 
+from IndirectCommon import formatRuns
+
 
 class SofQWMomentsScan(DataProcessorAlgorithm):
     _data_files = None
@@ -110,7 +112,7 @@ class SofQWMomentsScan(DataProcessorAlgorithm):
 
         progress.report('Energy transfer')
         scan_alg = self.createChildAlgorithm("ISISIndirectEnergyTransfer", 0.05, 0.95)
-        scan_alg.setProperty('InputFiles', self._format_runs(self._data_files))
+        scan_alg.setProperty('InputFiles', formatRuns(self._data_files, self._instrument_name))
         scan_alg.setProperty('SumFiles', self._sum_files)
         scan_alg.setProperty('LoadLogFiles', self._load_logs)
         scan_alg.setProperty('CalibrationWorkspace', self._calibration_ws)
@@ -470,22 +472,6 @@ class SofQWMomentsScan(DataProcessorAlgorithm):
 
         return instrument, run_number
 
-    def _format_runs(self, runs):
-        run_list = []
-        for run in runs:
-            if '-' in run:
-                a, b = run.split('-')
-                run_list.extend(range(int(a), int(b) + 1))
-            else:
-                try:
-                    run_list.append(int(run))
-                except:
-                    # run already has instrument eg 'osi1000'
-                    run_list.append(run)
-        for idx, run in enumerate(run_list):
-            if type(run) == int:
-                run_list[idx] = self._instrument_name + str(run)
-        return run_list
 
 # Register algorithm with Mantid
 AlgorithmFactory.subscribe(SofQWMomentsScan)
