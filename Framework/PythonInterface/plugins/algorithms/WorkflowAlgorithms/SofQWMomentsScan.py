@@ -161,7 +161,7 @@ class SofQWMomentsScan(DataProcessorAlgorithm):
             sofqw_alg.setProperty("QAxisBinning", self._q_range)
             sofqw_alg.setProperty("EMode", 'Indirect')
             sofqw_alg.setProperty("ReplaceNaNs", True)
-            sofqw_alg.setProperty("Method", 'Polygon')
+            sofqw_alg.setProperty("Method", 'NormalisedPolygon')
             sofqw_alg.setProperty("OutputWorkspace", input_ws + '_sqw')
             sofqw_alg.execute()
             mtd.addOrReplace(input_ws + '_sqw', sofqw_alg.getProperty("OutputWorkspace").value)
