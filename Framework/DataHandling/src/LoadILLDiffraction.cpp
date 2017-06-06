@@ -150,7 +150,8 @@ void LoadILLDiffraction::loadDataScan() {
   twoTheta0.load();
 
   // figure out the dimensions
-  m_numberDetectorsRead = static_cast<size_t>(data.dim1());
+  m_numberDetectorsRead =
+      static_cast<size_t>(data.dim1()) * static_cast<size_t>(data.dim2());
   m_numberScanPoints = static_cast<size_t>(data.dim0());
   g_log.debug() << "Read " << m_numberDetectorsRead << " detectors and "
                 << m_numberScanPoints << "\n";
@@ -284,7 +285,6 @@ void LoadILLDiffraction::fillMovingInstrumentScan(const NXUInt &data,
       m_outWorkspace->mutableY(j + i * m_numberScanPoints) = monitor[j];
       m_outWorkspace->mutableE(j + i * m_numberScanPoints) = sqrt(monitor[j]);
       m_outWorkspace->mutableX(j + i * m_numberScanPoints) = axis;
-      g_log.warning() << i << "::" << j << "::" << monitor[j] << std::endl;
     }
   }
 
@@ -292,7 +292,9 @@ void LoadILLDiffraction::fillMovingInstrumentScan(const NXUInt &data,
   for (size_t i = NUMBER_MONITORS;
        i < m_numberDetectorsActual + NUMBER_MONITORS; ++i) {
     for (size_t j = 0; j < m_numberScanPoints; ++j) {
-      unsigned int y = data(static_cast<int>(j), static_cast<int>(i));
+      unsigned int y = data(static_cast<int>(j),
+                            static_cast<int>((i - NUMBER_MONITORS) / 128),
+                            static_cast<int>((i - NUMBER_MONITORS) % 128));
       m_outWorkspace->mutableY(j + i * m_numberScanPoints) = y;
       m_outWorkspace->mutableE(j + i * m_numberScanPoints) = sqrt(y);
       m_outWorkspace->mutableX(j + i * m_numberScanPoints) = axis;
