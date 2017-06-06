@@ -67,6 +67,10 @@ namespace MantidWidgets {
 using namespace Mantid::API;
 
 const std::string MuonFitPropertyBrowser::SIMULTANEOUS_PREFIX{"MuonSimulFit_"};
+const std::string MuonFitPropertyBrowser::CUSTOM_LABEL{"Custom"};
+const std::string MuonFitPropertyBrowser::ALL_GROUPS_LABEL{"All Groups"};
+const std::string MuonFitPropertyBrowser::ALL_PAIRS_LABEL{"All Pairs"};
+const std::string MuonFitPropertyBrowser::ALL_PERIODS_LABEL{"All Periods"};
 
 /**
  * Constructor
@@ -158,9 +162,9 @@ void MuonFitPropertyBrowser::init() {
   multiFitSettingsGroup->addSubProperty(m_startX);
   multiFitSettingsGroup->addSubProperty(m_endX);
   m_groupsToFit = m_enumManager->addProperty("Groups/Pairs to fit");
-  m_groupsToFitOptions << "All groups"
-                       << "All Pairs"
-                       << "Custom";
+  m_groupsToFitOptions << QString::fromStdString(ALL_GROUPS_LABEL)
+                       << QString::fromStdString(ALL_PAIRS_LABEL)
+                       << QString::fromStdString(CUSTOM_LABEL);
   m_showGroupValue << "groups";
   m_showGroup = m_enumManager->addProperty("Selected Groups");
   m_enumManager->setEnumNames(m_groupsToFit, m_groupsToFitOptions);
@@ -173,10 +177,10 @@ void MuonFitPropertyBrowser::init() {
   tmp = "bwd";
   addGroupCheckbox(tmp);
   m_periodsToFit = m_enumManager->addProperty("Periods to fit");
-  m_periodsToFitOptions << "All Periods"
+  m_periodsToFitOptions << QString::fromStdString(ALL_PERIODS_LABEL)
                         << "1"
                         << "2"
-                        << "Custom";
+                        << QString::fromStdString(CUSTOM_LABEL);
   m_showPeriodValue << "1";
   m_showPeriods = m_enumManager->addProperty("Selected Periods");
   m_enumManager->setEnumNames(m_periodsToFit, m_periodsToFitOptions);
@@ -341,13 +345,13 @@ void MuonFitPropertyBrowser::enumChanged(QtProperty *prop) {
     int j = m_enumManager->value(m_groupsToFit);
     std::string option = m_groupsToFitOptions[j].toStdString();
 
-    if (option == "All groups") {
+    if (option == ALL_GROUPS_LABEL) {
       setAllGroups();
       m_reselectGroupBtn->setEnabled(false);
-    } else if (option == "All Pairs") {
+    } else if (option == ALL_PAIRS_LABEL) {
       setAllPairs();
       m_reselectGroupBtn->setEnabled(false);
-    } else if (option == "Custom") {
+    } else if (option == CUSTOM_LABEL) {
       m_reselectGroupBtn->setEnabled(true);
       genGroupWindow();
     }
@@ -356,10 +360,10 @@ void MuonFitPropertyBrowser::enumChanged(QtProperty *prop) {
   } else if (prop == m_periodsToFit) {
     int j = m_enumManager->value(m_periodsToFit);
     std::string option = m_periodsToFitOptions[j].toStdString();
-    if (option == "Custom") {
+    if (option == CUSTOM_LABEL) {
       m_reselectPeriodBtn->setEnabled(true);
       genPeriodWindow();
-    } else if (option == "All Periods") {
+    } else if (option == ALL_PERIODS_LABEL) {
       setAllPeriods();
       m_reselectPeriodBtn->setEnabled(false);
     } else {
@@ -1182,7 +1186,7 @@ void MuonFitPropertyBrowser::setAllPeriods() {
 void MuonFitPropertyBrowser::setNumPeriods(size_t numPeriods) {
   m_periodsToFitOptions.clear();
   if (numPeriods > 1) {
-    m_periodsToFitOptions << "All Periods";
+    m_periodsToFitOptions << QString::fromStdString(ALL_PERIODS_LABEL);
   }
   // create more boxes
   for (size_t i = 0; i != numPeriods; i++) {
@@ -1203,7 +1207,7 @@ void MuonFitPropertyBrowser::setNumPeriods(size_t numPeriods) {
     m_multiFitSettingsGroup->property()->addSubProperty(m_showPeriods);
     m_generateBtn->setDisabled(false);
 
-    m_periodsToFitOptions << "Custom";
+    m_periodsToFitOptions << QString::fromStdString(CUSTOM_LABEL);
     m_enumManager->setEnumNames(m_periodsToFit, m_periodsToFitOptions);
   }
 }
@@ -1272,7 +1276,7 @@ void MuonFitPropertyBrowser::addPeriodCheckbox(const QString &name) {
   setChosenPeriods(active);
   m_enumManager->setValue(m_periodsToFit, j);
   auto option = m_periodsToFitOptions[j].toStdString();
-  if (option == "All Periods") {
+  if (option ==ALL_PERIODS_LABEL) {
     setAllPeriods();
   }
 }
