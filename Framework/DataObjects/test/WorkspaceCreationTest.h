@@ -73,11 +73,14 @@ void run_indexInfo_legacy_compatibility_partitioned_workspace_failure(
   indices.setSpectrumDefinitions(
       std::vector<SpectrumDefinition>(indices.size()));
   const auto ws = create<Workspace2D>(indices, Histogram(BinEdges{1, 2}));
-  ws->getSpectrum(0).setSpectrumNo(7);
   if (comm.size() > 1) {
-    TS_ASSERT_THROWS(ws->indexInfo(), std::runtime_error);
+    TS_ASSERT_THROWS_EQUALS(ws->getSpectrum(0).setSpectrumNo(7),
+                            const std::logic_error &e, std::string(e.what()),
+                            "Setting spectrum numbers in MatrixWorkspace via "
+                            "ISpectrum::setSpectrumNo is not possible in MPI "
+                            "runs for distributed workspaces. Use IndexInfo.");
   } else {
-    TS_ASSERT_THROWS_NOTHING(ws->indexInfo());
+    TS_ASSERT_THROWS_NOTHING(ws->getSpectrum(0).setSpectrumNo(7));
   }
 }
 }

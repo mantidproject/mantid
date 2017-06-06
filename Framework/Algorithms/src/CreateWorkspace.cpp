@@ -160,6 +160,7 @@ void CreateWorkspace::exec() {
   }
   histogramBuilder.setY(ySize);
   histogramBuilder.setDistribution(getProperty("Distribution"));
+  auto histogram = histogramBuilder.build();
 
   const bool dataE_provided = !dataE.empty();
   if (dataE_provided && dataY.size() != dataE.size()) {
@@ -168,18 +169,18 @@ void CreateWorkspace::exec() {
   }
 
   // Create the OutputWorkspace
-  auto storageMode = Parallel::fromString(getProperty("ParallelStorageMode"));
-  IndexInfo indexInfo(nSpec, storageMode, communicator());
   MatrixWorkspace_const_sptr parentWS = getProperty("ParentWorkspace");
   MatrixWorkspace_sptr outputWS;
   if (parentWS) {
-    outputWS =
-        create<HistoWorkspace>(*parentWS, indexInfo, histogramBuilder.build());
+    outputWS = create<HistoWorkspace>(*parentWS, nSpec, histogram);
   } else {
-    outputWS = create<Workspace2D>(indexInfo, histogramBuilder.build());
+    auto storageMode = Parallel::fromString(getProperty("ParallelStorageMode"));
+    IndexInfo indexInfo(nSpec, storageMode, communicator());
+    outputWS = create<Workspace2D>(indexInfo, histogram);
   }
 
   Progress progress(this, 0.0, 1.0, nSpec);
+  const auto &indexInfo = outputWS->indexInfo();
 
   PARALLEL_FOR_IF(Kernel::threadSafe(*outputWS))
   for (int i = 0; i < nSpec; i++) {
@@ -198,9 +199,12 @@ void CreateWorkspace::exec() {
     const std::vector<double>::difference_type yEnd = yStart + ySize;
     auto local_i = localIndices[0];
 
-    // There is no instrument so setting detector IDs makes no sense, but if we
-    // don't we break quite a few unit tests relying on this legacy behavior.
-    outputWS->getSpectrum(local_i).setDetectorID(i + 1);
+    if (!parentWS) {
+      // There is no instrument so setting detector IDs makes no sense, but if
+      // we don't we break quite a few unit tests relying on this legacy
+      // behavior.
+      outputWS->getSpectrum(local_i).setDetectorID(i + 1);
+    }
 
     // Just set the pointer if common X bins. Otherwise, copy in the right chunk
     // (as we do for Y).
