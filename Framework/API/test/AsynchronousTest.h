@@ -16,80 +16,6 @@
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
-using namespace std;
-
-namespace {
-constexpr int NO_OF_LOOPS = 10;
-bool synchronise = false;
-std::condition_variable condition1;
-std::condition_variable condition2;
-std::mutex mtx;
-bool testStarted = false;
-bool execStarted = false;
-}
-
-class AsyncAlgorithm : public Algorithm {
-public:
-  AsyncAlgorithm() : Algorithm(), result(0), throw_exception(false) {}
-  AsyncAlgorithm(const bool throw_default)
-      : Algorithm(), result(0), throw_exception(throw_default) {}
-  ~AsyncAlgorithm() override {}
-  const std::string name() const override {
-    return "AsyncAlgorithm";
-  } ///< Algorithm's name for identification
-  int version() const override {
-    return 1;
-  } ///< Algorithm's version for identification
-  const std::string category() const override {
-    return "Cat";
-  } ///< Algorithm's category for identification
-  const std::string summary() const override { return "Test summary"; }
-
-  void init() override {
-    declareProperty(Kernel::make_unique<WorkspaceProperty<>>(
-        "InputWorkspace", "", Direction::Input, PropertyMode::Optional));
-  }
-
-  void exec() override {
-    if (synchronise) {
-      std::unique_lock<std::mutex> lock(mtx);
-      execStarted = true;
-      condition1.notify_all();
-      if (!testStarted) {
-        condition2.wait(lock);
-      }
-    }
-    Poco::Thread *thr = Poco::Thread::current();
-    for (int i = 0; i < NO_OF_LOOPS; i++) {
-      result = i;
-      if (thr)
-        thr->sleep(1);
-      progress(double(i) / NO_OF_LOOPS); // send progress notification
-      interruption_point();              // check for a termination request
-      if (throw_exception && i == NO_OF_LOOPS / 2)
-        throw std::runtime_error("Exception thrown");
-    }
-  }
-  int result;
-
-protected:
-  bool throw_exception;
-};
-
-DECLARE_ALGORITHM(AsyncAlgorithm)
-
-// AsyncAlgorithmThrows is the same as AsyncAlgorithm except that it
-// throws by default. This provides an easy way to make sure any child
-// algorithms also throw.
-class AsyncAlgorithmThrows : public AsyncAlgorithm {
-public:
-  AsyncAlgorithmThrows() : AsyncAlgorithm(true) {}
-  const std::string name() const override {
-    return "AsyncAlgorithmThrows";
-  } ///< Algorithm's name for identification
-};
-
-DECLARE_ALGORITHM(AsyncAlgorithmThrows)
 
 class AsynchronousTest : public CxxTest::TestSuite {
 public:
@@ -97,6 +23,65 @@ public:
   // This means the constructor isn't called when running other tests
   static AsynchronousTest *createSuite() { return new AsynchronousTest(); }
   static void destroySuite(AsynchronousTest *suite) { delete suite; }
+
+    class AsyncAlgorithm : public Algorithm {
+  public:
+    AsyncAlgorithm() : Algorithm(), result(0), throw_exception(false) {}
+    AsyncAlgorithm(const bool throw_default)
+        : Algorithm(), result(0), throw_exception(throw_default) {}
+    ~AsyncAlgorithm() override {}
+    const std::string name() const override {
+      return "AsyncAlgorithm";
+    } ///< Algorithm's name for identification
+    int version() const override {
+      return 1;
+    } ///< Algorithm's version for identification
+    const std::string category() const override {
+      return "Cat";
+    } ///< Algorithm's category for identification
+    const std::string summary() const override { return "Test summary"; }
+
+    void init() override {
+      declareProperty(Kernel::make_unique<WorkspaceProperty<>>(
+          "InputWorkspace", "", Direction::Input, PropertyMode::Optional));
+    }
+
+    void exec() override {
+      if (synchronise) {
+        std::unique_lock<std::mutex> lock(mtx);
+        execStarted = true;
+        condition1.notify_all();
+        if (!testStarted) {
+          condition2.wait(lock);
+        }
+      }
+      Poco::Thread *thr = Poco::Thread::current();
+      for (int i = 0; i < NO_OF_LOOPS; i++) {
+        result = i;
+        if (thr)
+          thr->sleep(1);
+        progress(double(i) / NO_OF_LOOPS); // send progress notification
+        interruption_point();              // check for a termination request
+        if (throw_exception && i == NO_OF_LOOPS / 2)
+          throw std::runtime_error("Exception thrown");
+      }
+    }
+    int result;
+
+  protected:
+    bool throw_exception;
+  };
+
+  // AsyncAlgorithmThrows is the same as AsyncAlgorithm except that it
+  // throws by default. This provides an easy way to make sure any child
+  // algorithms also throw.
+  class AsyncAlgorithmThrows : public AsyncAlgorithm {
+  public:
+    AsyncAlgorithmThrows() : AsyncAlgorithm(true) {}
+    const std::string name() const override {
+      return "AsyncAlgorithmThrows";
+    } ///< Algorithm's name for identification
+  };
 
   AsynchronousTest()
       : m_startedObserver(*this, &AsynchronousTest::handleStarted),
@@ -106,12 +91,16 @@ public:
         m_errorObserver(*this, &AsynchronousTest::handleError),
         errorNotificationReseived(false), errorNotificationMessage(""),
         m_progressObserver(*this, &AsynchronousTest::handleProgress), count(0) {
+    // DECLARE_ALGORITHM macro doesn't work because the class name contains '::'
+    // The algorithms need to be registered because cloning is done through AlgorithmFactory
+    AlgorithmFactory::Instance().subscribe<AsyncAlgorithm>();
+    AlgorithmFactory::Instance().subscribe<AsyncAlgorithmThrows>();
   }
 
   void testExecution() {
     AsyncAlgorithm alg;
     setupTest(alg);
-    Poco::ActiveResult<bool> result = alg.executeAsync();
+    auto result = alg.executeAsync();
     TS_ASSERT(!result.available())
     result.wait();
     generalChecks(alg, true, true, true, false);
@@ -123,7 +112,7 @@ public:
   void testCancel() {
     AsyncAlgorithm alg;
     setupTest(alg);
-    Poco::ActiveResult<bool> result = alg.executeAsync();
+    auto result = alg.executeAsync();
     alg.cancel();
     result.wait();
     generalChecks(alg, false, true, false, true);
@@ -134,7 +123,7 @@ public:
     AsyncAlgorithmThrows alg;
     setupTest(alg);
     alg.addObserver(m_errorObserver);
-    Poco::ActiveResult<bool> result = alg.executeAsync();
+    auto result = alg.executeAsync();
     result.wait();
     generalChecks(alg, false, true, false, true);
     TS_ASSERT_LESS_THAN(alg.result, NO_OF_LOOPS - 1)
@@ -146,7 +135,7 @@ public:
     AsyncAlgorithm alg;
     setupTest(alg);
     alg.setPropertyValue("InputWorkspace", "groupWS");
-    Poco::ActiveResult<bool> result = alg.executeAsync();
+    auto result = alg.executeAsync();
     TS_ASSERT(!result.available())
     result.wait();
     generalChecks(alg, true, true, true, false);
@@ -165,7 +154,7 @@ public:
     AsyncAlgorithm alg;
     setupTest(alg);
     alg.setPropertyValue("InputWorkspace", "groupWS");
-    Poco::ActiveResult<bool> result = alg.executeAsync();
+    auto result = alg.executeAsync();
     {
       std::unique_lock<std::mutex> lock(mtx);
       if (!execStarted) {
@@ -190,7 +179,7 @@ public:
     setupTest(alg);
     alg.initialize();
     alg.setPropertyValue("InputWorkspace", "groupWS");
-    Poco::ActiveResult<bool> result = alg.executeAsync();
+    auto result = alg.executeAsync();
     result.wait();
     generalChecks(alg, false, true, false, true);
     TS_ASSERT_EQUALS(errorNotificationMessage,
@@ -279,6 +268,24 @@ private:
     TS_ASSERT_EQUALS(finishedNotificationReseived, expectFinished)
     TS_ASSERT_EQUALS(errorNotificationReseived, expectError)
   }
+
+  static const int NO_OF_LOOPS = 10;
+  static bool synchronise;
+  static std::condition_variable condition1;
+  static std::condition_variable condition2;
+  static std::mutex mtx;
+  static bool testStarted;
+  static bool execStarted;
+
 };
+
+bool AsynchronousTest::synchronise = false;
+std::condition_variable AsynchronousTest::condition1;
+std::condition_variable AsynchronousTest::condition2;
+std::mutex AsynchronousTest::mtx;
+bool AsynchronousTest::testStarted = false;
+bool AsynchronousTest::execStarted = false;
+
+
 
 #endif /*ASYNCHRONOUSTEST_H_*/
