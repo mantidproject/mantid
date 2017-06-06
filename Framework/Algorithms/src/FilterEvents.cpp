@@ -1162,18 +1162,19 @@ void FilterEvents::createOutputWorkspaces() {
       m_wsNames.push_back(wsname.str());
 
       // Set (property) to output workspace and set to ADS
-      // TODO/ISSUE/NOW - If grouping workspace later, then there is no need to
-      // create these output properties
-      declareProperty(
-          Kernel::make_unique<
-              API::WorkspaceProperty<DataObjects::EventWorkspace>>(
-              propertynamess.str(), wsname.str(), Direction::Output),
-          "Output");
-      setProperty(propertynamess.str(), optws);
       AnalysisDataService::Instance().addOrReplace(wsname.str(), optws);
 
-      ++numoutputws;
+      // create these output properties
+      if (!this->m_toGroupWS) {
+        declareProperty(
+            Kernel::make_unique<
+                API::WorkspaceProperty<DataObjects::EventWorkspace>>(
+                propertynamess.str(), wsname.str(), Direction::Output),
+            "Output");
+        setProperty(propertynamess.str(), optws);
+      }
 
+      ++numoutputws;
       g_log.debug() << "Created output Workspace of group = " << wsgroup
                     << "  Property Name = " << propertynamess.str()
                     << " Workspace name = " << wsname.str()
@@ -1251,20 +1252,28 @@ void FilterEvents::createOutputWorkspacesMatrixCase() {
 
     // Inserted this pair to map
     m_wsNames.push_back(wsname.str());
-
-    // Set (property) to output workspace and set to ADS
-    declareProperty(Kernel::make_unique<
-                        API::WorkspaceProperty<DataObjects::EventWorkspace>>(
-                        propertynamess.str(), wsname.str(), Direction::Output),
-                    "Output");
-    setProperty(propertynamess.str(), optws);
     AnalysisDataService::Instance().addOrReplace(wsname.str(), optws);
 
     g_log.debug() << "Created output Workspace of group = " << wsgroup
-                  << "  Property Name = " << propertynamess.str()
                   << " Workspace name = " << wsname.str()
                   << " with Number of events = " << optws->getNumberEvents()
                   << "\n";
+
+    // Set (property) to output workspace and set to ADS
+    if (m_toGroupWS)
+    {
+      declareProperty(Kernel::make_unique<
+                         API::WorkspaceProperty<DataObjects::EventWorkspace>>(
+                         propertynamess.str(), wsname.str(), Direction::Output),
+                     "Output");
+     setProperty(propertynamess.str(), optws);
+
+     g_log.debug() << "  Property Name = " << propertynamess.str() << "\n";
+    }
+    else
+    {
+      g_log.debug() << "\n";
+    }
 
     // Update progress report
     m_progress =
@@ -1325,29 +1334,38 @@ void FilterEvents::createOutputWorkspacesTableSplitterCase() {
     // TODO/NOW/ISSUE -- How about comment and info?
 
     // add to output workspace property
-    std::stringstream propertynamess;
-    if (wsgroup < 0) {
-      propertynamess << "OutputWorkspace_unfiltered";
-    } else {
-      propertynamess << "OutputWorkspace_" << wsgroup;
-    }
 
     // Inserted this pair to map
     m_wsNames.push_back(wsname.str());
 
     // Set (property) to output workspace and set to ADS
-    declareProperty(Kernel::make_unique<
-                        API::WorkspaceProperty<DataObjects::EventWorkspace>>(
-                        propertynamess.str(), wsname.str(), Direction::Output),
-                    "Output");
-    setProperty(propertynamess.str(), optws);
     AnalysisDataService::Instance().addOrReplace(wsname.str(), optws);
 
     g_log.debug() << "Created output Workspace of group = " << wsgroup
-                  << "  Property Name = " << propertynamess.str()
                   << " Workspace name = " << wsname.str()
                   << " with Number of events = " << optws->getNumberEvents()
                   << "\n";
+
+    if (this->m_toGroupWS)
+    {
+      std::stringstream propertynamess;
+      if (wsgroup < 0) {
+        propertynamess << "OutputWorkspace_unfiltered";
+      } else {
+        propertynamess << "OutputWorkspace_" << wsgroup;
+      }
+      declareProperty(Kernel::make_unique<
+                          API::WorkspaceProperty<DataObjects::EventWorkspace>>(
+                          propertynamess.str(), wsname.str(), Direction::Output),
+                      "Output");
+      setProperty(propertynamess.str(), optws);
+
+      g_log.debug() << "  Property Name = " << propertynamess.str() << "\n";
+    }
+    else
+    {
+      g_log.debug() << "\n";
+    }
 
     // Update progress report
     m_progress =
@@ -1656,10 +1674,12 @@ void FilterEvents::filterEventsByVectorSplitters(double progressamount) {
     size_t num_proton_charges =
         m_eventWS->run().getProperty("proton_charge")->size();
     if (num_proton_charges < m_vecSplitterTime.size()) {
-      // TODO/ISSUE/NOW - Better error message!
-      throw runtime_error("It is not a good choice to split fast event by "
-                          "pulse time when there are more splitters than pulse "
-                          "times.");
+      // throw an exception if there more splitters than proton charges
+      std::stringstream errmsg;
+      errmsg << "It is not proper to split fast event 'By PulseTime'', when there are "
+                "more splitters (" << m_vecSplitterTime.size() << ") than pulse time "
+                "log entries (" << num_proton_charges << ")";
+      throw runtime_error(errmsg.str());
     } else
       g_log.warning("User should understand the inaccurancy to filter events "
                     "by pulse time.");
