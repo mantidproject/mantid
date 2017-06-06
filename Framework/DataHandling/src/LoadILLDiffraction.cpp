@@ -293,8 +293,8 @@ void LoadILLDiffraction::fillMovingInstrumentScan(const NXUInt &data,
        i < m_numberDetectorsActual + NUMBER_MONITORS; ++i) {
     for (size_t j = 0; j < m_numberScanPoints; ++j) {
       unsigned int y = data(static_cast<int>(j),
-                            static_cast<int>((i - NUMBER_MONITORS) / 128),
-                            static_cast<int>((i - NUMBER_MONITORS) % 128));
+                            static_cast<int>((i - NUMBER_MONITORS) % 128),
+                            static_cast<int>((i - NUMBER_MONITORS) / 128));
       m_outWorkspace->mutableY(j + i * m_numberScanPoints) = y;
       m_outWorkspace->mutableE(j + i * m_numberScanPoints) = sqrt(y);
       m_outWorkspace->mutableX(j + i * m_numberScanPoints) = axis;
