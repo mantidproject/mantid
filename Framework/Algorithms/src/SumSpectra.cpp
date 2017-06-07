@@ -276,11 +276,15 @@ void SumSpectra::doWorkspace2D(ISpectrum &outSpec, Progress &progress,
   // Loop over spectra
   for (const auto wsIndex : this->m_indices) {
     // Don't go outside the range.
-    if ((wsIndex >= this->m_numberOfSpectra) || (wsIndex < 0)) {
+    if (wsIndex < 0) {
       g_log.error() << "Invalid index " << wsIndex
                     << " was specified. Sum was aborted.\n";
       break;
-    }
+    } else if (wsIndex >= this->m_numberOfSpectra) {
+		g_log.warning() << "Selected range exceeds number of spectra in input workspace. Indices greater than " << wsIndex-1
+			<< " have been disregarded.\n";
+		break;
+	}
 
     if (spectrumInfo.hasDetectors(wsIndex)) {
       // Skip monitors, if the property is set to do so
@@ -379,11 +383,16 @@ void SumSpectra::doRebinnedOutput(MatrixWorkspace_sptr outputWorkspace,
   // Loop over spectra
   for (const auto i : m_indices) {
     // Don't go outside the range.
-    if ((i >= m_numberOfSpectra) || (i < 0)) {
-      g_log.error() << "Invalid index " << i
-                    << " was specified. Sum was aborted.\n";
-      break;
-    }
+	  if (i < 0) {
+		  g_log.error() << "Invalid index " << i
+			  << " was specified. Sum was aborted.\n";
+		  break;
+	  }
+	  else if (i >= this->m_numberOfSpectra) {
+		  g_log.warning() << "Selected range exceeds number of spectra in input workspace. Indices greater than " << i - 1
+			  << " have been disregarded.\n";
+		  break;
+	  }
 
     if (spectrumInfo.hasDetectors(i)) {
       // Skip monitors, if the property is set to do so
@@ -466,11 +475,16 @@ void SumSpectra::execEvent(EventWorkspace_const_sptr localworkspace,
   size_t numZeros(0);
   for (const auto i : indices) {
     // Don't go outside the range.
-    if ((i >= m_numberOfSpectra) || (i < 0)) {
-      g_log.error() << "Invalid index " << i
-                    << " was specified. Sum was aborted.\n";
-      break;
-    }
+	  if (i < 0) {
+		  g_log.error() << "Invalid index " << i
+			  << " was specified. Sum was aborted.\n";
+		  break;
+	  }
+	  else if (i >= this->m_numberOfSpectra) {
+		  g_log.warning() << "Selected range exceeds number of spectra in input workspace. Indices greater than " << i - 1
+			  << " have been disregarded.\n";
+		  break;
+	  }
 
     if (spectrumInfo.hasDetectors(i)) {
       // Skip monitors, if the property is set to do so
