@@ -57,7 +57,8 @@ public:
   /// A constructor that looks like a Python __init__ method
   IFunction1DAdapter(PyObject *self);
 
-  /// Disable copy operator - The PyObject must be supplied to construct the object
+  /// Disable copy operator - The PyObject must be supplied to construct the
+  /// object
   IFunction1DAdapter(const IFunction1DAdapter &) = delete;
 
   /// Disable assignment operator

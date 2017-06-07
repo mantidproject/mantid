@@ -46,7 +46,8 @@ public:
   /// A constructor that looks like a Python __init__ method
   IPeakFunctionAdapter(PyObject *self);
 
-  /// Disable copy operator - The PyObject must be supplied to construct the object
+  /// Disable copy operator - The PyObject must be supplied to construct the
+  /// object
   IPeakFunctionAdapter(const IPeakFunctionAdapter &) = delete;
 
   /// Disable assignment operator
@@ -92,7 +93,6 @@ public:
                           boost::python::object &jacobian);
 
 private:
-  
 };
 }
 }

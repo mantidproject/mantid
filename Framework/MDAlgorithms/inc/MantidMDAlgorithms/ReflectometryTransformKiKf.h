@@ -49,7 +49,8 @@ public:
   ReflectometryTransformKiKf(const ReflectometryTransformKiKf &) = delete;
 
   /// Disable assignment operator
-  ReflectometryTransformKiKf &operator=(const ReflectometryTransformKiKf &) = delete;
+  ReflectometryTransformKiKf &
+  operator=(const ReflectometryTransformKiKf &) = delete;
 };
 
 } // namespace MDAlgorithms

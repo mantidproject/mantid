@@ -49,7 +49,8 @@ public:
   /// A constructor that looks like a Python __init__ method
   DataProcessorAdapter(PyObject *self);
 
-  /// Disable default constructor - The PyObject must be supplied to construct the object
+  /// Disable default constructor - The PyObject must be supplied to construct
+  /// the object
   DataProcessorAdapter() = delete;
 
   /// Disable copy operator
@@ -141,7 +142,6 @@ public:
 
   int getNThreadsProxy() { return this->getNThreads(); }
   // ------------------------------------------------------------------------
-
 };
 }
 }

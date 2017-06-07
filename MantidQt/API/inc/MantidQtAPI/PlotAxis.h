@@ -55,7 +55,6 @@ public:
   QString title() const;
 
 private:
-
   /// Creates a title suitable for an axis attached to the given index
   void titleFromIndex(const Mantid::API::IMDWorkspace &workspace,
                       const size_t index);

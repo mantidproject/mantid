@@ -68,9 +68,9 @@ public:
   /// Destructor
   ~TobyFitResolutionModel() override;
 
-    /// Disable copy operator
+  /// Disable copy operator
   TobyFitResolutionModel(const TobyFitResolutionModel &) = delete;
-  
+
   /// Disable assignment operator
   TobyFitResolutionModel &operator=(const TobyFitResolutionModel &) = delete;
 

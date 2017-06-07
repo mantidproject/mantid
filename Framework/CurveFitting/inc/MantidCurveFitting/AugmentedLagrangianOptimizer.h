@@ -142,7 +142,8 @@ public:
   AugmentedLagrangianOptimizer(const AugmentedLagrangianOptimizer &) = delete;
 
   /// Disable assignment operator
-  AugmentedLagrangianOptimizer &operator=(const AugmentedLagrangianOptimizer &) = delete;
+  AugmentedLagrangianOptimizer &
+  operator=(const AugmentedLagrangianOptimizer &) = delete;
 
   /// @returns The number of parameters under minimization
   inline size_t numParameters() const { return m_nparams; }

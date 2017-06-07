@@ -45,7 +45,8 @@ public:
   PseudoRandomNumberGenerator(const PseudoRandomNumberGenerator &) = delete;
 
   /// Disable assignment operator
-  PseudoRandomNumberGenerator &operator=(const PseudoRandomNumberGenerator &) = delete;
+  PseudoRandomNumberGenerator &
+  operator=(const PseudoRandomNumberGenerator &) = delete;
 
   /// Set the random number seed
   virtual void setSeed(const size_t seedValue) = 0;
