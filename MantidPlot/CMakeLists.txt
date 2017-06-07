@@ -183,9 +183,10 @@ set ( MANTID_SRCS  src/Mantid/AlgorithmDockWidget.cpp
                    src/Mantid/MantidMDCurve.cpp
                    src/Mantid/MantidMDCurveDialog.cpp
                    src/Mantid/MantidMatrixDialog.cpp
+                   src/Mantid/MantidPlotUtilities.cpp
                    src/Mantid/MantidSampleLogDialog.cpp
                    src/Mantid/MantidSampleMaterialDialog.cpp
-				   src/Mantid/MantidGroupPlotGenerator.cpp
+                   src/Mantid/MantidSurfaceContourPlotGenerator.cpp
                    src/Mantid/MantidUI.cpp
                    src/Mantid/MantidTable.cpp
                    src/Mantid/PeakPickerTool.cpp
@@ -375,9 +376,10 @@ set ( MANTID_HDRS  src/Mantid/AlgorithmMonitor.h
                    src/Mantid/MantidMatrixDialog.h
                    src/Mantid/MantidMatrix.h
                    src/Mantid/MantidMatrixFunction.h
+                   src/Mantid/MantidPlotUtilities.h
                    src/Mantid/MantidSampleLogDialog.h
                    src/Mantid/MantidSampleMaterialDialog.h
-				   src/Mantid/MantidGroupPlotGenerator.h
+		   src/Mantid/MantidSurfaceContourPlotGenerator.h
                    src/Mantid/MantidUI.h
                    src/Mantid/MantidTable.h
                    src/Mantid/PeakPickerTool.h

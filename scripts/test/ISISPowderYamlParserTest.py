@@ -5,7 +5,7 @@ import tempfile
 import os
 import unittest
 import warnings
-from six import assertRaisesRegex
+from six_shim import assertRaisesRegex
 
 from isis_powder.routines import yaml_parser
 
@@ -115,15 +115,15 @@ class ISISPowderYamlParserTest(unittest.TestCase):
         file_handle.close()
 
         # Test a value in the middle of 1-10
-        with assertRaisesRegex(self, ValueError, "Run number 5 not recognised in calibration mapping"):
+        with assertRaisesRegex(self, ValueError, "Run number 5 not recognised in cycle mapping file"):
             yaml_parser.get_run_dictionary(run_number_string="5", file_path=file_path)
 
         # Check on edge of invalid numbers
-        with assertRaisesRegex(self, ValueError, "Run number 9 not recognised in calibration mapping"):
+        with assertRaisesRegex(self, ValueError, "Run number 9 not recognised in cycle mapping file"):
             yaml_parser.get_run_dictionary(run_number_string=9, file_path=file_path)
 
         # What about a range of numbers
-        with assertRaisesRegex(self, ValueError, "Run number 2 not recognised in calibration mapping"):
+        with assertRaisesRegex(self, ValueError, "Run number 2 not recognised in cycle mapping file"):
             yaml_parser.get_run_dictionary(run_number_string="2-8", file_path=file_path)
 
         # Check valid number still works

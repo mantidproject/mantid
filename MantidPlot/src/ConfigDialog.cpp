@@ -854,6 +854,15 @@ void ConfigDialog::initMdPlottingVsiTab() {
   grid->addWidget(lblVsiDefaultBackground, 1, 0);
   grid->addWidget(vsiDefaultBackground, 1, 1);
 
+  // Axes Color
+  vsiAxesColor = new QGroupBox();
+  vsiAxesColor->setCheckable(true);
+  vsiAxesColor->setChecked(m_mdSettings.getUserSettingAutoColorAxes());
+  vsiAxesColor->setTitle(tr("Automatic axes color selection"));
+  vsiAxesColor->setToolTip(
+      tr("Automatically select a contrasting color for all axes"));
+  vsiTabLayout->addWidget(vsiAxesColor);
+
   const QColor backgroundColor = m_mdSettings.getUserSettingBackgroundColor();
   vsiDefaultBackground->setColor(backgroundColor);
 
@@ -2721,6 +2730,10 @@ void ConfigDialog::updateMdPlottingSettings() {
   // Read the Vsi color map
   if (vsiDefaultColorMap) {
     m_mdSettings.setUserSettingColorMap(vsiDefaultColorMap->currentText());
+  }
+
+  if (vsiAxesColor) {
+    m_mdSettings.setUserSettingAutoColorAxes(vsiAxesColor->isChecked());
   }
 
   // Read if the usage of the last color map and background color should be

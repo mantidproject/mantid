@@ -5,13 +5,12 @@
 #include "AlgorithmHistoryWindow.h"
 #include "AlgorithmMonitor.h"
 #include "ImportWorkspaceDlg.h"
-#include "MantidGroupPlotGenerator.h"
+#include "MantidSurfaceContourPlotGenerator.h"
 #include "MantidMDCurve.h"
 #include "MantidMDCurveDialog.h"
 #include "MantidMatrix.h"
 #include "MantidMatrixCurve.h"
 #include "MantidQtMantidWidgets/FitPropertyBrowser.h"
-#include "MantidQtMantidWidgets/MantidSurfacePlotDialog.h"
 #include "MantidQtMantidWidgets/MantidWSIndexDialog.h"
 #include "MantidSampleLogDialog.h"
 #include "MantidSampleMaterialDialog.h"
@@ -50,6 +49,7 @@
 #include "MantidQtMantidWidgets/WorkspacePresenter/QWorkspaceDockView.h"
 
 #include "MantidAPI/CompositeFunction.h"
+#include "MantidAPI/DetectorInfo.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidAPI/IPeaksWorkspace.h"
@@ -57,6 +57,9 @@
 #include "MantidAPI/Run.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidTypes/SpectrumDefinition.h"
+
+#include "MantidGeometry/Instrument/ReferenceFrame.h"
 
 #include <QListWidget>
 #include <QMdiArea>
@@ -99,7 +102,6 @@ using namespace Mantid::API;
 using namespace MantidQt::API;
 using namespace MantidQt::MantidWidgets;
 using MantidQt::MantidWidgets::MantidWSIndexDialog;
-using MantidQt::MantidWidgets::MantidSurfacePlotDialog;
 using MantidQt::MantidWidgets::MantidTreeWidget;
 using Mantid::Kernel::DateAndTime;
 using MantidQt::SliceViewer::SliceViewerWindow;
@@ -189,6 +191,19 @@ GraphOptions::CurveType getCurveTypeForFitResult(const size_t spectrum) {
   default:
     return GraphOptions::CurveType::Unspecified;
   }
+}
+
+std::vector<Mantid::API::MatrixWorkspace_const_sptr>
+getWorkspacesFromAds(const QList<QString> &workspaceNames) {
+  std::vector<Mantid::API::MatrixWorkspace_const_sptr> workspaces;
+  for (auto &workspaceName : workspaceNames) {
+    Mantid::API::MatrixWorkspace_const_sptr workspace =
+        boost::dynamic_pointer_cast<const Mantid::API::MatrixWorkspace>(
+            Mantid::API::AnalysisDataService::Instance().retrieve(
+                workspaceName.toStdString()));
+    workspaces.push_back(workspace);
+  }
+  return workspaces;
 }
 }
 
@@ -385,9 +400,25 @@ void MantidUI::shutdown() {
       Poco::Thread::sleep(100);
     }
   }
+  // Close any open algorithm dialogs. They contain alorithm references so
+  // should be cleaned up before the framework (and the Python environment)
+  // is destroyed. We traverse the object tree rather than tracking the
+  // creation as it is possible to create a dialog without going through
+  // factory methods.
+  const auto &childWidgets = m_appWindow->children();
+  for (auto child : childWidgets) {
+    if (auto *widget = qobject_cast<MantidQt::API::AlgorithmDialog *>(child)) {
+      // We want to delete this now and not defer it to later in the
+      // event loop
+      widget->setAttribute(Qt::WA_DeleteOnClose, false);
+      widget->close();
+      delete widget;
+      child = nullptr;
+    }
+  }
+
   // If any python objects need to be cleared away then the GIL needs to be
-  // held. This doesn't feel like
-  // it is in the right place but it will do no harm
+  // held.
   ScopedPythonGIL gil;
   // Relevant notifications are connected to signals that will close all
   // dependent windows
@@ -1232,6 +1263,9 @@ Table *MantidUI::createDetectorTable(
   // check if efixed value is available
   bool calcQ(true);
 
+  // check if we have a scanning workspace
+  bool isScanning = ws->detectorInfo().isScanning();
+
   const auto &spectrumInfo = ws->spectrumInfo();
   if (spectrumInfo.hasDetectors(0)) {
     try {
@@ -1251,6 +1285,8 @@ Table *MantidUI::createDetectorTable(
   colNames << "Index"
            << "Spectrum No"
            << "Detector ID(s)";
+  if (isScanning)
+    colNames << "Time Indexes";
   if (include_data) {
     colNames << "Data Value"
              << "Data Error";
@@ -1279,10 +1315,15 @@ Table *MantidUI::createDetectorTable(
   }
   t->setHeaderColType();
   t->setTextFormat(2);
+  if (isScanning)
+    t->setTextFormat(3);
   t->setTextFormat(ncols - 1);
 
   // Cache some frequently used values
   IComponent_const_sptr sample = ws->getInstrument()->getSample();
+  const auto beamAxisIndex =
+      ws->getInstrument()->getReferenceFrame()->pointingAlongBeam();
+  const auto sampleDist = sample->getPos()[beamAxisIndex];
   bool signedThetaParamRetrieved(false),
       showSignedTwoTheta(false); // If true,  signedVersion of the two theta
                                  // value should be displayed
@@ -1304,32 +1345,9 @@ Table *MantidUI::createDetectorTable(
     try {
       auto &spectrum = ws->getSpectrum(wsIndex);
       Mantid::specnum_t specNo = spectrum.getSpectrumNo();
-      QString detIds("");
-      const auto &ids = spectrum.getDetectorIDs();
-      size_t ndets = ids.size();
-      auto iter = ids.begin();
-      auto itEnd = ids.end();
-      if (ndets > DET_TABLE_NDETS_GROUP) {
-        detIds = QString("%1,%2...(%3 more)...%4,%5");
-        // post-fix increments and returns last value
-        // NOTE: Doing this detIds.arg(*iter++).arg(*iter++).arg(ndets-4) seems
-        // to result
-        // in an undefined order in which the iterator is dereference and
-        // incremented leading
-        // to the first two items being backward on some systems
-        const Mantid::detid_t first(*iter++), second(*iter++);
-        detIds =
-            detIds.arg(first).arg(second).arg(ndets - 4); // First two + n extra
-        auto revIter = ids.rbegin(); // Set iterators are unidirectional ... so
-                                     // no operator-()
-        const Mantid::detid_t last(*revIter++), lastm1(*revIter++);
-        detIds = detIds.arg(lastm1).arg(last);
-      } else {
-        for (; iter != itEnd; ++iter) {
-          detIds += QString::number(*iter) + ",";
-        }
-        detIds.chop(1); // Drop last comma
-      }
+      const auto &ids =
+          dynamic_cast<const std::set<int> &>(spectrum.getDetectorIDs());
+      QString detIds = createTruncatedList(ids);
 
       // Geometry
       if (!spectrumInfo.hasDetectors(wsIndex))
@@ -1343,11 +1361,13 @@ Table *MantidUI::createDetectorTable(
                                    "Always") != parameters.end());
         signedThetaParamRetrieved = true;
       }
+
       double R(0.0), theta(0.0), phi(0.0);
-      // R and theta used as dummy variables
+      // theta used as a dummy variable
       // Note: phi is the angle around Z, not necessarily the beam direction.
       spectrumInfo.position(wsIndex).getSpherical(R, theta, phi);
-      // R is actually L2 (same as R if sample is at (0,0,0))
+      // R is actually L2 (same as R if sample is at (0,0,0)), except for
+      // monitors which are handled below.
       R = spectrumInfo.l2(wsIndex);
       // Theta is actually 'twoTheta' for detectors (twice the scattering
       // angle), if Z is the beam direction this corresponds to theta in
@@ -1363,28 +1383,50 @@ Table *MantidUI::createDetectorTable(
           // Log the error and leave theta as it is
           g_log.error(ex.what());
         }
+      } else {
+        const auto dist = spectrumInfo.position(wsIndex)[beamAxisIndex];
+        theta = sampleDist > dist ? 180.0 : 0.0;
       }
       const QString isMonitorDisplay = isMonitor ? "yes" : "no";
       colValues << QVariant(specNo) << QVariant(detIds);
+      if (isScanning) {
+        std::set<int> timeIndexSet;
+        for (auto def : spectrumInfo.spectrumDefinition(wsIndex)) {
+          timeIndexSet.insert(int(def.second));
+        }
+
+        QString timeIndexes = createTruncatedList(timeIndexSet);
+        colValues << QVariant(timeIndexes);
+      }
       // Y/E
       if (include_data) {
         colValues << QVariant(dataY0) << QVariant(dataE0); // data
       }
+      // If monitors are before the sample in the beam, DetectorInfo
+      // returns a negative l2 distance.
+      if (isMonitor) {
+        R = std::abs(R);
+      }
       colValues << QVariant(R) << QVariant(theta);
 
       if (calcQ) {
+        if (isMonitor) {
+          // twoTheta is not defined for monitors.
+          colValues << QVariant(std::nan(""));
+        } else {
+          try {
 
-        try {
-          // Get unsigned theta and efixed value
-          IDetector_const_sptr det(&spectrumInfo.detector(wsIndex),
-                                   Mantid::NoDeleting());
-          double efixed = ws->getEFixed(det);
-          double usignTheta = spectrumInfo.twoTheta(wsIndex) * 0.5;
+            // Get unsigned theta and efixed value
+            IDetector_const_sptr det(&spectrumInfo.detector(wsIndex),
+                                     Mantid::NoDeleting());
+            double efixed = ws->getEFixed(det);
+            double usignTheta = spectrumInfo.twoTheta(wsIndex) * 0.5;
 
-          double q = Mantid::Kernel::UnitConversion::run(usignTheta, efixed);
-          colValues << QVariant(q);
-        } catch (std::runtime_error &) {
-          colValues << QVariant("No Efixed");
+            double q = Mantid::Kernel::UnitConversion::run(usignTheta, efixed);
+            colValues << QVariant(q);
+          } catch (std::runtime_error &) {
+            colValues << QVariant("No Efixed");
+          }
         }
       }
 
@@ -1453,6 +1495,36 @@ MantidUI::createDetectorTable(const QString &wsName,
   t->setReadOnlyAllColumns(true);
   t->showNormal();
   return t;
+}
+
+QString MantidUI::createTruncatedList(const std::set<int> &elements) {
+  QString qString("");
+  size_t ndets = elements.size();
+  auto iter = elements.begin();
+  auto itEnd = elements.end();
+  if (ndets > DET_TABLE_NDETS_GROUP) {
+    qString = QString("%1,%2...(%3 more)...%4,%5");
+    // post-fix increments and returns last value
+    // NOTE: Doing this detIds.arg(*iter++).arg(*iter++).arg(ndets-4) seems
+    // to result
+    // in an undefined order in which the iterator is dereference and
+    // incremented leading
+    // to the first two items being backward on some systems
+    const Mantid::detid_t first(*iter++), second(*iter++);
+    qString =
+        qString.arg(first).arg(second).arg(ndets - 4); // First two + n extra
+    auto revIter = elements.rbegin(); // Set iterators are unidirectional ... so
+                                      // no operator-()
+    const Mantid::detid_t last(*revIter++), lastm1(*revIter++);
+    qString = qString.arg(lastm1).arg(last);
+  } else {
+    for (; iter != itEnd; ++iter) {
+      qString += QString::number(*iter) + ",";
+    }
+    qString.chop(1); // Drop last comma
+  }
+
+  return qString;
 }
 
 /**
@@ -2959,6 +3031,8 @@ MultiLayer *MantidUI::plot1D(const QStringList &ws_names,
 @param clearWindow :: Whether to clear specified plotWindow before plotting.
 Ignored if plotWindow == NULL
 @param waterfallPlot :: If true create a waterfall type plot
+@param log :: log name for advanced plotting
+@param customLogValues :: custom log values for advanced plotting
 @return NULL if failure. Otherwise, if plotWindow == NULL - created window, if
 not NULL - plotWindow
 */
@@ -2966,12 +3040,15 @@ MultiLayer *MantidUI::plot1D(const QMultiMap<QString, set<int>> &toPlot,
                              bool spectrumPlot,
                              MantidQt::DistributionFlag distr, bool errs,
                              MultiLayer *plotWindow, bool clearWindow,
-                             bool waterfallPlot) {
+                             bool waterfallPlot, const QString &log,
+                             const std::set<double> &customLogValues) {
   // Convert the list into a map (with the same workspace as key in each case)
+  bool multipleSpectra = false;
   QMultiMap<QString, int> pairs;
   // Need to iterate through the workspaces
   QMultiMap<QString, std::set<int>>::const_iterator it;
   for (it = toPlot.constBegin(); it != toPlot.constEnd(); ++it) {
+    multipleSpectra = multipleSpectra || (it.value().size() > 1);
     std::set<int>::const_reverse_iterator itSet;
     for (itSet = it->rbegin(); itSet != it->rend(); ++itSet) {
       pairs.insert(it.key(), *itSet);
@@ -2980,7 +3057,8 @@ MultiLayer *MantidUI::plot1D(const QMultiMap<QString, set<int>> &toPlot,
 
   // Pass over to the overloaded method
   return plot1D(pairs, spectrumPlot, distr, errs, GraphOptions::Unspecified,
-                plotWindow, clearWindow, waterfallPlot);
+                plotWindow, clearWindow, waterfallPlot, log, customLogValues,
+                multipleSpectra);
 }
 
 /** Create a 1d graph from the specified spectra in a MatrixWorkspace
@@ -3024,6 +3102,10 @@ MultiLayer *MantidUI::plot1D(const QString &wsName,
 @param clearWindow :: Whether to clear specified plotWindow before plotting.
 Ignored if plotWindow == NULL
 @param waterfallPlot :: If true create a waterfall type plot
+@param log :: log name for advanced plotting
+@param customLogValues :: custom log values for advanced plotting
+@param multipleSpectra :: indicates that there are multiple spectra and
+so spectrum numbers must always be shown in the plot legend.
 @return NULL if failure. Otherwise, if plotWindow == NULL - created window, if
 not NULL - plotWindow
 */
@@ -3032,7 +3114,9 @@ MultiLayer *MantidUI::plot1D(const QMultiMap<QString, int> &toPlot,
                              MantidQt::DistributionFlag distr, bool errs,
                              GraphOptions::CurveType style,
                              MultiLayer *plotWindow, bool clearWindow,
-                             bool waterfallPlot) {
+                             bool waterfallPlot, const QString &log,
+                             const std::set<double> &customLogValues,
+                             bool multipleSpectra) {
   if (toPlot.size() == 0)
     return NULL;
 
@@ -3085,26 +3169,28 @@ MultiLayer *MantidUI::plot1D(const QMultiMap<QString, int> &toPlot,
     plotAsDistribution = (distr == MantidQt::DistributionTrue);
   }
 
-  // Try to add curves to the plot
+  vector<CurveSpec> curveSpecList;
+  putLogsIntoCurveSpecs(curveSpecList, toPlot, log, customLogValues);
+
+  // Add curves to the plot
   Graph *g = ml->activeGraph();
   MantidMatrixCurve::IndexDir indexType =
       (spectrumPlot) ? MantidMatrixCurve::Spectrum : MantidMatrixCurve::Bin;
   MantidMatrixCurve *firstCurve(NULL);
-  for (QMultiMap<QString, int>::const_iterator it = toPlot.begin();
-       it != toPlot.end(); ++it) {
-    try {
-      auto *wsCurve = new MantidMatrixCurve(it.key(), g, it.value(), indexType,
-                                            errs, plotAsDistribution, style);
-      if (!firstCurve) {
-        firstCurve = wsCurve;
-        g->setNormalizable(firstCurve->isNormalizable());
-        g->setDistribution(firstCurve->isDistribution());
-      }
-    } catch (Mantid::Kernel::Exception::NotFoundError &) {
-      g_log.warning() << "Workspace " << it.key().toStdString()
-                      << " not found\n";
-    } catch (std::exception &ex) {
-      g_log.warning() << ex.what() << '\n';
+  QString logValue("");
+  for (size_t i = 0; i < curveSpecList.size(); i++) {
+
+    if (!log.isEmpty()) { // Get log value from workspace
+      logValue = logValue.number(curveSpecList[i].logVal, 'g', 6);
+    }
+
+    auto *wsCurve = new MantidMatrixCurve(
+        logValue, curveSpecList[i].wsName, g, curveSpecList[i].index, indexType,
+        errs, plotAsDistribution, style, multipleSpectra);
+    if (!firstCurve) {
+      firstCurve = wsCurve;
+      g->setNormalizable(firstCurve->isNormalizable());
+      g->setDistribution(firstCurve->isDistribution());
     }
   }
 
@@ -3130,6 +3216,54 @@ MultiLayer *MantidUI::plot1D(const QMultiMap<QString, int> &toPlot,
   ml->maybeNeedToClose();
 
   return ml;
+}
+
+/* Get the log values and put into a curve spec list in preparation of
+*  the creation of the curves
+*  @param curveSpecList :: list of curve specs to recieve the logs
+*  @param toPlot :: workspaces to plot
+*  @param log :: log value
+*  @param customLogValues :: custom log values
+*/
+void MantidUI::putLogsIntoCurveSpecs(std::vector<CurveSpec> &curveSpecList,
+                                     const QMultiMap<QString, int> &toPlot,
+                                     const QString &log,
+                                     const std::set<double> &customLogValues) {
+  // Try to store log values, if needed, and prepare for sorting.
+  int i = 0;
+  for (QMultiMap<QString, int>::const_iterator it = toPlot.begin();
+       it != toPlot.end(); ++it) {
+    CurveSpec curveSpec;
+
+    try {
+      if (!log.isEmpty()) { // Get log value from workspace
+        if (!customLogValues.empty()) {
+          curveSpec.logVal = getSingleWorkspaceLogValue(i++, customLogValues);
+        } else {
+          MatrixWorkspace_const_sptr workspace =
+              AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+                  it.key().toStdString());
+          curveSpec.logVal = getSingleWorkspaceLogValue(1, workspace, log);
+        }
+      } else {
+        curveSpec.logVal = 0.1234; // This should not be used.
+      }
+      curveSpec.wsName = it.key();
+      curveSpec.index = it.value();
+      curveSpecList.push_back(curveSpec);
+
+    } catch (Mantid::Kernel::Exception::NotFoundError &) {
+      g_log.warning() << "Workspace " << it.key().toStdString()
+                      << " not found\n";
+    } catch (std::exception &ex) {
+      g_log.warning() << ex.what() << '\n';
+    }
+  }
+
+  // Sort curves, if log values are used
+  if (!log.isEmpty()) {
+    sort(curveSpecList.begin(), curveSpecList.end(), byLogValue);
+  }
 }
 
 /**
@@ -3935,18 +4069,6 @@ void MantidUI::updateRecentFilesList(const QString &fname) {
   m_appWindow->updateRecentFilesList(fname);
 }
 
-MantidSurfacePlotDialog *
-MantidUI::createSurfacePlotDialog(int flags, QStringList wsNames,
-                                  const QString &plotType) {
-  QList<QString> names;
-
-  for (auto &name : wsNames)
-    names.append(name);
-
-  return new MantidSurfacePlotDialog(this, static_cast<Qt::WFlags>(flags),
-                                     names, plotType);
-}
-
 /**
  * Create a new MantidWSIndexDialog
  * @param flags :: [input] Qt::WindowFlags enum as an integer
@@ -3954,53 +4076,38 @@ MantidUI::createSurfacePlotDialog(int flags, QStringList wsNames,
  * @param showWaterfall :: [input] Whether to show "plot as waterfall" option
  * @param showPlotAll :: [input] Whether to show "plot all" button
  * @param showTiledOpt :: [input] Whether to show "tiled plot" option
+ * @param isAdvanced :: [input] Whether to do advanced plotting
  * @returns :: New dialog
  */
-MantidWSIndexDialog *MantidUI::createWorkspaceIndexDialog(int flags,
-                                                          QStringList wsNames,
-                                                          bool showWaterfall,
-                                                          bool showPlotAll,
-                                                          bool showTiledOpt) {
+MantidWSIndexDialog *
+MantidUI::createWorkspaceIndexDialog(int flags, const QStringList &wsNames,
+                                     bool showWaterfall, bool showPlotAll,
+                                     bool showTiledOpt, bool isAdvanced) {
   return new MantidWSIndexDialog(m_appWindow, static_cast<Qt::WFlags>(flags),
                                  wsNames, showWaterfall, showPlotAll,
-                                 showTiledOpt);
+                                 showTiledOpt, isAdvanced);
 }
 
-void MantidUI::showSurfacePlot() {
-  // find the workspace group clicked on
-  auto wksp = m_exploreMantid->getSelectedWorkspace();
-
-  if (wksp) {
-    const auto wsGroup =
-        boost::dynamic_pointer_cast<const WorkspaceGroup>(wksp);
-    if (wsGroup) {
-      auto options = m_exploreMantid->chooseSurfacePlotOptions(
-          wsGroup->getNumberOfEntries());
-
-      // TODO: Figure out how to get rid of MantidUI dependency here.
-      auto plotter =
-          Mantid::Kernel::make_unique<MantidGroupPlotGenerator>(this);
-      plotter->plotSurface(wsGroup, options);
-    }
-  }
+void MantidUI::plotContour(bool accepted, int plotIndex,
+                           const QString &axisName, const QString &logName,
+                           const std::set<double> &customLogValues,
+                           const QList<QString> &workspaceNames) {
+  auto workspaces = getWorkspacesFromAds(workspaceNames);
+  auto plotter =
+      Mantid::Kernel::make_unique<MantidSurfaceContourPlotGenerator>(this);
+  plotter->plotContour(accepted, plotIndex, axisName, logName, customLogValues,
+                       workspaces);
 }
 
-void MantidUI::showContourPlot() {
-  auto wksp = m_exploreMantid->getSelectedWorkspace();
-
-  if (wksp) {
-    const auto wsGroup =
-        boost::dynamic_pointer_cast<const WorkspaceGroup>(wksp);
-    if (wsGroup) {
-      auto options = m_exploreMantid->chooseContourPlotOptions(
-          wsGroup->getNumberOfEntries());
-
-      // TODO: Figure out how to remove the MantidUI dependency
-      auto plotter =
-          Mantid::Kernel::make_unique<MantidGroupPlotGenerator>(this);
-      plotter->plotContour(wsGroup, options);
-    }
-  }
+void MantidUI::plotSurface(bool accepted, int plotIndex,
+                           const QString &axisName, const QString &logName,
+                           const std::set<double> &customLogValues,
+                           const QList<QString> &workspaceNames) {
+  auto workspaces = getWorkspacesFromAds(workspaceNames);
+  auto plotter =
+      Mantid::Kernel::make_unique<MantidSurfaceContourPlotGenerator>(this);
+  plotter->plotSurface(accepted, plotIndex, axisName, logName, customLogValues,
+                       workspaces);
 }
 
 QWidget *MantidUI::getParent() { return m_appWindow; }

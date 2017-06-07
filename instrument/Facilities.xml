@@ -631,6 +631,17 @@
     <technique>Powder diffraction</technique>
   </instrument>
 
+  <instrument name="D20">
+    <technique>Powder diffraction</technique>
+  </instrument>
+
+  <instrument name="D1B">
+    <technique>Powder diffraction</technique>
+  </instrument>
+
+  <instrument name="D4">
+    <technique>Liquid diffraction</technique>
+  </instrument>
 
   <instrument name="D17">
     <technique>Reflectometry</technique>
@@ -755,6 +766,14 @@
 <facility name="ANSTO" FileExtensions=".nxs,.tar">
   <instrument name="Bilby">
     <technique>Small Angle Scattering</technique>
+  </instrument>
+</facility>
+
+<!-- HZB -->
+<facility name="HZB" FileExtensions=".nxs">
+  <instrument name="EXED">
+    <technique>TOF Direct Geometry Spectroscopy</technique>
+    <technique>Single Crystal Diffraction</technique>
   </instrument>
 </facility>
 

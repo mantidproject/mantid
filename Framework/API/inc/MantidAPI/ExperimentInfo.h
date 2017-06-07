@@ -24,6 +24,7 @@ class DetectorInfo;
 class SpectrumInfo;
 }
 namespace Geometry {
+class InfoComponentVisitor;
 class ParameterMap;
 class XMLInstrumentParameter;
 }
@@ -193,6 +194,9 @@ protected:
   Geometry::Instrument_const_sptr sptr_instrument;
 
 private:
+  void makeAPIComponentInfo(const Geometry::InfoComponentVisitor &visitor);
+
+  boost::shared_ptr<Geometry::Instrument> makeParameterizedInstrument() const;
   /// Fill with given instrument parameter
   void populateWithParameter(Geometry::ParameterMap &paramMap,
                              Geometry::ParameterMap &paramMapForPosAndRot,
@@ -218,6 +222,8 @@ private:
   mutable std::unordered_map<detid_t, size_t> m_det2group;
   void cacheDefaultDetectorGrouping() const; // Not thread-safe
   void invalidateAllSpectrumDefinitions();
+  std::unique_ptr<Geometry::InfoComponentVisitor>
+  makeOrRetrieveVisitor(const Geometry::Instrument &instrument) const;
   mutable std::once_flag m_defaultDetectorGroupingCached;
 
   /// Mutex to protect against cow_ptr copying
@@ -228,14 +234,13 @@ private:
 
   boost::shared_ptr<Beamline::ComponentInfo> m_componentInfo;
   std::unique_ptr<API::ComponentInfo> m_componentInfoWrapper;
-  boost::shared_ptr<const std::vector<Geometry::ComponentID>> m_componentIds;
-
   mutable std::unique_ptr<Beamline::SpectrumInfo> m_spectrumInfo;
   mutable std::unique_ptr<SpectrumInfo> m_spectrumInfoWrapper;
   mutable std::mutex m_spectrumInfoMutex;
   // This vector stores boolean flags but uses char to do so since
   // std::vector<bool> is not thread-safe.
   mutable std::vector<char> m_spectrumDefinitionNeedsUpdate;
+  std::unique_ptr<Geometry::InfoComponentVisitor> m_infoVisitor;
 };
 
 /// Shared pointer to ExperimentInfo

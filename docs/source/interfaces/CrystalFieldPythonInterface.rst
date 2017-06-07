@@ -114,12 +114,12 @@ The new output::
   
 To calculate a spectrum we need to define a shape of each peak (peak profile function) and its default width (`FWHM`).
 The width can be set either via a keyword argument or a property with name `FWHM`. If the peak shape isn't set the default
-of Lorentzian is assumed. To set a different shape use the `setPeaks` method::
+of Lorentzian is assumed. To set a different shape use the `PeakShape` property::
 
-  cf.setPeaks('Gaussian')
+  cf.PeakShape = 'Gaussian'
   cf.FWHM = 0.9
   
-The arguments of `setPeaks` are expected to be names of Mantid peak fit functions. At the moment only `Lorentzian` and
+The values of `PeakShape` are expected to be names of Mantid peak fit functions. At the moment only `Lorentzian` and
 `Gaussian` can be used.
 
 After the peak shape is defined a spectrum can be calculated::
@@ -212,11 +212,11 @@ For the parameters of the background the syntax is the same but the methods are 
 The names of the peak parameters both in ties and constraints must include the index of the peak to which they belong. Here we follow
 the naming convention of the :ref:`func-CompositeFunction`: f<n>.<name>, where <n> stands for an integer index staring at 0 and <name>
 is the name of the parameter. For example, `f1.Sigma`, `f3.FWHM`. Because names now contain the period symbol '.' keyword arguments
-cannot be used. Instead we must pass strings containing ties::
+cannot be used. Instead we must pass a dictionary containing ties. The keys are parameter names and the values are the ties::
 
-    cf.peaks.ties('f2.FWHM=2*f1.FWHM', 'f3.FWHM=2*f2.FWHM')
+    cf.peaks.ties({'f2.FWHM': '2*f1.FWHM', 'f3.FWHM': '2*f2.FWHM'})
     
-and constraints are also a list of strings::
+Constraints are a list of strings::
 
     cf.peaks.constraints('f0.FWHM < 2.2', 'f1.FWHM >= 0.1')
     
@@ -226,13 +226,13 @@ If a parameter of all peaks needs to be tied/constrained with the same expressio
     cf.peaks.constrainAll('0 < Sigma < 0.1', 4)
 
 where the first argument is the general formula of the tie/constraint and the second is the number of peaks to apply to.
-The is also a version for a range of peak indices::
+There is also a version for a range of peak indices::
 
     cf.peaks.tieAll('Sigma=f0.Sigma', 1, 3)
 
 which is equivalent to::
 
-    cf.peaks.ties('f1.Sigma=f0.Sigma', 'f2.Sigma=f0.Sigma', 'f3.Sigma=f0.Sigma')
+    cf.peaks.ties({'f1.Sigma': 'f0.Sigma', 'f2.Sigma': 'f0.Sigma', 'f3.Sigma': 'f0.Sigma'})
 
 
 Setting Resolution Model
@@ -280,11 +280,11 @@ become lists. Here is an example of defining a `CrystalField` object with two sp
 
     cf = CrystalField('Ce', 'C2v', B20=0.37737, B22=3.9770, B40=-0.031787, B42=-0.11611, B44=-0.12544,
                       Temperature=[44.0, 50], FWHM=[1.1, 0.9])
-    cf.setPeaks('Lorentzian')
+    cf.PeakShape = 'Lorentzian'
     cf.peaks[0].param[0]['FWHM'] = 1.11
     cf.peaks[1].param[1]['FWHM'] = 1.12
-    cf.setBackground(peak=Function('Gaussian', Height=10, Sigma=0.3),
-                     background=Function('FlatBackground', A0=1.0))
+    cf.background = Background(peak=Function('Gaussian', Height=10, Sigma=0.3),
+                               background=Function('FlatBackground', A0=1.0))
     cf.background[1].peak.param['Sigma'] = 0.8
     cf.background[1].background.param['A0'] = 1.1
 
@@ -301,7 +301,7 @@ change::
     cf.background[1].peak.ties(Height=20.2)
     cf.background[1].peak.constraints('Sigma > 0.2')
     cf.peaks[1].tieAll('FWHM=2*f1.FWHM', 2, 5)
-    cf.peaks[0].constrainAll('FWHM < 2.2', 1, 6)
+    cf.peaks[0].constrainAll('FWHM < 2.2', 1, 4)
 
 The resolution model also needs to be initialised from a list::
 
@@ -327,6 +327,16 @@ To calculate a spectrum call the same method `getSpectrum` but pass the spectrum
   
   # Calculate first spectrum, use the i-th spectrum of a workspace
   sp = cf.getSpectrum(0, ws, i)
+
+Note that the attributes `Temperature`, `FWHM`, `peaks` and `background` may be set separately from the constructor, e.g.::
+
+    cf = CrystalField('Ce', 'C2v', B20=0.37737, B22=3.9770, B40=-0.031787, B42=-0.11611, B44=-0.12544)
+    cf.Temperature = [5, 50]
+
+However, each time that `Temperature` is set, if it defines a different number of spectra from the previous value
+(e.g. if `Temperature` was initially empty or `None` and is then defined as in the example above, or if `Temperature`
+was initially a scalar value but is then redefined to be a list or vice versa), then all `Ties`, `Constraints`,
+`FWHM` and `peaks` parameters are cleared. Any crystal field parameters previously defined will be retained, however.
 
 
 Multiple Ions
@@ -369,6 +379,9 @@ After fitting finishes the `CrystalField` object updates automatically and conta
 Finding Initial Parameters
 --------------------------
 
+Using a Monte Carlo estimation method
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 If the initial values of the fitting parameters are not known they can be estimated using `estimate_parameters()` method.
 It randomly searches the parameter space in a given region such that the calculated spectra are as close to the
 fit data as possible. The method uses :ref:`EstimateFitParameters <algm-EstimateFitParameters>` internally. See
@@ -406,6 +419,127 @@ Here is an example of a fit with initial estimation::
     print cf['B22'], cf['B40'], cf['B42'], cf['B44']
     # Run fit
     fit.fit()
+
+Using the point charge model
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Alternatively, the *Point Charge Model* may be used to calculate the crystal field parameters. In this case, the 
+crystal field interaction is assumed to be purely electrostatic. At an infinite distance away from an ion, or
+analogously, at a nonzero distance from an ion of infinitesimal extend (a *point charge*), the charge in free space 
+is zero, so Gauss's law becomes :math:`\nabla^2 V = 0` which is Laplace's equation. The solution of this is a 
+*multipole expansion*, a sum of spherical harmonic functions: 
+:math:`V(r,\theta\phi) = \sum_{l=0}^{\infty} \sum_{m=-l}^l R_l(r) Y_l^m(\theta,\phi)`. In the limit of infinite 
+:math:`r`, :math:`R_l(r) = B / r^{l+1}`. The radial term is the crystal field parameters, and the angular term 
+(spherical harmonics in this case) are the crystal field operators. 
+
+One should now note that the quantities noted above are generally complex. In order to have real valued parameters,
+Stevens chose to use the *tesseral harmonics* :math:`Z_l^m(\theta,\phi)` instead of the spherical harmonics for the 
+angular part. These functions are simply the hermitian combinations of spherical harmonics of the same rank :math:`l`
+and opposite signed order :math:`m`. (An alternative formulation by Wybourne uses the original spherical harmonics)
+
+In Mantid we use the Stevens convention, as common in the neutron scattering literature. The user should note that
+the convention amongst optical spectroscopists is that of Wybourne. 
+
+A derivation of the point charge energy can be found in many text books (e.g. 
+`Morrison <http://dx.doi.org/10.1007/978-3-642-93376-9_12>`_), but will not be detailed here, where only the final
+result is given:
+
+.. math::
+   B_l^m = \frac{4\pi}{2l+1} \frac{| e|^2}{4\pi\epsilon_0} 
+           \sum_i \frac{q_i}{r_i^{l+1}} a_0^l \langle r^l \rangle Z_l^m(\theta_i,\phi_i)
+
+where :math:`q_i`, :math:`r_i`, :math:`\theta_i` and :math:`\phi_i` are the charge (in units of the elemental
+charge :math:`|e|`) and relative polar coordinates of the :math:`i^{\mathrm{th}}` point charge from the magnetic ion; 
+:math:`a_0` is the Bohr radius, :math:`\langle r^l \rangle` is the :math:`l^{\mathrm{th}}` order expectation value
+of the radial wavefunction of the magnetic ion and :math:`\epsilon_0` is the permitivity of free space (note this
+equation is in SI units; many older texts use cgs units, but this does not matter because the value is eventually
+converted to energy units of **meV**, rather than Joules or ergs).
+
+In order to calculate the point charge model crystal field parameters a set of charged ligands around the magnetic
+ion has to be given. This may be done either directly, as a list of 4-element lists ``[charge, pos_x, pos_y, pos_z]``::
+
+    from CrystalField import PointCharge
+    axial_pc_model = PointCharge([[-2, 0, 0, -4], [-2, 0, 0, 4]], 'Nd')
+    axial_blm = axial_pc_model.calculate()
+    print(axial_blm)
+
+which represents a simple axial crystal field with charges at :math:`\pm 4\mathrm{\AA}` away from a Nd ion in the 
+*z*-direction.
+
+Alternatively, the set of ligands may be calculated from a crystal structure and a maximum distance. For example,
+for a cubic crystal field in the perovskite structure::
+
+    from CrystalField import PointCharge
+    from mantid.geometry import CrystalStructure
+    perovskite_structure = CrystalStructure('4 4 4 90 90 90', 'P m -3 m', 'Ce 0 0 0 1 0; Al 0.5 0.5 0.5 1 0; O 0.5 0.5 0 1 0')
+    cubic_pc_model = PointCharge(perovskite_structure, 'Ce', Charges={'Ce':3, 'Al':3, 'O':-2}, MaxDistance=7.5)
+
+The syntax for the ``CrystalStructure`` object is given in the :ref:`Crystal Structure concept page <Crystal structure and reflections>`.
+Instead of the maximum distance, ``MaxDistance``, in Angstrom, the maximum *n*\ :sup:`th` neighbour can be specified with::
+
+    cubic_pc_model = PointCharge(perovskite_structure, 'Ce', Charges={'Ce':3, 'Al':3, 'O':-2}, Neighbour=2)
+
+note that this might result in a slightly slower calculation, because internally, a maximum distance much greater
+the *n*\ :sup:`th` neighbour is set and then all neighbours up to *n* are found within this distance.
+
+If a workspace with a defined crystal structure exists, it can be used instead of the ``CrystalStructure`` object.
+Other inputs remain the same. Finally, a CIF file can be given directly::
+
+    cif_pc_model = PointCharge('somecompound.cif')
+
+This uses :ref:`LoadCIF <algm-LoadCIF>` to parse the input CIF file. Note that ``LoadCIF`` changes the atom labels,
+so you should use the ``getIons()`` method to get the actual atom labels which ``PointCharge`` uses. E.g. using
+`this cif file <http://rruff.geo.arizona.edu/AMS/download.php?id=19658.cif&down=cif>`_::
+
+    cif_pc_model = PointCharge('AMS_DATA.cif')
+    print(cif_pc_model.getIons())
+    
+gives::
+
+    {'O1': [0.125, 0.125, 0.375],
+     'O2': [0.125, 0.375, 0.375],
+     'Yb1': [0.25, 0.25, 0.25],
+     'Yb2': [0.021, 0.0, 0.25],
+     'Yb3': [0.542, 0.0, 0.25]}
+
+You can then define the charges for each site, the magnetic ion and the maximum distance, and calculate::
+
+    cif_pc_model.Charges = {'O1':-2, 'O2':-2, 'Yb1':3, 'Yb2':3, 'Yb3':3}
+    cif_pc_model.IonLabel = 'Yb2'
+    cif_pc_model.Neighbour = 1
+    cif_blm = cif_pc_model.calculate()
+    print(cif_blm)
+
+Note that only the magnetic structure (as a ``CrystalStructure`` object, CIF file name or workspace) is needed
+to construct a ``PointCharge`` object. However, the calculations will return an error unless both ``IonLabel``
+and ``Charges`` are defined. By default a value of 5 :math:`\mathrm{\AA}` for ``MaxDistance`` is used if neither
+``MaxDistance`` nor ``Neighbour`` is defined. Whichever of ``MaxDistance`` or ``Neighbour`` is defined last
+takes precedent, and if both are defined in the constructor, e.g.::
+
+    bad_pc_model = PointCharge('AMS_DATA.cif', MaxDistance=7.5, Neighbour=2)
+
+then the value for ``MaxDistance`` will be used regardless of where it appears in the keyword list.
+
+For ``Charges``, instead of listing the charges of each site, you can just give the charge for each element, e.g.::
+
+    cif_pc_model.Charges = {'O':-2, 'Yb':3}
+    cif_blm = cif_pc_model.calculate()
+
+The result of the ``calculate()`` method can be put directly into a ``CrystalField`` object and used either
+to calculate a spectrum or as the starting parameters in a fit::
+
+    cf = CrystalField('Yb', 'C2', Temperature=5, FWHM=10, **cif_pc_model.calculate())
+    plot(**cf.getSpectrum())
+    fit = CrystalFieldFit(cf, InputWorkspace=ws)
+    fit.fit()
+
+Finally, note that the calculated crystal field parameters are defined with the quantisation axis along the *z* direction
+in the Busing-Levy convention (that is, it is perpendicular to the *a*-*b* plane). This means that if the particular 
+magnetic ion lies on a higher symmetry site but the highest symmetry rotation axis is not along *z* (for example, the A 
+or B site in the Pyrochlore lattice, which has a 3-fold axis along [111], whilst *z* is parallel to *c*), then the 
+parameters may appear to have a low symmetry (e.g. more *m* terms are nonzero). You then need to rotate the parameters 
+if you want it quantised along the high symmetry direction. 
+
 
 Calculating Physical Properties
 -------------------------------
@@ -528,7 +662,11 @@ or separately after construction::
     fit_moment.fit()
 
 Unfortunately only 1D datasets can be fitted (e.g. M(H, T) cannot be fitted as a simultaneous function of field and
-temperature).
+temperature). Also, note that setting the `PhysicalProperty` attribute after constructing the `CrystalField` object
+(e.g. running `cf.PhysicalProperty = PhysicalProperties('Cv')`) causes the number of datasets to change and will 
+clear all `Ties` and `Constraints` previously set, and also reset all `FWHM` and `peaks` to the default values (zero 
+for `FWHM` and `Lorentzian` for `peaks`). 
+
 
 Simultaneous Fitting of Physical Properties and Inelastic Neutron Spectra
 -------------------------------------------------------------------------

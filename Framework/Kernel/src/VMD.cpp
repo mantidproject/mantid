@@ -140,6 +140,31 @@ VMDBase<TYPE> &VMDBase<TYPE>::operator=(const VMDBase &other) {
   return *this;
 }
 
+/** Move constructor
+ * @param other :: move into this
+ */
+template <typename TYPE>
+VMDBase<TYPE>::VMDBase(VMDBase &&other) noexcept : nd(other.nd),
+                                                   data(other.data) {
+  other.data = nullptr;
+  other.nd = 0;
+}
+
+/** Move assignment
+ * @param other :: move into this
+ */
+template <typename TYPE>
+VMDBase<TYPE> &VMDBase<TYPE>::operator=(VMDBase &&other) noexcept {
+  if (this != &other) {
+    this->nd = other.nd;
+    other.nd = 0;
+    delete[] this->data;
+    this->data = other.data;
+    other.data = nullptr;
+  }
+  return *this;
+}
+
 /** Constructor
  * @param nd :: number of dimensions
  * @param bareData :: pointer to a nd-sized bare data array */

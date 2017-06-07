@@ -1,7 +1,7 @@
 #include "MantidAlgorithms/SmoothNeighbours.h"
 #include "MantidAPI/DetectorInfo.h"
 #include "MantidAPI/InstrumentValidator.h"
-#include "MantidAPI/NearestNeighbourInfo.h"
+#include "MantidAPI/WorkspaceNearestNeighbourInfo.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/EventList.h"
@@ -135,19 +135,24 @@ void SmoothNeighbours::init() {
   declareProperty(
       "RadiusUnits", "Meters",
       boost::make_shared<StringListValidator>(radiusPropOptions),
-      "Units used to specify the radius?\n"
+      "Units used to specify the radius.\n"
       "  Meters : Radius is in meters.\n"
       "  NumberOfPixels : Radius is in terms of the number of pixels.");
 
   declareProperty(
       "Radius", 0.0, mustBePositiveDouble,
-      "The radius around a pixel to look for nearest neighbours to average. \n"
+      "The radius cut-off around a pixel to look for nearest neighbours to "
+      "average. \n"
+      "This radius cut-off is applied to a set of nearest neighbours whose "
+      "number is "
+      "defined in the NumberOfNeighbours property. See below for more details. "
+      "\n"
       "If 0, will use the AdjX and AdjY parameters for rectangular detectors "
       "instead.");
 
   declareProperty("NumberOfNeighbours", 8, mustBePositive,
                   "Number of nearest neighbouring pixels.\n"
-                  "Alternative to providing the radius. The default is 8.");
+                  "The default is 8.");
 
   declareProperty("SumNumberOfNeighbours", 1,
                   "Sum nearest neighbouring pixels with same parent.\n"
@@ -329,7 +334,8 @@ void SmoothNeighbours::findNeighboursUbiqutious() {
   m_neighbours.resize(inWS->getNumberHistograms());
 
   bool ignoreMaskedDetectors = getProperty("IgnoreMaskedDetectors");
-  NearestNeighbourInfo neighbourInfo(*inWS, ignoreMaskedDetectors, nNeighbours);
+  WorkspaceNearestNeighbourInfo neighbourInfo(*inWS, ignoreMaskedDetectors,
+                                              nNeighbours);
 
   // Cull by radius
   RadiusFilter radiusFilter(Radius);
@@ -411,8 +417,8 @@ void SmoothNeighbours::findNeighboursUbiqutious() {
             neighbParent = det.getParent();
             neighbGParent = neighbParent->getParent();
             if (noNeigh >= sum ||
-                neighbParent->getName().compare(parent->getName()) != 0 ||
-                neighbGParent->getName().compare(grandparent->getName()) != 0 ||
+                neighbParent->getName() != parent->getName() ||
+                neighbGParent->getName() != grandparent->getName() ||
                 used[neighWI])
               continue;
             noNeigh++;

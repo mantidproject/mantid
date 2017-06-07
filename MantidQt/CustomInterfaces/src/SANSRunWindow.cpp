@@ -200,6 +200,23 @@ void setTransmissionOnSaveCommand(
     }
   }
 }
+
+bool checkSaveOptions(QString &message, bool is1D, bool isCanSAS,
+                      bool isNistQxy) {
+  // Check we are dealing with 1D or 2D data
+  bool isValid = true;
+  if (is1D && isNistQxy) {
+    isValid = false;
+    message +=
+        "Save option issue: Cannot save in NistQxy format for 1D data.\n";
+  }
+
+  if (!is1D && isCanSAS) {
+    isValid = false;
+    message += "Save option issue: Cannot save in CanSAS format for 2D data.\n";
+  }
+  return isValid;
+}
 }
 
 //----------------------------------------------
@@ -2483,6 +2500,9 @@ void SANSRunWindow::handleReduceButtonClick(const QString &typeStr) {
       return;
     }
 
+    // Update the IDF file path for batch reductions
+    updateIDFFilePathForBatch();
+
     // check for the detectors combination option
     // transform the SANS Diagnostic gui option in: 'rear', 'front' , 'both',
     // 'merged', None WavRangeReduction option
@@ -2911,6 +2931,10 @@ void SANSRunWindow::handleDefSaveClick() {
         "A filename must be entered into the text box above to save this file");
   }
 
+  if (!areSaveSettingsValid(m_outputWS)) {
+    return;
+  }
+
   // If we save with a zero-error-free correction we need to swap the
   QString workspaceNameBuffer = m_outputWS;
   QString clonedWorkspaceName = m_outputWS + "_cloned_temp";
@@ -2992,6 +3016,31 @@ void SANSRunWindow::handleDefSaveClick() {
                           "console?");
   }
 }
+
+/**
+ * Checks if the save options are valid
+ */
+bool SANSRunWindow::areSaveSettingsValid(const QString &workspaceName) {
+  Mantid::API::MatrixWorkspace_sptr ws =
+      AnalysisDataService::Instance().retrieveWS<Mantid::API::MatrixWorkspace>(
+          workspaceName.toStdString());
+  auto is1D = ws->getNumberHistograms() == 1;
+  auto isNistQxy = m_uiForm.saveNIST_Qxy_check->isChecked();
+  auto isCanSAS = m_uiForm.saveCan_check->isChecked();
+
+  QString message;
+
+  auto isValid = checkSaveOptions(message, is1D, isCanSAS, isNistQxy);
+
+  // Print the error message if there are any
+  if (!message.isEmpty()) {
+    QString warning = "Please correct these settings before proceeding:\n";
+    warning += message;
+    QMessageBox::warning(this, "Inconsistent input", warning);
+  }
+  return isValid;
+}
+
 /**
  * Set up controls based on the users selection in the combination box
  * @param new_index :: The new index that has been set
@@ -4512,6 +4561,23 @@ bool SANSRunWindow::areSettingsValid(States type) {
     message += "Sample width issue: Only values > 0 are allowed.\n";
   }
 
+  // Check save format consistency for batch mode reduction
+  // 1D --> cannot be Nist Qxy
+  // 2D --> cannot be CanSAS
+  auto isBatchMode = !m_uiForm.single_mode_btn->isChecked();
+  if (isBatchMode) {
+    auto is1D = type == OneD;
+    auto isCanSAS = m_uiForm.saveCan_check->isChecked();
+    auto isNistQxy = m_uiForm.saveNIST_Qxy_check->isChecked();
+    QString saveMessage;
+    auto isValidSaveOption =
+        checkSaveOptions(saveMessage, is1D, isCanSAS, isNistQxy);
+    if (!isValidSaveOption) {
+      isValid = false;
+      message += saveMessage;
+    }
+  }
+
   // Print the error message if there are any
   if (!message.isEmpty()) {
     QString warning = "Please correct these settings before proceeding:\n";
@@ -5109,17 +5175,30 @@ bool SANSRunWindow::isValidUserFile() {
   return true;
 }
 
-void SANSRunWindow::updateIDFFilePath() {
-  QString getIdf = "i.get_current_idf_path_in_reducer()\n";
-  QString resultIdf(runPythonCode(getIdf, false));
-  auto teset1 = resultIdf.toStdString();
+void SANSRunWindow::updateIDFInfo(const QString &command) {
+  QString resultIdf(runPythonCode(command, false));
   resultIdf = resultIdf.simplified();
-  auto test2 = resultIdf.toStdString();
   if (resultIdf != m_constants.getPythonEmptyKeyword() &&
       !resultIdf.isEmpty()) {
-    auto test = resultIdf.toStdString();
     m_uiForm.current_idf_path->setText(resultIdf);
   }
+}
+
+void SANSRunWindow::updateIDFFilePathForBatch() {
+
+  if (m_uiForm.batch_table->rowCount() == 0) {
+    return;
+  }
+  // We base the IDF entry on the sample scatter entry of the first row
+  auto *table_item = m_uiForm.batch_table->item(0, 0);
+  auto scatter_sample_run = table_item->text();
+  QString getIdf = "i.get_idf_path_for_run(\"" + scatter_sample_run + "\")\n";
+  updateIDFInfo(getIdf);
+}
+
+void SANSRunWindow::updateIDFFilePath() {
+  QString getIdf = "i.get_current_idf_path_in_reducer()\n";
+  updateIDFInfo(getIdf);
 }
 
 void SANSRunWindow::onUpdateGeometryRequest() {

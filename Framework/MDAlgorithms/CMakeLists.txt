@@ -55,6 +55,7 @@ set ( SRC_FILES
     src/ImportMDHistoWorkspaceBase.cpp
     src/Integrate3DEvents.cpp
     src/IntegrateEllipsoids.cpp
+    src/IntegrateEllipsoidsTwoStep.cpp
     src/IntegrateFlux.cpp
     src/IntegrateMDHistoWorkspace.cpp
     src/IntegratePeaksMD.cpp
@@ -185,6 +186,7 @@ set ( INC_FILES
     inc/MantidMDAlgorithms/ImportMDHistoWorkspaceBase.h
     inc/MantidMDAlgorithms/Integrate3DEvents.h
     inc/MantidMDAlgorithms/IntegrateEllipsoids.h
+    inc/MantidMDAlgorithms/IntegrateEllipsoidsTwoStep.h
     inc/MantidMDAlgorithms/IntegrateFlux.h
     inc/MantidMDAlgorithms/IntegrateMDHistoWorkspace.h
     inc/MantidMDAlgorithms/IntegratePeaksMD.h
@@ -315,6 +317,7 @@ set ( TEST_FILES
     ImportMDHistoWorkspaceTest.h
     Integrate3DEventsTest.h
     IntegrateEllipsoidsTest.h
+    IntegrateEllipsoidsTwoStepTest.h
     IntegrateFluxTest.h
     IntegrateMDHistoWorkspaceTest.h
     IntegratePeaksMD2Test.h

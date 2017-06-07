@@ -387,10 +387,13 @@ void Run::saveNexus(::NeXus::File *file, const std::string &group,
  */
 void Run::loadNexus(::NeXus::File *file, const std::string &group,
                     bool keepOpen) {
-  LogManager::loadNexus(file, group, true);
 
+  if (!group.empty()) {
+    file->openGroup(group, "NXgroup");
+  }
   std::map<std::string, std::string> entries;
   file->getEntries(entries);
+  LogManager::loadNexus(file, entries);
   for (const auto &name_class : entries) {
     if (name_class.second == "NXpositioner") {
       // Goniometer class
@@ -464,19 +467,19 @@ void Run::calculateGoniometerMatrix() {
                     boost::lexical_cast<std::string>(maxAngle) +
                     ".  Used mean = " +
                     boost::lexical_cast<std::string>(angle) + ".");
-      if (axisName.compare("omega") == 0) {
+      if (axisName == "omega") {
         g_log.warning("To set to last angle, replace omega with " +
                       boost::lexical_cast<std::string>(lastAngle) +
                       ": "
                       "SetGoniometer(Workspace=\'workspace\',Axis0=omega,0,1,0,"
                       "1\',Axis1='chi,0,0,1,1',Axis2='phi,0,1,0,1')");
-      } else if (axisName.compare("chi") == 0) {
+      } else if (axisName == "chi") {
         g_log.warning("To set to last angle, replace chi with " +
                       boost::lexical_cast<std::string>(lastAngle) +
                       ": "
                       "SetGoniometer(Workspace=\'workspace\',Axis0=omega,0,1,0,"
                       "1\',Axis1='chi,0,0,1,1',Axis2='phi,0,1,0,1')");
-      } else if (axisName.compare("phi") == 0) {
+      } else if (axisName == "phi") {
         g_log.warning("To set to last angle, replace phi with " +
                       boost::lexical_cast<std::string>(lastAngle) +
                       ": "

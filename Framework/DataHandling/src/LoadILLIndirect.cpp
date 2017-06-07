@@ -32,6 +32,8 @@ LoadILLIndirect::LoadILLIndirect()
       m_numberOfPixelsPerTube(0), m_numberOfChannels(0),
       m_numberOfSimpleDetectors(0), m_numberOfHistograms(0) {
   m_supportedInstruments.emplace_back("IN16B");
+  useAlgorithm("LoadILLIndirect", 2);
+  deprecatedDate("01.04.2017");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -246,8 +248,8 @@ void LoadILLIndirect::loadDataIntoTheWorkSpace(
   size_t nb_monitors = monitorsData.size();
   size_t nb_SD_detectors = dataSD.dim0();
 
-  Progress progress(this, 0, 1, m_numberOfTubes * m_numberOfPixelsPerTube +
-                                    nb_monitors + nb_SD_detectors);
+  Progress progress(this, 0.0, 1.0, m_numberOfTubes * m_numberOfPixelsPerTube +
+                                        nb_monitors + nb_SD_detectors);
 
   // Assign fake values to first X axis
   const HistogramData::BinEdges histoBinEdges(

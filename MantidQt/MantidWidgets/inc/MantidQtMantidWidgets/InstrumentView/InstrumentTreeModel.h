@@ -1,14 +1,12 @@
 #ifndef INSTRUMENTTREEMODEL_H
 #define INSTRUMENTTREEMODEL_H
 
-#include <QAbstractItemModel>
-#include <QModelIndex>
+#include "MantidQtMantidWidgets/InstrumentView/InstrumentWidget.h"
 
-#include <boost/shared_ptr.hpp>
+#include <QAbstractItemModel>
 
 namespace MantidQt {
 namespace MantidWidgets {
-class InstrumentActor;
 
 /**
 * The InstrumentTreeModel is a class used by a QTreeView
@@ -23,7 +21,7 @@ class InstrumentActor;
 class InstrumentTreeModel : public QAbstractItemModel {
   Q_OBJECT
 public:
-  InstrumentTreeModel(const InstrumentActor *, QObject *parent);
+  InstrumentTreeModel(const InstrumentWidget *instrWidget, QObject *parent);
   ~InstrumentTreeModel() override;
 
   QVariant data(const QModelIndex &index, int role) const override;
@@ -37,8 +35,8 @@ public:
   int columnCount(const QModelIndex &parent = QModelIndex()) const override;
 
 private:
-  const InstrumentActor *
-      m_instrumentActor; ///< actor of instrument to which the model corresponds
+  /// instrument widget to which the model corresponds
+  const InstrumentWidget *m_instrWidget;
 };
 } // MantidWidgets
 } // MantidQt

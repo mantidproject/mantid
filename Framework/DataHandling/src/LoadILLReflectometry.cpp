@@ -288,7 +288,7 @@ void LoadILLReflectometry::loadDataIntoTheWorkSpace(
   size_t spec = 0;
   size_t nb_monitors = monitorsData.size();
 
-  Progress progress(this, 0, 1,
+  Progress progress(this, 0.0, 1.0,
                     m_numberOfTubes * m_numberOfPixelsPerTube + nb_monitors);
 
   // Assign tof values to first X axis

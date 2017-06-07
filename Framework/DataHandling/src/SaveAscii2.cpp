@@ -261,13 +261,13 @@ void SaveAscii2::exec() {
     populateAllMetaData();
   }
   if (idx.empty()) {
-    Progress progress(this, 0, 1, nSpectra);
+    Progress progress(this, 0.0, 1.0, nSpectra);
     for (int i = 0; i < nSpectra; i++) {
       writeSpectrum(i, file);
       progress.report();
     }
   } else {
-    Progress progress(this, 0, 1, idx.size());
+    Progress progress(this, 0.0, 1.0, idx.size());
     for (auto i = idx.begin(); i != idx.end(); ++i) {
       writeSpectrum(*i, file);
       progress.report();
@@ -408,11 +408,11 @@ void SaveAscii2::populateAngleMetaData() {
 */
 void SaveAscii2::populateAllMetaData() {
   for (const auto &metaDataType : m_metaData) {
-    if (metaDataType.compare("spectrumnumber") == 0)
+    if (metaDataType == "spectrumnumber")
       populateSpectrumNumberMetaData();
-    if (metaDataType.compare("q") == 0)
+    if (metaDataType == "q")
       populateQMetaData();
-    if (metaDataType.compare("angle") == 0)
+    if (metaDataType == "angle")
       populateAngleMetaData();
   }
 }
