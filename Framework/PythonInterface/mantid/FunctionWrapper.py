@@ -1,3 +1,5 @@
+from mantid.simpleapi import FunctionFactory
+
 class FunctionWrapper:
 # Wrapper class for Fitting Function 
   def __init__ (self, name, **kwargs):
