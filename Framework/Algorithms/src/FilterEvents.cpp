@@ -826,72 +826,45 @@ void FilterEvents::convertSplittersWorkspaceToVectors() {
   m_vecSplitterGroup.clear();
   m_vecSplitterTime.clear();
 
+  // define filter-left target index
+  int no_filter_index = m_maxTargetIndex + 1;
+
   // convert SplittersWorkspace to a set of pairs which can be sorted
-  size_t num_rows = this->m_splittersWorkspace->rowCount();
-  for (size_t irow = 0; irow < num_rows; ++irow) {
-    Kernel::SplittingInterval splitter =
-        m_splittersWorkspace->getSplitter(irow);
-    if (m_vecSplitterTime.size() == 0 ||
-        splitter.start() > m_vecSplitterTime.back() + TOLERANCE) {
-      m_vecSplitterTime.push_back(splitter.start().totalNanoseconds());
-      m_vecSplitterTime.push_back(splitter.stop().totalNanoseconds());
-      // 0 stands for not defined
-      m_vecSplitterGroup.push_back(0);
+  size_t num_splitters = m_splitters.size();
+  int64_t last_entry_time(0);
+
+  // it is assumed that m_splitters is sorted by time
+  for (size_t i_splitter = 0; i_splitter < num_splitters; ++i_splitter) {
+    // get splitter
+    Kernel::SplittingInterval splitter = m_splitters[i_splitter];
+    int64_t start_time_i64 = splitter.start().totalNanoseconds();
+    int64_t stop_time_i64 = splitter.stop().totalNanoseconds();
+    if (m_vecSplitterTime.size() == 0) {
+      // first entry: add
+      m_vecSplitterTime.push_back(start_time_i64);
+      m_vecSplitterTime.push_back(stop_time_i64);
       m_vecSplitterGroup.push_back(splitter.index());
-    } else if (splitter.start() < m_vecSplitterTime.back() - TOLERANCE) {
-      // almost same: then add the spliters.stop() only
-      m_vecSplitterTime.push_back(splitter.stop().totalNanoseconds());
+    } else if (abs(last_entry_time - start_time_i64) < TOLERANCE) {
+      // start time is SAME as last entry
+      m_vecSplitterTime.push_back(stop_time_i64);
+      m_vecSplitterGroup.push_back(splitter.index());
+    } else if (start_time_i64 > last_entry_time + TOLERANCE) {
+      // start time is way behind. then add an empty one
+      m_vecSplitterTime.push_back(start_time_i64);
+      m_vecSplitterTime.push_back(stop_time_i64);
+      m_vecSplitterGroup.push_back(no_filter_index);
       m_vecSplitterGroup.push_back(splitter.index());
     } else {
-      // have to insert the somewhere
-      std::vector<int64_t>::iterator finditer =
-          std::lower_bound(m_vecSplitterTime.begin(), m_vecSplitterTime.end(),
-                           splitter.start().totalNanoseconds());
-      // get the index
-      size_t split_index =
-          static_cast<size_t>(finditer - m_vecSplitterTime.begin());
-      if (*finditer - splitter.start().totalNanoseconds() > TOLERANCE) {
-        // the start time is before one splitter indicated by *finditer: insert
-        // both
-        // check
-        if (m_vecSplitterGroup[split_index] != UNDEFINED_SPLITTING_TARGET) {
-          std::stringstream errss;
-          errss << "Tried to insert splitter [" << splitter.start() << ", "
-                << splitter.stop() << "] but there is "
-                << "already a time entry with target "
-                << m_vecSplitterGroup[split_index] << " inside it.";
-          throw std::runtime_error(errss.str());
-        }
-        // inset the full set
-        m_vecSplitterTime.insert(finditer, splitter.stop().totalNanoseconds());
-        m_vecSplitterTime.insert(finditer, splitter.start().totalNanoseconds());
-        // insert the target
-        m_vecSplitterGroup.insert(m_vecSplitterGroup.begin() + split_index,
-                                  static_cast<int>(UNDEFINED_SPLITTING_TARGET));
-        m_vecSplitterGroup.insert(m_vecSplitterGroup.begin() + split_index,
-                                  static_cast<int>(splitter.index()));
-      } else if (*finditer - splitter.start().totalNanoseconds() > -TOLERANCE) {
-        // the start time is an existing entry
-        // check
-        if (m_vecSplitterGroup[split_index] != UNDEFINED_SPLITTING_TARGET) {
-          std::stringstream errss;
-          errss << "Tried to insert splitter [" << splitter.start() << ", "
-                << splitter.stop() << "] but there is "
-                << "already a time entry with target "
-                << m_vecSplitterGroup[split_index] << " inside it.";
-          throw std::runtime_error(errss.str());
-        }
-        // inset the stop time
-        m_vecSplitterTime.insert(finditer + 1,
-                                 splitter.stop().totalNanoseconds());
-        // insert the target
-        m_vecSplitterGroup.insert(m_vecSplitterGroup.begin() + split_index + 1,
-                                  splitter.index());
-      } else {
-        throw std::runtime_error("This is not a possible situation!");
-      }
-    } // IF-ELSE to add a new entry
-  }   // END-FOR (add all splitters)
+      // some impossible situation
+      std::stringstream errorss;
+      errorss << "New start time " << start_time_i64
+              << " is before last entry's time " << last_entry_time;
+      throw std::runtime_error(errorss.str());
+    }
+
+    // update
+    last_entry_time = m_vecSplitterTime.back();
+  } // END-FOR (add all splitters)
 
   return;
 }
