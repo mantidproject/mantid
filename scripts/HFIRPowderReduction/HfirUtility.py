@@ -115,8 +115,7 @@ def parseDetEffCorrFile(vancorrfname):
 
 def parseDetExclusionFile(detexludefilename):
     """ Parse excluded detectors file
-    Detector ID from __future__ import (absolute_import, division, print_function)
-from standard HB2A detector exclusion file start from 0,
+    Detector ID from standard HB2A detector exclusion file start from 0,
     while in the other circumstance, it starts from 1.
     Therefore Det ID output from here must be plus by 1.
     Return :: 2-tuple
