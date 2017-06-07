@@ -115,7 +115,10 @@ public:
   void setScaleType(GraphOptions::ScaleType type);
   void setExponent(double nth_power);
   void setViewType(const QString &type);
-  InstrumentActor *getInstrumentActor() const { return m_instrumentActor; }
+  const InstrumentActor &getInstrumentActor() const {
+    return *m_instrumentActor;
+  }
+  InstrumentActor &getInstrumentActor() { return *m_instrumentActor; }
   void resetInstrument(bool resetGeometry);
   void selectTab(int tab);
   void selectTab(Tab tab) { selectTab(int(tab)); }
@@ -256,7 +259,7 @@ protected:
   /// InstrumentActor holds a pointer to the workspace itself.
   QString m_workspaceName;
   /// Instrument actor is an interface to the instrument
-  InstrumentActor *m_instrumentActor;
+  std::unique_ptr<InstrumentActor> m_instrumentActor;
   /// Option to use or not OpenGL display for "unwrapped" view, 3D is always in
   /// OpenGL
   bool m_useOpenGL;

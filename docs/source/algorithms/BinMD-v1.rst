@@ -152,6 +152,23 @@ The output looks like the following in the `SliceViewer <http://www.mantidprojec
 .. image:: /images/BinMD_NonAxisAligned.png
     :alt: The sliceveiwer with the non axis aligned cut
 
+**Accumulation Example**
+
+.. testcode:: Accumulation
+
+    binned_ws=None
+    for x in range(3):
+        mdws = CreateMDWorkspace(Dimensions=2, Extents='-10,10,-10,10', Names='A,B', Units='U,U')
+        FakeMDEventData(InputWorkspace=mdws, PeakParams='500000,'+str(x)+',0,3')
+        binned_ws = BinMD(InputWorkspace=mdws, AlignedDim0='A,-10,10,100', AlignedDim1='B,-10,10,100', TemporaryDataWorkspace=binned_ws)
+    print "Number of events =", binned_ws.getNEvents()
+
+Output:
+
+.. testoutput:: Accumulation
+
+    Number of events = 1500000
+
 .. categories::
 
 .. sourcelink::
