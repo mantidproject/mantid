@@ -7,8 +7,12 @@
 ############################################################################
 from __future__ import (absolute_import, division, print_function)
 import os
-import urllib.request, urllib.error, urllib.parse
+try:
+	import urllib.request as wrllib2
+except ImportError:
+	import  urllib2 
 import math
+from six.moves import range
 
 import numpy
 
@@ -1128,3 +1132,4 @@ def downloadFile(url, localfilepath):
     ofile.close()
 
     return (True, "")
+

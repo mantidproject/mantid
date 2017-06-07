@@ -9,6 +9,7 @@ from six.moves import range
 import numpy
 import os
 
+
 from .ui_MainWindow import Ui_MainWindow #import line for the UI python class
 from PyQt4 import QtCore, QtGui
 try:
@@ -19,7 +20,7 @@ except AttributeError:
 
 import mantid
 import mantidqtpython as mqt
-from .HfirPDReductionControl import *
+from . import HfirPDReductionControl 
 
 #----- default configuration ---------------
 DEFAULT_SERVER = 'http://neutron.ornl.gov/user_data'
@@ -356,7 +357,7 @@ class MainWindow(QtGui.QMainWindow):
         self._currUnit = '2theta'
 
         # Workspaces
-        self._myControl = HFIRPDRedControl()
+        self._myControl = HfirPDReductionControl.HFIRPDRedControl()
 
         # Interactive graphics
         self._viewMerge_X = None
