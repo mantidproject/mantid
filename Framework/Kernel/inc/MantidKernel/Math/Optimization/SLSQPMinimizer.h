@@ -1,7 +1,6 @@
 #ifndef MANTID_KERNEL_SLSQPMINIMIZER_H_
 #define MANTID_KERNEL_SLSQPMINIMIZER_H_
 
-#include "MantidKernel/ClassMacros.h"
 #include "MantidKernel/DllConfig.h"
 #include "MantidKernel/Matrix.h"
 
@@ -95,6 +94,15 @@ public:
     initializeConstraints(equality, inequality);
   }
 
+  /// Disable default constructor
+  SLSQPMinimizer() = delete;
+
+  /// Disable copy operator
+  SLSQPMinimizer(const SLSQPMinimizer &) = delete;
+
+  /// Disable assignment operator
+  SLSQPMinimizer &operator=(const SLSQPMinimizer &) = delete;
+
   /// @returns The number of parameters under minimization
   inline size_t numParameters() const { return m_nparams; }
   /// @returns The number of equality constraints
@@ -106,9 +114,6 @@ public:
   std::vector<double> minimize(const std::vector<double> &x0) const;
 
 private:
-  DISABLE_DEFAULT_CONSTRUCT(SLSQPMinimizer)
-  DISABLE_COPY_AND_ASSIGN(SLSQPMinimizer)
-
   /**
    * Compute the value of the objective function
    * @param x The current parameter pt
