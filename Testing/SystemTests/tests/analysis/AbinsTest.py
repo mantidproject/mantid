@@ -2,12 +2,13 @@ from __future__ import (absolute_import, division, print_function)
 import numpy as np
 import stresstesting
 from mantid.simpleapi import Abins, mtd, DeleteWorkspace, Scale
-from AbinsModules import AbinsConstants, AbinsTestHelpers
+from AbinsModules import AbinsConstants, AbinsTestHelpers, AbinsParameters
 
 
 def skip_tests():
     return not hasattr(np, "einsum")
 
+AbinsParameters.s_relative_threshold = 0.07
 
 class HelperTestingClass(object):
     def __init__(self):
