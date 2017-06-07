@@ -5,13 +5,14 @@
 # Key Words: FUTURE
 #
 ############################################################################
+from __future__ import (absolute_import, division, print_function)
 import os
-import urllib2
+import urllib.request, urllib.error, urllib.parse
 import math
 
 import numpy
 
-import HfirUtility as hutil
+from . import HfirUtility as hutil
 
 # Import mantid
 import mantid.simpleapi as api
@@ -88,7 +89,7 @@ class PDRManager(object):
         # Sum and average
         numpts = self._rawSpiceTableWS.rowCount()
         totalcounts = 0
-        for irow in xrange(numpts):
+        for irow in range(numpts):
             moncounts = self._rawSpiceTableWS.cell(irow, imonitor)
             totalcounts += moncounts
 
@@ -141,7 +142,7 @@ class PDRManager(object):
         try:
             self.binsize = float(binsize)
         except TypeError as e:
-            print e
+            print(e)
 
         return
 
@@ -282,7 +283,7 @@ class HFIRPDRedControl(object):
                                                     DetectorID = detid,
                                                     NormalizeByMonitorCounts=normalized)
         else:
-            print "Plot detector %d's counts vs. sample log %s."%(detid, xlabel)
+            print("Plot detector %d's counts vs. sample log %s."%(detid, xlabel))
             tempoutws = \
                 api.GetSpiceDataRawCountsFromMD(InputWorkspace=datamdws,
                                                 MonitorWorkspace=monitormdws,
@@ -382,7 +383,7 @@ class HFIRPDRedControl(object):
         # ptnolist = self._getRunNumberList(datamdws=rmanager.datamdws)
 
         # get data
-        print "[DB] Plot sample log: XLabel = %s" % (xlabel)
+        print("[DB] Plot sample log: XLabel = %s" % (xlabel))
         tempoutws = api.GetSpiceDataRawCountsFromMD(InputWorkspace=datamdws,
                                                     MonitorWorkspace=monitormdws,
                                                     Mode='Sample Log',
@@ -483,7 +484,7 @@ class HFIRPDRedControl(object):
                 twotheta = math.asin(lambda_over_2d)*2.*180/math.pi
                 vanpeakpos2theta.append(twotheta)
             else:
-                print "Vanadium peak %f is out of d-Spacing range." % (peakpos)
+                print("Vanadium peak %f is out of d-Spacing range." % (peakpos))
 
         vanpeakpos2theta = sorted(vanpeakpos2theta)
         wsmanager.setVanadiumPeaks(vanpeakpos2theta)
@@ -535,7 +536,7 @@ class HFIRPDRedControl(object):
         """ Check whether an Exp/Scan has a reduced workspace
         """
         if ((exp, scan) in self._myWorkspaceDict) is False:
-            print self._myWorkspaceDict.keys()
+            print(list(self._myWorkspaceDict.keys()))
             return False
 
         if self._myWorkspaceDict[(exp, scan)].reducedws is None:
@@ -581,7 +582,7 @@ class HFIRPDRedControl(object):
         monitormdwslist = []
         self._lastWkspToMerge = []
 
-        print "[Checkpoint 0] Scans = ", str(scannolist)
+        print("[Checkpoint 0] Scans = ", str(scannolist))
         for scanno in sorted(scannolist):
             try:
                 wsmanager = self.getWorkspace(expno, scanno, True)
@@ -589,12 +590,12 @@ class HFIRPDRedControl(object):
                 monitormdwslist.append(wsmanager.monitormdws)
                 self._lastWkspToMerge.append(wsmanager)
             except KeyError as ne:
-                print '[Error] Unable to retrieve MDWorkspaces for Exp %d Scan %d due to %s.' % (
-                    expno, scanno, str(ne))
+                print('[Error] Unable to retrieve MDWorkspaces for Exp %d Scan %d due to %s.' % (
+                    expno, scanno, str(ne)))
                 scannolist.remove(scanno)
         # ENDFOR
 
-        print "[Checkpoing 1] Scans = ", str(scannolist)
+        print("[Checkpoing 1] Scans = ", str(scannolist))
 
         # Merge and binning
         if len(datamdwslist) > 1:
@@ -603,7 +604,7 @@ class HFIRPDRedControl(object):
         else:
             mg_datamdws = datamdwslist[0]
             mg_monitormdws = monitormdwslist[0]
-        for iw in xrange(2, len(datamdwslist)):
+        for iw in range(2, len(datamdwslist)):
             mg_datamdws += datamdwslist[iw]
             mg_monitormdws += monitormdwslist[iw]
 
@@ -731,7 +732,7 @@ class HFIRPDRedControl(object):
                 self.reduceSpicePDData(exp, scan, unit='2theta', xmin=min_x, xmax=max_x, binsize=bin_size)
 
             monitorcounts = wsmanager.getAverageMonitorCounts()
-            print '[DB] Exp %d Scan %d: average monitor counts = %.5f' % (exp, scan, monitorcounts)
+            print('[DB] Exp %d Scan %d: average monitor counts = %.5f' % (exp, scan, monitorcounts))
             # FUTURE: implement method ws_manager.reset_to_normalized() instead
             wsmanager.reducedws = wsmanager.reducedws / monitorcounts
         # END_FOR(scan)
@@ -771,7 +772,7 @@ class HFIRPDRedControl(object):
                 self.reduceSpicePDData(exp, scan, unit='2theta', xmin=min_x, xmax=max_x, binsize=bin_size)
 
             monitorcounts = wsmanager.getAverageMonitorCounts()
-            print '[DB] Exp %d Scan %d: average monitor counts = %.5f' % (exp, scan, monitorcounts)
+            print('[DB] Exp %d Scan %d: average monitor counts = %.5f' % (exp, scan, monitorcounts))
             wsmanager.reducedws = wsmanager.reducedws * monitorcounts
         # END_FOR(scan)
 
@@ -804,14 +805,14 @@ class HFIRPDRedControl(object):
             scalefactor = 1.
         else:
             scalefactor = float(scalefactor)
-            print "[DB] Scale factor is %f." % (scalefactor)
+            print("[DB] Scale factor is %f." % (scalefactor))
 
         # Excluded detectors
         if excludeddetlist is None:
             excludeddetlist = []
         else:
-            print "[DB] Excluded detectors: %s"%(excludeddetlist), "Convert to numpy array", \
-                numpy.array(excludeddetlist)
+            print("[DB] Excluded detectors: %s"%(excludeddetlist), "Convert to numpy array", \
+                numpy.array(excludeddetlist))
 
         basewsname = datamdws.name().split("_DataMD")[0]
         outwsname = basewsname + "_Reduced"
@@ -824,7 +825,7 @@ class HFIRPDRedControl(object):
                                    ExcludedDetectorIDs=numpy.array(excludeddetlist),
                                    ScaleFactor=scalefactor)
 
-        print "[DB] Reduction is finished.  Data is in workspace %s. " % (outwsname)
+        print("[DB] Reduction is finished.  Data is in workspace %s. " % (outwsname))
 
         # Set up class variable for min/max and
         outws = AnalysisDataService.retrieve(outwsname)
@@ -873,11 +874,11 @@ class HFIRPDRedControl(object):
                 raise e
             if detefffname is not None:
                 localdetefffname = os.path.join(localdatadir, detefffname)
-                print "[DB] Detector efficiency file name: %s From %s" % (detefffname, deteffurl)
+                print("[DB] Detector efficiency file name: %s From %s" % (detefffname, deteffurl))
                 if os.path.exists(localdetefffname) is False:
                     downloadFile(deteffurl, localdetefffname)
                 else:
-                    print "[Info] Detector efficiency file %s exists in directory %s." % (detefffname, localdatadir)
+                    print("[Info] Detector efficiency file %s exists in directory %s." % (detefffname, localdatadir))
             else:
                 localdetefffname = None
             # ENDIF
@@ -885,14 +886,14 @@ class HFIRPDRedControl(object):
             # excluded detectors file
             excldetfname, exclurl = hutil.makeExcludedDetectorFileName(exp)
             localexcldetfname = os.path.join(localdatadir, excldetfname)
-            print "[DB] Excluded det file name: %s From %s" % (excldetfname, exclurl)
+            print("[DB] Excluded det file name: %s From %s" % (excldetfname, exclurl))
             if os.path.exists(localexcldetfname) is False:
                 downloadstatus, errmsg = downloadFile(exclurl, localexcldetfname)
                 if downloadstatus is False:
                     localexcldetfname = None
-                    print "[Error] %s" % (errmsg)
+                    print("[Error] %s" % (errmsg))
             else:
-                print "[Info] Detector exclusion file %s exists in directory %s." % (excldetfname, localdatadir)
+                print("[Info] Detector exclusion file %s exists in directory %s." % (excldetfname, localdatadir))
 
             # Set to ws manager
             wsmanager.setWavelength(wavelength)
@@ -1074,7 +1075,7 @@ class HFIRPDRedControl(object):
         ptnolist = []
 
         numexpinfo = datamdws.getNumExperimentInfo()
-        for i in xrange(numexpinfo):
+        for i in range(numexpinfo):
             expinfo = datamdws.getExperimentInfo(i)
             runid = expinfo.run().getProperty('run_number').value
             if runid >= 0:
@@ -1109,9 +1110,9 @@ def downloadFile(url, localfilepath):
     """
     # open URL
     try:
-        response = urllib2.urlopen(url)
+        response = urllib.request.urlopen(url)
         wbuf = response.read()
-    except urllib2.HTTPError as e:
+    except urllib.error.HTTPError as e:
         # Unable to download file
         if str(e).count('HTTP Error 404') == 1:
             return (False, str(e))
