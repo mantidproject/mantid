@@ -5,6 +5,7 @@
 #
 ################################################################################
 
+from __future__ import (absolute_import, division, print_function)
 
 def makeHB2ADetEfficiencyFileName(expno, m1, colltrans):
     """ Fabricate the detector's efficiency file name for HB2A
@@ -114,7 +115,8 @@ def parseDetEffCorrFile(vancorrfname):
 
 def parseDetExclusionFile(detexludefilename):
     """ Parse excluded detectors file
-    Detector ID from standard HB2A detector exclusion file start from 0,
+    Detector ID from __future__ import (absolute_import, division, print_function)
+from standard HB2A detector exclusion file start from 0,
     while in the other circumstance, it starts from 1.
     Therefore Det ID output from here must be plus by 1.
     Return :: 2-tuple
