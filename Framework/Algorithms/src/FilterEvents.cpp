@@ -361,6 +361,14 @@ void FilterEvents::processAlgorithmProperties() {
 
   m_toGroupWS = this->getProperty("GroupWorkspaces");
 
+  if (m_toGroupWS && m_outputWSNameBase.compare(m_eventWS->getName()) == 0)
+  {
+    std::stringstream errss;
+    errss << "It is not allowed to group output workspaces into the same name (i..e, OutputWorkspaceBaseName = "
+          << m_outputWSNameBase << ") as the input workspace to filter events from.";
+    throw std::invalid_argument(errss.str());
+  }
+
   //-------------------------------------------------------------------------
   // TOF detector/sample correction
   //-------------------------------------------------------------------------
