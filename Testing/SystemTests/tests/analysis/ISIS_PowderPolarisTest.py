@@ -174,5 +174,5 @@ def _try_delete(path):
             shutil.rmtree(path)
         else:
             os.remove(path)
-    except OSError as err:
+    except OSError:
         print ("Could not delete output file at: ", path)
