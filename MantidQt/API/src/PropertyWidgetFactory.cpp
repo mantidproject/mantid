@@ -1,12 +1,14 @@
 #include "MantidQtAPI/PropertyWidgetFactory.h"
+#include "MantidAPI/FileProperty.h"
+#include "MantidAPI/IWorkspacePropertyWithIndex.h"
+#include "MantidAPI/MultipleFileProperty.h"
+#include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/System.h"
 #include "MantidQtAPI/BoolPropertyWidget.h"
-#include "MantidKernel/PropertyWithValue.h"
-#include "MantidAPI/FileProperty.h"
-#include "MantidAPI/MultipleFileProperty.h"
-#include "MantidQtAPI/TextPropertyWidget.h"
-#include "MantidQtAPI/OptionsPropertyWidget.h"
 #include "MantidQtAPI/FilePropertyWidget.h"
+#include "MantidQtAPI/OptionsPropertyWidget.h"
+#include "MantidQtAPI/TextPropertyWidget.h"
+#include "MantidQtAPI/WorkspaceIndexPropertyWidget.h"
 #include <MantidQtAPI/ListPropertyWidget.h>
 
 using namespace Mantid::Kernel;
@@ -38,14 +40,15 @@ PropertyWidget *
 PropertyWidgetFactory::createWidget(Mantid::Kernel::Property *prop,
                                     QWidget *parent, QGridLayout *layout,
                                     int row) {
-  Mantid::API::FileProperty *fileType =
-      dynamic_cast<Mantid::API::FileProperty *>(prop);
-  Mantid::API::MultipleFileProperty *multipleFileType =
+  auto *fileType = dynamic_cast<Mantid::API::FileProperty *>(prop);
+  auto *multipleFileType =
       dynamic_cast<Mantid::API::MultipleFileProperty *>(prop);
-  PropertyWithValue<bool> *boolProp =
-      dynamic_cast<PropertyWithValue<bool> *>(prop);
+  auto *boolProp = dynamic_cast<PropertyWithValue<bool> *>(prop);
+  auto *wProp = dynamic_cast<IWorkspacePropertyWithIndex *>(prop);
 
-  if (boolProp) {
+  if (wProp) {
+    return new WorkspaceIndexPropertyWidget(prop, parent, layout, row);
+  } else if (boolProp) {
     // CheckBox shown for BOOL properties
     return new BoolPropertyWidget(boolProp, parent, layout, row);
   } else if (!prop->allowedValues().empty() && !fileType && !multipleFileType) {
@@ -66,5 +69,5 @@ PropertyWidgetFactory::createWidget(Mantid::Kernel::Property *prop,
   }
 }
 
-} // namespace MantidQt
 } // namespace API
+} // namespace MantidQt

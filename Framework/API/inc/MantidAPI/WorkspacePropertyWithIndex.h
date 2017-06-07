@@ -76,13 +76,19 @@ public:
 
   std::string isValid() const override;
 
+  std::string setValue(const std::string &value) override;
+
   bool operator==(const WorkspacePropertyWithIndex<TYPE> &rhs);
+
+  WorkspacePropertyWithIndex &operator=(const std::string &rhs);
+
   WorkspacePropertyWithIndex &
   operator=(const std::tuple<boost::shared_ptr<TYPE>, API::IndexType,
                              std::vector<int>> &rhs);
-  WorkspacePropertyWithIndex &
-  operator=(const std::tuple<boost::shared_ptr<TYPE>, API::IndexType,
-                             std::string> &rhs);
+
+  WorkspacePropertyWithIndex &operator=(
+      const std::tuple<boost::shared_ptr<TYPE>, API::IndexType, std::string>
+          &rhs);
   WorkspacePropertyWithIndex &
   operator=(const WorkspacePropertyWithIndex<TYPE> &rhs);
   WorkspacePropertyWithIndex &
@@ -102,13 +108,14 @@ public:
     return *m_indexListProp.get();
   }
 
-  const Kernel::ArrayProperty<int> &indexListProperty() const override{
+  const Kernel::ArrayProperty<int> &indexListProperty() const override {
     return *m_indexListProp;
   }
 
   IndexTypeProperty &mutableIndexTypeProperty() override {
     return *m_indexTypeProp.get();
   }
+
   const IndexTypeProperty &indexTypeProperty() const override {
     return *m_indexTypeProp;
   }
@@ -116,7 +123,7 @@ public:
 private:
   std::unique_ptr<Kernel::ArrayProperty<int>> m_indexListProp;
   std::unique_ptr<IndexTypeProperty> m_indexTypeProp;
-
+  std::string m_indexListValue;
   const Indexing::SpectrumIndexSet getIndices() const;
 };
 } // namespace API

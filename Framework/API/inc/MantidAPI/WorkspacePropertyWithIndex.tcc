@@ -19,7 +19,7 @@ WorkspacePropertyWithIndex<TYPE>::WorkspacePropertyWithIndex(
     IValidator_sptr validator)
     : WorkspaceProperty<TYPE>(name, wsName, Direction::Input),
       m_indexListProp(
-          make_unique<ArrayProperty<int>>("indices", Direction::Output)),
+          make_unique<ArrayProperty<int>>("Indices", Direction::Output)),
       m_indexTypeProp(make_unique<IndexTypeProperty>(indexTypes)) {}
 
 template <typename TYPE>
@@ -28,7 +28,7 @@ WorkspacePropertyWithIndex<TYPE>::WorkspacePropertyWithIndex(
     API::PropertyMode::Type optional, Kernel::IValidator_sptr validator)
     : WorkspaceProperty<TYPE>(name, wsName, Direction::Input, optional),
       m_indexListProp(
-          make_unique<ArrayProperty<int>>("indices", Direction::Output)),
+          make_unique<ArrayProperty<int>>("Indices", Direction::Output)),
       m_indexTypeProp(make_unique<IndexTypeProperty>(indexTypes)) {}
 
 template <typename TYPE>
@@ -39,7 +39,7 @@ WorkspacePropertyWithIndex<TYPE>::WorkspacePropertyWithIndex(
     : WorkspaceProperty<TYPE>(name, wsName, Direction::Input, optional,
                               locking),
       m_indexListProp(
-          make_unique<ArrayProperty<int>>("indices", Direction::Output)),
+          make_unique<ArrayProperty<int>>("Indices", Direction::Output)),
       m_indexTypeProp(make_unique<IndexTypeProperty>(indexTypes)) {}
 
 template <typename TYPE>
@@ -51,14 +51,17 @@ WorkspacePropertyWithIndex<TYPE>::WorkspacePropertyWithIndex(
 
 template <typename TYPE>
 std::string WorkspacePropertyWithIndex<TYPE>::isValid() const {
-  std::string error = WorkspaceProperty<TYPE>::isValid() + " " +
-                      m_indexListProp->isValid() + " " +
-                      m_indexTypeProp->isValid() + " ";
+  std::string error = "";
+  std::string valid;
 
-  if (std::all_of(error.cbegin(), error.cend(),
-                  [](auto c) { return c == ' '; })) {
-    error = "";
+  if ((valid = WorkspaceProperty<TYPE>::isValid()) != "")
+    error += "\n" + valid;
+  if ((valid = m_indexTypeProp->isValid()) != "")
+    error += "\n" + valid;
+  if ((valid = m_indexListProp->setValue(m_indexListValue)) != "")
+    error += "\n" + valid;
 
+  if (error.empty()) {
     try {
       getIndices();
     } catch (std::out_of_range &) {
@@ -73,11 +76,46 @@ std::string WorkspacePropertyWithIndex<TYPE>::isValid() const {
 }
 
 template <typename TYPE>
+std::string
+WorkspacePropertyWithIndex<TYPE>::setValue(const std::string &value) {
+  *this = value;
+  return isValid();
+}
+
+template <typename TYPE>
 bool WorkspacePropertyWithIndex<TYPE>::
 operator==(const WorkspacePropertyWithIndex<TYPE> &rhs) {
   return WorkspaceProperty<TYPE>::operator==(rhs) &&
          m_indexListProp == rhs.m_indexListProp &&
          m_indexTypeProp == rhs.m_indexTypeProp;
+}
+
+template <typename TYPE>
+WorkspacePropertyWithIndex<TYPE> &WorkspacePropertyWithIndex<TYPE>::
+operator=(const std::string &rhs) {
+  std::string del = ";";
+  if (std::count(rhs.cbegin(), rhs.cend(), del[0]) == 2) {
+    std::string s = rhs;
+    size_t pos;
+    std::vector<std::string> values;
+    while ((pos = s.find(del)) != std::string::npos) {
+      auto token = s.substr(0, pos);
+      values.push_back(token);
+      s.erase(0, pos + del.length());
+    }
+
+    values.push_back(s);
+
+    WorkspaceProperty<TYPE>::setValue(values[0]);
+    *m_indexTypeProp.get() = values[1];
+    m_indexListValue = values[2];
+    m_indexListProp->setValue(m_indexListValue);
+
+  } else {
+    WorkspaceProperty<TYPE>::setValue(rhs);
+  }
+
+  return *this;
 }
 
 template <typename TYPE>
@@ -94,6 +132,7 @@ operator=(const std::tuple<boost::shared_ptr<TYPE>, API::IndexType,
   *this->m_indexTypeProp.get() = type;
   *this->m_indexListProp.get() = list;
 
+  m_indexListValue = this->m_indexListProp->value();
   return *this;
 }
 
@@ -109,7 +148,8 @@ operator=(const std::tuple<boost::shared_ptr<TYPE>, API::IndexType, std::string>
 
   *this = ws;
   *this->m_indexTypeProp.get() = type;
-  m_indexListProp->setValue(list);
+  m_indexListValue = list;
+  m_indexListProp->setValue(m_indexListValue);
 
   return *this;
 }
@@ -121,6 +161,7 @@ operator=(const WorkspacePropertyWithIndex<TYPE> &rhs) {
     return *this;
   API::WorkspaceProperty<TYPE>::operator=(rhs);
   *m_indexListProp = *rhs.m_indexListProp;
+  m_indexListValue = m_indexListProp->value();
   *m_indexTypeProp = rhs.m_indexTypeProp->selectedType();
 
   return *this;
@@ -142,8 +183,13 @@ WorkspacePropertyWithIndex<TYPE>::clone() const {
 
 template <typename TYPE>
 std::string WorkspacePropertyWithIndex<TYPE>::value() const {
-  return WorkspaceProperty<TYPE>::value() + "," + m_indexTypeProp->value() +
-         "," + m_indexListProp->value();
+  auto wksp = getWorkspace();
+  std::string wkspName = "";
+  if (wksp)
+    wkspName = wksp->getName();
+
+  return wkspName + ";" + m_indexTypeProp->value() + ";" +
+         m_indexListProp->value();
 }
 
 template <typename TYPE>
