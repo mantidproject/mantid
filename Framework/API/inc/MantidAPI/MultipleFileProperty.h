@@ -174,6 +174,14 @@ private:
   /// The action type of this property
   /// Load (dafault) or OptionalLoad are supported
   unsigned int m_action;
+  /// Last value of propValue used in
+  /// MultipleFileProperty::setValueAsMultipleFiles
+  /// and MultipleFileProperty::setValueAsSingleFile
+  std::string m_oldPropValue;
+  /// Last value of the found files used in
+  /// MultipleFileProperty::setValueAsMultipleFiles
+  /// and MultipleFileProperty::setValueAsSingleFile
+  std::vector<std::vector<std::string>> m_oldFoundValue;
 };
 
 } // namespace API
