@@ -23,3 +23,25 @@ class FunctionWrapper:
         
   def getFunction(self):
       return self.fun
+      
+class CompositeFunctionWrapper(FunctionWrapper):
+# Wrapper class for Composite Fitting Function
+    def __init__ (self, *args):
+        self.fun = FunctionFactory.createFunction("CompositeFunction")
+   
+        #Search for Function arguments, if found create a FunctionWrapper for it.
+        for a in args:
+           self.fun.add(a.fun)
+      
+    def __getitem__ (self, name):
+    # Override
+        pass
+
+    def __getitem__ (self, index):
+    # get function of specified index
+        pass
+
+    def __setitem__ (self, name):
+        pass
+      
+      
