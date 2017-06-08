@@ -72,12 +72,6 @@ public:
   std::string outputName() const override;
   /// Prefix for simultaneous fit results
   static const std::string SIMULTANEOUS_PREFIX;
-  /// custom label
-  static const std::string CUSTOM_LABEL;
-  static const std::string ALL_GROUPS_LABEL;
-  static const std::string ALL_PAIRS_LABEL;
-  static const std::string ALL_PERIODS_LABEL;
-
   /// Set label for simultaneous fit results
   void setSimultaneousLabel(const std::string &label) override {
     m_simultaneousLabel = label;

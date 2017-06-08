@@ -59,6 +59,10 @@
 
 namespace {
 Mantid::Kernel::Logger g_log("MuonFitPropertyBrowser");
+const std::string CUSTOM_LABEL{"Custom"};
+const std::string ALL_GROUPS_LABEL{"All Groups"};
+const std::string ALL_PAIRS_LABEL{"All Pairs"};
+const std::string ALL_PERIODS_LABEL{"All Periods"};
 }
 
 namespace MantidQt {
@@ -67,10 +71,6 @@ namespace MantidWidgets {
 using namespace Mantid::API;
 
 const std::string MuonFitPropertyBrowser::SIMULTANEOUS_PREFIX{"MuonSimulFit_"};
-const std::string MuonFitPropertyBrowser::CUSTOM_LABEL{"Custom"};
-const std::string MuonFitPropertyBrowser::ALL_GROUPS_LABEL{"All Groups"};
-const std::string MuonFitPropertyBrowser::ALL_PAIRS_LABEL{"All Pairs"};
-const std::string MuonFitPropertyBrowser::ALL_PERIODS_LABEL{"All Periods"};
 
 /**
  * Constructor
