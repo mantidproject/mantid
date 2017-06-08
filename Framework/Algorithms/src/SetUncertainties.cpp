@@ -6,6 +6,7 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/VisibleWhenProperty.h"
 
 #include <algorithm>
 #include <vector>
@@ -29,8 +30,8 @@ const std::string ONE_IF_ZERO("oneIfZero");
 const std::string SQRT_OR_ONE("sqrtOrOne");
 const std::string CUSTOM("custom");
 
-struct resetzeroerror {
-  explicit resetzeroerror(const double constant) : zeroErrorValue(constant) {}
+struct ResetZeroError {
+  explicit ResetZeroError(const double constant) : zeroErrorValue(constant) {}
 
   double operator()(const double error) {
     if (error < TOLERANCE) {
@@ -80,10 +81,22 @@ void SetUncertainties::init() {
                   "How to reset the uncertainties");
   declareProperty("SetErrorTo", 0.000, mustBePositive,
 	  "The error value to set when using custom values");
+  setPropertySettings("SetErrorTo",
+	  Kernel::make_unique<VisibleWhenProperty>(
+		  "SetError", IS_EQUAL_TO, "custom"));
+
   declareProperty("IfEqualTo", 0.000, mustBePositive, // TODO empty float?
 	  "The condition specifying where the custom error value should be set");
+  setPropertySettings("IfEqualTo",
+	  Kernel::make_unique<VisibleWhenProperty>(
+		  "SetError", IS_EQUAL_TO, "custom"));
+
   declareProperty("Precision", 3, mustBePositiveInt,
 	  "How many decimal places are taken into account for IfEqualTo" );
+  setPropertySettings("Precision",
+	  Kernel::make_unique<VisibleWhenProperty>(
+		  "SetError", IS_EQUAL_TO, "custom"));
+
 }
 
 void SetUncertainties::exec() {
@@ -127,7 +140,7 @@ void SetUncertainties::exec() {
         std::transform(Y.begin(), Y.end(), E.begin(),
                        sqrterror(resetOne ? 1. : 0.));
       } else {
-        std::transform(E.begin(), E.end(), E.begin(), resetzeroerror(1.));
+        std::transform(E.begin(), E.end(), E.begin(), ResetZeroError(1.));
       }
     }
 
