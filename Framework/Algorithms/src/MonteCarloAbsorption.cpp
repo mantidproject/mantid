@@ -113,12 +113,22 @@ std::tuple<double, double, double, double> extremeAngles(const MatrixWorkspace &
 std::tuple<double, double> extremeWavelengths(const MatrixWorkspace &ws) {
   double currentMin = std::numeric_limits<double>::max();
   double currentMax = std::numeric_limits<double>::lowest();
-  for (size_t i = 0; i < ws.getNumberHistograms(); ++i) {
-    const auto ps = ws.points(i);
-    const auto x0 = ps.front();
-    if (x0 < currentMin) currentMin = x0;
-    const auto x1 = ps.back();
-    if (x1 > currentMax) currentMax = x1;
+  if (ws.histogram(0).xMode() == Mantid::HistogramData::Histogram::XMode::BinEdges) {
+    for (size_t i = 0; i < ws.getNumberHistograms(); ++i) {
+      const auto &xs = ws.x(i);
+      const auto x0 = (xs[0] + xs[1]) / 2.0;
+      if (x0 < currentMin) currentMin = x0;
+      const auto x1 = (xs[xs.size() - 2] + xs[xs.size() - 1]) / 2.0;
+      if (x1 > currentMax) currentMax = x1;
+    }
+  } else {
+    for (size_t i = 0; i < ws.getNumberHistograms(); ++i) {
+      const auto &xs = ws.x(i);
+      const auto x0 = xs.front();
+      if (x0 < currentMin) currentMin = x0;
+      const auto x1 = xs.back();
+      if (x1 > currentMax) currentMax = x1;
+    }
   }
   return std::tie(currentMin, currentMax);
 }
