@@ -27,14 +27,6 @@ ZERO_ERROR_DEFAULT = 1e6
 INCIDENT_MONITOR_TAG = '_incident_monitor'
 MANTID_PROCESSED_WORKSPACE_TAG = 'Mantid Processed Workspace'
 
-# WORKAROUND FOR IMPORT ISSUE IN UBUNTU --- START
-CAN_IMPORT_NXS = True
-try:
-    import nxs
-except ImportError:
-    CAN_IMPORT_NXS = False
-# WORKAROUND FOR IMPORT ISSUE IN UBUNTU --- STOP
-
 
 def deprecated(obj):
     """
@@ -1535,23 +1527,23 @@ def can_load_as_event_workspace(filename):
     # Check if it can be loaded with LoadEventNexus
     is_event_workspace = FileLoaderRegistry.canLoad("LoadEventNexus", filename)
 
-    # Ubuntu does not provide NEXUS for python currently, need to hedge for that
-    if CAN_IMPORT_NXS:
-        if not is_event_workspace:
-            # pylint: disable=bare-except
-            try:
-                # We only check the first entry in the root
-                # and check for event_eventworkspace in the next level
-                nxs_file =nxs.open(filename, 'r')
-                rootKeys =  list(nxs_file.getentries().keys())
-                nxs_file.opengroup(rootKeys[0])
-                nxs_file.opengroup('event_workspace')
-                is_event_workspace = True
-            except:
-                pass
-            finally:
-                nxs_file.close()
-
+    # Original code test it with nexus python. why?
+    # This is just a copy of the logic and implement it using h5py
+    if not is_event_workspace:
+        # pylint: disable=bare-except
+        try:
+            # We only check the first entry in the root
+            # and check for event_eventworkspace in the next level
+            with h5.File(filename) as h5f:
+                try:
+                    rootKeys = h5f.keys()
+                    entry0 = h5f[rootKeys[0]]
+                    ew = entry0['event_workspace']
+                    is_event_workspace = ew is not None
+                except:
+                    pass
+        except IOError:
+            pass
     return is_event_workspace
 
 
@@ -1746,46 +1738,41 @@ class MeasurementTimeFromNexusFileExtractor(object):
     def __init__(self):
         super(MeasurementTimeFromNexusFileExtractor, self).__init__()
 
-    def _get_measurement_time_processed_file(self, nxs_file):
-        nxs_file.opengroup('logs')
-        nxs_file.opengroup('end_time')
-        nxs_file.opendata('value')
-        data =  nxs_file.getdata()
-        return data
+    def _get_str(self, v):
+        return v.tostring().decode('UTF-8')
 
-    def _get_measurement_time_for_non_processed_file(self, nxs_file):
-        nxs_file.opendata('end_time')
-        return nxs_file.getdata()
+    def _get_measurement_time_processed_file(self, h5entry):
+        logs = h5entry['logs']
+        end_time = logs['end_time']
+        value = end_time['value']
+        return self._get_str(value[0])
 
-    def _check_if_processed_nexus_file(self, nxs_file):
-        nxs_file.opendata('definition')
-        mantid_definition = nxs_file.getdata()
-        nxs_file.closedata()
+    def _get_measurement_time_for_non_processed_file(self, h5entry):
+        end_time = h5entry['end_time']
+        return self._get_str(end_time[0])
 
+    def _check_if_processed_nexus_file(self, h5entry):
+        definition = h5entry['definition']
+        mantid_definition = self._get_str(definition[0])
         is_processed = True if MANTID_PROCESSED_WORKSPACE_TAG in mantid_definition else False
         return is_processed
 
     def get_measurement_time(self, filename_full):
         measurement_time = ''
-        # Need to make sure that NXS module can be imported
-        if CAN_IMPORT_NXS:
-            try:
-                nxs_file = nxs.open(filename_full, 'r')
-            # pylint: disable=bare-except
+        try:
+            with h5.File(filename_full) as h5f:
                 try:
-                    rootKeys =  list(nxs_file.getentries().keys())
-                    nxs_file.opengroup(rootKeys[0])
-                    is_processed_file = self._check_if_processed_nexus_file(nxs_file)
+                    rootKeys =  list(h5f.keys())
+                    entry0 = h5f[rootKeys[0]]
+                    is_processed_file = self._check_if_processed_nexus_file(entry0)
                     if is_processed_file:
-                        measurement_time = self._get_measurement_time_processed_file(nxs_file)
+                        measurement_time = self._get_measurement_time_processed_file(entry0)
                     else:
-                        measurement_time = self._get_measurement_time_for_non_processed_file(nxs_file)
+                        measurement_time = self._get_measurement_time_for_non_processed_file(entry0)
                 except:
                     sanslog.warning("Failed to retrieve the measurement time for " + str(filename_full))
-                finally:
-                    nxs_file.close()
-            except ValueError:
-                sanslog.warning("Failed to open the file: " + str(filename_full))
+        except IOError:
+            sanslog.warning("Failed to open the file: " + str(filename_full))
         return measurement_time
 
 

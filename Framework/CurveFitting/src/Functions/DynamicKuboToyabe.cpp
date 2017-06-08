@@ -128,23 +128,26 @@ double integral(double func(const double, const double, const double),
 
 // f1: function to integrate
 double f1(const double x, const double G, const double w0) {
+  // G = Delta in doc
+  // x = dummy time variable
   return (exp(-G * G * x * x / 2) * sin(w0 * x));
 }
 
 // Static Zero Field Kubo Toyabe relaxation function
+// Also called Lorentzian Kubo-Toyabe
 double ZFKT(const double x, const double G) {
-
+  // q = Delta^2 t^2 in doc
   const double q = G * G * x * x;
   return (0.3333333333 + 0.6666666667 * exp(-0.5 * q) * (1 - q));
 }
 
 // Static non-zero field Kubo Toyabe relaxation function
 double HKT(const double x, const double G, const double F) {
-
+  // q = Delta^2 t^2 in doc
   const double q = G * G * x * x;
   // Muon gyromagnetic ratio * 2 * PI
   const double gm = 2 * M_PI * PhysicalConstants::MuonGyromagneticRatio;
-
+  // w = omega_0 in doc
   double w;
   if (F > 2 * G) {
     // Use F
@@ -153,7 +156,7 @@ double HKT(const double x, const double G, const double F) {
     // Use G
     w = gm * 2 * G;
   }
-
+  // r = Delta^2/omega_0^2
   const double r = G * G / w / w;
 
   double ig;
@@ -169,8 +172,10 @@ double HKT(const double x, const double G, const double F) {
       (1 - 2 * r * (1 - exp(-q / 2) * cos(w * x)) + 2 * r * r * w * ig);
 
   if (F > 2 * G) {
+    // longitudinal Gaussian field
     return ktb;
   } else {
+    //
     const double kz = ZFKT(x, G);
     return kz + F / 2 / G * (ktb - kz);
   }
@@ -223,6 +228,7 @@ double DynamicKuboToyabe::getDKT(double t, double G, double F, double v,
     // Generate dynamic Kubo Toyabe
     for (int k = 0; k < tsmax; k++) {
       double y = gStat[k];
+      // do integration
       for (int j = k - 1; j > 0; j--) {
         y = y * (1 - hop) + hop * gDyn[k - j] * gStat[j];
       }

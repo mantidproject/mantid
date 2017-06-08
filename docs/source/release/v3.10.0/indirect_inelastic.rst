@@ -39,6 +39,11 @@ Calibration
 
 - The range selector for resolution files is now dependent on the range of the spectrum, not the limit in the IPF
 
+SofQW
+~~~~~
+
+- The polygon option has been removed and the default method is NormalisedPolygon
+
 
 Data Analysis
 #############
