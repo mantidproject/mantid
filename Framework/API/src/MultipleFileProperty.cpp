@@ -37,17 +37,22 @@ bool doesNotContainWildCard(const std::string &ext) {
 static const std::string SUCCESS("");
 
 // Regular expressions for any adjacent + or , operators
-static const std::string REGEX_INVALID = "\\+\\+|,,|\\+,|,\\+";
-// Regular expressions that represent the allowed instances of + or ,
-// operators.
-static const std::string REGEX_NUM_COMMA_ALPHA("(?<=\\d)\\s*,\\s*(?=\\D)");
-static const std::string REGEX_ALPHA_COMMA_ALPHA("(?<=\\D)\\s*,\\s*(?=\\D)");
-static const std::string REGEX_NUM_PLUS_ALPHA("(?<=\\d)\\s*\\+\\s*(?=\\D)");
-static const std::string REGEX_ALPHA_PLUS_ALPHA("(?<=\\D)\\s*\\+\\s*(?=\\D)");
-static const std::string REGEX_COMMA_OPERATORS =
-    REGEX_NUM_COMMA_ALPHA + "|" + REGEX_ALPHA_COMMA_ALPHA;
-static const std::string REGEX_PLUS_OPERATORS =
-    REGEX_NUM_PLUS_ALPHA + "|" + REGEX_ALPHA_PLUS_ALPHA;
+const std::string INVALID = "\\+\\+|,,|\\+,|,\\+";
+static const boost::regex REGEX_INVALID(INVALID);
+
+// Regular expressions that represent the allowed instances of , operators
+const std::string NUM_COMMA_ALPHA("(?<=\\d)\\s*,\\s*(?=\\D)");
+const std::string ALPHA_COMMA_ALPHA("(?<=\\D)\\s*,\\s*(?=\\D)");
+const std::string COMMA_OPERATORS = NUM_COMMA_ALPHA + "|" + ALPHA_COMMA_ALPHA;
+static const boost::regex REGEX_COMMA_OPERATORS(COMMA_OPERATORS);
+
+// Regular expressions that represent the allowed instances of + operators
+const std::string NUM_PLUS_ALPHA("(?<=\\d)\\s*\\+\\s*(?=\\D)");
+const std::string ALPHA_PLUS_ALPHA("(?<=\\D)\\s*\\+\\s*(?=\\D)");
+const std::string PLUS_OPERATORS = NUM_PLUS_ALPHA + "|" + ALPHA_PLUS_ALPHA;
+static const boost::regex REGEX_PLUS_OPERATORS(PLUS_OPERATORS,
+                                               boost::regex_constants::perl);
+
 } // anonymous namespace
 
 namespace Mantid {
@@ -251,7 +256,7 @@ MultipleFileProperty::setValueAsMultipleFiles(const std::string &propValue) {
   // Return error if there are any adjacent + or , operators.
   boost::smatch invalid_substring;
   if (boost::regex_search(propValue.begin(), propValue.end(), invalid_substring,
-                          boost::regex(REGEX_INVALID)))
+                          REGEX_INVALID))
     return "Unable to parse filename due to an empty token.";
 
   std::stringstream errorMsg;
@@ -260,16 +265,15 @@ MultipleFileProperty::setValueAsMultipleFiles(const std::string &propValue) {
   // Tokenise on allowed comma operators, and iterate over each token.
   boost::sregex_token_iterator end;
   boost::sregex_token_iterator commaToken(propValue.begin(), propValue.end(),
-                                          boost::regex(REGEX_COMMA_OPERATORS),
-                                          -1);
+                                          REGEX_COMMA_OPERATORS, -1);
 
   for (; commaToken != end; ++commaToken) {
     const std::string commaTokenString = commaToken->str();
 
     // Tokenise on allowed plus operators.
-    boost::sregex_token_iterator plusToken(
-        commaTokenString.begin(), commaTokenString.end(),
-        boost::regex(REGEX_PLUS_OPERATORS, boost::regex_constants::perl), -1);
+    boost::sregex_token_iterator plusToken(commaTokenString.begin(),
+                                           commaTokenString.end(),
+                                           REGEX_PLUS_OPERATORS, -1);
 
     std::vector<std::vector<std::string>> temp;
 
