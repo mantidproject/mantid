@@ -13,7 +13,7 @@ from mantid.api import AlgorithmFactory, FileAction, FileProperty, PythonAlgorit
                        WorkspaceFactory, AnalysisDataService
 # noinspection PyProtectedMember
 from mantid.api._api import WorkspaceGroup
-from mantid.simpleapi import CloneWorkspace, GroupWorkspaces, SaveAscii, Load, DeleteWorkspace
+from mantid.simpleapi import CloneWorkspace, GroupWorkspaces, SaveAscii, Load
 from mantid.kernel import logger, StringListValidator, Direction, StringArrayProperty, Atom
 import AbinsModules
 
