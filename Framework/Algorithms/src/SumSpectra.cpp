@@ -97,11 +97,14 @@ SumSpectra::validateInputs() {
 	// check ListOfWorkspaceIndices in range
 	const std::vector<int> indices_list = getProperty("ListOfWorkspaceIndices");
 	this->m_indices.clear();
-	this->m_indices.insert(indices_list.begin(), indices_list.end());
-	auto listMaxIndex = std::prev(this->m_indices.end());
-	auto listMinIndex = this->m_indices.begin();
-	if ((*listMaxIndex >= this->m_numberOfSpectra) || (*listMinIndex < 0)) {
-		validationOutput["ListOfWorkspaceIndices"] = "One or more indices out of range of available spectra.";
+	// only if specified
+	if (indices_list.size() > 0) {
+		this->m_indices.insert(indices_list.begin(), indices_list.end());
+		auto listMaxIndex = std::prev(this->m_indices.end());
+		auto listMinIndex = this->m_indices.begin();
+		if ((*listMaxIndex >= this->m_numberOfSpectra) || (*listMinIndex < 0)) {
+			validationOutput["ListOfWorkspaceIndices"] = "One or more indices out of range of available spectra.";
+		}
 	}
 	return validationOutput;
 }
