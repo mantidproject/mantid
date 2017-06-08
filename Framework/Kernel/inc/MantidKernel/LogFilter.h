@@ -6,11 +6,12 @@
 //----------------------------------------------------------------------
 #include "MantidKernel/ClassMacros.h"
 #include "MantidKernel/DllConfig.h"
-#include "MantidKernel/Exception.h"
 
 #ifndef Q_MOC_RUN
 #include <boost/scoped_ptr.hpp>
 #endif
+
+#include <vector>                           
 
 namespace Mantid {
 namespace Kernel {

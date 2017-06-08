@@ -4,13 +4,12 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidKernel/EmptyValues.h"
+#include "MantidKernel/DllConfig.h"    
+
+#include <iosfwd>
 #include <string>
 #include <vector>
-#ifndef Q_MOC_RUN
-#include <boost/shared_ptr.hpp>
-#include <boost/lexical_cast.hpp>
-#endif
+
 namespace Mantid {
 namespace Kernel {
 //----------------------------------------------------------------------

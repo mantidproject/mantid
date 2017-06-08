@@ -1,10 +1,9 @@
-//
 #include "MantidKernel/DeltaEMode.h"
-#include "MantidKernel/Exception.h"
 
-#include <boost/algorithm/string.hpp>
 #include <map>
 #include <sstream>
+#include <stdexcept>
+#include <utility>
 
 namespace Mantid {
 namespace Kernel {

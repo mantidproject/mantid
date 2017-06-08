@@ -5,8 +5,6 @@
 #include <cfloat>
 #include <cmath>
 #include <iostream>
-#include <numeric>
-#include <sstream>
 
 #include <boost/accumulators/accumulators.hpp>
 #include <boost/accumulators/statistics/stats.hpp>

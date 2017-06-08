@@ -2,8 +2,8 @@
 #define MANTID_KERNEL_SLSQPMINIMIZER_H_
 
 #include "MantidKernel/ClassMacros.h"
-#include "MantidKernel/DllConfig.h"
 #include "MantidKernel/Matrix.h"
+#include "MantidKernel/System.h" 
 
 #include <vector>
 

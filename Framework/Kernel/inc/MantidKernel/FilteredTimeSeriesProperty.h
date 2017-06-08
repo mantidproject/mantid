@@ -23,8 +23,8 @@
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 #include "MantidKernel/ClassMacros.h"
-#include "MantidKernel/DllConfig.h"
 #include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidKernel/System.h"   
 
 namespace Mantid {
 namespace Kernel {

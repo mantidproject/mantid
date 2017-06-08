@@ -1,9 +1,12 @@
 #ifndef MANTID_KERNEL_STARTSWITHVALIDATOR_H_
 #define MANTID_KERNEL_STARTSWITHVALIDATOR_H_
 
-#include "MantidKernel/DllConfig.h"
-#include "MantidKernel/ListValidator.h"
-#include <vector>
+#include "MantidKernel/IValidator.h"     
+#include "MantidKernel/ListValidator.h"  
+#include "MantidKernel/System.h"         
+#include <set>                           
+#include <string>                        
+#include <vector>                        
 
 namespace Mantid {
 namespace Kernel {

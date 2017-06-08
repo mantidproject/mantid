@@ -2,11 +2,11 @@
 // Includes
 //------------------------------------------------------------------------------
 #include "MantidKernel/NeutronAtom.h"
-#include "MantidKernel/PhysicalConstants.h"
 #include <algorithm>
-#include <sstream>
-#include <stdexcept>
 #include <cmath>
+#include <ostream>
+#include <string>
+#include <stdexcept>
 
 namespace Mantid {
 

@@ -3,12 +3,14 @@
 
 #include "MantidKernel/ClassMacros.h"
 #include "MantidKernel/DllConfig.h"
-#include "MantidKernel/MagneticIon.h"
 
 #include <vector>
 
 namespace Mantid {
 namespace PhysicalConstants {
+
+	// Forward declare
+	struct MagneticIon;
 
 /**
   Implements a cached lookup table for a magnetic form factor. The table is

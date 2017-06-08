@@ -6,13 +6,9 @@
 //----------------------------------------------------------------------
 
 #include "MantidKernel/DllConfig.h"
+#include <string>                    
+#include <vector>                    
 
-#ifndef Q_MOC_RUN
-#include <boost/tokenizer.hpp>
-#include <boost/shared_ptr.hpp>
-#endif
-
-#include <vector>
 namespace Mantid {
 namespace Kernel {
 

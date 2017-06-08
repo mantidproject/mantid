@@ -7,9 +7,13 @@
 #include "MantidKernel/NeutronAtom.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include <boost/shared_ptr.hpp>
-#include <nexus/NeXusFile.hpp>
 
 namespace Mantid {
+
+	// Forward Declares
+	namespace NeXus {
+		class File;
+}
 
 namespace PhysicalConstants {
 class Atom;

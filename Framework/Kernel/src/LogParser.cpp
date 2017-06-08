@@ -7,8 +7,6 @@
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 
-#include <fstream>
-
 // constants for the new style icp event commands
 const char *START_COLLECTION = "START_COLLECTION";
 const char *STOP_COLLECTION = "STOP_COLLECTION";
