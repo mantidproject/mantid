@@ -8,6 +8,7 @@ from AbinsModules import AbinsConstants, AbinsTestHelpers, AbinsParameters
 def skip_tests():
     return not hasattr(np, "einsum")
 
+
 class HelperTestingClass(object):
     def __init__(self):
 
@@ -149,6 +150,7 @@ class AbinsCASTEPTestScratch(stresstesting.MantidStressTest, HelperTestingClass)
     order events is correct.
     """
     tolerance = None
+    ref_result = None
 
     def skipTests(self):
         return skip_tests()
@@ -167,7 +169,7 @@ class AbinsCASTEPTestScratch(stresstesting.MantidStressTest, HelperTestingClass)
 
     def validate(self):
 
-        self.tolerance = 1e-2
+        self.tolerance = 1e-1
         return self._output_name, self.ref_result
 
 # ----------------------------------------------------------------------------------------------------------------
@@ -179,6 +181,7 @@ class AbinsCRYSTALTestScratch(stresstesting.MantidStressTest, HelperTestingClass
     order event is correct.
     """
     tolerance = None
+    ref_result = None
 
     def skipTests(self):
         return skip_tests()
@@ -209,6 +212,7 @@ class AbinsCASTEPTestT(stresstesting.MantidStressTest, HelperTestingClass):
     file. In this benchmark input data from CASTEP DFT program is used.
     """
     tolerance = None
+    ref_result = None
 
     def skipTests(self):
         return skip_tests()
@@ -239,6 +243,7 @@ class AbinsCASTEPTestLargerOrder(stresstesting.MantidStressTest, HelperTestingCl
     of quantum event is larger than the one which is saved to an hdf file so S has to be calculated.
     """
     tolerance = None
+    ref_result = None
 
     def skipTests(self):
         return skip_tests()
@@ -269,6 +274,7 @@ class AbinsCASTEPTestSmallerOrder(stresstesting.MantidStressTest, HelperTestingC
     order of quantum event is smaller than the one which is saved to an hdf file so S is loaded from an hdf file.
     """
     tolerance = None
+    ref_result = None
 
     def skipTests(self):
         return skip_tests()
@@ -296,6 +302,7 @@ class AbinsCASTEPTestScale(stresstesting.MantidStressTest, HelperTestingClass):
     In this benchmark it is tested if scaling is correct.
     """
     tolerance = None
+    ref_result = None
 
     def skipTests(self):
         return skip_tests()
@@ -325,6 +332,7 @@ class AbinsCASTEPNoH(stresstesting.MantidStressTest, HelperTestingClass):
     In this benchmark it is tested if calculation for systems without H is correct.
     """
     tolerance = None
+    ref_result = None
 
     def skipTests(self):
         return skip_tests()

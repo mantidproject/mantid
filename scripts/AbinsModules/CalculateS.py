@@ -313,7 +313,9 @@ class CalculateS(object):
         new_fundamentals = new_fundamentals.reshape(chunk_num, int(chunk_size))
         new_fundamentals_coeff = new_fundamentals_coeff.reshape(chunk_num, int(chunk_size))
 
-        total_size = self._bins.size - AbinsModules.AbinsConstants.FIRST_BIN_INDEX
+        first = AbinsModules.AbinsConstants.FIRST_BIN_INDEX
+        last =  AbinsModules.AbinsConstants.LAST_BIN_INDEX
+        total_size = self._bins.size - first - last
         for lg_order in range(order, self._quantum_order_num + AbinsModules.AbinsConstants.S_LAST_INDEX):
             s["order_%s" % lg_order] = np.zeros(shape=total_size, dtype=AbinsModules.AbinsConstants.FLOAT_TYPE)
 

@@ -216,8 +216,7 @@ class Abins(PythonAlgorithm):
             workspaces.insert(0, self._create_experimental_data_workspace().getName())
             prog_reporter.report("Workspace with the experimental data has been constructed.")
 
-        group = ','.join(workspaces)
-        GroupWorkspaces(group, OutputWorkspace=self._out_ws_name)
+        GroupWorkspaces(InputWorkspaces=workspaces, OutputWorkspace=self._out_ws_name)
 
         # 8) save workspaces to ascii_file
         num_workspaces = mtd[self._out_ws_name].getNumberOfEntries()
@@ -326,8 +325,7 @@ class Abins(PythonAlgorithm):
 
                     self._fill_s_1d_workspace(s_points=s_points[n], workspace=wrk_name, atom_name=atom_name)
 
-                group = ','.join(partial_wrk_names)
-                GroupWorkspaces(group, OutputWorkspace=workspace)
+                GroupWorkspaces(InputWorkspaces=partial_wrk_names, OutputWorkspace=workspace)
 
     def _fill_s_1d_workspace(self, s_points=None, workspace=None, atom_name=None):
         """
