@@ -222,7 +222,7 @@ MultipleFileProperty::setValueAsSingleFile(const std::string &propValue) {
 
   // cache the new version of things
   m_oldPropValue = propValue;
-  m_oldFoundValue = foundFiles;
+  m_oldFoundValue = std::move(foundFiles);
 
   return SUCCESS;
 }
@@ -418,13 +418,14 @@ MultipleFileProperty::setValueAsMultipleFiles(const std::string &propValue) {
     allFullFileNames.push_back(fullFileNames);
   }
 
-  // cache the new version of things
-  m_oldPropValue = propValue;
-  m_oldFoundValue = allFullFileNames;
-
   // Now re-set the value using the full paths found.
   PropertyWithValue<std::vector<std::vector<std::string>>>::operator=(
       allFullFileNames);
+
+  // cache the new version of things
+  m_oldPropValue = propValue;
+  m_oldFoundValue = std::move(allFullFileNames);
+
   return SUCCESS;
 }
 
