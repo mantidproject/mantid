@@ -20,7 +20,7 @@ except AttributeError:
 
 import mantid
 import mantidqtpython as mqt
-from . import HfirPDReductionControl 
+from . import HfirPDReductionControl
 
 #----- default configuration ---------------
 DEFAULT_SERVER = 'http://neutron.ornl.gov/user_data'

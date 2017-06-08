@@ -8,9 +8,9 @@
 from __future__ import (absolute_import, division, print_function)
 import os
 try:
-	import urllib.request as wrllib2
+    import urllib.request as urllib
 except ImportError:
-	import  urllib2 
+    import  urllib
 import math
 from six.moves import range
 
@@ -24,8 +24,7 @@ from mantid.simpleapi import AnalysisDataService
 #from mantid.kernel import ConfigService
 
 
-VanadiumPeakPositions = [0.5044,0.5191,0.5350,0.5526,0.5936,0.6178,0.6453,0.6768,
-                         0.7134,0.7566,0.8089,0.8737,0.9571,1.0701,1.2356,1.5133,2.1401]
+VanadiumPeakPositions = [0.5044,0.5191,0.5350,0.5526,0.5936,0.6178,0.6453,0.6768,0.7134,0.7566,0.8089,0.8737,0.9571,1.0701,1.2356,1.5133,2.1401]
 
 
 class PDRManager(object):
@@ -815,8 +814,7 @@ class HFIRPDRedControl(object):
         if excludeddetlist is None:
             excludeddetlist = []
         else:
-            print("[DB] Excluded detectors: %s"%(excludeddetlist), "Convert to numpy array", \
-                numpy.array(excludeddetlist))
+            print("[DB] Excluded detectors: %s"%(excludeddetlist), "Convert to numpy array", numpy.array(excludeddetlist))
 
         basewsname = datamdws.name().split("_DataMD")[0]
         outwsname = basewsname + "_Reduced"
@@ -1132,4 +1130,3 @@ def downloadFile(url, localfilepath):
     ofile.close()
 
     return (True, "")
-
