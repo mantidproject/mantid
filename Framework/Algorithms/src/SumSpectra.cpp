@@ -81,32 +81,33 @@ void SumSpectra::init() {
 * @returns map with keys corresponding to properties with errors and values
 * containing the error messages.
 */
-std::map<std::string, std::string>
-SumSpectra::validateInputs() {
-	// create the map
-	std::map<std::string, std::string> validationOutput;
+std::map<std::string, std::string> SumSpectra::validateInputs() {
+  // create the map
+  std::map<std::string, std::string> validationOutput;
 
-	// check StartWorkspaceIndex in range
-	MatrixWorkspace_const_sptr localworkspace = getProperty("InputWorkspace");
-	m_numberOfSpectra = static_cast<int>(localworkspace->getNumberHistograms());
-	int maxIndex = getProperty("EndWorkspaceIndex");
-	if (maxIndex != EMPTY_INT() && maxIndex > m_numberOfSpectra) {
-		validationOutput["EndWorkspaceIndex"] = "Selected maximum workspace index is greater than available spectra.";
-	}
+  // check StartWorkspaceIndex in range
+  MatrixWorkspace_const_sptr localworkspace = getProperty("InputWorkspace");
+  m_numberOfSpectra = static_cast<int>(localworkspace->getNumberHistograms());
+  int maxIndex = getProperty("EndWorkspaceIndex");
+  if (maxIndex != EMPTY_INT() && maxIndex > m_numberOfSpectra) {
+    validationOutput["EndWorkspaceIndex"] =
+        "Selected maximum workspace index is greater than available spectra.";
+  }
 
-	// check ListOfWorkspaceIndices in range
-	const std::vector<int> indices_list = getProperty("ListOfWorkspaceIndices");
-	this->m_indices.clear();
-	// only if specified
-	if (indices_list.size() > 0) {
-		this->m_indices.insert(indices_list.begin(), indices_list.end());
-		auto listMaxIndex = std::prev(this->m_indices.end());
-		auto listMinIndex = this->m_indices.begin();
-		if ((*listMaxIndex >= this->m_numberOfSpectra) || (*listMinIndex < 0)) {
-			validationOutput["ListOfWorkspaceIndices"] = "One or more indices out of range of available spectra.";
-		}
-	}
-	return validationOutput;
+  // check ListOfWorkspaceIndices in range
+  const std::vector<int> indices_list = getProperty("ListOfWorkspaceIndices");
+  this->m_indices.clear();
+  // only if specified
+  if (indices_list.size() > 0) {
+    this->m_indices.insert(indices_list.begin(), indices_list.end());
+    auto listMaxIndex = std::prev(this->m_indices.end());
+    auto listMinIndex = this->m_indices.begin();
+    if ((*listMaxIndex >= this->m_numberOfSpectra) || (*listMinIndex < 0)) {
+      validationOutput["ListOfWorkspaceIndices"] =
+          "One or more indices out of range of available spectra.";
+    }
+  }
+  return validationOutput;
 }
 
 /** Executes the algorithm
@@ -308,12 +309,12 @@ void SumSpectra::doWorkspace2D(ISpectrum &outSpec, Progress &progress,
   const auto &spectrumInfo = localworkspace->spectrumInfo();
   // Loop over spectra
   for (const auto wsIndex : this->m_indices) {
-	  // Don't go outside the range.
-	  if ((wsIndex >= this->m_numberOfSpectra) || (wsIndex < 0)) {
-		  g_log.error() << "Invalid index " << wsIndex
-			  << " was specified. Sum was aborted.\n";
-		  break;
-	  }
+    // Don't go outside the range.
+    if ((wsIndex >= this->m_numberOfSpectra) || (wsIndex < 0)) {
+      g_log.error() << "Invalid index " << wsIndex
+                    << " was specified. Sum was aborted.\n";
+      break;
+    }
 
     if (spectrumInfo.hasDetectors(wsIndex)) {
       // Skip monitors, if the property is set to do so
@@ -412,11 +413,11 @@ void SumSpectra::doRebinnedOutput(MatrixWorkspace_sptr outputWorkspace,
   // Loop over spectra
   for (const auto i : m_indices) {
     // Don't go outside the range.
-	  if ((i >= this->m_numberOfSpectra) || (i < 0)) {
-		  g_log.error() << "Invalid index " << i
-			  << " was specified. Sum was aborted.\n";
-		  break;
-	  }
+    if ((i >= this->m_numberOfSpectra) || (i < 0)) {
+      g_log.error() << "Invalid index " << i
+                    << " was specified. Sum was aborted.\n";
+      break;
+    }
 
     if (spectrumInfo.hasDetectors(i)) {
       // Skip monitors, if the property is set to do so
@@ -499,11 +500,11 @@ void SumSpectra::execEvent(EventWorkspace_const_sptr localworkspace,
   size_t numZeros(0);
   for (const auto i : indices) {
     // Don't go outside the range.
-	  if ((i >= this->m_numberOfSpectra) || (i < 0)) {
-		  g_log.error() << "Invalid index " << i
-			  << " was specified. Sum was aborted.\n";
-		  break;
-	  }
+    if ((i >= this->m_numberOfSpectra) || (i < 0)) {
+      g_log.error() << "Invalid index " << i
+                    << " was specified. Sum was aborted.\n";
+      break;
+    }
 
     if (spectrumInfo.hasDetectors(i)) {
       // Skip monitors, if the property is set to do so
