@@ -494,7 +494,12 @@ MonteCarloAbsorption::doSimulation(const MatrixWorkspace &inputWS,
     // Interpolate through points not simulated
     if (!sparseInstrumentOpt.use && lambdaStepSize > 1) {
         auto histnew = simulationWS.histogram(i);
-        interpolateOpt.applyInplace(histnew, lambdaStepSize);
+        if (lambdaStepSize < nbins) {
+          interpolateOpt.applyInplace(histnew, lambdaStepSize);
+        } else {
+          std::fill(histnew.mutableY().begin() + 1, histnew.mutableY().end(), histnew.y()[0]);
+        }
+
         outputWS->setHistogram(i, histnew);
     }
 
