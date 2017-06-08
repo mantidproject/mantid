@@ -33,6 +33,21 @@ Mantid::Kernel::Logger g_log("MultipleFileProperty");
 bool doesNotContainWildCard(const std::string &ext) {
   return std::string::npos == ext.find('*');
 }
+
+static const std::string SUCCESS("");
+
+// Regular expressions for any adjacent + or , operators
+static const std::string REGEX_INVALID = "\\+\\+|,,|\\+,|,\\+";
+// Regular expressions that represent the allowed instances of + or ,
+// operators.
+static const std::string REGEX_NUM_COMMA_ALPHA("(?<=\\d)\\s*,\\s*(?=\\D)");
+static const std::string REGEX_ALPHA_COMMA_ALPHA("(?<=\\D)\\s*,\\s*(?=\\D)");
+static const std::string REGEX_NUM_PLUS_ALPHA("(?<=\\d)\\s*\\+\\s*(?=\\D)");
+static const std::string REGEX_ALPHA_PLUS_ALPHA("(?<=\\D)\\s*\\+\\s*(?=\\D)");
+static const std::string REGEX_COMMA_OPERATORS =
+    REGEX_NUM_COMMA_ALPHA + "|" + REGEX_ALPHA_COMMA_ALPHA;
+static const std::string REGEX_PLUS_OPERATORS =
+    REGEX_NUM_PLUS_ALPHA + "|" + REGEX_ALPHA_PLUS_ALPHA;
 } // anonymous namespace
 
 namespace Mantid {
@@ -62,10 +77,7 @@ MultipleFileProperty::MultipleFileProperty(const std::string &name,
   std::string allowMultiFileLoading =
       Kernel::ConfigService::Instance().getString("loading.multifile");
 
-  if (boost::iequals(allowMultiFileLoading, "On"))
-    m_multiFileLoadingEnabled = true;
-  else
-    m_multiFileLoadingEnabled = false;
+  m_multiFileLoadingEnabled = boost::iequals(allowMultiFileLoading, "On");
 
   for (const auto &ext : exts)
     if (doesNotContainWildCard(ext))
@@ -95,7 +107,7 @@ bool MultipleFileProperty::isOptional() const {
  */
 std::string MultipleFileProperty::isEmptyValueValid() const {
   if (isOptional()) {
-    return "";
+    return SUCCESS;
   } else {
     return "No file specified.";
   }
@@ -142,7 +154,7 @@ std::string MultipleFileProperty::setValue(const std::string &propValue) {
     const std::string error = setValueAsSingleFile(propValue);
 
     if (error.empty())
-      return "";
+      return SUCCESS;
 
     // If we failed return the error message from the multiple file load attempt
     // as the single file was a guess
@@ -184,7 +196,7 @@ MultipleFileProperty::setValueAsSingleFile(const std::string &propValue) {
   if ((propValue == m_oldPropValue) && (!m_oldFoundValue.empty())) {
     PropertyWithValue<std::vector<std::vector<std::string>>>::operator=(
         m_oldFoundValue);
-    return "";
+    return SUCCESS;
   }
 
   // Use a slave FileProperty to do the job for us.
@@ -212,7 +224,7 @@ MultipleFileProperty::setValueAsSingleFile(const std::string &propValue) {
   m_oldPropValue = propValue;
   m_oldFoundValue = foundFiles;
 
-  return "";
+  return SUCCESS;
 }
 
 /**
@@ -231,25 +243,16 @@ std::string
 MultipleFileProperty::setValueAsMultipleFiles(const std::string &propValue) {
   // if value is unchanged use the cached version
   if ((propValue == m_oldPropValue) && (!m_oldFoundValue.empty())) {
-    return PropertyWithValue<std::vector<std::vector<std::string>>>::setValue(
-        toString(m_oldFoundValue));
+    PropertyWithValue<std::vector<std::vector<std::string>>>::operator=(
+        m_oldFoundValue);
+    return SUCCESS;
   }
 
   // Return error if there are any adjacent + or , operators.
-  const std::string INVALID = "\\+\\+|,,|\\+,|,\\+";
   boost::smatch invalid_substring;
   if (boost::regex_search(propValue.begin(), propValue.end(), invalid_substring,
-                          boost::regex(INVALID)))
+                          boost::regex(REGEX_INVALID)))
     return "Unable to parse filename due to an empty token.";
-
-  // Regular expressions that represent the allowed instances of + or ,
-  // operators.
-  const std::string NUM_COMMA_ALPHA = "(?<=\\d)\\s*,\\s*(?=\\D)";
-  const std::string ALPHA_COMMA_ALPHA = "(?<=\\D)\\s*,\\s*(?=\\D)";
-  const std::string NUM_PLUS_ALPHA = "(?<=\\d)\\s*\\+\\s*(?=\\D)";
-  const std::string ALPHA_PLUS_ALPHA = "(?<=\\D)\\s*\\+\\s*(?=\\D)";
-  const std::string COMMA_OPERATORS = NUM_COMMA_ALPHA + "|" + ALPHA_COMMA_ALPHA;
-  const std::string PLUS_OPERATORS = NUM_PLUS_ALPHA + "|" + ALPHA_PLUS_ALPHA;
 
   std::stringstream errorMsg;
   std::vector<std::vector<std::string>> fileNames;
@@ -257,7 +260,8 @@ MultipleFileProperty::setValueAsMultipleFiles(const std::string &propValue) {
   // Tokenise on allowed comma operators, and iterate over each token.
   boost::sregex_token_iterator end;
   boost::sregex_token_iterator commaToken(propValue.begin(), propValue.end(),
-                                          boost::regex(COMMA_OPERATORS), -1);
+                                          boost::regex(REGEX_COMMA_OPERATORS),
+                                          -1);
 
   for (; commaToken != end; ++commaToken) {
     const std::string commaTokenString = commaToken->str();
@@ -265,7 +269,7 @@ MultipleFileProperty::setValueAsMultipleFiles(const std::string &propValue) {
     // Tokenise on allowed plus operators.
     boost::sregex_token_iterator plusToken(
         commaTokenString.begin(), commaTokenString.end(),
-        boost::regex(PLUS_OPERATORS, boost::regex_constants::perl), -1);
+        boost::regex(REGEX_PLUS_OPERATORS, boost::regex_constants::perl), -1);
 
     std::vector<std::vector<std::string>> temp;
 
@@ -419,8 +423,9 @@ MultipleFileProperty::setValueAsMultipleFiles(const std::string &propValue) {
   m_oldFoundValue = allFullFileNames;
 
   // Now re-set the value using the full paths found.
-  return PropertyWithValue<std::vector<std::vector<std::string>>>::setValue(
-      toString(allFullFileNames));
+  PropertyWithValue<std::vector<std::vector<std::string>>>::operator=(
+      allFullFileNames);
+  return SUCCESS;
 }
 
 } // namespace Mantid
