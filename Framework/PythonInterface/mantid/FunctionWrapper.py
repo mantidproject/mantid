@@ -20,6 +20,9 @@ class FunctionWrapper:
       
   def __setitem__ (self, name, value):
       self.fun.setParameter(name, value)
+      
+  def __str__ (self):
+      return self.fun.__str__()
         
   def getFunction(self):
       return self.fun
@@ -29,7 +32,7 @@ class CompositeFunctionWrapper(FunctionWrapper):
     def __init__ (self, *args):
         self.fun = FunctionFactory.createFunction("CompositeFunction")
    
-        #Search for Function arguments, if found create a FunctionWrapper for it.
+        #Add the functions
         for a in args:
            self.fun.add(a.fun)
       
