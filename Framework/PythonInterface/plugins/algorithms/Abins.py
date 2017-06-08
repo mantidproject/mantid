@@ -216,6 +216,7 @@ class Abins(PythonAlgorithm):
             workspaces.insert(0, self._create_experimental_data_workspace().getName())
             prog_reporter.report("Workspace with the experimental data has been constructed.")
 
+        workspaces.sort()
         GroupWorkspaces(InputWorkspaces=workspaces, OutputWorkspace=self._out_ws_name)
 
         # 8) save workspaces to ascii_file
