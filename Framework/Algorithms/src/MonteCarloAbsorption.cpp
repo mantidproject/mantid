@@ -1,5 +1,8 @@
 #include "MantidAlgorithms/MonteCarloAbsorption.h"
 #include "MantidAlgorithms/InterpolationOption.h"
+#include "MantidAlgorithms/SampleCorrections/DetectorGridDefinition.h"
+#include "MantidAlgorithms/SampleCorrections/MCAbsorptionStrategy.h"
+#include "MantidAlgorithms/SampleCorrections/RectangularBeamProfile.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/InstrumentValidator.h"
@@ -9,8 +12,6 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
-#include "MantidAlgorithms/SampleCorrections/MCAbsorptionStrategy.h"
-#include "MantidAlgorithms/SampleCorrections/RectangularBeamProfile.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidGeometry/Instrument.h"
@@ -109,71 +110,6 @@ std::tuple<double, double, double, double> extremeAngles(const MatrixWorkspace &
   return std::tie(minLat, maxLat, minLong, maxLong);
 }
 
-class DetectorGridDefinition {
-public:
-  DetectorGridDefinition(const double minLatitude, const double maxLatitude,
-                         const size_t latitudePoints, const double minLongitude,
-                         const double maxLongitude, const size_t longitudeStep);
-
-  double latitudeAt(const size_t row) const;
-  double longitudeAt(const size_t column) const;
-  std::array<size_t, 4> nearestNeighbourIndices(const double latitude, const double longitude) const;
-  size_t numberColumns() const;
-  size_t numberRows() const;
-
-private:
-  double m_minLatitude;
-  double m_maxLatitude;
-  size_t m_latitudePoints;
-  double m_latitudeStep;
-  double m_minLongitude;
-  double m_maxLongitude;
-  size_t m_longitudePoints;
-  double m_longitudeStep;
-};
-
-DetectorGridDefinition::DetectorGridDefinition(const double minLatitude, const double maxLatitude,
-                       const size_t latitudePoints, const double minLongitude,
-                       const double maxLongitude, const size_t longitudePoints)
-  : m_minLatitude(minLatitude), m_maxLatitude(maxLatitude), m_latitudePoints(latitudePoints),
-    m_minLongitude(minLongitude), m_maxLongitude(maxLongitude), m_longitudePoints(longitudePoints) {
-  m_latitudeStep = (maxLatitude - minLatitude) / static_cast<double>(latitudePoints - 1);
-  m_longitudeStep = (maxLongitude - minLongitude) / static_cast<double>(longitudePoints - 1);
-}
-
-double DetectorGridDefinition::latitudeAt(const size_t row) const {
-  return m_minLatitude + static_cast<double>(row) * m_latitudeStep;
-}
-
-double DetectorGridDefinition::longitudeAt(const size_t column) const {
-  return m_minLongitude + static_cast<double>(column) * m_longitudeStep;
-}
-
-std::array<size_t, 4> DetectorGridDefinition::nearestNeighbourIndices(const double latitude, const double longitude) const {
-  size_t row = static_cast<size_t>((latitude - m_minLatitude) / m_latitudeStep);
-  if (row == m_latitudePoints - 1) {
-    --row;
-  }
-  size_t col = static_cast<size_t>((longitude - m_minLongitude) / m_longitudeStep);
-  if (col == m_longitudePoints - 1) {
-    --col;
-  }
-  std::array<size_t, 4> is;
-  std::get<0>(is) = col * m_latitudePoints + row;
-  std::get<1>(is) = std::get<0>(is) + 1;
-  std::get<2>(is) = std::get<0>(is) + m_latitudePoints;
-  std::get<3>(is) = std::get<2>(is) + 1;
-  return is;
-}
-
-size_t DetectorGridDefinition::numberColumns() const {
-  return m_longitudePoints;
-}
-
-size_t DetectorGridDefinition::numberRows() const {
-  return m_latitudePoints;
-}
-
 std::tuple<double, double> extremeWavelengths(const MatrixWorkspace &ws) {
   double currentMin = std::numeric_limits<double>::max();
   double currentMax = std::numeric_limits<double>::lowest();
@@ -256,7 +192,7 @@ Object_sptr makeCubeShape() {
   return shapeFactory.createShape(typeElement);
 }
 
-MatrixWorkspace_uptr createWSWithSimulationInstrument(const MatrixWorkspace &modelWS, const DetectorGridDefinition &grid, const size_t wavelengthPoints) {
+MatrixWorkspace_uptr createWSWithSimulationInstrument(const MatrixWorkspace &modelWS, const Mantid::Algorithms::DetectorGridDefinition &grid, const size_t wavelengthPoints) {
   auto instrument = boost::make_shared<Instrument>("MC_simulation_instrument");
   instrument->setReferenceFrame(
       boost::make_shared<ReferenceFrame>(Y, Z, Right, ""));
@@ -368,45 +304,20 @@ struct SparseInstrumentOption {
   size_t wavelengthPoints = 2;
 
   SparseInstrumentOption(const bool use_) : use(use_) {}
-
-  MatrixWorkspace_uptr createSparseWSIfNeeded(const MatrixWorkspace &nonSparse) const;
-
-  void interpolate(MatrixWorkspace &targetWS, const MatrixWorkspace &sparseWS, const Mantid::Algorithms::InterpolationOption &interpOpt) const;
-
-private:
-  mutable std::unique_ptr<const DetectorGridDefinition> m_grid;
 };
 
-MatrixWorkspace_uptr SparseInstrumentOption::createSparseWSIfNeeded(const MatrixWorkspace &nonSparse) const {
-  if (!use) {
-    return nullptr;
-  }
+std::unique_ptr<const Mantid::Algorithms::DetectorGridDefinition> createDetectorGridDefinition(const MatrixWorkspace &modelWS, const SparseInstrumentOption &options) {
   double minLat, maxLat, minLong, maxLong;
-  std::tie(minLat, maxLat, minLong, maxLong) = extremeAngles(nonSparse);
-  m_grid = Mantid::Kernel::make_unique<DetectorGridDefinition>(minLat, maxLat, static_cast<size_t>(latitudinalDets), minLong, maxLong, static_cast<size_t>(longitudinalDets));
+  std::tie(minLat, maxLat, minLong, maxLong) = extremeAngles(modelWS);
+  return Mantid::Kernel::make_unique<Mantid::Algorithms::DetectorGridDefinition>(minLat, maxLat, static_cast<size_t>(options.latitudinalDets), minLong, maxLong, static_cast<size_t>(options.longitudinalDets));
+}
+
+MatrixWorkspace_uptr createSparseWS(const MatrixWorkspace &modelWS, const SparseInstrumentOption &options, const Mantid::Algorithms::DetectorGridDefinition &detGrid) {
   double minWavelength, maxWavelength;
-  std::tie(minWavelength, maxWavelength) = extremeWavelengths(nonSparse);
-
-  return createWSWithSimulationInstrument(nonSparse, *m_grid, wavelengthPoints);
+  std::tie(minWavelength, maxWavelength) = extremeWavelengths(modelWS);
+  return createWSWithSimulationInstrument(modelWS, detGrid, options.wavelengthPoints);
 }
 
-void SparseInstrumentOption::interpolate(MatrixWorkspace &targetWS, const MatrixWorkspace &sparseWS, const Mantid::Algorithms::InterpolationOption &interpOpt) const {
-  const auto &spectrumInfo = targetWS.spectrumInfo();
-  // TODO Parallel for.
-  for (int64_t i = 0; i < static_cast<decltype(i)>(spectrumInfo.size()); ++i) {
-    double lat, lon;
-    std::tie(lat, lon) = geographicalAngles(spectrumInfo.position(i));
-    const auto nearestIndices = m_grid->nearestNeighbourIndices(lat, lon);
-    const auto spatiallyInterpHisto = interpolateFromDetectorGrid(lat, lon, sparseWS, nearestIndices);
-    if (spatiallyInterpHisto.size() > 1) {
-      auto targetHisto = targetWS.histogram(i);
-      interpOpt.applyInPlace(spatiallyInterpHisto, targetHisto);
-      targetWS.setHistogram(i, targetHisto);
-    } else {
-      targetWS.mutableY(i) = spatiallyInterpHisto.y().front();
-    }
-  }
-}
 }
 /// @endcond
 
@@ -500,12 +411,15 @@ MonteCarloAbsorption::doSimulation(const MatrixWorkspace &inputWS,
     nlambda = inputNbins;
   }
   SparseInstrumentOption sparseInstrumentOpt(useSparseInstrument);
+  std::unique_ptr<const DetectorGridDefinition> detGrid;
+  MatrixWorkspace_uptr sparseWS;
   if (sparseInstrumentOpt.use) {
     sparseInstrumentOpt.latitudinalDets = getProperty("NumberOfDetectorRows");
     sparseInstrumentOpt.longitudinalDets = getProperty("NumberOfDetectorColumns");
     sparseInstrumentOpt.wavelengthPoints = nlambda;
+    detGrid = createDetectorGridDefinition(inputWS, sparseInstrumentOpt);
+    sparseWS = createSparseWS(inputWS, sparseInstrumentOpt, *detGrid);
   }
-  MatrixWorkspace_uptr sparseWS = sparseInstrumentOpt.createSparseWSIfNeeded(inputWS);
   MatrixWorkspace &simulationWS = sparseInstrumentOpt.use ? *sparseWS : *outputWS;
   const MatrixWorkspace &instrumentWS = sparseInstrumentOpt.use ? simulationWS : inputWS;
   // Cache information about the workspace that will be used repeatedly
@@ -579,7 +493,7 @@ MonteCarloAbsorption::doSimulation(const MatrixWorkspace &inputWS,
   PARALLEL_CHECK_INTERUPT_REGION
 
   if (sparseInstrumentOpt.use) {
-    sparseInstrumentOpt.interpolate(*outputWS, simulationWS, interpolateOpt);
+    interpolateFromSparse(*outputWS, simulationWS, interpolateOpt, *detGrid);
   }
 
   //return std::move(sparseInstrumentOpt.use ? sparseWS : outputWS); // TODO remove this line
@@ -625,5 +539,23 @@ MonteCarloAbsorption::createBeamProfile(const Instrument &instrument,
   return Mantid::Kernel::make_unique<RectangularBeamProfile>(
       *frame, source->getPos(), beamWidth, beamHeight);
 }
+
+void MonteCarloAbsorption::interpolateFromSparse(MatrixWorkspace &targetWS, const MatrixWorkspace &sparseWS, const Mantid::Algorithms::InterpolationOption &interpOpt, const DetectorGridDefinition &detGrid) {
+  const auto &spectrumInfo = targetWS.spectrumInfo();
+  for (int64_t i = 0; i < static_cast<decltype(i)>(spectrumInfo.size()); ++i) {
+    double lat, lon;
+    std::tie(lat, lon) = geographicalAngles(spectrumInfo.position(i));
+    const auto nearestIndices = detGrid.nearestNeighbourIndices(lat, lon);
+    const auto spatiallyInterpHisto = interpolateFromDetectorGrid(lat, lon, sparseWS, nearestIndices);
+    if (spatiallyInterpHisto.size() > 1) {
+      auto targetHisto = targetWS.histogram(i);
+      interpOpt.applyInPlace(spatiallyInterpHisto, targetHisto);
+      targetWS.setHistogram(i, targetHisto);
+    } else {
+      targetWS.mutableY(i) = spatiallyInterpHisto.y().front();
+    }
+  }
+}
+
 }
 }
