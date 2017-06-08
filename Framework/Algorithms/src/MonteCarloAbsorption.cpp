@@ -195,10 +195,13 @@ Mantid::HistogramData::Histogram modelHistogram(const MatrixWorkspace &modelWS, 
   Mantid::HistogramData::Points ps(wavelengthPoints, 0.0);
   Mantid::HistogramData::Histogram h(ps, ys, es);
   auto &xs = h.mutableX();
-  // TODO check that wavelengthPoints is actually limited to > 1
-  const double step = (maxWavelength - minWavelength) / static_cast<double>(wavelengthPoints - 1);
-  for (size_t i = 0; i < xs.size(); ++i) {
-    xs[i] = minWavelength + step * static_cast<double>(i);
+  if (wavelengthPoints > 1) {
+    const double step = (maxWavelength - minWavelength) / static_cast<double>(wavelengthPoints - 1);
+    for (size_t i = 0; i < xs.size(); ++i) {
+      xs[i] = minWavelength + step * static_cast<double>(i);
+    }
+  } else {
+    xs.front() = (minWavelength + maxWavelength) / 2.0;
   }
   return h;
 }
@@ -395,9 +398,13 @@ void SparseInstrumentOption::interpolate(MatrixWorkspace &targetWS, const Matrix
     std::tie(lat, lon) = geographicalAngles(spectrumInfo.position(i));
     const auto nearestIndices = m_grid->nearestNeighbourIndices(lat, lon);
     const auto spatiallyInterpHisto = interpolateFromDetectorGrid(lat, lon, sparseWS, nearestIndices);
-    auto targetHisto = targetWS.histogram(i);
-    interpOpt.applyInPlace(spatiallyInterpHisto, targetHisto);
-    targetWS.setHistogram(i, targetHisto);
+    if (spatiallyInterpHisto.size() > 1) {
+      auto targetHisto = targetWS.histogram(i);
+      interpOpt.applyInPlace(spatiallyInterpHisto, targetHisto);
+      targetWS.setHistogram(i, targetHisto);
+    } else {
+      targetWS.mutableY(i) = spatiallyInterpHisto.y().front();
+    }
   }
 }
 }
@@ -479,7 +486,7 @@ void MonteCarloAbsorption::exec() {
  */
 MatrixWorkspace_uptr
 MonteCarloAbsorption::doSimulation(const MatrixWorkspace &inputWS,
-                                   size_t nevents, int nlambda, int seed,
+                                   const size_t nevents, int nlambda, const int seed,
                                    const InterpolationOption &interpolateOpt,
                                    const bool useSparseInstrument) {
   auto outputWS = createOutputWorkspace(inputWS);

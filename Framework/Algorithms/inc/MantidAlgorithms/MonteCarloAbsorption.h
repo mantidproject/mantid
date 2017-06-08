@@ -63,8 +63,8 @@ private:
   void exec() override;
 
   API::MatrixWorkspace_uptr
-  doSimulation(const API::MatrixWorkspace &inputWS, size_t nevents, int nlambda,
-               int seed, const InterpolationOption &interpolateOpt, const bool useSparseInstrument);
+  doSimulation(const API::MatrixWorkspace &inputWS, const size_t nevents, int nlambda,
+               const int seed, const InterpolationOption &interpolateOpt, const bool useSparseInstrument);
   API::MatrixWorkspace_uptr
   createOutputWorkspace(const API::MatrixWorkspace &inputWS) const;
   std::unique_ptr<IBeamProfile>
