@@ -202,6 +202,16 @@ Mantid::HistogramData::Histogram modelHistogram(const MatrixWorkspace &modelWS, 
   return h;
 }
 
+bool constantEFixed(const EFixedProvider &eFixed, const size_t nSpectra) {
+  const auto e = eFixed.value(0);
+  for (Mantid::detid_t i = 1; i < static_cast<Mantid::detid_t>(nSpectra); ++i) {
+    if (e != eFixed.value(i)) {
+      return false;
+    }
+  }
+  return true;
+}
+
 Object_sptr makeCubeShape() {
   using namespace Poco::XML;
   const double dimension = 0.05;
@@ -290,13 +300,19 @@ MatrixWorkspace_uptr createWSWithSimulationInstrument(const MatrixWorkspace &mod
     paramMap.add("double", parametrizedSource.get(), "beam-width", beamWidthParam[0]);
     paramMap.add("double", parametrizedSource.get(), "beam-height", beamHeightParam[0]);
   }
+  // Add information about EFixed in a proper place.
   EFixedProvider eFixed(modelWS);
   ws->mutableRun().addProperty("deltaE-mode", Mantid::Kernel::DeltaEMode::asString(eFixed.emode()));
   if (eFixed.emode() == Mantid::Kernel::DeltaEMode::Direct) {
     ws->mutableRun().addProperty("Ei", eFixed.value(0));
   } else if (eFixed.emode() == Mantid::Kernel::DeltaEMode::Indirect) {
-    // TODO Indirect instruments with constant eFixed could be supported.
-    throw std::runtime_error("Sparse instrument with indirect mode not yet supported.");
+    if (!constantEFixed(eFixed, modelWS.getNumberHistograms())) {
+      throw std::runtime_error("Sparse instrument with variable EFixed not supported.");
+    }
+    const auto e = eFixed.value(0);
+    for (Mantid::detid_t i = 0; i < static_cast<Mantid::detid_t>(numSpectra); ++i) {
+      ws->setEFixed(i, e);
+    }
   }
   return MatrixWorkspace_uptr(ws.release());
 }
