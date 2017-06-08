@@ -180,6 +180,13 @@ std::string MultipleFileProperty::getDefault() const {
  */
 std::string
 MultipleFileProperty::setValueAsSingleFile(const std::string &propValue) {
+  // if value is unchanged use the cached version
+  if ((propValue == m_oldPropValue) && (!m_oldFoundValue.empty())) {
+    PropertyWithValue<std::vector<std::vector<std::string>>>::operator=(
+        m_oldFoundValue);
+    return "";
+  }
+
   // Use a slave FileProperty to do the job for us.
   FileProperty slaveFileProp("Slave", "", FileProperty::Load, m_exts,
                              Direction::Input);
@@ -190,15 +197,21 @@ MultipleFileProperty::setValueAsSingleFile(const std::string &propValue) {
     return error;
 
   // Store.
+  std::vector<std::vector<std::string>> foundFiles;
   try {
-    std::vector<std::vector<std::string>> result;
-    toValue(slaveFileProp(), result, "", "");
-    PropertyWithValue<std::vector<std::vector<std::string>>>::operator=(result);
+    toValue(slaveFileProp(), foundFiles, "", "");
+    PropertyWithValue<std::vector<std::vector<std::string>>>::operator=(
+        foundFiles);
   } catch (std::invalid_argument &except) {
     g_log.debug() << "Could not set property " << name() << ": "
                   << except.what();
     return except.what();
   }
+
+  // cache the new version of things
+  m_oldPropValue = propValue;
+  m_oldFoundValue = foundFiles;
+
   return "";
 }
 
@@ -216,6 +229,12 @@ MultipleFileProperty::setValueAsSingleFile(const std::string &propValue) {
  */
 std::string
 MultipleFileProperty::setValueAsMultipleFiles(const std::string &propValue) {
+  // if value is unchanged use the cached version
+  if ((propValue == m_oldPropValue) && (!m_oldFoundValue.empty())) {
+    return PropertyWithValue<std::vector<std::vector<std::string>>>::setValue(
+        toString(m_oldFoundValue));
+  }
+
   // Return error if there are any adjacent + or , operators.
   const std::string INVALID = "\\+\\+|,,|\\+,|,\\+";
   boost::smatch invalid_substring;
@@ -394,6 +413,10 @@ MultipleFileProperty::setValueAsMultipleFiles(const std::string &propValue) {
 
     allFullFileNames.push_back(fullFileNames);
   }
+
+  // cache the new version of things
+  m_oldPropValue = propValue;
+  m_oldFoundValue = allFullFileNames;
 
   // Now re-set the value using the full paths found.
   return PropertyWithValue<std::vector<std::vector<std::string>>>::setValue(
