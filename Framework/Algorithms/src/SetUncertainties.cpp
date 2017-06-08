@@ -5,6 +5,7 @@
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidKernel/BoundedValidator.h"
 
 #include <algorithm>
 #include <vector>
@@ -26,6 +27,7 @@ const std::string ZERO("zero");
 const std::string SQRT("sqrt");
 const std::string ONE_IF_ZERO("oneIfZero");
 const std::string SQRT_OR_ONE("sqrtOrOne");
+const std::string CUSTOM("custom");
 
 struct resetzeroerror {
   explicit resetzeroerror(const double constant) : zeroErrorValue(constant) {}
@@ -64,14 +66,24 @@ const std::string SetUncertainties::name() const { return "SetUncertainties"; }
 int SetUncertainties::version() const { return (1); }
 
 void SetUncertainties::init() {
+  auto mustBePositive = boost::make_shared<BoundedValidator<double>>();
+  auto mustBePositiveInt = boost::make_shared<BoundedValidator<int>>();
+  mustBePositive->setLower(0);
+  mustBePositiveInt->setLower(0);
   declareProperty(make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
       "InputWorkspace", "", Direction::Input));
   declareProperty(make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
       "OutputWorkspace", "", Direction::Output));
-  std::vector<std::string> errorTypes = {ZERO, SQRT, SQRT_OR_ONE, ONE_IF_ZERO};
+  std::vector<std::string> errorTypes = {ZERO, SQRT, SQRT_OR_ONE, ONE_IF_ZERO, CUSTOM};
   declareProperty("SetError", ZERO,
                   boost::make_shared<StringListValidator>(errorTypes),
                   "How to reset the uncertainties");
+  declareProperty("SetErrorTo", 0.000, mustBePositive,
+	  "The error value to set when using custom values");
+  declareProperty("IfEqualTo", 0.000, mustBePositive, // TODO empty float?
+	  "The condition specifying where the custom error value should be set");
+  declareProperty("Precision", 3, mustBePositiveInt,
+	  "How many decimal places are taken into account for IfEqualTo" );
 }
 
 void SetUncertainties::exec() {
@@ -80,6 +92,7 @@ void SetUncertainties::exec() {
   bool zeroError = (errorType == ZERO);
   bool takeSqrt = ((errorType == SQRT) || (errorType == SQRT_OR_ONE));
   bool resetOne = ((errorType == ONE_IF_ZERO) || (errorType == SQRT_OR_ONE));
+  bool customError = (errorType == CUSTOM);
 
   // Create the output workspace. This will copy many aspects from the input
   // one.
