@@ -542,7 +542,9 @@ MonteCarloAbsorption::createBeamProfile(const Instrument &instrument,
 
 void MonteCarloAbsorption::interpolateFromSparse(MatrixWorkspace &targetWS, const MatrixWorkspace &sparseWS, const Mantid::Algorithms::InterpolationOption &interpOpt, const DetectorGridDefinition &detGrid) {
   const auto &spectrumInfo = targetWS.spectrumInfo();
+  PARALLEL_FOR_IF(Kernel::threadSafe(targetWS, sparseWS))
   for (int64_t i = 0; i < static_cast<decltype(i)>(spectrumInfo.size()); ++i) {
+    PARALLEL_START_INTERUPT_REGION
     double lat, lon;
     std::tie(lat, lon) = geographicalAngles(spectrumInfo.position(i));
     const auto nearestIndices = detGrid.nearestNeighbourIndices(lat, lon);
@@ -554,7 +556,9 @@ void MonteCarloAbsorption::interpolateFromSparse(MatrixWorkspace &targetWS, cons
     } else {
       targetWS.mutableY(i) = spatiallyInterpHisto.y().front();
     }
+    PARALLEL_END_INTERUPT_REGION
   }
+  PARALLEL_CHECK_INTERUPT_REGION
 }
 
 }
