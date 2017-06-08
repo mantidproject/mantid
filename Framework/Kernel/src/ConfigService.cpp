@@ -112,6 +112,16 @@ public:
     m_pPtr = static_cast<T *>(this);
   }
 
+  /// Copy constructor taking a non-const argument. This avoids the copy
+  /// constructor being hidden by the templated constructor above (which would
+  /// take precedence over the copy constructor otherwise if supplied with a
+  /// non-const WrappedObject). It's not ideal having a non-const input
+  /// argument here, but at least we can cast it to const for the base class.
+  WrappedObject(WrappedObject<T> &A)
+      : T(std::const_cast<const WrappedObject<T> &>(A)) {
+    m_pPtr = static_cast<T *>(this);
+  }
+
   /// Overloaded = operator sets the pointer to the wrapped class
   /// and copies over the contents
   WrappedObject<T> &operator=(const WrappedObject<T> &rhs) {
