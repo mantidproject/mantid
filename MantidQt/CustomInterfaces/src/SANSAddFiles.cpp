@@ -14,6 +14,7 @@
 #include <QVariant>
 
 #include <Poco/Path.h>
+#include <Poco/Exception.h>
 
 #include <algorithm>
 
@@ -212,14 +213,29 @@ void SANSAddFiles::add2Runs2Add() {
 
     for (QStringList::const_iterator k = ranges.begin(); k != ranges.end();
          ++k) {
+      // Check the file property
+      FileProperty search("dummy", k->toStdString(), FileProperty::Load,
+                          std::vector<std::string>(), Direction::Input);
+
+      std::string isValid;
+      try {
+        isValid = search.isValid();
+      } catch (Poco::PathSyntaxException) {
+        QString message =
+            QString("The file entry ") + *k +
+            QString(" is not a valid file path on your operating system");
+        QMessageBox::critical(this, "Invalid entry for file path", message);
+        m_SANSForm->new2Add_edit->clear();
+        return;
+      }
+
+      // Put the full path in the tooltip so people can see it if they want to
+      // do this with the file finding functionality of the FileProperty
       // Don't display the full file path in the box, it's too long
       QListWidgetItem *newL = insertListFront(QFileInfo(*k).fileName());
       newL->setData(Qt::WhatsThisRole, QVariant(*k));
-      // Put the full path in the tooltip so people can see it if they want to
-      // do this with the file finding functionality of the FileProperty
-      FileProperty search("dummy", k->toStdString(), FileProperty::Load,
-                          std::vector<std::string>(), Direction::Input);
-      if (search.isValid() == "") { // this means the file was found
+
+      if (isValid == "") { // this means the file was found
         newL->setToolTip(QString::fromStdString(search.value()));
 
         // If we don't have an event workspace data set, then we disable the
