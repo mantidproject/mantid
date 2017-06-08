@@ -8,6 +8,10 @@ from __future__ import (absolute_import, division, print_function)
 from six.moves import range
 import numpy
 import os
+try:
+    import urllib.request as urllib
+except ImportError:
+    import  urllib
 
 
 from .ui_MainWindow import Ui_MainWindow #import line for the UI python class
@@ -583,7 +587,7 @@ class MainWindow(QtGui.QMainWindow):
         clearcache = self.ui.checkBox_delCache.isChecked()
 
         if clearcache is True:
-            delAllFile(self._cache)
+            urllib.delAllFile(self._cache)
 
         self.close()
 
@@ -2136,7 +2140,7 @@ class MainWindow(QtGui.QMainWindow):
 
             filename = '%s_exp%04d_scan%04d.dat' % (self._instrument.upper(), exp, scan)
             srcFileName = os.path.join(cachedir, filename)
-            status, errmsg = downloadFile(fullurl, srcFileName)
+            status, errmsg = urllib.downloadFile(fullurl, srcFileName)
             if status is False:
                 self._logError(errmsg)
                 srcFileName = None
@@ -2248,7 +2252,7 @@ class MainWindow(QtGui.QMainWindow):
         # scans = [startscan, endscan] + [others] - [excluded]
         status, extrascanlist = self._getIntArray(str(self.ui.lineEdit_extraScans.text()))
         if status is False:
-            raise RuntimeError(extrascanlsit)
+            raise RuntimeError(extrascanlist)
 
         status, excludedlist = self._getIntArray(str(self.ui.lineEdit_exclScans.text()))
         self._logDebug("Excluded list: %s" %(str(excludedlist)))
@@ -2518,7 +2522,7 @@ class MainWindow(QtGui.QMainWindow):
             else:
                 # Undefined siutation
                 returnstatus = False
-                errmsg = "Term %s contains more than 1 dash." % (level0terms)
+                errmsg = "Term %s contains more than 1 dash." % (level0term)
             # ENDIFELSE
 
             # break loop if something is wrong
