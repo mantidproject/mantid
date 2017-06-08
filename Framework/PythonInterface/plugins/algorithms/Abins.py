@@ -180,7 +180,9 @@ class Abins(PythonAlgorithm):
         # 4) get atoms for which S should be plotted
         self._extracted_dft_data = dft_data.get_atoms_data().extract()
         num_atoms = len(self._extracted_dft_data)
-        all_atoms_symbols = set([self._extracted_dft_data["atom_%s" % atom]["symbol"] for atom in range(num_atoms)])
+        all_atoms_symbols = list(set([self._extracted_dft_data["atom_%s" % atom]["symbol"]
+                                        for atom in range(num_atoms)]))
+        all_atoms_symbols.sort()
 
         if len(self._atoms) == 0:  # case: all atoms
             atoms_symbol = all_atoms_symbols
@@ -216,7 +218,6 @@ class Abins(PythonAlgorithm):
             workspaces.insert(0, self._create_experimental_data_workspace().getName())
             prog_reporter.report("Workspace with the experimental data has been constructed.")
 
-        workspaces.sort()
         GroupWorkspaces(InputWorkspaces=workspaces, OutputWorkspace=self._out_ws_name)
 
         # 8) save workspaces to ascii_file
