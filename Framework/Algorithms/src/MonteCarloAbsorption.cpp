@@ -22,6 +22,7 @@
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/DeltaEMode.h"
+#include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidKernel/MersenneTwister.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/VectorHelper.h"
@@ -441,10 +442,12 @@ void MonteCarloAbsorption::init() {
   InterpolationOption interpolateOpt;
   declareProperty(interpolateOpt.property(), interpolateOpt.propertyDoc());
   declareProperty("SparseInstrument", false, "Enable simulation on special instrument with a sparse grid of detectors interpolating the results to the real instrument.");
-  auto sparseDetectorCount = boost::make_shared<Kernel::BoundedValidator<int>>();
-  positiveInt->setLower(2);
-  declareProperty("DetectorRows", DEFAULT_LATITUDINAL_DETS, sparseDetectorCount, "Number of detector rows in the detector grid.");
-  declareProperty("DetectorColumns", DEFAULT_LONGITUDINAL_DETS, sparseDetectorCount, "Number of detector columns in the detector grid.");
+  auto twoOrMore = boost::make_shared<Kernel::BoundedValidator<int>>();
+  twoOrMore->setLower(2);
+  declareProperty("NumberOfDetectorRows", DEFAULT_LATITUDINAL_DETS, twoOrMore, "Number of detector rows in the detector grid of the sparse instrument.");
+  setPropertySettings("NumberOfDetectorRows", Kernel::make_unique<EnabledWhenProperty>("SparseInstrument", ePropertyCriterion::IS_NOT_DEFAULT));
+  declareProperty("NumberOfDetectorColumns", DEFAULT_LONGITUDINAL_DETS, twoOrMore, "Number of detector columns in the detector grid of the sparse instrument.");
+  setPropertySettings("NumberOfDetectorColumns", Kernel::make_unique<EnabledWhenProperty>("SparseInstrument", ePropertyCriterion::IS_NOT_DEFAULT));
 }
 
 /**
@@ -491,8 +494,8 @@ MonteCarloAbsorption::doSimulation(const MatrixWorkspace &inputWS,
   }
   SparseInstrumentOption sparseInstrumentOpt(useSparseInstrument);
   if (sparseInstrumentOpt.use) {
-    sparseInstrumentOpt.latitudinalDets = getProperty("DetectorRows");
-    sparseInstrumentOpt.longitudinalDets = getProperty("DetectorColumns");
+    sparseInstrumentOpt.latitudinalDets = getProperty("NumberOfDetectorRows");
+    sparseInstrumentOpt.longitudinalDets = getProperty("NumberOfDetectorColumns");
     sparseInstrumentOpt.wavelengthPoints = nlambda;
   }
   MatrixWorkspace_uptr sparseWS = sparseInstrumentOpt.createSparseWSIfNeeded(inputWS);
