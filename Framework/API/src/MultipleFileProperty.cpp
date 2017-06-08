@@ -328,7 +328,8 @@ MultipleFileProperty::setValueAsMultipleFiles(const std::string &propValue) {
       }
     }
 
-    fileNames.insert(fileNames.end(), temp.begin(), temp.end());
+    fileNames.insert(fileNames.end(), std::make_move_iterator(temp.begin()),
+                     std::make_move_iterator(temp.end()));
   }
 
   std::vector<std::vector<std::string>> allUnresolvedFileNames = fileNames;
@@ -339,12 +340,10 @@ MultipleFileProperty::setValueAsMultipleFiles(const std::string &propValue) {
   std::vector<std::string> flattenedAllUnresolvedFileNames =
       VectorHelper::flattenVector(allUnresolvedFileNames);
   std::string defaultExt;
-  auto unresolvedFileName = flattenedAllUnresolvedFileNames.begin();
-  for (; unresolvedFileName != flattenedAllUnresolvedFileNames.end();
-       ++unresolvedFileName) {
+  for (const auto &unresolvedFileName : flattenedAllUnresolvedFileNames) {
     try {
       // Check for an extension.
-      Poco::Path path(*unresolvedFileName);
+      Poco::Path path(unresolvedFileName);
       if (!path.getExtension().empty()) {
         defaultExt = "." + path.getExtension();
         break;
@@ -359,19 +358,17 @@ MultipleFileProperty::setValueAsMultipleFiles(const std::string &propValue) {
 
   // Cycle through each vector of unresolvedFileNames in allUnresolvedFileNames.
   // Remember, each vector contains files that are to be added together.
-  auto unresolvedFileNames = allUnresolvedFileNames.begin();
-  for (; unresolvedFileNames != allUnresolvedFileNames.end();
-       ++unresolvedFileNames) {
+  for (const auto &unresolvedFileNames : allUnresolvedFileNames) {
     // Check for the existance of wild cards. (Instead of iterating over all the
     // filenames just join them together
     // and search for "*" in the result.)
     if (std::string::npos !=
-        boost::algorithm::join(*unresolvedFileNames, "").find("*"))
+        boost::algorithm::join(unresolvedFileNames, "").find("*"))
       return "Searching for files by wildcards is not currently supported.";
 
     std::vector<std::string> fullFileNames;
 
-    for (auto &unresolvedFileName : *unresolvedFileNames) {
+    for (const auto &unresolvedFileName : unresolvedFileNames) {
       bool useDefaultExt;
 
       try {
@@ -416,10 +413,9 @@ MultipleFileProperty::setValueAsMultipleFiles(const std::string &propValue) {
       }
 
       // Append the file name to result.
-      fullFileNames.push_back(fullyResolvedFile);
+      fullFileNames.push_back(std::move(fullyResolvedFile));
     }
-
-    allFullFileNames.push_back(fullFileNames);
+    allFullFileNames.push_back(std::move(fullFileNames));
   }
 
   // Now re-set the value using the full paths found.
