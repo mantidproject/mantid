@@ -11,6 +11,7 @@
 #include "MantidAPI/WorkspaceHistory.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/Exception.h"
 #include "MantidKernel/make_unique.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/Unit.h"
@@ -377,10 +378,11 @@ void JoinRuns::exec() {
 
   if (!m_logEntry.empty()) {
     std::string unit = m_inputWS.front()->run().getLogData(m_logEntry)->units();
-    if (unit.empty()) {
-      unit = "Empty";
+    try {
+      m_outWS->getAxis(0)->unit() = UnitFactory::Instance().create(unit);
+    } catch (Exception::NotFoundError &) {
+      m_outWS->getAxis(0)->unit() = UnitFactory::Instance().create("Empty");
     }
-    m_outWS->getAxis(0)->unit() = UnitFactory::Instance().create(unit);
   }
 
   setProperty("OutputWorkspace", m_outWS);

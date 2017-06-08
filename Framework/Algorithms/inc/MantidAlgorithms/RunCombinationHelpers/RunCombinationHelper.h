@@ -11,7 +11,7 @@ namespace Algorithms {
 
 /** RunCombinationHelper : This holds some useful utilities for operations
  * involving transformations of lists of workspaces into single one.
- * E.g. this is used commonly between MergeRuns and JoinWorkspaces
+ * E.g. this is used commonly between MergeRuns and JoinRuns
 
   Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source
@@ -55,7 +55,7 @@ private:
   std::string m_yUnit;
   std::string m_spectrumAxisUnit;
   std::string m_instrumentName;
-  bool m_isDistribution;
+  bool m_isHistogramData;
 };
 
 } // namespace Algorithms
