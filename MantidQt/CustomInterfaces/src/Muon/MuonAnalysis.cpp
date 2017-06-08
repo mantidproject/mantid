@@ -29,7 +29,7 @@
 #include "MantidQtMantidWidgets/MuonFitDataSelector.h"
 #include "MantidQtMantidWidgets/MuonFitPropertyBrowser.h"
 #include "MantidQtMantidWidgets/MuonFunctionBrowser.h"
- 
+
 #include <Poco/File.h>
 #include <Poco/Path.h>
 #include <Poco/StringTokenizer.h>
