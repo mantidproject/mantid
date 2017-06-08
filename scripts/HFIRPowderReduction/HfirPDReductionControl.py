@@ -24,7 +24,7 @@ from mantid.simpleapi import AnalysisDataService
 #from mantid.kernel import ConfigService
 
 
-VanadiumPeakPositions = [0.5044,0.5191,0.5350,0.5526,0.5936,0.6178,0.6453,0.6768,0.7134,0.7566,0.8089, \
+VanadiumPeakPositions = [0.5044,0.5191,0.5350,0.5526,0.5936,0.6178,0.6453,0.6768,0.7134,0.7566,0.8089, 
                          0.8737,0.9571,1.0701,1.2356,1.5133,2.1401]
 
 
