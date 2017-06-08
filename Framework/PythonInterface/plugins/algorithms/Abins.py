@@ -180,18 +180,17 @@ class Abins(PythonAlgorithm):
         # 4) get atoms for which S should be plotted
         self._extracted_dft_data = dft_data.get_atoms_data().extract()
         num_atoms = len(self._extracted_dft_data)
-        all_atoms_symbols = list(set([self._extracted_dft_data["atom_%s" % atom]["symbol"]
-                                        for atom in range(num_atoms)]))
-        all_atoms_symbols.sort()
+        all_atms_smbls = list(set([self._extracted_dft_data["atom_%s" % atom]["symbol"] for atom in range(num_atoms)]))
+        all_atms_smbls.sort()
 
         if len(self._atoms) == 0:  # case: all atoms
-            atoms_symbol = all_atoms_symbols
+            atoms_symbol = all_atms_smbls
         else:  # case selected atoms
             if len(self._atoms) != len(set(self._atoms)):  # only different types
                 raise ValueError("Not all user defined atoms are unique.")
 
             for atom_symbol in self._atoms:
-                if atom_symbol not in all_atoms_symbols:
+                if atom_symbol not in all_atms_smbls:
                     raise ValueError("User defined atom not present in the system.")
             atoms_symbol = self._atoms
         prog_reporter.report("Atoms, for which dynamical structure factors should be plotted, have been determined.")

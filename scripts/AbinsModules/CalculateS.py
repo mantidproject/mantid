@@ -2,7 +2,7 @@ from __future__ import (absolute_import, division, print_function)
 import AbinsModules
 try:
     # noinspection PyUnresolvedReferences
-    from pathos.multiprocessing import ProcessingPool, ThreadingPool
+    from pathos.multiprocessing import ProcessingPool
     PATHOS_FOUND = True
 except ImportError:
     PATHOS_FOUND = False

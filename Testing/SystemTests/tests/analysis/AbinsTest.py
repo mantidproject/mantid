@@ -1,8 +1,8 @@
 from __future__ import (absolute_import, division, print_function)
 import numpy as np
 import stresstesting
-from mantid.simpleapi import Abins, mtd, DeleteWorkspace, Scale
-from AbinsModules import AbinsConstants, AbinsTestHelpers, AbinsParameters
+from mantid.simpleapi import Abins, mtd, DeleteWorkspace
+from AbinsModules import AbinsConstants, AbinsTestHelpers
 
 
 def skip_tests():
