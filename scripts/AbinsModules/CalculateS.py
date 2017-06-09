@@ -77,13 +77,12 @@ class CalculateS(object):
                                  AbinsModules.AbinsConstants.QUANTUM_ORDER_THREE: self._calculate_order_three,
                                  AbinsModules.AbinsConstants.QUANTUM_ORDER_FOUR: self._calculate_order_four}
 
-        start = AbinsModules.AbinsParameters.min_wavenumber
         step = AbinsModules.AbinsParameters.bin_width
+        start = AbinsModules.AbinsParameters.min_wavenumber + step
         stop = AbinsModules.AbinsParameters.max_wavenumber + step
-
         self._bins = np.arange(start=start, stop=stop, step=step, dtype=AbinsModules.AbinsConstants.FLOAT_TYPE)
-        self._bins_size = self._bins.size - 2
-        self._frequencies = self._bins[AbinsModules.AbinsConstants.FIRST_BIN_INDEX:-1]
+        self._freq_size = self._bins.size - 1
+        self._frequencies = self._bins[:-1]
 
         self._powder_atoms_data = None
         self._a_traces = None
@@ -313,9 +312,7 @@ class CalculateS(object):
         new_fundamentals = new_fundamentals.reshape(chunk_num, int(chunk_size))
         new_fundamentals_coeff = new_fundamentals_coeff.reshape(chunk_num, int(chunk_size))
 
-        first = AbinsModules.AbinsConstants.FIRST_BIN_INDEX
-        last =  AbinsModules.AbinsConstants.LAST_BIN_INDEX
-        total_size = self._bins.size - first - last
+        total_size = self._freq_size
         for lg_order in range(order, self._quantum_order_num + AbinsModules.AbinsConstants.S_LAST_INDEX):
             s["order_%s" % lg_order] = np.zeros(shape=total_size, dtype=AbinsModules.AbinsConstants.FLOAT_TYPE)
 
@@ -508,8 +505,7 @@ class CalculateS(object):
         """
         inds = np.digitize(x=array_x, bins=self._bins) - AbinsModules.AbinsConstants.PYTHON_INDEX_SHIFT
         output_array_y = np.asarray(
-            a=[array_y[inds == i].sum()
-               for i in range(AbinsModules.AbinsConstants.FIRST_BIN_INDEX, self._bins.size - 1)],
+            a=[array_y[inds == i].sum() for i in range(self._freq_size)],
             dtype=AbinsModules.AbinsConstants.FLOAT_TYPE)
 
         return output_array_y
@@ -528,8 +524,7 @@ class CalculateS(object):
             inds = np.digitize(x=array_x, bins=self._bins) - AbinsModules.AbinsConstants.PYTHON_INDEX_SHIFT
             output_array_x = self._frequencies
             output_array_y = np.asarray(
-                a=[array_y[inds == i].sum()
-                   for i in range(AbinsModules.AbinsConstants.FIRST_BIN_INDEX, self._bins.size - 1)],
+                a=[array_y[inds == i].sum() for i in range(self._freq_size)],
                 dtype=AbinsModules.AbinsConstants.FLOAT_TYPE)
 
         return output_array_x, output_array_y

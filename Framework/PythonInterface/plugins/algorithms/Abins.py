@@ -214,7 +214,7 @@ class Abins(PythonAlgorithm):
 
         # 7) add experimental data if available to the collection of workspaces
         if self._experimental_file != "":
-            workspaces.insert(0, self._create_experimental_data_workspace().getName())
+            workspaces.insert(0, self._create_experimental_data_workspace().name())
             prog_reporter.report("Workspace with the experimental data has been constructed.")
 
         GroupWorkspaces(InputWorkspaces=workspaces, OutputWorkspace=self._out_ws_name)
@@ -223,7 +223,7 @@ class Abins(PythonAlgorithm):
         num_workspaces = mtd[self._out_ws_name].getNumberOfEntries()
         for wrk_num in range(num_workspaces):
             wrk = mtd[self._out_ws_name].getItem(wrk_num)
-            SaveAscii(InputWorkspace=wrk, Filename=wrk.getName() + ".dat", Separator="Space", WriteSpectrumID=False)
+            SaveAscii(InputWorkspace=wrk, Filename=wrk.name() + ".dat", Separator="Space", WriteSpectrumID=False)
         prog_reporter.report("All workspaces have been saved to ASCII files.")
 
         # 9) set  OutputWorkspace
@@ -341,7 +341,7 @@ class Abins(PythonAlgorithm):
         dim = 1
         length = s_points.size
         wrk = WorkspaceFactory.create("Workspace2D", NVectors=dim, XLength=length + 1, YLength=length)
-        wrk.setX(0, self._bins[1:])
+        wrk.setX(0, self._bins)
         wrk.setY(0, s_points)
         AnalysisDataService.addOrReplace(workspace, wrk)
 
@@ -375,7 +375,7 @@ class Abins(PythonAlgorithm):
         total_workspace = self._out_ws_name + "_total"
 
         if isinstance(mtd[partial_workspaces[0]], WorkspaceGroup):
-            local_partial_workspaces = mtd[partial_workspaces[0]].getNames()
+            local_partial_workspaces = mtd[partial_workspaces[0]].names()
         else:
             local_partial_workspaces = partial_workspaces
 
@@ -425,7 +425,7 @@ class Abins(PythonAlgorithm):
         @return: workspace with experimental data
         """
         experimental_wrk = Load(self._experimental_file)
-        self._set_workspace_units(wrk=experimental_wrk.getName())
+        self._set_workspace_units(wrk=experimental_wrk.name())
 
         return experimental_wrk
 
@@ -725,9 +725,13 @@ class Abins(PythonAlgorithm):
         self._out_ws_name = self.getPropertyValue('OutputWorkspace')
         self._calc_partial = (len(self._atoms) > 0)
 
-        start = AbinsModules.AbinsParameters.min_wavenumber
+        # user defined interval is exclusive with respect to
+        # AbinsModules.AbinsParameters.min_wavenumber
+        # AbinsModules.AbinsParameters.max_wavenumber
+        # with bin width AbinsModules.AbinsParameters.bin_width
         step = AbinsModules.AbinsParameters.bin_width
-        stop = AbinsModules.AbinsParameters.max_wavenumber + step
+        start = AbinsModules.AbinsParameters.min_wavenumber + step / 2.0
+        stop = AbinsModules.AbinsParameters.max_wavenumber + step / 2.0
         self._bins = np.arange(start=start, stop=stop, step=step, dtype=AbinsModules.AbinsConstants.FLOAT_TYPE)
 
 
