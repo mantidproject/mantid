@@ -43,13 +43,13 @@ class CompositeFunctionWrapper(FunctionWrapper):
         for a in args:
            self.fun.add(a.fun)      
       
-    def __getitem__ (self, name):
-    # Override
-        pass
+    def getParameter(self, name):
+    # get parameter of specified name
+        return self.fun.getParameterValue(name)
 
     def __getitem__ (self, index):
     # get function of specified index
-        pass
+        return self.fun.__getitem__(index) 
 
     def __setitem__ (self, name):
         pass
