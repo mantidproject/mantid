@@ -23,7 +23,14 @@ class FunctionWrapper:
       
   def __str__ (self):
       return self.fun.__str__()
-        
+                 
+  def __add__ (self, other):
+      if(isinstance(self,CompositeFunctionWrapper)):
+        sum = self
+        return sum.fun.add(other.fun)
+      else:
+        return CompositeFunctionWrapper(self,other)
+                
   def getFunction(self):
       return self.fun
       
@@ -34,7 +41,7 @@ class CompositeFunctionWrapper(FunctionWrapper):
    
         #Add the functions
         for a in args:
-           self.fun.add(a.fun)
+           self.fun.add(a.fun)      
       
     def __getitem__ (self, name):
     # Override
@@ -46,5 +53,5 @@ class CompositeFunctionWrapper(FunctionWrapper):
 
     def __setitem__ (self, name):
         pass
-      
+        
       
