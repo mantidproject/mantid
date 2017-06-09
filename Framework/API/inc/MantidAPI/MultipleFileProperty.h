@@ -173,7 +173,7 @@ private:
   std::string m_defaultExt;
   /// The action type of this property
   /// Load (dafault) or OptionalLoad are supported
-  unsigned int m_action;
+  unsigned int m_action{2};
   /// Last value of propValue used in
   /// MultipleFileProperty::setValueAsMultipleFiles
   /// and MultipleFileProperty::setValueAsSingleFile
