@@ -82,12 +82,21 @@ private:
   double m_value;
 };
 
+/** Calculate latitude and longitude for given vector.
+ *  @param p A Mantid vector.
+ *  @return A pair containing the latitude and longitude values.
+ */
 std::pair<double, double> geographicalAngles(const V3D &p) {
   const double lat = std::atan2(p.Y(), std::hypot(p.X() , p.Z()));
   const double lon = std::atan2(p.X(), p.Z());
   return std::pair<double, double>(lat, lon);
 }
 
+/** Find the latitude and longitude intervals the detectors
+ *  of the given workspace spawn.
+ *  @param ws A workspace.
+ *  @return A tuple containing the latitude and longitude ranges.
+ */
 std::tuple<double, double, double, double> extremeAngles(const MatrixWorkspace &ws) {
   const auto &spectrumInfo = ws.spectrumInfo();
   double minLat = std::numeric_limits<double>::max();
@@ -111,10 +120,15 @@ std::tuple<double, double, double, double> extremeAngles(const MatrixWorkspace &
   return std::tie(minLat, maxLat, minLong, maxLong);
 }
 
+/** Find the maximum and minimum wavelength points over the entire workpace.
+ *  @param ws A workspace to investigate.
+ *  @return A tuple containing the wavelength range.
+ */
 std::tuple<double, double> extremeWavelengths(const MatrixWorkspace &ws) {
   double currentMin = std::numeric_limits<double>::max();
   double currentMax = std::numeric_limits<double>::lowest();
   if (ws.histogram(0).xMode() == Mantid::HistogramData::Histogram::XMode::BinEdges) {
+    // Really deal with point data.
     for (size_t i = 0; i < ws.getNumberHistograms(); ++i) {
       const auto &xs = ws.x(i);
       const auto x0 = (xs[0] + xs[1]) / 2.0;
@@ -134,6 +148,11 @@ std::tuple<double, double> extremeWavelengths(const MatrixWorkspace &ws) {
   return std::tie(currentMin, currentMax);
 }
 
+/** Create a template histogram for the sparse instrument workspace.
+ *  @param modelWS A workspace the sparse instrument is approximating.
+ *  @param wavelengthPoints Number of points in the output histogram.
+ *  @return A template histogram.
+ */
 Mantid::HistogramData::Histogram modelHistogram(const MatrixWorkspace &modelWS, const size_t wavelengthPoints) {
   double minWavelength, maxWavelength;
   std::tie(minWavelength, maxWavelength) = extremeWavelengths(modelWS);
@@ -153,6 +172,11 @@ Mantid::HistogramData::Histogram modelHistogram(const MatrixWorkspace &modelWS, 
   return h;
 }
 
+/** Check all detectors have the same EFixed value.
+ *  @param eFixed An EFixedProvider object.
+ *  @param detIDs A vector containing detector ids.
+ *  @return True, if all EFixed values match, false otherwise.
+ */
 bool constantEFixed(const EFixedProvider &eFixed, const std::vector<Mantid::detid_t> &detIDs) {
   const auto e = eFixed.value(detIDs[0]);
   for (size_t i = 1; i < detIDs.size(); ++i) {
@@ -163,6 +187,9 @@ bool constantEFixed(const EFixedProvider &eFixed, const std::vector<Mantid::deti
   return true;
 }
 
+/** Creates a rectangular cuboid shape.
+ *  @return A cube shape.
+ */
 Object_sptr makeCubeShape() {
   using namespace Poco::XML;
   const double dimension = 0.05;
@@ -203,21 +230,31 @@ Object_sptr makeCubeShape() {
   return shapeFactory.createShape(typeElement);
 }
 
+/** Create a workspace whose instrument approximates that of modelWS.
+ *  @param modelWS A workspace to model.
+ *  @param grid An object defining the detector grid of the output workspace.
+ *  @param wavelengthPoints Number of points in the output workspace.
+ *  @return A workspace with sparse instrument.
+ */
 MatrixWorkspace_uptr createWSWithSimulationInstrument(const MatrixWorkspace &modelWS, const Mantid::Algorithms::DetectorGridDefinition &grid, const size_t wavelengthPoints) {
+  // Build a quite standard and somewhat complete instrument.
   auto instrument = boost::make_shared<Instrument>("MC_simulation_instrument");
   instrument->setReferenceFrame(
       boost::make_shared<ReferenceFrame>(Y, Z, Right, ""));
+  // Add sample to origin.
   const V3D samplePos{0.0, 0.0, 0.0};
   auto sample = Mantid::Kernel::make_unique<ObjComponent>("sample", nullptr, instrument.get());
   sample->setPos(samplePos);
   instrument->add(sample.get());
   instrument->markAsSamplePos(sample.release());
-  const double R = 1.0;
+  const double R = 1.0; // This will be the default L2 distance.
+  // Add source behing the sample.
   const V3D sourcePos{0.0, 0.0, -2.0 * R};
   auto source = Mantid::Kernel::make_unique<ObjComponent>("source", nullptr, instrument.get());
   source->setPos(sourcePos);
   instrument->add(source.get());
   instrument->markAsSource(source.release());
+  // Add detectors and link them to spectra.
   const size_t numSpectra = grid.numberColumns() * grid.numberRows();
   const auto h = modelHistogram(modelWS, wavelengthPoints);
   auto ws = Mantid::DataObjects::create<Workspace2D>(numSpectra, h);
@@ -241,8 +278,10 @@ MatrixWorkspace_uptr createWSWithSimulationInstrument(const MatrixWorkspace &mod
     }
   }
   ws->setInstrument(instrument);
+  // Copy things needed for the simulation from the model workspace.
   auto &paramMap = ws->instrumentParameters();
   auto parametrizedInstrument = ws->getInstrument();
+  // Copy beam parameters.
   const auto modelSource = modelWS.getInstrument()->getSource();
   const auto beamWidthParam = modelSource->getNumberParameter("beam-width");
   const auto beamHeightParam = modelSource->getNumberParameter("beam-height");
@@ -270,6 +309,13 @@ MatrixWorkspace_uptr createWSWithSimulationInstrument(const MatrixWorkspace &mod
   return MatrixWorkspace_uptr(ws.release());
 }
 
+/** Calculate the distance between two points on a unit sphere.
+ *  @param lat1 Latitude of the first point.
+ *  @param long1 Longitude of the first point.
+ *  @param lat2 Latitude of the second point.
+ *  @param long2 Longitude of the second point.
+ *  @return The distance between the points.
+ */
 double greatCircleDistance(const double lat1, const double long1, const double lat2, const double long2) {
   const double latD = std::sin((lat2 - lat1) / 2.0);
   const double longD = std::sin((long2 - long1) / 2.0);
@@ -277,6 +323,10 @@ double greatCircleDistance(const double lat1, const double long1, const double l
   return 2.0 * std::asin(std::sqrt(S));
 }
 
+/** Calculate the inverse distance weights for the given distances.
+ *  @param distances The distances.
+ *  @return An array of inverse distance weights.
+ */
 std::array<double, 4> inverseDistanceWeights(const std::array<double, 4> &distances) {
   std::array<double, 4> weights;
   for (size_t i = 0; i < weights.size(); ++i) {
@@ -290,6 +340,13 @@ std::array<double, 4> inverseDistanceWeights(const std::array<double, 4> &distan
   return weights;
 }
 
+/** Spatially interpolate a single histogram from four nearby detectors.
+ *  @param lat Latitude of the interpolated detector.
+ *  @param lon Longitude of the interpolated detector.
+ *  @param ws A workspace containing the detectors used for the interpolation.
+ *  @param indices Indices to the nearest neighbour detectors.
+ *  @return An interpolated histogram.
+ */
 Mantid::HistogramData::Histogram interpolateFromDetectorGrid(const double lat, const double lon, const MatrixWorkspace &ws, const std::array<size_t, 4> &indices) {
   auto h = ws.histogram(0);
   const auto &spectrumInfo = ws.spectrumInfo();
@@ -310,15 +367,26 @@ Mantid::HistogramData::Histogram interpolateFromDetectorGrid(const double lat, c
   return h;
 }
 
+/// A class to provide a placeholder for sparse instrument properties.
 struct SparseInstrumentOption {
+  /// True, if a sparse instrument is to be used.
   bool use;
+  /// Number of detector rows.
   int latitudinalDets = DEFAULT_LATITUDINAL_DETS;
+  /// Number of detector columns.
   int longitudinalDets = DEFAULT_LONGITUDINAL_DETS;
+  /// Number of wavelength points in the simulation workspace.
   size_t wavelengthPoints = 2;
 
+  /// Constructs a SparseInstrumentOption object.
   SparseInstrumentOption(const bool use_) : use(use_) {}
 };
 
+/** Creates a detector grid definition for a sparse instrument.
+ *  @param modelWS A workspace the sparse instrument approximates.
+ *  @param options Options defining the grid.
+ *  @return A unique pointer pointing to the grid definition.
+ */
 std::unique_ptr<const Mantid::Algorithms::DetectorGridDefinition> createDetectorGridDefinition(const MatrixWorkspace &modelWS, const SparseInstrumentOption &options) {
   double minLat, maxLat, minLong, maxLong;
   std::tie(minLat, maxLat, minLong, maxLong) = extremeAngles(modelWS);
@@ -326,6 +394,7 @@ std::unique_ptr<const Mantid::Algorithms::DetectorGridDefinition> createDetector
 }
 
 MatrixWorkspace_uptr createSparseWS(const MatrixWorkspace &modelWS, const SparseInstrumentOption &options, const Mantid::Algorithms::DetectorGridDefinition &detGrid) {
+  // TODO check if this function is needed at all.
   double minWavelength, maxWavelength;
   std::tie(minWavelength, maxWavelength) = extremeWavelengths(modelWS);
   return createWSWithSimulationInstrument(modelWS, detGrid, options.wavelengthPoints);

@@ -5,11 +5,21 @@
 namespace Mantid {
 namespace Algorithms {
 
+/** Initializes a DetectorGridDefinition object.
+ *  @param minLatitude Start of the latitude range.
+ *  @param maxLatitude End of the latitude range.
+ *  @param latitudePoints Number of rows.
+ *  @param minLongitude Start of the longitude range.
+ *  @param maxLongitud End of the longitude range.
+ *  @param longitudePoints Number of columns.
+ */
 DetectorGridDefinition::DetectorGridDefinition(const double minLatitude, const double maxLatitude,
                        const size_t latitudePoints, const double minLongitude,
                        const double maxLongitude, const size_t longitudePoints)
   : m_minLatitude(minLatitude), m_maxLatitude(maxLatitude), m_latitudePoints(latitudePoints),
     m_minLongitude(minLongitude), m_maxLongitude(maxLongitude), m_longitudePoints(longitudePoints) {
+  // The angular ranges might be zero in some cases preventing
+  // the spawning of a real grid. We want to avoid this.
   const double tiny = 1e-5;
   const double smallShift = M_PI / 300.0;
   if (std::abs(m_minLatitude - m_maxLatitude) < tiny) {
@@ -24,16 +34,30 @@ DetectorGridDefinition::DetectorGridDefinition(const double minLatitude, const d
   m_longitudeStep = (maxLongitude - minLongitude) / static_cast<double>(longitudePoints - 1);
 }
 
+/** Return the latitude of the given row.
+ *  @param row Number of a row.
+ *  @return A latitude.
+ */
 double DetectorGridDefinition::latitudeAt(const size_t row) const {
   return m_minLatitude + static_cast<double>(row) * m_latitudeStep;
 }
 
+/** Return the longitude of the given column.
+ *  @param column Number of a column.
+ *  @return A longitude.
+ */
 double DetectorGridDefinition::longitudeAt(const size_t column) const {
   return m_minLongitude + static_cast<double>(column) * m_longitudeStep;
 }
 
+/** Return the indices to detector surrounding the given point.
+ *  @param latitude Latitude of a point.
+ *  @param longitude Longitude of a point.
+ *  @return Indices to four nearby detectors.
+ */
 std::array<size_t, 4> DetectorGridDefinition::nearestNeighbourIndices(const double latitude, const double longitude) const {
   size_t row = static_cast<size_t>((latitude - m_minLatitude) / m_latitudeStep);
+  // Check for points at the edges or outside the grid.
   if (row == m_latitudePoints - 1) {
     --row;
   }
@@ -49,10 +73,16 @@ std::array<size_t, 4> DetectorGridDefinition::nearestNeighbourIndices(const doub
   return is;
 }
 
+/** Return the number of columns in the grid.
+ *  @return Number of columns.
+ */
 size_t DetectorGridDefinition::numberColumns() const {
   return m_longitudePoints;
 }
 
+/** Return the number of rows in the grid.
+ *  @return Number of rows.
+ */
 size_t DetectorGridDefinition::numberRows() const {
   return m_latitudePoints;
 }
