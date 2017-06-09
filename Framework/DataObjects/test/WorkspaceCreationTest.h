@@ -176,8 +176,6 @@ public:
   void test_create_parent_without_logs() {
     const auto parent = create<Workspace2D>(m_instrument, make_indices(),
                                             Histogram(BinEdges{1, 2, 4}));
-//    Workspace2D_const_sptr p = create<Workspace2D>(m_instrument, make_indices(),
-//                                                   Histogram(BinEdges{1, 2, 4}));
 
     const std::string &name0 = "Log2";
     parent->mutableRun().addProperty(name0, 3.2);

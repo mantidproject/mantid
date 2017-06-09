@@ -80,7 +80,8 @@ WorkspaceFactoryImpl::create(const MatrixWorkspace_const_sptr &parent,
 /** Initialize a workspace from its parent
  * This sets values such as instrument, units, sample, spectramap.
  * This does NOT copy any data.
- * This does NOT copy any sample logs, i.e., Run object of the workspace won't be copied
+ * This does NOT copy any sample logs, i.e., Run object of the workspace won't
+ * be copied
  * from its parent.
  * @brief WorkspaceFactoryImpl::initializeFromParentWithoutLogs
  * @param parent
