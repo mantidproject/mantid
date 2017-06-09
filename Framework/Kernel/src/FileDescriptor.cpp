@@ -3,7 +3,7 @@
 #include <Poco/File.h>
 #include <Poco/Path.h>
 
-#include <stdexcept>  
+#include <stdexcept>
 
 namespace Mantid {
 namespace Kernel {

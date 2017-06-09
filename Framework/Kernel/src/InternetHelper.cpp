@@ -17,27 +17,27 @@
 #include <Poco/TemporaryFile.h>
 #include <Poco/URI.h>
 
-#include <Poco/Exception.h>                      
-#include <Poco/File.h>                           
+#include <Poco/Exception.h>
+#include <Poco/File.h>
 #include <Poco/FileStream.h>
-#include <Poco/Net/Context.h>                    
-#include <Poco/Net/HTTPClientSession.h>          
-#include <Poco/Net/HTTPMessage.h>                
-#include <Poco/Net/InvalidCertificateHandler.h>  
-#include <Poco/SharedPtr.h>                      
-#include <Poco/Timespan.h>                       
-#include <Poco/Types.h>                          
+#include <Poco/Net/Context.h>
+#include <Poco/Net/HTTPClientSession.h>
+#include <Poco/Net/HTTPMessage.h>
+#include <Poco/Net/InvalidCertificateHandler.h>
+#include <Poco/SharedPtr.h>
+#include <Poco/Timespan.h>
+#include <Poco/Types.h>
 
 #if defined(_WIN32) || defined(_WIN64)
 #include <Winhttp.h>
 #endif
 
-#include <boost/lexical_cast.hpp>                
+#include <boost/lexical_cast.hpp>
 
 // std
-#include <mutex>                                 
+#include <mutex>
 #include <fstream>
-#include <utility>  
+#include <utility>
 
 namespace Mantid {
 namespace Kernel {

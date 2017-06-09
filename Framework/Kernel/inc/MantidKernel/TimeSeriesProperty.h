@@ -14,13 +14,13 @@
 
 // Forward declare
 namespace NeXus {
-	class File;
+class File;
 }
 
 namespace Mantid {
 namespace Kernel {
-	class DataItem;
-	class SplittingInterval;
+class DataItem;
+class SplittingInterval;
 
 enum TimeSeriesSortStatus { TSUNKNOWN, TSUNSORTED, TSSORTED };
 

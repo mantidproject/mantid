@@ -14,14 +14,14 @@
 #include <limits>
 #include <list>
 #include <mutex>
-#include <string>  
+#include <string>
 #include <vector>
 
 namespace Mantid {
 namespace Kernel {
 
 // Forward declare
-	class ISaveable;
+class ISaveable;
 
 /** Buffer objects that need to be written out to disk
   so as to optimize writing operations.

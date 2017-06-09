@@ -5,7 +5,7 @@
 #include <Poco/LoggingRegistry.h>
 #include <Poco/Message.h>
 
-#include <algorithm> 
+#include <algorithm>
 
 namespace Poco {
 

@@ -1,4 +1,4 @@
-#include "MantidKernel/Matrix.h" 
+#include "MantidKernel/Matrix.h"
 #include "MantidKernel/VMD.h"
 #include "MantidKernel/StringTokenizer.h"
 #include "MantidKernel/Strings.h"
@@ -7,8 +7,8 @@
 
 #include <algorithm>
 #include <cstddef>
-#include <iterator>              
-#include <math.h>                
+#include <iterator>
+#include <math.h>
 #include <sstream>
 #include <stdexcept>
 

@@ -3,7 +3,7 @@
 
 #include "MantidKernel/DllConfig.h"
 
-#include <iosfwd> 
+#include <iosfwd>
 #include <string>
 
 namespace Poco {

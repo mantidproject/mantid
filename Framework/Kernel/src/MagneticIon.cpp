@@ -1,12 +1,11 @@
 #include "MantidKernel/MagneticIon.h"
 
-#include <cmath>        
-#include <memory>       
+#include <cmath>
+#include <memory>
 #include <sstream>
-#include <stdexcept>    
+#include <stdexcept>
 #include <unordered_map>
-#include <utility>      
-
+#include <utility>
 
 namespace Mantid {
 namespace PhysicalConstants {

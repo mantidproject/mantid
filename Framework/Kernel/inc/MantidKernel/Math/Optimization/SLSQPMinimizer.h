@@ -3,7 +3,7 @@
 
 #include "MantidKernel/ClassMacros.h"
 #include "MantidKernel/Matrix.h"
-#include "MantidKernel/System.h" 
+#include "MantidKernel/System.h"
 
 #include <vector>
 

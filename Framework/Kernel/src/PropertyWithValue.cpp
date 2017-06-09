@@ -4,12 +4,12 @@
 // PropertyWithValue implementation
 #include "MantidKernel/PropertyWithValue.tcc"
 
-#include <NeXusFile.hpp> 
+#include <NeXusFile.hpp>
 
 namespace Mantid {
 namespace Kernel {
-	// Forward declare
-	class PropertyManager;
+// Forward declare
+class PropertyManager;
 
 #define PROPERTYWITHVALUE_SAVEPROPERTY(type)                                   \
   template <>                                                                  \

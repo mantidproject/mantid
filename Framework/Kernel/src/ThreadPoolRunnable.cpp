@@ -1,9 +1,9 @@
-#include "MantidKernel/ProgressBase.h"    
-#include "MantidKernel/Task.h"            
+#include "MantidKernel/ProgressBase.h"
+#include "MantidKernel/Task.h"
 #include "MantidKernel/ThreadPoolRunnable.h"
-#include "MantidKernel/ThreadScheduler.h" 
+#include "MantidKernel/ThreadScheduler.h"
 
-#include <Poco/Thread.h>  
+#include <Poco/Thread.h>
 
 namespace Mantid {
 namespace Kernel {

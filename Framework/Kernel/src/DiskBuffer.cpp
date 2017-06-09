@@ -1,7 +1,7 @@
 #include "MantidKernel/DiskBuffer.h"
-#include "MantidKernel/ISaveable.h"      
+#include "MantidKernel/ISaveable.h"
 #include <sstream>
-#include <utility>                       
+#include <utility>
 
 using namespace Mantid::Kernel;
 

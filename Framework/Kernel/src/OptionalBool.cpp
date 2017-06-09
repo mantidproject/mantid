@@ -1,5 +1,5 @@
 #include "MantidKernel/OptionalBool.h"
-#include <utility> 
+#include <utility>
 
 namespace Mantid {
 namespace Kernel {

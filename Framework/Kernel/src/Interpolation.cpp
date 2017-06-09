@@ -3,9 +3,9 @@
 #include "MantidKernel/UnitFactory.h"
 #include <MantidKernel/StringTokenizer.h>
 
-#include <algorithm>  
-#include <iterator>   
-#include <stdexcept>  
+#include <algorithm>
+#include <iterator>
+#include <stdexcept>
 
 namespace Mantid {
 namespace Kernel {

@@ -5,7 +5,7 @@
 
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/DateAndTime.h"
-#include "MantidKernel/Property.h"  
+#include "MantidKernel/Property.h"
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/make_unique.h"

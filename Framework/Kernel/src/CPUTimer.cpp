@@ -3,7 +3,6 @@
 #include <sstream>
 #include <iomanip>
 
-
 namespace Mantid {
 namespace Kernel {
 

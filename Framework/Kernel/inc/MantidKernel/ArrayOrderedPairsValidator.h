@@ -1,11 +1,11 @@
 #ifndef MANTID_KERNEL_ARRAYORDEREDPAIRSVALIDATOR_H_
 #define MANTID_KERNEL_ARRAYORDEREDPAIRSVALIDATOR_H_
 
-#include "MantidKernel/DllConfig.h"      
-#include "MantidKernel/IValidator.h"     
-#include "MantidKernel/TypedValidator.h" 
-#include <string>                        
-#include <vector>                        
+#include "MantidKernel/DllConfig.h"
+#include "MantidKernel/IValidator.h"
+#include "MantidKernel/TypedValidator.h"
+#include <string>
+#include <vector>
 
 namespace Mantid {
 namespace Kernel {

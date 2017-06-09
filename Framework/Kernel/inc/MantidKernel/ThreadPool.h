@@ -8,14 +8,14 @@
 // Forward declares
 
 namespace Poco {
-	class Thread;
+class Thread;
 }
 
 namespace Mantid {
 namespace Kernel {
-	class ProgressBase;
-	class Task;
-	class ThreadPoolRunnable;
+class ProgressBase;
+class Task;
+class ThreadPoolRunnable;
 
 /** A Thread Pool implementation that keeps a certain number of
  * threads running (normally, equal to the number of hardware cores available)

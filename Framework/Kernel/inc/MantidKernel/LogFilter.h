@@ -11,7 +11,7 @@
 #include <boost/scoped_ptr.hpp>
 #endif
 
-#include <vector>                           
+#include <vector>
 
 namespace Mantid {
 namespace Kernel {

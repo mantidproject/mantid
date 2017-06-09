@@ -8,7 +8,7 @@
 #include <Poco/Glob.h>
 #include <Poco/Path.h>
 
-#include <set>   
+#include <set>
 #include <string>
 
 namespace Mantid {

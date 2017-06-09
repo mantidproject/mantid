@@ -6,7 +6,7 @@
 
 #include <ios>
 #include <map>
-#include <string>  
+#include <string>
 
 namespace Poco {
 // forward declaration

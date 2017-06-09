@@ -6,7 +6,7 @@
 #include <Poco/DateTimeParser.h>
 
 #include <boost/lexical_cast.hpp>
-#include <boost/date_time/time.hpp> 
+#include <boost/date_time/time.hpp>
 #include <boost/date_time/date.hpp>
 
 #include <math.h>

@@ -2,8 +2,8 @@
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
 
-#include <cmath>     
-#include <stdexcept> 
+#include <cmath>
+#include <stdexcept>
 
 namespace Mantid {
 namespace Kernel {

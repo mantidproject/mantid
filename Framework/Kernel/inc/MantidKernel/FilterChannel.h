@@ -35,12 +35,12 @@
 
 #include "MantidKernel/DllConfig.h"
 #include <Poco/Channel.h>
-#include <string> 
+#include <string>
 #include <mutex>
 
 namespace Poco {
-	// Forward declare
-	class Message;
+// Forward declare
+class Message;
 
 /// This channel sends a message to multiple
 /// channels simultaneously.

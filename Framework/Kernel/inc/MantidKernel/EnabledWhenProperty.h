@@ -4,7 +4,7 @@
 #include "MantidKernel/System.h"
 #include "MantidKernel/IPropertySettings.h"
 #include <memory>
-#include <string>   
+#include <string>
 
 namespace Mantid {
 namespace Kernel {
@@ -65,8 +65,8 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
 // Forward decelerations
-	class IPropertyManager;
-	class Property;
+class IPropertyManager;
+class Property;
 
 // Forward deceleration of structs defined at end of header
 

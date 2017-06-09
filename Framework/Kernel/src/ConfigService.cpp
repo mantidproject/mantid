@@ -9,7 +9,7 @@
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/FilterChannel.h"
 #include "MantidKernel/StdoutChannel.h"
-#include "MantidKernel/System.h"  
+#include "MantidKernel/System.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidKernel/NetworkProxy.h"
@@ -28,15 +28,15 @@
 #include <Poco/Process.h>
 #include <Poco/URI.h>
 
-#include <Poco/AutoPtr.h>                         
-#include <Poco/Channel.h>                         
-#include <Poco/DOM/Element.h>                     
-#include <Poco/DOM/Node.h>                        
-#include <Poco/Exception.h>                       
-#include <Poco/Instantiator.h>                    
-#include <Poco/Pipe.h>                            
-#include <Poco/Platform.h>                        
-#include <Poco/String.h>                          
+#include <Poco/AutoPtr.h>
+#include <Poco/Channel.h>
+#include <Poco/DOM/Element.h>
+#include <Poco/DOM/Node.h>
+#include <Poco/Exception.h>
+#include <Poco/Instantiator.h>
+#include <Poco/Pipe.h>
+#include <Poco/Platform.h>
+#include <Poco/String.h>
 #include <Poco/Logger.h>
 #include <Poco/LoggingRegistry.h>
 #include <Poco/PipeStream.h>
@@ -46,13 +46,13 @@
 #include <boost/regex.hpp>
 
 #include <algorithm>
-#include <exception>              
+#include <exception>
 #include <fstream>
-#include <functional>             
-#include <iostream>               
-#include <stdexcept>              
-#include <utility>                
-#include <ctype.h>   
+#include <functional>
+#include <iostream>
+#include <stdexcept>
+#include <utility>
+#include <ctype.h>
 
 #ifdef __APPLE__
 #include <mach-o/dyld.h>

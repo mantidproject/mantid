@@ -7,8 +7,6 @@
 #include <string>
 #include <tuple>
 
-
-
 namespace Mantid {
 // Forward declare
 namespace PhysicalConstants {

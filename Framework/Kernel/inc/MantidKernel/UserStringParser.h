@@ -6,8 +6,8 @@
 //----------------------------------------------------------------------
 
 #include "MantidKernel/DllConfig.h"
-#include <string>                    
-#include <vector>                    
+#include <string>
+#include <vector>
 
 namespace Mantid {
 namespace Kernel {

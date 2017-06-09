@@ -4,7 +4,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidKernel/DllConfig.h"    
+#include "MantidKernel/DllConfig.h"
 
 #include <boost/shared_ptr.hpp>
 

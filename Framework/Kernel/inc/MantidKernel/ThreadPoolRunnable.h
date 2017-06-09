@@ -6,9 +6,9 @@
 
 namespace Mantid {
 namespace Kernel {
-	// Forward declares
-	class ProgressBase;
-	class ThreadScheduler;
+// Forward declares
+class ProgressBase;
+class ThreadScheduler;
 
 /** ThreadPoolRunnable : Class used by thread pool (and POCO) to
  * run inside a thread.

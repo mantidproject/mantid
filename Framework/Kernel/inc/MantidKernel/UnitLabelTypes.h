@@ -28,8 +28,8 @@
 
 namespace Mantid {
 namespace Kernel {
-	// Forward declare
-	class UnitLabel;
+// Forward declare
+class UnitLabel;
 namespace Units {
 /**
  * A simple class containing common symbol types

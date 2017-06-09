@@ -1,9 +1,9 @@
 #ifndef MANTID_KERNEL_ARRAYLENGTHVALIDATOR_H_
 #define MANTID_KERNEL_ARRAYLENGTHVALIDATOR_H_
 
-#include "MantidKernel/DllConfig.h"   
+#include "MantidKernel/DllConfig.h"
 #include "MantidKernel/TypedValidator.h"
-#include "MantidKernel/IValidator.h"  
+#include "MantidKernel/IValidator.h"
 
 #include <string>
 #include <vector>

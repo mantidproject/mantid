@@ -5,10 +5,10 @@
 #include "MantidKernel/PropertyHistory.h"
 #include "MantidKernel/Property.h"
 
-#include <boost/lexical_cast.hpp>    
-#include <algorithm>                 
-#include <stdint.h>                  
-#include <ostream>                   
+#include <boost/lexical_cast.hpp>
+#include <algorithm>
+#include <stdint.h>
+#include <ostream>
 
 namespace Mantid {
 namespace Kernel {

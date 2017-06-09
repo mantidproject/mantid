@@ -3,7 +3,7 @@
 
 #include <Poco/DOM/AutoPtr.h>
 #include <Poco/DOM/Element.h>
-#include <Poco/DOM/Node.h>      
+#include <Poco/DOM/Node.h>
 #include <Poco/DOM/NodeList.h>
 #include <Poco/DOM/Text.h>
 

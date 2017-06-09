@@ -1,5 +1,5 @@
 #include "MantidKernel/Atom.h"
-#include "MantidKernel/NeutronAtom.h"   
+#include "MantidKernel/NeutronAtom.h"
 #include "MantidKernel/PhysicalConstants.h"
 
 #include <algorithm>

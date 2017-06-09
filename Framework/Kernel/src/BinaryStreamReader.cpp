@@ -6,7 +6,7 @@
 
 #include <cassert>
 #include <istream>
-#include <stdexcept> 
+#include <stdexcept>
 
 namespace Mantid {
 namespace Kernel {
