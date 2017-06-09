@@ -29,7 +29,7 @@ ISIS example data sets. The data sets can be downloaded
 from the `Mantid download page <https://download.mantidproject.org/>`_,
 under *Sample datasets* - *ISIS*. Users may also use their own
 data instead however results will differ. Some additional
-configuration may a;sp be required which is explained in later tutorials.
+configuration may also be required which is explained in later tutorials.
 
 .. _setup_tutorials_isis-powder-diffraction-ref:
 
@@ -211,7 +211,7 @@ found for each individual instrument in the reference document:
 How objects hold state in ISIS Powder
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Additionally as the objects hold state we can set a parameter
-anywhere. For example on Polaris that have a *chopper_on* indicates
+anywhere. For example on Polaris the *mode* indicates
 the chopper state for this/these run(s). This can either be set 
 when we create the object like this:
 
@@ -219,7 +219,7 @@ when we create the object like this:
 
     from isis_powder import Polaris
 
-    a_pol_obj = Polaris(chopper_on=True, ....)
+    a_pol_obj = Polaris(mode="PDF", ....)
     a_pol_obj.create_vanadium(...)
 
 Or set whilst calling a method like this:
@@ -229,7 +229,7 @@ Or set whilst calling a method like this:
     from isis_powder import Polaris
 
     a_pol_obj = Polaris(...)
-    a_pol_obj.create_vanadium(chopper_on=True, ...)
+    a_pol_obj.create_vanadium(mode="PDF", ...)
 
 Both of the above are equivalent. Additionally if we change the value
 the scripts will warn us. This can be demonstrated with the following
@@ -239,14 +239,14 @@ example:
 
     from isis_powder import Polaris
 
-    a_pol_obj = Polaris(chopper_on=True, ...)
+    a_pol_obj = Polaris(mode="PDF", ...)
 
     # The following line will warn us we changed the chopper
-    # status from True to False. It will also remain False
-    # from now on
-    a_pol_obj.create_vanadium(chopper_on=False, ...)
+    # status from PDF to Rietveld. It will also remain 
+    # in Rietveld mode from now on till we change it again
+    a_pol_obj.create_vanadium(mode="Rietveld", ...)
     
-    # Chopper_on is still False on the following line
+    # Mode is still Rietveld on the following line
     a_pol_obj.create_vanadium(...) 
 
 For these reasons it is recommended to create multiple objects
@@ -256,13 +256,13 @@ when you need to switch between different settings within a script:
 
     from isis_powder import Polaris
 
-    pol_chopper_on = Polaris(chopper_on=True, ...)
-    pol_chopper_off = Polaris(chopper_on=False, ...)
+    pol_PDF = Polaris(mode="PDF", ...)
+    pol_Rietveld = Polaris(mode="Rietveld", ...)
 
-    # Runs with chopper on:
-    pol_chopper_on.create_vanadium(...)
-    # Runs with chopper off:
-    pol_chopper_off.create_vanadium(...) 
+    # Runs with the chopper set to PDF mode:
+    pol_PDF.create_vanadium(...)
+    # Runs with the chopper set to Rietveld mode:
+    pol_Rietveld.create_vanadium(...) 
 
 .. _creating_first_vanadium_run_isis-powder-diffraction-ref:
 
@@ -287,12 +287,12 @@ For Polaris we require the following parameters in addition to the
 parameters discussed to create the object (see
 :ref:`creating_inst_object_isis-powder-diffraction-ref`):
 
-- *chopper_on* - Indicates what the chopper state was for this run
+- *do_absorb_corrections* - Indicates whether to account for absorption when processing
+  the vanadium data. It is recommended to have this set to *True*
 - *first_cycle_run_no* - Used to determine which cycle to create a vanadium for.
   For example on a cycle with runs 100-120 this value can be any value from 100-120 
   (e.g. 111)
-- *do_absorb_corrections* - Indicates whether to account for absorption when processing
-  the vanadium data. It is recommended to have this set to *True*
+- *mode* - Indicates what the chopper state was for this run
 - *multiple_scattering* - Indicates whether to account for the effects of
   multiple scattering. For the tutorial it is highly **recommended to set this to False**
   as it will increase the script run time from seconds to 10-30 minutes.
@@ -300,7 +300,7 @@ parameters discussed to create the object (see
 *Note: Due to the complexity of the Polaris instrument definition it will take 
 Mantid up to 10 minutes to load your first data set for this instrument.*
 
-As we will be later focusing run number 95599 we can use that to ensure
+As we will be later focusing run number 98533 we can use that to ensure
 the correct cycle is selected for the *first_cycle_run_no* input.
 
 .. code-block:: python
@@ -309,9 +309,9 @@ the correct cycle is selected for the *first_cycle_run_no* input.
 
     # This should be set from the previous tutorial. 
     a_pol_obj = Polaris(....)
-    a_pol_obj.create_vanadium(chopper_on=False,
-                              first_cycle_run_no=95599,
+    a_pol_obj.create_vanadium(first_cycle_run_no=98533,
                               do_absorb_corrections=True,
+                              mode="Rietveld",
                               multiple_scattering=False)
 
 Executing the above should now successfully process the vanadium run,
@@ -349,16 +349,6 @@ instrument reference document:
 To focus the Si sample included in the ISIS data set we 
 require the following parameters:
 
-- *chopper_on* - Indicates what the chopper state was for this run
-- *input_mode* - Some instruments will not have this 
-  (in which case the data will always be summed). Acceptable values
-  are **Individual** or **Summed**. When set to individual each run
-  will be loaded and processed separately, in summed all runs specified
-  will be summed.
-- *run_number* - The run number or range of run numbers. This can
-  either be a string or integer (plain number). For example 
-  *"100-105, 107, 109-111"* will process 
-  100, 101, 102..., 105, 107, 109, 110, 111.
 - *do_absorb_corrections* - This will be covered in a later tutorial
   it determines whether to perform sample absorption corrections on
   instruments which support this correction. For this tutorial please
@@ -366,9 +356,21 @@ require the following parameters:
 - *do_van_normalisation* - Determines whether to divide the data
   set by the processed vanadium splines. This should be set to 
   *True*.
+- *input_mode* - Some instruments will not have this 
+  (in which case the data will always be summed). Acceptable values
+  are **Individual** or **Summed**. When set to individual each run
+  will be loaded and processed separately, in summed all runs specified
+  will be summed.
+- *mode* - Indicates what the chopper state was for this run ("Rietveld")
+- *run_number* - The run number or range of run numbers. This can
+  either be a string or integer (plain number). For example 
+  *"100-105, 107, 109-111"* will process 
+  100, 101, 102..., 105, 107, 109, 110, 111.
 
-For this tutorial the run number will be 95599, and *input_mode*
-will not affect the result as it is a single run.
+
+For this tutorial the run number will be 98533, and *input_mode*
+will not affect the result as it is a single run. Additionally in
+the example data you could focus 98534 (YAG sample) too.
 
 .. code-block:: python
 
@@ -376,8 +378,8 @@ will not affect the result as it is a single run.
 
     # This should be set from the previous tutorial. 
     a_pol_obj = Polaris(....)
-    a_pol_obj.focus(chopper_on=False,
-                    input_mode="Individual", run_number=95599,
+    a_pol_obj.focus(input_mode="Individual", run_number=98533,
+                    mode="Rietveld",
                     do_absorb_corrections=False,
                     do_van_normalisation=True)
 
@@ -523,14 +525,17 @@ regardless of which cycle ISIS is on.
 Examples
 ^^^^^^^^^
 These examples explain the layout and concept of YAML files. For
-instrument specific examples please check the mapping file example
-from :ref:`copying_example_files_isis-powder-diffraction-ref`
+instrument specific examples please look at the individual
+instrument reference document:
+:ref:`instrument_doc_links_isis-powder-diffraction-ref` for
+an example specific to your instrument.
 
 The simplest example of the calibration file is used on Pearl as the
 empty, label and vanadium are the same regardless of mode.
 
 .. code-block:: yaml
  
+  # This is the layout used on PEARL
   # NB this example is not representative of actual run numbers
   123-200:
     # Notice how the indentation changes to indicate it belongs
@@ -549,6 +554,7 @@ if runs in different modes have not been collected yet.
 
 .. code-block:: yaml
 
+    # This is the layout used on GEM
     # NB this example is not representative of actual run numbers
     123-200:
         label: "1_2"
@@ -635,20 +641,20 @@ to the same cycle.
     empty_run_numbers : "160"
     offset_file_name : "pearl_offset_1_2-second.cal"  
 
-Processing partial files
---------------------------
-The scripts also support processing partial files. This
+Processing intermediate files
+------------------------------
+The scripts also support processing intermediate files. This
 tutorial assumes you have successfully focused data
 previously as detailed here: :ref:`focusing_data_isis-powder-diffraction-ref`.
 
-To process partial runs for example *.s1* or *.s2* files 
+To process intermediate runs for example *.s01* or *.s02* files
 you must ensure the user directories are setup to 
 include the folder where these files are located. 
 
 The instructions for this can be found here: 
 :ref:`prerequisites_isis-powder-diffraction-ref`.
 *Note: The 'Search Data Archive' option will not locate
-partial runs as only completed runs are published to the data archive.*
+intermediate runs as only completed runs are published to the data archive.*
 
 To indicate the extension to process the *file_ext* can be specified
 like so:
@@ -659,14 +665,14 @@ like so:
 
     a_pol_obj = Polaris(....)
 
-    a_pol_obj.focus(file_ext="s1", ...)
+    a_pol_obj.focus(file_ext="s01", ...)
     # Or
-    a_pol_obj.focus(file_ext=".s1", ...)
+    a_pol_obj.focus(file_ext=".s01", ...)
 
-This will locate a .s1 file for that run number and focus
+This will locate a .s01 file for that run number and focus
 it like a normal run. The output filename will also reflect that
 this is a partial file. For run number 123 and file extension s1 
-the output filename will be *s1'InstrumentName'123.nxs*.
+the output filename will be *s01'InstrumentName'123.nxs*.
 This allows users to easily distinguish between full runs and 
 partial runs in the output folder. (For more details about the 
 output folder see :ref:`output_folder_isis-powder-diffraction-ref`)

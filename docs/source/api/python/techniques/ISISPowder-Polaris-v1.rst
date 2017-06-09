@@ -70,7 +70,7 @@ the user enables and will spline the resulting workspace(s) for later focusing.
 On POLARIS the following parameters are required when executing *create_vanadium*:
 
 - :ref:`calibration_mapping_file_polaris_isis-powder-diffraction-ref`
-- :ref:`chopper_on_polaris_isis-powder-diffraction-ref`
+- :ref:`mode_polaris_isis-powder-diffraction-ref`
 - :ref:`do_absorb_corrections_polaris_isis-powder-diffraction-ref`
 - :ref:`first_cycle_run_no_polaris_isis-powder-diffraction-ref`
 
@@ -89,7 +89,7 @@ Example
   cal_mapping_file = r"C:\path\to\cal_mapping.yaml"
 
   polaris_example.create_vanadium(calibration_mapping_file=cal_mapping_file,
-                                  chopper_on=True, do_absorb_corrections=True,
+                                  mode="PDF", do_absorb_corrections=True,
                                   first_cycle_run_no=100, multiple_scattering=False)
 
 .. _focus_polaris_isis-powder-diffraction-ref:
@@ -102,7 +102,7 @@ focuses and optionally applies corrections if the user has requested them.
 On POLARIS the following parameters are required when executing *focus*:
 
 - :ref:`calibration_mapping_file_polaris_isis-powder-diffraction-ref`
-- :ref:`chopper_on_polaris_isis-powder-diffraction-ref`
+- :ref:`mode_polaris_isis-powder-diffraction-ref`
 - :ref:`do_absorb_corrections_polaris_isis-powder-diffraction-ref`
 - :ref:`do_van_normalisation_polaris_isis-powder-diffraction-ref`
 - :ref:`input_mode_polaris_isis-powder-diffraction-ref`
@@ -133,7 +133,7 @@ Example
   cal_mapping_file = r"C:\path\to\cal_mapping.yaml"
 
   polaris_example.focus(calibration_mapping_file=cal_mapping_file,
-                        chopper_on=True, do_absorb_corrections=False,
+                        mode="Rietveld", do_absorb_corrections=False,
                         file_ext=".s01", input_mode="Individual",
                         run_number="100-110")
 
@@ -184,10 +184,10 @@ substituting the below values for appropriate values:
   1-100:
     label: "1_1"
     offset_file_name: "offset_file.cal"
-    chopper_off:
+    PDF:
       vanadium_run_numbers: "10"
       empty_run_numbers: "20"
-    chopper_on:
+    Rietveld:
       vanadium_run_numbers: "30"
       empty_run_numbers: "40"
 
@@ -202,20 +202,20 @@ Example
   1-100:
     label: "1_1"
     offset_file_name: "offset_file.cal"
-    chopper_off:
+    PDF:
       vanadium_run_numbers: "10"
       empty_run_numbers: "20"
-    chopper_on:
+    Rietveld:
       vanadium_run_numbers: "30"
       empty_run_numbers: "40"
 
   101-:
     label: "1_2"
     offset_file_name: "offset_file.cal"
-    chopper_off:
+    PDF:
       vanadium_run_numbers: "110"
       empty_run_numbers: "120"
-    chopper_on:
+    Rietveld:
       vanadium_run_numbers: "130"
       empty_run_numbers: "140"
 
@@ -244,8 +244,7 @@ Example Input:
 
 ..  code-block:: python
 
-  calibration_dir = r"C:\path\to\calibration_dir"
-  polaris_example = Polaris(calibration_directory=calibration_dir, ...)
+  polaris_example = Polaris(calibration_directory=r"C:\path\to\calibration_dir", ...)
 
 .. _calibration_mapping_file_polaris_isis-powder-diffraction-ref:
 
@@ -262,28 +261,29 @@ Example Input:
 ..  code-block:: python
 
   # Notice the filename always ends in .yaml
-  cal_mapping_file = r"C:\path\to\file\calibration_mapping.yaml"
-  polaris_example = Polaris(calibration_mapping_file=cal_mapping_file, ...)
+  polaris_example = Polaris(calibration_mapping_file=r"C:\path\to\file\calibration_mapping.yaml", ...)
 
-.. _chopper_on_polaris_isis-powder-diffraction-ref:
+.. _mode_polaris_isis-powder-diffraction-ref:
 
-chopper_on
+mode
 ^^^^^^^^^^
-The chopper state to use in the 
+The current chopper mode to use in the 
 :ref:`create_vanadium_polaris_isis-powder-diffraction-ref`
 and :ref:`focus_polaris_isis-powder-diffraction-ref` method.
 This determines which vanadium and empty run numbers
 to use whilst processing.
 
-Accepted values are: **True** or **False**
+Accepted values are: **PDF** or **Rietveld**
+
+*Note: This parameter is not case sensitive*
 
 Example Input:
 
 ..  code-block:: python
 
-  polaris_example.create_vanadium(chopper_on=True, ...)
+  polaris_example.create_vanadium(mode="PDF", ...)
   # Or
-  polaris.focus(chopper_on=False, ...)
+  polaris_example.focus(mode="Rietveld", ...)
 
 .. _config_file_polaris_isis-powder-diffraction-ref:
 
@@ -302,8 +302,7 @@ Example Input:
 ..  code-block:: python
 
   # Notice the filename always ends in .yaml
-  configuration_file = r"C:\path\to\file\configuration.yaml"
-  polaris_example = Polaris(config_file=configuration_file, ...)
+  polaris_example = Polaris(config_file=r"C:\path\to\file\configuration.yaml", ...)
 
 .. _do_absorb_corrections_polaris_isis-powder-diffraction-ref:
 
@@ -458,8 +457,7 @@ Example Input:
 
 ..  code-block:: python
 
-  output_dir = r"C:\path\to\output_dir"
-  polaris_example = Polaris(output_directory=output_dir, ...)
+  polaris_example = Polaris(output_directory=r"C:\path\to\output_dir", ...)
 
 .. _run_number_polaris_isis_powder-diffraction-ref:
 

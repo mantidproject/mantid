@@ -195,8 +195,7 @@ Example Input:
 
 ..  code-block:: python
 
-  attenuation_path = r"C:\path\to\attenuation_file.out
-  pearl_example(attenuation_file_path=attenuation_path, ...)
+  pearl_example(attenuation_file_path=r"C:\path\to\attenuation_file.out", ...)
 
 .. _calibration_directory_pearl_isis-powder-diffraction-ref:
 
@@ -224,8 +223,7 @@ Example Input:
 
 ..  code-block:: python
 
-  calibration_dir = r"C:\path\to\calibration_dir"
-  pearl_example = Pearl(calibration_directory=calibration_dir, ...)
+  pearl_example = Pearl(calibration_directory=r"C:\path\to\calibration_dir", ...)
 
 .. _calibration_mapping_file_pearl_isis-powder-diffraction-ref:
 
@@ -242,8 +240,7 @@ Example Input:
 ..  code-block:: python
 
   # Notice the filename always ends in .yaml
-  cal_mapping_file = r"C:\path\to\file\calibration_mapping.yaml"
-  pearl_example = Pearl(calibration_mapping_file=cal_mapping_file, ...)
+  pearl_example = Pearl(calibration_mapping_file=r"C:\path\to\file\calibration_mapping.yaml", ...)
 
 .. _config_file_pearl_isis-powder-diffraction-ref:
 
@@ -262,8 +259,7 @@ Example Input:
 ..  code-block:: python
 
   # Notice the filename always ends in .yaml
-  configuration_file = r"C:\path\to\file\configuration.yaml"
-  pearl_example = Pearl(config_file=configuration_file, ...)
+  pearl_example = Pearl(config_file=r"C:\path\to\file\configuration.yaml", ...)
 
 .. _do_absorb_corrections_pearl_isis-powder-diffraction-ref:
 
@@ -415,8 +411,7 @@ Example Input:
 
 ..  code-block:: python
 
-  output_dir = r"C:\path\to\output_dir"
-  pearl_example = Pearl(output_directory=output_dir, ...)
+  pearl_example = Pearl(output_directory=r"C:\path\to\output_dir", ...)
 
 .. _perform_attenuation_pearl_isis-powder-diffraction-ref:
 
