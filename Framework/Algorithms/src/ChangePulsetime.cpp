@@ -42,9 +42,7 @@ void ChangePulsetime::exec() {
   EventWorkspace_const_sptr in_ws;
   SpectrumIndexSet indexSet(0);
 
-  std::tie(in_ws, indexSet) =
-      std::tuple<EventWorkspace_const_sptr, SpectrumIndexSet>(
-          getProperty("InputWorkspace"));
+  std::tie(in_ws, indexSet) = getProperty("InputWorkspace");
 
   EventWorkspace_sptr out_ws = getProperty("OutputWorkspace");
   if (!out_ws) {

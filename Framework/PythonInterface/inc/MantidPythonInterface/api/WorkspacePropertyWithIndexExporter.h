@@ -140,7 +140,7 @@ template <typename WorkspaceType> struct WorkspacePropertyWithIndexExporter {
     WorkspaceType_sptr wksp;
     Indexing::SpectrumIndexSet indices(0);
     std::tie(wksp, indices) =
-        std::tuple<WorkspaceType_sptr, Indexing::SpectrumIndexSet>(self);
+        std::tuple<WorkspaceType_sptr &, Indexing::SpectrumIndexSet &>(self);
 
     boost::python::list indexList;
     for (auto i : indices)

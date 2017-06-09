@@ -94,11 +94,11 @@ public:
   WorkspacePropertyWithIndex &
   operator+=(WorkspacePropertyWithIndex<TYPE> const *rhs);
 
-  operator const std::tuple<boost::shared_ptr<TYPE>,
-                            Indexing::SpectrumIndexSet>() const;
+  operator const std::tuple<boost::shared_ptr<TYPE> &,
+                            Indexing::SpectrumIndexSet &>() const;
 
-  operator const std::tuple<boost::shared_ptr<const TYPE>,
-                            Indexing::SpectrumIndexSet>() const;
+  operator const std::tuple<boost::shared_ptr<const TYPE> &,
+                            Indexing::SpectrumIndexSet &>() const;
 
   WorkspacePropertyWithIndex *clone() const override;
 
@@ -123,8 +123,12 @@ public:
 private:
   std::unique_ptr<Kernel::ArrayProperty<int>> m_indexListProp;
   std::unique_ptr<IndexTypeProperty> m_indexTypeProp;
-  std::string m_indexListValue;
-  const Indexing::SpectrumIndexSet getIndices() const;
+  std::string m_indexListValid;
+  mutable boost::shared_ptr<TYPE> m_workspace_sptr;
+  mutable boost::shared_ptr<const TYPE> m_workspace_const_sptr;
+  mutable Indexing::SpectrumIndexSet m_indexSet;
+
+  Indexing::SpectrumIndexSet &getIndices() const;
 };
 } // namespace API
 } // namespace Mantid

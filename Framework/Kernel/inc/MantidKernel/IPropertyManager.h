@@ -83,8 +83,8 @@ public:
   */
   virtual void setPropertiesWithString(
       const std::string &propertiesString,
-      const std::unordered_set<std::string> &
-          ignoreProperties = std::unordered_set<std::string>()) = 0;
+      const std::unordered_set<std::string> &ignoreProperties =
+          std::unordered_set<std::string>()) = 0;
 
   /** Sets all the declared properties from a string.
       @param propertiesJson :: A string of name = value pairs formatted
@@ -94,8 +94,8 @@ public:
    */
   virtual void
   setProperties(const std::string &propertiesJson,
-                const std::unordered_set<std::string> &
-                    ignoreProperties = std::unordered_set<std::string>()) = 0;
+                const std::unordered_set<std::string> &ignoreProperties =
+                    std::unordered_set<std::string>()) = 0;
 
   /** Sets all the declared properties from a json object
      @param jsonValue :: A json name value pair collection
@@ -104,8 +104,8 @@ public:
   */
   virtual void
   setProperties(const ::Json::Value &jsonValue,
-                const std::unordered_set<std::string> &
-                    ignoreProperties = std::unordered_set<std::string>()) = 0;
+                const std::unordered_set<std::string> &ignoreProperties =
+                    std::unordered_set<std::string>()) = 0;
 
   /** Sets property value from a string
       @param name :: Property name
@@ -444,10 +444,24 @@ protected:
       return pm.getValue<std::tuple<boost::shared_ptr<T>, S>>(prop);
     }
 
-    /// explicit specialization for std::tuple with boost::shared_ptr<T> and S
+    /// explicit specialization for std::tuple with boost::shared_ptr<const T>
+    /// and S
     template <typename T, typename S>
     operator std::tuple<boost::shared_ptr<const T>, S>() {
       return pm.getValue<std::tuple<boost::shared_ptr<const T>, S>>(prop);
+    }
+
+    /// explicit specialization for std::tuple with boost::shared_ptr<T>& and S&
+    template <typename T, typename S>
+    operator std::tuple<boost::shared_ptr<T> &, S &>() {
+      return pm.getValue<std::tuple<boost::shared_ptr<T> &, S &>>(prop);
+    }
+
+    /// explicit specialization for std::tuple with boost::shared_ptr<const T>&
+    /// and S&
+    template <typename T, typename S>
+    operator std::tuple<boost::shared_ptr<const T> &, S &>() {
+      return pm.getValue<std::tuple<boost::shared_ptr<const T> &, S &>>(prop);
     }
 
     /// explicit version for Matrices

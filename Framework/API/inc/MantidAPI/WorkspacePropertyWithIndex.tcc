@@ -4,6 +4,7 @@
 #include <MantidIndexing/IndexInfo.h>
 #include <MantidKernel/Property.h>
 #include <MantidKernel/make_unique.h>
+#include <functional>
 
 #include "MantidAPI/WorkspaceProperty.tcc"
 
@@ -20,7 +21,8 @@ WorkspacePropertyWithIndex<TYPE>::WorkspacePropertyWithIndex(
     : WorkspaceProperty<TYPE>(name, wsName, Direction::Input),
       m_indexListProp(
           make_unique<ArrayProperty<int>>("Indices", Direction::Output)),
-      m_indexTypeProp(make_unique<IndexTypeProperty>(indexTypes)) {}
+      m_indexTypeProp(make_unique<IndexTypeProperty>(indexTypes)),
+      m_indexSet(0) {}
 
 template <typename TYPE>
 WorkspacePropertyWithIndex<TYPE>::WorkspacePropertyWithIndex(
@@ -29,7 +31,8 @@ WorkspacePropertyWithIndex<TYPE>::WorkspacePropertyWithIndex(
     : WorkspaceProperty<TYPE>(name, wsName, Direction::Input, optional),
       m_indexListProp(
           make_unique<ArrayProperty<int>>("Indices", Direction::Output)),
-      m_indexTypeProp(make_unique<IndexTypeProperty>(indexTypes)) {}
+      m_indexTypeProp(make_unique<IndexTypeProperty>(indexTypes)),
+      m_indexSet(0) {}
 
 template <typename TYPE>
 WorkspacePropertyWithIndex<TYPE>::WorkspacePropertyWithIndex(
@@ -40,14 +43,16 @@ WorkspacePropertyWithIndex<TYPE>::WorkspacePropertyWithIndex(
                               locking),
       m_indexListProp(
           make_unique<ArrayProperty<int>>("Indices", Direction::Output)),
-      m_indexTypeProp(make_unique<IndexTypeProperty>(indexTypes)) {}
+      m_indexTypeProp(make_unique<IndexTypeProperty>(indexTypes)),
+      m_indexSet(0) {}
 
 template <typename TYPE>
 WorkspacePropertyWithIndex<TYPE>::WorkspacePropertyWithIndex(
     const WorkspacePropertyWithIndex<TYPE> &right)
     : WorkspaceProperty<TYPE>(right),
       m_indexListProp(make_unique<ArrayProperty<int>>(*right.m_indexListProp)),
-      m_indexTypeProp(make_unique<IndexTypeProperty>(*right.m_indexTypeProp)) {}
+      m_indexTypeProp(make_unique<IndexTypeProperty>(*right.m_indexTypeProp)),
+      m_indexSet(0) {}
 
 template <typename TYPE>
 std::string WorkspacePropertyWithIndex<TYPE>::isValid() const {
@@ -56,10 +61,14 @@ std::string WorkspacePropertyWithIndex<TYPE>::isValid() const {
 
   if ((valid = WorkspaceProperty<TYPE>::isValid()) != "")
     error += "\n" + valid;
-  if ((valid = m_indexTypeProp->isValid()) != "")
-    error += "\n" + valid;
-  if ((valid = m_indexListProp->setValue(m_indexListValue)) != "")
-    error += "\n" + valid;
+  if (m_indexListValid != "")
+    error += "\n" + m_indexListValid;
+
+  try {
+    m_indexTypeProp->selectedType();
+  } catch (std::runtime_error &e) {
+    error += "\n" + std::string(e.what());
+  }
 
   if (error.empty()) {
     try {
@@ -108,8 +117,7 @@ operator=(const std::string &rhs) {
 
     WorkspaceProperty<TYPE>::setValue(values[0]);
     *m_indexTypeProp.get() = values[1];
-    m_indexListValue = values[2];
-    m_indexListProp->setValue(m_indexListValue);
+    m_indexListValid = m_indexListProp->setValue(values[2]);
 
   } else {
     WorkspaceProperty<TYPE>::setValue(rhs);
@@ -131,8 +139,6 @@ operator=(const std::tuple<boost::shared_ptr<TYPE>, API::IndexType,
   *this = ws;
   *this->m_indexTypeProp.get() = type;
   *this->m_indexListProp.get() = list;
-
-  m_indexListValue = this->m_indexListProp->value();
   return *this;
 }
 
@@ -148,8 +154,7 @@ operator=(const std::tuple<boost::shared_ptr<TYPE>, API::IndexType, std::string>
 
   *this = ws;
   *this->m_indexTypeProp.get() = type;
-  m_indexListValue = list;
-  m_indexListProp->setValue(m_indexListValue);
+  m_indexListValid = m_indexListProp->setValue(list);
 
   return *this;
 }
@@ -161,7 +166,6 @@ operator=(const WorkspacePropertyWithIndex<TYPE> &rhs) {
     return *this;
   API::WorkspaceProperty<TYPE>::operator=(rhs);
   *m_indexListProp = *rhs.m_indexListProp;
-  m_indexListValue = m_indexListProp->value();
   *m_indexTypeProp = rhs.m_indexTypeProp->selectedType();
 
   return *this;
@@ -194,30 +198,36 @@ std::string WorkspacePropertyWithIndex<TYPE>::value() const {
 
 template <typename TYPE>
 WorkspacePropertyWithIndex<TYPE>::
-operator const std::tuple<boost::shared_ptr<TYPE>, SpectrumIndexSet>() const {
-  return std::make_pair(operator()(), getIndices());
+operator const std::tuple<boost::shared_ptr<TYPE> &, SpectrumIndexSet &>()
+    const {
+  getIndices();
+  m_workspace_sptr = boost::dynamic_pointer_cast<TYPE>(getWorkspace());
+  return std::tuple<boost::shared_ptr<TYPE> &, SpectrumIndexSet &>(
+      m_workspace_sptr, m_indexSet);
 }
 
 template <typename TYPE>
 WorkspacePropertyWithIndex<TYPE>::
-operator const std::tuple<boost::shared_ptr<const TYPE>, SpectrumIndexSet>()
+operator const std::tuple<boost::shared_ptr<const TYPE> &, SpectrumIndexSet &>()
     const {
-  return std::make_pair(operator()(), getIndices());
+  getIndices();
+  m_workspace_const_sptr =
+      boost::dynamic_pointer_cast<const TYPE>(getWorkspace());
+  return std::tuple<boost::shared_ptr<const TYPE> &, SpectrumIndexSet &>(
+      m_workspace_const_sptr, m_indexSet);
 }
 
 template <typename TYPE>
-const SpectrumIndexSet WorkspacePropertyWithIndex<TYPE>::getIndices() const {
+SpectrumIndexSet &WorkspacePropertyWithIndex<TYPE>::getIndices() const {
   // TODO handle DetectorID->SpectrumNumber conversion
   // This will need to be an extra IndexType
   const auto &list = this->m_indexListProp->operator()();
 
-  const auto &indexInfo =
-      boost::dynamic_pointer_cast<API::MatrixWorkspace>(getWorkspace())
-          ->indexInfo();
+  const auto &indexInfo = m_value->indexInfo();
 
   // If no indices provided, then assume all
   if (list.size() == 0)
-    return indexInfo.makeIndexSet();
+    return m_indexSet = indexInfo.makeIndexSet();
 
   // Determine if input is a pure range or just a list of numbers
   auto res = std::minmax_element(list.begin(), list.end());
@@ -230,28 +240,31 @@ const SpectrumIndexSet WorkspacePropertyWithIndex<TYPE>::getIndices() const {
     auto max = list[maxIndex];
     switch (m_indexTypeProp->selectedType()) {
     case IndexType::SpectrumNumber:
-      return indexInfo.makeIndexSet(Indexing::SpectrumNumber(min),
-                                    Indexing::SpectrumNumber(max));
+      return m_indexSet = indexInfo.makeIndexSet(Indexing::SpectrumNumber(min),
+                                                 Indexing::SpectrumNumber(max));
       break;
     case IndexType::WorkspaceIndex:
-      return indexInfo.makeIndexSet(Indexing::GlobalSpectrumIndex(min),
-                                    Indexing::GlobalSpectrumIndex(max));
+      return m_indexSet =
+                 indexInfo.makeIndexSet(Indexing::GlobalSpectrumIndex(min),
+                                        Indexing::GlobalSpectrumIndex(max));
       break;
     }
   } else { // Only make a vector if we don't have a pure range
     switch (m_indexTypeProp->selectedType()) {
     case IndexType::SpectrumNumber:
-      return indexInfo.makeIndexSet(
-          std::vector<Indexing::SpectrumNumber>(list.begin(), list.end()));
+      return m_indexSet =
+                 indexInfo.makeIndexSet(std::vector<Indexing::SpectrumNumber>(
+                     list.begin(), list.end()));
       break;
     case IndexType::WorkspaceIndex:
-      return indexInfo.makeIndexSet(
-          std::vector<Indexing::GlobalSpectrumIndex>(list.begin(), list.end()));
+      return m_indexSet = indexInfo.makeIndexSet(
+                 std::vector<Indexing::GlobalSpectrumIndex>(list.begin(),
+                                                            list.end()));
       break;
     }
   }
 
-  return Mantid::Indexing::SpectrumIndexSet(0);
+  return m_indexSet = Mantid::Indexing::SpectrumIndexSet(0);
 }
 } // namespace API
 } // namespace Mantid

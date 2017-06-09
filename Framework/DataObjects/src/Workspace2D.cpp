@@ -392,14 +392,14 @@ IPropertyManager::getValue<Workspace2D_const_sptr>(
 }
 
 template <>
-DLLExport std::tuple<Workspace2D_sptr, SpectrumIndexSet>
-IPropertyManager::getValue<std::tuple<Workspace2D_sptr, SpectrumIndexSet>>(
+DLLExport std::tuple<Workspace2D_sptr &, SpectrumIndexSet &>
+IPropertyManager::getValue<std::tuple<Workspace2D_sptr &, SpectrumIndexSet &>>(
     const std::string &name) const {
   WorkspacePropertyWithIndex<Workspace2D> *prop =
       dynamic_cast<WorkspacePropertyWithIndex<Workspace2D> *>(
           getPointerToProperty(name));
   if (prop) {
-    return std::tuple<Workspace2D_sptr, SpectrumIndexSet>(*prop);
+    return *prop;
   } else {
     std::string message =
         "Attempt to assign property " + name +
@@ -409,15 +409,15 @@ IPropertyManager::getValue<std::tuple<Workspace2D_sptr, SpectrumIndexSet>>(
 }
 
 template <>
-DLLExport std::tuple<Workspace2D_const_sptr, SpectrumIndexSet>
+DLLExport std::tuple<Workspace2D_const_sptr &, SpectrumIndexSet &>
 IPropertyManager::getValue<
-    std::tuple<Workspace2D_const_sptr, SpectrumIndexSet>>(
+    std::tuple<Workspace2D_const_sptr &, SpectrumIndexSet &>>(
     const std::string &name) const {
   WorkspacePropertyWithIndex<Workspace2D> *prop =
       dynamic_cast<WorkspacePropertyWithIndex<Workspace2D> *>(
           getPointerToProperty(name));
   if (prop) {
-    return std::tuple<Workspace2D_const_sptr, SpectrumIndexSet>(*prop);
+    return *prop;
   } else {
     std::string message =
         "Attempt to assign property " + name +
@@ -431,8 +431,9 @@ template <>
 DLLExport IPropertyManager *
 IPropertyManager::setTypedProperty<Workspace2D_sptr, API::IndexType,
                                    std::vector<int>>(
-    const std::string &name, const std::tuple<Workspace2D_sptr, API::IndexType,
-                                              std::vector<int>> &value) {
+    const std::string &name,
+    const std::tuple<Workspace2D_sptr, API::IndexType, std::vector<int>>
+        &value) {
   WorkspacePropertyWithIndex<Workspace2D> *prop =
       dynamic_cast<WorkspacePropertyWithIndex<Workspace2D> *>(
           getPointerToProperty(name));

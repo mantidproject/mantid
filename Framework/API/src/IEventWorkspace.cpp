@@ -78,15 +78,15 @@ IPropertyManager::getValue<IEventWorkspace_const_sptr>(
 }
 
 template <>
-DLLExport std::tuple<IEventWorkspace_const_sptr, SpectrumIndexSet>
+DLLExport std::tuple<IEventWorkspace_const_sptr &, SpectrumIndexSet &>
 IPropertyManager::getValue<
-    std::tuple<IEventWorkspace_const_sptr, SpectrumIndexSet>>(
+    std::tuple<IEventWorkspace_const_sptr &, SpectrumIndexSet &>>(
     const std::string &name) const {
   WorkspacePropertyWithIndex<IEventWorkspace> *prop =
       dynamic_cast<WorkspacePropertyWithIndex<IEventWorkspace> *>(
           getPointerToProperty(name));
   if (prop) {
-    return std::tuple<IEventWorkspace_const_sptr, SpectrumIndexSet>(*prop);
+    return *prop;
   } else {
     std::string message =
         "Attempt to assign property " + name +
@@ -96,14 +96,15 @@ IPropertyManager::getValue<
 }
 
 template <>
-DLLExport std::tuple<IEventWorkspace_sptr, SpectrumIndexSet>
-IPropertyManager::getValue<std::tuple<IEventWorkspace_sptr, SpectrumIndexSet>>(
+DLLExport std::tuple<IEventWorkspace_sptr &, SpectrumIndexSet &>
+IPropertyManager::getValue<
+    std::tuple<IEventWorkspace_sptr &, SpectrumIndexSet &>>(
     const std::string &name) const {
   WorkspacePropertyWithIndex<IEventWorkspace> *prop =
       dynamic_cast<WorkspacePropertyWithIndex<IEventWorkspace> *>(
           getPointerToProperty(name));
   if (prop) {
-    return std::tuple<IEventWorkspace_sptr, SpectrumIndexSet>(*prop);
+    return *prop;
   } else {
     std::string message =
         "Attempt to assign property " + name +
@@ -118,8 +119,8 @@ DLLExport IPropertyManager *
 IPropertyManager::setTypedProperty<IEventWorkspace_sptr, API::IndexType,
                                    std::vector<int>>(
     const std::string &name,
-    const std::tuple<IEventWorkspace_sptr, API::IndexType, std::vector<int>> &
-        value) {
+    const std::tuple<IEventWorkspace_sptr, API::IndexType, std::vector<int>>
+        &value) {
   WorkspacePropertyWithIndex<IEventWorkspace> *prop =
       dynamic_cast<WorkspacePropertyWithIndex<IEventWorkspace> *>(
           getPointerToProperty(name));
@@ -137,8 +138,8 @@ DLLExport IPropertyManager *
 IPropertyManager::setTypedProperty<IEventWorkspace_sptr, API::IndexType,
                                    std::string>(
     const std::string &name,
-    const std::tuple<IEventWorkspace_sptr, API::IndexType, std::string> &
-        value) {
+    const std::tuple<IEventWorkspace_sptr, API::IndexType, std::string>
+        &value) {
   WorkspacePropertyWithIndex<IEventWorkspace> *prop =
       dynamic_cast<WorkspacePropertyWithIndex<IEventWorkspace> *>(
           getPointerToProperty(name));

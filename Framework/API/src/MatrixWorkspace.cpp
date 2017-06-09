@@ -12,16 +12,16 @@
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidGeometry/MDGeometry/GeneralFrame.h"
 #include "MantidGeometry/MDGeometry/MDFrame.h"
+#include "MantidIndexing/GlobalSpectrumIndex.h"
 #include "MantidIndexing/IndexInfo.h"
 #include "MantidKernel/MDUnit.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/make_unique.h"
+#include "MantidTypes/SpectrumDefinition.h"
 #include <MantidAPI/WorkspacePropertyWithIndex.h>
 #include <MantidAPI/WorkspacePropertyWithIndex.tcc>
 #include <MantidIndexing/SpectrumIndexSet.h>
-#include "MantidIndexing/GlobalSpectrumIndex.h"
-#include "MantidTypes/SpectrumDefinition.h"
 
 #include <cmath>
 
@@ -116,8 +116,8 @@ void MatrixWorkspace::setIndexInfo(const Indexing::IndexInfo &indexInfo) {
                                 "workspace");
 
   for (size_t i = 0; i < getNumberHistograms(); ++i) {
-    getSpectrum(i)
-        .setSpectrumNo(static_cast<specnum_t>(indexInfo.spectrumNumber(i)));
+    getSpectrum(i).setSpectrumNo(
+        static_cast<specnum_t>(indexInfo.spectrumNumber(i)));
   }
   *m_indexInfo = indexInfo;
   m_indexInfoNeedsUpdate = false;
@@ -513,8 +513,8 @@ std::vector<size_t> MatrixWorkspace::getDetectorIDToWorkspaceIndexVector(
       int index = det + offset;
       if (index < 0 || index >= outSize) {
         g_log.debug() << "MatrixWorkspace::getDetectorIDToWorkspaceIndexVector("
-                         "): detector ID found (" << det
-                      << " at workspace index " << workspaceIndex
+                         "): detector ID found ("
+                      << det << " at workspace index " << workspaceIndex
                       << ") is invalid.\n";
       } else
         // Save it at that point.
@@ -2113,15 +2113,15 @@ IPropertyManager::getValue<MatrixWorkspace_const_sptr>(
 }
 
 template <>
-DLLExport std::tuple<MatrixWorkspace_const_sptr, SpectrumIndexSet>
+DLLExport std::tuple<MatrixWorkspace_const_sptr &, SpectrumIndexSet &>
 IPropertyManager::getValue<
-    std::tuple<MatrixWorkspace_const_sptr, SpectrumIndexSet>>(
+    std::tuple<MatrixWorkspace_const_sptr &, SpectrumIndexSet &>>(
     const std::string &name) const {
   WorkspacePropertyWithIndex<MatrixWorkspace> *prop =
       dynamic_cast<WorkspacePropertyWithIndex<MatrixWorkspace> *>(
           getPointerToProperty(name));
   if (prop) {
-    return std::tuple<MatrixWorkspace_const_sptr, SpectrumIndexSet>(*prop);
+    return *prop;
   } else {
     std::string message =
         "Attempt to assign property " + name +
@@ -2131,14 +2131,15 @@ IPropertyManager::getValue<
 }
 
 template <>
-DLLExport std::tuple<MatrixWorkspace_sptr, SpectrumIndexSet>
-IPropertyManager::getValue<std::tuple<MatrixWorkspace_sptr, SpectrumIndexSet>>(
+DLLExport std::tuple<MatrixWorkspace_sptr &, SpectrumIndexSet &>
+IPropertyManager::getValue<
+    std::tuple<MatrixWorkspace_sptr &, SpectrumIndexSet &>>(
     const std::string &name) const {
   WorkspacePropertyWithIndex<MatrixWorkspace> *prop =
       dynamic_cast<WorkspacePropertyWithIndex<MatrixWorkspace> *>(
           getPointerToProperty(name));
   if (prop) {
-    return std::tuple<MatrixWorkspace_sptr, SpectrumIndexSet>(*prop);
+    return *prop;
   } else {
     std::string message =
         "Attempt to assign property " + name +
@@ -2153,8 +2154,8 @@ DLLExport IPropertyManager *
 IPropertyManager::setTypedProperty<MatrixWorkspace_sptr, API::IndexType,
                                    std::vector<int>>(
     const std::string &name,
-    const std::tuple<MatrixWorkspace_sptr, API::IndexType, std::vector<int>> &
-        value) {
+    const std::tuple<MatrixWorkspace_sptr, API::IndexType, std::vector<int>>
+        &value) {
   WorkspacePropertyWithIndex<MatrixWorkspace> *prop =
       dynamic_cast<WorkspacePropertyWithIndex<MatrixWorkspace> *>(
           getPointerToProperty(name));
@@ -2172,8 +2173,8 @@ DLLExport IPropertyManager *
 IPropertyManager::setTypedProperty<MatrixWorkspace_sptr, API::IndexType,
                                    std::string>(
     const std::string &name,
-    const std::tuple<MatrixWorkspace_sptr, API::IndexType, std::string> &
-        value) {
+    const std::tuple<MatrixWorkspace_sptr, API::IndexType, std::string>
+        &value) {
   WorkspacePropertyWithIndex<MatrixWorkspace> *prop =
       dynamic_cast<WorkspacePropertyWithIndex<MatrixWorkspace> *>(
           getPointerToProperty(name));

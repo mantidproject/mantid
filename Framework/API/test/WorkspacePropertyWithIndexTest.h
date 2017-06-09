@@ -64,8 +64,7 @@ public:
     MatrixWorkspace_sptr outWs;
     SpectrumIndexSet indexSet(indices.size());
 
-    std::tie(outWs, indexSet) =
-        std::tuple<MatrixWorkspace_sptr, SpectrumIndexSet>(prop);
+    std::tie(outWs, indexSet) = prop;
 
     TS_ASSERT_EQUALS(outWs, ws);
 
@@ -98,7 +97,7 @@ public:
     // Invalid spectrum numbers could be set at the GUI level
     prop.mutableIndexListProperty() = std::vector<int>{25, 30, 95, 90};
 
-    TS_ASSERT(prop.isValid() != "");
+    TS_ASSERT_EQUALS(prop.isValid(), "SpectrumNumbers provided out of range.");
   }
 
   void testRetrieveWorkspaceAndSpectrumIndexSetUsingSpectrumNumbers() {
@@ -120,8 +119,7 @@ public:
     MatrixWorkspace_sptr outWs;
     SpectrumIndexSet indexSet(indices.size());
 
-    std::tie(outWs, indexSet) =
-        std::tuple<MatrixWorkspace_sptr, SpectrumIndexSet>(prop);
+    std::tie(outWs, indexSet) = prop;
 
     TS_ASSERT_EQUALS(outWs, ws);
 
@@ -146,8 +144,7 @@ public:
     MatrixWorkspace_sptr outWs;
     SpectrumIndexSet indexSet(indices.size());
 
-    std::tie(outWs, indexSet) =
-        std::tuple<MatrixWorkspace_sptr, SpectrumIndexSet>(prop);
+    std::tie(outWs, indexSet) = prop;
 
     TS_ASSERT_EQUALS(outWs, ws);
 
@@ -169,8 +166,7 @@ public:
     MatrixWorkspace_sptr outWs;
     SpectrumIndexSet indexSet(0);
 
-    std::tie(outWs, indexSet) =
-        std::tuple<MatrixWorkspace_sptr, SpectrumIndexSet>(prop);
+    std::tie(outWs, indexSet) = prop;
 
     TS_ASSERT_EQUALS(outWs, ws);
 
@@ -185,14 +181,12 @@ public:
     std::vector<int> list{1, 3, 9};
     MatrixWorkspaceIndexProp prop("InputWorkspaceWithIndex",
                                   IndexType::SpectrumNumber);
-    prop = std::tuple<MatrixWorkspace_sptr, IndexType, std::vector<int>>(
-        ws, IndexType::SpectrumNumber, list);
+    prop = std::make_tuple(ws, IndexType::SpectrumNumber, list);
 
     MatrixWorkspace_sptr outWs;
     SpectrumIndexSet indexSet(0);
 
-    std::tie(outWs, indexSet) =
-        std::tuple<MatrixWorkspace_sptr, SpectrumIndexSet>(prop);
+    std::tie(outWs, indexSet) = prop;
 
     TS_ASSERT_EQUALS(outWs, ws);
 
@@ -206,14 +200,12 @@ public:
     auto ws = WorkspaceFactory::Instance().create("WorkspaceTester", 10, 10, 9);
     MatrixWorkspaceIndexProp prop("InputWorkspaceWithIndex",
                                   IndexType::WorkspaceIndex);
-    prop = std::tuple<MatrixWorkspace_sptr, IndexType, std::string>(
-        ws, IndexType::WorkspaceIndex, "1:4,8");
+    prop = std::make_tuple(ws, IndexType::WorkspaceIndex, "1:4,8");
 
     MatrixWorkspace_sptr outWs;
     SpectrumIndexSet indexSet(0);
 
-    std::tie(outWs, indexSet) =
-        std::tuple<MatrixWorkspace_sptr, SpectrumIndexSet>(prop);
+    std::tie(outWs, indexSet) = prop;
 
     TS_ASSERT_EQUALS(outWs, ws);
 
@@ -225,18 +217,66 @@ public:
     TS_ASSERT_EQUALS(indexSet[4], 8);
   }
 
+  void testSetPropertyWithStringWorkspaceOnly() {
+    auto ws = WorkspaceFactory::Instance().create("WorkspaceTester", 10, 10, 9);
+    AnalysisDataService::Instance().add("ws", ws);
+    MatrixWorkspaceIndexProp prop("InputWorkspaceWithIndex");
+
+    TS_ASSERT_EQUALS(prop.setValue("ws"), "");
+    AnalysisDataService::Instance().remove("ws");
+  }
+
+  void testSetPropertyWithStringWorkspaceOnlyFailInvalidWorkspace() {
+    auto ws = WorkspaceFactory::Instance().create("WorkspaceTester", 10, 10, 9);
+    AnalysisDataService::Instance().add("ws", ws);
+    MatrixWorkspaceIndexProp prop("InputWorkspaceWithIndex");
+
+    TS_ASSERT_EQUALS(
+        prop.setValue("testws"),
+        "\nWorkspace \"testws\" was not found in the Analysis Data Service");
+
+    AnalysisDataService::Instance().remove("ws");
+  }
+
+  void testSetPropertyWithString() {
+    auto ws = WorkspaceFactory::Instance().create("WorkspaceTester", 10, 10, 9);
+    AnalysisDataService::Instance().add("ws", ws);
+    MatrixWorkspaceIndexProp prop("InputWorkspaceWithIndex");
+
+    TS_ASSERT_EQUALS(prop.setValue("ws;SpectrumNumber;1:5"), "");
+    AnalysisDataService::Instance().remove("ws");
+  }
+
+  void testSetPropertyWithStringFailWithInvalidIndexType() {
+    auto ws = WorkspaceFactory::Instance().create("WorkspaceTester", 10, 10, 9);
+    AnalysisDataService::Instance().add("ws", ws);
+    MatrixWorkspaceIndexProp prop("InputWorkspaceWithIndex");
+
+    TS_ASSERT_EQUALS(prop.setValue("ws;SpecNum;1:5"),
+                     "\nSpecNum is an invalid IndexType.");
+    AnalysisDataService::Instance().remove("ws");
+  }
+
+  void testSetPropertyWithStringFailWithInvalidIndexList() {
+    auto ws = WorkspaceFactory::Instance().create("WorkspaceTester", 10, 10, 9);
+    AnalysisDataService::Instance().add("ws", ws);
+    MatrixWorkspaceIndexProp prop("InputWorkspaceWithIndex");
+    TS_ASSERT_EQUALS(prop.setValue("ws;SpectrumNumber;one:five"),
+                     "\nCould not set property Indices. Can not convert "
+                     "\"one:five\" to int list");
+    AnalysisDataService::Instance().remove("ws");
+  }
+
   void testRetrieveConstWorkspace() {
     auto ws = WorkspaceFactory::Instance().create("WorkspaceTester", 10, 10, 9);
     MatrixWorkspaceIndexProp prop("InputWorkspaceWithIndex",
                                   IndexType::WorkspaceIndex);
-    prop = std::tuple<MatrixWorkspace_sptr, IndexType, std::string>(
-        ws, IndexType::WorkspaceIndex, "");
+    prop = std::make_tuple(ws, IndexType::WorkspaceIndex, "");
 
     MatrixWorkspace_const_sptr outWs;
     SpectrumIndexSet indexSet(0);
 
-    std::tie(outWs, indexSet) =
-        std::tuple<MatrixWorkspace_const_sptr, SpectrumIndexSet>(prop);
+    std::tie(outWs, indexSet) = prop;
 
     TS_ASSERT_EQUALS(outWs, ws);
   }
@@ -251,9 +291,7 @@ public:
     MatrixWorkspace_sptr outWs;
     SpectrumIndexSet indexSet(0);
 
-    std::tie(outWs, indexSet) =
-        std::tuple<MatrixWorkspace_sptr, SpectrumIndexSet>(
-            mgr.getProperty("InputWorkspaceWithIndex"));
+    std::tie(outWs, indexSet) = mgr.getProperty("InputWorkspaceWithIndex");
 
     TS_ASSERT_EQUALS(outWs, ws);
 
@@ -275,9 +313,7 @@ public:
     MatrixWorkspace_sptr outWs;
     SpectrumIndexSet indexSet(0);
 
-    std::tie(outWs, indexSet) =
-        std::tuple<MatrixWorkspace_sptr, SpectrumIndexSet>(
-            mgr.getProperty("InputWorkspaceWithIndex"));
+    std::tie(outWs, indexSet) = mgr.getProperty("InputWorkspaceWithIndex");
 
     TS_ASSERT_EQUALS(outWs, ws);
 
@@ -300,9 +336,7 @@ public:
     MatrixWorkspace_sptr outWs;
     SpectrumIndexSet indexSet(0);
 
-    std::tie(outWs, indexSet) =
-        std::tuple<MatrixWorkspace_sptr, SpectrumIndexSet>(
-            mgr.getProperty("InputWorkspaceWithIndex"));
+    std::tie(outWs, indexSet) = mgr.getProperty("InputWorkspaceWithIndex");
 
     TS_ASSERT_EQUALS(outWs, ws);
 
