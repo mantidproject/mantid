@@ -7,6 +7,7 @@
 #include <Poco/DOM/NodeList.h>
 #include <Poco/DOM/Text.h>
 
+#include <ostream>
 #include <stdexcept>
 
 namespace Mantid {

@@ -1,4 +1,6 @@
 #include "MantidKernel/OptionalBool.h"
+
+#include <ostream>
 #include <utility>
 
 namespace Mantid {
