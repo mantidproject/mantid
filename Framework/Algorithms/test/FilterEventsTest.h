@@ -420,7 +420,7 @@ public:
   //----------------------------------------------------------------------------------------------
   /** Test filtering with correction of direct geometry
     */
-  void Ptest_FilterElasticCorrection() {
+  void test_FilterElasticCorrection() {
     EventWorkspace_sptr ws = createEventWorkspaceElastic(0, 1000000);
     AnalysisDataService::Instance().addOrReplace("MockElasticEventWS", ws);
     TS_ASSERT_EQUALS(ws->getNumberEvents(), 10000);
@@ -478,7 +478,7 @@ public:
   //----------------------------------------------------------------------------------------------
   /** Test filtering with correction of direct geometry
     */
-  void Ptest_FilterDGCorrection() {
+  void test_FilterDGCorrection() {
     EventWorkspace_sptr ws = createEventWorkspaceDirect(0, 1000000);
     AnalysisDataService::Instance().addOrReplace("MockDirectEventWS", ws);
 
@@ -529,7 +529,7 @@ public:
   //----------------------------------------------------------------------------------------------
   /** Test filtering with correction to indirect geometry inelastic instrument
     */
-  void Ptest_FilterIndirectGeometryCorrection() {
+  void test_FilterIndirectGeometryCorrection() {
     // Create workspaces for filtering
     EventWorkspace_sptr ws = createEventWorkspaceInDirect(0, 1000000);
     AnalysisDataService::Instance().addOrReplace("MockIndirectEventWS", ws);
@@ -614,7 +614,7 @@ public:
         979: 3: 2.65e+08  -  3.65e+08: 2
         979: 4: 3.65e+08  -  4.65e+08: 2
    */
-  void Ptest_FilterRelativeTime() {
+  void test_FilterRelativeTime() {
     // Create EventWorkspace and SplittersWorkspace
     int64_t runstart_i64 = 20000000000;
     int64_t pulsedt = 100 * 1000 * 1000;
@@ -803,7 +803,7 @@ public:
    *  (2) Count events in each output including "-1", the excluded/unselected
    * events
    */
-  void Ptest_tableSplitter() {
+  void test_tableSplitter() {
     // Create EventWorkspace and SplittersWorkspace
     int64_t runstart_i64 = 20000000000;
     int64_t pulsedt = 100 * 1000 * 1000;
