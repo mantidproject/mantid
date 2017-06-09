@@ -59,10 +59,10 @@ Output:
 
 .. testoutput:: AbinsCastepSimple
 
-    benzene_wrk_H_total
-    benzene_wrk_H
     benzene_wrk_C_total
     benzene_wrk_C
+    benzene_wrk_H_total
+    benzene_wrk_H
 
 **Example - loading CRYSTAL phonon data :**
 
@@ -77,16 +77,16 @@ Output:
 
 .. testoutput:: AbinsCrystalSimple
 
-    wrk_Na_total
-    wrk_Na
     wrk_C_total
     wrk_C
     wrk_H_total
     wrk_H
-    wrk_O_total
-    wrk_O
     wrk_N_total
     wrk_N
+    wrk_Na_total
+    wrk_Na
+    wrk_O_total
+    wrk_O
 
 **Example - calling Abins with more arguments:**
 
