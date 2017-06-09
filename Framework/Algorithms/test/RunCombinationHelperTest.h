@@ -11,7 +11,8 @@
 #include "MantidKernel/UnitFactory.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
-using namespace Mantid::Algorithms;
+using Mantid::Algorithms::RunCombinationHelper;
+using Mantid::Algorithms::GroupWorkspaces;
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace WorkspaceCreationHelper;
@@ -72,8 +73,9 @@ public:
     // incompatible number of histograms
     MatrixWorkspace_sptr ws4 =
         create2DWorkspaceWithFullInstrument(3, 3, true, false, true, "test");
-    TS_ASSERT_EQUALS(m_testee.checkCompatibility(ws4),
+    TS_ASSERT_EQUALS(m_testee.checkCompatibility(ws4, true),
                      "different number of histograms; ");
+    TS_ASSERT(m_testee.checkCompatibility(ws4).empty());
 
     // point data
     MatrixWorkspace_sptr ws5 =

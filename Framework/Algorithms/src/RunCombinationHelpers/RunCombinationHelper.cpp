@@ -54,23 +54,26 @@ void RunCombinationHelper::setReferenceProperties(MatrixWorkspace_sptr ref) {
 //----------------------------------------------------------------------------------------------
 /** Compares the properties of the input workspace with the reference
  * @param ws : the testee workspace
+ * @param checkNumberHistograms : whether to check also the number of histograms
  * @return : empty if compatible, error message otherwises
  */
-std::string RunCombinationHelper::checkCompatibility(MatrixWorkspace_sptr ws) {
-    std::string errors;
-    if (ws->getNumberHistograms() != m_numberSpectra)
-      errors += "different number of histograms; ";
-    if (ws->getAxis(0)->unit()->unitID() != m_xUnit)
-      errors += "different X units; ";
-    if (ws->getAxis(1)->unit()->unitID() != m_spectrumAxisUnit)
-      errors += "different spectrum axis units; ";
-    if (ws->YUnit() != m_yUnit)
-      errors += "different Y units; ";
-    if (ws->isHistogramData() != m_isHistogramData)
-      errors += "different distribution or histogram type; ";
-    if (ws->getInstrument()->getName() != m_instrumentName)
-      errors += "different instrument names; ";
-    return errors;
+std::string
+RunCombinationHelper::checkCompatibility(MatrixWorkspace_sptr ws,
+                                         bool checkNumberHistograms) {
+  std::string errors;
+  if (ws->getNumberHistograms() != m_numberSpectra && checkNumberHistograms)
+    errors += "different number of histograms; ";
+  if (ws->getAxis(0)->unit()->unitID() != m_xUnit)
+    errors += "different X units; ";
+  if (ws->getAxis(1)->unit()->unitID() != m_spectrumAxisUnit)
+    errors += "different spectrum axis units; ";
+  if (ws->YUnit() != m_yUnit)
+    errors += "different Y units; ";
+  if (ws->isHistogramData() != m_isHistogramData)
+    errors += "different distribution or histogram type; ";
+  if (ws->getInstrument()->getName() != m_instrumentName)
+    errors += "different instrument names; ";
+  return errors;
 }
 
 } // namespace Algorithms

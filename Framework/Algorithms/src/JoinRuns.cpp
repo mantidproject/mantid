@@ -132,7 +132,7 @@ std::map<std::string, std::string> JoinRuns::validateInputs() {
 
     for (const auto &ws : m_inputWS) {
       // check if all the others are compatible with the first one
-      std::string compatible = combHelper.checkCompatibility(ws);
+      std::string compatible = combHelper.checkCompatibility(ws, true);
       if (!compatible.empty()) {
         issues[INPUTWORKSPACEPROPERTY] += "Workspace " + ws->getName() +
                                           " is not compatible: " + compatible +
@@ -356,22 +356,25 @@ void JoinRuns::exec() {
   if (m_inputWS.size() == 1) {
     g_log.warning() << "Nothing left to join after skipping the workspaces "
                        "that failed to merge the sample logs.";
-    // note, even if only one left, we need to continue still, since
+    // note, we need to continue still, since
     // the x-axis might need to be changed
   }
 
   size_t outBlockSize = xAxis.size();
+  size_t numSpec = first->getNumberHistograms();
 
   m_outWS = WorkspaceFactory::Instance().create(
-      first, first->getNumberHistograms(), outBlockSize, outBlockSize);
+      first, numSpec, outBlockSize, outBlockSize);
 
-  const long spectra = static_cast<long>(first->getNumberHistograms());
+  m_progress = make_unique<Progress>(this, 0.0, 1.0, numSpec);
+
   // Now loop in parallel over all the spectra and join the data
   PARALLEL_FOR_IF(threadSafe(m_outWS))
-  for (long index = 0; index < spectra; ++index) {
+  for (long index = 0; index < static_cast<long>(numSpec); ++index) {
     PARALLEL_START_INTERUPT_REGION
     m_outWS->mutableX(static_cast<size_t>(index)) = xAxis;
     joinSpectrum(index);
+    m_progress->report();
     PARALLEL_END_INTERUPT_REGION
   }
   PARALLEL_CHECK_INTERUPT_REGION
