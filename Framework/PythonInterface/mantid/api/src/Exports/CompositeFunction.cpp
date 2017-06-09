@@ -30,5 +30,7 @@ void export_CompositeFunction() {
     (arg("self"), arg("i")), "Get value of parameter of given index.")
     .def("getParameterValue", (getParameterType2) &CompositeFunction::getParameter,
     (arg("self"), arg("name")), "Get value of parameter of given name.")
+    .def("__getitem__", (getParameterType2)&CompositeFunction::getParameter,
+    (arg("self"), arg("name")), "Get value of parameter of given name.")
     ;
 }

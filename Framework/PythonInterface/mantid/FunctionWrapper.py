@@ -47,9 +47,9 @@ class CompositeFunctionWrapper(FunctionWrapper):
     # get parameter of specified name
         return self.fun.getParameterValue(name)
 
-    def __getitem__ (self, index):
-    # get function of specified index
-        return self.fun.__getitem__(index) 
+    def __getitem__ (self, nameorindex):
+    # get function of specified index or parameter of specified name
+        return self.fun.__getitem__(nameorindex) 
 
     def __setitem__ (self, name):
         pass
