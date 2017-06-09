@@ -11,6 +11,7 @@
 #include <Poco/Net/HTTPRequest.h>
 #include <Poco/Net/HTTPResponse.h>
 #include <Poco/Net/HTTPSClientSession.h>
+#include <Poco/Net/PrivateKeyPassphraseHandler.h>
 #include <Poco/Net/SSLManager.h>
 #include <Poco/StreamCopier.h>
 #include <Poco/TemporaryFile.h>

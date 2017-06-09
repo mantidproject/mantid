@@ -12,7 +12,7 @@
 namespace Mantid {
 // Forward declare
 namespace PhysicalConstants {
-class NeutronAtom;
+struct NeutronAtom;
 }
 
 namespace Kernel {
