@@ -6,6 +6,8 @@
 //----------------------------------------------------------------------
 #include "MantidKernel/DllConfig.h"    
 
+#include <boost/shared_ptr.hpp>
+
 #include <iosfwd>
 #include <string>
 #include <vector>

@@ -1,4 +1,5 @@
 #include "MantidKernel/PropertyWithValue.h"
+#include "MantidKernel/Matrix.h"
 
 // PropertyWithValue implementation
 #include "MantidKernel/PropertyWithValue.tcc"

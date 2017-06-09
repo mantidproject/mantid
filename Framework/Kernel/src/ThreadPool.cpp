@@ -4,6 +4,7 @@
 #include "MantidKernel/ThreadPool.h"
 
 #include "MantidKernel/ConfigService.h"
+#include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/ProgressBase.h"      
 #include "MantidKernel/Task.h"              
 #include "MantidKernel/ThreadPoolRunnable.h"

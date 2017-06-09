@@ -8,12 +8,13 @@
 #include "MantidKernel/PhysicalConstants.h"
 #include <boost/shared_ptr.hpp>
 
-namespace Mantid {
 
-	// Forward Declares
-	namespace NeXus {
-		class File;
+// Forward Declares
+namespace NeXus {
+       class File;
 }
+
+namespace Mantid {
 
 namespace PhysicalConstants {
 class Atom;

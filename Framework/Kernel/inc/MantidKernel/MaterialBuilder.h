@@ -7,7 +7,14 @@
 #include <string>
 #include <tuple>
 
+
+
 namespace Mantid {
+// Forward declare
+namespace PhysicalConstants {
+class NeutronAtom;
+}
+
 namespace Kernel {
 
 /**

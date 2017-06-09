@@ -7,6 +7,7 @@
 #include <ostream>
 #include <string>
 #include <stdexcept>
+#include <sstream>
 
 namespace Mantid {
 

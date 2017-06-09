@@ -2,9 +2,10 @@
 #define MANTID_KERNEL_PROPERTYNEXUS_H_
 
 #include "MantidKernel/System.h"
+#include <memory>
 
 // Forward declare
-namespace Nexus {
+namespace NeXus {
 class File;
 }
 

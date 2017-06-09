@@ -1,5 +1,6 @@
 #include "MantidKernel/DeltaEMode.h"
 
+#include <boost/algorithm/string/predicate.hpp>
 #include <map>
 #include <sstream>
 #include <stdexcept>

@@ -24,6 +24,7 @@
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 #include "MantidKernel/ClassMacros.h"
+#include "MantidKernel/DllConfig.h"
 
 namespace Mantid {
 namespace Kernel {

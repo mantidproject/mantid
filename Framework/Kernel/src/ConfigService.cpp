@@ -47,6 +47,7 @@
 
 #include <algorithm>
 #include <exception>              
+#include <fstream>
 #include <functional>             
 #include <iostream>               
 #include <stdexcept>              
