@@ -4,7 +4,6 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidKernel/ClassMacros.h"
 #include "MantidKernel/DllConfig.h"
 #include "MantidKernel/Exception.h"
 
@@ -47,6 +46,13 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
 class MANTID_KERNEL_DLL LogFilter {
 public:
+  /// Disable default constructor
+  LogFilter() = delete;
+
+  /// Disable copy and assignment operator
+  LogFilter(const LogFilter &) = delete;
+  LogFilter &operator=(const LogFilter &) = delete;
+
   /// Constructor taking a filter. Allows filters to be combined without being
   /// applied to a property
   LogFilter(const TimeSeriesProperty<bool> &filter);
@@ -68,9 +74,6 @@ public:
   void clear();
 
 private:
-  DISABLE_DEFAULT_CONSTRUCT(LogFilter)
-  DISABLE_COPY_AND_ASSIGN(LogFilter)
-
   /// Converts the given property to a TimeSeriesProperty<double>, throws if
   /// invalid.
   TimeSeriesProperty<double> *convertToTimeSeriesOfDouble(const Property *prop);

@@ -5,7 +5,6 @@
 // Includes
 //------------------------------------------------------------------------------
 #include "DllConfig.h"
-#include "ClassMacros.h"
 #include <vector>
 
 namespace Mantid {
@@ -44,6 +43,16 @@ public:
   NDRandomNumberGenerator(const unsigned int ndims);
   /// Virtual destructor to ensure that all inheriting classes have one
   virtual ~NDRandomNumberGenerator() = default;
+
+  /// Disable default constructor
+  NDRandomNumberGenerator() = delete;
+
+  /// Disable copy operator
+  NDRandomNumberGenerator(const NDRandomNumberGenerator &) = delete;
+
+  /// Disable assignment operator
+  NDRandomNumberGenerator &operator=(const NDRandomNumberGenerator &) = delete;
+
   /// Returns the number of dimensions the point will be generated in, i.e. the
   /// size
   /// of the vector returned from by nextPoint()
@@ -71,9 +80,6 @@ protected:
   inline std::vector<double> &getNextPointCache() { return m_nextPoint; }
 
 private:
-  DISABLE_DEFAULT_CONSTRUCT(NDRandomNumberGenerator)
-  DISABLE_COPY_AND_ASSIGN(NDRandomNumberGenerator)
-
   /// The number of dimensions
   const unsigned int m_ndims;
   /// Storage the next point to return

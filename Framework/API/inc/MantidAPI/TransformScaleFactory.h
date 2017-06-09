@@ -2,7 +2,6 @@
 #define MANTID_API_TRANSFORMSCALEFACTORY_H_
 
 #include "MantidAPI/DllConfig.h"
-#include "MantidKernel/ClassMacros.h"
 #include "MantidKernel/DynamicFactory.h"
 #include "MantidKernel/SingletonHolder.h"
 
