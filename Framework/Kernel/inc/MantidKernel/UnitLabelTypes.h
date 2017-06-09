@@ -24,7 +24,6 @@
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 #include "MantidKernel/UnitLabel.h"
-#include "MantidKernel/ClassMacros.h"
 
 namespace Mantid {
 namespace Kernel {

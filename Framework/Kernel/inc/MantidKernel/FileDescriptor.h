@@ -1,7 +1,6 @@
 #ifndef MANTID_KERNEL_FILEDESCRIPTOR_H_
 #define MANTID_KERNEL_FILEDESCRIPTOR_H_
 
-#include "MantidKernel/ClassMacros.h"
 #include "MantidKernel/DllConfig.h"
 
 #include <fstream>
@@ -54,6 +53,15 @@ public:
   /// Destructor
   ~FileDescriptor();
 
+  /// Disable default constructor
+  FileDescriptor() = delete;
+
+  /// Disable copy operator
+  FileDescriptor(const FileDescriptor &) = delete;
+
+  /// Disable assignment operator
+  FileDescriptor &operator=(const FileDescriptor &) = delete;
+
   /**
    * Access the filename
    * @returns A reference to a const string containing the filename
@@ -78,9 +86,6 @@ public:
   void resetStreamToStart();
 
 private:
-  DISABLE_DEFAULT_CONSTRUCT(FileDescriptor)
-  DISABLE_COPY_AND_ASSIGN(FileDescriptor)
-
   /// Open the file and cache description elements
   void initialize(const std::string &filename);
 
