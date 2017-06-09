@@ -102,6 +102,12 @@ public:
 
   /** Constructor with a class to wrap
    *  @param F :: The object to wrap
+   *
+   * Note that this constructor can hide the copy constructor because it takes
+   * precedence over the copy constructor if supplied with a non-const
+   * WrappedObject argument. However, it just calls the base class copy
+   * constructor and sets m_pPtr, so the behaviour is the same as the copy
+   * constructor.
    */
   template <typename Field> explicit WrappedObject(Field &F) : T(F) {
     m_pPtr = static_cast<T *>(this);
@@ -109,16 +115,6 @@ public:
 
   /// Copy constructor
   WrappedObject(const WrappedObject<T> &A) : T(A) {
-    m_pPtr = static_cast<T *>(this);
-  }
-
-  /// Copy constructor taking a non-const argument. This avoids the copy
-  /// constructor being hidden by the templated constructor above (which would
-  /// take precedence over the copy constructor otherwise if supplied with a
-  /// non-const WrappedObject). It's not ideal having a non-const input
-  /// argument here, but at least we can cast it to const for the base class.
-  WrappedObject(WrappedObject<T> &A)
-      : T(std::const_cast<const WrappedObject<T> &>(A)) {
     m_pPtr = static_cast<T *>(this);
   }
 
