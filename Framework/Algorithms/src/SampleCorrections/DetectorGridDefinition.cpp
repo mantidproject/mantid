@@ -1,5 +1,7 @@
 #include "MantidAlgorithms/SampleCorrections/DetectorGridDefinition.h"
 
+#include <cmath>
+
 namespace Mantid {
 namespace Algorithms {
 
@@ -8,6 +10,16 @@ DetectorGridDefinition::DetectorGridDefinition(const double minLatitude, const d
                        const double maxLongitude, const size_t longitudePoints)
   : m_minLatitude(minLatitude), m_maxLatitude(maxLatitude), m_latitudePoints(latitudePoints),
     m_minLongitude(minLongitude), m_maxLongitude(maxLongitude), m_longitudePoints(longitudePoints) {
+  const double tiny = 1e-5;
+  const double smallShift = M_PI / 300.0;
+  if (std::abs(m_minLatitude - m_maxLatitude) < tiny) {
+      m_minLatitude -= smallShift;
+      m_maxLatitude += smallShift;
+  }
+  if (std::abs(m_minLongitude - m_maxLongitude) < tiny) {
+      m_minLongitude -= smallShift;
+      m_maxLongitude += smallShift;
+  }
   m_latitudeStep = (maxLatitude - minLatitude) / static_cast<double>(latitudePoints - 1);
   m_longitudeStep = (maxLongitude - minLongitude) / static_cast<double>(longitudePoints - 1);
 }

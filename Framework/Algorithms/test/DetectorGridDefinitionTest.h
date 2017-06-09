@@ -64,6 +64,24 @@ public:
     TS_ASSERT_EQUALS(def.numberRows(), nLat())
   }
 
+  void test_latitudes_have_zero_gap() {
+    DetectorGridDefinition def(minLat(), minLat(), 2, minLong(), maxLong(), 4);
+    const auto indices = def.nearestNeighbourIndices(minLat(), (minLong() + maxLong()) / 2.0);
+    TS_ASSERT(inArray(indices, 2))
+    TS_ASSERT(inArray(indices, 3))
+    TS_ASSERT(inArray(indices, 4))
+    TS_ASSERT(inArray(indices, 5))
+  }
+
+  void test_longitudes_have_zero_gap() {
+    DetectorGridDefinition def(minLat(), maxLat(), 4, minLong(), minLong(), 2);
+    const auto indices = def.nearestNeighbourIndices((minLat() + maxLat()) / 2.0, minLong());
+    TS_ASSERT(inArray(indices, 1))
+    TS_ASSERT(inArray(indices, 2))
+    TS_ASSERT(inArray(indices, 5))
+    TS_ASSERT(inArray(indices, 6))
+  }
+
 private:
   static double minLat() { return -0.23; }
   static double maxLat() { return 1.36; }
