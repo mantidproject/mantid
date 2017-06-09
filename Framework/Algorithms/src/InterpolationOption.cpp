@@ -81,11 +81,13 @@ void InterpolationOption::applyInplace(HistogramData::Histogram &inOut,
     interpolateCSplineInplace(inOut, stepSize);
     return;
   default:
-    throw std::runtime_error("InterpolationOption::applyInplace() - Unimplemented interpolation method.");
+    throw std::runtime_error("InterpolationOption::applyInplace() - "
+                             "Unimplemented interpolation method.");
   }
 }
 
-void InterpolationOption::applyInPlace(const HistogramData::Histogram &in, HistogramData::Histogram &out) const {
+void InterpolationOption::applyInPlace(const HistogramData::Histogram &in,
+                                       HistogramData::Histogram &out) const {
   switch (m_value) {
   case Value::Linear:
     interpolateLinearInplace(in, out);
@@ -94,7 +96,8 @@ void InterpolationOption::applyInPlace(const HistogramData::Histogram &in, Histo
     interpolateCSplineInplace(in, out);
     return;
   default:
-    throw std::runtime_error("InterpolationOption::applyInplace() - Unimplemented interpolation method.");
+    throw std::runtime_error("InterpolationOption::applyInplace() - "
+                             "Unimplemented interpolation method.");
   }
 }
 

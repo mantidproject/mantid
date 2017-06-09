@@ -273,7 +273,6 @@ public:
     TS_ASSERT_DELTA(0.00408664, outputWS->y(4).front(), delta);
     TS_ASSERT_DELTA(3.67267e-05, outputWS->y(4)[middle_index], delta);
     TS_ASSERT_DELTA(4.21291e-07, outputWS->y(4).back(), delta);
-
   }
 
   void test_Sparse_Instrument_For_Direct() {
@@ -309,8 +308,9 @@ public:
 private:
   Mantid::API::MatrixWorkspace_const_sptr
   runAlgorithm(const TestWorkspaceDescriptor &wsProps, int nlambda = -1,
-               const std::string &interpolate = "", const bool sparseInstrument = false,
-               const int sparseRows = 2, const int sparseColumns = 2) {
+               const std::string &interpolate = "",
+               const bool sparseInstrument = false, const int sparseRows = 2,
+               const int sparseColumns = 2) {
     auto inputWS = setUpWS(wsProps);
     auto mcabs = createAlgorithm();
     TS_ASSERT_THROWS_NOTHING(mcabs->setProperty("InputWorkspace", inputWS));

@@ -13,25 +13,31 @@ namespace Algorithms {
  *  @param maxLongitud End of the longitude range.
  *  @param longitudePoints Number of columns.
  */
-DetectorGridDefinition::DetectorGridDefinition(const double minLatitude, const double maxLatitude,
-                       const size_t latitudePoints, const double minLongitude,
-                       const double maxLongitude, const size_t longitudePoints)
-  : m_minLatitude(minLatitude), m_maxLatitude(maxLatitude), m_latitudePoints(latitudePoints),
-    m_minLongitude(minLongitude), m_maxLongitude(maxLongitude), m_longitudePoints(longitudePoints) {
+DetectorGridDefinition::DetectorGridDefinition(const double minLatitude,
+                                               const double maxLatitude,
+                                               const size_t latitudePoints,
+                                               const double minLongitude,
+                                               const double maxLongitude,
+                                               const size_t longitudePoints)
+    : m_minLatitude(minLatitude), m_maxLatitude(maxLatitude),
+      m_latitudePoints(latitudePoints), m_minLongitude(minLongitude),
+      m_maxLongitude(maxLongitude), m_longitudePoints(longitudePoints) {
   // The angular ranges might be zero in some cases preventing
   // the spawning of a real grid. We want to avoid this.
   const double tiny = 1e-5;
   const double smallShift = M_PI / 300.0;
   if (std::abs(m_minLatitude - m_maxLatitude) < tiny) {
-      m_minLatitude -= smallShift;
-      m_maxLatitude += smallShift;
+    m_minLatitude -= smallShift;
+    m_maxLatitude += smallShift;
   }
   if (std::abs(m_minLongitude - m_maxLongitude) < tiny) {
-      m_minLongitude -= smallShift;
-      m_maxLongitude += smallShift;
+    m_minLongitude -= smallShift;
+    m_maxLongitude += smallShift;
   }
-  m_latitudeStep = (maxLatitude - minLatitude) / static_cast<double>(latitudePoints - 1);
-  m_longitudeStep = (maxLongitude - minLongitude) / static_cast<double>(longitudePoints - 1);
+  m_latitudeStep =
+      (maxLatitude - minLatitude) / static_cast<double>(latitudePoints - 1);
+  m_longitudeStep =
+      (maxLongitude - minLongitude) / static_cast<double>(longitudePoints - 1);
 }
 
 /** Return the latitude of the given row.
@@ -55,13 +61,16 @@ double DetectorGridDefinition::longitudeAt(const size_t column) const {
  *  @param longitude Longitude of a point.
  *  @return Indices to four nearby detectors.
  */
-std::array<size_t, 4> DetectorGridDefinition::nearestNeighbourIndices(const double latitude, const double longitude) const {
+std::array<size_t, 4>
+DetectorGridDefinition::nearestNeighbourIndices(const double latitude,
+                                                const double longitude) const {
   size_t row = static_cast<size_t>((latitude - m_minLatitude) / m_latitudeStep);
   // Check for points at the edges or outside the grid.
   if (row == m_latitudePoints - 1) {
     --row;
   }
-  size_t col = static_cast<size_t>((longitude - m_minLongitude) / m_longitudeStep);
+  size_t col =
+      static_cast<size_t>((longitude - m_minLongitude) / m_longitudeStep);
   if (col == m_longitudePoints - 1) {
     --col;
   }
@@ -83,9 +92,7 @@ size_t DetectorGridDefinition::numberColumns() const {
 /** Return the number of rows in the grid.
  *  @return Number of rows.
  */
-size_t DetectorGridDefinition::numberRows() const {
-  return m_latitudePoints;
-}
+size_t DetectorGridDefinition::numberRows() const { return m_latitudePoints; }
 
 } // namespace Algorithms
 } // namespace Mantid

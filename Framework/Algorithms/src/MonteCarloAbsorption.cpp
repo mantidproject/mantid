@@ -87,7 +87,7 @@ private:
  *  @return A pair containing the latitude and longitude values.
  */
 std::pair<double, double> geographicalAngles(const V3D &p) {
-  const double lat = std::atan2(p.Y(), std::hypot(p.X() , p.Z()));
+  const double lat = std::atan2(p.Y(), std::hypot(p.X(), p.Z()));
   const double lon = std::atan2(p.X(), p.Z());
   return std::pair<double, double>(lat, lon);
 }
@@ -97,7 +97,8 @@ std::pair<double, double> geographicalAngles(const V3D &p) {
  *  @param ws A workspace.
  *  @return A tuple containing the latitude and longitude ranges.
  */
-std::tuple<double, double, double, double> extremeAngles(const MatrixWorkspace &ws) {
+std::tuple<double, double, double, double>
+extremeAngles(const MatrixWorkspace &ws) {
   const auto &spectrumInfo = ws.spectrumInfo();
   double minLat = std::numeric_limits<double>::max();
   double maxLat = std::numeric_limits<double>::lowest();
@@ -127,22 +128,27 @@ std::tuple<double, double, double, double> extremeAngles(const MatrixWorkspace &
 std::tuple<double, double> extremeWavelengths(const MatrixWorkspace &ws) {
   double currentMin = std::numeric_limits<double>::max();
   double currentMax = std::numeric_limits<double>::lowest();
-  if (ws.histogram(0).xMode() == Mantid::HistogramData::Histogram::XMode::BinEdges) {
+  if (ws.histogram(0).xMode() ==
+      Mantid::HistogramData::Histogram::XMode::BinEdges) {
     // Really deal with point data.
     for (size_t i = 0; i < ws.getNumberHistograms(); ++i) {
       const auto &xs = ws.x(i);
       const auto x0 = (xs[0] + xs[1]) / 2.0;
-      if (x0 < currentMin) currentMin = x0;
+      if (x0 < currentMin)
+        currentMin = x0;
       const auto x1 = (xs[xs.size() - 2] + xs[xs.size() - 1]) / 2.0;
-      if (x1 > currentMax) currentMax = x1;
+      if (x1 > currentMax)
+        currentMax = x1;
     }
   } else {
     for (size_t i = 0; i < ws.getNumberHistograms(); ++i) {
       const auto &xs = ws.x(i);
       const auto x0 = xs.front();
-      if (x0 < currentMin) currentMin = x0;
+      if (x0 < currentMin)
+        currentMin = x0;
       const auto x1 = xs.back();
-      if (x1 > currentMax) currentMax = x1;
+      if (x1 > currentMax)
+        currentMax = x1;
     }
   }
   return std::tie(currentMin, currentMax);
@@ -153,7 +159,8 @@ std::tuple<double, double> extremeWavelengths(const MatrixWorkspace &ws) {
  *  @param wavelengthPoints Number of points in the output histogram.
  *  @return A template histogram.
  */
-Mantid::HistogramData::Histogram modelHistogram(const MatrixWorkspace &modelWS, const size_t wavelengthPoints) {
+Mantid::HistogramData::Histogram modelHistogram(const MatrixWorkspace &modelWS,
+                                                const size_t wavelengthPoints) {
   double minWavelength, maxWavelength;
   std::tie(minWavelength, maxWavelength) = extremeWavelengths(modelWS);
   Mantid::HistogramData::Frequencies ys(wavelengthPoints, 0.0);
@@ -162,7 +169,8 @@ Mantid::HistogramData::Histogram modelHistogram(const MatrixWorkspace &modelWS, 
   Mantid::HistogramData::Histogram h(ps, ys, es);
   auto &xs = h.mutableX();
   if (wavelengthPoints > 1) {
-    const double step = (maxWavelength - minWavelength) / static_cast<double>(wavelengthPoints - 1);
+    const double step = (maxWavelength - minWavelength) /
+                        static_cast<double>(wavelengthPoints - 1);
     for (size_t i = 0; i < xs.size(); ++i) {
       xs[i] = minWavelength + step * static_cast<double>(i);
     }
@@ -177,7 +185,8 @@ Mantid::HistogramData::Histogram modelHistogram(const MatrixWorkspace &modelWS, 
  *  @param detIDs A vector containing detector ids.
  *  @return True, if all EFixed values match, false otherwise.
  */
-bool constantEFixed(const EFixedProvider &eFixed, const std::vector<Mantid::detid_t> &detIDs) {
+bool constantEFixed(const EFixedProvider &eFixed,
+                    const std::vector<Mantid::detid_t> &detIDs) {
   const auto e = eFixed.value(detIDs[0]);
   for (size_t i = 1; i < detIDs.size(); ++i) {
     if (e != eFixed.value(detIDs[i])) {
@@ -222,8 +231,7 @@ Object_sptr makeCubeShape() {
   element->setAttribute("z", posCoord);
   shapeElement->appendChild(element);
   typeElement->appendChild(shapeElement);
-  AutoPtr<Element> algebraElement =
-      shapeDescription->createElement("algebra");
+  AutoPtr<Element> algebraElement = shapeDescription->createElement("algebra");
   algebraElement->setAttribute("val", "cube");
   typeElement->appendChild(algebraElement);
   ShapeFactory shapeFactory;
@@ -236,21 +244,26 @@ Object_sptr makeCubeShape() {
  *  @param wavelengthPoints Number of points in the output workspace.
  *  @return A workspace with sparse instrument.
  */
-MatrixWorkspace_uptr createSparseWS(const MatrixWorkspace &modelWS, const Mantid::Algorithms::DetectorGridDefinition &grid, const size_t wavelengthPoints) {
+MatrixWorkspace_uptr
+createSparseWS(const MatrixWorkspace &modelWS,
+               const Mantid::Algorithms::DetectorGridDefinition &grid,
+               const size_t wavelengthPoints) {
   // Build a quite standard and somewhat complete instrument.
   auto instrument = boost::make_shared<Instrument>("MC_simulation_instrument");
   instrument->setReferenceFrame(
       boost::make_shared<ReferenceFrame>(Y, Z, Right, ""));
   // Add sample to origin.
   const V3D samplePos{0.0, 0.0, 0.0};
-  auto sample = Mantid::Kernel::make_unique<ObjComponent>("sample", nullptr, instrument.get());
+  auto sample = Mantid::Kernel::make_unique<ObjComponent>("sample", nullptr,
+                                                          instrument.get());
   sample->setPos(samplePos);
   instrument->add(sample.get());
   instrument->markAsSamplePos(sample.release());
   const double R = 1.0; // This will be the default L2 distance.
   // Add source behing the sample.
   const V3D sourcePos{0.0, 0.0, -2.0 * R};
-  auto source = Mantid::Kernel::make_unique<ObjComponent>("source", nullptr, instrument.get());
+  auto source = Mantid::Kernel::make_unique<ObjComponent>("source", nullptr,
+                                                          instrument.get());
   source->setPos(sourcePos);
   instrument->add(source.get());
   instrument->markAsSource(source.release());
@@ -267,7 +280,8 @@ MatrixWorkspace_uptr createSparseWS(const MatrixWorkspace &modelWS, const Mantid
       const int detID = static_cast<int>(index);
       std::ostringstream detName;
       detName << "det-" << detID;
-      auto det = Mantid::Kernel::make_unique<Detector>(detName.str(), detID, detShape, instrument.get());
+      auto det = Mantid::Kernel::make_unique<Detector>(
+          detName.str(), detID, detShape, instrument.get());
       const double x = R * std::sin(lon) * std::cos(lat);
       const double y = R * std::sin(lat);
       const double z = R * std::cos(lon) * std::cos(lat);
@@ -287,18 +301,22 @@ MatrixWorkspace_uptr createSparseWS(const MatrixWorkspace &modelWS, const Mantid
   const auto beamHeightParam = modelSource->getNumberParameter("beam-height");
   if (beamWidthParam.size() == 1 && beamHeightParam.size() == 1) {
     auto parametrizedSource = parametrizedInstrument->getSource();
-    paramMap.add("double", parametrizedSource.get(), "beam-width", beamWidthParam[0]);
-    paramMap.add("double", parametrizedSource.get(), "beam-height", beamHeightParam[0]);
+    paramMap.add("double", parametrizedSource.get(), "beam-width",
+                 beamWidthParam[0]);
+    paramMap.add("double", parametrizedSource.get(), "beam-height",
+                 beamHeightParam[0]);
   }
   // Add information about EFixed in a proper place.
   EFixedProvider eFixed(modelWS);
-  ws->mutableRun().addProperty("deltaE-mode", Mantid::Kernel::DeltaEMode::asString(eFixed.emode()));
+  ws->mutableRun().addProperty(
+      "deltaE-mode", Mantid::Kernel::DeltaEMode::asString(eFixed.emode()));
   if (eFixed.emode() == Mantid::Kernel::DeltaEMode::Direct) {
     ws->mutableRun().addProperty("Ei", eFixed.value(0));
   } else if (eFixed.emode() == Mantid::Kernel::DeltaEMode::Indirect) {
     const auto &detIDs = modelWS.detectorInfo().detectorIDs();
     if (!constantEFixed(eFixed, detIDs)) {
-      throw std::runtime_error("Sparse instrument with variable EFixed not supported.");
+      throw std::runtime_error(
+          "Sparse instrument with variable EFixed not supported.");
     }
     const auto e = eFixed.value(detIDs[0]);
     const auto &sparseDetIDs = ws->detectorInfo().detectorIDs();
@@ -316,10 +334,12 @@ MatrixWorkspace_uptr createSparseWS(const MatrixWorkspace &modelWS, const Mantid
  *  @param long2 Longitude of the second point.
  *  @return The distance between the points.
  */
-double greatCircleDistance(const double lat1, const double long1, const double lat2, const double long2) {
+double greatCircleDistance(const double lat1, const double long1,
+                           const double lat2, const double long2) {
   const double latD = std::sin((lat2 - lat1) / 2.0);
   const double longD = std::sin((long2 - long1) / 2.0);
-  const double S = latD * latD + std::cos(lat1) * std::cos(lat2) * longD * longD;
+  const double S =
+      latD * latD + std::cos(lat1) * std::cos(lat2) * longD * longD;
   return 2.0 * std::asin(std::sqrt(S));
 }
 
@@ -327,7 +347,8 @@ double greatCircleDistance(const double lat1, const double long1, const double l
  *  @param distances The distances.
  *  @return An array of inverse distance weights.
  */
-std::array<double, 4> inverseDistanceWeights(const std::array<double, 4> &distances) {
+std::array<double, 4>
+inverseDistanceWeights(const std::array<double, 4> &distances) {
   std::array<double, 4> weights;
   for (size_t i = 0; i < weights.size(); ++i) {
     if (distances[i] == 0.0) {
@@ -347,13 +368,17 @@ std::array<double, 4> inverseDistanceWeights(const std::array<double, 4> &distan
  *  @param indices Indices to the nearest neighbour detectors.
  *  @return An interpolated histogram.
  */
-Mantid::HistogramData::Histogram interpolateFromDetectorGrid(const double lat, const double lon, const MatrixWorkspace &ws, const std::array<size_t, 4> &indices) {
+Mantid::HistogramData::Histogram
+interpolateFromDetectorGrid(const double lat, const double lon,
+                            const MatrixWorkspace &ws,
+                            const std::array<size_t, 4> &indices) {
   auto h = ws.histogram(0);
   const auto &spectrumInfo = ws.spectrumInfo();
   std::array<double, 4> distances;
   for (size_t i = 0; i < 4; ++i) {
     double detLat, detLong;
-   std::tie(detLat, detLong) = geographicalAngles(spectrumInfo.position(indices[i]));
+    std::tie(detLat, detLong) =
+        geographicalAngles(spectrumInfo.position(indices[i]));
     distances[i] = greatCircleDistance(lat, lon, detLat, detLong);
   }
   const auto weights = inverseDistanceWeights(distances);
@@ -373,12 +398,15 @@ Mantid::HistogramData::Histogram interpolateFromDetectorGrid(const double lat, c
  *  @param columns Number of columns in the detector gris.
  *  @return A unique pointer pointing to the grid definition.
  */
-std::unique_ptr<const Mantid::Algorithms::DetectorGridDefinition> createDetectorGridDefinition(const MatrixWorkspace &modelWS, const size_t rows, const size_t columns) {
+std::unique_ptr<const Mantid::Algorithms::DetectorGridDefinition>
+createDetectorGridDefinition(const MatrixWorkspace &modelWS, const size_t rows,
+                             const size_t columns) {
   double minLat, maxLat, minLong, maxLong;
   std::tie(minLat, maxLat, minLong, maxLong) = extremeAngles(modelWS);
-  return Mantid::Kernel::make_unique<Mantid::Algorithms::DetectorGridDefinition>(minLat, maxLat, rows, minLong, maxLong, columns);
+  return Mantid::Kernel::make_unique<
+      Mantid::Algorithms::DetectorGridDefinition>(minLat, maxLat, rows, minLong,
+                                                  maxLong, columns);
 }
-
 }
 /// @endcond
 
@@ -420,13 +448,26 @@ void MonteCarloAbsorption::init() {
 
   InterpolationOption interpolateOpt;
   declareProperty(interpolateOpt.property(), interpolateOpt.propertyDoc());
-  declareProperty("SparseInstrument", false, "Enable simulation on special instrument with a sparse grid of detectors interpolating the results to the real instrument.");
+  declareProperty("SparseInstrument", false, "Enable simulation on special "
+                                             "instrument with a sparse grid of "
+                                             "detectors interpolating the "
+                                             "results to the real instrument.");
   auto twoOrMore = boost::make_shared<Kernel::BoundedValidator<int>>();
   twoOrMore->setLower(2);
-  declareProperty("NumberOfDetectorRows", DEFAULT_LATITUDINAL_DETS, twoOrMore, "Number of detector rows in the detector grid of the sparse instrument.");
-  setPropertySettings("NumberOfDetectorRows", Kernel::make_unique<EnabledWhenProperty>("SparseInstrument", ePropertyCriterion::IS_NOT_DEFAULT));
-  declareProperty("NumberOfDetectorColumns", DEFAULT_LONGITUDINAL_DETS, twoOrMore, "Number of detector columns in the detector grid of the sparse instrument.");
-  setPropertySettings("NumberOfDetectorColumns", Kernel::make_unique<EnabledWhenProperty>("SparseInstrument", ePropertyCriterion::IS_NOT_DEFAULT));
+  declareProperty(
+      "NumberOfDetectorRows", DEFAULT_LATITUDINAL_DETS, twoOrMore,
+      "Number of detector rows in the detector grid of the sparse instrument.");
+  setPropertySettings(
+      "NumberOfDetectorRows",
+      Kernel::make_unique<EnabledWhenProperty>(
+          "SparseInstrument", ePropertyCriterion::IS_NOT_DEFAULT));
+  declareProperty("NumberOfDetectorColumns", DEFAULT_LONGITUDINAL_DETS,
+                  twoOrMore, "Number of detector columns in the detector grid "
+                             "of the sparse instrument.");
+  setPropertySettings(
+      "NumberOfDetectorColumns",
+      Kernel::make_unique<EnabledWhenProperty>(
+          "SparseInstrument", ePropertyCriterion::IS_NOT_DEFAULT));
 }
 
 /**
@@ -456,11 +497,10 @@ void MonteCarloAbsorption::exec() {
  * @param interpolateOpt Method of interpolation to compute unsimulated points
  * @return A new workspace containing the correction factors & errors
  */
-MatrixWorkspace_uptr
-MonteCarloAbsorption::doSimulation(const MatrixWorkspace &inputWS,
-                                   const size_t nevents, int nlambda, const int seed,
-                                   const InterpolationOption &interpolateOpt,
-                                   const bool useSparseInstrument) {
+MatrixWorkspace_uptr MonteCarloAbsorption::doSimulation(
+    const MatrixWorkspace &inputWS, const size_t nevents, int nlambda,
+    const int seed, const InterpolationOption &interpolateOpt,
+    const bool useSparseInstrument) {
   auto outputWS = createOutputWorkspace(inputWS);
   const auto inputNbins = static_cast<int>(inputWS.blocksize());
   if (isEmpty(nlambda) || nlambda > inputNbins) {
@@ -476,14 +516,17 @@ MonteCarloAbsorption::doSimulation(const MatrixWorkspace &inputWS,
   if (useSparseInstrument) {
     const int latitudinalDets = getProperty("NumberOfDetectorRows");
     const int longitudinalDets = getProperty("NumberOfDetectorColumns");
-    detGrid = createDetectorGridDefinition(inputWS, latitudinalDets, longitudinalDets);
+    detGrid = createDetectorGridDefinition(inputWS, latitudinalDets,
+                                           longitudinalDets);
     sparseWS = createSparseWS(inputWS, *detGrid, nlambda);
   }
   MatrixWorkspace &simulationWS = useSparseInstrument ? *sparseWS : *outputWS;
-  const MatrixWorkspace &instrumentWS = useSparseInstrument ? simulationWS : inputWS;
+  const MatrixWorkspace &instrumentWS =
+      useSparseInstrument ? simulationWS : inputWS;
   // Cache information about the workspace that will be used repeatedly
   auto instrument = instrumentWS.getInstrument();
-  const int64_t nhists = static_cast<int64_t>(instrumentWS.getNumberHistograms());
+  const int64_t nhists =
+      static_cast<int64_t>(instrumentWS.getNumberHistograms());
   const int nbins = static_cast<int>(simulationWS.blocksize());
 
   EFixedProvider efixed(instrumentWS);
@@ -542,14 +585,15 @@ MonteCarloAbsorption::doSimulation(const MatrixWorkspace &inputWS,
 
     // Interpolate through points not simulated
     if (!useSparseInstrument && lambdaStepSize > 1) {
-        auto histnew = simulationWS.histogram(i);
-        if (lambdaStepSize < nbins) {
-          interpolateOpt.applyInplace(histnew, lambdaStepSize);
-        } else {
-          std::fill(histnew.mutableY().begin() + 1, histnew.mutableY().end(), histnew.y()[0]);
-        }
+      auto histnew = simulationWS.histogram(i);
+      if (lambdaStepSize < nbins) {
+        interpolateOpt.applyInplace(histnew, lambdaStepSize);
+      } else {
+        std::fill(histnew.mutableY().begin() + 1, histnew.mutableY().end(),
+                  histnew.y()[0]);
+      }
 
-        outputWS->setHistogram(i, histnew);
+      outputWS->setHistogram(i, histnew);
     }
 
     PARALLEL_END_INTERUPT_REGION
@@ -603,7 +647,10 @@ MonteCarloAbsorption::createBeamProfile(const Instrument &instrument,
       *frame, source->getPos(), beamWidth, beamHeight);
 }
 
-void MonteCarloAbsorption::interpolateFromSparse(MatrixWorkspace &targetWS, const MatrixWorkspace &sparseWS, const Mantid::Algorithms::InterpolationOption &interpOpt, const DetectorGridDefinition &detGrid) {
+void MonteCarloAbsorption::interpolateFromSparse(
+    MatrixWorkspace &targetWS, const MatrixWorkspace &sparseWS,
+    const Mantid::Algorithms::InterpolationOption &interpOpt,
+    const DetectorGridDefinition &detGrid) {
   const auto &spectrumInfo = targetWS.spectrumInfo();
   PARALLEL_FOR_IF(Kernel::threadSafe(targetWS, sparseWS))
   for (int64_t i = 0; i < static_cast<decltype(i)>(spectrumInfo.size()); ++i) {
@@ -611,7 +658,8 @@ void MonteCarloAbsorption::interpolateFromSparse(MatrixWorkspace &targetWS, cons
     double lat, lon;
     std::tie(lat, lon) = geographicalAngles(spectrumInfo.position(i));
     const auto nearestIndices = detGrid.nearestNeighbourIndices(lat, lon);
-    const auto spatiallyInterpHisto = interpolateFromDetectorGrid(lat, lon, sparseWS, nearestIndices);
+    const auto spatiallyInterpHisto =
+        interpolateFromDetectorGrid(lat, lon, sparseWS, nearestIndices);
     if (spatiallyInterpHisto.size() > 1) {
       auto targetHisto = targetWS.histogram(i);
       interpOpt.applyInPlace(spatiallyInterpHisto, targetHisto);
@@ -623,6 +671,5 @@ void MonteCarloAbsorption::interpolateFromSparse(MatrixWorkspace &targetWS, cons
   }
   PARALLEL_CHECK_INTERUPT_REGION
 }
-
 }
 }

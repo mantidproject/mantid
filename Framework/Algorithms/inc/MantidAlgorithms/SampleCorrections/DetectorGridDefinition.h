@@ -40,7 +40,8 @@ public:
 
   double latitudeAt(const size_t row) const;
   double longitudeAt(const size_t column) const;
-  std::array<size_t, 4> nearestNeighbourIndices(const double latitude, const double longitude) const;
+  std::array<size_t, 4> nearestNeighbourIndices(const double latitude,
+                                                const double longitude) const;
   size_t numberColumns() const;
   size_t numberRows() const;
 

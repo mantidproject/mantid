@@ -51,7 +51,8 @@ public:
   std::string propertyDoc() const;
 
   void applyInplace(HistogramData::Histogram &inOut, size_t stepSize) const;
-  void applyInPlace(const HistogramData::Histogram &in, HistogramData::Histogram &out) const;
+  void applyInPlace(const HistogramData::Histogram &in,
+                    HistogramData::Histogram &out) const;
 
 private:
   Value m_value = Value::Linear;

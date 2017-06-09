@@ -63,21 +63,22 @@ void sanityCheck(const Histogram &input, const size_t stepSize,
 void sanityCheck(const Histogram &input, const Histogram &output) {
   const auto inPoints = input.points();
   const auto outPoints = output.points();
-  if (outPoints.front() < inPoints.front() || outPoints.back() > inPoints.back()) {
-    throw std::runtime_error("interpolate - input does not cover all points in output. Extrapolation not suppoted.");
+  if (outPoints.front() < inPoints.front() ||
+      outPoints.back() > inPoints.back()) {
+    throw std::runtime_error("interpolate - input does not cover all points in "
+                             "output. Extrapolation not suppoted.");
   }
   if (!std::is_sorted(inPoints.cbegin(), inPoints.cend())) {
-    throw std::runtime_error("interpolate - input X data must be sorted in ascending order.");
+    throw std::runtime_error(
+        "interpolate - input X data must be sorted in ascending order.");
   }
 }
 
-enum class InterpolationType {
-  LINEAR,
-  CSPLINE
-};
+enum class InterpolationType { LINEAR, CSPLINE };
 
 template <typename XData, typename YData, typename XInterp, typename YInterp>
-void interpolateInplace(const XData &xs, const YData &ys, const XInterp &points, YInterp &outY, const InterpolationType type) {
+void interpolateInplace(const XData &xs, const YData &ys, const XInterp &points,
+                        YInterp &outY, const InterpolationType type) {
   const gsl_interp_type *interpType = nullptr;
   switch (type) {
   case InterpolationType::LINEAR:
@@ -88,7 +89,8 @@ void interpolateInplace(const XData &xs, const YData &ys, const XInterp &points,
     break;
   }
   using gsl_interp_uptr = std::unique_ptr<gsl_interp, void (*)(gsl_interp *)>;
-  auto interp = gsl_interp_uptr(gsl_interp_alloc(interpType, xs.size()), gsl_interp_free);
+  auto interp =
+      gsl_interp_uptr(gsl_interp_alloc(interpType, xs.size()), gsl_interp_free);
   gsl_interp_init(interp.get(), xs.data(), ys.data(), xs.size());
   using gsl_interp_accel_uptr =
       std::unique_ptr<gsl_interp_accel, void (*)(gsl_interp_accel *)>;
@@ -96,7 +98,8 @@ void interpolateInplace(const XData &xs, const YData &ys, const XInterp &points,
       gsl_interp_accel_uptr(gsl_interp_accel_alloc(), gsl_interp_accel_free);
   // Evaluate each point for the full range
   for (size_t i = 0; i < outY.size(); ++i) {
-    outY[i] = gsl_interp_eval(interp.get(), xs.data(), ys.data(), points[i], lookupTable.get());
+    outY[i] = gsl_interp_eval(interp.get(), xs.data(), ys.data(), points[i],
+                              lookupTable.get());
   }
 }
 
@@ -205,8 +208,7 @@ void interpolateLinearInplace(Histogram &inOut, const size_t stepSize) {
   interpolateYLinearInplace(inOut, stepSize, inOut.mutableY());
 }
 
-void
-interpolateLinearInplace(const Histogram &input, Histogram &output) {
+void interpolateLinearInplace(const Histogram &input, Histogram &output) {
   sanityCheck(input, output);
   const auto &points = input.points().rawData();
   const auto &y = input.y().rawData();
