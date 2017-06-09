@@ -144,7 +144,7 @@ private:
   API::ITableWorkspace_sptr m_Messages;
 
   /// Report progress of comparison
-  API::Progress *m_Prog;
+  std::unique_ptr<API::Progress> m_Prog = nullptr;
 
   /// Variable states if one wants to compare workspaces in parallell. This
   /// usully true but if one wants to look at the comparison logs, parallell

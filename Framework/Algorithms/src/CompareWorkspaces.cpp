@@ -11,8 +11,8 @@
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
-#include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidDataObjects/TableWorkspace.h"
 #include "MantidGeometry/Crystal/IPeak.h"
 #include "MantidKernel/Unit.h"
 
@@ -30,12 +30,11 @@ DECLARE_ALGORITHM(CompareWorkspaces)
 /** Constructor
  */
 CompareWorkspaces::CompareWorkspaces()
-    : API::Algorithm(), m_Result(false), m_Prog(nullptr),
-      m_ParallelComparison(true) {}
+    : API::Algorithm(), m_Result(false), m_ParallelComparison(true) {}
 
 /** Destructor
  */
-CompareWorkspaces::~CompareWorkspaces() { delete m_Prog; }
+CompareWorkspaces::~CompareWorkspaces() {}
 
 /// Algorithms name for identification. @see Algorithm::name
 const std::string CompareWorkspaces::name() const {
@@ -340,14 +339,14 @@ void CompareWorkspaces::doComparison() {
   size_t numhist = ws1->getNumberHistograms();
 
   if (ews1 && ews2) {
-    m_Prog = new Progress(this, 0.0, 1.0, numhist * 5);
+    m_Prog = make_unique<Progress>(this, 0.0, 1.0, numhist * 5);
 
     // Compare event lists to see whether 2 event workspaces match each other
     if (!compareEventWorkspaces(*ews1, *ews2))
       return;
   } else {
     // Fewer steps if not events
-    m_Prog = new Progress(this, 0.0, 1.0, numhist * 2);
+    m_Prog = make_unique<Progress>(this, 0.0, 1.0, numhist * 2);
   }
 
   // ==============================================================================
@@ -404,8 +403,8 @@ bool CompareWorkspaces::compareEventWorkspaces(
   }
 
   // Both will end up sorted anyway
-  ews1.sortAll(PULSETIMETOF_SORT, m_Prog);
-  ews2.sortAll(PULSETIMETOF_SORT, m_Prog);
+  ews1.sortAll(PULSETIMETOF_SORT, m_Prog.get());
+  ews2.sortAll(PULSETIMETOF_SORT, m_Prog.get());
 
   // Determine the tolerance for "tof" attribute and "weight" of events
   double toleranceWeight = Tolerance; // Standard tolerance
@@ -444,9 +443,9 @@ bool CompareWorkspaces::compareEventWorkspaces(
       const EventList &el2 = ews2.getSpectrum(i);
       bool printdetail = (i == wsindex2print);
       if (printdetail) {
-        g_log.information() << "Spectrum " << i
-                            << " is set to print out in details. "
-                            << "\n";
+        g_log.information()
+            << "Spectrum " << i << " is set to print out in details. "
+            << "\n";
       }
 
       if (!el1.equals(el2, toleranceTOF, toleranceWeight, tolerancePulse)) {
