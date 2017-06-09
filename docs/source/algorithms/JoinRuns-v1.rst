@@ -10,35 +10,113 @@
 Description
 -----------
 
-TODO: Enter a full rst-markup description of your algorithm here.
+This algorithm joins the input workspaces into a single one by concatenating their spectra. The concatenation is done in the same order as in the input workspaces list. Consider using :ref:`SortXAxis <algm-SortXAxis>` afterwards, if necessary. The instrument and the units are copied from the first workspace. The sample logs are also copied from the first input, but the behaviour can be controlled by the instrument parameter file (IPF), as described in :ref:`MergeRuns <algm-MergeRuns>`. Furthermore, that behaviour can be overriden by providing input to the relevant optional properties of the algorithm.
 
+InputWorkspaces
+---------------
+This can be a mixed list of workspaces and workspace groups on AnalysisDataService (ADS), that will be flattened to a list of workspaces. At least two point-data MatrixWorkspaces are required with:
+
+- the same instrument
+- the same number of histograms
+- the same units
+
+SampleLogAsXAxis
+----------------
+
+If specified, this log values will constitute the x-axis of the resulting workspace. The log must exist in all the input workspaces and must be numeric (int or double), in which case the input workspaces must contain single bin only, or numeric time series, in which case the lenght of the series must match the number of bins. 
 
 Usage
 -----
-..  Try not to use files in your examples,
-    but if you cannot avoid it then the (small) files must be added to
-    autotestdata\UsageData and the following tag unindented
-    .. include:: ../usagedata-note.txt
 
-**Example - JoinWorkspaces**
+**Example - JoinRuns**
 
-.. testcode:: JoinWorkspacesExample
+.. testcode:: JoinRunsExample
+   
+    # Create input workspaces
+    list = []
+    for i in range(3):
+        ws = "ws_{0}".format(i)
+        CreateSampleWorkspace(Function="One Peak", NumBanks=1, BankPixelWidth=2,
+                              XMin=i*100, XMax=(i+1)*100, BinWidth=50,
+                              Random=True, OutputWorkspace=ws)
+        ConvertToPointData(InputWorkspace=ws, OutputWorkspace=ws)
+        list.append(ws)
 
-   # Create a host workspace
-   ws = CreateWorkspace(DataX=range(0,3), DataY=(0,2))
-   or
-   ws = CreateSampleWorkspace()
+    # Join the workspaces
+    out = JoinRuns(list)
 
-   wsOut = JoinWorkspaces()
-
-   # Print the result
-   print "The output workspace has %%i spectra" %% wsOut.getNumberHistograms()
+    # Check the output
+    print("out has {0} bins with x-axis as: {1}, {2}, {3}, {4}, {5}, {6}".
+          format(out.blocksize(), out.readX(0)[0], out.readX(0)[1], out.readX(0)[2],
+                 out.readX(0)[3], out.readX(0)[4], out.readX(0)[5]))
 
 Output:
 
-.. testoutput:: JoinWorkspacesExample
+.. testoutput:: JoinRunsExample
 
-  The output workspace has ?? spectra
+    out has 6 bins with x-axis as: 25.0, 75.0, 125.0, 175.0, 225.0, 275.0
+
+**Example - JoinRuns with a numeric log**
+
+.. testcode:: JoinRunsLogExample
+
+    # Create input workspaces
+    list = []
+    for i in range(3):
+        ws = "ws_{0}".format(i)
+        CreateSampleWorkspace(Function="One Peak", NumBanks=1, BankPixelWidth=2,
+                              XMin=i*100, XMax=(i+1)*100, BinWidth=100,
+                              Random=True, OutputWorkspace=ws)
+        ConvertToPointData(InputWorkspace=ws, OutputWorkspace=ws)
+        AddSampleLog(ws, LogName='LOG',LogType='Number', LogText=str(5*i))
+        list.append(ws)
+
+    # Join the workspaces
+    out = JoinRuns(list, SampleLogAsXAxis='LOG')
+
+    # Check the output
+    print("out has {0} bins with x-axis as: {1}, {2}, {3}".
+          format(out.blocksize(), out.readX(0)[0], out.readX(0)[1], out.readX(0)[2]))
+
+Output:
+
+.. testoutput:: JoinRunsLogExample
+
+    out has 3 bins with x-axis as: 0.0, 5.0, 10.0
+
+**Example - JoinRuns with a numeric time series log**
+
+.. testcode:: JoinRunsTSLogExample
+
+    import datetime
+    # Create input workspaces
+    list = []
+    for i in range(3):
+        ws = "ws_{0}".format(i)
+        CreateSampleWorkspace(Function="One Peak", NumBanks=1, BankPixelWidth=2,
+                              XMin=i*100, XMax=(i+1)*100, BinWidth=50,
+                              Random=True, OutputWorkspace=ws)
+        ConvertToPointData(InputWorkspace=ws, OutputWorkspace=ws)
+
+        for j in range(2):
+            AddTimeSeriesLog(ws, Name='LOG',Time=str(datetime.datetime.now()), Value=str(10*i+0.25*j))
+
+        list.append(ws)
+
+    # Join the workspaces
+    out = JoinRuns(list, SampleLogAsXAxis='LOG')
+
+    # Check the output
+    print("out has {0} bins with x-axis as: {1}, {2}, {3}, {4}, {5}, {6}".
+          format(out.blocksize(), out.readX(0)[0], out.readX(0)[1], out.readX(0)[2],
+          out.readX(0)[3], out.readX(0)[4], out.readX(0)[5]))
+
+Output:
+
+.. testoutput:: JoinRunsTSLogExample
+
+    out has 6 bins with x-axis as: 0.0, 0.25, 10.0, 10.25, 20.0, 20.25
+
 
 .. categories::
 
