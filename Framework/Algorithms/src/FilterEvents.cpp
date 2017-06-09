@@ -474,7 +474,8 @@ void FilterEvents::groupOutputWorkspace() {
 }
 
 //----------------------------------------------------------------------------------------------
-/** Clone the sample logs that will not be split, including single-value and add all the
+/** Clone the sample logs that will not be split, including single-value and add
+ * all the
  * TimeSeriesProperty sample logs
  *  to vectors by their type
  * @brief FilterEvents::copyNoneSplitLogs
