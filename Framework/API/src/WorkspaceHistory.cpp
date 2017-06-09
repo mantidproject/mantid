@@ -1,10 +1,10 @@
+#include "MantidAPI/WorkspaceHistory.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/AlgorithmHistory.h"
 #include "MantidAPI/HistoryView.h"
-#include "MantidAPI/WorkspaceHistory.h"
 #include "MantidKernel/EnvironmentHistory.h"
-#include "MantidKernel/Strings.h"
 #include "MantidKernel/StringTokenizer.h"
+#include "MantidKernel/Strings.h"
 
 #include <boost/algorithm/string/classification.hpp>
 #include <boost/algorithm/string/split.hpp>
@@ -20,7 +20,7 @@ namespace API {
 namespace {
 /// static logger object
 Kernel::Logger g_log("WorkspaceHistory");
-}
+} // namespace
 
 /// Default Constructor
 WorkspaceHistory::WorkspaceHistory() : m_environment() {}

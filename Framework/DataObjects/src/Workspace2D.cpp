@@ -1,12 +1,13 @@
-#include "MantidHistogramData/LinearGenerator.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidKernel/Exception.h"
+#include "MantidAPI/ISpectrum.h"
 #include "MantidAPI/RefAxis.h"
 #include "MantidAPI/SpectraAxis.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidAPI/ISpectrum.h"
-#include "MantidKernel/VectorHelper.h"
+#include "MantidAPI/WorkspacePropertyWithIndex.tcc"
+#include "MantidHistogramData/LinearGenerator.h"
+#include "MantidKernel/Exception.h"
 #include "MantidKernel/IPropertyManager.h"
+#include "MantidKernel/VectorHelper.h"
 
 using Mantid::API::ISpectrum;
 using Mantid::API::MantidImage;
@@ -63,7 +64,7 @@ Workspace2D::~Workspace2D() {
  *
  * @param YLength :: The number of data/error points in each vector
  * (must all be the same)
-*/
+ */
 void Workspace2D::init(const std::size_t &NVectors, const std::size_t &XLength,
                        const std::size_t &YLength) {
   m_noVectors = NVectors;
@@ -141,11 +142,11 @@ size_t Workspace2D::blocksize() const {
 }
 
 /**
-  * Copy the data (Y's) from an image to this workspace.
-  * @param image :: An image to copy the data from.
-  * @param start :: Startinf workspace indx to copy data to.
-  * @param parallelExecution :: Should inner loop run as parallel operation
-  */
+ * Copy the data (Y's) from an image to this workspace.
+ * @param image :: An image to copy the data from.
+ * @param start :: Startinf workspace indx to copy data to.
+ * @param parallelExecution :: Should inner loop run as parallel operation
+ */
 void Workspace2D::setImageY(const MantidImage &image, size_t start,
                             bool parallelExecution) {
   MantidImage m;
@@ -153,11 +154,11 @@ void Workspace2D::setImageY(const MantidImage &image, size_t start,
 }
 
 /**
-  * Copy the data from an image to this workspace's errors.
-  * @param image :: An image to copy the data from.
-  * @param start :: Startinf workspace indx to copy data to.
-  * @param parallelExecution :: Should inner loop run as parallel operation
-  */
+ * Copy the data from an image to this workspace's errors.
+ * @param image :: An image to copy the data from.
+ * @param start :: Startinf workspace indx to copy data to.
+ * @param parallelExecution :: Should inner loop run as parallel operation
+ */
 void Workspace2D::setImageE(const MantidImage &image, size_t start,
                             bool parallelExecution) {
   MantidImage m;
@@ -165,21 +166,21 @@ void Workspace2D::setImageE(const MantidImage &image, size_t start,
 }
 
 /**
-  * Copy the data from an image to the (Y's) and the errors for this
-  * workspace.
-  *
-  * @param imageY :: An image to copy the data from.
-  * @param imageE :: An image to copy the errors from.
-  * @param start :: Startinf workspace indx to copy data to.
-  *
-  * @param loadAsRectImg :: load using one histogram per row and one
-  * bin per column, instead of the default one histogram per pixel
-  *
-  * @param scale_1 :: scale factor for the X axis (norammly
-  * representing the inverse of the pixel width or similar.
-  *
-  * @param parallelExecution :: Should inner loop run as parallel operation
-  */
+ * Copy the data from an image to the (Y's) and the errors for this
+ * workspace.
+ *
+ * @param imageY :: An image to copy the data from.
+ * @param imageE :: An image to copy the errors from.
+ * @param start :: Startinf workspace indx to copy data to.
+ *
+ * @param loadAsRectImg :: load using one histogram per row and one
+ * bin per column, instead of the default one histogram per pixel
+ *
+ * @param scale_1 :: scale factor for the X axis (norammly
+ * representing the inverse of the pixel width or similar.
+ *
+ * @param parallelExecution :: Should inner loop run as parallel operation
+ */
 void Workspace2D::setImageYAndE(const API::MantidImage &imageY,
                                 const API::MantidImage &imageE, size_t start,
                                 bool loadAsRectImg, double scale_1,
@@ -346,16 +347,22 @@ void Workspace2D::generateHistogram(const std::size_t index, const MantidVec &X,
 }
 
 } // namespace DataObjects
-} // NamespaceMantid
+} // namespace Mantid
 
 namespace Mantid {
 namespace Kernel {
+
+using Mantid::DataObjects::Workspace2D;
+using Mantid::DataObjects::Workspace2D_sptr;
+using Mantid::DataObjects::Workspace2D_const_sptr;
+using Mantid::Indexing::SpectrumIndexSet;
+using Mantid::API::WorkspacePropertyWithIndex;
+
 template <>
-DLLExport Mantid::DataObjects::Workspace2D_sptr
-IPropertyManager::getValue<Mantid::DataObjects::Workspace2D_sptr>(
-    const std::string &name) const {
-  PropertyWithValue<Mantid::DataObjects::Workspace2D_sptr> *prop =
-      dynamic_cast<PropertyWithValue<Mantid::DataObjects::Workspace2D_sptr> *>(
+DLLExport Workspace2D_sptr
+IPropertyManager::getValue<Workspace2D_sptr>(const std::string &name) const {
+  PropertyWithValue<Workspace2D_sptr> *prop =
+      dynamic_cast<PropertyWithValue<Workspace2D_sptr> *>(
           getPointerToProperty(name));
   if (prop) {
     return *prop;
@@ -368,11 +375,11 @@ IPropertyManager::getValue<Mantid::DataObjects::Workspace2D_sptr>(
 }
 
 template <>
-DLLExport Mantid::DataObjects::Workspace2D_const_sptr
-IPropertyManager::getValue<Mantid::DataObjects::Workspace2D_const_sptr>(
+DLLExport Workspace2D_const_sptr
+IPropertyManager::getValue<Workspace2D_const_sptr>(
     const std::string &name) const {
-  PropertyWithValue<Mantid::DataObjects::Workspace2D_sptr> *prop =
-      dynamic_cast<PropertyWithValue<Mantid::DataObjects::Workspace2D_sptr> *>(
+  PropertyWithValue<Workspace2D_sptr> *prop =
+      dynamic_cast<PropertyWithValue<Workspace2D_sptr> *>(
           getPointerToProperty(name));
   if (prop) {
     return prop->operator()();
@@ -383,6 +390,80 @@ IPropertyManager::getValue<Mantid::DataObjects::Workspace2D_const_sptr>(
     throw std::runtime_error(message);
   }
 }
+
+template <>
+DLLExport std::tuple<Workspace2D_sptr &, SpectrumIndexSet &>
+IPropertyManager::getValue<std::tuple<Workspace2D_sptr &, SpectrumIndexSet &>>(
+    const std::string &name) const {
+  WorkspacePropertyWithIndex<Workspace2D> *prop =
+      dynamic_cast<WorkspacePropertyWithIndex<Workspace2D> *>(
+          getPointerToProperty(name));
+  if (prop) {
+    return *prop;
+  } else {
+    std::string message =
+        "Attempt to assign property " + name +
+        " to incorrect type. Expected shared_ptr<IWorkspace2D>.";
+    throw std::runtime_error(message);
+  }
+}
+
+template <>
+DLLExport std::tuple<Workspace2D_const_sptr &, SpectrumIndexSet &>
+IPropertyManager::getValue<
+    std::tuple<Workspace2D_const_sptr &, SpectrumIndexSet &>>(
+    const std::string &name) const {
+  WorkspacePropertyWithIndex<Workspace2D> *prop =
+      dynamic_cast<WorkspacePropertyWithIndex<Workspace2D> *>(
+          getPointerToProperty(name));
+  if (prop) {
+    return *prop;
+  } else {
+    std::string message =
+        "Attempt to assign property " + name +
+        " to incorrect type. Expected shared_ptr<IWorkspace2D>.";
+    throw std::runtime_error(message);
+  }
+}
+
+// Enable setTypedProperty for Workspace2D
+template <>
+DLLExport IPropertyManager *
+IPropertyManager::setTypedProperty<Workspace2D_sptr, API::IndexType,
+                                   std::vector<int>>(
+    const std::string &name,
+    const std::tuple<Workspace2D_sptr, API::IndexType, std::vector<int>>
+        &value) {
+  WorkspacePropertyWithIndex<Workspace2D> *prop =
+      dynamic_cast<WorkspacePropertyWithIndex<Workspace2D> *>(
+          getPointerToProperty(name));
+  if (prop) {
+    *prop = value;
+  } else {
+    throw std::invalid_argument("Attempt to assign to property (" + name +
+                                ") of incorrect type");
+  }
+  return this;
+}
+
+template <>
+DLLExport IPropertyManager *
+IPropertyManager::setTypedProperty<Workspace2D_sptr, API::IndexType,
+                                   std::string>(
+    const std::string &name,
+    const std::tuple<Workspace2D_sptr, API::IndexType, std::string> &value) {
+  WorkspacePropertyWithIndex<Workspace2D> *prop =
+      dynamic_cast<WorkspacePropertyWithIndex<Workspace2D> *>(
+          getPointerToProperty(name));
+  if (prop) {
+    *prop = value;
+  } else {
+    throw std::invalid_argument("Attempt to assign to property (" + name +
+                                ") of incorrect type");
+  }
+  return this;
+}
+
 } // namespace Kernel
 } // namespace Mantid
 

@@ -1,7 +1,7 @@
 #include "MantidAPI/IMDHistoWorkspace.h"
-#include "MantidKernel/System.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/IPropertyManager.h"
+#include "MantidKernel/System.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -19,19 +19,24 @@ const std::string IMDHistoWorkspace::toString() const {
 
   return os.str();
 }
-} // namespace Mantid
 } // namespace API
+} // namespace Mantid
 
 namespace Mantid {
 namespace Kernel {
+
+using Mantid::API::IMDHistoWorkspace;
+using Mantid::API::IMDHistoWorkspace_sptr;
+using Mantid::API::IMDHistoWorkspace_const_sptr;
+
 /** In order to be able to cast PropertyWithValue classes correctly a definition
- * for the PropertyWithValue<IMDEventWorkspace> is required */
+ * for the PropertyWithValue<IMDHistoWorkspace> is required */
 template <>
-MANTID_API_DLL Mantid::API::IMDHistoWorkspace_sptr
-IPropertyManager::getValue<Mantid::API::IMDHistoWorkspace_sptr>(
+MANTID_API_DLL IMDHistoWorkspace_sptr
+IPropertyManager::getValue<IMDHistoWorkspace_sptr>(
     const std::string &name) const {
-  PropertyWithValue<Mantid::API::IMDHistoWorkspace_sptr> *prop =
-      dynamic_cast<PropertyWithValue<Mantid::API::IMDHistoWorkspace_sptr> *>(
+  PropertyWithValue<IMDHistoWorkspace_sptr> *prop =
+      dynamic_cast<PropertyWithValue<IMDHistoWorkspace_sptr> *>(
           getPointerToProperty(name));
   if (prop) {
     return *prop;
@@ -46,11 +51,11 @@ IPropertyManager::getValue<Mantid::API::IMDHistoWorkspace_sptr>(
 /** In order to be able to cast PropertyWithValue classes correctly a definition
  * for the PropertyWithValue<IMDWorkspace_const_sptr> is required */
 template <>
-MANTID_API_DLL Mantid::API::IMDHistoWorkspace_const_sptr
-IPropertyManager::getValue<Mantid::API::IMDHistoWorkspace_const_sptr>(
+MANTID_API_DLL IMDHistoWorkspace_const_sptr
+IPropertyManager::getValue<IMDHistoWorkspace_const_sptr>(
     const std::string &name) const {
-  PropertyWithValue<Mantid::API::IMDHistoWorkspace_sptr> *prop =
-      dynamic_cast<PropertyWithValue<Mantid::API::IMDHistoWorkspace_sptr> *>(
+  PropertyWithValue<IMDHistoWorkspace_sptr> *prop =
+      dynamic_cast<PropertyWithValue<IMDHistoWorkspace_sptr> *>(
           getPointerToProperty(name));
   if (prop) {
     return prop->operator()();

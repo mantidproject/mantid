@@ -1,5 +1,5 @@
-#include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "MantidAPI/IMDEventWorkspace.h"
+#include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "MantidKernel/IPropertyManager.h"
 
 using Mantid::coord_t;
@@ -61,20 +61,25 @@ const std::string IMDEventWorkspace::toString() const {
 
 //-----------------------------------------------------------------------------------------------
 
-} // namespace MDEvents
+} // namespace API
 
 } // namespace Mantid
 
 namespace Mantid {
 namespace Kernel {
+
+using Mantid::API::IMDEventWorkspace;
+using Mantid::API::IMDEventWorkspace_sptr;
+using Mantid::API::IMDEventWorkspace_const_sptr;
+
 /** In order to be able to cast PropertyWithValue classes correctly a definition
  * for the PropertyWithValue<IMDEventWorkspace> is required */
 template <>
-MANTID_API_DLL Mantid::API::IMDEventWorkspace_sptr
-IPropertyManager::getValue<Mantid::API::IMDEventWorkspace_sptr>(
+MANTID_API_DLL IMDEventWorkspace_sptr
+IPropertyManager::getValue<IMDEventWorkspace_sptr>(
     const std::string &name) const {
-  PropertyWithValue<Mantid::API::IMDEventWorkspace_sptr> *prop =
-      dynamic_cast<PropertyWithValue<Mantid::API::IMDEventWorkspace_sptr> *>(
+  PropertyWithValue<IMDEventWorkspace_sptr> *prop =
+      dynamic_cast<PropertyWithValue<IMDEventWorkspace_sptr> *>(
           getPointerToProperty(name));
   if (prop) {
     return *prop;
@@ -89,12 +94,11 @@ IPropertyManager::getValue<Mantid::API::IMDEventWorkspace_sptr>(
 /** In order to be able to cast PropertyWithValue classes correctly a definition
  * for the PropertyWithValue<IMDEventWorkspace> is required */
 template <>
-MANTID_API_DLL Mantid::API::IMDEventWorkspace_const_sptr
-IPropertyManager::getValue<Mantid::API::IMDEventWorkspace_const_sptr>(
+MANTID_API_DLL IMDEventWorkspace_const_sptr
+IPropertyManager::getValue<IMDEventWorkspace_const_sptr>(
     const std::string &name) const {
-  PropertyWithValue<Mantid::API::IMDEventWorkspace_const_sptr> *prop =
-      dynamic_cast<
-          PropertyWithValue<Mantid::API::IMDEventWorkspace_const_sptr> *>(
+  PropertyWithValue<IMDEventWorkspace_const_sptr> *prop =
+      dynamic_cast<PropertyWithValue<IMDEventWorkspace_const_sptr> *>(
           getPointerToProperty(name));
   if (prop) {
     return prop->operator()();
@@ -102,8 +106,8 @@ IPropertyManager::getValue<Mantid::API::IMDEventWorkspace_const_sptr>(
     // Every other class with this behaviour allows you to get a shared_ptr<T>
     // property as a shared_ptr<const T>. This class should be consistent, so
     // try that:
-    PropertyWithValue<Mantid::API::IMDEventWorkspace_sptr> *nonConstProp =
-        dynamic_cast<PropertyWithValue<Mantid::API::IMDEventWorkspace_sptr> *>(
+    PropertyWithValue<IMDEventWorkspace_sptr> *nonConstProp =
+        dynamic_cast<PropertyWithValue<IMDEventWorkspace_sptr> *>(
             getPointerToProperty(name));
     if (nonConstProp) {
       return nonConstProp->operator()();

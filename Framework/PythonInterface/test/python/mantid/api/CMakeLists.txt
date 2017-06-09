@@ -49,6 +49,7 @@ set ( TEST_PY_FILES
   WorkspaceGroupTest.py
   WorkspaceHistoryTest.py
   WorkspacePropertiesTest.py
+  WorkspacePropertiesWithIndexTest.py
   WorkspaceValidatorsTest.py
 )
 

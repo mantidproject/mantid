@@ -12,12 +12,16 @@
 #include "MantidKernel/CPUTimer.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/Exception.h"
+
 #include "MantidKernel/FunctionTask.h"
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 
 #include "tbb/parallel_for.h"
 
+#include <MantidAPI/IndexTypeProperty.h>
+#include <MantidAPI/WorkspacePropertyWithIndex.tcc>
+#include <MantidIndexing/SpectrumIndexSet.h>
 #include <limits>
 #include <numeric>
 
@@ -30,7 +34,7 @@ namespace DataObjects {
 namespace {
 // static logger
 Kernel::Logger g_log("EventWorkspace");
-}
+} // namespace
 
 DECLARE_WORKSPACE(EventWorkspace)
 
@@ -668,13 +672,18 @@ void EventWorkspace::getIntegratedSpectra(std::vector<double> &out,
 
 namespace Mantid {
 namespace Kernel {
+
+using Mantid::DataObjects::EventWorkspace;
+using Mantid::DataObjects::EventWorkspace_sptr;
+using Mantid::DataObjects::EventWorkspace_const_sptr;
+using Mantid::Indexing::SpectrumIndexSet;
+using Mantid::API::WorkspacePropertyWithIndex;
+
 template <>
-DLLExport Mantid::DataObjects::EventWorkspace_sptr
-IPropertyManager::getValue<Mantid::DataObjects::EventWorkspace_sptr>(
-    const std::string &name) const {
-  PropertyWithValue<Mantid::DataObjects::EventWorkspace_sptr> *prop =
-      dynamic_cast<
-          PropertyWithValue<Mantid::DataObjects::EventWorkspace_sptr> *>(
+DLLExport EventWorkspace_sptr
+IPropertyManager::getValue<EventWorkspace_sptr>(const std::string &name) const {
+  PropertyWithValue<EventWorkspace_sptr> *prop =
+      dynamic_cast<PropertyWithValue<EventWorkspace_sptr> *>(
           getPointerToProperty(name));
   if (prop) {
     return *prop;
@@ -688,11 +697,10 @@ IPropertyManager::getValue<Mantid::DataObjects::EventWorkspace_sptr>(
 
 template <>
 DLLExport Mantid::DataObjects::EventWorkspace_const_sptr
-IPropertyManager::getValue<Mantid::DataObjects::EventWorkspace_const_sptr>(
+IPropertyManager::getValue<EventWorkspace_const_sptr>(
     const std::string &name) const {
   PropertyWithValue<Mantid::DataObjects::EventWorkspace_sptr> *prop =
-      dynamic_cast<
-          PropertyWithValue<Mantid::DataObjects::EventWorkspace_sptr> *>(
+      dynamic_cast<PropertyWithValue<EventWorkspace_sptr> *>(
           getPointerToProperty(name));
   if (prop) {
     return prop->operator()();
@@ -703,6 +711,81 @@ IPropertyManager::getValue<Mantid::DataObjects::EventWorkspace_const_sptr>(
     throw std::runtime_error(message);
   }
 }
+
+template <>
+DLLExport std::tuple<EventWorkspace_sptr &, SpectrumIndexSet &>
+IPropertyManager::getValue<
+    std::tuple<EventWorkspace_sptr &, SpectrumIndexSet &>>(
+    const std::string &name) const {
+  WorkspacePropertyWithIndex<EventWorkspace> *prop =
+      dynamic_cast<WorkspacePropertyWithIndex<EventWorkspace> *>(
+          getPointerToProperty(name));
+  if (prop) {
+    return *prop;
+  } else {
+    std::string message =
+        "Attempt to assign property " + name +
+        " to incorrect type. Expected shared_ptr<IEventWorkspace>.";
+    throw std::runtime_error(message);
+  }
+}
+
+template <>
+DLLExport std::tuple<EventWorkspace_const_sptr &, SpectrumIndexSet &>
+IPropertyManager::getValue<
+    std::tuple<EventWorkspace_const_sptr &, SpectrumIndexSet &>>(
+    const std::string &name) const {
+  WorkspacePropertyWithIndex<EventWorkspace> *prop =
+      dynamic_cast<WorkspacePropertyWithIndex<EventWorkspace> *>(
+          getPointerToProperty(name));
+  if (prop) {
+    return *prop;
+  } else {
+    std::string message =
+        "Attempt to assign property " + name +
+        " to incorrect type. Expected shared_ptr<IEventWorkspace>.";
+    throw std::runtime_error(message);
+  }
+}
+
+// Enable setTypedProperty for EventWorkspace
+template <>
+DLLExport IPropertyManager *
+IPropertyManager::setTypedProperty<EventWorkspace_sptr, API::IndexType,
+                                   std::vector<int>>(
+    const std::string &name,
+    const std::tuple<EventWorkspace_sptr, API::IndexType, std::vector<int>>
+        &value) {
+  WorkspacePropertyWithIndex<EventWorkspace> *prop =
+      dynamic_cast<WorkspacePropertyWithIndex<EventWorkspace> *>(
+          getPointerToProperty(name));
+  if (prop) {
+    *prop = value;
+  } else {
+    throw std::invalid_argument("Attempt to assign to property (" + name +
+                                ") of incorrect type");
+  }
+  return this;
+}
+
+template <>
+DLLExport IPropertyManager *
+IPropertyManager::setTypedProperty<EventWorkspace_sptr, API::IndexType,
+                                   std::string>(
+    const std::string &name,
+    const std::tuple<EventWorkspace_sptr, API::IndexType, std::string> &value) {
+  WorkspacePropertyWithIndex<EventWorkspace> *prop =
+      dynamic_cast<WorkspacePropertyWithIndex<EventWorkspace> *>(
+          getPointerToProperty(name));
+  if (prop) {
+    *prop = value;
+  } else {
+    throw std::invalid_argument("Attempt to assign to property (" + name +
+                                ") of incorrect type");
+  }
+  return this;
+}
+
 } // namespace Kernel
 } // namespace Mantid
 

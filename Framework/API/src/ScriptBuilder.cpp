@@ -1,15 +1,17 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAPI/AlgorithmFactory.h"
-#include "MantidAPI/AlgorithmManager.h"
-#include "MantidAPI/AlgorithmHistory.h"
-#include "MantidKernel/PropertyHistory.h"
-#include "MantidAPI/IAlgorithm.h"
-#include "MantidAPI/HistoryItem.h"
 #include "MantidAPI/ScriptBuilder.h"
-#include "MantidKernel/Property.h"
+#include "MantidAPI/AlgorithmFactory.h"
+#include "MantidAPI/AlgorithmHistory.h"
+#include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/HistoryItem.h"
+#include "MantidAPI/IAlgorithm.h"
+#include "MantidAPI/IWorkspacePropertyWithIndex.h"
+#include "MantidAPI/IndexTypeProperty.h"
 #include "MantidKernel/Logger.h"
+#include "MantidKernel/Property.h"
+#include "MantidKernel/PropertyHistory.h"
 
 #include <boost/utility.hpp>
 #include <set>
@@ -106,11 +108,11 @@ void ScriptBuilder::buildChildren(
 }
 
 /**
-* Build the script output for a single comment
-*
-* @param algHistory :: pointer to an algorithm history object
-* @returns std::string to run this algorithm
-*/
+ * Build the script output for a single comment
+ *
+ * @param algHistory :: pointer to an algorithm history object
+ * @returns std::string to run this algorithm
+ */
 const std::string
 ScriptBuilder::buildCommentString(AlgorithmHistory_const_sptr algHistory) {
   std::ostringstream comment;
@@ -127,11 +129,11 @@ ScriptBuilder::buildCommentString(AlgorithmHistory_const_sptr algHistory) {
 }
 
 /**
-* Build the script output for a single algorithm
-*
-* @param algHistory :: pointer to an algorithm history object
-* @returns std::string to run this algorithm
-*/
+ * Build the script output for a single algorithm
+ *
+ * @param algHistory :: pointer to an algorithm history object
+ * @returns std::string to run this algorithm
+ */
 const std::string
 ScriptBuilder::buildAlgorithmString(AlgorithmHistory_const_sptr algHistory) {
   std::ostringstream properties;
@@ -154,6 +156,12 @@ ScriptBuilder::buildAlgorithmString(AlgorithmHistory_const_sptr algHistory) {
     std::set<std::string> freshPropNames;
     for (const auto &propFresh : propsFresh) {
       freshPropNames.insert(propFresh->name());
+
+      // Special Handling for WorkspacePropertyWithIndex
+      if (dynamic_cast<IWorkspacePropertyWithIndex *>(propFresh)) {
+        freshPropNames.insert(propFresh->name() + "Spectra");
+        freshPropNames.insert(propFresh->name() + "Indices");
+      }
     }
 
     // remove properties that are not present on a fresh algorithm

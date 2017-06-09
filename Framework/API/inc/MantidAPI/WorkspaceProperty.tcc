@@ -167,7 +167,7 @@ std::string WorkspaceProperty<TYPE>::setValue(const std::string &value) {
     // the workspace name is not reset here, however.
   }
 
-  return isValid();
+  return WorkspaceProperty<TYPE>::isValid();
 }
 
 /** Set a value from a data item
@@ -434,7 +434,7 @@ std::string WorkspaceProperty<TYPE>::isOptionalWs() const {
       error = "Enter a name for the Input/InOut workspace";
     }
   } else {
-    error = "Workspace \"" + this->value() +
+    error = "Workspace \"" + WorkspaceProperty<TYPE>::value() +
             "\" was not found in the Analysis Data Service";
   }
 

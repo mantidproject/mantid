@@ -84,6 +84,7 @@ set ( SRC_FILES
 	src/ImplicitFunctionParameterParserFactory.cpp
 	src/ImplicitFunctionParserFactory.cpp
 	src/IncreasingAxisValidator.cpp
+	src/IndexTypeProperty.cpp
 	src/InstrumentDataService.cpp
 	src/InstrumentValidator.cpp
 	src/JointDomain.cpp
@@ -143,6 +144,7 @@ set ( SRC_FILES
 	src/WorkspaceHistory.cpp
 	src/WorkspaceOpOverloads.cpp
 	src/WorkspaceProperty.cpp
+	src/WorkspacePropertyWithIndex.cpp
 	src/WorkspaceUnitValidator.cpp
 )
 
@@ -274,6 +276,7 @@ set ( INC_FILES
 	inc/MantidAPI/ImplicitFunctionParser.h
 	inc/MantidAPI/ImplicitFunctionParserFactory.h
 	inc/MantidAPI/IncreasingAxisValidator.h
+	inc/MantidAPI/IndexTypeProperty.h
 	inc/MantidAPI/InstrumentDataService.h
 	inc/MantidAPI/InstrumentValidator.h
 	inc/MantidAPI/Jacobian.h
@@ -341,6 +344,9 @@ set ( INC_FILES
 	inc/MantidAPI/WorkspaceOpOverloads.h
 	inc/MantidAPI/WorkspaceProperty.h
 	inc/MantidAPI/WorkspaceProperty.tcc
+    inc/MantidAPI/IWorkspacePropertyWithIndex.h
+	inc/MantidAPI/WorkspacePropertyWithIndex.h
+	inc/MantidAPI/WorkspacePropertyWithIndex.tcc
 	inc/MantidAPI/WorkspaceUnitValidator.h
 	inc/MantidAPI/Workspace_fwd.h
 )
@@ -400,6 +406,7 @@ set ( TEST_FILES
 	ImmutableCompositeFunctionTest.h
 	ImplicitFunctionParserFactoryTest.h
 	IncreasingAxisValidatorTest.h
+	IndexTypePropertyTest.h
 	InstrumentDataServiceTest.h
 	InstrumentValidatorTest.h
 	LatticeDomainTest.h
@@ -450,6 +457,7 @@ set ( TEST_FILES
 	WorkspaceHistoryTest.h
 	WorkspaceOpOverloadsTest.h
 	WorkspacePropertyTest.h
+	WorkspacePropertyWithIndexTest.h
 	WorkspaceUnitValidatorTest.h
 )
 

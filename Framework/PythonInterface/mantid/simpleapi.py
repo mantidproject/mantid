@@ -86,6 +86,7 @@ def _create_generic_signature(algm_object):
     #   2 - All output properties will be removed from the function
     #       argument list
     arg_list = []
+
     for p in algm_object.mandatoryProperties():
         prop = algm_object.getProperty(p)
         # Mandatory parameters are those for which the default value is not valid
@@ -94,7 +95,13 @@ def _create_generic_signature(algm_object):
         else:
             valid_str = prop.isValid()
         if len(valid_str) > 0:
-            arg_list.append(p)
+            # Expand WorkspacePropertyWithIndex
+            if _is_workspace_property_with_index(prop):
+                arg_list.append(prop.name)
+                arg_list.append(prop.name + "Spectra=None")
+                arg_list.append(prop.name + "Indices=None")
+            else:
+                arg_list.append(p)
         else:
             # None is not quite accurate here, but we are reproducing the
             # behavior found in the C++ code for SimpleAPI.
@@ -160,10 +167,10 @@ def Load(*args, **kwargs):
     except ValueError as ve:
         raise ValueError('Problem when setting Filename. This is the detailed error '
                          'description: ' + str(ve) + '\nIf the file has been found '
-                         'but you got this error, you might not have read permissions '
-                         'or the file might be corrupted.\nIf the file has not been found, '
-                         'you might have forgotten to add its location in the data search '
-                         'directories.')
+                                                     'but you got this error, you might not have read permissions '
+                                                     'or the file might be corrupted.\nIf the file has not been found, '
+                                                     'you might have forgotten to add its location in the data search '
+                                                     'directories.')
     # Remove from keywords so it is not set twice
     try:
         del kwargs['Filename']
@@ -189,6 +196,7 @@ def Load(*args, **kwargs):
     # If a WorkspaceGroup was loaded then there will be a set of properties that have an underscore in the name
     # and users will simply expect the groups to be returned NOT the groups + workspaces.
     return _gather_returns('Load', lhs, algm, ignore_regex=['LoaderName', 'LoaderVersion', '.*_.*'])
+
 
 ######################################################################
 
@@ -293,8 +301,8 @@ def StartLiveData(*args, **kwargs):
 
     return _gather_returns("StartLiveData", lhs, algm)
 
-# ---------------------------- Fit ---------------------------------------------
 
+# ---------------------------- Fit ---------------------------------------------
 
 def fitting_algorithm(f):
     """
@@ -302,6 +310,7 @@ def fitting_algorithm(f):
     When applied to a function definition this decorator replaces its code with code of
     function 'wrapper' defined below.
     """
+
     def wrapper(*args, **kwargs):
         function, input_workspace = _get_mandatory_args(function_name, ["Function", "InputWorkspace"], *args, **kwargs)
         # Remove from keywords so it is not set twice
@@ -518,7 +527,7 @@ def CutMD(*args, **kwargs):
                 load_alg.setLogging(True)
                 load_alg.setAlwaysStoreInADS(False)
                 load_alg.setProperty("Filename", ws)
-                load_alg.setProperty("OutputWorkspace", "__loaded_by_cutmd_{0}".format(i+1))
+                load_alg.setProperty("OutputWorkspace", "__loaded_by_cutmd_{0}".format(i + 1))
                 load_alg.execute()
                 if not load_alg.isExecuted():
                     raise TypeError("Failed to load " + ws)
@@ -543,6 +552,9 @@ def CutMD(*args, **kwargs):
         return out_names
     else:
         return out_names[0]
+# enddef
+
+
 # enddef
 
 _replace_signature(CutMD, ("\bInputWorkspace", "**kwargs"))
@@ -678,6 +690,7 @@ def _get_mandatory_args(func_name, required_args, *args, **kwargs):
             return val
         except KeyError:
             raise RuntimeError('%s argument not supplied to %s function' % (str(key), func_name))
+
     nrequired = len(required_args)
     npositional = len(args)
 
@@ -748,6 +761,18 @@ def _is_workspace_property(prop):
         return True
     else:
         # Doesn't look like a workspace property
+        return False
+
+
+def _is_workspace_property_with_index(prop):
+    """
+        Returns true if the property is a workspace property with index.
+        :param prop: A property Object
+        :returns: True is the property is considered to be of type workspace with index
+    """
+    if isinstance(prop, _api.IWorkspacePropertyWithIndex):
+        return True
+    else:
         return False
 
 
@@ -922,11 +947,31 @@ def set_properties(alg_object, *args, **kwargs):
             alg_object.setPropertyValue(key, new_value.name())
         else:
             alg_object.setProperty(key, new_value)
+
     # end
     if len(args) > 0:
         mandatory_props = alg_object.mandatoryProperties()
     else:
         mandatory_props = []
+
+    # extra args are created for WorkspacePropertyWithIndex
+    # set these values here
+    if (len(args) + len(kwargs)) > alg_object.propertyCount():
+        indexProps = [prop for prop in alg_object.getProperties() if _is_workspace_property_with_index(prop)]
+
+        for prop in indexProps:
+            spec = prop.name + "Spectra"
+            ind = prop.name + "Indices"
+
+            if [kwargs.get(itype) for itype in [spec, ind]].count(None) < 1:
+                raise Exception("Must only have one index type " + spec + " or " + ind)
+            elif kwargs.get(spec):
+                prop.setIndexType(_api.IndexType.SpectrumNumber)
+                prop.setIndexList(kwargs.pop(spec))
+            elif kwargs.get(ind):
+                prop.setIndexType(_api.IndexType.WorkspaceIndex)
+                prop.setIndexList(kwargs.pop(ind))
+
     if len(kwargs) > 0:
         for (key, value) in iteritems(kwargs):
             do_set_property(key, value)
@@ -947,6 +992,7 @@ def _create_algorithm_function(name, version, algm_object):
         :param version: The version of the algorithm
         :param algm_object: the created algorithm object.
     """
+
     def algorithm_wrapper(*args, **kwargs):
         """
         Note that if the Version parameter is passed, we will create
@@ -1122,6 +1168,7 @@ def set_properties_dialog(algm_object, *args, **kwargs):
                 return '0'
         else:
             return str(value_to_use)
+
     # Translate positional arguments and add them to the keyword list
     ordered_props = algm_object.orderedProperties()
     for index, value in enumerate(args):
@@ -1151,6 +1198,7 @@ def _create_algorithm_dialog(algorithm, version, _algm_object):
         :param algorithm: name of the algorithm
         :param _algm_object: the created algorithm object.
     """
+
     def algorithm_wrapper(*args, **kwargs):
         _version = version
         if "Version" in kwargs:
@@ -1238,6 +1286,8 @@ def _mockup(plugins):
         """
         for alg_name in alg_names:
             create_fake_function(alg_name)
+    # -------------------------------------
+
     # -------------------------------------
 
     # Start with the loaded C++ algorithms

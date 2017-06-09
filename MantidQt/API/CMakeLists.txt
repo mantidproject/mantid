@@ -56,6 +56,7 @@
   src/WindowIcons.cpp
 	src/WorkspaceObserver.cpp
 	src/WorkspaceIcons.cpp
+	src/WorkspaceIndexPropertyWidget.cpp
 )
 
 set ( MOC_FILES
@@ -86,6 +87,7 @@ set ( MOC_FILES
   inc/MantidQtAPI/VatesViewerInterface.h
   inc/MantidQtAPI/WorkspaceObserver.h
   inc/MantidQtAPI/SelectionNotificationService.h
+  inc/MantidQtAPI/WorkspaceIndexPropertyWidget.h
 )
 
 # Include files aren't required, but this makes them appear in Visual Studio
