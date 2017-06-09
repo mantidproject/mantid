@@ -31,10 +31,12 @@ const std::string SQRT_OR_ONE("sqrtOrOne");
 const std::string CUSTOM("custom");
 
 struct SetError {
-  explicit SetError(const double setTo, const double ifEqualTo) : valueToSet(setTo), valueToCompare(ifEqualTo)  {}
+  explicit SetError(const double setTo, const double ifEqualTo, const double tolerance) 
+	  : valueToSet(setTo), valueToCompare(ifEqualTo), tolerance(tolerance)  {}
 
   double operator()(const double error) {
-    if (error-valueToCompare < TOLERANCE) {
+	double deviation = error - valueToCompare;
+    if (deviation < tolerance && deviation >= 0) {
       return valueToSet;
     } else {
 		return error;
@@ -43,6 +45,7 @@ struct SetError {
 
   double valueToSet;
   double valueToCompare;
+  double tolerance;
 };
 
 struct SqrtError {
@@ -108,6 +111,11 @@ void SetUncertainties::exec() {
   bool resetOne = ((errorType == ONE_IF_ZERO) || (errorType == SQRT_OR_ONE));
   bool customError = (errorType == CUSTOM);
 
+  double valueToSet = resetOne ? 1.0 : getProperty("SetErrorTo");
+  double valueToCompare = resetOne ? 0.0 : getProperty("IfEqualTo");
+  int precision = getProperty("Precision");
+  double tolerance = resetOne ? 1E-10 : std::pow(10.0, precision*(-1));
+
   // Create the output workspace. This will copy many aspects from the input
   // one.
   MatrixWorkspace_sptr outputWorkspace =
@@ -126,7 +134,7 @@ void SetUncertainties::exec() {
     outputWorkspace->setSharedX(i, inputWorkspace->sharedX(i));
     outputWorkspace->setSharedY(i, inputWorkspace->sharedY(i));
     // copy the E or set to zero depending on the mode
-    if (errorType == ONE_IF_ZERO) {
+    if (errorType == ONE_IF_ZERO || customError) {
       outputWorkspace->setSharedE(i, inputWorkspace->sharedE(i));
     } else {
       outputWorkspace->mutableE(i) = 0.0;
@@ -141,9 +149,7 @@ void SetUncertainties::exec() {
         std::transform(Y.begin(), Y.end(), E.begin(),
                        SqrtError(resetOne ? 1. : 0.));
       } else {
-		double valueToSet = resetOne ? 1.0 : getProperty("SetErrorTo");
-		double valueToCompare = resetOne ? 0.0 : getProperty("IfEqualTo");
-        std::transform(E.begin(), E.end(), E.begin(), SetError(valueToSet, valueToCompare));
+        std::transform(E.begin(), E.end(), E.begin(), SetError(valueToSet, valueToCompare, tolerance));
 	  } 
     }
 
