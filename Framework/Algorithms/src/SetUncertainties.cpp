@@ -30,22 +30,23 @@ const std::string ONE_IF_ZERO("oneIfZero");
 const std::string SQRT_OR_ONE("sqrtOrOne");
 const std::string CUSTOM("custom");
 
-struct ResetZeroError {
-  explicit ResetZeroError(const double constant) : zeroErrorValue(constant) {}
+struct SetError {
+  explicit SetError(const double setTo, const double ifEqualTo) : valueToSet(setTo), valueToCompare(ifEqualTo)  {}
 
   double operator()(const double error) {
-    if (error < TOLERANCE) {
-      return zeroErrorValue;
+    if (error-valueToCompare < TOLERANCE) {
+      return valueToSet;
     } else {
-      return error;
+		return error;
     }
   }
 
-  double zeroErrorValue;
+  double valueToSet;
+  double valueToCompare;
 };
 
-struct sqrterror {
-  explicit sqrterror(const double constant) : zeroSqrtValue(constant) {}
+struct SqrtError {
+  explicit SqrtError(const double constant) : zeroSqrtValue(constant) {}
 
   double operator()(const double intensity) {
     const double localIntensity = fabs(intensity);
@@ -138,10 +139,12 @@ void SetUncertainties::exec() {
       if (takeSqrt) {
         const auto &Y = outputWorkspace->y(i);
         std::transform(Y.begin(), Y.end(), E.begin(),
-                       sqrterror(resetOne ? 1. : 0.));
+                       SqrtError(resetOne ? 1. : 0.));
       } else {
-        std::transform(E.begin(), E.end(), E.begin(), ResetZeroError(1.));
-      }
+		double valueToSet = resetOne ? 1.0 : getProperty("SetErrorTo");
+		double valueToCompare = resetOne ? 0.0 : getProperty("IfEqualTo");
+        std::transform(E.begin(), E.end(), E.begin(), SetError(valueToSet, valueToCompare));
+	  } 
     }
 
     prog.report();
