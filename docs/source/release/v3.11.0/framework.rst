@@ -15,6 +15,7 @@ New
 Improved
 ########
 
+- :ref:`algm-MonteCarloAbsorption` now supports approximating the input instrument with a sparse grid of detectors enabling quick simulation of huge pixel arrays.
 
 Deprecated
 ##########
