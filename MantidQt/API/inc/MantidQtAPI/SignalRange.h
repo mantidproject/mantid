@@ -3,7 +3,6 @@
 
 #include "MantidQtAPI/DllOption.h"
 #include "MantidAPI/IMDWorkspace.h"
-#include "MantidKernel/ClassMacros.h"
 
 #include <qwt_double_interval.h>
 
@@ -43,15 +42,17 @@ public:
               const Mantid::API::MDNormalization normalization =
                   Mantid::API::NoNormalization);
 
+  /// Disable default constructor
+  SignalRange() = delete;
+
   /// Returns the range of the workspace signal values
   QwtDoubleInterval interval() const;
 
 private:
-  DISABLE_DEFAULT_CONSTRUCT(SignalRange)
-
   /// Find the min/max signal values in the entire workspace
   void findFullRange(const Mantid::API::IMDWorkspace &workspace,
                      Mantid::Geometry::MDImplicitFunction *function);
+
   /// Get the range of signal, in parallel, given an iterator
   QwtDoubleInterval
   getRange(const std::vector<Mantid::API::IMDIterator *> &iterators);
