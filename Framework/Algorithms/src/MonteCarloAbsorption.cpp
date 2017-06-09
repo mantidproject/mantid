@@ -236,7 +236,7 @@ Object_sptr makeCubeShape() {
  *  @param wavelengthPoints Number of points in the output workspace.
  *  @return A workspace with sparse instrument.
  */
-MatrixWorkspace_uptr createWSWithSimulationInstrument(const MatrixWorkspace &modelWS, const Mantid::Algorithms::DetectorGridDefinition &grid, const size_t wavelengthPoints) {
+MatrixWorkspace_uptr createSparseWS(const MatrixWorkspace &modelWS, const Mantid::Algorithms::DetectorGridDefinition &grid, const size_t wavelengthPoints) {
   // Build a quite standard and somewhat complete instrument.
   auto instrument = boost::make_shared<Instrument>("MC_simulation_instrument");
   instrument->setReferenceFrame(
@@ -367,37 +367,16 @@ Mantid::HistogramData::Histogram interpolateFromDetectorGrid(const double lat, c
   return h;
 }
 
-/// A class to provide a placeholder for sparse instrument properties.
-struct SparseInstrumentOption {
-  /// True, if a sparse instrument is to be used.
-  bool use;
-  /// Number of detector rows.
-  int latitudinalDets = DEFAULT_LATITUDINAL_DETS;
-  /// Number of detector columns.
-  int longitudinalDets = DEFAULT_LONGITUDINAL_DETS;
-  /// Number of wavelength points in the simulation workspace.
-  size_t wavelengthPoints = 2;
-
-  /// Constructs a SparseInstrumentOption object.
-  SparseInstrumentOption(const bool use_) : use(use_) {}
-};
-
 /** Creates a detector grid definition for a sparse instrument.
  *  @param modelWS A workspace the sparse instrument approximates.
- *  @param options Options defining the grid.
+ *  @param rows Number of rows in the detector grid.
+ *  @param columns Number of columns in the detector gris.
  *  @return A unique pointer pointing to the grid definition.
  */
-std::unique_ptr<const Mantid::Algorithms::DetectorGridDefinition> createDetectorGridDefinition(const MatrixWorkspace &modelWS, const SparseInstrumentOption &options) {
+std::unique_ptr<const Mantid::Algorithms::DetectorGridDefinition> createDetectorGridDefinition(const MatrixWorkspace &modelWS, const size_t rows, const size_t columns) {
   double minLat, maxLat, minLong, maxLong;
   std::tie(minLat, maxLat, minLong, maxLong) = extremeAngles(modelWS);
-  return Mantid::Kernel::make_unique<Mantid::Algorithms::DetectorGridDefinition>(minLat, maxLat, static_cast<size_t>(options.latitudinalDets), minLong, maxLong, static_cast<size_t>(options.longitudinalDets));
-}
-
-MatrixWorkspace_uptr createSparseWS(const MatrixWorkspace &modelWS, const SparseInstrumentOption &options, const Mantid::Algorithms::DetectorGridDefinition &detGrid) {
-  // TODO check if this function is needed at all.
-  double minWavelength, maxWavelength;
-  std::tie(minWavelength, maxWavelength) = extremeWavelengths(modelWS);
-  return createWSWithSimulationInstrument(modelWS, detGrid, options.wavelengthPoints);
+  return Mantid::Kernel::make_unique<Mantid::Algorithms::DetectorGridDefinition>(minLat, maxLat, rows, minLong, maxLong, columns);
 }
 
 }
@@ -492,18 +471,16 @@ MonteCarloAbsorption::doSimulation(const MatrixWorkspace &inputWS,
     }
     nlambda = inputNbins;
   }
-  SparseInstrumentOption sparseInstrumentOpt(useSparseInstrument);
   std::unique_ptr<const DetectorGridDefinition> detGrid;
   MatrixWorkspace_uptr sparseWS;
-  if (sparseInstrumentOpt.use) {
-    sparseInstrumentOpt.latitudinalDets = getProperty("NumberOfDetectorRows");
-    sparseInstrumentOpt.longitudinalDets = getProperty("NumberOfDetectorColumns");
-    sparseInstrumentOpt.wavelengthPoints = nlambda;
-    detGrid = createDetectorGridDefinition(inputWS, sparseInstrumentOpt);
-    sparseWS = createSparseWS(inputWS, sparseInstrumentOpt, *detGrid);
+  if (useSparseInstrument) {
+    const int latitudinalDets = getProperty("NumberOfDetectorRows");
+    const int longitudinalDets = getProperty("NumberOfDetectorColumns");
+    detGrid = createDetectorGridDefinition(inputWS, latitudinalDets, longitudinalDets);
+    sparseWS = createSparseWS(inputWS, *detGrid, nlambda);
   }
-  MatrixWorkspace &simulationWS = sparseInstrumentOpt.use ? *sparseWS : *outputWS;
-  const MatrixWorkspace &instrumentWS = sparseInstrumentOpt.use ? simulationWS : inputWS;
+  MatrixWorkspace &simulationWS = useSparseInstrument ? *sparseWS : *outputWS;
+  const MatrixWorkspace &instrumentWS = useSparseInstrument ? simulationWS : inputWS;
   // Cache information about the workspace that will be used repeatedly
   auto instrument = instrumentWS.getInstrument();
   const int64_t nhists = static_cast<int64_t>(instrumentWS.getNumberHistograms());
@@ -564,7 +541,7 @@ MonteCarloAbsorption::doSimulation(const MatrixWorkspace &inputWS,
     }
 
     // Interpolate through points not simulated
-    if (!sparseInstrumentOpt.use && lambdaStepSize > 1) {
+    if (!useSparseInstrument && lambdaStepSize > 1) {
         auto histnew = simulationWS.histogram(i);
         if (lambdaStepSize < nbins) {
           interpolateOpt.applyInplace(histnew, lambdaStepSize);
@@ -579,11 +556,10 @@ MonteCarloAbsorption::doSimulation(const MatrixWorkspace &inputWS,
   }
   PARALLEL_CHECK_INTERUPT_REGION
 
-  if (sparseInstrumentOpt.use) {
+  if (useSparseInstrument) {
     interpolateFromSparse(*outputWS, simulationWS, interpolateOpt, *detGrid);
   }
 
-  //return std::move(sparseInstrumentOpt.use ? sparseWS : outputWS); // TODO remove this line
   return outputWS;
 }
 
