@@ -4,6 +4,7 @@
 #include "MantidAlgorithms/SampleCorrections/MCAbsorptionStrategy.h"
 #include "MantidAlgorithms/SampleCorrections/RectangularBeamProfile.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/DetectorInfo.h"
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/Run.h"
@@ -152,10 +153,10 @@ Mantid::HistogramData::Histogram modelHistogram(const MatrixWorkspace &modelWS, 
   return h;
 }
 
-bool constantEFixed(const EFixedProvider &eFixed, const size_t nSpectra) {
-  const auto e = eFixed.value(0);
-  for (Mantid::detid_t i = 1; i < static_cast<Mantid::detid_t>(nSpectra); ++i) {
-    if (e != eFixed.value(i)) {
+bool constantEFixed(const EFixedProvider &eFixed, const std::vector<Mantid::detid_t> &detIDs) {
+  const auto e = eFixed.value(detIDs[0]);
+  for (size_t i = 1; i < detIDs.size(); ++i) {
+    if (e != eFixed.value(detIDs[i])) {
       return false;
     }
   }
@@ -256,12 +257,14 @@ MatrixWorkspace_uptr createWSWithSimulationInstrument(const MatrixWorkspace &mod
   if (eFixed.emode() == Mantid::Kernel::DeltaEMode::Direct) {
     ws->mutableRun().addProperty("Ei", eFixed.value(0));
   } else if (eFixed.emode() == Mantid::Kernel::DeltaEMode::Indirect) {
-    if (!constantEFixed(eFixed, modelWS.getNumberHistograms())) {
+    const auto &detIDs = modelWS.detectorInfo().detectorIDs();
+    if (!constantEFixed(eFixed, detIDs)) {
       throw std::runtime_error("Sparse instrument with variable EFixed not supported.");
     }
-    const auto e = eFixed.value(0);
-    for (Mantid::detid_t i = 0; i < static_cast<Mantid::detid_t>(numSpectra); ++i) {
-      ws->setEFixed(i, e);
+    const auto e = eFixed.value(detIDs[0]);
+    const auto &sparseDetIDs = ws->detectorInfo().detectorIDs();
+    for (size_t i = 0; i < sparseDetIDs.size(); ++i) {
+      ws->setEFixed(sparseDetIDs[i], e);
     }
   }
   return MatrixWorkspace_uptr(ws.release());
