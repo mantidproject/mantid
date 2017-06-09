@@ -49,6 +49,7 @@ class PlotCurve : public QObject, public QwtPlotCurve {
 public:
   explicit PlotCurve(const QString &name = QString());
   PlotCurve(const PlotCurve &c);
+  PlotCurve &operator=(const PlotCurve &rhs) = delete;
 
   virtual PlotCurve *clone(const Graph *) const = 0;
 
@@ -118,6 +119,7 @@ public:
   DataCurve(Table *t, const QString &xColName, const QString &name,
             int startRow = 0, int endRow = -1);
   DataCurve(const DataCurve &c);
+  DataCurve &operator=(const DataCurve &rhs) = delete;
   void clone(DataCurve *c);
 
   PlotCurve *clone(const Graph *) const override;

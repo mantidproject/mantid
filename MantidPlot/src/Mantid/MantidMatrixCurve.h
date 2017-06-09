@@ -66,6 +66,8 @@ public:
 
   ~MantidMatrixCurve() override;
 
+  MantidMatrixCurve &operator=(const MantidMatrixCurve &rhs) = delete;
+
   MantidMatrixCurve *clone(const Graph *) const override;
 
   /// Curve type. Used in the QtiPlot API.
