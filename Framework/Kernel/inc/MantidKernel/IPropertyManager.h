@@ -4,12 +4,21 @@
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/make_unique.h"
+#include "MantidKernel/DllConfig.h"
+#include "MantidKernel/IValidator.h"
+#include "MantidKernel/NullValidator.h"
+#include "MantidKernel/Property.h"
+#include "MantidKernel/System.h"
 
 #ifndef Q_MOC_RUN
 #include <boost/make_shared.hpp>
 #include <boost/type_traits.hpp>
 #endif
 
+#include <cstdint>
+#include <memory>
+#include <stdexcept>
+#include <string>
 #include <unordered_set>
 #include <vector>
 
@@ -21,11 +30,11 @@ namespace Mantid {
 
 namespace Kernel {
 
-class Logger;
 class DataItem;
 class DateAndTime;
 class IPropertySettings;
 class PropertyManager;
+class SplittingInterval;
 template <typename T> class TimeSeriesProperty;
 template <typename T> class Matrix;
 

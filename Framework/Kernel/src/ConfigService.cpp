@@ -9,6 +9,7 @@
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/FilterChannel.h"
 #include "MantidKernel/StdoutChannel.h"
+#include "MantidKernel/System.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidKernel/NetworkProxy.h"
@@ -26,11 +27,17 @@
 #include <Poco/Environment.h>
 #include <Poco/Process.h>
 #include <Poco/URI.h>
-#ifdef _WIN32
-#pragma warning(disable : 4250)
-#endif
+
+#include <Poco/AutoPtr.h>
+#include <Poco/Channel.h>
+#include <Poco/DOM/Element.h>
+#include <Poco/DOM/Node.h>
+#include <Poco/Exception.h>
+#include <Poco/Instantiator.h>
+#include <Poco/Pipe.h>
+#include <Poco/Platform.h>
+#include <Poco/String.h>
 #include <Poco/Logger.h>
-#include <Poco/SplitterChannel.h>
 #include <Poco/LoggingRegistry.h>
 #include <Poco/PipeStream.h>
 #include <Poco/StreamCopier.h>
@@ -38,7 +45,14 @@
 #include <boost/algorithm/string/join.hpp>
 #include <boost/regex.hpp>
 
+#include <algorithm>
+#include <exception>
 #include <fstream>
+#include <functional>
+#include <iostream>
+#include <stdexcept>
+#include <utility>
+#include <ctype.h>
 
 #ifdef __APPLE__
 #include <mach-o/dyld.h>

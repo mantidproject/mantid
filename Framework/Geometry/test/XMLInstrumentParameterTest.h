@@ -1,6 +1,7 @@
 #ifndef MANTID_GEOMETRY_XMLLOGFILETEST_H_
 #define MANTID_GEOMETRY_XMLLOGFILETEST_H_
 
+#include "MantidKernel/Exception.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidGeometry/Instrument/XMLInstrumentParameter.h"
 #include "MantidKernel/System.h"
