@@ -10,6 +10,10 @@ namespace {
 
   typedef double (CompositeFunction::*getParameterType1)(size_t) const;
   typedef double (CompositeFunction::*getParameterType2)(const std::string&) const;
+
+  typedef void (CompositeFunction::*setParameterType2)(const std::string&, const double&, bool);
+  BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(setParameterType2_Overloads,
+    setParameter, 2, 3)
 }
 
 void export_CompositeFunction() {
@@ -32,5 +36,7 @@ void export_CompositeFunction() {
     (arg("self"), arg("name")), "Get value of parameter of given name.")
     .def("__getitem__", (getParameterType2)&CompositeFunction::getParameter,
     (arg("self"), arg("name")), "Get value of parameter of given name.")
+    .def("__setitem__", (setParameterType2)&CompositeFunction::setParameter,
+      setParameterType2_Overloads((arg("self"), arg("name"), arg("value"), arg("explicitlySet")), "Get value of parameter of given name."))
     ;
 }

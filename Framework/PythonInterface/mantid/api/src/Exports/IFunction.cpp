@@ -104,6 +104,11 @@ void export_IFunction() {
            (double (IFunction::*)(const std::string &) const) &
                IFunction::getParameter,
            (arg("self"), arg("name")), "Get the value of the named parameter")
+ 
+      .def("__getitem__",
+           (double (IFunction::*)(const std::string &) const) &
+               IFunction::getParameter,
+           (arg("self"), arg("name")), "Get the value of the named parameter")
 
       .def("setParameter", (setParameterType1)&IFunction::setParameter,
            setParameterType1_Overloads(
@@ -111,6 +116,11 @@ void export_IFunction() {
                "Sets the value of the ith parameter"))
 
       .def("setParameter", (setParameterType2)&IFunction::setParameter,
+           setParameterType2_Overloads(
+               (arg("self"), arg("name"), arg("value"), arg("explicitlySet")),
+               "Sets the value of the named parameter"))
+
+      .def("__setitem__", (setParameterType2)&IFunction::setParameter,
            setParameterType2_Overloads(
                (arg("self"), arg("name"), arg("value"), arg("explicitlySet")),
                "Sets the value of the named parameter"))
