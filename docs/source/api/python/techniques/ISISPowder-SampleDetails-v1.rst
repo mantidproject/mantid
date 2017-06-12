@@ -50,7 +50,7 @@ sample geometry are required:
 Example
 ^^^^^^^
 
-.. code-block:: Python
+..  code-block:: python
 
     from isis_powder import SampleDetails
 
@@ -69,7 +69,7 @@ which is greater than 0.
 
 Example Input:
 
-.. code-block:: Python
+..  code-block:: python
 
     sample_obj = SampleDetails(height=5.0, ...)
 
@@ -82,7 +82,7 @@ which is greater than 0.
 
 Example Input:
 
-.. code-block:: Python
+..  code-block:: python
 
     sample_obj = SampleDetails(radius=5.0, ...)
 
@@ -95,7 +95,7 @@ co-ordinates. This co-ordinates must be numeric.
 
 Example Input:
 
-.. code-block:: Python
+..  code-block:: python
 
     sample_obj = SampleDetails(center=[-1.0, 0.0, 1.0], ...)
 
@@ -120,7 +120,7 @@ The following properties are required to set the sample material:
 Example
 ^^^^^^^
 
-.. code-block:: Python
+..  code-block:: python
 
     sample_obj.set_material(chemical_formula="V")
     # OR
@@ -139,7 +139,7 @@ more details.
 
 Example Input:
 
-.. code-block:: Python
+..  code-block:: python
 
     sample_obj.set_material(chemical_formula="V")
     # Or
@@ -158,7 +158,7 @@ is not an element the user must enter this value.
 
 Example Input:
 
-.. code-block:: Python
+..  code-block:: python
 
     sample_obj.set_material(number_density=0.123, ...)
 
@@ -181,7 +181,7 @@ These properties are:
 Example
 ^^^^^^^
 
-.. code-block:: Python
+..  code-block:: python
 
         sample_obj.set_material_properties(absorption_cross_section=123, 
                                            scattering_cross_section=456)
@@ -223,6 +223,6 @@ To change the chemical material or its advanced properties all
 *reset_sample_material*. This will reset **all** details (i.e
 advanced properties and chemical properties).
 
-.. code-block:: Python
+..  code-block:: python
 
     sample_obj.reset_sample_material()

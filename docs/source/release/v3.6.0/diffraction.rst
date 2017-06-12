@@ -44,10 +44,10 @@ Powder Diffraction
 -  Various fixes and optimizations to make
    :ref:`SNSPowderReduction <algm-SNSPowderReduction>`
    run faster.
--  New documentation page for the :ref:`ISIS Powder Diffraction <isis-powder-diffraction>`
+-  New documentation page for the `ISIS Powder Diffraction <http://docs.mantidproject.org/v3.6.0/api/python/techniques/PowderDiffractionISIS-v1.html>`_
    with comprehensive workflow-diagrams and usage example.
 -  Many small changes made to the ISIS Powder Diffraction script to
-   enable smoother process, which can be discovered on the :ref:`ISIS Powder Diffraction <isis-powder-diffraction>`
+   enable smoother process, which can be discovered on the `ISIS Powder Diffraction <http://docs.mantidproject.org/v3.6.0/api/python/techniques/PowderDiffractionISIS-v1.html>`_
    documentation page.
 
 Crystal Improvements

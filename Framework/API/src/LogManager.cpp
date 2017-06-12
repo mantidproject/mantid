@@ -471,19 +471,36 @@ void LogManager::saveNexus(::NeXus::File *file, const std::string &group,
 //--------------------------------------------------------------------------------------------
 /** Load the object from an open NeXus file.
  * @param file :: open NeXus file
- * @param group :: name of the group to open. Empty string to NOT open a group,
- * but
+ * @param group :: name of the group to open. Pass an empty string to NOT open a
+ * group
  * @param keepOpen :: do not close group on exit to allow overloading and child
  * classes reading from the same group
  * load any NXlog in the current open group.
  */
 void LogManager::loadNexus(::NeXus::File *file, const std::string &group,
                            bool keepOpen) {
-  if (!group.empty())
+  if (!group.empty()) {
     file->openGroup(group, "NXgroup");
-
+  }
   std::map<std::string, std::string> entries;
   file->getEntries(entries);
+  LogManager::loadNexus(file, entries);
+
+  if (!(group.empty() || keepOpen)) {
+    file->closeGroup();
+  }
+}
+
+//--------------------------------------------------------------------------------------------
+/** Load the object from an open NeXus file. Avoid multiple expensive calls to
+ * getEntries().
+ * @param file :: open NeXus file
+ * @param entries :: The entries available in the current place in the file.
+ * load any NXlog in the current open group.
+ */
+void LogManager::loadNexus(::NeXus::File *file,
+                           const std::map<std::string, std::string> &entries) {
+
   for (const auto &name_class : entries) {
     // NXLog types are the main one.
     if (name_class.second == "NXlog") {
@@ -496,8 +513,6 @@ void LogManager::loadNexus(::NeXus::File *file, const std::string &group,
       }
     }
   }
-  if (!(group.empty() || keepOpen))
-    file->closeGroup();
 }
 
 /**

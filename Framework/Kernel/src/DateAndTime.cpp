@@ -1,8 +1,20 @@
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/Logger.h"
+
 #include <Poco/DateTime.h>
 #include <Poco/DateTimeFormat.h>
 #include <Poco/DateTimeParser.h>
+
+#include <boost/lexical_cast.hpp>
+#include <boost/date_time/time.hpp>
+#include <boost/date_time/date.hpp>
+
+#include <math.h>
+#include <exception>
+#include <limits>
+#include <memory>
+#include <ostream>
+#include <stdexcept>
 
 namespace Mantid {
 namespace Kernel {

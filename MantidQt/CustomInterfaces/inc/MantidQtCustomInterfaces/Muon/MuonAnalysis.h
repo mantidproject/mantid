@@ -87,12 +87,14 @@ public:
   /// Destructor
   ~MuonAnalysis();
 
-  /// Sets index of group or pair to plot
-  /// and causes a replot
-  void setGroupOrPairAndReplot(int index);
-
-  /// Gets current index of group or pair to plot
+  /// Gets current index of the group or pair to plot
   int getGroupOrPairToPlot() const;
+
+  /// Sets the current index of the group or pair to plot
+  void setGroupOrPairIndexToPlot(int index);
+
+  /// Plots the currently selected group or pair
+  void plotCurrentGroupAndPairs();
 
 signals:
   /// Request to hide/show Mantid toolbars
@@ -156,7 +158,7 @@ private slots:
   void runFrontPlotButton();
 
   /// Creates a plot of selected group/pair.
-  void plotSelectedItem();
+  void plotSelectedGroupPair();
 
   /// Link to the wiki for the home tab
   void muonAnalysisHelpClicked();
@@ -304,8 +306,8 @@ private:
   std::string getNewAnalysisWSName(Muon::ItemType itemType, int tableRow,
                                    Muon::PlotType plotType);
 
-  /// Update front anc pair combo box
-  void updateFrontAndCombo();
+  /// Update front and pair combo box
+  void updateFrontAndCombo(bool updateIndexAndPlot);
 
   /// Updates widgets related to period algebra
   void updatePeriodWidgets(size_t numPeriods);
@@ -569,6 +571,9 @@ private:
   void setAnalysisTabsEnabled(const bool enabled);
 
   void setChosenGroupAndPeriods(const QString &wsName);
+
+  /// set the group/pair name
+  std::string m_groupPairName;
 };
 }
 }
