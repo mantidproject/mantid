@@ -48,7 +48,7 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
     _efixed = None
 
     def category(self):
-        return "Workflow\\MIDAS;Workflow\\Inelastic;Inelastic\\Indirect;Inelastic\\Reduction"
+        return "Workflow\\MIDAS;Workflow\\Inelastic;Inelastic\\Indirect;Inelastic\\Reduction;ILL\\Indirect"
 
     def summary(self):
         return 'Performs initial energy transfer reduction for ILL indirect geometry data, instrument IN16B.'
@@ -173,7 +173,7 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
         """
         Converts the x-axis from raw channel number to energy transfer
         @param ws :: input workspace name
-        @param ws :: number of cropped bins
+        @param n_crop :: number of cropped bins
         """
 
         x = mtd[ws].readX(0)
@@ -268,7 +268,7 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
             self._progress.report("Loading run #"+runnumber)
             if i == 0:
                 LoadILLIndirect(Filename=item,OutputWorkspace=self._red_ws)
-            if i > 0:
+            else:
                 LoadILLIndirect(Filename=item, OutputWorkspace=ws_name)
                 MergeRuns(InputWorkspaces=[self._red_ws,ws_name],OutputWorkspace=self._red_ws)
                 DeleteWorkspace(ws_name)
@@ -335,6 +335,7 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
         if self._reduction_type == 'QENS':
             if self._dead_channels:
                 CropWorkspace(InputWorkspace=ws,OutputWorkspace=ws,XMin=float(xmin),XMax=float(xmax+1.))
+                ScaleX(InputWorkspace=ws, OutputWorkspace=ws, Factor=-float(xmin), Operation='Add')
                 n_cropped_bins = mtd[mon].blocksize() - mtd[ws].blocksize() - 1
             else:
                 self._mask(ws, xmin, xmax)
@@ -386,7 +387,7 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
         """
         Normalises the ws to the monitor dependent on the reduction type
         @param ws :: input workspace name
-        @param ws :: ws's monitor
+        @param mon :: ws's monitor
         """
         x = mtd[ws].readX(0)
 
