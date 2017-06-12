@@ -376,7 +376,7 @@ void JoinRuns::exec() {
   m_progress = make_unique<Progress>(this, 0.0, 1.0, numSpec);
 
   // Now loop in parallel over all the spectra and join the data
-  PARALLEL_FOR_IF(threadSafe(m_outWS))
+  PARALLEL_FOR_IF(threadSafe(*m_outWS))
   for (long index = 0; index < static_cast<long>(numSpec); ++index) {
     PARALLEL_START_INTERUPT_REGION
     m_outWS->mutableX(static_cast<size_t>(index)) = xAxis;
