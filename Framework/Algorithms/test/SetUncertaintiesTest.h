@@ -50,32 +50,35 @@ public:
     return outWS;
   }
 
-  API::MatrixWorkspace_sptr runAlgCustom(const double toSet, const double toReplace, const double errorVal, const int precision, const int position) {
+  API::MatrixWorkspace_sptr
+  runAlgCustom(const double toSet, const double toReplace,
+               const double errorVal, const int precision, const int position) {
 
-	  const std::string mode = "custom";
-	  std::string outWSname = "SetUncertainties_" + mode;
+    const std::string mode = "custom";
+    std::string outWSname = "SetUncertainties_" + mode;
 
-	  auto inWksp = WorkspaceCreationHelper::create1DWorkspaceConstant(10, 1, 0., true);
-	  // Set random element to value to replace
-	  auto &E = inWksp->mutableE(0);
-	  E[position] = double(errorVal);
+    auto inWksp =
+        WorkspaceCreationHelper::create1DWorkspaceConstant(10, 1, 0., true);
+    // Set random element to value to replace
+    auto &E = inWksp->mutableE(0);
+    E[position] = double(errorVal);
 
-	  SetUncertainties alg;
-	  TS_ASSERT_THROWS_NOTHING(alg.initialize());
-	  alg.setProperty("InputWorkspace", inWksp);
-	  alg.setProperty("SetError", mode);
-	  alg.setProperty("OutputWorkspace", outWSname);
-	  alg.setProperty("SetErrorTo", toSet);
-	  alg.setProperty("ifEqualTo", toReplace);
-	  alg.setProperty("precision", precision);
-	  TS_ASSERT_THROWS_NOTHING(alg.execute());
-	  TS_ASSERT(alg.isExecuted());
+    SetUncertainties alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    alg.setProperty("InputWorkspace", inWksp);
+    alg.setProperty("SetError", mode);
+    alg.setProperty("OutputWorkspace", outWSname);
+    alg.setProperty("SetErrorTo", toSet);
+    alg.setProperty("ifEqualTo", toReplace);
+    alg.setProperty("precision", precision);
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(alg.isExecuted());
 
-	  const auto outWS =
-		  API::AnalysisDataService::Instance().retrieveWS<API::MatrixWorkspace>(
-			  outWSname);
-	  TS_ASSERT(bool(outWS)); // non-null pointer
-	  return outWS;
+    const auto outWS =
+        API::AnalysisDataService::Instance().retrieveWS<API::MatrixWorkspace>(
+            outWSname);
+    TS_ASSERT(bool(outWS)); // non-null pointer
+    return outWS;
   }
 
   void test_zero() {
@@ -128,71 +131,71 @@ public:
   }
 
   void test_setCustomWithinToleranceRange() {
-	  const double toSet = 3;
-	  const double toReplace = 0.5;
-	  const double errorVal = 0.500999;
-	  const int precision = 3;
-	  const int position = rand() % 10;
+    const double toSet = 3;
+    const double toReplace = 0.5;
+    const double errorVal = 0.500999;
+    const int precision = 3;
+    const int position = rand() % 10;
 
-	  const auto outWS = runAlgCustom(toSet, toReplace, errorVal, precision, position);
+    const auto outWS =
+        runAlgCustom(toSet, toReplace, errorVal, precision, position);
 
-	  const auto &E = outWS->e(0);
-	  for (size_t i = 0; i < E.size(); ++i) {
-		  if (i == position) {
-			  // Error should have been replaced with chosen value
-			  TS_ASSERT_EQUALS(E[i], toSet);
-		  }
-		  else {
-			  // Other values remain unchanged
-			  TS_ASSERT_EQUALS(E[i], 0.)
-		  }
-	  }
-	  API::AnalysisDataService::Instance().remove(outWS->getName());
+    const auto &E = outWS->e(0);
+    for (size_t i = 0; i < E.size(); ++i) {
+      if (i == position) {
+        // Error should have been replaced with chosen value
+        TS_ASSERT_EQUALS(E[i], toSet);
+      } else {
+        // Other values remain unchanged
+        TS_ASSERT_EQUALS(E[i], 0.)
+      }
+    }
+    API::AnalysisDataService::Instance().remove(outWS->getName());
   }
 
   void test_setCustomAboveToleranceRange() {
-	  const double toSet = 3;
-	  const double toReplace = 0.5;
-	  const double errorVal = 0.501;
-	  const int precision = 3;
-	  const int position = rand() % 10;
+    const double toSet = 3;
+    const double toReplace = 0.5;
+    const double errorVal = 0.501;
+    const int precision = 3;
+    const int position = rand() % 10;
 
-	  const auto outWS = runAlgCustom(toSet, toReplace, errorVal, precision, position);
+    const auto outWS =
+        runAlgCustom(toSet, toReplace, errorVal, precision, position);
 
-	  const auto &E = outWS->e(0);
-	  for (size_t i = 0; i < E.size(); ++i) {
-		  // Errors should be unchanged
-		  if (i == position) {
-			  TS_ASSERT_EQUALS(E[i], errorVal);
-		  }
-		  else {
-			  TS_ASSERT_EQUALS(E[i], 0.)
-		  }
-	  }
-	  API::AnalysisDataService::Instance().remove(outWS->getName());
+    const auto &E = outWS->e(0);
+    for (size_t i = 0; i < E.size(); ++i) {
+      // Errors should be unchanged
+      if (i == position) {
+        TS_ASSERT_EQUALS(E[i], errorVal);
+      } else {
+        TS_ASSERT_EQUALS(E[i], 0.)
+      }
+    }
+    API::AnalysisDataService::Instance().remove(outWS->getName());
   }
 
   void test_setCustomBelowToleranceRange() {
-	  const double toSet = 3;
-	  const double toReplace = 0.5;
-	  const double errorVal = 0.49999;
-	  const int precision = 1;
-	  const int position = rand() % 10;
+    const double toSet = 3;
+    const double toReplace = 0.5;
+    const double errorVal = 0.49999;
+    const int precision = 1;
+    const int position = rand() % 10;
 
-	  const auto outWS = runAlgCustom(toSet, toReplace, errorVal, precision, position);
+    const auto outWS =
+        runAlgCustom(toSet, toReplace, errorVal, precision, position);
 
-	  const auto &E = outWS->e(0);
-	  for (size_t i = 0; i < E.size(); ++i) {
-		  // Errors should be unchanged
-		  if (i == position) {
-			  TS_ASSERT_EQUALS(E[i], errorVal);
-		  } else {
-			  TS_ASSERT_EQUALS(E[i], 0.)
-		  }
-	  }
-	  API::AnalysisDataService::Instance().remove(outWS->getName());
+    const auto &E = outWS->e(0);
+    for (size_t i = 0; i < E.size(); ++i) {
+      // Errors should be unchanged
+      if (i == position) {
+        TS_ASSERT_EQUALS(E[i], errorVal);
+      } else {
+        TS_ASSERT_EQUALS(E[i], 0.)
+      }
+    }
+    API::AnalysisDataService::Instance().remove(outWS->getName());
   }
-
 };
 
 class SetUncertaintiesTestPerformance : public CxxTest::TestSuite {

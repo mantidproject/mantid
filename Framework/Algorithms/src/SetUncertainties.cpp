@@ -31,15 +31,16 @@ const std::string SQRT_OR_ONE("sqrtOrOne");
 const std::string CUSTOM("custom");
 
 struct SetError {
-  explicit SetError(const double setTo, const double ifEqualTo, const double tolerance) 
-	  : valueToSet(setTo), valueToCompare(ifEqualTo), tolerance(tolerance)  {}
+  explicit SetError(const double setTo, const double ifEqualTo,
+                    const double tolerance)
+      : valueToSet(setTo), valueToCompare(ifEqualTo), tolerance(tolerance) {}
 
   double operator()(const double error) {
-	double deviation = error - valueToCompare;
+    double deviation = error - valueToCompare;
     if (deviation < tolerance && deviation >= 0) {
       return valueToSet;
     } else {
-		return error;
+      return error;
     }
   }
 
@@ -79,28 +80,27 @@ void SetUncertainties::init() {
       "InputWorkspace", "", Direction::Input));
   declareProperty(make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
       "OutputWorkspace", "", Direction::Output));
-  std::vector<std::string> errorTypes = {ZERO, SQRT, SQRT_OR_ONE, ONE_IF_ZERO, CUSTOM};
+  std::vector<std::string> errorTypes = {ZERO, SQRT, SQRT_OR_ONE, ONE_IF_ZERO,
+                                         CUSTOM};
   declareProperty("SetError", ZERO,
                   boost::make_shared<StringListValidator>(errorTypes),
                   "How to reset the uncertainties");
   declareProperty("SetErrorTo", 1.000, mustBePositive,
-	  "The error value to set when using custom values");
-  setPropertySettings("SetErrorTo",
-	  Kernel::make_unique<VisibleWhenProperty>(
-		  "SetError", IS_EQUAL_TO, "custom"));
+                  "The error value to set when using custom values");
+  setPropertySettings("SetErrorTo", Kernel::make_unique<VisibleWhenProperty>(
+                                        "SetError", IS_EQUAL_TO, "custom"));
 
-  declareProperty("IfEqualTo", 0.000, mustBePositive, // TODO empty float?
-	  "The condition specifying where the custom error value should be set");
-  setPropertySettings("IfEqualTo",
-	  Kernel::make_unique<VisibleWhenProperty>(
-		  "SetError", IS_EQUAL_TO, "custom"));
+  declareProperty(
+      "IfEqualTo", 0.000, mustBePositive, // TODO empty float?
+      "The condition specifying where the custom error value should be set");
+  setPropertySettings("IfEqualTo", Kernel::make_unique<VisibleWhenProperty>(
+                                       "SetError", IS_EQUAL_TO, "custom"));
 
-  declareProperty("Precision", 3, mustBePositiveInt,
-	  "How many decimal places are taken into account for IfEqualTo" );
-  setPropertySettings("Precision",
-	  Kernel::make_unique<VisibleWhenProperty>(
-		  "SetError", IS_EQUAL_TO, "custom"));
-
+  declareProperty(
+      "Precision", 3, mustBePositiveInt,
+      "How many decimal places are taken into account for IfEqualTo");
+  setPropertySettings("Precision", Kernel::make_unique<VisibleWhenProperty>(
+                                       "SetError", IS_EQUAL_TO, "custom"));
 }
 
 void SetUncertainties::exec() {
@@ -114,7 +114,7 @@ void SetUncertainties::exec() {
   double valueToSet = resetOne ? 1.0 : getProperty("SetErrorTo");
   double valueToCompare = resetOne ? 0.0 : getProperty("IfEqualTo");
   int precision = getProperty("Precision");
-  double tolerance = resetOne ? 1E-10 : std::pow(10.0, precision*(-1));
+  double tolerance = resetOne ? 1E-10 : std::pow(10.0, precision * (-1));
 
   // Create the output workspace. This will copy many aspects from the input
   // one.
@@ -149,8 +149,9 @@ void SetUncertainties::exec() {
         std::transform(Y.begin(), Y.end(), E.begin(),
                        SqrtError(resetOne ? 1. : 0.));
       } else {
-        std::transform(E.begin(), E.end(), E.begin(), SetError(valueToSet, valueToCompare, tolerance));
-	  } 
+        std::transform(E.begin(), E.end(), E.begin(),
+                       SetError(valueToSet, valueToCompare, tolerance));
+      }
     }
 
     prog.report();
