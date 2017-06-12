@@ -1,11 +1,9 @@
 #ifndef MAGNETICION_H_
 #define MAGNETICION_H_
 
+#include "MantidKernel/DllConfig.h"
 #include <string>
 #include <vector>
-#include <map>
-#include "MantidKernel/DllConfig.h"
-#include "MantidKernel/PhysicalConstants.h"
 
 namespace Mantid {
 namespace PhysicalConstants {

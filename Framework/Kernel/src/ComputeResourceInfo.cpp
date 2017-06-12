@@ -1,11 +1,14 @@
 #include "MantidKernel/ComputeResourceInfo.h"
-#include "MantidKernel/FacilityInfo.h"
 #include "MantidKernel/Logger.h"
 
 #include <Poco/DOM/AutoPtr.h>
 #include <Poco/DOM/Element.h>
+#include <Poco/DOM/Node.h>
 #include <Poco/DOM/NodeList.h>
 #include <Poco/DOM/Text.h>
+
+#include <ostream>
+#include <stdexcept>
 
 namespace Mantid {
 namespace Kernel {
