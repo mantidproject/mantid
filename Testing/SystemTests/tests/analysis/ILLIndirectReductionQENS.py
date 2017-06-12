@@ -126,6 +126,8 @@ class ILLIndirectReductionQENSTest(stresstesting.MantidStressTest):
 
         self.runTestBackgroundCalibration()
 
+        self.runTestDifferentZeroMonitorChannels()
+
         self.tolerance = 1e-3
 
         self.disableChecking = ['Instrument']
