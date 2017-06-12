@@ -61,5 +61,8 @@ class CompositeFunctionWrapper(FunctionWrapper):
        
     def __delitem__ (self, index):
        self.fun.__delitem__(index)
+       
+    def __len__ (self):
+       return self.fun.__len__()
         
       
