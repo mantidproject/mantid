@@ -16,7 +16,8 @@ using namespace Kernel;
 
 //----------------------------------------------------------------------------------------------
 /** Flattens the list of group workspaces (if any) into list of workspaces
-* @param inputs : input workspaces vector [including] group workspaces (all must be on ADS)
+* @param inputs : input workspaces vector [including] group workspaces (all must
+* be on ADS)
 * @return : the flat vector of the input workspaces
 */
 std::vector<std::string>
@@ -43,12 +44,12 @@ RunCombinationHelper::unWrapGroups(const std::vector<std::string> &inputs) {
  * @param ref : the reference workspace
  */
 void RunCombinationHelper::setReferenceProperties(MatrixWorkspace_sptr ref) {
-    m_numberSpectra = ref->getNumberHistograms();
-    m_xUnit = ref->getAxis(0)->unit()->unitID();
-    m_spectrumAxisUnit = ref->getAxis(1)->unit()->unitID();
-    m_yUnit = ref->YUnit();
-    m_isHistogramData = ref->isHistogramData();
-    m_instrumentName = ref->getInstrument()->getName();
+  m_numberSpectra = ref->getNumberHistograms();
+  m_xUnit = ref->getAxis(0)->unit()->unitID();
+  m_spectrumAxisUnit = ref->getAxis(1)->unit()->unitID();
+  m_yUnit = ref->YUnit();
+  m_isHistogramData = ref->isHistogramData();
+  m_instrumentName = ref->getInstrument()->getName();
 }
 
 //----------------------------------------------------------------------------------------------
