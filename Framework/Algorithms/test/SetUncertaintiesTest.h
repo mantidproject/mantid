@@ -135,7 +135,7 @@ public:
     const double toReplace = 0.5;
     const double errorVal = 0.500999;
     const int precision = 3;
-    const int position = rand() % 10;
+    const unsigned position = rand() % 10;
 
     const auto outWS =
         runAlgCustom(toSet, toReplace, errorVal, precision, position);
@@ -158,7 +158,7 @@ public:
     const double toReplace = 0.5;
     const double errorVal = 0.501;
     const int precision = 3;
-    const int position = rand() % 10;
+    const unsigned position = rand() % 10;
 
     const auto outWS =
         runAlgCustom(toSet, toReplace, errorVal, precision, position);
@@ -180,7 +180,7 @@ public:
     const double toReplace = 0.5;
     const double errorVal = 0.49999;
     const int precision = 1;
-    const int position = rand() % 10;
+    const unsigned position = rand() % 10;
 
     const auto outWS =
         runAlgCustom(toSet, toReplace, errorVal, precision, position);
