@@ -83,7 +83,7 @@ void SetUncertainties::init() {
   declareProperty("SetError", ZERO,
                   boost::make_shared<StringListValidator>(errorTypes),
                   "How to reset the uncertainties");
-  declareProperty("SetErrorTo", 0.000, mustBePositive,
+  declareProperty("SetErrorTo", 1.000, mustBePositive,
 	  "The error value to set when using custom values");
   setPropertySettings("SetErrorTo",
 	  Kernel::make_unique<VisibleWhenProperty>(
