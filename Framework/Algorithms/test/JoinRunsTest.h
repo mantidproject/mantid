@@ -24,7 +24,7 @@ public:
   static JoinRunsTest *createSuite() { return new JoinRunsTest(); }
   static void destroySuite(JoinRunsTest *suite) { delete suite; }
 
-  void setUp() {
+  void setUp() override {
     MatrixWorkspace_sptr ws1 = create2DWorkspace123(5, 3); // 3 points
     MatrixWorkspace_sptr ws2 = create2DWorkspace154(5, 2); // 2 points
     MatrixWorkspace_sptr ws3 = create2DWorkspace123(5, 1); // 1 point
@@ -43,7 +43,7 @@ public:
     m_testWS = {"ws1", "ws2", "ws3", "ws4"};
   }
 
-  void tearDown() {
+  void tearDown() override {
     removeWS("ws1");
     removeWS("ws2");
     removeWS("ws3");
