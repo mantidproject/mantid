@@ -11,10 +11,9 @@ Algorithms
 New
 ###
 
-
 Improved
 ########
-
+- :ref:`SetUncertainties <algm-SetUncertainties-v1>` now provides a "custom" mode, which lets the user arbitrarily replace any error value x with y.
 
 Deprecated
 ##########
