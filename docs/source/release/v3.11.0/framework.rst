@@ -11,6 +11,7 @@ Algorithms
 New
 ###
 
+- :ref:`algm-IntegrateEPP` integrates a workspace around the elastic peak positions given in an EPP table.
 
 Improved
 ########
