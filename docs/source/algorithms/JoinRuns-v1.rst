@@ -14,7 +14,7 @@ This algorithm joins the input workspaces into a single one by concatenating the
 
 InputWorkspaces
 ---------------
-This can be a mixed list of workspaces and workspace groups on AnalysisDataService (ADS), that will be flattened to a list of workspaces. At least two point-data MatrixWorkspaces are required with:
+This can be a mixed list of workspaces and workspace groups on AnalysisDataService (ADS), that will be flattened to a list of workspaces. MatrixWorkspaces representing point-data are required with:
 
 - the same instrument
 - the same number of histograms

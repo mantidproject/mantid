@@ -1,7 +1,5 @@
 #include "MantidAlgorithms/JoinRuns.h"
 
-#include "MantidAlgorithms/RunCombinationHelpers/RunCombinationHelper.h"
-#include "MantidAlgorithms/RunCombinationHelpers/SampleLogsBehaviour.h"
 #include "MantidAPI/ADSValidator.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
@@ -9,15 +7,17 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/WorkspaceHistory.h"
+#include "MantidAlgorithms/RunCombinationHelpers/RunCombinationHelper.h"
+#include "MantidAlgorithms/RunCombinationHelpers/SampleLogsBehaviour.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/Exception.h"
-#include "MantidKernel/make_unique.h"
 #include "MantidKernel/ListValidator.h"
-#include "MantidKernel/Unit.h"
-#include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidKernel/Unit.h"
+#include "MantidKernel/UnitFactory.h"
+#include "MantidKernel/make_unique.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -44,9 +44,7 @@ const std::string JoinRuns::name() const { return "JoinRuns"; }
 int JoinRuns::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string JoinRuns::category() const {
-  return "Transforms\\Merging";
-}
+const std::string JoinRuns::category() const { return "Transforms\\Merging"; }
 
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
 const std::string JoinRuns::summary() const {
@@ -94,17 +92,18 @@ void JoinRuns::init() {
 
   const std::vector<std::string> failBehaviourOptions = {SKIP_BEHAVIOUR,
                                                          STOP_BEHAVIOUR};
-  declareProperty("FailBehaviour", SKIP_BEHAVIOUR,
-                  boost::make_shared<StringListValidator>(failBehaviourOptions),
-                  "Choose whether to skip the workspace and continue, or stop and "
-                  "throw and error, when encountering a failure on merging.");
-
+  declareProperty(
+      "FailBehaviour", SKIP_BEHAVIOUR,
+      boost::make_shared<StringListValidator>(failBehaviourOptions),
+      "Choose whether to skip the workspace and continue, or stop and "
+      "throw and error, when encountering a failure on merging.");
 }
 
 std::map<std::string, std::string> JoinRuns::validateInputs() {
   std::map<std::string, std::string> issues;
 
-  const std::vector<std::string> inputs_given = getProperty(INPUTWORKSPACEPROPERTY);
+  const std::vector<std::string> inputs_given =
+      getProperty(INPUTWORKSPACEPROPERTY);
   m_logEntry = getPropertyValue(SAMPLELOGXAXISPROPERTY);
 
   // find if there are workspaces that are not Matrix or not a point-data
@@ -122,9 +121,8 @@ std::map<std::string, std::string> JoinRuns::validateInputs() {
     }
   }
 
-  // we need at least 2 valid input workspaces to perform join operation
-  if (m_inputWS.size() < 2) {
-    issues[INPUTWORKSPACEPROPERTY] += "There are less than 2 point-data"
+  if (m_inputWS.empty()) {
+    issues[INPUTWORKSPACEPROPERTY] += "There are no point-data"
                                       " MatrixWorkspaces in the input list\n";
   } else {
     RunCombinationHelper combHelper;
@@ -218,7 +216,7 @@ std::vector<double> JoinRuns::getXAxis(MatrixWorkspace_sptr ws) const {
     // return the actual x-axis of the first spectrum
     axis = ws->x(0).rawData();
   } else {
-    auto& run = ws->run();
+    auto &run = ws->run();
     // try time series first
     TimeSeriesProperty<double> *timeSeriesDouble(nullptr);
     timeSeriesDouble =
@@ -329,42 +327,51 @@ void JoinRuns::exec() {
 
   auto it = m_inputWS.begin();
 
+  // Temporary workspace to carry the merged sample logs
+  // This is cloned from the first workspace and does not have
+  // the correct size to be the output, since the size is unknown
+  // at this point. We can check only later which ones are going
+  // to be skipped, to compute the size of the output respectively.
+  MatrixWorkspace_uptr temp = first->clone();
+
   // First sequentially merge the sample logs and build the x-axis
-  for(++it; it != m_inputWS.end(); ++it) {
+  for (++it; it != m_inputWS.end(); ++it) {
     // attempt to merge the sample logs
     try {
-    sampleLogsBehaviour.mergeSampleLogs(**it, *m_outWS);
-    sampleLogsBehaviour.setUpdatedSampleLogs(*m_outWS);
-    std::vector<double> axisIt = getXAxis(*it);
-    xAxis.insert(xAxis.end(), axisIt.begin(), axisIt.end());
+      sampleLogsBehaviour.mergeSampleLogs(**it, *temp);
+      sampleLogsBehaviour.setUpdatedSampleLogs(*temp);
+      std::vector<double> axisIt = getXAxis(*it);
+      xAxis.insert(xAxis.end(), axisIt.begin(), axisIt.end());
     } catch (std::invalid_argument &e) {
-        if (sampleLogsFailBehaviour == SKIP_BEHAVIOUR) {
-        g_log.error()
-            << "Could not join workspace: " << (*it)->getName()
-            << ". Reason: \"" << e.what()
-            << "\". Skipping.\n";
-        sampleLogsBehaviour.resetSampleLogs(*m_outWS);
+      if (sampleLogsFailBehaviour == SKIP_BEHAVIOUR) {
+        g_log.error() << "Could not join workspace: " << (*it)->getName()
+                      << ". Reason: \"" << e.what() << "\". Skipping.\n";
+        sampleLogsBehaviour.resetSampleLogs(*temp);
         // remove the skipped one from the list
         m_inputWS.erase(it);
         --it;
-        } else {
-            throw std::invalid_argument(e);
-        }
+      } else {
+        throw std::invalid_argument(e);
+      }
     }
   }
 
   if (m_inputWS.size() == 1) {
-    g_log.warning() << "Nothing left to join after skipping the workspaces "
-                       "that failed to merge the sample logs.";
+    g_log.warning() << "Nothing left to join [after skipping the workspaces "
+                       "that failed to merge the sample logs].";
     // note, we need to continue still, since
     // the x-axis might need to be changed
   }
 
+  // now get the size of the output
   size_t outBlockSize = xAxis.size();
   size_t numSpec = first->getNumberHistograms();
 
-  m_outWS = WorkspaceFactory::Instance().create(
-      first, numSpec, outBlockSize, outBlockSize);
+  m_outWS = WorkspaceFactory::Instance().create(first, numSpec, outBlockSize,
+                                                outBlockSize);
+
+  // copy over the merged sample logs from the temp
+  m_outWS->mutableRun() = temp->run();
 
   m_progress = make_unique<Progress>(this, 0.0, 1.0, numSpec);
 
@@ -380,7 +387,7 @@ void JoinRuns::exec() {
   PARALLEL_CHECK_INTERUPT_REGION
 
   if (!m_logEntry.empty()) {
-    std::string unit = m_inputWS.front()->run().getLogData(m_logEntry)->units();
+    std::string unit = first->run().getLogData(m_logEntry)->units();
     try {
       m_outWS->getAxis(0)->unit() = UnitFactory::Instance().create(unit);
     } catch (Exception::NotFoundError &) {
