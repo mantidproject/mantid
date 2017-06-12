@@ -54,5 +54,12 @@ class CompositeFunctionWrapper(FunctionWrapper):
     def __setitem__ (self, name, newValue):
     # set parameter of specified name
         self.fun.__setitem__(name, newValue)
+                    
+    def __iadd__ (self, other):
+       self.fun.add(other.fun)
+       return self
+       
+    def __delitem__ (self, index):
+       self.fun.__delitem__(index)
         
       

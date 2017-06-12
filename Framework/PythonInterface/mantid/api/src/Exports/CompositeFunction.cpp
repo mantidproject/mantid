@@ -38,5 +38,7 @@ void export_CompositeFunction() {
     (arg("self"), arg("name")), "Get value of parameter of given name.")
     .def("__setitem__", (setParameterType2)&CompositeFunction::setParameter,
       setParameterType2_Overloads((arg("self"), arg("name"), arg("value"), arg("explicitlySet")), "Get value of parameter of given name."))
+    .def("__delitem__", &CompositeFunction::removeFunction,
+      (arg("self"), arg("index")) )
     ;
 }
