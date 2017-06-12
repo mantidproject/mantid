@@ -204,7 +204,7 @@ std::string JoinRuns::checkLogEntry(MatrixWorkspace_sptr ws) const {
 
 //----------------------------------------------------------------------------------------------
 /** Return the to-be axis of the workspace dependent on the log entry
-* @param inputs : input workspace
+* @param ws : the input workspace
 * @return : the [to-be] x-axis of the workspace
 */
 std::vector<double> JoinRuns::getXAxis(MatrixWorkspace_sptr ws) const {
