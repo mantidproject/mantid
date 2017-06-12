@@ -4,6 +4,9 @@
 #
 # Here we run the calibration of WISH panel03 using a simple CalibrateWish function.
 #
+
+from __future__ import absolute_import, division, print_function
+
 import numpy
 import tube
 from mantid.simpleapi import *
@@ -21,11 +24,11 @@ def CalibrateWish( RunNumber, PanelNumber):
     CalibratedComponent = 'WISH/panel'+PanelNumber
 
     # Get calibration raw file and integrate it
-    print "Loading",filename
+    print("Loading",filename)
     rawCalibInstWS = Load(filename)  #'raw' in 'rawCalibInstWS' means unintegrated.
     CalibInstWS = Integration( rawCalibInstWS, RangeLower=1, RangeUpper=20000 )
     DeleteWorkspace(rawCalibInstWS)
-    print "Created workspace (CalibInstWS) with integrated data from run and instrument to calibrate"
+    print("Created workspace (CalibInstWS) with integrated data from run and instrument to calibrate")
 
     # Give y-positions of slit points (gotten for converting first tube's slit point to Y)
 
@@ -34,7 +37,7 @@ def CalibrateWish( RunNumber, PanelNumber):
     lower_tube = numpy.array([-0.41,-0.31,-0.21,-0.11,-0.02, 0.09, 0.18, 0.28, 0.39 ])
     upper_tube = numpy.array(lower_tube+0.003)
     funcForm = 9*[1] # 9 gaussian peaks
-    print "Created objects needed for calibration."
+    print("Created objects needed for calibration.")
 
     # Get the calibration and put it into the calibration table
 
@@ -49,17 +52,17 @@ def CalibrateWish( RunNumber, PanelNumber):
                                                  outputPeak = peakTable#give peak table to append data
                                                  )
 
-    print "Got calibration (new positions of detectors)"
+    print("Got calibration (new positions of detectors)")
 
     #Apply the calibration
     ApplyCalibration( Workspace=CalibInstWS, PositionTable=calibrationTable)
-    print "Applied calibration"
+    print("Applied calibration")
 
     # == Save workspace ==
     #uncomment these lines to save the workspace
     #nexusName = "TubeCalibDemoWish"+PanelNumber+"Result.nxs"
     #SaveNexusProcessed( CalibInstWS, 'TubeCalibDemoWishResult.nxs',"Result of Running TubeCalibWishMerlin_Simple.py")
-    #print "saved calibrated workspace (CalibInstWS) into Nexus file",nexusName
+    #print("saved calibrated workspace (CalibInstWS) into Nexus file",nexusName)
 
     # == Reset dafault instrument ==
     config['default.instrument'] = previousDefaultInstrument

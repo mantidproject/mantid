@@ -1,4 +1,7 @@
 # pylint: disable=invalid-name
+
+from __future__ import absolute_import, division, print_function
+
 import numpy
 import os
 import re
@@ -647,7 +650,7 @@ def savePeak(peakTable, filePath):
         row = peakTable.row(line)
         peak_values = [row[k] for k in peaksNames]
         tube_name = row['TubeId'].replace(' ', '%20')
-        print >> pFile, tube_name, peak_values
+        print(tube_name, peak_values, file = pFile)
 
     pFile.close()
 
@@ -663,8 +666,8 @@ def readPeakFile(file_name):
     .. code-block:: python
 
        for (det_code, cal_values) in readPeakFile('pathname/TubeDemo'):
-          print det_code
-          print cal_values
+          print(det_code)
+          print(cal_values)
 
     :param file_name: Path for the file
     :rtype: list of tuples(det_code, peaks_values)
@@ -686,8 +689,6 @@ def readPeakFile(file_name):
         try:
             f_values = [float(v) for v in line_vals[1:] if v != '']
         except ValueError:
-            # print 'Wrong format: we expected only numbers,
-            # but receive this line ',str(line_vals[1:])
             continue
 
         loaded_file.append((id_, f_values))
@@ -836,7 +837,7 @@ def correctMisalignedTubes(ws, calibrationTable, peaksTable, spec, idealTube,
     mean_peaks, bad_tubes = findBadPeakFits(peaksTable, threshold)
 
     for index in bad_tubes:
-        print "Refitting tube %s" % spec.getTubeName(index)
+        print("Refitting tube %s" % spec.getTubeName(index))
         tube_dets, _ = spec.getTube(index)
         getPoints(ws, idealTube.getFunctionalForms(), fitPar, tube_dets)
         tube_ws = mtd['TubePlot']

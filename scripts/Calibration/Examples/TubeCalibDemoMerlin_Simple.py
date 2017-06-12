@@ -12,6 +12,8 @@
 # The workspace with calibrated instrument is saved to a Nexus file
 #
 
+from __future__ import absolute_import, division, print_function
+
 import tube
 from tube_calib_fit_params import TubeCalibFitParams
 import numpy
@@ -42,13 +44,13 @@ def CalibrateMerlin(RunNumber):
     CalibratedComponent = 'MERLIN'  # Calibrate door 2
 
     # Get calibration raw file and integrate it
-    print filename
+    print(filename)
     rawCalibInstWS = LoadRaw(filename)
     # 'raw' in 'rawCalibInstWS' means unintegrated.
-    print "Integrating Workspace"
+    print("Integrating Workspace")
     CalibInstWS = Integration( rawCalibInstWS, RangeLower=rangeLower, RangeUpper=rangeUpper )
     DeleteWorkspace(rawCalibInstWS)
-    print "Created workspace (CalibInstWS) with integrated data from run and instrument to calibrate"
+    print("Created workspace (CalibInstWS) with integrated data from run and instrument to calibrate")
 
     # == Create Objects needed for calibration ==
 
@@ -66,21 +68,21 @@ def CalibrateMerlin(RunNumber):
     # Get fitting parameters
     fitPar = TubeCalibFitParams( ExpectedPositions, ExpectedHeight, ExpectedWidth, margin=40)
 
-    print "Created objects needed for calibration."
+    print("Created objects needed for calibration.")
 
     # == Get the calibration and put results into calibration table ==
     # also put peaks into PeakFile
     calibrationTable,peakTable = tube.calibrate(CalibInstWS, CalibratedComponent, knownPos, funcForm,
                                                 outputPeak=True, fitPar=fitPar, plotTube=range(0,280,20))
-    print "Got calibration (new positions of detectors) and put slit peaks into file TubeDemoMerlin01.txt"
+    print("Got calibration (new positions of detectors) and put slit peaks into file TubeDemoMerlin01.txt")
 
     # == Apply the Calibation ==
     ApplyCalibration( Workspace=CalibInstWS, PositionTable=calibrationTable)
-    print "Applied calibration"
+    print("Applied calibration")
 
     # == Save workspace ==
     #SaveNexusProcessed( CalibInstWS, 'TubeCalibDemoMerlinResult.nxs',"Result of Running TubeCalibDemoMerlin_Simple.py")
-    #print "saved calibrated workspace (CalibInstWS) into Nexus file TubeCalibDemoMerlinResult.nxs"
+    #print("saved calibrated workspace (CalibInstWS) into Nexus file TubeCalibDemoMerlinResult.nxs")
 
     # == Reset dafault instrument ==
     config['default.instrument'] = previousDefaultInstrument

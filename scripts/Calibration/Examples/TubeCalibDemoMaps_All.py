@@ -52,6 +52,8 @@ Calibration technique: Finding tubes not well calibrated
 
 """
 
+from __future__ import absolute_import, division, print_function
+
 from mantid.simpleapi import *
 import tube
 import numpy
@@ -63,10 +65,10 @@ def loadingStep(filename):
     rangeUpper = 10000 #
     # Get calibration raw file and integrate it
     rawCalibInstWS = Load(filename)  #'raw' in 'rawCalibInstWS' means unintegrated.
-    print "Integrating Workspace"
+    print("Integrating Workspace")
     CalibInstWS = Integration( rawCalibInstWS, RangeLower=rangeLower, RangeUpper=rangeUpper )
     DeleteWorkspace(rawCalibInstWS)
-    print "Created workspace (CalibInstWS) with integrated data from run and instrument to calibrate"
+    print("Created workspace (CalibInstWS) with integrated data from run and instrument to calibrate")
     return CalibInstWS
 
 
@@ -305,7 +307,7 @@ def calibrateB2Window(filename):
     """
     from tube_calib_fit_params import TubeCalibFitParams
     # b2 with 2 peaks range
-    b2_range = range(196,212) + range(222,233)
+    b2_range = list(range(196,212)) + list(range(222,233))
 
     CalibInstWS = loadingStep(filename)
     # == Set parameters for calibration ==
@@ -368,7 +370,7 @@ def findThoseTubesThatNeedSpecialCareForCalibration(filename):
     # == now, lets investigate the peaks
 
     #parsing the peakTable to produce a numpy array with dimension (number_of_tubes x number_of_peaks)
-    print 'parsing the peak table'
+    print('parsing the peak table')
     n = len(peakTable)
     peaksId = n*['']
     data = numpy.zeros((n,5))
@@ -384,9 +386,9 @@ def findThoseTubesThatNeedSpecialCareForCalibration(filename):
     #calculate how far from the expected position each peak position is
     distance_from_expected =  numpy.abs(data - expected_peak_pos)
 
-    print 'Creating the Peaks Workspace that shows the distance from the expected value for all peaks for each tube'
+    print('Creating the Peaks Workspace that shows the distance from the expected value for all peaks for each tube')
     # Let's see these peaks:
-    CreateWorkspace(range(n),distance_from_expected,NSpec=5,OutputWorkspace='Peaks')
+    CreateWorkspace(DataX=range(n),DataY=distance_from_expected,NSpec=5,OutputWorkspace='Peaks')
 
     # plot all the 5 peaks for Peaks Workspace. You will see that most of the tubes differ
     # at most 12 pixels from the expected values.
@@ -399,9 +401,9 @@ def findThoseTubesThatNeedSpecialCareForCalibration(filename):
     #select only those tubes inside the problematic_tubes
     problematic_tubes = list(set(check))
 
-    print 'Tubes whose distance is far from the expected value: ', problematic_tubes
+    print('Tubes whose distance is far from the expected value: ', problematic_tubes)
 
-    print 'Calibrating again only these tubes'
+    print('Calibrating again only these tubes')
     #let's confir that our suspect works
     CalibInstWS = loadingStep(filename)
     tube.calibrate(CalibInstWS, CalibratedComponent, knownPos, funcFactor,
@@ -462,7 +464,7 @@ def completeCalibration(filename):
                     273: [18.3711, 105.5, 145.5, 181.6, 243.252],
                     345: [4.6084, 87.0351, 128.125, 169.923, 245.3]}
 
-    b2_window = range(196,212) + range(222,233)
+    b2_window = list(range(196,212)) + list(range(222,233))
 
     complete_range = range(648)
 
@@ -497,15 +499,15 @@ def completeCalibration(filename):
 
     # == Save workspace ==
     #SaveNexusProcessed( CalibInstWS, path+'TubeCalibDemoMapsResult.nxs',"Result of Running TCDemoMaps.py")
-    #print "saved calibrated workspace (CalibInstWS) into Nexus file TubeCalibDemoMapsResult.nxs"
+    #print("saved calibrated workspace (CalibInstWS) into Nexus file TubeCalibDemoMapsResult.nxs")
 
 
 ####
 ## Uncomment one of the following lines to execute one of the examples
 #####
-filename = 'MAP14919.raw' #found at \\isis\inst$\NDXMAPS\Instrument\data\cycle_09_5
+
 if __name__ == "__main__":
-    filename = 'MAP14919.raw'
+    filename = 'MAP14919.raw' #found at \\isis\inst$\NDXMAPS\Instrument\data\cycle_09_5
     #minimalInput(filename)
     #provideTheExpectedValue(filename)
     #changeMarginAndExpectedValue(filename)

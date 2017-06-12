@@ -42,13 +42,16 @@ The previous calibrated instrument view:
 
 .. sectionauthor:: Gesner Passos - ISIS
 """
+
+from __future__ import absolute_import, division, print_function
+
 import numpy
 from mantid.simpleapi import *
 import tube
 
 
 def analisePeakTable(pTable, peaksName='Peaks'):
-    print 'parsing the peak table'
+    print('parsing the peak table')
     n = len(pTable)
     peaks = pTable.columnCount() -1
     peaksId = n*['']
@@ -62,14 +65,14 @@ def analisePeakTable(pTable, peaksName='Peaks'):
     # data now has all the peaks positions for each tube
     # the mean value is the expected value for the peak position for each tube
     expected_peak_pos = numpy.mean(data,axis=0)
-    print expected_peak_pos
+    print(expected_peak_pos)
     #calculate how far from the expected position each peak position is
     distance_from_expected =  numpy.abs(data - expected_peak_pos)
 
     CreateWorkspace(range(n),distance_from_expected,NSpec=peaks, OutputWorkspace=peaksName)
     check = numpy.where(distance_from_expected > 10)[0]
     problematic_tubes = list(set(check))
-    print 'Tubes whose distance is far from the expected value: ', problematic_tubes
+    print('Tubes whose distance is far from the expected value: ', problematic_tubes)
 
 
 def calibrateMerlin(filename):
@@ -80,10 +83,10 @@ def calibrateMerlin(filename):
 
     # Get calibration raw file and integrate it
     rawCalibInstWS = LoadRaw(filename)    #'raw' in 'rawCalibInstWS' means unintegrated.
-    print "Integrating Workspace"
+    print("Integrating Workspace")
     CalibInstWS = Integration( rawCalibInstWS, RangeLower=rangeLower, RangeUpper=rangeUpper )
     DeleteWorkspace(rawCalibInstWS)
-    print "Created workspace (CalibInstWS) with integrated data from run and instrument to calibrate"
+    print("Created workspace (CalibInstWS) with integrated data from run and instrument to calibrate")
 
     # the known positions are given in pixels inside the tubes and transformed to provide the positions
     # with the center of the tube as the origin
@@ -106,7 +109,7 @@ def calibrateMerlin(filename):
                                                  margin=30,
                                                  rangeList=range(20) # because 20, 21, 22, 23 are defective detectors
                                                  )
-    print "Got calibration (new positions of detectors) and put slit peaks into file TubeDemoMerlin01.txt"
+    print("Got calibration (new positions of detectors) and put slit peaks into file TubeDemoMerlin01.txt")
     analisePeakTable(peakTable, 'door9_tube1_peaks')
 
     # For the door8, the best points to define the known positions are the 1st edge, 5 peaks, last_edge
@@ -175,7 +178,6 @@ def calibrateMerlin(filename):
   # the knownpositions were given with the center of the bigger tube as origin, to convert
   # to the center of the lower tube as origin is necessary to sum them with  (len_big - len_small)/2
     doorpos = knownPositions[[0,1,2,3]] + half_diff_center
-  # print doorpos
     doorfunc = [2,2,1,1]
 
   # for the smal tubes, automatically searching for the peak position in pixel was not working quite well,
@@ -220,11 +222,11 @@ def calibrateMerlin(filename):
 
   # == Apply the Calibation ==
     ApplyCalibration( Workspace=CalibInstWS, PositionTable=calibrationTable)
-    print "Applied calibration"
+    print("Applied calibration")
 
   # == Save workspace ==
   #SaveNexusProcessed( CalibInstWS, 'TubeCalibDemoMerlinResult.nxs',"Result of Running TCDemoMerlin.py")
-  #print "saved calibrated workspace (CalibInstWS) into Nexus file TubeCalibDemoMerlinResult.nxs"
+  #print("saved calibrated workspace (CalibInstWS) into Nexus file TubeCalibDemoMerlinResult.nxs")
 
 
 if __name__=="__main__":
