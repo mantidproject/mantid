@@ -34,10 +34,10 @@ DetectorGridDefinition::DetectorGridDefinition(const double minLatitude,
     m_minLongitude -= smallShift;
     m_maxLongitude += smallShift;
   }
-  m_latitudeStep =
-      (m_maxLatitude - m_minLatitude) / static_cast<double>(m_latitudePoints - 1);
-  m_longitudeStep =
-      (m_maxLongitude - m_minLongitude) / static_cast<double>(m_longitudePoints - 1);
+  m_latitudeStep = (m_maxLatitude - m_minLatitude) /
+                   static_cast<double>(m_latitudePoints - 1);
+  m_longitudeStep = (m_maxLongitude - m_minLongitude) /
+                    static_cast<double>(m_longitudePoints - 1);
 }
 
 /** Return the latitude of the given row.
