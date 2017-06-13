@@ -3,6 +3,7 @@
 
 #include "MantidKernel/DllConfig.h"
 #include "MantidKernel/Matrix.h"
+#include "MantidKernel/System.h"
 
 #include <vector>
 
