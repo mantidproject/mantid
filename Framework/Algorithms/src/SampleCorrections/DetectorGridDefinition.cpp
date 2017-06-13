@@ -10,7 +10,7 @@ namespace Algorithms {
  *  @param maxLatitude End of the latitude range.
  *  @param latitudePoints Number of rows.
  *  @param minLongitude Start of the longitude range.
- *  @param maxLongitud End of the longitude range.
+ *  @param maxLongitude End of the longitude range.
  *  @param longitudePoints Number of columns.
  */
 DetectorGridDefinition::DetectorGridDefinition(const double minLatitude,

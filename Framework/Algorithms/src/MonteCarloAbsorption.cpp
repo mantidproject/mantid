@@ -495,6 +495,7 @@ void MonteCarloAbsorption::exec() {
  * are computed using interpolation
  * @param seed Seed value for the random number generator
  * @param interpolateOpt Method of interpolation to compute unsimulated points
+ * @param useSparseInstrument If true, use sparse instrument in simulation
  * @return A new workspace containing the correction factors & errors
  */
 MatrixWorkspace_uptr MonteCarloAbsorption::doSimulation(
