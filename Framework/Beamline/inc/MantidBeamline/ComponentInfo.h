@@ -86,7 +86,7 @@ public:
   void setRotation(const size_t componentIndex,
                    const Eigen::Quaterniond &newRotation);
 
-  size_t parentComponentIndex(const size_t componentIndex) const;
+  size_t parent(const size_t componentIndex) const;
 };
 } // namespace Beamline
 } // namespace Mantid

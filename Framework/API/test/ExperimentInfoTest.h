@@ -952,7 +952,7 @@ public:
         nComponents);
 
     TS_ASSERT_EQUALS(compInfo.indexOf(inst->getComponentID()),
-                     compInfo.parentComponentIndex(compInfo.indexOf(bankId)));
+                     compInfo.parent(compInfo.indexOf(bankId)));
   }
 
 private:

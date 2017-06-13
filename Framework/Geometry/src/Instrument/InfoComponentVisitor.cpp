@@ -85,10 +85,10 @@ InfoComponentVisitor::registerComponentAssembly(const ICompAssembly &assembly) {
 
   const size_t detectorStart = m_assemblySortedDetectorIndices->size();
   const size_t componentStart = m_assemblySortedComponentIndices->size();
-  std::vector<size_t> childrenToSetParentOn(assemblyChildren.size());
+  std::vector<size_t> children(assemblyChildren.size());
   for (size_t i = 0; i < assemblyChildren.size(); ++i) {
     // register everything under this assembly
-    childrenToSetParentOn[i] = assemblyChildren[i]->registerContents(*this);
+    children[i] = assemblyChildren[i]->registerContents(*this);
     m_parentComponentIndices->push_back(0);
   }
   const size_t detectorStop = m_assemblySortedDetectorIndices->size();
@@ -109,7 +109,7 @@ InfoComponentVisitor::registerComponentAssembly(const ICompAssembly &assembly) {
   clearPositionAndRotationParameters(m_pmap, assembly);
   // Now that we know what the index of the parent is we can apply it to the
   // children
-  for (const auto &child : childrenToSetParentOn) {
+  for (const auto &child : children) {
     (*m_parentComponentIndices)[child] = componentIndex;
   }
   return componentIndex;

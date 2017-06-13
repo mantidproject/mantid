@@ -75,7 +75,7 @@ public:
   Kernel::Quat rotation(const size_t componentIndex) const;
   void setPosition(size_t componentIndex, const Kernel::V3D &newPosition);
   void setRotation(size_t componentIndex, const Kernel::Quat &newRotation);
-  size_t parentComponentIndex(const size_t componentIndex) const;
+  size_t parent(const size_t componentIndex) const;
 };
 
 } // namespace API

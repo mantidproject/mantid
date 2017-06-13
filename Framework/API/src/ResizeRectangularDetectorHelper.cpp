@@ -25,9 +25,9 @@ void applyRectangularDetectorScaleToComponentInfo(
   transformation.pretranslate(origin);
 
   for (auto index : componentInfo.componentsInSubtree(componentIndex)) {
-      auto newPos = Kernel::toV3D(
-          transformation * Kernel::toVector3d(componentInfo.position(index)));
-      componentInfo.setPosition(index, newPos);
+    auto newPos = Kernel::toV3D(
+        transformation * Kernel::toVector3d(componentInfo.position(index)));
+    componentInfo.setPosition(index, newPos);
   }
 }
 

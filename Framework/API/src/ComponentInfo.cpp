@@ -66,8 +66,8 @@ Kernel::Quat ComponentInfo::rotation(const size_t componentIndex) const {
   return Kernel::toQuat(m_componentInfo.rotation(componentIndex));
 }
 
-size_t ComponentInfo::parentComponentIndex(const size_t componentIndex) const {
-  return m_componentInfo.parentComponentIndex(componentIndex);
+size_t ComponentInfo::parent(const size_t componentIndex) const {
+  return m_componentInfo.parent(componentIndex);
 }
 
 void ComponentInfo::setPosition(const size_t componentIndex,
