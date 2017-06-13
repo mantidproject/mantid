@@ -262,7 +262,7 @@ public:
     auto outputWS = runAlgorithm(wsProps, 5, "Linear", true, 3, 3);
 
     verifyDimensions(wsProps, outputWS);
-    const double delta{1e-05};
+    const double delta{1e-04};
     const size_t middle_index{4};
     TS_ASSERT_DELTA(0.00411903, outputWS->y(0).front(), delta);
     TS_ASSERT_DELTA(3.11845e-05, outputWS->y(0)[middle_index], delta);
@@ -279,7 +279,7 @@ public:
     using Mantid::Kernel::DeltaEMode;
     TestWorkspaceDescriptor wsProps = {1, 10, Environment::SampleOnly,
                                        DeltaEMode::Direct, -1, -1};
-    auto outputWS = runAlgorithm(wsProps, 5, "Linear", 3, 3);
+    auto outputWS = runAlgorithm(wsProps, 5, "Linear", true, 3, 3);
 
     verifyDimensions(wsProps, outputWS);
     const double delta(1e-05);
@@ -294,7 +294,7 @@ public:
     using Mantid::Kernel::DeltaEMode;
     TestWorkspaceDescriptor wsProps = {1, 10, Environment::SampleOnly,
                                        DeltaEMode::Indirect, -1, -1};
-    auto outputWS = runAlgorithm(wsProps, 5, "Linear", 3, 3);
+    auto outputWS = runAlgorithm(wsProps, 5, "Linear", true, 3, 3);
 
     verifyDimensions(wsProps, outputWS);
     const double delta(1e-05);
