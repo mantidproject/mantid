@@ -12,7 +12,6 @@ class FunctionWrapper:
             
     # Then deal with parameters        
     for key in kwargs:
-       #print key, "corresponds to", kwargs[key]
        self.fun.setParameter(key, kwargs[key])
        
   def __getitem__ (self, name):
@@ -30,7 +29,11 @@ class FunctionWrapper:
         return sum.fun.add(other.fun)
       else:
         return CompositeFunctionWrapper(self,other)
-                
+        
+  def tie (self, **kwargs):
+      for key in kwargs:
+        self.fun.tie(key, str(kwargs[key]), False)
+                        
   def getFunction(self):
       return self.fun
       

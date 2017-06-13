@@ -152,6 +152,9 @@ void export_IFunction() {
            (arg("self"), arg("name")),
            "Declare a fitting parameter settings its default value to 0.0")
 
+      .def("tie", &IFunction::tie, (arg("self"), arg("parName"), arg("expr"),
+           arg("isDefault")), "Tie a parameter to an expression")
+
       //-- Deprecated functions that have the wrong names --
       .def("categories", &getCategories, arg("self"),
            "Returns a list of the categories for an algorithm")
@@ -169,5 +172,6 @@ void export_IFunction() {
            (arg("self"), arg("i")), "Get the value of the ith parameter")
       //-- Python special methods --
       .def("__repr__", &IFunction::asString, arg("self"),
-           "Return a string representation of the function");
+           "Return a string representation of the function")
+        ;
 }
