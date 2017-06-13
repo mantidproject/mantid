@@ -954,6 +954,13 @@ public:
     return;
   }
 
+  // TODO/NOW/ - complete this unit test case
+  void Utest_excludeSampleLogs()
+  {
+
+
+  }
+
   //----------------------------------------------------------------------------------------------
   /** Create an EventWorkspace.  This workspace has
     * @param runstart_i64 : absolute run start time in int64_t format with unit
