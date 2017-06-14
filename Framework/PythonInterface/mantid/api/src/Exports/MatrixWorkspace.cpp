@@ -244,15 +244,18 @@ void export_MatrixWorkspace() {
 
       .def("spectrumInfo", &MatrixWorkspace::spectrumInfo,
            return_value_policy<reference_existing_object>(), args("self"),
-           "Return a const reference to the :class:`~mantid.api.SpectrumInfo` object.")
+           "Return a const reference to the :class:`~mantid.api.SpectrumInfo` "
+           "object.")
 
       // Deprecated
       .def("getNumberBins", &getNumberBinsDeprecated, arg("self"),
-           "Returns size of the Y data array (deprecated, use :class:`~mantid.api.MatrixWorkspace.blocksize` "
+           "Returns size of the Y data array (deprecated, use "
+           ":class:`~mantid.api.MatrixWorkspace.blocksize` "
            "instead)")
       .def("getSampleDetails", &getSampleDetailsDeprecated, arg("self"),
            return_internal_reference<>(),
-           "Return the Run object for this workspace (deprecated, use :class:`~mantid.api.MatrixWorkspace.getRun` "
+           "Return the Run object for this workspace (deprecated, use "
+           ":class:`~mantid.api.MatrixWorkspace.getRun` "
            "instead)")
 
       //--------------------------------------- Setters
