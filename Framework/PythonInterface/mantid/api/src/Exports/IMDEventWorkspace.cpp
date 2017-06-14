@@ -36,9 +36,9 @@ void export_IMDEventWorkspace() {
       .def("setDisplayNormalizationHisto",
            &IMDEventWorkspace::setDisplayNormalizationHisto,
            (arg("self"), arg("normalization")),
-           "For :class:`~mantid.api.IMDEventWorkspace`s sets"
+           "For :class:`~mantid.api.IMDEventWorkspace` s sets"
            " the visual normalization of dervied "
-           ":class`~mantid.api.IMDHistoWorkspace`s.");
+           ":class:`~mantid.api.IMDHistoWorkspace` s.");
 
   RegisterWorkspacePtrToPython<IMDEventWorkspace>();
 }
