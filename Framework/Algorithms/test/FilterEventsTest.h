@@ -27,6 +27,18 @@ using namespace Mantid::Geometry;
 
 using namespace std;
 
+/* TODO LIST
+ *  1. Remove all Ptest 
+ *  2. Add a new unit test for grouping workspaces in the end
+ *  3. Add a new unit test for throwing grouping workspaces if name is not vaid
+ *  4. Add a new unit test for excluding sample logs
+ *  5. Parallelizing spliting logs?
+ *  6. Speed test
+ *    6.1 with or without splitting logs;
+ *    6.2 different types of splitters workspaces;
+ *    6.3 old vs new
+ */
+
 class FilterEventsTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
@@ -954,11 +966,113 @@ public:
     return;
   }
 
-  // TODO/NOW/ - complete this unit test case
-  void Utest_excludeSampleLogs()
+  /** Test the feature to exclude some sample logs to be split and add to child workspaces
+   * @brief Utest_excludeSampleLogs
+   */
+  void test_excludeSampleLogs()
   {
+    // Create EventWorkspace and SplittersWorkspace
+    int64_t runstart_i64 = 20000000000;
+    int64_t pulsedt = 100 * 1000 * 1000;
+    int64_t tofdt = 10 * 1000 * 1000;
+    size_t numpulses = 5;
+
+    EventWorkspace_sptr inpWS =
+        createEventWorkspace(runstart_i64, pulsedt, tofdt, numpulses);
+    AnalysisDataService::Instance().addOrReplace("Test12", inpWS);
+
+    DataObjects::TableWorkspace_sptr splws =
+        createTableSplitters(0, pulsedt, tofdt);
+    AnalysisDataService::Instance().addOrReplace("TableSplitter2", splws);
+
+    FilterEvents filter;
+    filter.initialize();
+
+    // Set properties
+    filter.setProperty("InputWorkspace", "Test12");
+    filter.setProperty("OutputWorkspaceBaseName", "FilteredFromTable");
+    filter.setProperty("SplitterWorkspace", "TableSplitter2");
+    filter.setProperty("RelativeTime", true);
+    filter.setProperty("OutputWorkspaceIndexedFrom1", true);
+    filter.setProperty("RelativeTime", true);
+
+    std::vector<std::string> prop_vec;
+    prop_vec.push_back("LogB");
+    prop_vec.push_back("slow_log_int");
+    filter.setProperty("TimeSeriesPropertyLogs", prop_vec);
+    filter.setProperty("ExcludeSpecifiedLogs", true);
+
+    // Execute
+    TS_ASSERT_THROWS_NOTHING(filter.execute());
+    TS_ASSERT(filter.isExecuted());
+
+    // Get 3 output workspaces
+    int numsplittedws = filter.getProperty("NumberOutputWS");
+    TS_ASSERT_EQUALS(numsplittedws, 3);
+
+    // check number of sample logs
+    size_t num_original_logs = inpWS->run().getProperties().size();
+
+    std::vector<std::string> outputwsnames =
+        filter.getProperty("OutputWorkspaceNames");
+    for (size_t i = 0; i < outputwsnames.size(); ++i) {
+      EventWorkspace_sptr childworkspace =
+          boost::dynamic_pointer_cast<EventWorkspace>(
+              AnalysisDataService::Instance().retrieve(outputwsnames[i]));
+      TS_ASSERT(childworkspace);
+      // there is 1 sample logs that is excluded from propagating to the child workspaces
+      TS_ASSERT_EQUALS(num_original_logs, childworkspace->run().getProperties().size()+2);
+    }
 
 
+    // clean workspaces
+    AnalysisDataService::Instance().remove("Test12");
+    AnalysisDataService::Instance().remove("TableSplitter2");
+    for (size_t i = 0; i < outputwsnames.size(); ++i) {
+      AnalysisDataService::Instance().remove(outputwsnames[i]);
+    }
+
+    return;
+  }
+
+  /** test for the case that the input workspace name is same as output base workspace name
+   * @brief test_ThrowSameName
+   */
+  void test_ThrowSameName()
+  {
+    // Create EventWorkspace and SplittersWorkspace
+    int64_t runstart_i64 = 20000000000;
+    int64_t pulsedt = 100 * 1000 * 1000;
+    int64_t tofdt = 10 * 1000 * 1000;
+    size_t numpulses = 5;
+
+    EventWorkspace_sptr inpWS =
+        createEventWorkspace(runstart_i64, pulsedt, tofdt, numpulses);
+    AnalysisDataService::Instance().addOrReplace("Test13", inpWS);
+
+    DataObjects::TableWorkspace_sptr splws =
+        createTableSplitters(0, pulsedt, tofdt);
+    AnalysisDataService::Instance().addOrReplace("TableSplitter2", splws);
+
+    FilterEvents filter;
+    filter.initialize();
+
+    // Set properties
+    filter.setProperty("InputWorkspace", "Test13");
+    filter.setProperty("OutputWorkspaceBaseName", "Test13");
+    filter.setProperty("SplitterWorkspace", "TableSplitter2");
+    filter.setProperty("RelativeTime", true);
+    filter.setProperty("OutputWorkspaceIndexedFrom1", true);
+    filter.setProperty("RelativeTime", true);
+
+    // Execute
+    TS_ASSERT_THROWS_ANYTHING(filter.execute());
+
+    // clean workspaces
+    AnalysisDataService::Instance().remove("Test13");
+    AnalysisDataService::Instance().remove("TableSplitter2");
+
+    return;
   }
 
   //----------------------------------------------------------------------------------------------
