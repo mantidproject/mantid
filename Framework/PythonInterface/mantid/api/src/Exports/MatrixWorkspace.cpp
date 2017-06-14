@@ -168,7 +168,7 @@ void setDxFromPyObject(MatrixWorkspace &self, const size_t wsIndex,
  */
 size_t getNumberBinsDeprecated(MatrixWorkspace &self) {
   PyErr_Warn(PyExc_DeprecationWarning,
-             "``getNumberBins`` is deprecated, use :class:`~blocksize` instead.");
+             "``getNumberBins`` is deprecated, use ``blocksize`` instead.");
   return self.blocksize();
 }
 
@@ -180,7 +180,7 @@ size_t getNumberBinsDeprecated(MatrixWorkspace &self) {
  */
 Mantid::API::Run &getSampleDetailsDeprecated(MatrixWorkspace &self) {
   PyErr_Warn(PyExc_DeprecationWarning,
-             "``getSampleDetails`` is deprecated, use :class:`~getRun` instead.");
+             "``getSampleDetails`` is deprecated, use ``getRun`` instead.");
   return self.mutableRun();
 }
 }
@@ -248,11 +248,11 @@ void export_MatrixWorkspace() {
 
       // Deprecated
       .def("getNumberBins", &getNumberBinsDeprecated, arg("self"),
-           "Returns size of the Y data array (deprecated, use blocksize "
+           "Returns size of the Y data array (deprecated, use :class:`~mantid.api.MatrixWorkspace.blocksize` "
            "instead)")
       .def("getSampleDetails", &getSampleDetailsDeprecated, arg("self"),
            return_internal_reference<>(),
-           "Return the Run object for this workspace (deprecated, use getRun "
+           "Return the Run object for this workspace (deprecated, use :class:`~mantid.api.MatrixWorkspace.getRun` "
            "instead)")
 
       //--------------------------------------- Setters
