@@ -71,20 +71,25 @@ namespace Algorithms {
  */
 class DLLExport CompareWorkspaces : public API::Algorithm {
 public:
-  CompareWorkspaces();
-  ~CompareWorkspaces() override;
+  CompareWorkspaces()
+      : API::Algorithm(), m_Result(false), m_ParallelComparison(true) {}
+  ~CompareWorkspaces() override{};
 
   /// Algorithm's name
-  const std::string name() const override;
+  const std::string name() const override { return "CompareWorkspaces"; }
 
-  /// Algorithm's version
-  int version() const override;
+  /// Algorithm's version for identification. @see Algorithm::version
+  int version() const override { return 1; }
 
-  /// Categories this algorithm belongs to
-  const std::string category() const override;
+  /// Algorithm's category for identification. @see Algorithm::category
+  const std::string category() const override { return "Utility\\Workspaces"; }
 
-  /// Summary of algorithm's purpose
-  const std::string summary() const override;
+  /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
+  const std::string summary() const override {
+    return "Compares two workspaces for equality. This algorithm is mainly "
+           "intended for use by the Mantid development team as part of the "
+           "testing process.";
+  }
 
 private:
   /// Initialise algorithm

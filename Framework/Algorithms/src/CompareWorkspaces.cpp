@@ -27,35 +27,6 @@ using namespace Mantid::Geometry;
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(CompareWorkspaces)
 
-/** Constructor
- */
-CompareWorkspaces::CompareWorkspaces()
-    : API::Algorithm(), m_Result(false), m_ParallelComparison(true) {}
-
-/** Destructor
- */
-CompareWorkspaces::~CompareWorkspaces() {}
-
-/// Algorithms name for identification. @see Algorithm::name
-const std::string CompareWorkspaces::name() const {
-  return "CompareWorkspaces";
-}
-
-/// Algorithm's version for identification. @see Algorithm::version
-int CompareWorkspaces::version() const { return 1; }
-
-/// Algorithm's category for identification. @see Algorithm::category
-const std::string CompareWorkspaces::category() const {
-  return "Utility\\Workspaces";
-}
-
-/// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
-const std::string CompareWorkspaces::summary() const {
-  return "Compares two workspaces for equality. This algorithm is mainly "
-         "intended for use by the Mantid development team as part of the "
-         "testing process.";
-}
-
 /** Initialize the algorithm's properties.
  */
 void CompareWorkspaces::init() {
@@ -338,17 +309,16 @@ void CompareWorkspaces::doComparison() {
 
   size_t numhist = ws1->getNumberHistograms();
 
+  // Fewer steps if not events
+  int steps = 2;
   if (ews1 && ews2) {
-    m_Prog = make_unique<Progress>(this, 0.0, 1.0, numhist * 5);
-
     // Compare event lists to see whether 2 event workspaces match each other
     if (!compareEventWorkspaces(*ews1, *ews2))
       return;
-  } else {
-    // Fewer steps if not events
-    m_Prog = make_unique<Progress>(this, 0.0, 1.0, numhist * 2);
+    steps = 5;
   }
 
+  m_Prog = make_unique<Progress>(this, 0.0, 1.0, numhist * steps);
   // ==============================================================================
   // Matrix workspaces (Event & 2D)
   // ==============================================================================
@@ -402,9 +372,15 @@ bool CompareWorkspaces::compareEventWorkspaces(
     return false;
   }
 
+  // why the hell are you called after progress initialisation......... that's
+  // why it segfaults
   // Both will end up sorted anyway
   ews1.sortAll(PULSETIMETOF_SORT, m_Prog.get());
   ews2.sortAll(PULSETIMETOF_SORT, m_Prog.get());
+
+  if (m_Prog == nullptr) {
+    throw new std::")
+  }
 
   // Determine the tolerance for "tof" attribute and "weight" of events
   double toleranceWeight = Tolerance; // Standard tolerance
