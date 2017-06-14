@@ -226,7 +226,7 @@ void export_MatrixWorkspace() {
            "the given workspace index")
       .def("getRun", &MatrixWorkspace::mutableRun, arg("self"),
            return_internal_reference<>(),
-           "Return the Run object for this workspace")
+           "Return the :class:`~mantid.api.Run` object for this workspace")
       .def("axes", &MatrixWorkspace::axes, arg("self"),
            "Returns the number of axes attached to the workspace")
       .def("getAxis", &MatrixWorkspace::getAxis,
