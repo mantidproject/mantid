@@ -15,19 +15,24 @@ void export_IMDEventWorkspace() {
   class_<IMDEventWorkspace, bases<IMDWorkspace, MultipleExperimentInfos>,
          boost::noncopyable>("IMDEventWorkspace", no_init)
       .def("getNPoints", &IMDEventWorkspace::getNPoints, arg("self"),
-           "Returns the total number of points (events) in this workspace")
+           "Returns the total number of points (events) in this "
+           ":class:`~mantid.api.Workspace`")
 
       .def("getNumDims", &IMDEventWorkspace::getNumDims, arg("self"),
-           "Returns the number of dimensions in this workspace")
+           "Returns the number of dimensions in this "
+           ":class:`~mantid.api.Workspace`")
 
-      .def("getBoxController", (BoxController_sptr (IMDEventWorkspace::*)()) &
-                                   IMDEventWorkspace::getBoxController,
-           arg("self"), "Returns the BoxController used in this workspace")
+      .def("getBoxController",
+           (BoxController_sptr(IMDEventWorkspace::*)()) &
+               IMDEventWorkspace::getBoxController,
+           arg("self"),
+           "Returns the :class:`~mantid.api.BoxController` used in this "
+           ":class:`~mantid.api.Workspace`")
       .def("setDisplayNormalization",
            &IMDEventWorkspace::setDisplayNormalization,
            (arg("self"), arg("normalization")),
            "Sets the visual normalization of"
-           " the workspace.")
+           " the :class:`~mantid.api.Workspace`.")
       .def("setDisplayNormalizationHisto",
            &IMDEventWorkspace::setDisplayNormalizationHisto,
            (arg("self"), arg("normalization")),
