@@ -32,6 +32,8 @@ if ( PACKAGE_WORKBENCH AND NOT ENABLE_WORKBENCH )
   message ( FATAL_ERROR "Packaging workbench requested but workbench build is disabled!" )
 endif ()
 
+include(cotire)
+
 set ( CPACK_INSTALL_CMAKE_PROJECTS "${CMAKE_BINARY_DIR}" "Mantid" "ALL" "/" )
 
 ###########################################################################

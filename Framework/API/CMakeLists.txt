@@ -515,6 +515,8 @@ set_property ( TARGET API PROPERTY FOLDER "MantidFramework" )
 
 target_link_libraries ( API LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} ${JSONCPP_LIBRARIES} ${MANTIDLIBS} ${GSL_LIBRARIES} ${NEXUS_LIBRARIES} ${WINSOCK} )
 
+cotire(API)
+
 # Add the unit tests directory
 add_subdirectory ( test )
 

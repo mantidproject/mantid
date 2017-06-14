@@ -1014,6 +1014,7 @@ set_property ( TARGET Algorithms PROPERTY FOLDER "MantidFramework" )
 include_directories ( inc )
 
 target_link_libraries ( Algorithms LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} ${MANTIDLIBS} ${GSL_LIBRARIES} )
+cotire(Algorithms)
 
 # Add the unit tests directory
 add_subdirectory ( test )

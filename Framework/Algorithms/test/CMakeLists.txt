@@ -56,6 +56,7 @@ if ( CXXTEST_FOUND )
 
   # Add to the 'FrameworkTests' group in VS
   set_property ( TARGET AlgorithmsTest PROPERTY FOLDER "UnitTests" )
+  cotire(AlgorithmsTest)
 endif ()
 
 # python unit tests
