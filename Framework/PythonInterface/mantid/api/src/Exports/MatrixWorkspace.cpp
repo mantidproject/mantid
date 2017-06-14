@@ -168,7 +168,7 @@ void setDxFromPyObject(MatrixWorkspace &self, const size_t wsIndex,
  */
 size_t getNumberBinsDeprecated(MatrixWorkspace &self) {
   PyErr_Warn(PyExc_DeprecationWarning,
-             "'getNumberBins' is deprecated, use 'blocksize' instead.");
+             "``getNumberBins`` is deprecated, use :class:`~blocksize` instead.");
   return self.blocksize();
 }
 
@@ -180,7 +180,7 @@ size_t getNumberBinsDeprecated(MatrixWorkspace &self) {
  */
 Mantid::API::Run &getSampleDetailsDeprecated(MatrixWorkspace &self) {
   PyErr_Warn(PyExc_DeprecationWarning,
-             "'getSampleDetails' is deprecated, use 'getRun' instead.");
+             "``getSampleDetails`` is deprecated, use :class:`~getRun` instead.");
   return self.mutableRun();
 }
 }
@@ -221,8 +221,8 @@ void export_MatrixWorkspace() {
       .def("getDetector", &MatrixWorkspace::getDetector,
            return_value_policy<RemoveConstSharedPtr>(),
            (arg("self"), arg("workspaceIndex")),
-           "Return the Detector or "
-           "DetectorGroup that is linked to "
+           "Return the :class:`~mantid.geometry.Detector` or "
+           ":class:`~mantid.geometry.DetectorGroup` that is linked to "
            "the given workspace index")
       .def("getRun", &MatrixWorkspace::mutableRun, arg("self"),
            return_internal_reference<>(),
@@ -233,7 +233,7 @@ void export_MatrixWorkspace() {
            (arg("self"), arg("axis_index")), return_internal_reference<>(),
            "Get a pointer to a workspace axis")
       .def("isHistogramData", &MatrixWorkspace::isHistogramData, arg("self"),
-           "Returns True if this is considered to be binned data.")
+           "Returns ``True`` if this is considered to be binned data.")
       .def("isDistribution", (bool (MatrixWorkspace::*)() const) &
                                  MatrixWorkspace::isDistribution,
            arg("self"), "Returns the status of the distribution flag")
@@ -244,7 +244,7 @@ void export_MatrixWorkspace() {
 
       .def("spectrumInfo", &MatrixWorkspace::spectrumInfo,
            return_value_policy<reference_existing_object>(), args("self"),
-           "Return a const reference to the SpectrumInfo object.")
+           "Return a const reference to the :class:`~mantid.api.SpectrumInfo` object.")
 
       // Deprecated
       .def("getNumberBins", &getNumberBinsDeprecated, arg("self"),
