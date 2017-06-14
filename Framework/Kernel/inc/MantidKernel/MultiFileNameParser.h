@@ -6,12 +6,10 @@
 //----------------------------------------------------------------------
 
 #include "MantidKernel/DllConfig.h"
-#include "MantidKernel/UserStringParser.h"
 
 #include <set>
 #include <vector>
 #include <string>
-#include <map>
 #include <utility>
 /**
   Copyright &copy; 2010-2011 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
