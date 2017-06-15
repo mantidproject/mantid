@@ -58,22 +58,22 @@ void export_OrientedLattice() {
       .def("getuVector", (&OrientedLattice::getuVector), arg("self"),
            "Returns the vector along the beam direction when "
            ":class:`~mantid.geometry.Goniometer` s are at 0.")
-      .def(
-          "getvVector", (&OrientedLattice::getvVector), arg("self"),
-          "Returns the vector along the horizontal plane, perpendicular to the "
-          "beam direction when :class:`~mantid.geometry.Goniometer` s are at "
-          "0.")
+      .def("getvVector", (&OrientedLattice::getvVector), arg("self"),
+           "Returns the vector along the horizontal plane, perpendicular to "
+           "the "
+           "beam direction when :class:`~mantid.geometry.Goniometer` s are at "
+           "0.")
       .def("getU", &OrientedLattice::getU, arg("self"), return_readonly_numpy(),
            "Returns the U rotation matrix. This will return a "
            ":class:`numpy.ndarray` with shape ``(3,3)``.")
       .def("setU", &setU, (arg("self"), arg("newU"), arg("force") = true),
            "Set the U rotation matrix. This method expects a "
            ":class:`numpy.ndarray` with shape ``(3,3)``.")
-      .def(
-          "getUB", &OrientedLattice::getUB, arg("self"),
-          return_readonly_numpy(),
-          "Returns the UB matrix for this oriented lattice. This will return a "
-          ":class:`numpy.ndarray` with shape ``(3,3)``.")
+      .def("getUB", &OrientedLattice::getUB, arg("self"),
+           return_readonly_numpy(),
+           "Returns the UB matrix for this oriented lattice. This will return "
+           "a "
+           ":class:`numpy.ndarray` with shape ``(3,3)``.")
       .def("setUB", &setUB, (arg("self"), arg("newUB")),
            "Set the UB matrix. This method expects a "
            ":class:`numpy.ndarray` with shape ``(3,3)``.")

@@ -145,12 +145,12 @@ void export_UnitCell() {
            arg("self"),
            "Returns the reciprocal ``gamma`` angle of the unit cell. "
            "This is an alias for :func:`~mantid.geometry.UnitCell.gammastar`")
-      .def(
-          "betastar", (double (UnitCell::*)() const) & UnitCell::betastar,
-          arg("self"),
-          "Returns the reciprocal ``beta`` angle for this unit cell. The angle "
-          "will either be in degrees or radians depending on the ``Unit`` "
-          "parameter passed to the constructor.")
+      .def("betastar", (double (UnitCell::*)() const) & UnitCell::betastar,
+           arg("self"),
+           "Returns the reciprocal ``beta`` angle for this unit cell. The "
+           "angle "
+           "will either be in degrees or radians depending on the ``Unit`` "
+           "parameter passed to the constructor.")
       .def("bstar", (double (UnitCell::*)() const) & UnitCell::bstar,
            arg("self"),
            "Returns the length of the reciprocal ``b`` direction for this "
@@ -169,9 +169,8 @@ void export_UnitCell() {
       .def("d", (double (UnitCell::*)(const V3D &) const) & UnitCell::d,
            (arg("self"), arg("hkl")),
            "Returns d-spacing for a given H, K, L coordinate in Angstroms.")
-      .def("dstar",
-           (double (UnitCell::*)(double, double, double) const) &
-               UnitCell::dstar,
+      .def("dstar", (double (UnitCell::*)(double, double, double) const) &
+                        UnitCell::dstar,
            (arg("self"), arg("h"), arg("k"), arg("l")),
            "Returns reciprocal d-spacing for a given H, K, L coordinate in "
            "reciprocal Angstroms.")
@@ -204,10 +203,9 @@ void export_UnitCell() {
            "angle "
            "will either be in degrees or radians depending on the ``Unit`` "
            "parameter passed to the constructor.")
-      .def("recAngle",
-           (double (UnitCell::*)(double, double, double, double, double, double,
-                                 int const) const) &
-               UnitCell::recAngle,
+      .def("recAngle", (double (UnitCell::*)(double, double, double, double,
+                                             double, double, int const) const) &
+                           UnitCell::recAngle,
            (arg("self"), arg("h1"), arg("k1"), arg("l1"), arg("h2"), arg("k2"),
             arg("l2"), arg("Unit") = static_cast<int>(angDegrees)),
            "Returns the angle between two HKL reflections in reciprocal space.")
@@ -215,10 +213,9 @@ void export_UnitCell() {
            arg("self"),
            "Returns the volume of the reciprocal cell defined by this unit "
            "cell.")
-      .def("set",
-           (void (UnitCell::*)(double, double, double, double, double, double,
-                               int const)) &
-               UnitCell::set,
+      .def("set", (void (UnitCell::*)(double, double, double, double, double,
+                                      double, int const)) &
+                      UnitCell::set,
            (arg("self"), arg("_a"), arg("_b"), arg("_c"), arg("_alpha"),
             arg("_beta"), arg("_gamma"),
             arg("Unit") = static_cast<int>(angDegrees)),
@@ -252,10 +249,9 @@ void export_UnitCell() {
             arg("Unit") = static_cast<int>(angDegrees)),
            "Set the ``gamma`` angle of the unit cell. The angle can be set "
            "either in degrees or radians using the ``Unit`` parameter.")
-      .def("setError",
-           (void (UnitCell::*)(double, double, double, double, double, double,
-                               int const)) &
-               UnitCell::setError,
+      .def("setError", (void (UnitCell::*)(double, double, double, double,
+                                           double, double, int const)) &
+                           UnitCell::setError,
            (arg("self"), arg("_aerr"), arg("_berr"), arg("_cerr"),
             arg("_alphaerr"), arg("_betaerr"), arg("_gammaerr"),
             arg("Unit") = static_cast<int>(angDegrees)),
