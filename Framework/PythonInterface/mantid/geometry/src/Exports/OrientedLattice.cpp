@@ -55,15 +55,33 @@ void export_OrientedLattice() {
           (arg("_a"), arg("_b"), arg("_c"), arg("_alpha"), arg("_beta"),
            arg("_gamma"), arg("Unit") = static_cast<int>(angDegrees))))
       .def(init<UnitCell>(arg("uc")))
-      .def("getuVector", (&OrientedLattice::getuVector), arg("self"))
-      .def("getvVector", (&OrientedLattice::getvVector), arg("self"))
-      .def("getU", &OrientedLattice::getU, arg("self"), return_readonly_numpy())
-      .def("setU", &setU, (arg("self"), arg("newU"), arg("force") = true))
-      .def("getUB", &OrientedLattice::getUB, arg("self"),
-           return_readonly_numpy())
-      .def("setUB", &setUB, (arg("self"), arg("newUB")))
+      .def("getuVector", (&OrientedLattice::getuVector), arg("self"),
+           "Returns the vector along the beam direction when "
+           ":class:`~mantid.geometry.Goniometer` s are at 0.")
+      .def(
+          "getvVector", (&OrientedLattice::getvVector), arg("self"),
+          "Returns the vector along the horizontal plane, perpendicular to the "
+          "beam direction when :class:`~mantid.geometry.Goniometer` s are at "
+          "0.")
+      .def("getU", &OrientedLattice::getU, arg("self"), return_readonly_numpy(),
+           "Returns the U rotation matrix. This will return a "
+           ":class:`numpy.ndarray` with shape ``(3,3)``.")
+      .def("setU", &setU, (arg("self"), arg("newU"), arg("force") = true),
+           "Set the U rotation matrix. This method expects a "
+           ":class:`numpy.ndarray` with shape ``(3,3)``.")
+      .def(
+          "getUB", &OrientedLattice::getUB, arg("self"),
+          return_readonly_numpy(),
+          "Returns the UB matrix for this oriented lattice. This will return a "
+          ":class:`numpy.ndarray` with shape ``(3,3)``.")
+      .def("setUB", &setUB, (arg("self"), arg("newUB")),
+           "Set the UB matrix. This method expects a "
+           ":class:`numpy.ndarray` with shape ``(3,3)``.")
       .def("setUFromVectors", &setUFromVectors,
-           (arg("self"), arg("u"), arg("v")))
+           (arg("self"), arg("u"), arg("v")),
+           "Set the U rotation matrix using two vectors to define a new "
+           "coordinate system. This method with return the new U matrix as a"
+           ":class:`numpy.ndarray` with shape ``(3,3)``.")
       .def("qFromHKL", &qFromHKL, (arg("self"), arg("vec")),
            "Q vector from HKL vector")
       .def("hklFromQ", &hklFromQ, (arg("self"), arg("vec")),
