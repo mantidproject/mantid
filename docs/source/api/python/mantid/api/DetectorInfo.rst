@@ -1,6 +1,6 @@
-===========
+==============
  DetectorInfo
-===========
+==============
 
 This a python binding to the C++ class Mantid::API::DetectorInfo.
 
