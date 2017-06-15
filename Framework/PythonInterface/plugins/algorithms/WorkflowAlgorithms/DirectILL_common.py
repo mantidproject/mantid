@@ -15,6 +15,9 @@ BKG_DIAGNOSTICS_ON = 'Bkg Diagnostics ON'
 CLEANUP_OFF = 'Cleanup OFF'
 CLEANUP_ON = 'Cleanup ON'
 
+DEFAULT_MASK_OFF = 'Default Mask OFF'
+DEFAULT_MASK_ON = 'Default Mask ON'
+
 DWF_OFF = 'Correction OFF'
 DWF_ON = 'Correction ON'
 
@@ -46,6 +49,7 @@ PROP_BKG_DIAGNOSTICS_LOW_THRESHOLD = 'NoisyBkgLowThreshold'
 PROP_BKG_DIAGNOSTICS_SIGNIFICANCE_TEST = 'NoisyBkgErrorThreshold'
 PROP_BKG_SIGMA_MULTIPLIER = 'NonBkgRegionInSigmas'
 PROP_CLEANUP_MODE = 'Cleanup'
+PROP_DEFAULT_MASK = 'DefaultMask'
 PROP_DIAGNOSTICS_WS = 'DiagnosticsWorkspace'
 PROP_DWF_CORRECTION = 'DebyeWallerCorrection'
 PROP_EC_SCALING = 'EmptyContainerScaling'

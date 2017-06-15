@@ -3,15 +3,16 @@
 from __future__ import (absolute_import, division, print_function)
 
 import DirectILL_common as common
+import mantid
 from mantid.api import (AlgorithmFactory, DataProcessorAlgorithm, InstrumentValidator,
                         ITableWorkspaceProperty, MatrixWorkspaceProperty, mtd, Progress, PropertyMode, WorkspaceProperty,
                         WorkspaceUnitValidator)
 from mantid.kernel import (CompositeValidator, Direction, FloatBoundedValidator, IntArrayBoundedValidator,
                            IntArrayProperty, StringArrayProperty, StringListValidator)
-from mantid.simpleapi import (ClearMaskFlag, CloneWorkspace, CreateEmptyTableWorkspace, Divide, ExtractMask, Integration,
-                              MaskDetectors, MedianDetectorTest, Plus, SolidAngle)
+from mantid.simpleapi import (ClearMaskFlag, CloneWorkspace, CreateEmptyTableWorkspace, CreateWorkspace, Divide,
+                              ExtractMask, Integration, LoadMask, MaskDetectors, MedianDetectorTest, Plus, SolidAngle)
 import numpy
-
+import os.path
 
 _PLOT_TYPE_X = 1
 _PLOT_TYPE_Y = 2
@@ -57,6 +58,21 @@ def _createDiagnosticsReportTable(reportWSName, numberHistograms, algorithmLoggi
     for i in range(numberHistograms):
         reportWS.setCell('WorkspaceIndex', i, i)
     return reportWS
+
+
+def _createMaskWS(ws, wsNames, algorithmLogging):
+    """Return a single bin workspace with same number of histograms as ws."""
+    n = ws.getNumberHistograms()
+    xs = numpy.zeros(n)
+    ys = numpy.zeros(n)
+    maskWSName = wsNames.withSuffix('mask_template')
+    maskWS = CreateWorkspace(OutputWorkspace=maskWSName,
+                             DataX=xs,
+                             DataY=ys,
+                             NSpec=n,
+                             ParentWorkspace=ws,
+                             EnableLogging=algorithmLogging)
+    return maskWS
 
 
 def _elasticPeakDiagnostics(ws, peakSettings, wsNames, algorithmLogging):
@@ -287,7 +303,7 @@ class DirectILLDiagnostics(DataProcessorAlgorithm):
 
     def PyExec(self):
         """Executes the data reduction workflow."""
-        progress = Progress(self, 0.0, 1.0, 4)
+        progress = Progress(self, 0.0, 1.0, 5)
         subalgLogging = self.getProperty(common.PROP_SUBALG_LOGGING).value == common.SUBALG_LOGGING_ON
         wsNamePrefix = self.getProperty(common.PROP_OUTPUT_WS).valueAsStr
         cleanupMode = self.getProperty(common.PROP_CLEANUP_MODE).value
@@ -298,13 +314,19 @@ class DirectILLDiagnostics(DataProcessorAlgorithm):
         progress.report('Loading inputs')
         mainWS = self._inputWS(wsNames, wsCleanup, subalgLogging)
 
+        maskWS = _createMaskWS(mainWS, wsNames, subalgLogging)
+
+        # Apply hard mask.
+        progress.report('Applying default mask')
+        maskWS = self._applyDefaultMask(maskWS, wsNames, wsCleanup, subalgLogging)
+
         # Apply user mask.
         progress.report('Applying hard mask')
-        mainWS = self._applyUserMask(mainWS, wsNames, wsCleanup, subalgLogging)
+        maskWS = self._applyUserMask(maskWS, wsNames, wsCleanup, subalgLogging)
 
         # Detector diagnostics, if requested.
         progress.report('Diagnosing detectors')
-        mainWS = self._detDiagnostics(mainWS, wsNames, wsCleanup, subalgLogging)
+        mainWS = self._detDiagnostics(mainWS, maskWS, wsNames, wsCleanup, subalgLogging)
 
         self._finalize(mainWS, wsCleanup)
         progress.report('Done')
@@ -433,6 +455,13 @@ class DirectILLDiagnostics(DataProcessorAlgorithm):
                                  'test in the noisy background diagnostics.')
         self.setPropertyGroup(common.PROP_BKG_DIAGNOSTICS_SIGNIFICANCE_TEST,
                               common.PROPGROUP_BKG_DIAGNOSTICS)
+        self.declareProperty(name=common.PROP_DEFAULT_MASK,
+                             defaultValue=common.DEFAULT_MASK_ON,
+                             validator=StringListValidator([
+                             common.DEFAULT_MASK_ON,
+                             common.DEFAULT_MASK_OFF]),
+                             direction=Direction.Input,
+                             doc='Enable or disable instrument specific default mask.')
         self.declareProperty(IntArrayProperty(name=common.PROP_USER_MASK,
                                               values='',
                                               validator=positiveIntArray,
@@ -467,31 +496,47 @@ class DirectILLDiagnostics(DataProcessorAlgorithm):
         if self.getProperty(common.PROP_EPP_WS).isDefault:
             if self.getProperty(common.PROP_ELASTIC_PEAK_DIAGNOSTICS).value == common.ELASTIC_PEAK_DIAGNOSTICS_ON:
                 issues[common.PROP_EPP_WS] = 'An EPP table is needed for elastic peak diagnostics.'
-            if not self.getProperty(common.PROP_RAW_WS).isDefault:
+            if self.getProperty(common.PROP_BKG_DIAGNOSTICS).value == common.BKG_DIAGNOSTICS_ON:
                 issues[common.PROP_EPP_WS] = 'An EPP table is needed for background diagnostics.'
         return issues
 
-    def _applyUserMask(self, mainWS, wsNames, wsCleanup, algorithmLogging):
+    def _applyDefaultMask(self, maskWS, wsNames, wsCleanup, algorithmLogging):
+        """Apply instrument specific default mask to a workspace."""
+        option = self.getProperty(common.PROP_DEFAULT_MASK).value
+        if option == common.DEFAULT_MASK_OFF:
+            return maskWS
+        instrumentName = maskWS.getInstrument().getName()
+        if instrumentName == 'IN5':
+            maskFile = os.path.join(mantid.config.getInstrumentDirectory(), 'masks' , 'IN5_Mask.xml')
+            defaultMaskWSName = wsNames.withSuffix('default_mask')
+            defaultMaskWS = LoadMask(Instrument='IN5',
+                                     InputFile=maskFile,
+                                     RefWorkspace=maskWS,
+                                     OutputWorkspace=defaultMaskWSName,
+                                     EnableLogging=algorithmLogging)
+            MaskDetectors(Workspace=maskWS,
+                          MaskedWorkspace=defaultMaskWS,
+                          EnableLogging=algorithmLogging)
+            wsCleanup.cleanup(defaultMaskWS)
+        return maskWS
+
+    def _applyUserMask(self, maskWS, wsNames, wsCleanup, algorithmLogging):
         """Apply user mask to a workspace."""
         userMask = self.getProperty(common.PROP_USER_MASK).value
         maskComponents = self.getProperty(common.PROP_USER_MASK_COMPONENTS).value
-        maskedWSName = wsNames.withSuffix('masked')
-        maskedWS = CloneWorkspace(InputWorkspace=mainWS,
-                                  OutputWorkspace=maskedWSName,
-                                  EnableLogging=algorithmLogging)
-        MaskDetectors(Workspace=maskedWS,
+        MaskDetectors(Workspace=maskWS,
                       DetectorList=userMask,
                       ComponentList=maskComponents,
                       EnableLogging=algorithmLogging)
-        return maskedWS
+        return maskWS
 
-    def _detDiagnostics(self, mainWS, wsNames, wsCleanup, subalgLogging):
+    def _detDiagnostics(self, mainWS, maskWS, wsNames, wsCleanup, subalgLogging):
         """Perform and apply detector diagnostics."""
         reportWS = None
         if not self.getProperty(common.PROP_OUTPUT_DIAGNOSTICS_REPORT_WS).isDefault:
             reportWSName = self.getProperty(common.PROP_OUTPUT_DIAGNOSTICS_REPORT_WS).valueAsStr
             reportWS = _createDiagnosticsReportTable(reportWSName, mainWS.getNumberHistograms(), subalgLogging)
-        userMaskWS = _extractUserMask(mainWS, wsNames, subalgLogging)
+        userMaskWS = _extractUserMask(maskWS, wsNames, subalgLogging)
         diagnosticsWSName = wsNames.withSuffix('diagnostics')
         diagnosticsWS = CloneWorkspace(InputWorkspace=userMaskWS,
                                        OutputWorkspace=diagnosticsWSName,
@@ -549,6 +594,7 @@ class DirectILLDiagnostics(DataProcessorAlgorithm):
         return mainWS
 
     def _outputReports(self, reportWS, userMaskedSpectra, peakMaskedSpectra, bkgMaskedSpectra):
+        """Set the optional output report properties."""
         if reportWS is not None:
             self.setProperty(common.PROP_OUTPUT_DIAGNOSTICS_REPORT_WS, reportWS)
         report = 'Spectra masked by user:\n'
