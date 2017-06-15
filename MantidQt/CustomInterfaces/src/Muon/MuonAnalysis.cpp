@@ -1098,7 +1098,6 @@ void MuonAnalysis::handleInputFileChanges() {
     inputFileChanged(m_uiForm.mwRunFiles->getFilenames());
 
     m_textToDisplay = m_uiForm.mwRunFiles->getText();
-
     // save selected browse file directory to be reused next time interface is
     // started up
     m_uiForm.mwRunFiles->saveSettings(m_settingsGroup + "mwRunFilesBrowse");
@@ -1215,7 +1214,7 @@ void MuonAnalysis::inputFileChanged(const QStringList &files) {
     // Now apply DTC, if used, and grouping
     correctedGroupedWS =
         m_dataLoader.correctAndGroup(*loadResult, *groupResult->groupingUsed);
-
+	
   } catch (const std::exception &e) {
     g_log.error(e.what());
     QMessageBox::critical(this, "Loading failed",
@@ -1226,7 +1225,6 @@ void MuonAnalysis::inputFileChanged(const QStringList &files) {
 
     return;
   }
-
   // At this point we are sure that new data was loaded successfully, so we can
   // safely overwrite
   // previous one.
@@ -1514,7 +1512,8 @@ void MuonAnalysis::updateFrontAndCombo(bool updateIndexAndPlot) {
     auto groupName = m_uiForm.groupTable->item(m_groupToRow[i], 0)->text();
     if (groupName.toStdString() != "") {
       groupsAndPairs << groupName;
-    }
+	  auto p = groupName.toStdString();
+	}
   }
   for (int i = 0; i < numP; i++) {
     m_uiForm.frontGroupGroupPairComboBox->addItem(
@@ -1794,6 +1793,9 @@ void MuonAnalysis::plotSpectrum(const QString &wsName, bool logScale) {
   }
 
   runPythonCode(pyS);
+  //store the norm
+  m_fitDataPresenter->storeNorm(safeWSName.toStdString());
+
 }
 
 /**
@@ -2947,12 +2949,13 @@ MuonAnalysis::groupWorkspace(const std::string &wsName,
     groupAlg->setProperty("xmin", m_dataSelector->getStartTime());
     groupAlg->setProperty("xmax", m_dataSelector->getEndTime());
 
-    groupAlg->execute();
+    groupAlg->execute();  
+	m_fitDataPresenter->storeNorm(wsName);
+
   } catch (std::exception &e) {
     throw std::runtime_error("Unable to group workspace:\n\n" +
                              std::string(e.what()));
   }
-
   return outputEntry.retrieve();
 }
 
@@ -3162,8 +3165,10 @@ void MuonAnalysis::multiFitCheckboxChanged(int state) {
     // reset the view
     setTFAsymm(Muon::TFAsymmState::Disabled);
   }*/
+ /* if (m_uiForm.chkEnableMultiFit->isChecked() && state != 0) {
+	  m_fitDataPresenter->storeNorm(m_currentDataName.toStdString());
+  }*/
   m_fitFunctionPresenter->setMultiFitState(multiFitState);
-  m_fitDataPresenter->setIsItMultiFit(state);
   //add a line to set presenters knowledge of is it multi fitl
 }
 /**

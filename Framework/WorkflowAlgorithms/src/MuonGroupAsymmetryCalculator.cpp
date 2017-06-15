@@ -148,8 +148,10 @@ MuonGroupAsymmetryCalculator::estimateAsymmetry(const Workspace_sptr &inputWS,
 			API::TableRow row = table->appendRow();
 
 			row << norm << index;
+
+
 		
-	}
+		}
   }
   return outWS;
 }

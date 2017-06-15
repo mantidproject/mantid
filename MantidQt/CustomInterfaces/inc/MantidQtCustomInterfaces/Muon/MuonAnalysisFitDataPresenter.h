@@ -123,6 +123,7 @@ public:
   void checkAndUpdateFitLabel(bool sequentialFit);
   /// Generate names of workspaces to be created
   std::vector<std::string> generateWorkspaceNames(bool overwrite) const;
+  void storeNorm(std::string wsName) const;
 signals:
   void setChosenGroupSignal(const QString &group);
   void setChosenPeriodSignal(const QString &period);
@@ -174,6 +175,7 @@ private:
   /// Checks that runs are valid before fit
   bool isRunStringValid();
   void clearMultiFitNorm();
+
   /// Fit browser to update (non-owning pointer to FitPropertyBrowser interface)
   MantidQt::MantidWidgets::IWorkspaceFitControl *m_fitBrowser;
   /// Muon fit browser to update (non-owning pointer to MuonFitPropertyBrowser
