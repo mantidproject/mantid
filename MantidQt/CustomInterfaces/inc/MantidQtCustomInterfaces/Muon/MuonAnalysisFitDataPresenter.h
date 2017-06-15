@@ -103,7 +103,6 @@ public:
 	void setGrouping(const Mantid::API::Grouping &grouping) {
 		m_grouping = grouping;
 	}
-	void setIsItMultiFit(const bool state){m_isItMultiFit = state;};
   /// Update the stored plot type
   void setPlotType(const Muon::PlotType &plotType) { m_plotType = plotType; }
   /// Create workspaces to fit
@@ -174,8 +173,6 @@ private:
   void updateFitLabelFromRuns();
   /// Checks that runs are valid before fit
   bool isRunStringValid();
-  void clearMultiFitNorm();
-
   /// Fit browser to update (non-owning pointer to FitPropertyBrowser interface)
   MantidQt::MantidWidgets::IWorkspaceFitControl *m_fitBrowser;
   /// Muon fit browser to update (non-owning pointer to MuonFitPropertyBrowser
@@ -201,8 +198,6 @@ private:
   bool m_overwrite;
   /// Key for where "current run" file is
   boost::optional<Muon::CurrentRun> m_currentRun;
-  /// if it is multifitting mode
-  bool m_isItMultiFit;
 };
 } // namespace CustomInterfaces
 } // namespace Mantid

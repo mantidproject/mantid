@@ -1512,7 +1512,6 @@ void MuonAnalysis::updateFrontAndCombo(bool updateIndexAndPlot) {
     auto groupName = m_uiForm.groupTable->item(m_groupToRow[i], 0)->text();
     if (groupName.toStdString() != "") {
       groupsAndPairs << groupName;
-	  auto p = groupName.toStdString();
 	}
   }
   for (int i = 0; i < numP; i++) {

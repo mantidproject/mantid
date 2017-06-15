@@ -115,7 +115,7 @@ MuonAnalysisFitDataPresenter::MuonAnalysisFitDataPresenter(
       m_dataSelector(dataSelector), m_dataLoader(dataLoader),
       m_timeZero(timeZero), m_rebinArgs(rebinArgs), m_grouping(grouping),
       m_plotType(plotType), m_fitRawData(fitBrowser->rawData()),
-      m_overwrite(false),m_isItMultiFit(false) {
+      m_overwrite(false) {
   // Make sure the FitPropertyBrowser passed in implements the required
   // interfaces
   m_fitModel = dynamic_cast<IMuonFitDataModel *>(m_fitBrowser);
@@ -186,21 +186,6 @@ void MuonAnalysisFitDataPresenter::handleSelectedDataChanged(bool overwrite) {
     m_fitBrowser->allowSequentialFits(!isMultipleRuns());
     updateFitLabelFromRuns();
   }
-}
-/**
-* Called to clear the norm for
-* multiple fitting
-*/
-void MuonAnalysisFitDataPresenter::clearMultiFitNorm() {
-	if (m_isItMultiFit) {
-		Mantid::API::ITableWorkspace_sptr table = Mantid::API::WorkspaceFactory::Instance().createTable();
-		AnalysisDataService::Instance().addOrReplace("multiNorm", table);
-		table->addColumn("double", "norm");
-		table->addColumn("str", "spectra");
-	}
-	else {
-	AnalysisDataService::Instance().remove("multiNorm");
-	}
 }
 
 /**
