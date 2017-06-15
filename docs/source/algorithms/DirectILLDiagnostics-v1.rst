@@ -9,7 +9,7 @@
 Description
 -----------
 
-This algorithm performs detector diagnostics for the workspace provided by *InputWorkspace*, preferably the raw workspace provided by the *OutputRawWorkspace* property in :ref:`DirectILLCollectData <algm-DirectILLCollectData>`. The output is a mask workspace which can be further fed to :ref:`DirectILLReduction <algm-DirectILLReduction>` to mask the detectors diagnosed as bad. Optionally, a user specified hard mask given by *MaskedDetectors* or *MaskedComponents* can be added to the diagnostics mask. Algorithm's workflow diagram is shown below:
+This algorithm performs detector diagnostics for the workspace provided by *InputWorkspace*, preferably the raw workspace provided by the *OutputRawWorkspace* property in :ref:`DirectILLCollectData <algm-DirectILLCollectData>`. The output is a mask workspace which can be further fed to :ref:`DirectILLReduction <algm-DirectILLReduction>` to mask the detectors diagnosed as bad. Optionally, an instrument specific default mask or a user specified hard mask given by *MaskedDetectors* or *MaskedComponents* can be added to the diagnostics mask. A workflow diagram for the diagnostics is shown below:
 
 .. diagram:: DirectILLDiagnostics-v1_wkflw.dot
 
@@ -34,7 +34,7 @@ Diagnostics reporting
 The optional *OutputReportWorkspace* property returns a table workspace summarizing the diagnostics. The table has six columns:
 
 #. 'WorkspaceIndex'
-#. 'UserMask': Holds non-zero values for spectra masked by *MaskedDetectors* and *MaskedComponents*.
+#. 'UserMask': Holds non-zero values for spectra masked by the default mask, *MaskedDetectors* and *MaskedComponents*.
 #. 'ElasticIntensity': Holds the value of integrated elastic peaks used for the diagnostics.
 #. 'IntensityDiagnosed': Holds non-zero values for spectra diagnosed as 'bad' in elastic peak diagnostics.
 #. 'FlagBkg': Holds the value of the flat backgrounds used for the diagnostics.
