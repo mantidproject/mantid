@@ -16,7 +16,7 @@ the verbs). Workspaces hold the data in Mantid.
 They come in several forms, but the most common by far is the
 :ref:`MatrixWorkspace <MatrixWorkspace>` which contains measured or derived
 data with associated errors. Matrix Workspaces are typically created
-initially by executing one of Mantid's :ref:`Load<Load>` algorithms, for example
+initially by executing one of Mantid's :ref:`Load<algm-Load>` algorithms, for example
 :ref:`LoadRaw <algm-LoadRaw>`
 or
 :ref:`LoadNexus <algm-LoadNexus>`,
