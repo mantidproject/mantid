@@ -164,6 +164,7 @@ class AbinsCASTEPTestScratch(stresstesting.MantidStressTest, HelperTestingClass)
     def validate(self):
 
         self.tolerance = 1e-2
+        self.isSlow = True
 
         return self._output_name, self.ref_result
 
@@ -225,6 +226,7 @@ class AbinsCASTEPTestT(stresstesting.MantidStressTest, HelperTestingClass):
         self.case_restart_diff_t()
 
     def validate(self):
+        self.isSlow = True
         return self._output_name, self.ref_result
 
 # ----------------------------------------------------------------------------------------------------------------
@@ -253,6 +255,7 @@ class AbinsCASTEPTestLargerOrder(stresstesting.MantidStressTest, HelperTestingCl
         self.case_restart_diff_order(AbinsConstants.QUANTUM_ORDER_THREE)
 
     def validate(self):
+        self.isSlow = True
         return self._output_name, self.ref_result
 
 # ----------------------------------------------------------------------------------------------------------------
