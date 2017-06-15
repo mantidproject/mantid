@@ -44,7 +44,7 @@ void export_IMDWorkspace() {
       .def("displayNormalizationHisto",
            &IMDWorkspace::displayNormalizationHisto, arg("self"),
            "For MDEventWorkspaces returns the visual "
-           ":class:`~mantid.api.MDNormalization`of derived "
+           ":class:`~mantid.api.MDNormalization` of derived "
            "MDHistoWorkspaces. For all others returns the same as "
            "displayNormalization.");
 
