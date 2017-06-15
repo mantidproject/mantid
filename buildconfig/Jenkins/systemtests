@@ -39,6 +39,15 @@ else
   SCL_ON_RHEL6="eval"
 fi
 
+# Determine if we are the nightly system test build
+# Opt in by default as there is a release/master...etc.
+# and skip running the slow tests on the pull requests
+if [[ ${JOB_NAME} != *pull_requests*]]; then
+  # Append the flag to run the slow tests
+  EXTRA_ARGS=$EXTRA_ARGS --slow
+fi
+
+
 ###############################################################################
 # Create the build directory if it doesn't exist
 ###############################################################################
