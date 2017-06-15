@@ -44,7 +44,7 @@ fi
 # and skip running the slow tests on the pull requests
 if [[ ${JOB_NAME} != *pull_requests*]]; then
   # Append the flag to run the slow tests
-  EXTRA_ARGS=$EXTRA_ARGS --slow
+  EXTRA_ARGS="$EXTRA_ARGS --slow"
 fi
 
 
