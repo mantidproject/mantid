@@ -458,8 +458,8 @@ class DirectILLDiagnostics(DataProcessorAlgorithm):
         self.declareProperty(name=common.PROP_DEFAULT_MASK,
                              defaultValue=common.DEFAULT_MASK_ON,
                              validator=StringListValidator([
-                             common.DEFAULT_MASK_ON,
-                             common.DEFAULT_MASK_OFF]),
+                                 common.DEFAULT_MASK_ON,
+                                 common.DEFAULT_MASK_OFF]),
                              direction=Direction.Input,
                              doc='Enable or disable instrument specific default mask.')
         self.declareProperty(IntArrayProperty(name=common.PROP_USER_MASK,

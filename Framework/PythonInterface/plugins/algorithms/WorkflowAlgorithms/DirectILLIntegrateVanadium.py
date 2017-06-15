@@ -159,4 +159,5 @@ class DirectILLIntegrateVanadium(DataProcessorAlgorithm):
         wsCleanup.cleanup(mainWS)
         return calibrationWS
 
+
 AlgorithmFactory.subscribe(DirectILLIntegrateVanadium)
