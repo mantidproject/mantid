@@ -13,6 +13,9 @@
 #include "MantidQtMantidWidgets/MuonFitPropertyBrowser.h"
 #include <boost/lexical_cast.hpp>
 
+#include "MantidAPI/ITableWorkspace.h"
+
+
 using MantidQt::MantidWidgets::IMuonFitDataModel;
 using MantidQt::MantidWidgets::IMuonFitDataSelector;
 using MantidQt::MantidWidgets::IWorkspaceFitControl;
@@ -113,7 +116,7 @@ MuonAnalysisFitDataPresenter::MuonAnalysisFitDataPresenter(
       m_dataSelector(dataSelector), m_dataLoader(dataLoader),
       m_timeZero(timeZero), m_rebinArgs(rebinArgs), m_grouping(grouping),
       m_plotType(plotType), m_fitRawData(fitBrowser->rawData()),
-      m_overwrite(false) {
+      m_overwrite(false),m_isItMultiFit(false) {
   // Make sure the FitPropertyBrowser passed in implements the required
   // interfaces
   m_fitModel = dynamic_cast<IMuonFitDataModel *>(m_fitBrowser);
@@ -175,13 +178,31 @@ void MuonAnalysisFitDataPresenter::handleDataPropertiesChanged() {
  * @param overwrite :: [input] Whether overwrite is on or off in interface
  */
 void MuonAnalysisFitDataPresenter::handleSelectedDataChanged(bool overwrite) {
+  clearMultiFitNorm();
   const auto names = generateWorkspaceNames(overwrite);
+ 
   if (!names.empty()) {
     createWorkspacesToFit(names);
     updateWorkspaceNames(names);
     m_fitBrowser->allowSequentialFits(!isMultipleRuns());
     updateFitLabelFromRuns();
   }
+}
+/**
+* Called to clear the norm for
+* multiple fitting
+*/
+void MuonAnalysisFitDataPresenter::clearMultiFitNorm() {
+	if (m_isItMultiFit) {
+		Mantid::API::ITableWorkspace_sptr table = Mantid::API::WorkspaceFactory::Instance().createTable();
+		AnalysisDataService::Instance().addOrReplace("multiNorm", table);
+		table->addColumn("double", "norm");
+		table->addColumn("str", "spectra");
+		Mantid::API::TableRow row = table->appendRow();
+	}
+	else {
+	AnalysisDataService::Instance().remove("multiNorm");
+	}
 }
 
 /**
@@ -353,7 +374,25 @@ std::vector<std::string> MuonAnalysisFitDataPresenter::generateWorkspaceNames(
                       : getUniqueName(params);
         workspaceNames.push_back(m_fitRawData ? wsName + RAW_DATA_SUFFIX
                                               : wsName);
-      }
+
+		if (Mantid::API::AnalysisDataService::Instance().doesExist("multiNorm")) {
+
+			Mantid::API::ITableWorkspace_sptr table =
+				boost::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(
+					Mantid::API::AnalysisDataService::Instance().retrieve("multiNorm"));
+			Mantid::API::TableRow row = table->appendRow();
+			std::string tmp = workspaceNames[workspaceNames.size() - 1];
+			// spaces stop the string being written
+			std::replace(tmp.begin(), tmp.end(), ' ', ';');
+			if (Mantid::API::AnalysisDataService::Instance().doesExist("__norm__")) {
+				Mantid::API::ITableWorkspace_sptr tmpNorm =
+					boost::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(
+						Mantid::API::AnalysisDataService::Instance().retrieve("__norm__"));
+				auto colNorm = tmpNorm->getColumn("norm");
+				row << (*colNorm)[0] << tmp;
+			}
+		}
+	  }
     }
   }
   return workspaceNames;

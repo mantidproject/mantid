@@ -139,15 +139,17 @@ MuonGroupAsymmetryCalculator::estimateAsymmetry(const Workspace_sptr &inputWS,
     // move to helper later as a function
     normEst = Kernel::VectorHelper::splitStringIntoVector<double>(tmp);
     ITableWorkspace_sptr table = WorkspaceFactory::Instance().createTable();
-    API::AnalysisDataService::Instance().addOrReplace("__norm__", table);
-    table->addColumn("double", "norm");
-    table->addColumn("int", "spectra");
 
-    for (double norm : normEst) {
-      API::TableRow row = table->appendRow();
+		API::AnalysisDataService::Instance().addOrReplace("__norm__", table);
+		table->addColumn("double", "norm");
+		table->addColumn("int", "spectra");
 
-      row << norm << index;
-    }
+		for (double norm : normEst) {
+			API::TableRow row = table->appendRow();
+
+			row << norm << index;
+		
+	}
   }
   return outWS;
 }
