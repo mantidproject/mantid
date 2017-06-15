@@ -118,9 +118,8 @@ void export_MDGeometry() {
            (arg("self"), arg("index")),
            "Returns the source workspace attached at the given index")
 
-      .def("getOrigin",
-           (const Mantid::Kernel::VMD &(MDGeometry::*)() const) &
-               MDGeometry::getOrigin,
+      .def("getOrigin", (const Mantid::Kernel::VMD &(MDGeometry::*)() const) &
+                            MDGeometry::getOrigin,
            arg("self"), return_value_policy<copy_const_reference>(),
            "Returns the vector of the origin (in the original workspace) that "
            "corresponds to 0,0,0... in this workspace")

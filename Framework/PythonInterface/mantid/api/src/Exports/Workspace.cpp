@@ -64,9 +64,8 @@ void export_Workspace() {
                                       "(Default=1)"))
       .def("getMemorySize", &Workspace::getMemorySize, arg("self"),
            "Returns the memory footprint of the workspace in KB")
-      .def("getHistory",
-           (const WorkspaceHistory &(Workspace::*)() const) &
-               Workspace::getHistory,
+      .def("getHistory", (const WorkspaceHistory &(Workspace::*)() const) &
+                             Workspace::getHistory,
            arg("self"), return_value_policy<reference_existing_object>(),
            "Return read-only access to the "
            ":class:`~mantid.api.WorkspaceHistory`");

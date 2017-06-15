@@ -10,7 +10,7 @@ void export_MultipleExperimentInfos() {
   class_<MultipleExperimentInfos, boost::noncopyable>("MultipleExperimentInfos",
                                                       no_init)
       .def("getExperimentInfo",
-           (ExperimentInfo_sptr(MultipleExperimentInfos::*)(const uint16_t)) &
+           (ExperimentInfo_sptr (MultipleExperimentInfos::*)(const uint16_t)) &
                MultipleExperimentInfos::getExperimentInfo,
            (arg("self"), arg("run_index")),
            "Return the experiment info at the given index.")
