@@ -65,6 +65,8 @@ class MantidStressTest(unittest.TestCase):
         self.stripWhitespace = True
         # Tolerance
         self.tolerance = 0.00000001
+        # Set whether test is fast or slow
+        self.isSlow = False
         # Store the resident memory of the system (in MB) before starting the test
         import mantid.api
         mantid.api.FrameworkManager.clear()
@@ -690,7 +692,7 @@ class TestManager(object):
     '''
 
     def __init__(self, test_loc, runner, output = [TextResultReporter()],
-                 testsInclude=None, testsExclude=None):
+                 testsInclude=None, testsExclude=None, includeSlow=None):
         '''Initialize a class instance'''
 
         # Runners and reporters
@@ -723,6 +725,7 @@ class TestManager(object):
 
         self._testsInclude = testsInclude
         self._testsExclude = testsExclude
+        self._includeSlow = includeSlow
 
     totalTests = property(lambda self: len(self._tests))
     skippedTests = property(lambda self: (self.totalTests - self._passedTests - self._failedTests))
@@ -738,6 +741,9 @@ class TestManager(object):
             if self._testsExclude in suite.name:
                 suite.markAsSkipped("ExcludedTest")
                 return False
+        if not self._includeSlow and suite.isSlow:
+            suite.markAsSkipped("ExcludedTest")
+            return False
         return True
 
     def executeTests(self):
