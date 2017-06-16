@@ -48,42 +48,72 @@ void export_OrientedLattice() {
   typedef return_value_policy<Policies::MatrixToNumpy<Converters::WrapReadOnly>>
       return_readonly_numpy;
 
-  class_<OrientedLattice, bases<UnitCell>>("OrientedLattice", init<>())
-      .def(init<OrientedLattice const &>((arg("other"))))
-      .def(init<double, double, double>((arg("_a"), arg("_b"), arg("_c"))))
+  class_<OrientedLattice, bases<UnitCell>>(
+      "OrientedLattice",
+      init<>("Default constructor, with "
+             ":math:`a=b=c=1 \\rm{\\AA}, \\alpha = \\beta = \\gamma = "
+             "90^\\circ`. The :math:`U` matrix is set to the identity matrix."))
+      .def(init<OrientedLattice const &>(
+          (arg("other")),
+          "Copy constructor for creating a new oriented lattice."))
+      .def(init<double, double, double>(
+          (arg("_a"), arg("_b"), arg("_c")),
+          "Constructor using :math:`a, b, c` (in :math:`\\rm{\\AA}`), "
+          ":math:`\\alpha=\\beta=\\gamma=90^\\circ`. The :math:`U` matrix is "
+          "set to the identity matrix."))
       .def(init<double, double, double, double, double, double, optional<int>>(
           (arg("_a"), arg("_b"), arg("_c"), arg("_alpha"), arg("_beta"),
-           arg("_gamma"), arg("Unit") = static_cast<int>(angDegrees))))
-      .def(init<UnitCell>(arg("uc")))
+           arg("_gamma"), arg("Unit") = static_cast<int>(angDegrees)),
+          "Constructor using :math:`a, b, c` (in :math:`\\rm{\\AA}`), "
+          ":math:`\\alpha, \\beta, "
+          "\\gamma` (in degrees or radians). The optional parameter ``Unit`` "
+          "controls the "
+          "units for the angles, and can have the value of ``Degrees`` or "
+          "``Radians``. By default ``Unit`` = ``Degrees``."))
+      .def(init<UnitCell>(
+          arg("uc"), "Constructor from a :class:`~mantid.geometry.UnitCell`. "
+                     "The :math:`U` matrix is set to the identity matrix."))
       .def("getuVector", (&OrientedLattice::getuVector), arg("self"),
            "Returns the vector along the beam direction when "
-           ":class:`~mantid.geometry.Goniometer` s are at 0.")
+           ":class:`~mantid.geometry.Goniometer` s are at 0. See also: `\"Note "
+           "about orientation\" "
+           "<http://docs.mantidproject.org/nightly/concepts/"
+           "Lattice.html#note-about-orientation>`__.")
       .def("getvVector", (&OrientedLattice::getvVector), arg("self"),
            "Returns the vector along the horizontal plane, perpendicular to "
-           "the "
-           "beam direction when :class:`~mantid.geometry.Goniometer` s are at "
-           "0.")
+           "the beam direction when :class:`~mantid.geometry.Goniometer` s are "
+           "at 0. See also: `\"Note about orientation\" "
+           "<http://docs.mantidproject.org/nightly/concepts/"
+           "Lattice.html#note-about-orientation>`__.")
       .def("getU", &OrientedLattice::getU, arg("self"), return_readonly_numpy(),
-           "Returns the U rotation matrix. This will return a "
+           "Returns the :math:`U` rotation matrix. This will return a "
            ":class:`numpy.ndarray` with shape ``(3,3)``.")
       .def("setU", &setU, (arg("self"), arg("newU"), arg("force") = true),
-           "Set the U rotation matrix. This method expects a "
+           "Set the :math:`U` rotation matrix. This method expects a "
            ":class:`numpy.ndarray` with shape ``(3,3)``.")
       .def("getUB", &OrientedLattice::getUB, arg("self"),
            return_readonly_numpy(),
-           "Returns the UB matrix for this oriented lattice. This will return "
-           "a "
-           ":class:`numpy.ndarray` with shape ``(3,3)``.")
+           "Returns the :math:`UB` matrix for this oriented lattice. This will "
+           "return "
+           "a :class:`numpy.ndarray` with shape ``(3,3)``.")
       .def("setUB", &setUB, (arg("self"), arg("newUB")),
-           "Set the UB matrix. This method expects a "
-           ":class:`numpy.ndarray` with shape ``(3,3)``.")
-      .def("setUFromVectors", &setUFromVectors,
-           (arg("self"), arg("u"), arg("v")),
-           "Set the U rotation matrix using two vectors to define a new "
-           "coordinate system. This method with return the new U matrix as a"
-           ":class:`numpy.ndarray` with shape ``(3,3)``.")
+           "Set the :math:`UB` matrix. This methiod will calculate first the "
+           "lattice parameters, then the :math:`B` matrix, and then :math:`U`. "
+           "This method expects a "
+           ":class:`numpy.ndarray` with shape ``(3,3)``. See also: `\"Note "
+           "about orientation\" "
+           "<http://docs.mantidproject.org/nightly/concepts/"
+           "Lattice.html#note-about-orientation>`__ .")
+      .def(
+          "setUFromVectors", &setUFromVectors,
+          (arg("self"), arg("u"), arg("v")),
+          "Set the :math:`U` rotation matrix using two vectors to define a new "
+          "coordinate system. This method with return the new :math:`U` matrix "
+          "as a :class:`numpy.ndarray` with shape ``(3,3)``. See also: `\"Note "
+          "about orientation\" <http://docs.mantidproject.org/nightly/concepts/"
+          "Lattice.html#note-about-orientation>`__ .")
       .def("qFromHKL", &qFromHKL, (arg("self"), arg("vec")),
-           "Q vector from HKL vector")
+           ":math:`Q` vector from :math:`HKL` vector")
       .def("hklFromQ", &hklFromQ, (arg("self"), arg("vec")),
-           "HKL value from Q vector");
+           ":math:`HKL` value from :math:`Q` vector");
 }
