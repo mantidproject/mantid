@@ -858,10 +858,8 @@ void GenerateEventsFilter::makeFilterBySingleValue(
           stop = currT;
         }
 
-        std::stringstream infoss;
-        infoss << "Log." << m_dblLog->name() << ".From." << min << ".To." << max
-               << ".Direction=" << filterIncrease << filterDecrease;
-        addNewTimeFilterSplitter(start, stop, wsindex, infoss.str());
+        std::string empty("");
+        addNewTimeFilterSplitter(start, stop, wsindex, empty);
 
         // Reset the number of good ones, for next time
         numgood = 0;
@@ -886,12 +884,21 @@ void GenerateEventsFilter::makeFilterBySingleValue(
       stop = currT - tol;
     else
       stop = currT;
-    std::stringstream infoss;
-    infoss << "Log." << m_dblLog->name() << ".From." << min << ".To." << max
-           << ".Direction=" << filterIncrease << filterDecrease;
-    addNewTimeFilterSplitter(start, stop, wsindex, infoss.str());
-    numgood = 0;
+
+    std::string empty("");
+    addNewTimeFilterSplitter(start, stop, wsindex, empty);
   }
+
+  // add the row for information table workspace
+  //  std::stringstream infoss;
+  //  infoss << "DaDa Log." << m_dblLog->name() << ".From." << min << ".To." <<
+  //  max
+  //         << ".Direction=Increase" << filterIncrease << "DirectionDecrease="
+  //         << filterDecrease;
+  //  API::TableRow row = m_filterInfoWS->appendRow();
+  //  row << wsindex << infoss.str();
+
+  return;
 }
 
 //----------------------------------------------------------------------------------------------
