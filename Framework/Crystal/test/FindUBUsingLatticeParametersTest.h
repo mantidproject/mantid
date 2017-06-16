@@ -133,15 +133,15 @@ public:
     // Use a tiny set of 3 peaks - the minimum required
     /// to successfully find a UB matrix this checks the case that we still
     /// get a UB (although perhaps not a very good one).
-    std::vector<size_t> rom_ws;
+    std::vector<size_t> rows;
     for (size_t i = 3; i < m_ws->rowCount(); ++i) {
-      rom_ws.push_back(i);
+      rows.push_back(i);
     }
 
     DataHandling::DeleteTableRows removeRowAlg;
     removeRowAlg.initialize();
     removeRowAlg.setPropertyValue("TableWorkspace", m_ws->getName());
-    removeRowAlg.setProperty("Rows", rom_ws);
+    removeRowAlg.setProperty("Rows", rows);
     removeRowAlg.execute();
 
     FindUBUsingLatticeParameters alg;
