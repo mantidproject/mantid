@@ -37,7 +37,7 @@ public:
       searchobj.initialize();
 
     searchobj.setPropertyValue("RunRange", "1000000-1000001");
-    //search ALF instrument it is much faster
+    // search ALF instrument it is much faster
     searchobj.setPropertyValue("Instrument", "ALF");
     searchobj.setPropertyValue("OutputWorkspace", "Investigations");
 
@@ -55,7 +55,7 @@ public:
     if (!searchobj.isInitialized())
       searchobj.initialize();
 
-    //This is a keyword that is chosen to return an empty dataset - very fast
+    // This is a keyword that is chosen to return an empty dataset - very fast
     searchobj.setPropertyValue("Keywords", ":-)");
     searchobj.setPropertyValue("Instrument", "HRPD");
     searchobj.setPropertyValue("OutputWorkspace", "Investigations");
