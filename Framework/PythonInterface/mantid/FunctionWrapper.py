@@ -30,9 +30,17 @@ class FunctionWrapper:
       else:
         return CompositeFunctionWrapper(self,other)
         
-  def tie (self, **kwargs):
-      for key in kwargs:
+  def tie (self, *args, **kwargs):
+    for a in args:
+        if isinstance(a, dict):
+          for key in a:
+            self.fun.tie(key, str(a[key]), False)
+
+    for key in kwargs:
         self.fun.tie(key, str(kwargs[key]), False)
+        
+  def tie2 (self, arg1, arg):
+       print "tie2 arg1=", arg1, "arg2=", arg2
                         
   def getFunction(self):
       return self.fun
