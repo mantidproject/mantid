@@ -192,9 +192,8 @@ void export_UnitCell() {
            (arg("self"), arg("hkl")),
            "Returns :math:`d`-spacing for a given H, K, L coordinate in "
            ":math:`\\rm{\\AA}`.")
-      .def("dstar",
-           (double (UnitCell::*)(double, double, double) const) &
-               UnitCell::dstar,
+      .def("dstar", (double (UnitCell::*)(double, double, double) const) &
+                        UnitCell::dstar,
            (arg("self"), arg("h"), arg("k"), arg("l")),
            "Returns :math:`d^{*} = 1/d` for a given H, K, L coordinate in "
            ":math:`\\rm{\\AA}^{3}`.")
@@ -223,10 +222,9 @@ void export_UnitCell() {
            arg("self"),
            "Returns the :math:`\\gamma^{*}` angle for this unit cell in "
            "degrees.")
-      .def("recAngle",
-           (double (UnitCell::*)(double, double, double, double, double, double,
-                                 int const) const) &
-               UnitCell::recAngle,
+      .def("recAngle", (double (UnitCell::*)(double, double, double, double,
+                                             double, double, int const) const) &
+                           UnitCell::recAngle,
            (arg("self"), arg("h1"), arg("k1"), arg("l1"), arg("h2"), arg("k2"),
             arg("l2"), arg("Unit") = static_cast<int>(angDegrees)),
            "Returns the angle in reciprocal space between vectors given by "
@@ -235,13 +233,11 @@ void export_UnitCell() {
            "the units for the angles, and can have the value of ``Degrees`` or "
            "``Radians``. By default Unit = Degrees")
       .def("recVolume", (double (UnitCell::*)() const) & UnitCell::recVolume,
-           arg("self"),
-           "Return the volume of the reciprocal unit cell (in "
-           ":math:`\\rm{\\AA}^{-3}`)")
-      .def("set",
-           (void (UnitCell::*)(double, double, double, double, double, double,
-                               int const)) &
-               UnitCell::set,
+           arg("self"), "Return the volume of the reciprocal unit cell (in "
+                        ":math:`\\rm{\\AA}^{-3}`)")
+      .def("set", (void (UnitCell::*)(double, double, double, double, double,
+                                      double, int const)) &
+                      UnitCell::set,
            (arg("self"), arg("_a"), arg("_b"), arg("_c"), arg("_alpha"),
             arg("_beta"), arg("_gamma"),
             arg("Unit") = static_cast<int>(angDegrees)),
@@ -261,13 +257,13 @@ void export_UnitCell() {
       .def("setb", (void (UnitCell::*)(double))(&UnitCell::setb),
            (arg("self"), arg("_b")),
            "Set the length of the :math:`b` direction of the unit cell.")
-      .def(
-          "setbeta",
-          (void (UnitCell::*)(double, int const))(&UnitCell::setbeta),
-          (arg("self"), arg("_beta"),
-           arg("Unit") = static_cast<int>(angDegrees)),
-          "Set the :math:`\\beta` angle of the unit cell. The angle can be set "
-          "either in degrees or radians using the ``Unit`` parameter.")
+      .def("setbeta",
+           (void (UnitCell::*)(double, int const))(&UnitCell::setbeta),
+           (arg("self"), arg("_beta"),
+            arg("Unit") = static_cast<int>(angDegrees)),
+           "Set the :math:`\\beta` angle of the unit cell. The angle can be "
+           "set "
+           "either in degrees or radians using the ``Unit`` parameter.")
       .def("setc", (void (UnitCell::*)(double))(&UnitCell::setc),
            (arg("self"), arg("_c")),
            "Set the length of the :math:`c` direction of the unit cell.")
@@ -278,10 +274,9 @@ void export_UnitCell() {
            "Set the :math:`\\gamma` angle of the unit cell. The angle can be "
            "set "
            "either in degrees or radians using the ``Unit`` parameter.")
-      .def("setError",
-           (void (UnitCell::*)(double, double, double, double, double, double,
-                               int const)) &
-               UnitCell::setError,
+      .def("setError", (void (UnitCell::*)(double, double, double, double,
+                                           double, double, int const)) &
+                           UnitCell::setError,
            (arg("self"), arg("_aerr"), arg("_berr"), arg("_cerr"),
             arg("_alphaerr"), arg("_betaerr"), arg("_gammaerr"),
             arg("Unit") = static_cast<int>(angDegrees)),

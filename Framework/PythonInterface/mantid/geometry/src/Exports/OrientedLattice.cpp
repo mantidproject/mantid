@@ -96,12 +96,13 @@ void export_OrientedLattice() {
            "lattice parameters, then the :math:`B` matrix, and then :math:`U`. "
            "This method expects a "
            ":class:`numpy.ndarray` with shape ``(3,3)``. ")
-      .def(
-          "setUFromVectors", &setUFromVectors,
-          (arg("self"), arg("u"), arg("v")),
-          "Set the :math:`U` rotation matrix using two vectors to define a new "
-          "coordinate system. This method with return the new :math:`U` matrix "
-          "as a :class:`numpy.ndarray` with shape ``(3,3)``. ")
+      .def("setUFromVectors", &setUFromVectors,
+           (arg("self"), arg("u"), arg("v")),
+           "Set the :math:`U` rotation matrix using two vectors to define a "
+           "new "
+           "coordinate system. This method with return the new :math:`U` "
+           "matrix "
+           "as a :class:`numpy.ndarray` with shape ``(3,3)``. ")
       .def("qFromHKL", &qFromHKL, (arg("self"), arg("vec")),
            ":math:`Q` vector from :math:`HKL` vector")
       .def("hklFromQ", &hklFromQ, (arg("self"), arg("vec")),
