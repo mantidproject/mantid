@@ -9,6 +9,7 @@
 
 #include "MantidCrystal/FindUBUsingIndexedPeaks.h"
 #include "MantidDataHandling/LoadNexusProcessed.h"
+#include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidCrystal/LoadIsawUB.h"
 
