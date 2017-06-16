@@ -4,6 +4,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/AlgorithmNotification.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidKernel/make_unique.h"
 #include "MantidTestHelpers/FakeObjects.h"

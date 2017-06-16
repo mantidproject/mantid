@@ -164,6 +164,7 @@ set ( INC_FILES
 	inc/MantidAPI/AlgorithmHasProperty.h
 	inc/MantidAPI/AlgorithmHistory.h
 	inc/MantidAPI/AlgorithmManager.h
+	inc/MantidAPI/AlgorithmNotification.h
 	inc/MantidAPI/AlgorithmObserver.h
 	inc/MantidAPI/AlgorithmProperty.h
 	inc/MantidAPI/AlgorithmProxy.h

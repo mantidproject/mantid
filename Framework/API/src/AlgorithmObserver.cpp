@@ -3,6 +3,7 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/AlgorithmObserver.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/AlgorithmNotification.h"
 
 namespace Mantid {
 namespace API {

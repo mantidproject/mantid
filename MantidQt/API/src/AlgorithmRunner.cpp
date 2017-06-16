@@ -1,4 +1,5 @@
 #include "MantidQtAPI/AlgorithmRunner.h"
+#include "MantidAPI/AlgorithmNotification.h"
 
 #include <Poco/ActiveResult.h>
 

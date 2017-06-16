@@ -1,4 +1,5 @@
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/AlgorithmNotification.h"
 
 /**
  Implementation of various algorithm inner classes.

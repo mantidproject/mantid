@@ -1,6 +1,7 @@
 #include "AlgorithmMonitor.h"
 #include "MantidUI.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/AlgorithmNotification.h"
 #include "MantidKernel/PropertyManager.h"
 #include "MantidKernel/MaskedProperty.h"
 

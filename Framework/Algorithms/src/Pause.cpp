@@ -1,5 +1,6 @@
 #include "MantidAlgorithms/Pause.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/AlgorithmNotification.h"
 #include "MantidKernel/DateAndTime.h"
 
 #include <Poco/Thread.h>
