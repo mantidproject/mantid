@@ -36,7 +36,7 @@ public:
     LoadNexusProcessed loader;
     TS_ASSERT_THROWS_NOTHING(loader.initialize());
     TS_ASSERT(loader.isInitialized());
-    loader.setPropertyValue("Filename", "TOPAZ_3007.peaks");
+    loader.setPropertyValue("Filename", "TOPAZ_3007.peaks.nxs");
     loader.setPropertyValue("OutputWorkspace", WSName);
 
     TS_ASSERT(loader.execute());
