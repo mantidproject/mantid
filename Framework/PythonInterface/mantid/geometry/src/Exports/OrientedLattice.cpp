@@ -75,16 +75,11 @@ void export_OrientedLattice() {
                      "The :math:`U` matrix is set to the identity matrix."))
       .def("getuVector", (&OrientedLattice::getuVector), arg("self"),
            "Returns the vector along the beam direction when "
-           ":class:`~mantid.geometry.Goniometer` s are at 0. See also: `\"Note "
-           "about orientation\" "
-           "<http://docs.mantidproject.org/nightly/concepts/"
-           "Lattice.html#note-about-orientation>`__.")
+           ":class:`~mantid.geometry.Goniometer` s are at 0. ")
       .def("getvVector", (&OrientedLattice::getvVector), arg("self"),
            "Returns the vector along the horizontal plane, perpendicular to "
            "the beam direction when :class:`~mantid.geometry.Goniometer` s are "
-           "at 0. See also: `\"Note about orientation\" "
-           "<http://docs.mantidproject.org/nightly/concepts/"
-           "Lattice.html#note-about-orientation>`__.")
+           "at 0. ")
       .def("getU", &OrientedLattice::getU, arg("self"), return_readonly_numpy(),
            "Returns the :math:`U` rotation matrix. This will return a "
            ":class:`numpy.ndarray` with shape ``(3,3)``.")
@@ -100,18 +95,13 @@ void export_OrientedLattice() {
            "Set the :math:`UB` matrix. This methiod will calculate first the "
            "lattice parameters, then the :math:`B` matrix, and then :math:`U`. "
            "This method expects a "
-           ":class:`numpy.ndarray` with shape ``(3,3)``. See also: `\"Note "
-           "about orientation\" "
-           "<http://docs.mantidproject.org/nightly/concepts/"
-           "Lattice.html#note-about-orientation>`__ .")
+           ":class:`numpy.ndarray` with shape ``(3,3)``. ")
       .def(
           "setUFromVectors", &setUFromVectors,
           (arg("self"), arg("u"), arg("v")),
           "Set the :math:`U` rotation matrix using two vectors to define a new "
           "coordinate system. This method with return the new :math:`U` matrix "
-          "as a :class:`numpy.ndarray` with shape ``(3,3)``. See also: `\"Note "
-          "about orientation\" <http://docs.mantidproject.org/nightly/concepts/"
-          "Lattice.html#note-about-orientation>`__ .")
+          "as a :class:`numpy.ndarray` with shape ``(3,3)``. ")
       .def("qFromHKL", &qFromHKL, (arg("self"), arg("vec")),
            ":math:`Q` vector from :math:`HKL` vector")
       .def("hklFromQ", &hklFromQ, (arg("self"), arg("vec")),

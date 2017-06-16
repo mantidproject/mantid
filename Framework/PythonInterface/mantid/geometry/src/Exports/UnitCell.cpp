@@ -98,24 +98,15 @@ void export_UnitCell() {
       .def("a1", (double (UnitCell::*)() const) & UnitCell::a1, arg("self"),
            "Returns the length of the :math:`a_{1} = a` direction of the unit "
            "cell. "
-           "This is an alias for :func:`~mantid.geometry.UnitCell.a`. "
-           "See `\"International Tables for Crystallography\" "
-           "<http://it.iucr.org/Ba/ch1o1v0001/>`__ notation for more "
-           "information.")
+           "This is an alias for :func:`~mantid.geometry.UnitCell.a`. ")
       .def("a2", (double (UnitCell::*)() const) & UnitCell::a2, arg("self"),
            "Returns the length of the :math:`a_{2} = b` direction of the unit "
            "cell. "
-           "This is an alias for :func:`~mantid.geometry.UnitCell.b`. "
-           "See `\"International Tables for Crystallography\" "
-           "<http://it.iucr.org/Ba/ch1o1v0001/>`__ notation for more "
-           "information.")
+           "This is an alias for :func:`~mantid.geometry.UnitCell.b`. ")
       .def("a3", (double (UnitCell::*)() const) & UnitCell::a3, arg("self"),
            "Returns the length of the :math:`a_{2} = c` direction of the unit "
            "cell. "
-           "This is an alias for :func:`~mantid.geometry.UnitCell.c`. "
-           "See `\"International Tables for Crystallography\" "
-           "<http://it.iucr.org/Ba/ch1o1v0001/>`__ notation for more "
-           "information.")
+           "This is an alias for :func:`~mantid.geometry.UnitCell.c`. ")
       .def("alpha", (double (UnitCell::*)() const) & UnitCell::alpha,
            arg("self"),
            "Returns the :math:`\\alpha` angle for this unit cell in degrees.")
@@ -123,26 +114,17 @@ void export_UnitCell() {
            arg("self"),
            "Returns the :math:`\\alpha_{1} = \\alpha` angle of the unit cell "
            "in radians. "
-           "See also :func:`~mantid.geometry.UnitCell.alpha`. "
-           "See `\"International Tables for Crystallography\" "
-           "<http://it.iucr.org/Ba/ch1o1v0001/>`__ notation for more "
-           "information.")
+           "See also :func:`~mantid.geometry.UnitCell.alpha`. ")
       .def("alpha2", (double (UnitCell::*)() const) & UnitCell::alpha2,
            arg("self"),
            "Returns the :math:`\\alpha_{2} = \\beta` angle of the unit cell in "
            "radians. "
-           "See also :func:`~mantid.geometry.UnitCell.beta`. "
-           "See `\"International Tables for Crystallography\" "
-           "<http://it.iucr.org/Ba/ch1o1v0001/>`__ notation for more "
-           "information.")
+           "See also :func:`~mantid.geometry.UnitCell.beta`. ")
       .def("alpha3", (double (UnitCell::*)() const) & UnitCell::alpha3,
            arg("self"),
            "Returns the :math:`\\alpha_{3} = \\gamma` angle of the unit cell "
            "in radians. "
-           "See also :func:`~mantid.geometry.UnitCell.gamma`. "
-           "See `\"International Tables for Crystallography\" "
-           "<http://it.iucr.org/Ba/ch1o1v0001/>`__ notation for more "
-           "information.")
+           "See also :func:`~mantid.geometry.UnitCell.gamma`. ")
       .def("alphastar", (double (UnitCell::*)() const) & UnitCell::alphastar,
            arg("self"),
            "Returns the reciprocal :math:`\\alpha` angle for this unit cell in "
@@ -154,56 +136,38 @@ void export_UnitCell() {
       .def("b", (double (UnitCell::*)() const) & UnitCell::b, arg("self"),
            "Returns the length of the :math:`b` direction of the unit cell in "
            ":math:`\\rm{\\AA}`.")
-      .def(
-          "b1", (double (UnitCell::*)() const) & UnitCell::b1, arg("self"),
-          "Returns the length of the :math:`b_{1} = a^{*}` direction of the "
-          "unit "
-          "cell. This is an alias for :func:`~mantid.geometry.UnitCell.astar`. "
-          "See `\"International Tables for Crystallography\" "
-          "<http://it.iucr.org/Ba/ch1o1v0001/>`__ notation for more "
-          "information.")
-      .def(
-          "b2", (double (UnitCell::*)() const) & UnitCell::b2, arg("self"),
-          "Returns the length of the :math:`b_{2} = b^{*}` direction of the "
-          "unit "
-          "cell. This is an alias for :func:`~mantid.geometry.UnitCell.bstar`. "
-          "See `\"International Tables for Crystallography\" "
-          "<http://it.iucr.org/Ba/ch1o1v0001/>`__ notation for more "
-          "information.")
-      .def(
-          "b3", (double (UnitCell::*)() const) & UnitCell::b3, arg("self"),
-          "Returns the length of the :math:`b_{3} = c^{*}` direction of the "
-          "unit "
-          "cell. This is an alias for :func:`~mantid.geometry.UnitCell.cstar`. "
-          "See `\"International Tables for Crystallography\" "
-          "<http://it.iucr.org/Ba/ch1o1v0001/>`__ notation for more "
-          "information.")
+      .def("b1", (double (UnitCell::*)() const) & UnitCell::b1, arg("self"),
+           "Returns the length of the :math:`b_{1} = a^{*}` direction of the "
+           "unit "
+           "cell. This is an alias for "
+           ":func:`~mantid.geometry.UnitCell.astar`. ")
+      .def("b2", (double (UnitCell::*)() const) & UnitCell::b2, arg("self"),
+           "Returns the length of the :math:`b_{2} = b^{*}` direction of the "
+           "unit "
+           "cell. This is an alias for "
+           ":func:`~mantid.geometry.UnitCell.bstar`. ")
+      .def("b3", (double (UnitCell::*)() const) & UnitCell::b3, arg("self"),
+           "Returns the length of the :math:`b_{3} = c^{*}` direction of the "
+           "unit "
+           "cell. This is an alias for "
+           ":func:`~mantid.geometry.UnitCell.cstar`. ")
       .def("beta", (double (UnitCell::*)() const) & UnitCell::beta, arg("self"),
            "Returns the :math:`\\beta` angle for this unit cell in degrees.")
       .def("beta1", (double (UnitCell::*)() const) & UnitCell::beta1,
            arg("self"),
            "Returns the :math:`\\beta_{1} = \\alpha^{*}` angle of the unit "
            "cell in "
-           "radians. See also :func:`~mantid.geometry.UnitCell.alphastar`. "
-           "See `\"International Tables for Crystallography\" "
-           "<http://it.iucr.org/Ba/ch1o1v0001/>`__ notation for more "
-           "information.")
+           "radians. See also :func:`~mantid.geometry.UnitCell.alphastar`. ")
       .def("beta2", (double (UnitCell::*)() const) & UnitCell::beta2,
            arg("self"),
            "Returns the :math:`\\beta_{2} = \\beta^{*}` angle of the unit cell "
            "in radians. "
-           "See also :func:`~mantid.geometry.UnitCell.betastar`. "
-           "See `\"International Tables for Crystallography\" "
-           "<http://it.iucr.org/Ba/ch1o1v0001/>`__ notation for more "
-           "information.")
+           "See also :func:`~mantid.geometry.UnitCell.betastar`. ")
       .def("beta3", (double (UnitCell::*)() const) & UnitCell::beta3,
            arg("self"),
            "Returns the :math:`\\beta_{3} = \\gamma^{*}` angle of the unit "
            "cell in "
-           "radians. See also :func:`~mantid.geometry.UnitCell.gammastar`. "
-           "See `\"International Tables for Crystallography\" "
-           "<http://it.iucr.org/Ba/ch1o1v0001/>`__ notation for more "
-           "information.")
+           "radians. See also :func:`~mantid.geometry.UnitCell.gammastar`. ")
       .def("betastar", (double (UnitCell::*)() const) & UnitCell::betastar,
            arg("self"),
            "Returns the :math:`\\beta^{*}` angle for this unit cell in "
