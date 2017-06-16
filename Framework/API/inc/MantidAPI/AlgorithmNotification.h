@@ -49,71 +49,75 @@ namespace API {
 class Algorithm;
 class IAlgorithm;
 
-//class Algorithm {
 /// Base class for algorithm notifications
- class MANTID_API_DLL Algorithm::AlgorithmNotification : public Poco::Notification {
-  public:
-    AlgorithmNotification(const Algorithm *const alg);
-    const IAlgorithm *algorithm() const;
-  private:
-    const IAlgorithm *const m_algorithm; ///< The algorithm
-  };
+class MANTID_API_DLL Algorithm::AlgorithmNotification
+    : public Poco::Notification {
+public:
+  AlgorithmNotification(const Algorithm *const alg);
+  const IAlgorithm *algorithm() const;
 
-  /// StartedNotification is sent when the algorithm begins execution.
-  class MANTID_API_DLL Algorithm::StartedNotification : public AlgorithmNotification {
-  public:
-    StartedNotification(const Algorithm *const alg);
-    std::string name() const override;
-  };
+private:
+  const IAlgorithm *const m_algorithm; ///< The algorithm
+};
 
-  /// FinishedNotification is sent after the algorithm finishes its execution
-  class MANTID_API_DLL Algorithm::FinishedNotification : public AlgorithmNotification {
-  public:
-    FinishedNotification(const Algorithm *const alg, bool res);
-    std::string name() const override;
-    bool success; ///< true if the finished algorithm was successful or false if
-                  /// it failed.
-  };
+/// StartedNotification is sent when the algorithm begins execution.
+class MANTID_API_DLL Algorithm::StartedNotification
+    : public AlgorithmNotification {
+public:
+  StartedNotification(const Algorithm *const alg);
+  std::string name() const override;
+};
 
-  /// An algorithm can report its progress by sending ProgressNotification. Use
-  /// Algorithm::progress(double) function to send a progress notification.
-  class MANTID_API_DLL Algorithm::ProgressNotification : public AlgorithmNotification {
-  public:
-    /// Constructor
-    ProgressNotification(const Algorithm *const alg, double p,
-                         const std::string &msg, double estimatedTime,
-                         int progressPrecision);
-    std::string name() const override;
-    double progress;       ///< Current progress. Value must be between 0 and 1.
-    std::string message;   ///< Message sent with notification
-    double estimatedTime;  ///<Estimated time to completion
-    int progressPrecision; ///<Digits of precision to the progress (after the
-                           /// decimal).
-  };
+/// FinishedNotification is sent after the algorithm finishes its execution
+class MANTID_API_DLL Algorithm::FinishedNotification
+    : public AlgorithmNotification {
+public:
+  FinishedNotification(const Algorithm *const alg, bool res);
+  std::string name() const override;
+  bool success; ///< true if the finished algorithm was successful or false if
+                /// it failed.
+};
 
-  /// ErrorNotification is sent when an exception is caught during execution of
-  /// the algorithm.
-  class MANTID_API_DLL Algorithm::ErrorNotification : public AlgorithmNotification {
-  public:
-    /// Constructor
-    ErrorNotification(const Algorithm *const alg, const std::string &str);
-    std::string name() const override;
-    std::string what; ///< message string
-  };
+/// An algorithm can report its progress by sending ProgressNotification. Use
+/// Algorithm::progress(double) function to send a progress notification.
+class MANTID_API_DLL Algorithm::ProgressNotification
+    : public AlgorithmNotification {
+public:
+  /// Constructor
+  ProgressNotification(const Algorithm *const alg, double p,
+                       const std::string &msg, double estimatedTime,
+                       int progressPrecision);
+  std::string name() const override;
+  double progress;       ///< Current progress. Value must be between 0 and 1.
+  std::string message;   ///< Message sent with notification
+  double estimatedTime;  ///<Estimated time to completion
+  int progressPrecision; ///<Digits of precision to the progress (after the
+                         /// decimal).
+};
 
-  /// CancelException is thrown to cancel execution of the algorithm. Use
-  /// Algorithm::cancel() to
-  /// terminate an algorithm. The execution will only be stopped if
-  /// Algorithm::exec() method calls
-  /// periodically Algorithm::interuption_point() which checks if
-  /// Algorithm::cancel() has been called
-  /// and throws CancelException if needed.
-  class MANTID_API_DLL Algorithm::CancelException : public std::exception {
-  public:
-    /// Returns the message string.
-    const char *what() const noexcept override;
-  };
-//};
+/// ErrorNotification is sent when an exception is caught during execution of
+/// the algorithm.
+class MANTID_API_DLL Algorithm::ErrorNotification
+    : public AlgorithmNotification {
+public:
+  /// Constructor
+  ErrorNotification(const Algorithm *const alg, const std::string &str);
+  std::string name() const override;
+  std::string what; ///< message string
+};
+
+/// CancelException is thrown to cancel execution of the algorithm. Use
+/// Algorithm::cancel() to
+/// terminate an algorithm. The execution will only be stopped if
+/// Algorithm::exec() method calls
+/// periodically Algorithm::interuption_point() which checks if
+/// Algorithm::cancel() has been called
+/// and throws CancelException if needed.
+class MANTID_API_DLL Algorithm::CancelException : public std::exception {
+public:
+  /// Returns the message string.
+  const char *what() const noexcept override;
+};
 } // namespace API
 } // namespace Mantid
 
