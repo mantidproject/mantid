@@ -33,7 +33,7 @@ public:
   void test_exec() {
     // Name of the loader's output workspace.
     std::string WSName("peaks");
-    LoadNexusProcessed  loader;
+    LoadNexusProcessed loader;
     TS_ASSERT_THROWS_NOTHING(loader.initialize());
     TS_ASSERT(loader.isInitialized());
     loader.setPropertyValue("Filename", "TOPAZ_3007.peaks.nxs");
