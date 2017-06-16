@@ -225,7 +225,7 @@ class LoadNMoldyn4Ascii1D(PythonAlgorithm):
 
         all_gx = []
         fwhm_arr = fwhm_arr = resfunction(x_data)/2.35482
-        all_gx = [self.gaussianfunc(x_data, x_data[i], resfunction, fwhm_arr[i])) for i in range(len(x_data))]
+        all_gx = [self.gaussianfunc(x_data, x_data[i], resfunction, fwhm_arr[i]) for i in range(len(x_data))]
         return all_gx
 
     def convolutor(self, y_data, all_gx, x_data):
