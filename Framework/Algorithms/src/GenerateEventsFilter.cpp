@@ -859,8 +859,8 @@ void GenerateEventsFilter::makeFilterBySingleValue(
         }
 
         std::stringstream infoss;
-        infoss << "Log." << m_dblLog->name() << ".From." << min << ".To." << max << ".Direction=" << filterIncrease
-               << filterDecrease;
+        infoss << "Log." << m_dblLog->name() << ".From." << min << ".To." << max
+               << ".Direction=" << filterIncrease << filterDecrease;
         addNewTimeFilterSplitter(start, stop, wsindex, infoss.str());
 
         // Reset the number of good ones, for next time
@@ -887,8 +887,8 @@ void GenerateEventsFilter::makeFilterBySingleValue(
     else
       stop = currT;
     std::stringstream infoss;
-    infoss << "Log." << m_dblLog->name() << ".From." << min << ".To." << max << ".Direction=" << filterIncrease
-           << filterDecrease;
+    infoss << "Log." << m_dblLog->name() << ".From." << min << ".To." << max
+           << ".Direction=" << filterIncrease << filterDecrease;
     addNewTimeFilterSplitter(start, stop, wsindex, infoss.str());
     numgood = 0;
   }

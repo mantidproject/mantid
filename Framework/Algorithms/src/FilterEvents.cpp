@@ -470,6 +470,13 @@ void FilterEvents::groupOutputWorkspace() {
     g_log.error() << "Grouping all output workspaces fails.\n";
   }
 
+  // set the group workspace as output workspace
+  declareProperty(
+      make_unique<WorkspaceProperty<WorkspaceGroup>>("OutputWorkspace", "",
+                                                     Direction::Output),
+      "Name of the workspace to be created as the output of grouping ");
+  setProperty("OutputWorkspace", groupws);
+
   return;
 }
 
@@ -501,6 +508,10 @@ void FilterEvents::copyNoneSplitLogs(
   dbl_tsp_name_vector.clear();
   bool_tsp_name_vector.clear();
 
+  for (size_t i = 0; i < tsp_logs.size(); ++i)
+    g_log.warning() << "Include/Exclude " << i << ": " << tsp_logs[i] << "\n";
+  g_log.warning() << "TSP log set size = " << tsp_logs_set.size() << "\n";
+
   std::vector<Property *> prop_vector = m_eventWS->run().getProperties();
   for (size_t i = 0; i < prop_vector.size(); ++i) {
     // get property
@@ -518,17 +529,20 @@ void FilterEvents::copyNoneSplitLogs(
     // check for time series properties
     if (dbl_prop || int_prop || bool_prop) {
       // check whether the log is there
+      g_log.warning() << "Examine '" << name_i
+                      << "'. Excluded listed logs = " << exclude_listed_logs
+                      << "\n";
       set_iter = tsp_logs_set.find(name_i);
       if (exclude_listed_logs && set_iter != tsp_logs_set.end()) {
         // exclude all the listed tsp logs and this log name is in the set
         // skip
-        g_log.information() << "Skip splitting sample log " << name_i << "\n";
+        g_log.warning() << "Skip splitting sample log " << name_i << "\n";
         continue;
       } else if (!exclude_listed_logs && set_iter == tsp_logs_set.end()) {
         // include all the listed tsp logs to split but this log name is NOT in
         // the set
         // skip
-        g_log.information() << "Skip splitting sample log " << name_i << "\n";
+        g_log.warning() << "Skip splitting sample log " << name_i << "\n";
         continue;
       }
 

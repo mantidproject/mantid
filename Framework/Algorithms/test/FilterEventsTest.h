@@ -28,7 +28,7 @@ using namespace Mantid::Geometry;
 using namespace std;
 
 /* TODO LIST
- *  1. Remove all Ptest 
+ *  1. Remove all Ptest
  *  2. Add a new unit test for grouping workspaces in the end
  *  3. Add a new unit test for throwing grouping workspaces if name is not vaid
  *  4. Add a new unit test for excluding sample logs
@@ -937,8 +937,6 @@ public:
             runstart_i64);
     TS_ASSERT_EQUALS(splitter2->nthValue(2), 0);
 
-    // TODO - Find out the correct value of the splitter log 2
-
     // Check spectrum 3 of workspace 2
     EventList elist3 = filteredws2->getSpectrum(3);
     elist3.sortPulseTimeTOF();
@@ -966,11 +964,11 @@ public:
     return;
   }
 
-  /** Test the feature to exclude some sample logs to be split and add to child workspaces
+  /** Test the feature to exclude some sample logs to be split and add to child
+   * workspaces
    * @brief Utest_excludeSampleLogs
    */
-  void test_excludeSampleLogs()
-  {
+  void test_excludeSampleLogs() {
     // Create EventWorkspace and SplittersWorkspace
     int64_t runstart_i64 = 20000000000;
     int64_t pulsedt = 100 * 1000 * 1000;
@@ -998,7 +996,7 @@ public:
 
     std::vector<std::string> prop_vec;
     prop_vec.push_back("LogB");
-    prop_vec.push_back("slow_log_int");
+    prop_vec.push_back("slow_int_log");
     filter.setProperty("TimeSeriesPropertyLogs", prop_vec);
     filter.setProperty("ExcludeSpecifiedLogs", true);
 
@@ -1020,10 +1018,15 @@ public:
           boost::dynamic_pointer_cast<EventWorkspace>(
               AnalysisDataService::Instance().retrieve(outputwsnames[i]));
       TS_ASSERT(childworkspace);
-      // there is 1 sample logs that is excluded from propagating to the child workspaces
-      TS_ASSERT_EQUALS(num_original_logs, childworkspace->run().getProperties().size()+2);
+      // there is 1 sample logs that is excluded from propagating to the child
+      // workspaces. LogB is not TSP, so it won't be excluded even if it is
+      // listed
+      // a new TSP splitter is added by FilterEvents. So there will be exactly
+      // same number, but some different, sample logs in the input and output
+      // workspaces
+      TS_ASSERT_EQUALS(num_original_logs,
+                       childworkspace->run().getProperties().size());
     }
-
 
     // clean workspaces
     AnalysisDataService::Instance().remove("Test12");
@@ -1035,11 +1038,11 @@ public:
     return;
   }
 
-  /** test for the case that the input workspace name is same as output base workspace name
+  /** test for the case that the input workspace name is same as output base
+   * workspace name
    * @brief test_ThrowSameName
    */
-  void test_ThrowSameName()
-  {
+  void test_ThrowSameName() {
     // Create EventWorkspace and SplittersWorkspace
     int64_t runstart_i64 = 20000000000;
     int64_t pulsedt = 100 * 1000 * 1000;
@@ -1064,9 +1067,10 @@ public:
     filter.setProperty("RelativeTime", true);
     filter.setProperty("OutputWorkspaceIndexedFrom1", true);
     filter.setProperty("RelativeTime", true);
+    filter.setProperty("GroupWorkspaces", true);
 
     // Execute
-    TS_ASSERT_THROWS_ANYTHING(filter.execute());
+    TS_ASSERT(!filter.execute());
 
     // clean workspaces
     AnalysisDataService::Instance().remove("Test13");
@@ -1194,6 +1198,8 @@ public:
         elist.addEventQuickly(tofevent);
       } // FOR each pulse
     }   // For each bank
+
+    eventWS->mutableRun().integrateProtonCharge();
 
     // double constshift = l1 / sqrt(ei * 2. * PhysicalConstants::meV /
     //                           PhysicalConstants::NeutronMass);
