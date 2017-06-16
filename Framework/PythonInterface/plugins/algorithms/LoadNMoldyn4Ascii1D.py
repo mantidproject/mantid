@@ -204,10 +204,10 @@ class LoadNMoldyn4Ascii1D(PythonAlgorithm):
         # the width of the Gaussian a function of wavenumber(x)
         # Used in convolution
 
-        g_of_x = []
-        for i in range(len(x_data)):
-            coeff = -((x_data[i]-point_x)**2)/(2*fwhm**2)
-            g_of_x.append(np.exp(coeff))
+        x_data = np.array(x_data)
+        coeff_arr = -((x_data-point_x)**2)/(2*fwhm**2)
+        g_of_x = np.exp(coeff_arr)
+
         return g_of_x
 
     def integrator(self, y_data, g_of_x, x_data):
@@ -224,7 +224,7 @@ class LoadNMoldyn4Ascii1D(PythonAlgorithm):
         # Used in convolution
 
         all_gx = []
-        fwhm_arr = fwhm_arr = self.TOSCA_array(x_data)/2.35482
+        fwhm_arr = fwhm_arr = self.TOSCA_resfunction(x_data)/2.35482
         for i in range(len(x_data)):
             all_gx.append(self.gaussianfunc(x_data, x_data[i], resfunction, fwhm_arr[i]))
         return all_gx
