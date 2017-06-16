@@ -1,10 +1,11 @@
 #include "MantidAlgorithms/FilterEvents.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FileProperty.h"
-#include "MantidAPI/TableRow.h"
-#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/Run.h"
+#include "MantidAPI/SpectrumInfo.h"
+#include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAlgorithms/TimeAtSampleStrategyDirect.h"
 #include "MantidAlgorithms/TimeAtSampleStrategyElastic.h"
@@ -13,15 +14,15 @@
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/LogFilter.h"
 #include "MantidKernel/PhysicalConstants.h"
+#include "MantidKernel/Strings.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/VisibleWhenProperty.h"
-#include "MantidKernel/ArrayProperty.h"
-#include "MantidKernel/Strings.h"
 
 #include <memory>
 #include <sstream>
@@ -467,15 +468,25 @@ void FilterEvents::groupOutputWorkspace() {
   groupws->setProperty("OutputWorkspace", groupname);
   groupws->execute();
   if (!groupws->isExecuted()) {
-    g_log.error() << "Grouping all output workspaces fails.\n";
+    g_log.error("Grouping all output workspaces fails.");
+    return;
   }
 
   // set the group workspace as output workspace
   declareProperty(
-      make_unique<WorkspaceProperty<WorkspaceGroup>>("OutputWorkspace", "",
-                                                     Direction::Output),
+      make_unique<WorkspaceProperty<WorkspaceGroup>>(
+          "OutputWorkspace", groupname, Direction::Output),
       "Name of the workspace to be created as the output of grouping ");
-  setProperty("OutputWorkspace", groupws);
+
+  AnalysisDataServiceImpl &ads = AnalysisDataService::Instance();
+  API::WorkspaceGroup_sptr workspace_group =
+      boost::dynamic_pointer_cast<WorkspaceGroup>(ads.retrieve(groupname));
+  if (!workspace_group) {
+    g_log.error(
+        "Unable to retrieve output workspace from algorithm GroupWorkspaces");
+    return;
+  }
+  setProperty("OutputWorkspace", workspace_group);
 
   return;
 }
@@ -508,10 +519,6 @@ void FilterEvents::copyNoneSplitLogs(
   dbl_tsp_name_vector.clear();
   bool_tsp_name_vector.clear();
 
-  for (size_t i = 0; i < tsp_logs.size(); ++i)
-    g_log.warning() << "Include/Exclude " << i << ": " << tsp_logs[i] << "\n";
-  g_log.warning() << "TSP log set size = " << tsp_logs_set.size() << "\n";
-
   std::vector<Property *> prop_vector = m_eventWS->run().getProperties();
   for (size_t i = 0; i < prop_vector.size(); ++i) {
     // get property
@@ -529,9 +536,6 @@ void FilterEvents::copyNoneSplitLogs(
     // check for time series properties
     if (dbl_prop || int_prop || bool_prop) {
       // check whether the log is there
-      g_log.warning() << "Examine '" << name_i
-                      << "'. Excluded listed logs = " << exclude_listed_logs
-                      << "\n";
       set_iter = tsp_logs_set.find(name_i);
       if (exclude_listed_logs && set_iter != tsp_logs_set.end()) {
         // exclude all the listed tsp logs and this log name is in the set
@@ -707,72 +711,6 @@ void FilterEvents::splitTimeSeriesProperty(
 
   return;
 }
-
-//----------------------------------------------------------------------------------------------
-//**  Examine whether any spectrum does not have detector
-// * Warning message will be written out
-// * @brief FilterEvents::examineEventWS
-// */
-// void FilterEvents::examineAndSortEventWS() {
-//  // get event workspace information
-//  size_t numhist = m_eventWS->getNumberHistograms();
-//  m_vecSkip.resize(numhist, false);
-
-//  // check whether any detector is skipped
-//  if (m_specSkipType == EventFilterSkipNoDetTOFCorr &&
-//      m_tofCorrType == NoneCorrect) {
-//    // No TOF correction and skip spectrum only if TOF correction is required
-//    g_log.warning(
-//        "By user's choice, No spectrum will be skipped even if it has "
-//        "no detector.");
-//  } else {
-//    // check detectors whether there is any of them that will be skipped
-//    stringstream msgss;
-//    size_t numskipspec = 0;
-//    size_t numeventsskip = 0;
-
-//    const auto &spectrumInfo = m_eventWS->spectrumInfo();
-//    for (size_t i = 0; i < numhist; ++i) {
-//      if (!spectrumInfo.hasDetectors(i)) {
-//        m_vecSkip[i] = true;
-
-//        ++numskipspec;
-//        const EventList &elist = m_eventWS->getSpectrum(i);
-//        numeventsskip += elist.getNumberEvents();
-//        msgss << i;
-//        if (numskipspec % 10 == 0)
-//          msgss << "\n";
-//        else
-//          msgss << ",";
-//      }
-//    } // ENDFOR
-
-//    if (numskipspec > 0) {
-//      g_log.warning()
-//          << "There are " << numskipspec
-//          << " spectra that do not have detectors. "
-//          << "They will be skipped during filtering. There are total "
-//          << numeventsskip
-//          << " events in those spectra. \nList of these specta is as below:\n"
-//          << msgss.str() << "\n";
-//    } else {
-//      g_log.notice("There is no spectrum that does not have detectors.");
-//    }
-
-//  } // END-IF-ELSE
-
-//  // sort events
-//  DataObjects::EventSortType sortType = DataObjects::TOF_SORT;
-//  if (m_filterByPulseTime)
-//    sortType = DataObjects::PULSETIME_SORT;
-//  else
-//    sortType = DataObjects::PULSETIMETOF_SORT;
-
-//  // This runs the SortEvents algorithm in parallel
-//  m_eventWS->sortAll(sortType, nullptr);
-
-//  return;
-//}
 
 //----------------------------------------------------------------------------------------------
 /** Purpose:

@@ -1079,6 +1079,47 @@ public:
     return;
   }
 
+  /** test for the case that the input workspace name is same as output base
+   * workspace name
+   * @brief test_ThrowSameName
+   */
+  void test_groupWorkspaces() {
+    // Create EventWorkspace and SplittersWorkspace
+    int64_t runstart_i64 = 20000000000;
+    int64_t pulsedt = 100 * 1000 * 1000;
+    int64_t tofdt = 10 * 1000 * 1000;
+    size_t numpulses = 5;
+
+    EventWorkspace_sptr inpWS =
+        createEventWorkspace(runstart_i64, pulsedt, tofdt, numpulses);
+    AnalysisDataService::Instance().addOrReplace("Test13", inpWS);
+
+    DataObjects::TableWorkspace_sptr splws =
+        createTableSplitters(0, pulsedt, tofdt);
+    AnalysisDataService::Instance().addOrReplace("TableSplitter2", splws);
+
+    FilterEvents filter;
+    filter.initialize();
+
+    // Set properties
+    filter.setProperty("InputWorkspace", "Test13");
+    filter.setProperty("OutputWorkspaceBaseName", "13");
+    filter.setProperty("SplitterWorkspace", "TableSplitter2");
+    filter.setProperty("RelativeTime", true);
+    filter.setProperty("OutputWorkspaceIndexedFrom1", true);
+    filter.setProperty("RelativeTime", true);
+    filter.setProperty("GroupWorkspaces", true);
+
+    // Execute
+    TS_ASSERT(filter.execute());
+
+    // clean workspaces
+    AnalysisDataService::Instance().remove("Test13");
+    AnalysisDataService::Instance().remove("TableSplitter2");
+
+    return;
+  }
+
   //----------------------------------------------------------------------------------------------
   /** Create an EventWorkspace.  This workspace has
     * @param runstart_i64 : absolute run start time in int64_t format with unit
