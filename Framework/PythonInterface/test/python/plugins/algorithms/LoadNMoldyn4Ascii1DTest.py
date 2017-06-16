@@ -1,7 +1,7 @@
 from __future__ import (absolute_import, division, print_function)
 
 import unittest
-from mantid.simpleapi import CreateWorkspace, GroupWorkspaces
+from mantid.simpleapi import LoadNMoldyn4Ascii1D
 from mantid.api import *
 import os
 import math
