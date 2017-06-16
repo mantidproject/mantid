@@ -84,7 +84,6 @@ public:
     TS_ASSERT_DELTA(latt.erroralpha(), 0.0994, 5e-4);
     TS_ASSERT_DELTA(latt.errorbeta(), 0.0773, 5e-4);
     TS_ASSERT_DELTA(latt.errorgamma(), 0.0906, 5e-4);
-
   }
 
   void test_fixAll() {
