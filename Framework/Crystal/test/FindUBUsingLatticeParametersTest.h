@@ -189,7 +189,7 @@ private:
    */
   PeaksWorkspace_sptr loadPeaksWorkspace() const {
     std::string WSName("peaks");
-    LoadProcessedNexus loader;
+    LoadNexusProcessed loader;
     TS_ASSERT_THROWS_NOTHING(loader.initialize());
     TS_ASSERT(loader.isInitialized());
     loader.setPropertyValue("Filename", "TOPAZ_3007.peaks.nxs");
