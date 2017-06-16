@@ -2,13 +2,11 @@
 #define MANTID_KERNEL_IPROPERTYMANAGER_H_
 
 #include "MantidKernel/PropertyWithValue.h"
-#include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/make_unique.h"
 #include "MantidKernel/DllConfig.h"
 #include "MantidKernel/IValidator.h"
 #include "MantidKernel/NullValidator.h"
 #include "MantidKernel/Property.h"
-#include "MantidKernel/System.h"
 
 #ifndef Q_MOC_RUN
 #include <boost/make_shared.hpp>
@@ -33,6 +31,7 @@ namespace Kernel {
 class DataItem;
 class DateAndTime;
 class IPropertySettings;
+class OptionalBool;
 class PropertyManager;
 class SplittingInterval;
 template <typename T> class TimeSeriesProperty;
@@ -241,7 +240,7 @@ protected:
   template <typename T>
   void declareProperty(
       const std::string &name, T value,
-      IValidator_sptr validator = IValidator_sptr(new NullValidator),
+      IValidator_sptr validator = boost::make_shared<NullValidator>(),
       const std::string &doc = "",
       const unsigned int direction = Direction::Input) {
     std::unique_ptr<PropertyWithValue<T>> p =

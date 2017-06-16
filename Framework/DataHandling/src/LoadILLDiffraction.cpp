@@ -8,8 +8,9 @@
 #include "MantidGeometry/Instrument/ComponentHelper.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/DateAndTime.h"
-#include "MantidKernel/make_unique.h"
+#include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidKernel/make_unique.h"
 
 #include <boost/algorithm/string/predicate.hpp>
 #include <numeric>
