@@ -5,8 +5,8 @@ Lattice
 
 The purpose of this document is to explain how Mantid is using
 information about unit cells and their orientation with respect to the
-laboratory frame. For a detailed description, see
-http://github.com/mantidproject/documents/blob/master/Design/UBMatriximplementationnotes.pdf
+laboratory frame. For a detailed description, see the
+`UB matrix implementation notes <http://github.com/mantidproject/documents/blob/master/Design/UBMatriximplementationnotes.pdf>`__.
 
 Theory
 ------
