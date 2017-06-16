@@ -1,3 +1,4 @@
+
 #ifndef MANTID_KERNEL_IPROPERTYMANAGER_H_
 #define MANTID_KERNEL_IPROPERTYMANAGER_H_
 
@@ -8,7 +9,6 @@
 #include "MantidKernel/IValidator.h"
 #include "MantidKernel/NullValidator.h"
 #include "MantidKernel/Property.h"
-#include "MantidKernel/System.h"
 
 #ifndef Q_MOC_RUN
 #include <boost/make_shared.hpp>
