@@ -8,15 +8,16 @@
 #include "MantidAPI/Sample.h"
 
 #include "MantidCrystal/IndexPeaks.h"
-#include "MantidCrystal/LoadIsawPeaks.h"
+#include "MantidDataHandling/LoadNexusProcessed.h"
+#include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/Crystal/IndexingUtils.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidCrystal/LoadIsawUB.h"
 
-using namespace Mantid;
 using namespace Mantid::Crystal;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
+using Mantid::DataHandling::LoadNexusProcessed;
 using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
 
@@ -31,7 +32,7 @@ public:
   void test_exec() {
     // Name of the output workspace.
     std::string WSName("peaks");
-    LoadIsawPeaks loader;
+    LoadNexusProcessed loader;
     TS_ASSERT_THROWS_NOTHING(loader.initialize());
     TS_ASSERT(loader.isInitialized());
     loader.setPropertyValue("Filename", "TOPAZ_3007.peaks");
