@@ -94,11 +94,8 @@ public:
   /// Base class for algorithm notifications
   class AlgorithmNotification : public Poco::Notification {
   public:
-    AlgorithmNotification(const Algorithm *const alg)
-        : Poco::Notification(), m_algorithm(alg) {} ///< Constructor
-    const IAlgorithm *algorithm() const {
-      return m_algorithm;
-    } ///< The algorithm
+    AlgorithmNotification(const Algorithm *const alg);
+    const IAlgorithm *algorithm() const;
   private:
     const IAlgorithm *const m_algorithm; ///< The algorithm
   };
@@ -106,21 +103,15 @@ public:
   /// StartedNotification is sent when the algorithm begins execution.
   class StartedNotification : public AlgorithmNotification {
   public:
-    StartedNotification(const Algorithm *const alg)
-        : AlgorithmNotification(alg) {} ///< Constructor
-    std::string name() const override {
-      return "StartedNotification";
-    } ///< class name
+    StartedNotification(const Algorithm *const alg);
+    std::string name() const override;
   };
 
   /// FinishedNotification is sent after the algorithm finishes its execution
   class FinishedNotification : public AlgorithmNotification {
   public:
-    FinishedNotification(const Algorithm *const alg, bool res)
-        : AlgorithmNotification(alg), success(res) {} ///< Constructor
-    std::string name() const override {
-      return "FinishedNotification";
-    }             ///< class name
+    FinishedNotification(const Algorithm *const alg, bool res);
+    std::string name() const override;
     bool success; ///< true if the finished algorithm was successful or false if
                   /// it failed.
   };
@@ -132,12 +123,8 @@ public:
     /// Constructor
     ProgressNotification(const Algorithm *const alg, double p,
                          const std::string &msg, double estimatedTime,
-                         int progressPrecision)
-        : AlgorithmNotification(alg), progress(p), message(msg),
-          estimatedTime(estimatedTime), progressPrecision(progressPrecision) {}
-    std::string name() const override {
-      return "ProgressNotification";
-    }                      ///< class name
+                         int progressPrecision);
+    std::string name() const override;
     double progress;       ///< Current progress. Value must be between 0 and 1.
     std::string message;   ///< Message sent with notification
     double estimatedTime;  ///<Estimated time to completion
@@ -150,11 +137,8 @@ public:
   class ErrorNotification : public AlgorithmNotification {
   public:
     /// Constructor
-    ErrorNotification(const Algorithm *const alg, const std::string &str)
-        : AlgorithmNotification(alg), what(str) {}
-    std::string name() const override {
-      return "ErrorNotification";
-    }                 ///< class name
+    ErrorNotification(const Algorithm *const alg, const std::string &str);
+    std::string name() const override;
     std::string what; ///< message string
   };
 
@@ -168,11 +152,7 @@ public:
   class CancelException : public std::exception {
   public:
     /// Returns the message string.
-    const char *what() const noexcept override { return outMessage.c_str(); }
-
-  private:
-    /// The message returned by what()
-    std::string outMessage{"Algorithm terminated"};
+    const char *what() const noexcept override;
   };
 
   //============================================================================
