@@ -31,4 +31,4 @@ Please comment on the following ([full description](http://www.mantidproject.org
 - [ ] Do the changes handle unexpected situations, e.g. bad input?
 - [ ] Has the relevant (user and developer) documentation been added/updated?
 
-- Does everything look good? Mark the review as **Approve**. A member of `@mantidproject/gatekeepers` will take care of it.
+Does everything look good? Mark the review as **Approve**. A member of `@mantidproject/gatekeepers` will take care of it.
