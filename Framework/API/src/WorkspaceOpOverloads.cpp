@@ -539,8 +539,9 @@ void WorkspaceHelpers::makeDistribution(MatrixWorkspace_sptr workspace,
 
   const size_t numberOfSpectra = workspace->getNumberHistograms();
   // check X vs Y data size
-  if (workspace->x(0).size() == workspace->y(0).size()){
-	  throw std::runtime_error("Workspace is using point data for x (should be bin edges).");
+  if (workspace->x(0).size() == workspace->y(0).size()) {
+    throw std::runtime_error(
+        "Workspace is using point data for x (should be bin edges).");
   }
   for (size_t i = 0; i < numberOfSpectra; ++i) {
     if (forwards) {
