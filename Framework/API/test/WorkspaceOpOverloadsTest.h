@@ -204,6 +204,13 @@ public:
     TS_ASSERT_EQUALS(ws->readY(1)[0], 1.0)
     TS_ASSERT_EQUALS(ws->readE(0)[0], 1.0)
     TS_ASSERT_EQUALS(ws->readE(1)[0], 1.0)
+
+	// MakeDistribution throws exception if input WS uses point data
+	auto ws2 = boost::make_shared<WorkspaceTester>();
+	ws2->initialize(2, 2, 2);
+	TS_ASSERT(!ws->isDistribution());
+
+	TS_ASSERT_THROWS(WorkspaceHelpers::makeDistribution(ws2), std::runtime_error);
   }
 };
 
