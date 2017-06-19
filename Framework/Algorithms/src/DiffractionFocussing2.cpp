@@ -1,4 +1,3 @@
-#include "MantidHistogramData/LogarithmicGenerator.h"
 #include "MantidAlgorithms/DiffractionFocussing2.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
@@ -11,9 +10,10 @@
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/GroupingWorkspace.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
-#include "MantidKernel/VectorHelper.h"
+#include "MantidHistogramData/LogarithmicGenerator.h"
 #include "MantidIndexing/Group.h"
 #include "MantidIndexing/IndexInfo.h"
+#include "MantidKernel/VectorHelper.h"
 
 #include <cfloat>
 #include <iterator>
@@ -171,9 +171,8 @@ void DiffractionFocussing2::exec() {
   // is irrelevant
   MantidVec weights_default(1, 1.0), emptyVec(1, 0.0), EOutDummy(nPoints);
 
-  Progress *prog;
-  prog = new API::Progress(this, 0.2, 1.0,
-                           static_cast<int>(totalHistProcess) + nGroups);
+  std::unique_ptr<Progress> prog = make_unique<API::Progress>(
+      this, 0.2, 1.0, static_cast<int>(totalHistProcess) + nGroups);
 
   PARALLEL_FOR_IF(Kernel::threadSafe(*m_matrixInputW, *out))
   for (int outWorkspaceIndex = 0;
@@ -320,8 +319,6 @@ void DiffractionFocussing2::exec() {
   out->setIndexInfo(Indexing::group(m_matrixInputW->indexInfo(),
                                     std::move(m_validGroups),
                                     std::move(m_wsIndices)));
-
-  delete prog;
 
   setProperty("OutputWorkspace", out);
 
