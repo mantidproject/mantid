@@ -73,7 +73,6 @@ bool DampedGaussNewtonMinimizer::iterate(size_t) {
     if (tmp == 0.0) {
       m_errorString = "Function doesn't depend on parameter " +
                       m_leastSquares->parameterName(i);
-      g_log.information(m_errorString);
       return false;
     }
     H.set(i, i, tmp);
