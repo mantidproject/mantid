@@ -40,8 +40,7 @@
 #include <boost/timer.hpp>
 
 #include <Poco/File.h>
-#include <Poco/Path.h> namespace Mantid {
-  namespace DataHandling {
+#include <Poco/Path.h> namespace Mantid { namespace DataHandling {
 
   DECLARE_FILELOADER_ALGORITHM(LoadEventPreNexus2)
 
@@ -138,7 +137,7 @@
   //----------------------------------------------------------------------------------------------
   /** Generate mapping file name from Event workspace's instrument
     */
-  static string generateMappingfileName(EventWorkspace_sptr &wksp) {
+  static string generateMappingfileName(EventWorkspace_sptr & wksp) {
     // get the name of the mapping file as set in the parameter files
     std::vector<string> temp =
         wksp->getInstrument()->getStringParameter("TS_mapping_file");
@@ -204,7 +203,8 @@
    * not
    * be used
    */
-  int LoadEventPreNexus2::confidence(Kernel::FileDescriptor &descriptor) const {
+  int LoadEventPreNexus2::confidence(Kernel::FileDescriptor & descriptor)
+      const {
     if (descriptor.extension().rfind("dat") == std::string::npos)
       return 0;
 
@@ -411,8 +411,8 @@
   //------------------------------------------------------------------------------------------------
   /** Create and set up output Event Workspace
     */
-  void
-  LoadEventPreNexus2::createOutputWorkspace(const std::string event_filename) {
+  void LoadEventPreNexus2::createOutputWorkspace(
+      const std::string event_filename) {
     // Create the output workspace
     localWorkspace = EventWorkspace_sptr(new EventWorkspace());
 
@@ -610,9 +610,8 @@
    *  @param localWorkspace :: MatrixWorkspace in which to put the instrument
    * geometry
    */
-  void
-  LoadEventPreNexus2::runLoadInstrument(const std::string &eventfilename,
-                                        MatrixWorkspace_sptr localWorkspace) {
+  void LoadEventPreNexus2::runLoadInstrument(
+      const std::string &eventfilename, MatrixWorkspace_sptr localWorkspace) {
     // start by getting just the filename
     string instrument = Poco::Path(eventfilename).getFileName();
 
@@ -652,8 +651,8 @@
   /** Turn a pixel id into a "corrected" pixelid and period.
     *
     */
-  inline void LoadEventPreNexus2::fixPixelId(PixelType &pixel,
-                                             uint32_t &period) const {
+  inline void LoadEventPreNexus2::fixPixelId(PixelType & pixel,
+                                             uint32_t & period) const {
     if (!this->using_mapping_file) { // nothing to do here
       period = 0;
       return;
@@ -668,8 +667,8 @@
   /** Process the event file properly in parallel
     * @param workspace :: EventWorkspace to write to.
     */
-  void
-  LoadEventPreNexus2::procEvents(DataObjects::EventWorkspace_sptr &workspace) {
+  void LoadEventPreNexus2::procEvents(DataObjects::EventWorkspace_sptr &
+                                      workspace) {
     //-------------------------------------------------------------------------
     // Initialize statistic counters
     //-------------------------------------------------------------------------
@@ -977,7 +976,7 @@
     */
   void LoadEventPreNexus2::procEventsLinear(
       DataObjects::EventWorkspace_sptr & /*workspace*/,
-      std::vector<TofEvent> **arrayOfVectors, DasEvent *event_buffer,
+      std::vector<TofEvent> * *arrayOfVectors, DasEvent * event_buffer,
       size_t current_event_buffer_size, size_t fileOffset, bool dbprint) {
     // Starting pulse time
     DateAndTime pulsetime;
@@ -1195,8 +1194,8 @@
     *
     * @param workspace :: Event workspace to set the proton charge on
     */
-  void LoadEventPreNexus2::setProtonCharge(
-      DataObjects::EventWorkspace_sptr &workspace) {
+  void LoadEventPreNexus2::setProtonCharge(DataObjects::EventWorkspace_sptr &
+                                           workspace) {
     if (this->proton_charge.empty()) // nothing to do
       return;
 
@@ -1389,5 +1388,5 @@
       m_dbOpNumPulses = 0;
   }
 
-  } // namespace DataHandling
+} // namespace DataHandling
 } // namespace Mantid
