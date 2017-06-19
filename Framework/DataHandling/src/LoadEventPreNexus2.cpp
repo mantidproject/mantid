@@ -360,8 +360,8 @@ void LoadEventPreNexus2::exec() {
     pulseid_filename = generatePulseidName(event_filename);
     if (!pulseid_filename.empty()) {
       if (Poco::File(pulseid_filename).exists()) {
-        this->g_log.information()
-            << "Found pulseid file " << pulseid_filename << '\n';
+        this->g_log.information() << "Found pulseid file " << pulseid_filename
+                                  << '\n';
         throwError = false;
       } else {
         pulseid_filename = "";
@@ -446,8 +446,8 @@ void LoadEventPreNexus2::createOutputWorkspace(
   if (mapping_filename.empty()) {
     mapping_filename = generateMappingfileName(localWorkspace);
     if (!mapping_filename.empty())
-      this->g_log.information()
-          << "Found mapping file \"" << mapping_filename << "\"\n";
+      this->g_log.information() << "Found mapping file \"" << mapping_filename
+                                << "\"\n";
   }
   this->loadPixelMap(mapping_filename);
 
