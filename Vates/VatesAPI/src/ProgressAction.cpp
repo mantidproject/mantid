@@ -1,4 +1,5 @@
 #include "MantidVatesAPI/ProgressAction.h"
+#include "MantidAPI/AlgorithmNotification.h"
 
 namespace Mantid {
 namespace VATES {

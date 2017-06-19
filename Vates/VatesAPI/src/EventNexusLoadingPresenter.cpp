@@ -1,4 +1,5 @@
 #include "MantidVatesAPI/EventNexusLoadingPresenter.h"
+#include "MantidAPI/AlgorithmNotification.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/IEventWorkspace.h"
 #include "MantidAPI/IMDEventWorkspace.h"

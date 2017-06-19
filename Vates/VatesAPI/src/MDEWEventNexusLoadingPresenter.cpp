@@ -1,4 +1,5 @@
 #include "MantidVatesAPI/MDEWEventNexusLoadingPresenter.h"
+#include "MantidAPI/AlgorithmNotification.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidVatesAPI/MDLoadingView.h"
