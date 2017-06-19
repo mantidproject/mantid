@@ -72,7 +72,7 @@ namespace Algorithms {
 class DLLExport CompareWorkspaces : public API::Algorithm {
 public:
   CompareWorkspaces()
-      : API::Algorithm(), m_Result(false), m_ParallelComparison(true) {}
+      : API::Algorithm(), m_result(false), m_parallelComparison(true) {}
   ~CompareWorkspaces() override{};
 
   /// Algorithm's name
@@ -143,20 +143,20 @@ private:
   bool relErr(double x1, double x2, double errorVal) const;
 
   /// Result of comparison (true if equal, false otherwise)
-  bool m_Result;
+  bool m_result;
 
   /// Mismatch messages that resulted from comparison
-  API::ITableWorkspace_sptr m_Messages;
+  API::ITableWorkspace_sptr m_messages;
 
   /// Report progress of comparison
-  std::unique_ptr<API::Progress> m_Prog = nullptr;
+  std::unique_ptr<API::Progress> m_progress = nullptr;
 
   /// Variable states if one wants to compare workspaces in parallell. This
   /// usully true but if one wants to look at the comparison logs, parallell
   /// comparison make things complicated as
   /// logs from different threads are mixed together.  In this case, it is
   /// better not to do parallell comparison.
-  bool m_ParallelComparison;
+  bool m_parallelComparison;
 };
 
 } // namespace Algorithms
