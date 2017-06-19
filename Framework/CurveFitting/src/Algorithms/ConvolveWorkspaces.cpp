@@ -54,7 +54,7 @@ void ConvolveWorkspaces::exec() {
     throw std::runtime_error("Size mismatch");
   }
 
-  m_progress = std::make_unique<Progress>(this, 0.0, 1.0, numHists);
+  m_progress = make_unique<Progress>(this, 0.0, 1.0, numHists);
   // Now convolve the histograms
   PARALLEL_FOR_IF(Kernel::threadSafe(*ws1, *ws2, *outputWS))
   for (int i = 0; i < static_cast<int>(numHists); ++i) {
