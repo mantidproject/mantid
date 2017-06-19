@@ -49,6 +49,8 @@ typedef void (IFunction::*setParameterType2)(const std::string &,
                                              const double &value, bool);
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(setParameterType2_Overloads,
                                        setParameter, 2, 3)
+typedef void (IFunction::*removeTieByName)(const std::string & );
+
 #ifdef __clang__
 #pragma clang diagnostic pop
 #endif
@@ -154,6 +156,11 @@ void export_IFunction() {
 
       .def("tie", &IFunction::tie, (arg("self"), arg("parName"), arg("expr"),
            arg("isDefault")), "Tie a parameter to an expression")
+
+      .def("fix", &IFunction::fixParameter, (arg("self"), arg("parName")), "Fix a parameter")
+
+      .def("untie", (removeTieByName)&IFunction::removeTie, (arg("self"), arg("parName")), 
+           "Remove any tie from the given parameter")
 
       //-- Deprecated functions that have the wrong names --
       .def("categories", &getCategories, arg("self"),

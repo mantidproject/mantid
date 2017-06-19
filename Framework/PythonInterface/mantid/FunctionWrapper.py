@@ -39,9 +39,13 @@ class FunctionWrapper:
     for key in kwargs:
         self.fun.tie(key, str(kwargs[key]), False)
         
-  def tie2 (self, arg1, arg):
-       print "tie2 arg1=", arg1, "arg2=", arg2
-                        
+  def fix(self, name):
+      self.fun.fix(name)
+      
+  def untie(self, name):
+      self.fun.untie(name)
+
+      
   def getFunction(self):
       return self.fun
       
