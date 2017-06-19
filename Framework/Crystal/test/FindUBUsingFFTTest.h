@@ -13,7 +13,6 @@
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 
-using namespace Mantid;
 using namespace Mantid::Crystal;
 using Mantid::Geometry::OrientedLattice;
 using namespace Mantid::API;

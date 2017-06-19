@@ -20,6 +20,7 @@ if ( CXXTEST_FOUND )
             Indexing
             Kernel
             MDAlgorithms
+            Nexus
             ${Boost_LIBRARIES}
             ${POCO_LIBRARIES}
             ${GMOCK_LIBRARIES}

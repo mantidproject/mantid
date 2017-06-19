@@ -14,7 +14,6 @@
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidCrystal/LoadIsawUB.h"
 
-using namespace Mantid;
 using namespace Mantid::Crystal;
 using Mantid::Geometry::OrientedLattice;
 using namespace Mantid::API;
@@ -139,7 +138,7 @@ public:
       rows.push_back(i);
     }
 
-    DataHandling::DeleteTableRows removeRowAlg;
+    Mantid::DataHandling::DeleteTableRows removeRowAlg;
     removeRowAlg.initialize();
     removeRowAlg.setPropertyValue("TableWorkspace", m_ws->getName());
     removeRowAlg.setProperty("Rows", rows);

@@ -13,7 +13,6 @@
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidCrystal/LoadIsawUB.h"
 
-using namespace Mantid;
 using namespace Mantid::Crystal;
 using Mantid::Geometry::OrientedLattice;
 using namespace Mantid::API;

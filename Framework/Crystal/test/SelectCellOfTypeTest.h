@@ -14,7 +14,6 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Sample.h"
 
-using namespace Mantid;
 using namespace Mantid::Crystal;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;

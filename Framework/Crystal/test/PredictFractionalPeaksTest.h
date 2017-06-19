@@ -12,7 +12,6 @@
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/System.h"
 
-#include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidDataHandling/LoadNexusProcessed.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidCrystal/LoadIsawUB.h"
@@ -20,7 +19,6 @@
 #include "MantidCrystal/PredictFractionalPeaks.h"
 #include "MantidAPI/FrameworkManager.h"
 
-using namespace Mantid;
 using namespace Mantid::Crystal;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
