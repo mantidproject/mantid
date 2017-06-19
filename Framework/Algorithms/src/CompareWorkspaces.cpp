@@ -310,15 +310,17 @@ void CompareWorkspaces::doComparison() {
   size_t numhist = ws1->getNumberHistograms();
 
   // Fewer steps if not events
-  int steps = 2;
   if (ews1 && ews2) {
+    // we have to create the progress before the call to compareEventWorkspaces,
+    // because it uses the m_progress and it will segfault if not created
+    m_progress = make_unique<Progress>(this, 0.0, 1.0, numhist * 5);
     // Compare event lists to see whether 2 event workspaces match each other
     if (!compareEventWorkspaces(*ews1, *ews2))
       return;
-    steps = 5;
+  } else {
+    m_progress = make_unique<Progress>(this, 0.0, 1.0, numhist * 2);
   }
 
-  m_Prog = make_unique<Progress>(this, 0.0, 1.0, numhist * steps);
   // ==============================================================================
   // Matrix workspaces (Event & 2D)
   // ==============================================================================
@@ -328,21 +330,21 @@ void CompareWorkspaces::doComparison() {
     return;
 
   // Now do the other ones if requested. Bail out as soon as we see a failure.
-  m_Prog->reportIncrement(numhist / 5, "Axes");
+  m_progress->reportIncrement(numhist / 5, "Axes");
   if (static_cast<bool>(getProperty("CheckAxes")) && !checkAxes(ws1, ws2))
     return;
-  m_Prog->reportIncrement(numhist / 5, "SpectraMap");
+  m_progress->reportIncrement(numhist / 5, "SpectraMap");
   if (static_cast<bool>(getProperty("CheckSpectraMap")) &&
       !checkSpectraMap(ws1, ws2))
     return;
-  m_Prog->reportIncrement(numhist / 5, "Instrument");
+  m_progress->reportIncrement(numhist / 5, "Instrument");
   if (static_cast<bool>(getProperty("CheckInstrument")) &&
       !checkInstrument(ws1, ws2))
     return;
-  m_Prog->reportIncrement(numhist / 5, "Masking");
+  m_progress->reportIncrement(numhist / 5, "Masking");
   if (static_cast<bool>(getProperty("CheckMasking")) && !checkMasking(ws1, ws2))
     return;
-  m_Prog->reportIncrement(numhist / 5, "Sample");
+  m_progress->reportIncrement(numhist / 5, "Sample");
   if (static_cast<bool>(getProperty("CheckSample"))) {
     if (!checkSample(ws1->sample(), ws2->sample()))
       return;
@@ -375,11 +377,11 @@ bool CompareWorkspaces::compareEventWorkspaces(
   // why the hell are you called after progress initialisation......... that's
   // why it segfaults
   // Both will end up sorted anyway
-  ews1.sortAll(PULSETIMETOF_SORT, m_Prog.get());
-  ews2.sortAll(PULSETIMETOF_SORT, m_Prog.get());
+  ews1.sortAll(PULSETIMETOF_SORT, m_progress.get());
+  ews2.sortAll(PULSETIMETOF_SORT, m_progress.get());
 
-  if (m_Prog == nullptr) {
-    throw new std::")
+  if (!m_progress) {
+    throw new std::runtime_error("The progress pointer was found to be null!");
   }
 
   // Determine the tolerance for "tof" attribute and "weight" of events
@@ -411,7 +413,7 @@ bool CompareWorkspaces::compareEventWorkspaces(
                   ews2.threadSafe())
   for (int i = 0; i < static_cast<int>(ews1.getNumberHistograms()); ++i) {
     PARALLEL_START_INTERUPT_REGION
-    m_Prog->report("EventLists");
+    m_progress->report("EventLists");
     if (!mismatchedEvent ||
         checkallspectra) // This guard will avoid checking unnecessarily
     {
@@ -542,7 +544,7 @@ bool CompareWorkspaces::checkData(API::MatrixWorkspace_const_sptr ws1,
                   ws2->threadSafe())
   for (long i = 0; i < static_cast<long>(numHists); ++i) {
     PARALLEL_START_INTERUPT_REGION
-    m_Prog->report("Histograms");
+    m_progress->report("Histograms");
 
     if (resultBool || checkAllData) // Avoid checking unnecessarily
     {
