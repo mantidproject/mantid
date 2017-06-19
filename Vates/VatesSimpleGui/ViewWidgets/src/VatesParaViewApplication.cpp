@@ -16,7 +16,6 @@
 #include "pqCrashRecoveryBehavior.h"
 #include "pqAutoLoadPluginXMLBehavior.h"
 #include "pqVerifyRequiredPluginBehavior.h"
-#include "pqFixPathsInStateFilesBehavior.h"
 #include "pqCommandLineOptionsBehavior.h"
 #include "pqCollaborationBehavior.h"
 #include "pqViewStreamingBehavior.h"
@@ -101,7 +100,7 @@ void VatesParaViewApplication::setupParaViewBehaviors() {
   // new pqPluginDockWidgetsBehavior(mainWindow);
   new pqVerifyRequiredPluginBehavior(this);
   // new pqPluginActionGroupBehavior(mainWindow);
-  new pqFixPathsInStateFilesBehavior(this);
+  // new pqFixPathsInStateFilesBehavior(this);
   new pqCommandLineOptionsBehavior(this);
   // new pqPersistentMainWindowStateBehavior(mainWindow);
   new pqCollaborationBehavior(this);

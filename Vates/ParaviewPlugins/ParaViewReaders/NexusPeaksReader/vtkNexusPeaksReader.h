@@ -10,9 +10,8 @@ public:
   static vtkNexusPeaksReader *New();
   vtkNexusPeaksReader(const vtkNexusPeaksReader &) = delete;
   void operator=(const vtkNexusPeaksReader &) = delete;
-  vtkTypeMacro(vtkNexusPeaksReader,
-               vtkPolyDataAlgorithm) void PrintSelf(ostream &os,
-                                                    vtkIndent indent) override;
+  vtkTypeMacro(vtkNexusPeaksReader, vtkPolyDataAlgorithm);
+  void PrintSelf(ostream &os, vtkIndent indent) override;
   vtkSetStringMacro(FileName);
   vtkGetStringMacro(FileName);
   int CanReadFile(const char *fname);

@@ -41,10 +41,8 @@ public:
   static vtkPeaksSource *New();
   vtkPeaksSource(const vtkPeaksSource &) = delete;
   void operator=(const vtkPeaksSource &) = delete;
-  vtkTypeMacro(vtkPeaksSource,
-               vtkPolyDataAlgorithm) void PrintSelf(ostream &os,
-                                                    vtkIndent indent) override;
-
+  vtkTypeMacro(vtkPeaksSource, vtkPolyDataAlgorithm);
+  void PrintSelf(ostream &os, vtkIndent indent) override;
   void SetWsName(const std::string &wsName);
   void SetPeakDimension(int dim);
   /// Setter for the unitegrated peak marker size

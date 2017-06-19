@@ -11,18 +11,15 @@
 #include <pqImageUtil.h>
 #include <pqPVApplicationCore.h>
 #include <pqRenderViewBase.h>
-#include <pqSaveSnapshotDialog.h>
+//#include <pqSaveSnapshotDialog.h>
 #include <pqSettings.h>
-#include <pqStereoModeHelper.h>
+//#include <pqStereoModeHelper.h>
 #include <pqTabbedMultiViewWidget.h>
 #include <pqView.h>
 #include <vtkPVConfig.h>
 #include <vtkPVXMLElement.h>
 #include <vtkSMSessionProxyManager.h>
 #include <vtkSmartPointer.h>
-#if defined(__INTEL_COMPILER)
-#pragma warning enable 1170
-#endif
 
 #include <QDebug>
 #include <QFileInfo>
@@ -60,12 +57,14 @@ void SaveScreenshotReaction::saveScreenshot() {
     return;
   }
 
+  /*
   pqSaveSnapshotDialog ssDialog(pqCoreUtilities::mainWidget());
   ssDialog.setViewSize(view->getSize());
 
   if (ssDialog.exec() != QDialog::Accepted) {
     return;
   }
+  */
 
   QString lastUsedExt;
   // Load the most recently used file extensions from QSettings, if available.
@@ -95,7 +94,7 @@ void SaveScreenshotReaction::saveScreenshot() {
   lastUsedExt = QString("*.") + fileInfo.suffix();
   settings->setValue("extensions/ScreenshotExtension", lastUsedExt);
 
-  QSize size = ssDialog.viewSize();
+  /*QSize size = ssDialog.viewSize();
   QString palette = ssDialog.palette();
 
   vtkSMSessionProxyManager *pxm =
@@ -130,6 +129,7 @@ void SaveScreenshotReaction::saveScreenshot() {
   if (clone || stereo) {
     pqApplicationCore::instance()->render();
   }
+  */
 }
 
 //-----------------------------------------------------------------------------
@@ -138,7 +138,7 @@ void SaveScreenshotReaction::saveScreenshot(const QString &filename,
   pqView *view = pqActiveObjects::instance().activeView();
   vtkSmartPointer<vtkImageData> img;
   if (view) {
-    img.TakeReference(view->captureImage(size));
+    // img.TakeReference(view->captureImage(size));
   }
 
   if (!img.GetPointer()) {

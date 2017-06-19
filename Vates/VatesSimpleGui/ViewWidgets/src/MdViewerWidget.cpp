@@ -86,14 +86,10 @@
 #include <pqDataTimeStepBehavior.h>
 #include <pqDataRepresentation.h>
 #include <pqDefaultViewBehavior.h>
-#include <pqFixPathsInStateFilesBehavior.h>
 #include <pqInterfaceTracker.h>
 #include <pqObjectPickingBehavior.h>
-//#include <pqPersistentMainWindowStateBehavior.h>
 #include <pqPipelineContextMenuBehavior.h>
 #include <pqPipelineSource.h>
-//#include <pqPluginActionGroupBehavior.h>
-//#include <pqPluginDockWidgetsBehavior.h>
 #include <pqPluginManager.h>
 #include <pqPluginSettingsBehavior.h>
 #include <pqQtMessageHandlerBehavior.h>
@@ -104,13 +100,9 @@
 #include <pqStandardViewFrameActionsImplementation.h>
 #include <pqUndoRedoBehavior.h>
 #include <pqView.h>
-//#include <pqViewFrameActionsBehavior.h>
 #include <pqViewStreamingBehavior.h>
 #include <pqVerifyRequiredPluginBehavior.h>
 #include <pqSaveDataReaction.h>
-#if defined(__INTEL_COMPILER)
-#pragma warning enable 1170
-#endif
 
 #include <QAction>
 #include <QDragEnterEvent>
