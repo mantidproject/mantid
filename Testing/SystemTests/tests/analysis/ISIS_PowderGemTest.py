@@ -7,13 +7,13 @@ import shutil
 import mantid.simpleapi as mantid
 from mantid import config
 
-from isis_powder import Polaris
+from isis_powder import Gem
 
 DIRS = config['datasearch.directories'].split(';')
 
 # Setup various path details
 
-inst_name = "POLARIS"
+inst_name = "GEM"
 # Relative to system data folder
 working_folder_name = "ISIS_Powder"
 
@@ -23,8 +23,8 @@ output_folder_name = "output"
 
 # Relative to input folder
 calibration_folder_name = os.path.join("calibration", inst_name.lower())
-calibration_map_rel_path = os.path.join("yaml_files", "polaris_system_test_mapping.yaml")
-spline_rel_path = os.path.join("17_1", "VanSplined_98532_cycle_16_3_silicon_all_spectra.cal.nxs")
+calibration_map_rel_path = os.path.join("yaml_files", "gem_system_test_mapping.yaml")
+spline_rel_path = os.path.join("17_1", "VanSplined_83608_offsets_2011_cycle111b.cal.nxs")
 
 # Generate paths for the tests
 # This implies DIRS[0] is the system test data folder
@@ -88,17 +88,17 @@ class FocusTest(stresstesting.MantidStressTest):
 
 
 def _gen_required_files():
-    required_run_numbers = ["98531", "98532",  # create_van : PDF mode
-                            "98533"]  # File to focus (Si)
+    required_run_numbers = ["83607", "83608",  # create_van : PDF mode
+                            "83605", "83608_splined"]  # File to focus (Si)
 
     # Generate file names of form "INSTxxxxx.nxs"
-    input_files = [os.path.join(input_dir, (inst_name + "000" + number + ".nxs")) for number in required_run_numbers]
+    input_files = [os.path.join(input_dir, (inst_name + number + ".nxs")) for number in required_run_numbers]
     input_files.append(calibration_map_path)
     return input_files
 
 
 def run_vanadium_calibration():
-    vanadium_run = 98532  # Choose arbitrary run in the cycle 17_1
+    vanadium_run = 83605  # Choose arbitrary run in the cycle 17_1
 
     pdf_inst_obj = setup_inst_object(mode="PDF")
 
@@ -115,30 +115,30 @@ def run_vanadium_calibration():
 
 
 def run_focus():
-    run_number = 98533
-    sample_empty = 98532  # Use the vanadium empty again to make it obvious
+    run_number = 83605
+    sample_empty = 83608  # Use the vanadium empty again to make it obvious
     sample_empty_scale = 0.5  # Set it to 50% scale
 
     # Copy the required splined file into place first (instead of relying on generated one)
-    splined_file_name = "POLARIS00098532_splined.nxs"
+    splined_file_name = "GEM83608_splined.nxs"
 
     original_splined_path = os.path.join(input_dir, splined_file_name)
     shutil.copy(original_splined_path, spline_path)
 
     inst_object = setup_inst_object(mode="PDF")
-    return inst_object.focus(run_number=run_number, input_mode="Individual", do_van_normalisation=True,
+    return inst_object.focus(run_number=run_number, input_mode="Individual", vanadium_normalisation=True,
                              do_absorb_corrections=False, sample_empty=sample_empty,
                              sample_empty_scale=sample_empty_scale)
 
 
 def calibration_validator(results):
     # Get the name of the grouped workspace list
-    reference_file_name = "ISIS_Powder-POLARIS00098533_splined.nxs"
+    reference_file_name = "ISIS_Powder-GEM-VanSplined_83608_offsets_2011_cycle111b.cal.nxs"
     return _compare_ws(reference_file_name=reference_file_name, results=results)
 
 
 def focus_validation(results):
-    reference_file_name = "ISIS_Powder-POLARIS98533_FocusSempty.nxs"
+    reference_file_name = "ISIS_Powder-GEM83605_FocusSempty.nxs"
     return _compare_ws(reference_file_name=reference_file_name, results=results)
 
 
@@ -162,8 +162,8 @@ def setup_mantid_paths():
 def setup_inst_object(mode):
     user_name = "Test"
 
-    inst_obj = Polaris(user_name=user_name, calibration_mapping_file=calibration_map_path,
-                       calibration_directory=calibration_dir, output_directory=output_dir, mode=mode)
+    inst_obj = Gem(user_name=user_name, calibration_mapping_file=calibration_map_path,
+                   calibration_directory=calibration_dir, output_directory=output_dir, mode=mode)
     return inst_obj
 
 
