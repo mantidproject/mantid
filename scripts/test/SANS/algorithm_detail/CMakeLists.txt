@@ -12,5 +12,4 @@ set ( TEST_PY_FILES
 
 check_tests_valid ( ${CMAKE_CURRENT_SOURCE_DIR} ${TEST_PY_FILES} )
 
-# Prefix for test name=PythonSANS
-pyunittest_add_test ( ${CMAKE_CURRENT_SOURCE_DIR} PythonSANS ${TEST_PY_FILES} )
+pyunittest_add_test ( ${CMAKE_CURRENT_SOURCE_DIR} python.SANS.algorithm_detail ${TEST_PY_FILES} )
