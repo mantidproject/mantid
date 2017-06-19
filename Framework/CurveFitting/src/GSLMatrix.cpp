@@ -23,6 +23,9 @@ GSLMatrix::GSLMatrix(const size_t nx, const size_t ny)
 GSLMatrix::GSLMatrix(std::initializer_list<std::initializer_list<double>> ilist)
     : GSLMatrix(ilist.size(), ilist.begin()->size()) {
   for (auto row = ilist.begin(); row != ilist.end(); ++row) {
+    if (row->size() != size2()) {
+      throw std::runtime_error("All rows in initializer list must have the same size.");
+    }
     auto i = static_cast<size_t>(std::distance(ilist.begin(), row));
     for (auto cell = row->begin(); cell != row->end(); ++cell) {
       auto j = static_cast<size_t>(std::distance(row->begin(), cell));

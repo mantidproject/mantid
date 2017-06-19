@@ -363,6 +363,21 @@ public:
     TS_ASSERT_EQUALS(m(2, 2), 22.0);
   }
 
+  void test_initializer_list() {
+    gsl_set_error_handler_off();
+    GSLMatrix m({{1.0, 2.0}, {4.0, 2.0}, {-1.0, -3.0}});
+    TS_ASSERT_EQUALS(m.size1(), 3);
+    TS_ASSERT_EQUALS(m.size2(), 2);
+    TS_ASSERT_EQUALS(m(0, 0), 1.0);
+    TS_ASSERT_EQUALS(m(1, 0), 4.0);
+    TS_ASSERT_EQUALS(m(2, 0), -1.0);
+    TS_ASSERT_EQUALS(m(0, 1), 2.0);
+    TS_ASSERT_EQUALS(m(1, 1), 2.0);
+    TS_ASSERT_EQUALS(m(2, 1), -3.0);
+
+    TS_ASSERT_THROWS(GSLMatrix({{1.0, 2.0}, {4.0, 2.0, 0.0}, {-1.0, -3.0}}), std::runtime_error);
+  }
+
   void test_vector_mul() {
     gsl_set_error_handler_off();
     GSLMatrix m({{1.0, 2.0}, {4.0, 2.0}, {-1.0, -3.0}});
