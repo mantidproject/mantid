@@ -287,9 +287,8 @@ void VesuvioCalculateGammaBackground::calculateBackgroundFromFoils(
     std::transform(ctfoil.begin(), ctfoil.end(), foilSpectrum.begin(),
                    ctfoil.begin(), std::minus<double>());
   }
-  bool reversed =
-      (m_reversed.count(m_inputWS->getSpectrum(inputIndex).getSpectrumNo()) !=
-       0);
+  bool reversed = (m_reversed.count(m_inputWS->getSpectrum(inputIndex)
+                                        .getSpectrumNo()) != 0);
   // This is quicker than the if within the loop
   if (reversed) {
     // The reversed ones should be (C0 - C1)

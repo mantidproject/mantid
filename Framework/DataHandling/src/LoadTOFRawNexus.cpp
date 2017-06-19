@@ -165,9 +165,9 @@ void LoadTOFRawNexus::countPixels(const std::string &nexusfilename,
                         " dimension. Expected 3 dimensions.");
 
                   m_axisField = allAxes.back();
-                  g_log.information()
-                      << "Loading signal " << m_signalNo << ", " << m_dataField
-                      << " with axis " << m_axisField << '\n';
+                  g_log.information() << "Loading signal " << m_signalNo << ", "
+                                      << m_dataField << " with axis "
+                                      << m_axisField << '\n';
                   file->closeData();
                   break;
                 } // Data has a 'signal' attribute

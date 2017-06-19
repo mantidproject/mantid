@@ -407,8 +407,8 @@ void FilterEventsByLogValuePreNexus::exec() {
     PARALLEL_FOR_NO_WSP_CHECK()
     for (int64_t i = 0; i < numberOfSpectra; i++) {
       PARALLEL_START_INTERUPT_REGION
-      m_localWorkspace->getSpectrum(i).setSortOrder(
-          DataObjects::PULSETIME_SORT);
+      m_localWorkspace->getSpectrum(i)
+          .setSortOrder(DataObjects::PULSETIME_SORT);
       PARALLEL_END_INTERUPT_REGION
     }
     PARALLEL_CHECK_INTERUPT_REGION
@@ -456,8 +456,8 @@ void FilterEventsByLogValuePreNexus::processProperties() {
     if (!m_pulseIDFileName.empty()) {
       // Check existence of pulse ID file with generated name
       if (Poco::File(m_pulseIDFileName).exists()) {
-        g_log.information()
-            << "Found pulseid file " << m_pulseIDFileName << "\n";
+        g_log.information() << "Found pulseid file " << m_pulseIDFileName
+                            << "\n";
         m_throwError = false;
       } else {
         m_pulseIDFileName = "";
@@ -1442,9 +1442,9 @@ void FilterEventsByLogValuePreNexus::unmaskVetoEventIndexes() {
       uint64_t eventindex = m_vecEventIndex[i];
       if (eventindex > static_cast<uint64_t>(m_numEvents)) {
         PARALLEL_CRITICAL(unmask_veto_check) {
-          g_log.information()
-              << "Check: Pulse " << i
-              << ": unphysical event index = " << eventindex << "\n";
+          g_log.information() << "Check: Pulse " << i
+                              << ": unphysical event index = " << eventindex
+                              << "\n";
         }
       }
 

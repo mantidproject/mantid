@@ -1241,9 +1241,8 @@ std::string FindPeaks::estimatePeakParameters(
   if (leftfwhm <= 0 || rightfwhm <= 0) {
     std::stringstream errmsg;
     errmsg << "Estimate peak parameters error (FWHM cannot be zero): Input "
-              "data size = "
-           << vecX.size() << ", Xmin = " << vecX[i_min] << "(" << i_min
-           << "), Xmax = " << vecX[i_max] << "(" << i_max << "); "
+              "data size = " << vecX.size() << ", Xmin = " << vecX[i_min] << "("
+           << i_min << "), Xmax = " << vecX[i_max] << "(" << i_max << "); "
            << "Estimated peak centre @ " << vecX[iobscentre] << "("
            << iobscentre << ") with height = " << height
            << "; Lowest Y value = " << lowest
@@ -1257,9 +1256,8 @@ std::string FindPeaks::estimatePeakParameters(
   {
     std::stringstream errmsg;
     errmsg << "Estimate peak parameters error (FWHM cannot be zero): Input "
-              "data size = "
-           << vecX.size() << ", Xmin = " << vecX[i_min] << "(" << i_min
-           << "), Xmax = " << vecX[i_max] << "(" << i_max << "); "
+              "data size = " << vecX.size() << ", Xmin = " << vecX[i_min] << "("
+           << i_min << "), Xmax = " << vecX[i_max] << "(" << i_max << "); "
            << "Estimated peak centre @ " << vecX[iobscentre] << "("
            << iobscentre << ") with height = " << height
            << "; Lowest Y value = " << lowest

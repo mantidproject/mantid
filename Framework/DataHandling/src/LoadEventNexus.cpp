@@ -261,10 +261,10 @@ public:
 
     // Check that the required space is there in the file.
     if (dim0 < m_loadSize[0] + m_loadStart[0]) {
-      alg->getLogger().warning()
-          << "Entry " << entry_name << "'s event_id field is too small ("
-          << dim0 << ") to load the desired data size ("
-          << m_loadSize[0] + m_loadStart[0] << ").\n";
+      alg->getLogger().warning() << "Entry " << entry_name
+                                 << "'s event_id field is too small (" << dim0
+                                 << ") to load the desired data size ("
+                                 << m_loadSize[0] + m_loadStart[0] << ").\n";
       m_loadError = true;
     }
 
@@ -481,13 +481,13 @@ public:
 
     } // try block
     catch (std::exception &e) {
-      alg->getLogger().error()
-          << "Error while loading bank " << entry_name << ":\n";
+      alg->getLogger().error() << "Error while loading bank " << entry_name
+                               << ":\n";
       alg->getLogger().error() << e.what() << '\n';
       m_loadError = true;
     } catch (...) {
-      alg->getLogger().error()
-          << "Unspecified error while loading bank " << entry_name << '\n';
+      alg->getLogger().error() << "Unspecified error while loading bank "
+                               << entry_name << '\n';
       m_loadError = true;
     }
 

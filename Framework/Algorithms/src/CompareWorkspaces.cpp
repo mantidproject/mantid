@@ -421,9 +421,9 @@ bool CompareWorkspaces::compareEventWorkspaces(
       const EventList &el2 = ews2.getSpectrum(i);
       bool printdetail = (i == wsindex2print);
       if (printdetail) {
-        g_log.information()
-            << "Spectrum " << i << " is set to print out in details. "
-            << "\n";
+        g_log.information() << "Spectrum " << i
+                            << " is set to print out in details. "
+                            << "\n";
       }
 
       if (!el1.equals(el2, toleranceTOF, toleranceWeight, tolerancePulse)) {
