@@ -311,6 +311,9 @@ class MainWindow(QtGui.QMainWindow):
         self.connect(self.ui.pushButton_loadLastNthProject, QtCore.SIGNAL('clicked()'),
                      self.do_load_nth_project)
 
+        self.connect(self.ui.actionPre_Processing, QtCore.SIGNAL('triggered()'),
+                     self.menu_pre_process)
+
         # Validator ... (NEXT)
 
         # Declaration of class variable
@@ -3477,6 +3480,22 @@ class MainWindow(QtGui.QMainWindow):
         """
         self.save_settings()
         self.close()
+
+    def menu_pre_process(self):
+        """
+        blabla
+        :return:
+        """
+        # FIXME/TODO/NOWNOW - Make it work!
+
+        import PreprocessWindow
+
+        self._preProcessWindow = PreprocessWindow.ScanPreProcessWindow(self)
+        self._preProcessWindow.show()
+        self._preProcessWindow.setup(exp_number=12345, det_size=256, det_center=None,
+                                     det_sample_distance=None, wave_length=None)
+
+        return
 
     def show_scan_pt_list(self):
         """ Show the range of Pt. in a scan

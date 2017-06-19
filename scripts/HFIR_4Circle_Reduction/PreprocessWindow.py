@@ -12,7 +12,7 @@ class ScanPreProcessWindow(QtGui.QMainWindow):
         initialization
         :param parent:
         """
-        super(ScanPreProcessWindow, self).__init__(self)
+        super(ScanPreProcessWindow, self).__init__(parent)
 
         # define UI
         self.ui = ui_preprocess_window.Ui_PreprocessWindow()
@@ -84,10 +84,31 @@ class ScanPreProcessWindow(QtGui.QMainWindow):
         start the pre-precessing scans
         :return:
         """
+        # TODO/ISSUE/NOWNOW
+
         # get all the information
         exp_number = int(self.ui.lineEdit_ipts.text())
         scan_list = self.get_scan_numbers()
 
+        status, pt_list = self._myControl.get_pt_numbers(exp_number, scan_number)
+        if status is False:
+            # skip this row due to error
+            sum_error_msg += '%s\n' % str(pt_list)
+            continue
+
+        self.ui.tableWidget_mergeScans.set_status(row_number, 'In Processing')
+        status, ret_tup = self._myControl.merge_pts_in_scan(exp_no=exp_number, scan_no=scan_number,
+                                                            pt_num_list=[])
+
+        self._myControl.set_exp_number()
+        self._myControl.set_default_detector_sample_distance()
+        set_detector_sample_distance
+        self._myControl.set_default_pixel_size()
+        self._myControl.set_detector_center()
+        self._myControl.set_default_pixel_size()
+        self._myControl.save_merged_scan()
+
+        return
 
     def enable_calibration_settings(self, to_enable):
         """
