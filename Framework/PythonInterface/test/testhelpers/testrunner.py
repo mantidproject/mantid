@@ -11,9 +11,6 @@ import sys
 import xmlrunner
 import unittest
 
-# See inline comment about why we need this
-TEST_OUTPUT_SUFFIX = 'unit'
-
 
 def main(argv):
     """
@@ -31,11 +28,7 @@ def main(argv):
 
     # Load the test
     test_module = imp.load_source(module_name(pathname), pathname)
-    # The default output suffix is a timestamp so each run will generate a new file
-    # This is inconsistent with how our other tests run so we want to suppress it
-    # but old versions of xmlrunner check `if outputsuffix` and empty string
-    # is the same as None in this case so we need a non-zero length string
-    runner = xmlrunner.XMLTestRunner(output='.', outsuffix=TEST_OUTPUT_SUFFIX)
+    runner = xmlrunner.XMLTestRunner(output='.', outsuffix='')
     # execute
     unittest.main(
         module=test_module,
@@ -51,11 +44,16 @@ def main(argv):
 
 def module_name(pathname):
     """
-    Returns a Python module name for the given pathname
+    Returns a Python module name for the given pathname. This is used to form the suite name
+    for the test when written as xUnit-style output. We fake one so that we can group the tests
+    more easily. The parent's directory name is used as a namespace
     :param pathname: Path to a python file
     :return: A module name to give to the import mechanism
     """
-    return os.path.splitext(os.path.basename(pathname))[0]
+    directory_path, basename = os.path.split(pathname)
+    directory_name = os.path.relpath(directory_path, os.path.dirname(directory_path))
+    test_filename, _ = os.path.splitext(basename)
+    return 'Python.' + os.path.basename(directory_name) + "." + test_filename
 
 
 if __name__ == "__main__":
