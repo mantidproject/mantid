@@ -251,13 +251,21 @@ class IndirectILLReductionFWS(PythonAlgorithm):
             left = mtd[groupws].getItem(0).getName()
             right = mtd[groupws].getItem(1).getName()
             sum = '__sum_'+groupws
-            Plus(LHSWorkspace=left, RHSWorkspace=right, OutputWorkspace=sum)
 
             left_monitor = mtd[left].getRun().getLogData('MonitorIntegral').value
             right_monitor = mtd[right].getRun().getLogData('MonitorIntegral').value
 
             if left_monitor != 0. and right_monitor != 0.:
-                Scale(InputWorkspace=sum, OutputWorkspace=sum, Factor=0.5)
+                sum_monitor = left_monitor + right_monitor
+                left_factor = left_monitor / sum_monitor
+                right_factor = right_monitor / sum_monitor
+                Scale(InputWorkspace=left, OutputWorkspace=left, Factor=left_factor)
+                Scale(InputWorkspace=right, OutputWorkspace=right, Factor=right_factor)
+            else:
+                self.log().notice('Zero monitor integral has been found in one (or both) wings;'
+                                  ' left: {0}, right: {1}'.format(left_monitor, right_monitor))
+
+            Plus(LHSWorkspace=left, RHSWorkspace=right, OutputWorkspace=sum)
 
             DeleteWorkspace(left)
             DeleteWorkspace(right)
