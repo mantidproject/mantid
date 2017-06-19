@@ -15,6 +15,10 @@ from reduction_workflow.instruments.sans import hfir_instrument
 from mantid.kernel import Logger
 from mantid.simpleapi import Load
 
+# The following imports allow users to import this file and have all functionality automatically imported
+# Do not remove these imports as it will break user scripts which rely on them
+from reduction_workflow.command_interface import OutputPath, Reduce1D, Reduce, \
+                                                 AppendDataFile, ClearDataFiles  # noqa: F401
 
 def BIOSANS():
     Clear()

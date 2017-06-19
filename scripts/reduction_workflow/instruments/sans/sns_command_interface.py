@@ -2,20 +2,17 @@
 """
     Command set for EQSANS reduction
 """
+# Import the specific commands that we need - some of these are used in systemtests
 from reduction_workflow.command_interface import *
 
 from hfir_command_interface import SolidAngle
 from hfir_command_interface import SetBeamCenter as BaseSetBeamCenter
 
-from reduction_workflow.find_data import find_data
-
 # The following imports allow users to import this file and have all functionality automatically imported
 # Do not remove these imports as it will break user scripts which rely on them
 
-from hfir_command_interface import DarkCurrent, NoDarkCurrent, NoNormalization  # noqa: F401
-from hfir_command_interface import NoSolidAngle  # noqa: F401
+from hfir_command_interface import DarkCurrent, NoDarkCurrent, NoNormalization, NoSolidAngle  # noqa: F401
 from hfir_command_interface import DirectBeamCenter, ScatteringBeamCenter  # noqa: F401
-
 from hfir_command_interface import SensitivityCorrection, SetSensitivityBeamCenter  # noqa: F401
 from hfir_command_interface import SensitivityDirectBeamCenter, SensitivityScatteringBeamCenter  # noqa: F401
 from hfir_command_interface import NoSensitivityCorrection, DivideByThickness  # noqa: F401
@@ -35,8 +32,9 @@ from hfir_command_interface import BckTransmissionDirectBeamCenter, BckTransmiss
 from hfir_command_interface import SetSampleDetectorOffset, SetSampleDetectorDistance  # noqa: F401
 from hfir_command_interface import Mask, MaskRectangle, MaskDetectors, MaskDetectorSide  # noqa: F401
 from hfir_command_interface import SetAbsoluteScale, SetDirectBeamAbsoluteScale  # noqa: F401
-from hfir_command_interface import Stitch  # noqa: F401
+from hfir_command_interface import Stitch
 
+from reduction_workflow.find_data import find_data
 
 def EQSANS(keep_events=False, property_manager=None):
     Clear()
