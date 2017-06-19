@@ -21,6 +21,10 @@
 #include "MantidKernel/Glob.h"
 #include "MantidKernel/InstrumentInfo.h"
 #include "MantidKernel/ListValidator.h"
+<<<<<<< HEAD
+=======
+#include "MantidKernel/OptionalBool.h"
+>>>>>>> master
 #include "MantidKernel/System.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/UnitFactory.h"

@@ -18,6 +18,7 @@
 #include "MantidGeometry/Instrument/Component.h"
 #include "MantidGeometry/Instrument/ParameterFactory.h"
 #include "MantidKernel/Exception.h"
+#include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/StringTokenizer.h"
 #include "MantidTestHelpers/ScopedFileHelper.h"
 

@@ -11,6 +11,7 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/EmptyValues.h"
 #include "MantidKernel/Exception.h"
+#include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/UnitFactory.h"
 
 #include <algorithm>
