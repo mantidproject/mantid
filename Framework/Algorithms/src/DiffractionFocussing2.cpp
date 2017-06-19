@@ -346,8 +346,8 @@ void DiffractionFocussing2::execEvent() {
 
   EventType eventWtype = m_eventW->getEventType();
 
-  Progress *prog;
-  prog = new Progress(this, 0.2, 0.25, nGroups);
+  std::unique_ptr<Progress> prog =
+      make_unique<Progress>(this, 0.2, 0.25, nGroups);
 
   // determine precount size
   vector<size_t> size_required(this->m_validGroups.size(), 0);
@@ -363,8 +363,8 @@ void DiffractionFocussing2::execEvent() {
   }
 
   // ------------- Pre-allocate Event Lists ----------------------------
-  delete prog;
-  prog = new Progress(this, 0.25, 0.3, totalHistProcess);
+  prog.reset();
+  prog = make_unique<Progress>(this, 0.25, 0.3, totalHistProcess);
 
   // This creates and reserves the space required
   for (size_t iGroup = 0; iGroup < this->m_validGroups.size(); iGroup++) {
@@ -378,8 +378,8 @@ void DiffractionFocussing2::execEvent() {
   }
 
   // ----------- Focus ---------------
-  delete prog;
-  prog = new Progress(this, 0.3, 0.9, totalHistProcess);
+  prog.reset();
+  prog = make_unique<Progress>(this, 0.3, 0.9, totalHistProcess);
 
   if (this->m_validGroups.size() == 1) {
     g_log.information() << "Performing focussing on a single group\n";
@@ -449,8 +449,8 @@ void DiffractionFocussing2::execEvent() {
 
   // Now that the data is cleaned up, go through it and set the X vectors to the
   // input workspace we first talked about.
-  delete prog;
-  prog = new Progress(this, 0.9, 1.0, nGroups);
+  prog.reset();
+  prog = make_unique<Progress>(this, 0.9, 1.0, nGroups);
   for (size_t workspaceIndex = 0; workspaceIndex < this->m_validGroups.size();
        workspaceIndex++) {
     const int group = static_cast<int>(m_validGroups[workspaceIndex]);
@@ -480,7 +480,6 @@ void DiffractionFocussing2::execEvent() {
   }
   out->clearMRU();
   setProperty("OutputWorkspace", std::move(out));
-  delete prog;
 }
 
 //=============================================================================
