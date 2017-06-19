@@ -20,7 +20,8 @@ macro ( PYUNITTEST_ADD_TEST _test_src_dir _testname_prefix )
   foreach ( part ${ARGN} )
     get_filename_component( _filename ${part} NAME )
     get_filename_component( _suitename ${part} NAME_WE )
-    set ( _pyunit_separate_name "${_testname_prefix}_${_suitename}" )
+    # We duplicate the suitename so that it matches the junit output name
+    set ( _pyunit_separate_name "${_testname_prefix}.${_suitename}.${_suitename}" )
 
     if ( MSVC )
       # Debug

@@ -53,7 +53,7 @@ def module_name(pathname):
     directory_path, basename = os.path.split(pathname)
     directory_name = os.path.relpath(directory_path, os.path.dirname(directory_path))
     test_filename, _ = os.path.splitext(basename)
-    return 'Python.' + os.path.basename(directory_name) + "." + test_filename
+    return 'python.' + os.path.basename(directory_name) + "." + test_filename
 
 
 if __name__ == "__main__":
