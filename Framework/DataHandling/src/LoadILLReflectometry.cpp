@@ -9,6 +9,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/RegisterFileLoader.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/Quat.h"
 #include "MantidKernel/UnitFactory.h"
 

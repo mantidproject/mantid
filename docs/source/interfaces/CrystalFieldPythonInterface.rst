@@ -247,7 +247,7 @@ mandatory and can be either of the two
 
 1. A tuple containing two arrays (lists) of real numbers which will be interpreted as tabulated values of the model function. The first element of the tuple is a list of increasing values for peak centres, and the second element is a list of corresponding widths. Values between the tabulated peak positions will be linearly interpolated.
 
-2. A python function that takes a numpy array of peak positions and returns a numpy array of widths.
+2. A python function that takes a :class:`numpy.ndarray` of peak positions and returns a numpy array of widths.
 
 If the model is a tuple of two arrays then no additional parameters are required. If it's a function then the rest of the parameters define how to tabulate this
 function. `xstart` and `xend` define the interval of interpolation which must include all fitted peaks. The last argument is `accuracy` that defaults to

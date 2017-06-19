@@ -1,5 +1,5 @@
 from __future__ import (absolute_import, division, print_function)
-from mantid.simpleapi import *
+from mantid.simpleapi import CreateWorkspace, GroupWorkspaces
 from mantid.kernel import *
 from mantid.api import *
 
@@ -190,24 +190,24 @@ class LoadNMoldyn4Ascii1D(PythonAlgorithm):
             unit = 'Empty'
         return (data, unit, name)
 
-    def TOSCA_resfunction(self, point_x):
+    def TOSCA_resfunction(self, x_data):
         # Approximate resolution function for Tosca delE = f(E)
         # Used in convolution
 
-        delE = point_x*(16*np.exp(-point_x*0.0295)+0.000285*point_x + 1.058)
+        x_data = np.array(x_data)
+        delE = x_data*(16*np.exp(-x_data*0.0295)+0.000285*x_data + 1.058)
         delE /= 100
         return delE
 
-    def gaussianfunc(self, x_data, point_x, resfunction):
+    def gaussianfunc(self, x_data, point_x, resfunction, fwhm):
         # Outputs a gaussian peak for a point x on the wavenumber axis, with
         # the width of the Gaussian a function of wavenumber(x)
         # Used in convolution
 
-        g_of_x = []
-        for i in range(len(x_data)):
-            fwhm = resfunction(point_x)/2.35482
-            coeff = -((x_data[i]-point_x)**2)/(2*fwhm**2)
-            g_of_x.append(np.exp(coeff))
+        x_data = np.array(x_data)
+        coeff_arr = -((x_data-point_x)**2)/(2*fwhm**2)
+        g_of_x = np.exp(coeff_arr)
+
         return g_of_x
 
     def integrator(self, y_data, g_of_x, x_data):
@@ -224,8 +224,8 @@ class LoadNMoldyn4Ascii1D(PythonAlgorithm):
         # Used in convolution
 
         all_gx = []
-        for i in range(len(x_data)):
-            all_gx.append(self.gaussianfunc(x_data, x_data[i], resfunction))
+        fwhm_arr = fwhm_arr = resfunction(x_data)/2.35482
+        all_gx = [self.gaussianfunc(x_data, x_data[i], resfunction, fwhm_arr[i]) for i in range(len(x_data))]
         return all_gx
 
     def convolutor(self, y_data, all_gx, x_data):
