@@ -4,6 +4,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/Logger.h"
+#include "MantidKernel/OptionalBool.h"
 #include "MantidQtCustomInterfaces/Indirect/IndirectDataReduction.h"
 
 using namespace Mantid::API;

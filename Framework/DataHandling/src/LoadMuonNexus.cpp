@@ -2,18 +2,19 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidDataHandling/LoadMuonNexus.h"
-#include "MantidDataObjects/Workspace2D.h"
-#include "MantidKernel/UnitFactory.h"
-#include "MantidKernel/ConfigService.h"
-#include "MantidKernel/ArrayProperty.h"
 #include "MantidAPI/FileProperty.h"
-#include "MantidGeometry/Instrument.h"
-#include "MantidGeometry/Instrument/Detector.h"
 #include "MantidAPI/Progress.h"
 #include "MantidAPI/TableRow.h"
-#include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/Detector.h"
+#include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/ConfigService.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidKernel/OptionalBool.h"
+#include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidKernel/UnitFactory.h"
 
 #include <Poco/Path.h>
 #include <limits>
