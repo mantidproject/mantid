@@ -2,30 +2,29 @@
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/DetectorInfo.h"
 #include "MantidAPI/FileFinder.h"
+#include "MantidAPI/FileProperty.h"
 #include "MantidAPI/RegisterFileLoader.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/EventList.h"
+#include "MantidDataObjects/EventWorkspace.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidGeometry/IDetector.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ArrayProperty.h"
-#include "MantidKernel/FileValidator.h"
-#include "MantidKernel/DateAndTime.h"
-#include "MantidKernel/Glob.h"
-#include "MantidAPI/FileProperty.h"
 #include "MantidKernel/BinaryFile.h"
+#include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/CPUTimer.h"
+#include "MantidKernel/ConfigService.h"
+#include "MantidKernel/DateAndTime.h"
+#include "MantidKernel/FileValidator.h"
+#include "MantidKernel/Glob.h"
+#include "MantidKernel/InstrumentInfo.h"
+#include "MantidKernel/ListValidator.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/UnitFactory.h"
-#include "MantidKernel/DateAndTime.h"
-#include "MantidGeometry/IDetector.h"
-#include "MantidGeometry/Instrument.h"
-#include "MantidKernel/CPUTimer.h"
 #include "MantidKernel/VisibleWhenProperty.h"
-#include "MantidDataObjects/Workspace2D.h"
-#include "MantidKernel/BoundedValidator.h"
-#include "MantidKernel/ListValidator.h"
-#include "MantidKernel/ConfigService.h"
-#include "MantidKernel/InstrumentInfo.h"
 
 #include <algorithm>
 #include <functional>
@@ -345,7 +344,7 @@ void LoadEventPreNexus2::exec() {
     throw std::out_of_range("ChunkNumber cannot be larger than TotalChunks");
   }
 
-  prog = new Progress(this, 0.0, 1.0, 100);
+  prog = make_unique<Progress>(this, 0.0, 1.0, 100);
 
   // b. what spectra (pixel ID's) to load
   this->spectra_list = this->getProperty(PID_PARAM);
@@ -358,8 +357,8 @@ void LoadEventPreNexus2::exec() {
     pulseid_filename = generatePulseidName(event_filename);
     if (!pulseid_filename.empty()) {
       if (Poco::File(pulseid_filename).exists()) {
-        this->g_log.information() << "Found pulseid file " << pulseid_filename
-                                  << '\n';
+        this->g_log.information()
+            << "Found pulseid file " << pulseid_filename << '\n';
         throwError = false;
       } else {
         pulseid_filename = "";
@@ -398,8 +397,6 @@ void LoadEventPreNexus2::exec() {
   // Fast frequency sample environment data
   this->processImbedLogs();
 
-  // Cleanup
-  delete prog;
 } // exec()
 
 //------------------------------------------------------------------------------------------------
@@ -445,8 +442,8 @@ void LoadEventPreNexus2::createOutputWorkspace(
   if (mapping_filename.empty()) {
     mapping_filename = generateMappingfileName(localWorkspace);
     if (!mapping_filename.empty())
-      this->g_log.information() << "Found mapping file \"" << mapping_filename
-                                << "\"\n";
+      this->g_log.information()
+          << "Found mapping file \"" << mapping_filename << "\"\n";
   }
   this->loadPixelMap(mapping_filename);
 
