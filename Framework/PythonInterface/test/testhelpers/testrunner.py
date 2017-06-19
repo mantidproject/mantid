@@ -8,9 +8,62 @@ from __future__ import (absolute_import, division, print_function)
 import imp
 import os
 import sys
-import xmlrunner
+from xmlrunner import XMLTestRunner
+from xmlrunner.result import _TestInfo, _XMLTestResult, safe_unicode
 import unittest
 
+
+class GroupedNameTestInfo(_TestInfo):
+    """
+    Overrides these default xmlrunner class to
+    used a different test naming scheme
+    """
+
+    def __init__(self, test_result, test_method, outcome=_TestInfo.SUCCESS,
+                 err=None, subTest=None):
+        super(GroupedNameTestInfo, self).__init__(test_result, test_method, outcome,
+                                                  err, subTest)
+
+    def id(self):
+        return self.test_id
+
+
+class GroupedNameTestResult(_XMLTestResult):
+    """
+    A hack to allow us to prefix the test suite name with a prefix we choose allowing
+    to output to be organized by Jenkins.
+    """
+
+    testcase_prefix = None
+
+    def __init__(self, stream=sys.stderr, descriptions=1, verbosity=1,
+                 elapsed_times=True, properties=None):
+        super(GroupedNameTestResult, self).__init__(stream, descriptions, verbosity,
+                                                    elapsed_times, properties,
+                                                    infoclass=GroupedNameTestInfo)
+
+    def _get_info_by_testcase(self):
+        """
+        Organizes test results by TestCase module. This information is
+        used during the report generation, where a XML report will be created
+        for each TestCase.
+        """
+        tests_by_testcase = {}
+
+        if self.testcase_prefix is None:
+            self.testcase_prefix = ""
+        for tests in (self.successes, self.failures, self.errors,
+                      self.skipped):
+            for test_info in tests:
+                if isinstance(test_info, tuple):
+                    # This is a skipped, error or a failure test case
+                    test_info = test_info[0]
+                testcase_name = self.testcase_prefix + test_info.test_name
+                if testcase_name not in tests_by_testcase:
+                    tests_by_testcase[testcase_name] = []
+                tests_by_testcase[testcase_name].append(test_info)
+
+        return tests_by_testcase
 
 def main(argv):
     """
@@ -26,10 +79,19 @@ def main(argv):
     if not os.path.isfile(pathname):
         raise ValueError("Test path '{}' is not a file".format(pathname))
 
-    # Load the test
+    # Add the directory of the test to the Python path
+    sys.path.insert(0, os.path.dirname(pathname))
+
+    # Load the test and copy over any module variables so that we have
+    # the same environment defined here
     test_module = imp.load_source(module_name(pathname), pathname)
-    runner = xmlrunner.XMLTestRunner(output='.', outsuffix='')
-    # execute
+    test_module_globals = dir(test_module)
+    this_globals = globals()
+    for key in test_module_globals:
+        this_globals[key] = getattr(test_module, key)
+
+    # create runner & execute
+    runner = XMLTestRunner(output='.', outsuffix='', resultclass=result_class(pathname))
     unittest.main(
         module=test_module,
         # We've processed the test source so don't let unittest try to reparse it
@@ -44,16 +106,25 @@ def main(argv):
 
 def module_name(pathname):
     """
-    Returns a Python module name for the given pathname. This is used to form the suite name
-    for the test when written as xUnit-style output. We fake one so that we can group the tests
-    more easily. The parent's directory name is used as a namespace
+    Returns a Python module name for the given pathname using the standard rules
     :param pathname: Path to a python file
     :return: A module name to give to the import mechanism
     """
-    directory_path, basename = os.path.split(pathname)
+    return os.path.splitext(os.path.basename(pathname))[0]
+
+
+def result_class(pathname):
+    """
+    Returns a result class that can be passed to XMLTestRunner that
+    customizes the test naming to suite our needs. Note that this
+    is only suitable for running tests from a single file.
+    :return: A sub class of _XMLTestResult
+    """
+    directory_path, _ = os.path.split(pathname)
     directory_name = os.path.relpath(directory_path, os.path.dirname(directory_path))
-    test_filename, _ = os.path.splitext(basename)
-    return 'python.' + os.path.basename(directory_name) + "." + test_filename
+    class_ = GroupedNameTestResult
+    class_.testcase_prefix = "python." +  directory_name + "."
+    return class_
 
 
 if __name__ == "__main__":
