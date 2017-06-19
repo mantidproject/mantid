@@ -52,17 +52,6 @@ if ERRORLEVEL 1 exit /b %ERRORLEVEL%
 msbuild /nologo /nr:false /p:Configuration=Release SystemTestData.vcxproj
 if ERRORLEVEL 1 exit /b %ERRORLEVEL%
 
-:: Determine if we are the nightly system test build
-:: Opt in by default as there is a release/master...etc.
-:: and skip running the slow tests on the pull requests
-if not "%JOB_NAME%" == "%JOB_NAME:pull_requests=%" (
-
-  # Append the flag to run the slow tests
-  set SLOW_ARG="--slow"
-) else (
-  set SLOW_ARG=""
-)
-
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: Run the tests
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
@@ -79,4 +68,4 @@ set PKGDIR=%WORKSPACE%\build
 :: A completely clean build will not have Mantid installed but will need Python to
 :: run the testing setup scripts. Assume it is in the PATH
 set PYTHON_EXE=python.exe
-%PYTHON_EXE% %WORKSPACE%\Testing\SystemTests\scripts\InstallerTests.py -o -d %PKGDIR% %SLOW_ARG%
+%PYTHON_EXE% %WORKSPACE%\Testing\SystemTests\scripts\InstallerTests.py -o -d %PKGDIR%
