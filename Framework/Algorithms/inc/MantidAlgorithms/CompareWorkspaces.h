@@ -73,7 +73,7 @@ class DLLExport CompareWorkspaces : public API::Algorithm {
 public:
   CompareWorkspaces()
       : API::Algorithm(), m_result(false), m_parallelComparison(true) {}
-  ~CompareWorkspaces() override{};
+  ~CompareWorkspaces() override {}
 
   /// Algorithm's name
   const std::string name() const override { return "CompareWorkspaces"; }
