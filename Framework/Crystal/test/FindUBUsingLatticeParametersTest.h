@@ -172,14 +172,14 @@ public:
     std::vector<double> UB_calculated = latt.getUB().getVector();
 
     for (size_t i = 0; i < 9; i++) {
-      TS_ASSERT_DELTA(correct_UB[i], UB_calculated[i], 5e-4);
+      TS_ASSERT_DELTA(correct_UB[i], UB_calculated[i], 1e-2);
     }
-    TS_ASSERT_DELTA(latt.a(), 13.9520, 5e-4);
-    TS_ASSERT_DELTA(latt.b(), 19.5145, 5e-4);
-    TS_ASSERT_DELTA(latt.c(), 8.6566, 5e-4);
-    TS_ASSERT_DELTA(latt.alpha(), 92.6267, 5e-4);
-    TS_ASSERT_DELTA(latt.beta(), 103.7440, 5e-4);
-    TS_ASSERT_DELTA(latt.gamma(), 90.0272, 5e-4);
+    TS_ASSERT_DELTA(latt.a(), 13.9520, 1e-2);
+    TS_ASSERT_DELTA(latt.b(), 19.5145, 1e-2);
+    TS_ASSERT_DELTA(latt.c(), 8.6566, 1e-2);
+    TS_ASSERT_DELTA(latt.alpha(), 92.6267, 1e-2);
+    TS_ASSERT_DELTA(latt.beta(), 103.7440, 1e-2);
+    TS_ASSERT_DELTA(latt.gamma(), 90.0272, 1e-2);
   }
 
 private:
