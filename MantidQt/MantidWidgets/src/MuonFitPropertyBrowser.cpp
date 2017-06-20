@@ -162,9 +162,7 @@ void MuonFitPropertyBrowser::init() {
   multiFitSettingsGroup->addSubProperty(m_startX);
   multiFitSettingsGroup->addSubProperty(m_endX);
   m_groupsToFit = m_enumManager->addProperty("Groups/Pairs to fit");
-  m_groupsToFitOptions << ALL_GROUPS_LABEL
-                       << ALL_PAIRS_LABEL
-                       << CUSTOM_LABEL;
+  m_groupsToFitOptions << ALL_GROUPS_LABEL << ALL_PAIRS_LABEL << CUSTOM_LABEL;
   m_showGroupValue << "groups";
   m_showGroup = m_enumManager->addProperty("Selected Groups");
   m_enumManager->setEnumNames(m_groupsToFit, m_groupsToFitOptions);
