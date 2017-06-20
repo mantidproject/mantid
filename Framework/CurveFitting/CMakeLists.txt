@@ -503,6 +503,8 @@ include_directories ( inc )
 
 target_link_libraries ( CurveFitting LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} ${MANTIDLIBS} ${GSL_LIBRARIES} )
 
+cotire(CurveFitting)
+
 # Add the unit tests directory
 add_subdirectory ( test )
 

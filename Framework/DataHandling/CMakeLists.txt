@@ -591,6 +591,8 @@ target_include_directories ( DataHandling SYSTEM PRIVATE ${HDF5_INCLUDE_DIRS})
 
 target_link_libraries ( DataHandling LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} ${MANTIDLIBS} Nexus ${NEXUS_LIBRARIES} ${HDF5_LIBRARIES} ${HDF5_HL_LIBRARIES} ${JSONCPP_LIBRARIES} )
 
+cotire(DataHandling)
+
 # Add the unit tests directory
 add_subdirectory ( test )
 
