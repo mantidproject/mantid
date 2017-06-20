@@ -71,11 +71,11 @@ template void indexSort(const std::vector<int> &, std::vector<int> &);
 }
 
 template <typename T> std::vector<T> Matrix<T>::getVector() const {
-  std::vector<T> rez(nx * ny);
+  std::vector<T> rez(m_numRowsX * m_numColumnsY);
   size_t ic(0);
-  for (size_t i = 0; i < nx; i++) {
-    for (size_t j = 0; j < ny; j++) {
-      rez[ic] = V[i][j];
+  for (size_t i = 0; i < m_numRowsX; i++) {
+    for (size_t j = 0; j < m_numColumnsY; j++) {
+      rez[ic] = m_rawDataArrayPtr[i][j];
       ic++;
     }
   }
@@ -84,7 +84,7 @@ template <typename T> std::vector<T> Matrix<T>::getVector() const {
 //
 template <typename T>
 Matrix<T>::Matrix(const size_t nrow, const size_t ncol, const bool makeIdentity)
-    : nx(0), ny(0), V(nullptr)
+    : m_numRowsX(0), m_numColumnsY(0), m_rawDataArrayPtr(nullptr)
 /**
   Constructor with pre-set sizes. Matrix is zeroed
   @param nrow :: number of rows
@@ -92,7 +92,7 @@ Matrix<T>::Matrix(const size_t nrow, const size_t ncol, const bool makeIdentity)
   @param makeIdentity :: flag for the constructor to return an identity matrix
 */
 {
-  // Note:: nx,ny zeroed so setMem always works
+  // Note:: m_numRowsX, m_numColumnsY zeroed so setMem always works
   setMem(nrow, ncol);
   zeroMatrix();
   if (makeIdentity)
@@ -101,7 +101,7 @@ Matrix<T>::Matrix(const size_t nrow, const size_t ncol, const bool makeIdentity)
 
 template <typename T>
 Matrix<T>::Matrix(const std::vector<T> &A, const std::vector<T> &B)
-    : nx(0), ny(0), V(nullptr)
+    : m_numRowsX(0), m_numColumnsY(0), m_rawDataArrayPtr(nullptr)
 /**
   Constructor to take two vectors and multiply them to
   construct a matrix. (assuming that we have columns x row
@@ -110,32 +110,32 @@ Matrix<T>::Matrix(const std::vector<T> &A, const std::vector<T> &B)
   @param B :: Row vector to multiply
 */
 {
-  // Note:: nx,ny zeroed so setMem always works
+  // Note:: m_numRowsX,m_numColumnsY zeroed so setMem always works
   setMem(A.size(), B.size());
-  for (size_t i = 0; i < nx; i++) {
-    for (size_t j = 0; j < ny; j++) {
-      V[i][j] = A[i] * B[j];
+  for (size_t i = 0; i < m_numRowsX; i++) {
+    for (size_t j = 0; j < m_numColumnsY; j++) {
+      m_rawDataArrayPtr[i][j] = A[i] * B[j];
     }
   }
 }
 //
 template <typename T>
 Matrix<T>::Matrix(const std::vector<T> &data)
-    : nx(0), ny(0), V(nullptr) {
+    : m_numRowsX(0), m_numColumnsY(0), m_rawDataArrayPtr(nullptr) {
   size_t numel = data.size();
-  size_t nxt = static_cast<size_t>(sqrt(double(numel)));
-  size_t test = nxt * nxt;
+  size_t m_numRowsXt = static_cast<size_t>(sqrt(double(numel)));
+  size_t test = m_numRowsXt * m_numRowsXt;
   if (test != numel) {
     throw(std::invalid_argument(
         "number of elements in input vector have to be square of some value"));
   }
 
-  setMem(nxt, nxt);
+  setMem(m_numRowsXt, m_numRowsXt);
 
   size_t ic(0);
-  for (size_t i = 0; i < nx; i++) {
-    for (size_t j = 0; j < ny; j++) {
-      V[i][j] = data[ic];
+  for (size_t i = 0; i < m_numRowsX; i++) {
+    for (size_t j = 0; j < m_numColumnsY; j++) {
+      m_rawDataArrayPtr[i][j] = data[ic];
       ic++;
     }
   }
@@ -144,7 +144,7 @@ Matrix<T>::Matrix(const std::vector<T> &data)
 template <typename T>
 Matrix<T>::Matrix(const std::vector<T> &data, const size_t nrow,
                   const size_t ncol)
-    : nx(0), ny(0), V(nullptr) {
+    : m_numRowsX(0), m_numColumnsY(0), m_rawDataArrayPtr(nullptr) {
   size_t numel = data.size();
   size_t test = nrow * ncol;
   if (test != numel) {
@@ -156,9 +156,9 @@ Matrix<T>::Matrix(const std::vector<T> &data, const size_t nrow,
   setMem(nrow, ncol);
 
   size_t ic(0);
-  for (size_t i = 0; i < nx; i++) {
-    for (size_t j = 0; j < ny; j++) {
-      V[i][j] = data[ic];
+  for (size_t i = 0; i < m_numRowsX; i++) {
+    for (size_t j = 0; j < m_numColumnsY; j++) {
+      m_rawDataArrayPtr[i][j] = data[ic];
       ic++;
     }
   }
@@ -166,7 +166,8 @@ Matrix<T>::Matrix(const std::vector<T> &data, const size_t nrow,
 
 template <typename T>
 Matrix<T>::Matrix(const Matrix<T> &A, const size_t nrow, const size_t ncol)
-    : nx(A.nx - 1), ny(A.ny - 1), V(nullptr)
+    : m_numRowsX(A.m_numRowsX - 1), m_numColumnsY(A.m_numColumnsY - 1),
+      m_rawDataArrayPtr(nullptr)
 /**
   Constructor with for a missing row/column.
   @param A :: The input matrix
@@ -174,22 +175,22 @@ Matrix<T>::Matrix(const Matrix<T> &A, const size_t nrow, const size_t ncol)
   @param ncol :: number of column to miss
 */
 {
-  if (nrow > nx)
-    throw Kernel::Exception::IndexError(nrow, A.nx,
+  if (nrow > m_numRowsX)
+    throw Kernel::Exception::IndexError(nrow, A.m_numRowsX,
                                         "Matrix::Constructor without col");
-  if (ncol > ny)
-    throw Kernel::Exception::IndexError(ncol, A.ny,
+  if (ncol > m_numColumnsY)
+    throw Kernel::Exception::IndexError(ncol, A.m_numColumnsY,
                                         "Matrix::Constructor without col");
-  setMem(nx, ny);
-  if (V) {
+  setMem(m_numRowsX, m_numColumnsY);
+  if (m_rawDataArrayPtr) {
     size_t iR(0);
-    for (size_t i = 0; i <= nx; i++) {
+    for (size_t i = 0; i <= m_numRowsX; i++) {
       if (i != nrow) {
         size_t jR(0);
-        for (size_t j = 0; j <= ny; j++) {
+        for (size_t j = 0; j <= m_numColumnsY; j++) {
           if (j != ncol) {
 
-            V[iR][jR] = A.V[i][j];
+            m_rawDataArrayPtr[iR][jR] = A.m_rawDataArrayPtr[i][j];
             jR++;
           }
         }
@@ -201,18 +202,18 @@ Matrix<T>::Matrix(const Matrix<T> &A, const size_t nrow, const size_t ncol)
 
 template <typename T>
 Matrix<T>::Matrix(const Matrix<T> &A)
-    : nx(0), ny(0), V(nullptr)
+    : m_numRowsX(0), m_numColumnsY(0), m_rawDataArrayPtr(nullptr)
 /**
   Simple copy constructor
   @param A :: Object to copy
 */
 {
-  // Note:: nx,ny zeroed so setMem always works
-  setMem(A.nx, A.ny);
-  if (nx * ny) {
-    for (size_t i = 0; i < nx; i++) {
-      for (size_t j = 0; j < ny; j++) {
-        V[i][j] = A.V[i][j];
+  // Note:: m_numRowsX,m_numColumnsY zeroed so setMem always works
+  setMem(A.m_numRowsX, A.m_numColumnsY);
+  if (m_numRowsX * m_numColumnsY) {
+    for (size_t i = 0; i < m_numRowsX; i++) {
+      for (size_t j = 0; j < m_numColumnsY; j++) {
+        m_rawDataArrayPtr[i][j] = A.m_rawDataArrayPtr[i][j];
       }
     }
   }
@@ -227,11 +228,11 @@ Matrix<T> &Matrix<T>::operator=(const Matrix<T> &A)
 */
 {
   if (&A != this) {
-    setMem(A.nx, A.ny);
-    if (nx * ny) {
-      for (size_t i = 0; i < nx; i++) {
-        for (size_t j = 0; j < ny; j++) {
-          V[i][j] = A.V[i][j];
+    setMem(A.m_numRowsX, A.m_numColumnsY);
+    if (m_numRowsX * m_numColumnsY) {
+      for (size_t i = 0; i < m_numRowsX; i++) {
+        for (size_t j = 0; j < m_numColumnsY; j++) {
+          m_rawDataArrayPtr[i][j] = A.m_rawDataArrayPtr[i][j];
         }
       }
     }
@@ -240,23 +241,24 @@ Matrix<T> &Matrix<T>::operator=(const Matrix<T> &A)
 }
 
 template <typename T>
-Matrix<T>::Matrix(Matrix<T> &&other) noexcept : nx(other.nx),
-                                                ny(other.ny),
-                                                V(other.V) {
-  other.nx = 0;
-  other.ny = 0;
-  other.V = nullptr;
+Matrix<T>::Matrix(Matrix<T> &&other) noexcept
+    : m_numRowsX(other.m_numRowsX),
+      m_numColumnsY(other.m_numColumnsY),
+      m_rawDataArrayPtr(other.m_rawDataArrayPtr) {
+  other.m_numRowsX = 0;
+  other.m_numColumnsY = 0;
+  other.m_rawDataArrayPtr = nullptr;
 }
 
 template <typename T>
 Matrix<T> &Matrix<T>::operator=(Matrix<T> &&other) noexcept {
-  nx = other.nx;
-  ny = other.ny;
-  V = other.V;
+  m_numRowsX = other.m_numRowsX;
+  m_numColumnsY = other.m_numColumnsY;
+  m_rawDataArrayPtr = other.m_rawDataArrayPtr;
 
-  other.nx = 0;
-  other.ny = 0;
-  other.V = nullptr;
+  other.m_numRowsX = 0;
+  other.m_numColumnsY = 0;
+  other.m_rawDataArrayPtr = nullptr;
 
   return *this;
 }
@@ -281,11 +283,12 @@ Matrix<T> &Matrix<T>::operator+=(const Matrix<T> &A)
   @return Matrix(this + A)
 */
 {
-  const size_t Xpt((nx > A.nx) ? A.nx : nx);
-  const size_t Ypt((ny > A.ny) ? A.ny : ny);
+  const size_t Xpt((m_numRowsX > A.m_numRowsX) ? A.m_numRowsX : m_numRowsX);
+  const size_t Ypt((m_numColumnsY > A.m_numColumnsY) ? A.m_numColumnsY
+                                                     : m_numColumnsY);
   for (size_t i = 0; i < Xpt; i++) {
     for (size_t j = 0; j < Ypt; j++) {
-      V[i][j] += A.V[i][j];
+      m_rawDataArrayPtr[i][j] += A.m_rawDataArrayPtr[i][j];
     }
   }
 
@@ -302,11 +305,12 @@ Matrix<T> &Matrix<T>::operator-=(const Matrix<T> &A)
   @return Ma
 */
 {
-  const size_t Xpt((nx > A.nx) ? A.nx : nx);
-  const size_t Ypt((ny > A.ny) ? A.ny : ny);
+  const size_t Xpt((m_numRowsX > A.m_numRowsX) ? A.m_numRowsX : m_numRowsX);
+  const size_t Ypt((m_numColumnsY > A.m_numColumnsY) ? A.m_numColumnsY
+                                                     : m_numColumnsY);
   for (size_t i = 0; i < Xpt; i++) {
     for (size_t j = 0; j < Ypt; j++) {
-      V[i][j] -= A.V[i][j];
+      m_rawDataArrayPtr[i][j] -= A.m_rawDataArrayPtr[i][j];
     }
   }
 
@@ -350,14 +354,15 @@ Matrix<T> Matrix<T>::operator*(const Matrix<T> &A) const
   @return Matrix(This * A)
 */
 {
-  if (ny != A.nx)
-    throw Kernel::Exception::MisMatch<size_t>(ny, A.nx,
+  if (m_numColumnsY != A.m_numRowsX)
+    throw Kernel::Exception::MisMatch<size_t>(m_numColumnsY, A.m_numRowsX,
                                               "Matrix::operator*(Matrix)");
-  Matrix<T> X(nx, A.ny);
-  for (size_t i = 0; i < nx; i++) {
-    for (size_t j = 0; j < A.ny; j++) {
-      for (size_t kk = 0; kk < ny; kk++) {
-        X.V[i][j] += V[i][kk] * A.V[kk][j];
+  Matrix<T> X(m_numRowsX, A.m_numColumnsY);
+  for (size_t i = 0; i < m_numRowsX; i++) {
+    for (size_t j = 0; j < A.m_numColumnsY; j++) {
+      for (size_t kk = 0; kk < m_numColumnsY; kk++) {
+        X.m_rawDataArrayPtr[i][j] +=
+            m_rawDataArrayPtr[i][kk] * A.m_rawDataArrayPtr[kk][j];
       }
     }
   }
@@ -373,14 +378,14 @@ std::vector<T> Matrix<T>::operator*(const std::vector<T> &Vec) const
   @return Matrix(This * Vec)
 */
 {
-  if (ny > Vec.size())
-    throw Kernel::Exception::MisMatch<size_t>(ny, Vec.size(),
-                                              "Matrix::operator*(Vec)");
+  if (m_numColumnsY > Vec.size())
+    throw Kernel::Exception::MisMatch<size_t>(
+        m_numColumnsY, Vec.size(), "Matrix::operator*(m_rawDataArrayPtrec)");
 
-  std::vector<T> Out(nx);
-  for (size_t i = 0; i < nx; i++) {
-    for (size_t j = 0; j < ny; j++) {
-      Out[i] += V[i][j] * Vec[j];
+  std::vector<T> Out(m_numRowsX);
+  for (size_t i = 0; i < m_numRowsX; i++) {
+    for (size_t j = 0; j < m_numColumnsY; j++) {
+      Out[i] += m_rawDataArrayPtr[i][j] * Vec[j];
     }
   }
   return Out;
@@ -395,14 +400,14 @@ std::vector<T> Matrix<T>::operator*(const std::vector<T> &Vec) const
 template <typename T>
 void Matrix<T>::multiplyPoint(const std::vector<T> &in,
                               std::vector<T> &out) const {
-  out.resize(nx);
+  out.resize(m_numRowsX);
   std::fill(std::begin(out), std::end(out), static_cast<T>(0.0));
-  if (ny > in.size())
-    throw Kernel::Exception::MisMatch<size_t>(ny, in.size(),
+  if (m_numColumnsY > in.size())
+    throw Kernel::Exception::MisMatch<size_t>(m_numColumnsY, in.size(),
                                               "Matrix::multiplyPoint(in,out)");
-  for (size_t i = 0; i < nx; i++) {
-    for (size_t j = 0; j < ny; j++) {
-      out[i] += V[i][j] * in[j];
+  for (size_t i = 0; i < m_numRowsX; i++) {
+    for (size_t j = 0; j < m_numColumnsY; j++) {
+      out[i] += m_rawDataArrayPtr[i][j] * in[j];
     }
   }
 }
@@ -416,12 +421,14 @@ V3D Matrix<T>::operator*(const V3D &Vx) const
   @return Matrix(This * A)
 */
 {
-  if (ny != 3 || nx > 3)
-    throw Kernel::Exception::MisMatch<size_t>(ny, 3, "Matrix::operator*(V3D)");
+  if (m_numColumnsY != 3 || m_numRowsX > 3)
+    throw Kernel::Exception::MisMatch<size_t>(
+        m_numColumnsY, 3, "Matrix::operator*(m_rawDataArrayPtr3D)");
 
   V3D v;
-  for (size_t i = 0; i < nx; ++i) {
-    v[i] = V[i][0] * Vx.X() + V[i][1] * Vx.Y() + V[i][2] * Vx.Z();
+  for (size_t i = 0; i < m_numRowsX; ++i) {
+    v[i] = m_rawDataArrayPtr[i][0] * Vx.X() + m_rawDataArrayPtr[i][1] * Vx.Y() +
+           m_rawDataArrayPtr[i][2] * Vx.Z();
   }
 
   return v;
@@ -436,9 +443,9 @@ Matrix<T> Matrix<T>::operator*(const T &Value) const
 */
 {
   Matrix<T> X(*this);
-  for (size_t i = 0; i < nx; i++) {
-    for (size_t j = 0; j < ny; j++) {
-      X.V[i][j] *= Value;
+  for (size_t i = 0; i < m_numRowsX; i++) {
+    for (size_t j = 0; j < m_numColumnsY; j++) {
+      X.m_rawDataArrayPtr[i][j] *= Value;
     }
   }
   return X;
@@ -452,8 +459,9 @@ Matrix<T> Matrix<T>::operator*(const T &Value) const
  @return This *= A
 */
 template <typename T> Matrix<T> &Matrix<T>::operator*=(const Matrix<T> &A) {
-  if (ny != A.nx)
-    throw Kernel::Exception::MisMatch<size_t>(ny, A.nx, "Matrix*=(Matrix<T>)");
+  if (m_numColumnsY != A.m_numRowsX)
+    throw Kernel::Exception::MisMatch<size_t>(m_numColumnsY, A.m_numRowsX,
+                                              "Matrix*=(Matrix<T>)");
   // This construct to avoid the problem of changing size
   *this = this->operator*(A);
   return *this;
@@ -467,9 +475,9 @@ Matrix<T> &Matrix<T>::operator*=(const T &Value)
   @return *this
 */
 {
-  for (size_t i = 0; i < nx; i++) {
-    for (size_t j = 0; j < ny; j++) {
-      V[i][j] *= Value;
+  for (size_t i = 0; i < m_numRowsX; i++) {
+    for (size_t j = 0; j < m_numColumnsY; j++) {
+      m_rawDataArrayPtr[i][j] *= Value;
     }
   }
   return *this;
@@ -483,9 +491,9 @@ Matrix<T> &Matrix<T>::operator/=(const T &Value)
   @return *this
 */
 {
-  for (size_t i = 0; i < nx; i++) {
-    for (size_t j = 0; j < ny; j++) {
-      V[i][j] /= Value;
+  for (size_t i = 0; i < m_numRowsX; i++) {
+    for (size_t j = 0; j < m_numColumnsY; j++) {
+      m_rawDataArrayPtr[i][j] /= Value;
     }
   }
   return *this;
@@ -534,18 +542,18 @@ Always returns 0 if the Matrix have different sizes
 {
   if (&A != this) // this == A == always true
   {
-    if (A.nx != nx || A.ny != ny)
+    if (A.m_numRowsX != m_numRowsX || A.m_numColumnsY != m_numColumnsY)
       return false;
 
     double maxS(0.0);
     double maxDiff(0.0); // max di
-    for (size_t i = 0; i < nx; i++)
-      for (size_t j = 0; j < ny; j++) {
-        const T diff = (V[i][j] - A.V[i][j]);
+    for (size_t i = 0; i < m_numRowsX; i++)
+      for (size_t j = 0; j < m_numColumnsY; j++) {
+        const T diff = (m_rawDataArrayPtr[i][j] - A.m_rawDataArrayPtr[i][j]);
         if (fabs(diff) > maxDiff)
           maxDiff = fabs(diff);
-        if (fabs(V[i][j]) > maxS)
-          maxS = fabs(V[i][j]);
+        if (fabs(m_rawDataArrayPtr[i][j]) > maxS)
+          maxS = fabs(m_rawDataArrayPtr[i][j]);
       }
     if (maxDiff < Tolerance)
       return true;
@@ -567,12 +575,12 @@ template <typename T> bool Matrix<T>::operator<(const Matrix<T> &A) const {
   if (&A == this) // this < A == always false
     return false;
 
-  if (A.nx != nx || A.ny != ny)
+  if (A.m_numRowsX != m_numRowsX || A.m_numColumnsY != m_numColumnsY)
     return false;
 
-  for (size_t i = 0; i < nx; i++)
-    for (size_t j = 0; j < ny; j++) {
-      if (V[i][j] >= A.V[i][j])
+  for (size_t i = 0; i < m_numRowsX; i++)
+    for (size_t j = 0; j < m_numColumnsY; j++) {
+      if (m_rawDataArrayPtr[i][j] >= A.m_rawDataArrayPtr[i][j])
         return false;
     }
   return true;
@@ -588,12 +596,12 @@ template <typename T> bool Matrix<T>::operator>=(const Matrix<T> &A) const {
   if (&A == this)
     return true;
 
-  if (A.nx != nx || A.ny != ny)
+  if (A.m_numRowsX != m_numRowsX || A.m_numColumnsY != m_numColumnsY)
     return false;
 
-  for (size_t i = 0; i < nx; i++)
-    for (size_t j = 0; j < ny; j++) {
-      if (V[i][j] < A.V[i][j])
+  for (size_t i = 0; i < m_numRowsX; i++)
+    for (size_t j = 0; j < m_numColumnsY; j++) {
+      if (m_rawDataArrayPtr[i][j] < A.m_rawDataArrayPtr[i][j])
         return false;
     }
   return true;
@@ -606,13 +614,13 @@ void Matrix<T>::deleteMem()
   Deletes the memory held in matrix
 */
 {
-  if (V) {
-    delete[] * V;
-    delete[] V;
-    V = nullptr;
+  if (m_rawDataArrayPtr) {
+    delete[] * m_rawDataArrayPtr;
+    delete[] m_rawDataArrayPtr;
+    m_rawDataArrayPtr = nullptr;
   }
-  nx = 0;
-  ny = 0;
+  m_numRowsX = 0;
+  m_numColumnsY = 0;
 }
 
 /**
@@ -621,20 +629,20 @@ void Matrix<T>::deleteMem()
   @param b :: number of columns
 */
 template <typename T> void Matrix<T>::setMem(const size_t a, const size_t b) {
-  if (a == nx && b == ny && V != nullptr)
+  if (a == m_numRowsX && b == m_numColumnsY && m_rawDataArrayPtr != nullptr)
     return;
 
   deleteMem();
   if (a <= 0 || b <= 0)
     return;
 
-  nx = a;
-  ny = b;
-  if (nx * ny) {
-    auto tmpX = new T[nx * ny];
-    V = new T *[nx];
-    for (size_t i = 0; i < nx; i++) {
-      V[i] = tmpX + (i * ny);
+  m_numRowsX = a;
+  m_numColumnsY = b;
+  if (m_numRowsX * m_numColumnsY) {
+    auto tmpX = new T[m_numRowsX * m_numColumnsY];
+    m_rawDataArrayPtr = new T *[m_numRowsX];
+    for (size_t i = 0; i < m_numRowsX; i++) {
+      m_rawDataArrayPtr[i] = tmpX + (i * m_numColumnsY);
     }
   }
 }
@@ -646,11 +654,12 @@ template <typename T> void Matrix<T>::setMem(const size_t a, const size_t b) {
 */
 template <typename T>
 void Matrix<T>::swapRows(const size_t RowI, const size_t RowJ) {
-  if (nx * ny && RowI < nx && RowJ < nx && RowI != RowJ) {
-    for (size_t k = 0; k < ny; k++) {
-      T tmp = V[RowI][k];
-      V[RowI][k] = V[RowJ][k];
-      V[RowJ][k] = tmp;
+  if (m_numRowsX * m_numColumnsY && RowI < m_numRowsX && RowJ < m_numRowsX &&
+      RowI != RowJ) {
+    for (size_t k = 0; k < m_numColumnsY; k++) {
+      T tmp = m_rawDataArrayPtr[RowI][k];
+      m_rawDataArrayPtr[RowI][k] = m_rawDataArrayPtr[RowJ][k];
+      m_rawDataArrayPtr[RowJ][k] = tmp;
     }
   }
 }
@@ -662,11 +671,12 @@ void Matrix<T>::swapRows(const size_t RowI, const size_t RowJ) {
 */
 template <typename T>
 void Matrix<T>::swapCols(const size_t colI, const size_t colJ) {
-  if (nx * ny && colI < ny && colJ < ny && colI != colJ) {
-    for (size_t k = 0; k < nx; k++) {
-      T tmp = V[k][colI];
-      V[k][colI] = V[k][colJ];
-      V[k][colJ] = tmp;
+  if (m_numRowsX * m_numColumnsY && colI < m_numColumnsY &&
+      colJ < m_numColumnsY && colI != colJ) {
+    for (size_t k = 0; k < m_numRowsX; k++) {
+      T tmp = m_rawDataArrayPtr[k][colI];
+      m_rawDataArrayPtr[k][colI] = m_rawDataArrayPtr[k][colJ];
+      m_rawDataArrayPtr[k][colJ] = tmp;
     }
   }
 }
@@ -677,10 +687,10 @@ void Matrix<T>::zeroMatrix()
   Zeros all elements of the matrix
 */
 {
-  if (nx * ny) {
-    for (size_t i = 0; i < nx; i++) {
-      for (size_t j = 0; j < ny; j++) {
-        V[i][j] = static_cast<T>(0);
+  if (m_numRowsX * m_numColumnsY) {
+    for (size_t i = 0; i < m_numRowsX; i++) {
+      for (size_t j = 0; j < m_numColumnsY; j++) {
+        m_rawDataArrayPtr[i][j] = static_cast<T>(0);
       }
     }
   }
@@ -693,36 +703,36 @@ void Matrix<T>::identityMatrix()
   Zeros all the terms outside of the square
 */
 {
-  if (nx * ny) {
-    for (size_t i = 0; i < nx; i++) {
-      for (size_t j = 0; j < ny; j++) {
-        V[i][j] = static_cast<T>(j == i);
+  if (m_numRowsX * m_numColumnsY) {
+    for (size_t i = 0; i < m_numRowsX; i++) {
+      for (size_t j = 0; j < m_numColumnsY; j++) {
+        m_rawDataArrayPtr[i][j] = static_cast<T>(j == i);
       }
     }
   }
 }
 template <typename T>
 void Matrix<T>::setColumn(const size_t nCol, const std::vector<T> &newCol) {
-  if (nCol >= this->ny) {
+  if (nCol >= this->m_numColumnsY) {
     throw(std::invalid_argument("nCol requested> nCol availible"));
   }
-  size_t nxM = newCol.size();
-  if (nx < nxM)
-    nxM = nx;
-  for (size_t i = 0; i < nxM; i++) {
-    V[i][nCol] = newCol[i];
+  size_t m_numRowsXM = newCol.size();
+  if (m_numRowsX < m_numRowsXM)
+    m_numRowsXM = m_numRowsX;
+  for (size_t i = 0; i < m_numRowsXM; i++) {
+    m_rawDataArrayPtr[i][nCol] = newCol[i];
   }
 }
 template <typename T>
 void Matrix<T>::setRow(const size_t nRow, const std::vector<T> &newRow) {
-  if (nRow >= this->nx) {
+  if (nRow >= this->m_numRowsX) {
     throw(std::invalid_argument("nRow requested> nRow availible"));
   }
-  size_t nyM = newRow.size();
-  if (ny < nyM)
-    nyM = ny;
-  for (size_t j = 0; j < nyM; j++) {
-    V[nRow][j] = newRow[j];
+  size_t m_numColumnsYM = newRow.size();
+  if (m_numColumnsY < m_numColumnsYM)
+    m_numColumnsYM = m_numColumnsY;
+  for (size_t j = 0; j < m_numColumnsYM; j++) {
+    m_rawDataArrayPtr[nRow][j] = newRow[j];
   }
 }
 
@@ -741,10 +751,10 @@ void Matrix<T>::rotate(const double tau, const double s, const int i,
   @param m ::  second index (ypos)
  */
 {
-  const T gg = V[i][j];
-  const T hh = V[k][m];
-  V[i][j] = static_cast<T>(gg - s * (hh + gg * tau));
-  V[k][m] = static_cast<T>(hh + s * (gg - hh * tau));
+  const T gg = m_rawDataArrayPtr[i][j];
+  const T hh = m_rawDataArrayPtr[k][m];
+  m_rawDataArrayPtr[i][j] = static_cast<T>(gg - s * (hh + gg * tau));
+  m_rawDataArrayPtr[k][m] = static_cast<T>(hh + s * (gg - hh * tau));
 }
 
 template <typename T>
@@ -756,16 +766,16 @@ Matrix<T> Matrix<T>::preMultiplyByDiagonal(const std::vector<T> &Dvec) const
   @return D*this
 */
 {
-  if (Dvec.size() != nx) {
+  if (Dvec.size() != m_numRowsX) {
     std::ostringstream cx;
-    cx << "Matrix::preMultiplyByDiagonal Size: " << Dvec.size() << " " << nx
-       << " " << ny;
+    cx << "Matrix::preMultiplyByDiagonal Size: " << Dvec.size() << " "
+       << m_numRowsX << " " << m_numColumnsY;
     throw std::runtime_error(cx.str());
   }
-  Matrix<T> X(Dvec.size(), ny);
+  Matrix<T> X(Dvec.size(), m_numColumnsY);
   for (size_t i = 0; i < Dvec.size(); i++) {
-    for (size_t j = 0; j < ny; j++) {
-      X.V[i][j] = Dvec[i] * V[i][j];
+    for (size_t j = 0; j < m_numColumnsY; j++) {
+      X.m_rawDataArrayPtr[i][j] = Dvec[i] * m_rawDataArrayPtr[i][j];
     }
   }
   return X;
@@ -780,17 +790,17 @@ Matrix<T> Matrix<T>::postMultiplyByDiagonal(const std::vector<T> &Dvec) const
   @return this*D
 */
 {
-  if (Dvec.size() != ny) {
+  if (Dvec.size() != m_numColumnsY) {
     std::ostringstream cx;
-    cx << "Error Matrix::bDiaognal size:: " << Dvec.size() << " " << nx << " "
-       << ny;
+    cx << "Error Matrix::bDiaognal size:: " << Dvec.size() << " " << m_numRowsX
+       << " " << m_numColumnsY;
     throw std::runtime_error(cx.str());
   }
 
-  Matrix<T> X(nx, Dvec.size());
-  for (size_t i = 0; i < nx; i++) {
+  Matrix<T> X(m_numRowsX, Dvec.size());
+  for (size_t i = 0; i < m_numRowsX; i++) {
     for (size_t j = 0; j < Dvec.size(); j++) {
-      X.V[i][j] = Dvec[j] * V[i][j];
+      X.m_rawDataArrayPtr[i][j] = Dvec[j] * m_rawDataArrayPtr[i][j];
     }
   }
   return X;
@@ -804,10 +814,10 @@ Matrix<T> Matrix<T>::Tprime() const
   @return M^T
 */
 {
-  if (!nx * ny)
+  if (!m_numRowsX * m_numColumnsY)
     return *this;
 
-  if (nx == ny) // inplace transpose
+  if (m_numRowsX == m_numColumnsY) // inplace transpose
   {
     Matrix<T> MT(*this);
     MT.Transpose();
@@ -815,10 +825,10 @@ Matrix<T> Matrix<T>::Tprime() const
   }
 
   // irregular matrix
-  Matrix<T> MT(ny, nx);
-  for (size_t i = 0; i < nx; i++)
-    for (size_t j = 0; j < ny; j++)
-      MT.V[j][i] = V[i][j];
+  Matrix<T> MT(m_numColumnsY, m_numRowsX);
+  for (size_t i = 0; i < m_numRowsX; i++)
+    for (size_t j = 0; j < m_numColumnsY; j++)
+      MT.m_rawDataArrayPtr[j][i] = m_rawDataArrayPtr[i][j];
 
   return MT;
 }
@@ -831,39 +841,39 @@ Matrix<T> &Matrix<T>::Transpose()
   @return this^T
 */
 {
-  if (!nx * ny)
+  if (!m_numRowsX * m_numColumnsY)
     return *this;
-  if (nx == ny) // inplace transpose
+  if (m_numRowsX == m_numColumnsY) // inplace transpose
   {
-    for (size_t i = 0; i < nx; i++) {
-      for (size_t j = i + 1; j < ny; j++) {
-        T tmp = V[i][j];
-        V[i][j] = V[j][i];
-        V[j][i] = tmp;
+    for (size_t i = 0; i < m_numRowsX; i++) {
+      for (size_t j = i + 1; j < m_numColumnsY; j++) {
+        T tmp = m_rawDataArrayPtr[i][j];
+        m_rawDataArrayPtr[i][j] = m_rawDataArrayPtr[j][i];
+        m_rawDataArrayPtr[j][i] = tmp;
       }
     }
     return *this;
   }
   // irregular matrix
   // get some memory
-  auto tmpX = new T[ny * nx];
-  auto Vt = new T *[ny];
-  for (size_t i = 0; i < ny; i++) {
-    Vt[i] = tmpX + (i * nx);
+  auto tmpX = new T[m_numColumnsY * m_numRowsX];
+  auto Vt = new T *[m_numColumnsY];
+  for (size_t i = 0; i < m_numColumnsY; i++) {
+    Vt[i] = tmpX + (i * m_numRowsX);
   }
-  for (size_t i = 0; i < nx; i++) {
-    for (size_t j = 0; j < ny; j++) {
-      Vt[j][i] = V[i][j];
+  for (size_t i = 0; i < m_numRowsX; i++) {
+    for (size_t j = 0; j < m_numColumnsY; j++) {
+      Vt[j][i] = m_rawDataArrayPtr[i][j];
     }
   }
   // remove old memory
-  const size_t tx = nx;
-  const size_t ty = ny;
-  deleteMem(); // resets nx,ny
+  const size_t tx = m_numRowsX;
+  const size_t ty = m_numColumnsY;
+  deleteMem(); // resets m_numRowsX,m_numColumnsY
   // replace memory
-  V = Vt;
-  nx = ty;
-  ny = tx;
+  m_rawDataArrayPtr = Vt;
+  m_numRowsX = ty;
+  m_numColumnsY = tx;
 
   return *this;
 }
@@ -891,28 +901,28 @@ void Matrix<T>::GaussJordan(Matrix<T> &B)
  */
 {
   // check for input errors
-  if (nx != ny || B.nx != nx) {
+  if (m_numRowsX != m_numColumnsY || B.m_numRowsX != m_numRowsX) {
     throw std::invalid_argument("Matrix not square, or sizes do not match");
   }
 
   // pivoted rows
-  std::vector<int> pivoted(nx);
+  std::vector<int> pivoted(m_numRowsX);
   fill(pivoted.begin(), pivoted.end(), 0);
 
-  std::vector<int> indxcol(nx); // Column index
-  std::vector<int> indxrow(nx); // row index
+  std::vector<int> indxcol(m_numRowsX); // Column index
+  std::vector<int> indxrow(m_numRowsX); // row index
 
   size_t irow(0), icol(0);
-  for (size_t i = 0; i < nx; i++) {
+  for (size_t i = 0; i < m_numRowsX; i++) {
     // Get Biggest non-pivoted item
     double bigItem = 0.0; // get point to pivot over
-    for (size_t j = 0; j < nx; j++) {
+    for (size_t j = 0; j < m_numRowsX; j++) {
       if (pivoted[j] != 1) // check only non-pivots
       {
-        for (size_t k = 0; k < nx; k++) {
+        for (size_t k = 0; k < m_numRowsX; k++) {
           if (!pivoted[k]) {
-            if (fabs(V[j][k]) >= bigItem) {
-              bigItem = fabs(V[j][k]);
+            if (fabs(m_rawDataArrayPtr[j][k]) >= bigItem) {
+              bigItem = fabs(m_rawDataArrayPtr[j][k]);
               irow = j;
               icol = k;
             }
@@ -931,35 +941,35 @@ void Matrix<T>::GaussJordan(Matrix<T> &B)
     indxrow[i] = static_cast<int>(irow);
     indxcol[i] = static_cast<int>(icol);
 
-    if (V[icol][icol] == 0.0) {
+    if (m_rawDataArrayPtr[icol][icol] == 0.0) {
       throw std::runtime_error("Error doing G-J elem on a singular matrix");
     }
-    const T pivDiv = T(1.0) / V[icol][icol];
-    V[icol][icol] = 1;
-    for (size_t l = 0; l < nx; l++) {
-      V[icol][l] *= pivDiv;
+    const T pivDiv = T(1.0) / m_rawDataArrayPtr[icol][icol];
+    m_rawDataArrayPtr[icol][icol] = 1;
+    for (size_t l = 0; l < m_numRowsX; l++) {
+      m_rawDataArrayPtr[icol][l] *= pivDiv;
     }
-    for (size_t l = 0; l < B.ny; l++) {
-      B.V[icol][l] *= pivDiv;
+    for (size_t l = 0; l < B.m_numColumnsY; l++) {
+      B.m_rawDataArrayPtr[icol][l] *= pivDiv;
     }
 
-    for (size_t ll = 0; ll < nx; ll++) {
+    for (size_t ll = 0; ll < m_numRowsX; ll++) {
       if (ll != icol) {
-        const T div_num = V[ll][icol];
-        V[ll][icol] = 0.0;
-        for (size_t l = 0; l < nx; l++) {
-          V[ll][l] -= V[icol][l] * div_num;
+        const T div_num = m_rawDataArrayPtr[ll][icol];
+        m_rawDataArrayPtr[ll][icol] = 0.0;
+        for (size_t l = 0; l < m_numRowsX; l++) {
+          m_rawDataArrayPtr[ll][l] -= m_rawDataArrayPtr[icol][l] * div_num;
         }
-        for (size_t l = 0; l < B.ny; l++) {
-          B.V[ll][l] -= B.V[icol][l] * div_num;
+        for (size_t l = 0; l < B.m_numColumnsY; l++) {
+          B.m_rawDataArrayPtr[ll][l] -= B.m_rawDataArrayPtr[icol][l] * div_num;
         }
       }
     }
   }
 
   // Un-roll interchanges
-  if (nx > 0) {
-    for (int l = static_cast<int>(nx) - 1; l >= 0; l--) {
+  if (m_numRowsX > 0) {
+    for (int l = static_cast<int>(m_numRowsX) - 1; l >= 0; l--) {
       if (indxrow[l] != indxcol[l]) {
         swapCols(indxrow[l], indxcol[l]);
       }
@@ -975,33 +985,33 @@ T Matrix<T>::Invert()
   @return Determinant (0 if the matrix is singular)
 */
 {
-  if (nx != ny && nx < 1)
+  if (m_numRowsX != m_numColumnsY && m_numRowsX < 1)
     return 0;
 
-  if (nx == 1) {
-    T det = V[0][0];
-    if (V[0][0] != static_cast<T>(0.))
-      V[0][0] = static_cast<T>(1.) / V[0][0];
+  if (m_numRowsX == 1) {
+    T det = m_rawDataArrayPtr[0][0];
+    if (m_rawDataArrayPtr[0][0] != static_cast<T>(0.))
+      m_rawDataArrayPtr[0][0] = static_cast<T>(1.) / m_rawDataArrayPtr[0][0];
     return det;
   }
-  auto indx = new int[nx]; // Set in lubcmp
+  auto indx = new int[m_numRowsX]; // Set in lubcmp
 
-  auto col = new double[nx];
+  auto col = new double[m_numRowsX];
   int d;
   Matrix<T> Lcomp(*this);
   Lcomp.lubcmp(indx, d);
 
   double det = static_cast<double>(d);
-  for (size_t j = 0; j < nx; j++)
-    det *= Lcomp.V[j][j];
+  for (size_t j = 0; j < m_numRowsX; j++)
+    det *= Lcomp.m_rawDataArrayPtr[j][j];
 
-  for (size_t j = 0; j < nx; j++) {
-    for (size_t i = 0; i < nx; i++)
+  for (size_t j = 0; j < m_numRowsX; j++) {
+    for (size_t i = 0; i < m_numRowsX; i++)
       col[i] = 0.0;
     col[j] = 1.0;
     Lcomp.lubksb(indx, col);
-    for (size_t i = 0; i < nx; i++)
-      V[i][j] = static_cast<T>(col[i]);
+    for (size_t i = 0; i < m_numRowsX; i++)
+      m_rawDataArrayPtr[i][j] = static_cast<T>(col[i]);
   }
   delete[] indx;
   delete[] col;
@@ -1015,9 +1025,10 @@ T Matrix<T>::determinant() const
   @return Determinant of matrix.
 */
 {
-  if (nx != ny)
+  if (m_numRowsX != m_numColumnsY)
     throw Kernel::Exception::MisMatch<size_t>(
-        nx, ny, "Determinant error :: Matrix is not NxN");
+        m_numRowsX, m_numColumnsY,
+        "Determinant error :: Matrix is not m_numRowsXN");
 
   Matrix<T> Mt(*this); // temp copy
   T D = Mt.factor();
@@ -1033,18 +1044,20 @@ T Matrix<T>::factor()
    @return the factored matrix
 */
 {
-  if (nx != ny || nx < 1)
-    throw std::runtime_error("Matrix::factor Matrix is not NxN");
+  if (m_numRowsX != m_numColumnsY || m_numRowsX < 1)
+    throw std::runtime_error("Matrix::factor Matrix is not m_numRowsXN");
 
   double deter = 1.0;
-  for (int i = 0; i < static_cast<int>(nx) - 1; i++) // loop over each row
+  for (int i = 0; i < static_cast<int>(m_numRowsX) - 1;
+       i++) // loop over each row
   {
     int jmax = i;
-    double Pmax = fabs(V[i][i]);
-    for (int j = i + 1; j < static_cast<int>(nx); j++) // find max in Row i
+    double Pmax = fabs(m_rawDataArrayPtr[i][i]);
+    for (int j = i + 1; j < static_cast<int>(m_numRowsX);
+         j++) // find max in Row i
     {
-      if (fabs(V[i][j]) > Pmax) {
-        Pmax = fabs(V[i][j]);
+      if (fabs(m_rawDataArrayPtr[i][j]) > Pmax) {
+        Pmax = fabs(m_rawDataArrayPtr[i][j]);
         jmax = j;
       }
     }
@@ -1059,17 +1072,18 @@ T Matrix<T>::factor()
       deter *= -1; // change sign.
     }
     // zero all rows below diagonal
-    Pmax = V[i][i];
+    Pmax = m_rawDataArrayPtr[i][i];
     deter *= Pmax;
-    for (int k = i + 1; k < static_cast<int>(nx); k++) // row index
+    for (int k = i + 1; k < static_cast<int>(m_numRowsX); k++) // row index
     {
-      const double scale = V[k][i] / Pmax;
-      V[k][i] = static_cast<T>(0);
-      for (int q = i + 1; q < static_cast<int>(nx); q++) // column index
-        V[k][q] -= static_cast<T>(scale * V[i][q]);
+      const double scale = m_rawDataArrayPtr[k][i] / Pmax;
+      m_rawDataArrayPtr[k][i] = static_cast<T>(0);
+      for (int q = i + 1; q < static_cast<int>(m_numRowsX); q++) // column index
+        m_rawDataArrayPtr[k][q] -=
+            static_cast<T>(scale * m_rawDataArrayPtr[i][q]);
     }
   }
-  deter *= V[nx - 1][nx - 1];
+  deter *= m_rawDataArrayPtr[m_numRowsX - 1][m_numRowsX - 1];
   return static_cast<T>(deter);
 }
 
@@ -1080,14 +1094,14 @@ void Matrix<T>::normVert()
   Assumes that they have already been calculated
 */
 {
-  for (size_t i = 0; i < nx; i++) {
+  for (size_t i = 0; i < m_numRowsX; i++) {
     T sum = 0;
-    for (size_t j = 0; j < ny; j++) {
-      sum += V[i][j] * V[i][j];
+    for (size_t j = 0; j < m_numColumnsY; j++) {
+      sum += m_rawDataArrayPtr[i][j] * m_rawDataArrayPtr[i][j];
     }
     sum = static_cast<T>(std::sqrt(static_cast<double>(sum)));
-    for (size_t j = 0; j < ny; j++) {
-      V[i][j] /= sum;
+    for (size_t j = 0; j < m_numColumnsY; j++) {
+      m_rawDataArrayPtr[i][j] /= sum;
     }
   }
 }
@@ -1100,9 +1114,9 @@ T Matrix<T>::compSum() const
  */
 {
   T sum(0);
-  for (size_t i = 0; i < nx; i++) {
-    for (size_t j = 0; j < ny; j++) {
-      sum += V[i][j] * V[i][j];
+  for (size_t i = 0; i < m_numRowsX; i++) {
+    for (size_t j = 0; j < m_numColumnsY; j++) {
+      sum += m_rawDataArrayPtr[i][j] * m_rawDataArrayPtr[i][j];
     }
   }
   return sum;
@@ -1111,29 +1125,29 @@ T Matrix<T>::compSum() const
 template <typename T>
 void Matrix<T>::lubcmp(int *rowperm, int &interchange)
 /**
-  Find biggest pivot and move to top row. Then
-  divide by pivot.
-  @param interchange :: odd/even nterchange (+/-1)
-  @param rowperm :: row permutations [nx values]
+Find biggest pivot and move to top row. Then
+divide by pivot.
+@param interchange :: odd/even nterchange (+/-1)
+@param rowperm :: row permutations [m_numRowsX values]
 */
 {
   double sum, dum, big, temp;
 
-  if (nx != ny || nx < 2) {
+  if (m_numRowsX != m_numColumnsY || m_numRowsX < 2) {
     std::cerr << "Error with lubcmp\n";
     return;
   }
-  auto vv = new double[nx];
+  auto vv = new double[m_numRowsX];
   interchange = 1;
-  for (int i = 0; i < static_cast<int>(nx); i++) {
+  for (int i = 0; i < static_cast<int>(m_numRowsX); i++) {
     big = 0.0;
-    for (int j = 0; j < static_cast<int>(nx); j++)
-      if ((temp = fabs(V[i][j])) > big)
+    for (int j = 0; j < static_cast<int>(m_numRowsX); j++)
+      if ((temp = fabs(m_rawDataArrayPtr[i][j])) > big)
         big = temp;
 
     if (big == 0.0) {
       delete[] vv;
-      for (int j = 0; j < static_cast<int>(nx); j++) {
+      for (int j = 0; j < static_cast<int>(m_numRowsX); j++) {
         rowperm[j] = j;
       }
       return;
@@ -1141,20 +1155,20 @@ void Matrix<T>::lubcmp(int *rowperm, int &interchange)
     vv[i] = 1.0 / big;
   }
 
-  for (int j = 0; j < static_cast<int>(nx); j++) {
+  for (int j = 0; j < static_cast<int>(m_numRowsX); j++) {
     for (int i = 0; i < j; i++) {
-      sum = V[i][j];
+      sum = m_rawDataArrayPtr[i][j];
       for (int k = 0; k < i; k++)
-        sum -= V[i][k] * V[k][j];
-      V[i][j] = static_cast<T>(sum);
+        sum -= m_rawDataArrayPtr[i][k] * m_rawDataArrayPtr[k][j];
+      m_rawDataArrayPtr[i][j] = static_cast<T>(sum);
     }
     big = 0.0;
     int imax = j;
-    for (int i = j; i < static_cast<int>(nx); i++) {
-      sum = V[i][j];
+    for (int i = j; i < static_cast<int>(m_numRowsX); i++) {
+      sum = m_rawDataArrayPtr[i][j];
       for (int k = 0; k < j; k++)
-        sum -= V[i][k] * V[k][j];
-      V[i][j] = static_cast<T>(sum);
+        sum -= m_rawDataArrayPtr[i][k] * m_rawDataArrayPtr[k][j];
+      m_rawDataArrayPtr[i][j] = static_cast<T>(sum);
       if ((dum = vv[i] * fabs(sum)) >= big) {
         big = dum;
         imax = i;
@@ -1162,22 +1176,23 @@ void Matrix<T>::lubcmp(int *rowperm, int &interchange)
     }
 
     if (j != imax) {
-      for (int k = 0; k < static_cast<int>(nx); k++) { // Interchange rows
-        dum = V[imax][k];
-        V[imax][k] = V[j][k];
-        V[j][k] = static_cast<T>(dum);
+      for (int k = 0; k < static_cast<int>(m_numRowsX);
+           k++) { // Interchange rows
+        dum = m_rawDataArrayPtr[imax][k];
+        m_rawDataArrayPtr[imax][k] = m_rawDataArrayPtr[j][k];
+        m_rawDataArrayPtr[j][k] = static_cast<T>(dum);
       }
       interchange *= -1;
       vv[imax] = static_cast<T>(vv[j]);
     }
     rowperm[j] = imax;
 
-    if (V[j][j] == 0.0)
-      V[j][j] = static_cast<T>(1e-14);
-    if (j != static_cast<int>(nx) - 1) {
-      dum = 1.0 / (V[j][j]);
-      for (int i = j + 1; i < static_cast<int>(nx); i++)
-        V[i][j] *= static_cast<T>(dum);
+    if (m_rawDataArrayPtr[j][j] == 0.0)
+      m_rawDataArrayPtr[j][j] = static_cast<T>(1e-14);
+    if (j != static_cast<int>(m_numRowsX) - 1) {
+      dum = 1.0 / (m_rawDataArrayPtr[j][j]);
+      for (int i = j + 1; i < static_cast<int>(m_numRowsX); i++)
+        m_rawDataArrayPtr[i][j] *= static_cast<T>(dum);
     }
   }
   delete[] vv;
@@ -1192,23 +1207,23 @@ void Matrix<T>::lubksb(const int *rowperm, double *b)
 {
   int ii = -1;
 
-  for (int i = 0; i < static_cast<int>(nx); i++) {
+  for (int i = 0; i < static_cast<int>(m_numRowsX); i++) {
     int ip = rowperm[i];
     double sum = b[ip];
     b[ip] = b[i];
     if (ii != -1)
       for (int j = ii; j < i; j++)
-        sum -= V[i][j] * b[j];
+        sum -= m_rawDataArrayPtr[i][j] * b[j];
     else if (sum != 0.)
       ii = i;
     b[i] = sum;
   }
 
-  for (int i = static_cast<int>(nx) - 1; i >= 0; i--) {
+  for (int i = static_cast<int>(m_numRowsX) - 1; i >= 0; i--) {
     double sum = static_cast<T>(b[i]);
-    for (int j = i + 1; j < static_cast<int>(nx); j++)
-      sum -= V[i][j] * b[j];
-    b[i] = sum / V[i][i];
+    for (int j = i + 1; j < static_cast<int>(m_numRowsX); j++)
+      sum -= m_rawDataArrayPtr[i][j] * b[j];
+    b[i] = sum / m_rawDataArrayPtr[i][i];
   }
 }
 
@@ -1219,11 +1234,13 @@ void Matrix<T>::averSymmetric()
   out of the Matrix
 */
 {
-  const size_t minSize = (nx > ny) ? ny : nx;
+  const size_t minSize =
+      (m_numRowsX > m_numColumnsY) ? m_numColumnsY : m_numRowsX;
   for (size_t i = 0; i < minSize; i++) {
     for (size_t j = i + 1; j < minSize; j++) {
-      V[i][j] = (V[i][j] + V[j][i]) / 2;
-      V[j][i] = V[i][j];
+      m_rawDataArrayPtr[i][j] =
+          (m_rawDataArrayPtr[i][j] + m_rawDataArrayPtr[j][i]) / 2;
+      m_rawDataArrayPtr[j][i] = m_rawDataArrayPtr[i][j];
     }
   }
 }
@@ -1235,10 +1252,11 @@ std::vector<T> Matrix<T>::Diagonal() const
   @return Diagonal elements
 */
 {
-  const size_t Msize = (ny > nx) ? nx : ny;
+  const size_t Msize =
+      (m_numColumnsY > m_numRowsX) ? m_numRowsX : m_numColumnsY;
   std::vector<T> Diag(Msize);
   for (size_t i = 0; i < Msize; i++) {
-    Diag[i] = V[i][i];
+    Diag[i] = m_rawDataArrayPtr[i][i];
   }
   return Diag;
 }
@@ -1250,10 +1268,11 @@ T Matrix<T>::Trace() const
   @return Trace of matrix
 */
 {
-  const size_t Msize = (ny > nx) ? nx : ny;
+  const size_t Msize =
+      (m_numColumnsY > m_numRowsX) ? m_numRowsX : m_numColumnsY;
   T Trx = 0;
   for (size_t i = 0; i < Msize; i++) {
-    Trx += V[i][i];
+    Trx += m_rawDataArrayPtr[i][i];
   }
   return Trx;
 }
@@ -1266,7 +1285,8 @@ void Matrix<T>::sortEigen(Matrix<T> &DiagMatrix)
   @param DiagMatrix :: matrix of the EigenValues
 */
 {
-  if (ny != nx || nx != DiagMatrix.nx || nx != DiagMatrix.ny) {
+  if (m_numColumnsY != m_numRowsX || m_numRowsX != DiagMatrix.m_numRowsX ||
+      m_numRowsX != DiagMatrix.m_numColumnsY) {
     std::cerr << "Matrix not Eigen Form\n";
     throw(std::invalid_argument(" Matrix is not in an eigenvalue format"));
   }
@@ -1274,9 +1294,9 @@ void Matrix<T>::sortEigen(Matrix<T> &DiagMatrix)
   std::vector<T> X = DiagMatrix.Diagonal();
   indexSort(X, index);
   Matrix<T> EigenVec(*this);
-  for (size_t Icol = 0; Icol < nx; Icol++) {
-    for (size_t j = 0; j < nx; j++) {
-      V[j][Icol] = EigenVec[j][index[Icol]];
+  for (size_t Icol = 0; Icol < m_numRowsX; Icol++) {
+    for (size_t j = 0; j < m_numRowsX; j++) {
+      m_rawDataArrayPtr[j][Icol] = EigenVec[j][index[Icol]];
     }
     DiagMatrix[Icol][Icol] = X[index[Icol]];
   }
@@ -1291,13 +1311,13 @@ int Matrix<T>::Diagonalise(Matrix<T> &EigenVec, Matrix<T> &DiagMatrix) const
   @return :: 1  on success 0 on failure
 */
 {
-  if (nx != ny || nx < 1) {
+  if (m_numRowsX != m_numColumnsY || m_numRowsX < 1) {
     std::cerr << "Matrix not square\n";
     return 0;
   }
-  for (size_t i = 0; i < nx; i++)
-    for (size_t j = i + 1; j < nx; j++)
-      if (fabs(V[i][j] - V[j][i]) > 1e-6) {
+  for (size_t i = 0; i < m_numRowsX; i++)
+    for (size_t j = i + 1; j < m_numRowsX; j++)
+      if (fabs(m_rawDataArrayPtr[i][j] - m_rawDataArrayPtr[j][i]) > 1e-6) {
         std::cerr << "Matrix not symmetric\n";
         std::cerr << (*this);
         return 0;
@@ -1305,17 +1325,17 @@ int Matrix<T>::Diagonalise(Matrix<T> &EigenVec, Matrix<T> &DiagMatrix) const
 
   Matrix<T> A(*this);
   // Make V an identity matrix
-  EigenVec.setMem(nx, nx);
+  EigenVec.setMem(m_numRowsX, m_numRowsX);
   EigenVec.identityMatrix();
-  DiagMatrix.setMem(nx, nx);
+  DiagMatrix.setMem(m_numRowsX, m_numRowsX);
   DiagMatrix.zeroMatrix();
 
-  std::vector<double> Diag(nx);
-  std::vector<double> B(nx);
-  std::vector<double> ZeroComp(nx);
+  std::vector<double> Diag(m_numRowsX);
+  std::vector<double> B(m_numRowsX);
+  std::vector<double> ZeroComp(m_numRowsX);
   // set b and d to the diagonal elements o A
-  for (size_t i = 0; i < nx; i++) {
-    Diag[i] = B[i] = A.V[i][i];
+  for (size_t i = 0; i < m_numRowsX; i++) {
+    Diag[i] = B[i] = A.m_rawDataArrayPtr[i][i];
     ZeroComp[i] = 0;
   }
 
@@ -1323,40 +1343,41 @@ int Matrix<T>::Diagonalise(Matrix<T> &EigenVec, Matrix<T> &DiagMatrix) const
   for (int i = 0; i < 100; i++) // max 50 iterations
   {
     double sm = 0.0; // sum of off-diagonal terms
-    for (size_t ip = 0; ip < nx - 1; ip++)
-      for (size_t iq = ip + 1; iq < nx; iq++)
-        sm += fabs(A.V[ip][iq]);
+    for (size_t ip = 0; ip < m_numRowsX - 1; ip++)
+      for (size_t iq = ip + 1; iq < m_numRowsX; iq++)
+        sm += fabs(A.m_rawDataArrayPtr[ip][iq]);
 
     if (sm == 0.0) // Nothing to do return...
     {
       // Make OUTPUT -- D + A
       // sort Output::
-      for (size_t ix = 0; ix < nx; ix++)
-        DiagMatrix.V[ix][ix] = static_cast<T>(Diag[ix]);
+      for (size_t ix = 0; ix < m_numRowsX; ix++)
+        DiagMatrix.m_rawDataArrayPtr[ix][ix] = static_cast<T>(Diag[ix]);
       return 1;
     }
 
     // Threshold large for first 5 sweeps
-    double tresh = (i < 6) ? 0.2 * sm / static_cast<int>(nx * nx) : 0.0;
+    double tresh =
+        (i < 6) ? 0.2 * sm / static_cast<int>(m_numRowsX * m_numRowsX) : 0.0;
 
-    for (int ip = 0; ip < static_cast<int>(nx) - 1; ip++) {
-      for (int iq = ip + 1; iq < static_cast<int>(nx); iq++) {
-        double g = 100.0 * fabs(A.V[ip][iq]);
+    for (int ip = 0; ip < static_cast<int>(m_numRowsX) - 1; ip++) {
+      for (int iq = ip + 1; iq < static_cast<int>(m_numRowsX); iq++) {
+        double g = 100.0 * fabs(A.m_rawDataArrayPtr[ip][iq]);
         // After 4 sweeps skip if off diagonal small
         if (i > 6 &&
             static_cast<float>(fabs(Diag[ip] + g)) ==
                 static_cast<float>(fabs(Diag[ip])) &&
             static_cast<float>(fabs(Diag[iq] + g)) ==
                 static_cast<float>(fabs(Diag[iq])))
-          A.V[ip][iq] = 0;
+          A.m_rawDataArrayPtr[ip][iq] = 0;
 
-        else if (fabs(A.V[ip][iq]) > tresh) {
+        else if (fabs(A.m_rawDataArrayPtr[ip][iq]) > tresh) {
           double tanAngle, cosAngle, sinAngle;
           double h = Diag[iq] - Diag[ip];
           if (static_cast<float>((fabs(h) + g)) == static_cast<float>(fabs(h)))
-            tanAngle = A.V[ip][iq] / h; // tanAngle=1/(2theta)
+            tanAngle = A.m_rawDataArrayPtr[ip][iq] / h; // tanAngle=1/(2theta)
           else {
-            double theta = 0.5 * h / A.V[ip][iq];
+            double theta = 0.5 * h / A.m_rawDataArrayPtr[ip][iq];
             tanAngle = 1.0 / (fabs(theta) + sqrt(1.0 + theta * theta));
             if (theta < 0.0)
               tanAngle = -tanAngle;
@@ -1364,26 +1385,26 @@ int Matrix<T>::Diagonalise(Matrix<T> &EigenVec, Matrix<T> &DiagMatrix) const
           cosAngle = 1.0 / sqrt(1 + tanAngle * tanAngle);
           sinAngle = tanAngle * cosAngle;
           double tau = sinAngle / (1.0 + cosAngle);
-          h = tanAngle * A.V[ip][iq];
+          h = tanAngle * A.m_rawDataArrayPtr[ip][iq];
           ZeroComp[ip] -= h;
           ZeroComp[iq] += h;
           Diag[ip] -= h;
           Diag[iq] += h;
-          A.V[ip][iq] = 0;
+          A.m_rawDataArrayPtr[ip][iq] = 0;
           // Rotations 0<j<p
           for (int j = 0; j < ip; j++)
             A.rotate(tau, sinAngle, j, ip, j, iq);
           for (int j = ip + 1; j < iq; j++)
             A.rotate(tau, sinAngle, ip, j, j, iq);
-          for (int j = iq + 1; j < static_cast<int>(nx); j++)
+          for (int j = iq + 1; j < static_cast<int>(m_numRowsX); j++)
             A.rotate(tau, sinAngle, ip, j, iq, j);
-          for (int j = 0; j < static_cast<int>(nx); j++)
+          for (int j = 0; j < static_cast<int>(m_numRowsX); j++)
             EigenVec.rotate(tau, sinAngle, j, ip, j, iq);
           iteration++;
         }
       }
     }
-    for (size_t j = 0; j < nx; j++) {
+    for (size_t j = 0; j < m_numRowsX; j++) {
       B[j] += ZeroComp[j];
       Diag[j] = B[j];
       ZeroComp[j] = 0.0;
@@ -1399,14 +1420,15 @@ bool Matrix<T>::isRotation() const
 @ return :: true/false
 */
 {
-  if (this->nx != this->ny)
+  if (this->m_numRowsX != this->m_numColumnsY)
     throw(std::invalid_argument("matrix is not square"));
   //  std::cout << "Matrix determinant-1 is " << (this->determinant()-1) <<
   //  '\n';
   if (fabs(this->determinant() - 1) > 1e-5) {
     return false;
   } else {
-    Matrix<T> prod(nx, ny), ident(nx, ny, true);
+    Matrix<T> prod(m_numRowsX, m_numColumnsY),
+        ident(m_numRowsX, m_numColumnsY, true);
     prod = this->operator*(this->Tprime());
     //    std::cout << "Matrix * Matrix' = " << std::endl << prod << '\n';
     return prod.equals(ident, 1e-5);
@@ -1420,12 +1442,13 @@ to be -1
 @ return :: true/false
 */
 {
-  if (this->nx != this->ny)
+  if (this->m_numRowsX != this->m_numColumnsY)
     throw(std::invalid_argument("matrix is not square"));
   if (fabs(fabs(this->determinant()) - 1.) > 1e-5) {
     return false;
   } else {
-    Matrix<T> prod(nx, ny), ident(nx, ny, true);
+    Matrix<T> prod(m_numRowsX, m_numColumnsY),
+        ident(m_numRowsX, m_numColumnsY, true);
     prod = this->operator*(this->Tprime());
     return prod.equals(ident, 1e-7);
   }
@@ -1440,37 +1463,39 @@ std::vector<T> Matrix<T>::toRotation()
   less then 1e-10 or not square matrix
 */
 {
-  if (this->nx != this->ny)
+  if (this->m_numRowsX != this->m_numColumnsY)
     throw(std::invalid_argument("matrix is not square"));
   if (fabs(this->determinant()) < 1e-10)
     throw(std::invalid_argument("Determinant is too small"));
   // step 1: orthogonalize the matrix
-  for (size_t i = 0; i < this->ny; ++i) {
+  for (size_t i = 0; i < this->m_numColumnsY; ++i) {
     double spself = 0.;
-    for (size_t j = 0; j < this->nx; ++j)
-      spself += (V[j][i] * V[j][i]);
-    for (size_t k = i + 1; k < this->ny; ++k) {
+    for (size_t j = 0; j < this->m_numRowsX; ++j)
+      spself += (m_rawDataArrayPtr[j][i] * m_rawDataArrayPtr[j][i]);
+    for (size_t k = i + 1; k < this->m_numColumnsY; ++k) {
       double spother = 0;
-      for (size_t j = 0; j < this->nx; ++j)
-        spother += (V[j][i] * V[j][k]);
-      for (size_t j = 0; j < this->nx; ++j)
-        V[j][k] -= static_cast<T>(V[j][i] * spother / spself);
+      for (size_t j = 0; j < this->m_numRowsX; ++j)
+        spother += (m_rawDataArrayPtr[j][i] * m_rawDataArrayPtr[j][k]);
+      for (size_t j = 0; j < this->m_numRowsX; ++j)
+        m_rawDataArrayPtr[j][k] -=
+            static_cast<T>(m_rawDataArrayPtr[j][i] * spother / spself);
     }
   }
   // step 2: get scales and rescsale the matrix
-  std::vector<T> scale(this->nx);
+  std::vector<T> scale(this->m_numRowsX);
   T currentScale;
-  for (size_t i = 0; i < this->ny; ++i) {
+  for (size_t i = 0; i < this->m_numColumnsY; ++i) {
     currentScale = T(0.);
-    for (size_t j = 0; j < this->nx; ++j)
-      currentScale += (V[j][i] * V[j][i]);
+    for (size_t j = 0; j < this->m_numRowsX; ++j)
+      currentScale += (m_rawDataArrayPtr[j][i] * m_rawDataArrayPtr[j][i]);
     currentScale = static_cast<T>(sqrt(static_cast<double>(currentScale)));
     if (currentScale < 1e-10)
       throw(std::invalid_argument("Scale is too small"));
     scale[i] = currentScale;
   }
-  Matrix<T> scalingMatrix(nx, ny), change(nx, ny, true);
-  for (size_t i = 0; i < this->ny; ++i)
+  Matrix<T> scalingMatrix(m_numRowsX, m_numColumnsY),
+      change(m_numRowsX, m_numColumnsY, true);
+  for (size_t i = 0; i < this->m_numColumnsY; ++i)
     scalingMatrix[i][i] = static_cast<T>(1.0 / scale[i]);
   *this = this->operator*(scalingMatrix);
   if (this->determinant() < 0.) {
@@ -1495,9 +1520,9 @@ template <typename T>
 void Matrix<T>::setRandom(size_t seed, double rMin, double rMax) {
   MersenneTwister rng(seed, rMin, rMax);
 
-  for (size_t i = 0; i < nx; i++) {
-    for (size_t j = 0; j < ny; j++) {
-      V[i][j] = static_cast<T>(rng.nextValue());
+  for (size_t i = 0; i < m_numRowsX; i++) {
+    for (size_t j = 0; j < m_numColumnsY; j++) {
+      m_rawDataArrayPtr[i][j] = static_cast<T>(rng.nextValue());
     }
   }
 }
@@ -1512,25 +1537,25 @@ void Matrix<T>::write(std::ostream &Fh, const int blockCnt) const
 {
   std::ios::fmtflags oldFlags = Fh.flags();
   Fh.setf(std::ios::floatfield, std::ios::scientific);
-  const size_t blockNumber((blockCnt > 0) ? blockCnt : ny);
+  const size_t blockNumber((blockCnt > 0) ? blockCnt : m_numColumnsY);
   size_t BCnt(0);
   do {
     const size_t ACnt = BCnt;
     BCnt += blockNumber;
-    if (BCnt > ny) {
-      BCnt = ny;
+    if (BCnt > m_numColumnsY) {
+      BCnt = m_numColumnsY;
     }
 
     if (ACnt) {
       Fh << " ----- " << ACnt << " " << BCnt << " ------ \n";
     }
-    for (size_t i = 0; i < nx; i++) {
+    for (size_t i = 0; i < m_numRowsX; i++) {
       for (size_t j = ACnt; j < BCnt; j++) {
-        Fh << std::setw(10) << V[i][j] << "  ";
+        Fh << std::setw(10) << m_rawDataArrayPtr[i][j] << "  ";
       }
       Fh << '\n';
     }
-  } while (BCnt < ny);
+  } while (BCnt < m_numColumnsY);
 
   Fh.flags(oldFlags);
 }
@@ -1543,9 +1568,9 @@ std::string Matrix<T>::str() const
 */
 {
   std::ostringstream cx;
-  for (size_t i = 0; i < nx; i++) {
-    for (size_t j = 0; j < ny; j++) {
-      cx << std::setprecision(6) << V[i][j] << " ";
+  for (size_t i = 0; i < m_numRowsX; i++) {
+    for (size_t j = 0; j < m_numColumnsY; j++) {
+      cx << std::setprecision(6) << m_rawDataArrayPtr[i][j] << " ";
     }
   }
   return cx.str();
@@ -1647,7 +1672,7 @@ void fillFromStream(std::istream &is, Kernel::Matrix<T> &in,
   while (!is.eof() && std::getline(is, value_str, delimiter)) {
     try {
       T value = boost::lexical_cast<T>(value_str);
-      in.V[row][col] = value;
+      in.m_rawDataArrayPtr[row][col] = value;
     } catch (boost::bad_lexical_cast &) {
       throw std::invalid_argument(
           "Unexpected type found while reading Matrix from stream: \"" +

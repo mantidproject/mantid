@@ -45,10 +45,10 @@ public:
   typedef T value_type;
 
 private:
-  size_t nx; ///< Number of rows    (x coordinate)
-  size_t ny; ///< Number of columns (y coordinate)
+  size_t m_numRowsX;    ///< Number of rows    (x coordinate)
+  size_t m_numColumnsY; ///< Number of columns (y coordinate)
 
-  T **V;                     ///< Raw data
+  T **m_rawDataArrayPtr;     ///< Raw data
   void deleteMem();          ///< Helper function to delete memory
   void lubcmp(int *, int &); ///< starts inversion process
   void lubksb(int const *, double *);
@@ -76,9 +76,9 @@ public:
   ~Matrix();
 
   /// const Array accessor
-  const T *operator[](const size_t A) const { return V[A]; }
+  const T *operator[](const size_t A) const { return m_rawDataArrayPtr[A]; }
   /// Array accessor. Use, e.g. Matrix[row][col]
-  T *operator[](const size_t A) { return V[A]; }
+  T *operator[](const size_t A) { return m_rawDataArrayPtr[A]; }
 
   Matrix<T> &operator+=(const Matrix<T> &);     ///< Basic addition operator
   Matrix<T> operator+(const Matrix<T> &) const; ///< Basic addition operator
@@ -103,7 +103,7 @@ public:
   bool operator==(const Matrix<T> &) const;
   bool equals(const Matrix<T> &A, const double Tolerance = FLT_EPSILON) const;
   T item(const int a, const int b) const {
-    return V[a][b];
+    return m_rawDataArrayPtr[a][b];
   } ///< disallows access
 
   void print() const;
@@ -137,17 +137,19 @@ public:
 
   /// Access matrix sizes
   std::pair<size_t, size_t> size() const {
-    return std::pair<size_t, size_t>(nx, ny);
+    return std::pair<size_t, size_t>(m_numRowsX, m_numColumnsY);
   }
 
   /// Return the number of rows in the matrix
-  size_t numRows() const { return nx; }
+  size_t numRows() const { return m_numRowsX; }
 
   /// Return the number of columns in the matrix
-  size_t numCols() const { return ny; }
+  size_t numCols() const { return m_numColumnsY; }
 
   /// Return the smallest matrix size
-  size_t Ssize() const { return (nx > ny) ? ny : nx; }
+  size_t Ssize() const {
+    return (m_numRowsX > m_numColumnsY) ? m_numColumnsY : m_numRowsX;
+  }
 
   void swapRows(const size_t, const size_t); ///< Swap rows (first V index)
   void swapCols(const size_t, const size_t); ///< Swap cols (second V index)
