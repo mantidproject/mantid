@@ -51,13 +51,17 @@ const IAlgorithm *Algorithm::AlgorithmNotification::algorithm() const {
 
 Algorithm::StartedNotification::StartedNotification(const Algorithm *const alg)
     : AlgorithmNotification(alg) {}
+
+/// class name
 std::string Algorithm::StartedNotification::name() const {
   return "StartedNotification";
-} ///< class name
+}
 
 Algorithm::FinishedNotification::FinishedNotification(
     const Algorithm *const alg, bool res)
     : AlgorithmNotification(alg), success(res) {}
+
+/// class name
 std::string Algorithm::FinishedNotification::name() const {
   return "FinishedNotification";
 }
@@ -68,6 +72,7 @@ Algorithm::ProgressNotification::ProgressNotification(
     : AlgorithmNotification(alg), progress(p), message(msg),
       estimatedTime(estimatedTime), progressPrecision(progressPrecision) {}
 
+/// class name
 std::string Algorithm::ProgressNotification::name() const {
   return "ProgressNotification";
 }
@@ -76,10 +81,12 @@ Algorithm::ErrorNotification::ErrorNotification(const Algorithm *const alg,
                                                 const std::string &str)
     : AlgorithmNotification(alg), what(str) {}
 
+/// class name
 std::string Algorithm::ErrorNotification::name() const {
   return "ErrorNotification";
 }
 
+/// why the exception was raise
 const char *Algorithm::CancelException::what() const noexcept {
   return "Algorithm terminated";
 }
