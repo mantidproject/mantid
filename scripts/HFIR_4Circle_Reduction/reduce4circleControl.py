@@ -1743,6 +1743,34 @@ class CWSCDReductionControl(object):
 
         return True, out_hkl_name
 
+    def save_merged_scan(self, exp_number, scan_number, output_dir=None):
+        """
+
+        :param exp_number:
+        :param scan_number:
+        :return:
+        """
+        assert isinstance(exp_number, int), 'Experiment number {0} must be an integer but not a {1}.' \
+                                            ''.format(scan_number, type(scan_number))
+        assert isinstance(scan_number, int), 'Scan number {0} must be an integer but not a {2}.' \
+                                             ''.format(exp_number, type(exp_number))
+
+        if output_dir is None:
+            # FIXME/TODO/NOW - NEED TO MAKE THIS A STANDARD METHOD!
+            output_dir = '/HFIR/HB3A/exp{0}/shared/scans'.format(exp_number, scan_number)
+            if not os.path.exists(output_dir):
+                os.mkdir(output_dir, 0o775)
+        # END-IF
+
+        # MD file name
+        md_file_name = os.path.join(output_dir, 'HB3A_Exp{0}_Scan{1}_MD.nxs'.format(exp_number, scan_number))
+
+        # get input workspace
+        md_q_sample_ws = get_merged_md_name(self._instrumentName, exp_number, scan_number, pt_list=[])
+        mantidsimple.SaveMD(InputWorkspace=md_q_sample_ws, Filename=md_file_name)
+
+        return
+
     def set_roi(self, exp_number, scan_number, lower_left_corner, upper_right_corner):
         """
         Purpose: Set region of interest and record it by the combination of experiment number

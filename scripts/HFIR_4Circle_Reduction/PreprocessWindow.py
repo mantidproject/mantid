@@ -3,6 +3,7 @@ from PyQt4 import QtGui, QtCore
 import ui_preprocess_window
 import reduce4circleControl
 import guiutility as gui_util
+import NTableWidget
 
 
 class ScanPreProcessWindow(QtGui.QMainWindow):
@@ -105,30 +106,28 @@ class ScanPreProcessWindow(QtGui.QMainWindow):
         exp_number = int(self.ui.lineEdit_ipts.text())
         scan_list = self.get_scan_numbers()
 
+        # set up calibration information
         self.set_calibration_to_reduction_controller(exp_number)
 
-        # loop around to
+        # set up GUI
+        scan_row_dict = self.ui.tableView_scanProcessState.add_new_scans(scan_list, append=True)
 
+        # launch the multiple threading to scans
 
-
-
-
-        status, pt_list = self._myControl.get_pt_numbers(exp_number, scan_list)
-        if status is False:
-            # skip this row due to error
-            sum_error_msg += '%s\n' % str(pt_list)
-            continue
-
-        self.ui.tableWidget_mergeScans.set_status(row_number, 'In Processing')
-        status, ret_tup = self._myControl.merge_pts_in_scan(exp_no=exp_number, scan_no=scan_number,
-                                                            pt_num_list=[])
-
-
-        set_detector_sample_distance
-
-        self._myControl.set_detector_center()
-
-        self._myControl.save_merged_scan()
+        # loop over all the scan number to pre-process
+        # TODO/FIXME/NOW - Multiple threading
+        for scan_number in sorted(scan_list):
+            row_number = scan_row_dict[scan_number]
+            self.ui.tableView_scanProcessState.set_status(row_number, 'In Processing')
+            status, ret_object = self._reductionController.merge_pts_in_scan(exp_no=exp_number, scan_no=scan_number,
+                                                                             pt_num_list=[])
+            self._reductionController.save_merged_scan(exp_number, scan_number)
+            if status:
+                self.ui.tableView_scanProcessState.set_status(row_number, 'Done')
+            else:
+                error_msg = str(ret_object)
+                self.ui.tableView_scanProcessState.set_status(row_number, error_msg)
+        # END-FOR
 
         return
 
@@ -177,7 +176,7 @@ class ScanPreProcessWindow(QtGui.QMainWindow):
 
     def set_calibration_to_reduction_controller(self, exp_number):
         """
-        
+        set user-specified instrument calibrations to the my controller
         :param exp_number:
         :return:
         """
@@ -283,5 +282,97 @@ class ScanPreProcessWindow(QtGui.QMainWindow):
         self._reductionController = controller
 
         return
+
+
+class ScanPreProcessStatusTable(NTableWidget.NTableWidget):
+    """
+    Extended table widget for scans to process
+    """
+    TableSetup = [('Scan', 'int'),
+                  ('Status', 'str'),
+                  ('File', 'str'),
+                  ('Note', 'str')]
+
+    def __init__(self, parent):
+        """
+        Initialization
+        :param parent::
+        :return:
+        """
+        super(ScanPreProcessStatusTable, self).__init__(parent)
+
+        # column index of k-index
+        self._iColScanNumber = None
+        self._iColStatus = None
+        self._iColFile = None
+        self._iColNote = None
+
+        # a quick-reference list
+        self._scanRowDict = dict()
+
+        return
+
+    def setup(self):
+        """
+        Init setup
+        :return:
+        """
+        self.init_setup(self.Table_Setup)
+
+        # set columns' width
+        self.setColumnWidth(0, 35)
+        self.setColumnWidth(1, 60)
+        self.setColumnWidth(2, 90)
+        self.setColumnWidth(3, 120)
+
+        # set the column index
+        self._iColScanNumber = self.TableSetup.index(('Scan', 'int'))
+        self._iColStatus = self.TableSetup.index(('Status', 'str'))
+        self._iColFile = self.TableSetup.index(('File', 'str'))
+        self._iColNote = self.TableSetup.index(('Note', 'str'))
+
+        return
+
+    def add_new_scans(self, scan_numbers):
+        """
+        add scans to the
+        :param scan_numbers:
+        :return:
+        """
+        # check input
+        assert isinstance(scan_numbers, list), 'blabla'
+
+        # sort
+        scan_numbers.sort()
+        part_dict = dict()
+
+        # append to table
+        for scan_number in scan_numbers:
+            # skip the scan number that has been added to table
+            if scan_number in self._scanRowDict:
+                continue
+
+            # append scan
+            self.append_row([scan_number, '', '', ''])
+            num_rows = self.rowCount()
+            self._scanRowDict[scan_number] = num_rows - 1
+            part_dict[scan_number] = num_rows - 1
+        # END-FOR
+
+        return part_dict
+
+    def set_status(self, row_number, status):
+        """
+
+        :param row_number:
+        :param status:
+        :return:
+        """
+        # check ... blabla
+
+        self.update_cell_value(row_number, self._iColStatus, status)
+
+        return
+
 
 
