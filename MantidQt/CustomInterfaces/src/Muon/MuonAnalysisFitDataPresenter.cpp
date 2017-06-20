@@ -385,13 +385,16 @@ void MuonAnalysisFitDataPresenter::storeNorm(std::string name) const {
 	std::string tmp = name;
 	// spaces stop the string being written
 	std::replace(tmp.begin(), tmp.end(), ' ', ';');
+	//get data
 	if (Mantid::API::AnalysisDataService::Instance().doesExist("__norm__")) {
 		Mantid::API::ITableWorkspace_sptr tmpNorm =
 			boost::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(
 				Mantid::API::AnalysisDataService::Instance().retrieve("__norm__"));
 		auto colNorm = tmpNorm->getColumn("norm");
+		//saves data
 		row << (*colNorm)[0] << tmp;
 	}
+	
 }
 /**
  * Create an analysis workspace given the required name.
