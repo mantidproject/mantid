@@ -52,7 +52,7 @@ private:
   Mantid::Kernel::cow_ptr<std::vector<Eigen::Vector3d>> m_positions;
   Mantid::Kernel::cow_ptr<std::vector<Eigen::Quaterniond>> m_rotations;
   const size_t m_size = 0;
-  boost::shared_ptr<DetectorInfo> m_detectorInfo;
+  boost::shared_ptr<DetectorInfo> m_detectorInfo; // TODO this should be a raw pointer. ExperimentInfo is the owner.
 
 public:
   ComponentInfo();

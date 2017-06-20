@@ -99,9 +99,23 @@ private:
   /// Parameter map to purge.
   Mantid::Geometry::ParameterMap &m_pmap;
 
+  /// Source id to look for
+  Mantid::Geometry::IComponent * m_sourceId;
+
+  /// Sample id to look for
+  Mantid::Geometry::IComponent * m_sampleId;
+
+  /// Source index to set
+  int64_t m_sourceIndex = -1;
+
+  /// Sample index to set
+  int64_t m_sampleIndex = -1;
+
+  void markAsSourceOrSample(Mantid::Geometry::IComponent* componentId, const size_t componentIndex);
+
 public:
   InfoComponentVisitor(std::vector<detid_t> orderedDetectorIds,
-                       ParameterMap &pmap);
+                       ParameterMap &pmap, Mantid::Geometry::IComponent * source = nullptr, Mantid::Geometry::IComponent * sample = nullptr);
 
   virtual size_t registerComponentAssembly(
       const Mantid::Geometry::ICompAssembly &assembly) override;
@@ -146,6 +160,10 @@ public:
   boost::shared_ptr<std::vector<Eigen::Vector3d>> positions() const;
 
   boost::shared_ptr<std::vector<Eigen::Quaterniond>> rotations() const;
+
+  size_t sampleIndex() const;
+
+  size_t sourceIndex() const;
 };
 } // namespace Geometry
 } // namespace Mantid
