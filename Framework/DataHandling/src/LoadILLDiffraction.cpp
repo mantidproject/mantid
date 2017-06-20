@@ -16,8 +16,8 @@
 #include <numeric>
 
 #include <H5Cpp.h>
-#include <nexus/napi.h>
 #include <Poco/Path.h>
+#include <nexus/napi.h>
 
 namespace Mantid {
 namespace DataHandling {
@@ -32,8 +32,10 @@ namespace {
 // This defines the number of physical pixels in D20 (low resolution mode)
 // Then each pixel can be split into 2 (nominal) or 3 (high resolution) by DAQ
 constexpr size_t D20_NUMBER_PIXELS = 1600;
-// This defines the number of dead pixels on each side in low resolution mode
+// This defines the number of dead pixels on each side (in low resolution mode)
 constexpr size_t D20_NUMBER_DEAD_PIXELS = 32;
+// This is the angular size of a pixel in degrees (in low resolution mode)
+constexpr double D20_PIXEL_SIZE = 0.1;
 }
 
 // Register the algorithm into the AlgorithmFactory
@@ -90,20 +92,14 @@ void LoadILLDiffraction::init() {
  * Executes the algorithm.
  */
 void LoadILLDiffraction::exec() {
-
   Progress progress(this, 0, 1, 3);
-
   m_fileName = getPropertyValue("Filename");
-
   loadScanVars();
   progress.report("Loaded the scanned variables");
-
   loadDataScan();
   progress.report("Loaded the detector scan data");
-
   loadMetaData();
   progress.report("Loaded the metadata");
-
   setProperty("OutputWorkspace", m_outWorkspace);
 }
 
@@ -111,13 +107,10 @@ void LoadILLDiffraction::exec() {
 * Loads the scanned detector data
 */
 void LoadILLDiffraction::loadDataScan() {
-
   // open the root entry
   NXRoot dataRoot(m_fileName);
   NXEntry firstEntry = dataRoot.openFirstEntry();
-
   m_instName = firstEntry.getString("instrument/name");
-
   m_startTime = DateAndTime(
       m_loadHelper.dateTimeInIsoFormat(firstEntry.getString("start_time")));
 
@@ -156,11 +149,8 @@ void LoadILLDiffraction::loadDataScan() {
   }
 
   resolveScanType();
-
   resolveInstrument();
-
   initWorkspace();
-
   fillDataScanMetaData(scan);
 
   if (m_scanType == DetectorScan) {
@@ -179,13 +169,11 @@ void LoadILLDiffraction::loadDataScan() {
 * Dumps the metadata from the whole file to SampleLogs
 */
 void LoadILLDiffraction::loadMetaData() {
-
   m_outWorkspace->mutableRun().addProperty("Facility", std::string("ILL"));
 
   // Open NeXus file
   NXhandle nxHandle;
   NXstatus nxStat = NXopen(m_fileName.c_str(), NXACC_READ, &nxHandle);
-
   if (nxStat != NX_ERROR) {
     m_loadHelper.addNexusFieldsToWsRun(nxHandle, m_outWorkspace->mutableRun());
     nxStat = NXclose(&nxHandle);
@@ -202,7 +190,6 @@ void LoadILLDiffraction::loadMetaData() {
 void LoadILLDiffraction::fillStaticInstrumentScan(const NXUInt &data,
                                                   const NXDouble &scan,
                                                   const NXFloat &twoTheta0) {
-
   std::vector<double> axis = getAxis(scan);
   std::vector<double> monitor = getMonitor(scan);
 
@@ -240,7 +227,6 @@ void LoadILLDiffraction::fillStaticInstrumentScan(const NXUInt &data,
 void LoadILLDiffraction::loadScanVars() {
 
   H5File h5file(m_fileName, H5F_ACC_RDONLY);
-
   Group entry0 = h5file.openGroup("entry0");
   Group dataScan = entry0.openGroup("data_scan");
   Group scanVar = dataScan.openGroup("scanned_variables");
@@ -268,8 +254,7 @@ void LoadILLDiffraction::loadScanVars() {
 void LoadILLDiffraction::fillDataScanMetaData(const NXDouble &scan) {
   auto absoluteTimes = getAbsoluteTimes(scan);
   for (size_t i = 0; i < m_scanVar.size(); ++i) {
-    if (m_scanVar[i].axis != 1 &&
-        !boost::starts_with(m_scanVar[i].property, "Monitor")) {
+    if (!boost::starts_with(m_scanVar[i].property, "Monitor")) {
       auto property =
           Kernel::make_unique<TimeSeriesProperty<double>>(m_scanVar[i].name);
       for (size_t j = 0; j < m_numberScanPoints; ++j) {
@@ -287,7 +272,6 @@ void LoadILLDiffraction::fillDataScanMetaData(const NXDouble &scan) {
  * @return monitor spectrum
  */
 std::vector<double> LoadILLDiffraction::getMonitor(const NXDouble &scan) const {
-
   std::vector<double> monitor = {0.};
   for (size_t i = 0; i < m_scanVar.size(); ++i) {
     if (m_scanVar[i].name == "Monitor1") {
@@ -305,7 +289,6 @@ std::vector<double> LoadILLDiffraction::getMonitor(const NXDouble &scan) const {
  * @return the x-axis
  */
 std::vector<double> LoadILLDiffraction::getAxis(const NXDouble &scan) const {
-
   std::vector<double> axis = {0.};
   if (m_scanType == OtherScan) {
     for (size_t i = 0; i < m_scanVar.size(); ++i) {
@@ -384,30 +367,28 @@ void LoadILLDiffraction::resolveInstrument() {
   } else {
     m_numberDetectorsActual = m_numberDetectorsRead;
     if (m_instName == "D20") {
-      switch (m_numberDetectorsRead) {
       // Here we have to hardcode the numbers of pixels.
       // The only way is to read the size of the detectors read from the files
       // and based on it decide which of the 3 alternative IDFs to load.
       // Some amount of pixels are dead on each end, these has to be subtracted
       // correspondingly dependent on the resolution mode
-      case D20_NUMBER_PIXELS: {
+      m_resolutionMode = m_numberDetectorsRead / D20_NUMBER_PIXELS;
+      size_t activePixels = D20_NUMBER_PIXELS - 2 * D20_NUMBER_DEAD_PIXELS;
+      m_numberDetectorsActual = m_resolutionMode * activePixels;
+      // 1: low resolution, 2: nominal, 3: high resolution
+      switch (m_resolutionMode) {
+      case 1: {
         // low resolution mode
         m_instName += "_lr";
-        m_numberDetectorsActual =
-            D20_NUMBER_PIXELS - 2 * D20_NUMBER_DEAD_PIXELS;
         break;
       }
-      case 2 * D20_NUMBER_PIXELS: {
+      case 2: {
         // nominal resolution
-        m_numberDetectorsActual =
-            2 * (D20_NUMBER_PIXELS - 2 * D20_NUMBER_DEAD_PIXELS);
         break;
       }
-      case 3 * D20_NUMBER_PIXELS: {
+      case 3: {
         // high resolution mode
         m_instName += "_hr";
-        m_numberDetectorsActual =
-            3 * (D20_NUMBER_PIXELS - 2 * D20_NUMBER_DEAD_PIXELS);
         break;
       }
       default:
@@ -423,15 +404,12 @@ void LoadILLDiffraction::resolveInstrument() {
  * points, and scan type
  */
 void LoadILLDiffraction::initWorkspace() {
-
   size_t nSpectra = m_numberDetectorsActual + 1, nBins = 1;
-
   if (m_scanType == DetectorScan) {
     nSpectra *= m_numberScanPoints;
   } else if (m_scanType == OtherScan) {
     nBins = m_numberScanPoints;
   }
-
   m_outWorkspace = WorkspaceFactory::Instance().create("Workspace2D", nSpectra,
                                                        nBins, nBins);
 }
@@ -449,16 +427,17 @@ void LoadILLDiffraction::loadStaticInstrument() {
 
 /**
 * Rotates the detector to the 2theta0 read from the file
+* @param twoTheta0Read : 2theta0 read from the file
 */
-void LoadILLDiffraction::moveTwoThetaZero(double twoTheta0) {
-
+void LoadILLDiffraction::moveTwoThetaZero(double twoTheta0Read) {
   Instrument_const_sptr instrument = m_outWorkspace->getInstrument();
   IComponent_const_sptr component = instrument->getComponentByName("detector");
-
-  Quat rotation(twoTheta0, V3D(0, 1, 0));
-
-  g_log.debug() << "Setting 2theta0 to " << twoTheta0;
-
+  double twoTheta0Actual = twoTheta0Read;
+  if (m_instName == "D20") {
+    twoTheta0Actual += D20_NUMBER_DEAD_PIXELS * D20_PIXEL_SIZE;
+  }
+  Quat rotation(twoTheta0Actual, V3D(0, 1, 0));
+  g_log.debug() << "Setting 2theta0 to " << twoTheta0Actual;
   m_outWorkspace->mutableDetectorInfo().setRotation(*component, rotation);
 }
 
@@ -470,7 +449,6 @@ void LoadILLDiffraction::moveTwoThetaZero(double twoTheta0) {
 */
 std::string
 LoadILLDiffraction::getInstrumentFilePath(const std::string &instName) const {
-
   Poco::Path directory(ConfigService::Instance().getInstrumentDirectory());
   Poco::Path file(instName + "_Definition.xml");
   Poco::Path fullPath(directory, file);
