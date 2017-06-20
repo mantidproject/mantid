@@ -34,6 +34,7 @@ LOW_ANGLE_BANK = "LAB"
 SANS2D = "SANS2D"
 LARMOR = "LARMOR"
 LOQ = "LOQ"
+ZOOM = "ZOOM"
 
 REDUCED_WORKSPACE_BASE_NAME_IN_LOGS = "reduced_workspace_base_name"
 REDUCED_WORKSPACE_NAME_BY_USER_IN_LOGS = "reduced_workspace_name_by_user"

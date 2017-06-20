@@ -10,7 +10,7 @@ from mantid.api import FileFinder
 from mantid.kernel import (DateAndTime, ConfigService)
 from mantid.api import (AlgorithmManager, ExperimentInfo)
 from sans.common.enums import (SANSInstrument, FileType, SampleShape)
-from sans.common.constants import (SANS2D, LARMOR, LOQ)
+from sans.common.general_functions import (get_instrument, instrument_name_correction)
 from six import with_metaclass
 
 
@@ -48,7 +48,6 @@ MANTID_WORKSPACE_PREFIX = 'mantid_workspace_'
 EVENT_WORKSPACE = "event_workspace"
 
 # Other
-ALTERNATIVE_SANS2D_NAME = "SAN"
 DEFINITION = "Definition"
 PARAMETERS = "Parameters"
 
@@ -628,12 +627,9 @@ def get_from_raw_header(file_name, index):
     return element
 
 
-def instrument_name_correction(instrument_name):
-    return SANS2D if instrument_name == ALTERNATIVE_SANS2D_NAME else instrument_name
-
-
 def get_instrument_name_for_raw(file_name):
     instrument_name = get_from_raw_header(file_name, 0)
+    # We sometimes need an instrument name correction, eg SANS2D is sometimes stored as SAN
     return instrument_name_correction(instrument_name)
 
 
@@ -684,19 +680,6 @@ def get_date_for_raw(file_name):
     time = time[0]
     date = date[0]
     return get_raw_measurement_time(date, time)
-
-
-def get_instrument(instrument_name):
-    instrument_name = instrument_name.upper()
-    if instrument_name == SANS2D:
-        instrument = SANSInstrument.SANS2D
-    elif instrument_name == LARMOR:
-        instrument = SANSInstrument.LARMOR
-    elif instrument_name == LOQ:
-        instrument = SANSInstrument.LOQ
-    else:
-        instrument = SANSInstrument.NoInstrument
-    return instrument
 
 
 def get_geometry_information_raw(file_name):
