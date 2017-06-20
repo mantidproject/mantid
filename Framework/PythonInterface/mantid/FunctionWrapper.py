@@ -61,6 +61,11 @@ class CompositeFunctionWrapper(FunctionWrapper):
     def getParameter(self, name):
     # get parameter of specified name
         return self.fun.getParameterValue(name)
+        
+    def getCompositeParameterName(self, name, index):
+    # get composite parameter name of parameter of 
+    # given name of member function of given index
+        return "f"+str(index)+"."+name
 
     def __getitem__ (self, nameorindex):
     # get function of specified index or parameter of specified name
@@ -79,5 +84,18 @@ class CompositeFunctionWrapper(FunctionWrapper):
        
     def __len__ (self):
        return self.fun.__len__()
+       
+    def __iter__ (self):
+       return self
+       
+    def tieAll (self, name):
+    # For each member function, tie the parameter of the given name 
+    # to the parameter of that name in the first member function.
+    # The named parameter must occur in all the member functions.
+       expr = self.getCompositeParameterName(name, 0)
+       self.tie({self.getCompositeParameterName(name, i): expr for i in range(1,self.__len__()) })
+       print expr
+       for i in range(1,self.__len__()):
+          print self.getCompositeParameterName(name, i)
         
       
