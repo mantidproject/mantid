@@ -97,7 +97,8 @@ class StateWavelengthAndPixelAdjustmentBuilder(object):
 
 def get_wavelength_and_pixel_adjustment_builder(data_info):
     instrument = data_info.instrument
-    if instrument is SANSInstrument.LARMOR or instrument is SANSInstrument.SANS2D or instrument is SANSInstrument.LOQ:
+    if (instrument is SANSInstrument.LARMOR or instrument is SANSInstrument.SANS2D or
+        instrument is SANSInstrument.LOQ or instrument is SANSInstrument.ZOOM):  # noqa
         return StateWavelengthAndPixelAdjustmentBuilder(data_info)
     else:
         raise NotImplementedError("StateWavelengthAndPixelAdjustmentBuilder: Could not find any valid "

@@ -114,7 +114,8 @@ class StateBuilder(object):
 # ------------------------------------------
 def get_state_builder(data_info):
     instrument = data_info.instrument
-    if instrument is SANSInstrument.LARMOR or instrument is SANSInstrument.LOQ or instrument is SANSInstrument.SANS2D:
+    if (instrument is SANSInstrument.LARMOR or instrument is SANSInstrument.LOQ or
+        instrument is SANSInstrument.SANS2D or instrument is SANSInstrument.ZOOM):  # noqa
         return StateBuilder()
     else:
         raise NotImplementedError("SANSStateBuilder: Could not find any valid state builder for the "

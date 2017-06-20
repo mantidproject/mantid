@@ -46,7 +46,8 @@ class StateCompatibilityBuilder(object):
 
 def get_compatibility_builder(data_info):
     instrument = data_info.instrument
-    if instrument is SANSInstrument.LARMOR or instrument is SANSInstrument.LOQ or instrument is SANSInstrument.SANS2D:
+    if (instrument is SANSInstrument.LARMOR or instrument is SANSInstrument.LOQ or
+        instrument is SANSInstrument.SANS2D or instrument is SANSInstrument.ZOOM):  # noqa
         return StateCompatibilityBuilder()
     else:
         raise NotImplementedError("StateCompatibilityBuilder: Could not find any valid compatibility builder for the "

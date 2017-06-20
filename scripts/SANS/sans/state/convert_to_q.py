@@ -170,7 +170,8 @@ def get_convert_to_q_builder(data_info):
     # The data state has most of the information that we require to define the move. For the factory method, only
     # the instrument is of relevance.
     instrument = data_info.instrument
-    if instrument is SANSInstrument.LARMOR or instrument is SANSInstrument.LOQ or instrument is SANSInstrument.SANS2D:
+    if (instrument is SANSInstrument.LARMOR or instrument is SANSInstrument.LOQ or
+        instrument is SANSInstrument.SANS2D or instrument is SANSInstrument.ZOOM):  # noqa
         return StateConvertToQBuilder()
     else:
         raise NotImplementedError("StateConvertToQBuilder: Could not find any valid save builder for the "

@@ -27,5 +27,5 @@ class Configurations(object):
 
     class ZOOM(object):
         # The full wavelength range of the instrument
-        wavelength_full_range_low = 2.2
-        wavelength_full_range_high = 10.0
+        wavelength_full_range_low = 1.75
+        wavelength_full_range_high = 16.5

@@ -64,7 +64,8 @@ class StateWavelengthBuilder(object):
 
 def get_wavelength_builder(data_info):
     instrument = data_info.instrument
-    if instrument is SANSInstrument.LARMOR or instrument is SANSInstrument.LOQ or instrument is SANSInstrument.SANS2D:
+    if (instrument is SANSInstrument.LARMOR or instrument is SANSInstrument.LOQ or
+        instrument is SANSInstrument.SANS2D or instrument is SANSInstrument.ZOOM):  # noqa
         return StateWavelengthBuilder()
     else:
         raise NotImplementedError("StateWavelengthBuilder: Could not find any valid wavelength builder for the "

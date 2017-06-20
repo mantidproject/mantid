@@ -91,7 +91,8 @@ class StateSliceEventBuilder(object):
 # ------------------------------------------
 def get_slice_event_builder(data_info):
     instrument = data_info.instrument
-    if instrument is SANSInstrument.LARMOR or instrument is SANSInstrument.LOQ or instrument is SANSInstrument.SANS2D:
+    if (instrument is SANSInstrument.LARMOR or instrument is SANSInstrument.LOQ or
+        instrument is SANSInstrument.SANS2D or instrument is SANSInstrument.ZOOM):  # noqa
         return StateSliceEventBuilder()
     else:
         raise NotImplementedError("StateSliceEventBuilder: Could not find any valid slice builder for the "

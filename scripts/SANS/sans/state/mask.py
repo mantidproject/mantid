@@ -330,7 +330,8 @@ def get_mask_builder(data_info):
     # The data state has most of the information that we require to define the move. For the factory method, only
     # the instrument is of relevance.
     instrument = data_info.instrument
-    if instrument is SANSInstrument.LARMOR or instrument is SANSInstrument.LOQ or instrument is SANSInstrument.SANS2D:
+    if (instrument is SANSInstrument.LARMOR or instrument is SANSInstrument.LOQ or
+        instrument is SANSInstrument.SANS2D or instrument is SANSInstrument.ZOOM):  # noqa
         return StateMaskBuilder(data_info)
     else:
         raise NotImplementedError("StateMaskBuilder: Could not find any valid mask builder for the "
