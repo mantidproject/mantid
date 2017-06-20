@@ -8,6 +8,7 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataHandling/LoadDetectorsGroupingFile.h"
 #include "MantidHistogramData/HistogramMath.h"
+#include "MantidIndexing/Group.h"
 #include "MantidIndexing/IndexInfo.h"
 #include "MantidIndexing/SpectrumNumber.h"
 #include "MantidKernel/ArrayProperty.h"
@@ -1051,10 +1052,7 @@ size_t GroupDetectors2::formGroups(API::MatrixWorkspace_const_sptr inputWS,
   bool requireDivide(false);
   const auto &spectrumInfo = inputWS->spectrumInfo();
 
-  std::vector<SpectrumDefinition> spectrumDefinitions;
-  const auto &oldSpectrumDefinitions =
-      *(inputWS->indexInfo().spectrumDefinitions());
-
+  auto spectrumGroups = std::vector<std::vector<size_t>>();
   auto spectrumNumbers = std::vector<Indexing::SpectrumNumber>();
 
   for (storage_map::const_iterator it = m_GroupWsInds.begin();
@@ -1074,13 +1072,11 @@ size_t GroupDetectors2::formGroups(API::MatrixWorkspace_const_sptr inputWS,
 
     // Keep track of number of detectors required for masking
     size_t nonMaskedSpectra(0);
-    SpectrumDefinition spectrumDefinition;
+    auto spectrumGroup = std::vector<size_t>();
 
     for (auto originalWI : it->second) {
       // detectors to add to firstSpecNum
       const auto &inputSpectrum = inputWS->getSpectrum(originalWI);
-
-      const auto &oldSpectrumDefinition = oldSpectrumDefinitions[originalWI];
 
       outputHistogram += inputSpectrum.histogram();
       outSpec.addDetectorIDs(inputSpectrum.getDetectorIDs());
@@ -1088,9 +1084,10 @@ size_t GroupDetectors2::formGroups(API::MatrixWorkspace_const_sptr inputWS,
       if (!isMaskedDetector(spectrumInfo, originalWI))
         ++nonMaskedSpectra;
 
-      for (const auto &item : oldSpectrumDefinition)
-        spectrumDefinition.add(item.first, item.second);
+      spectrumGroup.push_back(originalWI);
     }
+
+    spectrumGroups.push_back(spectrumGroup);
 
     outSpec.setHistogram(outputHistogram);
 
@@ -1109,8 +1106,6 @@ size_t GroupDetectors2::formGroups(API::MatrixWorkspace_const_sptr inputWS,
       interruption_point();
     }
 
-    spectrumDefinitions.push_back(spectrumDefinition);
-
     outIndex++;
   }
 
@@ -1121,20 +1116,15 @@ size_t GroupDetectors2::formGroups(API::MatrixWorkspace_const_sptr inputWS,
       if (originalWI < 0)
         continue;
 
-      SpectrumDefinition spectrumDefinition;
-      for (const auto &item : oldSpectrumDefinitions[originalWI])
-        spectrumDefinition.add(item.first, item.second);
+      spectrumGroups.push_back(std::vector<size_t>(1, originalWI));
 
-      spectrumDefinitions.push_back(spectrumDefinition);
       auto spectrumNumber = inputWS->getSpectrum(originalWI).getSpectrumNo();
       spectrumNumbers.push_back(spectrumNumber);
     }
   }
 
-  Indexing::IndexInfo indexInfo =
-      Indexing::IndexInfo(spectrumDefinitions.size());
-  indexInfo.setSpectrumNumbers(std::move(spectrumNumbers));
-  indexInfo.setSpectrumDefinitions(std::move(spectrumDefinitions));
+  Indexing::IndexInfo indexInfo = Indexing::group(
+      inputWS->indexInfo(), std::move(spectrumNumbers), spectrumGroups);
   outputWS->setIndexInfo(indexInfo);
 
   if (bhv == 1 && requireDivide) {
