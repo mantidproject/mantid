@@ -4,8 +4,8 @@
 #include "MantidCurveFitting/Functions/VesuvioResolution.h"
 
 #include "MantidAPI/CompositeFunction.h"
-#include "MantidAPI/FunctionProperty.h"
 #include "MantidAPI/FunctionFactory.h"
+#include "MantidAPI/FunctionProperty.h"
 #include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
@@ -55,11 +55,10 @@ VesuvioCalculateGammaBackground::VesuvioCalculateGammaBackground()
     : Algorithm(), m_inputWS(), m_indices(), m_profileFunction(), m_npeaks(0),
       m_reversed(), m_samplePos(), m_l1(0.0), m_foilRadius(0.0),
       m_foilUpMin(0.0), m_foilUpMax(0.0), m_foils0(), m_foils1(),
-      m_backgroundWS(), m_correctedWS(), m_progress(nullptr) {}
+      m_backgroundWS(), m_correctedWS() {}
 
 /// Destructor
 VesuvioCalculateGammaBackground::~VesuvioCalculateGammaBackground() {
-  delete m_progress;
   m_indices.clear();
 }
 
@@ -113,7 +112,7 @@ void VesuvioCalculateGammaBackground::exec() {
   const int64_t nhist = static_cast<int64_t>(m_indices.size());
   const int64_t nreports =
       10 + nhist * (m_npeaks + 2 * m_foils0.size() * NTHETA * NUP * m_npeaks);
-  m_progress = new Progress(this, 0.0, 1.0, nreports);
+  m_progress = make_unique<Progress>(this, 0.0, 1.0, nreports);
 
   PARALLEL_FOR_IF(
       Kernel::threadSafe(*m_inputWS, *m_correctedWS, *m_backgroundWS))

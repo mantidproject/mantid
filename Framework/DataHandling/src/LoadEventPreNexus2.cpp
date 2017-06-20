@@ -197,14 +197,16 @@ static string generateMappingfileName(EventWorkspace_sptr &wksp) {
 //----------------------------------------------------------------------------------------------
 /** Return the confidence with with this algorithm can load the file
  *  @param descriptor A descriptor for the file
- *  @returns An integer specifying the confidence level. 0 indicates it will not
+ *  @returns An integer specifying the confidence level. 0 indicates it will
+ * not
  * be used
  */
 int LoadEventPreNexus2::confidence(Kernel::FileDescriptor &descriptor) const {
   if (descriptor.extension().rfind("dat") == std::string::npos)
     return 0;
 
-  // If this looks like a binary file where the exact file length is a multiple
+  // If this looks like a binary file where the exact file length is a
+  // multiple
   // of the DasEvent struct then we're probably okay.
   if (descriptor.isAscii())
     return 0;
@@ -296,11 +298,11 @@ void LoadEventPreNexus2::init() {
                   "  Parallel: Use all available cores.");
 
   // the output workspace name
-  declareProperty(
-      Kernel::make_unique<WorkspaceProperty<IEventWorkspace>>(
-          OUT_PARAM, "", Direction::Output),
-      "The name of the workspace that will be created, filled with the read-in "
-      "data and stored in the [[Analysis Data Service]].");
+  declareProperty(Kernel::make_unique<WorkspaceProperty<IEventWorkspace>>(
+                      OUT_PARAM, "", Direction::Output),
+                  "The name of the workspace that will be created, filled "
+                  "with the read-in "
+                  "data and stored in the [[Analysis Data Service]].");
 
   declareProperty(Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "EventNumberWorkspace", "", Direction::Output,
@@ -345,7 +347,7 @@ void LoadEventPreNexus2::exec() {
     throw std::out_of_range("ChunkNumber cannot be larger than TotalChunks");
   }
 
-  prog = new Progress(this, 0.0, 1.0, 100);
+  prog = make_unique<Progress>(this, 0.0, 1.0, 100);
 
   // b. what spectra (pixel ID's) to load
   this->spectra_list = this->getProperty(PID_PARAM);
@@ -398,8 +400,6 @@ void LoadEventPreNexus2::exec() {
   // Fast frequency sample environment data
   this->processImbedLogs();
 
-  // Cleanup
-  delete prog;
 } // exec()
 
 //------------------------------------------------------------------------------------------------
@@ -410,7 +410,8 @@ void LoadEventPreNexus2::createOutputWorkspace(
   // Create the output workspace
   localWorkspace = EventWorkspace_sptr(new EventWorkspace());
 
-  // Make sure to initialize. We can use dummy numbers for arguments, for event
+  // Make sure to initialize. We can use dummy numbers for arguments, for
+  // event
   // workspace it doesn't matter
   localWorkspace->initialize(1, 1, 1);
 
@@ -492,7 +493,8 @@ void LoadEventPreNexus2::unmaskVetoEventIndex() {
 
 //------------------------------------------------------------------------------------------------
 /** Generate a workspace with distribution of events with pulse
-  * Workspace has 2 spectrum.  spectrum 0 is the number of events in one pulse.
+  * Workspace has 2 spectrum.  spectrum 0 is the number of events in one
+ * pulse.
   * specrum 1 is the accumulated number of events
   */
 API::MatrixWorkspace_sptr
@@ -630,7 +632,8 @@ void LoadEventPreNexus2::runLoadInstrument(
                         Mantid::Kernel::OptionalBool(false));
   loadInst->executeAsChildAlg();
 
-  // Populate the instrument parameters in this workspace - this works around a
+  // Populate the instrument parameters in this workspace - this works around
+  // a
   // bug
   localWorkspace->populateInstrumentParameters();
 }
