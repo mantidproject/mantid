@@ -1029,6 +1029,8 @@ double GroupDetectors2::fileReadProg(
 * single spectra
 *  @param keepAll :: whether or not to keep ungrouped spectra
 *  @param unGroupedSet :: the set of workspace indexes that are left ungrouped
+*  @param indexInfo :: an IndexInfo object that will contain the desired
+* indexing after grouping
 *  @return number of new grouped spectra
 */
 size_t GroupDetectors2::formGroups(API::MatrixWorkspace_const_sptr inputWS,
