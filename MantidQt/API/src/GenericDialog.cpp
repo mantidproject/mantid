@@ -3,6 +3,7 @@
 //----------------------------------
 #include "MantidQtAPI/GenericDialog.h"
 #include "MantidQtAPI/AlgorithmInputHistory.h"
+#include "MantidAPI/AlgorithmNotification.h"
 
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidAPI/FileProperty.h"
