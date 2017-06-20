@@ -1,4 +1,5 @@
 #include "MantidAlgorithms/RecordPythonScript.h"
+#include "MantidAPI/AlgorithmNotification.h"
 #include "MantidAPI/FileProperty.h"
 
 #include <Poco/Thread.h>
