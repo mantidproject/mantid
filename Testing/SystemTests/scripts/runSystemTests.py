@@ -52,8 +52,8 @@ parser.add_option("-s", "--savedir", dest="savedir",
                   help="A directory to use for the Mantid save path")
 parser.add_option("", "--archivesearch", dest="archivesearch", action="store_true",
                   help="Turn on archive search for file finder.")
-parser.add_option("", "--slow", dest="includeSlow", action="store_true",
-                  help="Run all tests including those marked as slow")
+parser.add_option("", "--exclude-in-pull-requests", dest="exinpr",action="store_true",
+                  help="")
 parser.set_defaults(frameworkLoc=DEFAULT_FRAMEWORK_LOC, executable=sys.executable, makeprop=True,
                     loglevel="information")
 (options, args) = parser.parse_args()
@@ -85,8 +85,7 @@ execargs = options.execargs
 runner = stresstesting.TestRunner(executable=options.executable, exec_args=execargs, escape_quotes=True)
 reporter = stresstesting.XmlResultReporter(showSkipped=options.showskipped)
 mgr = stresstesting.TestManager(mtdconf.testDir, runner, output = [reporter],
-                                testsInclude=options.testsInclude, testsExclude=options.testsExclude,
-                                includeSlow = options.includeSlow)
+                                testsInclude=options.testsInclude, testsExclude=options.testsExclude, exinpr=options.exinpr)
 try:
     mgr.executeTests()
 except KeyboardInterrupt:
