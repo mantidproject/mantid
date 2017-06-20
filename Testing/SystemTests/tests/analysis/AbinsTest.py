@@ -159,10 +159,10 @@ class AbinsCASTEPTestScratch(stresstesting.MantidStressTest, HelperTestingClass)
 
         HelperTestingClass.__init__(self)
 
-        name = "BenzeneScratchAbins"
+        name = "TolueneScratchAbins"
 
         self.ref_result = name + ".nxs"
-        self.set_dft_program("CASTEP")
+        self.set_dft_program("CRYSTAL")
         self.set_name(name)
         self.set_order(AbinsConstants.QUANTUM_ORDER_FOUR)
         self.case_from_scratch()
@@ -221,10 +221,10 @@ class AbinsCASTEPTestT(stresstesting.MantidStressTest, HelperTestingClass):
 
         HelperTestingClass.__init__(self)
 
-        name = "BenzeneTAbins"
+        name = "TolueneTAbins"
 
         self.ref_result = name + ".nxs"
-        self.set_dft_program("CASTEP")
+        self.set_dft_program("CRYSTAL")
         self.set_name(name)
         self.set_order(AbinsConstants.QUANTUM_ORDER_TWO)
         self.case_restart_diff_t()
@@ -252,10 +252,10 @@ class AbinsCASTEPTestLargerOrder(stresstesting.MantidStressTest, HelperTestingCl
 
         HelperTestingClass.__init__(self)
 
-        name = "BenzeneLargerOrderAbins"
+        name = "TolueneLargerOrderAbins"
 
         self.ref_result = name + ".nxs"
-        self.set_dft_program("CASTEP")
+        self.set_dft_program("CRYSTAL")
         self.set_name(name)
         self.set_order(AbinsConstants.QUANTUM_ORDER_TWO)
         self.case_restart_diff_order(AbinsConstants.QUANTUM_ORDER_THREE)
@@ -283,10 +283,10 @@ class AbinsCASTEPTestSmallerOrder(stresstesting.MantidStressTest, HelperTestingC
 
         HelperTestingClass.__init__(self)
 
-        name = "BenzeneSmallerOrderAbins"
+        name = "TolueneSmallerOrderAbins"
 
         self.ref_result = name + ".nxs"
-        self.set_dft_program("CASTEP")
+        self.set_dft_program("CRYSTAL")
         self.set_name(name)
         self.set_order(AbinsConstants.QUANTUM_ORDER_TWO)
         self.case_restart_diff_order(AbinsConstants.QUANTUM_ORDER_ONE)
@@ -312,9 +312,9 @@ class AbinsCASTEPTestScale(stresstesting.MantidStressTest, HelperTestingClass):
 
         scaling_factor = 2.0
 
-        name = "BenzeneScale"
+        name = "TolueneScale"
         self.ref_result = name + ".nxs"
-        self.set_dft_program("CASTEP")
+        self.set_dft_program("CRYSTAL")
         self.set_name(name)
         self.set_order(AbinsConstants.QUANTUM_ORDER_TWO)
         self.set_scale(scale=scaling_factor)
