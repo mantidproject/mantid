@@ -1162,7 +1162,7 @@ GroupDetectors2::formGroupsEvent(DataObjects::EventWorkspace_const_sptr inputWS,
                                  const double prog4Copy) {
   if (inputWS->detectorInfo().isScanning())
     throw std::runtime_error("GroupDetectors does not currently support "
-                             "workspaces with detector scans.");
+                             "EventWorkspaces with detector scans.");
 
   // get "Behaviour" string
   const std::string behaviour = getProperty("Behaviour");
