@@ -99,6 +99,7 @@ private:
   size_t m_numberDetectorsRead;   ///< number of cells read from file
   size_t m_numberDetectorsActual; ///< number of cells actually active
   size_t m_numberScanPoints;      ///< number of scan points
+  size_t m_resolutionMode;        ///< resolution mode; 1:low, 2:nominal, 3:high
 
   std::string m_instName;            ///< instrument name to load the IDF
   std::set<std::string> m_instNames; ///< supported instruments

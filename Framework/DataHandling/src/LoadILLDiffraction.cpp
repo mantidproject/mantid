@@ -9,8 +9,9 @@
 #include "MantidGeometry/Instrument/ComponentHelper.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/DateAndTime.h"
-#include "MantidKernel/make_unique.h"
+#include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidKernel/make_unique.h"
 
 #include <boost/algorithm/string/predicate.hpp>
 #include <numeric>
@@ -37,6 +38,8 @@ constexpr size_t D20_NUMBER_DEAD_PIXELS = 32;
 // This defines the number of monitors in the instrument. If there are cases
 // where this is no longer one this decleration should be moved.
 constexpr size_t NUMBER_MONITORS = 1;
+// This is the angular size of a pixel in degrees (in low resolution mode)
+constexpr double D20_PIXEL_SIZE = 0.1;
 constexpr double rad2deg = 180. / M_PI;
 }
 
@@ -577,27 +580,31 @@ void LoadILLDiffraction::resolveInstrument() {
   } else {
     m_numberDetectorsActual = m_numberDetectorsRead;
     if (m_instName == "D20") {
-      switch (m_numberDetectorsRead) {
       // Here we have to hardcode the numbers of pixels.
       // The only way is to read the size of the detectors read from the files
       // and based on it decide which of the 3 alternative IDFs to load.
       // Some amount of pixels are dead on each end, these have to be
       // subtracted
       // correspondingly dependent on the resolution mode
-      case D20_NUMBER_PIXELS: {
+      m_resolutionMode = m_numberDetectorsRead / D20_NUMBER_PIXELS;
+      size_t activePixels = D20_NUMBER_PIXELS - 2 * D20_NUMBER_DEAD_PIXELS;
+      m_numberDetectorsActual = m_resolutionMode * activePixels;
+      // 1: low resolution, 2: nominal, 3: high resolution
+      switch (m_resolutionMode) {
+      case 1: {
         // low resolution mode
         m_instName += "_lr";
         m_numberDetectorsActual =
             D20_NUMBER_PIXELS - 2 * D20_NUMBER_DEAD_PIXELS;
         break;
       }
-      case 2 * D20_NUMBER_PIXELS: {
+      case 2: {
         // nominal resolution
         m_numberDetectorsActual =
             2 * (D20_NUMBER_PIXELS - 2 * D20_NUMBER_DEAD_PIXELS);
         break;
       }
-      case 3 * D20_NUMBER_PIXELS: {
+      case 3: {
         // high resolution mode
         m_instName += "_hr";
         m_numberDetectorsActual =
@@ -641,16 +648,17 @@ MatrixWorkspace_sptr LoadILLDiffraction::loadEmptyInstrument() {
 
 /**
 * Rotates the detector to the 2theta0 read from the file
+* @param twoTheta0Read : 2theta0 read from the file
 */
-void LoadILLDiffraction::moveTwoThetaZero(double twoTheta0) {
-
+void LoadILLDiffraction::moveTwoThetaZero(double twoTheta0Read) {
   Instrument_const_sptr instrument = m_outWorkspace->getInstrument();
   IComponent_const_sptr component = instrument->getComponentByName("detector");
-
-  Quat rotation(twoTheta0, V3D(0, 1, 0));
-
-  g_log.debug() << "Setting 2theta0 to " << twoTheta0;
-
+  double twoTheta0Actual = twoTheta0Read;
+  if (m_instName == "D20") {
+    twoTheta0Actual += D20_NUMBER_DEAD_PIXELS * D20_PIXEL_SIZE;
+  }
+  Quat rotation(twoTheta0Actual, V3D(0, 1, 0));
+  g_log.debug() << "Setting 2theta0 to " << twoTheta0Actual;
   m_outWorkspace->mutableDetectorInfo().setRotation(*component, rotation);
 }
 
