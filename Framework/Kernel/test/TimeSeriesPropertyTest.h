@@ -786,7 +786,9 @@ public:
       TS_ASSERT_EQUALS(out_3->nthValue(j), j + 4);
     }
 
-    return;
+    for (auto outputPtr : outputs) {
+      delete outputPtr;
+    }
   }
 
   //----------------------------------------------------------------------------
