@@ -310,14 +310,17 @@ void GroupDetectors2::exec() {
            : 1.);
 
   // Build a new map
-  const size_t outIndex =
-      formGroups(inputWS, outputWS, prog4Copy, keepAll, unGroupedSet);
+  auto indexInfo = Indexing::IndexInfo(0);
+  const size_t outIndex = formGroups(inputWS, outputWS, prog4Copy, keepAll,
+                                     unGroupedSet, indexInfo);
 
   // If we're keeping ungrouped spectra
   if (keepAll) {
     // copy them into the output workspace
     moveOthers(unGroupedSet, *inputWS, *outputWS, outIndex);
   }
+
+  outputWS->setIndexInfo(indexInfo);
 
   g_log.information() << name() << " algorithm has finished\n";
 
@@ -1031,7 +1034,8 @@ double GroupDetectors2::fileReadProg(
 size_t GroupDetectors2::formGroups(API::MatrixWorkspace_const_sptr inputWS,
                                    API::MatrixWorkspace_sptr outputWS,
                                    const double prog4Copy, const bool keepAll,
-                                   const std::set<int64_t> &unGroupedSet) {
+                                   const std::set<int64_t> &unGroupedSet,
+                                   Indexing::IndexInfo &indexInfo) {
   // get "Behaviour" string
   const std::string behaviour = getProperty("Behaviour");
   int bhv = 0;
@@ -1123,9 +1127,8 @@ size_t GroupDetectors2::formGroups(API::MatrixWorkspace_const_sptr inputWS,
     }
   }
 
-  Indexing::IndexInfo indexInfo = Indexing::group(
-      inputWS->indexInfo(), std::move(spectrumNumbers), spectrumGroups);
-  outputWS->setIndexInfo(indexInfo);
+  indexInfo = Indexing::group(inputWS->indexInfo(), std::move(spectrumNumbers),
+                              spectrumGroups);
 
   if (bhv == 1 && requireDivide) {
     g_log.debug() << "Running Divide algorithm to perform averaging.\n";
@@ -1155,6 +1158,10 @@ size_t
 GroupDetectors2::formGroupsEvent(DataObjects::EventWorkspace_const_sptr inputWS,
                                  DataObjects::EventWorkspace_sptr outputWS,
                                  const double prog4Copy) {
+  if (inputWS->detectorInfo().isScanning())
+    throw std::runtime_error("GroupDetectors does not currently support "
+                             "workspaces with detector scans.");
+
   // get "Behaviour" string
   const std::string behaviour = getProperty("Behaviour");
   int bhv = 0;

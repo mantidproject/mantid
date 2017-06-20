@@ -206,7 +206,8 @@ private:
   /// into the output workspace
   size_t formGroups(API::MatrixWorkspace_const_sptr inputWS,
                     API::MatrixWorkspace_sptr outputWS, const double prog4Copy,
-                    const bool keepAll, const std::set<int64_t> &unGroupedSet);
+                    const bool keepAll, const std::set<int64_t> &unGroupedSet,
+                    Indexing::IndexInfo &indexInfo);
   /// Copy the and combine the event lists that the user requested from the
   /// input into the output workspace
   size_t formGroupsEvent(DataObjects::EventWorkspace_const_sptr inputWS,
