@@ -9,8 +9,9 @@ import numpy as np
 import six
 import os
 
-from mantid.api import AlgorithmFactory, FileAction, FileProperty, PythonAlgorithm, Progress, WorkspaceProperty, mtd, \
-                       WorkspaceFactory, AnalysisDataService
+from mantid.api import AlgorithmFactory, FileAction, FileProperty, PythonAlgorithm, Progress, WorkspaceProperty, mtd
+from mantid.api import WorkspaceFactory, AnalysisDataService
+
 # noinspection PyProtectedMember
 from mantid.api._api import WorkspaceGroup
 from mantid.simpleapi import CloneWorkspace, GroupWorkspaces, SaveAscii, Load

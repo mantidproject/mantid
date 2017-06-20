@@ -77,7 +77,7 @@ class LoadCRYSTAL(AbinsModules.GeneralDFTProgram):
         """
         Determines whether the system is a molecule or a crystal.
         """
-        with open(self._clerk.get_input_filename(),  "r") as crystal_file:
+        with open(self._clerk.get_input_filename(), "r") as crystal_file:
             lines = crystal_file.read()
 
         if "MOLECULAR CALCULATION" in lines or "0D - MOLECULE" in lines:
@@ -99,7 +99,7 @@ class LoadCRYSTAL(AbinsModules.GeneralDFTProgram):
         Checks if we have data for more than one k-point.
         :return: True if many k-points included in calculations otherwise False
         """
-        with open(self._clerk.get_input_filename(),  "r") as crystal_file:
+        with open(self._clerk.get_input_filename(), "r") as crystal_file:
             lines = crystal_file.read()
         phonon_dispersion = lines.count("DISPERSION K ") > 1
 
@@ -191,7 +191,7 @@ class LoadCRYSTAL(AbinsModules.GeneralDFTProgram):
                 zdisp = []
 
                 local_line = line.replace("(", " ").replace(")", " ").split()
-                k_coordinates.append([float(local_line[7]),  float(local_line[8]), float(local_line[9])])
+                k_coordinates.append([float(local_line[7]), float(local_line[8]), float(local_line[9])])
                 weights.append(float(local_line[11]))
                 k_point_type = local_line[6]
 

@@ -139,8 +139,10 @@ class SPowderSemiEmpiricalCalculator(object):
         else:
             max_threshold = AbinsModules.AbinsConstants.MAX_THRESHOLD
 
-            if s_max - self._max_s_previous_order[atom] > small_s and \
-                            self._s_current_threshold[atom] < max_threshold:
+            is_not_smaller = s_max - self._max_s_previous_order[atom] > small_s
+            max_attempts = self._s_current_threshold[atom] < max_threshold
+
+            if is_not_smaller and max_attempts:
 
                 msg = ("Numerical instability detected. Threshold for S has to be increased." +
                        " Current max S is {} and the previous is {} for order {}."
