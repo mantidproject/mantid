@@ -232,7 +232,7 @@
      <x>0</x>
      <y>0</y>
      <width>1068</width>
-     <height>22</height>
+     <height>27</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -254,7 +254,7 @@
   <customwidget>
    <class>ScanPreProcessStatusTable</class>
    <extends>QTableView</extends>
-   <header>PreprocessWindow.h</header>
+   <header>pre_process_table.h</header>
   </customwidget>
  </customwidgets>
  <resources/>
