@@ -3,7 +3,6 @@
 
 #include "MantidKernel/DllConfig.h"
 #include "MantidKernel/ICatalogInfo.h"
-#include "Poco/Path.h"
 #include <boost/optional.hpp>
 #include <memory>
 

@@ -2,6 +2,8 @@
 #include "MantidKernel/Logger.h"
 #include <ostream>
 #include <cmath>
+#include <stdexcept>
+#include <vector>
 
 namespace {
 // Initialize the logger

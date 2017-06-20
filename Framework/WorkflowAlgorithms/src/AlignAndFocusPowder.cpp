@@ -1,8 +1,8 @@
 #include "MantidWorkflowAlgorithms/AlignAndFocusPowder.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/FileFinder.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidKernel/PropertyManagerDataService.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/GroupingWorkspace.h"
 #include "MantidDataObjects/MaskWorkspace.h"
@@ -10,13 +10,13 @@
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/ConfigService.h"
 #include "MantidKernel/EnabledWhenProperty.h"
+#include "MantidKernel/InstrumentInfo.h"
 #include "MantidKernel/PropertyManager.h"
+#include "MantidKernel/PropertyManagerDataService.h"
 #include "MantidKernel/RebinParamsValidator.h"
 #include "MantidKernel/System.h"
-#include "MantidKernel/ConfigService.h"
-#include "MantidKernel/InstrumentInfo.h"
-#include "MantidAPI/FileFinder.h"
 
 using Mantid::Geometry::Instrument_const_sptr;
 using namespace Mantid::Kernel;
@@ -33,23 +33,6 @@ using API::FileProperty;
 
 // Register the class into the algorithm factory
 DECLARE_ALGORITHM(AlignAndFocusPowder)
-
-AlignAndFocusPowder::AlignAndFocusPowder() : API::DataProcessorAlgorithm() {}
-
-AlignAndFocusPowder::~AlignAndFocusPowder() {
-  if (m_progress)
-    delete m_progress;
-}
-
-const std::string AlignAndFocusPowder::name() const {
-  return "AlignAndFocusPowder";
-}
-
-int AlignAndFocusPowder::version() const { return 1; }
-
-const std::string AlignAndFocusPowder::category() const {
-  return "Workflow\\Diffraction";
-}
 
 //----------------------------------------------------------------------------------------------
 /** Initialisation method. Declares properties to be used in algorithm.
@@ -356,7 +339,7 @@ void AlignAndFocusPowder::exec() {
   }
 
   // set up a progress bar with the "correct" number of steps
-  m_progress = new Progress(this, 0., 1., 22);
+  m_progress = make_unique<Progress>(this, 0., 1., 22);
 
   if (m_inputEW) {
     double tolerance = getProperty("CompressTolerance");

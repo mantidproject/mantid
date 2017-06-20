@@ -1,6 +1,7 @@
 #include "MantidKernel/ArrayOrderedPairsValidator.h"
 
 #include <boost/make_shared.hpp>
+#include <stdint.h>
 #include <sstream>
 
 namespace Mantid {

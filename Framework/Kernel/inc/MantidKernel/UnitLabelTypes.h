@@ -23,11 +23,12 @@
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-#include "MantidKernel/UnitLabel.h"
-#include "MantidKernel/ClassMacros.h"
+#include "MantidKernel/DllConfig.h"
 
 namespace Mantid {
 namespace Kernel {
+// Forward declare
+class UnitLabel;
 namespace Units {
 /**
  * A simple class containing common symbol types
