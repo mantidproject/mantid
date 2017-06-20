@@ -20,7 +20,7 @@ class PeaksIntegrationReportDialog(QtGui.QDialog):
         self.ui.setupUi(self)
 
         # initialize widget
-        self.ui.tableWidget_spreadsheet.setup()
+        self.ui.tableWidget_spreadsheet.set_instrument_calibration()
 
         # set up handlers
         self.connect(self.ui.pushButton_exportTable, QtCore.SIGNAL('clicked()'),

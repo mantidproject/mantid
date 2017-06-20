@@ -1,6 +1,8 @@
 import os
 from PyQt4 import QtGui, QtCore
 import ui_preprocess_window
+import reduce4circleControl
+import guiutility as gui_util
 
 
 class ScanPreProcessWindow(QtGui.QMainWindow):
@@ -21,6 +23,12 @@ class ScanPreProcessWindow(QtGui.QMainWindow):
         # initialize the widgets
         self.enable_calibration_settings(False)
 
+        # detector sizes
+        self.ui.comboBox_detSize.addItem('256 x 256')
+        self.ui.comboBox_detSize.addItem('512 x 512')
+        self.ui.comboBox_detSize.addItem('(512 x 9) x (512 x 9)')
+        self.ui.comboBox_detSize.setCurrentIndex(0)
+
         # define event handling
         self.connect(self.ui.pushButton_browseOutputDir, QtCore.SIGNAL('clicked()'),
                      self.do_browse_output_dir)
@@ -30,6 +38,9 @@ class ScanPreProcessWindow(QtGui.QMainWindow):
                      self.do_change_calibration_settings)
         self.connect(self.ui.pushButton_fixSettings, QtCore.SIGNAL('clicked()'),
                      self.do_fix_calibration_settings)
+
+        # class variables
+        self._reductionController = None
 
         return
 
@@ -42,7 +53,7 @@ class ScanPreProcessWindow(QtGui.QMainWindow):
         try:
             scan_numbers = self.get_scan_numbers()
         except RuntimeError as run_err:
-            gui_util.pop_error_dialog(self, run_err)
+            gui_util.show_message(self, '[ERROR] {0}'.format(run_err))
             return
 
         if len(scan_numbers) != 1:
@@ -84,13 +95,25 @@ class ScanPreProcessWindow(QtGui.QMainWindow):
         start the pre-precessing scans
         :return:
         """
-        # TODO/ISSUE/NOWNOW
+        assert isinstance(self._reductionController, reduce4circleControl.CWSCDReductionControl), 'blabla to remove'
+
+        # check whether it is well setup for reduction
+        if self._reductionController is None:
+            raise RuntimeError('Reduction controller has not been set up yet.  It is required for pre-processing.')
 
         # get all the information
         exp_number = int(self.ui.lineEdit_ipts.text())
         scan_list = self.get_scan_numbers()
 
-        status, pt_list = self._myControl.get_pt_numbers(exp_number, scan_number)
+        self.set_calibration_to_reduction_controller(exp_number)
+
+        # loop around to
+
+
+
+
+
+        status, pt_list = self._myControl.get_pt_numbers(exp_number, scan_list)
         if status is False:
             # skip this row due to error
             sum_error_msg += '%s\n' % str(pt_list)
@@ -100,12 +123,11 @@ class ScanPreProcessWindow(QtGui.QMainWindow):
         status, ret_tup = self._myControl.merge_pts_in_scan(exp_no=exp_number, scan_no=scan_number,
                                                             pt_num_list=[])
 
-        self._myControl.set_exp_number()
-        self._myControl.set_default_detector_sample_distance()
+
         set_detector_sample_distance
-        self._myControl.set_default_pixel_size()
+
         self._myControl.set_detector_center()
-        self._myControl.set_default_pixel_size()
+
         self._myControl.save_merged_scan()
 
         return
@@ -153,7 +175,65 @@ class ScanPreProcessWindow(QtGui.QMainWindow):
 
         return scan_list
 
-    def setup(self, exp_number, det_size, det_center, det_sample_distance, wave_length):
+    def set_calibration_to_reduction_controller(self, exp_number):
+        """
+        
+        :param exp_number:
+        :return:
+        """
+        # set up the experiment number if it is different
+        if exp_number != self._reductionController.get_experiment():
+            self._reductionController.set_exp_number(exp_number)
+            self._myControl.set_default_detector_sample_distance()
+            self._myControl.set_default_pixel_size()
+
+        # set up the calibration
+        # wave length
+        user_wavelength_str = str(self.ui.lineEdit_infoWavelength.text()).strip()
+        if len(user_wavelength_str) > 0:
+            try:
+                user_wavelength = float(user_wavelength_str)
+                self._reductionController.set_user_wave_length(exp_number, user_wavelength)
+            except ValueError:
+                gui_util.show_message(self, '[ERROR] User-specified wave length {0} cannot be converted to float.'
+                                            ''.format(user_wavelength_str))
+                return
+        # END-IF
+
+        # detector center
+        user_det_center_str = str(self.ui.lineEdit_infoDetCenter.text()).strip()
+        if len(user_det_center_str) > 0:
+            status, ret_obj = gui_util.parse_float_array(user_det_center_str)
+            if not status or len(ret_obj) != 2:
+                gui_util.show_message(self, 'User specified detector center must be two floating point,'
+                                            'but not {0}'.format(user_det_center_str))
+                return
+            det_center = ret_obj
+            self._reductionController.set_detector_center(exp_number, det_center[0], det_center[1])
+        # END-IF
+
+        # detector sample distance
+        status, ret_obj = gui_util.parse_float_editors([self.ui.lineEdit_infoDetSampleDistance], allow_blank=True)
+        if not status:
+            error_message = ret_obj
+            gui_util.show_message(self, '[ERROR] {0}'.format(error_message))
+            return
+        user_det_sample_distance = ret_obj[0]
+        if user_det_sample_distance is not None:
+            self._reductionController.set_default_detector_sample_distance(user_det_sample_distance)
+
+        # detector size
+        curr_det_size_index = self.ui.comboBox_detSize.currentIndex()
+        if curr_det_size_index > 2:
+            gui_util.show_message(self, 'Detector {0} is not supported by now!'
+                                        ''.format(str(self.ui.comboBox_detSize.currentText())))
+            return
+        det_size = [256, 512][curr_det_size_index]
+        self._reductionController.set_detector_geometry(det_size, det_size)
+
+        return
+
+    def set_instrument_calibration(self, exp_number, det_size, det_center, det_sample_distance, wave_length):
         """
         set up the calibration parameters
         :param exp_number:
@@ -189,3 +269,19 @@ class ScanPreProcessWindow(QtGui.QMainWindow):
             self.ui.lineEdit_infoWavelength.setText('{0}'.format(wave_length))
 
         return
+
+    def setup(self, controller):
+        """
+        setup the 4-circle reduction controller
+        :param controller:
+        :return:
+        """
+        assert isinstance(controller, reduce4circleControl.CWSCDReductionControl),\
+            'Reduction controller must be an instance of reduce4circleControl.CWSCDReductionControl but not a {0}.' \
+            ''.format(controller.__class__.__name__)
+
+        self._reductionController = controller
+
+        return
+
+

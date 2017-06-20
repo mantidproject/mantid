@@ -368,12 +368,12 @@ class MainWindow(QtGui.QMainWindow):
         self.ui.comboBox_detectorSize.setCurrentIndex(0)
 
         # Table widgets
-        self.ui.tableWidget_peaksCalUB.setup()
-        self.ui.tableWidget_ubMatrix.setup()
-        self.ui.tableWidget_surveyTable.setup()
-        self.ui.tableWidget_mergeScans.setup()
-        self.ui.tableWidget_ubInUse.setup()
-        self.ui.tableWidget_kShift.setup()
+        self.ui.tableWidget_peaksCalUB.set_instrument_calibration()
+        self.ui.tableWidget_ubMatrix.set_instrument_calibration()
+        self.ui.tableWidget_surveyTable.set_instrument_calibration()
+        self.ui.tableWidget_mergeScans.set_instrument_calibration()
+        self.ui.tableWidget_ubInUse.set_instrument_calibration()
+        self.ui.tableWidget_kShift.set_instrument_calibration()
 
         # Radio buttons
         self.ui.radioButton_ubFromTab1.setChecked(True)
@@ -3492,8 +3492,8 @@ class MainWindow(QtGui.QMainWindow):
 
         self._preProcessWindow = PreprocessWindow.ScanPreProcessWindow(self)
         self._preProcessWindow.show()
-        self._preProcessWindow.setup(exp_number=12345, det_size=256, det_center=None,
-                                     det_sample_distance=None, wave_length=None)
+        self._preProcessWindow.set_instrument_calibration(exp_number=12345, det_size=256, det_center=None,
+                                                          det_sample_distance=None, wave_length=None)
 
         return
 
