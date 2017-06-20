@@ -470,5 +470,14 @@ public:
     TSM_ASSERT_EQUALS("Parent of detector 0 is assembly index 3", 3,
                       compInfo.parent(0));
   }
+
+  void test_set_detectorInfo() {
+
+    ComponentInfo componentInfo;
+    DetectorInfo detectorInfo;
+    TS_ASSERT(!componentInfo.hasDetectorInfo());
+    componentInfo.setDetectorInfo(&detectorInfo);
+    TS_ASSERT(componentInfo.hasDetectorInfo());
+  }
 };
 #endif /* MANTID_BEAMLINE_COMPONENTINFOTEST_H_ */

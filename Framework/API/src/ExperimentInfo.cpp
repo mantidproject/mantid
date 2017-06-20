@@ -325,6 +325,7 @@ void ExperimentInfo::setInstrument(const Instrument_const_sptr &instr) {
       m_infoVisitor->detectorIdToIndexMap());
 
   makeAPIComponentInfo(*m_infoVisitor, m_detectorInfo);
+  m_detectorInfo->setComponentInfo(m_componentInfo.get());
 
   // Detector IDs that were previously dropped because they were not part of the
   // instrument may now suddenly be valid, so we have to reinitialize the

@@ -9,6 +9,7 @@
 namespace Mantid {
 namespace Beamline {
 
+class ComponentInfo;
 /** Beamline::DetectorInfo provides easy access to commonly used parameters of
   individual detectors (pixels) in a beamline, such as mask and monitor flags,
   positions, L2, and 2-theta.
@@ -94,6 +95,8 @@ public:
                        const std::pair<int64_t, int64_t> &interval);
 
   void merge(const DetectorInfo &other);
+  void setComponentInfo(ComponentInfo *componentInfo);
+  bool hasComponentInfo() const;
 
 private:
   size_t linearIndex(const std::pair<size_t, size_t> &index) const;
@@ -113,6 +116,7 @@ private:
       nullptr};
   Kernel::cow_ptr<std::vector<std::vector<size_t>>> m_indexMap{nullptr};
   Kernel::cow_ptr<std::vector<std::pair<size_t, size_t>>> m_indices{nullptr};
+  ComponentInfo *m_componentInfo = nullptr;
 };
 
 /** Returns the position of the detector with given detector index.

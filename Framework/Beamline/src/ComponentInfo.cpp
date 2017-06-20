@@ -23,7 +23,7 @@ ComponentInfo::ComponentInfo(
     boost::shared_ptr<const std::vector<size_t>> parentIndices,
     boost::shared_ptr<std::vector<Eigen::Vector3d>> positions,
     boost::shared_ptr<std::vector<Eigen::Quaterniond>> rotations,
-    DetectorInfo *const detectorInfo)
+    DetectorInfo *detectorInfo)
     : m_assemblySortedDetectorIndices(std::move(assemblySortedDetectorIndices)),
       m_assemblySortedComponentIndices(
           std::move(assemblySortedComponentIndices)),
@@ -58,6 +58,10 @@ ComponentInfo::ComponentInfo(
                                 "input of same size as the sum of "
                                 "non-detector and detector components");
   }
+  if (!m_detectorInfo) {
+    throw std::invalid_argument("DetectorInfo cannot be null");
+  }
+  m_detectorInfo->setComponentInfo(this);
 }
 
 std::vector<size_t>
@@ -188,6 +192,14 @@ size_t ComponentInfo::parent(const size_t componentIndex) const {
   } else {
     return componentIndex; // Root gets root as parent
   }
+}
+
+bool ComponentInfo::hasDetectorInfo() const {
+  return m_detectorInfo != nullptr;
+}
+
+void ComponentInfo::setDetectorInfo(DetectorInfo *detectorInfo) {
+  m_detectorInfo = detectorInfo;
 }
 
 } // namespace Beamline

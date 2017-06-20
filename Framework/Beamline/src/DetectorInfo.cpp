@@ -263,6 +263,14 @@ void DetectorInfo::merge(const DetectorInfo &other) {
   m_scanCounts = std::move(scanCounts);
 }
 
+void DetectorInfo::setComponentInfo(ComponentInfo *componentInfo) {
+  m_componentInfo = componentInfo;
+}
+
+bool DetectorInfo::hasComponentInfo() const {
+  return m_componentInfo != nullptr;
+}
+
 /// Returns the linear index for a pair of detector index and time index.
 size_t DetectorInfo::linearIndex(const std::pair<size_t, size_t> &index) const {
   // The most common case are beamlines with static detectors. In that case the
