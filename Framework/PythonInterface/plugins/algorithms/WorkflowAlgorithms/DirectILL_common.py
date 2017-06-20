@@ -9,6 +9,7 @@ from mantid.simpleapi import DeleteWorkspace
 ABSOLUTE_UNITS_OFF = 'Absolute Units OFF'
 ABSOLUTE_UNITS_ON = 'Absolute Units ON'
 
+BKG_DIAGNOSTICS_AUTO = 'Bkg Diagnostics AUTO'
 BKG_DIAGNOSTICS_OFF = 'Bkg Diagnostics OFF'
 BKG_DIAGNOSTICS_ON = 'Bkg Diagnostics ON'
 
@@ -27,9 +28,11 @@ ELASTIC_CHANNEL_FIT = 'Fit Elastic Channel'
 ELASTIC_PEAK_DIAGNOSTICS_OFF = 'Peak Diagnostics OFF'
 ELASTIC_PEAK_DIAGNOSTICS_ON = 'Peak Diagnostics ON'
 
+EPP_METHOD_AUTO = 'EPP Method AUTO'
 EPP_METHOD_FIT = 'Fit EPP'
-EPP_MEHTOD_CALCULATE = 'Calculate EPP'
+EPP_METHOD_CALCULATE = 'Calculate EPP'
 
+INCIDENT_ENERGY_CALIBRATION_AUTO = 'Energy Calibration AUTO'
 INCIDENT_ENERGY_CALIBRATION_OFF = 'Energy Calibration OFF'
 INCIDENT_ENERGY_CALIBRATION_ON = 'Energy Calibration ON'
 

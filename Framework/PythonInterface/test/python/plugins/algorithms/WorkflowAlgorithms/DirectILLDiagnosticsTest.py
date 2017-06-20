@@ -11,19 +11,20 @@ class DirectILLDiagnosticsTest(unittest.TestCase):
     _BKG_LEVEL = 1.42
     _EPP_WS_NAME = 'eppWS_'
     _RAW_WS_NAME = 'rawWS_'
+    _TEST_WS = None
     _TEST_WS_NAME = 'testWS_'
 
     def __init__(self, methodName='runTest'):
         unittest.TestCase.__init__(self, methodName)
-        self._testIN5WS = None
 
     def setUp(self):
-        if not self._testIN5WS:
-            self._testIN5WS = illhelpers.create_poor_mans_in5_workspace(self._BKG_LEVEL, illhelpers.default_test_detectors)
+        if DirectILLDiagnosticsTest._TEST_WS is None:
+            DirectILLDiagnosticsTest._TEST_WS = illhelpers.create_poor_mans_in5_workspace(self._BKG_LEVEL, 
+                                                                                          illhelpers.default_test_detectors)
         inWSName = 'inputWS'
-        mtd.addOrReplace(inWSName, self._testIN5WS)
+        mtd.addOrReplace(inWSName, DirectILLDiagnosticsTest._TEST_WS)
         kwargs = {
-            'InputWorkspace': self._testIN5WS,
+            'InputWorkspace': DirectILLDiagnosticsTest._TEST_WS,
             'OutputWorkspace': self._TEST_WS_NAME,
             'OutputEPPWorkspace': self._EPP_WS_NAME,
             'OutputRawWorkspace': self._RAW_WS_NAME
@@ -40,6 +41,7 @@ class DirectILLDiagnosticsTest(unittest.TestCase):
             'InputWorkspace': self._RAW_WS_NAME,
             'OutputWorkspace': outWSName,
             'EPPWorkspace': self._EPP_WS_NAME,
+            'DefaultMask': 'Default Mask OFF',
             'rethrow': True
         }
         run_algorithm('DirectILLDiagnostics', **kwargs)
@@ -70,8 +72,11 @@ class DirectILLDiagnosticsTest(unittest.TestCase):
             'OutputWorkspace': outWSName,
             'ElasticPeakDiagnostics': 'Peak Diagnostics OFF',
             'EPPWorkspace': self._EPP_WS_NAME,
+            'BkgDiagnostics': 'Bkg Diagnostics ON',
+            'NonBkgRegionInSigmas': 3,
             'NoisyBkgLowThreshold': 0.01,
             'NoisyBkgHighThreshold': 9.99,
+            'DefaultMask': 'Default Mask OFF',
             'rethrow': True
         }
         run_algorithm('DirectILLDiagnostics', **kwargs)
@@ -108,6 +113,7 @@ class DirectILLDiagnosticsTest(unittest.TestCase):
             'ElasticPeakLowThreshold': 0.2,
             'ElasticPeakHighThreshold': 9.7,
             'BkgDiagnostics': 'Bkg Diagnostics OFF',
+            'DefaultMask': 'Default Mask OFF',
             'rethrow': True
         }
         run_algorithm('DirectILLDiagnostics', **kwargs)

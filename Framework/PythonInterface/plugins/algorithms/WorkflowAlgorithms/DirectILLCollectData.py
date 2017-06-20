@@ -399,10 +399,11 @@ class DirectILLCollectData(DataProcessorAlgorithm):
             doc='Table workspace containing results from the FindEPP ' +
                 'algorithm.')
         self.declareProperty(name=common.PROP_EPP_METHOD,
-                             defaultValue=common.EPP_METHOD_FIT,
+                             defaultValue=common.EPP_METHOD_AUTO,
                              validator=StringListValidator([
+                                 common.EPP_METHOD_AUTO,
                                  common.EPP_METHOD_FIT,
-                                 common.EPP_MEHTOD_CALCULATE]),
+                                 common.EPP_METHOD_CALCULATE]),
                              direction=Direction.Input,
                              doc='Method to create the EPP table for detectors (monitor is awlays fitted) if '
                                  + common.PROP_EPP_WS + ' is not given.')
@@ -411,7 +412,7 @@ class DirectILLCollectData(DataProcessorAlgorithm):
                              validator=positiveFloat,
                              direction=Direction.Input,
                              doc='Nominal sigma for the EPP table when ' + common.PROP_EPP_METHOD +
-                                 ' is set to ' + common.EPP_MEHTOD_CALCULATE +
+                                 ' is set to ' + common.EPP_METHOD_CALCULATE +
                                  ' (default: 10 times the first bin width).')
         self.declareProperty(name=common.PROP_ELASTIC_CHANNEL_MODE,
                              defaultValue=common.ELASTIC_CHANNEL_SAMPLE_LOG,
@@ -433,13 +434,13 @@ class DirectILLCollectData(DataProcessorAlgorithm):
                              direction=Direction.Input,
                              doc='Index of the incident monitor, if not specified in instrument parameters.')
         self.declareProperty(name=common.PROP_INCIDENT_ENERGY_CALIBRATION,
-                             defaultValue=common.INCIDENT_ENERGY_CALIBRATION_ON,
+                             defaultValue=common.INCIDENT_ENERGY_CALIBRATION_AUTO,
                              validator=StringListValidator([
+                                 common.INCIDENT_ENERGY_CALIBRATION_AUTO,
                                  common.INCIDENT_ENERGY_CALIBRATION_ON,
                                  common.INCIDENT_ENERGY_CALIBRATION_OFF]),
                              direction=Direction.Input,
-                             doc='Enable or disable incident energy ' +
-                                 'calibration on IN4 and IN6.')
+                             doc='Control the incident energy calibration.')
         self.setPropertyGroup(common.PROP_INCIDENT_ENERGY_CALIBRATION, common.PROPGROUP_INCIDENT_ENERGY_CALIBRATION)
         self.declareProperty(MatrixWorkspaceProperty(
             name=common.PROP_INCIDENT_ENERGY_WS,
@@ -544,6 +545,12 @@ class DirectILLCollectData(DataProcessorAlgorithm):
     def _calibrateEi(self, mainWS, detEPPWS, monWS, monEPPWS, wsNames, wsCleanup, report, subalgLogging):
         """Perform and apply incident energy calibration."""
         eiCalibration = self.getProperty(common.PROP_INCIDENT_ENERGY_CALIBRATION).value
+        if eiCalibration == common.INCIDENT_ENERGY_CALIBRATION_AUTO:
+            instrumentName = mainWS.getInstrument().getName()
+            if instrumentName == 'IN5':
+                eiCalibration = common.INCIDENT_ENERGY_CALIBRATION_OFF
+            else:
+                eiCalibration = common.INCIDENT_ENERGY_CALIBRATION_ON
         if eiCalibration == common.INCIDENT_ENERGY_CALIBRATION_ON:
             if self.getProperty(common.PROP_INCIDENT_ENERGY_WS).isDefault:
                 monIndex = self._monitorIndex(monWS)
@@ -618,6 +625,12 @@ class DirectILLCollectData(DataProcessorAlgorithm):
         detEPPInWS = self.getProperty(common.PROP_EPP_WS).value
         if not detEPPInWS:
             eppMethod = self.getProperty(common.PROP_EPP_METHOD).value
+            if eppMethod == common.EPP_METHOD_AUTO:
+                instrumentName = mainWS.getInstrument().getName()
+                if instrumentName == 'IN5':
+                    eppMethod = common.EPP_METHOD_CALCULATE
+                else:
+                    eppMethod = common.EPP_METHOD_FIT
             if eppMethod == common.EPP_METHOD_FIT:
                 detEPPWS = _fitEPP(mainWS, common.WS_CONTENT_DETS, wsNames, subalgLogging)
             else:

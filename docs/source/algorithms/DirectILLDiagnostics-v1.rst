@@ -28,6 +28,8 @@ Flat background diagnostics
 
 Similarly to elastic peak diagnostics, *EPPWorkspace* and *NonBgkRegionInSigmas* are used to integrate the time-independent background regions of *InputWorkspace*. *NonBkgRegionInSigmas* is a factor applied to the 'Sigma' column in *EPPWorkspace* and this interval around the elastic peak positions is excluded from the integration. No opening angle corrections are applied to the background diagnostics.
 
+By default, the background diagnostics are disabled for IN5.
+
 Diagnostics reporting
 #####################
 

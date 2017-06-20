@@ -57,16 +57,18 @@ Elastic peak positions (EPP)
 
 Information on the elastic peaks (position, peak width) is needed for incident energy calibration, as well as for the :ref:`DirectILLDiagnostics <algm-DirectILLDiagnostics>` and :ref:`DirectILLIntegrateVanadium <algm-DirectILLIntegrateVanadium>` algorithms. This data comes in the form of a EPP workspace which is a TableWorkspace containing columns specified by the :ref:`FindEPP <algm-FindEPP>` algorithm.
 
-If no external EPP table is given by the *EPPWorkspace* property, the algorithm either fits the elastic peaks using :ref:`FindEPP <algm-FindEPP>`, or calculates their nominal positions using :ref:`CreateEPP <algm-CreateEPP>`. This behavior can be controlled by the *EPPCreationMode* property. In the calculation case, a nominal peak width can be given using the *Sigma* property.  The peak width is needed for some integration operations. If *Sigma* is not specified, ten times the first bin width in the workspace will be used.
+If no external EPP table is given by the *EPPWorkspace* property, the algorithm either fits the elastic peaks using :ref:`FindEPP <algm-FindEPP>`, or calculates their nominal positions using :ref:`CreateEPP <algm-CreateEPP>`. This behavior can be controlled by the *EPPCreationMode* property. The default ('EPP Method AUTO') is to calculate the positions for the IN5 instrument, and to fit for any other instrument.
+
+In the calculation case, a nominal peak width can be given using the *Sigma* property.  The peak width is needed for some integration operations. If *Sigma* is not specified, ten times the first bin width in the workspace will be used.
 
 Incident energy calibration
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+This step applies to IN4 and IN6 only. Incident energy calibration is disabled for IN5 by default.
+
 Incident energy is calibrated either by giving a new energy as a single-value workspace in *IncidentEnergyWorkspace* or calculating it from the elastic peak positions. The elastic peak position can be given by *EPPWorkspace*. If this parameter not specified, :ref:`FindEPP <algm-FindEPP>` is used.
 
 The calibrated energy can be retrieved as a single-value workspace using the *OutputIncidentEnergyWorkspace* property.
-
-This step applies to IN4 and IN6 only.
 
 TOF axis adjustment
 ^^^^^^^^^^^^^^^^^^^

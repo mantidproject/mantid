@@ -95,7 +95,7 @@ def _extractUserMask(ws, wsNames, algorithmLogging):
     maskWSName = wsNames.withSuffix('user_mask_extracted')
     maskWS, detectorIDs = ExtractMask(InputWorkspace=ws,
                                       OutputWorkspace=maskWSName,
-                                      EnableLogging=True)
+                                      EnableLogging=algorithmLogging)
     return maskWS
 
 
@@ -416,12 +416,13 @@ class DirectILLDiagnostics(DataProcessorAlgorithm):
         self.setPropertyGroup(common.PROP_PEAK_DIAGNOSTICS_SIGNIFICANCE_TEST,
                               common.PROPGROUP_PEAK_DIAGNOSTICS)
         self.declareProperty(name=common.PROP_BKG_DIAGNOSTICS,
-                             defaultValue=common.BKG_DIAGNOSTICS_ON,
+                             defaultValue=common.BKG_DIAGNOSTICS_AUTO,
                              validator=StringListValidator([
+                                 common.BKG_DIAGNOSTICS_AUTO,
                                  common.BKG_DIAGNOSTICS_ON,
                                  common.BKG_DIAGNOSTICS_OFF]),
                              direction=Direction.Input,
-                             doc='Enable or disable background diagnostics.')
+                             doc='Control the background diagnostics.')
         self.setPropertyGroup(common.PROP_BKG_DIAGNOSTICS, common.PROPGROUP_BKG_DIAGNOSTICS)
         self.declareProperty(name=common.PROP_BKG_SIGMA_MULTIPLIER,
                              defaultValue=10.0,
@@ -561,7 +562,14 @@ class DirectILLDiagnostics(DataProcessorAlgorithm):
                                  OutputWorkspace=diagnosticsWSName,
                                  EnableLogging=subalgLogging)
             wsCleanup.cleanup(peakDiagnosticsWS)
-        if self.getProperty(common.PROP_BKG_DIAGNOSTICS).value == common.BKG_DIAGNOSTICS_ON:
+        bkgDiagnostics = self.getProperty(common.PROP_BKG_DIAGNOSTICS).value
+        if bkgDiagnostics == common.BKG_DIAGNOSTICS_AUTO:
+            instrumentName = mainWS.getInstrument().getName()
+            if instrumentName == 'IN5':
+                bkgDiagnostics = common.BKG_DIAGNOSTICS_OFF
+            else:
+                bkgDiagnostics = common.BKG_DIAGNOSTICS_ON
+        if bkgDiagnostics == common.BKG_DIAGNOSTICS_ON:
             eppWS = self.getProperty(common.PROP_EPP_WS).value
             sigmaMultiplier = self.getProperty(common.PROP_BKG_SIGMA_MULTIPLIER).value
             integratedBkgs = _integrateBkgs(mainWS, eppWS, sigmaMultiplier, wsNames, wsCleanup, subalgLogging)
