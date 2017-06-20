@@ -2,11 +2,7 @@
 #define MANTID_API_ALGORITHM_NOTIFICATION_H_
 
 #include "MantidAPI/DllConfig.h"
-
-// forward declarations
-namespace Poco {
-class Notification;
-}
+#include <Poco/Notification.h>
 
 namespace Mantid {
 namespace API {

@@ -1,6 +1,5 @@
-#include "MantidAPI/AlgorithmNotification.h"
 #include "MantidAPI/Algorithm.h"
-#include <Poco/Notification.h>
+#include "MantidAPI/AlgorithmNotification.h"
 
 /**
  Implementation of various algorithm inner classes.
