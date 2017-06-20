@@ -14,6 +14,7 @@ if ( CXXTEST_FOUND )
             Crystal
             DataHandling
             MDAlgorithms
+            Nexus
             ${GMOCK_LIBRARIES}
             ${GTEST_LIBRARIES} )
   add_dependencies ( CrystalTest Algorithms CurveFitting )

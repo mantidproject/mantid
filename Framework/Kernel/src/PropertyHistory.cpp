@@ -1,8 +1,14 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
+#include "MantidKernel/EmptyValues.h"
 #include "MantidKernel/PropertyHistory.h"
 #include "MantidKernel/Property.h"
+
+#include <boost/lexical_cast.hpp>
+#include <algorithm>
+#include <stdint.h>
+#include <ostream>
 
 namespace Mantid {
 namespace Kernel {

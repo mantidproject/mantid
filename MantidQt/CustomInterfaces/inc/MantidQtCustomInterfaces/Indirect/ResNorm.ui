@@ -229,11 +229,6 @@
          </widget>
         </item>
        </layout>
-       <zorder>pbSave</zorder>
-       <zorder>lblPlot</zorder>
-       <zorder>cbPlot</zorder>
-       <zorder>pbPlot</zorder>
-       <zorder>horizontalSpacer_18</zorder>
       </widget>
      </item>
     </layout>
