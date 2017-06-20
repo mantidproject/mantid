@@ -217,7 +217,8 @@ void Fit::finalizeMinimizer(size_t nIterations) {
   setPropertyValue("OutputStatus", errorString);
   setProperty("OutputNIterations", static_cast<int>(nIterations));
   if (!this->isChild()) {
-    auto &logStream = errorString == "success" ? g_log.notice() : g_log.warning();
+    auto &logStream =
+        errorString == "success" ? g_log.notice() : g_log.warning();
     logStream << "Fit status: " << errorString << '\n';
   }
 }
