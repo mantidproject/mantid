@@ -9,14 +9,31 @@ except ImportError:
 import numpy as np
 
 
+# Helper class for handling stability issues with S threshold for one atom and one quantum event.
+class StabilityError(Exception):
+    def __init__(self, value=None):
+        self._value = value
+
+    def __str__(self):
+        return self._value
+
+
+# Helper class for handling stability issues with S threshold for all atoms and all quantum events.
+class StabilityErrorAllAtoms(Exception):
+    def __init__(self, value=None):
+        self._value = value
+
+    def __str__(self):
+        return self._value
+
+
 # noinspection PyMethodMayBeStatic
-class CalculateS(object):
+class SPowderSemiEmpiricalCalculator(object):
     """
     Class for calculating S(Q, omega)
     """
 
-    def __init__(self, filename=None, temperature=None, sample_form=None, abins_data=None, instrument=None,
-                 quantum_order_num=None):
+    def __init__(self, filename=None, temperature=None, abins_data=None, instrument=None, quantum_order_num=None):
         """
         @param filename: name of input DFT file (CASTEP: foo.phonon)
         @param temperature: temperature in K for which calculation of S should be done
@@ -31,10 +48,7 @@ class CalculateS(object):
             raise ValueError("Temperature cannot be negative.")
         self._temperature = float(temperature)
 
-        if sample_form in AbinsModules.AbinsConstants.ALL_SAMPLE_FORMS:
-            self._sample_form = sample_form
-        else:
-            raise ValueError("Invalid sample form %s" % sample_form)
+        self._sample_form = "Powder"
 
         if isinstance(abins_data, AbinsModules.AbinsData):
             self._abins_data = abins_data
@@ -67,10 +81,7 @@ class CalculateS(object):
             group_name=(AbinsModules.AbinsParameters.s_data_group + "/%s" % self._instrument + "/" +
                         self._sample_form + "/%sK" % self._temperature))
 
-        if self._sample_form == "Powder":
-            self._freq_generator = AbinsModules.FrequencyPowderGenerator()
-        else:
-            raise ValueError("Only powder case is implemented at the moment.")
+        self._freq_generator = AbinsModules.FrequencyPowderGenerator()
 
         self._calculate_order = {AbinsModules.AbinsConstants.QUANTUM_ORDER_ONE: self._calculate_order_one,
                                  AbinsModules.AbinsConstants.QUANTUM_ORDER_TWO: self._calculate_order_two,
@@ -84,6 +95,14 @@ class CalculateS(object):
         self._freq_size = self._bins.size - 1
         self._frequencies = self._bins[:-1]
 
+        # set initial threshold for s for each atom
+        self._num_atoms = len(self._abins_data.get_atoms_data().extract())
+        s_threshold = AbinsModules.AbinsParameters.s_relative_threshold
+        self._s_threshold_ref = np.asarray([s_threshold for _ in range(self._num_atoms)])
+        self._s_current_threshold = np.copy(self._s_threshold_ref)
+        self._max_s_previous_order = np.asarray([0.0 for _ in range(self._num_atoms)])
+        self._total_s_correction_num_attempt = 0
+
         self._powder_atoms_data = None
         self._a_traces = None
         self._b_traces = None
@@ -92,55 +111,111 @@ class CalculateS(object):
 
     def _calculate_s(self):
 
-        # Powder case: calculate A and B tensors
-        # if self._sample_form == "Powder":
-        #
-        #     powder_calculator = AbinsModules.CalculatePowder(filename=self._input_filename, abins_data=self._abins_data)
-        #     powder_data = powder_calculator.get_formatted_data()
-        #     if self._instrument.get_name() in AbinsModules.AbinsConstants.ONE_DIMENSIONAL_INSTRUMENTS:
-        #         calculate_s_powder = self._calculate_s_powder_1d
-        #     else:
-        #         calculate_s_powder = self._calculate_s_powder_2d
-        #     s_data = calculate_s_powder(powder_data=powder_data)
         powder_calculator = AbinsModules.CalculatePowder(filename=self._input_filename, abins_data=self._abins_data)
         powder_data = powder_calculator.get_formatted_data()
+        calculate_s_powder = None
         if self._instrument.get_name() in AbinsModules.AbinsConstants.ONE_DIMENSIONAL_INSTRUMENTS:
             calculate_s_powder = self._calculate_s_powder_1d
         s_data = calculate_s_powder(powder_data=powder_data)
 
-        # # Crystal case: calculate DW
-        # else:
-        #     raise ValueError("SingleCrystal case not implemented yet.")
-
         return s_data
 
-    def _calculate_s_over_threshold(self, s=None, freq=None, coeff=None):
+    def _calculate_s_over_threshold(self, s=None, freq=None, coeff=None, atom=None, order=None):
         """
-        Discards small S and corresponding frequencies.
-        @param s: numpy array with S for the given order quantum event and atom
-        @param freq: frequencies which correspond to s
-        @param coeff: coefficients which correspond to  freq
-        @return: large enough s, and corresponding freq, coeff
+        Discards frequencies for small S.
+        :param s: numpy array with S for the given order quantum event and atom
+        :param freq: frequencies which correspond to s
+        :param coeff: coefficients which correspond to  freq
+        :param atom: number of atom
+        :param order: order of quantum event
+        :return: large enough s, and corresponding freq, coeff and also if calculation is stable
         """
-        threshold = max(np.max(a=s) * AbinsModules.AbinsParameters.s_relative_threshold,
-                        AbinsModules.AbinsParameters.s_absolute_threshold)
+        s_max = np.max(a=s)
+        threshold = max(s_max * self._s_current_threshold[atom], AbinsModules.AbinsParameters.s_absolute_threshold)
+        small_s = AbinsModules.AbinsConstants.SMALL_S
+
+        if order == AbinsModules.AbinsConstants.FUNDAMENTALS:
+            self._max_s_previous_order[atom] = max(s_max, small_s)
+        else:
+            max_threshold = AbinsModules.AbinsConstants.MAX_THRESHOLD
+
+            if s_max - self._max_s_previous_order[atom] > small_s and \
+                            self._s_current_threshold[atom] < max_threshold:
+
+                msg = ("Numerical instability detected. Threshold for S has to be increased." +
+                       " Current max S is {} and the previous is {} for order {}."
+                       .format(s_max, self._max_s_previous_order[atom], order))
+                raise StabilityError(msg)
+            else:
+                self._max_s_previous_order[atom] = max(s_max, small_s)
 
         indices = s > threshold
+        # indices are guaranteed to be a numpy array (but can be an empty numpy array)
         # noinspection PyUnresolvedReferences
         if indices.any():
 
-            s = s[indices]
             freq = freq[indices]
             coeff = coeff[indices]
 
         else:
 
-            s = np.zeros(shape=AbinsModules.AbinsConstants.MIN_SIZE, dtype=AbinsModules.AbinsConstants.FLOAT_TYPE)
-            s.fill(AbinsModules.AbinsConstants.S_THRESHOLD)
             freq = freq[:AbinsModules.AbinsConstants.MIN_SIZE]
             coeff = coeff[:AbinsModules.AbinsConstants.MIN_SIZE]
 
-        return s, freq, coeff
+        return freq, coeff
+
+    def _check_tot_s(self, tot_s=None):
+        """
+        Checks if total S for each quantum order event is consistent (it is expected that maximum intensity for n-th
+        order is larger than maximum intensity for n+1-th order ).
+        :param tot_s: dictionary with S for all atoms and all quantum events
+        """
+        s_temp = np.zeros_like(tot_s["atom_0"]["s"]["order_1"])
+        previous_s_max = 0.0
+        for order in range(AbinsModules.AbinsConstants.FUNDAMENTALS,
+                           self._quantum_order_num + AbinsModules.AbinsConstants.S_LAST_INDEX):
+            s_temp.fill(0.0)
+            for atom in range(self._num_atoms):
+                s_temp += tot_s["atom_{}".format(atom)]["s"]["order_{}".format(order)]
+            if order == AbinsModules.AbinsConstants.FUNDAMENTALS:
+                previous_s_max = np.max(s_temp)
+            else:
+                current_s_max = np.max(s_temp)
+                if previous_s_max <= current_s_max:
+                    raise StabilityErrorAllAtoms(
+                        "Numerical instability detected for all atoms for order {}".format(order))
+                else:
+                    previous_s_max = current_s_max
+
+    def _s_threshold_up(self, atom=None):
+        """
+        If index of atom is given then sets new higher threshold for S for the given atom. If no atom is specified then
+        threshold is increased for all  atoms.
+        :param atom: number of atom
+        """
+        intend = AbinsModules.AbinsConstants.S_THRESHOLD_CHANGE_INDENTATION
+        if atom is None:
+
+            self._s_current_threshold = self._s_threshold_ref * 2.0 ** self._total_s_correction_num_attempt
+            self._report_progress(
+                intend + "Threshold for S has been changed to {} for all atoms."
+                .format(self._s_current_threshold[0]) + " S for all atoms will be calculated from scratch.")
+
+        else:
+
+            self._s_current_threshold[atom] *= 2
+            atom_symbol = self._atoms["atom_{}".format(atom)]["symbol"]
+            self._report_progress(
+                intend + "Threshold for S has been changed to {} for atom {}  ({})."
+                .format(self._s_current_threshold[atom], atom, atom_symbol) +
+                " S for this atom will be calculated from scratch.")
+
+    def _s_threshold_reset(self):
+        """
+        Reset threshold for S to the initial value.
+        """
+        self._s_current_threshold = np.copy(self._s_threshold_ref)
+        self._total_s_correction_num_attempt = 0
 
     def _get_gamma_data(self, k_data=None):
         """
@@ -175,13 +250,33 @@ class CalculateS(object):
         """
         s_data = AbinsModules.SData(temperature=self._temperature, sample_form=self._sample_form)
         self._powder_atoms_data = powder_data.extract()
-        data = self._calculate_s_powder_core()
+        data = self._calculate_s_powder_over_atoms()
         data.update({"frequencies": self._frequencies})
         s_data.set(items=data)
 
         return s_data
 
-    def _calculate_s_powder_core(self, q_indx=None):
+    def _calculate_s_powder_over_atoms(self):
+        """
+        Evaluates S for all atoms for the given q-point and checks if S is consistent.
+        :return: Python dictionary with S data
+        """
+        self._s_threshold_reset()
+        while True:
+
+            try:
+
+                s_all_atoms = self._calculate_s_powder_over_atoms_core()
+                self._check_tot_s(tot_s=s_all_atoms)
+                return s_all_atoms
+
+            except StabilityErrorAllAtoms as e:
+
+                self._report_progress("{}".format(e))
+                self._total_s_correction_num_attempt += 1
+                self._s_threshold_up()
+
+    def _calculate_s_powder_over_atoms_core(self):
         """
         Helper function for _calculate_s_powder_1d.
         :return: Python dictionary with S data
@@ -189,15 +284,13 @@ class CalculateS(object):
         atoms_items = dict()
         num_atoms, atoms = self._prepare_data()
 
-        q_multiplied = [q_indx] * num_atoms
-
         if PATHOS_FOUND:
             p_local = ProcessingPool(nodes=AbinsModules.AbinsParameters.atoms_threads)
-            result = p_local.map(self._calculate_s_powder_one_atom, atoms, q_multiplied)
+            result = p_local.map(self._calculate_s_powder_one_atom, atoms)
         else:
             result = []
             for atom in atoms:
-                result.append(self._calculate_s_powder_one_atom(atom=atom, q_indx=q_indx))
+                result.append(self._calculate_s_powder_one_atom(atom=atom))
 
         for atom in range(num_atoms):
             atoms_items["atom_%s" % atom] = {"s": result[atoms.index(atom)]}
@@ -275,9 +368,12 @@ class CalculateS(object):
                     # number of transitions can only go up
                     for lg_order in range(order, self._quantum_order_num + AbinsModules.AbinsConstants.S_LAST_INDEX):
 
-                        part_local_freq, part_local_coeff, part_broad_spectrum = self._helper_atom(
-                            atom=atom, local_freq=part_local_freq, local_coeff=part_local_coeff,
-                            fundamentals_freq=fund_chunk, fund_coeff=fund_coeff_chunk, order=lg_order, q_indx=q_indx)
+                        part_local_freq, part_local_coeff, part_broad_spectrum = self._helper_atom(atom=atom,
+                                                                                                   local_freq=part_local_freq,
+                                                                                                   local_coeff=part_local_coeff,
+                                                                                                   fundamentals_freq=fund_chunk,
+                                                                                                   fund_coeff=fund_coeff_chunk,
+                                                                                                   order=lg_order)
 
                         s["order_%s" % lg_order] += part_broad_spectrum
 
@@ -286,9 +382,10 @@ class CalculateS(object):
             # if relatively small array of transitions then process it in one shot
             else:
 
-                local_freq, local_coeff, s["order_%s" % order] = self._helper_atom(
-                    atom=atom, local_freq=local_freq, local_coeff=local_coeff,
-                    fundamentals_freq=self._fundamentals_freq, fund_coeff=fund_coeff, order=order, q_indx=q_indx)
+                local_freq, local_coeff, s["order_%s" % order] = self._helper_atom(atom=atom, local_freq=local_freq,
+                                                                                   local_coeff=local_coeff,
+                                                                                   fundamentals_freq=self._fundamentals_freq,
+                                                                                   fund_coeff=fund_coeff, order=order)
 
         return s
 
@@ -324,7 +421,7 @@ class CalculateS(object):
         return new_fundamentals, new_fundamentals_coeff
 
     def _helper_atom(self, atom=None, local_freq=None, local_coeff=None, fundamentals_freq=None, fund_coeff=None,
-                     order=None, q_indx=None):
+                     order=None):
         """
         Helper function for _calculate_s_powder_1d_one_atom.
         :param atom: number of atom
@@ -343,12 +440,9 @@ class CalculateS(object):
 
         if local_freq.any():  # check if local_freq has non-zero values
 
+            q2 = None
             if self._instrument.get_name() in AbinsModules.AbinsConstants.ONE_DIMENSIONAL_INSTRUMENTS:
                 q2 = self._instrument.calculate_q_powder(input_data=local_freq)
-            elif self._instrument.get_name() in AbinsModules.AbinsConstants.TWO_DIMENSIONAL_INSTRUMENTS:
-                q2 = self._instrument.calculate_q_powder(input_data=q_indx)
-            else:
-                raise ValueError("Unsupported instrument.")
 
             value_dft = self._calculate_order[order](q2=q2,
                                                      frequencies=local_freq,
@@ -358,10 +452,6 @@ class CalculateS(object):
                                                      b_tensor=self._powder_atoms_data["b_tensors"][atom],
                                                      b_trace=self._b_traces[atom])
 
-            value_dft, local_freq, local_coeff = self._calculate_s_over_threshold(s=value_dft,
-                                                                                  freq=local_freq,
-                                                                                  coeff=local_coeff)
-
             rebined_freq, rebined_spectrum = self._rebin_data_opt(array_x=local_freq, array_y=value_dft)
 
             freq, broad_spectrum = self._instrument.convolve_with_resolution_function(frequencies=rebined_freq,
@@ -369,6 +459,13 @@ class CalculateS(object):
 
             rebined_broad_spectrum = self._rebin_data_full(array_x=freq, array_y=broad_spectrum)
             rebined_broad_spectrum = self._fix_empty_array(array_y=rebined_broad_spectrum)
+
+            local_freq, local_coeff = self._calculate_s_over_threshold(s=value_dft,
+                                                                       freq=local_freq,
+                                                                       coeff=local_coeff,
+                                                                       atom=atom,
+                                                                       order=order)
+
         else:
             rebined_broad_spectrum = self._fix_empty_array()
 
@@ -493,13 +590,6 @@ class CalculateS(object):
             np.exp(-q2 * a_trace / 3.0 * coth * coth)
 
         return s
-
-    # def _calculate_s_crystal(self, crystal_data=None):
-    #
-    #     if not isinstance(crystal_data, AbinsModules.SingleCrystalData):
-    #
-    #         raise ValueError("Input parameter should be of type CrystalData.")
-    #         # TODO: implement calculation of S for the single crystal scenario
 
     def _rebin_data_full(self, array_x=None, array_y=None):
         """
