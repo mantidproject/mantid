@@ -69,11 +69,11 @@ public:
 
     auto positions = boost::make_shared<std::vector<Eigen::Vector3d>>(2);
     auto rotations = boost::make_shared<std::vector<Eigen::Quaterniond>>(2);
-    auto detectorInfo = boost::make_shared<Beamline::DetectorInfo>();
+    Beamline::DetectorInfo detectorInfo;
 
     Mantid::Beamline::ComponentInfo internalInfo(
         detectorIndices, detectorRanges, componentIndices, componentRanges,
-        parentIndices, positions, rotations, detectorInfo);
+        parentIndices, positions, rotations, &detectorInfo);
     Mantid::Geometry::ObjComponent comp1("component1");
     Mantid::Geometry::ObjComponent comp2("component2");
 

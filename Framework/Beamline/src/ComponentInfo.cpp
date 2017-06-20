@@ -11,7 +11,7 @@ namespace Beamline {
 ComponentInfo::ComponentInfo()
     : m_assemblySortedDetectorIndices(
           boost::make_shared<std::vector<size_t>>(0)),
-      m_size(0) {}
+      m_size(0), m_detectorInfo(nullptr) {}
 
 ComponentInfo::ComponentInfo(
     boost::shared_ptr<const std::vector<size_t>> assemblySortedDetectorIndices,
@@ -23,7 +23,7 @@ ComponentInfo::ComponentInfo(
     boost::shared_ptr<const std::vector<size_t>> parentIndices,
     boost::shared_ptr<std::vector<Eigen::Vector3d>> positions,
     boost::shared_ptr<std::vector<Eigen::Quaterniond>> rotations,
-    boost::shared_ptr<DetectorInfo> detectorInfo)
+    DetectorInfo *const detectorInfo)
     : m_assemblySortedDetectorIndices(std::move(assemblySortedDetectorIndices)),
       m_assemblySortedComponentIndices(
           std::move(assemblySortedComponentIndices)),

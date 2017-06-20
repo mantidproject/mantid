@@ -271,12 +271,11 @@ InfoComponentVisitor::detectorIdToIndexMap() const {
 }
 
 std::unique_ptr<Beamline::ComponentInfo> InfoComponentVisitor::componentInfo(
-    boost::shared_ptr<Beamline::DetectorInfo> detectorInfo) const {
+    Beamline::DetectorInfo *const detectorInfo) const {
   return Kernel::make_unique<Mantid::Beamline::ComponentInfo>(
       m_assemblySortedDetectorIndices, m_detectorRanges,
       m_assemblySortedComponentIndices, m_componentRanges,
-      m_parentComponentIndices, m_positions, m_rotations,
-      std::move(detectorInfo));
+      m_parentComponentIndices, m_positions, m_rotations, detectorInfo);
 }
 
 boost::shared_ptr<std::vector<detid_t>>

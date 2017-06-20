@@ -385,18 +385,22 @@ const Geometry::IDetector &DetectorInfo::detector(const size_t index) const {
 
 /// Returns the source position.
 Kernel::V3D DetectorInfo::sourcePosition() const {
-  cacheSource();
+  // TODO. Forward to m_componentInfo.sourcePosition();
+  cacheSource(); // TODO eliminate this
   return m_sourcePos;
 }
 
 /// Returns the sample position.
 Kernel::V3D DetectorInfo::samplePosition() const {
-  cacheSample();
+
+  // TODO. Forward to m_componentInfo.samplePosition();
+  cacheSample(); // TODO eliminate this
   return m_samplePos;
 }
 
 /// Returns L1 (distance from source to sample).
 double DetectorInfo::l1() const {
+  // TODO. Forward to m_componentInfo.l1();
   cacheSource();
   cacheSample();
   std::call_once(m_L1Cached, &DetectorInfo::cacheL1, this);

@@ -153,7 +153,7 @@ public:
   bool isEmpty() const;
 
   std::unique_ptr<Beamline::ComponentInfo>
-  componentInfo(boost::shared_ptr<Beamline::DetectorInfo> detectorInfo) const;
+  componentInfo(Beamline::DetectorInfo *const detectorInfo) const;
 
   boost::shared_ptr<std::vector<detid_t>> detectorIds() const;
 

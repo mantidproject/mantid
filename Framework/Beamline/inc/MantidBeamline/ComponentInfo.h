@@ -52,7 +52,7 @@ private:
   Mantid::Kernel::cow_ptr<std::vector<Eigen::Vector3d>> m_positions;
   Mantid::Kernel::cow_ptr<std::vector<Eigen::Quaterniond>> m_rotations;
   const size_t m_size = 0;
-  boost::shared_ptr<DetectorInfo> m_detectorInfo; // TODO this should be a raw pointer. ExperimentInfo is the owner.
+  DetectorInfo *const m_detectorInfo; // ExperimentInfo is the owner.
 
 public:
   ComponentInfo();
@@ -67,7 +67,7 @@ public:
                 boost::shared_ptr<const std::vector<size_t>> parentIndices,
                 boost::shared_ptr<std::vector<Eigen::Vector3d>> positions,
                 boost::shared_ptr<std::vector<Eigen::Quaterniond>> rotations,
-                boost::shared_ptr<DetectorInfo> detectorInfo);
+                DetectorInfo *const detectorInfo);
 
   std::vector<size_t> detectorsInSubtree(const size_t componentIndex) const;
   std::vector<size_t> componentsInSubtree(const size_t componentIndex) const;

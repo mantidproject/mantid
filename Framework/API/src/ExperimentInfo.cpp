@@ -264,7 +264,7 @@ void ExperimentInfo::makeAPIComponentInfo(
     boost::shared_ptr<Beamline::DetectorInfo> detectorInfo) {
 
   // Internal Beamline ComponentInfo
-  m_componentInfo = visitor.componentInfo(detectorInfo);
+  m_componentInfo = visitor.componentInfo(detectorInfo.get());
 
   // Wrapper API ComponentInfo
   m_componentInfoWrapper = Kernel::make_unique<ComponentInfo>(

@@ -15,7 +15,7 @@ namespace {
 
 std::tuple<ComponentInfo, std::vector<Eigen::Vector3d>,
            std::vector<Eigen::Quaterniond>, std::vector<Eigen::Vector3d>,
-           std::vector<Eigen::Quaterniond>>
+           std::vector<Eigen::Quaterniond>, boost::shared_ptr<DetectorInfo>>
 makeTreeExampleAndReturnGeometricArguments() {
 
   /*
@@ -76,11 +76,11 @@ makeTreeExampleAndReturnGeometricArguments() {
           bankSortedComponentIndices,
           boost::make_shared<const std::vector<std::pair<size_t, size_t>>>(
               componentRanges),
-          parentIndices, compPositions, compRotations, detectorInfo),
-      detPositions, detRotations, *compPositions, *compRotations);
+          parentIndices, compPositions, compRotations, detectorInfo.get()),
+      detPositions, detRotations, *compPositions, *compRotations, detectorInfo);
 }
 
-ComponentInfo makeTreeExample() {
+std::tuple<ComponentInfo, boost::shared_ptr<DetectorInfo>> makeTreeExample() {
   /*
    Detectors are marked with detector indices below.
    There are 3 detectors.
@@ -118,15 +118,18 @@ ComponentInfo makeTreeExample() {
   auto rotations = boost::make_shared<std::vector<Eigen::Quaterniond>>(
       2); // 2 rotations provided. 2 non-detectors
 
-  return ComponentInfo(
-      bankSortedDetectorIndices,
-      boost::make_shared<const std::vector<std::pair<size_t, size_t>>>(
-          detectorRanges),
-      bankSortedComponentIndices,
-      boost::make_shared<const std::vector<std::pair<size_t, size_t>>>(
-          componentRanges),
-      parentIndices, positions, rotations,
-      boost::make_shared<DetectorInfo>(detPositions, detRotations));
+  auto detectorInfo =
+      boost::make_shared<DetectorInfo>(detPositions, detRotations);
+  return std::make_tuple(
+      ComponentInfo(
+          bankSortedDetectorIndices,
+          boost::make_shared<const std::vector<std::pair<size_t, size_t>>>(
+              detectorRanges),
+          bankSortedComponentIndices,
+          boost::make_shared<const std::vector<std::pair<size_t, size_t>>>(
+              componentRanges),
+          parentIndices, positions, rotations, detectorInfo.get()),
+      detectorInfo);
 }
 }
 
@@ -141,9 +144,10 @@ public:
     /*
      Imitate an instrument with 3 detectors and nothing more.
     */
-    auto info = makeTreeExample();
+    auto infos = makeTreeExample();
+    auto compInfo = std::get<0>(infos);
 
-    TS_ASSERT_EQUALS(info.size(), 5);
+    TS_ASSERT_EQUALS(compInfo.size(), 5);
   }
 
   void
@@ -168,13 +172,12 @@ public:
     auto positions = boost::make_shared<std::vector<Eigen::Vector3d>>();
     auto rotations = boost::make_shared<std::vector<Eigen::Quaterniond>>();
 
-    TS_ASSERT_THROWS(
-        ComponentInfo(
-            bankSortedDetectorIndices, detectorRanges,
-            bankSortedComponentIndices, componentRanges, parentIndices,
-            positions, rotations,
-            boost::make_shared<DetectorInfo>() /*Detector info size 0*/),
-        std::invalid_argument &);
+    DetectorInfo detectorInfo; // Detector info size 0
+    TS_ASSERT_THROWS(ComponentInfo(bankSortedDetectorIndices, detectorRanges,
+                                   bankSortedComponentIndices, componentRanges,
+                                   parentIndices, positions, rotations,
+                                   &detectorInfo),
+                     std::invalid_argument &);
   }
 
   void test_throw_if_positions_rotation_inputs_different_sizes() {
@@ -202,10 +205,11 @@ public:
     auto rotations = boost::make_shared<std::vector<Eigen::Quaterniond>>(
         0); // 0 rotations provided
 
+    DetectorInfo detectorInfo;
     TS_ASSERT_THROWS(ComponentInfo(detectorsInSubtree, detectorRanges,
                                    bankSortedComponentIndices, componentRanges,
                                    parentIndices, positions, rotations,
-                                   boost::make_shared<DetectorInfo>()),
+                                   &detectorInfo),
                      std::invalid_argument &);
   }
 
@@ -239,10 +243,11 @@ public:
         boost::make_shared<const std::vector<std::pair<size_t, size_t>>>(
             std::vector<std::pair<size_t, size_t>>{{0, 0}});
 
+    DetectorInfo detectorInfo; // Empty DetectorInfo;
     TS_ASSERT_THROWS(ComponentInfo(detectorsInSubtree, detectorRanges,
                                    componentsInSubtree, componentRanges,
                                    parentIndices, positions, rotations,
-                                   boost::make_shared<DetectorInfo>()),
+                                   &detectorInfo),
                      std::invalid_argument &);
   }
 
@@ -418,49 +423,52 @@ public:
 
   void test_detector_indexes() {
 
-    auto info = makeTreeExample();
-
+    auto infos = makeTreeExample();
+    const auto &compInfo = std::get<0>(infos);
     /*
     Note that detectors are always the first n component indexes!
     */
-    TS_ASSERT_EQUALS(info.detectorsInSubtree(0), std::vector<size_t>{0});
-    TS_ASSERT_EQUALS(info.detectorsInSubtree(1), std::vector<size_t>{1});
-    TS_ASSERT_EQUALS(info.detectorsInSubtree(2), std::vector<size_t>{2});
+    TS_ASSERT_EQUALS(compInfo.detectorsInSubtree(0), std::vector<size_t>{0});
+    TS_ASSERT_EQUALS(compInfo.detectorsInSubtree(1), std::vector<size_t>{1});
+    TS_ASSERT_EQUALS(compInfo.detectorsInSubtree(2), std::vector<size_t>{2});
 
     // Now we have non-detector components
-    TS_ASSERT_EQUALS(info.detectorsInSubtree(4 /*component index of root*/),
+    TS_ASSERT_EQUALS(compInfo.detectorsInSubtree(4 /*component index of root*/),
                      std::vector<size_t>({0, 2, 1}));
     TS_ASSERT_EQUALS(
-        info.detectorsInSubtree(3 /*component index of sub-assembly*/),
+        compInfo.detectorsInSubtree(3 /*component index of sub-assembly*/),
         std::vector<size_t>({0, 2}));
   }
 
   void test_component_indexes() {
 
-    auto info = makeTreeExample();
+    auto infos = makeTreeExample();
+    const auto &compInfo = std::get<0>(infos);
     /*
     Note that detectors are always the first n component indexes!
     */
-    TS_ASSERT_EQUALS(info.componentsInSubtree(0), std::vector<size_t>{0});
-    TS_ASSERT_EQUALS(info.componentsInSubtree(1), std::vector<size_t>{1});
-    TS_ASSERT_EQUALS(info.componentsInSubtree(2), std::vector<size_t>{2});
+    TS_ASSERT_EQUALS(compInfo.componentsInSubtree(0), std::vector<size_t>{0});
+    TS_ASSERT_EQUALS(compInfo.componentsInSubtree(1), std::vector<size_t>{1});
+    TS_ASSERT_EQUALS(compInfo.componentsInSubtree(2), std::vector<size_t>{2});
 
     // Now we have non-detector components
-    TS_ASSERT_EQUALS(info.componentsInSubtree(4 /*component index of root*/),
-                     std::vector<size_t>(
-                         {0, 2, 3, 1, 4})); // Note inclusion of self comp index
+    TS_ASSERT_EQUALS(
+        compInfo.componentsInSubtree(4 /*component index of root*/),
+        std::vector<size_t>(
+            {0, 2, 3, 1, 4})); // Note inclusion of self comp index
 
     TS_ASSERT_EQUALS(
-        info.componentsInSubtree(3 /*component index of sub-assembly*/),
+        compInfo.componentsInSubtree(3 /*component index of sub-assembly*/),
         std::vector<size_t>({0, 2, 3})); // Note inclusion of self comp index
   }
 
   void test_parent_component_indices() {
-    auto info = makeTreeExample();
+    auto infos = makeTreeExample();
+    const auto &compInfo = std::get<0>(infos);
     TSM_ASSERT_EQUALS("Root component's parent index is self", 4,
-                      info.parentComponentIndex(4));
+                      compInfo.parent(4));
     TSM_ASSERT_EQUALS("Parent of detector 0 is assembly index 3", 3,
-                      info.parentComponentIndex(0));
+                      compInfo.parent(0));
   }
 };
 #endif /* MANTID_BEAMLINE_COMPONENTINFOTEST_H_ */
