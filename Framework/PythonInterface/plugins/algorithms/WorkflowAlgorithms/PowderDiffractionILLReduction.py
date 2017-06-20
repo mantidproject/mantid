@@ -11,6 +11,14 @@ from mantid.simpleapi import *  # noqa
 
 class PowderDiffractionILLReduction(PythonAlgorithm):
 
+    _runs = []
+    _calibration_file = None
+    _normalise_option = None
+    _region_of_interest = None
+    _observable = None
+    _sort_x_axis = None
+
+
     def category(self):
         return "ILL\\Diffraction"
 
@@ -38,6 +46,14 @@ class PowderDiffractionILLReduction(PythonAlgorithm):
                              doc='Normalise to time, monitor or ROI counts.')
 
         self.declareProperty(name='ROI', defaultValue='', doc='Region of interest.')
+
+        self.declareProperty(name='Observable',
+                             defaultValue='sample.temperature',
+                             doc='Scanning observable, a Sample Log entry\n')
+
+        self.declareProperty(name='SortXAxis',
+                             defaultValue=False,
+                             doc='Whether or not to sort the x-axis\n')
 
         self.declareProperty(MatrixWorkspaceProperty('OutputWorkspace', '',
                                                      direction=Direction.Output),
