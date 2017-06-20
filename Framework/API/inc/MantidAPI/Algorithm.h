@@ -96,6 +96,7 @@ public:
   public:
     AlgorithmNotification(const Algorithm *const alg);
     const IAlgorithm *algorithm() const;
+
   private:
     const IAlgorithm *const m_algorithm; ///< The algorithm
   };

@@ -39,43 +39,46 @@
 namespace Mantid {
 namespace API {
 
-Algorithm::AlgorithmNotification::AlgorithmNotification(const Algorithm *const alg)
-        : Poco::Notification(), m_algorithm(alg) {}
+Algorithm::AlgorithmNotification::AlgorithmNotification(
+    const Algorithm *const alg)
+    : Poco::Notification(), m_algorithm(alg) {}
 
-const IAlgorithm * Algorithm::AlgorithmNotification::algorithm() const {
+const IAlgorithm *Algorithm::AlgorithmNotification::algorithm() const {
   return m_algorithm;
 }
 
 Algorithm::StartedNotification::StartedNotification(const Algorithm *const alg)
-        : AlgorithmNotification(alg) {}
+    : AlgorithmNotification(alg) {}
 std::string Algorithm::StartedNotification::name() const {
   return "StartedNotification";
 } ///< class name
 
-Algorithm::FinishedNotification::FinishedNotification(const Algorithm *const alg, bool res)
-        : AlgorithmNotification(alg), success(res) {}
+Algorithm::FinishedNotification::FinishedNotification(
+    const Algorithm *const alg, bool res)
+    : AlgorithmNotification(alg), success(res) {}
 std::string Algorithm::FinishedNotification::name() const {
   return "FinishedNotification";
 }
 
-Algorithm::ProgressNotification::ProgressNotification(const Algorithm *const alg, double p,
-                         const std::string &msg, double estimatedTime,
-                         int progressPrecision)
-        : AlgorithmNotification(alg), progress(p), message(msg),
-          estimatedTime(estimatedTime), progressPrecision(progressPrecision) {}
+Algorithm::ProgressNotification::ProgressNotification(
+    const Algorithm *const alg, double p, const std::string &msg,
+    double estimatedTime, int progressPrecision)
+    : AlgorithmNotification(alg), progress(p), message(msg),
+      estimatedTime(estimatedTime), progressPrecision(progressPrecision) {}
 
 std::string Algorithm::ProgressNotification::name() const {
   return "ProgressNotification";
 }
 
-Algorithm::ErrorNotification::ErrorNotification(const Algorithm *const alg, const std::string &str)
-        : AlgorithmNotification(alg), what(str) {}
+Algorithm::ErrorNotification::ErrorNotification(const Algorithm *const alg,
+                                                const std::string &str)
+    : AlgorithmNotification(alg), what(str) {}
 
-std::string Algorithm::ErrorNotification::name() const{
+std::string Algorithm::ErrorNotification::name() const {
   return "ErrorNotification";
 }
 
-const char * Algorithm::CancelException::what() const noexcept {
+const char *Algorithm::CancelException::what() const noexcept {
   return "Algorithm terminated";
 }
 
