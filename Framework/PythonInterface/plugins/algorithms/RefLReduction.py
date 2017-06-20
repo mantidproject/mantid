@@ -181,14 +181,6 @@ class RefLReduction(PythonAlgorithm):
         is_nexus_detector_rotated_flag = wks_utility.isNexusTakeAfterRefDate(ws_event_data.getRun().getProperty('run_start').value)
         print('-> is NeXus taken with new detector geometry: ' + str(is_nexus_detector_rotated_flag))
 
-        #dimension of the detector (256 by 304 pixels)
-        if is_nexus_detector_rotated_flag:
-            maxX = 256
-            maxY = 304
-        else:
-            maxX = 304
-            maxY = 256
-
         ## retrieve general informations
         # calculate the central pixel (using weighted average)
         print('-> retrieving general informations')
