@@ -94,5 +94,17 @@ class CompositeFunctionWrapper(FunctionWrapper):
     # The named parameter must occur in all the member functions.
        expr = self.getCompositeParameterName(name, 0)
        self.tie({self.getCompositeParameterName(name, i): expr for i in range(1,self.__len__()) })
+       
+    def fixAll (self, name):
+    # Fix all parameters with the given local name.
+    # Every member function must have a parameter of this name.
+       for i in range(0, self.__len__()):
+          self[i].fix(name)
+          
+    def untieAll (self, name):
+    # Untie all parameters with the given local name.
+    # Every member function must have a parameter of this name.
+       for i in range(0, self.__len__()):
+          self[i].untie(name)
         
       
