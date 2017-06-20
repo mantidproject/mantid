@@ -94,8 +94,5 @@ class CompositeFunctionWrapper(FunctionWrapper):
     # The named parameter must occur in all the member functions.
        expr = self.getCompositeParameterName(name, 0)
        self.tie({self.getCompositeParameterName(name, i): expr for i in range(1,self.__len__()) })
-       print expr
-       for i in range(1,self.__len__()):
-          print self.getCompositeParameterName(name, i)
         
       
