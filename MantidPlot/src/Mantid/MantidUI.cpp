@@ -26,6 +26,7 @@
 #include "MantidQtAPI/pixmaps.h"
 
 #include "Mantid/InstrumentWidget/InstrumentWindow.h"
+#include "MantidAPI/AlgorithmNotification.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/TextAxis.h"
 #include "MantidKernel/ConfigService.h"

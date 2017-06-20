@@ -1,4 +1,5 @@
 #include "MantidVatesAPI/MDHWNexusLoadingPresenter.h"
+#include "MantidAPI/AlgorithmNotification.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidVatesAPI/MDLoadingView.h"

@@ -84,93 +84,17 @@ class AlgorithmHistory;
 
  File change history is stored at: <https://github.com/mantidproject/mantid>.
  Code Documentation is available at: <http://doxygen.mantidproject.org>
- */
+*/
 class MANTID_API_DLL Algorithm : public IAlgorithm,
                                  public Kernel::PropertyManagerOwner {
 public:
-  /// Base class for algorithm notifications
-  class AlgorithmNotification : public Poco::Notification {
-  public:
-    AlgorithmNotification(const Algorithm *const alg)
-        : Poco::Notification(), m_algorithm(alg) {} ///< Constructor
-    const IAlgorithm *algorithm() const {
-      return m_algorithm;
-    } ///< The algorithm
-  private:
-    const IAlgorithm *const m_algorithm; ///< The algorithm
-  };
-
-  /// StartedNotification is sent when the algorithm begins execution.
-  class StartedNotification : public AlgorithmNotification {
-  public:
-    StartedNotification(const Algorithm *const alg)
-        : AlgorithmNotification(alg) {} ///< Constructor
-    std::string name() const override {
-      return "StartedNotification";
-    } ///< class name
-  };
-
-  /// FinishedNotification is sent after the algorithm finishes its execution
-  class FinishedNotification : public AlgorithmNotification {
-  public:
-    FinishedNotification(const Algorithm *const alg, bool res)
-        : AlgorithmNotification(alg), success(res) {} ///< Constructor
-    std::string name() const override {
-      return "FinishedNotification";
-    }             ///< class name
-    bool success; ///< true if the finished algorithm was successful or false if
-                  /// it failed.
-  };
-
-  /// An algorithm can report its progress by sending ProgressNotification. Use
-  /// Algorithm::progress(double) function to send a progress notification.
-  class ProgressNotification : public AlgorithmNotification {
-  public:
-    /// Constructor
-    ProgressNotification(const Algorithm *const alg, double p,
-                         const std::string &msg, double estimatedTime,
-                         int progressPrecision)
-        : AlgorithmNotification(alg), progress(p), message(msg),
-          estimatedTime(estimatedTime), progressPrecision(progressPrecision) {}
-    std::string name() const override {
-      return "ProgressNotification";
-    }                      ///< class name
-    double progress;       ///< Current progress. Value must be between 0 and 1.
-    std::string message;   ///< Message sent with notification
-    double estimatedTime;  ///<Estimated time to completion
-    int progressPrecision; ///<Digits of precision to the progress (after the
-                           /// decimal).
-  };
-
-  /// ErrorNotification is sent when an exception is caught during execution of
-  /// the algorithm.
-  class ErrorNotification : public AlgorithmNotification {
-  public:
-    /// Constructor
-    ErrorNotification(const Algorithm *const alg, const std::string &str)
-        : AlgorithmNotification(alg), what(str) {}
-    std::string name() const override {
-      return "ErrorNotification";
-    }                 ///< class name
-    std::string what; ///< message string
-  };
-
-  /// CancelException is thrown to cancel execution of the algorithm. Use
-  /// Algorithm::cancel() to
-  /// terminate an algorithm. The execution will only be stopped if
-  /// Algorithm::exec() method calls
-  /// periodically Algorithm::interuption_point() which checks if
-  /// Algorithm::cancel() has been called
-  /// and throws CancelException if needed.
-  class CancelException : public std::exception {
-  public:
-    /// Returns the message string.
-    const char *what() const noexcept override { return outMessage.c_str(); }
-
-  private:
-    /// The message returned by what()
-    std::string outMessage{"Algorithm terminated"};
-  };
+  // forward declaration of inner classes
+  class AlgorithmNotification;
+  class StartedNotification;
+  class FinishedNotification;
+  class ProgressNotification;
+  class ErrorNotification;
+  class CancelException;
 
   //============================================================================
   Algorithm();

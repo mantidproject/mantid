@@ -1,6 +1,7 @@
 #include "MantidAPI/AlgorithmProxy.h"
 #include "MantidAPI/AlgorithmObserver.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/AlgorithmNotification.h"
 #include "MantidAPI/DeprecatedAlgorithm.h"
 #include <MantidKernel/StringTokenizer.h>
 

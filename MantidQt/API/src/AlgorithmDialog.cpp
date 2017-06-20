@@ -1,4 +1,5 @@
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/AlgorithmNotification.h"
 #include "MantidAPI/IWorkspaceProperty.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/IPropertySettings.h"

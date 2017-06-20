@@ -8,6 +8,7 @@
 #pragma warning(default : 4250)
 #endif
 #include "MantidPythonInterface/kernel/GetPointer.h"
+#include "MantidAPI/AlgorithmNotification.h"
 
 #include <boost/python/bases.hpp>
 #include <boost/python/class.hpp>

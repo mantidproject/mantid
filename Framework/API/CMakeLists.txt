@@ -5,6 +5,7 @@ set ( SRC_FILES
 	src/AlgorithmHasProperty.cpp
 	src/AlgorithmHistory.cpp
 	src/AlgorithmManager.cpp
+	src/AlgorithmNotification.cpp
 	src/AlgorithmObserver.cpp
 	src/AlgorithmProperty.cpp
 	src/AlgorithmProxy.cpp
@@ -163,6 +164,7 @@ set ( INC_FILES
 	inc/MantidAPI/AlgorithmHasProperty.h
 	inc/MantidAPI/AlgorithmHistory.h
 	inc/MantidAPI/AlgorithmManager.h
+	inc/MantidAPI/AlgorithmNotification.h
 	inc/MantidAPI/AlgorithmObserver.h
 	inc/MantidAPI/AlgorithmProperty.h
 	inc/MantidAPI/AlgorithmProxy.h
