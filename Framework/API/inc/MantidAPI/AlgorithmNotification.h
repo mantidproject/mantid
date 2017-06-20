@@ -3,7 +3,10 @@
 
 #include "MantidAPI/DllConfig.h"
 
-#include <Poco/Notification.h>
+// forward declarations
+namespace Poco {
+class Notification;
+}
 
 namespace Mantid {
 namespace API {
