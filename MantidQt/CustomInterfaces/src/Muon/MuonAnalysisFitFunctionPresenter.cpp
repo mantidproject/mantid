@@ -108,9 +108,11 @@ void MuonAnalysisFitFunctionPresenter::updateFunctionAndFit(bool sequential) {
   // Run fit
   if (sequential) {
     m_fitBrowser->runSequentialFit();
-  } else {
+  }
+  else{
     m_fitBrowser->runFit();
   }
+  
 }
 /**
  * Called when fit finished OR undone.

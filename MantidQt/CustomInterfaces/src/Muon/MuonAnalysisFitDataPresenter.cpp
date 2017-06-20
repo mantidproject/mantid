@@ -359,11 +359,6 @@ std::vector<std::string> MuonAnalysisFitDataPresenter::generateWorkspaceNames(
 					: getUniqueName(params);
 				workspaceNames.push_back(m_fitRawData ? wsName + RAW_DATA_SUFFIX
 					: wsName);
-
-				if (Mantid::API::AnalysisDataService::Instance().doesExist("multiNorm")) {
-					std::string tmp = workspaceNames[workspaceNames.size() - 1];
-					//storeNorm(tmp);
-				}
 			}
 		}
 	}
@@ -372,27 +367,29 @@ std::vector<std::string> MuonAnalysisFitDataPresenter::generateWorkspaceNames(
 }
 
 void MuonAnalysisFitDataPresenter::storeNorm(std::string name) const {
-	if (!Mantid::API::AnalysisDataService::Instance().doesExist("multiNorm")) {
-		Mantid::API::ITableWorkspace_sptr table = Mantid::API::WorkspaceFactory::Instance().createTable();
-		AnalysisDataService::Instance().addOrReplace("multiNorm", table);
-		table->addColumn("double", "norm");
-		table->addColumn("str", "spectra");
-	}
-	Mantid::API::ITableWorkspace_sptr table =
-		boost::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(
-			Mantid::API::AnalysisDataService::Instance().retrieve("multiNorm"));
-	Mantid::API::TableRow row = table->appendRow();
-	std::string tmp = name;
-	// spaces stop the string being written
-	std::replace(tmp.begin(), tmp.end(), ' ', ';');
-	//get data
-	if (Mantid::API::AnalysisDataService::Instance().doesExist("__norm__")) {
-		Mantid::API::ITableWorkspace_sptr tmpNorm =
+	if (m_isItTFAsymm) {
+		if (!Mantid::API::AnalysisDataService::Instance().doesExist("multiNorm")) {
+			Mantid::API::ITableWorkspace_sptr table = Mantid::API::WorkspaceFactory::Instance().createTable();
+			AnalysisDataService::Instance().addOrReplace("multiNorm", table);
+			table->addColumn("double", "norm");
+			table->addColumn("str", "name");
+		}
+		Mantid::API::ITableWorkspace_sptr table =
 			boost::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(
-				Mantid::API::AnalysisDataService::Instance().retrieve("__norm__"));
-		auto colNorm = tmpNorm->getColumn("norm");
-		//saves data
-		row << (*colNorm)[0] << tmp;
+				Mantid::API::AnalysisDataService::Instance().retrieve("multiNorm"));
+		Mantid::API::TableRow row = table->appendRow();
+		std::string tmp = name;
+		// spaces stop the string being written
+		std::replace(tmp.begin(), tmp.end(), ' ', ';');
+		//get data
+		if (Mantid::API::AnalysisDataService::Instance().doesExist("__norm__")) {
+			Mantid::API::ITableWorkspace_sptr tmpNorm =
+				boost::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(
+					Mantid::API::AnalysisDataService::Instance().retrieve("__norm__"));
+			auto colNorm = tmpNorm->getColumn("norm");
+			//saves data
+			row << (*colNorm)[0] << tmp;
+		}
 	}
 	
 }

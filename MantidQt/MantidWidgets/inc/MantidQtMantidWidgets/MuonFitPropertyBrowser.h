@@ -99,8 +99,7 @@ public:
 
   /// Enable/disable the Fit button;
   virtual void setFitEnabled(bool yes) override;
-
-  void doTFAsymmFit(int maxIterations);
+  void doTFAsymmFit();
   void setAvailableGroups(const QStringList &groups);
   void setAvailablePeriods(const QStringList &periods);
 
@@ -165,7 +164,8 @@ private:
   QAction *m_fitActionTFAsymm;
   /// override populating fit menu
   void populateFitMenuButton(QSignalMapper *fitMapper, QMenu *fitMenu) override;
-
+  void rescaleWS(const std::map<std::string, double>norm,const std::string wsName,const double shift);
+  std::string getTFAsymmFitFunction(const std::string original, const std::vector< double> norm);
   /// Get the registered function names
   void populateFunctionNames() override;
   /// Check if the workspace can be used in the fit
@@ -223,7 +223,7 @@ private:
 
   std::vector<std::string> m_groupsList;
 };
-
+std::map<std::string, double> readMultipleNormalization();
 std::vector<double> readNormalization();
 } // MantidQt
 } // API

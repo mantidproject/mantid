@@ -123,6 +123,7 @@ public:
   /// Generate names of workspaces to be created
   std::vector<std::string> generateWorkspaceNames(bool overwrite) const;
   void storeNorm(std::string wsName) const;
+  void setTFAsymmState(const bool state){ m_isItTFAsymm = state;};
 signals:
   void setChosenGroupSignal(const QString &group);
   void setChosenPeriodSignal(const QString &period);
@@ -198,6 +199,7 @@ private:
   bool m_overwrite;
   /// Key for where "current run" file is
   boost::optional<Muon::CurrentRun> m_currentRun;
+  bool m_isItTFAsymm;
 };
 } // namespace CustomInterfaces
 } // namespace Mantid

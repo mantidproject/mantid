@@ -3178,6 +3178,12 @@ void MuonAnalysis::changedTFAsymmCheckbox(int state) {
   const Muon::TFAsymmState TFAsymmState = state == Qt::CheckState::Checked
                                               ? Muon::TFAsymmState::Enabled
                                               : Muon::TFAsymmState::Disabled;
+  if (TFAsymmState == Muon::TFAsymmState::Enabled) {
+	  m_fitDataPresenter->setTFAsymmState(true);
+  }
+  else {
+	  m_fitDataPresenter->setTFAsymmState(false);
+  }
 /*  // If both multiFit and TFAsymm are checked
   // uncheck the multiFit
   if (m_uiForm.chkTFAsymm->isChecked() && state != 0) {
