@@ -30,7 +30,7 @@ DECLARE_FUNCMINIMIZER(DampedGaussNewtonMinimizer, Damped GaussNewton)
 DampedGaussNewtonMinimizer::DampedGaussNewtonMinimizer(double relTol)
     : IFuncMinimizer(), m_relTol(relTol) {
   declareProperty("Damping", 0.0, "The damping parameter.");
-  declareProperty("Debug", false, "Turn on the debug output.");
+  declareProperty("Verbose", false, "Make output more verbose.");
 }
 
 /// Initialize minimizer, i.e. pass a function to minimize.
@@ -48,7 +48,7 @@ void DampedGaussNewtonMinimizer::initialize(API::ICostFunction_sptr function,
 
 /// Do one iteration.
 bool DampedGaussNewtonMinimizer::iterate(size_t) {
-  const bool debug = getProperty("Debug");
+  const bool verbose = getProperty("Verbose");
   const double damping = getProperty("Damping");
 
   if (!m_leastSquares) {
@@ -78,7 +78,7 @@ bool DampedGaussNewtonMinimizer::iterate(size_t) {
     H.set(i, i, tmp);
   }
 
-  if (debug) {
+  if (verbose) {
     g_log.warning() << "H:\n" << H;
     g_log.warning() << "-----------------------------\n";
     for (size_t j = 0; j < n; ++j) {
@@ -98,7 +98,7 @@ bool DampedGaussNewtonMinimizer::iterate(size_t) {
     return false;
   }
 
-  if (debug) {
+  if (verbose) {
     for (size_t j = 0; j < n; ++j) {
       g_log.warning() << dx.get(j) << ' ';
     }
@@ -113,7 +113,7 @@ bool DampedGaussNewtonMinimizer::iterate(size_t) {
     }
     double d = m_leastSquares->getParameter(i) + dx.get(i);
     m_leastSquares->setParameter(i, d);
-    if (debug) {
+    if (verbose) {
       g_log.warning() << i << " Parameter " << m_leastSquares->parameterName(i)
                       << ' ' << d << '\n';
     }
