@@ -1,17 +1,11 @@
 #ifndef MANTID_ALGORITHMS_MERGERUNS_H_
 #define MANTID_ALGORITHMS_MERGERUNS_H_
 
-#include <list>
-#include <vector>
-#include <boost/shared_ptr.hpp>
 #include <MantidAPI/MatrixWorkspace.h>
 #include "MantidAPI/MultiPeriodGroupAlgorithm.h"
 #include "MantidAPI/WorkspaceHistory.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidKernel/System.h"
-#include <boost/shared_ptr.hpp>
-#include <list>
-#include <vector>
 
 namespace Mantid {
 namespace API {
@@ -66,12 +60,6 @@ namespace Algorithms {
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-namespace MergeRunsOptions {
-const std::string SKIP_BEHAVIOUR = "Skip File";
-const std::string STOP_BEHAVIOUR = "Stop";
-const std::string REBIN_BEHAVIOUR = "Rebin";
-const std::string FAIL_BEHAVIOUR = "Fail";
-}
 
 class DLLExport MergeRuns : public API::MultiPeriodGroupAlgorithm {
 public:
@@ -103,10 +91,7 @@ private:
   void buildAdditionTables();
   // Overriden MultiPeriodGroupAlgorithm method.
   std::string fetchInputPropertyName() const override;
-  /// test the compatibility of the given workspace with others
-  void testCompatibility(API::MatrixWorkspace_const_sptr ws,
-                         const std::string &xUnitID, const std::string &YUnit,
-                         const bool dist, const std::string instrument) const;
+
   /// An addition table is a list of pairs: First int = workspace index in the
   /// EW being added, Second int = workspace index to which it will be added in
   /// the OUTPUT EW. -1 if it should add a new entry at the end.
