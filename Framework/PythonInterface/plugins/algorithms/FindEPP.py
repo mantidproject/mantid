@@ -123,7 +123,7 @@ class FindEPP(PythonAlgorithm):
             else:
                 nextrow["FitStatus"] = result[0]
                 nextrow["chiSq"] = result[1]
-                ptable = result[4]
+                ptable = result[3]
                 for num in range(ptable.rowCount() - 1):
                     row = ptable.row(num)
                     name = row["Name"]

@@ -81,10 +81,10 @@ class SimpleAPIFitTest(unittest.TestCase):
         self.assertEquals(len(retvals), 6)
         self.assertTrue(isinstance(retvals[0], str))
         self.assertTrue(isinstance(retvals[1], float))
-        self.assertTrue(isinstance(retvals[2], int))
+        self.assertTrue(isinstance(retvals[2], ITableWorkspace))
         self.assertTrue(isinstance(retvals[3], ITableWorkspace))
-        self.assertTrue(isinstance(retvals[4], ITableWorkspace))
-        self.assertTrue(isinstance(retvals[5], MatrixWorkspace))
+        self.assertTrue(isinstance(retvals[4], MatrixWorkspace))
+        self.assertTrue(isinstance(retvals[5], int))
 
 
     def test_that_dialog_call_raises_runtime_error(self):

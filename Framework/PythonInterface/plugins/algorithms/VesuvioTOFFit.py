@@ -163,7 +163,7 @@ class VesuvioTOFFit(VesuvioBase):
                                           Minimizer=self.getPropertyValue("Minimizer"))
 
         result, reduced_chi_squared = outputs[0], outputs[1]
-        params, fitted_data = outputs[4], outputs[5]
+        params, fitted_data = outputs[3], outputs[4]
 
         # Output result of fiting to log
         result_log_str = 'Fit result: {0}'.format(result)
