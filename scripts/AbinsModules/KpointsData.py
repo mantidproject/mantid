@@ -32,8 +32,8 @@ class KpointsData(AbinsModules.GeneralData):
 
     def __init__(self, num_k=None, num_atoms=None):
         """
-        @param num_k: total number of k-points (int)
-        @param num_atoms: total number of atoms in the unit cell (int)
+        :param num_k: total number of k-points (int)
+        :param num_atoms: total number of atoms in the unit cell (int)
         """
         super(KpointsData, self).__init__()
         dim = 3  # number of coordinates
@@ -60,50 +60,96 @@ class KpointsData(AbinsModules.GeneralData):
             raise ValueError("Invalid structure of the dictionary.")
 
         dim = 3
+
+        # unit_cell
+        unit_cell = items["unit_cell"]
+        if not (isinstance(unit_cell, np.ndarray) and
+                unit_cell.shape == (dim, dim) and
+                unit_cell.dtype.num == AbinsModules.AbinsConstants.FLOAT_ID):
+
+            raise ValueError("Invalid values of unit cell vectors.")
+
         #  "weights"
         weights = items["weights"]
 
-        if (isinstance(weights, np.ndarray) and
+        if not (isinstance(weights, np.ndarray) and
            weights.shape == (self._num_k,) and
            weights.dtype.num == AbinsModules.AbinsConstants.FLOAT_ID and
            np.allclose(weights, weights[weights >= 0])):
 
-            self._data["weights"] = weights
-        else:
             raise ValueError("Invalid value of weights.")
 
         #  "k_vectors"
         k_vectors = items["k_vectors"]
 
-        if (isinstance(k_vectors, np.ndarray) and
+        if not (isinstance(k_vectors, np.ndarray) and
            k_vectors.shape == (self._num_k, dim) and
            k_vectors.dtype.num == AbinsModules.AbinsConstants.FLOAT_ID):
 
-            self._data["k_vectors"] = k_vectors
-        else:
             raise ValueError("Invalid value of k_vectors.")
 
         #  "frequencies"
         frequencies = items["frequencies"]
-
-        if (isinstance(frequencies, np.ndarray) and
-           frequencies.shape == (self._num_k, self._num_freq) and
-           frequencies.dtype.num == AbinsModules.AbinsConstants.FLOAT_ID):
-
-            self._data["frequencies"] = frequencies
-        else:
+        if not (isinstance(frequencies, np.ndarray) and
+                frequencies.shape == (self._num_k, self._num_freq) and
+                frequencies.dtype.num == AbinsModules.AbinsConstants.FLOAT_ID):
             raise ValueError("Invalid value of frequencies.")
 
-        #  "atomic_displacements"
+        # "atomic_displacements"
         atomic_displacements = items["atomic_displacements"]
+        if not (isinstance(
+                atomic_displacements, np.ndarray) and
+                atomic_displacements.shape == (self._num_k, self._num_atoms, self._num_freq, dim) and
+                atomic_displacements.dtype.num == AbinsModules.AbinsConstants.COMPLEX_ID):
 
-        if (isinstance(atomic_displacements, np.ndarray) and
-           atomic_displacements.shape == (self._num_k, self._num_atoms, self._num_freq, dim) and
-           atomic_displacements.dtype.num == AbinsModules.AbinsConstants.COMPLEX_ID):
-
-            self._data["atomic_displacements"] = atomic_displacements
-        else:
             raise ValueError("Invalid value of atomic_displacements.")
+
+        # remove data which correspond to imaginary frequencies
+        freq_dic = {}
+        atomic_displacements_dic = {}
+        weights_dic = {}
+        k_vectors_dic = {}
+
+        indx = frequencies > AbinsModules.AbinsConstants.ACOUSTIC_PHONON_THRESHOLD
+        for k in range(frequencies.shape[0]):
+            freq_dic[str(k)] = frequencies[k, indx[k]]
+            for atom in range(self._num_atoms):
+                temp = atomic_displacements[k]
+                atomic_displacements_dic[str(k)] = temp[:, indx[k]]
+
+            weights_dic[str(k)] = weights[k]
+            k_vectors_dic[str(k)] = k_vectors[k]
+
+        self._data["unit_cell"] = unit_cell
+        self._data["frequencies"] = freq_dic
+        self._data["atomic_displacements"] = atomic_displacements_dic
+        self._data["k_vectors"] = k_vectors_dic
+        self._data["weights"] = weights_dic
+
+    def get_gamma_point_data(self):
+        """
+        Extracts k points data only for Gamma point.
+        :return: dictionary with data only for Gamma point
+        """
+        gamma_pkt_index = -1
+
+        # look for index of Gamma point
+        for k in self._data["k_vectors"]:
+            if np.linalg.norm(self._data["k_vectors"][k]) < AbinsModules.AbinsConstants.SMALL_K:
+                gamma_pkt_index = k
+                break
+        if gamma_pkt_index == -1:
+            raise ValueError("Gamma point not found.")
+
+        gamma = AbinsModules.AbinsConstants.GAMMA_POINT
+
+        k_points = {"weights": {gamma: self._data["weights"][gamma_pkt_index]},
+                    "k_vectors": {gamma: self._data["k_vectors"][gamma_pkt_index]},
+                    "frequencies": {gamma: self._data["frequencies"][gamma_pkt_index]},
+                    "atomic_displacements": {gamma: self._data["atomic_displacements"][gamma_pkt_index]}
+                    }
+
+        return k_points
 
     def extract(self):
 

@@ -589,16 +589,9 @@ class Abins(PythonAlgorithm):
         :param message_end: closing part of the error message.
         """
         if PATHOS_FOUND:
-            atoms_threads = AbinsModules.AbinsParameters.atoms_threads
-            if not (isinstance(atoms_threads, six.integer_types) and 1 <= atoms_threads <= mp.cpu_count()):
+            threads = AbinsModules.AbinsParameters.threads
+            if not (isinstance(threads, six.integer_types) and 1 <= threads <= mp.cpu_count()):
                 raise RuntimeError("Invalid number of threads for parallelisation over atoms" + message_end)
-
-            q_threads = AbinsModules.AbinsParameters.q_threads
-            if not (isinstance(q_threads, six.integer_types) and 1 <= q_threads <= mp.cpu_count()):
-                raise RuntimeError("Invalid number of threads for parallelisation over q" + message_end)
-
-            if atoms_threads * q_threads > mp.cpu_count():
-                raise RuntimeError("User asked for more threads than available.")
 
     def _validate_crystal_input_file(self, filename_full_path=None):
         """
@@ -714,7 +707,6 @@ class Abins(PythonAlgorithm):
             self._instrument = instrument_producer.produce_instrument(name=self._instrument_name)
         else:
             raise ValueError("Unknown instrument %s" % instrument_name)
-        self._nspec = self._instrument.get_nspec()
 
         self._atoms = self.getProperty("Atoms").value
         self._sum_contributions = self.getProperty("SumContributions").value

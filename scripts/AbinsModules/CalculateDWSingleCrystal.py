@@ -12,8 +12,8 @@ class CalculateDWSingleCrystal(object):
 
     def __init__(self, temperature=None, abins_data=None):
         """
-        @param temperature: temperature in K for which Debye-Waller factors should be calculated
-        @param abins_data: input Abins data (type: AbinsData)
+        :param temperature: temperature in K for which Debye-Waller factors should be calculated
+        :param abins_data: input Abins data (type: AbinsData)
         """
 
         if not isinstance(temperature, (float, int)):
@@ -31,9 +31,9 @@ class CalculateDWSingleCrystal(object):
 
         extracted_k_data = _data["k_points_data"]
 
-        self._num_k = extracted_k_data["atomic_displacements"].shape[0]
-        self._num_atoms = extracted_k_data["atomic_displacements"].shape[1]
-        self._num_freq = extracted_k_data["atomic_displacements"].shape[2]
+        gamma = AbinsModules.AbinsConstants.GAMMA_POINT
+        self._num_k = len(extracted_k_data["atomic_displacements"])
+        self._num_atoms = extracted_k_data["atomic_displacements"][gamma].shape[0]
         super(CalculateDWSingleCrystal, self).__init__()
 
     def _calculate_dw(self):
@@ -49,52 +49,55 @@ class CalculateDWSingleCrystal(object):
         num_atoms = len(data["atoms_data"])
         mass_hartree_factor = np.asarray([1.0 / (data["atoms_data"]["atom_%s" % atom]["mass"] * 2)
                                           for atom in range(num_atoms)])
-        frequencies_hartree = data["k_points_data"]["frequencies"]
+
         temperature_hartree = self._temperature * AbinsModules.AbinsConstants.K_2_HARTREE
-
-        weights = data["k_points_data"]["weights"]
-        atomic_displacements = \
-            data["k_points_data"]["atomic_displacements"] / AbinsModules.AbinsConstants.ATOMIC_LENGTH_2_ANGSTROM
-
         coth_factor = 1.0 / (2.0 * temperature_hartree)  # coth( coth_factor * omega)
 
-        tanh = np.tanh(np.multiply(coth_factor, frequencies_hartree))
-        coth_over_omega = np.divide(1.0, np.multiply(tanh, frequencies_hartree))  # coth(...)/omega
+        k_points = [str(k) for k in range(self._num_k)]
+        frequencies_hartree = data["k_points_data"]["frequencies"]
+        atomic_displacements = data["k_points_data"]["atomic_displacements"]
+        weights = data["k_points_data"]["weights"]
 
+        coth_over_omega = {}
+
+        for k in k_points:
+            tanh = np.tanh(np.multiply(coth_factor, frequencies_hartree[k]))
+            coth_over_omega[k] = np.divide(1.0, np.multiply(tanh, frequencies_hartree[k]))  # coth(...)/omega
+            atomic_displacements[k] = atomic_displacements[k] / AbinsModules.AbinsConstants.ATOMIC_LENGTH_2_ANGSTROM
+
+            #     num_freq -- number of phonons
+            #     dim -- size of displacement vector for one atom (dim = 3)
+
+        # item_k [dim, dim]
         item_k = np.zeros((3, 3), dtype=AbinsModules.AbinsConstants.FLOAT_TYPE)  # stores DW for one atom
-        item_freq = np.zeros((3, 3), dtype=AbinsModules.AbinsConstants.FLOAT_TYPE)
 
         for num in range(self._num_atoms):
             item_k.fill(0.0)  # erase stored information so that it can be filled with content for the next atom
+            for k in k_points:
 
-            for k in range(self._num_k):
+                disp = atomic_displacements[k][num]
 
-                # correction for acoustic modes at Gamma point
-                if np.linalg.norm(data["k_points_data"]["k_vectors"][k]) < AbinsModules.AbinsConstants.SMALL_K:
-                    start = 3
-                else:
-                    start = 0
+                # temp_1 [freq, dim dim]
+                temp_1 = np.einsum('kij,k->kij',
+                                   np.einsum('ki, kj->kij', disp, disp.conjugate()).real,
+                                   coth_over_omega[k])
 
-                item_freq.fill(0.0)
+                # temp2 [dim, dim]
+                temp_2 = np.sum(temp_1, axis=0)
 
-                for n_freq in range(start, self._num_freq):
-
-                    displacement = atomic_displacements[k, num, n_freq, :]
-                    tensor = np.outer(displacement, displacement.conjugate()).real  # DW factors are real
-                    np.multiply(tensor, coth_over_omega[k, n_freq], tensor)
-                    np.add(item_freq, tensor, item_freq)
-
-                np.add(item_k, np.multiply(item_freq, weights[k]), item_k)
+                np.add(item_k, np.multiply(temp_2, weights[k]), item_k)
 
             np.multiply(item_k, mass_hartree_factor[num], item_k)
+
             # noinspection PyProtectedMember
             dw._append(item=item_k, num_atom=num)
+
         return dw
 
     def calculate_data(self):
         """
         Calculates Debye-Waller factors.
-        @return: object of type DwData with Debye-Waller factors.
+        :return: object of type DwData with Debye-Waller factors.
         """
 
         data = self._calculate_dw()

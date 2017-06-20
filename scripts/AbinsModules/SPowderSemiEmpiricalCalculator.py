@@ -222,24 +222,26 @@ class SPowderSemiEmpiricalCalculator(object):
     def _get_gamma_data(self, k_data=None):
         """
         Extracts k points data only for Gamma point.
-        @param k_data: numpy array with k-points data.
-        @return:
+        :return: dictionary with data only for Gamma point
         """
         gamma_pkt_index = -1
 
         # look for index of Gamma point
-        num_k = k_data["k_vectors"].shape[0]
-        for k in range(num_k):
+        for k in k_data["k_vectors"]:
             if np.linalg.norm(k_data["k_vectors"][k]) < AbinsModules.AbinsConstants.SMALL_K:
                 gamma_pkt_index = k
                 break
         if gamma_pkt_index == -1:
             raise ValueError("Gamma point not found.")
 
-        k_points = {"weights": np.asarray([k_data["weights"][gamma_pkt_index]]),
-                    "k_vectors": np.asarray([k_data["k_vectors"][gamma_pkt_index]]),
-                    "frequencies": np.asarray([k_data["frequencies"][gamma_pkt_index]]),
-                    "atomic_displacements": np.asarray([k_data["atomic_displacements"][gamma_pkt_index]])}
+        gamma = AbinsModules.AbinsConstants.GAMMA_POINT
+
+        k_points = {"weights": {gamma: k_data["weights"][gamma_pkt_index]},
+                    "k_vectors": {gamma: k_data["k_vectors"][gamma_pkt_index]},
+                    "frequencies": {gamma: k_data["frequencies"][gamma_pkt_index]},
+                    "atomic_displacements": {gamma: k_data["atomic_displacements"][gamma_pkt_index]}
+                    }
+
         return k_points
 
     def _calculate_s_powder_1d(self, powder_data=None):
@@ -287,7 +289,7 @@ class SPowderSemiEmpiricalCalculator(object):
         num_atoms, atoms = self._prepare_data()
 
         if PATHOS_FOUND:
-            p_local = ProcessingPool(nodes=AbinsModules.AbinsParameters.atoms_threads)
+            p_local = ProcessingPool(nodes=AbinsModules.AbinsParameters.threads)
             result = p_local.map(self._calculate_s_powder_one_atom, atoms)
         else:
             result = []
@@ -304,19 +306,15 @@ class SPowderSemiEmpiricalCalculator(object):
         Sets all necessary fields for 1D calculations. Sorts atom indices to improve parallelism.
         :return: number of atoms, sorted atom indices
         """
-
-        num_atoms = self._powder_atoms_data["a_tensors"].shape[0]
-        self._a_traces = np.trace(a=self._powder_atoms_data["a_tensors"], axis1=1, axis2=2)
-        self._b_traces = np.trace(a=self._powder_atoms_data["b_tensors"], axis1=2, axis2=3)
+        gamma = AbinsModules.AbinsConstants.GAMMA_POINT
+        num_atoms = self._powder_atoms_data["a_tensors"][gamma].shape[0]
+        self._a_traces = np.trace(a=self._powder_atoms_data["a_tensors"][gamma], axis1=1, axis2=2)
+        self._b_traces = np.trace(a=self._powder_atoms_data["b_tensors"][gamma], axis1=2, axis2=3)
         abins_data_extracted = self._abins_data.extract()
         self._atoms_data = abins_data_extracted["atoms_data"]
         k_points_data = self._get_gamma_data(abins_data_extracted["k_points_data"])
-
-        if k_points_data["frequencies"][0].size == 3 * num_atoms:  # use case: crystal
-            first_frequency = AbinsModules.AbinsConstants.FIRST_OPTICAL_PHONON
-        else:  # use case: molecule
-            first_frequency = AbinsModules.AbinsConstants.FIRST_MOLECULAR_VIBRATION
-        self._fundamentals_freq = k_points_data["frequencies"][0][first_frequency:]
+        gamma = AbinsModules.AbinsConstants.GAMMA_POINT
+        self._fundamentals_freq = k_points_data["frequencies"][gamma]
 
         # sort atoms over atom type so that parallelisation is more efficient
         symbols = []
@@ -440,6 +438,8 @@ class SPowderSemiEmpiricalCalculator(object):
             fundamentals_coefficients=fund_coeff,
             quantum_order=order)
 
+        gamma = AbinsModules.AbinsConstants.GAMMA_POINT
+
         if local_freq.any():  # check if local_freq has non-zero values
 
             q2 = None
@@ -449,9 +449,9 @@ class SPowderSemiEmpiricalCalculator(object):
             value_dft = self._calculate_order[order](q2=q2,
                                                      frequencies=local_freq,
                                                      indices=local_coeff,
-                                                     a_tensor=self._powder_atoms_data["a_tensors"][atom],
+                                                     a_tensor=self._powder_atoms_data["a_tensors"][gamma][atom],
                                                      a_trace=self._a_traces[atom],
-                                                     b_tensor=self._powder_atoms_data["b_tensors"][atom],
+                                                     b_tensor=self._powder_atoms_data["b_tensors"][gamma][atom],
                                                      b_trace=self._b_traces[atom])
 
             rebined_freq, rebined_spectrum = self._rebin_data_opt(array_x=local_freq, array_y=value_dft)
