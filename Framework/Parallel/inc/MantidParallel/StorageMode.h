@@ -1,21 +1,19 @@
-#ifndef MANTID_PARALLEL_REQUEST_H_
-#define MANTID_PARALLEL_REQUEST_H_
+#ifndef MANTID_PARALLEL_STORAGEMODE_H_
+#define MANTID_PARALLEL_STORAGEMODE_H_
 
 #include "MantidParallel/DllConfig.h"
 
-#ifdef MPI_EXPERIMENTAL
-#include <boost/mpi/request.hpp>
-#endif
-#include <thread>
+#include <map>
+#include <string>
 
 namespace Mantid {
 namespace Parallel {
-namespace detail {
-class ThreadingBackend;
-}
 
-/** Wrapper for boost::mpi::request. For non-MPI builds an equivalent
-  implementation is provided.
+/** Storage mode used for a Workspace in an MPI build.
+
+  Cloned: There is a copy (clone) of the Workspace on each rank.
+  Distributed: Each rank holds parts of the Workspace (spectra).
+  MasterOnly: The master/root rank has the Workspace.
 
   @author Simon Heybrock
   @date 2017
@@ -41,31 +39,13 @@ class ThreadingBackend;
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTID_PARALLEL_DLL Request {
-public:
-  Request() = default;
-#ifdef MPI_EXPERIMENTAL
-  Request(const boost::mpi::request &request);
-#endif
+enum class StorageMode { Cloned, Distributed, MasterOnly };
 
-  void wait();
-
-private:
-  template <class Function> explicit Request(Function &&f);
-#ifdef MPI_EXPERIMENTAL
-  boost::mpi::request m_request;
-#endif
-  std::thread m_thread;
-  const bool m_threadingBackend{false};
-  // For accessing constructor based on callable.
-  friend class detail::ThreadingBackend;
-};
-
-template <class Function>
-Request::Request(Function &&f)
-    : m_thread(std::forward<Function>(f)), m_threadingBackend{true} {}
+MANTID_PARALLEL_DLL std::string toString(StorageMode mode);
+MANTID_PARALLEL_DLL std::string
+toString(const std::map<std::string, StorageMode> &map);
 
 } // namespace Parallel
 } // namespace Mantid
 
-#endif /* MANTID_PARALLEL_REQUEST_H_ */
+#endif /* MANTID_PARALLEL_STORAGEMODE_H_ */

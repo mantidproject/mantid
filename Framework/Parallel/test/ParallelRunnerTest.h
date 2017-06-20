@@ -3,12 +3,13 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidParallel/ParallelRunner.h"
+#include "MantidTestHelpers/ParallelRunner.h"
 
 #include <mutex>
 #include <vector>
 
 using namespace Mantid::Parallel;
+using ParallelTestHelpers::ParallelRunner;
 
 namespace {
 void check_size(const Communicator &comm, const int expected) {
@@ -40,12 +41,18 @@ public:
     std::set<int> ranks;
     ParallelRunner parallel;
     parallel.run(get_ranks, std::ref(mutex), std::ref(ranks));
+    int size{1};
+#ifdef MPI_EXPERIMENTAL
     boost::mpi::communicator world;
-    if (world.size() == 1) {
+    size = world.size();
+#endif
+    if (size == 1) {
       for (int rank = 0; rank < parallel.size(); ++rank)
         TS_ASSERT_EQUALS(ranks.count(rank), 1);
     } else {
+#ifdef MPI_EXPERIMENTAL
       TS_ASSERT_EQUALS(ranks.count(world.rank()), 1);
+#endif
     }
   }
 };

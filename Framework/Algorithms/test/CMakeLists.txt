@@ -40,18 +40,10 @@ if ( CXXTEST_FOUND )
                         ../../TestHelpers/src/WorkspaceCreationHelper.cpp
                         )
   cxxtest_add_test ( AlgorithmsTest ${TEST_FILES} )
-  target_link_libraries ( AlgorithmsTest LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME}
+  target_link_libraries ( AlgorithmsTest LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} ${MANTIDLIBS}
             Algorithms
-            API
             DataHandling
-            DataObjects
-            Geometry
-            HistogramData
-            Indexing
-            Kernel
             Nexus
-            ${Boost_LIBRARIES}
-            ${POCO_LIBRARIES}
             ${GMOCK_LIBRARIES}
             ${GTEST_LIBRARIES} )
   add_dependencies ( AlgorithmsTest Crystal CurveFitting )

@@ -15,9 +15,9 @@
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/EmptyValues.h"
 
-//----------------------------------------------------------------------
-// Forward Declaration
-//----------------------------------------------------------------------
+#include "MantidParallel/ExecutionMode.h"
+#include "MantidParallel/StorageMode.h"
+
 namespace boost {
 template <class T> class weak_ptr;
 }
@@ -35,6 +35,9 @@ class Value;
 }
 
 namespace Mantid {
+namespace Parallel {
+class Communicator;
+}
 namespace API {
 //----------------------------------------------------------------------
 // Forward Declaration
@@ -309,11 +312,22 @@ public:
 
   void copyNonWorkspaceProperties(IAlgorithm *alg, int periodNum);
 
+  const Parallel::Communicator &communicator() const;
+  void setCommunicator(const Parallel::Communicator &communicator);
+
 protected:
   /// Virtual method - must be overridden by concrete algorithm
   virtual void init() = 0;
   /// Virtual method - must be overridden by concrete algorithm
   virtual void exec() = 0;
+
+  void exec(Parallel::ExecutionMode executionMode);
+  virtual void execDistributed();
+  virtual void execMasterOnly();
+  virtual void execNonMaster();
+
+  virtual Parallel::ExecutionMode getParallelExecutionMode(
+      const std::map<std::string, Parallel::StorageMode> &storageModes) const;
 
   /// Returns a semi-colon separated list of workspace types to attach this
   /// algorithm
@@ -411,6 +425,11 @@ private:
 
   void registerFeatureUsage() const;
 
+  Parallel::ExecutionMode getExecutionMode() const;
+  std::map<std::string, Parallel::StorageMode>
+  getInputWorkspaceStorageModes() const;
+  void setupSkipValidationMasterOnly();
+
   // --------------------- Private Members -----------------------------------
   /// Poco::ActiveMethod used to implement asynchronous execution.
   Poco::ActiveMethod<bool, Poco::Void, Algorithm,
@@ -462,6 +481,9 @@ private:
   int m_singleGroup;
   /// All the groups have similar names (group_1, group_2 etc.)
   bool m_groupsHaveSimilarNames;
+
+  /// (MPI) communicator used when executing the algorithm.
+  std::unique_ptr<Parallel::Communicator> m_communicator;
 };
 
 /// Typedef for a shared pointer to an Algorithm

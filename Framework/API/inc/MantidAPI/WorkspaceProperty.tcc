@@ -237,6 +237,12 @@ template <typename TYPE> std::string WorkspaceProperty<TYPE>::isValid() const {
         error = "Workspace " + this->value() + " is not of the correct type";
       }
       return error;
+    } else {
+      // Skip validation on non-master ranks if storage mode is MasterOnly.
+      if (!m_isMasterRank &&
+          Kernel::PropertyWithValue<boost::shared_ptr<TYPE>>::m_value
+                  ->storageMode() == Parallel::StorageMode::MasterOnly)
+        return {};
     }
   }
   // Call superclass method to access any attached validators (which do their
@@ -344,6 +350,12 @@ template <typename TYPE> bool WorkspaceProperty<TYPE>::store() {
 template <typename TYPE>
 Workspace_sptr WorkspaceProperty<TYPE>::getWorkspace() const {
   return this->operator()();
+}
+
+/// Sets a flag indicating whether this is the master rank in MPI builds.
+template <typename TYPE>
+void WorkspaceProperty<TYPE>::setIsMasterRank(bool isMasterRank) {
+  m_isMasterRank = isMasterRank;
 }
 
 /** Checks whether the entered workspace group is valid.

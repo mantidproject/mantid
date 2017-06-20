@@ -69,6 +69,9 @@ private:
     MockWorkspace *doClone() const override {
       throw std::runtime_error("Cloning of MockWorkspace is not implemented.");
     }
+    MockWorkspace *doCloneEmpty() const override {
+      throw std::runtime_error("Cloning of MockWorkspace is not implemented.");
+    }
   };
 
   /// Make a simple group

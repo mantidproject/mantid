@@ -1,21 +1,21 @@
-#ifndef MANTID_PARALLEL_REQUEST_H_
-#define MANTID_PARALLEL_REQUEST_H_
+#ifndef MANTID_PARALLEL_EXECUTIONMODE_H_
+#define MANTID_PARALLEL_EXECUTIONMODE_H_
 
 #include "MantidParallel/DllConfig.h"
+#include "MantidParallel/StorageMode.h"
 
-#ifdef MPI_EXPERIMENTAL
-#include <boost/mpi/request.hpp>
-#endif
-#include <thread>
+#include <string>
 
 namespace Mantid {
 namespace Parallel {
-namespace detail {
-class ThreadingBackend;
-}
 
-/** Wrapper for boost::mpi::request. For non-MPI builds an equivalent
-  implementation is provided.
+/** Execution mode used for an Algorithm in an MPI build.
+
+  Invalid: Indicates a state where execution is not possible.
+  Serial: Serial execution (non-MPI build or MPI build with single rank).
+  Identical: Independent execution in the same way on each rank.
+  Distributed: Distributed execution, may involve communication.
+  MasterOnly: Execution only on the master rank.
 
   @author Simon Heybrock
   @date 2017
@@ -41,31 +41,20 @@ class ThreadingBackend;
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTID_PARALLEL_DLL Request {
-public:
-  Request() = default;
-#ifdef MPI_EXPERIMENTAL
-  Request(const boost::mpi::request &request);
-#endif
-
-  void wait();
-
-private:
-  template <class Function> explicit Request(Function &&f);
-#ifdef MPI_EXPERIMENTAL
-  boost::mpi::request m_request;
-#endif
-  std::thread m_thread;
-  const bool m_threadingBackend{false};
-  // For accessing constructor based on callable.
-  friend class detail::ThreadingBackend;
+enum class ExecutionMode {
+  Invalid,
+  Serial,
+  Identical,
+  Distributed,
+  MasterOnly
 };
 
-template <class Function>
-Request::Request(Function &&f)
-    : m_thread(std::forward<Function>(f)), m_threadingBackend{true} {}
+MANTID_PARALLEL_DLL ExecutionMode
+getCorrespondingExecutionMode(StorageMode storageMode);
+
+MANTID_PARALLEL_DLL std::string toString(ExecutionMode mode);
 
 } // namespace Parallel
 } // namespace Mantid
 
-#endif /* MANTID_PARALLEL_REQUEST_H_ */
+#endif /* MANTID_PARALLEL_EXECUTIONMODE_H_ */
