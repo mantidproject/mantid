@@ -97,12 +97,8 @@ void VatesParaViewApplication::setupParaViewBehaviors() {
   new pqAlwaysConnectedBehavior(this);
   new pqCrashRecoveryBehavior(this);
   new pqAutoLoadPluginXMLBehavior(this);
-  // new pqPluginDockWidgetsBehavior(mainWindow);
   new pqVerifyRequiredPluginBehavior(this);
-  // new pqPluginActionGroupBehavior(mainWindow);
-  // new pqFixPathsInStateFilesBehavior(this);
   new pqCommandLineOptionsBehavior(this);
-  // new pqPersistentMainWindowStateBehavior(mainWindow);
   new pqCollaborationBehavior(this);
   new pqViewStreamingBehavior(this);
   new pqPluginSettingsBehavior(this);
