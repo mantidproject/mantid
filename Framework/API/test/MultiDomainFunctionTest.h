@@ -478,8 +478,8 @@ public:
                       "name=MultiDomainFunctionTest_Function; "
                       "(name=MultiDomainFunctionTest_Function;name="
                       "MultiDomainFunctionTest_Function))";
-    auto f =  FunctionFactory::Instance().createInitialized(ini);
-    auto g =  FunctionFactory::Instance().createInitialized(f->asString());
+    auto f = FunctionFactory::Instance().createInitialized(ini);
+    auto g = FunctionFactory::Instance().createInitialized(f->asString());
     TS_ASSERT_EQUALS(g->asString(),
                      "composite=MultiDomainFunction,NumDeriv=false;(composite="
                      "CompositeFunction,NumDeriv=false,$domains=i;name="

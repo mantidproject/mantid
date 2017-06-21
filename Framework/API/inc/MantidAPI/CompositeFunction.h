@@ -67,7 +67,8 @@ public:
   /// Returns the function's name
   std::string name() const override { return "CompositeFunction"; }
   /// Writes itself into a string
-  std::string asString(const std::string &parentLocalAttributesStr = "") const override;
+  std::string
+  asString(const std::string &parentLocalAttributesStr = "") const override;
   /// Sets the workspace for each member function
   void setWorkspace(boost::shared_ptr<const Workspace> ws) override;
   /// Set matrix workspace
