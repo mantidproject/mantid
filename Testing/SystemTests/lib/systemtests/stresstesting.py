@@ -577,11 +577,11 @@ class TestRunner(object):
 #########################################################################
 class TestScript(object):
 
-    def __init__(self, test_dir, module_name, test_cls_name, exinpr):
+    def __init__(self, test_dir, module_name, test_cls_name, exclude_in_pr_builds):
         self._test_dir = test_dir
         self._modname = module_name
         self._test_cls_name = test_cls_name
-        self._exinpr = not exinpr
+        self._exclude_in_pr_builds = not exclude_in_pr_builds
 
     def asString(self):
         code = '''import sys
@@ -598,7 +598,7 @@ exitcode = systest.returnValidationCode({4})
 systest.cleanup()
 sys.exit(exitcode)'''
         return code.format(TESTING_FRAMEWORK_DIR, self._test_dir, self._modname,
-                           self._test_cls_name, TestRunner.VALIDATION_FAIL_CODE, self._exinpr)
+                           self._test_cls_name, TestRunner.VALIDATION_FAIL_CODE, self._exclude_in_pr_builds)
 
 #########################################################################
 # A class to tie together a test and its results
@@ -650,10 +650,10 @@ class TestSuite(object):
         self.setOutputMsg(reason)
         self._result.status = 'skipped'
 
-    def execute(self, runner, exinpr):
+    def execute(self, runner, exclude_in_pr_builds):
         print(time.strftime("%a, %d %b %Y %H:%M:%S", time.localtime()) + ': Executing ' + self._fqtestname)
         if self._test_cls_name is not None:
-          script = TestScript(self._test_dir, self._modname, self._test_cls_name,exinpr)
+          script = TestScript(self._test_dir, self._modname, self._test_cls_name,exclude_in_pr_builds)
           # Start the new process and wait until it finishes
           retcode, output  = runner.start(script)
         else:
@@ -710,7 +710,7 @@ class TestManager(object):
     '''
 
     def __init__(self, test_loc, runner, output = [TextResultReporter()],
-                 testsInclude=None, testsExclude=None, exinpr=None):
+                 testsInclude=None, testsExclude=None, exclude_in_pr_builds=None):
         '''Initialize a class instance'''
 
         # Runners and reporters
@@ -744,7 +744,7 @@ class TestManager(object):
         self._testsInclude = testsInclude
         self._testsExclude = testsExclude
         # flag to exclude slow tests from pull requests
-        self._exinpr = exinpr
+        self._exclude_in_pr_builds = exclude_in_pr_builds
 
     totalTests = property(lambda self: len(self._tests))
     skippedTests = property(lambda self: (self.totalTests - self._passedTests - self._failedTests))
@@ -766,7 +766,7 @@ class TestManager(object):
         # Get the defined tests
         for suite in self._tests:
             if self.__shouldTest(suite):
-                suite.execute(self._runner, self._exinpr)
+                suite.execute(self._runner, self._exclude_in_pr_builds)
             if suite.status == "success":
                 self._passedTests += 1
             elif suite.status == "skipped":
