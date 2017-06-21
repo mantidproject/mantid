@@ -590,9 +590,10 @@ sys.path.append('{0}')
 sys.path.append('{1}')
 from {2} import {3}
 systest = {3}()
-def exinpr():
-    return {5}
-systest.excludeInPullRequests = exinpr
+def returnFalse():
+    return False
+if {5}:
+    systest.excludeInPullRequests = returnFalse
 systest.execute()
 exitcode = systest.returnValidationCode({4})
 systest.cleanup()
