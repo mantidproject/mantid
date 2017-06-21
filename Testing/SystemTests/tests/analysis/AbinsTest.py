@@ -144,9 +144,9 @@ class HelperTestingClass(object):
 # ----------------------------------------------------------------------------------------------------------------
 
 
-class AbinsCASTEPTestScratch(stresstesting.MantidStressTest, HelperTestingClass):
+class AbinsCRYSTALTestScratch(stresstesting.MantidStressTest, HelperTestingClass):
     """
-    In this benchmark it is tested if calculation from scratch with input data from CASTEP and for 1-4 quantum
+    In this benchmark it is tested if calculation from scratch with input data from CRYSTAL and for 1-4 quantum
     order events is correct.
     """
     tolerance = None
@@ -175,7 +175,7 @@ class AbinsCASTEPTestScratch(stresstesting.MantidStressTest, HelperTestingClass)
 # ----------------------------------------------------------------------------------------------------------------
 
 
-class AbinsCRYSTALTestScratch(stresstesting.MantidStressTest, HelperTestingClass):
+class AbinsCRYSTALTestBiggerSystem(stresstesting.MantidStressTest, HelperTestingClass):
     """
     In this benchmark it is tested if calculation from scratch with input data from CRYSTAL and for only 1 quantum
     order event is correct.
@@ -206,10 +206,10 @@ class AbinsCRYSTALTestScratch(stresstesting.MantidStressTest, HelperTestingClass
 # ----------------------------------------------------------------------------------------------------------------
 
 
-class AbinsCASTEPTestT(stresstesting.MantidStressTest, HelperTestingClass):
+class AbinsCRYSTALTestT(stresstesting.MantidStressTest, HelperTestingClass):
     """
     In this benchmark scenario of restart is considered in which data for other temperature already exists in an hdf
-    file. In this benchmark input data from CASTEP DFT program is used.
+    file. In this benchmark input data from CRYSTAL DFT program is used.
     """
     tolerance = None
     ref_result = None
@@ -237,9 +237,9 @@ class AbinsCASTEPTestT(stresstesting.MantidStressTest, HelperTestingClass):
 # ----------------------------------------------------------------------------------------------------------------
 
 
-class AbinsCASTEPTestLargerOrder(stresstesting.MantidStressTest, HelperTestingClass):
+class AbinsCRYSTALTestLargerOrder(stresstesting.MantidStressTest, HelperTestingClass):
     """
-    In this benchmark it is tested if calculation from restart with input data from CASTEP is correct. Requested order
+    In this benchmark it is tested if calculation from restart with input data from CRYSTAL is correct. Requested order
     of quantum event is larger than the one which is saved to an hdf file so S has to be calculated.
     """
     tolerance = None
@@ -268,9 +268,9 @@ class AbinsCASTEPTestLargerOrder(stresstesting.MantidStressTest, HelperTestingCl
 # ----------------------------------------------------------------------------------------------------------------
 
 
-class AbinsCASTEPTestSmallerOrder(stresstesting.MantidStressTest, HelperTestingClass):
+class AbinsCRYSTALTestSmallerOrder(stresstesting.MantidStressTest, HelperTestingClass):
     """
-    In this benchmark it is tested if calculation from restart with input data from CASTEP is correct. Requested
+    In this benchmark it is tested if calculation from restart with input data from CRYSTAL is correct. Requested
     order of quantum event is smaller than the one which is saved to an hdf file so S is loaded from an hdf file.
     """
     tolerance = None
@@ -297,7 +297,7 @@ class AbinsCASTEPTestSmallerOrder(stresstesting.MantidStressTest, HelperTestingC
         return self._output_name, self.ref_result
 
 
-class AbinsCASTEPTestScale(stresstesting.MantidStressTest, HelperTestingClass):
+class AbinsCRYSTALTestScale(stresstesting.MantidStressTest, HelperTestingClass):
     """
     In this benchmark it is tested if scaling is correct.
     """
