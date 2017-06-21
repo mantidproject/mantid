@@ -42,9 +42,20 @@ class FunctionWrapper:
   def fix(self, name):
       self.fun.fix(name)
       
+  def fixAllParameters(self):
+       for i in range(0, self.fun.numParams()):
+          self.fix(self.getParameterName(i))
+      
   def untie(self, name):
       self.fun.untie(name)
-
+      
+  def untieAllParameters(self):
+       for i in range(0, self.fun.numParams()):
+          self.untie(self.getParameterName(i))
+      
+  def getParameterName(self, index):
+  # Get the name of the parameter of given index
+      return self.fun.getParamName(index)
       
   def getFunction(self):
       return self.fun
@@ -93,8 +104,8 @@ class CompositeFunctionWrapper(FunctionWrapper):
     # to the parameter of that name in the first member function.
     # The named parameter must occur in all the member functions.
        expr = self.getCompositeParameterName(name, 0)
-       self.tie({self.getCompositeParameterName(name, i): expr for i in range(1,self.__len__()) })
-       
+       self.tie({self.getCompositeParameterName(name, i): expr for i in range(1,self.__len__()) }) 
+          
     def fixAll (self, name):
     # Fix all parameters with the given local name.
     # Every member function must have a parameter of this name.
