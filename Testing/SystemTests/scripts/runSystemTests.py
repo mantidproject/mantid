@@ -52,7 +52,7 @@ parser.add_option("-s", "--savedir", dest="savedir",
                   help="A directory to use for the Mantid save path")
 parser.add_option("", "--archivesearch", dest="archivesearch", action="store_true",
                   help="Turn on archive search for file finder.")
-parser.add_option("", "--exclude-in-pull-requests", dest="exinpr",action="store_true",
+parser.add_option("", "--exclude-in-pull-requests", dest="exclude_in_pr_builds",action="store_true",
                   help="Skip tests that are not run in pull request builds")
 parser.set_defaults(frameworkLoc=DEFAULT_FRAMEWORK_LOC, executable=sys.executable, makeprop=True,
                     loglevel="information")
@@ -85,7 +85,7 @@ execargs = options.execargs
 runner = stresstesting.TestRunner(executable=options.executable, exec_args=execargs, escape_quotes=True)
 reporter = stresstesting.XmlResultReporter(showSkipped=options.showskipped)
 mgr = stresstesting.TestManager(mtdconf.testDir, runner, output = [reporter],
-                                testsInclude=options.testsInclude, testsExclude=options.testsExclude, exinpr=options.exinpr)
+                                testsInclude=options.testsInclude, testsExclude=options.testsExclude, exclude_in_pr_builds=options.exclude_in_pr_builds)
 try:
     mgr.executeTests()
 except KeyboardInterrupt:
