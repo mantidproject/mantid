@@ -97,7 +97,7 @@ void ResizeRectangularDetector::exec() {
     throw std::runtime_error("Component with name " + ComponentName +
                              " was not found.");
 
-  auto componentInfo = input->mutableComponentInfo();
+  auto& componentInfo = inputW->mutableComponentInfo();
   const auto componentIndex = componentInfo.indexOf(comp->getComponentID());
   if (!componentInfo.isDetector(componentIndex))
     throw std::runtime_error("Component with name " + ComponentName +
@@ -105,11 +105,11 @@ void ResizeRectangularDetector::exec() {
 
   auto input = boost::dynamic_pointer_cast<ExperimentInfo>(ws);
   Geometry::ParameterMap &pmap = input->instrumentParameters();
-  auto oldscalex = pmap.getDouble(det->getName(), std::string("scalex"));
-  auto oldscaley = pmap.getDouble(det->getName(), std::string("scaley"));
+  auto oldscalex = pmap.getDouble(ComponentName, std::string("scalex"));
+  auto oldscaley = pmap.getDouble(ComponentName, std::string("scaley"));
   // Add a parameter for the new scale factors
-  pmap.addDouble(det->getComponentID(), "scalex", ScaleX);
-  pmap.addDouble(det->getComponentID(), "scaley", ScaleY);
+  pmap.addDouble(comp->getComponentID(), "scalex", ScaleX);
+  pmap.addDouble(comp->getComponentID(), "scaley", ScaleY);
   pmap.clearPositionSensitiveCaches();
 
   // Positions of detectors are now stored in DetectorInfo, so we must update
@@ -122,8 +122,8 @@ void ResizeRectangularDetector::exec() {
     relscalex /= oldscalex[0];
   if (!oldscaley.empty())
     relscaley /= oldscaley[0];
-  applyRectangularDetectorScaleToDetectorInfo(
-      *componentInfo, comp->getComponentID(), relscalex, relscaley);
+  applyRectangularDetectorScaleToComponentInfo(
+      componentInfo, comp->getComponentID(), relscalex, relscaley);
 }
 
 } // namespace Mantid
