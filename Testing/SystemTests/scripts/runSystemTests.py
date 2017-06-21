@@ -53,7 +53,7 @@ parser.add_option("-s", "--savedir", dest="savedir",
 parser.add_option("", "--archivesearch", dest="archivesearch", action="store_true",
                   help="Turn on archive search for file finder.")
 parser.add_option("", "--exclude-in-pull-requests", dest="exinpr",action="store_true",
-                  help="")
+                  help="Skip tests that are not run in pull request builds")
 parser.set_defaults(frameworkLoc=DEFAULT_FRAMEWORK_LOC, executable=sys.executable, makeprop=True,
                     loglevel="information")
 (options, args) = parser.parse_args()
