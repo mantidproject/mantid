@@ -20,11 +20,11 @@ set ( SRC_FILES
 	src/BinaryOperation.cpp
 	src/CalMuonDeadTime.cpp
 	src/CalMuonDetectorPhases.cpp
-	src/CalculateMuonAsymmetry.cpp
 	src/CalculateCountRate.cpp
 	src/CalculateDIFC.cpp
 	src/CalculateEfficiency.cpp
 	src/CalculateFlatBackground.cpp
+	src/CalculateMuonAsymmetry.cpp
 	src/CalculateResolution.cpp
 	src/CalculateSlits.cpp
 	src/CalculateTransmission.cpp
@@ -155,12 +155,12 @@ set ( SRC_FILES
 	src/He3TubeEfficiency.cpp
 	src/IQTransform.cpp
 	src/IdentifyNoisyDetectors.cpp
-	src/ImggTomographicReconstruction.cpp
 	src/IntegrateByComponent.cpp
 	src/Integration.cpp
 	src/InterpolatingRebin.cpp
 	src/InterpolationOption.cpp
 	src/InvertMask.cpp
+	src/LineProfile.cpp
 	src/Logarithm.cpp
 	src/LorentzCorrection.cpp
 	src/MagFormFactorCorrection.cpp
@@ -293,7 +293,6 @@ set ( SRC_FILES
 	src/TimeAtSampleStrategyDirect.cpp
 	src/TimeAtSampleStrategyElastic.cpp
 	src/TimeAtSampleStrategyIndirect.cpp
-	src/Tomography/FBPTomopy.cpp
 	src/Transpose.cpp
 	src/UnGroupWorkspace.cpp
 	src/UnaryOperation.cpp
@@ -311,13 +310,7 @@ set ( SRC_FILES
 	src/XDataConverter.cpp
 )
 
-# C as they originally come from a different project (tomopy)
-set ( C_SRC_FILES
-	src/Tomography/tomopy/fbp.c
-	src/Tomography/tomopy/utils.c
-)
-
-set ( INC_FILES	
+set ( INC_FILES
 	inc/MantidAlgorithms/AbsorptionCorrection.h
 	inc/MantidAlgorithms/AddLogDerivative.h
 	inc/MantidAlgorithms/AddNote.h
@@ -340,11 +333,11 @@ set ( INC_FILES
 	inc/MantidAlgorithms/BoostOptionalToAlgorithmProperty.h
 	inc/MantidAlgorithms/CalMuonDeadTime.h
 	inc/MantidAlgorithms/CalMuonDetectorPhases.h
-	inc/MantidAlgorithms/CalculateMuonAsymmetry.h
 	inc/MantidAlgorithms/CalculateCountRate.h
 	inc/MantidAlgorithms/CalculateDIFC.h
 	inc/MantidAlgorithms/CalculateEfficiency.h
 	inc/MantidAlgorithms/CalculateFlatBackground.h
+	inc/MantidAlgorithms/CalculateMuonAsymmetry.h
 	inc/MantidAlgorithms/CalculateResolution.h
 	inc/MantidAlgorithms/CalculateSlits.h
 	inc/MantidAlgorithms/CalculateTransmission.h
@@ -476,12 +469,12 @@ set ( INC_FILES
 	inc/MantidAlgorithms/He3TubeEfficiency.h
 	inc/MantidAlgorithms/IQTransform.h
 	inc/MantidAlgorithms/IdentifyNoisyDetectors.h
-	inc/MantidAlgorithms/ImggTomographicReconstruction.h
 	inc/MantidAlgorithms/IntegrateByComponent.h
 	inc/MantidAlgorithms/Integration.h
 	inc/MantidAlgorithms/InterpolatingRebin.h
 	inc/MantidAlgorithms/InterpolationOption.h
 	inc/MantidAlgorithms/InvertMask.h
+	inc/MantidAlgorithms/LineProfile.h
 	inc/MantidAlgorithms/Logarithm.h
 	inc/MantidAlgorithms/LorentzCorrection.h
 	inc/MantidAlgorithms/MagFormFactorCorrection.h
@@ -619,9 +612,6 @@ set ( INC_FILES
 	inc/MantidAlgorithms/TimeAtSampleStrategyDirect.h
 	inc/MantidAlgorithms/TimeAtSampleStrategyElastic.h
 	inc/MantidAlgorithms/TimeAtSampleStrategyIndirect.h
-	inc/MantidAlgorithms/Tomography/FBPTomopy.h
-	inc/MantidAlgorithms/Tomography/tomopy/fbp.h
-	inc/MantidAlgorithms/Tomography/tomopy/utils.h
 	inc/MantidAlgorithms/Transpose.h
 	inc/MantidAlgorithms/UnGroupWorkspace.h
 	inc/MantidAlgorithms/UnaryOperation.h
@@ -672,11 +662,11 @@ set ( TEST_FILES
 	BinaryOperationTest.h
 	CalMuonDeadTimeTest.h
 	CalMuonDetectorPhasesTest.h
-	CalculateMuonAsymmetryTest.h
 	CalculateCountRateTest.h
 	CalculateDIFCTest.h
 	CalculateEfficiencyTest.h
 	CalculateFlatBackgroundTest.h
+	CalculateMuonAsymmetryTest.h
 	CalculateResolutionTest.h
 	CalculateSlitsTest.h
 	CalculateTransmissionBeamSpreaderTest.h
@@ -802,12 +792,12 @@ set ( TEST_FILES
 	He3TubeEfficiencyTest.h
 	IQTransformTest.h
 	IdentifyNoisyDetectorsTest.h
-	ImggTomographicReconstructionTest.h
 	IntegrateByComponentTest.h
 	IntegrationTest.h
 	InterpolatingRebinTest.h
 	InterpolationOptionTest.h
 	InvertMaskTest.h
+	LineProfileTest.h
 	LogarithmTest.h
 	LorentzCorrectionTest.h
 	MCAbsorptionStrategyTest.h
@@ -924,7 +914,6 @@ set ( TEST_FILES
 	TimeAtSampleStrategyDirectTest.h
 	TimeAtSampleStrategyElasticTest.h
 	TimeAtSampleStrategyIndirectTest.h
-	Tomography/FBPTomopyTest.h
 	TransposeTest.h
 	UnGroupWorkspaceTest.h
 	UnaryOperationTest.h

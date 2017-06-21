@@ -24,7 +24,7 @@ class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS InstrumentTreeWidget
   Q_OBJECT
 public:
   explicit InstrumentTreeWidget(QWidget *w);
-  void setInstrumentActor(InstrumentActor *instrActor);
+  void setInstrumentWidget(InstrumentWidget *w);
   void getSelectedBoundingBox(const QModelIndex &index, double &xmax,
                               double &ymax, double &zmax, double &xmin,
                               double &ymin, double &zmin);
@@ -39,7 +39,7 @@ signals:
   void componentSelected(const Mantid::Geometry::ComponentID);
 
 private:
-  InstrumentActor *m_instrActor;
+  InstrumentWidget *m_instrWidget;
   InstrumentTreeModel *m_treeModel;
 };
 } // MantidWidgets

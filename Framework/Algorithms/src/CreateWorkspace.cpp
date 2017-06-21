@@ -163,7 +163,7 @@ void CreateWorkspace::exec() {
         WorkspaceFactory::Instance().create("Workspace2D", nSpec, xSize, ySize);
   }
 
-  Progress progress(this, 0, 1, nSpec);
+  Progress progress(this, 0.0, 1.0, nSpec);
 
   PARALLEL_FOR_IF(Kernel::threadSafe(*outputWS))
   for (int i = 0; i < nSpec; i++) {

@@ -2,6 +2,8 @@
 #define MANTID_KERNEL_PROGRESSBASE_H_
 
 #include "MantidKernel/DllConfig.h"
+
+#include <atomic>
 #include <string>
 
 namespace Mantid {
@@ -44,7 +46,7 @@ public:
     // This function was put inline for highest speed.
     if (++m_i - m_last_reported < m_notifyStep)
       return;
-    m_last_reported = m_i;
+    m_last_reported.store(m_i.load());
     this->doReport("");
   }
 
@@ -75,9 +77,9 @@ protected:
   /// Progress increment at each loop
   double m_step;
   /// Loop counter
-  int64_t m_i;
+  std::atomic<int64_t> m_i;
   /// Last loop counter value the was a peport
-  int64_t m_last_reported;
+  std::atomic<int64_t> m_last_reported;
   /// Timer that is started when the progress bar is constructed.
   Kernel::Timer *m_timeElapsed;
   /// Digits of precision in the reporting

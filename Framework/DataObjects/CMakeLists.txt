@@ -39,6 +39,7 @@ set ( SRC_FILES
 	src/PropertyWithValue.cpp
 	src/RebinnedOutput.cpp
 	src/ReflectometryTransform.cpp
+	src/ScanningWorkspaceBuilder.cpp
 	src/SpecialWorkspace2D.cpp
 	src/SplittersWorkspace.cpp
 	src/TableColumn.cpp
@@ -117,6 +118,7 @@ set ( INC_FILES
 	inc/MantidDataObjects/PeaksWorkspace.h
 	inc/MantidDataObjects/RebinnedOutput.h
 	inc/MantidDataObjects/ReflectometryTransform.h
+	inc/MantidDataObjects/ScanningWorkspaceBuilder.h
 	inc/MantidDataObjects/SkippingPolicy.h
 	inc/MantidDataObjects/SpecialWorkspace2D.h
 	inc/MantidDataObjects/SplittersWorkspace.h
@@ -175,6 +177,7 @@ set ( TEST_FILES
 	RebinnedOutputTest.h
 	RefAxisTest.h
 	ReflectometryTransformTest.h
+	ScanningWorkspaceBuilderTest.h
 	SkippingPolicyTest.h
 	SpecialWorkspace2DTest.h
 	SplittersWorkspaceTest.h

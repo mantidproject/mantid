@@ -62,13 +62,13 @@ Usage
 
 .. testcode:: position
 
-      LoadCalFile(InstrumentName="PG3",
+      ws = LoadEmptyInstrument(Filename="POWGEN_Definition_2015-08-01.xml")
+      LoadCalFile(InputWorkspace=ws,
             CalFilename="PG3_golden.cal",
             MakeGroupingWorkspace=False,
             MakeOffsetsWorkspace=True,
             MakeMaskWorkspace=True,
             WorkspaceName="PG3")
-      ws = LoadEmptyInstrument(Filename="POWGEN_Definition_2015-08-01.xml")
       component="bank26"
       print "Start position is",ws.getInstrument().getComponentByName(component).getPos()
       AlignComponents(CalibrationTable="PG3_cal",
@@ -91,13 +91,13 @@ Output:
 
 .. testcode:: rotation
 
-      LoadCalFile(InstrumentName="PG3",
+      ws = LoadEmptyInstrument(Filename="POWGEN_Definition_2015-08-01.xml")
+      LoadCalFile(InputWorkspace=ws,
 	    CalFilename="PG3_golden.cal",
 	    MakeGroupingWorkspace=False,
 	    MakeOffsetsWorkspace=True,
 	    MakeMaskWorkspace=True,
 	    WorkspaceName="PG3")
-      ws = LoadEmptyInstrument(Filename="POWGEN_Definition_2015-08-01.xml")
       components="bank25,bank46"
       bank25Rot = ws.getInstrument().getComponentByName("bank25").getRotation().getEulerAngles()
       bank46Rot = ws.getInstrument().getComponentByName("bank46").getRotation().getEulerAngles()
@@ -128,7 +128,8 @@ Output:
 
 .. testcode:: sample
 
-      LoadCalFile(InstrumentName="PG3",
+      ws = LoadEmptyInstrument(Filename="POWGEN_Definition_2015-08-01.xml")
+      LoadCalFile(InputWorkspace=ws,
 	    CalFilename="PG3_golden.cal",
 	    MakeGroupingWorkspace=False,
 	    MakeOffsetsWorkspace=True,
@@ -137,7 +138,6 @@ Output:
       # Mask banks that don't have calibration data
       MaskBTP(Workspace='PG3_mask', Instrument='POWGEN',
 	      Bank='22-25,42-45,62-66,82-86,102-105,123,124,143,144,164,184,204')
-      ws = LoadEmptyInstrument(Filename="POWGEN_Definition_2015-08-01.xml")
       print "Start sample position is",ws.getInstrument().getSample().getPos().getZ()
       AlignComponents(CalibrationTable="PG3_cal",
             Workspace=ws,

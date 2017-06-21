@@ -1,7 +1,5 @@
 #include "MantidKernel/StringTokenizer.h"
 #include <algorithm>
-#include <functional>
-#include <cassert>
 #include <iterator> //cbegin,cend
 
 namespace {

@@ -77,7 +77,13 @@ public:
     ExperimentInfo ws;
     boost::shared_ptr<const Instrument> i = ws.getInstrument();
     TSM_ASSERT("ExperimentInfo gets a default, empty Instrument.", i);
+    TS_ASSERT(i->isEmptyInstrument());
     TS_ASSERT_EQUALS(ws.getInstrument()->type(), "Instrument");
+
+    // ALL of these should be set. Even though we have just an empty instrument
+    // stored. See constructor.
+    TS_ASSERT(i->hasInfoVisitor());
+    TS_ASSERT(i->hasDetectorInfo());
   }
 
   void test_GetSetInstrument_default() {
@@ -901,14 +907,7 @@ public:
     instrument->markAsSamplePos(sample);
 
     ExperimentInfo expInfo;
-    expInfo.setInstrument(instrument);
-    const Mantid::API::ComponentInfo &compInfo = expInfo.componentInfo();
-
-    TSM_ASSERT_EQUALS("Should be a valid component index", 0,
-                      compInfo.indexOf(det1->getComponentID()));
-    TSM_ASSERT_THROWS("Should throw. Duplicate should have been rejected",
-                      compInfo.indexOf(det2->getComponentID()),
-                      std::out_of_range &);
+    TS_ASSERT_THROWS_NOTHING(expInfo.setInstrument(instrument));
   }
 
 private:

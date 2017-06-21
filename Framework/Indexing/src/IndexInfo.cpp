@@ -1,6 +1,7 @@
 #include "MantidIndexing/IndexInfo.h"
 #include "MantidIndexing/RoundRobinPartitioner.h"
 #include "MantidIndexing/SpectrumNumberTranslator.h"
+#include "MantidParallel/Communicator.h"
 #include "MantidKernel/make_cow.h"
 #include "MantidKernel/make_unique.h"
 #include "MantidTypes/SpectrumDefinition.h"
@@ -14,9 +15,18 @@ namespace Indexing {
 
 /// Construct a default IndexInfo, with contiguous spectrum numbers starting at
 /// 1 and no detector IDs.
-IndexInfo::IndexInfo(const size_t globalSize, const StorageMode storageMode,
-                     const Communicator &communicator)
-    : m_storageMode(storageMode), m_communicator(communicator) {
+IndexInfo::IndexInfo(const size_t globalSize,
+                     const Parallel::StorageMode storageMode)
+    : IndexInfo(globalSize, storageMode, Parallel::Communicator{}) {}
+
+/// Construct a default IndexInfo, with contiguous spectrum numbers starting at
+/// 1 and no detector IDs.
+IndexInfo::IndexInfo(const size_t globalSize,
+                     const Parallel::StorageMode storageMode,
+                     const Parallel::Communicator &communicator)
+    : m_storageMode(storageMode),
+      m_communicator(
+          Kernel::make_unique<Parallel::Communicator>(communicator)) {
   // Default to spectrum numbers 1...globalSize
   std::vector<SpectrumNumber> specNums(globalSize);
   std::iota(specNums.begin(), specNums.end(), 1);
@@ -26,11 +36,39 @@ IndexInfo::IndexInfo(const size_t globalSize, const StorageMode storageMode,
 /// Construct with given spectrum number and vector of detector IDs for each
 /// index.
 IndexInfo::IndexInfo(std::vector<SpectrumNumber> spectrumNumbers,
-                     const StorageMode storageMode,
-                     const Communicator &communicator)
-    : m_storageMode(storageMode), m_communicator(communicator) {
+                     const Parallel::StorageMode storageMode)
+    : IndexInfo(std::move(spectrumNumbers), storageMode,
+                Parallel::Communicator{}) {}
+
+/// Construct with given spectrum number and vector of detector IDs for each
+/// index.
+IndexInfo::IndexInfo(std::vector<SpectrumNumber> spectrumNumbers,
+                     const Parallel::StorageMode storageMode,
+                     const Parallel::Communicator &communicator)
+    : m_storageMode(storageMode),
+      m_communicator(
+          Kernel::make_unique<Parallel::Communicator>(communicator)) {
   makeSpectrumNumberTranslator(std::move(spectrumNumbers));
 }
+
+IndexInfo::IndexInfo(const IndexInfo &other)
+    : m_storageMode(other.m_storageMode),
+      m_communicator(
+          Kernel::make_unique<Parallel::Communicator>(*other.m_communicator)),
+      m_spectrumDefinitions(other.m_spectrumDefinitions),
+      m_spectrumNumberTranslator(other.m_spectrumNumberTranslator) {}
+
+IndexInfo::IndexInfo(IndexInfo &&) = default;
+
+// Defined as default in source for forward declaration with std::unique_ptr.
+IndexInfo::~IndexInfo() = default;
+
+IndexInfo &IndexInfo::operator=(const IndexInfo &other) {
+  auto copy(other);
+  return *this = std::move(copy);
+}
+
+IndexInfo &IndexInfo::operator=(IndexInfo &&) = default;
 
 /// The *local* size, i.e., the number of spectra in this partition.
 size_t IndexInfo::size() const {
@@ -166,17 +204,22 @@ void IndexInfo::makeSpectrumNumberTranslator(
     std::vector<SpectrumNumber> &&spectrumNumbers) const {
   PartitionIndex partition;
   int numberOfPartitions;
-  if (m_storageMode == StorageMode::Distributed) {
-    partition = PartitionIndex(m_communicator.rank);
-    numberOfPartitions = m_communicator.size;
-  } else if (m_storageMode == StorageMode::Cloned) {
+  if (m_storageMode == Parallel::StorageMode::Distributed) {
+    partition = PartitionIndex(m_communicator->rank());
+    numberOfPartitions = m_communicator->size();
+  } else if (m_storageMode == Parallel::StorageMode::Cloned) {
+    partition = PartitionIndex(0);
+    numberOfPartitions = 1;
+  } else if (m_storageMode == Parallel::StorageMode::MasterOnly) {
+    if (m_communicator->rank() != 0)
+      throw std::runtime_error(
+          "IndexInfo: storage mode is " + Parallel::toString(m_storageMode) +
+          " but creation on non-master rank has been attempted");
     partition = PartitionIndex(0);
     numberOfPartitions = 1;
   } else {
-    // We still need to figure out the required behavior here, will do this when
-    // implementing basic MPI support for MatrixWorkspace.
-    throw std::runtime_error(
-        "IndexInfo does not yet support StorageMode::MasterOnly");
+    throw std::runtime_error("IndexInfo: unknown storage mode " +
+                             Parallel::toString(m_storageMode));
   }
   auto partitioner = Kernel::make_unique<RoundRobinPartitioner>(
       numberOfPartitions, partition,

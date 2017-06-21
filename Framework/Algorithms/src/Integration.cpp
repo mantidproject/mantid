@@ -162,7 +162,7 @@ void Integration::exec() {
       this->getOutputWorkspace(localworkspace, minSpec, maxSpec);
 
   bool is_distrib = outputWorkspace->isDistribution();
-  Progress progress(this, progressStart, 1, maxSpec - minSpec + 1);
+  Progress progress(this, progressStart, 1.0, maxSpec - minSpec + 1);
 
   const bool axisIsText = localworkspace->getAxis(1)->isText();
   const bool axisIsNumeric = localworkspace->getAxis(1)->isNumeric();

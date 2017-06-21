@@ -47,6 +47,7 @@ private:
   API::MatrixWorkspace_sptr
   estimateAsymmetry(const API::Workspace_sptr &inputWS, const int index) const;
 };
+double getStoredNorm();
 } // namespace WorkflowAlgorithms
 } // namespace Mantid
 

@@ -1,238 +1,691 @@
 .. _isis-powder-diffraction-polaris-ref:
 
-=========================================
-ISIS Powder Diffraction Scripts - Polaris
-=========================================
-
-.. warning:: These scripts and documentation are still undergoing active development.
-             They can change in any way during these stages and the validity of all
-             data has not been tested.
+=====================================================
+ISIS Powder Diffraction Scripts - POLARIS Reference
+=====================================================
 
 .. contents:: Table of Contents
     :local:
 
+.. _creating_polaris_object_isis-powder-diffraction-ref:
 
+Creating POLARIS Object
+------------------------
+This method assumes you are familiar with the concept of objects in Python.
+If not more details can be read here: :ref:`intro_to_objects-isis-powder-diffraction-ref`
 
-.. _polaris_calibration_folder-powder-diffraction-ref:
+To create a POLARIS object the following parameters are required:
 
-Calibration Folder
-------------------
-Within the top level of the calibration folder for POLARIS the following files
-must be present:
+- :ref:`calibration_directory_polaris_isis-powder-diffraction-ref` 
+- :ref:`output_directory_polaris_isis-powder-diffraction-ref` 
+- :ref:`user_name_polaris_isis-powder-diffraction-ref` 
 
-- .cal file containing the detector grouping information
-- File containing masking data for Vanadium peaks
-- Folder for each cycle label (e.g. 10_2) containing a .cal file with detector
-  offsets for that cycle
+Optionally a configuration file may be specified if one exists 
+using the following parameter:
 
-The names of the .cal grouping file and masking file are set in the advanced
-configuration file. See: :ref:`polaris_adv_config-powder-diffraction-ref`
+- :ref:`config_file_polaris_isis-powder-diffraction-ref`
 
-The label for the run being processed and the appropriate offset filename is
-read from the calibration mapping file: :ref:`polaris_calibration_map-powder-diffraction-ref`
+See :ref:`configuration_files_isis-powder-diffraction-ref`
+on YAML configuration files for more details
 
-.. _polaris_calibration_map-powder-diffraction-ref:
+Example
+^^^^^^^
 
-Calibration Configuration File
-------------------------------
-An example of the file layout is below:
+..  code-block:: python
+
+  from isis_powder import Polaris
+  
+  calibration_dir = r"C:\path\to\calibration_dir"
+  output_dir = r"C:\path\to\output_dir"
+  
+  polaris_example = Polaris(calibration_directory=calibration_dir,
+                            output_directory=output_dir,
+                            user_name="Mantid")
+
+  # Optionally we could provide a configuration file like so
+  # Notice how the file name ends with .yaml
+  config_file_path = r"C:\path\to\config_file.yaml
+  polaris_example = Polaris(config_file=config_file_path,
+                            user_name="Mantid", ...)
+
+Methods
+--------
+The following methods can be executed on a POLARIS object:
+
+- :ref:`create_vanadium_polaris_isis-powder-diffraction-ref`
+- :ref:`focus_polaris_isis-powder-diffraction-ref`
+- :ref:`set_sample_polaris_isis-powder-diffraction-ref`
+
+For information on creating a POLARIS object see: 
+:ref:`creating_polaris_object_isis-powder-diffraction-ref`
+
+.. _create_vanadium_polaris_isis-powder-diffraction-ref:
+
+create_vanadium
+^^^^^^^^^^^^^^^^
+The *create_vanadium* method allows a user to process a vanadium run.
+Whilst processing the vanadium run the scripts can apply any corrections
+the user enables and will spline the resulting workspace(s) for later focusing.
+
+On POLARIS the following parameters are required when executing *create_vanadium*:
+
+- :ref:`calibration_mapping_file_polaris_isis-powder-diffraction-ref`
+- :ref:`mode_polaris_isis-powder-diffraction-ref`
+- :ref:`do_absorb_corrections_polaris_isis-powder-diffraction-ref`
+- :ref:`first_cycle_run_no_polaris_isis-powder-diffraction-ref`
+
+If :ref:`do_absorb_corrections_polaris_isis-powder-diffraction-ref` is 
+set to **True** the following parameter is required in addition to the 
+above:
+
+- :ref:`multiple_scattering_polaris_isis-powder-diffraction-ref`
+
+Example
+=======
+
+..  code-block:: python
+
+  # Notice how the filename ends with .yaml
+  cal_mapping_file = r"C:\path\to\cal_mapping.yaml"
+
+  polaris_example.create_vanadium(calibration_mapping_file=cal_mapping_file,
+                                  mode="PDF", do_absorb_corrections=True,
+                                  first_cycle_run_no=100, multiple_scattering=False)
+
+.. _focus_polaris_isis-powder-diffraction-ref:
+
+focus
+^^^^^
+The *focus* method processes the user specified run(s). It aligns,
+focuses and optionally applies corrections if the user has requested them.
+
+On POLARIS the following parameters are required when executing *focus*:
+
+- :ref:`calibration_mapping_file_polaris_isis-powder-diffraction-ref`
+- :ref:`mode_polaris_isis-powder-diffraction-ref`
+- :ref:`do_absorb_corrections_polaris_isis-powder-diffraction-ref`
+- :ref:`do_van_normalisation_polaris_isis-powder-diffraction-ref`
+- :ref:`input_mode_polaris_isis-powder-diffraction-ref`
+- :ref:`run_number_polaris_isis_powder-diffraction-ref`
+
+If :ref:`do_absorb_corrections_polaris_isis-powder-diffraction-ref` is 
+set to **True** the following parameter is required in addition to the 
+above:
+
+- :ref:`multiple_scattering_polaris_isis-powder-diffraction-ref`
+
+The following parameters may also be optionally set:
+
+- :ref:`file_ext_polaris_isis-powder-diffraction-ref`
+- :ref:`sample_empty_polaris_isis_powder-diffraction-ref`
+
+If :ref:`sample_empty_polaris_isis_powder-diffraction-ref` is 
+set then the following parameter is also required:
+
+- :ref:`sample_empty_scale_polaris_isis-powder-diffraction-ref`
+
+Example
+=======
+
+..  code-block:: python
+
+  # Notice how the filename ends with .yaml
+  cal_mapping_file = r"C:\path\to\cal_mapping.yaml"
+
+  polaris_example.focus(calibration_mapping_file=cal_mapping_file,
+                        mode="Rietveld", do_absorb_corrections=False,
+                        file_ext=".s01", input_mode="Individual",
+                        run_number="100-110")
+
+.. _set_sample_polaris_isis-powder-diffraction-ref:
+
+set_sample
+^^^^^^^^^^^
+The *set_sample* method allows a user to specify a SampleDetails
+object which contains the sample properties used when
+:ref:`do_absorb_corrections_polaris_isis-powder-diffraction-ref` is **True**
+whilst focusing.
+
+For more details on the SampleDetails object and how to set
+it see: :ref:`isis-powder-diffraction-sampleDetails-ref`
+
+The following parameter is required when calling *set_sample*
+
+- *sample* - This must be a SampleDetails object with the
+  material set already.
+
+Example
+=======
+
+..  code-block:: python
+
+  sample_obj = SampleDetails(...)
+  sample_obj.set_material(...)
+
+  polaris_example.set_sample(sample=sample_obj)
+
+.. _calibration_mapping_polaris-isis-powder-ref:
+
+Calibration Mapping File
+-------------------------
+The calibration mapping file holds the mapping between
+run numbers, current label, offset filename and the empty 
+and vanadium numbers.
+
+For more details on the calibration mapping file see:
+:ref:`cycle_mapping_files_isis-powder-diffraction-ref`
+
+The layout on POLARIS should look as follows for each block
+substituting the below values for appropriate values:
 
 .. code-block:: yaml
   :linenos:
 
-  123-130, 135-140:
-    label : "10_1"
-    offset_file_name : "offsets_example_10_1.cal"
+  1-100:
+    label: "1_1"
+    offset_file_name: "offset_file.cal"
+    PDF:
+      vanadium_run_numbers: "10"
+      empty_run_numbers: "20"
+    Rietveld:
+      vanadium_run_numbers: "30"
+      empty_run_numbers: "40"
 
-    chopper_on :
-      vanadium_run_numbers : "123-125"
-      empty_run_numbers : "126-130"
+Lines 5 and 6 in this example set the vanadium and empty run numbers for
+chopper off mode. Lines 8 and 9 set the vanadium and empty for chopper
+on mode.
 
-    chopper_off :
-      vanadium_run_numbers : "135-137"
-      empty_run_numbers : "138-140"
+Example
+^^^^^^^^
+.. code-block:: yaml
 
-  141-145: ...etc.
+  1-100:
+    label: "1_1"
+    offset_file_name: "offset_file.cal"
+    PDF:
+      vanadium_run_numbers: "10"
+      empty_run_numbers: "20"
+    Rietveld:
+      vanadium_run_numbers: "30"
+      empty_run_numbers: "40"
 
-Line 1 is documented here: :ref:`calibration_map_isis-powder-diffraction-ref`
+  101-:
+    label: "1_2"
+    offset_file_name: "offset_file.cal"
+    PDF:
+      vanadium_run_numbers: "110"
+      empty_run_numbers: "120"
+    Rietveld:
+      vanadium_run_numbers: "130"
+      empty_run_numbers: "140"
 
-The subsequent lines can be placed in any order provided that blocks (which are
-marked by the indentation of the line) remain together. This is further explained
-below.
+Parameters
+-----------
+The following parameters for POLARIS are intended for regular use
+when using the ISIS Powder scripts.
 
-- Line 2 sets the label that is associated with any runs specified in line 1
-  and is used for the calibration and output directories
-- Line 3 sets the name of the offset file to use. See TODO link (calibration folder)
-- Lines 4 and 8 are whitespace - they are there to visually separate the blocks
-  and will be ignored by the parser
-- Line 5 indicates the next block (which is marked by the indentation) will
-  be runs for when the chopper was on
-- Line 6 the vanadium run numbers for when the chopper is on
-- Line 7 the empty run numbers for when the chopper was on
-- Line 8 - See line 4
-- Line 9 indicates the next block, notice the indentation is back to the original
-  level. This says the subsequent lines at deeper indentation are for chopper off
-- Line 10 the vanadium run numbers for when the chopper is off
-- Line 11 the empty run numbers for when the chopper is off
+.. _calibration_directory_polaris_isis-powder-diffraction-ref:
 
-Basic Script Parameters
------------------------
-For background on script parameters and how they are evaluated see:
-:ref:`script_param_overview_isis-powder-diffraction-ref`
+calibration_directory
+^^^^^^^^^^^^^^^^^^^^^
+This parameter should be the full path to the calibration folder.
+Within the folder the following should be present:
 
-- `calibration_directory` - The location of the calibration folder. The structure
-  of the folder is described here: :ref:`polaris_calibration_folder-powder-diffraction-ref`
-  Additionally calibrated vanadium data will be stored here for later
-  use whilst focusing.
+- Grouping .cal file (see: :ref:`grouping_file_name_polaris_isis-powder-diffraction-ref`)
+- Masking file (see: :ref:`masking_file_name_polaris_isis-powder-diffraction-ref`)
+- Folder(s) with the label name specified in mapping file (e.g. "1_1")
+  - Inside each folder should be the offset file with name specified in mapping file
 
-- `calibration_mapping_file` - The full path to the YAML mapping of run numbers,
-  label and vanadium/empty runs. This is described in more detail here:
-  :ref:`polaris_calibration_map-powder-diffraction-ref`
+The script will also save out vanadium splines into the relevant
+label folder which are subsequently loaded and used within the
+:ref:`focus_polaris_isis-powder-diffraction-ref` method. 
 
-- `chopper_on` - This flag which can be set to True or False indicates whether the
-  chopper was on for this set of runs. As noted (:ref:`script_param_overview_isis-powder-diffraction-ref`)
-  the scripts will use the most recent value set on that object.
+Example Input:
 
-- `config_file` - The full path to the YAML configuration file. The full description
-  of this file is here: :ref:`calibration_map_isis-powder-diffraction-ref`
+..  code-block:: python
 
-- `do_absorb_corrections` - Used during a vanadium calibration and subsequent focusing
-  if set to True the calibration routine will correct for absorption and scattering
-  in a cylindrical sample as defined in the advanced configuration file. It then applies
-  these calibrations to the vanadium sample.
+  polaris_example = Polaris(calibration_directory=r"C:\path\to\calibration_dir", ...)
 
-- `do_van_normalisation` - If set to True divides the sample by the calculated vanadium
-  spline during the normalisation step.
+.. _calibration_mapping_file_polaris_isis-powder-diffraction-ref:
 
-- `input_mode` - Specifies how the runs are processed. Accepted values `Individual`,
-  `Summed` - TODO write section on input modes for overview
+calibration_mapping_file
+^^^^^^^^^^^^^^^^^^^^^^^^^
+This parameter gives the full path to the YAML file containing the 
+calibration mapping. For more details on this file see:
+:ref:`calibration_mapping_polaris-isis-powder-ref`
 
-- `multiple_scattering` - If set to True with `do_absorb_corrections` the calculation
-  will factor in the effects of multiple scattering and apply the correct corrections.
+*Note: This should be the full path to the file including extension*
 
-- `run_in_range` - Only used during vanadium calibration. The run specified here
-  is used with to determine the current label and the correct runs to use whilst
-  calculating the calibration. See :ref:`polaris_calibration_map-powder-diffraction-ref`
+Example Input:
 
-- `run_number` - used during focusing, a single run or range of runs can be specified here.
-  All ranges specified are processed inclusively with the behavior determined by
-  `input_mode`. See TODO link
+..  code-block:: python
 
-- `output_directory` - The folder where the data is saved. The data is saved
-  in a folder with the label appropriate for that/those run(s) and the user name
-  specified by the user.
+  # Notice the filename always ends in .yaml
+  polaris_example = Polaris(calibration_mapping_file=r"C:\path\to\file\calibration_mapping.yaml", ...)
 
-- `user_name` - Specifies the user name to use when saving out focused data.
+.. _mode_polaris_isis-powder-diffraction-ref:
 
-.. _polaris_adv_config-powder-diffraction-ref:
+mode
+^^^^^^^^^^
+The current chopper mode to use in the 
+:ref:`create_vanadium_polaris_isis-powder-diffraction-ref`
+and :ref:`focus_polaris_isis-powder-diffraction-ref` method.
+This determines which vanadium and empty run numbers
+to use whilst processing.
 
-Advanced Script Parameters
---------------------------
+Accepted values are: **PDF** or **Rietveld**
 
-- `grouping_file_name` - The name of the .cal file containing grouping information
-  for the detectors. This file must be located at the top of the calibration
-  directory as noted here :ref:`polaris_calibration_folder-powder-diffraction-ref`
+*Note: This parameter is not case sensitive*
 
-- `focused_cropping_values` - Stores the TOF window to crop down to on a bank-by-bank
-  basis. This is one of the final steps applied to a focused workspace. The values
-  are stored as a list of tuples, with one tuple per bank and each containing
-  the minimum and maximum values in TOF. The window specified must be less than
-  both `vanadium_cropping_values` and `raw_data_tof_cropping`
+Example Input:
 
-- `masking_file_name` - The name of the file containing Vanadium masking information.
-  This file must be located at the top of the calibration directory as noted here:
-  :ref:`polaris_calibration_folder-powder-diffraction-ref`
+..  code-block:: python
 
-- `raw_data_cropping_values` - The window in TOF which the data should be cropped
-  down to before any processing. This should be stored as a tuple of minimum and
-  maximum TOF values. The window should be larger than `vanadium_cropping_values`.
+  polaris_example.create_vanadium(mode="PDF", ...)
+  # Or
+  polaris_example.focus(mode="Rietveld", ...)
 
-- `spline_coefficient` - The coefficient to use whilst taking a b-spline of the
-  Vanadium workspace during calibration
+.. _config_file_polaris_isis-powder-diffraction-ref:
 
-- `vanadium_cropping_values` - Stores the TOF window the vanadium workspace is
-  cropped down to after focusing. This value is stored as a tuple of the minimum
-  and maximum values. The TOF window should be smaller than `raw_data_cropping_values`
-  but larger than `tof_cropping_ranges`
+config_file
+^^^^^^^^^^^
+The full path to the YAML configuration file. This file is 
+described in detail here: :ref:`configuration_files_isis-powder-diffraction-ref`
+It is recommended to set this parameter at object creation instead
+of on a method as it will warn if any parameters are overridden 
+in the scripting window.
 
-Configuring the Scripts
------------------------
-The scripts are objected oriented - for more information on this concept see
-:ref:`script_param_overview_isis-powder-diffraction-ref`
+*Note: This should be the full path to the file including extension*
 
-The following parameters must be included in the object construction step.
-They can either be manually specified or set in the configuration file:
+Example Input:
 
-- calibration_directory
-- output_directory
-- user_name
+..  code-block:: python
 
-The first step is importing the correct scripts for the Polaris instrument:
+  # Notice the filename always ends in .yaml
+  polaris_example = Polaris(config_file=r"C:\path\to\file\configuration.yaml", ...)
+
+.. _do_absorb_corrections_polaris_isis-powder-diffraction-ref:
+
+do_absorb_corrections
+^^^^^^^^^^^^^^^^^^^^^
+Indicates whether to perform vanadium absorption corrections 
+in :ref:`create_vanadium_polaris_isis-powder-diffraction-ref` mode.
+In :ref:`focus_polaris_isis-powder-diffraction-ref` mode
+sample absorption corrections require the sample be
+set first with the :ref:`set_sample_polaris_isis-powder-diffraction-ref`
+method. 
+
+Accepted values are: **True** or **False**
+
+*Note: If this is set to 'True'*
+:ref:`multiple_scattering_polaris_isis-powder-diffraction-ref`
+*must be set*
+
+Example Input:
+
+..  code-block:: python
+
+  polaris_example.create_vanadium(do_absorb_corrections=True, ...)
+
+  # Or (this assumes sample details have already been set)
+  polaris_example.focus(do_absorb_corrections=True, ...)
+
+.. _do_van_normalisation_polaris_isis-powder-diffraction-ref:
+
+do_van_normalisation
+^^^^^^^^^^^^^^^^^^^^
+Indicates whether to divide the focused workspace within 
+:ref:`focus_polaris_isis-powder-diffraction-ref` mode with a
+previously generated vanadium spline. 
+
+This requires a vanadium to have been previously created
+with the :ref:`create_vanadium_polaris_isis-powder-diffraction-ref`
+method
+
+Accepted values are: **True** or **False**
+
+Example Input:
+
+..  code-block:: python
+
+  polaris_example.focus(do_van_normalisation=True, ...)
+
+.. _file_ext_polaris_isis-powder-diffraction-ref:
+
+file_ext
+^^^^^^^^
+*Optional*
+
+Specifies a file extension to use when using the 
+:ref:`focus_polaris_isis-powder-diffraction-ref` method.
+
+This should be used to process partial runs. When 
+processing full runs (i.e. completed runs) it should not
+be specified as Mantid will automatically determine the
+best extension to use.
+
+*Note: A leading dot (.) is not required but 
+is preferred for readability*
+
+Example Input:
+
+..  code-block:: python
+
+  polaris_example.focus(file_ext=".s01", ...)
 
 
-.. code-block:: python
+.. _first_cycle_run_no_polaris_isis-powder-diffraction-ref:
 
-  # First import the scripts for Polaris
-  from isis_powder.polaris import Polaris
+first_cycle_run_no
+^^^^^^^^^^^^^^^^^^^
+Indicates a run from the current cycle to use when calling
+:ref:`create_vanadium_polaris_isis-powder-diffraction-ref`.
+This does not have the be the first run of the cycle or
+the run number corresponding to the vanadium. However it
+must be in the correct cycle according to the 
+:ref:`calibration_mapping_polaris-isis-powder-ref`.
 
-The scripts can be setup in 3 ways:
+Example Input:
 
-1. Explicitly setting all parameters:
+..  code-block:: python
 
-.. code-block:: python
-
-  polaris_manually_specified = Polaris(user_name="Mantid",
-                                       calibration_directory="<Path to Calibration folder>",
-                                       output_directory="<Path to output folder>")
-
-2. Using user configuration files see :ref:`yaml_basic_conf_isis-powder-diffraction-ref`.
-   This eliminates having to specify common parameters:
-
-.. code-block:: python
-
-  config_file_path = "<path_to_your_config_file">
-  polaris_using_config_file = Polaris(user_name="Mantid2", config_file=config_file_path)
-
-3. Using a combination of both, a parameter set from the script will override the
-   configuration parameter without changing the configuration file.
-
-.. code-block:: python
-
-  # This will use "My custom location" instead of the value set in the configuration file
-  polaris_overriden = Polaris(user_name="Mantid3", config_file=config_file_path,
-                              output_directory="My custom location")
+  # In this example assume we mean a cycle with run numbers 100-200
+  polaris_example.create_vanadium(first_cycle_run_no=100, ...)
 
 
-Vanadium Calibration
+.. _input_mode_polaris_isis-powder-diffraction-ref:
+
+input_mode
+^^^^^^^^^^
+Indicates how to interpret the parameter 
+:ref:`run_number_polaris_isis_powder-diffraction-ref` whilst
+calling the :ref:`focus_polaris_isis-powder-diffraction-ref`
+method.
+If the input_mode is set to *Summed* it will process
+to sum all runs specified. If set to *Individual* it
+will process all runs individually (i.e. One at a time)
+
+Accepted values are: **Summed** and **Individual**
+
+*Note: This parameter is not case sensitive*
+
+Example Input:
+
+..  code-block:: python
+
+  polaris_example.focus(input_mode="Summed", ...)
+
+
+.. _multiple_scattering_polaris_isis-powder-diffraction-ref:
+
+multiple_scattering
+^^^^^^^^^^^^^^^^^^^
+Indicates whether to account for the effects of multiple scattering
+when calculating absorption corrections. If 
+:ref:`do_absorb_corrections_polaris_isis-powder-diffraction-ref` is
+set to **True** this parameter must be set.
+
+Accepted values are: **True** or **False**
+
+*Note: Calculating multiple scattering effects will add around
+10-30 minutes to the script runtime depending on the speed of
+the computer you are using*
+
+Example Input:
+
+..  code-block:: python
+
+  polaris_example.create_vanadium(multiple_scattering=True, ...)
+  # Or
+  polaris_example.focus(multiple_scattering=False, ...)
+
+.. _output_directory_polaris_isis-powder-diffraction-ref:
+
+output_directory
+^^^^^^^^^^^^^^^^
+Specifies the path to the output directory to save resulting files
+into. The script will automatically create a folder
+with the label determined from the 
+:ref:`calibration_mapping_file_polaris_isis-powder-diffraction-ref`
+and within that create another folder for the current
+:ref:`user_name_polaris_isis-powder-diffraction-ref`. 
+
+Within this folder processed data will be saved out in
+several formats.
+
+Example Input:
+
+..  code-block:: python
+
+  polaris_example = Polaris(output_directory=r"C:\path\to\output_dir", ...)
+
+.. _run_number_polaris_isis_powder-diffraction-ref:
+
+run_number
+^^^^^^^^^^
+Specifies the run number(s) to process when calling the
+:ref:`focus_polaris_isis-powder-diffraction-ref` method.
+
+This parameter accepts a single value or a range 
+of values with the following syntax:
+
+**-** : Indicates a range of runs inclusive 
+(e.g. *1-10* would process 1, 2, 3....8, 9, 10)
+
+**,** : Indicates a gap between runs 
+(e.g. *1, 3, 5, 7* would process run numbers 1, 3, 5, 7)
+
+These can be combined like so:
+*1-3, 5, 8-10* would process run numbers 1, 2, 3, 5, 8, 9, 10.
+
+In addition the :ref:`input_mode_polaris_isis-powder-diffraction-ref`
+parameter determines what effect a range of inputs has
+on the data to be processed
+
+Example Input:
+
+..  code-block:: python
+
+  # Process run number 1, 3, 5, 6, 7
+  polaris_example.focus(run_number="1, 3, 5-7", ...)
+  # Or just a single run
+  polaris_example.focus(run_number=100, ...)
+
+.. _sample_empty_polaris_isis_powder-diffraction-ref:
+
+sample_empty
+^^^^^^^^^^^^
+*Optional*
+
+This parameter specifies a/several sample empty run(s)
+to subtract from the run in the 
+:ref:`focus_polaris_isis-powder-diffraction-ref` method. 
+If multiple runs are specified it will sum these runs
+before subtracting the result. 
+
+This input uses the same syntax as
+:ref:`run_number_polaris_isis_powder-diffraction-ref`.
+Please visit the above page for more details.
+
+*Note: If this parameter is set to* **True**
+:ref:`sample_empty_scale_polaris_isis-powder-diffraction-ref`
+*must also be set.*
+
+Example Input:
+
+..  code-block:: python
+
+  # Our sample empty is a single number
+  polaris_example.focus(sample_empty=100, ...)
+  # Or a range of numbers
+  polaris_example.focus(sample_empty="100-110", ...)
+
+
+.. _sample_empty_scale_polaris_isis-powder-diffraction-ref:
+
+sample_empty_scale
+^^^^^^^^^^^^^^^^^^
+Required if :ref:`sample_empty_polaris_isis_powder-diffraction-ref` 
+is set to **True**
+
+Sets a factor to scale the sample empty run(s) to before
+subtracting. This value is multiplied after summing the 
+sample empty runs and before subtracting the empty from
+the data set. For more details see: :ref:`Scale <algm-Scale-v1>`.
+
+Example Input:
+
+..  code-block:: python
+
+  # Scale sample empty to 90% of original
+  polaris_example.focus(sample_empty_scale=0.9, ...)
+
+.. _user_name_polaris_isis-powder-diffraction-ref:
+
+user_name
+^^^^^^^^^
+Specifies the name of the current user when creating a 
+new POLARIS object. This is only used when saving data to
+sort data into respective user folders. 
+See :ref:`output_directory_polaris_isis-powder-diffraction-ref`
+for more details.
+
+Example Input:
+
+..  code-block:: python
+
+  polaris_example = Polaris(user_name="Mantid", ...)
+
+
+Advanced Parameters
 --------------------
-Within the objects now configured we can run the vanadium calibrations. This
-is done with the `create_vanadium` method.
+.. warning:: These values are not intended to be changed and should
+             reflect optimal defaults for the instrument. For more
+             details please read: 
+             :ref:`instrument_advanced_properties_isis-powder-diffraction-ref`
+             
+             This section is mainly intended to act as reference of the
+             current settings distributed with Mantid
 
-This will generate a calibration for the matching vanadium and empty runs in
-the calibration mapping file (see :ref:`polaris_calibration_map-powder-diffraction-ref`)
-and store it into the calibration folder under the appropriate label.
+All values changed in the advanced configuration file
+requires the user to restart Mantid for the new values to take effect. 
+Please read :ref:`instrument_advanced_properties_isis-powder-diffraction-ref`
+before proceeding to change values within the advanced configuration file.
 
-*Note: This only needs to be completed once per cycle for each set of options used.
-The splined vanadium will automatically be loaded during focusing so the
-vanadium calibration step should not be part of your focusing scripts.*
+.. _focused_cropping_values_polaris_isis-powder-diffraction-ref:
 
-TODO the following parameters are needed.
+focused_cropping_values
+^^^^^^^^^^^^^^^^^^^^^^^^
+Indicates a list of TOF values to crop the focused workspace
+which was created by :ref:`focus_polaris_isis-powder-diffraction-ref`
+on a bank by bank basis.
 
-.. code-block:: python
+This parameter is a list of bank cropping values with 
+one list entry per bank. The values **must** have a smaller
+TOF window than the :ref:`vanadium_cropping_values_polaris_isis-powder-diffraction-ref`
 
-  # Using the manually specified object where we put in the calibration folder
-  # location when configuring the scripts
-  polaris_manually_specified.create_vanadium(run_in_range="123", ...)
+On POLARIS this is set to the following TOF windows:
 
-Focusing
----------
-Using the examples for the configured scripts we can now run the focusing method:
+..  code-block:: python
 
-TODO required parameters
+  focused_cropping_values = [
+      (1500, 19900),  # Bank 1
+      (1500, 19900),  # Bank 2
+      (1500, 19900),  # Bank 3
+      (1500, 19900),  # Bank 4
+      (1500, 19900),  # Bank 5
+      ]
 
-.. code-block:: python
+.. _grouping_file_name_polaris_isis-powder-diffraction-ref:
 
-  # We will use the object which has the output_directory overridden to
-  # "My custom location"
-  polaris_overriden.focus(run_number="140-150", input_mode="Individual"...)
+grouping_file_name
+^^^^^^^^^^^^^^^^^^
+Determines the name of the grouping cal file which is located
+within top level of the :ref:`calibration_directory_polaris_isis-powder-diffraction-ref`.
 
+The grouping file determines the detector ID to bank mapping to use
+whilst focusing the spectra into banks.
+
+On POLARIS this is set to the following:
+
+..  code-block:: python
+
+  grouping_file_name: "Master_copy_of_grouping_file_with_essential_masks.cal"
+
+.. _masking_file_name_polaris_isis-powder-diffraction-ref:
+
+masking_file_name
+^^^^^^^^^^^^^^^^^^
+Determines the name of the masking file containing the 
+masks to remove Bragg peaks on Polaris. This file must 
+be located within the top level of the
+:ref:`calibration_directory_polaris_isis-powder-diffraction-ref`.
+
+On POLARIS this is set to the following:
+
+..  code-block:: python
+
+  masking_file_name: "VanaPeaks.dat"
+
+.. _raw_data_cropping_values_polaris_isis-powder-diffraction-ref:
+
+raw_data_cropping_values
+^^^^^^^^^^^^^^^^^^^^^^^^^
+Determines the TOF window to crop all spectra down to before any 
+processing in the :ref:`create_vanadium_polaris_isis-powder-diffraction-ref`
+and :ref:`focus_polaris_isis-powder-diffraction-ref` methods. 
+
+This helps remove negative counts where at very low TOF
+the empty counts can exceed the captured neutron counts 
+of the run to process.
+
+On POLARIS this is set to the following:
+
+..  code-block:: python
+
+  raw_data_cropping_values: (750, 20000)
+
+.. _spline_coefficient_polaris_isis_powder-diffraction-ref:
+
+spline_coefficient
+^^^^^^^^^^^^^^^^^^
+Determines the spline coefficient to use after processing
+the vanadium in :ref:`create_vanadium_polaris_isis-powder-diffraction-ref`
+method. For more details see :ref:`SplineBackground <algm-SplineBackground>`
+
+*Note that if this value is changed 'create_vanadium'
+will need to be called again.*
+
+On POLARIS this is set to the following:
+
+..  code-block:: python
+  
+  spline_coefficient: 100
+
+
+.. _vanadium_cropping_values_polaris_isis-powder-diffraction-ref:
+
+vanadium_cropping_values
+^^^^^^^^^^^^^^^^^^^^^^^^
+Determines the TOF windows to crop to on a bank by bank basis 
+within the :ref:`create_vanadium_polaris_isis-powder-diffraction-ref`
+method. This is applied after focusing and before a spline is taken.
+
+It is used to remove low counts at the start and end of the vanadium run
+to produce a spline which better matches the data. 
+
+This parameter is a list of bank cropping values with 
+one list entry per bank. The values **must** have a larger
+TOF window than the :ref:`focused_cropping_values_polaris_isis-powder-diffraction-ref`
+and a smaller window than :ref:`raw_data_cropping_values_polaris_isis-powder-diffraction-ref`.
+
+On POLARIS this is set to the following:
+
+..  code-block:: python
+
+  vanadium_cropping_values = [(800, 19995),  # Bank 1
+                              (800, 19995),  # Bank 2
+                              (800, 19995),  # Bank 3
+                              (800, 19995),  # Bank 4
+                              (800, 19995),  # Bank 5
+                             ]

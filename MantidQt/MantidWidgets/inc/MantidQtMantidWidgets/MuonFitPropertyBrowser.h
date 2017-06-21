@@ -110,11 +110,15 @@ public:
   /// Clear list of selected groups
   void clearChosenGroups() const;
   void setAllGroups();
+  void setGroupNames(const std::vector<std::string> groupNames);
   void setAllPairs();
+  void setAllGroupsOrPairs(const bool isItGroup);
   void clearChosenPeriods() const;
-  void setChosenGroup(QString &group);
+  void setChosenGroup(const QString &group);
+  void setAllPeriods();
   void setChosenPeriods(const QString &period);
   void setSingleFitLabel(std::string name);
+
 public slots:
   /// Perform the fit algorithm
   void fit() override;
@@ -190,6 +194,7 @@ private:
   std::string m_simultaneousLabel;
   QtProperty *m_normalization;
   QStringList m_normalizationValue;
+  QtProperty *m_keepNorm;
 
   QtBrowserItem *m_multiFitSettingsGroup;
   QtProperty *m_groupsToFit;
@@ -216,12 +221,10 @@ private:
   QDialog *m_periodWindow;
   QDialog *m_comboWindow;
 
-  std::vector<std::string> m_groupsList = {"fwd", "bkwd", "top", "bottom",
-                                           "bwd"};
+  std::vector<std::string> m_groupsList;
 };
 
 std::vector<double> readNormalization();
-
 } // MantidQt
 } // API
 

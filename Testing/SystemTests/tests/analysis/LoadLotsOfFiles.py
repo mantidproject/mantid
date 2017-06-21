@@ -74,6 +74,7 @@ BANNED_FILES = ['80_tubes_Top_and_Bottom_April_2015.xml',
                 'Wish_Diffuse_Scattering_ISAW_UB.mat',
                 'WSH_test.dat',
                 'WISH00035991.raw',
+                'WISH00038237.raw',
                 'SANS2D_multiPeriodTests.csv',
                 'SANS2D_periodTests.csv',
                 'SANS2DTube_ZerroErrorFreeTest.txt',
@@ -97,7 +98,8 @@ BANNED_FILES = ['80_tubes_Top_and_Bottom_April_2015.xml',
                 'USER_Larmor_163F_HePATest_r13038.txt',
                 'Vesuvio_IP_file_test.par',
                 'IP0004_10.par',
-                'Crystalb3lypScratchAbins.out']
+                'Crystalb3lypScratchAbins.out',
+                'V15_0000016544_S000_P01.raw']
 
 EXPECTED_EXT = '.expected'
 

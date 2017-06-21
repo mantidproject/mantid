@@ -1,8 +1,9 @@
-#pylint: disable=invalid-name
+# pylint: disable=invalid-name
 import random
 import string
 import os
 import mantid
+import time
 
 from isis_instrument import BaseInstrument
 
@@ -11,6 +12,7 @@ class ReductionStep(object):
     """
         Base class for reduction steps
     """
+
     @classmethod
     def delete_workspaces(cls, workspace):
         """
@@ -25,8 +27,9 @@ class ReductionStep(object):
         """
             Generate a unique name for an internal workspace
         """
-        random_str = ''.join(random.choice(string.ascii_lowercase + string.ascii_uppercase + string.digits) for x in range(5))
-        return "__"+descriptor+"_"+extract_workspace_name(filepath)+"_"+random_str
+        random_str = ''.join(
+            random.choice(string.ascii_lowercase + string.ascii_uppercase + string.digits) for x in range(5))
+        return "__" + descriptor + "_" + os.path.basename(filepath) + "_" + random_str
 
     def execute(self, reducer, inputworkspace=None, outputworkspace=None):
         """
@@ -64,14 +67,16 @@ class Reducer(object):
     output_workspaces = []
 
     def __init__(self):
-        self.UID = ''.join(random.choice(string.ascii_lowercase + string.ascii_uppercase + string.digits) for x in range(5))
+        self.UID = ''.join(
+            random.choice(string.ascii_lowercase + string.ascii_uppercase + string.digits) for x in range(5))
         self._reduction_steps = []
 
     def set_instrument(self, configuration):
         if issubclass(configuration.__class__, BaseInstrument):
             self.instrument = configuration
         else:
-            raise RuntimeError("Reducer.set_instrument expects an %s object, found %s" % (Instrument, configuration.__class__))
+            raise RuntimeError(
+                "Reducer.set_instrument expects an %s object, found %s" % (BaseInstrument, configuration.__class__))
 
     def set_data_path(self, path):
         """
@@ -131,7 +136,7 @@ class Reducer(object):
         self.pre_process()
 
         # Go through the list of files to be reduced
-        #for file_ws in self._data_files:
+        # for file_ws in self._data_files:
         #    for item in self._reduction_steps:
         #        try:
         #            result = item.execute(self, file_ws)
@@ -141,7 +146,7 @@ class Reducer(object):
         #            self.log_text += "\n%s\n" % sys.exc_value
         #            raise
 
-        #any clean up, possibly removing workspaces
+        # any clean up, possibly removing workspaces
         self.post_process()
 
         # Determine which directory to use
@@ -152,8 +157,8 @@ class Reducer(object):
             else:
                 output_dir = os.path.expanduser('~')
 
-        self.log_text += "Reduction completed in %g sec\n" % (time.time()-t_0)
-        log_path = os.path.join(output_dir,"%s_reduction.log" % instrument_name)
+        self.log_text += "Reduction completed in %g sec\n" % (time.time() - t_0)
+        log_path = os.path.join(output_dir, "%s_reduction.log" % instrument_name)
         self.log_text += "Log saved to %s" % log_path
 
         # Write the log to file

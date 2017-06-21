@@ -6,6 +6,7 @@
 #include "MantidKernel/Exception.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
+#include "MantidGeometry/Instrument/InfoComponentVisitor.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include <cxxtest/TestSuite.h>
 #include "MantidKernel/DateAndTime.h"
@@ -551,9 +552,7 @@ public:
     // Extract information from instrument to create DetectorInfo
     auto detInfo = makeDetectorInfo(instrument);
 
-    boost::shared_ptr<const std::unordered_map<detid_t, size_t>>
-        detIdToIndexMap;
-    instrument.setDetectorInfo(detInfo, detIdToIndexMap);
+    instrument.setDetectorInfo(detInfo);
     // bank 1
     TS_ASSERT(detInfo->position(0).isApprox(
         toVector3d(bankOffset + V3D{-0.008, -0.0002, 0.0}), 1e-12));
@@ -617,9 +616,7 @@ public:
     // Extract information from instrument to create DetectorInfo
     auto detInfo = makeDetectorInfo(instrument);
 
-    boost::shared_ptr<const std::unordered_map<detid_t, size_t>>
-        detIdToIndexMap;
-    instrument.setDetectorInfo(detInfo, detIdToIndexMap);
+    instrument.setDetectorInfo(detInfo);
     // bank 1
     double pitch = 0.008;
     TS_ASSERT(
@@ -659,6 +656,38 @@ public:
                      V3D(scalex * pitch, 0.0, 5.0));
     TS_ASSERT_EQUALS(legacyInstrument.getDetector(7)->getPos(),
                      V3D(scalex * pitch, scaley * pitch, 5.0));
+  }
+
+  void test_empty_Instrument() {
+    Instrument emptyInstrument{};
+    TS_ASSERT(emptyInstrument.isEmptyInstrument());
+  }
+
+  void test_not_empty_Instrument() {
+
+    Instrument instrument{};
+    TS_ASSERT(instrument.isEmptyInstrument());
+    instrument.add(new CompAssembly{});
+    TS_ASSERT(!instrument.isEmptyInstrument());
+  }
+
+  void test_empty_Instrument_does_not_have_Instrument_infos() {
+    Instrument loneInstrument{}; // No Experiment info associated via
+                                 // ExperimentInfo::setInstrumen
+    TSM_ASSERT("Can only be "
+               "available when associated with ExperimentInfo",
+               !loneInstrument.hasInfoVisitor());
+    TSM_ASSERT("Can only be "
+               "available when associated with ExperimentInfo",
+               !loneInstrument.hasDetectorInfo());
+  }
+
+  void test_set_InfoVisitor() {
+    Instrument instrument;
+    TS_ASSERT(!instrument.hasInfoVisitor());
+    InfoComponentVisitor visitor(std::vector<detid_t>{});
+    instrument.setInfoVisitor(visitor);
+    TS_ASSERT(instrument.hasInfoVisitor());
   }
 
 private:
