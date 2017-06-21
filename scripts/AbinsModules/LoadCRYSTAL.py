@@ -46,7 +46,7 @@ class LoadCRYSTAL(AbinsModules.GeneralDFTProgram):
 
         # read data from output CRYSTAL file
         filename = self._clerk.get_input_filename()
-        with io.open(filename, "r") as crystal_file:
+        with io.open(filename, "r", encoding="utf8") as crystal_file:
             logger.notice("Reading from " + filename)
 
             if system is AbinsModules.AbinsConstants.CRYSTAL:
@@ -75,7 +75,7 @@ class LoadCRYSTAL(AbinsModules.GeneralDFTProgram):
         """
         Determines whether the system is a molecule or a crystal.
         """
-        with io.open(self._clerk.get_input_filename(), "r") as crystal_file:
+        with io.open(self._clerk.get_input_filename(), "r", encoding="utf8") as crystal_file:
             lines = crystal_file.read()
 
         if "MOLECULAR CALCULATION" in lines or "0D - MOLECULE" in lines:
@@ -97,14 +97,14 @@ class LoadCRYSTAL(AbinsModules.GeneralDFTProgram):
         Checks if we have data for more than one k-point.
         :return: True if many k-points included in calculations otherwise False
         """
-        with io.open(self._clerk.get_input_filename(), "r") as crystal_file:
+        with io.open(self._clerk.get_input_filename(), "r", encoding="utf8") as crystal_file:
             lines = crystal_file.read()
         phonon_dispersion = lines.count("DISPERSION K ") > 1
 
         if phonon_dispersion:
             # In case there is more than one k-point super-cell is constructed. In order to obtain metric tensor we
             # need to find expansion transformation.
-            with io.open(self._clerk.get_input_filename(), "r") as crystal_file:
+            with io.open(self._clerk.get_input_filename(), "r", encoding="utf8") as crystal_file:
                 self._find(file_obj=crystal_file, msg="EXPANSION MATRIX OF PRIMITIVE CELL")
                 dim = 3
 
