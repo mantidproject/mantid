@@ -315,3 +315,6 @@ class LoadLotsOfFiles(stresstesting.MantidStressTest):
                                % (len(failed), len(files)))
         else:
             print "Successfully loaded %d files" % len(files)
+
+    def excludeInPullRequests(self):
+        return True
