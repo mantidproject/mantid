@@ -80,7 +80,6 @@ class CalculatePowder(object):
         # factor[num_atoms, num_freq]
         factor = np.einsum('ij,j->ij', 1.0 / masses, AbinsModules.AbinsConstants.CONSTANT / self._frequencies[k])
 
-
         # b_tensors[num_atoms, num_freq, dim, dim]
         b_tensors = np.einsum('ijkl,ij->ijkl',
                               np.einsum('lki, lkj->lkij', disp, disp.conjugate()).real, factor)

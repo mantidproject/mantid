@@ -2,6 +2,7 @@ from __future__ import (absolute_import, division, print_function)
 from AbinsModules import AbinsParameters
 import numpy as np
 
+
 # noinspection PyPep8Naming
 class Instrument(object):
 

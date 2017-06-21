@@ -1,5 +1,4 @@
 from __future__ import (absolute_import, division, print_function)
-import numpy as np
 
 from .Instrument import Instrument
 from AbinsModules import AbinsParameters
@@ -41,9 +40,11 @@ class ToscaInstrument(Instrument, FrequencyPowderGenerator):
 
             # freq_num: number of transition energies for the given quantum order event
             # sigma[freq_num]
-            sigma = AbinsParameters.tosca_a * frequencies ** 2 + \
-                    AbinsParameters.tosca_b * frequencies + \
-                    AbinsParameters.tosca_c
+
+            a = AbinsParameters.tosca_a
+            b = AbinsParameters.tosca_b
+            c = AbinsParameters.tosca_c
+            sigma = a * frequencies ** 2 + b * frequencies + c
 
             pkt_per_peak = AbinsParameters.pkt_per_peak
             points_freq, broadened_spectrum = self._convolve_with_resolution_function_helper(frequencies=frequencies,

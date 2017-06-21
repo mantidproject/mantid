@@ -14,5 +14,3 @@ class InstrumentProducer(object):
             raise ValueError("Unknown instrument: %s" % name)
         elif name == "TOSCA":
             return ToscaInstrument("TOSCA")
-        elif name == "TwoDMap":
-            return TwoDMap("TwoDMap")
