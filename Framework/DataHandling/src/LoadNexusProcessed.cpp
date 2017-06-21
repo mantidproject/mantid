@@ -1012,9 +1012,8 @@ API::Workspace_sptr LoadNexusProcessed::loadPeaksEntry(NXEntry &entry) {
     // This loads logs, sample, and instrument.
     peakWS->loadExperimentInfoNexus(getPropertyValue("Filename"), m_cppFile,
                                     parameterStr);
-    // Populate the instrument parameters in this workspace - this works around
-    // a bug
-    peakWS->populateInstrumentParameters();
+    // Populate the instrument parameters in this workspace
+    peakWS->readParameterMap(parameterStr);
   } catch (std::exception &e) {
     g_log.information("Error loading Instrument section of nxs file");
     g_log.information(e.what());
