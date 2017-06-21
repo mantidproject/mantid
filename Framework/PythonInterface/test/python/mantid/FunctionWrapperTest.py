@@ -6,7 +6,7 @@ from __future__ import (absolute_import, division, print_function)
 import unittest
 import testhelpers
 import platform
-from mantid.simpleapi import CreateWorkspace, Fit, FitDialog, FunctionWrapper
+from mantid.simpleapi import CreateWorkspace, Fit, FitDialog, FunctionWrapper, CompositeFunctionWrapper
 from mantid.api import mtd, MatrixWorkspace, ITableWorkspace
 import numpy as np
 from testhelpers import run_algorithm
@@ -33,6 +33,10 @@ class FunctionWrapperTest(unittest.TestCase):
         g[2] = 1.5
         self.assertAlmostEqual(g[2],1.5,10)
         
+    def test_compositefunction_creation(self):
+        g0 = FunctionWrapper( "Gaussian", Height=7.5, Sigma=1.2, PeakCentre=10)
+        g1 = FunctionWrapper( "Gaussian", Height=8.5, Sigma=1.2, PeakCentre=11)
+        testhelpers.assertRaisesNothing(self, CompositeFunctionWrapper, g0, g1)        
 
 if __name__ == '__main__':
     unittest.main()
