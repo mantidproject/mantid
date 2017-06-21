@@ -4,6 +4,9 @@
 Data reduction for ILL's direct geometry instruments
 ====================================================
 
+.. contents:: Table of contents
+    :local:
+
 There are six workflow algorithms supporting data reduction at ILL's time-of-flight instruments. These algorithms are:
 
 :ref:`algm-DirectILLCollectData`
@@ -27,6 +30,8 @@ There are six workflow algorithms supporting data reduction at ILL's time-of-fli
 The algorithms can be used as flexible building blocks in Python scripts. Not all of them need to be necessarily used in a reduction: the simplest script could call :ref:`algm-DirectILLCollectData` and :ref:`algm-DirectILLReduction` only.
 
 Together with the other algorithms and services provided by the Mantid framework, the reduction algorithms can handle a great number of reduction scenarios. If this proves insufficient, however, the algorithms can be accessed using Python. Before making modifications it is recommended to copy the source files and rename the algorithms as not to break the original behavior.
+
+This document tries to give an overview on how the algorithms work together via Python examples. Please refer to the algorithm documentation for details of each individual algorithm.
 
 Reduction basics
 ================
@@ -243,42 +248,12 @@ Vanadium (or equivalent reference sample) does not only offer detector calibrati
         DiagnosticsWorkspace='diagnostics'        # Mask 'bad' detectors.
     )
 
-
-
-- IN5 specifics.
-
 Detector diagnostics and masking
 ================================
 
-- How and where masking is used.
+:ref:`algm-DirectILLDiagnostics` not only performs detector diagnostics, it also handles masking in general. The output workspace can be further fed to :ref:`algm-DirectILLReduction` where the mask is actually applied.
 
-- Prerequisites of input workspace (OutputRawWorkspace).
-
-- User masking, default masks.
-
-- IN5 specifics.
-
-Diagnosing the diagnostics
---------------------------
-
-- Tips on how to plot columns from the diagnostics report.
-
-Absorption corrections
-======================
-
-- How and where absorption corrections are used.
-
-- How to set sample and beam information.
-
-Recommendations for IN5
-=======================
-
-There are a few things to point out with regards to IN5. Some of these may be valid for IN4 and IN6 data as well.
-
-Elastic peak positions
-----------------------
-
-The intensities measured by individual pixels on IN5 are very low. This makes the fitting procedure employed by :ref:`algm-FindEPP` to work unreliably or fail altogether. There is an option in :ref:`algm-DirectILLCollectData` to use :ref:`algm-CreateEPP` instead. This algorithm will create an artificial EPP workspace based on the instrument geometry. This should be accurate enough for vanadium integration, though.
+It is recommended to use vanadium or similar reference workspace for the diagnostics.
 
 .. code-block:: python
 
@@ -288,28 +263,385 @@ The intensities measured by individual pixels on IN5 are very low. This makes th
     # Vanadium
     DirectILLCollectData(
         Run='0100:0109',
-        OutputWorkspace='sample',
-        EPPCreationMethod='CalculateEPP'
+        OutputWorkspace='vanadium',
+        OutputEPPWorkspace='vanadium-epps', # Elastic peak positions.
+        OutputRawWorkspace='vanadium-raw'   # Unnormalized 'raw' data, no bkg subtracted.
     )
+
+    diagResult = DirectILLDiagnostics(
+        InputWorkspace='vanadium-raw', # 'Raw' data needed here...
+        OutputWorkspace='diagnostics',
+        EPPWorkspace='vanadium-epps',  # ...and the elastic peak positions.
+        MaskComponents='rosace, bottom_bank, top_bank' # Interested only on middle_bank.
+        OutputReportWorkspace='diagnostics-report'
+    )
+
+    # Print a formatted string of what was masked.
+    print(diagResult.OutputReport)
+
+    # Prepare for the reduction.
+    DirectILLIntegrateVanadium(
+        InputWorkspace='vanadium',
+        OutputWorkspace='vanadium-integrated'
+    )
+
+    DirectILLCollectData(
+        Run='0151, 0153, 0155',
+        OutputWorkspace='sample',
+    )
+
+    DirectILLReduction(
+        InputWorkspace='sample',
+        OutputWorkspace='SofQW',
+        IntegratedVanadiumWorkspace='vanadium-integrated',
+        DiagnosticsWorkspace='diagnostics' # This applies the mask.
+    )
+
+Absorption corrections
+======================
+
+Due to the time consuming nature of simulating the absorption corrections, there are two algorithms dealing with absorption corrections. :ref:`algm-DirectILLSelfShielding` calculates the corrections and needs to be run only once. The result can then be applied by :ref:`algm-DirectILLApplySelfShielding` to any number of workspaces.
+
+:ref:`algm-DirectILLApplySelfShielding` is also used for empty container subtraction, see `Empty containers`_.
+
+.. code-block:: python
+
+    # Add a temporary data search directory.
+    mantid.config.appendDataSearchDir('/data/')
+
+    DirectILLCollectData(
+        Run='0151+0155',
+        OutputWorkspace='sample',
+    )
+
+    # Set sample shape, material and beam profile.
+    ws = mtd['sample']
+    sampleGeometry = {
+        'Shape': 'Cylinder',
+        'Height': 8.0,
+        'Radius': 2.0,
+        'Center': [0.0, 0.0, 0.0]
+    }
+    sampleMaterial = {
+        'ChemicalFormula': 'Yb 2 O 3.2 Fe',
+        'SampleNumberDensity': 0.23
+    }
+    SetSample(
+        InputWorkspace=ws,
+        Geometry=sampleGeometry,
+        Material=sampleMaterial
+    )
+    beamGeometry = {
+        'Shape': 'Slit',
+        'Width': 2.0,
+        'Height': 4.0
+    }
+    SetBeam(
+        InputWorkspace=ws,
+        Geometry=beamGeometry
+    }
+
+    DirectILLSelfShielding(
+        InputWorkspace=ws,
+        OutputWorkspace='absorption-corrections'
+    )
+
+    DirectILLApplySelfShielding(
+        InputWorkspace=ws,
+        OutputWorkspace='sample-absorption-corrected',
+        SelfShieldingCorrectionWorkspace='absorption-corrections'
+    )
+
+    # Apply corrections to other measurements as well.
+    DirectILLCollectData(
+        Run='0158+0162',
+        OutputWorkspace='sample2',
+    )
+
+    DirectILLApplySelfShielding(
+        InputWorkspace='sample2',
+        OutputWorkspace='sample2-absorption-corrected',
+        SelfShieldingCorrectionWorkspace='absorption-corrections'
+    )
+
+IN5 specifics
+=============
+
+Elastic peak positions
+----------------------
+
+The intensities of individual pixels on IN5 are very low. This makes the fitting procedure employed by :ref:`algm-FindEPP` to work unreliably or fail altogether. Because of this, :ref:`algm-DirectILLCollectData` will use :ref:`algm-CreateEPP` instead by default for IN5. :ref:`algm-CreateEPP` produces an artificial EPP workspace based on the instrument geometry. This should be accurate enough for vanadium integration and diagnostics.
 
 Diagnostics
 -----------
 
-The elastic peak diagnostics might be usable to mask the beam stop of IN5. The background diagnostics, on the other hand, should not be used as it makes no sense to mask individual pixels based on them.
+The elastic peak diagnostics might be usable to mask the beam stop of IN5. The background diagnostics, on the other hand, are turned off by default as it makes no sense to mask individual pixels based on them.
 
 Memory management
 -----------------
 
 Certain instruments with a large number of detectors/pixels may create workspaces which consume a lot of memory. When working on memory constrained systems, it is recommended to manually delete the workspaces which are not needed anymore in the reduction script. The :ref:`algm-SaveNexus` can be used to save the data to disk.
 
-
 Full example
 ============
 
-- A well documented example script involving everyting:
-- Empty containers and absorption corrections for vanadium.
-- Empty container interpolation for sample.
-- Absorption corrections.
-- Samples
+Lets put it all together into a complex Python script. The script below reduces the following dataset:
+
+* Vanadium reference.
+
+* An empty vanadium container.
+
+  * Same shape as the sample container.
+  * Complex shape: has to be given as XML.
+
+* Sample measured at wavelength 1 at 50, 100 and 150K.
+
+  * Share time-independent backgrounds from the measurement at 50K.
+
+* Empty container measured at wavelength 1 at 50 and 150K.
+
+  * Need to interpolate to 150K.
+
+* Sample measured at wavelength 2 at 50, 100 and 150K.
+
+  * Share time-independent backgrounds from the measurement at 50K.
+
+* Empty container measured at wavelength 2.
+
+
+
+.. code-block:: python
+
+    mantid.config.appendDataSearchDir('/data/')
+
+    # Gather dataset information.
+    containerRuns = '96,97'
+    vanadiumRuns = '100-103'
+    # Samples at 50K, 100K and 150K.
+    # Wavelength 1
+    containerRuns1 = {
+        50: '131-137',
+        150: '138-143'
+    }
+    runs1 = {
+        50: '105, 107-110',
+        100: '112-117',
+        150: '119-123, 125'
+    }
+    # Wavelength 2
+    containerRun2 = '166-170'
+    runs2 = {
+        50: '146, 148, 150',
+        100: '151-156',
+        150: '160-165'
+    }
+
+    # Vanadium & vanadium container.
+    DirectILLCollectData(
+        Run=vanadiumRuns,
+        OutputWorkspace='vanadium',
+        OutputEPPWorkspace='vanadium-epp',
+        OutputRawWorkspace='vanadium-raw',
+        OutputIncidentEnergyWorkspace='vanadium-Ei' # Use for container
+    )
+
+    DirectILLCollectData(
+        Run=containerRuns,
+        OutputWorkspace='vanadium-container',
+        IncidentEnergyWorkspace='vanadium-Ei'
+    )
+
+    containerShape = """
+        <hollow-cylinder id="inner-ring">
+          <centre-of-bottom-base x="0.0" y="-0.04" z="0.0" />
+          <axis x="0.0" y="1.0" z="0.0" />
+          <inner-radius val="0.017" />
+          <outer-radius val="0.018" />
+          <height val="0.08" />
+        </hollow-cylinder>
+        <hollow-cylinder id="outer-ring">
+          <centre-of-bottom-base x="0.0" y="-0.04" z="0.0" />
+          <axis x="0.0" y="1.0" z="0.0" />
+          <inner-radius val="0.02" />
+          <outer-radius val="0.021" />
+          <height val="0.08" />
+        </hollow-cylinder>
+        <algebra val="inner-ring : outer-ring" />
+    """
+    containerGeometry = {
+        'CSG': containerShape
+    }
+    containerMaterial = {
+        'ChemicalFormula': 'Al',
+        'SampleNumberDensity': 0.1
+    }
+    SetSample('vanadium-container', containerGeometry, containerMaterial)
+    DirectILLSelfShielding(
+        InputWorkspace='vanadium-container',
+        OutputWorkspace='vanadium-container-self-shielding'
+    )
+    DirectILLApplySelfShielding(
+        InputWorkspace='vanadium-container',
+        OutputWorkspace='vanadium-container-corrected'
+        SelfShieldingCorrectionWorkspace='vanadium-container-self-shielding'
+    )
+
+    sampleGeometry = {
+        'Shape': 'HollowCylinder',
+        'Height': 8.0,
+        'InnerRadius': 1.8,
+        'OuterRadium': 2.0,
+        'Center': [0.0, 0.0, 0.0]
+    }
+    vanadiumMaterial = {
+        'ChemicalFormula': 'V',
+        'SampleNumberDensity': 0.15
+    }
+    SetSample('vanadium', sampleGeometry, vanadiumMaterial)
+    DirectILLSelfShielding(
+        InputWorkspace='vanadium',
+        OutputWorkspace='vanadium-self-shielding'
+    )
+    DirectILLApplySelfShielding(
+        InputWorkspace='vanadium',
+        OutputWorkspace='vanadium-corrected',
+        SelfShieldingCorrectionWorkspace='vanadium-self-shielding',
+        EmptyContainerWorkspace='vanadium-container-corrected'
+    )
+
+    DirectILLIntegrateVanadium(
+        InputWorkspace='vanadium-corrected',
+        OutputWorkspace='vanadium-calibration',
+        EPPWorkspace='vanadium-epp'
+    )
+
+    diagnosticsResult = DirectILLDiagnoseDetectors(
+        InputWorkspace='vanadium-raw',
+        OutputWorkspace='mask',
+        EPPWorkspace='vanadium-epp',
+        OutputReportWorkspace='diagnostics-report'
+    )
+
+    DirectILLCollectData(
+        Run=runs1[50],
+        OutputWorkspace='run1-50K',
+        OutputIncidentEnergyWorkspace='Ei1',
+        OutputFlatBkgWorkspace='bkg1-50K'
+    )
+
+    DirectILLCollectData(
+        Run=containerRuns1[50],
+        OutputWorkspace='container1-50K',
+        IncidentEnergyWorkspace='Ei1'
+    )
+
+    SetSample('container1-50K', containerGeometry, containerMaterial)
+
+    DirectILLSelfShielding(
+        InputWorkspace='container1-50K',
+        OutputWorkspace='container1-self-shielding'
+    )
+
+    DirectILLCollectData(
+        Run=containerRuns1[150],
+        OutputWorkspace='container1-150K',
+        IncidentEnergyWorkspace='Ei1'
+    )
+
+    interpolated = 0.5 * (mtd['container1-50K'] + mtd['container1-150K'])
+    RenameWorkspace(interpolated, 'container1-100K')
+
+    for T in [50, 100, 150]:
+        DirectILLApplySelfShielding(
+            InputWorkspace='container1-{}K'.format(T),
+            OutputWorkspace='container1-{}K-corrected'.format(T),
+            SelfShieldingCorrectionWorkspace='container1-self-shielding'
+        )
+
+    sampleMaterial = {
+        'ChemicalFormula': 'Fe 2 O 3',
+        'SampleNumberDensity': 0.23
+    }
+    SetSample('run1-50K', sampleGeometry, sampleMaterial)
+    DirectILLSelfShielding(
+        InputWorkspace='run1-50K',
+        OutputWorkspace='run1-self-shielding',
+    )
+
+    for T in runs1:
+        if T != 50:
+            # 50K data has been loaded already.
+            DirectILLCollectData(
+                Run=runs1[T],
+                OutputWorkspace='run1-{}K'.format(T),
+                IncidentEnergyWorkspace='Ei1',
+                FlatBkgWorkspace='bkg1-50K'
+            )
+        DirectILLApplySelfShielding(
+            InputWorkspace='run1-{}K'.format(T),
+            OutputWorkspace='run1-{}K-corrected'.format(T),
+            SelfShieldingCorrectionWorkspace='run1-self-shielding',
+            EmptyContainerWorkspace='container1-{}K-corrected'.format(T)
+        )
+        DirectILLReduction(
+            InputWorkspace='run1-{}K-corrected'.format(T),
+            OutputWorkspace='SofQW1-{}K'.format(T),
+            IntegratedVanadiumWorkspace='vanadium-calibration',
+            DiagnosticsWorkspace='mask'
+        )
+        SaveNexus('SofQW1-{}K'.format(T), '/data/output2-{}.nxs'.format(T))
+
+    DirectILLCollectData(
+        Run=runs2[50],
+        OutputWorkspace='run2-50K',
+        OutputIncidentEnergyWorkspace=Ei2',
+        OutputFlatBkgWorkspace='bgk2-50K'
+    )
+
+    DirectILLCollectData(
+        Run=containerRun2,
+        OutputWorkspace='container2',
+        IncidentEnergyWorkspace='Ei2'
+    )
+
+    SetSample('container2', containerGeometry, containerMaterial)
+    DirectILLSelfShielding(
+        InputWorkspace='container2',
+        OutputWorkspace='container2-self-shielding'
+    )
+    DirectILLApplySelfShielding(
+        InputWorkspace='container2',
+        OutputWorkspace='container2-corrected',
+        SelfShieldingCorrectionWorkspace='container2-self-shielding'
+    )
+
+    SetSample('run2-50K', sampleGeometry, sampleMaterial)
+    DirectILLSelfShielding(
+        InputWorkspace='run2-50K',
+        OutputWorkspace='run2-self-shielding'
+    )
+
+    for T in runs2:
+        if T != 50:
+            # 50K data has been loaded already.
+            DirectILLCollectData(
+                Run=runs2[T]
+                OuputWorkspace='run2-{}K'.format(T),
+                IncidentEnergyWorkspace='Ei2',
+                FlatBkgWorkspace='bkg2-50K
+            )
+        DirectILLApplySelfShielding(
+            InputWorkspace='run2-{}K'.format(T),
+            OutputWorkspace='run2-{}K-corrected'.format(T),
+            SelfShieldingCorrectionWorkspace='run2-self-shielding',
+            EmptyContainerWorkspace='container2'
+        )
+        DirectILLReduction(
+            InputWorkspace='run2-{}K-corrected'.format(T),
+            OutputWorkspace='SofQW2-{}K'.format(T),
+            IntegratedVanadiumWorkspace='vanadium-calibration',
+            DiagnosticsWorkspace='mask'
+        )
+        SaveNexus('SofQW2-{}K'.format(T), '/data/output2-{}.nxs'.format(T))
 
 .. categories: Concepts
