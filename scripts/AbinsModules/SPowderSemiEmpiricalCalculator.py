@@ -356,7 +356,7 @@ class SPowderSemiEmpiricalCalculator(object):
                 self._report_progress("{}".format(e))
                 self._s_threshold_up(atom=atom)
 
-    def _calculate_s_powder_one_atom_core(self, atom=None, q_indx=None):
+    def _calculate_s_powder_one_atom_core(self, atom=None):
         """
         @param atom: number of atom
         @return: s, and corresponding frequencies for all quantum events taken into account
@@ -379,18 +379,15 @@ class SPowderSemiEmpiricalCalculator(object):
 
                 for fund_chunk, fund_coeff_chunk in zip(chunked_fundamentals, chunked_fundamentals_coeff):
 
-                    part_local_freq = np.copy(local_freq)
-                    part_local_coeff = np.copy(local_coeff)
+                    part_loc_freq = np.copy(local_freq)
+                    part_loc_coeff = np.copy(local_coeff)
 
                     # number of transitions can only go up
                     for lg_order in range(order, self._quantum_order_num + AbinsModules.AbinsConstants.S_LAST_INDEX):
 
-                        part_local_freq, part_local_coeff, part_broad_spectrum = self._helper_atom(atom=atom,
-                                                                                                   local_freq=part_local_freq,
-                                                                                                   local_coeff=part_local_coeff,
-                                                                                                   fundamentals_freq=fund_chunk,
-                                                                                                   fund_coeff=fund_coeff_chunk,
-                                                                                                   order=lg_order)
+                        part_loc_freq, part_loc_coeff, part_broad_spectrum = self._helper_atom(
+                            atom=atom, local_freq=part_loc_freq, local_coeff=part_loc_coeff,
+                            fundamentals_freq=fund_chunk, fund_coeff=fund_coeff_chunk, order=lg_order)
 
                         s["order_%s" % lg_order] += part_broad_spectrum
 
@@ -399,10 +396,9 @@ class SPowderSemiEmpiricalCalculator(object):
             # if relatively small array of transitions then process it in one shot
             else:
 
-                local_freq, local_coeff, s["order_%s" % order] = self._helper_atom(atom=atom, local_freq=local_freq,
-                                                                                   local_coeff=local_coeff,
-                                                                                   fundamentals_freq=self._fundamentals_freq,
-                                                                                   fund_coeff=fund_coeff, order=order)
+                local_freq, local_coeff, s["order_%s" % order] = self._helper_atom(
+                    atom=atom, local_freq=local_freq, local_coeff=local_coeff,
+                    fundamentals_freq=self._fundamentals_freq, fund_coeff=fund_coeff, order=order)
 
         return s
 
