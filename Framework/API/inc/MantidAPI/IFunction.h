@@ -324,7 +324,7 @@ public:
   /// Returns the function's name
   virtual std::string name() const = 0;
   /// Writes itself into a string
-  virtual std::string asString() const;
+  virtual std::string asString(const std::string &localAttributesStr = "") const;
   /// Virtual copy constructor
   virtual boost::shared_ptr<IFunction> clone() const;
   /// Set the workspace.

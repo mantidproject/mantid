@@ -46,7 +46,7 @@ public:
   /// Returns the function's name
   std::string name() const override { return "ImmutableCompositeFunction"; }
   /// Writes itself into a string
-  std::string asString() const override;
+  std::string asString(const std::string &parentLocalAttributesStr = "") const override;
   /// Set i-th parameter
   void setParameter(size_t i, const double &value,
                     bool explicitlySet = true) override {
