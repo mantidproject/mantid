@@ -45,6 +45,7 @@ public:
   std::vector<class Geometry::IComponent *> componentIds() const;
 
 private:
+  std::vector<class Geometry::IComponent *> m_detectorComponentIds;
   std::vector<class Geometry::IComponent *> m_componentIds;
 };
 

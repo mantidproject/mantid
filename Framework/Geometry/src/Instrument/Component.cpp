@@ -393,6 +393,51 @@ Quat Component::getRotation() const {
       return m_parent->getRotation() * m_rot;
   }
 }
+/* TODO
+bool Component::hasComponentInfo() const {
+  const IComponent *root = m_base;
+  while (auto parent = root->getBareParent())
+    root = parent;
+  auto instrument = dynamic_cast<const Instrument *>(root);
+  return m_map->hasDetectorInfo(instrument);
+}
+
+
+/// Return the relative position to the parent
+Kernel::V3D Component::getRelativePos() const {
+  if (m_map && hasComponentInfo())
+    return Kernel::toV3D(m_map->componentInfo().position(index())) -
+           getParent()->getPos();
+  return ObjComponent::getRelativePos();
+}
+
+/// Return the absolute position of the Detector
+Kernel::V3D Detector::getPos() const {
+  if (m_map && hasDetectorInfo())
+    return Kernel::toV3D(m_map->detectorInfo().position(index()));
+  return ObjComponent::getPos();
+}
+
+/// Return the relative rotation to the parent
+Kernel::Quat Detector::getRelativeRot() const {
+  if (m_map && hasDetectorInfo()) {
+    auto inverseParentRot = getParent()->getRotation();
+    inverseParentRot.inverse();
+    // Note the unusual order. This matches the convention in Component::getPos
+    // (child rotations first, then parent, then grandparent, ...).
+    return inverseParentRot *
+           Kernel::toQuat(m_map->detectorInfo().rotation(index()));
+  }
+  return ObjComponent::getRelativeRot();
+}
+
+/// Return the absolute rotation of the Detector
+Kernel::Quat Detector::getRotation() const {
+  if (m_map && hasDetectorInfo())
+    return Kernel::toQuat(m_map->detectorInfo().rotation(index()));
+  return ObjComponent::getRotation();
+}
+*/
 
 /** Gets the distance between two Components
 *  @param comp :: The Component to measure against

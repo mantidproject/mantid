@@ -17,25 +17,27 @@ size_t CacheComponentVisitor::registerComponentAssembly(
     child->registerContents(*this);
   }
   m_componentIds.emplace_back(assembly.getComponentID());
-  return m_componentIds.size() - 1;
+  return m_detectorComponentIds.size() + m_componentIds.size() - 1;
 }
 
 size_t CacheComponentVisitor::registerGenericComponent(
     const Geometry::IComponent &component) {
 
   m_componentIds.emplace_back(component.getComponentID());
-  return m_componentIds.size() - 1;
+  return m_detectorComponentIds.size() + m_componentIds.size() - 1;
 }
 
 size_t
 CacheComponentVisitor::registerDetector(const Geometry::IDetector &detector) {
-  m_componentIds.emplace_back(detector.getComponentID());
-  return m_componentIds.size() - 1;
+  m_detectorComponentIds.emplace_back(detector.getComponentID());
+  return m_detectorComponentIds.size() - 1;
 }
 
 std::vector<Geometry::IComponent *>
 CacheComponentVisitor::componentIds() const {
-  return m_componentIds;
+  std::vector<Geometry::IComponent *> combined = m_detectorComponentIds;
+  combined.insert(combined.end(), m_componentIds.begin(), m_componentIds.end());
+  return combined;
 }
 
 } // namespace Geometry

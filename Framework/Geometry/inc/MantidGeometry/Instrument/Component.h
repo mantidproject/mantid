@@ -305,6 +305,8 @@ public:
   virtual size_t
   registerContents(class ComponentVisitor &componentVisitor) const override;
 
+  bool hasComponentInfo() const;
+
 protected:
   /// Parent component in the tree
   const IComponent *m_parent;

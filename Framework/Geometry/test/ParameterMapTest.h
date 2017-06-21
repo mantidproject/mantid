@@ -632,20 +632,6 @@ public:
     TS_ASSERT_EQUALS(oldA->value<bool>(), false);
   }
 
-  void test_hasDetectorInfo(){
-      ParameterMap pmap;
-      auto instr = ComponentCreationHelper::createMinimalInstrument(Mantid::Kernel::V3D{0,0,0}, Mantid::Kernel::V3D{10,0,0}, Mantid::Kernel::V3D{11,0,0});
-      TS_ASSERT(!pmap.hasDetectorInfo(instr.get()));
-
-      pmap.setInstrument(instr.get());
-      TS_ASSERT(!pmap.hasDetectorInfo(instr.get()));
-
-      instr->setDetectorInfo(boost::make_shared<const Mantid::Beamline::DetectorInfo>());
-      pmap.setInstrument(instr.get());
-      TS_ASSERT(pmap.hasDetectorInfo(instr.get()));
-
-  }
-
 private:
   template <typename ValueType>
   void doCopyAndUpdateTestUsingGenericAdd(const std::string &type,

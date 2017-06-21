@@ -691,6 +691,37 @@ public:
     TS_ASSERT(instrument.hasInfoVisitor());
   }
 
+  void test_component_index() {
+
+    auto instrument = ComponentCreationHelper::createMinimalInstrument(
+        Mantid::Kernel::V3D(0, 0, 0),
+        /*source pos*/
+        Mantid::Kernel::V3D(10, 0, 0),
+        /*sample pos*/
+        Mantid::Kernel::V3D(20, 0, 0));
+
+    boost::shared_ptr<const IComponent> comp = instrument->getChild(0);
+    // TS_ASSERT_EQUALS(0, instrument->componentIndex(comp->getComponentID()));
+    TSM_ASSERT("Component index 0 must be detector",
+               dynamic_cast<const Geometry::IDetector *>(comp.get()));
+
+    comp = instrument->getSource();
+    TS_ASSERT_EQUALS(1, instrument->componentIndex(comp->getComponentID()));
+    comp = instrument->getSample();
+    TS_ASSERT_EQUALS(2, instrument->componentIndex(comp->getComponentID()));
+
+    ObjComponent *extraComp = new ObjComponent("extra_component");
+    TSM_ASSERT_THROWS("Component has not been added. Should throw",
+                      instrument->componentIndex(extraComp->getComponentID()),
+                      std::runtime_error &);
+
+    // Now lets add it.
+    instrument->add(extraComp);
+
+    comp = instrument->getChild(3);
+    TS_ASSERT_EQUALS(3, instrument->componentIndex(comp->getComponentID()));
+  }
+
 private:
   Instrument_sptr createInstrumentWithSource() {
     using Mantid::Kernel::V3D;

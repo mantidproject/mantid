@@ -1,5 +1,6 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/InfoComponentVisitor.h"
+#include "MantidGeometry/Instrument/CacheComponentVisitor.h"
 #include "MantidGeometry/Instrument/ParComponentFactory.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
@@ -660,6 +661,7 @@ void Instrument::markAsSamplePos(const IComponent *comp) {
     g_log.warning(
         "Have already added samplePos component to the _sampleCache.");
   }
+  m_componentCacheGood = false;
 }
 
 /** Mark a component which has already been added to the Instrument (as a child
@@ -686,6 +688,7 @@ void Instrument::markAsSource(const IComponent *comp) {
   } else {
     g_log.warning("Have already added source component to the _sourceCache.");
   }
+  m_componentCacheGood = false;
 }
 
 /** Mark a Component which has already been added to the Instrument (as a child
@@ -710,6 +713,7 @@ void Instrument::markAsDetector(const IDetector *det) {
     bool isMonitor = false;
     m_detectorCache.emplace(it, det->getID(), det_sptr, isMonitor);
   }
+  m_componentCacheGood = false;
 }
 
 /// As markAsDetector but without the required sorting. Must call
@@ -723,6 +727,7 @@ void Instrument::markAsDetectorIncomplete(const IDetector *det) {
   IDetector_const_sptr det_sptr = IDetector_const_sptr(det, NoDeleting());
   bool isMonitor = false;
   m_detectorCache.emplace_back(det->getID(), det_sptr, isMonitor);
+  m_componentCacheGood = false;
 }
 
 /// Sorts the detector cache. Called after all detectors have been marked via
@@ -787,6 +792,7 @@ void Instrument::removeDetector(IDetector *det) {
   {
     parentAssembly->remove(det);
   }
+  m_componentCacheGood = false;
 }
 
 /** This method returns monitor detector ids
@@ -1251,6 +1257,12 @@ bool Instrument::hasInfoVisitor() const {
 
 bool Instrument::isEmptyInstrument() const { return this->nelements() == 0; }
 
+int Instrument::add(IComponent *component) {
+  // invalidate cache
+  m_componentCacheGood = false;
+  return CompAssembly::add(component);
+}
+
 /* Only for use by ExperimentInfo. Sets the pointer to the DetectorInfo.
  * Sets the pointer to the detector id -> index map
 */
@@ -1276,6 +1288,29 @@ size_t Instrument::detectorIndex(const detid_t detID) const {
   const auto &baseInstr = m_map ? *m_instr : *this;
   const auto it = find(baseInstr.m_detectorCache, detID);
   return std::distance(baseInstr.m_detectorCache.cbegin(), it);
+}
+
+/**
+ * @brief Instrument::componentIndex
+ * Note that this index can be used with ComponentInfo. Throw std::runtime_error
+ * if the ComponentID does not exist.
+ * @param componentId : ComponentID to find the index for.
+ * @return the Component index associated with this Component.
+ */
+size_t Instrument::componentIndex(const ComponentID componentId) const {
+  if (!m_componentCacheGood) {
+    CacheComponentVisitor visitor;
+    this->registerContents(visitor);
+    m_componentCache = visitor.componentIds();
+    m_componentCacheGood = true;
+  }
+  auto it = std::find(m_componentCache.cbegin(), m_componentCache.cend(),
+                      componentId);
+  if (it == m_componentCache.end()) {
+    throw std::runtime_error("ComponentID does not identify a Component that "
+                             "is not part of the instrument");
+  }
+  return std::distance(m_componentCache.cbegin(), it);
 }
 
 /// Returns a legacy ParameterMap, containing information that is now stored in

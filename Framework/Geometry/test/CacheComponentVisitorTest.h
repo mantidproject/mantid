@@ -6,6 +6,7 @@
 #include "MantidGeometry/Instrument/CacheComponentVisitor.h"
 #include "MantidGeometry/Instrument/CompAssembly.h"
 #include "MantidGeometry/Instrument/ObjComponent.h"
+#include "MantidGeometry/Instrument/Detector.h"
 
 using namespace Mantid::Geometry;
 
@@ -42,6 +43,26 @@ public:
     TS_ASSERT_EQUALS(visitor.componentIds()[0], source);
     TS_ASSERT_EQUALS(visitor.componentIds()[1], sample);
     TS_ASSERT_EQUALS(visitor.componentIds()[2], &assembly);
+  }
+
+  void test_indexing_scheme() {
+    /* Note this is testing internals. Client code should only be
+     * calling the register.. methods in a few special places.
+     */
+    CacheComponentVisitor visitor;
+    Detector detector1("det", 1, nullptr);
+    TSM_ASSERT_EQUALS("Should have Index 0", 0,
+                      visitor.registerDetector(detector1));
+
+    ObjComponent comp("some_comp");
+    TSM_ASSERT_EQUALS("Should have Index 1", 1,
+                      visitor.registerGenericComponent(comp));
+
+    // Detector now "steals" lower index previously allocated above. Detector
+    // always first indexes.
+    Detector detector2("det", 2, nullptr);
+    TSM_ASSERT_EQUALS("Should have Index 1", 1,
+                      visitor.registerDetector(detector2));
   }
 };
 
