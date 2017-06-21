@@ -1,3 +1,5 @@
+from __future__ import (absolute_import, division, print_function)
+
 from mantid.simpleapi import (mtd, CloneWorkspace, DeleteWorkspace, GroupWorkspaces,
                               Divide, Minus, Scale, ScaleX, AddSampleLogMultiple)
 from mantid.api import (PythonAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty, WorkspaceGroupProperty,
@@ -6,7 +8,6 @@ from mantid.kernel import (Direction, logger)
 
 
 class ApplyMCAbsorptionCorrection(PythonAlgorithm):
-
     _sample_ws_name = None
 
     _corrections_ws_name = None
@@ -25,10 +26,8 @@ class ApplyMCAbsorptionCorrection(PythonAlgorithm):
     def category(self):
         return "Workflow\\MIDAS"
 
-
     def summary(self):
         return "Applies a calculated Monte Carlo absorption correction."
-
 
     def PyInit(self):
         self.declareProperty(MatrixWorkspaceProperty('SampleWorkspace', '', direction=Direction.Input),
@@ -51,7 +50,6 @@ class ApplyMCAbsorptionCorrection(PythonAlgorithm):
         self.declareProperty(MatrixWorkspaceProperty('OutputWorkspace', '', direction=Direction.Output),
                              doc='The output corrections workspace.')
 
-
     def PyExec(self):
         self._setup()
 
@@ -60,20 +58,20 @@ class ApplyMCAbsorptionCorrection(PythonAlgorithm):
 
         if self._use_can:
 
-            # Appy container shift if needed
+            # Apply container shift if needed
             if self._shift_can:
                 # Use temp workspace so we don't modify data
                 prog_container.report('Shifting can')
                 self._scale_x(self._can_ws_name, self._shifted_container, self._can_shift_factor)
-                logger.information('Container data shifted by %f' % self._can_shift_factor)
+                logger.information('Container data shifted by {}'.format(self._can_shift_factor))
             else:
                 prog_container.report('Cloning Workspace')
                 self._clone_ws(self._can_ws_name, self._shifted_container)
 
-        # Apply container scale factor if needed
+            # Apply container scale factor if needed
             if self._scale_can:
                 # Use temp workspace so we don't modify original data
-                prog_container.report('Scaling can')
+                prog_container.report('Scaling container')
                 self._scale(self._shifted_container, self._scaled_container, self._can_scale_factor)
                 logger.information('Container scaled by %f' % self._can_scale_factor)
             else:
@@ -126,13 +124,13 @@ class ApplyMCAbsorptionCorrection(PythonAlgorithm):
 
     def validateInputs(self):
         """
-        Validate user input.
-        """
+		Validate user input.
+		"""
 
         self._setup()
         issues = dict()
-		
-		# Need something to get corrections from
+
+        # Need something to get corrections from
         if self._corrections_ws_name == '':
             issues['CorrectionsWorkspace'] = 'Must provide CorrectionsWorkspace'
 
@@ -146,8 +144,8 @@ class ApplyMCAbsorptionCorrection(PythonAlgorithm):
 
     def _setup(self):
         """
-        Get properties and setup instance variables.
-        """
+		Get properties and setup instance variables.
+		"""
 
         self._sample_ws_name = self.getPropertyValue('SampleWorkspace')
         self._unit = mtd[self._sample_ws_name].getAxis(0).getUnit().unitID()
@@ -178,11 +176,11 @@ class ApplyMCAbsorptionCorrection(PythonAlgorithm):
 
     def _get_correction_factor_ws_name(self, factor_type):
         """
-        Gets the full name for a correction factor workspace given the correction type.
+		Gets the full name for a correction factor workspace given the correction type.
 
-        @param factor_type Factory type (ass, acc)
-        @return Full name of workspace (None if not found)
-        """
+		@param factor_type Factory type (ass, acc)
+		@return Full name of workspace (None if not found)
+		"""
 
         corrections_ws = mtd[self._corrections_ws_name]
 
@@ -194,13 +192,13 @@ class ApplyMCAbsorptionCorrection(PythonAlgorithm):
 
     def _pre_process_corrections(self):
         """
-        If the sample is not in wavelength then convert the corrections to
-        whatever units the sample is in.
-        """
+		If the sample is not in wavelength then convert the corrections to
+		whatever units the sample is in.
+		"""
 
         factor_types = ['ass']
         if self._use_can:
-            factor_types.extend(['acc'])
+            factor_types.append('acc')
 
         for factor_type in factor_types:
             input_name = self._get_correction_factor_ws_name(factor_type)
@@ -211,7 +209,7 @@ class ApplyMCAbsorptionCorrection(PythonAlgorithm):
         corr_unit = mtd[self._corrections + '_ass'].getAxis(0).getUnit().unitID()
         if corr_unit != self._unit:
             raise ValueError('Sample and its correction unit NOT the same')
-		
+
         if self._use_can:
             can_unit = mtd[self._can_ws_name].getAxis(0).getUnit().unitID()
             corr_unit = mtd[self._corrections + '_acc'].getAxis(0).getUnit().unitID()
@@ -224,8 +222,8 @@ class ApplyMCAbsorptionCorrection(PythonAlgorithm):
 
     def _correct_sample_can(self):
         """
-        Correct for sample and container.
-        """
+		Correct for sample and container.
+		"""
 
         corrected_can_ws = '__corrected_can'
 
@@ -291,8 +289,8 @@ class ApplyMCAbsorptionCorrection(PythonAlgorithm):
         scale_alg.setProperty("Operation", 'Multiply')
         scale_alg.execute()
         mtd.addOrReplace(output_ws, scale_alg.getProperty("OutputWorkspace").value)
-	
-    def _scale_x(self):
+
+    def _scale_x(self, input_ws, output_ws, factor):
         scale_x_alg = self.createChildAlgorithm("ScaleX", enableLogging=False)
         scale_x_alg.setProperty("InputWorkspace", input_ws)
         scale_x_alg.setProperty("OutputWorkspace", output_ws)
@@ -300,6 +298,7 @@ class ApplyMCAbsorptionCorrection(PythonAlgorithm):
         scale_x_alg.setProperty("Operation", 'Add')
         scale_x_alg.execute()
         mtd.addOrReplace(output_ws, scale_x_alg.getProperty("OutputWorkspace").value)
+
 
 # Register algorithm with Mantid
 AlgorithmFactory.subscribe(ApplyMCAbsorptionCorrection)

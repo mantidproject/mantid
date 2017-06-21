@@ -20,7 +20,7 @@ class AnnulusMonteCarloAbsorption(DataProcessorAlgorithm):
     _beam_height = None
     _beam_width = None
 
-    _output_ws=None
+    _output_ws = None
     _events = None
     _interpolation = None
 
@@ -74,15 +74,13 @@ class AnnulusMonteCarloAbsorption(DataProcessorAlgorithm):
         self.declareProperty(MatrixWorkspaceProperty('OutputWorkspace', '', direction=Direction.Output),
                              doc='The output corrected workspace.')
 
-
     def PyExec(self):
 
         # Set up progress reporting
         prog = Progress(self, 0.0, 1.0, 2)
 
-
         sample_thickness = self._sample_outer_radius - self._sample_inner_radius
-        logger.information('Sample thickness: ' + str(sample_thickness))
+        logger.information('Sample thickness: {}'.format(sample_thickness))
 
         prog.report('Calculating sample corrections')
         SetBeam(self._input_ws_name,
@@ -119,7 +117,6 @@ class AnnulusMonteCarloAbsorption(DataProcessorAlgorithm):
                        ('sample_height', self._sample_height),
                        ('beam_height', self._beam_height),
                        ('beam_width', self._beam_width)]
-
 
         log_names = [item[0] for item in sample_logs]
         log_values = [item[1] for item in sample_logs]
@@ -172,7 +169,6 @@ class AnnulusMonteCarloAbsorption(DataProcessorAlgorithm):
             issues['SampleOuterRadius'] = 'Must be greater than SampleInnerRadius'
 
         return issues
-
 
 
 # Register algorithm with Mantid

@@ -8,7 +8,6 @@ from mantid.kernel import (StringListValidator, StringMandatoryValidator, IntBou
 
 
 class FlatPlateMonteCarloAbsorption(DataProcessorAlgorithm):
-
     # Sample variables
     _input_ws_name = None
     _sample_chemical_formula = None
@@ -39,9 +38,9 @@ class FlatPlateMonteCarloAbsorption(DataProcessorAlgorithm):
         self.declareProperty(name='ChemicalFormula', defaultValue='',
                              validator=StringMandatoryValidator(),
                              doc='Chemical formula for the sample')
-        self.declareProperty(name='DensityType', defaultValue = 'Mass Density',
+        self.declareProperty(name='DensityType', defaultValue='Mass Density',
                              validator=StringListValidator(['Mass Density', 'Number Density']),
-                             doc = 'Use of Mass density or Number density')
+                             doc='Use of Mass density or Number density')
         self.declareProperty(name='Density', defaultValue=0.1,
                              validator=FloatBoundedValidator(0.0),
                              doc='Mass density (g/cm^3) or Number density (atoms/Angstrom^3)')
@@ -103,7 +102,7 @@ class FlatPlateMonteCarloAbsorption(DataProcessorAlgorithm):
                             'Width': self._sample_width,
                             'Height': self._sample_height,
                             'Thick': self._sample_thickness,
-							'Center': [0.,0.,self._sample_center],
+                            'Center': [0., 0., self._sample_center],
                             'Angle': self._sample_angle},
                   Material=sample_mat_list)
 
@@ -121,7 +120,6 @@ class FlatPlateMonteCarloAbsorption(DataProcessorAlgorithm):
                        ('sample_thickness', self._sample_thickness),
                        ('beam_height', self._beam_height),
                        ('beam_width', self._beam_width)]
-
 
         log_names = [item[0] for item in sample_logs]
         log_values = [item[1] for item in sample_logs]
@@ -172,6 +170,7 @@ class FlatPlateMonteCarloAbsorption(DataProcessorAlgorithm):
             issues['ChemicalFormula'] = 'Sample chemical formula must be defined'
 
         return issues
+
 
 # Register algorithm with Mantid
 AlgorithmFactory.subscribe(FlatPlateMonteCarloAbsorption)

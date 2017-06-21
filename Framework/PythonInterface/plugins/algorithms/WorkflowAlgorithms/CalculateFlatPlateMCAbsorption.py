@@ -1,3 +1,5 @@
+from __future__ import (absolute_import, division, print_function)
+
 from mantid.simpleapi import (mtd, CloneWorkspace, DeleteWorkspace, GroupWorkspaces, ConvertUnits,
                               Multiply, AddSampleLogMultiple, FlatPlateMonteCarloAbsorption)
 from mantid.api import (DataProcessorAlgorithm, AlgorithmFactory, PropertyMode, MatrixWorkspaceProperty,
@@ -5,8 +7,8 @@ from mantid.api import (DataProcessorAlgorithm, AlgorithmFactory, PropertyMode, 
 from mantid.kernel import (StringListValidator, StringMandatoryValidator, IntBoundedValidator,
                            FloatBoundedValidator, Direction, logger, CompositeValidator)
 
-class CalculateFlatPlateMCAbsorption(DataProcessorAlgorithm):
 
+class CalculateFlatPlateMCAbsorption(DataProcessorAlgorithm):
     # Sample variables
     _sample_ws_name = None
     _sample_chemical_formula = None
@@ -30,21 +32,18 @@ class CalculateFlatPlateMCAbsorption(DataProcessorAlgorithm):
     _unit = None
     _emode = None
     _efixed = None
-    _number_wavelengths = None    
+    _number_wavelengths = None
     _events = None
     _abs_ws = None
     _ass_ws = None
     _acc_ws = None
     _output_ws = None
 
-
     def category(self):
         return "Workflow\\Inelastic;CorrectionFunctions\\AbsorptionCorrections;Workflow\\MIDAS"
 
-
     def summary(self):
         return "Calculates indirect absorption corrections for a flat sample shape."
-
 
     def PyInit(self):
         # Sample
@@ -112,7 +111,6 @@ class CalculateFlatPlateMCAbsorption(DataProcessorAlgorithm):
                                                     optional=PropertyMode.Optional),
                              doc='The workspace group to save correction factors')
 
-
     def PyExec(self):
 
         # Set up progress reporting
@@ -123,7 +121,7 @@ class CalculateFlatPlateMCAbsorption(DataProcessorAlgorithm):
 
         sample_wave_ws = '__sam_wave'
         self._convert_to_wavelength(self._sample_ws_name, sample_wave_ws)
-					 
+
         prog.report('Calculating sample corrections')
         FlatPlateMonteCarloAbsorption(InputWorkspace=sample_wave_ws,
                                       OutputWorkspace=self._ass_ws,
@@ -143,7 +141,6 @@ class CalculateFlatPlateMCAbsorption(DataProcessorAlgorithm):
         self._convert_from_wavelength(self._ass_ws, self._ass_ws)
         group = self._ass_ws
 
-
         if self._can_ws_name is not None:
             can1_wave_ws = '__can1_wave'
             can2_wave_ws = '__can2_wave'
@@ -151,7 +148,7 @@ class CalculateFlatPlateMCAbsorption(DataProcessorAlgorithm):
             self._clone_ws(can1_wave_ws, can2_wave_ws)
 
             prog.report('Calculating container corrections')
-            offset_front = 0.5*(float(self._can_front_thickness) + float(self._sample_thickness))
+            offset_front = 0.5 * (float(self._can_front_thickness) + float(self._sample_thickness))
             FlatPlateMonteCarloAbsorption(InputWorkspace=can1_wave_ws,
                                           OutputWorkspace='__Acc1',
                                           ChemicalFormula=self._can_chemical_formula,
@@ -168,7 +165,7 @@ class CalculateFlatPlateMCAbsorption(DataProcessorAlgorithm):
                                           NumberOfWavelengthPoints=self._number_wavelengths,
                                           Interpolation=self._interpolation)
 
-            offset_back = 0.5*(float(self._can_back_thickness) + float(self._sample_thickness))
+            offset_back = 0.5 * (float(self._can_back_thickness) + float(self._sample_thickness))
             FlatPlateMonteCarloAbsorption(InputWorkspace=can2_wave_ws,
                                           OutputWorkspace='__Acc2',
                                           ChemicalFormula=self._can_chemical_formula,
@@ -205,8 +202,8 @@ class CalculateFlatPlateMCAbsorption(DataProcessorAlgorithm):
         if self._can_ws_name is not None:
             sample_log_workspaces.append(self._acc_ws)
             sample_logs.append(('container_filename', self._can_ws_name))
-            sample_logs.append(('container_front_thickness', self. _can_front_thickness))
-            sample_logs.append(('container_back_thickness', self. _can_back_thickness))
+            sample_logs.append(('container_front_thickness', self._can_front_thickness))
+            sample_logs.append(('container_back_thickness', self._can_back_thickness))
 
         log_names = [item[0] for item in sample_logs]
         log_values = [item[1] for item in sample_logs]
@@ -217,7 +214,6 @@ class CalculateFlatPlateMCAbsorption(DataProcessorAlgorithm):
         # Output the Ass workspace
         self._group_ws(group, self._abs_ws)
         self.setProperty('CorrectionsWorkspace', self._abs_ws)
-
 
     def _setup(self):
         """
@@ -264,7 +260,7 @@ class CalculateFlatPlateMCAbsorption(DataProcessorAlgorithm):
 
         self._number_wavelengths = self.getProperty('NumberOfWavelengthPoints').value
         self._events = self.getProperty('EventsPerPoint').value
-        self._interpolation	= 'CSpline'
+        self._interpolation = 'CSpline'
 
         self._abs_ws = self.getPropertyValue('CorrectionsWorkspace')
         self._ass_ws = self._abs_ws + '_ass'
@@ -282,7 +278,7 @@ class CalculateFlatPlateMCAbsorption(DataProcessorAlgorithm):
             can_unit = mtd[self._can_ws_name].getAxis(0).getUnit().unitID()
             if can_unit != self._unit:
                 raise ValueError('Sample and container unit NOT the same')
-            
+
             if self._can_chemical_formula == '':
                 issues['ContainerChemicalFormula'] = 'Must be set to use container corrections'
 

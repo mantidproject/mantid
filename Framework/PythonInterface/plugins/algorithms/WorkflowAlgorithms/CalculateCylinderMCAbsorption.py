@@ -1,3 +1,5 @@
+from __future__ import (absolute_import, division, print_function)
+
 from mantid.simpleapi import (mtd, CloneWorkspace, DeleteWorkspace, GroupWorkspaces, ConvertUnits,
                               Multiply, AddSampleLogMultiple,
                               CylinderMonteCarloAbsorption, AnnulusMonteCarloAbsorption)
@@ -6,8 +8,8 @@ from mantid.api import (DataProcessorAlgorithm, AlgorithmFactory, PropertyMode, 
 from mantid.kernel import (StringListValidator, StringMandatoryValidator, IntBoundedValidator,
                            FloatBoundedValidator, Direction, logger, CompositeValidator)
 
-class CalculateCylinderMCAbsorption(DataProcessorAlgorithm):
 
+class CalculateCylinderMCAbsorption(DataProcessorAlgorithm):
     # Sample variables
     _sample_ws_name = None
     _sample_chemical_formula = None
@@ -29,21 +31,18 @@ class CalculateCylinderMCAbsorption(DataProcessorAlgorithm):
     _unit = None
     _emode = None
     _efixed = None
-    _number_wavelengths = None    
+    _number_wavelengths = None
     _events = None
     _abs_ws = None
     _ass_ws = None
     _acc_ws = None
     _output_ws = None
 
-
     def category(self):
         return "Workflow\\Inelastic;CorrectionFunctions\\AbsorptionCorrections;Workflow\\MIDAS"
 
-
     def summary(self):
         return "Calculates indirect absorption corrections for a flat sample shape."
-
 
     def PyInit(self):
         # Sample
@@ -106,7 +105,6 @@ class CalculateCylinderMCAbsorption(DataProcessorAlgorithm):
                                                     optional=PropertyMode.Optional),
                              doc='The workspace group to save correction factors')
 
-
     def PyExec(self):
 
         # Set up progress reporting
@@ -117,7 +115,7 @@ class CalculateCylinderMCAbsorption(DataProcessorAlgorithm):
 
         sample_wave_ws = '__sam_wave'
         self._convert_to_wavelength(self._sample_ws_name, sample_wave_ws)
-					 
+
         prog.report('Calculating sample corrections')
         CylinderMonteCarloAbsorption(InputWorkspace=sample_wave_ws,
                                      OutputWorkspace=self._ass_ws,
@@ -132,7 +130,6 @@ class CalculateCylinderMCAbsorption(DataProcessorAlgorithm):
                                      Interpolation=self._interpolation)
         self._convert_from_wavelength(self._ass_ws, self._ass_ws)
         group = self._ass_ws
-
 
         if self._can_ws_name is not None:
             can_wave_ws = '__can_wave'
@@ -169,8 +166,8 @@ class CalculateCylinderMCAbsorption(DataProcessorAlgorithm):
         if self._can_ws_name is not None:
             sample_logs.append(('container_filename', self._can_ws_name))
             sample_log_workspaces.append(self._acc_ws)
-            sample_logs.append(('container_inner_radius', self. _can_inner_radius))
-            sample_logs.append(('container_outer_radius', self. _can_outer_radius))
+            sample_logs.append(('container_inner_radius', self._can_inner_radius))
+            sample_logs.append(('container_outer_radius', self._can_outer_radius))
 
         log_names = [item[0] for item in sample_logs]
         log_values = [item[1] for item in sample_logs]
@@ -181,7 +178,6 @@ class CalculateCylinderMCAbsorption(DataProcessorAlgorithm):
         # Output the Ass workspace
         self._group_ws(group, self._abs_ws)
         self.setProperty('CorrectionsWorkspace', self._abs_ws)
-
 
     def _setup(self):
         """
@@ -222,7 +218,7 @@ class CalculateCylinderMCAbsorption(DataProcessorAlgorithm):
 
         self._number_wavelengths = self.getProperty('NumberOfWavelengthPoints').value
         self._events = self.getProperty('EventsPerPoint').value
-        self._interpolation	= 'CSpline'
+        self._interpolation = 'CSpline'
 
         self._abs_ws = self.getPropertyValue('CorrectionsWorkspace')
         self._ass_ws = self._abs_ws + '_ass'
