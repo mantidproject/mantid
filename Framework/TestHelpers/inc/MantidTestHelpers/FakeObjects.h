@@ -99,7 +99,11 @@ private:
 //===================================================================================================================
 class AxeslessWorkspaceTester : public MatrixWorkspace {
 public:
-  AxeslessWorkspaceTester() : MatrixWorkspace(), m_spec(0) {}
+  AxeslessWorkspaceTester(
+      const Parallel::StorageMode storageMode = Parallel::StorageMode::Cloned)
+      : MatrixWorkspace(), m_spec(0) {
+    setStorageMode(storageMode);
+  }
 
   // Empty overrides of virtual methods
   size_t getNumberHistograms() const override { return m_spec; }
@@ -163,13 +167,20 @@ private:
 
 class WorkspaceTester : public AxeslessWorkspaceTester {
 public:
-  WorkspaceTester() : AxeslessWorkspaceTester() {}
+  WorkspaceTester(
+      const Parallel::StorageMode storageMode = Parallel::StorageMode::Cloned)
+      : AxeslessWorkspaceTester(storageMode) {}
 
   const std::string id() const override { return "WorkspaceTester"; }
 
   /// Returns a clone of the workspace
   std::unique_ptr<WorkspaceTester> clone() const {
     return std::unique_ptr<WorkspaceTester>(doClone());
+  }
+
+  /// Returns a default-initialized clone of the workspace
+  std::unique_ptr<WorkspaceTester> cloneEmpty() const {
+    return std::unique_ptr<WorkspaceTester>(doCloneEmpty());
   }
 
 protected:
@@ -196,15 +207,22 @@ private:
     return new WorkspaceTester(*this);
   }
   WorkspaceTester *doCloneEmpty() const override {
-    throw std::runtime_error("Cloning of WorkspaceTester is not implemented.");
+    return new WorkspaceTester(storageMode());
   }
 };
 
 //===================================================================================================================
 class TableWorkspaceTester : public ITableWorkspace {
 public:
-  TableWorkspaceTester() {}
-  ~TableWorkspaceTester() override {}
+  /// Returns a clone of the workspace
+  std::unique_ptr<TableWorkspaceTester> clone() const {
+    return std::unique_ptr<TableWorkspaceTester>(doClone());
+  }
+
+  /// Returns a default-initialized clone of the workspace
+  std::unique_ptr<TableWorkspaceTester> cloneEmpty() const {
+    return std::unique_ptr<TableWorkspaceTester>(doCloneEmpty());
+  }
 
   const std::string id() const override { return "TableWorkspaceTester"; }
 
@@ -225,10 +243,6 @@ public:
   }
 
   void removeColumn(const std::string &) override {
-    throw std::runtime_error("removeColumn not implemented");
-  }
-
-  ITableWorkspace *clone() const {
     throw std::runtime_error("removeColumn not implemented");
   }
 
@@ -298,6 +312,10 @@ public:
 
 private:
   TableWorkspaceTester *doClone() const override {
+    throw std::runtime_error(
+        "Cloning of TableWorkspaceTester is not implemented.");
+  }
+  TableWorkspaceTester *doCloneEmpty() const override {
     throw std::runtime_error(
         "Cloning of TableWorkspaceTester is not implemented.");
   }

@@ -1,14 +1,14 @@
-#include "MantidAPI/IMDEventWorkspace.h"
-#include "MantidKernel/System.h"
-#include "MantidDataObjects/MDEventFactory.h"
 #include "MantidMDAlgorithms/SliceMD.h"
-#include "MantidGeometry/MDGeometry/MDImplicitFunction.h"
-#include "MantidKernel/ThreadScheduler.h"
-#include "MantidKernel/ThreadPool.h"
-#include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidAPI/FileProperty.h"
+#include "MantidAPI/IMDEventWorkspace.h"
+#include "MantidDataObjects/MDEventFactory.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
+#include "MantidGeometry/MDGeometry/MDImplicitFunction.h"
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/EnabledWhenProperty.h"
+#include "MantidKernel/System.h"
+#include "MantidKernel/ThreadPool.h"
+#include "MantidKernel/ThreadScheduler.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -185,7 +185,7 @@ void SliceMD::slice(typename MDEventWorkspace<MDE, nd>::sptr ws) {
   if (fileBackedWS)
     API::IMDNode::sortObjByID(boxes);
 
-  auto prog = new Progress(this, 0.0, 1.0, boxes.size());
+  auto prog = make_unique<Progress>(this, 0.0, 1.0, boxes.size());
 
   // The root of the output workspace
   MDBoxBase<OMDE, ond> *outRootBox = outWS->getBox();
@@ -277,7 +277,6 @@ void SliceMD::slice(typename MDEventWorkspace<MDE, nd>::sptr ws) {
   // return the size of the input workspace write buffer to its initial value
   // bc->setCacheParameters(sizeof(MDE),writeBufSize);
   this->setProperty("OutputWorkspace", outEvent);
-  delete prog;
 }
 
 //----------------------------------------------------------------------------------------------

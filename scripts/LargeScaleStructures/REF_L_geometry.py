@@ -1,6 +1,7 @@
 #pylint: disable=invalid-name
 from __future__ import (absolute_import, division, print_function)
 from .geometry_writer import MantidGeom
+import mantid.simpleapi as mantid
 
 NUM_PIXELS_PER_TUBE = 304
 NUM_TUBES = 256
@@ -15,10 +16,10 @@ def create_grouping(workspace=None):
 
     ## Integrated over X
     if workspace is not None:
-        if mtd[workspace].getInstrument().hasParameter("number-of-x-pixels"):
-            npix_x = int(mtd[workspace].getInstrument().getNumberParameter("number-of-x-pixels")[0])
-        if mtd[workspace].getInstrument().hasParameter("number-of-y-pixels"):
-            npix_y = int(mtd[workspace].getInstrument().getNumberParameter("number-of-y-pixels")[0])
+        if mantid.mtd[workspace].getInstrument().hasParameter("number-of-x-pixels"):
+            npix_x = int(mantid.mtd[workspace].getInstrument().getNumberParameter("number-of-x-pixels")[0])
+        if mantid.mtd[workspace].getInstrument().hasParameter("number-of-y-pixels"):
+            npix_y = int(mantid.mtd[workspace].getInstrument().getNumberParameter("number-of-y-pixels")[0])
 
     f = open("REFL_Detector_Grouping_Sum_X_rot.xml",'w')
     f.write("<detector-grouping description=\"Integrated over X\">\n")

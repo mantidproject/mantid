@@ -90,6 +90,9 @@ void MinusMD::doMinus(typename MDEventWorkspace<MDE, nd>::sptr ws1) {
   } while (it2.next());
 
   this->progress(0.41, "Splitting Boxes");
+
+  // This is freed in the destructor of the ThreadPool class,
+  // it should not be a memory leak
   auto prog2 = new Progress(this, 0.4, 0.9, 100);
   ThreadScheduler *ts = new ThreadSchedulerFIFO();
   ThreadPool tp(ts, 0, prog2);

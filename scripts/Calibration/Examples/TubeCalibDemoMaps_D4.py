@@ -8,6 +8,7 @@ from __future__ import absolute_import, division, print_function
 
 import tube
 from tube_calib_fit_params import TubeCalibFitParams
+import mantid.simpleapi as mantid
 
 # == Set parameters for calibration ==
 
@@ -16,12 +17,12 @@ filename = 'MAP14919.raw' # Calibration run ( found in \\isis\inst$\NDXMAPS\Inst
 CalibratedComponent = 'D4_window'  # Calibrate D4 window
 
 # Get calibration raw file and integrate it
-rawCalibInstWS = Load(filename)  #'raw' in 'rawCalibInstWS' means unintegrated.
+rawCalibInstWS = mantid.Load(filename)  #'raw' in 'rawCalibInstWS' means unintegrated.
 print("Integrating Workspace")
 rangeLower = 2000 # Integrate counts in each spectra from rangeLower to rangeUpper
 rangeUpper = 10000 #
-CalibInstWS = Integration( rawCalibInstWS, RangeLower=rangeLower, RangeUpper=rangeUpper )
-DeleteWorkspace(rawCalibInstWS)
+CalibInstWS = mantid.Integration( rawCalibInstWS, RangeLower=rangeLower, RangeUpper=rangeUpper )
+mantid.DeleteWorkspace(rawCalibInstWS)
 print("Created workspace (CalibInstWS) with integrated data from run and instrument to calibrate")
 
 # == Create Objects needed for calibration ==
@@ -48,10 +49,10 @@ calibrationTable = tube.calibrate(CalibInstWS, CalibratedComponent, knownPos, fu
 print("Got calibration (new positions of detectors) ")
 
 # == Apply the Calibation ==
-ApplyCalibration( Workspace=CalibInstWS, PositionTable=calibrationTable)
+mantid.ApplyCalibration( Workspace=CalibInstWS, PositionTable=calibrationTable)
 print("Applied calibration")
 
 
 # == Save workspace ==
-SaveNexusProcessed( CalibInstWS, 'TubeCalibDemoMapsResult.nxs',"Result of Running TCDemoMaps.py")
+mantid.SaveNexusProcessed(CalibInstWS, 'TubeCalibDemoMapsResult.nxs',"Result of Running TCDemoMaps.py")
 print("saved calibrated workspace (CalibInstWS) into Nexus file TubeCalibDemoMapsResult.nxs")
