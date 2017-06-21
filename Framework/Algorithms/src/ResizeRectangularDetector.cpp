@@ -97,7 +97,7 @@ void ResizeRectangularDetector::exec() {
     throw std::runtime_error("Component with name " + ComponentName +
                              " was not found.");
 
-  auto& componentInfo = inputW->mutableComponentInfo();
+  auto &componentInfo = inputW->mutableComponentInfo();
   const auto componentIndex = componentInfo.indexOf(comp->getComponentID());
   if (!componentInfo.isDetector(componentIndex))
     throw std::runtime_error("Component with name " + ComponentName +

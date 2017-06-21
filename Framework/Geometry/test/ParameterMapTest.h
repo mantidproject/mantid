@@ -5,6 +5,8 @@
 #include "MantidGeometry/Instrument/ParameterFactory.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidGeometry/Instrument/Detector.h"
+#include "MantidBeamline/ComponentInfo.h"
+#include "MantidBeamline/DetectorInfo.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidKernel/V3D.h"
 #include <cxxtest/TestSuite.h>
@@ -630,6 +632,20 @@ public:
     TS_ASSERT_EQUALS(oldA->value<bool>(), false);
   }
 
+  void test_hasDetectorInfo(){
+      ParameterMap pmap;
+      auto instr = ComponentCreationHelper::createMinimalInstrument(Mantid::Kernel::V3D{0,0,0}, Mantid::Kernel::V3D{10,0,0}, Mantid::Kernel::V3D{11,0,0});
+      TS_ASSERT(!pmap.hasDetectorInfo(instr.get()));
+
+      pmap.setInstrument(instr.get());
+      TS_ASSERT(!pmap.hasDetectorInfo(instr.get()));
+
+      instr->setDetectorInfo(boost::make_shared<const Mantid::Beamline::DetectorInfo>());
+      pmap.setInstrument(instr.get());
+      TS_ASSERT(pmap.hasDetectorInfo(instr.get()));
+
+  }
+
 private:
   template <typename ValueType>
   void doCopyAndUpdateTestUsingGenericAdd(const std::string &type,
@@ -698,7 +714,6 @@ private:
     auto origParameter = pmap.get(m_testInstrument.get(), name);
     TS_ASSERT_EQUALS(origTypedValue, origParameter->value<ValueType>());
   }
-
   // private instrument
   Instrument_sptr m_testInstrument;
 };
