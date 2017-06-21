@@ -11,7 +11,8 @@ set ( TEST_PY_FILES
   SimpleAPITest.py
   SimpleAPILoadTest.py
   SimpleAPIFitTest.py
-  SimpleAPIRenameWorkspaceTest.py  
+  SimpleAPIRenameWorkspaceTest.py
+  FunctionWrapperTest.py  
 )
 
 if ( MAKE_VATES )

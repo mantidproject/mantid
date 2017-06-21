@@ -131,5 +131,3 @@ new_attrs = _simpleapi._translate()
 _plugins.sync_attrs(_simpleapi, new_attrs, plugin_modules)
 
 ################################################################################
-
-from .FunctionWrapper import *
