@@ -56,14 +56,16 @@ class HelperTestingClass(object):
         if order in orders:
             self._quantum_order_event = order
         else:
-            raise RuntimeError("Unsupported number of quantum order event %s" % order)
+            raise RuntimeError(
+                "Unsupported number of quantum order event %s" % order)
 
     def set_name(self, name):
         if isinstance(name, str):
             self._system_name = name
             self._output_name = name
         else:
-            raise RuntimeError("Invalid name. Name should be a string but it is %s " % type(name))
+            raise RuntimeError(
+                "Invalid name. Name should be a string but it is %s " % type(name))
 
     def set_cross_section(self, cross_section=None):
         self._cross_section_factor = cross_section
@@ -161,10 +163,11 @@ class AbinsCASTEPTestScratch(stresstesting.MantidStressTest, HelperTestingClass)
         self.set_order(AbinsConstants.QUANTUM_ORDER_FOUR)
         self.case_from_scratch()
 
-    def validate(self):
+    def excludeInPullRequests(self):
+        return True
 
+    def validate(self):
         self.tolerance = 1e-2
-        self.isSlow = True
 
         return self._output_name, self.ref_result
 
@@ -225,8 +228,10 @@ class AbinsCASTEPTestT(stresstesting.MantidStressTest, HelperTestingClass):
         self.set_order(AbinsConstants.QUANTUM_ORDER_TWO)
         self.case_restart_diff_t()
 
+    def excludeInPullRequests(self):
+        return True
+
     def validate(self):
-        self.isSlow = True
         return self._output_name, self.ref_result
 
 # ----------------------------------------------------------------------------------------------------------------
@@ -254,8 +259,10 @@ class AbinsCASTEPTestLargerOrder(stresstesting.MantidStressTest, HelperTestingCl
         self.set_order(AbinsConstants.QUANTUM_ORDER_TWO)
         self.case_restart_diff_order(AbinsConstants.QUANTUM_ORDER_THREE)
 
+    def excludeInPullRequests(self):
+        return True
+
     def validate(self):
-        self.isSlow = True
         return self._output_name, self.ref_result
 
 # ----------------------------------------------------------------------------------------------------------------
@@ -288,35 +295,35 @@ class AbinsCASTEPTestSmallerOrder(stresstesting.MantidStressTest, HelperTestingC
 
 
 class AbinsCASTEPTestScale(stresstesting.MantidStressTest, HelperTestingClass):
-        """
-        In this benchmark it is tested if scaling is correct.
-        """
-        _wrk_1 = None
-        _ref_result = None
+    """
+    In this benchmark it is tested if scaling is correct.
+    """
+    _wrk_1 = None
+    _ref_result = None
 
-        def skipTests(self):
-            return skip_tests()
+    def skipTests(self):
+        return skip_tests()
 
-        def runTest(self):
-            HelperTestingClass.__init__(self)
+    def runTest(self):
+        HelperTestingClass.__init__(self)
 
-            scaling_factor = 2.0
+        scaling_factor = 2.0
 
-            name = "BenzeneScale"
-            self.ref_result = name + ".nxs"
-            self.set_dft_program("CASTEP")
-            self.set_name(name)
-            self.set_order(AbinsConstants.QUANTUM_ORDER_TWO)
-            self.case_from_scratch()
-            self._wrk_1 = self._output_name
+        name = "BenzeneScale"
+        self.ref_result = name + ".nxs"
+        self.set_dft_program("CASTEP")
+        self.set_name(name)
+        self.set_order(AbinsConstants.QUANTUM_ORDER_TWO)
+        self.case_from_scratch()
+        self._wrk_1 = self._output_name
 
-            Scale(InputWorkspace=self._wrk_1,
-                  OutputWorkspace=self._wrk_1,
-                  Operation='Multiply',
-                  Factor=scaling_factor)
+        Scale(InputWorkspace=self._wrk_1,
+              OutputWorkspace=self._wrk_1,
+              Operation='Multiply',
+              Factor=scaling_factor)
 
-        def validate(self):
-            return self._output_name, self.ref_result
+    def validate(self):
+        return self._output_name, self.ref_result
 
 
 # noinspection PyAttributeOutsideInit,PyPep8Naming
