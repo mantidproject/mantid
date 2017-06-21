@@ -21,7 +21,6 @@ if ( NOT COMMONSETUP_DONE )
   include ( CommonSetup )
 endif ()
 
-option(BUILD_MATLAB_DEPENDENCIES "Build Mantid-Matlab interface in the case of Matlab was found" OFF)
 ###########################################################################
 # Look for dependencies - bail out if any necessary ones not found
 ###########################################################################
@@ -57,6 +56,7 @@ if ( ${CMAKE_SYSTEM_NAME} MATCHES "Linux" )
   endif ( MPI_BUILD )
 endif ()
 
+set ( MPI_EXPERIMENTAL OFF CACHE BOOL "Enable MPI options" )
 if ( MPI_EXPERIMENTAL )
   include ( BoostMPI )
 endif ()
@@ -106,13 +106,6 @@ add_subdirectory (API)
 set ( MANTIDLIBS ${MANTIDLIBS} API )
 
 add_subdirectory (PythonInterface)
-#
-if (BUILD_MATLAB_DEPENDENCIES)
-    find_package ( Matlab )
-    if( MATLAB_FOUND )
-        add_subdirectory (MatlabAPI)
-    endif ()
-endif()
 
 include_directories (DataObjects/inc)
 add_subdirectory (DataObjects)

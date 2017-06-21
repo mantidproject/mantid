@@ -85,6 +85,12 @@ public:
   std::unique_ptr<IMDWorkspace> clone() const {
     return std::unique_ptr<IMDWorkspace>(doClone());
   }
+
+  /// Returns a default-initialized clone of the workspace
+  std::unique_ptr<IMDWorkspace> cloneEmpty() const {
+    return std::unique_ptr<IMDWorkspace>(doCloneEmpty());
+  }
+
   /// Get the number of points associated with the workspace.
   /// For MDEvenWorkspace it is the number of events contributing into the
   /// workspace
@@ -176,6 +182,7 @@ protected:
 private:
   std::string m_convention;
   IMDWorkspace *doClone() const override = 0;
+  IMDWorkspace *doCloneEmpty() const override = 0;
 };
 
 /// Shared pointer to the IMDWorkspace base class

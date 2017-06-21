@@ -1,22 +1,22 @@
 // SaveNexusProcessed
 // @author Ronald Fowler, based on SaveNexus
+#include "MantidDataHandling/SaveNexusProcessed.h"
 #include "MantidAPI/EnabledWhenWorkspaceIsType.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidAPI/WorkspaceHistory.h"
 #include "MantidAPI/WorkspaceOpOverloads.h"
-#include "MantidDataHandling/SaveNexusProcessed.h"
 #include "MantidDataObjects/EventWorkspace.h"
-#include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidDataObjects/OffsetsWorkspace.h"
+#include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidNexus/NexusFileIO.h"
-#include <nexus/NeXusFile.hpp>
+#include <Poco/File.h>
 #include <boost/regex.hpp>
 #include <boost/shared_ptr.hpp>
-#include <Poco/File.h>
+#include <nexus/NeXusFile.hpp>
 
 using namespace Mantid::API;
 
@@ -35,7 +35,7 @@ DECLARE_ALGORITHM(SaveNexusProcessed)
 
 /// Empty default constructor
 SaveNexusProcessed::SaveNexusProcessed()
-    : Algorithm(), m_timeProgInit(0.0), prog() {}
+    : Algorithm(), m_timeProgInit(0.0), m_progress() {}
 
 //-----------------------------------------------------------------------------------------------
 /** Initialisation method.
@@ -361,8 +361,8 @@ void SaveNexusProcessed::appendEventListData(std::vector<T> events,
 void SaveNexusProcessed::execEvent(Mantid::NeXus::NexusFileIO *nexusFile,
                                    const bool uniformSpectra,
                                    const std::vector<int> spec) {
-  prog = new Progress(this, m_timeProgInit, 1.0,
-                      m_eventWorkspace->getNumberEvents() * 2);
+  m_progress = make_unique<Progress>(this, m_timeProgInit, 1.0,
+                                     m_eventWorkspace->getNumberEvents() * 2);
 
   // Start by writing out the axes and crap
   nexusFile->writeNexusProcessedData2D(m_eventWorkspace, uniformSpectra, spec,
@@ -445,7 +445,7 @@ void SaveNexusProcessed::execEvent(Mantid::NeXus::NexusFileIO *nexusFile,
                           errorSquareds, pulsetimes);
       break;
     }
-    prog->reportIncrement(el.getNumberEvents(), "Copying EventList");
+    m_progress->reportIncrement(el.getNumberEvents(), "Copying EventList");
 
     PARALLEL_END_INTERUPT_REGION
   }

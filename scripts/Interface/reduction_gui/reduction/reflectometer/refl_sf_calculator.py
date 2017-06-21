@@ -156,7 +156,7 @@ class REFLSFCalculatorScripter(BaseReductionScripter):
 
         _script = self.create_script(script_part2)
         if _script == '':
-            print 'Please define a Scaling Factor File Name'
+            print('Please define a Scaling Factor File Name')
             raise RuntimeError
 
         script += _script
@@ -175,14 +175,14 @@ class REFLSFCalculatorScripter(BaseReductionScripter):
         if HAS_MANTID:
             script = self.to_script(None)
 
-            print script
+            print(script)
 
             try:
                 t0 = time.time()
-                exec script
+                exec(script)
                 delta_t = time.time()-t0
-                print REF_RED_OUTPUT_MESSAGE
-                print "SF calculation time: %5.2g sec" % delta_t
+                print("REF_RED_OUTPUT_MESSAGE")
+                print("SF calculation time: %5.2g sec" % delta_t)
                 # Update scripter
                 for item in self._observers:
                     if item.state() is not None:
@@ -196,6 +196,6 @@ class REFLSFCalculatorScripter(BaseReductionScripter):
                             item.state().update()
                         except:
                             pass
-                raise RuntimeError(sys.exc_value)
+                raise RuntimeError(sys.exc_info()[1])
         else:
             raise RuntimeError("SF calculation could not be executed: Mantid could not be imported")

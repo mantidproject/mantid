@@ -327,7 +327,8 @@ public:
 
     std::vector<std::string> colNames{"X", "Z"};
 
-    boost::scoped_ptr<ITableWorkspace> cloned(tw.clone(colNames).release());
+    boost::scoped_ptr<ITableWorkspace> cloned(
+        tw.cloneColumns(colNames).release());
 
     // Check clone is same as original.
     TS_ASSERT_EQUALS(colNames.size(), cloned->columnCount());

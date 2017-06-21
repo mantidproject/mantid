@@ -470,6 +470,8 @@ class GSASIIRefineFitPeaks(PythonAlgorithm):
         @return a tuple with: 1) a tuple with the Rwp and GoF values (weighted profile
         R-factor, goodness of fit), 2) the parameters dictionary
         """
+        import GSASIIpwd
+
         (limits, peaks_list, background_def) = fit_inputs
         (inst_parm1, inst_parm2) = gs2_rd.pwdparms['Instrument Parameters']
         # peaks: ['pos','int','alp','bet','sig','gam'] / with the refine flag each
@@ -538,6 +540,8 @@ class GSASIIRefineFitPeaks(PythonAlgorithm):
         # algorithm finishes and is destroyed!
         # This seems to destroy/close safely
         import wx
+        import GSASII
+
         self._gsas2_app = wx.App()
 
         gs2 = GSASII.GSASII(None)
@@ -700,7 +704,7 @@ class GSASIIRefineFitPeaks(PythonAlgorithm):
                                                             usedRanIdList=['noGUI'], Start=False)
         if err_msg:
             raise RuntimeError("There was a problem while importing the phase information file ({0}. "
-                               "Error details: {1}".format(phase_filename, errm_msg))
+                               "Error details: {1}".format(phase_filename, err_msg))
 
         phase_reader = phase_readers_list[0]
         GSASIIphsGUI.SetupGeneralWithoutGUI(gs2, phase_reader.Phase)
@@ -744,7 +748,9 @@ class GSASIIRefineFitPeaks(PythonAlgorithm):
 
         @param phase_data :: from GSAS-II, the first entry in 'Phases'
         """
+        import GSASII
         import GSASIIspc
+
         SGData = phase_data['General']['SGData']
         use_list = phase_data['Histograms']
         NShkl = len(GSASIIspc.MustrainNames(SGData))

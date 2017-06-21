@@ -16,7 +16,7 @@ the verbs). Workspaces hold the data in Mantid.
 They come in several forms, but the most common by far is the
 :ref:`MatrixWorkspace <MatrixWorkspace>` which contains measured or derived
 data with associated errors. Matrix Workspaces are typically created
-initially by executing one of Mantid's 'Load' algorithms, for example
+initially by executing one of Mantid's :ref:`Load<algm-Load>` algorithms, for example
 :ref:`LoadRaw <algm-LoadRaw>`
 or
 :ref:`LoadNexus <algm-LoadNexus>`,
@@ -29,9 +29,8 @@ This stores data of (somewhat) arbitrary type in rows and columns, much
 like a spreadsheet. These typically are created as the output of certain
 specialized algorithms (e.g. curve fitting).
 
-In addition to data, workspaces hold a `workspace
-history <WorkspaceHistory>`__, which details the algorithms which have
-been run on this workspace.
+In addition to data, workspaces hold a :ref:`workspace  history <Workspace-Workspace_History>`,
+which details the algorithms which have been run on this workspace.
 
 In software engineering terms, the 'abstract' concept of a workspace is
 an 'interface', in that it defines common properties that are
@@ -167,6 +166,7 @@ createWorkspace if you are writing C++ or Python algorithms.
 | "MDHistoWorkspace"            | :ref:`MDHistoWorkspace <MDHistoWorkspace>`|
 +-------------------------------+-------------------------------------------+
 
+.. _Workspace-Workspace_History:
 
 Workspace History
 #################
@@ -203,6 +203,8 @@ Output:
         InputWorkspace = myWS
         OutputWorkspace = myWS
         Params = 200
+        
+The full documentation for workspace history can be found at the :class:`~mantid.api.WorkspaceHistory` api.
 
 Writing you own workspace
 -------------------------
