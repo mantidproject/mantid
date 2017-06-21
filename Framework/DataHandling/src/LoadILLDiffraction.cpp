@@ -239,7 +239,7 @@ void LoadILLDiffraction::initMovingWorkspace(const NXDouble &scan) {
   // For D2B angles in the NeXus files are for the last detector. Here we change
   // them to be the first detector.
   std::vector<double> instrumentAngles =
-      getScannedVaribleByPropertyName(scan, "Position");
+      getScannedVaribleByPropertyName(scan, "actual_position");
   if (m_instName == "D2B") {
     // The rotations in the NeXus file are the absolute rotation of tube_1, here
     // we get the home angle of tube_1
@@ -402,18 +402,24 @@ void LoadILLDiffraction::fillDataScanMetaData(const NXDouble &scan) {
  */
 std::vector<double> LoadILLDiffraction::getScannedVaribleByPropertyName(
     const NXDouble &scan, const std::string &propertyName) const {
-  std::vector<double> timeDurations;
+  std::vector<double> scannedVariable;
 
   for (size_t i = 0; i < m_scanVar.size(); ++i) {
     if (m_scanVar[i].property.compare(propertyName) == 0) {
       for (size_t j = 0; j < m_numberScanPoints; ++j) {
-        timeDurations.push_back(scan(static_cast<int>(i), static_cast<int>(j)));
+        scannedVariable.push_back(
+            scan(static_cast<int>(i), static_cast<int>(j)));
       }
       break;
     }
   }
 
-  return timeDurations;
+  if (scannedVariable.size() == 0)
+    throw std::runtime_error(
+        "Can not load file because scanned variable with property name " +
+        propertyName + " was not found");
+
+  return scannedVariable;
 }
 
 /**
