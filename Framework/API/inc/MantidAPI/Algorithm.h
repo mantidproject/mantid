@@ -92,7 +92,7 @@ class MANTID_API_DLL Algorithm : public IAlgorithm,
                                  public Kernel::PropertyManagerOwner {
 public:
   /// Base class for algorithm notifications
-  class AlgorithmNotification : public Poco::Notification {
+  class MANTID_API_DLL AlgorithmNotification : public Poco::Notification {
   public:
     AlgorithmNotification(const Algorithm *const alg);
     const IAlgorithm *algorithm() const;
@@ -102,14 +102,14 @@ public:
   };
 
   /// StartedNotification is sent when the algorithm begins execution.
-  class StartedNotification : public AlgorithmNotification {
+  class MANTID_API_DLL StartedNotification : public AlgorithmNotification {
   public:
     StartedNotification(const Algorithm *const alg);
     std::string name() const override;
   };
 
   /// FinishedNotification is sent after the algorithm finishes its execution
-  class FinishedNotification : public AlgorithmNotification {
+  class MANTID_API_DLL FinishedNotification : public AlgorithmNotification {
   public:
     FinishedNotification(const Algorithm *const alg, bool res);
     std::string name() const override;
@@ -119,7 +119,7 @@ public:
 
   /// An algorithm can report its progress by sending ProgressNotification. Use
   /// Algorithm::progress(double) function to send a progress notification.
-  class ProgressNotification : public AlgorithmNotification {
+  class MANTID_API_DLL ProgressNotification : public AlgorithmNotification {
   public:
     /// Constructor
     ProgressNotification(const Algorithm *const alg, double p,
@@ -135,7 +135,7 @@ public:
 
   /// ErrorNotification is sent when an exception is caught during execution of
   /// the algorithm.
-  class ErrorNotification : public AlgorithmNotification {
+  class MANTID_API_DLL ErrorNotification : public AlgorithmNotification {
   public:
     /// Constructor
     ErrorNotification(const Algorithm *const alg, const std::string &str);
@@ -150,7 +150,7 @@ public:
   /// periodically Algorithm::interuption_point() which checks if
   /// Algorithm::cancel() has been called
   /// and throws CancelException if needed.
-  class CancelException : public std::exception {
+  class MANTID_API_DLL CancelException : public std::exception {
   public:
     /// Returns the message string.
     const char *what() const noexcept override;
