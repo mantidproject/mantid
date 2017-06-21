@@ -55,6 +55,13 @@ class SPowderSemiEmpiricalCalculator(object):
         else:
             raise ValueError("Object of type AbinsData was expected.")
 
+        self._atoms = self._abins_data.get_atoms_data().extract()
+
+        if isinstance(abins_data, AbinsModules.AbinsData):
+            self._abins_data = abins_data
+        else:
+            raise ValueError("Object of type AbinsData was expected.")
+
         min_order = AbinsModules.AbinsConstants.FUNDAMENTALS
         max_order = AbinsModules.AbinsConstants.FUNDAMENTALS + AbinsModules.AbinsConstants.HIGHER_ORDER_QUANTUM_EVENTS
         if isinstance(quantum_order_num, int) and min_order <= quantum_order_num <= max_order:
@@ -339,7 +346,17 @@ class SPowderSemiEmpiricalCalculator(object):
         from mantid.kernel import logger
         logger.notice(msg)
 
-    def _calculate_s_powder_one_atom(self, atom=None, q_indx=None):
+    def _calculate_s_powder_one_atom(self, atom=None):
+
+        while True:
+            try:
+                s = self._calculate_s_powder_one_atom_core(atom=atom)
+                return s
+            except StabilityError as e:
+                self._report_progress("{}".format(e))
+                self._s_threshold_up(atom=atom)
+
+    def _calculate_s_powder_one_atom_core(self, atom=None, q_indx=None):
         """
         @param atom: number of atom
         @return: s, and corresponding frequencies for all quantum events taken into account
