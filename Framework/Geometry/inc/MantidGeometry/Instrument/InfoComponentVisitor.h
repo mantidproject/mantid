@@ -100,10 +100,10 @@ private:
   Mantid::Geometry::ParameterMap &m_pmap;
 
   /// Source id to look for
-  Mantid::Geometry::IComponent * m_sourceId;
+  Mantid::Geometry::IComponent *m_sourceId;
 
   /// Sample id to look for
-  Mantid::Geometry::IComponent * m_sampleId;
+  Mantid::Geometry::IComponent *m_sampleId;
 
   /// Source index to set
   int64_t m_sourceIndex = -1;
@@ -111,11 +111,14 @@ private:
   /// Sample index to set
   int64_t m_sampleIndex = -1;
 
-  void markAsSourceOrSample(Mantid::Geometry::IComponent* componentId, const size_t componentIndex);
+  void markAsSourceOrSample(Mantid::Geometry::IComponent *componentId,
+                            const size_t componentIndex);
 
 public:
   InfoComponentVisitor(std::vector<detid_t> orderedDetectorIds,
-                       ParameterMap &pmap, Mantid::Geometry::IComponent * source = nullptr, Mantid::Geometry::IComponent * sample = nullptr);
+                       ParameterMap &pmap,
+                       Mantid::Geometry::IComponent *source = nullptr,
+                       Mantid::Geometry::IComponent *sample = nullptr);
 
   virtual size_t registerComponentAssembly(
       const Mantid::Geometry::ICompAssembly &assembly) override;

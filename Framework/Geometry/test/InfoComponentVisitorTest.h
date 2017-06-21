@@ -37,8 +37,9 @@ public:
                                            V3D(11, 0, 0) /*detector position*/);
     Mantid::Geometry::ParameterMap pmap;
     // Create the visitor.
-    InfoComponentVisitor visitor(std::vector<detid_t>{1} /*detector ids*/,
-                                 pmap, visitee->getSource()->getComponentID(), visitee->getSample()->getComponentID());
+    InfoComponentVisitor visitor(std::vector<detid_t>{1} /*detector ids*/, pmap,
+                                 visitee->getSource()->getComponentID(),
+                                 visitee->getSample()->getComponentID());
 
     // Visit everything
     visitee->registerContents(visitor);
@@ -69,7 +70,9 @@ public:
     TS_ASSERT_EQUALS(pmap.size(), 2);
 
     // Create the visitor.
-    InfoComponentVisitor visitor(std::vector<detid_t>{0}, pmap, visitee->getSource()->getComponentID(), visitee->getSample()->getComponentID());
+    InfoComponentVisitor visitor(std::vector<detid_t>{0}, pmap,
+                                 visitee->getSource()->getComponentID(),
+                                 visitee->getSample()->getComponentID());
 
     // Visit everything. Purging should happen.
     visitee->registerContents(visitor);
@@ -119,8 +122,9 @@ public:
                       2);
 
     const size_t detectorIndex = 0;
-    InfoComponentVisitor visitor(std::vector<detid_t>{detectorIndex},
-                                 *paramMap, parInstrument->getSource()->getComponentID(), parInstrument->getSample()->getComponentID());
+    InfoComponentVisitor visitor(std::vector<detid_t>{detectorIndex}, *paramMap,
+                                 parInstrument->getSource()->getComponentID(),
+                                 parInstrument->getSample()->getComponentID());
     parInstrument->registerContents(visitor);
 
     TSM_ASSERT_EQUALS("Expect 0 items in the purged parameter map",
@@ -148,8 +152,9 @@ public:
     // Create the visitor.
     const size_t detectorIndex =
         0; // Internally we expect detector index to start at 0
-    InfoComponentVisitor visitor(std::vector<detid_t>{1} /*detector ids*/,
-                                 pmap, visitee->getSource()->getComponentID(), visitee->getSample()->getComponentID());
+    InfoComponentVisitor visitor(std::vector<detid_t>{1} /*detector ids*/, pmap,
+                                 visitee->getSource()->getComponentID(),
+                                 visitee->getSample()->getComponentID());
 
     // Visit everything
     visitee->registerContents(visitor);
@@ -172,8 +177,9 @@ public:
 
     Mantid::Geometry::ParameterMap pmap;
     // Create the visitor.
-    InfoComponentVisitor visitor(std::vector<detid_t>{1} /*detector ids*/,
-                                 pmap, visitee->getSource()->getComponentID(), visitee->getSample()->getComponentID());
+    InfoComponentVisitor visitor(std::vector<detid_t>{1} /*detector ids*/, pmap,
+                                 visitee->getSource()->getComponentID(),
+                                 visitee->getSample()->getComponentID());
 
     // Visit everything
     visitee->registerContents(visitor);
@@ -226,8 +232,9 @@ public:
 
     Mantid::Geometry::ParameterMap pmap;
     // Create the visitor.
-    InfoComponentVisitor visitor(std::vector<detid_t>{1} /*detector ids*/,
-                                 pmap, visitee->getSource()->getComponentID(), visitee->getSample()->getComponentID());
+    InfoComponentVisitor visitor(std::vector<detid_t>{1} /*detector ids*/, pmap,
+                                 visitee->getSource()->getComponentID(),
+                                 visitee->getSample()->getComponentID());
 
     // Visit everything
     visitee->registerContents(visitor);
@@ -263,8 +270,9 @@ public:
 
     Mantid::Geometry::ParameterMap pmap;
     // Create the visitor.
-    InfoComponentVisitor visitor(std::vector<detid_t>{1} /*detector ids*/,
-                                 pmap, visitee->getSource()->getComponentID(), visitee->getSample()->getComponentID());
+    InfoComponentVisitor visitor(std::vector<detid_t>{1} /*detector ids*/, pmap,
+                                 visitee->getSource()->getComponentID(),
+                                 visitee->getSample()->getComponentID());
 
     // Visit everything
     visitee->registerContents(visitor);
@@ -299,8 +307,9 @@ public:
                                            V3D(11, 0, 0) /*detector position*/);
 
     Mantid::Geometry::ParameterMap pmap;
-    InfoComponentVisitor visitor(std::vector<detid_t>{1} /*detector ids*/,
-                                 pmap, visitee->getSource()->getComponentID(), visitee->getSample()->getComponentID());
+    InfoComponentVisitor visitor(std::vector<detid_t>{1} /*detector ids*/, pmap,
+                                 visitee->getSource()->getComponentID(),
+                                 visitee->getSample()->getComponentID());
 
     // Visit everything
     visitee->registerContents(visitor);
@@ -368,7 +377,9 @@ public:
 
     Mantid::Geometry::ParameterMap pmap;
     InfoComponentVisitor visitor(instrument->getDetectorIDs() /*detector ids*/,
-                                 pmap, instrument->getSource()->getComponentID(), instrument->getSample()->getComponentID());
+                                 pmap,
+                                 instrument->getSource()->getComponentID(),
+                                 instrument->getSample()->getComponentID());
 
     // Visit everything
     instrument->registerContents(visitor);
@@ -391,25 +402,25 @@ public:
     TS_ASSERT_EQUALS(instrumentIndex, visitor.size() - 1);
   }
 
-
   void test_source_and_sample() {
 
-      // Create a very basic instrument to visit
-      auto visitee = createMinimalInstrument(V3D(0, 0, 0) /*source pos*/,
-                                             V3D(10, 0, 0) /*sample pos*/
-                                             ,
-                                             V3D(11, 0, 0) /*detector position*/);
+    // Create a very basic instrument to visit
+    auto visitee = createMinimalInstrument(V3D(0, 0, 0) /*source pos*/,
+                                           V3D(10, 0, 0) /*sample pos*/
+                                           ,
+                                           V3D(11, 0, 0) /*detector position*/);
 
-      Mantid::Geometry::ParameterMap pmap;
-      InfoComponentVisitor visitor(std::vector<detid_t>{1} /*detector ids*/,
-                                   pmap, visitee->getSource()->getComponentID(), visitee->getSample()->getComponentID());
+    Mantid::Geometry::ParameterMap pmap;
+    InfoComponentVisitor visitor(std::vector<detid_t>{1} /*detector ids*/, pmap,
+                                 visitee->getSource()->getComponentID(),
+                                 visitee->getSample()->getComponentID());
 
-      // Visit everything
-      visitee->registerContents(visitor);
+    // Visit everything
+    visitee->registerContents(visitor);
 
-      // Detector has component index of 0
-      TS_ASSERT_EQUALS(1, visitor.sourceIndex());
-      TS_ASSERT_EQUALS(2, visitor.sampleIndex());
+    // Detector has component index of 0
+    TS_ASSERT_EQUALS(1, visitor.sourceIndex());
+    TS_ASSERT_EQUALS(2, visitor.sampleIndex());
   }
 };
 
@@ -435,7 +446,9 @@ public:
 
   void test_process_rectangular_instrument() {
     Mantid::Geometry::ParameterMap pmap;
-    InfoComponentVisitor visitor(m_instrument->getDetectorIDs(), pmap, m_instrument->getSource()->getComponentID(), m_instrument->getSample()->getComponentID());
+    InfoComponentVisitor visitor(m_instrument->getDetectorIDs(), pmap,
+                                 m_instrument->getSource()->getComponentID(),
+                                 m_instrument->getSample()->getComponentID());
     m_instrument->registerContents(visitor);
     TS_ASSERT(visitor.size() >= size_t(m_nPixels * m_nPixels));
   }

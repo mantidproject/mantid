@@ -46,8 +46,7 @@ void clearPositionAndRotationParameters(ParameterMap &pmap,
 
 InfoComponentVisitor::InfoComponentVisitor(
     std::vector<detid_t> orderedDetectorIds, ParameterMap &pmap,
-        ComponentID sourceId, ComponentID sampleId
-        )
+    ComponentID sourceId, ComponentID sampleId)
     : m_componentIds(boost::make_shared<std::vector<ComponentID>>(
           orderedDetectorIds.size(), nullptr)),
       m_assemblySortedDetectorIndices(
@@ -66,10 +65,7 @@ InfoComponentVisitor::InfoComponentVisitor(
           std::move(orderedDetectorIds))),
       m_positions(boost::make_shared<std::vector<Eigen::Vector3d>>()),
       m_rotations(boost::make_shared<std::vector<Eigen::Quaterniond>>()),
-      m_pmap(pmap),
-      m_sourceId(sourceId),
-      m_sampleId(sampleId)
-{
+      m_pmap(pmap), m_sourceId(sourceId), m_sampleId(sampleId) {
   const auto nDetectors = m_orderedDetectorIds->size();
   m_assemblySortedDetectorIndices->reserve(nDetectors);  // Exact
   m_assemblySortedComponentIndices->reserve(nDetectors); // Approximation
@@ -148,12 +144,12 @@ InfoComponentVisitor::registerGenericComponent(const IComponent &component) {
   return componentIndex;
 }
 
-void InfoComponentVisitor::markAsSourceOrSample(ComponentID componentId, const size_t componentIndex){
-  if(componentId == m_sampleId){
-      m_sampleIndex = componentIndex;
-  }
-  else if(componentId == m_sourceId){
-      m_sourceIndex = componentIndex;
+void InfoComponentVisitor::markAsSourceOrSample(ComponentID componentId,
+                                                const size_t componentIndex) {
+  if (componentId == m_sampleId) {
+    m_sampleIndex = componentIndex;
+  } else if (componentId == m_sourceId) {
+    m_sourceIndex = componentIndex;
   }
 }
 
@@ -197,7 +193,10 @@ size_t InfoComponentVisitor::registerDetector(const IDetector &detector) {
   component list
   forming a contiguous block.
   */
-  markAsSourceOrSample(detector.getComponentID(), detectorIndex); // TODO. Optimisation. Cannot have a detector that is either source or sample. So delete this.
+  markAsSourceOrSample(detector.getComponentID(),
+                       detectorIndex); // TODO. Optimisation. Cannot have a
+                                       // detector that is either source or
+                                       // sample. So delete this.
   return detectorIndex;
 }
 
@@ -290,18 +289,12 @@ InfoComponentVisitor::positions() const {
 
 boost::shared_ptr<std::vector<Eigen::Quaterniond>>
 InfoComponentVisitor::rotations() const {
-    return m_rotations;
+  return m_rotations;
 }
 
-size_t InfoComponentVisitor::sampleIndex() const
-{
-    return m_sampleIndex;
-}
+size_t InfoComponentVisitor::sampleIndex() const { return m_sampleIndex; }
 
-size_t InfoComponentVisitor::sourceIndex() const
-{
-    return m_sourceIndex;
-}
+size_t InfoComponentVisitor::sourceIndex() const { return m_sourceIndex; }
 
 } // namespace Geometry
 } // namespace Mantid
