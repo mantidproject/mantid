@@ -17,6 +17,9 @@ class FunctionWrapperTest(unittest.TestCase):
 
     def setUp(self):
         pass
+        
+    def test_creation(self):
+        testhelpers.assertRaisesNothing(self, FunctionWrapper, "Gaussian", Height=7.5, Sigma=1.2, PeakCentre=10)
 
     def test_read_array_elements(self):
         g = FunctionWrapper( "Gaussian", Height=7.5, Sigma=1.2, PeakCentre=10)  
@@ -29,6 +32,7 @@ class FunctionWrapperTest(unittest.TestCase):
         self.assertAlmostEqual(g["Height"],8,10)
         g[2] = 1.5
         self.assertAlmostEqual(g[2],1.5,10)
+        
 
 if __name__ == '__main__':
     unittest.main()
