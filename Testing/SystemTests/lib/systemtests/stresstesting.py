@@ -36,8 +36,7 @@ import tempfile
 import time
 import unittest
 from six import PY3
-#import pydevd
-#pydevd.settrace('localhost', port=5280, stdoutToServer=True, stderrToServer=True)
+
 # Path to this file
 THIS_MODULE_DIR = os.path.dirname(os.path.realpath(__file__))
 # Some windows paths can contain sequences such as \r, e.g. \release_systemtests
@@ -613,7 +612,6 @@ class TestSuite(object):
         self._modname = modname
         self._test_cls_name = testname
         self._fqtestname = modname
-        # flag for slow tests
 
         # A None testname indicates the source did not load properly
         # It has come this far so that it gets reported as a proper failure
@@ -745,6 +743,7 @@ class TestManager(object):
 
         self._testsInclude = testsInclude
         self._testsExclude = testsExclude
+        # flag to exclude slow tests from pull requests
         self._exinpr = exinpr
 
     totalTests = property(lambda self: len(self._tests))
