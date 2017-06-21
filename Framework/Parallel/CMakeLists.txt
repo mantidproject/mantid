@@ -1,36 +1,26 @@
-if ( MPI_EXPERIMENTAL )
-  set ( MPI_SRC_FILES
-    src/ParallelRunner.cpp
-    src/Request.cpp
-    src/ThreadingBackend.cpp
-    )
-
-  set ( MPI_INC_FILES
-    inc/MantidParallel/ParallelRunner.h
-    inc/MantidParallel/Request.h
-    inc/MantidParallel/ThreadingBackend.h
-    )
-
-  set ( MPI_TEST_FILES
-    ParallelRunnerTest.h
-    RequestTest.h
-    ThreadingBackendTest.h
-    )
-endif ()
-
 set ( SRC_FILES
-  ${MPI_SRC_FILES}
   src/Communicator.cpp
+  src/ExecutionMode.cpp
+  src/Request.cpp
+  src/StorageMode.cpp
+  src/ThreadingBackend.cpp
 )
 
 set ( INC_FILES
-  ${MPI_INC_FILES}
   inc/MantidParallel/Communicator.h
+  inc/MantidParallel/ExecutionMode.h
+  inc/MantidParallel/Request.h
+  inc/MantidParallel/StorageMode.h
+  inc/MantidParallel/ThreadingBackend.h
 )
 
 set ( TEST_FILES
-  ${MPI_TEST_FILES}
   CommunicatorTest.h
+  ExecutionModeTest.h
+  ParallelRunnerTest.h
+  RequestTest.h
+  StorageModeTest.h
+  ThreadingBackendTest.h
 )
 
 if (COVERALLS)

@@ -22,6 +22,9 @@ private:
   MockWorkspace *doClone() const override {
     throw std::runtime_error("Cloning of MockWorkspace is not implemented.");
   }
+  MockWorkspace *doCloneEmpty() const override {
+    throw std::runtime_error("Cloning of MockWorkspace is not implemented.");
+  }
 };
 typedef boost::shared_ptr<MockWorkspace> MockWorkspace_sptr;
 

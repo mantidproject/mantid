@@ -26,7 +26,3 @@ if ( CXXTEST_FOUND )
   # Add to the 'UnitTests' group in VS
   set_property( TARGET MantidWidgetsTest PROPERTY FOLDER "UnitTests" )
 endif ()
-
-if ( PYUNITTEST_FOUND )
-  pyunittest_add_test (${CMAKE_CURRENT_SOURCE_DIR} MantidWidgetsTest ${TEST_PY_FILES} )
-endif ()

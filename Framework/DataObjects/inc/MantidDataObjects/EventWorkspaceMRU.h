@@ -7,9 +7,11 @@
 #include "MantidKernel/MRUList.h"
 #include "MantidHistogramData/HistogramY.h"
 #include "MantidHistogramData/HistogramE.h"
+
+#include "Poco/RWLock.h"
+
 #include <cstdint>
 #include <vector>
-#include <mutex>
 
 namespace Mantid {
 namespace DataObjects {
@@ -109,8 +111,8 @@ protected:
   mutable std::vector<mru_listE *> m_bufferedDataE;
 
   /// Mutex when adding entries in the MRU list
-  mutable std::mutex m_changeMruListsMutexE;
-  mutable std::mutex m_changeMruListsMutexY;
+  mutable Poco::RWLock m_changeMruListsMutexE;
+  mutable Poco::RWLock m_changeMruListsMutexY;
 };
 
 } // namespace DataObjects
