@@ -96,6 +96,8 @@ def LOQ(idf_path='LOQ_Definition_20020226-.xml'):
 def LARMOR(idf_path = None):
     config['default.instrument'] = 'LARMOR'
 
+def ZOOM(idf_path = None):
+    config['default.instrument'] = 'ZOOM'
 
 # ----------------------------------------------------------------------------------------------------------------------
 # Unused commands

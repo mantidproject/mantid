@@ -12,7 +12,7 @@ from sans.common.constants import (SANS_FILE_TAG, ALL_PERIODS, SANS2D, LOQ, LARM
                                    REDUCED_CAN_TAG)
 from sans.common.log_tagger import (get_tag, has_tag, set_tag, has_hash, get_hash_value, set_hash)
 from sans.common.enums import (DetectorType, RangeStepType, ReductionDimensionality, OutputParts, ISISReductionMode,
-                               SANSInstrument)
+                               SANSInstrument, SANSFacility)
 
 # -------------------------------------------
 # Constants
@@ -295,6 +295,20 @@ def convert_bank_name_to_detector_type_isis(detector_name):
         raise RuntimeError("There is not detector type conversion for a detector with the "
                            "name {0}".format(detector_name))
     return detector_type
+
+
+def convert_instrument_and_detector_type_to_bank_name(instrument, detector_type):
+    if instrument is SANSInstrument.SANS2D:
+        bank_name = "front-detector" if detector_type is DetectorType.HAB else "rear-detector"
+    elif instrument is SANSInstrument.LOQ:
+        bank_name = "HAB" if detector_type is DetectorType.HAB else "main-detector-bank"
+    elif instrument is SANSInstrument.LARMOR:
+        bank_name = "DetectorBench"
+    elif instrument is SANSInstrument.ZOOM:
+        bank_name = "rear-detector"
+    else:
+        raise RuntimeError("SANSCrop: The instrument {0} is currently not supported.".format(instrument))
+    return bank_name
 
 
 def is_part_of_reduced_output_workspace_group(state):
@@ -672,10 +686,17 @@ def sanitise_instrument_name(instrument_name):
     return instrument_name
 
 
+def get_facility(instrument):
+    if (instrument is SANSInstrument.SANS2D or instrument is SANSInstrument.LOQ or
+        instrument is SANSInstrument.LARMOR or instrument is SANSInstrument.ZOOM):  # noqa
+        return SANSFacility.ISIS
+    else:
+        return SANSFacility.NoFacility
+
+
 # ----------------------------------------------------------------------------------------------------------------------
 # Other
 # ----------------------------------------------------------------------------------------------------------------------
-
 def instrument_name_correction(instrument_name):
     return SANS2D if instrument_name == ALTERNATIVE_SANS2D_NAME else instrument_name
 

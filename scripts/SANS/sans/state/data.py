@@ -39,6 +39,7 @@ class StateData(StateBase):
     sample_scatter_run_number = PositiveIntegerParameter()
     sample_scatter_is_multi_period = BoolParameter()
     instrument = ClassTypeParameter(SANSInstrument)
+    facility = ClassTypeParameter(SANSFacility)
     idf_file_path = StringParameter()
     ipf_file_path = StringParameter()
 
@@ -57,6 +58,7 @@ class StateData(StateBase):
         # This should be reset by the builder. Setting this to NoInstrument ensure that we will trip early on,
         # in case this is not set, for example by not using the builders.
         self.instrument = SANSInstrument.NoInstrument
+        self.facility = SANSFacility.NoFacility
 
     def validate(self):
         is_invalid = dict()
@@ -109,8 +111,10 @@ def set_information_from_file(data_info):
     file_information_factory = SANSFileInformationFactory()
     file_information = file_information_factory.create_sans_file_information(file_name)
     instrument = file_information.get_instrument()
+    facility = file_information.get_facility()
     run_number = file_information.get_run_number()
     data_info.instrument = instrument
+    data_info.facility = facility
     data_info.sample_scatter_run_number = run_number
     data_info.sample_scatter_is_multi_period = file_information.get_number_of_periods() > 1
     data_info.idf_file_path = file_information.get_idf_file_path()

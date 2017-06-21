@@ -10,7 +10,7 @@ from mantid.api import FileFinder
 from mantid.kernel import (DateAndTime, ConfigService)
 from mantid.api import (AlgorithmManager, ExperimentInfo)
 from sans.common.enums import (SANSInstrument, FileType, SampleShape)
-from sans.common.general_functions import (get_instrument, instrument_name_correction)
+from sans.common.general_functions import (get_instrument, instrument_name_correction, get_facility)
 from six import with_metaclass
 
 
@@ -260,7 +260,6 @@ def convert_to_shape(shape_flag):
     else:
         shape = None
     return shape
-
 
 # ----------------------------------------------------------------------------------------------------------------------
 # Functions for ISIS Nexus
@@ -734,6 +733,10 @@ class SANSFileInformation(with_metaclass(ABCMeta, object)):
         pass
 
     @abstractmethod
+    def get_facility(self):
+        pass
+
+    @abstractmethod
     def get_date(self):
         pass
 
@@ -799,6 +802,9 @@ class SANSFileInformationISISNexus(SANSFileInformation):
         instrument_name = get_instrument_name_for_isis_nexus(self._full_file_name)
         self._instrument = SANSInstrument.from_string(instrument_name)
 
+        # Setup the facility
+        self._facility = get_facility(self._instrument)
+
         # Setup date
         self._date = get_date_for_isis_nexus(self._full_file_name)
 
@@ -823,6 +829,9 @@ class SANSFileInformationISISNexus(SANSFileInformation):
 
     def get_instrument(self):
         return self._instrument
+
+    def get_facility(self):
+        return self._facility
 
     def get_date(self):
         return self._date
@@ -860,7 +869,10 @@ class SANSFileInformationISISAdded(SANSFileInformation):
         super(SANSFileInformationISISAdded, self).__init__(file_name)
         # Setup instrument name
         instrument_name = get_instrument_name_for_isis_nexus(self._full_file_name)
-        self._instrument_name = get_instrument(instrument_name)
+        self._instrument = get_instrument(instrument_name)
+
+        # Setup the facility
+        self._facility = get_facility(self._instrument)
 
         date, run_number = get_date_and_run_number_added_nexus(self._full_file_name)
         self._date = date
@@ -881,7 +893,10 @@ class SANSFileInformationISISAdded(SANSFileInformation):
         return self._full_file_name
 
     def get_instrument(self):
-        return self._instrument_name
+        return self._instrument
+
+    def get_facility(self):
+        return self._facility
 
     def get_date(self):
         return self._date
@@ -921,6 +936,9 @@ class SANSFileInformationRaw(SANSFileInformation):
         instrument_name = get_instrument_name_for_raw(self._full_file_name)
         self._instrument = SANSInstrument.from_string(instrument_name)
 
+        # Setup the facility
+        self._facility = get_facility(self._instrument)
+
         # Setup date
         self._date = get_date_for_raw(self._full_file_name)
 
@@ -943,6 +961,9 @@ class SANSFileInformationRaw(SANSFileInformation):
 
     def get_instrument(self):
         return self._instrument
+
+    def get_facility(self):
+        return self._facility
 
     def get_date(self):
         return self._date

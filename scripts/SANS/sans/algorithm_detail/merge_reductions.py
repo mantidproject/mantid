@@ -4,7 +4,7 @@ from __future__ import (absolute_import, division, print_function)
 from abc import (ABCMeta, abstractmethod)
 from six import with_metaclass
 from sans.common.general_functions import create_child_algorithm
-from sans.common.enums import (SANSInstrument, DataType, FitModeForMerge)
+from sans.common.enums import (SANSFacility, DataType, FitModeForMerge)
 from sans.algorithm_detail.bundles import MergeBundle
 
 
@@ -101,10 +101,9 @@ class MergeFactory(object):
     def create_merger(state):
         # The selection depends on the facility/instrument
         data_info = state.data
-        instrument = data_info.instrument
+        facility = data_info.facility
 
-        if instrument is SANSInstrument.LARMOR or instrument is SANSInstrument.LOQ or \
-           instrument is SANSInstrument.SANS2D:
+        if facility is SANSFacility.ISIS:
             merger = ISIS1DMerger()
         else:
             merger = NullMerger()

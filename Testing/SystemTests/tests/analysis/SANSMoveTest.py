@@ -58,6 +58,10 @@ class SANSMoveFactoryTest(unittest.TestCase):
         mover_type = SANSMoveLARMOROldStyle
         self._do_test(file_name, mover_type)
 
+    def test_that_ZOOM_strategy_is_selected(self):
+        # TODO when test data becomes available
+        pass
+
 
 class SANSMoveTest(unittest.TestCase):
     @staticmethod
@@ -340,6 +344,10 @@ class SANSMoveTest(unittest.TestCase):
 
         # Act + Assert for setting to zero position for all
         self.check_that_sets_to_zero(workspace, move_alg, state.move, comp_name=None)
+
+    def test_that_ZOOM_can_be_moved(self):
+        # TODO when test data becomes available
+        pass
 
     def test_that_missing_beam_centre_is_taken_from_move_state(self):
         # Arrange

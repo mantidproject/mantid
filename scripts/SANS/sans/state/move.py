@@ -259,11 +259,14 @@ class StateMoveZOOMBuilder(object):
     @automatic_setters(StateMoveZOOM, exclusions=["detector_name", "detector_name_short", "monitor_names"])
     def __init__(self, data_info):
         super(StateMoveZOOMBuilder, self).__init__()
-        self.state = StateMoveSANS2D()
+        self.state = StateMoveZOOM()
         # TODO: At the moment we set the monitor names up manually here. In principle we have all necessary information
         #       in the IDF we should be able to parse it and get.
         invalid_monitor_names = ["monitor5", "monitor6", "monitor7", "monitor8", "monitor9", "monitor10"]
-        setup_idf_and_ipf_content(self.state, data_info, invalid_monitor_names=invalid_monitor_names)
+        invalid_detector_types = [DetectorType.HAB]
+        setup_idf_and_ipf_content(self.state, data_info,
+                                  invalid_detector_types=invalid_detector_types,
+                                  invalid_monitor_names=invalid_monitor_names)
 
     def build(self):
         self.state.validate()

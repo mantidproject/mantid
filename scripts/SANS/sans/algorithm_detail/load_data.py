@@ -53,7 +53,7 @@ from sans.common.file_information import (SANSFileInformationFactory, FileType, 
 from sans.common.constants import (EMPTY_NAME, SANS_SUFFIX, TRANS_SUFFIX, MONITOR_SUFFIX, CALIBRATION_WORKSPACE_TAG,
                                    SANS_FILE_TAG, OUTPUT_WORKSPACE_GROUP, OUTPUT_MONITOR_WORKSPACE,
                                    OUTPUT_MONITOR_WORKSPACE_GROUP)
-from sans.common.enums import (SANSInstrument, SANSDataType)
+from sans.common.enums import (SANSFacility, SANSInstrument, SANSDataType)
 from sans.common.general_functions import (create_child_algorithm)
 from sans.common.log_tagger import (set_tag, has_tag, get_tag)
 from sans.state.data import (StateData)
@@ -753,13 +753,13 @@ class SANSLoadDataFactory(object):
         super(SANSLoadDataFactory, self).__init__()
 
     @staticmethod
-    def _get_instrument_type(state):
+    def _get_facility(state):
         data = state.data
         # Get the correct loader based on the sample scatter file from the data sub state
         data.validate()
         file_info, _ = get_file_and_period_information_from_data(data)
         sample_scatter_info = file_info[SANSDataType.SampleScatter]
-        return sample_scatter_info.get_instrument()
+        return sample_scatter_info.get_facility()
 
     @staticmethod
     def create_loader(state):
@@ -769,9 +769,8 @@ class SANSLoadDataFactory(object):
         :param state: a SANSState object
         :return: the corresponding loader
         """
-        instrument_type = SANSLoadDataFactory._get_instrument_type(state)
-        if instrument_type is SANSInstrument.LARMOR or instrument_type is SANSInstrument.LOQ or\
-           instrument_type is SANSInstrument.SANS2D:
+        facility = SANSLoadDataFactory._get_facility(state)
+        if facility is SANSFacility.ISIS:
             loader = SANSLoadDataISIS()
         else:
             raise RuntimeError("SANSLoaderFactory: Other instruments are not implemented yet.")

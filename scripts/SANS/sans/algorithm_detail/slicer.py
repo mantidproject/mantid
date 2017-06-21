@@ -7,7 +7,7 @@ from mantid.dataobjects import Workspace2D
 
 from sans.common.general_functions import (get_charge_and_time, create_unmanaged_algorithm)
 from sans.common.constants import EMPTY_NAME
-from sans.common.enums import (SANSInstrument, DataType)
+from sans.common.enums import (SANSFacility, DataType)
 
 
 def slice_by_time(workspace, start_time=None, stop_time=None):
@@ -133,7 +133,7 @@ class SliceEventFactory(object):
         :return: the corresponding slicer
         """
         data_info = state.data
-        instrument = data_info.instrument
+        facility = data_info.facility
 
         # The factory is currently set up to
         # 1. Use NullSlicer when we have a histogram
@@ -141,8 +141,7 @@ class SliceEventFactory(object):
         # 3. else raise error
         if isinstance(workspace, Workspace2D):
             slicer = NullSlicer()
-        elif instrument is SANSInstrument.LARMOR or instrument is SANSInstrument.LOQ or \
-             instrument is SANSInstrument.SANS2D:  # noqa
+        elif facility is SANSFacility.ISIS:
             slicer = ISISSlicer(data_type)
         else:
             raise RuntimeError("SliceEventFactory: Other instruments are not implemented yet.")
