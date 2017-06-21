@@ -16,18 +16,10 @@ if ( CXXTEST_FOUND )
 
   cxxtest_add_test ( DataHandlingTest ${TEST_FILES} )
   target_include_directories( DataHandlingTest SYSTEM PRIVATE ${HDF5_INCLUDE_DIRS} )
-  target_link_libraries( DataHandlingTest LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME}
-            API
+  target_link_libraries( DataHandlingTest LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} ${MANTIDLIBS}
             DataHandling
-            DataObjects
-            Geometry
-            HistogramData
-            Indexing
-            Kernel
             Nexus
             ${NEXUS_LIBRARIES}
-            ${Boost_LIBRARIES}
-            ${POCO_LIBRARIES}
             ${HDF5_LIBRARIES}
             ${HDF5_HL_LIBRARIES} )
   add_dependencies ( DataHandlingTest Algorithms MDAlgorithms )

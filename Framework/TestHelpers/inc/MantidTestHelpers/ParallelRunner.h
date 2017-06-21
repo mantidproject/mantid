@@ -1,14 +1,15 @@
-#ifndef MANTID_PARALLEL_PARALLELRUNNER_H_
-#define MANTID_PARALLEL_PARALLELRUNNER_H_
+#ifndef MANTID_TESTHELPERS_PARALLELRUNNER_H_
+#define MANTID_TESTHELPERS_PARALLELRUNNER_H_
 
 #include "MantidParallel/Communicator.h"
 #include "MantidParallel/DllConfig.h"
 
+#include <boost/make_shared.hpp>
+
 #include <functional>
 #include <thread>
 
-namespace Mantid {
-namespace Parallel {
+namespace ParallelTestHelpers {
 
 /** Runs a callable in parallel. This is mainly a helper for testing code with
   MPI calls. ParallelRunner passes a Communicator as first argument to the
@@ -36,7 +37,7 @@ namespace Parallel {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTID_PARALLEL_DLL ParallelRunner {
+class ParallelRunner {
 public:
   ParallelRunner();
   ParallelRunner(const int threads);
@@ -47,18 +48,18 @@ public:
   void run(Function &&f, Args &&... args);
 
 private:
-  boost::shared_ptr<detail::ThreadingBackend> m_backend;
+  boost::shared_ptr<Mantid::Parallel::detail::ThreadingBackend> m_backend;
 };
 
 template <class Function, class... Args>
 void ParallelRunner::run(Function &&f, Args &&... args) {
   if (!m_backend) {
-    Communicator comm;
+    Mantid::Parallel::Communicator comm;
     f(comm, std::forward<Args>(args)...);
   } else {
     std::vector<std::thread> threads;
     for (int t = 0; t < m_backend->size(); ++t) {
-      Communicator comm(m_backend, t);
+      Mantid::Parallel::Communicator comm(m_backend, t);
       threads.emplace_back(std::forward<Function>(f), comm,
                            std::forward<Args>(args)...);
     }
@@ -73,7 +74,6 @@ template <class... Args> void runParallel(Args &&... args) {
   runner.run(std::forward<Args>(args)...);
 }
 
-} // namespace Parallel
-} // namespace Mantid
+} // namespace ParallelTestHelpers
 
-#endif /* MANTID_PARALLEL_PARALLELRUNNER_H_ */
+#endif /* MANTID_TESTHELPERS_PARALLELRUNNER_H_ */
