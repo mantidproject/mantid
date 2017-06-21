@@ -160,7 +160,10 @@ void export_IFunction() {
       .def("fix", &IFunction::fixParameter, (arg("self"), arg("parName")), "Fix a parameter")
 
       .def("untie", (removeTieByName)&IFunction::removeTie, (arg("self"), arg("parName")), 
-           "Remove any tie from the given parameter")
+           "Remove any tie or fix from the given parameter")
+
+      .def("constrain", &IFunction::addConstraints, (arg("self"), arg("str"),  arg("isDefault")), 
+            "Add constraint")
 
       //-- Deprecated functions that have the wrong names --
       .def("categories", &getCategories, arg("self"),

@@ -52,6 +52,9 @@ class FunctionWrapper:
   def untieAllParameters(self):
        for i in range(0, self.fun.numParams()):
           self.untie(self.getParameterName(i))
+          
+  def constrain(self, expressions):
+      self.fun.constrain( expressions, False )
       
   def getParameterName(self, index):
   # Get the name of the parameter of given index
