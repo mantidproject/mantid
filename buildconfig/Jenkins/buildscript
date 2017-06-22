@@ -310,7 +310,7 @@ fi
 ###############################################################################
 if [[ ${SYSTEMTESTS} == true ]]; then
   if [[ ${PRBUILD} == true ]]; then
-    $SCRIPT_DIR/systemtests --exclude-in-pull-requests
+    EXTRA_ARGS="--exclude-in-pull-requests" $SCRIPT_DIR/systemtests
   else
     $SCRIPT_DIR/systemtests
   fi
