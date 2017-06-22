@@ -131,7 +131,7 @@ In particular, an algorithm may cause a transition from one storage mode to anot
 Examples are given in the series of figures on the right.
 
 Building and Running Mantid with MPI Support
-###############################
+############################################
 
 Build with MPI support
 ----------------------
