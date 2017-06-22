@@ -150,6 +150,7 @@ ComponentInfo::relativeRotation(const size_t componentIndex) const {
 void ComponentInfo::setPosition(const size_t componentIndex,
                                 const Eigen::Vector3d &newPosition) {
 
+  scanningCheck(componentIndex);
   const Eigen::Vector3d offset = newPosition - position(componentIndex);
   const auto indices = this->componentsInSubtree(
       componentIndex); // Includes requested component index
@@ -159,7 +160,6 @@ void ComponentInfo::setPosition(const size_t componentIndex,
                                   m_detectorInfo->position(index) + offset);
     } else {
       m_positions.access()[compOffsetIndex(index)] += offset;
-      // TODO. This could change L1/L2. Is that being detected?
     }
   }
 }
@@ -179,6 +179,7 @@ void ComponentInfo::setRotation(const size_t componentIndex,
                                 const Eigen::Quaterniond &newRotation) {
 
   using namespace Eigen;
+  scanningCheck(componentIndex);
   const Eigen::Vector3d compPos = position(componentIndex);
   const Eigen::Quaterniond currentRotInv = rotation(componentIndex).inverse();
   const Eigen::Quaterniond rotDelta =
@@ -201,9 +202,16 @@ void ComponentInfo::setRotation(const size_t componentIndex,
       const size_t childCompIndexOffset = compOffsetIndex(index);
       m_positions.access()[childCompIndexOffset] = newPos;
       m_rotations.access()[childCompIndexOffset] = newRot;
-
-      // TODO. This could change L1/L2. Is that being detected?
     }
+  }
+}
+
+void ComponentInfo::scanningCheck(size_t compIndex) const {
+  if (!componentsInSubtree(compIndex).empty() && m_detectorInfo->isScanning()) {
+    throw std::runtime_error(
+        "Cannot move or rotate parent component containing "
+        "detectors since the beamline has "
+        "time-dependent (moving) detectors.");
   }
 }
 

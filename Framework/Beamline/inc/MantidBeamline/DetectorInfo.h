@@ -97,6 +97,9 @@ public:
   void merge(const DetectorInfo &other);
   void setComponentInfo(ComponentInfo *componentInfo);
   bool hasComponentInfo() const;
+  double l1() const;
+  Eigen::Vector3d sourcePosition() const;
+  Eigen::Vector3d samplePosition() const;
 
 private:
   size_t linearIndex(const std::pair<size_t, size_t> &index) const;

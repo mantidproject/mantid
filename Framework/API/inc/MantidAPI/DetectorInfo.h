@@ -106,9 +106,6 @@ public:
   void setRotation(const std::pair<size_t, size_t> &index,
                    const Kernel::Quat &rotation);
 
-  void setPosition(const Geometry::IComponent &comp, const Kernel::V3D &pos);
-  void setRotation(const Geometry::IComponent &comp, const Kernel::Quat &rot);
-
   const Geometry::IDetector &detector(const size_t index) const;
 
   // This does not really belong into DetectorInfo, but it seems to be useful
@@ -141,8 +138,6 @@ private:
   getDetectorPtr(const size_t index) const;
   const Geometry::IComponent &getSource() const;
   const Geometry::IComponent &getSample() const;
-  const std::vector<size_t> &
-  getAssemblyDetectorIndices(const Geometry::IComponent &comp) const;
 
   void cacheSource() const;
   void cacheSample() const;

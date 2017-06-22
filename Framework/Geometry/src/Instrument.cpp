@@ -6,6 +6,7 @@
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidGeometry/Instrument/RectangularDetectorPixel.h"
+#include "MantidBeamline/ComponentInfo.h"
 #include "MantidBeamline/DetectorInfo.h"
 #include "MantidKernel/EigenConversionHelpers.h"
 #include "MantidKernel/Exception.h"
@@ -1246,6 +1247,12 @@ const Beamline::DetectorInfo &Instrument::detectorInfo() const {
     throw std::runtime_error("Cannot return reference to NULL DetectorInfo");
   return *m_detectorInfo;
 }
+/// Only for use by ExperimentInfo. Returns a reference to the ComponentInfo.
+const Beamline::ComponentInfo &Instrument::componentInfo() const {
+  if (!hasComponentInfo())
+    throw std::runtime_error("Cannot return reference to NULL ComponentInfo");
+  return *m_componentInfo;
+}
 
 /**
  * Only for use by ExperimentInfo
@@ -1253,6 +1260,14 @@ const Beamline::DetectorInfo &Instrument::detectorInfo() const {
  */
 bool Instrument::hasInfoVisitor() const {
   return static_cast<bool>(m_infoVisitor);
+}
+
+/**
+ * Only for use by ExperimentInfo
+ * @return True only if a ComponentInfo has been set.
+ */
+bool Instrument::hasComponentInfo() const {
+  return static_cast<bool>(m_componentInfo);
 }
 
 bool Instrument::isEmptyInstrument() const { return this->nelements() == 0; }
@@ -1269,6 +1284,11 @@ int Instrument::add(IComponent *component) {
 void Instrument::setDetectorInfo(
     boost::shared_ptr<const Beamline::DetectorInfo> detectorInfo) {
   m_detectorInfo = std::move(detectorInfo);
+}
+
+void Instrument::setComponentInfo(
+    boost::shared_ptr<const Beamline::ComponentInfo> componentInfo) {
+  m_componentInfo = std::move(componentInfo);
 }
 
 void Instrument::setInfoVisitor(const InfoComponentVisitor &visitor) {

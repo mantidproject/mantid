@@ -1,4 +1,5 @@
 #include "MantidBeamline/DetectorInfo.h"
+#include "MantidBeamline/ComponentInfo.h"
 #include "MantidKernel/make_cow.h"
 
 #include <algorithm>
@@ -261,6 +262,9 @@ void DetectorInfo::merge(const DetectorInfo &other) {
     m_scanIntervals.access().push_back((*other.m_scanIntervals)[linearIndex]);
   }
   m_scanCounts = std::move(scanCounts);
+  if (hasComponentInfo()) {
+    m_componentInfo->setDetectorInfo(this); // TODO this needs more thought!
+  }
 }
 
 void DetectorInfo::setComponentInfo(ComponentInfo *componentInfo) {
@@ -269,6 +273,30 @@ void DetectorInfo::setComponentInfo(ComponentInfo *componentInfo) {
 
 bool DetectorInfo::hasComponentInfo() const {
   return m_componentInfo != nullptr;
+}
+
+double DetectorInfo::l1() const {
+  if (!hasComponentInfo()) {
+    throw std::runtime_error(
+        "DetectorInfo has no valid ComponentInfo thus cannot determine l1");
+  }
+  return m_componentInfo->l1();
+}
+
+Eigen::Vector3d DetectorInfo::sourcePosition() const {
+  if (!hasComponentInfo()) {
+    throw std::runtime_error("DetectorInfo has no valid ComponentInfo thus "
+                             "cannot determine sourcePosition");
+  }
+  return m_componentInfo->sourcePosition();
+}
+
+Eigen::Vector3d DetectorInfo::samplePosition() const {
+  if (!hasComponentInfo()) {
+    throw std::runtime_error("DetectorInfo has no valid ComponentInfo thus "
+                             "cannot determine samplePosition");
+  }
+  return m_componentInfo->samplePosition();
 }
 
 /// Returns the linear index for a pair of detector index and time index.

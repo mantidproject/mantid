@@ -197,7 +197,8 @@ protected:
 private:
   void
   makeAPIComponentInfo(const Geometry::InfoComponentVisitor &visitor,
-                       boost::shared_ptr<Beamline::DetectorInfo> detectorInfo);
+                       boost::shared_ptr<Beamline::DetectorInfo> detectorInfo,
+                       const Geometry::Instrument &newInstrument);
 
   boost::shared_ptr<Geometry::Instrument> makeParameterizedInstrument() const;
   /// Fill with given instrument parameter

@@ -20,6 +20,7 @@ namespace Mantid {
 typedef std::map<detid_t, Geometry::IDetector_const_sptr> detid2det_map;
 
 namespace Beamline {
+class ComponentInfo;
 class DetectorInfo;
 }
 namespace Geometry {
@@ -246,10 +247,15 @@ public:
   const Beamline::DetectorInfo &detectorInfo() const;
   bool hasInfoVisitor() const;
 
+  bool hasComponentInfo() const;
+  const Beamline::ComponentInfo &componentInfo() const;
+
   size_t detectorIndex(const detid_t detID) const;
   size_t componentIndex(const ComponentID componentId) const;
   void
   setDetectorInfo(boost::shared_ptr<const Beamline::DetectorInfo> detectorInfo);
+  void setComponentInfo(
+      boost::shared_ptr<const Beamline::ComponentInfo> componentInfo);
   void setInfoVisitor(const InfoComponentVisitor &visitor);
 
   const InfoComponentVisitor &infoVisitor() const;
@@ -345,6 +351,10 @@ private:
   /// Pointer to the DetectorInfo object. NULL unless the instrument is
   /// associated with an ExperimentInfo object.
   boost::shared_ptr<const Beamline::DetectorInfo> m_detectorInfo{nullptr};
+
+  /// Pointer to the ComponentInfo object. NULL unless the instrument is
+  /// associated with an ExperimentInfo object.
+  boost::shared_ptr<const Beamline::ComponentInfo> m_componentInfo{nullptr};
 
   /// Flag - is this the physical rather than neutronic instrument
   bool m_isPhysicalInstrument{false};
