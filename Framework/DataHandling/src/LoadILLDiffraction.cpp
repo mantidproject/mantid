@@ -247,7 +247,7 @@ void LoadILLDiffraction::initMovingWorkspace(const NXDouble &scan) {
   // For D2B angles in the NeXus files are for the last detector. Here we change
   // them to be the first detector.
   std::vector<double> instrumentAngles =
-      getScannedVaribleByPropertyName(scan, "actual_position");
+      getScannedVaribleByPropertyName(scan, "Position");
   if (m_instName == "D2B") {
     // The rotations in the NeXus file are the absolute rotation of tube_1, here
     // we get the home angle of tube_1
