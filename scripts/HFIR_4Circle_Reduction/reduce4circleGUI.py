@@ -36,6 +36,7 @@ import viewspicedialog
 import peak_integration_utility
 import FindUBUtility
 import message_dialog
+import PreprocessWindow
 
 # import line for the UI python class
 from ui_MainWindow import Ui_MainWindow
@@ -73,6 +74,7 @@ class MainWindow(QtGui.QMainWindow):
         self._addUBPeaksDialog = None
         self._spiceViewer = None
         self._mySinglePeakIntegrationDialog = None
+        self._preProcessWindow = None
         self._singlePeakIntegrationDialogBuffer = ''
 
         # Make UI scrollable
@@ -3486,14 +3488,31 @@ class MainWindow(QtGui.QMainWindow):
         blabla
         :return:
         """
-        # FIXME/TODO/NOWNOW - Make it work!
+        # initialize the pre processing window if it is not initialized
+        reset_pre_process_window = False
+        if self._preProcessWindow is None:
+            # initialize the instance
+            self._preProcessWindow = PreprocessWindow.ScanPreProcessWindow(self)
+            self._preProcessWindow.setup(self._myControl)
+            reset_pre_process_window = True
 
-        import PreprocessWindow
-
-        self._preProcessWindow = PreprocessWindow.ScanPreProcessWindow(self)
+        # show the window
         self._preProcessWindow.show()
-        self._preProcessWindow.set_instrument_calibration(exp_number=12345, det_size=256, det_center=None,
-                                                          det_sample_distance=None, wave_length=None)
+
+        # setup the parameters
+        if reset_pre_process_window:
+            exp_number = int(str(self.ui.lineEdit_exp.text()))
+            det_size_str = str(self.ui.comboBox_detectorSize.currentText())
+            det_size = int(det_size_str.split()[0])
+            det_center = str(self.ui.lineEdit_infoDetCenter.text())
+            # TODO/ISSUE/NOWNOW - Set up the other calibration parameters
+
+            self._preProcessWindow.set_instrument_calibration(exp_number=exp_number, det_size=det_size,
+                                                              det_center=det_center,
+                                                              det_sample_distance=None, wave_length=None)
+        # END-IF
+
+
 
         return
 

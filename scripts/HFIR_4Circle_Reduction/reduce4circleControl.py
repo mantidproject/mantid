@@ -1814,9 +1814,11 @@ class CWSCDReductionControl(object):
         # check
         assert isinstance(exp_number, int) and exp_number > 0, 'Experiment number must be integer'
         assert center_row is None or (isinstance(center_row, int) and center_row >= 0), \
-            'Center row number must either None or non-negative integer.'
+            'Center row number {0} of type {1} must either None or non-negative integer.' \
+            ''.format(center_row, type(center_row))
         assert center_col is None or (isinstance(center_col, int) and center_col >= 0), \
-            'Center column number must be either Noe or non-negative integer.'
+            'Center column number {0} of type {1} must be either Noe or non-negative integer.' \
+            ''.format(center_col, type(center_col))
 
         if default:
             self._defaultDetectorCenter = (center_row, center_col)

@@ -96,7 +96,9 @@ class ScanPreProcessWindow(QtGui.QMainWindow):
         start the pre-precessing scans
         :return:
         """
-        assert isinstance(self._reductionController, reduce4circleControl.CWSCDReductionControl), 'blabla to remove'
+        assert isinstance(self._reductionController, reduce4circleControl.CWSCDReductionControl), \
+            'Reduction controller of type {0} is not accepted. It must be a CWSCDReductionControl instance.' \
+            ''.format(self._reductionController.__class__.__name__)
 
         # check whether it is well setup for reduction
         if self._reductionController is None:
@@ -113,6 +115,8 @@ class ScanPreProcessWindow(QtGui.QMainWindow):
         scan_row_dict = self.ui.tableView_scanProcessState.add_new_scans(scan_list, append=True)
 
         # launch the multiple threading to scans
+        # TODO/FIXME/NOWNOW - It is not implemented where to export the data!
+        self.ui.checkBox_saveToDataServer
 
         # loop over all the scan number to pre-process
         # TODO/FIXME/NOW - Multiple threading
@@ -157,19 +161,21 @@ class ScanPreProcessWindow(QtGui.QMainWindow):
             return scan_list
 
         # replace ',' by ' ' such that the scans can be accepted by different type of deliminators
-        scan_str = scans_str.replace(',', '')
+        # TODO/FIXME/NOWNOW - the case '1-3' does not work!
+        scans_str = scans_str.replace(',', '')
         scan_str_list = scans_str.split()
 
-        for scan_str in scan_str_list:
+        for single_scan_str in scan_str_list:
             # skip empty string
-            if len(scans_str) == 0:
+            if len(single_scan_str) == 0:
                 continue
 
-            if scan_str.isdigit():
-                scan = int(scan_str)
+            if single_scan_str.isdigit():
+                scan = int(single_scan_str)
                 scan_list.append(scan)
             else:
-                raise RuntimeError('{0} in scan list {1} cannot be converted to integer.'.format(scan_str, scans_str))
+                raise RuntimeError('{0} in scan list {1} cannot be converted to integer.'
+                                   ''.format(single_scan_str, scans_str))
         # END-FOR
 
         return scan_list
@@ -201,8 +207,9 @@ class ScanPreProcessWindow(QtGui.QMainWindow):
 
         # detector center
         user_det_center_str = str(self.ui.lineEdit_infoDetCenter.text()).strip()
+        user_det_center_str = user_det_center_str.replace('x', ',')
         if len(user_det_center_str) > 0:
-            status, ret_obj = gui_util.parse_float_array(user_det_center_str)
+            status, ret_obj = gui_util.parse_integer_list(user_det_center_str)
             if not status or len(ret_obj) != 2:
                 gui_util.show_message(self, 'User specified detector center must be two floating point,'
                                             'but not {0}'.format(user_det_center_str))
@@ -237,11 +244,12 @@ class ScanPreProcessWindow(QtGui.QMainWindow):
         set up the calibration parameters
         :param exp_number:
         :param det_size:
-        :param det_center:
-        :param det_sample_distance:
-        :param wave_length:
+        :param det_center: ok with string
+        :param det_sample_distance: ok with string
+        :param wave_length: ok with string
         :return:
         """
+        # TODO/NOWNOW/ - Make more documentation for caller
         # experiment number
         assert isinstance(exp_number, int), 'Experiment number {0} must be an integer'.format(exp_number)
         self.ui.lineEdit_ipts.setText('{0}'.format(exp_number))
