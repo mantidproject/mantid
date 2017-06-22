@@ -437,6 +437,11 @@ A typical example could look as follows:
 Here ``MantidTestHelpers/ParallelAlgorithmCreation.h`` provides the algorithm factory method ``ParallelTestHelpers::create<WorkspaceType>``.
 ``MantidTestHelpers/ParallelRunner.h`` provides ``ParallelTestHelpers::runParallel``, which uses ``ParallelRunner`` with a reasonable default choice for the number of ranks.
 
+Documentation
+-------------
+
+When adding MPI support for an algorithm, add it to the table at the end of this document.
+Potential limitations must be described in the comments.
 
 Supported Algorithms
 ####################
