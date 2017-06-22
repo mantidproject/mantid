@@ -3,6 +3,8 @@
 
 #include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
+#include "MantidKernel/Quat.h"
+#include "MantidKernel/V3D.h"
 
 #include <string>
 #include <typeinfo>
@@ -16,11 +18,6 @@ class XMLWriter;
 }
 
 namespace Mantid {
-namespace Kernel {
-class V3D;
-class Quat;
-}
-
 namespace Geometry {
 
 //----------------------------------------------------------------------
