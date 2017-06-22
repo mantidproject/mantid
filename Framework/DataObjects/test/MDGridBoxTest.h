@@ -792,8 +792,8 @@ public:
           MDEventsTestHelper::makeRecursiveMDGridBox<2>(numSplit,
                                                         recurseLevels);
 
-      for (double x = 0; x < numSplit; x += spacing)
-        for (double y = 0; y < numSplit; y += spacing) {
+      for (double x = 0; x < static_cast<double>(numSplit); x += spacing)
+        for (double y = 0; y < static_cast<double>(numSplit); y += spacing) {
           for (size_t i = 0; i < num_to_repeat; i++) {
             coord_t centers[2] = {static_cast<coord_t>(x),
                                   static_cast<coord_t>(y)};
