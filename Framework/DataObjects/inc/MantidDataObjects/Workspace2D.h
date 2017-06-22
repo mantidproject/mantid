@@ -115,8 +115,8 @@ protected:
   std::vector<Histogram1D *> data;
 
 private:
-  Workspace2D *doClone() const override { return new Workspace2D(*this); }
-  Workspace2D *doCloneEmpty() const override { return new Workspace2D(); }
+  Workspace2D *doClone() const override;
+  Workspace2D *doCloneEmpty() const override;
 
   virtual std::size_t getHistogramNumberHelper() const;
 };

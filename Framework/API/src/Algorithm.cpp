@@ -1710,7 +1710,16 @@ void Algorithm::execNonMaster() {
         // This is the reverse cast of what is done in
         // cacheWorkspaceProperties(), so it should never fail.
         const Property &prop = dynamic_cast<Property &>(*wsProp);
-        setProperty(prop.name(), ws->cloneEmpty());
+        auto clone = ws->cloneEmpty();
+        // Currently we have not implemented a proper cloneEmpty() for all
+        // workspace types, in particular the abundance of Workspace2D subtypes,
+        // so we do a safety check here.
+        if (ws->storageMode() != clone->storageMode())
+          throw std::runtime_error(clone->id() +
+                                   "::cloneEmpty() did not return a workspace "
+                                   "with the correct storage mode. Make sure "
+                                   "cloneEmpty() sets the storage mode.");
+        setProperty(prop.name(), std::move(clone));
         return;
       }
     }
