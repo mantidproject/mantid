@@ -105,7 +105,6 @@ private:
   bool m_useVolumeNormalization = true;
   /// Signal density factor
   double m_signalThresholdFactor = 1.5;
-
 };
 
 } // namespace Mantid

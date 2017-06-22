@@ -107,10 +107,8 @@ void addDetectors(DataObjects::Peak &peak, MDBoxBase<MDE, nd> &box) {
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(FindPeaksMD)
 
-
 const std::string FindPeaksMD::volume = "Volume";
 const std::string FindPeaksMD::numberOfEvents = "NumberOfEvents";
-
 
 //----------------------------------------------------------------------------------------------
 /** Constructor
@@ -148,22 +146,23 @@ void FindPeaksMD::init() {
                   "considered to be peaks. See the help.\n"
                   "Default: 10.0");
 
-  setPropertySettings("DensityThresholdFactor",
-                      make_unique<EnabledWhenProperty>(
-                          "Normalization", IS_DEFAULT));
+  setPropertySettings(
+      "DensityThresholdFactor",
+      make_unique<EnabledWhenProperty>("Normalization", IS_DEFAULT));
 
   declareProperty(make_unique<PropertyWithValue<double>>(
                       "SignalThresholdFactor", 1.5, Direction::Input),
                   "TODO.\n"
                   "Default: 1.50");
 
-  setPropertySettings("SignalThresholdFactor",
-                      make_unique<EnabledWhenProperty>(
-                          "Normalization", IS_NOT_DEFAULT));
+  setPropertySettings(
+      "SignalThresholdFactor",
+      make_unique<EnabledWhenProperty>("Normalization", IS_NOT_DEFAULT));
 
   std::vector<std::string> normalizationOptions = {volume, numberOfEvents};
   declareProperty("Normalization", normalizationOptions.front(),
-                  boost::make_shared<Mantid::Kernel::StringListValidator>(normalizationOptions),
+                  boost::make_shared<Mantid::Kernel::StringListValidator>(
+                      normalizationOptions),
                   "TODO.");
 
   declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace>>(
@@ -304,8 +303,10 @@ void FindPeaksMD::findPeaks(typename MDEventWorkspace<MDE, nd>::sptr ws) {
 
     // Calculate a threshold below which a box is too diffuse to be considered a
     // peak.
-    signal_t threshold = m_useVolumeNormalization ? ws->getBox()->getSignalNormalized() * DensityThresholdFactor:
-                                                    ws->getBox()->getSignalByNEvents() * m_signalThresholdFactor;
+    signal_t threshold =
+        m_useVolumeNormalization
+            ? ws->getBox()->getSignalNormalized() * DensityThresholdFactor
+            : ws->getBox()->getSignalByNEvents() * m_signalThresholdFactor;
     threshold *= m_densityScaleFactor;
 
     if (!std::isfinite(threshold)) {
@@ -314,8 +315,7 @@ void FindPeaksMD::findPeaks(typename MDEventWorkspace<MDE, nd>::sptr ws) {
              "may be invalid. Using a 0 threshold instead.\n";
       threshold = 0;
     }
-    g_log.information() << "Threshold signal density: " << threshold
-                        << '\n';
+    g_log.information() << "Threshold signal density: " << threshold << '\n';
 
     typedef API::IMDNode *boxPtr;
     // We will fill this vector with pointers to all the boxes (up to a given
@@ -339,7 +339,8 @@ void FindPeaksMD::findPeaks(typename MDEventWorkspace<MDE, nd>::sptr ws) {
     auto it1_end = boxes.end();
     for (; it1 != it1_end; it1++) {
       auto box = *it1;
-      double value = m_useVolumeNormalization ? box->getSignalNormalized() : box->getSignalByNEvents();
+      double value = m_useVolumeNormalization ? box->getSignalNormalized()
+                                              : box->getSignalByNEvents();
       value *= m_densityScaleFactor;
       // Skip any boxes with too small a signal value.
       if (value > threshold)
