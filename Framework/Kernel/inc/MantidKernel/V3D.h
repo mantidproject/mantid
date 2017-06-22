@@ -4,11 +4,11 @@
 #include <cmath>
 #include <vector>
 #include "MantidKernel/DllConfig.h"
-#include "MantidKernel/Matrix.h"
 #include <nexus/NeXusFile.hpp>
 
 namespace Mantid {
 namespace Kernel {
+template <class T> class Matrix;
 /** @class V3D V3D.h Kernel\V3D.h
 
 Class for 3D vectors.

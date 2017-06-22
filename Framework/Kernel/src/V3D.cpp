@@ -3,6 +3,7 @@
 #include <complex>
 #include <vector>
 
+#include "MantidKernel/Matrix.h"
 #include "MantidKernel/V3D.h"
 #include "MantidKernel/Tolerance.h"
 #include "MantidKernel/Exception.h"
