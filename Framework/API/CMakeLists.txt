@@ -5,7 +5,6 @@ set ( SRC_FILES
 	src/AlgorithmHasProperty.cpp
 	src/AlgorithmHistory.cpp
 	src/AlgorithmManager.cpp
-	src/AlgorithmNotification.cpp
 	src/AlgorithmObserver.cpp
 	src/AlgorithmProperty.cpp
 	src/AlgorithmProxy.cpp
