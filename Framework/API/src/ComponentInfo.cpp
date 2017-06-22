@@ -70,6 +70,16 @@ size_t ComponentInfo::parent(const size_t componentIndex) const {
   return m_componentInfo.parent(componentIndex);
 }
 
+Kernel::V3D ComponentInfo::sourcePosition() const {
+  return Kernel::toV3D(m_componentInfo.sourcePosition());
+}
+
+Kernel::V3D ComponentInfo::samplePosition() const {
+  return Kernel::toV3D(m_componentInfo.samplePosition());
+}
+
+double ComponentInfo::l1() const { return m_componentInfo.l1(); }
+
 void ComponentInfo::setPosition(const size_t componentIndex,
                                 const Kernel::V3D &newPosition) {
   m_componentInfo.setPosition(componentIndex, Kernel::toVector3d(newPosition));

@@ -73,7 +73,7 @@ public:
 
     Mantid::Beamline::ComponentInfo internalInfo(
         detectorIndices, detectorRanges, componentIndices, componentRanges,
-        parentIndices, positions, rotations, &detectorInfo);
+        parentIndices, positions, rotations, -1, -1, &detectorInfo);
     Mantid::Geometry::ObjComponent comp1("component1");
     Mantid::Geometry::ObjComponent comp2("component2");
 

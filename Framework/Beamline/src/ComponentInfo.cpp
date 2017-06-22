@@ -23,7 +23,7 @@ ComponentInfo::ComponentInfo(
     boost::shared_ptr<const std::vector<size_t>> parentIndices,
     boost::shared_ptr<std::vector<Eigen::Vector3d>> positions,
     boost::shared_ptr<std::vector<Eigen::Quaterniond>> rotations,
-    DetectorInfo *detectorInfo)
+    size_t sourceIndex, size_t sampleIndex, DetectorInfo *detectorInfo)
     : m_assemblySortedDetectorIndices(std::move(assemblySortedDetectorIndices)),
       m_assemblySortedComponentIndices(
           std::move(assemblySortedComponentIndices)),
@@ -33,6 +33,7 @@ ComponentInfo::ComponentInfo(
       m_positions(std::move(positions)), m_rotations(std::move(rotations)),
       m_size(m_assemblySortedDetectorIndices->size() +
              m_detectorRanges->size()),
+      m_sourceIndex(sourceIndex), m_sampleIndex(sampleIndex),
       m_detectorInfo(detectorInfo) {
   if (m_rotations->size() != m_positions->size()) {
     throw std::invalid_argument("ComponentInfo should have been provided same "
@@ -220,6 +221,28 @@ bool ComponentInfo::hasDetectorInfo() const {
 
 void ComponentInfo::setDetectorInfo(DetectorInfo *detectorInfo) {
   m_detectorInfo = detectorInfo;
+}
+
+bool ComponentInfo::hasSource() const { return m_sourceIndex >= 0; }
+
+bool ComponentInfo::hasSample() const { return m_sampleIndex >= 0; }
+
+Eigen::Vector3d ComponentInfo::sourcePosition() const {
+  if (!hasSource()) {
+    throw std::runtime_error("Source component has not been specified");
+  }
+  return position(static_cast<size_t>(m_sourceIndex));
+}
+
+Eigen::Vector3d ComponentInfo::samplePosition() const {
+  if (!hasSample()) {
+    throw std::runtime_error("Sample component has not been specified");
+  }
+  return position(static_cast<size_t>(m_sampleIndex));
+}
+
+double ComponentInfo::l1() const {
+  return (sourcePosition() - samplePosition()).norm();
 }
 
 } // namespace Beamline

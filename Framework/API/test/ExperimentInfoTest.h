@@ -911,6 +911,23 @@ public:
     TS_ASSERT_THROWS_NOTHING(expInfo.setInstrument(instrument));
   }
 
+  void test_component_info_source_sample_l1() {
+
+    auto inst = ComponentCreationHelper::createMinimalInstrument(
+        V3D{-2, 0, 0} /*source*/, V3D{10, 0, 0} /*sample*/,
+        V3D{12, 0, 0} /*detector*/);
+
+    ExperimentInfo expInfo;
+    expInfo.setInstrument(inst);
+    const Mantid::API::ComponentInfo &compInfo = expInfo.componentInfo();
+
+    TS_ASSERT_EQUALS((V3D{-2, 0, 0}), compInfo.sourcePosition());
+
+    TS_ASSERT_EQUALS((V3D{10, 0, 0}), compInfo.samplePosition());
+
+    TS_ASSERT_DELTA(12, compInfo.l1(), 1e-12);
+  }
+
   void test_component_info_component_index_tree() {
 
     const int nPixels = 10;

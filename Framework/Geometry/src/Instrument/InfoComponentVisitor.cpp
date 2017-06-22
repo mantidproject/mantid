@@ -274,7 +274,8 @@ std::unique_ptr<Beamline::ComponentInfo> InfoComponentVisitor::componentInfo(
   return Kernel::make_unique<Mantid::Beamline::ComponentInfo>(
       m_assemblySortedDetectorIndices, m_detectorRanges,
       m_assemblySortedComponentIndices, m_componentRanges,
-      m_parentComponentIndices, m_positions, m_rotations, detectorInfo);
+      m_parentComponentIndices, m_positions, m_rotations, m_sourceIndex,
+      m_sampleIndex, detectorInfo);
 }
 
 boost::shared_ptr<std::vector<detid_t>>

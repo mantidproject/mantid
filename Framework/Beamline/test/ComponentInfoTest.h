@@ -76,7 +76,8 @@ makeTreeExampleAndReturnGeometricArguments() {
           bankSortedComponentIndices,
           boost::make_shared<const std::vector<std::pair<size_t, size_t>>>(
               componentRanges),
-          parentIndices, compPositions, compRotations, detectorInfo.get()),
+          parentIndices, compPositions, compRotations, -1, -1,
+          detectorInfo.get()),
       detPositions, detRotations, *compPositions, *compRotations, detectorInfo);
 }
 
@@ -128,7 +129,7 @@ std::tuple<ComponentInfo, boost::shared_ptr<DetectorInfo>> makeTreeExample() {
           bankSortedComponentIndices,
           boost::make_shared<const std::vector<std::pair<size_t, size_t>>>(
               componentRanges),
-          parentIndices, positions, rotations, detectorInfo.get()),
+          parentIndices, positions, rotations, -1, -1, detectorInfo.get()),
       detectorInfo);
 }
 }
@@ -175,7 +176,7 @@ public:
     DetectorInfo detectorInfo; // Detector info size 0
     TS_ASSERT_THROWS(ComponentInfo(bankSortedDetectorIndices, detectorRanges,
                                    bankSortedComponentIndices, componentRanges,
-                                   parentIndices, positions, rotations,
+                                   parentIndices, positions, rotations, -1, -1,
                                    &detectorInfo),
                      std::invalid_argument &);
   }
@@ -208,7 +209,7 @@ public:
     DetectorInfo detectorInfo;
     TS_ASSERT_THROWS(ComponentInfo(detectorsInSubtree, detectorRanges,
                                    bankSortedComponentIndices, componentRanges,
-                                   parentIndices, positions, rotations,
+                                   parentIndices, positions, rotations, -1, -1,
                                    &detectorInfo),
                      std::invalid_argument &);
   }
@@ -246,7 +247,7 @@ public:
     DetectorInfo detectorInfo; // Empty DetectorInfo;
     TS_ASSERT_THROWS(ComponentInfo(detectorsInSubtree, detectorRanges,
                                    componentsInSubtree, componentRanges,
-                                   parentIndices, positions, rotations,
+                                   parentIndices, positions, rotations, -1, -1,
                                    &detectorInfo),
                      std::invalid_argument &);
   }
@@ -498,10 +499,6 @@ public:
                compInfo.position(rootIndex)
                    .isApprox(compInfo.relativePosition(rootIndex)));
 
-    TS_ASSERT(
-        compInfo.position(rootIndex).isApprox(rootPosition)); // Sanity check
-    TS_ASSERT(
-        compInfo.position(detectorIndex).isApprox(detPosition)); // Sanity check
     const Eigen::Vector3d expectedRelativePos =
         compInfo.position(detectorIndex) -
         compInfo.position(compInfo.parent(detectorIndex));

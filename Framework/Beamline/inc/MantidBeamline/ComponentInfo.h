@@ -52,6 +52,8 @@ private:
   Mantid::Kernel::cow_ptr<std::vector<Eigen::Vector3d>> m_positions;
   Mantid::Kernel::cow_ptr<std::vector<Eigen::Quaterniond>> m_rotations;
   const size_t m_size = 0;
+  const int64_t m_sourceIndex = -1;
+  const int64_t m_sampleIndex = -1;
   DetectorInfo *m_detectorInfo; // ExperimentInfo is the owner.
 
 public:
@@ -67,6 +69,7 @@ public:
                 boost::shared_ptr<const std::vector<size_t>> parentIndices,
                 boost::shared_ptr<std::vector<Eigen::Vector3d>> positions,
                 boost::shared_ptr<std::vector<Eigen::Quaterniond>> rotations,
+                size_t sourceIndex, size_t sampleIndex,
                 DetectorInfo *detectorInfo);
 
   std::vector<size_t> detectorsInSubtree(const size_t componentIndex) const;
@@ -91,6 +94,11 @@ public:
   size_t parent(const size_t componentIndex) const;
   bool hasDetectorInfo() const;
   void setDetectorInfo(DetectorInfo *detectorInfo);
+  bool hasSource() const;
+  bool hasSample() const;
+  Eigen::Vector3d sourcePosition() const;
+  Eigen::Vector3d samplePosition() const;
+  double l1() const;
 };
 } // namespace Beamline
 } // namespace Mantid
