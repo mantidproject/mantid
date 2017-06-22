@@ -236,6 +236,14 @@ void LoadILLDiffraction::initMovingWorkspace(const NXDouble &scan) {
       getScannedVaribleByPropertyName(scan, "Time");
   scanningWorkspaceBuilder.setTimeRanges(m_startTime, timeDurations);
 
+  g_log.debug() << "First time index starts at:"
+                << m_startTime.toISO8601String() << "\n";
+
+  g_log.debug() << "Last time index ends at:"
+                << (m_startTime + std::accumulate(timeDurations.begin(),
+                                                  timeDurations.end(), 0.0))
+                       .toISO8601String() << "\n";
+
   // For D2B angles in the NeXus files are for the last detector. Here we change
   // them to be the first detector.
   std::vector<double> instrumentAngles =
