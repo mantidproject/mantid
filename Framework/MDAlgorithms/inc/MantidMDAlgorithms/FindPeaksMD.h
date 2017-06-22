@@ -97,6 +97,15 @@ private:
   eDimensionType dimType;
   /// Goniometer matrix
   Mantid::Kernel::Matrix<double> m_goniometer;
+
+  static const std::string volume;
+  static const std::string numberOfEvents;
+
+  /// Use volume normalization or number of events normalization
+  bool m_useVolumeNormalization = true;
+  /// Signal density factor
+  double m_signalThresholdFactor = 1.5;
+
 };
 
 } // namespace Mantid
