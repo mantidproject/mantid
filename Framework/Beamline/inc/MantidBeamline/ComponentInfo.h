@@ -81,6 +81,8 @@ public:
 
   Eigen::Vector3d position(const size_t componentIndex) const;
   Eigen::Quaterniond rotation(const size_t componentIndex) const;
+  Eigen::Vector3d relativePosition(const size_t componentIndex) const;
+  Eigen::Quaterniond relativeRotation(const size_t componentIndex) const;
   void setPosition(const size_t componentIndex,
                    const Eigen::Vector3d &newPosition);
   void setRotation(const size_t componentIndex,

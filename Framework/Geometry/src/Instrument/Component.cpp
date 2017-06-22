@@ -2,6 +2,7 @@
 #include "MantidGeometry/Instrument/ParComponentFactory.h"
 #include "MantidGeometry/Instrument/Component.h"
 #include "MantidGeometry/Instrument/ComponentVisitor.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Objects/BoundingBox.h"
 #include "MantidKernel/Exception.h"
 
@@ -393,7 +394,12 @@ Quat Component::getRotation() const {
       return m_parent->getRotation() * m_rot;
   }
 }
-/* TODO
+
+/// Helper for legacy access mode. Returns the index of the component.
+size_t Component::index() const {
+  return m_map->componentIndex(this->getComponentID());
+}
+
 bool Component::hasComponentInfo() const {
   const IComponent *root = m_base;
   while (auto parent = root->getBareParent())
@@ -401,7 +407,7 @@ bool Component::hasComponentInfo() const {
   auto instrument = dynamic_cast<const Instrument *>(root);
   return m_map->hasDetectorInfo(instrument);
 }
-
+/*
 
 /// Return the relative position to the parent
 Kernel::V3D Component::getRelativePos() const {

@@ -117,6 +117,26 @@ Eigen::Quaterniond ComponentInfo::rotation(const size_t componentIndex) const {
   return (*m_rotations)[rangesIndex];
 }
 
+Eigen::Vector3d
+ComponentInfo::relativePosition(const size_t componentIndex) const {
+  size_t parentIndex = parent(componentIndex);
+  if (parentIndex == componentIndex) {
+    return position(componentIndex);
+  } else {
+    return position(componentIndex) - position(parentIndex);
+  }
+}
+
+Eigen::Quaterniond
+ComponentInfo::relativeRotation(const size_t componentIndex) const {
+  size_t parentIndex = parent(componentIndex);
+  if (parentIndex == componentIndex) {
+    return rotation(componentIndex);
+  } else {
+    return rotation(parentIndex).inverse() * rotation(componentIndex);
+  }
+}
+
 /**
  * Sets the rotation for a component described by target component index
  *

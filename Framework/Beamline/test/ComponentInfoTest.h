@@ -60,8 +60,8 @@ makeTreeExampleAndReturnGeometricArguments() {
 
   // Set non-detectors at different positions
   auto compPositions = boost::make_shared<std::vector<Eigen::Vector3d>>();
-  compPositions->emplace_back(1, 0, 0);
-  compPositions->emplace_back(1, -0.5, 0);
+  compPositions->emplace_back(1, -1, 0);
+  compPositions->emplace_back(1, -1, 0);
 
   // Set non-detectors at different rotations
   auto compRotations = boost::make_shared<std::vector<Eigen::Quaterniond>>();
@@ -478,6 +478,80 @@ public:
     TS_ASSERT(!componentInfo.hasDetectorInfo());
     componentInfo.setDetectorInfo(&detectorInfo);
     TS_ASSERT(componentInfo.hasDetectorInfo());
+  }
+
+  void test_read_relative_position() {
+    using namespace Eigen;
+    auto infos = makeTreeExample();
+    auto &compInfo = std::get<0>(infos);
+
+    const size_t rootIndex = 4;
+    const size_t detectorIndex = 0;
+
+    Eigen::Vector3d rootPosition{1, 0, 0};
+    compInfo.setPosition(rootIndex, rootPosition);
+    Eigen::Vector3d detPosition{2, 0, 0};
+    compInfo.setPosition(detectorIndex, detPosition);
+
+    TSM_ASSERT("For a root (no parent) relative rotations are always the same "
+               "as absolute ones",
+               compInfo.position(rootIndex)
+                   .isApprox(compInfo.relativePosition(rootIndex)));
+
+    TS_ASSERT(
+        compInfo.position(rootIndex).isApprox(rootPosition)); // Sanity check
+    TS_ASSERT(
+        compInfo.position(detectorIndex).isApprox(detPosition)); // Sanity check
+    const Eigen::Vector3d expectedRelativePos =
+        compInfo.position(detectorIndex) -
+        compInfo.position(compInfo.parent(detectorIndex));
+    const Eigen::Vector3d actualRelativePos =
+        compInfo.relativePosition(detectorIndex);
+    TS_ASSERT(expectedRelativePos.isApprox(actualRelativePos));
+  }
+
+  void test_read_relative_rotation() {
+    // throw std::runtime_error("Test not implemented but needed!");
+
+    using namespace Eigen;
+    auto allOutputs = makeTreeExampleAndReturnGeometricArguments();
+
+    // Resulting ComponentInfo
+    ComponentInfo info = std::get<0>(allOutputs);
+    // Arguments to ComponentInfo for geometric aspects
+
+    const size_t rootIndex = 4;
+    const size_t subAssemblyIndex = 3;
+    const auto theta = M_PI / 2;      // 90 degree rotation
+    Eigen::Vector3d axis = {0, 1, 0}; // rotate around y axis
+    const auto rootCenter =
+        info.position(rootIndex); // for rotation around root center.
+    const auto subAssemblyCenter = info.position(
+        subAssemblyIndex); // for rotation around sub-assembly center
+    // Note that in the example rootCenter is the same as the subAssemblyCenter
+
+    // Compound rotation. First rotate around the root.
+    auto transform1 = Translation3d(rootCenter) * AngleAxisd(theta, axis) *
+                      Translation3d(-rootCenter);
+    info.setRotation(rootIndex,
+                     Quaterniond(transform1.rotation())); // Do first rotation
+
+    // Compound rotation. Secondly rotate around the sub-assembly.
+    auto transform2 = Translation3d(subAssemblyCenter) *
+                      AngleAxisd(theta, axis) *
+                      Translation3d(-subAssemblyCenter);
+    info.setRotation(rootIndex,
+                     Quaterniond(transform2.rotation())); // Do second rotation
+
+    TSM_ASSERT(
+        "For a root (no parent) relative rotations are always the same as "
+        "absolute ones",
+        info.relativeRotation(rootIndex).isApprox(info.rotation(rootIndex)));
+    TSM_ASSERT_DELTA(
+        "90 degree RELATIVE rotation between root ans sub-assembly",
+        info.relativeRotation(rootIndex)
+            .angularDistance(info.relativeRotation(subAssemblyIndex)),
+        theta, 1e-6);
   }
 };
 #endif /* MANTID_BEAMLINE_COMPONENTINFOTEST_H_ */
