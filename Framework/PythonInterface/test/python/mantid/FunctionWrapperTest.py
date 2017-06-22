@@ -85,5 +85,23 @@ class FunctionWrapperTest(unittest.TestCase):
         self.assertEqual(c_str.count("ties="),1)
         self.assertEqual(c_str.count("ties=(Sigma=1.2)"),1)
 
+    def test_tie(self):
+        g = FunctionWrapper( "Gaussian", Height=8.5, Sigma=1.2, PeakCentre=15)
+        
+        g.tie(Sigma="0.1*Height")
+        g_str = g.__str__()
+        self.assertEqual(g_str.count("ties="),1)
+        self.assertEqual(g_str.count("ties=(Sigma=0.1*Height)"),1)
+        
+        g0 = FunctionWrapper( "Gaussian", Height=7.5, Sigma=1.2, PeakCentre=10)
+        g1 = FunctionWrapper( "Gaussian", Height=8.5, Sigma=1.2, PeakCentre=11)
+        c = CompositeFunctionWrapper(g0, g1)
+        
+        c.tie({"f1.Sigma":"f0.Sigma"})
+        c_str = c.__str__()
+        self.assertEqual(c_str.count("ties="),1)
+        self.assertEqual(c_str.count("ties=(f1.Sigma=f0.Sigma)"),1)
+
+        
 if __name__ == '__main__':
     unittest.main()
