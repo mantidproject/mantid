@@ -55,7 +55,7 @@ class SPowderSemiEmpiricalCalculator(object):
             self._abins_data = abins_data
         else:
             raise ValueError("Object of type AbinsData was expected.")
-        self._q2_indices = self._abins_data.get_kpoints_data().extract()["k_vectors"].keys()
+        self._q2_indices = list(self._abins_data.get_kpoints_data().extract()["k_vectors"].keys())
         self._atoms = self._abins_data.get_atoms_data().extract()
 
         if isinstance(abins_data, AbinsModules.AbinsData):
