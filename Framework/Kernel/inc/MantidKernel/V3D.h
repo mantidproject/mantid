@@ -2,9 +2,13 @@
 #define MANTID_KERNEL_V3D_H_
 
 #include <cmath>
+#include <iosfwd>
 #include <vector>
 #include "MantidKernel/DllConfig.h"
-#include <nexus/NeXusFile.hpp>
+
+namespace NeXus {
+class File;
+}
 
 namespace Mantid {
 namespace Kernel {

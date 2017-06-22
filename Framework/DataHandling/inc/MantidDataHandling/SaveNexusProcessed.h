@@ -66,6 +66,11 @@ public:
   /// Algorithm's category for identification overriding a virtual method
   const std::string category() const override { return "DataHandling\\Nexus"; }
 
+  void saveSpectraMapNexus(
+      const API::MatrixWorkspace &ws, ::NeXus::File *file,
+      const std::vector<int> &spec,
+      const ::NeXus::NXcompression compression = ::NeXus::LZW) const;
+
 protected:
   /// Override process groups
   bool processGroups() override;

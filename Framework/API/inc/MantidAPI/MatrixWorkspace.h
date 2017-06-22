@@ -455,9 +455,6 @@ public:
 
   void saveInstrumentNexus(::NeXus::File *file) const;
   void loadInstrumentNexus(::NeXus::File *file);
-  void saveSpectraMapNexus(
-      ::NeXus::File *file, const std::vector<int> &spec,
-      const ::NeXus::NXcompression compression = ::NeXus::LZW) const;
 
   //=====================================================================================
   // MD Geometry methods
