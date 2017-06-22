@@ -69,6 +69,13 @@ void initializeFromParentWithoutLogs(const API::MatrixWorkspace &parent,
   // removes the entry from the MRU.
   static_cast<void>(ws.mutableX(0));
 }
+
+template <>
+void fixDistributionFlag(API::MatrixWorkspace &workspace,
+                         const HistogramData::Histogram &histArg) {
+  workspace.setDistribution(histArg.yMode() ==
+                            HistogramData::Histogram::YMode::Frequencies);
+}
 }
 } // namespace DataObjects
 } // namespace Mantid
