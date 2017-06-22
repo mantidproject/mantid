@@ -656,7 +656,7 @@ double MatrixWorkspace::getXMax() const {
 }
 
 void MatrixWorkspace::getXMinMax(double &xmin, double &xmax) const {
-  if (m_indexInfo->communicator().size() > 1)
+  if (m_indexInfo->size() != m_indexInfo->globalSize())
     throw std::runtime_error(
         "MatrixWorkspace: Parallel support for XMin and XMax not implemented.");
 
