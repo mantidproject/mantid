@@ -4,10 +4,10 @@
 #include "MantidAPI/DllConfig.h"
 
 #include "MantidAPI/SpectraDetectorTypes.h"
-#include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Instrument_fwd.h"
 
 #include "MantidKernel/DeltaEMode.h"
+#include "MantidKernel/V3D.h"
 #include "MantidKernel/cow_ptr.h"
 
 #include <list>
@@ -24,6 +24,7 @@ class DetectorInfo;
 class SpectrumInfo;
 }
 namespace Geometry {
+class IDetector;
 class InfoComponentVisitor;
 class ParameterMap;
 class XMLInstrumentParameter;
@@ -116,8 +117,9 @@ public:
   /// Easy access to the efixed value for this run & detector ID
   double getEFixed(const detid_t detID) const;
   /// Easy access to the efixed value for this run & optional detector
-  double getEFixed(const Geometry::IDetector_const_sptr detector =
-                       Geometry::IDetector_const_sptr()) const;
+  double getEFixed(const boost::shared_ptr<const Geometry::IDetector> detector =
+                       boost::shared_ptr<const Geometry::IDetector>{
+                           nullptr}) const;
   /// Set the efixed value for a given detector ID
   void setEFixed(const detid_t detID, const double value);
 
