@@ -51,16 +51,21 @@ public:
   /// Note that this method is static. Applications can simply use this without
   /// having to create a reaction instance.
   static void saveScreenshot();
-  static void saveScreenshot(const QString &filename, const QSize &size,
-                             int quality);
+  static bool saveScreenshot(const QString &filename, const QSize &size,
+                             int quality, bool all_views = false);
 
 public slots:
   /// Updates the enabled state. Applications need not explicitly call this.
   void updateEnableState() override;
+  /// Prompt for a filename. Will return empty string if user cancelled the
+  /// operation.
+  static QString promptFileName();
 
 protected:
   /// Called when the action is triggered.
-  void onTriggered() override { SaveScreenshotReaction::saveScreenshot(); }
+  virtual void onTriggered() override {
+    SaveScreenshotReaction::saveScreenshot();
+  }
 
 private:
   Q_DISABLE_COPY(SaveScreenshotReaction)

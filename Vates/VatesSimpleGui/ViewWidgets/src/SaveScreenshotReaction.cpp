@@ -1,25 +1,24 @@
 #include "MantidVatesSimpleGuiViewWidgets/SaveScreenshotReaction.h"
 
-#if defined(__INTEL_COMPILER)
-#pragma warning disable 1170
-#endif
-
-#include "MantidVatesAPI/vtkImageData_Silent.h"
-#include <pqActiveObjects.h>
-#include <pqCoreUtilities.h>
-#include <pqFileDialog.h>
-#include <pqImageUtil.h>
-#include <pqPVApplicationCore.h>
-#include <pqRenderViewBase.h>
-//#include <pqSaveSnapshotDialog.h>
-#include <pqSettings.h>
-//#include <pqStereoModeHelper.h>
-#include <pqTabbedMultiViewWidget.h>
-#include <pqView.h>
-#include <vtkPVConfig.h>
-#include <vtkPVXMLElement.h>
-#include <vtkSMSessionProxyManager.h>
-#include <vtkSmartPointer.h>
+#include "pqActiveObjects.h"
+#include "pqApplicationCore.h"
+#include "pqCoreUtilities.h"
+#include "pqFileDialog.h"
+#include "pqProxyWidgetDialog.h"
+#include "pqServer.h"
+#include "pqSettings.h"
+#include "pqView.h"
+#include "vtkImageData.h"
+#include "vtkNew.h"
+#include "vtkSMParaViewPipelineController.h"
+#include "vtkSMProperty.h"
+#include "vtkSMPropertyHelper.h"
+#include "vtkSMSaveScreenshotProxy.h"
+#include "vtkSMSessionProxyManager.h"
+#include "vtkSMUtilities.h"
+#include "vtkSMViewLayoutProxy.h"
+#include "vtkSMViewProxy.h"
+#include "vtkSmartPointer.h"
 
 #include <QDebug>
 #include <QFileInfo>
@@ -50,22 +49,7 @@ void SaveScreenshotReaction::updateEnableState() {
 }
 
 //-----------------------------------------------------------------------------
-void SaveScreenshotReaction::saveScreenshot() {
-  pqView *view = pqActiveObjects::instance().activeView();
-  if (!view) {
-    qDebug() << "Cannnot save image. No active view.";
-    return;
-  }
-
-  /*
-  pqSaveSnapshotDialog ssDialog(pqCoreUtilities::mainWidget());
-  ssDialog.setViewSize(view->getSize());
-
-  if (ssDialog.exec() != QDialog::Accepted) {
-    return;
-  }
-  */
-
+QString SaveScreenshotReaction::promptFileName() {
   QString lastUsedExt;
   // Load the most recently used file extensions from QSettings, if available.
   pqSettings *settings = pqApplicationCore::instance()->settings();
@@ -73,79 +57,112 @@ void SaveScreenshotReaction::saveScreenshot() {
     lastUsedExt = settings->value("extensions/ScreenshotExtension").toString();
   }
 
-  QString filters;
-  filters += "PNG image (*.png)";
-  filters += ";;BMP image (*.bmp)";
-  filters += ";;TIFF image (*.tif)";
-  filters += ";;PPM image (*.ppm)";
-  filters += ";;JPG image (*.jpg)";
-  filters += ";;PDF file (*.pdf)";
-  pqFileDialog file_dialog(nullptr, pqCoreUtilities::mainWidget(),
+  QString filters("PNG image (*.png);;JPG image (*.jpg);;TIFF image (*.tif)"
+                  ";;BMP image (*.bmp);;PPM image (*.ppm)");
+
+  pqFileDialog file_dialog(NULL, pqCoreUtilities::mainWidget(),
                            tr("Save Screenshot:"), QString(), filters);
   file_dialog.setRecentlyUsedExtension(lastUsedExt);
   file_dialog.setObjectName("FileSaveScreenshotDialog");
   file_dialog.setFileMode(pqFileDialog::AnyFile);
   if (file_dialog.exec() != QDialog::Accepted) {
-    return;
+    return QString();
   }
 
   QString file = file_dialog.getSelectedFiles()[0];
-  QFileInfo fileInfo = QFileInfo(file);
+  QFileInfo fileInfo(file);
   lastUsedExt = QString("*.") + fileInfo.suffix();
   settings->setValue("extensions/ScreenshotExtension", lastUsedExt);
-
-  /*QSize size = ssDialog.viewSize();
-  QString palette = ssDialog.palette();
-
-  vtkSMSessionProxyManager *pxm =
-      pqActiveObjects::instance().activeServer()->proxyManager();
-  vtkSMProxy *colorPalette = pxm->GetProxy("global_properties", "ColorPalette");
-  vtkSmartPointer<vtkSMProxy> clone;
-  if (colorPalette && !palette.isEmpty()) {
-    // save current property values
-    clone.TakeReference(
-        pxm->NewProxy(colorPalette->GetXMLGroup(), colorPalette->GetXMLName()));
-    clone->Copy(colorPalette);
-
-    auto chosenPalette = vtkSmartPointer<vtkSMProxy>::Take(
-        pxm->NewProxy("palettes", palette.toLatin1().data()));
-    colorPalette->Copy(chosenPalette);
-  }
-
-  // temporarily set stereo mode from dialog.
-  int stereo = ssDialog.getStereoMode();
-  pqStereoModeHelper setStereo(stereo,
-                               pqActiveObjects::instance().activeServer());
-
-  SaveScreenshotReaction::saveScreenshot(file, size, ssDialog.quality());
-
-  // restore color palette.
-  if (clone) {
-    colorPalette->Copy(clone);
-  }
-
-  // check if need to render to clear the changes we did
-  // while saving the screenshot.
-  if (clone || stereo) {
-    pqApplicationCore::instance()->render();
-  }
-  */
+  return file;
 }
 
 //-----------------------------------------------------------------------------
-void SaveScreenshotReaction::saveScreenshot(const QString &filename,
-                                            const QSize &size, int quality) {
+void SaveScreenshotReaction::saveScreenshot() {
   pqView *view = pqActiveObjects::instance().activeView();
-  vtkSmartPointer<vtkImageData> img;
-  if (view) {
-    // img.TakeReference(view->captureImage(size));
+  if (!view) {
+    qDebug() << "Cannot save image. No active view.";
+    return;
   }
 
-  if (!img.GetPointer()) {
-    qCritical() << "Save Image failed.";
-  } else {
-    pqImageUtil::saveImage(img, filename, quality);
+  vtkSMViewProxy *viewProxy = view->getViewProxy();
+  vtkSMViewLayoutProxy *layout = vtkSMViewLayoutProxy::FindLayout(viewProxy);
+  int showWindowDecorations = -1;
+
+  vtkSMSessionProxyManager *pxm = view->getServer()->proxyManager();
+  vtkSmartPointer<vtkSMProxy> proxy;
+  proxy.TakeReference(pxm->NewProxy("misc", "SaveScreenshot"));
+  vtkSMSaveScreenshotProxy *shProxy =
+      vtkSMSaveScreenshotProxy::SafeDownCast(proxy);
+  if (!shProxy) {
+    qCritical() << "Incorrect type for `SaveScreenshot` proxy.";
+    return;
   }
+
+  vtkNew<vtkSMParaViewPipelineController> controller;
+  controller->PreInitializeProxy(shProxy);
+  vtkSMPropertyHelper(shProxy, "View").Set(viewProxy);
+  vtkSMPropertyHelper(shProxy, "Layout").Set(layout);
+  controller->PostInitializeProxy(shProxy);
+
+  if (shProxy->UpdateSaveAllViewsPanelVisibility()) {
+    Q_ASSERT(layout != NULL);
+    // let's hide window decorations.
+    vtkSMPropertyHelper helper(layout, "ShowWindowDecorations");
+    showWindowDecorations = helper.GetAsInt();
+    helper.Set(0);
+  }
+
+  pqProxyWidgetDialog dialog(shProxy, pqCoreUtilities::mainWidget());
+  dialog.setObjectName("SaveScreenshotDialog");
+  dialog.setApplyChangesImmediately(true);
+  dialog.setWindowTitle("Save Screenshot Options");
+  dialog.setEnableSearchBar(true);
+  dialog.setSettingsKey("SaveScreenshotDialog");
+  if (dialog.exec() == QDialog::Accepted) {
+    QString filename = SaveScreenshotReaction::promptFileName();
+    if (!filename.isEmpty()) {
+      shProxy->WriteImage(filename.toLocal8Bit().data());
+    }
+  }
+
+  if (layout && showWindowDecorations != -1) {
+    vtkSMPropertyHelper(layout, "ShowWindowDecorations")
+        .Set(showWindowDecorations);
+    layout->UpdateVTKObjects();
+  }
+
+  // This should not be needed as image capturing code only affects back buffer,
+  // however it is currently needed due to paraview/paraview#17256. Once that's
+  // fixed, we should remove this.
+  pqApplicationCore::instance()->render();
+}
+
+//-----------------------------------------------------------------------------
+bool SaveScreenshotReaction::saveScreenshot(const QString &filename,
+                                            const QSize &size, int quality,
+                                            bool all_views) {
+  pqView *view = pqActiveObjects::instance().activeView();
+  if (!view) {
+    qDebug() << "Cannot save image. No active view.";
+    return false;
+  }
+
+  vtkSMViewProxy *viewProxy = view->getViewProxy();
+
+  vtkSmartPointer<vtkImageData> image;
+  const vtkVector2i isize(size.width(), size.height());
+  if (all_views) {
+    vtkSMViewLayoutProxy *layout = vtkSMViewLayoutProxy::FindLayout(viewProxy);
+    image = vtkSMSaveScreenshotProxy::CaptureImage(layout, isize);
+  } else {
+    image = vtkSMSaveScreenshotProxy::CaptureImage(viewProxy, isize);
+  }
+
+  if (image) {
+    return vtkSMUtilities::SaveImage(image, filename.toLocal8Bit().data(),
+                                     quality) != 0;
+  }
+  return false;
 }
 }
 }
