@@ -36,7 +36,21 @@ This document tries to give an overview on how the algorithms work together via 
 Reduction basics
 ================
 
-The following simple script reduces a sample run using a vanadium reference.
+A very basic reduction would include a vanadium reference and a sample and follow the steps:
+
+#. Load vanadium data.
+
+#. Integrate vanadium.
+
+#. Run diagnostics.
+
+   * Generally, this step should not be skipped even if no actual diagnostics were performed, as :ref:`algm-DirectILLDiagnostics` may create a default mask for the instrument. This is the case of IN5, for example, where the pixels at the detector tube ends are masked.
+
+#. Load sample data.
+
+#. Reduce the data applying vanadium calibration coefficients and diagnostics mask.
+
+These steps would translate to something like the following simple Python script:
 
 .. code-block:: python
 
@@ -47,13 +61,21 @@ The following simple script reduces a sample run using a vanadium reference.
     DirectILLCollectData(
         Run='0100:0109',
         OutputWorkspace='vanadium',
-        OutputEPPWorkspace='vanadium-epps'   # Elastic peak positions.
+        OutputEPPWorkspace='vanadium-epps',  # Elastic peak positions.
+        OutputRawWorkspace='vanadium-raw'    # 'Raw' data for diagnostics.
     )
 
     DirectILLIntegrateVanadium(
         InputWorkspace='vanadium',
         OutputWorkspace='integrated',
         EPPWorkspace='vanadium-epps'
+    )
+
+    DirectILLDiagnostics(
+        InputWorkspace='vanadium-raw',
+        OutputWorkspace='diagnostics',
+        EPPWorkspace='vanadium-epps',
+        RawWorkspace='vanadium-raw'
     )
 
     # Sample
@@ -66,126 +88,305 @@ The following simple script reduces a sample run using a vanadium reference.
         InputWorkspace='sample',
         OutputWorkspace='SofQW',
         IntegratedVanadiumWorkspace='integrated'
+        DiagnosticsWorkspace='diagnostics'
     )
 
-All data is loaded into Mantid using :ref:`algm-DirectILLCollectData`. After setting the data search directory, Mantid can find the data files by the numors only. It is possible to specify ranges of numors, as for the vanadium above:
+Connecting inputs and outputs
+=============================
+
+Every ``DirectILL`` algorithm has an *OutputWorkspace* property which provides the main output workspace. Additionally, the algorithms may provide optional output workspaces to be used with other algorithms or for reporting/debugging purposes. The linking of outputs to inputs is an important feature of the ``DirectILL`` algorithms and allows for great flexibility in the reduction. An example of the usage of these optional output workspaces is the *OutputEPPWorkspace* which in the vanadium case above is needed in the integration and diagnostics steps:
 
 .. code-block:: python
 
-    DirectILLCollectData(
-        Run='0100:0109',
     ...
-
-The syntax for the ranges supports characters `,`, `-`, `:`, `+`, allowing complex sets of numors to be loaded. The following merges numors 0201, 0205, 0209 and 0210:
-
-.. code-block:: python
-
-    DirectILLCollectData(
-        Run='0201, 0205, 0209-0210',
-        OutputWorkspace='sample'
-    )
-
-Every ``DirectILL`` algorithm has an *OutputWorkspace* property which provides the main output workspace. Additionally, the algorithms may provide optional output workspaces to be used with other algorithms or for reporting/debugging purposes. Such an optional output is the *OutputEPPWorkspace* which in the vanadium case above is needed in integration:
-
-.. code-block:: python
-
     # Vanadium
     DirectILLCollectData(
         ...
-        OutputEPPWorkspace='vanadium-epps'    # This workspace...
+        OutputEPPWorkspace='vanadium-epps'  # This workspace...
     )
-
     DirectILLIntegrateVanadium(
         ...
-        EPPWorkspace='vanadium-epps'          # ...is needed here.
+        EPPWorkspace='vanadium-epps'        # ...is needed here...
     )
+    DirectILLDiagnostics(
+        ...
+        EPPWorkspace='vanadium-epps'        # ...and here.
+    )
+    ...
 
 As shown above, these optional outputs are sometimes named similarly the corresponding inputs giving a hint were they are supposed to be used.
 
-Debugging
-=========
+Self-shielding corrections
+==========================
 
-The reduction algorithms do not produce much output to Mantid logs by default. Also, none of the intermediate workspaces will show up in the analysis data service. Both behaviors can be controlled by the *SubalgorithmLogging* and *Cleanup* properties. Enabling *SubalgorithmLogging* will log all messages from child algorithms to Mantid's logs. Disabling *Cleanup* will unhide the intermediate workspaces created during the algorithm run and disable their deletion.
+A more complete reduction example would include corrections for self-shielding:
 
-Note, that disabling *Cleanup* might produce a large number of workspaces and cause the computer to run out of memory.
+#. Load vanadium data.
 
-Empty containers
-================
+#. Integrate vanadium.
+
+#. Run diagnostics.
+
+#. Load sample data.
+
+#. Calculate absorption corrections for the sample.
+
+   * This may be a time consuming step. Fortunately, the resulting correction factors can be reused as many times as needed.
+
+   * Sample and beam parameters can be set using :ref:`algm-SetSample` and :ref:`algm-SetBeam`.
+
+#. Apply the corrections.
+
+#. Reduce the data applying vanadium calibration coefficients and diagnostics mask.
+
+The above workflow would translate to this kind of Python script:
+
+.. code-block:: python
+
+    # Add a temporary data search directory.
+    mantid.config.appendDataSearchDir('/data/')
+
+    # Vanadium
+    DirectILLCollectData(
+        Run='0100:0109',
+        OutputWorkspace='vanadium',
+        OutputEPPWorkspace='vanadium-epps',  # Elastic peak positions.
+        OutputRawWorkspace='vanadium-raw'    # 'Raw' data for diagnostics.
+    )
+
+    DirectILLIntegrateVanadium(
+        InputWorkspace='vanadium',
+        OutputWorkspace='integrated',
+        EPPWorkspace='vanadium-epps'
+    )
+
+    DirectILLDiagnostics(
+        InputWorkspace='vanadium-raw',
+        OutputWorkspace='diagnostics',
+        EPPWorkspace='vanadium-epps',
+        RawWorkspace='vanadium-raw'
+    )
+
+    # Sample
+    DirectILLCollectData(
+        Run='0201, 0205, 0209-0210',
+        OutputWorkspace='sample',
+    )
+
+    geometry = {
+        'Shape': 'FlatPlate',
+        'Width': 4.0,
+        'Height': 5.0,
+        'Thick': 0.1,
+        'Center': [0.0, 0.0, 0.0],
+        'Angle': 45.0
+    }
+    material = {
+        'ChemicalFormula': 'Ni Cr Fe',
+        'SampleNumberDensity': 0.09
+    }
+    SetSample(
+        InputWorkspace='sample',
+        Geometry=geometry,
+        Material=material
+    )
+    DirectILLSelfShielding(
+        InputWorkspace='sample',
+        OutputWorkspace='corrections'
+    )
+    DirectILLApplySelfShielding(
+        InputWorkspace='sample',
+        OutputWorkspace='sample-corrected',
+        SelfShieldingCorrectionWorkspace='corrections',
+    )
+
+    DirectILLReduction(
+        InputWorkspace='sample-corrected',
+        OutputWorkspace='SofQW',
+        IntegratedVanadiumWorkspace='integrated'
+        DiagnosticsWorkspace='diagnostics'
+    )
+
+Workspace compatibility
+=======================
+
+Mantid can be picky with binning when doing arithmetics between workspaces. This is an issue for the time-of-flight instruments at ILL as the time axis needs to be corrected to correspond to a physical flight distance. Even thought data is recorded with the same nominal wavelength, the actual value written in the NeXus files may differ between runs. Incident energy calibration further complicates matters. As the correction to the time-of-flight axis depends on the wavelength, two datasets loaded into Mantid with :ref:`algm-DirectILLCollectData` may have slightly different time-of-flight axis. This prevents arithmetics between the workspaces. The situation is most often encountered between sample and the corresponding empty container.
+
+To alleviate the situation, the output workspaces of :ref:`algm-DirectILLCollectData` can be forced to use the same wavelength. The following Python script shows how to propagate the calibrated incident energy from the first loaded workspace into the rest:
+
+.. code-bloc:: python
+
+    DirectILLCollectData(
+        Run='0100:0109',
+        OutputWorkspace='sample1',
+        OutputIncidentEnergyWorkspace='Ei'  # Get a common incident energy.
+    )
+
+    # Empty container.
+    DirectILLCollectData(
+        Run='0201:0205',
+        OutputWorkspace='container',
+        IncidentEnergyWorkspace='Ei'  # Empty container should have same TOF binning.
+    )
+
+    # More samples with same nominal wavelength and container as 'sample1'.
+    runs = ['0110:0119,', '0253:0260']
+    index = 1
+    for run in runs:
+        DirectILLCollectData(
+            Run=run,
+            OutputWorkspace='sample{}'.format(index),
+            IncidentEnergyWorkspace='Ei'
+        )
+        index += 1
+    
+    # The empty container is now compatible with all the samples.
+
+Container background subtraction
+================================
 
 The container background subtraction is done perhaps a bit counterintuitively in :ref:`algm-DirectILLApplySelfShielding`. At the moment the self-shielding corrections and the empty container data do not have much to do with each other but this may change in the future if the so called Paalman-Pings corrections are used.
 
-There is a quirk with regards to binning of the container data shown in the example below.
+With empty container data, the steps to reduce the experimental data might look like this:
+
+#. Load vanadium data.
+
+#. Integrate vanadium.
+
+#. Run diagnostics.
+
+#. Load sample data.
+
+#. Load container data.
+
+   * Propagate the incident energy from the sample, see `Workspace compatibility`_.
+
+#. Calculate and apply absorption corrections for the container.
+
+#. Calculate the absorption corrections for the sample.
+
+#. Apply the absoprtion corrections and subtract the container.
+
+#. Reduce the data applying vanadium calibration coefficients and diagnostics mask.
+
+A corresponding Python script follows.
 
 .. code-block:: python
 
     mantid.config.appendDataSearchDir('/data/')
 
-    # Sample.
-    # Has to be loaded before the container because of incident energy.
+    # Vanadium
     DirectILLCollectData(
-        Run='0540+0545',
+        Run='0100:0109',
+        OutputWorkspace='vanadium',
+        OutputEPPWorkspace='vanadium-epps',
+        OutputRawWorkspace='vanadium-raw'
+    )
+
+    DirectILLIntegrateVanadium(
+        InputWorkspace='vanadium',
+        OutputWorkspace='integrated',
+        EPPWorkspace='vanadium-epps'
+    )
+
+    DirectILLDiagnostics(
+        InputWorkspace='vanadium-raw',
+        OutputWorkspace='diagnostics',
+        EPPWorkspace='vanadium-epps',
+        RawWorkspace='vanadium-raw'
+    )
+
+    # Sample
+    DirectILLCollectData(
+        Run='0201, 0205, 0209-0210',
         OutputWorkspace='sample',
-        OutputIncidentEnergyWorkspace='Ei' # Needed for container.
+        OutputIncidentEnergyWorkspace='Ei'
     )
 
-    # Container.
+    # Container
     DirectILLCollectData(
-        Run='0561, 0564',
-        OutputWorkspace='container,
-        IncidentEnergyWorkspace='Ei' # Ensure same binning in TOF.
+        Run='0333:0335',
+        OutputWorkspace='container',
+        IncidentEnergyWorkspace='Ei'
     )
 
-    # Subtraction can be done without the self-shielding corrections.
+    # Container self-shielding.
+    # Geometry XML allows for very complex geometries.
+    containerShape = """
+        <hollow-cylinder id="inner-ring">
+          <centre-of-bottom-base x="0.0" y="-0.04" z="0.0" />
+          <axis x="0.0" y="1.0" z="0.0" />
+          <inner-radius val="0.017" />
+          <outer-radius val="0.018" />
+          <height val="0.08" />
+        </hollow-cylinder>
+        <hollow-cylinder id="outer-ring">
+          <centre-of-bottom-base x="0.0" y="-0.04" z="0.0" />
+          <axis x="0.0" y="1.0" z="0.0" />
+          <inner-radius val="0.02" />
+          <outer-radius val="0.021" />
+          <height val="0.08" />
+        </hollow-cylinder>
+        <algebra val="inner-ring : outer-ring" />
+    """
+    geometry = {
+        'Shape': 'CSG',
+        'Value': containerShape
+    }
+    material = {
+        'ChemicalFormula': 'Al',
+        'SampleNumberDensity': 0.09
+    }
+    SetSample(
+        InputWorkspace='container',
+        Geometry=geometry,
+        Material=material
+    )
+    DirectILLSelfShielding(
+        InputWorkspace='container',
+        OutputWorkspace='container-corrections'
+    )
+    DirectILLApplySelfShielding(
+        InputWorkspace='container',
+        OutputWorkspace='container-corrected',
+        SelfShieldingCorrectionWorkspace='container-corrections',
+    )
+
+    # Sample self-shielding and container subtraction.
+    geometry = {
+        'Shape': 'HollowCylinder',
+        'Height': 8.0,
+        'InnerRadius': 1.8,
+        'OuterRadium': 2.0,
+        'Center': [0.0, 0.0, 0.0]
+    }
+    material = {
+        'ChemicalFormula': 'C2 O D6',
+        'SampleNumberDensity': 0.1
+    }
+    SetSample('sample', geometry, material)
+    DirectILLSelfShielding(
+        InputWorkspace='sample',
+        OutputWorkspace='sample-corrections'
+    )
     DirectILLApplySelfShielding(
         InputWorkspace='sample',
-        EmptyContainerWorkspace='container'
+        OutputWorkspace='sample-corrected',
+        SelfShieldingCorrectionWorkspace='sample-corrections',
+        EmptyContainerWorkspace='container-corrected'
     )
 
-Mantid is picky about the compatibility of workspaces when it comes to arithmetics. Thus, the container and the sample workspaces must have the same TOF binning. Since the binning depends on the incident energy, the value has to be propagated from the sample to the container data:
-
-.. code-block:: python
-
-    # Sample.
-    DirectILLCollectData(
-        ...
-        OutputIncidentEnergyWorkspace='Ei' # This output...
+    DirectILLReduction(
+        InputWorkspace='sample-corrected',
+        OutputWorkspace='SofQW',
+        IntegratedVanadiumWorkspace='integrated'
+        DiagnosticsWorkspace='diagnostics'
     )
 
-    # Container.
-    DirectILLCollectData(
-        ...
-        IncidentEnergyWorkspace='Ei'       # ...is needed here.
-    )
+Interpolation of container data to different temperatures
+---------------------------------------------------------
 
-Further, this procedure is recommended for all sample and container data measured with the same wavelength:
-
-.. code-block:: python
-
-    # Sample at 3K.
-    DirectILLCollectData(
-        ...
-        OutputWorkspace='sample_3K',
-        OutputIncidentEnergyWorkspace='Ei' # This output...
-    )
-
-    # Container.
-    DirectILLCollectData(
-        ...
-        OutputWorkspace='container',
-        IncidentEnergyWorkspace='Ei'       # ...is needed here...
-    )
-
-    # Sample at 50K.
-    DirectILLCollectData(
-        ...
-        OutputWorkspace='sample_230K',
-        IncidentEnergyWorkspace='Ei'       # ...as well as here.
-    )
-
-Interpolation to different temperatures
----------------------------------------
-
-One can use Mantid's workspace arithmetics to perform simple linear interpolation:
+Sometimes the empty container is not measured at all the experiment's temperature points. One can use Mantid's workspace arithmetics to perform simple linear interpolation in temperature:
 
 .. code-block:: python
 
@@ -205,167 +406,15 @@ One can use Mantid's workspace arithmetics to perform simple linear interpolatio
 
 As usual, care should be taken when extrapolating the container data outside the measured range.
 
-Vanadium
-========
+Finding out what went wrong
+===========================
 
-Vanadium (or equivalent reference sample) does not only offer detector calibration data but is very usable for detector diagnostics as well. Extending the example script in the `Reduction basics`_ section above:
+The reduction algorithms do not produce much output to Mantid logs by default. Also, none of the intermediate workspaces generated during the run of the ``DirectILL`` algorithms will show up in the analysis data service. Both behaviors can be controlled by the *SubalgorithmLogging* and *Cleanup* properties. Enabling *SubalgorithmLogging* will log all messages from child algorithms to Mantid's logs. Disabling *Cleanup* will unhide the intermediate workspaces created during the algorithm run and disable their deletion.
 
-.. code-block:: python
+Note, that disabling *Cleanup* might produce a large number of workspaces and cause the computer to run out of memory.
 
-    # Add a temporary data search directory.
-    mantid.config.appendDataSearchDir('/data/')
-
-    # Vanadium
-    DirectILLCollectData(
-        Run='0100:0109',
-        OutputWorkspace='vanadium',
-        OutputEPPWorkspace='vanadium-epps', # Elastic peak positions.
-        OutputRawWorkspace='vanadium-raw'   # Unnormalized 'raw' data, no bkg subtracted.
-    )
-
-    DirectILLIntegrateVanadium(
-        InputWorkspace='vanadium',
-        OutputWorkspace='integrated',
-        EPPWorkspace='vanadium-epps'
-    )
-
-    DirectILLDiagnostics(
-        InputWorkspace='vanadium-raw', # 'Raw' data needed here...
-        OutputWorkspace='diagnostics',
-        EPPWorkspace='vanadium-epps'   # ...and the elastic peak positions.
-    )
-
-    # Sample
-    DirectILLCollectData(
-        Run='0201, 0205, 0209-0210',
-        OutputWorkspace='sample'
-    )
-
-    DirectILLReduction(
-        InputWorkspace='sample',
-        OutputWorkspace='SofQW',
-        IntegratedVanadiumWorkspace='integrated',
-        DiagnosticsWorkspace='diagnostics'        # Mask 'bad' detectors.
-    )
-
-Detector diagnostics and masking
-================================
-
-:ref:`algm-DirectILLDiagnostics` not only performs detector diagnostics, it also handles masking in general. The output workspace can be further fed to :ref:`algm-DirectILLReduction` where the mask is actually applied.
-
-It is recommended to use vanadium or similar reference workspace for the diagnostics.
-
-.. code-block:: python
-
-    # Add a temporary data search directory.
-    mantid.config.appendDataSearchDir('/data/')
-
-    # Vanadium
-    DirectILLCollectData(
-        Run='0100:0109',
-        OutputWorkspace='vanadium',
-        OutputEPPWorkspace='vanadium-epps', # Elastic peak positions.
-        OutputRawWorkspace='vanadium-raw'   # Unnormalized 'raw' data, no bkg subtracted.
-    )
-
-    diagResult = DirectILLDiagnostics(
-        InputWorkspace='vanadium-raw', # 'Raw' data needed here...
-        OutputWorkspace='diagnostics',
-        EPPWorkspace='vanadium-epps',  # ...and the elastic peak positions.
-        MaskComponents='rosace, bottom_bank, top_bank' # Interested only on middle_bank.
-        OutputReportWorkspace='diagnostics-report'
-    )
-
-    # Print a formatted string of what was masked.
-    print(diagResult.OutputReport)
-
-    # Prepare for the reduction.
-    DirectILLIntegrateVanadium(
-        InputWorkspace='vanadium',
-        OutputWorkspace='vanadium-integrated'
-    )
-
-    DirectILLCollectData(
-        Run='0151, 0153, 0155',
-        OutputWorkspace='sample',
-    )
-
-    DirectILLReduction(
-        InputWorkspace='sample',
-        OutputWorkspace='SofQW',
-        IntegratedVanadiumWorkspace='vanadium-integrated',
-        DiagnosticsWorkspace='diagnostics' # This applies the mask.
-    )
-
-Absorption corrections
-======================
-
-Due to the time consuming nature of simulating the absorption corrections, there are two algorithms dealing with absorption corrections. :ref:`algm-DirectILLSelfShielding` calculates the corrections and needs to be run only once. The result can then be applied by :ref:`algm-DirectILLApplySelfShielding` to any number of workspaces.
-
-:ref:`algm-DirectILLApplySelfShielding` is also used for empty container subtraction, see `Empty containers`_.
-
-.. code-block:: python
-
-    # Add a temporary data search directory.
-    mantid.config.appendDataSearchDir('/data/')
-
-    DirectILLCollectData(
-        Run='0151+0155',
-        OutputWorkspace='sample',
-    )
-
-    # Set sample shape, material and beam profile.
-    ws = mtd['sample']
-    sampleGeometry = {
-        'Shape': 'Cylinder',
-        'Height': 8.0,
-        'Radius': 2.0,
-        'Center': [0.0, 0.0, 0.0]
-    }
-    sampleMaterial = {
-        'ChemicalFormula': 'Yb 2 O 3.2 Fe',
-        'SampleNumberDensity': 0.23
-    }
-    SetSample(
-        InputWorkspace=ws,
-        Geometry=sampleGeometry,
-        Material=sampleMaterial
-    )
-    beamGeometry = {
-        'Shape': 'Slit',
-        'Width': 2.0,
-        'Height': 4.0
-    }
-    SetBeam(
-        InputWorkspace=ws,
-        Geometry=beamGeometry
-    }
-
-    DirectILLSelfShielding(
-        InputWorkspace=ws,
-        OutputWorkspace='absorption-corrections'
-    )
-
-    DirectILLApplySelfShielding(
-        InputWorkspace=ws,
-        OutputWorkspace='sample-absorption-corrected',
-        SelfShieldingCorrectionWorkspace='absorption-corrections'
-    )
-
-    # Apply corrections to other measurements as well.
-    DirectILLCollectData(
-        Run='0158+0162',
-        OutputWorkspace='sample2',
-    )
-
-    DirectILLApplySelfShielding(
-        InputWorkspace='sample2',
-        OutputWorkspace='sample2-absorption-corrected',
-        SelfShieldingCorrectionWorkspace='absorption-corrections'
-    )
-
-IN5 specifics
-=============
+Instrument specific defaults and recommendations
+================================================
 
 Elastic peak positions
 ----------------------
@@ -380,7 +429,7 @@ The elastic peak diagnostics might be usable to mask the beam stop of IN5. The b
 Memory management
 -----------------
 
-Certain instruments with a large number of detectors/pixels may create workspaces which consume a lot of memory. When working on memory constrained systems, it is recommended to manually delete the workspaces which are not needed anymore in the reduction script. The :ref:`algm-SaveNexus` can be used to save the data to disk.
+When working on memory constrained systems, it is recommended to manually delete the workspaces which are not needed anymore in the reduction script. The :ref:`algm-SaveNexus` can be used to save the data to disk.
 
 Full example
 ============
@@ -437,6 +486,7 @@ Lets put it all together into a complex Python script. The script below reduces 
     }
 
     # Vanadium & vanadium container.
+
     DirectILLCollectData(
         Run=vanadiumRuns,
         OutputWorkspace='vanadium',
@@ -522,6 +572,8 @@ Lets put it all together into a complex Python script. The script below reduces 
         OutputReportWorkspace='diagnostics-report'
     )
 
+    # Sample and container at wavelength 1.
+
     DirectILLCollectData(
         Run=runs1[50],
         OutputWorkspace='run1-50K',
@@ -536,7 +588,6 @@ Lets put it all together into a complex Python script. The script below reduces 
     )
 
     SetSample('container1-50K', containerGeometry, containerMaterial)
-
     DirectILLSelfShielding(
         InputWorkspace='container1-50K',
         OutputWorkspace='container1-self-shielding'
@@ -590,6 +641,8 @@ Lets put it all together into a complex Python script. The script below reduces 
             DiagnosticsWorkspace='mask'
         )
         SaveNexus('SofQW1-{}K'.format(T), '/data/output2-{}.nxs'.format(T))
+
+    # Sample and container at wavelength 2.
 
     DirectILLCollectData(
         Run=runs2[50],
