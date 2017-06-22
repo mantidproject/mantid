@@ -31,6 +31,7 @@
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/EigenConversionHelpers.h"
 #include "MantidKernel/InstrumentInfo.h"
+#include "MantidKernel/IPropertyManager.h"
 #include "MantidKernel/Property.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/StringTokenizer.h"
