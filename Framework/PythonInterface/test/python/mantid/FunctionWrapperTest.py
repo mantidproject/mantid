@@ -68,5 +68,22 @@ class FunctionWrapperTest(unittest.TestCase):
         c[1]["Height"] = 11.0
         self.assertAlmostEqual(c[1]["Height"], 11.0,10)
 
+    def test_fix(self):
+        g = FunctionWrapper( "Gaussian", Height=8.5, Sigma=1.2, PeakCentre=15)
+        
+        g.fix("Sigma")
+        g_str = g.__str__()
+        self.assertEqual(g_str.count("ties="),1)
+        self.assertEqual(g_str.count("ties=(Sigma=1.2)"),1)
+        
+        g0 = FunctionWrapper( "Gaussian", Height=7.5, Sigma=1.2, PeakCentre=10)
+        g1 = FunctionWrapper( "Gaussian", Height=8.5, Sigma=1.2, PeakCentre=11)
+        c = CompositeFunctionWrapper(g0, g1)
+        
+        c.fix("f1.Sigma")
+        c_str = c.__str__()
+        self.assertEqual(c_str.count("ties="),1)
+        self.assertEqual(c_str.count("ties=(Sigma=1.2)"),1)
+
 if __name__ == '__main__':
     unittest.main()
