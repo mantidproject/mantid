@@ -48,7 +48,7 @@ RefMatrixWSImageView::RefMatrixWSImageView(QString wpsName, int peakMin,
 
   std::vector<float> data(static_cast<size_t>(totalYMax) * sz);
 
-  for (size_t px = 0; px < totalYMax; px++) {
+  for (size_t px = 0; px < static_cast<size_t>(totalYMax); px++) {
     // Retrieve data now
     const auto &yAxis = ws->y(px);
     for (size_t tof = 0; tof < sz; tof++)
