@@ -525,6 +525,7 @@ bool SaveNexusProcessed::processGroups() {
 }
 
 /** Save the spectra detector map to an open NeXus file.
+* @param ws :: Workspace containing spectrum data
 * @param file :: open NeXus file
 * @param spec :: list of the Workspace Indices to save.
 * @param compression :: NXcompression int to indicate how to compress
