@@ -1,5 +1,4 @@
 set ( SRC_FILES
-	src/Collectives.cpp
 	src/Communicator.cpp
 	src/ExecutionMode.cpp
 	src/Request.cpp
