@@ -399,9 +399,7 @@ std::string IFunction::writeConstraints() const {
  * IFunction
  * @return string representation of the function
  */
-std::string IFunction::asString() const {
-  return writeToString();
-}
+std::string IFunction::asString() const { return writeToString(); }
 
 /**
  * Writes this function into a string.

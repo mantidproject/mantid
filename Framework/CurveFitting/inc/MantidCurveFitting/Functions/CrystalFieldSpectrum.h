@@ -38,8 +38,8 @@ public:
   void buildTargetFunction() const override;
 
 protected:
-  std::string
-  writeToString(const std::string &parentLocalAttributesStr = "") const override;
+  std::string writeToString(
+      const std::string &parentLocalAttributesStr = "") const override;
   void updateTargetFunction() const override;
 
 private:

@@ -51,8 +51,8 @@ void CompositeFunction::init() {}
  *    Can be passed in by a CompositeFunction (eg MultiDomainFunction).
  * @return the string representation of the composite function
  */
-std::string
-CompositeFunction::writeToString(const std::string &parentLocalAttributesStr) const {
+std::string CompositeFunction::writeToString(
+    const std::string &parentLocalAttributesStr) const {
   std::ostringstream ostr;
 
   // if empty just return function name

@@ -219,8 +219,8 @@ protected:
   /// Get status of parameter
   ParameterStatus getParameterStatus(size_t i) const override;
   /// Writes itself into a string
-  std::string
-  writeToString(const std::string &parentLocalAttributesStr = "") const override;
+  std::string writeToString(
+      const std::string &parentLocalAttributesStr = "") const override;
 
   size_t paramOffset(size_t i) const { return m_paramOffsets[i]; }
 

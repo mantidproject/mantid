@@ -84,8 +84,8 @@ protected:
   /// Add default constraints
   void addDefaultConstraints(const std::string &constraints);
   /// Writes itself into a string
-  std::string
-  writeToString(const std::string &parentLocalAttributesStr = "") const override;
+  std::string writeToString(
+      const std::string &parentLocalAttributesStr = "") const override;
 
 private:
   /// Keep paramater aliases
