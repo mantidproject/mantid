@@ -11,7 +11,7 @@ Description
 
 Applies absorption corrections calculated in the Paalman and Pings
 absorption factor format. The various partial absorption factors are
-denoted as :math:`A_{a,b}` where the subscript :math:`b` denotes the
+denoted as :math:`A_{a,b}` where the subscript :math:`a` denotes the
 component the neutron is scattered from and :math:`b` denotes the
 component where the neutron is absorbed. The various partial
 absorption factors, and what their names must contain in the
@@ -19,17 +19,17 @@ absorption factors, and what their names must contain in the
 of the partial absorption factors are not supplied, they are assumed
 to be one.
 
-================ ============ =================== ==============
-    Symbol       Scatter From Absorbed By         Workspace Name
-================ ============ =================== ==============
-:math:`A_{s,s}`  sample       sample              ``ass``
----------------- ------------ ------------------- --------------
-:math:`A_{s,sc}` sample       sample or container ``assc``
----------------- ------------ ------------------- --------------
-:math:`A_{c,c}`  container    container           ``acc``
----------------- ------------ ------------------- --------------
-:math:`A_{c,sc}` container    sample or container ``acsc``
-================ ============ =================== ==============
+================ ============ ==================== ==============
+    Symbol       Scatter From Absorbed By          Workspace Name
+================ ============ ==================== ==============
+:math:`A_{s,s}`  sample       sample               ``ass``
+---------------- ------------ -------------------- --------------
+:math:`A_{s,sc}` sample       sample and container ``assc``
+---------------- ------------ -------------------- --------------
+:math:`A_{c,c}`  container    container            ``acc``
+---------------- ------------ -------------------- --------------
+:math:`A_{c,sc}` container    sample and container ``acsc``
+================ ============ ==================== ==============
 
 This algorithm can be used to apply absorption corrections calculated
 with either the :ref:`CylinderPaalmanPingsCorrection
