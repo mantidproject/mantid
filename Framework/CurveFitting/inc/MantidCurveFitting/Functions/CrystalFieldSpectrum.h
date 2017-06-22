@@ -36,10 +36,10 @@ public:
   std::string name() const override { return "CrystalFieldSpectrum"; }
   const std::string category() const override { return "General"; }
   void buildTargetFunction() const override;
-  std::string
-  asString(const std::string &parentLocalAttributesStr = "") const override;
 
 protected:
+  std::string
+  writeToString(const std::string &parentLocalAttributesStr = "") const override;
   void updateTargetFunction() const override;
 
 private:

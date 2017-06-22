@@ -395,13 +395,23 @@ std::string IFunction::writeConstraints() const {
 }
 
 /**
- * Writes a string that can be used in Fit.IFunction to create a copy of this
+ * Writes a string that can be used in FunctionFunctory to create a copy of this
  * IFunction
- * @param localAttributesStr :: A preformatted string with local attributes.
- *    Can be passed in by a CompositeFunction (eg MultiDomainFunction).
  * @return string representation of the function
  */
-std::string IFunction::asString(const std::string &localAttributesStr) const {
+std::string IFunction::asString() const {
+  return writeToString();
+}
+
+/**
+ * Writes this function into a string.
+ * @param parentLocalAttributesStr :: A preformatted string with local
+ * attributes of a parent composite function. Can be passed in by a
+ * CompositeFunction (eg MultiDomainFunction).
+ * @return string representation of the function
+ */
+std::string
+IFunction::writeToString(const std::string &parentLocalAttributesStr) const {
   std::ostringstream ostr;
   ostr << "name=" << this->name();
   // print the attributes
@@ -442,7 +452,7 @@ std::string IFunction::asString(const std::string &localAttributesStr) const {
          << ")";
   }
   // "local" attributes of a parent composite function
-  ostr << localAttributesStr;
+  ostr << parentLocalAttributesStr;
   return ostr.str();
 }
 

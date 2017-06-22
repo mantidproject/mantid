@@ -36,9 +36,9 @@ CompositeFunction::CompositeFunction()
 void CompositeFunction::init() {}
 
 /**
- * Writes itself into a string. Functions derived from CompositeFunction must
- * override this method with something like this:
- *   std::string NewFunction::asString()const
+ * Writes itself into a string. Functions derived from CompositeFunction may
+ * need to override this method with something like this:
+ *   std::string NewFunction::writeToString()const
  *   {
  *      ostr << "composite=" << this->name() << ';';
  *      // write NewFunction's own attributes and parameters
@@ -52,7 +52,7 @@ void CompositeFunction::init() {}
  * @return the string representation of the composite function
  */
 std::string
-CompositeFunction::asString(const std::string &parentLocalAttributesStr) const {
+CompositeFunction::writeToString(const std::string &parentLocalAttributesStr) const {
   std::ostringstream ostr;
 
   // if empty just return function name
@@ -89,7 +89,7 @@ CompositeFunction::asString(const std::string &parentLocalAttributesStr) const {
                            << localAttValue;
       }
     }
-    ostr << fun->asString(localAttributesStr.str());
+    ostr << fun->writeToString(localAttributesStr.str());
     if (isComp)
       ostr << ')';
     if (i < nFunctions() - 1) {

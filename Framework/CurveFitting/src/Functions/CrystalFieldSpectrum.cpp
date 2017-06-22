@@ -97,7 +97,7 @@ void CrystalFieldSpectrum::updateTargetFunction() const {
 }
 
 /// Custom string conversion method
-std::string CrystalFieldSpectrum::asString(
+std::string CrystalFieldSpectrum::writeToString(
     const std::string &parentLocalAttributesStr) const {
   std::ostringstream ostr;
   ostr << "name=" << this->name();
