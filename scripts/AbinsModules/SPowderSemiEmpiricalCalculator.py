@@ -524,6 +524,9 @@ class SPowderSemiEmpiricalCalculator(object):
         else:
             rebined_broad_spectrum = self._fix_empty_array()
 
+        # multiply by k-point weight
+        rebined_broad_spectrum = rebined_broad_spectrum * self._weight
+
         return local_freq, local_coeff, rebined_broad_spectrum
 
     # noinspection PyUnusedLocal
