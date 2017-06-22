@@ -18,7 +18,8 @@ from sans.state.adjustment import (StateAdjustment)
 from sans.state.convert_to_q import (StateConvertToQ)
 
 from state_test_helper import assert_validate_error, assert_raises_nothing
-from sans.common.enums import SANSInstrument
+from sans.common.enums import (SANSInstrument, SANSFacility)
+
 
 # ----------------------------------------------------------------------------------------------------------------------
 #  State
@@ -106,6 +107,7 @@ class StateTest(unittest.TestCase):
                            "save": MockStateSave(), "scale": MockStateScale(), "adjustment": MockStateAdjustment(),
                            "convert_to_q": MockStateConvertToQ()}
         default_entries["data"].instrument = SANSInstrument.LARMOR
+        default_entries["data"].facility = SANSFacility.ISIS
 
         for key, value in list(default_entries.items()):
             if key in entries:
