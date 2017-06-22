@@ -353,8 +353,8 @@ public:
   const std::vector<Geometry::ComponentID> &componentIds() const;
   void
   setDetectorInfo(boost::shared_ptr<const Beamline::DetectorInfo> detectorInfo);
-  void
-  setComponentInfo(boost::shared_ptr<const Beamline::ComponentInfo> componentInfo);
+  void setComponentInfo(
+      boost::shared_ptr<const Beamline::ComponentInfo> componentInfo);
   void setInstrument(const Instrument *instrument);
 
 private:
