@@ -1,7 +1,6 @@
 #pylint: disable=invalid-name
 import sys
 from scripter import BaseScriptElement
-import sys
 
 # Check whether we are running in MantidPlot
 IS_IN_MANTIDPLOT = False
