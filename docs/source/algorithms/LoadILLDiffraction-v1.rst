@@ -40,7 +40,7 @@ Output:
 
 **Example - LoadILLDiffraction - D20 temperature scan**
 
-.. testcode:: LoadILLDiffractionScanExample
+.. testcode:: LoadILLDiffractionTemperatureScanExample
 
    ws = LoadILLDiffraction(Filename='ILL/D20/000017.nxs')
 
@@ -54,7 +54,7 @@ Output:
 
 **Example - LoadILLDiffraction - D2B detector scan**
 
-.. testcode:: LoadILLDiffractionTemperatureScanExample
+.. testcode:: LoadILLDiffractionDetectorScanExample
 
    ws = LoadILLDiffraction(Filename='ILL/D2B/508093.nxs')
 
@@ -62,7 +62,7 @@ Output:
 
 Output:
 
-.. testoutput:: LoadILLDiffractionScanExample
+.. testoutput:: LoadILLDiffractionDetectorScanExample
 
    The output has 1 bins (detector scan) and 409625 spectra
 
