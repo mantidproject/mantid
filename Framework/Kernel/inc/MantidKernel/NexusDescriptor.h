@@ -1,7 +1,6 @@
 #ifndef MANTID_KERNEL_NEXUSDESCRIPTOR_H_
 #define MANTID_KERNEL_NEXUSDESCRIPTOR_H_
 
-#include "MantidKernel/ClassMacros.h"
 #include "MantidKernel/DllConfig.h"
 
 #include <map>
@@ -67,6 +66,15 @@ public:
   /// Destructor
   ~NexusDescriptor();
 
+  /// Disable default constructor
+  NexusDescriptor() = delete;
+
+  /// Disable copy operator
+  NexusDescriptor(const NexusDescriptor &) = delete;
+
+  /// Disable assignment operator
+  NexusDescriptor &operator=(const NexusDescriptor &) = delete;
+
   /**
    * Access the filename
    * @returns A reference to a const string containing the filename
@@ -98,9 +106,6 @@ public:
   bool classTypeExists(const std::string &classType) const;
 
 private:
-  DISABLE_DEFAULT_CONSTRUCT(NexusDescriptor)
-  DISABLE_COPY_AND_ASSIGN(NexusDescriptor)
-
   /// Initialize object with filename
   void initialize(const std::string &filename);
   /// Walk the tree and cache the structure

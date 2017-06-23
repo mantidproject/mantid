@@ -196,6 +196,6 @@ class REFLSFCalculatorScripter(BaseReductionScripter):
                             item.state().update()
                         except:
                             pass
-                raise RuntimeError(sys.exc_value)
+                raise RuntimeError(sys.exc_info()[1])
         else:
             raise RuntimeError("SF calculation could not be executed: Mantid could not be imported")

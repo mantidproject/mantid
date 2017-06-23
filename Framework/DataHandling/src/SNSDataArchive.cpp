@@ -39,6 +39,14 @@ DECLARE_ARCHIVESEARCH(SNSDataArchive, SNSDataSearch)
 std::string
 SNSDataArchive::getArchivePath(const std::set<std::string> &filenames,
                                const std::vector<std::string> &exts) const {
+  g_log.debug() << "getArchivePath([ ";
+  for (const auto iter : filenames)
+    g_log.debug() << iter << " ";
+  g_log.information() << "], [ ";
+  for (const auto iter : exts)
+    g_log.debug() << iter << " ";
+  g_log.debug() << "])\n";
+
   auto iter = filenames.cbegin();
   std::string filename = *iter;
 

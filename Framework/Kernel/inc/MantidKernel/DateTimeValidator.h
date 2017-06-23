@@ -1,7 +1,10 @@
 #ifndef MANTID_KERNEL_DATETIMEVALIDATOR_H_
 #define MANTID_KERNEL_DATETIMEVALIDATOR_H_
 
+#include "MantidKernel/DllConfig.h"
 #include "MantidKernel/TypedValidator.h"
+#include "MantidKernel/IValidator.h"
+#include <string>
 
 namespace Mantid {
 namespace Kernel {

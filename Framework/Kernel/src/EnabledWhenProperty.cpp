@@ -1,8 +1,14 @@
 #include "MantidKernel/EnabledWhenProperty.h"
 
+#include "MantidKernel/Exception.h"
+#include "MantidKernel/IPropertyManager.h"
+#include "MantidKernel/Property.h"
+
 #include <boost/lexical_cast.hpp>
+
 #include <exception>
 #include <memory>
+#include <stdexcept>
 
 using namespace Mantid::Kernel;
 

@@ -6,11 +6,15 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidDataHandling/SaveGSS.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidKernel/make_unique.h"
+#include "MantidTestHelpers/FileComparisonHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
+
 #include "cxxtest/TestSuite.h"
 
 #include <Poco/File.h>
 #include <Poco/Glob.h>
+#include <Poco/TemporaryFile.h>
 #include <fstream>
 
 using namespace Mantid;
@@ -52,26 +56,33 @@ void populateWorkspaceWithLogData(MatrixWorkspace *wsPointer) {
   }
 }
 
-/**
-  * Generates a fully defined instrument with specified number
-  * of histograms and bins for the test
-  *
-  * @param numHistograms :: The number of histograms the output workspace should
-  *have
-  * @param numBins :: The number of bins the workspace should have
-  * @return :: A workspace with logarithmic binning and test data
-  */
-API::MatrixWorkspace_sptr generateTestMatrixWorkspace(int numHistograms,
+// Generates a test matrix workspace populated with data and registers it into
+// the ADS
+API::MatrixWorkspace_sptr generateTestMatrixWorkspace(const std::string &wsName,
+                                                      int numHistograms,
                                                       int numBins) {
   // Create workspace
   MatrixWorkspace_sptr dataws = boost::dynamic_pointer_cast<MatrixWorkspace>(
       WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(
           numHistograms, numBins, false, false, true, "TestFake"));
   populateWorkspaceWithLogData(dataws.get());
-
+  AnalysisDataService::Instance().addOrReplace(wsName, dataws);
   return dataws;
 }
+
+// Generates a matrix WS with no instrument but with data and registers it into
+// ADS
+API::MatrixWorkspace_sptr generateNoInstWorkspace(const std::string &wsName,
+                                                  int numHistograms,
+                                                  int numBins) {
+  MatrixWorkspace_sptr dataws =
+      WorkspaceCreationHelper::create2DWorkspace(numHistograms, numBins);
+  populateWorkspaceWithLogData(dataws.get());
+  AnalysisDataService::Instance().addOrReplace(wsName, dataws);
+  return dataws;
 }
+
+} // End of anonymous namespace
 
 class SaveGSSTest : public CxxTest::TestSuite {
 public:
@@ -82,260 +93,91 @@ public:
     TS_ASSERT_EQUALS(saver.version(), 1)
   }
 
-  //----------------------------------------------------------------------------------------------
-  /** Save a 2 banks diffraction data with instrument
-    */
-  void test_2BankInstrument() {
-    // Create a workspace for writing out
-    MatrixWorkspace_sptr dataws =
-        generateTestMatrixWorkspace(m_defaultNumHistograms, m_defaultNumBins);
-    AnalysisDataService::Instance().addOrReplace("Test2BankWS", dataws);
-
-    Mantid::DataHandling::SaveGSS saver;
-    saver.initialize();
-
-    // Set properties
-    TS_ASSERT_THROWS_NOTHING(
-        saver.setPropertyValue("InputWorkspace", "Test2BankWS"));
-    TS_ASSERT_THROWS_NOTHING(saver.setProperty("Filename", "test1.gsa"));
-    TS_ASSERT_THROWS_NOTHING(saver.setProperty("Format", "SLOG"));
-    TS_ASSERT_THROWS_NOTHING(saver.setProperty("SplitFiles", false));
-    TS_ASSERT_THROWS_NOTHING(saver.setProperty("MultiplyByBinWidth", false));
-    TS_ASSERT_THROWS_NOTHING(saver.setProperty("Append", false));
+  void test_2BankInstrumentSLOG() {
+    // Save a 2 banks diffraction data with instrument using SLOG format
+    const std::string wsName = "SaveGSS_2BankSLOG";
+    auto dataws = generateTestMatrixWorkspace(wsName, m_defaultNumHistograms,
+                                              m_defaultNumBins);
+    // Get the output file handle
+    auto outputFileHandle = Poco::TemporaryFile();
+    const std::string outPath = outputFileHandle.path();
 
     // Execute
-    saver.execute();
-    TS_ASSERT(saver.isExecuted());
+    auto alg = setupSaveGSSAlg(outPath, wsName, "SLOG");
+    alg->execute();
+    TS_ASSERT(alg->isExecuted());
 
-    // Check result
-    // locate output file
-    std::string outfilepath = saver.getPropertyValue("Filename");
-    std::cout << "Output file is located at " << outfilepath << "\n";
-
-    Poco::File gsasfile(outfilepath);
-    TS_ASSERT(gsasfile.exists());
-
-    // check file
-    if (gsasfile.exists()) {
-      size_t numlines = 0;
-      std::ifstream fs_gsas(outfilepath.c_str());
-      std::string line;
-      while (std::getline(fs_gsas, line)) {
-        size_t linenumber = numlines;
-        std::stringstream liness(line);
-        if (linenumber == 11) {
-          std::string bank;
-          int banknumber;
-          liness >> bank >> banknumber;
-          TS_ASSERT_EQUALS(bank, "BANK");
-          TS_ASSERT_EQUALS(banknumber, 1);
-        } else if (linenumber == 60) {
-          double x, y, e;
-          liness >> x >> y >> e;
-          TS_ASSERT_DELTA(x, 8101.43, 0.01);
-          TS_ASSERT_DELTA(y, 688.18, 0.01);
-          TS_ASSERT_DELTA(e, 26.23, 0.01);
-        } else if (linenumber == 114) {
-          std::string bank;
-          int banknumber;
-          liness >> bank >> banknumber;
-          TS_ASSERT_EQUALS(bank, "BANK");
-          TS_ASSERT_EQUALS(banknumber, 2);
-        } else if (linenumber == 173) {
-          double x, y, e;
-          liness >> x >> y >> e;
-          TS_ASSERT_DELTA(x, 8949.02, 0.01);
-          TS_ASSERT_DELTA(y, 1592.26, 0.01);
-          TS_ASSERT_DELTA(e, 39.90, 0.01);
-        }
-
-        ++numlines;
-      }
-
-      TS_ASSERT_EQUALS(numlines, 215);
-    }
+    // Check file is identical
+    TS_ASSERT(FileComparisonHelper::isEqualToReferenceFile(
+        "SaveGSS_test2BankInstSLOG_Ref.gsa", outPath));
 
     // Clean
-    AnalysisDataService::Instance().remove("Test2BankWS");
-    if (gsasfile.exists())
-      gsasfile.remove();
-
-    return;
+    AnalysisDataService::Instance().remove(wsName);
   }
 
-  //----------------------------------------------------------------------------------------------
-  /** Save a 2 banks diffraction data with instrument
-    */
   void test_2BankInstrumentRALF() {
-    // Create a workspace for writing out
-    MatrixWorkspace_sptr dataws =
-        generateTestMatrixWorkspace(m_defaultNumHistograms, m_defaultNumBins);
-    AnalysisDataService::Instance().addOrReplace("Test2BankWS", dataws);
-
-    Mantid::DataHandling::SaveGSS saver;
-    saver.initialize();
-
-    // Set properties
-    TS_ASSERT_THROWS_NOTHING(
-        saver.setPropertyValue("InputWorkspace", "Test2BankWS"));
-    TS_ASSERT_THROWS_NOTHING(saver.setProperty("Filename", "test1r.gsa"));
-    TS_ASSERT_THROWS_NOTHING(saver.setProperty("Format", "RALF"));
-    TS_ASSERT_THROWS_NOTHING(saver.setProperty("SplitFiles", false));
-    TS_ASSERT_THROWS_NOTHING(saver.setProperty("MultiplyByBinWidth", false));
-    TS_ASSERT_THROWS_NOTHING(saver.setProperty("Append", false));
+    // Save a 2 banks diffraction data with RALF format
+    const std::string wsName = "SaveGSS_2BankRALF";
+    auto dataws = generateTestMatrixWorkspace(wsName, m_defaultNumHistograms,
+                                              m_defaultNumBins);
+    // Get file handle
+    auto outFileHandle = Poco::TemporaryFile();
+    const std::string outFilePath = outFileHandle.path();
 
     // Execute
-    saver.execute();
-    TS_ASSERT(saver.isExecuted());
+    auto alg = setupSaveGSSAlg(outFilePath, wsName, "RALF");
+    alg->execute();
+    TS_ASSERT(alg->isExecuted());
 
     // Check result
-    // locate output file
-    std::string outfilepath = saver.getPropertyValue("Filename");
-    std::cout << "Output file is located at " << outfilepath << "\n";
-
-    Poco::File gsasfile(outfilepath);
-    TS_ASSERT(gsasfile.exists());
-
-    // check file
-    if (gsasfile.exists()) {
-      size_t numlines = 0;
-      std::ifstream fs_gsas(outfilepath.c_str());
-      std::string line;
-      while (std::getline(fs_gsas, line)) {
-        size_t linenumber = numlines;
-        std::stringstream liness(line);
-        if (linenumber == 8) {
-          std::string bank;
-          int banknumber;
-          liness >> bank >> banknumber;
-          TS_ASSERT_EQUALS(bank, "BANK");
-          TS_ASSERT_EQUALS(banknumber, 1);
-        } else if (linenumber == 57) {
-          double x, y, e;
-          liness >> x >> y >> e;
-          TS_ASSERT_DELTA(x, 8101.43, 0.01);
-          TS_ASSERT_DELTA(y, 688.18, 0.01);
-          TS_ASSERT_DELTA(e, 26.23, 0.01);
-        } else if (linenumber == 111) {
-          std::string bank;
-          int banknumber;
-          liness >> bank >> banknumber;
-          TS_ASSERT_EQUALS(bank, "BANK");
-          TS_ASSERT_EQUALS(banknumber, 2);
-        } else if (linenumber == 170) {
-          double x, y, e;
-          liness >> x >> y >> e;
-          TS_ASSERT_DELTA(x, 8949.02, 0.01);
-          TS_ASSERT_DELTA(y, 1592.26, 0.01);
-          TS_ASSERT_DELTA(e, 39.90, 0.01);
-        }
-
-        ++numlines;
-      }
-
-      TS_ASSERT_EQUALS(numlines, 212);
-    }
+    TS_ASSERT(FileComparisonHelper::isEqualToReferenceFile(
+        "SaveGSS_test2BankInstRALF_Ref.gsa", outFilePath));
 
     // Clean
-    AnalysisDataService::Instance().remove("Test2BankWS");
-    if (gsasfile.exists())
-      gsasfile.remove();
-
-    return;
+    AnalysisDataService::Instance().remove(wsName);
   }
 
-  //----------------------------------------------------------------------------------------------
-  /** Save a 2 bank workspace in point data format and without instrument
-    */
   void test_2BankNoInstrumentData() {
-    MatrixWorkspace_sptr dataws =
-        generateNoInstrumentWorkspace(m_defaultNumHistograms, m_defaultNumBins);
-
-    AnalysisDataService::Instance().addOrReplace("TestNoInstWS", dataws);
-
-    Mantid::DataHandling::SaveGSS saver;
-    saver.initialize();
-
-    // Set properties
-    TS_ASSERT_THROWS_NOTHING(
-        saver.setPropertyValue("InputWorkspace", "TestNoInstWS"));
-    TS_ASSERT_THROWS_NOTHING(saver.setProperty("Filename", "test2.gsa"));
-    TS_ASSERT_THROWS_NOTHING(saver.setProperty("Format", "SLOG"));
-    TS_ASSERT_THROWS_NOTHING(saver.setProperty("SplitFiles", false));
-    TS_ASSERT_THROWS_NOTHING(saver.setProperty("MultiplyByBinWidth", false));
-    TS_ASSERT_THROWS_NOTHING(saver.setProperty("Append", false));
+    // Test saving a 2 bank workspace in point data format and without
+    // instrument
+    const std::string wsName = "SaveGSS_NoInstWs";
+    auto dataws = generateNoInstWorkspace(wsName, m_defaultNumHistograms,
+                                          m_defaultNumBins);
+    // Get file handle
+    auto outFileHandle = Poco::TemporaryFile();
+    const std::string outFilePath = outFileHandle.path();
 
     // Execute
-    saver.execute();
-    TS_ASSERT(saver.isExecuted());
+    auto alg = setupSaveGSSAlg(outFilePath, wsName, "SLOG");
+    alg->execute();
+    TS_ASSERT(alg->isExecuted());
 
-    // Check result
-    // locate output file
-    std::string outfilepath = saver.getPropertyValue("Filename");
-    std::cout << "Output file is located at " << outfilepath << "\n";
-
-    Poco::File gsasfile(outfilepath);
-    TS_ASSERT(gsasfile.exists());
-
-    // check file
-    if (gsasfile.exists()) {
-      size_t numlines = 0;
-      std::ifstream fs_gsas(outfilepath.c_str());
-      std::string line;
-      while (std::getline(fs_gsas, line)) {
-        size_t linenumber = numlines;
-        std::stringstream liness(line);
-        if (linenumber == 10) {
-          std::string bank;
-          int banknumber;
-          liness >> bank >> banknumber;
-          TS_ASSERT_EQUALS(bank, "BANK");
-          TS_ASSERT_EQUALS(banknumber, 1);
-        } else if (linenumber == 59) {
-          double x, y, e;
-          liness >> x >> y >> e;
-          TS_ASSERT_DELTA(x, 8101.43, 0.01);
-          TS_ASSERT_DELTA(y, 688.18, 0.01);
-          TS_ASSERT_DELTA(e, 26.23, 0.01);
-        } else if (linenumber == 112) {
-          std::string bank;
-          int banknumber;
-          liness >> bank >> banknumber;
-          TS_ASSERT_EQUALS(bank, "BANK");
-          TS_ASSERT_EQUALS(banknumber, 2);
-        } else if (linenumber == 171) {
-          double x, y, e;
-          liness >> x >> y >> e;
-          TS_ASSERT_DELTA(x, 8949.02, 0.01);
-          TS_ASSERT_DELTA(y, 1592.26, 0.01);
-          TS_ASSERT_DELTA(e, 39.90, 0.01);
-        }
-
-        ++numlines;
-      }
-
-      TS_ASSERT_EQUALS(numlines, 213);
-    }
+    TS_ASSERT(FileComparisonHelper::isEqualToReferenceFile(
+        "SaveGSS_test2BankNoInst_Ref.gsa", outFilePath));
 
     // Clean
-    AnalysisDataService::Instance().remove("TestNoInstWS");
-    if (gsasfile.exists())
-      gsasfile.remove();
-
-    return;
+    AnalysisDataService::Instance().remove(wsName);
   }
 
 private:
-  API::MatrixWorkspace_sptr generateNoInstrumentWorkspace(int numHistograms,
-                                                          int numBins) {
-    MatrixWorkspace_sptr dataws =
-        WorkspaceCreationHelper::create2DWorkspace(numHistograms, numBins);
-    populateWorkspaceWithLogData(dataws.get());
-    return dataws;
-  }
-
   const int m_defaultNumHistograms = 2;
   const int m_defaultNumBins = 100;
+
+  std::unique_ptr<SaveGSS> setupSaveGSSAlg(const std::string &filePath,
+                                           const std::string &wsName,
+                                           const std::string &formatMode) {
+    auto saver = Kernel::make_unique<SaveGSS>();
+    saver->initialize();
+    saver->setRethrows(true);
+    // Set properties
+    TS_ASSERT_THROWS_NOTHING(saver->setPropertyValue("InputWorkspace", wsName));
+    TS_ASSERT_THROWS_NOTHING(saver->setProperty("Filename", filePath));
+    TS_ASSERT_THROWS_NOTHING(saver->setProperty("Format", formatMode));
+    TS_ASSERT_THROWS_NOTHING(saver->setProperty("SplitFiles", false));
+    TS_ASSERT_THROWS_NOTHING(saver->setProperty("MultiplyByBinWidth", false));
+    TS_ASSERT_THROWS_NOTHING(saver->setProperty("Append", false));
+    return saver;
+  }
 };
 
 class SaveGSSTestPerformance : public CxxTest::TestSuite {
@@ -343,7 +185,7 @@ public:
   void setUp() override {
     // Create a workspace for writing out
     MatrixWorkspace_sptr dataws =
-        generateTestMatrixWorkspace(2, m_numberOfBinsToSave);
+        generateTestMatrixWorkspace(wsName, 2, m_numberOfBinsToSave);
     AnalysisDataService::Instance().addOrReplace(wsName, dataws);
 
     m_alg = new SaveGSS();

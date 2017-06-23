@@ -17,6 +17,8 @@ OS X
 User Interface
 --------------
 
+- Choosing 'Show Detectors' for a workspace will now also show the time indexes for scanning workspaces.
+
 Instrument View
 ###############
 

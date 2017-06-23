@@ -234,9 +234,7 @@ class DataSets(BaseScriptElement):
         self.reset()
         dom = xml.dom.minidom.parseString(xml_str)
         self.from_xml_element(dom)
-        element_list = dom.getElementsByTagName("RefMData")
-        if len(element_list) > 0:
-            instrument_dom = element_list[0]
+        dom.getElementsByTagName("RefMData")
 
     def from_xml_element(self, instrument_dom):
         """

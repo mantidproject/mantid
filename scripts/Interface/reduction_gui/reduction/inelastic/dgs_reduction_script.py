@@ -100,10 +100,7 @@ class DgsReductionScripter(BaseReductionScripter):
                             options += subitem
 
         if '_spe' in output_workspace:
-            output_workspace_name = 'live_spe'
             output_workspace = 'OutputWorkspace="live_spe"'
-        else:
-            output_workspace_name = output_workspace.split('"')[1]
 
         script = """StartLiveData(UpdateEvery='10',Instrument='"""
         script += self.instrument_name
