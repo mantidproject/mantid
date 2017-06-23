@@ -166,11 +166,8 @@ private:
   void populateFitMenuButton(QSignalMapper *fitMapper, QMenu *fitMenu) override;
   void rescaleWS(const std::map<std::string, double>norm,const std::string wsName,const double shift);
   void rescaleWS(const double norm, const std::string wsName, const double shift);
-
-  std::string getTFAsymmFitFunction(const std::string original, const std::vector< double> norm);
-
-  Mantid::API::IFunction_sptr test(Mantid::API::IFunction_sptr original,const std::vector<double> norms);
-
+  Mantid::API::IFunction_sptr getTFAsymmFitFunction(Mantid::API::IFunction_sptr original,const std::vector<double> norms);
+  void updateMultipleNormalization(std::map<std::string, double > norms);
   /// Get the registered function names
   void populateFunctionNames() override;
   /// Check if the workspace can be used in the fit

@@ -373,6 +373,7 @@ void MuonAnalysisFitDataPresenter::storeNorm(std::string name) const {
 			AnalysisDataService::Instance().addOrReplace("multiNorm", table);
 			table->addColumn("double", "norm");
 			table->addColumn("str", "name");
+			table->addColumn("str", "method");
 		}
 		Mantid::API::ITableWorkspace_sptr table =
 			boost::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(
@@ -388,7 +389,7 @@ void MuonAnalysisFitDataPresenter::storeNorm(std::string name) const {
 					Mantid::API::AnalysisDataService::Instance().retrieve("__norm__"));
 			auto colNorm = tmpNorm->getColumn("norm");
 			//saves data
-			row << (*colNorm)[0] << tmp;
+			row << (*colNorm)[0] << tmp<<"Estimate";
 		}
 	}
 	
