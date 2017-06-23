@@ -15,6 +15,7 @@ New
 Improved
 ########
 
+- :ref:`LoadBBY <algm-LoadBBY-v1>` is now better at handling sample information. 
 
 Deprecated
 ##########
