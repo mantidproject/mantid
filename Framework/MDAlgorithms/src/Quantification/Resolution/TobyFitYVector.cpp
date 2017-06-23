@@ -5,6 +5,7 @@
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/ModeratorModel.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
+#include "MantidKernel/Matrix.h"
 
 namespace Mantid {
 namespace MDAlgorithms {
