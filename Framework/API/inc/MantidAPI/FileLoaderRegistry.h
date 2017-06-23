@@ -4,7 +4,7 @@
 #include "MantidAPI/AlgorithmFactory.h"
 #include "MantidAPI/IFileLoader.h"
 #include "MantidKernel/SingletonHolder.h"
-
+ 
 #ifndef Q_MOC_RUN
 #include <type_traits>
 #endif
@@ -14,12 +14,13 @@
 #include <vector>
 
 namespace Mantid {
-// Forward declaration
 namespace Kernel {
+
 class Logger;
+
 }
 namespace API {
-// Forward declaration
+
 class IAlgorithm;
 
 /**
