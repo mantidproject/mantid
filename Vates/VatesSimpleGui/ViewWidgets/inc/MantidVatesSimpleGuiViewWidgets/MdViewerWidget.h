@@ -20,6 +20,7 @@
 class pqApplicationSettingsReaction;
 class pqLoadDataReaction;
 class pqPipelineSource;
+class pqSaveScreenshotReaction;
 
 // forward declaration of Qt classes
 class QAction;
@@ -35,7 +36,6 @@ namespace Vates {
 namespace SimpleGui {
 
 class RotationPointDialog;
-class SaveScreenshotReaction;
 class ViewBase;
 class RebinDialog;
 class ColorMapEditorPanel;
@@ -161,7 +161,7 @@ private:
   QAction *lodAction;  ///< Holder for the LOD threshold menu item
   bool pluginMode;     ///< Flag to say widget is in plugin mode
   RotationPointDialog *rotPointDialog; ///< Holder for the rotation point dialog
-  SaveScreenshotReaction *screenShot;  ///< Holder for the screen shot reaction
+  pqSaveScreenshotReaction *screenShot; ///< Holder for the screen shot reaction
   Ui::MdViewerWidgetClass ui;          ///< The MD viewer's UI form
   QHBoxLayout *viewLayout;             ///< Layout manager for the view widget
   pqApplicationSettingsReaction *

@@ -26,7 +26,6 @@
 #include "MantidVatesSimpleGuiViewWidgets/ColorSelectionWidget.h"
 #include "MantidVatesSimpleGuiViewWidgets/MdViewerWidget.h"
 #include "MantidVatesSimpleGuiViewWidgets/MultisliceView.h"
-#include "MantidVatesSimpleGuiViewWidgets/SaveScreenshotReaction.h"
 #include "MantidVatesSimpleGuiViewWidgets/SplatterPlotView.h"
 #include "MantidVatesSimpleGuiViewWidgets/StandardView.h"
 #include "MantidVatesSimpleGuiViewWidgets/ThreesliceView.h"
@@ -37,10 +36,6 @@
 #include "boost/shared_ptr.hpp"
 #include "boost/scoped_ptr.hpp"
 
-// Have to deal with ParaView warnings and Intel compiler the hard way.
-#if defined(__INTEL_COMPILER)
-#pragma warning disable 1170
-#endif
 #include <pqActiveObjects.h>
 #include <pqAnimationManager.h>
 #include <pqAnimationScene.h>
@@ -56,6 +51,7 @@
 #include <pqPipelineRepresentation.h>
 #include <pqPipelineSource.h>
 #include <pqRenderView.h>
+#include <pqSaveScreenshotReaction.h>
 #include <pqServer.h>
 #include <pqServerManagerModel.h>
 #include <pqSettings.h>
@@ -1367,7 +1363,7 @@ void MdViewerWidget::createMenus() {
   screenShotAction->setShortcut(QKeySequence::fromString("Ctrl+Shift+R"));
   screenShotAction->setStatusTip(
       QApplication::tr("Save a screenshot of the current view."));
-  this->screenShot = new SaveScreenshotReaction(screenShotAction);
+  this->screenShot = new pqSaveScreenshotReaction(screenShotAction);
   viewMenu->addAction(screenShotAction);
 
   QAction *settingsAction = new QAction(QApplication::tr("Settings..."), this);
