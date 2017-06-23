@@ -697,4 +697,4 @@ Lets put it all together into a complex Python script. The script below reduces 
         )
         SaveNexus('SofQW2-{}K'.format(T), '/data/output2-{}.nxs'.format(T))
 
-.. categories: Concepts
+.. categories:: Concepts
