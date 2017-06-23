@@ -847,3 +847,5 @@ On PEARL this is set to the following:
     vanadium_tof_cropping: (1400, 19990)
   # Long mode ON:
     vanadium_tof_cropping: (20295, 39993)
+
+.. categories:: Techniques
