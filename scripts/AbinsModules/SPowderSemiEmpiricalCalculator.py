@@ -235,31 +235,6 @@ class SPowderSemiEmpiricalCalculator(object):
         self._s_current_threshold = np.copy(self._s_threshold_ref)
         self._total_s_correction_num_attempt = 0
 
-    def _get_gamma_data(self, k_data=None):
-        """
-        Extracts k points data only for Gamma point.
-        :return: dictionary with data only for Gamma point
-        """
-        gamma_pkt_index = -1
-
-        # look for index of Gamma point
-        for k in k_data["k_vectors"]:
-            if np.linalg.norm(k_data["k_vectors"][k]) < AbinsModules.AbinsConstants.SMALL_K:
-                gamma_pkt_index = k
-                break
-        if gamma_pkt_index == -1:
-            raise ValueError("Gamma point not found.")
-
-        gamma = AbinsModules.AbinsConstants.GAMMA_POINT
-
-        k_points = {"weights": {gamma: k_data["weights"][gamma_pkt_index]},
-                    "k_vectors": {gamma: k_data["k_vectors"][gamma_pkt_index]},
-                    "frequencies": {gamma: k_data["frequencies"][gamma_pkt_index]},
-                    "atomic_displacements": {gamma: k_data["atomic_displacements"][gamma_pkt_index]}
-                    }
-
-        return k_points
-
     def _calculate_s_powder_over_k(self):
         """
         Helper function. It calculates S for all q points  and all atoms.
