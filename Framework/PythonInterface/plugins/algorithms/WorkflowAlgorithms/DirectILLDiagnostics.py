@@ -319,7 +319,7 @@ class DirectILLDiagnostics(DataProcessorAlgorithm):
 
         # Apply hard mask.
         progress.report('Applying default mask')
-        maskWS = self._applyDefaultMask(maskWS, wsNames, wsCleanup, subalgLogging)
+        maskWS = self._applyDefaultMask(maskWS, wsNames, wsCleanup, report, subalgLogging)
 
         # Apply user mask.
         progress.report('Applying hard mask')
@@ -502,16 +502,18 @@ class DirectILLDiagnostics(DataProcessorAlgorithm):
                 issues[common.PROP_EPP_WS] = 'An EPP table is needed for background diagnostics.'
         return issues
 
-    def _applyDefaultMask(self, maskWS, wsNames, wsCleanup, algorithmLogging):
+    def _applyDefaultMask(self, maskWS, wsNames, wsCleanup, report, algorithmLogging):
         """Apply instrument specific default mask to a workspace."""
         option = self.getProperty(common.PROP_DEFAULT_MASK).value
         if option == common.DEFAULT_MASK_OFF:
             return maskWS
-        instrumentName = maskWS.getInstrument().getName()
-        if instrumentName == 'IN5':
-            maskFile = os.path.join(mantid.config.getInstrumentDirectory(), 'masks' , 'IN5_Mask.xml')
+        instrument = maskWS.getInstrument()
+        instrumentName = instrument.getName()
+        if instrument.hasParameter('Workflow.MaskFile'):
+            maskFilename = instrument.getStringParameter('Workflow.MaskFile')[0]
+            maskFile = os.path.join(mantid.config.getInstrumentDirectory(), 'masks', maskFilename)
             defaultMaskWSName = wsNames.withSuffix('default_mask')
-            defaultMaskWS = LoadMask(Instrument='IN5',
+            defaultMaskWS = LoadMask(Instrument=instrumentName,
                                      InputFile=maskFile,
                                      RefWorkspace=maskWS,
                                      OutputWorkspace=defaultMaskWSName,
@@ -520,6 +522,9 @@ class DirectILLDiagnostics(DataProcessorAlgorithm):
                           MaskedWorkspace=defaultMaskWS,
                           EnableLogging=algorithmLogging)
             wsCleanup.cleanup(defaultMaskWS)
+            report.notice('Applied default mask from ' + maskFilename)
+        else:
+            report.notice('No default mask available for ' + instrumentName + '.')
         return maskWS
 
     def _applyUserMask(self, maskWS, wsNames, wsCleanup, algorithmLogging):

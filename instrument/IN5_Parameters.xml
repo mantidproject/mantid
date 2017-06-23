@@ -40,6 +40,9 @@
 		<parameter name="enable_elastic_channel_fitting" type="bool">
 			<value val="true" />
 		</parameter>
+		<parameter name="Workflow.MaskFile" type="string">
+			<value val="IN5_Mask.xml" />
+		</parameter>
 		<!-- MergeRuns behavior when merging sample logs. -->
 		<parameter name="sample_logs_sum" type="string">
 			<value val="Detector.detsum, duration, monitor.monsum" />
