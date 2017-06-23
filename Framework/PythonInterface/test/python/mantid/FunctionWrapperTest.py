@@ -180,8 +180,29 @@ class FunctionWrapperTest(unittest.TestCase):
         self.assertEqual(g1_str.count("constraints=(Sigma<2)"),1)
         
         g.unconstrain("Sigma")
+        gz_str = g.__str__()
+        self.assertEqual(gz_str.count("constraints="),0)
+        
+    def test_free(self):
+        g = FunctionWrapper( "Gaussian", Height=8.5, Sigma=1.2, PeakCentre=15)
+        
+        g.constrain("Sigma < 2.0, Height > 7.0")
+        g.tie({"PeakCentre":"2*Height"})
+        
+        g.free("Height")
         g1_str = g.__str__()
-        self.assertEqual(g1_str.count("constraints="),0)
+        self.assertEqual(g1_str.count("ties="),1)
+        self.assertEqual(g1_str.count("constraints="),1)
+        self.assertEqual(g1_str.count("constraints=(Sigma<2)"),1)
+        
+        g.free("PeakCentre")
+        g2_str = g.__str__()
+        self.assertEqual(g2_str.count("ties="),0)
+        self.assertEqual(g2_str.count("constraints="),1)
+        
+        g.free("Sigma")
+        gz_str = g.__str__()
+        self.assertEqual(gz_str.count("constraints="),0)
        
 if __name__ == '__main__':
     unittest.main()

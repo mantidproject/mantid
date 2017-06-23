@@ -59,6 +59,11 @@ class FunctionWrapper:
   def unconstrain(self, name):
       self.fun.unconstrain(name)
       
+  def free(self, name):
+  # Free parameter from tie or constraint
+      self.fun.untie(name)
+      self.fun.unconstrain(name)
+      
   def getParameterName(self, index):
   # Get the name of the parameter of given index
       return self.fun.getParamName(index)
