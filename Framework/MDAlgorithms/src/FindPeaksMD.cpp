@@ -148,22 +148,32 @@ void FindPeaksMD::init() {
 
   setPropertySettings(
       "DensityThresholdFactor",
-      make_unique<EnabledWhenProperty>("Normalization", IS_DEFAULT));
+      make_unique<EnabledWhenProperty>("UseNumberOfEventsNormalization", IS_DEFAULT));
+
+
+  declareProperty(
+      make_unique<PropertyWithValue<bool>>("UseNumberOfEventsNormalization", false,
+                                           Direction::Input),
+      "This option is only valid for MDEventWorkspaces. The standard peak finding \n"
+      "sorts all boxes in the workspace by decreasing order of signal density \n"
+      "(total weighted event sum divided by box volume). This option will instead use\n"
+      "the total weighted event sum divded by the number of events. This can improve\n"
+      "peak finding for histogram-based raw data which has been converted to an EventWorkspace.\n"
+      "The threshold for peak finding can be controlled by the SignalThresholdFactor which\n"
+      " should be larger than 1.\n"
+      "Note that this approach does not work for event-based raw data.");
+
 
   declareProperty(make_unique<PropertyWithValue<double>>(
                       "SignalThresholdFactor", 1.5, Direction::Input),
-                  "TODO.\n"
+                  "The signal threshold factor when UseNumberOfEventsNormalization has been enabled.\n"
+                  "The value should be larger than 1.\n"
                   "Default: 1.50");
 
   setPropertySettings(
       "SignalThresholdFactor",
-      make_unique<EnabledWhenProperty>("Normalization", IS_NOT_DEFAULT));
+      make_unique<EnabledWhenProperty>("UseNumberOfEventsNormalization", IS_NOT_DEFAULT));
 
-  std::vector<std::string> normalizationOptions = {volume, numberOfEvents};
-  declareProperty("Normalization", normalizationOptions.front(),
-                  boost::make_shared<Mantid::Kernel::StringListValidator>(
-                      normalizationOptions),
-                  "TODO.");
 
   declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
@@ -304,9 +314,9 @@ void FindPeaksMD::findPeaks(typename MDEventWorkspace<MDE, nd>::sptr ws) {
     // Calculate a threshold below which a box is too diffuse to be considered a
     // peak.
     signal_t threshold =
-        m_useVolumeNormalization
-            ? ws->getBox()->getSignalNormalized() * DensityThresholdFactor
-            : ws->getBox()->getSignalByNEvents() * m_signalThresholdFactor;
+        m_useNumberOfEventsNormalization
+            ? ws->getBox()->getSignalByNEvents() * m_signalThresholdFactor
+            : ws->getBox()->getSignalNormalized() * DensityThresholdFactor;
     threshold *= m_densityScaleFactor;
 
     if (!std::isfinite(threshold)) {
@@ -339,8 +349,8 @@ void FindPeaksMD::findPeaks(typename MDEventWorkspace<MDE, nd>::sptr ws) {
     auto it1_end = boxes.end();
     for (; it1 != it1_end; it1++) {
       auto box = *it1;
-      double value = m_useVolumeNormalization ? box->getSignalNormalized()
-                                              : box->getSignalByNEvents();
+      double value = m_useNumberOfEventsNormalization ? box->getSignalByNEvents()
+                                              : box->getSignalNormalized();
       value *= m_densityScaleFactor;
       // Skip any boxes with too small a signal value.
       if (value > threshold)
@@ -631,8 +641,7 @@ void FindPeaksMD::exec() {
 
   DensityThresholdFactor = getProperty("DensityThresholdFactor");
   m_signalThresholdFactor = getProperty("SignalThresholdFactor");
-  std::string normalization = getProperty("Normalization");
-  m_useVolumeNormalization = normalization == volume;
+  m_useNumberOfEventsNormalization = getProperty("UseNumberOfEventsNormalization");
 
   m_maxPeaks = getProperty("MaxPeaks");
   m_edge = this->getProperty("EdgePixels");
@@ -657,6 +666,24 @@ void FindPeaksMD::exec() {
 
   // Save the output
   setProperty("OutputWorkspace", peakWS);
+}
+
+//----------------------------------------------------------------------------------------------
+/** Validate the inputs.
+ */
+std::map<std::string, std::string> FindPeaksMD::validateInputs() {
+  std::map<std::string, std::string> result;
+  // Check for number of event normalzation
+  const bool useNumberOfEventsNormalization = getProperty("UseNumberOfEventsNormalization");
+  IMDWorkspace_sptr inWS = getProperty("InputWorkspace");
+  IMDEventWorkspace_sptr inMDEW =
+      boost::dynamic_pointer_cast<IMDEventWorkspace>(inWS);
+
+  if (useNumberOfEventsNormalization && !inMDEW) {
+    result["UseNumberOfEventsNormalization"] =
+        "This feature can only be used with an MDEventWorkspace as the input.";
+  }
+  return result;
 }
 
 } // namespace Mantid

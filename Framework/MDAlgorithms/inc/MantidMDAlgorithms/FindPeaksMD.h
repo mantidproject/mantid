@@ -38,6 +38,8 @@ public:
     return "Optimization\\PeakFinding;MDAlgorithms\\Peaks";
   }
 
+  std::map<std::string, std::string> validateInputs() override;
+
 private:
   /// Initialise the properties
   void init() override;
@@ -101,8 +103,8 @@ private:
   static const std::string volume;
   static const std::string numberOfEvents;
 
-  /// Use volume normalization or number of events normalization
-  bool m_useVolumeNormalization = true;
+  /// Use number of events normalization for event workspaces.
+  bool m_useNumberOfEventsNormalization = false;
   /// Signal density factor
   double m_signalThresholdFactor = 1.5;
 };
