@@ -94,22 +94,22 @@ class AbinsAdvancedParametersTest(unittest.TestCase):
         AbinsParameters.fwhm = 10.0
         self.assertRaises(RuntimeError, Abins, PhononFile=self._Si2 + ".phonon", OutputWorkspace=self._wrk_name)
 
-    def test_wrong_delta_width(self):
+    def test_wrong_direct_instrument_resolution(self):
 
-        # delta_width should be a number
-        AbinsParameters.delta_width = "fd"
+        # direct_instrument_resolution should be a number
+        AbinsParameters.direct_instrument_resolution = "fd"
         self.assertRaises(RuntimeError, Abins, PhononFile=self._Si2 + ".phonon", OutputWorkspace=self._wrk_name)
 
         # delta_with is positive so it cannot be negative
-        AbinsParameters.delta_width = -0.01
+        AbinsParameters.direct_instrument_resolution = -0.01
         self.assertRaises(RuntimeError, Abins, PhononFile=self._Si2 + ".phonon", OutputWorkspace=self._wrk_name)
 
-        # delta_width should have non-zero value
-        AbinsParameters.delta_width = 0.0
+        # direct_instrument_resolution should have non-zero value
+        AbinsParameters.direct_instrument_resolution = 0.0
         self.assertRaises(RuntimeError, Abins, PhononFile=self._Si2 + ".phonon", OutputWorkspace=self._wrk_name)
 
-        # delta_width should be smaller than one
-        AbinsParameters.delta_width = 1.0
+        # direct_instrument_resolution should be smaller than one
+        AbinsParameters.direct_instrument_resolution = 1.0
         self.assertRaises(RuntimeError, Abins, PhononFile=self._Si2 + ".phonon", OutputWorkspace=self._wrk_name)
 
     # Tests for TOSCA parameters

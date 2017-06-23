@@ -449,6 +449,7 @@ class Abins(PythonAlgorithm):
         message = " in AbinsParameters.py. "
 
         self._check_general_resolution(message)
+        self._check_2d_parameters(message)
         self._check_tosca_parameters(message)
         self._check_folder_names(message)
         self._check_rebining(message)
@@ -466,10 +467,32 @@ class Abins(PythonAlgorithm):
         if not (isinstance(fwhm, float) and 0.0 < fwhm < 10.0):
             raise RuntimeError("Invalid value of fwhm" + message_end)
 
-        # check delta_width
-        delta_width = AbinsModules.AbinsParameters.delta_width
-        if not (isinstance(delta_width, float) and 0.0 < delta_width < 1.0):
-            raise RuntimeError("Invalid value of delta_width" + message_end)
+    def _check_2d_parameters(self, message_end=None):
+        """
+        Checks if parameters for 2D instruments have valid values.
+        :param message_end: closing part of the error message.
+        """
+        # check direct instrument resolution
+        direct_instrument_resolution = AbinsModules.AbinsParameters.direct_instrument_resolution
+        min_res = AbinsModules.AbinsConstants.MIN_DIRECT_RESOLUTION
+        max_res = AbinsModules.AbinsConstants.MAX_DIRECT_RESOLUTION
+        if not (isinstance(direct_instrument_resolution, float) and min_res <= direct_instrument_resolution <= max_res):
+            raise RuntimeError("Invalid value of direct_instrument_resolution" + message_end)
+
+        # angles -- numpy array in which all elements are floats
+        angles = AbinsModules.AbinsParameters.angles
+        if not (isinstance(angles, np.ndarray) and angles.dtype.num == AbinsModules.AbinsConstants.FLOAT_ID):
+            raise ValueError("Invalid value of angles" + message_end)
+
+        # e_init -- list in which all elements are floats
+        e_init = AbinsModules.AbinsParameters.e_init
+        if not (isinstance(e_init, list) and all([isinstance(i, float) for i in e_init])):
+            raise ValueError("Invalid value of incident energies" + message_end)
+
+        # q_size -- this is int
+        q_size = AbinsModules.AbinsParameters.q_size
+        if not isinstance(q_size, int):
+            raise ValueError("Invalid number of q slices" + message_end)
 
     def _check_tosca_parameters(self, message_end=None):
         """

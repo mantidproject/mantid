@@ -133,6 +133,7 @@ NUMPY_VERSION_REQUIRED = "1.6.0"  # Abins requires numpy 1.6.0 or higher
 ALL_SUPPORTED_DFT_PROGRAMS = ["CRYSTAL", "CASTEP"]
 
 ONE_DIMENSIONAL_INSTRUMENTS = ["TOSCA"]
+TWO_DIMENSIONAL_INSTRUMENTS = ["TwoDMap"]
 ONE_DIMENSIONAL_SPECTRUM = 1
 
 FIRST_BIN_INDEX = 1
@@ -142,7 +143,8 @@ BUF = 65536
 
 CRYSTAL = False
 
-# definition of momentum transfer range
+Q_BEGIN = 0.7
+Q_END = 30.0
 ACOUSTIC_PHONON_THRESHOLD = 10.0  # acoustic threshold in cm^-1
 
 # indentations in messages
