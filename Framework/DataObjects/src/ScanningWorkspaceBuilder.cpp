@@ -179,7 +179,8 @@ MatrixWorkspace_sptr ScanningWorkspaceBuilder::buildWorkspace() const {
       m_instrument, m_nDetectors * m_nTimeIndexes, m_histogram);
 
   auto &outputDetectorInfo = outputWorkspace->mutableDetectorInfo();
-  outputDetectorInfo.setScanInterval(0, m_timeRanges[0]);
+  for (size_t i = 0; i < m_nDetectors; ++i)
+    outputDetectorInfo.setScanInterval(i, m_timeRanges[0]);
 
   buildOutputDetectorInfo(outputDetectorInfo);
 
