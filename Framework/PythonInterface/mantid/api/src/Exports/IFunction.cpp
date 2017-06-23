@@ -163,7 +163,10 @@ void export_IFunction() {
            "Remove any tie or fix from the given parameter")
 
       .def("constrain", &IFunction::addConstraints, (arg("self"), arg("str"),  arg("isDefault")), 
-            "Add constraint")
+            "Add constraints")
+
+      .def("unconstrain", &IFunction::removeConstraint, (arg("self"), arg("parname")),
+          "Remove constraint from parameter")
 
       //-- Deprecated functions that have the wrong names --
       .def("categories", &getCategories, arg("self"),

@@ -174,10 +174,14 @@ class FunctionWrapperTest(unittest.TestCase):
         self.assertEqual(g_str.count("constraints="),1)
         self.assertEqual(g_str.count("constraints=(7<Height,Sigma<2)"),1)
         
-        #g.untie("Height")
-        #g1_str = g.__str__()
-        #self.assertEqual(g1_str.count("constraints="),1)
-        #self.assertEqual(g1_str.count("constraints=(Sigma<2)"),1)
+        g.unconstrain("Height")
+        g1_str = g.__str__()
+        self.assertEqual(g1_str.count("constraints="),1)
+        self.assertEqual(g1_str.count("constraints=(Sigma<2)"),1)
+        
+        g.unconstrain("Sigma")
+        g1_str = g.__str__()
+        self.assertEqual(g1_str.count("constraints="),0)
        
 if __name__ == '__main__':
     unittest.main()

@@ -56,6 +56,9 @@ class FunctionWrapper:
   def constrain(self, expressions):
       self.fun.constrain( expressions, False )
       
+  def unconstrain(self, name):
+      self.fun.unconstrain(name)
+      
   def getParameterName(self, index):
   # Get the name of the parameter of given index
       return self.fun.getParamName(index)
