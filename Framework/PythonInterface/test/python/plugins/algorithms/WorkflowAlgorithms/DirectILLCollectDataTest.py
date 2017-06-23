@@ -10,19 +10,16 @@ import unittest
 class DirectILLCollectDataTest(unittest.TestCase):
     _BKG_LEVEL = 2.3
     _TEST_WS_NAME = 'testWS_'
+    _TEST_WS = None
 
     def __init__(self, methodName='runTest'):
         unittest.TestCase.__init__(self, methodName)
-        self._testIN5WS = None
 
     def setUp(self):
-        if not self._testIN5WS:
-            self._testIN5WS = illhelpers.create_poor_mans_in5_workspace(self._BKG_LEVEL, illhelpers.default_test_detectors)
-        tempName = 'temp_testWS_'
-        mtd.addOrReplace(tempName, self._testIN5WS)
-        CloneWorkspace(InputWorkspace=tempName,
-                       OutputWorkspace=self._TEST_WS_NAME)
-        mtd.remove(tempName)
+        if not DirectILLCollectDataTest._TEST_WS:
+            DirectILLCollectDataTest._TEST_WS = illhelpers.create_poor_mans_in5_workspace(self._BKG_LEVEL,
+                                                                                          illhelpers.default_test_detectors)
+        mtd.addOrReplace(self._TEST_WS_NAME, DirectILLCollectDataTest._TEST_WS)
 
     def tearDown(self):
         mtd.clear()
@@ -40,9 +37,10 @@ class DirectILLCollectDataTest(unittest.TestCase):
         run_algorithm('DirectILLCollectData', **algProperties)
         self.assertTrue(mtd.doesExist(outWSName))
         outWS = mtd[outWSName]
-        self.assertEquals(outWS.getNumberHistograms(), self._testIN5WS.getNumberHistograms() - 1)
+        inWS = mtd[self._TEST_WS_NAME]
+        self.assertEquals(outWS.getNumberHistograms(), inWS.getNumberHistograms() - 1)
         ys = outWS.extractY()
-        originalYs = self._testIN5WS.extractY()
+        originalYs = inWS.extractY()
         numpy.testing.assert_almost_equal(ys, originalYs[1:, :] - self._BKG_LEVEL)
 
     def testBackgroundOutput(self):
@@ -78,11 +76,12 @@ class DirectILLCollectDataTest(unittest.TestCase):
         run_algorithm('DirectILLCollectData', **algProperties)
         self.assertTrue(mtd.doesExist(outWSName))
         outWS = mtd[outWSName]
+        inWS = mtd[self._TEST_WS_NAME]
         ys = outWS.extractY()
-        originalYs = self._testIN5WS.extractY()
+        originalYs = inWS.extractY()
         numpy.testing.assert_almost_equal(ys, originalYs[1:, :] / duration)
         es = outWS.extractE()
-        originalEs = self._testIN5WS.extractE()
+        originalEs = inWS.extractE()
         numpy.testing.assert_almost_equal(es, originalEs[1:, :] / duration)
 
     def testRawWorkspaceOutput(self):
@@ -97,13 +96,14 @@ class DirectILLCollectDataTest(unittest.TestCase):
         run_algorithm('DirectILLCollectData', **algProperties)
         self.assertTrue(mtd.doesExist(outWSName))
         outWS = mtd[outWSName]
+        inWS = mtd[self._TEST_WS_NAME]
         self.assertTrue(mtd.doesExist(rawWSName))
         rawWS = mtd[rawWSName]
         ys = rawWS.extractY()
-        originalYS = self._testIN5WS.extractY()
+        originalYS = inWS.extractY()
         numpy.testing.assert_almost_equal(ys, originalYS[1:, :])
         es = rawWS.extractE()
-        originalES = self._testIN5WS.extractE()
+        originalES = inWS.extractE()
         numpy.testing.assert_almost_equal(es, originalES[1:, :])
         xs = rawWS.extractX()
         outXS = outWS.extractX()
@@ -129,15 +129,16 @@ class DirectILLCollectDataTest(unittest.TestCase):
         run_algorithm('DirectILLCollectData', **algProperties)
         self.assertTrue(mtd.doesExist(outWSName))
         outWS = mtd[outWSName]
-        self.assertEquals(outWS.getNumberHistograms(), self._testIN5WS.getNumberHistograms() - 1)
+        inWS = mtd[self._TEST_WS_NAME]
+        self.assertEquals(outWS.getNumberHistograms(), inWS.getNumberHistograms() - 1)
         xs = outWS.extractX()
-        originalXs = self._testIN5WS.extractX()
+        originalXs = inWS.extractX()
         numpy.testing.assert_almost_equal(xs, originalXs[1:, :])
         ys = outWS.extractY()
-        originalYs = self._testIN5WS.extractY()
+        originalYs = inWS.extractY()
         numpy.testing.assert_almost_equal(ys, originalYs[1:, :])
         es = outWS.extractE()
-        originalEs = self._testIN5WS.extractE()
+        originalEs = inWS.extractE()
         numpy.testing.assert_almost_equal(es, originalEs[1:, :])
 
 
