@@ -5,6 +5,7 @@
 #include "MantidDataHandling/DllConfig.h"
 #include "MantidDataHandling/LoadHelper.h"
 #include "MantidKernel/DateAndTime.h"
+#include "MantidKernel/V3D.h"
 #include "MantidNexus/NexusClasses.h"
 
 namespace Mantid {
@@ -82,6 +83,8 @@ private:
 
   void initStaticWorkspace();
   void initMovingWorkspace(const NeXus::NXDouble &scan);
+  void calculateRelativeRotations(std::vector<double> &instrumentAngles,
+                                  const Kernel::V3D &tube1Position);
   void loadDataScan();
   void loadMetaData();
   void loadScanVars();

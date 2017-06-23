@@ -244,35 +244,51 @@ void LoadILLDiffraction::initMovingWorkspace(const NXDouble &scan) {
                                                   timeDurations.end(), 0.0))
                        .toISO8601String() << "\n";
 
-  // For D2B angles in the NeXus files are for the last detector. Here we change
-  // them to be the first detector.
-  std::vector<double> instrumentAngles =
+  // Angles in the NeXus files are the absolute position for tube 1
+  std::vector<double> tubeAngles =
       getScannedVaribleByPropertyName(scan, "Position");
-  if (m_instName == "D2B") {
-    // The rotations in the NeXus file are the absolute rotation of tube_1, here
-    // we get the home angle of tube_1
-    const auto &tube1Position =
-        instrument->getComponentByName("tube_1")->getPos();
-    const double tube1RotationAngle =
-        tube1Position.angle(V3D(0, 0, 1)) * rad2deg;
-    g_log.debug() << "Tube 1 rotation:" << tube1RotationAngle << "\n";
 
-    // Now pass calculate the rotations to apply for each time index.
-    std::transform(instrumentAngles.begin(), instrumentAngles.end(),
-                   instrumentAngles.begin(),
-                   [&](double angle) { return (angle - tube1RotationAngle); });
-  }
+  const auto &tube1Position =
+      instrument->getComponentByName("tube_1")->getPos();
 
-  g_log.debug() << "Instrument rotations to be applied : "
-                << instrumentAngles.front() << " to " << instrumentAngles.back()
-                << "\n";
+  // Convert the tube positions to relative rotations for all detectors
+  calculateRelativeRotations(tubeAngles, tube1Position);
 
   auto rotationCentre = V3D(0, 0, 0);
   auto rotationAxis = V3D(0, 1, 0);
   scanningWorkspaceBuilder.setRelativeRotationsForScans(
-      std::move(instrumentAngles), rotationCentre, rotationAxis);
+      std::move(tubeAngles), rotationCentre, rotationAxis);
 
   m_outWorkspace = scanningWorkspaceBuilder.buildWorkspace();
+}
+
+/**
+ * Convert from absolute rotation angle, around the sample, of tube 1, to a
+ *relative rotation angle around the sample.
+ *
+ * @param tubeRotations Input is the absolute rotations around the sample of
+ *tube 1, output is the relative rotations required from the IDF for all
+ *detectors
+ * @param firstTubePosition A V3D object containing the position of the first
+ *tube
+ */
+void LoadILLDiffraction::calculateRelativeRotations(
+    std::vector<double> &tubeRotations, const V3D &firstTubePosition) {
+  // The rotations in the NeXus file are the absolute rotation of the first
+  // tube. Here we get the angle of that tube as defined in the IDF.
+
+  const double firstTubeRotationAngle =
+      firstTubePosition.angle(V3D(0, 0, 1)) * rad2deg;
+  g_log.debug() << "First tube rotation:" << firstTubeRotationAngle << "\n";
+
+  // Now pass calculate the rotations to apply for each time index.
+  std::transform(
+      tubeRotations.begin(), tubeRotations.end(), tubeRotations.begin(),
+      [&](double angle) { return (angle - firstTubeRotationAngle); });
+
+  g_log.debug() << "Instrument rotations to be applied : "
+                << tubeRotations.front() << " to " << tubeRotations.back()
+                << "\n";
 }
 
 /**
