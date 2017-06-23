@@ -40,7 +40,6 @@ using Kernel::V3D;
 namespace {
 /// static logger
 Kernel::Logger g_log("MatrixWorkspace");
-constexpr double rad2deg = 180. / M_PI;
 }
 const std::string MatrixWorkspace::xDimensionId = "xDimension";
 const std::string MatrixWorkspace::yDimensionId = "yDimension";
