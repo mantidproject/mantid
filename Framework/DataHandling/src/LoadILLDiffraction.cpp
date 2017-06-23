@@ -99,14 +99,14 @@ void LoadILLDiffraction::exec() {
 
   m_fileName = getPropertyValue("Filename");
 
-  loadScanVars();
   progress.report("Loading the scanned variables");
+  loadScanVars();
 
+  progress.report("Loading the detector scan data");
   loadDataScan();
-  progress.report("Loaded the detector scan data");
 
+  progress.report("Loading the metadata");
   loadMetaData();
-  progress.report("Loaded the metadata");
 
   setProperty("OutputWorkspace", m_outWorkspace);
 }
