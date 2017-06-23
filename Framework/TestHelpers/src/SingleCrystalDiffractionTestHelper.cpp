@@ -1,4 +1,4 @@
-/* Test functions for algorithms for single crysal diffraction
+/* Test functions for algorithms for single crystal diffraction
  */
 
 #include "MantidAPI/AlgorithmManager.h"

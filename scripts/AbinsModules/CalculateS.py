@@ -2,7 +2,7 @@ from __future__ import (absolute_import, division, print_function)
 import AbinsModules
 try:
     # noinspection PyUnresolvedReferences
-    from pathos.multiprocessing import ProcessingPool, ThreadingPool
+    from pathos.multiprocessing import ProcessingPool
     PATHOS_FOUND = True
 except ImportError:
     PATHOS_FOUND = False
@@ -77,10 +77,12 @@ class CalculateS(object):
                                  AbinsModules.AbinsConstants.QUANTUM_ORDER_THREE: self._calculate_order_three,
                                  AbinsModules.AbinsConstants.QUANTUM_ORDER_FOUR: self._calculate_order_four}
 
-        self._bins = np.arange(start=AbinsModules.AbinsParameters.min_wavenumber,
-                               stop=AbinsModules.AbinsParameters.max_wavenumber,
-                               step=AbinsModules.AbinsParameters.bin_width,
-                               dtype=AbinsModules.AbinsConstants.FLOAT_TYPE)
+        step = AbinsModules.AbinsParameters.bin_width
+        start = AbinsModules.AbinsParameters.min_wavenumber + step
+        stop = AbinsModules.AbinsParameters.max_wavenumber + step
+        self._bins = np.arange(start=start, stop=stop, step=step, dtype=AbinsModules.AbinsConstants.FLOAT_TYPE)
+        self._freq_size = self._bins.size - 1
+        self._frequencies = self._bins[:-1]
 
         self._powder_atoms_data = None
         self._a_traces = None
@@ -158,47 +160,6 @@ class CalculateS(object):
                     "atomic_displacements": np.asarray([k_data["atomic_displacements"][gamma_pkt_index]])}
         return k_points
 
-    def _calculate_s_powder_2d(self, powder_data=None):
-        """
-        Calculates 2D S for the powder case.
-        :param powder_data: object of type PowderData with with A and B tensors
-        :return:  object of type SData with 2D dynamical structure factors for the powder case
-        """
-        if self._instrument.get_name() not in AbinsModules.AbinsConstants.TWO_DIMENSIONAL_INSTRUMENTS:
-            raise ValueError("Instrument for 2D S map was expected.")
-
-        q2_size = self._instrument.get_q_powder_size()
-        q2_indices = range(q2_size)
-        self._powder_atoms_data = powder_data.extract()
-        if PATHOS_FOUND:
-            p_local = ThreadingPool(nodes=AbinsModules.AbinsParameters.q_threads)
-            result = p_local.map(self._calculate_s_powder_core, q2_indices)
-        else:
-            result = []
-            for q2_i in q2_indices:
-                self._report_progress("Calculation for Q2 %s " % q2_i)
-                result.append(self._calculate_s_powder_core(q_indx=q2_i))
-
-        num_atoms = powder_data.extract()["a_tensors"].shape[0]
-
-        atoms_items = dict()
-
-        for atom in range(num_atoms):
-            atoms_items["atom_%s" % atom] = {"s": dict()}
-            for order in range(AbinsModules.AbinsConstants.FUNDAMENTALS,
-                               self._quantum_order_num + AbinsModules.AbinsConstants.S_LAST_INDEX):
-                atoms_items["atom_%s" % atom]["s"]["order_%s" % order] = np.zeros(
-                    shape=(q2_size, self._bins.size - AbinsModules.AbinsConstants.FIRST_BIN_INDEX),
-                    dtype=AbinsModules.AbinsConstants.FLOAT_TYPE)
-                for q2_i in q2_indices:
-                    atoms_items["atom_%s" % atom]["s"]["order_%s" % order][q2_i] =\
-                        result[q2_i]["atom_%s" % atom]["s"]["order_%s" % order]
-
-        s_data = AbinsModules.SData(temperature=self._temperature, sample_form=self._sample_form)
-        atoms_items.update({"frequencies": self._bins[AbinsModules.AbinsConstants.FIRST_BIN_INDEX:]})
-        s_data.set(items=atoms_items)
-        return s_data
-
     def _calculate_s_powder_1d(self, powder_data=None):
         """
         Calculates 1D S for the powder case.
@@ -210,7 +171,7 @@ class CalculateS(object):
         s_data = AbinsModules.SData(temperature=self._temperature, sample_form=self._sample_form)
         self._powder_atoms_data = powder_data.extract()
         data = self._calculate_s_powder_core()
-        data.update({"frequencies": self._bins[AbinsModules.AbinsConstants.FIRST_BIN_INDEX:]})
+        data.update({"frequencies": self._frequencies})
         s_data.set(items=data)
 
         return s_data
@@ -351,7 +312,7 @@ class CalculateS(object):
         new_fundamentals = new_fundamentals.reshape(chunk_num, int(chunk_size))
         new_fundamentals_coeff = new_fundamentals_coeff.reshape(chunk_num, int(chunk_size))
 
-        total_size = self._bins.size - AbinsModules.AbinsConstants.FIRST_BIN_INDEX
+        total_size = self._freq_size
         for lg_order in range(order, self._quantum_order_num + AbinsModules.AbinsConstants.S_LAST_INDEX):
             s["order_%s" % lg_order] = np.zeros(shape=total_size, dtype=AbinsModules.AbinsConstants.FLOAT_TYPE)
 
@@ -538,33 +499,33 @@ class CalculateS(object):
     def _rebin_data_full(self, array_x=None, array_y=None):
         """
         Rebins S data so that all quantum events have the same x-axis. The size of rebined data is equal to _bins.size.
-        @param array_x: numpy array with frequencies
-        @param array_y: numpy array with S
-        @return: rebined frequencies, rebined S
+        :param array_x: numpy array with frequencies
+        :param array_y: numpy array with S
+        :return: rebined frequencies, rebined S
         """
-        inds = np.digitize(x=array_x, bins=self._bins)
-        output_array_y = np.asarray(a=[array_y[inds == i].sum()
-                                       for i in range(AbinsModules.AbinsConstants.FIRST_BIN_INDEX, self._bins.size)],
-                                    dtype=AbinsModules.AbinsConstants.FLOAT_TYPE)
+        inds = np.digitize(x=array_x, bins=self._bins) - AbinsModules.AbinsConstants.PYTHON_INDEX_SHIFT
+        output_array_y = np.asarray(
+            a=[array_y[inds == i].sum() for i in range(self._freq_size)],
+            dtype=AbinsModules.AbinsConstants.FLOAT_TYPE)
 
         return output_array_y
 
     def _rebin_data_opt(self, array_x=None, array_y=None):
         """
         Rebins S data in optimised way: the size of rebined data may be smaller then _bins.size.
-        @param array_x: numpy array with frequencies
-        @param array_y: numpy array with S
-        @return: rebined frequencies, rebined S
+        :param array_x: numpy array with frequencies
+        :param array_y: numpy array with S
+        :return: rebined frequencies, rebined S
         """
         if self._bins.size > array_x.size:
             output_array_x = array_x
             output_array_y = array_y
         else:
-            inds = np.digitize(x=array_x, bins=self._bins)
-            output_array_x = self._bins[AbinsModules.AbinsConstants.FIRST_BIN_INDEX:]
-            output_array_y = np.asarray(a=[array_y[inds == i].sum()
-                                           for i in range(AbinsModules.AbinsConstants.FIRST_BIN_INDEX, self._bins.size)],
-                                        dtype=AbinsModules.AbinsConstants.FLOAT_TYPE)
+            inds = np.digitize(x=array_x, bins=self._bins) - AbinsModules.AbinsConstants.PYTHON_INDEX_SHIFT
+            output_array_x = self._frequencies
+            output_array_y = np.asarray(
+                a=[array_y[inds == i].sum() for i in range(self._freq_size)],
+                dtype=AbinsModules.AbinsConstants.FLOAT_TYPE)
 
         return output_array_x, output_array_y
 

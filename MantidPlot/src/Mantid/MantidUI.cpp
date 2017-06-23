@@ -49,6 +49,7 @@
 #include "MantidQtMantidWidgets/WorkspacePresenter/QWorkspaceDockView.h"
 
 #include "MantidAPI/CompositeFunction.h"
+#include "MantidAPI/DetectorInfo.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidAPI/IPeaksWorkspace.h"
@@ -56,6 +57,9 @@
 #include "MantidAPI/Run.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidTypes/SpectrumDefinition.h"
+
+#include "MantidGeometry/Instrument/ReferenceFrame.h"
 
 #include <QListWidget>
 #include <QMdiArea>
@@ -84,6 +88,7 @@
 #include <boost/tokenizer.hpp>
 
 #include <Poco/ActiveResult.h>
+#include <Poco/Thread.h>
 
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidQtFactory/WidgetFactory.h"
@@ -1259,6 +1264,9 @@ Table *MantidUI::createDetectorTable(
   // check if efixed value is available
   bool calcQ(true);
 
+  // check if we have a scanning workspace
+  bool isScanning = ws->detectorInfo().isScanning();
+
   const auto &spectrumInfo = ws->spectrumInfo();
   if (spectrumInfo.hasDetectors(0)) {
     try {
@@ -1278,6 +1286,8 @@ Table *MantidUI::createDetectorTable(
   colNames << "Index"
            << "Spectrum No"
            << "Detector ID(s)";
+  if (isScanning)
+    colNames << "Time Indexes";
   if (include_data) {
     colNames << "Data Value"
              << "Data Error";
@@ -1306,10 +1316,15 @@ Table *MantidUI::createDetectorTable(
   }
   t->setHeaderColType();
   t->setTextFormat(2);
+  if (isScanning)
+    t->setTextFormat(3);
   t->setTextFormat(ncols - 1);
 
   // Cache some frequently used values
   IComponent_const_sptr sample = ws->getInstrument()->getSample();
+  const auto beamAxisIndex =
+      ws->getInstrument()->getReferenceFrame()->pointingAlongBeam();
+  const auto sampleDist = sample->getPos()[beamAxisIndex];
   bool signedThetaParamRetrieved(false),
       showSignedTwoTheta(false); // If true,  signedVersion of the two theta
                                  // value should be displayed
@@ -1331,32 +1346,9 @@ Table *MantidUI::createDetectorTable(
     try {
       auto &spectrum = ws->getSpectrum(wsIndex);
       Mantid::specnum_t specNo = spectrum.getSpectrumNo();
-      QString detIds("");
-      const auto &ids = spectrum.getDetectorIDs();
-      size_t ndets = ids.size();
-      auto iter = ids.begin();
-      auto itEnd = ids.end();
-      if (ndets > DET_TABLE_NDETS_GROUP) {
-        detIds = QString("%1,%2...(%3 more)...%4,%5");
-        // post-fix increments and returns last value
-        // NOTE: Doing this detIds.arg(*iter++).arg(*iter++).arg(ndets-4) seems
-        // to result
-        // in an undefined order in which the iterator is dereference and
-        // incremented leading
-        // to the first two items being backward on some systems
-        const Mantid::detid_t first(*iter++), second(*iter++);
-        detIds =
-            detIds.arg(first).arg(second).arg(ndets - 4); // First two + n extra
-        auto revIter = ids.rbegin(); // Set iterators are unidirectional ... so
-                                     // no operator-()
-        const Mantid::detid_t last(*revIter++), lastm1(*revIter++);
-        detIds = detIds.arg(lastm1).arg(last);
-      } else {
-        for (; iter != itEnd; ++iter) {
-          detIds += QString::number(*iter) + ",";
-        }
-        detIds.chop(1); // Drop last comma
-      }
+      const auto &ids =
+          dynamic_cast<const std::set<int> &>(spectrum.getDetectorIDs());
+      QString detIds = createTruncatedList(ids);
 
       // Geometry
       if (!spectrumInfo.hasDetectors(wsIndex))
@@ -1370,11 +1362,13 @@ Table *MantidUI::createDetectorTable(
                                    "Always") != parameters.end());
         signedThetaParamRetrieved = true;
       }
+
       double R(0.0), theta(0.0), phi(0.0);
-      // R and theta used as dummy variables
+      // theta used as a dummy variable
       // Note: phi is the angle around Z, not necessarily the beam direction.
       spectrumInfo.position(wsIndex).getSpherical(R, theta, phi);
-      // R is actually L2 (same as R if sample is at (0,0,0))
+      // R is actually L2 (same as R if sample is at (0,0,0)), except for
+      // monitors which are handled below.
       R = spectrumInfo.l2(wsIndex);
       // Theta is actually 'twoTheta' for detectors (twice the scattering
       // angle), if Z is the beam direction this corresponds to theta in
@@ -1390,28 +1384,50 @@ Table *MantidUI::createDetectorTable(
           // Log the error and leave theta as it is
           g_log.error(ex.what());
         }
+      } else {
+        const auto dist = spectrumInfo.position(wsIndex)[beamAxisIndex];
+        theta = sampleDist > dist ? 180.0 : 0.0;
       }
       const QString isMonitorDisplay = isMonitor ? "yes" : "no";
       colValues << QVariant(specNo) << QVariant(detIds);
+      if (isScanning) {
+        std::set<int> timeIndexSet;
+        for (auto def : spectrumInfo.spectrumDefinition(wsIndex)) {
+          timeIndexSet.insert(int(def.second));
+        }
+
+        QString timeIndexes = createTruncatedList(timeIndexSet);
+        colValues << QVariant(timeIndexes);
+      }
       // Y/E
       if (include_data) {
         colValues << QVariant(dataY0) << QVariant(dataE0); // data
       }
+      // If monitors are before the sample in the beam, DetectorInfo
+      // returns a negative l2 distance.
+      if (isMonitor) {
+        R = std::abs(R);
+      }
       colValues << QVariant(R) << QVariant(theta);
 
       if (calcQ) {
+        if (isMonitor) {
+          // twoTheta is not defined for monitors.
+          colValues << QVariant(std::nan(""));
+        } else {
+          try {
 
-        try {
-          // Get unsigned theta and efixed value
-          IDetector_const_sptr det(&spectrumInfo.detector(wsIndex),
-                                   Mantid::NoDeleting());
-          double efixed = ws->getEFixed(det);
-          double usignTheta = spectrumInfo.twoTheta(wsIndex) * 0.5;
+            // Get unsigned theta and efixed value
+            IDetector_const_sptr det(&spectrumInfo.detector(wsIndex),
+                                     Mantid::NoDeleting());
+            double efixed = ws->getEFixed(det);
+            double usignTheta = spectrumInfo.twoTheta(wsIndex) * 0.5;
 
-          double q = Mantid::Kernel::UnitConversion::run(usignTheta, efixed);
-          colValues << QVariant(q);
-        } catch (std::runtime_error &) {
-          colValues << QVariant("No Efixed");
+            double q = Mantid::Kernel::UnitConversion::run(usignTheta, efixed);
+            colValues << QVariant(q);
+          } catch (std::runtime_error &) {
+            colValues << QVariant("No Efixed");
+          }
         }
       }
 
@@ -1480,6 +1496,36 @@ MantidUI::createDetectorTable(const QString &wsName,
   t->setReadOnlyAllColumns(true);
   t->showNormal();
   return t;
+}
+
+QString MantidUI::createTruncatedList(const std::set<int> &elements) {
+  QString qString("");
+  size_t ndets = elements.size();
+  auto iter = elements.begin();
+  auto itEnd = elements.end();
+  if (ndets > DET_TABLE_NDETS_GROUP) {
+    qString = QString("%1,%2...(%3 more)...%4,%5");
+    // post-fix increments and returns last value
+    // NOTE: Doing this detIds.arg(*iter++).arg(*iter++).arg(ndets-4) seems
+    // to result
+    // in an undefined order in which the iterator is dereference and
+    // incremented leading
+    // to the first two items being backward on some systems
+    const Mantid::detid_t first(*iter++), second(*iter++);
+    qString =
+        qString.arg(first).arg(second).arg(ndets - 4); // First two + n extra
+    auto revIter = elements.rbegin(); // Set iterators are unidirectional ... so
+                                      // no operator-()
+    const Mantid::detid_t last(*revIter++), lastm1(*revIter++);
+    qString = qString.arg(lastm1).arg(last);
+  } else {
+    for (; iter != itEnd; ++iter) {
+      qString += QString::number(*iter) + ",";
+    }
+    qString.chop(1); // Drop last comma
+  }
+
+  return qString;
 }
 
 /**

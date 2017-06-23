@@ -7,6 +7,7 @@ set ( PY_FILES
   algorithm_decorator.py
   illhelpers.py
   tempfile_wrapper.py
+  testrunner.py
   mlzhelpers.py
 )
 

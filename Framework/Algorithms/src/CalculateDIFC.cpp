@@ -102,7 +102,7 @@ void CalculateDIFC::exec() {
 
   const auto &detectorInfo = inputWs->detectorInfo();
 
-  API::Progress progress(this, 0, 1, detectorInfo.size());
+  API::Progress progress(this, 0.0, 1.0, detectorInfo.size());
   calculate(progress, outputWs, offsetsWs, detectorInfo);
 
   setProperty("OutputWorkspace", outputWs);

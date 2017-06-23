@@ -1,4 +1,3 @@
-#pylint: disable=invalid-name
 ##-------------------------------------------------------------------------
 ##
 ## Example: Calculating the solid angle for a spectrum with respect to the
@@ -6,8 +5,11 @@
 ##
 ##-------------------------------------------------------------------------
 # Prompt for a raw file to load
+import mantid.simpleapi as mantid
+import math
+
 rawWSTitle = "RawFile"
-LoadRawDialog(OutputWorkspace=rawWSTitle)
+mantid.LoadRawDialog(OutputWorkspace=rawWSTitle)
 
 # Get the loaded workspace from Mantid
 rawData = mantid.getMatrixWorkspace(rawWSTitle)
@@ -26,11 +28,11 @@ r = detector.getDistance(sample)
 twoTheta = detector.getTwoTheta(samplePos, beamPos)*180./math.pi
 phi = detector.getPhi()
 
-print 'R = ' + str(r) + ', TwoTheta = ' + str(twoTheta)+ ', Phi = ' + str(phi)
+print('R = ' + str(r) + ', TwoTheta = ' + str(twoTheta)+ ', Phi = ' + str(phi))
 
 # Check if the spectrum is masked out and calculate the result if not
 solidAngle = 0.0
 if not rawData.spectrumInfo().isMasked(0):
-    sAngle = detector.solidAngle(samplePos)
+    solidAngle = detector.solidAngle(samplePos)
 
-print "The solid angle of the spectrum located at index " + str(wsIndex) + " is: " + str(sAngle) + " steradians"
+print("The solid angle of the spectrum located at index " + str(wsIndex) + " is: " + str(solidAngle) + " steradians")

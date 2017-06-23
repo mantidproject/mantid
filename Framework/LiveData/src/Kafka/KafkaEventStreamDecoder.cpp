@@ -6,6 +6,7 @@
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/Logger.h"
+#include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/WarningSuppressions.h"

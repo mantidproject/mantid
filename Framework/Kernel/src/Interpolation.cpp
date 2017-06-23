@@ -3,6 +3,10 @@
 #include "MantidKernel/UnitFactory.h"
 #include <MantidKernel/StringTokenizer.h>
 
+#include <algorithm>
+#include <iterator>
+#include <stdexcept>
+
 namespace Mantid {
 namespace Kernel {
 namespace {

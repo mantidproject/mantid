@@ -1,4 +1,5 @@
-#pylint: disable=invalid-name,no-init
+# pylint: disable=invalid-name,no-init
+from __future__ import (absolute_import, division, print_function)
 from mantid.simpleapi import *
 from mantid.api import FrameworkManager
 import copy
@@ -33,7 +34,7 @@ BANNED_FILES = ['80_tubes_Top_and_Bottom_April_2015.xml',
                 'IP0005.dat',
                 'batch_input.csv',
                 'mar11015.msk',
-                'LET_hard.msk', #It seems loade does not understand it?
+                'LET_hard.msk',  # It seems loade does not understand it?
                 'MASK.094AA',
                 'MASKSANS2D_094i_RKH.txt',
                 'MASKSANS2D.091A',
@@ -50,11 +51,11 @@ BANNED_FILES = ['80_tubes_Top_and_Bottom_April_2015.xml',
                 'MASK_SANS2D_BOTH_Extras_24Mar2015.xml',
                 'MASK_Tube6.xml',
                 'MASK_squareBeamstop_6x8Beam_11-October-2016.xml',
-                'MAP17269.raw', # Don't need to check multiple MAPS files
+                'MAP17269.raw',  # Don't need to check multiple MAPS files
                 'MAP17589.raw',
-                'MER06399.raw', # Don't need to check multiple MERLIN files
-                'PG3_11485-1.dat', # Generic load doesn't do very well with ASCII files
-                'PG3_2538_event.nxs', # Don't need to check all of the PG3 files
+                'MER06399.raw',  # Don't need to check multiple MERLIN files
+                'PG3_11485-1.dat',  # Generic load doesn't do very well with ASCII files
+                'PG3_2538_event.nxs',  # Don't need to check all of the PG3 files
                 'PG3_9829_event.nxs',
                 'REF_M_9684_event.nxs',
                 'REF_M_9709_event.nxs',
@@ -74,6 +75,7 @@ BANNED_FILES = ['80_tubes_Top_and_Bottom_April_2015.xml',
                 'Wish_Diffuse_Scattering_ISAW_UB.mat',
                 'WSH_test.dat',
                 'WISH00035991.raw',
+                'WISH00038237.raw',
                 'SANS2D_multiPeriodTests.csv',
                 'SANS2D_periodTests.csv',
                 'SANS2DTube_ZerroErrorFreeTest.txt',
@@ -85,7 +87,7 @@ BANNED_FILES = ['80_tubes_Top_and_Bottom_April_2015.xml',
                 'MaskLOQData.txt',
                 'DIRECTHAB.983',
                 'loq_batch_mode_reduction.csv',
-                'det_corrected7.nxs', # this file can be loaded by LoadDetectorInfo; not sure if generic loader should ever deal with it
+                'det_corrected7.nxs',  # this file can be loaded by LoadDetectorInfo; not sure if generic loader should ever deal with it
                 'poldi2013n006903.hdf',
                 'poldi2013n006904.hdf',
                 'poldi2014n019874.hdf',
@@ -97,7 +99,8 @@ BANNED_FILES = ['80_tubes_Top_and_Bottom_April_2015.xml',
                 'USER_Larmor_163F_HePATest_r13038.txt',
                 'Vesuvio_IP_file_test.par',
                 'IP0004_10.par',
-                'Crystalb3lypScratchAbins.out']
+                'Crystalb3lypScratchAbins.out',
+                'V15_0000016544_S000_P01.raw']
 
 EXPECTED_EXT = '.expected'
 
@@ -140,25 +143,25 @@ def useFile(direc, filename):
     """Returns (useFile, abspath)"""
     # if it is an -stamp file then assume these are cmake created files
     if filename.endswith("-stamp"):
-        return (False, filename)
+        return False, filename
 
     # list of explicitly banned files at the top of this script
     if filename in BANNED_FILES:
-        return (False, filename)
+        return False, filename
 
     # is an 'expected' file
     if filename.endswith(EXPECTED_EXT):
-        return (False, filename)
+        return False, filename
 
     # list of banned files by regexp
     for regexp in BANNED_REGEXP:
         if re.match(regexp, filename, re.I) is not None:
-            return (False, filename)
+            return False, filename
 
     filename = os.path.join(direc, filename)
     if os.path.isdir(filename):
-        return (False, filename)
-    return (True, filename)
+        return False, filename
+    return True, filename
 
 
 class LoadLotsOfFiles(stresstesting.MantidStressTest):
@@ -166,7 +169,7 @@ class LoadLotsOfFiles(stresstesting.MantidStressTest):
         # get a list of directories to look in
         dirs = config['datasearch.directories'].split(';')
         dirs = [item for item in dirs if useDir(item)]
-        print "Looking for data files in:", ', '.join(dirs)
+        print("Looking for data files in:", ', '.join(dirs))
 
         # Files and their corresponding sizes. the low-memory win machines
         # fair better loading the big files first
@@ -176,7 +179,7 @@ class LoadLotsOfFiles(stresstesting.MantidStressTest):
             myFiles = os.listdir(direc)
             for filename in myFiles:
                 (good, fullpath) = useFile(direc, filename)
-                #print "***", good, filename
+                # print "***", good, filename
                 if good:
                     files[fullpath] = os.path.getsize(fullpath)
                     try:
@@ -202,19 +205,19 @@ class LoadLotsOfFiles(stresstesting.MantidStressTest):
         """Runs extra tests that are specified in '.expected' files
         next to the data files"""
         expected = filename + EXPECTED_EXT
-        if not os.path.exists(expected): #file exists
+        if not os.path.exists(expected):  # file exists
             return True
-        if os.path.getsize(expected) <= 0: #non-zero length
+        if os.path.getsize(expected) <= 0:  # non-zero length
             return True
 
         # Eval statement will use current scope. Allow access to
         # mantid module
-        import mantid # noqa
+        import mantid  # noqa
 
-        print "Found an expected file '%s' file" % expected
+        print("Found an expected file '%s' file" % expected)
         expectedfile = open(expected)
         tests = expectedfile.readlines()
-        failed = [] # still run all of the tests
+        failed = []  # still run all of the tests
         for test in tests:
             test = test.strip()
             result = eval(test)
@@ -222,14 +225,14 @@ class LoadLotsOfFiles(stresstesting.MantidStressTest):
                 failed.append((test, result))
         if len(failed) > 0:
             for item in failed:
-                print "  Failed test '%s' returned '%s' instead of 'True'" % (item[0], item[1])
+                print("  Failed test '%s' returned '%s' instead of 'True'" % (item[0], item[1]))
             return False
         return True
 
     def __loadAndTest__(self, filename):
         """Do all of the real work of loading and testing the file"""
-        print "----------------------------------------"
-        print "Loading '%s'" % filename
+        print("----------------------------------------")
+        print("Loading '%s'" % filename)
         from mantid.api import Workspace
         # Output can be a tuple if the Load algorithm has extra output properties
         # but the output workspace should always be the first argument
@@ -240,40 +243,40 @@ class LoadLotsOfFiles(stresstesting.MantidStressTest):
             wksp = outputs
 
         if not isinstance(wksp, Workspace):
-            print "Unexpected output type from Load algorithm: Type found=%s" % str(type(outputs))
+            print("Unexpected output type from Load algorithm: Type found=%s" % str(type(outputs)))
             return False
 
         if wksp is None:
-            print 'Load returned None'
+            print('Load returned None')
             return False
 
         # generic checks
         if wksp.name() is None or len(wksp.name()) <= 0:
-            print "Workspace does not have a name"
+            print("Workspace does not have a name")
             del wksp
             return False
 
         wid = wksp.id()
         if wid is None or len(wid) <= 0:
-            print "Workspace does not have an id"
+            print("Workspace does not have an id")
             del wksp
             return False
 
         # checks based on workspace type
         if hasattr(wksp, "getNumberHistograms"):
             if wksp.getNumberHistograms() <= 0:
-                print "Workspace has zero histograms"
+                print("Workspace has zero histograms")
                 del wksp
                 return False
             if "managed" not in wid.lower() and wksp.getMemorySize() <= 0:
-                print "Workspace takes no memory: Memory used=" + str(wksp.getMemorySize())
+                print("Workspace takes no memory: Memory used=" + str(wksp.getMemorySize()))
                 del wksp
                 return False
 
         # checks for EventWorkspace
         if hasattr(wksp, "getNumberEvents"):
             if wksp.getNumberEvents() <= 0:
-                print "EventWorkspace does not have events"
+                print("EventWorkspace does not have events")
                 del wksp
                 return False
 
@@ -293,23 +296,26 @@ class LoadLotsOfFiles(stresstesting.MantidStressTest):
         for filename in files:
             try:
                 if not self.__loadAndTest__(filename):
-                    print "FAILED TO LOAD '%s'" % filename
+                    print("FAILED TO LOAD '%s'" % filename)
                     failed.append(filename)
-            except Exception, e:
-                print "FAILED TO LOAD '%s' WITH ERROR:" % filename
-                print e
+            except Exception as e:
+                print("FAILED TO LOAD '%s' WITH ERROR:" % filename)
+                print(e)
                 failed.append(filename)
             finally:
                 # Clear everything for the next test
                 FrameworkManager.Instance().clear()
 
         # final say on whether or not it 'worked'
-        print "----------------------------------------"
+        print("----------------------------------------")
         if len(failed) != 0:
-            print "SUMMARY OF FAILED FILES"
+            print("SUMMARY OF FAILED FILES")
             for filename in failed:
-                print filename
+                print(filename)
             raise RuntimeError("Failed to load %d of %d files"
                                % (len(failed), len(files)))
         else:
-            print "Successfully loaded %d files" % len(files)
+            print("Successfully loaded %d files" % len(files))
+
+    def excludeInPullRequests(self):
+        return True

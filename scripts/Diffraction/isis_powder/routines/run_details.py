@@ -7,6 +7,19 @@ import os
 def create_run_details_object(run_number_string, inst_settings, is_vanadium_run, empty_run_call=None,
                               grouping_file_name_call=None, vanadium_run_call=None,
                               splined_name_list=None, van_abs_file_name=None):
+    """
+    Creates and returns a run details object which holds various
+    properties about the current run.
+    :param run_number_string: The user string for the current run
+    :param inst_settings: The current instrument object
+    :param is_vanadium_run: Boolean of if the current run is a vanadium run
+    :param empty_run_call: (Optional) Callable to setup custom empty run number(s) from mapping file
+    :param grouping_file_name_call: (Optional) Callable to setup custom grouping file name
+    :param vanadium_run_call: (Optional) Callable to setup custom van run number(s) from mapping file
+    :param splined_name_list: (Optional) List of unique properties to generate a splined vanadium name from
+    :param van_abs_file_name: (Optional) The name of the vanadium absorption file
+    :return: RunDetails object with attributes set to applicable values
+    """
     cal_map_dict = RunDetailsWrappedCommonFuncs.get_cal_mapping_dict(
         run_number_string=run_number_string, inst_settings=inst_settings)
     run_number = common.get_first_run_number(run_number_string=run_number_string)

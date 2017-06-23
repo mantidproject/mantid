@@ -1,8 +1,10 @@
-#include "MantidKernel/Matrix.h"
-#include "MantidKernel/V3D.h"
 #include "MantidKernel/Exception.h"
-#include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidKernel/Matrix.h"
 #include "MantidKernel/MersenneTwister.h"
+#include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidKernel/V3D.h"
+
+#include <sstream>
 
 using Mantid::Kernel::TimeSeriesProperty;
 

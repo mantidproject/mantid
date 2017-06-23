@@ -708,9 +708,10 @@ LoadNexusProcessed::loadEventEntry(NXData &wksp_cls, NXDouble &xbins,
   // indices of events
   boost::shared_array<int64_t> indices = indices_data.sharedBuffer();
   // Create all the event lists
+  int64_t max = static_cast<int64_t>(m_filtered_spec_idxs.size());
+  Progress progress(this, progressStart, progressStart + progressRange, max);
   PARALLEL_FOR_NO_WSP_CHECK()
-  for (int64_t j = 0; j < static_cast<int64_t>(m_filtered_spec_idxs.size());
-       j++) {
+  for (int64_t j = 0; j < max; ++j) {
     PARALLEL_START_INTERUPT_REGION
     size_t wi = m_filtered_spec_idxs[j] - 1;
     int64_t index_start = indices[wi];
@@ -751,9 +752,7 @@ LoadNexusProcessed::loadEventEntry(NXData &wksp_cls, NXDouble &xbins,
         el.setHistogram(HistogramData::BinEdges(std::move(x)));
       }
     }
-
-    progress(progressStart +
-             progressRange * (1.0 / static_cast<double>(numspec)));
+    progress.report();
     PARALLEL_END_INTERUPT_REGION
   }
   PARALLEL_CHECK_INTERUPT_REGION
@@ -1013,6 +1012,8 @@ API::Workspace_sptr LoadNexusProcessed::loadPeaksEntry(NXEntry &entry) {
     // This loads logs, sample, and instrument.
     peakWS->loadExperimentInfoNexus(getPropertyValue("Filename"), m_cppFile,
                                     parameterStr);
+    // Populate the instrument parameters in this workspace
+    peakWS->readParameterMap(parameterStr);
   } catch (std::exception &e) {
     g_log.information("Error loading Instrument section of nxs file");
     g_log.information(e.what());

@@ -18,6 +18,7 @@ Algorithms
 - :ref:`BASISReduction311 <algm-BASISReduction311>` has been deprecated (2017-03-11). Use :ref:`BASISReduction <algm-BASISReduction>` instead.
 - :ref:`BASISReduction <algm-BASISReduction>` includes now an option to compute and save the dynamic susceptibility.
 - :ref:`VesuvioDiffractionReduction <algm-VesuvioDiffractionReduction>` has been deprecated, use :ref:`ISISIndirectDiffractionReduction <algm-ISISIndirectDiffractionReduction>`
+- :ref:`IndirectILLReductionQENS <algm-IndirectILLReductionQENS>` and :ref:`IndirectILLReductionFWS <algm-IndirectILLReductionFWS>` will now have an option to subtract a background also from the calibration runs.
 
 QuickRuns
 ~~~~~~~~~
@@ -28,10 +29,20 @@ QuickRuns
 Data Reduction
 ##############
 
+Energy Transfer
+~~~~~~~~~~~~~~~
+
+- Now sorts the x axis before rebinning
+
 Calibration
 ~~~~~~~~~~~
 
 - The range selector for resolution files is now dependent on the range of the spectrum, not the limit in the IPF
+
+SofQW
+~~~~~
+
+- The polygon option has been removed and the default method is NormalisedPolygon
 
 
 Data Analysis

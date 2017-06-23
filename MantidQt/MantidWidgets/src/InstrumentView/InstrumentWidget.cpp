@@ -195,7 +195,6 @@ InstrumentWidget::InstrumentWidget(const QString &wsName, QWidget *parent,
 InstrumentWidget::~InstrumentWidget() {
   if (m_instrumentActor) {
     saveSettings();
-    delete m_instrumentActor;
   }
 }
 
@@ -250,8 +249,8 @@ void InstrumentWidget::init(bool resetGeometry, bool autoscaling,
                             double scaleMin, double scaleMax,
                             bool setDefaultView) {
   // Previously in (now removed) setWorkspaceName method
-  m_instrumentActor =
-      new InstrumentActor(m_workspaceName, autoscaling, scaleMin, scaleMax);
+  m_instrumentActor.reset(
+      new InstrumentActor(m_workspaceName, autoscaling, scaleMin, scaleMax));
   m_xIntegration->setTotalRange(m_instrumentActor->minBinValue(),
                                 m_instrumentActor->maxBinValue());
   m_xIntegration->setUnits(QString::fromStdString(
@@ -275,7 +274,7 @@ void InstrumentWidget::init(bool resetGeometry, bool autoscaling,
     }
     setupColorMap();
   } else {
-    surface->resetInstrumentActor(m_instrumentActor);
+    surface->resetInstrumentActor(m_instrumentActor.get());
     updateInfoText();
   }
 }
@@ -285,8 +284,6 @@ void InstrumentWidget::init(bool resetGeometry, bool autoscaling,
 * @param resetGeometry
 */
 void InstrumentWidget::resetInstrument(bool resetGeometry) {
-  delete m_instrumentActor;
-  m_instrumentActor = nullptr;
   init(resetGeometry, true, 0.0, 0.0, false);
   updateInstrumentDetectors();
 }
@@ -414,16 +411,18 @@ void InstrumentWidget::setSurfaceType(int type) {
 
       // create the surface
       if (surfaceType == FULL3D) {
-        surface =
-            new Projection3D(m_instrumentActor, getInstrumentDisplayWidth(),
-                             getInstrumentDisplayHeight());
+        surface = new Projection3D(m_instrumentActor.get(),
+                                   getInstrumentDisplayWidth(),
+                                   getInstrumentDisplayHeight());
       } else if (surfaceType <= CYLINDRICAL_Z) {
-        surface = new UnwrappedCylinder(m_instrumentActor, sample_pos, axis);
+        surface =
+            new UnwrappedCylinder(m_instrumentActor.get(), sample_pos, axis);
       } else if (surfaceType <= SPHERICAL_Z) {
-        surface = new UnwrappedSphere(m_instrumentActor, sample_pos, axis);
+        surface =
+            new UnwrappedSphere(m_instrumentActor.get(), sample_pos, axis);
       } else // SIDE_BY_SIDE
       {
-        surface = new PanelsSurface(m_instrumentActor, sample_pos, axis);
+        surface = new PanelsSurface(m_instrumentActor.get(), sample_pos, axis);
       }
     } catch (InstrumentHasNoSampleError &) {
       QApplication::restoreOverrideCursor();
@@ -1217,7 +1216,7 @@ QString InstrumentWidget::getSettingsGroupName() const {
 QString InstrumentWidget::getInstrumentSettingsGroupName() const {
   return QString::fromAscii(InstrumentWidgetSettingsGroup) + "/" +
          QString::fromStdString(
-             getInstrumentActor()->getInstrument()->getName());
+             getInstrumentActor().getInstrument()->getName());
 }
 
 bool InstrumentWidget::hasWorkspace(const std::string &wsName) const {
@@ -1233,6 +1232,11 @@ void InstrumentWidget::handleWorkspaceReplacement(
       // the same name)
       auto matrixWS =
           boost::dynamic_pointer_cast<const MatrixWorkspace>(workspace);
+      if (!matrixWS) {
+        emit preDeletingHandle();
+        close();
+        return;
+      }
       bool sameWS = false;
       try {
         sameWS = (matrixWS == m_instrumentActor->getWorkspace());
@@ -1302,8 +1306,10 @@ void InstrumentWidget::clearADSHandle() {
  */
 void InstrumentWidget::overlayPeaksWorkspace(IPeaksWorkspace_sptr ws) {
   auto surface = getUnwrappedSurface();
-  surface->setPeaksWorkspace(ws);
-  updateInstrumentView();
+  if (surface) {
+    surface->setPeaksWorkspace(ws);
+    updateInstrumentView();
+  }
 }
 
 /**
@@ -1311,10 +1317,10 @@ void InstrumentWidget::overlayPeaksWorkspace(IPeaksWorkspace_sptr ws) {
  * @param ws :: mask workspace to overlay
  */
 void InstrumentWidget::overlayMaskedWorkspace(IMaskWorkspace_sptr ws) {
-  auto actor = getInstrumentActor();
-  actor->setMaskMatrixWorkspace(
+  auto &actor = getInstrumentActor();
+  actor.setMaskMatrixWorkspace(
       boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(ws));
-  actor->updateColors();
+  actor.updateColors();
   updateInstrumentDetectors();
   emit maskedWorkspaceOverlayed();
 }

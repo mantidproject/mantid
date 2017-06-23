@@ -2,6 +2,7 @@
 #include "MantidAPI/FileProperty.h"
 #include "MantidDataHandling/LoadHelper.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/StringTokenizer.h"
 
 #include <map>

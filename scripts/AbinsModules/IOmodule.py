@@ -25,7 +25,9 @@ class IOmodule(object):
             self._input_filename = input_filename
             try:
                 self._hash_input_filename = self.calculate_dft_file_hash()
-            except (IOError, ValueError) as err:
+            except IOError as err:
+                logger.error(str(err))
+            except ValueError as err:
                 logger.error(str(err))
 
             # extract name of file from the full path in the platform independent way
@@ -47,7 +49,9 @@ class IOmodule(object):
 
         try:
             self._advanced_parameters = self._get_advanced_parameters()
-        except (IOError, ValueError) as err:
+        except IOError as err:
+            logger.error(str(err))
+        except ValueError as err:
             logger.error(str(err))
 
         self._attributes = {}  # attributes for group
@@ -219,8 +223,12 @@ class IOmodule(object):
                                    " -o " + os.path.join(path, temp_file)])
 
             shutil.move(os.path.join(path, temp_file), os.path.join(path, self._hdf_filename))
-        except (OSError, IOError, RuntimeError):
+        except OSError:
             pass  # repacking failed: no h5repack installed in the system... but we proceed
+        except IOError:
+            pass
+        except RuntimeError:
+            pass
 
     # noinspection PyMethodMayBeStatic
     def _list_of_str(self, list_str=None):
@@ -298,7 +306,7 @@ class IOmodule(object):
         @param item: converts unicode to item
         @return: converted element
         """
-        assert isinstance(item, unicode)
+        assert isinstance(item, six.text_type)
         return item.encode('utf-8')
 
     def _convert_unicode_to_str(self, object_to_check=None):
@@ -315,7 +323,7 @@ class IOmodule(object):
 
             elif isinstance(object_to_check, dict):
                 for item in object_to_check:
-                    if isinstance(item, unicode):
+                    if isinstance(item, six.text_type):
 
                         decoded_item = self._convert_unicode_to_string_core(item)
                         item_dict = object_to_check[item]
@@ -326,7 +334,7 @@ class IOmodule(object):
                     object_to_check[item] = self._convert_unicode_to_str(object_to_check[item])
 
             # unicode element
-            elif isinstance(object_to_check, unicode):
+            elif isinstance(object_to_check, six.text_type):
                 object_to_check = self._convert_unicode_to_string_core(object_to_check)
 
         return object_to_check

@@ -126,6 +126,9 @@ private:
   MockIMDWorkspace *doClone() const override {
     throw std::runtime_error("Cloning of MockIMDWorkspace is not implemented.");
   }
+  MockIMDWorkspace *doCloneEmpty() const override {
+    throw std::runtime_error("Cloning of MockIMDWorkspace is not implemented.");
+  }
 };
 
 //=================================================================================================
