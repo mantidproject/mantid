@@ -1,15 +1,21 @@
 import math
+import numpy as np
 """
 Parameters for instruments and Abins
 """
+
 
 # Instruments constants  #############################
 # These parameters can be changed by a user if necessary
 
 fwhm = 3.0  # approximate value for the full width at half maximum for Gaussian experimental resolutions
 
-# TwoDMap instrument
-delta_width = 0.1  # width of narrow Gaussian which approximates Dirac delta
+# ***TwoDMap instrument***
+# width of narrow Gaussian in terms of incident energy which approximates Dirac delta
+direct_instrument_resolution = 0.01
+q_size = 30  # how many q_slices
+e_init = [2050.0]  # list of incident energies with energies in cm^-1
+angles = np.arange(3.0, 140.0, 5.0)  # angle detectors in degrees
 
 # TOSCA instrument
 #    TOSCA parameters for calculating Q^2
