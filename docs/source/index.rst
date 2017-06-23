@@ -23,6 +23,7 @@ Mantid Documentation
    algorithms/index
    algorithms/*
    concepts/index
+   techniques/index
    interfaces/index
    fitfunctions/*
    fitminimizers/index
@@ -41,6 +42,7 @@ This is the documentation for Mantid |release|.
 
 * `Algorithms <algorithms/index.html>`_
 * `Concepts <concepts/index.html>`_
+* `Techniques <techniques/index.html>`_
 * `Interfaces <interfaces/index.html>`_
 * `Fit Functions <fitfunctions/index.html>`_
 * `Fit Minimizers <fitminimizers/index.html>`_
