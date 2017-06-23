@@ -6,7 +6,7 @@
 #include "MantidKernel/SingletonHolder.h"
 
 #ifndef Q_MOC_RUN
-#include <boost/type_traits/is_base_of.hpp>
+#include <type_traits>
 #endif
 
 #include <map>
@@ -106,7 +106,7 @@ private:
     static void check(LoaderFormat format) {
       switch (format) {
       case Nexus:
-        if (!boost::is_base_of<IFileLoader<Kernel::NexusDescriptor>,
+        if (!std::is_base_of<IFileLoader<Kernel::NexusDescriptor>,
                                T>::value) {
           throw std::runtime_error(
               std::string("FileLoaderRegistryImpl::subscribe - Class '") +
@@ -116,7 +116,7 @@ private:
         }
         break;
       case Generic:
-        if (!boost::is_base_of<IFileLoader<Kernel::FileDescriptor>, T>::value) {
+        if (!std::is_base_of<IFileLoader<Kernel::FileDescriptor>, T>::value) {
           throw std::runtime_error(
               std::string("FileLoaderRegistryImpl::subscribe - Class '") +
               typeid(T).name() + "' registered as Generic loader but it does "
