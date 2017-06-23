@@ -7,6 +7,7 @@ import numpy.testing
 from testhelpers import illhelpers, run_algorithm
 import unittest
 
+
 class DirectILLApplySelfShieldingTest(unittest.TestCase):
     _BKG_LEVEL = 0.0
     _TEST_WS_NAME = 'testWS_'

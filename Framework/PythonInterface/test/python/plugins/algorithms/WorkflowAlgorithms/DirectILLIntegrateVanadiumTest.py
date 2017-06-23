@@ -3,9 +3,10 @@
 from __future__ import (absolute_import, division, print_function)
 
 from mantid import mtd
-from mantid.simpleapi import (CloneWorkspace, DirectILLIntegrateVanadium, FindEPP)
+from mantid.simpleapi import (CloneWorkspace, FindEPP)
 from testhelpers import illhelpers, run_algorithm
 import unittest
+
 
 class DirectILLIntegrateVanadiumTest(unittest.TestCase):
     _BKG_LEVEL = 0.0
@@ -21,7 +22,7 @@ class DirectILLIntegrateVanadiumTest(unittest.TestCase):
     def testIntegration(self):
         ws = self._cloneTestWorkspace()
         eppWSName = 'eppWS'
-        eppWs = self._EPPTable(ws, eppWSName)
+        self._EPPTable(ws, eppWSName)
         outWSName = 'outWS'
         algProperties = {
             'InputWorkspace': self._TEST_WS_NAME,

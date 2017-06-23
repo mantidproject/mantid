@@ -1,8 +1,6 @@
 from __future__ import (absolute_import, division, print_function)
 
 from mantid.api import mtd
-from mantid.simpleapi import (DirectILLDiagnostics, DirectILLCollectData)
-import numpy.testing
 from testhelpers import illhelpers, run_algorithm
 import unittest
 
@@ -19,7 +17,7 @@ class DirectILLDiagnosticsTest(unittest.TestCase):
 
     def setUp(self):
         if DirectILLDiagnosticsTest._TEST_WS is None:
-            DirectILLDiagnosticsTest._TEST_WS = illhelpers.create_poor_mans_in5_workspace(self._BKG_LEVEL, 
+            DirectILLDiagnosticsTest._TEST_WS = illhelpers.create_poor_mans_in5_workspace(self._BKG_LEVEL,
                                                                                           illhelpers.default_test_detectors)
         inWSName = 'inputWS'
         mtd.addOrReplace(inWSName, DirectILLDiagnosticsTest._TEST_WS)
@@ -81,7 +79,6 @@ class DirectILLDiagnosticsTest(unittest.TestCase):
         }
         run_algorithm('DirectILLDiagnostics', **kwargs)
         self.assertTrue(mtd.doesExist(outWSName))
-        inWS = mtd[self._RAW_WS_NAME]
         outWS = mtd[outWSName]
         self.assertEquals(outWS.getNumberHistograms(), spectraCount)
         self.assertEquals(outWS.blocksize(), 1)

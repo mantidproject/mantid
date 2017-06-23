@@ -1,10 +1,7 @@
 from __future__ import (absolute_import, division, print_function)
 
 from mantid.kernel import DeltaEModeType, UnitConversion
-from mantid.simpleapi import (AddSampleLog, CreateWorkspace, LoadEmptyInstrument, MaskDetectors,
-                              RemoveMaskedSpectra)
 import numpy
-from scipy import constants
 from testhelpers import run_algorithm
 
 
@@ -135,6 +132,7 @@ def create_poor_mans_in5_workspace(bkgLevel, removeDetectors):
     ws = _fillTemplateWorkspace(ws, bkgLevel)
     return ws
 
+
 def default_test_detectors(ws):
     mask = list()
     for i in range(513):
@@ -145,11 +143,11 @@ def default_test_detectors(ws):
         'DetectorList': mask,
         'child': True
     }
-    alg = run_algorithm('MaskDetectors', **kwargs)
+    run_algorithm('MaskDetectors', **kwargs)
     kwargs = {
         'Workspace': ws,
         'StartWorkspaceIndex': 512,
         'child': True
     }
-    alg = run_algorithm('MaskDetectors', **kwargs)
+    run_algorithm('MaskDetectors', **kwargs)
     return ws

@@ -2,9 +2,6 @@ from __future__ import (absolute_import, division, print_function)
 
 import collections
 from mantid.api import mtd
-from mantid.simpleapi import (DirectILLCollectData, DirectILLReduction)
-import numpy
-import numpy.testing
 from scipy import constants
 from testhelpers import illhelpers, run_algorithm
 import unittest
@@ -22,7 +19,7 @@ class DirectILLReductionTest(unittest.TestCase):
 
     def setUp(self):
         if not self._testIN5WS:
-            self._testIN5WS = illhelpers.create_poor_mans_in5_workspace(self._BKG_LEVEL, 
+            self._testIN5WS = illhelpers.create_poor_mans_in5_workspace(self._BKG_LEVEL,
                                                                         illhelpers.default_test_detectors)
         inWSName = 'inputWS'
         mtd.addOrReplace(inWSName, self._testIN5WS)
@@ -73,7 +70,7 @@ class DirectILLReductionTest(unittest.TestCase):
             'Transposing': 'Transposing OFF',
             'rethrow': True
         }
-        alg = run_algorithm('DirectILLReduction', **algProperties)
+        run_algorithm('DirectILLReduction', **algProperties)
         groupedWSName = outWSName + '_grouped_detectors_'
         self.assertTrue(groupedWSName in mtd)
         groupedWS = mtd[groupedWSName]
@@ -94,6 +91,7 @@ class DirectILLReductionTest(unittest.TestCase):
         for algName in args:
             return algName in algNames
 
+
 def _groupingTestDetectors(ws):
     """Mask detectors for detector grouping tests."""
     indexBegin = 63106  # Detector at L2 and at 2theta = 40.6.
@@ -103,7 +101,7 @@ def _groupingTestDetectors(ws):
         'EndWorkspaceIndex': indexBegin - 1,
         'child': True
     }
-    alg = run_algorithm('MaskDetectors', **kwargs)
+    run_algorithm('MaskDetectors', **kwargs)
     referenceDetector = ws.getDetector(indexBegin)
     reference2Theta = ws.detectorTwoTheta(referenceDetector)
     mask = list()
@@ -117,13 +115,13 @@ def _groupingTestDetectors(ws):
         'DetectorList': mask,
         'child': True
     }
-    alg = run_algorithm('MaskDetectors', **kwargs)
+    run_algorithm('MaskDetectors', **kwargs)
     kwargs = {
         'Workspace': ws,
         'StartWorkspaceIndex': indexBegin + 10000,
         'child': True
     }
-    alg = run_algorithm('MaskDetectors', **kwargs)
+    run_algorithm('MaskDetectors', **kwargs)
     return ws
 
 if __name__ == '__main__':

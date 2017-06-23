@@ -16,7 +16,7 @@ class DirectILLSelfShieldingTest(unittest.TestCase):
     def setUp(self):
         if DirectILLSelfShieldingTest._TEST_WS is None:
             bkgLevel = 0.0
-            DirectILLSelfShieldingTest._TEST_WS = illhelpers.create_poor_mans_in5_workspace(bkgLevel, 
+            DirectILLSelfShieldingTest._TEST_WS = illhelpers.create_poor_mans_in5_workspace(bkgLevel,
                                                                                             illhelpers.default_test_detectors)
             tempMonitorWSName = 'monitors'
             kwargs = {
