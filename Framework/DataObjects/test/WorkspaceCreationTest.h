@@ -239,6 +239,24 @@ public:
     check_instrument(*ws);
   }
 
+  void test_create_parent_distribution_flag() {
+    Histogram hist(BinEdges{1, 2}, Counts{1});
+    Histogram dist(BinEdges{1, 2}, Frequencies{1});
+    const auto wsHist = create<Workspace2D>(m_instrument, make_indices(), hist);
+    const auto wsDist = create<Workspace2D>(m_instrument, make_indices(), dist);
+    // Distribution flag inherited from parent if not explicitly specified
+    TS_ASSERT(!create<Workspace2D>(*wsHist)->isDistribution());
+    TS_ASSERT(create<Workspace2D>(*wsDist)->isDistribution());
+    TS_ASSERT(!create<Workspace2D>(*wsHist, BinEdges{1, 2})->isDistribution());
+    TS_ASSERT(create<Workspace2D>(*wsDist, BinEdges{1, 2})->isDistribution());
+    // Passing a full Histogram explicitly specifies the YMode, i.e.,
+    // distribution flag.
+    TS_ASSERT(!create<Workspace2D>(*wsHist, hist)->isDistribution());
+    TS_ASSERT(!create<Workspace2D>(*wsDist, hist)->isDistribution());
+    TS_ASSERT(create<Workspace2D>(*wsHist, dist)->isDistribution());
+    TS_ASSERT(create<Workspace2D>(*wsDist, dist)->isDistribution());
+  }
+
   void test_create_parent_without_logs() {
     const auto parent = create<Workspace2D>(m_instrument, make_indices(),
                                             Histogram(BinEdges{1, 2, 4}));
