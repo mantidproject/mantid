@@ -697,3 +697,5 @@ On GEM this is set to the following:
                               (510, 19500),  # Bank 5
                               (510, 18000)   # Bank 6
                               ]
+
+.. categories:: Techniques

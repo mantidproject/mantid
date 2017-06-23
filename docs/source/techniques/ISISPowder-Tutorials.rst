@@ -896,3 +896,5 @@ If you change a value within the advanced config file you will
 need to restart Mantid for it to take effect. If you are happy
 with the new value please ensure you forward it on to the Mantid
 development team to be distributed in future versions.
+
+.. categories:: Techniques
