@@ -214,7 +214,7 @@ Mantid can be picky with binning when doing arithmetics between workspaces. This
 
 To alleviate the situation, the output workspaces of :ref:`algm-DirectILLCollectData` can be forced to use the same wavelength. The following Python script shows how to propagate the calibrated incident energy from the first loaded workspace into the rest:
 
-.. code-bloc:: python
+.. code-block:: python
 
     DirectILLCollectData(
         Run='0100:0109',
