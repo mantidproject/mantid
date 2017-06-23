@@ -13,6 +13,7 @@ set ( TEST_PY_FILES
   DirectILLDiagnosticsTest.py
   DirectILLIntegrateVanadiumTest.py
   DirectILLReductionTest.py
+  DirectILLSelfShieldingTest.py
   EnergyWindowScanTest.py
   FlatPlatePaalmanPingsCorrectionTest.py
   ILLIN16BCalibrationTest.py
