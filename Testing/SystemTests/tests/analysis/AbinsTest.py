@@ -358,7 +358,7 @@ class AbinsCASTEPNoH(stresstesting.MantidStressTest, HelperTestingClass):
 # noinspection PyAttributeOutsideInit,PyPep8Naming
 class AbinsCASTEP1DDispersion(stresstesting.MantidStressTest, HelperTestingClass):
     """
-    In this benchmark it is tested if calculation of S from phonon dispersion is correct.
+    In this benchmark it is tested if calculation of S from phonon dispersion is correct (1D case).
     """
     tolerance = None
     ref_result = None
