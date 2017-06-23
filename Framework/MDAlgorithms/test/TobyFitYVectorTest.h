@@ -13,8 +13,6 @@
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 
-#include "MantidKernel/Matrix.h"
-
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 
 #include <cxxtest/TestSuite.h>

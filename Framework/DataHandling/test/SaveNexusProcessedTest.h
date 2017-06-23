@@ -1,8 +1,6 @@
 #ifndef SAVENEXUSPROCESSEDTEST_H_
 #define SAVENEXUSPROCESSEDTEST_H_
 
-#include <nexus/NeXusFile.hpp>
-
 // These includes seem to make the difference between initialization of the
 // workspace names (workspace2D/1D etc), instrument classes and not for this
 // test case.
@@ -36,6 +34,8 @@
 
 #include <boost/lexical_cast.hpp>
 
+#include <nexus/NeXusFile.hpp>
+
 #include <fstream>
 #include <cxxtest/TestSuite.h>
 
@@ -44,7 +44,6 @@ using namespace Mantid::Kernel;
 using namespace Mantid::DataHandling;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
-using namespace Mantid::NeXus;
 using Mantid::HistogramData::HistogramDx;
 
 class SaveNexusProcessedTest : public CxxTest::TestSuite {
