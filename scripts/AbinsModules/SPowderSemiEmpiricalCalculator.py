@@ -594,7 +594,7 @@ class SPowderSemiEmpiricalCalculator(object):
 
         # in case of 2D instrument rebin over q
         if self._instrument.get_name() in AbinsModules.AbinsConstants.TWO_DIMENSIONAL_INSTRUMENTS:
-            temp_full_s = np.zeros(shape=(AbinsModules.AbinsParameters.q_size + 1, self._bins_size),
+            temp_full_s = np.zeros(shape=(AbinsModules.AbinsParameters.q_size + 1, rebined_broad_spectrum.size),
                                    dtype=AbinsModules.AbinsConstants.FLOAT_TYPE)
 
             all_q2 = self._instrument.calculate_q_powder(input_data=self._frequencies)

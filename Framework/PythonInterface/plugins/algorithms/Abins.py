@@ -10,7 +10,7 @@ import six
 import os
 
 from mantid.api import AlgorithmFactory, FileAction, FileProperty, PythonAlgorithm, Progress, WorkspaceProperty, mtd
-from mantid.api import WorkspaceFactory, AnalysisDataService
+from mantid.api import WorkspaceFactory, AnalysisDataService, NumericAxis
 
 # noinspection PyProtectedMember
 from mantid.api._api import WorkspaceGroup
@@ -28,7 +28,6 @@ class Abins(PythonAlgorithm):
     _temperature = None
     _scale = None
     _sample_form = None
-    _instrument_name = None
     _atoms = None
     _sum_contributions = None
     _scale_by_cross_section = None
@@ -85,8 +84,7 @@ class Abins(PythonAlgorithm):
         self.declareProperty(name="Instrument",
                              direction=Direction.Input,
                              defaultValue="TOSCA",
-                             # validator=StringListValidator(AbinsModules.AbinsConstants.ALL_INSTRUMENTS)
-                             validator=StringListValidator(["TOSCA"]),
+                             validator=StringListValidator(AbinsModules.AbinsConstants.ALL_INSTRUMENTS),
                              doc="Name of an instrument for which analysis should be performed.")
 
         self.declareProperty(StringArrayProperty("Atoms", Direction.Input),
@@ -328,6 +326,42 @@ class Abins(PythonAlgorithm):
                     self._fill_s_1d_workspace(s_points=s_points[n], workspace=wrk_name, atom_name=atom_name)
 
                 GroupWorkspaces(InputWorkspaces=partial_wrk_names, OutputWorkspace=workspace)
+        # 2D S map
+        else:
+
+            q_slices = float(AbinsModules.AbinsParameters.q_size)
+            step = (AbinsModules.AbinsConstants.Q_END - AbinsModules.AbinsConstants.Q_BEGIN) / q_slices
+
+            q = np.arange(start=AbinsModules.AbinsConstants.Q_BEGIN,
+                          stop=AbinsModules.AbinsConstants.Q_END + step,
+                          step=step)
+            q = q[AbinsModules.AbinsConstants.FIRST_BIN_INDEX:]
+
+            # only FUNDAMENTALS
+            if s_points.shape[0] == AbinsModules.AbinsConstants.FUNDAMENTALS:
+
+                self._fill_s_2d_workspace(s_points=s_points[0], workspace=workspace, atom_name=atom_name, q=q)
+
+            # total workspaces
+            elif s_points.shape[0] == AbinsModules.AbinsParameters.q_size and len(s_points.shape) == 2:
+
+                self._fill_s_2d_workspace(s_points=s_points, workspace=workspace, atom_name=atom_name, q=q)
+
+            # quantum order events (fundamentals  or  overtones + combinations for the given order)
+            else:
+
+                dim = s_points.shape[0]
+                partial_wrk_names = []
+
+                for n in range(dim):
+                    seed = "quantum_event_%s" % (n + 1)
+                    wrk_name = workspace + "_" + seed
+                    partial_wrk_names.append(wrk_name)
+
+                    self._fill_s_2d_workspace(s_points=s_points[n], workspace=wrk_name, atom_name=atom_name, q=q)
+
+                group = ','.join(partial_wrk_names)
+                GroupWorkspaces(group, OutputWorkspace=workspace)
 
     def _fill_s_1d_workspace(self, s_points=None, workspace=None, atom_name=None):
         """
@@ -347,6 +381,40 @@ class Abins(PythonAlgorithm):
         AnalysisDataService.addOrReplace(workspace, wrk)
 
         # Set correct units on workspace
+        self._set_workspace_units(wrk=workspace)
+
+    def _fill_s_2d_workspace(self, s_points=None, workspace=None, atom_name=None, q=None):
+        """
+        Puts 2D S into workspace.
+        :param s_points: dynamical factor for the given atom
+        :param workspace:  workspace to be filled with S
+        :param atom_name: name of atom (for example H for hydrogen)
+        :param q: momentum transfer
+        """
+        if atom_name is not None:
+            s_points = s_points * self._scale * self._get_cross_section(atom_name=atom_name)
+
+        # create "Workspace2D"
+        length = s_points[0].size
+        dim = q.size
+        wrk = WorkspaceFactory.create("Workspace2D", NVectors=dim, XLength=length + 1, YLength=length)
+
+        # set VerticalAxisValues for workspace
+        y_axis = NumericAxis.create(dim)
+        y_axis.setUnit("MomentumTransfer")
+        for idx in range(dim):
+            y_axis.setValue(idx, q[idx])
+        wrk.replaceAxis(1, y_axis)
+
+        # fill workspace
+        for i in range(dim):
+            wrk.setX(i, self._bins)
+            wrk.setY(i, s_points[i])
+
+        # make workspace accessible from outside function
+        AnalysisDataService.addOrReplace(workspace, wrk)
+
+        # set correct units on workspace
         self._set_workspace_units(wrk=workspace)
 
     def _get_cross_section(self, atom_name=None):
@@ -380,23 +448,37 @@ class Abins(PythonAlgorithm):
         else:
             local_partial_workspaces = partial_workspaces
 
+        # num_freq - number of frequencies
+        # num_q - number of q points
+
         if len(local_partial_workspaces) > 1:
 
             # get frequencies
             ws = mtd[local_partial_workspaces[0]]
 
+            # dim = num_q
+            dim = ws.getNumberHistograms()
+
             # initialize S
-            s_atoms = np.zeros_like(ws.dataY(0))
+            if self._instrument.get_name() in AbinsModules.AbinsConstants.ONE_DIMENSIONAL_INSTRUMENTS:
+                s_atoms = np.zeros_like(ws.dataY(0))
+            else:
+                # s_atoms[num_freq, q]
+                shape = (dim, ws.blocksize())
+                s_atoms = np.zeros(shape=shape, dtype=AbinsModules.AbinsConstants.FLOAT_TYPE)
 
             # collect all S
             for partial_ws in local_partial_workspaces:
                 if self._instrument.get_name() in AbinsModules.AbinsConstants.ONE_DIMENSIONAL_INSTRUMENTS:
                     s_atoms += mtd[partial_ws].dataY(0)
+                else:
+                    for i in range(dim):
+                        s_atoms[i] += mtd[partial_ws].dataY(i)
 
             # create workspace with S
             self._fill_s_workspace(s_atoms, total_workspace)
 
-        # # Otherwise just repackage the workspace we have as the total
+        # Otherwise just repackage the workspace we have as the total
         else:
             CloneWorkspace(InputWorkspace=local_partial_workspaces[0], OutputWorkspace=total_workspace)
 
@@ -724,12 +806,8 @@ class Abins(PythonAlgorithm):
         self._sample_form = self.getProperty("SampleForm").value
 
         instrument_name = self.getProperty("Instrument").value
-        if instrument_name in AbinsModules.AbinsConstants.ALL_INSTRUMENTS:
-            self._instrument_name = instrument_name
-            instrument_producer = AbinsModules.InstrumentProducer()
-            self._instrument = instrument_producer.produce_instrument(name=self._instrument_name)
-        else:
-            raise ValueError("Unknown instrument %s" % instrument_name)
+        instrument_producer = AbinsModules.InstrumentProducer()
+        self._instrument = instrument_producer.produce_instrument(name=instrument_name)
 
         self._atoms = self.getProperty("Atoms").value
         self._sum_contributions = self.getProperty("SumContributions").value
