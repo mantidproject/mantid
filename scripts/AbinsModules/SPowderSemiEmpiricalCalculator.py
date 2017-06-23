@@ -253,7 +253,6 @@ class SPowderSemiEmpiricalCalculator(object):
         Helper functions which sums S for all atoms and all quantum events taken into account.
         :param current_val: S accumulated so far
         :param addition: S to be added
-        :return: summed S
         """
         for atom in range(self._num_atoms):
             for order in range(AbinsModules.AbinsConstants.FUNDAMENTALS,
