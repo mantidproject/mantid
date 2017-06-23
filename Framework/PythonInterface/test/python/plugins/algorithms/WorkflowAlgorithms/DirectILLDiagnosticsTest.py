@@ -26,6 +26,7 @@ class DirectILLDiagnosticsTest(unittest.TestCase):
         kwargs = {
             'InputWorkspace': DirectILLDiagnosticsTest._TEST_WS,
             'OutputWorkspace': self._TEST_WS_NAME,
+            'EPPCreationMethod': 'Fit EPP',
             'OutputEPPWorkspace': self._EPP_WS_NAME,
             'OutputRawWorkspace': self._RAW_WS_NAME
         }
@@ -73,7 +74,6 @@ class DirectILLDiagnosticsTest(unittest.TestCase):
             'ElasticPeakDiagnostics': 'Peak Diagnostics OFF',
             'EPPWorkspace': self._EPP_WS_NAME,
             'BkgDiagnostics': 'Bkg Diagnostics ON',
-            'NonBkgRegionInSigmas': 3,
             'NoisyBkgLowThreshold': 0.01,
             'NoisyBkgHighThreshold': 9.99,
             'DefaultMask': 'Default Mask OFF',

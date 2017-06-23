@@ -123,6 +123,7 @@ class DirectILLCollectData(unittest.TestCase):
             'FlatBkgScaling': 0.0,
             'IncidentEnergyCalibration': 'Energy Calibration OFF',
             'Normalisation': 'Normalisation OFF',
+            'ElasticChannel': 'Default Elastic Channel',
             'rethrow': True
         }
         run_algorithm('DirectILLCollectData', **algProperties)

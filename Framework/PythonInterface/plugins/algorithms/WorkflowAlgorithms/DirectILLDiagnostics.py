@@ -304,6 +304,7 @@ class DirectILLDiagnostics(DataProcessorAlgorithm):
     def PyExec(self):
         """Executes the data reduction workflow."""
         progress = Progress(self, 0.0, 1.0, 5)
+        report = common.Report()
         subalgLogging = self.getProperty(common.PROP_SUBALG_LOGGING).value == common.SUBALG_LOGGING_ON
         wsNamePrefix = self.getProperty(common.PROP_OUTPUT_WS).valueAsStr
         cleanupMode = self.getProperty(common.PROP_CLEANUP_MODE).value
@@ -326,9 +327,9 @@ class DirectILLDiagnostics(DataProcessorAlgorithm):
 
         # Detector diagnostics, if requested.
         progress.report('Diagnosing detectors')
-        mainWS = self._detDiagnostics(mainWS, maskWS, wsNames, wsCleanup, subalgLogging)
+        mainWS = self._detDiagnostics(mainWS, maskWS, wsNames, wsCleanup, report, subalgLogging)
 
-        self._finalize(mainWS, wsCleanup)
+        self._finalize(mainWS, wsCleanup, report)
         progress.report('Done')
 
     def PyInit(self):
@@ -531,7 +532,30 @@ class DirectILLDiagnostics(DataProcessorAlgorithm):
                       EnableLogging=algorithmLogging)
         return maskWS
 
-    def _detDiagnostics(self, mainWS, maskWS, wsNames, wsCleanup, subalgLogging):
+    def _bkgDiagnosticsEnabled(self, mainWS, report):
+        """Return true if background diagnostics are enabled, false otherwise."""
+        bkgDiagnostics = self.getProperty(common.PROP_BKG_DIAGNOSTICS).value
+        if bkgDiagnostics == common.BKG_DIAGNOSTICS_AUTO:
+            instrument = mainWS.getInstrument()
+            if instrument.hasParameter('enable_background_diagnostics'):
+                enabled = instrument.getBoolParameter('enable_background_diagnostics')[0]
+                if enabled:
+                    report.notice(common.PROP_BKG_DIAGNOSTICS + ' set to '
+                                  + common.BKG_DIAGNOSTICS_ON + ' by the IPF.')
+                    return True
+                else:
+                    report.notice(common.PROP_BKG_DIAGNOSTICS + ' set to '
+                                  + common.BKG_DIAGNOSTICS_OFF + ' by the IPF.')
+                    return False
+            else:
+                report.notice('Defaulted ' + common.PROP_BKG_DIAGNOSTICS + ' to '
+                              + common.BKG_DIAGNOSTICS_ON + '.')
+                return True
+        elif bkgDiagnostics == common.BKG_DIAGNOSTICS_ON:
+            return True
+        return False
+
+    def _detDiagnostics(self, mainWS, maskWS, wsNames, wsCleanup, report, subalgLogging):
         """Perform and apply detector diagnostics."""
         reportWS = None
         if not self.getProperty(common.PROP_OUTPUT_DIAGNOSTICS_REPORT_WS).isDefault:
@@ -562,14 +586,8 @@ class DirectILLDiagnostics(DataProcessorAlgorithm):
                                  OutputWorkspace=diagnosticsWSName,
                                  EnableLogging=subalgLogging)
             wsCleanup.cleanup(peakDiagnosticsWS)
-        bkgDiagnostics = self.getProperty(common.PROP_BKG_DIAGNOSTICS).value
-        if bkgDiagnostics == common.BKG_DIAGNOSTICS_AUTO:
-            instrumentName = mainWS.getInstrument().getName()
-            if instrumentName == 'IN5':
-                bkgDiagnostics = common.BKG_DIAGNOSTICS_OFF
-            else:
-                bkgDiagnostics = common.BKG_DIAGNOSTICS_ON
-        if bkgDiagnostics == common.BKG_DIAGNOSTICS_ON:
+        bkgDiagnosticsEnabled = self._bkgDiagnosticsEnabled(mainWS, report)
+        if bkgDiagnosticsEnabled:
             eppWS = self.getProperty(common.PROP_EPP_WS).value
             sigmaMultiplier = self.getProperty(common.PROP_BKG_SIGMA_MULTIPLIER).value
             integratedBkgs = _integrateBkgs(mainWS, eppWS, sigmaMultiplier, wsNames, wsCleanup, subalgLogging)
@@ -589,11 +607,12 @@ class DirectILLDiagnostics(DataProcessorAlgorithm):
         self._outputReports(reportWS, userMaskedSpectra, peakMaskedSpectra, bkgMaskedSpectra)
         return diagnosticsWS
 
-    def _finalize(self, outWS, wsCleanup):
+    def _finalize(self, outWS, wsCleanup, report):
         """Do final cleanup and set the output property."""
         self.setProperty(common.PROP_OUTPUT_WS, outWS)
         wsCleanup.cleanup(outWS)
         wsCleanup.finalCleanup()
+        report.toLog(self.log())
 
     def _inputWS(self, wsNames, wsCleanup, subalgLogging):
         """Return the raw input workspace."""

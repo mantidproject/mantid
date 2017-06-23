@@ -324,7 +324,7 @@ class DirectILLCollectData(DataProcessorAlgorithm):
 
         # Find elastic peak positions.
         progress.report('Calculating EPPs')
-        detEPPWS = self._createEPPWSDet(mainWS, wsNames, wsCleanup, subalgLogging)
+        detEPPWS = self._createEPPWSDet(mainWS, wsNames, wsCleanup, report, subalgLogging)
         wsCleanup.cleanupLater(detEPPWS, monEPPWS)
 
         # Calibrate incident energy, if requested.
@@ -340,7 +340,7 @@ class DirectILLCollectData(DataProcessorAlgorithm):
 
         # Find elastic peak positions.
         progress.report('Recalculating EPPs')
-        detEPPWS = self._createEPPWSDet(mainWS, wsNames, wsCleanup, subalgLogging)
+        detEPPWS = self._createEPPWSDet(mainWS, wsNames, wsCleanup, report, subalgLogging)
         wsCleanup.cleanupLater(detEPPWS, monEPPWS)
 
         self._finalize(mainWS, wsCleanup, report)
@@ -415,8 +415,9 @@ class DirectILLCollectData(DataProcessorAlgorithm):
                                  ' is set to ' + common.EPP_METHOD_CALCULATE +
                                  ' (default: 10 times the first bin width).')
         self.declareProperty(name=common.PROP_ELASTIC_CHANNEL_MODE,
-                             defaultValue=common.ELASTIC_CHANNEL_SAMPLE_LOG,
+                             defaultValue=common.ELASTIC_CHANNEL_AUTO,
                              validator=StringListValidator([
+                                 common.ELASTIC_CHANNEL_AUTO,
                                  common.ELASTIC_CHANNEL_SAMPLE_LOG,
                                  common.ELASTIC_CHANNEL_FIT]),
                              direction=Direction.Input,
@@ -544,14 +545,7 @@ class DirectILLCollectData(DataProcessorAlgorithm):
 
     def _calibrateEi(self, mainWS, detEPPWS, monWS, monEPPWS, wsNames, wsCleanup, report, subalgLogging):
         """Perform and apply incident energy calibration."""
-        eiCalibration = self.getProperty(common.PROP_INCIDENT_ENERGY_CALIBRATION).value
-        if eiCalibration == common.INCIDENT_ENERGY_CALIBRATION_AUTO:
-            instrumentName = mainWS.getInstrument().getName()
-            if instrumentName == 'IN5':
-                eiCalibration = common.INCIDENT_ENERGY_CALIBRATION_OFF
-            else:
-                eiCalibration = common.INCIDENT_ENERGY_CALIBRATION_ON
-        if eiCalibration == common.INCIDENT_ENERGY_CALIBRATION_ON:
+        if self._eiCalibrationEnabled(mainWS, report):
             if self.getProperty(common.PROP_INCIDENT_ENERGY_WS).isDefault:
                 monIndex = self._monitorIndex(monWS)
                 eiCalibrationWS = _calibratedIncidentEnergy(mainWS, detEPPWS, monWS, monEPPWS, monIndex, wsNames,
@@ -574,6 +568,46 @@ class DirectILLCollectData(DataProcessorAlgorithm):
             wsCleanup.cleanup(eiCalibrationWS)
         return mainWS, monWS
 
+    def _chooseElasticChannelMode(self, mainWS, report):
+        """Return suitable elastic channel mode."""
+        mode = self.getProperty(common.PROP_ELASTIC_CHANNEL_MODE).value
+        if mode == common.ELASTIC_CHANNEL_AUTO:
+            instrument = mainWS.getInstrument()
+            if instrument.hasParameter('enable_elastic_channel_fitting'):
+                if instrument.getBoolParameter('enable_elastic_channel_fitting')[0]:
+                    report.notice(common.PROP_ELASTIC_CHANNEL_MODE + ' set to '
+                                  + common.ELASTIC_CHANNEL_FIT + ' by the IPF.')
+                    return common.ELASTIC_CHANNEL_FIT
+                else:
+                    report.notice(common.PROP_ELASTIC_CHANNEL_MODE + ' set to '
+                                  + common.ELASTIC_CHANNEL_SAMPLE_LOG + ' by the IPF.')
+                    return common.ELASTIC_CHANNEL_SAMPLE_LOG
+            else:
+                report.notice('Defaulted ' + common.PROP_ELASTIC_CHANNEL_MODE + ' to '
+                              + common.ELASTIC_CHANNEL_SAMPLE_LOG + '.')
+                return common.ELASTIC_CHANNEL_SAMPLE_LOG
+        return mode
+
+    def _chooseEPPMethod(self, mainWS, report):
+        """Return a suitable EPP method."""
+        eppMethod = self.getProperty(common.PROP_EPP_METHOD).value
+        if eppMethod == common.EPP_METHOD_AUTO:
+            instrument = mainWS.getInstrument()
+            if instrument.hasParameter('enable_elastic_peak_fitting'):
+                if instrument.getBoolParameter('enable_elastic_peak_fitting')[0]:
+                    report.notice(common.PROP_EPP_METHOD + ' set to '
+                                  + common.EPP_METHOD_FIT + ' by the IPF.')
+                    return common.EPP_METHOD_FIT
+                else:
+                    report.notice(common.PROP_EPP_METHOD + ' set to '
+                                  + common.EPP_METHOD_CALCULATE + ' by the IPF.')
+                    return common.EPP_METHOD_CALCULATE
+            else:
+                report.notice('Defaulted ' + common.PROP_EPP_METHOD + ' to '
+                              + common.EPP_METHOD_FIT + '.')
+                return common.EPP_METHOD_FIT
+        return eppMethod
+
     def _correctTOFAxis(self, mainWS, wsNames, wsCleanup, report, subalgLogging):
         """Adjust the TOF axis to get the elastic channel correct."""
         try:
@@ -585,7 +619,7 @@ class DirectILLCollectData(DataProcessorAlgorithm):
             indexWS = self.getProperty(common.PROP_ELASTIC_CHANNEL_WS).value
             index = int(indexWS.readY(0)[0])
         else:
-            mode = self.getProperty(common.PROP_ELASTIC_CHANNEL_MODE).value
+            mode = self._chooseElasticChannelMode(mainWS, report)
             if mode == common.ELASTIC_CHANNEL_SAMPLE_LOG:
                 if not mainWS.run().hasProperty('Detector.elasticpeak'):
                     self.log().warning('No ' + common.PROP_ELASTIC_CHANNEL +
@@ -613,7 +647,7 @@ class DirectILLCollectData(DataProcessorAlgorithm):
         wsCleanup.cleanup(mainWS)
         return correctedWS
 
-    def _createEPPWSDet(self, mainWS, wsNames, wsCleanup, subalgLogging):
+    def _createEPPWSDet(self, mainWS, wsNames, wsCleanup, report, subalgLogging):
         """Create an EPP table for a detector workspace."""
         eiCalibration = self.getProperty(common.PROP_INCIDENT_ENERGY_CALIBRATION).value
         noEiCalibration = eiCalibration == common.INCIDENT_ENERGY_CALIBRATION_OFF
@@ -624,13 +658,7 @@ class DirectILLCollectData(DataProcessorAlgorithm):
             return None
         detEPPInWS = self.getProperty(common.PROP_EPP_WS).value
         if not detEPPInWS:
-            eppMethod = self.getProperty(common.PROP_EPP_METHOD).value
-            if eppMethod == common.EPP_METHOD_AUTO:
-                instrumentName = mainWS.getInstrument().getName()
-                if instrumentName == 'IN5':
-                    eppMethod = common.EPP_METHOD_CALCULATE
-                else:
-                    eppMethod = common.EPP_METHOD_FIT
+            eppMethod = self._chooseEPPMethod(mainWS, report)
             if eppMethod == common.EPP_METHOD_FIT:
                 detEPPWS = _fitEPP(mainWS, common.WS_CONTENT_DETS, wsNames, subalgLogging)
             else:
@@ -657,6 +685,29 @@ class DirectILLCollectData(DataProcessorAlgorithm):
         wsCleanup.cleanup(outWS)
         wsCleanup.finalCleanup()
         report.toLog(self.log())
+
+    def _eiCalibrationEnabled(self, mainWS, report):
+        """Return true if incident energy calibration should be perfomed, false if not."""
+        eppMethod = self.getProperty(common.PROP_INCIDENT_ENERGY_CALIBRATION).value
+        if eppMethod == common.INCIDENT_ENERGY_CALIBRATION_AUTO:
+            instrument = mainWS.getInstrument()
+            if instrument.hasParameter('enable_incident_energy_calibration'):
+                enabled = instrument.getBoolParameter('enable_incident_energy_calibration')[0]
+                if enabled:
+                    report.notice(common.PROP_INCIDENT_ENERGY_CALIBRATION + ' set to '
+                                  + common.INCIDENT_ENERGY_CALIBRATION_ON + ' by the IPF.')
+                    return True
+                else:
+                    report.notice(common.PROP_INCIDENT_ENERGY_CALIBRATION + ' set to '
+                                  + common.INCIDENT_ENERGY_CALIBRATION_OFF + ' by the IPF.')
+                    return False
+            else:
+                report.notice('Defaulted ' + common.PROP_INCIDENT_ENERGY_CALIBRATION + ' to '
+                              + common.INCIDENT_ENERGY_CALIBRATION_ON + '.')
+                return True
+        elif eppMethod == common.INCIDENT_ENERGY_CALIBRATION_ON:
+            return True
+        return False
 
     def _flatBkgDet(self, mainWS, wsNames, wsCleanup, subalgLogging):
         """Subtract flat background from a detector workspace."""
@@ -703,6 +754,7 @@ class DirectILLCollectData(DataProcessorAlgorithm):
         return mainWS
 
     def _monitorIndex(self, monWS):
+        """Return the workspace index of the main monitor."""
         if self.getProperty(common.PROP_MON_INDEX).isDefault:
             NON_RECURSIVE = False  # Prevent recursive calls in the following.
             if not monWS.getInstrument().hasParameter('default-incident-monitor-spectrum', NON_RECURSIVE):
