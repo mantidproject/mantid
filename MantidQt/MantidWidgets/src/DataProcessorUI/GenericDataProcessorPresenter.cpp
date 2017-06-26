@@ -60,7 +60,8 @@ GenericDataProcessorPresenter::GenericDataProcessorPresenter(
       m_preprocessMap(preprocessMap), m_processor(processor),
       m_postprocessor(postprocessor), m_postprocessMap(postprocessMap),
       m_progressReporter(nullptr), m_postprocess(true), m_promptUser(true),
-      m_tableDirty(false), m_newSelection(true), m_reductionPaused(true) {
+      m_tableDirty(false), m_newSelection(true), m_reductionPaused(true),
+      m_nextActionFlag(ReductionFlag::StopReduceFlag) {
 
   // Column Options must be added to the whitelist
   m_whitelist.addElement("Options", "Options",
@@ -254,6 +255,8 @@ void GenericDataProcessorPresenter::doNextAction() {
     break;
   case ReductionFlag::ReduceGroupFlag:
     nextGroup();
+    break;
+  case ReductionFlag::StopReduceFlag:
     break;
   }
   // Not having a 'default' case is deliberate. gcc issues a warning if there's

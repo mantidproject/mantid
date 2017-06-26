@@ -3573,6 +3573,9 @@ public:
     EXPECT_CALL(mockMainPresenter, pause()).Times(1);
 
     presenter.notify(DataProcessorPresenter::PauseFlag);
+
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
   }
 
   void testResumeReduction() {
@@ -3594,6 +3597,9 @@ public:
 
     presenter.setNewSelectionState(false);
     presenter.notify(DataProcessorPresenter::ProcessFlag);
+
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
   }
 };
 
