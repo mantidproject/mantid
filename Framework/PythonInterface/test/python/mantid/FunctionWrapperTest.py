@@ -183,6 +183,25 @@ class FunctionWrapperTest(unittest.TestCase):
         gz_str = g.__str__()
         self.assertEqual(gz_str.count("constraints="),0)
         
+    def test_constrain_composite(self):
+        g0 = FunctionWrapper( "Gaussian", Height=7.5, Sigma=1.2, PeakCentre=10)
+        g1 = FunctionWrapper( "Gaussian", Height=8.5, Sigma=1.2, PeakCentre=11)
+        c = CompositeFunctionWrapper(g0, g1)
+        
+        c.constrain("f1.Sigma < 2, f0.Height > 7")
+        c_str = c.__str__()
+        self.assertEqual(c_str.count("constraints="),2)
+        self.assertEqual(c_str.count("Sigma<2"),1)
+        self.assertEqual(c_str.count("7<Height"),1)
+        
+        c[1].unconstrain("Sigma")
+        c[0].unconstrain("Height")
+        c[1].constrain("Sigma < 3")
+        c1_str = c.__str__()
+        self.assertEqual(c1_str.count("constraints="),1)
+        self.assertEqual(c1_str.count("Sigma<3"),1)
+ 
+        
     def test_free(self):
         g = FunctionWrapper( "Gaussian", Height=8.5, Sigma=1.2, PeakCentre=15)
         

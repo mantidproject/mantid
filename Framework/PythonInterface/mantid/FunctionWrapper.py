@@ -3,17 +3,20 @@ from mantid.simpleapi import FunctionFactory
 class FunctionWrapper:
 # Wrapper class for Fitting Function 
   def __init__ (self, name, **kwargs):
-    self.fun = FunctionFactory.createFunction(name)
+    if not isinstance(name, str):
+       self.fun = name
+    else:
+       self.fun = FunctionFactory.createFunction(name)
     
-    # Deal with attributes first
-#    for key in kwargs:
-#       if(self.fun.hasAttribute(key)):
-#           self.fun.storeAttributeValue(key, kwargs[key])
+       # Deal with attributes first
+#       for key in kwargs:
+#          if(self.fun.hasAttribute(key)):
+#              self.fun.storeAttributeValue(key, kwargs[key])
             
-    # Then deal with parameters        
-    for key in kwargs:
-       self.fun.setParameter(key, kwargs[key])
-       
+       # Then deal with parameters        
+       for key in kwargs:
+          self.fun.setParameter(key, kwargs[key])
+             
   def __getitem__ (self, name):
       return self.fun.getParameterValue(name)
       
@@ -91,7 +94,10 @@ class CompositeFunctionWrapper(FunctionWrapper):
 
     def __getitem__ (self, nameorindex):
     # get function of specified index or parameter of specified name
-        return self.fun.__getitem__(nameorindex) 
+        if( isinstance(self.fun.__getitem__(nameorindex), float)):
+           return  self.fun.__getitem__(nameorindex)
+        else:           
+           return FunctionWrapper(self.fun.__getitem__(nameorindex))
 
     def __setitem__ (self, name, newValue):
     # set parameter of specified name
