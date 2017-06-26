@@ -32,7 +32,7 @@ class ILLIndirectReductionQENSTest(stresstesting.MantidStressTest):
                 "136555.nxs","136556.nxs",  # alignment vanadium files
                 "136599.nxs","136600.nxs",  # background (empty can)
                 "136558.nxs","136559.nxs",  # sample
-                "140721.nxs"]  # pathological case with 0 monitor channels
+                "140721.nxs","140722.nxs"]  # pathological case with 0 monitor channels
 
     def test_unmirror_0_1_2_3(self):
 
@@ -156,7 +156,7 @@ class ILLIndirectReductionQENSTest(stresstesting.MantidStressTest):
 
     def runTestDifferentZeroMonitorChannels(self):
 
-        out_croped_mon = IndirectILLReductionQENS(Run='140721', CropDeadMonitorChannels=True)
+        out_croped_mon = IndirectILLReductionQENS(Run='140721-140722', CropDeadMonitorChannels=True)
 
         self.assertEquals(out_croped_mon.getItem(0).getNumberHistograms(), 18)
 
