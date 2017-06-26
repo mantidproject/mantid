@@ -171,8 +171,9 @@ Run Python with ``mpirun`` and the desired number of MPI ranks:
 
   mpirun -n 3 python test.py
 
-Note that ``mpirun -n 3 mantidpython test.py`` does not work.
-The paths must either be set manually or an alternative to ``mantidpython`` that uses ``mpirun`` internally must be provided.
+Note that directly using the Mantid Python wrapper ``mantidpython`` is not possible, i.e., ``mpirun -n 3 mantidpython test.py`` does not work.
+Instead the correct paths to Mantid and library preloads should be set manually.
+Alternatively, a modified version of ``mantidpython`` that internally uses ``mpirun`` to call python could be created.
 
 Possible output:
 
