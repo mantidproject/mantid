@@ -267,6 +267,8 @@ void MatrixWorkspace::initialize(const std::size_t &NVectors,
 void MatrixWorkspace::initialize(const Indexing::IndexInfo &indexInfo,
                                  const HistogramData::Histogram &histogram) {
   initialize(indexInfo.size(), histogram);
+  // Reopen initialization since setIndexInfo needs to disable some consistency
+  // checks that prevent setting an incompatible IndexInfo after initialization.
   m_isInitialized = false;
   setIndexInfo(indexInfo);
   m_isInitialized = true;

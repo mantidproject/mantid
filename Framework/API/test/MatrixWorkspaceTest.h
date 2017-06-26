@@ -84,7 +84,12 @@ void run_legacy_setting_spectrum_numbers_with_MPI(
                     HistogramData::Histogram(HistogramData::Points(1)));
     }
     if (storageMode == StorageMode::Distributed && comm.size() > 1) {
-      TS_ASSERT_THROWS(ws.getSpectrum(0).setSpectrumNo(42), std::logic_error);
+      TS_ASSERT_THROWS_EQUALS(ws.getSpectrum(0).setSpectrumNo(42),
+                              const std::logic_error &e, std::string(e.what()),
+                              "Setting spectrum numbers in MatrixWorkspace via "
+                              "ISpectrum::setSpectrumNo is not possible in MPI "
+                              "runs for distributed workspaces. Use "
+                              "IndexInfo.");
     } else {
       if (comm.rank() == 0 || storageMode != StorageMode::MasterOnly) {
         TS_ASSERT_THROWS_NOTHING(ws.getSpectrum(0).setSpectrumNo(42));
