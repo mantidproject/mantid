@@ -196,11 +196,18 @@ class FunctionWrapperTest(unittest.TestCase):
         
         c[1].unconstrain("Sigma")
         c[0].unconstrain("Height")
+        cz_str = c.__str__()
+        self.assertEqual(cz_str.count("Constraints="),0)
+        
         c[1].constrain("Sigma < 3")
         c1_str = c.__str__()
         self.assertEqual(c1_str.count("constraints="),1)
         self.assertEqual(c1_str.count("Sigma<3"),1)
- 
+        
+        c.unconstrain("f1.Sigma")
+        c.unconstrain("f0.Height")
+        cz_str = c.__str__()
+        self.assertEqual(cz_str.count("Constraints="),0)
         
     def test_free(self):
         g = FunctionWrapper( "Gaussian", Height=8.5, Sigma=1.2, PeakCentre=15)
