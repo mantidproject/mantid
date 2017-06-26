@@ -23,3 +23,5 @@ IdealTube
 
 .. autoclass:: ideal_tube.IdealTube
    :members:              
+
+.. categories:: Techniques

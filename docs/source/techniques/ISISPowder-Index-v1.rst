@@ -52,3 +52,5 @@ Instrument Reference
 - :ref:`isis-powder-diffraction-gem-ref`
 - :ref:`isis-powder-diffraction-pearl-ref`
 - :ref:`isis-powder-diffraction-polaris-ref`
+
+.. categories:: Techniques

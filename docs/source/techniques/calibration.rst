@@ -18,3 +18,5 @@ in:
    :maxdepth: 1
 
    calibration_implementation
+
+.. categories:: Techniques

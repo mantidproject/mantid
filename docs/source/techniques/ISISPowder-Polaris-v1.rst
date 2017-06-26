@@ -689,3 +689,5 @@ On POLARIS this is set to the following:
                               (800, 19995),  # Bank 4
                               (800, 19995),  # Bank 5
                              ]
+
+.. categories:: Techniques
