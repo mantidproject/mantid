@@ -16,6 +16,9 @@ direct_instrument_resolution = 0.01
 q_size = 30  # how many q_slices
 e_init = [2050.0]  # list of incident energies with energies in cm^-1
 angles = np.arange(3.0, 140.0, 5.0)  # angle detectors in degrees
+interpolation = "lanczos"
+colormap = "hot"
+figure_format = "pdf"
 
 # TOSCA instrument
 #    TOSCA parameters for calculating Q^2

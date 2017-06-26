@@ -103,12 +103,9 @@ class SPowderSemiEmpiricalCalculator(object):
         self._freq_size = self._bins.size - 1
         self._frequencies = self._bins[:-1]
 
-        q_slices = float(AbinsModules.AbinsParameters.q_size)
-        step = (AbinsModules.AbinsConstants.Q_END - AbinsModules.AbinsConstants.Q_BEGIN) / q_slices
-
-        self._q_bins = np.arange(start=AbinsModules.AbinsConstants.Q_BEGIN,
-                                 stop=AbinsModules.AbinsConstants.Q_END + 2 * step,
-                                 step=step)
+        self._q_bins = np.linspace(start=AbinsModules.AbinsConstants.Q_BEGIN,
+                                   stop=AbinsModules.AbinsConstants.Q_END,
+                                   num=AbinsModules.AbinsParameters.q_size)
 
         # set initial threshold for s for each atom
         self._num_atoms = len(self._abins_data.get_atoms_data().extract())

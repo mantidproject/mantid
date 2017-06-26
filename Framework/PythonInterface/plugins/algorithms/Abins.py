@@ -8,6 +8,7 @@ except ImportError:
 import numpy as np
 import six
 import os
+import pylab as plt
 
 from mantid.api import AlgorithmFactory, FileAction, FileProperty, PythonAlgorithm, Progress, WorkspaceProperty, mtd
 from mantid.api import WorkspaceFactory, AnalysisDataService, NumericAxis
@@ -15,7 +16,7 @@ from mantid.api import WorkspaceFactory, AnalysisDataService, NumericAxis
 # noinspection PyProtectedMember
 from mantid.api._api import WorkspaceGroup
 from mantid.simpleapi import CloneWorkspace, GroupWorkspaces, SaveAscii, Load
-from mantid.kernel import logger, StringListValidator, Direction, StringArrayProperty, Atom
+from mantid.kernel import logger, StringListValidator, Direction, StringArrayProperty, Atom, ConfigService
 import AbinsModules
 
 
@@ -225,9 +226,82 @@ class Abins(PythonAlgorithm):
             SaveAscii(InputWorkspace=wrk, Filename=wrk.name() + ".dat", Separator="Space", WriteSpectrumID=False)
         prog_reporter.report("All workspaces have been saved to ASCII files.")
 
+        # 9) save workspaces to matplotlib figures
+        self.make_matplotlib_figs()
+        prog_reporter.report("Figures of all workspaces have been saved.")
+
         # 9) set  OutputWorkspace
         self.setProperty('OutputWorkspace', self._out_ws_name)
         prog_reporter.report("Group workspace with all required  dynamical structure factors has been constructed.")
+
+    def make_matplotlib_figs(self):
+        """
+        Makes nice pictures for 2D map using matplotlib.
+        """
+        # default path for saving files
+        path = ConfigService.getString("defaultsave.directory")
+
+        figure_format = AbinsModules.AbinsParameters.figure_format
+
+        # switch on latex
+        plt.rc('font', family='serif')
+        plt.rc('text', usetex=True)
+
+        begin_energy = self._bins[0]
+        end_energy = self._bins[-1]
+        step_energy = AbinsModules.AbinsConstants.ENERGY_PLOT_STEP
+        x_ticks = np.arange(begin_energy, end_energy, step_energy)
+        x_ticks_labels = [str(i).split(".")[0] for i in x_ticks]
+
+        begin_q = 0
+        end_q = AbinsModules.AbinsParameters.q_size
+        step_q = AbinsModules.AbinsParameters.q_size / AbinsModules.AbinsConstants.Q_PLOT_STEP
+        y_ticks = np.arange(begin_q, end_q, step_q)
+        y_ticks_labels = [str(i * (AbinsModules.AbinsConstants.Q_PLOT_STEP - 1)).split(".")[0] for i in range(len(y_ticks))]
+
+        if self._instrument.get_name() in AbinsModules.AbinsConstants.TWO_DIMENSIONAL_INSTRUMENTS:
+            num_workspaces = mtd[self._out_ws_name].getNumberOfEntries()
+            for wrk_num in range(num_workspaces):
+
+                wrk = mtd[self._out_ws_name].getItem(wrk_num)
+                y_val = wrk.extractY()
+                wrk_name = wrk.name()
+
+                im = plt.imshow(y_val, cmap='hot', aspect="auto", origin='lower', interpolation="lanczos")
+                plt.ylabel(r' \textbf{Momentum transfer ($\AA^{-1}$)}')
+                plt.xlabel(r'\textbf{Energy transfer [cm$^{-1}$]}')
+
+                axes = im.axes
+                axes.set_xticks(x_ticks)
+                axes.set_xticklabels(x_ticks_labels)
+                axes.set_yticks(y_ticks)
+                axes.set_yticklabels(y_ticks_labels)
+
+                # colorbar
+                min_s = np.min(y_val)
+                max_s = np.max(y_val)
+                step_s = (max_s - min_s) / AbinsModules.AbinsConstants.S_PLOT_SPACING
+                cbar_val = np.arange(min_s, max_s + step_s, step_s)
+                cbar_sticks = [self._round(number=i) for i in cbar_val]
+                cbar = plt.colorbar(im, ticks=cbar_val)
+                cbar.ax.set_yticklabels(cbar_sticks)
+
+                plt.savefig(os.path.join(path, wrk_name + "." + figure_format), bbox_inches='tight')
+                cbar.remove()
+
+    def _round(self, number):
+        """
+        Nicely rounds number which is in the scientific notation.
+        :param number: number to round
+        :return: rounded number
+        """
+        number_str = str(number)
+        parts = number_str.split("e")
+        if len(parts) == 1:
+            result = str(round(float(parts[0]), AbinsModules.AbinsConstants.DIGITS_NUM))
+        else:
+            result = str(round(float(parts[0]), AbinsModules.AbinsConstants.DIGITS_NUM)) + "e" + parts[1]
+        return result
 
     def _create_workspaces(self, atoms_symbols=None, s_data=None):
         """
@@ -329,13 +403,9 @@ class Abins(PythonAlgorithm):
         # 2D S map
         else:
 
-            q_slices = float(AbinsModules.AbinsParameters.q_size)
-            step = (AbinsModules.AbinsConstants.Q_END - AbinsModules.AbinsConstants.Q_BEGIN) / q_slices
-
-            q = np.arange(start=AbinsModules.AbinsConstants.Q_BEGIN,
-                          stop=AbinsModules.AbinsConstants.Q_END + step,
-                          step=step)
-            q = q[AbinsModules.AbinsConstants.FIRST_BIN_INDEX:]
+            q = np.linspace(start=AbinsModules.AbinsConstants.Q_BEGIN,
+                                   stop=AbinsModules.AbinsConstants.Q_END,
+                                   num=AbinsModules.AbinsParameters.q_size)
 
             # only FUNDAMENTALS
             if s_points.shape[0] == AbinsModules.AbinsConstants.FUNDAMENTALS:
@@ -575,6 +645,19 @@ class Abins(PythonAlgorithm):
         q_size = AbinsModules.AbinsParameters.q_size
         if not isinstance(q_size, int):
             raise ValueError("Invalid number of q slices" + message_end)
+
+        # interpolation
+        interpolation = AbinsModules.AbinsParameters.interpolation
+        if interpolation not in AbinsModules.AbinsConstants.ALL_INTERPOLATIONS:
+            raise ValueError("Invalid interpolation.")
+
+        colormap = AbinsModules.AbinsParameters.colormap
+        if colormap not in AbinsModules.AbinsConstants.ALL_COLORMAPS:
+            raise ValueError("Invalid colormap.")
+
+        figure_format = AbinsModules.AbinsParameters.figure_format
+        if figure_format not in AbinsModules.AbinsConstants.ALL_FIG_FORMATS:
+            raise ValueError("Invalid format of figure.")
 
     def _check_tosca_parameters(self, message_end=None):
         """

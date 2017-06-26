@@ -69,6 +69,9 @@ class AbinsAdvancedParametersTest(unittest.TestCase):
         AbinsParameters.s_absolute_threshold = 10e-8
         AbinsParameters.optimal_size = 5000000
         AbinsParameters.threads = 1
+        AbinsParameters.interpolation = None
+        AbinsParameters.colormap = "hot"
+        AbinsParameters.figure_format = "pdf"
 
     def tearDown(self):
         # remove all created files
@@ -110,6 +113,18 @@ class AbinsAdvancedParametersTest(unittest.TestCase):
 
         # direct_instrument_resolution should be smaller than one
         AbinsParameters.direct_instrument_resolution = 1.0
+        self.assertRaises(RuntimeError, Abins, PhononFile=self._Si2 + ".phonon", OutputWorkspace=self._wrk_name)
+
+    def test_wrong_interpolation(self):
+        AbinsParameters.interpolation = "invalid"
+        self.assertRaises(RuntimeError, Abins, PhononFile=self._Si2 + ".phonon", OutputWorkspace=self._wrk_name)
+
+    def test_wrong_colormap(self):
+        AbinsParameters.colormap = "wrong"
+        self.assertRaises(RuntimeError, Abins, PhononFile=self._Si2 + ".phonon", OutputWorkspace=self._wrk_name)
+
+    def test_wrong_figure_format(self):
+        AbinsParameters.figure_format = "jpg"  # jpg may not be supported by all matplotlib backends
         self.assertRaises(RuntimeError, Abins, PhononFile=self._Si2 + ".phonon", OutputWorkspace=self._wrk_name)
 
     # Tests for TOSCA parameters
