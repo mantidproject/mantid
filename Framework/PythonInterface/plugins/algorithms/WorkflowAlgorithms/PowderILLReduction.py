@@ -69,6 +69,10 @@ class PowderILLReduction(PythonAlgorithm):
                                           action=FileAction.OptionalLoad, extensions=['.nxs']),
                              doc='File containing the detector efficiencies.')
 
+        self.declareProperty(FileProperty('ROCFile', '',
+                                          action=FileAction.OptionalLoad, extensions=['.nxs']),
+                             doc='File containing the radial oscillating collimator (ROC) corrections.')
+
         self.declareProperty(name='NormaliseTo',
                              defaultValue='Time',
                              validator=StringListValidator(['Time', 'Monitor', 'ROI']),
@@ -81,9 +85,14 @@ class PowderILLReduction(PythonAlgorithm):
                              defaultValue='sample.temperature',
                              doc='Scanning observable, a Sample Log entry.')
 
-        self.declareProperty(name='SortXAxis',
+        self.declareProperty(name='SortObservableAxis',
                              defaultValue=False,
-                             doc='Whether or not to sort the x-axis.')
+                             doc='Whether or not to sort the scanning observable axis.')
+
+        self.declareProperty(name='Unit',
+                             defaultValue='dSpacing',
+                             validator=StringListValidator(['dSpacing', 'ScatteringAngle', 'MomentumTransfer']),
+                             doc='The unit of the reduced diffractogram.')
 
         self.declareProperty(MatrixWorkspaceProperty('OutputWorkspace', '',
                                                      direction=Direction.Output),
@@ -94,7 +103,7 @@ class PowderILLReduction(PythonAlgorithm):
         runs = self.getPropertyValue('Run')
         self._out_name = self.getPropertyValue('OutputWorkspace')
         self._observable = self.getPropertyValue('Observable')
-        self._sort_x_axis = self.getProperty('SortXAxis').value
+        self._sort_x_axis = self.getProperty('SortObservableAxis').value
         self._normalise_option = self.getPropertyValue('NormaliseTo')
         self._calibration_file = self.getPropertyValue('CalibrationFile')
 
