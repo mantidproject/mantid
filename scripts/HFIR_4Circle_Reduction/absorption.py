@@ -10,8 +10,7 @@ import fourcircle_utility as util4
 
 
 class Lattice(object):
-    """
-    A simple structure-styled class to hold lattice or lattice*
+    """A simple structure-styled class to hold lattice or lattice*
     """
     def __init__(self, a, b, c, alpha, beta, gamma):
         """
@@ -33,8 +32,8 @@ class Lattice(object):
         return
 
     def __str__(self):
-        """
-        Customized output
+        """Customized output
+
         :return:
         """
         return '%f, %f, %f, %f, %f, %f' % (self._a, self._b, self._c, self._alpha, self._beta, self._gamma)
@@ -328,7 +327,9 @@ def calculate_absorption_correction_spice(exp_number, scan_number, lattice, ub_m
 
 
 def get_average_spice_table(exp_number, scan_number, col_name):
-    """
+    """get average values from a table for a SPICE file
+
+    :
     """
     spice_table_name = util4.get_spice_table_name(exp_number, scan_number)
     # spice_table_name = 'HB3A_Exp%d_%04d_SpiceTable' % (exp_number, scan_number)
@@ -347,8 +348,8 @@ def get_average_spice_table(exp_number, scan_number, col_name):
 
 
 def get_average_omega(exp_number, scan_number):
-    """
-    Get average omega (omega-theta)
+    """Get average omega (omega-theta)
+
     :param exp_number:
     :param scan_number:
     :return:
@@ -377,8 +378,8 @@ def get_average_omega(exp_number, scan_number):
 
 
 def convert_mantid_ub_to_spice(mantid_ub):
-    """
-    Convert Mantid UB matrix to SPICE ub matrix
+    """Convert Mantid UB matrix to SPICE ub matrix
+
     :param mantid_ub:
     :return:
     """
@@ -399,8 +400,8 @@ def convert_mantid_ub_to_spice(mantid_ub):
 
 
 def calculate_absorption_correction_2(exp_number, scan_number, spice_ub_matrix):
-    """
-    Second approach to calculate absorption correction factor without calculating B matrix
+    """Second approach to calculate absorption correction factor without calculating B matrix
+
     :param exp_number:
     :param scan_number:
     :param spice_ub_matrix:
