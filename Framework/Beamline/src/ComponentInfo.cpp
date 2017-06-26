@@ -23,7 +23,7 @@ ComponentInfo::ComponentInfo(
     boost::shared_ptr<const std::vector<size_t>> parentIndices,
     boost::shared_ptr<std::vector<Eigen::Vector3d>> positions,
     boost::shared_ptr<std::vector<Eigen::Quaterniond>> rotations,
-    size_t sourceIndex, size_t sampleIndex, DetectorInfo *detectorInfo)
+    size_t sourceIndex, size_t sampleIndex)
     : m_assemblySortedDetectorIndices(std::move(assemblySortedDetectorIndices)),
       m_assemblySortedComponentIndices(
           std::move(assemblySortedComponentIndices)),
@@ -33,8 +33,7 @@ ComponentInfo::ComponentInfo(
       m_positions(std::move(positions)), m_rotations(std::move(rotations)),
       m_size(m_assemblySortedDetectorIndices->size() +
              m_detectorRanges->size()),
-      m_sourceIndex(sourceIndex), m_sampleIndex(sampleIndex),
-      m_detectorInfo(detectorInfo) {
+      m_sourceIndex(sourceIndex), m_sampleIndex(sampleIndex) {
   if (m_rotations->size() != m_positions->size()) {
     throw std::invalid_argument("ComponentInfo should have been provided same "
                                 "number of postions and rotations");
@@ -44,10 +43,6 @@ ComponentInfo::ComponentInfo(
         "ComponentInfo should have as many positions "
         "and rotations as assembly sorted detector component "
         "ranges");
-  }
-  if (m_detectorInfo->size() != m_assemblySortedDetectorIndices->size()) {
-    throw std::invalid_argument("ComponentInfo must have detector indices "
-                                "input of same size as size of DetectorInfo");
   }
   if (m_rotations->size() != m_componentRanges->size()) {
     throw std::invalid_argument("ComponentInfo should have as many positions "
@@ -59,10 +54,6 @@ ComponentInfo::ComponentInfo(
                                 "input of same size as the sum of "
                                 "non-detector and detector components");
   }
-  if (!m_detectorInfo) {
-    throw std::invalid_argument("DetectorInfo cannot be null");
-  }
-  m_detectorInfo->setComponentInfo(this);
 }
 
 std::vector<size_t>
@@ -104,6 +95,7 @@ size_t ComponentInfo::size() const { return m_size; }
 
 Eigen::Vector3d ComponentInfo::position(const size_t componentIndex) const {
   if (isDetector(componentIndex)) {
+    checkDetectorInfo();
     return m_detectorInfo->position(componentIndex);
   }
   const auto rangesIndex = compOffsetIndex(componentIndex);
@@ -112,6 +104,7 @@ Eigen::Vector3d ComponentInfo::position(const size_t componentIndex) const {
 
 Eigen::Quaterniond ComponentInfo::rotation(const size_t componentIndex) const {
   if (isDetector(componentIndex)) {
+    checkDetectorInfo();
     return m_detectorInfo->rotation(componentIndex);
   }
   const auto rangesIndex = compOffsetIndex(componentIndex);
@@ -155,11 +148,13 @@ void ComponentInfo::setPosition(const size_t componentIndex,
   const auto indices = this->componentsInSubtree(
       componentIndex); // Includes requested component index
   for (auto &index : indices) {
-    if (isDetector(index)) {
+    if (isDetector(componentIndex)) {
+      checkDetectorInfo();
       m_detectorInfo->setPosition(index,
                                   m_detectorInfo->position(index) + offset);
     } else {
-      m_positions.access()[compOffsetIndex(index)] += offset;
+      size_t offsetIndex = compOffsetIndex(index);
+      m_positions.access()[offsetIndex] += offset;
     }
   }
 }
@@ -194,7 +189,8 @@ void ComponentInfo::setRotation(const size_t componentIndex,
 
     auto newPos = transform * position(index);
     auto newRot = rotDelta * rotation(index);
-    if (isDetector(index)) {
+    if (isDetector(componentIndex)) {
+      checkDetectorInfo();
       m_detectorInfo->setPosition(index, newPos);
       m_detectorInfo->setRotation(index, newRot);
 
@@ -206,8 +202,15 @@ void ComponentInfo::setRotation(const size_t componentIndex,
   }
 }
 
+void ComponentInfo::checkDetectorInfo() const {
+  if (!hasDetectorInfo()) {
+    throw std::runtime_error("No DetectorInfo set on this ComponentInfo");
+  }
+}
+
 void ComponentInfo::scanningCheck(size_t compIndex) const {
-  if (!componentsInSubtree(compIndex).empty() && m_detectorInfo->isScanning()) {
+  if (!componentsInSubtree(compIndex).empty() && hasDetectorInfo() &&
+      m_detectorInfo->isScanning()) {
     throw std::runtime_error(
         "Cannot move or rotate parent component containing "
         "detectors since the beamline has "
@@ -228,6 +231,10 @@ bool ComponentInfo::hasDetectorInfo() const {
 }
 
 void ComponentInfo::setDetectorInfo(DetectorInfo *detectorInfo) {
+  if (detectorInfo->size() != m_assemblySortedDetectorIndices->size()) {
+    throw std::invalid_argument("ComponentInfo must have detector indices "
+                                "input of same size as size of DetectorInfo");
+  }
   m_detectorInfo = detectorInfo;
 }
 

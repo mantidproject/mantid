@@ -383,15 +383,6 @@ public:
     compInfo.setRotation(rootIndex, rootRot);
     compInfo.setPosition(rootIndex, rootPos);
     compInfo.setPosition(bankIndex, bankPos);
-    /*
-    detInfo.setRotation(*root, rot);
-    detInfo.setPosition(*root, delta1);
-    detInfo.setPosition(*bank, delta1 + delta2);
-    // Undo, but *not* in reverse order.
-    detInfo.setRotation(*root, rootRot);
-    detInfo.setPosition(*root, rootPos);
-    detInfo.setPosition(*bank, bankPos);
-    */
     TS_ASSERT_EQUALS(detInfo.position(0), (V3D{-0.008, -0.0002, 5.0}));
   }
 

@@ -76,8 +76,7 @@ makeTreeExampleAndReturnGeometricArguments() {
           bankSortedComponentIndices,
           boost::make_shared<const std::vector<std::pair<size_t, size_t>>>(
               componentRanges),
-          parentIndices, compPositions, compRotations, -1, -1,
-          detectorInfo.get()),
+          parentIndices, compPositions, compRotations, -1, -1),
       detPositions, detRotations, *compPositions, *compRotations, detectorInfo);
 }
 
@@ -129,7 +128,7 @@ std::tuple<ComponentInfo, boost::shared_ptr<DetectorInfo>> makeTreeExample() {
           bankSortedComponentIndices,
           boost::make_shared<const std::vector<std::pair<size_t, size_t>>>(
               componentRanges),
-          parentIndices, positions, rotations, -1, -1, detectorInfo.get()),
+          parentIndices, positions, rotations, -1, -1),
       detectorInfo);
 }
 }
@@ -152,7 +151,7 @@ public:
   }
 
   void
-  test_constructor_throws_if_size_mismatch_between_detector_indices_and_detectorinfo() {
+  test_setter_throws_if_size_mismatch_between_detector_indices_and_detectorinfo() {
     /*
      Imitate an instrument with 3 detectors and nothing more.
     */
@@ -173,11 +172,12 @@ public:
     auto positions = boost::make_shared<std::vector<Eigen::Vector3d>>();
     auto rotations = boost::make_shared<std::vector<Eigen::Quaterniond>>();
 
+    ComponentInfo componentInfo(bankSortedDetectorIndices, detectorRanges,
+                                bankSortedComponentIndices, componentRanges,
+                                parentIndices, positions, rotations, -1, -1);
+
     DetectorInfo detectorInfo; // Detector info size 0
-    TS_ASSERT_THROWS(ComponentInfo(bankSortedDetectorIndices, detectorRanges,
-                                   bankSortedComponentIndices, componentRanges,
-                                   parentIndices, positions, rotations, -1, -1,
-                                   &detectorInfo),
+    TS_ASSERT_THROWS(componentInfo.setDetectorInfo(&detectorInfo),
                      std::invalid_argument &);
   }
 
@@ -206,11 +206,9 @@ public:
     auto rotations = boost::make_shared<std::vector<Eigen::Quaterniond>>(
         0); // 0 rotations provided
 
-    DetectorInfo detectorInfo;
     TS_ASSERT_THROWS(ComponentInfo(detectorsInSubtree, detectorRanges,
                                    bankSortedComponentIndices, componentRanges,
-                                   parentIndices, positions, rotations, -1, -1,
-                                   &detectorInfo),
+                                   parentIndices, positions, rotations, -1, -1),
                      std::invalid_argument &);
   }
 
@@ -244,11 +242,9 @@ public:
         boost::make_shared<const std::vector<std::pair<size_t, size_t>>>(
             std::vector<std::pair<size_t, size_t>>{{0, 0}});
 
-    DetectorInfo detectorInfo; // Empty DetectorInfo;
     TS_ASSERT_THROWS(ComponentInfo(detectorsInSubtree, detectorRanges,
                                    componentsInSubtree, componentRanges,
-                                   parentIndices, positions, rotations, -1, -1,
-                                   &detectorInfo),
+                                   parentIndices, positions, rotations, -1, -1),
                      std::invalid_argument &);
   }
 

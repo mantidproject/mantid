@@ -6,7 +6,6 @@
 #include "MantidKernel/EigenConversionHelpers.h"
 #include "MantidKernel/make_unique.h"
 #include "MantidBeamline/ComponentInfo.h"
-#include "MantidBeamline/DetectorInfo.h"
 
 #include <numeric>
 #include <algorithm>
@@ -269,13 +268,13 @@ InfoComponentVisitor::detectorIdToIndexMap() const {
   return m_detectorIdToIndexMap;
 }
 
-std::unique_ptr<Beamline::ComponentInfo> InfoComponentVisitor::componentInfo(
-    Beamline::DetectorInfo *const detectorInfo) const {
+std::unique_ptr<Beamline::ComponentInfo>
+InfoComponentVisitor::componentInfo() const {
   return Kernel::make_unique<Mantid::Beamline::ComponentInfo>(
       m_assemblySortedDetectorIndices, m_detectorRanges,
       m_assemblySortedComponentIndices, m_componentRanges,
       m_parentComponentIndices, m_positions, m_rotations, m_sourceIndex,
-      m_sampleIndex, detectorInfo);
+      m_sampleIndex);
 }
 
 boost::shared_ptr<std::vector<detid_t>>

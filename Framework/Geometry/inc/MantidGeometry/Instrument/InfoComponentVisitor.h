@@ -20,7 +20,6 @@ class ParameterMap;
 }
 namespace Beamline {
 class ComponentInfo;
-class DetectorInfo;
 }
 
 namespace Geometry {
@@ -155,8 +154,7 @@ public:
 
   bool isEmpty() const;
 
-  std::unique_ptr<Beamline::ComponentInfo>
-  componentInfo(Beamline::DetectorInfo *const detectorInfo) const;
+  std::unique_ptr<Beamline::ComponentInfo> componentInfo() const;
 
   boost::shared_ptr<std::vector<detid_t>> detectorIds() const;
 

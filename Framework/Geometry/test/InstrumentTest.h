@@ -12,6 +12,7 @@
 #include "MantidKernel/DateAndTime.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidBeamline/DetectorInfo.h"
+#include "MantidBeamline/ComponentInfo.h"
 #include <boost/make_shared.hpp>
 
 using namespace Mantid;
@@ -39,6 +40,16 @@ makeDetectorInfo(const Instrument &instrument) {
   return boost::make_shared<Beamline::DetectorInfo>(
       std::move(positions), std::move(rotations), monitors);
 }
+}
+
+boost::shared_ptr<Beamline::ComponentInfo>
+makeComponentInfo(const Instrument &parInstrument) {
+  InfoComponentVisitor visitor(parInstrument.getDetectorIDs(),
+                               *parInstrument.getParameterMap(),
+                               parInstrument.getSource()->getComponentID(),
+                               parInstrument.getSample()->getComponentID());
+  parInstrument.registerContents(visitor);
+  return boost::shared_ptr<Beamline::ComponentInfo>(visitor.componentInfo());
 }
 
 class InstrumentTest : public CxxTest::TestSuite {
@@ -550,9 +561,14 @@ public:
     Instrument instrument(baseInstrument, pmap);
 
     // Extract information from instrument to create DetectorInfo
-    auto detInfo = makeDetectorInfo(instrument);
+    auto compInfo = makeComponentInfo(instrument);
+    instrument.setComponentInfo(compInfo);
+    pmap->setComponentInfo(compInfo);
 
+    auto detInfo = makeDetectorInfo(instrument);
     instrument.setDetectorInfo(detInfo);
+    detInfo->setComponentInfo(compInfo.get());
+    compInfo->setDetectorInfo(detInfo.get());
     // bank 1
     TS_ASSERT(detInfo->position(0).isApprox(
         toVector3d(bankOffset + V3D{-0.008, -0.0002, 0.0}), 1e-12));
@@ -578,8 +594,8 @@ public:
     detInfo->setPosition(1, detInfo->position(1) + toVector3d(detEpsilon));
     detInfo->setPosition(9, detInfo->position(9) + toVector3d(detEpsilon));
     detInfo->setRotation(19, toQuaterniond(detRotEps) * detInfo->rotation(19));
-    // 3 bank parameters, det pos/rot is in DetectorInfo
-    TS_ASSERT_EQUALS(pmap->size(), 3);
+    // All position information should be purged
+    TS_ASSERT_EQUALS(pmap->size(), 0);
 
     const auto legacyMap = instrument.makeLegacyParameterMap();
     // 3 bank parameters + 2 det parameters
@@ -614,7 +630,14 @@ public:
     Instrument instrument(baseInstrument, pmap);
 
     // Extract information from instrument to create DetectorInfo
+    auto compInfo = makeComponentInfo(instrument);
+    instrument.setComponentInfo(compInfo);
+    pmap->setComponentInfo(compInfo);
+
     auto detInfo = makeDetectorInfo(instrument);
+    instrument.setDetectorInfo(detInfo);
+    detInfo->setComponentInfo(compInfo.get());
+    compInfo->setDetectorInfo(detInfo.get());
 
     instrument.setDetectorInfo(detInfo);
     // bank 1
@@ -700,12 +723,11 @@ public:
         /*sample pos*/
         Mantid::Kernel::V3D(20, 0, 0));
 
-    boost::shared_ptr<const IComponent> comp = instrument->getChild(0);
-    // TS_ASSERT_EQUALS(0, instrument->componentIndex(comp->getComponentID()));
-    TSM_ASSERT("Component index 0 must be detector",
-               dynamic_cast<const Geometry::IDetector *>(comp.get()));
+    boost::shared_ptr<const IDetector> det =
+        instrument->getDetector(1); // One and only detector
+    TS_ASSERT_EQUALS(0, instrument->componentIndex(det->getComponentID()));
 
-    comp = instrument->getSource();
+    boost::shared_ptr<const IComponent> comp = instrument->getSource();
     TS_ASSERT_EQUALS(1, instrument->componentIndex(comp->getComponentID()));
     comp = instrument->getSample();
     TS_ASSERT_EQUALS(2, instrument->componentIndex(comp->getComponentID()));

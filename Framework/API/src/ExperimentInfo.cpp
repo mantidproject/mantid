@@ -76,12 +76,15 @@ ExperimentInfo::ExperimentInfo()
           *m_parmap)) {
   auto parInstrument = makeParameterizedInstrument();
   m_parmap->setDetectorInfo(m_detectorInfo);
+  m_parmap->setComponentInfo(m_componentInfo);
   m_detectorInfoWrapper = Kernel::make_unique<DetectorInfo>(
       *m_detectorInfo, sptr_instrument, m_infoVisitor->detectorIds(),
       m_parmap.get(), m_infoVisitor->detectorIdToIndexMap());
 
   sptr_instrument->registerContents(*m_infoVisitor);
-  makeAPIComponentInfo(*m_infoVisitor, m_detectorInfo, *sptr_instrument);
+  makeAPIComponentInfo(*m_infoVisitor, *sptr_instrument);
+  m_componentInfo->setDetectorInfo(m_detectorInfo.get());
+  m_detectorInfo->setComponentInfo(m_componentInfo.get());
 }
 
 /**
@@ -257,13 +260,10 @@ makeDetectorInfo(const Instrument &oldInstr, const Instrument &newInstr) {
  * Make the beamline and API ComponentInfo
  * @param visitor : Component visitor to query. Visitor MUST have been filled
  * via registerContents.
- * @param detectorInfo : DetectorInfo to consult internally when dealing with
- * detector components.
  * @param newInstrument : unparametrised new instrument
  */
 void ExperimentInfo::makeAPIComponentInfo(
     const InfoComponentVisitor &visitor,
-    boost::shared_ptr<Beamline::DetectorInfo> detectorInfo,
     const Instrument &newInstrument) {
 
   if (newInstrument.hasComponentInfo()) {
@@ -278,7 +278,7 @@ void ExperimentInfo::makeAPIComponentInfo(
 
   } else {
     // We have to make the internal Beamline ComponentInfo
-    m_componentInfo = visitor.componentInfo(detectorInfo.get());
+    m_componentInfo = visitor.componentInfo();
   }
 
   // Wrapper API ComponentInfo
@@ -339,6 +339,8 @@ void ExperimentInfo::setInstrument(const Instrument_const_sptr &instr) {
       sptr_instrument, m_parmap);
 
   m_infoVisitor = makeOrRetrieveVisitor(*parInstrument, *instr);
+  makeAPIComponentInfo(*m_infoVisitor, *instr);
+  m_parmap->setComponentInfo(m_componentInfo);
 
   m_detectorInfo = makeDetectorInfo(*parInstrument, *instr);
   m_parmap->setDetectorInfo(m_detectorInfo);
@@ -348,7 +350,7 @@ void ExperimentInfo::setInstrument(const Instrument_const_sptr &instr) {
       m_infoVisitor->detectorIds(), m_parmap.get(),
       m_infoVisitor->detectorIdToIndexMap());
 
-  makeAPIComponentInfo(*m_infoVisitor, m_detectorInfo, *instr);
+  m_componentInfo->setDetectorInfo(m_detectorInfo.get());
   m_detectorInfo->setComponentInfo(m_componentInfo.get());
 
   // Detector IDs that were previously dropped because they were not part of the
@@ -373,7 +375,8 @@ Instrument_sptr ExperimentInfo::makeParameterizedInstrument() const {
 Instrument_const_sptr ExperimentInfo::getInstrument() const {
   auto instrument = makeParameterizedInstrument();
   instrument->setDetectorInfo(m_detectorInfo);
-  instrument->setInfoVisitor(*m_infoVisitor);
+  instrument->setInfoVisitor(*m_infoVisitor); // TODO. We actually only need the
+                                              // ID->index part of this mapping
   instrument->setComponentInfo(m_componentInfo);
   return instrument;
 }

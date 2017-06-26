@@ -57,6 +57,7 @@ private:
   DetectorInfo *m_detectorInfo; // ExperimentInfo is the owner.
 
   void scanningCheck(size_t componentIndex) const;
+  void checkDetectorInfo() const;
 
 public:
   ComponentInfo();
@@ -71,8 +72,7 @@ public:
                 boost::shared_ptr<const std::vector<size_t>> parentIndices,
                 boost::shared_ptr<std::vector<Eigen::Vector3d>> positions,
                 boost::shared_ptr<std::vector<Eigen::Quaterniond>> rotations,
-                size_t sourceIndex, size_t sampleIndex,
-                DetectorInfo *detectorInfo);
+                size_t sourceIndex, size_t sampleIndex);
 
   std::vector<size_t> detectorsInSubtree(const size_t componentIndex) const;
   std::vector<size_t> componentsInSubtree(const size_t componentIndex) const;

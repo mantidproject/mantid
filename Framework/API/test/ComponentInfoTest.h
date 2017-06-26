@@ -5,7 +5,6 @@
 
 #include "MantidAPI/ComponentInfo.h"
 #include "MantidBeamline/ComponentInfo.h"
-#include "MantidBeamline/DetectorInfo.h"
 #include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/Instrument/ObjComponent.h"
 #include "MantidKernel/EigenConversionHelpers.h"
@@ -69,11 +68,10 @@ public:
 
     auto positions = boost::make_shared<std::vector<Eigen::Vector3d>>(2);
     auto rotations = boost::make_shared<std::vector<Eigen::Quaterniond>>(2);
-    Beamline::DetectorInfo detectorInfo;
 
     Mantid::Beamline::ComponentInfo internalInfo(
         detectorIndices, detectorRanges, componentIndices, componentRanges,
-        parentIndices, positions, rotations, -1, -1, &detectorInfo);
+        parentIndices, positions, rotations, -1, -1);
     Mantid::Geometry::ObjComponent comp1("component1");
     Mantid::Geometry::ObjComponent comp2("component2");
 
