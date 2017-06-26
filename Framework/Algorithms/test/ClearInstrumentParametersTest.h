@@ -3,14 +3,15 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidAlgorithms/ClearInstrumentParameters.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/DetectorInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAlgorithms/ClearInstrumentParameters.h"
 #include "MantidDataHandling/LoadInstrument.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidKernel/OptionalBool.h"
 
 using namespace Mantid::Algorithms;
 using namespace Mantid::API;

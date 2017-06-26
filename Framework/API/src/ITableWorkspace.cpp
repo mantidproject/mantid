@@ -9,7 +9,7 @@ namespace API {
 /// @param colNames :: Names of the column to clone. If empty clone
 ///   all columns.
 ITableWorkspace_uptr
-ITableWorkspace::clone(const std::vector<std::string> &colNames) const {
+ITableWorkspace::cloneColumns(const std::vector<std::string> &colNames) const {
   return ITableWorkspace_uptr(doCloneColumns(colNames));
 }
 

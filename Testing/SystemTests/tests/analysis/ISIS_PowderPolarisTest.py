@@ -2,38 +2,64 @@ from __future__ import (absolute_import, division, print_function)
 
 import os
 import stresstesting
+import shutil
 
 import mantid.simpleapi as mantid
 from mantid import config
 
-from isis_powder import polaris
+from isis_powder import Polaris
 
 DIRS = config['datasearch.directories'].split(';')
 
+# Setup various path details
 
-class VanadiumCalibrationTest(stresstesting.MantidStressTest):
+inst_name = "POLARIS"
+# Relative to system data folder
+working_folder_name = "ISIS_Powder"
+
+# Relative to working folder
+input_folder_name = "input"
+output_folder_name = "output"
+
+# Relative to input folder
+calibration_folder_name = os.path.join("calibration", inst_name.lower())
+calibration_map_rel_path = os.path.join("yaml_files", "polaris_system_test_mapping.yaml")
+spline_rel_path = os.path.join("17_1", "VanSplined_98532_cycle_16_3_silicon_all_spectra.cal.nxs")
+
+# Generate paths for the tests
+# This implies DIRS[0] is the system test data folder
+working_dir = os.path.join(DIRS[0], working_folder_name)
+
+input_dir = os.path.join(working_dir, input_folder_name)
+output_dir = os.path.join(working_dir, output_folder_name)
+
+calibration_map_path = os.path.join(input_dir, calibration_map_rel_path)
+calibration_dir = os.path.join(input_dir, calibration_folder_name)
+spline_path = os.path.join(calibration_dir, spline_rel_path)
+
+
+class CreateVanadiumTest(stresstesting.MantidStressTest):
 
     calibration_results = None
     existing_config = config['datasearch.directories']
-
-    # TODO
-    # Test disabled whilst in development as we were having to update the reference file on a daily basis
-    def skipTests(self):
-        return True
 
     def requiredFiles(self):
         return _gen_required_files()
 
     def runTest(self):
-        self.calibration_results = _run_vanadium_calibration()
+        setup_mantid_paths()
+        self.calibration_results = run_vanadium_calibration()
 
     def validate(self):
-        return _calibration_validation(self, self.calibration_results)
+        return calibration_validator(self.calibration_results)
 
     def cleanup(self):
-        # TODO clean up reference files properly
-        config['datasearch.directories'] = self.existing_config
-        # _clean_up()
+        try:
+            _try_delete(output_dir)
+            _try_delete(spline_path)
+        finally:
+            mantid.mtd.clear()
+            config['datasearch.directories'] = self.existing_config
 
 
 class FocusTest(stresstesting.MantidStressTest):
@@ -41,104 +67,112 @@ class FocusTest(stresstesting.MantidStressTest):
     focus_results = None
     existing_config = config['datasearch.directories']
 
-    # TODO
-    # Test disabled whilst in development as we were having to update the reference file on a daily basis
-    def skipTests(self):
-        return True
-
     def requiredFiles(self):
         return _gen_required_files()
 
     def runTest(self):
         # Gen vanadium calibration first
-        _run_vanadium_calibration()
-        self.focus_results = _run_focus()
+        setup_mantid_paths()
+        self.focus_results = run_focus()
 
-    def validation(self):
-        return _focus_validation(self, self.focus_results)
+    def validate(self):
+        return focus_validation(self.focus_results)
 
     def cleanup(self):
-        config['datasearch.directories'] = self.existing_config
-        # TODO
+        try:
+            _try_delete(spline_path)
+            _try_delete(output_dir)
+        finally:
+            config['datasearch.directories'] = self.existing_config
+            mantid.mtd.clear()
 
 
 def _gen_required_files():
-    input_files = ["POLARIS/POL78338.raw",
-                   "POLARIS/POL78339.raw",
-                   "POLARIS/POL79514.raw"]
+    required_run_numbers = ["98531", "98532",  # create_van : PDF mode
+                            "98533"]  # File to focus (Si)
+
+    # Generate file names of form "INSTxxxxx.nxs"
+    input_files = [os.path.join(input_dir, (inst_name + "000" + number + ".nxs")) for number in required_run_numbers]
+    input_files.append(calibration_map_path)
     return input_files
 
 
-def _run_vanadium_calibration():
-    vanadium_run = 95598
+def run_vanadium_calibration():
+    vanadium_run = 98532  # Choose arbitrary run in the cycle 17_1
 
-    polaris_obj = setup_polaris_instrument()
-    # Try it without an output name
+    pdf_inst_obj = setup_inst_object(mode="PDF")
 
-    return polaris_obj.create_calibration_vanadium(run_in_range=vanadium_run, do_absorb_corrections=True,
-                                                   generate_absorb_corrections=True)
+    # Run create vanadium twice to ensure we get two different output splines / files
+    pdf_inst_obj.create_vanadium(first_cycle_run_no=vanadium_run,
+                                 do_absorb_corrections=True, multiple_scattering=False)
 
+    # Check the spline looks good and was saved
+    if not os.path.exists(spline_path):
+        raise RuntimeError("Could not find output spline at the following path: " + spline_path)
+    splined_ws = mantid.Load(Filename=spline_path)
 
-def _run_focus():
-    run_number = 95599
-    polaris_obj = setup_polaris_instrument()
-    return polaris_obj.focus(run_number=run_number, input_mode="Individual", do_van_normalisation=True)
-
-
-def _calibration_validation(cls, results):
-    _validation_setup(cls)
-    results_name = results[0].name()
-    reference_file_name = "ISIS_Powder-POLARIS78338_Van_Cal.nxs"
-    return results_name, reference_file_name
+    return splined_ws
 
 
-def _focus_validation(cls, results):
-    _validation_setup(cls)
+def run_focus():
+    run_number = 98533
+    sample_empty = 98532  # Use the vanadium empty again to make it obvious
+    sample_empty_scale = 0.5  # Set it to 50% scale
 
-    reference_file_name = "POLARIS_PowderFocus79514.nxs"
-    focus_output_name = "Focus_results"
-    mantid.GroupWorkspaces(InputWorkspaces=results, OutputWorkspace=focus_output_name)
+    # Copy the required splined file into place first (instead of relying on generated one)
+    splined_file_name = "POLARIS00098532_splined.nxs"
 
-    return focus_output_name, reference_file_name
+    original_splined_path = os.path.join(input_dir, splined_file_name)
+    shutil.copy(original_splined_path, spline_path)
 
-
-def _validation_setup(cls):
-    cls.disableChecking.append('Instrument')
-    cls.disableChecking.append('Sample')
-    cls.disableChecking.append('SpectraMap')
-
-
-def _clean_up():
-    output_file_path = _get_calibration_dir() + _get_calibration_output_name()
-    try:
-        os.remove(output_file_path)
-    except OSError:
-        print ("Could not delete output file at: ", output_file_path)
+    inst_object = setup_inst_object(mode="PDF")
+    return inst_object.focus(run_number=run_number, input_mode="Individual", do_van_normalisation=True,
+                             do_absorb_corrections=False, sample_empty=sample_empty,
+                             sample_empty_scale=sample_empty_scale)
 
 
-def setup_polaris_instrument():
+def calibration_validator(results):
+    # Get the name of the grouped workspace list
+    reference_file_name = "ISIS_Powder-POLARIS00098533_splined.nxs"
+    return _compare_ws(reference_file_name=reference_file_name, results=results)
+
+
+def focus_validation(results):
+    reference_file_name = "ISIS_Powder-POLARIS98533_FocusSempty.nxs"
+    return _compare_ws(reference_file_name=reference_file_name, results=results)
+
+
+def _compare_ws(reference_file_name, results):
+    ref_ws = mantid.Load(Filename=reference_file_name)
+
+    is_valid = True if len(results) > 0 else False
+
+    for ws, ref in zip(results, ref_ws):
+        if not (mantid.CompareWorkspaces(Workspace1=ws, Workspace2=ref)):
+            is_valid = False
+            print (ws.getName() + " was not equal to: " + ref.getName())
+
+    return is_valid
+
+
+def setup_mantid_paths():
+    config['datasearch.directories'] += ";" + input_dir
+
+
+def setup_inst_object(mode):
     user_name = "Test"
-    calibration_mapping_file_name = "polaris_calibration.yaml"
 
-    calibration_dir = _get_calibration_dir()
-    calibration_mapping_path = os.path.join(calibration_dir, calibration_mapping_file_name)
-    output_dir = _get_output_dir()
-
-    path_to_add = os.path.join(DIRS[0], "POLARIS")
-    config['datasearch.directories'] += ";" + path_to_add
-    polaris_obj = polaris.Polaris(user_name=user_name, chopper_on=True, apply_solid_angle=False,
-                                  calibration_directory=calibration_dir, output_directory=output_dir,
-                                  calibration_mapping_file=calibration_mapping_path)
-    return polaris_obj
+    inst_obj = Polaris(user_name=user_name, calibration_mapping_file=calibration_map_path,
+                       calibration_directory=calibration_dir, output_directory=output_dir, mode=mode)
+    return inst_obj
 
 
-def _get_calibration_output_name():
-    return "system_test_polaris_van_cal.nxs"
-
-
-def _get_output_dir():
-    return os.path.join(DIRS[0], "POLARIS/DataOut")
-
-
-def _get_calibration_dir():
-    return os.path.join(DIRS[0], "POLARIS/Calibration")
+def _try_delete(path):
+    try:
+        # Use this instead of os.remove as we could be passed a non-empty dir
+        if os.path.isdir(path):
+            shutil.rmtree(path)
+        else:
+            os.remove(path)
+    except OSError:
+        print ("Could not delete output file at: ", path)

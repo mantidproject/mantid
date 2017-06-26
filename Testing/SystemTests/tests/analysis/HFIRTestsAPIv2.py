@@ -17,6 +17,7 @@ import stresstesting
 from mantid.api import *
 from mantid.simpleapi import *
 from reduction_workflow.instruments.sans.hfir_command_interface import *
+from reduction_workflow.command_interface import AppendDataFile, Reduce, Reduce1D
 
 
 # Set directory containing the test data, relative to the Mantid release

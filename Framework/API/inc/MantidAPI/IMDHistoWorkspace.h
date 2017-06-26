@@ -44,6 +44,10 @@ public:
   IMDHistoWorkspace_uptr clone() const {
     return IMDHistoWorkspace_uptr(doClone());
   }
+  /// Returns a default-initialized clone of the workspace
+  IMDHistoWorkspace_uptr cloneEmpty() const {
+    return IMDHistoWorkspace_uptr(doCloneEmpty());
+  }
   /// See the MDHistoWorkspace definition for descriptions of these
   virtual coord_t getInverseVolume() const = 0;
   virtual signal_t *getSignalArray() const = 0;
@@ -109,6 +113,7 @@ protected:
 
 private:
   IMDHistoWorkspace *doClone() const override = 0;
+  IMDHistoWorkspace *doCloneEmpty() const override = 0;
 };
 
 } // namespace API

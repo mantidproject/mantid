@@ -8,12 +8,13 @@
  *DataHandling)
  *********************************************************************************/
 #include "MantidTestHelpers/SANSInstrumentCreationHelper.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
 #include "MantidDataHandling/LoadInstrument.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/UnitFactory.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 /*****************************************************
  * SANS instrument helper class
