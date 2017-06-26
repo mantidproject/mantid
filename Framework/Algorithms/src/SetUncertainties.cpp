@@ -90,15 +90,15 @@ void SetUncertainties::init() {
   setPropertySettings("SetErrorTo", Kernel::make_unique<VisibleWhenProperty>(
                                         "SetError", IS_EQUAL_TO, "custom"));
 
-  declareProperty(
-      "IfEqualTo", 0.000, mustBePositive,
-      "Which error values in the input workspace should be replaced when using custom mode");
+  declareProperty("IfEqualTo", 0.000, mustBePositive,
+                  "Which error values in the input workspace should be "
+                  "replaced when using custom mode");
   setPropertySettings("IfEqualTo", Kernel::make_unique<VisibleWhenProperty>(
                                        "SetError", IS_EQUAL_TO, "custom"));
 
-  declareProperty(
-      "Precision", 3, mustBePositiveInt,
-      "How many decimal places of ``IfEqualTo`` are taken into account for matching when using custom mode");
+  declareProperty("Precision", 3, mustBePositiveInt,
+                  "How many decimal places of ``IfEqualTo`` are taken into "
+                  "account for matching when using custom mode");
   setPropertySettings("Precision", Kernel::make_unique<VisibleWhenProperty>(
                                        "SetError", IS_EQUAL_TO, "custom"));
 }
