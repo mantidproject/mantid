@@ -172,7 +172,7 @@ void AnvredCorrection::exec() {
     PARALLEL_START_INTERUPT_REGION
 
     // If no detector is found, skip onto the next spectrum
-    if (!spectrumInfo.hasDetectors(i))
+    if (!spectrumInfo.hasDetectors(i) || spectrumInfo.isMonitor(i))
       continue;
 
     // This is the scattered beam direction
@@ -274,7 +274,7 @@ void AnvredCorrection::execEvent() {
     correctionFactors->setHistogram(i, eventW->binEdges(i));
 
     // If no detector is found, skip onto the next spectrum
-    if (!spectrumInfo.hasDetectors(i))
+    if (!spectrumInfo.hasDetectors(i) || spectrumInfo.isMonitor(i))
       continue;
 
     // This is the scattered beam direction

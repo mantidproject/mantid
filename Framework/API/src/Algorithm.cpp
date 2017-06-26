@@ -1,9 +1,9 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/AlgorithmHistory.h"
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AlgorithmProxy.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/DeprecatedAlgorithm.h"
-#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/IWorkspaceProperty.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/WorkspaceHistory.h"
@@ -15,6 +15,8 @@
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/UsageService.h"
+
+#include "MantidParallel/Communicator.h"
 
 #include <boost/algorithm/string/regex.hpp>
 #include <boost/weak_ptr.hpp>
@@ -90,7 +92,8 @@ Algorithm::Algorithm()
       m_runningAsync(false), m_running(false), m_rethrow(false),
       m_isAlgStartupLoggingEnabled(true), m_startChildProgress(0.),
       m_endChildProgress(0.), m_algorithmID(this), m_singleGroup(-1),
-      m_groupsHaveSimilarNames(false) {}
+      m_groupsHaveSimilarNames(false),
+      m_communicator(Kernel::make_unique<Parallel::Communicator>()) {}
 
 /// Virtual destructor
 Algorithm::~Algorithm() {
@@ -257,6 +260,7 @@ void Algorithm::initialize() {
   try {
     try {
       this->init();
+      setupSkipValidationMasterOnly();
     } catch (std::runtime_error &) {
       throw;
     }
@@ -545,7 +549,7 @@ bool Algorithm::execute() {
       // Start a timer
       Timer timer;
       // Call the concrete algorithm's exec method
-      this->exec();
+      this->exec(getExecutionMode());
       registerFeatureUsage();
       // Check for a cancellation request in case the concrete algorithm doesn't
       interruption_point();
@@ -1617,6 +1621,201 @@ void Algorithm::setAlgStartupLogging(const bool enabled) {
 bool Algorithm::getAlgStartupLogging() const {
   return m_isAlgStartupLoggingEnabled;
 }
+
+/// Runs the algorithm with the specified execution mode.
+void Algorithm::exec(Parallel::ExecutionMode executionMode) {
+  switch (executionMode) {
+  case Parallel::ExecutionMode::Serial:
+  case Parallel::ExecutionMode::Identical:
+    return exec();
+  case Parallel::ExecutionMode::Distributed:
+    return execDistributed();
+  case Parallel::ExecutionMode::MasterOnly:
+    return execMasterOnly();
+  default:
+    throw(std::runtime_error("Algorithm " + name() +
+                             " does not support execution mode " +
+                             Parallel::toString(executionMode)));
+  }
+}
+
+/** Runs the algorithm in `distributed` execution mode.
+ *
+ * The default implementation runs the normal exec() method on all ranks.
+ * Classes inheriting from Algorithm can re-implement this if they support
+ * execution with multiple MPI ranks and require a special implementation for
+ * distributed execution. */
+void Algorithm::execDistributed() { exec(); }
+
+/** Runs the algorithm in `master-only` execution mode.
+ *
+ * The default implementation runs the normal exec() method on rank 0 and
+ * execNonMaster() on all other ranks. Classes inheriting from Algorithm can
+ * re-implement this if they support execution with multiple MPI ranks and
+ * require a special implementation for master-only execution. */
+void Algorithm::execMasterOnly() {
+  if (communicator().rank() == 0)
+    exec();
+  else
+    execNonMaster();
+}
+
+/** By default execMasterOnly() runs this in `master-only` execution mode on all
+ * but rank 0.
+ *
+ * The default implementation creates dummy workspaces for all pure output
+ * workspaces. Classes inheriting from Algorithm can re-implement this if they
+ * support execution with multiple MPI ranks and require a special behavior on
+ * non-master ranks in master-only execution. */
+void Algorithm::execNonMaster() {
+  // Does Algorithm have exactly one input and one output workspace property?
+  if (m_inputWorkspaceProps.size() == 1 &&
+      m_pureOutputWorkspaceProps.size() == 1) {
+    // Does the input workspace property point to an actual workspace?
+    if (const auto &ws = m_inputWorkspaceProps.front()->getWorkspace()) {
+      if (ws->storageMode() == Parallel::StorageMode::MasterOnly) {
+        const auto &wsProp = m_pureOutputWorkspaceProps.front();
+        // This is the reverse cast of what is done in
+        // cacheWorkspaceProperties(), so it should never fail.
+        const Property &prop = dynamic_cast<Property &>(*wsProp);
+        setProperty(prop.name(), ws->cloneEmpty());
+        return;
+      }
+    }
+  }
+  throw std::runtime_error(
+      "Attempt to run algorithm with " +
+      Parallel::toString(Parallel::ExecutionMode::MasterOnly) +
+      ": Execution in this mode not implemented.");
+}
+
+/** Get a (valid) execution mode for this algorithm.
+ *
+ * "Valid" implies that this function does check whether or not the Algorithm
+ * actually supports the mode. If it cannot return a valid mode it throws an
+ * error. As a consequence, the return value of this function can be used
+ * without further sanitization of the return value. */
+Parallel::ExecutionMode Algorithm::getExecutionMode() const {
+  if (communicator().size() == 1)
+    return Parallel::ExecutionMode::Serial;
+
+  const auto storageModes = getInputWorkspaceStorageModes();
+  const auto executionMode = getParallelExecutionMode(storageModes);
+  if (executionMode == Parallel::ExecutionMode::Invalid) {
+    std::string error("Algorithm does not support execution with input "
+                      "workspaces of the following storage types: " +
+                      Parallel::toString(storageModes) + ".");
+    getLogger().error() << error << "\n";
+    throw(std::runtime_error(error));
+  }
+  if (executionMode == Parallel::ExecutionMode::Serial) {
+    std::string error(Parallel::toString(executionMode) +
+                      " is not a valid *parallel* execution mode.");
+    getLogger().error() << error << "\n";
+    throw(std::runtime_error(error));
+  }
+  return executionMode;
+}
+
+/** Get map of storage modes of all input workspaces.
+ *
+ * The key to the name is the property name of the respective workspace. */
+std::map<std::string, Parallel::StorageMode>
+Algorithm::getInputWorkspaceStorageModes() const {
+  std::map<std::string, Parallel::StorageMode> map;
+  for (const auto &wsProp : m_inputWorkspaceProps) {
+    // This is the reverse cast of what is done in cacheWorkspaceProperties(),
+    // so it should never fail.
+    const Property &prop = dynamic_cast<Property &>(*wsProp);
+    // Check if we actually have that input workspace
+    if (wsProp->getWorkspace())
+      map.emplace(prop.name(), wsProp->getWorkspace()->storageMode());
+  }
+  return map;
+}
+
+/** Get correct execution mode based on input storage modes for an MPI run.
+ *
+ * The default implementation returns ExecutionMode::Invalid. Classes inheriting
+ * from Algorithm can re-implement this if they support execution with multiple
+ * MPI ranks. May not return ExecutionMode::Serial, because that is not a
+ * "parallel" execution mode. */
+Parallel::ExecutionMode Algorithm::getParallelExecutionMode(
+    const std::map<std::string, Parallel::StorageMode> &storageModes) const {
+  UNUSED_ARG(storageModes)
+  // By default no parallel execution is possible.
+  return Parallel::ExecutionMode::Invalid;
+}
+
+/// Sets up skipping workspace validation on non-master ranks for
+/// StorageMode::MasterOnly.
+void Algorithm::setupSkipValidationMasterOnly() {
+  // If workspaces have StorageMode::MasterOnly, validation on non-master ranks
+  // would usually fail. Therefore, WorkspaceProperty needs to skip validation.
+  // Thus, we must notify it whether or not it is on the master rank or not.
+  if (communicator().rank() != 0)
+    for (auto *prop : getProperties())
+      if (auto *wsProp = dynamic_cast<IWorkspaceProperty *>(prop))
+        wsProp->setIsMasterRank(false);
+}
+
+/// Returns a const reference to the (MPI) communicator of the algorithm.
+const Parallel::Communicator &Algorithm::communicator() const {
+  return *m_communicator;
+}
+
+/// Sets the (MPI) communicator of the algorithm.
+void Algorithm::setCommunicator(const Parallel::Communicator &communicator) {
+  m_communicator = Kernel::make_unique<Parallel::Communicator>(communicator);
+}
+
+//---------------------------------------------------------------------------
+// Algorithm's inner classes
+//---------------------------------------------------------------------------
+
+Algorithm::AlgorithmNotification::AlgorithmNotification(
+    const Algorithm *const alg)
+    : Poco::Notification(), m_algorithm(alg) {}
+
+const IAlgorithm *Algorithm::AlgorithmNotification::algorithm() const {
+  return m_algorithm;
+}
+
+Algorithm::StartedNotification::StartedNotification(const Algorithm *const alg)
+    : AlgorithmNotification(alg) {}
+std::string Algorithm::StartedNotification::name() const {
+  return "StartedNotification";
+} ///< class name
+
+Algorithm::FinishedNotification::FinishedNotification(
+    const Algorithm *const alg, bool res)
+    : AlgorithmNotification(alg), success(res) {}
+std::string Algorithm::FinishedNotification::name() const {
+  return "FinishedNotification";
+}
+
+Algorithm::ProgressNotification::ProgressNotification(
+    const Algorithm *const alg, double p, const std::string &msg,
+    double estimatedTime, int progressPrecision)
+    : AlgorithmNotification(alg), progress(p), message(msg),
+      estimatedTime(estimatedTime), progressPrecision(progressPrecision) {}
+
+std::string Algorithm::ProgressNotification::name() const {
+  return "ProgressNotification";
+}
+
+Algorithm::ErrorNotification::ErrorNotification(const Algorithm *const alg,
+                                                const std::string &str)
+    : AlgorithmNotification(alg), what(str) {}
+
+std::string Algorithm::ErrorNotification::name() const {
+  return "ErrorNotification";
+}
+
+const char *Algorithm::CancelException::what() const noexcept {
+  return "Algorithm terminated";
+}
+
 } // namespace API
 
 //---------------------------------------------------------------------------

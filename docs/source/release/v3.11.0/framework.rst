@@ -15,6 +15,8 @@ New
 Improved
 ########
 
+- :ref:`LoadBBY <algm-LoadBBY-v1>` is now better at handling sample information. 
+- :ref:`GroupDetectors <algm-GroupDetectors-v2>` now supports workspaces with detector scans.
 
 Deprecated
 ##########

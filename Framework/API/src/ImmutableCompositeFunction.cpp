@@ -16,8 +16,9 @@ using std::size_t;
  * Overridden method creates an initialization string which makes it look like a
  * siple function.
  */
-std::string ImmutableCompositeFunction::asString() const {
-  return IFunction::asString();
+std::string ImmutableCompositeFunction::writeToString(
+    const std::string &parentLocalAttributesStr) const {
+  return IFunction::writeToString(parentLocalAttributesStr);
 }
 
 /**

@@ -2,20 +2,27 @@
 #define MANTID_PARALLEL_COMMUNICATOR_H_
 
 #include "MantidParallel/DllConfig.h"
-#ifdef MPI_EXPERIMENTAL
 #include "MantidParallel/Request.h"
 #include "MantidParallel/ThreadingBackend.h"
-#endif
 
 #ifdef MPI_EXPERIMENTAL
-#include <boost/make_shared.hpp>
 #include <boost/mpi/communicator.hpp>
 #endif
+
+namespace boost {
+namespace mpi {
+class environment;
+}
+}
+
+namespace ParallelTestHelpers {
+class ParallelRunner;
+}
 
 namespace Mantid {
 namespace Parallel {
 #ifdef MPI_EXPERIMENTAL
-class ParallelRunner;
+extern boost::mpi::environment environment;
 #endif
 
 /** Wrapper for boost::mpi::communicator. For non-MPI builds an equivalent
@@ -54,7 +61,6 @@ public:
 
   int rank() const;
   int size() const;
-#ifdef MPI_EXPERIMENTAL
   template <typename... T> void send(T &&... args) const;
   template <typename... T> void recv(T &&... args) const;
   template <typename... T> Request isend(T &&... args) const;
@@ -64,20 +70,25 @@ private:
   Communicator(boost::shared_ptr<detail::ThreadingBackend> backend,
                const int rank);
 
+#ifdef MPI_EXPERIMENTAL
   boost::mpi::communicator m_communicator;
+#endif
   boost::shared_ptr<detail::ThreadingBackend> m_backend;
   int m_rank{0};
 
   // For accessing constructor with threading backend.
-  friend class ParallelRunner;
-#endif
+  friend class ParallelTestHelpers::ParallelRunner;
 };
 
-#ifdef MPI_EXPERIMENTAL
 template <typename... T> void Communicator::send(T &&... args) const {
   if (m_backend)
     return m_backend->send(m_rank, std::forward<T>(args)...);
+#ifdef MPI_EXPERIMENTAL
   m_communicator.send(std::forward<T>(args)...);
+#else
+  throw std::runtime_error(
+      "Parallel::Communicator without backend in non-MPI build");
+#endif
 }
 
 template <typename... T> void Communicator::recv(T &&... args) const {
@@ -85,21 +96,35 @@ template <typename... T> void Communicator::recv(T &&... args) const {
   // http://mpi-forum.org/docs/mpi-1.1/mpi-11-html/node35.html#Node35.
   if (m_backend)
     return m_backend->recv(m_rank, std::forward<T>(args)...);
+#ifdef MPI_EXPERIMENTAL
   static_cast<void>(m_communicator.recv(std::forward<T>(args)...));
+#else
+  throw std::runtime_error(
+      "Parallel::Communicator without backend in non-MPI build");
+#endif
 }
 
 template <typename... T> Request Communicator::isend(T &&... args) const {
   if (m_backend)
     return m_backend->isend(m_rank, std::forward<T>(args)...);
+#ifdef MPI_EXPERIMENTAL
   return m_communicator.isend(std::forward<T>(args)...);
+#else
+  throw std::runtime_error(
+      "Parallel::Communicator without backend in non-MPI build");
+#endif
 }
 
 template <typename... T> Request Communicator::irecv(T &&... args) const {
   if (m_backend)
     return m_backend->irecv(m_rank, std::forward<T>(args)...);
+#ifdef MPI_EXPERIMENTAL
   return m_communicator.irecv(std::forward<T>(args)...);
-}
+#else
+  throw std::runtime_error(
+      "Parallel::Communicator without backend in non-MPI build");
 #endif
+}
 
 } // namespace Parallel
 } // namespace Mantid

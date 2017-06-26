@@ -76,7 +76,8 @@ class FrequencyPowderGenerator(object):
             # This will be the same in case full array with transitions is processed
             # but in case array of transitions is huge and we proceed chunk by chunk then
             # fundamentals_ind differ from fundamentals_coefficients
-            fundamentals_ind = np.arange(start=0, step=1, stop=fundamentals_size, dtype=AbinsModules.AbinsConstants.INT_TYPE)
+            fundamentals_ind = np.arange(start=0, step=1, stop=fundamentals_size,
+                                         dtype=AbinsModules.AbinsConstants.INT_TYPE)
 
             n = fundamentals_size * previous_size
             num_of_arrays = 2
