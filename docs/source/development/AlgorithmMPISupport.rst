@@ -356,7 +356,7 @@ This index is represented by ``Indexing::GlobalSpectrumIndex``. [#spectrum-index
 The consequences are as follows:
 
 - Workspace indices should not be logged or written into output of other types such as tables. Instead spectrum numbers (``Indexing::SpectrumNumber``) or global spectrum indices (``Indexing::GlobalSpectrumIndex``) must be used.
-- The number of histograms in a workspace obtained from ``MatrixWorkspace::getNumberHistograms()`` may only be used for processing all spectra.
+- The number of histograms in a workspace obtained from ``MatrixWorkspace::getNumberHistograms()`` may only be used for processing all spectra, i.e., when each MPI rank is processing all its local spectra.
   It should not be logged, written as output, or used for branching execution paths since it is meaningless.
   If the total number of spectra in a workspace is required it can be accessed via ``MatrixWorkspace::indexInfo()::globalSize()``.
 - User input providing indices or spectrum numbers in way or another must be translated into local indices by ``IndexInfo``.
