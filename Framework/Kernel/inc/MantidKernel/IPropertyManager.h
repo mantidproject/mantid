@@ -161,9 +161,9 @@ public:
   template <typename T>
   IPropertyManager *setProperty(const std::string &name,
                                 std::unique_ptr<T> value) {
-    setTypedProperty(name, std::move(value),
-                     std::is_convertible<std::unique_ptr<T>,
-                                           boost::shared_ptr<DataItem>>());
+    setTypedProperty(
+        name, std::move(value),
+        std::is_convertible<std::unique_ptr<T>, boost::shared_ptr<DataItem>>());
     this->afterPropertySet(name);
     return this;
   }

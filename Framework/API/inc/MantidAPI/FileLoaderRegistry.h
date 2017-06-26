@@ -4,7 +4,7 @@
 #include "MantidAPI/AlgorithmFactory.h"
 #include "MantidAPI/IFileLoader.h"
 #include "MantidKernel/SingletonHolder.h"
- 
+
 #ifndef Q_MOC_RUN
 #include <type_traits>
 #endif
@@ -17,7 +17,6 @@ namespace Mantid {
 namespace Kernel {
 
 class Logger;
-
 }
 namespace API {
 
@@ -107,8 +106,7 @@ private:
     static void check(LoaderFormat format) {
       switch (format) {
       case Nexus:
-        if (!std::is_base_of<IFileLoader<Kernel::NexusDescriptor>,
-                               T>::value) {
+        if (!std::is_base_of<IFileLoader<Kernel::NexusDescriptor>, T>::value) {
           throw std::runtime_error(
               std::string("FileLoaderRegistryImpl::subscribe - Class '") +
               typeid(T).name() + "' registered as Nexus loader but it does not "

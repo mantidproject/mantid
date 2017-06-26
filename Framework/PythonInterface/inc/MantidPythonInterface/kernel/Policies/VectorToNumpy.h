@@ -47,8 +47,7 @@ template <typename T> struct is_std_vector : std::false_type {};
 
 /// Specialization for std::vector types to inherit from
 /// std::true_type
-template <typename T>
-struct is_std_vector<std::vector<T>> : std::true_type {};
+template <typename T> struct is_std_vector<std::vector<T>> : std::true_type {};
 
 //-----------------------------------------------------------------------
 // VectorRefToNumpyImpl - Policy for reference returns
