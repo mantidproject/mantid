@@ -412,10 +412,14 @@ class IndirectILLReductionFWS(PythonAlgorithm):
         for energy in self._all_runs[reference]:
             if energy in self._all_runs[label]:
                 ws = self._insert_energy_value(self._red_ws + '_' + label, energy, label)
-                x_range = mtd[ws].readX(0)[-1] - mtd[ws].readX(0)[0]
                 if mtd[ws].blocksize() > 1:
-                    Integration(InputWorkspace=ws, OutputWorkspace=ws)
-                    Scale(InputWorkspace=ws,OutputWorkspace=ws,Factor=1./x_range)
+                    SortXAxis(InputWorkspace=ws, OutputWorkspace=ws)
+                    axis = mtd[ws].readX(0)
+                    start = axis[0]
+                    end = axis[-1]
+                    range = end-start
+                    params = [start, range, end]
+                    Rebin(InputWorkspace=ws, OutputWorkspace=ws, Params=params)
 
     def _interpolate(self, label, reference):
         '''
@@ -493,10 +497,8 @@ class IndirectILLReductionFWS(PythonAlgorithm):
             for column in range(mtd[sample].blocksize()):
                 scale = np.max(mtd[calib].extractY()[:,column])
                 for spectrum in range(mtd[sample].getNumberHistograms()):
-                    y = mtd[sample].dataY(spectrum)[column]
-                    e = mtd[sample].dataE(spectrum)[column]
-                    y *= scale
-                    e *= scale
+                    mtd[sample].dataY(spectrum)[column] *= scale
+                    mtd[sample].dataE(spectrum)[column] *= scale
 
     def _get_observable_values(self, ws_list):
         '''
