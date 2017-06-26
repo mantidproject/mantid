@@ -11,7 +11,7 @@
 #include "MantidKernel/UnitLabel.h"
 #include "MantidKernel/WarningSuppressions.h"
 
-#include "boost/make_shared.hpp"
+#include <boost/make_shared.hpp>
 #include <boost/algorithm/string.hpp>
 #include <boost/format.hpp>
 #include <boost/functional/hash.hpp>

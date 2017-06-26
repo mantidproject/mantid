@@ -350,10 +350,7 @@ def spline_vanadium_workspaces(focused_vanadium_spectra, spline_coefficient):
     :param spline_coefficient: The coefficient to use when creating the splined vanadium workspaces
     :return: The splined vanadium workspace
     """
-    stripped_ws_list = _strip_vanadium_peaks(workspaces_to_strip=focused_vanadium_spectra)
-    splined_workspaces = spline_workspaces(stripped_ws_list, num_splines=spline_coefficient)
-
-    remove_intermediate_workspace(stripped_ws_list)
+    splined_workspaces = spline_workspaces(focused_vanadium_spectra, num_splines=spline_coefficient)
     return splined_workspaces
 
 
@@ -385,6 +382,7 @@ def subtract_summed_runs(ws_to_correct, empty_sample_ws_string, instrument, scal
     :param ws_to_correct: The workspace to subtract the empty instrument runs from
     :param empty_sample_ws_string: The empty run numbers to subtract from the workspace
     :param instrument: The instrument object these runs belong to
+    :param scale_factor: The percentage to scale the loaded runs by
     :return: The workspace with the empty runs subtracted
     """
     # If an empty string was not specified just return to skip this step
@@ -488,7 +486,7 @@ def _load_list_of_files(run_numbers_list, instrument, file_ext=None):
 def _strip_vanadium_peaks(workspaces_to_strip):
     out_list = []
     for i, ws in enumerate(workspaces_to_strip):
-        out_name = ws.getName() + "_splined-" + str(i+1)
+        out_name = ws.getName() + "_toSpline-" + str(i+1)
         out_list.append(mantid.StripVanadiumPeaks(InputWorkspace=ws, OutputWorkspace=out_name))
     return out_list
 

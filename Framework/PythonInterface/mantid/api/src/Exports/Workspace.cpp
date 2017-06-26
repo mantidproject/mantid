@@ -67,7 +67,8 @@ void export_Workspace() {
       .def("getHistory", (const WorkspaceHistory &(Workspace::*)() const) &
                              Workspace::getHistory,
            arg("self"), return_value_policy<reference_existing_object>(),
-           "Return read-only access to the workspace history");
+           "Return read-only access to the "
+           ":class:`~mantid.api.WorkspaceHistory`");
 
   // register pointers
   RegisterWorkspacePtrToPython<Workspace>();

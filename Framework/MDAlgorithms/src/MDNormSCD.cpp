@@ -102,6 +102,20 @@ void MDNormSCD::init() {
                   "An input workspace containing momentum integrated vanadium "
                   "(a measure of the solid angle).");
 
+  declareProperty(make_unique<WorkspaceProperty<IMDHistoWorkspace>>(
+                      "TemporaryNormalizationWorkspace", "", Direction::Input,
+                      PropertyMode::Optional),
+                  "An input MDHistoWorkspace used to accumulate normalization "
+                  "from multiple MDEventWorkspaces. "
+                  "If unspecified a blank MDHistoWorkspace will be created.");
+
+  declareProperty(make_unique<WorkspaceProperty<IMDHistoWorkspace>>(
+                      "TemporaryDataWorkspace", "", Direction::Input,
+                      PropertyMode::Optional),
+                  "An input MDHistoWorkspace used to accumulate data from "
+                  "multiple MDEventWorkspaces. If "
+                  "unspecified a blank MDHistoWorkspace will be created.");
+
   declareProperty(make_unique<WorkspaceProperty<Workspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "A name for the output data MDHistoWorkspace.");
@@ -215,6 +229,7 @@ MDHistoWorkspace_sptr MDNormSCD::binInputWS() {
   for (auto prop : props) {
     const auto &propName = prop->name();
     if (propName != "FluxWorkspace" && propName != "SolidAngleWorkspace" &&
+        propName != "TemporaryNormalizationWorkspace" &&
         propName != "OutputNormalizationWorkspace") {
       binMD->setPropertyValue(propName, prop->value());
     }
@@ -230,8 +245,15 @@ MDHistoWorkspace_sptr MDNormSCD::binInputWS() {
  */
 void MDNormSCD::createNormalizationWS(const MDHistoWorkspace &dataWS) {
   // Copy the MDHisto workspace, and change signals and errors to 0.
-  m_normWS = dataWS.clone();
-  m_normWS->setTo(0., 0., 0.);
+  boost::shared_ptr<IMDHistoWorkspace> tmp =
+      this->getProperty("TemporaryNormalizationWorkspace");
+  m_normWS = boost::dynamic_pointer_cast<MDHistoWorkspace>(tmp);
+  if (!m_normWS) {
+    m_normWS = dataWS.clone();
+    m_normWS->setTo(0., 0., 0.);
+  } else {
+    m_accumulate = true;
+  }
 }
 
 /**
@@ -477,7 +499,15 @@ for (int64_t i = 0; i < ndets; i++) {
   PARALLEL_END_INTERUPT_REGION
 }
 PARALLEL_CHECK_INTERUPT_REGION
-std::copy(signalArray.cbegin(), signalArray.cend(), m_normWS->getSignalArray());
+if (m_accumulate) {
+  std::transform(
+      signalArray.cbegin(), signalArray.cend(), m_normWS->getSignalArray(),
+      m_normWS->getSignalArray(),
+      [](const std::atomic<signal_t> &a, const signal_t &b) { return a + b; });
+} else {
+  std::copy(signalArray.cbegin(), signalArray.cend(),
+            m_normWS->getSignalArray());
+}
 }
 
 /**

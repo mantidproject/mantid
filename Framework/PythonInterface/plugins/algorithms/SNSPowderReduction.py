@@ -704,7 +704,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
             if sample_ws_name is None:
                 # sample run workspace is not set up.
                 sample_ws_name = ws_name
-                info = tempinfo
+                self._info = tempinfo
             else:
                 # there is sample run workspace set up previously, then add current one to previous for summation
                 self.checkInfoMatch(info, tempinfo)
@@ -998,6 +998,10 @@ class SNSPowderReduction(DataProcessorAlgorithm):
         # Check requirements
         assert isinstance(wksp_name, str)
         assert self.does_workspace_exist(wksp_name)
+
+        # Reset characterization run numbers in the property manager
+        if PropertyManagerDataService.doesExist('__snspowderreduction'):
+            PropertyManagerDataService.remove('__snspowderreduction')
 
         # Determine characterization
         api.PDDetermineCharacterizations(InputWorkspace=wksp_name,

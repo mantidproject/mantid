@@ -95,7 +95,7 @@ private:
   QHash<QString, QString>
   provideZeroFreeWorkspaces(const QListWidget *workspaces);
   void removeZeroFreeWorkspaces(QHash<QString, QString> workspaces);
-
+  bool isValid();
 private slots:
   void saveSel();
   void setFileName(int row);

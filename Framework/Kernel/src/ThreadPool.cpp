@@ -2,8 +2,17 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidKernel/ThreadPool.h"
+
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/MultiThreaded.h"
+#include "MantidKernel/ProgressBase.h"
+#include "MantidKernel/Task.h"
+#include "MantidKernel/ThreadPoolRunnable.h"
+
+#include <Poco/Thread.h>
+
+#include <algorithm>
+#include <stdexcept>
 #include <sstream>
 // needed on windows and any place missing openmp
 #if defined(_WIN32) || !defined(_OPENMP)

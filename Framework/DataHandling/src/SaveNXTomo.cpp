@@ -163,7 +163,7 @@ void SaveNXTomo::processAll() {
   ::NeXus::File nxFile = setupFile();
 
   // Create a progress reporting object
-  Progress progress(this, 0, 1, m_workspaces.size());
+  Progress progress(this, 0.0, 1.0, m_workspaces.size());
 
   for (auto &workspace : m_workspaces) {
     writeSingleWorkspace(workspace, nxFile);

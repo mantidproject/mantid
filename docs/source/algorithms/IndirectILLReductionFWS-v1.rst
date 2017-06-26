@@ -12,6 +12,7 @@ Description
 This algorithm performs Fixed Window Scan (FWS) data reduction (both Elastic and Inelastic) for IN16B indirect geometry instrument at ILL.
 It uses internally the :ref:`IndirectILLEnergyTransfer <algm-IndirectILLEnergyTransfer>` algorithm.
 
+
 Input
 -----
 
@@ -26,7 +27,7 @@ Y-axis will be detector angle, and the values would be the intensities integrate
 (symmetric around each peak) at the beginning and the end of the spectra (for IFWS).
 Scanning observable can be any numeric or time-stamp-like string parameter.
 See ``sample.*`` or e.g. ``start_time`` in Sample Logs.
-``BackgroundRun`` s and ``CalibrationRun`` s will be averaged or interpolated over all the ovservable points according to option.
+``BackgroundRun`` s, ``CalibrationBackgroundRun`` s and ``CalibrationRun`` s will be averaged (default) or interpolated over all the observable points according to the option.
 Interpolation is provided by :ref:`SplineInterpolation <algm-SplineInterpolation>`, which does cubic spline (or linear for 2 points only) interpolation inside the range and
 flat extrapolation beyond the range. For the moment it does not give errors on interpolated results.
 Interpolated subtraction or calibration is recommended only if there is a strong dependence on the observable and many measured points in the data to be interpolated.

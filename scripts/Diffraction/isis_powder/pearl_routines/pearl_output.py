@@ -3,6 +3,7 @@ from __future__ import (absolute_import, division, print_function)
 import mantid.simpleapi as mantid
 
 import isis_powder.routines.common as common
+from isis_powder.routines.common_enums import WORKSPACE_UNITS
 
 # This file generates the various outputs for the PEARL instruments and saves them to their respective files
 
@@ -33,19 +34,19 @@ def _attenuate_workspace(instrument, output_file_paths, attenuated_ws):
 
 
 def _focus_mode_mods(output_file_paths, calibrated_spectra):
-    index = 1
     append = False
     output_list = []
-    for ws in calibrated_spectra:
-
-        mantid.SaveGSS(InputWorkspace=ws, Filename=output_file_paths["gss_filename"], Append=append, Bank=index)
-        output_name = output_file_paths["output_name"] + "_mod" + str(index)
-        dspacing_ws = mantid.ConvertUnits(InputWorkspace=ws, OutputWorkspace=output_name, Target="dSpacing")
+    for index, ws in enumerate(calibrated_spectra):
+        output_name = output_file_paths["output_name"] + "_mod" + str(index + 1)
+        tof_ws = mantid.ConvertUnits(InputWorkspace=ws, OutputWorkspace=output_name,
+                                     Target=WORKSPACE_UNITS.tof)
+        mantid.SaveGSS(InputWorkspace=tof_ws, Filename=output_file_paths["gss_filename"], Append=append, Bank=index + 1)
+        dspacing_ws = mantid.ConvertUnits(InputWorkspace=ws, OutputWorkspace=output_name,
+                                          Target=WORKSPACE_UNITS.d_spacing)
         output_list.append(dspacing_ws)
         mantid.SaveNexus(Filename=output_file_paths["nxs_filename"], InputWorkspace=dspacing_ws, Append=append)
 
         append = True
-        index += 1
     return output_list
 
 

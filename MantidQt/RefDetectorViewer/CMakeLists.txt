@@ -1,10 +1,10 @@
 set ( SRC_FILES
-       src/RefImageDisplay.cpp   
-       src/RefImagePlotItem.cpp  
-       src/RefImageView.cpp      
+       src/RefImageDisplay.cpp
+       src/RefImagePlotItem.cpp
+       src/RefImageView.cpp
        src/RefSliderHandler.cpp
        src/RefRangeHandler.cpp
-       src/RefIVConnections.cpp 
+       src/RefIVConnections.cpp
        src/RefMatrixWSImageView.cpp
        src/RefLimitsHandler.cpp
 )
@@ -21,16 +21,12 @@ set ( INC_FILES
        inc/MantidQtRefDetectorViewer/RefLimitsHandler.h
 )
 
-set ( MOC_FILES 
+set ( MOC_FILES
        inc/MantidQtRefDetectorViewer/RefIVConnections.h
 )
 
-set ( UI_FILES 
+set ( UI_FILES
        inc/MantidQtRefDetectorViewer/RefImageView.ui
-)
-
-# Python unit tests
-set ( TEST_PY_FILES 
 )
 
 include_directories ( inc )
@@ -47,7 +43,7 @@ qt4_wrap_cpp ( MOCCED_FILES ${MOC_FILES} )
 
 set ( ALL_SRC ${SRC_FILES} ${MOCCED_FILES} )
 
-qt4_wrap_ui ( UI_HDRS ${UI_FILES} ) 
+qt4_wrap_ui ( UI_HDRS ${UI_FILES} )
 
 include_directories ( ${CMAKE_CURRENT_BINARY_DIR} )
 include_directories ( inc )
@@ -63,7 +59,7 @@ if (OSX_VERSION VERSION_GREATER 10.8)
 endif ()
 
 # ... and links to other required libs
-target_link_libraries ( MantidQtRefDetectorViewer LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} 
+target_link_libraries ( MantidQtRefDetectorViewer LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME}
             MantidQtSpectrumViewer
             ${CORE_MANTIDLIBS}
             ${Boost_LIBRARIES}
@@ -77,7 +73,7 @@ target_link_libraries ( MantidQtRefDetectorViewer LINK_PRIVATE ${TCMALLOC_LIBRAR
 ###########################################################################
 
 add_executable ( RefDetectorViewDemo EXCLUDE_FROM_ALL src/RefDetectorViewDemo.cpp )
-target_link_libraries ( RefDetectorViewDemo LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} 
+target_link_libraries ( RefDetectorViewDemo LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME}
             MantidQtRefDetectorViewer
             MantidQtSpectrumViewer
             ${Boost_LIBRARIES}
@@ -95,5 +91,3 @@ target_link_libraries ( RefDetectorViewDemo LINK_PRIVATE ${TCMALLOC_LIBRARIES_LI
 ###########################################################################
 
 install ( TARGETS MantidQtRefDetectorViewer ${SYSTEM_PACKAGE_TARGET} DESTINATION ${LIB_DIR} )
-
-
