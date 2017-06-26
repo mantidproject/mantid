@@ -34,9 +34,9 @@ Examples may help to clarify this:
 
 - If the detectors are not moveable, a 1:1 mapping is the most common.
 - Some beamlines at ISIS group multiple detectors into a single spectrum, so the region of space corresponding to a spectrum is larger than a single detector pixel.
-- After running algorithms like ``SumSpectra`` or ``DiffractionFocussing``, a spectrum will contain data from more than one detectors, even if there was an initial 1:1 correspondence.
+- After running algorithms like ``SumSpectra`` or ``DiffractionFocussing``, a spectrum will contain data from more than one detector, even if there was an initial 1:1 correspondence.
 - If the detectors are moveable, a spectrum would correspond to a region of space given by the position a specific detector had in a certain time interval.
-- There can be detectors without a corresponding spectrum, and Mantid is thus not handling data of that detectors.
+- There can be detectors without a corresponding spectrum, and Mantid is thus not handling data of those detectors.
 
 For the purpose of MPI support, Mantid always stores the complete instrument including **all detectors** on **every MPI rank**. [#split-instrument]_
 Only a subset of all spectra is stored on the local MPI rank, so a detector may be locally without corresponding spectrum but have a spectrum associated to it on another MPI rank.
