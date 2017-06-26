@@ -1,12 +1,14 @@
-#include "MantidHistogramData/LinearGenerator.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidKernel/Exception.h"
+#include "MantidAPI/ISpectrum.h"
 #include "MantidAPI/RefAxis.h"
 #include "MantidAPI/SpectraAxis.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidAPI/ISpectrum.h"
-#include "MantidKernel/VectorHelper.h"
+#include "MantidHistogramData/LinearGenerator.h"
+#include "MantidKernel/Exception.h"
 #include "MantidKernel/IPropertyManager.h"
+#include "MantidKernel/VectorHelper.h"
+
+#include <sstream>
 
 using Mantid::API::ISpectrum;
 using Mantid::API::MantidImage;
@@ -283,7 +285,7 @@ Histogram1D &Workspace2D::getSpectrum(const size_t index) {
 /// Return const reference to Histogram1D at the given workspace index.
 const Histogram1D &Workspace2D::getSpectrum(const size_t index) const {
   if (index >= m_noVectors) {
-    std::stringstream ss;
+    std::ostringstream ss;
     ss << "Workspace2D::getSpectrum, histogram number " << index
        << " out of range " << m_noVectors;
     throw std::range_error(ss.str());
