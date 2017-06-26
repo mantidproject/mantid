@@ -126,7 +126,8 @@ KernelVector gaussianKernel(const double fwhm) {
 KernelVector renormaliseKernel(KernelVector kernel,
                                std::vector<bool> validity) {
 
-  if (std::accumulate(validity.cbegin(), validity.cend(), static_cast<size_t>(0)) < kernel.size()) {
+  if (std::accumulate(validity.cbegin(), validity.cend(),
+                      static_cast<size_t>(0)) < kernel.size()) {
     // Use validity as a mask
     for (size_t i = 0; i < kernel.size(); ++i) {
       kernel[i] *= validity[i];
