@@ -204,7 +204,6 @@ public:
     TS_ASSERT_EQUALS(ws->readY(1)[0], 1.0)
     TS_ASSERT_EQUALS(ws->readE(0)[0], 1.0)
     TS_ASSERT_EQUALS(ws->readE(1)[0], 1.0)
-
   }
 
   void test_makeDistribution_fails_for_point_data() {
@@ -213,7 +212,7 @@ public:
     TS_ASSERT(!ws->isDistribution());
 
     TS_ASSERT_THROWS(WorkspaceHelpers::makeDistribution(ws),
-        std::runtime_error);
+                     std::runtime_error);
   }
 };
 

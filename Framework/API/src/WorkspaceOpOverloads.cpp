@@ -538,7 +538,8 @@ void WorkspaceHelpers::makeDistribution(MatrixWorkspace_sptr workspace,
                              "into distributions.");
 
   const size_t numberOfSpectra = workspace->getNumberHistograms();
-  if (workspace->histogram(0).xMode() == HistogramData::Histogram::XMode::Points) {
+  if (workspace->histogram(0).xMode() ==
+      HistogramData::Histogram::XMode::Points) {
     throw std::runtime_error(
         "Workspace is using point data for x (should be bin edges).");
   }
