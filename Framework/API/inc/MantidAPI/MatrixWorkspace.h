@@ -569,7 +569,7 @@ protected:
 
 private:
   MatrixWorkspace *doClone() const override = 0;
-  virtual MatrixWorkspace *doCloneEmpty() const = 0;
+  MatrixWorkspace *doCloneEmpty() const override = 0;
 
   /// Create an MantidImage instance.
   MantidImage_sptr

@@ -68,7 +68,7 @@ public:
     TSM_ASSERT("Decoder should not have create data buffers yet",
                !decoder->hasData());
     TS_ASSERT_THROWS_NOTHING(decoder->startCapture());
-    std::this_thread::sleep_for(std::chrono::milliseconds(500));
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));
     Workspace_sptr workspace;
     TSM_ASSERT("Decoder's data buffers should be created now",
                decoder->hasData());
@@ -104,7 +104,7 @@ public:
         .WillOnce(Return(new FakeISISSpDetStreamSubscriber));
     auto decoder = createTestDecoder(mockBroker);
     TS_ASSERT_THROWS_NOTHING(decoder->startCapture());
-    std::this_thread::sleep_for(std::chrono::milliseconds(500));
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));
     Workspace_sptr workspace;
     TS_ASSERT_THROWS_NOTHING(workspace = decoder->extractData());
     TS_ASSERT_THROWS_NOTHING(decoder->stopCapture());
@@ -141,7 +141,7 @@ public:
         .WillOnce(Return(new FakeISISSpDetStreamSubscriber));
     auto decoder = createTestDecoder(mockBroker);
     TS_ASSERT_THROWS_NOTHING(decoder->startCapture());
-    std::this_thread::sleep_for(std::chrono::milliseconds(500));
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));
     TS_ASSERT_THROWS_NOTHING(decoder->extractData());
     TS_ASSERT_THROWS_NOTHING(decoder->stopCapture());
     TS_ASSERT(!decoder->isCapturing());
@@ -162,7 +162,7 @@ public:
         .WillOnce(Return(new FakeExceptionThrowingStreamSubscriber));
     auto decoder = createTestDecoder(mockBroker);
     TS_ASSERT_THROWS_NOTHING(decoder->startCapture());
-    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));
     TS_ASSERT_THROWS(decoder->extractData(), std::runtime_error);
     TS_ASSERT_THROWS_NOTHING(decoder->stopCapture());
     TS_ASSERT(!decoder->isCapturing());
@@ -180,7 +180,7 @@ public:
         .WillOnce(Return(new FakeEmptyStreamSubscriber));
     auto decoder = createTestDecoder(mockBroker);
     TS_ASSERT_THROWS_NOTHING(decoder->startCapture());
-    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));
     TS_ASSERT_THROWS(decoder->extractData(), std::runtime_error);
     TS_ASSERT_THROWS_NOTHING(decoder->stopCapture());
     TS_ASSERT(!decoder->isCapturing());
@@ -198,7 +198,7 @@ public:
         .WillOnce(Return(new FakeISISSpDetStreamSubscriber));
     auto decoder = createTestDecoder(mockBroker);
     TS_ASSERT_THROWS_NOTHING(decoder->startCapture());
-    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));
     TS_ASSERT_THROWS(decoder->extractData(), std::runtime_error);
     TS_ASSERT_THROWS_NOTHING(decoder->stopCapture());
     TS_ASSERT(!decoder->isCapturing());

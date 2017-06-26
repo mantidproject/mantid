@@ -139,6 +139,9 @@ class FitSingleSpectrumBivariateGaussianTiesTest(stresstesting.MantidStressTest)
     a Bivariate Gaussian
     """
 
+    def excludeInPullRequests(self):
+        return True
+
     def runTest(self):
         flags = _create_test_flags(background=False, multivariate=True)
         flags['masses'][0]['ties'] = 'SigmaX=SigmaY'

@@ -2,7 +2,8 @@
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
 
-#include <boost/lexical_cast.hpp>
+#include <cmath>
+#include <stdexcept>
 
 namespace Mantid {
 namespace Kernel {

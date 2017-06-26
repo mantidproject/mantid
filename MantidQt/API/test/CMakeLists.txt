@@ -34,5 +34,5 @@ if ( CXXTEST_FOUND )
 endif ()
 
 if ( PYUNITTEST_FOUND )
-  pyunittest_add_test (${CMAKE_CURRENT_SOURCE_DIR} MantidQtAPITest ${TEST_PY_FILES} )
+  pyunittest_add_test (${CMAKE_CURRENT_SOURCE_DIR} python.test ${TEST_PY_FILES} )
 endif ()

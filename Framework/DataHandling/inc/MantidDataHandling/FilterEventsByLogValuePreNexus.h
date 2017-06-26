@@ -1,14 +1,14 @@
 #ifndef FILTEREVENTSBYLOGVALUEPRENEXUS_H_
 #define FILTEREVENTSBYLOGVALUEPRENEXUS_H_
 
+#include "MantidAPI/DeprecatedAlgorithm.h"
+#include "MantidAPI/IFileLoader.h"
+#include "MantidDataObjects/EventWorkspace.h"
+#include "MantidDataObjects/Events.h"
+#include "MantidKernel/BinaryFile.h"
 #include <fstream>
 #include <string>
 #include <vector>
-#include "MantidAPI/IFileLoader.h"
-#include "MantidKernel/BinaryFile.h"
-#include "MantidDataObjects/EventWorkspace.h"
-#include "MantidDataObjects/Events.h"
-#include "MantidAPI/DeprecatedAlgorithm.h"
 
 namespace Mantid {
 namespace DataHandling {
@@ -177,7 +177,7 @@ private:
   /// Perform statistics to event (wrong pixel ID) logs
   void doStatToEventLog(size_t mindex);
 
-  Mantid::API::Progress *m_prog;
+  std::unique_ptr<Mantid::API::Progress> m_progress = nullptr;
 
   DataObjects::EventWorkspace_sptr m_localWorkspace; //< Output EventWorkspace
   std::vector<int64_t> m_spectraList;                ///<the list of Spectra

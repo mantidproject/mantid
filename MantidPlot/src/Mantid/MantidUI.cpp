@@ -88,6 +88,7 @@
 #include <boost/tokenizer.hpp>
 
 #include <Poco/ActiveResult.h>
+#include <Poco/Thread.h>
 
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidQtFactory/WidgetFactory.h"
