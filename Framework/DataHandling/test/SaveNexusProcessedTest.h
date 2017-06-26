@@ -1,8 +1,6 @@
 #ifndef SAVENEXUSPROCESSEDTEST_H_
 #define SAVENEXUSPROCESSEDTEST_H_
 
-#include <nexus/NeXusFile.hpp>
-
 // These includes seem to make the difference between initialization of the
 // workspace names (workspace2D/1D etc), instrument classes and not for this
 // test case.
@@ -35,6 +33,8 @@
 #include <Poco/Path.h>
 
 #include <boost/lexical_cast.hpp>
+
+#include <nexus/NeXusFile.hpp>
 
 #include <fstream>
 #include <cxxtest/TestSuite.h>

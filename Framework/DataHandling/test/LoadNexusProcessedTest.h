@@ -1,8 +1,6 @@
 #ifndef LOADNEXUSPROCESSEDTEST_H_
 #define LOADNEXUSPROCESSEDTEST_H_
 
-#include "SaveNexusProcessedTest.h"
-
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FileFinder.h"
 #include "MantidAPI/AnalysisDataService.h"
@@ -23,6 +21,8 @@
 #include "MantidDataHandling/LoadInstrument.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidTestHelpers/HistogramDataTestHelper.h"
+
+#include "SaveNexusProcessedTest.h"
 
 #include <cxxtest/TestSuite.h>
 
