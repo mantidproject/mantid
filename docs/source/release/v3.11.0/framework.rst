@@ -13,7 +13,7 @@ New
 
 Improved
 ########
-- :ref:`SetUncertainties <algm-SetUncertainties-v1>` now provides a "custom" mode, which lets the user arbitrarily replace any error value x with y.
+- :ref:`SetUncertainties <algm-SetUncertainties-v1>` now provides a "custom" mode, which lets the user specify both an arbitrary error value whose occurences are to be replaced in the input workspace, as well as the value to replace it with.
 
 Deprecated
 ##########

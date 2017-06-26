@@ -86,19 +86,19 @@ void SetUncertainties::init() {
                   boost::make_shared<StringListValidator>(errorTypes),
                   "How to reset the uncertainties");
   declareProperty("SetErrorTo", 1.000, mustBePositive,
-                  "The error value to set when using custom values");
+                  "The error value to set when using custom mode");
   setPropertySettings("SetErrorTo", Kernel::make_unique<VisibleWhenProperty>(
                                         "SetError", IS_EQUAL_TO, "custom"));
 
   declareProperty(
-      "IfEqualTo", 0.000, mustBePositive, // TODO empty float?
-      "The condition specifying where the custom error value should be set");
+      "IfEqualTo", 0.000, mustBePositive,
+      "Which error values in the input workspace should be replaced when using custom mode");
   setPropertySettings("IfEqualTo", Kernel::make_unique<VisibleWhenProperty>(
                                        "SetError", IS_EQUAL_TO, "custom"));
 
   declareProperty(
       "Precision", 3, mustBePositiveInt,
-      "How many decimal places are taken into account for IfEqualTo");
+      "How many decimal places of ``IfEqualTo`` are taken into account for matching when using custom mode");
   setPropertySettings("Precision", Kernel::make_unique<VisibleWhenProperty>(
                                        "SetError", IS_EQUAL_TO, "custom"));
 }
