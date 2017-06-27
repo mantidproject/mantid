@@ -62,7 +62,10 @@ void EstimateResolutionDiffraction::init() {
       Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
           "InputWorkspace", "", Direction::Input),
       "Name of the workspace to have detector resolution calculated");
-
+  declareProperty(
+      Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
+          "DivergenceWorkspace", "", Direction::Input, PropertyMode::Optional),
+      "Workspace containing the divergence");
   declareProperty(Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "Name of the output workspace containing delta(d)/d of each "
@@ -127,6 +130,7 @@ void EstimateResolutionDiffraction::exec() {
   */
 void EstimateResolutionDiffraction::processAlgProperties() {
   m_inputWS = getProperty("InputWorkspace");
+  m_divergenceWS = getProperty("DivergenceWorkspace");
 
   m_deltaT = getProperty("DeltaTOF");
   m_deltaT *= MICROSEC_TO_SEC; // convert to meter
@@ -216,13 +220,19 @@ void EstimateResolutionDiffraction::estimateDetectorResolution() {
         spectrumInfo.isMonitor(i) ? 0.0 : spectrumInfo.twoTheta(i);
     const double theta = 0.5 * twotheta;
 
-    double solidangle = 0.0;
-    for (const auto detID : m_inputWS->getSpectrum(i).getDetectorIDs()) {
-      const auto index = detectorInfo.indexOf(detID);
-      if (!detectorInfo.isMasked(index))
-        solidangle += detectorInfo.detector(index).solidAngle(samplepos);
+    double deltatheta = 0.;
+    if (m_divergenceWS) {
+      deltatheta = m_divergenceWS->readY(i)[0];
+    } else {
+      double solidangle = 0.0;
+
+      for (const auto detID : m_inputWS->getSpectrum(i).getDetectorIDs()) {
+        const auto index = detectorInfo.indexOf(detID);
+        if (!detectorInfo.isMasked(index))
+          solidangle += detectorInfo.detector(index).solidAngle(samplepos);
+      }
+      deltatheta = sqrt(solidangle);
     }
-    const double deltatheta = sqrt(solidangle);
 
     // Resolution
     const double t1 = m_deltaT / centraltof;

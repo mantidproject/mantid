@@ -67,6 +67,8 @@ private:
 
   /// Input workspace
   API::MatrixWorkspace_sptr m_inputWS;
+  /// Workspace with custom divergence term
+  API::MatrixWorkspace_sptr m_divergenceWS;
 
   /// workspace holding the term for just the time-of-flight portion of the
   /// resolution
