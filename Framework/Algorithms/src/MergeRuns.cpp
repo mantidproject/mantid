@@ -5,14 +5,19 @@
 #include "MantidAPI/ADSValidator.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/Axis.h"
+#include "MantidAPI/DetectorInfo.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
+#include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidIndexing/IndexInfo.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/make_unique.h"
-#include "MantidDataObjects/WorkspaceCreation.h"
+#include "MantidTypes/SpectrumDefinition.h"
 
 using Mantid::HistogramData::HistogramX;
 
@@ -67,6 +72,10 @@ void MergeRuns::init() {
                   boost::make_shared<StringListValidator>(failBehaviourOptions),
                   "Choose whether to skip the file and continue, or stop and "
                   "throw and error, when encountering a failure.");
+
+  declareProperty(make_unique<PropertyWithValue<bool>>("AppendDetectorScans",
+                                                       true, Direction::Input),
+                  "TODO: Description goes here.");
 }
 
 // @return the name of the property used to supply in input workspace(s).
@@ -133,6 +142,41 @@ void MergeRuns::exec() {
         sampleLogsWarn, sampleLogsWarnTolerances, sampleLogsFail,
         sampleLogsFailTolerances);
 
+    auto isScanning = outWS->detectorInfo().isScanning();
+    bool appendDetectorScans = getProperty("AppendDetectorScans");
+
+    if (isScanning && !appendDetectorScans) {
+      // TODO: Could actually provide a check in here. For the cases in use
+      // at the moment it is not required though.
+      g_log.warning() << "Merging workspaces with detector scans. This is "
+                         "not recommended unless the detectors have the same "
+                         "positions, rotations etc. for each time index.\n";
+    } else if (isScanning && appendDetectorScans) {
+      auto numOutputSpectra = (*it)->getNumberHistograms();
+      auto outputSpectraDefs = std::vector<Mantid::SpectrumDefinition>(0);
+      const auto &firstWorkspaceSpectrumDefs =
+          *((*it)->indexInfo().spectrumDefinitions());
+
+      for (auto &spectrumDefinition : firstWorkspaceSpectrumDefs) {
+        outputSpectraDefs.push_back(spectrumDefinition);
+      }
+
+      for (++it; it != m_inMatrixWS.end(); ++it) {
+        numOutputSpectra += (*it)->getNumberHistograms();
+        const auto &newSpectraDefs =
+            *((*it)->indexInfo().spectrumDefinitions());
+        for (auto &spectrumDefinition : newSpectraDefs)
+          outputSpectraDefs.push_back(spectrumDefinition);
+      }
+
+      outWS = DataObjects::create<MatrixWorkspace>(*outWS, numOutputSpectra,
+                                                   outWS->histogram(0));
+
+      auto newIndexInfo = Indexing::IndexInfo(numOutputSpectra);
+      newIndexInfo.setSpectrumDefinitions(std::move(outputSpectraDefs));
+      outWS->setIndexInfo(newIndexInfo);
+    }
+
     m_progress = Kernel::make_unique<Progress>(this, 0.0, 1.0, numberOfWSs - 1);
     // Note that the iterator is incremented before first pass so that 1st
     // workspace isn't added to itself
@@ -168,15 +212,20 @@ void MergeRuns::exec() {
       try {
         sampleLogsBehaviour.mergeSampleLogs(**it, *outWS);
         sampleLogsBehaviour.removeSampleLogsFromWorkspace(*addee);
-        outWS = outWS + addee;
+        if (isScanning && appendDetectorScans) {
+          auto &mergeDetectorInfo = (*it)->mutableDetectorInfo();
+          outWS->mutableDetectorInfo().merge(mergeDetectorInfo);
+        } else {
+          outWS = outWS + addee;
+        }
         sampleLogsBehaviour.setUpdatedSampleLogs(*outWS);
         sampleLogsBehaviour.readdSampleLogToWorkspace(*addee);
       } catch (std::invalid_argument &e) {
         if (sampleLogsFailBehaviour == SKIP_BEHAVIOUR) {
-          g_log.error()
-              << "Could not merge run: " << it->get()->getName()
-              << ". Reason: \"" << e.what()
-              << "\". MergeRuns will continue but this run will be skipped.\n";
+          g_log.error() << "Could not merge run: " << it->get()->getName()
+                        << ". Reason: \"" << e.what()
+                        << "\". MergeRuns will continue but this run will be "
+                           "skipped.\n";
           sampleLogsBehaviour.resetSampleLogs(*outWS);
         } else {
           throw std::invalid_argument(e);
@@ -208,7 +257,8 @@ void MergeRuns::buildAdditionTables() {
   try {
     lhs_det_to_wi = lhs->getDetectorIDToWorkspaceIndexMap(true);
   } catch (std::runtime_error &) {
-    // If it fails, then there are some grouped detector IDs, and the map cannot
+    // If it fails, then there are some grouped detector IDs, and the map
+    // cannot
     // exist
   }
 
@@ -221,7 +271,8 @@ void MergeRuns::buildAdditionTables() {
 
     // An addition table is a list of pairs:
     //  First int = workspace index in the EW being added
-    //  Second int = workspace index to which it will be added in the OUTPUT EW.
+    //  Second int = workspace index to which it will be added in the OUTPUT
+    //  EW.
     //  -1 if it should add a new entry at the end.
     AdditionTable table;
 
@@ -234,7 +285,8 @@ void MergeRuns::buildAdditionTables() {
 
       bool done = false;
 
-      // First off, try to match the workspace indices. Most times, this will be
+      // First off, try to match the workspace indices. Most times, this will
+      // be
       // ok right away.
       int outWI = inWI;
       if (outWI < lhs_nhist) // don't go out of bounds
@@ -381,12 +433,12 @@ static bool compare(MatrixWorkspace_sptr first, MatrixWorkspace_sptr second) {
  *
  *  @param  inputWorkspaces The names of the input workspaces
  *  @throw invalid_argument if there is an incompatibility.
- *  @return true if all workspaces are event workspaces and valid. False if any
+ *  @return true if all workspaces are event workspaces and valid. False if
+ *any
  *are not found,
  */
 bool MergeRuns::validateInputsForEventWorkspaces(
     const std::vector<std::string> &inputWorkspaces) {
-
   m_inEventWS.clear();
 
   // Going to check that name of instrument matches - think that's the best
@@ -426,14 +478,16 @@ bool MergeRuns::validateInputsForEventWorkspaces(
 }
 
 //------------------------------------------------------------------------------------------------
-/** Checks that the input workspace all exist, that they are the same size, have
+/** Checks that the input workspace all exist, that they are the same size,
+ * have
  * the same units
  *  and the same instrument name. Will throw if they don't.
  *  @param  inputWorkspaces The names of the input workspaces
  *  @return A list of pointers to the input workspace, ordered by increasing
  * frame starting point
  *  @throw  Exception::NotFoundError If an input workspace doesn't exist
- *  @throw  std::invalid_argument    If the input workspaces are not compatible
+ *  @throw  std::invalid_argument    If the input workspaces are not
+ * compatible
  */
 std::list<API::MatrixWorkspace_sptr>
 MergeRuns::validateInputs(const std::vector<std::string> &inputWorkspaces) {
@@ -485,11 +539,13 @@ MergeRuns::validateInputs(const std::vector<std::string> &inputWorkspaces) {
 }
 
 //------------------------------------------------------------------------------------------------
-/** Calculates the parameters to hand to the Rebin algorithm. Specifies the new
+/** Calculates the parameters to hand to the Rebin algorithm. Specifies the
+ * new
  * binning, bin-by-bin,
  *  to cover the full range covered by the two input workspaces. In regions of
  * overlap, the bins from
- *  the workspace having the wider bins are taken. Note that because the list of
+ *  the workspace having the wider bins are taken. Note that because the list
+ * of
  * input workspaces
  *  is sorted, ws1 will always start before (or at the same point as) ws2.
  *  @param ws1 ::    The first input workspace. Will start before ws2.
@@ -516,7 +572,8 @@ void MergeRuns::calculateRebinParams(const API::MatrixWorkspace_const_sptr &ws1,
       params.push_back(X1[i] - X1[i - 1]);
       params.push_back(X1[i]);
     }
-    // If the range of workspace2 is completely within that of workspace1, then
+    // If the range of workspace2 is completely within that of workspace1,
+    // then
     // call the
     // 'inclusion' routine. Otherwise call the standard 'intersection' one.
     if (end1 < end2) {
@@ -528,7 +585,8 @@ void MergeRuns::calculateRebinParams(const API::MatrixWorkspace_const_sptr &ws1,
 }
 
 //------------------------------------------------------------------------------------------------
-/** Calculates the rebin paramters in the case where the two input workspaces do
+/** Calculates the rebin paramters in the case where the two input workspaces
+ * do
  * not overlap at all.
  *  @param X1 ::     The bin boundaries from the first workspace
  *  @param X2 ::     The bin boundaries from the second workspace
@@ -620,7 +678,8 @@ void MergeRuns::inclusionParams(const HistogramX &X1, int64_t &i,
   //++overlapbins1;
   overlapbins2 = X2.size() - 1;
 
-  // In the overlap region, we want to use whichever one has the larger bins (on
+  // In the overlap region, we want to use whichever one has the larger bins
+  // (on
   // average)
   if (overlapbins1 + 1 <= overlapbins2) {
     // In the case where the first workspace has larger bins it's easy

@@ -57,6 +57,7 @@ private:
   std::string m_spectrumAxisUnit;
   std::string m_instrumentName;
   bool m_isHistogramData;
+  bool m_isScanning;
 };
 
 } // namespace Algorithms

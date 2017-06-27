@@ -2,6 +2,7 @@
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
+#include "MantidAPI/DetectorInfo.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidGeometry/Instrument.h"
@@ -49,6 +50,7 @@ void RunCombinationHelper::setReferenceProperties(MatrixWorkspace_sptr ref) {
   m_spectrumAxisUnit = ref->getAxis(1)->unit()->unitID();
   m_yUnit = ref->YUnit();
   m_isHistogramData = ref->isHistogramData();
+  m_isScanning = ref->detectorInfo().isScanning();
   m_instrumentName = ref->getInstrument()->getName();
 }
 
@@ -72,6 +74,8 @@ RunCombinationHelper::checkCompatibility(MatrixWorkspace_sptr ws,
     errors += "different Y units; ";
   if (ws->isHistogramData() != m_isHistogramData)
     errors += "different distribution or histogram type; ";
+  if (ws->detectorInfo().isScanning() != m_isScanning)
+    errors += "a mix of workspaces with and without detector scans; ";
   if (ws->getInstrument()->getName() != m_instrumentName)
     errors += "different instrument names; ";
   return errors;
