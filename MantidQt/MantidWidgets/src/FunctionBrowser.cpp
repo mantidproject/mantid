@@ -1617,7 +1617,7 @@ void FunctionBrowser::removeFunction() {
     // Remove local parameters that were deleted with the function
     // or renamed due to change in the structure of the composite
     // function
-    for (auto &iter = m_localParameterValues.begin();
+    for (auto iter = m_localParameterValues.begin();
          iter != m_localParameterValues.end();) {
       auto param = iter.key();
       if (!fun->hasParameter(param.toStdString())) {
