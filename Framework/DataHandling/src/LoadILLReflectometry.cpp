@@ -813,7 +813,7 @@ void LoadILLReflectometry::placeSource() {
     return;
   }
   const double dist = getDouble("ChopperSetting.chopperpair_sample_distance");
-  debugLogWithUnitMeter("Source-sample distance ", dist);
+  debugLogWithUnitMeter("Source-sample distance ", dist inMeter);
   const std::string source = "chopper1";
   const V3D newPos{0.0, 0.0, -dist inMeter};
   m_loader.moveComponent(m_localWorkspace, source, newPos);
