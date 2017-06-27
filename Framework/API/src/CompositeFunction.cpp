@@ -36,9 +36,9 @@ CompositeFunction::CompositeFunction()
 void CompositeFunction::init() {}
 
 /**
- * Writes itself into a string. Functions derived from CompositeFunction must
- * override this method with something like this:
- *   std::string NewFunction::asString()const
+ * Writes itself into a string. Functions derived from CompositeFunction may
+ * need to override this method with something like this:
+ *   std::string NewFunction::writeToString()const
  *   {
  *      ostr << "composite=" << this->name() << ';';
  *      // write NewFunction's own attributes and parameters
@@ -46,9 +46,13 @@ void CompositeFunction::init() {}
  *      // write NewFunction's own ties and constraints
  *      // ostr << ";constraints=(" << ... <<")";
  *   }
+ * @param parentLocalAttributesStr :: A preformatted string with parent's local
+ * attributes.
+ *    Can be passed in by a CompositeFunction (eg MultiDomainFunction).
  * @return the string representation of the composite function
  */
-std::string CompositeFunction::asString() const {
+std::string CompositeFunction::writeToString(
+    const std::string &parentLocalAttributesStr) const {
   std::ostringstream ostr;
 
   // if empty just return function name
@@ -57,7 +61,7 @@ std::string CompositeFunction::asString() const {
   }
 
   if (name() != "CompositeFunction" || nAttributes() > 1 ||
-      getAttribute("NumDeriv").asBool()) {
+      getAttribute("NumDeriv").asBool() || !parentLocalAttributesStr.empty()) {
     ostr << "composite=" << name();
     std::vector<std::string> attr = this->getAttributeNames();
     for (const auto &attName : attr) {
@@ -66,24 +70,26 @@ std::string CompositeFunction::asString() const {
         ostr << ',' << attName << '=' << attValue;
       }
     }
-    ostr << ';';
+    ostr << parentLocalAttributesStr << ';';
   }
+  const auto localAttr = this->getLocalAttributeNames();
   for (size_t i = 0; i < nFunctions(); i++) {
-    const auto localAttr = this->getLocalAttributeNames();
     IFunction_sptr fun = getFunction(i);
     bool isComp =
         boost::dynamic_pointer_cast<CompositeFunction>(fun) != nullptr;
     if (isComp)
       ostr << '(';
-    ostr << fun->asString();
+    std::ostringstream localAttributesStr;
     for (const auto &localAttName : localAttr) {
       const std::string localAttValue =
           this->getLocalAttribute(i, localAttName).value();
       if (!localAttValue.empty()) {
         // local attribute names are prefixed by dollar sign
-        ostr << ',' << '$' << localAttName << '=' << localAttValue;
+        localAttributesStr << ',' << '$' << localAttName << '='
+                           << localAttValue;
       }
     }
+    ostr << fun->writeToString(localAttributesStr.str());
     if (isComp)
       ostr << ')';
     if (i < nFunctions() - 1) {
