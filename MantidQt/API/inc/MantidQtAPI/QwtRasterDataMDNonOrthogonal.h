@@ -13,7 +13,6 @@ class EXPORT_OPT_MANTIDQT_API QwtRasterDataMDNonOrthogonal
     : public QwtRasterDataMD {
 public:
   QwtRasterDataMDNonOrthogonal();
-  ~QwtRasterDataMDNonOrthogonal() override;
   QwtRasterDataMDNonOrthogonal *copy() const override;
 
   void setWorkspace(Mantid::API::IMDWorkspace_const_sptr ws) override;
@@ -24,8 +23,8 @@ public:
                       Mantid::Geometry::IMDDimension_const_sptr X,
                       Mantid::Geometry::IMDDimension_const_sptr Y,
                       std::vector<Mantid::coord_t> &slicePoint) override;
-  Mantid::coord_t *m_lookPoint;
-  Mantid::coord_t m_fromHklToXyz[9];
+  mutable std::vector<Mantid::coord_t> m_lookPoint;
+  std::array<Mantid::coord_t, 9> m_fromHklToXyz;
   size_t m_missingHKLdim;
 
 protected:

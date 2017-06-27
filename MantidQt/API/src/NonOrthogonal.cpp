@@ -197,7 +197,8 @@ template <typename T> bool doRequiresSkewMatrix(T workspace) {
 
 template <size_t N>
 std::array<Mantid::coord_t, N>
-getTransformedArray(Mantid::coord_t skewMatrix[N * N], size_t dimension) {
+getTransformedArray(std::array<Mantid::coord_t, N * N> skewMatrix,
+                    size_t dimension) {
   std::array<Mantid::coord_t, N> vec = {{0., 0., 0.}};
   for (size_t index = 0; index < N; ++index) {
     vec[index] = skewMatrix[dimension + index * N];
@@ -395,8 +396,9 @@ bool isHKLDimensions(Mantid::API::IMDWorkspace_const_sptr workspace,
   return dimensionHKL;
 }
 
-void transformFromDoubleToCoordT(Mantid::Kernel::DblMatrix &skewMatrix,
-                                 Mantid::coord_t skewMatrixCoord[9]) {
+void transformFromDoubleToCoordT(
+    Mantid::Kernel::DblMatrix &skewMatrix,
+    std::array<Mantid::coord_t, 9> skewMatrixCoord) {
   std::size_t index = 0;
   for (std::size_t i = 0; i < skewMatrix.numRows(); ++i) {
     for (std::size_t j = 0; j < skewMatrix.numCols(); ++j) {
@@ -417,10 +419,9 @@ K = M24X + M22Y + M23Z
 L = M31X + M32Y + M33Z
 
 */
-void transformLookpointToWorkspaceCoord(Mantid::coord_t *lookPoint,
-                                        const Mantid::coord_t skewMatrix[9],
-                                        const size_t &dimX, const size_t &dimY,
-                                        const size_t &dimSlice) {
+void transformLookpointToWorkspaceCoord(
+    Mantid::coord_t *lookPoint, const std::array<Mantid::coord_t, 9> skewMatrix,
+    const size_t &dimX, const size_t &dimY, const size_t &dimSlice) {
 
   auto sliceDimResult =
       (lookPoint[dimSlice] - skewMatrix[3 * dimSlice + dimX] * lookPoint[dimX] -
@@ -467,8 +468,8 @@ void transformLookpointToWorkspaceCoord(Mantid::coord_t *lookPoint,
 *are measured from the x axis.
 */
 std::pair<double, double>
-getGridLineAnglesInRadian(Mantid::coord_t skewMatrixCoord[9], size_t dimX,
-                          size_t dimY) {
+    getGridLineAnglesInRadian(std::array<Mantid::coord_t, 9> skewMatrixCoord,
+                              size_t dimX, size_t dimY) {
   // Get the two vectors for the selected dimensions in the orthogonal axis
   // representation.
 

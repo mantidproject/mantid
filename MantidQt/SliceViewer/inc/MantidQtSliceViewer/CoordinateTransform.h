@@ -39,7 +39,7 @@ public:
 
 private:
   bool m_dimensionsHKL;
-  Mantid::coord_t m_skewMatrix[9];
+  std::array<Mantid::coord_t, 9> m_skewMatrix;
 };
 
 std::unique_ptr<CoordinateTransform> EXPORT_OPT_MANTIDQT_SLICEVIEWER

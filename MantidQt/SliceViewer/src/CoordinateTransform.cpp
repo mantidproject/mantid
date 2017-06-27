@@ -41,8 +41,8 @@ void NonOrthogonalTransform::checkDimensionsForHKL(
 void NonOrthogonalTransform::transform(Mantid::Kernel::VMD &coords, size_t dimX,
                                        size_t dimY, size_t missingHKLDim) {
   if (m_dimensionsHKL) {
-    API::transformLookpointToWorkspaceCoordGeneric(coords, m_skewMatrix, dimX,
-                                                   dimY, missingHKLDim);
+    API::transformLookpointToWorkspaceCoord(coords, m_skewMatrix, dimX, dimY,
+                                            missingHKLDim);
   }
 }
 
