@@ -183,7 +183,6 @@ void MuonAnalysis::initLayout() {
 
   m_fitDataTab = new MuonAnalysisFitDataTab(m_uiForm);
   m_fitDataTab->init();
-
   m_resultTableTab = new MuonAnalysisResultTableTab(m_uiForm);
   connect(m_resultTableTab, SIGNAL(runPythonCode(const QString &, bool)), this,
           SIGNAL(runAsPythonScript(const QString &, bool)));
@@ -2169,6 +2168,7 @@ void MuonAnalysis::loadFittings() {
           SLOT(handleGroupBox()));
   connect(m_uiForm.fitBrowser, SIGNAL(periodBoxClicked()), this,
           SLOT(handlePeriodBox()));
+  connect(m_dataSelector, SIGNAL(nameChanged(QString)), this, SLOT(updateNorm(QString)));
 
   m_fitDataPresenter->setOverwrite(isOverwriteEnabled());
   // Set multi fit mode on/off as appropriate
@@ -2557,6 +2557,10 @@ void MuonAnalysis::changeTab(int newTabIndex) {
 
   m_currentTab = newTab;
 }
+void MuonAnalysis::updateNorm(QString name) {
+	m_uiForm.fitBrowser->setNormalization(name.toStdString());
+}
+
 
 /**
 * Set up the signals and slots for auto updating the plots

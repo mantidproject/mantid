@@ -185,6 +185,9 @@ void MuonFitPropertyBrowser::init() {
   multiFitSettingsGroup->addSubProperty(m_showPeriods);
   m_enumManager->setEnumNames(m_showPeriods, m_showPeriodValue);
 
+  multiFitSettingsGroup->addSubProperty(m_normalization);
+
+
   /* Create editors and assign them to the managers */
   createEditors(w);
 
@@ -461,9 +464,28 @@ double MuonFitPropertyBrowser::normalization() const {
   return readNormalization()[0];
 }
 void MuonFitPropertyBrowser::setNormalization() {
-  m_normalizationValue.clear();
-  m_normalizationValue.append(QString::number(normalization()));
-  m_enumManager->setEnumNames(m_normalization, m_normalizationValue);
+  setNormalization(workspaceName());
+}
+/**
+* @param name :: the ws name to get normalization for
+* @returns the normalization
+*/
+void MuonFitPropertyBrowser::setNormalization(const std::string name) {
+	m_normalizationValue.clear();
+	QString label;
+	auto norms = readMultipleNormalization();
+	std::string tmp =name;
+	// stored with ; instead of spaces
+	std::replace(tmp.begin(), tmp.end(), ' ', ';');
+	auto it = norms.find(tmp);
+	if (it == norms.end()) {
+		label = QString::fromStdString("N/A");
+	}
+	else {
+		label = QString::number(it->second);
+	}
+	m_normalizationValue.append(label);
+	m_enumManager->setEnumNames(m_normalization, m_normalizationValue);
 }
 
 /** Called when a bool property changed
@@ -657,9 +679,6 @@ void MuonFitPropertyBrowser::doTFAsymmFit() {
 			//rescale WS:
 			rescaleWS(norms, tmpWSNameNoRaw, -1.0);
 		}
-		//*********************************************************************************
-		//replace with update
-		//*********************************************************************************
 		updateMultipleNormalization(norms);
 	}
 	catch (const std::exception &e) {
@@ -682,7 +701,7 @@ void MuonFitPropertyBrowser::updateMultipleNormalization(std::map<std::string, d
 		auto it = norms.find(std::get<0>(norm));
 		if (it != norms.end() && it->second != std::get<1>(norm)) {
 			    //write new norm
-				row << it->second << std::get<0>(norm) << "Calculated";
+				row << it->second << std::get<0>(norm) << "Calculated";//pass calc or est
 			}
 			else {
 				//write old norm
@@ -753,9 +772,6 @@ std::map<std::string, double> readMultipleNormalization() {
 			norm[colName->cell<std::string>(j)]=((*colNorm)[j]); // read norm
 		}
 		
-	}
-	else {
-		g_log.error("No normalizations found to read");
 	}
 	return norm;
 }
@@ -1133,10 +1149,12 @@ void MuonFitPropertyBrowser::setTFAsymmMode(bool enabled) {
   // Show or hide the TFAsymmetry fit
   if (enabled) {
     m_settingsGroup->property()->addSubProperty(m_normalization);
+	m_multiFitSettingsGroup->property()->addSubProperty(m_normalization);
     m_settingsGroup->property()->addSubProperty(m_keepNorm);
     setNormalization();
   } else {
     m_settingsGroup->property()->removeSubProperty(m_normalization);
+	m_multiFitSettingsGroup->property()->removeSubProperty(m_normalization);
     m_settingsGroup->property()->removeSubProperty(m_keepNorm);
   }
 }

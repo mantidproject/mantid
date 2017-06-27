@@ -117,7 +117,7 @@ public:
   void setAllPeriods();
   void setChosenPeriods(const QString &period);
   void setSingleFitLabel(std::string name);
-
+  void setNormalization(const std::string name);
 public slots:
   /// Perform the fit algorithm
   void fit() override;
@@ -154,6 +154,8 @@ protected:
   void showEvent(QShowEvent *e) override;
   double normalization() const;
   void setNormalization();
+
+
 private slots:
   void doubleChanged(QtProperty *prop) override;
   void boolChanged(QtProperty *prop) override;
@@ -225,6 +227,7 @@ private:
 
   std::vector<std::string> m_groupsList;
 };
+
 std::map<std::string, double> readMultipleNormalization();
 std::vector<double> readNormalization();
 } // MantidQt

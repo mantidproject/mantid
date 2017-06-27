@@ -154,6 +154,7 @@ void MuonAnalysisFitDataPresenter::doConnect() {
             SLOT(handleSimultaneousFitLabelChanged()));
     connect(dataSelector, SIGNAL(datasetIndexChanged(int)), this,
             SLOT(handleDatasetIndexChanged(int)));
+
   }
 }
 
@@ -378,6 +379,18 @@ void MuonAnalysisFitDataPresenter::storeNorm(std::string name) const {
 		Mantid::API::ITableWorkspace_sptr table =
 			boost::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(
 				Mantid::API::AnalysisDataService::Instance().retrieve("multiNorm"));
+		auto colName = table->getColumn("name");
+		if(table->rowCount()>1){
+			std::string tmp =name;
+			// stored with ; instead of spaces
+			std::replace(tmp.begin(), tmp.end(), ' ', ';');
+		for (size_t j = 0; j < table->rowCount(); j++) {
+			if (colName->cell<std::string>(j) == tmp) {//already exists
+				return;
+			}
+		}
+	}
+
 		Mantid::API::TableRow row = table->appendRow();
 		std::string tmp = name;
 		// spaces stop the string being written
