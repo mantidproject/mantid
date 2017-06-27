@@ -26,7 +26,7 @@ as
 
 and thus
 
-.. math:: \frac{\Delta d}{d} = \sqrt{(\frac{\Delta T}{T})^2 + (\frac{\Delta L}{L})^2 + (\Delta\theta\cdot\cot(\theta))^2}
+.. math:: \frac{\Delta d}{d} = \sqrt{\left(\frac{\Delta T}{T}\right)^2 + \left(\frac{\Delta L}{L}\right)^2 + \left(\Delta\theta\cdot\cot(\theta)\right)^2}
 
 where,
 
@@ -36,6 +36,16 @@ where,
    to sample
 -  :math:`L` is the flight path of the neutron from source to detector
 -  :math:`\theta` is half the Bragg angle :math:`2 \theta`, or half of the angle from the downstream beam
+
+The optional ``DivergenceWorkspace`` specifies the values of
+:math:`\Delta\theta` to use rather than those derived from the solid
+angle of the detectors. :ref:`EstimateDivergence
+<algm-EstimateDivergence>` can be used for estimating the divergence.
+
+``PartialResolutionWorkspaces`` is a collection of partial resolution
+functions where ``_tof`` is the time-of-flight term, ``_length`` is
+the path length term, and ``_angle`` is the angular term. Note that
+the total resolution is these terms added in quadriture.
 
 Factor Sheet
 ------------
@@ -87,7 +97,8 @@ Output:
   Estimated resolution of detector of spectrum 100 =  0.00323608373204
   Estimated resolution of detector of spectrum 999 =  0.00354849279137
 
-.. seealso :: Algorithms :ref:`algm-CalibrateRectangularDetectors` and :ref:`algm-GetDetOffsetsMultiPeaks`
+.. seealso :: Algorithms :ref:`algm-EstimateDivergence`, :ref:`algm-CalibrateRectangularDetectors` and
+   :ref:`algm-GetDetOffsetsMultiPeaks`
 
 .. categories::
 
