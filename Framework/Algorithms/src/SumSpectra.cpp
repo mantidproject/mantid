@@ -92,16 +92,18 @@ std::map<std::string, std::string> SumSpectra::validateInputs() {
 
   // check StartWorkSpaceIndex in range
   if (minIndex >= m_numberOfSpectra) {
-	  validationOutput["EndWorkspaceIndex"] =
-		  "Selected minimum workspace index is greater than available spectra.";
+    validationOutput["EndWorkspaceIndex"] =
+        "Selected minimum workspace index is greater than available spectra.";
   }
 
   // check StartWorkspaceIndex < EndWorkspaceIndex
   if (minIndex > maxIndex) {
-	  validationOutput["StartWorkspaceIndex"] =
-		  "Selected minimum workspace index is greater than selected maximum workspace index.";
-	  validationOutput["EndWorkspaceIndex"] =
-		  "Selected maximum workspace index is lower than selected minimum workspace index.";
+    validationOutput["StartWorkspaceIndex"] = "Selected minimum workspace "
+                                              "index is greater than selected "
+                                              "maximum workspace index.";
+    validationOutput["EndWorkspaceIndex"] = "Selected maximum workspace index "
+                                            "is lower than selected minimum "
+                                            "workspace index.";
   }
 
   // check EndWorkspaceIndex in range
@@ -191,8 +193,7 @@ void SumSpectra::exec() {
     // Create the 2D workspace for the output
     MatrixWorkspace_sptr outputWorkspace =
         API::WorkspaceFactory::Instance().create(
-            localworkspace, 1, localworkspace->x(m_minWsInd).size(),
-            m_yLength);
+            localworkspace, 1, localworkspace->x(m_minWsInd).size(), m_yLength);
     size_t numSpectra(0); // total number of processed spectra
     size_t numMasked(0);  // total number of the masked and skipped spectra
     size_t numZeros(0);   // number of spectra which have 0 value in the first
@@ -213,7 +214,7 @@ void SumSpectra::exec() {
 
     if (localworkspace->id() == "RebinnedOutput") {
       doRebinnedOutput(outputWorkspace, progress, numSpectra, numMasked,
-                             numZeros);
+                       numZeros);
     } else {
       doWorkspace2D(outSpec, progress, numSpectra, numMasked, numZeros);
     }
