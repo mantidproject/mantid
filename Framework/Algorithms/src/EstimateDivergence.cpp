@@ -1,4 +1,11 @@
 #include "MantidAlgorithms/EstimateDivergence.h"
+#include "MantidAPI/DetectorInfo.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/SpectrumInfo.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
+#include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/V3D.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -12,40 +19,104 @@ DECLARE_ALGORITHM(EstimateDivergence)
 //----------------------------------------------------------------------------------------------
 
 /// Algorithms name for identification. @see Algorithm::name
-const std::string EstimateDivergence::name() const { return "EstimateDivergence"; }
+const std::string EstimateDivergence::name() const {
+  return "EstimateDivergence";
+}
 
 /// Algorithm's version for identification. @see Algorithm::version
 int EstimateDivergence::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
 const std::string EstimateDivergence::category() const {
-  return "TODO: FILL IN A CATEGORY";
+  return "Diffraction\\Utility";
 }
 
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
 const std::string EstimateDivergence::summary() const {
-  return "TODO: FILL IN A SUMMARY";
+  return "Estimate the divergence of each detector pixel";
 }
 
 //----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void EstimateDivergence::init() {
+  declareProperty(Kernel::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
+                      "InputWorkspace", "", Direction::Input),
+                  "Workspace to have divergence calculated from");
+
+  auto positiveParameter =
+      boost::make_shared<Kernel::BoundedValidator<double>>();
+  positiveParameter->setLower(0.);
+  positiveParameter->setLowerExclusive(false); // zero is allowed
+
+  declareProperty("alpha", 0., positiveParameter,
+                  "Vertical divergence parameter");
+  declareProperty("beta0", 0., positiveParameter,
+                  "Horizontal divergence parameter");
+  declareProperty("beta1", 0., positiveParameter,
+                  "Other horizontal divergence parameter");
+
   declareProperty(
-      Kernel::make_unique<WorkspaceProperty<API::Workspace>>("InputWorkspace", "",
-                                                             Direction::Input),
-      "An input workspace.");
-  declareProperty(
-      Kernel::make_unique<WorkspaceProperty<API::Workspace>>("OutputWorkspace", "",
-                                                             Direction::Output),
-      "An output workspace.");
+      Kernel::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
+          "OutputWorkspace", "", Direction::Output),
+      "Workspace containing the divergence of each detector/spectrum");
 }
 
 //----------------------------------------------------------------------------------------------
 /** Execute the algorithm.
  */
 void EstimateDivergence::exec() {
-  // TODO Auto-generated execute stub
+  // read input parameters
+  API::MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
+  const double alpha = getProperty("alpha");
+  const double beta0 = getProperty("beta0");
+  const double beta1 = getProperty("beta1");
+
+  // derived terms
+  const double horizontal = alpha * alpha;
+  const double vertical_numerator = 4. * (beta0 * beta0 + beta1 * beta1);
+
+  // create output workspaces
+  API::MatrixWorkspace_sptr divergenceWS =
+      DataObjects::create<DataObjects::Workspace2D>(*inputWS,
+                                                    HistogramData::Points(1));
+
+  // do the math
+  const auto &spectrumInfo = inputWS->spectrumInfo();
+  const auto &detectorInfo = inputWS->detectorInfo();
+  const auto samplepos = spectrumInfo.samplePosition();
+  size_t numspec = inputWS->getNumberHistograms();
+  double solidangletotal = 0.;
+  for (size_t i = 0; i < numspec; ++i) {
+    // angle
+    const double twotheta =
+        spectrumInfo.isMonitor(i) ? 0.0 : spectrumInfo.twoTheta(i);
+    const double sintwotheta = sin(twotheta);
+    // vertical term
+    const double vertical = vertical_numerator / (sintwotheta * sintwotheta);
+
+    // solid angle
+    double solidangle = 0.0;
+    for (const auto detID : inputWS->getSpectrum(i).getDetectorIDs()) {
+      const auto index = detectorInfo.indexOf(detID);
+      if (!detectorInfo.isMasked(index))
+        solidangle += detectorInfo.detector(index).solidAngle(samplepos);
+    }
+    solidangletotal += solidangle;
+    const double deltatwotheta = sqrt(solidangle);
+
+    // put it all together and set it in the output workspace
+    const double divergence =
+        .5 * sqrt(deltatwotheta * deltatwotheta + horizontal + vertical);
+    divergenceWS->mutableX(i)[0] = static_cast<double>(i);
+    if (spectrumInfo.isMonitor(i))
+      divergenceWS->mutableY(i)[0] = 0.;
+    else
+      divergenceWS->mutableY(i)[0] = divergence;
+  }
+  g_log.notice() << "total solid angle " << solidangletotal << "\n";
+
+  setProperty("OutputWorkspace", divergenceWS);
 }
 
 } // namespace Algorithms
