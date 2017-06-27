@@ -180,8 +180,8 @@ class SNSPowderReduction(DataProcessorAlgorithm):
         self.declareProperty(FileProperty(name="GroupingFile",defaultValue="",action=FileAction.OptionalLoad,
                                           extensions=[".xml"]), "Overrides grouping from CalibrationFile")
         self.declareProperty(MultipleFileProperty(name="CharacterizationRunsFile",
-                                          action=FileAction.OptionalLoad,
-                                          extensions=["txt"]), "File with characterization runs denoted")
+                                                  action=FileAction.OptionalLoad,
+                                                  extensions=["txt"]), "File with characterization runs denoted")
         self.declareProperty(FileProperty(name="ExpIniFilename", defaultValue="", action=FileAction.OptionalLoad,
                                           extensions=[".ini"]))
         self.copyProperties('AlignAndFocusPowderFromFiles',
