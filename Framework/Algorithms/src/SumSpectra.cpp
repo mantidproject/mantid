@@ -85,24 +85,40 @@ std::map<std::string, std::string> SumSpectra::validateInputs() {
   // create the map
   std::map<std::string, std::string> validationOutput;
 
-  // check StartWorkspaceIndex in range
   MatrixWorkspace_const_sptr localworkspace = getProperty("InputWorkspace");
   m_numberOfSpectra = static_cast<int>(localworkspace->getNumberHistograms());
-  int maxIndex = getProperty("EndWorkspaceIndex");
-  if (maxIndex != EMPTY_INT() && maxIndex > m_numberOfSpectra) {
+  const int minIndex = getProperty("StartWorkspaceIndex");
+  const int maxIndex = getProperty("EndWorkspaceIndex");
+
+  // check StartWorkSpaceIndex in range
+  if (minIndex >= m_numberOfSpectra) {
+	  validationOutput["EndWorkspaceIndex"] =
+		  "Selected minimum workspace index is greater than available spectra.";
+  }
+
+  // check StartWorkspaceIndex < EndWorkspaceIndex
+  if (minIndex > maxIndex) {
+	  validationOutput["StartWorkspaceIndex"] =
+		  "Selected minimum workspace index is greater than selected maximum workspace index.";
+	  validationOutput["EndWorkspaceIndex"] =
+		  "Selected maximum workspace index is lower than selected minimum workspace index.";
+  }
+
+  // check EndWorkspaceIndex in range
+  if (maxIndex != EMPTY_INT() && maxIndex >= m_numberOfSpectra) {
     validationOutput["EndWorkspaceIndex"] =
         "Selected maximum workspace index is greater than available spectra.";
   }
 
   // check ListOfWorkspaceIndices in range
   const std::vector<int> indices_list = getProperty("ListOfWorkspaceIndices");
-  this->m_indices.clear();
+  m_indices.clear();
   // only if specified
-  if (indices_list.size() > 0) {
-    this->m_indices.insert(indices_list.begin(), indices_list.end());
-    auto listMaxIndex = std::prev(this->m_indices.end());
-    auto listMinIndex = this->m_indices.begin();
-    if ((*listMaxIndex >= this->m_numberOfSpectra) || (*listMinIndex < 0)) {
+  if (!indices_list.empty()) {
+    m_indices.insert(indices_list.begin(), indices_list.end());
+    const auto listMaxIndex = *m_indices.rbegin();
+    const auto listMinIndex = *m_indices.begin();
+    if ((listMaxIndex >= m_numberOfSpectra) || (listMinIndex < 0)) {
       validationOutput["ListOfWorkspaceIndices"] =
           "One or more indices out of range of available spectra.";
     }
@@ -126,7 +142,7 @@ void SumSpectra::exec() {
   MatrixWorkspace_const_sptr localworkspace = getProperty("InputWorkspace");
 
   m_numberOfSpectra = static_cast<int>(localworkspace->getNumberHistograms());
-  this->m_yLength = static_cast<int>(localworkspace->blocksize());
+  m_yLength = static_cast<int>(localworkspace->blocksize());
 
   // Check 'StartSpectrum' is in range 0-m_numberOfSpectra
   if (m_minWsInd >= m_numberOfSpectra) {
@@ -148,16 +164,16 @@ void SumSpectra::exec() {
   }
 
   // Make the set of indices to sum up from the list
-  this->m_indices.insert(indices_list.begin(), indices_list.end());
+  m_indices.insert(indices_list.begin(), indices_list.end());
 
   // And add the range too, if any
   if (!isEmpty(m_maxWsInd)) {
     for (int i = m_minWsInd; i <= m_maxWsInd; i++)
-      this->m_indices.insert(i);
+      m_indices.insert(i);
   }
 
   // determine the output spectrum number
-  m_outSpecNum = this->getOutputSpecNo(localworkspace);
+  m_outSpecNum = getOutputSpecNo(localworkspace);
   g_log.information()
       << "Spectra remapping gives single spectra with spectra number: "
       << m_outSpecNum << "\n";
@@ -168,7 +184,7 @@ void SumSpectra::exec() {
       boost::dynamic_pointer_cast<const EventWorkspace>(localworkspace);
   if (eventW) {
     m_calculateWeightedSum = false;
-    this->execEvent(eventW, this->m_indices);
+    execEvent(eventW, m_indices);
   } else {
     //-------Workspace 2D mode -----
 
@@ -176,14 +192,14 @@ void SumSpectra::exec() {
     MatrixWorkspace_sptr outputWorkspace =
         API::WorkspaceFactory::Instance().create(
             localworkspace, 1, localworkspace->x(m_minWsInd).size(),
-            this->m_yLength);
+            m_yLength);
     size_t numSpectra(0); // total number of processed spectra
     size_t numMasked(0);  // total number of the masked and skipped spectra
     size_t numZeros(0);   // number of spectra which have 0 value in the first
     // column (used in special cases of evaluating how good
     // Poissonian statistics is)
 
-    Progress progress(this, 0.0, 1.0, this->m_indices.size());
+    Progress progress(this, 0.0, 1.0, m_indices.size());
 
     // This is the (only) output spectrum
     auto &outSpec = outputWorkspace->getSpectrum(0);
@@ -196,10 +212,10 @@ void SumSpectra::exec() {
     outSpec.clearDetectorIDs();
 
     if (localworkspace->id() == "RebinnedOutput") {
-      this->doRebinnedOutput(outputWorkspace, progress, numSpectra, numMasked,
+      doRebinnedOutput(outputWorkspace, progress, numSpectra, numMasked,
                              numZeros);
     } else {
-      this->doWorkspace2D(outSpec, progress, numSpectra, numMasked, numZeros);
+      doWorkspace2D(outSpec, progress, numSpectra, numMasked, numZeros);
     }
 
     // Pointer to sqrt function
@@ -234,13 +250,13 @@ specnum_t
 SumSpectra::getOutputSpecNo(MatrixWorkspace_const_sptr localworkspace) {
   // initial value
   specnum_t specId =
-      localworkspace->getSpectrum(*(this->m_indices.begin())).getSpectrumNo();
+      localworkspace->getSpectrum(*(m_indices.begin())).getSpectrumNo();
 
   // the total number of spectra
   int totalSpec = static_cast<int>(localworkspace->getNumberHistograms());
 
   specnum_t temp;
-  for (const auto index : this->m_indices) {
+  for (const auto index : m_indices) {
     if (index < totalSpec) {
       temp = localworkspace->getSpectrum(index).getSpectrumNo();
       if (temp < specId)
@@ -264,7 +280,7 @@ SumSpectra::replaceSpecialValues(API::MatrixWorkspace_sptr inputWs) {
     return inputWs;
   }
 
-  IAlgorithm_sptr alg = this->createChildAlgorithm("ReplaceSpecialValues");
+  IAlgorithm_sptr alg = createChildAlgorithm("ReplaceSpecialValues");
   alg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", inputWs);
   std::string outName = "_" + inputWs->getName() + "_clean";
   alg->setProperty("OutputWorkspace", outName);
@@ -308,9 +324,9 @@ void SumSpectra::doWorkspace2D(ISpectrum &outSpec, Progress &progress,
   auto localworkspace = replaceSpecialValues(in_ws);
   const auto &spectrumInfo = localworkspace->spectrumInfo();
   // Loop over spectra
-  for (const auto wsIndex : this->m_indices) {
+  for (const auto wsIndex : m_indices) {
     // Don't go outside the range.
-    if ((wsIndex >= this->m_numberOfSpectra) || (wsIndex < 0)) {
+    if ((wsIndex >= m_numberOfSpectra) || (wsIndex < 0)) {
       g_log.error() << "Invalid index " << wsIndex
                     << " was specified. Sum was aborted.\n";
       break;
@@ -413,7 +429,7 @@ void SumSpectra::doRebinnedOutput(MatrixWorkspace_sptr outputWorkspace,
   // Loop over spectra
   for (const auto i : m_indices) {
     // Don't go outside the range.
-    if ((i >= this->m_numberOfSpectra) || (i < 0)) {
+    if ((i >= m_numberOfSpectra) || (i < 0)) {
       g_log.error() << "Invalid index " << i
                     << " was specified. Sum was aborted.\n";
       break;
@@ -437,7 +453,7 @@ void SumSpectra::doRebinnedOutput(MatrixWorkspace_sptr outputWorkspace,
     const auto &FracArea = inWS->readF(i);
 
     if (m_calculateWeightedSum) {
-      for (int k = 0; k < this->m_yLength; ++k) {
+      for (int k = 0; k < m_yLength; ++k) {
         if (YErrors[k] != 0) {
           double errsq = YErrors[k] * YErrors[k] * FracArea[k] * FracArea[k];
           YError[k] += errsq;
@@ -450,7 +466,7 @@ void SumSpectra::doRebinnedOutput(MatrixWorkspace_sptr outputWorkspace,
         }
       }
     } else {
-      for (int k = 0; k < this->m_yLength; ++k) {
+      for (int k = 0; k < m_yLength; ++k) {
         YSum[k] += YValues[k] * FracArea[k];
         YError[k] += YErrors[k] * YErrors[k] * FracArea[k] * FracArea[k];
         FracSum[k] += FracArea[k];
@@ -500,7 +516,7 @@ void SumSpectra::execEvent(EventWorkspace_const_sptr localworkspace,
   size_t numZeros(0);
   for (const auto i : indices) {
     // Don't go outside the range.
-    if ((i >= this->m_numberOfSpectra) || (i < 0)) {
+    if ((i >= m_numberOfSpectra) || (i < 0)) {
       g_log.error() << "Invalid index " << i
                     << " was specified. Sum was aborted.\n";
       break;
