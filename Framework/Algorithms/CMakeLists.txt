@@ -160,6 +160,7 @@ set ( SRC_FILES
 	src/InterpolatingRebin.cpp
 	src/InterpolationOption.cpp
 	src/InvertMask.cpp
+        src/JoinRuns.cpp
 	src/LineProfile.cpp
 	src/Logarithm.cpp
 	src/LorentzCorrection.cpp
@@ -179,7 +180,6 @@ set ( SRC_FILES
 	src/MaxMin.cpp
 	src/MedianDetectorTest.cpp
 	src/MergeRuns.cpp
-	src/MergeRuns/SampleLogsBehaviour.cpp
 	src/Min.cpp
 	src/Minus.cpp
 	src/ModeratorTzero.cpp
@@ -248,6 +248,8 @@ set ( SRC_FILES
 	src/ResetNegatives.cpp
 	src/ResizeRectangularDetector.cpp
 	src/RingProfile.cpp
+	src/RunCombinationHelpers/RunCombinationHelper.cpp
+	src/RunCombinationHelpers/SampleLogsBehaviour.cpp
 	src/SANSCollimationLengthEstimator.cpp
 	src/SampleCorrections/MCAbsorptionStrategy.cpp
 	src/SampleCorrections/MCInteractionVolume.cpp
@@ -474,6 +476,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/InterpolatingRebin.h
 	inc/MantidAlgorithms/InterpolationOption.h
 	inc/MantidAlgorithms/InvertMask.h
+        inc/MantidAlgorithms/JoinRuns.h
 	inc/MantidAlgorithms/LineProfile.h
 	inc/MantidAlgorithms/Logarithm.h
 	inc/MantidAlgorithms/LorentzCorrection.h
@@ -496,7 +499,6 @@ set ( INC_FILES
 	inc/MantidAlgorithms/MaxMin.h
 	inc/MantidAlgorithms/MedianDetectorTest.h
 	inc/MantidAlgorithms/MergeRuns.h
-	inc/MantidAlgorithms/MergeRuns/SampleLogsBehaviour.h
 	inc/MantidAlgorithms/Min.h
 	inc/MantidAlgorithms/Minus.h
 	inc/MantidAlgorithms/ModeratorTzero.h
@@ -565,6 +567,8 @@ set ( INC_FILES
 	inc/MantidAlgorithms/ResetNegatives.h
 	inc/MantidAlgorithms/ResizeRectangularDetector.h
 	inc/MantidAlgorithms/RingProfile.h
+	inc/MantidAlgorithms/RunCombinationHelpers/RunCombinationHelper.h
+	inc/MantidAlgorithms/RunCombinationHelpers/SampleLogsBehaviour.h
 	inc/MantidAlgorithms/SANSCollimationLengthEstimator.h
 	inc/MantidAlgorithms/SampleCorrections/IBeamProfile.h
 	inc/MantidAlgorithms/SampleCorrections/MCAbsorptionStrategy.h
@@ -797,6 +801,7 @@ set ( TEST_FILES
 	InterpolatingRebinTest.h
 	InterpolationOptionTest.h
 	InvertMaskTest.h
+        JoinRunsTest.h
 	LineProfileTest.h
 	LogarithmTest.h
 	LorentzCorrectionTest.h
@@ -879,6 +884,7 @@ set ( TEST_FILES
 	ResetNegativesTest.h
 	ResizeRectangularDetectorTest.h
 	RingProfileTest.h
+	RunCombinationHelperTest.h
 	SANSCollimationLengthEstimatorTest.h
 	SassenaFFTTest.h
 	ScaleTest.h

@@ -1,4 +1,4 @@
-#include "MantidAlgorithms/MergeRuns/SampleLogsBehaviour.h"
+#include "MantidAlgorithms/RunCombinationHelpers/SampleLogsBehaviour.h"
 #include "MantidAPI/Run.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/Strings.h"
@@ -35,6 +35,51 @@ const std::string SampleLogsBehaviour::WARN_MERGE_TOLERANCES =
     "sample_logs_warn_tolerances";
 const std::string SampleLogsBehaviour::FAIL_MERGE_TOLERANCES =
     "sample_logs_fail_tolerances";
+
+// Names and docs from the properties allowing to override the default (IPF
+// controlled) merging behaviour.
+// These are common between e.g. MergeRuns and JoinWorkspaces.
+const std::string SampleLogsBehaviour::TIME_SERIES_PROP =
+    "SampleLogsTimeSeries";
+const std::string SampleLogsBehaviour::TIME_SERIES_DOC =
+    "A comma separated list of the sample logs to merge into a "
+    "time series. The initial times are taken as the start times "
+    "for the run. Sample logs must be numeric.";
+const std::string SampleLogsBehaviour::LIST_PROP = "SampleLogsList";
+const std::string SampleLogsBehaviour::LIST_DOC =
+    "A comma separated list of the sample logs to merge into a "
+    "list.";
+const std::string SampleLogsBehaviour::WARN_PROP = "SampleLogsWarn";
+const std::string SampleLogsBehaviour::WARN_DOC =
+    "A comma separated list of the sample "
+    "logs to generate a warning if "
+    "different when merging.";
+const std::string SampleLogsBehaviour::WARN_TOL_PROP =
+    "SampleLogsWarnTolerances";
+const std::string SampleLogsBehaviour::WARN_TOL_DOC =
+    "The tolerances for warning if sample logs are different. "
+    "Can either be empty for a comparison of the strings, a "
+    "single value for all warn sample logs, or a comma "
+    "separated list of values (must be the same length as "
+    "SampleLogsWarn).";
+const std::string SampleLogsBehaviour::FAIL_PROP = "SampleLogsFail";
+const std::string SampleLogsBehaviour::FAIL_DOC =
+    "The sample logs to fail if different "
+    "when merging. If there is a "
+    "difference the run is skipped.";
+const std::string SampleLogsBehaviour::FAIL_TOL_PROP =
+    "SampleLogsFailTolerances";
+const std::string SampleLogsBehaviour::FAIL_TOL_DOC =
+    "The tolerances for failing if sample logs are different. "
+    "Can either be empty for a comparison of the strings, a "
+    "single value for all fail sample logs, or a comma "
+    "separated list of values (must be the same length as "
+    "SampleLogsFail).";
+const std::string SampleLogsBehaviour::SUM_PROP = "SampleLogsSum";
+const std::string SampleLogsBehaviour::SUM_DOC =
+    "A comma separated list of the sample "
+    "logs to sum into a single entry.  "
+    "Sample logs must be numeric.";
 
 /**
  * Create and initialise an object that is responsbile for keeping track of the
