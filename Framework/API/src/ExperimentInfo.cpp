@@ -338,10 +338,13 @@ void ExperimentInfo::setInstrument(const Instrument_const_sptr &instr) {
   const auto parInstrument = Geometry::ParComponentFactory::createInstrument(
       sptr_instrument, m_parmap);
 
+  // Make the ComponentInfo first
   m_infoVisitor = makeOrRetrieveVisitor(*parInstrument, *instr);
   makeAPIComponentInfo(*m_infoVisitor, *instr);
   m_parmap->setComponentInfo(m_componentInfo);
 
+  // Make the DetectorInfo. ComponentInfo needs to be set
+  // on the Parameter map before doing this.
   m_detectorInfo = makeDetectorInfo(*parInstrument, *instr);
   m_parmap->setDetectorInfo(m_detectorInfo);
 
@@ -350,6 +353,7 @@ void ExperimentInfo::setInstrument(const Instrument_const_sptr &instr) {
       m_infoVisitor->detectorIds(), m_parmap.get(),
       m_infoVisitor->detectorIdToIndexMap());
 
+  // Cross link Component and Detector info objects
   m_componentInfo->setDetectorInfo(m_detectorInfo.get());
   m_detectorInfo->setComponentInfo(m_componentInfo.get());
 

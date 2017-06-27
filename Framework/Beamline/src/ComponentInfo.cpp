@@ -148,7 +148,7 @@ void ComponentInfo::setPosition(const size_t componentIndex,
   const auto indices = this->componentsInSubtree(
       componentIndex); // Includes requested component index
   for (auto &index : indices) {
-    if (isDetector(componentIndex)) {
+    if (isDetector(index)) {
       checkDetectorInfo();
       m_detectorInfo->setPosition(index,
                                   m_detectorInfo->position(index) + offset);
@@ -189,7 +189,7 @@ void ComponentInfo::setRotation(const size_t componentIndex,
 
     auto newPos = transform * position(index);
     auto newRot = rotDelta * rotation(index);
-    if (isDetector(componentIndex)) {
+    if (isDetector(index)) {
       checkDetectorInfo();
       m_detectorInfo->setPosition(index, newPos);
       m_detectorInfo->setRotation(index, newRot);

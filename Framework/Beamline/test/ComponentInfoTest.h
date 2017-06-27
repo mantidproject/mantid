@@ -68,16 +68,19 @@ makeTreeExampleAndReturnGeometricArguments() {
   compRotations->emplace_back(Eigen::AngleAxisd(0, Eigen::Vector3d::UnitZ()));
   compRotations->emplace_back(Eigen::AngleAxisd(0, Eigen::Vector3d::UnitZ()));
 
-  return std::make_tuple(
-      ComponentInfo(
-          bankSortedDetectorIndices,
-          boost::make_shared<const std::vector<std::pair<size_t, size_t>>>(
-              detectorRanges),
-          bankSortedComponentIndices,
-          boost::make_shared<const std::vector<std::pair<size_t, size_t>>>(
-              componentRanges),
-          parentIndices, compPositions, compRotations, -1, -1),
-      detPositions, detRotations, *compPositions, *compRotations, detectorInfo);
+  ComponentInfo compInfo(
+      bankSortedDetectorIndices,
+      boost::make_shared<const std::vector<std::pair<size_t, size_t>>>(
+          detectorRanges),
+      bankSortedComponentIndices,
+      boost::make_shared<const std::vector<std::pair<size_t, size_t>>>(
+          componentRanges),
+      parentIndices, compPositions, compRotations, -1, -1);
+
+  compInfo.setDetectorInfo(detectorInfo.get());
+
+  return std::make_tuple(compInfo, detPositions, detRotations, *compPositions,
+                         *compRotations, detectorInfo);
 }
 
 std::tuple<ComponentInfo, boost::shared_ptr<DetectorInfo>> makeTreeExample() {
@@ -120,16 +123,19 @@ std::tuple<ComponentInfo, boost::shared_ptr<DetectorInfo>> makeTreeExample() {
 
   auto detectorInfo =
       boost::make_shared<DetectorInfo>(detPositions, detRotations);
-  return std::make_tuple(
-      ComponentInfo(
-          bankSortedDetectorIndices,
-          boost::make_shared<const std::vector<std::pair<size_t, size_t>>>(
-              detectorRanges),
-          bankSortedComponentIndices,
-          boost::make_shared<const std::vector<std::pair<size_t, size_t>>>(
-              componentRanges),
-          parentIndices, positions, rotations, -1, -1),
-      detectorInfo);
+
+  ComponentInfo componentInfo(
+      bankSortedDetectorIndices,
+      boost::make_shared<const std::vector<std::pair<size_t, size_t>>>(
+          detectorRanges),
+      bankSortedComponentIndices,
+      boost::make_shared<const std::vector<std::pair<size_t, size_t>>>(
+          componentRanges),
+      parentIndices, positions, rotations, -1, -1);
+
+  componentInfo.setDetectorInfo(detectorInfo.get());
+
+  return std::make_tuple(componentInfo, detectorInfo);
 }
 }
 
