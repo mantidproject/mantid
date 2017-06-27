@@ -30,7 +30,6 @@ DetectorInfo::DetectorInfo(
     : m_detectorInfo(detectorInfo), m_pmap(pmap), m_instrument(instrument),
       m_detectorIDs(detectorIds), m_detIDToIndex(detIdToIndexMap),
       m_lastDetector(PARALLEL_GET_MAX_THREADS),
-      m_lastAssemblyDetectorIndices(PARALLEL_GET_MAX_THREADS),
       m_lastIndex(PARALLEL_GET_MAX_THREADS, -1) {
 
   // Note: This does not seem possible currently (the instrument objects is
@@ -358,56 +357,6 @@ DetectorInfo::getDetectorPtr(const size_t index) const {
   static_cast<void>(getDetector(index));
   return m_lastDetector[thread];
 }
-
-/// Returns a reference to the source component. The value is cached, so calling
-/// it repeatedly is cheap.
-const Geometry::IComponent &DetectorInfo::getSource() const {
-  cacheSource();
-  return *m_source;
-}
-
-/// Returns a reference to the sample component. The value is cached, so calling
-/// it repeatedly is cheap.
-const Geometry::IComponent &DetectorInfo::getSample() const {
-  cacheSample();
-  return *m_sample;
-}
-
-void DetectorInfo::cacheSource() const {
-  std::call_once(m_sourceCached, &DetectorInfo::doCacheSource, this);
-  if (!m_sourceGood)
-    throw std::runtime_error("Instrument does not contain source!");
-}
-
-void DetectorInfo::cacheSample() const {
-  std::call_once(m_sampleCached, &DetectorInfo::doCacheSample, this);
-  if (!m_sampleGood)
-    throw std::runtime_error("Instrument does not contain sample!");
-}
-
-void DetectorInfo::doCacheSource() const {
-  m_source = m_instrument->getSource();
-  // Workaround: GCC has trouble with exceptions thrown from with std::call_once
-  // (example from cppreference does not work). Instead we set a flag and throw
-  // in a wrapper function.
-  if (!m_source)
-    return;
-  m_sourceGood = true;
-  m_sourcePos = m_source->getPos();
-}
-
-void DetectorInfo::doCacheSample() const {
-  m_sample = m_instrument->getSample();
-  // Workaround: GCC has trouble with exceptions thrown from with std::call_once
-  // (example from cppreference does not work). Instead we set a flag and throw
-  // in a wrapper function.
-  if (!m_sample)
-    return;
-  m_sampleGood = true;
-  m_samplePos = m_sample->getPos();
-}
-
-void DetectorInfo::cacheL1() const { m_L1 = m_source->getDistance(*m_sample); }
 
 boost::shared_ptr<const std::unordered_map<detid_t, size_t>>
 DetectorInfo::detIdToIndexMap() const {

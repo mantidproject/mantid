@@ -136,17 +136,6 @@ private:
   const Geometry::IDetector &getDetector(const size_t index) const;
   boost::shared_ptr<const Geometry::IDetector>
   getDetectorPtr(const size_t index) const;
-  const Geometry::IComponent &getSource() const;
-  const Geometry::IComponent &getSample() const;
-
-  void cacheSource() const;
-  void cacheSample() const;
-
-  // These cache init functions are not thread-safe! Use only in combination
-  // with std::call_once!
-  void doCacheSource() const;
-  void doCacheSample() const;
-  void cacheL1() const;
 
   /// Reference to the actual DetectorInfo object (non-wrapping part).
   Beamline::DetectorInfo &m_detectorInfo;
@@ -155,24 +144,9 @@ private:
   boost::shared_ptr<const Geometry::Instrument> m_instrument;
   boost::shared_ptr<const std::vector<detid_t>> m_detectorIDs;
   boost::shared_ptr<const std::unordered_map<detid_t, size_t>> m_detIDToIndex;
-  // The following variables are mutable, since they are initialized (cached)
-  // only on demand, by const getters.
-  mutable boost::shared_ptr<const Geometry::IComponent> m_source;
-  mutable boost::shared_ptr<const Geometry::IComponent> m_sample;
-  mutable bool m_sourceGood{false};
-  mutable bool m_sampleGood{false};
-  mutable Kernel::V3D m_sourcePos;
-  mutable Kernel::V3D m_samplePos;
-  mutable double m_L1;
-  mutable std::once_flag m_sourceCached;
-  mutable std::once_flag m_sampleCached;
-  mutable std::once_flag m_L1Cached;
 
   mutable std::vector<boost::shared_ptr<const Geometry::IDetector>>
       m_lastDetector;
-  mutable std::vector<
-      std::pair<const Geometry::IComponent *, std::vector<size_t>>>
-      m_lastAssemblyDetectorIndices;
   mutable std::vector<size_t> m_lastIndex;
 };
 
