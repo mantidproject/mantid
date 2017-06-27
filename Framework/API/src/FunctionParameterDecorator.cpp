@@ -109,6 +109,11 @@ double FunctionParameterDecorator::getParameter(const std::string &name) const {
   return m_wrappedFunction->getParameter(name);
 }
 
+bool FunctionParameterDecorator::hasParameter(const std::string &name) const {
+  throwIfNoFunctionSet();
+  return m_wrappedFunction->hasParameter(name);
+}
+
 size_t FunctionParameterDecorator::nParams() const {
   if (!m_wrappedFunction) {
     return 0;
