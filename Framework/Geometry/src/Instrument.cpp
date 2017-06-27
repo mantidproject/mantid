@@ -32,16 +32,14 @@ Instrument::Instrument()
     : CompAssembly(), m_detectorCache(), m_sourceCache(nullptr),
       m_chopperPoints(new std::vector<const ObjComponent *>),
       m_sampleCache(nullptr), m_defaultView("3D"), m_defaultViewAxis("Z+"),
-      m_referenceFrame(new ReferenceFrame) {
-}
+      m_referenceFrame(new ReferenceFrame) {}
 
 /// Constructor with name
 Instrument::Instrument(const std::string &name)
     : CompAssembly(name), m_detectorCache(), m_sourceCache(nullptr),
       m_chopperPoints(new std::vector<const ObjComponent *>),
       m_sampleCache(nullptr), m_defaultView("3D"), m_defaultViewAxis("Z+"),
-      m_referenceFrame(new ReferenceFrame) {
-}
+      m_referenceFrame(new ReferenceFrame) {}
 
 /** Constructor to create a parametrized instrument
  *  @param instr :: instrument for parameter inclusion
