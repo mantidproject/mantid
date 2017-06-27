@@ -691,7 +691,7 @@ void MuonFitPropertyBrowser::doTFAsymmFit() {
 void MuonFitPropertyBrowser::updateMultipleNormalization(std::map<std::string, double> norms) {
 	auto oldNorm = readMultipleNormalization();
 	ITableWorkspace_sptr table = WorkspaceFactory::Instance().createTable();
-	AnalysisDataService::Instance().addOrReplace("multiNorm", table);
+	AnalysisDataService::Instance().addOrReplace("MuonAnalysisTFNormalizations", table);
 	table->addColumn("double", "norm");
 	table->addColumn("str", "name");
 	table->addColumn("str", "method");
@@ -762,10 +762,10 @@ std::vector<double> readNormalization() {
 */
 std::map<std::string, double> readMultipleNormalization() {
 	std::map<std::string,double> norm;
-	if (AnalysisDataService::Instance().doesExist("multiNorm")) {
+	if (AnalysisDataService::Instance().doesExist("MuonAnalysisTFNormalizations")) {
 		Mantid::API::ITableWorkspace_sptr table =
 			boost::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(
-				Mantid::API::AnalysisDataService::Instance().retrieve("multiNorm"));
+				Mantid::API::AnalysisDataService::Instance().retrieve("MuonAnalysisTFNormalizations"));
 		auto colNorm = table->getColumn("norm");
 		auto colName = table->getColumn("name");
 		for (size_t j = 0; j < table->rowCount(); j++) {

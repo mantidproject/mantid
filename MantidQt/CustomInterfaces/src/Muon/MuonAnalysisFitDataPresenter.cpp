@@ -369,16 +369,16 @@ std::vector<std::string> MuonAnalysisFitDataPresenter::generateWorkspaceNames(
 
 void MuonAnalysisFitDataPresenter::storeNorm(std::string name) const {
 	if (m_isItTFAsymm) {
-		if (!Mantid::API::AnalysisDataService::Instance().doesExist("multiNorm")) {
+		if (!Mantid::API::AnalysisDataService::Instance().doesExist("MuonAnalysisTFNormalizations")) {
 			Mantid::API::ITableWorkspace_sptr table = Mantid::API::WorkspaceFactory::Instance().createTable();
-			AnalysisDataService::Instance().addOrReplace("multiNorm", table);
+			AnalysisDataService::Instance().addOrReplace("MuonAnalysisTFNormalizations", table);
 			table->addColumn("double", "norm");
 			table->addColumn("str", "name");
 			table->addColumn("str", "method");
 		}
 		Mantid::API::ITableWorkspace_sptr table =
 			boost::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(
-				Mantid::API::AnalysisDataService::Instance().retrieve("multiNorm"));
+				Mantid::API::AnalysisDataService::Instance().retrieve("MuonAnalysisTFNormalizations"));
 		auto colName = table->getColumn("name");
 		if(table->rowCount()>1){
 			std::string tmp =name;
