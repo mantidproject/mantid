@@ -62,47 +62,47 @@ public:
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class MANTIDQT_CUSTOMINTERFACES_DLL MuonAnalysisFitDataPresenter
-	: public QObject {
-	Q_OBJECT
+    : public QObject {
+  Q_OBJECT
 public:
-	/// Constructor overload with default arguments
-	MuonAnalysisFitDataPresenter(
-		MantidQt::MantidWidgets::IWorkspaceFitControl *fitBrowser,
-		MantidQt::MantidWidgets::IMuonFitDataSelector *dataSelector,
-		MuonAnalysisDataLoader &dataLoader, const Mantid::API::Grouping &grouping,
-		const Muon::PlotType &plotType);
-	/// Constructor overload with default argument
-	MuonAnalysisFitDataPresenter(
-		MantidQt::MantidWidgets::IWorkspaceFitControl *fitBrowser,
-		MantidQt::MantidWidgets::IMuonFitDataSelector *dataSelector,
-		MuonAnalysisDataLoader &dataLoader, const Mantid::API::Grouping &grouping,
-		const Muon::PlotType &plotType, double timeZero);
-	/// Constructor
-	MuonAnalysisFitDataPresenter(
-		MantidQt::MantidWidgets::IWorkspaceFitControl *fitBrowser,
-		MantidQt::MantidWidgets::IMuonFitDataSelector *dataSelector,
-		MuonAnalysisDataLoader &dataLoader, const Mantid::API::Grouping &grouping,
-		const Muon::PlotType &plotType, double timeZero,
-		const RebinOptions &rebinArgs);
-	/// Handles "selected data changed"
-	void handleSelectedDataChanged(bool overwrite);
-	/// Handles peak picker being reassigned to a new graph
-	void setAssignedFirstRun(const QString &wsName,
-		const boost::optional<QString> &filePath);
-	/// Get the workspace the peak picker is currently assigned to
-	QString getAssignedFirstRun() const { return m_PPAssignedFirstRun; };
-	/// Change the stored time zero
-	void setTimeZero(double timeZero) { m_timeZero = timeZero; }
-	/// Change the stored rebin args
-	void setRebinArgs(const RebinOptions &rebinArgs) { m_rebinArgs = rebinArgs; }
-	/// Generate names of workspaces to be created
-	std::vector<std::string> generateWorkspaceNames(const std::string &instrument,
-		const std::string &runString,
-		bool overwrite) const;
-	/// Update the stored grouping
-	void setGrouping(const Mantid::API::Grouping &grouping) {
-		m_grouping = grouping;
-	}
+  /// Constructor overload with default arguments
+  MuonAnalysisFitDataPresenter(
+      MantidQt::MantidWidgets::IWorkspaceFitControl *fitBrowser,
+      MantidQt::MantidWidgets::IMuonFitDataSelector *dataSelector,
+      MuonAnalysisDataLoader &dataLoader, const Mantid::API::Grouping &grouping,
+      const Muon::PlotType &plotType);
+  /// Constructor overload with default argument
+  MuonAnalysisFitDataPresenter(
+      MantidQt::MantidWidgets::IWorkspaceFitControl *fitBrowser,
+      MantidQt::MantidWidgets::IMuonFitDataSelector *dataSelector,
+      MuonAnalysisDataLoader &dataLoader, const Mantid::API::Grouping &grouping,
+      const Muon::PlotType &plotType, double timeZero);
+  /// Constructor
+  MuonAnalysisFitDataPresenter(
+      MantidQt::MantidWidgets::IWorkspaceFitControl *fitBrowser,
+      MantidQt::MantidWidgets::IMuonFitDataSelector *dataSelector,
+      MuonAnalysisDataLoader &dataLoader, const Mantid::API::Grouping &grouping,
+      const Muon::PlotType &plotType, double timeZero,
+      const RebinOptions &rebinArgs);
+  /// Handles "selected data changed"
+  void handleSelectedDataChanged(bool overwrite);
+  /// Handles peak picker being reassigned to a new graph
+  void setAssignedFirstRun(const QString &wsName,
+                           const boost::optional<QString> &filePath);
+  /// Get the workspace the peak picker is currently assigned to
+  QString getAssignedFirstRun() const { return m_PPAssignedFirstRun; };
+  /// Change the stored time zero
+  void setTimeZero(double timeZero) { m_timeZero = timeZero; }
+  /// Change the stored rebin args
+  void setRebinArgs(const RebinOptions &rebinArgs) { m_rebinArgs = rebinArgs; }
+  /// Generate names of workspaces to be created
+  std::vector<std::string> generateWorkspaceNames(const std::string &instrument,
+                                                  const std::string &runString,
+                                                  bool overwrite) const;
+  /// Update the stored grouping
+  void setGrouping(const Mantid::API::Grouping &grouping) {
+    m_grouping = grouping;
+  }
   /// Update the stored plot type
   void setPlotType(const Muon::PlotType &plotType) { m_plotType = plotType; }
   /// Create workspaces to fit
@@ -123,7 +123,7 @@ public:
   /// Generate names of workspaces to be created
   std::vector<std::string> generateWorkspaceNames(bool overwrite) const;
   void storeNorm(std::string wsName) const;
-  void setTFAsymmState(const bool state){ m_isItTFAsymm = state;};
+  void setTFAsymmState(const bool state) { m_isItTFAsymm = state; };
 signals:
   void setChosenGroupSignal(const QString &group);
   void setChosenPeriodSignal(const QString &period);

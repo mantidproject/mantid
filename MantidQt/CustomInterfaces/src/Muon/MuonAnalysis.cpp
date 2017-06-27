@@ -1213,7 +1213,7 @@ void MuonAnalysis::inputFileChanged(const QStringList &files) {
     // Now apply DTC, if used, and grouping
     correctedGroupedWS =
         m_dataLoader.correctAndGroup(*loadResult, *groupResult->groupingUsed);
-	
+
   } catch (const std::exception &e) {
     g_log.error(e.what());
     QMessageBox::critical(this, "Loading failed",
@@ -1511,7 +1511,7 @@ void MuonAnalysis::updateFrontAndCombo(bool updateIndexAndPlot) {
     auto groupName = m_uiForm.groupTable->item(m_groupToRow[i], 0)->text();
     if (groupName.toStdString() != "") {
       groupsAndPairs << groupName;
-	}
+    }
   }
   for (int i = 0; i < numP; i++) {
     m_uiForm.frontGroupGroupPairComboBox->addItem(
@@ -1791,9 +1791,8 @@ void MuonAnalysis::plotSpectrum(const QString &wsName, bool logScale) {
   }
 
   runPythonCode(pyS);
-  //store the norm
+  // store the norm
   m_fitDataPresenter->storeNorm(safeWSName.toStdString());
-
 }
 
 /**
@@ -2168,7 +2167,8 @@ void MuonAnalysis::loadFittings() {
           SLOT(handleGroupBox()));
   connect(m_uiForm.fitBrowser, SIGNAL(periodBoxClicked()), this,
           SLOT(handlePeriodBox()));
-  connect(m_dataSelector, SIGNAL(nameChanged(QString)), this, SLOT(updateNorm(QString)));
+  connect(m_dataSelector, SIGNAL(nameChanged(QString)), this,
+          SLOT(updateNorm(QString)));
 
   m_fitDataPresenter->setOverwrite(isOverwriteEnabled());
   // Set multi fit mode on/off as appropriate
@@ -2558,9 +2558,8 @@ void MuonAnalysis::changeTab(int newTabIndex) {
   m_currentTab = newTab;
 }
 void MuonAnalysis::updateNorm(QString name) {
-	m_uiForm.fitBrowser->setNormalization(name.toStdString());
+  m_uiForm.fitBrowser->setNormalization(name.toStdString());
 }
-
 
 /**
 * Set up the signals and slots for auto updating the plots
@@ -2952,8 +2951,8 @@ MuonAnalysis::groupWorkspace(const std::string &wsName,
     groupAlg->setProperty("xmin", m_dataSelector->getStartTime());
     groupAlg->setProperty("xmax", m_dataSelector->getEndTime());
 
-    groupAlg->execute();  
-	m_fitDataPresenter->storeNorm(wsName);
+    groupAlg->execute();
+    m_fitDataPresenter->storeNorm(wsName);
 
   } catch (std::exception &e) {
     throw std::runtime_error("Unable to group workspace:\n\n" +
@@ -3159,20 +3158,20 @@ void MuonAnalysis::multiFitCheckboxChanged(int state) {
   const Muon::MultiFitState multiFitState = state == Qt::CheckState::Checked
                                                 ? Muon::MultiFitState::Enabled
                                                 : Muon::MultiFitState::Disabled;
- /* // If both multiFit and TFAsymm are checked
-  // uncheck the TFAsymm
-  if (m_uiForm.chkEnableMultiFit->isChecked() && state != 0) {
-    // uncheck the box
-    m_uiForm.chkTFAsymm->setChecked(false);
-    changedTFAsymmCheckbox(0);
-    // reset the view
-    setTFAsymm(Muon::TFAsymmState::Disabled);
-  }*/
- /* if (m_uiForm.chkEnableMultiFit->isChecked() && state != 0) {
-	  m_fitDataPresenter->storeNorm(m_currentDataName.toStdString());
-  }*/
+  /* // If both multiFit and TFAsymm are checked
+   // uncheck the TFAsymm
+   if (m_uiForm.chkEnableMultiFit->isChecked() && state != 0) {
+     // uncheck the box
+     m_uiForm.chkTFAsymm->setChecked(false);
+     changedTFAsymmCheckbox(0);
+     // reset the view
+     setTFAsymm(Muon::TFAsymmState::Disabled);
+   }*/
+  /* if (m_uiForm.chkEnableMultiFit->isChecked() && state != 0) {
+           m_fitDataPresenter->storeNorm(m_currentDataName.toStdString());
+   }*/
   m_fitFunctionPresenter->setMultiFitState(multiFitState);
-  //add a line to set presenters knowledge of is it multi fitl
+  // add a line to set presenters knowledge of is it multi fitl
 }
 /**
 * Called when the "TF Asymmetry" checkbox is changed (settings tab.)
@@ -3183,20 +3182,19 @@ void MuonAnalysis::changedTFAsymmCheckbox(int state) {
                                               ? Muon::TFAsymmState::Enabled
                                               : Muon::TFAsymmState::Disabled;
   if (TFAsymmState == Muon::TFAsymmState::Enabled) {
-	  m_fitDataPresenter->setTFAsymmState(true);
+    m_fitDataPresenter->setTFAsymmState(true);
+  } else {
+    m_fitDataPresenter->setTFAsymmState(false);
   }
-  else {
-	  m_fitDataPresenter->setTFAsymmState(false);
-  }
-/*  // If both multiFit and TFAsymm are checked
-  // uncheck the multiFit
-  if (m_uiForm.chkTFAsymm->isChecked() && state != 0) {
-    // uncheck the box
-    m_uiForm.chkEnableMultiFit->setChecked(false);
-    multiFitCheckboxChanged(0);
-    // reset the view
-    m_fitFunctionPresenter->setMultiFitState(Muon::MultiFitState::Disabled);
-  }*/
+  /*  // If both multiFit and TFAsymm are checked
+    // uncheck the multiFit
+    if (m_uiForm.chkTFAsymm->isChecked() && state != 0) {
+      // uncheck the box
+      m_uiForm.chkEnableMultiFit->setChecked(false);
+      multiFitCheckboxChanged(0);
+      // reset the view
+      m_fitFunctionPresenter->setMultiFitState(Muon::MultiFitState::Disabled);
+    }*/
   setTFAsymm(TFAsymmState);
 }
 /**
@@ -3210,16 +3208,16 @@ void MuonAnalysis::setTFAsymm(Muon::TFAsymmState TFAsymmState) {
   } else {
     m_uiForm.chkTFAsymm->setChecked(false);
   }
-/*  // If both multiFit and TFAsymm are checked
-  // uncheck the multiFit
-  if (m_uiForm.chkEnableMultiFit->isChecked() &&
-      TFAsymmState == Muon::TFAsymmState::Enabled) {
-    // uncheck the box
-    m_uiForm.chkEnableMultiFit->setChecked(false);
-    multiFitCheckboxChanged(0);
-    // reset the view
-    m_fitFunctionPresenter->setMultiFitState(Muon::MultiFitState::Disabled);
-  }*/
+  /*  // If both multiFit and TFAsymm are checked
+    // uncheck the multiFit
+    if (m_uiForm.chkEnableMultiFit->isChecked() &&
+        TFAsymmState == Muon::TFAsymmState::Enabled) {
+      // uncheck the box
+      m_uiForm.chkEnableMultiFit->setChecked(false);
+      multiFitCheckboxChanged(0);
+      // reset the view
+      m_fitFunctionPresenter->setMultiFitState(Muon::MultiFitState::Disabled);
+    }*/
   m_fitFunctionPresenter->setTFAsymmState(TFAsymmState);
 }
 /**

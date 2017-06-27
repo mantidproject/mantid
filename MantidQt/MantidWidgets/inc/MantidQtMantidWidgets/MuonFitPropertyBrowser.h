@@ -155,7 +155,6 @@ protected:
   double normalization() const;
   void setNormalization();
 
-
 private slots:
   void doubleChanged(QtProperty *prop) override;
   void boolChanged(QtProperty *prop) override;
@@ -166,10 +165,14 @@ private:
   QAction *m_fitActionTFAsymm;
   /// override populating fit menu
   void populateFitMenuButton(QSignalMapper *fitMapper, QMenu *fitMenu) override;
-  void rescaleWS(const std::map<std::string, double>norm,const std::string wsName,const double shift);
-  void rescaleWS(const double norm, const std::string wsName, const double shift);
-  Mantid::API::IFunction_sptr getTFAsymmFitFunction(Mantid::API::IFunction_sptr original,const std::vector<double> norms);
-  void updateMultipleNormalization(std::map<std::string, double > norms);
+  void rescaleWS(const std::map<std::string, double> norm,
+                 const std::string wsName, const double shift);
+  void rescaleWS(const double norm, const std::string wsName,
+                 const double shift);
+  Mantid::API::IFunction_sptr
+  getTFAsymmFitFunction(Mantid::API::IFunction_sptr original,
+                        const std::vector<double> norms);
+  void updateMultipleNormalization(std::map<std::string, double> norms);
   /// Get the registered function names
   void populateFunctionNames() override;
   /// Check if the workspace can be used in the fit

@@ -116,6 +116,7 @@ signals:
   /// Dataset index changed
   void datasetIndexChanged(int index);
   void nameChanged(QString name);
+
 private:
   /// Set default values in some input controls
   void setDefaultValues();

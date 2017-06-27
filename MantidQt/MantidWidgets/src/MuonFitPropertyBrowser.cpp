@@ -187,7 +187,6 @@ void MuonFitPropertyBrowser::init() {
 
   multiFitSettingsGroup->addSubProperty(m_normalization);
 
-
   /* Create editors and assign them to the managers */
   createEditors(w);
 
@@ -282,8 +281,8 @@ void MuonFitPropertyBrowser::init() {
 // Set up the execution of the muon fit menu
 void MuonFitPropertyBrowser::executeFitMenu(const QString &item) {
   if (item == "TFAsymm") {
-	  emit functionUpdateRequested();
-	  doTFAsymmFit();
+    emit functionUpdateRequested();
+    doTFAsymmFit();
   } else {
     FitPropertyBrowser::executeFitMenu(item);
   }
@@ -320,9 +319,8 @@ void MuonFitPropertyBrowser::setFitEnabled(bool yes) {
   // only allow TFAsymm fit if not keeping norm
   if (!m_boolManager->value(m_keepNorm) && yes) {
     m_fitActionTFAsymm->setEnabled(yes);
-  }
-  else {
-	  m_fitActionTFAsymm->setEnabled(false);
+  } else {
+    m_fitActionTFAsymm->setEnabled(false);
   }
 }
 /**
@@ -471,21 +469,20 @@ void MuonFitPropertyBrowser::setNormalization() {
 * @returns the normalization
 */
 void MuonFitPropertyBrowser::setNormalization(const std::string name) {
-	m_normalizationValue.clear();
-	QString label;
-	auto norms = readMultipleNormalization();
-	std::string tmp =name;
-	// stored with ; instead of spaces
-	std::replace(tmp.begin(), tmp.end(), ' ', ';');
-	auto it = norms.find(tmp);
-	if (it == norms.end()) {
-		label = QString::fromStdString("N/A");
-	}
-	else {
-		label = QString::number(it->second);
-	}
-	m_normalizationValue.append(label);
-	m_enumManager->setEnumNames(m_normalization, m_normalizationValue);
+  m_normalizationValue.clear();
+  QString label;
+  auto norms = readMultipleNormalization();
+  std::string tmp = name;
+  // stored with ; instead of spaces
+  std::replace(tmp.begin(), tmp.end(), ' ', ';');
+  auto it = norms.find(tmp);
+  if (it == norms.end()) {
+    label = QString::fromStdString("N/A");
+  } else {
+    label = QString::number(it->second);
+  }
+  m_normalizationValue.append(label);
+  m_enumManager->setEnumNames(m_normalization, m_normalizationValue);
 }
 
 /** Called when a bool property changed
@@ -586,158 +583,161 @@ void MuonFitPropertyBrowser::populateFunctionNames() {
 * Creates an instance of Fit algorithm, sets its properties and launches it.
 */
 void MuonFitPropertyBrowser::doTFAsymmFit() {
-	std::string wsName = workspaceName();
-	if (wsName.empty()) {
-		QMessageBox::critical(this, "Mantid - Error", "Workspace name is not set");
-		return;
-	}
-	std::vector<double> normVec;
-	auto norms= readMultipleNormalization();
+  std::string wsName = workspaceName();
+  if (wsName.empty()) {
+    QMessageBox::critical(this, "Mantid - Error", "Workspace name is not set");
+    return;
+  }
+  std::vector<double> normVec;
+  auto norms = readMultipleNormalization();
 
-	// TFAsymm calculation -> there is already some estimated data
-	//rescale WS to normalized counts:
-	const int nWorkspaces = static_cast<int>(m_workspacesToFit.size());
+  // TFAsymm calculation -> there is already some estimated data
+  // rescale WS to normalized counts:
+  const int nWorkspaces = static_cast<int>(m_workspacesToFit.size());
 
-		for (int i = 0; i < nWorkspaces; i++) {
-			rescaleWS(norms, m_workspacesToFit[i], 1.0);
-			std::string tmp = m_workspacesToFit[i];
-			std::replace(tmp.begin(), tmp.end(), ' ', ';');
-			//The order of the input is the same
-			// as the order of the workspace list
-			// create a vec of norms in the same order
-			auto it = norms.find(tmp);
-			normVec.push_back(it->second);
-		}
-	try {
-		m_initialParameters.resize(compositeFunction()->nParams());
-		for (size_t i = 0; i < compositeFunction()->nParams(); i++) {
-			m_initialParameters[i] = compositeFunction()->getParameter(i);
-		}
-		m_fitActionUndoFit->setEnabled(true);
+  for (int i = 0; i < nWorkspaces; i++) {
+    rescaleWS(norms, m_workspacesToFit[i], 1.0);
+    std::string tmp = m_workspacesToFit[i];
+    std::replace(tmp.begin(), tmp.end(), ' ', ';');
+    // The order of the input is the same
+    // as the order of the workspace list
+    // create a vec of norms in the same order
+    auto it = norms.find(tmp);
+    normVec.push_back(it->second);
+  }
+  try {
+    m_initialParameters.resize(compositeFunction()->nParams());
+    for (size_t i = 0; i < compositeFunction()->nParams(); i++) {
+      m_initialParameters[i] = compositeFunction()->getParameter(i);
+    }
+    m_fitActionUndoFit->setEnabled(true);
 
+    IAlgorithm_sptr alg = AlgorithmManager::Instance().create("Fit");
+    alg->initialize();
+    if (m_compositeFunction->name() == "MultiBG") {
+      alg->setPropertyValue("Function", "");
+    } else {
+      IFunction_sptr userFunc = getFittingFunction();
+      auto TFAsymmFunc = getTFAsymmFitFunction(userFunc, normVec);
+      alg->setProperty("Function", TFAsymmFunc);
+    }
+    if (rawData()) {
+      alg->setPropertyValue("InputWorkspace", wsName + "_Raw");
+    } else {
+      alg->setPropertyValue("InputWorkspace", wsName);
+    }
+    alg->setProperty("WorkspaceIndex", workspaceIndex());
+    alg->setProperty("StartX", startX());
+    alg->setProperty("EndX", endX());
+    alg->setPropertyValue("Minimizer", minimizer());
+    alg->setPropertyValue("CostFunction", costFunction());
 
-		IAlgorithm_sptr alg = AlgorithmManager::Instance().create("Fit");
-		alg->initialize();
-		if (m_compositeFunction->name() == "MultiBG") {
-			alg->setPropertyValue("Function", "");
-		}
-		else  {
-			IFunction_sptr userFunc = getFittingFunction();
-			auto TFAsymmFunc = getTFAsymmFitFunction(userFunc,normVec);
-			alg->setProperty("Function",TFAsymmFunc);
-		}
-		if (rawData()) {
-			alg->setPropertyValue("InputWorkspace", wsName + "_Raw");
-		}else {
-			alg->setPropertyValue("InputWorkspace", wsName);
-		}
-		alg->setProperty("WorkspaceIndex", workspaceIndex());
-		alg->setProperty("StartX", startX());
-		alg->setProperty("EndX", endX());
-		alg->setPropertyValue("Minimizer", minimizer());
-		alg->setPropertyValue("CostFunction", costFunction());
+    // If we are doing a simultaneous fit, set this up here
+    const int nWorkspaces = static_cast<int>(m_workspacesToFit.size());
+    if (nWorkspaces > 1) {
+      alg->setPropertyValue("InputWorkspace", m_workspacesToFit[0]);
+      // Remove existing results with the same name
+      if (AnalysisDataService::Instance().doesExist(outputName())) {
+        AnalysisDataService::Instance().deepRemoveGroup(outputName());
+      }
+      for (int i = 1; i < nWorkspaces; i++) {
+        std::string suffix = boost::lexical_cast<std::string>(i);
+        alg->setPropertyValue("InputWorkspace_" + suffix, m_workspacesToFit[i]);
+        alg->setProperty("WorkspaceIndex_" + suffix, workspaceIndex());
+        alg->setProperty("StartX_" + suffix, startX());
+        alg->setProperty("EndX_" + suffix, endX());
+      }
+    } else {
+      setSingleFitLabel(wsName);
+    }
+    alg->setPropertyValue("Output", outputName());
 
-		// If we are doing a simultaneous fit, set this up here
-		const int nWorkspaces = static_cast<int>(m_workspacesToFit.size());
-		if (nWorkspaces > 1) {
-			alg->setPropertyValue("InputWorkspace", m_workspacesToFit[0]);
-			// Remove existing results with the same name
-			if (AnalysisDataService::Instance().doesExist(outputName())) {
-				AnalysisDataService::Instance().deepRemoveGroup(outputName());
-			}
-			for (int i = 1; i < nWorkspaces; i++) {
-				std::string suffix = boost::lexical_cast<std::string>(i);
-				alg->setPropertyValue("InputWorkspace_" + suffix, m_workspacesToFit[i]);
-				alg->setProperty("WorkspaceIndex_" + suffix, workspaceIndex());
-				alg->setProperty("StartX_" + suffix, startX());
-				alg->setProperty("EndX_" + suffix, endX());
-			}
-		}
-		else {
-			setSingleFitLabel(wsName);
-		}
-		alg->setPropertyValue("Output", outputName());
-
-		observeFinish(alg);
-		alg->execute();
-		// get norms
-		std::vector<double> newNorms;
-		IFunction_sptr outputFunction = alg->getProperty("Function");
-		for (size_t j = 0; j < nWorkspaces; j++) {
-			std::string paramName = "f" + std::to_string(j);
-			paramName += ".f0.f0.A0";
-			newNorms.push_back(outputFunction->getParameter(paramName));
-			std::string tmpWSName = m_workspacesToFit[j];
-			if (rawData()) { // store norms without the raw
-				tmpWSName = tmpWSName.substr(0, tmpWSName.size() - 4);
-			}
-			auto tmpWSNameNoRaw = tmpWSName;
-			std::replace(tmpWSName.begin(), tmpWSName.end(), ' ', ';');
-			auto it = norms.find(tmpWSName);
-			it->second = newNorms[newNorms.size() - 1];
-			//transform data back to Asymm
-			//rescale WS:
-			rescaleWS(norms, tmpWSNameNoRaw, -1.0);
-		}
-		updateMultipleNormalization(norms);
-	}
-	catch (const std::exception &e) {
-		QString msg = "TF Asymmetry Fit failed.\n\n" + QString(e.what()) + "\n";
-		QMessageBox::critical(this, "Mantid - Error", msg);
-	}
-	//setNormalization();
-	//runFit();
+    observeFinish(alg);
+    alg->execute();
+    // get norms
+    std::vector<double> newNorms;
+    IFunction_sptr outputFunction = alg->getProperty("Function");
+    for (size_t j = 0; j < nWorkspaces; j++) {
+      std::string paramName = "f" + std::to_string(j);
+      paramName += ".f0.f0.A0";
+      newNorms.push_back(outputFunction->getParameter(paramName));
+      std::string tmpWSName = m_workspacesToFit[j];
+      if (rawData()) { // store norms without the raw
+        tmpWSName = tmpWSName.substr(0, tmpWSName.size() - 4);
+      }
+      auto tmpWSNameNoRaw = tmpWSName;
+      std::replace(tmpWSName.begin(), tmpWSName.end(), ' ', ';');
+      auto it = norms.find(tmpWSName);
+      it->second = newNorms[newNorms.size() - 1];
+      // transform data back to Asymm
+      // rescale WS:
+      rescaleWS(norms, tmpWSNameNoRaw, -1.0);
+    }
+    updateMultipleNormalization(norms);
+  } catch (const std::exception &e) {
+    QString msg = "TF Asymmetry Fit failed.\n\n" + QString(e.what()) + "\n";
+    QMessageBox::critical(this, "Mantid - Error", msg);
+  }
+  // setNormalization();
+  // runFit();
 }
-void MuonFitPropertyBrowser::updateMultipleNormalization(std::map<std::string, double> norms) {
-	auto oldNorm = readMultipleNormalization();
-	ITableWorkspace_sptr table = WorkspaceFactory::Instance().createTable();
-	AnalysisDataService::Instance().addOrReplace("MuonAnalysisTFNormalizations", table);
-	table->addColumn("double", "norm");
-	table->addColumn("str", "name");
-	table->addColumn("str", "method");
+void MuonFitPropertyBrowser::updateMultipleNormalization(
+    std::map<std::string, double> norms) {
+  auto oldNorm = readMultipleNormalization();
+  ITableWorkspace_sptr table = WorkspaceFactory::Instance().createTable();
+  AnalysisDataService::Instance().addOrReplace("MuonAnalysisTFNormalizations",
+                                               table);
+  table->addColumn("double", "norm");
+  table->addColumn("str", "name");
+  table->addColumn("str", "method");
 
-	for (auto norm : oldNorm) {
-		Mantid::API::TableRow row = table->appendRow();
-		auto it = norms.find(std::get<0>(norm));
-		if (it != norms.end() && it->second != std::get<1>(norm)) {
-			    //write new norm
-				row << it->second << std::get<0>(norm) << "Calculated";//pass calc or est
-			}
-			else {
-				//write old norm
-				row << std::get<1>(norm) << std::get<0>(norm) << "Estimated";
-			}
-		
-	}
+  for (auto norm : oldNorm) {
+    Mantid::API::TableRow row = table->appendRow();
+    auto it = norms.find(std::get<0>(norm));
+    if (it != norms.end() && it->second != std::get<1>(norm)) {
+      // write new norm
+      row << it->second << std::get<0>(norm) << "Calculated"; // pass calc or
+                                                              // est
+    } else {
+      // write old norm
+      row << std::get<1>(norm) << std::get<0>(norm) << "Estimated";
+    }
+  }
 }
 /** Gets the fitting function for TFAsymmetry fit
 * @param original :: The function defined by the user (in GUI)
 * @param norms :: vector of normalization constants
 * @returns :: The fitting function for the TFAsymmetry fit
 */
-Mantid::API::IFunction_sptr MuonFitPropertyBrowser::getTFAsymmFitFunction(Mantid::API::IFunction_sptr original,const std::vector<double> norms) {
-	auto multi = boost::make_shared<MultiDomainFunction>();
-	auto tmp = boost::dynamic_pointer_cast<MultiDomainFunction> (original);		
-	size_t numDomains = original->getNumberDomains();
-	for (size_t j = 0; j < numDomains; j++) {
-		IFunction_sptr userFunc;
-		auto constant = FunctionFactory::Instance().createInitialized("name = FlatBackground, A0 = 1.0, ties = (A0 = 1.0)");
-		if (numDomains == 1) {
-			userFunc = original;
-		}else {
-			userFunc = tmp->getFunction(j);
-			multi->setDomainIndex(j, j);
-		}		
-		auto inBrace = boost::make_shared <CompositeFunction>();
-		inBrace->addFunction(constant);
-		inBrace->addFunction(userFunc);
-		auto norm = FunctionFactory::Instance().createInitialized("composite=CompositeFunction,NumDeriv=true;name = FlatBackground, A0 =" + std::to_string(norms[j]));
-		auto product = boost::dynamic_pointer_cast<CompositeFunction> (FunctionFactory::Instance().createFunction("ProductFunction"));
-		product->addFunction(norm);
-		product->addFunction(inBrace);
-		multi->addFunction(product);
-	}
-	return boost::dynamic_pointer_cast<IFunction> (multi);
+Mantid::API::IFunction_sptr MuonFitPropertyBrowser::getTFAsymmFitFunction(
+    Mantid::API::IFunction_sptr original, const std::vector<double> norms) {
+  auto multi = boost::make_shared<MultiDomainFunction>();
+  auto tmp = boost::dynamic_pointer_cast<MultiDomainFunction>(original);
+  size_t numDomains = original->getNumberDomains();
+  for (size_t j = 0; j < numDomains; j++) {
+    IFunction_sptr userFunc;
+    auto constant = FunctionFactory::Instance().createInitialized(
+        "name = FlatBackground, A0 = 1.0, ties = (A0 = 1.0)");
+    if (numDomains == 1) {
+      userFunc = original;
+    } else {
+      userFunc = tmp->getFunction(j);
+      multi->setDomainIndex(j, j);
+    }
+    auto inBrace = boost::make_shared<CompositeFunction>();
+    inBrace->addFunction(constant);
+    inBrace->addFunction(userFunc);
+    auto norm = FunctionFactory::Instance().createInitialized(
+        "composite=CompositeFunction,NumDeriv=true;name = FlatBackground, A0 "
+        "=" +
+        std::to_string(norms[j]));
+    auto product = boost::dynamic_pointer_cast<CompositeFunction>(
+        FunctionFactory::Instance().createFunction("ProductFunction"));
+    product->addFunction(norm);
+    product->addFunction(inBrace);
+    multi->addFunction(product);
+  }
+  return boost::dynamic_pointer_cast<IFunction>(multi);
 }
 
 std::vector<double> readNormalization() {
@@ -756,85 +756,88 @@ std::vector<double> readNormalization() {
   }
   return norm;
 }
-/** Reads the normalization constants and which WS 
+/** Reads the normalization constants and which WS
 * they belong to
 * @returns :: A map of normalization constants and WS names
 */
 std::map<std::string, double> readMultipleNormalization() {
-	std::map<std::string,double> norm;
-	if (AnalysisDataService::Instance().doesExist("MuonAnalysisTFNormalizations")) {
-		Mantid::API::ITableWorkspace_sptr table =
-			boost::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(
-				Mantid::API::AnalysisDataService::Instance().retrieve("MuonAnalysisTFNormalizations"));
-		auto colNorm = table->getColumn("norm");
-		auto colName = table->getColumn("name");
-		for (size_t j = 0; j < table->rowCount(); j++) {
-			norm[colName->cell<std::string>(j)]=((*colNorm)[j]); // read norm
-		}
-		
-	}
-	return norm;
+  std::map<std::string, double> norm;
+  if (AnalysisDataService::Instance().doesExist(
+          "MuonAnalysisTFNormalizations")) {
+    Mantid::API::ITableWorkspace_sptr table =
+        boost::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(
+            Mantid::API::AnalysisDataService::Instance().retrieve(
+                "MuonAnalysisTFNormalizations"));
+    auto colNorm = table->getColumn("norm");
+    auto colName = table->getColumn("name");
+    for (size_t j = 0; j < table->rowCount(); j++) {
+      norm[colName->cell<std::string>(j)] = ((*colNorm)[j]); // read norm
+    }
+  }
+  return norm;
 }
 /** The transformation between normalized counts and asymmetry
 * @param norm :: map of normalization constants
 * @param WSName :: the name of the WS to rescale
 * @param shift :: offset to add (+1 = to normalized counts, -1 = to asymmetry)
 */
-void MuonFitPropertyBrowser::rescaleWS(const std::map<std::string, double>norm,const std::string wsName,const double shift) {
-	//get norm: 
-	std::string tmp = wsName;
-	// stored with ; instead of spaces
-	std::replace(tmp.begin(), tmp.end(), ' ', ';');
-	auto it = norm.find(tmp);
-	if (it == norm.end()) {
-		g_log.error("WS not found: "+wsName);
-		return;
-	}
-	double value =  it->second;
-	rescaleWS(value, wsName, shift);
-	if (rawData()) {
-		rescaleWS(value, wsName+"_Raw", shift);
-
-	}
+void MuonFitPropertyBrowser::rescaleWS(const std::map<std::string, double> norm,
+                                       const std::string wsName,
+                                       const double shift) {
+  // get norm:
+  std::string tmp = wsName;
+  // stored with ; instead of spaces
+  std::replace(tmp.begin(), tmp.end(), ' ', ';');
+  auto it = norm.find(tmp);
+  if (it == norm.end()) {
+    g_log.error("WS not found: " + wsName);
+    return;
+  }
+  double value = it->second;
+  rescaleWS(value, wsName, shift);
+  if (rawData()) {
+    rescaleWS(value, wsName + "_Raw", shift);
+  }
 }
 /** The transformation between normalized counts and asymmetry
 * @param value :: normalization constants
 * @param WSName :: the name of the WS to rescale
 * @param shift :: offset to add (+1 = to normalized counts, -1 = to asymmetry)
 */
-void MuonFitPropertyBrowser::rescaleWS(const double value, const std::string wsName, const double shift) {
-	//go back to normalized counts
-	if (shift == 1.0) {
-		IAlgorithm_sptr alg = AlgorithmManager::Instance().create("Scale");
-		alg->initialize();
-		alg->setProperty("InputWorkspace", wsName);
-		alg->setProperty("OutputWorkspace", wsName);
-		alg->setProperty("Factor", 1.0);
-		alg->setProperty("Operation", "Add");
-		alg->execute();
-	}
-	IAlgorithm_sptr alg = AlgorithmManager::Instance().create("Scale");
-	alg->initialize();
-	alg->setProperty("InputWorkspace", wsName);
-	alg->setProperty("OutputWorkspace", wsName);
-	if (shift == 1) {
-		alg->setProperty("Factor", value);
-	}
-	else {
-		alg->setProperty("Factor", 1. / value);
-	}
-	alg->setProperty("Operation", "Multiply");
-	alg->execute();
-	// if to asymmetry 
-	if (shift == -1.0) {
-		IAlgorithm_sptr alg = AlgorithmManager::Instance().create("Scale");
-		alg->initialize();
-		alg->setProperty("InputWorkspace", wsName);
-		alg->setProperty("OutputWorkspace", wsName);
-		alg->setProperty("Factor", -1.0);
-		alg->setProperty("Operation", "Add");
-		alg->execute();
-	}
+void MuonFitPropertyBrowser::rescaleWS(const double value,
+                                       const std::string wsName,
+                                       const double shift) {
+  // go back to normalized counts
+  if (shift == 1.0) {
+    IAlgorithm_sptr alg = AlgorithmManager::Instance().create("Scale");
+    alg->initialize();
+    alg->setProperty("InputWorkspace", wsName);
+    alg->setProperty("OutputWorkspace", wsName);
+    alg->setProperty("Factor", 1.0);
+    alg->setProperty("Operation", "Add");
+    alg->execute();
+  }
+  IAlgorithm_sptr alg = AlgorithmManager::Instance().create("Scale");
+  alg->initialize();
+  alg->setProperty("InputWorkspace", wsName);
+  alg->setProperty("OutputWorkspace", wsName);
+  if (shift == 1) {
+    alg->setProperty("Factor", value);
+  } else {
+    alg->setProperty("Factor", 1. / value);
+  }
+  alg->setProperty("Operation", "Multiply");
+  alg->execute();
+  // if to asymmetry
+  if (shift == -1.0) {
+    IAlgorithm_sptr alg = AlgorithmManager::Instance().create("Scale");
+    alg->initialize();
+    alg->setProperty("InputWorkspace", wsName);
+    alg->setProperty("OutputWorkspace", wsName);
+    alg->setProperty("Factor", -1.0);
+    alg->setProperty("Operation", "Add");
+    alg->execute();
+  }
 }
 /**
  * Requests checks and updates prior to running a fit
@@ -1149,12 +1152,12 @@ void MuonFitPropertyBrowser::setTFAsymmMode(bool enabled) {
   // Show or hide the TFAsymmetry fit
   if (enabled) {
     m_settingsGroup->property()->addSubProperty(m_normalization);
-	m_multiFitSettingsGroup->property()->addSubProperty(m_normalization);
+    m_multiFitSettingsGroup->property()->addSubProperty(m_normalization);
     m_settingsGroup->property()->addSubProperty(m_keepNorm);
     setNormalization();
   } else {
     m_settingsGroup->property()->removeSubProperty(m_normalization);
-	m_multiFitSettingsGroup->property()->removeSubProperty(m_normalization);
+    m_multiFitSettingsGroup->property()->removeSubProperty(m_normalization);
     m_settingsGroup->property()->removeSubProperty(m_keepNorm);
   }
 }

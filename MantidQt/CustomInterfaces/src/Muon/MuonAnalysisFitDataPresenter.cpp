@@ -154,7 +154,6 @@ void MuonAnalysisFitDataPresenter::doConnect() {
             SLOT(handleSimultaneousFitLabelChanged()));
     connect(dataSelector, SIGNAL(datasetIndexChanged(int)), this,
             SLOT(handleDatasetIndexChanged(int)));
-
   }
 }
 
@@ -178,9 +177,9 @@ void MuonAnalysisFitDataPresenter::handleDataPropertiesChanged() {
  * @param overwrite :: [input] Whether overwrite is on or off in interface
  */
 void MuonAnalysisFitDataPresenter::handleSelectedDataChanged(bool overwrite) {
- // clearMultiFitNorm();
+  // clearMultiFitNorm();
   const auto names = generateWorkspaceNames(overwrite);
- 
+
   if (!names.empty()) {
     createWorkspacesToFit(names);
     updateWorkspaceNames(names);
@@ -292,120 +291,122 @@ MuonAnalysisFitDataPresenter::generateWorkspaceNames(bool overwrite) const {
  * @returns :: list of workspace names
  */
 std::vector<std::string> MuonAnalysisFitDataPresenter::generateWorkspaceNames(
-	const std::string &instrument, const std::string &runString,
-	bool overwrite) const {
-	// If no instrument or runs, no workspaces needed
-	if (instrument.empty() || runString.empty()) {
-		return{};
-	}
+    const std::string &instrument, const std::string &runString,
+    bool overwrite) const {
+  // If no instrument or runs, no workspaces needed
+  if (instrument.empty() || runString.empty()) {
+    return {};
+  }
 
-	// From view, get names of all workspaces needed
-	std::vector<std::string> workspaceNames;
-	const auto groups = m_dataSelector->getChosenGroups();
-	const auto periods = m_dataSelector->getPeriodSelections();
+  // From view, get names of all workspaces needed
+  std::vector<std::string> workspaceNames;
+  const auto groups = m_dataSelector->getChosenGroups();
+  const auto periods = m_dataSelector->getPeriodSelections();
 
-	Muon::DatasetParams params;
-	const std::string instRuns = instrument + runString;
-	std::vector<int> selectedRuns;
-	MuonAnalysisHelper::parseRunLabel(instRuns, params.instrument, selectedRuns);
-	params.version = 1;
-	params.plotType = m_plotType;
+  Muon::DatasetParams params;
+  const std::string instRuns = instrument + runString;
+  std::vector<int> selectedRuns;
+  MuonAnalysisHelper::parseRunLabel(instRuns, params.instrument, selectedRuns);
+  params.version = 1;
+  params.plotType = m_plotType;
 
-	// Find if given name is a group or a pair - defaults to group.
-	// If it is not in the groups or pairs list, we will produce a workspace name
-	// with "Group" in it rather than throwing.
-	const auto grouping = m_grouping;
-	const auto getItemType = [&grouping](const std::string &name) {
-		if (std::find(grouping.pairNames.begin(), grouping.pairNames.end(), name) !=
-			grouping.pairNames.end()) {
-			return Muon::ItemType::Pair;
-		}
-		else { // If it's not a pair, assume it's a group
-			return Muon::ItemType::Group;
-		}
-	};
+  // Find if given name is a group or a pair - defaults to group.
+  // If it is not in the groups or pairs list, we will produce a workspace name
+  // with "Group" in it rather than throwing.
+  const auto grouping = m_grouping;
+  const auto getItemType = [&grouping](const std::string &name) {
+    if (std::find(grouping.pairNames.begin(), grouping.pairNames.end(), name) !=
+        grouping.pairNames.end()) {
+      return Muon::ItemType::Pair;
+    } else { // If it's not a pair, assume it's a group
+      return Muon::ItemType::Group;
+    }
+  };
 
-	// Generate a unique name from the given parameters
-	const auto getUniqueName = [](Muon::DatasetParams &params) {
-		std::string workspaceName =
-			MuonAnalysisHelper::generateWorkspaceName(params);
-		while (AnalysisDataService::Instance().doesExist(workspaceName)) {
-			params.version++;
-			workspaceName = MuonAnalysisHelper::generateWorkspaceName(params);
-		}
-		return workspaceName;
-	};
+  // Generate a unique name from the given parameters
+  const auto getUniqueName = [](Muon::DatasetParams &params) {
+    std::string workspaceName =
+        MuonAnalysisHelper::generateWorkspaceName(params);
+    while (AnalysisDataService::Instance().doesExist(workspaceName)) {
+      params.version++;
+      workspaceName = MuonAnalysisHelper::generateWorkspaceName(params);
+    }
+    return workspaceName;
+  };
 
-	// generate workspace names
-	std::vector<std::vector<int>> runNumberVectors;
-	if (m_dataSelector->getFitType() == IMuonFitDataSelector::FitType::CoAdd) {
-		// Analyse all the runs in one go
-		runNumberVectors.push_back(selectedRuns);
-	}
-	else { // Analyse the runs one by one
-		for (const int run : selectedRuns) {
-			runNumberVectors.push_back({ run });
-		}
-	}
+  // generate workspace names
+  std::vector<std::vector<int>> runNumberVectors;
+  if (m_dataSelector->getFitType() == IMuonFitDataSelector::FitType::CoAdd) {
+    // Analyse all the runs in one go
+    runNumberVectors.push_back(selectedRuns);
+  } else { // Analyse the runs one by one
+    for (const int run : selectedRuns) {
+      runNumberVectors.push_back({run});
+    }
+  }
 
-	for (const auto runsVector : runNumberVectors) {
-		params.runs = runsVector;
-		for (const auto &group : groups) {
-			params.itemType = getItemType(group.toStdString());
-			params.itemName = group.toStdString();
-			for (const auto &period : periods) {
-				params.periods = period.toStdString();
-				const std::string wsName =
-					overwrite ? MuonAnalysisHelper::generateWorkspaceName(params)
-					: getUniqueName(params);
-				workspaceNames.push_back(m_fitRawData ? wsName + RAW_DATA_SUFFIX
-					: wsName);
-			}
-		}
-	}
+  for (const auto runsVector : runNumberVectors) {
+    params.runs = runsVector;
+    for (const auto &group : groups) {
+      params.itemType = getItemType(group.toStdString());
+      params.itemName = group.toStdString();
+      for (const auto &period : periods) {
+        params.periods = period.toStdString();
+        const std::string wsName =
+            overwrite ? MuonAnalysisHelper::generateWorkspaceName(params)
+                      : getUniqueName(params);
+        workspaceNames.push_back(m_fitRawData ? wsName + RAW_DATA_SUFFIX
+                                              : wsName);
+      }
+    }
+  }
 
   return workspaceNames;
 }
 
 void MuonAnalysisFitDataPresenter::storeNorm(std::string name) const {
-	if (m_isItTFAsymm) {
-		if (!Mantid::API::AnalysisDataService::Instance().doesExist("MuonAnalysisTFNormalizations")) {
-			Mantid::API::ITableWorkspace_sptr table = Mantid::API::WorkspaceFactory::Instance().createTable();
-			AnalysisDataService::Instance().addOrReplace("MuonAnalysisTFNormalizations", table);
-			table->addColumn("double", "norm");
-			table->addColumn("str", "name");
-			table->addColumn("str", "method");
-		}
-		Mantid::API::ITableWorkspace_sptr table =
-			boost::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(
-				Mantid::API::AnalysisDataService::Instance().retrieve("MuonAnalysisTFNormalizations"));
-		auto colName = table->getColumn("name");
-		if(table->rowCount()>1){
-			std::string tmp =name;
-			// stored with ; instead of spaces
-			std::replace(tmp.begin(), tmp.end(), ' ', ';');
-		for (size_t j = 0; j < table->rowCount(); j++) {
-			if (colName->cell<std::string>(j) == tmp) {//already exists
-				return;
-			}
-		}
-	}
+  if (m_isItTFAsymm) {
+    if (!Mantid::API::AnalysisDataService::Instance().doesExist(
+            "MuonAnalysisTFNormalizations")) {
+      Mantid::API::ITableWorkspace_sptr table =
+          Mantid::API::WorkspaceFactory::Instance().createTable();
+      AnalysisDataService::Instance().addOrReplace(
+          "MuonAnalysisTFNormalizations", table);
+      table->addColumn("double", "norm");
+      table->addColumn("str", "name");
+      table->addColumn("str", "method");
+    }
+    Mantid::API::ITableWorkspace_sptr table =
+        boost::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(
+            Mantid::API::AnalysisDataService::Instance().retrieve(
+                "MuonAnalysisTFNormalizations"));
+    auto colName = table->getColumn("name");
+    if (table->rowCount() > 1) {
+      std::string tmp = name;
+      // stored with ; instead of spaces
+      std::replace(tmp.begin(), tmp.end(), ' ', ';');
+      for (size_t j = 0; j < table->rowCount(); j++) {
+        if (colName->cell<std::string>(j) == tmp) { // already exists
+          return;
+        }
+      }
+    }
 
-		Mantid::API::TableRow row = table->appendRow();
-		std::string tmp = name;
-		// spaces stop the string being written
-		std::replace(tmp.begin(), tmp.end(), ' ', ';');
-		//get data
-		if (Mantid::API::AnalysisDataService::Instance().doesExist("__norm__")) {
-			Mantid::API::ITableWorkspace_sptr tmpNorm =
-				boost::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(
-					Mantid::API::AnalysisDataService::Instance().retrieve("__norm__"));
-			auto colNorm = tmpNorm->getColumn("norm");
-			//saves data
-			row << (*colNorm)[0] << tmp<<"Estimate";
-		}
-	}
-	
+    Mantid::API::TableRow row = table->appendRow();
+    std::string tmp = name;
+    // spaces stop the string being written
+    std::replace(tmp.begin(), tmp.end(), ' ', ';');
+    // get data
+    if (Mantid::API::AnalysisDataService::Instance().doesExist("__norm__")) {
+      Mantid::API::ITableWorkspace_sptr tmpNorm =
+          boost::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(
+              Mantid::API::AnalysisDataService::Instance().retrieve(
+                  "__norm__"));
+      auto colNorm = tmpNorm->getColumn("norm");
+      // saves data
+      row << (*colNorm)[0] << tmp << "Estimate";
+    }
+  }
 }
 /**
  * Create an analysis workspace given the required name.
@@ -442,7 +443,6 @@ MuonAnalysisFitDataPresenter::createWorkspace(const std::string &name,
     const auto correctedData =
         m_dataLoader.correctAndGroup(loadedData, m_grouping);
 
-	
     // run analysis to generate workspace
     Muon::AnalysisOptions analysisOptions(m_grouping);
     // Periods

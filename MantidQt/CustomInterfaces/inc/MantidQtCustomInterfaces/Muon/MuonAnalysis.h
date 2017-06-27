@@ -257,7 +257,7 @@ private slots:
   void setTFAsymm(Muon::TFAsymmState);
   /// Called when "overwrite" is changed
   void updateDataPresenterOverwrite(int state);
-  //update norm
+  // update norm
   void updateNorm(QString name);
 
 private:
