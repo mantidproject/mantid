@@ -30,11 +30,12 @@ and thus
 
 where,
 
--  :math:`\Delta T` is the time resolution from modulator;
+-  :math:`\Delta T` is the time resolution from modulator
 -  :math:`\Delta\theta` is the coverage of the detector, and can be
    approximated from the square root of the solid angle of the detector
-   to sample;
--  :math:`L` is the flight path of the neutron from source to detector.
+   to sample
+-  :math:`L` is the flight path of the neutron from source to detector
+-  :math:`\theta` is half the Bragg angle :math:`2 \theta`, or half of the angle from the downstream beam
 
 Factor Sheet
 ------------

@@ -3,15 +3,16 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/SpectrumInfo.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/WorkspaceProperty.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/V3D.h"
-#include "MantidDataObjects/Workspace2D.h"
-#include "MantidDataObjects/WorkspaceCreation.h"
 
 #include <cmath>
 
@@ -46,8 +47,8 @@ const std::string EstimateResolutionDiffraction::alias() const {
 }
 
 const std::string EstimateResolutionDiffraction::summary() const {
-  return "Estimate the resolution of each detector for a powder "
-         "diffractometer. ";
+  return "Estimate the resolution of each detector pixel for a powder "
+         "diffractometer";
 }
 
 int EstimateResolutionDiffraction::version() const { return 1; }
@@ -60,12 +61,12 @@ void EstimateResolutionDiffraction::init() {
   declareProperty(
       Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
           "InputWorkspace", "", Direction::Input),
-      "Name of the workspace to have detector resolution calculated. ");
+      "Name of the workspace to have detector resolution calculated");
 
   declareProperty(Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "Name of the output workspace containing delta(d)/d of each "
-                  "detector/spectrum.");
+                  "detector/spectrum");
 
   auto positiveDeltaTOF = boost::make_shared<BoundedValidator<double>>();
   positiveDeltaTOF->setLower(0.);
@@ -80,6 +81,10 @@ void EstimateResolutionDiffraction::init() {
   declareProperty("Wavelength", EMPTY_DBL(), positiveWavelength,
                   "Wavelength setting in Angstroms. This overrides what is in "
                   "the dataset.");
+
+  declareProperty(make_unique<WorkspaceProperty<WorkspaceGroup>>(
+                      "PartialResolutionWorkspaces", "", Direction::Output),
+                  "Workspaces created showing the various resolution terms");
 }
 
 /**
@@ -89,12 +94,33 @@ void EstimateResolutionDiffraction::exec() {
 
   retrieveInstrumentParameters();
 
+  // create all of the output workspaces
+  std::string partials_prefix = getPropertyValue("PartialResolutionWorkspaces");
+  m_resTof = DataObjects::create<DataObjects::Workspace2D>(
+      *m_inputWS, HistogramData::Points(1));
+  m_resPathLength = DataObjects::create<DataObjects::Workspace2D>(
+      *m_inputWS, HistogramData::Points(1));
+  m_resAngle = DataObjects::create<DataObjects::Workspace2D>(
+      *m_inputWS, HistogramData::Points(1));
   m_outputWS = DataObjects::create<DataObjects::Workspace2D>(
       *m_inputWS, HistogramData::Points(1));
 
   estimateDetectorResolution();
 
   setProperty("OutputWorkspace", m_outputWS);
+
+  // put together the output group
+  auto partialsGroup = boost::make_shared<WorkspaceGroup>();
+  API::AnalysisDataService::Instance().addOrReplace(partials_prefix + "_tof",
+                                                    m_resTof);
+  API::AnalysisDataService::Instance().addOrReplace(partials_prefix + "_length",
+                                                    m_resPathLength);
+  API::AnalysisDataService::Instance().addOrReplace(partials_prefix + "_angle",
+                                                    m_resAngle);
+  partialsGroup->addWorkspace(m_resTof);
+  partialsGroup->addWorkspace(m_resPathLength);
+  partialsGroup->addWorkspace(m_resAngle);
+  setProperty("PartialResolutionWorkspaces", partialsGroup);
 }
 
 /**
@@ -155,13 +181,13 @@ void EstimateResolutionDiffraction::estimateDetectorResolution() {
   g_log.notice() << "L1 = " << l1 << "\n";
   const V3D samplepos = spectrumInfo.samplePosition();
 
-  size_t numspec = m_inputWS->getNumberHistograms();
+  const size_t numspec = m_inputWS->getNumberHistograms();
 
-  double mintwotheta = 10000;
-  double maxtwotheta = 0;
+  double mintwotheta = 10000.;
+  double maxtwotheta = 0.;
 
-  double mint3 = 1;
-  double maxt3 = 0;
+  double mint3 = 1.;
+  double maxt3 = 0.;
 
   size_t count_nodetsize = 0;
 
@@ -170,8 +196,8 @@ void EstimateResolutionDiffraction::estimateDetectorResolution() {
     double detdim;
     const auto realdet = dynamic_cast<const Detector *>(&det);
     if (realdet) {
-      double dy = realdet->getHeight();
-      double dx = realdet->getWidth();
+      const double dy = realdet->getHeight();
+      const double dx = realdet->getWidth();
       detdim = sqrt(dx * dx + dy * dy) * 0.5;
     } else {
       // Use detector dimension as 0 as no-information
@@ -180,15 +206,15 @@ void EstimateResolutionDiffraction::estimateDetectorResolution() {
     }
 
     // Get the distance from detector to source
-    double l2 = spectrumInfo.l2(i);
+    const double l2 = spectrumInfo.l2(i);
 
     // Calculate T
-    double centraltof = (l1 + l2) / m_centreVelocity;
+    const double centraltof = (l1 + l2) / m_centreVelocity;
 
     // Angle
-    double twotheta =
+    const double twotheta =
         spectrumInfo.isMonitor(i) ? 0.0 : spectrumInfo.twoTheta(i);
-    double theta = 0.5 * twotheta;
+    const double theta = 0.5 * twotheta;
 
     double solidangle = 0.0;
     for (const auto detID : m_inputWS->getSpectrum(i).getDetectorIDs()) {
@@ -196,19 +222,30 @@ void EstimateResolutionDiffraction::estimateDetectorResolution() {
       if (!detectorInfo.isMasked(index))
         solidangle += detectorInfo.detector(index).solidAngle(samplepos);
     }
-    double deltatheta = sqrt(solidangle);
+    const double deltatheta = sqrt(solidangle);
 
     // Resolution
-    double t1 = m_deltaT / centraltof;
-    double t2 = detdim / (l1 + l2);
-    double t3 = deltatheta * (cos(theta) / sin(theta));
+    const double t1 = m_deltaT / centraltof;
+    const double t2 = detdim / (l1 + l2);
+    const double t3 = deltatheta * (cos(theta) / sin(theta));
 
-    double resolution = sqrt(t1 * t1 + t2 * t2 + t3 * t3);
-    if (spectrumInfo.isMonitor(i))
-      resolution = 0.0;
+    const double resolution = sqrt(t1 * t1 + t2 * t2 + t3 * t3);
+    if (spectrumInfo.isMonitor(i)) {
+      m_resTof->mutableY(i)[0] = 0.;
+      m_resPathLength->mutableY(i)[0] = 0.;
+      m_resAngle->mutableY(i)[0] = 0.;
+      m_outputWS->mutableY(i)[0] = 0.;
+    } else { // not a monitor
+      m_resTof->mutableY(i)[0] = t1;
+      m_resPathLength->mutableY(i)[0] = t2;
+      m_resAngle->mutableY(i)[0] = t3;
+      m_outputWS->mutableY(i)[0] = resolution;
+    }
 
+    m_resTof->mutableX(i)[0] = static_cast<double>(i);
+    m_resPathLength->mutableX(i)[0] = static_cast<double>(i);
+    m_resAngle->mutableX(i)[0] = static_cast<double>(i);
     m_outputWS->mutableX(i)[0] = static_cast<double>(i);
-    m_outputWS->mutableY(i)[0] = resolution;
 
     if (twotheta > maxtwotheta)
       maxtwotheta = twotheta;
