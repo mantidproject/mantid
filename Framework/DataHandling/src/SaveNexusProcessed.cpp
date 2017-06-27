@@ -17,7 +17,6 @@
 #include <Poco/File.h>
 #include <boost/regex.hpp>
 #include <boost/shared_ptr.hpp>
-#include <nexus/NeXusFile.hpp>
 
 using namespace Mantid::API;
 
@@ -144,10 +143,10 @@ void SaveNexusProcessed::getSpectrumList(
   }
 }
 
-void SaveNexusProcessed::doExec(Workspace_sptr inputWorkspace,
-                                Mantid::NeXus::NexusFileIO_sptr &nexusFile,
-                                const bool keepFile,
-                                optional_size_t entryNumber) {
+void SaveNexusProcessed::doExec(
+    Workspace_sptr inputWorkspace,
+    boost::shared_ptr<Mantid::NeXus::NexusFileIO> &nexusFile,
+    const bool keepFile, optional_size_t entryNumber) {
   // TODO: Remove?
   NXMEnableErrorReporting();
 
