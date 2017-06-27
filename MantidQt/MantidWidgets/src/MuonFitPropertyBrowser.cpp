@@ -281,7 +281,6 @@ void MuonFitPropertyBrowser::init() {
 // Set up the execution of the muon fit menu
 void MuonFitPropertyBrowser::executeFitMenu(const QString &item) {
   if (item == "TFAsymm") {
-    emit functionUpdateRequested();
     doTFAsymmFit();
   } else {
     FitPropertyBrowser::executeFitMenu(item);
@@ -594,7 +593,9 @@ void MuonFitPropertyBrowser::doTFAsymmFit() {
   // TFAsymm calculation -> there is already some estimated data
   // rescale WS to normalized counts:
   const int nWorkspaces = static_cast<int>(m_workspacesToFit.size());
-
+  if (nWorkspaces > 1) {
+	  emit functionUpdateRequested();
+  }
   for (int i = 0; i < nWorkspaces; i++) {
     rescaleWS(norms, m_workspacesToFit[i], 1.0);
     std::string tmp = m_workspacesToFit[i];
