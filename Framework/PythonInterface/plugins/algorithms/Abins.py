@@ -227,73 +227,73 @@ class Abins(PythonAlgorithm):
         prog_reporter.report("All workspaces have been saved to ASCII files.")
 
         # 9) save workspaces to matplotlib figures
-        self.make_matplotlib_figs()
-        prog_reporter.report("Figures of all workspaces have been saved.")
+        if self._instrument.get_name() in AbinsModules.AbinsConstants.TWO_DIMENSIONAL_INSTRUMENTS:
+            self._make_matplotlib_figs()
+            prog_reporter.report("Figures of all workspaces have been saved.")
 
         # 9) set  OutputWorkspace
         self.setProperty('OutputWorkspace', self._out_ws_name)
         prog_reporter.report("Group workspace with all required  dynamical structure factors has been constructed.")
 
-    def make_matplotlib_figs(self):
+    def _make_matplotlib_figs(self):
         """
         Makes nice pictures for 2D map using matplotlib.
         """
-        if self._instrument.get_name() in AbinsModules.AbinsConstants.TWO_DIMENSIONAL_INSTRUMENTS:
-            # default path for saving
-            path = ConfigService.getString("defaultsave.directory")
+        # default path for saving
+        path = ConfigService.getString("defaultsave.directory")
 
-            figure_format = AbinsModules.AbinsParameters.figure_format
+        figure_format = AbinsModules.AbinsParameters.figure_format
 
-            # switch on latex
-            plt.rc('font', family='serif')
-            plt.rc('text', usetex=True)
+        # switch on latex
+        plt.rc('font', family='serif')
+        plt.rc('text', usetex=True)
 
-            begin_energy = self._bins[0]
-            end_energy = self._bins[-1]
-            step_energy = AbinsModules.AbinsConstants.ENERGY_PLOT_STEP
-            x_ticks = np.arange(begin_energy, end_energy, step_energy)
-            x_ticks_labels = [str(i).split(".")[0] for i in x_ticks]
+        begin_energy = self._bins[0]
+        end_energy = self._bins[-1]
+        step_energy = AbinsModules.AbinsConstants.ENERGY_PLOT_STEP
+        x_ticks = np.arange(begin_energy, end_energy, step_energy)
+        x_ticks_labels = [str(i).split(".")[0] for i in x_ticks]
 
-            begin_q = 0
-            end_q = AbinsModules.AbinsParameters.q_size
-            step_q = AbinsModules.AbinsParameters.q_size / AbinsModules.AbinsConstants.Q_PLOT_STEP
-            y_ticks = np.arange(begin_q, end_q, step_q)
-            y_ticks_labels = [str(i * (AbinsModules.AbinsConstants.Q_PLOT_STEP - 1)).split(".")[0]
-                              for i in range(len(y_ticks))]
+        begin_q = 0
+        end_q = AbinsModules.AbinsParameters.q_size
+        step_q = AbinsModules.AbinsParameters.q_size / AbinsModules.AbinsConstants.Q_PLOT_STEP
+        y_ticks = np.arange(begin_q, end_q, step_q)
+        y_ticks_labels = [str(i * (AbinsModules.AbinsConstants.Q_PLOT_STEP - 1)).split(".")[0]
+                          for i in range(len(y_ticks))]
 
-            cmap = plt.get_cmap(AbinsModules.AbinsParameters.colormap)
-            cmap.set_under(color='black')
-            interpolation = AbinsModules.AbinsParameters.interpolation
+        cmap = plt.get_cmap(AbinsModules.AbinsParameters.colormap)
+        cmap.set_under(color='black')
+        interpolation = AbinsModules.AbinsParameters.interpolation
 
-            num_workspaces = mtd[self._out_ws_name].getNumberOfEntries()
-            for wrk_num in range(num_workspaces):
+        num_workspaces = mtd[self._out_ws_name].getNumberOfEntries()
+        for wrk_num in range(num_workspaces):
 
-                wrk = mtd[self._out_ws_name].getItem(wrk_num)
-                y_val = wrk.extractY()
-                wrk_name = wrk.name()
-                im = plt.imshow(y_val, cmap=cmap, aspect="auto", origin='lower', interpolation=interpolation,
-                                vmin=AbinsModules.AbinsConstants.S_PLOT_THRESHOLD)
+            wrk = mtd[self._out_ws_name].getItem(wrk_num)
+            y_val = wrk.extractY()
+            wrk_name = wrk.name()
+            im = plt.imshow(y_val, cmap=cmap, aspect="auto", origin='lower', interpolation=interpolation,
+                            vmin=AbinsModules.AbinsConstants.S_PLOT_THRESHOLD)
 
-                plt.ylabel(r' \textbf{Momentum transfer ($\AA^{-1}$)}')
-                plt.xlabel(r'\textbf{Energy transfer [cm$^{-1}$]}')
+            plt.ylabel(r' \textbf{Momentum transfer ($\AA^{-1}$)}')
+            plt.xlabel(r'\textbf{Energy transfer [cm$^{-1}$]}')
 
-                axes = im.axes
-                axes.set_xticks(x_ticks)
-                axes.set_xticklabels(x_ticks_labels)
-                axes.set_yticks(y_ticks)
-                axes.set_yticklabels(y_ticks_labels)
+            axes = im.axes
+            axes.set_xticks(x_ticks)
+            axes.set_xticklabels(x_ticks_labels)
+            axes.set_yticks(y_ticks)
+            axes.set_yticklabels(y_ticks_labels)
 
-                # colorbar
-                max_s = np.max(y_val)
-                min_s = np.min(y_val)
-                cbar_ticks = np.linspace(min_s, max_s, AbinsModules.AbinsConstants.S_PLOT_SPACING)
-                cbar = plt.colorbar(im, ticks=cbar_ticks)
+            # colorbar
+            max_s = np.max(y_val)
+            min_s = np.min(y_val)
+            cbar_ticks = np.linspace(min_s, max_s, AbinsModules.AbinsConstants.S_PLOT_SPACING)
+            cbar = plt.colorbar(im, ticks=cbar_ticks)
 
-                plt.savefig(os.path.join(path, wrk_name + "." + figure_format),
-                            bbox_inches=AbinsModules.AbinsConstants.BBOX,
-                            dpi=AbinsModules.AbinsConstants.DPI)
-                cbar.remove()
-                del im
+            plt.savefig(os.path.join(path, wrk_name + "." + figure_format),
+                        bbox_inches=AbinsModules.AbinsConstants.BBOX,
+                        dpi=AbinsModules.AbinsConstants.DPI)
+            cbar.remove()
+            del im
 
     def _round(self, number):
         """
