@@ -231,7 +231,7 @@ class Abins(PythonAlgorithm):
             self._make_matplotlib_figs()
             prog_reporter.report("Figures of all workspaces have been saved.")
 
-        # 9) set  OutputWorkspace
+        # 10) set  OutputWorkspace
         self.setProperty('OutputWorkspace', self._out_ws_name)
         prog_reporter.report("Group workspace with all required  dynamical structure factors has been constructed.")
 
