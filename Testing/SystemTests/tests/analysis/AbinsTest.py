@@ -56,14 +56,16 @@ class HelperTestingClass(object):
         if order in orders:
             self._quantum_order_event = order
         else:
-            raise RuntimeError("Unsupported number of quantum order event %s" % order)
+            raise RuntimeError(
+                "Unsupported number of quantum order event %s" % order)
 
     def set_name(self, name):
         if isinstance(name, str):
             self._system_name = name
             self._output_name = name
         else:
-            raise RuntimeError("Invalid name. Name should be a string but it is %s " % type(name))
+            raise RuntimeError(
+                "Invalid name. Name should be a string but it is %s " % type(name))
 
     def set_cross_section(self, cross_section=None):
         self._cross_section_factor = cross_section
@@ -139,6 +141,7 @@ class HelperTestingClass(object):
 
         mtd.clear()
 
+
 # ----------------------------------------------------------------------------------------------------------------
 # Tests for 1D S
 # ----------------------------------------------------------------------------------------------------------------
@@ -156,7 +159,6 @@ class AbinsCASTEPTestScratch(stresstesting.MantidStressTest, HelperTestingClass)
         return skip_tests()
 
     def runTest(self):
-
         HelperTestingClass.__init__(self)
 
         name = "BenzeneScratchAbins"
@@ -167,10 +169,13 @@ class AbinsCASTEPTestScratch(stresstesting.MantidStressTest, HelperTestingClass)
         self.set_order(AbinsConstants.QUANTUM_ORDER_FOUR)
         self.case_from_scratch()
 
-    def validate(self):
+    def excludeInPullRequests(self):
+        return True
 
-        self.tolerance = 1e-1
+    def validate(self):
+        self.tolerance = 1e-2
         return self._output_name, self.ref_result
+
 
 # ----------------------------------------------------------------------------------------------------------------
 
@@ -187,7 +192,6 @@ class AbinsCRYSTALTestScratch(stresstesting.MantidStressTest, HelperTestingClass
         return skip_tests()
 
     def runTest(self):
-
         HelperTestingClass.__init__(self)
 
         name = "Crystalb3lypScratchAbins"
@@ -199,9 +203,9 @@ class AbinsCRYSTALTestScratch(stresstesting.MantidStressTest, HelperTestingClass
         self.case_from_scratch()
 
     def validate(self):
-
         self.tolerance = 1e-1
         return self._output_name, self.ref_result
+
 
 # ----------------------------------------------------------------------------------------------------------------
 
@@ -218,7 +222,6 @@ class AbinsCASTEPTestT(stresstesting.MantidStressTest, HelperTestingClass):
         return skip_tests()
 
     def runTest(self):
-
         HelperTestingClass.__init__(self)
 
         name = "BenzeneTAbins"
@@ -229,10 +232,13 @@ class AbinsCASTEPTestT(stresstesting.MantidStressTest, HelperTestingClass):
         self.set_order(AbinsConstants.QUANTUM_ORDER_TWO)
         self.case_restart_diff_t()
 
-    def validate(self):
+    def excludeInPullRequests(self):
+        return True
 
+    def validate(self):
         self.tolerance = 1e-1
         return self._output_name, self.ref_result
+
 
 # ----------------------------------------------------------------------------------------------------------------
 
@@ -249,7 +255,6 @@ class AbinsCASTEPTestLargerOrder(stresstesting.MantidStressTest, HelperTestingCl
         return skip_tests()
 
     def runTest(self):
-
         HelperTestingClass.__init__(self)
 
         name = "BenzeneLargerOrderAbins"
@@ -260,10 +265,13 @@ class AbinsCASTEPTestLargerOrder(stresstesting.MantidStressTest, HelperTestingCl
         self.set_order(AbinsConstants.QUANTUM_ORDER_TWO)
         self.case_restart_diff_order(AbinsConstants.QUANTUM_ORDER_THREE)
 
-    def validate(self):
+    def excludeInPullRequests(self):
+        return True
 
+    def validate(self):
         self.tolerance = 1e-1
         return self._output_name, self.ref_result
+
 
 # ----------------------------------------------------------------------------------------------------------------
 
@@ -280,7 +288,6 @@ class AbinsCASTEPTestSmallerOrder(stresstesting.MantidStressTest, HelperTestingC
         return skip_tests()
 
     def runTest(self):
-
         HelperTestingClass.__init__(self)
 
         name = "BenzeneSmallerOrderAbins"
@@ -292,7 +299,6 @@ class AbinsCASTEPTestSmallerOrder(stresstesting.MantidStressTest, HelperTestingC
         self.case_restart_diff_order(AbinsConstants.QUANTUM_ORDER_ONE)
 
     def validate(self):
-
         self.tolerance = 1e-1
         return self._output_name, self.ref_result
 
@@ -301,8 +307,9 @@ class AbinsCASTEPTestScale(stresstesting.MantidStressTest, HelperTestingClass):
     """
     In this benchmark it is tested if scaling is correct.
     """
+    _wrk_1 = None
+    _ref_result = None
     tolerance = None
-    ref_result = None
 
     def skipTests(self):
         return skip_tests()
@@ -317,11 +324,11 @@ class AbinsCASTEPTestScale(stresstesting.MantidStressTest, HelperTestingClass):
         self.set_dft_program("CASTEP")
         self.set_name(name)
         self.set_order(AbinsConstants.QUANTUM_ORDER_TWO)
+
         self.set_scale(scale=scaling_factor)
         self.case_from_scratch()
 
     def validate(self):
-
         self.tolerance = 1e-1
         return self._output_name, self.ref_result
 
@@ -350,6 +357,5 @@ class AbinsCASTEPNoH(stresstesting.MantidStressTest, HelperTestingClass):
         self._wrk_1 = self._output_name
 
     def validate(self):
-
         self.tolerance = 1e-1
         return self._output_name, self.ref_result

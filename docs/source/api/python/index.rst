@@ -19,15 +19,6 @@ Matplotlib-like plotting interface
 
    mantidplot.pyplot <mantidplot/pyplot/index>
 
-Techniques
-----------
-
-.. toctree::
-   :glob:
-   :maxdepth: 1
-
-   techniques/*
-
 Reference
 ---------
 .. toctree::
