@@ -1358,74 +1358,73 @@ boost::shared_ptr<ParameterMap> Instrument::makeLegacyParameterMap() const {
   const double imag_norm_max = sin(d_max / (2.0 * L * safety_factor));
 
   Eigen::Affine3d transformation;
+  int64_t oldParentIndex = -1;
 
   for (size_t i = 0; i < m_componentInfo->size(); ++i) {
 
+    const int64_t parentIndex = m_componentInfo->parent(i);
+    const bool makeTransform = parentIndex != oldParentIndex;
+    bool isRectangularDetectorPixel = false;
+
+    if (makeTransform) {
+      oldParentIndex = parentIndex;
+      const auto parentPos = m_componentInfo->position(parentIndex);
+      const auto invParentRot =
+          m_componentInfo->rotation(parentIndex).conjugate();
+
+      transformation = invParentRot;
+      transformation.translate(-parentPos);
+    }
+
     if (m_componentInfo->isDetector(i)) {
+
       const boost::shared_ptr<const IDetector> &baseDet =
           std::get<1>(baseInstr.m_detectorCache[i]);
+
+      isRectangularDetectorPixel = bool(
+          boost::dynamic_pointer_cast<const RectangularDetectorPixel>(baseDet));
       if (m_detectorInfo->isMasked(i)) {
         pmap->forceUnsafeSetMasked(baseDet.get(), true);
       }
 
-      const auto parentPos =
-          m_componentInfo->position(m_componentInfo->parent(i));
-      const auto invParentRot =
-          m_componentInfo->rotation(m_componentInfo->parent(i)).conjugate();
+      if (makeTransform) {
+        // Special case: scaling for RectangularDetectorPixel.
+        if (isRectangularDetectorPixel) {
 
-      // invParentRot = toQuaterniond(parParent->getRotation()).conjugate();
-      transformation = invParentRot;
-      transformation.translate(-parentPos);
+          size_t panelIndex = m_componentInfo->parent(parentIndex);
+          ComponentID panelID = m_componentCache[panelIndex];
 
-      // Special case: scaling for RectangularDetectorPixel
-      if (boost::dynamic_pointer_cast<const RectangularDetectorPixel>(
-              baseDet)) {
-        const auto *panel = baseDet->getParent()->getParent().get();
-        Eigen::Vector3d scale(1, 1, 1);
-        if (auto scalex = pmap->get(panel, "scalex"))
-          scale[0] = 1.0 / scalex->value<double>();
-        if (auto scaley = pmap->get(panel, "scaley"))
-          scale[1] = 1.0 / scaley->value<double>();
-        transformation.prescale(scale);
+          Eigen::Vector3d scale(1, 1, 1);
+          if (auto scalex = pmap->get(panelID, "scalex"))
+            scale[0] = 1.0 / scalex->value<double>();
+          if (auto scaley = pmap->get(panelID, "scaley"))
+            scale[1] = 1.0 / scaley->value<double>();
+          transformation.prescale(scale);
+        }
       }
+    }
 
-      // Undo parent transformation to obtain relative position/rotation.
-      Eigen::Vector3d relPos = transformation * m_detectorInfo->position(i);
-      Eigen::Quaterniond relRot = m_componentInfo->relativeRotation(i);
-      // Tolerance 1e-9 m as in Beamline::DetectorInfo::isEquivalent.
-      if ((relPos - toVector3d(baseDet->getRelativePos())).norm() >= 1e-9) {
-        if (boost::dynamic_pointer_cast<const RectangularDetectorPixel>(
-                baseDet)) {
+    // Undo parent transformation to obtain relative position/rotation.
+    Eigen::Vector3d relPos = transformation * m_componentInfo->position(i);
+    Eigen::Quaterniond relRot = m_componentInfo->relativeRotation(i);
+
+    const IComponent *baseComponent = m_componentCache[i]->getBaseComponent();
+    // Tolerance 1e-9 m as in Beamline::DetectorInfo::isEquivalent.
+    if ((relPos - toVector3d(baseComponent->getRelativePos())).norm() >= 1e-9) {
+      if (isRectangularDetectorPixel) {
           throw std::runtime_error(
               "Cannot create legacy ParameterMap: Position "
               "parameters for RectangularDetectorPixel are "
               "not supported");
         }
-        pmap->addV3D(baseDet->getComponentID(), ParameterMap::pos(),
-                     toV3D(relPos));
-      }
-      if ((relRot * toQuaterniond(baseDet->getRelativeRot()).conjugate())
-              .vec()
-              .norm() >= imag_norm_max)
-        pmap->addQuat(baseDet->getComponentID(), ParameterMap::rot(),
-                      toQuat(relRot));
-
-    } else {
-      Eigen::Vector3d relPos = m_componentInfo->relativePosition(i);
-      Eigen::Quaterniond relRot = m_componentInfo->relativeRotation(i);
-
-      const IComponent *baseComponent = m_componentCache[i]->getBaseComponent();
-      if ((relPos - toVector3d(baseComponent->getRelativePos())).norm() >=
-          1e-9) {
         pmap->addV3D(m_componentCache[i], ParameterMap::pos(),
                      Kernel::toV3D(relPos));
-      }
-      if ((relRot * toQuaterniond(baseComponent->getRelativeRot()).conjugate())
-              .vec()
-              .norm() >= imag_norm_max) {
-        pmap->addQuat(m_componentCache[i], ParameterMap::rot(),
-                      Kernel::toQuat(relRot));
-      }
+    }
+    if ((relRot * toQuaterniond(baseComponent->getRelativeRot()).conjugate())
+            .vec()
+            .norm() >= imag_norm_max) {
+      pmap->addQuat(m_componentCache[i], ParameterMap::rot(),
+                    Kernel::toQuat(relRot));
     }
   }
 
