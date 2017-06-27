@@ -46,29 +46,39 @@ int QDataProcessorTwoLevelTreeModel::columnCount(
 */
 QVariant QDataProcessorTwoLevelTreeModel::data(const QModelIndex &index,
                                                int role) const {
+
   if (!index.isValid())
     return QVariant();
 
-  if (role != Qt::DisplayRole && role != Qt::EditRole)
-    return QVariant();
+  bool parentValid = parent(index).isValid();
 
-  if (!parent(index).isValid()) {
-    // Index corresponds to a group
+  if (role != Qt::DisplayRole && role != Qt::EditRole) {
+    if (!parentValid) {
+      // Index corresponds to a group
 
-    if (index.column() == 0) {
-      // Return the group name only in the first column
-      return QString::fromStdString(m_groupName.at(index.row()));
-    } else {
-      return QVariant();
+      if (index.column() == 0) {
+        // Return the group name only in the first column
+        return QString::fromStdString(m_groupName.at(index.row()));
+      }
+      else {
+        return QVariant();
+      }
     }
-  } else {
-    // Index corresponds to a row
+    else {
+      // Index corresponds to a row
 
-    // Absolute position of this row in the table
-    int absolutePosition = m_rowsOfGroup[parent(index).row()][index.row()];
-    return QString::fromStdString(
+      // Absolute position of this row in the table
+      int absolutePosition = m_rowsOfGroup[parent(index).row()][index.row()];
+      return QString::fromStdString(
         m_tWS->String(absolutePosition, index.column() + 1));
+    }
+  } else if (role == Qt::BackgroundRole) {
+    if (parent(index).row() == m_highlighted.first &&
+        (!parentValid || index.row() == m_highlighted.second))
+      return QColor("#FF8040");
   }
+
+  return QVariant();
 }
 
 Qt::ItemFlags
@@ -474,6 +484,16 @@ void QDataProcessorTwoLevelTreeModel::setupModelData(
 ITableWorkspace_sptr
 QDataProcessorTwoLevelTreeModel::getTableWorkspace() const {
   return m_tWS;
+}
+
+/** Set the current row / group to be highlighted 
+ *
+ * @param groupIndex : Index of the group
+ * @param rowIndex : Index of the row
+ */
+void QDataProcessorTwoLevelTreeModel::setHighlighted(int groupIndex,
+                                                     int rowIndex) const {
+  m_highlighted = std::make_pair(groupIndex, rowIndex);
 }
 
 } // namespace MantidWidgets
