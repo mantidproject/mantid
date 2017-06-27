@@ -125,9 +125,6 @@ void QwtRasterDataMDNonOrthogonal::copyFrom(
 
   std::copy(std::begin(source.m_fromHklToXyz), std::end(source.m_fromHklToXyz),
             std::begin(dest.m_fromHklToXyz));
-  //  for (size_t d = 0; d < 9; ++d) {
-  //    dest.m_fromHklToXyz[d] = source.m_fromHklToXyz[d];
-  //  }
 }
 
 } // namespace

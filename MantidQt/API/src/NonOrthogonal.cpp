@@ -197,7 +197,7 @@ template <typename T> bool doRequiresSkewMatrix(T workspace) {
 
 template <size_t N>
 std::array<Mantid::coord_t, N>
-getTransformedArray(std::array<Mantid::coord_t, N * N> skewMatrix,
+getTransformedArray(const std::array<Mantid::coord_t, N * N> &skewMatrix,
                     size_t dimension) {
   std::array<Mantid::coord_t, N> vec = {{0., 0., 0.}};
   for (size_t index = 0; index < N; ++index) {
@@ -397,8 +397,8 @@ bool isHKLDimensions(Mantid::API::IMDWorkspace_const_sptr workspace,
 }
 
 void transformFromDoubleToCoordT(
-    Mantid::Kernel::DblMatrix &skewMatrix,
-    std::array<Mantid::coord_t, 9> skewMatrixCoord) {
+    const Mantid::Kernel::DblMatrix &skewMatrix,
+    std::array<Mantid::coord_t, 9> &skewMatrixCoord) {
   std::size_t index = 0;
   for (std::size_t i = 0; i < skewMatrix.numRows(); ++i) {
     for (std::size_t j = 0; j < skewMatrix.numCols(); ++j) {
@@ -468,8 +468,8 @@ void transformLookpointToWorkspaceCoord(
 *are measured from the x axis.
 */
 std::pair<double, double>
-    getGridLineAnglesInRadian(std::array<Mantid::coord_t, 9> skewMatrixCoord,
-                              size_t dimX, size_t dimY) {
+getGridLineAnglesInRadian(const std::array<Mantid::coord_t, 9> &skewMatrixCoord,
+                          size_t dimX, size_t dimY) {
   // Get the two vectors for the selected dimensions in the orthogonal axis
   // representation.
 

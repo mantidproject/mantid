@@ -26,8 +26,8 @@ getMissingHKLDimensionIndex(Mantid::API::IMDWorkspace_const_sptr workspace,
                             size_t dimX, size_t dimY);
 
 void EXPORT_OPT_MANTIDQT_API
-transformFromDoubleToCoordT(Mantid::Kernel::DblMatrix &skewMatrix,
-                            std::array<Mantid::coord_t, 9> skewMatrixCoord);
+transformFromDoubleToCoordT(const Mantid::Kernel::DblMatrix &skewMatrix,
+                            std::array<Mantid::coord_t, 9> &skewMatrixCoord);
 
 template <typename T>
 void transformLookpointToWorkspaceCoord(
@@ -56,8 +56,8 @@ void transformLookpointToWorkspaceCoord(
 }
 
 std::pair<double, double> EXPORT_OPT_MANTIDQT_API
-    getGridLineAnglesInRadian(std::array<Mantid::coord_t, 9> skewMatrixCoord,
-                              size_t dimX, size_t dimY);
+getGridLineAnglesInRadian(const std::array<Mantid::coord_t, 9> &skewMatrixCoord,
+                          size_t dimX, size_t dimY);
 }
 }
 
