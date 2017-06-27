@@ -2,9 +2,9 @@
 #define MANTID_KERNEL_ENABLEDWHENPROPERTY_H_
 
 #include "MantidKernel/System.h"
-#include "MantidKernel/IPropertyManager.h"
 #include "MantidKernel/IPropertySettings.h"
 #include <memory>
+#include <string>
 
 namespace Mantid {
 namespace Kernel {
@@ -63,6 +63,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
+
+// Forward decelerations
+class IPropertyManager;
+class Property;
 
 // Forward deceleration of structs defined at end of header
 

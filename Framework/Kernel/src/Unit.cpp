@@ -1,9 +1,8 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidKernel/Unit.h"
-#include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/PhysicalConstants.h"
+#include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/UnitLabelTypes.h"
 #include <cfloat>

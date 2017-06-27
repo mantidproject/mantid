@@ -20,35 +20,41 @@ void export_Instrument() {
                                                               no_init)
       .def("getSample", &Instrument::getSample, arg("self"),
            return_value_policy<RemoveConstSharedPtr>(),
-           "Return the object that represents the sample")
+           "Return the :class:`~mantid.geometry.Component` object that "
+           "represents the sample")
 
       .def("getSource", &Instrument::getSource, arg("self"),
            return_value_policy<RemoveConstSharedPtr>(),
-           "Return the object that represents the source")
+           "Return the :class:`~mantid.geometry.Component` object that "
+           "represents the source")
 
       .def("getComponentByName",
            (boost::shared_ptr<IComponent>(Instrument::*)(const std::string &)) &
                Instrument::getComponentByName,
-           (arg("self"), arg("cname")), "Returns the named component")
+           (arg("self"), arg("cname")),
+           "Returns the named :class:`~mantid.geometry.Component`")
 
       .def("getDetector", (boost::shared_ptr<IDetector>(
                               Instrument::*)(const detid_t &) const) &
                               Instrument::getDetector,
            (arg("self"), arg("detector_id")),
-           "Returns the detector with the given ID")
+           "Returns the :class:`~mantid.geometry.Detector` with the given ID")
 
       .def("getReferenceFrame",
            (boost::shared_ptr<const ReferenceFrame>(Instrument::*)()) &
                Instrument::getReferenceFrame,
            arg("self"), return_value_policy<RemoveConstSharedPtr>(),
-           "Returns the reference frame attached that defines the instrument "
+           "Returns the :class:`~mantid.geometry.ReferenceFrame` attached that "
+           "defines the instrument "
            "axes")
 
       .def("getValidFromDate", &Instrument::getValidFromDate, arg("self"),
-           "Return the valid from date of the instrument")
+           "Return the valid from :class:`~mantid.kernel.DateAndTime` of the "
+           "instrument")
 
       .def("getValidToDate", &Instrument::getValidToDate, arg("self"),
-           "Return the valid to date of the instrument")
+           "Return the valid to :class:`~mantid.kernel.DateAndTime` of the "
+           "instrument")
 
       .def("getBaseInstrument", &Instrument::baseInstrument, arg("self"),
            return_value_policy<RemoveConstSharedPtr>(),

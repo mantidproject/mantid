@@ -3,14 +3,15 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidDataHandling/SaveSPE.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidAPI/DetectorInfo.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidDataHandling/LoadInstrument.h"
+#include "MantidDataHandling/SaveSPE.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/UnitFactory.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 #include <boost/lexical_cast.hpp>
 #include <Poco/File.h>
