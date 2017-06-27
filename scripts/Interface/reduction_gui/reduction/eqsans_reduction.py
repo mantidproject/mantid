@@ -6,7 +6,7 @@ from __future__ import (absolute_import, division, print_function)
 """
 import time
 import os
-from scripter import BaseReductionScripter
+from reduction_gui.reduction.scripter import BaseReductionScripter
 
 HAS_MANTID = False
 try:
