@@ -94,6 +94,7 @@ public:
                    const Eigen::Quaterniond &newRotation);
 
   size_t parent(const size_t componentIndex) const;
+  bool hasParent(const size_t componentIndex) const;
   bool hasDetectorInfo() const;
   void setDetectorInfo(DetectorInfo *detectorInfo);
   bool hasSource() const;

@@ -73,9 +73,12 @@ public:
   bool isDetector(const size_t componentIndex) const;
   Kernel::V3D position(const size_t componentIndex) const;
   Kernel::Quat rotation(const size_t componentIndex) const;
+  Kernel::V3D relativePosition(const size_t componentIndex) const;
+  Kernel::Quat relativeRotation(const size_t componentIndex) const;
   void setPosition(size_t componentIndex, const Kernel::V3D &newPosition);
   void setRotation(size_t componentIndex, const Kernel::Quat &newRotation);
   size_t parent(const size_t componentIndex) const;
+  bool hasParent(const size_t componentIndex) const;
   Kernel::V3D sourcePosition() const;
   Kernel::V3D samplePosition() const;
   double l1() const;

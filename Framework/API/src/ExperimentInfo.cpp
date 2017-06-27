@@ -380,7 +380,7 @@ Instrument_const_sptr ExperimentInfo::getInstrument() const {
   instrument->setDetectorInfo(m_detectorInfo);
   instrument->setInfoVisitor(*m_infoVisitor); // TODO. We actually only need the
                                               // ID->index part of this mapping
-  instrument->setComponentInfo(m_componentInfo);
+  instrument->setComponentInfo(m_componentInfo, *m_infoVisitor->componentIds());
   return instrument;
 }
 
@@ -481,16 +481,25 @@ T getParam(const std::string &paramType, const std::string &paramValue) {
 void updatePosition(ComponentInfo &componentInfo, const IComponent *component,
                     const V3D &newRelPos) {
   const auto compIndex = componentInfo.indexOf(component->getComponentID());
-  componentInfo.setPosition(compIndex,
-                            componentInfo.position(compIndex) + newRelPos);
+  V3D position = newRelPos;
+  if (componentInfo.hasParent(compIndex)) {
+    const auto parentIndex = componentInfo.parent(compIndex);
+    componentInfo.rotation(parentIndex).rotate(position);
+    position += componentInfo.position(parentIndex);
+  }
+  componentInfo.setPosition(compIndex, position);
 }
 
 void updateRotation(ComponentInfo &componentInfo, const IComponent *component,
                     const Quat &newRelRot) {
-
   const auto compIndex = componentInfo.indexOf(component->getComponentID());
-  componentInfo.setRotation(compIndex,
-                            componentInfo.rotation(compIndex) * newRelRot);
+
+  auto rotation = newRelRot;
+  if (componentInfo.hasParent(compIndex)) {
+    const auto parentIndex = componentInfo.parent(compIndex);
+    rotation = componentInfo.rotation(parentIndex) * newRelRot;
+  }
+  componentInfo.setRotation(compIndex, rotation);
 }
 
 void adjustPositionsFromScaleFactor(ComponentInfo &componentInfo,

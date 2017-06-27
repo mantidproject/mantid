@@ -42,14 +42,17 @@ makeDetectorInfo(const Instrument &instrument) {
 }
 }
 
-boost::shared_ptr<Beamline::ComponentInfo>
+std::tuple<boost::shared_ptr<Beamline::ComponentInfo>,
+           boost::shared_ptr<const std::vector<Geometry::ComponentID>>>
 makeComponentInfo(const Instrument &parInstrument) {
   InfoComponentVisitor visitor(parInstrument.getDetectorIDs(),
                                *parInstrument.getParameterMap(),
                                parInstrument.getSource()->getComponentID(),
                                parInstrument.getSample()->getComponentID());
   parInstrument.registerContents(visitor);
-  return boost::shared_ptr<Beamline::ComponentInfo>(visitor.componentInfo());
+  return std::make_tuple(
+      boost::shared_ptr<Beamline::ComponentInfo>(visitor.componentInfo()),
+      visitor.componentIds());
 }
 
 class InstrumentTest : public CxxTest::TestSuite {
@@ -561,14 +564,17 @@ public:
     Instrument instrument(baseInstrument, pmap);
 
     // Extract information from instrument to create DetectorInfo
-    auto compInfo = makeComponentInfo(instrument);
-    instrument.setComponentInfo(compInfo);
-    pmap->setComponentInfo(compInfo);
+    auto componentTuple = makeComponentInfo(instrument);
+    auto componentInfo = std::get<0>(componentTuple);
+    instrument.setComponentInfo(componentInfo, *std::get<1>(componentTuple));
+    baseInstrument->setComponentInfo(componentInfo,
+                                     *std::get<1>(componentTuple));
+    pmap->setComponentInfo(componentInfo);
 
     auto detInfo = makeDetectorInfo(instrument);
     instrument.setDetectorInfo(detInfo);
-    detInfo->setComponentInfo(compInfo.get());
-    compInfo->setDetectorInfo(detInfo.get());
+    detInfo->setComponentInfo(componentInfo.get());
+    componentInfo->setDetectorInfo(detInfo.get());
     // bank 1
     TS_ASSERT(detInfo->position(0).isApprox(
         toVector3d(bankOffset + V3D{-0.008, -0.0002, 0.0}), 1e-12));
@@ -630,16 +636,18 @@ public:
     Instrument instrument(baseInstrument, pmap);
 
     // Extract information from instrument to create DetectorInfo
-    auto compInfo = makeComponentInfo(instrument);
-    instrument.setComponentInfo(compInfo);
-    pmap->setComponentInfo(compInfo);
+    auto componentTuple = makeComponentInfo(instrument);
+    auto componentInfo = std::get<0>(componentTuple);
+    instrument.setComponentInfo(componentInfo, *std::get<1>(componentTuple));
+    baseInstrument->setComponentInfo(componentInfo,
+                                     *std::get<1>(componentTuple));
+    pmap->setComponentInfo(componentInfo);
 
     auto detInfo = makeDetectorInfo(instrument);
     instrument.setDetectorInfo(detInfo);
-    detInfo->setComponentInfo(compInfo.get());
-    compInfo->setDetectorInfo(detInfo.get());
+    detInfo->setComponentInfo(componentInfo.get());
+    componentInfo->setDetectorInfo(detInfo.get());
 
-    instrument.setDetectorInfo(detInfo);
     // bank 1
     double pitch = 0.008;
     TS_ASSERT(
@@ -716,32 +724,45 @@ public:
 
   void test_component_index() {
 
-    auto instrument = ComponentCreationHelper::createMinimalInstrument(
+    auto baseInstrument = ComponentCreationHelper::createMinimalInstrument(
         Mantid::Kernel::V3D(0, 0, 0),
         /*source pos*/
         Mantid::Kernel::V3D(10, 0, 0),
         /*sample pos*/
         Mantid::Kernel::V3D(20, 0, 0));
 
-    boost::shared_ptr<const IDetector> det =
-        instrument->getDetector(1); // One and only detector
-    TS_ASSERT_EQUALS(0, instrument->componentIndex(det->getComponentID()));
+    auto pmap = boost::make_shared<ParameterMap>();
+    auto parInstrument = Instrument(baseInstrument, pmap);
 
-    boost::shared_ptr<const IComponent> comp = instrument->getSource();
-    TS_ASSERT_EQUALS(1, instrument->componentIndex(comp->getComponentID()));
-    comp = instrument->getSample();
-    TS_ASSERT_EQUALS(2, instrument->componentIndex(comp->getComponentID()));
+    TSM_ASSERT_THROWS("No index mapping as no ComponentInfo set. Should throw",
+                      parInstrument.componentIndex(det->getComponentID()),
+                      std::runtime_error &);
+
+    auto componentTuple = makeComponentInfo(parInstrument);
+    auto componentInfo = std::get<0>(componentTuple);
+    parInstrument.setComponentInfo(componentInfo, *std::get<1>(componentTuple));
+    baseInstrument->setComponentInfo(componentInfo,
+                                     *std::get<1>(componentTuple));
+    pmap->setComponentInfo(componentInfo);
+
+    auto detInfo = makeDetectorInfo(parInstrument);
+    parInstrument.setDetectorInfo(detInfo);
+    detInfo->setComponentInfo(componentInfo.get());
+    componentInfo->setDetectorInfo(detInfo.get());
+
+    boost::shared_ptr<const IDetector> det =
+        parInstrument.getDetector(1); // One and only detector
+    TS_ASSERT_EQUALS(0, parInstrument.componentIndex(det->getComponentID()));
+
+    boost::shared_ptr<const IComponent> comp = parInstrument.getSource();
+    TS_ASSERT_EQUALS(1, parInstrument.componentIndex(comp->getComponentID()));
+    comp = parInstrument.getSample();
+    TS_ASSERT_EQUALS(2, parInstrument.componentIndex(comp->getComponentID()));
 
     ObjComponent *extraComp = new ObjComponent("extra_component");
     TSM_ASSERT_THROWS("Component has not been added. Should throw",
-                      instrument->componentIndex(extraComp->getComponentID()),
+                      parInstrument.componentIndex(extraComp->getComponentID()),
                       std::runtime_error &);
-
-    // Now lets add it.
-    instrument->add(extraComp);
-
-    comp = instrument->getChild(3);
-    TS_ASSERT_EQUALS(3, instrument->componentIndex(comp->getComponentID()));
   }
 
 private:

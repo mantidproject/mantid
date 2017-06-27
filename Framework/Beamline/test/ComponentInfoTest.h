@@ -552,5 +552,16 @@ public:
             .angularDistance(info.relativeRotation(subAssemblyIndex)),
         theta, 1e-6);
   }
+
+  void test_has_parent() {
+    using namespace Eigen;
+    auto infos = makeTreeExample();
+    auto &compInfo = std::get<0>(infos);
+
+    TSM_ASSERT("Detector should have a parent", compInfo.hasParent(0));
+    TSM_ASSERT("Sub component should have a parent", compInfo.hasParent(3));
+    TSM_ASSERT("Root component should not have a parent",
+               !compInfo.hasParent(compInfo.size() - 1 /*root index*/));
+  }
 };
 #endif /* MANTID_BEAMLINE_COMPONENTINFOTEST_H_ */

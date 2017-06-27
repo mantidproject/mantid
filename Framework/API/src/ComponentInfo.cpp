@@ -66,8 +66,21 @@ Kernel::Quat ComponentInfo::rotation(const size_t componentIndex) const {
   return Kernel::toQuat(m_componentInfo.rotation(componentIndex));
 }
 
+Kernel::V3D ComponentInfo::relativePosition(const size_t componentIndex) const {
+  return Kernel::toV3D(m_componentInfo.relativePosition(componentIndex));
+}
+
+Kernel::Quat
+ComponentInfo::relativeRotation(const size_t componentIndex) const {
+  return Kernel::toQuat(m_componentInfo.relativeRotation(componentIndex));
+}
+
 size_t ComponentInfo::parent(const size_t componentIndex) const {
   return m_componentInfo.parent(componentIndex);
+}
+
+bool ComponentInfo::hasParent(const size_t componentIndex) const {
+  return m_componentInfo.hasParent(componentIndex);
 }
 
 Kernel::V3D ComponentInfo::sourcePosition() const {

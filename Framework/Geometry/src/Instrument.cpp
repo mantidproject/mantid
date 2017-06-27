@@ -1,6 +1,5 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/InfoComponentVisitor.h"
-#include "MantidGeometry/Instrument/CacheComponentVisitor.h"
 #include "MantidGeometry/Instrument/ParComponentFactory.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
@@ -16,7 +15,6 @@
 
 #include <boost/make_shared.hpp>
 #include <queue>
-#include <mutex>
 
 using namespace Mantid::Kernel;
 using Mantid::Kernel::Exception::NotFoundError;
@@ -35,7 +33,6 @@ Instrument::Instrument()
       m_chopperPoints(new std::vector<const ObjComponent *>),
       m_sampleCache(nullptr), m_defaultView("3D"), m_defaultViewAxis("Z+"),
       m_referenceFrame(new ReferenceFrame) {
-  m_componentCacheGood.store(false);
 }
 
 /// Constructor with name
@@ -44,7 +41,6 @@ Instrument::Instrument(const std::string &name)
       m_chopperPoints(new std::vector<const ObjComponent *>),
       m_sampleCache(nullptr), m_defaultView("3D"), m_defaultViewAxis("Z+"),
       m_referenceFrame(new ReferenceFrame) {
-  m_componentCacheGood.store(false);
 }
 
 /** Constructor to create a parametrized instrument
@@ -667,7 +663,6 @@ void Instrument::markAsSamplePos(const IComponent *comp) {
     g_log.warning(
         "Have already added samplePos component to the _sampleCache.");
   }
-  m_componentCacheGood = false;
 }
 
 /** Mark a component which has already been added to the Instrument (as a child
@@ -694,7 +689,6 @@ void Instrument::markAsSource(const IComponent *comp) {
   } else {
     g_log.warning("Have already added source component to the _sourceCache.");
   }
-  m_componentCacheGood = false;
 }
 
 /** Mark a Component which has already been added to the Instrument (as a child
@@ -719,7 +713,6 @@ void Instrument::markAsDetector(const IDetector *det) {
     bool isMonitor = false;
     m_detectorCache.emplace(it, det->getID(), det_sptr, isMonitor);
   }
-  m_componentCacheGood = false;
 }
 
 /// As markAsDetector but without the required sorting. Must call
@@ -733,7 +726,6 @@ void Instrument::markAsDetectorIncomplete(const IDetector *det) {
   IDetector_const_sptr det_sptr = IDetector_const_sptr(det, NoDeleting());
   bool isMonitor = false;
   m_detectorCache.emplace_back(det->getID(), det_sptr, isMonitor);
-  m_componentCacheGood = false;
 }
 
 /// Sorts the detector cache. Called after all detectors have been marked via
@@ -798,7 +790,6 @@ void Instrument::removeDetector(IDetector *det) {
   {
     parentAssembly->remove(det);
   }
-  m_componentCacheGood = false;
 }
 
 /** This method returns monitor detector ids
@@ -1279,7 +1270,6 @@ bool Instrument::isEmptyInstrument() const { return this->nelements() == 0; }
 
 int Instrument::add(IComponent *component) {
   // invalidate cache
-  m_componentCacheGood = false;
   return CompAssembly::add(component);
 }
 
@@ -1292,8 +1282,15 @@ void Instrument::setDetectorInfo(
 }
 
 void Instrument::setComponentInfo(
-    boost::shared_ptr<const Beamline::ComponentInfo> componentInfo) {
+    boost::shared_ptr<const Beamline::ComponentInfo> componentInfo,
+    std::vector<Geometry::ComponentID> componentIds) {
+  if (componentInfo->size() != componentIds.size()) {
+    throw std::runtime_error("Instrument::setInstrument requires that the same "
+                             "number of component ids are provided as the size "
+                             "of the ComponentInfo");
+  }
   m_componentInfo = std::move(componentInfo);
+  m_componentCache = std::move(componentIds);
 }
 
 void Instrument::setInfoVisitor(const InfoComponentVisitor &visitor) {
@@ -1316,32 +1313,22 @@ size_t Instrument::detectorIndex(const detid_t detID) const {
 }
 
 /**
- * Lazy creation of a component cache.
- * Components must be visited bottom up in exactly the same way as will
- * happen when ExperimentInfo::setInstrument is called.
- */
-void Instrument::makeOrCreateComponentCache() const {
-  if (!m_componentCacheGood.load()) {
-    CacheComponentVisitor visitor;
-    this->registerContents(visitor);
-    std::lock_guard<std::mutex> lock(m_mutex);
-    UNUSED_ARG(lock);
-    m_componentCache = visitor.componentIds();
-    m_componentCacheGood.store(true);
-  }
-}
-
-/**
  * @brief Instrument::componentIndex
- * Note that this index can be used with ComponentInfo. Throw std::runtime_error
- * if the ComponentID does not exist.
+ * Note that this method is ONLY to be used in conjunction with an
+ * ExperimentInfo.
+ * Until setComponentInfo has been called, you will not be able to use this.
  * @param componentId : ComponentID to find the index for.
  * @return the Component index associated with this Component.
  */
 size_t Instrument::componentIndex(const ComponentID componentId) const {
-  makeOrCreateComponentCache();
+  if (!hasComponentInfo()) {
+    throw std::runtime_error(
+        "No ComponentInfo, cannot call Instrument::componentIndex");
+  }
+
   auto it = std::find(m_componentCache.cbegin(), m_componentCache.cend(),
                       componentId);
+
   if (it == m_componentCache.end()) {
     throw std::runtime_error("ComponentID does not identify a Component that "
                              "is not part of the instrument");
@@ -1428,8 +1415,6 @@ boost::shared_ptr<ParameterMap> Instrument::makeLegacyParameterMap() const {
     } else {
       Eigen::Vector3d relPos = m_componentInfo->relativePosition(i);
       Eigen::Quaterniond relRot = m_componentInfo->relativeRotation(i);
-
-      makeOrCreateComponentCache(); // TODO. This is not thread safe.
 
       const IComponent *baseComponent = m_componentCache[i]->getBaseComponent();
       if ((relPos - toVector3d(baseComponent->getRelativePos())).norm() >=

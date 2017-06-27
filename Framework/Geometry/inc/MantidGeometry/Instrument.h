@@ -14,7 +14,6 @@
 #include <tuple>
 #include <vector>
 #include <unordered_map>
-#include <atomic>
 
 namespace Mantid {
 /// Typedef of a map from detector ID to detector shared pointer.
@@ -256,7 +255,9 @@ public:
   void
   setDetectorInfo(boost::shared_ptr<const Beamline::DetectorInfo> detectorInfo);
   void setComponentInfo(
-      boost::shared_ptr<const Beamline::ComponentInfo> componentInfo);
+      boost::shared_ptr<const Beamline::ComponentInfo> componentInfo,
+      std::vector<Geometry::ComponentID> componentIds);
+
   void setInfoVisitor(const InfoComponentVisitor &visitor);
 
   const InfoComponentVisitor &infoVisitor() const;
@@ -280,21 +281,12 @@ private:
   void appendPlottable(const CompAssembly &ca,
                        std::vector<IObjComponent_const_sptr> &lst) const;
 
-  /// Make or create a component id vector ordered in a bottom up specific way.
-  void makeOrCreateComponentCache() const;
-
   /// Map which holds detector-IDs and pointers to detector components, and
   /// monitor flags.
   std::vector<std::tuple<detid_t, IDetector_const_sptr, bool>> m_detectorCache;
 
   /// Mappings to obtain component index
   mutable std::vector<Geometry::ComponentID> m_componentCache;
-
-  /// Flag for component cache invalidation
-  mutable std::atomic<bool> m_componentCacheGood;
-
-  /// Mutex protecting component cache
-  mutable std::mutex m_mutex;
 
   /// Purpose to hold copy of source component. For now assumed to be just one
   /// component

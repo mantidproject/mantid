@@ -226,6 +226,10 @@ size_t ComponentInfo::parent(const size_t componentIndex) const {
   }
 }
 
+bool ComponentInfo::hasParent(const size_t componentIndex) const {
+  return parent(componentIndex) != componentIndex;
+}
+
 bool ComponentInfo::hasDetectorInfo() const {
   return m_detectorInfo != nullptr;
 }
