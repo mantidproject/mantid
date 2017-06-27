@@ -10,11 +10,6 @@
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
 
-#include <boost/mpl/if.hpp>
-#include <boost/type_traits.hpp>
-
-#include <sstream>
-
 namespace Mantid {
 namespace Algorithms {
 
