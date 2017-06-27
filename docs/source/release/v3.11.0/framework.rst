@@ -17,6 +17,7 @@ Improved
 - :ref:`SetUncertainties <algm-SetUncertainties-v1>` now provides a "custom" mode, which lets the user specify both an arbitrary error value whose occurences are to be replaced in the input workspace, as well as the value to replace it with.
 - :ref:`LoadBBY <algm-LoadBBY-v1>` is now better at handling sample information. 
 - :ref:`GroupDetectors <algm-GroupDetectors-v2>` now supports workspaces with detector scans.
+- :ref:`FilterEvents <algm-FilterEvents-v1>` has refactored on splitting sample logs.
 
 Deprecated
 ##########
