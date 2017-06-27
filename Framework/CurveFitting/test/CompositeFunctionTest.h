@@ -152,7 +152,7 @@ public:
     auto g = boost::make_shared<CurveFittingGauss>();
     auto g1 = boost::make_shared<CurveFittingGauss>();
     auto g2 = boost::make_shared<CurveFittingGauss>();
-    auto bk =boost::make_shared<CurveFittingLinear>();
+    auto bk = boost::make_shared<CurveFittingLinear>();
     auto c = boost::make_shared<CompositeFunction>();
 
     mfun->addFunction(bk);
