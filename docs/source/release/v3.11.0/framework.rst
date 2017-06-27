@@ -14,7 +14,7 @@ New
 
 Improved
 ########
-
++- :ref:`SumSpectra <algm-SumSpectra-v1>`: Fixed a bug where a wrong fallback value would be used in case of invalid values being set for min/max worspace index, and improved input validation for those properties.
 
 Deprecated
 ##########
