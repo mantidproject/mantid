@@ -262,9 +262,8 @@ makeDetectorInfo(const Instrument &oldInstr, const Instrument &newInstr) {
  * via registerContents.
  * @param newInstrument : unparametrised new instrument
  */
-void ExperimentInfo::makeAPIComponentInfo(
-    const InfoComponentVisitor &visitor,
-    const Instrument &newInstrument) {
+void ExperimentInfo::makeAPIComponentInfo(const InfoComponentVisitor &visitor,
+                                          const Instrument &newInstrument) {
 
   if (newInstrument.hasComponentInfo()) {
     /*

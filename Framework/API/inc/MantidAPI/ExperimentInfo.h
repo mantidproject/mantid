@@ -195,9 +195,8 @@ protected:
   Geometry::Instrument_const_sptr sptr_instrument;
 
 private:
-  void
-  makeAPIComponentInfo(const Geometry::InfoComponentVisitor &visitor,
-                       const Geometry::Instrument &newInstrument);
+  void makeAPIComponentInfo(const Geometry::InfoComponentVisitor &visitor,
+                            const Geometry::Instrument &newInstrument);
 
   boost::shared_ptr<Geometry::Instrument> makeParameterizedInstrument() const;
   /// Fill with given instrument parameter
