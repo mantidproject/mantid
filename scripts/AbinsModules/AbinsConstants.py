@@ -179,6 +179,7 @@ DIGITS_NUM = 5
 S_PLOT_SPACING = 4.0
 ENERGY_PLOT_STEP = 500.0
 Q_PLOT_STEP = 6.0
+S_PLOT_THRESHOLD = 1e-7
 
 # from https://matplotlib.org/examples/images_contours_and_fields/interpolation_methods.html
 ALL_INTERPOLATIONS = [
@@ -197,3 +198,7 @@ ALL_COLORMAPS = [
 
 # from https://matplotlib.org/devdocs/api/_as_gen/matplotlib.pyplot.savefig.html
 ALL_FIG_FORMATS = ["png", "pdf", "ps", "eps", "svg"]
+
+# from https://matplotlib.org/devdocs/api/_as_gen/matplotlib.pyplot.savefig.html
+DPI = 600
+BBOX = "tight"

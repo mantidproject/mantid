@@ -238,36 +238,42 @@ class Abins(PythonAlgorithm):
         """
         Makes nice pictures for 2D map using matplotlib.
         """
-        # default path for saving files
-        path = ConfigService.getString("defaultsave.directory")
-
-        figure_format = AbinsModules.AbinsParameters.figure_format
-
-        # switch on latex
-        plt.rc('font', family='serif')
-        plt.rc('text', usetex=True)
-
-        begin_energy = self._bins[0]
-        end_energy = self._bins[-1]
-        step_energy = AbinsModules.AbinsConstants.ENERGY_PLOT_STEP
-        x_ticks = np.arange(begin_energy, end_energy, step_energy)
-        x_ticks_labels = [str(i).split(".")[0] for i in x_ticks]
-
-        begin_q = 0
-        end_q = AbinsModules.AbinsParameters.q_size
-        step_q = AbinsModules.AbinsParameters.q_size / AbinsModules.AbinsConstants.Q_PLOT_STEP
-        y_ticks = np.arange(begin_q, end_q, step_q)
-        y_ticks_labels = [str(i * (AbinsModules.AbinsConstants.Q_PLOT_STEP - 1)).split(".")[0] for i in range(len(y_ticks))]
-
         if self._instrument.get_name() in AbinsModules.AbinsConstants.TWO_DIMENSIONAL_INSTRUMENTS:
+            # default path for saving
+            path = ConfigService.getString("defaultsave.directory")
+
+            figure_format = AbinsModules.AbinsParameters.figure_format
+
+            # switch on latex
+            plt.rc('font', family='serif')
+            plt.rc('text', usetex=True)
+
+            begin_energy = self._bins[0]
+            end_energy = self._bins[-1]
+            step_energy = AbinsModules.AbinsConstants.ENERGY_PLOT_STEP
+            x_ticks = np.arange(begin_energy, end_energy, step_energy)
+            x_ticks_labels = [str(i).split(".")[0] for i in x_ticks]
+
+            begin_q = 0
+            end_q = AbinsModules.AbinsParameters.q_size
+            step_q = AbinsModules.AbinsParameters.q_size / AbinsModules.AbinsConstants.Q_PLOT_STEP
+            y_ticks = np.arange(begin_q, end_q, step_q)
+            y_ticks_labels = [str(i * (AbinsModules.AbinsConstants.Q_PLOT_STEP - 1)).split(".")[0]
+                              for i in range(len(y_ticks))]
+
+            cmap = plt.get_cmap(AbinsModules.AbinsParameters.colormap)
+            cmap.set_under(color='black')
+            interpolation = AbinsModules.AbinsParameters.interpolation
+
             num_workspaces = mtd[self._out_ws_name].getNumberOfEntries()
             for wrk_num in range(num_workspaces):
 
                 wrk = mtd[self._out_ws_name].getItem(wrk_num)
                 y_val = wrk.extractY()
                 wrk_name = wrk.name()
+                im = plt.imshow(y_val, cmap=cmap, aspect="auto", origin='lower', interpolation=interpolation,
+                                vmin=AbinsModules.AbinsConstants.S_PLOT_THRESHOLD)
 
-                im = plt.imshow(y_val, cmap='hot', aspect="auto", origin='lower', interpolation="lanczos")
                 plt.ylabel(r' \textbf{Momentum transfer ($\AA^{-1}$)}')
                 plt.xlabel(r'\textbf{Energy transfer [cm$^{-1}$]}')
 
@@ -278,16 +284,16 @@ class Abins(PythonAlgorithm):
                 axes.set_yticklabels(y_ticks_labels)
 
                 # colorbar
-                min_s = np.min(y_val)
                 max_s = np.max(y_val)
-                step_s = (max_s - min_s) / AbinsModules.AbinsConstants.S_PLOT_SPACING
-                cbar_val = np.arange(min_s, max_s + step_s, step_s)
-                cbar_sticks = [self._round(number=i) for i in cbar_val]
-                cbar = plt.colorbar(im, ticks=cbar_val)
-                cbar.ax.set_yticklabels(cbar_sticks)
+                min_s = np.min(y_val)
+                cbar_ticks = np.linspace(min_s, max_s, AbinsModules.AbinsConstants.S_PLOT_SPACING)
+                cbar = plt.colorbar(im, ticks=cbar_ticks)
 
-                plt.savefig(os.path.join(path, wrk_name + "." + figure_format), bbox_inches='tight')
+                plt.savefig(os.path.join(path, wrk_name + "." + figure_format),
+                            bbox_inches=AbinsModules.AbinsConstants.BBOX,
+                            dpi=AbinsModules.AbinsConstants.DPI)
                 cbar.remove()
+                del im
 
     def _round(self, number):
         """
