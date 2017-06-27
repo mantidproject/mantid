@@ -77,11 +77,15 @@ class FunctionWrapper:
 class CompositeFunctionWrapper(FunctionWrapper):
 # Wrapper class for Composite Fitting Function
     def __init__ (self, *args):
-        self.fun = FunctionFactory.createFunction("CompositeFunction")
+       if hasattr(args[0],'nFunctions'):
+          # We have a composite function to wrap
+          self.fun = args[0]
+       else:
+          self.fun = FunctionFactory.createFunction("CompositeFunction")
    
-        #Add the functions
-        for a in args:
-           self.fun.add(a.fun)      
+          #Add the functions
+          for a in args:
+             self.fun.add(a.fun)      
       
     def getParameter(self, name):
     # get parameter of specified name
@@ -94,10 +98,14 @@ class CompositeFunctionWrapper(FunctionWrapper):
 
     def __getitem__ (self, nameorindex):
     # get function of specified index or parameter of specified name
-        if( isinstance(self.fun.__getitem__(nameorindex), float)):
-           return  self.fun.__getitem__(nameorindex)
+        item = self.fun.__getitem__(nameorindex)
+        if( isinstance(item, float)):
+           return  item
+        elif( hasattr(item, 'nFunctions')):
+           # item is a CompositeFunction
+           return CompositeFunctionWrapper(item)
         else:           
-           return FunctionWrapper(self.fun.__getitem__(nameorindex))
+           return FunctionWrapper(item)
 
     def __setitem__ (self, name, newValue):
     # set parameter of specified name
@@ -128,6 +136,17 @@ class CompositeFunctionWrapper(FunctionWrapper):
     # Every member function must have a parameter of this name.
        for i in range(0, self.__len__()):
           self[i].fix(name)
+          
+    def constrainAll (self, expressions):
+    # Constrain all parameters according local names in expressions.
+       for i in range(0, self.__len__()):
+          if( isinstance( self[i], CompositeFunctionWrapper )):
+             self[i].constrainAll(expressions)
+          else:
+             try:
+                self[i].constrain(expressions)
+             except:
+                pass
           
     def untieAll (self, name):
     # Untie all parameters with the given local name.
