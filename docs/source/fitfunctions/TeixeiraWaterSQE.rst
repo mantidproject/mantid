@@ -68,7 +68,7 @@ The value of the momentum transfer :math:`Q` is contained in the loaded data
     name=LinearBackground"""
     # Let's fit spectrum with workspace index 5. Appropriate value of Q is picked up
     # automatically from workspace 'data' and passed on to the fit function
-    out,chi2,covariance,params,curves,niter=Fit(Function=function, InputWorkspace=data,
+    out,chi2,covariance,params,curves=Fit(Function=function, InputWorkspace=data,
         WorkspaceIndex=5, CreateOutput=True, Output="fit", MaxIterations=100)
     # Check some results
     drow=params.row(6)
