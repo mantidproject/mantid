@@ -30,8 +30,10 @@ NonOrthogonalTransform::NonOrthogonalTransform(
   auto numberOfDimensions = workspace->getNumDims();
   Mantid::Kernel::DblMatrix skewMatrix(numberOfDimensions, numberOfDimensions,
                                        true);
+  ///@cond
   API::provideSkewMatrix(skewMatrix, workspace);
   API::transformFromDoubleToCoordT(skewMatrix, m_skewMatrix);
+  ///@endcond
   checkDimensionsForHKL(workspace, dimX, dimY);
 }
 void NonOrthogonalTransform::checkDimensionsForHKL(
