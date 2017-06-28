@@ -50,6 +50,10 @@ public:
                           IReflSaveTabPresenter *savePresenter);
   /// Destructor
   ~ReflMainWindowPresenter() override;
+
+  // Tell the presenter something has happened
+  void notify(IReflMainWindowPresenter::Flag flag) override;
+
   /// Returns values passed for 'Transmission run(s)'
   std::string getTransmissionRuns(int group) const override;
   /// Returns global options for 'CreateTransmissionWorkspaceAuto'
@@ -77,11 +81,18 @@ public:
   std::string runPythonAlgorithm(const std::string &pythonCode) override;
   void setInstrumentName(const std::string &instName) const override;
 
+  /// Returns whether the Runs Tab is currently processing any runs
+  bool checkIfProcessing() const override;
+
 private:
   /// Check for Settings Tab null pointer
   void checkSettingsPtrValid(IReflSettingsTabPresenter *pointer) const;
   /// Check for Event Handling Tab null pointer
   void checkEventPtrValid(IReflEventTabPresenter *pointer) const;
+  /// Pauses reduction in the Runs Tab
+  void pauseReduction() const;
+  /// Resumes reduction in the Runs Tab
+  void resumeReduction() const;
   /// The view we are handling
   IReflMainWindowView *m_view;
   /// The presenter of tab 'Runs'
@@ -92,6 +103,8 @@ private:
   IReflSettingsTabPresenter *m_settingsPresenter;
   /// The presenter of tab 'Save ASCII'
   IReflSaveTabPresenter *m_savePresenter;
+  /// State boolean on whether runs are currently being processed or not
+  mutable bool m_isProcessing;
 };
 }
 }

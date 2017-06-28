@@ -2,20 +2,16 @@
 #define MANTID_KERNEL_IPROPERTYMANAGER_H_
 
 #include "MantidKernel/PropertyWithValue.h"
-#include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/make_unique.h"
 #include "MantidKernel/DllConfig.h"
 #include "MantidKernel/IValidator.h"
 #include "MantidKernel/NullValidator.h"
-#include "MantidKernel/Property.h"
-#include "MantidKernel/System.h"
 
 #ifndef Q_MOC_RUN
 #include <boost/make_shared.hpp>
-#include <boost/type_traits.hpp>
+#include <type_traits>
 #endif
 
-#include <cstdint>
 #include <memory>
 #include <stdexcept>
 #include <string>
@@ -33,6 +29,8 @@ namespace Kernel {
 class DataItem;
 class DateAndTime;
 class IPropertySettings;
+class OptionalBool;
+class Property;
 class PropertyManager;
 class SplittingInterval;
 template <typename T> class TimeSeriesProperty;
@@ -163,9 +161,9 @@ public:
   template <typename T>
   IPropertyManager *setProperty(const std::string &name,
                                 std::unique_ptr<T> value) {
-    setTypedProperty(name, std::move(value),
-                     boost::is_convertible<std::unique_ptr<T>,
-                                           boost::shared_ptr<DataItem>>());
+    setTypedProperty(
+        name, std::move(value),
+        std::is_convertible<std::unique_ptr<T>, boost::shared_ptr<DataItem>>());
     this->afterPropertySet(name);
     return this;
   }
@@ -241,7 +239,7 @@ protected:
   template <typename T>
   void declareProperty(
       const std::string &name, T value,
-      IValidator_sptr validator = IValidator_sptr(new NullValidator),
+      IValidator_sptr validator = boost::make_shared<NullValidator>(),
       const std::string &doc = "",
       const unsigned int direction = Direction::Input) {
     std::unique_ptr<PropertyWithValue<T>> p =
@@ -455,7 +453,7 @@ private:
   template <typename T>
   IPropertyManager *doSetProperty(const std::string &name, const T &value) {
     setTypedProperty(name, value,
-                     boost::is_convertible<T, boost::shared_ptr<DataItem>>());
+                     std::is_convertible<T, boost::shared_ptr<DataItem>>());
     this->afterPropertySet(name);
     return this;
   }
@@ -479,7 +477,7 @@ private:
     // wrong badly. To circumvent this we call `sizeof` here to force a compiler
     // error if T is an incomplete type.
     static_cast<void>(sizeof(T)); // DO NOT REMOVE, enforces complete type
-    setTypedProperty(name, value, boost::is_convertible<T *, DataItem *>());
+    setTypedProperty(name, value, std::is_convertible<T *, DataItem *>());
     this->afterPropertySet(name);
     return this;
   }
@@ -494,7 +492,7 @@ private:
    */
   template <typename T>
   IPropertyManager *setTypedProperty(const std::string &name, const T &value,
-                                     const boost::false_type &) {
+                                     const std::false_type &) {
     PropertyWithValue<T> *prop =
         dynamic_cast<PropertyWithValue<T> *>(getPointerToProperty(name));
     if (prop) {
@@ -515,7 +513,7 @@ private:
    */
   template <typename T>
   IPropertyManager *setTypedProperty(const std::string &name, const T &value,
-                                     const boost::true_type &) {
+                                     const std::true_type &) {
     // T is convertible to DataItem_sptr
     boost::shared_ptr<DataItem> data =
         boost::static_pointer_cast<DataItem>(value);
@@ -538,7 +536,7 @@ private:
   template <typename T>
   IPropertyManager *setTypedProperty(const std::string &name,
                                      std::unique_ptr<T> value,
-                                     const boost::true_type &) {
+                                     const std::true_type &) {
     // T is convertible to DataItem_sptr
     boost::shared_ptr<DataItem> data(std::move(value));
     std::string error = getPointerToProperty(name)->setDataItem(data);

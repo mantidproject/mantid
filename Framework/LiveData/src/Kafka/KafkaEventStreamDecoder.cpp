@@ -6,6 +6,7 @@
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/Logger.h"
+#include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/WarningSuppressions.h"
@@ -118,7 +119,8 @@ KafkaEventStreamDecoder::KafkaEventStreamDecoder(
     : m_broker(broker), m_eventTopic(eventTopic), m_runInfoTopic(runInfoTopic),
       m_spDetTopic(spDetTopic), m_interrupt(false), m_localEvents(),
       m_specToIdx(), m_runStart(), m_runNumber(-1), m_thread(),
-      m_capturing(false), m_exception(), m_extractWaiting(false) {}
+      m_capturing(false), m_exception(), m_extractWaiting(false),
+      m_cbIterationEnd([] {}), m_cbError([] {}) {}
 
 /**
  * Destructor.
@@ -154,7 +156,7 @@ void KafkaEventStreamDecoder::startCapture(bool startNow) {
   m_runStream = m_broker->subscribe(m_runInfoTopic);
   m_spDetStream = m_broker->subscribe(m_spDetTopic);
 
-  auto m_thread = std::thread([this]() { this->captureImpl(); });
+  m_thread = std::thread([this]() { this->captureImpl(); });
   m_thread.detach();
 }
 
@@ -257,8 +259,10 @@ void KafkaEventStreamDecoder::captureImpl() noexcept {
   try {
     captureImplExcept();
   } catch (std::exception &exc) {
+    m_cbError();
     m_exception = boost::make_shared<std::runtime_error>(exc.what());
   } catch (...) {
+    m_cbError();
     m_exception = boost::make_shared<std::runtime_error>(
         "KafkaEventStreamDecoder: Unknown exception type caught.");
   }
@@ -281,8 +285,10 @@ void KafkaEventStreamDecoder::captureImplExcept() {
     // Pull in events
     m_eventStream->consumeMessage(&buffer);
     // No events, wait for some to come along...
-    if (buffer.empty())
+    if (buffer.empty()) {
+      m_cbIterationEnd();
       continue;
+    }
     auto evtMsg = ISISStream::GetEventMessage(
         reinterpret_cast<const uint8_t *>(buffer.c_str()));
     if (evtMsg->message_type() == ISISStream::MessageTypes_FramePart) {
@@ -323,7 +329,7 @@ void KafkaEventStreamDecoder::captureImplExcept() {
         // "Stop" or "Rename" run transition option.
         m_extractWaiting = true;
         m_extractedEndRunData = false;
-        g_log.debug() << "Reached end of run in data stream." << std::endl;
+        g_log.debug("Reached end of run in data stream.");
       }
     }
 
@@ -348,6 +354,7 @@ void KafkaEventStreamDecoder::captureImplExcept() {
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
       }
     }
+    m_cbIterationEnd();
   }
   g_log.debug("Event capture finished");
 }

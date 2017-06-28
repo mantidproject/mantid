@@ -49,8 +49,8 @@ namespace Algorithms {
 class DLLExport UnwrapSNS : public API::Algorithm {
 public:
   UnwrapSNS();
-  ~UnwrapSNS() override;
-  const std::string name() const override;
+  ~UnwrapSNS() override {}
+  const std::string name() const override { return "UnwrapSNS"; }
   /// Summary of algorithms purpose
   const std::string summary() const override {
     return "Takes an input workspace that contains 'raw' data, unwraps the "
@@ -59,8 +59,10 @@ public:
            "bins in the maximum theoretical wavelength range.";
   }
 
-  int version() const override;
-  const std::string category() const override;
+  int version() const override { return 1; }
+  const std::string category() const override {
+    return "CorrectionFunctions\\InstrumentCorrections";
+  }
 
 private:
   void init() override;
@@ -83,7 +85,7 @@ private:
   int m_numberOfSpectra; ///< The number of spectra in the workspace
   int m_XSize;           ///< The size of the X vectors in the input workspace
   /// Progress reporting
-  API::Progress *m_progress;
+  std::unique_ptr<API::Progress> m_progress;
 };
 
 } // namespace Algorithm

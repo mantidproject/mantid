@@ -1,5 +1,6 @@
 #include "MantidKernel/IPropertyManager.h"
 #include "MantidKernel/IPropertySettings.h"
+#include "MantidKernel/OptionalBool.h"
 
 ///@cond
 DEFINE_IPROPERTYMANAGER_GETVALUE(int16_t)

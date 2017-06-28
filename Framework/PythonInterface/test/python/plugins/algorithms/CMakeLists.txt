@@ -33,7 +33,7 @@ set ( TEST_PY_FILES
   EnggFitPeaksTest.py
   EnggFocusTest.py
   EnggVanadiumCorrectionsTest.py
-  ExportSpectraMaskTest.py   
+  ExportSpectraMaskTest.py
   FilterLogByTimeTest.py
   FindEPPTest.py
   FindReflectometryLinesTest.py
@@ -100,4 +100,4 @@ set ( TEST_PY_FILES
 check_tests_valid ( ${CMAKE_CURRENT_SOURCE_DIR} ${TEST_PY_FILES} )
 
 # Prefix for test name=PythonAlgorithms
-pyunittest_add_test ( ${CMAKE_CURRENT_SOURCE_DIR} PythonAlgorithms ${TEST_PY_FILES} )
+pyunittest_add_test ( ${CMAKE_CURRENT_SOURCE_DIR} python.algorithms ${TEST_PY_FILES} )
