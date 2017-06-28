@@ -1537,8 +1537,11 @@ FunctionBrowser::getParameterProperty(const QString &funcIndex,
       }
     }
   }
-  throw std::runtime_error("Unknown function parameter " +
-                           (funcIndex + paramName).toStdString());
+  std::string message = "Unknown function parameter " +
+                        (funcIndex + paramName).toStdString() +
+                        "\n\n This may happen if there is a CompositeFunction "
+                        "containing only one function.";
+  throw std::runtime_error(message);
 }
 
 /**
