@@ -165,4 +165,22 @@ class CompositeFunctionWrapper(FunctionWrapper):
        for i in range(0, self.__len__()):
           self[i].untie(name)
         
-      
+def _create_wrapper_function(name):
+    """Create fake functions for the given name
+    """
+    # ------------------------------------------------------------------------------------------------
+    def wrapper_function(*args, **kwargs):
+        if( name == "CompositeFunction"):
+           pass
+        else:
+           return FunctionWrapper(name, *args, **kwargs)
+
+    # ------------------------------------------------------------------------------------------------
+    wrapper_function.__name__ = name
+    # _replace_signature(fake_function, ("", ""))
+    globals()[name] = wrapper_function
+
+fnames = FunctionFactory.getFunctionNames()
+for i, val in enumerate(fnames):    
+   _create_wrapper_function(val)
+
