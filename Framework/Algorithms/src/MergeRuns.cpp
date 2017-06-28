@@ -152,29 +152,7 @@ void MergeRuns::exec() {
                          "not recommended unless the detectors have the same "
                          "positions, rotations etc. for each time index.\n";
     } else if (isScanning && appendDetectorScans) {
-      auto numOutputSpectra = (*it)->getNumberHistograms();
-      auto outputSpectraDefs = std::vector<Mantid::SpectrumDefinition>(0);
-      const auto &firstWorkspaceSpectrumDefs =
-          *((*it)->indexInfo().spectrumDefinitions());
-
-      for (auto &spectrumDefinition : firstWorkspaceSpectrumDefs) {
-        outputSpectraDefs.push_back(spectrumDefinition);
-      }
-
-      for (++it; it != m_inMatrixWS.end(); ++it) {
-        numOutputSpectra += (*it)->getNumberHistograms();
-        const auto &newSpectraDefs =
-            *((*it)->indexInfo().spectrumDefinitions());
-        for (auto &spectrumDefinition : newSpectraDefs)
-          outputSpectraDefs.push_back(spectrumDefinition);
-      }
-
-      outWS = DataObjects::create<MatrixWorkspace>(*outWS, numOutputSpectra,
-                                                   outWS->histogram(0));
-
-      auto newIndexInfo = Indexing::IndexInfo(numOutputSpectra);
-      newIndexInfo.setSpectrumDefinitions(std::move(outputSpectraDefs));
-      outWS->setIndexInfo(newIndexInfo);
+      outWS = buildScanningOutputWorkspace();
     }
 
     m_progress = Kernel::make_unique<Progress>(this, 0.0, 1.0, numberOfWSs - 1);
@@ -212,12 +190,10 @@ void MergeRuns::exec() {
       try {
         sampleLogsBehaviour.mergeSampleLogs(**it, *outWS);
         sampleLogsBehaviour.removeSampleLogsFromWorkspace(*addee);
-        if (isScanning && appendDetectorScans) {
-          auto &mergeDetectorInfo = (*it)->mutableDetectorInfo();
-          outWS->mutableDetectorInfo().merge(mergeDetectorInfo);
-        } else {
+        if (isScanning && appendDetectorScans)
+          outWS->mutableDetectorInfo().merge((*it)->mutableDetectorInfo());
+        else
           outWS = outWS + addee;
-        }
         sampleLogsBehaviour.setUpdatedSampleLogs(*outWS);
         sampleLogsBehaviour.readdSampleLogToWorkspace(*addee);
       } catch (std::invalid_argument &e) {
@@ -237,6 +213,36 @@ void MergeRuns::exec() {
     // Set the final workspace to the output property
     setProperty("OutputWorkspace", outWS);
   }
+}
+
+MatrixWorkspace_sptr MergeRuns::buildScanningOutputWorkspace() {
+  auto it = m_inMatrixWS.begin();
+
+  auto numOutputSpectra = (*it)->getNumberHistograms();
+  auto outputSpectraDefs = std::vector<Mantid::SpectrumDefinition>(0);
+  const auto &firstWorkspaceSpectrumDefs =
+      *((*it)->indexInfo().spectrumDefinitions());
+
+  for (auto &spectrumDefinition : firstWorkspaceSpectrumDefs) {
+    outputSpectraDefs.push_back(spectrumDefinition);
+  }
+
+  for (++it; it != m_inMatrixWS.end(); ++it) {
+    numOutputSpectra += (*it)->getNumberHistograms();
+    const auto &newSpectraDefs = *((*it)->indexInfo().spectrumDefinitions());
+    for (auto &spectrumDefinition : newSpectraDefs)
+      outputSpectraDefs.push_back(spectrumDefinition);
+  }
+
+  auto initialWS = *(m_inMatrixWS.begin());
+  MatrixWorkspace_sptr newOutWS = DataObjects::create<MatrixWorkspace>(
+      *initialWS, numOutputSpectra, initialWS->histogram(0));
+
+  auto newIndexInfo = Indexing::IndexInfo(numOutputSpectra);
+  newIndexInfo.setSpectrumDefinitions(std::move(outputSpectraDefs));
+  newOutWS->setIndexInfo(newIndexInfo);
+
+  return newOutWS;
 }
 
 /** Build up addition tables for merging eventlists together.
