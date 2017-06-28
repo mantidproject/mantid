@@ -1,6 +1,6 @@
 include(ExternalProject)
 
-set(eigen_version "3.3.3")
+set(eigen_version "3.3.4")
 
 option(USE_SYSTEM_EIGEN "Use the system installed Eigen - v${eigen_version}?" OFF)
 
