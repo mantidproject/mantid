@@ -10,20 +10,14 @@ if ( CXXTEST_FOUND )
                         ../../TestHelpers/src/InstrumentCreationHelper.cpp
                         ../../TestHelpers/src/NexusTestHelper.cpp
                         ../../TestHelpers/src/FakeObjects.cpp
+                        ../../TestHelpers/src/ParallelRunner.cpp
       )
   cxxtest_add_test ( APITest ${TEST_FILES} ${GMOCK_TEST_FILES})
-  target_link_libraries( APITest LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME}
+  target_link_libraries( APITest LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} ${MANTIDLIBS}
             API
-            Geometry
-            HistogramData
-            Indexing
-            Beamline
-            Kernel
             Nexus
             ${JSONCPP_LIBRARIES}
             ${NEXUS_LIBRARIES}
-            ${Boost_LIBRARIES}
-            ${POCO_LIBRARIES}
             ${MUPARSER_LIBRARIES}
             ${GMOCK_LIBRARIES}
             ${GTEST_LIBRARIES} )

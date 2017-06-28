@@ -5,9 +5,10 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/RegisterFileLoader.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidHistogramData/LinearGenerator.h"
-#include "MantidKernel/UnitFactory.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidHistogramData/LinearGenerator.h"
+#include "MantidKernel/OptionalBool.h"
+#include "MantidKernel/UnitFactory.h"
 
 #include <boost/algorithm/string.hpp>
 
@@ -248,8 +249,8 @@ void LoadILLIndirect::loadDataIntoTheWorkSpace(
   size_t nb_monitors = monitorsData.size();
   size_t nb_SD_detectors = dataSD.dim0();
 
-  Progress progress(this, 0, 1, m_numberOfTubes * m_numberOfPixelsPerTube +
-                                    nb_monitors + nb_SD_detectors);
+  Progress progress(this, 0.0, 1.0, m_numberOfTubes * m_numberOfPixelsPerTube +
+                                        nb_monitors + nb_SD_detectors);
 
   // Assign fake values to first X axis
   const HistogramData::BinEdges histoBinEdges(

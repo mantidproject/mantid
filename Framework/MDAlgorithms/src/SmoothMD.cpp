@@ -188,7 +188,7 @@ SmoothMD::hatSmooth(IMDHistoWorkspace_const_sptr toSmooth,
 
   const bool useWeights = weightingWS.is_initialized();
   uint64_t nPoints = toSmooth->getNPoints();
-  Progress progress(this, 0, 1, size_t(double(nPoints) * 1.1));
+  Progress progress(this, 0.0, 1.0, size_t(double(nPoints) * 1.1));
   // Create the output workspace.
   IMDHistoWorkspace_sptr outWS(toSmooth->clone());
   progress.reportIncrement(
@@ -291,7 +291,7 @@ SmoothMD::gaussianSmooth(IMDHistoWorkspace_const_sptr toSmooth,
 
   const bool useWeights = weightingWS.is_initialized();
   uint64_t nPoints = toSmooth->getNPoints();
-  Progress progress(this, 0, 1, size_t(double(nPoints) * 1.1));
+  Progress progress(this, 0.0, 1.0, size_t(double(nPoints) * 1.1));
   // Create the output workspace
   IMDHistoWorkspace_sptr outWS(toSmooth->clone().release());
   // Create a temporary workspace

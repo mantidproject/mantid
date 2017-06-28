@@ -95,7 +95,6 @@ INPUT = @CMAKE_CURRENT_SOURCE_DIR@/../Algorithms/inc \
         @CMAKE_CURRENT_SOURCE_DIR@/../ICat/src \
         @CMAKE_CURRENT_SOURCE_DIR@/../Kernel/inc \
         @CMAKE_CURRENT_SOURCE_DIR@/../Kernel/src \
-        @CMAKE_CURRENT_SOURCE_DIR@/../MatlabAPI/src \
         @CMAKE_CURRENT_SOURCE_DIR@/../MDAlgorithms/inc \
         @CMAKE_CURRENT_SOURCE_DIR@/../MDAlgorithms/src \
         @CMAKE_CURRENT_SOURCE_DIR@/../Nexus/inc \

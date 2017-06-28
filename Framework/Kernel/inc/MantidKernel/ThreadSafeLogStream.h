@@ -6,13 +6,19 @@
 //--------------------------------------------
 #include "MantidKernel/DllConfig.h"
 
-#include <Poco/Logger.h>
 #include <Poco/LogStream.h>
+#include <Poco/Message.h>
 #include <Poco/Thread.h>
-#include <Poco/UnbufferedStreamBuf.h>
 
-#include <istream>
+#include <map>
+#include <string>
+#include <iosfwd>
 #include <mutex>
+
+// Forward Declare
+namespace Poco {
+class Logger;
+}
 
 namespace Mantid {
 namespace Kernel {

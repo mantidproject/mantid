@@ -115,7 +115,7 @@ class ConvertToWavelengthTest(unittest.TestCase):
     def cropped_x_range(cls, ws, index):
         det_ws_x = ws.readX(index)
         mask = ws.readY(index) != 0 # CropWorkspace will only zero out y values! so we need to translate those to an x range
-        cropped_x = det_ws_x[mask]
+        cropped_x = det_ws_x[:-1][mask]
         return cropped_x[0], cropped_x[-1]
 
     def test_convert(self):

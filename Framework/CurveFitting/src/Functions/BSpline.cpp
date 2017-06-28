@@ -7,7 +7,6 @@
 #include "MantidAPI/FunctionFactory.h"
 
 #include <boost/lexical_cast.hpp>
-#include <gsl/gsl_version.h>
 
 namespace Mantid {
 namespace CurveFitting {
@@ -26,18 +25,20 @@ namespace {
 struct ReleaseBSplineWorkspace {
   void operator()(gsl_bspline_workspace *ws) { gsl_bspline_free(ws); }
 };
+#if GSL_MAJOR_VERSION < 2
 // shared pointer deleter for bspline derivative workspace
 struct ReleaseBSplineDerivativeWorkspace {
   void operator()(gsl_bspline_deriv_workspace *ws) {
     gsl_bspline_deriv_free(ws);
   }
 };
+#endif
 }
 
 /**
  * Constructor
  */
-BSpline::BSpline() : m_bsplineWorkspace(), m_bsplineDerivWorkspace() {
+BSpline::BSpline() {
   const size_t nbreak = 10;
   declareAttribute("Uniform", Attribute(true));
   declareAttribute("Order", Attribute(3));
@@ -180,7 +181,9 @@ void BSpline::resetGSLObjects() {
                                                 static_cast<size_t>(nbreak));
   m_bsplineWorkspace =
       boost::shared_ptr<gsl_bspline_workspace>(ws, ReleaseBSplineWorkspace());
+#if GSL_MAJOR_VERSION < 2
   m_bsplineDerivWorkspace.reset();
+#endif
 }
 
 /**

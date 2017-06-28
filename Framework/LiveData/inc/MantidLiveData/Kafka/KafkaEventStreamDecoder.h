@@ -44,6 +44,9 @@ namespace LiveData {
 */
 class DLLExport KafkaEventStreamDecoder {
 public:
+  using CallbackFn = std::function<void()>;
+
+public:
   KafkaEventStreamDecoder(std::shared_ptr<IKafkaBroker> broker,
                           const std::string &eventTopic,
                           const std::string &runInfoTopic,
@@ -65,6 +68,14 @@ public:
   bool hasData() const noexcept;
   int runNumber() const noexcept { return m_runNumber; }
   bool hasReachedEndOfRun() noexcept;
+  ///@}
+
+  ///@name Callbacks
+  ///@{
+  void registerIterationEndCb(CallbackFn cb) {
+    m_cbIterationEnd = std::move(cb);
+  }
+  void registerErrorCb(CallbackFn cb) { m_cbError = std::move(cb); }
   ///@}
 
   ///@name Modifying
@@ -135,6 +146,10 @@ private:
   /// EndRun
   bool m_runStatusSeen;
   std::atomic<bool> m_extractedEndRunData;
+
+  // Callbacks
+  CallbackFn m_cbIterationEnd;
+  CallbackFn m_cbError;
 };
 
 } // namespace LiveData

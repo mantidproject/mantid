@@ -362,8 +362,16 @@ void GenerateEventsFilter::setFilterByTimeOnly() {
   vector<double> vec_timeintervals = this->getProperty("TimeInterval");
 
   bool singleslot = false;
-  if (vec_timeintervals.empty())
+  if (vec_timeintervals.empty()) {
     singleslot = true;
+  } else {
+    // Check that there is at least one non-zero time value/interval
+    if (std::all_of(vec_timeintervals.begin(), vec_timeintervals.end(),
+                    [](double i) { return i == 0; }))
+      throw std::invalid_argument(
+          "If TimeInterval has one or more values, at "
+          "least one of those values must be non-zero.");
+  }
 
   // Progress
   int64_t totaltime =

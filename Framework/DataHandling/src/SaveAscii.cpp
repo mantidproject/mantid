@@ -197,7 +197,7 @@ void SaveAscii::exec() {
   if (prec != EMPTY_INT())
     file.precision(prec);
 
-  Progress progress(this, 0, 1, nBins);
+  Progress progress(this, 0.0, 1.0, nBins);
   auto pointDeltas = ws->pointStandardDeviations(0);
   auto points = ws->points(0);
   for (int bin = 0; bin < nBins; bin++) {

@@ -1,7 +1,3 @@
-#include <ostream>
-#include <sstream>
-
-#include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/RemoteJobManager.h"
 
@@ -13,6 +9,8 @@
 #include <Poco/Net/HTTPSClientSession.h>
 #include <Poco/Net/HTTPRequest.h>
 #include <Poco/URI.h>
+
+#include <sstream>
 
 namespace Mantid {
 namespace Kernel {
