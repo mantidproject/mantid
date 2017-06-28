@@ -8,7 +8,7 @@ setlocal enableextensions enabledelayedexpansion
 :: BUILD_THREADS & PARAVIEW_DIR should be set in the configuration of each slave.
 :: CMake, git & git-lfs should be on the PATH
 ::
-:: All nodes currently have PARAVIEW_DIR=5.3.0 and PARAVIEW_NEXT_DIR=5.3.0-RC1
+:: All nodes currently have PARAVIEW_DIR=5.3.0 and PARAVIEW_NEXT_DIR=5.4.0
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 call cmake.exe --version
 echo %sha1%
