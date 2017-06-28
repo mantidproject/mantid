@@ -41,10 +41,9 @@ class SimpleAPIFitTest(unittest.TestCase):
         if  platform.system() == 'Darwin': # crashes
             return
         retvals = Fit("name=FlatBackground", self._raw_ws)
-        self.assertEquals(len(retvals), 3)
+        self.assertEquals(len(retvals), 2)
         self.assertTrue(isinstance(retvals[0], str))
         self.assertTrue(isinstance(retvals[1], float))
-        self.assertTrue(isinstance(retvals[2], int))
 
     def test_function_accepts_all_arguments_as_keywords(self):
         if  platform.system() == 'Darwin': # crashes
@@ -78,13 +77,12 @@ class SimpleAPIFitTest(unittest.TestCase):
         self.assertTrue(output_name + '_Workspace' in mtd)
 
     def _check_returns_are_correct_type_with_workspaces(self, retvals):
-        self.assertEquals(len(retvals), 6)
+        self.assertEquals(len(retvals), 5)
         self.assertTrue(isinstance(retvals[0], str))
         self.assertTrue(isinstance(retvals[1], float))
         self.assertTrue(isinstance(retvals[2], ITableWorkspace))
         self.assertTrue(isinstance(retvals[3], ITableWorkspace))
         self.assertTrue(isinstance(retvals[4], MatrixWorkspace))
-        self.assertTrue(isinstance(retvals[5], int))
 
 
     def test_that_dialog_call_raises_runtime_error(self):

@@ -51,8 +51,6 @@ public:
       fit.execute();
       std::string status = fit.getProperty("OutputStatus");
       TS_ASSERT_EQUALS(status, "cannot reach the specified tolerance in F");
-      int nIters = fit.getProperty("OutputNIterations");
-      TS_ASSERT_EQUALS(nIters, 2);
     }
     {
       Fit fit;
@@ -64,8 +62,6 @@ public:
       fit.execute();
       std::string status = fit.getProperty("OutputStatus");
       TS_ASSERT_EQUALS(status, "Function doesn\'t depend on parameter b");
-      int nIters = fit.getProperty("OutputNIterations");
-      TS_ASSERT_EQUALS(nIters, 1);
     }
     {
       Fit fit;
@@ -77,8 +73,6 @@ public:
       fit.execute();
       std::string status = fit.getProperty("OutputStatus");
       TS_ASSERT_EQUALS(status, "Failed to converge after 10 iterations.");
-      int nIters = fit.getProperty("OutputNIterations");
-      TS_ASSERT_EQUALS(nIters, 10);
     }
     {
       Fit fit;
@@ -90,8 +84,6 @@ public:
       fit.execute();
       std::string status = fit.getProperty("OutputStatus");
       TS_ASSERT_EQUALS(status, "success");
-      int nIters = fit.getProperty("OutputNIterations");
-      TS_ASSERT_EQUALS(nIters, 1);
     }
     {
       Fit fit;
@@ -103,8 +95,6 @@ public:
       fit.execute();
       std::string status = fit.getProperty("OutputStatus");
       TS_ASSERT_EQUALS(status, "success");
-      int nIters = fit.getProperty("OutputNIterations");
-      TS_ASSERT_EQUALS(nIters, 1);
     }
     {
       Fit fit;
@@ -116,8 +106,6 @@ public:
       fit.execute();
       std::string status = fit.getProperty("OutputStatus");
       TS_ASSERT_EQUALS(status, "success");
-      int nIters = fit.getProperty("OutputNIterations");
-      TS_ASSERT_EQUALS(nIters, 5);
     }
     {
       Fit fit;
@@ -129,8 +117,6 @@ public:
       fit.execute();
       std::string status = fit.getProperty("OutputStatus");
       TS_ASSERT_EQUALS(status, "success");
-      int nIters = fit.getProperty("OutputNIterations");
-      TS_ASSERT_EQUALS(nIters, 5);
     }
     {
       Fit fit;
@@ -142,8 +128,6 @@ public:
       fit.execute();
       std::string status = fit.getProperty("OutputStatus");
       TS_ASSERT_EQUALS(status, "Failed to converge after 10 iterations.");
-      int nIters = fit.getProperty("OutputNIterations");
-      TS_ASSERT_EQUALS(nIters, 10);
     }
     {
       Fit fit;
@@ -155,8 +139,6 @@ public:
       fit.execute();
       std::string status = fit.getProperty("OutputStatus");
       TS_ASSERT_EQUALS(status, "Function doesn\'t depend on parameter b");
-      int nIters = fit.getProperty("OutputNIterations");
-      TS_ASSERT_EQUALS(nIters, 1);
     }
     {
       Fit fit;
@@ -168,8 +150,6 @@ public:
       fit.execute();
       std::string status = fit.getProperty("OutputStatus");
       TS_ASSERT_EQUALS(status, "success");
-      int nIters = fit.getProperty("OutputNIterations");
-      TS_ASSERT_EQUALS(nIters, 2);
     }
   }
 
@@ -192,8 +172,6 @@ public:
       fit.execute();
       std::string status = fit.getProperty("OutputStatus");
       TS_ASSERT_EQUALS(status, "Failed to converge, maximum mu reached.");
-      int nIters = fit.getProperty("OutputNIterations");
-      TS_ASSERT_EQUALS(nIters, 72);
     }
   }
 
@@ -260,8 +238,6 @@ public:
       fit.execute();
       std::string status = fit.getProperty("OutputStatus");
       TS_ASSERT_EQUALS(status, "Failed to converge after 500 iterations.");
-      int nIters = fit.getProperty("OutputNIterations");
-      TS_ASSERT_EQUALS(nIters, 500);
     }
   }
 
@@ -282,8 +258,6 @@ public:
       fit.execute();
       std::string status = fit.getProperty("OutputStatus");
       TS_ASSERT_EQUALS(status, "Encountered an infinite number or NaN.");
-      int nIters = fit.getProperty("OutputNIterations");
-      TS_ASSERT_EQUALS(nIters, 3);
     }
   }
 

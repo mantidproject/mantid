@@ -302,39 +302,6 @@ def fitting_algorithm(f):
     When applied to a function definition this decorator replaces its code with code of
     function 'wrapper' defined below.
     """
-    def gather_fitting_returns(function_name, lhs, algm):
-        """
-        Custom returns gatherer for Fit that puts the outputs in the right order
-        that doesn't break old user scripts.
-        """
-        def move_value(asdict, retvals, key):
-            """
-            Move a key/value pair from asdict to retvals
-            """
-            if key in asdict:
-                retvals[key] = asdict[key]
-                del asdict[key]
-
-        returns = _gather_returns(function_name, lhs, algm)
-        if function_name != 'Fit':
-            return returns
-        # Do the ordering only for Fit
-        asdict = returns._asdict()
-        outputNIterations = asdict['OutputNIterations']
-        del asdict['OutputNIterations']
-        retvals = OrderedDict()
-        # Move these returns in this order
-        move_value(asdict, retvals, 'OutputStatus')
-        move_value(asdict, retvals, 'OutputChi2overDoF')
-        move_value(asdict, retvals, 'OutputNormalisedCovarianceMatrix')
-        move_value(asdict, retvals, 'OutputParameters')
-        move_value(asdict, retvals, 'OutputWorkspace')
-        retvals.update(asdict)
-        # The new property goes last
-        retvals['OutputNIterations'] = outputNIterations
-        ret_type = namedtuple("Fit_returns", retvals.keys())
-        return ret_type(**retvals)
-
     def wrapper(*args, **kwargs):
         function, input_workspace = _get_mandatory_args(function_name, ["Function", "InputWorkspace"], *args, **kwargs)
         # Remove from keywords so it is not set twice
@@ -375,7 +342,7 @@ def fitting_algorithm(f):
         set_properties(algm, **kwargs)
         algm.execute()
 
-        return gather_fitting_returns(function_name, lhs, algm)
+        return _gather_returns(function_name, lhs, algm)
     # end
     function_name = f.__name__
     signature = ("\bFunction, InputWorkspace", "**kwargs")
