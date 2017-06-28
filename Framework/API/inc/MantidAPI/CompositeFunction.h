@@ -66,8 +66,6 @@ public:
 
   /// Returns the function's name
   std::string name() const override { return "CompositeFunction"; }
-  /// Writes itself into a string
-  std::string asString() const override;
   /// Sets the workspace for each member function
   void setWorkspace(boost::shared_ptr<const Workspace> ws) override;
   /// Set matrix workspace
@@ -220,6 +218,9 @@ protected:
   void setParameterStatus(size_t i, ParameterStatus status) override;
   /// Get status of parameter
   ParameterStatus getParameterStatus(size_t i) const override;
+  /// Writes itself into a string
+  std::string writeToString(
+      const std::string &parentLocalAttributesStr = "") const override;
 
   size_t paramOffset(size_t i) const { return m_paramOffsets[i]; }
 

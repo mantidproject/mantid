@@ -18,6 +18,7 @@
 #include "MantidKernel/make_unique.h"
 #include "MantidIndexing/IndexInfo.h"
 #include "MantidIndexing/GlobalSpectrumIndex.h"
+#include "MantidParallel/Communicator.h"
 #include "MantidTypes/SpectrumDefinition.h"
 
 #include <cmath>
@@ -45,10 +46,10 @@ const std::string MatrixWorkspace::xDimensionId = "xDimension";
 const std::string MatrixWorkspace::yDimensionId = "yDimension";
 
 /// Default constructor
-MatrixWorkspace::MatrixWorkspace()
-    : IMDWorkspace(), ExperimentInfo(), m_axes(), m_isInitialized(false),
-      m_YUnit(), m_YUnitLabel(), m_isCommonBinsFlagSet(false),
-      m_isCommonBinsFlag(false), m_masks() {}
+MatrixWorkspace::MatrixWorkspace(const Parallel::StorageMode storageMode)
+    : IMDWorkspace(storageMode), ExperimentInfo(), m_axes(),
+      m_isInitialized(false), m_YUnit(), m_YUnitLabel(),
+      m_isCommonBinsFlagSet(false), m_isCommonBinsFlag(false), m_masks() {}
 
 MatrixWorkspace::MatrixWorkspace(const MatrixWorkspace &other)
     : IMDWorkspace(other), ExperimentInfo(other) {
@@ -106,6 +107,11 @@ const Indexing::IndexInfo &MatrixWorkspace::indexInfo() const {
  *
  * Used for setting spectrum number and detector ID information of spectra */
 void MatrixWorkspace::setIndexInfo(const Indexing::IndexInfo &indexInfo) {
+  if (m_isInitialized && (indexInfo.storageMode() != storageMode()))
+    throw std::invalid_argument("MatrixWorkspace::setIndexInfo: "
+                                "Parallel::StorageMode in IndexInfo does not "
+                                "match storage mode in workspace");
+
   // Comparing the *local* size of the indexInfo.
   if (indexInfo.size() != getNumberHistograms())
     throw std::invalid_argument("MatrixWorkspace::setIndexInfo: IndexInfo size "
@@ -116,6 +122,7 @@ void MatrixWorkspace::setIndexInfo(const Indexing::IndexInfo &indexInfo) {
     getSpectrum(i)
         .setSpectrumNo(static_cast<specnum_t>(indexInfo.spectrumNumber(i)));
   }
+  setStorageMode(indexInfo.storageMode());
   *m_indexInfo = indexInfo;
   m_indexInfoNeedsUpdate = false;
   if (!m_indexInfo->spectrumDefinitions())
@@ -145,6 +152,11 @@ void MatrixWorkspace::setIndexInfo(const Indexing::IndexInfo &indexInfo) {
 /// Variant of setIndexInfo, used by WorkspaceFactoryImpl.
 void MatrixWorkspace::setIndexInfoWithoutISpectrumUpdate(
     const Indexing::IndexInfo &indexInfo) {
+  // Workspace is already initialized (m_isInitialized == true), but this is
+  // called by initializedFromParent which is some sort of second-stage
+  // initialization, so there is no check for storage mode compatibility here,
+  // in contrast to what setIndexInfo() does.
+  setStorageMode(indexInfo.storageMode());
   // Comparing the *local* size of the indexInfo.
   if (indexInfo.size() != getNumberHistograms())
     throw std::invalid_argument("MatrixWorkspace::setIndexInfo: IndexInfo size "
@@ -255,7 +267,11 @@ void MatrixWorkspace::initialize(const std::size_t &NVectors,
 void MatrixWorkspace::initialize(const Indexing::IndexInfo &indexInfo,
                                  const HistogramData::Histogram &histogram) {
   initialize(indexInfo.size(), histogram);
+  // Reopen initialization since setIndexInfo needs to disable some consistency
+  // checks that prevent setting an incompatible IndexInfo after initialization.
+  m_isInitialized = false;
   setIndexInfo(indexInfo);
+  m_isInitialized = true;
 }
 
 //---------------------------------------------------------------------------------------
@@ -642,6 +658,10 @@ double MatrixWorkspace::getXMax() const {
 }
 
 void MatrixWorkspace::getXMinMax(double &xmin, double &xmax) const {
+  if (m_indexInfo->size() != m_indexInfo->globalSize())
+    throw std::runtime_error(
+        "MatrixWorkspace: Parallel support for XMin and XMax not implemented.");
+
   // set to crazy values to start
   xmin = std::numeric_limits<double>::max();
   xmax = -1.0 * xmin;
@@ -1981,6 +2001,11 @@ void MatrixWorkspace::setImageE(const MantidImage &image, size_t start,
 }
 
 void MatrixWorkspace::invalidateCachedSpectrumNumbers() {
+  if (storageMode() == Parallel::StorageMode::Distributed &&
+      m_indexInfo->communicator().size() > 1)
+    throw std::logic_error("Setting spectrum numbers in MatrixWorkspace via "
+                           "ISpectrum::setSpectrumNo is not possible in MPI "
+                           "runs for distributed workspaces. Use IndexInfo.");
   m_indexInfoNeedsUpdate = true;
 }
 
@@ -2012,6 +2037,12 @@ void MatrixWorkspace::updateCachedDetectorGrouping(const size_t index) const {
 void MatrixWorkspace::buildDefaultSpectrumDefinitions() {
   const auto &detInfo = detectorInfo();
   size_t numberOfDetectors{detInfo.size()};
+  if (numberOfDetectors == 0) {
+    // Default to empty spectrum definitions if there is no instrument.
+    m_indexInfo->setSpectrumDefinitions(
+        std::vector<SpectrumDefinition>(m_indexInfo->size()));
+    return;
+  }
   size_t numberOfSpectra{0};
   if (detInfo.isScanning()) {
     for (size_t i = 0; i < numberOfDetectors; ++i)

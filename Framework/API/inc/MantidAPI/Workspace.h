@@ -45,7 +45,8 @@ class WorkspaceHistory;
  */
 class MANTID_API_DLL Workspace : public Kernel::DataItem {
 public:
-  Workspace();
+  Workspace(
+      const Parallel::StorageMode storageMode = Parallel::StorageMode::Cloned);
   ~Workspace();
 
   /** Returns a clone (copy) of the workspace with covariant return type in all
@@ -117,7 +118,7 @@ private:
   /// The history of the workspace, algorithm and environment
   std::unique_ptr<WorkspaceHistory> m_history;
   /// Storage mode of the Workspace (used for MPI runs)
-  Parallel::StorageMode m_storageMode{Parallel::StorageMode::Cloned};
+  Parallel::StorageMode m_storageMode;
 
   /// Virtual clone method. Not implemented to force implementation in children.
   virtual Workspace *doClone() const = 0;

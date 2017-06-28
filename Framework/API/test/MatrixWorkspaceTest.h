@@ -22,6 +22,7 @@
 #include "MantidTestHelpers/InstrumentCreationHelper.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidTestHelpers/NexusTestHelper.h"
+#include "MantidTestHelpers/ParallelRunner.h"
 #include "PropertyManagerHelper.h"
 
 #include <cxxtest/TestSuite.h>
@@ -68,6 +69,34 @@ boost::shared_ptr<MatrixWorkspace> makeWorkspaceWithDetectors(size_t numSpectra,
   }
   ws2->setInstrument(inst);
   return ws2;
+}
+
+namespace {
+void run_legacy_setting_spectrum_numbers_with_MPI(
+    const Parallel::Communicator &comm) {
+  using namespace Parallel;
+  for (const auto storageMode : {StorageMode::MasterOnly, StorageMode::Cloned,
+                                 StorageMode::Distributed}) {
+    WorkspaceTester ws;
+    if (comm.rank() == 0 || storageMode != StorageMode::MasterOnly) {
+      Indexing::IndexInfo indexInfo(1000, storageMode, comm);
+      ws.initialize(indexInfo,
+                    HistogramData::Histogram(HistogramData::Points(1)));
+    }
+    if (storageMode == StorageMode::Distributed && comm.size() > 1) {
+      TS_ASSERT_THROWS_EQUALS(ws.getSpectrum(0).setSpectrumNo(42),
+                              const std::logic_error &e, std::string(e.what()),
+                              "Setting spectrum numbers in MatrixWorkspace via "
+                              "ISpectrum::setSpectrumNo is not possible in MPI "
+                              "runs for distributed workspaces. Use "
+                              "IndexInfo.");
+    } else {
+      if (comm.rank() == 0 || storageMode != StorageMode::MasterOnly) {
+        TS_ASSERT_THROWS_NOTHING(ws.getSpectrum(0).setSpectrumNo(42));
+      }
+    }
+  }
+}
 }
 
 class MatrixWorkspaceTest : public CxxTest::TestSuite {
@@ -361,6 +390,14 @@ public:
                            "Run end:  not available\n";
 
     TS_ASSERT_EQUALS(expected, testWS->toString());
+  }
+
+  void test_initialize_with_IndexInfo_does_not_set_default_detectorIDs() {
+    WorkspaceTester ws;
+    Indexing::IndexInfo indexInfo(1);
+    ws.initialize(indexInfo,
+                  HistogramData::Histogram(HistogramData::Points(1)));
+    TS_ASSERT_EQUALS(ws.getSpectrum(0).getDetectorIDs().size(), 0);
   }
 
   void testGetSetTitle() {
@@ -1622,6 +1659,11 @@ public:
                      std::runtime_error);
     TS_ASSERT_THROWS(detInfo.setRotation(*det.getParent(), Quat(1, 2, 3, 4)),
                      std::runtime_error);
+  }
+
+  void test_legacy_setting_spectrum_numbers_with_MPI() {
+    ParallelTestHelpers::runParallel(
+        run_legacy_setting_spectrum_numbers_with_MPI);
   }
 
 private:

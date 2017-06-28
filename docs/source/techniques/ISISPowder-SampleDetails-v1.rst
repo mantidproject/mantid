@@ -226,3 +226,5 @@ advanced properties and chemical properties).
 ..  code-block:: python
 
     sample_obj.reset_sample_material()
+
+.. categories:: Techniques
