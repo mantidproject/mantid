@@ -9,7 +9,7 @@ using namespace Mantid::API;
 
 QwtRasterDataMDNonOrthogonal::QwtRasterDataMDNonOrthogonal()
     : m_lookPoint(),
-      m_fromHklToXyz({1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0}),
+      m_fromHklToXyz({{1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0}}),
       m_missingHKLdim(0) {}
 
 //-------------------------------------------------------------------------

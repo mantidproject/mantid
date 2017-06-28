@@ -114,7 +114,7 @@ public:
   }
 
   void test_getGridLineAnglesInRadianWithZeroArray() {
-    std::array<Mantid::coord_t, 9> skewMatrixCoord = {0};
+    std::array<Mantid::coord_t, 9> skewMatrixCoord = {{}};
     auto radianAngles =
         MantidQt::API::getGridLineAnglesInRadian(skewMatrixCoord, DimX, DimY);
     TSM_ASSERT("When given Zero array, getGridLinesInRadian should return "
@@ -278,10 +278,11 @@ private:
   std::array<Mantid::coord_t, 9> getExampleCoordTArray(bool nonSkewed) {
     std::array<Mantid::coord_t, 9> coordinates;
     if (nonSkewed) {
-      coordinates = {1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0};
+      coordinates = {{1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0}};
     } else {
-      coordinates = {1.0, 0.0, static_cast<Mantid::coord_t>(-0.57735), 0.0, 1.0,
-                     0.0, 0.0, 0.0, static_cast<Mantid::coord_t>(1.1547)};
+      coordinates = {{1.0, 0.0, static_cast<Mantid::coord_t>(-0.57735), 0.0,
+                      1.0, 0.0, 0.0, 0.0,
+                      static_cast<Mantid::coord_t>(1.1547)}};
     }
     return coordinates;
   }

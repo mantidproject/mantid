@@ -25,7 +25,7 @@ NonOrthogonalTransform::~NonOrthogonalTransform() {}
 NonOrthogonalTransform::NonOrthogonalTransform(
     const Mantid::API::IMDWorkspace_const_sptr &workspace, size_t dimX,
     size_t dimY)
-    : m_dimensionsHKL(true), m_skewMatrix({0}) {
+    : m_dimensionsHKL(true), m_skewMatrix() {
   // Set the skewMatrix for the non-orthogonal data
   auto numberOfDimensions = workspace->getNumDims();
   Mantid::Kernel::DblMatrix skewMatrix(numberOfDimensions, numberOfDimensions,
