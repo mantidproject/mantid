@@ -14,7 +14,7 @@ using namespace Mantid::API;
 QDataProcessorOneLevelTreeModel::QDataProcessorOneLevelTreeModel(
     ITableWorkspace_sptr tableWorkspace,
     const DataProcessorWhiteList &whitelist)
-    : m_tWS(tableWorkspace), m_whitelist(whitelist) {
+    : AbstractDataProcessorTreeModel(tableWorkspace, whitelist) {
 
   if (tableWorkspace->columnCount() != m_whitelist.size())
     throw std::invalid_argument(
@@ -23,14 +23,6 @@ QDataProcessorOneLevelTreeModel::QDataProcessorOneLevelTreeModel(
 }
 
 QDataProcessorOneLevelTreeModel::~QDataProcessorOneLevelTreeModel() {}
-
-/** Returns the number of columns, i.e. elements in the whitelist
-* @return : The number of columns
-*/
-int QDataProcessorOneLevelTreeModel::columnCount(
-    const QModelIndex & /* parent */) const {
-  return static_cast<int>(m_whitelist.size());
-}
 
 /** Returns data for specified index
 * @param index : The index
@@ -42,21 +34,16 @@ QVariant QDataProcessorOneLevelTreeModel::data(const QModelIndex &index,
   if (!index.isValid())
     return QVariant();
 
-  if (role != Qt::DisplayRole && role != Qt::EditRole)
-    return QVariant();
-
   if (parent(index).isValid())
     return QVariant();
 
+  if (role != Qt::DisplayRole && role != Qt::EditRole) {
+    if (role == Qt::BackgroundRole && index.row() == m_highlighted.first)
+      return QColor("#FF8040");
+    return QVariant();
+  }
+
   return QString::fromStdString(m_tWS->String(index.row(), index.column()));
-}
-
-Qt::ItemFlags
-QDataProcessorOneLevelTreeModel::flags(const QModelIndex &index) const {
-  if (!index.isValid())
-    return 0;
-
-  return Qt::ItemIsEditable | QAbstractItemModel::flags(index);
 }
 
 /** Returns the column name (header data for given section)
@@ -195,6 +182,16 @@ bool QDataProcessorOneLevelTreeModel::setData(const QModelIndex &index,
   emit dataChanged(index, index);
 
   return true;
+}
+
+/** Sets the currently highlighted row
+* @param rowIndex : The highlighted row index
+* @param groupIndex : The group the highlighted row is in
+*/
+void QDataProcessorOneLevelTreeModel::setHighlighted(int rowIndex,
+                                                     int groupIndex) {
+  UNUSED_ARG(groupIndex);
+  m_highlighted.first = rowIndex;
 }
 
 } // namespace MantidWidgets

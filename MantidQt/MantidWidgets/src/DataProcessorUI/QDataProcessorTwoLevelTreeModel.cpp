@@ -15,7 +15,7 @@ columns, their indices and descriptions
 QDataProcessorTwoLevelTreeModel::QDataProcessorTwoLevelTreeModel(
     ITableWorkspace_sptr tableWorkspace,
     const DataProcessorWhiteList &whitelist)
-    : m_tWS(tableWorkspace), m_whitelist(whitelist) {
+    : AbstractDataProcessorTreeModel(tableWorkspace, whitelist) {
 
   if (tableWorkspace->columnCount() != m_whitelist.size() + 1)
     throw std::invalid_argument("Invalid table workspace. Table workspace must "
@@ -31,14 +31,6 @@ QDataProcessorTwoLevelTreeModel::QDataProcessorTwoLevelTreeModel(
 
 QDataProcessorTwoLevelTreeModel::~QDataProcessorTwoLevelTreeModel() {}
 
-/** Returns the number of columns, i.e. elements in the whitelist
-* @return : The number of columns
-*/
-int QDataProcessorTwoLevelTreeModel::columnCount(
-    const QModelIndex & /* parent */) const {
-  return static_cast<int>(m_whitelist.size());
-}
-
 /** Returns data for specified index
 * @param index : The index
 * @param role : The role
@@ -52,7 +44,7 @@ QVariant QDataProcessorTwoLevelTreeModel::data(const QModelIndex &index,
 
   bool parentValid = parent(index).isValid();
 
-  if (role != Qt::DisplayRole && role != Qt::EditRole) {
+  if (role == Qt::DisplayRole && role == Qt::EditRole) {
     if (!parentValid) {
       // Index corresponds to a group
 
@@ -79,14 +71,6 @@ QVariant QDataProcessorTwoLevelTreeModel::data(const QModelIndex &index,
   }
 
   return QVariant();
-}
-
-Qt::ItemFlags
-QDataProcessorTwoLevelTreeModel::flags(const QModelIndex &index) const {
-  if (!index.isValid())
-    return 0;
-
-  return Qt::ItemIsEditable | QAbstractItemModel::flags(index);
 }
 
 /** Returns the column name (header data for given section)
@@ -491,9 +475,10 @@ QDataProcessorTwoLevelTreeModel::getTableWorkspace() const {
  * @param groupIndex : Index of the group
  * @param rowIndex : Index of the row
  */
-void QDataProcessorTwoLevelTreeModel::setHighlighted(int groupIndex,
-                                                     int rowIndex) const {
-  m_highlighted = std::make_pair(groupIndex, rowIndex);
+void QDataProcessorTwoLevelTreeModel::setHighlighted(int rowIndex,
+                                                     int groupIndex) {
+  m_highlighted.first = rowIndex;
+  m_highlighted.second = groupIndex;
 }
 
 } // namespace MantidWidgets

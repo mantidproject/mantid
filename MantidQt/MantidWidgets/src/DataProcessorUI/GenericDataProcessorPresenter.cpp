@@ -277,6 +277,7 @@ void GenericDataProcessorPresenter::nextRow() {
   // Add processed row data to the group
   int rowIndex = m_rowItem.first;
   m_groupData[rowIndex] = m_rowItem.second;
+  int groupIndex = m_gqueue.front().first;
   auto &rqueue = m_gqueue.front().second;
 
   if (!rqueue.empty()) {
@@ -285,7 +286,7 @@ void GenericDataProcessorPresenter::nextRow() {
     // Reduce next row
     m_rowItem = rqueue.front();
     rqueue.pop();
-    startAsyncRowReduceThread(&m_rowItem, m_gqueue.front().first);
+    startAsyncRowReduceThread(&m_rowItem, groupIndex);
   } else {
     m_gqueue.pop();
     // Set next action flag
@@ -293,7 +294,7 @@ void GenericDataProcessorPresenter::nextRow() {
 
     if (m_groupData.size() > 1) {
       // Multiple rows in containing group, do post-processing on the group
-      startAsyncGroupReduceThread(m_groupData);
+      startAsyncGroupReduceThread(m_groupData, groupIndex);
     } else {
       // Single row in containing group, skip to next group
       nextGroup();
@@ -319,6 +320,7 @@ void GenericDataProcessorPresenter::nextGroup() {
     auto &rqueue = m_gqueue.front().second;
     m_rowItem = rqueue.front();
     rqueue.pop();
+    m_manager;
     startAsyncRowReduceThread(&m_rowItem, m_gqueue.front().first);
   } else {
     // If "Output Notebook" checkbox is checked then create an ipython notebook
@@ -344,10 +346,10 @@ void GenericDataProcessorPresenter::startAsyncRowReduceThread(RowItem *rowItem,
 Reduce the current group asynchronously
 */
 void GenericDataProcessorPresenter::startAsyncGroupReduceThread(
-    GroupData &groupData) {
+    GroupData &groupData, int groupIndex) {
 
-  auto *worker =
-      new GenericDataProcessorPresenterGroupReducerWorker(this, groupData);
+  auto *worker = new GenericDataProcessorPresenterGroupReducerWorker(
+      this, groupData, groupIndex);
   m_workerThread.reset(new GenericDataProcessorPresenterThread(this, worker));
   m_workerThread->start();
 }
@@ -359,6 +361,7 @@ void GenericDataProcessorPresenter::endReduction() {
 
   pause();
   m_mainPresenter->confirmReductionPaused();
+  m_manager->setHighlighted(-1, -1); // No row / group highlighted
   m_newSelection = true; // Allow same selection to be processed again
 }
 
