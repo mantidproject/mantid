@@ -6,7 +6,7 @@ from __future__ import (absolute_import, division, print_function)
 import unittest
 import testhelpers
 import platform
-from mantid.simpleapi import CreateWorkspace, Fit, FitDialog, FunctionWrapper, CompositeFunctionWrapper
+from mantid.simpleapi import CreateWorkspace, Fit, FitDialog, FunctionWrapper, CompositeFunctionWrapper, Gaussian
 from mantid.api import mtd, MatrixWorkspace, ITableWorkspace
 import numpy as np
 from testhelpers import run_algorithm
@@ -270,6 +270,9 @@ class FunctionWrapperTest(unittest.TestCase):
         g.free("Sigma")
         gz_str = g.__str__()
         self.assertEqual(gz_str.count("constraints="),0)
+        
+    def test_prefinedfunction(self):
+        testhelpers.assertRaisesNothing(self, Gaussian, Height=7.5, Sigma=1.2, PeakCentre=10)
        
 if __name__ == '__main__':
     unittest.main()
