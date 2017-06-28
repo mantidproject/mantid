@@ -1,20 +1,21 @@
 #pylint: disable=R0913,W0403,R0903,C0103
+import fourcircle_utility as util4
+from mantid.api import AnalysisDataService
+import math
 import numpy
 import numpy.linalg
-import math
-from mantid.api import AnalysisDataService
 
-import fourcircle_utility as util4
 
 # Do absorption correction
 
 
 class Lattice(object):
     """A simple structure-styled class to hold lattice or lattice*
+
     """
     def __init__(self, a, b, c, alpha, beta, gamma):
-        """
-        Initialization
+        """Initialization
+
         :param a:
         :param b:
         :param c:
@@ -39,50 +40,50 @@ class Lattice(object):
         return '%f, %f, %f, %f, %f, %f' % (self._a, self._b, self._c, self._alpha, self._beta, self._gamma)
 
     def get_a(self):
-        """
-        get lattice a
+        """get lattice a
+
         :return:
         """
         return self._a
 
     def get_b(self):
-        """
-        get lattice B
+        """get lattice B
+
         :return:
         """
         return self._b
 
     def get_c(self):
-        """
-        get lattice C
+        """get lattice C
+
         :return:
         """
         return self._c
 
     def get_alpha(self):
-        """
-        get lattice alpha
+        """get lattice alpha
+
         :return:
         """
         return self._alpha
 
     def get_beta(self):
-        """
-        get lattice beta
+        """get lattice beta
+
         :return:
         """
         return self._beta
 
     def get_gamma(self):
-        """
-        get lattice gamma
+        """get lattice gamma
+
         :return:
         """
         return self._gamma
 
     def set_a(self, lattice_a):
-        """
-        set lattice parameter a
+        """set lattice parameter a
+
         :param lattice_a:
         :return:
         """
@@ -91,8 +92,8 @@ class Lattice(object):
         return
 
     def set_b(self, lattice_b):
-        """
-        set lattice parameter b
+        """set lattice parameter b
+
         :param lattice_b:
         :return:
         """
@@ -101,8 +102,8 @@ class Lattice(object):
         return
 
     def set_c(self, lattice_c):
-        """
-        set lattice parameter c
+        """set lattice parameter c
+
         :param lattice_c:
         :return:
         """
@@ -111,8 +112,8 @@ class Lattice(object):
         return
 
     def set_alpha(self, alpha):
-        """
-        set alpha
+        """set alpha
+
         :param alpha:
         :return:
         """
@@ -121,8 +122,8 @@ class Lattice(object):
         return
 
     def set_beta(self, beta):
-        """
-        set beta
+        """set beta
+
         :param beta:
         :return:
         """
@@ -131,8 +132,8 @@ class Lattice(object):
         return
 
     def set_gamma(self, gamma):
-        """
-        set gamma
+        """set gamma
+
         :param gamma:
         :return:
         """
@@ -142,8 +143,8 @@ class Lattice(object):
 
 
 def m_sin(degree):
-    """
-    sin function on degree
+    """sin function on degree
+
     :param degree:
     :return:
     """
@@ -151,8 +152,8 @@ def m_sin(degree):
 
 
 def m_cos(degree):
-    """
-    cosine function on degree
+    """cosine function on degree
+
     :param degree:
     :return:
     """
@@ -160,8 +161,8 @@ def m_cos(degree):
 
 
 def multiply_matrices(matrix1, matrix2):
-    """
-    multiply 2 matrices: same as numpy.dot()
+    """multiply 2 matrices: same as numpy.dot()
+
     :param matrix1:
     :param matrix2:
     :return:
@@ -178,8 +179,8 @@ def multiply_matrices(matrix1, matrix2):
 
 
 def multiply_matrix_vector(matrix, vector):
-    """
-    multiply matrix and vector: same as numpy.dot()
+    """multiply matrix and vector: same as numpy.dot()
+
     :param matrix:
     :param vector:
     :return:
@@ -194,7 +195,7 @@ def multiply_matrix_vector(matrix, vector):
 
 
 def invert_matrix(matrix):
-    """
+    """invert a matrix
 
     :param matrix:
     :return:
@@ -213,7 +214,7 @@ def invert_matrix(matrix):
 
 
 def calculate_reciprocal_lattice(lattice):
-    """
+    """calculate reciprocal lattice
 
     :param lattice:
     :return:
@@ -248,8 +249,8 @@ def calculate_reciprocal_lattice(lattice):
 
 
 def calculate_b_matrix(lattice):
-    """
-    calculate B matrix
+    """calculate B matrix
+
     :param lattice:
     :return:
     """
@@ -276,7 +277,8 @@ def calculate_b_matrix(lattice):
 
 
 def calculate_upphi(omg0, theta2ave, chiave, phiave):
-    """ Equation 58 busing paper
+    """Equation 58 busing paper
+
     """
     up_phi = numpy.ndarray(shape=(3,), dtype='float')
     up_phi[0] = m_sin(theta2ave*0.5+omg0)*m_cos(chiave)*m_cos(phiave)+m_cos(theta2ave*0.5+omg0)*m_sin(phiave)
@@ -287,7 +289,8 @@ def calculate_upphi(omg0, theta2ave, chiave, phiave):
 
 
 def calculate_usphi(omg0, theta2ave, chiave, phiave):
-    """ Equation 58 busing paper
+    """Equation 58 busing paper
+
     """
     us_phi = numpy.ndarray(shape=(3,), dtype='float')
     us_phi[0] = m_sin(theta2ave*0.5-omg0)*m_cos(chiave)*m_cos(phiave)-m_cos(theta2ave*0.5-omg0)*m_sin(phiave)
@@ -298,10 +301,11 @@ def calculate_usphi(omg0, theta2ave, chiave, phiave):
 
 
 def calculate_absorption_correction_spice(exp_number, scan_number, lattice, ub_matrix):
-    """
-    SPICE ub matrix -0.1482003, -0.0376897, 0.0665967,
-                             -0.0494848, 0.2256107, 0.0025953,
-                             -0.1702423, -0.0327691, -0.0587285,
+    """calculate absorption correcton from a SPICE ub matrix
+
+    Example: -0.1482003, -0.0376897, 0.0665967,
+             -0.0494848, 0.2256107, 0.0025953,
+             -0.1702423, -0.0327691, -0.0587285,
     """
     # process angles from SPICE table
     theta2ave = get_average_spice_table(exp_number, scan_number, '2theta')  # sum(theta2(:))/length(theta2);
