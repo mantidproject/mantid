@@ -44,7 +44,7 @@ QVariant QDataProcessorTwoLevelTreeModel::data(const QModelIndex &index,
 
   bool parentValid = parent(index).isValid();
 
-  if (role == Qt::DisplayRole && role == Qt::EditRole) {
+  if (role == Qt::DisplayRole || role == Qt::EditRole) {
     if (!parentValid) {
       // Index corresponds to a group
 
@@ -65,8 +65,10 @@ QVariant QDataProcessorTwoLevelTreeModel::data(const QModelIndex &index,
         m_tWS->String(absolutePosition, index.column() + 1));
     }
   } else if (role == Qt::BackgroundRole) {
-    if (parent(index).row() == m_highlighted.first &&
-        (!parentValid || index.row() == m_highlighted.second))
+    // Highlight if this is the current row / group, transparent otherwise
+    if (!parentValid && index.row() == m_highlighted.second ||
+        parentValid && index.row() == m_highlighted.first &&
+            parent(index).row() == m_highlighted.second)
       return QColor("#FF8040");
   }
 
