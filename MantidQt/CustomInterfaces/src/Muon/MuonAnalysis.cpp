@@ -3158,20 +3158,7 @@ void MuonAnalysis::multiFitCheckboxChanged(int state) {
   const Muon::MultiFitState multiFitState = state == Qt::CheckState::Checked
                                                 ? Muon::MultiFitState::Enabled
                                                 : Muon::MultiFitState::Disabled;
-  /* // If both multiFit and TFAsymm are checked
-   // uncheck the TFAsymm
-   if (m_uiForm.chkEnableMultiFit->isChecked() && state != 0) {
-     // uncheck the box
-     m_uiForm.chkTFAsymm->setChecked(false);
-     changedTFAsymmCheckbox(0);
-     // reset the view
-     setTFAsymm(Muon::TFAsymmState::Disabled);
-   }*/
-  /* if (m_uiForm.chkEnableMultiFit->isChecked() && state != 0) {
-           m_fitDataPresenter->storeNorm(m_currentDataName.toStdString());
-   }*/
   m_fitFunctionPresenter->setMultiFitState(multiFitState);
-  // add a line to set presenters knowledge of is it multi fitl
 }
 /**
 * Called when the "TF Asymmetry" checkbox is changed (settings tab.)
@@ -3186,15 +3173,6 @@ void MuonAnalysis::changedTFAsymmCheckbox(int state) {
   } else {
     m_fitDataPresenter->setTFAsymmState(false);
   }
-  /*  // If both multiFit and TFAsymm are checked
-    // uncheck the multiFit
-    if (m_uiForm.chkTFAsymm->isChecked() && state != 0) {
-      // uncheck the box
-      m_uiForm.chkEnableMultiFit->setChecked(false);
-      multiFitCheckboxChanged(0);
-      // reset the view
-      m_fitFunctionPresenter->setMultiFitState(Muon::MultiFitState::Disabled);
-    }*/
   setTFAsymm(TFAsymmState);
 }
 /**
@@ -3208,16 +3186,6 @@ void MuonAnalysis::setTFAsymm(Muon::TFAsymmState TFAsymmState) {
   } else {
     m_uiForm.chkTFAsymm->setChecked(false);
   }
-  /*  // If both multiFit and TFAsymm are checked
-    // uncheck the multiFit
-    if (m_uiForm.chkEnableMultiFit->isChecked() &&
-        TFAsymmState == Muon::TFAsymmState::Enabled) {
-      // uncheck the box
-      m_uiForm.chkEnableMultiFit->setChecked(false);
-      multiFitCheckboxChanged(0);
-      // reset the view
-      m_fitFunctionPresenter->setMultiFitState(Muon::MultiFitState::Disabled);
-    }*/
   m_fitFunctionPresenter->setTFAsymmState(TFAsymmState);
 }
 /**

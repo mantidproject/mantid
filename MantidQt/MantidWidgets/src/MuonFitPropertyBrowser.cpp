@@ -679,9 +679,13 @@ void MuonFitPropertyBrowser::doTFAsymmFit() {
     QString msg = "TF Asymmetry Fit failed.\n\n" + QString(e.what()) + "\n";
     QMessageBox::critical(this, "Mantid - Error", msg);
   }
-  // setNormalization();
-  // runFit();
+  runFit();
 }
+/**
+* Updates the normalization in the table WS
+* assumes that the change is due to a calculation
+* @param norms :: map of updated normalization values
+*/
 void MuonFitPropertyBrowser::updateMultipleNormalization(
     std::map<std::string, double> norms) {
   auto oldNorm = readMultipleNormalization();
@@ -697,8 +701,7 @@ void MuonFitPropertyBrowser::updateMultipleNormalization(
     auto it = norms.find(std::get<0>(norm));
     if (it != norms.end() && it->second != std::get<1>(norm)) {
       // write new norm
-      row << it->second << std::get<0>(norm) << "Calculated"; // pass calc or
-                                                              // est
+      row << it->second << std::get<0>(norm) << "Calculated"; 
     } else {
       // write old norm
       row << std::get<1>(norm) << std::get<0>(norm) << "Estimated";

@@ -177,7 +177,6 @@ void MuonAnalysisFitDataPresenter::handleDataPropertiesChanged() {
  * @param overwrite :: [input] Whether overwrite is on or off in interface
  */
 void MuonAnalysisFitDataPresenter::handleSelectedDataChanged(bool overwrite) {
-  // clearMultiFitNorm();
   const auto names = generateWorkspaceNames(overwrite);
 
   if (!names.empty()) {
@@ -363,7 +362,12 @@ std::vector<std::string> MuonAnalysisFitDataPresenter::generateWorkspaceNames(
 
   return workspaceNames;
 }
-
+/**
+* Stores the normalization into the table WS
+* If the workspace is already in the table
+* do nothing. 
+* @param name :: the name of the workspace to add. 
+*/
 void MuonAnalysisFitDataPresenter::storeNorm(std::string name) const {
   if (m_isItTFAsymm) {
     if (!Mantid::API::AnalysisDataService::Instance().doesExist(

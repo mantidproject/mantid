@@ -8,6 +8,8 @@ Muon Analysis
 Interfaces
 ----------
 
+- Updated the TF asymmetry fit. It now works with multiple fitting. 
+
 Muon Analysis
 #############
 
