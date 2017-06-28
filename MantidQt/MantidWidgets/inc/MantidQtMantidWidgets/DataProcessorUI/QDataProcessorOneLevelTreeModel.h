@@ -2,9 +2,8 @@
 #define MANTIDQTMANTIDWIDGETS_QDATAPROCESSORONELEVELTREEMODEL_H_
 
 #include "MantidAPI/ITableWorkspace_fwd.h"
+#include "MantidQtMantidWidgets/DataProcessorUI/AbstractDataProcessorTreeModel.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorWhiteList.h"
-#include "MantidQtMantidWidgets/WidgetDllOption.h"
-#include <QAbstractItemModel>
 #include <boost/shared_ptr.hpp>
 #include <map>
 #include <vector>
@@ -41,9 +40,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS QDataProcessorOneLevelTreeModel
-    : public QAbstractItemModel {
-  Q_OBJECT
+class QDataProcessorOneLevelTreeModel : public AbstractDataProcessorTreeModel {
 public:
   QDataProcessorOneLevelTreeModel(
       Mantid::API::ITableWorkspace_sptr tableWorkspace,
@@ -52,8 +49,6 @@ public:
 
   // Functions to read data from the model
 
-  // Get flags for a cell
-  Qt::ItemFlags flags(const QModelIndex &index) const override;
   // Get data for a cell
   QVariant data(const QModelIndex &index,
                 int role = Qt::DisplayRole) const override;
@@ -62,8 +57,6 @@ public:
                       int role) const override;
   // Row count
   int rowCount(const QModelIndex &parent = QModelIndex()) const override;
-  // Column count
-  int columnCount(const QModelIndex &parent = QModelIndex()) const override;
   // Get the index for a given column, row and parent
   QModelIndex index(int row, int column,
                     const QModelIndex &parent = QModelIndex()) const override;
@@ -83,11 +76,10 @@ public:
   bool removeRows(int row, int count,
                   const QModelIndex &parent = QModelIndex()) override;
 
-private:
-  /// Collection of data for viewing.
-  Mantid::API::ITableWorkspace_sptr m_tWS;
-  /// Map of column indexes to names and viceversa
-  DataProcessorWhiteList m_whitelist;
+  // Miscellaneous model functions
+
+  // Set the currently highlighted row
+  void setHighlighted(int rowIndex, int groupIndex) override;
 };
 
 /// Typedef for a shared pointer to \c QDataProcessorOneLevelTreeModel

@@ -63,7 +63,7 @@ protected:
   DataProcessorWhiteList m_whitelist;
   /// The current row or group in the table to be highlighted (first = group
   /// index, second = row index)
-  mutable std::pair<int, int> m_highlighted;
+  std::pair<int, int> m_highlighted;
 };
 } // namespace MantidWidgets
 } // namespace Mantid

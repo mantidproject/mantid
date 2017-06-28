@@ -85,13 +85,15 @@ public:
   /// Update row with new data
   void update(int parent, int child,
               const std::vector<std::string> &data) override;
+  /// Highlight a specific row / group
+  void setHighlighted(int rowIndex, int groupIndex) override;
 
   /// Validate a table workspace
   bool isValidModel(Mantid::API::Workspace_sptr ws,
                     size_t whitelistColumns) const override;
 
   /// Return the model
-  boost::shared_ptr<QAbstractItemModel> getModel() override;
+  boost::shared_ptr<AbstractDataProcessorTreeModel> getModel() override;
   /// Return the table workspace
   Mantid::API::ITableWorkspace_sptr getTableWorkspace() override;
 
@@ -99,7 +101,7 @@ private:
   /// The DataProcessor presenter
   DataProcessorPresenter *m_presenter;
   /// The model
-  boost::shared_ptr<QDataProcessorOneLevelTreeModel> m_model;
+  boost::shared_ptr<AbstractDataProcessorTreeModel> m_model;
   /// The workspace the model is currently representing
   Mantid::API::ITableWorkspace_sptr m_ws;
 

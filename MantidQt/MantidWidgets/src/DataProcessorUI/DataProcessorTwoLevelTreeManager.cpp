@@ -588,10 +588,19 @@ void DataProcessorTwoLevelTreeManager::update(
                      QString::fromStdString(data[col]));
 }
 
+/** Set the current row / group to be highlighted
+* @param groupIndex : Index of the group
+* @param rowIndex : Index of the row
+*/
+void DataProcessorTwoLevelTreeManager::setHighlighted(int rowIndex,
+                                                      int groupIndex) {
+  m_model->setHighlighted(rowIndex, groupIndex);
+}
+
 /** Return a shared ptr to the model
 * @return :: A shared ptr to the model
 */
-boost::shared_ptr<QAbstractItemModel>
+boost::shared_ptr<AbstractDataProcessorTreeModel>
 DataProcessorTwoLevelTreeManager::getModel() {
   return m_model;
 }

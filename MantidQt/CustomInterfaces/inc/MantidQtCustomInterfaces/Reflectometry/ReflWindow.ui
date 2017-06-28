@@ -322,9 +322,6 @@
          <layout class="QVBoxLayout" name="layoutButtonsTable">
           <item>
            <widget class="QTableView" name="viewTable">
-            <property name="selectionBehavior">
-             <enum>QAbstractItemView::SelectRows</enum>
-            </property>
             <property name="sizePolicy">
              <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
               <horstretch>0</horstretch>

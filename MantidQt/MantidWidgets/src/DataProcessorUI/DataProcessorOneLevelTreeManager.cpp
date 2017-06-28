@@ -372,10 +372,19 @@ void DataProcessorOneLevelTreeManager::update(
                      QString::fromStdString(data[col]));
 }
 
+/** Sets the currently highlighted row
+* @param rowIndex : The highlighted row index
+* @param groupIndex : The group the highlighted row is in
+*/
+void DataProcessorOneLevelTreeManager::setHighlighted(int rowIndex,
+                                                      int groupIndex) {
+  m_model->setHighlighted(rowIndex, groupIndex);
+}
+
 /** Return a shared ptr to the model
 * @return :: A shared ptr to the model
 */
-boost::shared_ptr<QAbstractItemModel>
+boost::shared_ptr<AbstractDataProcessorTreeModel>
 DataProcessorOneLevelTreeManager::getModel() {
   return m_model;
 }
