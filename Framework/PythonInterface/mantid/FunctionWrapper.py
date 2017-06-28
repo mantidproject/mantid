@@ -53,7 +53,7 @@ class FunctionWrapper:
       self.fun.untie(name)
       
   def untieAllParameters(self):
-       for i in range(0, self.fun.numParams()):
+      for i in range(0, self.fun.numParams()):
           self.untie(self.getParameterName(i))
           
   def constrain(self, expressions):
@@ -61,7 +61,7 @@ class FunctionWrapper:
       
   def unconstrain(self, name):
       self.fun.unconstrain(name)
-      
+           
   def free(self, name):
   # Free parameter from tie or constraint
       self.fun.untie(name)
