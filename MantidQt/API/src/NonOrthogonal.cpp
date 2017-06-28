@@ -181,7 +181,7 @@ void doProvideSkewMatrix(Mantid::Kernel::DblMatrix &skewMatrix, T workspace) {
       .Invert(); // Current fix so skewed image displays in correct orientation
 }
 
-template <typename T> bool doRequiresSkewMatrix(T workspace) {
+template <typename T> bool doRequiresSkewMatrix(const T &workspace) {
   auto requiresSkew(true);
   try {
     const auto &sample = workspace->getExperimentInfo(0)->sample();
@@ -352,7 +352,7 @@ getMissingHKLDimensionIndex(Mantid::API::IMDWorkspace_const_sptr workspace,
 }
 
 void provideSkewMatrix(Mantid::Kernel::DblMatrix &skewMatrix,
-                       Mantid::API::IMDWorkspace_const_sptr workspace) {
+                       const Mantid::API::IMDWorkspace_const_sptr &workspace) {
   if (Mantid::API::IMDEventWorkspace_const_sptr eventWorkspace =
           boost::dynamic_pointer_cast<const Mantid::API::IMDEventWorkspace>(
               workspace)) {
@@ -382,7 +382,7 @@ bool requiresSkewMatrix(Mantid::API::IMDWorkspace_const_sptr workspace) {
   }
   return requiresSkewMatrix;
 }
-bool isHKLDimensions(Mantid::API::IMDWorkspace_const_sptr workspace,
+bool isHKLDimensions(const Mantid::API::IMDWorkspace_const_sptr &workspace,
                      size_t dimX, size_t dimY) {
   auto dimensionHKL = true;
   size_t dimensionIndices[2] = {dimX, dimY};

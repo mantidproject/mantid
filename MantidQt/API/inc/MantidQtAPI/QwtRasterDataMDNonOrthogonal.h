@@ -5,6 +5,7 @@
 #include "MantidQtAPI/QwtRasterDataMD.h"
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidKernel/Matrix.h"
+#include <array>
 
 namespace MantidQt {
 namespace API {

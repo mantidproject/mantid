@@ -4,6 +4,7 @@
 #include "MantidQtAPI/DllOption.h"
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidKernel/Matrix.h"
+#include <array>
 
 namespace MantidQt {
 namespace API {
@@ -12,14 +13,14 @@ enum class DimensionSelection { H, K, L };
 
 void EXPORT_OPT_MANTIDQT_API
 provideSkewMatrix(Mantid::Kernel::DblMatrix &skewMatrix,
-                  Mantid::API::IMDWorkspace_const_sptr workspace);
+                  const Mantid::API::IMDWorkspace_const_sptr &workspace);
 
 bool EXPORT_OPT_MANTIDQT_API
 requiresSkewMatrix(Mantid::API::IMDWorkspace_const_sptr workspace);
 
 bool EXPORT_OPT_MANTIDQT_API
-isHKLDimensions(Mantid::API::IMDWorkspace_const_sptr workspace, size_t dimX,
-                size_t dimY);
+isHKLDimensions(const Mantid::API::IMDWorkspace_const_sptr &workspace,
+                size_t dimX, size_t dimY);
 
 size_t EXPORT_OPT_MANTIDQT_API
 getMissingHKLDimensionIndex(Mantid::API::IMDWorkspace_const_sptr workspace,
