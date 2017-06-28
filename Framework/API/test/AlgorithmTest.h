@@ -3,19 +3,20 @@
 
 #include <cxxtest/TestSuite.h>
 
+#include "FakeAlgorithms.h"
 #include "MantidAPI/Algorithm.h"
-#include "MantidKernel/Property.h"
 #include "MantidAPI/AlgorithmFactory.h"
-#include "MantidTestHelpers/FakeObjects.h"
-#include "MantidKernel/ReadLock.h"
-#include "MantidKernel/WriteLock.h"
-#include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidAPI/WorkspaceProperty.h"
 #include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/Property.h"
+#include "MantidKernel/ReadLock.h"
 #include "MantidKernel/RebinParamsValidator.h"
 #include "MantidKernel/Strings.h"
-#include "FakeAlgorithms.h"
+#include "MantidKernel/WriteLock.h"
+#include "MantidTestHelpers/FakeObjects.h"
 #include "PropertyManagerHelper.h"
 #include <map>
 
@@ -158,6 +159,24 @@ public:
 const std::string FailingAlgorithm::FAIL_MSG("Algorithm failed as requested");
 
 DECLARE_ALGORITHM(FailingAlgorithm)
+
+class IndexingAlgorithm : public Algorithm {
+public:
+  IndexingAlgorithm() : Algorithm() {}
+  ~IndexingAlgorithm() override {}
+  const std::string name() const override { return "IndexingAlgorithm"; }
+  int version() const override { return 1; }
+  const std::string summary() const override {
+    return "Test indexing property creation";
+  }
+  static const std::string FAIL_MSG;
+
+  void init() override {}
+
+  void exec() override {}
+};
+
+DECLARE_ALGORITHM(IndexingAlgorithm)
 
 class AlgorithmTest : public CxxTest::TestSuite {
 public:
@@ -755,9 +774,9 @@ public:
   }
 
   /**
-  * Test declaring an algorithm property and retrieving as const
-  * and non-const
-  */
+   * Test declaring an algorithm property and retrieving as const
+   * and non-const
+   */
   void testGetProperty_const_sptr() {
     const std::string algName = "InputAlgorithm";
     IAlgorithm_sptr algInput(new StubbedWorkspaceAlgorithm());
@@ -785,6 +804,86 @@ public:
     TS_ASSERT_THROWS_NOTHING(algCastNonConst = (IAlgorithm_sptr)val);
     TS_ASSERT(algCastNonConst != NULL);
     TS_ASSERT_EQUALS(algCastConst, algCastNonConst);
+  }
+
+  void testIndexingAlgorithm_declareIndexPropertyMethod() {
+    IndexingAlgorithm indexAlg;
+    TS_ASSERT_THROWS_NOTHING(
+        indexAlg.declareIndexProperty<MatrixWorkspace>("InputWorkspace"));
+  }
+
+  void testIndexingAlgorithm_setIndexPropertyMethods() {
+    IndexingAlgorithm indexAlg;
+    auto wksp =
+        WorkspaceFactory::Instance().create("WorkspaceTester", 10, 10, 9);
+    indexAlg.declareIndexProperty<MatrixWorkspace>("InputWorkspace1");
+    indexAlg.declareIndexProperty<MatrixWorkspace>("InputWorkspace2");
+    indexAlg.declareIndexProperty<MatrixWorkspace>("InputWorkspace3");
+    indexAlg.declareIndexProperty<MatrixWorkspace>("InputWorkspace4");
+
+    AnalysisDataService::Instance().add("wksp", wksp);
+    TS_ASSERT_THROWS_NOTHING(indexAlg.setIndexProperty<MatrixWorkspace>(
+        "InputWorkspace1", wksp, IndexType::WorkspaceIndex,
+        std::vector<int>{1, 2, 3, 4, 5}));
+    TS_ASSERT_THROWS_NOTHING(indexAlg.setIndexProperty<MatrixWorkspace>(
+        "InputWorkspace2", wksp, IndexType::WorkspaceIndex, "1:5"));
+    TS_ASSERT_THROWS_NOTHING(indexAlg.setIndexProperty<MatrixWorkspace>(
+        "InputWorkspace3", "wksp", IndexType::WorkspaceIndex,
+        std::vector<int>{1, 2, 3, 4, 5}));
+    TS_ASSERT_THROWS_NOTHING(indexAlg.setIndexProperty<MatrixWorkspace>(
+        "InputWorkspace4", "wksp", IndexType::WorkspaceIndex, "1:5"));
+    AnalysisDataService::Instance().remove("wksp");
+  }
+
+  void testIndexingAlgorithm_getIndexPropertyMethod() {
+    IndexingAlgorithm indexAlg;
+    indexAlg.declareIndexProperty<MatrixWorkspace>("InputWorkspace");
+
+    auto wksp =
+        WorkspaceFactory::Instance().create("WorkspaceTester", 10, 10, 9);
+    AnalysisDataService::Instance().add("wksp", wksp);
+    indexAlg.setIndexProperty<MatrixWorkspace>(
+        "InputWorkspace", "wksp", IndexType::WorkspaceIndex, "1:5");
+
+    MatrixWorkspace_sptr wsTest;
+    Indexing::SpectrumIndexSet indexSet(0);
+
+    TS_ASSERT_THROWS_NOTHING(
+        std::tie(wsTest, indexSet) =
+            indexAlg.getIndexProperty<MatrixWorkspace>("InputWorkspace"));
+
+    TS_ASSERT_EQUALS(wsTest, wksp);
+
+    for (int i = 0; i < indexSet.size(); i++)
+      TS_ASSERT_EQUALS(indexSet[i], i + 1);
+
+    AnalysisDataService::Instance().remove("wksp");
+  }
+
+  void testIndexingAlgorithm_accessFailInvalidPropertyType() {
+    IndexingAlgorithm indexAlg;
+    indexAlg.declareProperty(
+        Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
+            "InputWorkspace", "", Kernel::Direction::Input));
+
+    TS_ASSERT_THROWS(
+        indexAlg.getIndexProperty<MatrixWorkspace>("InputWorkspace"),
+        std::runtime_error);
+    TS_ASSERT_THROWS(
+        indexAlg.setIndexProperty<MatrixWorkspace>(
+            "InputWorkspace", "wksp", IndexType::SpectrumNum, "1:5"),
+        std::runtime_error);
+  }
+
+  void testIndexingAlgorithm_failExistingIndexProperty() {
+    IndexingAlgorithm indexAlg;
+    indexAlg.declareIndexProperty<MatrixWorkspace>("InputWorkspace");
+
+    TS_ASSERT_THROWS(
+        indexAlg.declareProperty(
+            Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
+                "InputWorkspace", "", Kernel::Direction::Input)),
+        std::runtime_error);
   }
 
 private:

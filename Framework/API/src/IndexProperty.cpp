@@ -121,7 +121,7 @@ Indexing::SpectrumIndexSet IndexProperty::getIndices() const {
       return m_indices = indexInfo.makeIndexSet(
                  static_cast<Indexing::GlobalSpectrumIndex>(m_min),
                  static_cast<Indexing::GlobalSpectrumIndex>(m_max));
-    case IndexType::SpectrumNumber:
+    case IndexType::SpectrumNum:
       return m_indices = indexInfo.makeIndexSet(
                  static_cast<Indexing::SpectrumNumber>(m_min),
                  static_cast<Indexing::SpectrumNumber>(m_max));
@@ -134,7 +134,7 @@ Indexing::SpectrumIndexSet IndexProperty::getIndices() const {
       return m_indices = indexInfo.makeIndexSet(
                  std::vector<Indexing::GlobalSpectrumIndex>(m_value.begin(),
                                                             m_value.end()));
-    case IndexType::SpectrumNumber:
+    case IndexType::SpectrumNum:
       return m_indices =
                  indexInfo.makeIndexSet(std::vector<Indexing::SpectrumNumber>(
                      m_value.begin(), m_value.end()));

@@ -2,12 +2,12 @@
 
 namespace Mantid {
 namespace API {
-IndexTypeProperty::IndexTypeProperty(const int indexType)
-    : PropertyWithValue<std::string>("IndexType", "",
-                                     Kernel::Direction::Input) {
+IndexTypeProperty::IndexTypeProperty(const std::string &name,
+                                     const int indexType)
+    : PropertyWithValue<std::string>(name, "", Kernel::Direction::Input) {
   if (indexType & IndexType::WorkspaceIndex)
     m_allowedValues.push_back("WorkspaceIndex");
-  if (indexType & IndexType::SpectrumNumber)
+  if (indexType & IndexType::SpectrumNum)
     m_allowedValues.push_back("SpectrumNumber");
 
   if (m_allowedValues.size() == 0)
@@ -19,7 +19,7 @@ IndexTypeProperty::IndexTypeProperty(const int indexType)
 IndexType IndexTypeProperty::selectedType() const {
   auto val = this->value();
   if (val.compare("SpectrumNumber") == 0)
-    return IndexType::SpectrumNumber;
+    return IndexType::SpectrumNum;
   else if (val.compare("WorkspaceIndex") == 0)
     return IndexType::WorkspaceIndex;
   else if (val.empty())
@@ -34,7 +34,7 @@ int IndexTypeProperty::allowedTypes() const {
   auto end = m_allowedValues.cend();
 
   if (std::find(beg, end, "SpectrumNumber") != end) {
-    types |= IndexType::SpectrumNumber;
+    types |= IndexType::SpectrumNum;
   }
 
   if (std::find(beg, end, "WorkspaceIndex") != end) {
@@ -54,7 +54,7 @@ std::string &IndexTypeProperty::operator=(API::IndexType type) {
   std::string val;
 
   switch (type) {
-  case IndexType::SpectrumNumber:
+  case IndexType::SpectrumNum:
     val = "SpectrumNumber";
     break;
   case IndexType::WorkspaceIndex:

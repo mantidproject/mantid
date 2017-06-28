@@ -7,7 +7,7 @@
 namespace Mantid {
 namespace API {
 
-enum IndexType { SpectrumNumber = 1, WorkspaceIndex = 2 };
+enum IndexType { SpectrumNum = 1, WorkspaceIndex = 2 };
 
 /** IndexTypeProperty : TODO : Add support for
 DetectorID->SpectrumNumber/WorkspaceIndex
@@ -37,7 +37,8 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 class MANTID_API_DLL IndexTypeProperty
     : public Kernel::PropertyWithValue<std::string> {
 public:
-  IndexTypeProperty(const int indexType = IndexType::WorkspaceIndex);
+  IndexTypeProperty(const std::string &name = "IndexType",
+                    int indexType = IndexType::WorkspaceIndex);
 
   IndexType selectedType() const;
 

@@ -39,7 +39,7 @@ public:
     WorkspaceProperty<Workspace> wkspProp("InputWorkspace", "",
                                           Kernel::Direction::Input);
 
-	auto ws = boost::make_shared<TableWorkspaceTester>();
+    auto ws = boost::make_shared<TableWorkspaceTester>();
     wkspProp = ws;
 
     IndexProperty indexProp("IndexSet", wkspProp, m_itypeProp);
@@ -61,7 +61,7 @@ public:
     auto indexSet = indexProp.getIndices();
 
     TS_ASSERT_EQUALS(indexSet.size(), 6);
-	std::vector<int> testVec{ 0, 1, 2, 3, 4, 7 };
+    std::vector<int> testVec{0, 1, 2, 3, 4, 7};
 
     for (size_t i = 0; i < indexSet.size(); i++)
       TS_ASSERT_EQUALS(indexSet[i], testVec[i]);
@@ -71,7 +71,7 @@ public:
     auto ws = WorkspaceFactory::Instance().create("WorkspaceTester", 10, 10, 9);
     m_wkspProp = ws;
 
-    IndexTypeProperty itypeProp(IndexType::SpectrumNumber);
+    IndexTypeProperty itypeProp("IndexType", IndexType::SpectrumNum);
     IndexProperty indexProp("IndexSet", m_wkspProp, itypeProp);
     std::vector<int> input{1, 3, 5, 7};
     indexProp = input;

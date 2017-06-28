@@ -5,15 +5,19 @@
 
 #include "MantidAPI/DllConfig.h"
 #include "MantidAPI/IAlgorithm.h"
+#include "MantidAPI/IndexTypeProperty.h"
 #include "MantidKernel/PropertyManagerOwner.h"
 
 // -- These headers will (most-likely) be used by every inheriting algorithm
 #include "MantidAPI/AlgorithmFactory.h" //for the factory macro
+#include "MantidAPI/IndexProperty.h"
+#include "MantidAPI/IndexTypeProperty.h"
 #include "MantidAPI/Progress.h"
-#include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/WorkspaceOpOverloads.h"
-#include "MantidKernel/MultiThreaded.h"
+#include "MantidAPI/WorkspaceProperty.h"
 #include "MantidKernel/EmptyValues.h"
+#include "MantidKernel/MultiThreaded.h"
+#include <MantidIndexing/SpectrumIndexSet.h>
 
 //----------------------------------------------------------------------
 // Forward Declaration
@@ -28,7 +32,7 @@ template <class O> class ActiveStarter;
 class NotificationCenter;
 template <class C, class N> class NObserver;
 class Void;
-}
+} // namespace Poco
 
 namespace Json {
 class Value;
@@ -43,48 +47,48 @@ class AlgorithmProxy;
 class AlgorithmHistory;
 
 /**
- Base class from which all concrete algorithm classes should be derived.
- In order for a concrete algorithm class to do anything
- useful the methods init() & exec()  should be overridden.
+Base class from which all concrete algorithm classes should be derived.
+In order for a concrete algorithm class to do anything
+useful the methods init() & exec()  should be overridden.
 
- Further text from Gaudi file.......
- The base class provides utility methods for accessing
- standard services (event data service etc.); for declaring
- properties which may be configured by the job options
- service; and for creating Child Algorithms.
- The only base class functionality which may be used in the
- constructor of a concrete algorithm is the declaration of
- member variables as properties. All other functionality,
- i.e. the use of services and the creation of Child Algorithms,
- may be used only in initialise() and afterwards (see the
- Gaudi user guide).
+Further text from Gaudi file.......
+The base class provides utility methods for accessing
+standard services (event data service etc.); for declaring
+properties which may be configured by the job options
+service; and for creating Child Algorithms.
+The only base class functionality which may be used in the
+constructor of a concrete algorithm is the declaration of
+member variables as properties. All other functionality,
+i.e. the use of services and the creation of Child Algorithms,
+may be used only in initialise() and afterwards (see the
+Gaudi user guide).
 
- @author Russell Taylor, Tessella Support Services plc
- @author Based on the Gaudi class of the same name (see
- http://proj-gaudi.web.cern.ch/proj-gaudi/)
- @date 12/09/2007
+@author Russell Taylor, Tessella Support Services plc
+@author Based on the Gaudi class of the same name (see
+http://proj-gaudi.web.cern.ch/proj-gaudi/)
+@date 12/09/2007
 
- Copyright &copy; 2007-10 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
- National Laboratory & European Spallation Source
+Copyright &copy; 2007-10 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+National Laboratory & European Spallation Source
 
- This file is part of Mantid.
+This file is part of Mantid.
 
- Mantid is free software; you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
- the Free Software Foundation; either version 3 of the License, or
- (at your option) any later version.
+Mantid is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 3 of the License, or
+(at your option) any later version.
 
- Mantid is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
+Mantid is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
 
- You should have received a copy of the GNU General Public License
- along with this program.  If not, see <http://www.gnu.org/licenses/>.
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
- File change history is stored at: <https://github.com/mantidproject/mantid>.
- Code Documentation is available at: <http://doxygen.mantidproject.org>
- */
+File change history is stored at: <https://github.com/mantidproject/mantid>.
+Code Documentation is available at: <http://doxygen.mantidproject.org>
+*/
 class MANTID_API_DLL Algorithm : public IAlgorithm,
                                  public Kernel::PropertyManagerOwner {
 public:
@@ -204,6 +208,163 @@ public:
   /// implementation is provided.
   /// Override if the algorithm is not part of the Mantid distribution.
   const std::string helpURL() const override { return ""; }
+
+  template <typename T> void checkWorkspaceType() const {
+    static_assert(std::is_convertible<T *, MatrixWorkspace *>::value,
+                  "Workspace type needs to be convertible to MatrixWorkspace.");
+  }
+
+  inline bool isReserved(const std::vector<std::string> &list,
+                         const std::string &name) const {
+    return std::find(list.cbegin(), list.cend(), name) != list.cend();
+  }
+
+  using IPropertyManager::declareProperty;
+  using PropertyManagerOwner::declareProperty;
+  void declareProperty(std::unique_ptr<Kernel::Property> p,
+                       const std::string &doc = "") override;
+
+  Kernel::IPropertyManager::TypedValue
+  getProperty(const std::string &name) const override;
+
+  template <typename Workspace>
+  void
+  declareIndexProperty(const std::string &propertyName,
+                       const int allowedIndexTypes = IndexType::WorkspaceIndex,
+                       const std::string &doc = "") {
+    checkWorkspaceType<Workspace>();
+
+    declareProperty(Kernel::make_unique<WorkspaceProperty<Workspace>>(
+                        propertyName, "", Kernel::Direction::Input),
+                    doc);
+
+    declareProperty(Kernel::make_unique<IndexTypeProperty>(
+        propertyName + "IndexType", allowedIndexTypes));
+
+    auto *wsProp = dynamic_cast<WorkspaceProperty<Workspace> *>(
+        getPointerToProperty(propertyName));
+    auto *indexTypeProp = dynamic_cast<IndexTypeProperty *>(
+        getPointerToProperty(propertyName + "IndexType"));
+
+    declareProperty(Kernel::make_unique<IndexProperty>(
+        propertyName + "IndexSet", *wsProp, *indexTypeProp));
+
+    m_reservedList.push_back(propertyName);
+  }
+
+  template <typename Workspace>
+  std::tuple<boost::shared_ptr<Workspace>, Indexing::SpectrumIndexSet>
+  getIndexProperty(const std::string &name) const {
+    checkWorkspaceType<Workspace>();
+
+    if (!isReserved(m_reservedList, name))
+      throw std::runtime_error("Algorithm::getIndexProperty can only be used "
+                               "when on properties declared using "
+                               "declareIndexProperty.");
+
+    auto *wsProp = dynamic_cast<WorkspaceProperty<Workspace> *>(
+        getPointerToProperty(name));
+    auto *indexProp =
+        dynamic_cast<IndexProperty *>(getPointerToProperty(name + "IndexSet"));
+
+    return std::make_tuple(
+        boost::dynamic_pointer_cast<Workspace>(wsProp->getWorkspace()),
+        indexProp->getIndices());
+  }
+
+  template <typename Workspace>
+  void setIndexProperty(const std::string &name,
+                        const boost::shared_ptr<Workspace> &wksp,
+                        IndexType type, const std::vector<int> &list) {
+    checkWorkspaceType<Workspace>();
+    if (!isReserved(m_reservedList, name))
+      throw std::runtime_error("Algorithm::setIndexProperty can only be used "
+                               "when on properties declared using "
+                               "declareIndexProperty.");
+
+    auto *wsProp = dynamic_cast<WorkspaceProperty<Workspace> *>(
+        getPointerToProperty(name));
+    auto *indexTypeProp = dynamic_cast<IndexTypeProperty *>(
+        getPointerToProperty(name + "IndexType"));
+    auto *indexProp =
+        dynamic_cast<IndexProperty *>(getPointerToProperty(name + "IndexSet"));
+
+    *wsProp = wksp;
+
+    *indexTypeProp = type;
+
+    *indexProp = list;
+  }
+
+  template <typename Workspace>
+  void setIndexProperty(const std::string &name,
+                        const boost::shared_ptr<Workspace> &wksp,
+                        IndexType type, const std::string &list) {
+    checkWorkspaceType<Workspace>();
+    if (!isReserved(m_reservedList, name))
+      throw std::runtime_error("Algorithm::setIndexProperty can only be used "
+                               "when on properties declared using "
+                               "declareIndexProperty.");
+
+    auto *wsProp = dynamic_cast<WorkspaceProperty<Workspace> *>(
+        getPointerToProperty(name));
+    auto *indexTypeProp = dynamic_cast<IndexTypeProperty *>(
+        getPointerToProperty(name + "IndexType"));
+    auto *indexProp =
+        dynamic_cast<IndexProperty *>(getPointerToProperty(name + "IndexSet"));
+
+    *wsProp = wksp;
+
+    *indexTypeProp = type;
+
+    indexProp->setValue(list);
+  }
+
+  template <typename Workspace>
+  void setIndexProperty(const std::string &name, const std::string &wsName,
+                        IndexType type, const std::vector<int> &list) {
+    checkWorkspaceType<Workspace>();
+    if (!isReserved(m_reservedList, name))
+      throw std::runtime_error("Algorithm::setIndexProperty can only be used "
+                               "when on properties declared using "
+                               "declareIndexProperty.");
+
+    auto *wsProp = dynamic_cast<WorkspaceProperty<Workspace> *>(
+        getPointerToProperty(name));
+    auto *indexTypeProp = dynamic_cast<IndexTypeProperty *>(
+        getPointerToProperty(name + "IndexType"));
+    auto *indexProp =
+        dynamic_cast<IndexProperty *>(getPointerToProperty(name + "IndexSet"));
+
+    wsProp->setValue(wsName);
+
+    *indexTypeProp = type;
+
+    *indexProp = list;
+  }
+
+  template <typename Workspace>
+  void setIndexProperty(const std::string &name, const std::string &wsName,
+                        IndexType type, const std::string &list) {
+    checkWorkspaceType<Workspace>();
+    if (!isReserved(m_reservedList, name))
+      throw std::runtime_error("Algorithm::setIndexProperty can only be used "
+                               "when on properties declared using "
+                               "declareIndexProperty.");
+
+    auto *wsProp = dynamic_cast<WorkspaceProperty<Workspace> *>(
+        getPointerToProperty(name));
+    auto *indexTypeProp = dynamic_cast<IndexTypeProperty *>(
+        getPointerToProperty(name + "IndexType"));
+    auto *indexProp =
+        dynamic_cast<IndexProperty *>(getPointerToProperty(name + "IndexSet"));
+
+    wsProp->setValue(wsName);
+
+    *indexTypeProp = type;
+
+    indexProp->setValue(list);
+  }
 
   const std::string workspaceMethodName() const override;
   const std::vector<std::string> workspaceMethodOn() const override;
@@ -427,7 +588,7 @@ private:
   bool m_isExecuted;            ///< Algorithm is executed flag
   bool m_isChildAlgorithm;      ///< Algorithm is a child algorithm
   bool m_recordHistoryForChild; ///< Flag to indicate whether history should be
-  /// recorded. Applicable to child algs only
+                                /// recorded. Applicable to child algs only
   bool m_alwaysStoreInADS; ///< Always store in the ADS, even for child algos
   bool m_runningAsync;     ///< Algorithm is running asynchronously
   std::atomic<bool> m_running; ///< Algorithm is running
@@ -436,15 +597,15 @@ private:
                                      /// closedown messages from the base class
                                      /// (default = true)
   mutable double m_startChildProgress; ///< Keeps value for algorithm's progress
-  /// at start of an Child Algorithm
-  mutable double m_endChildProgress; ///< Keeps value for algorithm's progress
-  /// at Child Algorithm's finish
-  AlgorithmID m_algorithmID; ///< Algorithm ID for managed algorithms
+                                       /// at start of an Child Algorithm
+  mutable double m_endChildProgress;   ///< Keeps value for algorithm's progress
+                                       /// at Child Algorithm's finish
+  AlgorithmID m_algorithmID;           ///< Algorithm ID for managed algorithms
   std::vector<boost::weak_ptr<IAlgorithm>> m_ChildAlgorithms; ///< A list of
-  /// weak pointers
-  /// to any child
-  /// algorithms
-  /// created
+                                                              /// weak pointers
+                                                              /// to any child
+                                                              /// algorithms
+                                                              /// created
 
   /// Vector of all the workspaces that have been read-locked
   WorkspaceVector m_readLockedWorkspaces;
@@ -462,6 +623,8 @@ private:
   int m_singleGroup;
   /// All the groups have similar names (group_1, group_2 etc.)
   bool m_groupsHaveSimilarNames;
+
+  std::vector<std::string> m_reservedList;
 };
 
 /// Typedef for a shared pointer to an Algorithm
