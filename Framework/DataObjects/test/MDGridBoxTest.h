@@ -781,7 +781,7 @@ public:
   void xtest_addEvent_with_recursive_gridding_Performance() {
     // Make a 2D box split into 4, 4 levels deep. = 4^4^2 boxes at the bottom =
     // 256^2 boxes.
-    size_t numSplit = 4;
+    const size_t numSplit = 4;
     for (size_t recurseLevels = 1; recurseLevels < 5; recurseLevels++) {
       double boxes_per_side = pow(double(numSplit), double(recurseLevels));
       double spacing = double(numSplit) / boxes_per_side;
