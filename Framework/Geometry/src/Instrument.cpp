@@ -1412,13 +1412,12 @@ boost::shared_ptr<ParameterMap> Instrument::makeLegacyParameterMap() const {
     // Tolerance 1e-9 m as in Beamline::DetectorInfo::isEquivalent.
     if ((relPos - toVector3d(baseComponent->getRelativePos())).norm() >= 1e-9) {
       if (isRectangularDetectorPixel) {
-          throw std::runtime_error(
-              "Cannot create legacy ParameterMap: Position "
-              "parameters for RectangularDetectorPixel are "
-              "not supported");
-        }
-        pmap->addV3D(m_componentCache[i], ParameterMap::pos(),
-                     Kernel::toV3D(relPos));
+        throw std::runtime_error("Cannot create legacy ParameterMap: Position "
+                                 "parameters for RectangularDetectorPixel are "
+                                 "not supported");
+      }
+      pmap->addV3D(m_componentCache[i], ParameterMap::pos(),
+                   Kernel::toV3D(relPos));
     }
     if ((relRot * toQuaterniond(baseComponent->getRelativeRot()).conjugate())
             .vec()
