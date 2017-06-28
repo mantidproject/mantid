@@ -42,7 +42,7 @@ protected:
 public:
   std::string name() const override { return "GramCharlier"; }
   void function1D(double *out, const double *xValues,
-                  const size_t nData) const override;
+                  const size_t n) const override;
 
 };
 
