@@ -365,8 +365,8 @@ std::vector<std::string> MuonAnalysisFitDataPresenter::generateWorkspaceNames(
 /**
 * Stores the normalization into the table WS
 * If the workspace is already in the table
-* do nothing. 
-* @param name :: the name of the workspace to add. 
+* do nothing.
+* @param name :: the name of the workspace to add.
 */
 void MuonAnalysisFitDataPresenter::storeNorm(std::string name) const {
   if (m_isItTFAsymm) {

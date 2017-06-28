@@ -594,7 +594,7 @@ void MuonFitPropertyBrowser::doTFAsymmFit() {
   // rescale WS to normalized counts:
   const int nWorkspaces = static_cast<int>(m_workspacesToFit.size());
   if (nWorkspaces > 1) {
-	  emit functionUpdateRequested();
+    emit functionUpdateRequested();
   }
   for (int i = 0; i < nWorkspaces; i++) {
     rescaleWS(norms, m_workspacesToFit[i], 1.0);
@@ -701,7 +701,7 @@ void MuonFitPropertyBrowser::updateMultipleNormalization(
     auto it = norms.find(std::get<0>(norm));
     if (it != norms.end() && it->second != std::get<1>(norm)) {
       // write new norm
-      row << it->second << std::get<0>(norm) << "Calculated"; 
+      row << it->second << std::get<0>(norm) << "Calculated";
     } else {
       // write old norm
       row << std::get<1>(norm) << std::get<0>(norm) << "Estimated";
