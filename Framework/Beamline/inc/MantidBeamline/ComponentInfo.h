@@ -77,10 +77,10 @@ public:
   std::vector<size_t> detectorsInSubtree(const size_t componentIndex) const;
   std::vector<size_t> componentsInSubtree(const size_t componentIndex) const;
   size_t size() const;
-  inline bool isDetector(const size_t componentIndex) const {
+  bool isDetector(const size_t componentIndex) const {
     return componentIndex < m_assemblySortedDetectorIndices->size();
   }
-  inline size_t compOffsetIndex(const size_t componentIndex) const {
+  size_t compOffsetIndex(const size_t componentIndex) const {
     return componentIndex - m_assemblySortedDetectorIndices->size();
   }
 

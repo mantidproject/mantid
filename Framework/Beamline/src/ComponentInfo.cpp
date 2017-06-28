@@ -111,16 +111,45 @@ Eigen::Quaterniond ComponentInfo::rotation(const size_t componentIndex) const {
   return (*m_rotations)[rangesIndex];
 }
 
+/**
+ * Extract the position of a component relative to it's parent
+ *
+ * The parent rotatation is unwound prior to establishing the offset. This means
+ *that
+ * recorded relative positions are independent of changes in rotation.
+ *
+ * BEWARE that this method does not account for scaling factors as found in
+ *RectangularDetectors
+ * see Instrument::makeLegacyParmeterMap for correct handling of those cases.
+ *
+ * BEWARE of peformance on repeated calls to this method as the transformation
+ *has to
+ * be established every time, independent of whether the parent remains the
+ *same.
+ *
+ * @param componentIndex
+ * @return
+ */
 Eigen::Vector3d
 ComponentInfo::relativePosition(const size_t componentIndex) const {
   size_t parentIndex = parent(componentIndex);
   if (parentIndex == componentIndex) {
     return position(componentIndex);
   } else {
-    return position(componentIndex) - position(parentIndex);
+    const auto parentPos = position(parentIndex);
+    Eigen::Affine3d transformation;
+    transformation =
+        rotation(parentIndex).conjugate(); // Inverse parent rotation
+    transformation.translate(-parentPos);
+    return transformation * position(componentIndex);
   }
 }
 
+/**
+ * Extract the rotation of a component relative to it's parent
+ * @param componentIndex
+ * @return
+ */
 Eigen::Quaterniond
 ComponentInfo::relativeRotation(const size_t componentIndex) const {
   size_t parentIndex = parent(componentIndex);
@@ -209,7 +238,7 @@ void ComponentInfo::checkDetectorInfo() const {
 }
 
 void ComponentInfo::scanningCheck(size_t compIndex) const {
-  if (!componentsInSubtree(compIndex).empty() && hasDetectorInfo() &&
+  if (!detectorsInSubtree(compIndex).empty() && hasDetectorInfo() &&
       m_detectorInfo->isScanning()) {
     throw std::runtime_error(
         "Cannot move or rotate parent component containing "

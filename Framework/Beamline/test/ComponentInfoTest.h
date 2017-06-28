@@ -117,9 +117,10 @@ std::tuple<ComponentInfo, boost::shared_ptr<DetectorInfo>> makeTreeExample() {
       0, 5)); // instrument assembly (with 4 sub-components and self)
 
   auto positions = boost::make_shared<std::vector<Eigen::Vector3d>>(
-      2); // 2 positions provided. 2 non-detectors
+      2, Eigen::Vector3d{0, 0, 0}); // 2 positions provided. 2 non-detectors
   auto rotations = boost::make_shared<std::vector<Eigen::Quaterniond>>(
-      2); // 2 rotations provided. 2 non-detectors
+      2,
+      Eigen::Quaterniond::Identity()); // 2 rotations provided. 2 non-detectors
 
   auto detectorInfo =
       boost::make_shared<DetectorInfo>(detPositions, detRotations);
@@ -483,7 +484,9 @@ public:
     TS_ASSERT(componentInfo.hasDetectorInfo());
   }
 
-  void test_read_relative_position() {
+  void test_read_relative_position_simple_case() {
+    // Not dealing with rotations at all here in this test
+
     using namespace Eigen;
     auto infos = makeTreeExample();
     auto &compInfo = std::get<0>(infos);
@@ -493,10 +496,14 @@ public:
 
     Eigen::Vector3d rootPosition{1, 0, 0};
     compInfo.setPosition(rootIndex, rootPosition);
+    compInfo.setRotation(rootIndex, Quaterniond::Identity()); // Ensure
+                                                              // Root/Parent is
+                                                              // NOT rotated in
+                                                              // this example
     Eigen::Vector3d detPosition{2, 0, 0};
     compInfo.setPosition(detectorIndex, detPosition);
 
-    TSM_ASSERT("For a root (no parent) relative rotations are always the same "
+    TSM_ASSERT("For a root (no parent) relative positions are always the same "
                "as absolute ones",
                compInfo.position(rootIndex)
                    .isApprox(compInfo.relativePosition(rootIndex)));
@@ -504,9 +511,44 @@ public:
     const Eigen::Vector3d expectedRelativePos =
         compInfo.position(detectorIndex) -
         compInfo.position(compInfo.parent(detectorIndex));
+
     const Eigen::Vector3d actualRelativePos =
         compInfo.relativePosition(detectorIndex);
     TS_ASSERT(expectedRelativePos.isApprox(actualRelativePos));
+  }
+
+  void test_read_relative_position_complex_case() {
+
+    using namespace Eigen;
+    auto infos = makeTreeExample();
+    auto &compInfo = std::get<0>(infos);
+
+    const size_t rootIndex = 4;
+    const size_t subComponentIndex = 3;
+
+    Vector3d rootPosition{0, 0, 0};
+    Vector3d subCompPosition{2, 0, 0};
+    compInfo.setPosition(rootIndex, rootPosition);
+    compInfo.setPosition(subComponentIndex, subCompPosition);
+    compInfo.setRotation(
+        rootIndex,
+        Quaterniond(AngleAxisd(
+            M_PI / 2, Vector3d::UnitY()))); // Root is rotated 90 Deg around Y
+
+    // Quick sanity check. We now expect the absolute position of the
+    // subcomponent to be rotated by above.
+    TS_ASSERT(
+        compInfo.position(subComponentIndex).isApprox(Vector3d{0, 0, -2}));
+    // Relative position removes the parent rotation. Should be 2,0,0 (which is
+    // comp - root).
+    TS_ASSERT(compInfo.relativePosition(subComponentIndex)
+                  .isApprox(subCompPosition - rootPosition));
+
+    const auto diffPos =
+        compInfo.position(subComponentIndex) - compInfo.position(rootIndex);
+    TSM_ASSERT("Vector between comp and root is not the same as relative "
+               "position. Rotation involved.",
+               !compInfo.relativePosition(subComponentIndex).isApprox(diffPos));
   }
 
   void test_read_relative_rotation() {
