@@ -148,6 +148,17 @@ class CompositeFunctionWrapper(FunctionWrapper):
              except:
                 pass
           
+    def unconstrainAll (self, name):
+    # Constrain all parameters according local names in expressions.
+       for i in range(0, self.__len__()):
+          if( isinstance( self[i], CompositeFunctionWrapper )):
+             self[i].unconstrainAll(name)
+          else:
+             try:
+                self[i].unconstrain(name)
+             except:
+                pass
+          
     def untieAll (self, name):
     # Untie all parameters with the given local name.
     # Every member function must have a parameter of this name.

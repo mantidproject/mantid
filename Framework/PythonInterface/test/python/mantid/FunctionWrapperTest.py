@@ -244,6 +244,11 @@ class FunctionWrapperTest(unittest.TestCase):
         g2_str = c[2][1].__str__()
         self.assertEqual(g2_str.count("constraints="),1)
         self.assertEqual(g2_str.count("Sigma<1.8"),1)
+        
+        c.unconstrainAll("Sigma")
+        
+        cz_str = c.__str__()
+        self.assertEqual(cz_str.count("constraints="),0)
               
     def test_free(self):
         g = FunctionWrapper( "Gaussian", Height=8.5, Sigma=1.2, PeakCentre=15)
