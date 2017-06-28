@@ -171,7 +171,7 @@ def _create_wrapper_function(name):
     # ------------------------------------------------------------------------------------------------
     def wrapper_function(*args, **kwargs):
         if( name == "CompositeFunction"):
-           pass
+           return CompositeFunctionWrapper( *args, **kwargs )
         else:
            return FunctionWrapper(name, *args, **kwargs)
 
