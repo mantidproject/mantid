@@ -101,7 +101,6 @@ Custom Interfaces
 
 - Indirect > Corrections > CalculatePaalmanPings is upgraded with few new options for computation of the corrections. Those are needed to be able to compute the corrections for different scenarios, like QENS, FWS, diffraction.
 - Indirect > Corrections and Indirect > Analysis interfaces have been configured to not to accept GroupWorkspace as input.
-- General > Multi dataset fitting interface and the general fitting dock now display the status string returned by the `Fit` algorithm. If an error occured during fitting it will be reported in this string.
 
 
 Bugs Resolved
