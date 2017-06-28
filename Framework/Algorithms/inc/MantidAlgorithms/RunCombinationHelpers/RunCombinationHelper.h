@@ -52,6 +52,7 @@ public:
 
 private:
   size_t m_numberSpectra;
+  size_t m_numberDetectors;
   std::string m_xUnit;
   std::string m_yUnit;
   std::string m_spectrumAxisUnit;

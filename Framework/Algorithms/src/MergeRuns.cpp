@@ -128,7 +128,7 @@ void MergeRuns::exec() {
     // At least one is not event workspace ----------------
 
     // This gets the list of workspaces
-    m_inMatrixWS = this->validateInputs(inputs);
+    m_inMatrixWS = validateInputs(inputs);
 
     // Iterate over the collection of input workspaces
     auto it = m_inMatrixWS.begin();
@@ -152,6 +152,7 @@ void MergeRuns::exec() {
                          "not recommended unless the detectors have the same "
                          "positions, rotations etc. for each time index.\n";
     } else if (isScanning && appendDetectorScans) {
+      // Build a new output workspace
       outWS = buildScanningOutputWorkspace();
     }
 

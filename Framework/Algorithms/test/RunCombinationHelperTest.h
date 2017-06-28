@@ -4,15 +4,19 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAlgorithms/RunCombinationHelpers/RunCombinationHelper.h"
+#include "MantidAPI/FrameworkManager.h"
 
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/DetectorInfo.h"
+#include "MantidAlgorithms/CreateSampleWorkspace.h"
 #include "MantidAlgorithms/GroupWorkspaces.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using Mantid::Algorithms::RunCombinationHelper;
 using Mantid::Algorithms::GroupWorkspaces;
+using Mantid::Algorithms::CreateSampleWorkspace;
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace WorkspaceCreationHelper;
@@ -106,8 +110,54 @@ public:
     TS_ASSERT_EQUALS(m_testee.checkCompatibility(ws8), "different Y units; ");
   }
 
+  void test_scanning_workspaces_throw_no_error() {
+    const auto scanWS1 = createSampleScanningWorkspace(2);
+    const auto scanWS2 = createSampleScanningWorkspace(2);
+
+    m_testee.setReferenceProperties(scanWS1);
+    TS_ASSERT(m_testee.checkCompatibility(scanWS2).empty());
+  }
+
+  void test_mix_of_scanning_and_non_scanning_workspaces_throws_error() {
+    const auto scanWS = createSampleScanningWorkspace(2);
+    const auto nonScanWS = createSampleScanningWorkspace(1);
+
+    m_testee.setReferenceProperties(scanWS);
+    TS_ASSERT_EQUALS(m_testee.checkCompatibility(nonScanWS),
+                     "a mix of workspaces with and without detector scans; ");
+  }
+
+  void
+  test_scanning_workspaces_with_different_numbers_of_detectors_throws_error() {
+    const auto scanWS1 = createSampleScanningWorkspace(2);
+    const auto scanWS2 = createSampleScanningWorkspace(2, 5);
+
+    TS_ASSERT_EQUALS(scanWS1->detectorInfo().size(), 200)
+    TS_ASSERT_EQUALS(scanWS2->detectorInfo().size(), 205)
+
+    m_testee.setReferenceProperties(scanWS1);
+    TS_ASSERT_EQUALS(m_testee.checkCompatibility(scanWS2),
+                     "workspaces with detectors scans have different number of "
+                     "detectors; ");
+  }
+
 private:
   RunCombinationHelper m_testee;
+
+  MatrixWorkspace_sptr createSampleScanningWorkspace(int nTimeIndexes,
+                                                     int nMonitors = 0) {
+    FrameworkManager::Instance();
+
+    CreateSampleWorkspace wsAlg;
+    wsAlg.initialize();
+    wsAlg.setChild(true);
+    wsAlg.setProperty("NumScanPoints", nTimeIndexes);
+    wsAlg.setProperty("NumMonitors", nMonitors);
+    wsAlg.setPropertyValue("OutputWorkspace", "__out");
+    wsAlg.execute();
+
+    return wsAlg.getProperty("OutputWorkspace");
+  }
 };
 
 #endif /* MANTID_ALGORITHMS_RUNCOMBINATIONHELPERTEST_H_ */
