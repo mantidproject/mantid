@@ -14,7 +14,7 @@ using namespace Mantid::API;
 AbstractDataProcessorTreeModel::AbstractDataProcessorTreeModel(
     ITableWorkspace_sptr tableWorkspace,
     const DataProcessorWhiteList &whitelist)
-    : m_tWS(tableWorkspace), m_whitelist(whitelist), m_highlighted(-1, -1){};
+    : m_tWS(tableWorkspace), m_whitelist(whitelist){};
 
 AbstractDataProcessorTreeModel::~AbstractDataProcessorTreeModel() {}
 
@@ -32,14 +32,6 @@ AbstractDataProcessorTreeModel::flags(const QModelIndex &index) const {
     return 0;
 
   return Qt::ItemIsEditable | QAbstractItemModel::flags(index);
-}
-
-/** Returns the currently highlighted row / group
-* @return : The highlighted row / group as a pair of group and row indexes
-*/
-std::pair<int, int> AbstractDataProcessorTreeModel::getHighlighted() const {
-
-  return m_highlighted;
 }
 
 } // namespace MantidWidgets

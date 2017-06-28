@@ -48,8 +48,8 @@ public:
 private slots:
   void startWorker() {
     try {
-      m_presenter->m_manager->setHighlighted(0, m_groupIndex);
       m_presenter->postProcessGroup(m_groupData);
+      m_presenter->m_manager->addHighlighted(m_groupIndex);
       emit finished(0);
     } catch (std::exception &ex) {
       emit reductionErrorSignal(ex);

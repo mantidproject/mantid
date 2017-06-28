@@ -372,13 +372,21 @@ void DataProcessorOneLevelTreeManager::update(
                      QString::fromStdString(data[col]));
 }
 
-/** Sets the currently highlighted row
-* @param rowIndex : The highlighted row index
-* @param groupIndex : The group the highlighted row is in
+/** Sets a new row to be highlighted
+* @param position : The index of the row to be highlighted
 */
-void DataProcessorOneLevelTreeManager::setHighlighted(int rowIndex,
-                                                      int groupIndex) {
-  m_model->setHighlighted(rowIndex, groupIndex);
+void DataProcessorOneLevelTreeManager::addHighlighted(int position) {
+  m_model->addHighlighted(position);
+}
+
+/** Sets a new row to be highlighted
+* @param position : The index of the row to be highlighted
+* @param parent : The parent of the row
+*/
+void DataProcessorOneLevelTreeManager::addHighlighted(int position,
+                                                      int parent) {
+  UNUSED_ARG(parent);
+  addHighlighted(position);
 }
 
 /** Return a shared ptr to the model
