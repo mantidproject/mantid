@@ -361,7 +361,7 @@ void GenericDataProcessorPresenter::endReduction() {
 
   pause();
   m_mainPresenter->confirmReductionPaused();
-  m_manager->setHighlighted(-1, -1); // No row / group highlighted
+  //m_manager->setHighlighted(-1, -1); // No row / group highlighted
   m_newSelection = true; // Allow same selection to be processed again
 }
 

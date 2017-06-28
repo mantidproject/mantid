@@ -37,13 +37,16 @@ QVariant QDataProcessorOneLevelTreeModel::data(const QModelIndex &index,
   if (parent(index).isValid())
     return QVariant();
 
-  if (role != Qt::DisplayRole && role != Qt::EditRole) {
-    if (role == Qt::BackgroundRole && index.row() == m_highlighted.first)
+  if (role == Qt::DisplayRole || role == Qt::EditRole) {
+    return QString::fromStdString(m_tWS->String(index.row(), index.column()));
+  } else if (role == Qt::BackgroundRole) {
+    // Highlight if this is in the lists of rows to be highlighted
+    if (std::find(m_highlightRows.begin(), m_highlightRows.end(),
+                  index.row()) != m_highlightRows.end())
       return QColor("#FF8040");
-    return QVariant();
   }
 
-  return QString::fromStdString(m_tWS->String(index.row(), index.column()));
+  return QVariant();
 }
 
 /** Returns the column name (header data for given section)
@@ -185,13 +188,14 @@ bool QDataProcessorOneLevelTreeModel::setData(const QModelIndex &index,
 }
 
 /** Sets the currently highlighted row
-* @param rowIndex : The highlighted row index
-* @param groupIndex : The group the highlighted row is in
+* @param position : The position of the row to be highlighted
+* @param parent : The parent of this row
 */
-void QDataProcessorOneLevelTreeModel::setHighlighted(int rowIndex,
-                                                     int groupIndex) {
-  UNUSED_ARG(groupIndex);
-  m_highlighted.first = rowIndex;
+void QDataProcessorOneLevelTreeModel::addHighlighted(
+    int position, const QModelIndex &parent) {
+
+  if (!parent.isValid())
+    m_highlightRows.push_back(position);
 }
 
 } // namespace MantidWidgets

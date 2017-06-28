@@ -85,8 +85,9 @@ public:
   /// Update row with new data
   void update(int parent, int child,
               const std::vector<std::string> &data) override;
-  /// Highlight a specific row / group
-  void setHighlighted(int rowIndex, int groupIndex) override;
+  /// Highlight a new data item
+  void addHighlighted(int position) override;
+  void addHighlighted(int position, int parent) override;
 
   /// Validate a table workspace
   bool isValidModel(Mantid::API::Workspace_sptr ws,

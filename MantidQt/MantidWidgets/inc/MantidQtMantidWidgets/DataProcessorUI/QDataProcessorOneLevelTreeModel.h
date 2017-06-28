@@ -78,8 +78,13 @@ public:
 
   // Miscellaneous model functions
 
-  // Set the currently highlighted row
-  void setHighlighted(int rowIndex, int groupIndex) override;
+  // Add a row to the list of rows to be highlighted
+  void addHighlighted(int position,
+                      const QModelIndex &parent = QModelIndex()) override;
+
+private:
+  /// List of row indexes that should be highlighted
+  std::vector<int> m_highlightRows;
 };
 
 /// Typedef for a shared pointer to \c QDataProcessorOneLevelTreeModel

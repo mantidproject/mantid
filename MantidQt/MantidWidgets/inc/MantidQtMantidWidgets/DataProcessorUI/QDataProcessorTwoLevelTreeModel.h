@@ -83,8 +83,9 @@ public:
 
   // Miscellaneous model functions
 
-  // Set the currently highlighted row
-  void setHighlighted(int rowIndex, int groupIndex) override;
+  // Add a row / group to the list of items to be highlighted
+  void addHighlighted(int position,
+                      const QModelIndex &parent = QModelIndex()) override;
 
 private:
   void setupModelData(Mantid::API::ITableWorkspace_sptr table);
@@ -97,6 +98,10 @@ private:
   std::vector<std::string> m_groupName;
   /// Vector containing the (absolute) row indices for a given group
   std::vector<std::vector<int>> m_rowsOfGroup;
+  /// List of row indexes for each group that should be highlighted
+  std::vector<std::vector<int>> m_highlightRows;
+  /// List of group indexes that should be highlighted
+  std::vector<int> m_highlightGroups;
 };
 
 /// Typedef for a shared pointer to \c QDataProcessorTwoLevelTreeModel

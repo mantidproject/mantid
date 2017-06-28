@@ -51,25 +51,30 @@ QVariant QDataProcessorTwoLevelTreeModel::data(const QModelIndex &index,
       if (index.column() == 0) {
         // Return the group name only in the first column
         return QString::fromStdString(m_groupName.at(index.row()));
-      }
-      else {
+      } else {
         return QVariant();
       }
-    }
-    else {
+    } else {
       // Index corresponds to a row
 
       // Absolute position of this row in the table
       int absolutePosition = m_rowsOfGroup[parent(index).row()][index.row()];
       return QString::fromStdString(
-        m_tWS->String(absolutePosition, index.column() + 1));
+          m_tWS->String(absolutePosition, index.column() + 1));
     }
+ 
   } else if (role == Qt::BackgroundRole) {
-    // Highlight if this is the current row / group, transparent otherwise
-    if (!parentValid && index.row() == m_highlighted.second ||
-        parentValid && index.row() == m_highlighted.first &&
-            parent(index).row() == m_highlighted.second)
-      return QColor("#FF8040");
+    // Highlight if this is in the lists of rows / groups to be highlighted
+    if (!parentValid) {
+      if (std::find(m_highlightGroups.begin(), m_highlightGroups.end(),
+                    index.row()) != m_highlightGroups.end())
+        return QColor("#FF8040");
+    } else if (parent(index).row() < m_highlightRows.size()) {
+      auto groupItems = m_highlightRows[parent(index).row()];
+      if (std::find(groupItems.begin(), groupItems.end(), index.row()) !=
+          groupItems.end())
+        return QColor("#FF8040");
+    }
   }
 
   return QVariant();
@@ -463,24 +468,31 @@ void QDataProcessorTwoLevelTreeModel::setupModelData(
 }
 
 /** Return the underlying data structure, i.e. the table workspace this model is
- * representing
- *
- * @return :: the underlying table workspace
- */
+* representing
+* @return :: the underlying table workspace
+*/
 ITableWorkspace_sptr
 QDataProcessorTwoLevelTreeModel::getTableWorkspace() const {
   return m_tWS;
 }
 
-/** Set the current row / group to be highlighted 
- *
- * @param groupIndex : Index of the group
- * @param rowIndex : Index of the row
- */
-void QDataProcessorTwoLevelTreeModel::setHighlighted(int rowIndex,
-                                                     int groupIndex) {
-  m_highlighted.first = rowIndex;
-  m_highlighted.second = groupIndex;
+/** Add a new data item to be highlighted
+* @param position : The position of the item to be highlighted
+* @param parent : The parent of this item
+*/
+void QDataProcessorTwoLevelTreeModel::addHighlighted(
+    int position, const QModelIndex &parent) {
+
+  if (!parent.isValid()) {
+    // Add a group item
+    m_highlightGroups.push_back(position);
+  } else {
+    // Add a row item
+    if (m_highlightRows.size() <= parent.row())
+      m_highlightRows.push_back(std::vector<int>());
+
+    m_highlightRows[parent.row()].push_back(position);
+  }
 }
 
 } // namespace MantidWidgets

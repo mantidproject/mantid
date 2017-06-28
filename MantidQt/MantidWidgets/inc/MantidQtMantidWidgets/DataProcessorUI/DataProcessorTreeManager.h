@@ -90,8 +90,9 @@ public:
   /// Update row with new data
   virtual void update(int parent, int child,
                       const std::vector<std::string> &data) = 0;
-  /// Highlight a specific row / group
-  virtual void setHighlighted(int rowIndex, int groupIndex) = 0;
+  /// Add a new data item to be highlighted
+  virtual void addHighlighted(int position) = 0;
+  virtual void addHighlighted(int position, int parent) = 0;
 
   /// Validate a table workspace
   virtual bool isValidModel(Mantid::API::Workspace_sptr ws,

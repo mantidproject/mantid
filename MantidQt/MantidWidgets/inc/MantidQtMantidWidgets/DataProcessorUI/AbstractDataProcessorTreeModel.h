@@ -51,19 +51,15 @@ public:
 
   // Miscellaneous model functions
 
-  // Set the currently highlighted row / group
-  virtual void setHighlighted(int rowIndex, int groupIndex) = 0;
-  // Get the currently highlighted row / group
-  std::pair<int, int> getHighlighted() const;
+  // Add a data item to the list of items to be highlighted
+  virtual void addHighlighted(int position,
+                              const QModelIndex &parent = QModelIndex()) = 0;
 
 protected:
   /// Collection of data for viewing.
   Mantid::API::ITableWorkspace_sptr m_tWS;
   /// Map of column indexes to names and viceversa
   DataProcessorWhiteList m_whitelist;
-  /// The current row or group in the table to be highlighted (first = group
-  /// index, second = row index)
-  std::pair<int, int> m_highlighted;
 };
 } // namespace MantidWidgets
 } // namespace Mantid
