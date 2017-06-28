@@ -107,10 +107,8 @@ public:
 
   //--------------------------------------------------------------------------------------------
   /// Make a copy of the present type of validator
-  IPropertySettings *clone() override {
-    auto out =
-        new EnabledWhenWorkspaceIsType<T>(m_otherPropName, m_enabledSetting);
-    return out;
+  IPropertySettings *clone() const override {
+    return new EnabledWhenWorkspaceIsType<T>(m_otherPropName, m_enabledSetting);
   }
 
 protected:

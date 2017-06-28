@@ -20,7 +20,8 @@ using std::size_t;
 DECLARE_WORKSPACE(Workspace2D)
 
 /// Constructor
-Workspace2D::Workspace2D() : m_noVectors(0) {}
+Workspace2D::Workspace2D(const Parallel::StorageMode storageMode)
+    : HistoWorkspace(storageMode), m_noVectors(0) {}
 
 Workspace2D::Workspace2D(const Workspace2D &other)
     : HistoWorkspace(other), m_noVectors(other.m_noVectors),
@@ -345,6 +346,12 @@ void Workspace2D::generateHistogram(const std::size_t index, const MantidVec &X,
     Mantid::Kernel::VectorHelper::rebin(currentX, currentY, currentE, X, Y, E,
                                         this->isDistribution());
   }
+}
+
+Workspace2D *Workspace2D::doClone() const { return new Workspace2D(*this); }
+
+Workspace2D *Workspace2D::doCloneEmpty() const {
+  return new Workspace2D(storageMode());
 }
 
 } // namespace DataObjects
