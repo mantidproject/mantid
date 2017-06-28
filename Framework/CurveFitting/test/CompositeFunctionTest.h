@@ -148,28 +148,28 @@ public:
   }
 
   void test_has_parameter() {
-    auto mfun = boost::make_shared<CompositeFunction>();
-    auto g = boost::make_shared<CurveFittingGauss>();
-    auto g1 = boost::make_shared<CurveFittingGauss>();
-    auto g2 = boost::make_shared<CurveFittingGauss>();
-    auto bk = boost::make_shared<CurveFittingLinear>();
-    auto c = boost::make_shared<CompositeFunction>();
+    auto composite = boost::make_shared<CompositeFunction>();
+    auto gauss = boost::make_shared<CurveFittingGauss>();
+    auto gauss1 = boost::make_shared<CurveFittingGauss>();
+    auto gauss2 = boost::make_shared<CurveFittingGauss>();
+    auto linear = boost::make_shared<CurveFittingLinear>();
+    auto innerComposite = boost::make_shared<CompositeFunction>();
 
-    mfun->addFunction(bk);
-    mfun->addFunction(g);
-    c->addFunction(g1);
-    c->addFunction(g2);
-    mfun->addFunction(c);
+    composite->addFunction(linear);
+    composite->addFunction(gauss);
+    innerComposite->addFunction(gauss1);
+    innerComposite->addFunction(gauss2);
+    composite->addFunction(innerComposite);
 
-    TS_ASSERT(mfun->hasParameter("f0.a"));
-    TS_ASSERT(mfun->hasParameter("f0.b"));
-    TS_ASSERT(mfun->hasParameter("f1.h"));
-    TS_ASSERT(mfun->hasParameter("f1.c"));
-    TS_ASSERT(mfun->hasParameter("f2.f0.c"));
-    TS_ASSERT(mfun->hasParameter("f2.f1.h"));
-    TS_ASSERT(!mfun->hasParameter("h"));
-    TS_ASSERT(!mfun->hasParameter("f0.h"));
-    TS_ASSERT(!mfun->hasParameter("f2.f3.a"));
+    TS_ASSERT(composite->hasParameter("f0.a"));
+    TS_ASSERT(composite->hasParameter("f0.b"));
+    TS_ASSERT(composite->hasParameter("f1.h"));
+    TS_ASSERT(composite->hasParameter("f1.c"));
+    TS_ASSERT(composite->hasParameter("f2.f0.c"));
+    TS_ASSERT(composite->hasParameter("f2.f1.h"));
+    TS_ASSERT(!composite->hasParameter("h"));
+    TS_ASSERT(!composite->hasParameter("f0.h"));
+    TS_ASSERT(!composite->hasParameter("f2.f3.a"));
   }
 
   void testFit() {
