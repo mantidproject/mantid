@@ -46,6 +46,13 @@ public:
   /// A constructor that looks like a Python __init__ method
   IPeakFunctionAdapter(PyObject *self);
 
+  /// Disable copy operator - The PyObject must be supplied to construct the
+  /// object
+  IPeakFunctionAdapter(const IPeakFunctionAdapter &) = delete;
+
+  /// Disable assignment operator
+  IPeakFunctionAdapter &operator=(const IPeakFunctionAdapter &) = delete;
+
   /// Calls 'centre' method in Python
   double centre() const override;
   /// Calls 'height' method in Python
@@ -86,8 +93,6 @@ public:
                           boost::python::object &jacobian);
 
 private:
-  /// The PyObject must be supplied to construct the object
-  DISABLE_COPY_AND_ASSIGN(IPeakFunctionAdapter)
 };
 }
 }

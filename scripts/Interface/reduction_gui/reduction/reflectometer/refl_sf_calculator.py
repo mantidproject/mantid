@@ -1,3 +1,4 @@
+from __future__ import (absolute_import, division, print_function)
 #pylint: disable=invalid-name
 """
     This class holds all the necessary information to create a reduction script.
@@ -42,7 +43,7 @@ class REFLSFCalculatorScripter(BaseReductionScripter):
         back_from = []
         back_to = []
 
-        tof_range = [0.0,200000.0]
+        tof_range = [0.0, 200000.0]
         incident_medium = ''
         incident_medium_index = -1
 
@@ -77,7 +78,7 @@ class REFLSFCalculatorScripter(BaseReductionScripter):
 
                 if _arg == 'Incident medium':
 
-                    _val=_val[4:-3]
+                    _val = _val[4:-3]
                     if incident_medium.strip() == '':
                         incident_medium = _val
                     continue
@@ -107,19 +108,19 @@ class REFLSFCalculatorScripter(BaseReductionScripter):
                     continue
 
         run_attenuator = []
-        for (run,att) in zip(run_number, attenuator):
+        for (run, att) in zip(run_number, attenuator):
             run_attenuator.append(run.strip() + ':' + att.strip())
         join_string = ','
         script_run_attenuator = join_string.join(run_attenuator)
 
         list_peak_back = []
         for (_peak_from, _peak_to, _back_from, _back_to) in zip(peak_from, peak_to, back_from, back_to):
-            list_peak_back.append([int(_peak_from),int(_peak_to),int(_back_from),int(_back_to)])
+            list_peak_back.append([int(_peak_from), int(_peak_to), int(_back_from), int(_back_to)])
 
         new_script = algo + '(string_runs="' + script_run_attenuator + '"'
         new_script += ',list_peak_back=' + str(list_peak_back)
 
-        #retrieve right incident medium
+        # retrieve right incident medium
 
         incident_medium_list = incident_medium.split(',')
         incident_medium = incident_medium_list[incident_medium_index]
@@ -156,7 +157,7 @@ class REFLSFCalculatorScripter(BaseReductionScripter):
 
         _script = self.create_script(script_part2)
         if _script == '':
-            print 'Please define a Scaling Factor File Name'
+            print('Please define a Scaling Factor File Name')
             raise RuntimeError
 
         script += _script
@@ -175,14 +176,13 @@ class REFLSFCalculatorScripter(BaseReductionScripter):
         if HAS_MANTID:
             script = self.to_script(None)
 
-            print script
+            print(script)
 
             try:
                 t0 = time.time()
-                exec script
-                delta_t = time.time()-t0
-                print REF_RED_OUTPUT_MESSAGE
-                print "SF calculation time: %5.2g sec" % delta_t
+                exec(script)
+                delta_t = time.time() - t0
+                print("SF calculation time: %5.2g sec" % delta_t)
                 # Update scripter
                 for item in self._observers:
                     if item.state() is not None:
@@ -196,6 +196,6 @@ class REFLSFCalculatorScripter(BaseReductionScripter):
                             item.state().update()
                         except:
                             pass
-                raise RuntimeError(sys.exc_value)
+                raise RuntimeError(sys.exc_info()[1])
         else:
             raise RuntimeError("SF calculation could not be executed: Mantid could not be imported")

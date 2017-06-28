@@ -10,7 +10,7 @@ Description
 -----------
 
 Calculates absorption corrections for an infinite flat plate sample giving output in the
-Paalman & Pings absorption factors:
+Paalman and Pings absorption factors:
 :math:`A_{s,s}` (scattering and absorption in sample),
 :math:`A_{s,sc}` (scattering in sample and absorption in sample and container),
 :math:`A_{c,sc}` (scattering in container and absorption in sample and container)
@@ -75,6 +75,12 @@ Output:
 .. testoutput:: exSampleAndCan
 
     Correction workspaces: corr_ass, corr_assc, corr_acsc, corr_acc
+
+Related Algorithms
+------------------
+
+:ref:`ApplyPaalmanPingsCorrection <algm-ApplyPaalmanPingsCorrection>`
+will correctly apply the partial absorption factors
 
 .. categories::
 

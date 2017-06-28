@@ -5,6 +5,8 @@
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/VisibleWhenProperty.h"
 
 #include <algorithm>
 #include <vector>
@@ -26,23 +28,29 @@ const std::string ZERO("zero");
 const std::string SQRT("sqrt");
 const std::string ONE_IF_ZERO("oneIfZero");
 const std::string SQRT_OR_ONE("sqrtOrOne");
+const std::string CUSTOM("custom");
 
-struct resetzeroerror {
-  explicit resetzeroerror(const double constant) : zeroErrorValue(constant) {}
+struct SetError {
+  explicit SetError(const double setTo, const double ifEqualTo,
+                    const double tolerance)
+      : valueToSet(setTo), valueToCompare(ifEqualTo), tolerance(tolerance) {}
 
   double operator()(const double error) {
-    if (error < TOLERANCE) {
-      return zeroErrorValue;
+    double deviation = error - valueToCompare;
+    if (deviation < tolerance && deviation >= 0) {
+      return valueToSet;
     } else {
       return error;
     }
   }
 
-  double zeroErrorValue;
+  double valueToSet;
+  double valueToCompare;
+  double tolerance;
 };
 
-struct sqrterror {
-  explicit sqrterror(const double constant) : zeroSqrtValue(constant) {}
+struct SqrtError {
+  explicit SqrtError(const double constant) : zeroSqrtValue(constant) {}
 
   double operator()(const double intensity) {
     const double localIntensity = fabs(intensity);
@@ -64,14 +72,35 @@ const std::string SetUncertainties::name() const { return "SetUncertainties"; }
 int SetUncertainties::version() const { return (1); }
 
 void SetUncertainties::init() {
+  auto mustBePositive = boost::make_shared<BoundedValidator<double>>();
+  auto mustBePositiveInt = boost::make_shared<BoundedValidator<int>>();
+  mustBePositive->setLower(0);
+  mustBePositiveInt->setLower(0);
   declareProperty(make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
       "InputWorkspace", "", Direction::Input));
   declareProperty(make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
       "OutputWorkspace", "", Direction::Output));
-  std::vector<std::string> errorTypes = {ZERO, SQRT, SQRT_OR_ONE, ONE_IF_ZERO};
+  std::vector<std::string> errorTypes = {ZERO, SQRT, SQRT_OR_ONE, ONE_IF_ZERO,
+                                         CUSTOM};
   declareProperty("SetError", ZERO,
                   boost::make_shared<StringListValidator>(errorTypes),
                   "How to reset the uncertainties");
+  declareProperty("SetErrorTo", 1.000, mustBePositive,
+                  "The error value to set when using custom mode");
+  setPropertySettings("SetErrorTo", Kernel::make_unique<VisibleWhenProperty>(
+                                        "SetError", IS_EQUAL_TO, "custom"));
+
+  declareProperty("IfEqualTo", 0.000, mustBePositive,
+                  "Which error values in the input workspace should be "
+                  "replaced when using custom mode");
+  setPropertySettings("IfEqualTo", Kernel::make_unique<VisibleWhenProperty>(
+                                       "SetError", IS_EQUAL_TO, "custom"));
+
+  declareProperty("Precision", 3, mustBePositiveInt,
+                  "How many decimal places of ``IfEqualTo`` are taken into "
+                  "account for matching when using custom mode");
+  setPropertySettings("Precision", Kernel::make_unique<VisibleWhenProperty>(
+                                       "SetError", IS_EQUAL_TO, "custom"));
 }
 
 void SetUncertainties::exec() {
@@ -80,6 +109,12 @@ void SetUncertainties::exec() {
   bool zeroError = (errorType == ZERO);
   bool takeSqrt = ((errorType == SQRT) || (errorType == SQRT_OR_ONE));
   bool resetOne = ((errorType == ONE_IF_ZERO) || (errorType == SQRT_OR_ONE));
+  bool customError = (errorType == CUSTOM);
+
+  double valueToSet = resetOne ? 1.0 : getProperty("SetErrorTo");
+  double valueToCompare = resetOne ? 0.0 : getProperty("IfEqualTo");
+  int precision = getProperty("Precision");
+  double tolerance = resetOne ? 1E-10 : std::pow(10.0, precision * (-1));
 
   // Create the output workspace. This will copy many aspects from the input
   // one.
@@ -99,7 +134,7 @@ void SetUncertainties::exec() {
     outputWorkspace->setSharedX(i, inputWorkspace->sharedX(i));
     outputWorkspace->setSharedY(i, inputWorkspace->sharedY(i));
     // copy the E or set to zero depending on the mode
-    if (errorType == ONE_IF_ZERO) {
+    if (errorType == ONE_IF_ZERO || customError) {
       outputWorkspace->setSharedE(i, inputWorkspace->sharedE(i));
     } else {
       outputWorkspace->mutableE(i) = 0.0;
@@ -112,9 +147,10 @@ void SetUncertainties::exec() {
       if (takeSqrt) {
         const auto &Y = outputWorkspace->y(i);
         std::transform(Y.begin(), Y.end(), E.begin(),
-                       sqrterror(resetOne ? 1. : 0.));
+                       SqrtError(resetOne ? 1. : 0.));
       } else {
-        std::transform(E.begin(), E.end(), E.begin(), resetzeroerror(1.));
+        std::transform(E.begin(), E.end(), E.begin(),
+                       SetError(valueToSet, valueToCompare, tolerance));
       }
     }
 

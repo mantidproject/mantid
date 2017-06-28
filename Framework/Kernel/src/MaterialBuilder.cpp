@@ -4,7 +4,6 @@
 #include "MantidKernel/NeutronAtom.h"
 #include "MantidKernel/make_unique.h"
 #include <boost/make_shared.hpp>
-#include <iostream>
 
 namespace Mantid {
 using PhysicalConstants::Atom;
