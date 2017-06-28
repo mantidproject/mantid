@@ -658,7 +658,7 @@ void MuonFitPropertyBrowser::doTFAsymmFit() {
     // get norms
     std::vector<double> newNorms;
     IFunction_sptr outputFunction = alg->getProperty("Function");
-    for (size_t j = 0; j < nWorkspaces; j++) {
+    for (int j = 0; j < nWorkspaces; j++) {
       std::string paramName = "f" + std::to_string(j);
       paramName += ".f0.f0.A0";
       newNorms.push_back(outputFunction->getParameter(paramName));
@@ -782,7 +782,7 @@ std::map<std::string, double> readMultipleNormalization() {
 }
 /** The transformation between normalized counts and asymmetry
 * @param norm :: map of normalization constants
-* @param WSName :: the name of the WS to rescale
+* @param wsName :: the name of the WS to rescale
 * @param shift :: offset to add (+1 = to normalized counts, -1 = to asymmetry)
 */
 void MuonFitPropertyBrowser::rescaleWS(const std::map<std::string, double> norm,
@@ -805,7 +805,7 @@ void MuonFitPropertyBrowser::rescaleWS(const std::map<std::string, double> norm,
 }
 /** The transformation between normalized counts and asymmetry
 * @param value :: normalization constants
-* @param WSName :: the name of the WS to rescale
+* @param wsName :: the name of the WS to rescale
 * @param shift :: offset to add (+1 = to normalized counts, -1 = to asymmetry)
 */
 void MuonFitPropertyBrowser::rescaleWS(const double value,
