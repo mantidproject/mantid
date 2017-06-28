@@ -27,8 +27,8 @@ std::string IndexProperty::isValid() const {
     error = "Duplicate indices supplied to IndexProperty.";
   }
 
-  if(!m_validString.empty())
-	error += " " + m_validString;
+  if (!m_validString.empty())
+    error += " " + m_validString;
 
   return error;
 }
@@ -40,18 +40,17 @@ std::vector<int> &IndexProperty::operator=(const std::vector<int> &rhs) {
 
   // Instead of just copying vector, determine if we have a pure range.
   if (rhs.size() > 0) {
-	  auto res = std::minmax_element(rhs.cbegin(), rhs.cend());
-	  auto minIndex = res.first - rhs.begin();
-	  auto maxIndex = res.second - rhs.begin();
-	  bool isPureRange = (rhs[maxIndex] - rhs[minIndex] + 1) == rhs.size();
+    auto res = std::minmax_element(rhs.cbegin(), rhs.cend());
+    auto minIndex = res.first - rhs.begin();
+    auto maxIndex = res.second - rhs.begin();
+    bool isPureRange = (rhs[maxIndex] - rhs[minIndex] + 1) == rhs.size();
 
-	  if (isPureRange) {
-		  m_min = static_cast<size_t>(rhs[0]);
-		  m_max = static_cast<size_t>(rhs[rhs.size() - 1]);
-		  m_value = std::vector<int>();
-	  }
-	  else
-		  m_value = rhs;
+    if (isPureRange) {
+      m_min = static_cast<size_t>(rhs[0]);
+      m_max = static_cast<size_t>(rhs[rhs.size() - 1]);
+      m_value = std::vector<int>();
+    } else
+      m_value = rhs;
   }
 
   return m_value;
@@ -80,7 +79,7 @@ std::string IndexProperty::setValue(const std::string &value) {
     if (!err.empty())
       return m_validString = err;
 
-	m_value = std::vector<int>();
+    m_value = std::vector<int>();
 
     if (m_min >= m_max)
       err += " min should be less than max";

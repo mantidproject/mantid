@@ -169,5 +169,19 @@ QtReflMainWindowView::runPythonAlgorithm(const std::string &pythonCode) {
   QString output = runPythonCode(QString::fromStdString(pythonCode), false);
   return output.toStdString();
 }
+
+/**
+Handles attempt to close main window
+* @param event : [input] The close event
+*/
+void QtReflMainWindowView::closeEvent(QCloseEvent *event) {
+
+  // Close only if reduction has been paused
+  if (!m_presenter->checkIfProcessing()) {
+    event->accept();
+  } else {
+    event->ignore();
+  }
+}
 }
 }

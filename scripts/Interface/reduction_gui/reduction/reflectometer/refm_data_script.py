@@ -234,20 +234,18 @@ class DataSets(BaseScriptElement):
         self.reset()
         dom = xml.dom.minidom.parseString(xml_str)
         self.from_xml_element(dom)
-        element_list = dom.getElementsByTagName("RefMData")
-        if len(element_list) > 0:
-            instrument_dom = element_list[0]
+        dom.getElementsByTagName("RefMData")
 
     def from_xml_element(self, instrument_dom):
         """
             Read in data from XML
             @param xml_str: text to read the data from
         """
-        #Peak from/to pixels
+        # Peak from/to pixels
         self.DataPeakPixels = [BaseScriptElement.getIntElement(instrument_dom, "from_peak_pixels"),
                                BaseScriptElement.getIntElement(instrument_dom, "to_peak_pixels")]
 
-        #low resolution range
+        # low resolution range
         self.data_x_range_flag = BaseScriptElement.getBoolElement(instrument_dom, "x_range_flag",
                                                                   default=DataSets.data_x_range_flag)
 
@@ -260,44 +258,44 @@ class DataSets(BaseScriptElement):
         self.norm_x_range = [BaseScriptElement.getIntElement(instrument_dom, "norm_x_min"),
                              BaseScriptElement.getIntElement(instrument_dom, "norm_x_max")]
 
-        #discrete selection string
+        # discrete selection string
         self.DataPeakDiscreteSelection = BaseScriptElement.getStringElement(instrument_dom, "peak_discrete_selection")
 
-        #background flag
+        # background flag
         self.DataBackgroundFlag = BaseScriptElement.getBoolElement(instrument_dom,
                                                                    "background_flag",
                                                                    default=DataSets.DataBackgroundFlag)
 
-        #background from/to pixels
+        # background from/to pixels
         self.DataBackgroundRoi = [BaseScriptElement.getIntElement(instrument_dom, "back_roi1_from"),
                                   BaseScriptElement.getIntElement(instrument_dom, "back_roi1_to"),
                                   BaseScriptElement.getIntElement(instrument_dom, "back_roi2_from"),
                                   BaseScriptElement.getIntElement(instrument_dom, "back_roi2_to")]
 
-        #from TOF and to TOF
-        #self.crop_TOF_range = BaseScriptElement.getBoolElement(instrument_dom, "crop_tof",
+        # from TOF and to TOF
+        # self.crop_TOF_range = BaseScriptElement.getBoolElement(instrument_dom, "crop_tof",
         #                                                       default=DataSets.crop_TOF_range)
         self.DataTofRange = [BaseScriptElement.getFloatElement(instrument_dom, "from_tof_range"),
                              BaseScriptElement.getFloatElement(instrument_dom, "to_tof_range")]
         self.TOFstep = BaseScriptElement.getFloatElement(instrument_dom, "tof_step",
-                                                         default = DataSets.TOFstep)
+                                                         default=DataSets.TOFstep)
 
         self.data_files = BaseScriptElement.getStringList(instrument_dom, "data_sets")
 
-        #with or without norm
+        # with or without norm
         self.NormFlag = BaseScriptElement.getBoolElement(instrument_dom, "norm_flag",
                                                          default=DataSets.NormFlag)
 
-        #Peak from/to pixels
+        # Peak from/to pixels
         self.NormPeakPixels = [BaseScriptElement.getIntElement(instrument_dom, "norm_from_peak_pixels"),
                                BaseScriptElement.getIntElement(instrument_dom, "norm_to_peak_pixels")]
 
-        #background flag
+        # background flag
         self.NormBackgroundFlag = BaseScriptElement.getBoolElement(instrument_dom,
                                                                    "norm_background_flag",
                                                                    default=DataSets.NormBackgroundFlag)
 
-        #background from/to pixels
+        # background from/to pixels
         self.NormBackgroundRoi = [BaseScriptElement.getIntElement(instrument_dom, "norm_from_back_pixels"),
                                   BaseScriptElement.getIntElement(instrument_dom, "norm_to_back_pixels")]
 
@@ -311,7 +309,7 @@ class DataSets(BaseScriptElement):
 
         # scattering angle
         self.theta = BaseScriptElement.getFloatElement(instrument_dom, "theta", default=DataSets.theta)
-        #self.use_center_pixel = BaseScriptElement.getBoolElement(instrument_dom,
+        # self.use_center_pixel = BaseScriptElement.getBoolElement(instrument_dom,
         #                                                         "use_center_pixel",
         #                                                         default=DataSets.use_center_pixel)
 

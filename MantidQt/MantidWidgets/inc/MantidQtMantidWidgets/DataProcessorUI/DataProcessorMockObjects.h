@@ -42,6 +42,8 @@ public:
   MOCK_METHOD0(getEnableNotebook, bool());
   MOCK_METHOD0(expandAll, void());
   MOCK_METHOD0(collapseAll, void());
+  MOCK_METHOD0(pause, void());
+  MOCK_METHOD0(resume, void());
   MOCK_METHOD1(setSelection, void(const std::set<int> &rows));
   MOCK_METHOD1(setClipboard, void(const std::string &text));
 
@@ -66,6 +68,7 @@ public:
   // Calls we don't care about
   void showTable(boost::shared_ptr<QAbstractItemModel>) override{};
   void saveSettings(const std::map<std::string, QVariant> &) override{};
+  void setSelectionModelConnections() override{};
 
   DataProcessorPresenter *getPresenter() const override { return nullptr; }
 };
@@ -101,6 +104,14 @@ public:
   // Event handling
   MOCK_CONST_METHOD0(getTimeSlicingValues, std::string());
   MOCK_CONST_METHOD0(getTimeSlicingType, std::string());
+
+  // Data reduction paused/resumed handling
+  MOCK_CONST_METHOD0(pause, void());
+  MOCK_CONST_METHOD0(resume, void());
+
+  // Calls we don't care about
+  void confirmReductionPaused() const override{};
+  void confirmReductionResumed() const override{};
 };
 
 class MockDataProcessorPresenter : public DataProcessorPresenter {
@@ -114,6 +125,7 @@ public:
   MOCK_METHOD1(accept, void(DataProcessorMainPresenter *));
   MOCK_CONST_METHOD0(selectedParents, std::set<int>());
   MOCK_CONST_METHOD0(selectedChildren, std::map<int, std::set<int>>());
+  MOCK_CONST_METHOD0(newSelectionMade, bool());
   MOCK_CONST_METHOD2(askUserYesNo,
                      bool(const std::string &prompt, const std::string &title));
   MOCK_CONST_METHOD2(giveUserWarning,
@@ -128,7 +140,7 @@ private:
 
   std::vector<DataProcessorCommand_uptr> publishCommands() override {
     std::vector<DataProcessorCommand_uptr> commands;
-    for (size_t i = 0; i < 29; i++)
+    for (size_t i = 0; i < 31; i++)
       commands.push_back(
           Mantid::Kernel::make_unique<DataProcessorAppendRowCommand>(this));
     publishCommandsMocked();

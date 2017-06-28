@@ -39,9 +39,9 @@ class DataProcessorMainPresenter {
 public:
   virtual ~DataProcessorMainPresenter(){};
 
-  enum Flag { ADSChangedFlag };
+  enum class Flag { ADSChangedFlag };
 
-  /// Notify this receiver that something changed in the ADS
+  /// Notify this receiver that something has changed
   virtual void notify(DataProcessorMainPresenter::Flag flag) = 0;
 
   /// Dialog/Prompt methods
@@ -69,6 +69,14 @@ public:
   virtual std::string getTimeSlicingValues() const = 0;
   /// Return time-slicing type
   virtual std::string getTimeSlicingType() const = 0;
+
+  /// Handle data reduction paused/resumed
+  virtual void pause() const = 0;
+  virtual void resume() const = 0;
+
+  /// Handle data reduction paused/resumed confirmation
+  virtual void confirmReductionPaused() const = 0;
+  virtual void confirmReductionResumed() const = 0;
 };
 }
 }

@@ -8,6 +8,9 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataHandling/LoadDetectorsGroupingFile.h"
 #include "MantidHistogramData/HistogramMath.h"
+#include "MantidIndexing/Group.h"
+#include "MantidIndexing/IndexInfo.h"
+#include "MantidIndexing/SpectrumNumber.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/ListValidator.h"
@@ -307,13 +310,17 @@ void GroupDetectors2::exec() {
            : 1.);
 
   // Build a new map
-  const size_t outIndex = formGroups(inputWS, outputWS, prog4Copy);
+  auto indexInfo = Indexing::IndexInfo(0);
+  const size_t outIndex = formGroups(inputWS, outputWS, prog4Copy, keepAll,
+                                     unGroupedSet, indexInfo);
 
   // If we're keeping ungrouped spectra
   if (keepAll) {
     // copy them into the output workspace
     moveOthers(unGroupedSet, *inputWS, *outputWS, outIndex);
   }
+
+  outputWS->setIndexInfo(indexInfo);
 
   g_log.information() << name() << " algorithm has finished\n";
 
@@ -1020,11 +1027,17 @@ double GroupDetectors2::fileReadProg(
 *  @param outputWS :: user selected output workspace for the algorithm
 *  @param prog4Copy :: the amount of algorithm progress to attribute to moving a
 * single spectra
+*  @param keepAll :: whether or not to keep ungrouped spectra
+*  @param unGroupedSet :: the set of workspace indexes that are left ungrouped
+*  @param indexInfo :: an IndexInfo object that will contain the desired
+* indexing after grouping
 *  @return number of new grouped spectra
 */
 size_t GroupDetectors2::formGroups(API::MatrixWorkspace_const_sptr inputWS,
                                    API::MatrixWorkspace_sptr outputWS,
-                                   const double prog4Copy) {
+                                   const double prog4Copy, const bool keepAll,
+                                   const std::set<int64_t> &unGroupedSet,
+                                   Indexing::IndexInfo &indexInfo) {
   // get "Behaviour" string
   const std::string behaviour = getProperty("Behaviour");
   int bhv = 0;
@@ -1044,13 +1057,17 @@ size_t GroupDetectors2::formGroups(API::MatrixWorkspace_const_sptr inputWS,
   // would be waste as it would be just dividing by 1
   bool requireDivide(false);
   const auto &spectrumInfo = inputWS->spectrumInfo();
+
+  auto spectrumGroups = std::vector<std::vector<size_t>>();
+  auto spectrumNumbers = std::vector<Indexing::SpectrumNumber>();
+
   for (storage_map::const_iterator it = m_GroupWsInds.begin();
        it != m_GroupWsInds.end(); ++it) {
     // This is the grouped spectrum
     auto &outSpec = outputWS->getSpectrum(outIndex);
 
     // The spectrum number of the group is the key
-    outSpec.setSpectrumNo(it->first);
+    spectrumNumbers.push_back(it->first);
     // Start fresh with no detector IDs
     outSpec.clearDetectorIDs();
 
@@ -1061,6 +1078,7 @@ size_t GroupDetectors2::formGroups(API::MatrixWorkspace_const_sptr inputWS,
 
     // Keep track of number of detectors required for masking
     size_t nonMaskedSpectra(0);
+    auto spectrumGroup = std::vector<size_t>();
 
     for (auto originalWI : it->second) {
       // detectors to add to firstSpecNum
@@ -1069,10 +1087,13 @@ size_t GroupDetectors2::formGroups(API::MatrixWorkspace_const_sptr inputWS,
       outputHistogram += inputSpectrum.histogram();
       outSpec.addDetectorIDs(inputSpectrum.getDetectorIDs());
 
-      if (!isMaskedDetector(spectrumInfo, originalWI)) {
+      if (!isMaskedDetector(spectrumInfo, originalWI))
         ++nonMaskedSpectra;
-      }
+
+      spectrumGroup.push_back(originalWI);
     }
+
+    spectrumGroups.push_back(spectrumGroup);
 
     outSpec.setHistogram(outputHistogram);
 
@@ -1090,8 +1111,26 @@ size_t GroupDetectors2::formGroups(API::MatrixWorkspace_const_sptr inputWS,
       progress(m_FracCompl);
       interruption_point();
     }
+
     outIndex++;
   }
+
+  // Add the ungrouped spectra to IndexInfo, if they are being kept
+  if (keepAll) {
+    for (const auto originalWI : unGroupedSet) {
+      // Negative WIs are intended to be invalid
+      if (originalWI < 0)
+        continue;
+
+      spectrumGroups.push_back(std::vector<size_t>(1, originalWI));
+
+      auto spectrumNumber = inputWS->getSpectrum(originalWI).getSpectrumNo();
+      spectrumNumbers.push_back(spectrumNumber);
+    }
+  }
+
+  indexInfo = Indexing::group(inputWS->indexInfo(), std::move(spectrumNumbers),
+                              spectrumGroups);
 
   if (bhv == 1 && requireDivide) {
     g_log.debug() << "Running Divide algorithm to perform averaging.\n";
@@ -1121,6 +1160,10 @@ size_t
 GroupDetectors2::formGroupsEvent(DataObjects::EventWorkspace_const_sptr inputWS,
                                  DataObjects::EventWorkspace_sptr outputWS,
                                  const double prog4Copy) {
+  if (inputWS->detectorInfo().isScanning())
+    throw std::runtime_error("GroupDetectors does not currently support "
+                             "EventWorkspaces with detector scans.");
+
   // get "Behaviour" string
   const std::string behaviour = getProperty("Behaviour");
   int bhv = 0;

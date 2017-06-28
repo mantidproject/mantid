@@ -143,7 +143,11 @@ _translations = {
     'Gemma Guest'             : 'Guest, Gemma',
     'Anthony Lim'             : 'Lim, Anthony',
     'AnthonyLim23'            : 'Lim, Anthony',
-    'CipPruteanu'             : 'Ciprian Pruteanu'
+    'CipPruteanu'             : 'Ciprian Pruteanu',
+    'Tasev'                   : 'Tasev, Dimitar',
+    'Mayer Alexandra'         : 'Mayer, Alexandra',
+    'simonfernandes'          : 'Fernandes, Simon',
+    'Simon Fernandes'         : 'Fernandes, Simon'
 }
 
 # Used to ensure a Git author does not appear in any of the DOIs.  This is NOT
@@ -200,7 +204,7 @@ def run_from_script_dir(func):
 def _get_all_git_tags():
     '''Returns a list of all the tags in the tree.
     '''
-    return subprocess.check_output(['git', 'tag']).replace('"', '').split('\n')
+    return subprocess.check_output(['git', 'tag', '--sort=version:refname']).replace('"', '').split('\n')
 
 
 def _clean_up_author_list(author_list):
@@ -264,7 +268,6 @@ def get_previous_tag(tag):
     all_tags = _get_all_git_tags()
     if tag not in all_tags:
         return None
-
     return all_tags[all_tags.index(tag) - 1]
 
 

@@ -153,6 +153,16 @@ void QtReflRunsTabView::setRowCommands(
 void QtReflRunsTabView::clearCommands() { m_commands.clear(); }
 
 /**
+* Sets a specific action in the "Edit" menu enabled or disabled
+* @param index : The index of the action in the "Edit" menu
+* @param enabled : Whether to enable or disable the action
+*/
+void QtReflRunsTabView::setRowActionEnabled(int index, bool enabled) {
+
+  ui.menuRows->actions()[index]->setEnabled(enabled);
+}
+
+/**
 * Set all possible tranfer methods
 * @param methods : All possible transfer methods.
 */

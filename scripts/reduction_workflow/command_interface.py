@@ -8,8 +8,7 @@ from reduction_workflow.reducer import Reducer
 
 class ReductionSingleton(object):
     """ Singleton reduction class """
-
-    ## storage for the instance reference
+    # storage for the instance reference
     __instance = None
 
     def __init__(self):
@@ -66,7 +65,8 @@ class ReductionSingleton(object):
 
 
 def get_property_manager(name):
-    prop_mng = PropertyManagerDataService.retrieve(name)
+    # prop_mng = mantid.PropertyManagerDataService.retrieve(name)
+    pass
 
 ## List of user commands ######################################################
 
