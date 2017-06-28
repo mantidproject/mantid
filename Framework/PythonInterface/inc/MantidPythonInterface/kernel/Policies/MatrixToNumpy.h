@@ -27,10 +27,8 @@
 #include "MantidPythonInterface/kernel/Converters/PyArrayType.h"
 #include "MantidKernel/Matrix.h"
 
-#include <boost/type_traits/integral_constant.hpp>
-#include <boost/type_traits/is_reference.hpp>
-#include <boost/type_traits/remove_reference.hpp>
-#include <boost/type_traits/remove_const.hpp>
+#include <type_traits>
+
 #include <boost/mpl/if.hpp>
 #include <boost/mpl/and.hpp>
 
@@ -87,11 +85,11 @@ template <typename ConversionPolicy> struct MatrixToNumpy {
   template <class T> struct apply {
     // Typedef that removes and const or reference qualifiers from the return
     // type
-    typedef typename boost::remove_const<
-        typename boost::remove_reference<T>::type>::type non_const_type;
+    typedef typename std::remove_const<
+        typename std::remove_reference<T>::type>::type non_const_type;
     // MPL compile-time check that T is a reference to a Kernel::Matrix
     typedef typename boost::mpl::if_c<
-        boost::mpl::and_<boost::is_reference<T>,
+        boost::mpl::and_<std::is_reference<T>,
                          is_matrix<non_const_type>>::value,
         ConvertMatrixToNDArray<non_const_type, ConversionPolicy>,
         MatrixToNumpy_Requires_Reference_To_Matrix_Return_Type<T>>::type type;

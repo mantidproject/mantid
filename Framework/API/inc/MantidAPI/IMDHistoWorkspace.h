@@ -1,10 +1,10 @@
 #ifndef MANTID_API_IMDHISTOWORKSPACE_H_
 #define MANTID_API_IMDHISTOWORKSPACE_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/IMDHistoWorkspace_fwd.h"
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/MultipleExperimentInfos.h"
+#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace API {

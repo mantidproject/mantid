@@ -324,7 +324,7 @@ public:
   /// Returns the function's name
   virtual std::string name() const = 0;
   /// Writes itself into a string
-  virtual std::string asString() const;
+  std::string asString() const;
   /// Virtual copy constructor
   virtual boost::shared_ptr<IFunction> clone() const;
   /// Set the workspace.
@@ -589,6 +589,9 @@ protected:
                               const API::IFunction::Attribute &value) const;
   /// Add a new tie. Derived classes must provide storage for ties
   virtual void addTie(std::unique_ptr<ParameterTie> tie);
+  /// Writes itself into a string
+  virtual std::string
+  writeToString(const std::string &parentLocalAttributesStr = "") const;
 
   friend class ParameterTie;
   friend class CompositeFunction;
