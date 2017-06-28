@@ -69,5 +69,4 @@ RefIVConnections *RefMatrixWSImageView::getConnections() {
 
 RefMatrixWSImageView::~RefMatrixWSImageView() {
   // nothing to do here, since m_imageView is deleted when the window closes
-  delete m_imageView;
 }
