@@ -24,12 +24,12 @@ namespace Algorithms {
 
 using namespace API;
 using namespace Kernel;
-using namespace MergeRunsOptions;
+using namespace RunCombinationOptions;
 
 namespace {
-static const std::string INPUTWORKSPACEPROPERTY = "InputWorkspaces";
-static const std::string OUTPUTWORKSPACEPROPERTY = "OutputWorkspace";
-static const std::string SAMPLELOGXAXISPROPERTY = "SampleLogAsXAxis";
+static const std::string INPUT_WORKSPACE_PROPERTY = "InputWorkspaces";
+static const std::string OUTPUT_WORKSPACE_PROPERTY = "OutputWorkspace";
+static const std::string SAMPLE_LOG_X_AXIS_PROPERTY = "SampleLogAsXAxis";
 }
 
 // Register the algorithm into the AlgorithmFactory
@@ -57,22 +57,22 @@ const std::string JoinRuns::summary() const {
 void JoinRuns::init() {
   declareProperty(
       Kernel::make_unique<ArrayProperty<std::string>>(
-          INPUTWORKSPACEPROPERTY, boost::make_shared<ADSValidator>()),
+          INPUT_WORKSPACE_PROPERTY, boost::make_shared<ADSValidator>()),
       "The names of the input workspaces or workspace groups as a list. At "
       "least two point-data MatrixWorkspaces are "
       "required, having the same instrument, same number of spectra and "
       "units.");
   declareProperty(
-      SAMPLELOGXAXISPROPERTY, "",
+      SAMPLE_LOG_X_AXIS_PROPERTY, "",
       "The name of the numeric sample log to become the x-axis of the output. "
       "Empty by default, in which case the x-axis of the input "
-      "workspaces are stitched."
+      "workspaces are stitched. "
       "If specified, this will be the x-axis. It has to be numeric, in which "
-      "case all the input workspaces must have only one point(bin) or numeric "
+      "case all the input workspaces must have only one point or numeric "
       "time series, in which case the number"
-      "of elements in the series must match the blocksize for each workspace.");
+      "of elements in the series must match the number of points for each workspace.");
   declareProperty(Kernel::make_unique<WorkspaceProperty<API::Workspace>>(
-                      OUTPUTWORKSPACEPROPERTY, "", Direction::Output),
+                      OUTPUT_WORKSPACE_PROPERTY, "", Direction::Output),
                   "The output workspace.");
 
   declareProperty(SampleLogsBehaviour::TIME_SERIES_PROP, "",
@@ -103,18 +103,18 @@ std::map<std::string, std::string> JoinRuns::validateInputs() {
   std::map<std::string, std::string> issues;
 
   const std::vector<std::string> inputs_given =
-      getProperty(INPUTWORKSPACEPROPERTY);
-  m_logEntry = getPropertyValue(SAMPLELOGXAXISPROPERTY);
+      getProperty(INPUT_WORKSPACE_PROPERTY);
+  m_logEntry = getPropertyValue(SAMPLE_LOG_X_AXIS_PROPERTY);
 
   // find if there are workspaces that are not Matrix or not a point-data
   for (const auto &input : RunCombinationHelper::unWrapGroups(inputs_given)) {
     MatrixWorkspace_sptr ws =
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(input);
     if (!ws) {
-      issues[INPUTWORKSPACEPROPERTY] +=
+      issues[INPUT_WORKSPACE_PROPERTY] +=
           "Workspace " + ws->getName() + " is not a MatrixWorkspace\n";
     } else if (ws->isHistogramData()) {
-      issues[INPUTWORKSPACEPROPERTY] +=
+      issues[INPUT_WORKSPACE_PROPERTY] +=
           "Workspace " + ws->getName() + " is not a point-data\n";
     } else {
       m_inputWS.push_back(ws);
@@ -122,7 +122,7 @@ std::map<std::string, std::string> JoinRuns::validateInputs() {
   }
 
   if (m_inputWS.empty()) {
-    issues[INPUTWORKSPACEPROPERTY] += "There are no point-data"
+    issues[INPUT_WORKSPACE_PROPERTY] += "There are no point-data"
                                       " MatrixWorkspaces in the input list\n";
   } else {
     RunCombinationHelper combHelper;
@@ -132,14 +132,14 @@ std::map<std::string, std::string> JoinRuns::validateInputs() {
       // check if all the others are compatible with the first one
       std::string compatible = combHelper.checkCompatibility(ws, true);
       if (!compatible.empty()) {
-        issues[INPUTWORKSPACEPROPERTY] += "Workspace " + ws->getName() +
+        issues[INPUT_WORKSPACE_PROPERTY] += "Workspace " + ws->getName() +
                                           " is not compatible: " + compatible +
                                           "\n";
       }
       // if the log entry is given, validate it
       const std::string logValid = checkLogEntry(ws);
       if (!logValid.empty()) {
-        issues[INPUTWORKSPACEPROPERTY] += "Invalid sample log entry for " +
+        issues[INPUT_WORKSPACE_PROPERTY] += "Invalid sample log entry for " +
                                           ws->getName() + ": " + logValid +
                                           "\n";
       }
@@ -205,7 +205,7 @@ std::string JoinRuns::checkLogEntry(MatrixWorkspace_sptr ws) const {
 //----------------------------------------------------------------------------------------------
 /** Return the to-be axis of the workspace dependent on the log entry
 * @param ws : the input workspace
-* @return : the [to-be] x-axis of the workspace
+* @return : the x-axis to use for the output workspace
 */
 std::vector<double> JoinRuns::getXAxis(MatrixWorkspace_sptr ws) const {
 
@@ -289,8 +289,8 @@ void JoinRuns::joinSpectrum(long wsIndex) {
 void JoinRuns::exec() {
 
   const std::vector<std::string> inputs_given =
-      getProperty(INPUTWORKSPACEPROPERTY);
-  m_logEntry = getPropertyValue(SAMPLELOGXAXISPROPERTY);
+      getProperty(INPUT_WORKSPACE_PROPERTY);
+  m_logEntry = getPropertyValue(SAMPLE_LOG_X_AXIS_PROPERTY);
 
   const std::string sampleLogsSum = getProperty(SampleLogsBehaviour::SUM_PROP);
   const std::string sampleLogsTimeSeries =
@@ -377,7 +377,7 @@ void JoinRuns::exec() {
 
   // Now loop in parallel over all the spectra and join the data
   PARALLEL_FOR_IF(threadSafe(*m_outWS))
-  for (long index = 0; index < static_cast<long>(numSpec); ++index) {
+  for (int64_t index = 0; index < static_cast<int64_t>(numSpec); ++index) {
     PARALLEL_START_INTERUPT_REGION
     m_outWS->mutableX(static_cast<size_t>(index)) = xAxis;
     joinSpectrum(index);

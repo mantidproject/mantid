@@ -176,28 +176,17 @@ public:
     TS_ASSERT_THROWS(m_testee.execute(), std::runtime_error);
   }
 
-  void testWithNumSeriesLog() {
+  void testPassWithNumSeriesLog() {
+
     AddTimeSeriesLog timeLogAdder;
     timeLogAdder.initialize();
     timeLogAdder.setProperty("Workspace", "ws1");
     timeLogAdder.setProperty("Name", "TestTimeLog");
+
     timeLogAdder.setProperty("Time", "2010-09-14T04:20:12");
     timeLogAdder.setProperty("Value", 5.7);
     timeLogAdder.execute();
 
-    timeLogAdder.setProperty("Workspace", "ws2");
-    timeLogAdder.setProperty("Time", "2010-09-14T04:25:12");
-    timeLogAdder.setProperty("Value", 8.3);
-    timeLogAdder.execute();
-
-    m_testee.setProperty("SampleLogAsXAxis", "TestTimeLog");
-    m_testee.setProperty("InputWorkspaces",
-                         std::vector<std::string>{"ws1", "ws2"});
-
-    // ws1 has 3 bins, ws2 has 2, fail
-    TS_ASSERT_THROWS(m_testee.execute(), std::runtime_error);
-
-    timeLogAdder.setProperty("Workspace", "ws1");
     timeLogAdder.setProperty("Time", "2010-09-14T04:21:12");
     timeLogAdder.setProperty("Value", 6.1);
     timeLogAdder.execute();
@@ -207,11 +196,19 @@ public:
     timeLogAdder.execute();
 
     timeLogAdder.setProperty("Workspace", "ws2");
+
+    timeLogAdder.setProperty("Time", "2010-09-14T04:25:12");
+    timeLogAdder.setProperty("Value", 8.3);
+    timeLogAdder.execute();
+
     timeLogAdder.setProperty("Time", "2010-09-14T04:26:12");
     timeLogAdder.setProperty("Value", 9.5);
     timeLogAdder.execute();
 
-    // now the size of time series matches the blocksize
+    m_testee.setProperty("SampleLogAsXAxis", "TestTimeLog");
+    m_testee.setProperty("InputWorkspaces",
+                         std::vector<std::string>{"ws1", "ws2"});
+
     TS_ASSERT_THROWS_NOTHING(m_testee.execute());
     MatrixWorkspace_sptr out =
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("out");
@@ -240,6 +237,53 @@ public:
     TS_ASSERT_EQUALS(xaxis[2], 6.7);
     TS_ASSERT_EQUALS(xaxis[3], 8.3);
     TS_ASSERT_EQUALS(xaxis[4], 9.5);
+  }
+
+  void testFailWithNumSeriesLog() {
+
+    AddTimeSeriesLog timeLogAdder;
+    timeLogAdder.initialize();
+    timeLogAdder.setProperty("Workspace", "ws1");
+    timeLogAdder.setProperty("Name", "TestTimeLog");
+    timeLogAdder.setProperty("Time", "2010-09-14T04:20:12");
+    timeLogAdder.setProperty("Value", 5.7);
+    timeLogAdder.execute();
+
+    timeLogAdder.setProperty("Workspace", "ws2");
+    timeLogAdder.setProperty("Time", "2010-09-14T04:25:12");
+    timeLogAdder.setProperty("Value", 8.3);
+    timeLogAdder.execute();
+
+    m_testee.setProperty("SampleLogAsXAxis", "TestTimeLog");
+    m_testee.setProperty("InputWorkspaces",
+                         std::vector<std::string>{"ws1", "ws2"});
+
+    // ws1 has 3 bins, ws2 has 2, fail
+    TS_ASSERT_THROWS(m_testee.execute(), std::runtime_error);
+  }
+
+  void testMergeSampleLogFail() {
+    AddSampleLog logAdder;
+    logAdder.initialize();
+    logAdder.setProperty("LogName", "Wavelength");
+    logAdder.setProperty("LogType", "Number");
+
+    logAdder.setProperty("Workspace", "ws1");
+    logAdder.setProperty("LogText", "1.2");
+    logAdder.execute();
+
+    logAdder.setProperty("Workspace", "ws2");
+    logAdder.setProperty("LogText", "1.5");
+    logAdder.execute();
+
+    m_testee.setProperty("SampleLogsFail", "Wavelength");
+    m_testee.setProperty("SampleLogsFailTolerances", "0.1");
+    m_testee.setProperty("FailBehaviour", "Stop");
+
+    m_testee.setProperty("InputWorkspaces",
+                         std::vector<std::string>{"ws1", "ws2"});
+
+    TS_ASSERT_THROWS(m_testee.execute(), std::runtime_error);
   }
 
 private:

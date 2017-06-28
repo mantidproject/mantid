@@ -26,7 +26,7 @@ using namespace Kernel;
 using namespace API;
 using namespace Geometry;
 using namespace DataObjects;
-using namespace MergeRunsOptions;
+using namespace RunCombinationOptions;
 
 /// Initialisation method
 void MergeRuns::init() {

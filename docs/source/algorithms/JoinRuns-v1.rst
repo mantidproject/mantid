@@ -117,6 +117,30 @@ Output:
 
     out has 6 bins with x-axis as: 0.0, 0.25, 10.0, 10.25, 20.0, 20.25
 
+**Example - JoinRuns to fail with a sample log forbidding to merge**
+
+.. testcode:: JoinRunsLogFail
+
+     # Create input workspaces
+    list = []
+    for i in range(3):
+        ws = "ws_{0}".format(i)
+        CreateSampleWorkspace(Function="One Peak", NumBanks=1, BankPixelWidth=2,
+                            XMin=i*100, XMax=(i+1)*100, BinWidth=50,
+                            Random=True, OutputWorkspace=ws)
+        ConvertToPointData(InputWorkspace=ws, OutputWorkspace=ws)
+        AddSampleLog(Workspace=ws, LogName="Wavelength", LogType="Number", LogText=str(2+0.5*i))
+        list.append(ws)
+    try:
+        out = JoinRuns(list, SampleLogsFail="Wavelength", SampleLogsFailTolerances="0.1", FailBehaviour="Stop")
+    except ValueError:
+        print("The differences in the wavelength of the inputs are more than the allowed tolerance")
+
+Output:
+
+.. testoutput:: JoinRunsLogFail
+
+    The differences in the wavelength of the inputs are more than the allowed tolerance
 
 .. categories::
 
