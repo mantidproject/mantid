@@ -74,20 +74,24 @@ class FunctionWrapper:
       
   def getFunction(self):
       return self.fun
+
       
 class CompositeFunctionWrapper(FunctionWrapper):
 # Wrapper class for Composite Fitting Function
     def __init__ (self, *args):
+       return self.initByName("CompositeFunction", *args)
+
+    def initByName(self, name, *args):
        if hasattr(args[0],'nFunctions'):
           # We have a composite function to wrap
           self.fun = args[0]
        else:
-          self.fun = FunctionFactory.createFunction("CompositeFunction")
+          self.fun = FunctionFactory.createFunction(name)
    
           #Add the functions
           for a in args:
              if(not isinstance(a, int)): 
-                self.fun.add(a.fun)      
+                self.fun.add(a.fun)    
       
     def getParameter(self, name):
     # get parameter of specified name
@@ -166,6 +170,13 @@ class CompositeFunctionWrapper(FunctionWrapper):
     # Every member function must have a parameter of this name.
        for i in range(0, self.__len__()):
           self[i].untie(name)
+ 
+ 
+class ProductFunctionWrapper(CompositeFunctionWrapper):
+# Wrapper class for Product Fitting Function
+    def __init__ (self, *args):
+       return self.initByName("ProductFunction", *args)
+     
         
 def _create_wrapper_function(name):
     """Create fake functions for the given name
