@@ -54,7 +54,7 @@ QVariant QDataProcessorTwoLevelTreeModel::data(const QModelIndex &index,
       // Highlight if this is in the list of highlighted groups
       if (std::find(m_highlightGroups.begin(), m_highlightGroups.end(),
                     index.row()) != m_highlightGroups.end())
-        return QColor("#FF8040");
+        return QColor("#00b300");
     }
   } else {
     // Index corresponds to a row
@@ -72,7 +72,7 @@ QVariant QDataProcessorTwoLevelTreeModel::data(const QModelIndex &index,
         auto groupItems = m_highlightRows.at(pIndex.row());
         if (std::find(groupItems.begin(), groupItems.end(), index.row()) !=
             groupItems.end())
-          return QColor("#FF8040");
+          return QColor("#00b300");
       }
     }
   }
