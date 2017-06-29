@@ -41,12 +41,10 @@ public:
   };
   QString name() override { return QString("Pause"); }
   QString icon() override { return QString("://pause.png"); }
-  QString tooltip() override {
-    return QString("Pause processing runs");
-  }
+  QString tooltip() override { return QString("Pause processing runs"); }
   QString whatsthis() override {
     return QString("Pauses processing any selected runs. Processing may be "
-                       "resumed by clicking on the 'Process' button.");
+                   "resumed by clicking on the 'Process' button.");
   }
   QString shortcut() override { return QString(); }
 };
