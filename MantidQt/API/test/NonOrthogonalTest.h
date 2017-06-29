@@ -29,7 +29,7 @@ public:
     // Act
     bool orthogonalWorkspaceFailed = false;
     try {
-      MantidQt::API::provideSkewMatrix(skewMatrix, eventWorkspace);
+      MantidQt::API::provideSkewMatrix(skewMatrix, *eventWorkspace);
     } catch (std::invalid_argument &) {
       orthogonalWorkspaceFailed = true;
     }
@@ -46,7 +46,7 @@ public:
     // Act
     bool orthogonalWorkspaceFailed = false;
     try {
-      MantidQt::API::provideSkewMatrix(skewMatrix, eventWorkspace);
+      MantidQt::API::provideSkewMatrix(skewMatrix, *eventWorkspace);
     } catch (std::invalid_argument &) {
       orthogonalWorkspaceFailed = true;
     }
@@ -60,7 +60,7 @@ public:
     auto exampleSkewMatrix = getExampleSkewMatrix();
     bool nonOrthogonalWorkspaceFailed = true;
     Mantid::Kernel::DblMatrix skewMatrix(3, 3, true);
-    MantidQt::API::provideSkewMatrix(skewMatrix, eventWorkspace);
+    MantidQt::API::provideSkewMatrix(skewMatrix, *eventWorkspace);
 
     const auto numberOfColumns = skewMatrix.numCols();
     const auto numberOfRows = skewMatrix.numRows();
@@ -80,37 +80,37 @@ public:
   void test_requiresSkewMatrixWithOrthogonal() {
     auto eventWorkspace = getOrthogonalEventWorkspace();
     TSM_ASSERT("Orthogonal workspaces should not require a skew matrix",
-               !MantidQt::API::requiresSkewMatrix(eventWorkspace));
+               !MantidQt::API::requiresSkewMatrix(*eventWorkspace));
   }
 
   void test_requiresSkewMatrixWithOrthogonalandHKL() {
     auto eventWorkspace = getOrthogonalHKLEventWorkspace();
     TSM_ASSERT("Orthogonal HKL workspaces should not require a skew matrix",
-               !MantidQt::API::requiresSkewMatrix(eventWorkspace));
+               !MantidQt::API::requiresSkewMatrix(*eventWorkspace));
   }
 
   void test_requiresSkewMatrixWithNonOrthogonal() {
     auto eventWorkspace = getNonOrthogonalEventWorkspace();
     TSM_ASSERT("NonOrthogonal workspaces should require a skew matrix",
-               MantidQt::API::requiresSkewMatrix(eventWorkspace));
+               MantidQt::API::requiresSkewMatrix(*eventWorkspace));
   }
 
   void test_isHKLDimensionsWithOrthogonal() {
     auto eventWorkspace = getOrthogonalEventWorkspace();
     TSM_ASSERT("Should not have HKL dimensions",
-               !MantidQt::API::isHKLDimensions(eventWorkspace, DimX, DimY));
+               !MantidQt::API::isHKLDimensions(*eventWorkspace, DimX, DimY));
   }
 
   void test_isHKLDimensionsWithOrthogonalandHKL() {
     auto eventWorkspace = getOrthogonalHKLEventWorkspace();
     TSM_ASSERT("Should have HKL dimensions",
-               MantidQt::API::isHKLDimensions(eventWorkspace, DimX, DimY));
+               MantidQt::API::isHKLDimensions(*eventWorkspace, DimX, DimY));
   }
 
   void test_isHKLDimensionsWithNonOrthogonal() {
     auto eventWorkspace = getNonOrthogonalEventWorkspace();
     TSM_ASSERT("Should have HKL dimensions",
-               MantidQt::API::isHKLDimensions(eventWorkspace, DimX, DimY));
+               MantidQt::API::isHKLDimensions(*eventWorkspace, DimX, DimY));
   }
 
   void test_getGridLineAnglesInRadianWithZeroArray() {

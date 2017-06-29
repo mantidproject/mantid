@@ -13,8 +13,8 @@ void NullTransform::transform(Mantid::Kernel::VMD &coords, size_t dimX,
   (void)dimY;
   (void)missingHKLDim;
 }
-void NullTransform::checkDimensionsForHKL(
-    const Mantid::API::IMDWorkspace_const_sptr &ws, size_t dimX, size_t dimY) {
+void NullTransform::checkDimensionsForHKL(const Mantid::API::IMDWorkspace &ws,
+                                          size_t dimX, size_t dimY) {
   (void)ws;
   (void)dimX;
   (void)dimY;
@@ -23,11 +23,10 @@ void NullTransform::checkDimensionsForHKL(
 NonOrthogonalTransform::~NonOrthogonalTransform() {}
 
 NonOrthogonalTransform::NonOrthogonalTransform(
-    const Mantid::API::IMDWorkspace_const_sptr &workspace, size_t dimX,
-    size_t dimY)
+    const Mantid::API::IMDWorkspace &workspace, size_t dimX, size_t dimY)
     : m_dimensionsHKL(true), m_skewMatrix() {
   // Set the skewMatrix for the non-orthogonal data
-  auto numberOfDimensions = workspace->getNumDims();
+  auto numberOfDimensions = workspace.getNumDims();
   Mantid::Kernel::DblMatrix skewMatrix(numberOfDimensions, numberOfDimensions,
                                        true);
   ///@cond
@@ -37,9 +36,8 @@ NonOrthogonalTransform::NonOrthogonalTransform(
   checkDimensionsForHKL(workspace, dimX, dimY);
 }
 void NonOrthogonalTransform::checkDimensionsForHKL(
-    const Mantid::API::IMDWorkspace_const_sptr &ws, size_t dimX, size_t dimY) {
-  bool dimensionHKL = API::isHKLDimensions(ws, dimX, dimY);
-  m_dimensionsHKL = dimensionHKL;
+    const Mantid::API::IMDWorkspace &ws, size_t dimX, size_t dimY) {
+  m_dimensionsHKL = API::isHKLDimensions(ws, dimX, dimY);
 }
 void NonOrthogonalTransform::transform(Mantid::Kernel::VMD &coords, size_t dimX,
                                        size_t dimY, size_t missingHKLDim) {
@@ -50,16 +48,13 @@ void NonOrthogonalTransform::transform(Mantid::Kernel::VMD &coords, size_t dimX,
 }
 
 std::unique_ptr<CoordinateTransform>
-createCoordinateTransform(const Mantid::API::IMDWorkspace_sptr &ws, size_t dimX,
+createCoordinateTransform(const Mantid::API::IMDWorkspace &ws, size_t dimX,
                           size_t dimY) {
-  std::unique_ptr<CoordinateTransform> coordinateTransform;
   if (MantidQt::API::requiresSkewMatrix(ws)) {
-    coordinateTransform =
-        Mantid::Kernel::make_unique<NonOrthogonalTransform>(ws, dimX, dimY);
+    return Mantid::Kernel::make_unique<NonOrthogonalTransform>(ws, dimX, dimY);
   } else {
-    coordinateTransform = Mantid::Kernel::make_unique<NullTransform>();
+    return Mantid::Kernel::make_unique<NullTransform>();
   }
-  return coordinateTransform;
 }
 }
 }

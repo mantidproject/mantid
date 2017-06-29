@@ -14,9 +14,8 @@ public:
   virtual ~CoordinateTransform() {}
   virtual void transform(Mantid::Kernel::VMD &coords, size_t dimX, size_t dimY,
                          size_t missingHKLDim) = 0;
-  virtual void
-  checkDimensionsForHKL(const Mantid::API::IMDWorkspace_const_sptr &ws,
-                        size_t dimX, size_t dimY) = 0;
+  virtual void checkDimensionsForHKL(const Mantid::API::IMDWorkspace &ws,
+                                     size_t dimX, size_t dimY) = 0;
 };
 
 class EXPORT_OPT_MANTIDQT_SLICEVIEWER NullTransform
@@ -24,20 +23,20 @@ class EXPORT_OPT_MANTIDQT_SLICEVIEWER NullTransform
 public:
   void transform(Mantid::Kernel::VMD &coords, size_t dimX, size_t dimY,
                  size_t missingHKLDim) override;
-  void checkDimensionsForHKL(const Mantid::API::IMDWorkspace_const_sptr &ws,
-                             size_t dimX, size_t dimY) override;
+  void checkDimensionsForHKL(const Mantid::API::IMDWorkspace &ws, size_t dimX,
+                             size_t dimY) override;
 };
 
 class EXPORT_OPT_MANTIDQT_SLICEVIEWER NonOrthogonalTransform
     : public CoordinateTransform {
 public:
   ~NonOrthogonalTransform();
-  NonOrthogonalTransform(const Mantid::API::IMDWorkspace_const_sptr &workspace,
+  NonOrthogonalTransform(const Mantid::API::IMDWorkspace &workspace,
                          size_t dimX, size_t dimY);
   void transform(Mantid::Kernel::VMD &coords, size_t dimX, size_t dimY,
                  size_t missingHKLDim) override;
-  void checkDimensionsForHKL(const Mantid::API::IMDWorkspace_const_sptr &ws,
-                             size_t dimX, size_t dimY) override;
+  void checkDimensionsForHKL(const Mantid::API::IMDWorkspace &ws, size_t dimX,
+                             size_t dimY) override;
 
 private:
   bool m_dimensionsHKL;
@@ -45,7 +44,7 @@ private:
 };
 
 std::unique_ptr<CoordinateTransform> EXPORT_OPT_MANTIDQT_SLICEVIEWER
-createCoordinateTransform(const Mantid::API::IMDWorkspace_sptr &ws, size_t dimX,
+createCoordinateTransform(const Mantid::API::IMDWorkspace &ws, size_t dimX,
                           size_t dimY);
 }
 }

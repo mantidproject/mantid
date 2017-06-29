@@ -69,7 +69,7 @@ void QwtRasterDataMDNonOrthogonal::setWorkspace(IMDWorkspace_const_sptr ws) {
   m_lookPoint.resize(m_nd);
   // Add the skewMatrix for the basis
   Mantid::Kernel::DblMatrix skewMatrix(m_nd, m_nd, true);
-  provideSkewMatrix(skewMatrix, ws);
+  provideSkewMatrix(skewMatrix, *ws);
   transformFromDoubleToCoordT(skewMatrix, m_fromHklToXyz);
 }
 

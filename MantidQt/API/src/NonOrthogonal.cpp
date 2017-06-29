@@ -11,9 +11,9 @@
 #include "MantidGeometry/MDGeometry/HKL.h"
 
 #include <boost/pointer_cast.hpp>
-#include <array>
 #include <algorithm>
-#include <math.h>
+#include <array>
+#include <cmath>
 
 /**
 *
@@ -100,24 +100,25 @@ void stripMatrix(Mantid::Kernel::DblMatrix &matrix) {
 }
 
 template <typename T>
-void doProvideSkewMatrix(Mantid::Kernel::DblMatrix &skewMatrix, T workspace) {
+void doProvideSkewMatrix(Mantid::Kernel::DblMatrix &skewMatrix,
+                         const T &workspace) {
   // The input workspace needs have
   // 1. an HKL frame
   // 2. an oriented lattice
   // else we cannot create the skew matrix
-  const auto &sample = workspace->getExperimentInfo(0)->sample();
-  const auto &run = workspace->getExperimentInfo(0)->run();
-  auto specialCoordnateSystem = workspace->getSpecialCoordinateSystem();
+  const auto &sample = workspace.getExperimentInfo(0)->sample();
+  const auto &run = workspace.getExperimentInfo(0)->run();
+  auto specialCoordnateSystem = workspace.getSpecialCoordinateSystem();
   checkForSampleAndRunEntries(sample, run, specialCoordnateSystem);
 
   // Create Affine Matrix
   Mantid::Kernel::Matrix<Mantid::coord_t> affineMatrix;
   try {
-    auto const *transform = workspace->getTransformToOriginal();
+    auto const *transform = workspace.getTransformToOriginal();
     affineMatrix = transform->makeAffineMatrix();
   } catch (std::runtime_error &) {
     // Create identity matrix of dimension+1
-    std::size_t nDims = workspace->getNumDims() + 1;
+    std::size_t nDims = workspace.getNumDims() + 1;
     Mantid::Kernel::Matrix<Mantid::coord_t> temp(nDims, nDims, true);
     affineMatrix = temp;
   }
@@ -149,7 +150,7 @@ void doProvideSkewMatrix(Mantid::Kernel::DblMatrix &skewMatrix, T workspace) {
                                             orientedLattice.cstar()};
 
   // Expand matrix to 4 dimensions if necessary
-  if (4 == workspace->getNumDims()) {
+  if (4 == workspace.getNumDims()) {
     basisNormalization.push_back(1.0);
     Mantid::Kernel::DblMatrix temp(4, 4, true);
     for (std::size_t i = 0; i < 3; i++) {
@@ -174,19 +175,19 @@ void doProvideSkewMatrix(Mantid::Kernel::DblMatrix &skewMatrix, T workspace) {
   // Perform similarity transform to get coordinate orientation correct
   skewMatrix = affMat.Tprime() * (skewMatrix * affMat);
 
-  if (4 == workspace->getNumDims()) {
+  if (4 == workspace.getNumDims()) {
     stripMatrix(skewMatrix);
   }
-  skewMatrix
-      .Invert(); // Current fix so skewed image displays in correct orientation
+  // Current fix so skewed image displays in correct orientation
+  skewMatrix.Invert();
 }
 
 template <typename T> bool doRequiresSkewMatrix(const T &workspace) {
   auto requiresSkew(true);
   try {
-    const auto &sample = workspace->getExperimentInfo(0)->sample();
-    const auto &run = workspace->getExperimentInfo(0)->run();
-    auto specialCoordnateSystem = workspace->getSpecialCoordinateSystem();
+    const auto &sample = workspace.getExperimentInfo(0)->sample();
+    const auto &run = workspace.getExperimentInfo(0)->run();
+    auto specialCoordnateSystem = workspace.getSpecialCoordinateSystem();
     checkForSampleAndRunEntries(sample, run, specialCoordnateSystem);
   } catch (std::invalid_argument &) {
     requiresSkew = false;
@@ -352,15 +353,13 @@ getMissingHKLDimensionIndex(Mantid::API::IMDWorkspace_const_sptr workspace,
 }
 
 void provideSkewMatrix(Mantid::Kernel::DblMatrix &skewMatrix,
-                       const Mantid::API::IMDWorkspace_const_sptr &workspace) {
-  if (Mantid::API::IMDEventWorkspace_const_sptr eventWorkspace =
-          boost::dynamic_pointer_cast<const Mantid::API::IMDEventWorkspace>(
-              workspace)) {
-    doProvideSkewMatrix(skewMatrix, eventWorkspace);
-  } else if (Mantid::API::IMDHistoWorkspace_const_sptr histoWorkspace =
-                 boost::dynamic_pointer_cast<
-                     const Mantid::API::IMDHistoWorkspace>(workspace)) {
-    doProvideSkewMatrix(skewMatrix, histoWorkspace);
+                       const Mantid::API::IMDWorkspace &workspace) {
+  if (auto mdew =
+          dynamic_cast<const Mantid::API::IMDEventWorkspace *>(&workspace)) {
+    doProvideSkewMatrix(skewMatrix, *mdew);
+  } else if (auto mdhw = dynamic_cast<const Mantid::API::IMDHistoWorkspace *>(
+                 &workspace)) {
+    doProvideSkewMatrix(skewMatrix, *mdhw);
   } else {
     throw std::invalid_argument("NonOrthogonal: The provided workspace "
                                 "must either be an IMDEvent or IMDHisto "
@@ -368,32 +367,25 @@ void provideSkewMatrix(Mantid::Kernel::DblMatrix &skewMatrix,
   }
 }
 
-bool requiresSkewMatrix(Mantid::API::IMDWorkspace_const_sptr workspace) {
-
-  auto requiresSkewMatrix(false);
-  if (Mantid::API::IMDEventWorkspace_const_sptr eventWorkspace =
-          boost::dynamic_pointer_cast<const Mantid::API::IMDEventWorkspace>(
-              workspace)) {
-    requiresSkewMatrix = doRequiresSkewMatrix(eventWorkspace);
-  } else if (Mantid::API::IMDHistoWorkspace_const_sptr histoWorkspace =
-                 boost::dynamic_pointer_cast<
-                     const Mantid::API::IMDHistoWorkspace>(workspace)) {
-    requiresSkewMatrix = doRequiresSkewMatrix(histoWorkspace);
+bool requiresSkewMatrix(const Mantid::API::IMDWorkspace &workspace) {
+  if (auto mdew =
+          dynamic_cast<const Mantid::API::IMDEventWorkspace *>(&workspace)) {
+    return doRequiresSkewMatrix(*mdew);
+  } else if (auto mdhw = dynamic_cast<const Mantid::API::IMDHistoWorkspace *>(
+                 &workspace)) {
+    return doRequiresSkewMatrix(*mdhw);
+  } else {
+    return false;
   }
-  return requiresSkewMatrix;
 }
-bool isHKLDimensions(const Mantid::API::IMDWorkspace_const_sptr &workspace,
-                     size_t dimX, size_t dimY) {
-  auto dimensionHKL = true;
-  size_t dimensionIndices[2] = {dimX, dimY};
-  for (const auto &dimensionIndex : dimensionIndices) {
-    auto dimension = workspace->getDimension(dimensionIndex);
-    const auto &frame = dimension->getMDFrame();
-    if (frame.name() != Mantid::Geometry::HKL::HKLName) {
-      dimensionHKL = false;
-    }
-  }
-  return dimensionHKL;
+
+bool isHKLDimensions(const Mantid::API::IMDWorkspace &workspace, size_t dimX,
+                     size_t dimY) {
+  auto hklname = [&workspace](size_t index) {
+    return workspace.getDimension(index)->getMDFrame().name() ==
+           Mantid::Geometry::HKL::HKLName;
+  };
+  return hklname(dimX) && hklname(dimY);
 }
 
 void transformFromDoubleToCoordT(
@@ -420,8 +412,9 @@ L = M31X + M32Y + M33Z
 
 */
 void transformLookpointToWorkspaceCoord(
-    Mantid::coord_t *lookPoint, const std::array<Mantid::coord_t, 9>& skewMatrix,
-    const size_t &dimX, const size_t &dimY, const size_t &dimSlice) {
+    Mantid::coord_t *lookPoint,
+    const std::array<Mantid::coord_t, 9> &skewMatrix, const size_t &dimX,
+    const size_t &dimY, const size_t &dimSlice) {
 
   auto sliceDimResult =
       (lookPoint[dimSlice] - skewMatrix[3 * dimSlice + dimX] * lookPoint[dimX] -

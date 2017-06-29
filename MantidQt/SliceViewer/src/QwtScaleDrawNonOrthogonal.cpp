@@ -289,9 +289,9 @@ void QwtScaleDrawNonOrthogonal::setTransformationMatrices(
   m_missingDimension =
       MantidQt::API::getMissingHKLDimensionIndex(workspace, m_dimX, m_dimY);
 
-  if (MantidQt::API::isHKLDimensions(workspace, m_dimX, m_dimY)) {
+  if (MantidQt::API::isHKLDimensions(*workspace, m_dimX, m_dimY)) {
     Mantid::Kernel::DblMatrix skewMatrix(3, 3, true);
-    MantidQt::API::provideSkewMatrix(skewMatrix, workspace);
+    MantidQt::API::provideSkewMatrix(skewMatrix, *workspace);
     MantidQt::API::transformFromDoubleToCoordT(skewMatrix, m_fromXyzToHkl);
     skewMatrix.Invert();
     MantidQt::API::transformFromDoubleToCoordT(skewMatrix, m_fromHklToXyz);

@@ -13,14 +13,14 @@ enum class DimensionSelection { H, K, L };
 
 void EXPORT_OPT_MANTIDQT_API
 provideSkewMatrix(Mantid::Kernel::DblMatrix &skewMatrix,
-                  const Mantid::API::IMDWorkspace_const_sptr &workspace);
+                  const Mantid::API::IMDWorkspace &workspace);
 
 bool EXPORT_OPT_MANTIDQT_API
-requiresSkewMatrix(Mantid::API::IMDWorkspace_const_sptr workspace);
+requiresSkewMatrix(const Mantid::API::IMDWorkspace &workspace);
 
 bool EXPORT_OPT_MANTIDQT_API
-isHKLDimensions(const Mantid::API::IMDWorkspace_const_sptr &workspace,
-                size_t dimX, size_t dimY);
+isHKLDimensions(const Mantid::API::IMDWorkspace &workspace, size_t dimX,
+                size_t dimY);
 
 size_t EXPORT_OPT_MANTIDQT_API
 getMissingHKLDimensionIndex(Mantid::API::IMDWorkspace_const_sptr workspace,
