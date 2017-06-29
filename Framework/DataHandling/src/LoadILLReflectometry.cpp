@@ -6,7 +6,9 @@
 #include "MantidAPI/IPeakFunction.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/RegisterFileLoader.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidDataObjects/TableWorkspace.h"
 #include "MantidHistogramData/LinearGenerator.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/EnabledWhenProperty.h"
@@ -23,41 +25,7 @@ using Mantid::HistogramData::LinearGenerator;
 using Mantid::DataObjects::create;
 using Mantid::DataObjects::Workspace2D;
 
-// unit
-/// Convert an angle from degree to radiant
-#define inRad *M_PI / 180.
-/// Convert and angle from radiant to degree
-#define inDeg *180. / M_PI
-/// Convert a value from millimeter to meter
-#define inMeter *1.0e-3
 // formula
-/// Computes the antan of an angle in rad used for the coherence equation, where
-/// \a is a peak position. This equation requires the sample-detector distance
-/// of the direct beam.
-#define atanUsingDirectBeam(a)                                                 \
-  atan((a - m_pixelCentre) * m_pixelWidth / m_detectorDistanceDirectBeam)
-/// Computes the antan of an angle in rad used for the coherence equation, where
-/// \a is a peak position. This equation requires the sample-detector distance
-/// of the reflected beam.
-#define atanUsingReflectedBeam(a)                                              \
-  atan((a - m_pixelCentre) * m_pixelWidth / m_detectorDistanceValue)
-/** Computes the coherence and incoherence equation for an angle \a, and peak
-  * positions of the reflected beam \b and \c. The signed factor \sign depends
-  * on Figaro's reflection down option.
-  */
-#define eq1(a, b, c, sign)                                                     \
-  (a -                                                                         \
-   (sign)*0.5 * (atanUsingDirectBeam(b) + (sign)*atanUsingReflectedBeam(c)))   \
-      inDeg
-/** Computes the coherence and incoherence equation for an angle \a, and peak
-  * positions of the direct and reflected beam \b and \c, respectively. The
-  *  signed factor \sign depends on Figaro's reflection
-  * down option.
-  */
-#define eq2(a, b, c, sign)                                                     \
-  (a -                                                                         \
-   (sign)*0.5 *                                                                \
-       (atanUsingReflectedBeam(b) + (sign)*atanUsingReflectedBeam(c))) inDeg
 /// Returns an iterator for an iterator \a and \b and a double value \c
 #define iterator(a, b, c)                                                      \
   std::find_if(a, b, [c](double value) { return value < 0.5 * c; })
@@ -92,6 +60,79 @@ using Mantid::DataObjects::Workspace2D;
 /// check via ws->run().hasProperty(myString).
 #define getDouble(myString)                                                    \
   m_localWorkspace->run().getPropertyValueAsType<double>(myString)
+
+namespace {
+struct Peak {
+  double fittedCentre;
+  double positionOfMaximum;
+};
+
+struct DirectBeamMeasurement {
+  double detectorAngle;
+  double detectorDistance;
+  double fittedPeakCentre;
+  double positionOfMaximum;
+};
+
+Mantid::API::ITableWorkspace_sptr createBeamPositionTable(const DirectBeamMeasurement &info) {
+  auto table = Mantid::API::WorkspaceFactory::Instance().createTable();
+  table->addColumn("double", "DetectorAngle");
+  table->addColumn("double", "DetectorDistance");
+  table->addColumn("double", "FittedPeakCentre");
+  table->addColumn("double", "PositionOfMaximum");
+  table->appendRow();
+  auto col = table->getColumn("DetectorAngle");
+  col->cell<double>(0) = info.detectorAngle;
+  col = table->getColumn("DetectorDistance");
+  col->cell<double>(0) = info.detectorDistance;
+  col = table->getColumn("FittedPeakCentre");
+  col->cell<double>(0) = info.fittedPeakCentre;
+  col = table->getColumn("PositionOfMaximum");
+  col->cell<double>(0) = info.positionOfMaximum;
+  return table;
+}
+
+std::pair<size_t, size_t> fitIntegrationWSIndexRange(const Mantid::API::MatrixWorkspace &ws) {
+  const size_t nHisto = ws.getNumberHistograms();
+  size_t begin = 0;
+  const auto &spectrumInfo = ws.spectrumInfo();
+  for (size_t i = 0; i < nHisto; ++i) {
+    if (!spectrumInfo.isMonitor(i)) {
+      break;
+    }
+    ++begin;
+  }
+  size_t end = nHisto - 1;
+  for (ptrdiff_t i = static_cast<ptrdiff_t>(nHisto) - 1; i != 0; --i) {
+    if (!spectrumInfo.isMonitor(i)) {
+      break;
+    }
+    --end;
+  }
+  return std::pair<size_t, size_t>{begin, end};
+}
+
+DirectBeamMeasurement parseBeamPositionTable(const Mantid::API::ITableWorkspace &table) {
+  if (table.rowCount() != 1) {
+    throw std::runtime_error("BeamPosition table should have a single row.");
+  }
+  DirectBeamMeasurement m;
+  auto col = table.getColumn("DetectorAngle");
+  m.detectorAngle = col->cell<double>(0);
+  col = table.getColumn("DetectorDistance");
+  m.detectorDistance = col->cell<double>(0);
+  col = table.getColumn("FittedPeakCentre");
+  m.fittedPeakCentre = col->cell<double>(0);
+  col = table.getColumn("PositionOfMaximum");
+  m.positionOfMaximum = col->cell<double>(0);
+  return m;
+}
+
+void rebinIntegralWorkspace(Mantid::API::MatrixWorkspace &ws) {
+  auto &xs = ws.mutableX(0);
+  std::iota(xs.begin(), xs.end(), 0.0);
+}
+} // anonymous namespace
 
 namespace Mantid {
 namespace DataHandling {
@@ -137,20 +178,12 @@ void LoadILLReflectometry::init() {
                       "OutputWorkspace", std::string(), Direction::Output),
                   "Name of the output workspace");
 
-  const std::vector<std::string> angle{"sample angle", "detector angle",
-                                       "user defined"};
-  declareProperty("InputAngle", "sample angle",
-                  boost::make_shared<StringListValidator>(angle),
-                  "Optional angle for calculating the Bragg angle.\n");
+  declareProperty(Kernel::make_unique<WorkspaceProperty<ITableWorkspace>>("OutputBeamPosition", std::string(), Direction::Output, PropertyMode::Optional), "Name of the fitted beam position output workspace");
 
-  auto positiveDouble = boost::make_shared<BoundedValidator<double>>();
-  positiveDouble->setLower(0.0);
-  declareProperty("BraggAngle", EMPTY_DBL(), positiveDouble,
-                  "User defined Bragg angle");
-  setPropertySettings("BraggAngle",
-                      Kernel::make_unique<EnabledWhenProperty>(
-                          "InputAngle", IS_EQUAL_TO, "user defined"));
+  declareProperty(Kernel::make_unique<WorkspaceProperty<ITableWorkspace>>("BeamPosition", std::string(), Direction::Input, PropertyMode::Optional), "A workspace defining the beam position; used to calculate the Bragg angle");
 
+  declareProperty("BraggAngle", EMPTY_DBL(),
+                  "User defined Bragg angle in degrees");
   const std::vector<std::string> availableUnits{"Wavelength", "TimeOfFlight"};
   declareProperty("XUnit", "Wavelength",
                   boost::make_shared<StringListValidator>(availableUnits),
@@ -159,17 +192,8 @@ void LoadILLReflectometry::init() {
   const std::vector<std::string> scattering{"coherent", "incoherent"};
   declareProperty("ScatteringType", "incoherent",
                   boost::make_shared<StringListValidator>(scattering),
-                  "Scattering type used to calculate the Bragg angle");
+                  "Scattering type used to calculate the Bragg angle.");
 
-  // user defined InputAngle and D17 instrument: ScatteringAngle can be disabled
-
-  declareProperty(Kernel::make_unique<FileProperty>("DirectBeam", std::string(),
-                                                    FileProperty::OptionalLoad,
-                                                    ".nxs", Direction::Input),
-                  "Name of the direct beam Nexus file to load");
-  setPropertySettings("DirectBeam",
-                      Kernel::make_unique<EnabledWhenProperty>(
-                          "InputAngle", IS_EQUAL_TO, "detector angle"));
 }
 
 /**
@@ -178,28 +202,12 @@ void LoadILLReflectometry::init() {
  */
 std::map<std::string, std::string> LoadILLReflectometry::validateInputs() {
   std::map<std::string, std::string> result;
-  // check input file
-  const std::string fileName{getPropertyValue("Filename")};
-  if (!fileName.empty() &&
-      (m_supportedInstruments.find(fileName) != m_supportedInstruments.end()))
-    result["Filename"] = "Instrument not supported.";
-  // check user defined angle
-  const double angleUserDefined{getProperty("BraggAngle")};
-  const std::string angleOption{getPropertyValue("InputAngle")};
-  if ((angleOption == "user defined") && (angleUserDefined == EMPTY_DBL()))
-    result["BraggAngle"] =
-        "User defined BraggAngle option requires an input value";
-  // check direct beam file
-  const std::string directBeam{getPropertyValue("DirectBeam")};
-  if (!directBeam.empty() &&
-      (m_supportedInstruments.find(directBeam) != m_supportedInstruments.end()))
-    result["DirectBeam"] = "Instrument not supported.";
-  // compatibility check for reflected and direct beam located in loadBeam
-  // further input validation is needed for general LoadDialog and Python
-  if ((angleOption != "user defined") && (angleUserDefined != EMPTY_DBL()))
-    result["BraggAngle"] = "No input value required";
-  if (directBeam.empty() && (angleOption == "detector angle"))
-    result["InputAngle"] = "DirectBeam input required";
+  if (!getPointerToProperty("BeamPosition")->isDefault() && !getPointerToProperty("BraggAngle")->isDefault()) {
+    result["BraggAngle"] = "User defined Bragg angle cannot be given simultaneously to BeamPosition.";
+  }
+  if (!getPointerToProperty("BraggAngle")->isDefault() && !getPointerToProperty("OutputBeamPosition")->isDefault()) {
+    result["OutputBeamPosition"] = "Beam position will not be calculated as user defined Bragg angle was given.";
+  }
   return result;
 }
 
@@ -269,7 +277,7 @@ void LoadILLReflectometry::initNames(NeXus::NXEntry &entry) {
   g_log.debug(
       StringConcat("Instrument name : ", m_instrumentName).append("\n"));
   if (m_instrumentName == "D17") {
-    m_detectorDistance = "det";
+    m_detectorDistanceName = "det";
     m_detectorAngleName = "dan.value";
     m_sampleAngleName = "san.value";
     m_offsetFrom = "VirtualChopper";
@@ -279,7 +287,7 @@ void LoadILLReflectometry::initNames(NeXus::NXEntry &entry) {
     m_chopper2Name = "Chopper2";
     // m_wavelength = getFloat("wavelength");
   } else if (m_instrumentName == "Figaro") {
-    m_detectorDistance = "DTR";
+    m_detectorDistanceName = "DTR";
     m_detectorAngleName = "VirtualAxis.DAN_actual_angle";
     m_sampleAngleName = "CollAngle.actual_coll_angle";
     m_offsetFrom = "CollAngle";
@@ -396,7 +404,7 @@ void LoadILLReflectometry::loadDataDetails(NeXus::NXEntry &entry) {
   NXFloat pixelWidth =
       entry.openNXFloat(StringConcat("instrument/PSD/", widthName));
   pixelWidth.load();
-  m_pixelWidth = static_cast<double>(pixelWidth[0]) inMeter;
+  m_pixelWidth = static_cast<double>(pixelWidth[0]) * 1e-3;
 
   g_log.debug("Please note that ILL reflectometry instruments have "
               "several tubes, after integration one "
@@ -567,218 +575,115 @@ void LoadILLReflectometry::loadNexusEntriesIntoProperties() {
   stat = NXclose(&nxfileID);
 }
 
-/** Load direct or reflected beam:
-  * - load detector counts
-  * - get angle value for computing the Bragg angle, only for direct beam
-  * @params beamWS :: Workspace holding detector counts
-  * @params beam :: Name of the beam file
-  * @params angleDirectBeam :: Name of the detector angle of the direct beam
-  */
-void LoadILLReflectometry::loadBeam(MatrixWorkspace_sptr &beamWS,
-                                    const std::string &beam,
-                                    std::string angleDirectBeam) {
-  if (!beam.empty()) {
-    // init beam workspace, we do not need its monitor counts
-    beamWS = WorkspaceFactory::Instance().create(
-        "Workspace2D", m_numberOfHistograms, m_numberOfChannels + 1,
-        m_numberOfChannels);
-    // open the root node
-    NeXus::NXRoot dataRoot(getPropertyValue(beam));
-    NXEntry entry{dataRoot.openFirstEntry()};
-    // load counts
-    NXData dataGroup = entry.openNXData("data");
-    NXInt data = dataGroup.openIntData();
-    data.load();
-    // check whether beam workspace is compatible
-    if (beam == "DirectBeam") {
-      if (data.dim0() * data.dim1() * data.dim2() !=
-          int(m_numberOfChannels * m_numberOfHistograms))
-        g_log.error(
-            StringConcat(beam, " has incompatible size with Filename beam\n"));
-      // get sample detector distance
-      if (m_instrumentName == "D17")
-        m_detectorDistanceDirectBeam = entry.getFloat(
-            StringConcat("instrument/", m_detectorDistance).append("/value"))
-                                           inMeter;
-      else if (m_instrumentName == "Figaro")
-        m_detectorDistanceDirectBeam =
-            entry.getFloat(StringConcat("instrument/", m_detectorDistance)
-                               .append("/value")) inMeter +
-            entry.getFloat(StringConcat("instrument/", m_detectorDistance)
-                               .append("/offset_value")) inMeter;
-      debugLog2("Sample-detector distance (m) ", beam,
-                m_detectorDistanceDirectBeam);
-      // set Bragg angle of the direct beam for later use
-      if (!angleDirectBeam.empty()) {
-        std::replace(angleDirectBeam.begin(), angleDirectBeam.end(), '.', '/');
-        m_angleDirectBeam =
-            entry.getFloat(StringConcat("instrument/", angleDirectBeam));
-        debugLogWithUnitDegrees("Bragg angle of the direct beam: ",
-                                m_angleDirectBeam); //?
-      }
-    }
-    /* uncommented since validation needed. This cannot be found in cosmos
-    // set offset angle
-    if (!(incidentAngle == "user defined")) {
-      double sampleAngle = getDouble(m_sampleAngleName); // read directly from
-    Nexus
-    file
-      double detectorAngle = getDouble(m_detectorAngleName); // read directly
-    from Nexus file
-      debugLog("sample angle ", sampleAngle);
-      debugLog("detector angle ", detectorAngle);
-      m_offsetAngle = detectorAngle / 2. * sampleAngle;
-      debugLogWithUnitDegrees("Offset angle of the direct beam (will be added to
-    "
-                              "the scattering angle) ",
-                              m_offsetAngle);
-    }
-    */
-    dataRoot.close();
-    // set x values
-    std::vector<double> xVals;
-    xVals.reserve(int(m_numberOfChannels) + 1);
-    for (size_t t = 0; t < m_numberOfChannels + 1; ++t)
-      xVals.push_back(double(t));
-    // write data
-    if (!xVals.empty()) {
-      HistogramData::BinEdges binEdges(xVals);
-      for (size_t j = 0; j < m_numberOfHistograms; ++j) {
-        int *data_p = &data(0, static_cast<int>(j), 0);
-        const Counts counts(data_p, data_p + m_numberOfChannels);
-        beamWS->setHistogram(j, binEdges, std::move(counts));
-      }
-    }
-  } else
-    throw std::runtime_error("Name of the beam is missing");
-}
-
 /**
-  * Gaussian fit to determine peak position AND set the Bragg angle of
-  *the direct beam if requested for later use
+  * Gaussian fit to determine peak position.
   *
-  * @param beam :: Name of the beam. This is the ReflectedBeam by default and
-  *the DirectBeam if explicitely mentioned
-  * @param angleDirectBeam :: Name of detector angle of the direct beam
-  * @return centre :: detector position of the peak: Gaussian fit and position
-  *of the maximum (serves as start value for the optimization)
+  * @return :: detector position of the peak: Gaussian fit and position
+  * of the maximum (serves as start value for the optimization)
   */
-std::vector<double>
-LoadILLReflectometry::fitReflectometryPeak(const std::string &beam,
-                                           const std::string &angleDirectBeam) {
-  std::vector<double> centre{0.0, 0.0};
-  if ((beam == "DirectBeam") || (beam == "Filename")) {
-    MatrixWorkspace_sptr beamWS;
-    loadBeam(beamWS, beam, angleDirectBeam);
-    // create new MatrixWorkspace containing (single spectrum only)
-    // MatrixWorkspace_sptr singleSpectrum =
-    // WorkspaceFactory::Instance().create(
-    //  "Workspace2D", 1, m_numberOfHistograms, m_numberOfHistograms);
-    Points x(m_numberOfHistograms, LinearGenerator(0, 1));
-    auto singleSpectrum = create<Workspace2D>(1, Histogram(x));
-    MatrixWorkspace_sptr spectrum{std::move(singleSpectrum)};
-    for (size_t i = 0; i < (m_numberOfHistograms); ++i) {
-      auto Y = beamWS->y(i);
-      spectrum->mutableY(0)[i] = std::accumulate(Y.begin(), Y.end(), 0);
-    }
-    // check sum of detector counts
-    if ((beam == "Filename") &&
-        getDouble("PSD.detsum") !=
-            std::accumulate(spectrum->y(0).begin(), spectrum->y(0).end(), 0))
-      g_log.error("Error after integrating and transposing beam\n");
-    // determine initial height: maximum value
-    auto maxValueIt =
-        std::max_element(spectrum->y(0).begin(), spectrum->y(0).end());
-    double height = *maxValueIt;
-    // determine initial centre: index of the maximum value
-    size_t maxIndex = std::distance(spectrum->y(0).begin(), maxValueIt);
-    centre[1] = static_cast<double>(maxIndex);
-    debugLog2("Peak maximum position of ", beam, centre[1]);
-    // determine sigma
-    auto minFwhmIt = iterator(maxValueIt, spectrum->y(0).begin(), height);
-    auto maxFwhmIt = iterator(maxValueIt, spectrum->y(0).end(), height);
-    double fwhm =
-        0.5 * static_cast<double>(std::distance(minFwhmIt, maxFwhmIt) + 1);
-    debugLog2("Initial fwhm (fixed window at half maximum) ", beam, fwhm);
-    // generate Gaussian
-    auto func = API::FunctionFactory::Instance().createFunction("Gaussian");
-    auto initialGaussian =
-        boost::dynamic_pointer_cast<API::IPeakFunction>(func);
-    initialGaussian->setHeight(height);
-    initialGaussian->setCentre(centre[1]);
-    initialGaussian->setFwhm(fwhm);
-    // call Fit child algorithm
-    API::IAlgorithm_sptr fitGaussian =
-        createChildAlgorithm("Fit", -1, -1, true);
-    fitGaussian->initialize();
-    fitGaussian->setProperty(
-        "Function",
-        boost::dynamic_pointer_cast<API::IFunction>(initialGaussian));
-    fitGaussian->setProperty("InputWorkspace", spectrum);
-    bool success = fitGaussian->execute();
-    if (!success)
-      g_log.warning("Fit not successful, take initial values\n");
-    else {
-      // get fitted values back
-      centre[0] = initialGaussian->centre();
-      double sigma = initialGaussian->fwhm();
-      debugLog("Sigma: ", sigma);
-    }
-    debugLog2("Estimated peak position of ", beam, centre[0]);
-  } else
-    throw std::runtime_error(
-        StringConcat("The input ", beam).append(" does not exist"));
-  return centre;
+std::pair<double, double> LoadILLReflectometry::fitReflectometryPeak() {
+  size_t startIndex;
+  size_t endIndex;
+  std::tie(startIndex, endIndex) = fitIntegrationWSIndexRange(*m_localWorkspace);
+  IAlgorithm_sptr integration = createChildAlgorithm("Integration");
+  integration->initialize();
+  integration->setProperty("InputWorkspace", m_localWorkspace);
+  integration->setProperty("OutputWorkspace", "__unused_for_child");
+  integration->setProperty("StartWorkspaceIndex", static_cast<int>(startIndex));
+  integration->setProperty("EndWorkspaceIndex", static_cast<int>(endIndex));
+  integration->execute();
+  MatrixWorkspace_sptr integralWS = integration->getProperty("OutputWorkspace");
+  IAlgorithm_sptr transpose = createChildAlgorithm("Transpose");
+  transpose->initialize();
+  transpose->setProperty("InputWorkspace", integralWS);
+  transpose->setProperty("OutputWorkspace", "__unused_for_child");
+  transpose->execute();
+  integralWS = transpose->getProperty("OutputWorkspace");
+  rebinIntegralWorkspace(*integralWS);
+  // determine initial height: maximum value
+  const auto maxValueIt =
+      std::max_element(integralWS->y(0).cbegin(), integralWS->y(0).cend());
+  const double height = *maxValueIt;
+  // determine initial centre: index of the maximum value
+  const size_t maxIndex = std::distance(integralWS->y(0).cbegin(), maxValueIt);
+  const double centreByMax = static_cast<double>(maxIndex);
+  debugLog("Peak maximum position ", centreByMax);
+  // determine sigma
+  const auto minFwhmIt = iterator(maxValueIt, integralWS->y(0).begin(), centreByMax);
+  const auto maxFwhmIt = iterator(maxValueIt, integralWS->y(0).end(), centreByMax);
+  const double fwhm =
+      0.5 * static_cast<double>(std::distance(minFwhmIt, maxFwhmIt) + 1);
+  debugLog("Initial fwhm (fixed window at half maximum) ", fwhm);
+  // generate Gaussian
+  auto func = API::FunctionFactory::Instance().createFunction("Gaussian");
+  auto initialGaussian =
+      boost::dynamic_pointer_cast<API::IPeakFunction>(func);
+  initialGaussian->setHeight(height);
+  initialGaussian->setCentre(centreByMax);
+  initialGaussian->setFwhm(fwhm);
+  // call Fit child algorithm
+  API::IAlgorithm_sptr fitGaussian = createChildAlgorithm("Fit");
+  fitGaussian->initialize();
+  fitGaussian->setProperty(
+      "Function",
+      boost::dynamic_pointer_cast<API::IFunction>(initialGaussian));
+  fitGaussian->setProperty("InputWorkspace", integralWS);
+  bool success = fitGaussian->execute();
+  if (!success)
+    g_log.warning("Fit not successful, using initial values.\n");
+  else
+    debugLog("Sigma: ", initialGaussian->fwhm());
+  const double centreByFit = success ? initialGaussian->centre() : centreByMax;
+  debugLog("Estimated peak position ", centreByFit);
+  return std::pair<double, double>{centreByFit, centreByMax};
 }
 
 /// Compute Bragg angle
 double LoadILLReflectometry::computeBraggAngle() {
-  // compute bragg angle called angleBragg in the following
-  const std::string inputAngle = getPropertyValue("InputAngle");
-  std::string incidentAngle{std::string()};
-  if (inputAngle == "sample angle" || inputAngle == "detector angle") {
-    inputAngle == "sample angle" ? incidentAngle = m_sampleAngleName
-                                 : incidentAngle = m_detectorAngleName;
-  } else
-    incidentAngle = "user defined";
-  double angle = getProperty("BraggAngle");
-  // no user input for BraggAngle means we take sample or detector angle value
-  if (angle == EMPTY_DBL()) {
-    // modify error message "Unknown property search object"
-    if (m_localWorkspace->run().hasProperty(incidentAngle)) {
-      angle = getDouble(incidentAngle);
-      debugLog2("Use angle (degrees), ", incidentAngle, angle);
-    } else
-      throw std::runtime_error(
-          std::string(incidentAngle).append(" is not defined in Nexus file"));
+  const double userAngle = getProperty("BraggAngle");
+  if (userAngle != EMPTY_DBL()) {
+    return userAngle;
   }
+  ITableWorkspace_const_sptr posTable = getProperty("BeamPosition");
+  const std::string incidentAngle = posTable ? m_detectorAngleName : m_sampleAngleName;
+  // modify error message "Unknown property search object"
+  if (!m_localWorkspace->run().hasProperty(incidentAngle))
+    throw std::runtime_error(
+        std::string(incidentAngle).append(" is not defined in Nexus file"));
   // user angle and sample angle behave equivalently for D17
-  const std::string scatteringType = getProperty("ScatteringType");
-  double angleBragg{angle};
+  const double angle = getDouble(incidentAngle);
+  debugLog2("Use angle (degrees), ", incidentAngle, angle);
   // the reflected beam
-  std::vector<double> peakPosRB = fitReflectometryPeak("Filename");
+  double reflectedCentre;
+  double reflectedMaxPosition;
+  std::tie(reflectedCentre, reflectedMaxPosition) = fitReflectometryPeak();
+  if (!getPointerToProperty("OutputBeamPosition")->isDefault()) {
+    DirectBeamMeasurement m;
+    m.detectorAngle = getDouble(m_detectorAngleName);
+    m.detectorDistance = sampleDetectorDistance();
+    m.fittedPeakCentre = reflectedCentre;
+    m.positionOfMaximum = reflectedMaxPosition;
+    setProperty("OutputBeamPosition", createBeamPositionTable(m));
+  }
   // Figaro theta sign informs about reflection down (-1.0) or up (1.0)
   double down{1.0}; // default value for D17
   if (m_instrumentName == "Figaro") {
     down = getDouble("theta");
     down > 0. ? down = 1. : down = -1.;
-    if (inputAngle == "detectorAngle")
-      down = down;
   }
   double sign{-down};
-  if (((inputAngle == ("sample angle")) || (m_instrumentName == "Figaro")) &&
-      (scatteringType == "coherent")) {
-    angleBragg = eq2(angle inRad, peakPosRB[1], peakPosRB[0], sign);
-  } else if (inputAngle == "detector angle") {
-    // DirectBeam is abvailable and we can read from its Nexus file
-    std::vector<double> peakPosDB =
-        fitReflectometryPeak("DirectBeam", incidentAngle);
-    double angleCentre = down * ((angle - m_angleDirectBeam) / 2.)inRad;
-    debugLogWithUnitDegrees("Centre angle ", angleCentre inDeg);
+  const std::string scatteringType = getProperty("ScatteringType");
+  double angleBragg{angle};
+  if (!posTable && scatteringType == "coherent") {
+    angleBragg = braggAngleReflectedBeam(angle, reflectedMaxPosition, reflectedCentre, sign);
+  } else if (posTable) {
+    const auto directBeamMeasurement = parseBeamPositionTable(*posTable);
+    const double angleCentre = down * (angle - directBeamMeasurement.detectorAngle) / 2.;
+    debugLogWithUnitDegrees("Centre angle ", angleCentre);
     if (scatteringType == "incoherent")
-      angleBragg = eq1(angleCentre, peakPosDB[0], peakPosRB[0], sign);
-    else if (scatteringType == "coherent")
-      angleBragg = eq1(angleCentre, peakPosDB[0], peakPosRB[1] + 0.5, sign);
+      angleBragg = braggAngleDirectBeam(angleCentre, directBeamMeasurement.fittedPeakCentre, reflectedCentre, sign, directBeamMeasurement.detectorDistance);
+    else
+      angleBragg = braggAngleDirectBeam(angleCentre, directBeamMeasurement.fittedPeakCentre, reflectedMaxPosition + 0.5, sign, directBeamMeasurement.detectorDistance);
   }
   debugLogWithUnitDegrees("Bragg angle ", angleBragg);
   return angleBragg;
@@ -787,19 +692,16 @@ double LoadILLReflectometry::computeBraggAngle() {
 /// Update detector position according to data file
 void LoadILLReflectometry::placeDetector() {
   g_log.debug("Move the detector bank \n");
-  double dist = getDouble(StringConcat(m_detectorDistance, ".value"));
-  m_detectorDistanceValue = dist inMeter;
-  if (m_instrumentName == "Figaro")
-    dist += getDouble(StringConcat(m_detectorDistance, ".offset_value"));
-  debugLogWithUnitMeter("Sample-detector distance ", m_detectorDistanceValue);
-  double rho = computeBraggAngle() + m_offsetAngle / 2.;
-  double theta_rad = (2. * rho)inRad;
+  const double dist = sampleDetectorDistance();
+  debugLogWithUnitMeter("Sample-detector distance ", dist);
+  const double rho = computeBraggAngle() + m_offsetAngle / 2.;
+  const double theta_rad = 2 * rho / 180.0 * M_PI;
   // incident angle for using the algorithm ConvertToReflectometryQ
-  m_localWorkspace->mutableRun().addProperty("stheta", double(rho inRad));
+  m_localWorkspace->mutableRun().addProperty("stheta", rho / 180.0 * M_PI);
   const std::string componentName = "bank";
   V3D pos = m_loader.getComponentPosition(m_localWorkspace, componentName);
-  V3D newpos(m_detectorDistanceValue * sin(theta_rad), pos.Y(),
-             m_detectorDistanceValue * cos(theta_rad));
+  V3D newpos(dist * sin(theta_rad), pos.Y(),
+             dist * cos(theta_rad));
   m_loader.moveComponent(m_localWorkspace, componentName, newpos);
   // apply a local rotation to stay perpendicular to the beam
   const V3D axis(0.0, 1.0, 0.0);
@@ -812,11 +714,45 @@ void LoadILLReflectometry::placeSource() {
   if (m_instrumentName != "Figaro") {
     return;
   }
-  const double dist = getDouble("ChopperSetting.chopperpair_sample_distance");
-  debugLogWithUnitMeter("Source-sample distance ", dist inMeter);
+  const double dist = getDouble("ChopperSetting.chopperpair_sample_distance") * 1e-3;
+  debugLogWithUnitMeter("Source-sample distance ", dist);
   const std::string source = "chopper1";
-  const V3D newPos{0.0, 0.0, -dist inMeter};
+  const V3D newPos{0.0, 0.0, -dist};
   m_loader.moveComponent(m_localWorkspace, source, newPos);
+}
+
+/// Computes the atan of an angle in rad used for the coherence equation, where
+/// \a is a peak position. This equation requires the sample-detector distance
+/// of the direct beam.
+double LoadILLReflectometry::detectorAngle(const double peakPosition, const double detectorDistance) const {
+  return std::atan((peakPosition - m_pixelCentre) * m_pixelWidth / detectorDistance) / M_PI * 180.0;
+}
+
+/** Computes the coherence and incoherence equation for an angle and peak
+  * positions of the direct and reflected reflected beams. The signed factor depends
+  * on Figaro's reflection down option.
+  */
+double LoadILLReflectometry::braggAngleDirectBeam(const double angle, const double directBeamPeakPosition, const double reflectedBeamPeakPosition, const double sign, const double directBeamDetectorDistance) const {
+  const double d = sampleDetectorDistance();
+  return angle - sign * 0.5 * (detectorAngle(directBeamPeakPosition, directBeamDetectorDistance) + sign * detectorAngle(reflectedBeamPeakPosition, d));
+}
+
+/** Computes the coherence and incoherence equation for an angle \a, and peak
+  * positions of the direct and reflected beam \b and \c, respectively. The
+  *  signed factor \sign depends on Figaro's reflection
+  * down option.
+  */
+double LoadILLReflectometry::braggAngleReflectedBeam(const double angle, const double reflectedBeamMaxPosition, const double reflectedBeamPeakPosition, const double sign) const {
+  const double d = sampleDetectorDistance();
+  return angle - sign * 0.5 * (detectorAngle(reflectedBeamMaxPosition, d) + sign * detectorAngle(reflectedBeamPeakPosition, d));
+}
+
+double LoadILLReflectometry::sampleDetectorDistance() const {
+  // TODO This might be incorrect for Figaro.
+  double dist = getDouble(StringConcat(m_detectorDistanceName, ".value")) * 1e-3;
+  if (m_instrumentName == "Figaro")
+    dist -= getDouble(StringConcat(m_detectorDistanceName, ".offset_value")) * 1e-3;
+  return dist;
 }
 } // namespace DataHandling
 } // namespace Mantid

@@ -49,10 +49,6 @@ public:
   }
   /// Cross-check properties with each other @see IAlgorithm::validateInputs
   std::map<std::string, std::string> validateInputs() override;
-  /// Return the detector position of the peak
-  std::vector<double>
-  fitReflectometryPeak(const std::string &beam = "ReflectedBeam",
-                       const std::string &angleDirectBeam = "");
 
 private:
   void init() override;
@@ -63,6 +59,7 @@ private:
   void loadDataDetails(NeXus::NXEntry &entry);
   std::vector<double> getXValues();
   void convertTofToWavelength();
+  std::pair<double, double> fitReflectometryPeak();
   void loadData(NeXus::NXEntry &entry,
                 const std::vector<std::vector<int> > &monitorsData,
                 const std::vector<double> &xVals);
@@ -71,13 +68,14 @@ private:
                                      const std::string &monitor_data);
   std::vector<std::vector<int>> loadMonitors(NeXus::NXEntry &entry);
   void loadInstrument();
-  void loadBeam(API::MatrixWorkspace_sptr &beamWS,
-                const std::string &beam,
-                std::string angleDirectBeam);
   double computeBraggAngle();
   void placeDetector();
   void placeSource();
 
+  double detectorAngle(const double peakPosition, const double detectorDistance) const ;
+  double braggAngleDirectBeam(const double angle, const double directBeamPeakPosition, const double reflectedBeamPeakPosition, const double sign, const double directBeamDetectorDistance) const;
+  double braggAngleReflectedBeam(const double angle, const double reflectedBeamMaxPosition, const double reflectedBeamPeakPosition, const double sign) const;
+  double sampleDetectorDistance() const;
   API::MatrixWorkspace_sptr m_localWorkspace;
 
   /* Values parsed from the nexus file */
@@ -89,17 +87,14 @@ private:
       0}; // number of tubes (always 1) times number of pixels per tube
   double m_wavelength{0.0};
   double m_channelWidth{0.0};
-  double m_angleDirectBeam{0.0}; /// detector angle of the direct beam
   double m_offsetAngle{0.0};
-  std::string m_detectorDistance{std::string()};
   std::string m_detectorAngleName{std::string()};
+  std::string m_detectorDistanceName;
   std::string m_sampleAngleName{std::string()};
   std::string m_offsetName{std::string()};
   std::string m_offsetFrom{std::string()};
   std::string m_chopper1Name{std::string()};
   std::string m_chopper2Name{std::string()};
-  double m_detectorDistanceDirectBeam{0.0}; ///< Sample detector distance
-  double m_detectorDistanceValue{0.0};
   double m_pixelCentre{0.0};
   double m_pixelWidth{0.0};
   std::unordered_set<std::string> m_supportedInstruments{"D17", "d17", "Figaro",
