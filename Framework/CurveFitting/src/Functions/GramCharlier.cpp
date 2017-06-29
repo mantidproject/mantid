@@ -19,10 +19,10 @@ void GramCharlier::init() {
   declareParameter("A", 0.01, "Amplitude");
   declareParameter("X0", 0.2, "Position of the centroid");
   declareParameter("Sigma", 4, "Std. Deviation of distribution");
-  declareParameter("C4", -0.005, "Coefficient of x^4 terms");
-  declareParameter("C6", -0.003, "Coefficient of x^6 terms");
-  declareParameter("C8", -0.002, "Coefficient of x^8 terms");
-  declareParameter("C10", -0.001, "Coefficient of x^10 terms");
+  declareParameter("C4", -0.005, "Coefficient of 4th Hermite polynomial");
+  declareParameter("C6", -0.003, "Coefficient of 6th Hermite polynomial");
+  declareParameter("C8", -0.002, "Coefficient of 8th Hermite polynomial");
+  declareParameter("C10", -0.001, "Coefficient of 10th Hermite polynomial");
   declareParameter("Afse", 0.01, "Ampliude of final-state effects term");
 }
 
