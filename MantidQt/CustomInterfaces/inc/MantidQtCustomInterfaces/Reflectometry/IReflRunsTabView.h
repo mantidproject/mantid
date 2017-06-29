@@ -65,6 +65,7 @@ public:
   virtual void setRowCommands(
       std::vector<std::unique_ptr<DataProcessorCommand>> rowCommands) = 0;
   virtual void clearCommands() = 0;
+  virtual void setRowActionEnabled(int index, bool enabled) = 0;
 
   // Accessor methods
   virtual std::set<int> getSelectedSearchRows() const = 0;

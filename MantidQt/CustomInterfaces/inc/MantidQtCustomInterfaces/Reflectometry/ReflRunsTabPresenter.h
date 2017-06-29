@@ -73,6 +73,7 @@ public:
   void giveUserWarning(std::string prompt, std::string title) override;
   void giveUserCritical(std::string prompt, std::string title) override;
   std::string runPythonAlgorithm(const std::string &pythonCode) override;
+  /// Handle data reduction paused/resumed
   std::map<std::string, std::string> getPreprocessingValues() const override;
   std::map<std::string, std::set<std::string>>
   getPreprocessingProperties() const override;
@@ -82,6 +83,12 @@ public:
   std::string getPostprocessingOptions() const override;
   std::string getTimeSlicingValues() const override;
   std::string getTimeSlicingType() const override;
+  /// Handle data reduction paused/resumed
+  void pause() const override;
+  void resume() const override;
+  /// Reduction paused/resumed confirmation handler
+  void confirmReductionPaused() const override;
+  void confirmReductionResumed() const override;
 
 private:
   /// The search model
