@@ -145,6 +145,7 @@ set ( INC_FILES
 	inc/MantidKernel/ArrayLengthValidator.h
 	inc/MantidKernel/ArrayOrderedPairsValidator.h
 	inc/MantidKernel/ArrayProperty.h
+	inc/MantidKernel/ArrayProperty.tcc
 	inc/MantidKernel/Atom.h
 	inc/MantidKernel/BinFinder.h
 	inc/MantidKernel/BinaryFile.h

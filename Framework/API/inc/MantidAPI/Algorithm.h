@@ -212,15 +212,17 @@ public:
   getProperty(const std::string &name) const override;
 
   template <typename Workspace>
-  void
-  declareIndexProperty(const std::string &propertyName,
-                       const int allowedIndexTypes = IndexType::WorkspaceIndex,
-                       const std::string &doc = "") {
+  void declareIndexProperty(
+      const std::string &propertyName,
+      const int allowedIndexTypes = IndexType::WorkspaceIndex,
+      PropertyMode::Type optional = PropertyMode::Type::Mandatory,
+      LockMode::Type lock = LockMode::Type::Lock, const std::string &doc = "") {
     checkWorkspaceType<Workspace>();
 
-    declareProperty(Kernel::make_unique<WorkspaceProperty<Workspace>>(
-                        propertyName, "", Kernel::Direction::Input),
-                    doc);
+    declareProperty(
+        Kernel::make_unique<WorkspaceProperty<Workspace>>(
+            propertyName, "", Kernel::Direction::Input, optional, lock),
+        doc);
 
     declareProperty(Kernel::make_unique<IndexTypeProperty>(
         propertyName + "IndexType", allowedIndexTypes));

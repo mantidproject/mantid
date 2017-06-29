@@ -1,5 +1,8 @@
 #include "MantidAPI/IndexTypeProperty.h"
 
+// ArrayProperty Implementation
+#include <MantidKernel/ArrayProperty.tcc>
+
 namespace Mantid {
 namespace API {
 IndexTypeProperty::IndexTypeProperty(const std::string &name,

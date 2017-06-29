@@ -19,8 +19,7 @@ using std::size_t;
 /** Initialize the algorithm's properties.
  */
 void ChangePulsetime2::init() {
-  declareIndexProperty<EventWorkspace>(
-      "InputWorkspace", IndexType::WorkspaceIndex, "An input event workspace.");
+  declareIndexProperty<EventWorkspace>("InputWorkspace");
   declareProperty(
       make_unique<PropertyWithValue<double>>("TimeOffset", Direction::Input),
       "Number of seconds (a float) to add to each event's pulse "

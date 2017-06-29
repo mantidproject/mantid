@@ -41,6 +41,8 @@ public:
       Kernel::IValidator_sptr validator =
           Kernel::IValidator_sptr(new Kernel::NullValidator));
 
+  IndexProperty *clone() const override;
+
   std::string isValid() const override;
   std::vector<int> &operator=(const std::vector<int> &rhs) override;
   std::string setValue(const std::string &value) override;
