@@ -82,7 +82,7 @@ class CompositeFunctionWrapper(FunctionWrapper):
        return self.initByName("CompositeFunction", *args)
 
     def initByName(self, name, *args):
-       if hasattr(args[0],'nFunctions'):
+       if len(args) == 1 and hasattr(args[0],'nFunctions'):
           # We have a composite function to wrap
           self.fun = args[0]
        else:
@@ -170,7 +170,32 @@ class CompositeFunctionWrapper(FunctionWrapper):
     # Every member function must have a parameter of this name.
        for i in range(0, self.__len__()):
           self[i].untie(name)
- 
+
+    def flatten (self):
+    # Return composite function, equal to self, but with 
+    # every composite function within replaced by
+    # its list of functions, so having a pure list of functions.
+    # This would enable sensible __add__ and __mult__ operations.
+    
+    # If there are no composite functions, do nothing
+       needToFlatten = False
+       for i in range(0, self.__len__()):
+          if( not needToFlatten and isinstance(self[i],CompositeFunctionWrapper)):
+             needToFlatten = True
+             
+       if( not needToFlatten ):
+          return self
+       
+       flatSelf = CompositeFunctionWrapper()
+       for i in range(0, self.__len__()):
+          if(isinstance(self[i],CompositeFunctionWrapper)):
+             currentFunction = self[i].flatten()
+             for j in range(0, currentFunction.__len__()):
+                flatSelf.add(currentFunction[i])
+          else:
+             flatSelf.add(self[i])
+             
+       return flatSelf          
  
 class ProductFunctionWrapper(CompositeFunctionWrapper):
 # Wrapper class for Product Fitting Function
