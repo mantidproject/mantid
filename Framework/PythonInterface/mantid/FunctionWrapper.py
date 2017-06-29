@@ -28,8 +28,7 @@ class FunctionWrapper:
                  
   def __add__ (self, other):
       if(isinstance(self,CompositeFunctionWrapper)):
-        sum = self
-        return sum.fun.add(other.fun)
+        return CompositeFunctionWrapper(self.fun.add(other.fun))
       else:
         return CompositeFunctionWrapper(self,other)
         
@@ -85,7 +84,8 @@ class CompositeFunctionWrapper(FunctionWrapper):
    
           #Add the functions
           for a in args:
-             self.fun.add(a.fun)      
+             if(not isinstance(a, int)): 
+                self.fun.add(a.fun)      
       
     def getParameter(self, name):
     # get parameter of specified name
