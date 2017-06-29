@@ -269,10 +269,7 @@ private:
   }
 
   template <typename T> bool skewWithinTolerance(T coord, T target) {
-    if ((coord >= target - 0.000005) && (coord <= target + 0.000005)) {
-      return true;
-    } else
-      return false;
+    return (coord >= target - 0.000005) && (coord <= target + 0.000005);
   }
 
   std::array<Mantid::coord_t, 9> getExampleCoordTArray(bool nonSkewed) {
