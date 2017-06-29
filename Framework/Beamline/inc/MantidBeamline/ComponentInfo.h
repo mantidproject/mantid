@@ -101,6 +101,8 @@ public:
   bool hasSample() const;
   Eigen::Vector3d sourcePosition() const;
   Eigen::Vector3d samplePosition() const;
+  size_t sourceIndex() const;
+  size_t sampleIndex() const;
   double l1() const;
 };
 } // namespace Beamline

@@ -5,11 +5,14 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
-#include "MantidAPI/DetectorInfo.h"
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidGeometry/Instrument_fwd.h"
 
 namespace Mantid {
+namespace API {
+class DetectorInfo;
+class ComponentInfo;
+}
 namespace DataHandling {
 /**
  Find the offsets for each detector
@@ -77,13 +80,13 @@ private:
   /// Set the center of the supplied detector name
   void center(const double x, const double y, const double z,
               const std::string &detname, API::Workspace_sptr ws,
-              API::DetectorInfo &detectorInfo);
+              API::ComponentInfo &componentInfo);
 
   Geometry::Instrument_sptr getCheckInst(API::Workspace_sptr ws);
   std::vector<std::string> getFilenames();
 
   void doRotation(Kernel::V3D rX, Kernel::V3D rY,
-                  API::DetectorInfo &detectorInfo,
+                  API::ComponentInfo &componentInfo,
                   boost::shared_ptr<const Geometry::IComponent> comp,
                   bool doWishCorrection = false);
   void applyScalings(

@@ -81,6 +81,8 @@ public:
   bool hasParent(const size_t componentIndex) const;
   Kernel::V3D sourcePosition() const;
   Kernel::V3D samplePosition() const;
+  size_t sourceIndex() const;
+  size_t sampleIndex() const;
   double l1() const;
 };
 

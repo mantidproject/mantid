@@ -1,6 +1,6 @@
 #include "MantidDataHandling/LoadILLIndirect2.h"
 #include "MantidAPI/Axis.h"
-#include "MantidAPI/DetectorInfo.h"
+#include "MantidAPI/ComponentInfo.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/RegisterFileLoader.h"
@@ -406,7 +406,9 @@ void LoadILLIndirect2::moveComponent(const std::string &componentName,
     g_log.debug() << componentName << " : t = " << theta
                   << " ==> t = " << twoTheta << "\n";
 
-    m_localWorkspace->mutableDetectorInfo().setPosition(*component, newPos);
+    auto &compInfo = m_localWorkspace->mutableComponentInfo();
+    const auto componentIndex = compInfo.indexOf(component->getComponentID());
+    compInfo.setPosition(componentIndex, newPos);
 
   } catch (Mantid::Kernel::Exception::NotFoundError &) {
     throw std::runtime_error("Error when trying to move the " + componentName +

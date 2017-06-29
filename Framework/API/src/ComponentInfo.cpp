@@ -91,6 +91,14 @@ Kernel::V3D ComponentInfo::samplePosition() const {
   return Kernel::toV3D(m_componentInfo.samplePosition());
 }
 
+size_t ComponentInfo::sourceIndex() const {
+  return m_componentInfo.sourceIndex();
+}
+
+size_t ComponentInfo::sampleIndex() const {
+  return m_componentInfo.sampleIndex();
+}
+
 double ComponentInfo::l1() const { return m_componentInfo.l1(); }
 
 void ComponentInfo::setPosition(const size_t componentIndex,

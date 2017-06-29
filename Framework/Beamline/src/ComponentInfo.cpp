@@ -289,6 +289,20 @@ Eigen::Vector3d ComponentInfo::samplePosition() const {
   return position(static_cast<size_t>(m_sampleIndex));
 }
 
+size_t ComponentInfo::sourceIndex() const {
+  if (!hasSource()) {
+    throw std::runtime_error("Source component has not been specified");
+  }
+  return static_cast<size_t>(m_sourceIndex);
+}
+
+size_t ComponentInfo::sampleIndex() const {
+  if (!hasSample()) {
+    throw std::runtime_error("Sample component has not been specified");
+  }
+  return static_cast<size_t>(m_sampleIndex);
+}
+
 double ComponentInfo::l1() const {
   return (sourcePosition() - samplePosition()).norm();
 }
