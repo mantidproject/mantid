@@ -2,6 +2,8 @@
 from __future__ import (absolute_import, division, print_function)
 from Direct.PropertiesDescriptors import *
 from Direct.RunDescriptor import RunDescriptor,RunDescriptorDependent
+from mantid.simpleapi import *
+from mantid import geometry
 
 
 class NonIDF_Properties(object):

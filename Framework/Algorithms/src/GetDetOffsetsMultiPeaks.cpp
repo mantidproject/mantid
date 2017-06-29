@@ -474,7 +474,7 @@ void GetDetOffsetsMultiPeaks::calculateDetectorsOffsets() {
       m_maskWS->getDetectorIDToWorkspaceIndexMap(true);
 
   // Fit all the spectra with a gaussian
-  Progress prog(this, 0, 1.0, nspec);
+  Progress prog(this, 0.0, 1.0, nspec);
 
   auto &spectrumInfo = m_maskWS->mutableSpectrumInfo();
   // cppcheck-suppress syntaxError
@@ -1183,7 +1183,7 @@ void GetDetOffsetsMultiPeaks::addInfoToReportWS(
 
   // Peak width delta(d)/d
   m_resolutionWS->mutableX(wi)[0] = static_cast<double>(wi);
-  if (offsetresult.fitoffsetstatus.compare("success") == 0) {
+  if (offsetresult.fitoffsetstatus == "success") {
     // Only add successfully calculated value
     m_resolutionWS->mutableY(wi)[0] = offsetresult.resolution;
     m_resolutionWS->mutableE(wi)[0] = offsetresult.dev_resolution;

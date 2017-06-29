@@ -26,6 +26,7 @@ Mantid Documentation
    interfaces/index
    fitfunctions/*
    fitminimizers/index
+   techniques/index
    api/index
    release/index
 
@@ -44,6 +45,7 @@ This is the documentation for Mantid |release|.
 * `Interfaces <interfaces/index.html>`_
 * `Fit Functions <fitfunctions/index.html>`_
 * `Fit Minimizers <fitminimizers/index.html>`_
+* `Techniques <techniques/index.html>`_
 * `API <api/index.html>`_
     - `Python <api/python/index.html>`_
     - `C++ <http://doxygen.mantidproject.org/>`_ (Doxygen)

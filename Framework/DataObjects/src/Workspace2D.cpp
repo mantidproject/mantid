@@ -1,12 +1,14 @@
-#include "MantidHistogramData/LinearGenerator.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidKernel/Exception.h"
+#include "MantidAPI/ISpectrum.h"
 #include "MantidAPI/RefAxis.h"
 #include "MantidAPI/SpectraAxis.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidAPI/ISpectrum.h"
-#include "MantidKernel/VectorHelper.h"
+#include "MantidHistogramData/LinearGenerator.h"
+#include "MantidKernel/Exception.h"
 #include "MantidKernel/IPropertyManager.h"
+#include "MantidKernel/VectorHelper.h"
+
+#include <sstream>
 
 using Mantid::API::ISpectrum;
 using Mantid::API::MantidImage;
@@ -73,20 +75,16 @@ void Workspace2D::init(const std::size_t &NVectors, const std::size_t &XLength,
       XLength, HistogramData::LinearGenerator(1.0, 1.0));
   HistogramData::Counts y(YLength);
   HistogramData::CountStandardDeviations e(YLength);
+  Histogram1D spec(HistogramData::getHistogramXMode(XLength, YLength),
+                   HistogramData::Histogram::YMode::Counts);
+  spec.setX(x);
+  spec.setCounts(y);
+  spec.setCountStandardDeviations(e);
   for (size_t i = 0; i < m_noVectors; i++) {
-    // Create the spectrum upon init
-    auto spec =
-        new Histogram1D(HistogramData::getHistogramXMode(XLength, YLength),
-                        HistogramData::Histogram::YMode::Counts);
-    data[i] = spec;
-    // Set the data and X
-    spec->setX(x);
-    // Y,E arrays populated
-    spec->setCounts(y);
-    spec->setCountStandardDeviations(e);
+    data[i] = new Histogram1D(spec);
     // Default spectrum number = starts at 1, for workspace index 0.
-    spec->setSpectrumNo(specnum_t(i + 1));
-    spec->setDetectorID(detid_t(i + 1));
+    data[i]->setSpectrumNo(specnum_t(i + 1));
+    data[i]->setDetectorID(detid_t(i + 1));
   }
 
   // Add axes that reference the data
@@ -112,10 +110,10 @@ void Workspace2D::init(const std::size_t &NVectors,
     }
   }
 
+  Histogram1D spec(initializedHistogram.xMode(), initializedHistogram.yMode());
+  spec.setHistogram(initializedHistogram);
   for (size_t i = 0; i < m_noVectors; i++) {
-    data[i] = new Histogram1D(initializedHistogram.xMode(),
-                              initializedHistogram.yMode());
-    data[i]->setHistogram(initializedHistogram);
+    data[i] = new Histogram1D(spec);
     // Default spectrum number = starts at 1, for workspace index 0.
     data[i]->setSpectrumNo(specnum_t(i + 1));
     data[i]->setDetectorID(detid_t(i + 1));
@@ -287,7 +285,7 @@ Histogram1D &Workspace2D::getSpectrum(const size_t index) {
 /// Return const reference to Histogram1D at the given workspace index.
 const Histogram1D &Workspace2D::getSpectrum(const size_t index) const {
   if (index >= m_noVectors) {
-    std::stringstream ss;
+    std::ostringstream ss;
     ss << "Workspace2D::getSpectrum, histogram number " << index
        << " out of range " << m_noVectors;
     throw std::range_error(ss.str());

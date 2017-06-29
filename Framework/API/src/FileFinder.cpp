@@ -682,6 +682,14 @@ std::string
 FileFinderImpl::getArchivePath(const std::vector<IArchiveSearch_sptr> &archs,
                                const std::set<std::string> &filenames,
                                const std::vector<std::string> &exts) const {
+  g_log.debug() << "getArchivePath([IArchiveSearch_sptr], [ ";
+  for (const auto iter : filenames)
+    g_log.debug() << iter << " ";
+  g_log.debug() << "], [ ";
+  for (const auto iter : exts)
+    g_log.debug() << iter << " ";
+  g_log.debug() << "])\n";
+
   std::string path;
   for (const auto &arch : archs) {
     try {

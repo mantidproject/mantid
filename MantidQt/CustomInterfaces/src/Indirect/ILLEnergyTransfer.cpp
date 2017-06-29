@@ -53,21 +53,16 @@ bool ILLEnergyTransfer::validate() {
     bool isDouble = true;
     m_backScaling = m_uiForm.leBackgroundFactor->text().toDouble(&isDouble);
     if ((!isDouble || m_backScaling <= 0) &&
-        !m_uiForm.rfBackgroundRun->getUserInput()
-             .toString()
-             .toStdString()
-             .empty()) {
-      uiv.addErrorMessage("BackgroundScaleFactor is invalid.");
+        !m_uiForm.rfBackgroundRun->getUserInput().toString().isEmpty()) {
+      uiv.addErrorMessage("BackgroundScaleFactor is invalid. "
+                          "It has to be a positive number.");
     }
   }
 
   // Validate calibration file
   if (!m_uiForm.rfCalibrationRun->isValid()) {
     uiv.addErrorMessage("Calibration Run File is invalid.");
-  } else if (!m_uiForm.rfCalibrationRun->getUserInput()
-                  .toString()
-                  .toStdString()
-                  .empty()) {
+  } else if (!m_uiForm.rfCalibrationRun->getUserInput().toString().isEmpty()) {
     auto range = m_uiForm.lePeakRange->text().split(',');
     if (range.size() != 2) {
       uiv.addErrorMessage("Calibration Peak Range is invalid. \n"
@@ -89,6 +84,26 @@ bool ILLEnergyTransfer::validate() {
         }
       }
     }
+  }
+
+  // Validate the calibration background file
+  if (!m_uiForm.rfBackCalibrationRun->isValid()) {
+    uiv.addErrorMessage("Background run for calibration is invalid.");
+  } else {
+    bool isDouble = true;
+    m_backCalibScaling = m_uiForm.leBackCalibScale->text().toDouble(&isDouble);
+    if ((!isDouble || m_backCalibScaling <= 0) &&
+        !m_uiForm.rfBackCalibrationRun->getUserInput().toString().isEmpty()) {
+      uiv.addErrorMessage("Scale factor for calibration background is invalid. "
+                          "It has to be a positive number.");
+    }
+  }
+
+  // Calibration file required if calibration background is given
+  if (!m_uiForm.rfBackCalibrationRun->getUserInput().toString().isEmpty() &&
+      m_uiForm.rfCalibrationRun->getUserInput().toString().isEmpty()) {
+    uiv.addErrorMessage(
+        "Calibration file is required if calibration background is given");
   }
 
   // Validate the manual PSD integration range
@@ -121,7 +136,7 @@ bool ILLEnergyTransfer::validate() {
   }
 
   // Validate if the output workspace name is not empty
-  if (m_uiForm.leOutWS->text().toStdString().empty())
+  if (m_uiForm.leOutWS->text().isEmpty())
     uiv.addErrorMessage("OutputWorkspace name is invalid.");
 
   // Validate QENS specific
@@ -131,17 +146,14 @@ bool ILLEnergyTransfer::validate() {
     int useVanadiumRun = m_uiForm.sbUnmirrorOption->value();
     if ((useVanadiumRun == 5 || useVanadiumRun == 7) &&
         (!m_uiForm.rfAlignmentRun->isValid() ||
-         m_uiForm.rfAlignmentRun->getUserInput()
-             .toString()
-             .toStdString()
-             .empty()))
+         m_uiForm.rfAlignmentRun->getUserInput().toString().isEmpty()))
       uiv.addErrorMessage("Alignment run is invalid.");
   }
 
   // Validate FWS specific
 
   if (m_uiForm.rdFWS->isChecked()) {
-    if (m_uiForm.cbObservable->currentText().toStdString().empty()) {
+    if (m_uiForm.cbObservable->currentText().isEmpty()) {
       uiv.addErrorMessage("Observable is invalid, check the sample logs "
                           "for available options");
     }
@@ -162,6 +174,8 @@ void ILLEnergyTransfer::run() {
       m_uiForm.rfBackgroundRun->getUserInput().toString();
   QString calibrationFilename =
       m_uiForm.rfCalibrationRun->getUserInput().toString();
+  QString calibrationBackgroundFilename =
+      m_uiForm.rfBackCalibrationRun->getUserInput().toString();
 
   IAlgorithm_sptr reductionAlg = nullptr;
 
@@ -207,6 +221,10 @@ void ILLEnergyTransfer::run() {
         "CalibrationOption",
         m_uiForm.cbCalibOption->currentText().toStdString());
 
+    reductionAlg->setProperty(
+        "CalibrationBackgroundOption",
+        m_uiForm.cbBackCalibOption->currentText().toStdString());
+
     reductionAlg->setProperty("SortXAxis", m_uiForm.cbSortX->isChecked());
   }
 
@@ -228,9 +246,31 @@ void ILLEnergyTransfer::run() {
                               calibrationFilename.toStdString());
   }
 
+  // Handle calibration background file
+  if (!calibrationBackgroundFilename.toStdString().empty()) {
+    reductionAlg->setProperty("CalibrationBackgroundRun",
+                              calibrationBackgroundFilename.toStdString());
+    reductionAlg->setProperty("CalibrationBackgroundScalingFactor",
+                              m_backCalibScaling);
+  }
+
   reductionAlg->setProperty("Analyser", instDetails["analyser"].toStdString());
   reductionAlg->setProperty("Reflection",
                             instDetails["reflection"].toStdString());
+
+  std::string target = m_uiForm.cbSpectrumTarget->currentText().toStdString();
+  reductionAlg->setProperty("SpectrumAxis", target);
+
+  // Keep track of the suffix
+  if (target == "SpectrumNumber") {
+    m_suffix = "_red";
+  } else if (target == "2Theta") {
+    m_suffix = "_2theta";
+  } else if (target == "Q") {
+    m_suffix = "_q";
+  } else if (target == "Q2") {
+    m_suffix = "_q2";
+  }
 
   // Handle mapping file
   bool useMapFile = m_uiForm.rdGroupChoose->isChecked();
@@ -269,9 +309,6 @@ void ILLEnergyTransfer::algorithmComplete(bool error) {
     if (m_uiForm.ckPlot->isChecked()) {
       plot();
     }
-    if (m_uiForm.ck2Theta->isChecked()) {
-      convertTo2Theta();
-    }
   }
 
   // Nothing to do here
@@ -285,7 +322,8 @@ void ILLEnergyTransfer::plot() {
                     "from IndirectReductionCommon import plot_reduction\n";
   pyInput += "plot_reduction(mtd[\"";
   pyInput += m_uiForm.leOutWS->text();
-  pyInput += "_red\"].getItem(0).getName(),\"Contour\")\n";
+  pyInput += QString::fromStdString(m_suffix);
+  pyInput += "\"].getItem(0).getName(),\"Contour\")\n";
   m_pythonRunner.runPythonCode(pyInput);
 }
 
@@ -296,23 +334,11 @@ void ILLEnergyTransfer::save() {
   QString pyInput;
   pyInput += "SaveNexusProcessed(\"";
   pyInput += m_uiForm.leOutWS->text();
-  pyInput += "_red\",\"";
+  pyInput += QString::fromStdString(m_suffix);
+  pyInput += "\",\"";
   pyInput += m_uiForm.leOutWS->text();
-  pyInput += "_red.nxs\")\n";
-  m_pythonRunner.runPythonCode(pyInput);
-}
-
-/**
- * Handles the conversion of y-axis to 2theta
- */
-void ILLEnergyTransfer::convertTo2Theta() {
-  QString pyInput;
-  QString inputWS = m_uiForm.leOutWS->text();
-  pyInput += "ConvertSpectrumAxis(InputWorkspace=\"";
-  pyInput += inputWS;
-  pyInput += "_red\",EMode=\"Indirect\",Target=\"Theta\",OutputWorkspace=\"";
-  pyInput += inputWS;
-  pyInput += "_2theta\")\n";
+  pyInput += QString::fromStdString(m_suffix);
+  pyInput += ".nxs\")\n";
   m_pythonRunner.runPythonCode(pyInput);
 }
 

@@ -27,6 +27,7 @@
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorOpenTableCommand.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorOptionsCommand.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorPasteSelectedCommand.h"
+#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorPauseCommand.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorPlotGroupCommand.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorPlotRowCommand.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorProcessCommand.h"
@@ -136,7 +137,7 @@ public:
 
     auto comm = manager.publishCommands();
 
-    TS_ASSERT_EQUALS(comm.size(), 29);
+    TS_ASSERT_EQUALS(comm.size(), 31);
     TS_ASSERT(dynamic_cast<DataProcessorOpenTableCommand *>(comm[0].get()));
     TS_ASSERT(dynamic_cast<DataProcessorNewTableCommand *>(comm[1].get()));
     TS_ASSERT(dynamic_cast<DataProcessorSaveTableCommand *>(comm[2].get()));
@@ -148,27 +149,29 @@ public:
     TS_ASSERT(dynamic_cast<DataProcessorOptionsCommand *>(comm[8].get()));
     TS_ASSERT(dynamic_cast<DataProcessorSeparatorCommand *>(comm[9].get()));
     TS_ASSERT(dynamic_cast<DataProcessorProcessCommand *>(comm[10].get()));
-    TS_ASSERT(dynamic_cast<DataProcessorExpandCommand *>(comm[11].get()));
-    TS_ASSERT(dynamic_cast<DataProcessorExpandGroupsCommand *>(comm[12].get()));
+    TS_ASSERT(dynamic_cast<DataProcessorPauseCommand *>(comm[11].get()));
+    TS_ASSERT(dynamic_cast<DataProcessorSeparatorCommand *>(comm[12].get()));
+    TS_ASSERT(dynamic_cast<DataProcessorExpandCommand *>(comm[13].get()));
+    TS_ASSERT(dynamic_cast<DataProcessorExpandGroupsCommand *>(comm[14].get()));
     TS_ASSERT(
-        dynamic_cast<DataProcessorCollapseGroupsCommand *>(comm[13].get()));
-    TS_ASSERT(dynamic_cast<DataProcessorSeparatorCommand *>(comm[14].get()));
-    TS_ASSERT(dynamic_cast<DataProcessorPlotRowCommand *>(comm[15].get()));
-    TS_ASSERT(dynamic_cast<DataProcessorPlotGroupCommand *>(comm[16].get()));
-    TS_ASSERT(dynamic_cast<DataProcessorSeparatorCommand *>(comm[17].get()));
-    TS_ASSERT(dynamic_cast<DataProcessorAppendRowCommand *>(comm[18].get()));
-    TS_ASSERT(dynamic_cast<DataProcessorAppendGroupCommand *>(comm[19].get()));
-    TS_ASSERT(dynamic_cast<DataProcessorSeparatorCommand *>(comm[20].get()));
-    TS_ASSERT(dynamic_cast<DataProcessorGroupRowsCommand *>(comm[21].get()));
-    TS_ASSERT(dynamic_cast<DataProcessorCopySelectedCommand *>(comm[22].get()));
-    TS_ASSERT(dynamic_cast<DataProcessorCutSelectedCommand *>(comm[23].get()));
+        dynamic_cast<DataProcessorCollapseGroupsCommand *>(comm[15].get()));
+    TS_ASSERT(dynamic_cast<DataProcessorSeparatorCommand *>(comm[16].get()));
+    TS_ASSERT(dynamic_cast<DataProcessorPlotRowCommand *>(comm[17].get()));
+    TS_ASSERT(dynamic_cast<DataProcessorPlotGroupCommand *>(comm[18].get()));
+    TS_ASSERT(dynamic_cast<DataProcessorSeparatorCommand *>(comm[19].get()));
+    TS_ASSERT(dynamic_cast<DataProcessorAppendRowCommand *>(comm[20].get()));
+    TS_ASSERT(dynamic_cast<DataProcessorAppendGroupCommand *>(comm[21].get()));
+    TS_ASSERT(dynamic_cast<DataProcessorSeparatorCommand *>(comm[22].get()));
+    TS_ASSERT(dynamic_cast<DataProcessorGroupRowsCommand *>(comm[23].get()));
+    TS_ASSERT(dynamic_cast<DataProcessorCopySelectedCommand *>(comm[24].get()));
+    TS_ASSERT(dynamic_cast<DataProcessorCutSelectedCommand *>(comm[25].get()));
     TS_ASSERT(
-        dynamic_cast<DataProcessorPasteSelectedCommand *>(comm[24].get()));
+        dynamic_cast<DataProcessorPasteSelectedCommand *>(comm[26].get()));
     TS_ASSERT(
-        dynamic_cast<DataProcessorClearSelectedCommand *>(comm[25].get()));
-    TS_ASSERT(dynamic_cast<DataProcessorSeparatorCommand *>(comm[26].get()));
-    TS_ASSERT(dynamic_cast<DataProcessorDeleteRowCommand *>(comm[27].get()));
-    TS_ASSERT(dynamic_cast<DataProcessorDeleteGroupCommand *>(comm[28].get()));
+        dynamic_cast<DataProcessorClearSelectedCommand *>(comm[27].get()));
+    TS_ASSERT(dynamic_cast<DataProcessorSeparatorCommand *>(comm[28].get()));
+    TS_ASSERT(dynamic_cast<DataProcessorDeleteRowCommand *>(comm[29].get()));
+    TS_ASSERT(dynamic_cast<DataProcessorDeleteGroupCommand *>(comm[30].get()));
   }
 
   void test_append_row() {

@@ -1,17 +1,18 @@
 #include "MantidDataHandling/LoadMask.h"
-#include "MantidKernel/System.h"
-#include "MantidAPI/FileProperty.h"
 #include "MantidAPI/FileFinder.h"
-#include "MantidKernel/MandatoryValidator.h"
-#include "MantidKernel/ListValidator.h"
-#include "MantidKernel/Exception.h"
-#include "MantidKernel/EnabledWhenProperty.h"
-#include "MantidDataObjects/Workspace2D.h"
+#include "MantidAPI/FileProperty.h"
 #include "MantidDataObjects/MaskWorkspace.h"
-#include "MantidKernel/Strings.h"
-#include "MantidGeometry/Instrument.h"
+#include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/ICompAssembly.h"
 #include "MantidGeometry/IDTypes.h"
+#include "MantidGeometry/Instrument.h"
+#include "MantidKernel/EnabledWhenProperty.h"
+#include "MantidKernel/Exception.h"
+#include "MantidKernel/ListValidator.h"
+#include "MantidKernel/MandatoryValidator.h"
+#include "MantidKernel/OptionalBool.h"
+#include "MantidKernel/Strings.h"
+#include "MantidKernel/System.h"
 
 #include <fstream>
 #include <sstream>
@@ -156,7 +157,7 @@ void parseISISStringToVector(const std::string &ins,
     vector<string> temps;
     boost::split(temps, splitstrings[index], boost::is_any_of("-"),
                  boost::token_compress_on);
-    if (splitstrings[index].compare("-") == 0 || temps.size() == 1) {
+    if (splitstrings[index] == "-" || temps.size() == 1) {
       // Nothing to split
       index++;
     } else if (temps.size() == 2) {
@@ -189,8 +190,7 @@ void parseISISStringToVector(const std::string &ins,
         boost::lexical_cast<Mantid::specnum_t>(splitstrings[index]));
 
     // ii)  push the ending vector
-    if (index == splitstrings.size() - 1 ||
-        splitstrings[index + 1].compare("-") != 0) {
+    if (index == splitstrings.size() - 1 || splitstrings[index + 1] != "-") {
       // the next one is not '-'
       ranges.push_back(
           boost::lexical_cast<Mantid::specnum_t>(splitstrings[index]));
@@ -334,7 +334,7 @@ void LoadMask::exec() {
   if (m_sourceMapWS) { // check if the instruments are compatible
     auto t_inst_name = m_maskWS->getInstrument()->getName();
     auto r_inst_name = m_sourceMapWS->getInstrument()->getName();
-    if (t_inst_name.compare(r_inst_name) != 0) {
+    if (t_inst_name != r_inst_name) {
       throw std::invalid_argument("If reference workspace is provided, it has "
                                   "to have instrument with the same name as "
                                   "specified by 'Instrument' property");
@@ -661,12 +661,12 @@ void LoadMask::parseXML() {
   while (pNode) {
     const Poco::XML::XMLString value = pNode->innerText();
 
-    if (pNode->nodeName().compare("group") == 0) {
+    if (pNode->nodeName() == "group") {
       // Node "group"
       ingroup = true;
       tomask = true;
 
-    } else if (pNode->nodeName().compare("component") == 0) {
+    } else if (pNode->nodeName() == "component") {
       // Node "component"
       if (ingroup) {
         parseComponent(value, tomask, m_maskCompIdSingle, m_uMaskCompIdSingle);
@@ -674,7 +674,7 @@ void LoadMask::parseXML() {
         g_log.error() << "XML File hierarchical (component) error!\n";
       }
 
-    } else if (pNode->nodeName().compare("ids") == 0) {
+    } else if (pNode->nodeName() == "ids") {
       // Node "ids"
       if (ingroup) {
         parseRangeText(value, singleSp, pairSp);
@@ -683,7 +683,7 @@ void LoadMask::parseXML() {
                       << "  Inner Text = " << pNode->innerText() << '\n';
       }
 
-    } else if (pNode->nodeName().compare("detids") == 0) {
+    } else if (pNode->nodeName() == "detids") {
       // Node "detids"
       if (ingroup) {
         if (tomask) {
@@ -695,7 +695,7 @@ void LoadMask::parseXML() {
         g_log.error() << "XML File (detids) hierarchical error!\n";
       }
 
-    } else if (pNode->nodeName().compare("detector-masking") == 0) {
+    } else if (pNode->nodeName() == "detector-masking") {
       // Node "detector-masking".  Check default value
       m_defaultToUse = true;
     } // END-IF-ELSE: pNode->nodeName()

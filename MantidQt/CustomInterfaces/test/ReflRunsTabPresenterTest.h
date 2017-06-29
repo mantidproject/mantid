@@ -260,6 +260,102 @@ public:
                      "Login Failed")).Times(1);
     presenter.notify(IReflRunsTabPresenter::SearchFlag);
   }
+
+  void test_pause() {
+    NiceMock<MockRunsTabView> mockRunsTabView;
+    MockProgressableView mockProgress;
+    NiceMock<MockDataProcessorPresenter> mockTablePresenter;
+    MockMainWindowPresenter mockMainPresenter;
+    std::vector<DataProcessorPresenter *> tablePresenterVec;
+    tablePresenterVec.push_back(&mockTablePresenter);
+
+    ReflRunsTabPresenter presenter(&mockRunsTabView, &mockProgress,
+                                   tablePresenterVec);
+    presenter.acceptMainPresenter(&mockMainPresenter);
+
+    // Expect that the view enables the 'process' button and disables the
+    // 'pause' button
+    EXPECT_CALL(mockRunsTabView, setRowActionEnabled(0, true))
+        .Times(Exactly(1));
+    EXPECT_CALL(mockRunsTabView, setRowActionEnabled(1, false))
+        .Times(Exactly(1));
+    // Pause presenter
+    presenter.pause();
+
+    // Verify expectations
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockRunsTabView));
+  }
+
+  void test_resume() {
+    NiceMock<MockRunsTabView> mockRunsTabView;
+    MockProgressableView mockProgress;
+    NiceMock<MockDataProcessorPresenter> mockTablePresenter;
+    MockMainWindowPresenter mockMainPresenter;
+    std::vector<DataProcessorPresenter *> tablePresenterVec;
+    tablePresenterVec.push_back(&mockTablePresenter);
+
+    ReflRunsTabPresenter presenter(&mockRunsTabView, &mockProgress,
+                                   tablePresenterVec);
+    presenter.acceptMainPresenter(&mockMainPresenter);
+
+    // Expect that the view enables the 'process' button and disables the
+    // 'pause' button
+    EXPECT_CALL(mockRunsTabView, setRowActionEnabled(0, false))
+        .Times(Exactly(1));
+    EXPECT_CALL(mockRunsTabView, setRowActionEnabled(1, true))
+        .Times(Exactly(1));
+    // Resume presenter
+    presenter.resume();
+
+    // Verify expectations
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockRunsTabView));
+  }
+
+  void test_confirmReductionPaused() {
+    NiceMock<MockRunsTabView> mockRunsTabView;
+    MockProgressableView mockProgress;
+    NiceMock<MockDataProcessorPresenter> mockTablePresenter;
+    MockMainWindowPresenter mockMainPresenter;
+    std::vector<DataProcessorPresenter *> tablePresenterVec;
+    tablePresenterVec.push_back(&mockTablePresenter);
+    ReflRunsTabPresenter presenter(&mockRunsTabView, &mockProgress,
+                                   tablePresenterVec);
+    presenter.acceptMainPresenter(&mockMainPresenter);
+
+    // Expect that the main presenter is notified that data reduction is paused
+    EXPECT_CALL(
+        mockMainPresenter,
+        notify(IReflMainWindowPresenter::Flag::ConfirmReductionPausedFlag))
+        .Times(Exactly(1));
+
+    presenter.confirmReductionPaused();
+
+    // Verify expectations
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockRunsTabView));
+  }
+
+  void test_confirmReductionResumed() {
+    NiceMock<MockRunsTabView> mockRunsTabView;
+    MockProgressableView mockProgress;
+    NiceMock<MockDataProcessorPresenter> mockTablePresenter;
+    MockMainWindowPresenter mockMainPresenter;
+    std::vector<DataProcessorPresenter *> tablePresenterVec;
+    tablePresenterVec.push_back(&mockTablePresenter);
+    ReflRunsTabPresenter presenter(&mockRunsTabView, &mockProgress,
+                                   tablePresenterVec);
+    presenter.acceptMainPresenter(&mockMainPresenter);
+
+    // Expect that the main presenter is notified that data reduction is resumed
+    EXPECT_CALL(
+        mockMainPresenter,
+        notify(IReflMainWindowPresenter::Flag::ConfirmReductionResumedFlag))
+        .Times(Exactly(1));
+
+    presenter.confirmReductionResumed();
+
+    // Verify expectations
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockRunsTabView));
+  }
 };
 
 #endif /* MANTID_CUSTOMINTERFACES_REFLRUNSTABPRESENTERTEST_H */

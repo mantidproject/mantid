@@ -68,7 +68,10 @@ class MANTID_API_DLL DetectorInfo {
 public:
   DetectorInfo(Beamline::DetectorInfo &detectorInfo,
                boost::shared_ptr<const Geometry::Instrument> instrument,
-               Geometry::ParameterMap *pmap = nullptr);
+               boost::shared_ptr<std::vector<detid_t>> detectorIds,
+               Geometry::ParameterMap *pmap,
+               boost::shared_ptr<const std::unordered_map<detid_t, size_t>>
+                   detIdToIndexMap);
 
   DetectorInfo &operator=(const DetectorInfo &rhs);
 
@@ -117,7 +120,7 @@ public:
   const std::vector<detid_t> &detectorIDs() const;
   /// Returns the index of the detector with the given detector ID.
   /// This will throw an out of range exception if the detector does not exist.
-  size_t indexOf(const detid_t id) const { return m_detIDToIndex.at(id); }
+  size_t indexOf(const detid_t id) const { return m_detIDToIndex->at(id); }
 
   size_t scanCount(const size_t index) const;
   std::pair<Kernel::DateAndTime, Kernel::DateAndTime>
@@ -128,6 +131,8 @@ public:
 
   void merge(const DetectorInfo &other);
 
+  boost::shared_ptr<const std::unordered_map<detid_t, size_t>>
+  detIdToIndexMap() const;
   friend class SpectrumInfo;
 
 private:
@@ -153,8 +158,8 @@ private:
 
   Geometry::ParameterMap *m_pmap;
   boost::shared_ptr<const Geometry::Instrument> m_instrument;
-  std::vector<detid_t> m_detectorIDs;
-  std::unordered_map<detid_t, size_t> m_detIDToIndex;
+  boost::shared_ptr<const std::vector<detid_t>> m_detectorIDs;
+  boost::shared_ptr<const std::unordered_map<detid_t, size_t>> m_detIDToIndex;
   // The following variables are mutable, since they are initialized (cached)
   // only on demand, by const getters.
   mutable boost::shared_ptr<const Geometry::IComponent> m_source;

@@ -22,9 +22,9 @@
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-#include "MantidKernel/ClassMacros.h"
 #include "MantidKernel/DllConfig.h"
 #include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace Kernel {
@@ -45,12 +45,13 @@ public:
   /// Destructor
   ~FilteredTimeSeriesProperty() override;
 
+  /// Disable default constructor
+  FilteredTimeSeriesProperty() = delete;
+
   /// Access the unfiltered log
   const TimeSeriesProperty<HeldType> *unfiltered() const;
 
 private:
-  DISABLE_DEFAULT_CONSTRUCT(FilteredTimeSeriesProperty)
-
   /// The original unfiltered property as an owned pointer
   const TimeSeriesProperty<HeldType> *m_unfiltered;
 };

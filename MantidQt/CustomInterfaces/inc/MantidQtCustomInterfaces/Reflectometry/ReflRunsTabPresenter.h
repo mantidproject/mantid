@@ -67,12 +67,19 @@ public:
   void notify(IReflRunsTabPresenter::Flag flag) override;
   void notifyADSChanged(const QSet<QString> &workspaceList) override;
   QString getPreprocessingProperties() const override;
+  /// Handle data reduction paused/resumed
   /// Global options (inherited from DataProcessorMainPresenter)
   QString getPreprocessingOptionsAsString() const override;
   QString getProcessingOptions() const override;
   QString getPostprocessingOptions() const override;
   QString getTimeSlicingValues() const override;
   QString getTimeSlicingType() const override;
+  /// Handle data reduction paused/resumed
+  void pause() const override;
+  void resume() const override;
+  /// Reduction paused/resumed confirmation handler
+  void confirmReductionPaused() const override;
+  void confirmReductionResumed() const override;
 
 private:
   /// The search model

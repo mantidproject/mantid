@@ -96,20 +96,17 @@ bool SVUtils::FindValidInterval(double &min, double &max) {
   if (max == min) // adjust values so they are not equal
   {
     valuesOK = false;
-    if (min == 0) {
-      min = -1, max = 1;
+    if (min == 0.0) {
+      min = -1.0;
+      max = 1.0;
     } else {
-      max = 1.1 * max;
-      min = 0.9 * min;
+      min *= 0.9;
+      max *= 1.1;
     }
-  }
-
-  if (min > max) // fix the order
+  } else if (min > max) // fix the order
   {
     valuesOK = false;
-    double temp = min;
-    min = max;
-    max = temp;
+    std::swap(min, max);
   }
 
   return valuesOK;

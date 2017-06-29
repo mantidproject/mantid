@@ -7,20 +7,22 @@
 #include "MantidKernel/DllConfig.h"
 #include "MantidKernel/SingletonHolder.h"
 #include "MantidKernel/ProxyInfo.h"
-#include <vector>
 #include <map>
 #include <set>
+#include <string>
+#include <vector>
 
 #include <Poco/Notification.h>
 #include <Poco/NotificationCenter.h>
-#include <Poco/AutoPtr.h>
 
 //----------------------------------------------------------------------
 // Forward declarations
 //----------------------------------------------------------------------
 /// @cond Exclude from doxygen documentation
 namespace Poco {
+class AbstractObserver;
 class Channel;
+template <class C> class AutoPtr;
 namespace Util {
 class PropertyFileConfiguration;
 class SystemConfiguration;
@@ -37,7 +39,6 @@ namespace Kernel {
 //----------------------------------------------------------------------
 // More forward declarations
 //----------------------------------------------------------------------
-class Logger;
 class FacilityInfo;
 class InstrumentInfo;
 

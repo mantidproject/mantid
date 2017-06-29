@@ -20,7 +20,6 @@ class AttributeExample(IFunction1D):
                     self._freq = value
             if name == "Sine":
                     self._sine = value
-            self.storeAttributeValue(name, value)
 
         def function1D(self,xvals):
             ampl=self.getParameterValue("Amplitude")

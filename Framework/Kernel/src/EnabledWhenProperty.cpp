@@ -1,8 +1,14 @@
 #include "MantidKernel/EnabledWhenProperty.h"
 
+#include "MantidKernel/Exception.h"
+#include "MantidKernel/IPropertyManager.h"
+#include "MantidKernel/Property.h"
+
 #include <boost/lexical_cast.hpp>
+
 #include <exception>
 #include <memory>
+#include <stdexcept>
 
 using namespace Mantid::Kernel;
 
@@ -37,10 +43,9 @@ EnabledWhenProperty::EnabledWhenProperty(
     : // This method allows the Python interface to easily construct these
       // objects
       // Copy the object then forward onto our move constructor
-      EnabledWhenProperty(
-          std::move(std::make_shared<EnabledWhenProperty>(conditionOne)),
-          std::move(std::make_shared<EnabledWhenProperty>(conditionTwo)),
-          logicOperator) {}
+      EnabledWhenProperty(std::make_shared<EnabledWhenProperty>(conditionOne),
+                          std::make_shared<EnabledWhenProperty>(conditionTwo),
+                          logicOperator) {}
 
 /** Multiple conditions constructor - takes two shared pointers to
 * EnabledWhenProperty objects and returns the product of them

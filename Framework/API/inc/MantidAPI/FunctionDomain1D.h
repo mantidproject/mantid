@@ -5,7 +5,6 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/FunctionDomain.h"
-#include "MantidKernel/ClassMacros.h"
 
 #include <vector>
 
@@ -158,11 +157,18 @@ public:
   /// Constructor.
   FunctionDomain1DHistogram(std::vector<double>::const_iterator from,
                             std::vector<double>::const_iterator to);
+
+  /// Disable copy operator
+  FunctionDomain1DHistogram(const FunctionDomain1DHistogram &) = delete;
+
+  /// Disable assignment operator
+  FunctionDomain1DHistogram &
+  operator=(const FunctionDomain1DHistogram &) = delete;
+
   /// Get the leftmost boundary
   double leftBoundary() const;
 
 protected:
-  DISABLE_COPY_AND_ASSIGN(FunctionDomain1DHistogram)
   std::vector<double> m_bins; ///< vector of bin boundaries
 };
 

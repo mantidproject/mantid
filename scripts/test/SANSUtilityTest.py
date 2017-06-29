@@ -4,13 +4,14 @@ import unittest
 # Need to import mantid before we import SANSUtility
 import mantid
 from mantid.simpleapi import *
-from mantid.api import (mtd, WorkspaceGroup, AlgorithmManager, AnalysisDataService)
+from mantid.api import (mtd, WorkspaceGroup, AlgorithmManager, AnalysisDataService, FileFinder)
 from mantid.kernel import (DateAndTime, time_duration, FloatTimeSeriesProperty,
                            BoolTimeSeriesProperty,StringTimeSeriesProperty,
                            StringPropertyWithValue, V3D, Quat)
 import SANSUtility as su
 import re
 import random
+import os
 import numpy as np
 
 
@@ -1597,10 +1598,13 @@ class TestSelectNewDetector(unittest.TestCase):
     def test_that_for_SANS2D_correct_settings_are_selected(self):
         self.assertTrue(su.get_correct_combinDet_setting("SANS2d", "rear") == "rear")
         self.assertTrue(su.get_correct_combinDet_setting("SANS2D", "FRONT") == "front")
+        self.assertTrue(su.get_correct_combinDet_setting("SANS2d", "rear-detector") == "rear")
+        self.assertTrue(su.get_correct_combinDet_setting("SANS2D", "FRONT-DETECTOR") == "front")
         self.assertTrue(su.get_correct_combinDet_setting("sAnS2d", "boTH") == "both")
         self.assertTrue(su.get_correct_combinDet_setting("sans2d", "merged") == "merged")
 
     def test_that_for_LOQ_correct_settings_are_selected(self):
+        self.assertTrue(su.get_correct_combinDet_setting("Loq", "main-detector-bank") == "rear")
         self.assertTrue(su.get_correct_combinDet_setting("Loq", "main") == "rear")
         self.assertTrue(su.get_correct_combinDet_setting("LOQ", "Hab") == "front")
         self.assertTrue(su.get_correct_combinDet_setting("lOQ", "boTH") == "both")
@@ -1671,6 +1675,16 @@ class TestRenamingOfBatchModeWorkspaces(unittest.TestCase):
         args = ["SANS2D", "jsdlkfsldkfj", "test", workspace]
         self.assertRaises(RuntimeError, su.rename_workspace_correctly, *args)
         AnalysisDataService.remove("ws")
+
+
+class TestEventWorkspaceCheck(unittest.TestCase):
+    def test_that_can_identify_event_workspace(self):
+        file_name = FileFinder.findRuns("SANS2D00022048")[0]
+        self.assertTrue(su.can_load_as_event_workspace(file_name))
+
+    def test_that_can_identify_histo_workspace_as_not_being_event_workspace(self):
+        file_name = FileFinder.findRuns("SANS2D00022024")[0]
+        self.assertFalse(su.can_load_as_event_workspace(file_name))
 
 
 if __name__ == "__main__":

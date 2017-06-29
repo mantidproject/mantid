@@ -62,6 +62,14 @@ public:
   virtual QString getTimeSlicingValues() const { return QString(); }
   /// Return time-slicing type
   virtual QString getTimeSlicingType() const { return QString(); }
+
+  /// Handle data reduction paused/resumed
+  virtual void pause() const {}
+  virtual void resume() const {}
+
+  /// Handle data reduction paused/resumed confirmation
+  virtual void confirmReductionPaused() const {}
+  virtual void confirmReductionResumed() const {}
 };
 }
 }

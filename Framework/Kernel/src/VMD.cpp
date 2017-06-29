@@ -1,11 +1,14 @@
+#include "MantidKernel/Matrix.h"
 #include "MantidKernel/VMD.h"
 #include "MantidKernel/StringTokenizer.h"
 #include "MantidKernel/Strings.h"
-#include "MantidKernel/System.h"
 #include "MantidKernel/Tolerance.h"
 #include "MantidKernel/V3D.h"
+
 #include <algorithm>
 #include <cstddef>
+#include <iterator>
+#include <math.h>
 #include <sstream>
 #include <stdexcept>
 
@@ -137,6 +140,31 @@ VMDBase<TYPE> &VMDBase<TYPE>::operator=(const VMDBase &other) {
   }
   for (size_t d = 0; d < nd; d++)
     data[d] = other.data[d];
+  return *this;
+}
+
+/** Move constructor
+ * @param other :: move into this
+ */
+template <typename TYPE>
+VMDBase<TYPE>::VMDBase(VMDBase &&other) noexcept : nd(other.nd),
+                                                   data(other.data) {
+  other.data = nullptr;
+  other.nd = 0;
+}
+
+/** Move assignment
+ * @param other :: move into this
+ */
+template <typename TYPE>
+VMDBase<TYPE> &VMDBase<TYPE>::operator=(VMDBase &&other) noexcept {
+  if (this != &other) {
+    this->nd = other.nd;
+    other.nd = 0;
+    delete[] this->data;
+    this->data = other.data;
+    other.data = nullptr;
+  }
   return *this;
 }
 

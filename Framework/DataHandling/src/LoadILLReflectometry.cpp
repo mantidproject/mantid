@@ -9,6 +9,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/RegisterFileLoader.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/Quat.h"
 #include "MantidKernel/UnitFactory.h"
 
@@ -288,7 +289,7 @@ void LoadILLReflectometry::loadDataIntoTheWorkSpace(
   size_t spec = 0;
   size_t nb_monitors = monitorsData.size();
 
-  Progress progress(this, 0, 1,
+  Progress progress(this, 0.0, 1.0,
                     m_numberOfTubes * m_numberOfPixelsPerTube + nb_monitors);
 
   // Assign tof values to first X axis

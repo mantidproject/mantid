@@ -1,61 +1,49 @@
 from __future__ import (absolute_import, division, print_function)
 
 import mantid.simpleapi as mantid
-import os
 
-from isis_powder.routines import absorb_corrections, common, yaml_parser
-from isis_powder.routines.RunDetails import RunDetails
+from isis_powder.routines import absorb_corrections, common
+from isis_powder.routines.run_details import create_run_details_object, \
+                                             CustomFuncForRunDetails, RunDetailsWrappedCommonFuncs
 from isis_powder.polaris_routines import polaris_advanced_config
 
 
-def calculate_absorb_corrections(ws_to_correct, multiple_scattering):
-    mantid.MaskDetectors(ws_to_correct, SpectraList=list(range(0, 55)))
+def calculate_van_absorb_corrections(ws_to_correct, multiple_scattering):
+    mantid.MaskDetectors(ws_to_correct, SpectraList=list(range(1, 55)))
 
     absorb_dict = polaris_advanced_config.absorption_correction_params
+    sample_details_obj = absorb_corrections.create_vanadium_sample_details_obj(config_dict=absorb_dict)
     ws_to_correct = absorb_corrections.run_cylinder_absorb_corrections(
-        ws_to_correct=ws_to_correct, multiple_scattering=multiple_scattering, config_dict=absorb_dict)
+        ws_to_correct=ws_to_correct, multiple_scattering=multiple_scattering, sample_details_obj=sample_details_obj)
     return ws_to_correct
 
 
-def get_run_details(run_number_string, inst_settings):
-    run_number = common.get_first_run_number(run_number_string=run_number_string)
-    cal_mapping = yaml_parser.get_run_dictionary(run_number_string=run_number, file_path=inst_settings.cal_mapping_file)
+def get_run_details(run_number_string, inst_settings, is_vanadium_run):
+    cal_mapping_callable = CustomFuncForRunDetails().add_to_func_chain(
+        user_function=RunDetailsWrappedCommonFuncs.get_cal_mapping_dict, run_number_string=run_number_string,
+        inst_settings=inst_settings
+    ).add_to_func_chain(user_function=polaris_get_chopper_config, inst_settings=inst_settings)
 
-    label = common.cal_map_dictionary_key_helper(cal_mapping, "label")
-    offset_file_name = common.cal_map_dictionary_key_helper(cal_mapping, "offset_file_name")
+    # Get empty and vanadium
+    err_message = "this must be under the relevant Rietveld or PDF mode."
 
-    if inst_settings.chopper_on:
-        chopper_config = common.cal_map_dictionary_key_helper(cal_mapping, "chopper_on")
-    else:
-        chopper_config = common.cal_map_dictionary_key_helper(cal_mapping, "chopper_off")
+    empty_run_callable = cal_mapping_callable.add_to_func_chain(
+        user_function=RunDetailsWrappedCommonFuncs.cal_dictionary_key_helper, key="empty_run_numbers",
+        append_to_error_message=err_message)
 
-    err_message = "This must be under the relevant chopper_on / chopper_off section."
-    empty_runs = common.cal_map_dictionary_key_helper(chopper_config, "empty_run_numbers", err_message)
-    vanadium_runs = common.cal_map_dictionary_key_helper(chopper_config, "vanadium_run_numbers", err_message)
+    vanadium_run_callable = cal_mapping_callable.add_to_func_chain(
+        user_function=RunDetailsWrappedCommonFuncs.cal_dictionary_key_helper, key="vanadium_run_numbers",
+        append_to_error_message=err_message)
 
-    grouping_full_path = os.path.normpath(os.path.expanduser(inst_settings.calibration_dir))
-    grouping_full_path = os.path.join(grouping_full_path, inst_settings.grouping_file_name)
+    return create_run_details_object(run_number_string=run_number_string, inst_settings=inst_settings,
+                                     is_vanadium_run=is_vanadium_run, empty_run_call=empty_run_callable,
+                                     vanadium_run_call=vanadium_run_callable)
 
-    in_calib_dir = os.path.join(inst_settings.calibration_dir, label)
-    offsets_file_full_path = os.path.join(in_calib_dir, offset_file_name)
 
-    # Generate the name of the splined file we will either be loading or saving
-    chopper_status = "ChopperOn" if inst_settings.chopper_on else "ChopperOff"
-    splined_vanadium_name = common.generate_splined_name(vanadium_runs, chopper_status, offset_file_name)
-
-    splined_vanadium = os.path.join(in_calib_dir, splined_vanadium_name)
-
-    run_details = RunDetails(run_number=run_number)
-    run_details.user_input_run_number = run_number_string
-    run_details.empty_runs = empty_runs
-    run_details.vanadium_run_numbers = vanadium_runs
-    run_details.label = label
-
-    run_details.offset_file_path = offsets_file_full_path
-    run_details.grouping_file_path = grouping_full_path
-    run_details.splined_vanadium_file_path = splined_vanadium
-
-    return run_details
+def polaris_get_chopper_config(forwarded_value, inst_settings):
+    # Forwarded value should be a cal mapping
+    cal_mapping = forwarded_value
+    return common.cal_map_dictionary_key_helper(cal_mapping, inst_settings.mode)
 
 
 def process_vanadium_for_focusing(bank_spectra, mask_path, spline_number):

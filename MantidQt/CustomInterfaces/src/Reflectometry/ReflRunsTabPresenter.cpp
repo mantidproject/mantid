@@ -137,7 +137,7 @@ void ReflRunsTabPresenter::pushCommands() {
   m_view->clearCommands();
 
   // The expected number of commands
-  const size_t nCommands = 29;
+  const size_t nCommands = 31;
   auto commands =
       m_tablePresenters.at(m_view->getSelectedGroup())->publishCommands();
   if (commands.size() != nCommands) {
@@ -371,8 +371,8 @@ QString ReflRunsTabPresenter::getPreprocessingProperties() const {
 QString ReflRunsTabPresenter::getPreprocessingOptionsAsString() const {
 
   std::string optionsStr =
-      "Transmission Run(s), " +
-      m_mainPresenter->getTransmissionOptions(m_view->getSelectedGroup());
+      "Transmission Run(s)," +
+      m_mainPresenter->getTransmissionRuns(m_view->getSelectedGroup());
 
   return QString::fromStdString(optionsStr);
 }
@@ -411,6 +411,40 @@ QString ReflRunsTabPresenter::getTimeSlicingValues() const {
 QString ReflRunsTabPresenter::getTimeSlicingType() const {
   return QString::fromStdString(
       m_mainPresenter->getTimeSlicingType(m_view->getSelectedGroup()));
+}
+
+/** Tells view to enable the 'process' button and disable the 'pause' button
+* when data reduction is paused
+*/
+void ReflRunsTabPresenter::pause() const {
+
+  m_view->setRowActionEnabled(0, true);
+  m_view->setRowActionEnabled(1, false);
+}
+
+/** Tells view to disable the 'process' button and enable the 'pause' button
+* when data reduction is resumed
+*/
+void ReflRunsTabPresenter::resume() const {
+
+  m_view->setRowActionEnabled(0, false);
+  m_view->setRowActionEnabled(1, true);
+}
+
+/** Notifies main presenter that data reduction is confirmed to be paused
+*/
+void ReflRunsTabPresenter::confirmReductionPaused() const {
+
+  m_mainPresenter->notify(
+      IReflMainWindowPresenter::Flag::ConfirmReductionPausedFlag);
+}
+
+/** Notifies main presenter that data reduction is confirmed to be resumed
+*/
+void ReflRunsTabPresenter::confirmReductionResumed() const {
+
+  m_mainPresenter->notify(
+      IReflMainWindowPresenter::Flag::ConfirmReductionResumedFlag);
 }
 
 /** Changes the current instrument in the data processor widget. Also updates

@@ -1,18 +1,19 @@
 #include "MantidDataHandling/LoadSpice2D.h"
-#include "MantidDataHandling/XmlHandler.h"
 #include "MantidAPI/AlgorithmFactory.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/RegisterFileLoader.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidDataHandling/XmlHandler.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Instrument.h"
-#include "MantidKernel/UnitFactory.h"
-#include "MantidKernel/ConfigService.h"
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/ConfigService.h"
+#include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidKernel/UnitFactory.h"
 
 #include <boost/regex.hpp>
 #include <boost/shared_array.hpp>
@@ -97,7 +98,7 @@ void store_value(DataObjects::Workspace2D_sptr ws, int specID, double value,
  * be used
  */
 int LoadSpice2D::confidence(Kernel::FileDescriptor &descriptor) const {
-  if (descriptor.extension().compare(".xml") != 0)
+  if (descriptor.extension() != ".xml")
     return 0;
 
   std::istream &is = descriptor.data();
@@ -122,7 +123,7 @@ int LoadSpice2D::confidence(Kernel::FileDescriptor &descriptor) const {
     // Get pointer to root element
     Element *pRootElem = pDoc->documentElement();
     if (pRootElem) {
-      if (pRootElem->tagName().compare("SPICErack") == 0) {
+      if (pRootElem->tagName() == "SPICErack") {
         confidence = 80;
       }
     }

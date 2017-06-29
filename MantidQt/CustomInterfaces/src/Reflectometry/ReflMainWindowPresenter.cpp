@@ -23,7 +23,7 @@ ReflMainWindowPresenter::ReflMainWindowPresenter(
     IReflSaveTabPresenter *savePresenter)
     : m_view(view), m_runsPresenter(runsPresenter),
       m_eventPresenter(eventPresenter), m_settingsPresenter(settingsPresenter),
-      m_savePresenter(savePresenter) {
+      m_savePresenter(savePresenter), m_isProcessing(false) {
 
   // Tell the tab presenters that this is going to be the main presenter
   m_runsPresenter->acceptMainPresenter(this);
@@ -37,6 +37,23 @@ ReflMainWindowPresenter::ReflMainWindowPresenter(
 /** Destructor
 */
 ReflMainWindowPresenter::~ReflMainWindowPresenter() {}
+
+/**
+Used by the view to tell the presenter something has changed
+*/
+void ReflMainWindowPresenter::notify(IReflMainWindowPresenter::Flag flag) {
+
+  switch (flag) {
+  case Flag::ConfirmReductionPausedFlag:
+    m_isProcessing = false;
+    break;
+  case Flag::ConfirmReductionResumedFlag:
+    m_isProcessing = true;
+    break;
+  }
+  // Not having a 'default' case is deliberate. gcc issues a warning if there's
+  // a flag we aren't handling.
+}
 
 /** Returns values passed for 'Transmission run(s)'
 *
@@ -161,6 +178,15 @@ void ReflMainWindowPresenter::setInstrumentName(
     const std::string &instName) const {
 
   m_settingsPresenter->setInstrumentName(instName);
+}
+
+/**
+Checks whether or not data is currently being processed in the Runs Tab
+* @return : Bool on whether data is being processed
+*/
+bool ReflMainWindowPresenter::checkIfProcessing() const {
+
+  return m_isProcessing;
 }
 
 /** Checks for Settings Tab null pointer

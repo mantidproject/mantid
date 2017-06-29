@@ -10,6 +10,7 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/System.h"
 #include <Poco/Path.h>
 #include <fstream>
@@ -123,11 +124,11 @@ void LoadVulcanCalFile::processInOutProperites() {
   // Grouping
   string grouptypestr = getPropertyValue("Grouping");
   size_t numeffbanks = 6;
-  if (grouptypestr.compare("6Modules") == 0) {
+  if (grouptypestr == "6Modules") {
     m_groupingType = VULCAN_OFFSET_BANK;
-  } else if (grouptypestr.compare("2Banks") == 0) {
+  } else if (grouptypestr == "2Banks") {
     m_groupingType = VULCAN_OFFSET_MODULE;
-  } else if (grouptypestr.compare("1Bank") == 0) {
+  } else if (grouptypestr == "1Bank") {
     m_groupingType = VULCAN_OFFSET_STACK;
   } else {
     stringstream ess;

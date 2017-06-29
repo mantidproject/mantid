@@ -11,27 +11,29 @@ namespace Mantid {
 namespace API {
 
 /**
- * Constructor
- * @brief ComponentInfo::ComponentInfo
- * @param componentInfo
+ * Constructor.
+ * @param componentInfo : Internal Beamline ComponentInfo
  * @param componentIds : ComponentIDs ordered by component
+ * @param componentIdToIndexMap : ID -> index translation map
  * index
  */
 ComponentInfo::ComponentInfo(
     const Mantid::Beamline::ComponentInfo &componentInfo,
     boost::shared_ptr<const std::vector<Mantid::Geometry::IComponent *>>
-        componentIds)
+        componentIds,
+    boost::shared_ptr<const std::unordered_map<Geometry::IComponent *, size_t>>
+        componentIdToIndexMap)
     : m_componentInfo(componentInfo), m_componentIds(std::move(componentIds)),
-      m_compIDToIndex(boost::make_shared<
-          std::unordered_map<Geometry::IComponent *, size_t>>()) {
-  /*
-   * Ideally we would check here that componentIds.size() ==
-   * m_componentInfo.size().
-   * Currently that check would break too much in Mantid.
-   */
+      m_compIDToIndex(std::move(componentIdToIndexMap)) {
 
-  for (size_t i = 0; i < m_componentInfo.size(); ++i) {
-    (*m_compIDToIndex)[(*m_componentIds)[i]] = i;
+  if (m_componentIds->size() != m_compIDToIndex->size()) {
+    throw std::invalid_argument(
+        "Inconsistent ID and Mapping input containers for API::ComponentInfo");
+  }
+  if (m_componentIds->size() != m_componentInfo.size()) {
+    throw std::invalid_argument("Inconsistent ID and base "
+                                "Beamline::ComponentInfo sizes for "
+                                "API::ComponentInfo");
   }
 }
 
@@ -40,15 +42,19 @@ ComponentInfo::detectorIndices(size_t componentIndex) const {
   return m_componentInfo.detectorIndices(componentIndex);
 }
 
-const std::vector<Geometry::IComponent *> &ComponentInfo::componentIds() const {
-  return *m_componentIds;
-}
-
 size_t ComponentInfo::size() const { return m_componentInfo.size(); }
 
 size_t ComponentInfo::indexOf(Geometry::IComponent *id) const {
   return m_compIDToIndex->at(id);
 }
 
+bool ComponentInfo::operator==(const ComponentInfo &other) const {
+  return this->m_componentInfo == other.m_componentInfo &&
+         m_compIDToIndex == other.m_compIDToIndex;
+}
+
+bool ComponentInfo::operator!=(const ComponentInfo &other) const {
+  return !this->operator==(other);
+}
 } // namespace API
 } // namespace Mantid

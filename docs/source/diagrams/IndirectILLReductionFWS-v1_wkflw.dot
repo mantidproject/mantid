@@ -17,6 +17,7 @@ digraph IndirectILLReductionFWS {
   	Observable
   	CalibrationRun
   	BackgroundRun
+  	CalibrationBackgroundRun
   }
 
   subgraph algorithms {
@@ -24,18 +25,24 @@ digraph IndirectILLReductionFWS {
   	IndirectILLEnergyTransfer
   	IndirectILLEnergyTransferB [label="IndirectILLEnergyTransfer"]
   	IndirectILLEnergyTransferC [label="IndirectILLEnergyTransfer"]
+  	IndirectILLEnergyTransferCB [label="IndirectILLEnergyTransfer"]
     SelectNexusFilesByMetadata
     SelectNexusFilesByMetadataB [label="SelectNexusFilesByMetadata"]
     SelectNexusFilesByMetadataC [label="SelectNexusFilesByMetadata"]
+    SelectNexusFilesByMetadataCB [label="SelectNexusFilesByMetadata"]
     Integration
     IntegrationB [label="Integration"]
     IntegrationC [label="Integration"]
+    IntegrationCB [label="Integration"]
     GroupWorkspaces
     SplineInterpolationB [label="SplineInterpolation"]
     SplineInterpolationC [label="SplineInterpolation"]
+    SplineInterpolationCB [label="SplineInterpolation"]
     IntegrationBB [label="Integration"]
     IntegrationCC [label="Integration"]
-    Minus
+    IntegrationCCBB [label="Integration"]
+    MinusA [label="Minus"]
+    MinusB [label="Minus"]
     Divide
   }
 
@@ -44,6 +51,7 @@ digraph IndirectILLReductionFWS {
   	Scan
   	ScanB [label="Scan"]
   	ScanC [label="Scan"]
+  	ScanCB [label="Scan"]
   }
 
   Run -> SelectNexusFilesByMetadata
@@ -61,14 +69,23 @@ digraph IndirectILLReductionFWS {
   SelectNexusFilesByMetadataC -> IndirectILLEnergyTransferC
   IndirectILLEnergyTransferC -> IntegrationC
   IntegrationC -> ScanC
-  ScanC -> IntegrationCC [label="Sum"]
-  ScanC -> SplineInterpolationC [label="Interpolate"]
-  Scan -> Minus
-  IntegrationBB -> Minus
-  SplineInterpolationB -> Minus
-  Minus -> Divide
+  ScanC -> MinusB
+  MinusB -> IntegrationCC [label="Sum"]
+  MinusB -> SplineInterpolationC [label="Interpolate"]
+  Scan -> MinusA
+  IntegrationBB -> MinusA
+  SplineInterpolationB -> MinusA
+  MinusA -> Divide
   IntegrationCC -> Divide
   SplineInterpolationC -> Divide
+  CalibrationBackgroundRun -> SelectNexusFilesByMetadataCB
+  SelectNexusFilesByMetadataCB -> IndirectILLEnergyTransferCB
+  IndirectILLEnergyTransferCB -> IntegrationCB
+  IntegrationCB -> ScanCB
+  ScanCB -> IntegrationCCBB
+  IntegrationCCBB -> MinusB
+  ScanCB -> SplineInterpolationCB
+  SplineInterpolationCB -> MinusB
   Divide -> GroupWorkspaces
   GroupWorkspaces -> OutputWorkspace
 }

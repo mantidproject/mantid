@@ -612,7 +612,8 @@ class LimitParser(UserFileComponentParser):
             simple_pattern = self._extract_simple_pattern(event_binning, LimitsId.events_binning)
             rebin_values = simple_pattern[LimitsId.events_binning]
             prefix = -1. if rebin_values.step_type is RangeStepType.Log else 1.
-            binning_string = str(rebin_values.start) + "," + str(prefix*rebin_values.step) + "," + str(rebin_values.stop)  # noqa
+            binning_string = str(rebin_values.start) + "," + str(prefix*rebin_values.step) + "," + \
+                             str(rebin_values.stop)  # noqa
         else:
             rebin_values = extract_float_list(event_binning)
             binning_string = ",".join([str(val) for val in rebin_values])

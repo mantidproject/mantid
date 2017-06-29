@@ -698,11 +698,18 @@ void SliceViewer::switchQWTRaster(bool useNonOrthogonal) {
   m_coordinateTransform = createCoordinateTransform(m_ws, m_dimX, m_dimY);
 
   if (useNonOrthogonal && ui.btnNonOrthogonalToggle->isChecked()) {
-    m_data = Kernel::make_unique<API::QwtRasterDataMDNonOrthogonal>();
+    // Transfer the current settings
+    auto tempData = Kernel::make_unique<API::QwtRasterDataMDNonOrthogonal>();
+    transferSettings(m_data.get(), tempData.get());
+    m_data = std::move(tempData);
     applyNonOrthogonalAxisScaleDraw();
   } else {
     applyOrthogonalAxisScaleDraw();
-    m_data = Kernel::make_unique<API::QwtRasterDataMD>();
+
+    // Transfer the current settings
+    auto tempData = Kernel::make_unique<API::QwtRasterDataMD>();
+    transferSettings(m_data.get(), tempData.get());
+    m_data = std::move(tempData);
   }
 
   m_coordinateTransform = createCoordinateTransform(m_ws, m_dimX, m_dimY);
@@ -738,8 +745,11 @@ void SliceViewer::setWorkspace(Mantid::API::IMDWorkspace_sptr ws) {
   m_data->setWorkspace(ws);
   m_plot->setWorkspace(ws);
   autoRebinIfRequired();
-  // Set the normalization appropriate
-  this->setNormalization(ws->displayNormalization(), false);
+
+  // Set the appropriate normalization
+  auto initialDisplayNormalization = ws->displayNormalization();
+  this->setNormalization(initialDisplayNormalization, false);
+  m_data->setNormalization(initialDisplayNormalization);
 
   // Only allow perpendicular lines if looking at a matrix workspace.
   bool matrix = bool(boost::dynamic_pointer_cast<MatrixWorkspace>(m_ws));
@@ -1697,6 +1707,10 @@ void SliceViewer::changedShownDim(int index, int dim, int oldDim) {
   }
   // Show the new slice. This finds m_dimX and m_dimY
   this->updateDisplay();
+
+  // AutoRebin if required
+  autoRebinIfRequired();
+
   // Send out a signal
   emit changedShownDim(m_dimX, m_dimY);
 }
@@ -2992,6 +3006,13 @@ void SliceViewer::applyOrthogonalAxisScaleDraw() {
   auto *axis1 = new QwtScaleDraw();
   m_plot->setAxisScaleDraw(QwtPlot::xBottom, axis0);
   m_plot->setAxisScaleDraw(QwtPlot::yLeft, axis1);
+  this->updateDisplay();
+}
+
+/// Transfer data between QwtRasterDataMD instances
+void SliceViewer::transferSettings(const API::QwtRasterDataMD *const from,
+                                   API::QwtRasterDataMD *to) const {
+  from->transferSettingsTo(to);
 }
 
 } // namespace
