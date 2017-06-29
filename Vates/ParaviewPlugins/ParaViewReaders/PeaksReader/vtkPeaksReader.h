@@ -11,8 +11,10 @@ public:
   vtkPeaksReader(const vtkPeaksReader &) = delete;
 
   void operator=(const vtkPeaksReader &) = delete;
-  vtkTypeMacro(vtkPeaksReader, vtkPolyDataAlgorithm);
+  // clang-format off
+  vtkTypeMacro(vtkPeaksReader, vtkPolyDataAlgorithm)
   void PrintSelf(ostream &os, vtkIndent indent) override;
+  // clang-format on
   vtkSetStringMacro(FileName);
   vtkGetStringMacro(FileName);
   int CanReadFile(const char *fname);
