@@ -36,6 +36,7 @@
 #include <numeric>
 
 using std::size_t;
+using namespace Mantid;
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
