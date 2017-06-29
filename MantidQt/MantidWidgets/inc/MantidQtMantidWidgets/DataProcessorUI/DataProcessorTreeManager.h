@@ -93,6 +93,8 @@ public:
   /// Add a new data item to be highlighted
   virtual void addHighlighted(int position) = 0;
   virtual void addHighlighted(int position, int parent) = 0;
+  /// Clear all highlighted data items
+  void clearHighlighted() { getModel()->clearHighlighted(); }
 
   /// Validate a table workspace
   virtual bool isValidModel(Mantid::API::Workspace_sptr ws,

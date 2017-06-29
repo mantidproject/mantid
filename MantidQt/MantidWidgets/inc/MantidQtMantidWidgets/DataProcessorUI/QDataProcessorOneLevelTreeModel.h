@@ -81,6 +81,8 @@ public:
   // Add a row to the list of rows to be highlighted
   void addHighlighted(int position,
                       const QModelIndex &parent = QModelIndex()) override;
+  // Clear the list of highlighted items
+  void clearHighlighted() override;
 
 private:
   /// List of row indexes that should be highlighted

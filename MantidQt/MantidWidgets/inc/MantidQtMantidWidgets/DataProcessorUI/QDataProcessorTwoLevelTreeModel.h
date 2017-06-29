@@ -86,6 +86,8 @@ public:
   // Add a row / group to the list of items to be highlighted
   void addHighlighted(int position,
                       const QModelIndex &parent = QModelIndex()) override;
+  // Clear the list of highlighted items
+  virtual void clearHighlighted() override;
 
 private:
   void setupModelData(Mantid::API::ITableWorkspace_sptr table);

@@ -102,7 +102,7 @@ private:
   /// The DataProcessor presenter
   DataProcessorPresenter *m_presenter;
   /// The model
-  boost::shared_ptr<AbstractDataProcessorTreeModel> m_model;
+  boost::shared_ptr<QDataProcessorOneLevelTreeModel> m_model;
   /// The workspace the model is currently representing
   Mantid::API::ITableWorkspace_sptr m_ws;
 
