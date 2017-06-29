@@ -39,9 +39,13 @@ class ScanPreProcessWindow(QtGui.QMainWindow):
                      self.do_change_calibration_settings)
         self.connect(self.ui.pushButton_fixSettings, QtCore.SIGNAL('clicked()'),
                      self.do_fix_calibration_settings)
+        self.connect(self.ui.actionExit, QtCore.SIGNAL('triggered()'),
+                     self.do_quit)
 
         # class variables
         self._reductionController = None
+        self._myMergePeaksThread = None
+        self._rowScanDict = dict()
 
         return
 
@@ -91,6 +95,18 @@ class ScanPreProcessWindow(QtGui.QMainWindow):
 
         return
 
+    def do_quit(self):
+        """close window properly
+
+        :return:
+        """
+        print '[INFO] Closing {0}'.format(self.objectName())
+
+        if self._myMergePeaksThread is not None:
+            self._myMergePeaksThread.terminate()
+
+        return
+
     def do_start_pre_process(self):
         """
         start the pre-precessing scans
@@ -115,9 +131,9 @@ class ScanPreProcessWindow(QtGui.QMainWindow):
         self.set_calibration_to_reduction_controller(exp_number)
 
         # set up GUI
-        scan_row_dict = self.ui.tableView_scanProcessState.add_new_scans(scan_list, append=True)
+        self._rowScanDict = self.ui.tableView_scanProcessState.add_new_scans(scan_list, append=True)
 
-        # launch the multiple threading to scans
+        # form the output files
         if self.ui.checkBox_saveToDataServer.isChecked():
             output_dir = '/HFIR/HB3A/Exp{0}/Shared/reduced/'.format(exp_number)
         else:
@@ -127,9 +143,14 @@ class ScanPreProcessWindow(QtGui.QMainWindow):
             os.mkdir(output_dir)
             os.chmod(output_dir, 0o777)
 
-        # loop over all the scan number to pre-process
-        self._myMergePeaksThread =  multi_threads_helpers.MergePeaksThread(self, exp_number, scan_number_list,
-                                                                           output_md_list)
+        file_list = list()
+        for scan in scan_list:
+            md_file_name = os.path.join(output_dir, 'Exp{0}_Scan{1}_MD.nxs'.format(exp_number, scan))
+            file_list.append(md_file_name)
+
+        # launch the multiple threading to scans
+        self._myMergePeaksThread = multi_threads_helpers.MergePeaksThread(self, exp_number, scan_list,
+                                                                          file_list)
         self._myMergePeaksThread.start()
 
         return
@@ -303,7 +324,7 @@ class ScanPreProcessWindow(QtGui.QMainWindow):
         :param scan_number:
         :return:
         """
-        row_number = scan_row_dict[scan_number]
+        row_number = self._rowScanDict[scan_number]
         self.ui.tableView_scanProcessState.set_status(row_number, message)
 
         return
@@ -359,13 +380,14 @@ class ScanPreProcessStatusTable(NTableWidget.NTableWidget):
         return
 
     def add_new_scans(self, scan_numbers):
-        """
-        add scans to the
+        """add scans to the table
+
         :param scan_numbers:
         :return:
         """
         # check input
-        assert isinstance(scan_numbers, list), 'blabla'
+        assert isinstance(scan_numbers, list), 'Scan numbers {0} must be a list but not a {1}.' \
+                                               ''.format(scan_numbers, type(scan_numbers))
 
         # sort
         scan_numbers.sort()
@@ -378,7 +400,7 @@ class ScanPreProcessStatusTable(NTableWidget.NTableWidget):
                 continue
 
             # append scan
-            self.append_row([scan_number, '', '', ''])
+            self.append_row([scan_number, '', '', 'Queued'])
             num_rows = self.rowCount()
             self._scanRowDict[scan_number] = num_rows - 1
             part_dict[scan_number] = num_rows - 1
