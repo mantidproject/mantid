@@ -159,8 +159,8 @@ set ( SRC_FILES
 	src/Integration.cpp
 	src/InterpolatingRebin.cpp
 	src/InterpolationOption.cpp
-        src/InvertMask.cpp
-        src/JoinRuns.cpp
+	src/InvertMask.cpp
+	src/JoinRuns.cpp
 	src/LineProfile.cpp
 	src/Logarithm.cpp
 	src/LorentzCorrection.cpp
