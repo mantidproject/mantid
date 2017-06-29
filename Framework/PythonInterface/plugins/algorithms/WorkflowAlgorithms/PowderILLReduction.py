@@ -24,6 +24,7 @@ class PowderILLReduction(PythonAlgorithm):
     _calib_name = None
     _roi_name = None
     _mon_name = None
+    _progress = None
 
     def category(self):
         return "ILL\\Diffraction"
@@ -55,6 +56,8 @@ class PowderILLReduction(PythonAlgorithm):
                         except ValueError:
                             roi_valid = False
                             break
+            else:
+                roi_valid = False
         if not roi_valid:
             issues['ROI'] = 'Invalid region of interest. Specify , separated list of - separated ranges.'
 
@@ -78,7 +81,7 @@ class PowderILLReduction(PythonAlgorithm):
                              validator=StringListValidator(['Time', 'Monitor', 'ROI']),
                              doc='Normalise to time, monitor or ROI counts.')
 
-        self.declareProperty(name='ROI', defaultValue='', doc='Regions of interest in scattering angle in degrees.'
+        self.declareProperty(name='ROI', defaultValue='0-153.6', doc='Regions of interest in scattering angle in degrees.'
                                                               'E.g. 1.5-20,50-110')
 
         self.declareProperty(name='Observable',
@@ -118,6 +121,8 @@ class PowderILLReduction(PythonAlgorithm):
 
         to_group = []
 
+        self._progress = Progress(self, start=0.0, end=1.0, nreports=runs.count(',')+runs.count('+')+1)
+
         for runs_list in runs.split(','):
 
             runs_sum = runs_list.split('+')
@@ -126,6 +131,7 @@ class PowderILLReduction(PythonAlgorithm):
                 # nothing to sum
                 runnumber = os.path.basename(runs_sum[0]).split('.')[0]
                 LoadILLDiffraction(Filename=runs_sum[0], OutputWorkspace=hide(runnumber))
+                self._progress.report('Loaded run #' + runnumber)
                 to_group.append(hide(runnumber))
             else:
                 for i, run in enumerate(runs_sum):
@@ -133,9 +139,11 @@ class PowderILLReduction(PythonAlgorithm):
                     if i == 0:
                         first = hide(runnumber + '_multiple')
                         LoadILLDiffraction(Filename=run, OutputWorkspace=first)
+                        self._progress.report('Loaded run #' + runnumber)
                         to_group.append(first)
                     else:
                         LoadILLDiffraction(Filename=run, OutputWorkspace=hide(runnumber))
+                        self._progress.report('Loaded run #' + runnumber)
                         MergeRuns(InputWorkspaces=[first, hide(runnumber)], OutputWorkspace=first)
                         DeleteWorkspace(Workspace=hide(runnumber))
 
@@ -143,8 +151,8 @@ class PowderILLReduction(PythonAlgorithm):
 
         if self._normalise_option == 'Time':
             for ws in to_group:
-                #normalise to time here, since the duration is in sample logs
-                duration = mtd[ws].getRun().getLogData('duration')
+                #normalise to time here, before joining, since the duration is in sample logs
+                duration = mtd[ws].getRun().getLogData('duration').value
                 Scale(InputWorkspace=ws,OutputWorkspace=ws,Factor=1./duration)
 
         JoinRuns(InputWorkspaces=self._temp_name, SampleLogAsXAxis=self._observable, OutputWorkspace=self._temp_name+'_joined')
@@ -153,19 +161,20 @@ class PowderILLReduction(PythonAlgorithm):
 
         RenameWorkspace(InputWorkspace=self._temp_name+'_joined', OutputWorkspace=self._temp_name)
 
+        ExtractMonitors(InputWorkspace=self._temp_name, DetectorWorkspace=self._temp_name,
+                        MonitorWorkspace=self._mon_name)
+
         ConvertSpectrumAxis(InputWorkspace=self._temp_name, OutputWorkspace=self._temp_name, Target='SignedTheta')
 
         if self._normalise_option == 'Monitor':
-            #normalise to monitor
-            ExtractMonitors(InputWorkspace=self._temp_name, DetectorWorkspace=self._temp_name, MonitorWorkspace=self._mon_name)
             Divide(LHSWorkspace=self._temp_name, RHSWorkspace=self._mon_name, OutputWorkspace=self._temp_name)
-            DeleteWorkspace(self._mon_name)
         elif self._normalise_option == 'ROI':
-            sum_pattern = self._parse_roi()
-            SumSpectra(InputWorkspace=self._temp_name, OutputWorkspace=self._roi_name, ListOfWorkspaceIndices=sum_pattern)
+            SumSpectra(InputWorkspace=self._temp_name, OutputWorkspace=self._roi_name, ListOfWorkspaceIndices=self._parse_roi())
             SumSpectra(InputWorkspace=self._roi_name, OutputWorkspace=self._roi_name)
             Divide(LHSWorkspace=self._temp_name, RHSWorkspace=self._roi_name, OutputWorkspace=self._temp_name)
             DeleteWorkspace(self._roi_name)
+
+        DeleteWorkspace(self._mon_name)
 
         if self._calibration_file:
             LoadNexusProcessed(Filename=self._calibration_file, OutputWorkspace=self._calib_name)
@@ -174,6 +183,8 @@ class PowderILLReduction(PythonAlgorithm):
 
         if self._sort_x_axis:
             SortXAxis(InputWorkspace=self._temp_name, OutputWorkspace=self._temp_name)
+
+        Transpose(InputWorkspace=self._temp_name, OutputWorkspace=self._temp_name)
 
         RenameWorkspace(InputWorkspace=self._temp_name, OutputWorkspace=self._out_name)
 
