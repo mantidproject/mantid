@@ -77,6 +77,7 @@ public:
   void setRowCommands(
       std::vector<std::unique_ptr<DataProcessorCommand>> rowCommands) override;
   void clearCommands() override;
+  void setRowActionEnabled(int index, bool enabled) override;
 
   // Set the status of the progress bar
   void setProgressRange(int min, int max) override;

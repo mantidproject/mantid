@@ -1,12 +1,14 @@
-#include "MantidHistogramData/LinearGenerator.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidKernel/Exception.h"
+#include "MantidAPI/ISpectrum.h"
 #include "MantidAPI/RefAxis.h"
 #include "MantidAPI/SpectraAxis.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidAPI/ISpectrum.h"
-#include "MantidKernel/VectorHelper.h"
+#include "MantidHistogramData/LinearGenerator.h"
+#include "MantidKernel/Exception.h"
 #include "MantidKernel/IPropertyManager.h"
+#include "MantidKernel/VectorHelper.h"
+
+#include <sstream>
 
 using Mantid::API::ISpectrum;
 using Mantid::API::MantidImage;
@@ -18,7 +20,8 @@ using std::size_t;
 DECLARE_WORKSPACE(Workspace2D)
 
 /// Constructor
-Workspace2D::Workspace2D() : m_noVectors(0) {}
+Workspace2D::Workspace2D(const Parallel::StorageMode storageMode)
+    : HistoWorkspace(storageMode), m_noVectors(0) {}
 
 Workspace2D::Workspace2D(const Workspace2D &other)
     : HistoWorkspace(other), m_noVectors(other.m_noVectors),
@@ -283,7 +286,7 @@ Histogram1D &Workspace2D::getSpectrum(const size_t index) {
 /// Return const reference to Histogram1D at the given workspace index.
 const Histogram1D &Workspace2D::getSpectrum(const size_t index) const {
   if (index >= m_noVectors) {
-    std::stringstream ss;
+    std::ostringstream ss;
     ss << "Workspace2D::getSpectrum, histogram number " << index
        << " out of range " << m_noVectors;
     throw std::range_error(ss.str());
@@ -343,6 +346,12 @@ void Workspace2D::generateHistogram(const std::size_t index, const MantidVec &X,
     Mantid::Kernel::VectorHelper::rebin(currentX, currentY, currentE, X, Y, E,
                                         this->isDistribution());
   }
+}
+
+Workspace2D *Workspace2D::doClone() const { return new Workspace2D(*this); }
+
+Workspace2D *Workspace2D::doCloneEmpty() const {
+  return new Workspace2D(storageMode());
 }
 
 } // namespace DataObjects
