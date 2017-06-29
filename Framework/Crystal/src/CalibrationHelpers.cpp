@@ -15,7 +15,6 @@ namespace CalibrationHelpers {
  * Updates the ComponentInfo for the workspace containing newInstrument to
  *reflect the position of the source
  *
- * @param newInstrument The instrument whose parameter map will be changed to
  *reflect the new source position
  * @param L0 The new distance from source to sample (should be positive)
  * @param newSampPos The relative shift for the new sample position
