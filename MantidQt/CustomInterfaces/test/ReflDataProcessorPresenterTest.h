@@ -257,6 +257,9 @@ public:
     EXPECT_CALL(mockMainPresenter, getPreprocessingProperties())
         .Times(8)
         .WillRepeatedly(Return(QString()));
+    EXPECT_CALL(mockMainPresenter, getProcessingOptions())
+        .Times(8)
+        .WillRepeatedly(Return(""));
     EXPECT_CALL(mockMainPresenter, getPostprocessingOptions())
         .Times(3)
         .WillRepeatedly(Return(""));
