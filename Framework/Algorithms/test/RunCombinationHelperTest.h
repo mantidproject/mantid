@@ -132,9 +132,6 @@ public:
     const auto scanWS1 = createSampleScanningWorkspace(2);
     const auto scanWS2 = createSampleScanningWorkspace(2, 5);
 
-    TS_ASSERT_EQUALS(scanWS1->detectorInfo().size(), 200)
-    TS_ASSERT_EQUALS(scanWS2->detectorInfo().size(), 205)
-
     m_testee.setReferenceProperties(scanWS1);
     TS_ASSERT_EQUALS(m_testee.checkCompatibility(scanWS2),
                      "workspaces with detectors scans have different number of "
@@ -145,18 +142,9 @@ private:
   RunCombinationHelper m_testee;
 
   MatrixWorkspace_sptr createSampleScanningWorkspace(int nTimeIndexes,
-                                                     int nMonitors = 0) {
-    FrameworkManager::Instance();
-
-    CreateSampleWorkspace wsAlg;
-    wsAlg.initialize();
-    wsAlg.setChild(true);
-    wsAlg.setProperty("NumScanPoints", nTimeIndexes);
-    wsAlg.setProperty("NumMonitors", nMonitors);
-    wsAlg.setPropertyValue("OutputWorkspace", "__out");
-    wsAlg.execute();
-
-    return wsAlg.getProperty("OutputWorkspace");
+                                                     int nhist = 2) {
+    return create2DDetectorScanWorkspaceWithFullInstrument(
+        nhist, 3, nTimeIndexes, true, false, true, "test");
   }
 };
 
