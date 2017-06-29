@@ -96,6 +96,9 @@ class ScanPreProcessWindow(QtGui.QMainWindow):
         start the pre-precessing scans
         :return:
         """
+        import multi_threads_helpers
+
+        # check inputs
         assert isinstance(self._reductionController, reduce4circleControl.CWSCDReductionControl), \
             'Reduction controller of type {0} is not accepted. It must be a CWSCDReductionControl instance.' \
             ''.format(self._reductionController.__class__.__name__)
@@ -115,23 +118,19 @@ class ScanPreProcessWindow(QtGui.QMainWindow):
         scan_row_dict = self.ui.tableView_scanProcessState.add_new_scans(scan_list, append=True)
 
         # launch the multiple threading to scans
-        # TODO/FIXME/NOWNOW - It is not implemented where to export the data!
-        self.ui.checkBox_saveToDataServer
+        if self.ui.checkBox_saveToDataServer.isChecked():
+            output_dir = '/HFIR/HB3A/Exp{0}/Shared/reduced/'.format(exp_number)
+        else:
+            output_dir = str(self.ui.lineEdit_outputDir.text())
+        if os.path.exists(output_dir) is False:
+            # create output directory and change to all accessible
+            os.mkdir(output_dir)
+            os.chmod(output_dir, 0o777)
 
         # loop over all the scan number to pre-process
-        # TODO/FIXME/NOW - Multiple threading
-        for scan_number in sorted(scan_list):
-            row_number = scan_row_dict[scan_number]
-            self.ui.tableView_scanProcessState.set_status(row_number, 'In Processing')
-            status, ret_object = self._reductionController.merge_pts_in_scan(exp_no=exp_number, scan_no=scan_number,
-                                                                             pt_num_list=[])
-            self._reductionController.save_merged_scan(exp_number, scan_number)
-            if status:
-                self.ui.tableView_scanProcessState.set_status(row_number, 'Done')
-            else:
-                error_msg = str(ret_object)
-                self.ui.tableView_scanProcessState.set_status(row_number, error_msg)
-        # END-FOR
+        self._myMergePeaksThread =  multi_threads_helpers.MergePeaksThread(self, exp_number, scan_number_list,
+                                                                           output_md_list)
+        self._myMergePeaksThread.start()
 
         return
 
@@ -161,8 +160,7 @@ class ScanPreProcessWindow(QtGui.QMainWindow):
             return scan_list
 
         # replace ',' by ' ' such that the scans can be accepted by different type of deliminators
-        # TODO/FIXME/NOWNOW - the case '1-3' does not work!
-        scans_str = scans_str.replace(',', '')
+        scans_str = scans_str.replace(',', ' ')
         scan_str_list = scans_str.split()
 
         for single_scan_str in scan_str_list:
@@ -173,6 +171,15 @@ class ScanPreProcessWindow(QtGui.QMainWindow):
             if single_scan_str.isdigit():
                 scan = int(single_scan_str)
                 scan_list.append(scan)
+            elif single_scan_str.count('-') == 1:
+                terms = single_scan_str.split('-')
+                if len(terms) == 2 and terms[0].isdigit() and terms[1].isdigit():
+                    start_scan = int(terms[0])
+                    end_scan = int(terms[1])
+                    scan_list.extend(range(start_scan, end_scan+1))
+                else:
+                    raise RuntimeError('{0} in scan list {1} cannot be converted to integer list.'
+                                       ''.format(single_scan_str, scans_str))
             else:
                 raise RuntimeError('{0} in scan list {1} cannot be converted to integer.'
                                    ''.format(single_scan_str, scans_str))
@@ -240,8 +247,8 @@ class ScanPreProcessWindow(QtGui.QMainWindow):
         return
 
     def set_instrument_calibration(self, exp_number, det_size, det_center, det_sample_distance, wave_length):
-        """
-        set up the calibration parameters
+        """set up the calibration parameters
+
         :param exp_number:
         :param det_size:
         :param det_center: ok with string
@@ -249,7 +256,6 @@ class ScanPreProcessWindow(QtGui.QMainWindow):
         :param wave_length: ok with string
         :return:
         """
-        # TODO/NOWNOW/ - Make more documentation for caller
         # experiment number
         assert isinstance(exp_number, int), 'Experiment number {0} must be an integer'.format(exp_number)
         self.ui.lineEdit_ipts.setText('{0}'.format(exp_number))
@@ -288,6 +294,17 @@ class ScanPreProcessWindow(QtGui.QMainWindow):
             ''.format(controller.__class__.__name__)
 
         self._reductionController = controller
+
+        return
+
+    def update_merge_value(self, scan_number, message):
+        """update merged signal
+
+        :param scan_number:
+        :return:
+        """
+        row_number = scan_row_dict[scan_number]
+        self.ui.tableView_scanProcessState.set_status(row_number, message)
 
         return
 
@@ -370,17 +387,14 @@ class ScanPreProcessStatusTable(NTableWidget.NTableWidget):
         return part_dict
 
     def set_status(self, row_number, status):
-        """
+        """set the status of the scan
 
         :param row_number:
         :param status:
         :return:
         """
-        # check ... blabla
+        # check
 
         self.update_cell_value(row_number, self._iColStatus, status)
 
         return
-
-
-

@@ -1528,8 +1528,9 @@ class MainWindow(QtGui.QMainWindow):
         return
 
     def do_integrate_roi(self):
-        """
-        integrate the detector counts in the region of interest (2D) along axis-0 and axis-1 respectively.
+        """integrate the detector counts in the region of interest
+
+        Integrate the detector's counts (2D) along axis-0 and axis-1 respectively.
         and save the result (1D data) to file
         :return:
         """
@@ -1545,7 +1546,8 @@ class MainWindow(QtGui.QMainWindow):
         return
 
     def do_integrate_peaks(self):
-        """ Integrate selected peaks tab-'scan processing'.
+        """Integrate selected peaks tab-'scan processing'.
+
         If any scan is not merged, then it will merge the scan first.
         Integrate peaks from the table of merged peak.
         It will so the simple cuboid integration with region of interest and background subtraction.
