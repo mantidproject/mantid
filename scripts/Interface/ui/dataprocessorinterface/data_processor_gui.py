@@ -82,7 +82,7 @@ class DataProcessorGui(QtGui.QMainWindow, ui_data_processor_window.Ui_DataProces
 
         # The white list (mandatory)
         # Defines the number of columns, their names and the algorithm properties linked to them
-        # Metdho 'addElement' adds a column to the widget
+        # Method 'addElement' adds a column to the widget
         # The first argument is the name of the column
         # The second argument is the algorithm property
         # The third argument is a brief description of the column

@@ -889,11 +889,9 @@ void GenericDataProcessorPresenter::reduceRow(RowData *data) {
       alg->setProperty(propertyName, runWS->getName());
     } else {
       // No pre-processing needed
-      // No pre-processing needed
       auto propertyValue = data->at(i);
       if (!propertyValue.empty())
         alg->setPropertyValue(propertyName, propertyValue);
-      // alg->setPropertyValue(propertyName, globalOptions);
     }
   }
 

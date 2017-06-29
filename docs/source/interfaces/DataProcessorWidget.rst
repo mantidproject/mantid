@@ -223,7 +223,7 @@ blacklist of algorithms properties can be provided as a string of comma-separate
 															  'OutputWorkspace,'
 															  'OutputWorkspaceWavelength,')
 
-The only effect of the blaklist is on the *Options* column, not in the reduction. This column uses a *HintingLineEdit* (a MantidWidget)
+The only effect of the blacklist is on the *Options* column, not in the reduction. This column uses a *HintingLineEdit* (a MantidWidget)
 delegate to provide auto-completion functionality so that when users start typing in this column, they get a list of algorithm
 property names they can easily select. The figure below illustrates this behaviour:
 
