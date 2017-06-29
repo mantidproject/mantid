@@ -42,38 +42,38 @@ QVariant QDataProcessorTwoLevelTreeModel::data(const QModelIndex &index,
   if (!index.isValid())
     return QVariant();
 
-  bool parentValid = parent(index).isValid();
+  if (!parent(index).isValid()) {
+    // Index corresponds to a group
 
-  if (role == Qt::DisplayRole || role == Qt::EditRole) {
-    if (!parentValid) {
-      // Index corresponds to a group
-
-      if (index.column() == 0) {
-        // Return the group name only in the first column
-        return QString::fromStdString(m_groupName.at(index.row()));
-      } else {
-        return QVariant();
-      }
-    } else {
-      // Index corresponds to a row
-
-      // Absolute position of this row in the table
-      int absolutePosition = m_rowsOfGroup[parent(index).row()][index.row()];
-      return QString::fromStdString(
-          m_tWS->String(absolutePosition, index.column() + 1));
+    if ((role == Qt::DisplayRole || role == Qt::EditRole) &&
+        index.column() == 0) {
+      // Return the group name only in the first column
+      return QString::fromStdString(m_groupName.at(index.row()));
     }
- 
-  } else if (role == Qt::BackgroundRole) {
-    // Highlight if this is in the lists of rows / groups to be highlighted
-    if (!parentValid) {
+    if (role == Qt::BackgroundRole) {
+      // Highlight if this is in the list of highlighted groups
       if (std::find(m_highlightGroups.begin(), m_highlightGroups.end(),
                     index.row()) != m_highlightGroups.end())
         return QColor("#FF8040");
-    } else if (parent(index).row() < m_highlightRows.size()) {
-      auto groupItems = m_highlightRows[parent(index).row()];
-      if (std::find(groupItems.begin(), groupItems.end(), index.row()) !=
-          groupItems.end())
-        return QColor("#FF8040");
+    }
+  } else {
+    // Index corresponds to a row
+    auto pIndex = parent(index);
+
+    if (role == Qt::DisplayRole || role == Qt::EditRole) {
+      // Absolute position of this row in the table
+      int absolutePosition = m_rowsOfGroup[pIndex.row()][index.row()];
+      return QString::fromStdString(
+          m_tWS->String(absolutePosition, index.column() + 1));
+    }
+    if (role == Qt::BackgroundRole) {
+      // Highlight if this is in the lists of rows to be highlighted
+      if (m_highlightRows.count(pIndex.row())) {
+        auto groupItems = m_highlightRows.at(pIndex.row());
+        if (std::find(groupItems.begin(), groupItems.end(), index.row()) !=
+            groupItems.end())
+          return QColor("#FF8040");
+      }
     }
   }
 
@@ -488,9 +488,6 @@ void QDataProcessorTwoLevelTreeModel::addHighlighted(
     m_highlightGroups.push_back(position);
   } else {
     // Add a row item
-    if (m_highlightRows.size() <= parent.row())
-      m_highlightRows.push_back(std::vector<int>());
-
     m_highlightRows[parent.row()].push_back(position);
   }
 }

@@ -98,8 +98,8 @@ private:
   std::vector<std::string> m_groupName;
   /// Vector containing the (absolute) row indices for a given group
   std::vector<std::vector<int>> m_rowsOfGroup;
-  /// List of row indexes for each group that should be highlighted
-  std::vector<std::vector<int>> m_highlightRows;
+  /// Map of row indexes for each group index that should be highlighted
+  std::map<int, std::vector<int>> m_highlightRows;
   /// List of group indexes that should be highlighted
   std::vector<int> m_highlightGroups;
 };
