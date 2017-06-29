@@ -420,7 +420,7 @@ L = M31X + M32Y + M33Z
 
 */
 void transformLookpointToWorkspaceCoord(
-    Mantid::coord_t *lookPoint, const std::array<Mantid::coord_t, 9> skewMatrix,
+    Mantid::coord_t *lookPoint, const std::array<Mantid::coord_t, 9>& skewMatrix,
     const size_t &dimX, const size_t &dimY, const size_t &dimSlice) {
 
   auto sliceDimResult =
