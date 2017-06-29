@@ -67,7 +67,7 @@ QVariant QDataProcessorTwoLevelTreeModel::data(const QModelIndex &index,
           m_tWS->String(absolutePosition, index.column() + 1));
     }
     if (role == Qt::BackgroundRole) {
-      // Highlight if this is in the lists of rows to be highlighted
+      // Highlight if this is in the list of highlighted rows
       if (m_highlightRows.count(pIndex.row())) {
         auto groupItems = m_highlightRows.at(pIndex.row());
         if (std::find(groupItems.begin(), groupItems.end(), index.row()) !=
@@ -490,6 +490,14 @@ void QDataProcessorTwoLevelTreeModel::addHighlighted(
     // Add a row item
     m_highlightRows[parent.row()].push_back(position);
   }
+}
+
+/** Clear the lists of highlighted rows and groups
+*/
+void QDataProcessorTwoLevelTreeModel::clearHighlighted() {
+
+  m_highlightRows.clear();
+  m_highlightGroups.clear();
 }
 
 } // namespace MantidWidgets

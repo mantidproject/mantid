@@ -216,6 +216,9 @@ void GenericDataProcessorPresenter::process() {
 
   m_newSelection = false;
 
+  // Clear any highlighted rows
+  m_manager->clearHighlighted();
+
   // Progress: each group and each row within count as a progress step.
   int progress = 0;
   int maxProgress = (int)(m_selectedData.size());
@@ -361,7 +364,6 @@ void GenericDataProcessorPresenter::endReduction() {
 
   pause();
   m_mainPresenter->confirmReductionPaused();
-  //m_manager->setHighlighted(-1, -1); // No row / group highlighted
   m_newSelection = true; // Allow same selection to be processed again
 }
 

@@ -198,5 +198,12 @@ void QDataProcessorOneLevelTreeModel::addHighlighted(
     m_highlightRows.push_back(position);
 }
 
+/** Clear the list of highlighted rows
+*/
+void QDataProcessorOneLevelTreeModel::clearHighlighted() {
+
+  m_highlightRows.clear();
+}
+
 } // namespace MantidWidgets
 } // namespace Mantid

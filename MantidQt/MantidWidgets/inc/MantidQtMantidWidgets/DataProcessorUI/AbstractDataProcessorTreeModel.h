@@ -54,6 +54,8 @@ public:
   // Add a data item to the list of items to be highlighted
   virtual void addHighlighted(int position,
                               const QModelIndex &parent = QModelIndex()) = 0;
+  // Clear the list of highlighted items
+  virtual void clearHighlighted() = 0;
 
 protected:
   /// Collection of data for viewing.
