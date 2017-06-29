@@ -1450,8 +1450,10 @@ public:
 
     MergeRuns alg;
     alg.initialize();
-    alg.setPropertyValue("RebinBehaviour", RunCombinationOptions::FAIL_BEHAVIOUR);
-    alg.setPropertyValue("FailBehaviour", RunCombinationOptions::STOP_BEHAVIOUR);
+    alg.setPropertyValue("RebinBehaviour",
+                         RunCombinationOptions::FAIL_BEHAVIOUR);
+    alg.setPropertyValue("FailBehaviour",
+                         RunCombinationOptions::STOP_BEHAVIOUR);
     do_test_mergeSampleLogs_modified_alg(
         alg, ws, "prop1", SampleLogsBehaviour::SUM_MERGE, "1", 1, true);
   }

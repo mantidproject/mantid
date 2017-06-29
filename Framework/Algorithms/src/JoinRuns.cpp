@@ -70,7 +70,8 @@ void JoinRuns::init() {
       "If specified, this will be the x-axis. It has to be numeric, in which "
       "case all the input workspaces must have only one point or numeric "
       "time series, in which case the number"
-      "of elements in the series must match the number of points for each workspace.");
+      "of elements in the series must match the number of points for each "
+      "workspace.");
   declareProperty(Kernel::make_unique<WorkspaceProperty<API::Workspace>>(
                       OUTPUT_WORKSPACE_PROPERTY, "", Direction::Output),
                   "The output workspace.");
@@ -123,7 +124,7 @@ std::map<std::string, std::string> JoinRuns::validateInputs() {
 
   if (m_inputWS.empty()) {
     issues[INPUT_WORKSPACE_PROPERTY] += "There are no point-data"
-                                      " MatrixWorkspaces in the input list\n";
+                                        " MatrixWorkspaces in the input list\n";
   } else {
     RunCombinationHelper combHelper;
     combHelper.setReferenceProperties(m_inputWS.front());
@@ -133,15 +134,15 @@ std::map<std::string, std::string> JoinRuns::validateInputs() {
       std::string compatible = combHelper.checkCompatibility(ws, true);
       if (!compatible.empty()) {
         issues[INPUT_WORKSPACE_PROPERTY] += "Workspace " + ws->getName() +
-                                          " is not compatible: " + compatible +
-                                          "\n";
+                                            " is not compatible: " +
+                                            compatible + "\n";
       }
       // if the log entry is given, validate it
       const std::string logValid = checkLogEntry(ws);
       if (!logValid.empty()) {
         issues[INPUT_WORKSPACE_PROPERTY] += "Invalid sample log entry for " +
-                                          ws->getName() + ": " + logValid +
-                                          "\n";
+                                            ws->getName() + ": " + logValid +
+                                            "\n";
       }
     }
   }
