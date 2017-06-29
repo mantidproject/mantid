@@ -1,10 +1,14 @@
 #include "MantidCurveFitting/Functions/GramCharlier.h"
 
+#include "MantidAPI/FunctionFactory.h"
+
 #include <boost/math/special_functions/hermite.hpp>
 
 namespace Mantid {
 namespace CurveFitting {
 namespace Functions {
+
+DECLARE_FUNCTION(GramCharlier)
 
 /**
  * @brief GramCharlier::init Initialize the function parameters. This is
