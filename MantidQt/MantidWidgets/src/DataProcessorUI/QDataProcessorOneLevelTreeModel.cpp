@@ -190,12 +190,21 @@ bool QDataProcessorOneLevelTreeModel::setData(const QModelIndex &index,
 /** Sets the currently highlighted row
 * @param position : The position of the row to be highlighted
 * @param parent : The parent of this row
+* @return : Boolean indicating whether the row was successfully highlighted
 */
-void QDataProcessorOneLevelTreeModel::addHighlighted(
+bool QDataProcessorOneLevelTreeModel::addHighlighted(
     int position, const QModelIndex &parent) {
 
-  if (!parent.isValid())
-    m_highlightRows.push_back(position);
+  if (parent.isValid())
+    return false;
+
+  // Incorrect position
+  if (position < 0 || position >= rowCount())
+    return false;
+
+  m_highlightRows.push_back(position);
+
+  return true;
 }
 
 /** Clear the list of highlighted rows

@@ -479,17 +479,28 @@ QDataProcessorTwoLevelTreeModel::getTableWorkspace() const {
 /** Add a new data item to be highlighted
 * @param position : The position of the item to be highlighted
 * @param parent : The parent of this item
+* @return : Boolean indicating whether the row was successfully highlighted
 */
-void QDataProcessorTwoLevelTreeModel::addHighlighted(
+bool QDataProcessorTwoLevelTreeModel::addHighlighted(
     int position, const QModelIndex &parent) {
 
   if (!parent.isValid()) {
+    // Invalid position
+    if (position < 0 || position >= rowCount())
+      return false;
+
     // Add a group item
     m_highlightGroups.push_back(position);
   } else {
+    // Invalid position
+    if (position < 0 || position >= rowCount(parent))  
+      return false;
+
     // Add a row item
     m_highlightRows[parent.row()].push_back(position);
   }
+
+  return true;
 }
 
 /** Clear the lists of highlighted rows and groups

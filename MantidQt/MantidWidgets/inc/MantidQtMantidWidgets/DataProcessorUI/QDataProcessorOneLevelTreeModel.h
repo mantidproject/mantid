@@ -40,7 +40,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class QDataProcessorOneLevelTreeModel : public AbstractDataProcessorTreeModel {
+class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS QDataProcessorOneLevelTreeModel
+    : public AbstractDataProcessorTreeModel {
+  Q_OBJECT
 public:
   QDataProcessorOneLevelTreeModel(
       Mantid::API::ITableWorkspace_sptr tableWorkspace,
@@ -79,7 +81,7 @@ public:
   // Miscellaneous model functions
 
   // Add a row to the list of rows to be highlighted
-  void addHighlighted(int position,
+  bool addHighlighted(int position,
                       const QModelIndex &parent = QModelIndex()) override;
   // Clear the list of highlighted items
   void clearHighlighted() override;
