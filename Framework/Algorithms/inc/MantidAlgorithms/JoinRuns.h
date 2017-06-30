@@ -51,7 +51,7 @@ private:
 
   std::string checkLogEntry(API::MatrixWorkspace_sptr) const;
   std::vector<double> getXAxis(API::MatrixWorkspace_sptr) const;
-  void joinSpectrum(long);
+  void joinSpectrum(int64_t);
 
   /// Sample log entry name
   std::string m_logEntry;
