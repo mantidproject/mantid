@@ -165,6 +165,11 @@ processing that is in progress. And at the bottom, near the **Process**
 button is the processing instrument selector. The processing instrument is
 used to help identify the correct data to load when processing runs.
 
+While processing, any runs that have been successfully processed will have their
+row highlighted green. Any groups that have been post-processed successfully
+will also be highlighted. Starting a new reduction will clear all highlighted
+rows and groups.
+
 Next to the **Process** button there is a checkbox which allows enabling and
 disabling output to an ipython notebook. If the checkbox is enabled, a dialog
 window will ask for a save location for the notebook after processing is

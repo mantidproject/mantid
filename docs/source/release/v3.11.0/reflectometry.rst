@@ -22,6 +22,8 @@ ISIS Reflectometry
   - Data reduction must be paused first before the interface can be closed.
   - When reduction is paused, the interface will finish reducing the current row before pausing.
 
+- During reduction, rows and groups that have been successfully processed are highlighted green.
+
 
 ISIS Reflectometry (Old)
 ########################
