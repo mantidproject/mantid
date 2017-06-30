@@ -271,6 +271,40 @@ class FunctionWrapperTest(unittest.TestCase):
         gz_str = g.__str__()
         self.assertEqual(gz_str.count("constraints="),0)
         
+    def test_flatten(self):
+        g0 = FunctionWrapper( "Gaussian", Height=7.5, Sigma=1.2, PeakCentre=10)  
+        g1 = FunctionWrapper( "Gaussian", Height=8.5, Sigma=1.25, PeakCentre=12)  
+        g2 = FunctionWrapper( "Gaussian", Height=9.5, Sigma=1.3, PeakCentre=14)
+        l = FunctionWrapper("Lorentzian",PeakCentre=9, Amplitude=2.4, FWHM=3)
+        lb = FunctionWrapper("LinearBackground")
+        
+        # Test already flat composite function, no change should occur
+        c1 = CompositeFunctionWrapper(lb, g0, g1 )
+        fc1 = c1.flatten()
+        c1_str = c1.__str__()
+        fc1_str = fc1.__str__()
+        self.assertEqual(fc1_str,c1_str)
+        
+        # Test composite function of depth 1
+        c2 = CompositeFunctionWrapper(c1, l)
+        fc2 = c2.flatten()
+        fc2_str = fc2.__str__()
+        self.assertEqual(fc2_str.count("("),0)
+        self.assertEqual(fc2_str.count("PeakCentre"),3)
+        self.assertEqual(fc2_str.count("Sigma="),2)
+        self.assertEqual(fc2_str.count("Sigma=1.25"),1)
+        
+        # Test composite function of depth 2
+        c3 = CompositeFunctionWrapper( g2, c2)
+        fc3 = c3.flatten()
+        fc3_str = fc3.__str__()
+        self.assertEqual(fc3_str.count("("),0)
+        self.assertEqual(fc3_str.count("PeakCentre"),4)
+        self.assertEqual(fc3_str.count("Sigma="),3)
+        self.assertEqual(fc3_str.count("Sigma=1.25"),1)
+        self.assertEqual(fc3_str.count("Sigma=1.3"),1)
+        
+        
     def test_prefinedfunction(self):
         testhelpers.assertRaisesNothing(self, Gaussian, Height=7.5, Sigma=1.2, PeakCentre=10)
        

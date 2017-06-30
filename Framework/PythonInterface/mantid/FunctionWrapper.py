@@ -191,9 +191,9 @@ class CompositeFunctionWrapper(FunctionWrapper):
           if(isinstance(self[i],CompositeFunctionWrapper)):
              currentFunction = self[i].flatten()
              for j in range(0, currentFunction.__len__()):
-                flatSelf.add(currentFunction[i])
+                flatSelf.fun.add(currentFunction[j].fun)
           else:
-             flatSelf.add(self[i])
+             flatSelf.fun.add(self[i].fun)
              
        return flatSelf          
  
