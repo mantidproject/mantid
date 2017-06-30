@@ -434,9 +434,9 @@ void StartLiveDataDialog::initListenerPropLayout(const QString &listener) {
   }
 
   // update algorithm's properties
-if (ui.cmbInstrument->currentText().toStdString() != "") {
-    m_algorithm->setPropertyValue("Instrument",
-      ui.cmbInstrument->currentText().toStdString());
+  if (ui.cmbInstrument->currentText().toStdString() != "") {
+    m_algorithm->setPropertyValue(
+        "Instrument", ui.cmbInstrument->currentText().toStdString());
     m_algorithm->setPropertyValue("Listener", listener.toStdString());
     // create or clear the layout
     QLayout *layout = ui.listenerProps->layout();
@@ -499,8 +499,7 @@ void StartLiveDataDialog::updateConnectionChoices(const QString &inst_name) {
     auto selectName = QString::fromStdString(inst.liveListenerInfo().name());
     auto index = ui.cmbConnection->findText(selectName);
     ui.cmbConnection->setCurrentIndex(index);
-  }
-  catch (std::runtime_error &)     {
+  } catch (std::runtime_error &) {
     // the default instrument has no live listener, don't make a selection
   }
 }
