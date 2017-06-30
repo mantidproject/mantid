@@ -121,8 +121,8 @@ public:
     TSM_ASSERT_EQUALS("Expect 2 items in the parameter map", paramMap->size(),
                       2);
 
-    const size_t detectorIndex = 0;
-    InfoComponentVisitor visitor(std::vector<detid_t>{detectorIndex}, *paramMap,
+    const detid_t detectorId = 0;
+    InfoComponentVisitor visitor(std::vector<detid_t>{detectorId}, *paramMap,
                                  parInstrument->getSource()->getComponentID(),
                                  parInstrument->getSample()->getComponentID());
     parInstrument->registerContents(visitor);
