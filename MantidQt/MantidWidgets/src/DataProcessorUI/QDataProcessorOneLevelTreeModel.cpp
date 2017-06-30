@@ -43,7 +43,7 @@ QVariant QDataProcessorOneLevelTreeModel::data(const QModelIndex &index,
     // Highlight if this is in the lists of rows to be highlighted
     if (std::find(m_highlightRows.begin(), m_highlightRows.end(),
                   index.row()) != m_highlightRows.end())
-      return QColor("#FF8040");
+      return QColor("#00b300");
   }
 
   return QVariant();

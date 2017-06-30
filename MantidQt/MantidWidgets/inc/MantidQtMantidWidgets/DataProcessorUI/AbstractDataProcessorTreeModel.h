@@ -5,6 +5,7 @@
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorWhiteList.h"
 #include "MantidQtMantidWidgets/WidgetDllOption.h"
 #include <QAbstractItemModel>
+#include <QColor>
 
 namespace MantidQt {
 namespace MantidWidgets {

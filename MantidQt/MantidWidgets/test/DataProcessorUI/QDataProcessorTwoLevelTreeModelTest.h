@@ -631,8 +631,8 @@ public:
     QDataProcessorTwoLevelTreeModel model(ws, m_whitelist);
 
     // Non-existent row
-    TS_ASSERT_EQUALS(model.addHighlighted(0, model.index(10, 0)), false);
-    TS_ASSERT_EQUALS(model.addHighlighted(0, model.index(-1, 0)), false);
+    TS_ASSERT_EQUALS(model.addHighlighted(10, model.index(0, 0)), false);
+    TS_ASSERT_EQUALS(model.addHighlighted(-1, model.index(0, 0)), false);
 
     // Non-existent group
     TS_ASSERT_EQUALS(model.addHighlighted(10), false);
@@ -651,7 +651,7 @@ public:
         model.data(model.index(0, 0, model.index(0, 0)), Qt::BackgroundRole)
             .toString()
             .toStdString(),
-        "#ff8040");
+        "#00b300");
     TS_ASSERT_EQUALS(
         model.data(model.index(1, 0, model.index(0, 0)), Qt::BackgroundRole)
             .toString()
@@ -660,7 +660,7 @@ public:
     TS_ASSERT_EQUALS(model.data(model.index(1, 0), Qt::BackgroundRole)
                          .toString()
                          .toStdString(),
-                     "#ff8040");
+                     "#00b300");
     TS_ASSERT_EQUALS(
         model.data(model.index(0, 0, model.index(1, 0)), Qt::BackgroundRole)
             .toString()
