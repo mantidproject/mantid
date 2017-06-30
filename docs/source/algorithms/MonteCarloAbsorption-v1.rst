@@ -84,6 +84,61 @@ Interpolation
 The default linear interpolation method will produce an absorption curve that is not smooth. CSpline interpolation
 will produce a smoother result by using a 3rd-order polynomial to approximate the original points. 
 
+Sparse instrument
+#################
+
+The simulation may take long to complete on instruments with a large number of detectors. To speed up the simulation, the instrument can be approximated by a sparse grid of detectors. The behavior can be enabled by setting the *SparseInstrument* property to true.
+
+The sparse instrument consists of a grid of detectors covering the full instrument entirely. The figure below shows an example of a such an instrument approximating the IN5 spectrometer at ILL.
+
+.. figure:: ../images/MonteCarloAbsorption_Sparse_Instrument.png
+   :alt: IN5 spectrometer and its sparse approximation. 
+   :scale: 60%
+
+   Absorption corrections for IN5 spectrometer interpolated from the sparse instrument shown on the right. The sparse instrument has 6 detector rows and 22 columns, a total of 132 detectors. IN5, on the other hand, has approximately 100000 detectors.
+
+.. note:: It is recommended to remove monitor spectra from the input workspace since these are included in the area covered by the sparse instrument and may make the detector grid unnecessarily large.
+
+When the sparse instrument option is enabled, a sparse instrument corresponding to the instrument attached to the input workspace is created. The simulation is then run using the created instrument. Finally, the simulated absorption corrections are interpolated to the output workspace.
+
+The interpolation is a two step process: first a spatial interpolation is done from the detector grid of the sparse instrument to the actual detector positions of the full instrument. Then, the correction factors are interpolated over the missing wavelengths.
+
+.. note:: Currently, the sparse instrument mode does not support instruments with varying *EFixed*.
+
+Spatial interpolation
+^^^^^^^^^^^^^^^^^^^^^
+
+The sample to detector distance does not matter for absorption, so it suffices to consider directions only. The detector grid of the sparse instrument consists of detectors at constant latitude and longitude intervals. For a detector :math:`D` of the full input instrument at latitude :math:`\phi` and longitude :math:`\lambda`, we pick the four detectors :math:`D_i` (:math:`i = 1, 2, 3, 4`) at the corners of the grid cell which includes (:math:`\phi`, :math:`\lambda`). The distance :math:`\Delta_i` in units of angle between :math:`D` and  :math:`D_i` on a spherical surface is given by
+
+.. math::
+
+   \Delta_i = 2 \arcsin \sqrt{\sin^2 \left(\frac{\phi - \phi_i}{2} \right) + \cos \phi \cos \phi_i \sin^2 \left( \frac{\lambda - \lambda_i}{2} \right)}
+
+If :math:`D` coincides with any :math:`D_i`, the :math:`y` values of the histogram linked to :math:`D` are directly taken from :math:`D_i`. Otherwise, :math:`y` is interpolated using the inverse distance weighing method
+
+.. math::
+
+   y = \frac{\sum_i w_i y_i}{\sum_i w_i},
+
+where the weights are given by
+
+.. math::
+
+   w_i = \frac{1}{\Delta_i^2}
+
+Wavelength interpolation
+^^^^^^^^^^^^^^^^^^^^^^^^
+
+The wavelength points for simulation with the sparse instrument are chosen as follows:
+
+#. Find the global minimum and maximum wavelengths of the input workspace.
+
+#. Divide the wavelength interval to as many points as defined by the input parameters.
+
+After the simulation has been run and the spatial interpolation done, the interpolated histograms will be further interpolated to the wavelength points of the input workspace. This is done similarly to the full instrument case. If only a single wavelength point is specified, then the output histograms will be filled with the single simulated value.
+
+.. note:: If the input workspace contains varying bin widths then the output is always interpolated.
+
 Usage
 -----
 
@@ -162,6 +217,21 @@ default facility and instrument respectively. The definition can be found at
              Material={'ChemicalFormula': '(Li7)2-C-H4-N-Cl6', 'SampleNumberDensity': 0.07})
    # Simulating every data point can be slow. Use a smaller set and interpolate
    abscor = MonteCarloAbsorption(data, NumberOfWavelengthPoints=30)
+   corrected = data/abscor
+
+**Example: A cylindrical sample setting a beam size**
+
+.. testcode:: ExSpatialInstrument
+
+   data = CreateSampleWorkspace(WorkspaceType='Histogram', NumBanks=1)
+   data = ConvertUnits(data, Target='Wavelength')
+   SetSample(data, Geometry={'Shape': 'Cylinder', 'Height': 5.0, 'Radius': 1.0,
+                     'Center': [0.0,0.0,0.0]},
+                   Material={'ChemicalFormula': '(Li7)2-C-H4-N-Cl6', 'SampleNumberDensity': 0.07},
+            )
+
+   abscor = MonteCarloAbsorption(data, NumberOfWavelengthPoints=10,SparseInstrument=True,
+                                 NumberOfDetectorRows=5, NumberOfDetectorColumns=5)
    corrected = data/abscor
 
 References

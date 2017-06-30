@@ -255,10 +255,62 @@ public:
     // only checking that it can successfully execute
   }
 
+  void test_Sparse_Instrument_For_Elastic() {
+    using Mantid::Kernel::DeltaEMode;
+    TestWorkspaceDescriptor wsProps = {5, 10, Environment::SampleOnly,
+                                       DeltaEMode::Elastic, -1, -1};
+    auto outputWS = runAlgorithm(wsProps, 5, "Linear", true, 3, 3);
+
+    verifyDimensions(wsProps, outputWS);
+    const double delta{1e-04};
+    const size_t middle_index{4};
+    TS_ASSERT_DELTA(0.00411903, outputWS->y(0).front(), delta);
+    TS_ASSERT_DELTA(3.11845e-05, outputWS->y(0)[middle_index], delta);
+    TS_ASSERT_DELTA(3.8547e-07, outputWS->y(0).back(), delta);
+    TS_ASSERT_DELTA(0.00408066, outputWS->y(2).front(), delta);
+    TS_ASSERT_DELTA(3.30326e-05, outputWS->y(2)[middle_index], delta);
+    TS_ASSERT_DELTA(3.84174e-07, outputWS->y(2).back(), delta);
+    TS_ASSERT_DELTA(0.00408664, outputWS->y(4).front(), delta);
+    TS_ASSERT_DELTA(3.67267e-05, outputWS->y(4)[middle_index], delta);
+    TS_ASSERT_DELTA(4.21291e-07, outputWS->y(4).back(), delta);
+  }
+
+  void test_Sparse_Instrument_For_Direct() {
+    using Mantid::Kernel::DeltaEMode;
+    TestWorkspaceDescriptor wsProps = {1, 10, Environment::SampleOnly,
+                                       DeltaEMode::Direct, -1, -1};
+    auto outputWS = runAlgorithm(wsProps, 5, "Linear", true, 3, 3);
+
+    verifyDimensions(wsProps, outputWS);
+    const double delta(1e-05);
+    const size_t middle_index(4);
+
+    TS_ASSERT_DELTA(0.00134398, outputWS->y(0).front(), delta);
+    TS_ASSERT_DELTA(6.37626e-05, outputWS->y(0)[middle_index], delta);
+    TS_ASSERT_DELTA(6.97537e-05, outputWS->y(0).back(), delta);
+  }
+
+  void test_Sparse_Instrument_For_Indirect() {
+    using Mantid::Kernel::DeltaEMode;
+    TestWorkspaceDescriptor wsProps = {1, 10, Environment::SampleOnly,
+                                       DeltaEMode::Indirect, -1, -1};
+    auto outputWS = runAlgorithm(wsProps, 5, "Linear", true, 3, 3);
+
+    verifyDimensions(wsProps, outputWS);
+    const double delta(1e-05);
+    const size_t middle_index(4);
+
+    TS_ASSERT_DELTA(0.000333585, outputWS->y(0).front(), delta);
+    TS_ASSERT_DELTA(9.85491e-06, outputWS->y(0)[middle_index], delta);
+    TS_ASSERT_DELTA(9.16794e-07, outputWS->y(0).back(), delta);
+  }
+
 private:
   Mantid::API::MatrixWorkspace_const_sptr
   runAlgorithm(const TestWorkspaceDescriptor &wsProps, int nlambda = -1,
-               const std::string &interpolate = "") {
+               const std::string &interpolate = "",
+               const bool sparseInstrument = false, const int sparseRows = 2,
+               const int sparseColumns = 2) {
     auto inputWS = setUpWS(wsProps);
     auto mcabs = createAlgorithm();
     TS_ASSERT_THROWS_NOTHING(mcabs->setProperty("InputWorkspace", inputWS));
@@ -269,6 +321,11 @@ private:
     if (!interpolate.empty()) {
       TS_ASSERT_THROWS_NOTHING(
           mcabs->setProperty("Interpolation", interpolate));
+    }
+    if (sparseInstrument) {
+      mcabs->setProperty("SparseInstrument", true);
+      mcabs->setProperty("NumberOfDetectorRows", sparseRows);
+      mcabs->setProperty("NumberOfDetectorColumns", sparseColumns);
     }
     mcabs->execute();
     return getOutputWorkspace(mcabs);

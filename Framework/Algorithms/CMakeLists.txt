@@ -249,6 +249,7 @@ set ( SRC_FILES
 	src/ResizeRectangularDetector.cpp
 	src/RingProfile.cpp
 	src/SANSCollimationLengthEstimator.cpp
+	src/SampleCorrections/DetectorGridDefinition.cpp
 	src/SampleCorrections/MCAbsorptionStrategy.cpp
 	src/SampleCorrections/MCInteractionVolume.cpp
 	src/SampleCorrections/MayersSampleCorrection.cpp
@@ -566,6 +567,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/ResizeRectangularDetector.h
 	inc/MantidAlgorithms/RingProfile.h
 	inc/MantidAlgorithms/SANSCollimationLengthEstimator.h
+	inc/MantidAlgorithms/SampleCorrections/DetectorGridDefinition.h
 	inc/MantidAlgorithms/SampleCorrections/IBeamProfile.h
 	inc/MantidAlgorithms/SampleCorrections/MCAbsorptionStrategy.h
 	inc/MantidAlgorithms/SampleCorrections/MCInteractionVolume.h
@@ -739,6 +741,7 @@ set ( TEST_FILES
 	DetectorEfficiencyCorTest.h
 	DetectorEfficiencyCorUserTest.h
 	DetectorEfficiencyVariationTest.h
+	DetectorGridDefinitionTest.h
 	DiffractionEventCalibrateDetectorsTest.h
 	DiffractionFocussing2Test.h
 	DiffractionFocussingTest.h

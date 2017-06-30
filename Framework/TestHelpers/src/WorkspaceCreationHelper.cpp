@@ -840,7 +840,7 @@ createGroupedWorkspace2DWithRingsAndBoxes(size_t RootOfNumHist, int numBins,
 
 // not strictly creating a workspace, but really helpful to see what one
 // contains
-void displayDataY(const MatrixWorkspace_sptr ws) {
+void displayDataY(MatrixWorkspace_const_sptr ws) {
   const size_t numHists = ws->getNumberHistograms();
   for (size_t i = 0; i < numHists; ++i) {
     std::cout << "Histogram " << i << " = ";
@@ -851,11 +851,11 @@ void displayDataY(const MatrixWorkspace_sptr ws) {
     std::cout << '\n';
   }
 }
-void displayData(const MatrixWorkspace_sptr ws) { displayDataX(ws); }
+void displayData(MatrixWorkspace_const_sptr ws) { displayDataX(ws); }
 
 // not strictly creating a workspace, but really helpful to see what one
 // contains
-void displayDataX(const MatrixWorkspace_sptr ws) {
+void displayDataX(MatrixWorkspace_const_sptr ws) {
   const size_t numHists = ws->getNumberHistograms();
   for (size_t i = 0; i < numHists; ++i) {
     std::cout << "Histogram " << i << " = ";
@@ -869,7 +869,7 @@ void displayDataX(const MatrixWorkspace_sptr ws) {
 
 // not strictly creating a workspace, but really helpful to see what one
 // contains
-void displayDataE(const MatrixWorkspace_sptr ws) {
+void displayDataE(MatrixWorkspace_const_sptr ws) {
   const size_t numHists = ws->getNumberHistograms();
   for (size_t i = 0; i < numHists; ++i) {
     std::cout << "Histogram " << i << " = ";

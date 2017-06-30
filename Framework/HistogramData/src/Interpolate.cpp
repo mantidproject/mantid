@@ -60,9 +60,52 @@ void sanityCheck(const Histogram &input, const size_t stepSize,
   }
 }
 
+void sanityCheck(const Histogram &input, const Histogram &output) {
+  const auto inPoints = input.points();
+  const auto outPoints = output.points();
+  if (outPoints.front() < inPoints.front() ||
+      outPoints.back() > inPoints.back()) {
+    throw std::runtime_error("interpolate - input does not cover all points in "
+                             "output. Extrapolation not suppoted.");
+  }
+  if (!std::is_sorted(inPoints.cbegin(), inPoints.cend())) {
+    throw std::runtime_error(
+        "interpolate - input X data must be sorted in ascending order.");
+  }
+}
+
+enum class InterpolationType { LINEAR, CSPLINE };
+
+template <typename XData, typename YData, typename XInterp, typename YInterp>
+void interpolateInplace(const XData &xs, const YData &ys, const XInterp &points,
+                        YInterp &outY, const InterpolationType type) {
+  const gsl_interp_type *interpType = nullptr;
+  switch (type) {
+  case InterpolationType::LINEAR:
+    interpType = gsl_interp_linear;
+    break;
+  case InterpolationType::CSPLINE:
+    interpType = gsl_interp_cspline;
+    break;
+  }
+  using gsl_interp_uptr = std::unique_ptr<gsl_interp, void (*)(gsl_interp *)>;
+  auto interp =
+      gsl_interp_uptr(gsl_interp_alloc(interpType, xs.size()), gsl_interp_free);
+  gsl_interp_init(interp.get(), xs.data(), ys.data(), xs.size());
+  using gsl_interp_accel_uptr =
+      std::unique_ptr<gsl_interp_accel, void (*)(gsl_interp_accel *)>;
+  auto lookupTable =
+      gsl_interp_accel_uptr(gsl_interp_accel_alloc(), gsl_interp_accel_free);
+  // Evaluate each point for the full range
+  for (size_t i = 0; i < outY.size(); ++i) {
+    outY[i] = gsl_interp_eval(interp.get(), xs.data(), ys.data(), points[i],
+                              lookupTable.get());
+  }
+}
+
 /**
  * Perform linear interpolation assuming the input data set to be a Histogram
- * with XMode=Points. It is assumed all sanity cheks have been performed
+ * with XMode=Points. It is assumed all sanity checks have been performed
  * by the interpolateLinear entry point.
  * @param input See interpolateLinear
  * @param stepSize See interpolateLinear
@@ -121,20 +164,7 @@ void interpolateYCSplineInplace(const Histogram &input, const size_t stepSize,
   xc.back() = xold.back();
   yc.back() = yold.back();
 
-  // Manage gsl memory with unique_ptrs
-  using gsl_spline_uptr = std::unique_ptr<gsl_spline, void (*)(gsl_spline *)>;
-  auto spline = gsl_spline_uptr(gsl_spline_alloc(gsl_interp_cspline, ncalc),
-                                gsl_spline_free);
-  // Compute spline
-  gsl_spline_init(spline.get(), xc.data(), yc.data(), ncalc);
-  // Evaluate each point for the full range
-  using gsl_interp_accel_uptr =
-      std::unique_ptr<gsl_interp_accel, void (*)(gsl_interp_accel *)>;
-  auto lookupTable =
-      gsl_interp_accel_uptr(gsl_interp_accel_alloc(), gsl_interp_accel_free);
-  for (size_t i = 0; i < nypts; ++i) {
-    ynew[i] = gsl_spline_eval(spline.get(), xold[i], lookupTable.get());
-  }
+  interpolateInplace(xc, yc, xold, ynew, InterpolationType::CSPLINE);
 }
 
 } // end anonymous namespace
@@ -178,6 +208,15 @@ void interpolateLinearInplace(Histogram &inOut, const size_t stepSize) {
   interpolateYLinearInplace(inOut, stepSize, inOut.mutableY());
 }
 
+void interpolateLinearInplace(const Histogram &input, Histogram &output) {
+  sanityCheck(input, output);
+  const auto &points = input.points().rawData();
+  const auto &y = input.y().rawData();
+  const auto &interpPoints = output.points();
+  auto &newY = output.mutableY();
+  interpolateInplace(points, y, interpPoints, newY, InterpolationType::LINEAR);
+}
+
 /**
  * Interpolate through the y values of a histogram using a cubic spline,
  * assuming that the calculated "nodes" are stepSize apart.
@@ -213,6 +252,15 @@ Histogram interpolateCSpline(const Histogram &input, const size_t stepSize) {
 void interpolateCSplineInplace(Histogram &inOut, const size_t stepSize) {
   sanityCheck(inOut, stepSize, 4, CSPLINE_NAME);
   interpolateYCSplineInplace(inOut, stepSize, inOut.mutableY());
+}
+
+void interpolateCSplineInplace(const Histogram &input, Histogram &output) {
+  sanityCheck(input, output);
+  const auto &points = input.points().rawData();
+  const auto &y = input.y().rawData();
+  const auto &interpPoints = output.points();
+  auto &newY = output.mutableY();
+  interpolateInplace(points, y, interpPoints, newY, InterpolationType::CSPLINE);
 }
 
 } // namespace HistogramData
