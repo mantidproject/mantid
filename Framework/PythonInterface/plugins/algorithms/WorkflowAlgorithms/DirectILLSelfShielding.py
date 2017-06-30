@@ -52,6 +52,7 @@ class DirectILLSelfShielding(DataProcessorAlgorithm):
     def PyInit(self):
         """Initialize the algorithm's input and output properties."""
         greaterThanOneInt = IntBoundedValidator(lower=2)
+        greaterThanTwoInt = IntBoundedValidator(lower=3)
         inputWorkspaceValidator = CompositeValidator()
         inputWorkspaceValidator.add(InstrumentValidator())
         inputWorkspaceValidator.add(WorkspaceUnitValidator('TOF'))
@@ -109,7 +110,7 @@ class DirectILLSelfShielding(DataProcessorAlgorithm):
                                  PropertyCriterion.IsEqualTo, common.SIMULATION_INSTRUMEN_SPARSE))
         self.declareProperty(name=common.PROP_NUMBER_OF_SIMULATION_WAVELENGTHS,
                              defaultValue=Property.EMPTY_INT,
-                             validator=greaterThanOneInt,
+                             validator=greaterThanTwoInt,
                              direction=Direction.Input,
                              doc='Number of wavelength points where the simulation is performed (default: all).')
 
