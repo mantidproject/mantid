@@ -4,6 +4,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidCurveFitting/Functions/GramCharlier.h"
+#include <array>
 
 using Mantid::CurveFitting::Functions::GramCharlier;
 
