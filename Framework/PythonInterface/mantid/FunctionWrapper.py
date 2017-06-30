@@ -30,6 +30,7 @@ class FunctionWrapper:
       if(isinstance(self,CompositeFunctionWrapper)):
         sum = self
         sum.fun.add(other.fun)
+        sum = sum.flatten()
         return CompositeFunctionWrapper(sum)
       else:
         return CompositeFunctionWrapper(self,other)
