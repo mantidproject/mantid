@@ -35,4 +35,4 @@ AbstractDataProcessorTreeModel::flags(const QModelIndex &index) const {
 }
 
 } // namespace MantidWidgets
-} // namespace Mantid 
+} // namespace Mantid

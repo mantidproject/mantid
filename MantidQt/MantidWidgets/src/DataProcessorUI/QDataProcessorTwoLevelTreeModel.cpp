@@ -493,7 +493,7 @@ bool QDataProcessorTwoLevelTreeModel::addHighlighted(
     m_highlightGroups.push_back(position);
   } else {
     // Invalid position
-    if (position < 0 || position >= rowCount(parent))  
+    if (position < 0 || position >= rowCount(parent))
       return false;
 
     // Add a row item
