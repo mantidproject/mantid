@@ -439,7 +439,7 @@ void MonteCarloAbsorption::init() {
   positiveInt->setLower(1);
   declareProperty("NumberOfWavelengthPoints", EMPTY_INT(), positiveInt,
                   "The number of wavelength points for which a simulation is "
-                  "atttempted (default: all points)");
+                  "attempted (default: all points)");
   declareProperty(
       "EventsPerPoint", DEFAULT_NEVENTS, positiveInt,
       "The number of \"neutron\" events to generate per simulated point");
