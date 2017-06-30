@@ -1,8 +1,8 @@
 #include "MantidGeometry/Instrument/ParameterMap.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Objects/BoundingBox.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidKernel/Cache.h"
-#include "MantidBeamline/ComponentInfo.h"
 #include "MantidBeamline/DetectorInfo.h"
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidGeometry/Instrument.h"
@@ -1167,10 +1167,7 @@ bool ParameterMap::hasDetectorInfo(const Instrument *instrument) const {
 
 /** Only for use by ExperimentInfo. Returns returns true if this instrument
  contains a ComponentInfo.
-
- The `instrument` argument is needed for the special case of having a neutronic
- *and* a physical instrument. `Instrument` uses the same parameter map for both,
- but the ComponentInfo is only for the neutronic instrument. */
+*/
 bool ParameterMap::hasComponentInfo(const Instrument *instrument) const {
   if (instrument != m_instrument)
     return false;
@@ -1185,7 +1182,7 @@ const Beamline::DetectorInfo &ParameterMap::detectorInfo() const {
 }
 
 /// Only for use by ExperimentInfo. Returns a reference to the ComponentInfo.
-const Beamline::ComponentInfo &ParameterMap::componentInfo() const {
+const Geometry::ComponentInfo &ParameterMap::componentInfo() const {
   if (!hasComponentInfo(m_instrument)) {
     throw std::runtime_error("Cannot return reference to NULL ComponentInfo");
   }
@@ -1198,7 +1195,7 @@ size_t ParameterMap::detectorIndex(const detid_t detID) const {
 }
 
 size_t ParameterMap::componentIndex(const ComponentID componentId) const {
-  return m_instrument->componentIndex(componentId);
+  return m_componentInfo->indexOf(componentId);
 }
 
 /// Only for use by ExperimentInfo. Sets the pointer to the DetectorInfo.
@@ -1208,7 +1205,7 @@ void ParameterMap::setDetectorInfo(
 }
 
 void ParameterMap::setComponentInfo(
-    boost::shared_ptr<const Beamline::ComponentInfo> componentInfo) {
+    boost::shared_ptr<const Geometry::ComponentInfo> componentInfo) {
   m_componentInfo = std::move(componentInfo);
 }
 

@@ -1,4 +1,5 @@
 #include "MantidGeometry/IComponent.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/ParComponentFactory.h"
 #include "MantidGeometry/Instrument/Component.h"
 #include "MantidGeometry/Instrument/ComponentVisitor.h"
@@ -6,7 +7,6 @@
 #include "MantidGeometry/Objects/BoundingBox.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/EigenConversionHelpers.h"
-#include "MantidBeamline/ComponentInfo.h"
 
 #include <Poco/XML/XMLWriter.h>
 #include <Poco/SAX/AttributesImpl.h>
@@ -302,93 +302,6 @@ V3D Component::getScaleFactor() const {
   return V3D(1, 1, 1);
 }
 
-/*
-V3D Component::getRelativePos() const {
-  if (m_map) {
-    if (m_map->contains(m_base, "pos")) {
-      return m_map->get(m_base, "pos")->value<V3D>();
-    } else
-      return m_base->m_pos;
-  } else
-    return m_pos;
-}
-
-
-V3D Component::getPos() const {
-  if (this->m_map) {
-    // Avoid instantiation of the parent's parameterized object if possible
-    const IComponent *baseParent = m_base->m_parent;
-    if (!baseParent) {
-      return this->getRelativePos();
-    } else {
-      // Avoid instantiation of parent shared pointer if we can
-      V3D absPos = this->getRelativePos();
-      // get the parent rotation, try to get it from the cache first to avoid
-      // instantiaing the class
-      Quat parentRot;
-      V3D parentPos;
-      if (!(m_map->getCachedLocation(baseParent, parentPos) &&
-            m_map->getCachedRotation(baseParent, parentRot))) {
-        // Couldn't get them from the cache, so I have to instantiate the class
-        boost::shared_ptr<const IComponent> parParent = getParent();
-        if (parParent) {
-          parentRot = parParent->getRotation();
-          parentPos = parParent->getPos();
-        }
-      }
-      parentRot.rotate(absPos);
-      absPos += parentPos;
-      return absPos;
-    }
-  } else {
-    if (!m_parent) {
-      return m_pos;
-    } else {
-      V3D absPos(m_pos);
-      m_parent->getRotation().rotate(absPos);
-      return absPos + m_parent->getPos();
-    }
-  }
-}
-
-Quat Component::getRelativeRot() const {
-  if (m_map) {
-    if (m_map->contains(m_base, "rot")) {
-      return m_map->get(m_base, "rot")->value<Quat>();
-    }
-    return m_base->m_rot;
-  } else
-    return m_rot;
-}
-
-
-Quat Component::getRotation() const {
-  if (m_map) {
-    // Avoid instantiation of the parent's parameterized object if possible
-    const IComponent *baseParent = m_base->m_parent;
-    if (!baseParent) {
-      return getRelativeRot();
-    } else {
-      Quat parentRot;
-      if (!m_map->getCachedRotation(baseParent, parentRot)) {
-        // Get the parent's rotation
-        boost::shared_ptr<const IComponent> parParent = getParent();
-        if (parParent) {
-          parentRot = parParent->getRotation();
-        }
-      }
-      return parentRot * getRelativeRot();
-    }
-  } else {
-    // Not parametrized
-    if (!m_parent)
-      return m_rot;
-    else
-      return m_parent->getRotation() * m_rot;
-  }
-}
-*/
-
 /// Helper for legacy access mode. Returns the index of the component.
 size_t Component::index() const {
   return m_map->componentIndex(this->getComponentID());
@@ -407,7 +320,7 @@ Kernel::V3D Component::getRelativePos() const {
   if (m_map) {
 
     if (hasComponentInfo() && !m_map->componentInfo().isDetector(index())) {
-      return Kernel::toV3D(m_map->componentInfo().relativePosition(index()));
+      return m_map->componentInfo().relativePosition(index());
     } else {
       if (m_map->contains(m_base, "pos")) {
         return m_map->get(m_base, "pos")->value<V3D>();
@@ -423,7 +336,7 @@ Kernel::V3D Component::getRelativePos() const {
 Kernel::V3D Component::getPos() const {
   if (m_map) {
     if (hasComponentInfo() && !m_map->componentInfo().isDetector(index())) {
-      return Kernel::toV3D(m_map->componentInfo().position(index()));
+      return m_map->componentInfo().position(index());
     } else {
       // We currently have to treat detectors in a different way because
       // InfoComponentVisitor functionality is incomplete w.r.t DetectorInfo
@@ -444,10 +357,8 @@ Kernel::V3D Component::getPos() const {
             !m_map->componentInfo().isDetector(
                 m_map->componentInfo().parent(index()))) {
           size_t parentIndex = m_map->componentInfo().parent(index());
-          parentRot =
-              Kernel::toQuat(m_map->componentInfo().rotation(parentIndex));
-          parentPos =
-              Kernel::toV3D(m_map->componentInfo().position(parentIndex));
+          parentRot = m_map->componentInfo().rotation(parentIndex);
+          parentPos = m_map->componentInfo().position(parentIndex);
         } else {
 
           if (!(m_map->getCachedLocation(baseParent, parentPos) &&
@@ -481,7 +392,7 @@ Kernel::V3D Component::getPos() const {
 Kernel::Quat Component::getRelativeRot() const {
   if (m_map) {
     if (hasComponentInfo() && !m_map->componentInfo().isDetector(index())) {
-      return Kernel::toQuat(m_map->componentInfo().relativeRotation(index()));
+      return m_map->componentInfo().relativeRotation(index());
     } else {
       if (m_map->contains(m_base, "rot")) {
         return m_map->get(m_base, "rot")->value<Quat>();
@@ -497,7 +408,7 @@ Kernel::Quat Component::getRelativeRot() const {
 Kernel::Quat Component::getRotation() const {
   if (m_map) {
     if (hasComponentInfo() && !m_map->componentInfo().isDetector(index())) {
-      return Kernel::toQuat(m_map->componentInfo().rotation(index()));
+      return m_map->componentInfo().rotation(index());
     } else {
       // Avoid instantiation of the parent's parameterized object if possible
       const IComponent *baseParent = m_base->m_parent;
@@ -510,8 +421,7 @@ Kernel::Quat Component::getRotation() const {
             !m_map->componentInfo().isDetector(
                 m_map->componentInfo().parent(index()))) {
           size_t parentIndex = m_map->componentInfo().parent(index());
-          parentRot =
-              Kernel::toQuat(m_map->componentInfo().rotation(parentIndex));
+          parentRot = m_map->componentInfo().rotation(parentIndex);
         } else {
 
           if (!m_map->getCachedRotation(baseParent, parentRot)) {

@@ -76,13 +76,13 @@ ExperimentInfo::ExperimentInfo()
           *m_parmap)) {
   auto parInstrument = makeParameterizedInstrument();
   m_parmap->setDetectorInfo(m_detectorInfo);
-  m_parmap->setComponentInfo(m_componentInfo);
   m_detectorInfoWrapper = Kernel::make_unique<DetectorInfo>(
       *m_detectorInfo, sptr_instrument, m_infoVisitor->detectorIds(),
       m_parmap.get(), m_infoVisitor->detectorIdToIndexMap());
 
   sptr_instrument->registerContents(*m_infoVisitor);
   makeAPIComponentInfo(*m_infoVisitor, *sptr_instrument);
+  m_parmap->setComponentInfo(m_componentInfoWrapper);
   m_componentInfo->setDetectorInfo(m_detectorInfo.get());
   m_detectorInfo->setComponentInfo(m_componentInfo.get());
 }
@@ -281,7 +281,7 @@ void ExperimentInfo::makeAPIComponentInfo(const InfoComponentVisitor &visitor,
   }
 
   // Wrapper API ComponentInfo
-  m_componentInfoWrapper = Kernel::make_unique<ComponentInfo>(
+  m_componentInfoWrapper = boost::make_shared<Geometry::ComponentInfo>(
       *m_componentInfo, visitor.componentIds(),
       visitor.componentIdToIndexMap());
 }
@@ -340,7 +340,7 @@ void ExperimentInfo::setInstrument(const Instrument_const_sptr &instr) {
   // Make the ComponentInfo first
   m_infoVisitor = makeOrRetrieveVisitor(*parInstrument, *instr);
   makeAPIComponentInfo(*m_infoVisitor, *instr);
-  m_parmap->setComponentInfo(m_componentInfo);
+  m_parmap->setComponentInfo(m_componentInfoWrapper);
 
   // Make the DetectorInfo. ComponentInfo needs to be set
   // on the Parameter map before doing this.

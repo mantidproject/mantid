@@ -419,8 +419,8 @@ public:
     visitee->registerContents(visitor);
 
     // Detector has component index of 0
-    TS_ASSERT_EQUALS(1, visitor.sourceIndex());
-    TS_ASSERT_EQUALS(2, visitor.sampleIndex());
+    TS_ASSERT_EQUALS(1, visitor.source());
+    TS_ASSERT_EQUALS(2, visitor.sample());
   }
 };
 

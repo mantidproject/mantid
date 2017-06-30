@@ -81,9 +81,10 @@ public:
   bool hasParent(const size_t componentIndex) const;
   Kernel::V3D sourcePosition() const;
   Kernel::V3D samplePosition() const;
-  size_t sourceIndex() const;
-  size_t sampleIndex() const;
+  size_t source() const;
+  size_t sample() const;
   double l1() const;
+  size_t root();
 };
 
 } // namespace Geometry

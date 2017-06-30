@@ -32,13 +32,13 @@ void adjustUpSampleAndSourcePositions(const double L0, const V3D &newSampPos,
 
   V3D samplePos = componentInfo.samplePosition();
   if (samplePos != newSampPos) {
-    componentInfo.setPosition(componentInfo.sampleIndex(), newSampPos);
+    componentInfo.setPosition(componentInfo.sample(), newSampPos);
   }
 
   double scalee = L0 / oldL1;
   V3D newSourcePos = newSampPos - oldSourceToSampleDir * scalee;
 
-  componentInfo.setPosition(componentInfo.sourceIndex(), newSourcePos);
+  componentInfo.setPosition(componentInfo.source(), newSourcePos);
 }
 
 /**

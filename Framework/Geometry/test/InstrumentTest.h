@@ -5,6 +5,7 @@
 #include "MantidKernel/EigenConversionHelpers.h"
 #include "MantidKernel/Exception.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidGeometry/Instrument/InfoComponentVisitor.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
@@ -43,7 +44,9 @@ makeDetectorInfo(const Instrument &instrument) {
 }
 
 std::tuple<boost::shared_ptr<Beamline::ComponentInfo>,
-           boost::shared_ptr<const std::vector<Geometry::ComponentID>>>
+           boost::shared_ptr<const std::vector<Geometry::ComponentID>>,
+           boost::shared_ptr<const std::unordered_map<
+               Mantid::Geometry::IComponent *, size_t>>>
 makeComponentInfo(const Instrument &parInstrument) {
   InfoComponentVisitor visitor(parInstrument.getDetectorIDs(),
                                *parInstrument.getParameterMap(),
@@ -52,7 +55,7 @@ makeComponentInfo(const Instrument &parInstrument) {
   parInstrument.registerContents(visitor);
   return std::make_tuple(
       boost::shared_ptr<Beamline::ComponentInfo>(visitor.componentInfo()),
-      visitor.componentIds());
+      visitor.componentIds(), visitor.componentIdToIndexMap());
 }
 
 class InstrumentTest : public CxxTest::TestSuite {
@@ -566,10 +569,11 @@ public:
     // Extract information from instrument to create DetectorInfo
     auto componentTuple = makeComponentInfo(instrument);
     auto componentInfo = std::get<0>(componentTuple);
-    instrument.setComponentInfo(componentInfo, *std::get<1>(componentTuple));
-    baseInstrument->setComponentInfo(componentInfo,
-                                     *std::get<1>(componentTuple));
-    pmap->setComponentInfo(componentInfo);
+    auto componentIds = std::get<1>(componentTuple);
+    auto componentIdToIndexMap = std::get<2>(componentTuple);
+    instrument.setComponentInfo(componentInfo, *componentIds);
+    pmap->setComponentInfo(boost::make_shared<Geometry::ComponentInfo>(
+        *componentInfo, componentIds, componentIdToIndexMap));
 
     auto detInfo = makeDetectorInfo(instrument);
     instrument.setDetectorInfo(detInfo);
@@ -638,10 +642,11 @@ public:
     // Extract information from instrument to create DetectorInfo
     auto componentTuple = makeComponentInfo(instrument);
     auto componentInfo = std::get<0>(componentTuple);
-    instrument.setComponentInfo(componentInfo, *std::get<1>(componentTuple));
-    baseInstrument->setComponentInfo(componentInfo,
-                                     *std::get<1>(componentTuple));
-    pmap->setComponentInfo(componentInfo);
+    auto componentIds = std::get<1>(componentTuple);
+    auto componentIdToIndexMap = std::get<2>(componentTuple);
+    instrument.setComponentInfo(componentInfo, *componentIds);
+    pmap->setComponentInfo(boost::make_shared<Geometry::ComponentInfo>(
+        *componentInfo, componentIds, componentIdToIndexMap));
 
     auto detInfo = makeDetectorInfo(instrument);
     instrument.setDetectorInfo(detInfo);
@@ -740,10 +745,11 @@ public:
 
     auto componentTuple = makeComponentInfo(parInstrument);
     auto componentInfo = std::get<0>(componentTuple);
-    parInstrument.setComponentInfo(componentInfo, *std::get<1>(componentTuple));
-    baseInstrument->setComponentInfo(componentInfo,
-                                     *std::get<1>(componentTuple));
-    pmap->setComponentInfo(componentInfo);
+    auto componentIds = std::get<1>(componentTuple);
+    auto componentIdToIndexMap = std::get<2>(componentTuple);
+    parInstrument.setComponentInfo(componentInfo, *componentIds);
+    pmap->setComponentInfo(boost::make_shared<Geometry::ComponentInfo>(
+        *componentInfo, componentIds, componentIdToIndexMap));
 
     auto detInfo = makeDetectorInfo(parInstrument);
     parInstrument.setDetectorInfo(detInfo);

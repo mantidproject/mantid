@@ -91,15 +91,13 @@ Kernel::V3D ComponentInfo::samplePosition() const {
   return Kernel::toV3D(m_componentInfo.samplePosition());
 }
 
-size_t ComponentInfo::sourceIndex() const {
-  return m_componentInfo.sourceIndex();
-}
+size_t ComponentInfo::source() const { return m_componentInfo.source(); }
 
-size_t ComponentInfo::sampleIndex() const {
-  return m_componentInfo.sampleIndex();
-}
+size_t ComponentInfo::sample() const { return m_componentInfo.sample(); }
 
 double ComponentInfo::l1() const { return m_componentInfo.l1(); }
+
+size_t ComponentInfo::root() { returm m_componentInfo.root(); }
 
 void ComponentInfo::setPosition(const size_t componentIndex,
                                 const Kernel::V3D &newPosition) {

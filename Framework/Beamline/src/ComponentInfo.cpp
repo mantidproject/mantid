@@ -289,18 +289,22 @@ Eigen::Vector3d ComponentInfo::samplePosition() const {
   return position(static_cast<size_t>(m_sampleIndex));
 }
 
-size_t ComponentInfo::sourceIndex() const {
+size_t ComponentInfo::source() const {
   if (!hasSource()) {
     throw std::runtime_error("Source component has not been specified");
   }
   return static_cast<size_t>(m_sourceIndex);
 }
 
-size_t ComponentInfo::sampleIndex() const {
+size_t ComponentInfo::sample() const {
   if (!hasSample()) {
     throw std::runtime_error("Sample component has not been specified");
   }
   return static_cast<size_t>(m_sampleIndex);
+}
+
+size_t ComponentInfo::root() const {
+  return m_size - 1; // Root would always be the last index.
 }
 
 double ComponentInfo::l1() const {

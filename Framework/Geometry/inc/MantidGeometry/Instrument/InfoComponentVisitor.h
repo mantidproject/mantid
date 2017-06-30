@@ -162,9 +162,9 @@ public:
 
   boost::shared_ptr<std::vector<Eigen::Quaterniond>> rotations() const;
 
-  size_t sampleIndex() const;
+  size_t sample() const;
 
-  size_t sourceIndex() const;
+  size_t source() const;
 };
 } // namespace Geometry
 } // namespace Mantid
