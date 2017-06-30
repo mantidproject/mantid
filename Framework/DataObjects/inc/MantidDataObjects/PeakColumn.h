@@ -5,6 +5,7 @@
 #include "MantidDataObjects/Peak.h"
 
 #include <boost/variant.hpp>
+#include <list>
 
 namespace Mantid {
 namespace DataObjects {

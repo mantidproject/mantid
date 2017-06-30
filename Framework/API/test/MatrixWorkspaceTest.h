@@ -36,6 +36,7 @@
 #include <numeric>
 
 using std::size_t;
+using namespace Mantid;
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
@@ -801,21 +802,6 @@ public:
     TS_ASSERT_THROWS(wkspace.binIndexOf(std::nextafter(2.3, 0.0)),
                      std::out_of_range);
     TS_ASSERT_THROWS(wkspace.binIndexOf(0.), std::out_of_range);
-  }
-
-  void test_nexus_spectraMap() {
-    NexusTestHelper th(true);
-    th.createFile("MatrixWorkspaceTest.nxs");
-    auto ws = makeWorkspaceWithDetectors(100, 50);
-    std::vector<int> spec;
-    for (int i = 0; i < 100; i++) {
-      // Give some funny numbers, so it is not the default
-      ws->getSpectrum(size_t(i)).setSpectrumNo(i * 11);
-      ws->getSpectrum(size_t(i)).setDetectorID(99 - i);
-      spec.push_back(i);
-    }
-    // Save that to the NXS file
-    TS_ASSERT_THROWS_NOTHING(ws->saveSpectraMapNexus(th.file, spec););
   }
 
   void test_hasGroupedDetectors() {

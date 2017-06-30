@@ -12,6 +12,7 @@
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/make_unique.h"
 
+#include <nexus/NeXusFile.hpp>
 #include <boost/make_shared.hpp>
 #include <queue>
 

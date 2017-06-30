@@ -102,7 +102,8 @@ public:
 
   /**@name Instrument queries */
   //@{
-  Geometry::IDetector_const_sptr getDetector(const size_t workspaceIndex) const;
+  boost::shared_ptr<const Geometry::IDetector>
+  getDetector(const size_t workspaceIndex) const;
   double detectorTwoTheta(const Geometry::IDetector &det) const;
   double detectorSignedTwoTheta(const Geometry::IDetector &det) const;
 
@@ -454,9 +455,6 @@ public:
 
   void saveInstrumentNexus(::NeXus::File *file) const;
   void loadInstrumentNexus(::NeXus::File *file);
-  void saveSpectraMapNexus(
-      ::NeXus::File *file, const std::vector<int> &spec,
-      const ::NeXus::NXcompression compression = ::NeXus::LZW) const;
 
   //=====================================================================================
   // MD Geometry methods

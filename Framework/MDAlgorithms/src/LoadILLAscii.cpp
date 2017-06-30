@@ -21,6 +21,7 @@
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidMDAlgorithms/LoadILLAsciiHelper.h"
+#include "MantidGeometry/IDetector.h"
 
 #include <Poco/TemporaryFile.h>
 #include <boost/shared_ptr.hpp>

@@ -1,7 +1,6 @@
 #ifndef MANTID_API_IMDWORKSPACE_H_
 #define MANTID_API_IMDWORKSPACE_H_
 
-#include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidAPI/MDGeometry.h"
 #include "MantidAPI/Workspace.h"
