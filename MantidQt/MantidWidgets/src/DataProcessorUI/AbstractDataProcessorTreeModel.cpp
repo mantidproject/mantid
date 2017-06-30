@@ -14,7 +14,7 @@ using namespace Mantid::API;
 AbstractDataProcessorTreeModel::AbstractDataProcessorTreeModel(
     ITableWorkspace_sptr tableWorkspace,
     const DataProcessorWhiteList &whitelist)
-    : m_tWS(tableWorkspace), m_whitelist(whitelist){};
+    : m_tWS(tableWorkspace), m_whitelist(whitelist) {}
 
 AbstractDataProcessorTreeModel::~AbstractDataProcessorTreeModel() {}
 
