@@ -12,7 +12,7 @@ public:
 
   void operator=(const vtkPeaksReader &) = delete;
   // clang-format off
-  vtkTypeMacro(vtkPeaksReader, vtkPolyDataAlgorithm)
+  vtkTypeMacro(vtkPeaksReader, vtkPolyDataAlgorithm);
   void PrintSelf(ostream &os, vtkIndent indent) override;
   // clang-format on
   vtkSetStringMacro(FileName);

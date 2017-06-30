@@ -11,7 +11,7 @@ public:
   vtkNexusPeaksReader(const vtkNexusPeaksReader &) = delete;
   void operator=(const vtkNexusPeaksReader &) = delete;
   // clang-format off
-  vtkTypeMacro(vtkNexusPeaksReader, vtkPolyDataAlgorithm)
+  vtkTypeMacro(vtkNexusPeaksReader, vtkPolyDataAlgorithm);
   void PrintSelf(ostream &os, vtkIndent indent) override;
   // clang-format on
   vtkSetStringMacro(FileName);

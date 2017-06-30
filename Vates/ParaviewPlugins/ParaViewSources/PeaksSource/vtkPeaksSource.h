@@ -42,7 +42,7 @@ public:
   vtkPeaksSource(const vtkPeaksSource &) = delete;
   void operator=(const vtkPeaksSource &) = delete;
   // clang-format off
-  vtkTypeMacro(vtkPeaksSource, vtkPolyDataAlgorithm)
+  vtkTypeMacro(vtkPeaksSource, vtkPolyDataAlgorithm);
   void PrintSelf(ostream &os, vtkIndent indent) override;
   // clang-format on
   void SetWsName(const std::string &wsName);
