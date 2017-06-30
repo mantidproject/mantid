@@ -48,7 +48,7 @@ void ChangePulsetime2::exec() {
 
   Progress prog(this, 0.0, 1.0, indexSet.size());
   PARALLEL_FOR_NO_WSP_CHECK()
-  for (int64_t i = 0; i < indexSet.size(); i++) {
+  for (int64_t i = 0; i < static_cast<int64_t>(indexSet.size()); i++) {
     // What workspace index?
 
     // Call the method on the event list

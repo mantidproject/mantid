@@ -9,8 +9,7 @@ namespace API {
 
 enum IndexType { SpectrumNum = 1, WorkspaceIndex = 2 };
 
-/** IndexTypeProperty : TODO : Add support for
-DetectorID->SpectrumNumber/WorkspaceIndex
+/** IndexTypeProperty : TODO : Add support for DetectorIDs
 @author Lamar Moore
 @Date 05-05-2017
 Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge

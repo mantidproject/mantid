@@ -32,6 +32,8 @@
 
 #include <map>
 
+#include <MantidKernel/ArrayProperty.tcc>
+
 using namespace Mantid::Kernel;
 
 namespace Mantid {
@@ -477,7 +479,8 @@ bool Algorithm::execute() {
     callProcessGroups = this->checkGroups();
   } catch (std::exception &ex) {
     getLogger().error() << "Error in execution of algorithm " << this->name()
-                        << "\n" << ex.what() << "\n";
+                        << "\n"
+                        << ex.what() << "\n";
     notificationCenter().postNotification(
         new ErrorNotification(this, ex.what()));
     m_running = false;
@@ -581,8 +584,9 @@ bool Algorithm::execute() {
       if (m_isChildAlgorithm || m_runningAsync || m_rethrow)
         throw;
       else {
-        getLogger().error() << "Error in execution of algorithm "
-                            << this->name() << '\n' << ex.what() << '\n';
+        getLogger().error()
+            << "Error in execution of algorithm " << this->name() << '\n'
+            << ex.what() << '\n';
       }
       notificationCenter().postNotification(
           new ErrorNotification(this, ex.what()));
@@ -592,8 +596,9 @@ bool Algorithm::execute() {
       if (m_isChildAlgorithm || m_runningAsync || m_rethrow)
         throw;
       else {
-        getLogger().error() << "Logic Error in execution of algorithm "
-                            << this->name() << '\n' << ex.what() << '\n';
+        getLogger().error()
+            << "Logic Error in execution of algorithm " << this->name() << '\n'
+            << ex.what() << '\n';
       }
       notificationCenter().postNotification(
           new ErrorNotification(this, ex.what()));
@@ -617,7 +622,8 @@ bool Algorithm::execute() {
     notificationCenter().postNotification(
         new ErrorNotification(this, ex.what()));
     getLogger().error() << "Error in execution of algorithm " << this->name()
-                        << ":\n" << ex.what() << "\n";
+                        << ":\n"
+                        << ex.what() << "\n";
     this->unlockWorkspaces();
     throw;
   }
@@ -1626,7 +1632,7 @@ bool Algorithm::getAlgStartupLogging() const {
 
 void Algorithm::declareProperty(std::unique_ptr<Kernel::Property> p,
                                 const std::string &doc) {
-  if (isReserved(m_reservedList, p->name()))
+  if (isCompoundProperty(p->name()))
     throw std::runtime_error(
         p->name() +
         " has already been used by Algorithm::declareIndexProperty.");
@@ -1636,12 +1642,17 @@ void Algorithm::declareProperty(std::unique_ptr<Kernel::Property> p,
 
 Kernel::IPropertyManager::TypedValue
 Algorithm::getProperty(const std::string &name) const {
-  if (isReserved(m_reservedList, name))
+  if (isCompoundProperty(name))
     throw std::runtime_error("Algorithm::getIndexProperty must be used with "
                              "properties declared using "
                              "Algorithm::declareIndexProperty.");
 
   return PropertyManagerOwner::getProperty(name);
+}
+
+bool Algorithm::isCompoundProperty(const std::string &name) const {
+  return std::find(m_reservedList.cbegin(), m_reservedList.cend(), name) !=
+         m_reservedList.cend();
 }
 
 /// Runs the algorithm with the specified execution mode.

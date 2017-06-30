@@ -35,16 +35,18 @@ namespace API {
 */
 class MANTID_API_DLL IndexProperty : public Kernel::ArrayProperty<int> {
 public:
-  explicit IndexProperty(
-      const std::string &name, const IWorkspaceProperty &workspaceProp,
-      const IndexTypeProperty &indexTypeProp,
-      Kernel::IValidator_sptr validator =
-          Kernel::IValidator_sptr(new Kernel::NullValidator));
+  IndexProperty(const std::string &name,
+                const IWorkspaceProperty &workspaceProp,
+                const IndexTypeProperty &indexTypeProp,
+                Kernel::IValidator_sptr validator =
+                    Kernel::IValidator_sptr(new Kernel::NullValidator));
 
   IndexProperty *clone() const override;
 
+  bool isDefault() const override;
   std::string isValid() const override;
   std::vector<int> &operator=(const std::vector<int> &rhs) override;
+  std::string &operator=(const std::string &rhs);
   std::string setValue(const std::string &value) override;
   Indexing::SpectrumIndexSet getIndices() const;
   std::string value() const override;

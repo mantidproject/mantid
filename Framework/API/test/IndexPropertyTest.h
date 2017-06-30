@@ -131,8 +131,8 @@ public:
 
     IndexProperty indexProp("IndexSet", m_wkspProp, m_itypeProp);
 
-    indexProp.setValue(
-        "10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30");
+    indexProp =
+        "10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30";
 
     TS_ASSERT_EQUALS(indexProp.value(), "10:30");
     TS_ASSERT_EQUALS(indexProp.isValid(), "");

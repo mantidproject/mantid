@@ -21,7 +21,6 @@
 
 #include "MantidParallel/ExecutionMode.h"
 #include "MantidParallel/StorageMode.h"
-
 namespace boost {
 template <class T> class weak_ptr;
 }
@@ -193,83 +192,66 @@ public:
   /// Override if the algorithm is not part of the Mantid distribution.
   const std::string helpURL() const override { return ""; }
 
-  template <typename T> void checkWorkspaceType() const {
-    static_assert(std::is_convertible<T *, MatrixWorkspace *>::value,
-                  "Workspace type needs to be convertible to MatrixWorkspace.");
-  }
-
-  inline bool isReserved(const std::vector<std::string> &list,
-                         const std::string &name) const {
-    return std::find(list.cbegin(), list.cend(), name) != list.cend();
-  }
-
   using IPropertyManager::declareProperty;
+
   using PropertyManagerOwner::declareProperty;
+
   void declareProperty(std::unique_ptr<Kernel::Property> p,
                        const std::string &doc = "") override;
 
   Kernel::IPropertyManager::TypedValue
   getProperty(const std::string &name) const override;
 
-  template <typename Workspace>
-  void declareIndexProperty(
-      const std::string &propertyName,
-      const int allowedIndexTypes = IndexType::WorkspaceIndex,
-      PropertyMode::Type optional = PropertyMode::Type::Mandatory,
-      LockMode::Type lock = LockMode::Type::Lock, const std::string &doc = "") {
-    checkWorkspaceType<Workspace>();
+  /** Mechanism for retriving the index property. This method can only be used
+  if T is convertible to a MatrixWorkspace.
 
-    declareProperty(
-        Kernel::make_unique<WorkspaceProperty<Workspace>>(
-            propertyName, "", Kernel::Direction::Input, optional, lock),
-        doc);
-
-    declareProperty(Kernel::make_unique<IndexTypeProperty>(
-        propertyName + "IndexType", allowedIndexTypes));
-
-    auto *wsProp = dynamic_cast<WorkspaceProperty<Workspace> *>(
-        getPointerToProperty(propertyName));
-    auto *indexTypeProp = dynamic_cast<IndexTypeProperty *>(
-        getPointerToProperty(propertyName + "IndexType"));
-
-    declareProperty(Kernel::make_unique<IndexProperty>(
-        propertyName + "IndexSet", *wsProp, *indexTypeProp));
-
-    m_reservedList.push_back(propertyName);
-  }
-
-  template <typename Workspace>
-  std::tuple<boost::shared_ptr<Workspace>, Indexing::SpectrumIndexSet>
+  @param name Property name
+  @returns Tuple containing Workspace shared pointer and SpectrumIndexSet
+  */
+  template <typename T,
+            typename = typename std::enable_if<
+                std::is_convertible<T *, MatrixWorkspace *>::value>::type>
+  std::tuple<boost::shared_ptr<T>, Indexing::SpectrumIndexSet>
   getIndexProperty(const std::string &name) const {
-    checkWorkspaceType<Workspace>();
-
-    if (!isReserved(m_reservedList, name))
+    if (!isCompoundProperty(name))
       throw std::runtime_error("Algorithm::getIndexProperty can only be used "
                                "when on properties declared using "
                                "declareIndexProperty.");
 
-    auto *wsProp = dynamic_cast<WorkspaceProperty<Workspace> *>(
-        getPointerToProperty(name));
+    auto *wsProp =
+        dynamic_cast<WorkspaceProperty<T> *>(getPointerToProperty(name));
     auto *indexProp =
         dynamic_cast<IndexProperty *>(getPointerToProperty(name + "IndexSet"));
 
     return std::make_tuple(
-        boost::dynamic_pointer_cast<Workspace>(wsProp->getWorkspace()),
+        boost::dynamic_pointer_cast<T>(wsProp->getWorkspace()),
         indexProp->getIndices());
   }
 
-  template <typename Workspace>
+  /** Mechanism for setting the index property with a workspace shared pointer.
+   * This method can only be used if T1 is convertible to a MatrixWorkspace and
+   * T2 is either std::string or std::vector<int>
+
+   @param name Property name
+   @param wksp Workspace as a pointer
+   @param type Index type IndexType::WorkspaceIndex or IndexType::SpectrumNum
+   @param list List of indices to be used.
+   */
+  template <typename T1, typename T2,
+            typename = typename std::enable_if<
+                std::is_convertible<T1 *, MatrixWorkspace *>::value>::type,
+            typename = typename std::enable_if<
+                std::is_convertible<T2 *, std::string *>::value ||
+                std::is_convertible<T2 *, std::vector<int> *>::value>::type>
   void setIndexProperty(const std::string &name,
-                        const boost::shared_ptr<Workspace> &wksp,
-                        IndexType type, const std::vector<int> &list) {
-    checkWorkspaceType<Workspace>();
-    if (!isReserved(m_reservedList, name))
+                        const boost::shared_ptr<T1> &wksp, IndexType type,
+                        const T2 &list) {
+    if (!isCompoundProperty(name))
       throw std::runtime_error("Algorithm::setIndexProperty can only be used "
                                "when on properties declared using "
                                "declareIndexProperty.");
-
-    auto *wsProp = dynamic_cast<WorkspaceProperty<Workspace> *>(
-        getPointerToProperty(name));
+    auto *wsProp =
+        dynamic_cast<WorkspaceProperty<T1> *>(getPointerToProperty(name));
     auto *indexTypeProp = dynamic_cast<IndexTypeProperty *>(
         getPointerToProperty(name + "IndexType"));
     auto *indexProp =
@@ -282,41 +264,29 @@ public:
     *indexProp = list;
   }
 
-  template <typename Workspace>
-  void setIndexProperty(const std::string &name,
-                        const boost::shared_ptr<Workspace> &wksp,
-                        IndexType type, const std::string &list) {
-    checkWorkspaceType<Workspace>();
-    if (!isReserved(m_reservedList, name))
-      throw std::runtime_error("Algorithm::setIndexProperty can only be used "
-                               "when on properties declared using "
-                               "declareIndexProperty.");
+  /** Mechanism for setting the index property with a workspace shared pointer.
+  * This method can only be used if T1 is convertible to a MatrixWorkspace and
+  * T2 is either std::string or std::vector<int>
 
-    auto *wsProp = dynamic_cast<WorkspaceProperty<Workspace> *>(
-        getPointerToProperty(name));
-    auto *indexTypeProp = dynamic_cast<IndexTypeProperty *>(
-        getPointerToProperty(name + "IndexType"));
-    auto *indexProp =
-        dynamic_cast<IndexProperty *>(getPointerToProperty(name + "IndexSet"));
-
-    *wsProp = wksp;
-
-    *indexTypeProp = type;
-
-    indexProp->setValue(list);
-  }
-
-  template <typename Workspace>
+  @param name Property name
+  @param wksp Workspace as a pointer
+  @param type Index type IndexType::WorkspaceIndex or IndexType::SpectrumNum
+  @param list List of indices to be used.
+  */
+  template <typename T1, typename T2,
+            typename = typename std::enable_if<
+                std::is_convertible<T1 *, MatrixWorkspace *>::value>::type,
+            typename = typename std::enable_if<
+                std::is_convertible<T2 *, std::string *>::value ||
+                std::is_convertible<T2 *, std::vector<int> *>::value>::type>
   void setIndexProperty(const std::string &name, const std::string &wsName,
-                        IndexType type, const std::vector<int> &list) {
-    checkWorkspaceType<Workspace>();
-    if (!isReserved(m_reservedList, name))
+                        IndexType type, const T2 &list) {
+    if (!isCompoundProperty(name))
       throw std::runtime_error("Algorithm::setIndexProperty can only be used "
                                "when on properties declared using "
                                "declareIndexProperty.");
-
-    auto *wsProp = dynamic_cast<WorkspaceProperty<Workspace> *>(
-        getPointerToProperty(name));
+    auto *wsProp =
+        dynamic_cast<WorkspaceProperty<T1> *>(getPointerToProperty(name));
     auto *indexTypeProp = dynamic_cast<IndexTypeProperty *>(
         getPointerToProperty(name + "IndexType"));
     auto *indexProp =
@@ -327,29 +297,6 @@ public:
     *indexTypeProp = type;
 
     *indexProp = list;
-  }
-
-  template <typename Workspace>
-  void setIndexProperty(const std::string &name, const std::string &wsName,
-                        IndexType type, const std::string &list) {
-    checkWorkspaceType<Workspace>();
-    if (!isReserved(m_reservedList, name))
-      throw std::runtime_error("Algorithm::setIndexProperty can only be used "
-                               "when on properties declared using "
-                               "declareIndexProperty.");
-
-    auto *wsProp = dynamic_cast<WorkspaceProperty<Workspace> *>(
-        getPointerToProperty(name));
-    auto *indexTypeProp = dynamic_cast<IndexTypeProperty *>(
-        getPointerToProperty(name + "IndexType"));
-    auto *indexProp =
-        dynamic_cast<IndexProperty *>(getPointerToProperty(name + "IndexSet"));
-
-    wsProp->setValue(wsName);
-
-    *indexTypeProp = type;
-
-    indexProp->setValue(list);
   }
 
   const std::string workspaceMethodName() const override;
@@ -551,6 +498,47 @@ protected:
   /// versions
   bool m_usingBaseProcessGroups = false;
 
+  /** Declare a property which defines the workspace and allowed index types, as
+   * well as a property for capturing the indices all at once. This method is
+   * only enabled if T is convertible to MatrixWorkspace.
+   @param propertyName Name of property which will be reserved
+   @param allowedIndexTypes combination of allowed index types. Default
+   IndexType::WorkspaceIndex
+   @param optional Determines if workspace property is optional. Default
+   PropertyMode::Type::Mandatory
+   @param lock Determines whether or not the workspace is locked. Default
+   LockMode::Type::Lock
+   @param doc Property documentation string.
+   */
+  template <typename T,
+            typename = typename std::enable_if<
+                std::is_convertible<T *, MatrixWorkspace *>::value>::type>
+  void declareIndexProperty(
+      const std::string &propertyName,
+      const int allowedIndexTypes = IndexType::WorkspaceIndex,
+      PropertyMode::Type optional = PropertyMode::Type::Mandatory,
+      LockMode::Type lock = LockMode::Type::Lock, const std::string &doc = "") {
+    declareProperty(
+        Kernel::make_unique<WorkspaceProperty<T>>(
+            propertyName, "", Kernel::Direction::Input, optional, lock),
+        doc);
+
+    declareProperty(Kernel::make_unique<IndexTypeProperty>(
+        propertyName + "IndexType", allowedIndexTypes));
+
+    auto *wsProp = dynamic_cast<WorkspaceProperty<T> *>(
+        getPointerToProperty(propertyName));
+    auto *indexTypeProp = dynamic_cast<IndexTypeProperty *>(
+        getPointerToProperty(propertyName + "IndexType"));
+
+    declareProperty(Kernel::make_unique<IndexProperty>(
+        propertyName + "IndexSet", *wsProp, *indexTypeProp));
+
+    m_reservedList.push_back(propertyName);
+    m_reservedList.push_back(propertyName + "IndexType");
+    m_reservedList.push_back(propertyName + "IndexSet");
+  }
+
 private:
   void lockWorkspaces();
   void unlockWorkspaces();
@@ -573,6 +561,8 @@ private:
   std::map<std::string, Parallel::StorageMode>
   getInputWorkspaceStorageModes() const;
   void setupSkipValidationMasterOnly();
+
+  bool isCompoundProperty(const std::string &name) const;
 
   // --------------------- Private Members -----------------------------------
   /// Poco::ActiveMethod used to implement asynchronous execution.

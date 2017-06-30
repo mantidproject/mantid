@@ -12,11 +12,16 @@ IndexProperty::IndexProperty(const std::string &name,
                              const IWorkspaceProperty &workspaceProp,
                              const IndexTypeProperty &indexTypeProp,
                              Kernel::IValidator_sptr validator)
-    : ArrayProperty<int>(name, "", validator, Kernel::Direction::Input),
-      m_workspaceProp(workspaceProp), m_indexTypeProp(indexTypeProp), m_min(0),
-      m_max(0), m_indices(0), m_indicesExtracted(false) {}
+    : ArrayProperty<int>(name, "", validator), m_workspaceProp(workspaceProp),
+      m_indexTypeProp(indexTypeProp), m_min(0), m_max(0), m_indices(0),
+      m_indicesExtracted(false) {}
 
 IndexProperty *IndexProperty::clone() const { return new IndexProperty(*this); }
+
+bool IndexProperty::isDefault() const {
+  // The default value is an empty vector/string.
+  return value().empty();
+}
 
 std::string IndexProperty::isValid() const {
   std::string error;
@@ -37,6 +42,10 @@ std::string IndexProperty::isValid() const {
   return error;
 }
 
+std::string &IndexProperty::operator=(const std::string &rhs) {
+  return setValue(rhs);
+}
+
 std::vector<int> &IndexProperty::operator=(const std::vector<int> &rhs) {
   m_indicesExtracted = false;
   m_min = m_max = 0;
@@ -47,11 +56,12 @@ std::vector<int> &IndexProperty::operator=(const std::vector<int> &rhs) {
     auto res = std::minmax_element(rhs.cbegin(), rhs.cend());
     auto minIndex = res.first - rhs.begin();
     auto maxIndex = res.second - rhs.begin();
-    bool isPureRange = (rhs[maxIndex] - rhs[minIndex] + 1) == rhs.size();
+    bool isPureRange =
+        static_cast<size_t>((rhs[maxIndex] - rhs[minIndex] + 1)) == rhs.size();
 
     if (isPureRange) {
-      m_min = static_cast<size_t>(rhs[0]);
-      m_max = static_cast<size_t>(rhs[rhs.size() - 1]);
+      m_min = rhs[0];
+      m_max = rhs[rhs.size() - 1];
       m_value = std::vector<int>();
     } else
       m_value = rhs;
@@ -65,9 +75,11 @@ std::string IndexProperty::setValue(const std::string &value) {
   m_min = m_max = 0;
 
   // Check whether or not string value is simply a range
-  if (std::count(value.cbegin(), value.cend(), ':') == 1 &&
+  if ((std::count(value.cbegin(), value.cend(), ':') == 1 ||
+       std::count(value.cbegin(), value.cend(), '-') == 1) &&
       std::count(value.cbegin(), value.cend(), ',') == 0) {
     auto pos = value.find(":");
+    pos = pos == std::string::npos ? value.find("-") : pos;
     auto min = value.substr(0, pos);
     auto max = value.substr(pos + 1, value.size() - 1);
 
