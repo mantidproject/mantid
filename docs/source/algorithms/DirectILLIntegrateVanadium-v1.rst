@@ -9,10 +9,10 @@
 Description
 -----------
 
-This algorithm integrates the workspace given in *InputWorkspace* using the :ref:`ComputeCalibrationCoefVan <algm-ComputeCalibrationCoefVan>` algorithm.
+This algorithm integrates the workspace given in *InputWorkspace* using the :ref:`ComputeCalibrationCoefVan <algm-ComputeCalibrationCoefVan>` algorithm. It is part of :ref:`ILL's direct geometry reduction algorithms <DirectILL>`.
 
 .. note::
-    At the moment, the integration range is fixed to :math:`\pm` 3 * FWHM (:math:`2\sqrt{2 \ln 2}` times the 'Sigma' column in *EPPWorkspace*).
+    At the moment, the integration range is fixed to :math:`\pm` 3 * FWHM (:math:`2\sqrt{2 \ln 2}`) times the 'Sigma' column in *EPPWorkspace*).
 
 Input workspaces
 ################

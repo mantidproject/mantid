@@ -9,7 +9,9 @@
 Description
 -----------
 
-This algorithm performs detector diagnostics for the workspace provided by *InputWorkspace*, preferably the raw workspace provided by the *OutputRawWorkspace* property in :ref:`DirectILLCollectData <algm-DirectILLCollectData>`. The output is a mask workspace which can be further fed to :ref:`DirectILLReduction <algm-DirectILLReduction>` to mask the detectors diagnosed as bad. Optionally, an instrument specific default mask or a user specified hard mask given by *MaskedDetectors* or *MaskedComponents* can be added to the diagnostics mask. A workflow diagram for the diagnostics is shown below:
+This algorithm performs detector diagnostics and masking. It is part of :ref:`ILL's direct geometry data reduction suite <DirectILL>`. The diagnostics are calculated using *InputWorkspace* which is preferably the raw workspace provided by the *OutputRawWorkspace* property of :ref:`DirectILLCollectData <algm-DirectILLCollectData>`. The output is a mask workspace which can be further fed to :ref:`DirectILLReduction <algm-DirectILLReduction>` to mask the detectors diagnosed as bad. Optionally, an instrument specific default mask or a user specified hard mask given by *MaskedDetectors* or *MaskedComponents* can be added to the diagnostics mask.
+
+A workflow diagram for the diagnostics is shown below:
 
 .. diagram:: DirectILLDiagnostics-v1_wkflw.dot
 

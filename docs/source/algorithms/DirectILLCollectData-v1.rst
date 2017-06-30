@@ -9,7 +9,7 @@
 Description
 -----------
 
-This algorithm preprocesses data for the other algorithms in ILL's time-of-flight data reduction suite. Thus, it is usually the first algorithm to call in the reduction process. The algorithm (optionally) loads data from disk, performs some common basic data reduction steps to the raw data, and provides other workspaces, such as flat background information, which can be used in subsequent reduction steps. The workflow of the algorithm is shown in the diagram below:
+This algorithm preprocesses data for the other algorithms in :ref:`ILL's time-of-flight data reduction suite <DirectILL>`. Thus, it is usually the first algorithm to call in the reduction process. The algorithm (optionally) loads data from disk, performs some common basic data reduction steps to the raw data, and provides other workspaces, such as flat background information, which can be used in subsequent reduction steps. The workflow of the algorithm is shown in the diagram below:
 
 .. diagram:: DirectILLCollectData-v1_wkflw.dot
 
