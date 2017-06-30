@@ -323,7 +323,6 @@ void GenericDataProcessorPresenter::nextGroup() {
     auto &rqueue = m_gqueue.front().second;
     m_rowItem = rqueue.front();
     rqueue.pop();
-    m_manager;
     startAsyncRowReduceThread(&m_rowItem, m_gqueue.front().first);
   } else {
     // If "Output Notebook" checkbox is checked then create an ipython notebook
