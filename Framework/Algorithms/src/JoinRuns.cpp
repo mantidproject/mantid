@@ -266,7 +266,7 @@ void JoinRuns::fillHistory() {
 /** Joins the given spectrum for the list of workspaces
 * @param wsIndex : the workspace index
 */
-void JoinRuns::joinSpectrum(long wsIndex) {
+void JoinRuns::joinSpectrum(int64_t wsIndex) {
   std::vector<double> spectrum;
   std::vector<double> errors;
   spectrum.reserve(m_outWS->blocksize());
