@@ -120,7 +120,7 @@ public:
     EXPECT_CALL(mockRunsTabView, getSelectedGroup())
         .Times(Exactly(1))
         .WillOnce(Return(group));
-    EXPECT_CALL(mockMainPresenter, getTransmissionOptions(group)).Times(1);
+    EXPECT_CALL(mockMainPresenter, getTransmissionRuns(group)).Times(1);
     presenter.getPreprocessingOptionsAsString();
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
