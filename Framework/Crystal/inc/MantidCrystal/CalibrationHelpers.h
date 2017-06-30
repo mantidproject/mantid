@@ -4,7 +4,7 @@
 #include "MantidGeometry/Instrument.h"
 
 namespace Mantid {
-namespace API {
+namespace Geometry {
 class ComponentInfo;
 }
 namespace Crystal {
@@ -38,14 +38,14 @@ namespace CalibrationHelpers {
 
 DLLExport void
 adjustUpSampleAndSourcePositions(double const L0, const Kernel::V3D &newSampPos,
-                                 API::ComponentInfo &componentInfo);
+                                 Geometry::ComponentInfo &componentInfo);
 
 DLLExport void
 adjustBankPositionsAndSizes(const std::vector<std::string> &bankNames,
                             const Geometry::Instrument &newInstrument,
                             const Kernel::V3D &pos, const Kernel::Quat &rot,
                             const double detWScale, const double detHtScale,
-                            API::ComponentInfo &componentInfo);
+                            Geometry::ComponentInfo &componentInfo);
 
 } // namespace CalibrationHelpers
 } // namespace Crystal

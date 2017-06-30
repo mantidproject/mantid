@@ -2,7 +2,7 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/Exception.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
-#include "MantidAPI/ComponentInfo.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 
 namespace Mantid {
 namespace DataHandling {

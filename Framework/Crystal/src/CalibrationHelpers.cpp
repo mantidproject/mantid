@@ -1,4 +1,4 @@
-#include "MantidAPI/ComponentInfo.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidAPI/ResizeRectangularDetectorHelper.h"
 #include "MantidCrystal/SCDCalibratePanels.h"
 #include "MantidCrystal/CalibrationHelpers.h"

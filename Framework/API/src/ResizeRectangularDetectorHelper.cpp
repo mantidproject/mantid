@@ -1,5 +1,5 @@
 #include "MantidAPI/ResizeRectangularDetectorHelper.h"
-#include "MantidAPI/ComponentInfo.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidKernel/EigenConversionHelpers.h"
 #include "MantidGeometry/IComponent.h"
 
@@ -8,7 +8,7 @@ namespace Mantid {
 namespace API {
 
 void applyRectangularDetectorScaleToComponentInfo(
-    ComponentInfo &componentInfo, Geometry::ComponentID componentId,
+    Geometry::ComponentInfo &componentInfo, Geometry::ComponentID componentId,
     const double scaleX, const double scaleY) {
 
   const size_t componentIndex = componentInfo.indexOf(componentId);

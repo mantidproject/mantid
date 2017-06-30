@@ -1,9 +1,9 @@
-#ifndef MANTID_API_COMPONENTINFOTEST_H_
-#define MANTID_API_COMPONENTINFOTEST_H_
+#ifndef MANTID_GEOMETRY_COMPONENTINFOTEST_H_
+#define MANTID_GEOMETRY_COMPONENTINFOTEST_H_
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidAPI/ComponentInfo.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidBeamline/ComponentInfo.h"
 #include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/Instrument/ObjComponent.h"
@@ -11,7 +11,7 @@
 
 #include <boost/make_shared.hpp>
 
-using Mantid::API::ComponentInfo;
+using Mantid::Geometry::ComponentInfo;
 using namespace Mantid;
 using namespace Mantid::Kernel;
 
@@ -85,4 +85,4 @@ public:
   }
 };
 
-#endif /* MANTID_API_COMPONENTINFOTEST_H_ */
+#endif /* MANTID_GEOMETRY_COMPONENTINFOTEST_H_ */

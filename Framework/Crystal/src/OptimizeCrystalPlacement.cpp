@@ -7,7 +7,7 @@
  */
 #include "MantidCrystal/OptimizeCrystalPlacement.h"
 
-#include "MantidAPI/ComponentInfo.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/WorkspaceFactory.h"

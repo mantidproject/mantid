@@ -3,7 +3,7 @@
  * */
 
 #include "MantidDataHandling/LoadHelper.h"
-#include "MantidAPI/ComponentInfo.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidAPI/SpectrumInfo.h"

@@ -1,7 +1,7 @@
-#ifndef MANTID_API_COMPONENTINFO_H_
-#define MANTID_API_COMPONENTINFO_H_
+#ifndef MANTID_GEOMETRY_COMPONENTINFO_H_
+#define MANTID_GEOMETRY_COMPONENTINFO_H_
 
-#include "MantidAPI/DllConfig.h"
+#include "MantidGeometry/DllConfig.h"
 #include <unordered_map>
 #include <vector>
 #include <boost/shared_ptr.hpp>
@@ -22,7 +22,7 @@ namespace Beamline {
 class ComponentInfo;
 }
 
-namespace API {
+namespace Geometry {
 
 /** ComponentInfo : Provides a component centric view on to the instrument.
   Indexes are per component.
@@ -48,7 +48,7 @@ namespace API {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTID_API_DLL ComponentInfo {
+class MANTID_GEOMETRY_DLL ComponentInfo {
 private:
   /// Reference to the actual ComponentInfo object (non-wrapping part).
   Beamline::ComponentInfo &m_componentInfo;
@@ -86,7 +86,7 @@ public:
   double l1() const;
 };
 
-} // namespace API
+} // namespace Geometry
 } // namespace Mantid
 
-#endif /* MANTID_API_COMPONENTINFO_H_ */
+#endif /* MANTID_GEOMETRY_COMPONENTINFO_H_ */

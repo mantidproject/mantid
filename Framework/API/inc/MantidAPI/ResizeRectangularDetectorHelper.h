@@ -5,10 +5,10 @@
 
 namespace Mantid {
 namespace Geometry {
+class ComponentInfo;
 class IComponent;
 }
 namespace API {
-class ComponentInfo;
 /** Helpers for resizing RectangularDetectors
 
   Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
@@ -33,7 +33,7 @@ class ComponentInfo;
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 MANTID_API_DLL void applyRectangularDetectorScaleToComponentInfo(
-    ComponentInfo &componentInfo, Geometry::IComponent *componentId,
+    Geometry::ComponentInfo &componentInfo, Geometry::IComponent *componentId,
     const double scaleX, const double scaleY);
 } // namespace API
 } // namespace Mantid

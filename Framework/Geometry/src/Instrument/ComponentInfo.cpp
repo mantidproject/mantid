@@ -1,4 +1,4 @@
-#include "MantidAPI/ComponentInfo.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/IComponent.h"
 #include "MantidBeamline/ComponentInfo.h"
 #include "MantidKernel/EigenConversionHelpers.h"
@@ -9,7 +9,7 @@
 #include <sstream>
 
 namespace Mantid {
-namespace API {
+namespace Geometry {
 
 /**
  * Constructor.
@@ -28,13 +28,13 @@ ComponentInfo::ComponentInfo(
       m_compIDToIndex(std::move(componentIdToIndexMap)) {
 
   if (m_componentIds->size() != m_compIDToIndex->size()) {
-    throw std::invalid_argument(
-        "Inconsistent ID and Mapping input containers for API::ComponentInfo");
+    throw std::invalid_argument("Inconsistent ID and Mapping input containers "
+                                "for Geometry::ComponentInfo");
   }
   if (m_componentIds->size() != m_componentInfo.size()) {
     throw std::invalid_argument("Inconsistent ID and base "
                                 "Beamline::ComponentInfo sizes for "
-                                "API::ComponentInfo");
+                                "Geometry::ComponentInfo");
   }
 }
 
@@ -111,5 +111,5 @@ void ComponentInfo::setRotation(const size_t componentIndex,
   m_componentInfo.setRotation(componentIndex,
                               Kernel::toQuaterniond(newRotation));
 }
-} // namespace API
+} // namespace Geometry
 } // namespace Mantid

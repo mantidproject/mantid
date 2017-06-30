@@ -1,6 +1,6 @@
 #include "MantidDataHandling/LoadIsawDetCal.h"
 
-#include "MantidAPI/ComponentInfo.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/MultipleFileProperty.h"
@@ -321,7 +321,7 @@ void LoadIsawDetCal::exec() {
  */
 void LoadIsawDetCal::center(const double x, const double y, const double z,
                             const std::string &detname, API::Workspace_sptr ws,
-                            API::ComponentInfo &componentInfo) {
+                            Geometry::ComponentInfo &componentInfo) {
 
   Instrument_sptr inst = getCheckInst(ws);
 

@@ -1,6 +1,6 @@
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/ChopperModel.h"
-#include "MantidAPI/ComponentInfo.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidAPI/DetectorInfo.h"
 #include "MantidAPI/InstrumentDataService.h"
 #include "MantidAPI/ModeratorModel.h"
@@ -1284,7 +1284,7 @@ SpectrumInfo &ExperimentInfo::mutableSpectrumInfo() {
       static_cast<const ExperimentInfo &>(*this).spectrumInfo());
 }
 
-const API::ComponentInfo &ExperimentInfo::componentInfo() const {
+const Geometry::ComponentInfo &ExperimentInfo::componentInfo() const {
   return *m_componentInfoWrapper;
 }
 

@@ -1,7 +1,7 @@
 #ifndef MANTID_API_EXPERIMENTINFOTEST_H_
 #define MANTID_API_EXPERIMENTINFOTEST_H_
 
-#include "MantidAPI/ComponentInfo.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidAPI/DetectorInfo.h"
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/ChopperModel.h"
@@ -780,7 +780,7 @@ public:
 
     ExperimentInfo expInfo;
     expInfo.setInstrument(inst);
-    const Mantid::API::ComponentInfo &compInfo = expInfo.componentInfo();
+    const Mantid::Geometry::ComponentInfo &compInfo = expInfo.componentInfo();
 
     size_t nComponents = nPixels * nPixels;
     nComponents += nPixels; // One additional CompAssembly per row.
@@ -833,7 +833,7 @@ public:
 
     ExperimentInfo expInfo;
     expInfo.setInstrument(inst);
-    const Mantid::API::ComponentInfo &compInfo = expInfo.componentInfo();
+    const Mantid::Geometry::ComponentInfo &compInfo = expInfo.componentInfo();
     const Mantid::API::DetectorInfo &detInfo = expInfo.detectorInfo();
     // Test one of the detectors
     const auto targetDetectorIndex = 0;
@@ -866,7 +866,7 @@ public:
 
     ExperimentInfo expInfo;
     expInfo.setInstrument(inst);
-    const Mantid::API::ComponentInfo &compInfo = expInfo.componentInfo();
+    const Mantid::Geometry::ComponentInfo &compInfo = expInfo.componentInfo();
 
     // Test non-detector, non-assembly components
     auto sampleId = inst->getComponentByName("sample")->getComponentID();
@@ -919,7 +919,7 @@ public:
 
     ExperimentInfo expInfo;
     expInfo.setInstrument(inst);
-    const Mantid::API::ComponentInfo &compInfo = expInfo.componentInfo();
+    const Mantid::Geometry::ComponentInfo &compInfo = expInfo.componentInfo();
 
     TS_ASSERT_EQUALS((V3D{-2, 0, 0}), compInfo.sourcePosition());
 
@@ -937,7 +937,7 @@ public:
 
     ExperimentInfo expInfo;
     expInfo.setInstrument(inst);
-    const Mantid::API::ComponentInfo &compInfo = expInfo.componentInfo();
+    const Mantid::Geometry::ComponentInfo &compInfo = expInfo.componentInfo();
 
     // Test non-detector, non-assembly components
     auto sampleId = inst->getComponentByName("sample")->getComponentID();
