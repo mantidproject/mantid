@@ -66,8 +66,7 @@ void IntegrateEPP::init() {
       boost::make_shared<Kernel::CompositeValidator>();
   mandatoryPositiveDouble->add(mandatoryDouble);
   mandatoryPositiveDouble->add(positiveDouble);
-  const double hwhm = std::sqrt(2.0 * std::log(2.0));
-  declareProperty(PropertyNames::WIDTH, hwhm, mandatoryPositiveDouble,
+  declareProperty(PropertyNames::WIDTH, 5.0, mandatoryPositiveDouble,
                   "Half of the integration width in multiplies of 'Sigma'.");
 }
 
