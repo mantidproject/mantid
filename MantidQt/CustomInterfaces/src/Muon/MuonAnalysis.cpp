@@ -1885,6 +1885,10 @@ void MuonAnalysis::selectMultiPeak(const QString &wsName,
                    std::back_inserter(groupsAndPairs), &QString::fromStdString);
     std::transform(groups.pairNames.begin(), groups.pairNames.end(),
                    std::back_inserter(groupsAndPairs), &QString::fromStdString);
+	auto naes = m_groupingHelper.parseGroupingTable().groupNames;
+	auto names = m_groupingHelper.parseGroupingTable().pairNames;
+
+
     m_uiForm.fitBrowser->setAvailableGroups(groupsAndPairs);
     m_uiForm.fitBrowser->setNumPeriods(m_numPeriods);
 
@@ -2544,6 +2548,10 @@ void MuonAnalysis::changeTab(int newTabIndex) {
       m_uiForm.fitBrowser->setSingleFitLabel(m_currentDataName.toStdString());
     } else {
       Muon::AnalysisOptions options(m_groupingHelper.parseGroupingTable());
+
+	  //use these to update the names of pairs/groups
+	  auto naes = m_groupingHelper.parseGroupingTable().groupNames;
+	  auto names = m_groupingHelper.parseGroupingTable().pairNames;
       m_uiForm.fitBrowser->setGroupNames(options.grouping.groupNames);
       auto isItGroup = m_dataLoader.isContainedIn(m_groupPairName,
                                                   options.grouping.groupNames);
