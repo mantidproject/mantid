@@ -304,6 +304,29 @@ class FunctionWrapperTest(unittest.TestCase):
         self.assertEqual(fc3_str.count("Sigma=1.25"),1)
         self.assertEqual(fc3_str.count("Sigma=1.3"),1)
         
+    def test_add(self):
+        g0 = FunctionWrapper( "Gaussian", Height=7.5, Sigma=1.2, PeakCentre=10)  
+        g1 = FunctionWrapper( "Gaussian", Height=8.5, Sigma=1.25, PeakCentre=12)  
+        lb = FunctionWrapper("LinearBackground")
+        
+        c = lb + g0 + g1
+        
+        c_str = c.__str__()
+        self.assertEqual(c_str.count("("),0)
+        self.assertEqual(c_str.count("LinearBackground"),1)
+        self.assertEqual(c_str.count("Gaussian"),2)
+        
+        lb_str = lb.__str__()
+        c0_str = c[0].__str__()
+        self.assertEqual(c0_str, lb_str)
+           
+        g0_str = g0.__str__()
+        c1_str = c[1].__str__()
+        self.assertEqual(c1_str, g0_str)
+        
+        g1_str = g1.__str__()
+        c2_str = c[2].__str__()
+        self.assertEqual(c2_str, g1_str)
         
     def test_prefinedfunction(self):
         testhelpers.assertRaisesNothing(self, Gaussian, Height=7.5, Sigma=1.2, PeakCentre=10)
