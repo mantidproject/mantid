@@ -14,11 +14,12 @@
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
+using Mantid::Kernel::Direction;
+using Mantid::API::IndexType;
 
 class IndexPropertyTest : public CxxTest::TestSuite {
 public:
-  IndexPropertyTest()
-      : m_wkspProp("InputWorkspace", "", Kernel::Direction::Input) {}
+  IndexPropertyTest() : m_wkspProp("InputWorkspace", "", Direction::Input) {}
 
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
@@ -35,7 +36,7 @@ public:
 
   void testInvalidWorkspaceType() {
     WorkspaceProperty<Workspace> wkspProp("InputWorkspace", "",
-                                          Kernel::Direction::Input);
+                                          Direction::Input);
 
     auto ws = boost::make_shared<TableWorkspaceTester>();
     wkspProp = ws;
