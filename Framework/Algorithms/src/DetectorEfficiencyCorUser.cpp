@@ -102,7 +102,9 @@ void DetectorEfficiencyCorUser::exec() {
  * @param parser :: muParser used to evalute f(e)
  * @param index :: the workspace index of the histogram to correct
  */
-void DetectorEfficiencyCorUser::correctHistogram(const size_t index, const double eff0, double &e, mu::Parser &parser) {
+void DetectorEfficiencyCorUser::correctHistogram(const size_t index,
+                                                 const double eff0, double &e,
+                                                 mu::Parser &parser) {
   const auto &xIn = m_inputWS->points(index);
   const auto &yIn = m_inputWS->y(index);
   const auto &eIn = m_inputWS->e(index);
@@ -111,7 +113,7 @@ void DetectorEfficiencyCorUser::correctHistogram(const size_t index, const doubl
   for (size_t i = 0; i < xIn.size(); ++i) {
     e = m_Ei - xIn[i];
     const double eff = evaluate(parser);
-    const double corr = eff /eff0;
+    const double corr = eff / eff0;
     yOut[i] = yIn[i] / corr;
     eOut[i] = eIn[i] / corr;
   }
@@ -123,8 +125,7 @@ void DetectorEfficiencyCorUser::correctHistogram(const size_t index, const doubl
  * @return calculated value
  * @throw InstrumentDefinitionError if parser throws during evaluation
  */
-double
-DetectorEfficiencyCorUser::evaluate(const mu::Parser &parser) const {
+double DetectorEfficiencyCorUser::evaluate(const mu::Parser &parser) const {
   try {
     return parser.Eval();
   } catch (mu::Parser::exception_type &e) {
@@ -134,9 +135,8 @@ DetectorEfficiencyCorUser::evaluate(const mu::Parser &parser) const {
   }
 }
 
-mu::Parser
-DetectorEfficiencyCorUser::generateParser(const std::string &formula,
-                                                 double *e) const {
+mu::Parser DetectorEfficiencyCorUser::generateParser(const std::string &formula,
+                                                     double *e) const {
   mu::Parser p;
   p.DefineVar("e", e);
   p.SetExpr(formula);
@@ -148,15 +148,16 @@ DetectorEfficiencyCorUser::generateParser(const std::string &formula,
  * @param workspaceIndex detector's workspace index
  * @return the efficiency correction formula
  */
-std::string DetectorEfficiencyCorUser::retrieveFormula(
-    const size_t workspaceIndex) {
+std::string
+DetectorEfficiencyCorUser::retrieveFormula(const size_t workspaceIndex) {
   const std::string formulaParamName("formula_eff");
   const auto &paramMap = m_inputWS->constInstrumentParameters();
   auto det = m_inputWS->getDetector(workspaceIndex);
   auto param = paramMap.getRecursive(det.get(), formulaParamName, "string");
   if (!param) {
     throw Kernel::Exception::InstrumentDefinitionError(
-        "No <" + formulaParamName + "> parameter found for component '" + det->getFullName() + "' in the instrument definition.");
+        "No <" + formulaParamName + "> parameter found for component '" +
+        det->getFullName() + "' in the instrument definition.");
   }
   const auto ret = param->asString();
   g_log.debug() << "Found formula for workspace index " << workspaceIndex
@@ -178,7 +179,8 @@ void DetectorEfficiencyCorUser::retrieveProperties() {
   // If input and output workspaces are not the same, create a new workspace for
   // the output
   if (m_outputWS != this->m_inputWS) {
-    m_outputWS.reset(Mantid::DataObjects::create<DataObjects::Workspace2D>(*m_inputWS).release());
+    m_outputWS.reset(Mantid::DataObjects::create<DataObjects::Workspace2D>(
+                         *m_inputWS).release());
   }
 
   // these first three properties are fully checked by validators

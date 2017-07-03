@@ -76,11 +76,13 @@ public:
 
     const auto nHisto = outWS->getNumberHistograms();
     for (size_t i = 0; i != nHisto; ++i) {
-      auto eff0 = i < nHisto / 2 ? efficiencyBank1(m_Ei) : efficiencyBank2(m_Ei);
+      auto eff0 =
+          i < nHisto / 2 ? efficiencyBank1(m_Ei) : efficiencyBank2(m_Ei);
       const auto &ys = outWS->counts(i);
       const auto &es = outWS->countStandardDeviations(i);
       for (size_t j = 0; j != ys.size(); ++j) {
-        const auto eff = i < nHisto / 2 ? efficiencyBank1(m_Efs[j]) : efficiencyBank2(m_Efs[j]);
+        const auto eff = i < nHisto / 2 ? efficiencyBank1(m_Efs[j])
+                                        : efficiencyBank2(m_Efs[j]);
         // By default, input workspace has y = 2, e = sqrt(2).
         TS_ASSERT_DELTA(ys[j], 2 * eff0 / eff, 1e-6);
         TS_ASSERT_DELTA(es[j], std::sqrt(2) * eff0 / eff, 1e-6);
@@ -136,7 +138,8 @@ private:
     dataws->instrumentParameters().addString(
         bank.get(), "formula_eff", "exp(-1/sqrt(e))*(1-exp(-1/sqrt(e)))");
     bank = instrument->getComponentByName("bank2");
-    dataws->instrumentParameters().addString(bank.get(), "formula_eff", "exp(-2/sqrt(e))*(1-exp(-2/sqrt(e)))");
+    dataws->instrumentParameters().addString(
+        bank.get(), "formula_eff", "exp(-2/sqrt(e))*(1-exp(-2/sqrt(e)))");
     API::AnalysisDataService::Instance().addOrReplace(m_inWSName, dataws);
   }
 };
