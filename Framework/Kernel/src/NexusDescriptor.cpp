@@ -7,6 +7,7 @@
 #include <Poco/Path.h>
 
 #include <cstring>
+#include <string>
 
 namespace Mantid {
 namespace Kernel {
@@ -247,7 +248,7 @@ void NexusDescriptor::walkFile(::NeXus::File &file, const std::string &rootPath,
     const std::string &entryClass = it->second;
     const std::string entryPath =
         std::string(rootPath).append("/").append(entryName);
-    if (entryClass == "SDS") {
+    if (entryClass == "SDS" || entryClass == "ILL_data_scan_vars") {
       pmap.emplace(entryPath, entryClass);
     } else if (entryClass == "CDF0.0") {
       // Do nothing with this

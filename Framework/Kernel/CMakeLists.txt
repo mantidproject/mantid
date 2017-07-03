@@ -43,6 +43,7 @@ set ( SRC_FILES
 	src/InstrumentInfo.cpp
 	src/InternetHelper.cpp
 	src/Interpolation.cpp
+	src/InvisibleProperty.cpp
 	src/LibraryManager.cpp
 	src/LibraryWrapper.cpp
 	src/LiveListenerInfo.cpp
@@ -157,7 +158,6 @@ set ( INC_FILES
 	inc/MantidKernel/Chainable.h
 	inc/MantidKernel/ChainableFactory.h
 	inc/MantidKernel/ChecksumHelper.h
-	inc/MantidKernel/ClassMacros.h
 	inc/MantidKernel/CompositeValidator.h
 	inc/MantidKernel/ComputeResourceInfo.h
 	inc/MantidKernel/ConfigService.h
@@ -202,6 +202,7 @@ set ( INC_FILES
 	inc/MantidKernel/InstrumentInfo.h
 	inc/MantidKernel/InternetHelper.h
 	inc/MantidKernel/Interpolation.h
+	inc/MantidKernel/InvisibleProperty.h
 	inc/MantidKernel/LibraryManager.h
 	inc/MantidKernel/LibraryWrapper.h
 	inc/MantidKernel/ListValidator.h
@@ -236,6 +237,7 @@ set ( INC_FILES
 	inc/MantidKernel/NDPseudoRandomNumberGenerator.h
 	inc/MantidKernel/NDRandomNumberGenerator.h
 	inc/MantidKernel/NetworkProxy.h
+        inc/MantidKernel/NearestNeighbours.h
 	inc/MantidKernel/NeutronAtom.h
 	inc/MantidKernel/NexusDescriptor.h
 	inc/MantidKernel/NormalDistribution.h
@@ -361,6 +363,7 @@ set ( TEST_FILES
 	InstrumentInfoTest.h
 	InternetHelperTest.h
 	InterpolationTest.h
+	InvisiblePropertyTest.h
 	ListValidatorTest.h
 	LiveListenerInfoTest.h
 	LogFilterTest.h
@@ -388,6 +391,7 @@ set ( TEST_FILES
 	MutexTest.h
 	NDPseudoRandomNumberGeneratorTest.h
 	NDRandomNumberGeneratorTest.h
+        NearestNeighboursTest.h
 	NeutronAtomTest.h
 	NexusDescriptorTest.h
 	NormalDistributionTest.h

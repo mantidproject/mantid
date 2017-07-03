@@ -203,7 +203,7 @@ void LoadMuonNexus1::exec() {
 
   WorkspaceGroup_sptr wsGrpSptr = WorkspaceGroup_sptr(new WorkspaceGroup);
 
-  API::Progress progress(this, 0., 1., m_numberOfPeriods * total_specs);
+  API::Progress progress(this, 0.0, 1.0, m_numberOfPeriods * total_specs);
   // Loop over the number of periods in the Nexus file, putting each period in a
   // separate workspace
   for (int64_t period = 0; period < m_numberOfPeriods; ++period) {

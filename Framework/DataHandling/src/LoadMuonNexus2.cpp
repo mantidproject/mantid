@@ -16,8 +16,8 @@
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/UnitLabelTypes.h"
 #include "MantidNexus/NexusClasses.h"
-#include <nexus/NeXusException.hpp>
 #include <nexus/NeXusFile.hpp>
+#include <nexus/NeXusException.hpp>
 
 #include <Poco/Path.h>
 #include <boost/lexical_cast.hpp>
@@ -215,7 +215,7 @@ void LoadMuonNexus2::doExec() {
     }
   }
 
-  API::Progress progress(this, 0., 1., m_numberOfPeriods * total_specs);
+  API::Progress progress(this, 0.0, 1.0, m_numberOfPeriods * total_specs);
   // Loop over the number of periods in the Nexus file, putting each period in a
   // separate workspace
   for (int period = 0; period < m_numberOfPeriods; ++period) {

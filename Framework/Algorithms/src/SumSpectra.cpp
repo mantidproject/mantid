@@ -149,7 +149,7 @@ void SumSpectra::exec() {
     // column (used in special cases of evaluating how good
     // Poissonian statistics is)
 
-    Progress progress(this, 0, 1, this->m_indices.size());
+    Progress progress(this, 0.0, 1.0, this->m_indices.size());
 
     // This is the (only) output spectrum
     auto &outSpec = outputWorkspace->getSpectrum(0);
@@ -452,7 +452,7 @@ void SumSpectra::execEvent(EventWorkspace_const_sptr localworkspace,
   auto outputWorkspace =
       create<EventWorkspace>(*localworkspace, 1, localworkspace->binEdges(0));
 
-  Progress progress(this, 0, 1, indices.size());
+  Progress progress(this, 0.0, 1.0, indices.size());
 
   // Get the pointer to the output event list
   EventList &outEL = outputWorkspace->getSpectrum(0);

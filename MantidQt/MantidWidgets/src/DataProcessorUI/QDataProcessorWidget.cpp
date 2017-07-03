@@ -71,6 +71,12 @@ void QDataProcessorWidget::addActions(
             ui.rowToolBar, std::move(command)));
   }
 
+  // Add actions to context menu
+  m_contextMenu = new QMenu(this);
+  for (const auto &command : m_commands) {
+    m_contextMenu->addAction(command->getAction());
+  }
+
   // Add a whats this button
   ui.rowToolBar->addAction(QWhatsThis::createAction(this));
 }
@@ -81,6 +87,16 @@ void QDataProcessorWidget::addActions(
 void QDataProcessorWidget::processClicked() {
 
   m_presenter->notify(DataProcessorPresenter::ProcessFlag);
+}
+
+/** This slot notifies the presenter that the selection has changed
+*/
+void QDataProcessorWidget::newSelection(const QItemSelection &selected,
+                                        const QItemSelection &deselected) {
+
+  Q_UNUSED(selected);
+  Q_UNUSED(deselected);
+  m_presenter->notify(DataProcessorPresenter::SelectionChangedFlag);
 }
 
 /**
@@ -116,6 +132,8 @@ void QDataProcessorWidget::showTable(
           SIGNAL(dataChanged(const QModelIndex &, const QModelIndex &)), this,
           SLOT(tableUpdated(const QModelIndex &, const QModelIndex &)));
   ui.viewTable->setModel(m_model.get());
+  // Reset selection model connections
+  setSelectionModelConnections();
 }
 
 /**
@@ -169,11 +187,7 @@ void QDataProcessorWidget::showContextMenu(const QPoint &pos) {
   if (!ui.viewTable->indexAt(pos).isValid())
     return;
 
-  QMenu *menu = new QMenu(this);
-  for (const auto &command : m_commands) {
-    menu->addAction(command->getAction());
-  }
-  menu->popup(ui.viewTable->viewport()->mapToGlobal(pos));
+  m_contextMenu->popup(ui.viewTable->viewport()->mapToGlobal(pos));
 }
 
 /**
@@ -218,6 +232,36 @@ void QDataProcessorWidget::collapseAll() { ui.viewTable->collapseAll(); }
 Select all groups
 */
 void QDataProcessorWidget::selectAll() { ui.viewTable->selectAll(); }
+
+/**
+Handle interface when data reduction paused
+*/
+void QDataProcessorWidget::pause() {
+
+  // Enable 'resume' buttons
+  ui.rowToolBar->actions()[0]->setEnabled(true);
+  m_contextMenu->actions()[0]->setEnabled(true);
+  ui.buttonProcess->setEnabled(true);
+
+  // Disable 'pause' buttons
+  ui.rowToolBar->actions()[1]->setEnabled(false);
+  m_contextMenu->actions()[1]->setEnabled(false);
+}
+
+/**
+Handle interface when data reduction resumed
+*/
+void QDataProcessorWidget::resume() {
+
+  // Enable 'resume' buttons
+  ui.rowToolBar->actions()[0]->setEnabled(false);
+  m_contextMenu->actions()[0]->setEnabled(false);
+  ui.buttonProcess->setEnabled(false);
+
+  // Disable 'pause' buttons
+  ui.rowToolBar->actions()[1]->setEnabled(true);
+  m_contextMenu->actions()[1]->setEnabled(true);
+}
 
 /**
 Save settings
@@ -285,6 +329,17 @@ void QDataProcessorWidget::setSelection(const std::set<int> &groups) {
                            QItemSelectionModel::Select |
                                QItemSelectionModel::Rows);
   }
+}
+
+/**
+Set up the connections from the table selection model
+*/
+void QDataProcessorWidget::setSelectionModelConnections() {
+  // Emit a signal when selection has changed
+  connect(
+      ui.viewTable->selectionModel(),
+      SIGNAL(selectionChanged(const QItemSelection &, const QItemSelection &)),
+      this, SLOT(newSelection(const QItemSelection &, const QItemSelection &)));
 }
 
 /**

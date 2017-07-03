@@ -76,11 +76,16 @@ public:
   // Select all groups
   virtual void selectAll() = 0;
 
+  // Handle pause/resume of data reduction
+  virtual void pause() = 0;
+  virtual void resume() = 0;
+
   // Setter methods
   virtual void setTableList(const std::set<std::string> &tables) = 0;
   virtual void setInstrumentList(const std::vector<std::string> &instruments,
                                  const std::string &defaultInstrument) = 0;
   virtual void setSelection(const std::set<int> &groups) = 0;
+  virtual void setSelectionModelConnections() = 0;
   virtual void
   setOptionsHintStrategy(MantidQt::MantidWidgets::HintStrategy *hintStrategy,
                          int column) = 0;

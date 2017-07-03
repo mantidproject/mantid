@@ -55,6 +55,7 @@ void WindowIcons::initInternalLookup() {
   m_idToPixmapName["Note"] = "note_xpm";
   m_idToPixmapName["MultiLayer"] = "graph_xpm";
   m_idToPixmapName["Graph3D"] = "trajectory_xpm";
+  m_idToPixmapName["Graph"] = "graph_xpm";
   m_idToPixmapName["Workspace"] = "mantid_matrix_xpm";
   m_idToPixmapName["SliceViewer"] =
       ":/SliceViewer/icons/SliceViewerWindow_icon.png";

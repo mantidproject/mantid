@@ -1,11 +1,10 @@
 from __future__ import (absolute_import, division, print_function)
-import os
+
 import numpy as numpy
 import mantid.simpleapi as mantid
 
 import isis_powder.routines.common as common
-from isis_powder.routines import yaml_parser
-from isis_powder.routines.RunDetails import RunDetails
+from isis_powder.routines.run_details import create_run_details_object, CustomFuncForRunDetails
 
 
 def attenuate_workspace(attenuation_file_path, ws_to_correct):
@@ -41,11 +40,10 @@ def apply_vanadium_absorb_corrections(van_ws, run_details):
     return van_ws
 
 
-def generate_out_name(run_number_string, absorb_on, long_mode_on, tt_mode):
+def generate_out_name(run_number_string, long_mode_on, tt_mode):
     output_name = "PRL" + str(run_number_string)
     # Append each mode of operation
     output_name += "_" + str(tt_mode)
-    output_name += "_absorb" if absorb_on else ""
     output_name += "_long" if long_mode_on else ""
     return output_name
 
@@ -69,46 +67,28 @@ def generate_vanadium_absorb_corrections(van_ws):
     return absorb_ws
 
 
-def get_run_details(run_number_string, inst_settings):
-    first_run_number = common.get_first_run_number(run_number_string=run_number_string)
-    mapping_dict = yaml_parser.get_run_dictionary(run_number_string=first_run_number,
-                                                  file_path=inst_settings.cal_map_path)
+def get_run_details(run_number_string, inst_settings, is_vanadium_run):
+    spline_identifier = [inst_settings.tt_mode]
+    if inst_settings.long_mode:
+        spline_identifier.append("_long")
 
-    calibration_file_name = common.cal_map_dictionary_key_helper(mapping_dict, "calibration_file")
-    empty_run_numbers = common.cal_map_dictionary_key_helper(mapping_dict, "empty_run_numbers")
-    label = common.cal_map_dictionary_key_helper(mapping_dict, "label")
-    vanadium_run_numbers = common.cal_map_dictionary_key_helper(mapping_dict, "vanadium_run_numbers")
+    grouping_file_name_callable = CustomFuncForRunDetails().add_to_func_chain(
+        user_function=_pearl_get_tt_grouping_file_name,
+        inst_settings=inst_settings)
 
-    # Use generate out name to provide the unique fingerprint for this file
-    splined_vanadium_name = common.generate_splined_name(
-        generate_out_name(run_number_string=vanadium_run_numbers,
-                          absorb_on=inst_settings.absorb_corrections,
-                          long_mode_on=inst_settings.long_mode, tt_mode=inst_settings.tt_mode))
+    return create_run_details_object(run_number_string=run_number_string, inst_settings=inst_settings,
+                                     is_vanadium_run=is_vanadium_run, splined_name_list=spline_identifier,
+                                     grouping_file_name_call=grouping_file_name_callable,
+                                     van_abs_file_name=inst_settings.van_absorb_file)
 
-    calibration_dir = inst_settings.calibration_dir
-    cycle_calibration_dir = os.path.join(calibration_dir, label)
 
-    absorption_file_path = os.path.join(calibration_dir, inst_settings.van_absorb_file)
-    calibration_file_path = os.path.join(cycle_calibration_dir, calibration_file_name)
+def _pearl_get_tt_grouping_file_name(inst_settings):
     tt_grouping_key = str(inst_settings.tt_mode).lower() + '_grouping'
     try:
-        grouping_file_path = os.path.join(calibration_dir, getattr(inst_settings, tt_grouping_key))
+        grouping_file_name = getattr(inst_settings, tt_grouping_key)
     except AttributeError:
         raise ValueError("The tt_mode: " + str(inst_settings.tt_mode).lower() + " is unknown")
-
-    splined_vanadium_path = os.path.join(cycle_calibration_dir, splined_vanadium_name)
-
-    run_details = RunDetails(run_number=first_run_number)
-    run_details.user_input_run_number = run_number_string
-    run_details.offset_file_path = calibration_file_path
-    run_details.grouping_file_path = grouping_file_path
-    run_details.empty_runs = empty_run_numbers
-    run_details.label = label
-    run_details.splined_vanadium_file_path = splined_vanadium_path
-    run_details.vanadium_absorption_path = absorption_file_path
-    run_details.vanadium_run_numbers = vanadium_run_numbers
-
-    return run_details
+    return grouping_file_name
 
 
 def normalise_ws_current(ws_to_correct, monitor_ws, spline_coeff, lambda_values, integration_range):
@@ -129,7 +109,8 @@ def normalise_ws_current(ws_to_correct, monitor_ws, spline_coeff, lambda_values,
     splined_monitor_ws = mantid.SplineBackground(InputWorkspace=processed_monitor_ws,
                                                  WorkspaceIndex=0, NCoeff=spline_coeff)
 
-    normalised_ws = mantid.ConvertUnits(InputWorkspace=ws_to_correct, Target="Wavelength", OutputWorkspace=ws_to_correct)
+    normalised_ws = mantid.ConvertUnits(InputWorkspace=ws_to_correct, Target="Wavelength",
+                                        OutputWorkspace=ws_to_correct)
     normalised_ws = mantid.NormaliseToMonitor(InputWorkspace=normalised_ws, MonitorWorkspace=splined_monitor_ws,
                                               IntegrationRangeMin=integration_range[0],
                                               IntegrationRangeMax=integration_range[-1],

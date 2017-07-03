@@ -401,7 +401,8 @@ MuonAnalysisFitDataPresenter::createWorkspace(const std::string &name,
     if (params.periods.empty()) {
       analysisOptions.summedPeriods = "1";
     } else {
-      std::replace(params.periods.begin(), params.periods.end(), ',', '+');
+      // need a comma seperated list
+      std::replace(params.periods.begin(), params.periods.end(), '+', ',');
       const size_t minus = params.periods.find('-');
       analysisOptions.summedPeriods = params.periods.substr(0, minus);
       if (minus != std::string::npos && minus != params.periods.size()) {
@@ -785,20 +786,6 @@ void MuonAnalysisFitDataPresenter::setUpDataSelector(
   const QString numberString = instRun.right(instRun.size() - firstZero);
   m_dataSelector->setWorkspaceDetails(
       numberString, QString::fromStdString(wsParams.instrument), filePath);
-
-  // Set selected groups/pairs and periods here too
-  // (unless extra groups/periods are already selected, in which case don't
-  // unselect them)
-  const QString &groupToSet = QString::fromStdString(wsParams.itemName);
-  const QString &periodToSet = QString::fromStdString(wsParams.periods);
-  const auto &groups = m_dataSelector->getChosenGroups();
-  const auto &periods = m_dataSelector->getPeriodSelections();
-  if (!groups.contains(groupToSet)) {
-    m_dataSelector->setChosenGroup(groupToSet);
-  }
-  if (!periodToSet.isEmpty() && !periods.contains(periodToSet)) {
-    m_dataSelector->setChosenPeriod(periodToSet);
-  }
 
   // If given an optional file path to "current run", cache it for later use
   if (filePath && !wsParams.runs.empty()) {

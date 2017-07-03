@@ -1,18 +1,17 @@
 // Includes
 #include "MantidKernel/Statistics.h"
 
-#include <algorithm>
-#include <cfloat>
-#include <cmath>
-#include <iostream>
-#include <numeric>
-#include <sstream>
-
 #include <boost/accumulators/accumulators.hpp>
 #include <boost/accumulators/statistics/stats.hpp>
 #include <boost/accumulators/statistics/min.hpp>
 #include <boost/accumulators/statistics/max.hpp>
 #include <boost/accumulators/statistics/variance.hpp>
+
+#include <algorithm>
+#include <cfloat>
+#include <cmath>
+#include <iostream>
+#include <sstream>
 
 namespace Mantid {
 namespace Kernel {

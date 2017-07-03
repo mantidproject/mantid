@@ -17,6 +17,7 @@
 #include "MantidKernel/UnitFactory.h"
 
 #include <Poco/File.h>
+#include <nexus/NeXusFile.hpp>
 #include <boost/lexical_cast.hpp>
 #include <vector>
 

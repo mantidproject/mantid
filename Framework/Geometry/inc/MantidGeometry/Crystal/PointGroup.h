@@ -10,6 +10,7 @@
 #include <vector>
 #include <string>
 #include <set>
+#include <map>
 
 #include "MantidGeometry/Crystal/SymmetryOperation.h"
 #include "MantidGeometry/Crystal/Group.h"
@@ -63,7 +64,7 @@ public:
   Kernel::V3D getReflectionFamily(const Kernel::V3D &hkl) const;
 
 protected:
-  std::vector<Kernel::V3D> getEquivalentSet(const Kernel::V3D &hkl) const;
+  std::vector<Kernel::V3D> getAllEquivalents(const Kernel::V3D &hkl) const;
 
   CrystalSystem getCrystalSystemFromGroup() const;
   LatticeSystem getLatticeSystemFromCrystalSystemAndGroup(

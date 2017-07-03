@@ -12,21 +12,15 @@ if ( CXXTEST_FOUND )
                         ../../TestHelpers/src/ScopedFileHelper.cpp
                         ../../TestHelpers/src/InstrumentCreationHelper.cpp
                         ../../TestHelpers/src/WorkspaceCreationHelper.cpp
+                        ../../TestHelpers/src/SingleCrystalDiffractionTestHelper.cpp
                          )
 
   cxxtest_add_test ( MDAlgorithmsTest ${TEST_FILES} ${GMOCK_TEST_FILES})
-  target_link_libraries( MDAlgorithmsTest LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME}
-            API
+  target_link_libraries( MDAlgorithmsTest LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} ${MANTIDLIBS}
             DataHandling
-            DataObjects
             CurveFitting
-            Geometry
-            HistogramData
-            Kernel
             MDAlgorithms
             Nexus
-            ${Boost_LIBRARIES}
-            ${POCO_LIBRARIES}
             ${MUPARSER_LIBRARIES}
             ${GMOCK_LIBRARIES}
             ${GTEST_LIBRARIES}

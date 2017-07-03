@@ -5,6 +5,7 @@
 
 from __future__ import (absolute_import, division, print_function)
 from mantid.simpleapi import *
+from mantid.kernel import funcinspect
 from Direct.PropertiesDescriptors import *
 import re
 import collections

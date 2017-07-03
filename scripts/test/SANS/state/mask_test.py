@@ -35,8 +35,7 @@ class StateMaskTest(unittest.TestCase):
                          "phi_min": 0.5, "phi_max": 1., "use_mask_phi_mirror": True,
                          "beam_stop_arm_width": 1., "beam_stop_arm_angle": 24.5, "beam_stop_arm_pos1": 12.,
                          "beam_stop_arm_pos2": 34.,
-                         "clear": False, "clear_time": False, "single_spectra": [1, 4, 6],
-                         "spectrum_range_start": [1, 5, 7], "spectrum_range_stop": [2, 6, 8],
+                         "clear": False, "clear_time": False,
                          "idf_path": ""}
 
         for key, value in list(mask_settings.items()):
@@ -53,7 +52,8 @@ class StateMaskTest(unittest.TestCase):
                              "block_vertical_start": [1, 2, 4], "block_vertical_stop": [2, 3, 5],
                              "block_cross_horizontal": [1, 2, 4], "block_cross_vertical": [2, 3, 5],
                              "bin_mask_start": [1., 2., 4.], "bin_mask_stop": [2., 3., 5.],
-                             "detector_name": "name", "detector_name_short": "name_short"}
+                             "detector_name": "name", "detector_name_short": "name_short", "single_spectra": [1, 4, 6],
+                             "spectrum_range_start": [1, 5, 7], "spectrum_range_stop": [2, 6, 8]}
 
         StateMaskTest._set_detector(state, detector_settings, detector_entries,
                                     DetectorType.to_string(DetectorType.LAB))
@@ -77,6 +77,7 @@ class StateMaskTest(unittest.TestCase):
         # Bad values
         bad_value_general_dict = StateMaskTest._get_dict(entry_name, bad_value_general)
         bad_value_detector_dict = StateMaskTest._get_dict(entry_name, bad_value_detector)
+
         state = self._get_mask_state(bad_value_general_dict, bad_value_detector_dict)
         assert_validate_error(self, ValueError, state)
 
@@ -102,16 +103,16 @@ class StateMaskTest(unittest.TestCase):
                                                                            None, [1., 2., 3.], None)
 
     def test_that_raises_when_only_one_spectrum_range_has_been_set(self):
-        self.assert_raises_for_bad_value_and_raises_nothing_for_good_value("spectrum_range_start", EXPLICIT_NONE,
-                                                                           None, [1, 5, 7], None)
+        self.assert_raises_for_bad_value_and_raises_nothing_for_good_value("spectrum_range_start", None, EXPLICIT_NONE,
+                                                                           None, [1, 5, 7])
 
     def test_that_raises_when_spectrum_range_lengths_are_mismatched(self):
-        self.assert_raises_for_bad_value_and_raises_nothing_for_good_value("spectrum_range_start", [1, 3],
-                                                                           None, [1, 5, 7], None)
+        self.assert_raises_for_bad_value_and_raises_nothing_for_good_value("spectrum_range_start", None,
+                                                                           [1, 3], None, [1, 5, 7])
 
     def test_that_raises_lower_bound_is_larger_than_upper_bound_for_spectrum_range(self):
-        self.assert_raises_for_bad_value_and_raises_nothing_for_good_value("spectrum_range_start", [1, 10, 3],
-                                                                           None, [1, 5, 7], None)
+        self.assert_raises_for_bad_value_and_raises_nothing_for_good_value("spectrum_range_start", None, [1, 10, 3],
+                                                                           None, [1, 5, 7])
 
     def test_that_raises_when_only_one_vertical_strip_has_been_set(self):
         self.assert_raises_for_bad_value_and_raises_nothing_for_good_value("range_vertical_strip_start", None,

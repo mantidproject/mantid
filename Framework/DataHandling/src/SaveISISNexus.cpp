@@ -963,7 +963,7 @@ void SaveISISNexus::selog() {
     }
   }
 
-  Progress prog(this, 0.5, 1, potentialLogFiles.size());
+  Progress prog(this, 0.5, 1.0, potentialLogFiles.size());
 
   NXmakegroup(handle, "selog", "IXselog");
   NXopengroup(handle, "selog", "IXselog");

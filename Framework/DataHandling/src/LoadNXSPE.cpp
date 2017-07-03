@@ -11,8 +11,8 @@
 #include "MantidKernel/UnitFactory.h"
 
 #include "MantidNexus/NexusClasses.h"
-#include <nexus/NeXusException.hpp>
 #include <nexus/NeXusFile.hpp>
+#include <nexus/NeXusException.hpp>
 
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Detector.h"

@@ -3,7 +3,7 @@
 
 #include "MantidAPI/DllConfig.h"
 #include "MantidKernel/make_unique.h"
-#include "MantidKernel/PropertyManager.h"
+#include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/Statistics.h"
 #include <memory>
 #include <vector>
@@ -18,6 +18,8 @@ template <class KEYTYPE, class VALUETYPE> class Cache;
 template <typename TYPE> class TimeSeriesProperty;
 class SplittingInterval;
 typedef std::vector<SplittingInterval> TimeSplitterType;
+class DateAndTime;
+class PropertyManager;
 }
 
 namespace API {
@@ -102,13 +104,8 @@ public:
   bool hasProperty(const std::string &name) const;
   /// Remove a named property
   void removeProperty(const std::string &name, bool delProperty = true);
-  /**
-   * Return all of the current properties
-   * @returns A vector of the current list of properties
-   */
-  inline const std::vector<Kernel::Property *> &getProperties() const {
-    return m_manager.getProperties();
-  }
+  const std::vector<Kernel::Property *> &getProperties() const;
+
   /// Returns a property as a time series property. It will throw if it is not
   /// valid
   template <typename T>
@@ -192,8 +189,11 @@ public:
   void clearLogs();
 
 protected:
+  /// Load the run from a NeXus file with a given group name
+  void loadNexus(::NeXus::File *file,
+                 const std::map<std::string, std::string> &entries);
   /// A pointer to a property manager
-  Kernel::PropertyManager m_manager;
+  std::unique_ptr<Kernel::PropertyManager> m_manager;
   /// Name of the log entry containing the proton charge when retrieved using
   /// getProtonCharge
   static const char *PROTON_CHARGE_LOG_NAME;

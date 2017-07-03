@@ -47,6 +47,8 @@ set ( TEST_PY_FILES
       test/ISISPowderAbsorptionTest.py
       test/ISISPowderCommonTest.py
       test/ISISPowderInstrumentSettingsTest.py
+      test/ISISPowderRunDetailsTest.py
+      test/ISISPowderSampleDetailsTest.py
       test/ISISPowderYamlParserTest.py
       test/PyChopTest.py
       test/ReductionSettingsTest.py
@@ -74,7 +76,7 @@ add_subdirectory(test/SANS)
 
 # python unit tests
 if (PYUNITTEST_FOUND)
-  pyunittest_add_test ( ${CMAKE_CURRENT_SOURCE_DIR}/test PythonScriptsTest ${TEST_PY_FILES} )
+  pyunittest_add_test ( ${CMAKE_CURRENT_SOURCE_DIR}/test python.scripts ${TEST_PY_FILES} )
   # Trying to add tested modules to python system path
   #set (ENV{PYTHONPATH}  "ENV{PYTHONPATH} ${CMAKE_CURRENT_SOURCE_DIR}/Inelastic" )
 endif ()

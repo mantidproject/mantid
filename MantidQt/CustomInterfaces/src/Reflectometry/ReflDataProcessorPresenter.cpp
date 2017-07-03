@@ -5,6 +5,7 @@
 #include "MantidAPI/Run.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorTreeManager.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorView.h"
+#include "MantidQtMantidWidgets/DataProcessorUI/ParseKeyValueString.h"
 #include "MantidQtMantidWidgets/ProgressPresenter.h"
 
 using namespace MantidQt::MantidWidgets;
@@ -46,20 +47,26 @@ ReflDataProcessorPresenter::~ReflDataProcessorPresenter() {}
 void ReflDataProcessorPresenter::process() {
 
   // Get selected runs
-  const auto items = m_manager->selectedData(true);
+  m_selectedData = m_manager->selectedData(true);
+
+  // Don't continue if there are no items to process
+  if (m_selectedData.size() == 0)
+    return;
 
   // If uniform slicing is empty process normally, delegating to
   // GenericDataProcessorPresenter
   std::string timeSlicingValues = m_mainPresenter->getTimeSlicingValues();
   if (timeSlicingValues.empty()) {
     // Check if any input event workspaces still exist in ADS
-    if (proceedIfWSTypeInADS(items, true))
+    if (proceedIfWSTypeInADS(m_selectedData, true)) {
+      setPromptUser(false); // Prevent prompting user twice
       GenericDataProcessorPresenter::process();
+    }
     return;
   }
 
   // Check if any input non-event workspaces exist in ADS
-  if (!proceedIfWSTypeInADS(items, false))
+  if (!proceedIfWSTypeInADS(m_selectedData, false))
     return;
 
   // Get time slicing type
@@ -67,7 +74,7 @@ void ReflDataProcessorPresenter::process() {
 
   // Progress report
   int progress = 0;
-  int maxProgress = (int)(items.size());
+  int maxProgress = (int)(m_selectedData.size());
   ProgressPresenter progressReporter(progress, maxProgress, maxProgress,
                                      m_progressView);
 
@@ -77,7 +84,7 @@ void ReflDataProcessorPresenter::process() {
   bool errors = false;
 
   // Loop in groups
-  for (const auto &item : items) {
+  for (const auto &item : m_selectedData) {
 
     // Group of runs
     GroupData group = item.second;
@@ -183,10 +190,13 @@ bool ReflDataProcessorPresenter::processGroupAsEventWS(
   size_t numGroupSlices = INT_MAX;
 
   std::vector<double> startTimes, stopTimes;
+  std::string logFilter; // Set if we are slicing by log value
 
-  // For custom slicing, the start/stop times are the same for all rows
+  // For custom/log value slicing the start/stop times are the same for all rows
   if (timeSlicingType == "Custom")
     parseCustom(timeSlicingValues, startTimes, stopTimes);
+  if (timeSlicingType == "LogValue")
+    parseLogValue(timeSlicingValues, logFilter, startTimes, stopTimes);
 
   for (const auto &row : group) {
 
@@ -194,7 +204,7 @@ bool ReflDataProcessorPresenter::processGroupAsEventWS(
     const auto data = row.second;         // Vector containing data for this row
     std::string runNo = row.second.at(0); // The run number
 
-    if (timeSlicingType != "Custom") {
+    if (timeSlicingType == "UniformEven" || timeSlicingType == "Uniform") {
       const std::string runName = "TOF_" + runNo;
       parseUniform(timeSlicingValues, timeSlicingType, runName, startTimes,
                    stopTimes);
@@ -205,12 +215,13 @@ bool ReflDataProcessorPresenter::processGroupAsEventWS(
 
     for (size_t i = 0; i < numSlices; i++) {
       try {
-        auto wsName = takeSlice(runNo, i, startTimes[i], stopTimes[i]);
-        std::vector<std::string> slice(data);
+        RowData slice(data);
+        std::string wsName =
+            takeSlice(runNo, i, startTimes[i], stopTimes[i], logFilter);
         slice[0] = wsName;
-        auto newData = reduceRow(slice);
-        newData[0] = data[0];
-        m_manager->update(groupID, rowID, newData);
+        reduceRow(&slice);
+        slice[0] = data[0];
+        m_manager->update(groupID, rowID, slice);
       } catch (...) {
         return true;
       }
@@ -225,8 +236,8 @@ bool ReflDataProcessorPresenter::processGroupAsEventWS(
   // Post-process (if needed)
   if (multiRow) {
 
-    // All slices are common for uniform even or custom slicing
-    if (timeSlicingType == "UniformEven" || timeSlicingType == "Custom")
+    // All slices are common for uniform even, custom and log value slicing
+    if (timeSlicingType != "Uniform")
       numGroupSlices = startTimes.size();
 
     addNumGroupSlicesEntry(groupID, numGroupSlices);
@@ -256,17 +267,17 @@ bool ReflDataProcessorPresenter::processGroupAsEventWS(
 * @param group :: the group of event workspaces
 * @return :: true if errors were encountered
 */
-bool ReflDataProcessorPresenter::processGroupAsNonEventWS(
-    int groupID, const GroupData &group) {
+bool ReflDataProcessorPresenter::processGroupAsNonEventWS(int groupID,
+                                                          GroupData &group) {
 
   bool errors = false;
 
-  for (const auto &row : group) {
+  for (auto &row : group) {
 
     // Reduce this row
-    auto newData = reduceRow(row.second);
+    reduceRow(&row.second);
     // Update the tree
-    m_manager->update(groupID, row.first, newData);
+    m_manager->update(groupID, row.first, row.second);
   }
 
   // Post-process (if needed)
@@ -351,28 +362,47 @@ void ReflDataProcessorPresenter::parseCustom(const std::string &timeSlicing,
   std::transform(timesStr.begin(), timesStr.end(), std::back_inserter(times),
                  [](const std::string &astr) { return std::stod(astr); });
 
-  size_t numTimes = times.size();
+  size_t numSlices = times.size() > 1 ? times.size() - 1 : 1;
 
   // Add the start/stop times
-  startTimes = std::vector<double>(numTimes - 1);
-  stopTimes = std::vector<double>(numTimes - 1);
+  startTimes = std::vector<double>(numSlices);
+  stopTimes = std::vector<double>(numSlices);
 
-  if (numTimes == 1) {
+  if (times.size() == 1) {
     startTimes[0] = 0;
     stopTimes[0] = times[0];
   } else {
-    for (size_t i = 0; i < numTimes - 1; i++) {
+    for (size_t i = 0; i < numSlices; i++) {
       startTimes[i] = times[i];
       stopTimes[i] = times[i + 1];
     }
   }
 }
 
-/** Loads an event workspace and puts it into the ADS
+/** Parses a string to extract log value filter and time slicing
  *
- * @param runNo :: the run number as a string
- * @return :: True if algorithm was executed. False otherwise
+ * @param inputStr :: The string to parse
+ * @param logFilter :: The log filter to use
+ * @param startTimes :: Start times for the set of slices
+ * @param stopTimes :: Stop times for the set of slices
  */
+void ReflDataProcessorPresenter::parseLogValue(const std::string &inputStr,
+                                               std::string &logFilter,
+                                               std::vector<double> &startTimes,
+                                               std::vector<double> &stopTimes) {
+
+  auto strMap = parseKeyValueString(inputStr);
+  std::string timeSlicing = strMap.at("Slicing");
+  logFilter = strMap.at("LogFilter");
+
+  parseCustom(timeSlicing, startTimes, stopTimes);
+}
+
+/** Loads an event workspace and puts it into the ADS
+*
+* @param runNo :: The run number as a string
+* @return :: True if algorithm was executed. False otherwise
+*/
 bool ReflDataProcessorPresenter::loadEventRun(const std::string &runNo) {
 
   bool runFound;
@@ -394,9 +424,9 @@ bool ReflDataProcessorPresenter::loadEventRun(const std::string &runNo) {
 }
 
 /** Loads a non-event workspace and puts it into the ADS
- *
- * @param runNo :: the run number as a string
- */
+*
+* @param runNo :: The run number as a string
+*/
 void ReflDataProcessorPresenter::loadNonEventRun(const std::string &runNo) {
 
   bool runFound; // unused but required
@@ -445,42 +475,52 @@ std::string ReflDataProcessorPresenter::loadRun(const std::string &run,
 
 /** Takes a slice from a run and puts the 'sliced' workspace into the ADS
 *
-* @param runNo :: the run number as a string
-* @param sliceIndex :: the index of the slice being taken
-* @param startTime :: start time
-* @param stopTime :: stop time
+* @param runNo :: The run number as a string
+* @param sliceIndex :: The index of the slice being taken
+* @param startTime :: Start time
+* @param stopTime :: Stop time
+* @param logFilter :: The log filter to use if slicing by log value
 * @return :: the name of the sliced workspace (without prefix 'TOF_')
 */
-std::string ReflDataProcessorPresenter::takeSlice(const std::string &runNo,
-                                                  size_t sliceIndex,
-                                                  double startTime,
-                                                  double stopTime) {
+std::string ReflDataProcessorPresenter::takeSlice(
+    const std::string &runNo, size_t sliceIndex, double startTime,
+    double stopTime, const std::string &logFilter) {
 
   std::string runName = "TOF_" + runNo;
   std::string sliceName = runName + "_slice_" + std::to_string(sliceIndex);
   std::string monName = runName + "_monitors";
+  std::string filterAlg =
+      logFilter.empty() ? "FilterByTime" : "FilterByLogValue";
 
-  // Filter by time
-  IAlgorithm_sptr filter = AlgorithmManager::Instance().create("FilterByTime");
+  // Filter the run using the appropriate filter algorithm
+  IAlgorithm_sptr filter = AlgorithmManager::Instance().create(filterAlg);
   filter->initialize();
   filter->setProperty("InputWorkspace", runName);
   filter->setProperty("OutputWorkspace", sliceName);
-  filter->setProperty("StartTime", startTime);
-  filter->setProperty("StopTime", stopTime);
+  if (filterAlg == "FilterByTime") {
+    filter->setProperty("StartTime", startTime);
+    filter->setProperty("StopTime", stopTime);
+  } else { // FilterByLogValue
+    filter->setProperty("MinimumValue", startTime);
+    filter->setProperty("MaximumValue", stopTime);
+    filter->setProperty("TimeTolerance", 1.0);
+    filter->setProperty("LogName", logFilter);
+  }
+
   filter->execute();
 
-  // Get the normalization constant for this slice
-  MatrixWorkspace_sptr mws =
-      AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(runName);
+  // Obtain the normalization constant for this slice
+  IEventWorkspace_sptr mws =
+      AnalysisDataService::Instance().retrieveWS<IEventWorkspace>(runName);
   double total = mws->run().getProtonCharge();
-  mws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(sliceName);
+  mws = AnalysisDataService::Instance().retrieveWS<IEventWorkspace>(sliceName);
   double slice = mws->run().getProtonCharge();
-  double fraction = slice / total;
+  double scaleFactor = slice / total;
 
   IAlgorithm_sptr scale = AlgorithmManager::Instance().create("Scale");
   scale->initialize();
   scale->setProperty("InputWorkspace", monName);
-  scale->setProperty("Factor", fraction);
+  scale->setProperty("Factor", scaleFactor);
   scale->setProperty("OutputWorkspace", "__" + monName + "_temp");
   scale->execute();
 

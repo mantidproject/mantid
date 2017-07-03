@@ -19,8 +19,6 @@
 #include "MantidDataHandling/SaveNexusProcessed.h"
 #include "MantidDataHandling/Load.h"
 #include "MantidDataHandling/LoadInstrument.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include "MantidTestHelpers/HistogramDataTestHelper.h"
 
 #include "SaveNexusProcessedTest.h"
 
@@ -31,6 +29,9 @@
 #include <Poco/File.h>
 
 #include <string>
+
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidTestHelpers/HistogramDataTestHelper.h"
 
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
@@ -1442,6 +1443,14 @@ public:
     loader.initialize();
     loader.setPropertyValue("Filename", "PG3_733_focussed.nxs");
     loader.setPropertyValue("OutputWorkspace", "ws");
+    TS_ASSERT(loader.execute());
+  }
+
+  void testPeaksWorkspace() {
+    LoadNexusProcessed loader;
+    loader.initialize();
+    loader.setPropertyValue("Filename", "24954_allpeaksbyhand.nxs");
+    loader.setPropertyValue("OutputWorkspace", "peaks");
     TS_ASSERT(loader.execute());
   }
 };

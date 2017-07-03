@@ -87,12 +87,14 @@ public:
   /// Destructor
   ~MuonAnalysis();
 
-  /// Sets index of group or pair to plot
-  /// and causes a replot
-  void setGroupOrPairAndReplot(int index);
-
-  /// Gets current index of group or pair to plot
+  /// Gets current index of the group or pair to plot
   int getGroupOrPairToPlot() const;
+
+  /// Sets the current index of the group or pair to plot
+  void setGroupOrPairIndexToPlot(int index);
+
+  /// Plots the currently selected group or pair
+  void plotCurrentGroupAndPairs();
 
 signals:
   /// Request to hide/show Mantid toolbars
@@ -101,7 +103,8 @@ signals:
 private slots:
   /// Guess Alpha clicked
   void guessAlphaClicked();
-
+  void handleGroupBox();
+  void handlePeriodBox();
   /// Checks whether two specified periods are equal and, if they are, sets
   /// second one to None
   void checkForEqualPeriods();
@@ -155,7 +158,7 @@ private slots:
   void runFrontPlotButton();
 
   /// Creates a plot of selected group/pair.
-  void plotSelectedItem();
+  void plotSelectedGroupPair();
 
   /// Link to the wiki for the home tab
   void muonAnalysisHelpClicked();
@@ -249,6 +252,9 @@ private slots:
   /// Called when "enable multi fit" checkbox is turned on/off
   void multiFitCheckboxChanged(int state);
 
+  /// Called when "TF Asymmetry" checkbox is turned on/off
+  void changedTFAsymmCheckbox(int state);
+  void setTFAsymm(Muon::TFAsymmState);
   /// Called when "overwrite" is changed
   void updateDataPresenterOverwrite(int state);
 
@@ -300,8 +306,8 @@ private:
   std::string getNewAnalysisWSName(Muon::ItemType itemType, int tableRow,
                                    Muon::PlotType plotType);
 
-  /// Update front anc pair combo box
-  void updateFrontAndCombo();
+  /// Update front and pair combo box
+  void updateFrontAndCombo(bool updateIndexAndPlot);
 
   /// Updates widgets related to period algebra
   void updatePeriodWidgets(size_t numPeriods);
@@ -330,6 +336,9 @@ private:
 
   /// Plots specific WS spectrum (used by plotPair and plotGroup)
   void plotSpectrum(const QString &wsName, bool logScale = false);
+
+  /// set labels for a single data set
+  void updateLabels(std::string &name);
 
   /// Get current plot style parameters. wsName and wsIndex are used to get
   /// default values if
@@ -560,6 +569,11 @@ private:
 
   /// Set the Grouping and Data Analysis tabs enabled/disabled
   void setAnalysisTabsEnabled(const bool enabled);
+
+  void setChosenGroupAndPeriods(const QString &wsName);
+
+  /// set the group/pair name
+  std::string m_groupPairName;
 };
 }
 }

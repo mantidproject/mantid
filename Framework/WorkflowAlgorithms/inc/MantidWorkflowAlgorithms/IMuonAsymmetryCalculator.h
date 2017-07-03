@@ -40,7 +40,6 @@ public:
                            const std::vector<int> summedPeriods,
                            const std::vector<int> subtractedPeriods);
   virtual ~IMuonAsymmetryCalculator() = default;
-
   /// Overridden in derived classes to perform asymmetry calculation
   virtual API::MatrixWorkspace_sptr calculate() const = 0;
 

@@ -2,7 +2,7 @@ from __future__ import (absolute_import, division, print_function)
 
 from mantid.api import mtd, AlgorithmFactory, DataProcessorAlgorithm, ITableWorkspaceProperty, \
     MatrixWorkspaceProperty, MultipleFileProperty, PropertyMode
-from mantid.kernel import Direction
+from mantid.kernel import ConfigService, Direction
 from mantid.simpleapi import AlignAndFocusPowder, CompressEvents, ConvertUnits, CreateCacheFilename, \
     DeleteWorkspace, DetermineChunking, Divide, EditInstrumentGeometry, FilterBadPulses, Load, \
     LoadNexusProcessed, PDDetermineCharacterizations, Plus, RenameWorkspace, SaveNexusProcessed
@@ -10,9 +10,11 @@ import os
 
 EXTENSIONS_NXS = ["_event.nxs", ".nxs.h5"]
 PROPS_FOR_INSTR = ["PrimaryFlightPath", "SpectrumIDs", "L2", "Polar", "Azimuthal"]
-PROPS_FOR_ALIGN = ["CalFileName", "GroupFilename", "GroupingWorkspace",
-                   "CalibrationWorkspace", "OffsetsWorkspace",
-                   "MaskWorkspace", "MaskBinTable",
+CAL_FILE, GROUP_FILE = "CalFileName", "GroupFilename"
+CAL_WKSP, GRP_WKSP, MASK_WKSP = "CalibrationWorkspace", "GroupingWorkspace", "MaskWorkspace"
+PROPS_FOR_ALIGN = [CAL_FILE, GROUP_FILE,
+                   GRP_WKSP,CAL_WKSP, "OffsetsWorkspace",
+                   MASK_WKSP, "MaskBinTable",
                    "Params", "ResampleX", "Dspacing", "DMin", "DMax",
                    "TMin", "TMax", "PreserveEvents",
                    "RemovePromptPulseWidth", "CompressTolerance",
@@ -20,6 +22,7 @@ PROPS_FOR_ALIGN = ["CalFileName", "GroupFilename", "GroupingWorkspace",
                    "CropWavelengthMin", "CropWavelengthMax",
                    "LowResSpectrumOffset", "ReductionProperties"]
 PROPS_FOR_ALIGN.extend(PROPS_FOR_INSTR)
+PROPS_FOR_PD_CHARACTER = ['FrequencyLogNames', 'WaveLengthLogNames']
 
 
 def determineChunking(filename, chunkSize):
@@ -78,6 +81,7 @@ class AlignAndFocusPowderFromFiles(DataProcessorAlgorithm):
                              'Characterizations table')
 
         self.copyProperties("AlignAndFocusPowder", PROPS_FOR_ALIGN)
+        self.copyProperties('PDDetermineCharacterizations', PROPS_FOR_PD_CHARACTER)
 
     def _getLinearizedFilenames(self, propertyName):
         runnumbers = self.getProperty(propertyName).value
@@ -94,20 +98,51 @@ class AlignAndFocusPowderFromFiles(DataProcessorAlgorithm):
         for name in PROPS_FOR_ALIGN:
             prop = self.getProperty(name)
             if name == 'PreserveEvents' or not prop.isDefault:
-                args[name] = prop.value
+                if 'Workspace' in name:
+                    args[name] = prop.valueAsStr
+                else:
+                    args[name] = prop.value
         return args
+
+    def __updateAlignAndFocusArgs(self, wkspname):
+        self.log().warning('__updateAlignAndFocusArgs(%s)!!!!!!!' % wkspname)
+        # if the files are missing, there is nothing to do
+        if (CAL_FILE not in self.kwargs) and (GROUP_FILE not in self.kwargs):
+            self.log().warning('--> Nothing to do')
+        self.log().warning('--> Updating')
+
+        # delete the files from the list of kwargs
+        if CAL_FILE in self.kwargs:
+            del self.kwargs[CAL_FILE]
+        if CAL_FILE in self.kwargs:
+            del self.kwargs[GROUP_FILE]
+
+        # get the instrument name
+        instr = mtd[wkspname].getInstrument().getName()
+        instr = ConfigService.getInstrument(instr).shortName()
+
+        # use the canonical names if they weren't specifed
+        for key, ext in zip((CAL_WKSP, GRP_WKSP, MASK_WKSP),
+                            ('_cal', '_group', '_mask')):
+            if key not in self.kwargs:
+                self.kwargs[key] = instr + ext
 
     def __determineCharacterizations(self, filename, wkspname):
         tempname = '__%s_temp' % wkspname
         Load(Filename=filename, OutputWorkspace=tempname,
              MetaDataOnly=True)
+
+        # put together argument list
+        args = dict(InputWorkspace=tempname,
+                    ReductionProperties=self.getProperty('ReductionProperties').valueAsStr)
+        for name in PROPS_FOR_PD_CHARACTER:
+            prop = self.getProperty(name)
+            if not prop.isDefault:
+                args[name] = prop.value
         if self.charac is not None:
-            PDDetermineCharacterizations(InputWorkspace=tempname,
-                                         Characterizations=self.charac,
-                                         ReductionProperties=self.getProperty('ReductionProperties').valueAsStr)
-        else:
-            PDDetermineCharacterizations(InputWorkspace=tempname,
-                                         ReductionProperties=self.getProperty('ReductionProperties').valueAsStr)
+            args['Characterizations'] = self.charac
+
+        PDDetermineCharacterizations(**args)
         DeleteWorkspace(Workspace=tempname)
 
     def __getCacheName(self, wkspname):
@@ -165,6 +200,7 @@ class AlignAndFocusPowderFromFiles(DataProcessorAlgorithm):
             prog_start += 2.*prog_per_chunk_step # AlignAndFocusPowder counts for two steps
 
             if j == 0:
+                self.__updateAlignAndFocusArgs(chunkname)
                 RenameWorkspace(InputWorkspace=chunkname, OutputWorkspace=wkspname)
             else:
                 Plus(LHSWorkspace=wkspname, RHSWorkspace=chunkname, OutputWorkspace=wkspname,
@@ -192,7 +228,8 @@ class AlignAndFocusPowderFromFiles(DataProcessorAlgorithm):
         for (i, filename) in enumerate(filenames):
             # default name is based off of filename
             wkspname = os.path.split(filename)[-1].split('.')[0]
-            self.__determineCharacterizations(filename, wkspname)
+            self.__determineCharacterizations(filename,
+                                              wkspname) # updates instance variable
             cachefile = self.__getCacheName(wkspname)
             wkspname += '_f%d' % i # add file number to be unique
 
@@ -206,7 +243,8 @@ class AlignAndFocusPowderFromFiles(DataProcessorAlgorithm):
                     prop = self.getProperty(name)
                     if not prop.isDefault:
                         editinstrargs[name] = prop.value
-                EditInstrumentGeometry(Workspace=wkspname, **editinstrargs)
+                if editinstrargs:
+                    EditInstrumentGeometry(Workspace=wkspname, **editinstrargs)
             else:
                 self.__processFile(filename, wkspname, self.prog_per_file*float(i))
                 if cachefile is not None:
@@ -222,6 +260,10 @@ class AlignAndFocusPowderFromFiles(DataProcessorAlgorithm):
                 DeleteWorkspace(Workspace=wkspname)
                 if self.kwargs['PreserveEvents']:
                     CompressEvents(InputWorkspace=finalname, OutputWorkspace=finalname)
+
+        # with more than one chunk or file the integrated proton charge is
+        # generically wrong
+        mtd[finalname].run().integrateProtonCharge()
 
         # set the output workspace
         self.setProperty('OutputWorkspace', mtd[finalname])

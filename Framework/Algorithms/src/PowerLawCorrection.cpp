@@ -3,6 +3,7 @@
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/PowerLawCorrection.h"
 #include "MantidKernel/ArrayProperty.h"
+#include <cmath>
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;

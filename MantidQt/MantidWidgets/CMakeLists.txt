@@ -87,7 +87,6 @@ set ( SRC_FILES
 	src/MWDiag.cpp
 	src/MWView.cpp
 	src/MantidHelpWindow.cpp
-	src/MantidSurfacePlotDialog.cpp
 	src/MantidTreeWidget.cpp
 	src/MantidTreeWidgetItem.cpp
 	src/MantidWSIndexDialog.cpp
@@ -132,6 +131,10 @@ set ( MOC_FILES
     inc/MantidQtMantidWidgets/CheckboxHeader.h
     inc/MantidQtMantidWidgets/ColorBarWidget.h
     inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorCommandAdapter.h
+    inc/MantidQtMantidWidgets/DataProcessorUI/GenericDataProcessorPresenter.h
+    inc/MantidQtMantidWidgets/DataProcessorUI/GenericDataProcessorPresenterThread.h
+    inc/MantidQtMantidWidgets/DataProcessorUI/GenericDataProcessorPresenterRowReducerWorker.h
+    inc/MantidQtMantidWidgets/DataProcessorUI/GenericDataProcessorPresenterGroupReducerWorker.h
     inc/MantidQtMantidWidgets/DataProcessorUI/QDataProcessorOneLevelTreeModel.h
     inc/MantidQtMantidWidgets/DataProcessorUI/QDataProcessorTwoLevelTreeModel.h
     inc/MantidQtMantidWidgets/DataProcessorUI/QDataProcessorWidget.h
@@ -154,7 +157,6 @@ set ( MOC_FILES
     inc/MantidQtMantidWidgets/InstrumentSelector.h
     inc/MantidQtMantidWidgets/IndirectInstrumentConfig.h
     inc/MantidQtMantidWidgets/InputController.h
-    inc/MantidQtMantidWidgets/MantidSurfacePlotDialog.h
     inc/MantidQtMantidWidgets/MantidWSIndexDialog.h
     inc/MantidQtMantidWidgets/MantidTreeWidget.h
     inc/MantidQtMantidWidgets/MantidHelpWindow.h
@@ -224,23 +226,24 @@ set ( INC_FILES
 	inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorClearSelectedCommand.h
 	inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorCommand.h
 	inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorCommandBase.h
-  inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorCollapseGroupsCommand.h
+  	inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorCollapseGroupsCommand.h
 	inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorCopySelectedCommand.h
 	inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorCutSelectedCommand.h
 	inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorDeleteGroupCommand.h
 	inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorDeleteRowCommand.h
 	inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorExpandCommand.h
-  inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorExpandGroupsCommand.h
+	inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorExpandGroupsCommand.h
 	inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorExportTableCommand.h
 	inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorGenerateNotebook.h
 	inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorGroupRowsCommand.h
 	inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorImportTableCommand.h
-    inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorMainPresenter.h
+	inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorMainPresenter.h
 	inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorNewTableCommand.h
 	inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorOneLevelTreeManager.h
 	inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorOpenTableCommand.h
 	inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorOptionsCommand.h
 	inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorPasteSelectedCommand.h
+	inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorPauseCommand.h
 	inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorPlotGroupCommand.h
 	inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorPlotRowCommand.h
 	inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorPostprocessingAlgorithm.h
@@ -257,7 +260,6 @@ set ( INC_FILES
 	inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorView.h
 	inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorWhiteList.h
 	inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorWorkspaceCommand.h
-	inc/MantidQtMantidWidgets/DataProcessorUI/GenericDataProcessorPresenter.h
 	inc/MantidQtMantidWidgets/DataProcessorUI/GenericDataProcessorPresenterFactory.h
 	inc/MantidQtMantidWidgets/DataProcessorUI/ParseKeyValueString.h
 	inc/MantidQtMantidWidgets/ErrorCurve.h
