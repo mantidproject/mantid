@@ -480,8 +480,7 @@ bool Algorithm::execute() {
     callProcessGroups = this->checkGroups();
   } catch (std::exception &ex) {
     getLogger().error() << "Error in execution of algorithm " << this->name()
-                        << "\n"
-                        << ex.what() << "\n";
+                        << "\n" << ex.what() << "\n";
     notificationCenter().postNotification(
         new ErrorNotification(this, ex.what()));
     m_running = false;
@@ -585,9 +584,8 @@ bool Algorithm::execute() {
       if (m_isChildAlgorithm || m_runningAsync || m_rethrow)
         throw;
       else {
-        getLogger().error()
-            << "Error in execution of algorithm " << this->name() << '\n'
-            << ex.what() << '\n';
+        getLogger().error() << "Error in execution of algorithm "
+                            << this->name() << '\n' << ex.what() << '\n';
       }
       notificationCenter().postNotification(
           new ErrorNotification(this, ex.what()));
@@ -597,9 +595,8 @@ bool Algorithm::execute() {
       if (m_isChildAlgorithm || m_runningAsync || m_rethrow)
         throw;
       else {
-        getLogger().error()
-            << "Logic Error in execution of algorithm " << this->name() << '\n'
-            << ex.what() << '\n';
+        getLogger().error() << "Logic Error in execution of algorithm "
+                            << this->name() << '\n' << ex.what() << '\n';
       }
       notificationCenter().postNotification(
           new ErrorNotification(this, ex.what()));
@@ -623,8 +620,7 @@ bool Algorithm::execute() {
     notificationCenter().postNotification(
         new ErrorNotification(this, ex.what()));
     getLogger().error() << "Error in execution of algorithm " << this->name()
-                        << ":\n"
-                        << ex.what() << "\n";
+                        << ":\n" << ex.what() << "\n";
     this->unlockWorkspaces();
     throw;
   }
