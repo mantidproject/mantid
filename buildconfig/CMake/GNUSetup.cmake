@@ -37,16 +37,10 @@ set( GNUFLAGS "-Wall -Wextra -Wconversion -Winit-self -Wpointer-arith -Wcast-qua
 # -Wno-deprecated: Do not warn about use of deprecated headers.
 # -Wno-write-strings: Do not warn about deprecated conversions of char*->const char*
 # -Wno-unused-result: Do not warn about unused return values in some C functions
-set( GNUFLAGS "${GNUFLAGS} -Wno-deprecated -Wno-write-strings")
+set( GNUFLAGS "${GNUFLAGS} -Wno-deprecated -Wno-write-strings -Wno-unused-result -Wpedantic")
 
-# Check if we have a new enough version for this flag
-# some -pedantic warnings remain with gcc 4.4.7
-if ( CMAKE_COMPILER_IS_GNUCXX )
-  if (NOT (GCC_COMPILER_VERSION VERSION_LESS "4.5"))
-    set(GNUFLAGS "${GNUFLAGS} -Wno-unused-result -pedantic")
-  endif ()
-elseif ( "${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang" )
-    set(GNUFLAGS "${GNUFLAGS} -Wno-sign-conversion")
+if ( "${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang" )
+  set(GNUFLAGS "${GNUFLAGS} -Wno-sign-conversion")
 endif()
 
 # Check if we have a new enough version for these flags
