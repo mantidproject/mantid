@@ -46,7 +46,7 @@ public:
   bool isDefault() const override;
   std::string isValid() const override;
   std::vector<int> &operator=(const std::vector<int> &rhs) override;
-  std::string &operator=(const std::string &rhs);
+  std::string operator=(const std::string &rhs);
   std::string setValue(const std::string &value) override;
   Indexing::SpectrumIndexSet getIndices() const;
   std::string value() const override;
