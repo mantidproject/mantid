@@ -208,14 +208,13 @@ public:
   @param name Property name
   @returns Tuple containing Workspace shared pointer and SpectrumIndexSet
   */
-  template <typename T,
-            typename = typename std::enable_if<
-                std::is_convertible<T *, MatrixWorkspace *>::value>::type>
+  template <typename T, typename = typename std::enable_if<std::is_convertible<
+                            T *, MatrixWorkspace *>::value>::type>
   std::tuple<boost::shared_ptr<T>, Indexing::SpectrumIndexSet>
   getIndexProperty(const std::string &name) const {
     if (!isCompoundProperty(name))
       throw std::runtime_error("Algorithm::getIndexProperty can only be used "
-                               "when on properties declared using "
+                               "with properties declared using "
                                "declareIndexProperty.");
 
     auto *wsProp =
@@ -248,7 +247,7 @@ public:
                         const T2 &list) {
     if (!isCompoundProperty(name))
       throw std::runtime_error("Algorithm::setIndexProperty can only be used "
-                               "when on properties declared using "
+                               "with properties declared using "
                                "declareIndexProperty.");
     auto *wsProp =
         dynamic_cast<WorkspaceProperty<T1> *>(getPointerToProperty(name));
@@ -283,7 +282,7 @@ public:
                         IndexType type, const T2 &list) {
     if (!isCompoundProperty(name))
       throw std::runtime_error("Algorithm::setIndexProperty can only be used "
-                               "when on properties declared using "
+                               "with properties declared using "
                                "declareIndexProperty.");
     auto *wsProp =
         dynamic_cast<WorkspaceProperty<T1> *>(getPointerToProperty(name));
@@ -510,9 +509,8 @@ protected:
    LockMode::Type::Lock
    @param doc Property documentation string.
    */
-  template <typename T,
-            typename = typename std::enable_if<
-                std::is_convertible<T *, MatrixWorkspace *>::value>::type>
+  template <typename T, typename = typename std::enable_if<std::is_convertible<
+                            T *, MatrixWorkspace *>::value>::type>
   void declareIndexProperty(
       const std::string &propertyName,
       const int allowedIndexTypes = IndexType::WorkspaceIndex,

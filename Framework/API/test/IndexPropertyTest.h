@@ -67,7 +67,24 @@ public:
       TS_ASSERT_EQUALS(indexSet[i], testVec[i]);
   }
 
-  void testSetIndicesUsingVector() {
+  void testAssignIndicesUsingString() {
+    auto ws = WorkspaceFactory::Instance().create("WorkspaceTester", 10, 10, 9);
+    m_wkspProp = ws;
+
+    IndexProperty indexProp("IndexSet", m_wkspProp, m_itypeProp);
+
+    indexProp = "0-5";
+
+    auto indexSet = indexProp.getIndices();
+
+    TS_ASSERT_EQUALS(indexSet.size(), 6);
+    std::vector<int> testVec{0, 1, 2, 3, 4, 5};
+
+    for (size_t i = 0; i < indexSet.size(); i++)
+      TS_ASSERT_EQUALS(indexSet[i], testVec[i]);
+  }
+
+  void testAssignIndicesUsingVector() {
     auto ws = WorkspaceFactory::Instance().create("WorkspaceTester", 10, 10, 9);
     m_wkspProp = ws;
 
