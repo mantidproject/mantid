@@ -2,8 +2,9 @@
 #include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/Run.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/muParser_Silent.h"
 #include "MantidKernel/BoundedValidator.h"
@@ -11,6 +12,8 @@
 #include "MantidKernel/Strings.h"
 
 using Mantid::HistogramData::Histogram;
+using Mantid::HistogramData::HistogramE;
+using Mantid::HistogramData::HistogramY;
 using Mantid::HistogramData::Points;
 
 namespace Mantid {
@@ -80,11 +83,7 @@ void DetectorEfficiencyCorUser::exec() {
     auto parser = generateParser(effFormula, &e);
     e = m_Ei;
     const double eff0 = evaluate(parser);
-    const auto effVec =
-        calculateEfficiency(eff0, e, parser, m_inputWS->points(i));
-    // run this outside to benefit from parallel for (?)
-    m_outputWS->setHistogram(i, applyDetEfficiency(numberOfChannels, effVec,
-                                                   m_inputWS->histogram(i)));
+    correctHistogram(i, eff0, e, parser);
 
     prog.report("Detector Efficiency correction...");
 
@@ -96,48 +95,26 @@ void DetectorEfficiencyCorUser::exec() {
 }
 
 /**
- * Apply the detector efficiency to a single spectrum
- * @param nChans Number of channels in a spectra (nbins - 1)
- * @param effVec efficiency values (to be divided by the counts)
- * @param histogram uncorrected histogram
-
- * @returns corrected histogram
- */
-Histogram DetectorEfficiencyCorUser::applyDetEfficiency(
-    const size_t nChans, const MantidVec &effVec, const Histogram &histogram) {
-  Histogram outHist(histogram);
-
-  auto &outY = outHist.mutableY();
-  auto &outE = outHist.mutableE();
-
-  for (unsigned int j = 0; j < nChans; ++j) {
-    outY[j] /= effVec[j];
-    outE[j] /= effVec[j];
-  }
-
-  return outHist;
-}
-
-/**
- * Calculate detector efficiency given a formula, the efficiency at the elastic
- * line, and a vector with energies.
+ * Apply efficiency corrections to a histogram in the output workspace.
  * Efficiency = f(Ei-DeltaE) / f(Ei)
- * @param eff0 :: calculated eff0
+ * @param eff0 :: calculated f(Ei)
  * @param e :: reference to the parser's energy parameter
  * @param parser :: muParser used to evalute f(e)
- * @param xIn :: Energy bins vector (X axis)
- * @return a vector with the efficiencies
+ * @param index :: the workspace index of the histogram to correct
  */
-MantidVec DetectorEfficiencyCorUser::calculateEfficiency(
-    double eff0, double &e, mu::Parser &parser, const Points &xIn) {
-  MantidVec effOut(xIn.size());
-
-  for (size_t i = 0; i < effOut.size(); ++i) {
+void DetectorEfficiencyCorUser::correctHistogram(const size_t index, const double eff0, double &e, mu::Parser &parser) {
+  const auto &xIn = m_inputWS->points(index);
+  const auto &yIn = m_inputWS->y(index);
+  const auto &eIn = m_inputWS->e(index);
+  auto &yOut = m_outputWS->mutableY(index);
+  auto &eOut = m_outputWS->mutableE(index);
+  for (size_t i = 0; i < xIn.size(); ++i) {
     e = m_Ei - xIn[i];
     const double eff = evaluate(parser);
-    effOut[i] = eff / eff0;
+    const double corr = eff /eff0;
+    yOut[i] = yIn[i] / corr;
+    eOut[i] = eIn[i] / corr;
   }
-  return effOut;
 }
 
 /**
@@ -201,7 +178,7 @@ void DetectorEfficiencyCorUser::retrieveProperties() {
   // If input and output workspaces are not the same, create a new workspace for
   // the output
   if (m_outputWS != this->m_inputWS) {
-    m_outputWS = API::WorkspaceFactory::Instance().create(m_inputWS);
+    m_outputWS.reset(Mantid::DataObjects::create<DataObjects::Workspace2D>(*m_inputWS).release());
   }
 
   // these first three properties are fully checked by validators

@@ -13,6 +13,8 @@ namespace Mantid {
 
 namespace HistogramData {
 class Histogram;
+class HistogramE;
+class HistogramY;
 class Points;
 }
 
@@ -66,12 +68,7 @@ private:
   void init() override;
   void exec() override;
   void retrieveProperties();
-  MantidVec calculateEfficiency(double eff0, double &e, mu::Parser &parser,
-                                const HistogramData::Points &xIn);
-
-  HistogramData::Histogram
-  applyDetEfficiency(const size_t nChans, const Mantid::MantidVec &effVec,
-                     const HistogramData::Histogram &histogram);
+  void correctHistogram(const size_t index, const double eff0, double &e, mu::Parser &parser);
 
   double evaluate(const mu::Parser &parser) const;
 
