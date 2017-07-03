@@ -105,11 +105,12 @@ class AlignAndFocusPowderFromFiles(DataProcessorAlgorithm):
         return args
 
     def __updateAlignAndFocusArgs(self, wkspname):
-        self.log().warning('__updateAlignAndFocusArgs(%s)!!!!!!!' % wkspname)
+        self.log().debug('__updateAlignAndFocusArgs(%s)' % wkspname)
         # if the files are missing, there is nothing to do
         if (CAL_FILE not in self.kwargs) and (GROUP_FILE not in self.kwargs):
-            self.log().warning('--> Nothing to do')
-        self.log().warning('--> Updating')
+            self.log().debug('--> Nothing to do')
+            return
+        self.log().debug('--> Updating')
 
         # delete the files from the list of kwargs
         if CAL_FILE in self.kwargs:
