@@ -34,18 +34,20 @@ class DataProcessorGroupRowsCommand : public DataProcessorCommandBase {
 public:
   DataProcessorGroupRowsCommand(DataProcessorPresenter *tablePresenter)
       : DataProcessorCommandBase(tablePresenter){};
+  DataProcessorGroupRowsCommand(const QDataProcessorWidget &widget)
+      : DataProcessorCommandBase(widget){};
   virtual ~DataProcessorGroupRowsCommand(){};
 
   void execute() override {
     m_presenter->notify(DataProcessorPresenter::GroupRowsFlag);
   };
-  std::string name() override { return std::string("Group Selected"); }
-  std::string icon() override { return std::string("://drag_curves.png"); }
-  std::string tooltip() override { return std::string("Group selected rows"); }
-  std::string whatsthis() override {
-    return std::string("Places all selected runs into the same group");
+  QString name() override { return QString("Group Selected"); }
+  QString icon() override { return QString("://drag_curves.png"); }
+  QString tooltip() override { return QString("Group selected rows"); }
+  QString whatsthis() override {
+    return QString("Places all selected runs into the same group");
   }
-  std::string shortcut() override { return std::string(); }
+  QString shortcut() override { return QString(); }
 };
 }
 }

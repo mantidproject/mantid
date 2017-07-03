@@ -2,10 +2,12 @@
 #define MANTIDQTMANTIDWIDGETS_DATAPROCESSORCOMMANDBASE_H
 
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorCommand.h"
+#include "MantidQtMantidWidgets/DataProcessorUI/QDataProcessorWidget.h"
+#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorPresenter.h"
 
 namespace MantidQt {
 namespace MantidWidgets {
-class DataProcessorPresenter;
+
 /** @class ReflCommandBase
 
 ReflCommandBase is an interface which defines the functions any data processor
@@ -40,6 +42,8 @@ public:
       throw std::invalid_argument("Invalid abstract presenter");
     }
   };
+  DataProcessorCommandBase(const QDataProcessorWidget &widget)
+      : DataProcessorCommandBase(widget.getPresenter()) {}
 
 protected:
   DataProcessorPresenter *const m_presenter;

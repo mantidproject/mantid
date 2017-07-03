@@ -1,5 +1,7 @@
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorWhiteList.h"
 
+#include <QString>
+
 namespace MantidQt {
 namespace MantidWidgets {
 
@@ -11,18 +13,17 @@ namespace MantidWidgets {
 * @param prefix : the prefix to be added to the value of this column
 * @param description : a description of this column
 */
-void DataProcessorWhiteList::addElement(const std::string &colName,
-                                        const std::string &algProperty,
-                                        const std::string &description,
-                                        bool showValue,
-                                        const std::string &prefix) {
+void DataProcessorWhiteList::addElement(const QString &colName,
+                                        const QString &algProperty,
+                                        const QString &description,
+                                        bool showValue, const QString &prefix) {
 
-  m_colIndexToColName.push_back(colName);
-  m_colIndexToAlgProp.push_back(algProperty);
+  m_colIndexToColName.push_back(colName.toStdString());
+  m_colIndexToAlgProp.push_back(algProperty.toStdString());
   m_showValue.push_back(showValue);
-  m_prefix.push_back(prefix);
-  m_description.push_back(description);
-  m_colNameToColIndex[colName] = m_lastIndex++;
+  m_prefix.push_back(prefix.toStdString());
+  m_description.push_back(description.toStdString());
+  m_colNameToColIndex[colName.toStdString()] = m_lastIndex++;
 }
 
 /** Returns the column index for a column specified via its name

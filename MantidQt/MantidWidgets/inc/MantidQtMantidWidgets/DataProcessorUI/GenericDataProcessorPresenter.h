@@ -9,6 +9,7 @@
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorOneLevelTreeManager.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorTwoLevelTreeManager.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorPostprocessingAlgorithm.h"
+#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorPreprocessMap.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorPreprocessingAlgorithm.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorPresenter.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorProcessingAlgorithm.h"
@@ -17,8 +18,8 @@
 #include "MantidQtMantidWidgets/ProgressPresenter.h"
 #include "MantidQtMantidWidgets/WidgetDllOption.h"
 
+#include <QSet>
 #include <queue>
-#include <set>
 
 #include <QObject>
 
@@ -99,6 +100,17 @@ public:
   GenericDataProcessorPresenter(
       const DataProcessorWhiteList &whitelist,
       const DataProcessorProcessingAlgorithm &processor);
+  // Delegating constructor: pre-processing, no post-processing
+  GenericDataProcessorPresenter(
+      const DataProcessorWhiteList &whitelist,
+      const DataProcessorPreprocessMap &preprocessMap,
+      const DataProcessorProcessingAlgorithm &processor);
+  // Delegating Constructor: pre-processing and post-processing
+  GenericDataProcessorPresenter(
+      const DataProcessorWhiteList &whitelist,
+      const DataProcessorPreprocessMap &preprocessMap,
+      const DataProcessorProcessingAlgorithm &processor,
+      const DataProcessorPostprocessingAlgorithm &postprocessor);
   virtual ~GenericDataProcessorPresenter() override;
   void notify(DataProcessorPresenter::Flag flag) override;
   const std::map<std::string, QVariant> &options() const override;
@@ -280,7 +292,7 @@ private:
   void resume();
 
   // List of workspaces the user can open
-  std::set<std::string> m_workspaceList;
+  QSet<QString> m_workspaceList;
 
   void addHandle(const std::string &name,
                  Mantid::API::Workspace_sptr workspace) override;
