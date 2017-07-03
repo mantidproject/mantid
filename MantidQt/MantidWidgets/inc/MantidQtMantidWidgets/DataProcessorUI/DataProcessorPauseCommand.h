@@ -39,16 +39,14 @@ public:
   void execute() override {
     m_presenter->notify(DataProcessorPresenter::PauseFlag);
   };
-  std::string name() override { return std::string("Pause"); }
-  std::string icon() override { return std::string("://pause.png"); }
-  std::string tooltip() override {
-    return std::string("Pause processing runs");
+  QString name() override { return QString("Pause"); }
+  QString icon() override { return QString("://pause.png"); }
+  QString tooltip() override { return QString("Pause processing runs"); }
+  QString whatsthis() override {
+    return QString("Pauses processing any selected runs. Processing may be "
+                   "resumed by clicking on the 'Process' button.");
   }
-  std::string whatsthis() override {
-    return std::string("Pauses processing any selected runs. Processing may be "
-                       "resumed by clicking on the 'Process' button.");
-  }
-  std::string shortcut() override { return std::string(); }
+  QString shortcut() override { return QString(); }
 };
 }
 }

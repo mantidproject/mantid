@@ -53,19 +53,14 @@ public:
   virtual std::string getTimeSlicingValues(int group) const = 0;
   /// Time-slicing type
   virtual std::string getTimeSlicingType(int group) const = 0;
-  /// Dialog/Prompt methods
-  virtual std::string askUserString(const std::string &prompt,
-                                    const std::string &title,
-                                    const std::string &defaultValue) = 0;
-  virtual bool askUserYesNo(const std::string &prompt,
-                            const std::string &title) = 0;
-  virtual void giveUserWarning(const std::string &prompt,
-                               const std::string &title) = 0;
   virtual void giveUserCritical(const std::string &prompt,
                                 const std::string &title) = 0;
+  /// Dialog to print information
   virtual void giveUserInfo(const std::string &prompt,
                             const std::string &title) = 0;
+  /// Run a python algorithm
   virtual std::string runPythonAlgorithm(const std::string &pythonCode) = 0;
+  /// Set the instrument name
   virtual void setInstrumentName(const std::string &instName) const = 0;
   /// Data processing check
   virtual bool checkIfProcessing() const = 0;

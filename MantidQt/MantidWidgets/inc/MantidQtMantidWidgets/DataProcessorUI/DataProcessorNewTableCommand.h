@@ -34,18 +34,20 @@ class DataProcessorNewTableCommand : public DataProcessorCommandBase {
 public:
   DataProcessorNewTableCommand(DataProcessorPresenter *tablePresenter)
       : DataProcessorCommandBase(tablePresenter){};
+  DataProcessorNewTableCommand(const QDataProcessorWidget &widget)
+      : DataProcessorCommandBase(widget){};
   virtual ~DataProcessorNewTableCommand(){};
 
   void execute() override {
     m_presenter->notify(DataProcessorPresenter::NewTableFlag);
   };
-  std::string name() override { return std::string("New Table"); }
-  std::string icon() override { return std::string("://new.png"); }
-  std::string tooltip() override { return std::string("New Table"); }
-  std::string whatsthis() override {
-    return std::string("Loads a blank table into the interface");
+  QString name() override { return QString("New Table"); }
+  QString icon() override { return QString("://new.png"); }
+  QString tooltip() override { return QString("New Table"); }
+  QString whatsthis() override {
+    return QString("Loads a blank table into the interface");
   }
-  std::string shortcut() override { return std::string(); }
+  QString shortcut() override { return QString(); }
 };
 }
 }

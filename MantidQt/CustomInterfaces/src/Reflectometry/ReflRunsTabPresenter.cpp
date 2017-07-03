@@ -342,89 +342,75 @@ ReflRunsTabPresenter::getTransferStrategy() {
   }
 }
 
-/**
-Used to tell the presenter something has changed
+/** Used to tell the presenter something has changed in the ADS
+*
+* @param workspaceList :: the list of table workspaces in the ADS that could be
+* loaded into the interface
 */
-void ReflRunsTabPresenter::notify(DataProcessorMainPresenter::Flag flag) {
+void ReflRunsTabPresenter::notifyADSChanged(
+    const QSet<QString> &workspaceList) {
 
-  switch (flag) {
-  case DataProcessorMainPresenter::Flag::ADSChangedFlag:
-    pushCommands();
-    break;
-  }
-  // Not having a 'default' case is deliberate. gcc issues a warning if there's
-  // a flag we aren't handling.
-}
-
-/** Requests pre-processing values. Values are supplied by the main
-* presenter
-* @return :: Pre-processing values
-*/
-std::map<std::string, std::string>
-ReflRunsTabPresenter::getPreprocessingValues() const {
-
-  std::map<std::string, std::string> valuesMap;
-  valuesMap["Transmission Run(s)"] =
-      m_mainPresenter->getTransmissionRuns(m_view->getSelectedGroup());
-
-  return valuesMap;
+  UNUSED_ARG(workspaceList);
+  pushCommands();
 }
 
 /** Requests property names associated with pre-processing values.
 * @return :: Pre-processing property names.
 */
-std::map<std::string, std::set<std::string>>
-ReflRunsTabPresenter::getPreprocessingProperties() const {
+QString ReflRunsTabPresenter::getPreprocessingProperties() const {
 
-  std::map<std::string, std::set<std::string>> propertiesMap;
-  propertiesMap["Transmission Run(s)"] = {"FirstTransmissionRun",
-                                          "SecondTransmissionRun"};
-
-  return propertiesMap;
+  std::string properties =
+      "Transmission Run(s):FirstTransmissionRun,SecondTransmissionRun";
+  return QString::fromStdString(properties);
 }
 
-/** Requests global pre-processing options. Options are supplied by the main
-* presenter
-* @return :: Global pre-processing options
-*/
-std::map<std::string, std::string>
-ReflRunsTabPresenter::getPreprocessingOptions() const {
+/** Requests global pre-processing options as a string. Options are supplied by
+  * the main presenter.
+  * @return :: Global pre-processing options
+  */
+QString ReflRunsTabPresenter::getPreprocessingOptionsAsString() const {
 
-  std::map<std::string, std::string> options;
-  options["Transmission Run(s)"] =
-      m_mainPresenter->getTransmissionOptions(m_view->getSelectedGroup());
+  std::string optionsStr =
+      "Transmission Run(s)," +
+      m_mainPresenter->getTransmissionRuns(m_view->getSelectedGroup());
 
-  return options;
+  return QString::fromStdString(optionsStr);
 }
 
 /** Requests global processing options. Options are supplied by the main
 * presenter
 * @return :: Global processing options
 */
-std::string ReflRunsTabPresenter::getProcessingOptions() const {
-  return m_mainPresenter->getReductionOptions(m_view->getSelectedGroup());
+QString ReflRunsTabPresenter::getProcessingOptions() const {
+
+  return QString::fromStdString(
+      m_mainPresenter->getReductionOptions(m_view->getSelectedGroup()));
 }
 
 /** Requests global post-processing options. Options are supplied by the main
 * presenter
 * @return :: Global post-processing options
 */
-std::string ReflRunsTabPresenter::getPostprocessingOptions() const {
-  return m_mainPresenter->getStitchOptions(m_view->getSelectedGroup());
+QString ReflRunsTabPresenter::getPostprocessingOptions() const {
+
+  return QString::fromStdString(
+      m_mainPresenter->getStitchOptions(m_view->getSelectedGroup()));
 }
 
 /** Requests time-slicing values. Values are supplied by the main presenter
 * @return :: Time-slicing values
 */
-std::string ReflRunsTabPresenter::getTimeSlicingValues() const {
-  return m_mainPresenter->getTimeSlicingValues(m_view->getSelectedGroup());
+QString ReflRunsTabPresenter::getTimeSlicingValues() const {
+  return QString::fromStdString(
+      m_mainPresenter->getTimeSlicingValues(m_view->getSelectedGroup()));
 }
 
 /** Requests time-slicing type. Type is supplied by the main presenter
 * @return :: Time-slicing values
 */
-std::string ReflRunsTabPresenter::getTimeSlicingType() const {
-  return m_mainPresenter->getTimeSlicingType(m_view->getSelectedGroup());
+QString ReflRunsTabPresenter::getTimeSlicingType() const {
+  return QString::fromStdString(
+      m_mainPresenter->getTimeSlicingType(m_view->getSelectedGroup()));
 }
 
 /** Tells view to enable the 'process' button and disable the 'pause' button
@@ -459,65 +445,6 @@ void ReflRunsTabPresenter::confirmReductionResumed() const {
 
   m_mainPresenter->notify(
       IReflMainWindowPresenter::Flag::ConfirmReductionResumedFlag);
-}
-
-/**
-Tells the view to show an critical error dialog
-@param prompt : The prompt to appear on the dialog
-@param title : The text for the title bar of the dialog
-*/
-void ReflRunsTabPresenter::giveUserCritical(std::string prompt,
-                                            std::string title) {
-
-  m_mainPresenter->giveUserCritical(prompt, title);
-}
-
-/**
-Tells the view to show a warning dialog
-@param prompt : The prompt to appear on the dialog
-@param title : The text for the title bar of the dialog
-*/
-void ReflRunsTabPresenter::giveUserWarning(std::string prompt,
-                                           std::string title) {
-
-  m_mainPresenter->giveUserWarning(prompt, title);
-}
-
-/**
-Tells the view to ask the user a Yes/No question
-@param prompt : The prompt to appear on the dialog
-@param title : The text for the title bar of the dialog
-@returns a boolean true if Yes, false if No
-*/
-bool ReflRunsTabPresenter::askUserYesNo(std::string prompt, std::string title) {
-
-  return m_mainPresenter->askUserYesNo(prompt, title);
-}
-
-/**
-Tells the view to ask the user to enter a string.
-@param prompt : The prompt to appear on the dialog
-@param title : The text for the title bar of the dialog
-@param defaultValue : The default value entered.
-@returns The user's string if submitted, or an empty string
-*/
-std::string
-ReflRunsTabPresenter::askUserString(const std::string &prompt,
-                                    const std::string &title,
-                                    const std::string &defaultValue) {
-
-  return m_mainPresenter->askUserString(prompt, title, defaultValue);
-}
-
-/**
-Tells the main presenter to run an algorithm as python code
-* @param pythonCode : [input] The algorithm as python code
-* @return : The result of the execution
-*/
-std::string
-ReflRunsTabPresenter::runPythonAlgorithm(const std::string &pythonCode) {
-
-  return m_mainPresenter->runPythonAlgorithm(pythonCode);
 }
 
 /** Changes the current instrument in the data processor widget. Also updates

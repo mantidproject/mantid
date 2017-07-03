@@ -35,18 +35,18 @@ class DataProcessorDeleteRowCommand : public DataProcessorCommandBase {
 public:
   DataProcessorDeleteRowCommand(DataProcessorPresenter *tablePresenter)
       : DataProcessorCommandBase(tablePresenter){};
+  DataProcessorDeleteRowCommand(const QDataProcessorWidget &widget)
+      : DataProcessorCommandBase(widget){};
   virtual ~DataProcessorDeleteRowCommand(){};
 
   void execute() override {
     m_presenter->notify(DataProcessorPresenter::DeleteRowFlag);
   };
-  std::string name() override { return std::string("Delete Row"); }
-  std::string icon() override { return std::string("://delete_row.png"); }
-  std::string tooltip() override { return std::string("Deletes a row"); }
-  std::string whatsthis() override {
-    return std::string("Deletes the selected row");
-  }
-  std::string shortcut() override { return std::string(); }
+  QString name() override { return QString("Delete Row"); }
+  QString icon() override { return QString("://delete_row.png"); }
+  QString tooltip() override { return QString("Deletes a row"); }
+  QString whatsthis() override { return QString("Deletes the selected row"); }
+  QString shortcut() override { return QString(); }
 };
 }
 }
