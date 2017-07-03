@@ -429,12 +429,13 @@ QString ReflRunsTabPresenter::getTimeSlicingType() const {
       m_mainPresenter->getTimeSlicingType(m_view->getSelectedGroup()));
 }
 
-/** Tells view to enable the 'process' button and disable the 'pause' button
+/** Tells view to enable all 'process' buttons and disable the 'pause' button
 * when data reduction is paused
 */
 void ReflRunsTabPresenter::pause() const {
 
   m_view->setRowActionEnabled(0, true);
+  m_view->setAutoreduceButtonEnabled(true);
   m_view->setRowActionEnabled(1, false);
 }
 
@@ -444,6 +445,7 @@ void ReflRunsTabPresenter::pause() const {
 void ReflRunsTabPresenter::resume() const {
 
   m_view->setRowActionEnabled(0, false);
+  m_view->setAutoreduceButtonEnabled(false);
   m_view->setRowActionEnabled(1, true);
 }
 

@@ -177,6 +177,15 @@ void QtReflRunsTabView::setRowActionEnabled(int index, bool enabled) {
 }
 
 /**
+* Sets the "Autoreduce" button enabled or disabled
+* @param enabled : Whether to enable or disable the button
+*/
+void QtReflRunsTabView::setAutoreduceButtonEnabled(bool enabled) {
+
+  ui.buttonAutoreduce->setEnabled(enabled);
+}
+
+/**
 * Set all possible tranfer methods
 * @param methods : All possible transfer methods.
 */

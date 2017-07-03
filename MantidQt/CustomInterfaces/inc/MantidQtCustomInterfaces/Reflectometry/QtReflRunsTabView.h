@@ -79,6 +79,7 @@ public:
   void setAllSearchRowsSelected() override;
   void clearCommands() override;
   void setRowActionEnabled(int index, bool enabled) override;
+  void setAutoreduceButtonEnabled(bool enabled) override;
 
   // Set the status of the progress bar
   void setProgressRange(int min, int max) override;
