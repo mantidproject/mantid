@@ -11,6 +11,7 @@ if ( CXXTEST_FOUND )
                         ../../TestHelpers/src/StartFrameworkManager.cpp
                         ../../TestHelpers/src/TearDownWorld.cpp
                         ../../TestHelpers/src/WorkspaceCreationHelper.cpp
+                        ../../TestHelpers/src/NexusTestHelper.cpp
                         NXcanSASTestHelper.cpp
       )
 

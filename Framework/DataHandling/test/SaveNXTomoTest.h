@@ -8,6 +8,7 @@
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <Poco/File.h>
+#include <nexus/NeXusFile.hpp>
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;

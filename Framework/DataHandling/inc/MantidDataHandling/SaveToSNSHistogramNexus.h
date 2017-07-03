@@ -1,9 +1,6 @@
 #ifndef MANTID_DATAHANDLING_SAVESNSNEXUS_H_
 #define MANTID_DATAHANDLING_SAVESNSNEXUS_H_
 
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAPI/Progress.h"
@@ -12,8 +9,8 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include <climits>
-#include <nexus/NeXusException.hpp>
 #include <nexus/NeXusFile.hpp>
+#include <nexus/NeXusException.hpp>
 
 namespace Mantid {
 namespace DataHandling {

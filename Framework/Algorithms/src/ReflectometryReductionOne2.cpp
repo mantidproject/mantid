@@ -8,6 +8,7 @@
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/StringTokenizer.h"
 #include "MantidKernel/Unit.h"
+#include "MantidGeometry/IDetector.h"
 
 #include <algorithm>
 #include <boost/lexical_cast.hpp>

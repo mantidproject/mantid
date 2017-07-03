@@ -4,6 +4,7 @@
 #include "MantidAPI/Run.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/PropertyManagerDataService.h"
+#include "MantidKernel/PropertyManager.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 
