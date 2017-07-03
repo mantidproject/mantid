@@ -1027,10 +1027,20 @@ void MuonFitPropertyBrowser::setAvailableGroups(const QStringList &groups) {
 
   m_enumManager->setValue(m_groupsToFit, 0);
   // If it's the same list, do nothing
+  if (groups.size() == m_groupBoxes.size()) {
+	  auto existingGroups = m_groupBoxes.keys();
+	  auto newGroups = groups;
+	  qSort(existingGroups);
+	  qSort(newGroups);
+	  if (existingGroups == newGroups) {
+		  return;
+		  
+	  }
+	  
+  }
   clearGroupCheckboxes();
   QSettings settings;
   for (const auto group : groups) {
-	  auto t = group.toStdString();
     addGroupCheckbox(group);
   }
 }

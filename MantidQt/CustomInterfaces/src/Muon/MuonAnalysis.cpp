@@ -2558,8 +2558,6 @@ void MuonAnalysis::changeTab(int newTabIndex) {
       m_uiForm.fitBrowser->setSingleFitLabel(m_currentDataName.toStdString());
     } else {
       Muon::AnalysisOptions options(m_groupingHelper.parseGroupingTable());
-
-	  //use these to update the names of pairs/groups
       m_uiForm.fitBrowser->setGroupNames(options.grouping.groupNames);
       auto isItGroup = m_dataLoader.isContainedIn(m_groupPairName,
                                                   options.grouping.groupNames);
