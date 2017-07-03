@@ -5,6 +5,7 @@
 
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/FacilityInfo.h"
+#include "MantidKernel/Strings.h"
 
 #include <numeric>
 #include <sstream>
@@ -546,11 +547,11 @@ std::vector<std::vector<unsigned int>> generateRange(unsigned int from,
     throw std::runtime_error(
         "Unable to generate a range with a step size of zero.");
 
-  size_t limit = 100;
-  int success =
-      ConfigService::Instance().getValue("loading.multifilelimit", limit);
-  if (!success) {
-    limit = 100;
+  size_t limit;
+  std::string limitStr;
+  ConfigService::Instance().getValue("loading.multifilelimit", limitStr);
+  if (!Strings::convert(limitStr, limit)) {
+    limit = ConfigService::Instance().getFacility().multiFileLimit();
   }
 
   unsigned int orderedTo = from > to ? from : to;
@@ -559,9 +560,9 @@ std::vector<std::vector<unsigned int>> generateRange(unsigned int from,
   if (numberOfFiles > limit) {
     std::stringstream sstream;
     sstream << "The range from " << orderedFrom << " to " << orderedTo
-            << " step " << stepSize << ", would genetate " << numberOfFiles
+            << " with step " << stepSize << " would generate " << numberOfFiles
             << " files.  "
-            << "This is greater then the current limit of " << limit << ".  "
+            << "This is greater than the current limit of " << limit << ".  "
             << "This limit can be configured in the Mantid.user.properties "
                "file using the key loading.multifilelimit=200.";
     throw std::range_error(sstream.str());
@@ -618,7 +619,7 @@ std::vector<std::vector<unsigned int>> generateRange(unsigned int from,
  */
 void validateToken(const std::string &token) {
   // Each token must be non-empty.
-  if (token.size() == 0)
+  if (token.empty())
     throw std::runtime_error("A comma-separated token is empty.");
 
   // Each token must begin and end with a numeric character.

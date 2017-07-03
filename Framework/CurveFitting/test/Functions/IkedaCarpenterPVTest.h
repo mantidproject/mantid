@@ -56,6 +56,20 @@ public:
     TS_ASSERT_DELTA(y[13], 77.7493, 1e-4);
     TS_ASSERT_DELTA(y[14], 53.8871, 1e-4);
   }
+
+  void test_intensity() {
+    IkedaCarpenterPV fn;
+    fn.initialize();
+    fn.setParameter("I", 67.2548);
+    fn.setParameter("Alpha0", 1.6);
+    fn.setParameter("Alpha1", 1.5);
+    fn.setParameter("Beta0", 31.9);
+    fn.setParameter("Kappa", 46.0);
+    fn.setParameter("SigmaSquared", 0.00281776);
+    fn.setParameter("Gamma", 0.125);
+    fn.setParameter("X0", 0);
+    TS_ASSERT_DELTA(fn.intensity(), 810.7256, 1e-4);
+  }
 };
 
 #endif /*IKEDACARPENTERPVTEST_H_*/

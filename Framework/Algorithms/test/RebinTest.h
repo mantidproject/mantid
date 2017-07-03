@@ -3,17 +3,22 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidHistogramData/LinearGenerator.h"
-#include "MantidDataObjects/Workspace2D.h"
-#include "MantidDataObjects/EventWorkspace.h"
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidAlgorithms/Rebin.h"
-#include "MantidAlgorithms/MaskBins.h"
-#include "MantidAPI/WorkspaceProperty.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidAPI/RefAxis.h"
-#include "MantidAPI/SpectraAxis.h"
 #include "MantidAPI/ScopedWorkspace.h"
+#include "MantidAPI/SpectraAxis.h"
+#include "MantidAPI/WorkspaceProperty.h"
+#include "MantidAlgorithms/CreateWorkspace.h"
+#include "MantidAlgorithms/MaskBins.h"
+#include "MantidAlgorithms/Rebin.h"
+#include "MantidDataObjects/EventWorkspace.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidHistogramData/LinearGenerator.h"
+#include "MantidTestHelpers/ParallelAlgorithmCreation.h"
+#include "MantidTestHelpers/ParallelRunner.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+
+#include <numeric>
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
@@ -23,6 +28,53 @@ using namespace Mantid::Algorithms;
 using Mantid::HistogramData::BinEdges;
 using Mantid::HistogramData::Counts;
 using Mantid::HistogramData::CountStandardDeviations;
+
+namespace {
+
+std::unique_ptr<Rebin> prepare_rebin(const Parallel::Communicator &comm,
+                                     const std::string &storageMode) {
+  auto create = ParallelTestHelpers::create<Algorithms::CreateWorkspace>(comm);
+  std::vector<double> dataEYX(2000);
+  for (size_t i = 0; i < dataEYX.size(); ++i)
+    dataEYX[i] = static_cast<double>(i % 2 + 1);
+  int nspec = 1000;
+  create->setProperty<int>("NSpec", nspec);
+  create->setProperty<std::vector<double>>("DataX", dataEYX);
+  create->setProperty<std::vector<double>>("DataY", dataEYX);
+  create->setProperty<std::vector<double>>("DataE", dataEYX);
+  create->setProperty("ParallelStorageMode", storageMode);
+  create->execute();
+  MatrixWorkspace_sptr ws = create->getProperty("OutputWorkspace");
+  auto rebin = ParallelTestHelpers::create<Algorithms::Rebin>(comm);
+  rebin->setProperty("InputWorkspace", ws);
+  return rebin;
+}
+
+void run_rebin(const Parallel::Communicator &comm,
+               const std::string &storageMode) {
+  auto rebin = prepare_rebin(comm, storageMode);
+  rebin->setProperty("Params", "1,1,3");
+  TS_ASSERT_THROWS_NOTHING(rebin->execute());
+  MatrixWorkspace_const_sptr ws = rebin->getProperty("OutputWorkspace");
+  TS_ASSERT_EQUALS(ws->storageMode(), Parallel::fromString(storageMode));
+}
+
+void run_rebin_params_only_bin_width(const Parallel::Communicator &comm,
+                                     const std::string &storageMode) {
+  auto rebin = prepare_rebin(comm, storageMode);
+  rebin->setProperty("Params", "0.5");
+  if (Parallel::fromString(storageMode) == Parallel::StorageMode::Distributed &&
+      comm.size() > 1) {
+    TS_ASSERT_THROWS_EQUALS(
+        rebin->execute(), const std::runtime_error &e, std::string(e.what()),
+        "MatrixWorkspace: Parallel support for XMin and XMax not implemented.");
+  } else {
+    TS_ASSERT_THROWS_NOTHING(rebin->execute());
+    MatrixWorkspace_const_sptr ws = rebin->getProperty("OutputWorkspace");
+    TS_ASSERT_EQUALS(ws->storageMode(), Parallel::fromString(storageMode));
+  }
+}
+}
 
 class RebinTest : public CxxTest::TestSuite {
 public:
@@ -58,9 +110,9 @@ public:
     TS_ASSERT(rebin.isExecuted());
     MatrixWorkspace_sptr rebindata =
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("test_out");
-    const Mantid::MantidVec outX = rebindata->readX(0);
-    const Mantid::MantidVec outY = rebindata->readY(0);
-    const Mantid::MantidVec outE = rebindata->readE(0);
+    auto &outX = rebindata->x(0);
+    auto &outY = rebindata->y(0);
+    auto &outE = rebindata->e(0);
 
     TS_ASSERT_DELTA(outX[7], 15.5, 0.000001);
     TS_ASSERT_DELTA(outY[7], 3.0, 0.000001);
@@ -93,9 +145,9 @@ public:
     MatrixWorkspace_sptr rebindata =
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("test_out");
 
-    const Mantid::MantidVec outX = rebindata->readX(0);
-    const Mantid::MantidVec outY = rebindata->readY(0);
-    const Mantid::MantidVec outE = rebindata->readE(0);
+    auto &outX = rebindata->x(0);
+    auto &outY = rebindata->y(0);
+    auto &outE = rebindata->e(0);
 
     TS_ASSERT_DELTA(outX[7], 15.5, 0.000001);
     TS_ASSERT_DELTA(outY[7], 8.0, 0.000001);
@@ -130,9 +182,7 @@ public:
     TS_ASSERT(rebin.isExecuted());
     MatrixWorkspace_sptr rebindata =
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("test_out");
-    const Mantid::MantidVec outX = rebindata->readX(0);
-    const Mantid::MantidVec outY = rebindata->readY(0);
-    const Mantid::MantidVec outE = rebindata->readE(0);
+    auto &outX = rebindata->x(0);
 
     TS_ASSERT_EQUALS(outX.size(), 11);
     TS_ASSERT_DELTA(outX[0], 1.0, 1e-5);
@@ -161,9 +211,9 @@ public:
     MatrixWorkspace_sptr rebindata =
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("test_out");
 
-    const Mantid::MantidVec outX = rebindata->readX(5);
-    const Mantid::MantidVec outY = rebindata->readY(5);
-    const Mantid::MantidVec outE = rebindata->readE(5);
+    auto &outX = rebindata->x(5);
+    auto &outY = rebindata->y(5);
+    auto &outE = rebindata->e(5);
     TS_ASSERT_DELTA(outX[7], 15.5, 0.000001);
     TS_ASSERT_DELTA(outY[7], 3.0, 0.000001);
     TS_ASSERT_DELTA(outE[7], sqrt(4.5) / 2.0, 0.000001);
@@ -191,7 +241,7 @@ public:
                               bool PreserveEvents, bool expectOutputEvent) {
     // Two events per bin
     EventWorkspace_sptr test_in =
-        WorkspaceCreationHelper::CreateEventWorkspace2(50, 100);
+        WorkspaceCreationHelper::createEventWorkspace2(50, 100);
     test_in->switchEventType(eventType);
 
     std::string inName("test_inEvent");
@@ -230,9 +280,9 @@ public:
         TS_ASSERT(eventOutWS == test_in);
     }
 
-    const MantidVec &X = outWS->readX(0);
-    const MantidVec &Y = outWS->readY(0);
-    const MantidVec &E = outWS->readE(0);
+    auto &X = outWS->x(0);
+    auto &Y = outWS->y(0);
+    auto &E = outWS->e(0);
 
     TS_ASSERT_EQUALS(X.size(), 26);
     TS_ASSERT_DELTA(X[0], 0.0, 1e-5);
@@ -334,9 +384,9 @@ public:
     TS_ASSERT(!outWS->isHistogramData());
     TS_ASSERT_EQUALS(outWS->getNumberHistograms(), 1);
 
-    TS_ASSERT_EQUALS(outWS->readX(0)[0], 7.3750);
-    TS_ASSERT_EQUALS(outWS->readX(0)[10], 14.8750);
-    TS_ASSERT_EQUALS(outWS->readX(0)[20], 22.3750);
+    TS_ASSERT_EQUALS(outWS->x(0)[0], 7.3750);
+    TS_ASSERT_EQUALS(outWS->x(0)[10], 14.8750);
+    TS_ASSERT_EQUALS(outWS->x(0)[20], 22.3750);
 
     AnalysisDataService::Instance().remove("test_RebinPointDataInput");
     AnalysisDataService::Instance().remove("test_RebinPointDataOutput");
@@ -358,14 +408,14 @@ public:
     MatrixWorkspace_sptr rebindata =
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
             "test_Rebin_masked_ws");
-    const MantidVec &outX = rebindata->readX(0);
-    const MantidVec &outY = rebindata->readY(0);
+    auto &outX = rebindata->x(0);
+    auto &outY = rebindata->y(0);
 
     MatrixWorkspace_sptr input =
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
             "test_Rebin_mask_dist");
-    const MantidVec &inX = input->readX(0);
-    const MantidVec &inY = input->readY(0);
+    auto &inX = input->x(0);
+    auto &inY = input->y(0);
 
     const MatrixWorkspace::MaskList &mask = rebindata->maskedBins(0);
 
@@ -412,8 +462,8 @@ public:
     MatrixWorkspace_sptr input =
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
             "test_Rebin_unmasked");
-    const Mantid::MantidVec inX = input->readX(0);
-    const Mantid::MantidVec inY = input->readY(0);
+    auto &inX = input->x(0);
+    auto &inY = input->y(0);
 
     maskFirstBins("test_Rebin_mask_raw", "test_Rebin_masked_ws", 10.0);
 
@@ -424,8 +474,8 @@ public:
     MatrixWorkspace_sptr masked =
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
             "test_Rebin_masked_ws");
-    const Mantid::MantidVec outX = masked->readX(0);
-    const Mantid::MantidVec outY = masked->readY(0);
+    auto &outX = masked->x(0);
+    auto &outY = masked->y(0);
 
     const MatrixWorkspace::MaskList &mask = masked->maskedBins(0);
 
@@ -469,6 +519,30 @@ public:
     std::vector<double> yExpected = {4.0, 4.0, 2.8, 2.8, 2.8, 8.0};
     std::string params = "0.5, 1.0, 3.1, 0.7, 5.0, 2.0, 7.25";
     do_test_FullBinsOnly(params, yExpected, xExpected);
+  }
+
+  void test_parallel_cloned() {
+    ParallelTestHelpers::runParallel(run_rebin,
+                                     "Parallel::StorageMode::Cloned");
+  }
+
+  void test_parallel_distributed() {
+    ParallelTestHelpers::runParallel(run_rebin,
+                                     "Parallel::StorageMode::Distributed");
+  }
+
+  void test_parallel_master_only() {
+    ParallelTestHelpers::runParallel(run_rebin,
+                                     "Parallel::StorageMode::MasterOnly");
+  }
+
+  void test_parallel_only_bin_width() {
+    ParallelTestHelpers::runParallel(run_rebin_params_only_bin_width,
+                                     "Parallel::StorageMode::Cloned");
+    ParallelTestHelpers::runParallel(run_rebin_params_only_bin_width,
+                                     "Parallel::StorageMode::Distributed");
+    ParallelTestHelpers::runParallel(run_rebin_params_only_bin_width,
+                                     "Parallel::StorageMode::MasterOnly");
   }
 
 private:
@@ -538,11 +612,11 @@ private:
       return; // Nothing else to check
     }
 
-    auto xValues = ws->readX(0);
-    TS_ASSERT_DELTA(xValues, xExpected, 0.001);
+    auto &xValues = ws->x(0);
+    TS_ASSERT_DELTA(xValues.rawData(), xExpected, 0.001);
 
-    auto yValues = ws->readY(0);
-    TS_ASSERT_DELTA(yValues, yExpected, 0.001);
+    auto &yValues = ws->y(0);
+    TS_ASSERT_DELTA(yValues.rawData(), yExpected, 0.001);
   }
 };
 
@@ -556,7 +630,7 @@ public:
   static void destroySuite(RebinTestPerformance *suite) { delete suite; }
 
   RebinTestPerformance() {
-    ws = WorkspaceCreationHelper::Create2DWorkspaceBinned(5000, 20000);
+    ws = WorkspaceCreationHelper::create2DWorkspaceBinned(5000, 20000);
   }
 
   void test_rebin() {

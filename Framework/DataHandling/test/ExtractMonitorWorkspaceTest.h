@@ -29,7 +29,7 @@ public:
   }
 
   void test_fails_if_no_monitor_workspace() {
-    auto inws = WorkspaceCreationHelper::Create1DWorkspaceRand(1);
+    auto inws = WorkspaceCreationHelper::create1DWorkspaceRand(1, true);
 
     ExtractMonitorWorkspace alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
@@ -77,8 +77,8 @@ public:
   }
 
   void test_2D_2D() {
-    auto inws = WorkspaceCreationHelper::Create1DWorkspaceRand(1);
-    auto monws = WorkspaceCreationHelper::Create1DWorkspaceFib(1);
+    auto inws = WorkspaceCreationHelper::create1DWorkspaceRand(1, true);
+    auto monws = WorkspaceCreationHelper::create1DWorkspaceFib(1, true);
     doTest(inws, monws);
   }
 
@@ -86,20 +86,20 @@ public:
   // type
 
   void test_2D_event() {
-    auto inws = WorkspaceCreationHelper::Create1DWorkspaceRand(1);
-    auto monws = WorkspaceCreationHelper::CreateEventWorkspace2(1, 1);
+    auto inws = WorkspaceCreationHelper::create1DWorkspaceRand(1, true);
+    auto monws = WorkspaceCreationHelper::createEventWorkspace2(1, 1);
     doTest(inws, monws);
   }
 
   void test_event_2D() {
-    auto inws = WorkspaceCreationHelper::CreateEventWorkspace2(1, 1);
-    auto monws = WorkspaceCreationHelper::Create1DWorkspaceRand(1);
+    auto inws = WorkspaceCreationHelper::createEventWorkspace2(1, 1);
+    auto monws = WorkspaceCreationHelper::create1DWorkspaceRand(1, true);
     doTest(inws, monws);
   }
 
   void test_event_event() {
-    auto inws = WorkspaceCreationHelper::CreateEventWorkspace2(1, 1);
-    auto monws = WorkspaceCreationHelper::CreateEventWorkspace2(1, 1);
+    auto inws = WorkspaceCreationHelper::createEventWorkspace2(1, 1);
+    auto monws = WorkspaceCreationHelper::createEventWorkspace2(1, 1);
     doTest(inws, monws);
   }
 

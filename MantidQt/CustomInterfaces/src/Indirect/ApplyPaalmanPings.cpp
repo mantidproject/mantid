@@ -1,7 +1,9 @@
 #include "MantidQtCustomInterfaces/Indirect/ApplyPaalmanPings.h"
 #include "MantidQtCustomInterfaces/UserInputValidator.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/TextAxis.h"
+#include "MantidAPI/WorkspaceGroup.h"
 
 #include <QStringList>
 
@@ -32,8 +34,12 @@ ApplyPaalmanPings::ApplyPaalmanPings(QWidget *parent) : CorrectionsTab(parent) {
           SLOT(updateContainer()));
   connect(m_uiForm.ckScaleCan, SIGNAL(toggled(bool)), this,
           SLOT(updateContainer()));
+  connect(m_uiForm.ckRebinContainer, SIGNAL(toggled(bool)), this,
+          SLOT(updateContainer()));
   connect(m_uiForm.ckUseCan, SIGNAL(toggled(bool)), this,
           SLOT(updateContainer()));
+  connect(m_uiForm.pbPlot, SIGNAL(clicked()), this, SLOT(plotClicked()));
+  connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveClicked()));
 
   m_uiForm.spPreviewSpec->setMinimum(0);
   m_uiForm.spPreviewSpec->setMaximum(0);
@@ -118,7 +124,7 @@ void ApplyPaalmanPings::updateContainer() {
     scaleAlg->execute();
 
     const auto sampleValid = m_uiForm.dsSample->isValid();
-    if (sampleValid) {
+    if (sampleValid && m_uiForm.ckRebinContainer->isChecked()) {
       IAlgorithm_sptr rebin =
           AlgorithmManager::Instance().create("RebinToWorkspace");
       rebin->initialize();
@@ -127,7 +133,7 @@ void ApplyPaalmanPings::updateContainer() {
       rebin->setProperty("WorkspaceToMatch", m_sampleWorkspaceName);
       rebin->setProperty("OutputWorkspace", m_containerWorkspaceName);
       rebin->execute();
-    } else {
+    } else if (!sampleValid) {
       // Sample was not valid so do not rebin
       m_uiForm.ppPreview->removeSpectrum("Container");
       return;
@@ -172,17 +178,15 @@ void ApplyPaalmanPings::run() {
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(cloneName);
     // Check for same binning across sample and container
     if (!checkWorkspaceBinningMatches(sampleWs, canClone)) {
-      const char *text =
-          "Binning on sample and container does not match."
-          "Would you like to rebin the container to match the sample?";
+      const char *text = "Binning on sample and container does not match."
+                         "Would you like to enable rebinning of the container?";
 
       int result = QMessageBox::question(NULL, tr("Rebin sample?"), tr(text),
                                          QMessageBox::Yes, QMessageBox::No,
                                          QMessageBox::NoButton);
 
       if (result == QMessageBox::Yes) {
-        addRebinStep(QString::fromStdString(canName),
-                     QString::fromStdString(m_sampleWorkspaceName));
+        m_uiForm.ckRebinContainer->setChecked(true);
       } else {
         m_batchAlgoRunner->clearQueue();
         g_log.error("Cannot apply absorption corrections "
@@ -203,6 +207,8 @@ void ApplyPaalmanPings::run() {
       const double canShiftFactor = m_uiForm.spCanShift->value();
       applyCorrAlg->setProperty("canShiftFactor", canShiftFactor);
     }
+    const bool rebinContainer = m_uiForm.ckRebinContainer->isChecked();
+    applyCorrAlg->setProperty("RebinCanToSample", rebinContainer);
   }
 
   if (useCorrections) {
@@ -217,13 +223,15 @@ void ApplyPaalmanPings::run() {
           boost::dynamic_pointer_cast<MatrixWorkspace>(corrections->getItem(i));
 
       // Check for matching binning
-      if (sampleWs && (sampleWs->blocksize() != factorWs->blocksize())) {
+      if (sampleWs && (factorWs->blocksize() != sampleWs->blocksize() &&
+                       factorWs->blocksize() != 1)) {
         int result;
         if (interpolateAll) {
           result = QMessageBox::Yes;
         } else {
           std::string text = "Number of bins on sample and " +
-                             factorWs->name() + " workspace does not match.\n" +
+                             factorWs->getName() +
+                             " workspace does not match.\n" +
                              "Would you like to interpolate this workspace to "
                              "match the sample?";
 
@@ -314,28 +322,6 @@ void ApplyPaalmanPings::run() {
 }
 
 /**
-* Adds a rebin to workspace step to the calculation for when using a sample and
-*container that
-* have different binning.
-*
-* @param toRebin
-* @param toMatch
-*/
-void ApplyPaalmanPings::addRebinStep(QString toRebin, QString toMatch) {
-  API::BatchAlgorithmRunner::AlgorithmRuntimeProps rebinProps;
-  rebinProps["WorkspaceToMatch"] = toMatch.toStdString();
-
-  IAlgorithm_sptr rebinAlg =
-      AlgorithmManager::Instance().create("RebinToWorkspace");
-  rebinAlg->initialize();
-
-  rebinAlg->setProperty("WorkspaceToRebin", toRebin.toStdString());
-  rebinAlg->setProperty("OutputWorkspace", toRebin.toStdString());
-
-  m_batchAlgoRunner->addAlgorithm(rebinAlg, rebinProps);
-}
-
-/**
 * Adds a spline interpolation as a step in the calculation for using legacy
 *correction factor
 * workspaces.
@@ -353,8 +339,8 @@ void ApplyPaalmanPings::addInterpolationStep(MatrixWorkspace_sptr toInterpolate,
   interpolationAlg->initialize();
 
   interpolationAlg->setProperty("WorkspaceToInterpolate",
-                                toInterpolate->name());
-  interpolationAlg->setProperty("OutputWorkspace", toInterpolate->name());
+                                toInterpolate->getName());
+  interpolationAlg->setProperty("OutputWorkspace", toInterpolate->getName());
 
   m_batchAlgoRunner->addAlgorithm(interpolationAlg, interpolationProps);
 }
@@ -367,18 +353,13 @@ void ApplyPaalmanPings::addInterpolationStep(MatrixWorkspace_sptr toInterpolate,
 void ApplyPaalmanPings::absCorComplete(bool error) {
   disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
              SLOT(absCorComplete(bool)));
-  const bool useCan = m_uiForm.ckUseCan->isChecked();
   if (error) {
     emit showMessageBox(
         "Unable to apply corrections.\nSee Results Log for more details.");
     return;
   }
 
-  // Add save algorithms if required
-  bool save = m_uiForm.ckSave->isChecked();
-  if (save)
-    addSaveWorkspaceToQueue(QString::fromStdString(m_pythonExportWsName));
-  if (useCan) {
+  if (m_uiForm.ckUseCan->isChecked()) {
     if (m_uiForm.ckShiftCan->isChecked()) { // If container is shifted
       IAlgorithm_sptr shiftLog =
           AlgorithmManager::Instance().create("AddSampleLog");
@@ -413,17 +394,13 @@ void ApplyPaalmanPings::postProcessComplete(bool error) {
     return;
   }
 
+  // Enable post processing plot and save
+  m_uiForm.cbPlotOutput->setEnabled(true);
+  m_uiForm.pbPlot->setEnabled(true);
+  m_uiForm.pbSave->setEnabled(true);
+
   // Handle preview plot
   plotPreview(m_uiForm.spPreviewSpec->value());
-
-  // Handle Mantid plotting
-  QString plotType = m_uiForm.cbPlotOutput->currentText();
-
-  if (plotType == "Spectra" || plotType == "Both")
-    plotSpectrum(QString::fromStdString(m_pythonExportWsName));
-
-  if (plotType == "Contour" || plotType == "Both")
-    plot2D(QString::fromStdString(m_pythonExportWsName));
 
   // Clean up unwanted workspaces
   IAlgorithm_sptr deleteAlg =
@@ -497,7 +474,7 @@ bool ApplyPaalmanPings::validate() {
         Mantid::Kernel::Unit_sptr xUnit = factorWs->getAxis(0)->unit();
         if (xUnit->caption() != "Wavelength") {
           QString msg = "Correction factor workspace " +
-                        QString::fromStdString(factorWs->name()) +
+                        QString::fromStdString(factorWs->getName()) +
                         " is not in wavelength";
           uiv.addErrorMessage(msg);
         }
@@ -570,6 +547,31 @@ void ApplyPaalmanPings::plotPreview(int wsIndex) {
         Qt::red);
   }
 }
+/**
+ * Handles saving of the workspace
+ */
+void ApplyPaalmanPings::saveClicked() {
 
+  if (checkADSForPlotSaveWorkspace(m_pythonExportWsName, false))
+    addSaveWorkspaceToQueue(QString::fromStdString(m_pythonExportWsName));
+  m_batchAlgoRunner->executeBatchAsync();
+}
+
+/**
+ * Handles mantid plotting of workspace
+ */
+void ApplyPaalmanPings::plotClicked() {
+
+  QString plotType = m_uiForm.cbPlotOutput->currentText();
+
+  if (checkADSForPlotSaveWorkspace(m_pythonExportWsName, true)) {
+
+    if (plotType == "Spectra" || plotType == "Both")
+      plotSpectrum(QString::fromStdString(m_pythonExportWsName));
+
+    if (plotType == "Contour" || plotType == "Both")
+      plot2D(QString::fromStdString(m_pythonExportWsName));
+  }
+}
 } // namespace CustomInterfaces
 } // namespace MantidQt

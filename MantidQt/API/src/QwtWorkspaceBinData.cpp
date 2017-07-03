@@ -5,6 +5,7 @@
 #include "MantidQtAPI/PlotAxis.h"
 
 #include <QStringBuilder>
+#include <sstream>
 
 /// Constructor
 QwtWorkspaceBinData::QwtWorkspaceBinData(
@@ -31,7 +32,12 @@ QwtWorkspaceBinData *QwtWorkspaceBinData::copyWithNewSource(
 
 /** Size of the data set
  */
-size_t QwtWorkspaceBinData::size() const { return m_Y.size(); }
+size_t QwtWorkspaceBinData::size() const {
+  if (!isPlottable()) {
+    return 0;
+  }
+  return m_Y.size();
+}
 
 /**
 Return the x value of data point i
@@ -70,7 +76,6 @@ QString QwtWorkspaceBinData::getYAxisLabel() const { return m_yTitle; }
 QwtWorkspaceBinData &QwtWorkspaceBinData::
 operator=(const QwtWorkspaceBinData &rhs) {
   if (this != &rhs) {
-    static_cast<MantidQwtMatrixWorkspaceData &>(*this) = rhs;
     m_binIndex = rhs.m_binIndex;
     m_X = rhs.m_X;
     m_Y = rhs.m_Y;

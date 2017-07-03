@@ -3,6 +3,7 @@
 
 #include "MantidAlgorithms/ResizeRectangularDetector.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
@@ -51,19 +52,19 @@ public:
     // Bank 1 got scaled
     V3D pos;
     pos = det->getAtXY(1, 1)->getPos();
-    TS_ASSERT(ws->instrumentParameters().contains(det.get(), "scalex"));
-    TS_ASSERT(ws->instrumentParameters().contains(det.get(), "scaley"));
+    TS_ASSERT(ws->constInstrumentParameters().contains(det.get(), "scalex"));
+    TS_ASSERT(ws->constInstrumentParameters().contains(det.get(), "scaley"));
     TS_ASSERT_EQUALS(pos, V3D(0.008 * 2, 0.008 * 0.5, 5.0));
     TS_ASSERT_DELTA(det->xstep(), 0.008 * 2, 1e-6);
 
-    // Check that accessing through getDetector() also works
-    IDetector_const_sptr pixel;
+    // Check that accessing through spectrumInfo.detector() also works
     const RectangularDetectorPixel *recDetPix;
-    pixel = ws->getDetector(11);
+    const auto &spectrumInfo = ws->spectrumInfo();
+    const auto &pixel = spectrumInfo.detector(11);
     recDetPix = dynamic_cast<const RectangularDetectorPixel *>(
         det->getAtXY(1, 1).get());
     TSM_ASSERT("getDetector() returns a RectangularDetectorPixel", recDetPix);
-    pos = pixel->getPos();
+    pos = pixel.getPos();
     TS_ASSERT_EQUALS(pos, V3D(0.008 * 2, 0.008 * 0.5, 5.0));
 
     // Bank 2 did not get scaled

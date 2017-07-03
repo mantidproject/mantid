@@ -5,16 +5,24 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/IFileLoader.h"
-#include "MantidDataHandling/BankPulseTimes.h"
-#include "MantidDataObjects/EventWorkspace.h"
-#include <nexus/NeXusFile.hpp>
-#include <nexus/NeXusException.hpp>
-#include "MantidDataObjects/Events.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidDataHandling/BankPulseTimes.h"
+#include "MantidDataHandling/EventWorkspaceCollection.h"
+#include "MantidDataObjects/EventWorkspace.h"
+#include "MantidDataObjects/Events.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
+#include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/TimeSeriesProperty.h"
-#include "MantidDataHandling/EventWorkspaceCollection.h"
+
+#ifdef _WIN32 // fixing windows issue causing conflict between
+// winnt char and nexus char
+#undef CHAR
+#endif
+
+#include <nexus/NeXusFile.hpp>
+#include <nexus/NeXusException.hpp>
+
 #include <memory>
 #include <mutex>
 #include <boost/lexical_cast.hpp>
@@ -323,10 +331,9 @@ bool LoadEventNexus::runLoadInstrument(const std::string &nexusfilename,
       }
     }
   }
-  if (instrument.compare("POWGEN3") ==
-      0) // hack for powgen b/c of bad long name
+  if (instrument == "POWGEN3") // hack for powgen b/c of bad long name
     instrument = "POWGEN";
-  if (instrument.compare("NOM") == 0) // hack for nomad
+  if (instrument == "NOM") // hack for nomad
     instrument = "NOMAD";
 
   if (instrument.empty())
@@ -375,7 +382,7 @@ bool LoadEventNexus::runLoadInstrument(const std::string &nexusfilename,
 
   // Ticket #2049: Cleanup all loadinstrument members to a single instance
   // If requested update the instrument to positions in the data file
-  const Geometry::ParameterMap &pmap = localWorkspace->instrumentParameters();
+  const auto &pmap = localWorkspace->constInstrumentParameters();
   if (!pmap.contains(localWorkspace->getInstrument()->getComponentID(),
                      "det-pos-source"))
     return executionSuccessful;
@@ -501,7 +508,7 @@ void LoadEventNexus::loadEntryMetadata(const std::string &nexusfilename, T WS,
     std::string units;
     for (std::vector< ::NeXus::AttrInfo>::const_iterator it = infos.begin();
          it != infos.end(); ++it) {
-      if (it->name.compare("units") == 0) {
+      if (it->name == "units") {
         units = file.getStrAttr(*it);
         break;
       }

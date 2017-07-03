@@ -4,6 +4,7 @@
 #include "MantidGeometry/Objects/BoundingBox.h"
 #include "MantidGeometry/Objects/Object.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
+#include "MantidGeometry/Objects/Track.h"
 #include "MantidGeometry/Rendering/BitmapGeometryHandler.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Material.h"
@@ -487,7 +488,7 @@ RectangularDetector::getComponentByName(const std::string &cname,
 
   // check that the searched for name starts with the detector's
   // name as they are generated
-  if (cname.substr(0, MEMBER_NAME.length()).compare(MEMBER_NAME) != 0) {
+  if (cname.substr(0, MEMBER_NAME.length()) != MEMBER_NAME) {
     return boost::shared_ptr<const IComponent>();
   } else {
     return CompAssembly::getComponentByName(cname, nlevels);

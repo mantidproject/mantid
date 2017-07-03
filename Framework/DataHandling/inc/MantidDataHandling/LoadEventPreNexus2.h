@@ -1,13 +1,13 @@
 #ifndef LOADEVENTPRENEXUS_H_
 #define LOADEVENTPRENEXUS_H_
 
+#include "MantidAPI/IFileLoader.h"
+#include "MantidDataObjects/EventWorkspace.h"
+#include "MantidDataObjects/Events.h"
+#include "MantidKernel/BinaryFile.h"
 #include <fstream>
 #include <string>
 #include <vector>
-#include "MantidAPI/IFileLoader.h"
-#include "MantidKernel/BinaryFile.h"
-#include "MantidDataObjects/EventWorkspace.h"
-#include "MantidDataObjects/Events.h"
 
 namespace Mantid {
 namespace DataHandling {
@@ -118,7 +118,7 @@ private:
   /// Execution code
   void exec() override;
 
-  Mantid::API::Progress *prog;
+  std::unique_ptr<Mantid::API::Progress> prog = nullptr;
 
   DataObjects::EventWorkspace_sptr localWorkspace; //< Output EventWorkspace
   std::vector<int64_t> spectra_list;               ///<the list of Spectra

@@ -6,6 +6,8 @@ from mantid.simpleapi import *
 from abc import ABCMeta, abstractmethod
 
 #----------------------------------------------------------------------
+
+
 class ISISMuonAnalysis(stresstesting.MantidStressTest):
     """A base class for the ISIS Muon Analysis tests
 
@@ -93,13 +95,12 @@ class ISISMuonAnalysis(stresstesting.MantidStressTest):
         """Check the object properties are
       in an expected state to continue
       """
-        if type(self.instr_name) != str:
+        if not isinstance(self.instr_name, str):
             raise RuntimeError("instr_name property should be a string")
-        if type(self.file_name) != str:
+        if not isinstance(self.file_name, str):
             raise RuntimeError("file_name property should be a string")
-        if type(self.period_data) != bool:
+        if not isinstance(self.period_data, bool):
             raise RuntimeError("period_data property should be a bool")
-
 
 
 #------------------------- ARGUS tests -------------------------------------------------
@@ -186,5 +187,3 @@ class MuSRAnalysisFromFile(ISISMuonAnalysis):
 
     def get_reference_file(self):
         return "MuSRAnalysis.nxs"
-
-

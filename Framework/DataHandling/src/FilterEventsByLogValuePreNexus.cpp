@@ -1,25 +1,28 @@
 #include "MantidDataHandling/FilterEventsByLogValuePreNexus.h"
 #include "MantidAPI/Axis.h"
+#include "MantidAPI/DetectorInfo.h"
 #include "MantidAPI/FileFinder.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/RegisterFileLoader.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/EventList.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/IDetector.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BinaryFile.h"
 #include "MantidKernel/BoundedValidator.h"
-#include "MantidKernel/ConfigService.h"
 #include "MantidKernel/CPUTimer.h"
+#include "MantidKernel/ConfigService.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/FileValidator.h"
 #include "MantidKernel/Glob.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/UnitFactory.h"
@@ -175,14 +178,19 @@ static string generateMappingfileName(EventWorkspace_sptr &wksp) {
   for (auto &dir : dirs) {
     if ((dir.length() > CAL_LEN) &&
         (dir.compare(dir.length() - CAL.length(), CAL.length(), CAL) == 0)) {
-      if (Poco::File(base.path() + "/" + dir + "/calibrations/" + mapping)
-              .exists())
-        files.push_back(base.path() + "/" + dir + "/calibrations/" + mapping);
+      std::string path = std::string(base.path())
+                             .append("/")
+                             .append(dir)
+                             .append("/calibrations/")
+                             .append(mapping);
+      if (Poco::File(path).exists()) {
+        files.push_back(path);
+      }
     }
   }
 
   if (files.empty())
-    return "";
+    return std::string();
   else if (files.size() == 1)
     return files[0];
   else // just assume that the last one is the right one, this should never be
@@ -198,19 +206,19 @@ static string generateMappingfileName(EventWorkspace_sptr &wksp) {
 /** Constructor
 */
 FilterEventsByLogValuePreNexus::FilterEventsByLogValuePreNexus()
-    : Mantid::API::IFileLoader<Kernel::FileDescriptor>(), m_prog(nullptr),
-      m_protonChargeTot(0), m_detid_max(0), m_eventFile(nullptr),
-      m_numEvents(0), m_numPulses(0), m_numPixel(0), m_numGoodEvents(0),
-      m_numErrorEvents(0), m_numBadEvents(0), m_numWrongdetidEvents(0),
-      m_numIgnoredEvents(0), m_firstEvent(0), m_maxNumEvents(0),
-      m_usingMappingFile(false), m_loadOnlySomeSpectra(false),
-      m_longestTof(0.0), m_shortestTof(0.0), m_parallelProcessing(false),
-      m_pulseTimesIncreasing(false), m_throwError(true), m_examEventLog(false),
-      m_pixelid2exam(0), m_numevents2write(0), m_freqHz(0), m_istep(0),
-      m_dbPixelID(0), m_useDBOutput(false), m_corretctTOF(false) {}
+    : Mantid::API::IFileLoader<Kernel::FileDescriptor>(), m_protonChargeTot(0),
+      m_detid_max(0), m_eventFile(nullptr), m_numEvents(0), m_numPulses(0),
+      m_numPixel(0), m_numGoodEvents(0), m_numErrorEvents(0), m_numBadEvents(0),
+      m_numWrongdetidEvents(0), m_numIgnoredEvents(0), m_firstEvent(0),
+      m_maxNumEvents(0), m_usingMappingFile(false),
+      m_loadOnlySomeSpectra(false), m_longestTof(0.0), m_shortestTof(0.0),
+      m_parallelProcessing(false), m_pulseTimesIncreasing(false),
+      m_throwError(true), m_examEventLog(false), m_pixelid2exam(0),
+      m_numevents2write(0), m_freqHz(0), m_istep(0), m_dbPixelID(0),
+      m_useDBOutput(false), m_corretctTOF(false) {}
 
 //----------------------------------------------------------------------------------------------
-/** Desctructor
+/** Destructor
  */
 FilterEventsByLogValuePreNexus::~FilterEventsByLogValuePreNexus() {
   delete this->m_eventFile;
@@ -351,14 +359,14 @@ void FilterEventsByLogValuePreNexus::init() {
  */
 void FilterEventsByLogValuePreNexus::exec() {
   // Process inputs
-  m_prog = new Progress(this, 0.0, 1.0, 100);
+  m_progress = make_unique<Progress>(this, 0.0, 1.0, 100);
   processProperties();
 
   // Read input files
-  m_prog->report("Loading Pulse ID file");
+  m_progress->report("Loading Pulse ID file");
   readPulseidFile(m_pulseIDFileName, m_throwError);
 
-  m_prog->report("Loading Event File");
+  m_progress->report("Loading Event File");
   openEventFile(m_eventFileName);
 
   // Correct wrong event index in loaded eventindexes
@@ -419,8 +427,6 @@ void FilterEventsByLogValuePreNexus::exec() {
   // Add fast frequency sample environment (events) data to workspace's log
   processEventLogs();
 
-  // -1. Cleanup
-  delete m_prog;
 } // exec()
 
 //----------------------------------------------------------------------------------------------
@@ -533,7 +539,7 @@ void FilterEventsByLogValuePreNexus::processProperties() {
 DataObjects::EventWorkspace_sptr
 FilterEventsByLogValuePreNexus::setupOutputEventWorkspace() {
   // Create and initialize output EventWorkspace
-  m_prog->report("Creating output workspace");
+  m_progress->report("Creating output workspace");
 
   EventWorkspace_sptr tempworkspace;
 
@@ -565,11 +571,11 @@ FilterEventsByLogValuePreNexus::setupOutputEventWorkspace() {
                                           getRunnumber(m_eventFileName));
 
   // Add the instrument!
-  m_prog->report("Loading Instrument");
+  m_progress->report("Loading Instrument");
   this->runLoadInstrument(m_eventFileName, tempworkspace);
 
   // Load the mapping file
-  m_prog->report("Loading Mapping File");
+  m_progress->report("Loading Mapping File");
   string mapping_filename = this->getPropertyValue(MAP_PARAM);
   if (mapping_filename.empty()) {
     // No mapping file given: genrate mapping file name by routine
@@ -583,7 +589,15 @@ FilterEventsByLogValuePreNexus::setupOutputEventWorkspace() {
   // if (!mapping_filename.empty())
   loadPixelMap(mapping_filename);
 
-  return tempworkspace;
+  // Create workspace of correct size
+  // Number of non-monitors in instrument
+  size_t nSpec = tempworkspace->getInstrument()->getDetectorIDs(true).size();
+  if (!this->m_spectraList.empty())
+    nSpec = this->m_spectraList.size();
+  auto ws = createWorkspace<EventWorkspace>(nSpec, 2, 1);
+  WorkspaceFactory::Instance().initializeFromParent(*tempworkspace, *ws, true);
+
+  return ws;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -808,32 +822,39 @@ void FilterEventsByLogValuePreNexus::procEvents(
   // Set up instrument related parameters such as detector map and etc.
   // We want to pad out empty pixels.
   //--------------------------------------------------------------------
-  detid2det_map detector_map;
-  workspace->getInstrument()->getDetectors(detector_map);
+  const auto &detectorInfo = workspace->detectorInfo();
+  const auto &detIDs = detectorInfo.detectorIDs();
 
   // Determine maximum pixel id
-  detid2det_map::iterator it;
   m_detid_max = 0; // seems like a safe lower bound
-  for (it = detector_map.begin(); it != detector_map.end(); it++)
-    if (it->first > m_detid_max)
-      m_detid_max = it->first;
+  for (const auto detID : detIDs)
+    if (detID > m_detid_max)
+      m_detid_max = detID;
 
   // Pad all the pixels
-  m_prog->report("Padding Pixels");
+  m_progress->report("Padding Pixels");
   this->m_pixelToWkspindex.reserve(
       m_detid_max + 1); // starting at zero up to and including m_detid_max
   // Set to zero
   this->m_pixelToWkspindex.assign(m_detid_max + 1, 0);
   size_t workspaceIndex = 0;
-  for (it = detector_map.begin(); it != detector_map.end(); it++) {
-    if (!it->second->isMonitor()) {
-      // Add non-monitor detector ID
-      this->m_pixelToWkspindex[it->first] = workspaceIndex;
-      EventList &spec = workspace->getOrAddEventList(workspaceIndex);
-      spec.addDetectorID(it->first);
-      // Start the spectrum number at 1
-      spec.setSpectrumNo(specnum_t(workspaceIndex + 1));
-      workspaceIndex += 1;
+  specnum_t spectrumNumber = 1;
+  for (size_t i = 0; i < detectorInfo.size(); ++i) {
+    if (!detectorInfo.isMonitor(i)) {
+      if (!m_loadOnlySomeSpectra ||
+          (spectraLoadMap.find(detIDs[i]) != spectraLoadMap.end())) {
+        // Add non-monitor detector ID
+        this->m_pixelToWkspindex[detIDs[i]] = workspaceIndex;
+        EventList &spec = workspace->getSpectrum(workspaceIndex);
+        spec.addDetectorID(detIDs[i]);
+        // Start the spectrum number at 1
+        spec.setSpectrumNo(spectrumNumber);
+        workspaceIndex += 1;
+        ++workspaceIndex;
+      } else {
+        this->m_pixelToWkspindex[detIDs[i]] = -1;
+      }
+      ++spectrumNumber;
     }
   }
 
@@ -856,7 +877,7 @@ void FilterEventsByLogValuePreNexus::procEvents(
     // second, e.g. 7 million events more per seconds).
     // compared to a setup time/merging time of about 10 seconds per million
     // detectors.
-    double setUpTime = double(detector_map.size()) * 10e-6;
+    double setUpTime = double(detectorInfo.size()) * 10e-6;
     m_parallelProcessing = ((double(m_maxNumEvents) / 7e6) > setUpTime);
     g_log.information() << (m_parallelProcessing ? "Using" : "Not using")
                         << " parallel processing."
@@ -914,14 +935,10 @@ void FilterEventsByLogValuePreNexus::procEvents(
       EventWorkspace_sptr partWS;
 
       if (m_parallelProcessing) {
-        m_prog->report("Creating Partial Workspace");
-        // Create a partial workspace
-        partWS = EventWorkspace_sptr(new EventWorkspace());
-        // Make sure to initialize.
-        partWS->initialize(1, 1, 1);
-        // Copy all the spectra numbers and stuff (no actual events to copy
-        // though).
-        partWS->copyDataFrom(*workspace);
+        m_progress->report("Creating Partial Workspace");
+        // Create a partial workspace, copy all the spectra numbers and stuff
+        // (no actual events to copy though).
+        partWS = workspace->clone();
         // Push it in the array
         partWorkspaces[i] = partWS;
       } else
@@ -945,7 +962,7 @@ void FilterEventsByLogValuePreNexus::procEvents(
                         << " workspaces for parallel loading."
                         << "\n";
 
-    m_prog->resetNumSteps(numBlocks, 0.1, 0.8);
+    m_progress->resetNumSteps(numBlocks, 0.1, 0.8);
 
     // -------------------------------------------------------------------
     // LOAD THE DATA
@@ -988,7 +1005,7 @@ void FilterEventsByLogValuePreNexus::procEvents(
                        current_event_buffer_size, fileOffset);
 
       // Report progress
-      m_prog->report("Load Event PreNeXus");
+      m_progress->report("Load Event PreNeXus");
 
       PARALLEL_END_INTERUPT_REGION
     }
@@ -1001,7 +1018,7 @@ void FilterEventsByLogValuePreNexus::procEvents(
     //--------------------------------------------------------------------
     if (m_parallelProcessing) {
       PARALLEL_START_INTERUPT_REGION
-      m_prog->resetNumSteps(workspace->getNumberHistograms(), 0.8, 0.95);
+      m_progress->resetNumSteps(workspace->getNumberHistograms(), 0.8, 0.95);
 
       // Merge all workspaces, index by index.
       PARALLEL_FOR_NO_WSP_CHECK()
@@ -1026,7 +1043,7 @@ void FilterEventsByLogValuePreNexus::procEvents(
           // Free up memory as you go along.
           partEl.clear(false);
         }
-        m_prog->report("Merging Workspaces");
+        m_progress->report("Merging Workspaces");
       }
 
       g_log.debug() << tim << " to merge workspaces together.\n";
@@ -1041,14 +1058,10 @@ void FilterEventsByLogValuePreNexus::procEvents(
     }
     delete[] eventVectors;
 
-    m_prog->resetNumSteps(3, 0.94, 1.00);
+    m_progress->resetNumSteps(3, 0.94, 1.00);
 
     // finalize loading
-    m_prog->report("Deleting Empty Lists");
-    if (m_loadOnlySomeSpectra)
-      workspace->deleteEmptyLists();
-
-    m_prog->report("Setting proton charge");
+    m_progress->report("Setting proton charge");
     this->setProtonCharge(workspace);
     g_log.debug() << tim << " to set the proton charge log.\n";
 
@@ -1526,14 +1539,10 @@ void FilterEventsByLogValuePreNexus::filterEvents() {
       EventWorkspace_sptr partWS;
 
       if (m_parallelProcessing) {
-        m_prog->report("Creating Partial Workspace");
-        // Create a partial workspace
-        partWS = EventWorkspace_sptr(new EventWorkspace());
-        // Make sure to initialize.
-        partWS->initialize(1, 1, 1);
-        // Copy all the spectra numbers and stuff (no actual events to copy
-        // though).
-        partWS->copyDataFrom(*m_localWorkspace);
+        m_progress->report("Creating Partial Workspace");
+        // Create a partial workspace, copy all the spectra numbers and stuff
+        // (no actual events to copy though).
+        partWS = m_localWorkspace->clone();
         // Push it in the array
         partWorkspaces[i] = partWS;
       } else
@@ -1549,7 +1558,10 @@ void FilterEventsByLogValuePreNexus::filterEvents() {
       for (detid_t j = 0; j < m_detid_max + 1; j++) {
         size_t wi = m_pixelToWkspindex[j];
         // Save a POINTER to the vector<tofEvent>
-        theseEventVectors[j] = &partWS->getSpectrum(wi).getEvents();
+        if (wi != static_cast<size_t>(-1))
+          theseEventVectors[j] = &partWS->getSpectrum(wi).getEvents();
+        else
+          theseEventVectors[j] = nullptr;
       }
     } // END FOR [Threads]
 
@@ -1557,7 +1569,7 @@ void FilterEventsByLogValuePreNexus::filterEvents() {
                         << " workspaces for parallel loading."
                         << "\n";
 
-    m_prog->resetNumSteps(numBlocks, 0.1, 0.8);
+    m_progress->resetNumSteps(numBlocks, 0.1, 0.8);
 
     // -------------------------------------------------------------------
     // LOAD THE DATA
@@ -1600,7 +1612,7 @@ void FilterEventsByLogValuePreNexus::filterEvents() {
                          current_event_buffer_size, fileOffset);
 
       // Report progress
-      m_prog->report("Load Event PreNeXus");
+      m_progress->report("Load Event PreNeXus");
 
       PARALLEL_END_INTERUPT_REGION
     }
@@ -1613,7 +1625,8 @@ void FilterEventsByLogValuePreNexus::filterEvents() {
     //--------------------------------------------------------------------
     if (m_parallelProcessing) {
       PARALLEL_START_INTERUPT_REGION
-      m_prog->resetNumSteps(m_localWorkspace->getNumberHistograms(), 0.8, 0.95);
+      m_progress->resetNumSteps(m_localWorkspace->getNumberHistograms(), 0.8,
+                                0.95);
 
       // Merge all workspaces, index by index.
       PARALLEL_FOR_NO_WSP_CHECK()
@@ -1639,7 +1652,7 @@ void FilterEventsByLogValuePreNexus::filterEvents() {
           // Free up memory as you go along.
           partEl.clear(false);
         }
-        m_prog->report("Merging Workspaces");
+        m_progress->report("Merging Workspaces");
       }
 
       g_log.debug() << tim << " to merge workspaces together.\n";
@@ -1654,14 +1667,10 @@ void FilterEventsByLogValuePreNexus::filterEvents() {
     }
     delete[] eventVectors;
 
-    m_prog->resetNumSteps(3, 0.94, 1.00);
+    m_progress->resetNumSteps(3, 0.94, 1.00);
 
     // finalize loading
-    m_prog->report("Deleting Empty Lists");
-    if (m_loadOnlySomeSpectra)
-      m_localWorkspace->deleteEmptyLists();
-
-    m_prog->report("Setting proton charge");
+    m_progress->report("Setting proton charge");
     this->setProtonCharge(m_localWorkspace);
     g_log.debug() << tim << " to set the proton charge log.\n";
 
@@ -1794,8 +1803,6 @@ void FilterEventsByLogValuePreNexus::filterEventsLinear(
       boost::dynamic_pointer_cast<const IComponent>(instrument->getSource());
   if (!source)
     throw std::runtime_error("Source is not set up in local workspace.");
-  double l1 = instrument->getDistance(*source);
-  g_log.notice() << "[DB] L1 = " << l1 << "\n";
 
   //----------------------------------------------------------------------------------
   // process the individual events
@@ -1806,6 +1813,12 @@ void FilterEventsByLogValuePreNexus::filterEventsLinear(
   int64_t boundindex(0);
   int64_t prevbtime(0);
   PixelType boundpixel(0);
+
+  const auto &detectorInfo = m_localWorkspace->detectorInfo();
+  const auto &detIds = detectorInfo.detectorIDs();
+
+  double l1 = detectorInfo.l1();
+  g_log.notice() << "[DB] L1 = " << l1 << "\n";
 
   for (size_t ievent = 0; ievent < current_event_buffer_size; ++ievent) {
     bool iswrongdetid = false;
@@ -1934,13 +1947,11 @@ void FilterEventsByLogValuePreNexus::filterEventsLinear(
       } else {
         double factor(1.0);
         if (m_corretctTOF) {
-          // Calculate TOF correction value
-          IComponent_const_sptr det =
-              boost::dynamic_pointer_cast<const IComponent>(
-                  instrument->getDetector(pixelid));
-          if (!det)
+          if (std::find(detIds.begin(), detIds.end(), pixelid) == detIds.end())
             throw std::runtime_error("Unable to get access to detector ");
-          double l2 = instrument->getDistance(*det);
+
+          // Calculate TOF correction value
+          double l2 = detectorInfo.l2(pixelid);
           factor = (l1) / (l1 + l2);
         }
 
@@ -2105,19 +2116,17 @@ void FilterEventsByLogValuePreNexus::filterEventsLinear(
   */
 size_t FilterEventsByLogValuePreNexus::padOutEmptyPixels(
     DataObjects::EventWorkspace_sptr eventws) {
-  // Obtain detector map
-  detid2det_map detector_map;
-  eventws->getInstrument()->getDetectors(detector_map);
+  const auto &detectorInfo = eventws->detectorInfo();
+  const auto &detIDs = detectorInfo.detectorIDs();
 
   // Determine maximum pixel id
-  detid2det_map::iterator it;
   m_detid_max = 0; // seems like a safe lower bound
-  for (it = detector_map.begin(); it != detector_map.end(); it++)
-    if (it->first > m_detid_max)
-      m_detid_max = it->first;
+  for (const auto detID : detIDs)
+    if (detID > m_detid_max)
+      m_detid_max = detID;
 
   // Pad all the pixels
-  m_prog->report("Padding Pixels of workspace");
+  m_progress->report("Padding Pixels of workspace");
   this->m_pixelToWkspindex.reserve(
       m_detid_max + 1); // starting at zero up to and including m_detid_max
   // Set to zero
@@ -2125,20 +2134,19 @@ size_t FilterEventsByLogValuePreNexus::padOutEmptyPixels(
 
   // Set up the map between workspace index and pixel ID
   size_t workspaceIndex = 0;
-  for (it = detector_map.begin(); it != detector_map.end(); it++) {
-    if (!it->second->isMonitor()) {
-      // Add non-monitor detector ID
-      this->m_pixelToWkspindex[it->first] = workspaceIndex;
-
-      // EventList & spec = workspace->getOrAddEventList(workspaceIndex);
-      // spec.addDetectorID(it->first);
-      // Start the spectrum number at 1
-      // spec.setSpectrumNo(specnum_t(workspaceIndex+1));
-      workspaceIndex += 1;
+  for (size_t i = 0; i < detectorInfo.size(); ++i) {
+    if (!detectorInfo.isMonitor(i)) {
+      if (!m_loadOnlySomeSpectra ||
+          (spectraLoadMap.find(detIDs[i]) != spectraLoadMap.end())) {
+        this->m_pixelToWkspindex[detIDs[i]] = workspaceIndex;
+        ++workspaceIndex;
+      } else {
+        this->m_pixelToWkspindex[detIDs[i]] = -1;
+      }
     }
   }
 
-  return detector_map.size();
+  return detectorInfo.size();
 }
 
 //----------------------------------------------------------------------------------------------
@@ -2148,20 +2156,23 @@ size_t FilterEventsByLogValuePreNexus::padOutEmptyPixels(
   */
 void FilterEventsByLogValuePreNexus::setupPixelSpectrumMap(
     DataObjects::EventWorkspace_sptr eventws) {
-  // Obtain detector map
-  detid2det_map detector_map;
-  eventws->getInstrument()->getDetectors(detector_map);
+  const auto &detectorInfo = eventws->detectorInfo();
+  const auto &detIDs = detectorInfo.detectorIDs();
 
   // Set up
-  for (auto &det : detector_map) {
-    if (!det.second->isMonitor()) {
-      // Add non-monitor detector ID
-      size_t workspaceIndex = m_pixelToWkspindex[det.first];
-      // this->m_pixelToWkspindex[it->first] = workspaceIndex;
-      EventList &spec = eventws->getOrAddEventList(workspaceIndex);
-      spec.addDetectorID(det.first);
-      // Start the spectrum number at 1
-      spec.setSpectrumNo(specnum_t(workspaceIndex + 1));
+  specnum_t spectrumNumber = 1;
+  for (size_t i = 0; i < detectorInfo.size(); ++i) {
+    if (!detectorInfo.isMonitor(i)) {
+      if (!m_loadOnlySomeSpectra ||
+          (spectraLoadMap.find(detIDs[i]) != spectraLoadMap.end())) {
+        // Add non-monitor detector ID
+        size_t workspaceIndex = m_pixelToWkspindex[detIDs[i]];
+        EventList &spec = eventws->getSpectrum(workspaceIndex);
+        spec.addDetectorID(detIDs[i]);
+        // Start the spectrum number at 1
+        spec.setSpectrumNo(spectrumNumber);
+      }
+      ++spectrumNumber;
     }
   }
 }

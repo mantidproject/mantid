@@ -45,12 +45,13 @@ public:
   void test_valid_algorithms() {
     // MergeRuns
     TS_ASSERT_THROWS_NOTHING(DataProcessorPostprocessingAlgorithm("MergeRuns"));
-    // Default: Stitch1DMany
-    TS_ASSERT_THROWS_NOTHING(DataProcessorPostprocessingAlgorithm());
   }
+
   void test_Stitch1DMany() {
 
-    auto stitch = DataProcessorPostprocessingAlgorithm();
+    auto stitch = DataProcessorPostprocessingAlgorithm(
+        "Stitch1DMany", "IvsQ_",
+        std::set<std::string>{"InputWorkspaces", "OutputWorkspace"});
     TS_ASSERT_EQUALS(stitch.name(), "Stitch1DMany");
     TS_ASSERT_EQUALS(stitch.inputProperty(), "InputWorkspaces");
     TS_ASSERT_EQUALS(stitch.outputProperty(), "OutputWorkspace");

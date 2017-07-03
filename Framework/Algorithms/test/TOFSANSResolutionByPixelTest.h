@@ -137,10 +137,10 @@ Mantid::API::MatrixWorkspace_sptr createTestWorkspace(
     std::vector<double> guideLogDetails = std::vector<double>()) {
   Mantid::API::MatrixWorkspace_sptr ws2d;
   if (isModerator) {
-    ws2d = WorkspaceCreationHelper::Create2DWorkspaceFromFunction(
+    ws2d = WorkspaceCreationHelper::create2DWorkspaceFromFunction(
         twos(), static_cast<int>(nhist), x0, x1, dx, true);
   } else {
-    ws2d = WorkspaceCreationHelper::Create2DWorkspaceFromFunction(
+    ws2d = WorkspaceCreationHelper::create2DWorkspaceFromFunction(
         ones(), static_cast<int>(nhist), x0, x1, dx, true);
   }
 
@@ -236,8 +236,8 @@ public:
         result = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
             Mantid::API::AnalysisDataService::Instance().retrieve(outputWS)));
 
-    const Mantid::MantidVec &xOUT = result->dataX(0);
-    const Mantid::MantidVec &xIN = testWorkspace->dataX(0);
+    const auto &xOUT = result->x(0);
+    const auto &xIN = testWorkspace->x(0);
 
     TSM_ASSERT_EQUALS("Output should have the same binning as the input.",
                       xOUT.size(), xIN.size());

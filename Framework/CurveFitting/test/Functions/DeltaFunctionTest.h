@@ -127,7 +127,6 @@ public:
   }
 
   void test_delta_with_shift() {
-    IPeakFunction::setPeakRadius(1000);
     auto res = IPeakFunction_sptr(new DeltaFunctionTest_Gauss());
     double a = 0.13;
     double ha = 1.0 / sqrt(M_PI * a);
@@ -169,7 +168,6 @@ public:
   }
 
   void test_two_deltas_with_shifts() {
-    IPeakFunction::setPeakRadius(1000);
     auto res = IPeakFunction_sptr(new DeltaFunctionTest_Gauss());
     double a = 0.13;
     double ha = 1.0 / sqrt(M_PI * a);

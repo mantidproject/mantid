@@ -19,6 +19,11 @@ RotationPointDialog::RotationPointDialog(QWidget *parent) : QDialog(parent) {
   // Gather the coordinates
   QObject::connect(this->ui.buttonBox, SIGNAL(accepted()), this,
                    SLOT(getCoordinates()));
+#ifdef __APPLE__
+  // On macOS the dialogs appear behind everything by default. Need to find
+  // a better fix that this...
+  setModal(true);
+#endif
 }
 
 RotationPointDialog::~RotationPointDialog() {}

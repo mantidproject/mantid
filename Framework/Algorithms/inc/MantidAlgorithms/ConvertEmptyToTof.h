@@ -2,6 +2,7 @@
 #define MANTID_ALGORITHMS_CONVERTEMPTYTOTOF_H_
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/DeprecatedAlgorithm.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/System.h"
@@ -9,6 +10,9 @@
 #include <utility> // std::pair
 
 namespace Mantid {
+namespace API {
+class SpectrumInfo;
+}
 namespace Algorithms {
 
 /** ConvertEmptyToTof :
@@ -38,7 +42,8 @@ namespace Algorithms {
  File change history is stored at: <https://github.com/mantidproject/mantid>
  Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-class DLLExport ConvertEmptyToTof : public API::Algorithm {
+class DLLExport ConvertEmptyToTof : public API::Algorithm,
+                                    public API::DeprecatedAlgorithm {
 public:
   const std::string name() const override;
   int version() const override;
@@ -64,18 +69,16 @@ private:
   bool doFitGaussianPeak(int, double &, double &, double &, double, double);
   std::pair<int, double> findAverageEppAndEpTof(const std::map<int, int> &);
 
-  double getL1(API::MatrixWorkspace_const_sptr);
-  double getL2(API::MatrixWorkspace_const_sptr, int);
   double calculateTOF(double, double);
   bool areEqual(double, double, double);
-  template <typename T>
-  T getPropertyFromRun(API::MatrixWorkspace_const_sptr, const std::string &);
   int roundUp(double);
   std::vector<double> makeTofAxis(int, double, size_t, double);
   void setTofInWS(const std::vector<double> &, API::MatrixWorkspace_sptr);
 
   DataObjects::Workspace2D_sptr m_inputWS;
   API::MatrixWorkspace_sptr m_outputWS;
+  // Provide hint to compiler that this should be default initialized to nullptr
+  const API::SpectrumInfo *m_spectrumInfo = nullptr;
 };
 
 } // namespace Algorithms

@@ -8,6 +8,7 @@
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/V3D.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include <cmath>
 #include <boost/shared_ptr.hpp>
 #include <sstream>
@@ -17,19 +18,13 @@ using namespace Mantid::Geometry;
 using namespace Mantid::API;
 
 namespace Mantid {
-
-namespace API {
-class MatrixWorkspace;
-}
-
 namespace Algorithms {
 
-//----------------------------------------------------------------------------------------------
 /** Constructor
  */
 TimeAtSampleStrategyIndirect::TimeAtSampleStrategyIndirect(
     MatrixWorkspace_const_sptr ws)
-    : m_ws(ws) {}
+    : m_ws(ws), m_spectrumInfo(m_ws->spectrumInfo()) {}
 
 Correction
 TimeAtSampleStrategyIndirect::calculate(const size_t &workspace_index) const {
@@ -37,18 +32,17 @@ TimeAtSampleStrategyIndirect::calculate(const size_t &workspace_index) const {
   // A constant among all spectra
   double twomev_d_mass =
       2. * PhysicalConstants::meV / PhysicalConstants::NeutronMass;
-  V3D samplepos = m_ws->getInstrument()->getSample()->getPos();
 
   // Get the parameter map
   const ParameterMap &pmap = m_ws->constInstrumentParameters();
 
   double shift;
-  IDetector_const_sptr det = m_ws->getDetector(workspace_index);
-  if (!det->isMonitor()) {
+  const IDetector *det = &m_spectrumInfo.detector(workspace_index);
+  if (!m_spectrumInfo.isMonitor(workspace_index)) {
     // Get E_fix
     double efix = 0.;
     try {
-      Parameter_sptr par = pmap.getRecursive(det.get(), "Efixed");
+      Parameter_sptr par = pmap.getRecursive(det, "Efixed");
       if (par) {
         efix = par->value<double>();
       }
@@ -60,10 +54,7 @@ TimeAtSampleStrategyIndirect::calculate(const size_t &workspace_index) const {
       throw std::runtime_error(errmsg.str());
     }
 
-    // Get L2
-    double l2 = det->getPos().distance(samplepos);
-
-    // Calculate shift
+    double l2 = m_spectrumInfo.l2(workspace_index);
     shift = -1. * l2 / sqrt(efix * twomev_d_mass);
 
   } else {

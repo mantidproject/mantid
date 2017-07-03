@@ -1,5 +1,5 @@
 #include "MantidCurveFitting/Algorithms/CrystalFieldEnergies.h"
-#include "MantidKernel/ArrayLengthValidator.h"
+//#include "MantidKernel/ArrayLengthValidator.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/make_unique.h"
@@ -46,19 +46,21 @@ const std::string CrystalFieldEnergies::summary() const {
 void CrystalFieldEnergies::init() {
 
   // Input
-  auto bounds = boost::make_shared<Kernel::BoundedValidator<int>>(1, 13);
+  auto bounds = boost::make_shared<Kernel::BoundedValidator<int>>(-99, 13);
   declareProperty("Nre", 1, bounds, "A rare earth ion. Possible values are: "
                                     "1=Ce 2=Pr 3=Nd 4=Pm 5=Sm 6=Eu 7=Gd 8=Tb "
-                                    "9=Dy 10=Ho 11=Er 12=Tm 13=Yb");
-  auto threeElements =
-      boost::make_shared<Kernel::ArrayLengthValidator<double>>(3);
-  std::vector<double> defaultVector(3, 0);
-  declareProperty(Kernel::make_unique<Kernel::ArrayProperty<double>>(
-                      "Bmol", defaultVector, threeElements),
-                  "Parameters of the molecular field (3 values).");
-  declareProperty(Kernel::make_unique<Kernel::ArrayProperty<double>>(
-                      "Bext", defaultVector, threeElements),
-                  "Parameters of the external field (3 values).");
+                                    "9=Dy 10=Ho 11=Er 12=Tm 13=Yb, or "
+                                    "negative values for arbitrary J with "
+                                    "J=-nre/2 up to nre=-99 (J=99/2)");
+
+  declareProperty("BmolX", 0.0, "The x-component of the molecular field.");
+  declareProperty("BmolY", 0.0, "The y-component of the molecular field.");
+  declareProperty("BmolZ", 0.0, "The z-component of the molecular field.");
+
+  declareProperty("BextX", 0.0, "The x-component of the external field.");
+  declareProperty("BextY", 0.0, "The y-component of the external field.");
+  declareProperty("BextZ", 0.0, "The z-component of the external field.");
+
   declareProperty("B20", 0.0, "Real part of the B20 field parameter.");
   declareProperty("B21", 0.0, "Real part of the B21 field parameter.");
   declareProperty("B22", 0.0, "Real part of the B22 field parameter.");
@@ -109,17 +111,21 @@ void CrystalFieldEnergies::init() {
 void CrystalFieldEnergies::exec() {
   int nre = getProperty("Nre");
 
+  double BmolX = getProperty("BmolX");
+  double BmolY = getProperty("BmolY");
+  double BmolZ = getProperty("BmolZ");
   DoubleFortranVector bmol(1, 3);
-  std::vector<double> bmolProp = getProperty("Bmol");
-  for (size_t i = 0; i < bmolProp.size(); ++i) {
-    bmol.set(i, bmolProp[i]);
-  }
+  bmol(1) = BmolX;
+  bmol(2) = BmolY;
+  bmol(3) = BmolZ;
 
+  double BextX = getProperty("BextX");
+  double BextY = getProperty("BextY");
+  double BextZ = getProperty("BextZ");
   DoubleFortranVector bext(1, 3);
-  std::vector<double> bextProp = getProperty("Bext");
-  for (size_t i = 0; i < bextProp.size(); ++i) {
-    bext.set(i, bextProp[i]);
-  }
+  bext(1) = BextX;
+  bext(2) = BextY;
+  bext(3) = BextZ;
 
   double B20 = getProperty("B20");
   double B21 = getProperty("B21");

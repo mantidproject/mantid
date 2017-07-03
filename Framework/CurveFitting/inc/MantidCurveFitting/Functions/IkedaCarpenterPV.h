@@ -54,13 +54,8 @@ public:
   std::string name() const override { return "IkedaCarpenterPV"; }
   const std::string category() const override { return "Peak"; }
 
-  // define these instead of functionLocal if you want to custom specify the
-  // calculation
-  // domain for this function
-  // virtual void function(double* out, const double* xValues, const int&
-  // nData)const;
-  // virtual void functionDeriv(API::Jacobian* out, const double* xValues, const
-  // int& nData);
+  /// Returns the integral intensity of the peak
+  double intensity() const override;
 
 protected:
   void functionLocal(double *out, const double *xValues,
@@ -89,6 +84,9 @@ private:
   void convertVoigtToPseudo(const double &voigtSigmaSq,
                             const double &voigtGamma, double &H,
                             double &eta) const;
+
+  /// constrain all parameters to be non-negative
+  void lowerConstraint0(std::string paramName);
 };
 
 } // namespace Functions

@@ -46,7 +46,7 @@ public:
     alg.initialize();
     alg.setProperty(
         "InputWorkspace",
-        WorkspaceCreationHelper::Create1DWorkspaceConstant(1, 1, 1));
+        WorkspaceCreationHelper::create1DWorkspaceConstant(1, 1, 1, true));
     alg.setPropertyValue("OutputWorkspace", "test_out");
     TS_ASSERT_THROWS(alg.execute(), std::runtime_error &);
   }
@@ -57,7 +57,7 @@ public:
     alg.initialize();
     alg.setProperty(
         "InputWorkspace",
-        WorkspaceCreationHelper::Create1DWorkspaceConstant(1, 1, 1));
+        WorkspaceCreationHelper::create1DWorkspaceConstant(1, 1, 1, true));
     alg.setPropertyValue("OutputWorkspace", "test_out");
     TS_ASSERT_THROWS(alg.setProperty("TwoThetaIn", 0.0),
                      std::invalid_argument &);
@@ -69,7 +69,7 @@ public:
     alg.initialize();
     alg.setProperty(
         "InputWorkspace",
-        WorkspaceCreationHelper::Create1DWorkspaceConstant(1, 1, 1));
+        WorkspaceCreationHelper::create1DWorkspaceConstant(1, 1, 1, true));
     alg.setPropertyValue("OutputWorkspace", "test_out");
     TS_ASSERT_THROWS(alg.setProperty("TwoThetaIn", 90.0),
                      std::invalid_argument &);
@@ -82,7 +82,7 @@ public:
     alg->initialize();
     alg->setProperty(
         "InputWorkspace",
-        WorkspaceCreationHelper::Create1DWorkspaceConstant(1, 1, 1));
+        WorkspaceCreationHelper::create1DWorkspaceConstant(1, 1, 1, true));
     alg->setPropertyValue("OutputWorkspace", "test_out");
     alg->setProperty("TwoThetaIn", 10.0);
 

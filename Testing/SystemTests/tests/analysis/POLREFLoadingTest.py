@@ -2,6 +2,8 @@
 from LoadAndCheckBase import *
 
 # Test File loading and basic data integrity checks of POLREF data in Mantid.
+
+
 class POLREFLoadingTest(LoadAndCheckBase):
     def get_raw_workspace_filename(self):
         return "POLREF00004699.raw"
@@ -17,4 +19,3 @@ class POLREFLoadingTest(LoadAndCheckBase):
 
     def get_expected_instrument_name(self):
         return "POLREF"
-

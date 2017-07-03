@@ -5,8 +5,11 @@
 #include "MantidCrystal/AddPeakHKL.h"
 #include "MantidKernel/V3D.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/Run.h"
+#include "MantidAPI/Sample.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
+#include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 
 using Mantid::Crystal::AddPeakHKL;

@@ -2,6 +2,7 @@
 #define VTKPEAKMARKERFACTORY_TEST_H_
 
 #include "MantidAPI/IPeaksWorkspace.h"
+#include "MantidAPI/Run.h"
 #include "MantidDataObjects/PeakShapeSpherical.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidKernel/WarningSuppressions.h"

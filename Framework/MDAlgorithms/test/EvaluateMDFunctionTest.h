@@ -5,6 +5,7 @@
 
 #include "MantidMDAlgorithms/EvaluateMDFunction.h"
 #include "MantidMDAlgorithms/CreateMDHistoWorkspace.h"
+#include "MantidAPI/AnalysisDataService.h"
 
 using Mantid::MDAlgorithms::EvaluateMDFunction;
 using Mantid::MDAlgorithms::CreateMDHistoWorkspace;

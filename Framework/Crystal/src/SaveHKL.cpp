@@ -1,17 +1,21 @@
 #include "MantidAPI/FileProperty.h"
+#include "MantidAPI/Run.h"
+#include "MantidAPI/Sample.h"
 #include "MantidCrystal/SaveHKL.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidKernel/Utils.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/Material.h"
+#include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidKernel/Strings.h"
 #include "MantidCrystal/AnvredCorrection.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include <fstream>
 
 #include <Poco/File.h>
-#include <boost/math/special_functions/fpclassify.hpp>
+#include <cmath>
 
 using namespace Mantid::Geometry;
 using namespace Mantid::DataObjects;
@@ -26,7 +30,6 @@ namespace Crystal {
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(SaveHKL)
 
-//----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void SaveHKL::init() {
@@ -89,10 +92,9 @@ void SaveHKL::init() {
   declareProperty(Kernel::make_unique<FileProperty>(
                       "UBFilename", "", FileProperty::OptionalLoad, exts),
                   "Path to an ISAW-style UB matrix text file only needed for "
-                  "DirectionCosines.");
+                  "DirectionCosines if workspace does not have lattice.");
 }
 
-//----------------------------------------------------------------------------------------------
 /** Execute the algorithm.
  */
 void SaveHKL::exec() {
@@ -115,27 +117,33 @@ void SaveHKL::exec() {
   int widthBorder = getProperty("WidthBorder");
   int decimalHKL = getProperty("HKLDecimalPlaces");
   bool cosines = getProperty("DirectionCosines");
-  Mantid::Geometry::OrientedLattice lat;
   Kernel::DblMatrix UB(3, 3);
   if (cosines) {
-    // Find OrientedLattice
-    std::string fileUB = getProperty("UBFilename");
-    // Open the file
-    std::ifstream in(fileUB.c_str());
-    std::string s;
-    double val;
+    if (peaksW->sample().hasOrientedLattice()) {
+      UB = peaksW->sample().getOrientedLattice().getUB();
+    } else {
+      // Find OrientedLattice
+      std::string fileUB = getProperty("UBFilename");
+      // Open the file
+      std::ifstream in(fileUB.c_str());
+      if (!in)
+        throw std::runtime_error(
+            "A file containing the UB matrix must be input into UBFilename.");
+      std::string s;
+      double val;
 
-    // Read the ISAW UB matrix
-    for (size_t row = 0; row < 3; row++) {
-      for (size_t col = 0; col < 3; col++) {
-        s = getWord(in, true);
-        if (!convert(s, val))
-          throw std::runtime_error(
-              "The string '" + s +
-              "' in the file was not understood as a number.");
-        UB[row][col] = val;
+      // Read the ISAW UB matrix
+      for (size_t row = 0; row < 3; row++) {
+        for (size_t col = 0; col < 3; col++) {
+          s = getWord(in, true);
+          if (!convert(s, val))
+            throw std::runtime_error(
+                "The string '" + s +
+                "' in the file was not understood as a number.");
+          UB[row][col] = val;
+        }
+        readToEndOfLine(in, true);
       }
-      readToEndOfLine(in, true);
     }
   }
 
@@ -321,8 +329,8 @@ void SaveHKL::exec() {
       for (auto wi : ids) {
 
         Peak &p = peaks[wi];
-        if (p.getIntensity() == 0.0 || boost::math::isnan(p.getIntensity()) ||
-            boost::math::isnan(p.getSigmaIntensity())) {
+        if (p.getIntensity() == 0.0 || !(std::isfinite(p.getIntensity())) ||
+            !(std::isfinite(p.getSigmaIntensity()))) {
           banned.insert(wi);
           continue;
         }
@@ -407,8 +415,8 @@ void SaveHKL::exec() {
           // Distance to center of detector
           boost::shared_ptr<const IComponent> det0 =
               inst->getComponentByName(p.getBankName());
-          if (inst->getName().compare("CORELLI") ==
-              0) // for Corelli with sixteenpack under bank
+          if (inst->getName() ==
+              "CORELLI") // for Corelli with sixteenpack under bank
           {
             std::vector<Geometry::IComponent_const_sptr> children;
             boost::shared_ptr<const Geometry::ICompAssembly> asmb =
@@ -713,21 +721,21 @@ double SaveHKL::spectrumCalc(double TOF, int iSpec,
   return spect;
 }
 void SaveHKL::sizeBanks(std::string bankName, int &nCols, int &nRows) {
-  if (bankName.compare("None") == 0)
+  if (bankName == "None")
     return;
   boost::shared_ptr<const IComponent> parent =
       ws->getInstrument()->getComponentByName(bankName);
   if (!parent)
     return;
-  if (parent->type().compare("RectangularDetector") == 0) {
+  if (parent->type() == "RectangularDetector") {
     boost::shared_ptr<const RectangularDetector> RDet =
         boost::dynamic_pointer_cast<const RectangularDetector>(parent);
 
     nCols = RDet->xpixels();
     nRows = RDet->ypixels();
   } else {
-    if (ws->getInstrument()->getName().compare("CORELLI") ==
-        0) // for Corelli with sixteenpack under bank
+    if (ws->getInstrument()->getName() ==
+        "CORELLI") // for Corelli with sixteenpack under bank
     {
       std::vector<Geometry::IComponent_const_sptr> children;
       boost::shared_ptr<const Geometry::ICompAssembly> asmb =

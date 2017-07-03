@@ -263,7 +263,7 @@ void GatherWorkspaces::execEvent() {
                                                  numBins + hist, numBins));
     // Copy geometry over.
     API::WorkspaceFactory::Instance().initializeFromParent(
-        eventW, outputWorkspace, true);
+        *eventW, *outputWorkspace, true);
     setProperty("OutputWorkspace", outputWorkspace);
     ExperimentInfo_sptr inWS = inputWorkspace;
     outputWorkspace->copyExperimentInfoFrom(inWS.get());
@@ -280,7 +280,7 @@ void GatherWorkspaces::execEvent() {
         if (accum == "Append")
           index = wi + i * totalSpec;
         outputWorkspace->dataX(index) = eventW->readX(wi);
-        outputWorkspace->getOrAddEventList(index) += out_values[i];
+        outputWorkspace->getSpectrum(index) += out_values[i];
         const auto &inSpec = eventW->getSpectrum(wi);
         auto &outSpec = outputWorkspace->getSpectrum(index);
         outSpec.clearDetectorIDs();

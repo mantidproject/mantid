@@ -22,12 +22,13 @@
 // lifetime policies.
 ////////////////////////////////////////////////////////////////////////////////
 
-#include <cstdlib>
-#include <cassert>
-#include <stdexcept>
-#include <typeinfo>
-#include <string>
 #include <MantidKernel/DllConfig.h>
+#include <cassert>
+#include <cstdlib>
+#include <mutex>
+#include <stdexcept>
+#include <string>
+#include <typeinfo>
 
 namespace Mantid {
 namespace Kernel {
@@ -53,6 +54,7 @@ private:
   SingletonHolder();
 
   static T *pInstance;
+  static std::once_flag flag;
   static bool destroyed;
 };
 
@@ -76,13 +78,10 @@ template <typename T> inline T &SingletonHolder<T>::Instance() {
     s += typeid(T).name();
     throw std::runtime_error(s.c_str());
   }
-  if (!pInstance) {
-    //		std::cerr << "creating singleton " << typeid(T).name() <<
-    // '\n';
+  std::call_once(flag, [] {
     pInstance = CreateUsingNew<T>::Create();
     AddSingleton(&DestroySingleton);
-    // atexit(&CleanupSingletons);
-  }
+  });
   return *pInstance;
 }
 
@@ -97,6 +96,8 @@ template <typename T> void SingletonHolder<T>::DestroySingleton() {
 
 /// global variable holding pointer to singleton instance
 template <typename T> T *SingletonHolder<T>::pInstance = nullptr;
+
+template <typename T> std::once_flag SingletonHolder<T>::flag;
 
 /// variable to allow trapping of attempts to destroy a singleton more than once
 template <typename T> bool SingletonHolder<T>::destroyed = false;

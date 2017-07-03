@@ -29,12 +29,11 @@ DataProcessorPostprocessingAlgorithm::DataProcessorPostprocessingAlgorithm(
 
   m_outputProp = outputWsProperties.at(0);
 }
-/** Default constructor: use 'Stitch1DMany' as the default post-processor
- * algorithm */
+
+/** Default constructor: no algorithm defined */
 DataProcessorPostprocessingAlgorithm::DataProcessorPostprocessingAlgorithm()
-    : DataProcessorPostprocessingAlgorithm(
-          "Stitch1DMany", "IvsQ_",
-          std::set<std::string>{"InputWorkspaces", "OutputWorkspace"}) {}
+    : m_prefix(), m_inputProp(), m_outputProp() {}
+
 // Destructor
 DataProcessorPostprocessingAlgorithm::~DataProcessorPostprocessingAlgorithm() {}
 

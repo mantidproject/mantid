@@ -1,9 +1,12 @@
 #include "MantidKernel/ConfigService.h"
 #include "ManageInterfaceCategories.h"
+#include "MantidQtAPI/MantidDesktopServices.h"
 #include "../ApplicationWindow.h"
 
 #include <QtGui>
 #include <QtAlgorithms>
+
+using MantidQt::API::MantidDesktopServices;
 
 /////////////////////////////////////////////////////
 // InterfaceCategoryModel
@@ -175,5 +178,5 @@ void ManageInterfaceCategories::initLayout() {
  */
 void ManageInterfaceCategories::helpClicked() {
   QUrl helpUrl("http://www.mantidproject.org/ManageInterfaceCategories");
-  QDesktopServices::openUrl(helpUrl);
+  MantidDesktopServices::openUrl(helpUrl);
 }

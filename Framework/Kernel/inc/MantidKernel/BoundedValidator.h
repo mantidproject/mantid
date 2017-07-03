@@ -1,11 +1,10 @@
 #ifndef MANTID_KERNEL_BOUNDEDVALIDATOR_H_
 #define MANTID_KERNEL_BOUNDEDVALIDATOR_H_
 
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidKernel/TypedValidator.h"
+#include <boost/make_shared.hpp>
 #include <string>
+#include <sstream>
 
 namespace Mantid {
 namespace Kernel {

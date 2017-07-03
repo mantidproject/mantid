@@ -5,6 +5,7 @@
 #include "MantidDataHandling/SetScalingPSD.h"
 #include "MantidDataHandling/LoadEmptyInstrument.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidKernel/ConfigService.h"
 #include <Poco/File.h>
 #include <Poco/Path.h>
@@ -42,9 +43,10 @@ public:
 
     // Store the detector positions before the shifts so that we can compare
     std::map<int, V3D> originalPositions;
+    const auto &spectrumInfo = testWS->spectrumInfo();
     for (int i = 0; i < ndets; ++i) {
-      IDetector_const_sptr det = testWS->getDetector(i);
-      originalPositions.emplace(i, det->getPos());
+      const auto pos = spectrumInfo.position(i);
+      originalPositions.emplace(i, pos);
     }
 
     IAlgorithm_sptr scaler = createAlgorithm();
@@ -56,20 +58,23 @@ public:
     double expectedYPos[5] = {-0.0005, 0.0990, 0.1985, -0.002042, -0.0025133};
     double expectedYScale[3] = {0.995002, 0.995001, 0.995000};
 
-    const ParameterMap &pmap = testWS->instrumentParameters();
+    const auto &pmap = testWS->constInstrumentParameters();
+    const auto &spectrumIndexNew = testWS->spectrumInfo();
     for (int i = 0; i < ndets; ++i) {
-      IDetector_const_sptr det = testWS->getDetector(i);
-      V3D newPos = det->getPos();
+      V3D newPos = spectrumIndexNew.position(i);
       V3D oldPos = originalPositions[i];
       TS_ASSERT_DELTA(newPos.Y(), expectedYPos[i], 1e-6);
       TS_ASSERT_DELTA(fabs(oldPos.X() - newPos.X()), 0.0, 1e-05);
       TS_ASSERT_DELTA(fabs(oldPos.Z() - newPos.Z()), 0.0, 1e-05);
 
-      if (det->isMonitor()) {
-        TS_ASSERT_EQUALS(pmap.contains(det.get(), "sca"), false);
+      if (spectrumIndexNew.isMonitor(i)) {
+        TS_ASSERT_EQUALS(pmap.contains(&spectrumIndexNew.detector(i), "sca"),
+                         false);
       } else {
-        TS_ASSERT_EQUALS(pmap.contains(det.get(), "sca"), true);
-        Parameter_sptr scaleParam = pmap.get(det.get(), "sca");
+        TS_ASSERT_EQUALS(pmap.contains(&spectrumIndexNew.detector(i), "sca"),
+                         true);
+        Parameter_sptr scaleParam =
+            pmap.get(&spectrumIndexNew.detector(i), "sca");
         const V3D scaleFactor = scaleParam->value<V3D>();
         TS_ASSERT_EQUALS(scaleFactor.X(), 1.0);
         TS_ASSERT_EQUALS(scaleFactor.Z(), 1.0);
@@ -101,9 +106,9 @@ public:
     V3D expectedValues[3] = {V3D(-0.08982175, -1.03708771, 3.88495351),
                              V3D(-0.09233499, -1.06610575, 3.87703178),
                              V3D(-0.09484302, -1.09506369, 3.86889169)};
+    const auto &spectrumInfo = testWS->spectrumInfo();
     for (int i = 0; i < 3; ++i) {
-      IDetector_const_sptr det = testWS->getDetector(testIndices[i]);
-      V3D pos = det->getPos();
+      const auto pos = spectrumInfo.position(testIndices[i]);
       V3D expectedPos = expectedValues[i];
       TS_ASSERT_DELTA(pos.X(), expectedPos.X(), 1e-8);
       TS_ASSERT_DELTA(pos.Y(), expectedPos.Y(), 1e-8);
@@ -125,15 +130,16 @@ private:
     writer << ndets << "\t" << -1 << "\n";
     writer << "det no.  offset    l2     code     theta        phi"
            << "         w_x         w_y         w_z         f_x         f_y\n";
+    const auto &spectrumInfo = testWS->spectrumInfo();
     for (int i = 0; i < ndets; ++i) {
-      IDetector_const_sptr det = testWS->getDetector(i);
-      V3D oldPos(det->getPos());
+      auto oldPos = spectrumInfo.position(i);
       // Move in Y only
       oldPos.setY(oldPos.Y() - m_y_offset * (i + 1));
       double l2, theta, phi;
       oldPos.getSpherical(l2, theta, phi);
-      writer << det->getID() << "\t" << -1 << "\t" << l2 << "\t" << -1 << "\t"
-             << theta << "\t" << phi << "\n";
+      const auto &detector = spectrumInfo.detector(i);
+      writer << detector.getID() << "\t" << -1 << "\t" << l2 << "\t" << -1
+             << "\t" << theta << "\t" << phi << "\n";
     }
 
     writer.close();

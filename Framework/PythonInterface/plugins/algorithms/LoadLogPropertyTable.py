@@ -9,6 +9,7 @@ from mantid.api import * # PythonAlgorithm, AlgorithmFactory, WorkspaceProperty
 from mantid.kernel import * # StringArrayProperty
 from mantid.simpleapi import * # needed for Load
 
+
 class LoadLogPropertyTable(PythonAlgorithm):
 
     def summary(self):
@@ -29,7 +30,7 @@ class LoadLogPropertyTable(PythonAlgorithm):
         self.declareProperty(FileProperty(name="LastFile",defaultValue="",action=FileAction.Load,extensions = ["nxs","raw"]),
                              "The Last file to load from, must be in the same directory, all files in between will also be used")
         self.declareProperty(StringArrayProperty("LogNames",direction=Direction.Input),
-                             "The comma seperated list of properties to include. \n"+\
+                             "The comma seperated list of properties to include. \n"+
                              "The full list will be printed if an invalid value is used.")
         self.declareProperty(WorkspaceProperty("OutputWorkspace","",Direction.Output),"Table of results")
 

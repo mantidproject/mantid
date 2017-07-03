@@ -3,6 +3,7 @@
 
 #include "MantidGeometry/DllConfig.h"
 #include "MantidKernel/Matrix.h"
+#include <string>
 
 namespace Mantid {
 namespace Geometry {

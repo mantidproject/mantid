@@ -205,7 +205,7 @@ void PeakOverlay::removeShapes(const QList<Shape2D *> &shapeList) {
   // Run the DeleteTableRows algorithm to delete the peak.
   auto alg =
       Mantid::API::AlgorithmManager::Instance().create("DeleteTableRows", -1);
-  alg->setPropertyValue("TableWorkspace", m_peaksWorkspace->name());
+  alg->setPropertyValue("TableWorkspace", m_peaksWorkspace->getName());
   alg->setProperty("Rows", rows);
   emit executeAlgorithm(alg);
 }
@@ -335,6 +335,17 @@ int PeakOverlay::getNumberPeaks() const {
 */
 Mantid::Geometry::IPeak &PeakOverlay::getPeak(int i) {
   return m_peaksWorkspace->getPeak(i);
+}
+
+QList<PeakMarker2D *> PeakOverlay::getSelectedPeakMarkers() {
+  QList<PeakMarker2D *> peaks;
+  for (auto &shape : m_selectedShapes) {
+    auto marker = dynamic_cast<PeakMarker2D *>(shape);
+    if (marker)
+      peaks.append(marker);
+  }
+
+  return peaks;
 }
 
 /// Sets the scaler that is used to determine the size of peak markers.

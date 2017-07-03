@@ -10,6 +10,17 @@
 namespace Mantid {
 namespace PythonInterface {
 namespace Converters {
+
+extern template int NDArrayTypeIndex<bool>::typenum;
+extern template int NDArrayTypeIndex<int>::typenum;
+extern template int NDArrayTypeIndex<long>::typenum;
+extern template int NDArrayTypeIndex<long long>::typenum;
+extern template int NDArrayTypeIndex<unsigned int>::typenum;
+extern template int NDArrayTypeIndex<unsigned long>::typenum;
+extern template int NDArrayTypeIndex<unsigned long long>::typenum;
+extern template int NDArrayTypeIndex<float>::typenum;
+extern template int NDArrayTypeIndex<double>::typenum;
+
 namespace Impl {
 /**
  * Returns a new numpy array with the a copy of the data from 1D vector with the

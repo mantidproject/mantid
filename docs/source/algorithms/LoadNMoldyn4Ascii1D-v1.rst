@@ -61,6 +61,7 @@ resolution convolution**
     
     for ws in data:
         print ws.name()
+
 Output:
 
 .. code-block:: python

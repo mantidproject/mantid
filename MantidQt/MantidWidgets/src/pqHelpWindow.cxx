@@ -7,7 +7,7 @@
    All rights reserved.
 
    ParaView is a free software; you can redistribute it and/or modify it
-   under the terms of the ParaView license version 1.2. 
+   under the terms of the ParaView license version 1.2.
 
    See License_v1.2.txt for the full ParaView license.
    A copy of this license can be obtained by contacting
@@ -30,9 +30,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ========================================================================*/
 #include "MantidQtMantidWidgets/pqHelpWindow.h"
+#include "MantidQtAPI/MantidDesktopServices.h"
 #include "ui_pqHelpWindow.h"
 
-#include <QDesktopServices>
 #include <QFileInfo>
 #include <QHelpContentWidget>
 #include <QHelpEngine>
@@ -42,6 +42,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <QNetworkProxy>
 #include <QNetworkReply>
 #include <QPointer>
+#include <QPrinter>
+#include <QPrintDialog>
 #include <QPushButton>
 #include <QTextBrowser>
 #include <QTextStream>
@@ -51,7 +53,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <QUrl>
 #include <QWebHistory>
 #include <QWebView>
-#include <iostream>
+
+using MantidQt::API::MantidDesktopServices;
 
 // ****************************************************************************
 //            CLASS pqHelpWindowNetworkReply
@@ -194,6 +197,8 @@ pqHelpWindow::pqHelpWindow(
   // add a navigation toolbar
   QToolBar *navigation = new QToolBar("Navigation");
   QPushButton *home = new QPushButton("Home");
+  QPushButton *print = new QPushButton("Print...");
+  print->setToolTip("Print the current page");
 
   m_forward = new QToolButton();
   m_forward->setArrowType(Qt::RightArrow);
@@ -208,6 +213,7 @@ pqHelpWindow::pqHelpWindow(
   m_backward->setAutoRaise(true);
 
   navigation->addWidget(home);
+  navigation->addWidget(print);
   navigation->addWidget(m_backward);
   navigation->addWidget(m_forward);
   navigation->setAllowedAreas(Qt::TopToolBarArea | Qt::RightToolBarArea);
@@ -256,6 +262,7 @@ pqHelpWindow::pqHelpWindow(
 
   // connect the navigation buttons
   connect(home, SIGNAL(clicked()), this, SLOT(showHomePage()));
+  connect(print, SIGNAL(clicked()), this, SLOT(printPage()));
   connect(m_forward,  SIGNAL(clicked()), m_browser, SLOT(forward()));
   connect(m_backward, SIGNAL(clicked()), m_browser, SLOT(back()));
   connect(m_forward,  SIGNAL(clicked()), this, SLOT(updateNavButtons()));
@@ -297,7 +304,7 @@ void pqHelpWindow::errorMissingPage(const QUrl& url)
 //-----------------------------------------------------------------------------
 void pqHelpWindow::showPage(const QString& url)
 {
-  this->showPage(QUrl(url));
+  this->showPage(QUrl::fromUserInput(url));
 }
 
 //-----------------------------------------------------------------------------
@@ -313,8 +320,18 @@ void pqHelpWindow::showPage(const QUrl& url)
   }
   else
   {
-    QDesktopServices::openUrl(url);
+    MantidDesktopServices::openUrl(url);
   }
+}
+
+//-----------------------------------------------------------------------------
+void pqHelpWindow::printPage() {
+  QPrinter printer;
+  QPrintDialog dialog(&printer, this);
+  dialog.setWindowTitle(tr("Print Document"));
+  if (dialog.exec() != QDialog::Accepted)
+    return;
+  m_browser->print(&printer);
 }
 
 //-----------------------------------------------------------------------------

@@ -142,9 +142,10 @@ public:
   std::vector<Kernel::V3D> const &getCoordSystem() const {
     return coord_system;
   }
-
   //@}
 
+  /// Generate a random point within the box
+  Kernel::V3D generatePointInside(double r1, double r2, double r3) const;
   /** returns the expanded box consisting of all 8 box points,
     * shifted into the coordinate system with the observer centre; */
   void getFullBox(std::vector<Kernel::V3D> &box,
@@ -222,7 +223,8 @@ typedef boost::shared_ptr<BoundingBox> BoundingBox_sptr;
 typedef boost::shared_ptr<const BoundingBox> BoundingBox_const_sptr;
 
 /// Print out the bounding box values to a stream.
-std::ostream &operator<<(std::ostream &os, const BoundingBox &box);
+MANTID_GEOMETRY_DLL std::ostream &operator<<(std::ostream &os,
+                                             const BoundingBox &box);
 }
 }
 

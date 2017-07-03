@@ -50,14 +50,14 @@ class SpaceGroupBuilder(object):
         try:
             return self._getSpaceGroupFromString(cifData)
         # pylint: disable=unused-variable
-        except (RuntimeError, ValueError) as error:
+        except (RuntimeError, ValueError):
             try:
                 return self._getSpaceGroupFromNumber(cifData)
             # pylint: disable=unused-variable,invalid-name
-            except RuntimeError as e:
+            except RuntimeError:
                 raise RuntimeError(
-                    'Can not create space group from supplied CIF-file. You could try to modify the HM-symbol ' \
-                    'to contain spaces between the components.\n' \
+                    'Can not create space group from supplied CIF-file. You could try to modify the HM-symbol '
+                    'to contain spaces between the components.\n'
                     'Keys to look for: _space_group_name_H-M_alt, _symmetry_space_group_name_H-M')
 
     def _getSpaceGroupFromString(self, cifData):
@@ -76,8 +76,11 @@ class SpaceGroupBuilder(object):
 
     def _getCleanSpaceGroupSymbol(self, rawSpaceGroupSymbol):
         # Remove :1 and :H from the symbol. Those are not required at the moment because they are the default.
-        removalRe = re.compile(':[1H]', re.IGNORECASE)
-        return re.sub(removalRe, '', rawSpaceGroupSymbol).strip()
+        # Also substitute 'R' and 'Z' endings used by ICSD to indicate alternative origin choice or settings
+        mappings = {':[1Hh]':'', ' S$':'', ' H$':'', ' Z$':' :2', ' R$':' :r'}
+        for k, v in mappings.items():
+            rawSpaceGroupSymbol = re.sub(k, v, rawSpaceGroupSymbol)
+        return rawSpaceGroupSymbol.strip()
 
     def _getSpaceGroupFromNumber(self, cifData):
         spaceGroupNumber = [int(cifData[x]) for x in
@@ -117,7 +120,7 @@ class UnitCellBuilder(object):
                                  unitCellComponents])
 
         if unitCellValueMap['_cell_length_a'] is None:
-            raise RuntimeError('The a-parameter of the unit cell is not specified in the supplied CIF.\n' \
+            raise RuntimeError('The a-parameter of the unit cell is not specified in the supplied CIF.\n'
                                'Key to look for: _cell_length_a')
 
         replacementMap = {
@@ -182,7 +185,7 @@ class AtomListBuilder(object):
         for field in coordinateFields:
             if field not in cifData.keys():
                 raise RuntimeError(
-                    'Mandatory field {0} not found in CIF-file.' \
+                    'Mandatory field {0} not found in CIF-file.'
                     'Please check the atomic position definitions.'.format(field))
 
         # Return a dict like { 'label1': 'x y z', 'label2': 'x y z' }
@@ -379,7 +382,7 @@ class LoadCIF(PythonAlgorithm):
         try:
             self._loadFromCif()
         except ImportError:
-            raise RuntimeError('This algorithm requires an additional Python package: PyCifRW' \
+            raise RuntimeError('This algorithm requires an additional Python package: PyCifRW'
                                ' (https://pypi.python.org/pypi/PyCifRW/4.1)')
 
     def _loadFromCif(self):

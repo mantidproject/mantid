@@ -17,8 +17,8 @@
 #include <pqServerManagerModel.h>
 #include <pqSMAdaptor.h>
 
-#include <vtkCallbackCommand.h>
 #include "vtk_jsoncpp.h"
+#include <vtkCallbackCommand.h>
 #include <vtkSMDoubleVectorProperty.h>
 #include <vtkSMIntVectorProperty.h>
 #include <vtkSMProxy.h>
@@ -66,7 +66,7 @@ VsiColorScale ColorUpdater::autoScale() {
 void ColorUpdater::colorMapChange(pqPipelineRepresentation *repr,
                                   const Json::Value &model) {
   pqScalarsToColors *lut = repr->getLookupTable();
-  if (NULL == lut) {
+  if (!lut) {
     // Got a bad proxy, so just return
     return;
   }
@@ -80,6 +80,9 @@ void ColorUpdater::colorMapChange(pqPipelineRepresentation *repr,
  * @param max The upper end of the color scale.
  */
 void ColorUpdater::colorScaleChange(double min, double max) {
+  if (min >= max)
+    return;
+
   this->m_minScale = min;
   this->m_maxScale = max;
 
@@ -117,7 +120,7 @@ void ColorUpdater::colorScaleChange(double min, double max) {
 void ColorUpdater::updateLookupTable(pqDataRepresentation *representation) {
   pqScalarsToColors *lookupTable = representation->getLookupTable();
 
-  if (NULL != lookupTable) {
+  if (lookupTable) {
     // Set the scalar range values
     lookupTable->setScalarRange(this->m_minScale, this->m_maxScale);
 
@@ -127,7 +130,7 @@ void ColorUpdater::updateLookupTable(pqDataRepresentation *representation) {
     vtkSMProxy *scalarOpacityFunctionProxy =
         lutProxy ? pqSMAdaptor::getProxyProperty(
                        lutProxy->GetProperty("ScalarOpacityFunction"))
-                 : NULL;
+                 : nullptr;
 
     if (scalarOpacityFunctionProxy) {
       vtkSMTransferFunctionProxy::RescaleTransferFunction(

@@ -2,6 +2,7 @@
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/Run.h"
 #include "MantidKernel/Strings.h"
 #include "MantidGeometry/Instrument.h"
 
@@ -269,7 +270,7 @@ void ALCDataLoadingPresenter::updateAvailableInfo() {
   if (auto timeLimits = m_view->timeRange()) {
     if (std::abs(timeLimits->first) < 0.0001 &&
         std::abs(timeLimits->second) < 0.0001) {
-      m_view->setTimeLimits(firstGoodData - timeZero, ws->readX(0).back());
+      m_view->setTimeLimits(firstGoodData - timeZero, ws->x(0).back());
     }
   }
 

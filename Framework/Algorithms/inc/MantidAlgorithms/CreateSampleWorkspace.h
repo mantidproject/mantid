@@ -6,6 +6,7 @@
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Objects/Object.h"
 #include "MantidKernel/PseudoRandomNumberGenerator.h"
 
 namespace Mantid {
@@ -53,18 +54,22 @@ private:
   void exec() override;
 
   DataObjects::EventWorkspace_sptr
-  createEventWorkspace(int numPixels, int numBins, int numEvents, double x0,
-                       double binDelta, int start_at_pixelID,
+  createEventWorkspace(int numPixels, int numBins, int numMonitors,
+                       int numEvents, double x0, double binDelta,
                        Geometry::Instrument_sptr inst,
                        const std::string &functionString, bool isRandom);
   API::MatrixWorkspace_sptr
-  createHistogramWorkspace(int numPixels, int numBins, double x0,
-                           double binDelta, int start_at_pixelID,
+  createHistogramWorkspace(int numPixels, int numBins, int numMonitors,
+                           double x0, double binDelta,
                            Geometry::Instrument_sptr inst,
                            const std::string &functionString, bool isRandom);
+  API::MatrixWorkspace_sptr createScanningWorkspace(
+      int numBins, double x0, double binDelta, Geometry::Instrument_sptr inst,
+      const std::string &functionString, bool isRandom, int numScanPoints);
   Geometry::Instrument_sptr createTestInstrumentRectangular(
-      API::Progress &progress, int num_banks, int pixels, double pixelSpacing,
-      const double bankDistanceFromSample, const double sourceSampleDistance);
+      API::Progress &progress, int numBanks, int numMonitors, int pixels,
+      double pixelSpacing, const double bankDistanceFromSample,
+      const double sourceSampleDistance);
   Geometry::Object_sptr createCappedCylinder(double radius, double height,
                                              const Kernel::V3D &baseCentre,
                                              const Kernel::V3D &axis,

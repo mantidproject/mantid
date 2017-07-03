@@ -7,6 +7,7 @@
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidDataHandling/LoadInstrument.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Instrument.h"
@@ -231,7 +232,7 @@ public:
     WorkspaceGroup_sptr gws;
     gws = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(wsName);
     auto ws = boost::dynamic_pointer_cast<MatrixWorkspace>(gws->getItem(0));
-    Mantid::Geometry::ParameterMap &paramMap = ws->instrumentParameters();
+    const auto &paramMap = ws->constInstrumentParameters();
     boost::shared_ptr<const Mantid::Geometry::Instrument> instr =
         ws->getInstrument();
 
@@ -273,7 +274,7 @@ public:
 
     // Now check second workspace
     ws = boost::dynamic_pointer_cast<MatrixWorkspace>(gws->getItem(1));
-    Mantid::Geometry::ParameterMap &paramMap2 = ws->instrumentParameters();
+    const auto &paramMap2 = ws->constInstrumentParameters();
     instr = ws->getInstrument();
 
     // Check Alpha0 parameter

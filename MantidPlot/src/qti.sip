@@ -701,9 +701,6 @@ class Graph : QWidget /PyName=Layer/
 %End
 public:
   enum TicksStyle{NoTicks = 0, Out = 1, InOut = 2, In = 3};
-  enum CurveType{Line, Scatter, LineSymbols, VerticalBars, Area, Pie, VerticalDropLines,
-			Spline, HorizontalSteps, Histogram, HorizontalBars, VectXYXY, ErrorBars,
-			Box, VectXYAM, VerticalSteps, ColorMap, GrayScale, ColorMapContour, Contour, Function, ImagePlot};
 
   bool isPiePlot();
   SIP_PYOBJECT pieLegendText() /PyName=pieLegend/;
@@ -713,7 +710,7 @@ public:
 
   bool insertCurve(Table*, const QString&, int style = 1, int startRow = 0, int endRow = -1);
   bool insertCurve(Table*, const QString&, const QString&, int style = 1, int startRow = 0, int endRow = -1);
-  bool insertCurve(QString, int, bool=false, Graph::CurveType style = Graph::Unspecified);
+  bool insertCurve(QString, int, bool=false, GraphOptions::CurveType style = GraphOptions::Unspecified, bool=false);
   void insertCurve(Graph*, int);
   bool addCurves(Table*, SIP_PYTUPLE, int=0, double=1, int=3, int=0, int=-1);
 %MethodCode
@@ -915,6 +912,7 @@ public:
   Graph* layer(int num);
   Graph* addLayer(int = 0, int = 0, int = 0, int = 0);
   void insertCurve(MultiLayer* ml, int i);
+  void setCommonAxisScales();
   void setCols(int);
   void setRows(int);
   void setName(const QString&);
@@ -1100,7 +1098,7 @@ class ApplicationWindow: QMainWindow
 // we have to do this to override casting in qt/qobject.sip (PyQt 3.16)
 // Russell Taylor, 4/8/09: Change needed for mac build.
 //   Taken from main qtiplot svn revision 1187.
-sipClass=sipFindClass(sipCpp->metaObject()->className());
+sipType=sipFindType(sipCpp->metaObject()->className());
 %End
 
 public:
@@ -1194,7 +1192,7 @@ public:
 %End
 
 	Matrix* importImage(const QString&);
-	MultiLayer* plotSpectrogram(Matrix*, Graph::CurveType = Graph::ColorMap) /PyName=plot/;
+	MultiLayer* plotSpectrogram(Matrix*, GraphOptions::CurveType = GraphOptions::ColorMap) /PyName=plot/;
 
     Graph3D* newPlot3D();
     Graph3D* plotXYZ(Table* table, const QString&, int = 0) /PyName=plot3D/;
@@ -1264,8 +1262,8 @@ ApplicationWindow *sipqti_app()
   PyObject *mydict = PyModule_GetDict(me);
   PyObject *pyapp = PyDict_GetItemString(mydict,"app");
   Py_DECREF(me);
-  if (sipCanConvertToInstance(pyapp, sipClass_ApplicationWindow, SIP_NOT_NONE))
-    return (ApplicationWindow*) sipConvertToInstance(pyapp, sipClass_ApplicationWindow, NULL, SIP_NOT_NONE, NULL, &iserr);
+  if (sipCanConvertToType(pyapp, sipType_ApplicationWindow, SIP_NOT_NONE))
+    return (ApplicationWindow*) sipConvertToType(pyapp, sipType_ApplicationWindow, NULL, SIP_NOT_NONE, NULL, &iserr);
   else
     return NULL;
 }
@@ -1361,7 +1359,7 @@ public:
   double dataE(int,int) const;
   //int indexX(int,double) const;
   Graph3D* plotGraph3D(int = 3);
-  MultiLayer* plotGraph2D(Graph::CurveType = Graph::ColorMap);
+  MultiLayer* plotGraph2D(GraphOptions::CurveType = GraphOptions::ColorMap);
   void goToTab(const QString &);
   void goTo(int,int) /PyName = selectCell/;
   void goToRow(int) /PyName = selectRow/;
@@ -1469,23 +1467,27 @@ class MantidUI: QObject
 // we have to do this to override casting in qt/qobject.sip (PyQt 3.16)
 // Russell Taylor, 4/8/09: Change needed for mac build.
 //   Taken from main qtiplot svn revision 1187.
-sipClass=sipFindClass(sipCpp->metaObject()->className());
+sipType=sipFindType(sipCpp->metaObject()->className());
 %End
 
 public:
   // Plotting methods
   MultiLayer *plot1D(const QList<QString> &wsnames, const QList<int> &, bool spectrumPlot,
 					 MantidQt::DistributionFlag distr = MantidQt::DistributionDefault,
-					 bool errs = true, Graph::CurveType style = Graph::Unspecified,
+					 bool errs = true, GraphOptions::CurveType style = GraphOptions::Unspecified,
 					 MultiLayer *plotWindow = NULL, bool clearWindow = false,
 					 bool waterfallPlot = false);
 
-  MultiLayer* drawSingleColorFillPlot(const QString & name, Graph::CurveType style = Graph::ColorMap,
+  MultiLayer* drawSingleColorFillPlot(const QString & name, GraphOptions::CurveType style = GraphOptions::ColorMap,
                                       MultiLayer* window = NULL);
 
   MultiLayer* plotMDList(const QList<QString>& wsNames, const int plotAxis,
     const Mantid::API::MDNormalization normalization, const bool showErrors, MultiLayer* window = NULL,
     bool clearWindow = false);
+    
+  MultiLayer *plotSubplots(const QList<QString>& wsNames, const QList<int> &indexList, 
+                           MantidQt::DistributionFlag distr = MantidQt::DistributionDefault, 
+                           bool errs = false, MultiLayer *plotWindow = NULL);
 
   MultiLayer* mergePlots(MultiLayer*, MultiLayer*);
   void convertToWaterfall(MultiLayer*);

@@ -34,6 +34,10 @@ private slots:
   void updateProperties(QtProperty *prop, double val) override;
   /// Slot to handle the preview spectrum being changed
   void previewSpecChanged(int value);
+  /// Slots to handle plot and save
+  void saveClicked();
+  void plotClicked();
+  void plotCurrentPreview();
 
 private:
   /// Current preview spectrum

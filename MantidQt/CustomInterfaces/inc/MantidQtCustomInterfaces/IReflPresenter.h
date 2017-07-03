@@ -62,7 +62,10 @@ public:
     ImportTableFlag,
     ExportTableFlag,
     PlotRowFlag,
-    PlotGroupFlag
+    PlotGroupFlag,
+    ExpandAllGroupsFlag,
+    CollapseAllGroupsFlag,
+    PauseFlag
   };
 
   // Tell the presenter something happened

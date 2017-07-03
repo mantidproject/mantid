@@ -14,7 +14,7 @@ PeaksTableColumnsDialog::PeaksTableColumnsDialog(QWidget *parent)
 
 PeaksTableColumnsDialog::~PeaksTableColumnsDialog() { delete ui; }
 
-void PeaksTableColumnsDialog::setVisibleColumns(std::set<QString> &cols) {
+void PeaksTableColumnsDialog::setVisibleColumns(const std::set<QString> &cols) {
   // copy in the original values
   m_origVisible.clear();
   m_origVisible.insert(cols.begin(), cols.end());

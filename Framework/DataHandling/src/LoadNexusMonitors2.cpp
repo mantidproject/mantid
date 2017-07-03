@@ -1,21 +1,19 @@
-//------------------------------------------------------------------------------
-// Includes
-//------------------------------------------------------------------------------
 #include "MantidDataHandling/LoadNexusMonitors2.h"
 
-#include "MantidDataHandling/LoadEventNexus.h"
-#include "MantidDataHandling/ISISRunLogs.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
-#include "MantidAPI/WorkspaceGroup.h"
+#include "MantidAPI/Sample.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/WorkspaceGroup.h"
+#include "MantidDataHandling/ISISRunLogs.h"
+#include "MantidDataHandling/LoadEventNexus.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/UnitFactory.h"
 
-#include <boost/lexical_cast.hpp>
 #include <Poco/File.h>
 #include <Poco/Path.h>
+#include <boost/lexical_cast.hpp>
 
 #include <algorithm>
 #include <cmath>
@@ -26,6 +24,10 @@ using Mantid::DataObjects::EventWorkspace;
 using Mantid::DataObjects::EventWorkspace_sptr;
 using Mantid::API::WorkspaceGroup;
 using Mantid::API::WorkspaceGroup_sptr;
+using Mantid::HistogramData::Counts;
+using Mantid::HistogramData::CountStandardDeviations;
+using Mantid::HistogramData::BinEdges;
+using Mantid::HistogramData::Histogram;
 
 namespace Mantid {
 namespace DataHandling {
@@ -107,9 +109,9 @@ void LoadNexusMonitors2::init() {
 
 //------------------------------------------------------------------------------
 /**
- * Executes the algorithm. Reading in the file and creating and populating
- * the output workspace
- */
+* Executes the algorithm. Reading in the file and creating and populating
+* the output workspace
+*/
 void LoadNexusMonitors2::exec() {
   // Retrieve the filename from the properties
   m_filename = this->getPropertyValue("Filename");
@@ -147,6 +149,11 @@ void LoadNexusMonitors2::exec() {
   m_monitor_count =
       getMonitorInfo(file, monitorNames, numHistMon, numEventMon, numPeriods,
                      monitorNumber2Name, isEventMonitors);
+
+  if (numPeriods > 1) {
+    m_multiPeriodCounts.resize(m_monitor_count);
+    m_multiPeriodBinEdges.resize(m_monitor_count);
+  }
 
   // Nothing to do
   if (0 == m_monitor_count) {
@@ -249,7 +256,7 @@ void LoadNexusMonitors2::exec() {
       readEventMonitorEntry(file, ws_index);
     } else {
       // load as a histogram monitor
-      readHistoMonitorEntry(file, ws_index);
+      readHistoMonitorEntry(file, ws_index, numPeriods);
     }
 
     file.closeGroup(); // NXmonitor
@@ -359,12 +366,12 @@ void LoadNexusMonitors2::exec() {
 
 //------------------------------------------------------------------------------
 /**
- * Can we get a histogram (non event data) for every monitor?
- *
- * @param file :: NeXus file object (open)
- * @param monitorNames :: names of monitors of interest
- * @return If there seems to be histograms for all monitors (they have "data")
- **/
+* Can we get a histogram (non event data) for every monitor?
+*
+* @param file :: NeXus file object (open)
+* @param monitorNames :: names of monitors of interest
+* @return If there seems to be histograms for all monitors (they have "data")
+**/
 bool LoadNexusMonitors2::allMonitorsHaveHistoData(
     ::NeXus::File &file, const std::vector<std::string> &monitorNames) {
   bool res = true;
@@ -385,14 +392,14 @@ bool LoadNexusMonitors2::allMonitorsHaveHistoData(
 
 //------------------------------------------------------------------------------
 /**
- * Fix the detector numbers if the defaults are not correct. Currently checks
- * the isis_vms_compat block and reads them from there if possible.
- *
- * @param det_ids :: An array of prefilled detector IDs
- * @param file :: A reference to the NeXus file opened at the root entry
- * @param spec_ids :: An array of spectrum numbers that the monitors have
- * @param nmonitors :: The size of the det_ids and spec_ids arrays
- */
+* Fix the detector numbers if the defaults are not correct. Currently checks
+* the isis_vms_compat block and reads them from there if possible.
+*
+* @param det_ids :: An array of prefilled detector IDs
+* @param file :: A reference to the NeXus file opened at the root entry
+* @param spec_ids :: An array of spectrum numbers that the monitors have
+* @param nmonitors :: The size of the det_ids and spec_ids arrays
+*/
 void LoadNexusMonitors2::fixUDets(
     boost::scoped_array<detid_t> &det_ids, ::NeXus::File &file,
     const boost::scoped_array<specnum_t> &spec_ids,
@@ -452,11 +459,11 @@ void LoadNexusMonitors2::runLoadLogs(const std::string filename,
 
 //------------------------------------------------------------------------------
 /**
- * Helper method to make sure that a file is / can be openend as a NeXus file
- *
- * @param fname :: name of the file
- * @return True if opening the file as NeXus and retrieving entries succeeds
- **/
+* Helper method to make sure that a file is / can be openend as a NeXus file
+*
+* @param fname :: name of the file
+* @return True if opening the file as NeXus and retrieving entries succeeds
+**/
 bool LoadNexusMonitors2::canOpenAsNeXus(const std::string &fname) {
   bool res = true;
   ::NeXus::File *f = nullptr;
@@ -476,11 +483,11 @@ bool LoadNexusMonitors2::canOpenAsNeXus(const std::string &fname) {
 
 //------------------------------------------------------------------------------
 /**
- * Splits multiperiod histogram data into seperate workspaces and puts them in
- * a group
- *
- * @param numPeriods :: number of periods
- **/
+* Splits multiperiod histogram data into seperate workspaces and puts them in
+* a group
+*
+* @param numPeriods :: number of periods
+**/
 void LoadNexusMonitors2::splitMutiPeriodHistrogramData(
     const size_t numPeriods) {
   // protection - we should not have entered the routine if these are not true
@@ -493,54 +500,39 @@ void LoadNexusMonitors2::splitMutiPeriodHistrogramData(
   }
 
   // Y array should be divisible by the number of periods
-  if (m_workspace->blocksize() % numPeriods != 0) {
+  if (m_multiPeriodCounts[0].size() % numPeriods != 0) {
     g_log.warning()
         << "Attempted to split multiperiod histogram workspace with "
-        << m_workspace->blocksize() << "data entries, into " << numPeriods
+        << m_multiPeriodCounts[0].size() << "data entries, into " << numPeriods
         << "periods."
            " Aborted.\n";
     return;
   }
 
   WorkspaceGroup_sptr wsGroup(new WorkspaceGroup);
-  size_t yLength = m_workspace->blocksize() / numPeriods;
+  size_t yLength = m_multiPeriodCounts[0].size() / numPeriods;
   size_t xLength = yLength + 1;
   size_t numSpectra = m_workspace->getNumberHistograms();
   ISISRunLogs monLogCreator(m_workspace->run());
+
+  BinEdges edges = m_multiPeriodBinEdges[0];
+
   for (size_t i = 0; i < numPeriods; i++) {
     // create the period workspace
     API::MatrixWorkspace_sptr wsPeriod =
         API::WorkspaceFactory::Instance().create(m_workspace, numSpectra,
                                                  xLength, yLength);
 
-    // assign x values - restart at start for all periods
-    for (size_t wsIndex = 0; wsIndex < numSpectra; wsIndex++) {
-      MantidVec &outputVec = wsPeriod->dataX(wsIndex);
-      const MantidVec &inputVec = m_workspace->readX(wsIndex);
-      for (size_t index = 0; index < xLength; index++) {
-        outputVec[index] = inputVec[index];
-      }
-    }
+    auto offset = yLength * i;
 
-    // assign y values - use the values offset by the period number
     for (size_t wsIndex = 0; wsIndex < numSpectra; wsIndex++) {
-      MantidVec &outputVec = wsPeriod->dataY(wsIndex);
-      const MantidVec &inputVec = m_workspace->readY(wsIndex);
-      for (size_t index = 0; index < yLength; index++) {
-        outputVec[index] = inputVec[(yLength * i) + index];
-      }
-    }
+      auto inYBegin = m_multiPeriodCounts[wsIndex].cbegin() + offset;
 
-    // assign E values
-    for (size_t wsIndex = 0; wsIndex < numSpectra; wsIndex++) {
-      MantidVec &outputVec = wsPeriod->dataE(wsIndex);
-      const MantidVec &inputVec = m_workspace->readE(wsIndex);
-      for (size_t index = 0; index < yLength; index++) {
-        outputVec[index] = inputVec[(yLength * i) + index];
-      }
+      wsPeriod->setHistogram(wsIndex, edges,
+                             Counts(inYBegin, inYBegin + yLength));
     }
-
     // add period logs
+    monLogCreator.addStatusLog(wsPeriod->mutableRun());
     monLogCreator.addPeriodLogs(static_cast<int>(i + 1),
                                 wsPeriod->mutableRun());
 
@@ -632,16 +624,16 @@ size_t LoadNexusMonitors2::getMonitorInfo(
 }
 
 /** Create output workspace
- * @brief LoadNexusMonitors2::createOutputWorkspace
- * @param numHistMon
- * @param numEventMon
- * @param monitorsAsEvents
- * @param monitorNames
- * @param isEventMonitors
- * @param monitorNumber2Name
- * @param loadMonitorFlags
- * @return
- */
+* @brief LoadNexusMonitors2::createOutputWorkspace
+* @param numHistMon
+* @param numEventMon
+* @param monitorsAsEvents
+* @param monitorNames
+* @param isEventMonitors
+* @param monitorNumber2Name
+* @param loadMonitorFlags
+* @return
+*/
 bool LoadNexusMonitors2::createOutputWorkspace(
     size_t numHistMon, size_t numEventMon, bool monitorsAsEvents,
     std::vector<std::string> &monitorNames, std::vector<bool> &isEventMonitors,
@@ -839,17 +831,13 @@ void LoadNexusMonitors2::readEventMonitorEntry(NeXus::File &file, size_t i) {
     event_list.setSortOrder(DataObjects::PULSETIME_SORT);
 }
 
-void LoadNexusMonitors2::readHistoMonitorEntry(NeXus::File &file, size_t i) {
+void LoadNexusMonitors2::readHistoMonitorEntry(NeXus::File &file, size_t i,
+                                               size_t numPeriods) {
   // Now, actually retrieve the necessary data
   file.openData("data");
   MantidVec data;
   file.getDataCoerce(data);
   file.closeData();
-  MantidVec error(data.size()); // create vector of correct size
-
-  // Transform errors via square root
-  std::transform(data.begin(), data.end(), error.begin(),
-                 (double (*)(double))sqrt);
 
   // Get the TOF axis
   file.openData("time_of_flight");
@@ -857,9 +845,13 @@ void LoadNexusMonitors2::readHistoMonitorEntry(NeXus::File &file, size_t i) {
   file.getDataCoerce(tof);
   file.closeData();
 
-  m_workspace->dataX(i) = tof;
-  m_workspace->dataY(i) = data;
-  m_workspace->dataE(i) = error;
+  if (numPeriods > 1) {
+    m_multiPeriodBinEdges[i] = std::move(tof);
+    m_multiPeriodCounts[i] = std::move(data);
+  } else {
+    m_workspace->setHistogram(
+        i, Histogram(BinEdges(std::move(tof)), Counts(std::move(data))));
+  }
 }
 
 } // end DataHandling

@@ -2,13 +2,13 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/Algorithms/ConvolveWorkspaces.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidCurveFitting/Functions/Convolution.h"
 #include "MantidCurveFitting/Functions/TabulatedFunction.h"
-#include "MantidAPI/WorkspaceFactory.h"
 
 #include <gsl/gsl_errno.h>
-#include <gsl/gsl_fft_real.h>
 #include <gsl/gsl_fft_halfcomplex.h>
+#include <gsl/gsl_fft_real.h>
 
 #include <sstream>
 
@@ -18,12 +18,6 @@ namespace Algorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(ConvolveWorkspaces)
-
-/// Constructor
-ConvolveWorkspaces::ConvolveWorkspaces() : API::Algorithm(), prog(nullptr) {}
-
-/// Virtual destructor
-ConvolveWorkspaces::~ConvolveWorkspaces() { delete prog; }
 
 using namespace Kernel;
 using namespace API;
@@ -52,45 +46,43 @@ void ConvolveWorkspaces::exec() {
 
   // Cache a few things for later use
   const size_t numHists = ws1->getNumberHistograms();
-  const size_t numBins = ws1->blocksize();
   Workspace2D_sptr outputWS = boost::dynamic_pointer_cast<Workspace2D>(
-      WorkspaceFactory::Instance().create(ws1, numHists, numBins + 1, numBins));
+      WorkspaceFactory::Instance().create(ws1));
 
   // First check that the workspace are the same size
   if (numHists != ws2->getNumberHistograms()) {
     throw std::runtime_error("Size mismatch");
   }
 
-  prog = new Progress(this, 0.0, 1.0, numHists);
+  m_progress = make_unique<Progress>(this, 0.0, 1.0, numHists);
   // Now convolve the histograms
-  PARALLEL_FOR3(ws1, ws2, outputWS)
-  for (int l = 0; l < static_cast<int>(numHists); ++l) {
+  PARALLEL_FOR_IF(Kernel::threadSafe(*ws1, *ws2, *outputWS))
+  for (int i = 0; i < static_cast<int>(numHists); ++i) {
     PARALLEL_START_INTERUPT_REGION
-    prog->report();
-    const MantidVec &X1 = ws1->readX(l);
-    MantidVec &x = outputWS->dataX(l);
-    x = X1;
-    MantidVec &Yout = outputWS->dataY(l);
+    m_progress->report();
+    outputWS->setSharedX(i, ws1->sharedX(i));
+    auto &Yout = outputWS->mutableY(i);
     Convolution conv;
 
     auto res = boost::make_shared<TabulatedFunction>();
     res->setAttributeValue("Workspace", ws1name);
-    res->setAttributeValue("WorkspaceIndex", l);
+    res->setAttributeValue("WorkspaceIndex", i);
 
     conv.addFunction(res);
 
     auto fun = boost::make_shared<TabulatedFunction>();
     fun->setAttributeValue("Workspace", ws2name);
-    fun->setAttributeValue("WorkspaceIndex", l);
+    fun->setAttributeValue("WorkspaceIndex", i);
 
     conv.addFunction(fun);
     size_t N = Yout.size();
-    FunctionDomain1DView xView(&x[0], N);
+    const double *firstX = &outputWS->mutableX(i)[0];
+    FunctionDomain1DView xView(firstX, N);
     FunctionValues out(xView);
     conv.function(xView, out);
 
-    for (size_t i = 0; i < N; i++) {
-      Yout[i] = out.getCalculated(i);
+    for (size_t j = 0; j < N; j++) {
+      Yout[j] = out.getCalculated(j);
     }
     PARALLEL_END_INTERUPT_REGION
   }

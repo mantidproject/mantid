@@ -41,6 +41,9 @@ public:
   void execute() override{};
   std::string name() override { return std::string(); }
   std::string icon() override { return std::string(); }
+  std::string tooltip() override { return std::string(); }
+  std::string whatsthis() override { return std::string(); }
+  std::string shortcut() override { return std::string(); }
 };
 }
 }

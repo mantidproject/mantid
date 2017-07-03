@@ -32,15 +32,17 @@
 #include "PlotCurve.h"
 #include "cursors.h"
 
-#include <qwt_symbol.h>
-#include <QPoint>
 #include <QApplication>
 #include <QClipboard>
-#include <QKeyEvent>
-#include <QMessageBox>
 #include <QEvent>
+#include <QKeyEvent>
 #include <QLocale>
+#include <QMessageBox>
+#include <QPoint>
 #include <QTextStream>
+#include <qwt_symbol.h>
+
+using namespace MantidQt::API;
 
 RangeSelectorTool::RangeSelectorTool(Graph *graph, const QObject *status_target,
                                      const char *status_slot)
@@ -164,7 +166,8 @@ void RangeSelectorTool::setActivePoint(int point) {
 
 void RangeSelectorTool::emitStatusText() {
   QLocale locale = d_graph->plotWidget()->locale();
-  if ((static_cast<PlotCurve *>(d_selected_curve))->type() == Graph::Function) {
+  if ((static_cast<PlotCurve *>(d_selected_curve))->type() ==
+      GraphOptions::Function) {
     emit statusText(
         QString("%1 <=> %2[%3]: x=%4; y=%5")
             .arg(d_active_marker.xValue() > d_inactive_marker.xValue()
@@ -296,7 +299,8 @@ void RangeSelectorTool::clearSelection() {
   if (!d_selected_curve)
     return;
 
-  if ((static_cast<PlotCurve *>(d_selected_curve))->type() != Graph::Function) {
+  if ((static_cast<PlotCurve *>(d_selected_curve))->type() !=
+      GraphOptions::Function) {
     Table *t = (static_cast<DataCurve *>(d_selected_curve))->table();
     if (!t)
       return;
@@ -351,7 +355,8 @@ void RangeSelectorTool::pasteSelection() {
   if (text.isEmpty())
     return;
 
-  if ((static_cast<PlotCurve *>(d_selected_curve))->type() == Graph::Function)
+  if ((static_cast<PlotCurve *>(d_selected_curve))->type() ==
+      GraphOptions::Function)
     return;
 
   Table *t = (static_cast<DataCurve *>(d_selected_curve))->table();
@@ -424,7 +429,8 @@ void RangeSelectorTool::setCurveRange() {
   if (!d_selected_curve)
     return;
 
-  if ((static_cast<PlotCurve *>(d_selected_curve))->type() != Graph::Function) {
+  if ((static_cast<PlotCurve *>(d_selected_curve))->type() !=
+      GraphOptions::Function) {
     (static_cast<DataCurve *>(d_selected_curve))
         ->setRowRange(qMin(d_active_point, d_inactive_point),
                       qMax(d_active_point, d_inactive_point));

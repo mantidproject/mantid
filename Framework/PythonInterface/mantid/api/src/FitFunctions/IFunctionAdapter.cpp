@@ -2,6 +2,7 @@
 #include "MantidPythonInterface/kernel/Environment/CallMethod.h"
 
 #include <boost/python/class.hpp>
+#include <boost/python/list.hpp>
 
 namespace Mantid {
 namespace PythonInterface {
@@ -41,9 +42,17 @@ IFunction::Attribute createAttributeFromPythonValue(const object &value) {
   else if (PyBytes_Check(rawptr) == 1) {
 #endif
     attr = IFunction::Attribute(extract<std::string>(rawptr)());
+  } else if (PyList_Check(rawptr) == 1) {
+    auto n = PyList_Size(rawptr);
+    std::vector<double> vec;
+    for (Py_ssize_t i = 0; i < n; ++i) {
+      auto v = extract<double>(PyList_GetItem(rawptr, i))();
+      vec.push_back(v);
+    }
+    attr = IFunction::Attribute(vec);
   } else
     throw std::invalid_argument(
-        "Invalid attribute type. Allowed types=float,int,str,bool");
+        "Invalid attribute type. Allowed types=float,int,str,bool,list(float)");
 
   return attr;
 }
@@ -95,21 +104,26 @@ void IFunctionAdapter::declareAttribute(const std::string &name,
 
 /**
  * Get the value of the named attribute as a Python object
- * @param name :: The name of the new attribute
+ * @param self :: A reference to a function object that has the attribute.
+ * @param name :: The name of the new attribute.
  * @returns The value of the attribute
  */
-PyObject *IFunctionAdapter::getAttributeValue(const std::string &name) {
-  auto attr = IFunction::getAttribute(name);
-  return getAttributeValue(attr);
+PyObject *IFunctionAdapter::getAttributeValue(IFunction &self,
+                                              const std::string &name) {
+  auto attr = self.getAttribute(name);
+  return getAttributeValue(self, attr);
 }
 
 /**
  * Get the value of the given attribute as a Python object
+ * @param self :: A reference to a function object that has the attribute.
  * @param attr An attribute object
  * @returns The value of the attribute
  */
 PyObject *
-IFunctionAdapter::getAttributeValue(const API::IFunction::Attribute &attr) {
+IFunctionAdapter::getAttributeValue(IFunction &self,
+                                    const API::IFunction::Attribute &attr) {
+  UNUSED_ARG(self);
   std::string type = attr.type();
   PyObject *result(nullptr);
   if (type == "int")
@@ -120,10 +134,25 @@ IFunctionAdapter::getAttributeValue(const API::IFunction::Attribute &attr) {
     result = to_python_value<const std::string &>()(attr.asString());
   else if (type == "bool")
     result = to_python_value<const bool &>()(attr.asBool());
+  else if (type == "std::vector<double>")
+    result = to_python_value<const std::vector<double> &>()(attr.asVector());
   else
     throw std::runtime_error("Unknown attribute type, cannot convert C++ type "
                              "to Python. Contact developement team.");
   return result;
+}
+
+/**
+ * Set the attribute's value in the default IFunction's cache
+ * @param self :: A reference to a function object that has the attribute.
+ * @param name :: The name of the attribute
+ * @param value :: The value to set
+ */
+void IFunctionAdapter::setAttributePythonValue(IFunction &self,
+                                               const std::string &name,
+                                               const object &value) {
+  auto attr = createAttributeFromPythonValue(value);
+  self.setAttribute(name, attr);
 }
 
 /**
@@ -135,7 +164,7 @@ IFunctionAdapter::getAttributeValue(const API::IFunction::Attribute &attr) {
 void IFunctionAdapter::setAttribute(const std::string &attName,
                                     const Attribute &attr) {
   try {
-    object value = object(handle<>(getAttributeValue(attr)));
+    object value = object(handle<>(getAttributeValue(*this, attr)));
     callMethod<void, std::string, object>(getSelf(), "setAttributeValue",
                                           attName, value);
   } catch (UndefinedAttributeError &) {
@@ -143,15 +172,20 @@ void IFunctionAdapter::setAttribute(const std::string &attName,
   }
 }
 
-/**
- * Store the attribute's value in the default IFunction's cache
- * @param name :: The name of the attribute
- * @param value :: The value to store
+/** Split this function (if needed) into a list of independent functions.
+ * @param self :: A reference to a function object. If it's a multi-domain
+ *    function the result should in general contain more than 1 function.
+ *    For a single domain function it should have a single element (self).
+ * @return A python list of IFunction_sprs.
  */
-void IFunctionAdapter::storeAttributePythonValue(const std::string &name,
-                                                 const object &value) {
-  auto attr = createAttributeFromPythonValue(value);
-  storeAttributeValue(name, attr);
+boost::python::object
+IFunctionAdapter::createPythonEquivalentFunctions(IFunction &self) {
+  auto functions = self.createEquivalentFunctions();
+  boost::python::list list;
+  for (auto fun : functions) {
+    list.append(fun);
+  }
+  return list;
 }
 
 /**

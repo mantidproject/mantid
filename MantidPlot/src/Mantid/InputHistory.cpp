@@ -4,6 +4,7 @@
 #include <QSettings>
 #include <QStringList>
 #include <vector>
+#include <iostream>
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;

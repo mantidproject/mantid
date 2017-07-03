@@ -10,8 +10,8 @@
 #include "MantidQtAPI/InterfaceManager.h"
 #include "MantidQtMantidWidgets/RangeSelector.h"
 
-#include <boost/algorithm/string/find.hpp>
 #include <QMessageBox>
+#include <boost/algorithm/string/find.hpp>
 
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
@@ -150,10 +150,7 @@ bool IndirectTab::loadFile(const QString &filename, const QString &outputName,
 
 /**
  * Configures the SaveNexusProcessed algorithm to save a workspace in the
- *default
- * save directory and adds the algorithm to the batch queue.
- *
- * This uses the plotSpectrum function from the Python API.
+ * default save directory and adds the algorithm to the batch queue.
  *
  * @param wsName Name of workspace to save
  * @param filename Name of file to save as (including extension)
@@ -207,6 +204,40 @@ QString IndirectTab::getWorkspaceBasename(const QString &wsName) {
     return QString(wsName);
 
   return wsName.left(lastUnderscoreIndex);
+}
+
+/**
+ * Plots different spectra from multiple workspaces on the same plot
+ *
+ * This uses the plotSpectrum function from the Python API.
+ *
+ * @param workspaceNames List of names of workspaces to plot
+ * @param workspaceIndices List of indices to plot
+ */
+void IndirectTab::plotMultipleSpectra(
+    const QStringList &workspaceNames,
+    const std::vector<int> &workspaceIndices) {
+
+  if (workspaceNames.isEmpty())
+    return;
+  if (workspaceNames.length() != static_cast<int>(workspaceIndices.size()))
+    return;
+
+  QString pyInput = "from mantidplot import plotSpectrum\n";
+  pyInput += "current_window = plotSpectrum('";
+  pyInput += workspaceNames[0];
+  pyInput += "', ";
+  pyInput += QString::number(workspaceIndices[0]);
+  pyInput += ")\n";
+
+  for (int i = 1; i < workspaceNames.size(); i++) {
+    pyInput += "plotSpectrum('";
+    pyInput += workspaceNames[i];
+    pyInput += "', ";
+    pyInput += QString::number(workspaceIndices[i]);
+    pyInput += ", window=current_window)\n";
+  }
+  m_pythonRunner.runPythonCode(pyInput);
 }
 
 /**
@@ -268,11 +299,11 @@ void IndirectTab::plotSpectrum(const QStringList &workspaceNames, int specStart,
 
   pyInput += "plotSpectrum(['";
   pyInput += workspaceNames.join("','");
-  pyInput += "'], range(";
+  pyInput += "'], list(range(";
   pyInput += QString::number(specStart);
   pyInput += ",";
   pyInput += QString::number(specEnd + 1);
-  pyInput += "))\n";
+  pyInput += ")))\n";
 
   m_pythonRunner.runPythonCode(pyInput);
 }
@@ -298,14 +329,14 @@ void IndirectTab::plotSpectrum(const QString &workspaceName, int specStart,
 }
 
 /**
-* Creates a spectrum plot of one or more workspaces with a set
-*  of spectra specified in a vector
-*
-* This uses the plotSpectrum function from the Python API.
-*
-* @param workspaceNames List of names of workspaces to plot
-* @param wsIndices List of indices of spectra to plot
-*/
+ * Creates a spectrum plot of one or more workspaces with a set
+ *  of spectra specified in a vector
+ *
+ * This uses the plotSpectrum function from the Python API.
+ *
+ * @param workspaceNames List of names of workspaces to plot
+ * @param wsIndices List of indices of spectra to plot
+ */
 void IndirectTab::plotSpectra(const QStringList &workspaceNames,
                               const std::vector<int> &wsIndices) {
   if (workspaceNames.isEmpty()) {
@@ -329,12 +360,12 @@ void IndirectTab::plotSpectra(const QStringList &workspaceNames,
 }
 
 /**
-* Creates a spectrum plot of a single workspace with a set
-*  of spectra specified in a vector
-*
-* @param workspaceName Name of workspace to plot
-* @param wsIndices List of indices of spectra to plot
-*/
+ * Creates a spectrum plot of a single workspace with a set
+ *  of spectra specified in a vector
+ *
+ * @param workspaceName Name of workspace to plot
+ * @param wsIndices List of indices of spectra to plot
+ */
 void IndirectTab::plotSpectra(const QString &workspaceName,
                               const std::vector<int> &wsIndices) {
   if (workspaceName.isEmpty()) {
@@ -493,7 +524,7 @@ double IndirectTab::getEFixed(Mantid::API::MatrixWorkspace_sptr ws) {
 }
 
 /**
- * Checks the workspace's intrument for a resolution parameter to use as
+ * Checks the workspace's instrument for a resolution parameter to use as
  * a default for the energy range on the mini plot
  *
  * @param workspace :: Name of the workspace to use
@@ -509,7 +540,7 @@ bool IndirectTab::getResolutionRangeFromWs(const QString &workspace,
 }
 
 /**
- * Checks the workspace's intrument for a resolution parameter to use as
+ * Checks the workspace's instrument for a resolution parameter to use as
  * a default for the energy range on the mini plot
  *
  * @param ws :: Pointer to the workspace to use
@@ -586,7 +617,7 @@ QString IndirectTab::runPythonCode(QString code, bool no_output) {
  * @param workspaceName The name of the workspace to look for
  * @param plotting if true use plotting error message, false use saving error
  * message
- * @return False if no workpsace found, True if workspace found
+ * @return False if no workspace found, True if workspace found
  */
 bool IndirectTab::checkADSForPlotSaveWorkspace(const std::string &workspaceName,
                                                const bool &plotting) {

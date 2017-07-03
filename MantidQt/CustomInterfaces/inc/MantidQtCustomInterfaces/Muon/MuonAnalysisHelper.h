@@ -5,6 +5,7 @@
 #include "MantidKernel/System.h"
 #include "MantidAPI/Workspace_fwd.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/DateAndTime.h"
 
@@ -15,6 +16,30 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
+namespace Muon {
+/// Types of entities we are dealing with
+enum ItemType { Pair, Group };
+
+/// Possible plot types users might request
+enum PlotType { Asymmetry, Counts, Logarithm };
+
+/// Parameters from parsed workspace name
+struct DatasetParams {
+  std::string label;
+  std::string instrument;
+  std::vector<int> runs;
+  ItemType itemType;
+  std::string itemName;
+  PlotType plotType;
+  std::string periods;
+  size_t version;
+};
+/// Whether multiple fitting is enabled or disabled
+enum class MultiFitState { Enabled, Disabled };
+/// Whether TF Asymmetry is enabled or disabled
+enum class TFAsymmState { Enabled, Disabled };
+}
+
 namespace MuonAnalysisHelper {
 
 /// Sets double validator for specified field
@@ -43,7 +68,11 @@ getRunLabel(const Mantid::API::Workspace_sptr &ws);
 
 /// Get a run label for a list of workspaces
 MANTIDQT_CUSTOMINTERFACES_DLL std::string
-getRunLabel(std::vector<Mantid::API::Workspace_sptr> wsList);
+getRunLabel(const std::vector<Mantid::API::Workspace_sptr> &wsList);
+
+/// Get a run label given instrument and run numbers
+MANTIDQT_CUSTOMINTERFACES_DLL std::string
+getRunLabel(const std::string &instrument, const std::vector<int> &runNumbers);
 
 /// Sums a list of workspaces together
 MANTIDQT_CUSTOMINTERFACES_DLL Mantid::API::Workspace_sptr
@@ -84,6 +113,14 @@ appendTimeSeriesLogs(boost::shared_ptr<Mantid::API::Workspace> toAppend,
                      boost::shared_ptr<Mantid::API::Workspace> resultant,
                      const std::string &logName);
 
+/// Parse analysis workspace name
+MANTIDQT_CUSTOMINTERFACES_DLL MantidQt::CustomInterfaces::Muon::DatasetParams
+parseWorkspaceName(const std::string &wsName);
+
+/// Generate new analysis workspace name
+MANTIDQT_CUSTOMINTERFACES_DLL std::string generateWorkspaceName(
+    const MantidQt::CustomInterfaces::Muon::DatasetParams &params);
+
 /// Get "run: period" string from workspace name
 MANTIDQT_CUSTOMINTERFACES_DLL QString
 runNumberString(const std::string &workspaceName, const std::string &firstRun);
@@ -92,6 +129,15 @@ runNumberString(const std::string &workspaceName, const std::string &firstRun);
 MANTIDQT_CUSTOMINTERFACES_DLL bool isReloadGroupingNecessary(
     const boost::shared_ptr<Mantid::API::Workspace> currentWorkspace,
     const boost::shared_ptr<Mantid::API::Workspace> loadedWorkspace);
+
+/// Parse run label into instrument and runs
+MANTIDQT_CUSTOMINTERFACES_DLL void parseRunLabel(const std::string &label,
+                                                 std::string &instrument,
+                                                 std::vector<int> &runNumbers);
+
+/// Get colors for workspaces to go in table
+MANTIDQT_CUSTOMINTERFACES_DLL QMap<int, QColor> getWorkspaceColors(
+    const std::vector<boost::shared_ptr<Mantid::API::Workspace>> &workspaces);
 
 /**
  * A class which deals with auto-saving the widget values. Widgets are

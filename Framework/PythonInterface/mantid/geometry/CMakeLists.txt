@@ -82,10 +82,13 @@ set_target_output_directory ( PythonGeometryModule ${OUTPUT_DIR} .pyd )
 target_link_libraries ( PythonGeometryModule LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME}
             PythonKernelModule
             Geometry
+            Beamline
             Kernel
             ${PYTHON_LIBRARIES}
             ${POCO_LIBRARIES}
             ${Boost_LIBRARIES}
+			${TBB_LIBRARIES} 
+			${TBB_MALLOC_LIBRARIES}
             )
 
 if (OSX_VERSION VERSION_GREATER 10.8)

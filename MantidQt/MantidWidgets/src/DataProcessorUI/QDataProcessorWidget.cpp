@@ -1,12 +1,11 @@
 #include "MantidQtMantidWidgets/DataProcessorUI/QDataProcessorWidget.h"
-#include "MantidQtAPI/FileDialogHandler.h"
-#include "MantidQtAPI/HelpWindow.h"
 #include "MantidQtAPI/MantidWidget.h"
+#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorCommandAdapter.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorPresenter.h"
-#include "MantidQtMantidWidgets/DataProcessorUI/QDataProcessorTreeModel.h"
 #include "MantidQtMantidWidgets/HintingLineEditFactory.h"
 
 #include <QWidget>
+#include <qabstractitemmodel.h>
 namespace {
 const QString DataProcessorSettingsGroup =
     "Mantid/MantidWidgets/ISISDataProcessorUI";
@@ -42,11 +41,6 @@ Initialise the Interface
 void QDataProcessorWidget::createTable() {
   ui.setupUi(this);
 
-  ui.buttonProcess->setDefaultAction(ui.actionProcess);
-
-  // Create a whats this button
-  ui.rowToolBar->addAction(QWhatsThis::createAction(this));
-
   // Allow rows and columns to be reordered
   QHeaderView *header = new QHeaderView(Qt::Horizontal);
   header->setMovable(true);
@@ -60,6 +54,49 @@ void QDataProcessorWidget::createTable() {
   // Custom context menu for table
   connect(ui.viewTable, SIGNAL(customContextMenuRequested(const QPoint &)),
           this, SLOT(showContextMenu(const QPoint &)));
+  // Process button
+  connect(ui.buttonProcess, SIGNAL(clicked()), this, SLOT(processClicked()));
+}
+
+/** Add actions to the toolbar
+* @param commands :: A vector of actions (commands)
+*/
+void QDataProcessorWidget::addActions(
+    std::vector<std::unique_ptr<DataProcessorCommand>> commands) {
+
+  // Put the commands in the toolbar
+  for (auto &command : commands) {
+    m_commands.push_back(
+        Mantid::Kernel::make_unique<DataProcessorCommandAdapter>(
+            ui.rowToolBar, std::move(command)));
+  }
+
+  // Add actions to context menu
+  m_contextMenu = new QMenu(this);
+  for (const auto &command : m_commands) {
+    m_contextMenu->addAction(command->getAction());
+  }
+
+  // Add a whats this button
+  ui.rowToolBar->addAction(QWhatsThis::createAction(this));
+}
+
+/** This slot notifies the presenter that the 'Process' button has been
+ * clicked
+ */
+void QDataProcessorWidget::processClicked() {
+
+  m_presenter->notify(DataProcessorPresenter::ProcessFlag);
+}
+
+/** This slot notifies the presenter that the selection has changed
+*/
+void QDataProcessorWidget::newSelection(const QItemSelection &selected,
+                                        const QItemSelection &deselected) {
+
+  Q_UNUSED(selected);
+  Q_UNUSED(deselected);
+  m_presenter->notify(DataProcessorPresenter::SelectionChangedFlag);
 }
 
 /**
@@ -87,13 +124,16 @@ void QDataProcessorWidget::setModel(const std::string &name) {
 Set a new model in the tableview
 @param model : the model to be attached to the tableview
 */
-void QDataProcessorWidget::showTable(QDataProcessorTreeModel_sptr model) {
+void QDataProcessorWidget::showTable(
+    boost::shared_ptr<QAbstractItemModel> model) {
   m_model = model;
   // So we can notify the presenter when the user updates the table
   connect(m_model.get(),
           SIGNAL(dataChanged(const QModelIndex &, const QModelIndex &)), this,
           SLOT(tableUpdated(const QModelIndex &, const QModelIndex &)));
   ui.viewTable->setModel(m_model.get());
+  // Reset selection model connections
+  setSelectionModelConnections();
 }
 
 /**
@@ -119,114 +159,6 @@ void QDataProcessorWidget::setTableList(const std::set<std::string> &tables) {
     connect(m_openMap, SIGNAL(mapped(QString)), this, SLOT(setModel(QString)),
             Qt::UniqueConnection);
   }
-}
-
-/**
-This slot notifies the presenter that the "append row" button has been pressed
-*/
-void QDataProcessorWidget::on_actionAppendRow_triggered() {
-  m_presenter->notify(DataProcessorPresenter::AppendRowFlag);
-}
-
-/**
-This slot notifies the presenter that the "append group" button has been pressed
-*/
-void QDataProcessorWidget::on_actionAppendGroup_triggered() {
-  m_presenter->notify(DataProcessorPresenter::AppendGroupFlag);
-}
-
-/**
-This slot notifies the presenter that the "delete row" button has been pressed
-*/
-void QDataProcessorWidget::on_actionDeleteRow_triggered() {
-  m_presenter->notify(DataProcessorPresenter::DeleteRowFlag);
-}
-
-/**
-This slot notifies the presenter that the "delete group" button has been pressed
-*/
-void QDataProcessorWidget::on_actionDeleteGroup_triggered() {
-  m_presenter->notify(DataProcessorPresenter::DeleteGroupFlag);
-}
-
-/**
-This slot notifies the presenter that the "process" button has been pressed
-*/
-void QDataProcessorWidget::on_actionProcess_triggered() {
-  m_presenter->notify(DataProcessorPresenter::ProcessFlag);
-}
-
-/**
-This slot notifies the presenter that the "group rows" button has been pressed
-*/
-void QDataProcessorWidget::on_actionGroupRows_triggered() {
-  m_presenter->notify(DataProcessorPresenter::GroupRowsFlag);
-}
-
-/**
-This slot notifies the presenter that the "clear selected" button has been
-pressed
-*/
-void QDataProcessorWidget::on_actionClearSelected_triggered() {
-  m_presenter->notify(DataProcessorPresenter::ClearSelectedFlag);
-}
-
-/**
-This slot notifies the presenter that the "copy selection" button has been
-pressed
-*/
-void QDataProcessorWidget::on_actionCopySelected_triggered() {
-  m_presenter->notify(DataProcessorPresenter::CopySelectedFlag);
-}
-
-/**
-This slot notifies the presenter that the "cut selection" button has been
-pressed
-*/
-void QDataProcessorWidget::on_actionCutSelected_triggered() {
-  m_presenter->notify(DataProcessorPresenter::CutSelectedFlag);
-}
-
-/**
-This slot notifies the presenter that the "paste selection" button has been
-pressed
-*/
-void QDataProcessorWidget::on_actionPasteSelected_triggered() {
-  m_presenter->notify(DataProcessorPresenter::PasteSelectedFlag);
-}
-
-/**
-This slot notifies the presenter that the "expand selection" button has been
-pressed
-*/
-void QDataProcessorWidget::on_actionExpandSelection_triggered() {
-  m_presenter->notify(DataProcessorPresenter::ExpandSelectionFlag);
-}
-
-/**
-This slot opens the documentation when the "help" button has been pressed
-*/
-void QDataProcessorWidget::on_actionHelp_triggered() {
-  MantidQt::API::HelpWindow::showPage(
-      this,
-      QString(
-          "qthelp://org.mantidproject/doc/interfaces/ISIS_Reflectometry.html"));
-}
-
-/**
-This slot notifies the presenter that the "plot selected rows" button has been
-pressed
-*/
-void QDataProcessorWidget::on_actionPlotRow_triggered() {
-  m_presenter->notify(DataProcessorPresenter::PlotRowFlag);
-}
-
-/**
-This slot notifies the presenter that the "plot selected groups" button has been
-pressed
-*/
-void QDataProcessorWidget::on_actionPlotGroup_triggered() {
-  m_presenter->notify(DataProcessorPresenter::PlotGroupFlag);
 }
 
 /** This slot is used to update the instrument*/
@@ -255,27 +187,7 @@ void QDataProcessorWidget::showContextMenu(const QPoint &pos) {
   if (!ui.viewTable->indexAt(pos).isValid())
     return;
 
-  // parent widget takes ownership of QMenu
-  QMenu *menu = new QMenu(this);
-  menu->addAction(ui.actionProcess);
-  menu->addAction(ui.actionExpandSelection);
-  menu->addSeparator();
-  menu->addAction(ui.actionPlotRow);
-  menu->addAction(ui.actionPlotGroup);
-  menu->addSeparator();
-  menu->addAction(ui.actionAppendRow);
-  menu->addAction(ui.actionAppendGroup);
-  menu->addSeparator();
-  menu->addAction(ui.actionGroupRows);
-  menu->addAction(ui.actionCopySelected);
-  menu->addAction(ui.actionCutSelected);
-  menu->addAction(ui.actionPasteSelected);
-  menu->addAction(ui.actionClearSelected);
-  menu->addSeparator();
-  menu->addAction(ui.actionDeleteRow);
-  menu->addAction(ui.actionDeleteGroup);
-
-  menu->popup(ui.viewTable->viewport()->mapToGlobal(pos));
+  m_contextMenu->popup(ui.viewTable->viewport()->mapToGlobal(pos));
 }
 
 /**
@@ -285,9 +197,9 @@ std::string QDataProcessorWidget::requestNotebookPath() {
 
   // We won't use QFileDialog directly here as using the NativeDialog option
   // causes problems on MacOS.
-  QString qfilename = API::FileDialogHandler::getSaveFileName(
+  QString qfilename = QFileDialog::getSaveFileName(
       this, "Save notebook file", QDir::currentPath(),
-      "IPython Notebook files (*.ipynb);;All files (*.*)",
+      "IPython Notebook files (*.ipynb);;All files (*)",
       new QString("IPython Notebook files (*.ipynb)"));
 
   // There is a Qt bug (QTBUG-27186) which means the filename returned
@@ -304,6 +216,46 @@ std::string QDataProcessorWidget::requestNotebookPath() {
   }
 
   return filename;
+}
+
+/**
+Expand all currently closed groups
+*/
+void QDataProcessorWidget::expandAll() { ui.viewTable->expandAll(); }
+
+/**
+Collapse all currently expanded groups
+*/
+void QDataProcessorWidget::collapseAll() { ui.viewTable->collapseAll(); }
+
+/**
+Handle interface when data reduction paused
+*/
+void QDataProcessorWidget::pause() {
+
+  // Enable 'resume' buttons
+  ui.rowToolBar->actions()[0]->setEnabled(true);
+  m_contextMenu->actions()[0]->setEnabled(true);
+  ui.buttonProcess->setEnabled(true);
+
+  // Disable 'pause' buttons
+  ui.rowToolBar->actions()[1]->setEnabled(false);
+  m_contextMenu->actions()[1]->setEnabled(false);
+}
+
+/**
+Handle interface when data reduction resumed
+*/
+void QDataProcessorWidget::resume() {
+
+  // Enable 'resume' buttons
+  ui.rowToolBar->actions()[0]->setEnabled(false);
+  m_contextMenu->actions()[0]->setEnabled(false);
+  ui.buttonProcess->setEnabled(false);
+
+  // Disable 'pause' buttons
+  ui.rowToolBar->actions()[1]->setEnabled(true);
+  m_contextMenu->actions()[1]->setEnabled(true);
 }
 
 /**
@@ -375,6 +327,17 @@ void QDataProcessorWidget::setSelection(const std::set<int> &groups) {
 }
 
 /**
+Set up the connections from the table selection model
+*/
+void QDataProcessorWidget::setSelectionModelConnections() {
+  // Emit a signal when selection has changed
+  connect(
+      ui.viewTable->selectionModel(),
+      SIGNAL(selectionChanged(const QItemSelection &, const QItemSelection &)),
+      this, SLOT(newSelection(const QItemSelection &, const QItemSelection &)));
+}
+
+/**
 Set the list of available instruments to process
 @param instruments : The list of instruments available
 @param defaultInstrument : The instrument to have selected by default
@@ -423,11 +386,11 @@ std::string QDataProcessorWidget::getProcessInstrument() const {
 }
 
 /**
-Get the indices of the highlighted runs (rows)
-@returns :: a map where keys are group indices and values are sets containing
-the highlighted row numbers
+Get the indices of the highlighted items that have a valid parent
+@returns :: a map where keys are parents of selected items and values are sets
+containing the highlighted children
 */
-std::map<int, std::set<int>> QDataProcessorWidget::getSelectedRows() const {
+std::map<int, std::set<int>> QDataProcessorWidget::getSelectedChildren() const {
   std::map<int, std::set<int>> rows;
   auto selectionModel = ui.viewTable->selectionModel();
   if (selectionModel) {
@@ -435,38 +398,31 @@ std::map<int, std::set<int>> QDataProcessorWidget::getSelectedRows() const {
     for (auto it = selectedRows.begin(); it != selectedRows.end(); ++it) {
 
       if (it->parent().isValid()) {
-        // This item is a run (row)
-        // Add run and corresponding group
-        int run = it->row();
-        int group = it->parent().row();
-        rows[group].insert(run);
+        int children = it->row();
+        int parent = it->parent().row();
+        rows[parent].insert(children);
       }
-      // else :
-      // A group was selected, selected groups can be retrieved using
-      // getSelectedGroups()
     }
   }
   return rows;
 }
 
 /**
-Get the indices of the highlighted groups
-@returns :: a sets containing
-the highlighted row numbers
+Get the indices of the highlighted items that have invalid parent
+@returns :: a set containing the highlighted item numbers
 */
-std::set<int> QDataProcessorWidget::getSelectedGroups() const {
-  std::set<int> groups;
+std::set<int> QDataProcessorWidget::getSelectedParents() const {
+  std::set<int> parents;
   auto selectionModel = ui.viewTable->selectionModel();
   if (selectionModel) {
     auto selectedRows = selectionModel->selectedRows();
     for (auto it = selectedRows.begin(); it != selectedRows.end(); ++it) {
       if (!it->parent().isValid()) {
-        // This group was selected
-        groups.insert(it->row());
+        parents.insert(it->row());
       }
     }
   }
-  return groups;
+  return parents;
 }
 
 /**

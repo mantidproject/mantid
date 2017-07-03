@@ -15,7 +15,7 @@ class ConvertToWavelengthTest(unittest.TestCase):
     def test_construction_from_single_ws_name(self):
         ws = CreateWorkspace(DataY=[1,2,3], DataX=[1,2,3])
 
-        converter = ConvertToWavelength(ws.getName())
+        converter = ConvertToWavelength(ws.name())
         self.assertTrue(converter != None, "Should have been able to make a valid converter from a single workspace name")
         DeleteWorkspace(ws)
 
@@ -30,7 +30,7 @@ class ConvertToWavelengthTest(unittest.TestCase):
     def test_construction_from_many_workspace_names(self):
         ws1 = CreateWorkspace(DataY=[1,2,3], DataX=[1,2,3])
         ws2 = CreateWorkspace(DataY=[1,2,3], DataX=[1,2,3])
-        converter = ConvertToWavelength([ws1.getName(), ws2.getName()])
+        converter = ConvertToWavelength([ws1.name(), ws2.name()])
         self.assertTrue(converter != None, "Should have been able to make a valid converter from many workspace objects")
         DeleteWorkspace(ws1)
         DeleteWorkspace(ws2)
@@ -38,7 +38,7 @@ class ConvertToWavelengthTest(unittest.TestCase):
     def test_construction_from_comma_separated_workspaces(self):
         ws1 = CreateWorkspace(DataY=[1,2,3], DataX=[1,2,3])
         ws2 = CreateWorkspace(DataY=[1,2,3], DataX=[1,2,3])
-        comma_separated_names = "%s, %s" % (ws1.getName(), ws2.getName())
+        comma_separated_names = "%s, %s" % (ws1.name(), ws2.name())
         converter = ConvertToWavelength(comma_separated_names)
         self.assertTrue(converter != None, "Should have been able to make a valid converter from many , separated workspace objects")
         DeleteWorkspace(ws1)
@@ -47,7 +47,7 @@ class ConvertToWavelengthTest(unittest.TestCase):
     def test_construction_from_semicolon_separated_workspaces(self):
         ws1 = CreateWorkspace(DataY=[1,2,3], DataX=[1,2,3])
         ws2 = CreateWorkspace(DataY=[1,2,3], DataX=[1,2,3])
-        colon_separated_names = "%s: %s" % (ws1.getName(), ws2.getName())
+        colon_separated_names = "%s: %s" % (ws1.name(), ws2.name())
         converter = ConvertToWavelength(colon_separated_names)
         self.assertTrue(converter != None, "Should have been able to make a valid converter from many : separated workspace objects")
         DeleteWorkspace(ws1)
@@ -115,7 +115,7 @@ class ConvertToWavelengthTest(unittest.TestCase):
     def cropped_x_range(cls, ws, index):
         det_ws_x = ws.readX(index)
         mask = ws.readY(index) != 0 # CropWorkspace will only zero out y values! so we need to translate those to an x range
-        cropped_x = det_ws_x[mask]
+        cropped_x = det_ws_x[:-1][mask]
         return cropped_x[0], cropped_x[-1]
 
     def test_convert(self):

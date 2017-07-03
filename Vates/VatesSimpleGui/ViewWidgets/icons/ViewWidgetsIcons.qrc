@@ -6,5 +6,56 @@
         <file>pvIcon.png</file>
         <file>pqEditColor24.png</file>
         <file>resetViewToAll24.png</file>
+        <file>pqSlice24.png</file>
+        <file>pqThreshold24.png</file>
+    </qresource>
+    <qresource prefix="/VatesSimpleGuiViewWidgets/icons">
+        <file>pqWidgets/Icons/pqResetCamera.png</file>
+        <file>pqWidgets/Icons/pqResetCamera@2x.png</file>
+        <file>pqWidgets/Icons/pqResetCamera16.png</file>
+        <file>pqWidgets/Icons/pqResetCamera24.png</file>
+        <file>pqWidgets/Icons/pqResetCamera32.png</file>
+        <file>pqWidgets/Icons/pqRotateCameraCCW.png</file>
+        <file>pqWidgets/Icons/pqRotateCameraCCW@2x.png</file>
+        <file>pqWidgets/Icons/pqRotateCameraCCW24.png</file>
+        <file>pqWidgets/Icons/pqRotateCameraCW.png</file>
+        <file>pqWidgets/Icons/pqRotateCameraCW@2x.png</file>
+        <file>pqWidgets/Icons/pqRotateCameraCW24.png</file>
+        <file>pqWidgets/Icons/pqXMinus.png</file>
+        <file>pqWidgets/Icons/pqXMinus@2x.png</file>
+        <file>pqWidgets/Icons/pqXMinus16.png</file>
+        <file>pqWidgets/Icons/pqXMinus24.png</file>
+        <file>pqWidgets/Icons/pqXMinus32.png</file>
+        <file>pqWidgets/Icons/pqXPlus.png</file>
+        <file>pqWidgets/Icons/pqXPlus@2x.png</file>
+        <file>pqWidgets/Icons/pqXPlus16.png</file>
+        <file>pqWidgets/Icons/pqXPlus24.png</file>
+        <file>pqWidgets/Icons/pqXPlus32.png</file>
+        <file>pqWidgets/Icons/pqYMinus.png</file>
+        <file>pqWidgets/Icons/pqYMinus@2x.png</file>
+        <file>pqWidgets/Icons/pqYMinus16.png</file>
+        <file>pqWidgets/Icons/pqYMinus24.png</file>
+        <file>pqWidgets/Icons/pqYMinus32.png</file>
+        <file>pqWidgets/Icons/pqYPlus.png</file>
+        <file>pqWidgets/Icons/pqYPlus@2x.png</file>
+        <file>pqWidgets/Icons/pqYPlus16.png</file>
+        <file>pqWidgets/Icons/pqYPlus24.png</file>
+        <file>pqWidgets/Icons/pqYPlus32.png</file>
+        <file>pqWidgets/Icons/pqZMinus.png</file>
+        <file>pqWidgets/Icons/pqZMinus@2x.png</file>
+        <file>pqWidgets/Icons/pqZMinus16.png</file>
+        <file>pqWidgets/Icons/pqZMinus24.png</file>
+        <file>pqWidgets/Icons/pqZMinus32.png</file>
+        <file>pqWidgets/Icons/pqZoomToData.png</file>
+        <file>pqWidgets/Icons/pqZoomToData@2x.png</file>
+        <file>pqWidgets/Icons/pqZoomToData24.png</file>
+        <file>pqWidgets/Icons/pqZoomToSelection.png</file>
+        <file>pqWidgets/Icons/pqZoomToSelection@2x.png</file>
+        <file>pqWidgets/Icons/pqZoomToSelection24.png</file>
+        <file>pqWidgets/Icons/pqZPlus.png</file>
+        <file>pqWidgets/Icons/pqZPlus@2x.png</file>
+        <file>pqWidgets/Icons/pqZPlus16.png</file>
+        <file>pqWidgets/Icons/pqZPlus24.png</file>
+        <file>pqWidgets/Icons/pqZPlus32.png</file>
     </qresource>
 </RCC>

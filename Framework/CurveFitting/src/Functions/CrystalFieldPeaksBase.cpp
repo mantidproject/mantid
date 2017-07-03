@@ -3,6 +3,7 @@
 
 #include <functional>
 #include <map>
+#include <cctype>
 
 namespace Mantid {
 namespace CurveFitting {
@@ -11,19 +12,22 @@ namespace Functions {
 namespace {
 
 // Maps ion name to its int code.
-std::map<std::string, int> ion2nre{{"Ce", 1},
-                                   {"Pr", 2},
-                                   {"Nd", 3},
-                                   {"Pm", 4},
-                                   {"Sm", 5},
-                                   {"Eu", 6},
-                                   {"Gd", 7},
-                                   {"Tb", 8},
-                                   {"Dy", 9},
-                                   {"Ho", 10},
-                                   {"Er", 11},
-                                   {"Tm", 12},
-                                   {"Yb", 13}};
+const std::map<std::string, int> ION_2_NRE{{"Ce", 1},
+                                           {"Pr", 2},
+                                           {"Nd", 3},
+                                           {"Pm", 4},
+                                           {"Sm", 5},
+                                           {"Eu", 6},
+                                           {"Gd", 7},
+                                           {"Tb", 8},
+                                           {"Dy", 9},
+                                           {"Ho", 10},
+                                           {"Er", 11},
+                                           {"Tm", 12},
+                                           {"Yb", 13}};
+
+const bool REAL_PARAM_PART = true;
+const bool IMAG_PARAM_PART = false;
 
 void fixx(API::IFunction &fun, const std::string &par) {
   fun.setParameter(par, 0.0);
@@ -44,9 +48,6 @@ void free(API::IFunction &fun, const std::string &par, bool realOnly) {
   }
 }
 
-const bool real = true;
-const bool cmplx = false;
-
 // Set symmetry C1 or Ci
 void setSymmetryC1(API::IFunction &fun) {
   fun.clearTies();
@@ -65,17 +66,17 @@ void setSymmetryC2(API::IFunction &fun) {
   fun.unfixParameter("B40");
   fun.unfixParameter("B60");
   fixx(fun, "B21");
-  free(fun, "B22", real);
+  free(fun, "B22", REAL_PARAM_PART);
   fixx(fun, "B41");
-  free(fun, "B42", cmplx);
+  free(fun, "B42", IMAG_PARAM_PART);
   fixx(fun, "B43");
-  free(fun, "B44", cmplx);
+  free(fun, "B44", IMAG_PARAM_PART);
   fixx(fun, "B61");
-  free(fun, "B62", cmplx);
+  free(fun, "B62", IMAG_PARAM_PART);
   fixx(fun, "B63");
-  free(fun, "B64", cmplx);
+  free(fun, "B64", IMAG_PARAM_PART);
   fixx(fun, "B65");
-  free(fun, "B66", cmplx);
+  free(fun, "B66", IMAG_PARAM_PART);
 }
 
 // Set symmetry C2v, D2 or D2h
@@ -85,17 +86,17 @@ void setSymmetryC2v(API::IFunction &fun) {
   fun.unfixParameter("B40");
   fun.unfixParameter("B60");
   fixx(fun, "B21");
-  free(fun, "B22", real);
+  free(fun, "B22", REAL_PARAM_PART);
   fixx(fun, "B41");
-  free(fun, "B42", real);
+  free(fun, "B42", REAL_PARAM_PART);
   fixx(fun, "B43");
-  free(fun, "B44", real);
+  free(fun, "B44", REAL_PARAM_PART);
   fixx(fun, "B61");
-  free(fun, "B62", real);
+  free(fun, "B62", REAL_PARAM_PART);
   fixx(fun, "B63");
-  free(fun, "B64", real);
+  free(fun, "B64", REAL_PARAM_PART);
   fixx(fun, "B65");
-  free(fun, "B66", real);
+  free(fun, "B66", REAL_PARAM_PART);
 }
 
 // Set symmetry C4, S4 or C4h
@@ -109,11 +110,11 @@ void setSymmetryC4(API::IFunction &fun) {
   fixx(fun, "B41");
   fixx(fun, "B42");
   fixx(fun, "B43");
-  free(fun, "B44", real);
+  free(fun, "B44", REAL_PARAM_PART);
   fixx(fun, "B61");
   fixx(fun, "B62");
   fixx(fun, "B63");
-  free(fun, "B64", cmplx);
+  free(fun, "B64", IMAG_PARAM_PART);
   fixx(fun, "B65");
   fixx(fun, "B66");
 }
@@ -129,11 +130,11 @@ void setSymmetryD4(API::IFunction &fun) {
   fixx(fun, "B41");
   fixx(fun, "B42");
   fixx(fun, "B43");
-  free(fun, "B44", real);
+  free(fun, "B44", REAL_PARAM_PART);
   fixx(fun, "B61");
   fixx(fun, "B62");
   fixx(fun, "B63");
-  free(fun, "B64", real);
+  free(fun, "B64", REAL_PARAM_PART);
   fixx(fun, "B65");
   fixx(fun, "B66");
 }
@@ -148,14 +149,14 @@ void setSymmetryC3(API::IFunction &fun) {
   fixx(fun, "B22");
   fixx(fun, "B41");
   fixx(fun, "B42");
-  free(fun, "B43", real);
+  free(fun, "B43", REAL_PARAM_PART);
   fixx(fun, "B44");
   fixx(fun, "B61");
   fixx(fun, "B62");
-  free(fun, "B63", cmplx);
+  free(fun, "B63", IMAG_PARAM_PART);
   fixx(fun, "B64");
   fixx(fun, "B65");
-  free(fun, "B66", cmplx);
+  free(fun, "B66", IMAG_PARAM_PART);
 }
 
 // Set symmetry D3, C3v or D3d
@@ -168,14 +169,14 @@ void setSymmetryD3(API::IFunction &fun) {
   fixx(fun, "B22");
   fixx(fun, "B41");
   fixx(fun, "B42");
-  free(fun, "B43", real);
+  free(fun, "B43", REAL_PARAM_PART);
   fixx(fun, "B44");
   fixx(fun, "B61");
   fixx(fun, "B62");
-  free(fun, "B63", real);
+  free(fun, "B63", REAL_PARAM_PART);
   fixx(fun, "B64");
   fixx(fun, "B65");
-  free(fun, "B66", real);
+  free(fun, "B66", REAL_PARAM_PART);
 }
 
 // Set symmetry C6, C3h, C6h, D6, C6v, D3h, or D6h
@@ -195,7 +196,7 @@ void setSymmetryC6(API::IFunction &fun) {
   fixx(fun, "B63");
   fixx(fun, "B64");
   fixx(fun, "B65");
-  free(fun, "B66", real);
+  free(fun, "B66", REAL_PARAM_PART);
 }
 
 // Set symmetry T, Td, Th, O, or Oh
@@ -210,11 +211,11 @@ void setSymmetryT(API::IFunction &fun) {
   fixx(fun, "B41");
   fixx(fun, "B42");
   fixx(fun, "B43");
-  free(fun, "B44", real);
+  free(fun, "B44", REAL_PARAM_PART);
   fixx(fun, "B61");
   fixx(fun, "B62");
   fixx(fun, "B63");
-  free(fun, "B64", real);
+  free(fun, "B64", REAL_PARAM_PART);
   fixx(fun, "B65");
   fixx(fun, "B66");
   fun.tie("B44", "5*B40");
@@ -222,7 +223,7 @@ void setSymmetryT(API::IFunction &fun) {
 }
 
 /// Maps symmetry group names to the symmetry setting functions
-std::map<std::string, std::function<void(API::IFunction &)>> symmetryMap{
+const std::map<std::string, std::function<void(API::IFunction &)>> SYMMETRY_MAP{
     // Set symmetry C1 or Ci
     {"C1", setSymmetryC1},
     {"Ci", setSymmetryC1},
@@ -269,12 +270,12 @@ std::map<std::string, std::function<void(API::IFunction &)>> symmetryMap{
 
 /// Constructor
 CrystalFieldPeaksBase::CrystalFieldPeaksBase()
-    : API::IFunctionGeneral(), API::ParamFunction(), m_defaultDomainSize(0) {
+    : API::ParamFunction(), m_defaultDomainSize(0) {
 
   declareAttribute("Ion", Attribute("Ce"));
   declareAttribute("Symmetry", Attribute("Ci"));
   declareAttribute("ToleranceEnergy", Attribute(1.0e-10));
-  declareAttribute("ToleranceIntensity", Attribute(1.0e-3));
+  declareAttribute("ToleranceIntensity", Attribute(1.0e-1));
   declareAttribute("MaxPeakCount", Attribute(0));
 
   declareParameter("BmolX", 0.0, "The x-component of the molecular field.");
@@ -320,9 +321,13 @@ CrystalFieldPeaksBase::CrystalFieldPeaksBase()
 /// Calculate the crystal field eigensystem
 /// @param en :: Output eigenvalues.
 /// @param wf :: Output eigenvectors.
+/// @param ham :: Output crystal field hamiltonian (without external field)
+/// @param hz :: Output Zeeman hamiltonian (external field term)
 /// @param nre :: Output ion code.
 void CrystalFieldPeaksBase::calculateEigenSystem(DoubleFortranVector &en,
                                                  ComplexFortranMatrix &wf,
+                                                 ComplexFortranMatrix &ham,
+                                                 ComplexFortranMatrix &hz,
                                                  int &nre) const {
 
   auto ion = getAttribute("Ion").asString();
@@ -330,18 +335,53 @@ void CrystalFieldPeaksBase::calculateEigenSystem(DoubleFortranVector &en,
     throw std::runtime_error("Ion name must be specified.");
   }
 
-  auto ionIter = ion2nre.find(ion);
-  if (ionIter == ion2nre.end()) {
-    throw std::runtime_error("Unknown ion name passed to CrystalFieldPeaks.");
+  auto ionIter = ION_2_NRE.find(ion);
+  if (ionIter == ION_2_NRE.end()) {
+    // If 'Ion=S2', or 'Ion=J2.5' etc, interpret as arbitrary J values with gJ=2
+    // Allow lower case, but values must be half-integral. E.g. 'Ion=S2.4' fails
+    switch (ion[0]) {
+    case 'S':
+    case 's':
+    case 'J':
+    case 'j': {
+      if (ion.size() > 1 && std::isdigit(ion[1])) {
+        // Need to store as 2J to allow half-integer values
+        try {
+          auto J2 = std::stof(ion.substr(1)) * 2.;
+          if (J2 > 99.) {
+            throw std::out_of_range("");
+          }
+          if (fabs(J2 - (int)J2) < 0.001) {
+            nre = -(int)J2;
+            break;
+          }
+          // Catch exceptions thrown by stof so we get a more meaningful error
+        } catch (const std::invalid_argument &) {
+          throw std::runtime_error("Invalid value '" + ion.substr(1) +
+                                   "' of J passed to CrystalFieldPeaks.");
+        } catch (const std::out_of_range &) {
+          throw std::runtime_error("Value of J: '" + ion.substr(1) +
+                                   "' passed to CrystalFieldPeaks is too big.");
+        }
+      }
+      // fall through
+    }
+    default:
+      throw std::runtime_error("Unknown ion name '" + ion +
+                               "' passed to CrystalFieldPeaks.");
+    }
+  } else {
+    nre = ionIter->second;
   }
-
-  nre = ionIter->second;
 
   DoubleFortranVector bmol(1, 3);
   bmol(1) = getParameter("BmolX");
   bmol(2) = getParameter("BmolY");
   bmol(3) = getParameter("BmolZ");
 
+  // For CrystalFieldSusceptibility and CrystalFieldMagnetisation we need
+  //   to be able to override the external field set here, since in these
+  //   measurements, a different external field is applied.
   DoubleFortranVector bext(1, 3);
   bext(1) = getParameter("BextX");
   bext(2) = getParameter("BextY");
@@ -393,8 +433,7 @@ void CrystalFieldPeaksBase::calculateEigenSystem(DoubleFortranVector &en,
   bkq(6, 5) = ComplexType(B65, IB65);
   bkq(6, 6) = ComplexType(B66, IB66);
 
-  ComplexFortranMatrix ham;
-  calculateEigensystem(en, wf, ham, nre, bmol, bext, bkq);
+  calculateEigensystem(en, wf, ham, hz, nre, bmol, bext, bkq);
   // MaxPeakCount is a read-only "mutable" attribute.
   const_cast<CrystalFieldPeaksBase *>(this)
       ->setAttributeValue("MaxPeakCount", static_cast<int>(en.size()));
@@ -404,8 +443,8 @@ void CrystalFieldPeaksBase::calculateEigenSystem(DoubleFortranVector &en,
 void CrystalFieldPeaksBase::setAttribute(const std::string &name,
                                          const IFunction::Attribute &attr) {
   if (name == "Symmetry") {
-    auto symmIter = symmetryMap.find(attr.asString());
-    if (symmIter == symmetryMap.end()) {
+    auto symmIter = SYMMETRY_MAP.find(attr.asString());
+    if (symmIter == SYMMETRY_MAP.end()) {
       throw std::runtime_error("Unknown symmetry passed to CrystalFieldPeaks.");
     }
     symmIter->second(*this);

@@ -1,0 +1,28 @@
+[flake8]
+ignore = E114,E115,E116,E121,E123,E126,E133,E2,E704,W503,F403,F405,F999
+exclude =
+    .git,
+    buildconfig,
+    docs,
+    Framework/Algorithms/test,
+    Framework/DataObjects,
+    Framework/MPIAlgorithms,
+    Framework/PythonInterface/mantid,
+    Framework/PythonInterface/test,
+    Framework/WorkflowAlgorithms,
+    images,
+    installers,
+    instrument,
+    MantidPlot,
+    MantidQt,
+    QtPropertyBrowser,
+    scripts/test,
+    Testing/PerformanceTests,
+    Testing/SystemTests/lib,
+    Testing/SystemTests/scripts,
+    Testing/SystemTests/tests/analysis/reference,
+    Testing/Tools,
+    Vates/ParaviewPlugins,
+    Vates/VatesSimpleGui
+max-complexity = 20
+max-line-length = 140

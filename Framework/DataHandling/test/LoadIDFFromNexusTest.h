@@ -3,19 +3,17 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidDataHandling/LoadIDFFromNexus.h"
-#include "MantidAPI/WorkspaceFactory.h"
-#include "MantidGeometry/Instrument.h"
-#include "MantidDataObjects/Workspace2D.h"
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidKernel/Exception.h"
-#include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/DetectorInfo.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/Workspace.h"
-#include "MantidAPI/Algorithm.h"
-#include "MantidGeometry/Instrument/Component.h"
+#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidDataHandling/LoadIDFFromNexus.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Detector.h"
+#include "MantidKernel/Exception.h"
 #include "MantidTestHelpers/ScopedFileHelper.h"
-#include <vector>
 #include <Poco/Path.h>
 
 using namespace Mantid::API;
@@ -96,34 +94,32 @@ public:
     TS_ASSERT_DELTA(samplepos->getPos().Z(), 11.0, 0.01);
 
     // Test third pixel in main detector bank, which has indices (2,0)
-    boost::shared_ptr<const Detector> ptrDetMain =
-        boost::dynamic_pointer_cast<const Detector>(i->getDetector(5));
-    TS_ASSERT_EQUALS(ptrDetMain->getID(), 5);
-    TS_ASSERT_EQUALS(ptrDetMain->getName(), "main-detector-bank(2,0)");
-    TS_ASSERT_DELTA(ptrDetMain->getPos().X(), -0.3035, 0.0001);
-    TS_ASSERT_DELTA(ptrDetMain->getPos().Y(), -0.3124, 0.0001);
-    double d = ptrDetMain->getPos().distance(samplepos->getPos());
-    TS_ASSERT_DELTA(d, 4.1727, 0.0001);
-    double cmpDistance = ptrDetMain->getDistance(*samplepos);
-    TS_ASSERT_DELTA(cmpDistance, 4.1727, 0.0001);
-
-    TS_ASSERT_EQUALS(ptrDetMain->type(), "RectangularDetectorPixel");
+    const auto &detectorInfo = output->detectorInfo();
+    const auto &ptrDetMain = detectorInfo.detector(detectorInfo.indexOf(5));
+    TS_ASSERT_EQUALS(ptrDetMain.getID(), 5);
+    TS_ASSERT_EQUALS(ptrDetMain.getName(), "main-detector-bank(2,0)");
+    TS_ASSERT_EQUALS(ptrDetMain.type(), "RectangularDetectorPixel");
+    TS_ASSERT_DELTA(ptrDetMain.getPos().X(), -0.3035, 0.0001);
+    TS_ASSERT_DELTA(ptrDetMain.getPos().Y(), -0.3124, 0.0001);
+    TS_ASSERT_DELTA(detectorInfo.l2(detectorInfo.indexOf(5)), 4.1727, 0.0001);
 
     // Test a HAB pixel detector
-    boost::shared_ptr<const Detector> ptrDetHab =
-        boost::dynamic_pointer_cast<const Detector>(i->getDetector(16734));
-    TS_ASSERT_EQUALS(ptrDetHab->getID(), 16734);
-    TS_ASSERT_EQUALS(ptrDetHab->getName(), "HAB-pixel");
+    const auto &ptrDetHab = detectorInfo.detector(detectorInfo.indexOf(16734));
+    TS_ASSERT_EQUALS(ptrDetHab.getID(), 16734);
+    TS_ASSERT_EQUALS(ptrDetHab.getName(), "HAB-pixel");
+
     // Test a non-existant detector
-    TS_ASSERT_THROWS(i->getDetector(16735), Exception::NotFoundError);
+    TS_ASSERT_THROWS(detectorInfo.detector(detectorInfo.indexOf(16735)),
+                     std::out_of_range);
 
     // Check the monitors are correctly marked
-    TS_ASSERT(i->getDetector(1)->isMonitor())
-    TS_ASSERT(i->getDetector(2)->isMonitor())
+    const auto &detInfo = output->detectorInfo();
+    TS_ASSERT(detInfo.isMonitor(0))
+    TS_ASSERT(detInfo.isMonitor(1))
     // ...and that a normal detector isn't
-    TS_ASSERT(!i->getDetector(3)->isMonitor())
-    TS_ASSERT(!i->getDetector(300)->isMonitor())
-    TS_ASSERT(!i->getDetector(16500)->isMonitor())
+    TS_ASSERT(!detInfo.isMonitor(2))
+    TS_ASSERT(!detInfo.isMonitor(299))
+    TS_ASSERT(!detInfo.isMonitor(16499))
 
     AnalysisDataService::Instance().remove(wsName);
   }
@@ -163,7 +159,7 @@ public:
             wsName));
 
     // We now check the parameter that is different in the embedded parameters
-    const ParameterMap &paramMap = output->instrumentParameters();
+    const auto &paramMap = output->constInstrumentParameters();
     boost::shared_ptr<const Instrument> i = output->getInstrument();
     TS_ASSERT_EQUALS(paramMap.getString(i.get(), "low-angle-detector-name"),
                      "LAB");
@@ -206,7 +202,7 @@ public:
             wsName));
 
     // We now check a parameter
-    const ParameterMap &paramMap = output->instrumentParameters();
+    const auto &paramMap = output->constInstrumentParameters();
     boost::shared_ptr<const Instrument> i = output->getInstrument();
     TS_ASSERT_EQUALS(paramMap.getString(i.get(), "low-angle-detector-name"),
                      "main-detector-bank");
@@ -288,7 +284,7 @@ public:
             wsName));
 
     // We now check a parameter that has been changed by this
-    const ParameterMap &paramMap = output->instrumentParameters();
+    const auto &paramMap = output->constInstrumentParameters();
     boost::shared_ptr<const Instrument> i = output->getInstrument();
     TS_ASSERT_EQUALS(paramMap.getString(i.get(), "high-angle-detector-name"),
                      "HAB App");
@@ -378,7 +374,7 @@ public:
             wsName));
 
     // We now check a parameter that has been changed by this
-    const ParameterMap &paramMap = output->instrumentParameters();
+    const auto &paramMap = output->constInstrumentParameters();
     boost::shared_ptr<const Instrument> i = output->getInstrument();
     TS_ASSERT_EQUALS(paramMap.getString(i.get(), "high-angle-detector-name"),
                      "HAB Rep");

@@ -459,13 +459,19 @@ MantidQt::SliceViewer::PeakBoundingBox getPeakBoundingBoxForEllipsoid(
   // Get the length of largest projection onto x,y,z
   auto projectionLengths = getProjectionLengths(directions, radii);
 
-  // Corners
-  const double leftValue = originEllipsoid.X() - projectionLengths[0];
-  const double rightValue = originEllipsoid.X() + projectionLengths[0];
-  const double bottomValue = originEllipsoid.Y() - projectionLengths[1];
-  const double topValue = originEllipsoid.Y() + projectionLengths[1];
-
   using namespace MantidQt::SliceViewer;
+
+  // Corners
+  EllipsoidPlaneSliceCalculator calc;
+  auto zoomOutFactor = calc.getZoomOutFactor();
+  const double leftValue =
+      originEllipsoid.X() - zoomOutFactor * projectionLengths[0];
+  const double rightValue =
+      originEllipsoid.X() + zoomOutFactor * projectionLengths[0];
+  const double bottomValue =
+      originEllipsoid.Y() - zoomOutFactor * projectionLengths[1];
+  const double topValue =
+      originEllipsoid.Y() + zoomOutFactor * projectionLengths[1];
 
   Left left(leftValue);
   Right right(rightValue);
@@ -474,6 +480,10 @@ MantidQt::SliceViewer::PeakBoundingBox getPeakBoundingBoxForEllipsoid(
   SlicePoint slicePoint(originEllipsoid.Z());
 
   return PeakBoundingBox(left, right, top, bottom, slicePoint);
+}
+
+double EllipsoidPlaneSliceCalculator::getZoomOutFactor() const {
+  return m_zoomOutFactor;
 }
 }
 }

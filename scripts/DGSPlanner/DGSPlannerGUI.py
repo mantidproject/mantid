@@ -1,9 +1,14 @@
 #pylint: disable=invalid-name,relative-import
-import InstrumentSetupWidget,ClassicUBInputWidget,MatrixUBInputWidget,DimensionSelectorWidget
+from __future__ import (absolute_import, division, print_function)
+from . import InstrumentSetupWidget
+from . import ClassicUBInputWidget
+from . import MatrixUBInputWidget
+from . import DimensionSelectorWidget
 from PyQt4 import QtCore, QtGui
 import sys
 import mantid
-from ValidateOL import ValidateOL
+import mantidqtpython as mqt
+from .ValidateOL import ValidateOL
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 from  mpl_toolkits.axisartist.grid_helper_curvelinear import GridHelperCurveLinear
@@ -12,6 +17,7 @@ import numpy
 import copy
 import os
 
+
 def float2Input(x):
     if numpy.isfinite(x):
         return x
@@ -19,6 +25,8 @@ def float2Input(x):
         return None
 
 # pylint: disable=too-many-instance-attributes
+
+
 class DGSPlannerGUI(QtGui.QWidget):
     def __init__(self,ol=None,parent=None):
         # pylint: disable=unused-argument,super-on-old-class
@@ -105,7 +113,6 @@ class DGSPlannerGUI(QtGui.QWidget):
         #register startup
         mantid.UsageService.registerFeatureUsage("Interface","DGSPlanner",False)
 
-
     @QtCore.pyqtSlot(mantid.geometry.OrientedLattice)
     def updateUB(self,ol):
         self.ol=ol
@@ -116,9 +123,9 @@ class DGSPlannerGUI(QtGui.QWidget):
     def updateParams(self,d):
         if self.sender() is self.instrumentWidget:
             self.updatedInstrument=True
-        if d.has_key('dimBasis') and self.masterDict.has_key('dimBasis') and d['dimBasis']!=self.masterDict['dimBasis']:
+        if 'dimBasis' in d and 'dimBasis' in self.masterDict and d['dimBasis']!=self.masterDict['dimBasis']:
             self.needToClear=True
-        if d.has_key('dimIndex') and self.masterDict.has_key('dimIndex')and d['dimIndex']!=self.masterDict['dimIndex']:
+        if 'dimIndex' in d and 'dimIndex' in self.masterDict and d['dimIndex']!=self.masterDict['dimIndex']:
             self.needToClear=True
         self.masterDict.update(copy.deepcopy(d))
 
@@ -132,12 +139,12 @@ class DGSPlannerGUI(QtGui.QWidget):
             helpapp = QtCore.QLibraryInfo.location(QtCore.QLibraryInfo.BinariesPath) + QtCore.QDir.separator()
             helpapp += 'assistant'
             args = ['-enableRemoteControl', '-collectionFile',self.collectionFile,'-showUrl',self.qtUrl]
-            if os.path.isfile(helpapp):
+            if os.path.isfile(helpapp) and os.path.isfile(self.collectionFile):
                 self.assistantProcess.close()
                 self.assistantProcess.waitForFinished()
                 self.assistantProcess.start(helpapp, args)
             else:
-                QtGui.QDesktopServices.openUrl(QtCore.QUrl(self.externalUrl))
+                mqt.MantidQt.API.MantidDesktopServices.openUrl(QtCore.QUrl(self.externalUrl))
 
     def closeEvent(self,event):
         self.assistantProcess.close()
@@ -163,7 +170,7 @@ class DGSPlannerGUI(QtGui.QWidget):
                                                   QtGui.QMessageBox.No)
                 if reply==QtGui.QMessageBox.No:
                     return
-            if self.wg!=None:
+            if self.wg is not None:
                 mantid.simpleapi.DeleteWorkspace(self.wg)
             mantid.simpleapi.LoadEmptyInstrument(mantid.api.ExperimentInfo.getInstrumentFilename(self.masterDict['instrument']),
                                                  OutputWorkspace="__temp_instrument")
@@ -172,8 +179,14 @@ class DGSPlannerGUI(QtGui.QWidget):
                 mantid.simpleapi.AddSampleLog(Workspace="__temp_instrument",LogName='s2',
                                               LogText=str(self.masterDict['S2']),LogType='Number Series')
                 mantid.simpleapi.LoadInstrument(Workspace="__temp_instrument", RewriteSpectraMap=True, InstrumentName="HYSPEC")
+            if self.masterDict['instrument']=='EXED':
+                mantid.simpleapi.RotateInstrumentComponent(Workspace="__temp_instrument",
+                                                           ComponentName='Tank',
+                                                           Y=1,
+                                                           Angle=str(self.masterDict['S2']),
+                                                           RelativeRotation=False)
             #masking
-            if self.masterDict.has_key('maskFilename') and len(self.masterDict['maskFilename'].strip())>0:
+            if 'maskFilename' in self.masterDict and len(self.masterDict['maskFilename'].strip())>0:
                 try:
                     __maskWS=mantid.simpleapi.Load(self.masterDict['maskFilename'])
                     mantid.simpleapi.MaskDetectors(Workspace="__temp_instrument",MaskedWorkspace=__maskWS)
@@ -184,8 +197,8 @@ class DGSPlannerGUI(QtGui.QWidget):
                     if reply==QtGui.QMessageBox.No:
                         return
             if self.masterDict['makeFast']:
-                sp=range(mantid.mtd["__temp_instrument"].getNumberHistograms())
-                tomask=sp[::4]+sp[1::4]+sp[2::4]
+                sp=list(range(mantid.mtd["__temp_instrument"].getNumberHistograms()))
+                tomask=sp[1::4]+sp[2::4]+sp[3::4]
                 mantid.simpleapi.MaskDetectors("__temp_instrument",SpectraList=tomask)
             i=0
             groupingStrings=[]
@@ -293,7 +306,6 @@ class DGSPlannerGUI(QtGui.QWidget):
         self.canvas.draw()
         mantid.simpleapi.DeleteWorkspace(__mdws)
 
-
     def save(self):
         fileName = str(QtGui.QFileDialog.getSaveFileName(self, 'Save Plot', self.saveDir,'*.png'))
         data = "Instrument "+self.masterDict['instrument']+'\n'
@@ -338,6 +350,7 @@ class DGSPlannerGUI(QtGui.QWidget):
             h2,k2,l2=(float(temp) for temp in self.masterDict['dimBasis'][self.masterDict['dimIndex'][1]].split(','))
             angle=numpy.radians(self.ol.recAngle(h1,k1,l1,h2,k2,l2))
             return 1.*x+numpy.cos(angle)*y,  numpy.sin(angle)*y
+
     def inv_tr(self,x,y):
         x, y = numpy.asarray(x), numpy.asarray(y)
         #one of the axes is energy

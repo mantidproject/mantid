@@ -9,6 +9,7 @@
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/FilterChannel.h"
 #include "MantidKernel/StdoutChannel.h"
+#include "MantidKernel/System.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidKernel/NetworkProxy.h"
@@ -26,11 +27,17 @@
 #include <Poco/Environment.h>
 #include <Poco/Process.h>
 #include <Poco/URI.h>
-#ifdef _WIN32
-#pragma warning(disable : 4250)
-#endif
+
+#include <Poco/AutoPtr.h>
+#include <Poco/Channel.h>
+#include <Poco/DOM/Element.h>
+#include <Poco/DOM/Node.h>
+#include <Poco/Exception.h>
+#include <Poco/Instantiator.h>
+#include <Poco/Pipe.h>
+#include <Poco/Platform.h>
+#include <Poco/String.h>
 #include <Poco/Logger.h>
-#include <Poco/SplitterChannel.h>
 #include <Poco/LoggingRegistry.h>
 #include <Poco/PipeStream.h>
 #include <Poco/StreamCopier.h>
@@ -38,7 +45,14 @@
 #include <boost/algorithm/string/join.hpp>
 #include <boost/regex.hpp>
 
+#include <algorithm>
+#include <exception>
 #include <fstream>
+#include <functional>
+#include <iostream>
+#include <stdexcept>
+#include <utility>
+#include <ctype.h>
 
 #ifdef __APPLE__
 #include <mach-o/dyld.h>
@@ -160,28 +174,7 @@ ConfigServiceImpl::ConfigServiceImpl()
       "StdoutChannel",
       new Poco::Instantiator<Poco::StdoutChannel, Poco::Channel>);
 
-  // Define the directory to search for the Mantid.properties file.
-  Poco::File f;
-
-  // First directory: the current working
-  m_strBaseDir = Poco::Path::current();
-  f = Poco::File(m_strBaseDir + m_properties_file_name);
-  if (!f.exists()) {
-    // Check the executable directory to see if it includes a mantid.properties
-    // file
-    m_strBaseDir = getDirectoryOfExecutable();
-    f = Poco::File(m_strBaseDir + m_properties_file_name);
-    if (!f.exists()) {
-      // Last, use the MANTIDPATH environment var
-      if (Poco::Environment::has("MANTIDPATH")) {
-        // Here we have to follow the convention of the rest of this code and
-        // add a trailing slash.
-        // Note: adding it to the MANTIDPATH itself will make other parts of the
-        // code crash.
-        m_strBaseDir = Poco::Environment::get("MANTIDPATH") + "/";
-      }
-    }
-  }
+  setBaseDirectory();
 
   // Fill the list of possible relative path keys that may require conversion to
   // absolute paths
@@ -285,6 +278,55 @@ ConfigServiceImpl::~ConfigServiceImpl() {
   clearFacilities();
 }
 
+/**
+ * Set the base directory path so we can file the Mantid.properties file.
+ *
+ * This will search for the base directory that contains the .properties file
+ * by checking the following places:
+ *  - The current working directory
+ *  - The executable directory
+ *  - The directory defined by the MANTIDPATH enviroment var
+ *  - OSX only: the directory two directories up from the executable (which
+ *    is the base on the OSX package.
+ *
+ */
+void ConfigServiceImpl::setBaseDirectory() {
+  // Define the directory to search for the Mantid.properties file.
+  Poco::File f;
+
+  // First directory: the current working
+  m_strBaseDir = Poco::Path::current();
+  f = Poco::File(m_strBaseDir + m_properties_file_name);
+  if (f.exists())
+    return;
+
+  // Check the executable directory to see if it includes a mantid.properties
+  // file
+  m_strBaseDir = getDirectoryOfExecutable();
+  f = Poco::File(m_strBaseDir + m_properties_file_name);
+  if (f.exists())
+    return;
+
+  // Check the MANTIDPATH environment var
+  if (Poco::Environment::has("MANTIDPATH")) {
+    // Here we have to follow the convention of the rest of this code and
+    // add a trailing slash.
+    // Note: adding it to the MANTIDPATH itself will make other parts of the
+    // code crash.
+    m_strBaseDir = Poco::Environment::get("MANTIDPATH") + "/";
+    f = Poco::File(m_strBaseDir + m_properties_file_name);
+    if (f.exists())
+      return;
+  }
+
+#ifdef __APPLE__
+  // Finally, on OSX check if we're in the package directory and the .properties
+  // file just happens to be two directories up
+  auto path = Poco::Path(getDirectoryOfExecutable());
+  m_strBaseDir = path.parent().parent().parent().toString();
+#endif
+}
+
 /** Loads the config file provided.
  *  If the file contains logging setup instructions then these will be used to
  *setup the logging framework.
@@ -382,88 +424,26 @@ void ConfigServiceImpl::registerLoggingFilterChannel(
  *
  */
 void ConfigServiceImpl::configureLogging() {
-  try {
-    // Ensure that the logging directory exists
-    m_logFilePath = getString("logging.channels.fileChannel.path");
-    Poco::Path logpath(m_logFilePath);
-
-    // Undocumented way to override the mantid.log path
-    if (Poco::Environment::has("MANTIDLOGPATH")) {
-      logpath = Poco::Path(Poco::Environment::get("MANTIDLOGPATH"));
-      logpath = logpath.absolute();
-      m_logFilePath = logpath.toString();
-    }
-
-    // An absolute path makes things simpler
+  // Undocumented way to override the mantid.log path
+  if (Poco::Environment::has("MANTIDLOGPATH")) {
+    auto logpath = Poco::Path(Poco::Environment::get("MANTIDLOGPATH"));
     logpath = logpath.absolute();
-
-    // First, try the logpath given
-    if (!m_logFilePath.empty()) {
-      try {
-        // Save it for later
-        m_logFilePath = logpath.toString();
-
-        // make this path point to the parent directory and create it if it does
-        // not exist
-        Poco::Path parent = logpath;
-        parent.makeParent();
-        Poco::File(parent).createDirectories();
-
-        // Try to create or append to the file. If it fails, use the default
-        FILE *fp = fopen(m_logFilePath.c_str(), "a+");
-        if (fp == nullptr) {
-          std::cerr
-              << "Error writing to log file path given in properties file: \""
-              << m_logFilePath << "\". Will use a default path instead.\n";
-          // Clear the path; this will make it use the default
-          m_logFilePath = "";
-        } else
-          fclose(fp);
-      } catch (std::exception &) {
-        std::cerr
-            << "Error writing to log file path given in properties file: \""
-            << m_logFilePath << "\". Will use a default path instead.\n";
-        // ERROR! Maybe the file is not writable!
-        // Clear the path; this will make it use the default
-        m_logFilePath = "";
-      }
-    }
-
-    // The path given was invalid somehow? Use a default
-    if (m_logFilePath.empty()) {
-      m_logFilePath = getUserPropertiesDir() + "mantid.log";
-      // Check whether the file can be written. The Poco::File::canWrite method
-      // does not work
-      // for files that don't exist, it throws an exception. It also can't be
-      // used to check for
-      // directory access as the Windows API doesn't return this information
-      // correctly for
-      // directories.
-      FILE *fp = fopen(m_logFilePath.c_str(), "a+");
-      if (!fp) {
-        // if we cannot write to the default directory then set use the system
-        // temp
-        logpath = Poco::Path::temp() + "mantid.log";
-        m_logFilePath = logpath.toString();
-        std::cerr << "Error writing to log file path to default location: \""
-                  << m_logFilePath
-                  << "\". Will use a system temp path instead: \""
-                  << m_logFilePath << "\"\n";
-      } else
-        fclose(fp);
-    }
+    m_logFilePath = logpath.toString();
     // Set the line in the configuration properties.
-    //  this'll be picked up by LoggingConfigurator (somehow)
     m_pConf->setString("logging.channels.fileChannel.path", m_logFilePath);
-
-    // make this path point to the parent directory and create it if it does not
-    // exist
-    logpath.makeParent();
-    if (!logpath.toString().empty()) {
-      Poco::File(logpath)
-          .createDirectories(); // Also creates all necessary directories
+  } else {
+    m_logFilePath = getString("logging.channels.fileChannel.path");
+    if (m_logFilePath.empty()) {
+      // Default to appdata/mantid.log
+      Poco::Path path(getAppDataDir());
+      path.append("mantid.log");
+      m_logFilePath = path.toString();
+      // Set the line in the configuration properties.
+      m_pConf->setString("logging.channels.fileChannel.path", m_logFilePath);
     }
+  }
 
+  try {
     // Configure the logging framework
     Poco::Util::LoggingConfigurator configurator;
     configurator.configure(m_pConf);
@@ -471,7 +451,6 @@ void ConfigServiceImpl::configureLogging() {
     std::cerr << "Trouble configuring the logging framework " << e.what()
               << '\n';
   }
-
   // register the filter channels - the order here is important
   registerLoggingFilterChannel("fileFilterChannel", nullptr);
   registerLoggingFilterChannel("consoleFilterChannel", nullptr);
@@ -704,7 +683,11 @@ void ConfigServiceImpl::createUserPropertiesFile() const {
         << "## Valid values are: error, warning, notice, information, debug\n";
     filestr << "#logging.channels.fileFilterChannel.level=debug\n\n";
     filestr << "## Sets the file to write logs to\n";
-    filestr << "#logging.channels.fileChannel.path=../mantid.log\n\n";
+    filestr << "#logging.channels.fileChannel.path=../mantid.log\n";
+    filestr << "## Uncomment the following line to flush log messages to disk "
+               "immediately.\n";
+    filestr << "## Useful for debugging crashes but it will hurt performance\n";
+    filestr << "#logging.channels.fileChannel.flush = true\n\n";
     filestr << "##\n";
     filestr << "## MantidPlot\n";
     filestr << "##\n\n";
@@ -888,7 +871,7 @@ void ConfigServiceImpl::saveConfig(const std::string &filename) const {
       // If it does exist make sure the value is current
       std::string value = getString(key, false);
       Poco::replaceInPlace(value, "\\", "\\\\"); // replace single \ with double
-      updated_file += key + "=" + value;
+      updated_file.append(key).append("=").append(value);
       // Remove the key from the changed key list
       m_changed_keys.erase(key);
     }
@@ -988,9 +971,9 @@ void ConfigServiceImpl::getKeysRecursive(
   for (auto &rootKey : rootKeys) {
     std::string searchString;
     if (root.empty()) {
-      searchString = rootKey;
+      searchString.append(rootKey);
     } else {
-      searchString = root + "." + rootKey;
+      searchString.append(root).append(".").append(rootKey);
     }
 
     getKeysRecursive(searchString, allKeys);
@@ -1653,6 +1636,15 @@ const std::vector<std::string> &ConfigServiceImpl::getUserSearchDirs() const {
 }
 
 /**
+* Sets the search directories for XML instrument definition files (IDFs)
+* @param directories An ordered list of paths for instrument searching
+*/
+void ConfigServiceImpl::setInstrumentDirectories(
+    const std::vector<std::string> &directories) {
+  m_InstrumentDirs = directories;
+}
+
+/**
  * Return the search directories for XML instrument definition files (IDFs)
  * @returns An ordered list of paths for instrument searching
  */
@@ -1686,19 +1678,26 @@ const std::string ConfigServiceImpl::getVTPFileDirectory() {
   return directoryName;
 }
 /**
- * Fills the internal cache of instrument definition directories
+ * Fills the internal cache of instrument definition directories and creates
+ * The %appdata%/mantidproject/mantid or $home/.mantid directory.
+ *
+ * This will normally contain from Index 0
+ * - The download directory (win %appdata%/mantidproject/mantid/instrument)
+ *   (linux $home/.mantid/instrument )
+ * - The user instrument area /etc/mantid/instrument (not on windows)
+ * - The install directory/instrument
  */
 void ConfigServiceImpl::cacheInstrumentPaths() {
   m_InstrumentDirs.clear();
+
   Poco::Path path(getAppDataDir());
   path.makeDirectory();
   path.pushDirectory("instrument");
-  std::string appdatadir = path.toString();
+  const std::string appdatadir = path.toString();
   addDirectoryifExists(appdatadir, m_InstrumentDirs);
 
 #ifndef _WIN32
-  std::string etcdatadir = "/etc/mantid/instrument";
-  addDirectoryifExists(etcdatadir, m_InstrumentDirs);
+  addDirectoryifExists("/etc/mantid/instrument", m_InstrumentDirs);
 #endif
 
   // Determine the search directory for XML instrument definition files (IDFs)
@@ -1739,6 +1738,45 @@ bool ConfigServiceImpl::addDirectoryifExists(
   }
 }
 
+std::string ConfigServiceImpl::getFacilityFilename(const std::string &fName) {
+  // first try the supplied file
+  if (!fName.empty()) {
+    const Poco::File fileObj(fName);
+    if (fileObj.exists()) {
+      return fName;
+    }
+  }
+
+  // search all of the instrument directories
+  const std::vector<std::string> directoryNames = getInstrumentDirectories();
+
+  // only use downloaded instruments if configured to download
+  const std::string updateInstrStr =
+      this->getString("UpdateInstrumentDefinitions.OnStartup");
+
+  auto instrDir = directoryNames.begin();
+  if (updateInstrStr == "1" || updateInstrStr == "on" ||
+      updateInstrStr == "On") {
+    // do nothing
+  } else {
+    instrDir++; // advance to after the first value
+  }
+
+  for (; instrDir != directoryNames.end(); ++instrDir) {
+    std::string filename = (*instrDir) + "Facilities.xml";
+
+    Poco::File fileObj(filename);
+    // stop when you find the first one
+    if (fileObj.exists())
+      return filename;
+  }
+
+  // getting this far means the file was not found
+  std::string directoryNamesList = boost::algorithm::join(directoryNames, ", ");
+  throw std::runtime_error("Failed to find \"Facilities.xml\". Searched in " +
+                           directoryNamesList);
+}
+
 /**
  * Load facility information from instrumentDir/Facilities.xml file if fName
  * parameter
@@ -1748,19 +1786,18 @@ bool ConfigServiceImpl::addDirectoryifExists(
 void ConfigServiceImpl::updateFacilities(const std::string &fName) {
   clearFacilities();
 
-  std::string instrDir = getString("instrumentDefinition.directory");
-  std::string fileName = fName.empty() ? instrDir + "Facilities.xml" : fName;
-
-  // Set up the DOM parser and parse xml file
-  Poco::XML::DOMParser pParser;
-  Poco::AutoPtr<Poco::XML::Document> pDoc;
-
   try {
+    std::string fileName = getFacilityFilename(fName);
+
+    // Set up the DOM parser and parse xml file
+    Poco::AutoPtr<Poco::XML::Document> pDoc;
     try {
+      Poco::XML::DOMParser pParser;
       pDoc = pParser.parse(fileName);
     } catch (...) {
       throw Kernel::Exception::FileError("Unable to parse file:", fileName);
     }
+
     // Get pointer to root element
     Poco::XML::Element *pRootElem = pDoc->documentElement();
     if (!pRootElem->hasChildNodes()) {

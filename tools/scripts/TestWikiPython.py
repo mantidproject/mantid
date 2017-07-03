@@ -11,6 +11,7 @@ import urllib2
 import argparse
 import json
 
+
 def readWebPage(url):
     # set your environment HTTP_PROXY to be your proxy
     # for ral HTTP_PROXY=http://wwwcache.rl.ac.uk:8080
@@ -32,6 +33,7 @@ def getTestablePages(url):
 def convertURLToRaw(url):
     return url.replace(" ","%20") + "?action=raw"
 
+
 def writeTestRst(filepath,mediawikiText,pageName):
     '''
     for a block of wiki text, writes out all tests found to an rst page
@@ -46,6 +48,7 @@ def writeTestRst(filepath,mediawikiText,pageName):
         findCodeSections(mediawikiText,pageName)
     finally:
         sys.stdout = sys.__stdout__
+
 
 def findCodeSections(mediawikiText,pageName):
     '''
@@ -97,6 +100,7 @@ def findCodeSections(mediawikiText,pageName):
             printDirective("testoutput",testName,m.group(8),True, "+ELLIPSIS, +NORMALIZE_WHITESPACE")
         print
 
+
 def printDirective (directive, name, contents, hideIfNone = False,options = None):
     if not(hideIfNone and contents is None):
         print ".. {}:: {}".format(directive,name)
@@ -108,6 +112,7 @@ def printDirective (directive, name, contents, hideIfNone = False,options = None
                 print "   " + line
         print
 
+
 def coords_of_str_index(string, index):
     """Get (line_number, col) of `index` in `string`."""
     lines = string.splitlines(True)
@@ -116,6 +121,7 @@ def coords_of_str_index(string, index):
         if curr_pos + len(line) > index:
             return linenum + 1, index-curr_pos
         curr_pos += len(line)
+
 
 def ensureDirectoriesExist(path):
     try:

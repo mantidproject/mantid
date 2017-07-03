@@ -11,7 +11,7 @@ from reduction_gui.reduction.sans.hfir_sample_script import SampleData
 # Disable unused import warning
 # pylint: disable=W0611
 try:
-    import mantidplot
+    import mantidplot # noqa
     IS_IN_MANTIDPLOT = True
 except(ImportError, ImportWarning):
     IS_IN_MANTIDPLOT = False
@@ -38,7 +38,7 @@ class Background(BaseScriptElement):
                 raise RuntimeError(error_str)
 
             return "BckDirectBeamTransmission(\"%s\", \"%s\", beam_radius=%g)\n" % \
-            (self.sample_file, self.direct_beam, self.beam_radius)
+                (self.sample_file, self.direct_beam, self.beam_radius)
 
         def from_setup_info(self, xml_str):
             """
@@ -71,17 +71,17 @@ class Background(BaseScriptElement):
                 @param execute: if true, the script will be executed
             """
             if len(str(self.sample_scatt).strip())==0\
-                or len(str(self.sample_spreader).strip())==0\
-                or len(str(self.direct_scatt).strip())==0\
-                or len(str(self.direct_spreader).strip())==0:
+                    or len(str(self.sample_spreader).strip())==0\
+                    or len(str(self.direct_scatt).strip())==0\
+                    or len(str(self.direct_spreader).strip())==0:
                 error_str = "Beam spreader method for background transmission was selected but "
                 error_str += "all the appropriate data files were not entered."
                 raise RuntimeError(error_str)
 
             return "BckBeamSpreaderTransmission(\"%s\",\n \"%s\",\n \"%s\",\n \"%s\", %g, %g)\n" % \
-            (self.sample_spreader, self.direct_spreader,
-             self.sample_scatt, self.direct_scatt,
-             self.spreader_trans, self.spreader_trans_spread)
+                (self.sample_spreader, self.direct_spreader,
+                 self.sample_scatt, self.direct_scatt,
+                 self.spreader_trans, self.spreader_trans_spread)
 
         def from_setup_info(self, xml_str):
             """
@@ -198,21 +198,21 @@ class Background(BaseScriptElement):
                                                                       default = Background.dark_current_corr)
             self.dark_current_file = BaseScriptElement.getStringElement(instrument_dom, "dark_current_file")
 
-            self.background_corr = BaseScriptElement.getBoolElement(instrument_dom, "background_corr",\
-                                                                      default = Background.background_corr)
+            self.background_corr = BaseScriptElement.getBoolElement(instrument_dom, "background_corr",
+                                                                    default = Background.background_corr)
             self.background_file = BaseScriptElement.getStringElement(instrument_dom, "background_file")
 
-            self.bck_transmission_enabled = BaseScriptElement.getBoolElement(instrument_dom, "bck_trans_enabled",\
-                                                                           default = Background.bck_transmission_enabled)
+            self.bck_transmission_enabled = BaseScriptElement.getBoolElement(instrument_dom, "bck_trans_enabled",
+                                                                             default = Background.bck_transmission_enabled)
 
-            self.bck_transmission = BaseScriptElement.getFloatElement(instrument_dom, "bck_trans",\
-                                                                  default=Background.bck_transmission)
-            self.bck_transmission_spread = BaseScriptElement.getFloatElement(instrument_dom, "bck_trans_spread",\
-                                                                  default=Background.bck_transmission_spread)
+            self.bck_transmission = BaseScriptElement.getFloatElement(instrument_dom, "bck_trans",
+                                                                      default=Background.bck_transmission)
+            self.bck_transmission_spread = BaseScriptElement.getFloatElement(instrument_dom, "bck_trans_spread",
+                                                                             default=Background.bck_transmission_spread)
             self.calculate_transmission = BaseScriptElement.getBoolElement(instrument_dom, "calculate_trans",
                                                                            default = Background.calculate_transmission)
-            self.theta_dependent = BaseScriptElement.getBoolElement(instrument_dom, "theta_dependent",\
-                                                                           default = Background.theta_dependent)
+            self.theta_dependent = BaseScriptElement.getBoolElement(instrument_dom, "theta_dependent",
+                                                                    default = Background.theta_dependent)
             self.trans_dark_current = BaseScriptElement.getStringElement(instrument_dom, "trans_dark_current")
 
             for m in [Background.DirectBeam, Background.BeamSpreader]:
@@ -269,4 +269,3 @@ class Background(BaseScriptElement):
         self.trans_dark_current = Background.trans_dark_current
         self.trans_calculation_method = Background.trans_calculation_method
         self.sample_thickness = Background.sample_thickness
-

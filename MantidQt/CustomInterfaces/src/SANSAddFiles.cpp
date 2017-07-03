@@ -4,6 +4,7 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/PropertyHelper.h"
 #include "MantidAPI/AlgorithmManager.h"
 
 #include <QStringList>
@@ -13,6 +14,7 @@
 #include <QVariant>
 
 #include <Poco/Path.h>
+#include <Poco/Exception.h>
 
 #include <algorithm>
 
@@ -75,7 +77,6 @@ SANSAddFiles::SANSAddFiles(QWidget *parent, Ui::SANSRunWindow *ParWidgets)
 SANSAddFiles::~SANSAddFiles() {
   try {
     ConfigService::Instance().removeObserver(m_newOutDir);
-    saveSettings();
   } catch (...) {
     // we've cleaned up the best we can, move on
   }
@@ -122,8 +123,6 @@ void SANSAddFiles::initLayout() {
   connect(m_SANSForm->remove_Btn, SIGNAL(clicked()), this,
           SLOT(removeSelected()));
 
-  readSettings();
-
   setToolTips();
 
   setOutDir(ConfigService::Instance().getString("defaultsave.directory"));
@@ -139,27 +138,7 @@ void SANSAddFiles::initLayout() {
   connect(m_SANSForm->overlayCheckBox, SIGNAL(stateChanged(int)), this,
           SLOT(onStateChangedForOverlayCheckBox(int)));
 }
-/**
- * Restore previous input
- */
-void SANSAddFiles::readSettings() {
-  QSettings value_store;
-  value_store.beginGroup("CustomInterfaces/AddRuns");
 
-  m_SANSForm->loadSeparateEntries->setChecked(
-      value_store.value("Minimise_memory", false).toBool());
-
-  value_store.endGroup();
-}
-/**
- * Save input for future use
- */
-void SANSAddFiles::saveSettings() {
-  QSettings value_store;
-  value_store.beginGroup("CustomInterfaces/AddRuns");
-  value_store.setValue("Minimise_memory",
-                       m_SANSForm->loadSeparateEntries->isChecked());
-}
 /** sets tool tip strings for the components on the form
 */
 void SANSAddFiles::setToolTips() {
@@ -168,8 +147,6 @@ void SANSAddFiles::setToolTips() {
                                         "directory");
   m_SANSForm->summedPath_Btn->setToolTip(
       "Set the directories used both for loading and\nsaving run data");
-  m_SANSForm->loadSeparateEntries->setToolTip(
-      "Where possible load a minimum amount into\nmemory at any time");
 
   m_SANSForm->add_Btn->setToolTip("Click here to do the sum");
   m_SANSForm->clear_Btn->setToolTip("Clear the run files to sum box");
@@ -236,14 +213,29 @@ void SANSAddFiles::add2Runs2Add() {
 
     for (QStringList::const_iterator k = ranges.begin(); k != ranges.end();
          ++k) {
+      // Check the file property
+      FileProperty search("dummy", k->toStdString(), FileProperty::Load,
+                          std::vector<std::string>(), Direction::Input);
+
+      std::string isValid;
+      try {
+        isValid = search.isValid();
+      } catch (Poco::PathSyntaxException) {
+        QString message =
+            QString("The file entry ") + *k +
+            QString(" is not a valid file path on your operating system");
+        QMessageBox::critical(this, "Invalid entry for file path", message);
+        m_SANSForm->new2Add_edit->clear();
+        return;
+      }
+
+      // Put the full path in the tooltip so people can see it if they want to
+      // do this with the file finding functionality of the FileProperty
       // Don't display the full file path in the box, it's too long
       QListWidgetItem *newL = insertListFront(QFileInfo(*k).fileName());
       newL->setData(Qt::WhatsThisRole, QVariant(*k));
-      // Put the full path in the tooltip so people can see it if they want to
-      // do this with the file finding functionality of the FileProperty
-      FileProperty search("dummy", k->toStdString(), FileProperty::Load,
-                          std::vector<std::string>(), Direction::Input);
-      if (search.isValid() == "") { // this means the file was found
+
+      if (isValid == "") { // this means the file was found
         newL->setToolTip(QString::fromStdString(search.value()));
 
         // If we don't have an event workspace data set, then we disable the
@@ -280,7 +272,7 @@ void SANSAddFiles::runPythonAddFiles() {
   add2Runs2Add();
 
   QString code_torun = "import SANSadd2\n";
-  code_torun += "print SANSadd2.add_runs((";
+  code_torun += "print(SANSadd2.add_runs((";
   // there are multiple file list inputs that can be filled in loop through them
   for (int i = 0; i < m_SANSForm->toAdd_List->count(); ++i) {
     QString filename =
@@ -313,8 +305,7 @@ void SANSAddFiles::runPythonAddFiles() {
   code_torun.truncate(code_torun.length() - 1);
   code_torun += ")";
 
-  QString lowMem =
-      m_SANSForm->loadSeparateEntries->isChecked() ? "True" : "False";
+  QString lowMem = "True";
   code_torun += ", lowMem=" + lowMem;
 
   QString overlay = m_SANSForm->overlayCheckBox->isChecked() ? "True" : "False";
@@ -339,7 +330,7 @@ void SANSAddFiles::runPythonAddFiles() {
     break;
   }
 
-  code_torun += ")\n";
+  code_torun += "))\n";
 
   g_log.debug() << "Executing Python: \n" << code_torun.toStdString() << '\n';
 

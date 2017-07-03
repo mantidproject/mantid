@@ -106,7 +106,7 @@ void IntegratePeaksMDHKL::exec() {
   int npeaks = peakWS->getNumberPeaks();
 
   auto prog = make_unique<Progress>(this, 0.3, 1.0, npeaks);
-  PARALLEL_FOR1(peakWS)
+  PARALLEL_FOR_IF(Kernel::threadSafe(*peakWS))
   for (int i = 0; i < npeaks; i++) {
     PARALLEL_START_INTERUPT_REGION
 

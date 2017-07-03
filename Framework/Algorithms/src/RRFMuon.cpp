@@ -1,10 +1,8 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAlgorithms/RRFMuon.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidKernel/Unit.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -60,19 +58,19 @@ void RRFMuon::exec() {
   // Get phase
   double phase = getProperty("Phase");
   // Get number of histograms
-  size_t nHisto = inputWs->getNumberHistograms();
+  const size_t nHisto = inputWs->getNumberHistograms();
   if (nHisto != 2) {
     throw std::runtime_error("Invalid number of spectra in input workspace");
   }
   // Set number of data points
-  size_t nData = inputWs->blocksize();
+  const size_t nData = inputWs->blocksize();
 
   // Compute the RRF polarization
   const double twoPiFreq = 2. * M_PI * freq * factor;
-  MantidVec time = inputWs->readX(0);  // X axis: time
-  MantidVec labRe = inputWs->readY(0); // Lab-frame polarization (real part)
-  MantidVec labIm =
-      inputWs->readY(1); // Lab-frame polarization (imaginary part)
+  const auto &time = inputWs->x(0);  // X axis: time
+  const auto &labRe = inputWs->y(0); // Lab-frame polarization (real part)
+  const auto &labIm = inputWs->y(1); // Lab-frame polarization (imaginary part)
+
   MantidVec rrfRe(nData),
       rrfIm(nData); // Rotating Reference frame (RRF) polarizations
   for (size_t t = 0; t < nData; t++) {
@@ -91,13 +89,11 @@ void RRFMuon::exec() {
 
   // Put results into output workspace
   // Real RRF polarization
-  outputWs->getSpectrum(0).setSpectrumNo(1);
-  outputWs->dataX(0) = inputWs->readX(0);
-  outputWs->dataY(0) = rrfRe;
+  outputWs->setSharedX(0, inputWs->sharedX(0));
+  outputWs->mutableY(0) = rrfRe;
   // Imaginary RRF polarization
-  outputWs->getSpectrum(1).setSpectrumNo(2);
-  outputWs->dataX(1) = inputWs->readX(1);
-  outputWs->dataY(1) = rrfIm;
+  outputWs->setSharedX(1, inputWs->sharedX(1));
+  outputWs->mutableY(1) = rrfIm;
 
   // Set output workspace
   setProperty("OutputWorkspace", outputWs);

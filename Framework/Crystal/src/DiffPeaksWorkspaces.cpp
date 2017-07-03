@@ -1,6 +1,7 @@
 #include "MantidCrystal/DiffPeaksWorkspaces.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
+#include "MantidAPI/Sample.h"
 
 namespace Mantid {
 namespace Crystal {
@@ -72,7 +73,7 @@ void DiffPeaksWorkspaces::exec() {
   // Get hold of the peaks in the first workspace as we'll need to examine them
   auto &lhsPeaks = output->getPeaks();
 
-  Progress progress(this, 0, 1, rhsPeaks.size());
+  Progress progress(this, 0.0, 1.0, rhsPeaks.size());
 
   // Loop over the peaks in the second workspace, searching for a match in the
   // first

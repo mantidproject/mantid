@@ -3,12 +3,12 @@
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/FindPeaks.h"
 
-#include "MantidAlgorithms/FitPeak.h"
 #include "MantidAPI/CostFunctionFactory.h"
-#include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/FuncMinimizerFactory.h"
+#include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAlgorithms/FitPeak.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/StartsWithValidator.h"
@@ -42,9 +42,9 @@ DECLARE_ALGORITHM(FindPeaks)
   */
 FindPeaks::FindPeaks()
     : API::Algorithm(), m_peakParameterNames(), m_bkgdParameterNames(),
-      m_bkgdOrder(0), m_outPeakTableWS(), m_progress(nullptr), m_dataWS(),
-      m_inputPeakFWHM(0), m_wsIndex(0), singleSpectrum(false),
-      m_highBackground(false), m_rawPeaksTable(false), m_numTableParams(0),
+      m_bkgdOrder(0), m_outPeakTableWS(), m_dataWS(), m_inputPeakFWHM(0),
+      m_wsIndex(0), singleSpectrum(false), m_highBackground(false),
+      m_rawPeaksTable(false), m_numTableParams(0),
       m_centreIndex(1) /* for Gaussian */, m_peakFuncType(""),
       m_backgroundType(""), m_vecPeakCentre(), m_vecFitWindows(),
       m_backgroundFunction(), m_peakFunction(), m_minGuessedPeakWidth(0),
@@ -218,9 +218,9 @@ void FindPeaks::processAlgorithmProperties() {
   singleSpectrum = !isEmpty(m_wsIndex);
   if (singleSpectrum &&
       m_wsIndex >= static_cast<int>(m_dataWS->getNumberHistograms())) {
-    g_log.error() << "The value of WorkspaceIndex provided (" << m_wsIndex
-                  << ") is larger than the size of this workspace ("
-                  << m_dataWS->getNumberHistograms() << ")\n";
+    g_log.warning() << "The value of WorkspaceIndex provided (" << m_wsIndex
+                    << ") is larger than the size of this workspace ("
+                    << m_dataWS->getNumberHistograms() << ")\n";
     throw Kernel::Exception::IndexError(m_wsIndex,
                                         m_dataWS->getNumberHistograms() - 1,
                                         "FindPeaks WorkspaceIndex property");
@@ -237,7 +237,7 @@ void FindPeaks::processAlgorithmProperties() {
              "postive and make sense). "
           << "User inputs are min = " << t1 << ", max = " << t2
           << ", step = " << t3;
-    g_log.error(errss.str());
+    g_log.warning(errss.str());
     throw std::runtime_error(errss.str());
   }
 
@@ -339,18 +339,18 @@ void FindPeaks::findPeaksGivenStartingPoints(
   const int end = singleSpectrum
                       ? m_wsIndex + 1
                       : static_cast<int>(m_dataWS->getNumberHistograms());
-  m_progress = new Progress(this, 0.0, 1.0, end - start);
+  m_progress = make_unique<Progress>(this, 0.0, 1.0, end - start);
 
   for (int spec = start; spec < end; ++spec) {
-    auto &vecX = m_dataWS->x(spec);
+    const auto &vecX = m_dataWS->x(spec);
 
     double practical_x_min = vecX.front();
     double practical_x_max = vecX.back();
     g_log.information() << "actual x-range = [" << practical_x_min << " -> "
                         << practical_x_max << "]\n";
     {
-      auto &vecY = m_dataWS->y(spec);
-      auto &vecE = m_dataWS->e(spec);
+      const auto &vecY = m_dataWS->y(spec);
+      const auto &vecE = m_dataWS->e(spec);
       const size_t numY = vecY.size();
       size_t i_min = 1;
       for (; i_min < numY; ++i_min) {
@@ -458,12 +458,12 @@ void FindPeaks::findPeaksUsingMariscotti() {
   const int end = singleSpectrum
                       ? m_wsIndex + 1
                       : static_cast<int>(smoothedData->getNumberHistograms());
-  m_progress = new Progress(this, 0.0, 1.0, end - start);
+  m_progress = make_unique<Progress>(this, 0.0, 1.0, end - start);
   const int blocksize = static_cast<int>(smoothedData->blocksize());
 
   for (int k = start; k < end; ++k) {
-    auto &S = smoothedData->y(k);
-    auto &F = smoothedData->e(k);
+    const auto &S = smoothedData->y(k);
+    const auto &F = smoothedData->e(k);
 
     // This implements the flow chart given on page 320 of Mariscotti
     int i0 = 0, i1 = 0, i2 = 0, i3 = 0, i4 = 0, i5 = 0;
@@ -642,7 +642,7 @@ API::MatrixWorkspace_sptr FindPeaks::calculateSecondDifference(
     // Copy over the X values
     diffed->setSharedX(i, input->sharedX(i));
 
-    auto &Y = input->y(i);
+    const auto &Y = input->y(i);
     auto &S = diffed->mutableY(i);
     // Go through each spectrum calculating the second difference at each point
     // First and last points in each spectrum left as zero (you'd never be able
@@ -787,13 +787,13 @@ int FindPeaks::getIndex(const HistogramX &vecX, double x) {
       std::stringstream errss;
       errss << "Returned index = 0 for x = " << x << " with X[0] = " << vecX[0]
             << ". This situation is ruled out in this algorithm.";
-      g_log.error(errss.str());
+      g_log.warning(errss.str());
       throw std::runtime_error(errss.str());
     } else if (x < vecX[index - 1] || x > vecX[index]) {
       std::stringstream errss;
       errss << "Returned x = " << x << " is not between " << vecX[index - 1]
             << " and " << vecX[index] << ", which are returned by lower_bound.";
-      g_log.error(errss.str());
+      g_log.warning(errss.str());
       throw std::runtime_error(errss.str());
     }
 
@@ -829,8 +829,8 @@ void FindPeaks::fitPeakGivenFWHM(const API::MatrixWorkspace_sptr &input,
                                  const bool hasrightpeak,
                                  const double rightpeakcentre) {
   // The X axis you are looking at
-  auto &vecX = input->x(wsIndex);
-  auto &vecY = input->y(wsIndex);
+  const auto &vecX = input->x(wsIndex);
+  const auto &vecY = input->y(wsIndex);
 
   // Find i_center - the index of the center - The guess is within the X axis?
   int i_centre = this->getIndex(vecX, center_guess);
@@ -893,13 +893,13 @@ void FindPeaks::fitPeakInWindow(const API::MatrixWorkspace_sptr &input,
                       << centre_guess << "  x-min = " << xmin
                       << ", x-max = " << xmax << "\n";
   if (xmin >= centre_guess || xmax <= centre_guess) {
-    g_log.error("Peak centre is on the edge of Fit window. ");
+    g_log.warning("Peak centre is on the edge of Fit window. ");
     addNonFitRecord(wsIndex, centre_guess);
     return;
   }
 
   // The X axis you are looking at
-  auto &vecX = input->x(wsIndex);
+  const auto &vecX = input->x(wsIndex);
 
   // The centre index
   int i_centre = this->getIndex(vecX, centre_guess);
@@ -907,10 +907,10 @@ void FindPeaks::fitPeakInWindow(const API::MatrixWorkspace_sptr &input,
   // The left index
   int i_min = getIndex(vecX, xmin);
   if (i_min >= i_centre) {
-    g_log.error() << "Input peak centre @ " << centre_guess
-                  << " is out side of minimum x = " << xmin
-                  << ".  Input X ragne = " << vecX.front() << ", "
-                  << vecX.back() << "\n";
+    g_log.warning() << "Input peak centre @ " << centre_guess
+                    << " is out side of minimum x = " << xmin
+                    << ".  Input X ragne = " << vecX.front() << ", "
+                    << vecX.back() << "\n";
     addNonFitRecord(wsIndex, centre_guess);
     return;
   }
@@ -918,8 +918,8 @@ void FindPeaks::fitPeakInWindow(const API::MatrixWorkspace_sptr &input,
   // The right index
   int i_max = getIndex(vecX, xmax);
   if (i_max < i_centre) {
-    g_log.error() << "Input peak centre @ " << centre_guess
-                  << " is out side of maximum x = " << xmax << "\n";
+    g_log.warning() << "Input peak centre @ " << centre_guess
+                    << " is out side of maximum x = " << xmax << "\n";
     addNonFitRecord(wsIndex, centre_guess);
     return;
   }
@@ -935,8 +935,8 @@ void FindPeaks::fitPeakInWindow(const API::MatrixWorkspace_sptr &input,
 void FindPeaks::fitSinglePeak(const API::MatrixWorkspace_sptr &input,
                               const int spectrum, const int i_min,
                               const int i_max, const int i_centre) {
-  auto &vecX = input->x(spectrum);
-  auto &vecY = input->y(spectrum);
+  const auto &vecX = input->x(spectrum);
+  const auto &vecY = input->y(spectrum);
 
   // Exclude peak with peak counts
   bool hasHighCounts = false;
@@ -983,12 +983,12 @@ void FindPeaks::fitSinglePeak(const API::MatrixWorkspace_sptr &input,
   std::string errmsg = estimatePeakParameters(
       vecX, vecY, i_min, i_max, vecbkgdparvalue, i_obscentre, est_height,
       est_fwhm, est_leftfwhm, est_rightfwhm);
-  if (errmsg.size() > 0) {
+  if (!errmsg.empty()) {
     // Unable to estimate peak
     i_obscentre = i_centre;
     est_fwhm = 1.;
     est_height = 1.;
-    g_log.error(errmsg);
+    g_log.warning(errmsg);
   }
 
   // Set peak parameters to
@@ -1049,10 +1049,11 @@ int FindPeaks::findPeakBackground(const MatrixWorkspace_sptr &input,
                                   int spectrum, size_t i_min, size_t i_max,
                                   std::vector<double> &vecBkgdParamValues,
                                   std::vector<double> &vecpeakrange) {
-  auto &vecX = input->x(spectrum);
+  const auto &vecX = input->x(spectrum);
 
   // Call FindPeakBackground
   IAlgorithm_sptr estimate = createChildAlgorithm("FindPeakBackground");
+  estimate->setLoggingOffset(1);
   estimate->setProperty("InputWorkspace", input);
   estimate->setProperty("WorkspaceIndex", spectrum);
   // estimate->setProperty("SigmaConstant", 1.0);
@@ -1301,12 +1302,11 @@ void FindPeaks::estimateBackground(const HistogramX &X, const HistogramY &Y,
     numavg = 1;
 
   // Get (x0, y0) and (xf, yf)
-  double x0, y0, xf, yf;
+  double x0 = 0.0;
+  double y0 = 0.0;
+  double xf = 0.0;
+  double yf = 0.0;
 
-  x0 = 0.0;
-  y0 = 0.0;
-  xf = 0.0;
-  yf = 0.0;
   for (size_t i = 0; i < numavg; ++i) {
     x0 += X[i_min + i];
     y0 += Y[i_min + i];

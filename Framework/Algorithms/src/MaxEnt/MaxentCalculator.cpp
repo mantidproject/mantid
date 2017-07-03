@@ -176,7 +176,8 @@ void MaxentCalculator::iterate(const std::vector<double> &data,
   // Gradient of entropy
   std::vector<double> sgrad = m_entropy->derivative(m_image, m_background);
   // Metric (second derivative of the entropy)
-  std::vector<double> metric = m_entropy->secondDerivative(m_image);
+  std::vector<double> metric =
+      m_entropy->secondDerivative(m_image, m_background);
 
   if (cgrad.size() != npoints || sgrad.size() != npoints ||
       metric.size() != npoints)

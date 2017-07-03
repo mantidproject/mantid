@@ -47,13 +47,21 @@ this.
     :alt: A labelled image of the instrument created by CreateSampleWorkspace
 
 The sample is placed at the origin.  The source is seperated from the sample in
-the negative direction by the vlue you specify in "SourceDistanceFromSample".
+the negative direction by the value you specify in "SourceDistanceFromSample".
 The instrument has "NumBanks" detector banks, each bank is moved down the X axis
-by "BankDistanceFromSample" from the Sample or the previous bank.
+by "BankDistanceFromSample" from the sample or the previous bank.
 
 Each bank is a square rectangular bank comprising of "BankPixelWidth" pixels in
 width and height.  The size of each pixel 4mm square, but additional padding can
 be set using "PixelSpacing".
+
+If "NumMonitors" is also given the first monitor is created half-way between the
+sample and the first bank, then between each bank (or where the banks would be
+if "NumMonitors" > "NumBanks").
+
+If "NumScanPoints" > 1 then a scanning workspace is created, that is one with time
+indexed positions and rotations. The scan is set up such that for each scan point 
+all the detectors are rotated by 1 degree around the sample.
 
 Usage
 -----
@@ -174,7 +182,7 @@ Output:
 .. testcode:: ExEveryOption
 
    #Random adds a little random noise to the data function
-   ws=CreateSampleWorkspace(WorkspaceType="Event",Function="One Peak",NumBanks=4,BankPixelWidth=5,NumEvents=500,Random=True,XUnit="tof",XMin=0, XMax=8000, BinWidth=100)
+   ws=CreateSampleWorkspace(WorkspaceType="Event",Function="One Peak",NumBanks=4,NumMonitors=3,BankPixelWidth=5,NumEvents=500,Random=True,XUnit="tof",XMin=0, XMax=8000, BinWidth=100)
 
    print "Number of spectra: " +  str(ws.getNumberHistograms())
    print "Number of bins: " +  str(ws.blocksize())
@@ -183,7 +191,7 @@ Output:
 
 .. testoutput:: ExEveryOption
 
-   Number of spectra: 100
+   Number of spectra: 103
    Number of bins: 80
 
 .. categories::

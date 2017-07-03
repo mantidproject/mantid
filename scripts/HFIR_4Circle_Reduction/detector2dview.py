@@ -1,7 +1,7 @@
 #pylint: disable=W0403,R0902,R0903,R0904,W0212
-import mpl2dgraphicsview
-
+import os
 import numpy as np
+import mpl2dgraphicsview
 
 
 class Detector2DView(mpl2dgraphicsview.Mpl2dGraphicsView):
@@ -45,6 +45,9 @@ class Detector2DView(mpl2dgraphicsview.Mpl2dGraphicsView):
         self._resolutionX = 0.005
         self._resolutionY = 0.005
 
+        # parent window
+        self._myParentWindow = None
+
         return
 
     def add_roi(self, roi_start, roi_end):
@@ -73,9 +76,85 @@ class Detector2DView(mpl2dgraphicsview.Mpl2dGraphicsView):
         """
         assert isinstance(state, bool)
 
+        # set
         self._roiSelectMode = state
 
+        if state:
+            # new in add-ROI mode
+            self._roiStart = None
+            self._roiEnd = None
+            self._myPolygon = None
+
+        # # reset _myPolygen
+        # if state is False:
+        #     if self._myPolygon is not None:
+        #         self.remove_roi()
+
         return
+
+    def integrate_roi_linear(self, exp_number, scan_number, pt_number, output_dir):
+        """
+        integrate the 2D data inside region of interest along both axis-0 and axis-1 individually.
+        and the result (as 1D data) will be saved to ascii file.
+        the X values will be the corresponding pixel index either along axis-0 or axis-1
+        :return:
+        """
+        def save_to_file(base_file_name, axis, array1d, start_index):
+            """
+            save the result (1D data) to an ASCII file
+            :param base_file_name:
+            :param axis:
+            :param array1d:
+            :param start_index:
+            :return:
+            """
+            file_name = '{0}_axis_{1}.dat'.format(base_file_name, axis)
+
+            wbuf = ''
+            vec_x = np.array(range(len(array1d))) + start_index
+            for i in range(len(array1d)):
+                wbuf += '{0} \t{1}\n'.format(vec_x[i], array1d[i])
+
+            ofile = open(file_name, 'w')
+            ofile.write(wbuf)
+            ofile.close()
+
+            return
+
+        matrix = self.array2d
+        assert isinstance(matrix, np.ndarray), 'A matrix must be an ndarray but not {0}.'.format(type(matrix))
+
+        # get region of interest
+        if self._roiStart is None:
+            self._roiStart = (0, 0)
+        if self._roiEnd is None:
+            self._roiEnd = matrix.shape
+
+        ll_row = min(self._roiStart[0], self._roiEnd[0])
+        ll_col = min(self._roiStart[1], self._roiEnd[1])
+
+        ur_row = max(self._roiStart[0], self._roiEnd[0])
+        ur_col = max(self._roiStart[1], self._roiEnd[1])
+
+        # print 'Row: {0} : {1}  Col: {2} : {3}'.format(ll_row, ur_row, ll_col, ur_col)
+
+        roi_matrix = matrix[ll_col:ur_col, ll_row:ur_row]
+
+        sum_0 = roi_matrix.sum(0)
+        #  print sum_0
+        sum_1 = roi_matrix.sum(1)
+        #  print sum_1
+        print '[SUM 0] Dimension: {0}'.format(sum_0.shape)
+        print '[SUM 1] Dimension: {0}'.format(sum_1.shape)
+
+        # write to file
+        base_name = os.path.join(output_dir, 'Exp{0}_Scan{1}_Pt{2}'.format(exp_number, scan_number, pt_number))
+        save_to_file(base_name, 0, sum_0, ll_row)
+        save_to_file(base_name, 1, sum_1, ll_col)
+
+        message = 'Integrated values are saved to {0}...'.format(base_name)
+
+        return message
 
     def get_roi(self):
         """
@@ -133,6 +212,9 @@ class Detector2DView(mpl2dgraphicsview.Mpl2dGraphicsView):
 
             # FUTURE-TO-DO: this should be replaced by some update() method of canvas
             self._myCanvas._flush()
+
+            self._roiStart = None
+            self._roiEnd = None
 
         return
 
@@ -213,16 +295,15 @@ class Detector2DView(mpl2dgraphicsview.Mpl2dGraphicsView):
         self._currX = event.xdata
         self._currY = event.ydata
 
+        # update button
+        prev_mouse_pressed = self._mousePressed
+        self._mousePressed = Detector2DView.MousePress.RELEASED
+
         # do something
-        if self._roiSelectMode is True and self._mousePressed == Detector2DView.MousePress.LEFT:
+        if self._roiSelectMode and prev_mouse_pressed == Detector2DView.MousePress.LEFT:
             # end the ROI selection mode
             self.update_roi_poly(self._currX, self._currY)
-
-            # release the mode
-            # self._roiStart = self._roiEnd = None
-
-        # update button
-        self._mousePressed = Detector2DView.MousePress.RELEASED
+        # END-IF
 
         return
 
@@ -240,6 +321,18 @@ class Detector2DView(mpl2dgraphicsview.Mpl2dGraphicsView):
         """
         return (self.y_max - self.y_min) * self._resolutionY
 
+    def set_parent_window(self, parent_window):
+        """
+        Set the parent window for synchronizing the operation
+        :param parent_window:
+        :return:
+        """
+        assert parent_window is not None, 'Parent window cannot be None'
+
+        self._myParentWindow = parent_window
+
+        return
+
     def update_roi_poly(self, cursor_x, cursor_y):
         """ Update region of interest.  It is to
         (1) remove the original polygon
@@ -247,8 +340,8 @@ class Detector2DView(mpl2dgraphicsview.Mpl2dGraphicsView):
         :return:
         """
         # check
-        assert isinstance(cursor_x, float)
-        assert isinstance(cursor_y, float)
+        assert isinstance(cursor_x, float), 'Cursor x coordination {0} must be a float.'.format(cursor_x)
+        assert isinstance(cursor_y, float), 'Cursor y coordination {0} must be a float.'.format(cursor_y)
 
         # remove the original polygon
         if self._myPolygon is not None:
@@ -262,7 +355,8 @@ class Detector2DView(mpl2dgraphicsview.Mpl2dGraphicsView):
         # plot the new polygon
         self.plot_roi()
 
+        # update
+        if self._myPolygon is not None:
+            self._myParentWindow.do_apply_roi()
+
         return
-
-
-

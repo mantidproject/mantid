@@ -1,8 +1,10 @@
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidCrystal/CentroidPeaks.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
+#include "MantidKernel/Unit.h"
 #include "MantidKernel/VectorHelper.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
+#include "MantidGeometry/Crystal/EdgePixel.h"
 
 using Mantid::DataObjects::PeaksWorkspace;
 
@@ -70,7 +72,7 @@ void CentroidPeaks::integrate() {
   int MaxPeaks = -1;
   size_t Numberwi = inWS->getNumberHistograms();
   int NumberPeaks = peakWS->getNumberPeaks();
-  for (int i = 0; i < NumberPeaks; i++) {
+  for (int i = 0; i < NumberPeaks; ++i) {
     Peak &peak = peakWS->getPeaks()[i];
     int pixelID = peak.getDetectorID();
 
@@ -87,22 +89,22 @@ void CentroidPeaks::integrate() {
 
   int Edge = getProperty("EdgePixels");
   Progress prog(this, MinPeaks, 1.0, MaxPeaks);
-  PARALLEL_FOR2(inWS, peakWS)
-  for (int i = MinPeaks; i <= MaxPeaks; i++) {
+  PARALLEL_FOR_IF(Kernel::threadSafe(*inWS, *peakWS))
+  for (int i = MinPeaks; i <= MaxPeaks; ++i) {
     PARALLEL_START_INTERUPT_REGION
     // Get a direct ref to that peak.
-    IPeak &peak = peakWS->getPeak(i);
+    auto &peak = peakWS->getPeak(i);
     int col = peak.getCol();
     int row = peak.getRow();
     int pixelID = peak.getDetectorID();
-    detid2index_map::const_iterator it = wi_to_detid_map.find(pixelID);
+    auto it = wi_to_detid_map.find(pixelID);
     if (it == wi_to_detid_map.end()) {
       continue;
     }
     size_t workspaceIndex = it->second;
     double TOFPeakd = peak.getTOF();
-    const MantidVec &X = inWS->readX(workspaceIndex);
-    int chan = Kernel::VectorHelper::getBinIndex(X, TOFPeakd);
+    const auto &X = inWS->x(workspaceIndex);
+    int chan = Kernel::VectorHelper::getBinIndex(X.rawData(), TOFPeakd);
     std::string bankName = peak.getBankName();
 
     double intensity = 0.0;
@@ -119,15 +121,15 @@ void CentroidPeaks::integrate() {
     for (int ichan = chanstart; ichan <= chanend; ++ichan) {
       for (int irow = rowstart; irow <= rowend; ++irow) {
         for (int icol = colstart; icol <= colend; ++icol) {
-          if (edgePixel(bankName, icol, irow, Edge))
+          if (edgePixel(inst, bankName, icol, irow, Edge))
             continue;
-          detid2index_map::const_iterator it =
+          const auto it =
               wi_to_detid_map.find(findPixelID(bankName, icol, irow));
           if (it == wi_to_detid_map.end())
             continue;
           size_t workspaceIndex = (it->second);
 
-          const MantidVec &histogram = inWS->readY(workspaceIndex);
+          const auto &histogram = inWS->y(workspaceIndex);
 
           intensity += histogram[ichan];
           rowcentroid += irow * histogram[ichan];
@@ -147,12 +149,12 @@ void CentroidPeaks::integrate() {
 
     peak.setDetectorID(findPixelID(bankName, col, row));
     // Set wavelength to change tof for peak object
-    if (!edgePixel(bankName, col, row, Edge)) {
+    if (!edgePixel(inst, bankName, col, row, Edge)) {
       it = wi_to_detid_map.find(findPixelID(bankName, col, row));
       workspaceIndex = (it->second);
       Mantid::Kernel::Units::Wavelength wl;
       std::vector<double> timeflight;
-      timeflight.push_back(inWS->readX(workspaceIndex)[chan]);
+      timeflight.push_back(inWS->x(workspaceIndex)[chan]);
       double scattering = peak.getScattering();
       double L1 = peak.getL1();
       double L2 = peak.getL2();
@@ -161,7 +163,7 @@ void CentroidPeaks::integrate() {
       timeflight.clear();
 
       peak.setWavelength(lambda);
-      peak.setBinCount(inWS->readY(workspaceIndex)[chan]);
+      peak.setBinCount(inWS->y(workspaceIndex)[chan]);
     }
     PARALLEL_END_INTERUPT_REGION
   }
@@ -169,12 +171,12 @@ void CentroidPeaks::integrate() {
 
   for (int i = int(peakWS->getNumberPeaks()) - 1; i >= 0; --i) {
     // Get a direct ref to that peak.
-    IPeak &peak = peakWS->getPeak(i);
+    auto &peak = peakWS->getPeak(i);
     int col = peak.getCol();
     int row = peak.getRow();
     std::string bankName = peak.getBankName();
 
-    if (edgePixel(bankName, col, row, Edge)) {
+    if (edgePixel(inst, bankName, col, row, Edge)) {
       peakWS->removePeak(i);
     }
   }
@@ -206,8 +208,9 @@ void CentroidPeaks::integrateEvent() {
   int MaxPeaks = -1;
   size_t Numberwi = inWS->getNumberHistograms();
   int NumberPeaks = peakWS->getNumberPeaks();
-  for (int i = 0; i < NumberPeaks; i++) {
-    Peak &peak = peakWS->getPeaks()[i];
+
+  for (int i = 0; i < NumberPeaks; ++i) {
+    auto &peak = peakWS->getPeak(i);
     int pixelID = peak.getDetectorID();
 
     // Find the workspace index for this detector ID
@@ -223,11 +226,11 @@ void CentroidPeaks::integrateEvent() {
 
   int Edge = getProperty("EdgePixels");
   Progress prog(this, MinPeaks, 1.0, MaxPeaks);
-  PARALLEL_FOR2(inWS, peakWS)
-  for (int i = MinPeaks; i <= MaxPeaks; i++) {
+  PARALLEL_FOR_IF(Kernel::threadSafe(*inWS, *peakWS))
+  for (int i = MinPeaks; i <= MaxPeaks; ++i) {
     PARALLEL_START_INTERUPT_REGION
     // Get a direct ref to that peak.
-    IPeak &peak = peakWS->getPeak(i);
+    auto &peak = peakWS->getPeak(i);
     int col = peak.getCol();
     int row = peak.getRow();
     double TOFPeakd = peak.getTOF();
@@ -235,10 +238,8 @@ void CentroidPeaks::integrateEvent() {
 
     double intensity = 0.0;
     double tofcentroid = 0.0;
-    if (edgePixel(bankName, col, row, Edge))
+    if (edgePixel(inst, bankName, col, row, Edge))
       continue;
-    Mantid::detid2index_map::iterator it;
-    it = wi_to_detid_map.find(findPixelID(bankName, col, row));
 
     double tofstart = TOFPeakd * std::pow(1.004, -PeakRadius);
     double tofend = TOFPeakd * std::pow(1.004, PeakRadius);
@@ -250,23 +251,19 @@ void CentroidPeaks::integrateEvent() {
     int colend = col + PeakRadius;
     for (int irow = rowstart; irow <= rowend; ++irow) {
       for (int icol = colstart; icol <= colend; ++icol) {
-        Mantid::detid2index_map::iterator it;
-        if (edgePixel(bankName, icol, irow, Edge))
+        if (edgePixel(inst, bankName, icol, irow, Edge))
           continue;
-        it = wi_to_detid_map.find(findPixelID(bankName, icol, irow));
-        size_t workspaceIndex = (it->second);
+        auto it1 = wi_to_detid_map.find(findPixelID(bankName, icol, irow));
+        size_t workspaceIndex = (it1->second);
         EventList el = eventW->getSpectrum(workspaceIndex);
         el.switchTo(WEIGHTED_NOTIME);
         std::vector<WeightedEventNoTime> events = el.getWeightedEventsNoTime();
 
-        std::vector<WeightedEventNoTime>::iterator itev;
-        auto itev_end = events.end();
-
         // Check for events in tof range
-        for (itev = events.begin(); itev != itev_end; ++itev) {
-          double tof = itev->tof();
+        for (const auto &event : events) {
+          double tof = event.tof();
           if (tof > tofstart && tof < tofend) {
-            double weight = itev->weight();
+            double weight = event.weight();
             intensity += weight;
             rowcentroid += irow * weight;
             colcentroid += icol * weight;
@@ -280,7 +277,7 @@ void CentroidPeaks::integrateEvent() {
     row = std::max(0, row);
     col = int(colcentroid / intensity);
     col = std::max(0, col);
-    if (!edgePixel(bankName, col, row, Edge)) {
+    if (!edgePixel(inst, bankName, col, row, Edge)) {
       peak.setDetectorID(findPixelID(bankName, col, row));
 
       // Set wavelength to change tof for peak object
@@ -304,12 +301,12 @@ void CentroidPeaks::integrateEvent() {
 
   for (int i = int(peakWS->getNumberPeaks()) - 1; i >= 0; --i) {
     // Get a direct ref to that peak.
-    IPeak &peak = peakWS->getPeak(i);
+    auto &peak = peakWS->getPeak(i);
     int col = peak.getCol();
     int row = peak.getRow();
     std::string bankName = peak.getBankName();
 
-    if (edgePixel(bankName, col, row, Edge)) {
+    if (edgePixel(inst, bankName, col, row, Edge)) {
       peakWS->removePeak(i);
     }
   }
@@ -322,7 +319,7 @@ void CentroidPeaks::integrateEvent() {
  */
 void CentroidPeaks::exec() {
   inWS = getProperty("InputWorkspace");
-
+  inst = inWS->getInstrument();
   // For quickly looking up workspace index from det id
   wi_to_detid_map = inWS->getDetectorIDToWorkspaceIndexMap();
 
@@ -334,11 +331,11 @@ void CentroidPeaks::exec() {
     this->integrate();
   }
 }
+
 int CentroidPeaks::findPixelID(std::string bankName, int col, int row) {
-  Geometry::Instrument_const_sptr Iptr = inWS->getInstrument();
   boost::shared_ptr<const IComponent> parent =
-      Iptr->getComponentByName(bankName);
-  if (parent->type().compare("RectangularDetector") == 0) {
+      inst->getComponentByName(bankName);
+  if (parent->type() == "RectangularDetector") {
     boost::shared_ptr<const RectangularDetector> RDet =
         boost::dynamic_pointer_cast<const RectangularDetector>(parent);
 
@@ -349,45 +346,15 @@ int CentroidPeaks::findPixelID(std::string bankName, int col, int row) {
     // Only works for WISH
     bankName0.erase(0, 4);
     std::ostringstream pixelString;
-    pixelString << Iptr->getName() << "/" << bankName0 << "/" << bankName
+    pixelString << inst->getName() << "/" << bankName0 << "/" << bankName
                 << "/tube" << std::setw(3) << std::setfill('0') << col
                 << "/pixel" << std::setw(4) << std::setfill('0') << row;
     boost::shared_ptr<const Geometry::IComponent> component =
-        Iptr->getComponentByName(pixelString.str());
+        inst->getComponentByName(pixelString.str());
     boost::shared_ptr<const Detector> pixel =
         boost::dynamic_pointer_cast<const Detector>(component);
     return pixel->getID();
   }
-}
-bool CentroidPeaks::edgePixel(std::string bankName, int col, int row,
-                              int Edge) {
-  if (bankName.compare("None") == 0)
-    return false;
-  Geometry::Instrument_const_sptr Iptr = inWS->getInstrument();
-  boost::shared_ptr<const IComponent> parent =
-      Iptr->getComponentByName(bankName);
-  if (parent->type().compare("RectangularDetector") == 0) {
-    boost::shared_ptr<const RectangularDetector> RDet =
-        boost::dynamic_pointer_cast<const RectangularDetector>(parent);
-
-    return col < Edge || col >= (RDet->xpixels() - Edge) || row < Edge ||
-           row >= (RDet->ypixels() - Edge);
-  } else {
-    std::vector<Geometry::IComponent_const_sptr> children;
-    boost::shared_ptr<const Geometry::ICompAssembly> asmb =
-        boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(parent);
-    asmb->getChildren(children, false);
-    boost::shared_ptr<const Geometry::ICompAssembly> asmb2 =
-        boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(children[0]);
-    std::vector<Geometry::IComponent_const_sptr> grandchildren;
-    asmb2->getChildren(grandchildren, false);
-    int NROWS = static_cast<int>(grandchildren.size());
-    int NCOLS = static_cast<int>(children.size());
-    // Wish pixels and tubes start at 1 not 0
-    return col - 1 < Edge || col - 1 >= (NCOLS - Edge) || row - 1 < Edge ||
-           row - 1 >= (NROWS - Edge);
-  }
-  return false;
 }
 
 } // namespace Mantid

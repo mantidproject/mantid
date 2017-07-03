@@ -13,7 +13,7 @@ class Parser;
 namespace Mantid {
 
 namespace API {
-class GeometryInfo;
+class SpectrumInfo;
 }
 
 namespace Algorithms {
@@ -77,7 +77,7 @@ private:
   void setAxisValue(const double &value, std::vector<Variable_ptr> &variables);
   void calculateValues(mu::Parser &p, std::vector<double> &vec,
                        std::vector<Variable_ptr> variables);
-  void setGeometryValues(API::GeometryInfo &geomInfo,
+  void setGeometryValues(const API::SpectrumInfo &specInfo, const size_t index,
                          std::vector<Variable_ptr> &variables);
   double evaluateResult(mu::Parser &p);
 };

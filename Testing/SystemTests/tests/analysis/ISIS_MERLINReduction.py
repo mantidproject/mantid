@@ -1,4 +1,4 @@
-﻿#pylint: disable=invalid-name
+#pylint: disable=invalid-name
 """ Sample MERLIN reduction scrip """
 from Direct.ReductionWrapper import *
 try:
@@ -12,13 +12,11 @@ class ReduceMERLIN(ReductionWrapper):
     def def_main_properties(self):
         """ Define main properties used in reduction """
 
-
         prop = {}
         prop['sample_run'] = 6398
         prop['wb_run'] = 6399
         prop['incident_energy'] = 18
         prop['energy_bins'] = [-10, 0.2, 15]
-
 
       # Absolute units reduction properties.
        #prop['monovan_run'] = 17589
@@ -42,6 +40,7 @@ class ReduceMERLIN(ReductionWrapper):
 
         return prop
       #
+
     @iliad
     def reduce(self,input_file=None,output_directory=None):
         """ Method executes reduction over single file
@@ -71,7 +70,6 @@ if __name__=="__main__":
     rd = ReduceMERLIN()
     rd.def_advanced_properties()
     rd.def_main_properties()
-
 
      #using_web_data = False
      #if not using_web_data:

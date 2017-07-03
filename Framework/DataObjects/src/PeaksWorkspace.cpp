@@ -3,8 +3,9 @@
 #include "MantidAPI/Column.h"
 #include "MantidAPI/ColumnFactory.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/Run.h"
+#include "MantidAPI/Sample.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidAPI/WorkspaceProperty.h"
 #include "MantidDataObjects/Peak.h"
 #include "MantidDataObjects/TableColumn.h"
 #include "MantidDataObjects/TableWorkspace.h"
@@ -46,6 +47,8 @@ PeaksWorkspace::PeaksWorkspace()
     : IPeaksWorkspace(), peaks(), columns(), columnNames(),
       m_coordSystem(None) {
   initColumns();
+  // PeaksWorkspace does not use the grouping mechanism of ExperimentInfo.
+  setNumberOfDetectorGroups(0);
 }
 
 //---------------------------------------------------------------------------------------------
@@ -58,6 +61,8 @@ PeaksWorkspace::PeaksWorkspace(const PeaksWorkspace &other)
     : IPeaksWorkspace(other), peaks(other.peaks), columns(), columnNames(),
       m_coordSystem(other.m_coordSystem) {
   initColumns();
+  // PeaksWorkspace does not use the grouping mechanism of ExperimentInfo.
+  setNumberOfDetectorGroups(0);
 }
 
 //=====================================================================================
@@ -155,6 +160,12 @@ void PeaksWorkspace::addPeak(const Geometry::IPeak &ipeak) {
     peaks.push_back(Peak(ipeak));
   }
 }
+
+//---------------------------------------------------------------------------------------------
+/** Add a peak to the list
+ * @param peak :: Peak object to add (move) into this.
+ */
+void PeaksWorkspace::addPeak(Peak &&peak) { peaks.push_back(peak); }
 
 //---------------------------------------------------------------------------------------------
 /** Return a reference to the Peak
@@ -853,6 +864,13 @@ API::LogManager_sptr PeaksWorkspace::logs() {
 
   m_logCash = API::LogManager_sptr(&(this->mutableRun()), NullDeleter());
   return m_logCash;
+}
+
+/** Get constant access to shared pointer containing workspace porperties;
+ * Copies logs into new LogManager variable Meaningfull only for some
+ * multithereaded methods when a thread wants to have its own copy of logs */
+API::LogManager_const_sptr PeaksWorkspace::getLogs() const {
+  return API::LogManager_const_sptr(new API::LogManager(this->run()));
 }
 
 ITableWorkspace *

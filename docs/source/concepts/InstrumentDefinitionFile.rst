@@ -1245,7 +1245,7 @@ below:
 
 .. code-block:: xml
 
-    <component type="adjusted cuboid"
+    <component type="adjusted cuboid">
       <location />
     </component>
 

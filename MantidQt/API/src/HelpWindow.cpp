@@ -6,7 +6,6 @@
 #include "MantidKernel/Logger.h"
 
 #include <boost/lexical_cast.hpp>
-#include <QDesktopServices>
 #include <QUrl>
 #include <QWidget>
 
@@ -107,16 +106,19 @@ void HelpWindow::showFitFunction(QWidget *parent, const std::string &name) {
   }
 }
 
-void HelpWindow::showCustomInterface(QWidget *parent, const std::string &name) {
-  showCustomInterface(parent, QString(name.c_str()));
+void HelpWindow::showCustomInterface(QWidget *parent, const std::string &name,
+                                     const std::string &section) {
+  showCustomInterface(parent, QString::fromStdString(name),
+                      QString::fromStdString(section));
 }
 
-void HelpWindow::showCustomInterface(QWidget *parent, const QString &name) {
+void HelpWindow::showCustomInterface(QWidget *parent, const QString &name,
+                                     const QString &section) {
   InterfaceManager interfaceManager;
   MantidHelpInterface *gui = interfaceManager.createHelpWindow();
   if (gui) {
     connectParent(gui, parent);
-    gui->showCustomInterface(name);
+    gui->showCustomInterface(name, section);
   } else {
     g_log.error() << "Failed to launch help for custom interface "
                   << name.toStdString() << "\n";

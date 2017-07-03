@@ -1,8 +1,10 @@
-#include "MantidKernel/Matrix.h"
-#include "MantidKernel/V3D.h"
 #include "MantidKernel/Exception.h"
-#include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidKernel/Matrix.h"
 #include "MantidKernel/MersenneTwister.h"
+#include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidKernel/V3D.h"
+
+#include <sstream>
 
 using Mantid::Kernel::TimeSeriesProperty;
 
@@ -129,6 +131,29 @@ Matrix<T>::Matrix(const std::vector<T> &data)
   }
 
   setMem(nxt, nxt);
+
+  size_t ic(0);
+  for (size_t i = 0; i < nx; i++) {
+    for (size_t j = 0; j < ny; j++) {
+      V[i][j] = data[ic];
+      ic++;
+    }
+  }
+}
+
+template <typename T>
+Matrix<T>::Matrix(const std::vector<T> &data, const size_t nrow,
+                  const size_t ncol)
+    : nx(0), ny(0), V(nullptr) {
+  size_t numel = data.size();
+  size_t test = nrow * ncol;
+  if (test != numel) {
+    throw(std::invalid_argument("number of elements in input vector have is "
+                                "incompatible with the number of rows and "
+                                "columns"));
+  }
+
+  setMem(nrow, ncol);
 
   size_t ic(0);
   for (size_t i = 0; i < nx; i++) {
@@ -359,6 +384,27 @@ std::vector<T> Matrix<T>::operator*(const std::vector<T> &Vec) const
     }
   }
   return Out;
+}
+
+/**
+  Matrix multiplication THIS * Vec to produce a vec
+  @param in :: size of vector > this->nrows
+  @param out :: result of Matrix(This * Vec)
+  @throw MisMatch<size_t> if there is a size mismatch.
+*/
+template <typename T>
+void Matrix<T>::multiplyPoint(const std::vector<T> &in,
+                              std::vector<T> &out) const {
+  out.resize(nx);
+  std::fill(std::begin(out), std::end(out), static_cast<T>(0.0));
+  if (ny > in.size())
+    throw Kernel::Exception::MisMatch<size_t>(ny, in.size(),
+                                              "Matrix::multiplyPoint(in,out)");
+  for (size_t i = 0; i < nx; i++) {
+    for (size_t j = 0; j < ny; j++) {
+      out[i] += V[i][j] * in[j];
+    }
+  }
 }
 
 template <typename T>

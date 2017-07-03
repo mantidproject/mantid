@@ -1,28 +1,34 @@
+#include "MantidDataHandling/LoadNXcanSAS.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
+#include "MantidAPI/FileFinder.h"
+#include "MantidAPI/FileProperty.h"
+#include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/Progress.h"
 #include "MantidAPI/RegisterFileLoader.h"
-#include "MantidAPI/NumericAxis.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/Workspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
-#include "MantidAPI/FileProperty.h"
-#include "MantidAPI/FileFinder.h"
-#include "MantidDataHandling/LoadNXcanSAS.h"
 #include "MantidDataHandling/H5Util.h"
 #include "MantidDataHandling/NXcanSASDefinitions.h"
 #include "MantidKernel/Logger.h"
-#include "MantidKernel/make_unique.h"
 #include "MantidKernel/UnitFactory.h"
+#include "MantidKernel/make_unique.h"
 
 #include <H5Cpp.h>
-#include <Poco/Path.h>
 #include <Poco/DirectoryIterator.h>
+#include <Poco/Path.h>
+#include <nexus/NeXusFile.hpp>
 #include <type_traits>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::DataHandling::NXcanSAS;
+using Mantid::HistogramData::HistogramX;
+using Mantid::HistogramData::HistogramY;
+using Mantid::HistogramData::HistogramE;
 
 namespace {
 
@@ -83,6 +89,16 @@ Mantid::API::MatrixWorkspace_sptr createWorkspace(H5::DataSet &dataSet) {
       dimInfo.dimBin /*xdata*/, dimInfo.dimBin /*ydata*/);
 }
 
+Mantid::API::MatrixWorkspace_sptr
+createWorkspaceForHistogram(H5::DataSet &dataSet) {
+  auto dimInfo = getDataSpaceInfo(dataSet);
+
+  // Create a workspace based on the dataSpace information
+  return Mantid::API::WorkspaceFactory::Instance().create(
+      "Workspace2D", dimInfo.dimSpectrumAxis /*NHisto*/,
+      dimInfo.dimBin + 1 /*xdata*/, dimInfo.dimBin /*ydata*/);
+}
+
 // ----- LOGS
 
 void loadLogs(H5::Group &entry, Mantid::API::MatrixWorkspace_sptr workspace) {
@@ -120,7 +136,7 @@ std::string extractIdfFileOnCurrentSystem(std::string idf) {
 
   // Get the specified IDF name
   Poco::Path path(idf);
-  auto fileName = path.getFileName();
+  const auto &fileName = path.getFileName();
 
   // Compare against all available IDFs
   const std::vector<std::string> &directoryNames =
@@ -216,39 +232,31 @@ void loadData1D(H5::Group &dataGroup,
   workspace->setDistribution(true);
 
   // Load the Q value
-  Mantid::MantidVec qData =
+  workspace->mutableX(0) =
       Mantid::DataHandling::H5Util::readArray1DCoerce<double>(dataGroup,
                                                               sasDataQ);
-  auto &dataQ = workspace->dataX(0);
-  dataQ.swap(qData);
   workspace->getAxis(0)->setUnit("MomentumTransfer");
 
   // Load the I value + units
-  Mantid::MantidVec iData =
+  workspace->mutableY(0) =
       Mantid::DataHandling::H5Util::readArray1DCoerce<double>(dataGroup,
                                                               sasDataI);
-  auto &dataI = workspace->dataY(0);
-  dataI.swap(iData);
 
   auto iDataSet = dataGroup.openDataSet(sasDataI);
   auto yUnit = getUnit(iDataSet);
   workspace->setYUnit(yUnit);
 
   // Load the Idev value
-  Mantid::MantidVec iDevData =
+  workspace->mutableE(0) =
       Mantid::DataHandling::H5Util::readArray1DCoerce<double>(dataGroup,
                                                               sasDataIdev);
-  auto &dataIdev = workspace->dataE(0);
-  dataIdev.swap(iDevData);
 
   // Load the Qdev value (optional)
   bool hasQResolution = hasQDev(dataGroup);
   if (hasQResolution) {
-    Mantid::MantidVec qDevData =
-        Mantid::DataHandling::H5Util::readArray1DCoerce<double>(dataGroup,
-                                                                sasDataQdev);
-    auto &dataQdev = workspace->dataDx(0);
-    dataQdev.swap(qDevData);
+    workspace->setPointStandardDeviations(
+        0, Mantid::DataHandling::H5Util::readArray1DCoerce<double>(
+               dataGroup, sasDataQdev));
   }
 }
 
@@ -271,10 +279,14 @@ void read2DWorkspace(H5::DataSet &dataSet,
   hsize_t memSpaceDimension[1] = {dimInfo.dimBin};
   H5::DataSpace memSpace(1, memSpaceDimension);
 
+  auto &dataHist = func(workspace, 0);
+  Mantid::MantidVec data(dataHist.size());
   for (size_t index = 0; index < dimInfo.dimSpectrumAxis; ++index) {
     // Set the dataSpace to a 1D HyperSlab
     fileSpace.selectHyperslab(H5S_SELECT_SET, sizeOfSingleSlab, start);
-    dataSet.read(func(workspace, index), memoryDataType, memSpace, fileSpace);
+    dataSet.read(data.data(), memoryDataType, memSpace, fileSpace);
+    auto &dat = func(workspace, index);
+    dat = data;
     ++start[0];
   }
 }
@@ -330,9 +342,8 @@ void loadData2D(H5::Group &dataGroup,
   //-----------------------------------------
   // Load the I value.
   auto iDataSet = dataGroup.openDataSet(sasDataI);
-  auto iExtractor = [](Mantid::API::MatrixWorkspace_sptr ws, size_t index) {
-    return ws->dataY(index).data();
-  };
+  auto iExtractor = [](Mantid::API::MatrixWorkspace_sptr ws, size_t index)
+                        -> HistogramY &{ return ws->mutableY(index); };
   auto iDataType = Mantid::DataHandling::H5Util::getType<double>();
   read2DWorkspace(iDataSet, workspace, iExtractor, iDataType);
   auto yUnit = getUnit(iDataSet);
@@ -341,17 +352,15 @@ void loadData2D(H5::Group &dataGroup,
   //-----------------------------------------
   // Load the Idev value
   auto eDataSet = dataGroup.openDataSet(sasDataIdev);
-  auto eExtractor = [](Mantid::API::MatrixWorkspace_sptr ws, size_t index) {
-    return ws->dataE(index).data();
-  };
+  auto eExtractor = [](Mantid::API::MatrixWorkspace_sptr ws, size_t index)
+                        -> HistogramE &{ return ws->mutableE(index); };
   read2DWorkspace(eDataSet, workspace, eExtractor, iDataType);
 
   //-----------------------------------------
   // Load the Qx value + units
   auto qxDataSet = dataGroup.openDataSet(sasDataQx);
-  auto qxExtractor = [](Mantid::API::MatrixWorkspace_sptr ws, size_t index) {
-    return ws->dataX(index).data();
-  };
+  auto qxExtractor = [](Mantid::API::MatrixWorkspace_sptr ws, size_t index)
+                         -> HistogramX &{ return ws->mutableX(index); };
   auto qxDataType = Mantid::DataHandling::H5Util::getType<double>();
   read2DWorkspace(qxDataSet, workspace, qxExtractor, qxDataType);
   workspace->getAxis(0)->setUnit("MomentumTransfer");
@@ -415,58 +424,22 @@ void loadTransmissionData(H5::Group &transmission,
                           Mantid::API::MatrixWorkspace_sptr workspace) {
   //-----------------------------------------
   // Load T
-  Mantid::MantidVec tData =
+  workspace->mutableY(0) =
       Mantid::DataHandling::H5Util::readArray1DCoerce<double>(
           transmission, sasTransmissionSpectrumT);
-  auto &dataT = workspace->dataY(0);
-  dataT.swap(tData);
-
   //-----------------------------------------
   // Load Tdev
-  Mantid::MantidVec tDevData =
+  workspace->mutableE(0) =
       Mantid::DataHandling::H5Util::readArray1DCoerce<double>(
           transmission, sasTransmissionSpectrumTdev);
-  auto &dataTdev = workspace->dataE(0);
-  dataTdev.swap(tDevData);
-
   //-----------------------------------------
   // Load Lambda
-  Mantid::MantidVec lambdaData =
-      Mantid::DataHandling::H5Util::readArray1DCoerce<double>(
-          transmission, sasTransmissionSpectrumLambda);
-  auto &dataLambda = workspace->dataX(0);
-  dataLambda.swap(lambdaData);
+  workspace->setPoints(0,
+                       Mantid::DataHandling::H5Util::readArray1DCoerce<double>(
+                           transmission, sasTransmissionSpectrumLambda));
+
   workspace->getAxis(0)->unit() =
       Mantid::Kernel::UnitFactory::Instance().create("Wavelength");
-}
-
-void loadTransmission(H5::Group &entry, const std::string &name) {
-  if (!hasTransmissionEntry(entry, name)) {
-    g_log.information("NXcanSAS file does not contain transmission for " +
-                      name);
-  }
-  auto transmission =
-      entry.openGroup(sasTransmissionSpectrumGroupName + "_" + name);
-
-  // Create a 1D workspace
-  auto tDataSet = transmission.openDataSet(sasTransmissionSpectrumT);
-  auto workspace = createWorkspace(tDataSet);
-
-  // Load logs
-  loadLogs(entry, workspace);
-  auto title = workspace->getTitle();
-  const std::string transExtension = "_trans_" + name;
-  title += transExtension;
-  workspace->setTitle(transExtension);
-
-  // Load instrument
-  loadInstrument(entry, workspace);
-
-  // Load transmission data
-  loadTransmissionData(transmission, workspace);
-
-  // Add the workspace to the ADS
-  Mantid::API::AnalysisDataService::Instance().add(title, workspace);
 }
 }
 
@@ -481,7 +454,7 @@ LoadNXcanSAS::LoadNXcanSAS() {}
 
 int LoadNXcanSAS::confidence(Kernel::NexusDescriptor &descriptor) const {
   const std::string &extn = descriptor.extension();
-  if (extn.compare(".nxs") != 0 && extn.compare(".h5") != 0) {
+  if (extn != ".nxs" && extn != ".h5") {
     return 0;
   }
 
@@ -565,6 +538,54 @@ void LoadNXcanSAS::exec() {
   }
   file.close();
   setProperty("OutputWorkspace", ws);
+}
+
+void LoadNXcanSAS::loadTransmission(H5::Group &entry, const std::string &name) {
+  if (!hasTransmissionEntry(entry, name)) {
+    g_log.information("NXcanSAS file does not contain transmission for " +
+                      name);
+    return;
+  }
+
+  auto transmission =
+      entry.openGroup(sasTransmissionSpectrumGroupName + "_" + name);
+
+  // Create a 1D workspace
+  auto tDataSet = transmission.openDataSet(sasTransmissionSpectrumT);
+  auto workspace = createWorkspaceForHistogram(tDataSet);
+
+  // Load logs
+  loadLogs(entry, workspace);
+  auto title = workspace->getTitle();
+  const std::string transExtension = "_trans_" + name;
+  title += transExtension;
+  workspace->setTitle(transExtension);
+
+  // Load instrument
+  loadInstrument(entry, workspace);
+
+  // Load transmission data
+  loadTransmissionData(transmission, workspace);
+
+  // Set to distribution
+  workspace->setDistribution(true);
+  workspace->setYUnitLabel("Transmission");
+
+  // Set the workspace on the output
+
+  std::string propertyName;
+  if (name == "sample")
+    propertyName = "TransmissionWorkspace";
+  else
+    propertyName = "TransmissionCanWorkspace";
+  const std::string doc = "The transmission workspace";
+
+  declareProperty(
+      Kernel::make_unique<
+          Mantid::API::WorkspaceProperty<Mantid::API::MatrixWorkspace>>(
+          propertyName, title, Direction::Output),
+      doc);
+  setProperty(propertyName, workspace);
 }
 
 } // namespace DataHandling

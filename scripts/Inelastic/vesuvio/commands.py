@@ -1,8 +1,10 @@
-#pylint: disable=too-many-arguments,invalid-name,too-many-locals,too-many-branches
+# pylint: disable=too-many-arguments,invalid-name,too-many-locals,too-many-branches
 """
 Defines functions and classes to start the processing of Vesuvio data.
 The main entry point that most users should care about is fit_tof().
 """
+from __future__ import (absolute_import, division, print_function)
+from six import iteritems
 
 import copy
 import re
@@ -13,7 +15,6 @@ from mantid.api import (AnalysisDataService, WorkspaceFactory, TextAxis)
 from vesuvio.instrument import VESUVIO
 
 import mantid.simpleapi as ms
-
 
 
 # --------------------------------------------------------------------------------
@@ -55,7 +56,7 @@ def fit_tof(runs, flags, iterations=1, convergence_threshold=None):
 
     exit_iteration = 0
 
-    for iteration in range(1, iterations+1):
+    for iteration in range(1, iterations + 1):
         iteration_flags = copy.deepcopy(flags)
         iteration_flags['iteration'] = iteration
 
@@ -63,7 +64,7 @@ def fit_tof(runs, flags, iterations=1, convergence_threshold=None):
             iteration_flags['masses'] = _update_masses_from_params(copy.deepcopy(flags['masses']),
                                                                    last_results[2])
 
-        print "=== Iteration {0} out of a possible {1}".format(iteration, iterations)
+        print("=== Iteration {0} out of a possible {1}".format(iteration, iterations))
         results = fit_tof_iteration(sample_data, container_data, runs, iteration_flags)
         exit_iteration += 1
 
@@ -72,16 +73,16 @@ def fit_tof(runs, flags, iterations=1, convergence_threshold=None):
             chi2 = np.array(results[3])
             chi2_delta = last_chi2 - chi2
             max_chi2_delta = np.abs(np.max(chi2_delta))
-            print "Cost function change: {0}".format(max_chi2_delta)
+            print("Cost function change: {0}".format(max_chi2_delta))
 
             if max_chi2_delta <= convergence_threshold:
-                print "Stopped at iteration {0} due to minimal change in cost function".format(exit_iteration)
+                print("Stopped at iteration {0} due to minimal change in cost function".format(exit_iteration))
                 last_results = results
                 break
 
         last_results = results
 
-    return (last_results[0], last_results[2], last_results[3], exit_iteration)
+    return last_results[0], last_results[2], last_results[3], exit_iteration
 
 
 def fit_tof_iteration(sample_data, container_data, runs, flags):
@@ -111,10 +112,14 @@ def fit_tof_iteration(sample_data, container_data, runs, flags):
     num_spec = sample_data.getNumberHistograms()
     pre_correct_pars_workspace = None
     pars_workspace = None
+    fit_workspace = None
     max_fit_iterations = flags.get('max_fit_iterations', 5000)
 
     output_groups = []
     chi2_values = []
+    data_workspaces = []
+    result_workspaces = []
+    group_name = runs + '_result'
     for index in range(num_spec):
         if isinstance(profiles_strs, list):
             profiles = profiles_strs[index]
@@ -147,8 +152,7 @@ def fit_tof_iteration(sample_data, container_data, runs, flags):
         ms.DeleteWorkspace(corrections_fit_name)
         corrections_args['FitParameters'] = pre_correction_pars_name
 
-
-        # Add the mutiple scattering arguments
+        # Add the multiple scattering arguments
         corrections_args.update(flags['ms_flags'])
 
         corrected_data_name = runs + "_tof_corrected" + suffix
@@ -199,6 +203,9 @@ def fit_tof_iteration(sample_data, container_data, runs, flags):
         if pars_workspace is None:
             pars_workspace = _create_param_workspace(num_spec, mtd[pars_name])
 
+        if fit_workspace is None:
+            fit_workspace = _create_param_workspace(num_spec, mtd[linear_correction_fit_params_name])
+
         spec_num_str = str(sample_data.getSpectrum(index).getSpectrumNo())
         current_spec = 'spectrum_' + spec_num_str
 
@@ -208,34 +215,56 @@ def fit_tof_iteration(sample_data, container_data, runs, flags):
         _update_fit_params(pars_workspace, index,
                            mtd[pars_name], current_spec)
 
+        _update_fit_params(fit_workspace, index, mtd[linear_correction_fit_params_name], current_spec)
+
         ms.DeleteWorkspace(pre_correction_pars_name)
         ms.DeleteWorkspace(pars_name)
+        ms.DeleteWorkspace(linear_correction_fit_params_name)
 
         # Process spectrum group
         # Note the ordering of operations here gives the order in the WorkspaceGroup
-        group_name = runs + suffix
-        output_workspaces = [fit_ws_name, linear_correction_fit_params_name]
+        output_workspaces = []
+        data_workspaces.append(fit_ws_name)
         if flags.get('output_verbose_corrections', False):
             output_workspaces += mtd[corrections_args["CorrectionWorkspaces"]].getNames()
             output_workspaces += mtd[corrections_args["CorrectedWorkspaces"]].getNames()
             ms.UnGroupWorkspace(corrections_args["CorrectionWorkspaces"])
             ms.UnGroupWorkspace(corrections_args["CorrectedWorkspaces"])
 
-        output_groups.append(ms.GroupWorkspaces(InputWorkspaces=output_workspaces,
-                                                OutputWorkspace=group_name))
+            for workspace in output_workspaces:
+
+                group_name = runs + '_iteration_' + str(flags.get('iteration', None))
+                name = group_name + '_' + workspace.split('_')[1] + '_' + workspace.split('_')[-1]
+                result_workspaces.append(name)
+                if index == 0:
+                    ms.RenameWorkspace(InputWorkspace=workspace, OutputWorkspace=name)
+                else:
+                    ms.ConjoinWorkspaces(InputWorkspace1=name, InputWorkspace2=workspace)
 
         # Output the parameter workspaces
         params_pre_corr = runs + "_params_pre_correction_iteration_" + str(flags['iteration'])
         params_name = runs + "_params_iteration_" + str(flags['iteration'])
+        fit_name = runs + "_correction_fit_scale_iteration_" + str(flags['iteration'])
         AnalysisDataService.Instance().addOrReplace(params_pre_corr, pre_correct_pars_workspace)
         AnalysisDataService.Instance().addOrReplace(params_name, pars_workspace)
+        AnalysisDataService.Instance().addOrReplace(fit_name, fit_workspace)
+
+    if result_workspaces:
+        output_groups.append(ms.GroupWorkspaces(InputWorkspaces=result_workspaces,
+                                                OutputWorkspace=group_name))
+
+    if data_workspaces:
+        output_groups.append(ms.GroupWorkspaces(InputWorkspaces=data_workspaces,
+                                                OutputWorkspace=group_name + '_data'))
+    else:
+        output_groups.append(fit_ws_name)
 
     if len(output_groups) > 1:
         result_ws = output_groups
     else:
         result_ws = output_groups[0]
 
-    return (result_ws, pre_correct_pars_workspace, pars_workspace, chi2_values)
+    return result_ws, pre_correct_pars_workspace, pars_workspace, chi2_values
 
 
 def load_and_crop_data(runs, spectra, ip_file, diff_mode='single',
@@ -292,13 +321,15 @@ def load_and_crop_data(runs, spectra, ip_file, diff_mode='single',
 
     return tof_data
 
+
 # --------------------------------------------------------------------------------
 # Private Functions
 # --------------------------------------------------------------------------------
 
+
 def _update_masses_from_params(old_masses, param_ws):
     """
-    Update the massses flag based on the results of a fit.
+    Update the masses flag based on the results of a fit.
 
     @param old_masses The existing masses dictionary
     @param param_ws The workspace to update from
@@ -339,6 +370,7 @@ def _update_masses_from_params(old_masses, param_ws):
 
     return masses
 
+
 def _create_param_workspace(num_spec, param_table):
     num_params = param_table.rowCount()
     param_workspace = WorkspaceFactory.Instance().create("Workspace2D",
@@ -355,6 +387,7 @@ def _create_param_workspace(num_spec, param_table):
 
     return param_workspace
 
+
 def _update_fit_params(params_ws, spec_idx, params_table, name):
     params_ws.getAxis(0).setLabel(spec_idx, name)
     for idx in range(params_table.rowCount()):
@@ -362,12 +395,14 @@ def _update_fit_params(params_ws, spec_idx, params_table, name):
         params_ws.dataY(idx)[spec_idx] = params_table.column('Value')[idx]
         params_ws.dataE(idx)[spec_idx] = params_table.column('Error')[idx]
 
+
 def _create_tof_workspace_suffix(runs, spectra):
     return runs + "_" + spectra + "_tof"
 
+
 def _create_fit_workspace_suffix(index, tof_data, fit_mode, spectra, iteration=None):
     if fit_mode == "bank":
-        suffix = "_" + spectra + "_bank_" + str(index+1)
+        suffix = "_" + spectra + "_bank_" + str(index + 1)
     else:
         spectrum = tof_data.getSpectrum(index)
         suffix = "_spectrum_" + str(spectrum.getSpectrumNo())
@@ -376,6 +411,7 @@ def _create_fit_workspace_suffix(index, tof_data, fit_mode, spectra, iteration=N
         suffix += "_iteration_" + str(iteration)
 
     return suffix
+
 
 def _create_profile_strs_and_mass_list(profile_flags):
     """
@@ -388,7 +424,7 @@ def _create_profile_strs_and_mass_list(profile_flags):
     for mass_prop in profile_flags:
         function_props = ["function={0}".format(mass_prop["function"])]
         del mass_prop["function"]
-        for key, value in mass_prop.iteritems():
+        for key, value in iteritems(mass_prop):
             if key == 'value':
                 mass_values.append(value)
             else:
@@ -397,6 +433,7 @@ def _create_profile_strs_and_mass_list(profile_flags):
     profiles = ";".join(profiles)
 
     return mass_values, profiles
+
 
 def _create_background_str(background_flags):
     """
@@ -407,7 +444,7 @@ def _create_background_str(background_flags):
     if background_flags:
         background_props = ["function={0}".format(background_flags["function"])]
         del background_flags["function"]
-        for key, value in background_flags.iteritems():
+        for key, value in iteritems(background_flags):
             background_props.append("{0}={1}".format(key, value))
         background_str = ",".join(background_props)
     else:
@@ -415,15 +452,16 @@ def _create_background_str(background_flags):
 
     return background_str
 
+
 def _create_intensity_constraint_str(intensity_constraints):
     """
     Create a string suitable for the algorithms out of the intensity constraint flags
-    :param inten_constr_flags: A list of lists for the constraints (can be None)
+    :param intensity_constraints: A list of lists for the constraints (can be None)
     :return: A string to pass to the algorithm
     """
     if intensity_constraints:
         if not isinstance(intensity_constraints[0], list):
-            intensity_constraints = [intensity_constraints,]
+            intensity_constraints = [intensity_constraints]
         # Make each element a string and then join them together
         intensity_constraints = [str(c) for c in intensity_constraints]
         intensity_constraints_str = ";".join(intensity_constraints)
@@ -431,6 +469,7 @@ def _create_intensity_constraint_str(intensity_constraints):
         intensity_constraints_str = ""
 
     return intensity_constraints_str
+
 
 def _create_user_defined_ties_str(masses):
     """
@@ -441,13 +480,12 @@ def _create_user_defined_ties_str(masses):
     user_defined_ties = []
     for index, mass in enumerate(masses):
         if 'ties' in mass:
-           ties = mass['ties'].split(',')
-           function_dependant_ties= []
-           function_indentifier = 'f' + str(index) + '.'
-           for t in ties:
-               tie_str = function_indentifier + t
-               equal_pos = tie_str.index('=') + 1
-               tie_str = tie_str[:equal_pos] + function_indentifier + tie_str[equal_pos:]
-               user_defined_ties.append(tie_str)
+            ties = mass['ties'].split(',')
+            function_identifier = 'f' + str(index) + '.'
+            for t in ties:
+                tie_str = function_identifier + t
+                equal_pos = tie_str.index('=') + 1
+                tie_str = tie_str[:equal_pos] + function_identifier + tie_str[equal_pos:]
+                user_defined_ties.append(tie_str)
     user_defined_ties = ','.join(user_defined_ties)
     return user_defined_ties

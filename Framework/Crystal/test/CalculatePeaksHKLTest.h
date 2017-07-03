@@ -5,6 +5,7 @@
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidCrystal/CalculatePeaksHKL.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
+#include "MantidAPI/Sample.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using Mantid::Crystal::CalculatePeaksHKL;

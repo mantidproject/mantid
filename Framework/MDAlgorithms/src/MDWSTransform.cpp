@@ -6,6 +6,7 @@
 #include "MantidGeometry/MDGeometry/QLab.h"
 #include "MantidGeometry/MDGeometry/QSample.h"
 #include "MantidKernel/MDUnit.h"
+#include "MantidKernel/Tolerance.h"
 
 #include <cfloat>
 
@@ -119,11 +120,9 @@ std::vector<double>
 MDWSTransform::getTransfMatrix(MDWSDescription &TargWSDescription,
                                CnvrtToMD::TargetFrame FrameID,
                                CoordScaling &ScaleID) const {
-
   Kernel::Matrix<double> mat(3, 3, true);
 
   bool powderMode = TargWSDescription.isPowder();
-
   bool has_lattice(true);
   if (!TargWSDescription.hasLattice())
     has_lattice = false;
@@ -131,23 +130,18 @@ MDWSTransform::getTransfMatrix(MDWSDescription &TargWSDescription,
   if (!(powderMode || has_lattice)) {
     std::string inWsName = TargWSDescription.getWSName();
     // notice about 3D case without lattice
-    g_Log.notice()
+    g_Log.information()
         << "Can not obtain transformation matrix from the input workspace: "
         << inWsName << " as no oriented lattice has been defined. \n"
                        "Will use unit transformation matrix.\n";
   }
   // set the frame ID to the values, requested by properties
   CnvrtToMD::TargetFrame CoordFrameID(FrameID);
-  if (FrameID == AutoSelect || powderMode) // if this value is auto-select, find
-                                           // appropriate frame from workspace
-                                           // properties
+  if (FrameID == AutoSelect || powderMode) {
     CoordFrameID = findTargetFrame(TargWSDescription);
-  else // if not, and specific target frame requested, verify if everything is
-       // available on the workspace for this frame
-    checkTargetFrame(
-        TargWSDescription,
-        CoordFrameID); // throw, if the information is not available
-
+  } else {
+    checkTargetFrame(TargWSDescription, CoordFrameID);
+  }
   switch (CoordFrameID) {
   case (CnvrtToMD::LabFrame): {
     ScaleID = NoScaling;

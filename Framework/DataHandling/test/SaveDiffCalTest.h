@@ -4,6 +4,7 @@
 #include <cxxtest/TestSuite.h>
 #include <Poco/File.h>
 
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidDataHandling/SaveDiffCal.h"
 #include "MantidDataObjects/MaskWorkspace.h"
@@ -50,7 +51,8 @@ public:
 
   MaskWorkspace_sptr createMasking(Instrument_sptr instr) {
     MaskWorkspace_sptr maskWS = boost::make_shared<MaskWorkspace>(instr);
-    maskWS->maskWorkspaceIndex(0);
+    maskWS->getSpectrum(0).clearData();
+    maskWS->mutableSpectrumInfo().setMasked(0, true);
     return maskWS;
   }
 
@@ -104,6 +106,56 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("CalibrationWorkspace", calWS));
     TS_ASSERT_THROWS(alg.execute(), std::runtime_error);
     TS_ASSERT(!alg.isExecuted());
+  }
+
+  void test_no_mask() {
+    Instrument_sptr inst = createInstrument();
+    GroupingWorkspace_sptr groupWS = createGrouping(inst);
+    MaskWorkspace_sptr maskWS = createMasking(inst);
+    TableWorkspace_sptr calWS =
+        createCalibration(NUM_BANK * 9); // nine components per bank
+
+    SaveDiffCal alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    TS_ASSERT(alg.isInitialized());
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("GroupingWorkspace", groupWS));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Filename", FILENAME));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("CalibrationWorkspace", calWS));
+    TS_ASSERT_THROWS_NOTHING(alg.execute(););
+    TS_ASSERT(alg.isExecuted());
+
+    // confirm that it exists
+    std::string filename = alg.getPropertyValue("Filename");
+    TS_ASSERT(Poco::File(filename).exists());
+
+    // cleanup
+    if (Poco::File(filename).exists())
+      Poco::File(filename).remove();
+  }
+
+  void test_no_grouping() {
+    Instrument_sptr inst = createInstrument();
+    GroupingWorkspace_sptr groupWS = createGrouping(inst);
+    MaskWorkspace_sptr maskWS = createMasking(inst);
+    TableWorkspace_sptr calWS =
+        createCalibration(NUM_BANK * 9); // nine components per bank
+
+    SaveDiffCal alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    TS_ASSERT(alg.isInitialized());
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("MaskWorkspace", maskWS));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Filename", FILENAME));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("CalibrationWorkspace", calWS));
+    TS_ASSERT_THROWS_NOTHING(alg.execute(););
+    TS_ASSERT(alg.isExecuted());
+
+    // confirm that it exists
+    std::string filename = alg.getPropertyValue("Filename");
+    TS_ASSERT(Poco::File(filename).exists());
+
+    // cleanup
+    if (Poco::File(filename).exists())
+      Poco::File(filename).remove();
   }
 
   void test_exec() {

@@ -271,7 +271,7 @@ public:
 private:
   /// Create workspace containing test data
   MatrixWorkspace_sptr createTestData(bool isHisto) {
-    return WorkspaceCreationHelper::Create2DWorkspaceFromFunction(
+    return WorkspaceCreationHelper::create2DWorkspaceFromFunction(
         dataFunction, 1, 0.0, 10.0, 0.1, isHisto);
   }
 

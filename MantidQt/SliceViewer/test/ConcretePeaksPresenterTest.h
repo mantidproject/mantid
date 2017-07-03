@@ -558,7 +558,7 @@ public:
     auto pMockView = new NiceMock<MockPeakOverlayView>;
     auto mockView = boost::shared_ptr<NiceMock<MockPeakOverlayView>>(pMockView);
     EXPECT_CALL(*pMockView, showView())
-        .Times(1); // Expect that the view will be forced to SHOW.
+        .Times(2); // Expect that the view will be forced to SHOW.
     EXPECT_CALL(*pMockView, hideView())
         .Times(1); // Expect that the view will be forced to HIDE.
     EXPECT_CALL(*pMockView, updateView())
@@ -701,9 +701,6 @@ public:
     // factory.
     auto pMockView = new NiceMock<MockPeakOverlayView>;
     auto mockView = boost::shared_ptr<NiceMock<MockPeakOverlayView>>(pMockView);
-    EXPECT_CALL(*pMockView, positionOnly())
-        .WillOnce(
-            Return(true)); // A peak repesentation without an absolute size.
     EXPECT_CALL(*pMockView, getOccupancyInView())
         .WillOnce(
             Return(occupancyInView)); // The occupancy that the VIEW returns.
@@ -738,9 +735,6 @@ public:
     // factory.
     auto pMockView = new NiceMock<MockPeakOverlayView>;
     auto mockView = boost::shared_ptr<NiceMock<MockPeakOverlayView>>(pMockView);
-    EXPECT_CALL(*pMockView, positionOnly())
-        .WillOnce(
-            Return(true)); // A peak repesentation without an absolute size.
     EXPECT_CALL(*pMockView, getOccupancyIntoView())
         .WillOnce(
             Return(occupancyIntoView)); // The occupancy that the VIEW returns.

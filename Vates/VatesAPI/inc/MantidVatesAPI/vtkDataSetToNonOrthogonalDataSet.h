@@ -1,13 +1,14 @@
 #ifndef MANTID_VATES_VTKDATASETTONONORTHOGONALDATASET_H_
 #define MANTID_VATES_VTKDATASETTONONORTHOGONALDATASET_H_
 
-#include "MantidVatesAPI/WorkspaceProvider.h"
+#include "MantidGeometry/MDGeometry/MDTypes.h"
+#include "MantidKernel/Matrix.h"
 #include "MantidKernel/SpecialCoordinateSystem.h"
 #include "MantidKernel/System.h"
-#include "MantidKernel/cow_ptr.h"
-#include "MantidKernel/Matrix.h"
 #include "MantidKernel/V3D.h"
-#include "MantidGeometry/MDGeometry/MDTypes.h"
+#include "MantidKernel/cow_ptr.h"
+#include "MantidVatesAPI/ProgressAction.h"
+#include "MantidVatesAPI/WorkspaceProvider.h"
 
 #include <string>
 #include <array>
@@ -58,7 +59,7 @@ public:
       vtkDataSet *dataset, std::string name,
       std::unique_ptr<Mantid::VATES::WorkspaceProvider> workspaceProvider);
   /// Class execution method
-  void execute();
+  void execute(ProgressAction *progress = nullptr);
   /// Destructor
   virtual ~vtkDataSetToNonOrthogonalDataSet();
 

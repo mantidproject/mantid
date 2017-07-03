@@ -1,13 +1,13 @@
 #pylint: disable=C0103,R0904
 # N(DAV)TableWidget
-#
-
+import csv
 from PyQt4 import QtGui, QtCore
 
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
 except AttributeError:
-    _fromUtf8 = lambda s: s
+    def _fromUtf8(s):
+        return s
 
 
 class NTableWidget(QtGui.QTableWidget):
@@ -15,6 +15,7 @@ class NTableWidget(QtGui.QTableWidget):
     NdavTableWidget inherits from QTableWidget by extending the features
     for easy application.
     """
+
     def __init__(self, parent):
         """
 
@@ -30,6 +31,7 @@ class NTableWidget(QtGui.QTableWidget):
         self._editableList = list()
 
         self._statusColName = 'Status'
+        self._colIndexSelect = None
 
         return
 
@@ -89,6 +91,47 @@ class NTableWidget(QtGui.QTableWidget):
 
         return
 
+    def export_table_csv(self, csv_file_name):
+        """
+
+        :return:
+        """
+        # get title as header
+        col_names = self._myColumnNameList[:]
+        # col_names_str = '{0}'.format(col_names)
+        # col_names_str = col_names_str.replace(', ', ' ')
+        # headeder = col_names_str
+
+        num_columns = self.columnCount()
+
+        num_rows = self.rowCount()
+        content_line_list = list()
+        for i_row in range(num_rows):
+            line_items = list()
+            for j_col in range(num_columns):
+                item_value = self.get_cell_value(i_row, j_col)
+                if isinstance(item_value, str):
+                    # remove tab because tab will be used as delimiter
+                    item_value = item_value.replace('\t', '')
+                elif item_value is None:
+                    item_value = ''
+                line_items.append(item_value)
+            # END-FOR
+            content_line_list.append(line_items)
+        # END-FOR (row)
+
+        with open(csv_file_name, 'w') as csv_file:
+            csv_writer = csv.writer(csv_file, delimiter=' ', quoting=csv.QUOTE_MINIMAL)
+            # write header
+            csv_writer.writerow(col_names)
+            # write content
+            for line_items in content_line_list:
+                csv_writer.writerow(line_items)
+            # END-FOR
+        # END-WITH
+
+        return
+
     def get_cell_value(self, row_index, col_index):
         """
         Purpose: Get cell value
@@ -119,7 +162,9 @@ class NTableWidget(QtGui.QTableWidget):
             assert isinstance(item_i_j, QtGui.QTableWidgetItem)
 
             return_value = str(item_i_j.text())
-            if cell_data_type == 'int':
+            if return_value == 'None':
+                return_value = None
+            elif cell_data_type == 'int':
                 return_value = int(return_value)
             elif cell_data_type == 'float' or cell_data_type == 'double':
                 return_value = float(return_value)
@@ -184,7 +229,6 @@ class NTableWidget(QtGui.QTableWidget):
         # check
         assert isinstance(status, bool)
         assert self._statusColName is not None
-        print 'Status column name = ', self._statusColName
         index_status = self._myColumnNameList.index(self._statusColName)
 
         # loop over all the rows
@@ -266,6 +310,23 @@ class NTableWidget(QtGui.QTableWidget):
 
         return error_message
 
+    def revert_selection(self):
+        """
+        revert the selection of rows
+        :return:
+        """
+        # check
+        if self._colIndexSelect is None:
+            raise RuntimeError('Column for selection is not defined yet. Unable to revert selection')
+
+        num_rows = self.rowCount()
+        for i_row in range(num_rows):
+            curr_selection = self.get_cell_value(i_row, self._colIndexSelect)
+            self.update_cell_value(i_row, self._colIndexSelect, not curr_selection)
+        # END-FOR
+
+        return
+
     def select_all_rows(self, status):
         """
         Purpose: select or deselect all rows in the table if applied
@@ -288,6 +349,65 @@ class NTableWidget(QtGui.QTableWidget):
         for row_index in xrange(num_rows):
             if self.get_cell_value(row_index, status_col_index) != status:
                 self.update_cell_value(row_index, status_col_index, status)
+        # END-FOR
+
+        return
+
+    def select_row(self, row_index, status=True):
+        """
+        Select a row
+        :param row_index:
+        :param status:
+        :return:
+        """
+        # get column  index
+        try:
+            status_col_index = self._myColumnNameList.index(self._statusColName)
+        except ValueError as e:
+            # status column name is not properly set up
+            return False, str(e)
+
+        # Loop over all rows. If any row's status is not same as target status, then set it
+        num_rows = self.rowCount()
+        assert isinstance(row_index, int) and 0 <= row_index < num_rows, 'Row number %s of type %s is not right.' \
+                                                                         '' % (str(row_index), type(row_index))
+
+        if self.get_cell_value(row_index, status_col_index) != status:
+            self.update_cell_value(row_index, status_col_index, status)
+
+        return
+
+    def select_rows_by_column_value(self, column_index, target_value, value_tolerance,
+                                    keep_current_selection):
+        """
+        select row
+        :param column_index:
+        :param target_value:
+        :param value_tolerance:
+        :param keep_current_selection:
+        :return:
+        """
+        # check inputs
+        assert isinstance(column_index, int) and 0 <= column_index < self.columnCount(),\
+            'Column index {0} must be an integer (now {1}) and in range (0, {2}]' \
+            ''.format(column_index, type(column_index), self.columnCount())
+        if self._colIndexSelect is None:
+            raise RuntimeError('Column for selection is never set up.')
+
+        # loop over lines
+        num_rows = self.rowCount()
+        for i_row in range(num_rows):
+            if keep_current_selection and self.get_cell_value(i_row, self._colIndexSelect) is False:
+                # in case to keep and based on current selection, and this row is not selected, skip
+                continue
+
+            value_i = self.get_cell_value(i_row, column_index)
+            if isinstance(target_value, str) and value_i == target_value:
+                # in case of string
+                self.update_cell_value(i_row, self._colIndexSelect, True)
+            elif (isinstance(target_value, float) or isinstance(target_value, int)) and abs(value_i - target_value) < value_tolerance:
+                # in case of integer or float, then test with consideration of tolerance
+                self.update_cell_value(i_row, self._colIndexSelect, True)
         # END-FOR
 
         return
@@ -328,10 +448,15 @@ class NTableWidget(QtGui.QTableWidget):
         # check
         assert isinstance(name, str), 'Given status column name must be an integer,' \
                                       'but not %s.' % str(type(name))
-        assert name in self._myColumnNameList
+        if name not in self._myColumnNameList:
+            raise RuntimeError('Input selection/status name {0} is not in column names list {1}.'
+                               ''.format(name, self._myColumnNameList))
 
         # set value
         self._statusColName = name
+
+        # set the column index
+        self._colIndexSelect = self._myColumnNameList.index(name)
 
         return
 
@@ -395,7 +520,6 @@ class NTableWidget(QtGui.QTableWidget):
         self.remove_all_rows()
 
         # add rows back
-        print '[DB-BAT] Sort by column %d. Keys = ' % column_index, key_list, 'sort_order = ', sort_order
         for key_value in key_list:
             self.append_row(row_content_dict[key_value])
         # END-FOR
@@ -408,10 +532,11 @@ class NTableWidget(QtGui.QTableWidget):
         :param row:
         :param col:
         :param value:
-        :return:
+        :return: None
         """
         # Check
-        assert isinstance(row, int) and 0 <= row < self.rowCount()
+        assert isinstance(row, int) and 0 <= row < self.rowCount(),\
+            'Row %s (%s) must be an integer between 0 and %d.' % (str(row), type(row), self.rowCount())
         assert isinstance(col, int) and 0 <= col < self.columnCount()
 
         cell_item = self.item(row, col)

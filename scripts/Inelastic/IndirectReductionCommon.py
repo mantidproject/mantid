@@ -1,18 +1,20 @@
-#pylint: disable=invalid-name,too-many-branches,too-many-arguments,deprecated-module,no-name-in-module,too-many-locals
+from __future__ import (absolute_import, division, print_function)
 from mantid.api import WorkspaceGroup, AlgorithmManager
 from mantid import mtd, logger, config
 
 import os
 import numpy as np
 
-#-------------------------------------------------------------------------------
+
+# -------------------------------------------------------------------------------
+
 
 def load_files(data_files, ipf_filename, spec_min, spec_max, sum_files=False, load_logs=True, load_opts=None):
     """
     Loads a set of files and extracts just the spectra we care about (i.e. detector range and monitor).
 
     @param data_files List of data file names
-    @param ipf_filename FIle path/name for the instrument parameter file to load
+    @param ipf_filename File path/name for the instrument parameter file to load
     @param spec_min Minimum spectra ID to load
     @param spec_max Maximum spectra ID to load
     @param sum_files Sum loaded files
@@ -32,12 +34,12 @@ def load_files(data_files, ipf_filename, spec_min, spec_max, sum_files=False, lo
 
     for filename in data_files:
         # The filename without path and extension will be the workspace name
-        ws_name = os.path.splitext(os.path.basename(filename))[0]
+        ws_name = os.path.splitext(os.path.basename(str(filename)))[0]
         logger.debug('Loading file %s as workspace %s' % (filename, ws_name))
 
         if 'VESUVIO' in ipf_filename:
-            evs_filename = os.path.basename(filename).replace('EVS', '')
-            LoadVesuvio(Filename=evs_filename,
+            # Load all spectra. They are cropped later
+            LoadVesuvio(Filename=str(filename),
                         OutputWorkspace=ws_name,
                         SpectrumList='1-198',
                         **load_opts)
@@ -63,10 +65,10 @@ def load_files(data_files, ipf_filename, spec_min, spec_max, sum_files=False, lo
         try:
             chop_threshold = mtd[ws_name].getInstrument().getNumberParameter('Workflow.ChopDataIfGreaterThan')[0]
             x_max = mtd[ws_name].readX(0)[-1]
-            chopped_data =  x_max > chop_threshold
+            chopped_data = x_max > chop_threshold
         except IndexError:
             chopped_data = False
-        logger.information('Workspace %s need data chop: %s' % (ws_name, str(chopped_data)))
+        logger.information('Workspace {0} need data chop: {1}'.format(ws_name, str(chopped_data)))
 
         workspaces = [ws_name]
         if chopped_data:
@@ -106,7 +108,9 @@ def load_files(data_files, ipf_filename, spec_min, spec_max, sum_files=False, lo
 
     return workspace_names, chopped_data
 
-#-------------------------------------------------------------------------------
+
+# -------------------------------------------------------------------------------
+
 
 def sum_regular_runs(workspace_names):
     """
@@ -159,7 +163,9 @@ def sum_regular_runs(workspace_names):
     # Only have the one workspace now
     return [summed_detector_ws_name]
 
-#-------------------------------------------------------------------------------
+
+# -------------------------------------------------------------------------------
+
 
 def sum_chopped_runs(workspace_names):
     """
@@ -176,7 +182,7 @@ def sum_chopped_runs(workspace_names):
 
     # Generate a list of workspaces to be merged
     for idx in range(0, num_merges):
-        merges.append({'detector':list(), 'monitor':list()})
+        merges.append({'detector': list(), 'monitor': list()})
 
         for ws_name in workspace_names:
             detector_ws_name = mtd[ws_name].getNames()[idx]
@@ -212,13 +218,15 @@ def sum_chopped_runs(workspace_names):
     # Only have the one workspace now
     return [workspace_names[0]]
 
-#-------------------------------------------------------------------------------
+
+# -------------------------------------------------------------------------------
+
 
 def identify_bad_detectors(workspace_name):
     """
     Identify detectors which should be masked
 
-    @param workspace_name Name of worksapce to use ot get masking detectors
+    @param workspace_name Name of workspace to use to get masking detectors
     @return List of masked spectra
     """
     from mantid.simpleapi import (IdentifyNoisyDetectors, DeleteWorkspace)
@@ -230,7 +238,7 @@ def identify_bad_detectors(workspace_name):
     except IndexError:
         masking_type = 'None'
 
-    logger.information('Masking type: %s' % (masking_type))
+    logger.information('Masking type: %s' % masking_type)
 
     masked_spec = list()
 
@@ -246,11 +254,13 @@ def identify_bad_detectors(workspace_name):
         # Remove the temporary masking workspace
         DeleteWorkspace(ws_mask)
 
-    logger.debug('Masked specta for workspace %s: %s' % (workspace_name, str(masked_spec)))
+    logger.debug('Masked spectra for workspace %s: %s' % (workspace_name, str(masked_spec)))
 
     return masked_spec
 
-#-------------------------------------------------------------------------------
+
+# -------------------------------------------------------------------------------
+
 
 def unwrap_monitor(workspace_name):
     """
@@ -312,7 +322,9 @@ def unwrap_monitor(workspace_name):
 
     return should_unwrap
 
-#-------------------------------------------------------------------------------
+
+# -------------------------------------------------------------------------------
+
 
 def process_monitor_efficiency(workspace_name):
     """
@@ -333,7 +345,7 @@ def process_monitor_efficiency(workspace_name):
         raise ValueError('Cannot get monitor details form parameter file')
 
     if area == -1 or thickness == -1 or attenuation == -1:
-        logger.information('For workspace %s, skipping monitor efficiency' % (workspace_name))
+        logger.information('For workspace %s, skipping monitor efficiency' % workspace_name)
         return
 
     OneMinusExponentialCor(InputWorkspace=monitor_workspace_name,
@@ -341,7 +353,9 @@ def process_monitor_efficiency(workspace_name):
                            C=attenuation * thickness,
                            C1=area)
 
-#-------------------------------------------------------------------------------
+
+# -------------------------------------------------------------------------------
+
 
 def scale_monitor(workspace_name):
     """
@@ -366,7 +380,9 @@ def scale_monitor(workspace_name):
               Factor=1.0 / scale_factor,
               Operation='Multiply')
 
-#-------------------------------------------------------------------------------
+
+# -------------------------------------------------------------------------------
+
 
 def scale_detectors(workspace_name, e_mode='Indirect'):
     """
@@ -392,12 +408,14 @@ def scale_detectors(workspace_name, e_mode='Indirect'):
            RHSWorkspace=monitor_workspace_name,
            OutputWorkspace=workspace_name)
 
-#-------------------------------------------------------------------------------
+
+# -------------------------------------------------------------------------------
+
 
 def group_spectra(workspace_name, masked_detectors, method, group_file=None, group_ws=None):
     """
     Groups spectra in a given workspace according to the Workflow.GroupingMethod and
-    Workflow.GroupingFile parameters and GrpupingPolicy property.
+    Workflow.GroupingFile parameters and GroupingPolicy property.
 
     @param workspace_name Name of workspace to group spectra of
     @param masked_detectors List of spectra numbers to mask
@@ -454,7 +472,7 @@ def group_spectra(workspace_name, masked_detectors, method, group_file=None, gro
 
         # If it is still not found just give up
         if not os.path.isfile(grouping_file):
-            raise RuntimeError('Cannot find grouping file: %s' % (grouping_file))
+            raise RuntimeError('Cannot find grouping file: %s' % grouping_file)
 
         # Mask detectors if required
         if len(masked_detectors) > 0:
@@ -477,7 +495,9 @@ def group_spectra(workspace_name, masked_detectors, method, group_file=None, gro
     else:
         raise RuntimeError('Invalid grouping method %s for workspace %s' % (grouping_method, workspace_name))
 
-#-------------------------------------------------------------------------------
+
+# -------------------------------------------------------------------------------
+
 
 def fold_chopped(workspace_name):
     """
@@ -509,7 +529,7 @@ def fold_chopped(workspace_name):
     for i in range(0, mtd[merged_ws].blocksize()):
         y_val = 0.0
         for rng in ranges:
-            if data_x[i] >= rng[0] and data_x[i] <= rng[1]:
+            if rng[0] <= data_x[i] <= rng[1]:
                 y_val += 1.0
 
         data_y.append(y_val)
@@ -528,11 +548,13 @@ def fold_chopped(workspace_name):
     DeleteWorkspace(Workspace=merged_ws)
     DeleteWorkspace(Workspace=scaling_ws)
 
-#-------------------------------------------------------------------------------
+
+# -------------------------------------------------------------------------------
+
 
 def rename_reduction(workspace_name, multiple_files):
     """
-    Renames a worksapce according to the naming policy in the Workflow.NamingConvention parameter.
+    Renames a workspace according to the naming policy in the Workflow.NamingConvention parameter.
 
     @param workspace_name Name of workspace
     @param multiple_files Insert the multiple file marker
@@ -553,7 +575,7 @@ def rename_reduction(workspace_name, multiple_files):
     try:
         convention = instrument.getStringParameter('Workflow.NamingConvention')[0]
     except IndexError:
-        # Defualt to run title if naming convention parameter not set
+        # Default to run title if naming convention parameter not set
         convention = 'RunTitle'
     logger.information('Naming convention for workspace %s is %s' % (workspace_name, convention))
 
@@ -603,14 +625,16 @@ def rename_reduction(workspace_name, multiple_files):
 
     return new_name
 
-#-------------------------------------------------------------------------------
+
+# -------------------------------------------------------------------------------
+
 
 def plot_reduction(workspace_name, plot_type):
     """
     Plot a given workspace based on the Plot property.
 
     @param workspace_name Name of workspace to plot
-    @param plot_types Type of plot to create
+    @param plot_type Type of plot to create
     """
 
     if plot_type == 'Spectra' or plot_type == 'Both':
@@ -627,21 +651,23 @@ def plot_reduction(workspace_name, plot_type):
         plot_workspace = importMatrixWorkspace(workspace_name)
         plot_workspace.plotGraph2D()
 
-#-------------------------------------------------------------------------------
 
-def save_reduction(worksspace_names, formats, x_units='DeltaE'):
+# -------------------------------------------------------------------------------
+
+
+def save_reduction(workspace_names, formats, x_units='DeltaE'):
     """
     Saves the workspaces to the default save directory.
 
-    @param worksspace_names List of workspace names to save
+    @param workspace_names List of workspace names to save
     @param formats List of formats to save in
-    @param Output X units
+    @param x_units X units
     """
     from mantid.simpleapi import (SaveSPE, SaveNexusProcessed, SaveNXSPE,
                                   SaveAscii, Rebin, DeleteWorkspace,
                                   ConvertSpectrumAxis, SaveDaveGrp)
 
-    for workspace_name in worksspace_names:
+    for workspace_name in workspace_names:
         if 'spe' in formats:
             SaveSPE(InputWorkspace=workspace_name,
                     Filename=workspace_name + '.spe')
@@ -655,10 +681,8 @@ def save_reduction(worksspace_names, formats, x_units='DeltaE'):
                       Filename=workspace_name + '.nxspe')
 
         if 'ascii' in formats:
-            # Version 1 of SaveAscii produces output that works better with excel/origin
-            # For some reason this has to be done with an algorithm object, using the function
-            # wrapper with Version did not change the version that was run
-            saveAsciiAlg = AlgorithmManager.createUnmanaged('SaveAscii', 1)
+            # Changed to version 2 to enable re-loading of files into mantid
+            saveAsciiAlg = AlgorithmManager.createUnmanaged('SaveAscii', 2)
             saveAsciiAlg.initialize()
             saveAsciiAlg.setProperty('InputWorkspace', workspace_name)
             saveAsciiAlg.setProperty('Filename', workspace_name + '.dat')
@@ -666,9 +690,9 @@ def save_reduction(worksspace_names, formats, x_units='DeltaE'):
 
         if 'aclimax' in formats:
             if x_units == 'DeltaE_inWavenumber':
-                bins = '24, -0.005, 4000' #cm-1
+                bins = '24, -0.005, 4000'  # cm-1
             else:
-                bins = '3, -0.005, 500' #meV
+                bins = '3, -0.005, 500'  # meV
 
             Rebin(InputWorkspace=workspace_name,
                   OutputWorkspace=workspace_name + '_aclimax_save_temp',
@@ -687,7 +711,9 @@ def save_reduction(worksspace_names, formats, x_units='DeltaE'):
                         Filename=workspace_name + '.grp')
             DeleteWorkspace(Workspace=workspace_name + '_davegrp_save_temp')
 
-#-------------------------------------------------------------------------------
+
+# -------------------------------------------------------------------------------
+
 
 def get_multi_frame_rebin(workspace_name, rebin_string):
     """
@@ -716,7 +742,9 @@ def get_multi_frame_rebin(workspace_name, rebin_string):
 
     return None, None
 
-#-------------------------------------------------------------------------------
+
+# -------------------------------------------------------------------------------
+
 
 def rebin_reduction(workspace_name, rebin_string, multi_frame_rebin_string, num_bins):
     """
@@ -725,7 +753,7 @@ def rebin_reduction(workspace_name, rebin_string, multi_frame_rebin_string, num_
     @param multi_frame_rebin_string Rebin string for multiple frame rebinning
     @param num_bins Max number of bins in input frames
     """
-    from mantid.simpleapi import (Rebin, RebinToWorkspace)
+    from mantid.simpleapi import (Rebin, RebinToWorkspace, SortXAxis)
 
     if rebin_string is not None:
         if multi_frame_rebin_string is not None and num_bins is not None:
@@ -740,6 +768,8 @@ def rebin_reduction(workspace_name, rebin_string, multi_frame_rebin_string, num_
                       Params=multi_frame_rebin_string)
         else:
             # Regular data
+            SortXAxis(InputWorkspace=workspace_name,
+                      OutputWorkspace=workspace_name)
             Rebin(InputWorkspace=workspace_name,
                   OutputWorkspace=workspace_name,
                   Params=rebin_string)
@@ -752,4 +782,4 @@ def rebin_reduction(workspace_name, rebin_string, multi_frame_rebin_string, num_
         except RuntimeError:
             logger.warning('Rebinning failed, will try to continue anyway.')
 
-#-------------------------------------------------------------------------------
+# -------------------------------------------------------------------------------

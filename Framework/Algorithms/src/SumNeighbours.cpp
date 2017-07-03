@@ -3,6 +3,7 @@
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/SumNeighbours.h"
 #include "MantidAPI/InstrumentValidator.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/EventList.h"
 #include "MantidGeometry/IComponent.h"
@@ -62,9 +63,10 @@ void SumNeighbours::exec() {
 
   // Get the input workspace
   Mantid::API::MatrixWorkspace_sptr inWS = getProperty("InputWorkspace");
-  Mantid::Geometry::IDetector_const_sptr det = inWS->getDetector(0);
+  const auto &spectrumInfo = inWS->spectrumInfo();
+  const auto &det = spectrumInfo.detector(0);
   // Check if grandparent is rectangular detector
-  boost::shared_ptr<const Geometry::IComponent> parent = det->getParent();
+  boost::shared_ptr<const Geometry::IComponent> parent = det.getParent();
   boost::shared_ptr<const RectangularDetector> rect;
 
   if (parent) {
@@ -74,7 +76,7 @@ void SumNeighbours::exec() {
 
   Mantid::API::MatrixWorkspace_sptr outWS;
 
-  Progress progress(this, 0, 1, 2);
+  Progress progress(this, 0.0, 1.0, 2);
 
   progress.report("Smoothing Neighbours...");
 

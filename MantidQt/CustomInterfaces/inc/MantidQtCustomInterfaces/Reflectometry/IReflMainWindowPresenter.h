@@ -38,13 +38,21 @@ class IReflMainWindowPresenter {
 public:
   /// Destructor
   virtual ~IReflMainWindowPresenter(){};
+
+  enum class Flag { ConfirmReductionPausedFlag, ConfirmReductionResumedFlag };
+  virtual void notify(Flag flag) = 0;
+
   /// Pre-processing
-  virtual std::string getPlusOptions() const = 0;
-  virtual std::string getTransmissionOptions() const = 0;
+  virtual std::string getTransmissionRuns(int group) const = 0;
+  virtual std::string getTransmissionOptions(int group) const = 0;
   /// Processing
-  virtual std::string getReductionOptions() const = 0;
+  virtual std::string getReductionOptions(int group) const = 0;
   /// Post-processing
-  virtual std::string getStitchOptions() const = 0;
+  virtual std::string getStitchOptions(int group) const = 0;
+  /// Time-slicing values
+  virtual std::string getTimeSlicingValues(int group) const = 0;
+  /// Time-slicing type
+  virtual std::string getTimeSlicingType(int group) const = 0;
   /// Dialog/Prompt methods
   virtual std::string askUserString(const std::string &prompt,
                                     const std::string &title,
@@ -58,6 +66,9 @@ public:
   virtual void giveUserInfo(const std::string &prompt,
                             const std::string &title) = 0;
   virtual std::string runPythonAlgorithm(const std::string &pythonCode) = 0;
+  virtual void setInstrumentName(const std::string &instName) const = 0;
+  /// Data processing check
+  virtual bool checkIfProcessing() const = 0;
 };
 }
 }

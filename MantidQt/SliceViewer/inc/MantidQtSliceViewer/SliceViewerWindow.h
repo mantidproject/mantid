@@ -3,6 +3,7 @@
 
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidQtAPI/WorkspaceObserver.h"
+#include "MantidQtAPI/IProjectSerialisable.h"
 #include "MantidQtSliceViewer/LineViewer.h"
 #include "MantidQtSliceViewer/SliceViewer.h"
 #include "MantidQtSliceViewer/PeaksViewer.h"
@@ -25,7 +26,8 @@ namespace SliceViewer {
  */
 class EXPORT_OPT_MANTIDQT_SLICEVIEWER SliceViewerWindow
     : public QMainWindow,
-      public MantidQt::API::WorkspaceObserver {
+      public MantidQt::API::WorkspaceObserver,
+      public MantidQt::API::IProjectSerialisable {
   Q_OBJECT
 
 public:
@@ -35,6 +37,18 @@ public:
   MantidQt::SliceViewer::SliceViewer *getSlicer();
   MantidQt::SliceViewer::LineViewer *getLiner();
   const QString &getLabel() const;
+  /// Load the state of the slice viewer from a Mantid project file
+  static API::IProjectSerialisable *loadFromProject(const std::string &lines,
+                                                    ApplicationWindow *app,
+                                                    const int fileVersion);
+  /// Save the state of the slice viewer to a Mantid project file
+  virtual std::string saveToProject(ApplicationWindow *app) override;
+  /// Get the name of the window
+  std::string getWindowName() override;
+  /// Get the workspaces associated with this window
+  std::vector<std::string> getWorkspaceNames() override;
+  /// Get the window type as a string
+  std::string getWindowType() override;
 
 private:
   void setLineViewerValues(QPointF start2D, QPointF end2D, double width);
@@ -93,7 +107,7 @@ protected:
   /// Width of the LineViewer last time it was open
   int m_lastLinerWidth;
 
-  /// Width of the PeaksViewer last tiem it was open
+  /// Width of the PeaksViewer last time it was open
   int m_lastPeaksViewerWidth;
 
   /// Window width

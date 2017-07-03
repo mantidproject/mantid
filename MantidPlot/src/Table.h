@@ -40,7 +40,7 @@
 #include "ScriptingEnv.h"
 #include "Scripted.h"
 
-#include "Mantid/IProjectSerialisable.h"
+#include "MantidQtAPI/IProjectSerialisable.h"
 
 class QTableWidgetItem;
 
@@ -165,6 +165,7 @@ public slots:
   void setText(int row, int col, const QString &text);
   void setRandomValues();
   void setAscValues();
+  void setTextAlignment(int row, int col, QFlags<Qt::AlignmentFlag> alignment);
 
   virtual void cellEdited(int, int col);
   void moveCurrentCell();
@@ -196,6 +197,7 @@ public slots:
   void showAllColumns();
   void hideColumn(int col, bool = true);
   bool isColumnHidden(int col) { return d_table->isColumnHidden(col); };
+  void resizeColumnsToContents();
   //@}
 
   //! \name Sorting
@@ -391,9 +393,12 @@ public slots:
   void showComments(bool on = true);
   bool commentsEnabled() { return d_show_comments; }
 
-  static IProjectSerialisable *loadFromProject(const std::string &lines,
-                                               ApplicationWindow *app,
-                                               const int fileVersion);
+  static MantidQt::API::IProjectSerialisable *
+  loadFromProject(const std::string &lines, ApplicationWindow *app,
+                  const int fileVersion);
+  /// Returns a list of workspace names that are used by this window
+  std::vector<std::string> getWorkspaceNames() override;
+
   void restore(const QStringList &lst) override;
 
   //! This slot notifies the main application that the table has been modified.

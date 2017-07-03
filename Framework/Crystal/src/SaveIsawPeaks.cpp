@@ -1,13 +1,17 @@
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/InstrumentValidator.h"
+#include "MantidAPI/Run.h"
 #include "MantidCrystal/SaveIsawPeaks.h"
 #include "MantidDataObjects/Peak.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
+#include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
+#include "MantidKernel/Strings.h"
 #include "MantidKernel/Utils.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include <fstream>
 #include <Poco/File.h>
+#include <boost/algorithm/string/trim.hpp>
 
 using namespace Mantid::Geometry;
 using namespace Mantid::DataObjects;
@@ -20,7 +24,6 @@ namespace Crystal {
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(SaveIsawPeaks)
 
-//----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void SaveIsawPeaks::init() {
@@ -43,7 +46,6 @@ void SaveIsawPeaks::init() {
       "An optional Workspace2D of profiles from integrating cylinder.");
 }
 
-//----------------------------------------------------------------------------------------------
 /** Execute the algorithm.
  */
 void SaveIsawPeaks::exec() {
@@ -56,16 +58,39 @@ void SaveIsawPeaks::exec() {
   PeaksWorkspace_sptr ws = getProperty("InputWorkspace");
   std::vector<Peak> peaks = ws->getPeaks();
   inst = ws->getInstrument();
-
-  // We cannot assume the peaks have bank type detector modules, so we have a
-  // string to check this
-  std::string bankPart = "?";
+  const DetectorInfo &detectorInfo = ws->detectorInfo();
 
   // We must sort the peaks first by run, then bank #, and save the list of
   // workspace indices of it
   typedef std::map<int, std::vector<size_t>> bankMap_t;
   typedef std::map<int, bankMap_t> runMap_t;
   std::set<int, std::less<int>> uniqueBanks;
+  if (!inst)
+    throw std::runtime_error(
+        "No instrument in the Workspace. Cannot save DetCal file.");
+  // We cannot assume the peaks have bank type detector modules, so we have a
+  // string to check this
+  std::string bankPart = "bank";
+  if (inst->getName().compare("WISH") == 0)
+    bankPart = "WISHpanel";
+
+  // Get all children
+  std::vector<IComponent_const_sptr> comps;
+  inst->getChildren(comps, true);
+
+  for (auto &comp : comps) {
+    std::string bankName = comp->getName();
+    boost::trim(bankName);
+    boost::erase_all(bankName, bankPart);
+    int bank = 0;
+    Strings::convert(bankName, bank);
+    if (bank == 0)
+      continue;
+    if (bankMasked(comp, detectorInfo))
+      continue;
+    // Track unique bank numbers
+    uniqueBanks.insert(bank);
+  }
   runMap_t runMap;
   for (size_t i = 0; i < peaks.size(); ++i) {
     Peak &p = peaks[i];
@@ -89,8 +114,6 @@ void SaveIsawPeaks::exec() {
 
     // Save in the map
     runMap[run][bank].push_back(i);
-    // Track unique bank numbers
-    uniqueBanks.insert(bank);
   }
 
   if (!inst)
@@ -168,8 +191,8 @@ void SaveIsawPeaks::exec() {
         // Retrieve it
         boost::shared_ptr<const IComponent> det =
             inst->getComponentByName(bankName);
-        if (inst->getName().compare("CORELLI") ==
-            0) // for Corelli with sixteenpack under bank
+        if (inst->getName() ==
+            "CORELLI") // for Corelli with sixteenpack under bank
         {
           std::vector<Geometry::IComponent_const_sptr> children;
           boost::shared_ptr<const Geometry::ICompAssembly> asmb =
@@ -351,7 +374,7 @@ void SaveIsawPeaks::exec() {
           Workspace2D_sptr wsProfile2D = getProperty("ProfileWorkspace");
           if (wsProfile2D) {
             out << "8";
-            const Mantid::MantidVec &yValues = wsProfile2D->readY(wi);
+            const auto &yValues = wsProfile2D->y(wi);
             for (size_t j = 0; j < yValues.size(); j++) {
               out << std::setw(8) << static_cast<int>(yValues[j]);
               if ((j + 1) % 10 == 0) {
@@ -372,10 +395,45 @@ void SaveIsawPeaks::exec() {
   out.close();
 }
 
+bool SaveIsawPeaks::bankMasked(IComponent_const_sptr parent,
+                               const DetectorInfo &detectorInfo) {
+  std::vector<Geometry::IComponent_const_sptr> children;
+  boost::shared_ptr<const Geometry::ICompAssembly> asmb =
+      boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(parent);
+  asmb->getChildren(children, false);
+  if (children[0]->getName().compare("sixteenpack") == 0) {
+    asmb =
+        boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(children[0]);
+    children.clear();
+    asmb->getChildren(children, false);
+  }
+
+  for (auto &col : children) {
+    boost::shared_ptr<const Geometry::ICompAssembly> asmb2 =
+        boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(col);
+    std::vector<Geometry::IComponent_const_sptr> grandchildren;
+    asmb2->getChildren(grandchildren, false);
+
+    for (auto &row : grandchildren) {
+      Detector *d =
+          dynamic_cast<Detector *>(const_cast<IComponent *>(row.get()));
+      if (d) {
+        auto detID = d->getID();
+        if (detID < 0)
+          continue;
+        const auto index = detectorInfo.indexOf(detID);
+        if (!detectorInfo.isMasked(index))
+          return false;
+      }
+    }
+  }
+  return true;
+}
+
 V3D SaveIsawPeaks::findPixelPos(std::string bankName, int col, int row) {
   boost::shared_ptr<const IComponent> parent =
       inst->getComponentByName(bankName);
-  if (parent->type().compare("RectangularDetector") == 0) {
+  if (parent->type() == "RectangularDetector") {
     boost::shared_ptr<const RectangularDetector> RDet =
         boost::dynamic_pointer_cast<const RectangularDetector>(parent);
 
@@ -386,7 +444,7 @@ V3D SaveIsawPeaks::findPixelPos(std::string bankName, int col, int row) {
     boost::shared_ptr<const Geometry::ICompAssembly> asmb =
         boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(parent);
     asmb->getChildren(children, false);
-    if (children[0]->getName().compare("sixteenpack") == 0) {
+    if (children[0]->getName() == "sixteenpack") {
       asmb = boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(
           children[0]);
       children.clear();
@@ -407,11 +465,11 @@ V3D SaveIsawPeaks::findPixelPos(std::string bankName, int col, int row) {
 }
 void SaveIsawPeaks::sizeBanks(std::string bankName, int &NCOLS, int &NROWS,
                               double &xsize, double &ysize) {
-  if (bankName.compare("None") == 0)
+  if (bankName == "None")
     return;
   boost::shared_ptr<const IComponent> parent =
       inst->getComponentByName(bankName);
-  if (parent->type().compare("RectangularDetector") == 0) {
+  if (parent->type() == "RectangularDetector") {
     boost::shared_ptr<const RectangularDetector> RDet =
         boost::dynamic_pointer_cast<const RectangularDetector>(parent);
 
@@ -424,7 +482,7 @@ void SaveIsawPeaks::sizeBanks(std::string bankName, int &NCOLS, int &NROWS,
     boost::shared_ptr<const Geometry::ICompAssembly> asmb =
         boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(parent);
     asmb->getChildren(children, false);
-    if (children[0]->getName().compare("sixteenpack") == 0) {
+    if (children[0]->getName() == "sixteenpack") {
       asmb = boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(
           children[0]);
       children.clear();

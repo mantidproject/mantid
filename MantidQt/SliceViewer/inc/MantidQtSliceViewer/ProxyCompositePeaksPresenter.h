@@ -16,8 +16,9 @@ Proxy wrapper of the CompositePeaksPresenter. Allows the CompositePeaksPresenter
 to
 be used in situations where diluted power, via a restricted API is required.
 ----------------------------------------------------------*/
-class DLLExport ProxyCompositePeaksPresenter : public QObject,
-                                               public UpdateableOnDemand {
+class EXPORT_OPT_MANTIDQT_SLICEVIEWER ProxyCompositePeaksPresenter
+    : public QObject,
+      public UpdateableOnDemand {
 public:
   ProxyCompositePeaksPresenter(
       boost::shared_ptr<CompositePeaksPresenter> compositePresenter);
@@ -86,6 +87,14 @@ public:
   /// Can we add HKL peaks to this workspace.
   bool
   hasPeakAddModeFor(boost::weak_ptr<const Mantid::API::IPeaksWorkspace> target);
+  /// Set the peaks size within the current projection
+  void setPeakSizeOnProjection(const double fraction);
+  /// Set the peaks size into the current projection
+  void setPeakSizeIntoProjection(const double fraction);
+  /// Get the peaks size onto the current projection
+  double getPeakSizeOnProjection() const;
+  /// Get the peaks size into the current projection
+  double getPeakSizeIntoProjection() const;
 
 private:
   /// Wrapped composite to delegate to.

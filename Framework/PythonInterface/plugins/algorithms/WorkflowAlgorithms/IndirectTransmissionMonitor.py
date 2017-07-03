@@ -1,4 +1,6 @@
 #pylint: disable=no-init
+from __future__ import (absolute_import, division, print_function)
+
 from mantid.simpleapi import *
 from mantid.api import *
 from mantid.kernel import *
@@ -12,14 +14,11 @@ class IndirectTransmissionMonitor(PythonAlgorithm):
     _can_ws_in = None
     _out_ws = None
 
-
     def category(self):
         return "Workflow\\Inelastic;Inelastic\\Indirect"
 
-
     def summary(self):
         return "Calculates the sample transmission using the raw data files of the sample and its background or container."
-
 
     def PyInit(self):
         self.declareProperty(WorkspaceProperty('SampleWorkspace', '', direction=Direction.Input),
@@ -31,7 +30,6 @@ class IndirectTransmissionMonitor(PythonAlgorithm):
         self.declareProperty(WorkspaceProperty('OutputWorkspace', '', direction=Direction.Output),
                              doc='Output workspace group')
 
-
     def PyExec(self):
         setup_prog = Progress(self, start=0.0, end=0.05, nreports=5)
         setup_prog.report('Setting up algorithm')
@@ -39,7 +37,7 @@ class IndirectTransmissionMonitor(PythonAlgorithm):
 
         ws_basename = str(self._sample_ws_in)
 
-        trans_prog = Progress(self, start=0.05, end=0.04, nreports=2)
+        trans_prog = Progress(self, start=0.05, end=0.4, nreports=2)
         trans_prog.report('Transforming monitor for Sample')
         self._trans_mon(ws_basename, 'Sam', self._sample_ws_in)
         trans_prog.report('Transforming monitor for Container')
@@ -69,7 +67,6 @@ class IndirectTransmissionMonitor(PythonAlgorithm):
         self.setProperty('OutputWorkspace', self._out_ws)
         workflow_prog.report('Algorithm complete')
 
-
     def _setup(self):
         """
         Get properties.
@@ -78,7 +75,6 @@ class IndirectTransmissionMonitor(PythonAlgorithm):
         self._sample_ws_in = self.getPropertyValue("SampleWorkspace")
         self._can_ws_in = self.getPropertyValue("CanWorkspace")
         self._out_ws = self.getPropertyValue('OutputWorkspace')
-
 
     def _get_spectra_index(self, input_ws):
         """
@@ -100,8 +96,9 @@ class IndirectTransmissionMonitor(PythonAlgorithm):
 
         except IndexError:
             # If that fails just get the first spectrum which is a detector
+            spectrumInfo = workspace.spectrumInfo()
             for spec_idx in range(workspace.getNumberHistograms()):
-                if not workspace.getDetector(spec_idx).isMonitor():
+                if not spectrumInfo.isMonitor(spec_idx):
                     detector_1_idx = spec_idx
                     logger.information('Got index of first detector in workspace: %d' % (detector_1_idx))
                     break
@@ -126,7 +123,6 @@ class IndirectTransmissionMonitor(PythonAlgorithm):
 
         return monitor_1_idx, monitor_2_idx, detector_1_idx
 
-
     def _get_detector_workspace_index(self, workspace, detector_id):
         """
         Returns the workspace index for a given detector ID in a workspace.
@@ -140,7 +136,6 @@ class IndirectTransmissionMonitor(PythonAlgorithm):
                 return spec_idx
 
         return None
-
 
     def _unwrap_mon(self, input_ws):
         out_ws = '_unwrap_mon_out'
@@ -163,7 +158,6 @@ class IndirectTransmissionMonitor(PythonAlgorithm):
         DeleteWorkspace(input_ws)
 
         return out_ws
-
 
     def _trans_mon(self, ws_basename, file_type, input_ws):
         monitor_1_idx, monitor_2_idx, detector_1_idx = self._get_spectra_index(input_ws)

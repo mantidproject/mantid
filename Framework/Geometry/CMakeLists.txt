@@ -9,6 +9,7 @@ set ( SRC_FILES
 	src/Crystal/ConventionalCell.cpp
 	src/Crystal/CrystalStructure.cpp
 	src/Crystal/CyclicGroup.cpp
+	src/Crystal/EdgePixel.cpp
 	src/Crystal/Group.cpp
 	src/Crystal/GroupTransformation.cpp
 	src/Crystal/HKLFilter.cpp
@@ -43,18 +44,17 @@ set ( SRC_FILES
 	src/Crystal/V3R.cpp
 	src/IObjComponent.cpp
 	src/Instrument.cpp
-	src/Instrument/Container.cpp
 	src/Instrument/CompAssembly.cpp
 	src/Instrument/Component.cpp
 	src/Instrument/ComponentHelper.cpp
+	src/Instrument/Container.cpp
 	src/Instrument/Detector.cpp
 	src/Instrument/DetectorGroup.cpp
 	src/Instrument/FitParameter.cpp
 	src/Instrument/Goniometer.cpp
 	src/Instrument/IDFObject.cpp
-	src/Instrument/InstrumentDefinitionParser.cpp
-	src/Instrument/NearestNeighbours.cpp
-	src/Instrument/NearestNeighboursFactory.cpp
+        src/Instrument/InfoComponentVisitor.cpp
+        src/Instrument/InstrumentDefinitionParser.cpp
 	src/Instrument/ObjCompAssembly.cpp
 	src/Instrument/ObjComponent.cpp
 	src/Instrument/ParComponentFactory.cpp
@@ -153,6 +153,7 @@ set ( INC_FILES
 	inc/MantidGeometry/Crystal/ConventionalCell.h
 	inc/MantidGeometry/Crystal/CrystalStructure.h
 	inc/MantidGeometry/Crystal/CyclicGroup.h
+	inc/MantidGeometry/Crystal/EdgePixel.h
 	inc/MantidGeometry/Crystal/Group.h
 	inc/MantidGeometry/Crystal/GroupTransformation.h
 	inc/MantidGeometry/Crystal/HKLFilter.h
@@ -197,20 +198,18 @@ set ( INC_FILES
 	inc/MantidGeometry/IDetector_fwd.h
 	inc/MantidGeometry/IObjComponent.h
 	inc/MantidGeometry/Instrument.h
-	inc/MantidGeometry/Instrument/Container.h
 	inc/MantidGeometry/Instrument/CompAssembly.h
 	inc/MantidGeometry/Instrument/Component.h
 	inc/MantidGeometry/Instrument/ComponentHelper.h
+	inc/MantidGeometry/Instrument/ComponentVisitor.h
+	inc/MantidGeometry/Instrument/Container.h
 	inc/MantidGeometry/Instrument/Detector.h
 	inc/MantidGeometry/Instrument/DetectorGroup.h
 	inc/MantidGeometry/Instrument/FitParameter.h
 	inc/MantidGeometry/Instrument/Goniometer.h
 	inc/MantidGeometry/Instrument/IDFObject.h
-	inc/MantidGeometry/Instrument/INearestNeighbours.h
-	inc/MantidGeometry/Instrument/INearestNeighboursFactory.h
-	inc/MantidGeometry/Instrument/InstrumentDefinitionParser.h
-	inc/MantidGeometry/Instrument/NearestNeighbours.h
-	inc/MantidGeometry/Instrument/NearestNeighboursFactory.h
+        inc/MantidGeometry/Instrument/InfoComponentVisitor.h
+        inc/MantidGeometry/Instrument/InstrumentDefinitionParser.h
 	inc/MantidGeometry/Instrument/ObjCompAssembly.h
 	inc/MantidGeometry/Instrument/ObjComponent.h
 	inc/MantidGeometry/Instrument/ParComponentFactory.h
@@ -305,7 +304,6 @@ set ( TEST_FILES
 	BraggScattererFactoryTest.h
 	BraggScattererInCrystalStructureTest.h
 	BraggScattererTest.h
-	ContainerTest.h
 	CenteringGroupTest.h
 	CompAssemblyTest.h
 	ComponentHelperTest.h
@@ -314,6 +312,7 @@ set ( TEST_FILES
 	CompositeBraggScattererTest.h
 	CompositeImplicitFunctionTest.h
 	ConeTest.h
+	ContainerTest.h
 	ConventionalCellTest.h
 	ConvexPolygonIteratorTest.h
 	ConvexPolygonTest.h
@@ -336,6 +335,7 @@ set ( TEST_FILES
 	IMDDimensionFactoryTest.h
 	IMDDimensionTest.h
 	IndexingUtilsTest.h
+	InfoComponentVisitorTest.h
 	InstrumentDefinitionParserTest.h
 	InstrumentRayTracerTest.h
 	InstrumentTest.h
@@ -354,8 +354,6 @@ set ( TEST_FILES
 	MathSupportTest.h
 	MatrixVectorPairParserTest.h
 	MatrixVectorPairTest.h
-	NearestNeighboursFactoryTest.h
-	NearestNeighboursTest.h
 	NiggliCellTest.h
 	NullImplicitFunctionTest.h
 	ObjCompAssemblyTest.h
@@ -450,7 +448,7 @@ if ( APPLE )
   add_definitions ( -DHAVE_IOSTREAM -DHAVE_LIMITS -DHAVE_IOMANIP )
 endif ()
 
-include_directories ( ${OPENGL_INCLUDE_DIR} )
+include_directories ( ${OPENGL_INCLUDE_DIR} ${TBB_INCLUDE_DIRS} )
 include_directories ( ${GSL_INCLUDE_DIR} )
 
 
@@ -475,6 +473,8 @@ endif ()
 set_property ( TARGET Geometry PROPERTY FOLDER "MantidFramework" )
 
 target_link_libraries ( Geometry LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} ${MANTIDLIBS}  ${OPENGL_LIBRARIES} ${GSL_LIBRARIES} ${NEXUS_LIBRARIES} ${JSONCPP_LIBRARIES} )
+
+target_link_libraries ( Geometry LINK_PUBLIC ${TBB_LIBRARIES} ${TBB_MALLOC_LIBRARIES} )
 
 if (ENABLE_OPENCASCADE)
   target_link_libraries ( Geometry LINK_PRIVATE ${OPENCASCADE_LIBRARIES} )

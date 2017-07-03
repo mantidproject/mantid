@@ -1,24 +1,23 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidDataHandling/LoadMLZ.h"
-#include "MantidDataHandling/LoadHelper.h"
 #include "MantidAPI/Axis.h"
+#include "MantidAPI/DetectorInfo.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Progress.h"
 #include "MantidAPI/RegisterFileLoader.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidDataHandling/LoadHelper.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/EmptyValues.h"
 #include "MantidKernel/Exception.h"
+#include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/UnitFactory.h"
 
 #include <algorithm>
 #include <cmath>
 #include <limits>
 #include <vector>
-//-----------------------------------------------------------------------
 
 namespace Mantid {
 namespace DataHandling {
@@ -26,11 +25,12 @@ namespace DataHandling {
 using namespace Kernel;
 using namespace API;
 using namespace NeXus;
+using HistogramData::BinEdges;
+using HistogramData::Counts;
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadMLZ)
 
-//----------------------------------------------------------------------------------------------
 /** Constructor
  */
 LoadMLZ::LoadMLZ()
@@ -40,7 +40,6 @@ LoadMLZ::LoadMLZ()
       m_monitorCounts{0}, m_chopper_speed{0.0}, m_chopper_ratio{0}, m_l1{0.0},
       m_l2{0.0}, m_t1{0.0}, m_supportedInstruments{"TOFTOF", "DNS"} {}
 
-//---------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string LoadMLZ::name() const { return "LoadMLZ"; }
 
@@ -50,7 +49,6 @@ int LoadMLZ::version() const { return 1; }
 /// Algorithm's category for identification. @see Algorithm::category
 const std::string LoadMLZ::category() const { return "DataHandling\\Nexus"; }
 
-//---------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void LoadMLZ::init() {
@@ -64,7 +62,6 @@ void LoadMLZ::init() {
                   "The name to use for the output workspace");
 }
 
-//---------------------------------------------------------------------------
 /** Execute the algorithm.
  */
 void LoadMLZ::exec() {
@@ -126,34 +123,23 @@ void LoadMLZ::maskDetectors(NeXus::NXEntry &entry) {
   g_log.debug() << "Number of masked detectors: " << masked_detectors.size()
                 << '\n';
 
+  auto &detInfo = m_localWorkspace->mutableDetectorInfo();
+  std::vector<size_t> indicesToMask;
   for (auto masked_detector : masked_detectors) {
     g_log.debug() << "List of masked detectors: ";
     g_log.debug() << masked_detector;
     g_log.debug() << ", ";
+    try {
+      indicesToMask.push_back(detInfo.indexOf(masked_detector));
+    } catch (std::out_of_range &) {
+      g_log.warning() << "Invalid detector ID " << masked_detector
+                      << ". Found while running LoadMLZ\n";
+    }
   }
   g_log.debug() << '\n';
 
-  // Need to get hold of the parameter map
-  Geometry::ParameterMap &pmap = m_localWorkspace->instrumentParameters();
-
-  // If explicitly given a list of detectors to mask, just mark those.
-  // Otherwise, mask all detectors pointing to the requested spectra in
-  // indexlist loop below
-  std::vector<detid_t>::const_iterator it;
-  Geometry::Instrument_const_sptr instrument =
-      m_localWorkspace->getInstrument();
-  if (!masked_detectors.empty()) {
-    for (it = masked_detectors.begin(); it != masked_detectors.end(); ++it) {
-      try {
-        if (const Geometry::ComponentID det =
-                instrument->getDetector(*it)->getComponentID()) {
-          pmap.addBool(det, "masked", true);
-        }
-      } catch (Kernel::Exception::NotFoundError &e) {
-        g_log.warning() << e.what() << " Found while running MaskDetectors\n";
-      }
-    }
-  }
+  for (const auto index : indicesToMask)
+    detInfo.setMasked(index, true);
 }
 
 /**
@@ -218,8 +204,8 @@ void LoadMLZ::initWorkSpace(
  */
 void LoadMLZ::initInstrumentSpecific() {
   // Read data from IDF: distance source-sample and distance sample-detectors
-  m_l1 = m_mlzloader.getL1(m_localWorkspace);
-  m_l2 = m_mlzloader.getL2(m_localWorkspace);
+  m_l1 = m_localWorkspace->spectrumInfo().l1();
+  m_l2 = m_localWorkspace->spectrumInfo().l2(1);
 
   g_log.debug() << "L1: " << m_l1 << ", L2: " << m_l2 << '\n';
 }
@@ -295,14 +281,13 @@ void LoadMLZ::loadRunDetails(NXEntry &entry) {
   std::string end_time = entry.getString("end_time");
   runDetails.addProperty("run_end", end_time);
 
-  std::string wavelength = boost::lexical_cast<std::string>(m_wavelength);
-  runDetails.addProperty("wavelength", wavelength);
+  runDetails.addProperty("wavelength", m_wavelength, "Angstrom", true);
 
   double ei = m_mlzloader.calculateEnergy(m_wavelength);
-  runDetails.addProperty<double>("Ei", ei, true); // overwrite
+  runDetails.addProperty<double>("Ei", ei, "meV", true); // overwrite
 
-  std::string duration = std::to_string(entry.getInt("duration"));
-  runDetails.addProperty("duration", duration);
+  int duration = entry.getInt("duration");
+  runDetails.addProperty("duration", duration, "Seconds", true);
 
   std::string mode = entry.getString("mode");
   runDetails.addProperty("mode", mode);
@@ -313,22 +298,14 @@ void LoadMLZ::loadRunDetails(NXEntry &entry) {
   // Check if temperature is defined
   NXClass sample = entry.openNXGroup("sample");
   if (sample.containsDataSet("temperature")) {
-    std::string temperature =
-        boost::lexical_cast<std::string>(entry.getFloat("sample/temperature"));
-    runDetails.addProperty("temperature", temperature);
+    double temperature = entry.getFloat("sample/temperature");
+    runDetails.addProperty("temperature", temperature, "K", true);
   }
 
-  std::string monitorCounts = std::to_string(m_monitorCounts);
-  runDetails.addProperty("monitor_counts", monitorCounts);
-
-  std::string chopper_speed = boost::lexical_cast<std::string>(m_chopper_speed);
-  runDetails.addProperty("chopper_speed", chopper_speed);
-
-  std::string chopper_ratio = std::to_string(m_chopper_ratio);
-  runDetails.addProperty("chopper_ratio", chopper_ratio);
-
-  std::string channel_width = boost::lexical_cast<std::string>(m_channelWidth);
-  runDetails.addProperty("channel_width", channel_width);
+  runDetails.addProperty("monitor_counts", m_monitorCounts);
+  runDetails.addProperty("chopper_speed", m_chopper_speed);
+  runDetails.addProperty("chopper_ratio", m_chopper_ratio);
+  runDetails.addProperty("channel_width", m_channelWidth, "microseconds", true);
 
   // Calculate number of full time channels - use to crop workspace - S. Busch's
   // method
@@ -349,7 +326,7 @@ void LoadMLZ::loadRunDetails(NXEntry &entry) {
   runDetails.addProperty("experiment_team", user_name);
 
   runDetails.addProperty("EPP", m_monitorElasticPeakPosition);
-  runDetails.addProperty("TOF1", m_t1);
+  runDetails.addProperty("TOF1", m_t1, "microseconds", true);
 }
 
 /**
@@ -391,25 +368,17 @@ void LoadMLZ::loadDataIntoTheWorkSpace(NeXus::NXEntry &entry) {
   }
 
   // Assign calculated bins to first X axis
-  m_localWorkspace->dataX(0)
-      .assign(detectorTofBins.begin(), detectorTofBins.end());
+  BinEdges edges(std::move(detectorTofBins));
 
-  Progress progress(this, 0, 1, m_numberOfTubes * m_numberOfPixelsPerTube);
+  Progress progress(this, 0.0, 1.0, m_numberOfTubes * m_numberOfPixelsPerTube);
   size_t spec = 0;
   for (size_t i = 0; i < m_numberOfTubes; ++i) {
     for (size_t j = 0; j < m_numberOfPixelsPerTube; ++j) {
-      if (spec > 0) {
-        // just copy the time binning axis to every spectra
-        m_localWorkspace->dataX(spec) = m_localWorkspace->readX(0);
-      }
       // Assign Y
       int *data_p = &data(static_cast<int>(i), static_cast<int>(j), 0);
 
-      m_localWorkspace->dataY(spec).assign(data_p, data_p + m_numberOfChannels);
-      // Assign Error
-      MantidVec &E = m_localWorkspace->dataE(spec);
-      std::transform(data_p, data_p + m_numberOfChannels, E.begin(),
-                     LoadMLZ::calculateError);
+      m_localWorkspace->setHistogram(
+          spec, edges, Counts(data_p, data_p + m_numberOfChannels));
 
       ++spec;
       progress.report();

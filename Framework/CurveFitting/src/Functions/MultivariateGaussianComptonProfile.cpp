@@ -91,7 +91,7 @@ MultivariateGaussianComptonProfile::intensityParameterIndices() const {
  */
 size_t MultivariateGaussianComptonProfile::fillConstraintMatrix(
     Kernel::DblMatrix &cmatrix, const size_t start,
-    const std::vector<double> &errors) const {
+    const HistogramData::HistogramE &errors) const {
   std::vector<double> result(ySpace().size());
   this->massProfile(result.data(), ySpace().size());
   std::transform(result.begin(), result.end(), errors.begin(), result.begin(),

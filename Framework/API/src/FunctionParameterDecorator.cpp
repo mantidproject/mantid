@@ -1,7 +1,9 @@
 #include "MantidAPI/FunctionParameterDecorator.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/CompositeFunction.h"
+#include "MantidAPI/IConstraint.h"
 #include "MantidAPI/ParameterReference.h"
+#include "MantidAPI/ParameterTie.h"
 
 namespace Mantid {
 namespace API {
@@ -152,24 +154,6 @@ void FunctionParameterDecorator::setError(size_t i, double err) {
   return m_wrappedFunction->setError(i, err);
 }
 
-bool FunctionParameterDecorator::isFixed(size_t i) const {
-  throwIfNoFunctionSet();
-
-  return m_wrappedFunction->isFixed(i);
-}
-
-void FunctionParameterDecorator::fix(size_t i) {
-  throwIfNoFunctionSet();
-
-  m_wrappedFunction->fix(i);
-}
-
-void FunctionParameterDecorator::unfix(size_t i) {
-  throwIfNoFunctionSet();
-
-  m_wrappedFunction->unfix(i);
-}
-
 size_t FunctionParameterDecorator::getParameterIndex(
     const ParameterReference &ref) const {
   throwIfNoFunctionSet();
@@ -178,8 +162,8 @@ size_t FunctionParameterDecorator::getParameterIndex(
     return m_wrappedFunction->getParameterIndex(ref);
   }
 
-  if (ref.getFunction() == this && ref.getIndex() < nParams()) {
-    return ref.getIndex();
+  if (ref.getLocalFunction() == this && ref.getLocalIndex() < nParams()) {
+    return ref.getLocalIndex();
   }
 
   return nParams();
@@ -220,12 +204,16 @@ bool FunctionParameterDecorator::hasAttribute(
   return m_wrappedFunction->hasAttribute(attName);
 }
 
-ParameterTie *FunctionParameterDecorator::tie(const std::string &parName,
-                                              const std::string &expr,
-                                              bool isDefault) {
+void FunctionParameterDecorator::setParameterStatus(
+    size_t i, IFunction::ParameterStatus status) {
   throwIfNoFunctionSet();
+  m_wrappedFunction->setParameterStatus(i, status);
+}
 
-  return m_wrappedFunction->tie(parName, expr, isDefault);
+IFunction::ParameterStatus
+FunctionParameterDecorator::getParameterStatus(size_t i) const {
+  throwIfNoFunctionSet();
+  return m_wrappedFunction->getParameterStatus(i);
 }
 
 void FunctionParameterDecorator::applyTies() {
@@ -258,10 +246,11 @@ ParameterTie *FunctionParameterDecorator::getTie(size_t i) const {
   return m_wrappedFunction->getTie(i);
 }
 
-void FunctionParameterDecorator::addConstraint(IConstraint *ic) {
+void FunctionParameterDecorator::addConstraint(
+    std::unique_ptr<IConstraint> ic) {
   throwIfNoFunctionSet();
 
-  m_wrappedFunction->addConstraint(ic);
+  m_wrappedFunction->addConstraint(std::move(ic));
 }
 
 IConstraint *FunctionParameterDecorator::getConstraint(size_t i) const {
@@ -297,11 +286,17 @@ void FunctionParameterDecorator::declareParameter(
   UNUSED_ARG(description);
 }
 
+void FunctionParameterDecorator::tie(const std::string &parName,
+                                     const std::string &expr, bool isDefault) {
+  throwIfNoFunctionSet();
+  m_wrappedFunction->tie(parName, expr, isDefault);
+}
+
 /// Forwads addTie-call to the decorated function.
-void FunctionParameterDecorator::addTie(ParameterTie *tie) {
+void FunctionParameterDecorator::addTie(std::unique_ptr<ParameterTie> tie) {
   throwIfNoFunctionSet();
 
-  m_wrappedFunction->addTie(tie);
+  m_wrappedFunction->addTie(std::move(tie));
 }
 
 /**

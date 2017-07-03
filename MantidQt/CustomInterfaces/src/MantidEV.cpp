@@ -2,15 +2,17 @@
 #include <QMessageBox>
 #include <QFileDialog>
 #include <QSettings>
-#include <QDesktopServices>
 #include <QDesktopWidget>
 #include <Poco/Path.h>
 
 #include "MantidQtCustomInterfaces/MantidEV.h"
+#include "MantidQtAPI/MantidDesktopServices.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/IEventWorkspace.h"
 
 namespace MantidQt {
+using API::MantidDesktopServices;
+
 namespace CustomInterfaces {
 
 // Register the class with the factory
@@ -100,9 +102,8 @@ RunSphereIntegrate::RunSphereIntegrate(
     const std::string &event_ws_name, double peak_radius, double inner_radius,
     double outer_radius, bool integrate_edge, bool use_cylinder_integration,
     double cylinder_length, double cylinder_percent_bkg,
-    const std::string &cylinder_profile_fit)
-
-{
+    const std::string &cylinder_profile_fit, bool adaptiveQBkg,
+    double adaptiveQMult) {
   this->worker = worker;
   this->peaks_ws_name = peaks_ws_name;
   this->event_ws_name = event_ws_name;
@@ -114,16 +115,18 @@ RunSphereIntegrate::RunSphereIntegrate(
   this->cylinder_length = cylinder_length;
   this->cylinder_percent_bkg = cylinder_percent_bkg;
   this->cylinder_profile_fit = cylinder_profile_fit;
+  this->adaptiveQBkg = adaptiveQBkg;
+  this->adaptiveQMult = adaptiveQMult;
 }
 
 /**
  *  Class to call sphereIntegrate in a separate thread.
  */
 void RunSphereIntegrate::run() {
-  worker->sphereIntegrate(peaks_ws_name, event_ws_name, peak_radius,
-                          inner_radius, outer_radius, integrate_edge,
-                          use_cylinder_integration, cylinder_length,
-                          cylinder_percent_bkg, cylinder_profile_fit);
+  worker->sphereIntegrate(
+      peaks_ws_name, event_ws_name, peak_radius, inner_radius, outer_radius,
+      integrate_edge, use_cylinder_integration, cylinder_length,
+      cylinder_percent_bkg, cylinder_profile_fit, adaptiveQBkg, adaptiveQMult);
 }
 
 /**
@@ -380,6 +383,8 @@ void MantidEV::initLayout() {
       new QDoubleValidator(m_uiForm.CylinderLength_ledt));
   m_uiForm.CylinderPercentBkg_ledt->setValidator(
       new QDoubleValidator(m_uiForm.CylinderPercentBkg_ledt));
+  m_uiForm.AdaptiveQMult_ledt->setValidator(
+      new QDoubleValidator(m_uiForm.AdaptiveQMult_ledt));
   m_uiForm.NBadEdgePixels_ledt->setValidator(
       new QDoubleValidator(m_uiForm.NBadEdgePixels_ledt));
   m_uiForm.RegionRadius_ledt->setValidator(
@@ -495,6 +500,8 @@ void MantidEV::setDefaultState_slot() {
   m_uiForm.PeakSize_ledt->setText("0.18");
   m_uiForm.BackgroundInnerSize_ledt->setText("0.18");
   m_uiForm.BackgroundOuterSize_ledt->setText("0.23");
+  m_uiForm.AdaptiveQBkg_ckbx->setChecked(false);
+  m_uiForm.AdaptiveQMult_ledt->setText("0.0");
   setEnabledSphereIntParams_slot(true);
   setEnabledFitIntParams_slot(false);
   setEnabledEllipseIntParams_slot(false);
@@ -510,7 +517,7 @@ void MantidEV::setDefaultState_slot() {
  * Go to MantidEV web page when help menu item is chosen
  */
 void MantidEV::help_slot() {
-  QDesktopServices::openUrl(
+  MantidDesktopServices::openUrl(
       QUrl("http://www.mantidproject.org/"
            "SCD_Event_Data_Reduction_Interface_(MantidEV)"));
 }
@@ -629,9 +636,9 @@ void MantidEV::loadEventFileEntered_slot() {
  */
 void MantidEV::loadEventFile_slot() {
   QString file_path = getFilePath(last_event_file);
-  QString Qfile_name =
-      QFileDialog::getOpenFileName(this, tr("Load event file"), file_path,
-                                   tr("Nexus Files (*.nxs);; All files(*.*)"));
+  QString Qfile_name = QFileDialog::getOpenFileName(
+      this, tr("Load event file"), file_path,
+      tr("Nexus Files (*.nxs *.h5);; All files(*)"));
 
   if (Qfile_name.length() > 0) {
     m_uiForm.EventFileName_ledt->setText(Qfile_name);
@@ -647,7 +654,7 @@ void MantidEV::selectDetCalFile_slot() {
   QString file_path = getFilePath(last_cal_file);
   QString Qfile_name = QFileDialog::getOpenFileName(
       this, tr("Load calibration file"), file_path,
-      tr("ISAW .DetCal Files (*.DetCal);; All files(*.*)"));
+      tr("ISAW .DetCal Files (*.DetCal);; All files(*)"));
 
   if (Qfile_name.length() > 0) {
     m_uiForm.CalFileName_ledt->setText(Qfile_name);
@@ -663,7 +670,7 @@ void MantidEV::selectDetCalFile2_slot() {
   QString file_path = getFilePath(last_cal_file2);
   QString Qfile_name = QFileDialog::getOpenFileName(
       this, tr("Load calibration file"), file_path,
-      tr("ISAW .DetCal Files (*.DetCal);; All files(*.*)"));
+      tr("ISAW .DetCal Files (*.DetCal);; All files(*)"));
 
   if (Qfile_name.length() > 0) {
     m_uiForm.CalFileName2_ledt->setText(Qfile_name);
@@ -762,7 +769,7 @@ void MantidEV::getLoadPeaksFileName_slot() {
   QString file_path = getFilePath(last_peaks_file);
   QString Qfile_name = QFileDialog::getOpenFileName(
       this, tr("Load peaks file"), file_path,
-      tr("Peaks Files (*.peaks *.integrate *.nxs *.h5);; All files(*.*)"));
+      tr("Peaks Files (*.peaks *.integrate *.nxs *.h5);; All files(*)"));
 
   if (Qfile_name.length() > 0) {
     last_peaks_file = Qfile_name.toStdString();
@@ -778,7 +785,7 @@ void MantidEV::getSavePeaksFileName() {
   QString file_path = getFilePath(last_peaks_file);
   QString Qfile_name = QFileDialog::getSaveFileName(
       this, tr("Save peaks file"), file_path,
-      tr("Peaks Files (*.peaks *.integrate *.nxs *.h5);; All files(*.*)"), 0,
+      tr("Peaks Files (*.peaks *.integrate *.nxs *.h5);; All files(*)"), 0,
       QFileDialog::DontConfirmOverwrite);
 
   if (Qfile_name.length() > 0) {
@@ -830,9 +837,7 @@ void MantidEV::findUB_slot() {
       errorMessage("Find UB Using FFT Failed");
       return;
     }
-  }
-
-  else if (use_IndexedPeaks) {
+  } else if (use_IndexedPeaks) {
     double indPeaks_tolerance = 0.1;
 
     if (!getPositiveDouble(m_uiForm.IndexedPeaksTolerance_ledt,
@@ -843,9 +848,7 @@ void MantidEV::findUB_slot() {
       errorMessage("Find UB Using Indexed Peaks Failed");
       return;
     }
-  }
-
-  else if (load_UB) {
+  } else if (load_UB) {
     std::string file_name =
         m_uiForm.SelectUBFile_ledt->text().trimmed().toStdString();
     if (file_name.length() == 0) {
@@ -926,7 +929,7 @@ void MantidEV::getLoadUB_FileName_slot() {
   QString file_path = getFilePath(last_UB_file);
   QString Qfile_name =
       QFileDialog::getOpenFileName(this, tr("Load matrix file"), file_path,
-                                   tr("Matrix Files (*.mat);; All files(*.*)"));
+                                   tr("Matrix Files (*.mat);; All files(*)"));
   if (Qfile_name.length() > 0) {
     last_UB_file = Qfile_name.toStdString();
     m_uiForm.SelectUBFile_ledt->setText(Qfile_name);
@@ -940,7 +943,7 @@ void MantidEV::getSaveUB_FileName() {
   QString file_path = getFilePath(last_UB_file);
   QString Qfile_name =
       QFileDialog::getSaveFileName(this, tr("Save matrix file"), file_path,
-                                   tr("Matrix Files (*.mat);; All files(*.*)"));
+                                   tr("Matrix Files (*.mat);; All files(*)"));
 
   if (Qfile_name.length() > 0) {
     last_UB_file = Qfile_name.toStdString();
@@ -979,9 +982,7 @@ void MantidEV::chooseCell_slot() {
                            allow_perm)) {
       errorMessage("Failed to Show Conventional Cells");
     }
-  }
-
-  else if (select_cell_type) {
+  } else if (select_cell_type) {
     std::string cell_type = m_uiForm.CellType_cmbx->currentText().toStdString();
     std::string centering =
         m_uiForm.CellCentering_cmbx->currentText().toStdString();
@@ -989,9 +990,7 @@ void MantidEV::chooseCell_slot() {
                                   allow_perm)) {
       errorMessage("Failed to Select Specified Conventional Cell");
     }
-  }
-
-  else if (select_cell_form) {
+  } else if (select_cell_form) {
     std::string form =
         m_uiForm.CellFormNumber_cmbx->currentText().toStdString();
     double form_num = 0;
@@ -1077,12 +1076,13 @@ void MantidEV::integratePeaks_slot() {
   bool ellipsoid_integrate = m_uiForm.EllipsoidIntegration_rbtn->isChecked();
   bool use_cylinder_integration = m_uiForm.Cylinder_ckbx->isChecked();
 
-  if (sphere_integrate || use_cylinder_integration) {
+  if (sphere_integrate) {
     double peak_radius = 0.20;
     double inner_radius = 0.20;
     double outer_radius = 0.25;
     double cylinder_length = 0.0;
     double cylinder_percent_bkg = 0.0;
+    double adaptiveQMult = 0.0;
 
     if (!getPositiveDouble(m_uiForm.PeakRadius_ledt, peak_radius))
       return;
@@ -1105,10 +1105,16 @@ void MantidEV::integratePeaks_slot() {
     std::string cylinder_profile_fit =
         m_uiForm.CylinderProfileFit_cmbx->currentText().toStdString();
 
+    bool adaptive_background = m_uiForm.AdaptiveQBkg_ckbx->isChecked();
+
+    if (!getDouble(m_uiForm.AdaptiveQMult_ledt, adaptiveQMult))
+      return;
+
     RunSphereIntegrate *runner = new RunSphereIntegrate(
         worker, peaks_ws_name, event_ws_name, peak_radius, inner_radius,
         outer_radius, integrate_edge, use_cylinder_integration, cylinder_length,
-        cylinder_percent_bkg, cylinder_profile_fit);
+        cylinder_percent_bkg, cylinder_profile_fit, adaptive_background,
+        adaptiveQMult);
 
     bool running = m_thread_pool->tryStart(runner);
     if (!running)
@@ -1271,7 +1277,7 @@ void MantidEV::saveState_slot() {
   QString file_path = getFilePath(last_ini_file);
   QString Qfile_name = QFileDialog::getSaveFileName(
       this, tr("Save Settings File(.ini)"), file_path,
-      tr("Settings Files (*.ini);; All files(*.*) "));
+      tr("Settings Files (*.ini);; All files(*) "));
 
   if (Qfile_name.length() > 0) {
     last_ini_file = Qfile_name.toStdString();
@@ -1286,7 +1292,7 @@ void MantidEV::loadState_slot() {
   QString file_path = getFilePath(last_ini_file);
   QString Qfile_name = QFileDialog::getOpenFileName(
       this, tr("Load Settings File(.ini)"), file_path,
-      tr("Settings Files (*.ini);; All files(*.*)"));
+      tr("Settings Files (*.ini);; All files(*)"));
 
   if (Qfile_name.length() > 0) {
     last_ini_file = Qfile_name.toStdString();
@@ -1735,6 +1741,8 @@ void MantidEV::setEnabledSphereIntParams_slot(bool on) {
   m_uiForm.CylinderLength_ledt->setEnabled(on);
   m_uiForm.CylinderPercentBkg_ledt->setEnabled(on);
   m_uiForm.CylinderProfileFit_cmbx->setEnabled(on);
+  m_uiForm.AdaptiveQBkg_ckbx->setEnabled(on);
+  m_uiForm.AdaptiveQMult_ledt->setEnabled(on);
 }
 
 /**
@@ -2068,6 +2076,8 @@ void MantidEV::saveSettings(const std::string &filename) {
                   m_uiForm.BackgroundInnerSize_ledt->text());
   state->setValue("BackgroundOuterSize_ledt",
                   m_uiForm.BackgroundOuterSize_ledt->text());
+  state->setValue("AdaptiveQBkg_ckbx", m_uiForm.AdaptiveQBkg_ckbx->isChecked());
+  state->setValue("AdaptiveQMult_ledt", m_uiForm.AdaptiveQMult_ledt->text());
 
   // save info for file paths
   state->setValue("last_UB_file", QString::fromStdString(last_UB_file));
@@ -2192,6 +2202,8 @@ void MantidEV::loadSettings(const std::string &filename) {
   restore(state, "PeakSize_ledt", m_uiForm.PeakSize_ledt);
   restore(state, "BackgroundInnerSize_ledt", m_uiForm.BackgroundInnerSize_ledt);
   restore(state, "BackgroundOuterSize_ledt", m_uiForm.BackgroundOuterSize_ledt);
+  restore(state, "AdaptiveQBkg_ckbx", m_uiForm.AdaptiveQBkg_ckbx);
+  restore(state, "AdaptiveQMult_ledt", m_uiForm.AdaptiveQMult_ledt);
   setEnabledEllipseSizeOptions_slot();
   // load info for file paths
   last_UB_file = state->value("last_UB_file", "").toString().toStdString();

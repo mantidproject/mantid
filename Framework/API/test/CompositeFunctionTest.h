@@ -59,6 +59,7 @@ public:
   }
   const std::string id(void) const override { return ""; }
   void init(const size_t &, const size_t &, const size_t &) override {}
+  void init(const size_t &, const HistogramData::Histogram &) override {}
   void generateHistogram(const std::size_t, const MantidVec &, MantidVec &,
                          MantidVec &, bool) const override {}
 
@@ -70,6 +71,11 @@ public:
 
 private:
   CompositeFunctionTest_MocMatrixWorkspace *doClone() const override {
+    throw std::runtime_error("Cloning of "
+                             "CompositeFunctionTest_MocMatrixWorkspace is not "
+                             "implemented.");
+  }
+  CompositeFunctionTest_MocMatrixWorkspace *doCloneEmpty() const override {
     throw std::runtime_error("Cloning of "
                              "CompositeFunctionTest_MocMatrixWorkspace is not "
                              "implemented.");
@@ -356,17 +362,17 @@ public:
 
     TS_ASSERT_EQUALS(mfun->nParams(), 12);
 
-    TS_ASSERT_EQUALS(mfun->getParameter(0), 0.8);
+    TS_ASSERT_EQUALS(mfun->getParameter(0), 0.0);
     TS_ASSERT_EQUALS(mfun->getParameter(1), 0.0);
     TS_ASSERT_EQUALS(mfun->getParameter(2), 1.1);
     TS_ASSERT_EQUALS(mfun->getParameter(3), 1.2);
-    TS_ASSERT_EQUALS(mfun->getParameter(4), 1.3);
+    TS_ASSERT_EQUALS(mfun->getParameter(4), 0.0);
     TS_ASSERT_EQUALS(mfun->getParameter(5), 2.1);
-    TS_ASSERT_EQUALS(mfun->getParameter(6), 2.2);
-    TS_ASSERT_EQUALS(mfun->getParameter(7), 2.3);
+    TS_ASSERT_EQUALS(mfun->getParameter(6), 0.0);
+    TS_ASSERT_EQUALS(mfun->getParameter(7), 0.0);
     TS_ASSERT_EQUALS(mfun->getParameter(8), 2.4);
     TS_ASSERT_EQUALS(mfun->getParameter(9), 3.1);
-    TS_ASSERT_EQUALS(mfun->getParameter(10), 3.2);
+    TS_ASSERT_EQUALS(mfun->getParameter(10), 0.0);
     TS_ASSERT_EQUALS(mfun->getParameter(11), 3.3);
 
     TS_ASSERT_EQUALS(mfun->parameterName(0), "f0.a");
@@ -382,17 +388,17 @@ public:
     TS_ASSERT_EQUALS(mfun->parameterName(10), "f3.h");
     TS_ASSERT_EQUALS(mfun->parameterName(11), "f3.s");
 
-    TS_ASSERT_EQUALS(mfun->getParameter("f0.a"), 0.8);
+    TS_ASSERT_EQUALS(mfun->getParameter("f0.a"), 0.0);
     TS_ASSERT_EQUALS(mfun->getParameter("f0.b"), 0.0);
     TS_ASSERT_EQUALS(mfun->getParameter("f1.c"), 1.1);
     TS_ASSERT_EQUALS(mfun->getParameter("f1.h"), 1.2);
-    TS_ASSERT_EQUALS(mfun->getParameter("f1.s"), 1.3);
+    TS_ASSERT_EQUALS(mfun->getParameter("f1.s"), 0.0);
     TS_ASSERT_EQUALS(mfun->getParameter("f2.c0"), 2.1);
-    TS_ASSERT_EQUALS(mfun->getParameter("f2.c1"), 2.2);
-    TS_ASSERT_EQUALS(mfun->getParameter("f2.c2"), 2.3);
+    TS_ASSERT_EQUALS(mfun->getParameter("f2.c1"), 0.0);
+    TS_ASSERT_EQUALS(mfun->getParameter("f2.c2"), 0.0);
     TS_ASSERT_EQUALS(mfun->getParameter("f2.c3"), 2.4);
     TS_ASSERT_EQUALS(mfun->getParameter("f3.c"), 3.1);
-    TS_ASSERT_EQUALS(mfun->getParameter("f3.h"), 3.2);
+    TS_ASSERT_EQUALS(mfun->getParameter("f3.h"), 0.0);
     TS_ASSERT_EQUALS(mfun->getParameter("f3.s"), 3.3);
 
     TS_ASSERT_EQUALS(mfun->parameterIndex("f0.a"), 0);
@@ -461,17 +467,17 @@ public:
 
     TS_ASSERT_EQUALS(mfun->nParams(), 12);
 
-    TS_ASSERT_EQUALS(mfun->getParameter(0), 0.8);
-    TS_ASSERT_EQUALS(mfun->getParameter(1), 0.0);
+    TS_ASSERT_EQUALS(mfun->getParameter(0), -1);
+    TS_ASSERT_EQUALS(mfun->getParameter(1), -2);
     TS_ASSERT_EQUALS(mfun->getParameter(2), 100);
     TS_ASSERT_EQUALS(mfun->getParameter(3), 101);
-    TS_ASSERT_EQUALS(mfun->getParameter(4), 1.3);
+    TS_ASSERT_EQUALS(mfun->getParameter(4), -3);
     TS_ASSERT_EQUALS(mfun->getParameter(5), 102);
-    TS_ASSERT_EQUALS(mfun->getParameter(6), 2.2);
-    TS_ASSERT_EQUALS(mfun->getParameter(7), 2.3);
+    TS_ASSERT_EQUALS(mfun->getParameter(6), -4);
+    TS_ASSERT_EQUALS(mfun->getParameter(7), -5);
     TS_ASSERT_EQUALS(mfun->getParameter(8), 103);
     TS_ASSERT_EQUALS(mfun->getParameter(9), 104);
-    TS_ASSERT_EQUALS(mfun->getParameter(10), 3.2);
+    TS_ASSERT_EQUALS(mfun->getParameter(10), -6);
     TS_ASSERT_EQUALS(mfun->getParameter(11), 105);
 
     delete mfun;
@@ -597,18 +603,18 @@ public:
 
     TS_ASSERT_EQUALS(mfun->nParams(), 12);
 
-    TS_ASSERT_EQUALS(mfun->getParameter(0), 154);
-    TS_ASSERT_EQUALS(mfun->getParameter(1), 77);
-    TS_ASSERT_EQUALS(mfun->getParameter(2), 1.1);
-    TS_ASSERT_EQUALS(mfun->getParameter(3), 1.2);
-    TS_ASSERT_EQUALS(mfun->getParameter(4), 1.65);
-    TS_ASSERT_EQUALS(mfun->getParameter(5), 2.1);
-    TS_ASSERT_EQUALS(mfun->getParameter(6), 2.4 * 2.4);
-    TS_ASSERT_EQUALS(mfun->getParameter(7), sqrt(2.4));
-    TS_ASSERT_EQUALS(mfun->getParameter(8), 2.4);
-    TS_ASSERT_EQUALS(mfun->getParameter(9), 3.1);
-    TS_ASSERT_EQUALS(mfun->getParameter(10), 79.1);
-    TS_ASSERT_EQUALS(mfun->getParameter(11), 3.3);
+    TS_ASSERT_EQUALS(mfun->getParameter("f0.a"), 154);
+    TS_ASSERT_EQUALS(mfun->getParameter("f0.b"), 77);
+    TS_ASSERT_EQUALS(mfun->getParameter("f1.c"), 1.1);
+    TS_ASSERT_EQUALS(mfun->getParameter("f1.h"), 1.2);
+    TS_ASSERT_EQUALS(mfun->getParameter("f1.s"), 1.65);
+    TS_ASSERT_EQUALS(mfun->getParameter("f2.c0"), 2.1);
+    TS_ASSERT_EQUALS(mfun->getParameter("f2.c1"), 2.4 * 2.4);
+    TS_ASSERT_EQUALS(mfun->getParameter("f2.c2"), sqrt(2.4));
+    TS_ASSERT_EQUALS(mfun->getParameter("f2.c3"), 2.4);
+    TS_ASSERT_EQUALS(mfun->getParameter("f3.c"), 3.1);
+    TS_ASSERT_EQUALS(mfun->getParameter("f3.h"), 79.1);
+    TS_ASSERT_EQUALS(mfun->getParameter("f3.s"), 3.3);
 
     delete mfun;
   }
@@ -658,7 +664,7 @@ public:
 
     TS_ASSERT_EQUALS(mfun->nParams(), 12);
 
-    TS_ASSERT_DIFFERS(mfun->getParameter(0), 154);
+    TS_ASSERT_EQUALS(mfun->getParameter(0), 154);
     TS_ASSERT_EQUALS(mfun->getParameter(1), 77);
     TS_ASSERT_EQUALS(mfun->getParameter(2), 1.1);
     TS_ASSERT_EQUALS(mfun->getParameter(3), 1.2);
@@ -1067,11 +1073,11 @@ public:
 
     TS_ASSERT_EQUALS(mfun->nParams(), 5);
 
-    TS_ASSERT(!mfun->isFixed(0));
-    TS_ASSERT(mfun->isFixed(1));
-    TS_ASSERT(!mfun->isFixed(2));
-    TS_ASSERT(mfun->isFixed(3));
-    TS_ASSERT(mfun->isFixed(4));
+    TS_ASSERT(mfun->isActive(0));  // f0.a
+    TS_ASSERT(!mfun->isActive(1)); // f0.b
+    TS_ASSERT(mfun->isActive(2));  // f1.c
+    TS_ASSERT(!mfun->isActive(3)); // f1.h
+    TS_ASSERT(mfun->isFixed(4));   // f1.s
 
     mfun->applyTies();
 
@@ -1108,9 +1114,9 @@ public:
 
     TS_ASSERT_EQUALS(mfun->nParams(), 3);
 
-    TS_ASSERT(!mfun->isFixed(0));
-    TS_ASSERT(!mfun->isFixed(1));
-    TS_ASSERT(mfun->isFixed(2));
+    TS_ASSERT(mfun->isActive(0));
+    TS_ASSERT(mfun->isActive(1));
+    TS_ASSERT(!mfun->isActive(2));
 
     mfun->applyTies();
 
@@ -1185,6 +1191,31 @@ public:
     TS_ASSERT(fun->hasAttribute("NumDeriv"));
     b = fun->getAttribute("NumDeriv").asBool();
     TS_ASSERT(!b);
+  }
+
+  void test_local_name() {
+    std::string funStr = "name=Linear;(name=Linear;(name=Linear;name=Linear))";
+    auto fun = boost::dynamic_pointer_cast<CompositeFunction>(
+        FunctionFactory::Instance().createInitialized(funStr));
+    TS_ASSERT_EQUALS(fun->parameterLocalIndex(0), 0);
+    TS_ASSERT_EQUALS(fun->parameterLocalIndex(2), 0);
+    TS_ASSERT_EQUALS(fun->parameterLocalIndex(4), 2);
+    TS_ASSERT_EQUALS(fun->parameterLocalIndex(6), 4);
+
+    TS_ASSERT_EQUALS(fun->parameterLocalName(0), "a");
+    TS_ASSERT_EQUALS(fun->parameterLocalName(2), "f0.a");
+    TS_ASSERT_EQUALS(fun->parameterLocalName(4), "f1.f0.a");
+    TS_ASSERT_EQUALS(fun->parameterLocalName(6), "f1.f1.a");
+
+    TS_ASSERT_EQUALS(fun->parameterLocalIndex(0, true), 0);
+    TS_ASSERT_EQUALS(fun->parameterLocalIndex(2, true), 0);
+    TS_ASSERT_EQUALS(fun->parameterLocalIndex(4, true), 0);
+    TS_ASSERT_EQUALS(fun->parameterLocalIndex(6, true), 0);
+
+    TS_ASSERT_EQUALS(fun->parameterLocalName(0, true), "a");
+    TS_ASSERT_EQUALS(fun->parameterLocalName(2, true), "a");
+    TS_ASSERT_EQUALS(fun->parameterLocalName(4, true), "a");
+    TS_ASSERT_EQUALS(fun->parameterLocalName(6, true), "a");
   }
 };
 

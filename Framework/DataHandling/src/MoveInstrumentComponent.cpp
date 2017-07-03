@@ -1,11 +1,9 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidDataHandling/MoveInstrumentComponent.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/Exception.h"
-#include "MantidGeometry/Instrument/ComponentHelper.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
+#include "MantidAPI/DetectorInfo.h"
+#include "MantidGeometry/Instrument/RectangularDetectorPixel.h"
 
 namespace Mantid {
 namespace DataHandling {
@@ -59,14 +57,14 @@ void MoveInstrumentComponent::exec() {
       boost::dynamic_pointer_cast<DataObjects::PeaksWorkspace>(ws);
 
   // Get some stuff from the input workspace
-  Instrument_sptr inst;
+  Instrument_const_sptr inst;
   if (inputW) {
-    inst = boost::const_pointer_cast<Instrument>(inputW->getInstrument());
+    inst = inputW->getInstrument();
     if (!inst)
       throw std::runtime_error("Could not get a valid instrument from the "
                                "MatrixWorkspace provided as input");
   } else if (inputP) {
-    inst = boost::const_pointer_cast<Instrument>(inputP->getInstrument());
+    inst = inputP->getInstrument();
     if (!inst)
       throw std::runtime_error("Could not get a valid instrument from the "
                                "PeaksWorkspace provided as input");
@@ -85,7 +83,6 @@ void MoveInstrumentComponent::exec() {
   const bool relativePosition = getProperty("RelativePosition");
 
   IComponent_const_sptr comp;
-
   // Find the component to move
   if (DetID != -1) {
     comp = inst->getDetector(DetID);
@@ -108,19 +105,23 @@ void MoveInstrumentComponent::exec() {
     throw std::invalid_argument("DetectorID or ComponentName must be given.");
   }
 
+  if (dynamic_cast<const Geometry::RectangularDetectorPixel *>(comp.get())) {
+    // DetectorInfo makes changing positions possible but we keep the old
+    // behavior of ignoring position changes for RectangularDetectorPixel.
+    g_log.warning("Component is a RectangularDetectorPixel, moving is not "
+                  "possible, doing nothing.");
+    return;
+  }
+
   // Do the move
-  using namespace Geometry::ComponentHelper;
-  TransformType positionType = Absolute;
+  V3D position(X, Y, Z);
   if (relativePosition)
-    positionType = Relative;
+    position += comp->getPos();
+
   if (inputW) {
-    Geometry::ParameterMap &pmap = inputW->instrumentParameters();
-    Geometry::ComponentHelper::moveComponent(*comp, pmap, V3D(X, Y, Z),
-                                             positionType);
+    inputW->mutableDetectorInfo().setPosition(*comp, position);
   } else if (inputP) {
-    Geometry::ParameterMap &pmap = inputP->instrumentParameters();
-    Geometry::ComponentHelper::moveComponent(*comp, pmap, V3D(X, Y, Z),
-                                             positionType);
+    inputP->mutableDetectorInfo().setPosition(*comp, position);
   }
 }
 

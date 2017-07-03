@@ -6,6 +6,7 @@ from reduction_gui.reduction.scripter import BaseScriptElement
 from reduction_gui.reduction.sans.hfir_background_script import Background as BaseBackground
 from reduction_gui.reduction.sans.eqsans_sample_script import SampleData
 
+
 class Background(BaseBackground):
 
     class DirectBeam(SampleData.DirectBeam):
@@ -21,10 +22,11 @@ class Background(BaseBackground):
                 Generate reduction script
             """
             if len(str(self.sample_file).strip())==0 or len(str(self.direct_beam).strip())==0:
-                raise RuntimeError("Direct beam method for background transmission was selected but was selected but all the appropriate data files were not entered.")
+                raise RuntimeError("Direct beam method for background transmission was selected but was selected "
+                                   "but all the appropriate data files were not entered.")
 
             return "BckDirectBeamTransmission(\"%s\", \"%s\", beam_radius=%g)\n" % \
-            (self.sample_file, self.direct_beam, self.beam_radius)
+                (self.sample_file, self.direct_beam, self.beam_radius)
 
         def from_setup_info(self, xml_str):
             """

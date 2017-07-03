@@ -1,7 +1,8 @@
-﻿#pylint: disable=no-init,attribute-defined-outside-init
+#pylint: disable=no-init,attribute-defined-outside-init
 import stresstesting
 from mantid.simpleapi import *
 from math import pi
+
 
 class MuonFFTTest(stresstesting.MantidStressTest):
     '''Tests the FFT algorithm on a MUSR workspace, to check it can cope with rounding errors in X'''

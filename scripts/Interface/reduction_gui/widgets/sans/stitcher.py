@@ -123,6 +123,7 @@ class StitcherWidget(BaseWidget):
         self.populate_combobox(self._content.high_q_combo)
         self._content.high_q_combo.setEditable(True)
         # pylint: disable = no-self-argument
+
         class ShowEventFilter(QtCore.QObject):
             def eventFilter(obj_self, filteredObj, event):
                 if event.type() == QtCore.QEvent.HoverEnter:
@@ -274,7 +275,6 @@ class StitcherWidget(BaseWidget):
                 scale = util._check_and_get_float_line_edit(scale_control)
                 data_object.set_scale(scale)
 
-            _npts = data_object.get_number_of_points()
             util.set_valid(dataset_control.lineEdit(), True)
         else:
             data_object = None
@@ -327,7 +327,6 @@ class StitcherWidget(BaseWidget):
                                           "Could not load %s.\nMake sure you pick the XML output from the reduction." % file_in)
                 return
             self._content.high_scale_edit.setText("1.0")
-            _npts = self._high_q_data.get_number_of_points()
             util.set_valid(self._content.high_q_combo.lineEdit(), True)
         else:
             self._high_q_data = None
@@ -343,7 +342,7 @@ class StitcherWidget(BaseWidget):
         fname = QtCore.QFileInfo(QtGui.QFileDialog.getOpenFileName(self, title,
                                                                    self._output_dir,
                                                                    "Reduced XML files (*.xml);; Reduced Nexus files"
-                                                                   " (*.nxs);; All files (*.*)")).filePath()
+                                                                   " (*.nxs);; All files (*)")).filePath()
         if fname:
             # Store the location of the loaded file
             self._output_dir = str(QtCore.QFileInfo(fname).path())

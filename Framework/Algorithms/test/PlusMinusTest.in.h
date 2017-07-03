@@ -23,7 +23,7 @@ using namespace Mantid::DataObjects;
 
 /*****************************************************************************************/
 /********** PLEASE NOTE! THIS FILE WAS AUTO-GENERATED FROM CMAKE.  ***********************/
-/********** Source = PlusMinusTest.h.in **************************************************/
+/********** Source = PlusMinusTest.in.h **************************************************/
 /*****************************************************************************************/
 
 class @PLUSMINUSTEST_CLASS@ : public CxxTest::TestSuite
@@ -43,12 +43,12 @@ public:
     wsNameOut = "MinusTest_outputWorkspace";
     DO_PLUS = @PLUSMINUSTEST_DO_PLUS@;
 
-    fibWS1d = WorkspaceCreationHelper::Create1DWorkspaceFib(5);
-    histWS_5x10_123 = WorkspaceCreationHelper::Create2DWorkspace123(5,10);
-    histWS_5x10_154 = WorkspaceCreationHelper::Create2DWorkspace154(5,10);
-    histWS_5x10_bin = WorkspaceCreationHelper::Create2DWorkspace(5,10);
-    eventWS_5x10_50 = WorkspaceCreationHelper::CreateEventWorkspace(5,10,50,0.0,1.0,2);
-    eventWS_small = WorkspaceCreationHelper::CreateEventWorkspace(numPixels, numBins, numBins, 0.0, 1.0, 2);
+    fibWS1d = WorkspaceCreationHelper::create1DWorkspaceFib(5, true);
+    histWS_5x10_123 = WorkspaceCreationHelper::create2DWorkspace123(5,10, true);
+    histWS_5x10_154 = WorkspaceCreationHelper::create2DWorkspace154(5,10, true);
+    histWS_5x10_bin = WorkspaceCreationHelper::create2DWorkspace(5,10);
+    eventWS_5x10_50 = WorkspaceCreationHelper::createEventWorkspace(5,10,50,0.0,1.0,2);
+    eventWS_small = WorkspaceCreationHelper::createEventWorkspace(numPixels, numBins, numBins, 0.0, 1.0, 2);
   }
 
   void testInit()
@@ -82,9 +82,9 @@ public:
 
   void test_CompoundAssignment()
   {
-    Workspace2D_sptr a = WorkspaceCreationHelper::Create2DWorkspace(5,5);
+    Workspace2D_sptr a = WorkspaceCreationHelper::create2DWorkspace(5,5);
     const Workspace_const_sptr b = a;
-    Workspace2D_sptr c = WorkspaceCreationHelper::Create2DWorkspace(5,5);
+    Workspace2D_sptr c = WorkspaceCreationHelper::create2DWorkspace(5,5);
     if (DO_PLUS)
     {
       a += 5;
@@ -129,9 +129,9 @@ public:
   {
     if (DO_PLUS)
     {
-      MatrixWorkspace_sptr a = WorkspaceCreationHelper::CreateWorkspaceSingleValue(3);
+      MatrixWorkspace_sptr a = WorkspaceCreationHelper::createWorkspaceSingleValue(3);
       a->mutableRun().setProtonCharge(10.);
-      MatrixWorkspace_sptr b = WorkspaceCreationHelper::CreateWorkspaceSingleValue(2);
+      MatrixWorkspace_sptr b = WorkspaceCreationHelper::createWorkspaceSingleValue(2);
       b->mutableRun().setProtonCharge(5.);
       AnalysisDataService::Instance().add("a", a);
       AnalysisDataService::Instance().add("b", b);
@@ -167,7 +167,7 @@ public:
   {
     int nBins = 5;
     MatrixWorkspace_sptr work_in1 = fibWS1d;
-    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::Create1DWorkspaceRand(nBins);
+    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::create1DWorkspaceRand(nBins, true);
     performTest(work_in1,work_in2);
   }
 
@@ -182,7 +182,7 @@ public:
   void test_2D_2D_inplace()
   {
     int nHist = 5,nBins=10;
-    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::Create2DWorkspaceBinned(nHist,nBins);
+    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::create2DWorkspaceBinned(nHist,nBins);
     MatrixWorkspace_sptr work_in2 = histWS_5x10_bin;
     performTest(work_in1,work_in2, true /*inplace*/, false /*not event*/,
         DO_PLUS ? 4.0 : 0.0,   2.0);
@@ -198,16 +198,17 @@ public:
   void test_2D_2D_Histograms()
   {
     int nHist = 5,nBins=10;
-    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::Create2DWorkspace123(nHist,nBins, true);
-    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::Create2DWorkspace154(nHist,nBins, true);
+    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::create2DWorkspace123(nHist,nBins, true);
+    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::create2DWorkspace154(nHist,nBins, true);
     performTest(work_in1,work_in2);
   }
 
   void test_1D_Rand2D()
   {
     int nHist = 5,nBins=5;
-    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::Create2DWorkspace154(nHist,nBins);
-    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::Create1DWorkspaceRand(nBins);
+    const bool isHistogram(true);
+    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::create2DWorkspace154(nHist,nBins, isHistogram);
+    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::create1DWorkspaceRand(nBins, isHistogram);
     performTest(work_in1,work_in2);
   }
 
@@ -215,14 +216,14 @@ public:
   {
     int nBins=10;
     MatrixWorkspace_sptr work_in1 = histWS_5x10_154;
-    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::Create2DWorkspace123(1,nBins);
+    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::create2DWorkspace123(1,nBins, true);
     performTest(work_in1,work_in2);
   }
 
   void test_1DVertical_2D()
   {
     int nBins=10;
-    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::Create2DWorkspace123(1,nBins);
+    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::create2DWorkspace123(1,nBins, true);
     MatrixWorkspace_sptr work_in2 = histWS_5x10_154;
     if (DO_PLUS)
     {
@@ -238,8 +239,8 @@ public:
   {
     //In 2D workspaces, the X bins have to match
     int nHist = 10,nBins=5;
-    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::Create2DWorkspace123(nHist,nBins);
-    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::Create2DWorkspace154(1,nBins*5);
+    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::create2DWorkspace123(nHist,nBins, true);
+    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::create2DWorkspace154(1,nBins*5);
     performTest_fails(work_in1, work_in2);
   }
 
@@ -274,15 +275,15 @@ public:
   void test_1D_SingleValue()
   {
     MatrixWorkspace_sptr work_in1 = fibWS1d;
-    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::CreateWorkspaceSingleValue(2.2);
+    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::createWorkspaceSingleValue(2.2);
     performTest(work_in1,work_in2);
   }
 
   void test_SingleValue_1D()
   {
     int nBins = 5;
-    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::CreateWorkspaceSingleValue(2.2);
-    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::Create2DWorkspaceBinned(1,nBins);
+    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::createWorkspaceSingleValue(2.2);
+    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::create2DWorkspaceBinned(1,nBins);
     if (DO_PLUS)
       MatrixWorkspace_sptr out = performTest(work_in1,work_in2,
           false /*in place*/, false /*not event*/,
@@ -296,22 +297,22 @@ public:
   void test_2D_SingleValue()
   {
     MatrixWorkspace_sptr work_in1 = histWS_5x10_bin;
-    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::CreateWorkspaceSingleValue(4.455);
+    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::createWorkspaceSingleValue(4.455);
     performTest(work_in1,work_in2);
   }
 
   void test_2D_SingleValue_InPlace()
   {
     int nHist =5,nBins=10;
-    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::Create2DWorkspaceBinned(nHist,nBins);
-    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::CreateWorkspaceSingleValue(4.455);
+    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::create2DWorkspaceBinned(nHist,nBins);
+    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::createWorkspaceSingleValue(4.455);
     performTest(work_in1,work_in2, true /*in place*/, false /*not event*/,
         DO_PLUS ? 6.455 : -2.455,   2.5406);
   }
 
   void test_SingleValue_2D()
   {
-    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::CreateWorkspaceSingleValue(4.455);
+    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::createWorkspaceSingleValue(4.455);
     MatrixWorkspace_sptr work_in2 = histWS_5x10_bin;
     if (DO_PLUS)
     {
@@ -330,7 +331,7 @@ public:
   void test_2D_SingleValueNoError()
   {
     MatrixWorkspace_sptr work_in1 = histWS_5x10_bin;
-    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::CreateWorkspaceSingleValueWithError(5.0, 0.0);
+    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::createWorkspaceSingleValueWithError(5.0, 0.0);
     performTest(work_in1,work_in2);
   }
 
@@ -341,7 +342,7 @@ public:
   void test_Event_SingleValue()
   {
     MatrixWorkspace_sptr work_in1 = eventWS_5x10_50;
-    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::CreateWorkspaceSingleValue(2.0);
+    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::createWorkspaceSingleValue(2.0);
     // Become a WS2D
     performTest(work_in1, work_in2, false, false /*output is NOT event*/ );
   }
@@ -349,13 +350,13 @@ public:
   void test_Event_SingleValue_inPlace_fails()
   {
     MatrixWorkspace_sptr work_in1 = eventWS_5x10_50;
-    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::CreateWorkspaceSingleValue(2.0);
+    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::createWorkspaceSingleValue(2.0);
     performTest_fails(work_in1, work_in2, true);
   }
 
   void test_SingleValue_Event()
   {
-    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::CreateWorkspaceSingleValue(2.0);
+    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::createWorkspaceSingleValue(2.0);
     MatrixWorkspace_sptr work_in2 = eventWS_5x10_50;
     // Become a WS2D
     if (DO_PLUS)
@@ -374,7 +375,7 @@ public:
   void test_SingleValue_Event_inPlace_fails()
   {
     MatrixWorkspace_sptr work_in1 = eventWS_5x10_50;
-    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::CreateWorkspaceSingleValue(2.0);
+    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::createWorkspaceSingleValue(2.0);
     // Become a WS2D
     performTest_fails(work_in1, work_in2, true);
   }
@@ -391,7 +392,7 @@ public:
   void test_2D_Event_inPlace()
   {
     int nHist = 5, nBins=10;
-    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::Create2DWorkspace(nHist,nBins);
+    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::create2DWorkspace(nHist,nBins);
     MatrixWorkspace_sptr work_in2 = eventWS_5x10_50;
     // You have to specify the expected output value because in1 gets changed.
     performTest(work_in1,work_in2, true, false /*not event out*/,
@@ -417,14 +418,14 @@ public:
   void test_Event_2DSingleSpectrum()
   {
     MatrixWorkspace_sptr work_in1 = eventWS_5x10_50;
-    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::Create2DWorkspace(1, 10);
+    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::create2DWorkspace(1, 10);
     performTest(work_in1,work_in2, false);
   }
 
   void test_Event_2DSingleSpectrum_inPlace_fails()
   {
     MatrixWorkspace_sptr work_in1 = eventWS_5x10_50;
-    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::Create2DWorkspace(1, 10);
+    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::create2DWorkspace(1, 10);
     performTest_fails(work_in1,work_in2, true);
   }
 
@@ -432,7 +433,7 @@ public:
   {
     for(int inplace=0; inplace<2;inplace++)
     {
-      MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::Create2DWorkspace(1, 10);
+      MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::create2DWorkspace(1, 10);
       MatrixWorkspace_sptr work_in2 = eventWS_5x10_50;
       if (DO_PLUS)
       {
@@ -480,7 +481,7 @@ public:
   void test_Event_Event_inPlace()
   {
     int nHist = 5,nBins=10;
-    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::CreateEventWorkspace(nHist,nBins,50,0.0,1.0,2);
+    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::createEventWorkspace(nHist,nBins,50,0.0,1.0,2);
     MatrixWorkspace_sptr work_in2 = eventWS_5x10_50;
     MatrixWorkspace_sptr work_out = performTest(work_in1,work_in2, true, true /*outputIsEvent*/,
         DO_PLUS ? 4.0 : 0.0,   DO_PLUS ? 2.0 : 2.0);
@@ -489,13 +490,13 @@ public:
   void test_Event_EventSingleSpectrum_fails()
   {
     MatrixWorkspace_sptr work_in1 = eventWS_5x10_50;
-    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::CreateEventWorkspace(1,10,50,0.0,1.0,2);
+    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::createEventWorkspace(1,10,50,0.0,1.0,2);
     performTest_fails(work_in1,work_in2, false);
   }
 
   void test_EventSingleSpectrum_Event_fails()
   {
-    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::CreateEventWorkspace(1,10,50,0.0,1.0,2);
+    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::createEventWorkspace(1,10,50,0.0,1.0,2);
     MatrixWorkspace_sptr work_in2 = eventWS_5x10_50;
     performTest_fails(work_in1,work_in2, false);
   }
@@ -506,8 +507,8 @@ public:
     for(int inplace=0; inplace<2;inplace++)
     {
       int nHist = 5,nBins=1;
-      MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::CreateEventWorkspace(nHist,nBins,50,0.0,1.0,2);
-      MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::CreateEventWorkspace(nHist,nBins,50,0.0,1.0,2);
+      MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::createEventWorkspace(nHist,nBins,50,0.0,1.0,2);
+      MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::createEventWorkspace(nHist,nBins,50,0.0,1.0,2);
       MatrixWorkspace_sptr work_out = performTest(work_in1,work_in2, inplace!=0, true /*outputIsEvent*/,
           DO_PLUS ? 4.0 : 0.0,   DO_PLUS ? 2.0 : 2.0);
     }
@@ -518,8 +519,8 @@ public:
     for(int inplace=0; inplace<2;inplace++)
     {
       int nHist = 5,nBins=10;
-      MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::CreateEventWorkspace(nHist,nBins,50,0.0,1.0,2);
-      MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::CreateEventWorkspace(nHist,1,50,0.0,1.0,2);
+      MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::createEventWorkspace(nHist,nBins,50,0.0,1.0,2);
+      MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::createEventWorkspace(nHist,1,50,0.0,1.0,2);
       MatrixWorkspace_sptr work_out = performTest(work_in1,work_in2, inplace!=0, true /*outputIsEvent*/,
           DO_PLUS ? 4.0 : 0.0,   DO_PLUS ? 2.0 : 2.0);
     }
@@ -529,7 +530,7 @@ public:
   {
     for(int inplace=0; inplace<2;inplace++)
     {
-      MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::CreateEventWorkspace(5,1,50,0.0,1.0,2);
+      MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::createEventWorkspace(5,1,50,0.0,1.0,2);
       MatrixWorkspace_sptr work_in2 = eventWS_5x10_50;
       MatrixWorkspace_sptr work_out = performTest(work_in1,work_in2, inplace!=0, true /*outputIsEvent*/,
           DO_PLUS ? 4.0 : 0.0,   DO_PLUS ? 2.0 : 2.0);
@@ -541,8 +542,8 @@ public:
     for(int inplace=0; inplace<2;inplace++)
     {
       int nHist=1,nBins=1;
-      MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::CreateEventWorkspace(nHist,nBins,50,0.0,1.0,2);
-      MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::CreateEventWorkspace(nHist,nBins,50,0.0,1.0,2);
+      MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::createEventWorkspace(nHist,nBins,50,0.0,1.0,2);
+      MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::createEventWorkspace(nHist,nBins,50,0.0,1.0,2);
       MatrixWorkspace_sptr work_out = performTest(work_in1,work_in2, inplace!=0, true /*outputIsEvent*/,
           DO_PLUS ? 4.0 : 0.0,   DO_PLUS ? 2.0 : 2.0);
     }
@@ -556,7 +557,7 @@ public:
   void test_Event_IncompatibleUnits_fails()
   {
     MatrixWorkspace_sptr work_in1 = eventWS_5x10_50;
-    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::CreateEventWorkspace(5,10,50,0.0,1.0,2);
+    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::createEventWorkspace(5,10,50,0.0,1.0,2);
     work_in2->setYUnit("Microfurlongs per Megafortnights");
     performTest_fails(work_in1,work_in2, false /*not inplace*/);
   }
@@ -567,8 +568,8 @@ public:
   {
     for (int inplace =0; inplace < 2; inplace++)
     {
-      MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::CreateEventWorkspace(3,10,50, 0.0, 1.0, 3); // 5 ev
-      MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::CreateEventWorkspace(3,10,50, 0.0, 1.0, 2, 100); //100 events per spectrum, but the spectra are at different pixel ids
+      MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::createEventWorkspace(3,10,50, 0.0, 1.0, 3); // 5 ev
+      MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::createEventWorkspace(3,10,50, 0.0, 1.0, 2, 100); //100 events per spectrum, but the spectra are at different pixel ids
 
       //First pixel id of rhs is 100
       TS_ASSERT( work_in2->getSpectrum(0).hasDetectorID(100) );
@@ -703,6 +704,7 @@ public:
     alg->setPropertyValue("RHSWorkspace",wsName2);
     alg->setPropertyValue("OutputWorkspace",wsNameOut);
     alg->setProperty("AllowDifferentNumberSpectra", allowMismatchedSpectra);
+    alg->setRethrows(true);
     TSM_ASSERT_THROWS_NOTHING(message, alg->execute());
     TSM_ASSERT( message, alg->isExecuted() );
     MatrixWorkspace_sptr work_out1;
@@ -1049,7 +1051,7 @@ public:
   void test_EventWorkspace_EventWorkspace_clearRHS()
   {
     EventWorkspace_sptr lhs = eventWS_small;
-    EventWorkspace_sptr rhs = WorkspaceCreationHelper::CreateEventWorkspace(numPixels, numBins, numBins, 0.0, 1.0, 2);
+    EventWorkspace_sptr rhs = WorkspaceCreationHelper::createEventWorkspace(numPixels, numBins, numBins, 0.0, 1.0, 2);
     performTest_withClearRHS(lhs,rhs, true, true, lhs->getNumberEvents() + rhs->getNumberEvents(), true);
   }
 
@@ -1063,7 +1065,7 @@ public:
   void test_Workspace2D_EventWorkspace_clearRHS()
   {
     MatrixWorkspace_sptr lhs = histWS_5x10_bin;
-    EventWorkspace_sptr rhs = WorkspaceCreationHelper::CreateEventWorkspace(numPixels, numBins, numBins, 0.0, 1.0, 2);
+    EventWorkspace_sptr rhs = WorkspaceCreationHelper::createEventWorkspace(numPixels, numBins, numBins, 0.0, 1.0, 2);
     performTest_withClearRHS(lhs,rhs, true, false, 0, true);
   }
 
@@ -1077,28 +1079,28 @@ public:
   void test_EventWorkspace_Workspace2D_clearRHS()
   {
     EventWorkspace_sptr lhs = eventWS_small;
-    MatrixWorkspace_sptr rhs = WorkspaceCreationHelper::Create2DWorkspace(numPixels, numBins);
+    MatrixWorkspace_sptr rhs = WorkspaceCreationHelper::create2DWorkspace(numPixels, numBins);
     performTest_withClearRHS(lhs,rhs, true, false, 0, false);
   }
 
 
   void test_EventWorkspace_EventWorkspace_inPlace_of_lhs()
   {
-    EventWorkspace_sptr lhs = WorkspaceCreationHelper::CreateEventWorkspace(numPixels, numBins, numBins, 0.0, 1.0, 2);
-    EventWorkspace_sptr rhs = WorkspaceCreationHelper::CreateEventWorkspace(numPixels, numBins, numBins, 0.0, 1.0, 2);
+    EventWorkspace_sptr lhs = WorkspaceCreationHelper::createEventWorkspace(numPixels, numBins, numBins, 0.0, 1.0, 2);
+    EventWorkspace_sptr rhs = WorkspaceCreationHelper::createEventWorkspace(numPixels, numBins, numBins, 0.0, 1.0, 2);
     performTest_withClearRHS(lhs,rhs, false, true, lhs->getNumberEvents() + rhs->getNumberEvents(), false, 1);
   }
 
   void test_EventWorkspace_EventWorkspace_inPlace_of_rhs()
   {
-    EventWorkspace_sptr lhs = WorkspaceCreationHelper::CreateEventWorkspace(numPixels, numBins, numBins, 0.0, 1.0, 2);
-    EventWorkspace_sptr rhs = WorkspaceCreationHelper::CreateEventWorkspace(numPixels, numBins, numBins, 0.0, 1.0, 2);
+    EventWorkspace_sptr lhs = WorkspaceCreationHelper::createEventWorkspace(numPixels, numBins, numBins, 0.0, 1.0, 2);
+    EventWorkspace_sptr rhs = WorkspaceCreationHelper::createEventWorkspace(numPixels, numBins, numBins, 0.0, 1.0, 2);
     performTest_withClearRHS(lhs,rhs, false, true, lhs->getNumberEvents() + rhs->getNumberEvents(), false, 2);
   }
 
   void test_EventWorkspace_EventWorkspace_inPlace_AND_lhs_is_rhs()
   {
-    EventWorkspace_sptr lhs = WorkspaceCreationHelper::CreateEventWorkspace(numPixels, numBins, numBins, 0.0, 1.0, 2);
+    EventWorkspace_sptr lhs = WorkspaceCreationHelper::createEventWorkspace(numPixels, numBins, numBins, 0.0, 1.0, 2);
     EventWorkspace_sptr rhs = lhs;
     performTest_withClearRHS(lhs,rhs, false, true, lhs->getNumberEvents() + rhs->getNumberEvents(), false, 1);
   }
@@ -1112,15 +1114,15 @@ public:
 
   void test_EventWorkspace_EventWorkspace_lhs_is_rhs_with_clearRHS_set_doesnt_clearRHS()
   {
-    EventWorkspace_sptr lhs = WorkspaceCreationHelper::CreateEventWorkspace(numPixels, numBins, numBins, 0.0, 1.0, 2);
+    EventWorkspace_sptr lhs = WorkspaceCreationHelper::createEventWorkspace(numPixels, numBins, numBins, 0.0, 1.0, 2);
     EventWorkspace_sptr rhs = lhs;
     performTest_withClearRHS(lhs,rhs, false, true, lhs->getNumberEvents() + rhs->getNumberEvents(), false);
   }
 
   void test_EventWorkspace_EventWorkspace_inPlace_of_rhs_with_clearRHS_set_doesnt_clearRHS()
   {
-    EventWorkspace_sptr lhs = WorkspaceCreationHelper::CreateEventWorkspace(numPixels, numBins, numBins, 0.0, 1.0, 2);
-    EventWorkspace_sptr rhs = WorkspaceCreationHelper::CreateEventWorkspace(numPixels, numBins, numBins, 0.0, 1.0, 2);
+    EventWorkspace_sptr lhs = WorkspaceCreationHelper::createEventWorkspace(numPixels, numBins, numBins, 0.0, 1.0, 2);
+    EventWorkspace_sptr rhs = WorkspaceCreationHelper::createEventWorkspace(numPixels, numBins, numBins, 0.0, 1.0, 2);
     performTest_withClearRHS(lhs,rhs, false, true, lhs->getNumberEvents() + rhs->getNumberEvents(), false, 2);
   }
 
@@ -1148,8 +1150,8 @@ public:
   
   void setUp() override
   {
-  	ws2D_1 = WorkspaceCreationHelper::Create2DWorkspace(10000 /*histograms*/, 1000/*bins*/);
-   	ws2D_2 = WorkspaceCreationHelper::Create2DWorkspace(10000 /*histograms*/, 1000/*bins*/);
+  	ws2D_1 = WorkspaceCreationHelper::create2DWorkspace(10000 /*histograms*/, 1000/*bins*/);
+   	ws2D_2 = WorkspaceCreationHelper::create2DWorkspace(10000 /*histograms*/, 1000/*bins*/);
   }
   
   void test_large_2D()

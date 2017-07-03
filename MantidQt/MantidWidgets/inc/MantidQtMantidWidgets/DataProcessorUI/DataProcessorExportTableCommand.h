@@ -43,6 +43,11 @@ public:
   };
   std::string name() override { return std::string("Export .TBL"); }
   std::string icon() override { return std::string("://save_template.png"); }
+  std::string tooltip() override { return std::string("Export .TBL file"); }
+  std::string whatsthis() override {
+    return std::string("Opens a dialog to export a table as .TBL file");
+  }
+  std::string shortcut() override { return std::string(); }
 };
 }
 }

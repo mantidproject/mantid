@@ -1,11 +1,12 @@
-#include "MantidQtAPI/MantidColorMap.h"
 #include "MantidQtMantidWidgets/ColorBarWidget.h"
-#include "MantidQtAPI/QScienceSpinBox.h"
+#include "MantidQtAPI/MantidColorMap.h"
 #include "MantidQtAPI/PowerScaleEngine.h"
-#include <qwt_scale_map.h>
-#include <qwt_scale_widget.h>
+#include "MantidQtAPI/QScienceSpinBox.h"
+#include "MantidQtAPI/TSVSerialiser.h"
 #include <QKeyEvent>
 #include <qwt_scale_engine.h>
+#include <qwt_scale_map.h>
+#include <qwt_scale_widget.h>
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -99,7 +100,7 @@ void ColorBarWidget::setRenderMode(bool rendering) {
 *	 ADD_AUTOSCALE_CURRENT_SLICE
 *	 ADD_AUTOSCALE_ON_LOAD
 *	 ADD_AUTOSCALE_BOTH
-*
+*	 ADD_AUTOSCALE_NONE
 * @param strategy :: select which checkboxes are shown
 */
 void ColorBarWidget::setCheckBoxMode(CheckboxStrategy strategy) {
@@ -125,11 +126,18 @@ void ColorBarWidget::setCheckBoxMode(CheckboxStrategy strategy) {
     ui.autoScaleForCurrentSlice->setVisible(true);
     ui.autoScaleForCurrentSlice->setEnabled(true);
     break;
+
+  case ADD_AUTOSCALE_NONE: // for exporting images
+    ui.autoScale->setVisible(false);
+    ui.autoScale->setEnabled(false);
+    ui.autoScaleForCurrentSlice->setVisible(false);
+    ui.autoScaleForCurrentSlice->setEnabled(false);
+    break;
   }
 }
 
 // Get the current colorbar scaling type
-int ColorBarWidget::getScale() {
+int ColorBarWidget::getScale() const {
   // Get value from GUI
   return ui.cmbScaleType->currentIndex();
 }
@@ -153,7 +161,7 @@ void ColorBarWidget::setExponent(double nth_power) {
 }
 
 // Get exponent value for power scale
-double ColorBarWidget::getExponent() {
+double ColorBarWidget::getExponent() const {
   // Get value from GUI
   return ui.dspnN->value();
 }
@@ -424,6 +432,55 @@ bool ColorBarWidget::getAutoScale() const { return ui.autoScale->isChecked(); }
  */
 bool ColorBarWidget::getAutoScaleforCurrentSlice() const {
   return ui.autoScaleForCurrentSlice->isChecked();
+}
+
+/**
+ * Load the state of the color bar widget from a Mantid project file
+ * @param lines :: lines from the project file to load state from
+ */
+void ColorBarWidget::loadFromProject(const std::string &lines) {
+  API::TSVSerialiser tsv(lines);
+
+  double min, max, power;
+  bool autoScale, autoScaleSlice;
+  int scaleType;
+  QString fileName;
+
+  tsv.selectLine("AutoScale");
+  tsv >> autoScale;
+  tsv.selectLine("AutoScaleSlice");
+  tsv >> autoScaleSlice;
+  tsv.selectLine("ScaleType");
+  tsv >> scaleType;
+  tsv.selectLine("Power");
+  tsv >> power;
+  tsv.selectLine("Range");
+  tsv >> min >> max;
+  tsv.selectLine("Filename");
+  tsv >> fileName;
+
+  setAutoScale(autoScale);
+  ui.autoScaleForCurrentSlice->setChecked(autoScaleSlice);
+  setScale(scaleType);
+  setMinimum(min);
+  setMaximum(max);
+  setExponent(power);
+  getColorMap().loadMap(fileName);
+}
+
+/**
+ * Save the state of the color bar widget to a Mantid project file
+ * @return a string representing the current state
+ */
+std::string ColorBarWidget::saveToProject() const {
+  API::TSVSerialiser tsv;
+  tsv.writeLine("AutoScale") << getAutoScale();
+  tsv.writeLine("AutoScaleSlice") << getAutoScaleforCurrentSlice();
+  tsv.writeLine("ScaleType") << getScale();
+  tsv.writeLine("Power") << getExponent();
+  tsv.writeLine("Range") << m_min << m_max;
+  tsv.writeLine("Filename") << m_colorMap.getFilePath();
+  return tsv.outputLines();
 }
 
 ColorBarWidget::~ColorBarWidget() {}

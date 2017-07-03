@@ -14,6 +14,7 @@ try:
 except:
     pass
 
+
 class HFIRReductionScripter(BaseReductionScripter):
     """
         Organizes the set of reduction parameters that will be used to
@@ -74,5 +75,4 @@ class HFIRReductionScripter(BaseReductionScripter):
             mantidplot.runPythonScript(script, True)
             return table_ws
         else:
-            raise RuntimeError, "Reduction could not be executed: Mantid could not be imported"
-
+            raise RuntimeError("Reduction could not be executed: Mantid could not be imported")

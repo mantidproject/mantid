@@ -22,7 +22,7 @@ public:
                        const bool canAddPeaks, PeaksViewer *parent);
 
   std::set<QString> getShownColumns();
-  void setShownColumns(std::set<QString> &cols);
+  void setShownColumns(const std::set<QString> &cols);
   ~PeaksWorkspaceWidget() override;
   Mantid::API::IPeaksWorkspace_const_sptr getPeaksWorkspace() const;
   void setBackgroundColor(const PeakViewColor &backgroundColor);

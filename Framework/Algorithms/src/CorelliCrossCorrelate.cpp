@@ -1,5 +1,7 @@
 #include "MantidAlgorithms/CorelliCrossCorrelate.h"
 #include "MantidAPI/InstrumentValidator.h"
+#include "MantidAPI/Run.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidDataObjects/EventWorkspace.h"
@@ -8,7 +10,11 @@
 #include "MantidGeometry/muParser_Silent.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
+#include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/TimeSeriesProperty.h"
+
+#include <boost/algorithm/string/classification.hpp>
+#include <boost/algorithm/string/split.hpp>
 
 namespace Mantid {
 namespace Algorithms {
@@ -21,7 +27,6 @@ using namespace DataObjects;
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(CorelliCrossCorrelate)
 
-//----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void CorelliCrossCorrelate::init() {
@@ -93,7 +98,6 @@ std::map<std::string, std::string> CorelliCrossCorrelate::validateInputs() {
   return errors;
 }
 
-//----------------------------------------------------------------------------------------------
 /** Execute the algorithm.
  */
 void CorelliCrossCorrelate::exec() {
@@ -184,12 +188,12 @@ void CorelliCrossCorrelate::exec() {
   // Do the cross correlation.
   int64_t numHistograms = static_cast<int64_t>(inputWS->getNumberHistograms());
   API::Progress prog = API::Progress(this, 0.0, 1.0, numHistograms);
-  PARALLEL_FOR1(outputWS)
+  const auto &spectrumInfo = inputWS->spectrumInfo();
+  PARALLEL_FOR_IF(Kernel::threadSafe(*outputWS))
   for (int64_t i = 0; i < numHistograms; ++i) {
     PARALLEL_START_INTERUPT_REGION
 
     auto &evlist = outputWS->getSpectrum(i);
-    IDetector_const_sptr detector = inputWS->getDetector(i);
 
     // Switch to weighted if needed.
     if (evlist.getEventType() == TOF)
@@ -209,7 +213,7 @@ void CorelliCrossCorrelate::exec() {
 
     // Scale for elastic scattering.
     double distanceSourceToDetector =
-        distanceSourceToSample + detector->getDistance(*sample);
+        distanceSourceToSample + spectrumInfo.l2(i);
     double tofScale = distanceChopperToSource / distanceSourceToDetector;
 
     double E1;

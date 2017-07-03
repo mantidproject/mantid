@@ -12,28 +12,32 @@
 #include <Poco/Net/HTTPResponse.h>
 #include <Poco/Net/HTTPSClientSession.h>
 #include <Poco/Net/PrivateKeyPassphraseHandler.h>
-#include <Poco/Net/SecureStreamSocket.h>
 #include <Poco/Net/SSLManager.h>
 #include <Poco/StreamCopier.h>
 #include <Poco/TemporaryFile.h>
 #include <Poco/URI.h>
-// Visual Studio complains with the inclusion of Poco/FileStream
-// disabling this warning.
-#if defined(_WIN32) || defined(_WIN64)
-#pragma warning(push)
-#pragma warning(disable : 4250)
-#include <Poco/FileStream.h>
-#include <Poco/NullStream.h>
-#include <Winhttp.h>
-#pragma warning(pop)
-#else
-#include <Poco/FileStream.h>
-#include <Poco/NullStream.h>
 
+#include <Poco/Exception.h>
+#include <Poco/File.h>
+#include <Poco/FileStream.h>
+#include <Poco/Net/Context.h>
+#include <Poco/Net/HTTPClientSession.h>
+#include <Poco/Net/HTTPMessage.h>
+#include <Poco/Net/InvalidCertificateHandler.h>
+#include <Poco/SharedPtr.h>
+#include <Poco/Timespan.h>
+#include <Poco/Types.h>
+
+#if defined(_WIN32) || defined(_WIN64)
+#include <Winhttp.h>
 #endif
 
+#include <boost/lexical_cast.hpp>
+
 // std
+#include <mutex>
 #include <fstream>
+#include <utility>
 
 namespace Mantid {
 namespace Kernel {
@@ -46,6 +50,33 @@ namespace {
 // anonymous namespace for some utility functions
 /// static Logger object
 Logger g_log("InternetHelper");
+
+/// Flag to protect SSL initialization
+std::once_flag SSL_INIT_FLAG;
+
+/**
+ * Perform initialization of SSL context. Implementation
+ * designed to be called by std::call_once
+ */
+void doSSLInit() {
+  // initialize ssl
+  Poco::SharedPtr<InvalidCertificateHandler> certificateHandler =
+      new AcceptCertificateHandler(true);
+  // Currently do not use any means of authentication. This should be updated
+  // IDS has signed certificate.
+  const Context::Ptr context =
+      new Context(Context::CLIENT_USE, "", "", "", Context::VERIFY_NONE);
+  // Create a singleton for holding the default context.
+  // e.g. any future requests to publish are made to this certificate and
+  // context.
+  SSLManager::instance().initializeClient(nullptr, certificateHandler, context);
+}
+
+/**
+ * Entry function to initialize SSL context for the process. It ensures the
+ * initialization only happens once per process.
+ */
+void initializeSSL() { std::call_once(SSL_INIT_FLAG, doSSLInit); }
 }
 
 //----------------------------------------------------------------------------------------------
@@ -240,18 +271,7 @@ int InternetHelper::sendHTTPSRequest(const std::string &url,
 
   Poco::URI uri(url);
   try {
-    // initialize ssl
-    Poco::SharedPtr<InvalidCertificateHandler> certificateHandler =
-        new AcceptCertificateHandler(true);
-    // Currently do not use any means of authentication. This should be updated
-    // IDS has signed certificate.
-    const Context::Ptr context =
-        new Context(Context::CLIENT_USE, "", "", "", Context::VERIFY_NONE);
-    // Create a singleton for holding the default context.
-    // e.g. any future requests to publish are made to this certificate and
-    // context.
-    SSLManager::instance().initializeClient(nullptr, certificateHandler,
-                                            context);
+    initializeSSL();
     // Create the session
     HTTPSClientSession session(uri.getHost(),
                                static_cast<Poco::UInt16>(uri.getPort()));

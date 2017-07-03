@@ -1,4 +1,5 @@
 #include "MantidAPI/IPeaksWorkspace.h"
+#include "MantidAPI/Run.h"
 #include "MantidGeometry/Crystal/IPeak.h"
 #include "MantidPythonInterface/kernel/GetPointer.h"
 #include "MantidPythonInterface/kernel/Converters/PyObjectToV3D.h"

@@ -41,7 +41,7 @@ class LoadSINQFile(PythonAlgorithm):
         inst=self.getProperty('Instrument').value
         fname = self.getProperty('Filename').value
 
-        diclookup = {\
+        diclookup = {
             "AMOR":"amor.dic",
             "BOA":"boa.dic",
             "DMC":"dmc.dic",
@@ -54,7 +54,7 @@ class LoadSINQFile(PythonAlgorithm):
             "RITA-2":"rita.dic",
             "SANS":"sans.dic",
             "SANS2":"sans.dic",
-            "TRICS":"trics.dic"\
+            "TRICS":"trics.dic"
         }
 
         lookupInstrumentName = inst

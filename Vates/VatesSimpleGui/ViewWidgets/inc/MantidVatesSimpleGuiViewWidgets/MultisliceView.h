@@ -53,9 +53,11 @@ public:
    * Default constructor.
    * @param parent the parent widget of the multislice view widget
    * @param rebinnedSourcesManager Pointer to a RebinnedSourcesManager
+   * @param createRenderProxy :: Whether to create a render proxy for this view
    */
-  MultiSliceView(QWidget *parent = 0,
-                 RebinnedSourcesManager *rebinnedSourcesManager = 0);
+  MultiSliceView(QWidget *parent = nullptr,
+                 RebinnedSourcesManager *rebinnedSourcesManager = nullptr,
+                 bool createRenderProxy = true);
   /// Default constructor.
   ~MultiSliceView() override;
 
@@ -83,6 +85,11 @@ public:
    * ViewBase::resetDisplay()
    */
   void resetDisplay() override;
+
+  /// @see ViewBase::setView
+  void setView(pqRenderView *view) override;
+  /// @see ViewBase::getViewType
+  ModeControlWidget::Views getViewType() override;
 
 protected slots:
   /// Determine if slice is to be shown in SliceViewer.

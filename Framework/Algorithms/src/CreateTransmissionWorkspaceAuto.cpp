@@ -12,7 +12,6 @@
 #include "MantidAlgorithms/CreateTransmissionWorkspaceAuto.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidKernel/ArrayProperty.h"
-#include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/RebinParamsValidator.h"
 
@@ -86,8 +85,6 @@ void CreateTransmissionWorkspaceAuto::init() {
                   "Wavelength Min in angstroms", Direction::Input);
   declareProperty("WavelengthMax", Mantid::EMPTY_DBL(),
                   "Wavelength Max in angstroms", Direction::Input);
-  declareProperty("WavelengthStep", Mantid::EMPTY_DBL(),
-                  "Wavelength step in angstroms", Direction::Input);
   declareProperty(make_unique<PropertyWithValue<double>>(
                       "MonitorBackgroundWavelengthMin", Mantid::EMPTY_DBL(),
                       Direction::Input),
@@ -155,7 +152,6 @@ void CreateTransmissionWorkspaceAuto::exec() {
       this, "WavelengthMin", instrument, "LambdaMin");
   double wavelength_max = checkForMandatoryInstrumentDefault<double>(
       this, "WavelengthMax", instrument, "LambdaMax");
-  auto wavelength_step = isSet<double>("WavelengthStep");
   auto wavelength_back_min = checkForOptionalInstrumentDefault<double>(
       this, "MonitorBackgroundWavelengthMin", instrument,
       "MonitorBackgroundMin");
@@ -172,7 +168,7 @@ void CreateTransmissionWorkspaceAuto::exec() {
   // construct the algorithm
 
   IAlgorithm_sptr algCreateTransWS =
-      createChildAlgorithm("CreateTransmissionWorkspace");
+      createChildAlgorithm("CreateTransmissionWorkspace", -1, -1, true, 1);
   algCreateTransWS->setRethrows(true);
   algCreateTransWS->initialize();
 
@@ -203,11 +199,6 @@ void CreateTransmissionWorkspaceAuto::exec() {
     algCreateTransWS->setProperty("ProcessingInstructions",
                                   processing_commands);
     algCreateTransWS->setProperty("WavelengthMin", wavelength_min);
-
-    if (wavelength_step.is_initialized()) {
-      algCreateTransWS->setProperty("WavelengthStep", wavelength_step.get());
-    }
-
     algCreateTransWS->setProperty("WavelengthMax", wavelength_max);
     if (wavelength_back_min.is_initialized()) {
       algCreateTransWS->setProperty("MonitorBackgroundWavelengthMin",

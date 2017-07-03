@@ -4,14 +4,16 @@ from mantid.api import *
 from mantid.kernel import *
 import numpy as np
 
+
 class PeakFindingException(Exception):
     pass
+
 
 class FindReflectometryLines(PythonAlgorithm):
 
     # Determine if a given signal  identifies a peak or not.
     def __is_peak(self, before, current, after):
-    	# A peak is defined to be any signal that is preceeded by a lower signal value and followed by a lower signal value.
+        # A peak is defined to be any signal that is preceeded by a lower signal value and followed by a lower signal value.
         if before < current and current > after:
             return True
         return False
@@ -32,7 +34,7 @@ class FindReflectometryLines(PythonAlgorithm):
     def __remove_background(self, y_data):
         y_average = np.sum(y_data) / y_data.size
         y_max = np.max(y_data)
-    	#The thresholding criteria is hard-coded to be above the average as follows.
+        #The thresholding criteria is hard-coded to be above the average as follows.
         threshold =  (y_max - y_average)/10 + y_average
         y_data[y_data < threshold] = 0
         return y_data
@@ -67,19 +69,19 @@ class FindReflectometryLines(PythonAlgorithm):
         min_wavelength = self.getPropertyValue("StartWavelength")
         keep_workspaces = self.getPropertyValue("KeepIntermediateWorkspaces")
 
-    	# Crop off lower wavelengths where the signal is also lower.
+        # Crop off lower wavelengths where the signal is also lower.
         cropped_ws = ms.CropWorkspace(InputWorkspace=in_ws,XMin=float(min_wavelength))
-    	# Integrate over the higher wavelengths after cropping.
+        # Integrate over the higher wavelengths after cropping.
         summed_ws = ms.Integration(InputWorkspace=cropped_ws)
-    	# Loop through each histogram, and fetch out each intensity value from the single bin to generate a list of all values.
+        # Loop through each histogram, and fetch out each intensity value from the single bin to generate a list of all values.
         n_histograms = summed_ws.getNumberHistograms()
         y_data = np.empty([n_histograms])
         for i in range(0, n_histograms):
             intensity = summed_ws.readY(i)[0]
             y_data[i] = intensity
-    	#Remove the background
+        #Remove the background
         y_data = self.__remove_background(y_data)
-    	#Find the peaks
+        #Find the peaks
         peak_index_list = self.__find_peak_spectrum_numbers(y_data, summed_ws)
         #Reverse the order so that it goes from high spec number to low spec number
         peak_index_list.reverse()

@@ -8,7 +8,6 @@
 #include <QComboBox>
 #include <QSpinBox>
 #include <QUrl>
-#include <QDesktopServices>
 #include <QDesktopWidget>
 #include <QFileInfo>
 

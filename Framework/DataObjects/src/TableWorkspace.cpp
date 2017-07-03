@@ -1,7 +1,6 @@
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidKernel/Logger.h"
 #include "MantidAPI/ColumnFactory.h"
-#include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/WorkspaceFactory.h"
 
 #include <queue>
@@ -274,7 +273,7 @@ void TableWorkspace::sort(std::vector<std::pair<std::string, bool>> &criteria) {
 
 /// Clone the workspace keeping only selected columns.
 /// @param colNames :: Names of columns to clone.
-API::ITableWorkspace *
+TableWorkspace *
 TableWorkspace::doCloneColumns(const std::vector<std::string> &colNames) const {
   if (colNames.empty()) {
     return new TableWorkspace(*this);

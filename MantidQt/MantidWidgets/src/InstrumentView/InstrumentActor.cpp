@@ -6,22 +6,19 @@
 #include "MantidQtMantidWidgets/InstrumentView/ObjCompAssemblyActor.h"
 #include "MantidQtMantidWidgets/InstrumentView/ObjComponentActor.h"
 #include "MantidQtMantidWidgets/InstrumentView/RectangularDetectorActor.h"
-#include "MantidQtMantidWidgets/InstrumentView/SampleActor.h"
 #include "MantidQtMantidWidgets/InstrumentView/StructuredDetectorActor.h"
 
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/Axis.h"
 #include "MantidAPI/CommonBinsValidator.h"
+#include "MantidAPI/DetectorInfo.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/IMaskWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
 
-#include "MantidGeometry/Objects/Object.h"
-#include "MantidGeometry/ICompAssembly.h"
 #include "MantidGeometry/Instrument.h"
-#include "MantidGeometry/IObjComponent.h"
 
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Exception.h"
@@ -29,7 +26,7 @@
 #include "MantidKernel/V3D.h"
 
 #include <boost/algorithm/string.hpp>
-#include <boost/math/special_functions/fpclassify.hpp>
+#include <cmath>
 
 #include <QMessageBox>
 #include <QSettings>
@@ -132,10 +129,9 @@ void InstrumentActor::setUpWorkspace(
   m_WkspBinMinValue = DBL_MAX;
   m_WkspBinMaxValue = -DBL_MAX;
   for (size_t i = 0; i < nHist; ++i) {
-    const Mantid::MantidVec &values = sharedWorkspace->readX(i);
+    const auto &values = sharedWorkspace->x(i);
     double xtest = values.front();
-    if (xtest != std::numeric_limits<double>::infinity()) {
-
+    if (!std::isinf(xtest)) {
       if (xtest < m_WkspBinMinValue) {
         m_WkspBinMinValue = xtest;
       } else if (xtest > m_WkspBinMaxValue) {
@@ -145,7 +141,7 @@ void InstrumentActor::setUpWorkspace(
     }
 
     xtest = values.back();
-    if (xtest != std::numeric_limits<double>::infinity()) {
+    if (!std::isinf(xtest)) {
       if (xtest < m_WkspBinMinValue) {
         m_WkspBinMinValue = xtest;
       } else if (xtest > m_WkspBinMaxValue) {
@@ -282,7 +278,7 @@ IMaskWorkspace_sptr InstrumentActor::getMaskWorkspaceIfExists() const {
 * Apply mask stored in the helper mask workspace to the data workspace.
 */
 void InstrumentActor::applyMaskWorkspace() {
-  auto wsName = getWorkspace()->name();
+  auto wsName = getWorkspace()->getName();
   if (m_maskWorkspace) {
     // Mask detectors
     try {
@@ -358,13 +354,18 @@ const MantidColorMap &InstrumentActor::getColorMap() const {
   return m_colorMap;
 }
 
-IDetector_const_sptr InstrumentActor::getDetector(size_t i) const {
-  try {
-    // Call the local getInstrument, NOT the one on the workspace
-    return this->getInstrument()->getDetector(m_detIDs.at(i));
-  } catch (...) {
-  };
-  return IDetector_const_sptr();
+/// Get a detector reference given a pick ID.
+const Mantid::Geometry::IDetector &
+InstrumentActor::getDetectorByPickID(size_t pickID) const {
+  return getDetectorByDetID(m_detIDs.at(pickID));
+}
+
+/// Get a reference to a detector by a detector ID.
+const Mantid::Geometry::IDetector &
+InstrumentActor::getDetectorByDetID(Mantid::detid_t detID) const {
+  const auto &detectorInfo = getWorkspace()->detectorInfo();
+  auto detectorIndex = detectorInfo.indexOf(detID);
+  return detectorInfo.detector(detectorIndex);
 }
 
 Mantid::detid_t InstrumentActor::getDetID(size_t pickID) const {
@@ -382,10 +383,8 @@ InstrumentActor::getComponentID(size_t pickID) const {
   size_t ndet = m_detIDs.size();
   auto compID = Mantid::Geometry::ComponentID();
   if (pickID < ndet) {
-    auto det = getDetector(m_detIDs[pickID]);
-    if (det) {
-      compID = det->getComponentID();
-    }
+    auto &det = getDetectorByPickID(m_detIDs[pickID]);
+    compID = det.getComponentID();
   } else if (pickID < ndet + m_nonDetIDs.size()) {
     compID = m_nonDetIDs[pickID - ndet];
   }
@@ -502,21 +501,14 @@ void InstrumentActor::sumDetectorsUniform(QList<int> &dets,
   getBinMinMaxIndex(wi, imin, imax);
 
   Mantid::API::MatrixWorkspace_const_sptr ws = getWorkspace();
-  const Mantid::MantidVec &X = ws->readX(wi);
-  x.assign(X.begin() + imin, X.begin() + imax);
-  if (ws->isHistogramData()) {
-    // calculate the bin centres
-    std::transform(x.begin(), x.end(), X.begin() + imin + 1, x.begin(),
-                   std::plus<double>());
-    std::transform(x.begin(), x.end(), x.begin(),
-                   std::bind2nd(std::divides<double>(), 2.0));
-  }
+  const auto &XPoints = ws->points(wi);
+  x.assign(XPoints.begin() + imin, XPoints.begin() + imax);
   y.resize(x.size(), 0);
   // sum the spectra
   foreach (int id, dets) {
     try {
       size_t index = getWorkspaceIndex(id);
-      const Mantid::MantidVec &Y = ws->readY(index);
+      const auto &Y = ws->y(index);
       std::transform(y.begin(), y.end(), Y.begin() + imin, y.begin(),
                      std::plus<double>());
     } catch (Mantid::Kernel::Exception::NotFoundError &) {
@@ -560,17 +552,13 @@ void InstrumentActor::sumDetectorsRagged(QList<int> &dets,
   foreach (int id, dets) {
     try {
       size_t index = getWorkspaceIndex(id);
-      dws->dataX(nSpec) = ws->readX(index);
-      dws->dataY(nSpec) = ws->readY(index);
-      dws->dataE(nSpec) = ws->readE(index);
-      double xmin = dws->readX(nSpec).front();
-      double xmax = dws->readX(nSpec).back();
-      if (xmin < xStart) {
+      dws->setHistogram(nSpec, ws->histogram(index));
+      double xmin = dws->x(nSpec).front();
+      double xmax = dws->x(nSpec).back();
+      if (xmin < xStart)
         xStart = xmin;
-      }
-      if (xmax > xEnd) {
+      if (xmax > xEnd)
         xEnd = xmax;
-      }
       ++nSpec;
     } catch (Mantid::Kernel::Exception::NotFoundError &) {
       continue; // Detector doesn't have a workspace index relating to it
@@ -584,13 +572,11 @@ void InstrumentActor::sumDetectorsRagged(QList<int> &dets,
   }
 
   // limits should exceed the integration range
-  if (xStart < minBinValue()) {
+  if (xStart < minBinValue())
     xStart = minBinValue();
-  }
 
-  if (xEnd > maxBinValue()) {
+  if (xEnd > maxBinValue())
     xEnd = maxBinValue();
-  }
 
   double dx = (xEnd - xStart) / static_cast<double>(size - 1);
   std::string params =
@@ -610,11 +596,14 @@ void InstrumentActor::sumDetectorsRagged(QList<int> &dets,
         Mantid::API::AnalysisDataService::Instance().retrieve(outName));
     Mantid::API::AnalysisDataService::Instance().remove(outName);
 
-    x = ws->readX(0);
-    y = ws->readY(0);
+    const auto &X = ws->x(0);
+    const auto &Y = ws->y(0);
+    x.assign(X.begin(), X.end());
+    y.assign(Y.begin(), Y.end());
+
     // add the spectra
     for (size_t i = 0; i < nSpec; ++i) {
-      const Mantid::MantidVec &Y = ws->readY(i);
+      const auto &Y = ws->y(i);
       std::transform(y.begin(), y.end(), Y.begin(), y.begin(),
                      std::plus<double>());
     }
@@ -635,11 +624,10 @@ void InstrumentActor::resetColors() {
   m_colors.resize(m_specIntegrs.size());
 
   auto sharedWorkspace = getWorkspace();
+  const auto &spectrumInfo = sharedWorkspace->spectrumInfo();
 
-  Instrument_const_sptr inst = getInstrument();
   IMaskWorkspace_sptr mask = getMaskWorkspaceIfExists();
 
-  // PARALLEL_FOR1(m_workspace)
   for (int iwi = 0; iwi < int(m_specIntegrs.size()); iwi++) {
     size_t wi = size_t(iwi);
     double integratedValue = m_specIntegrs[wi];
@@ -651,7 +639,7 @@ void InstrumentActor::resetColors() {
       if (mask) {
         masked = mask->isMasked(dets);
       } else {
-        masked = inst->isDetectorMasked(dets);
+        masked = spectrumInfo.hasDetectors(wi) && spectrumInfo.isMasked(wi);
       }
 
       if (masked) {
@@ -758,9 +746,9 @@ void InstrumentActor::setupPickColors() {
 void InstrumentActor::cacheDetPos() const {
   if (m_detPos.size() != m_detIDs.size()) {
     m_detPos.clear();
-    for (size_t i = 0; i < m_detIDs.size(); i++) {
-      IDetector_const_sptr det = this->getDetector(i);
-      m_detPos.push_back(det->getPos());
+    for (size_t pickID = 0; pickID < m_detIDs.size(); pickID++) {
+      auto &det = this->getDetectorByPickID(pickID);
+      m_detPos.push_back(det.getPos());
     }
   }
 }
@@ -869,7 +857,7 @@ Mantid::API::MatrixWorkspace_sptr InstrumentActor::extractCurrentMask() const {
   Mantid::API::IAlgorithm *alg =
       Mantid::API::FrameworkManager::Instance().createAlgorithm("ExtractMask",
                                                                 -1);
-  alg->setPropertyValue("InputWorkspace", getWorkspace()->name());
+  alg->setPropertyValue("InputWorkspace", getWorkspace()->getName());
   alg->setPropertyValue("OutputWorkspace", maskName);
   alg->execute();
 
@@ -1053,29 +1041,27 @@ void InstrumentActor::rotateToLookAt(const Mantid::Kernel::V3D &eye,
 /**
 * Find the offsets in the spectrum's x vector of the bounds of integration.
 * @param wi :: The works[ace index of the spectrum.
-* @param imin :: Index of the lower bound: x_min == readX(wi)[imin]
-* @param imax :: Index of the upper bound: x_max == readX(wi)[imax]
+* @param imin :: Index of the lower bound: x_min == x(wi)[imin]
+* @param imax :: Index of the upper bound: x_max == x(wi)[imax]
 */
 void InstrumentActor::getBinMinMaxIndex(size_t wi, size_t &imin,
                                         size_t &imax) const {
   Mantid::API::MatrixWorkspace_const_sptr ws = getWorkspace();
-  const Mantid::MantidVec &x = ws->readX(wi);
-  Mantid::MantidVec::const_iterator x_begin = x.begin();
-  Mantid::MantidVec::const_iterator x_end = x.end();
-  if (x_begin == x_end) {
+  const auto &x = ws->x(wi);
+
+  auto x_begin = x.begin();
+  auto x_end = x.end();
+  if (x_begin == x_end)
     throw std::runtime_error("No bins found to plot");
-  }
-  if (ws->isHistogramData()) {
+  if (ws->isHistogramData())
     --x_end;
-  }
+
   if (wholeRange()) {
     imin = 0;
     imax = static_cast<size_t>(x_end - x_begin);
   } else {
-    Mantid::MantidVec::const_iterator x_from =
-        std::lower_bound(x_begin, x_end, minBinValue());
-    Mantid::MantidVec::const_iterator x_to =
-        std::upper_bound(x_begin, x_end, maxBinValue());
+    auto x_from = std::lower_bound(x_begin, x_end, minBinValue());
+    auto x_to = std::upper_bound(x_begin, x_end, maxBinValue());
     imin = static_cast<size_t>(x_from - x_begin);
     imax = static_cast<size_t>(x_to - x_begin);
     if (imax <= imin) {
@@ -1152,7 +1138,7 @@ void InstrumentActor::setDataIntegrationRange(const double &xmin,
         continue;
       }
       double sum = m_specIntegrs[i];
-      if (boost::math::isinf(sum) || boost::math::isnan(sum)) {
+      if (!std::isfinite(sum)) {
         throw std::runtime_error(
             "The workspace contains values that cannot be displayed (infinite "
             "or NaN).\n"

@@ -31,7 +31,7 @@
 #include "ApplicationWindow.h"
 #include "Folder.h"
 
-#include "Mantid/IProjectSerialisable.h"
+#include "MantidQtAPI/IProjectSerialisable.h"
 
 #include <QApplication>
 #include <QMessageBox>
@@ -91,6 +91,7 @@ void MdiSubWindow::init(QWidget *parent, const QString &label,
             SLOT(changeToFloating(MdiSubWindow *)));
   }
 }
+
 void MdiSubWindow::updateCaption() {
   switch (d_caption_policy) {
   case Name:
@@ -121,9 +122,9 @@ void MdiSubWindow::updateCaption() {
 
 void MdiSubWindow::setLabel(const QString &label) { d_label = label; }
 
-IProjectSerialisable *MdiSubWindow::loadFromProject(const std::string &lines,
-                                                    ApplicationWindow *app,
-                                                    const int fileVersion) {
+MantidQt::API::IProjectSerialisable *
+MdiSubWindow::loadFromProject(const std::string &lines, ApplicationWindow *app,
+                              const int fileVersion) {
   Q_UNUSED(lines);
   Q_UNUSED(app);
   Q_UNUSED(fileVersion);
@@ -133,9 +134,15 @@ IProjectSerialisable *MdiSubWindow::loadFromProject(const std::string &lines,
 
 std::string MdiSubWindow::saveToProject(ApplicationWindow *app) {
   Q_UNUSED(app);
-  throw std::runtime_error(
-      "SaveToProject not implemented for raw MdiSubWindow");
+  // By default this is unimplemented and so should return nothing
+  return "";
 }
+
+std::vector<std::string> MdiSubWindow::getWorkspaceNames() { return {}; }
+
+std::string MdiSubWindow::getWindowName() { return objectName().toStdString(); }
+
+std::string MdiSubWindow::getWindowType() { return metaObject()->className(); }
 
 void MdiSubWindow::resizeEvent(QResizeEvent *e) {
   emit resizedWindow(this);

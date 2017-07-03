@@ -1,10 +1,12 @@
 #include "MantidQtAPI/ScriptRepositoryView.h"
+#include "MantidQtAPI/MantidDesktopServices.h"
 #include "MantidQtAPI/RepoModel.h"
-#include <QDebug>
 #include "MantidAPI/ScriptRepository.h"
 #include "MantidAPI/ScriptRepositoryFactory.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Logger.h"
+
+#include <QDebug>
 #include <QMessageBox>
 #include <QTime>
 #include <QCoreApplication>
@@ -13,7 +15,7 @@
 #include <QPushButton>
 #include <QFileDialog>
 #include <QPainter>
-#include <QDesktopServices>
+
 namespace MantidQt {
 namespace API {
 namespace {
@@ -152,7 +154,7 @@ ScriptRepositoryView::ScriptRepositoryView(QWidget *parent)
     // create the model
     model = new RepoModel(this);
 
-  } catch (EXC_OPTIONS ex) {
+  } catch (EXC_OPTIONS &ex) {
     if (ex == NODIRECTORY)
       // probably the user change mind. He does not want to install any more.
       QMessageBox::warning(this, "Installation Failed",
@@ -284,7 +286,7 @@ void ScriptRepositoryView::currentChanged(const QModelIndex &in) {
 
 /** Open the ScriptRepository Page on Web Browser*/
 void ScriptRepositoryView::helpClicked() {
-  QDesktopServices::openUrl(
+  MantidDesktopServices::openUrl(
       QUrl("http://www.mantidproject.org/ScriptRepository"));
 }
 
@@ -618,7 +620,7 @@ void ScriptRepositoryView::openFolderLink(QString link) {
     return;
   }
 
-  const bool openSuccessful = QDesktopServices::openUrl(url);
+  const bool openSuccessful = MantidDesktopServices::openUrl(url);
   if (!openSuccessful)
     g_log.error() << error_msg << "Could not find directory.\n";
 }

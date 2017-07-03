@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>ReflSettingsTabWidget</class>
+  <class>ReflSettingsTabWidget</class>
   <widget class="QWidget" name="ReflSettingsTabWidget">
     <property name="geometry">
       <rect>
@@ -13,122 +13,24 @@
     <property name="windowTitle">
       <string>Settings Tab</string>
     </property>
-    <layout class="QGridLayout" name="optionsLayout">
+    <layout class="QVBoxLayout" name="settingsMainLayout">
       <property name="margin">
-        <number>20</number>
+        <number>5</number>
       </property>
-      <item row ="0" column="0">
-        <widget class="QLabel" name="stageLabel">
-          <property name="text">
-            <string>Stage</string>
-          </property>
+      <item>
+        <widget class="QToolBox" name="toolbox">
           <property name="font">
             <font>
-            <weight>75</weight>
-            <bold>true</bold>
-            </font>
-          </property>
-        </widget>
-      </item>
-      <item row ="0" column="1">
-        <widget class="QLabel" name="algorithmLabel">
-          <property name="text">
-            <string>Algorithm</string>
-          </property>
-          <property name="font">
-            <font>
-              <weight>75</weight>
+              <pointsize>11</pointsize>
               <bold>true</bold>
             </font>
           </property>
         </widget>
-      </item>
-      <item row ="0" column="2">
-        <widget class="QLabel" name="optionsLabel">
-          <property name="text">
-            <string>Global Options</string>
-          </property>
-          <property name="font">
-            <font>
-              <weight>75</weight>
-              <bold>true</bold>
-            </font>
-          </property>
-        </widget>
-      </item>
-      <item row="1" column="0">
-        <widget class="QLabel" name="preProcessLabel1">
-          <property name="text">
-            <string>Pre-process</string>
-          </property>
-        </widget>
-      </item>
-      <item row="1" column="1">
-        <widget class="QLabel" name="plusLabel">
-          <property name="text">
-            <string>Plus</string>
-          </property>
-        </widget>
-      </item>
-      <item row="2" column="0">
-        <widget class="QLabel" name="preProcessLabel2">
-          <property name="text">
-            <string>Pre-process</string>
-          </property>
-        </widget>
-      </item>
-      <item row="2" column="1">
-        <widget class="QLabel" name="transmissionLabel">
-          <property name="text">
-            <string>CreateTransmissionWorkspaceAuto</string>
-          </property>
-        </widget>
-      </item>
-      <item row="3" column="0">
-        <widget class="QLabel" name="processLabel">
-          <property name="text">
-            <string>Process</string>
-          </property>
-        </widget>
-      </item>
-      <item row="3" column="1">
-        <widget class="QLabel" name="reductionLabel">
-          <property name="text">
-            <string>ReflectometryReductionOneAuto</string>
-          </property>
-        </widget>
-      </item>
-      <item row="4" column="0">
-        <widget class="QLabel" name="postProcessLabel">
-          <property name="text">
-            <string>Post-process</string>
-          </property>
-        </widget>
-      </item>
-      <item row="4" column="1">
-        <widget class="QLabel" name="stitchLabel">
-          <property name="text">
-            <string>Stitch1DMany</string>
-          </property>
-        </widget>
-      </item>
-      <item row="5" column="0">
-        <spacer name="verticalSpacer">
-          <property name="orientation">
-            <enum>Qt::Vertical</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-            <size>
-              <width>40</width>
-              <height>40</height>
-            </size>
-          </property>
-        </spacer>
       </item>
     </layout>
   </widget>
- <tabstops/>
- <customwidgets/>
- <resources/>
- <connections/>
+  <tabstops/>
+  <customwidgets/>
+  <resources/>
+  <connections/>
 </ui>

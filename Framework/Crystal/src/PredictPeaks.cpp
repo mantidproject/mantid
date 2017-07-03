@@ -1,14 +1,24 @@
 #include "MantidCrystal/PredictPeaks.h"
+#include "MantidAPI/DetectorInfo.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/Run.h"
+#include "MantidAPI/Sample.h"
 #include "MantidGeometry/Crystal/BasicHKLFilters.h"
 #include "MantidGeometry/Crystal/HKLFilterWavelength.h"
 #include "MantidGeometry/Crystal/HKLGenerator.h"
 #include "MantidGeometry/Crystal/StructureFactorCalculatorSummation.h"
 #include "MantidGeometry/Objects/InstrumentRayTracer.h"
+#include "MantidGeometry/Objects/BoundingBox.h"
+#include "MantidGeometry/Instrument/ReferenceFrame.h"
+#include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/EnabledWhenProperty.h"
+#include "MantidKernel/make_unique.h"
+#include "MantidGeometry/Instrument/RectangularDetector.h"
+#include "MantidGeometry/Crystal/EdgePixel.h"
 
+#include <fstream>
 using Mantid::Kernel::EnabledWhenProperty;
 
 namespace Mantid {
@@ -34,7 +44,6 @@ double get_factor_for_q_convention(const std::string &convention) {
 }
 }
 
-//----------------------------------------------------------------------------------------------
 /** Constructor
  */
 PredictPeaks::PredictPeaks()
@@ -44,7 +53,6 @@ PredictPeaks::PredictPeaks()
   m_refConds = getAllReflectionConditions();
 }
 
-//----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void PredictPeaks::init() {
@@ -101,6 +109,7 @@ void PredictPeaks::init() {
                   "values in the HKLPeaksWorkspace to the nearest integers if "
                   "checked.\n"
                   "Keep unchecked to use the original values");
+
   setPropertySettings("RoundHKL", make_unique<EnabledWhenProperty>(
                                       "HKLPeaksWorkspace", IS_NOT_DEFAULT));
 
@@ -119,14 +128,24 @@ void PredictPeaks::init() {
   declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "An output PeaksWorkspace.");
+
+  declareProperty("PredictPeaksOutsideDetectors", false,
+                  "Use an extended detector space (if defined for the"
+                  " instrument) to predict peaks which do not fall onto any"
+                  "detector. This may produce a very high number of results.");
+
+  auto nonNegativeInt = boost::make_shared<BoundedValidator<int>>();
+  nonNegativeInt->setLower(0);
+  declareProperty("EdgePixels", 0, nonNegativeInt,
+                  "Remove peaks that are at pixels this close to edge. ");
 }
 
-//----------------------------------------------------------------------------------------------
 /** Execute the algorithm.
  */
 void PredictPeaks::exec() {
   // Get the input properties
   Workspace_sptr rawInputWorkspace = getProperty("InputWorkspace");
+  m_edge = this->getProperty("EdgePixels");
 
   ExperimentInfo_sptr inputExperimentInfo =
       boost::dynamic_pointer_cast<ExperimentInfo>(rawInputWorkspace);
@@ -205,7 +224,7 @@ void PredictPeaks::exec() {
 
   setInstrumentFromInputWorkspace(inputExperimentInfo);
   setRunNumberFromInputWorkspace(inputExperimentInfo);
-
+  setReferenceFrameAndBeamDirection();
   checkBeamDirection();
 
   // Create the output
@@ -217,7 +236,7 @@ void PredictPeaks::exec() {
   const Sample &sample = inputExperimentInfo->sample();
 
   // Retrieve the OrientedLattice (UnitCell) from the workspace
-  OrientedLattice orientedLattice = sample.getOrientedLattice();
+  const OrientedLattice &orientedLattice = sample.getOrientedLattice();
 
   // Get the UB matrix from it
   Matrix<double> ub(3, 3, true);
@@ -243,6 +262,9 @@ void PredictPeaks::exec() {
   Progress prog(this, 0.0, 1.0, possibleHKLs.size() * gonioVec.size());
   prog.setNotifyStep(0.01);
 
+  m_detectorCacheSearch =
+      Kernel::make_unique<DetectorSearcher>(m_inst, m_pw->detectorInfo());
+
   for (auto &goniometerMatrix : gonioVec) {
     // Final transformation matrix (HKL to Q in lab frame)
     DblMatrix orientedUB = goniometerMatrix * ub;
@@ -253,6 +275,13 @@ void PredictPeaks::exec() {
 
     size_t allowedPeakCount = 0;
 
+    bool useExtendedDetectorSpace = getProperty("PredictPeaksOutsideDetectors");
+    if (useExtendedDetectorSpace &&
+        !m_inst->getComponentByName("extended-detector-space")) {
+      g_log.warning() << "Attempting to find peaks outside of detectors but "
+                         "no extended detector space has been defined\n";
+    }
+
     for (auto &possibleHKL : possibleHKLs) {
       if (lambdaFilter.isAllowed(possibleHKL)) {
         ++allowedPeakCount;
@@ -261,13 +290,42 @@ void PredictPeaks::exec() {
       prog.report();
     }
 
-    g_log.notice() << "Out of " << allowedPeakCount
-                   << " allowed peaks within parameters, "
-                   << m_pw->getNumberPeaks()
-                   << " were found to hit a detector.\n";
+    logNumberOfPeaksFound(allowedPeakCount);
   }
 
   setProperty<PeaksWorkspace_sptr>("OutputWorkspace", m_pw);
+}
+
+/**
+ * Log the number of peaks found to fall on and off detectors
+ *
+ * @param allowedPeakCount :: number of candidate peaks found
+ */
+void PredictPeaks::logNumberOfPeaksFound(size_t allowedPeakCount) const {
+  const bool usingExtendedDetectorSpace =
+      getProperty("PredictPeaksOutsideDetectors");
+  const auto &peaks = m_pw->getPeaks();
+  size_t offDetectorPeakCount = 0;
+  size_t onDetectorPeakCount = 0;
+
+  for (const auto &peak : peaks) {
+    if (peak.getDetectorID() == -1) {
+      offDetectorPeakCount++;
+    } else {
+      onDetectorPeakCount++;
+    }
+  }
+
+  g_log.notice() << "Out of " << allowedPeakCount
+                 << " allowed peaks within parameters, " << onDetectorPeakCount
+                 << " were found to hit a detector";
+
+  if (usingExtendedDetectorSpace) {
+    g_log.notice() << " and " << offDetectorPeakCount << " were found in "
+                   << "extended detector space.";
+  }
+
+  g_log.notice() << "\n";
 }
 
 /// Tries to set the internally stored instrument from an ExperimentInfo-object.
@@ -420,28 +478,96 @@ void PredictPeaks::calculateQAndAddToOutput(const V3D &hkl,
   // The q-vector direction of the peak is = goniometer * ub * hkl_vector
   // This is in inelastic convention: momentum transfer of the LATTICE!
   // Also, q does have a 2pi factor = it is equal to 2pi/wavelength.
-  V3D q = orientedUB * hkl * (2.0 * M_PI * m_qConventionFactor);
+  const auto q = orientedUB * hkl * (2.0 * M_PI * m_qConventionFactor);
+  const auto params = getPeakParametersFromQ(q);
+  const auto detectorDir = std::get<0>(params);
+  const auto wl = std::get<1>(params);
 
-  // Create the peak using the Q in the lab framewith all its info:
-  Peak p(m_inst, q);
+  const bool useExtendedDetectorSpace =
+      getProperty("PredictPeaksOutsideDetectors");
+  const auto result = m_detectorCacheSearch->findDetectorIndex(q);
+  const auto hitDetector = std::get<0>(result);
+  const auto index = std::get<1>(result);
 
-  /* The constructor calls setQLabFrame, which already calls findDetector, which
-     is expensive. It's not necessary to call it again, instead it's enough to
-     check whether a detector has already been set. */
-  if (p.getDetector()) {
-    // Only add peaks that hit the detector
-    p.setGoniometerMatrix(goniometerMatrix);
-    // Save the run number found before.
-    p.setRunNumber(m_runNumber);
-    p.setHKL(hkl);
+  if (!hitDetector && !useExtendedDetectorSpace) {
+    return;
+  }
 
-    if (m_sfCalculator) {
-      p.setIntensity(m_sfCalculator->getFSquared(hkl));
-    }
+  const auto &detInfo = m_pw->detectorInfo();
+  const auto &det = detInfo.detector(index);
+  std::unique_ptr<Peak> peak;
 
-    // Add it to the workspace
-    m_pw->addPeak(p);
-  } // Detector was found
+  if (hitDetector) {
+    // peak hit a detector to add it to the list
+    peak = Kernel::make_unique<Peak>(m_inst, det.getID(), wl);
+    if (!peak->getDetector())
+      return;
+
+  } else if (useExtendedDetectorSpace) {
+    // use extended detector space to try and guess peak position
+    const auto returnedComponent =
+        m_inst->getComponentByName("extended-detector-space");
+    // Check that the component is valid
+    const auto component =
+        boost::dynamic_pointer_cast<const ObjComponent>(returnedComponent);
+    if (!component)
+      throw std::runtime_error("PredictPeaks: user requested use of a extended "
+                               "detector space to predict peaks but there is no"
+                               "definition in the IDF");
+
+    // find where this Q vector should intersect with "extended" space
+    Geometry::Track track(detInfo.samplePosition(), detectorDir);
+    if (!component->interceptSurface(track))
+      return;
+
+    // The exit point is the vector to the place that we hit a detector
+    const auto magnitude = track.back().exitPoint.norm();
+    peak = Kernel::make_unique<Peak>(m_inst, q,
+                                     boost::optional<double>(magnitude));
+  }
+
+  if (m_edge > 0 && edgePixel(m_inst, peak->getBankName(), peak->getCol(),
+                              peak->getRow(), m_edge))
+    return;
+
+  // Only add peaks that hit the detector
+  peak->setGoniometerMatrix(goniometerMatrix);
+  // Save the run number found before.
+  peak->setRunNumber(m_runNumber);
+  peak->setHKL(hkl * m_qConventionFactor);
+
+  if (m_sfCalculator) {
+    peak->setIntensity(m_sfCalculator->getFSquared(hkl));
+  }
+
+  // Add it to the workspace
+  m_pw->addPeak(*peak);
+}
+
+/** Get the detector direction and wavelength of a peak from it's QLab vector
+ *
+ * @param q :: the q lab vector for this peak
+ * @return a tuple containing the detector direction and the wavelength
+ */
+std::tuple<V3D, double>
+PredictPeaks::getPeakParametersFromQ(const V3D &q) const {
+  double norm_q = q.norm();
+  // Default for ki-kf has -q
+  const double qBeam = q.scalar_prod(m_refBeamDir) * m_qConventionFactor;
+  double one_over_wl = (norm_q * norm_q) / (2.0 * qBeam);
+  double wl = (2.0 * M_PI) / one_over_wl;
+  // Default for ki-kf has -q
+  V3D detectorDir = q * -m_qConventionFactor;
+  detectorDir[m_refFrame->pointingAlongBeam()] = one_over_wl - qBeam;
+  detectorDir.normalize();
+  return std::make_tuple(detectorDir, wl);
+}
+
+/** Cache the reference frame and beam direction using the instrument
+ */
+void PredictPeaks::setReferenceFrameAndBeamDirection() {
+  m_refFrame = m_inst->getReferenceFrame();
+  m_refBeamDir = m_refFrame->vecPointingAlongBeam();
 }
 
 } // namespace Mantid

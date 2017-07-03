@@ -3,27 +3,26 @@
 #include "vtkBox.h"
 #include "vtkInformation.h"
 #include "vtkInformationVector.h"
+#include "vtkNew.h"
 #include "vtkObjectFactory.h"
 #include "vtkPVClipDataSet.h"
 #include "vtkPVInformationKeys.h"
-#include "vtkUnstructuredGridAlgorithm.h"
-#include "vtkUnstructuredGrid.h"
 #include "vtkStreamingDemandDrivenPipeline.h"
-#include "vtkNew.h"
+#include "vtkUnstructuredGrid.h"
+#include "vtkUnstructuredGridAlgorithm.h"
 
-#include "MantidVatesAPI/BoxInfo.h"
-#include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/IMDEventWorkspace.h"
+#include "MantidAPI/IMDWorkspace.h"
+#include "MantidKernel/WarningSuppressions.h"
+#include "MantidVatesAPI/ADSWorkspaceProvider.h"
+#include "MantidVatesAPI/BoxInfo.h"
+#include "MantidVatesAPI/FilteringUpdateProgressAction.h"
 #include "MantidVatesAPI/MDEWInMemoryLoadingPresenter.h"
 #include "MantidVatesAPI/MDLoadingViewAdapter.h"
-#include "MantidVatesAPI/ADSWorkspaceProvider.h"
-#include "MantidVatesAPI/vtkMDHexFactory.h"
-#include "MantidVatesAPI/vtkMDQuadFactory.h"
-#include "MantidVatesAPI/vtkMDLineFactory.h"
 #include "MantidVatesAPI/vtkMD0DFactory.h"
-#include "MantidVatesAPI/FilteringUpdateProgressAction.h"
-#include "MantidVatesAPI/IgnoreZerosThresholdRange.h"
-#include "MantidKernel/WarningSuppressions.h"
+#include "MantidVatesAPI/vtkMDHexFactory.h"
+#include "MantidVatesAPI/vtkMDLineFactory.h"
+#include "MantidVatesAPI/vtkMDQuadFactory.h"
 
 #include <boost/optional.hpp>
 
@@ -45,13 +44,11 @@ vtkMDEWSource::~vtkMDEWSource() {}
  Setter for the recursion depth
  @param depth : recursion depth to use
 */
-void vtkMDEWSource::SetDepth(int depth)
-{
+void vtkMDEWSource::SetDepth(int depth) {
   size_t temp = depth;
-  if(m_depth != temp)
-  {
-   this->m_depth = temp;
-   this->Modified();
+  if (m_depth != temp) {
+    this->m_depth = temp;
+    this->Modified();
   }
 }
 
@@ -59,10 +56,8 @@ void vtkMDEWSource::SetDepth(int depth)
   Setter for the workspace name.
   @param name : workspace name to extract from ADS.
 */
-void vtkMDEWSource::SetWsName(std::string name)
-{
-  if(m_wsName != name && name != "")
-  {
+void vtkMDEWSource::SetWsName(const std::string &name) {
+  if (m_wsName != name && !name.empty()) {
     m_wsName = name;
     this->Modified();
   }
@@ -101,38 +96,6 @@ int vtkMDEWSource::GetSpecialCoordinates() {
 }
 
 /**
- * Gets the minimum value of the data associated with the
- * workspace.
- * @return The minimum value of the workspace data.
- */
-double vtkMDEWSource::GetMinValue() {
-  if (nullptr == m_presenter) {
-    return 0.0;
-  }
-  try {
-    return m_presenter->getMinValue();
-  } catch (std::runtime_error &) {
-    return 0;
-  }
-}
-
-/**
- * Gets the maximum value of the data associated with the
- * workspace.
- * @return The maximum value of the workspace data.
- */
-double vtkMDEWSource::GetMaxValue() {
-  if (nullptr == m_presenter) {
-    return 0.0;
-  }
-  try {
-    return m_presenter->getMaxValue();
-  } catch (std::runtime_error &) {
-    return 0;
-  }
-}
-
-/**
  * Gets the (first) instrument which is associated with the workspace.
  * @return The name of the instrument.
  */
@@ -148,43 +111,41 @@ std::string vtkMDEWSource::GetInstrument() {
 }
 
 /**
-Set the normalization option. This is how the signal data will be normalized before viewing.
+Set the normalization option. This is how the signal data will be normalized
+before viewing.
 @param option : Normalization option
 */
-void vtkMDEWSource::SetNormalization(int option)
-{
+void vtkMDEWSource::SetNormalization(int option) {
   m_normalization = static_cast<Mantid::VATES::VisualNormalization>(option);
   this->Modified();
 }
 
-
-int vtkMDEWSource::RequestData(vtkInformation *, vtkInformationVector **, vtkInformationVector *outputVector)
-{
-  if(m_presenter->canReadFile())
-  {
+int vtkMDEWSource::RequestData(vtkInformation *, vtkInformationVector **,
+                               vtkInformationVector *outputVector) {
+  if (m_presenter->canReadFile()) {
     using namespace Mantid::VATES;
-    //get the info objects
+    // get the info objects
     vtkInformation *outInfo = outputVector->GetInformationObject(0);
 
-    if (outInfo->Has(vtkStreamingDemandDrivenPipeline::UPDATE_TIME_STEP()))
-    {
+    if (outInfo->Has(vtkStreamingDemandDrivenPipeline::UPDATE_TIME_STEP())) {
       // usually only one actual step requested
-      m_time =outInfo->Get(vtkStreamingDemandDrivenPipeline::UPDATE_TIME_STEP());
+      m_time =
+          outInfo->Get(vtkStreamingDemandDrivenPipeline::UPDATE_TIME_STEP());
     }
 
-    FilterUpdateProgressAction<vtkMDEWSource> loadingProgressUpdate(this, "Loading...");
-    FilterUpdateProgressAction<vtkMDEWSource> drawingProgressUpdate(this, "Drawing...");
+    FilterUpdateProgressAction<vtkMDEWSource> loadingProgressUpdate(
+        this, "Loading...");
+    FilterUpdateProgressAction<vtkMDEWSource> drawingProgressUpdate(
+        this, "Drawing...");
 
-    ThresholdRange_scptr thresholdRange =
-        boost::make_shared<IgnoreZerosThresholdRange>();
-    auto hexahedronFactory = Mantid::Kernel::make_unique<vtkMDHexFactory>(
-        thresholdRange, m_normalization);
+    auto hexahedronFactory =
+        Mantid::Kernel::make_unique<vtkMDHexFactory>(m_normalization);
 
-    hexahedronFactory->setSuccessor(
-                         Mantid::Kernel::make_unique<vtkMDQuadFactory>(
-                             thresholdRange, m_normalization))
-        .setSuccessor(Mantid::Kernel::make_unique<vtkMDLineFactory>(
-            thresholdRange, m_normalization))
+    hexahedronFactory
+        ->setSuccessor(
+            Mantid::Kernel::make_unique<vtkMDQuadFactory>(m_normalization))
+        .setSuccessor(
+            Mantid::Kernel::make_unique<vtkMDLineFactory>(m_normalization))
         .setSuccessor(Mantid::Kernel::make_unique<vtkMD0DFactory>());
 
     hexahedronFactory->setTime(m_time);
@@ -192,7 +153,7 @@ int vtkMDEWSource::RequestData(vtkInformation *, vtkInformationVector **, vtkInf
     product = m_presenter->execute(
         hexahedronFactory.get(), loadingProgressUpdate, drawingProgressUpdate);
 
-    //-------------------------------------------------------- Corrects problem whereby boundaries not set propertly in PV.
+    // Corrects problem whereby boundaries not set propertly in PV.
     auto box = vtkSmartPointer<vtkBox>::New();
     box->SetBounds(product->GetBounds());
     auto clipper = vtkSmartPointer<vtkPVClipDataSet>::New();
@@ -204,17 +165,16 @@ int vtkMDEWSource::RequestData(vtkInformation *, vtkInformationVector **, vtkInf
     //--------------------------------------------------------
 
     vtkUnstructuredGrid *output = vtkUnstructuredGrid::SafeDownCast(
-      outInfo->Get(vtkDataObject::DATA_OBJECT()));
+        outInfo->Get(vtkDataObject::DATA_OBJECT()));
     output->ShallowCopy(clipperOutput);
 
-    try
-    {
-      auto workspaceProvider = Mantid::Kernel::make_unique<ADSWorkspaceProvider<Mantid::API::IMDWorkspace>>();
-      m_presenter->makeNonOrthogonal(output, std::move(workspaceProvider));
-    }
-    catch (std::invalid_argument &e)
-    {
-    std::string error = e.what();
+    try {
+      auto workspaceProvider = Mantid::Kernel::make_unique<
+          ADSWorkspaceProvider<Mantid::API::IMDWorkspace>>();
+      m_presenter->makeNonOrthogonal(output, std::move(workspaceProvider),
+                                     &drawingProgressUpdate);
+    } catch (std::invalid_argument &e) {
+      std::string error = e.what();
       vtkDebugMacro(<< "Workspace does not have correct information to "
                     << "plot non-orthogonal axes. " << error);
       // Add the standard change of basis matrix and set the boundaries
@@ -232,48 +192,46 @@ int vtkMDEWSource::RequestInformation(
     vtkInformation *vtkNotUsed(request),
     vtkInformationVector **vtkNotUsed(inputVector),
     vtkInformationVector *outputVector) {
-  if (m_presenter == NULL && !m_wsName.empty()) {
+  if (!m_presenter && !m_wsName.empty()) {
     std::unique_ptr<MDLoadingView> view =
         Mantid::Kernel::make_unique<MDLoadingViewAdapter<vtkMDEWSource>>(this);
     m_presenter = Mantid::Kernel::make_unique<MDEWInMemoryLoadingPresenter>(
         std::move(view),
         new ADSWorkspaceProvider<Mantid::API::IMDEventWorkspace>, m_wsName);
-    if (!m_presenter->canReadFile()) {
-      vtkErrorMacro(<< "Cannot fetch the specified workspace from Mantid ADS.");
-    } else {
+    if (m_presenter->canReadFile()) {
       // If the MDEvent workspace has had top level splitting applied to it,
       // then use the a deptgit stah of 1
-      auto workspaceProvider = Mantid::Kernel::make_unique<ADSWorkspaceProvider<Mantid::API::IMDEventWorkspace>>();
-      if (auto split =
-              Mantid::VATES::findRecursionDepthForTopLevelSplitting(m_wsName, std::move(workspaceProvider))) {
+      auto workspaceProvider = Mantid::Kernel::make_unique<
+          ADSWorkspaceProvider<Mantid::API::IMDEventWorkspace>>();
+      if (auto split = Mantid::VATES::findRecursionDepthForTopLevelSplitting(
+              m_wsName, *workspaceProvider)) {
         SetDepth(split.get());
       }
 
       m_presenter->executeLoadMetadata();
       setTimeRange(outputVector);
+    } else {
+      vtkErrorMacro(<< "Cannot fetch the specified workspace from Mantid ADS.");
     }
   }
   return 1;
 }
 
-void vtkMDEWSource::PrintSelf(ostream& os, vtkIndent indent)
-{
+void vtkMDEWSource::PrintSelf(ostream &os, vtkIndent indent) {
   this->Superclass::PrintSelf(os, indent);
 }
 
 /** Helper function to setup the time range.
 @param outputVector : vector onto which the time range will be set.
 */
-void vtkMDEWSource::setTimeRange(vtkInformationVector* outputVector)
-{
-  if(m_presenter->hasTDimensionAvailable())
-  {
+void vtkMDEWSource::setTimeRange(vtkInformationVector *outputVector) {
+  if (m_presenter->hasTDimensionAvailable()) {
     vtkInformation *outInfo = outputVector->GetInformationObject(0);
     outInfo->Set(vtkPVInformationKeys::TIME_LABEL_ANNOTATION(),
                  m_presenter->getTimeStepLabel().c_str());
     std::vector<double> timeStepValues = m_presenter->getTimeStepValues();
-    outInfo->Set(vtkStreamingDemandDrivenPipeline::TIME_STEPS(), &timeStepValues[0],
-      static_cast<int> (timeStepValues.size()));
+    outInfo->Set(vtkStreamingDemandDrivenPipeline::TIME_STEPS(),
+                 &timeStepValues[0], static_cast<int>(timeStepValues.size()));
     double timeRange[2];
     timeRange[0] = timeStepValues.front();
     timeRange[1] = timeStepValues.back();
@@ -286,37 +244,28 @@ void vtkMDEWSource::setTimeRange(vtkInformationVector* outputVector)
 Getter for the recursion depth.
 @return depth
 */
-size_t vtkMDEWSource::getRecursionDepth() const
-{
-  return this->m_depth;
-}
+size_t vtkMDEWSource::getRecursionDepth() const { return this->m_depth; }
 
 /*
 Getter for the load in memory status
 @return true.
 */
-bool vtkMDEWSource::getLoadInMemory() const
-{
-  return true;
-}
+bool vtkMDEWSource::getLoadInMemory() const { return true; }
 
 /*Getter for the time
 @return the time.
 */
-double vtkMDEWSource::getTime() const
-{
-  return m_time;
-}
+double vtkMDEWSource::getTime() const { return m_time; }
 
 /*
 Setter for the algorithm progress.
 @param progress : progress increment
 @param message : progress message
 */
-void vtkMDEWSource::updateAlgorithmProgress(double progress, const std::string& message)
-{
+void vtkMDEWSource::updateAlgorithmProgress(double progress,
+                                            const std::string &message) {
   this->SetProgressText(message.c_str());
-  this->SetProgress(progress);
+  this->UpdateProgress(progress);
 }
 
 /*

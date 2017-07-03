@@ -27,16 +27,20 @@ MaxentEntropyNegativeValues::derivative(const std::vector<double> &values,
 /**
 * Returns the second derivative at a given point.
 * @param values : [input] The values of the image as a vector
+* @param background : [input] The background
 * @return : The second derivative as a vector
 */
-std::vector<double> MaxentEntropyNegativeValues::secondDerivative(
-    const std::vector<double> &values) {
+std::vector<double>
+MaxentEntropyNegativeValues::secondDerivative(const std::vector<double> &values,
+                                              double background) {
 
   std::vector<double> result(values.size());
 
+  double bkg2 = background * background;
+
   // Second derivative
   for (size_t i = 0; i < values.size(); i++) {
-    result[i] = std::fabs(values[i]);
+    result[i] = std::sqrt(values[i] * values[i] + bkg2);
   }
   return result;
 }

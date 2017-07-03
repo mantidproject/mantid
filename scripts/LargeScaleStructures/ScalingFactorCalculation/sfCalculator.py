@@ -1,3 +1,4 @@
+from __future__ import (absolute_import, division, print_function)
 from mantid import *
 from mantid.simpleapi import *
 from numpy import zeros
@@ -5,6 +6,7 @@ from pylab import *
 import os.path
 
 PRECISION = 0.010
+
 
 class sfCalculator():
 
@@ -61,7 +63,7 @@ class sfCalculator():
     def __init__(self, numerator=None, denominator=None,
                  tof_range=None):
 
-        print '---> initialize calculation'
+        print('---> initialize calculation')
 
         if (tof_range is None):
             self.tof_min = 10000
@@ -79,7 +81,7 @@ class sfCalculator():
 
     def setNumerator(self, minPeak, maxPeak, minBack, maxBack):
 
-        print '---> set numerator (' + self.numerator + ')'
+        print('---> set numerator (' + self.numerator + ')')
 
         if minPeak != 0:
             self.n_peak_pixel_min = minPeak
@@ -92,7 +94,7 @@ class sfCalculator():
 
     def setDenominator(self, minPeak, maxPeak, minBack, maxBack):
 
-        print '---> set denominator (' + self.denominator + ')'
+        print('---> set denominator (' + self.denominator + ')')
 
         if minPeak != 0:
             self.d_peak_pixel_min = minPeak
@@ -121,8 +123,8 @@ class sfCalculator():
 
         self.y_axis_error_ratio = ((self.y_axis_error_numerator /
                                     self.y_axis_numerator) ** 2 +
-                                    (self.y_axis_error_denominator /
-                                     self.y_axis_denominator) ** 2)
+                                   (self.y_axis_error_denominator /
+                                    self.y_axis_denominator) ** 2)
         self.y_axis_error_ratio = sqrt(self.y_axis_error_ratio)
         self.y_axis_error_ratio *= self.y_axis_ratio
 
@@ -225,7 +227,7 @@ class sfCalculator():
 
         mt3 = mtd['DataWks']
         self._calculateFinalAxis(Workspace=mt3,
-                           bNumerator=bNumerator)
+                                 bNumerator=bNumerator)
 
         #cleanup workspaces
         mtd.remove('EventDataWks')
@@ -287,7 +289,7 @@ class sfCalculator():
                 index = int(self.alpha_pixel_nbr * x + y)
                 y_axis[y, :] += InputWorkspace.readY(index)[:]
                 y_error_axis[y, :] += ((InputWorkspace.readE(index)[:]) *
-                                        (InputWorkspace.readE(index)[:]))
+                                       (InputWorkspace.readE(index)[:]))
 
         y_axis = y_axis.flatten()
         y_error_axis = sqrt(y_error_axis)
@@ -360,6 +362,7 @@ class sfCalculator():
         self.error_a = res.getDouble("Error", 0)
         self.error_b = res.getDouble("Error", 1)
 
+
 def plotObject(instance):
 
 #    return
@@ -388,6 +391,7 @@ def plotObject(instance):
     show()
     legend()
 
+
 def recordSettings(a, b, error_a, error_b, name, instance):
     """
     This function will record the various fitting parameters and the
@@ -411,20 +415,21 @@ def variable_value_splitter(variable_value):
     value = float(_split[1])
     return {'variable':variable, 'value':value}
 
+
 def isWithinRange(value1, value2):
     """
         This function checks if the two values and return true if their
         difference is <= PRECISION
     """
-    print 'value1: ' + str(value1)
-    print 'value2: ' + str(value2)
-
+    print('value1: ' + str(value1))
+    print('value2: ' + str(value2))
 
     diff = abs(float(value1)) - abs(float(value2))
     if abs(diff) <= PRECISION:
         return True
     else:
         return False
+
 
 def outputFittingParameters(a, b, error_a, error_b,
                             lambda_requested,
@@ -461,7 +466,6 @@ def outputFittingParameters(a, b, error_a, error_b,
 #        split_lines = text.split('\n')
         split_lines = text
 
-
         entry_list_to_add = []
 
         sz = len(a)
@@ -489,7 +493,7 @@ def outputFittingParameters(a, b, error_a, error_b,
                                         _match = True
                                         break
 
-            if _match == False:
+            if not _match:
                 entry_list_to_add.append(i)
 
         _content = []
@@ -550,6 +554,7 @@ def outputFittingParameters(a, b, error_a, error_b,
         f.writelines(_content)
         f.close()
 
+
 def createIndividualList(string_list_files):
     """
     Using the list_files, will produce a dictionary of the run
@@ -574,6 +579,7 @@ def createIndividualList(string_list_files):
     return {'list_runs':list_runs,
             'list_attenuator':list_attenuator}
 
+
 def getLambdaValue(mt):
     """
     return the lambdaRequest value
@@ -581,6 +587,7 @@ def getLambdaValue(mt):
     mt_run = mt.getRun()
     _lambda = mt_run.getProperty('LambdaRequest').value
     return _lambda
+
 
 def getSh(mt, top_tag, bottom_tag):
     """
@@ -593,23 +600,26 @@ def getSh(mt, top_tag, bottom_tag):
     units = mt_run.getProperty(top_tag).units
     return sh, units
 
+
 def getS1h(mt=None):
     """
         returns the height and units of the slit #1
     """
-    if mt != None:
+    if mt is not None:
         _h, units = getSh(mt, 's1t', 's1b')
         return _h, units
     return None, ''
+
 
 def getS2h(mt=None):
     """
         returns the height and units of the slit #2
     """
-    if mt != None:
+    if mt is not None:
         _h, units = getSh(mt, 's2t', 's2b')
         return _h, units
     return None, None
+
 
 def getSw(mt, left_tag, right_tag):
     """
@@ -622,23 +632,26 @@ def getSw(mt, left_tag, right_tag):
     units = mt_run.getProperty(left_tag).units
     return sw, units
 
+
 def getS1w(mt=None):
     """
         returns the width and units of the slit #1
     """
-    if mt != None:
+    if mt is not None:
         _w, units = getSw(mt, 's1l', 's1r')
         return _w, units
     return None, ''
+
 
 def getS2w(mt=None):
     """
         returns the width and units of the slit #2
     """
-    if mt != None:
+    if mt is not None:
         _w, units = getSh(mt, 's2l', 's2r')
         return _w, units
     return None, None
+
 
 def getSlitsValueAndLambda(full_list_runs,
                            S1H, S2H,
@@ -651,10 +664,10 @@ def getSlitsValueAndLambda(full_list_runs,
                  lambda requested values
     """
     _nbr_files = len(full_list_runs)
-    print '> Retrieving Slits and Lambda Requested for each file:'
+    print('> Retrieving Slits and Lambda Requested for each file:')
     for i in range(_nbr_files):
         _full_file_name = full_list_runs[i]
-        print '-> ' + _full_file_name
+        print('-> ' + _full_file_name)
         LoadEventNexus(Filename=_full_file_name,
                        OutputWorkspace='tmpWks',
                        MetaDataOnly='1')
@@ -671,6 +684,7 @@ def getSlitsValueAndLambda(full_list_runs,
 
         _lambda_value = getLambdaValue(mt1)
         lambdaRequest[i] = _lambda_value
+
 
 def isRunsSorted(list_runs, S1H, S2H):
     """
@@ -702,7 +716,7 @@ def calculateAndFit(numerator='',
                     list_objects=[],
                     tof_range=None):
 
-    print '--> running calculate and fit algorithm'
+    print('--> running calculate and fit algorithm')
 
     cal1 = sfCalculator(numerator=numerator,
                         denominator=denominator,
@@ -728,24 +742,22 @@ def calculateAndFit(numerator='',
         cal1.fit()
         return cal1
 
+
 def help():
     """
         Here the user will have information about how the command line
         works
     """
-    print 'sfCalculator help:'
-    print
-    print 'example:'
-    print ' > sfCalculator.calculate(string_runs="55889:0, 55890:1, 55891:1, 55892:2",'
-    print '                          list_'
-
-
-
+    print('sfCalculator help:')
+    print()
+    print('example:')
+    print(' > sfCalculator.calculate(string_runs="55889:0, 55890:1, 55891:1, 55892:2",')
+    print('                          list_')
 
 
 #if __name__ == '__main__':
 def calculate(string_runs=None,
-#              list_attenuator=None,
+              #              list_attenuator=None,
               list_peak_back=None,
               output_file_name=None,
               incident_medium=None,
@@ -773,7 +785,7 @@ def calculate(string_runs=None,
 
     """
 
-    list_attenuator = None;
+    list_attenuator = None
 
     #use default string files if not provided
     if (string_runs is None):
@@ -810,7 +822,7 @@ def calculate(string_runs=None,
 
     if (list_attenuator is None):
 #        list_attenuator = [0, 1, 1, 1, 1, 1, 1, 2, 2, 2, 3, 3, 4, 4]
-        list_attenuator = [0, 1, 1, 1, 1, 1];
+        list_attenuator = [0, 1, 1, 1, 1, 1]
 
     if (list_peak_back is None):
         list_peak_back = zeros((len(list_runs), 4))   #[peak_min, peak_max, back_min, back_max]
@@ -835,7 +847,6 @@ def calculate(string_runs=None,
 
     #Make sure all the lambdaRequested are identical within a given range
     lambdaRequestPrecision = 0.01 #1%
-    _lr = lambdaRequest[0]
     for i in lambdaRequest:
         _localValue = float(lambdaRequest[i][0])
         _localValueRate = lambdaRequestPrecision * _localValue
@@ -854,7 +865,6 @@ def calculate(string_runs=None,
         error_a = []
         error_b = []
         name = []
-        _previous_cal = None
 
         finalS1H = []
         finalS2H = []
@@ -880,7 +890,7 @@ def calculate(string_runs=None,
 
         for i in range(len(list_runs)):
 
-            print '> Working with index: ' + str(i)
+            print('> Working with index: ' + str(i))
             _attenuator = list_attenuator[i]
 
             if _attenuator == 0:
@@ -894,19 +904,18 @@ def calculate(string_runs=None,
                     index_numerator = i
                     index_denominator = _index_first_A[_attenuator]
 
-                print '-> numerator  : ' + str(list_runs[index_numerator])
-                print '-> denominator: ' + str(list_runs[index_denominator])
+                print('-> numerator  : ' + str(list_runs[index_numerator]))
+                print('-> denominator: ' + str(list_runs[index_denominator]))
                 cal = calculateAndFit(numerator=list_runs[index_numerator],
-                                       denominator=list_runs[index_denominator],
-                                       list_peak_back_numerator=list_peak_back[index_numerator],
-                                       list_peak_back_denominator=list_peak_back[index_denominator],
-                                       list_objects=list_objects,
-                                       tof_range=tof_range)
+                                      denominator=list_runs[index_denominator],
+                                      list_peak_back_numerator=list_peak_back[index_numerator],
+                                      list_peak_back_denominator=list_peak_back[index_denominator],
+                                      list_objects=list_objects,
+                                      tof_range=tof_range)
 
                 recordSettings(a, b, error_a, error_b, name, cal)
 
-                if (i < (len(list_runs) - 1) and
-                         list_attenuator[i + 1] == (_attenuator+1)):
+                if (i < (len(list_runs) - 1) and list_attenuator[i + 1] == (_attenuator+1)):
                     list_objects.append(cal)
 
             #record S1H and S2H
@@ -934,11 +943,10 @@ def calculate(string_runs=None,
                                 finalS1W, finalS2W,
                                 output_file_name)
 
-        print 'Done !'
+        print('Done !')
 
     else:
         """
         sort the files
         """
         pass
-

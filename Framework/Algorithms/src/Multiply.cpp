@@ -79,8 +79,8 @@ void Multiply::performEventBinaryOperation(DataObjects::EventList &lhs,
                                            const DataObjects::EventList &rhs) {
   // We must histogram the rhs event list to multiply.
   MantidVec rhsY, rhsE;
-  rhs.generateHistogram(rhs.readX(), rhsY, rhsE);
-  lhs.multiply(rhs.readX(), rhsY, rhsE);
+  rhs.generateHistogram(rhs.x().rawData(), rhsY, rhsE);
+  lhs.multiply(rhs.x().rawData(), rhsY, rhsE);
 }
 
 /** Carries out the binary operation IN-PLACE on a single EventList,
@@ -187,7 +187,7 @@ std::string Multiply::checkSizeCompatibility(
     if (m_matchXSize) {
       // Past this point, for a 2D WS operation, we require the X arrays to
       // match. Note this only checks the first spectrum
-      if (!WorkspaceHelpers::matchingBins(lhs, rhs, true)) {
+      if (!WorkspaceHelpers::matchingBins(*lhs, *rhs, true)) {
         return "X arrays must match when multiplying 2D workspaces.";
       }
     }

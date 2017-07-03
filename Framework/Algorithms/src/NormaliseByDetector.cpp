@@ -5,11 +5,12 @@
 #include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
-#include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidGeometry/Instrument/Component.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidGeometry/Instrument/FitParameter.h"
+#include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidGeometry/muParser_Silent.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/UnitFactory.h"
@@ -66,13 +67,13 @@ void NormaliseByDetector::init() {
 }
 
 const Geometry::FitParameter NormaliseByDetector::tryParseFunctionParameter(
-    Geometry::Parameter_sptr parameter, Geometry::IDetector_const_sptr det) {
+    Geometry::Parameter_sptr parameter, const Geometry::IDetector &det) {
   if (parameter == nullptr) {
     std::stringstream stream;
-    stream << det->getName() << " and all of it's parent components, have no "
-                                "fitting type parameters. This algorithm "
-                                "cannot be run without fitting parameters. See "
-                                "wiki help for details on setup.";
+    stream << det.getName() << " and all of it's parent components, have no "
+                               "fitting type parameters. This algorithm "
+                               "cannot be run without fitting parameters. See "
+                               "wiki help for details on setup.";
     this->g_log.warning(stream.str());
     throw std::runtime_error(stream.str());
   }
@@ -92,14 +93,14 @@ use.
 @param prog: progress reporting object.
 */
 void NormaliseByDetector::processHistogram(size_t wsIndex,
-                                           MatrixWorkspace_sptr denominatorWS,
                                            MatrixWorkspace_const_sptr inWS,
+                                           MatrixWorkspace_sptr denominatorWS,
                                            Progress &prog) {
-  const Geometry::ParameterMap &paramMap = inWS->instrumentParameters();
-  Geometry::IDetector_const_sptr det = inWS->getDetector(wsIndex);
+  const auto &paramMap = inWS->constInstrumentParameters();
+  const auto &spectrumInfo = inWS->spectrumInfo();
+  const auto &det = spectrumInfo.detector(wsIndex);
   const std::string type = "fitting";
-  Geometry::Parameter_sptr foundParam =
-      paramMap.getRecursiveByType(&(*det), type);
+  Geometry::Parameter_sptr foundParam = paramMap.getRecursiveByType(&det, type);
 
   const Geometry::FitParameter &foundFittingParam =
       tryParseFunctionParameter(foundParam, det);
@@ -112,17 +113,17 @@ void NormaliseByDetector::processHistogram(size_t wsIndex,
 
   // Lookup each parameter name.
   for (auto &name : allParamNames) {
-    Geometry::Parameter_sptr param = paramMap.getRecursive(&(*det), name, type);
+    Geometry::Parameter_sptr param = paramMap.getRecursive(&det, name, type);
 
     const Geometry::FitParameter &fitParam =
         tryParseFunctionParameter(param, det);
 
-    if (fitParam.getFormula().compare("") == 0) {
+    if (fitParam.getFormula().empty()) {
       throw std::runtime_error(
           "A Forumla has not been provided for a fit function");
     } else {
       std::string resultUnitStr = fitParam.getResultUnit();
-      if (!resultUnitStr.empty() && resultUnitStr.compare("Wavelength") != 0) {
+      if (!resultUnitStr.empty() && resultUnitStr != "Wavelength") {
         throw std::runtime_error(
             "Units for function parameters must be in Wavelength");
       }
@@ -134,22 +135,18 @@ void NormaliseByDetector::processHistogram(size_t wsIndex,
     function->setParameter(fitParam.getName(), paramValue);
   }
 
-  auto wavelengths = inWS->readX(wsIndex);
-  const size_t nInputBins = wavelengths.size() - 1;
-  std::vector<double> centerPointWavelength(nInputBins);
-  std::vector<double> outIntensity(nInputBins);
-  for (size_t binIndex = 0; binIndex < nInputBins; ++binIndex) {
-    centerPointWavelength[binIndex] =
-        0.5 * (wavelengths[binIndex] + wavelengths[binIndex + 1]);
-  }
-  FunctionDomain1DVector domain(centerPointWavelength);
+  auto wavelengths = inWS->points(wsIndex);
+  FunctionDomain1DVector domain(wavelengths.rawData());
   FunctionValues values(domain);
   function->function(domain, values);
+
+  auto &Y = denominatorWS->mutableY(wsIndex);
   for (size_t i = 0; i < domain.size(); ++i) {
-    outIntensity[i] = values[i];
+    Y[i] = values[i];
   }
-  denominatorWS->dataY(wsIndex) = outIntensity;
-  denominatorWS->dataE(wsIndex) = MantidVec(nInputBins, 0);
+
+  denominatorWS->mutableE(wsIndex) = 0.0;
+
   prog.report();
 }
 
@@ -178,16 +175,16 @@ NormaliseByDetector::processHistograms(MatrixWorkspace_sptr inWS) {
   // Choose between parallel execution and sequential execution then, process
   // histograms accordingly.
   if (m_parallelExecution) {
-    PARALLEL_FOR2(inWS, denominatorWS)
+    PARALLEL_FOR_IF(Kernel::threadSafe(*inWS, *denominatorWS))
     for (int wsIndex = 0; wsIndex < static_cast<int>(nHistograms); ++wsIndex) {
       PARALLEL_START_INTERUPT_REGION
-      this->processHistogram(wsIndex, denominatorWS, inWS, prog);
+      this->processHistogram(wsIndex, inWS, denominatorWS, prog);
       PARALLEL_END_INTERUPT_REGION
     }
     PARALLEL_CHECK_INTERUPT_REGION
   } else {
     for (size_t wsIndex = 0; wsIndex < nHistograms; ++wsIndex) {
-      this->processHistogram(wsIndex, denominatorWS, inWS, prog);
+      this->processHistogram(wsIndex, inWS, denominatorWS, prog);
     }
   }
 

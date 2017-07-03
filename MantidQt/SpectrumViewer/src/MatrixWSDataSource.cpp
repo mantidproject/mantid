@@ -15,11 +15,13 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/ISpectrum.h"
 #include "MantidGeometry/Instrument/Detector.h"
+#include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidAPI/Run.h"
+#include "MantidAPI/SpectrumInfo.h"
 
 using namespace Mantid;
 using namespace Kernel;
@@ -40,7 +42,7 @@ namespace SpectrumView {
  */
 MatrixWSDataSource::MatrixWSDataSource(MatrixWorkspace_const_sptr matWs)
     : SpectrumDataSource(0.0, 1.0, 0.0, 1.0, 0, 0), m_matWs(matWs),
-      m_emodeHandler(NULL) {
+      m_emodeHandler(NULL), m_spectrumInfo(m_matWs->spectrumInfo()) {
   m_totalXMin = matWs->getXMin();
   m_totalXMax = matWs->getXMax();
 
@@ -170,7 +172,7 @@ DataArray_const_sptr MatrixWSDataSource::getDataArray(double xMin, double xMax,
   MantidVec err;
   yVals.resize(numCols);
   err.resize(numCols);
-  size_t index = 0;
+  auto newDataIter = newData.begin();
   for (size_t i = 0; i < numRows; i++) {
     double midY = yMin + ((double)i + 0.5) * yStep;
     SVUtils::Interpolate(m_totalYMin, m_totalYMax, midY, 0.0,
@@ -182,10 +184,9 @@ DataArray_const_sptr MatrixWSDataSource::getDataArray(double xMin, double xMax,
     err.resize(numCols, 0);
 
     m_matWs->generateHistogram(sourceRow, xScale, yVals, err, true);
-    for (size_t col = 0; col < numCols; col++) {
-      newData[index] = (float)yVals[col];
-      index++;
-    }
+    newDataIter =
+        std::transform(yVals.cbegin(), yVals.cend(), newDataIter,
+                       [](const double y) { return static_cast<float>(y); });
   }
 
   // The calling code is responsible for deleting the DataArray when it is done
@@ -266,27 +267,22 @@ std::vector<std::string> MatrixWSDataSource::getInfoList(double x, double y) {
       return list;
     }
 
-    auto det = m_matWs->getDetector(row);
-    if (det == 0) {
+    if (!m_spectrumInfo.hasDetectors(row)) {
       g_log.debug() << "No DETECTOR for row " << row << " in MatrixWorkspace\n";
       return list;
     }
 
-    double l1 = m_source->getDistance(*m_sample);
-    double l2 = 0.0;
-    double two_theta = 0.0;
-    double azi = 0.0;
-    if (det->isMonitor()) {
-      l2 = det->getDistance(*m_source);
-      l2 = l2 - l1;
-    } else {
-      l2 = det->getDistance(*m_sample);
-      two_theta = m_matWs->detectorTwoTheta(*det);
-      azi = det->getPhi();
+    double l1 = m_spectrumInfo.l1();
+    double l2 = m_spectrumInfo.l2(row);
+    double two_theta = m_spectrumInfo.twoTheta(row);
+    double azi = m_spectrumInfo.detector(row).getPhi();
+    if (m_spectrumInfo.isMonitor(row)) {
+      two_theta = 0.0;
+      azi = 0.0;
     }
     SVUtils::PushNameValue("L2", 8, 4, l2, list);
-    SVUtils::PushNameValue("TwoTheta", 8, 2, two_theta * deg2rad, list);
-    SVUtils::PushNameValue("Azimuthal", 8, 2, azi * deg2rad, list);
+    SVUtils::PushNameValue("TwoTheta", 8, 2, two_theta * rad2deg, list);
+    SVUtils::PushNameValue("Azimuthal", 8, 2, azi * rad2deg, list);
 
     /* For now, only support diffractometers and monitors. */
     /* We need a portable way to determine emode and */
@@ -330,17 +326,18 @@ std::vector<std::string> MatrixWSDataSource::getInfoList(double x, double y) {
     // Finally, try getting indirect geometry information from the detector
     // object
     if (efixed == 0) {
-      if (!(det->isMonitor() && det->hasParameter("Efixed"))) {
+      const auto &det = m_spectrumInfo.detector(row);
+      if (!(m_spectrumInfo.isMonitor(row) && det.hasParameter("Efixed"))) {
         try {
           const ParameterMap &pmap = m_matWs->constInstrumentParameters();
-          Parameter_sptr par = pmap.getRecursive(det.get(), "Efixed");
+          Parameter_sptr par = pmap.getRecursive(&det, "Efixed");
           if (par) {
             efixed = par->value<double>();
             emode = 2;
           }
         } catch (std::runtime_error &) {
           g_log.debug() << "Failed to get Efixed from detector ID: "
-                        << det->getID() << " in MatrixWSDataSource\n";
+                        << det.getID() << " in MatrixWSDataSource\n";
           efixed = 0;
         }
       }

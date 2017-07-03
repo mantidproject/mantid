@@ -1,10 +1,20 @@
 #include "MantidQtAPI/MantidQwtWorkspaceData.h"
 
-#include <boost/math/special_functions/fpclassify.hpp>
+#include <cmath>
+
+namespace {
+/// Minimum value considered positive
+constexpr double MIN_POSITIVE = 1e-3;
+/// Maximum value considered positive
+constexpr double MAX_POSITIVE = 1e30;
+/// Arbitrary multiplier between min/max if they are equal
+constexpr double MIN_MAX_DELTA = 1.001;
+}
 
 MantidQwtWorkspaceData::MantidQwtWorkspaceData(bool logScaleY)
     : m_logScaleY(logScaleY), m_minY(0), m_minPositive(0), m_maxY(0),
-      m_isWaterfall(false), m_offsetX(0), m_offsetY(0) {}
+      m_plottable(DataStatus::Undefined), m_isWaterfall(false), m_offsetX(0),
+      m_offsetY(0) {}
 
 MantidQwtWorkspaceData::MantidQwtWorkspaceData(
     const MantidQwtWorkspaceData &data) {
@@ -18,6 +28,7 @@ operator=(const MantidQwtWorkspaceData &data) {
   m_minY = data.m_minY;
   m_minPositive = data.m_minPositive;
   m_maxY = data.m_maxY;
+  m_plottable = data.m_plottable;
   m_isWaterfall = data.m_isWaterfall;
   m_offsetX = data.m_offsetX;
   m_offsetY = data.m_offsetY;
@@ -27,53 +38,64 @@ operator=(const MantidQwtWorkspaceData &data) {
 /// Calculate absolute minimum and maximum values in a vector. Also find the
 /// smallest positive value.
 void MantidQwtWorkspaceData::calculateYMinAndMax() const {
+  // Set this to true to get the "real" data size
+  // It's correct value is then recalculated below. This is not
+  // too nice but a big refactor is not worth it given the new
+  // workbench/plotting developments.
+  m_plottable = DataStatus::Plottable;
+  m_minY = m_maxY = m_minPositive = 0.0;
 
-  const double maxDouble = std::numeric_limits<double>::max();
-  double curMin = maxDouble;
-  double curMinPos = maxDouble;
-  double curMax = -maxDouble;
+  double ymin(std::numeric_limits<double>::max()),
+      ymax(-std::numeric_limits<double>::max()),
+      yminPos(std::numeric_limits<double>::max());
   for (size_t i = 0; i < size(); ++i) {
     auto val = y(i);
     // skip NaNs
-    if ((boost::math::isnan)(val) || (boost::math::isinf)(val))
+    if (!std::isfinite(val))
       continue;
 
     // Update our values as appropriate
-    if (val < curMin)
-      curMin = val;
-    if (val < curMinPos && val > 0)
-      curMinPos = val;
-    if (val > curMax)
-      curMax = val;
+    if (val < ymin)
+      ymin = val;
+    if (val > 0.0 && val < yminPos)
+      yminPos = val;
+    if (val > ymax)
+      ymax = val;
   }
 
-  // Save the results
-  if (curMin == maxDouble) {
+  if (ymin < std::numeric_limits<double>::max()) {
+    // Values are sensible range
+    m_minY = ymin;
+    // Ensure there is a difference beteween max and min
+    m_maxY = (ymax != ymin) ? ymax : ymin * MIN_MAX_DELTA;
+
+    // Minimum positive value is kept for log scales
+    if (yminPos < std::numeric_limits<double>::max()) {
+      m_minPositive = yminPos;
+      m_plottable = DataStatus::Plottable;
+    } else {
+      // All values are <= 0
+      m_minPositive = MIN_POSITIVE;
+      m_plottable =
+          logScaleY() ? DataStatus::NotPlottable : DataStatus::Plottable;
+    }
+  } else {
+    // Set to arbitrary values (this is unlikely to happen)
     m_minY = 0.0;
-    m_minPositive = 0.1;
-    m_maxY = 1.0;
-    return;
-  } else {
-    m_minY = curMin;
-  }
-
-  if (curMax == curMin) {
-    curMax *= 1.1;
-  }
-  m_maxY = curMax;
-
-  if (curMinPos == maxDouble) {
-    m_minPositive = 0.1;
-  } else {
-    m_minPositive = curMinPos;
+    m_maxY = MAX_POSITIVE;
+    m_minPositive = MIN_POSITIVE;
+    m_plottable = DataStatus::NotPlottable;
   }
 }
 
-void MantidQwtWorkspaceData::setLogScaleY(bool on) { m_logScaleY = on; }
+void MantidQwtWorkspaceData::setLogScaleY(bool on) {
+  m_logScaleY = on;
+  calculateYMinAndMax();
+}
 
 bool MantidQwtWorkspaceData::logScaleY() const { return m_logScaleY; }
 
-void MantidQwtWorkspaceData::saveLowestPositiveValue(const double v) {
+void MantidQwtWorkspaceData::setMinimumPositiveValue(const double v) {
   if (v > 0)
     m_minPositive = v;
 }
@@ -91,7 +113,7 @@ bool MantidQwtWorkspaceData::isWaterfallPlot() const { return m_isWaterfall; }
  * @return the lowest y value.
  */
 double MantidQwtWorkspaceData::getYMin() const {
-  if (m_minPositive == 0.0) {
+  if (m_plottable == DataStatus::Undefined) {
     calculateYMinAndMax();
   }
   return m_logScaleY ? m_minPositive : m_minY;
@@ -102,7 +124,7 @@ double MantidQwtWorkspaceData::getYMin() const {
  * @return the highest y value.
  */
 double MantidQwtWorkspaceData::getYMax() const {
-  if (m_minPositive == 0.0) {
+  if (m_plottable == DataStatus::Undefined) {
     calculateYMinAndMax();
   }
   if (m_logScaleY && m_maxY <= 0)
@@ -121,7 +143,12 @@ double MantidQwtWorkspaceData::y(size_t i) const {
   return tmp;
 }
 
-size_t MantidQwtWorkspaceData::esize() const { return this->size(); }
+size_t MantidQwtWorkspaceData::esize() const {
+  if (!isPlottable()) {
+    return 0;
+  }
+  return this->size();
+}
 
 double MantidQwtWorkspaceData::e(size_t i) const {
   double ei = getE(i);
@@ -137,5 +164,19 @@ double MantidQwtWorkspaceData::e(size_t i) const {
 
 double MantidQwtWorkspaceData::ex(size_t i) const { return getEX(i); }
 
+/**
+ * @brief MantidQwtWorkspaceData::isPlottable
+ * Data is considered plottable if either:
+ *   - scale != log or
+ *   - scale == log & all(y) > 0.0
+ * @return True if the data is considered plottable, false otherwise
+ */
+bool MantidQwtWorkspaceData::isPlottable() const {
+  return (m_plottable == DataStatus::Plottable);
+}
+
+//------------------------------------------------------------------------------
+// MantidQwtMatrixWorkspaceData class
+//------------------------------------------------------------------------------
 MantidQwtMatrixWorkspaceData::MantidQwtMatrixWorkspaceData(bool logScaleY)
     : MantidQwtWorkspaceData(logScaleY) {}

@@ -1,7 +1,7 @@
 #ifndef MANTID_CUSTOMINTERFACES_QTREFLSETTINGSTABVIEW_H_
 #define MANTID_CUSTOMINTERFACES_QTREFLSETTINGSTABVIEW_H_
 
-#include "MantidQtCustomInterfaces/Reflectometry/IReflSettingsTabView.h"
+#include "MantidQtCustomInterfaces/DllConfig.h"
 #include "ui_ReflSettingsTabWidget.h"
 #include <memory>
 
@@ -12,7 +12,7 @@ namespace CustomInterfaces {
 class IReflSettingsTabPresenter;
 
 /** QtReflSettingsTabView : Provides an interface for the "Settings" tab in the
-Reflectometry (Polref) interface.
+ISIS Reflectometry interface.
 
 Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
 National Laboratory & European Spallation Source
@@ -35,7 +35,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class QtReflSettingsTabView : public QWidget, public IReflSettingsTabView {
+class MANTIDQT_CUSTOMINTERFACES_DLL QtReflSettingsTabView : public QWidget {
   Q_OBJECT
 public:
   /// Constructor
@@ -43,28 +43,7 @@ public:
   /// Destructor
   ~QtReflSettingsTabView() override;
   /// Returns the presenter managing this view
-  IReflSettingsTabPresenter *getPresenter() const override;
-  /// Returns global options for 'Plus' algorithm
-  std::string getPlusOptions() const override;
-  /// Returns global options for 'CreateTransmissionWorkspaceAuto'
-  std::string getTransmissionOptions() const override;
-  /// Returns global options for 'ReflectometryReductionOneAuto'
-  std::string getReductionOptions() const override;
-  /// Returns global options for 'Stitch1DMany'
-  std::string getStitchOptions() const override;
-
-  /// Creates hints for 'Plus'
-  void
-  createPlusHints(const std::map<std::string, std::string> &hints) override;
-  /// Creates hints for 'CreateTransmissionWorkspaceAuto'
-  void createTransmissionHints(
-      const std::map<std::string, std::string> &hints) override;
-  /// Creates hints for 'ReflectometryReductionOneAuto'
-  void createReductionHints(
-      const std::map<std::string, std::string> &hints) override;
-  /// Creates hints for 'Stitch1DMany'
-  void
-  createStitchHints(const std::map<std::string, std::string> &hints) override;
+  IReflSettingsTabPresenter *getPresenter() const;
 
 private:
   /// Initialise the interface

@@ -1,13 +1,14 @@
 #include "MantidDataHandling/LoadDetectorInfo.h"
+#include "LoadRaw/isisraw2.h"
+#include "MantidAPI/DetectorInfo.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/Exception.h"
-#include "MantidGeometry/Instrument/ComponentHelper.h"
-#include "LoadRaw/isisraw2.h"
 
-#include <boost/algorithm/string/compare.hpp>
-#include <nexus/NeXusFile.hpp>
 #include <Poco/Path.h>
+#include <boost/algorithm/string/compare.hpp>
+#include <boost/algorithm/string/predicate.hpp>
+#include <nexus/NeXusFile.hpp>
 
 #include <fstream>
 
@@ -122,6 +123,7 @@ void LoadDetectorInfo::loadFromDAT(const std::string &filename) {
 
   // start loop over file
   auto &pmap = m_workspace->instrumentParameters();
+  auto &wsDetInfo = m_workspace->mutableDetectorInfo();
   while (getline(datFile, line)) {
     if (line.empty() || line[0] == '#')
       continue;
@@ -129,30 +131,31 @@ void LoadDetectorInfo::loadFromDAT(const std::string &filename) {
     std::istringstream is(line);
     detid_t detID(0);
     int code(0);
-    float droppedFloat(0.0f);
     float delta(0.0f), l2(0.0f), theta(0.0f), phi(0.0f);
     is >> detID >> delta >> l2 >> code >> theta >> phi;
     // offset value is be subtracted so store negative
     delta *= -1.0f;
 
-    IDetector_const_sptr det;
     try {
-      det = m_baseInstrument->getDetector(detID);
-    } catch (Exception::NotFoundError &) {
+      size_t index = wsDetInfo.indexOf(detID);
+      if (wsDetInfo.isMonitor(index) || code == 1)
+        continue;
+
+      // drop 10 float columns
+      for (int i = 0; i < 10; ++i) {
+        float droppedFloat(0.0f);
+        is >> droppedFloat;
+      }
+
+      // pressure, wall thickness
+      float pressure(0.0), thickness(0.0);
+      is >> pressure >> thickness;
+
+      updateParameterMap(wsDetInfo, index, pmap, l2, theta, phi, delta,
+                         pressure, thickness);
+    } catch (std::out_of_range &) {
       continue;
     }
-    if (det->isMonitor() || code == 1)
-      continue;
-
-    // drop 10 float columns
-    for (int i = 0; i < 10; ++i)
-      is >> droppedFloat;
-
-    // pressure, wall thickness
-    float pressure(0.0), thickness(0.0);
-    is >> pressure >> thickness;
-
-    updateParameterMap(pmap, det, l2, theta, phi, delta, pressure, thickness);
   }
 }
 
@@ -186,32 +189,33 @@ void LoadDetectorInfo::loadFromRAW(const std::string &filename) {
 
   // Start loop over detectors
   auto &pmap = m_workspace->instrumentParameters();
+  auto &wsDetInfo = m_workspace->mutableDetectorInfo();
   for (int i = 0; i < numDets; ++i) {
     detid_t detID = static_cast<detid_t>(iraw.udet[i]);
     int code = iraw.code[i];
-    IDetector_const_sptr det;
     try {
-      det = m_baseInstrument->getDetector(detID);
-    } catch (Exception::NotFoundError &) {
+      size_t index = wsDetInfo.indexOf(detID);
+      if (wsDetInfo.isMonitor(index) || code == 1)
+        continue;
+
+      // Positions
+      float l2 = iraw.len2[i];
+      float theta = iraw.tthe[i];
+      float phi = (phiPresent ? iraw.ut[i] : 0.0f);
+
+      // Parameters
+      float delta = iraw.delt[i];
+      // offset value is be subtracted so store negative
+      delta *= -1.0f;
+      // pressure, wall thickness
+      float pressure = iraw.ut[i + pressureTabNum * numDets];
+      float thickness = iraw.ut[i + thicknessTabNum * numDets];
+
+      updateParameterMap(wsDetInfo, index, pmap, l2, theta, phi, delta,
+                         pressure, thickness);
+    } catch (std::out_of_range &) {
       continue;
     }
-    if (det->isMonitor() || code == 1)
-      continue;
-
-    // Positions
-    float l2 = iraw.len2[i];
-    float theta = iraw.tthe[i];
-    float phi = (phiPresent ? iraw.ut[i] : 0.0f);
-
-    // Parameters
-    float delta = iraw.delt[i];
-    // offset value is be subtracted so store negative
-    delta *= -1.0f;
-    // pressure, wall thickness
-    float pressure = iraw.ut[i + pressureTabNum * numDets];
-    float thickness = iraw.ut[i + thicknessTabNum * numDets];
-
-    updateParameterMap(pmap, det, l2, theta, phi, delta, pressure, thickness);
   }
 }
 
@@ -247,33 +251,34 @@ void LoadDetectorInfo::loadFromIsisNXS(const std::string &filename) {
 
   // Start loop over detectors
   auto &pmap = m_workspace->instrumentParameters();
+  auto &wsDetInfo = m_workspace->mutableDetectorInfo();
   int numDets = static_cast<int>(detInfo.ids.size());
   for (int i = 0; i < numDets; ++i) {
     detid_t detID = detInfo.ids[i];
     int code = detInfo.codes[i];
-    IDetector_const_sptr det;
     try {
-      det = m_baseInstrument->getDetector(detID);
-    } catch (Exception::NotFoundError &) {
+      size_t index = wsDetInfo.indexOf(detID);
+      if (wsDetInfo.isMonitor(index) || code == 1)
+        continue;
+
+      // Positions
+      double l2 = detInfo.l2[i];
+      double theta = detInfo.theta[i];
+      double phi = detInfo.phi[i];
+
+      // Parameters
+      double delta = detInfo.delays[i];
+      // offset value is be subtracted so store negative
+      delta *= -1.0;
+      // pressure, wall thickness
+      double pressure = detInfo.pressures[i];
+      double thickness = detInfo.thicknesses[i];
+
+      updateParameterMap(wsDetInfo, index, pmap, l2, theta, phi, delta,
+                         pressure, thickness);
+    } catch (std::out_of_range &) {
       continue;
     }
-    if (det->isMonitor() || code == 1)
-      continue;
-
-    // Positions
-    double l2 = detInfo.l2[i];
-    double theta = detInfo.theta[i];
-    double phi = detInfo.phi[i];
-
-    // Parameters
-    double delta = detInfo.delays[i];
-    // offset value is be subtracted so store negative
-    delta *= -1.0;
-    // pressure, wall thickness
-    double pressure = detInfo.pressures[i];
-    double thickness = detInfo.thicknesses[i];
-
-    updateParameterMap(pmap, det, l2, theta, phi, delta, pressure, thickness);
   }
 }
 
@@ -309,11 +314,13 @@ void LoadDetectorInfo::readLibisisNxs(::NeXus::File &nxsFile,
   nxsFile.readData<double>("gas_pressure", pressure);
   nxsFile.readData<double>("wall_thickness", thickness);
   nxsFile.closeGroup();
+  // cppcheck-suppress knownConditionTrueFalse
   if (pressure <= 0.0) {
     g_log.warning("The data file does not contain correct He3 pressure, "
                   "default value of 10 bar is used instead");
     pressure = 10.0;
   }
+  // cppcheck-suppress knownConditionTrueFalse
   if (thickness <= 0.0) {
     g_log.warning("The data file does not contain correct detector's wall "
                   "thickness, default value of 0.8mm is used instead");
@@ -384,8 +391,9 @@ void LoadDetectorInfo::readNXSDotDat(::NeXus::File &nxsFile,
 
 /**
  *
+ * @param detectorInfo A reference to the workspace's detector info
+ * @param detIndex The index of the detector whose parameters should be updated
  * @param pmap A reference to the ParameterMap instance to update
- * @param det A pointer to the detector whose parameters should be updated
  * @param l2 The new l2 value
  * @param theta The new theta value
  * @param phi The new phi value
@@ -393,17 +401,23 @@ void LoadDetectorInfo::readNXSDotDat(::NeXus::File &nxsFile,
  * @param pressure The new pressure value
  * @param thickness The new thickness value
  */
-void LoadDetectorInfo::updateParameterMap(
-    Geometry::ParameterMap &pmap, const Geometry::IDetector_const_sptr &det,
-    const double l2, const double theta, const double phi, const double delay,
-    const double pressure, const double thickness) const {
+void LoadDetectorInfo::updateParameterMap(API::DetectorInfo &detectorInfo,
+                                          const size_t detIndex,
+                                          Geometry::ParameterMap &pmap,
+                                          const double l2, const double theta,
+                                          const double phi, const double delay,
+                                          const double pressure,
+                                          const double thickness) const {
+
+  const auto detCompID = detectorInfo.detector(detIndex).getComponentID();
+
   // store detector params that are different to instrument level
   if (fabs(delay - m_instDelta) > 1e-06)
-    pmap.addDouble(det->getComponentID(), DELAY_PARAM, delay);
+    pmap.addDouble(detCompID, DELAY_PARAM, delay);
   if (fabs(pressure - m_instPressure) > 1e-06)
-    pmap.addDouble(det->getComponentID(), PRESSURE_PARAM, pressure);
+    pmap.addDouble(detCompID, PRESSURE_PARAM, pressure);
   if (fabs(thickness - m_instThickness) > 1e-06)
-    pmap.addDouble(det->getComponentID(), THICKNESS_PARAM, thickness);
+    pmap.addDouble(detCompID, THICKNESS_PARAM, thickness);
 
   // move
   if (m_moveDets) {
@@ -411,8 +425,7 @@ void LoadDetectorInfo::updateParameterMap(
     newPos.spherical(l2, theta, phi);
     // The sample position may not be at 0,0,0
     newPos += m_samplePos;
-    ComponentHelper::moveComponent(*det, pmap, newPos,
-                                   ComponentHelper::Absolute);
+    detectorInfo.setPosition(detIndex, newPos);
   }
 }
 }

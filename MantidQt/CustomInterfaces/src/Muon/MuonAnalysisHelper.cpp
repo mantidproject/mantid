@@ -1,23 +1,62 @@
 #include "MantidQtCustomInterfaces/Muon/MuonAnalysisHelper.h"
 
-#include "MantidKernel/InstrumentInfo.h"
-#include "MantidKernel/EmptyValues.h"
-#include "MantidKernel/TimeSeriesProperty.h"
-#include "MantidKernel/StringTokenizer.h"
-
-#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/ScopedWorkspace.h"
+#include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidKernel/EmptyValues.h"
+#include "MantidKernel/InstrumentInfo.h"
+#include "MantidKernel/StringTokenizer.h"
+#include "MantidKernel/TimeSeriesProperty.h"
 
-#include <QLineEdit>
 #include <QCheckBox>
 #include <QComboBox>
+#include <QLineEdit>
 #include <QSpinBox>
 
+#include <boost/lexical_cast.hpp>
 #include <boost/scope_exit.hpp>
 #include <stdexcept>
+
+namespace {
+/// Colors for workspace (Black, Red, Green, Blue, Orange, Purple, if there are
+/// more than this then use black as default.)
+QColor getWorkspaceColor(size_t index) {
+  switch (index) {
+  case (1):
+    return QColor("red");
+  case (2):
+    return QColor("green");
+  case (3):
+    return QColor("blue");
+  case (4):
+    return QColor("orange");
+  case (5):
+    return QColor("purple");
+  default:
+    return QColor("black");
+  }
+}
+
+/// Get keys from parameter table
+std::vector<std::string>
+getKeysFromTable(const Mantid::API::ITableWorkspace_sptr &tab) {
+  std::vector<std::string> keys;
+  if (tab) {
+    Mantid::API::TableRow row = tab->getFirstRow();
+    do {
+      std::string key;
+      row >> key;
+      keys.push_back(key);
+    } while (row.next());
+  }
+  return keys;
+}
+}
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -123,7 +162,7 @@ void printRunInfo(MatrixWorkspace_sptr runWs, std::ostringstream &out) {
   double counts(0.0);
   for (size_t i = 0; i < runWs->getNumberHistograms(); ++i) {
     for (size_t j = 0; j < runWs->blocksize(); ++j) {
-      counts += runWs->dataY(i)[j];
+      counts += runWs->y(i)[j];
     }
   }
   // output this number to three decimal places
@@ -256,6 +295,8 @@ void WidgetAutoSaver::saveWidgetValue() {
     settings.setValue(senderName, w->isChecked());
   } else if (auto w = qobject_cast<QComboBox *>(sender)) {
     settings.setValue(senderName, w->currentIndex());
+  } else if (auto w = qobject_cast<QSpinBox *>(sender)) {
+    settings.setValue(senderName, w->value());
   }
   // ... add more as neccessary
 }
@@ -280,6 +321,8 @@ void WidgetAutoSaver::loadWidgetValue(QWidget *widget) {
     w->setChecked(value.toBool());
   } else if (auto w = qobject_cast<QComboBox *>(widget)) {
     w->setCurrentIndex(value.toInt());
+  } else if (auto w = qobject_cast<QSpinBox *>(widget)) {
+    w->setValue(value.toInt());
   }
   // ... add more as neccessary
 }
@@ -310,69 +353,79 @@ void WidgetAutoSaver::endGroup() { m_settings.endGroup(); }
  * Get a run label for the workspace.
  * E.g. for MUSR data of run 15189 it will look like MUSR00015189.
  * @param ws :: Workspace to get label for.
- * @return
+ * @return :: run label
  */
 std::string getRunLabel(const Workspace_sptr &ws) {
-  MatrixWorkspace_const_sptr firstPrd = firstPeriod(ws);
-
-  int runNumber = firstPrd->getRunNumber();
-  std::string instrName = firstPrd->getInstrument()->getName();
-
-  int zeroPadding;
-  try {
-    zeroPadding =
-        ConfigService::Instance().getInstrument(instrName).zeroPadding(
-            runNumber);
-  } catch (const Mantid::Kernel::Exception::NotFoundError &) {
-    // Old muon instrument without an IDF - default to 3 zeros
-    zeroPadding = 3;
-  }
-
-  std::ostringstream label;
-  label << instrName;
-  label << std::setw(zeroPadding) << std::setfill('0') << std::right
-        << runNumber;
-  return label.str();
+  const std::vector<Workspace_sptr> wsList{ws};
+  return getRunLabel(wsList);
 }
 
 /**
  * Get a run label for a list of workspaces.
  * E.g. for MUSR data of runs 15189, 15190, 15191 it will look like
  * MUSR00015189-91.
- * @param wsList
- * @return
+ * (Assumes all runs have the same instrument)
+ * @param wsList :: [input] Vector of workspace pointers
+ * @return :: run label
+ * @throws std::invalid_argument if empty list given
  */
-std::string getRunLabel(std::vector<Workspace_sptr> wsList) {
+std::string getRunLabel(const std::vector<Workspace_sptr> &wsList) {
   if (wsList.empty())
     throw std::invalid_argument("Unable to run on an empty list");
 
-  // Extract the run numbers and find the first run in the list
+  const std::string instrument =
+      firstPeriod(wsList.front())->getInstrument()->getName();
+
+  // Extract the run numbers
   std::vector<int> runNumbers;
-  int firstRunIndex = 0;
-  int firstRunNumber = firstPeriod(wsList.front())->getRunNumber();
   int numWorkspaces = static_cast<int>(wsList.size());
   for (int i = 0; i < numWorkspaces; i++) {
     int runNumber = firstPeriod(wsList[i])->getRunNumber();
     runNumbers.push_back(runNumber);
-    if (runNumber < firstRunNumber) {
-      firstRunNumber = runNumber;
-      firstRunIndex = i;
-    }
+  }
+
+  return getRunLabel(instrument, runNumbers);
+}
+
+/**
+ * Get a run label for a given instrument and list of runs.
+ * E.g. for MUSR data of runs 15189, 15190, 15191 it will look like
+ * MUSR00015189-91.
+ * (Assumes all runs have the same instrument)
+ * @param instrument :: [input] instrument name
+ * @param runNumbers :: [input] List of run numbers
+ * @return :: run label
+ * @throws std::invalid_argument if empty run list given
+ */
+std::string getRunLabel(const std::string &instrument,
+                        const std::vector<int> &runNumbers) {
+  if (runNumbers.empty()) {
+    throw std::invalid_argument("Cannot run on an empty list");
   }
 
   // Find ranges of consecutive runs
   auto ranges = findConsecutiveRuns(runNumbers);
 
+  // Zero-padding for the first run
+  int zeroPadding;
+  try {
+    zeroPadding = ConfigService::Instance()
+                      .getInstrument(instrument)
+                      .zeroPadding(ranges.begin()->first);
+  } catch (const Mantid::Kernel::Exception::NotFoundError &) {
+    // Old muon instrument without an IDF - default to 3 zeros
+    zeroPadding = 3;
+  }
+
   // Begin string output with full label of first run
   std::ostringstream label;
-  label << getRunLabel(wsList[firstRunIndex]);
+  label << instrument;
+  label << std::setw(zeroPadding) << std::setfill('0') << std::right;
 
   for (auto range : ranges) {
     std::string firstRun = std::to_string(range.first);
     std::string lastRun = std::to_string(range.second);
-    if (range != ranges.front()) {
-      label << firstRun;
-    }
+    label << firstRun;
     if (range.second != range.first) {
       // Remove the common part of the first and last run, so we get e.g.
       // "12345-56" instead of "12345-12356"
@@ -454,6 +507,7 @@ Workspace_sptr sumWorkspaces(const std::vector<Workspace_sptr> &workspaces) {
       };
 
   // Range of log values
+  auto runNumRange = findLogRange(workspaces, "run_number", numericalCompare);
   auto startRange = findLogRange(workspaces, "run_start", dateCompare);
   auto endRange = findLogRange(workspaces, "run_end", dateCompare);
   auto tempRange = findLogRange(workspaces, "sample_temp", numericalCompare);
@@ -502,6 +556,19 @@ Workspace_sptr sumWorkspaces(const std::vector<Workspace_sptr> &workspaces) {
                   rangeString(tempRange));
   replaceLogValue(accumulatorEntry.name(), "sample_magn_field",
                   rangeString(fieldRange));
+  // Construct range of run numbers differently
+  replaceLogValue(accumulatorEntry.name(), "run_number",
+                  [](std::pair<std::string, std::string> range) {
+                    for (size_t i = 0;
+                         i < range.first.size() && i < range.second.size();
+                         ++i) {
+                      if (range.first[i] != range.second[i]) {
+                        range.second.erase(0, i);
+                        break;
+                      }
+                    }
+                    return range.first + "-" + range.second;
+                  }(runNumRange));
 
   return accumulatorEntry.retrieve();
 }
@@ -846,6 +913,235 @@ bool isReloadGroupingNecessary(
   return reloadNecessary;
 }
 
+/**
+ * Parse a workspace name into dataset parameters
+ * Format: "INST00012345; Pair; long; Asym;[ 1;] #1"
+ * @param wsName :: [input] Name of workspace
+ * @returns :: Struct containing dataset parameters
+ */
+Muon::DatasetParams parseWorkspaceName(const std::string &wsName) {
+  Muon::DatasetParams params;
+
+  Mantid::Kernel::StringTokenizer tokenizer(
+      wsName, ";", Mantid::Kernel::StringTokenizer::TOK_TRIM);
+  const size_t numTokens = tokenizer.count();
+  if (numTokens < 5) {
+    throw std::invalid_argument("Could not parse workspace name: " + wsName);
+  }
+
+  params.label = tokenizer[0];
+  parseRunLabel(params.label, params.instrument, params.runs);
+  const std::string itemType = tokenizer[1];
+  params.itemType = (itemType == "Group") ? Muon::Group : Muon::Pair;
+  params.itemName = tokenizer[2];
+  const std::string plotType = tokenizer[3];
+  if (plotType == "Asym") {
+    params.plotType = Muon::Asymmetry;
+  } else if (plotType == "Counts") {
+    params.plotType = Muon::Counts;
+  } else {
+    params.plotType = Muon::Logarithm;
+  }
+  std::string versionString;
+  if (numTokens > 5) { // periods included
+    params.periods = tokenizer[4];
+    versionString = tokenizer[5];
+  } else {
+    versionString = tokenizer[4];
+  }
+  // Remove the # from the version string
+  versionString.erase(
+      std::remove(versionString.begin(), versionString.end(), '#'),
+      versionString.end());
+
+  try {
+    params.version = boost::lexical_cast<size_t>(versionString);
+  } catch (const boost::bad_lexical_cast &) {
+    params.version = 1; // Set to 1 and ignore the error
+  }
+
+  return params;
+}
+
+/**
+ * Parse a run label e.g. "MUSR00015189-91, 15193" into instrument
+ * ("MUSR") and set of runs (15189, 15190, 15191, 15193).
+ * Assumes instrument name doesn't contain a digit (true for muon instruments).
+ * @param label :: [input] Label to parse
+ * @param instrument :: [output] Name of instrument
+ * @param runNumbers :: [output] Vector to fill with run numbers
+ * @throws std::invalid_argument if input cannot be parsed
+ */
+void parseRunLabel(const std::string &label, std::string &instrument,
+                   std::vector<int> &runNumbers) {
+  const size_t instPos = label.find_first_of("0123456789");
+  instrument = label.substr(0, instPos);
+  const size_t numPos = label.find_first_not_of('0', instPos);
+  if (numPos != std::string::npos) {
+    std::string runString = label.substr(numPos, label.size());
+    // sets of continuous ranges
+    Mantid::Kernel::StringTokenizer rangeTokenizer(
+        runString, ",", Mantid::Kernel::StringTokenizer::TOK_TRIM);
+    for (const auto &range : rangeTokenizer.asVector()) {
+      Mantid::Kernel::StringTokenizer pairTokenizer(
+          range, "-", Mantid::Kernel::StringTokenizer::TOK_TRIM);
+      try {
+        if (pairTokenizer.count() == 2) {
+          // Range of run numbers
+          // Deal with common part of string: "151" in "15189-91"
+          const size_t diff =
+              pairTokenizer[0].length() - pairTokenizer[1].length();
+          const std::string endRun =
+              pairTokenizer[0].substr(0, diff) + pairTokenizer[1];
+          const int start = boost::lexical_cast<int>(pairTokenizer[0]);
+          const int end = boost::lexical_cast<int>(endRun);
+          for (int run = start; run < end + 1; run++) {
+            runNumbers.push_back(run);
+          }
+        } else if (pairTokenizer.count() == 1) {
+          // Single run
+          runNumbers.push_back(boost::lexical_cast<int>(pairTokenizer[0]));
+        } else {
+          throw std::invalid_argument("Failed to parse run label: " + label);
+        }
+      } catch (const boost::bad_lexical_cast &) {
+        throw std::invalid_argument("Failed to parse run label: " + label);
+      }
+    }
+  } else {
+    // The string was "INST000" or similar...
+    runNumbers = {0};
+  }
+}
+
+/**
+ * Generate a workspace name from the given parameters
+ * Format: "INST00012345; Pair; long; Asym;[ 1;] #1"
+ * @param params :: [input] Struct containing dataset parameters
+ * @returns :: Name for analysis workspace
+ */
+std::string generateWorkspaceName(const Muon::DatasetParams &params) {
+  std::ostringstream workspaceName;
+  const static std::string sep("; ");
+
+  // Instrument and run number
+  if (params.label.empty()) {
+    workspaceName << getRunLabel(params.instrument, params.runs) << sep;
+  } else {
+    workspaceName << params.label << sep;
+  }
+
+  // Pair/group and name of pair/group
+  if (params.itemType == Muon::ItemType::Pair) {
+    workspaceName << "Pair" << sep;
+  } else if (params.itemType == Muon::ItemType::Group) {
+    workspaceName << "Group" << sep;
+  }
+  workspaceName << params.itemName << sep;
+
+  // Type of plot
+  switch (params.plotType) {
+  case Muon::PlotType::Asymmetry:
+    workspaceName << "Asym";
+    break;
+  case Muon::PlotType::Counts:
+    workspaceName << "Counts";
+    break;
+  case Muon::PlotType::Logarithm:
+    workspaceName << "Logs";
+    break;
+  }
+
+  // Period(s)
+  const auto periods = params.periods;
+  if (!periods.empty()) {
+    workspaceName << sep << periods;
+  }
+
+  // Version - always "#1" if overwrite is on, otherwise increment
+  workspaceName << sep << "#" << params.version;
+
+  return workspaceName.str();
+}
+
+/**
+ * Get the colors corresponding to their position in the workspace list.
+ * Used in fittings table on results table tab.
+ *
+ * New color if:
+ * - different model used for fit
+ * - different number of runs (groups, periods) used in fit
+ *
+ * Colors: black, red, green, blue, orange, purple (if more, use black as
+ * default).
+ *
+ * @param workspaces :: Vector of either workspace groups (containing parameter
+ * tables) or parameter tables themselves
+ * @return :: List of colors with the key being position in input vector.
+ */
+QMap<int, QColor>
+getWorkspaceColors(const std::vector<Workspace_sptr> &workspaces) {
+  QMap<int, QColor> colors; // position, color
+
+  // Vector of <number of runs in fit, parameters in fit> pairs
+  typedef std::pair<size_t, std::vector<std::string>> FitProp;
+  std::vector<FitProp> fitProperties;
+
+  // Get fit properties for each input workspace
+  for (const auto &ws : workspaces) {
+    size_t nRuns = 0;
+    std::vector<std::string> params;
+    if (const auto group = boost::dynamic_pointer_cast<WorkspaceGroup>(ws)) {
+      for (size_t i = 0; i < group->size(); ++i) {
+        const auto &ws = group->getItem(i);
+        if (ws->getName().find("_Parameters") != std::string::npos) {
+          params = getKeysFromTable(
+              boost::dynamic_pointer_cast<ITableWorkspace>(ws));
+        } else if (ws->getName().find("_Workspace") != std::string::npos) {
+          ++nRuns;
+        }
+      }
+    } else if (const auto table =
+                   boost::dynamic_pointer_cast<ITableWorkspace>(ws)) {
+      nRuns = 1;
+      params = getKeysFromTable(table);
+    } else {
+      throw std::invalid_argument(
+          "Unexpected workspace type for " + ws->getName() +
+          " (expected WorkspaceGroup or ITableWorkspace)");
+    }
+    fitProperties.emplace_back(nRuns, params);
+  }
+
+  size_t colorCount(0);
+  colors[0] = getWorkspaceColor(colorCount);
+
+  if (fitProperties.size() > 1) {
+    FitProp firstProps = fitProperties.front();
+
+    while (static_cast<size_t>(colors.size()) < fitProperties.size()) {
+      // Go through and assign same color to all similar sets
+      for (size_t i = 1; i < fitProperties.size(); ++i) {
+        if (fitProperties[i] == firstProps) {
+          colors[static_cast<int>(i)] = getWorkspaceColor(colorCount);
+        }
+      }
+
+      // Increment color for next set
+      ++colorCount;
+
+      // Get the first unassigned one to compare to next time
+      for (size_t i = 1; i < fitProperties.size(); ++i) {
+        if (!colors.contains(static_cast<int>(i))) {
+          firstProps = fitProperties[i];
+          break;
+        }
+      }
+    }
+  }
+
+  return colors;
+}
 } // namespace MuonAnalysisHelper
 } // namespace CustomInterfaces
 } // namespace Mantid

@@ -1,15 +1,16 @@
-//------------------------------------------------------------------------------
-// Includes
-//------------------------------------------------------------------------------
 #include "MantidAlgorithms/MonteCarloAbsorption.h"
-#include "MantidAlgorithms/SampleCorrections/MCAbsorptionStrategy.h"
-#include "MantidAlgorithms/SampleCorrections/RectangularBeamProfile.h"
+#include "MantidAlgorithms/InterpolationOption.h"
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/Sample.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
+#include "MantidAlgorithms/SampleCorrections/MCAbsorptionStrategy.h"
+#include "MantidAlgorithms/SampleCorrections/RectangularBeamProfile.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidGeometry/Instrument/SampleEnvironment.h"
@@ -21,9 +22,15 @@
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/VectorHelper.h"
 
+#include "MantidHistogramData/HistogramX.h"
+#include "MantidHistogramData/Interpolate.h"
+
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
+using Mantid::HistogramData::HistogramX;
+using Mantid::HistogramData::interpolateLinearInplace;
+using Mantid::DataObjects::Workspace2D;
 namespace PhysicalConstants = Mantid::PhysicalConstants;
 
 /// @cond
@@ -40,17 +47,6 @@ inline double toWavelength(double energy) {
   return factor / sqrt(energy);
 }
 
-/// Get ith wavelength point for point data
-/// Assumes all checks on sizes have been done before calling
-double getWavelengthPointData(int i, const std::vector<double> &lambdas) {
-  return lambdas[i];
-}
-
-/// Get ith wavelength point for histogram data
-double getWavelengthHistogramData(int i, const std::vector<double> &lambdas) {
-  return 0.5 * (lambdas[i] + lambdas[i + 1]);
-}
-
 struct EFixedProvider {
   explicit EFixedProvider(const ExperimentInfo &expt)
       : m_expt(expt), m_emode(expt.getEMode()), m_value(0.0) {
@@ -59,11 +55,11 @@ struct EFixedProvider {
     }
   }
   inline DeltaEMode::Type emode() const { return m_emode; }
-  inline double value(const IDetector_const_sptr &det) const {
+  inline double value(const Mantid::detid_t detID) const {
     if (m_emode != DeltaEMode::Indirect)
       return m_value;
     else
-      return m_expt.getEFixed(det);
+      return m_expt.getEFixed(detID);
   }
 
 private:
@@ -109,6 +105,9 @@ void MonteCarloAbsorption::init() {
       "The number of \"neutron\" events to generate per simulated point");
   declareProperty("SeedValue", DEFAULT_SEED, positiveInt,
                   "Seed the random number generator with this value");
+
+  InterpolationOption interpolateOpt;
+  declareProperty(interpolateOpt.property(), interpolateOpt.propertyDoc());
 }
 
 /**
@@ -119,11 +118,13 @@ void MonteCarloAbsorption::exec() {
   const int nevents = getProperty("EventsPerPoint");
   const int nlambda = getProperty("NumberOfWavelengthPoints");
   const int seed = getProperty("SeedValue");
+  InterpolationOption interpolateOpt;
+  interpolateOpt.set(getPropertyValue("Interpolation"));
 
-  auto outputWS =
-      doSimulation(*inputWS, static_cast<size_t>(nevents), nlambda, seed);
+  auto outputWS = doSimulation(*inputWS, static_cast<size_t>(nevents), nlambda,
+                               seed, interpolateOpt);
 
-  setProperty("OutputWorkspace", outputWS);
+  setProperty("OutputWorkspace", std::move(outputWS));
 }
 
 /**
@@ -133,11 +134,13 @@ void MonteCarloAbsorption::exec() {
  * @param nlambda Number of wavelength points to simulate. The remainder
  * are computed using interpolation
  * @param seed Seed value for the random number generator
+ * @param interpolateOpt Method of interpolation to compute unsimulated points
  * @return A new workspace containing the correction factors & errors
  */
-MatrixWorkspace_sptr
+MatrixWorkspace_uptr
 MonteCarloAbsorption::doSimulation(const MatrixWorkspace &inputWS,
-                                   size_t nevents, int nlambda, int seed) {
+                                   size_t nevents, int nlambda, int seed,
+                                   const InterpolationOption &interpolateOpt) {
   auto outputWS = createOutputWorkspace(inputWS);
   // Cache information about the workspace that will be used repeatedly
   auto instrument = inputWS.getInstrument();
@@ -163,41 +166,32 @@ MonteCarloAbsorption::doSimulation(const MatrixWorkspace &inputWS,
 
   // Configure strategy
   MCAbsorptionStrategy strategy(*beamProfile, inputWS.sample(), nevents);
-  typedef double (*LambdaPointProvider)(int, const std::vector<double> &);
-  LambdaPointProvider lambda;
-  if (inputWS.isHistogramData()) {
-    lambda = &getWavelengthHistogramData;
-  } else {
-    lambda = &getWavelengthPointData;
-  }
 
-  PARALLEL_FOR1(outputWS)
+  const auto &spectrumInfo = outputWS->spectrumInfo();
+
+  PARALLEL_FOR_IF(Kernel::threadSafe(*outputWS))
   for (int64_t i = 0; i < nhists; ++i) {
     PARALLEL_START_INTERUPT_REGION
 
-    const auto &xvalues = outputWS->readX(i);
-    auto &signal = outputWS->dataY(i);
-    auto &errors = outputWS->dataE(i);
+    auto &outE = outputWS->mutableE(i);
     // The input was cloned so clear the errors out
-    // Y values are all overwritten later
-    std::fill(errors.begin(), errors.end(), 0.0);
-
+    outE = 0.0;
     // Final detector position
-    IDetector_const_sptr detector;
-    try {
-      detector = outputWS->getDetector(i);
-    } catch (Kernel::Exception::NotFoundError &) {
+    if (!spectrumInfo.hasDetectors(i)) {
       continue;
     }
     // Per spectrum values
-    const auto &detPos = detector->getPos();
-    const double lambdaFixed = toWavelength(efixed.value(detector));
+    const auto &detPos = spectrumInfo.position(i);
+    const double lambdaFixed =
+        toWavelength(efixed.value(spectrumInfo.detector(i).getID()));
     MersenneTwister rng(seed);
 
+    auto &outY = outputWS->mutableY(i);
+    const auto lambdas = outputWS->points(i);
     // Simulation for each requested wavelength point
     for (int j = 0; j < nbins; j += lambdaStepSize) {
       prog.report(reportMsg);
-      const double lambdaStep = lambda(j, xvalues);
+      const double lambdaStep = lambdas[j];
       double lambdaIn(lambdaStep), lambdaOut(lambdaStep);
       if (efixed.emode() == DeltaEMode::Direct) {
         lambdaIn = lambdaFixed;
@@ -206,7 +200,7 @@ MonteCarloAbsorption::doSimulation(const MatrixWorkspace &inputWS,
       } else {
         // elastic case already initialized
       }
-      std::tie(signal[j], std::ignore) =
+      std::tie(outY[j], std::ignore) =
           strategy.calculate(rng, detPos, lambdaIn, lambdaOut);
 
       // Ensure we have the last point for the interpolation
@@ -217,8 +211,9 @@ MonteCarloAbsorption::doSimulation(const MatrixWorkspace &inputWS,
 
     // Interpolate through points not simulated
     if (lambdaStepSize > 1) {
-      Kernel::VectorHelper::linearlyInterpolateY(xvalues, signal,
-                                                 lambdaStepSize);
+      auto histnew = outputWS->histogram(i);
+      interpolateOpt.applyInplace(histnew, lambdaStepSize);
+      outputWS->setHistogram(i, histnew);
     }
 
     PARALLEL_END_INTERUPT_REGION
@@ -228,9 +223,9 @@ MonteCarloAbsorption::doSimulation(const MatrixWorkspace &inputWS,
   return outputWS;
 }
 
-MatrixWorkspace_sptr MonteCarloAbsorption::createOutputWorkspace(
+MatrixWorkspace_uptr MonteCarloAbsorption::createOutputWorkspace(
     const MatrixWorkspace &inputWS) const {
-  MatrixWorkspace_sptr outputWS = inputWS.clone();
+  MatrixWorkspace_uptr outputWS = DataObjects::create<Workspace2D>(inputWS);
   // The algorithm computes the signal values at bin centres so they should
   // be treated as a distribution
   outputWS->setDistribution(true);

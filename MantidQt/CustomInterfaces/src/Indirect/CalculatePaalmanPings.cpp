@@ -3,6 +3,7 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/Material.h"
@@ -29,6 +30,9 @@ CalculatePaalmanPings::CalculatePaalmanPings(QWidget *parent)
   connect(m_uiForm.dsSample, SIGNAL(dataReady(const QString &)), this,
           SLOT(getBeamWidthFromWorkspace(const QString &)));
 
+  connect(m_uiForm.dsSample, SIGNAL(dataReady(const QString &)), this,
+          SLOT(fillCorrectionDetails(const QString &)));
+
   QRegExp regex("[A-Za-z0-9\\-\\(\\)]*");
   QValidator *formulaValidator = new QRegExpValidator(regex, this);
   m_uiForm.leSampleChemicalFormula->setValidator(formulaValidator);
@@ -37,6 +41,16 @@ CalculatePaalmanPings::CalculatePaalmanPings(QWidget *parent)
           SLOT(validateChemical()));
   connect(m_uiForm.leCanChemicalFormula, SIGNAL(editingFinished()), this,
           SLOT(validateChemical()));
+  // Connect slots for plot and save
+  connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveClicked()));
+  connect(m_uiForm.pbPlot, SIGNAL(clicked()), this, SLOT(plotClicked()));
+
+  // Connect slots for toggling the mass/number density unit
+  connect(m_uiForm.cbSampleDensity, SIGNAL(currentIndexChanged(int)), this,
+          SLOT(changeSampleDensityUnit(int)));
+  connect(m_uiForm.cbCanDensity, SIGNAL(currentIndexChanged(int)), this,
+          SLOT(changeCanDensityUnit(int)));
+
   UserInputValidator uiv;
   if (uiv.checkFieldIsNotEmpty("Can Chemical Formula",
                                m_uiForm.leCanChemicalFormula,
@@ -68,9 +82,21 @@ void CalculatePaalmanPings::run() {
       AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
           sampleWsName.toStdString());
 
+  const auto emode = m_uiForm.cbEmode->currentText();
+  absCorAlgo->setProperty("EMode", emode.toStdString());
+
+  const auto efixed = m_uiForm.doubleEfixed->value();
+  absCorAlgo->setProperty("EFixed", efixed);
+
+  const long int numwave = m_uiForm.spNwave->value();
+  absCorAlgo->setProperty("NumberWavelengths", numwave);
+
+  const bool inter = m_uiForm.cbInterpolate->isChecked();
+  absCorAlgo->setProperty("Interpolate", inter);
+
   // If not in wavelength then do conversion
   const auto sampleXUnit = sampleWs->getAxis(0)->unit();
-  if (sampleXUnit->caption() != "Wavelength") {
+  if (sampleXUnit->caption() != "Wavelength" && emode != "Efixed") {
     g_log.information(
         "Sample workspace not in wavelength, need to convert to continue.");
     absCorProps["SampleWorkspace"] =
@@ -79,8 +105,10 @@ void CalculatePaalmanPings::run() {
     absCorProps["SampleWorkspace"] = sampleWsName.toStdString();
   }
 
-  absCorAlgo->setProperty("SampleNumberDensity",
-                          m_uiForm.spSampleNumberDensity->value());
+  absCorAlgo->setProperty(
+      "SampleDensityType",
+      m_uiForm.cbSampleDensity->currentText().toStdString());
+  absCorAlgo->setProperty("SampleDensity", m_uiForm.spSampleDensity->value());
 
   absCorAlgo->setProperty(
       "SampleChemicalFormula",
@@ -97,7 +125,7 @@ void CalculatePaalmanPings::run() {
 
     // If not in wavelength then do conversion
     Mantid::Kernel::Unit_sptr canXUnit = canWs->getAxis(0)->unit();
-    if (canXUnit->caption() != "Wavelength") {
+    if (canXUnit->caption() != "Wavelength" && emode != "Efixed") {
       g_log.information("Container workspace not in wavelength, need to "
                         "convert to continue.");
       absCorProps["CanWorkspace"] = addConvertUnitsStep(canWs, "Wavelength");
@@ -105,8 +133,9 @@ void CalculatePaalmanPings::run() {
       absCorProps["CanWorkspace"] = canWsName;
     }
 
-    absCorAlgo->setProperty("CanNumberDensity",
-                            m_uiForm.spCanNumberDensity->value());
+    absCorAlgo->setProperty("CanDensityType",
+                            m_uiForm.cbCanDensity->currentText().toStdString());
+    absCorAlgo->setProperty("CanDensity", m_uiForm.spCanDensity->value());
 
     const auto canChemicalFormula = m_uiForm.leCanChemicalFormula->text();
     absCorAlgo->setProperty("CanChemicalFormula",
@@ -114,11 +143,6 @@ void CalculatePaalmanPings::run() {
 
     addShapeSpecificCanOptions(absCorAlgo, sampleShape);
   }
-
-  const auto eMode = getEMode(sampleWs);
-  absCorAlgo->setProperty("EMode", eMode);
-  if (eMode == "Indirect")
-    absCorAlgo->setProperty("EFixed", getEFixed(sampleWs));
 
   // Generate workspace names
   auto nameCutIndex = sampleWsName.lastIndexOf("_");
@@ -145,10 +169,6 @@ void CalculatePaalmanPings::run() {
 
   // Add corrections algorithm to queue
   m_batchAlgoRunner->addAlgorithm(absCorAlgo, absCorProps);
-
-  // Add save algorithms if required
-  if (m_uiForm.ckSave->isChecked())
-    addSaveWorkspaceToQueue(outputWsName);
 
   // Run algorithm queue
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
@@ -224,9 +244,36 @@ bool CalculatePaalmanPings::doValidation(bool silent) {
     if (containerType != sampleType)
       uiv.addErrorMessage(
           "Sample and can workspaces must contain the same type of data.");
+
+    // Shape validation
+
+    const auto shape = m_uiForm.cbSampleShape->currentIndex();
+    if (shape == 1 && m_uiForm.ckUseCan->isChecked()) {
+      auto sampleRadius = m_uiForm.spCylSampleOuterRadius->value();
+      auto containerRadius = m_uiForm.spCylCanOuterRadius->value();
+      if (containerRadius <= sampleRadius) {
+        uiv.addErrorMessage(
+            "Container radius must be bigger than sample radius");
+      }
+    }
+    if (shape == 2) {
+      auto sampleInnerRadius = m_uiForm.spAnnSampleInnerRadius->value();
+      auto sampleOuterRadius = m_uiForm.spAnnSampleOuterRadius->value();
+      if (sampleOuterRadius <= sampleInnerRadius) {
+        uiv.addErrorMessage(
+            "Sample outer radius must be bigger than sample inner radius");
+      }
+      if (m_uiForm.ckUseCan->isChecked()) {
+        auto containerRadius = m_uiForm.spAnnCanOuterRadius->value();
+        if (containerRadius <= sampleOuterRadius) {
+          uiv.addErrorMessage(
+              "Container outer radius must be bigger than sample outer radius");
+        }
+      }
+    }
   }
 
-  // Show error mssage if needed
+  // Show error message if needed
   if (!uiv.isAllInputValid() && !silent)
     emit showMessageBox(uiv.generateErrorMessage());
 
@@ -268,7 +315,7 @@ void CalculatePaalmanPings::absCorComplete(bool error) {
           AlgorithmManager::Instance().create("ConvertSpectrumAxis");
       convertSpecAlgo->initialize();
       convertSpecAlgo->setProperty("InputWorkspace", factorWs);
-      convertSpecAlgo->setProperty("OutputWorkspace", factorWs->name());
+      convertSpecAlgo->setProperty("OutputWorkspace", factorWs->getName());
       convertSpecAlgo->setProperty("Target", "ElasticQ");
       convertSpecAlgo->setProperty("EMode", "Indirect");
 
@@ -302,19 +349,50 @@ void CalculatePaalmanPings::postProcessComplete(bool error) {
     return;
   }
 
-  // Handle Mantid plotting
-  QString plotType = m_uiForm.cbPlotOutput->currentText();
-
-  if (plotType == "Both" || plotType == "Wavelength")
-    plotSpectrum(QString::fromStdString(m_pythonExportWsName));
-
-  if (plotType == "Both" || plotType == "Angle")
-    plotTimeBin(QString::fromStdString(m_pythonExportWsName));
+  // Enable post processing plot and save
+  m_uiForm.cbPlotOutput->setEnabled(true);
+  m_uiForm.pbPlot->setEnabled(true);
+  m_uiForm.pbSave->setEnabled(true);
 }
 
 void CalculatePaalmanPings::loadSettings(const QSettings &settings) {
   m_uiForm.dsSample->readSettings(settings.group());
   m_uiForm.dsContainer->readSettings(settings.group());
+}
+
+/**
+ * Slot that tries to populate correction details from
+ * instrument parameters on sample workspace selection
+ * @param wsName Sample workspace name
+ */
+void CalculatePaalmanPings::fillCorrectionDetails(const QString &wsName) {
+  auto ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+      wsName.toStdString());
+
+  try {
+    m_uiForm.doubleEfixed->setValue(getEFixed(ws));
+  } catch (std::runtime_error) {
+    // do nothing if there is no efixed
+  }
+
+  auto emode = QString::fromStdString(getEMode(ws));
+  int index = m_uiForm.cbEmode->findText(emode);
+  if (index != -1) {
+    m_uiForm.cbEmode->setCurrentIndex(index);
+  }
+
+  auto inst = ws->getInstrument();
+  if (inst) {
+    if (inst->hasParameter("AbsorptionCorrectionNumberWavelength")) {
+      m_uiForm.spNwave->setValue(
+          inst->getIntParameter("AbsorptionCorrectionNumberWavelength")[0]);
+    }
+    if (inst->hasParameter("AbsorptionCorrectionInterpolate")) {
+      bool interpolate =
+          inst->getBoolParameter("AbsorptionCorrectionInterpolate")[0];
+      m_uiForm.cbInterpolate->setChecked(interpolate);
+    }
+  }
 }
 
 /**
@@ -422,6 +500,57 @@ void CalculatePaalmanPings::addShapeSpecificCanOptions(IAlgorithm_sptr alg,
   } else if (shape == "Annulus") {
     const auto canOuterRadius = m_uiForm.spAnnCanOuterRadius->value();
     alg->setProperty("CanOuterRadius", canOuterRadius);
+  }
+}
+
+/**
+ * Handles saving of workspace
+ */
+void CalculatePaalmanPings::saveClicked() {
+
+  if (checkADSForPlotSaveWorkspace(m_pythonExportWsName, false))
+    addSaveWorkspaceToQueue(QString::fromStdString(m_pythonExportWsName));
+  m_batchAlgoRunner->executeBatchAsync();
+}
+
+/**
+ * Handles mantid plotting of workspace
+ */
+void CalculatePaalmanPings::plotClicked() {
+
+  QString plotType = m_uiForm.cbPlotOutput->currentText();
+
+  if (checkADSForPlotSaveWorkspace(m_pythonExportWsName, true)) {
+
+    if (plotType == "Both" || plotType == "Wavelength")
+      plotSpectrum(QString::fromStdString(m_pythonExportWsName));
+
+    if (plotType == "Both" || plotType == "Angle")
+      plotTimeBin(QString::fromStdString(m_pythonExportWsName));
+  }
+}
+
+/**
+ * Handle changing of the sample density unit
+ */
+void CalculatePaalmanPings::changeSampleDensityUnit(int index) {
+
+  if (index == 0) {
+    m_uiForm.spSampleDensity->setSuffix(" g/cm3");
+  } else {
+    m_uiForm.spSampleDensity->setSuffix(" /A3");
+  }
+}
+
+/**
+ * Handle changing of the can density unit
+ */
+void CalculatePaalmanPings::changeCanDensityUnit(int index) {
+
+  if (index == 0) {
+    m_uiForm.spCanDensity->setSuffix(" g/cm3");
+  } else {
+    m_uiForm.spCanDensity->setSuffix(" /A3");
   }
 }
 

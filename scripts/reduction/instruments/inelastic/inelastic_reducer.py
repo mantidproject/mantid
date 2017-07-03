@@ -13,6 +13,7 @@ from reduction import validate_loader
 ## Version number
 __version__ = '0.01'
 
+
 class InelasticReducer(Reducer):
     """
         Inelastic-specific implementation of the Reducer
@@ -50,8 +51,6 @@ class InelasticReducer(Reducer):
 
     ## Save SPE file
     _spe_saver = None
-
-
 
     def __init__(self):
         super(InelasticReducer, self).__init__()
@@ -139,8 +138,6 @@ class InelasticReducer(Reducer):
         """
         self._nexus_saver = saver
 
-
-
     def pre_process(self):
         """
             Create the list of algorithms that will be run.
@@ -156,8 +153,6 @@ class InelasticReducer(Reducer):
 
         if self._normalise is not None:
             self.append_step(self._normalise)
-
-
 
 
 #    def _absolute_norm_steps(self):

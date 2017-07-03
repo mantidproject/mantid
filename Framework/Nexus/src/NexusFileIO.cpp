@@ -1,10 +1,7 @@
 // NexusFileIO
 // @author Ronald Fowler
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
-#include <vector>
 #include <sstream>
+#include <vector>
 
 #ifdef _WIN32
 #include <io.h>
@@ -12,17 +9,18 @@
 // Maximum base file name size on modern windows systems is 260 characters
 #define NAME_MAX 260
 #endif /* _WIN32 */
-#include "MantidGeometry/Instrument.h"
-#include "MantidKernel/TimeSeriesProperty.h"
-#include "MantidNexus/NexusFileIO.h"
-#include "MantidDataObjects/Workspace2D.h"
-#include "MantidKernel/UnitFactory.h"
-#include "MantidKernel/ArrayProperty.h"
 #include "MantidAPI/NumericAxis.h"
-#include "MantidKernel/VectorHelper.h"
-#include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidDataObjects/RebinnedOutput.h"
+#include "MantidDataObjects/TableWorkspace.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidGeometry/Instrument.h"
+#include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidKernel/Unit.h"
+#include "MantidKernel/UnitFactory.h"
+#include "MantidKernel/VectorHelper.h"
+#include "MantidNexus/NexusFileIO.h"
 
 #include <Poco/File.h>
 #include <Poco/Path.h>
@@ -306,7 +304,7 @@ int NexusFileIO::writeNexusProcessedData2D(
   const size_t nHist = localworkspace->getNumberHistograms();
   if (nHist < 1)
     return (2);
-  const size_t nSpectBins = localworkspace->readY(0).size();
+  const size_t nSpectBins = localworkspace->y(0).size();
   const size_t nSpect = spec.size();
   int dims_array[2] = {static_cast<int>(nSpect), static_cast<int>(nSpectBins)};
 
@@ -350,7 +348,7 @@ int NexusFileIO::writeNexusProcessedData2D(
     NXopendata(fileID, name.c_str());
     for (size_t i = 0; i < nSpect; i++) {
       int s = spec[i];
-      NXputslab(fileID, localworkspace->readY(s).data(), start, asize);
+      NXputslab(fileID, localworkspace->y(s).rawData().data(), start, asize);
       start[0]++;
     }
     if (m_progress != nullptr)
@@ -377,7 +375,7 @@ int NexusFileIO::writeNexusProcessedData2D(
     start[0] = 0;
     for (size_t i = 0; i < nSpect; i++) {
       int s = spec[i];
-      NXputslab(fileID, localworkspace->readE(s).data(), start, asize);
+      NXputslab(fileID, localworkspace->e(s).rawData().data(), start, asize);
       start[0]++;
     }
 
@@ -405,7 +403,7 @@ int NexusFileIO::writeNexusProcessedData2D(
     // Potentially x error
     if (localworkspace->hasDx(0)) {
       dims_array[0] = static_cast<int>(nSpect);
-      dims_array[1] = static_cast<int>(localworkspace->readX(0).size());
+      dims_array[1] = static_cast<int>(localworkspace->dx(0).size());
       std::string dxErrorName = "xerrors";
       NXcompmakedata(fileID, dxErrorName.c_str(), NX_FLOAT64, 2, dims_array,
                      m_nexuscompression, asize);
@@ -424,20 +422,20 @@ int NexusFileIO::writeNexusProcessedData2D(
 
   // write X data, as single array or all values if "ragged"
   if (uniformSpectra) {
-    dims_array[0] = static_cast<int>(localworkspace->readX(0).size());
+    dims_array[0] = static_cast<int>(localworkspace->x(0).size());
     NXmakedata(fileID, "axis1", NX_FLOAT64, 1, dims_array);
     NXopendata(fileID, "axis1");
-    NXputdata(fileID, localworkspace->readX(0).data());
+    NXputdata(fileID, localworkspace->x(0).rawData().data());
 
   } else {
     dims_array[0] = static_cast<int>(nSpect);
-    dims_array[1] = static_cast<int>(localworkspace->readX(0).size());
+    dims_array[1] = static_cast<int>(localworkspace->x(0).size());
     NXmakedata(fileID, "axis1", NX_FLOAT64, 2, dims_array);
     NXopendata(fileID, "axis1");
     start[0] = 0;
     asize[1] = dims_array[1];
     for (size_t i = 0; i < nSpect; i++) {
-      NXputslab(fileID, localworkspace->readX(i).data(), start, asize);
+      NXputslab(fileID, localworkspace->x(i).rawData().data(), start, asize);
       start[0]++;
     }
   }
@@ -671,6 +669,11 @@ int NexusFileIO::writeNexusTableWorkspace(
       for (int ii = 0; ii < nRows; ii++) {
         if (col->cell<std::string>(ii).size() > maxStr)
           maxStr = col->cell<std::string>(ii).size();
+      }
+      // If the column is empty fill the data with spaces.
+      // Strings containing spaces only will be read back in as empty strings.
+      if (maxStr == 0) {
+        maxStr = 1;
       }
       int dims_array[2] = {nRows, static_cast<int>(maxStr)};
       int asize[2] = {1, dims_array[1]};
@@ -982,8 +985,9 @@ int NexusFileIO::getWorkspaceSize(int &numberOfSpectra, int &numberOfChannels,
   int len = NX_MAXNAMELEN;
   type = NX_CHAR;
 
-  if (checkAttributeName("units")) {
-    status = NXgetattr(fileID, "units", sbuf, &len, &type);
+  char unitsAttrName[] = "units";
+  if (checkAttributeName(unitsAttrName)) {
+    status = NXgetattr(fileID, unitsAttrName, sbuf, &len, &type);
     if (status != NX_ERROR)
       yUnits = sbuf;
     NXclosedata(fileID);
@@ -995,7 +999,7 @@ int NexusFileIO::getWorkspaceSize(int &numberOfSpectra, int &numberOfChannels,
     return (4);
   len = NX_MAXNAMELEN;
   type = NX_CHAR;
-  NXgetattr(fileID, "units", sbuf, &len, &type);
+  NXgetattr(fileID, unitsAttrName, sbuf, &len, &type);
   axesUnits = std::string(sbuf, len);
   NXgetinfo(fileID, &rank, dim, &type);
   // non-uniform X has 2D axis1 data
@@ -1010,7 +1014,7 @@ int NexusFileIO::getWorkspaceSize(int &numberOfSpectra, int &numberOfChannels,
   NXopendata(fileID, "axis2");
   len = NX_MAXNAMELEN;
   type = NX_CHAR;
-  NXgetattr(fileID, "units", sbuf, &len, &type);
+  NXgetattr(fileID, unitsAttrName, sbuf, &len, &type);
   axesUnits += std::string(":") + std::string(sbuf, len);
   NXclosedata(fileID);
   NXclosegroup(fileID);
@@ -1024,7 +1028,7 @@ bool NexusFileIO::checkAttributeName(const std::string &target) const {
   const std::vector< ::NeXus::AttrInfo> infos = m_filehandle->getAttrInfos();
   // clang-format on
   for (const auto &info : infos) {
-    if (target.compare(info.name) == 0)
+    if (target == info.name)
       return true;
   }
 
@@ -1194,7 +1198,7 @@ bool NexusFileIO::writeNexusBinMasking(
 
   // save masked bin indices
   dimensions[0] = static_cast<int>(bins.size());
-  status = NXmakedata(fileID, "masked_bins", NX_INT32, 1, dimensions);
+  status = NXmakedata(fileID, "masked_bins", NX_UINT64, 1, dimensions);
   if (status == NX_ERROR)
     return false;
   NXopendata(fileID, "masked_bins");
@@ -1262,7 +1266,7 @@ int getNexusEntryTypes(const std::string &fileName,
   while ((stat = NXgetnextentry(fileH, nxname, nxclass, &nxdatatype)) ==
          NX_OK) {
     std::string nxc(nxclass);
-    if (nxc.compare("NXentry") == 0)
+    if (nxc == "NXentry")
       entryList.push_back(nxname);
   }
   // for each entry found, look for "analysis" or "definition" text data fields
@@ -1275,9 +1279,9 @@ int getNexusEntryTypes(const std::string &fileName,
            NX_OK) {
       std::string nxc(nxclass), nxn(nxname);
       // if a data field
-      if (nxc.compare("SDS") == 0)
+      if (nxc == "SDS")
         // if one of the two names we are looking for
-        if (nxn.compare("definition") == 0 || nxn.compare("analysis") == 0) {
+        if (nxn == "definition" || nxn == "analysis") {
           NXopendata(fileH, nxname);
           stat = NXgetinfo(fileH, &rank, dims, &type);
           if (stat == NX_ERROR)

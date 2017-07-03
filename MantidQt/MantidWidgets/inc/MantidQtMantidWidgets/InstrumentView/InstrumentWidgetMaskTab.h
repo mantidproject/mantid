@@ -95,6 +95,7 @@ protected slots:
   void storeBinMask();
   void storeMask();
   void clearMask();
+  void saveShapesToTable() const;
   void saveInvertedMaskToWorkspace();
   void saveInvertedMaskToFile();
   void saveMaskToWorkspace();
@@ -108,7 +109,7 @@ protected slots:
   void saveExcludeGroupToFile();
   void showSaveMenuTooltip(QAction *);
   void toggleMaskGroup();
-
+  void enableApplyButtons();
   void doubleChanged(QtProperty *);
 
 protected:
@@ -123,7 +124,6 @@ protected:
   void saveMaskingToCalFile(bool invertMask = false);
   void saveMaskingToTableWorkspace(bool invertMask = false);
   std::string generateMaskWorkspaceName(bool temp = false) const;
-  void enableApplyButtons();
   void setSelectActivity();
   Mode getMode() const;
   /// Get mask/group border color
@@ -165,6 +165,7 @@ protected:
 
   QPushButton *m_applyToData;
   QPushButton *m_applyToView;
+  QPushButton *m_saveShapesToTable;
   QPushButton *m_clearAll;
   QPushButton *m_saveButton;
   bool m_maskBins;

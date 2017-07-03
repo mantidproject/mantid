@@ -3,6 +3,7 @@
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/Crystal/IndexingUtils.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
+#include "MantidAPI/Sample.h"
 
 namespace Mantid {
 namespace Crystal {
@@ -14,7 +15,6 @@ using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
 
-//--------------------------------------------------------------------------
 /** Constructor
  */
 FindUBUsingMinMaxD::FindUBUsingMinMaxD() {
@@ -32,7 +32,6 @@ const std::string FindUBUsingMinMaxD::category() const {
   return "Crystal\\UBMatrix";
 }
 
-//--------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void FindUBUsingMinMaxD::init() {

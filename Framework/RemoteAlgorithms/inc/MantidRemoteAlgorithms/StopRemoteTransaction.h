@@ -2,12 +2,17 @@
 #define STOPREMOTETRANSACTION_H_
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/DeprecatedAlgorithm.h"
 
 namespace Mantid {
 namespace RemoteAlgorithms {
 
-class DLLExport StopRemoteTransaction : public Mantid::API::Algorithm {
+class DLLExport StopRemoteTransaction : public Mantid::API::Algorithm,
+                                        public API::DeprecatedAlgorithm {
 public:
+  /// Constructor
+  StopRemoteTransaction() { this->useAlgorithm("StopRemoteTransaction", 2); }
+
   /// Algorithm's name
   const std::string name() const override { return "StopRemoteTransaction"; }
   /// Summary of algorithms purpose

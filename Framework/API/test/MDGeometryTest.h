@@ -1,6 +1,7 @@
 #ifndef MANTID_API_MDGEOMETRYTEST_H_
 #define MANTID_API_MDGEOMETRYTEST_H_
 
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MDGeometry.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidKernel/System.h"

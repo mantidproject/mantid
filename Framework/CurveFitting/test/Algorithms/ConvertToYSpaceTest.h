@@ -6,7 +6,23 @@
 #include "MantidCurveFitting/Algorithms/ConvertToYSpace.h"
 #include "../Functions/ComptonProfileTestHelpers.h"
 
+using namespace Mantid::API;
 using Mantid::CurveFitting::Algorithms::ConvertToYSpace;
+
+namespace {
+/** Creates an instance of the ConvertToYSpace algorithm and sets its
+* properties.
+*
+* @return ConvertToYSpace alg
+*/
+IAlgorithm_sptr createAlgorithm() {
+  IAlgorithm_sptr alg = boost::make_shared<ConvertToYSpace>();
+  alg->initialize();
+  alg->setChild(true);
+  alg->setPropertyValue("OutputWorkspace", "__UNUSED__");
+  return alg;
+}
+}
 
 class ConvertToYSpaceTest : public CxxTest::TestSuite {
 public:
@@ -54,9 +70,9 @@ public:
     const size_t npts = ySpOutputWs->blocksize();
 
     // Test a few y-Space values
-    const auto &ySpOutX = ySpOutputWs->readX(0);
-    const auto &ySpOutY = ySpOutputWs->readY(0);
-    const auto &ySpOutE = ySpOutputWs->readE(0);
+    const auto &ySpOutX = ySpOutputWs->x(0);
+    const auto &ySpOutY = ySpOutputWs->y(0);
+    const auto &ySpOutE = ySpOutputWs->e(0);
 
     // X
     TS_ASSERT_DELTA(-18.71348856, ySpOutX.front(), 1e-08);
@@ -72,9 +88,9 @@ public:
     TS_ASSERT_DELTA(138.38603736, ySpOutE.back(), 1e-08);
 
     // Test a few q-Space values
-    const auto &qSpOutX = qSpOutputWs->readX(0);
-    const auto &qSpOutY = qSpOutputWs->readY(0);
-    const auto &qSpOutE = qSpOutputWs->readE(0);
+    const auto &qSpOutX = qSpOutputWs->x(0);
+    const auto &qSpOutY = qSpOutputWs->y(0);
+    const auto &qSpOutE = qSpOutputWs->e(0);
 
     // X
     TS_ASSERT_DELTA(-18.71348856, qSpOutX.front(), 1e-08);
@@ -104,7 +120,7 @@ public:
 
   void test_Input_Workspace_Not_In_TOF_Throws_Error() {
     auto alg = createAlgorithm();
-    auto testWS = WorkspaceCreationHelper::Create2DWorkspace123(1, 10);
+    auto testWS = WorkspaceCreationHelper::create2DWorkspace123(1, 10);
     testWS->getAxis(0)->setUnit("Wavelength");
 
     TS_ASSERT_THROWS(alg->setProperty("InputWorkspace", testWS),
@@ -113,7 +129,7 @@ public:
 
   void test_Input_Workspace_In_TOF_Without_Instrument_Throws_Error() {
     auto alg = createAlgorithm();
-    auto testWS = WorkspaceCreationHelper::Create2DWorkspace123(1, 10);
+    auto testWS = WorkspaceCreationHelper::create2DWorkspace123(1, 10);
     testWS->getAxis(0)->setUnit("TOF");
 
     TS_ASSERT_THROWS(alg->setProperty("InputWorkspace", testWS),
@@ -133,15 +149,35 @@ public:
 
     TS_ASSERT_THROWS(alg->execute(), std::runtime_error);
   }
+};
+
+class ConvertToYSpaceTestPerformance : public CxxTest::TestSuite {
+public:
+  static ConvertToYSpaceTestPerformance *createSuite() {
+    return new ConvertToYSpaceTestPerformance();
+  }
+  static void destroySuite(ConvertToYSpaceTestPerformance *suite) {
+    delete suite;
+  }
+
+  void setUp() override {
+    convertToYSpaceAlg = createAlgorithm();
+    double x0(50.0), x1(300.0), dx(0.5);
+    auto testWS = ComptonProfileTestHelpers::createTestWorkspace(
+        1000, x0, x1, dx, true, true);
+    convertToYSpaceAlg->setChild(false);
+    convertToYSpaceAlg->setProperty("InputWorkspace", testWS);
+    convertToYSpaceAlg->setProperty("Mass", 1.0097);
+    convertToYSpaceAlg->setProperty("QWorkspace",
+                                    "ConvertToYSpace_Test_qSpace");
+  }
+
+  void testConvertToYSpaceTestPerformance() {
+    TS_ASSERT_THROWS_NOTHING(convertToYSpaceAlg->execute());
+  }
 
 private:
-  Mantid::API::IAlgorithm_sptr createAlgorithm() {
-    Mantid::API::IAlgorithm_sptr alg = boost::make_shared<ConvertToYSpace>();
-    alg->initialize();
-    alg->setChild(true);
-    alg->setPropertyValue("OutputWorkspace", "__UNUSED__");
-    return alg;
-  }
+  IAlgorithm_sptr convertToYSpaceAlg;
 };
 
 #endif /* MANTID_CURVEFITTING_CONVERTTOYSPACETEST_H_ */

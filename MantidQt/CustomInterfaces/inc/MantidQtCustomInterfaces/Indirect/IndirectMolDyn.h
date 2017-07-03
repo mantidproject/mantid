@@ -22,6 +22,9 @@ public:
 
 private slots:
   void versionSelected(const QString &);
+  // Handle plotting and saving
+  void plotClicked();
+  void saveClicked();
 
 private:
   // The ui form

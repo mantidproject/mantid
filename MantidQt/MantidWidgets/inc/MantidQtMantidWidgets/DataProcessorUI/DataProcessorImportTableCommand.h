@@ -41,6 +41,11 @@ public:
   };
   std::string name() override { return std::string("Import .TBL"); }
   std::string icon() override { return std::string("://open_template.png"); }
+  std::string tooltip() override { return std::string("Import .TBL file"); }
+  std::string whatsthis() override {
+    return std::string("Opens a dialog to select a .TBL file to import");
+  }
+  std::string shortcut() override { return std::string(); }
 };
 }
 }

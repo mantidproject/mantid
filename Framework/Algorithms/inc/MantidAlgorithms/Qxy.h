@@ -1,11 +1,7 @@
 #ifndef MANTID_ALGORITHMS_QXY_H_
 #define MANTID_ALGORITHMS_QXY_H_
 
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
-#include "MantidAlgorithms/GravitySANSHelper.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -71,8 +67,10 @@ private:
   /// Execution code
   void exec() override;
 
+  std::vector<double> logBinning(double min, double max, int num);
   API::MatrixWorkspace_sptr
   setUpOutputWorkspace(API::MatrixWorkspace_const_sptr inputWorkspace);
+  double getQminFromWs(const API::MatrixWorkspace &inputWorkspace);
 };
 
 } // namespace Algorithms

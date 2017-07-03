@@ -7,6 +7,7 @@
 #include "MantidGeometry/ICompAssembly.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/Sample.h"
 #include "MantidQtMantidWidgets/InstrumentView/GLActor.h"
 #include <queue>
 #include <QMessageBox>
@@ -17,14 +18,14 @@ namespace MantidQt {
 namespace MantidWidgets {
 
 InstrumentTreeWidget::InstrumentTreeWidget(QWidget *w)
-    : QTreeView(w), m_instrActor(NULL), m_treeModel(NULL) {
+    : QTreeView(w), m_instrWidget(nullptr), m_treeModel(nullptr) {
   connect(this, SIGNAL(clicked(const QModelIndex)), this,
           SLOT(sendComponentSelectedSignal(const QModelIndex)));
 }
 
-void InstrumentTreeWidget::setInstrumentActor(InstrumentActor *instrActor) {
-  m_instrActor = instrActor;
-  m_treeModel = new InstrumentTreeModel(instrActor, this);
+void InstrumentTreeWidget::setInstrumentWidget(InstrumentWidget *w) {
+  m_instrWidget = w;
+  m_treeModel = new InstrumentTreeModel(w, this);
   setModel(m_treeModel);
   setSelectionMode(SingleSelection);
   setSelectionBehavior(SelectRows);
@@ -35,7 +36,7 @@ void InstrumentTreeWidget::getSelectedBoundingBox(const QModelIndex &index,
                                                   double &zmax, double &xmin,
                                                   double &ymin, double &zmin) {
   Mantid::Geometry::Instrument_const_sptr instrument =
-      m_instrActor->getInstrument();
+      m_instrWidget->getInstrumentActor().getInstrument();
   // Check whether its instrument
   boost::shared_ptr<const Mantid::Geometry::IComponent> selectedComponent;
   if (instrument->getComponentID() ==
@@ -65,7 +66,8 @@ void InstrumentTreeWidget::getSelectedBoundingBox(const QModelIndex &index,
         // int(instrument->getSample()->getComponentID()) << '\n';
         if (tmpObj->getComponentID() ==
             instrument->getSample()->getComponentID()) {
-          boundBox = m_instrActor->getWorkspace()
+          boundBox = m_instrWidget->getInstrumentActor()
+                         .getWorkspace()
                          ->sample()
                          .getShape()
                          .getBoundingBox();
@@ -122,7 +124,7 @@ void InstrumentTreeWidget::sendComponentSelectedSignal(
   Mantid::Geometry::ComponentID id =
       static_cast<Mantid::Geometry::ComponentID>(index.internalPointer());
   auto visitor = SetVisibleComponentVisitor(id);
-  m_instrActor->accept(visitor);
+  m_instrWidget->getInstrumentActor().accept(visitor);
   emit componentSelected(id);
 }
 

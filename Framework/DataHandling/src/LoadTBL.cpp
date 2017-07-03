@@ -58,7 +58,7 @@ int LoadTBL::confidence(Kernel::FileDescriptor &descriptor) const {
       {
         confidence = 0;
       }
-    } catch (std::length_error) {
+    } catch (const std::length_error &) {
       confidence = 0;
     }
   }
@@ -130,7 +130,6 @@ void LoadTBL::csvParse(std::string line, std::vector<std::string> &cols,
                        std::vector<std::vector<size_t>> &quoteBounds,
                        size_t expectedCommas) const {
   size_t pairID = 0;
-  size_t valsFound = 0;
   size_t lastComma = 0;
   size_t pos = 0;
   bool firstCheck = true;
@@ -153,7 +152,6 @@ void LoadTBL::csvParse(std::string line, std::vector<std::string> &cols,
                                      quoteBounds.at(pairID).at(1) -
                                          (quoteBounds.at(pairID).at(0) + 1)));
           ++pairID;
-          ++valsFound;
         }
       } else {
         if (firstCell) {
@@ -163,7 +161,6 @@ void LoadTBL::csvParse(std::string line, std::vector<std::string> &cols,
           auto colVal = line.substr(lastComma + 1, pos - (lastComma + 1));
           cols.push_back(line.substr(lastComma + 1, pos - (lastComma + 1)));
         }
-        ++valsFound;
       }
       lastComma = pos;
     } else {
@@ -296,7 +293,7 @@ void LoadTBL::exec() {
   boost::split(columnHeadings, line, boost::is_any_of(","),
                boost::token_compress_off);
   for (auto entry = columnHeadings.begin(); entry != columnHeadings.end();) {
-    if (std::string(*entry).compare("") == 0) {
+    if (entry->empty()) {
       // erase the empty values
       entry = columnHeadings.erase(entry);
     } else {
@@ -403,7 +400,7 @@ void LoadTBL::exec() {
       // the columns vector to the TableWorkspace
       for (auto heading = columnHeadings.begin();
            heading != columnHeadings.end();) {
-        if (std::string(*heading).compare("") == 0) {
+        if (heading->empty()) {
           // there is no need to have empty column headings.
           heading = columnHeadings.erase(heading);
         } else {

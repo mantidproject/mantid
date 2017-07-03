@@ -19,6 +19,7 @@ SPHINX_BUILD_DIR = "@SPHINX_BUILD_DIR@"
 SCREENSHOTS_DIR = "@SCREENSHOTS_DIR@"
 DIAGRAMS_DIR = "@DIAGRAMS_DIR@"
 DOT_EXECUTABLE = "@DOT_EXECUTABLE@"
+BUILD_DIR = "@CMAKE_BINARY_DIR@"
 
 ###############################################################################
 # Main
@@ -39,7 +40,7 @@ def main(sysarg):
                            "Use -h for help" % ' '.join(args))
 
     # Update sys path if we need to
-    update_path(opts.mantidpath)
+    update_path()
 
     # Find test files
     testpaths = find_test_files(SRC_DIR, opts.testinclude)
@@ -101,8 +102,6 @@ def parseargs(arglist):
     """
     parser = OptionParser(usage="Usage: %prog [options]",
                           conflict_handler='error')
-    parser.add_option("-m", "--mantidpath", dest="mantidpath",
-                      help="Location of mantid package. Has no effect if run inside MantidPlot")
     parser.add_option("-R", "--tests-regex", dest="testinclude",
                       help="Regex specifying which tests to run. It is matched against the "
                       "filename when considering whether to run a test.")
@@ -110,13 +109,10 @@ def parseargs(arglist):
 
 #-----------------------------------------------------------------------------------------------
 
-def update_path(mantidpath):
+def update_path():
     """
     If not inside MantidPlot (current check is whether we can import _qti)
     then insert given path as first directory in sys.path
-
-    Args:
-      mantidpath (str): A string giving the location of the mantid module
     """
     try:
         import _qti
@@ -124,9 +120,20 @@ def update_path(mantidpath):
     except ImportError:
         gui = False
 
+
     # If it's MantidPlot then we already know what our paths should be so ignore it
     if gui:
         return
+
+    # the python wrapper sets this environment variable
+    mantidpath = os.environ.get('MANTIDPATH', None)
+
+    # otherwise try to expand based off of information in cmake
+    if mantidpath is None or len(mantidpath) == 0:
+        mantidpath = BUILD_DIR
+        if os.path.split(mantidpath)[-1] != 'bin' and \
+           os.path.isdir(os.path.join(mantidpath, 'bin')):
+            mantidpath = os.path.join(mantidpath, 'bin')
 
     # check for directory
     if not os.path.isdir(os.path.join(mantidpath, "mantid")):
@@ -159,7 +166,7 @@ def find_test_files(src_dir, name_re):
     for dirpath, dirnames, filenames in os.walk(src_dir):
         testfiles = find_matching_tests(filenames, name_re_comp)
         # Join each filename with the current path and extend the list
-        testpaths.extend(map(lambda x: os.path.join(dirpath, x), testfiles))
+        testpaths.extend([os.path.join(dirpath, x) for x in testfiles])
 
     return testpaths
 

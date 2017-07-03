@@ -3,12 +3,10 @@
 //-----------------------------------------------
 #include "MantidQtMantidWidgets/ScriptEditor.h"
 #include "MantidQtMantidWidgets/FindReplaceDialog.h"
-#include "MantidQtAPI/FileDialogHandler.h"
 
 // Qt
 #include <QApplication>
 #include <QFile>
-#include <QFileInfo>
 #include <QFileDialog>
 
 #include <QTextStream>
@@ -260,8 +258,8 @@ QSize ScriptEditor::sizeHint() const { return QSize(600, 500); }
 void ScriptEditor::saveAs() {
   QString selectedFilter;
   QString filter = "Scripts (*.py *.PY);;All Files (*)";
-  QString filename = MantidQt::API::FileDialogHandler::getSaveFileName(
-      NULL, "MantidPlot - Save", "", filter, &selectedFilter);
+  QString filename = QFileDialog::getSaveFileName(NULL, "MantidPlot - Save", "",
+                                                  filter, &selectedFilter);
 
   if (filename.isEmpty()) {
     throw SaveCancelledException();

@@ -28,7 +28,7 @@ public:
     alg.setChild(true); // no ADS storage
     alg.setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Name", "NotALog"));
-    auto ws = WorkspaceCreationHelper::Create2DWorkspace(10, 10);
+    auto ws = WorkspaceCreationHelper::create2DWorkspace(10, 10);
     alg.setProperty("Workspace", ws);
     TS_ASSERT_THROWS_NOTHING(alg.execute());
   }
@@ -38,7 +38,7 @@ public:
     alg.initialize();
     alg.setChild(true); // no ADS storage
     alg.setRethrows(true);
-    auto ws = WorkspaceCreationHelper::Create2DWorkspace(10, 10);
+    auto ws = WorkspaceCreationHelper::create2DWorkspace(10, 10);
     std::string logName("SingleValue");
     ws->mutableRun().addProperty<double>(logName, 1.0);
     alg.setProperty("Workspace", ws);
@@ -54,7 +54,7 @@ public:
     alg.initialize();
     alg.setChild(true); // no ADS storage
     alg.setRethrows(true);
-    auto ws = WorkspaceCreationHelper::Create2DWorkspace(10, 10);
+    auto ws = WorkspaceCreationHelper::create2DWorkspace(10, 10);
     std::string logName("TimeSeries");
 
     auto *tsp = new Mantid::Kernel::TimeSeriesProperty<double>(logName);

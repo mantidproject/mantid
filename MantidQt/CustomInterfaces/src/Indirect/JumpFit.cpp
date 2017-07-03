@@ -1,14 +1,14 @@
+#include "MantidQtCustomInterfaces/Indirect/JumpFit.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/TextAxis.h"
-#include "MantidQtCustomInterfaces/Indirect/JumpFit.h"
 #include "MantidQtCustomInterfaces/UserInputValidator.h"
 
-#include <string>
 #include <boost/lexical_cast.hpp>
+#include <string>
 
 using namespace Mantid::API;
 
@@ -17,7 +17,7 @@ namespace CustomInterfaces {
 namespace IDA {
 
 JumpFit::JumpFit(QWidget *parent)
-    : IndirectDataAnalysisTab(parent), m_jfTree(nullptr), m_plotResult(false) {
+    : IndirectDataAnalysisTab(parent), m_jfTree(nullptr) {
   m_uiForm.setupUi(parent);
 }
 
@@ -70,6 +70,10 @@ void JumpFit::setup() {
 
   connect(m_dblManager, SIGNAL(propertyChanged(QtProperty *)), this,
           SLOT(generatePlotGuess()));
+
+  // Handle plotting and saving
+  connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveClicked()));
+  connect(m_uiForm.pbPlot, SIGNAL(clicked()), this, SLOT(plotClicked()));
 }
 
 /**
@@ -101,18 +105,6 @@ bool JumpFit::validate() {
  * script that runs JumpFit
  */
 void JumpFit::run() {
-  bool plot = m_uiForm.chkPlot->isChecked();
-  bool save = m_uiForm.chkSave->isChecked();
-  runImpl(plot, save);
-}
-
-/**
- * Runs algorithm.
- *
- * @param plot Enable/disable plotting
- * @param save Enable/disable saving
- */
-void JumpFit::runImpl(bool plot, bool save) {
   // Do noting with invalid data
   if (!m_uiForm.dsSample->isValid())
     return;
@@ -138,7 +130,7 @@ void JumpFit::runImpl(bool plot, bool save) {
   m_fitAlg->initialize();
 
   m_fitAlg->setProperty("Function", functionString);
-  m_fitAlg->setProperty("InputWorkspace", sample);
+  m_fitAlg->setProperty("InputWorkspace", sample + "_HWHM");
   m_fitAlg->setProperty("WorkspaceIndex", width);
   m_fitAlg->setProperty("IgnoreInvalidData", true);
   m_fitAlg->setProperty("StartX", startX);
@@ -147,15 +139,6 @@ void JumpFit::runImpl(bool plot, bool save) {
   m_fitAlg->setProperty("Output", outputName.toStdString());
 
   m_batchAlgoRunner->addAlgorithm(m_fitAlg);
-
-  // Add save step if required
-  if (save) {
-    QString outWsName = outputName + "_Workspace";
-    addSaveWorkspaceToQueue(outWsName);
-  }
-  // update plot result state when run
-  m_plotResult = plot;
-
   // Connect algorithm runner to completion handler function
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
           SLOT(fitAlgDone(bool)));
@@ -173,7 +156,8 @@ void JumpFit::fitAlgDone(bool error) {
   // Ignore errors
   if (error)
     return;
-
+  m_uiForm.pbPlot->setEnabled(true);
+  m_uiForm.pbSave->setEnabled(true);
   std::string outName = m_fitAlg->getPropertyValue("Output");
 
   // Get output workspace name
@@ -197,12 +181,6 @@ void JumpFit::fitAlgDone(bool error) {
     if (specName == "Diff")
       m_uiForm.ppPlot->addSpectrum("Diff", outputWorkspace, histIndex,
                                    Qt::blue);
-  }
-
-  // plot result
-  if (m_plotResult) {
-    std::string outWsName = m_fitAlg->getPropertyValue("Output") + "_Workspace";
-    plotSpectrum(QString::fromStdString(outWsName), 0, 2);
   }
 
   // Update parameters in UI
@@ -245,15 +223,16 @@ void JumpFit::loadSettings(const QSettings &settings) {
  */
 void JumpFit::handleSampleInputReady(const QString &filename) {
   // Scale to convert to HWHM
+  QString sample = filename + "_HWHM";
   IAlgorithm_sptr scaleAlg = AlgorithmManager::Instance().create("Scale");
   scaleAlg->initialize();
   scaleAlg->setProperty("InputWorkspace", filename.toStdString());
-  scaleAlg->setProperty("OutputWorkspace", filename.toStdString());
+  scaleAlg->setProperty("OutputWorkspace", sample.toStdString());
   scaleAlg->setProperty("Factor", 0.5);
   scaleAlg->execute();
 
   auto ws = Mantid::API::AnalysisDataService::Instance().retrieve(
-      filename.toStdString());
+      sample.toStdString());
   auto mws = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(ws);
 
   findAllWidths(mws);
@@ -262,18 +241,15 @@ void JumpFit::handleSampleInputReady(const QString &filename) {
 
   if (m_spectraList.size() > 0) {
     m_uiForm.cbWidth->setEnabled(true);
-
     std::string currentWidth = m_uiForm.cbWidth->currentText().toStdString();
-
     m_uiForm.ppPlot->clear();
-    m_uiForm.ppPlot->addSpectrum("Sample", filename,
-                                 m_spectraList[currentWidth]);
+    m_uiForm.ppPlot->addSpectrum("Sample", sample, m_spectraList[currentWidth]);
 
     QPair<double, double> res;
     QPair<double, double> range = m_uiForm.ppPlot->getCurveRange("Sample");
 
     // Use the values from the instrument parameter file if we can
-    if (getResolutionRangeFromWs(filename, res))
+    if (getResolutionRangeFromWs(sample, res))
       setRangeSelector(qRangeSelector, m_properties["QMin"],
                        m_properties["QMax"], res);
     else
@@ -342,8 +318,7 @@ void JumpFit::findAllWidths(Mantid::API::MatrixWorkspace_const_sptr ws) {
  * @param text :: The name spectrum index to plot
  */
 void JumpFit::handleWidthChange(const QString &text) {
-  QString sampleName = m_uiForm.dsSample->getCurrentDataName();
-  QString samplePath = m_uiForm.dsSample->getFullFilePath();
+  QString sampleName = (m_uiForm.dsSample->getCurrentDataName() + "_HWHM");
 
   if (!sampleName.isEmpty() && m_spectraList.size() > 0) {
     if (validate()) {
@@ -388,7 +363,7 @@ void JumpFit::updateProperties(QtProperty *prop, double val) {
 /**
  * Gets a list of parameters for a given fit function.
  *
- * @return List fo parameters
+ * @return List of parameters
  */
 QStringList JumpFit::getFunctionParameters(const QString &functionName) {
   QStringList parameters;
@@ -443,10 +418,11 @@ void JumpFit::fitFunctionSelected(const QString &functionName) {
 void JumpFit::clearPlot() {
   m_uiForm.ppPlot->clear();
   const std::string sampleName =
-      m_uiForm.dsSample->getCurrentDataName().toStdString();
+      (m_uiForm.dsSample->getCurrentDataName().toStdString());
   if (sampleName.compare("") != 0) {
     MatrixWorkspace_sptr sample =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(sampleName);
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(sampleName +
+                                                                    "_HWHM");
     if (sample && m_spectraList.size() > 0) {
       m_uiForm.cbWidth->setEnabled(true);
 
@@ -475,7 +451,8 @@ void JumpFit::generatePlotGuess() {
 
   std::string widthText = m_uiForm.cbWidth->currentText().toStdString();
   int width = m_spectraList[widthText];
-  const auto sample = m_uiForm.dsSample->getCurrentDataName().toStdString();
+  const auto sample =
+      m_uiForm.dsSample->getCurrentDataName().toStdString() + "_HWHM";
   const auto startX = m_dblManager->value(m_properties["QMin"]);
   const auto endX = m_dblManager->value(m_properties["QMax"]);
 
@@ -558,6 +535,24 @@ void JumpFit::deletePlotGuessWorkspaces(const bool &removePlotGuess) {
   }
 }
 
+/**
+ * Handles mantid plotting
+ */
+void JumpFit::plotClicked() {
+  std::string outWsName = m_fitAlg->getPropertyValue("Output") + "_Workspace";
+  checkADSForPlotSaveWorkspace(outWsName, true);
+  plotSpectrum(QString::fromStdString(outWsName), 0, 2);
+}
+
+/**
+ * Handles saving of workspace
+ */
+void JumpFit::saveClicked() {
+  std::string outWsName = m_fitAlg->getPropertyValue("Output") + "_Workspace";
+  checkADSForPlotSaveWorkspace(outWsName, false);
+  addSaveWorkspaceToQueue(QString::fromStdString(outWsName));
+  m_batchAlgoRunner->executeBatchAsync();
+}
 } // namespace IDA
 } // namespace CustomInterfaces
 } // namespace MantidQt

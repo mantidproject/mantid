@@ -3,7 +3,6 @@
 
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 #include "MantidVatesAPI/MDLoadingPresenter.h"
-#include "MantidVatesAPI/NoThresholdRange.h"
 #include "MantidVatesAPI/ProgressAction.h"
 #include "MantidVatesAPI/vtkDataSetFactory.h"
 #include "MantidVatesAPI/vtkMDHexFactory.h"
@@ -55,8 +54,7 @@ private:
     FakeProgressAction progressUpdate;
     MDEventWorkspace3Lean::sptr ws =
         MDEventsTestHelper::makeMDEW<3>(8, -10.0, 10.0, 1);
-    Mantid::VATES::vtkMDHexFactory factory(
-        ThresholdRange_scptr(new NoThresholdRange), VolumeNormalization);
+    Mantid::VATES::vtkMDHexFactory factory(VolumeNormalization);
     factory.initialize(ws);
     auto dataset = factory.create(progressUpdate);
     auto grid = vtkUnstructuredGrid::SafeDownCast(dataset.Get());

@@ -141,7 +141,7 @@ void PropertyManager::splitByTime(
     }
 
     // Now the property does the splitting.
-    bool isProtonCharge = prop->name().compare("proton_charge") == 0;
+    bool isProtonCharge = prop->name() == "proton_charge";
     prop->splitByTime(splitter, output_properties, isProtonCharge);
 
   } // for each property
@@ -351,7 +351,6 @@ void PropertyManager::setPropertiesWithSimpleString(
   boost::char_separator<char> sep(";");
   tokenizer propPairs(propertiesString, ";",
                       Mantid::Kernel::StringTokenizer::TOK_TRIM);
-  int index = 0;
   // Iterate over the properties
   for (const auto &pair : propPairs) {
     size_t n = pair.find('=');
@@ -372,7 +371,6 @@ void PropertyManager::setPropertiesWithSimpleString(
       // Set it
       propertyJson[propName] = value;
     }
-    index++;
   }
   setProperties(propertyJson, ignoreProperties);
 }

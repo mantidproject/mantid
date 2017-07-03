@@ -1,5 +1,10 @@
+#include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Detector.h"
+#include "MantidGeometry/Instrument/ComponentVisitor.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
+#include "MantidBeamline/DetectorInfo.h"
+#include "MantidKernel/EigenConversionHelpers.h"
+#include "MantidKernel/Logger.h"
 
 namespace Mantid {
 namespace Geometry {
@@ -16,7 +21,7 @@ using Kernel::Quat;
  * @param map: pointer to the ParameterMap
  * */
 Detector::Detector(const Detector *base, const ParameterMap *map)
-    : ObjComponent(base, map), m_id(base->m_id), m_isMonitor(false) {}
+    : ObjComponent(base, map), m_id(base->m_id) {}
 
 /** Constructor
  *  @param name :: The name of the component
@@ -24,7 +29,7 @@ Detector::Detector(const Detector *base, const ParameterMap *map)
  *  @param parent :: The parent component
  */
 Detector::Detector(const std::string &name, int id, IComponent *parent)
-    : IDetector(), ObjComponent(name, parent), m_id(id), m_isMonitor(false) {}
+    : IDetector(), ObjComponent(name, parent), m_id(id) {}
 
 /** Constructor
  *  @param name :: The name of the component
@@ -35,8 +40,7 @@ Detector::Detector(const std::string &name, int id, IComponent *parent)
  */
 Detector::Detector(const std::string &name, int id,
                    boost::shared_ptr<Object> shape, IComponent *parent)
-    : IDetector(), ObjComponent(name, shape, parent), m_id(id),
-      m_isMonitor(false) {}
+    : IDetector(), ObjComponent(name, shape, parent), m_id(id) {}
 
 /** Gets the detector id
  *  @returns the detector id
@@ -88,13 +92,16 @@ double Detector::getSignedTwoTheta(const V3D &observer, const V3D &axis,
   return angle;
 }
 
-/// Get the phi angle between the detector with reference to the origin
-///@return The angle
+/** Get the phi angle between the detector with reference to the origin
+ * This function will not be supported in Instrument-2.0 due to its ambiguity.
+ * DO NOT USE IN NEW CODE
+ * @return The angle
+ */
 double Detector::getPhi() const {
-  double phi = 0.0, dummy;
-  this->getPos().getSpherical(dummy, dummy, phi);
-  return phi * M_PI / 180.0;
+  const Kernel::V3D pos = this->getPos();
+  return std::atan2(pos[1], pos[0]);
 }
+
 /**
  * Calculate the phi angle between detector and beam, and then offset.
  * @param offset in radians
@@ -121,38 +128,58 @@ det_topology Detector::getTopology(V3D &center) const {
   return rect;
 }
 
-/** Returns true if the detector is masked. Only Parametrized instruments
- * can have masked detectors.
- *  @return false
- */
-bool Detector::isMasked() const {
-  if (m_map) {
-    Parameter_sptr par = m_map->get(m_base, "masked");
-    if (par)
-      return par->value<bool>();
-  }
-  // If you get to here, instead of the Detector method, then it isn't masked
-  return false;
+/// Return the relative position to the parent
+Kernel::V3D Detector::getRelativePos() const {
+  if (m_map && hasDetectorInfo())
+    return Kernel::toV3D(m_map->detectorInfo().position(index())) -
+           getParent()->getPos();
+  return ObjComponent::getRelativePos();
 }
 
-/// Is the detector a monitor?
-///@return true if it is a monitor
-bool Detector::isMonitor() const {
-  if (m_map) {
-    const Detector *d = dynamic_cast<const Detector *>(m_base);
-    if (d) {
-      return d->isMonitor();
-    }
-  }
-
-  return m_isMonitor;
+/// Return the absolute position of the Detector
+Kernel::V3D Detector::getPos() const {
+  if (m_map && hasDetectorInfo())
+    return Kernel::toV3D(m_map->detectorInfo().position(index()));
+  return ObjComponent::getPos();
 }
 
-/** Sets the flag for whether this detector object is a monitor
- *  @param flag :: True to mark the detector a monitor (default), false
- * otherwise
- */
-void Detector::markAsMonitor(const bool flag) { m_isMonitor = flag; }
+/// Return the relative rotation to the parent
+Kernel::Quat Detector::getRelativeRot() const {
+  if (m_map && hasDetectorInfo()) {
+    auto inverseParentRot = getParent()->getRotation();
+    inverseParentRot.inverse();
+    // Note the unusual order. This matches the convention in Component::getPos
+    // (child rotations first, then parent, then grandparent, ...).
+    return inverseParentRot *
+           Kernel::toQuat(m_map->detectorInfo().rotation(index()));
+  }
+  return ObjComponent::getRelativeRot();
+}
+
+/// Return the absolute rotation of the Detector
+Kernel::Quat Detector::getRotation() const {
+  if (m_map && hasDetectorInfo())
+    return Kernel::toQuat(m_map->detectorInfo().rotation(index()));
+  return ObjComponent::getRotation();
+}
+
+/// Helper for legacy access mode. Returns a reference to the ParameterMap.
+const ParameterMap &Detector::parameterMap() const { return *m_map; }
+
+/// Helper for legacy access mode. Returns the index of the detector.
+size_t Detector::index() const { return m_map->detectorIndex(m_id); }
+
+void Detector::registerContents(ComponentVisitor &componentVisitor) const {
+  componentVisitor.registerDetector(*this);
+}
+
+bool Detector::hasDetectorInfo() const {
+  const IComponent *root = m_base;
+  while (auto parent = root->getBareParent())
+    root = parent;
+  auto instrument = dynamic_cast<const Instrument *>(root);
+  return m_map->hasDetectorInfo(instrument);
+}
 
 } // Namespace Geometry
 } // Namespace Mantid

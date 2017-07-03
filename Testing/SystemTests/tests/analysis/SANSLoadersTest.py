@@ -1,21 +1,22 @@
-﻿#pylint: disable=invalid-name,no-init
+#pylint: disable=invalid-name,no-init
 """
 Check the loaders of ISIS SANS reduction. It is created as systemtest because it does
 take considerable time because it involves loading data. Besides, it uses data that is
 currently available inside the systemtests.
 """
 
+from __future__ import (absolute_import, division, print_function)
 import unittest
 import stresstesting
 from mantid.simpleapi import *
 import isis_reduction_steps as steps
 import ISISCommandInterface as ici
 
+
 class LoadRunTest(unittest.TestCase):
     def setUp(self):
         config['default.instrument'] = 'SANS2D'
         ici.SANS2D()
-
 
     def loadAndAssign(self, run_spec,options=dict()):
         loadRun = steps.LoadRun(str(run_spec), **options)
@@ -26,7 +27,6 @@ class LoadRunTest(unittest.TestCase):
         loadRun = steps.LoadRun(ws, **options)
         loadRun._assignHelper(ici.ReductionSingleton())
         return loadRun
-
 
     def basicChecks(self, loadRun, file_path, runnum, periods_in_file, ws_name):
         self.assertTrue('Data/SystemTest/SANS2D/'+file_path in loadRun._data_file.replace('\\','/'),
@@ -43,8 +43,6 @@ class LoadRunTest(unittest.TestCase):
             self.assertTrue(loadRun.move2ws(0))
             self.assertEqual(loadRun.wksp_name, ws_name)
 
-
-
     def test_single_period_nxs_file(self):
         runnum = 22048
         loadRun = self.loadAndAssign(runnum)
@@ -59,7 +57,6 @@ class LoadRunTest(unittest.TestCase):
         self.basicChecks(loadRun, 'SANS2D0000%d.raw'%(runnum), runnum, 1, '5547_sans_raw')
         self.assertEqual(loadRun._period, -1)
         self.assertEqual(loadRun.ext, 'raw')
-
 
     def test_single_period_from_workspace_reload_true(self):
         runnum = 22048
@@ -112,8 +109,10 @@ class LoadRunTest(unittest.TestCase):
         self.assertTrue(not loadRun.move2ws(1))
         self.assertEqual(loadRun.wksp_name, name)
 
+
 class LoadSampleTest(unittest.TestCase):
     """LoadSample extends LoadRun in order to move the workspaces to the defined centre"""
+
     def setUp(self):
         config['default.instrument'] = 'SANS2D'
         ici.SANS2D()
@@ -133,14 +132,13 @@ class LoadSampleTest(unittest.TestCase):
         loadSample = steps.LoadSample('5512')
         loadSample.execute(ici.ReductionSingleton(), True)
         self.assertEqual(loadSample.wksp_name, '5512_sans_nxs_1')
-        self.assertEqual(loadSample.entries, range(0,13))
+        self.assertEqual(loadSample.entries, list(range(0,13)))
         for index in [0,5,12]:
             loadSample.move2ws(index)
             self.assertEqual(loadSample.wksp_name, '5512_sans_nxs_'+str(index+1))
             cur_pos = ici.ReductionSingleton().instrument.cur_detector_position(loadSample.wksp_name)
             self.assertAlmostEqual(cur_pos[0], 0.001)
             self.assertAlmostEqual(cur_pos[1], -0.002)
-
 
 
 class LoadSampleTestStressTest(stresstesting.MantidStressTest):
@@ -159,6 +157,7 @@ class LoadSampleTestStressTest(stresstesting.MantidStressTest):
 
     def validate(self):
         return self._success
+
 
 class LoadAddedEventDataSampleTestStressTest(stresstesting.MantidStressTest):
     def __init__(self):
@@ -184,7 +183,6 @@ class LoadAddedEventDataSampleTestStressTest(stresstesting.MantidStressTest):
         # Need to do validation ourselves since we have to compare to sets of workspace-file pairs
         if self._validateWorkspaceToNeXusCustom():
             self._success = True
-
 
     def _validateWorkspaceToNeXusCustom(self):
         '''
@@ -222,7 +220,7 @@ class LoadAddedEventDataSampleTestStressTest(stresstesting.MantidStressTest):
 
                 if not self.validateWorkspaces(valPair,mismatchName):
                     validationResult[index/2] = False
-                    print 'Workspace {0} not equal to its reference file'.format(valNames[ik])
+                    print('Workspace {0} not equal to its reference file'.format(valNames[ik]))
             #end check All results
 
         # Check if a comparison went wrong

@@ -2,13 +2,17 @@
 #define MANTID_KERNEL_COMPOSITEVALIDATOR_H_
 
 #include "MantidKernel/IValidator.h"
+#include "MantidKernel/System.h"
+
+#include <boost/make_shared.hpp>
+
 #include <list>
-#include <set>
+#include <string>
+#include <vector>
 
 namespace Mantid {
 namespace Kernel {
 
-//===============================================================================================
 /** A composite validator that can combine any 2+ arbitrary validators together.
 
     @author Russell Taylor, Janik Zikovsky

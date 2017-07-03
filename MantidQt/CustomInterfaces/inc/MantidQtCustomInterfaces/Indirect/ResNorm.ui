@@ -73,9 +73,6 @@
        <property name="autoLoad" stdset="0">
         <bool>true</bool>
        </property>
-       <property name="loadLabelText" stdset="0">
-        <string>Plot</string>
-       </property>
        <property name="workspaceSuffixes" stdset="0">
         <stringlist>
          <string>_red</string>
@@ -85,6 +82,9 @@
         <stringlist>
          <string>_red.nxs</string>
         </stringlist>
+       </property>
+       <property name="showLoad" stdset="0">
+        <bool>false</bool>
        </property>
       </widget>
      </item>
@@ -140,6 +140,13 @@
            </property>
           </spacer>
          </item>
+         <item>
+          <widget class="QPushButton" name="pbPlotCurrent">
+           <property name="text">
+            <string>Plot Current Preview</string>
+           </property>
+          </widget>
+         </item>
         </layout>
        </item>
       </layout>
@@ -163,11 +170,9 @@
         </item>
         <item>
          <widget class="QComboBox" name="cbPlot">
-          <item>
-           <property name="text">
-            <string>None</string>
-           </property>
-          </item>
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
           <item>
            <property name="text">
             <string>Intensity</string>
@@ -191,6 +196,16 @@
          </widget>
         </item>
         <item>
+         <widget class="QPushButton" name="pbPlot">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+          <property name="text">
+           <string>Plot</string>
+          </property>
+         </widget>
+        </item>
+        <item>
          <spacer name="horizontalSpacer_18">
           <property name="orientation">
            <enum>Qt::Horizontal</enum>
@@ -204,16 +219,16 @@
          </spacer>
         </item>
         <item>
-         <widget class="QCheckBox" name="ckSave">
+         <widget class="QPushButton" name="pbSave">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
           <property name="text">
-           <string>Save Result</string>
+           <string>Save</string>
           </property>
          </widget>
         </item>
        </layout>
-       <zorder>ckSave</zorder>
-       <zorder>lblPlot</zorder>
-       <zorder>cbPlot</zorder>
       </widget>
      </item>
     </layout>

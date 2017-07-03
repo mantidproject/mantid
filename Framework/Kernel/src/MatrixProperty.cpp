@@ -1,8 +1,8 @@
-//-----------------------------------------------------------------------------
-// Includes
-//-----------------------------------------------------------------------------
 #include "MantidKernel/MatrixProperty.h"
 #include "MantidKernel/IPropertyManager.h"
+
+// PropertyWithValue implementation
+#include "MantidKernel/PropertyWithValue.tcc"
 
 namespace Mantid {
 namespace Kernel {

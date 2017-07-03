@@ -1,25 +1,23 @@
-//---------------------------------------------------
-// Includes
-//---------------------------------------------------
 #include "MantidDataHandling/SaveOpenGenieAscii.h"
 
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/Run.h"
+#include "MantidAPI/SpectrumInfo.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ListValidator.h"
-#include "MantidKernel/Exception.h"
-#include "MantidKernel/VisibleWhenProperty.h"
 #include "MantidKernel/Property.h"
+#include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidKernel/VisibleWhenProperty.h"
 
 #include <Poco/File.h>
 #include <Poco/Path.h>
 
-#include <exception>
 #include <fstream>
-#include <list>
 #include <vector>
 
 namespace Mantid {
-namespace DatHandling {
+namespace DataHandling {
 
 using namespace Kernel;
 using namespace Mantid::API;
@@ -27,20 +25,14 @@ using namespace Mantid::API;
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(SaveOpenGenieAscii)
 
-/// Empty constructor
-SaveOpenGenieAscii::SaveOpenGenieAscii() : Mantid::API::Algorithm() {}
-
-//---------------------------------------------------
-// Private member functions
-//---------------------------------------------------
 /**
  * Initialise the algorithm
  */
 
 void SaveOpenGenieAscii::init() {
   declareProperty(
-      make_unique<API::WorkspaceProperty<>>("InputWorkspace", "",
-                                            Kernel::Direction::Input),
+      make_unique<API::WorkspaceProperty<MatrixWorkspace>>(
+          "InputWorkspace", "", Kernel::Direction::Input),
       "The name of the workspace containing the data you wish to save");
 
   // Declare required parameters, filename with ext {.his} and input
@@ -51,340 +43,352 @@ void SaveOpenGenieAscii::init() {
                   "The filename to use for the saved data");
   declareProperty("IncludeHeader", true,
                   "Whether to include the header lines (default: true)");
-  std::vector<std::string> header{"ENGIN-X Format", "Basic Format"};
+  std::vector<std::string> header{"ENGIN-X Format"};
   declareProperty("OpenGenieFormat", "ENGIN-X Format",
                   boost::make_shared<Kernel::StringListValidator>(header),
-                  "The format required to succesfully load the file to "
-                  "OpenGnie: ENGIN-X Format (default)");
-  declareProperty(
-      "SpecNumberField", "",
-      "Spec number is a required field for ENGIN-X format of OpenGenie,"
-      "an example of spec number would be: 1201 - 1400");
-  setPropertySettings("SpecNumberField",
-                      make_unique<VisibleWhenProperty>(
-                          "OpenGenieFormat", IS_EQUAL_TO, "ENGIN-X Format"));
+                  "The format required to successfully load the file to "
+                  "OpenGenie: ENGIN-X Format (default)");
 }
 
+/**
+  * Writes an OpenGenie file in ASCII at the user specified path
+  */
 void SaveOpenGenieAscii::exec() {
-  // Process properties
-
   // Retrieve the input workspace
-  /// Workspace
-  ws = getProperty("InputWorkspace");
-  int nSpectra = static_cast<int>(ws->getNumberHistograms());
-  int nBins = static_cast<int>(ws->blocksize());
+  m_inputWS = getProperty("InputWorkspace");
 
+  inputValidation();
+
+  // Its better to reserve over and the number of logs gives us a good
+  // estimate as some logs are not included whilst some other params are.
+  m_outputVector.reserve(m_inputWS->run().getLogData().size());
+
+  // Whilst this doesn't weigh in the processing
+  // required it breaks down the algorithm nicely for the moment
+  const int numOfSteps = 6;
+  Progress progressBar(this, 0.0, 1.0, numOfSteps);
+
+  const std::string formatType = getProperty("OpenGenieFormat");
+  // If we had a basic format this is where the specialization would go
+  if (formatType == "ENGIN-X Format") {
+    progressBar.report("Generating ENGINX header");
+    applyEnginxFormat();
+  }
+
+  // Store empty but required field
+  progressBar.report("Storing empty fields");
+  storeEmptyFields();
+
+  // store common workspace properties
+  progressBar.report("Processing workspace information");
+  storeWorkspaceInformation();
+
+  // store x, y, e to vector
+  progressBar.report("Processing workspace data");
+  convertWorkspaceData(m_inputWS->x(0), 'x');
+  convertWorkspaceData(m_inputWS->y(0), 'y');
+  convertWorkspaceData(m_inputWS->e(0), 'e');
+
+  progressBar.report("Processing log data");
+  getSampleLogs();
+
+  std::ofstream outStream;
+  openFileStream(outStream);
+
+  progressBar.report("Writing to file");
+  writeDataToFile(outStream);
+  outStream.close();
+
+  // Indicate we have finished
+  progressBar.report();
+}
+
+/**
+  * Adds ENGINX specific attributes to the output buffer
+  */
+void SaveOpenGenieAscii::applyEnginxFormat() {
+  // Bank number
+  determineEnginXBankId();
+
+  // Spectrum numbers
+  addToOutputBuffer("spec_no", m_stringType, "1");
+
+  // Par file that was used in the calibration
+  // This can be set to none at the moment as it does not affect the analysis
+  addToOutputBuffer("parameter_file", m_stringType, "None.par");
+  addToOutputBuffer("user_name", m_stringType, "NotSet");
+
+  // xunit & xlabel put in OpenGenie format
+  const std::string xunitsVal = "Time-of-Flight (\\\\gms)";
+  addToOutputBuffer("xunits", m_stringType, xunitsVal);
+  addToOutputBuffer("xlabel", m_stringType, xunitsVal);
+
+  // yunit & ylabel put in OpenGenie format
+  const std::string yunitsVal = "Neutron counts / \\\\gms";
+  addToOutputBuffer("yunits", m_stringType, yunitsVal);
+  addToOutputBuffer("ylabel", m_stringType, yunitsVal);
+}
+
+/**
+  * Calculates the delta in the logged (i.e. not data) X Y Z values by
+  * from the minimum and maximum logged values and stores them in the
+  * output buffer
+  *
+  * @param unit :: The axis of this delta (e.g. 'X' or 'Y') as a string
+  * @param values :: Pointer to the time series log values to process
+  */
+void SaveOpenGenieAscii::calculateXYZDelta(const std::string &unit,
+                                           const Kernel::Property *values) {
+  // Cast to TimeSeries so we can use the min/max value methods
+  const auto positionValues =
+      static_cast<const TimeSeriesProperty<double> *>(values);
+
+  const double deltaValue =
+      positionValues->maxValue() - positionValues->minValue();
+
+  addToOutputBuffer('d' + unit, m_floatType, std::to_string(deltaValue));
+}
+
+/**
+  * Converts histogram X/Y/E data into a compatible string representation
+  * and stores that into the output buffer
+  *
+  * @param histoData :: The histogram data to parse
+  * @param axis :: The axis being processed (i.e 'x') as a character
+  *
+  */
+template <typename T>
+void SaveOpenGenieAscii::convertWorkspaceData(const T &histoData,
+                                              const char &axis) {
+  // Padding to apply after 10 data values
+  const std::string newLineStr = "\r\n    ";
+  // Bank number - force to 1 at the moment
+  const std::string outputType = "GXRealarray\r\n    1";
+
+  // First 4 spaces for correct padding
+  std::string outputString("    ");
+  int valueCount(0);
+
+  // Working on primitive type so don't take ref
+  for (const auto val : histoData) {
+    if (valueCount % 10 == 0) {
+      outputString += newLineStr;
+    }
+    valueCount++;
+    outputString += std::to_string(val) + ' ';
+  }
+
+  // Have to put the number of values (second member of pair)
+  // followed by a space then a new line then the data into a string
+  auto outDataString =
+      std::to_string(valueCount) + " \r\n" + std::move(outputString);
+  addToOutputBuffer(std::string(1, axis), outputType, std::move(outDataString));
+}
+
+/**
+  * Determines the current bank from the ENGIN-X detector IDs
+  * and stores the value in the output buffer if successful
+  */
+void SaveOpenGenieAscii::determineEnginXBankId() {
+  const auto &detectorIds = m_inputWS->getSpectrum(0).getDetectorIDs();
+  const std::string firstDetectorId = std::to_string(*detectorIds.cbegin());
+
+  if (firstDetectorId.length() != 6) {
+    g_log.warning("Could not determine bank ID as detector ID in ENGIN-X "
+                  "workspace did not match expected format. You will need"
+                  "manually specify the bank in OpenGenie");
+    return;
+  }
+
+  // ENGIN-X format is 1X001, 1X002, 1X003...etc. for detectors
+  // where X = 0 is bank 1. X = 1 is bank 2.
+  const int bankNumber = firstDetectorId[1] == '0' ? 1 : 2;
+  addToOutputBuffer("bank", m_intType, std::to_string(bankNumber));
+}
+
+/** Reads the sample logs and converts them from the log name in
+  * Mantid to the expected log name in OpenGenie. If any names are
+  * unrecognised they are skipped. If the logs have multiple values
+  * the time weighted average is taken instead. These strings are
+  * then stored in the output buffer.
+  */
+void SaveOpenGenieAscii::getSampleLogs() {
+  // Maps Mantid log names -> Genie save file name / type
+  const std::unordered_map<std::string, std::pair<std::string, std::string>>
+      mantidGenieLogMapping = {
+          {"x", std::make_pair("x_pos", m_floatType)},
+          {"y", std::make_pair("y_pos", m_floatType)},
+          {"z", std::make_pair("z_pos", m_floatType)},
+          {"gd_prtn_chrg", std::make_pair("microamps", m_floatType)}};
+
+  const std::vector<Property *> &logData = m_inputWS->run().getLogData();
+
+  for (const auto &logEntry : logData) {
+    const std::string &logName = logEntry->name();
+
+    // Check this log value is known to us
+    const auto foundMapping = mantidGenieLogMapping.find(logName);
+    if (foundMapping == mantidGenieLogMapping.cend()) {
+      continue;
+    }
+
+    // Second member of map is the OpenGenie Name / Type as a pair
+    // First member of pair is name, second member of pair is the type
+    const std::string outName = foundMapping->second.first;
+    const std::string outType = foundMapping->second.second;
+    std::string outValue;
+
+    // Calculate dx/dy/dz
+    if (outName == "x_pos" || outName == "y_pos" || outName == "z_pos") {
+      calculateXYZDelta(foundMapping->first, logEntry);
+    } else if (outName == "microamps") {
+      // From reverse engineering the scripts the effective time is
+      // the microamps * 50 - what 50 represents is not documented
+      const std::string effectiveTime =
+          std::to_string(std::stod(logEntry->value()) * 50.);
+      addToOutputBuffer("effective_time", m_floatType, effectiveTime);
+    }
+
+    if (ITimeSeriesProperty *timeSeries =
+            dynamic_cast<ITimeSeriesProperty *>(logEntry)) {
+      outValue = std::to_string(timeSeries->timeAverageValue());
+    } else {
+      outValue = logEntry->value();
+    }
+
+    addToOutputBuffer(outName, outType, outValue);
+  }
+}
+
+/**
+  * Checks the workspace has data within it and that the number of spectra
+  * is 1. If there is more than one spectra this could indicate that an
+  * unfocused workspace is being saved.
+  */
+void SaveOpenGenieAscii::inputValidation() {
+  const size_t nSpectra = m_inputWS->getNumberHistograms();
+
+  if (m_inputWS->blocksize() == 0 || nSpectra == 0)
+    throw std::runtime_error("Trying to save an empty workspace");
+  else if (nSpectra > 1) {
+    throw std::runtime_error("Workspace has multiple spectra. This algorithm "
+                             "can only save focused workspaces.");
+  } else if (!m_inputWS->isHistogramData()) {
+    throw std::runtime_error("This algorithm cannot save workspaces with event "
+                             "data, please convert to histogram data first.");
+  }
+}
+
+/**
+  * Attempts to open the file at the user specified path. If this
+  * fails an exception is thrown else it returns the handle as a
+  * std stream.
+  *
+  * @return:: The opened file as an file stream
+  */
+void SaveOpenGenieAscii::openFileStream(std::ofstream &stream) {
   // Retrieve the filename from the properties
-  std::string filename = getProperty("Filename");
-
-  // Output string variables
-  const std::string singleSpc = " ";
-  const std::string fourspc = "    ";
-
-  // file
-  std::ofstream outfile(filename.c_str());
-  if (!outfile) {
+  const std::string filename = getProperty("Filename");
+  // Open file as binary so it doesn't convert CRLF to LF on UNIX
+  stream.open(filename, std::ofstream::binary | std::ofstream::out);
+  if (!stream) {
     g_log.error("Unable to create file: " + filename);
     throw Exception::FileError("Unable to create file: ", filename);
   }
-  if (nBins == 0 || nSpectra == 0)
-    throw std::runtime_error("Trying to save an empty workspace");
-
-  // Axis alphabets
-  const std::string Alpha[] = {"\"e\"", "\"x\"", "\"y\""};
-
-  // Get IncludeHeader property
-  const bool headers = getProperty("IncludeHeader");
-  // if true write file header
-  if (headers) {
-    writeFileHeader(outfile);
-  }
-
-  bool isHistogram = ws->isHistogramData();
-  Progress progress(this, 0, 1, nBins);
-
-  // writes out x, y, e to vector
-  std::string alpha;
-  for (const auto &Num : Alpha) {
-    alpha = Num;
-    axisToFile(alpha, singleSpc, fourspc, nBins, isHistogram);
-  }
-
-  // get all the sample in workspace
-  getSampleLogs(fourspc);
-
-  // add ntc sample log
-  addNtc(fourspc, nBins);
-
-  // Getting the format property
-  std::string formatType = getProperty("OpenGenieFormat");
-  if (formatType == "ENGIN-X Format") {
-    // Apply EnginX format if selected
-    applyEnginxFormat(fourspc);
-  } else {
-    std::stringstream msg;
-    msg << "Unrecognized format \"" << formatType << "\"";
-    throw std::runtime_error(msg.str());
-  }
-
-  // write out all samples in the vector
-  writeSampleLogs(outfile);
-
-  progress.report();
 }
 
-// -----------------------------------------------------------------------------
-/** generates the OpenGenie file header
-   *  @param outfile :: File it will save it out to
-   */
-void SaveOpenGenieAscii::writeFileHeader(std::ofstream &outfile) {
+/**
+  * Stores the default value OpenGENIE uses in the fields that
+  * aren't present in the input workspace but are required to be present
+  * into the output buffer.
+  */
+void SaveOpenGenieAscii::storeEmptyFields() {
+  const std::string floatVal = "999.000";
+  addToOutputBuffer("eurotherm", m_floatType, floatVal);
+  addToOutputBuffer("eurotherm_error", m_floatType, floatVal);
 
-  const std::vector<Property *> &logData = ws->run().getLogData();
-  auto &log = logData;
-  // get total number of sample logs
-  auto samplenumber = (&log)->size();
-  samplenumber += 3; // x, y, e
+  addToOutputBuffer("load", m_floatType, floatVal);
+  addToOutputBuffer("load_error", m_floatType, floatVal);
+  addToOutputBuffer("macro_strain", m_floatType, floatVal);
+  addToOutputBuffer("macro_strain_error", m_floatType, floatVal);
+  addToOutputBuffer("theta_pos", m_floatType, floatVal);
+  addToOutputBuffer("theta_pos_error", m_floatType, floatVal);
 
-  outfile << "# Open Genie ASCII File #\n# label \nGXWorkspace\n"
-          // number of entries
-          << samplenumber << '\n';
+  addToOutputBuffer("pos", m_floatType, floatVal);
+  addToOutputBuffer("pos_error", m_floatType, floatVal);
+  addToOutputBuffer("x_pos_error", m_floatType, floatVal);
+  addToOutputBuffer("y_pos_error", m_floatType, floatVal);
+  addToOutputBuffer("z_pos_error", m_floatType, floatVal);
 }
 
-//------------------------------------------------------------------------------
-/** generates the header for the axis which saves to file
-   *  @param alpha ::   onstant string Axis letter that is being used
-   *  @param singleSpc :: Constant string for single space
-   *  @param fourspc :: Constant string for four spaces
-   *  @param nBins ::  Number of bins
-   *  @return A string of of the header for the x y and e
-   */
-std::string SaveOpenGenieAscii::getAxisHeader(const std::string alpha,
-                                              const std::string singleSpc,
-                                              const std::string fourspc,
-                                              int nBins) {
-  std::string outStr;
-  const std::string GXR = "GXRealarray";
-  const std::string banknum = "1";
-  const std::string twospc = " ";
-
-  outStr += twospc + singleSpc + alpha + "\n";
-  outStr += fourspc + GXR + "\n";
-  outStr += fourspc + banknum + "\n";
-  outStr += fourspc + std::to_string(nBins) + "\n";
-
-  return outStr;
+/**
+  * Stores common workspace attributes such as title or run number
+  * in the output buffer
+  */
+void SaveOpenGenieAscii::storeWorkspaceInformation() {
+  // Run Number
+  addToOutputBuffer("run_no", m_stringType,
+                    std::to_string(m_inputWS->getRunNumber()));
+  // Workspace title
+  addToOutputBuffer("title", m_stringType, m_inputWS->getTitle());
+  // Instrument name
+  addToOutputBuffer("inst_name", m_stringType,
+                    m_inputWS->getInstrument()->getName());
+  // Number of bins
+  addToOutputBuffer("ntc", m_intType, std::to_string(m_inputWS->blocksize()));
+  // L1 (Source to sample distance)
+  const auto &specInfo = m_inputWS->spectrumInfo();
+  addToOutputBuffer("l1", m_floatType, std::to_string(specInfo.l1()));
+  // L2 (Sample to spectrum distance)
+  addToOutputBuffer("l2", m_floatType, std::to_string(specInfo.l2(0)));
+  // Unsigned scattering angle 2theta
+  const double two_theta = specInfo.twoTheta(0) * 180 / M_PI; // Convert to deg
+  addToOutputBuffer("twotheta", m_floatType, std::to_string(two_theta));
 }
 
-//-----------------------------------------------------------------------------
-/** Uses AxisHeader and WriteAxisValues to write in vector
-   *  @param alpha ::   Axis letter that is being used
-   *  @param singleSpc :: Constant string for single space
-   *  @param fourspc :: Constant string for four spaces
-   *  @param nBins ::  number of bins
-   *  @param isHistogram ::  If its a histogram
-   */
-void SaveOpenGenieAscii::axisToFile(const std::string alpha,
-                                    const std::string singleSpc,
-                                    const std::string fourspc, int nBins,
-                                    bool isHistogram) {
-  std::string out_str = getAxisHeader(alpha, singleSpc, fourspc, nBins);
-  for (int bin = 0; bin < nBins; bin++) {
-    if (isHistogram) // bin centres
-    {
-      if (bin == 0) {
-        out_str += fourspc;
-      }
-      auto axisStr = getAxisValues(alpha, bin, singleSpc);
-      out_str += axisStr;
-
-      if ((bin + 1) % 10 == 0 && bin != (nBins - 1)) {
-        out_str += "\n" + fourspc;
-      }
-    }
+/** Sorts the output buffer alphabetically and writes out the output
+  * buffer to the stream specified. It also formats the values to
+  * a valid OpenGenie format
+  *
+  *  @param outfile :: File it will to write the formatted buffer to
+  */
+void SaveOpenGenieAscii::writeDataToFile(std::ofstream &outfile) {
+  // Write header
+  if (getProperty("IncludeHeader")) {
+    outfile << "# Open Genie ASCII File #\r\n"
+            << "# label \r\n"
+            << "GXWorkspace\r\n" << m_outputVector.size() << "\r\n";
   }
-  out_str += "\n";
-  logVector.push_back(out_str);
-}
 
-//------------------------------------------------------------------------
-/** Reads if alpha is e then reads the E values accordingly
-   *  @param alpha :: Axis letter that is being used
-   *  @param bin :: bin counter which goes through all the bin
-   *  @param singleSpc :: Constant string for single space
-   *  @return A string of either e, x or y
-   */
-std::string SaveOpenGenieAscii::getAxisValues(std::string alpha, int bin,
-                                              const std::string singleSpc) {
-  std::string output;
-  if (alpha == "\"e\"") {
-    output += boost::lexical_cast<std::string>(ws->readE(0)[bin]) + singleSpc;
-  }
-  if (alpha == "\"x\"") {
-    output += boost::lexical_cast<std::string>(ws->readX(0)[bin]) + singleSpc;
-  }
-  if (alpha == "\"y\"") {
-    output += boost::lexical_cast<std::string>(ws->readY(0)[bin]) + singleSpc;
-  }
-  return output;
-}
+  // Sort by parameter name
+  std::sort(m_outputVector.begin(), m_outputVector.end(),
+            [](const OutputBufferEntry &t1, const OutputBufferEntry &t2) {
+              return std::get<0>(t1) < std::get<0>(t2);
+            });
 
-//-----------------------------------------------------------------------
-/** Reads the sample logs and writes to vector
-   *  @param fourspc :: Constant string for four spaces
-   */
-void SaveOpenGenieAscii::getSampleLogs(std::string fourspc) {
-  const std::vector<Property *> &logData = ws->run().getLogData();
+  for (const auto &outTuple : m_outputVector) {
+    // Format is 2 spaces followed by parameter name, newline
+    // 4 spaces then the type name, newline
+    // 4 spaces and value(s), newline
 
-  for (auto log : logData) {
-    std::string name = log->name();
-    std::string type = log->type();
-    std::string value = log->value();
+    // The parameter name must be surrounded with quotes
+    // If the type is a string the value must be wrapped in quotes
 
-    if (type.std::string::find("vector") &&
-        type.std::string::find("double") != std::string::npos) {
+    // First the parameter name
+    outfile << "  " << '"' << std::get<0>(outTuple) << '"' << "\r\n";
 
-      auto tsp = ws->run().getTimeSeriesProperty<double>(name);
-      value = boost::lexical_cast<std::string>(tsp->timeAverageValue());
-    }
+    const std::string outputType = std::get<1>(outTuple);
+    outfile << "    " << outputType << "\r\n";
 
-    else if (type.std::string::find("vector") &&
-             type.std::string::find("int") != std::string::npos) {
-
-      auto tsp = ws->run().getTimeSeriesProperty<int>(name);
-      value = boost::lexical_cast<std::string>(tsp->timeAverageValue());
-    }
-
-    else if (type.std::string::find("vector") &&
-             type.std::string::find("bool") != std::string::npos) {
-
-      auto tsp = ws->run().getTimeSeriesProperty<bool>(name);
-      value = boost::lexical_cast<std::string>(tsp->timeAverageValue());
-    }
-
-    else if (type.std::string::find("vector") &&
-             type.std::string::find("char") != std::string::npos) {
-
-      auto tsp = ws->run().getTimeSeriesProperty<std::string>(name);
-      value = (tsp->lastValue());
-    }
-
-    if ((type.std::string::find("number") != std::string::npos) ||
-        (type.std::string::find("double") != std::string::npos) ||
-        (type.std::string::find("dbl list") != std::string::npos)) {
-      type = "Float";
-    }
-
-    else if ((type.std::string::find("TimeValueUnit<bool>") !=
-              std::string::npos) ||
-             (type.std::string::find("TimeValueUnit<int>") !=
-              std::string::npos)) {
-      type = "Integer";
-    }
-
-    else if (type.std::string::find("string") != std::string::npos) {
-      type = "String";
-    }
-
-    if (name == "run_number") {
-      name = "run_no";
-      value = "\"" + value + "\"";
-    }
-
-    if (name == "run_title") {
-      name = "title";
-      value = "\"" + value + "\"";
-    }
-
-    // if name != x y or e push str to vector; to avoid any duplication
-    if (name != "x" && name != "y" && name != "e") {
-
-      std::string outStr = ("  \"" + name + "\"" + "\n" + fourspc + type +
-                            "\n" + fourspc + value + "\n");
-
-      logVector.push_back(outStr);
-    }
-  }
-}
-
-//------------------------------------------------------------------------------
-/** Sorts the vector and writes outt he sample logs to file
-   *  @param outfile :: File it will save it out to
-   */
-void SaveOpenGenieAscii::writeSampleLogs(std::ofstream &outfile) {
-  sort(logVector.begin(), logVector.end());
-
-  for (std::vector<std::string>::const_iterator i = logVector.begin();
-       i != logVector.end(); ++i) {
-    outfile << *i << ' ';
-  }
-}
-
-//------------------------------------------------------------------------------
-/** Add ntc field (num of bins) required to run open genie
-   *  @param fourspc :: Constant string for four spaces
-   *  @param nBins ::  Number of bins
-   */
-void SaveOpenGenieAscii::addNtc(const std::string fourspc, int nBins) {
-  std::string outStr;
-  std::string ntc = "ntc";
-
-  outStr += ("  \"" + ntc + "\"" + "\n" + fourspc + "Integer" + "\n" + fourspc +
-             std::to_string(nBins) + "\n");
-
-  logVector.push_back(outStr);
-}
-
-//------------------------------------------------------------------------------
-/** Apply enginX format field which is required for OpenGenie
-   *  @param fourspc :: Constant string for four spaces
-   */
-void SaveOpenGenieAscii::applyEnginxFormat(const std::string fourspc) {
-  std::string typeStr = "String";
-
-  // xunit & xlabel put in OpenGenie format
-  std::string xunits = "xunits";
-  std::string xlabel = "xlabel";
-  std::string xunitsVal = "\"Time-of-Flight (\\gms)\"";
-  auto xunitsOut = ("  \"" + xunits + "\"" + "\n" + fourspc + typeStr + "\n" +
-                    fourspc + xunitsVal + "\n");
-  auto xlabelOut = ("  \"" + xlabel + "\"" + "\n" + fourspc + typeStr + "\n" +
-                    fourspc + xunitsVal + "\n");
-
-  // yunit & ylabel put in OpenGenie format
-  std::string yunits = "yunits";
-  std::string ylabel = "ylabel";
-  std::string yunitsVal = "\"Neutron counts / \\gms\"";
-  // Assign it to a string
-  auto yunitsOut = ("  \"" + yunits + "\"" + "\n" + fourspc + typeStr + "\n" +
-                    fourspc + yunitsVal + "\n");
-
-  auto ylabelOut = ("  \"" + ylabel + "\"" + "\n" + fourspc + typeStr + "\n" +
-                    fourspc + yunitsVal + "\n");
-
-  // Get property SpecNumberField
-  std::string SpecNumberField = getProperty("SpecNumberField");
-  // while field is not empty
-  if (SpecNumberField != "") {
-    if (SpecNumberField.std::string::find('-') != std::string::npos) {
-      std::string specNum = "spec_no";
-
-      auto specNumOut = ("  \"" + specNum + "\"" + "\n" + fourspc + typeStr +
-                         "\n" + fourspc + "\"" + SpecNumberField + "\"" + "\n");
-
-      logVector.push_back(specNumOut);
+    // Then the data values - the formatting depends on data type
+    outfile << "    ";
+    if (outputType == m_stringType) {
+      outfile << '"' << std::get<2>(outTuple) << '"';
     } else {
-      std::string message =
-          "Invalid value of specNumVal = " + SpecNumberField +
-          " entered, please use the following format \"200 - 700\" ";
-      throw std::runtime_error(message);
+      outfile << std::get<2>(outTuple);
     }
+    outfile << "\r\n";
   }
-
-  // Push to vector
-  logVector.push_back(xunitsOut);
-  logVector.push_back(xlabelOut);
-  logVector.push_back(yunitsOut);
-  logVector.push_back(ylabelOut);
 }
 
 } // namespace DataHandling

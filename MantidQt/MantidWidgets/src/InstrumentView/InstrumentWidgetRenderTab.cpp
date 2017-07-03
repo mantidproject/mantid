@@ -12,7 +12,6 @@
 #include <QLabel>
 #include <QComboBox>
 #include <QCheckBox>
-#include <QFileDialog>
 #include <QFileInfo>
 #include <QSettings>
 #include <QAction>
@@ -288,7 +287,7 @@ void InstrumentWidgetRenderTab::enable3DSurface(bool on) {
 */
 void InstrumentWidgetRenderTab::initSurface() {
   setAxis(QString::fromStdString(
-      m_instrWidget->getInstrumentActor()->getInstrument()->getDefaultAxis()));
+      m_instrWidget->getInstrumentActor().getInstrument()->getDefaultAxis()));
   auto surface = getSurface();
 
   // 3D axes switch needs to be shown for the 3D surface
@@ -297,7 +296,7 @@ void InstrumentWidgetRenderTab::initSurface() {
     p3d->set3DAxesState(areAxesOn());
   }
 
-  bool detectorsOnly = !m_instrWidget->getInstrumentActor()->areGuidesShown();
+  bool detectorsOnly = !m_instrWidget->getInstrumentActor().areGuidesShown();
   m_displayDetectorsOnly->blockSignals(true);
   m_displayDetectorsOnly->setChecked(detectorsOnly);
   m_displayDetectorsOnly->blockSignals(false);
@@ -450,7 +449,7 @@ void InstrumentWidgetRenderTab::showAxes(bool on) {
 * @param yes :: True of false for on and off.
 */
 void InstrumentWidgetRenderTab::displayDetectorsOnly(bool yes) {
-  m_instrWidget->getInstrumentActor()->showGuides(!yes);
+  m_instrWidget->getInstrumentActor().showGuides(!yes);
   m_instrWidget->updateInstrumentView();
   m_displayDetectorsOnly->blockSignals(true);
   m_displayDetectorsOnly->setChecked(yes);
@@ -475,13 +474,11 @@ void InstrumentWidgetRenderTab::showEvent(QShowEvent *) {
   if (surface) {
     surface->setInteractionMode(ProjectionSurface::MoveMode);
   }
-  InstrumentActor *actor = m_instrWidget->getInstrumentActor();
-  if (actor) {
-    auto visitor = SetAllVisibleVisitor(actor->areGuidesShown());
-    actor->accept(visitor);
-    getSurface()->updateView();
-    getSurface()->requestRedraw();
-  }
+  auto &actor = m_instrWidget->getInstrumentActor();
+  auto visitor = SetAllVisibleVisitor(actor.areGuidesShown());
+  actor.accept(visitor);
+  getSurface()->updateView();
+  getSurface()->requestRedraw();
 }
 
 void InstrumentWidgetRenderTab::flipUnwrappedView(bool on) {
@@ -645,11 +642,10 @@ void InstrumentWidgetRenderTab::surfaceTypeChanged(int index) {
 * Respond to external change of the colormap.
 */
 void InstrumentWidgetRenderTab::colorMapChanged() {
-  InstrumentActor *instrumentActor = m_instrWidget->getInstrumentActor();
-  setupColorBar(instrumentActor->getColorMap(), instrumentActor->minValue(),
-                instrumentActor->maxValue(),
-                instrumentActor->minPositiveValue(),
-                instrumentActor->autoscaling());
+  const auto &instrumentActor = m_instrWidget->getInstrumentActor();
+  setupColorBar(instrumentActor.getColorMap(), instrumentActor.minValue(),
+                instrumentActor.maxValue(), instrumentActor.minPositiveValue(),
+                instrumentActor.autoscaling());
 }
 
 void InstrumentWidgetRenderTab::scaleTypeChanged(int type) {

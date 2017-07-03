@@ -1,11 +1,13 @@
 #ifndef PROPERTYHISTORYTEST_H_
 #define PROPERTYHISTORYTEST_H_
 
-#include <cxxtest/TestSuite.h>
+#include "MantidKernel/EmptyValues.h"
 #include "MantidKernel/PropertyHistory.h"
 #include "MantidKernel/Property.h"
-#include <sstream>
+
+#include <cxxtest/TestSuite.h>
 #include <boost/lexical_cast.hpp>
+#include <sstream>
 
 using namespace Mantid::Kernel;
 

@@ -1,14 +1,15 @@
 #ifndef VIEWBASE_H_
 #define VIEWBASE_H_
 
+#include "MantidVatesAPI/ColorScaleGuard.h"
+#include "MantidVatesSimpleGuiViewWidgets/VisibleAxesColor.h"
+#include "MantidVatesSimpleGuiQtWidgets/ModeControlWidget.h"
 #include "MantidVatesSimpleGuiViewWidgets/BackgroundRgbProvider.h"
 #include "MantidVatesSimpleGuiViewWidgets/ColorUpdater.h"
 #include "MantidVatesSimpleGuiViewWidgets/WidgetDllOption.h"
-#include "MantidVatesSimpleGuiQtWidgets/ModeControlWidget.h"
-#include "MantidVatesAPI/ColorScaleGuard.h"
+#include "vtk_jsoncpp.h"
 #include <QPointer>
 #include <QWidget>
-#include "vtk_jsoncpp.h"
 
 class pqDataRepresentation;
 class pqObjectBuilder;
@@ -23,6 +24,7 @@ namespace Mantid {
 namespace Vates {
 namespace SimpleGui {
 
+class ModeControlWidget;
 class ColorSelectionWidget;
 class RebinnedSourcesManager;
 
@@ -57,8 +59,8 @@ class EXPORT_OPT_MANTIDVATES_SIMPLEGUI_VIEWWIDGETS ViewBase : public QWidget {
   Q_OBJECT
 public:
   /// Default constructor.
-  ViewBase(QWidget *parent = 0,
-           RebinnedSourcesManager *rebinnedSourcesManager = 0);
+  ViewBase(QWidget *parent = nullptr,
+           RebinnedSourcesManager *rebinnedSourcesManager = nullptr);
 
   /// Default destructor.
   ~ViewBase() override {}
@@ -122,6 +124,8 @@ public:
   virtual void setColorForBackground(bool useCurrentColorSettings);
   /// Sets the splatterplot button to the desired visibility.
   virtual void setSplatterplot(bool visibility);
+  /// Sets axes colors that contrast with the background.
+  virtual unsigned long setVisibleAxesColors();
   /// Initializes the settings of the color scale
   virtual void initializeColorScale();
   /// Sets the standard veiw button to the desired visibility.
@@ -147,6 +151,10 @@ public:
       origRep; ///< The original source representation
   /// Has active source
   bool hasActiveSource();
+  /// Set the underlying view directly
+  virtual void setView(pqRenderView *view) = 0;
+  /// Get the view type of the current widget
+  virtual ModeControlWidget::Views getViewType() = 0;
 
 public slots:
   /// Set the color scale back to the original bounds.
@@ -241,6 +249,8 @@ protected:
 
   /// Set the Axes Grid
   void setAxesGrid();
+  /// Clear the render layout completely
+  void clearRenderLayout(QFrame *frame);
 
 private:
   Q_DISABLE_COPY(ViewBase)
@@ -258,6 +268,7 @@ private:
   BackgroundRgbProvider backgroundRgbProvider; /// < Holds the manager for
                                                /// background color related
                                                /// tasks.
+  VisibleAxesColor m_visibleAxesColor;
   RebinnedSourcesManager *m_rebinnedSourcesManager;
   Json::Value m_currentColorMapModel;
 

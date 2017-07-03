@@ -91,8 +91,8 @@ private:
       const DetectorParams &detPar,
       const CurveFitting::Functions::ResolutionParams &detRes);
   /// Compute a TOF spectrum for the given inputs & spectrum
-  void
-  calculateTofSpectrum(std::vector<double> &result,
+  std::vector<double>
+  calculateTofSpectrum(const std::vector<double> &inSpectrum,
                        std::vector<double> &tmpWork, const size_t wsIndex,
                        const DetectorParams &detpar,
                        const CurveFitting::Functions::ResolutionParams &respar);
@@ -140,7 +140,7 @@ private:
   API::MatrixWorkspace_sptr m_correctedWS;
 
   /// Pointer to progress reporting
-  API::Progress *m_progress;
+  std::unique_ptr<API::Progress> m_progress = nullptr;
 };
 
 } // namespace Algorithms

@@ -3,6 +3,7 @@
 
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/DeprecatedAlgorithm.h"
 
 #include "MantidMDAlgorithms/LoadILLAsciiHelper.h"
 #include "MantidAPI/IFileLoader.h"
@@ -38,7 +39,8 @@ namespace MDAlgorithms {
  File change history is stored at: <https://github.com/mantidproject/mantid>
  Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-class DLLExport LoadILLAscii : public API::IFileLoader<Kernel::FileDescriptor> {
+class DLLExport LoadILLAscii : public API::IFileLoader<Kernel::FileDescriptor>,
+                               public API::DeprecatedAlgorithm {
 public:
   const std::string name() const override;
   int version() const override;
@@ -60,7 +62,6 @@ private:
   void setWorkspaceRotationAngle(API::MatrixWorkspace_sptr,
                                  double rotationAngle);
 
-  // LoadHelper m_loader;
   std::string m_instrumentName; ///< Name of the instrument
   double m_wavelength = 0;
   std::vector<std::string> m_supportedInstruments{"D2B"};

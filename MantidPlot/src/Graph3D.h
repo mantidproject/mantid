@@ -29,8 +29,8 @@
 #ifndef GRAPH3D_H
 #define GRAPH3D_H
 
-#include "Mantid/IProjectSerialisable.h"
 #include "MantidGeometry/Rendering/OpenGL_Headers.h"
+#include "MantidQtAPI/IProjectSerialisable.h"
 
 #include <qwt3d_surfaceplot.h>
 #include <qwt3d_function.h>
@@ -299,10 +299,11 @@ public slots:
   void exportVector(const QString &fileName);
   void exportToFile(const QString &fileName);
 
-  static IProjectSerialisable *loadFromProject(const std::string &lines,
-                                               ApplicationWindow *app,
-                                               const int fileVersion);
+  static MantidQt::API::IProjectSerialisable *
+  loadFromProject(const std::string &lines, ApplicationWindow *app,
+                  const int fileVersion);
   std::string saveToProject(ApplicationWindow *app) override;
+  std::vector<std::string> getWorkspaceNames() override;
 
   void zoomChanged(double);
   void rotationChanged(double, double, double);
@@ -311,7 +312,7 @@ public slots:
 
   //! \name Colors
   //@{
-  void setDataColors(const QColor &cMax, const QColor &cMin);
+  void setDataColors(const QColor &cMin, const QColor &cMax);
 
   void changeTransparency(double t);
   void setTransparency(double t);
@@ -435,6 +436,7 @@ private:
                         const SurfaceFunctionParams &params);
   void setupMatrixPlot3D(ApplicationWindow *app, const QString &caption,
                          const SurfaceFunctionParams &params);
+  void readScaleType(const std::string &scaleTypes);
 
   //! Wait this many msecs before redraw 3D plot (used for animations)
   int animation_redraw_wait;

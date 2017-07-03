@@ -92,6 +92,14 @@ Explanation of Inputs
    :math:`0 < PeakSize \leq BackgroundInnerSize` and 
    :math:`BackgroundInnerSize < BackgroundOuterSize \leq RegionRadius`
 
+-  The top 1% of the background events are removed so that there are no intensity spikes near the edges.
+
+-  *AdaptiveQMultiplier* can be used with *SpecifySize* for the radius to vary as a function of the modulus of Q. If the *AdaptiveQBackground* option is set to True, the background radius also changes so each peak has a different integration radius.  Q includes the 2*pi factor.
+
+   -  PeakRadius + AdaptiveQMultiplier * **|Q|**
+   -  BackgroundOuterRadius + AdaptiveQMultiplier * **|Q|**
+   -  BackgroundInnerRadius + AdaptiveQMultiplier * **|Q|**
+
 -  If the *IntegrateInHKL* option is selected, then HKL space is used for
    the integration instead of reciprocal space.  This option may be useful
    for large unit cells where the radius of integration needs to be very different

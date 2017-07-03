@@ -7,7 +7,6 @@
 #include "MantidAPI/IMDHistoWorkspace_fwd.h"
 #include "MantidDataObjects/MDEventFactory.h"
 #include "MantidDataObjects/MDEventWorkspace.h"
-#include "MantidVatesAPI/ThresholdRange.h"
 #include "MantidVatesAPI/vtkDataSetFactory.h"
 #include "MantidVatesAPI/MetaDataExtractorUtils.h"
 #include "MantidVatesAPI/MetadataJsonManager.h"
@@ -15,8 +14,6 @@
 #include <vtkPoints.h>
 #include <boost/shared_ptr.hpp>
 #include <boost/scoped_ptr.hpp>
-
-using Mantid::DataObjects::MDEventWorkspace;
 
 namespace Mantid {
 namespace VATES {
@@ -55,8 +52,7 @@ typedef Mantid::signal_t (Mantid::API::IMDNode::*SigFuncIMDNodePtr)() const;
 class DLLExport vtkSplatterPlotFactory : public vtkDataSetFactory {
 public:
   /// Constructor
-  vtkSplatterPlotFactory(ThresholdRange_scptr thresholdRange,
-                         const std::string &scalarName,
+  vtkSplatterPlotFactory(const std::string &scalarName,
                          const size_t numPoints = 150000,
                          const double percentToUse = 5.0);
 
@@ -68,7 +64,7 @@ public:
   create(ProgressAction &progressUpdating) const override;
 
   /// Initalize with a target workspace.
-  void initialize(Mantid::API::Workspace_sptr) override;
+  void initialize(const Mantid::API::Workspace_sptr &workspace) override;
 
   /// Get the name of the type.
   std::string getFactoryTypeName() const override {
@@ -84,12 +80,6 @@ public:
   /// Set the time value.
   void setTime(double timeStep);
 
-  /// Get the max value of the data set
-  virtual double getMinValue();
-
-  /// Get the min value of the data set
-  virtual double getMaxValue();
-
   /// Getter for the instrument
   virtual const std::string &getInstrument();
 
@@ -98,16 +88,17 @@ public:
 
 private:
   template <typename MDE, size_t nd>
-  void doCreate(typename MDEventWorkspace<MDE, nd>::sptr ws) const;
+  void doCreate(
+      typename Mantid::DataObjects::MDEventWorkspace<MDE, nd>::sptr ws) const;
 
   /// Check if the MDHisto workspace is 3D or 4D in nature
-  bool doMDHisto4D(Mantid::API::IMDHistoWorkspace_sptr workspace) const;
+  bool doMDHisto4D(const Mantid::API::IMDHistoWorkspace *workspace) const;
 
   /// Generate the vtkDataSet from the objects input MDHistoWorkspace
-  void doCreateMDHisto(Mantid::API::IMDHistoWorkspace_sptr workspace) const;
+  void doCreateMDHisto(const Mantid::API::IMDHistoWorkspace &workspace) const;
 
   /// Set the signals and the valid points which are to be displayed
-  signal_t extractScalarSignal(Mantid::API::IMDHistoWorkspace_sptr workspace,
+  signal_t extractScalarSignal(const Mantid::API::IMDHistoWorkspace &workspace,
                                bool do4D, const int x, const int y,
                                const int z) const;
 
@@ -116,9 +107,6 @@ private:
 
   /// Add metadata
   void addMetadata() const;
-
-  /// Threshold range strategy.
-  ThresholdRange_scptr m_thresholdRange;
 
   /// Scalar name to provide on dataset.
   const std::string m_scalarName;
@@ -156,12 +144,6 @@ private:
 
   /// Time value.
   double m_time;
-
-  /// Min data value
-  mutable double m_minValue;
-
-  /// Max data value;
-  mutable double m_maxValue;
 
   /// Instrument
   mutable std::string m_instrument;

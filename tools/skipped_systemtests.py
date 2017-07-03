@@ -1,15 +1,14 @@
 #pylint: disable=invalid-name
 #!/usr/bin/env python
-
-import ast
+from __future__ import absolute_import, division, print_function
 import datetime
-import urllib
+import requests # python-requests
 
 URL = "http://builds.mantidproject.org/job/master_systemtests"
-PLATFORMS=['rhel7','rhel6', 'osx', 'win7', 'ubuntu']
+PLATFORMS=['rhel7','osx', 'win7', 'ubuntu', 'ubuntu-16.04']
 
-class TestCase:
 
+class TestCase(object):
     def __init__(self, kwargs):
         self.status = kwargs['status']
         if self.status == "REGRESSION":
@@ -37,20 +36,20 @@ def printResultCell(mark, length):
     if mark:
         left = int(length/2)
         right = length-left-1
-        print "%sx%s" % (' '*left, ' '*right),
+        print("%sx%s" % (' '*left, ' '*right),end=' ')
     else:
-        print ' '*(length),
-    print '|',
+        print(' '*(length),end=' ')
+    print('|',end=' ')
 
 
 def generateTable(interesting, labels, heading):
     if len(interesting) <= 0:
         return
 
-    print
-    print heading
-    print "-"*len(heading)
-    print
+    print()
+    print(heading)
+    print("-"*len(heading))
+    print()
 
     # get the maximum test name length
     tests = sorted(interesting.keys())
@@ -64,10 +63,10 @@ def generateTable(interesting, labels, heading):
     header = '| Test '+' '*(maxlength-5)+'|'
     for label in labels:
         header += ' '+label+' |'
-    print header
+    print(header)
     header = header.split('|')
     header = ['-'*len(item) for item in header]
-    print '|'.join(header)
+    print('|'.join(header))
 
     # sort the tests so the least tested is first
     ordered_tests = {}
@@ -77,27 +76,30 @@ def generateTable(interesting, labels, heading):
             ordered_tests[numSkip] = []
         ordered_tests[numSkip].append(test)
     tests = []
-    for i in [len(labels)-i for i in xrange(len(labels))]:
+    for i in range(len(labels), 0, -1):
         if i in ordered_tests:
             tests.extend(ordered_tests[i])
 
     # print the table
     for test in tests:
-        print '|', test, ' '*(maxlength-len(test)-2), '|',
+        print('|', test, ' '*(maxlength-len(test)-2), '|',end=' ')
         for label in labels:
             printResultCell(label in interesting[test], len(label))
-        print
+        print()
 
 skipped = {}
 failed = {}
 totalCount = 0
 
 for platform in PLATFORMS:
-    url = URL+"-"+PLATFORMS[0]+"/lastCompletedBuild/testReport/api/python"
-    request=urllib.urlopen(url)
-    if request.getcode() != 200:
+    url = URL+"-"+platform+"/lastCompletedBuild/testReport/api/json"
+    params = {}
+
+    request = requests.get(url, params=params)
+
+    if request.status_code != 200:
         raise RuntimeError("'%s' returned %d" % (url, request.getcode()))
-    json = ast.literal_eval(request.read())
+    json = request.json()
 
     label=platform
     totalCount += int(json['failCount'])+int(json['passCount'])+int(json['skipCount'])
@@ -123,36 +125,36 @@ for key in failed.keys():
 labels.sort()
 
 # print out the yaml header so it gets parsed by jekyll
-print '---'
-print 'layout: default'
-print 'date:', datetime.datetime.now().strftime("%Y-%m-%d")
-print 'author: Peter Peterson'
-print 'title: Currently Skipped System Tests'
-print '---'
+print('---')
+print('layout: default')
+print('date:', datetime.datetime.now().strftime("%Y-%m-%d"))
+print('author: Peter Peterson')
+print('title: Currently Skipped System Tests')
+print('---')
 
-print "Summary"
-print "======="
+print("Summary")
+print("=======")
 print
-print "* Job    : [%s](%s)" % ('Master Pipeline', 'http://builds.mantidproject.org/view/Master%20Pipeline/'),
-print datetime.datetime.now().strftime("%Y-%m-%d")
-print "* Labels :", ', '.join(labels)
-print "* Failed :", json['failCount'],
+print("* Job    : [%s](%s)" % ('Master Pipeline', 'http://builds.mantidproject.org/view/Master%20Pipeline/'),end='')
+print(datetime.datetime.now().strftime("%Y-%m-%d"))
+print("* Labels :", ', '.join(labels))
+print("* Failed :", json['failCount'],end='')
 if len(failed.keys()) < 2:
-    print
+    print()
 else:
-    print "(%d unique)" % len(failed.keys())
-print "* Skipped:", json['skipCount'],
+    print("(%d unique)" % len(failed.keys()))
+print("* Skipped:", json['skipCount'],end='')
 if len(skipped.keys()) < 2:
-    print
+    print()
 else:
-    print "(%d unique)" % len(skipped.keys())
-print "* Total  :", totalCount,
-print "(= %d * %d)" % (totalCount/len(labels), len(labels))
+    print("(%d unique)" % len(skipped.keys()))
+print("* Total  :", totalCount,)
+print("(= %d * %d)" % (totalCount/len(labels), len(labels)))
 
-print
+print()
 
-print "Details"
-print "======="
+print("Details")
+print("=======")
 
 generateTable(failed, labels, "Failed")
 generateTable(skipped, labels, "Skipped")

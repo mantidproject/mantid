@@ -1,5 +1,8 @@
-#include "MantidGeometry/IDTypes.h"
 #include "MantidAPI/ExperimentInfo.h"
+#include "MantidAPI/DetectorInfo.h"
+#include "MantidAPI/Run.h"
+#include "MantidAPI/Sample.h"
+#include "MantidGeometry/IDTypes.h"
 #include "MantidPythonInterface/kernel/GetPointer.h"
 #include "MantidPythonInterface/kernel/Policies/RemoveConst.h"
 #include <boost/python/class.hpp>
@@ -31,30 +34,30 @@ void export_ExperimentInfo() {
   class_<ExperimentInfo, boost::noncopyable>("ExperimentInfo", no_init)
       .def("getInstrument", &ExperimentInfo::getInstrument,
            return_value_policy<RemoveConstSharedPtr>(), args("self"),
-           "Returns the instrument for this run.")
+           "Returns the :class:`~mantid.geometry.Instrument` for this run.")
 
       .def("getInstrumentFilename", &ExperimentInfo::getInstrumentFilename,
            getInstrumentFilename_Overload(
-               "Returns IDF", (arg("instrument"), arg("date") = "")))
+               "Returns IDF filename", (arg("instrument"), arg("date") = "")))
       .staticmethod("getInstrumentFilename")
 
       .def("sample", &ExperimentInfo::sample,
            return_value_policy<reference_existing_object>(), args("self"),
-           "Return the Sample object. This cannot be modified, use "
-           "mutableSample to modify.")
+           "Return the :class:`~mantid.api.Sample` object. This cannot be "
+           "modified, use mutableSample to modify.")
 
       .def("mutableSample", &ExperimentInfo::mutableSample,
            return_value_policy<reference_existing_object>(), args("self"),
-           "Return a modifiable Sample object.")
+           "Return a modifiable :class:`~mantid.api.Sample` object.")
 
       .def("run", &ExperimentInfo::run,
            return_value_policy<reference_existing_object>(), args("self"),
-           "Return the Run object. This cannot be modified, use mutableRun to "
-           "modify.")
+           "Return the :class:`~mantid.api.Run` object. This cannot be "
+           "modified, use mutableRun to modify.")
 
       .def("mutableRun", &ExperimentInfo::mutableRun,
            return_value_policy<reference_existing_object>(), args("self"),
-           "Return a modifiable Run object.")
+           "Return a modifiable :class:`~mantid.api.Run` object.")
 
       .def("getRunNumber", &ExperimentInfo::getRunNumber, args("self"),
            "Returns the run identifier for this run.")
@@ -68,5 +71,10 @@ void export_ExperimentInfo() {
            args("self", "detId", "value"))
 
       .def("getEMode", &ExperimentInfo::getEMode, args("self"),
-           "Returns the energy mode.");
+           "Returns the energy mode.")
+
+      .def("detectorInfo", &ExperimentInfo::detectorInfo,
+           return_value_policy<reference_existing_object>(), args("self"),
+           "Return a const reference to the :class:`~mantid.api.DetectorInfo` "
+           "object.");
 }

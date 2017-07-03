@@ -3,8 +3,6 @@
 
 #include "MantidAPI/IMDIterator.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
-#include "MantidVatesAPI/UserDefinedThresholdRange.h"
-#include "MantidVatesAPI/NoThresholdRange.h"
 #include "MantidVatesAPI/vtkMDHistoLineFactory.h"
 #include "MockObjects.h"
 #include <cxxtest/TestSuite.h>
@@ -31,9 +29,7 @@ public:
     IMDWorkspace *nullWorkspace = NULL;
     Mantid::API::IMDWorkspace_sptr ws_sptr(nullWorkspace);
 
-    vtkMDHistoLineFactory factory(
-        ThresholdRange_scptr(new UserDefinedThresholdRange(0, 10000)),
-        Mantid::VATES::VolumeNormalization);
+    vtkMDHistoLineFactory factory(Mantid::VATES::VolumeNormalization);
 
     TSM_ASSERT_THROWS(
         "No workspace, so should not be possible to complete initialization.",
@@ -42,70 +38,8 @@ public:
 
   void testCreateWithoutInitializeThrows() {
     FakeProgressAction progressUpdate;
-    vtkMDHistoLineFactory factory(
-        ThresholdRange_scptr(new UserDefinedThresholdRange(0, 10000)),
-        Mantid::VATES::VolumeNormalization);
+    vtkMDHistoLineFactory factory(Mantid::VATES::VolumeNormalization);
     TS_ASSERT_THROWS(factory.create(progressUpdate), std::runtime_error);
-  }
-
-  void testInsideThresholds() {
-    FakeProgressAction progressUpdate;
-
-    Mantid::API::IMDWorkspace_sptr ws_sptr =
-        MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 1);
-
-    // Thresholds have been set such that the signal values (hard-coded to 1,
-    // see above) will fall between the minimum 0 and maximum 2.
-    vtkMDHistoLineFactory inside(
-        ThresholdRange_scptr(new UserDefinedThresholdRange(0, 2)),
-        Mantid::VATES::VolumeNormalization);
-    inside.initialize(ws_sptr);
-    auto insideData = inside.create(progressUpdate);
-    auto insideProduct = vtkUnstructuredGrid::SafeDownCast(insideData.Get());
-
-    TS_ASSERT_EQUALS(9, insideProduct->GetNumberOfCells());
-    TS_ASSERT_EQUALS(10, insideProduct->GetNumberOfPoints());
-  }
-
-  void testAboveThreshold() {
-    using namespace Mantid::Geometry;
-    using namespace testing;
-
-    FakeProgressAction progressUpdate;
-
-    Mantid::API::IMDWorkspace_sptr ws_sptr =
-        MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 1);
-
-    // Thresholds have been set such that the signal values (hard-coded to 1,
-    // see above) will fall above and outside the minimum 0 and maximum 0.5.
-    vtkMDHistoLineFactory above(
-        ThresholdRange_scptr(new UserDefinedThresholdRange(0, 0.5)),
-        Mantid::VATES::VolumeNormalization);
-    above.initialize(ws_sptr);
-    auto aboveData = above.create(progressUpdate);
-    auto aboveProduct = vtkUnstructuredGrid::SafeDownCast(aboveData.Get());
-
-    TS_ASSERT_EQUALS(0, aboveProduct->GetNumberOfCells());
-    TS_ASSERT_EQUALS(10, aboveProduct->GetNumberOfPoints());
-  }
-
-  void testBelowThreshold() {
-    FakeProgressAction progressUpdate;
-
-    Mantid::API::IMDWorkspace_sptr ws_sptr =
-        MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 1);
-
-    // Thresholds have been set such that the signal values (hard-coded to 1,
-    // see above) will fall below and outside the minimum 1.5 and maximum 2.
-    vtkMDHistoLineFactory below(
-        ThresholdRange_scptr(new UserDefinedThresholdRange(1.5, 2)),
-        Mantid::VATES::VolumeNormalization);
-    below.initialize(ws_sptr);
-    auto belowData = below.create(progressUpdate);
-    auto belowProduct = vtkUnstructuredGrid::SafeDownCast(belowData.Get());
-
-    TS_ASSERT_EQUALS(0, belowProduct->GetNumberOfCells());
-    TS_ASSERT_EQUALS(10, belowProduct->GetNumberOfPoints());
   }
 
   void testProgressUpdates() {
@@ -117,8 +51,7 @@ public:
 
     MDHistoWorkspace_sptr ws_sptr =
         MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 1);
-    vtkMDHistoLineFactory factory(ThresholdRange_scptr(new NoThresholdRange),
-                                  Mantid::VATES::VolumeNormalization);
+    vtkMDHistoLineFactory factory(Mantid::VATES::VolumeNormalization);
 
     factory.initialize(ws_sptr);
     auto product = factory.create(mockProgressAction);
@@ -144,9 +77,7 @@ public:
 
     // Constructional method ensures that factory is only suitable for providing
     // mesh information.
-    vtkMDHistoLineFactory factory(
-        ThresholdRange_scptr(new UserDefinedThresholdRange(0, 10000)),
-        Mantid::VATES::VolumeNormalization);
+    vtkMDHistoLineFactory factory(Mantid::VATES::VolumeNormalization);
 
     // Successor is provided.
     factory.setSuccessor(std::move(uniqueSuccessor));
@@ -168,9 +99,7 @@ public:
 
     // Constructional method ensures that factory is only suitable for providing
     // mesh information.
-    vtkMDHistoLineFactory factory(
-        ThresholdRange_scptr(new UserDefinedThresholdRange(0, 10000)),
-        Mantid::VATES::VolumeNormalization);
+    vtkMDHistoLineFactory factory(Mantid::VATES::VolumeNormalization);
 
     TSM_ASSERT_THROWS("Should have thrown an execption given that no successor "
                       "was available.",
@@ -202,9 +131,7 @@ public:
 
     // Constructional method ensures that factory is only suitable for providing
     // mesh information.
-    vtkMDHistoLineFactory factory(
-        boost::make_shared<UserDefinedThresholdRange>(0, 10000),
-        Mantid::VATES::VolumeNormalization);
+    vtkMDHistoLineFactory factory(Mantid::VATES::VolumeNormalization);
 
     // Successor is provided.
     factory.setSuccessor(std::move(uniqueSuccessor));
@@ -219,9 +146,7 @@ public:
   }
 
   void testTypeName() {
-    vtkMDHistoLineFactory factory(
-        boost::make_shared<UserDefinedThresholdRange>(0, 10000),
-        Mantid::VATES::VolumeNormalization);
+    vtkMDHistoLineFactory factory(Mantid::VATES::VolumeNormalization);
     TS_ASSERT_EQUALS("vtkMDHistoLineFactory", factory.getFactoryTypeName());
   }
 };
@@ -242,11 +167,7 @@ public:
 
   void testGenerateVTKDataSet() {
     FakeProgressAction progressUpdate;
-    // Thresholds have been set such that the signal values (hard-coded to 1,
-    // see above) will fall between the minimum 0 and maximum 2.
-    vtkMDHistoLineFactory factory(
-        boost::make_shared<UserDefinedThresholdRange>(0, 2),
-        Mantid::VATES::VolumeNormalization);
+    vtkMDHistoLineFactory factory(Mantid::VATES::VolumeNormalization);
     factory.initialize(m_ws_sptr);
     TS_ASSERT_THROWS_NOTHING(factory.create(progressUpdate));
   }

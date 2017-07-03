@@ -1,12 +1,14 @@
+#include "MantidDataHandling/LoadEmptyInstrument.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/RegisterFileLoader.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidDataHandling/LoadEmptyInstrument.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Instrument.h"
-#include "MantidKernel/ConfigService.h"
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/ConfigService.h"
+#include "MantidKernel/OptionalBool.h"
 
 namespace Mantid {
 namespace DataHandling {
@@ -54,9 +56,15 @@ int LoadEmptyInstrument::confidence(Kernel::FileDescriptor &descriptor) const {
 /// Initialisation method.
 void LoadEmptyInstrument::init() {
   declareProperty(
-      make_unique<FileProperty>("Filename", "", FileProperty::Load, ".xml"),
-      "The filename (including its full or relative path) of an instrument\n"
-      "definition file");
+      make_unique<FileProperty>("Filename", "", FileProperty::OptionalLoad,
+                                ".xml"),
+      "The filename (including its full or relative path) of an instrument "
+      "definition file. The file extension must either be .xml or .XML when "
+      "specifying an instrument definition file. Note Filename or "
+      "InstrumentName must be specified but not both.");
+  declareProperty(
+      "InstrumentName", "",
+      "Name of instrument. Can be used instead of Filename to specify an IDF");
   declareProperty(
       make_unique<WorkspaceProperty<MatrixWorkspace>>("OutputWorkspace", "",
                                                       Direction::Output),
@@ -118,7 +126,7 @@ void LoadEmptyInstrument::exec() {
     outWS = WorkspaceFactory::Instance().create("EventWorkspace",
                                                 number_spectra, 2, 1);
     // Copy geometry over.
-    WorkspaceFactory::Instance().initializeFromParent(ws, outWS, true);
+    WorkspaceFactory::Instance().initializeFromParent(*ws, *outWS, true);
   } else {
     // Now create the outputworkspace and copy over the instrument object
     outWS = WorkspaceFactory::Instance().create(ws, number_spectra, 2, 1);
@@ -134,9 +142,9 @@ void LoadEmptyInstrument::exec() {
     CountStandardDeviations v_e(1, detector_value);
     CountStandardDeviations v_monitor_e(1, monitor_value);
 
+    const auto &spectrumInfo = ws2D->spectrumInfo();
     for (size_t i = 0; i < ws2D->getNumberHistograms(); i++) {
-      IDetector_const_sptr det = ws2D->getDetector(i);
-      if (det->isMonitor()) {
+      if (spectrumInfo.isMonitor(i)) {
         ws2D->setCounts(i, v_monitor_y);
         ws2D->setCountStandardDeviations(i, v_monitor_e);
       } else {
@@ -152,36 +160,15 @@ void LoadEmptyInstrument::exec() {
 /// Run the Child Algorithm LoadInstrument (or LoadInstrumentFromRaw)
 API::MatrixWorkspace_sptr LoadEmptyInstrument::runLoadInstrument() {
   const std::string filename = getPropertyValue("Filename");
-  // Determine the search directory for XML instrument definition files (IDFs)
-  std::string directoryName =
-      Kernel::ConfigService::Instance().getInstrumentDirectory();
-  const std::string::size_type stripPath = filename.find_last_of("\\/");
-
-  std::string fullPathIDF;
-  if (stripPath != std::string::npos) {
-    fullPathIDF =
-        filename; // since if path already provided don't modify m_filename
-  } else {
-    // std::string instrumentID = m_filename.substr(stripPath+1);
-    fullPathIDF = directoryName + "/" + filename;
-  }
-
+  const std::string instrumentName = getPropertyValue("InstrumentName");
   IAlgorithm_sptr loadInst = createChildAlgorithm("LoadInstrument", 0, 1);
-  loadInst->setPropertyValue("Filename", fullPathIDF);
+  loadInst->setPropertyValue("Filename", filename);
+  loadInst->setPropertyValue("InstrumentName", instrumentName);
   loadInst->setProperty("RewriteSpectraMap", OptionalBool(true));
-  MatrixWorkspace_sptr ws =
-      WorkspaceFactory::Instance().create("Workspace2D", 1, 2, 1);
+  auto ws = WorkspaceFactory::Instance().create("Workspace2D", 1, 2, 1);
   loadInst->setProperty<MatrixWorkspace_sptr>("Workspace", ws);
 
-  // Now execute the Child Algorithm. Catch and log any error and stop,
-  // because there is no point in continuing without a valid instrument.
-  try {
-    loadInst->execute();
-  } catch (std::runtime_error &exc) {
-    std::ostringstream os;
-    os << "Unable to run LoadInstrument: '" << exc.what() << "'\n";
-    throw std::runtime_error(os.str());
-  }
+  loadInst->execute();
 
   return ws;
 }

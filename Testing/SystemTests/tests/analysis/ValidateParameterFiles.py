@@ -6,14 +6,15 @@ import glob
 
 EXPECTED_EXT = '.expected'
 
+
 class ValidateParameterFiles(stresstesting.MantidStressTest):
 
     xsdFile=''
 
     def skipTests(self):
         try:
-            from genxmlif import GenXmlIfError
-            from minixsv import pyxsval
+            from genxmlif import GenXmlIfError # noqa
+            from minixsv import pyxsval # noqa
         except ImportError:
             return True
         return False
@@ -33,7 +34,7 @@ class ValidateParameterFiles(stresstesting.MantidStressTest):
 
     def runTest(self):
         """Main entry point for the test suite"""
-        from minixsv import pyxsval
+        from minixsv import pyxsval # noqa
         direc = config['instrumentDefinition.directory']
         print direc
         self.xsdFile =  os.path.join(direc,'Schema/ParameterFile/1.0/','ParameterFileSchema.xsd')
@@ -57,12 +58,11 @@ class ValidateParameterFiles(stresstesting.MantidStressTest):
             print "SUMMARY OF FAILED FILES"
             for filename in failed:
                 print filename
-            raise RuntimeError("Failed Validation for %d of %d files" \
-                                   % (len(failed), len(files)))
+            raise RuntimeError("Failed Validation for %d of %d files"
+                               % (len(failed), len(files)))
         else:
             print "Succesfully Validated %d files" % len(files)
 
 if __name__ == '__main__':
     valid = ValidateParameterFiles()
     valid.runTest()
-

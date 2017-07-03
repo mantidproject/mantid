@@ -1,7 +1,10 @@
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/Progress.h"
+#include "MantidAPI/Run.h"
+#include "MantidAPI/Sample.h"
 #include "MantidAPI/WorkspaceProperty.h"
+#include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimensionBuilder.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidKernel/CPUTimer.h"
@@ -26,7 +29,6 @@ namespace Mantid {
 namespace MDAlgorithms {
 
 namespace {
-//------------------------------------------------------------------------------------------------
 /** Helper function allowing to typecast sequence of bytes into proper expected
 *type.
 * The input buffer is interpreted as the template type
@@ -60,7 +62,7 @@ int LoadSQW::confidence(Kernel::FileDescriptor &descriptor) const {
 
   // only .sqw can be considered
   const std::string &extn = descriptor.extension();
-  if (extn.compare(".sqw") != 0)
+  if (extn != ".sqw")
     return 0;
 
   if (descriptor.isAscii()) {
@@ -208,8 +210,8 @@ void LoadSQW::readEvents(
 
   size_t maxNPix = ~size_t(0);
   if (m_nDataPoints > maxNPix) {
-    throw new std::runtime_error("Not possible to address all datapoints in "
-                                 "memory using this architecture ");
+    throw std::runtime_error("Not possible to address all datapoints in "
+                             "memory using this architecture ");
   }
 
   const size_t ncolumns = 9; // qx, qy, qz, en, s, err, irunid, idetid, ien

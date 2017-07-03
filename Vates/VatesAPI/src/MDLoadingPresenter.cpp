@@ -1,5 +1,9 @@
 #include "MantidVatesAPI/MDLoadingPresenter.h"
 
+namespace {
+Mantid::Kernel::Logger g_log("MDLoadingPresenter");
+}
+
 namespace Mantid {
 namespace VATES {
 /**
@@ -34,14 +38,16 @@ void MDLoadingPresenter::setDefaultCOBandBoundaries(vtkDataSet *visualDataSet) {
  * @param visualDataSet: the vtk visual data set to which the transformation
  * will be applied
  * @param workspaceProvider: the provider of the underlying workspace
+ * @param progress: optional progress reporting.
  */
 void MDLoadingPresenter::makeNonOrthogonal(
     vtkDataSet *visualDataSet,
-    std::unique_ptr<Mantid::VATES::WorkspaceProvider> workspaceProvider) {
+    std::unique_ptr<Mantid::VATES::WorkspaceProvider> workspaceProvider,
+    ProgressAction *progress) {
   std::string wsName = vtkDataSetToWsName::exec(visualDataSet);
   vtkDataSetToNonOrthogonalDataSet converter(visualDataSet, wsName,
                                              std::move(workspaceProvider));
-  converter.execute();
+  converter.execute(progress);
 }
 }
 }

@@ -1,4 +1,5 @@
-﻿#pylint: disable=invalid-name
+#pylint: disable=invalid-name
+from __future__ import (absolute_import, division, print_function)
 from mantid.simpleapi import *
 from mantid import config,api
 from mantid.kernel import funcinspect
@@ -9,6 +10,7 @@ from Direct.DirectEnergyConversion import DirectEnergyConversion
 import os
 import re
 import time
+from six import iteritems
 try:
     import h5py
     h5py_installed = True
@@ -19,6 +21,8 @@ from abc import abstractmethod
 
 # R0921 abstract class not referenced -- wrong, client references it.
 # pylint: disable=too-many-instance-attributes, R0921
+
+
 class ReductionWrapper(object):
     """ Abstract class provides interface to direct inelastic reduction
         allowing it to be run  from Mantid, web services, or system tests
@@ -28,6 +32,7 @@ class ReductionWrapper(object):
 #pylint: disable=too-few-public-methods
     class var_holder(object):
         """ A simple wrapper class to keep web variables"""
+
         def __init__(self,Web_vars=None):
             if Web_vars:
                 self.standard_vars = Web_vars.standard_vars
@@ -36,6 +41,7 @@ class ReductionWrapper(object):
                 self.standard_vars = None
                 self.advanced_vars = None
         #
+
         def get_all_vars(self):
             """Return dictionary with all defined variables
                combined together
@@ -49,7 +55,6 @@ class ReductionWrapper(object):
                 else:
                     web_vars = self.standard_vars.copy()
             return web_vars
-
 
     def __init__(self,instrumentName,web_var=None):
         """ sets properties defaults for the instrument with Name
@@ -82,7 +87,6 @@ class ReductionWrapper(object):
         if web_vars :
             self.reducer.prop_man.set_input_parameters(**web_vars)
 
-
     @property
     def wait_for_file(self):
         """ If this variable set to positive value, this value
@@ -101,6 +105,7 @@ class ReductionWrapper(object):
         else:
             self._wait_for_file = False
 #
+
     def save_web_variables(self,FileName=None):
         """ Method to write simple and advanced properties and help
             information  into dictionary, to use by web reduction
@@ -116,7 +121,7 @@ class ReductionWrapper(object):
         f = open(FileName,'w')
         f.write("standard_vars = {\n")
         str_wrapper = '         '
-        for key,val in self._wvs.standard_vars.iteritems():
+        for key,val in iteritems(self._wvs.standard_vars):
             if isinstance(val,str):
                 row = "{0}\'{1}\':\'{2}\'".format(str_wrapper,key,val)
             else:
@@ -126,7 +131,7 @@ class ReductionWrapper(object):
         f.write("\n}\nadvanced_vars={\n")
         #print advances variables
         str_wrapper = '         '
-        for key,val in self._wvs.advanced_vars.iteritems():
+        for key,val in iteritems(self._wvs.advanced_vars):
             if isinstance(val,str):
                 row = "{0}\'{1}\':\'{2}\'".format(str_wrapper,key,val)
             else:
@@ -193,6 +198,7 @@ class ReductionWrapper(object):
         # validate properties and report result
         return self.reducer.prop_man.validate_properties(False)
 #
+
     def validation_file_name(self):
         """ the name of the file, used as reference to
             validate the run, specified as the class property
@@ -201,7 +207,7 @@ class ReductionWrapper(object):
             or workspace name to validate results against.
         """
 #pylint: disable=protected-access
-        if not PropertyManager.save_file_name._file_name is None:
+        if PropertyManager.save_file_name._file_name is not None:
 #pylint: disable=protected-access
             file_name = PropertyManager.save_file_name._file_name
             if isinstance(file_name,api.Workspace):
@@ -248,7 +254,7 @@ class ReductionWrapper(object):
 
             Returns:
             True   if reduction for sample_run produces result within Error from the reference file
-                   as reported by CheckWorkspaceMatch.
+                   as reported by CompareWorkspaces.
             False  if CheckWorkspaceMatch comparison between sample and reduction is unsuccessful
 
             True  if was not able to load reference file. In this case, algorithm builds validation
@@ -292,11 +298,11 @@ class ReductionWrapper(object):
         if build_validation:
             self.reducer.prop_man.save_file_name = validation_file
             self.reducer.prop_man.log\
-                 ("*** WARNING:can not find or load validation file {0}\n"\
-                  "    Building validation file for run N:{1}".format(validation_file,sample_run),'warning')
+                ("*** WARNING:can not find or load validation file {0}\n"
+                 "    Building validation file for run N:{1}".format(validation_file,sample_run),'warning')
         else:
             self.reducer.prop_man.log\
-                 ("*** FOUND VALIDATION FILE: {0}\n"\
+                 ("*** FOUND VALIDATION FILE: {0}\n"
                   "    Validating run {1} against this file".format(fileName,sample_run),'warning')
 
         # just in case, to be sure
@@ -328,19 +334,19 @@ class ReductionWrapper(object):
                 TOLL=self._tolerr
             else:
                 TOLL = Error
-            result = CheckWorkspacesMatch(Workspace1=reference_ws,Workspace2=reduced,\
-                                      Tolerance=TOLL,CheckSample=False,\
-                                      CheckInstrument=False,ToleranceRelErr=ToleranceRelErr)
+            result = CompareWorkspaces(Workspace1=reference_ws,Workspace2=reduced,
+                                       Tolerance=TOLL,CheckSample=False,
+                                       CheckInstrument=False,ToleranceRelErr=ToleranceRelErr)
 
         self.wait_for_file = current_wait_state
         self._run_from_web = current_web_state
-        if result == 'Success!':
+        if result[0]:
             return True,'Reference file and reduced workspace are equal with accuracy {0:<3.2f}'\
                         .format(TOLL)
         else:
             fname,_ = os.path.splitext(fileName)
             filename = fname+'-mismatch.nxs'
-            self.reducer.prop_man.log("***WARNING: can not get results matching the reference file.\n"\
+            self.reducer.prop_man.log("***WARNING: can not get results matching the reference file.\n"
                                       "   Saving new results to file {0}".format(filename),'warning')
             SaveNexus(reduced,Filename=filename)
             return False,result
@@ -355,6 +361,7 @@ class ReductionWrapper(object):
             values these properties should have.
         """
         raise NotImplementedError('def_main_properties  has to be implemented')
+
     @abstractmethod
     def def_advanced_properties(self):
         """ Define properties which considered to be advanced but still changeable by instrument scientist or advanced user
@@ -367,18 +374,20 @@ class ReductionWrapper(object):
 
         raise NotImplementedError('def_advanced_properties  has to be implemented')
     #
+
     def _run_pause(self,timeToWait=0):
         """ a wrapper around pause algorithm allowing to run something
             instead of pause in debug mode
         """
 
-        if not self._debug_wait_for_files_operation is None:
+        if self._debug_wait_for_files_operation is not None:
 # it is callable and the main point of this method is that it is callable
 #pylint: disable=E1102
             self._debug_wait_for_files_operation()
         else:
             Pause(timeToWait)
     #
+
     def _check_access_granted(self,input_file):
         """ Check if the access to the found nxs file is granted
 
@@ -393,8 +402,8 @@ class ReductionWrapper(object):
         if not h5py_installed: # well this check is not available. Sad, but it available on
             # all our working systems. Inform user about the problem
             self.reducer.prop_man.log \
-            ('*** Can not verify if file is accessible. Install h5py to be able to check file access in waiting mode',\
-            'notice')
+                ('*** Can not verify if file is accessible. Install h5py to be able to check file access in waiting mode',
+                 'notice')
             return
         ic=0
         #ok = os.access(input_file,os.R_OK) # does not work in this case
@@ -405,7 +414,7 @@ class ReductionWrapper(object):
             ok = False
             while not ok:
                 self.reducer.prop_man.log \
-                ('*** File found but access can not be gained. Waiting for 10 sec','notice')
+                    ('*** File found but access can not be gained. Waiting for 10 sec','notice')
                 time.sleep(10)
                 ic = ic+1
                 try:
@@ -415,10 +424,9 @@ class ReductionWrapper(object):
                     ok = False
                     if ic>24:
                         raise IOError\
-                        ("Can not get read access to input file: "+input_file+" after 4 min of trying")
+                            ("Can not get read access to input file: "+input_file+" after 4 min of trying")
         if ok:
             f.close()
-
 
     def reduce(self,input_file=None,output_directory=None):
         """ The method performs all main reduction operations over
@@ -440,8 +448,8 @@ class ReductionWrapper(object):
             Found,input_file = PropertyManager.sample_run.find_file(self.reducer.prop_man,be_quet=True)
             while not Found:
                 file_hint,fext = PropertyManager.sample_run.file_hint()
-                self.reducer.prop_man.log("*** Waiting {0} sec for file {1} to appear on the data search path"\
-                    .format(timeToWait,file_hint),'notice')
+                self.reducer.prop_man.log("*** Waiting {0} sec for file {1} to appear on the data search path"
+                                          .format(timeToWait,file_hint),'notice')
 
                 self._run_pause(timeToWait)
                 Found,input_file = PropertyManager.sample_run.find_file(self.reducer.prop_man,file_hint=file_hint,be_quet=True)
@@ -451,9 +459,9 @@ class ReductionWrapper(object):
                         wait_counter+=1
                         if wait_counter<2:
                             timeToWait =60
-                            self.reducer.prop_man.log(\
-                            "*** Requested file with extension {0} but found one with extension {1}\n"\
-                            "    The target may not have been delivered from the DAE machine\n".format(fext,found_ext))
+                            self.reducer.prop_man.log(
+                                "*** Requested file with extension {0} but found one with extension {1}\n"
+                                "    The target may not have been delivered from the DAE machine\n".format(fext,found_ext))
                             Found = False
                         else:
                             wait_counter = 0
@@ -472,6 +480,7 @@ class ReductionWrapper(object):
 
         return converted_to_energy_transfer_ws
     #
+
     def sum_and_reduce(self):
         """ procedure used to sum and reduce runs in case when not all files
            are available and user have to wait for these files to appear
@@ -508,8 +517,8 @@ class ReductionWrapper(object):
                     if ok: # no need to cache sum any more.  All necessary files found
                         self.reducer.prop_man.cashe_sum_ws = False
 
-                self.reducer.prop_man.log("*** Waiting {0} sec for runs {1} to appear on the data search path"\
-                    .format(timeToWait,str(missing)),'notice')
+                self.reducer.prop_man.log("*** Waiting {0} sec for runs {1} to appear on the data search path"
+                                          .format(timeToWait,str(missing)),'notice')
                 self._run_pause(timeToWait)
                 ok,missing,found = self.reducer.prop_man.find_files_to_sum()
                 n_found = len(found)
@@ -533,6 +542,7 @@ class ReductionWrapper(object):
         self._wait_for_file = timeToWait
         return ws
     #
+
     def run_reduction(self):
         """" Reduces runs one by one or sum all them together and reduce after this
 
@@ -550,19 +560,19 @@ class ReductionWrapper(object):
         # if this is not None, we want to run validation not reduction
         if self.validate_run_number:
             self.reducer.prop_man.log\
-            ("**************************************************************************************",'warning')
+                ("**************************************************************************************",'warning')
             self.reducer.prop_man.log\
-            ("**************************************************************************************",'warning')
+                ("**************************************************************************************",'warning')
             rez,mess=self.build_or_validate_result()
             if rez:
                 self.reducer.prop_man.log("*** SUCCESS! {0}".format(mess))
                 self.reducer.prop_man.log\
-               ("**************************************************************************************",'warning')
+                    ("**************************************************************************************",'warning')
 
             else:
                 self.reducer.prop_man.log("*** VALIDATION FAILED! {0}".format(mess))
                 self.reducer.prop_man.log\
-               ("**************************************************************************************",'warning')
+                    ("**************************************************************************************",'warning')
                 raise RuntimeError("Validation against old data file failed")
             self.validate_run_number=None
             return rez,mess
@@ -610,6 +620,7 @@ class ReductionWrapper(object):
             #end if
         #end
 
+
 def MainProperties(main_prop_definition):
     """ Decorator stores properties dedicated as main and sets these properties
         as input to reduction parameters."""
@@ -627,6 +638,8 @@ def MainProperties(main_prop_definition):
 
     return main_prop_wrapper
 #
+
+
 def AdvancedProperties(adv_prop_definition):
     """ Decorator stores properties decided to be advanced and sets these properties
         as input for reduction parameters
@@ -645,6 +658,8 @@ def AdvancedProperties(adv_prop_definition):
     return advanced_prop_wrapper
 
 #pylint: disable=too-many-branches
+
+
 def iliad(reduce):
     """ This decorator wraps around main procedure and switch input from
         web variables to properties or vise versa depending on web variables
@@ -693,7 +708,7 @@ def iliad(reduce):
             pass # we should set already set up variables using
 
         custom_print_function = host.set_custom_output_filename()
-        if not custom_print_function is None:
+        if custom_print_function is not None:
             PropertyManager.save_file_name.set_custom_print(custom_print_function)
         #
         rez = reduce(*args)

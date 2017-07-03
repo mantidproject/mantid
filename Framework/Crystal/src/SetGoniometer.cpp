@@ -1,7 +1,13 @@
 #include "MantidCrystal/SetGoniometer.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/Run.h"
+#include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidKernel/Strings.h"
 #include "MantidKernel/TimeSeriesProperty.h"
+
+#include <boost/algorithm/string/classification.hpp>
+#include <boost/algorithm/string/split.hpp>
 
 using Mantid::Geometry::Goniometer;
 using namespace Mantid::Geometry;
@@ -18,7 +24,6 @@ using namespace Mantid::API;
 /// How many axes (max) to define
 const size_t NUM_AXES = 6;
 
-//----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void SetGoniometer::init() {
@@ -45,7 +50,6 @@ void SetGoniometer::init() {
   }
 }
 
-//----------------------------------------------------------------------------------------------
 /** Execute the algorithm.
  */
 void SetGoniometer::exec() {
@@ -54,7 +58,7 @@ void SetGoniometer::exec() {
   // Create the goniometer
   Goniometer gon;
 
-  if (gonioDefined.compare("Universal") == 0)
+  if (gonioDefined == "Universal")
     gon.makeUniversalGoniometer();
   else
     for (size_t i = 0; i < NUM_AXES; i++) {

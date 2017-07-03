@@ -3,7 +3,8 @@ from __future__ import (absolute_import, division, print_function)
 
 from mantid.api import *
 from mantid.kernel import *
-import mantid, os
+import mantid
+import os
 
 
 # See ticket #14716
@@ -11,6 +12,7 @@ import mantid, os
 class CreateCacheFilename(PythonAlgorithm):
     """ Create cache filename
     """
+
     def category(self):
         """
         """
@@ -36,7 +38,7 @@ class CreateCacheFilename(PythonAlgorithm):
         # is there a place to register that?
         self.require()
 
-        self.declareProperty("PropertyManager", "", "name of a property manager from which properties are extracted from")
+        self.declareProperty("PropertyManager", "", "Name of a property manager from which properties are extracted from")
 
         self.declareProperty(
             StringArrayProperty("Properties", Direction.Input),
@@ -47,27 +49,45 @@ class CreateCacheFilename(PythonAlgorithm):
             "A list of key=value strings for other properties not in the property manager")
 
         self.declareProperty(
-            "Prefix", "", "prefix to the output hash name")
+            "Prefix", "", "prefix for the output file name")
 
         self.declareProperty(
             "CacheDir", "",
             "the directory in which the cache file will be created")
 
-        self.declareProperty("OutputFilename", "", "output filename", Direction.Output)
+        self.declareProperty("OutputFilename", "", "Full path of output file name", Direction.Output)
 
-        self.declareProperty("OutputSignature", "", "output signature", Direction.Output)
+        self.declareProperty("OutputSignature", "", "Calculated sha1 hash", Direction.Output)
         return
+
+    def validateInputs(self):
+        issues = dict()
+
+        manager = self.getPropertyValue('PropertyManager').strip()
+        if len(manager) > 0 and not mantid.PropertyManagerDataService.doesExist(manager):
+            issues['PropertyManager'] = 'Does not exist'
+        elif len(manager) <= 0 and not self.getProperty('OtherProperties').value:
+            message = "Either PropertyManager or OtherProperties should be supplied"
+            issues['PropertyManager'] = message
+            issues['OtherProperties'] = message
+
+        return issues
 
     def PyExec(self):
         """ Main Execution Body
         """
         # Inputs
-        prop_manager = self.getPropertyValue("PropertyManager")
+        prop_manager = self.getPropertyValue("PropertyManager").strip()
+        if len(prop_manager) > 0:
+            prop_manager = mantid.PropertyManagerDataService.retrieve(prop_manager)
+        else:
+            prop_manager = None
+
         other_props = self.getProperty("OtherProperties").value
+
         if not prop_manager and not other_props:
             raise ValueError("Either PropertyManager or OtherProperties should be supplied")
-        prop_manager = mantid.PropertyManagerDataService.retrieve(prop_manager)\
-                       if prop_manager else None
+
         # default to all properties in the manager
         props = self.getProperty("Properties").value
         if not props and prop_manager:
@@ -134,4 +154,3 @@ def matched(keys, patterns):
 
 # Register algorithm with Mantid
 AlgorithmFactory.subscribe(CreateCacheFilename)
-

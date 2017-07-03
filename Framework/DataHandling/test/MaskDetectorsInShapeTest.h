@@ -7,6 +7,8 @@
 #include "MantidDataHandling/LoadEmptyInstrument.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ArrayProperty.h"
+#include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/DetectorInfo.h"
 #include "MantidAPI/FrameworkManager.h"
 
 using namespace Mantid::API;
@@ -81,10 +83,9 @@ public:
     // check that the detectors have actually been marked dead
     std::vector<int> expectedDetectorArray =
         convertStringToVector(expectedHits);
-    Mantid::Geometry::Instrument_const_sptr i = outWS->getInstrument();
-    for (std::vector<int>::iterator it = expectedDetectorArray.begin();
-         it != expectedDetectorArray.end(); ++it) {
-      TS_ASSERT(i->getDetector((*it))->isMasked())
+    const auto &detectorInfo = outWS->detectorInfo();
+    for (const auto detID : expectedDetectorArray) {
+      TS_ASSERT(detectorInfo.isMasked(detectorInfo.indexOf(detID)));
     }
   }
 

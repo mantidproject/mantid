@@ -4,8 +4,18 @@
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Logger.h"
-#include <cfloat>
+#include "MantidKernel/Unit.h"
 
+#ifdef _MSC_VER
+// qualifier applied to function type has no meaning; ignored
+#pragma warning(disable : 4180)
+#endif
+#include "tbb/parallel_sort.h"
+#ifdef _MSC_VER
+#pragma warning(default : 4180)
+#endif
+
+#include <cfloat>
 #include <cmath>
 #include <functional>
 #include <limits>
@@ -23,22 +33,21 @@ using Kernel::DateAndTime;
 using namespace Mantid::API;
 
 namespace {
-/// The number of events to split for parallel sorting.
-const size_t NUM_EVENTS_PARALLEL_THRESHOLD = 500000;
 
 /**
  * Calculate the corrected full time in nanoseconds
- * @param totalNanoseconds : Time in nanoseconds
- * @param tof : Time of flight
+ * @param event : The event with pulse time and time-of-flight
  * @param tofFactor : Time of flight coefficient factor
  * @param tofShift : Tof shift in seconds
  * @return Corrected full time at sample in Nanoseconds.
  */
-int64_t calculateCorrectedFullTime(const int64_t &totalNanoseconds,
-                                   const double &tof, const double &tofFactor,
-                                   const double &tofShift) {
-  return totalNanoseconds +
-         static_cast<int64_t>(tofFactor * (tof * 1.0E3) + (tofShift * 1.0E9));
+template <typename EventType>
+int64_t calculateCorrectedFullTime(const EventType &event,
+                                   const double tofFactor,
+                                   const double tofShift) {
+  return event.pulseTime().totalNanoseconds() +
+         static_cast<int64_t>(tofFactor * (event.tof() * 1.0E3) +
+                              (tofShift * 1.0E9));
 }
 
 /**
@@ -52,7 +61,7 @@ private:
   const double m_tofShift;
 
 public:
-  CompareTimeAtSample(const double &tofFactor, const double &tofShift)
+  CompareTimeAtSample(const double tofFactor, const double tofShift)
       : m_tofFactor(tofFactor), m_tofShift(tofShift) {}
 
   /**
@@ -65,10 +74,10 @@ public:
    * @return True if first event evaluates to be < second event, otherwise false
    */
   bool operator()(const EventType &e1, const EventType &e2) const {
-    const auto tAtSample1 = calculateCorrectedFullTime(
-        e1.pulseTime().totalNanoseconds(), e1.tof(), m_tofFactor, m_tofShift);
-    const auto tAtSample2 = calculateCorrectedFullTime(
-        e2.pulseTime().totalNanoseconds(), e2.tof(), m_tofFactor, m_tofShift);
+    const auto tAtSample1 =
+        calculateCorrectedFullTime(e1, m_tofFactor, m_tofShift);
+    const auto tAtSample2 =
+        calculateCorrectedFullTime(e2, m_tofFactor, m_tofShift);
     return (tAtSample1 < tAtSample2);
   }
 };
@@ -129,9 +138,9 @@ EventList::EventList(EventWorkspaceMRU *mru, specnum_t specNo)
 /** Constructor copying from an existing event list
  * @param rhs :: EventList object to copy*/
 EventList::EventList(const EventList &rhs)
-    : IEventList(rhs), m_histogram(HistogramData::Histogram::XMode::BinEdges,
-                                   HistogramData::Histogram::YMode::Counts),
-      mru{nullptr} {
+    : IEventList(rhs), m_histogram(rhs.m_histogram), mru{nullptr} {
+  // Note that operator= also assigns m_histogram, but the above use of the copy
+  // constructor avoid a memory allocation and is thus faster.
   this->operator=(rhs);
 }
 
@@ -198,10 +207,6 @@ void EventList::createFromHistogram(const ISpectrum *inSpec, bool GenerateZeros,
   // Fresh start
   this->clear(true);
 
-  // Cached values for later checks
-  double inf = std::numeric_limits<double>::infinity();
-  double ninf = -inf;
-
   // Get the input histogram
   const MantidVec &X = inSpec->readX();
   const MantidVec &Y = inSpec->readY();
@@ -219,12 +224,10 @@ void EventList::createFromHistogram(const ISpectrum *inSpec, bool GenerateZeros,
 
   for (size_t i = 0; i < X.size() - 1; i++) {
     double weight = Y[i];
-    if ((weight != 0.0 || GenerateZeros) && (weight == weight) /*NAN check*/
-        && (weight != inf) && (weight != ninf)) {
+    if ((weight != 0.0 || GenerateZeros) && std::isfinite(weight)) {
       double error = E[i];
       // Also check that the error is not a bad number
-      if ((error == error) /*NAN check*/
-          && (error != inf) && (error != ninf)) {
+      if (std::isfinite(error)) {
         if (GenerateMultipleEvents) {
           // --------- Multiple events per bin ----------
           double errorSquared = error * error;
@@ -967,141 +970,6 @@ void EventList::setSortOrder(const EventSortType order) const {
 //    merge(begin, begin_right, end);
 //  }
 
-//----------------------------------------------------------------------------------------------------
-/** Merge two sorted lists into one sorted vector.
- *
- * @tparam T :: the type in the vector.
- * @param begin1 :: iterator at the start of the first list.
- * @param end1 :: iterator at the end of the first list.
- * @param begin2 :: iterator at the start of the second list.
- * @param end2 :: iterator at the end of the second list.
- * @param result_vector :: a vector (by reference) that will be filled with the
- *result.
- * */
-template <typename T>
-void merge(typename std::vector<T>::iterator begin1,
-           typename std::vector<T>::iterator end1,
-           typename std::vector<T>::iterator begin2,
-           typename std::vector<T>::iterator end2,
-           typename std::vector<T> &result_vector) {
-  auto it1 = begin1;
-  auto it2 = begin2;
-  while (!((it1 == end1) && (it2 == end2))) {
-    if (it1 == end1) {
-      // Only it2 makes sense
-      result_vector.push_back(*it2);
-      it2++;
-    } else if (it2 == end2) {
-      // Only it1 makes sense
-      result_vector.push_back(*it1);
-      it1++;
-    } else {
-      // Both iterators are valid. Which is smaller?
-      if (*it1 < *it2) {
-        result_vector.push_back(*it1);
-        it1++;
-      } else {
-        result_vector.push_back(*it2);
-        it2++;
-      }
-    }
-  }
-}
-
-//----------------------------------------------------------------------------------------------------
-/** Perform a parallelized sort on a provided vector, using 2 threads.
- * NOTE: Will temporarily use twice the memory used by the incoming vector.
- *
- * @param vec :: a vector, by refe/rence, that will be sorted-in place.
- */
-template <typename T> void parallel_sort2(typename std::vector<T> &vec) {
-  size_t size = vec.size();
-
-  auto begin = vec.begin();
-  auto middle = begin + size / 2;
-  auto end = vec.end();
-
-  PRAGMA_OMP(parallel sections) {
-    PRAGMA_OMP(section) {
-      std::sort(begin, middle);
-      // std::cout << " ----------- Part 1 --------------\n"; for (typename
-      // std::vector<T>::iterator it = begin; it != middle; it++) std::cout <<
-      // *it << "\n";
-    }
-    PRAGMA_OMP(section) {
-      std::sort(middle, end);
-      // std::cout << " ----------- Part 2 --------------\n";for (typename
-      // std::vector<T>::iterator it = middle; it != end; it++) std::cout << *it
-      // << "\n";
-    }
-  }
-
-  // Now merge back
-  typename std::vector<T> temp;
-  merge(begin, middle, middle, end, temp);
-
-  // std::cout << " ----------- Part 1+2 --------------\n"; for (typename
-  // std::vector<T>::iterator it = temp.begin(); it != temp.end(); it++)
-  // std::cout << *it << "\n";
-  // Swap storage with the temp vector
-  vec.swap(temp);
-  // Which we can now clear
-  temp.clear();
-}
-
-//----------------------------------------------------------------------------------------------------
-/** Perform a parallelized sort on a provided vector, using 4 threads.
- * NOTE: Will temporarily use twice the memory used by the incoming vector.
- *
- * @param vec :: a vector, by reference, that will be sorted-in place.
- */
-template <typename T> void parallel_sort4(std::vector<T> &vec) {
-  // int num_cores = PARALLEL_NUMBER_OF_THREADS;
-  size_t size = vec.size();
-
-  auto begin = vec.begin();
-  auto middle1 = begin + size / 4;
-  auto middle2 = begin + size / 2;
-  auto middle3 = begin + 3 * size / 4;
-  auto end = vec.end();
-
-  PRAGMA_OMP(parallel sections) {
-    PRAGMA_OMP(section) { std::sort(begin, middle1); }
-    PRAGMA_OMP(section) { std::sort(middle1, middle2); }
-    PRAGMA_OMP(section) { std::sort(middle2, middle3); }
-    PRAGMA_OMP(section) { std::sort(middle3, end); }
-  }
-
-  // Now merge back
-  typename std::vector<T> temp1, temp2;
-  // PRAGMA_OMP(parallel sections)
-  {
-    // PRAGMA_OMP(section)
-    { merge(begin, middle1, middle1, middle2, temp1); }
-    // PRAGMA_OMP(section)
-    { merge(middle2, middle3, middle3, end, temp2); }
-  }
-
-  // We can clear the incoming vector to free up memory now,
-  //  because it is copied already in temp1, temp2
-  vec.clear();
-
-  // Final merge
-  std::vector<T> temp;
-  merge(temp1.begin(), temp1.end(), temp2.begin(), temp2.end(), temp);
-
-  // Clear out this temporary storage
-  temp1.clear();
-  temp2.clear();
-  std::vector<T>().swap(temp1);
-  std::vector<T>().swap(temp2);
-
-  // Swap storage with the temp vector
-  vec.swap(temp);
-  // Which we can now clear
-  temp.clear();
-}
-
 // --------------------------------------------------------------------------
 /** Sort events by TOF in one thread */
 void EventList::sortTof() const {
@@ -1116,83 +984,15 @@ void EventList::sortTof() const {
 
   switch (eventType) {
   case TOF:
-    std::sort(events.begin(), events.end(), compareEventTof<TofEvent>);
+    tbb::parallel_sort(events.begin(), events.end(), compareEventTof<TofEvent>);
     break;
   case WEIGHTED:
-    std::sort(weightedEvents.begin(), weightedEvents.end(),
-              compareEventTof<WeightedEvent>);
+    tbb::parallel_sort(weightedEvents.begin(), weightedEvents.end(),
+                       compareEventTof<WeightedEvent>);
     break;
   case WEIGHTED_NOTIME:
-    std::sort(weightedEventsNoTime.begin(), weightedEventsNoTime.end(),
-              compareEventTof<WeightedEventNoTime>);
-    break;
-  }
-  // Save the order to avoid unnecessary re-sorting.
-  this->order = TOF_SORT;
-}
-
-// --------------------------------------------------------------------------
-/** Sort events by TOF, using two threads.
- *
- * Performance for 5e7 events:
- *  - 40.5 secs with sortTof() (one thread)
- *  - 21.1 secs with sortTof2() (two threads)
- *  - 18.2 secs with sortTof4() (four threads)
- * Performance gain tends to go up with longer event lists.
- * */
-void EventList::sortTof2() const {
-  if (this->order == TOF_SORT)
-    return; // nothing to do
-
-  // Avoid sorting from multiple threads
-  std::lock_guard<std::mutex> _lock(m_sortMutex);
-  // If the list was sorted while waiting for the lock, return.
-  if (this->order == TOF_SORT)
-    return;
-
-  switch (eventType) {
-  case TOF:
-    parallel_sort2(events);
-    break;
-  case WEIGHTED:
-    parallel_sort2(weightedEvents);
-    break;
-  case WEIGHTED_NOTIME:
-    parallel_sort2(weightedEventsNoTime);
-    break;
-  }
-  // Save the order to avoid unnecessary re-sorting.
-  this->order = TOF_SORT;
-}
-
-// --------------------------------------------------------------------------
-/** Sort events by TOF, using two threads.
- *
- * Performance for 5e7 events:
- *  - 40.5 secs with sortTof() (one thread)
- *  - 21.1 secs with sortTof2() (two threads)
- *  - 18.2 secs with sortTof4() (four threads)
- * Performance gain tends to go up with longer event lists.
- * */
-void EventList::sortTof4() const {
-  if (this->order == TOF_SORT)
-    return; // nothing to do
-
-  // Avoid sorting from multiple threads
-  std::lock_guard<std::mutex> _lock(m_sortMutex);
-  // If the list was sorted while waiting for the lock, return.
-  if (this->order == TOF_SORT)
-    return;
-
-  switch (eventType) {
-  case TOF:
-    parallel_sort4(events);
-    break;
-  case WEIGHTED:
-    parallel_sort4(weightedEvents);
-    break;
-  case WEIGHTED_NOTIME:
-    parallel_sort4(weightedEventsNoTime);
+    tbb::parallel_sort(weightedEventsNoTime.begin(), weightedEventsNoTime.end(),
+                       compareEventTof<WeightedEventNoTime>);
     break;
   }
   // Save the order to avoid unnecessary re-sorting.
@@ -1225,16 +1025,17 @@ void EventList::sortTimeAtSample(const double &tofFactor,
   switch (eventType) {
   case TOF: {
     CompareTimeAtSample<TofEvent> comparitor(tofFactor, tofShift);
-    std::sort(events.begin(), events.end(), comparitor);
+    tbb::parallel_sort(events.begin(), events.end(), comparitor);
   } break;
   case WEIGHTED: {
     CompareTimeAtSample<WeightedEvent> comparitor(tofFactor, tofShift);
-    std::sort(weightedEvents.begin(), weightedEvents.end(), comparitor);
+    tbb::parallel_sort(weightedEvents.begin(), weightedEvents.end(),
+                       comparitor);
   } break;
   case WEIGHTED_NOTIME: {
     CompareTimeAtSample<WeightedEventNoTime> comparitor(tofFactor, tofShift);
-    std::sort(weightedEventsNoTime.begin(), weightedEventsNoTime.end(),
-              comparitor);
+    tbb::parallel_sort(weightedEventsNoTime.begin(), weightedEventsNoTime.end(),
+                       comparitor);
   } break;
   }
   // Save the order to avoid unnecessary re-sorting.
@@ -1256,11 +1057,11 @@ void EventList::sortPulseTime() const {
   // Perform sort.
   switch (eventType) {
   case TOF:
-    std::sort(events.begin(), events.end(), compareEventPulseTime);
+    tbb::parallel_sort(events.begin(), events.end(), compareEventPulseTime);
     break;
   case WEIGHTED:
-    std::sort(weightedEvents.begin(), weightedEvents.end(),
-              compareEventPulseTime);
+    tbb::parallel_sort(weightedEvents.begin(), weightedEvents.end(),
+                       compareEventPulseTime);
     break;
   case WEIGHTED_NOTIME:
     // Do nothing; there is no time to sort
@@ -1286,11 +1087,11 @@ void EventList::sortPulseTimeTOF() const {
 
   switch (eventType) {
   case TOF:
-    std::sort(events.begin(), events.end(), compareEventPulseTimeTOF);
+    tbb::parallel_sort(events.begin(), events.end(), compareEventPulseTimeTOF);
     break;
   case WEIGHTED:
-    std::sort(weightedEvents.begin(), weightedEvents.end(),
-              compareEventPulseTimeTOF);
+    tbb::parallel_sort(weightedEvents.begin(), weightedEvents.end(),
+                       compareEventPulseTimeTOF);
     break;
   case WEIGHTED_NOTIME:
     // Do nothing; there is no time to sort
@@ -1407,7 +1208,7 @@ size_t EventList::histogram_size() const {
 }
 
 // ==============================================================================================
-// --- Setting the Histrogram X axis, without recalculating the histogram
+// --- Setting the Histogram X axis, without recalculating the histogram
 // -----------------------
 // ==============================================================================================
 
@@ -1629,7 +1430,7 @@ EventList::compressEventsHelper(const std::vector<T> &events,
   out.reserve(events.size() / 20);
 
   // The last TOF to which we are comparing.
-  double lastTof = -std::numeric_limits<double>::max();
+  double lastTof = std::numeric_limits<double>::lowest();
   // For getting an accurate average TOF
   double totalTof = 0;
   int num = 0;
@@ -1706,7 +1507,7 @@ void EventList::compressEventsParallelHelper(
     localOut.reserve(numPerBlock / 20);
 
     // The last TOF to which we are comparing.
-    double lastTof = -std::numeric_limits<double>::max();
+    double lastTof = std::numeric_limits<double>::lowest();
     // For getting an accurate average TOF
     double totalTof = 0;
     int num = 0;
@@ -1774,20 +1575,9 @@ void EventList::compressEventsParallelHelper(
  *the same.
  * @param destination :: EventList that will receive the compressed events. Can
  *be == this.
- * @param parallel :: if true, the compression will be done with all available
- *cores in parallel.
- *        Note: The parallel results may be slightly different than the serial
- *calculation.
- *        There will typically be more events because of the list was split up.
- *        Note: CURRENTLY IGNORED!
  */
-void EventList::compressEvents(double tolerance, EventList *destination,
-                               bool parallel) {
-  // Must have a sorted list
-  if (parallel)
-    this->sortTof4();
-  else
-    this->sortTof();
+void EventList::compressEvents(double tolerance, EventList *destination) {
+  this->sortTof();
   switch (eventType) {
   case TOF:
     //      if (parallel)
@@ -1880,7 +1670,8 @@ EventList::findFirstPulseEvent(const std::vector<T> &events,
 
   // if tof < X[0], that means that you need to skip some events
   while ((itev != itev_end) &&
-         (itev->pulseTime().totalNanoseconds() < seek_pulsetime))
+         (static_cast<double>(itev->pulseTime().totalNanoseconds()) <
+          seek_pulsetime))
     itev++;
   // Better fix would be to use a binary search instead of the linear one used
   // here.
@@ -1908,10 +1699,8 @@ typename std::vector<T>::const_iterator EventList::findFirstTimeAtSampleEvent(
   auto itev_end = events.cend(); // cache for speed
 
   // if tof < X[0], that means that you need to skip some events
-  while ((itev != itev_end) &&
-         (calculateCorrectedFullTime(itev->pulseTime().totalNanoseconds(),
-                                     itev->tof(), tofFactor,
-                                     tofOffset) < seek_time))
+  while ((itev != itev_end) && (static_cast<double>(calculateCorrectedFullTime(
+                                    *itev, tofFactor, tofOffset)) < seek_time))
     itev++;
   // Better fix would be to use a binary search instead of the linear one used
   // here.
@@ -2121,18 +1910,7 @@ void EventList::generateHistogram(const MantidVec &X, MantidVec &Y,
                                   MantidVec &E, bool skipError) const {
   // All types of weights need to be sorted by TOF
 
-  size_t numEvents = getNumberEvents();
-  if (numEvents > NUM_EVENTS_PARALLEL_THRESHOLD &&
-      PARALLEL_GET_MAX_THREADS >= 4)
-    // Four-core sort
-    this->sortTof4();
-  else if (numEvents > NUM_EVENTS_PARALLEL_THRESHOLD &&
-           PARALLEL_GET_MAX_THREADS >= 2)
-    // Two-core sort
-    this->sortTof2();
-  else
-    // One-core sort
-    this->sortTof();
+  this->sortTof();
 
   switch (eventType) {
   case TOF:
@@ -2221,6 +1999,48 @@ void EventList::generateCountsHistogramPulseTime(const MantidVec &X,
   } // end if (there are any events to histogram)
 }
 
+/** With respect to PulseTime fill a histogram given equal histogram
+*   bins.
+* Number of bins is equal to number of elements in vector Y.
+* Appends values to existing Y values.
+*
+* @param xMin :: Minimal Pulse time (in nanoseconds,
+*                i.e. DateTime->totalNanoseconds()) value to include
+*                in binning.
+* @param xMax :: Maximal Pulse time value to constrain binning by (include the
+*                times smaller than right boundary, excluding equal)
+* @param Y :: The generated counts histogram
+* @param TOF_min -- min TOF to include in histogram.
+* @param TOF_max -- max TOF to constrain values included in histogram.
+*/
+void EventList::generateCountsHistogramPulseTime(const double &xMin,
+                                                 const double &xMax,
+                                                 MantidVec &Y,
+                                                 const double TOF_min,
+                                                 const double TOF_max) const {
+
+  if (this->events.empty())
+    return;
+
+  size_t nBins = Y.size();
+
+  if (nBins == 0)
+    return;
+
+  double step = (xMax - xMin) / static_cast<double>(nBins);
+
+  for (const TofEvent &ev : this->events) {
+    double pulsetime = static_cast<double>(ev.pulseTime().totalNanoseconds());
+    if (pulsetime < xMin || pulsetime >= xMax)
+      continue;
+    if (ev.tof() < TOF_min || ev.tof() >= TOF_max)
+      continue;
+
+    size_t n_bin = static_cast<size_t>((pulsetime - xMin) / step);
+    Y[n_bin]++;
+  }
+}
+
 // --------------------------------------------------------------------------
 /** With respect to Time at Sample, fill a histogram given specified histogram
  * bounds. Does not modify
@@ -2234,7 +2054,7 @@ void EventList::generateCountsHistogramTimeAtSample(
     const MantidVec &X, MantidVec &Y, const double &tofFactor,
     const double &tofOffset) const {
   // For slight speed=up.
-  size_t x_size = X.size();
+  const size_t x_size = X.size();
 
   if (x_size <= 1) {
     // X was not set. Return an empty array.
@@ -2264,9 +2084,8 @@ void EventList::generateCountsHistogramTimeAtSample(
     // Find the first bin
     size_t bin = 0;
 
-    int64_t tAtSample =
-        calculateCorrectedFullTime(itev->pulseTime().totalNanoseconds(),
-                                   itev->tof(), tofFactor, tofOffset);
+    double tAtSample = static_cast<double>(
+        calculateCorrectedFullTime(*itev, tofFactor, tofOffset));
     while (bin < x_size - 1) {
       // Within range?
       if ((tAtSample >= X[bin]) && (tAtSample < X[bin + 1])) {
@@ -2280,9 +2099,8 @@ void EventList::generateCountsHistogramTimeAtSample(
 
     // Keep going through all the events
     while ((itev != itev_end) && (bin < x_size - 1)) {
-      tAtSample =
-          calculateCorrectedFullTime(itev->pulseTime().totalNanoseconds(),
-                                     itev->tof(), tofFactor, tofOffset);
+      tAtSample = static_cast<double>(
+          calculateCorrectedFullTime(*itev, tofFactor, tofOffset));
       while (bin < x_size - 1) {
         // Within range?
         if ((tAtSample >= X[bin]) && (tAtSample < X[bin + 1])) {
@@ -3106,6 +2924,56 @@ DateAndTime EventList::getPulseTimeMax() const {
   return tMax;
 }
 
+void EventList::getPulseTimeMinMax(Mantid::Kernel::DateAndTime &tMin,
+                                   Mantid::Kernel::DateAndTime &tMax) const {
+  // set up as the minimum available date time.
+  tMax = DateAndTime::minimum();
+  tMin = DateAndTime::maximum();
+
+  // no events is a soft error
+  if (this->empty())
+    return;
+
+  // when events are ordered by pulse time just need the first/last values
+  if (this->order == PULSETIME_SORT) {
+    switch (eventType) {
+    case TOF:
+      tMin = this->events.begin()->pulseTime();
+      tMax = this->events.rbegin()->pulseTime();
+      return;
+    case WEIGHTED:
+      tMin = this->weightedEvents.begin()->pulseTime();
+      tMax = this->weightedEvents.rbegin()->pulseTime();
+      return;
+    case WEIGHTED_NOTIME:
+      tMin = this->weightedEventsNoTime.begin()->pulseTime();
+      tMax = this->weightedEventsNoTime.rbegin()->pulseTime();
+      return;
+    }
+  }
+
+  // now we are stuck with a linear search
+  size_t numEvents = this->getNumberEvents();
+  DateAndTime temp = tMax; // start with the smallest possible value
+  for (size_t i = 0; i < numEvents; i++) {
+    switch (eventType) {
+    case TOF:
+      temp = this->events[i].pulseTime();
+      break;
+    case WEIGHTED:
+      temp = this->weightedEvents[i].pulseTime();
+      break;
+    case WEIGHTED_NOTIME:
+      temp = this->weightedEventsNoTime[i].pulseTime();
+      break;
+    }
+    if (temp > tMax)
+      tMax = temp;
+    if (temp < tMin)
+      tMin = temp;
+  }
+}
+
 DateAndTime EventList::getTimeAtSampleMax(const double &tofFactor,
                                           const double &tofOffset) const {
   // set up as the minimum available date time.
@@ -3119,17 +2987,14 @@ DateAndTime EventList::getTimeAtSampleMax(const double &tofFactor,
   if (this->order == TIMEATSAMPLE_SORT) {
     switch (eventType) {
     case TOF:
-      return calculateCorrectedFullTime(
-          this->events.rbegin()->pulseTime().totalNanoseconds(),
-          this->events.rbegin()->tof(), tofFactor, tofOffset);
+      return calculateCorrectedFullTime(*(this->events.rbegin()), tofFactor,
+                                        tofOffset);
     case WEIGHTED:
-      return calculateCorrectedFullTime(
-          this->weightedEvents.rbegin()->pulseTime().totalNanoseconds(),
-          this->weightedEvents.rbegin()->tof(), tofFactor, tofOffset);
+      return calculateCorrectedFullTime(*(this->weightedEvents.rbegin()),
+                                        tofFactor, tofOffset);
     case WEIGHTED_NOTIME:
-      return calculateCorrectedFullTime(
-          this->weightedEventsNoTime.rbegin()->pulseTime().totalNanoseconds(),
-          this->weightedEventsNoTime.rbegin()->tof(), tofFactor, tofOffset);
+      return calculateCorrectedFullTime(*(this->weightedEventsNoTime.rbegin()),
+                                        tofFactor, tofOffset);
     }
   }
 
@@ -3139,19 +3004,15 @@ DateAndTime EventList::getTimeAtSampleMax(const double &tofFactor,
   for (size_t i = 0; i < numEvents; i++) {
     switch (eventType) {
     case TOF:
-      temp = calculateCorrectedFullTime(
-          this->events[i].pulseTime().totalNanoseconds(), this->events[i].tof(),
-          tofFactor, tofOffset);
+      temp = calculateCorrectedFullTime(this->events[i], tofFactor, tofOffset);
       break;
     case WEIGHTED:
-      temp = calculateCorrectedFullTime(
-          this->weightedEvents[i].pulseTime().totalNanoseconds(),
-          this->weightedEvents[i].tof(), tofFactor, tofOffset);
+      temp = calculateCorrectedFullTime(this->weightedEvents[i], tofFactor,
+                                        tofOffset);
       break;
     case WEIGHTED_NOTIME:
-      temp = calculateCorrectedFullTime(
-          this->weightedEventsNoTime[i].pulseTime().totalNanoseconds(),
-          this->weightedEventsNoTime[i].tof(), tofFactor, tofOffset);
+      temp = calculateCorrectedFullTime(this->weightedEventsNoTime[i],
+                                        tofFactor, tofOffset);
       break;
     }
     if (temp > tMax)
@@ -3173,17 +3034,14 @@ DateAndTime EventList::getTimeAtSampleMin(const double &tofFactor,
   if (this->order == TIMEATSAMPLE_SORT) {
     switch (eventType) {
     case TOF:
-      return calculateCorrectedFullTime(
-          this->events.begin()->pulseTime().totalNanoseconds(),
-          this->events.begin()->tof(), tofFactor, tofOffset);
+      return calculateCorrectedFullTime(*(this->events.begin()), tofFactor,
+                                        tofOffset);
     case WEIGHTED:
-      return calculateCorrectedFullTime(
-          this->weightedEvents.begin()->pulseTime().totalNanoseconds(),
-          this->weightedEvents.begin()->tof(), tofFactor, tofOffset);
+      return calculateCorrectedFullTime(*(this->weightedEvents.begin()),
+                                        tofFactor, tofOffset);
     case WEIGHTED_NOTIME:
-      return calculateCorrectedFullTime(
-          this->weightedEventsNoTime.begin()->pulseTime().totalNanoseconds(),
-          this->weightedEventsNoTime.begin()->tof(), tofFactor, tofOffset);
+      return calculateCorrectedFullTime(*(this->weightedEventsNoTime.begin()),
+                                        tofFactor, tofOffset);
     }
   }
 
@@ -3193,19 +3051,15 @@ DateAndTime EventList::getTimeAtSampleMin(const double &tofFactor,
   for (size_t i = 0; i < numEvents; i++) {
     switch (eventType) {
     case TOF:
-      temp = calculateCorrectedFullTime(
-          this->events[i].pulseTime().totalNanoseconds(), this->events[i].tof(),
-          tofFactor, tofOffset);
+      temp = calculateCorrectedFullTime(this->events[i], tofFactor, tofOffset);
       break;
     case WEIGHTED:
-      temp = calculateCorrectedFullTime(
-          this->weightedEvents[i].pulseTime().totalNanoseconds(),
-          this->weightedEvents[i].tof(), tofFactor, tofOffset);
+      temp = calculateCorrectedFullTime(this->weightedEvents[i], tofFactor,
+                                        tofOffset);
       break;
     case WEIGHTED_NOTIME:
-      temp = calculateCorrectedFullTime(
-          this->weightedEventsNoTime[i].pulseTime().totalNanoseconds(),
-          this->weightedEventsNoTime[i].tof(), tofFactor, tofOffset);
+      temp = calculateCorrectedFullTime(this->weightedEventsNoTime[i],
+                                        tofFactor, tofOffset);
       break;
     }
     if (temp < tMin)
@@ -3422,7 +3276,7 @@ void EventList::multiplyHistogramHelper(std::vector<T> &events,
     while (bin < x_size - 1) {
       // Event is Within range?
       if ((tof >= X[bin]) && (tof < X[bin + 1])) {
-        // Process this event. Multilpy and calculate error.
+        // Process this event. Multiply and calculate error.
         itev->m_errorSquared =
             static_cast<float>(itev->m_errorSquared * valueSquared +
                                errorSquared * itev->m_weight * itev->m_weight);
@@ -3711,15 +3565,13 @@ void EventList::filterByTimeAtSampleHelper(std::vector<T> &events,
   auto itev_end = events.end();
   // Find the first event with m_pulsetime >= start
   while ((itev != itev_end) &&
-         (calculateCorrectedFullTime(itev->m_pulsetime.totalNanoseconds(),
-                                     itev->tof(), tofFactor,
-                                     tofOffset) < start.totalNanoseconds()))
+         (calculateCorrectedFullTime(*itev, tofFactor, tofOffset) <
+          start.totalNanoseconds()))
     itev++;
 
   while ((itev != itev_end) &&
-         (calculateCorrectedFullTime(itev->m_pulsetime.totalNanoseconds(),
-                                     itev->tof(), tofFactor,
-                                     tofOffset) < stop.totalNanoseconds())) {
+         (calculateCorrectedFullTime(*itev, tofFactor, tofOffset) <
+          stop.totalNanoseconds())) {
     // Add the copy to the output
     output.push_back(*itev);
     ++itev;
@@ -3750,6 +3602,7 @@ void EventList::filterByPulseTime(DateAndTime start, DateAndTime stop,
   output.switchTo(eventType);
   output.setDetectorIDs(this->getDetectorIDs());
   output.setHistogram(m_histogram);
+  output.setSortOrder(this->order);
 
   // Iterate through all events (sorted by pulse time)
   switch (eventType) {
@@ -3783,6 +3636,7 @@ void EventList::filterByTimeAtSample(Kernel::DateAndTime start,
   output.switchTo(eventType);
   output.setDetectorIDs(this->getDetectorIDs());
   output.setHistogram(m_histogram);
+  output.setSortOrder(this->order);
 
   // Iterate through all events (sorted by pulse time)
   switch (eventType) {
@@ -4052,9 +3906,7 @@ void EventList::splitByFullTimeHelper(Kernel::TimeSplitterType &splitter,
     while (itev != itev_end) {
       int64_t fulltime;
       if (docorrection)
-        fulltime =
-            calculateCorrectedFullTime(itev->m_pulsetime.totalNanoseconds(),
-                                       itev->m_tof, toffactor, tofshift);
+        fulltime = calculateCorrectedFullTime(*itev, toffactor, tofshift);
       else
         fulltime = itev->m_pulsetime.totalNanoseconds() +
                    static_cast<int64_t>(itev->m_tof * 1000);
@@ -4230,17 +4082,123 @@ std::string EventList::splitByFullTimeVectorSplitterHelper(
   return (msgss.str());
 }
 
+//------------------------------------------------------------------------------------------------
+/** Split the event list into n outputs, operating on a vector of either
+ *TofEvent's or WeightedEvent's
+ *  The comparison between neutron event and splitter is based on neutron
+ *event's pulse time plus
+ *
+ * @param vectimes :: a vector of absolute time in nanoseconds serving as
+ *boundaries of splitters
+ * @param vecgroups :: a vector of integer serving as the target workspace group
+ *for splitters
+ * @param outputs :: a vector of where the split events will end up. The # of
+ *entries in there should
+ *        be big enough to accommodate the indices.
+ * @param vecEvents :: either this->events or this->weightedEvents.
+ * @param docorrection :: flag to determine whether or not to apply correction
+ * @param toffactor :: factor multiplied to TOF for correcting event time from
+ *detector to sample
+ * @param tofshift :: shift in SECOND to TOF for correcting event time from
+ *detector to sample
+ */
+template <class T>
+std::string EventList::splitByFullTimeSparseVectorSplitterHelper(
+    const std::vector<int64_t> &vectimes, const std::vector<int> &vecgroups,
+    std::map<int, EventList *> outputs, typename std::vector<T> &vecEvents,
+    bool docorrection, double toffactor, double tofshift) const {
+  // Define variables for events
+  // size_t numevents = events.size();
+  // typename std::vector<T>::iterator eviter;
+  std::stringstream msgss;
+
+  size_t num_splitters = vecgroups.size();
+  // prepare to Iterate through all events (sorted by tof)
+  auto iter_events = vecEvents.begin();
+  auto iter_events_end = vecEvents.end();
+
+  // std::stringstream debug_ss;
+  // debug_ss << "\nFilter events...:\n";
+
+  for (size_t i = 0; i < num_splitters; ++i) {
+    // get one splitter
+    int64_t start_i64 = vectimes[i];
+    int64_t stop_i64 = vectimes[i + 1];
+    int group = vecgroups[i];
+    // debug_ss << "working on splitter: " << i << " from " << start_i64 << " to
+    // " << stop_i64 << "\n";
+
+    // go over events
+    while (iter_events != iter_events_end) {
+      int64_t absolute_time;
+      if (docorrection)
+        absolute_time =
+            iter_events->m_pulsetime.totalNanoseconds() +
+            static_cast<int64_t>(toffactor * iter_events->m_tof * 1000 +
+                                 tofshift * 1.0E9);
+      else
+        absolute_time = iter_events->m_pulsetime.totalNanoseconds() +
+                        static_cast<int64_t>(iter_events->m_tof * 1000);
+
+      // debug_ss << "  event " << iter_events - vecEvents.begin() << " abs.time
+      // = " << absolute_time << "\n";
+
+      if (absolute_time < start_i64) {
+        // event occurs before the splitter. only can happen with first
+        // splitter. Then ignore and move to next
+        ++iter_events;
+        continue;
+      }
+
+      if (absolute_time < stop_i64) {
+        // in the splitter, then copy the event into another
+        const T eventCopy(*iter_events);
+        // Copy event to the proper group
+        EventList *myOutput = outputs[group];
+        if (!myOutput) {
+          // there is no such group defined. quit for this group
+          std::stringstream errss;
+          errss << "Group " << group << " has a NULL output EventList. "
+                << "\n";
+          msgss << errss.str();
+          throw std::runtime_error(errss.str());
+        }
+        // Add the copy to the output
+        myOutput->addEventQuickly(eventCopy);
+        ++iter_events;
+      } else {
+        // event occurs after the stop time, it should belonged to the next
+        // splitter
+        break;
+      }
+    } // while
+
+    // quit the loop if there is no more event left
+    if (iter_events == iter_events_end)
+      break;
+  } // for splitter
+
+  // std::cout << debug_ss.str();
+
+  return (msgss.str());
+}
+
 //----------------------------------------------------------------------------------------------
 /**
- * @param vectimes :: vector of splitting times
+ * @brief EventList::splitByFullTimeMatrixSplitter
+ * @param vec_splitters_time  :: vector of splitting times
  * @param vecgroups :: vector of index group for splitters
  * @param vec_outputEventList :: vector of groups of splitted events
  * @param docorrection :: flag to do TOF correction from detector to sample
  * @param toffactor :: factor multiplied to TOF for correction
  * @param tofshift :: shift to TOF in unit of SECOND for correction
+ * @return
  */
+// TODO/FIXME/NOW - Consider to use vector to replace vec_outputEventList and
+// have an option to ignore the un-filtered events!
 std::string EventList::splitByFullTimeMatrixSplitter(
-    const std::vector<int64_t> &vectimes, const std::vector<int> &vecgroups,
+    const std::vector<int64_t> &vec_splitters_time,
+    const std::vector<int> &vecgroups,
     std::map<int, EventList *> vec_outputEventList, bool docorrection,
     double toffactor, double tofshift) const {
   // Check validity
@@ -4248,8 +4206,8 @@ std::string EventList::splitByFullTimeMatrixSplitter(
     throw std::runtime_error("EventList::splitByTime() called on an EventList "
                              "that no longer has time information.");
 
-  // Start by sorting the event list by pulse time.
-  // FIXME - Should find a good algorithm for sorted event list
+  // Start by sorting the event list by pulse time, if its flag is not set up
+  // right
   sortPulseTimeTOF();
 
   // Initialize all the output event list
@@ -4273,16 +4231,31 @@ std::string EventList::splitByFullTimeMatrixSplitter(
     // this->duplicate(outputs[-1]);
   } else {
     // Split
+
+    // Try to find out which filtering algorithm to use by comparing number of
+    // splitters and number of events
+    bool sparse_splitter = vec_splitters_time.size() < this->getNumberEvents();
+
     switch (eventType) {
     case TOF:
-      debugmessage = splitByFullTimeVectorSplitterHelper(
-          vectimes, vecgroups, vec_outputEventList, this->events, docorrection,
-          toffactor, tofshift);
+      if (sparse_splitter)
+        debugmessage = splitByFullTimeSparseVectorSplitterHelper(
+            vec_splitters_time, vecgroups, vec_outputEventList, this->events,
+            docorrection, toffactor, tofshift);
+      else
+        debugmessage = splitByFullTimeVectorSplitterHelper(
+            vec_splitters_time, vecgroups, vec_outputEventList, this->events,
+            docorrection, toffactor, tofshift);
       break;
     case WEIGHTED:
-      debugmessage = splitByFullTimeVectorSplitterHelper(
-          vectimes, vecgroups, vec_outputEventList, this->weightedEvents,
-          docorrection, toffactor, tofshift);
+      if (sparse_splitter)
+        debugmessage = splitByFullTimeSparseVectorSplitterHelper(
+            vec_splitters_time, vecgroups, vec_outputEventList,
+            this->weightedEvents, docorrection, toffactor, tofshift);
+      else
+        debugmessage = splitByFullTimeVectorSplitterHelper(
+            vec_splitters_time, vecgroups, vec_outputEventList,
+            this->weightedEvents, docorrection, toffactor, tofshift);
       break;
     case WEIGHTED_NOTIME:
       debugmessage = "TOF type is weighted no time.  Impossible to split. ";
@@ -4401,6 +4374,111 @@ void EventList::splitByPulseTime(Kernel::TimeSplitterType &splitter,
       break;
     }
   }
+}
+
+//----------------------------------------------------------------------------------------------
+/** Split the event list by pulse time
+ */
+// TODO/NOW - TEST
+void EventList::splitByPulseTimeWithMatrix(
+    const std::vector<int64_t> &vec_times, const std::vector<int> &vec_target,
+    std::map<int, EventList *> outputs) const {
+  // Check for supported event type
+  if (eventType == WEIGHTED_NOTIME)
+    throw std::runtime_error("EventList::splitByTime() called on an EventList "
+                             "that no longer has time information.");
+
+  // Start by sorting the event list by pulse time.
+  this->sortPulseTimeTOF();
+
+  // Initialize all the output event lists
+  std::map<int, EventList *>::iterator outiter;
+  for (outiter = outputs.begin(); outiter != outputs.end(); ++outiter) {
+    EventList *opeventlist = outiter->second;
+    opeventlist->clear();
+    opeventlist->setDetectorIDs(this->getDetectorIDs());
+    opeventlist->setHistogram(m_histogram);
+    // Match the output event type.
+    opeventlist->switchTo(eventType);
+  }
+
+  // Split
+  if (vec_target.size() == 0) {
+    // No splitter: copy all events to group workspace = -1
+    (*outputs[-1]) = (*this);
+  } else {
+    // Split
+    switch (eventType) {
+    case TOF:
+      splitByPulseTimeWithMatrixHelper(vec_times, vec_target, outputs,
+                                       this->events);
+      break;
+    case WEIGHTED:
+      splitByPulseTimeWithMatrixHelper(vec_times, vec_target, outputs,
+                                       this->weightedEvents);
+      break;
+    case WEIGHTED_NOTIME:
+      break;
+    }
+  }
+}
+
+template <class T>
+void EventList::splitByPulseTimeWithMatrixHelper(
+    const std::vector<int64_t> &vec_split_times,
+    const std::vector<int> &vec_split_target,
+    std::map<int, EventList *> outputs, typename std::vector<T> &events) const {
+  // Prepare to TimeSplitter Iterate through the splitter at the same time
+  if (vec_split_times.size() != vec_split_target.size() + 1)
+    throw std::runtime_error("Splitter time vector size and splitter target "
+                             "vector size are not correct.");
+
+  // Prepare to Events Iterate through all events (sorted by tof)
+  auto itev = events.begin();
+  auto itev_end = events.end();
+
+  // Iterate (loop) on all splitters
+  for (size_t i_target = 0; i_target < vec_split_target.size(); ++i_target) {
+    // Get the splitting interval times and destination group
+    int64_t start = vec_split_times[i_target];
+    int64_t stop = vec_split_times[i_target + 1];
+    const int index = vec_split_target[i_target];
+
+    // Skip the events before the start of the time and put to 'unfiltered'
+    // EventList
+    EventList *myOutput = outputs[-1];
+    while (itev != itev_end) {
+      if (itev->m_pulsetime < start) {
+        // Record to index = -1 space
+        const T eventCopy(*itev);
+        myOutput->addEventQuickly(eventCopy);
+        ++itev;
+      } else {
+        // Event within a splitter interval
+        break;
+      }
+    }
+
+    // Go through all the events that are in the interval (if any)
+    while (itev != itev_end) {
+
+      if (itev->m_pulsetime < stop) {
+        // Duplicate event
+        const T eventCopy(*itev);
+        EventList *myOutput = outputs[index];
+        // Add the copy to the output
+        myOutput->addEventQuickly(eventCopy);
+        ++itev;
+      } else {
+        // Out of interval
+        break;
+      }
+    }
+
+    // No need to keep looping through the filter if we are out of events
+    if (itev == itev_end)
+      break;
+  } // END-WHILE Splitter
 }
 
 //--------------------------------------------------------------------------

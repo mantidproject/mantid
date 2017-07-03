@@ -1,6 +1,8 @@
 #include "MantidAlgorithms/GetEi.h"
 #include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/InstrumentValidator.h"
+#include "MantidAPI/Run.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/Exception.h"
@@ -171,17 +173,17 @@ void GetEi::getGeometry(API::MatrixWorkspace_const_sptr WS, specnum_t mon0Spec,
     g_log.error() << "Error retrieving data for the first monitor\n";
     throw std::bad_cast();
   }
-  const auto &dets = WS->getSpectrum(monWI).getDetectorIDs();
 
-  if (dets.size() != 1) {
+  const auto &spectrumInfo = WS->spectrumInfo();
+
+  if (!spectrumInfo.hasUniqueDetector(monWI)) {
     g_log.error() << "The detector for spectrum number " << mon0Spec
                   << " was either not found or is a group, grouped monitors "
                      "are not supported by this algorithm\n";
     g_log.error() << "Error retrieving data for the first monitor\n";
     throw std::bad_cast();
   }
-  IDetector_const_sptr det = WS->getInstrument()->getDetector(*dets.begin());
-  monitor0Dist = det->getDistance(*(source.get()));
+  monitor0Dist = spectrumInfo.l1() + spectrumInfo.l2(monWI);
 
   // repeat for the second detector
   try {
@@ -193,16 +195,14 @@ void GetEi::getGeometry(API::MatrixWorkspace_const_sptr WS, specnum_t mon0Spec,
     g_log.error() << "Error retrieving data for the second monitor\n";
     throw std::bad_cast();
   }
-  const auto &dets2 = WS->getSpectrum(monWI).getDetectorIDs();
-  if (dets2.size() != 1) {
+  if (!spectrumInfo.hasUniqueDetector(monWI)) {
     g_log.error() << "The detector for spectrum number " << mon1Spec
                   << " was either not found or is a group, grouped monitors "
                      "are not supported by this algorithm\n";
     g_log.error() << "Error retrieving data for the second monitor\n";
     throw std::bad_cast();
   }
-  det = WS->getInstrument()->getDetector(*dets2.begin());
-  monitor1Dist = det->getDistance(*(source.get()));
+  monitor1Dist = spectrumInfo.l1() + spectrumInfo.l2(monWI);
 }
 /** Converts detector IDs to spectra indexes
 *  @param WS :: the workspace on which the calculations are being performed

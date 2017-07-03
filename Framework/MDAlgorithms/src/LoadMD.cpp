@@ -1,31 +1,34 @@
+#include "MantidMDAlgorithms/LoadMD.h"
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/RegisterFileLoader.h"
+#include "MantidAPI/WorkspaceHistory.h"
+#include "MantidDataObjects/BoxControllerNeXusIO.h"
+#include "MantidDataObjects/CoordTransformAffine.h"
+#include "MantidDataObjects/MDBoxFlatTree.h"
+#include "MantidDataObjects/MDEventFactory.h"
+#include "MantidDataObjects/MDHistoWorkspace.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "MantidGeometry/MDGeometry/IMDDimensionFactory.h"
 #include "MantidGeometry/MDGeometry/MDDimensionExtents.h"
-#include "MantidGeometry/MDGeometry/MDFrameFactory.h"
 #include "MantidGeometry/MDGeometry/MDFrame.h"
+#include "MantidGeometry/MDGeometry/MDFrameFactory.h"
 #include "MantidGeometry/MDGeometry/UnknownFrame.h"
 #include "MantidKernel/CPUTimer.h"
+#include "MantidKernel/ConfigService.h"
 #include "MantidKernel/EnabledWhenProperty.h"
-#include "MantidKernel/Memory.h"
-#include "MantidKernel/MDUnitFactory.h"
 #include "MantidKernel/MDUnit.h"
+#include "MantidKernel/MDUnitFactory.h"
+#include "MantidKernel/Memory.h"
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/System.h"
-#include "MantidMDAlgorithms/LoadMD.h"
 #include "MantidMDAlgorithms/SetMDFrame.h"
-#include "MantidDataObjects/MDEventFactory.h"
-#include "MantidDataObjects/MDBoxFlatTree.h"
-#include "MantidDataObjects/MDHistoWorkspace.h"
-#include "MantidDataObjects/BoxControllerNeXusIO.h"
-#include "MantidDataObjects/CoordTransformAffine.h"
-#include "MantidKernel/ConfigService.h"
-#include <nexus/NeXusException.hpp>
 #include <boost/algorithm/string.hpp>
+#include <boost/regex.hpp>
+#include <iostream>
+#include <nexus/NeXusException.hpp>
 #include <vector>
 
 typedef std::unique_ptr<Mantid::API::IBoxControllerIO> file_holder_type;
@@ -236,11 +239,13 @@ void LoadMD::exec() {
                         << m_QConvention << '\n';
 
     if (pref_QConvention != m_QConvention) {
+      std::vector<double> scaling(m_numDims);
+      scaling = qDimensions(ws);
       g_log.information() << "Transforming Q\n";
       Algorithm_sptr transform_alg = createChildAlgorithm("TransformMD");
       transform_alg->setProperty("InputWorkspace",
                                  boost::dynamic_pointer_cast<IMDWorkspace>(ws));
-      transform_alg->setProperty("Scaling", "-1.0");
+      transform_alg->setProperty("Scaling", scaling);
       transform_alg->executeAsChildAlg();
       IMDWorkspace_sptr tmp = transform_alg->getProperty("OutputWorkspace");
       ws = boost::dynamic_pointer_cast<IMDEventWorkspace>(tmp);
@@ -345,11 +350,13 @@ void LoadMD::loadHisto() {
                       << '\n';
 
   if (pref_QConvention != m_QConvention) {
+    std::vector<double> scaling(m_numDims);
+    scaling = qDimensions(ws);
     g_log.information() << "Transforming Q\n";
     Algorithm_sptr transform_alg = createChildAlgorithm("TransformMD");
     transform_alg->setProperty("InputWorkspace",
                                boost::dynamic_pointer_cast<IMDWorkspace>(ws));
-    transform_alg->setProperty("Scaling", "-1.0");
+    transform_alg->setProperty("Scaling", scaling);
     transform_alg->executeAsChildAlg();
     IMDWorkspace_sptr tmp = transform_alg->getProperty("OutputWorkspace");
     ws = boost::dynamic_pointer_cast<MDHistoWorkspace>(tmp);
@@ -489,7 +496,7 @@ void LoadMD::doLoad(typename MDEventWorkspace<MDE, nd>::sptr ws) {
                                 ": this is not possible.");
 
   CPUTimer tim;
-  auto prog = new Progress(this, 0.0, 1.0, 100);
+  auto prog = make_unique<Progress>(this, 0.0, 1.0, 100);
 
   prog->report("Opening file.");
   std::string title;
@@ -610,7 +617,6 @@ void LoadMD::doLoad(typename MDEventWorkspace<MDE, nd>::sptr ws) {
                 << " points after refresh.\n";
 
   g_log.debug() << tim << " to finish up.\n";
-  delete prog;
 }
 
 /**
@@ -650,10 +656,10 @@ CoordTransform *LoadMD::loadAffineMatrix(std::string entry_name) {
   m_file->getAttr<int>("rows", outD);
   m_file->getAttr<int>("columns", inD);
   m_file->closeData();
+  Matrix<coord_t> mat(vec, outD, inD);
   // Adjust dimensions
   inD--;
   outD--;
-  Matrix<coord_t> mat(vec);
   CoordTransform *transform = nullptr;
   if (("CoordTransformAffine" == type) || ("CoordTransformAligned" == type)) {
     auto affine = new CoordTransformAffine(inD, outD);
@@ -766,6 +772,26 @@ void LoadMD::checkForRequiredLegacyFixup(API::IMDWorkspace_sptr ws) {
   if (isQBasedSpecialCoordinateSystem && containsOnlyUnkownFrames) {
     m_requiresMDFrameCorrection = true;
   }
+}
+
+/**
+ * Find scaling for Q dimensions
+ */
+std::vector<double> LoadMD::qDimensions(API::IMDWorkspace_sptr ws) {
+  std::vector<double> scaling(m_numDims);
+  for (size_t d = 0; d < m_numDims; d++) {
+    std::string dimd = ws->getDimension(d)->getName();
+
+    // Assume the Q dimensions are those that have names starting with [
+    // such as [H,0.5H,0], or Q_ such as Q_sample_x.
+    // The change in sign should apply only to those.
+    boost::regex re("\\[.*|Q_");
+    if (boost::regex_search(dimd.begin(), dimd.begin() + 2, re))
+      scaling[d] = -1.0;
+    else
+      scaling[d] = 1.0;
+  }
+  return scaling;
 }
 const std::string LoadMD::VISUAL_NORMALIZATION_KEY = "visual_normalization";
 const std::string LoadMD::VISUAL_NORMALIZATION_KEY_HISTO =

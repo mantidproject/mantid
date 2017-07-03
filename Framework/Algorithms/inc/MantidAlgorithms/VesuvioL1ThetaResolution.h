@@ -48,7 +48,7 @@ private:
   void exec() override;
   void loadInstrument();
 
-  void calculateDetector(Mantid::Geometry::IDetector_const_sptr detector,
+  void calculateDetector(const Mantid::Geometry::IDetector &detector,
                          std::vector<double> &l1Values,
                          std::vector<double> &thetaValues);
   Mantid::API::MatrixWorkspace_sptr

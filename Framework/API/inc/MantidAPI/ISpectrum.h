@@ -10,6 +10,7 @@
 
 namespace Mantid {
 namespace API {
+class MatrixWorkspace;
 
 /** A "spectrum" is an object that holds the data for a particular spectrum,
  * in particular:
@@ -85,7 +86,6 @@ public:
   void setDetectorIDs(std::set<detid_t> &&detIDs);
 
   bool hasDetectorID(const detid_t detID) const;
-  std::set<detid_t> &getDetectorIDs();
   const std::set<detid_t> &getDetectorIDs() const;
 
   void clearDetectorIDs();
@@ -125,9 +125,6 @@ public:
   }
 
   HistogramData::BinEdges binEdges() const { return histogramRef().binEdges(); }
-  HistogramData::BinEdgeStandardDeviations binEdgeStandardDeviations() const {
-    return histogramRef().binEdgeStandardDeviations();
-  }
   HistogramData::Points points() const { return histogramRef().points(); }
   HistogramData::PointStandardDeviations pointStandardDeviations() const {
     return histogramRef().pointStandardDeviations();
@@ -135,24 +132,17 @@ public:
   template <typename... T> void setBinEdges(T &&... data) & {
     mutableHistogramRef().setBinEdges(std::forward<T>(data)...);
   }
-  template <typename... T> void setBinEdgeVariances(T &&... data) & {
-    mutableHistogramRef().setBinEdgeVariances(std::forward<T>(data)...);
-  }
-  template <typename... T> void setBinEdgeStandardDeviations(T &&... data) & {
-    mutableHistogramRef().setBinEdgeStandardDeviations(
-        std::forward<T>(data)...);
-  }
   template <typename... T> void setPoints(T &&... data) & {
     // Check for the special case EventList, it only works with BinEdges.
     checkWorksWithPoints();
     mutableHistogramRef().setPoints(std::forward<T>(data)...);
   }
   template <typename... T> void setPointVariances(T &&... data) & {
-    checkWorksWithPoints();
+    // Note that we can set point variances even if storage mode is BinEdges, Dx
+    // is *always* one value *per bin*.
     mutableHistogramRef().setPointVariances(std::forward<T>(data)...);
   }
   template <typename... T> void setPointStandardDeviations(T &&... data) & {
-    checkWorksWithPoints();
     mutableHistogramRef().setPointStandardDeviations(std::forward<T>(data)...);
   }
   virtual HistogramData::Counts counts() const {
@@ -250,21 +240,29 @@ public:
     mutableHistogramRef().setSharedE(e);
   }
 
+  void setMatrixWorkspace(MatrixWorkspace *matrixWorkspace, const size_t index);
+
 protected:
-  virtual void checkAndSanitizeHistogram(HistogramData::Histogram &) {}
+  virtual void checkAndSanitizeHistogram(HistogramData::Histogram &){};
   virtual void checkWorksWithPoints() const {}
   virtual void checkIsYAndEWritable() const {}
 
   // Copy and move are not public since this is an abstract class, but protected
   // such that derived classes can implement copy and move.
-  ISpectrum(const ISpectrum &) = default;
-  ISpectrum(ISpectrum &&) = default;
-  ISpectrum &operator=(const ISpectrum &) = default;
-  ISpectrum &operator=(ISpectrum &&) = default;
+  ISpectrum(const ISpectrum &other);
+  ISpectrum(ISpectrum &&other);
+  ISpectrum &operator=(const ISpectrum &other);
+  ISpectrum &operator=(ISpectrum &&other);
 
 private:
   virtual const HistogramData::Histogram &histogramRef() const = 0;
   virtual HistogramData::Histogram &mutableHistogramRef() = 0;
+
+  void invalidateCachedSpectrumNumbers() const;
+  void invalidateSpectrumDefinition() const;
+  MatrixWorkspace *m_matrixWorkspace{nullptr};
+  // The default value is meaningless. This will always be set before use.
+  size_t m_index{0};
 
   /// The spectrum number of this spectrum
   specnum_t m_specNo{0};

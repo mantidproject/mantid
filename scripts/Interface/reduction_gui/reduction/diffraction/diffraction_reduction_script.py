@@ -1,3 +1,4 @@
+from __future__ import (absolute_import, division, print_function)
 #pylint: disable=invalid-name,R0912
 """
     Classes for each reduction step. Those are kept separately
@@ -8,6 +9,7 @@ import os
 from mantid.kernel import Logger
 from mantid.api import FileFinder
 from reduction_gui.reduction.scripter import BaseReductionScripter
+
 
 class DiffractionReductionScripter(BaseReductionScripter):
     """ Organizes the set of reduction parameters that will be used to
@@ -76,7 +78,7 @@ class DiffractionReductionScripter(BaseReductionScripter):
             f.write(script)
             f.close()
         except IOError as e:
-            print "Unable to save script to file. Reason: %s." % (str(e))
+            print ("Unable to save script to file. Reason: %s." % (str(e)))
 
         # Export XML file
         autosavexmlfname = os.path.join(self.configDir, "snspowderreduction.xml")
@@ -87,10 +89,9 @@ class DiffractionReductionScripter(BaseReductionScripter):
             file_name, autosavexmlfname)
         wbuf += script
         wbuf += "\n========== End of Script ==========="
-        print wbuf
+        print (wbuf)
 
         return script
-
 
     def to_xml(self, file_name=None):
         """ Extending base class to_xml
@@ -98,7 +99,6 @@ class DiffractionReductionScripter(BaseReductionScripter):
         BaseReductionScripter.to_xml(self, file_name)
 
         return
-
 
     def parseTabSetupScript(self, tabsetuptype, setupscript, paramdict):
         """ Parse script returned from tab setup
@@ -194,8 +194,8 @@ class DiffractionReductionScripter(BaseReductionScripter):
                         script += "%sMinimumLogValue    = '%s',\n" % (DiffractionReductionScripter.WIDTH, filterdict["MinimumLogValue"])
                     if filterdict["MaximumLogValue"] != "":
                         script += "%sMaximumLogValue    = '%s',\n" % (DiffractionReductionScripter.WIDTH, filterdict["MaximumLogValue"])
-                    script += "%sFilterLogValueByChangingDirection = '%s',\n" % (DiffractionReductionScripter.WIDTH,\
-                            filterdict["FilterLogValueByChangingDirection"])
+                    script += "%sFilterLogValueByChangingDirection = '%s',\n" % (DiffractionReductionScripter.WIDTH,
+                                                                                 filterdict["FilterLogValueByChangingDirection"])
                     if filterdict["LogValueInterval"] != "":
                         # Filter by log value interval
                         script += "%sLogValueInterval       = '%s',\n" % (
@@ -223,11 +223,9 @@ class DiffractionReductionScripter(BaseReductionScripter):
 
         # ENDIF : do filter
 
-
-        print "Script and Save XML to default."
+        print ("Script and Save XML to default.")
 
         return script
-
 
     def doFiltering(self, filterdict):
         """ Check filter dictionary to determine whether filtering is required.
@@ -247,7 +245,6 @@ class DiffractionReductionScripter(BaseReductionScripter):
 
         return dofilter
 
-
     def getDataFileNames(self, runsetupdict, advsetupdict):
         """ Obtain the data file names (run names + SUFFIX)
 
@@ -255,6 +252,8 @@ class DiffractionReductionScripter(BaseReductionScripter):
         """
 
         runnumbers_str = str(runsetupdict["RunNumber"])
+        if runnumbers_str.count(':') > 0:
+            runnumbers_str = runnumbers_str.replace(':', '-')
         runnumbers_str = FileFinder.findRuns(self.instrument_name + runnumbers_str)
         runnumbers_str = [os.path.split(filename)[-1] for filename in runnumbers_str]
 
@@ -352,8 +351,8 @@ class DiffractionReductionScripter(BaseReductionScripter):
         if splitwsname is not None and splitwsname != "":
             script += "%sSplittersWorkspace = '%s',\n" % (DiffractionReductionScripter.WIDTH, str(splitwsname))
         if splitinfowsname is not None and splitinfowsname != "":
-            script += "%sSplitInformationWorkspace='%s',\n" % (DiffractionReductionScripter.WIDTH,\
-                                                              str(splitinfowsname))
+            script += "%sSplitInformationWorkspace='%s',\n" % (DiffractionReductionScripter.WIDTH,
+                                                               str(splitinfowsname))
         script += "%s)\n" % (DiffractionReductionScripter.WIDTH)
 
         return script
@@ -364,7 +363,7 @@ class DiffractionReductionScripter(BaseReductionScripter):
         # Facility instrument
         for observer in self._observers:
             observertype = observer._subject.__class__.__name__
-            print "[ToScript] Observer Type = ", observertype
+            print ("[ToScript] Observer Type = ", observertype)
             if observertype.count("AdvancedWidget") == 1:
                 self.instrument_name = observer._subject._instrument_name
 

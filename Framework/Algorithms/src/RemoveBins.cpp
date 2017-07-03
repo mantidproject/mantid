@@ -1,20 +1,22 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAlgorithms/RemoveBins.h"
 
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/HistogramValidator.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
-#include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/IDetector.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
+
+using Mantid::HistogramData::HistogramX;
+using Mantid::HistogramData::HistogramY;
+using Mantid::HistogramData::HistogramE;
 
 namespace Mantid {
 namespace Algorithms {
@@ -26,8 +28,9 @@ using namespace API;
 DECLARE_ALGORITHM(RemoveBins)
 
 RemoveBins::RemoveBins()
-    : API::Algorithm(), m_inputWorkspace(), m_startX(DBL_MAX), m_endX(-DBL_MAX),
-      m_rangeUnit(), m_interpolate(false) {}
+    : API::Algorithm(), m_inputWorkspace(), m_spectrumInfo(nullptr),
+      m_startX(DBL_MAX), m_endX(-DBL_MAX), m_rangeUnit(), m_interpolate(false) {
+}
 
 /** Initialisation method. Declares properties to be used in algorithm.
  *
@@ -85,7 +88,7 @@ void RemoveBins::exec() {
   const bool unitChange = (rangeUnit != "AsInput" && rangeUnit != "inputUnit");
   if (unitChange)
     m_rangeUnit = UnitFactory::Instance().create(rangeUnit);
-  const bool commonBins = WorkspaceHelpers::commonBoundaries(m_inputWorkspace);
+  const bool commonBins = WorkspaceHelpers::commonBoundaries(*m_inputWorkspace);
   const int index = getProperty("WorkspaceIndex");
   const bool singleSpectrum = !isEmpty(index);
   const bool recalcRange = (unitChange || !commonBins);
@@ -93,7 +96,7 @@ void RemoveBins::exec() {
   // If the above evaluates to false, and the range given is at the edge of the
   // workspace, then we can just call
   // CropWorkspace as a ChildAlgorithm and we're done.
-  const MantidVec &X0 = m_inputWorkspace->readX(0);
+  auto &X0 = m_inputWorkspace->x(0);
   if (!singleSpectrum && !recalcRange &&
       (m_startX <= X0.front() || m_endX >= X0.back())) {
     double start, end;
@@ -112,6 +115,8 @@ void RemoveBins::exec() {
     } // If this fails for any reason, just carry on and do it the other way
   }
 
+  m_spectrumInfo = &m_inputWorkspace->spectrumInfo();
+
   MatrixWorkspace_sptr outputWS = getProperty("OutputWorkspace");
 
   if (m_inputWorkspace !=
@@ -122,21 +127,12 @@ void RemoveBins::exec() {
 
   // Loop over the spectra
   int start = 0, end = 0;
-  const int blockSize = static_cast<int>(m_inputWorkspace->readX(0).size());
+  const int blockSize = static_cast<int>(m_inputWorkspace->x(0).size());
   const int numHists =
       static_cast<int>(m_inputWorkspace->getNumberHistograms());
   Progress prog(this, 0.0, 1.0, numHists);
   for (int i = 0; i < numHists; ++i) {
-    // Copy over the data
-    const MantidVec &X = m_inputWorkspace->readX(i);
-    MantidVec &myX = outputWS->dataX(i);
-    myX = X;
-    const MantidVec &Y = m_inputWorkspace->readY(i);
-    MantidVec &myY = outputWS->dataY(i);
-    myY = Y;
-    const MantidVec &E = m_inputWorkspace->readE(i);
-    MantidVec &myE = outputWS->dataE(i);
-    myE = E;
+    outputWS->setHistogram(i, m_inputWorkspace->histogram(i));
 
     // If just operating on a single spectrum and this isn't it, go to next
     // iteration
@@ -149,6 +145,9 @@ void RemoveBins::exec() {
       this->transformRangeUnit(i, startX, endX);
     }
 
+    auto &X = m_inputWorkspace->x(i);
+    auto &outY = outputWS->mutableY(i);
+    auto &outE = outputWS->mutableE(i);
     // Calculate the bin indices corresponding to the X range, if necessary
     if (recalcRange || singleSpectrum || !i) {
       start = this->findIndex(startX, X);
@@ -157,12 +156,12 @@ void RemoveBins::exec() {
 
     if (start == 0 || end == blockSize) {
       // Remove bins from either end
-      this->RemoveFromEnds(start, end, myY, myE);
+      this->RemoveFromEnds(start, end, outY, outE);
     } else {
       // Remove bins from middle
       const double startFrac = (X[start] - startX) / (X[start] - X[start - 1]);
       const double endFrac = (endX - X[end - 1]) / (X[end] - X[end - 1]);
-      this->RemoveFromMiddle(start - 1, end, startFrac, endFrac, myY, myE);
+      this->RemoveFromMiddle(start - 1, end, startFrac, endFrac, outY, outE);
     }
     prog.report();
   } // Loop over spectra
@@ -228,7 +227,7 @@ void RemoveBins::crop(const double &start, const double &end) {
  *  @param startX :: Returns the start of the range in the workspace's unit
  *  @param endX ::   Returns the end of the range in the workspace's unit
  */
-void RemoveBins::transformRangeUnit(const int &index, double &startX,
+void RemoveBins::transformRangeUnit(const int index, double &startX,
                                     double &endX) {
   const Kernel::Unit_sptr inputUnit = m_inputWorkspace->getAxis(0)->unit();
   // First check for a 'quick' conversion
@@ -265,33 +264,15 @@ void RemoveBins::transformRangeUnit(const int &index, double &startX,
  *  @param l2 ::       Returns the sample-detector distance
  *  @param twoTheta :: Returns the detector's scattering angle
  */
-void RemoveBins::calculateDetectorPosition(const int &index, double &l1,
+void RemoveBins::calculateDetectorPosition(const int index, double &l1,
                                            double &l2, double &twoTheta) {
-  // Get a pointer to the instrument contained in the workspace
-  Geometry::Instrument_const_sptr instrument =
-      m_inputWorkspace->getInstrument();
-  // Get the distance between the source and the sample (assume in metres)
-  Geometry::IComponent_const_sptr sample = instrument->getSample();
-  // Check for valid instrument
-  if (sample == nullptr) {
-    throw Exception::InstrumentDefinitionError(
-        "Instrument not sufficiently defined: failed to get sample");
-  }
-
-  l1 = instrument->getSource()->getDistance(*sample);
-  Geometry::IDetector_const_sptr det = m_inputWorkspace->getDetector(index);
-  // Get the sample-detector distance for this detector (in metres)
-  if (!det->isMonitor()) {
-    l2 = det->getDistance(*sample);
-    // The scattering angle for this detector (in radians).
-    twoTheta = m_inputWorkspace->detectorTwoTheta(*det);
-  } else // If this is a monitor then make l1+l2 = source-detector distance and
-         // twoTheta=0
-  {
-    l2 = det->getDistance(*(instrument->getSource()));
-    l2 = l2 - l1;
+  l1 = m_spectrumInfo->l1();
+  l2 = m_spectrumInfo->l2(index);
+  if (m_spectrumInfo->isMonitor(index))
     twoTheta = 0.0;
-  }
+  else
+    twoTheta = m_spectrumInfo->twoTheta(index);
+
   g_log.debug() << "Detector for index " << index << " has L1+L2=" << l1 + l2
                 << " & 2theta= " << twoTheta << '\n';
 }
@@ -302,7 +283,7 @@ void RemoveBins::calculateDetectorPosition(const int &index, double &l1,
  *  @return The index (will give vec.size()+1 if the value is past the end of
  * the vector)
  */
-int RemoveBins::findIndex(const double &value, const MantidVec &vec) {
+int RemoveBins::findIndex(const double &value, const HistogramX &vec) {
   auto pos = std::lower_bound(vec.cbegin(), vec.cend(), value);
   return static_cast<int>(std::distance(vec.cbegin(), pos));
 }
@@ -313,8 +294,8 @@ int RemoveBins::findIndex(const double &value, const MantidVec &vec) {
  *  @param Y ::     The data vector
  *  @param E ::     The error vector
  */
-void RemoveBins::RemoveFromEnds(int start, int end, MantidVec &Y,
-                                MantidVec &E) {
+void RemoveBins::RemoveFromEnds(int start, int end, HistogramY &Y,
+                                HistogramE &E) {
   if (start)
     --start;
   int size = static_cast<int>(Y.size());
@@ -342,8 +323,8 @@ void RemoveBins::RemoveFromEnds(int start, int end, MantidVec &Y,
  */
 void RemoveBins::RemoveFromMiddle(const int &start, const int &end,
                                   const double &startFrac,
-                                  const double &endFrac, MantidVec &Y,
-                                  MantidVec &E) {
+                                  const double &endFrac, HistogramY &Y,
+                                  HistogramE &E) {
   // Remove bins from middle
   double valPrev = 0;
   double valNext = 0;

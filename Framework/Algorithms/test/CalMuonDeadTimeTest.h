@@ -6,6 +6,7 @@
 #include "MantidDataHandling/LoadMuonNexus1.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/Column.h"
+#include "MantidAPI/Run.h"
 #include "MantidAlgorithms/CalMuonDeadTime.h"
 #include "MantidAPI/Workspace.h"
 #include "MantidDataObjects/Workspace2D.h"

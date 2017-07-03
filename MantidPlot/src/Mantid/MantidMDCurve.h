@@ -1,10 +1,10 @@
 #ifndef MANTID_MD_CURVE_H
 #define MANTID_MD_CURVE_H
 
-#include "MantidCurve.h"
-#include <boost/shared_ptr.hpp>
 #include "MantidAPI/IMDWorkspace.h"
+#include "MantidCurve.h"
 #include "MantidQtAPI/MantidQwtIMDWorkspaceData.h"
+#include <boost/shared_ptr.hpp>
 
 // Forward definitions
 class MantidUI;
@@ -42,7 +42,7 @@ public:
   /// More complex constructor setting some defaults for the curve
   MantidMDCurve(const QString &wsName, Graph *g, bool err = false,
                 bool distr = false,
-                Graph::CurveType style = Graph::HorizontalSteps);
+                GraphOptions::CurveType style = GraphOptions::HorizontalSteps);
 
   /// Copy constructor
   MantidMDCurve(const MantidMDCurve &c);
@@ -90,7 +90,8 @@ private:
   using PlotCurve::draw; // Avoid Intel compiler warning
 
   /// Init the curve
-  void init(Graph *g, bool distr, Graph::CurveType style) override;
+  void init(Graph *g, bool distr, GraphOptions::CurveType style,
+            bool multipleSpectra = false) override;
 
   /// Handles delete notification
   void postDeleteHandle(const std::string &wsName) override {

@@ -1,5 +1,7 @@
 #include "MantidQtMantidWidgets/InstrumentView/RotationSurface.h"
 #include "MantidKernel/Logger.h"
+#include "MantidAPI/DetectorInfo.h"
+#include "MantidAPI/MatrixWorkspace.h"
 
 #include <QCursor>
 #include <QMessageBox>
@@ -76,6 +78,8 @@ void RotationSurface::init() {
   m_u_min = -DBL_MAX;
   m_u_max = DBL_MAX;
 
+  const auto &detectorInfo = m_instrActor->getWorkspace()->detectorInfo();
+
   // Set if one of the threads in the following loop
   // throws an exception
   bool exceptionThrown = false;
@@ -91,35 +95,39 @@ void RotationSurface::init() {
                               unsigned char color[3];
                               Mantid::detid_t id = m_instrActor->getDetID(i);
 
-                              boost::shared_ptr<
-                                  const Mantid::Geometry::IDetector> det;
                               try {
-                                det = inst->getDetector(id);
+                                auto &det =
+                                    m_instrActor->getDetectorByDetID(id);
+
+                                if (detectorInfo.isMonitor(
+                                        detectorInfo.indexOf(id)) ||
+                                    (id < 0)) {
+                                  // Not a detector or a monitor
+                                  // Make some blank, empty thing that won't
+                                  // draw
+                                  m_unwrappedDetectors[i] = UnwrappedDetector();
+                                } else {
+                                  // A real detector.
+                                  m_instrActor->getColor(id).getUB3(&color[0]);
+
+                                  // Position, relative to origin
+                                  // Mantid::Kernel::V3D pos = det->getPos() -
+                                  // m_pos;
+                                  Mantid::Kernel::V3D pos =
+                                      m_instrActor->getDetPos(i) - m_pos;
+
+                                  // Create the unwrapped shape
+                                  UnwrappedDetector udet(&color[0], det);
+                                  // Calculate its position/size in UV
+                                  // coordinates
+                                  this->calcUV(udet, pos);
+
+                                  m_unwrappedDetectors[i] = udet;
+                                } // is a real detector
                               } catch (
                                   Mantid::Kernel::Exception::NotFoundError &) {
+                                // do nothing
                               }
-
-                              if (!det || det->isMonitor() || (id < 0)) {
-                                // Not a detector or a monitor
-                                // Make some blank, empty thing that won't draw
-                                m_unwrappedDetectors[i] = UnwrappedDetector();
-                              } else {
-                                // A real detector.
-                                m_instrActor->getColor(id).getUB3(&color[0]);
-
-                                // Position, relative to origin
-                                // Mantid::Kernel::V3D pos = det->getPos() -
-                                // m_pos;
-                                Mantid::Kernel::V3D pos =
-                                    m_instrActor->getDetPos(i) - m_pos;
-
-                                // Create the unwrapped shape
-                                UnwrappedDetector udet(&color[0], det);
-                                // Calculate its position/size in UV coordinates
-                                this->calcUV(udet, pos);
-
-                                m_unwrappedDetectors[i] = udet;
-                              } // is a real detectord
                             } catch (std::exception &e) {
                               // stop executing the body of the loop
                               exceptionThrown = true;
@@ -155,30 +163,43 @@ void RotationSurface::init() {
                             udet.u = applyUCorrection(udet.u);
                           }
                         }
+                        updateViewRectForUCorrection();
+}
 
-                        double dU = fabs(m_u_max - m_u_min);
-                        double dV = fabs(m_v_max - m_v_min);
-                        double du = dU * 0.05;
-                        double dv = dV * 0.05;
-                        if (m_width_max > du &&
-                            m_width_max !=
-                                std::numeric_limits<double>::infinity()) {
-                          if (du > 0 && !(dU >= m_width_max)) {
-                            m_width_max = dU;
-                          }
-                          du = m_width_max;
-                        }
-                        if (m_height_max > dv &&
-                            m_height_max !=
-                                std::numeric_limits<double>::infinity()) {
-                          if (dv > 0 && !(dV >= m_height_max)) {
-                            m_height_max = dV;
-                          }
-                          dv = m_height_max;
-                        }
+/** Update the view rect to account for the U correction
+ */
+void RotationSurface::updateViewRectForUCorrection() {
+  const auto offsets = calculateViewRectOffsets();
+  const auto min = QPointF(m_u_min - offsets.first, m_v_min - offsets.second);
+  const auto max = QPointF(m_u_max + offsets.first, m_v_max + offsets.second);
+  m_viewRect = RectF(min, max);
+}
 
-                        m_viewRect = RectF(QPointF(m_u_min - du, m_v_min - dv),
-                                           QPointF(m_u_max + du, m_v_max + dv));
+/** Calculate UV offsets to the view rect
+ *
+ * @return a std::pair containing the u & v offsets for the view rect
+ */
+std::pair<double, double> RotationSurface::calculateViewRectOffsets() {
+  const auto dU = fabs(m_u_max - m_u_min);
+  const auto dV = fabs(m_v_max - m_v_min);
+  auto du = dU * 0.05;
+  auto dv = dV * 0.05;
+
+  if (m_width_max > du && std::isfinite(m_width_max)) {
+    if (du > 0 && !(dU >= m_width_max)) {
+      m_width_max = dU;
+    }
+    du = m_width_max;
+  }
+
+  if (m_height_max > dv && std::isfinite(m_height_max)) {
+    if (dv > 0 && !(dV >= m_height_max)) {
+      m_height_max = dV;
+    }
+    dv = m_height_max;
+  }
+
+  return std::make_pair(du, dv);
 }
 
 void RotationSurface::findUVBounds() {
@@ -188,7 +209,7 @@ void RotationSurface::findUVBounds() {
   m_v_max = -DBL_MAX;
   for (size_t i = 0; i < m_unwrappedDetectors.size(); ++i) {
     const UnwrappedDetector &udet = m_unwrappedDetectors[i];
-    if (!udet.detector)
+    if (!udet.isValid())
       continue;
     if (udet.u < m_u_min)
       m_u_min = udet.u;
@@ -221,7 +242,7 @@ void RotationSurface::findAndCorrectUGap() {
   std::vector<UnwrappedDetector>::const_iterator ud =
       m_unwrappedDetectors.begin();
   for (; ud != m_unwrappedDetectors.end(); ++ud) {
-    if (!ud->detector)
+    if (!ud->isValid())
       continue;
     double u = ud->u;
     int i = int((u - m_u_min) / bin_width);
@@ -259,7 +280,7 @@ void RotationSurface::findAndCorrectUGap() {
 
     std::vector<UnwrappedDetector>::iterator ud = m_unwrappedDetectors.begin();
     for (; ud != m_unwrappedDetectors.end(); ++ud) {
-      if (!ud->detector)
+      if (!ud->isValid())
         continue;
       double &u = ud->u;
       u = applyUCorrection(u);
@@ -305,6 +326,7 @@ void RotationSurface::setUCorrection(double umin, double umax) {
   }
   m_manual_u_correction = true;
   updateDetectors();
+  updateViewRectForUCorrection();
 }
 
 /**
@@ -313,6 +335,7 @@ void RotationSurface::setUCorrection(double umin, double umax) {
 void RotationSurface::setAutomaticUCorrection() {
   m_manual_u_correction = false;
   updateDetectors();
+  updateViewRectForUCorrection();
 }
 
 } // MantidWidgets

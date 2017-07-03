@@ -1,4 +1,7 @@
 #include "MantidKernel/BinFinder.h"
+#include <cmath>
+#include <cstddef>
+#include <stdexcept>
 
 using std::size_t;
 

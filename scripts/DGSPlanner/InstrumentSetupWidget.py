@@ -1,4 +1,5 @@
 #pylint: disable=invalid-name,no-name-in-module,too-many-instance-attributes,too-many-public-methods
+from __future__ import (absolute_import, division, print_function)
 from PyQt4 import QtGui, QtCore
 import sys
 import mantid
@@ -6,10 +7,11 @@ import numpy
 import matplotlib
 matplotlib.use('Qt4Agg')
 matplotlib.rcParams['backend.qt4']='PyQt4'
-from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
-from matplotlib.figure import Figure
-from mpl_toolkits.mplot3d import Axes3D
-import matplotlib.pyplot
+#the following matplotlib imports cannot be placed before the use command, so we ignore flake8 warnings
+from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas # noqa
+from matplotlib.figure import Figure # noqa
+from mpl_toolkits.mplot3d import Axes3D # noqa
+import matplotlib.pyplot # noqa
 try:
     from PyQt4.QtCore import QString
 except ImportError:
@@ -21,6 +23,7 @@ class GonioTableModel(QtCore.QAbstractTableModel):
     Dealing with the goniometer input
     """
     changed=QtCore.pyqtSignal(dict) #each value is a list
+
     def __init__(self, axes, parent = None):
         QtCore.QAbstractTableModel.__init__(self, parent)
         self.labels = axes['gonioLabels']
@@ -136,16 +139,18 @@ class GonioTableModel(QtCore.QAbstractTableModel):
                 return False
         return True
 
+
 class InstrumentSetupWidget(QtGui.QWidget):
     #signal when things change and valid
     changed=QtCore.pyqtSignal(dict)
+
     def __init__(self,parent=None):
         # pylint: disable=unused-argument,super-on-old-class
         super(InstrumentSetupWidget,self).__init__()
         metrics=QtGui.QFontMetrics(self.font())
         self.signaldict=dict()
         #instrument selector
-        self.instrumentList=['ARCS','CNCS','DNS','FOCUS','HET','HYSPEC','LET','MAPS','MARI','MERLIN','SEQUOIA']
+        self.instrumentList=['ARCS','CNCS','DNS','EXED','FOCUS','HET','HYSPEC','LET','MAPS','MARI','MERLIN','SEQUOIA']
         self.combo = QtGui.QComboBox(self)
         for inst in self.instrumentList:
             self.combo.addItem(inst)
@@ -165,7 +170,7 @@ class InstrumentSetupWidget(QtGui.QWidget):
         self.signaldict['Ei']=self.Ei
         self.validatorS2=QtGui.QDoubleValidator(-90.,90.,5,self)
         self.validatorEi=QtGui.QDoubleValidator(1.,10000.,5,self)
-        self.labelS2=QtGui.QLabel('HYSPEC S2')
+        self.labelS2=QtGui.QLabel('S2')
         self.labelEi=QtGui.QLabel('Incident Energy')
         self.editS2=QtGui.QLineEdit()
         self.editS2.setValidator(self.validatorS2)
@@ -307,7 +312,7 @@ class InstrumentSetupWidget(QtGui.QWidget):
         d=dict()
         self.instrument=text
         d['instrument']=str(self.instrument)
-        if self.instrument=="HYSPEC":
+        if self.instrument in ["HYSPEC", "EXED"]:
             self.labelS2.show()
             self.editS2.show()
         else:

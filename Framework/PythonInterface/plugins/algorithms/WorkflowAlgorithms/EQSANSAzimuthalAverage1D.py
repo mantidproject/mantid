@@ -1,7 +1,10 @@
 #pylint: disable=no-init,invalid-name
+from __future__ import (absolute_import, division, print_function)
+
 import math
 from mantid.api import *
 from mantid.kernel import *
+
 
 class EQSANSAzimuthalAverage1D(PythonAlgorithm):
 
@@ -53,7 +56,7 @@ class EQSANSAzimuthalAverage1D(PythonAlgorithm):
         # Perform azimuthal averaging according to whether or not
         # we are in frame-skipping mode
         if workspace.getRun().hasProperty('is_frame_skipping') \
-            and workspace.getRun().getProperty('is_frame_skipping').value == 0:
+                and workspace.getRun().getProperty('is_frame_skipping').value == 0:
             self._no_frame_skipping(source_aperture_radius)
         else:
             self._with_frame_skipping(source_aperture_radius)
@@ -131,7 +134,6 @@ class EQSANSAzimuthalAverage1D(PythonAlgorithm):
         # Get output binning
         output_binning = alg.getPropertyValue("Binning")
         return (output_msg, output_ws, output_binning)
-
 
     def _with_frame_skipping(self, source_aperture_radius):
         """
@@ -358,14 +360,14 @@ class EQSANSAzimuthalAverage1D(PythonAlgorithm):
         pixel_size_y = workspace.getInstrument().getNumberParameter("y-pixel-size")[0]
 
         if workspace.getRun().hasProperty("beam_center_x") and \
-             workspace.getRun().hasProperty("beam_center_y"):
+                workspace.getRun().hasProperty("beam_center_y"):
             beam_ctr_x = workspace.getRun().getProperty("beam_center_x").value
             beam_ctr_y = workspace.getRun().getProperty("beam_center_y").value
         else:
             property_manager_name = self.getProperty("ReductionProperties").value
             property_manager = PropertyManagerDataService.retrieve(property_manager_name)
             if property_manager.existsProperty("LatestBeamCenterX") and \
-                property_manager.existsProperty("LatestBeamCenterY"):
+                    property_manager.existsProperty("LatestBeamCenterY"):
                 beam_ctr_x = property_manager.getProperty("LatestBeamCenterX").value
                 beam_ctr_y = property_manager.getProperty("LatestBeamCenterY").value
             else:

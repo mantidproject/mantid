@@ -1,14 +1,13 @@
-﻿#pylint: disable=invalid-name
-import sys
-if __name__ == "__main__":
-  # it is just to allow running this test in Mantid, allowing the following import
-    sys.path.append('/apps/mantid/systemtests/StressTestFramework/')
-from mantid.simpleapi import *
+#pylint: disable=invalid-name
+
+from __future__ import (absolute_import, division, print_function)
+import mantid  # noqa
 import ISISCommandInterface as i
 import isis_reducer
 import isis_instrument
 import isis_reduction_steps
 import SANS2DReductionGUI as sansgui
+
 
 class SANS2DGUISearchCentre(sansgui.SANS2DGUIReduction):
 
@@ -35,4 +34,3 @@ class SANS2DGUISearchCentre(sansgui.SANS2DGUIReduction):
 if __name__ == "__main__":
     test = SANS2DGUISearchCentre()
     test.execute()
-

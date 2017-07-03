@@ -1,4 +1,5 @@
 #include "MantidVatesAPI/SQWLoadingPresenter.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidVatesAPI/Common.h"
 #include "MantidVatesAPI/MDLoadingView.h"
@@ -6,6 +7,7 @@
 #include "MantidVatesAPI/vtkDataSetFactory.h"
 
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include <boost/regex.hpp>
 
 namespace Mantid {
@@ -20,7 +22,7 @@ namespace VATES {
     @throw logic_error if cannot use the reader-presenter for this filetype.
     */
 SQWLoadingPresenter::SQWLoadingPresenter(std::unique_ptr<MDLoadingView> view,
-                                         const std::string filename)
+                                         const std::string &filename)
     : MDEWLoadingPresenter(std::move(view)), m_filename(filename),
       m_wsTypeName("") {
   if (this->m_filename.empty()) {
@@ -72,7 +74,7 @@ SQWLoadingPresenter::execute(vtkDataSetFactory *factory,
     // Default is not to load into memory and when this is the case, generate a
     // nxs backend for output.
     if (!this->m_view->getLoadInMemory()) {
-      size_t pos = this->m_filename.find(".");
+      size_t pos = this->m_filename.find('.');
       std::string backEndFile = this->m_filename.substr(0, pos) + ".nxs";
       alg->setPropertyValue("OutputFilename", backEndFile);
     }

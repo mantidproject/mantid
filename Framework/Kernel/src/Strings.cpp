@@ -275,26 +275,31 @@ std::string removeSpace(const std::string &CLine) {
 
 //------------------------------------------------------------------------------------------------
 /**
+  *  Reads a line from the stream of max length spc.
+  *  Trailing comments are removed. (with # or ! character)
+  *  @param fh :: already open file handle
+  *  @return String read.
+  */
+std::string getLine(std::istream &fh) {
+  std::string line;
+  getLine(fh, line);
+  return line;
+}
+
+//------------------------------------------------------------------------------------------------
+/**
  *  Reads a line from the stream of max length spc.
  *  Trailing comments are removed. (with # or ! character)
  *  @param fh :: already open file handle
- *  @param spc :: max number of characters to read
- *  @return String read.
+ *  @param Line :: string read
  */
-std::string getLine(std::istream &fh, const int spc) {
-  auto ss = new char[spc + 1];
-  std::string Line;
-  if (fh.good()) {
-    fh.getline(ss, spc, '\n');
-    ss[spc] = 0; // incase line failed to read completely
-    Line = ss;
+void getLine(std::istream &fh, std::string &Line) {
+  if (std::getline(fh, Line)) {
     // remove trailing comments
-    std::string::size_type pos = Line.find_first_of("#!");
+    auto pos = Line.find_first_of("#!");
     if (pos != std::string::npos)
       Line.erase(pos);
   }
-  delete[] ss;
-  return Line;
 }
 
 /**
@@ -411,12 +416,11 @@ void writeMCNPX(const std::string &Line, std::ostream &OX) {
  *  @param Ln :: line component to strip
  *  @return vector of components
  */
-std::vector<std::string> StrParts(std::string Ln) {
-  std::vector<std::string> Out;
-  std::string Part;
-  while (section(Ln, Part))
-    Out.push_back(Part);
-  return Out;
+std::vector<std::string> StrParts(const std::string &Ln) {
+  auto tokenizer = Mantid::Kernel::StringTokenizer(
+      Ln, " ", Mantid::Kernel::StringTokenizer::TOK_TRIM |
+                   Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
+  return tokenizer.asVector();
 }
 
 /**
@@ -1022,7 +1026,7 @@ int isMember(const std::vector<std::string> &group,
              const std::string &candidate) {
   int num(-1);
   for (size_t i = 0; i < group.size(); i++) {
-    if (candidate.compare(group[i]) == 0) {
+    if (candidate == group[i]) {
       num = int(i);
       return num;
     }

@@ -4,9 +4,9 @@
 //----------------------------------
 // Includes
 //----------------------------------
-#include <QMainWindow>
+#include "MantidQtAPI/IProjectSerialisable.h"
 #include "Script.h"
-#include "Mantid/IProjectSerialisable.h"
+#include <QMainWindow>
 
 //----------------------------------------------------------
 // Forward declarations

@@ -32,7 +32,7 @@ using MantidWidgets::DataProcessorCommandAdapter;
 using MantidWidgets::SlitCalculator;
 
 /** QtReflRunsTabView : Provides an interface for the "Runs" tab in the
-Reflectometry (Polref) interface.
+ISIS Reflectometry interface.
 
 Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
 National Laboratory & European Spallation Source
@@ -77,6 +77,7 @@ public:
   void setRowCommands(
       std::vector<std::unique_ptr<DataProcessorCommand>> rowCommands) override;
   void clearCommands() override;
+  void setRowActionEnabled(int index, bool enabled) override;
 
   // Set the status of the progress bar
   void setProgressRange(int min, int max) override;
@@ -88,6 +89,7 @@ public:
   std::string getSearchInstrument() const override;
   std::string getSearchString() const override;
   std::string getTransferMethod() const override;
+  int getSelectedGroup() const override;
 
   IReflRunsTabPresenter *getPresenter() const override;
   boost::shared_ptr<MantidQt::API::AlgorithmRunner>
@@ -118,6 +120,7 @@ private slots:
   void slitCalculatorTriggered();
   void icatSearchComplete();
   void instrumentChanged(int index);
+  void groupChanged();
   void showSearchContextMenu(const QPoint &pos);
 };
 

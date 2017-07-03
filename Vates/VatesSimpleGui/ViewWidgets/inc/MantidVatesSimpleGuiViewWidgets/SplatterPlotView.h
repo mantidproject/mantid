@@ -8,9 +8,10 @@
 #include "MantidVatesSimpleGuiViewWidgets/PeaksTableControllerVsi.h"
 #include <boost/shared_ptr.hpp>
 
-#include <string>
 #include <QList>
 #include <QPointer>
+#include <pqPipelineFilter.h>
+#include <string>
 
 class QWidget;
 class QAction;
@@ -62,9 +63,12 @@ public:
    * Default constructor.
    * @param parent the parent widget for the threeslice view
    * @param rebinnedSourcesManager Pointer to a RebinnedSourcesManager
+   * @param createRenderProxy :: Whether to create a render proxy for this view
    */
-  explicit SplatterPlotView(QWidget *parent = 0,
-                            RebinnedSourcesManager *rebinnedSourcesManager = 0);
+  explicit SplatterPlotView(
+      QWidget *parent = nullptr,
+      RebinnedSourcesManager *rebinnedSourcesManager = nullptr,
+      bool createRenderProxy = true);
   /// Default destructor
   ~SplatterPlotView() override;
 
@@ -96,6 +100,11 @@ public:
    * Destroy all sources in the view.
    */
   void destroyAllSourcesInView() override;
+
+  /// @see ViewBase::setView
+  void setView(pqRenderView *view) override;
+  /// @see ViewBase::getViewType
+  ModeControlWidget::Views getViewType() override;
 
 signals:
   /// Reset to the Standard View
@@ -150,6 +159,9 @@ private:
   void updatePeaksFilter(pqPipelineSource *filter);
   /// Destroy splatter plot specific sources and filters
   void destroyFiltersForSplatterPlotView();
+  /// Find a filter in the proxy manager
+  pqPipelineFilter *findFilter(const QList<pqPipelineFilter *> &filters,
+                               const QString &name) const;
 
   bool m_noOverlay; ///< Flag to respond to overlay situation correctly
   QList<QPointer<pqPipelineSource>> m_peaksSource; ///< A list of peaks sources

@@ -9,6 +9,9 @@
 #include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
+#include "MantidAPI/DetectorInfo.h"
+#include "MantidAPI/Sample.h"
+#include "MantidAPI/SpectrumInfo.h"
 
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
@@ -17,6 +20,144 @@
 
 using Mantid::CurveFitting::Algorithms::VesuvioCalculateMS;
 
+namespace {
+Mantid::API::IAlgorithm_sptr
+createTestAlgorithm(const Mantid::API::MatrixWorkspace_sptr &inputWS) {
+  Mantid::API::IAlgorithm_sptr alg = boost::make_shared<VesuvioCalculateMS>();
+  alg->initialize();
+  alg->setRethrows(true);
+  alg->setChild(true);
+  // inputs
+  alg->setProperty("InputWorkspace", inputWS);
+  alg->setProperty("NoOfMasses", 3);
+  alg->setProperty("SampleDensity", 241.0);
+  const double sampleProps[9] = {1.007900, 0.9272392,     5.003738,
+                                 16.00000, 3.2587662E-02, 13.92299,
+                                 27.50000, 4.0172841E-02, 15.07701};
+  alg->setProperty("AtomicProperties",
+                   std::vector<double>(sampleProps, sampleProps + 9));
+  alg->setProperty("BeamRadius", 2.5);
+  // reduce number of events for test purposes
+  alg->setProperty("NumEventsPerRun", 10000);
+
+  // outputs
+  alg->setPropertyValue("TotalScatteringWS", "__unused_for_child");
+  alg->setPropertyValue("MultipleScatteringWS", "__unused_for_child");
+
+  return alg;
+}
+
+Mantid::API::MatrixWorkspace_sptr
+createTestWorkspace(const bool detShape = true,
+                    const bool groupedDets = false) {
+  using namespace Mantid::Geometry;
+  using namespace Mantid::Kernel;
+
+  const int nhist(1);
+  const double x0(50.0), x1(562.0), dx(1.0);
+  const bool singleMassSpec(false), foilChanger(true);
+  auto ws2d = ComptonProfileTestHelpers::createTestWorkspace(
+      nhist, x0, x1, dx, singleMassSpec, foilChanger);
+
+  if (detShape) {
+    // replace instrument with one that has a detector with a shape
+    const std::string shapeXML =
+        "<cuboid id=\"shape\">"
+        "<left-front-bottom-point x=\"0.0125\" y=\"-0.0395\" z= \"0.0045\" />"
+        "<left-front-top-point x=\"0.0125\" y=\"0.0395\" z= \"0.0045\" />"
+        "<left-back-bottom-point x=\"0.0125\" y=\"-0.0395\" z= \"-0.0045\" />"
+        "<right-front-bottom-point x=\"-0.0125\" y=\"-0.0395\" z= \"0.0045\" "
+        "/>"
+        "</cuboid>"
+        "<algebra val=\"shape\" />";
+    const auto pos = ws2d->spectrumInfo().position(0);
+    auto instrument =
+        ComptonProfileTestHelpers::createTestInstrumentWithFoilChanger(
+            1, pos, shapeXML);
+
+    if (groupedDets) {
+      // Add another detector in the same position as the first
+      auto shape = ShapeFactory().createShape(shapeXML);
+      Mantid::Geometry::Detector *det2 = new Detector("det1", 2, shape, NULL);
+      // Setting detectors should normally go via DetectorInfo, but here we need
+      // to set a position as we are adding a new detector. In general getPos
+      // should not be called as this tries to set the position of the base
+      // component. If the component is parameterized then this method would
+      // throw. getPos is required here, otherwise the new detector may not have
+      // a base position set.
+      det2->setPos(pos);
+      instrument->add(det2);
+      instrument->markAsDetector(det2);
+
+      // Group the detectors
+      ws2d->getSpectrum(0).addDetectorID(2);
+    }
+
+    ws2d->setInstrument(instrument);
+
+    ComptonProfileTestHelpers::addResolutionParameters(ws2d, 1);
+    if (groupedDets)
+      ComptonProfileTestHelpers::addResolutionParameters(ws2d, 2);
+    ComptonProfileTestHelpers::addFoilResolution(ws2d, "foil-pos0");
+  }
+
+  return ws2d;
+}
+
+Mantid::API::MatrixWorkspace_sptr
+createFlatPlateSampleWS(const bool detShape = true,
+                        const bool groupedDets = false) {
+  auto testWS = createTestWorkspace(detShape, groupedDets);
+  // Sample shape
+  const double halfHeight(0.05), halfWidth(0.05), halfThick(0.0025);
+  std::ostringstream sampleShapeXML;
+  sampleShapeXML << " <cuboid id=\"detector-shape\"> "
+                 << "<left-front-bottom-point x=\"" << halfWidth << "\" y=\""
+                 << -halfHeight << "\" z=\"" << -halfThick << "\"  /> "
+                 << "<left-front-top-point  x=\"" << halfWidth << "\" y=\""
+                 << halfHeight << "\" z=\"" << -halfThick << "\"  /> "
+                 << "<left-back-bottom-point  x=\"" << halfWidth << "\" y=\""
+                 << -halfHeight << "\" z=\"" << halfThick << "\"  /> "
+                 << "<right-front-bottom-point  x=\"" << -halfWidth << "\" y=\""
+                 << -halfHeight << "\" z=\"" << -halfThick << "\"  /> "
+                 << "</cuboid>";
+  auto sampleShape =
+      Mantid::Geometry::ShapeFactory().createShape(sampleShapeXML.str());
+  testWS->mutableSample().setShape(*sampleShape);
+
+  return testWS;
+}
+
+void checkOutputValuesAsExpected(const Mantid::API::IAlgorithm_sptr &alg,
+                                 const double expectedTotal,
+                                 const double expectedMS) {
+  using Mantid::API::MatrixWorkspace_sptr;
+  const size_t checkIdx = 100;
+// OS X and GCC>=5 seems to do a terrible job with keeping the same precision
+// here.
+#if defined(__APPLE__) || (__GNUC__ >= 5)
+  const double tolerance(1e-4);
+#else
+  const double tolerance(1e-8);
+#endif
+
+  // Values for total scattering
+  MatrixWorkspace_sptr totScatter = alg->getProperty("TotalScatteringWS");
+  TS_ASSERT(totScatter);
+  const auto &totY = totScatter->y(0);
+  TS_ASSERT_DELTA(expectedTotal, totY[checkIdx], tolerance);
+  const auto &totX = totScatter->x(0);
+  TS_ASSERT_DELTA(150.0, totX[checkIdx], tolerance); // based on workspace setup
+
+  // Values for multiple scatters
+  MatrixWorkspace_sptr multScatter = alg->getProperty("MultipleScatteringWS");
+  TS_ASSERT(multScatter);
+  const auto &msY = multScatter->y(0);
+  TS_ASSERT_DELTA(expectedMS, msY[checkIdx], tolerance);
+  const auto &msX = multScatter->x(0);
+  TS_ASSERT_DELTA(150.0, msX[checkIdx], tolerance); // based on workspace setup
+}
+}
 class VesuvioCalculateMSTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
@@ -59,14 +200,14 @@ public:
 #endif
   }
 
-  // ------------------------ Failure Cases
-  // -----------------------------------------
+  //   ------------------------ Failure Cases
+  //   -----------------------------------------
 
   void test_setting_input_workspace_not_in_tof_throws_invalid_argument() {
     VesuvioCalculateMS alg;
     alg.initialize();
 
-    auto testWS = WorkspaceCreationHelper::Create2DWorkspace(1, 1);
+    auto testWS = WorkspaceCreationHelper::create2DWorkspace(1, 1);
     TS_ASSERT_THROWS(alg.setProperty("InputWorkspace", testWS),
                      std::invalid_argument);
   }
@@ -75,7 +216,7 @@ public:
     VesuvioCalculateMS alg;
     alg.initialize();
 
-    auto testWS = WorkspaceCreationHelper::Create2DWorkspace(1, 1);
+    auto testWS = WorkspaceCreationHelper::create2DWorkspace(1, 1);
     testWS->getAxis(0)->setUnit("TOF");
     TS_ASSERT_THROWS(alg.setProperty("InputWorkspace", testWS),
                      std::invalid_argument);
@@ -127,140 +268,25 @@ public:
 
     TS_ASSERT_THROWS(alg->execute(), std::invalid_argument);
   }
+};
+class VesuvioCalculateMSTestPerformance : public CxxTest::TestSuite {
+public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static VesuvioCalculateMSTestPerformance *createSuite() {
+    return new VesuvioCalculateMSTestPerformance();
+  }
+  static void destroySuite(VesuvioCalculateMSTestPerformance *suite) {
+    delete suite;
+  }
+
+  void setUp() override {
+    alg = createTestAlgorithm(createFlatPlateSampleWS());
+  }
+
+  void test_exec_with_flat_plate_sample() { alg->execute(); }
 
 private:
-  Mantid::API::IAlgorithm_sptr
-  createTestAlgorithm(const Mantid::API::MatrixWorkspace_sptr &inputWS) {
-    Mantid::API::IAlgorithm_sptr alg = boost::make_shared<VesuvioCalculateMS>();
-    alg->initialize();
-    alg->setRethrows(true);
-    alg->setChild(true);
-    // inputs
-    alg->setProperty("InputWorkspace", inputWS);
-    alg->setProperty("NoOfMasses", 3);
-    alg->setProperty("SampleDensity", 241.0);
-    const double sampleProps[9] = {1.007900, 0.9272392,     5.003738,
-                                   16.00000, 3.2587662E-02, 13.92299,
-                                   27.50000, 4.0172841E-02, 15.07701};
-    alg->setProperty("AtomicProperties",
-                     std::vector<double>(sampleProps, sampleProps + 9));
-    alg->setProperty("BeamRadius", 2.5);
-    // reduce number of events for test purposes
-    alg->setProperty("NumEventsPerRun", 10000);
-
-    // outputs
-    alg->setPropertyValue("TotalScatteringWS", "__unused_for_child");
-    alg->setPropertyValue("MultipleScatteringWS", "__unused_for_child");
-
-    return alg;
-  }
-
-  Mantid::API::MatrixWorkspace_sptr
-  createFlatPlateSampleWS(const bool detShape = true,
-                          const bool groupedDets = false) {
-    auto testWS = createTestWorkspace(detShape, groupedDets);
-    // Sample shape
-    const double halfHeight(0.05), halfWidth(0.05), halfThick(0.0025);
-    std::ostringstream sampleShapeXML;
-    sampleShapeXML << " <cuboid id=\"detector-shape\"> "
-                   << "<left-front-bottom-point x=\"" << halfWidth << "\" y=\""
-                   << -halfHeight << "\" z=\"" << -halfThick << "\"  /> "
-                   << "<left-front-top-point  x=\"" << halfWidth << "\" y=\""
-                   << halfHeight << "\" z=\"" << -halfThick << "\"  /> "
-                   << "<left-back-bottom-point  x=\"" << halfWidth << "\" y=\""
-                   << -halfHeight << "\" z=\"" << halfThick << "\"  /> "
-                   << "<right-front-bottom-point  x=\"" << -halfWidth
-                   << "\" y=\"" << -halfHeight << "\" z=\"" << -halfThick
-                   << "\"  /> "
-                   << "</cuboid>";
-    auto sampleShape =
-        Mantid::Geometry::ShapeFactory().createShape(sampleShapeXML.str());
-    testWS->mutableSample().setShape(*sampleShape);
-
-    return testWS;
-  }
-
-  Mantid::API::MatrixWorkspace_sptr
-  createTestWorkspace(const bool detShape = true,
-                      const bool groupedDets = false) {
-    using namespace Mantid::Geometry;
-    using namespace Mantid::Kernel;
-
-    const int nhist(1);
-    const double x0(50.0), x1(562.0), dx(1.0);
-    const bool singleMassSpec(false), foilChanger(true);
-    auto ws2d = ComptonProfileTestHelpers::createTestWorkspace(
-        nhist, x0, x1, dx, singleMassSpec, foilChanger);
-
-    if (detShape) {
-      // replace instrument with one that has a detector with a shape
-      const std::string shapeXML =
-          "<cuboid id=\"shape\">"
-          "<left-front-bottom-point x=\"0.0125\" y=\"-0.0395\" z= \"0.0045\" />"
-          "<left-front-top-point x=\"0.0125\" y=\"0.0395\" z= \"0.0045\" />"
-          "<left-back-bottom-point x=\"0.0125\" y=\"-0.0395\" z= \"-0.0045\" />"
-          "<right-front-bottom-point x=\"-0.0125\" y=\"-0.0395\" z= \"0.0045\" "
-          "/>"
-          "</cuboid>"
-          "<algebra val=\"shape\" />";
-      const auto pos = ws2d->getDetector(0)->getPos();
-      auto instrument =
-          ComptonProfileTestHelpers::createTestInstrumentWithFoilChanger(
-              1, pos, shapeXML);
-
-      if (groupedDets) {
-        // Add another detector in the same position as the first
-        auto shape = ShapeFactory().createShape(shapeXML);
-        Mantid::Geometry::Detector *det2 = new Detector("det1", 2, shape, NULL);
-        det2->setPos(instrument->getDetector(1)->getPos());
-        instrument->add(det2);
-        instrument->markAsDetector(det2);
-
-        // Group the detectors
-        ws2d->getSpectrum(0).addDetectorID(2);
-      }
-
-      ws2d->setInstrument(instrument);
-
-      ComptonProfileTestHelpers::addResolutionParameters(ws2d, 1);
-      if (groupedDets)
-        ComptonProfileTestHelpers::addResolutionParameters(ws2d, 2);
-      ComptonProfileTestHelpers::addFoilResolution(ws2d, "foil-pos0");
-    }
-
-    return ws2d;
-  }
-
-  void checkOutputValuesAsExpected(const Mantid::API::IAlgorithm_sptr &alg,
-                                   const double expectedTotal,
-                                   const double expectedMS) {
-    using Mantid::API::MatrixWorkspace_sptr;
-    const size_t checkIdx = 100;
-// OS X and GCC>=5 seems to do a terrible job with keep the same precision here.
-#if defined(__APPLE__) || (__GNUC__ >= 5)
-    const double tolerance(1e-4);
-#else
-    const double tolerance(1e-8);
-#endif
-
-    // Values for total scattering
-    MatrixWorkspace_sptr totScatter = alg->getProperty("TotalScatteringWS");
-    TS_ASSERT(totScatter);
-    const auto &totY = totScatter->readY(0);
-    TS_ASSERT_DELTA(expectedTotal, totY[checkIdx], tolerance);
-    const auto &totX = totScatter->readX(0);
-    TS_ASSERT_DELTA(150.0, totX[checkIdx],
-                    tolerance); // based on workspace setup
-
-    // Values for multiple scatters
-    MatrixWorkspace_sptr multScatter = alg->getProperty("MultipleScatteringWS");
-    TS_ASSERT(multScatter);
-    const auto &msY = multScatter->readY(0);
-    TS_ASSERT_DELTA(expectedMS, msY[checkIdx], tolerance);
-    const auto &msX = multScatter->readX(0);
-    TS_ASSERT_DELTA(150.0, msX[checkIdx],
-                    tolerance); // based on workspace setup
-  }
+  Mantid::API::IAlgorithm_sptr alg;
 };
-
 #endif /* MANTID_CURVEFITTING_CALCULATEMSVESUIVIOTEST_H_ */

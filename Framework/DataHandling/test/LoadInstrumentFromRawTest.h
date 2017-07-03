@@ -3,21 +3,17 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidDataHandling/LoadInstrumentFromRaw.h"
-#include "MantidAPI/WorkspaceFactory.h"
-#include "MantidGeometry/Instrument.h"
-#include "MantidDataObjects/Workspace2D.h"
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidKernel/Exception.h"
-#include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/DetectorInfo.h"
 #include "MantidAPI/Workspace.h"
-#include "MantidAPI/Algorithm.h"
+#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidDataHandling/LoadInstrumentFromRaw.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Component.h"
 #include "MantidGeometry/Instrument/Detector.h"
-#include <vector>
 
 using namespace Mantid::API;
-using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
 using namespace Mantid::DataHandling;
 using namespace Mantid::DataObjects;
@@ -29,10 +25,8 @@ public:
   }
   static void destroySuite(LoadInstrumentFromRawTest *suite) { delete suite; }
 
-  LoadInstrumentFromRawTest() {
-    // initialise framework manager to allow logging
-    // Mantid::API::FrameworkManager::Instance().initialize();
-  }
+  LoadInstrumentFromRawTest() {}
+
   void testInit() {
     TS_ASSERT(!loader.isInitialized());
     TS_ASSERT_THROWS_NOTHING(loader.initialize());
@@ -83,35 +77,30 @@ public:
     boost::shared_ptr<const IComponent> samplepos = i->getSample();
     TS_ASSERT_DELTA(samplepos->getPos().Y(), 0.0, 0.01);
 
-    boost::shared_ptr<const Detector> ptrDetSp =
-        boost::dynamic_pointer_cast<const Detector>(i->getDetector(5));
-    TS_ASSERT_EQUALS(ptrDetSp->getID(), 5);
-    TS_ASSERT_EQUALS(ptrDetSp->getName(), "det");
-    TS_ASSERT_DELTA(
-        ptrDetSp->getPos().X(), 0,
-        0.01); // using phi values from raw file changes sign of this
-    TS_ASSERT_DELTA(ptrDetSp->getPos().Z(), -11.1499, 0.01);
-    double d = ptrDetSp->getPos().distance(samplepos->getPos());
-    TS_ASSERT_DELTA(d, 11.1499, 0.0001);
-    double cmpDistance = ptrDetSp->getDistance(*samplepos);
-    TS_ASSERT_DELTA(cmpDistance, 11.1499, 0.0001);
-
-    TS_ASSERT_EQUALS(ptrDetSp->type(), "DetectorComponent");
+    const auto &detectorInfo = output->detectorInfo();
+    const auto &ptrDetSp = detectorInfo.detector(detectorInfo.indexOf(5));
+    TS_ASSERT_EQUALS(ptrDetSp.getID(), 5);
+    TS_ASSERT_EQUALS(ptrDetSp.getName(), "det");
+    TS_ASSERT_EQUALS(ptrDetSp.type(), "DetectorComponent");
+    // using phi values from raw file changes sign of this
+    TS_ASSERT_DELTA(ptrDetSp.getPos().X(), 0, 0.01);
+    TS_ASSERT_DELTA(ptrDetSp.getPos().Z(), -11.1499, 0.01);
+    TS_ASSERT_DELTA(detectorInfo.l2(detectorInfo.indexOf(5)), 11.1499, 0.0001);
 
     // also a few tests on the last detector and a test for the one beyond the
     // last
-    boost::shared_ptr<const Detector> ptrDetLast =
-        boost::dynamic_pointer_cast<const Detector>(i->getDetector(8));
-    TS_ASSERT_EQUALS(ptrDetLast->getID(), 8);
-    TS_ASSERT_THROWS(i->getDetector(9), Exception::NotFoundError);
+    const auto &ptrDetLast = detectorInfo.detector(detectorInfo.indexOf(8));
+    TS_ASSERT_EQUALS(ptrDetLast.getID(), 8);
+    TS_ASSERT_THROWS(detectorInfo.indexOf(9), std::out_of_range);
 
     // Check the monitors are correctly marked
-    TS_ASSERT(i->getDetector(1)->isMonitor())
-    TS_ASSERT(i->getDetector(2)->isMonitor())
+    const auto &detInfo = output->detectorInfo();
+    TS_ASSERT(detInfo.isMonitor(0))
+    TS_ASSERT(detInfo.isMonitor(1))
     // ...and that a normal detector isn't
-    TS_ASSERT(!i->getDetector(3)->isMonitor())
-    TS_ASSERT(!i->getDetector(4)->isMonitor())
-    TS_ASSERT(!i->getDetector(8)->isMonitor())
+    TS_ASSERT(!detInfo.isMonitor(2))
+    TS_ASSERT(!detInfo.isMonitor(3))
+    TS_ASSERT(!detInfo.isMonitor(7))
 
     AnalysisDataService::Instance().remove(wsName);
   }

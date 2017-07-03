@@ -6,6 +6,10 @@
 namespace Mantid {
 namespace API {
 
+/// The constructor
+FunctionDomain1D::FunctionDomain1D(const double *x, size_t n)
+    : m_data(x), m_n(n), m_peakRadius(0) {}
+
 /// Convert to a vector
 std::vector<double> FunctionDomain1D::toVector() const {
   std::vector<double> res;
@@ -14,6 +18,17 @@ std::vector<double> FunctionDomain1D::toVector() const {
   }
   return res;
 }
+
+/**
+ * Set a peak redius to pass to peak functions.
+ * @param radius :: New radius value.
+ */
+void FunctionDomain1D::setPeakRadius(int radius) { m_peakRadius = radius; }
+
+/**
+ * Get the peak radius.
+ */
+int FunctionDomain1D::getPeakRadius() const { return m_peakRadius; }
 
 /**
   * Create a domain from a vector.
@@ -126,6 +141,33 @@ FunctionDomain1DSpectrum::FunctionDomain1DSpectrum(
     size_t wi, std::vector<double>::const_iterator from,
     std::vector<double>::const_iterator to)
     : FunctionDomain1DVector(from, to), m_workspaceIndex(wi) {}
+
+/// Constructor.
+/// @param bins :: A vector with bin boundaries.
+FunctionDomain1DHistogram::FunctionDomain1DHistogram(
+    const std::vector<double> &bins)
+    : FunctionDomain1DHistogram(bins.begin(), bins.end()) {}
+
+/**
+  * Create a domain from a part of a vector.
+  * @param from :: Iterator to start copying values from.
+  * @param to :: Iterator to the end of the data.
+  */
+FunctionDomain1DHistogram::FunctionDomain1DHistogram(
+    std::vector<double>::const_iterator from,
+    std::vector<double>::const_iterator to)
+    : FunctionDomain1D(nullptr, 0), m_bins(from, to) {
+  if (m_bins.size() < 2) {
+    throw std::runtime_error("Cannot initialize FunctionDomain1DHistogram with "
+                             "less than 2 bin boundaries.");
+  }
+  resetData(&m_bins[1], m_bins.size() - 1);
+}
+
+/// Get the leftmost boundary
+double FunctionDomain1DHistogram::leftBoundary() const {
+  return m_bins.front();
+}
 
 } // namespace API
 } // namespace Mantid

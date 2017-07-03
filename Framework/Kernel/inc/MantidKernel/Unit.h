@@ -5,11 +5,12 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidKernel/UnitLabel.h"
-#include <map>
 #include <vector>
 #ifndef Q_MOC_RUN
 #include <boost/shared_ptr.hpp>
 #endif
+
+#include "tbb/concurrent_unordered_map.h"
 
 namespace Mantid {
 namespace Kernel {
@@ -228,10 +229,12 @@ private:
   typedef std::pair<double, double> ConstantAndPower;
   /// Lists, for a given starting unit, the units to which a 'quick conversion'
   /// can be made
-  typedef std::map<std::string, ConstantAndPower> UnitConversions;
+  typedef tbb::concurrent_unordered_map<std::string, ConstantAndPower>
+      UnitConversions;
   /// The possible 'quick conversions' are held in a map with the starting unit
   /// as the key
-  typedef std::map<std::string, UnitConversions> ConversionsMap;
+  typedef tbb::concurrent_unordered_map<std::string, UnitConversions>
+      ConversionsMap;
   /// The table of possible 'quick conversions'
   static ConversionsMap s_conversionFactors;
 };
@@ -405,6 +408,33 @@ protected:
 };
 
 //=================================================================================================
+/// d-SpacingPerpendicular in Angstrom
+class MANTID_KERNEL_DLL dSpacingPerpendicular : public Unit {
+public:
+  const std::string unitID() const override; ///< "dSpacingPerpendicular"
+  const std::string caption() const override {
+    return "d-SpacingPerpendicular";
+  }
+  const UnitLabel label() const override;
+
+  double singleToTOF(const double x) const override;
+  double singleFromTOF(const double tof) const override;
+  void init() override;
+  Unit *clone() const override;
+  double conversionTOFMin() const override;
+  double conversionTOFMax() const override;
+
+  /// Constructor
+  dSpacingPerpendicular();
+
+protected:
+  double factorTo;   ///< Constant factor for to conversion
+  double sfpTo;      ///< Extra correction factor in to conversion
+  double factorFrom; ///< Constant factor for from conversion
+  double sfpFrom;    ///< Extra correction factor in to conversion
+};
+
+//=================================================================================================
 /// Momentum Transfer in Angstrom^-1
 class MANTID_KERNEL_DLL MomentumTransfer : public Unit {
 public:
@@ -490,6 +520,22 @@ public:
   double conversionTOFMax() const override;
   /// Constructor
   DeltaE_inWavenumber();
+};
+
+//=================================================================================================
+/// Energy transfer in units of frequency (GHz)
+class MANTID_KERNEL_DLL DeltaE_inFrequency : public DeltaE {
+public:
+  const std::string unitID() const override; ///< "DeltaE_inFrequency"
+  const std::string caption() const override { return "Energy transfer"; }
+  const UnitLabel label() const override;
+
+  void init() override;
+  Unit *clone() const override;
+  double conversionTOFMin() const override;
+  double conversionTOFMax() const override;
+  /// Constructor
+  DeltaE_inFrequency();
 };
 
 //=================================================================================================

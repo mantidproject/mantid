@@ -6,6 +6,7 @@
 #include <MantidQtMantidWidgets/WidgetDllOption.h>
 
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidGeometry/Crystal/IPeak.h"
 #include "MantidGeometry/ICompAssembly.h"
 #include "MantidGeometry/IDTypes.h"
 
@@ -59,6 +60,8 @@ public:
     Single = 0,
     AddPeak,
     ErasePeak,
+    ComparePeak,
+    AlignPeak,
     SingleDetectorSelection,
     Tube,
     Draw
@@ -69,6 +72,8 @@ public:
     TubeSelect,
     PeakSelect,
     PeakErase,
+    PeakCompare,
+    PeakAlign,
     DrawEllipse,
     DrawRectangle,
     DrawFree,
@@ -83,6 +88,7 @@ public:
   bool addToDisplayContextMenu(QMenu &) const override;
   void selectTool(const ToolType tool);
   boost::shared_ptr<ProjectionSurface> getSurface() const;
+  const InstrumentWidget *getInstrumentWidget() const;
   /// Load settings for the pick tab from a project file
   virtual void loadFromProject(const std::string &lines) override;
   /// Save settings for the pick tab to a project file
@@ -101,6 +107,11 @@ private slots:
   void removeCurve(const QString &);
   void singleComponentTouched(size_t pickID);
   void singleComponentPicked(size_t pickID);
+  void alignPeaks(const std::vector<Mantid::Kernel::V3D> &planePeaks,
+                  const Mantid::Geometry::IPeak *peak);
+  void
+  comparePeaks(const std::pair<std::vector<Mantid::Geometry::IPeak *>,
+                               std::vector<Mantid::Geometry::IPeak *>> &peaks);
   void updateSelectionInfoDisplay();
   void shapeCreated();
   void updatePlotMultipleDetectors();
@@ -117,8 +128,10 @@ private:
   QPushButton *m_one;   ///< Button switching on single detector selection mode
   QPushButton *m_tube; ///< Button switching on detector's parent selection mode
   QPushButton *m_peak; ///< Button switching on peak creation mode
-  QPushButton *m_peakSelect; ///< Button switching on peak selection mode
-  QPushButton *m_rectangle;  ///< Button switching on drawing a rectangular
+  QPushButton *m_peakSelect;  ///< Button switching on peak selection mode
+  QPushButton *m_peakCompare; ///< Button switching on peak comparison mode
+  QPushButton *m_peakAlign;   ///< Button switching on peak alignment mode
+  QPushButton *m_rectangle;   ///< Button switching on drawing a rectangular
   /// selection region
   QPushButton *
       m_ellipse; ///< Button switching on drawing a elliptical selection region
@@ -175,19 +188,28 @@ class ComponentInfoController : public QObject {
 public:
   /// Constructor.
   ComponentInfoController(InstrumentWidgetPickTab *tab,
-                          InstrumentActor *instrActor, QTextEdit *infoDisplay);
+                          const InstrumentWidget *instrWidget,
+                          QTextEdit *infoDisplay);
 public slots:
   void displayInfo(size_t pickID);
+  void displayComparePeaksInfo(
+      const std::pair<std::vector<Mantid::Geometry::IPeak *>,
+                      std::vector<Mantid::Geometry::IPeak *>> &peaks);
+  void displayAlignPeaksInfo(const std::vector<Mantid::Kernel::V3D> &planePeaks,
+                             const Mantid::Geometry::IPeak *peak);
   void clear();
 
 private:
   QString displayDetectorInfo(Mantid::detid_t detid);
   QString displayNonDetectorInfo(Mantid::Geometry::ComponentID compID);
-  QString getParameterInfo(Mantid::Geometry::IComponent_const_sptr comp);
+  QString displayPeakInfo(Mantid::Geometry::IPeak *peak);
+  QString displayPeakAngles(const std::pair<Mantid::Geometry::IPeak *,
+                                            Mantid::Geometry::IPeak *> &peaks);
+  QString getParameterInfo(const Mantid::Geometry::IComponent &comp);
   QString getPeakOverlayInfo();
 
   InstrumentWidgetPickTab *m_tab;
-  InstrumentActor *m_instrActor;
+  const InstrumentWidget *m_instrWidget;
   QTextEdit *m_selectionInfoDisplay;
 
   bool m_freezePlot;
@@ -213,7 +235,7 @@ public:
   };
 
   DetectorPlotController(InstrumentWidgetPickTab *tab,
-                         InstrumentActor *instrActor, OneCurvePlot *plot);
+                         InstrumentWidget *instrWidget, OneCurvePlot *plot);
   void setEnabled(bool on) { m_enabled = on; }
   void setPlotData(size_t pickID);
   void setPlotData(QList<int> detIDs);
@@ -252,7 +274,7 @@ private:
                                    const Mantid::Kernel::V3D &normal);
 
   InstrumentWidgetPickTab *m_tab;
-  InstrumentActor *m_instrActor;
+  InstrumentWidget *m_instrWidget;
   OneCurvePlot *m_plot;
 
   PlotType m_plotType;

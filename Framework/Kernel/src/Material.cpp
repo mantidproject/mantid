@@ -4,6 +4,7 @@
 #include "MantidKernel/Material.h"
 #include "MantidKernel/Atom.h"
 #include "MantidKernel/StringTokenizer.h"
+#include <NeXusFile.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/make_shared.hpp>
 #include <boost/regex.hpp>
@@ -392,7 +393,7 @@ void Material::saveNexus(::NeXus::File *file, const std::string &group) const {
 
   // determine how the information will be stored
   std::string style = "formula"; // default is a chemical formula
-  if (m_chemicalFormula.size() == 0) {
+  if (m_chemicalFormula.empty()) {
     style = "empty";
   } else if (m_chemicalFormula.size() == 1) {
     if (m_chemicalFormula[0].atom->symbol == "user") {

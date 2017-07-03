@@ -3,6 +3,8 @@ import stresstesting
 from mantid.simpleapi import *
 
 # Simply tests that our LoadRaw and LoadISISNexus algorithms produce the same workspace
+
+
 class HRPDPowderDiffraction(stresstesting.MantidStressTest):
 
     def requiredFiles(self):

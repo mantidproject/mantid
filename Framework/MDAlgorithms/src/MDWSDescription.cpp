@@ -3,12 +3,15 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/NumericAxis.h"
+#include "MantidAPI/Run.h"
+#include "MantidAPI/Sample.h"
 
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/Strings.h"
 
 #include "MantidMDAlgorithms/MDTransfFactory.h"
 #include "MantidGeometry/MDGeometry/MDFrameFactory.h"
+#include "MantidGeometry/Instrument/Goniometer.h"
 
 #include <boost/lexical_cast.hpp>
 
@@ -319,7 +322,7 @@ void MDWSDescription::getMinMax(std::vector<double> &min,
 /** Method checks if the workspace is expected to be processed in powder mode */
 bool MDWSDescription::isPowder() const {
   return (this->AlgID == "|Q|") ||
-         (this->AlgID.size() == 0 && !m_InWS->sample().hasOrientedLattice());
+         (this->AlgID.empty() && !m_InWS->sample().hasOrientedLattice());
 }
 
 /** Returns symbolic representation of current Emode */
@@ -446,8 +449,10 @@ MDWSDescription::getCoordinateSystem() const {
  * Is the algorithm running in Q3D mode?
  * @return True only if in Q3D mode
  */
-bool MDWSDescription::isQ3DMode() const {
-  return this->AlgID.compare("Q3D") == 0;
+bool MDWSDescription::isQ3DMode() const { return this->AlgID == "Q3D"; }
+
+bool MDWSDescription::hasLattice() const {
+  return m_InWS->sample().hasOrientedLattice();
 }
 
 } // end namespace MDAlgorithms

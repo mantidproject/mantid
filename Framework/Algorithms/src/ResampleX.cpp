@@ -2,11 +2,11 @@
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/VectorHelper.h"
-
-#include <boost/math/special_functions/fpclassify.hpp>
 
 #include <sstream>
 
@@ -133,19 +133,21 @@ string determineXMinMax(MatrixWorkspace_sptr inputWS, vector<double> &xmins,
   for (size_t i = 0; i < numSpectra; ++i) {
     // determine ranges if necessary
     if (updateXMins || updateXMaxs) {
-      const MantidVec &xvalues = inputWS->getSpectrum(i).dataX();
+      const auto &xvalues = inputWS->x(i);
       if (updateXMins) {
-        if (boost::math::isnan(xvalues.front())) {
+        const auto minimum = xvalues.front();
+        if (std::isnan(minimum) || minimum >= xmax_wksp) {
           xmins.push_back(xmin_wksp);
         } else {
-          xmins.push_back(xvalues.front());
+          xmins.push_back(minimum);
         }
       }
       if (updateXMaxs) {
-        if (boost::math::isnan(xvalues.back())) {
+        const auto maximum = xvalues.back();
+        if (std::isnan(maximum) || maximum <= xmin_wksp) {
           xmaxs.push_back(xmax_wksp);
         } else {
-          xmaxs.push_back(xvalues.back());
+          xmaxs.push_back(maximum);
         }
       }
     }
@@ -342,7 +344,7 @@ void ResampleX::exec() {
         Progress prog(this, 0.0, 1.0, numSpectra);
 
         // do the rebinning
-        PARALLEL_FOR2(inputEventWS, outputWS)
+        PARALLEL_FOR_IF(Kernel::threadSafe(*inputEventWS, *outputWS))
         for (int wkspIndex = 0; wkspIndex < numSpectra; ++wkspIndex) {
           PARALLEL_START_INTERUPT_REGION
           BinEdges xValues(0);
@@ -361,23 +363,16 @@ void ResampleX::exec() {
     else // event workspace -> matrix workspace
     {
       //--------- Different output, OR you're inplace but not preserving Events
-      //--- create a Workspace2D -------
       g_log.information() << "Creating a Workspace2D from the EventWorkspace "
                           << inputEventWS->getName() << ".\n";
+      outputWS = create<DataObjects::Workspace2D>(
+          *inputWS, numSpectra, HistogramData::BinEdges(m_numBins));
 
-      // Create a Workspace2D
-      // This creates a new Workspace2D through a torturous route using the
-      // WorkspaceFactory.
-      // The Workspace2D is created with an EMPTY CONSTRUCTOR
-      outputWS = WorkspaceFactory::Instance().create("Workspace2D", numSpectra,
-                                                     m_numBins, m_numBins - 1);
-      WorkspaceFactory::Instance().initializeFromParent(inputWS, outputWS,
-                                                        true);
       // Initialize progress reporting.
       Progress prog(this, 0.0, 1.0, numSpectra);
 
       // Go through all the histograms and set the data
-      PARALLEL_FOR2(inputEventWS, outputWS)
+      PARALLEL_FOR_IF(Kernel::threadSafe(*inputEventWS, *outputWS))
       for (int wkspIndex = 0; wkspIndex < numSpectra; ++wkspIndex) {
         PARALLEL_START_INTERUPT_REGION
 
@@ -396,8 +391,8 @@ void ResampleX::exec() {
         el.generateHistogram(xValues, y_data, e_data);
 
         // Copy the data over.
-        outputWS->dataY(wkspIndex).assign(y_data.begin(), y_data.end());
-        outputWS->dataE(wkspIndex).assign(e_data.begin(), e_data.end());
+        outputWS->mutableY(wkspIndex) = std::move(y_data);
+        outputWS->mutableE(wkspIndex) = std::move(e_data);
 
         // Report progress
         prog.report(name());
@@ -412,8 +407,9 @@ void ResampleX::exec() {
       }
 
       // Copy the units over too.
-      for (int i = 0; i < outputWS->axes(); ++i)
+      for (int i = 0; i < outputWS->axes(); ++i) {
         outputWS->getAxis(i)->unit() = inputWS->getAxis(i)->unit();
+      }
       outputWS->setYUnit(inputEventWS->YUnit());
       outputWS->setYUnitLabel(inputEventWS->YUnitLabel());
     }
@@ -446,15 +442,17 @@ void ResampleX::exec() {
       outputWS->replaceAxis(1, inputWS->getAxis(1)->clone(outputWS.get()));
 
     Progress prog(this, 0.0, 1.0, numSpectra);
-    PARALLEL_FOR2(inputWS, outputWS)
+    PARALLEL_FOR_IF(Kernel::threadSafe(*inputWS, *outputWS))
     for (int wkspIndex = 0; wkspIndex < numSpectra; ++wkspIndex) {
       PARALLEL_START_INTERUPT_REGION
       // get const references to input Workspace arrays (no copying)
+      // TODO: replace with HistogramX/Y/E when VectorHelper::rebin is updated
       const MantidVec &XValues = inputWS->readX(wkspIndex);
       const MantidVec &YValues = inputWS->readY(wkspIndex);
       const MantidVec &YErrors = inputWS->readE(wkspIndex);
 
       // get references to output workspace data (no copying)
+      // TODO: replace with HistogramX/Y/E when VectorHelper::rebin is updated
       MantidVec &YValues_new = outputWS->dataY(wkspIndex);
       MantidVec &YErrors_new = outputWS->dataE(wkspIndex);
 
@@ -464,10 +462,6 @@ void ResampleX::exec() {
                                             xmaxs[wkspIndex]);
       g_log.debug() << "delta[wkspindex=" << wkspIndex << "] = " << delta
                     << "\n";
-      //        outputWS->setX(wkspIndex, xValues);
-      //        const int ntcnew =
-      //        VectorHelper::createAxisFromRebinParams(rb_params,
-      //        XValues_new.access());
 
       // output data arrays are implicitly filled by function
       try {

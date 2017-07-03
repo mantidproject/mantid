@@ -1,13 +1,16 @@
 #include "FirstTimeSetup.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/MantidVersion.h"
+#include "MantidQtAPI/HelpWindow.h"
 #include "MantidQtAPI/ManageUserDirectories.h"
+#include "MantidQtAPI/MantidDesktopServices.h"
 
-#include <QDesktopServices>
 #include <QMessageBox>
 #include <QPainter>
 #include <QSettings>
 #include <QUrl>
+
+using MantidQt::API::MantidDesktopServices;
 
 FirstTimeSetup::FirstTimeSetup(QWidget *parent) : QDialog(parent) {
   m_uiForm.setupUi(this);
@@ -172,26 +175,26 @@ void FirstTimeSetup::openManageUserDirectories() {
 }
 
 void FirstTimeSetup::openReleaseNotes() {
-  QDesktopServices::openUrl(QUrl(
-      QString::fromStdString(Mantid::Kernel::MantidVersion::releaseNotes())));
+  MantidQt::API::HelpWindow::showPage(
+      this, Mantid::Kernel::MantidVersion::releaseNotes());
 }
 
 void FirstTimeSetup::openSampleDatasets() {
-  QDesktopServices::openUrl(QUrl("http://download.mantidproject.org"));
+  MantidDesktopServices::openUrl(QUrl("http://download.mantidproject.org"));
 }
 void FirstTimeSetup::openMantidIntroduction() {
-  QDesktopServices::openUrl(
+  MantidDesktopServices::openUrl(
       QUrl("http://www.mantidproject.org/Mantid_Basic_Course"));
 }
 void FirstTimeSetup::openPythonIntroduction() {
-  QDesktopServices::openUrl(
+  MantidDesktopServices::openUrl(
       QUrl("http://www.mantidproject.org/Introduction_To_Python"));
 }
 void FirstTimeSetup::openPythonInMantid() {
-  QDesktopServices::openUrl(
+  MantidDesktopServices::openUrl(
       QUrl("http://www.mantidproject.org/Python_In_Mantid"));
 }
 void FirstTimeSetup::openExtendingMantid() {
-  QDesktopServices::openUrl(
+  MantidDesktopServices::openUrl(
       QUrl("http://www.mantidproject.org/Extending_Mantid_With_Python"));
 }

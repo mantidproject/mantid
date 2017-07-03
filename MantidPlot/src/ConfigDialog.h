@@ -219,7 +219,6 @@ private:
   QLineEdit *functionArguments;
   QComboBox *defaultPeakShape;
   QSpinBox *findPeaksFWHM, *findPeaksTolerance;
-  QSpinBox *peakRadius;
   QSpinBox *decimals;
   /// mantid options page
   QWidget *mantidOptionsPage;
@@ -239,7 +238,7 @@ private:
       *lblGeneralDefaultColorMap, *lblBoxGeneralDefaultColorMap,
       *lblVsiLastSession, *lblVsiInitialView;
   ColorButton *vsiDefaultBackground;
-  QGroupBox *mdPlottingGeneralFrame, *mdPlottingVsiFrameBottom;
+  QGroupBox *mdPlottingGeneralFrame, *mdPlottingVsiFrameBottom, *vsiAxesColor;
   QCheckBox *vsiLastSession;
   MantidQt::API::MdSettings m_mdSettings;
 

@@ -3,12 +3,12 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidDataObjects/Workspace2D.h"
-#include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/WorkspaceOpOverloads.h"
+#include "MantidAPI/WorkspaceProperty.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 #include "MantidAlgorithms/Logarithm.h"
 
@@ -30,7 +30,7 @@ public:
 
     // Register the workspace in the data service
     MatrixWorkspace_sptr work_in1 =
-        WorkspaceCreationHelper::Create1DWorkspaceFib(sizex);
+        WorkspaceCreationHelper::create1DWorkspaceFib(sizex, true);
     AnalysisDataService::Instance().add("test_inLn", work_in1);
 
     Logarithm alg;
@@ -59,9 +59,9 @@ public:
     int nHist = 10, nBins = 20;
     // Register the workspace in the data service
     MatrixWorkspace_sptr work_in2 =
-        WorkspaceCreationHelper::Create2DWorkspace154(nHist, nBins);
+        WorkspaceCreationHelper::create2DWorkspace154(nHist, nBins);
     Workspace2D_sptr work_ou2 =
-        WorkspaceCreationHelper::Create2DWorkspace(nHist, nBins);
+        WorkspaceCreationHelper::create2DWorkspace(nHist, nBins);
 
     Logarithm alg;
     AnalysisDataService::Instance().add("test_inLn2", work_in2);
@@ -89,7 +89,7 @@ public:
 
   void testEvents() {
     // evin has 0 events per bin in pixel0, 1 in pixel 1, 2 in pixel2, ...
-    EventWorkspace_sptr evin = WorkspaceCreationHelper::CreateEventWorkspace(
+    EventWorkspace_sptr evin = WorkspaceCreationHelper::createEventWorkspace(
                             5, 3, 1000, 0, 1, 4),
                         evout;
     AnalysisDataService::Instance().add("test_ev_log", evin);
@@ -117,9 +117,9 @@ public:
             "test_ev_log_out"));
     TS_ASSERT(histo_out); // this should be a 2d workspace
 
-    TS_ASSERT_DELTA(histo_out->readY(0)[0], 123, 1e-10);
+    TS_ASSERT_DELTA(histo_out->y(0)[0], 123, 1e-10);
     for (size_t i = 1; i < 5; ++i) {
-      TS_ASSERT_DELTA(histo_out->readY(i)[0], std::log(static_cast<double>(i)),
+      TS_ASSERT_DELTA(histo_out->y(i)[0], std::log(static_cast<double>(i)),
                       1e-10);
     }
     AnalysisDataService::Instance().remove("test_ev_log");

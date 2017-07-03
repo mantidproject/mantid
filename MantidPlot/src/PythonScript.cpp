@@ -130,11 +130,8 @@ void PythonScript::setIdentifier(const QString &name) {
  * @return A PyObject wrapping this instance
  */
 PyObject *PythonScript::createSipInstanceFromMe() {
-  static sipWrapperType *sipClass(NULL);
-  if (!sipClass) {
-    sipClass = sipFindClass("PythonScript");
-  }
-  PyObject *sipWrapper = sipConvertFromInstance(this, sipClass, NULL);
+  const sipTypeDef *sipClass = sipFindType("PythonScript");
+  PyObject *sipWrapper = sipConvertFromType(this, sipClass, NULL);
   assert(sipWrapper);
   return sipWrapper;
 }

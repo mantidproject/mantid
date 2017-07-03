@@ -33,7 +33,6 @@ Description          : QtiPlot's main window
 #define APPLICATION_H
 
 #include <QBuffer>
-#include <QDesktopServices>
 #include <QFile>
 #include <QLocale>
 #include <QMainWindow>
@@ -44,10 +43,12 @@ Description          : QtiPlot's main window
 #include <QSplitter>
 
 #include "MantidQtAPI/HelpWindow.h"
-#include "Table.h"
-#include "ScriptingEnv.h"
-#include "Scripted.h"
+#include "MantidQtAPI/IProjectSerialisable.h"
+#include "ProjectSaveView.h"
 #include "Script.h"
+#include "Scripted.h"
+#include "ScriptingEnv.h"
+#include "Table.h"
 
 class QPixmap;
 class QCloseEvent;
@@ -241,7 +242,7 @@ public slots:
   * @param fn :: is read as a data file with the default column separator (as
   *set by the user)
   * and inserted as a table into a new, empty project.
-  * This table is then plotted with the Graph::LineSymbols style.
+  * This table is then plotted with the GraphOptions::LineSymbols style.
   */
   ApplicationWindow *plotFile(const QString &fn);
 
@@ -269,6 +270,12 @@ public slots:
   void saveProjectAs(const QString &fileName = QString(),
                      bool compress = false);
   bool saveProject(bool compress = false);
+  /// Run the project saver dialog
+  int execSaveProjectDialog();
+  /// Show the project saver dialog
+  void prepareSaveProject();
+  /// Update application window post save
+  void postSaveProject();
 
   //! Set the project status to modifed
   void modifiedProject();
@@ -313,7 +320,7 @@ public slots:
   void deleteLayer();
 
   //! Creates a new spectrogram graph
-  MultiLayer *plotSpectrogram(Matrix *m, Graph::CurveType type);
+  MultiLayer *plotSpectrogram(Matrix *m, GraphOptions::CurveType type);
   MultiLayer *plotGrayScale(Matrix *m = 0);
   MultiLayer *plotContour(Matrix *m = 0);
   MultiLayer *plotColorMap(Matrix *m = 0);
@@ -542,7 +549,7 @@ public slots:
   // error if not
   bool validFor2DPlot(Table *table);
   //! Generate a new 2D graph
-  MultiLayer *generate2DGraph(Graph::CurveType type);
+  MultiLayer *generate2DGraph(GraphOptions::CurveType type);
   //@}
 
   //! \name Image Analysis
@@ -596,6 +603,7 @@ public slots:
 
   bool hidden(QWidget *window);
   void closeActiveWindow();
+  void closeSimilarWindows();
   void closeWindow(MdiSubWindow *window);
 
   //!  Does all the cleaning work before actually deleting a window!
@@ -1022,7 +1030,6 @@ public slots:
   // parentFolder or to the current folder if no parent folder is specified.
   Folder *appendProject(const QString &file_name, Folder *parentFolder = 0);
   void saveAsProject();
-  void saveFolderAsProject(Folder *f);
 
   //!  adds a folder list item to the list view "lv"
   void addFolderListViewItem(Folder *f);
@@ -1091,6 +1098,14 @@ public slots:
 
   /// Show/hide MantidPlot toolbars.
   void setToolbarsVisible(bool visible);
+  /// Get a list of serialisable project windows
+  QList<QObject *> getSerialisableWindows() const {
+    return m_serialisableWindows;
+  }
+  /// Add a serialisable window
+  void addSerialisableWindow(QObject *window);
+  /// Remove a serialisable window
+  void removeSerialisableWindow(QObject *window);
 
   /// \name Tiled window
   //@{
@@ -1109,6 +1124,7 @@ public slots:
 signals:
   void modified();
   void shutting_down();
+  void configModified();
 
 protected:
   bool event(QEvent *e) override;
@@ -1124,6 +1140,8 @@ private:
   bool shouldExecuteAndQuit(const QString &arg);
   bool isSilentStartup(const QString &arg);
   void handleConfigDir();
+  /// Save the working directory to QSettings
+  void cacheWorkingDirectory() const;
 
 private slots:
   //! \name Initialization
@@ -1416,6 +1434,8 @@ private:
   QSet<QString> m_allCategories;
   // Map interfaces to their categories.
   QMap<QString, QSet<QString>> m_interfaceCategories;
+  /// Keep a list of serialisable windows
+  QList<QObject *> m_serialisableWindows;
 
   mutable MdiSubWindow *d_active_window;
   MdiSubWindow *getActiveWindow() const;
@@ -1440,6 +1460,8 @@ private:
   QDockWidget *explorerWindow;
   MantidQt::MantidWidgets::MessageDisplay *resultsLog;
   QMdiArea *d_workspace;
+
+  MantidQt::MantidWidgets::ProjectSaveView *m_projectSaveView;
 
   QToolBar *standardTools, *plotTools, *displayBar;
   QToolBar *formatToolBar;

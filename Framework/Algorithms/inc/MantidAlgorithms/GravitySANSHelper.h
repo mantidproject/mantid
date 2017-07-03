@@ -1,10 +1,12 @@
 #ifndef MANTID_ALGORITHMS_GRAVITYSANSHELPER_H_
 #define MANTID_ALGORITHMS_GRAVITYSANSHELPER_H_
-#include "MantidAPI/MatrixWorkspace_fwd.h"
+
 #include "MantidKernel/V3D.h"
-#include "MantidGeometry/IDetector.h"
 
 namespace Mantid {
+namespace API {
+class SpectrumInfo;
+}
 namespace Algorithms {
 /** A helper class for calculating neutron's gravitional drop. Only works for
 SANS because Mantid has no convention on which was is up or down. For this
@@ -37,8 +39,7 @@ class GravitySANSHelper {
 public:
   GravitySANSHelper()
       : m_beamLineNorm(-1), m_dropPerAngstrom2(-1), m_cachedDrop(-1) {}
-  GravitySANSHelper(API::MatrixWorkspace_const_sptr ws,
-                    Geometry::IDetector_const_sptr det,
+  GravitySANSHelper(const API::SpectrumInfo &spectrumInfo, const size_t index,
                     const double extraLength = 0.0);
   double calcSinTheta(const double wavAngstroms) const;
   double calcComponents(const double wavAngstroms, double &xFrac,
@@ -52,8 +53,6 @@ private:
   /// twice the distance from the source to the sample
   double m_beamLineNorm;
 
-  /// the detector whose neutrons we are doing the calcualations for
-  Geometry::IDetector_const_sptr m_det;
   /// the drop is proportional to the wavelength squared, storing this drop
   /// increases calculation speed a lot
   double m_dropPerAngstrom2;
@@ -75,9 +74,7 @@ private:
     return m_dropPerAngstrom2 * wav * wav;
   }
 
-  double gravitationalDrop(API::MatrixWorkspace_const_sptr ws,
-                           Geometry::IDetector_const_sptr det,
-                           const double waveLength,
+  double gravitationalDrop(const double L2, const double waveLength,
                            const double extraLength) const;
   double calcSinTheta() const;
 };

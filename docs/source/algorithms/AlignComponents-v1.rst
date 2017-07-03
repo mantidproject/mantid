@@ -1,4 +1,3 @@
-
 .. algorithm::
 
 .. summary::
@@ -59,49 +58,50 @@ components are aligned.
 Usage
 -----
 
-**Example - Align the X and Z position of bank26 in POWGEN:**
+**Example - Align the Y and Z position of bank26 in POWGEN:**
 
-.. code-block:: python
+.. testcode:: position
 
-      LoadCalFile(InstrumentName="PG3",
+      ws = LoadEmptyInstrument(Filename="POWGEN_Definition_2015-08-01.xml")
+      LoadCalFile(InputWorkspace=ws,
             CalFilename="PG3_golden.cal",
             MakeGroupingWorkspace=False,
             MakeOffsetsWorkspace=True,
             MakeMaskWorkspace=True,
             WorkspaceName="PG3")
-      ws = LoadEmptyInstrument(Filename="POWGEN_Definition_2015-08-01.xml")
       component="bank26"
       print "Start position is",ws.getInstrument().getComponentByName(component).getPos()
       AlignComponents(CalibrationTable="PG3_cal",
               Workspace=ws,
 	      MaskWorkspace="PG3_mask",
-	      Xposition=True, ZPosition=True,
+	      Yposition=True, ZPosition=True,
               ComponentList=component)
       ws=mtd['ws']
-      print "Final position is",ws.getInstrument().getComponentByName(component).getPos()
+      final_pos = ws.getInstrument().getComponentByName(component).getPos()
+      print "Final position is [{:.2f}.{:.2f},{:.2f}]".format(final_pos[0],final_pos[1],final_pos[2])
 
 Output:
 
-.. code-block:: none
+.. testoutput:: position
 
     Start position is [1.54436,0.863271,-1.9297]
-    Final position is [1.50591,0.863271,-1.92734]
+    Final position is [1.54.0.85,-1.95]
 
-**Example - Align the Y rotation of bank26 and bank46 in POWGEN:**
+**Example - Align the Y rotation of bank25 and bank46 in POWGEN:**
 
-.. code-block:: python
+.. testcode:: rotation
 
-      LoadCalFile(InstrumentName="PG3",
+      ws = LoadEmptyInstrument(Filename="POWGEN_Definition_2015-08-01.xml")
+      LoadCalFile(InputWorkspace=ws,
 	    CalFilename="PG3_golden.cal",
 	    MakeGroupingWorkspace=False,
 	    MakeOffsetsWorkspace=True,
 	    MakeMaskWorkspace=True,
 	    WorkspaceName="PG3")
-      ws = LoadEmptyInstrument(Filename="POWGEN_Definition_2015-08-01.xml")
-      components="bank26,bank46"
-      bank26Rot = ws.getInstrument().getComponentByName("bank26").getRotation().getEulerAngles()
+      components="bank25,bank46"
+      bank25Rot = ws.getInstrument().getComponentByName("bank25").getRotation().getEulerAngles()
       bank46Rot = ws.getInstrument().getComponentByName("bank46").getRotation().getEulerAngles()
-      print "Start bank26 rotation is [{:.3f}.{:.3f},{:.3f}]".format(bank26Rot[0], bank26Rot[1], bank26Rot[2])
+      print "Start bank25 rotation is [{:.3f}.{:.3f},{:.3f}]".format(bank25Rot[0], bank25Rot[1], bank25Rot[2])
       print "Start bank46 rotation is [{:.3f}.{:.3f},{:.3f}]".format(bank46Rot[0], bank46Rot[1], bank46Rot[2])
       AlignComponents(CalibrationTable="PG3_cal",
 	      Workspace=ws,
@@ -110,25 +110,26 @@ Output:
               AlphaRotation=True,
 	      ComponentList=components)
       ws=mtd['ws']
-      bank26Rot = ws.getInstrument().getComponentByName("bank26").getRotation().getEulerAngles()
+      bank25Rot = ws.getInstrument().getComponentByName("bank25").getRotation().getEulerAngles()
       bank46Rot = ws.getInstrument().getComponentByName("bank46").getRotation().getEulerAngles()
-      print "Final bank26 rotation is [{:.3f}.{:.3f},{:.3f}]".format(bank26Rot[0], bank26Rot[1], bank26Rot[2])
-      print "Final bank46 rotation is [{:.3f}.{:.3f},{:.3f}]".format(bank46Rot[0], bank46Rot[1], bank46Rot[2])
+      print "Final bank25 rotation is [{:.3f}.{:.3f},{:.3f}]".format(bank25Rot[0], bank25Rot[1], bank25Rot[2])
+      print "Final bank46 rotation is [{:.2f}.{:.3f},{:.3f}]".format(bank46Rot[0], bank46Rot[1], bank46Rot[2])
 
 Output:
 
-.. code-block:: none
+.. testoutput:: rotation
 
-      Start bank26 rotation is [-24.061.0.120,18.016]
+      Start bank25 rotation is [-24.089.0.179,9.030]
       Start bank46 rotation is [-41.092.0.061,17.795]
-      Final bank26 rotation is [-25.226.0.120,18.016]
-      Final bank46 rotation is [-37.397.0.061,17.795]
+      Final bank25 rotation is [-24.089.0.179,9.030]
+      Final bank46 rotation is [-37.40.0.061,17.795]
 
 **Example - Align sample position in POWGEN:**
 
-.. code-block:: python
+.. testcode:: sample
 
-      LoadCalFile(InstrumentName="PG3",
+      ws = LoadEmptyInstrument(Filename="POWGEN_Definition_2015-08-01.xml")
+      LoadCalFile(InputWorkspace=ws,
 	    CalFilename="PG3_golden.cal",
 	    MakeGroupingWorkspace=False,
 	    MakeOffsetsWorkspace=True,
@@ -137,21 +138,20 @@ Output:
       # Mask banks that don't have calibration data
       MaskBTP(Workspace='PG3_mask', Instrument='POWGEN',
 	      Bank='22-25,42-45,62-66,82-86,102-105,123,124,143,144,164,184,204')
-      ws = LoadEmptyInstrument(Filename="POWGEN_Definition_2015-08-01.xml")
       print "Start sample position is",ws.getInstrument().getSample().getPos().getZ()
       AlignComponents(CalibrationTable="PG3_cal",
             Workspace=ws,
             MaskWorkspace="PG3_mask",
             FitSamplePosition=True,
 	    Zposition=True)
-      print "Final sample position is {:.5f}".format(mtd['ws'].getInstrument().getSample().getPos().getZ())
+      print "Final sample position is {:.3f}".format(mtd['ws'].getInstrument().getSample().getPos().getZ())
 
 Output:
 
-.. code-block:: none
+.. testoutput:: sample
 
       Start sample position is 0.0
-      Final sample position is 0.02826
+      Final sample position is 0.028
 
 .. categories::
 

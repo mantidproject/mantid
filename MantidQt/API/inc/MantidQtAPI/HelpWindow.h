@@ -3,9 +3,9 @@
 
 #include "MantidQtAPI/DllOption.h"
 #include <string>
+#include <QString>
 
 // forward declarations
-class QString;
 class QUrl;
 class QWidget;
 
@@ -49,9 +49,11 @@ public:
   static void showConcept(QWidget *parent, const QString &name);
   static void showFitFunction(QWidget *parent,
                               const std::string &name = std::string());
-  static void showCustomInterface(QWidget *parent, const QString &name);
+  static void showCustomInterface(QWidget *parent, const QString &name,
+                                  const QString &section = QString());
   static void showCustomInterface(QWidget *parent,
-                                  const std::string &name = std::string());
+                                  const std::string &name = std::string(),
+                                  const std::string &section = std::string());
 };
 } // namespace API
 } // namespace MantidQt

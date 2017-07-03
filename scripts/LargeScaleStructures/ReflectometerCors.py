@@ -1,5 +1,7 @@
 #pylint: disable=invalid-name
+from __future__ import (absolute_import, division, print_function)
 from mantid.simpleapi import *
+
 
 def heliumDetectorEff(workspace):
     '''         Calculate the corrected Helium detector values. '''
@@ -30,6 +32,7 @@ def heliumDetectorEff(workspace):
     PolynomialCorrection(InputWorkspace=workspace,OutputWorkspace=workspace,Coefficients="-1.3697,0.8602,-0.7839,0.2866,-0.0447,0.0025")
     return
 
+
 def monitor2Eff(workspace):
     ''' Calculate the corrected monitor2 values. '''
   # expon= unt*(1-exp(-8.3047 * zz * x_mean ))
@@ -58,9 +61,8 @@ def main():
     ConvertUnits(InputWorkspace="ws",OutputWorkspace="ws",Target="Wavelength",AlignBins="1")
     heliumDetectorEff("ws")
     monitor2Eff("ws")
-    print "Done!"
+    print("Done!")
 
 
 if __name__ == '__main__':
     main()
-

@@ -8,6 +8,8 @@
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/Run.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 
 #include "MantidQtAPI/AlgorithmRunner.h"
@@ -372,7 +374,7 @@ QString MultiDatasetFit::getOutputWorkspaceName(int i) const {
     auto ws = Mantid::API::AnalysisDataService::Instance().retrieve(wsName);
     if (auto group =
             boost::dynamic_pointer_cast<Mantid::API::WorkspaceGroup>(ws)) {
-      wsName = group->getItem(i)->name();
+      wsName = group->getItem(i)->getName();
     }
   }
   return QString::fromStdString(wsName);
@@ -570,7 +572,6 @@ double MultiDatasetFit::getLocalParameterValue(const QString &parName,
 
 /// Reset the caches. Prepare to fill them in lazily.
 void MultiDatasetFit::reset() {
-  m_functionBrowser->resetLocalParameters();
   m_functionBrowser->setNumberOfDatasets(getNumberOfSpectra());
   setParameterNamesForPlotting();
   m_plotController->setGuessFunction(m_functionBrowser->getFunctionString());
@@ -713,31 +714,6 @@ void MultiDatasetFit::showParameterPlot() {
 
 void MultiDatasetFit::updateGuessFunction(const QString &, const QString &) {
   m_plotController->updateGuessFunction(*m_functionBrowser->getFunction());
-}
-
-/**
- * Returns list of log names from the first workspace
- * @return :: list of log names
- */
-std::vector<std::string> MultiDatasetFit::getLogNames() const {
-  if (getNumberOfSpectra() > 0) {
-    return m_dataController->getWorkspaceLogNames(0);
-  }
-
-  return std::vector<std::string>();
-}
-
-/**
- * Get value of the named log from workspace for spectrum i
- * @param logName :: [input] Name of log
- * @param function :: [input] Function to apply to log (e.g. mean, min, max...)
- * @param i :: [input] Spectrum number
- * @returns :: Value of the named log for given spectrum
- */
-double MultiDatasetFit::getLogValue(const QString &logName,
-                                    const StatisticType &function,
-                                    int i) const {
-  return m_dataController->getLogValue(logName, function, i);
 }
 
 /// Log a warning

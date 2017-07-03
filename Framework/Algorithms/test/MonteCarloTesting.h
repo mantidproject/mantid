@@ -8,6 +8,7 @@
 #include "MantidKernel/Material.h"
 #include "MantidKernel/PseudoRandomNumberGenerator.h"
 #include "MantidKernel/WarningSuppressions.h"
+#include "MantidKernel/make_unique.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 
 #include <gmock/gmock.h>
@@ -32,6 +33,8 @@ public:
   MOCK_METHOD0(restore, void());
   MOCK_METHOD1(setSeed, void(size_t));
   MOCK_METHOD2(setRange, void(const double, const double));
+  MOCK_CONST_METHOD0(min, double());
+  MOCK_CONST_METHOD0(max, double());
   GCC_DIAG_ON_SUGGEST_OVERRIDE
 };
 

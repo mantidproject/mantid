@@ -17,14 +17,12 @@
 #include "MantidVatesAPI/TimeToTimeStep.h"
 #include "MantidVatesAPI/vtkMDHistoHex4DFactory.h"
 #include "MantidVatesAPI/vtkMDHistoHexFactory.h"
-#include "MantidVatesAPI/IgnoreZerosThresholdRange.h"
 #include "MantidVatesAPI/FilteringUpdateProgressAction.h"
 #include "MantidVatesAPI/MDLoadingViewAdapter.h"
 
 vtkStandardNewMacro(vtkMDHWNexusReader)
 
     using namespace Mantid::VATES;
-using Mantid::Geometry::IMDDimension_sptr;
 
 vtkMDHWNexusReader::vtkMDHWNexusReader()
     : FileName{nullptr}, m_loadInMemory(false), m_depth(1), m_time(0),
@@ -70,7 +68,7 @@ std::string vtkMDHWNexusReader::GetInputGeometryXML() {
     return std::string();
   }
   try {
-    return m_presenter->getGeometryXML().c_str();
+    return m_presenter->getGeometryXML();
   } catch (std::runtime_error &) {
     return std::string();
   }
@@ -106,16 +104,13 @@ int vtkMDHWNexusReader::RequestData(
   FilterUpdateProgressAction<vtkMDHWNexusReader> drawingProgressAction(
       this, "Drawing...");
 
-  ThresholdRange_scptr thresholdRange =
-      boost::make_shared<IgnoreZerosThresholdRange>();
-
   // Will attempt to handle drawing in 4D case and then in 3D case
   // if that fails.
   auto factory =
       Mantid::Kernel::make_unique<vtkMDHistoHex4DFactory<TimeToTimeStep>>(
-          thresholdRange, m_normalizationOption, m_time);
-  factory->setSuccessor(Mantid::Kernel::make_unique<vtkMDHistoHexFactory>(
-      thresholdRange, m_normalizationOption));
+          m_normalizationOption, m_time);
+  factory->setSuccessor(
+      Mantid::Kernel::make_unique<vtkMDHistoHexFactory>(m_normalizationOption));
 
   auto product = m_presenter->execute(factory.get(), loadingProgressAction,
                                       drawingProgressAction);
@@ -126,7 +121,8 @@ int vtkMDHWNexusReader::RequestData(
   try {
     auto workspaceProvider = Mantid::Kernel::make_unique<
         ADSWorkspaceProvider<Mantid::API::IMDWorkspace>>();
-    m_presenter->makeNonOrthogonal(output, std::move(workspaceProvider));
+    m_presenter->makeNonOrthogonal(output, std::move(workspaceProvider),
+                                   &drawingProgressAction);
   } catch (std::invalid_argument &e) {
     std::string error = e.what();
     vtkDebugMacro(<< "Workspace does not have correct information to "
@@ -180,7 +176,7 @@ int vtkMDHWNexusReader::CanReadFile(const char *fname) {
   return temp.canReadFile();
 }
 
-unsigned long vtkMDHWNexusReader::GetMTime() { return Superclass::GetMTime(); }
+vtkMTimeType vtkMDHWNexusReader::GetMTime() { return Superclass::GetMTime(); }
 
 /**
   Update/Set the progress.

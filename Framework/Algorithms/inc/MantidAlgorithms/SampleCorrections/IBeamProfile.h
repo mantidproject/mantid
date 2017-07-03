@@ -2,9 +2,13 @@
 #define MANTID_ALGORITHMS_IBEAMPROFILE_H_
 
 #include "MantidAlgorithms/DllConfig.h"
+#include "MantidGeometry/Objects/BoundingBox.h"
 #include "MantidKernel/V3D.h"
 
 namespace Mantid {
+namespace API {
+class Sample;
+}
 namespace Kernel {
 class PseudoRandomNumberGenerator;
 }
@@ -44,6 +48,10 @@ public:
 
   virtual ~IBeamProfile() = default;
   virtual Ray generatePoint(Kernel::PseudoRandomNumberGenerator &rng) const = 0;
+  virtual Ray generatePoint(Kernel::PseudoRandomNumberGenerator &rng,
+                            const Geometry::BoundingBox &) const = 0;
+  virtual Geometry::BoundingBox
+  defineActiveRegion(const API::Sample &) const = 0;
 };
 
 } // namespace Algorithms

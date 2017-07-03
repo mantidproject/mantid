@@ -23,6 +23,9 @@ DensityOfStates::DensityOfStates(QWidget *parent)
 
   connect(m_uiForm.mwInputFile, SIGNAL(filesFound()), this,
           SLOT(handleFileChange()));
+  // Handle plot and save
+  connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveClicked()));
+  connect(m_uiForm.pbPlot, SIGNAL(clicked()), this, SLOT(plotClicked()));
 
   m_uiForm.lwIons->setSelectionMode(QAbstractItemView::MultiSelection);
 }
@@ -57,7 +60,7 @@ bool DensityOfStates::validate() {
 }
 
 /**
- * Configures and executes the LoadSassena algorithm.
+ * Configures and executes the DensityOfStates algorithm.
  */
 void DensityOfStates::run() {
   // Get the SimulatedDensityOfStates algorithm
@@ -131,20 +134,6 @@ void DensityOfStates::run() {
 
   m_batchAlgoRunner->addAlgorithm(dosAlgo);
 
-  // Setup save algorithm if needed
-  if (m_uiForm.ckSave->isChecked()) {
-    BatchAlgorithmRunner::AlgorithmRuntimeProps saveProps;
-    saveProps["InputWorkspace"] = m_outputWsName.toStdString();
-
-    const auto filename = (m_outputWsName + ".nxs").toStdString();
-
-    IAlgorithm_sptr saveAlgo =
-        AlgorithmManager::Instance().create("SaveNexusProcessed");
-    saveAlgo->setProperty("Filename", filename);
-
-    m_batchAlgoRunner->addAlgorithm(saveAlgo, saveProps);
-  }
-
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
           SLOT(dosAlgoComplete(bool)));
   m_batchAlgoRunner->executeBatchAsync();
@@ -161,10 +150,6 @@ void DensityOfStates::dosAlgoComplete(bool error) {
 
   if (error)
     return;
-
-  // Handle spectra plotting
-  if (m_uiForm.ckPlot->isChecked())
-    plotSpectrum(m_outputWsName);
 }
 
 /**
@@ -242,6 +227,9 @@ void DensityOfStates::ionLoadComplete(bool error) {
 
   // Select all ions by default
   m_uiForm.lwIons->selectAll();
+  // Enable plot and save
+  m_uiForm.pbPlot->setEnabled(true);
+  m_uiForm.pbSave->setEnabled(true);
 }
 
 /**
@@ -252,6 +240,23 @@ void DensityOfStates::ionLoadComplete(bool error) {
  */
 void DensityOfStates::loadSettings(const QSettings &settings) {
   m_uiForm.mwInputFile->readSettings(settings.group());
+}
+
+/**
+* Handle mantid plotting of workspace
+*/
+void DensityOfStates::plotClicked() {
+  if (checkADSForPlotSaveWorkspace(m_outputWsName.toStdString(), true))
+    plotSpectrum(m_outputWsName);
+}
+
+/**
+* Handle saving of workspace
+*/
+void DensityOfStates::saveClicked() {
+  if (checkADSForPlotSaveWorkspace(m_outputWsName.toStdString(), false))
+    addSaveWorkspaceToQueue(m_outputWsName);
+  m_batchAlgoRunner->executeBatchAsync();
 }
 
 } // namespace CustomInterfaces

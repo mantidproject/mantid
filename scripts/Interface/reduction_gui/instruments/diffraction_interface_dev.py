@@ -7,12 +7,13 @@ from reduction_gui.widgets.cluster_status import RemoteJobsWidget
 
 from reduction_gui.reduction.diffraction.diffraction_reduction_script import DiffractionReductionScripter
 
+
 class DiffractionInterface(InstrumentInterface):
     """
         Defines the widgets for direct geometry spectrometer reduction
     """
     # Allowed extensions for loading data files
-    data_type = "Data files *.* (*.*)"
+    data_type = "Data files * (*)"
 
     def __init__(self, name, settings):
         """

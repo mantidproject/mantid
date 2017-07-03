@@ -30,7 +30,8 @@ public:
   const std::string id() const override { return "EventWorkspace"; }
 
   // Constructor
-  EventWorkspace();
+  EventWorkspace(
+      const Parallel::StorageMode storageMode = Parallel::StorageMode::Cloned);
 
   // Destructor
   ~EventWorkspace() override;
@@ -40,13 +41,16 @@ public:
     return std::unique_ptr<EventWorkspace>(doClone());
   }
 
+  /// Returns a default-initialized clone of the workspace
+  std::unique_ptr<EventWorkspace> cloneEmpty() const {
+    return std::unique_ptr<EventWorkspace>(doCloneEmpty());
+  }
+
   // Initialize the pixels
   void init(const std::size_t &, const std::size_t &,
             const std::size_t &) override;
-
-  void copyDataFrom(const EventWorkspace &source,
-                    std::size_t sourceStartWorkspaceIndex = 0,
-                    std::size_t sourceEndWorkspaceIndex = size_t(-1));
+  void init(const std::size_t &NVectors,
+            const HistogramData::Histogram &histogram) override;
 
   bool threadSafe() const override;
 
@@ -73,8 +77,9 @@ public:
   double getTofMax() const override;
 
   Mantid::Kernel::DateAndTime getPulseTimeMin() const override;
-
   Mantid::Kernel::DateAndTime getPulseTimeMax() const override;
+  void getPulseTimeMinMax(Mantid::Kernel::DateAndTime &xmin,
+                          Mantid::Kernel::DateAndTime &xmax) const;
 
   Mantid::Kernel::DateAndTime
   getTimeAtSampleMin(double tofOffset = 0) const override;
@@ -107,24 +112,9 @@ public:
                                   MantidVec &Y, MantidVec &E,
                                   bool skipError = false) const;
 
-  //------------------------------------------------------------
   // Set the x-axis data (histogram bins) for all pixels
   virtual void setAllX(const HistogramData::BinEdges &x);
 
-  // Get or add an EventList
-  EventList &getOrAddEventList(const std::size_t workspace_index);
-
-  // Resizes the workspace to contain the number of spectra/event lists given
-  virtual void resizeTo(const std::size_t numSpectra);
-  // Pad pixels in the workspace using the loaded spectra. Requires a non-empty
-  // spectra-detector map
-  void padSpectra();
-  // Pad pixels in the workspace using specList. Requires a non-empty vector
-  virtual void padSpectra(const std::vector<int32_t> &specList);
-  // Remove pixels in the workspace that do not contain events.
-  void deleteEmptyLists();
-
-  //------------------------------------------------------------
   // The total number of events across all of the spectra.
   std::size_t getNumberEvents() const override;
 
@@ -141,8 +131,6 @@ public:
   std::size_t MRUSize() const;
 
   void clearMRU() const override;
-
-  void clearData();
 
   EventSortType getSortType() const;
 
@@ -161,6 +149,9 @@ protected:
 
 private:
   EventWorkspace *doClone() const override { return new EventWorkspace(*this); }
+  EventWorkspace *doCloneEmpty() const override {
+    return new EventWorkspace(storageMode());
+  }
 
   /** A vector that holds the event list for each spectrum; the key is
    * the workspace index, which is not necessarily the pixelid.

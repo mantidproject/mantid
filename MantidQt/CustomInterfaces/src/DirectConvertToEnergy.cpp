@@ -13,9 +13,6 @@
 #include <QMessageBox>
 #include <QDir>
 
-#include <QDesktopServices>
-#include <QUrl>
-
 // Add this class to the list of specialized dialogs in this namespace
 namespace MantidQt {
 namespace CustomInterfaces {

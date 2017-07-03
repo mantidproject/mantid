@@ -1,8 +1,6 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAlgorithms/DiffractionEventCalibrateDetectors.h"
 #include "MantidAlgorithms/GSLFunctions.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/InstrumentValidator.h"
@@ -13,6 +11,7 @@
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/GroupingWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/CPUTimer.h"
@@ -291,7 +290,10 @@ void DiffractionEventCalibrateDetectors::exec() {
   const std::string rb_params = getProperty("Params");
 
   // Get some stuff from the input workspace
-  Instrument_const_sptr inst = inputW->getInstrument();
+  // We make a copy of the instrument since we will be moving detectors in
+  // `inputW` but want to access original positions (etc.) via `detList` below.
+  const auto &dummyW = create<EventWorkspace>(*inputW, 1, inputW->binEdges(0));
+  Instrument_const_sptr inst = dummyW->getInstrument();
 
   // Build a list of Rectangular Detectors
   std::vector<boost::shared_ptr<RectangularDetector>> detList;
@@ -305,7 +307,7 @@ void DiffractionEventCalibrateDetectors::exec() {
 
     det = boost::dynamic_pointer_cast<RectangularDetector>((*inst)[i]);
     if (det) {
-      if (det->getName().compare(onebank) == 0)
+      if (det->getName() == onebank)
         detList.push_back(det);
       if (!doOneBank)
         detList.push_back(det);
@@ -318,7 +320,7 @@ void DiffractionEventCalibrateDetectors::exec() {
         for (int j = 0; j < assem->nelements(); j++) {
           det = boost::dynamic_pointer_cast<RectangularDetector>((*assem)[j]);
           if (det) {
-            if (det->getName().compare(onebank) == 0)
+            if (det->getName() == onebank)
               detList.push_back(det);
             if (!doOneBank)
               detList.push_back(det);
@@ -334,7 +336,7 @@ void DiffractionEventCalibrateDetectors::exec() {
                 det = boost::dynamic_pointer_cast<RectangularDetector>(
                     (*assem2)[k]);
                 if (det) {
-                  if (det->getName().compare(onebank) == 0)
+                  if (det->getName() == onebank)
                     detList.push_back(det);
                   if (!doOneBank)
                     detList.push_back(det);
@@ -410,7 +412,6 @@ void DiffractionEventCalibrateDetectors::exec() {
     std::cout << tim << " to CreateGroupingWorkspace\n";
 
     const gsl_multimin_fminimizer_type *T = gsl_multimin_fminimizer_nmsimplex;
-    gsl_multimin_fminimizer *s = nullptr;
     gsl_vector *ss, *x;
     gsl_multimin_function minex_func;
 
@@ -438,7 +439,7 @@ void DiffractionEventCalibrateDetectors::exec() {
     minex_func.f = &Mantid::Algorithms::gsl_costFunction;
     minex_func.params = &par;
 
-    s = gsl_multimin_fminimizer_alloc(T, nopt);
+    gsl_multimin_fminimizer *s = gsl_multimin_fminimizer_alloc(T, nopt);
     gsl_multimin_fminimizer_set(s, &minex_func, x, ss);
 
     do {

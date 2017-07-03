@@ -1,15 +1,19 @@
 #include "MantidVatesAPI/MDHWInMemoryLoadingPresenter.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
+#include "MantidGeometry/MDGeometry/MDGeometryXMLBuilder.h"
+#include "MantidVatesAPI/FactoryChains.h"
 #include "MantidVatesAPI/MDLoadingView.h"
 #include "MantidVatesAPI/MetaDataExtractorUtils.h"
-#include "MantidVatesAPI/FactoryChains.h"
 #include "MantidVatesAPI/ProgressAction.h"
-#include "MantidVatesAPI/vtkDataSetFactory.h"
 #include "MantidVatesAPI/WorkspaceProvider.h"
-#include "MantidGeometry/MDGeometry/MDGeometryXMLBuilder.h"
+#include "MantidVatesAPI/vtkDataSetFactory.h"
 #include <qwt_double_interval.h>
-#include <vtkUnstructuredGrid.h>
+
+#include "tbb/tbb.h"
+#include "vtkStructuredGrid.h"
+#include "vtkUnsignedCharArray.h"
+#include "vtkUnstructuredGrid.h"
 
 namespace Mantid {
 namespace VATES {
@@ -31,10 +35,10 @@ MDHWInMemoryLoadingPresenter::MDHWInMemoryLoadingPresenter(
   if (m_wsName.empty()) {
     throw std::invalid_argument("The workspace name is empty.");
   }
-  if (NULL == repository) {
+  if (!repository) {
     throw std::invalid_argument("The repository is NULL");
   }
-  if (nullptr == m_view) {
+  if (!m_view) {
     throw std::invalid_argument("View is NULL.");
   }
 }
@@ -49,14 +53,13 @@ bool MDHWInMemoryLoadingPresenter::canReadFile() const {
   if (!m_repository->canProvideWorkspace(m_wsName)) {
     // The workspace does not exist.
     bCanReadIt = false;
-  } else if (NULL ==
-             boost::dynamic_pointer_cast<Mantid::API::IMDHistoWorkspace>(
-                 m_repository->fetchWorkspace(m_wsName)).get()) {
+  } else if (boost::dynamic_pointer_cast<Mantid::API::IMDHistoWorkspace>(
+                 m_repository->fetchWorkspace(m_wsName))) {
     // The workspace can be found, but is not an IMDHistoWorkspace.
-    bCanReadIt = false;
+    bCanReadIt = true;
   } else {
     // The workspace is present, and is of the correct type.
-    bCanReadIt = true;
+    bCanReadIt = false;
   }
   return bCanReadIt;
 }
@@ -88,19 +91,9 @@ MDHWInMemoryLoadingPresenter::execute(vtkDataSetFactory *factory,
                               // argument for drawing!
 
   /*extractMetaData needs to be re-run here because the first execution of this
-    from ::executeLoadMetadata will not have ensured that all dimensions
-    have proper range extents set.
+   from ::executeLoadMetadata will not have ensured that all dimensions
+   have proper range extents set.
   */
-
-  // Update the meta data min and max values with the values of the visual data
-  // set. This is necessary since we want the full data range of the visual
-  // data set and not of the actual underlying data set.
-  double *range = visualDataSet->GetScalarRange();
-  if (range) {
-    this->m_metadataJsonManager->setMinValue(range[0]);
-    this->m_metadataJsonManager->setMaxValue(range[1]);
-  }
-
   this->extractMetadata(*m_cachedVisualHistoWs);
 
   // Transposed workpace is temporary, outside the ADS, and does not have a
@@ -128,15 +121,9 @@ void MDHWInMemoryLoadingPresenter::executeLoadMetadata() {
 
   MDHWLoadingPresenter::transposeWs(histoWs, m_cachedVisualHistoWs);
 
-  // Set the minimum and maximum of the workspace data.
-  QwtDoubleInterval minMaxContainer =
-      m_metaDataExtractor->getMinAndMax(histoWs);
-  m_metadataJsonManager->setMinValue(minMaxContainer.minValue());
-  m_metadataJsonManager->setMaxValue(minMaxContainer.maxValue());
-
   // Set the instrument which is associated with the workspace.
   m_metadataJsonManager->setInstrument(
-      m_metaDataExtractor->extractInstrument(m_cachedVisualHistoWs));
+      m_metaDataExtractor->extractInstrument(m_cachedVisualHistoWs.get()));
 
   // Set the special coordinates
   m_metadataJsonManager->setSpecialCoordinates(m_specialCoords);

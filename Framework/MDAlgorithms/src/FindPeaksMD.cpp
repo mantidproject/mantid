@@ -1,12 +1,11 @@
-#include "MantidDataObjects/PeaksWorkspace.h"
-#include "MantidKernel/System.h"
 #include "MantidMDAlgorithms/FindPeaksMD.h"
+#include "MantidAPI/Run.h"
 #include "MantidDataObjects/MDEventFactory.h"
 #include "MantidDataObjects/MDHistoWorkspace.h"
+#include "MantidDataObjects/PeaksWorkspace.h"
+#include "MantidGeometry/Crystal/EdgePixel.h"
+#include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/VMD.h"
-
-#include <boost/math/special_functions/fpclassify.hpp>
-#include <boost/type_traits/integral_constant.hpp>
 
 #include <map>
 #include <vector>
@@ -146,6 +145,11 @@ void FindPeaksMD::init() {
                   "If checked, then append the peaks in the output workspace "
                   "if it exists. \n"
                   "If unchecked, the output workspace is replaced (Default).");
+
+  auto nonNegativeInt = boost::make_shared<BoundedValidator<int>>();
+  nonNegativeInt->setLower(0);
+  declareProperty("EdgePixels", 0, nonNegativeInt,
+                  "Remove peaks that are at pixels this close to edge. ");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -192,6 +196,10 @@ void FindPeaksMD::readExperimentInfo(const ExperimentInfo_sptr &ei,
 void FindPeaksMD::addPeak(const V3D &Q, const double binCount) {
   try {
     auto p = this->createPeak(Q, binCount);
+    if (m_edge > 0) {
+      if (edgePixel(inst, p->getBankName(), p->getCol(), p->getRow(), m_edge))
+        return;
+    }
     if (p->getDetectorID() != -1)
       peakWS->addPeak(*p);
   } catch (std::exception &e) {
@@ -269,15 +277,14 @@ void FindPeaksMD::findPeaks(typename MDEventWorkspace<MDE, nd>::sptr ws) {
     // peak.
     signal_t thresholdDensity = ws->getBox()->getSignalNormalized() *
                                 DensityThresholdFactor * m_densityScaleFactor;
-    if (boost::math::isnan(thresholdDensity) ||
-        (thresholdDensity == std::numeric_limits<double>::infinity()) ||
-        (thresholdDensity == -std::numeric_limits<double>::infinity())) {
+    if (!std::isfinite(thresholdDensity)) {
       g_log.warning()
           << "Infinite or NaN overall density found. Your input data "
              "may be invalid. Using a 0 threshold instead.\n";
       thresholdDensity = 0;
     }
-    g_log.notice() << "Threshold signal density: " << thresholdDensity << '\n';
+    g_log.information() << "Threshold signal density: " << thresholdDensity
+                        << '\n';
 
     typedef API::IMDNode *boxPtr;
     // We will fill this vector with pointers to all the boxes (up to a given
@@ -311,7 +318,7 @@ void FindPeaksMD::findPeaks(typename MDEventWorkspace<MDE, nd>::sptr ws) {
     // List of chosen possible peak boxes.
     std::vector<API::IMDNode *> peakBoxes;
 
-    prog = new Progress(this, 0.30, 0.95, m_maxPeaks);
+    prog = make_unique<Progress>(this, 0.30, 0.95, m_maxPeaks);
 
     // used for selecting method for calculating BinCount
     bool isMDEvent(ws->id().find("MDEventWorkspace") != std::string::npos);
@@ -406,7 +413,14 @@ void FindPeaksMD::findPeaks(typename MDEventWorkspace<MDE, nd>::sptr ws) {
           addDetectors(*p, *mdBox);
         }
         if (p->getDetectorID() != -1) {
-          peakWS->addPeak(*p);
+          if (m_edge > 0) {
+            if (!edgePixel(inst, p->getBankName(), p->getCol(), p->getRow(),
+                           m_edge))
+              peakWS->addPeak(*p);
+            ;
+          } else {
+            peakWS->addPeak(*p);
+          }
           g_log.information() << "Add new peak with Q-center = " << Q[0] << ", "
                               << Q[1] << ", " << Q[2] << "\n";
         }
@@ -467,15 +481,14 @@ void FindPeaksMD::findPeaksHisto(
     double thresholdDensity =
         (totalSignal * ws->getInverseVolume() / double(numBoxes)) *
         DensityThresholdFactor * m_densityScaleFactor;
-    if ((thresholdDensity != thresholdDensity) ||
-        (thresholdDensity == std::numeric_limits<double>::infinity()) ||
-        (thresholdDensity == -std::numeric_limits<double>::infinity())) {
+    if (!std::isfinite(thresholdDensity)) {
       g_log.warning()
           << "Infinite or NaN overall density found. Your input data "
              "may be invalid. Using a 0 threshold instead.\n";
       thresholdDensity = 0;
     }
-    g_log.notice() << "Threshold signal density: " << thresholdDensity << '\n';
+    g_log.information() << "Threshold signal density: " << thresholdDensity
+                        << '\n';
 
     // -------------- Sort and Filter by Density -----------------------------
     progress(0.20, "Sorting Boxes by Density");
@@ -490,7 +503,7 @@ void FindPeaksMD::findPeaksHisto(
     // List of chosen possible peak boxes.
     std::vector<size_t> peakBoxes;
 
-    prog = new Progress(this, 0.30, 0.95, m_maxPeaks);
+    prog = make_unique<Progress>(this, 0.30, 0.95, m_maxPeaks);
 
     int64_t numBoxesFound = 0;
     // Now we go (backwards) through the map
@@ -585,6 +598,7 @@ void FindPeaksMD::exec() {
 
   DensityThresholdFactor = getProperty("DensityThresholdFactor");
   m_maxPeaks = getProperty("MaxPeaks");
+  m_edge = this->getProperty("EdgePixels");
 
   // Execute the proper algo based on the type of workspace
   if (inMDHW) {
@@ -596,8 +610,6 @@ void FindPeaksMD::exec() {
                              "MDHistoWorkspace or a MDEventWorkspace; it does "
                              "not work on a regular MatrixWorkspace.");
   }
-
-  delete prog;
 
   // Do a sort by bank name and then descending bin count (intensity)
   std::vector<std::pair<std::string, bool>> criteria;

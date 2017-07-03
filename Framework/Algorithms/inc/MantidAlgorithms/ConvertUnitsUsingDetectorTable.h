@@ -2,14 +2,17 @@
 #define MANTID_ALGORITHMS_CONVERTUNITSUSINGDETECTORTABLE_H_
 
 #include "MantidKernel/System.h"
-#include "MantidAPI/Algorithm.h"
+#include "MantidAlgorithms/ConvertUnits.h"
+#include "MantidAPI/DeprecatedAlgorithm.h"
 #include "MantidKernel/Unit.h"
 
 namespace Mantid {
 namespace Algorithms {
 
 /** ConvertUnitsUsingDetectorTable : Converts the units in which a workspace is
-  represented.
+  represented, this variant of ConvertUnits uses a supplied table of geometry
+  values
+  rather than those given by the instrument geometry.
 
   Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source
@@ -32,55 +35,29 @@ namespace Algorithms {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport ConvertUnitsUsingDetectorTable : public API::Algorithm {
+class DLLExport ConvertUnitsUsingDetectorTable
+    : public ConvertUnits,
+      public API::DeprecatedAlgorithm {
 public:
   const std::string name() const override;
   int version() const override;
   const std::string category() const override;
   const std::string summary() const override;
 
+protected:
+  const std::string workspaceMethodName() const override { return ""; }
+  const std::string workspaceMethodInputProperty() const override { return ""; }
+
 private:
   void init() override;
-  void exec() override;
 
-  void setupMemberVariables(const API::MatrixWorkspace_const_sptr inputWS);
-  API::MatrixWorkspace_sptr
-  setupOutputWorkspace(const API::MatrixWorkspace_const_sptr inputWS);
+  void storeEModeOnWorkspace(API::MatrixWorkspace_sptr outputWS) override;
 
-  void putBackBinWidth(const API::MatrixWorkspace_sptr outputWS);
-
-  /// Convert the workspace units according to a simple output = a * (input^b)
-  /// relationship
-  void convertQuickly(API::MatrixWorkspace_sptr outputWS, const double &factor,
-                      const double &power);
   /// Convert the workspace units using TOF as an intermediate step in the
   /// conversion
-  void convertViaTOF(Kernel::Unit_const_sptr fromUnit,
-                     API::MatrixWorkspace_sptr outputWS);
-
-  // Calls Rebin as a Child Algorithm to align the bins of the output workspace
   API::MatrixWorkspace_sptr
-  alignBins(const API::MatrixWorkspace_sptr workspace);
-  const std::vector<double>
-  calculateRebinParams(const API::MatrixWorkspace_const_sptr workspace) const;
-
-  /// Reverses the workspace if X values are in descending order
-  void reverse(API::MatrixWorkspace_sptr WS);
-
-  /// For conversions to energy transfer, removes bins corresponding to
-  /// inaccessible values
-  API::MatrixWorkspace_sptr
-  removeUnphysicalBins(const API::MatrixWorkspace_const_sptr workspace);
-
-  std::size_t m_numberOfSpectra =
-      0; ///< The number of spectra in the input workspace
-  bool m_distribution =
-      false; ///< Whether input is a distribution. Only applies to
-  /// histogram workspaces.
-  bool m_inputEvents = false; ///< Flag indicating whether input workspace is an
-  /// EventWorkspace
-  Kernel::Unit_const_sptr m_inputUnit; ///< The unit of the input workspace
-  Kernel::Unit_sptr m_outputUnit;      ///< The unit we're going to
+  convertViaTOF(Kernel::Unit_const_sptr fromUnit,
+                API::MatrixWorkspace_const_sptr inputWS) override;
 };
 
 } // namespace Algorithms

@@ -1,133 +1,79 @@
 #include "MantidQtCustomInterfaces/Reflectometry/ReflSettingsTabPresenter.h"
-#include "MantidAPI/AlgorithmManager.h"
 #include "MantidQtCustomInterfaces/Reflectometry/IReflMainWindowPresenter.h"
-#include "MantidQtCustomInterfaces/Reflectometry/IReflSettingsTabView.h"
+#include "MantidQtCustomInterfaces/Reflectometry/ReflSettingsPresenter.h"
 #include "MantidQtMantidWidgets/AlgorithmHintStrategy.h"
+#include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/MatrixWorkspace.h"
 
 #include <boost/algorithm/string.hpp>
 
 namespace MantidQt {
 namespace CustomInterfaces {
 
-using namespace Mantid::API;
-using namespace MantidQt::MantidWidgets;
-
 /** Constructor
-* @param view :: The view we are handling
+*
+* @param presenters :: The presenters of each group as a vector
 */
-ReflSettingsTabPresenter::ReflSettingsTabPresenter(IReflSettingsTabView *view)
-    : m_view(view), m_mainPresenter() {
-
-  // Create the 'HintingLineEdits'
-  createPlusHints();
-  createTransmissionHints();
-  createReductionHints();
-  createStitchHints();
-}
+ReflSettingsTabPresenter::ReflSettingsTabPresenter(
+    std::vector<IReflSettingsPresenter *> presenters)
+    : m_settingsPresenters(presenters) {}
 
 /** Destructor
+*
 */
 ReflSettingsTabPresenter::~ReflSettingsTabPresenter() {}
 
-/** Accept a main presenter
-* @param mainPresenter :: [input] The main presenter
+/** Sets the current instrument name and changes accessibility status of
+* the polarisation corrections option in the view accordingly
+*
+* @param instName :: [input] The name of the instrument to set to
 */
-void ReflSettingsTabPresenter::acceptMainPresenter(
-    IReflMainWindowPresenter *mainPresenter) {
-  m_mainPresenter = mainPresenter;
+void ReflSettingsTabPresenter::setInstrumentName(const std::string &instName) {
+  for (auto presenter : m_settingsPresenters)
+    presenter->setInstrumentName(instName);
 }
 
-/** Returns global options for 'Plus' algorithm
-* @return :: Global options for 'Plus' algorithm
+/** Returns values passed for 'Transmission run(s)'
+*
+* @param group :: The group from which to get the values
+* @param loadRuns :: If true, will try to load transmission runs as well
+* @return :: Values passed for 'Transmission run(s)'
 */
-std::string ReflSettingsTabPresenter::getPlusOptions() const {
+std::string ReflSettingsTabPresenter::getTransmissionRuns(int group,
+                                                          bool loadRuns) const {
 
-  return m_view->getPlusOptions();
+  return m_settingsPresenters.at(group)->getTransmissionRuns(loadRuns);
 }
 
 /** Returns global options for 'CreateTransmissionWorkspaceAuto'
+*
+* @param group :: The group from which to get the options
 * @return :: Global options for 'CreateTransmissionWorkspaceAuto'
 */
-std::string ReflSettingsTabPresenter::getTransmissionOptions() const {
+std::string ReflSettingsTabPresenter::getTransmissionOptions(int group) const {
 
-  return m_view->getTransmissionOptions();
+  return m_settingsPresenters.at(group)->getTransmissionOptions();
 }
 
 /** Returns global options for 'ReflectometryReductionOneAuto'
+*
+* @param group :: The group from which to get the options
 * @return :: Global options for 'ReflectometryReductionOneAuto'
 */
-std::string ReflSettingsTabPresenter::getReductionOptions() const {
+std::string ReflSettingsTabPresenter::getReductionOptions(int group) const {
 
-  return m_view->getReductionOptions();
+  return m_settingsPresenters.at(group)->getReductionOptions();
 }
 
 /** Returns global options for 'Stitch1DMany'
+*
+* @param group :: The group from which to get the options
 * @return :: Global options for 'Stitch1DMany'
 */
-std::string ReflSettingsTabPresenter::getStitchOptions() const {
+std::string ReflSettingsTabPresenter::getStitchOptions(int group) const {
 
-  return m_view->getStitchOptions();
-}
-
-/** Creates hints for 'Plus'
-*/
-void ReflSettingsTabPresenter::createPlusHints() {
-
-  // The algorithm
-  IAlgorithm_sptr alg = AlgorithmManager::Instance().create("Plus");
-  // The blacklist
-  std::set<std::string> blacklist = {"LHSWorkspace", "RHSWorkspace",
-                                     "OutputWorkspace"};
-  AlgorithmHintStrategy strategy(alg, blacklist);
-
-  m_view->createPlusHints(strategy.createHints());
-}
-
-/** Creates hints for 'CreateTransmissionWorkspaceAuto'
-*/
-void ReflSettingsTabPresenter::createTransmissionHints() {
-
-  // The algorithm
-  IAlgorithm_sptr alg =
-      AlgorithmManager::Instance().create("CreateTransmissionWorkspaceAuto");
-  // The blacklist
-  std::set<std::string> blacklist = {
-      "FirstTransmissionRun", "SecondTransmissionRun", "OutputWorkspace"};
-  AlgorithmHintStrategy strategy(alg, blacklist);
-
-  m_view->createTransmissionHints(strategy.createHints());
-}
-
-/** Creates hints for 'ReflectometryReductionOneAuto'
-*/
-void ReflSettingsTabPresenter::createReductionHints() {
-
-  // The algorithm
-  IAlgorithm_sptr alg =
-      AlgorithmManager::Instance().create("ReflectometryReductionOneAuto");
-  // The blacklist
-  std::set<std::string> blacklist = {
-      "ThetaIn", "ThetaOut", "InputWorkspace", "OutputWorkspace",
-      "OutputWorkspaceWavelength", "FirstTransmissionRun",
-      "SecondTransmissionRun", "MomentumTransferMinimum",
-      "MomentumTransferMaximum", "MomentumTransferStep", "ScaleFactor"};
-  AlgorithmHintStrategy strategy(alg, blacklist);
-
-  m_view->createReductionHints(strategy.createHints());
-}
-
-/** Creates hints for 'Stitch1DMany'
-*/
-void ReflSettingsTabPresenter::createStitchHints() {
-
-  // The algorithm
-  IAlgorithm_sptr alg = AlgorithmManager::Instance().create("Stitch1DMany");
-  // The blacklist
-  std::set<std::string> blacklist = {"InputWorkspaces", "OutputWorkspace",
-                                     "OutputWorkspace"};
-  AlgorithmHintStrategy strategy(alg, blacklist);
-
-  m_view->createStitchHints(strategy.createHints());
+  return m_settingsPresenters.at(group)->getStitchOptions();
 }
 }
 }

@@ -6,7 +6,11 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/IPeaksWorkspace_fwd.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
+
+#include <unordered_map>
+#include <vector>
 
 namespace Mantid {
 namespace Crystal {
@@ -17,18 +21,17 @@ public:
   /**
   Constructor
   @param t : tof
-  @param th2 : 2 * theta angle
   @param phi : psi angle
   @param intensity : peak intensity
   @param spectral : contributing spectra
-  @param Ltot : detector-sample absolute distance
-  @param detectorId : id of the contributing detector
+  @param wsIndex : ws index of the contributing spectrum
+  @param spectrumInfo: spectrum info of the original ws.
   */
-  SXPeak(double t, double th2, double phi, double intensity,
-         const std::vector<int> &spectral, double Ltot,
-         Mantid::detid_t detectorId)
-      : _t(t), _th2(th2), _phi(phi), _intensity(intensity), _Ltot(Ltot),
-        _detectorId(detectorId) {
+  SXPeak(double t, double phi, double intensity,
+         const std::vector<int> &spectral, const size_t wsIndex,
+         const API::SpectrumInfo &spectrumInfo)
+      : _t(t), _phi(phi), _intensity(intensity), _spectral(spectral),
+        _wsIndex(wsIndex) {
     // Sanity checks
     if (intensity < 0) {
       throw std::invalid_argument("SXPeak: Cannot have an intensity < 0");
@@ -37,12 +40,29 @@ public:
       throw std::invalid_argument(
           "SXPeak: Cannot have zero sized spectral list");
     }
-    if (Ltot < 0) {
+    if (!spectrumInfo.hasDetectors(_wsIndex)) {
+      throw std::invalid_argument("SXPeak: Spectrum at ws index " +
+                                  std::to_string(wsIndex) +
+                                  " doesn't have detectors");
+    }
+    _th2 = spectrumInfo.twoTheta(_wsIndex);
+    _Ltot = spectrumInfo.l1() + spectrumInfo.l2(_wsIndex);
+    if (_Ltot < 0) {
       throw std::invalid_argument("SXPeak: Cannot have detector distance < 0");
     }
+    _detId = spectrumInfo.detector(_wsIndex).getID();
     npixels = 1;
-    _spectral.resize(spectral.size());
-    std::copy(spectral.begin(), spectral.end(), _spectral.begin());
+
+    const auto samplePos = spectrumInfo.samplePosition();
+    const auto sourcePos = spectrumInfo.sourcePosition();
+    const auto detPos = spectrumInfo.position(_wsIndex);
+    // Normalized beam direction
+    auto beamDir = samplePos - sourcePos;
+    beamDir.normalize();
+    // Normalized detector direction
+    auto detDir = (detPos - samplePos);
+    detDir.normalize();
+    _unitWaveVector = beamDir - detDir;
   }
   /**
   Object comparision
@@ -67,20 +87,18 @@ public:
   @return q vector
   */
   Mantid::Kernel::V3D getQ() const {
-    double Qx = -sin(_th2) * cos(_phi);
-    double Qy = -sin(_th2) * sin(_phi);
-    double Qz = 1.0 - cos(_th2);
-    // Neutron velocity vi ( speed in m/s )
     double vi = _Ltot / (_t * 1e-6);
-    // wavelength = h / mv
-    double wi = PhysicalConstants::h / (PhysicalConstants::NeutronMass * vi);
+    // wavenumber = h_bar / mv
+    double wi =
+        PhysicalConstants::h_bar / (PhysicalConstants::NeutronMass * vi);
     // in angstroms
     wi *= 1e10;
-    // wavevector=1/wavelength
+    // wavevector=1/wavenumber = 2pi/wavelength
     double wvi = 1.0 / wi;
-    // Scale the scattered direction by the wavevector
-    return Mantid::Kernel::V3D(Qx * wvi, Qy * wvi, Qz * wvi);
+    // Now calculate the wavevector of the scattered neutron
+    return _unitWaveVector * wvi;
   }
+
   /**
   Operator addition overload
   @param rhs : Right hand slide peak for addition.
@@ -119,9 +137,9 @@ public:
   */
   const double &getIntensity() const { return _intensity; }
   /**
-  Getter for the detector id.
+  Getter for the detector Id.
   */
-  const Mantid::detid_t &getDetectorId() const { return _detectorId; }
+  detid_t getDetectorId() const { return _detId; }
 
 private:
   /// TOF
@@ -136,10 +154,14 @@ private:
   std::vector<int> _spectral;
   /// Detector-sample distance
   double _Ltot;
-  /// Detector id
-  Mantid::detid_t _detectorId;
+  /// Detector workspace index
+  size_t _wsIndex;
+  /// Detector ID
+  detid_t _detId;
   /// Number of contributing pixels
   int npixels;
+  /// Unit vector in the direction of the wavevector
+  Kernel::V3D _unitWaveVector;
 };
 
 typedef std::vector<SXPeak> peakvector;
@@ -214,6 +236,10 @@ private:
   void init() override;
   //
   void exec() override;
+  // Calculates/returns the average phi value of the detector(s)
+  double calculatePhi(
+      const std::unordered_map<size_t, std::vector<detid_t>> &detectorMapping,
+      const API::SpectrumInfo &spectrumInfo, size_t wsIndex);
   //
   void reducePeakList(const peakvector &);
   /// The value in X to start the search from
@@ -221,9 +247,9 @@ private:
   /// The value in X to finish the search at
   double m_MaxRange;
   /// The spectrum to start the integration from
-  size_t m_MinSpec;
+  size_t m_MinWsIndex;
   /// The spectrum to finish the integration at
-  size_t m_MaxSpec;
+  size_t m_MaxWsIndex;
   // The peaks workspace that contains the peaks information.
   Mantid::DataObjects::PeaksWorkspace_sptr m_peaks;
 };

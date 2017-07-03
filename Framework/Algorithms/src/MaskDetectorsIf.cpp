@@ -1,12 +1,10 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAlgorithms/MaskDetectorsIf.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/ListValidator.h"
 
 #include <fstream>
+#include <iomanip>
 
 namespace Mantid {
 namespace Algorithms {
@@ -70,7 +68,7 @@ void MaskDetectorsIf::exec() {
     if (dets.empty())
       continue;
     else {
-      double val = inputW->readY(i)[0];
+      double val = inputW->y(i)[0];
       if (compar_f(val, value)) {
         for (auto det : dets) {
           umap.emplace(det, select_on);

@@ -4,12 +4,14 @@
 #include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
+#include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/Unit.h"
 
 namespace Mantid {
@@ -28,14 +30,12 @@ const double MASS_TO_MEV =
     0.5 * PhysicalConstants::NeutronMass / PhysicalConstants::meV;
 }
 
-//----------------------------------------------------------------------------------------------
 /** Constructor
 */
 ConvertToYSpace::ConvertToYSpace()
     : Algorithm(), m_inputWS(), m_mass(0.0), m_l1(0.0), m_samplePos(),
       m_outputWS(), m_qOutputWS() {}
 
-//----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string ConvertToYSpace::name() const { return "ConvertToYSpace"; }
 
@@ -47,9 +47,6 @@ const std::string ConvertToYSpace::category() const {
   return "Transforms\\Units";
 }
 
-//----------------------------------------------------------------------------------------------
-
-//----------------------------------------------------------------------------------------------
 /**
 * @param ws The workspace with attached instrument
 * @param index Index of the spectrum
@@ -64,24 +61,23 @@ DetectorParams ConvertToYSpace::getDetectorParameters(
     throw std::invalid_argument(
         "ConvertToYSpace - Workspace has no source/sample.");
   }
-  Geometry::IDetector_const_sptr det;
-  try {
-    det = ws->getDetector(index);
-  } catch (Kernel::Exception::NotFoundError &) {
+
+  const auto &spectrumInfo = ws->spectrumInfo();
+  if (!spectrumInfo.hasDetectors(index))
     throw std::invalid_argument("ConvertToYSpace - Workspace has no detector "
                                 "attached to histogram at index " +
                                 std::to_string(index));
-  }
 
   DetectorParams detpar;
   const auto &pmap = ws->constInstrumentParameters();
-  detpar.l1 = sample->getDistance(*source);
-  detpar.l2 = det->getDistance(*sample);
-  detpar.pos = det->getPos();
-  detpar.theta = ws->detectorTwoTheta(*det);
-  detpar.t0 = ConvertToYSpace::getComponentParameter(det, pmap, "t0") *
-              1e-6; // Convert to seconds
-  detpar.efixed = ConvertToYSpace::getComponentParameter(det, pmap, "efixed");
+  const auto &det = spectrumInfo.detector(index);
+  detpar.l1 = spectrumInfo.l1();
+  detpar.l2 = spectrumInfo.l2(index);
+  detpar.pos = spectrumInfo.position(index);
+  detpar.theta = spectrumInfo.twoTheta(index);
+  detpar.t0 =
+      getComponentParameter(det, pmap, "t0") * 1e-6; // Convert to seconds
+  detpar.efixed = getComponentParameter(det, pmap, "efixed");
   return detpar;
 }
 
@@ -94,19 +90,15 @@ DetectorParams ConvertToYSpace::getDetectorParameters(
 * @returns The value of the parameter if it exists
 * @throws A std::invalid_argument error if the parameter does not exist
 */
-double ConvertToYSpace::getComponentParameter(
-    const Geometry::IComponent_const_sptr &comp,
-    const Geometry::ParameterMap &pmap, const std::string &name) {
-  if (!comp)
-    throw std::invalid_argument(
-        "ComptonProfile - Cannot retrieve parameter from NULL component");
-
+double
+ConvertToYSpace::getComponentParameter(const Geometry::IComponent &comp,
+                                       const Geometry::ParameterMap &pmap,
+                                       const std::string &name) {
   double result(0.0);
-  if (const auto group =
-          boost::dynamic_pointer_cast<const Geometry::DetectorGroup>(comp)) {
-    const auto dets = group->getDetectors();
+  if (const auto &group =
+          dynamic_cast<const Geometry::DetectorGroup *>(&comp)) {
     double avg(0.0);
-    for (const auto &det : dets) {
+    for (const auto &det : group->getDetectors()) {
       auto param = pmap.getRecursive(det->getComponentID(), name);
       if (param)
         avg += param->value<double>();
@@ -117,7 +109,7 @@ double ConvertToYSpace::getComponentParameter(
     }
     result = avg / static_cast<double>(group->nDets());
   } else {
-    auto param = pmap.getRecursive(comp->getComponentID(), name);
+    auto param = pmap.getRecursive(comp.getComponentID(), name);
     if (param) {
       result = param->value<double>();
     } else {
@@ -200,16 +192,26 @@ void ConvertToYSpace::exec() {
   const int64_t nreports = nhist;
   auto progress = boost::make_shared<Progress>(this, 0.0, 1.0, nreports);
 
-  PARALLEL_FOR2(m_inputWS, m_outputWS)
+  auto &spectrumInfo = m_outputWS->mutableSpectrumInfo();
+  SpectrumInfo *qSpectrumInfo{nullptr};
+  if (m_qOutputWS)
+    qSpectrumInfo = &m_qOutputWS->mutableSpectrumInfo();
+
+  PARALLEL_FOR_IF(Kernel::threadSafe(*m_inputWS, *m_outputWS))
   for (int64_t i = 0; i < nhist; ++i) {
     PARALLEL_START_INTERUPT_REGION
 
     if (!convert(i)) {
       g_log.warning("No detector defined for index=" + std::to_string(i) +
                     ". Zeroing spectrum.");
-      m_outputWS->maskWorkspaceIndex(i);
-      if (m_qOutputWS)
-        m_qOutputWS->maskWorkspaceIndex(i);
+      m_outputWS->getSpectrum(i).clearData();
+      PARALLEL_CRITICAL(setMasked) {
+        spectrumInfo.setMasked(i, true);
+        if (m_qOutputWS) {
+          m_qOutputWS->getSpectrum(i).clearData();
+          qSpectrumInfo->setMasked(i, true);
+        }
+      }
     }
 
     PARALLEL_END_INTERUPT_REGION
@@ -235,12 +237,12 @@ bool ConvertToYSpace::convert(const size_t index) {
     const double k1 = std::sqrt(detPar.efixed /
                                 PhysicalConstants::E_mev_toNeutronWavenumberSq);
 
-    auto &outX = m_outputWS->dataX(index);
-    auto &outY = m_outputWS->dataY(index);
-    auto &outE = m_outputWS->dataE(index);
-    const auto &inX = m_inputWS->readX(index);
-    const auto &inY = m_inputWS->readY(index);
-    const auto &inE = m_inputWS->readE(index);
+    auto &outX = m_outputWS->mutableX(index);
+    auto &outY = m_outputWS->mutableY(index);
+    auto &outE = m_outputWS->mutableE(index);
+    const auto &inX = m_inputWS->x(index);
+    const auto &inY = m_inputWS->y(index);
+    const auto &inE = m_inputWS->e(index);
 
     // The t->y mapping flips the order of the axis so we need to reverse it to
     // have a monotonically increasing axis
@@ -255,8 +257,8 @@ bool ConvertToYSpace::convert(const size_t index) {
       outE[outIndex] = prefactor * inE[j];
 
       if (m_qOutputWS) {
-        m_qOutputWS->dataX(index)[outIndex] = ys;
-        m_qOutputWS->dataY(index)[outIndex] = qs;
+        m_qOutputWS->mutableX(index)[outIndex] = ys;
+        m_qOutputWS->mutableY(index)[outIndex] = qs;
       }
     }
     return true;

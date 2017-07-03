@@ -1,6 +1,5 @@
 #include "MantidQtMantidWidgets/PropertyHandler.h"
 #include "MantidQtMantidWidgets/FitPropertyBrowser.h"
-//#include "../FunctionCurve.h"
 
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IPeakFunction.h"
@@ -12,7 +11,6 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/IFunction1D.h"
 #include "MantidAPI/FunctionDomain1D.h"
 #include "MantidAPI/FunctionValues.h"
 
@@ -21,7 +19,6 @@
 #include "ParameterPropertyManager.h"
 
 #include <QMessageBox>
-#include <QMenu>
 
 using std::size_t;
 
@@ -136,8 +133,7 @@ public:
 protected:
   /// Create string property
   QtProperty *apply(const std::string &str) const override {
-    QtProperty *prop = NULL;
-    prop = m_browser->addStringProperty(m_name);
+    QtProperty *prop = m_browser->addStringProperty(m_name);
     m_browser->setStringPropertyValue(prop, QString::fromStdString(str));
     return prop;
   }
@@ -168,7 +164,8 @@ protected:
     m_browser->m_vectorSizeManager->setValue(sizeProp,
                                              static_cast<int>(b.size()));
     prop->addSubProperty(sizeProp);
-    sizeProp->setEnabled(false);
+    m_handler->m_vectorSizes << sizeProp;
+    // sizeProp->setEnabled(false);
     m_browser->m_vectorSizeManager->blockSignals(false);
     m_browser->m_vectorDoubleManager->blockSignals(true);
     QString dpName = "value[%1]";
@@ -240,6 +237,12 @@ void PropertyHandler::initParameters() {
         prop->addSubProperty(tieProp);
         m_ties[parName] = tieProp;
       }
+    } else if (m_fun->isFixed(i)) {
+      QtProperty *tieProp = m_browser->m_stringManager->addProperty("Tie");
+      m_browser->m_stringManager->setValue(
+          tieProp, QString::number(m_fun->getParameter(i)));
+      prop->addSubProperty(tieProp);
+      m_ties[parName] = tieProp;
     }
     // add constraint properties
     Mantid::API::IConstraint *c = m_fun->getConstraint(i);
@@ -370,13 +373,12 @@ PropertyHandler *PropertyHandler::addFunction(const std::string &fnName) {
   // from data values at the ends of the fitting interval
   if (f->name() == "LinearBackground" && !m_browser->workspaceName().empty()) {
     if (ws && wi < ws->getNumberHistograms()) {
-      const Mantid::MantidVec &X = ws->readX(wi);
+      const auto &X = ws->x(wi);
       size_t istart = 0, iend = 0;
       for (size_t i = 0; i < X.size() - 1; ++i) {
         double x = X[i];
-        if (x < m_browser->startX()) {
+        if (x < m_browser->startX())
           istart = i;
-        }
         if (x > m_browser->endX()) {
           iend = i;
           if (iend > 0)
@@ -385,7 +387,7 @@ PropertyHandler *PropertyHandler::addFunction(const std::string &fnName) {
         }
       }
       if (iend > istart) {
-        const Mantid::MantidVec &Y = ws->readY(wi);
+        const auto &Y = ws->y(wi);
         double p0 = Y[istart];
         double p1 = Y[iend];
         double A1 = (p1 - p0) / (X[iend] - X[istart]);
@@ -575,6 +577,8 @@ PropertyHandler *PropertyHandler::findHandler(QtProperty *prop) {
     return this;
   if (m_vectorMembers.contains(prop))
     return this;
+  if (m_vectorSizes.contains(prop))
+    return this;
   if (!m_ties.key(prop, "").isEmpty())
     return this;
   QMap<QString, std::pair<QtProperty *, QtProperty *>>::iterator it =
@@ -675,12 +679,17 @@ protected:
   /// Create vector property
   void apply(std::vector<double> &v) const override {
     QList<QtProperty *> members = m_prop->subProperties();
-    if (members.size() <= 1) {
+    if (members.size() < 1) {
       v.clear();
       return;
     }
-    v.resize(members.size() - 1);
-    for (int i = 1; i < members.size(); ++i) {
+    int newSize = m_browser->m_vectorSizeManager->value(members[0]);
+    v.resize(newSize);
+    int vectorSize = members.size() - 1;
+    if (vectorSize > newSize) {
+      vectorSize = newSize;
+    }
+    for (int i = 1; i < vectorSize + 1; ++i) {
       v[i - 1] = m_browser->m_vectorDoubleManager->value(members[i]);
     }
   }
@@ -741,10 +750,12 @@ private:
 
 /**
 * Set function attribute value read from a QtProperty
-* @param prop :: The (string) property with the new attribute value
+* @param prop :: The property with the new attribute value
+* @param resetProperties :: Flag to reset all properties of the handled
+* function.
 * @return true if successfull
 */
-bool PropertyHandler::setAttribute(QtProperty *prop) {
+bool PropertyHandler::setAttribute(QtProperty *prop, bool resetProperties) {
   if (m_attributes.contains(prop)) {
     QString attName = prop->propertyName();
     try {
@@ -754,8 +765,10 @@ bool PropertyHandler::setAttribute(QtProperty *prop) {
       att.apply(tmp);
       m_fun->setAttribute(attName.toStdString(), att);
       m_browser->compositeFunction()->checkFunction();
-      initAttributes();
-      initParameters();
+      if (resetProperties) {
+        initAttributes();
+        initParameters();
+      }
       if (this == m_browser->m_autoBackground) {
         fit();
       }
@@ -769,7 +782,7 @@ bool PropertyHandler::setAttribute(QtProperty *prop) {
   }
   if (m_cf) {
     for (size_t i = 0; i < m_cf->nFunctions(); i++) {
-      bool res = getHandler(i)->setAttribute(prop);
+      bool res = getHandler(i)->setAttribute(prop, resetProperties);
       if (res)
         return true;
     }
@@ -832,7 +845,8 @@ void PropertyHandler::setVectorAttribute(QtProperty *prop) {
   foreach (QtProperty *att, m_attributes) {
     QList<QtProperty *> subProps = att->subProperties();
     if (subProps.contains(prop)) {
-      setAttribute(att);
+      bool resetProperties = m_vectorSizes.contains(prop);
+      setAttribute(att, resetProperties);
       return;
     }
   }
@@ -1016,12 +1030,11 @@ void PropertyHandler::addTie(const QString &tieStr) {
   std::string name = parts[0].trimmed().toStdString();
   std::string expr = parts[1].trimmed().toStdString();
   try {
-    Mantid::API::ParameterTie *tie =
-        m_browser->compositeFunction()->tie(name, expr);
-    if (tie == NULL)
-      return;
+    auto &cfun = *m_browser->compositeFunction();
+    cfun.tie(name, expr);
+    const bool recursive = true;
     QString parName = QString::fromStdString(
-        tie->getFunction()->parameterName(static_cast<int>(tie->getIndex())));
+        cfun.parameterLocalName(cfun.parameterIndex(name), recursive));
     foreach (QtProperty *parProp, m_parameters) {
       if (parProp->propertyName() == parName) {
         m_browser->m_changeSlotsEnabled = false;
@@ -1039,6 +1052,8 @@ void PropertyHandler::addTie(const QString &tieStr) {
     }
   } catch (...) {
   }
+  QMessageBox::critical(m_browser, "Mantid - Error",
+                        "Failed to set tie: " + tieStr);
 }
 
 void PropertyHandler::fix(const QString &parName) {
@@ -1103,8 +1118,8 @@ double PropertyHandler::EstimateFwhm() const {
       m_browser->getWorkspace());
   if (ws) {
     size_t wi = m_browser->workspaceIndex();
-    const Mantid::MantidVec &X = ws->readX(wi);
-    const Mantid::MantidVec &Y = ws->readY(wi);
+    const auto &X = ws->x(wi);
+    const auto &Y = ws->y(wi);
     size_t n = Y.size() - 1;
     if (m_ci < 0 || m_ci > static_cast<int>(n)) {
       fwhm = 0.;
@@ -1150,8 +1165,8 @@ void PropertyHandler::calcBase() {
       m_browser->getWorkspace());
   if (ws) {
     size_t wi = m_browser->workspaceIndex();
-    const Mantid::MantidVec &X = ws->readX(wi);
-    const Mantid::MantidVec &Y = ws->readY(wi);
+    const auto &X = ws->x(wi);
+    const auto &Y = ws->y(wi);
     int n = static_cast<int>(Y.size()) - 1;
     if (m_ci < 0 || m_ci > n || !m_browser->m_autoBackground) {
       m_base = 0.;
@@ -1208,7 +1223,7 @@ void PropertyHandler::setCentre(const double &c) {
         m_browser->getWorkspace());
     if (ws) {
       size_t wi = m_browser->workspaceIndex();
-      const Mantid::MantidVec &X = ws->readX(wi);
+      const auto &X = ws->x(wi);
       int n = static_cast<int>(X.size()) - 2;
       if (m_ci < 0)
         m_ci = 0;
@@ -1319,10 +1334,10 @@ void PropertyHandler::addConstraint(QtProperty *parProp, bool lo, bool up,
 
   m_constraints.insert(parProp->propertyName(), cnew);
 
-  Mantid::API::IConstraint *c =
+  auto c = std::unique_ptr<Mantid::API::IConstraint>(
       Mantid::API::ConstraintFactory::Instance().createInitialized(m_fun.get(),
-                                                                   ostr.str());
-  m_fun->addConstraint(c);
+                                                                   ostr.str()));
+  m_fun->addConstraint(std::move(c));
   m_browser->m_changeSlotsEnabled = true;
 }
 

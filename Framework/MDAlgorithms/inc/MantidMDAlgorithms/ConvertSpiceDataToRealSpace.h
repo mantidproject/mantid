@@ -7,6 +7,8 @@
 #include "MantidGeometry/IDTypes.h"
 #include "MantidKernel/FileDescriptor.h"
 
+#include <deque>
+
 namespace Mantid {
 namespace MDAlgorithms {
 

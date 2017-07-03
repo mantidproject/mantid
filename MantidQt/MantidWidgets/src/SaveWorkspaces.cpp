@@ -2,7 +2,6 @@
 // Includes
 //----------------------
 #include "MantidQtMantidWidgets/SaveWorkspaces.h"
-#include "MantidQtAPI/FileDialogHandler.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FileProperty.h"
@@ -11,16 +10,36 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ConfigService.h"
 
-#include <QLabel>
-#include <QHBoxLayout>
-#include <QVBoxLayout>
-#include <QPushButton>
-#include <QDoubleValidator>
 #include <QCloseEvent>
-#include <QShowEvent>
+#include <QDoubleValidator>
+#include <QFileDialog>
 #include <QGroupBox>
-#include <QSettings>
+#include <QHBoxLayout>
+#include <QLabel>
 #include <QMessageBox>
+#include <QPushButton>
+#include <QSettings>
+#include <QShowEvent>
+#include <QVBoxLayout>
+
+namespace {
+void setDetectorNamesOnCanSasFormat(QString &saveCommands,
+                                    const QList<QListWidgetItem *> &wspaces,
+                                    int j) {
+  saveCommands += ", DetectorNames=";
+  Mantid::API::Workspace_sptr workspace_ptr =
+      Mantid::API::AnalysisDataService::Instance().retrieve(
+          wspaces[j]->text().toStdString());
+  Mantid::API::MatrixWorkspace_sptr matrix_workspace =
+      boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(workspace_ptr);
+  if (matrix_workspace) {
+    if (matrix_workspace->getInstrument()->getName() == "SANS2D")
+      saveCommands += "'front-detector, rear-detector'";
+    if (matrix_workspace->getInstrument()->getName() == "LOQ")
+      saveCommands += "'HAB, main-detector-bank'";
+  }
+}
+}
 
 using namespace MantidQt::MantidWidgets;
 using namespace Mantid::Kernel;
@@ -108,17 +127,16 @@ void SaveWorkspaces::setupLine2(
   QPushButton *cancel = new QPushButton("Cancel");
   connect(cancel, SIGNAL(clicked()), this, SLOT(close()));
 
-  QCheckBox *saveNex = new QCheckBox("Nexus");
-  QCheckBox *saveNIST = new QCheckBox("NIST Qxy");
-  QCheckBox *saveCan = new QCheckBox("CanSAS");
-  QCheckBox *saveRKH = new QCheckBox("RKH");
-  QCheckBox *saveCSV = new QCheckBox("CSV");
+  QCheckBox *saveNIST = new QCheckBox("NIST Qxy (2D)");
+  QCheckBox *saveRKH = new QCheckBox("RKH (1D/2D)");
+  QCheckBox *saveNXcanSAS = new QCheckBox("NXcanSAS (1D/2D)");
+  QCheckBox *saveCan = new QCheckBox("CanSAS (1D)");
+
   // link the save option tick boxes to their save algorithm
-  m_savFormats.insert(saveNex, "SaveNexus");
   m_savFormats.insert(saveNIST, "SaveNISTDAT");
-  m_savFormats.insert(saveCan, "SaveCanSAS1D");
   m_savFormats.insert(saveRKH, "SaveRKH");
-  m_savFormats.insert(saveCSV, "SaveCSV");
+  m_savFormats.insert(saveNXcanSAS, "SaveNXcanSAS");
+  m_savFormats.insert(saveCan, "SaveCanSAS1D");
   setupFormatTicks(defSavs);
 
   m_append = new QCheckBox("Append");
@@ -132,11 +150,10 @@ void SaveWorkspaces::setupLine2(
   ly_saveConts->addStretch();
 
   QVBoxLayout *ly_saveFormats = new QVBoxLayout;
-  ly_saveFormats->addWidget(saveNex);
   ly_saveFormats->addWidget(saveNIST);
-  ly_saveFormats->addWidget(saveCan);
   ly_saveFormats->addWidget(saveRKH);
-  ly_saveFormats->addWidget(saveCSV);
+  ly_saveFormats->addWidget(saveNXcanSAS);
+  ly_saveFormats->addWidget(saveCan);
   QGroupBox *gb_saveForms = new QGroupBox(tr("Save Formats"));
   gb_saveForms->setLayout(ly_saveFormats);
   ly_saveConts->addWidget(gb_saveForms);
@@ -150,11 +167,10 @@ void SaveWorkspaces::setupLine2(
   gb_saveForms->setToolTip(formatsTip);
   save->setToolTip(formatsTip);
   cancel->setToolTip(formatsTip);
-  saveNex->setToolTip(formatsTip);
+  saveNXcanSAS->setToolTip(formatsTip);
   saveNIST->setToolTip(formatsTip);
   saveCan->setToolTip(formatsTip);
   saveRKH->setToolTip(formatsTip);
-  saveCSV->setToolTip(formatsTip);
   m_append->setToolTip(formatsTip);
 }
 /** Sets up some controls from what is in the QSettings
@@ -254,31 +270,23 @@ QString SaveWorkspaces::saveList(const QList<QListWidgetItem *> &wspaces,
       outFile += exten;
     }
     saveCommands += outFile + "'";
-    if (algorithm != "SaveCSV" && algorithm != "SaveNISTDAT") {
+    if (algorithm != "SaveNISTDAT" && algorithm != "SaveNXcanSAS") {
       saveCommands += ", Append=";
       saveCommands += toAppend ? "True" : "False";
     }
     if (algorithm == "SaveCanSAS1D") {
-      saveCommands += ", DetectorNames=";
-      Workspace_sptr workspace_ptr = AnalysisDataService::Instance().retrieve(
-          wspaces[j]->text().toStdString());
-      MatrixWorkspace_sptr matrix_workspace =
-          boost::dynamic_pointer_cast<MatrixWorkspace>(workspace_ptr);
-      if (matrix_workspace) {
-        if (matrix_workspace->getInstrument()->getName() == "SANS2D")
-          saveCommands += "'front-detector, rear-detector'";
-        if (matrix_workspace->getInstrument()->getName() == "LOQ")
-          saveCommands += "'HAB, main-detector-bank'";
-      } else {
-        // g_log.wa
-      }
+      setDetectorNamesOnCanSasFormat(saveCommands, wspaces, j);
+
+      // Add the geometry information
+      emit updateGeometryInformation();
+      // Remove the first three characters, since they are unwanted
+      saveCommands += ", Geometry='" + m_geometryID + "', SampleHeight=" +
+                      m_sampleHeight + ", SampleWidth=" + m_sampleWidth +
+                      ", SampleThickness=" + m_sampleThickness;
     }
-    // Add the geometry information
-    emit updateGeometryInformation();
-    // Remove the first three characters, since they are unwanted
-    saveCommands += ", Geometry='" + m_geometryID + "', SampleHeight=" +
-                    m_sampleHeight + ", SampleWidth=" + m_sampleWidth +
-                    ", SampleThickness=" + m_sampleThickness;
+    if (algorithm == "SaveNXcanSAS") {
+      setDetectorNamesOnCanSasFormat(saveCommands, wspaces, j);
+    }
     saveCommands += ")\n";
   }
   return saveCommands;
@@ -305,6 +313,11 @@ QString SaveWorkspaces::getSaveAlgExt(const QString &algName) {
 *  have been selected to be saved
 */
 void SaveWorkspaces::saveSel() {
+  // Check if the save selection is valid
+  if (!isValid()) {
+    return;
+  }
+
   // For each selected workspace, provide an zero-error free clone
   QHash<QString, QString> workspaceMap =
       provideZeroFreeWorkspaces(m_workspaces);
@@ -316,11 +329,6 @@ void SaveWorkspaces::saveSel() {
     if (i.key()->isChecked()) { // we need to save in this format
 
       bool toAppend = m_append->isChecked();
-      if (toAppend) { // SaveCSV doesn't support appending
-        if (i.value() == "SaveCSV") {
-          toAppend = false;
-        }
-      }
 
       try {
         saveCommands += saveList(m_workspaces->selectedItems(), i.value(),
@@ -347,6 +355,72 @@ void SaveWorkspaces::saveSel() {
                           "the selected formats");
   }
 }
+
+/**
+ * Checks if the save option selection is compatible with the dimensionality
+ * selection
+ * @return true if the save option selection is compatible with the
+ * dimensionality selection else false
+ */
+bool SaveWorkspaces::isValid() {
+  // Get the dimensionality of the workspaces
+  auto is1D = false;
+  auto is2D = false;
+
+  auto workspacesList = m_workspaces->selectedItems();
+  for (auto it = workspacesList.begin(); it != workspacesList.end(); ++it) {
+    auto wsName = (*it)->text();
+    auto workspace =
+        AnalysisDataService::Instance()
+            .retrieveWS<Mantid::API::MatrixWorkspace>(wsName.toStdString());
+    if (workspace->getNumberHistograms() == 1) {
+      is1D = true;
+    } else {
+      is2D = true;
+    }
+  }
+
+  // Check if the NistQxy or CanSAS were selected
+  auto isCanSAS = false;
+  auto isNistQxy = false;
+  for (SavFormatsConstIt i = m_savFormats.begin(); i != m_savFormats.end();
+       ++i) { // the key to a pointer to the check box that the user may have
+              // clicked
+    if (i.key()->isChecked()) { // we need to save in this format
+      if (i.value() == "SaveNISTDAT") {
+        isNistQxy = true;
+      }
+
+      if (i.value() == "SaveCanSAS1D") {
+        isCanSAS = true;
+      }
+    }
+  }
+
+  // Check for errors
+  QString message;
+  auto isValidOption = true;
+  if (is1D && isNistQxy) {
+    isValidOption = false;
+    message +=
+        "Save option issue: Cannot save in NistQxy format for 1D data.\n";
+  }
+
+  if (is2D && isCanSAS) {
+    isValidOption = false;
+    message += "Save option issue: Cannot save in CanSAS format for 2D data.\n";
+  }
+
+  // Print the error message if there are any
+  if (!message.isEmpty()) {
+    QString warning = "Please correct these save settings before proceeding:\n";
+    warning += message;
+    QMessageBox::warning(this, "Inconsistent input", warning);
+  }
+
+  return isValidOption;
+}
+
 /** Sets the filename to the name of the selected workspace
 *  @param row number of the row that is selected
 */
@@ -367,12 +441,12 @@ void SaveWorkspaces::saveFileBrowse() {
                                   ConfigService::Instance().getString(
                                       "defaultsave.directory"))).toString();
 
-  QString filter = ";;AllFiles (*.*)";
+  QString filter = ";;AllFiles (*)";
   QFileDialog::Option userCon = m_append->isChecked()
                                     ? QFileDialog::DontConfirmOverwrite
                                     : static_cast<QFileDialog::Option>(0);
-  QString oFile = API::FileDialogHandler::getSaveFileName(
-      this, title, prevPath, filter, NULL, userCon);
+  QString oFile = QFileDialog::getSaveFileName(this, title, prevPath, filter,
+                                               NULL, userCon);
 
   if (!oFile.isEmpty()) {
     m_fNameEdit->setText(oFile);

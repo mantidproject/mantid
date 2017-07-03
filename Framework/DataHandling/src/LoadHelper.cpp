@@ -3,9 +3,11 @@
  * */
 
 #include "MantidDataHandling/LoadHelper.h"
-
+#include "MantidAPI/DetectorInfo.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidGeometry/Instrument/ComponentHelper.h"
+#include "MantidGeometry/Instrument.h"
+#include "MantidAPI/SpectrumInfo.h"
+#include "MantidKernel/PhysicalConstants.h"
 
 #include <nexus/napi.h>
 
@@ -101,25 +103,6 @@ double LoadHelper::calculateTOF(double distance, double wavelength) {
                                             wavelength * 1e-10); // m/s
 
   return distance / velocity;
-}
-
-double LoadHelper::getL1(const API::MatrixWorkspace_sptr &workspace) {
-  Geometry::Instrument_const_sptr instrument = workspace->getInstrument();
-  Geometry::IComponent_const_sptr sample = instrument->getSample();
-  double l1 = instrument->getSource()->getDistance(*sample);
-  return l1;
-}
-
-double LoadHelper::getL2(const API::MatrixWorkspace_sptr &workspace,
-                         int detId) {
-  // Get a pointer to the instrument contained in the workspace
-  Geometry::Instrument_const_sptr instrument = workspace->getInstrument();
-  // Get the distance between the source and the sample (assume in metres)
-  Geometry::IComponent_const_sptr sample = instrument->getSample();
-  // Get the sample-detector distance for this detector (in metres)
-  double l2 =
-      workspace->getDetector(detId)->getPos().distance(sample->getPos());
-  return l2;
 }
 
 /*
@@ -222,17 +205,21 @@ void LoadHelper::recurseAndAddNexusFieldsToWsRun(NXhandle nxfileID,
 
       NXstatus opengroup_status;
       NXstatus opendata_status;
+      NXstatus getinfo_status;
 
       if ((opengroup_status = NXopengroup(nxfileID, nxname, nxclass)) ==
           NX_OK) {
 
-        // Go down to one level
-        std::string p_nxname(
-            nxname); // current names can be useful for next level
-        std::string p_nxclass(nxclass);
+        if (std::string(nxclass) != "ILL_data_scan_vars") {
 
-        recurseAndAddNexusFieldsToWsRun(nxfileID, runDetails, p_nxname,
-                                        p_nxclass, level + 1);
+          // Go down to one level, if the group is known to nexus
+          std::string p_nxname(
+              nxname); // current names can be useful for next level
+          std::string p_nxclass(nxclass);
+
+          recurseAndAddNexusFieldsToWsRun(nxfileID, runDetails, p_nxname,
+                                          p_nxclass, level + 1);
+        }
 
         NXclosegroup(nxfileID);
       } // if(NXopengroup
@@ -246,10 +233,9 @@ void LoadHelper::recurseAndAddNexusFieldsToWsRun(NXhandle nxfileID,
                         << nxname << ")\n";
           /* nothing */
         } else { // create a property
-          int rank;
-          int dims[4];
+          int rank = 0;
+          int dims[4] = {0, 0, 0, 0};
           int type;
-          dims[0] = dims[1] = dims[2] = dims[3] = 0;
 
           std::string property_name =
               (parent_name.empty() ? nxname : parent_name + "." + nxname);
@@ -258,132 +244,167 @@ void LoadHelper::recurseAndAddNexusFieldsToWsRun(NXhandle nxfileID,
                         << property_name << '\n';
 
           // Get the value
-          NXgetinfo(nxfileID, &rank, dims, &type);
+          if ((getinfo_status = NXgetinfo(nxfileID, &rank, dims, &type)) ==
+              NX_OK) {
 
-          // Note, we choose to only build properties on small float arrays
-          // filter logic is below
-          bool build_small_float_array = false; // default
+            g_log.debug() << indent_str << "Rank of " << property_name << " is "
+                          << rank << "\n" << indent_str << "Dimensions are "
+                          << dims[0] << ", " << dims[1] << ", " << dims[2]
+                          << ", " << dims[3] << "\n";
 
-          if ((type == NX_FLOAT32) || (type == NX_FLOAT64)) {
-            if ((rank == 1) && (dims[0] <= 9)) {
-              build_small_float_array = true;
-            } else {
-              g_log.debug() << indent_str
-                            << "ignored multi dimension float data on "
-                            << property_name << '\n';
-            }
-          } else if (type != NX_CHAR) {
-            if ((rank != 1) || (dims[0] != 1) || (dims[1] != 1) ||
-                (dims[2] != 1) || (dims[3] != 1)) {
-              g_log.debug() << indent_str << "ignored multi dimension data on "
-                            << property_name << '\n';
-            }
-          }
-
-          void *dataBuffer;
-          NXmalloc(&dataBuffer, rank, dims, type);
-
-          if (NXgetdata(nxfileID, dataBuffer) != NX_OK) {
-            NXfree(&dataBuffer);
-            throw std::runtime_error("Cannot read data from NeXus file");
-          }
-
-          if (type == NX_CHAR) {
-            std::string property_value(
-                reinterpret_cast<const char *>(dataBuffer));
-            if (boost::algorithm::ends_with(property_name, "_time")) {
-              // That's a time value! Convert to Mantid standard
-              property_value = dateTimeInIsoFormat(property_value);
-            }
-            runDetails.addProperty(property_name, property_value);
-
-          } else if ((type == NX_FLOAT32) || (type == NX_FLOAT64) ||
-                     (type == NX_INT16) || (type == NX_INT32) ||
-                     (type == NX_UINT16)) {
-
-            // Look for "units"
-            NXstatus units_status;
-            char units_sbuf[NX_MAXNAMELEN];
-            int units_len = NX_MAXNAMELEN;
-            int units_type = NX_CHAR;
-
-            units_status = NXgetattr(nxfileID, "units", units_sbuf, &units_len,
-                                     &units_type);
-            if (units_status != NX_ERROR) {
-              g_log.debug() << indent_str << "[ " << property_name
-                            << " has unit " << units_sbuf << " ]\n";
-            }
+            // Note, we choose to only build properties on small float arrays
+            // filter logic is below
+            bool build_small_float_array = false; // default
+            bool read_property = true;
 
             if ((type == NX_FLOAT32) || (type == NX_FLOAT64)) {
-              // Mantid numerical properties are double only.
-              double property_double_value = 0.0;
-
-              // Simple case, one value
-              if (dims[0] == 1) {
-                if (type == NX_FLOAT32) {
-                  property_double_value =
-                      *(reinterpret_cast<float *>(dataBuffer));
-                } else if (type == NX_FLOAT64) {
-                  property_double_value =
-                      *(reinterpret_cast<double *>(dataBuffer));
-                }
-                if (units_status != NX_ERROR)
-                  runDetails.addProperty(property_name, property_double_value,
-                                         std::string(units_sbuf));
-                else
-                  runDetails.addProperty(property_name, property_double_value);
-              } else if (build_small_float_array) {
-                // An array, converted to "name_index", with index < 10 (see
-                // test above)
-                for (int dim_index = 0; dim_index < dims[0]; dim_index++) {
-                  if (type == NX_FLOAT32) {
-                    property_double_value =
-                        (reinterpret_cast<float *>(dataBuffer))[dim_index];
-                  } else if (type == NX_FLOAT64) {
-                    property_double_value =
-                        (reinterpret_cast<double *>(dataBuffer))[dim_index];
-                  }
-                  std::string indexed_property_name = property_name +
-                                                      std::string("_") +
-                                                      std::to_string(dim_index);
-                  if (units_status != NX_ERROR)
-                    runDetails.addProperty(indexed_property_name,
-                                           property_double_value,
-                                           std::string(units_sbuf));
-                  else
-                    runDetails.addProperty(indexed_property_name,
-                                           property_double_value);
-                }
+              if ((rank == 1) && (dims[0] <= 9)) {
+                build_small_float_array = true;
+              } else {
+                g_log.debug() << indent_str
+                              << "ignored multi dimensional number "
+                                 "data with more than 10 elements "
+                              << property_name << '\n';
+                read_property = false;
               }
-
+            } else if (type != NX_CHAR) {
+              if ((rank > 1) || (dims[0] > 1) || (dims[1] > 1) ||
+                  (dims[2] > 1) || (dims[3] > 1)) {
+                g_log.debug() << indent_str
+                              << "ignored non-scalar numeric data on "
+                              << property_name << '\n';
+                read_property = false;
+              }
             } else {
-              // int case
-              int property_int_value = 0;
-              if (type == NX_INT16) {
-                property_int_value =
-                    *(reinterpret_cast<short int *>(dataBuffer));
-              } else if (type == NX_INT32) {
-                property_int_value = *(reinterpret_cast<int *>(dataBuffer));
-              } else if (type == NX_UINT16) {
-                property_int_value =
-                    *(reinterpret_cast<short unsigned int *>(dataBuffer));
+              if ((rank > 1) || (dims[1] > 1) || (dims[2] > 1) ||
+                  (dims[3] > 1)) {
+                g_log.debug() << indent_str << "ignored string array data on "
+                              << property_name << '\n';
+                read_property = false;
+              }
+            }
+
+            if (read_property) {
+
+              void *dataBuffer;
+              NXmalloc(&dataBuffer, rank, dims, type);
+
+              if (NXgetdata(nxfileID, dataBuffer) == NX_OK) {
+
+                if (type == NX_CHAR) {
+                  std::string property_value(
+                      reinterpret_cast<const char *>(dataBuffer));
+                  if (boost::algorithm::ends_with(property_name, "_time")) {
+                    // That's a time value! Convert to Mantid standard
+                    property_value = dateTimeInIsoFormat(property_value);
+                  }
+                  runDetails.addProperty(property_name, property_value);
+
+                } else if ((type == NX_FLOAT32) || (type == NX_FLOAT64) ||
+                           (type == NX_INT16) || (type == NX_INT32) ||
+                           (type == NX_UINT16)) {
+
+                  // Look for "units"
+                  NXstatus units_status;
+                  char units_sbuf[NX_MAXNAMELEN];
+                  int units_len = NX_MAXNAMELEN;
+                  int units_type = NX_CHAR;
+
+                  char unitsAttrName[] = "units";
+                  units_status = NXgetattr(nxfileID, unitsAttrName, units_sbuf,
+                                           &units_len, &units_type);
+                  if (units_status != NX_ERROR) {
+                    g_log.debug() << indent_str << "[ " << property_name
+                                  << " has unit " << units_sbuf << " ]\n";
+                  }
+
+                  if ((type == NX_FLOAT32) || (type == NX_FLOAT64)) {
+                    // Mantid numerical properties are double only.
+                    double property_double_value = 0.0;
+
+                    // Simple case, one value
+                    if (dims[0] == 1) {
+                      if (type == NX_FLOAT32) {
+                        property_double_value =
+                            *(reinterpret_cast<float *>(dataBuffer));
+                      } else if (type == NX_FLOAT64) {
+                        property_double_value =
+                            *(reinterpret_cast<double *>(dataBuffer));
+                      }
+                      if (units_status != NX_ERROR)
+                        runDetails.addProperty(property_name,
+                                               property_double_value,
+                                               std::string(units_sbuf));
+                      else
+                        runDetails.addProperty(property_name,
+                                               property_double_value);
+                    } else if (build_small_float_array) {
+                      // An array, converted to "name_index", with index < 10
+                      // (see
+                      // test above)
+                      for (int dim_index = 0; dim_index < dims[0];
+                           dim_index++) {
+                        if (type == NX_FLOAT32) {
+                          property_double_value = (reinterpret_cast<float *>(
+                              dataBuffer))[dim_index];
+                        } else if (type == NX_FLOAT64) {
+                          property_double_value = (reinterpret_cast<double *>(
+                              dataBuffer))[dim_index];
+                        }
+                        std::string indexed_property_name =
+                            property_name + std::string("_") +
+                            std::to_string(dim_index);
+                        if (units_status != NX_ERROR)
+                          runDetails.addProperty(indexed_property_name,
+                                                 property_double_value,
+                                                 std::string(units_sbuf));
+                        else
+                          runDetails.addProperty(indexed_property_name,
+                                                 property_double_value);
+                      }
+                    }
+
+                  } else {
+                    // int case
+                    int property_int_value = 0;
+                    if (type == NX_INT16) {
+                      property_int_value =
+                          *(reinterpret_cast<short int *>(dataBuffer));
+                    } else if (type == NX_INT32) {
+                      property_int_value =
+                          *(reinterpret_cast<int *>(dataBuffer));
+                    } else if (type == NX_UINT16) {
+                      property_int_value =
+                          *(reinterpret_cast<short unsigned int *>(dataBuffer));
+                    }
+
+                    if (units_status != NX_ERROR)
+                      runDetails.addProperty(property_name, property_int_value,
+                                             std::string(units_sbuf));
+                    else
+                      runDetails.addProperty(property_name, property_int_value);
+
+                  } // if (type==...
+
+                } else {
+                  g_log.debug() << indent_str << "unexpected data on "
+                                << property_name << '\n';
+                } // test on nxdata type
+
+              } else {
+                g_log.debug() << indent_str << "could not read the value of "
+                              << property_name << '\n';
               }
 
-              if (units_status != NX_ERROR)
-                runDetails.addProperty(property_name, property_int_value,
-                                       std::string(units_sbuf));
-              else
-                runDetails.addProperty(property_name, property_int_value);
+              NXfree(&dataBuffer);
+              dataBuffer = nullptr;
+            }
 
-            } // if (type==...
-
-          } else {
-            g_log.debug() << indent_str << "unexpected data on "
-                          << property_name << '\n';
-          } // test on nxdata type
-
-          NXfree(&dataBuffer);
-          dataBuffer = nullptr;
+          } // if NXgetinfo OK
+          else {
+            g_log.debug() << indent_str << "unexpected status ("
+                          << getinfo_status << ") on " << nxname << '\n';
+          }
 
         } // if (parent_class == "NXData" || parent_class == "NXMonitor") else
 
@@ -418,11 +439,28 @@ void LoadHelper::dumpNexusAttributes(NXhandle nxfileID,
   // Attributes
   NXname pName;
   int iLength, iType;
+#ifndef NEXUS43
+  int rank;
+  int dims[4];
+#endif
   int nbuff = 127;
   boost::shared_array<char> buff(new char[nbuff + 1]);
 
+#ifdef NEXUS43
   while (NXgetnextattr(nxfileID, pName, &iLength, &iType) != NX_EOD) {
+#else
+  while (NXgetnextattra(nxfileID, pName, &rank, dims, &iType) != NX_EOD) {
     g_log.debug() << indentStr << '@' << pName << " = ";
+    if (rank > 1) { // mantid only supports single value attributes
+      throw std::runtime_error(
+          "Encountered attribute with multi-dimensional array value");
+    }
+    iLength = dims[0]; // to clarify things
+    if (iType != NX_CHAR && iLength != 1) {
+      throw std::runtime_error("Encountered attribute with array value");
+    }
+#endif
+
     switch (iType) {
     case NX_CHAR: {
       if (iLength > nbuff + 1) {
@@ -484,81 +522,59 @@ std::string LoadHelper::dateTimeInIsoFormat(std::string dateToParse) {
   }
 }
 
+/**
+ * @brief LoadHelper::moveComponent
+ * @param ws A MatrixWorkspace
+ * @param componentName The name of the component of the instrument
+ * @param newPos New position of the component
+ */
 void LoadHelper::moveComponent(API::MatrixWorkspace_sptr ws,
                                const std::string &componentName,
                                const V3D &newPos) {
-
-  try {
-
-    Geometry::Instrument_const_sptr instrument = ws->getInstrument();
-    Geometry::IComponent_const_sptr component =
-        instrument->getComponentByName(componentName);
-
-    // g_log.debug() << tube->getName() << " : t = " << theta << " ==> t = " <<
-    // newTheta << "\n";
-    Geometry::ParameterMap &pmap = ws->instrumentParameters();
-    Geometry::ComponentHelper::moveComponent(
-        *component, pmap, newPos, Geometry::ComponentHelper::Absolute);
-
-  } catch (Mantid::Kernel::Exception::NotFoundError &) {
-    throw std::runtime_error("Error when trying to move the " + componentName +
-                             " : NotFoundError");
-  } catch (std::runtime_error &) {
-    throw std::runtime_error("Error when trying to move the " + componentName +
-                             " : runtime_error");
+  Geometry::IComponent_const_sptr component =
+      ws->getInstrument()->getComponentByName(componentName);
+  if (!component) {
+    throw std::invalid_argument("Instrument component " + componentName +
+                                " not found");
   }
+  ws->mutableDetectorInfo().setPosition(*component, newPos);
 }
 
+/**
+ * @brief LoadHelper::rotateComponent
+ * @param ws A MantrixWorkspace
+ * @param componentName The Name of the component of the instrument
+ * @param rot Rotations defined by setting a quaternion from an angle in degrees
+ * and an axis
+ */
 void LoadHelper::rotateComponent(API::MatrixWorkspace_sptr ws,
                                  const std::string &componentName,
                                  const Kernel::Quat &rot) {
-
-  try {
-
-    Geometry::Instrument_const_sptr instrument = ws->getInstrument();
-    Geometry::IComponent_const_sptr component =
-        instrument->getComponentByName(componentName);
-
-    // g_log.debug() << tube->getName() << " : t = " << theta << " ==> t = " <<
-    // newTheta << "\n";
-    Geometry::ParameterMap &pmap = ws->instrumentParameters();
-    Geometry::ComponentHelper::rotateComponent(
-        *component, pmap, rot, Geometry::ComponentHelper::Absolute);
-
-  } catch (Mantid::Kernel::Exception::NotFoundError &) {
-    throw std::runtime_error("Error when trying to move the " + componentName +
-                             " : NotFoundError");
-  } catch (std::runtime_error &) {
-    throw std::runtime_error("Error when trying to move the " + componentName +
-                             " : runtime_error");
+  Geometry::IComponent_const_sptr component =
+      ws->getInstrument()->getComponentByName(componentName);
+  if (!component) {
+    throw std::invalid_argument("Instrument component " + componentName +
+                                " not found");
   }
+  ws->mutableDetectorInfo().setRotation(*component, rot);
 }
 
+/**
+ * @brief LoadHelper::getComponentPosition
+ * @param ws A MatrixWorkspace
+ * @param componentName The Name of the component of the instrument
+ * @return The position of the component
+ */
 V3D LoadHelper::getComponentPosition(API::MatrixWorkspace_sptr ws,
                                      const std::string &componentName) {
-  try {
-    Geometry::Instrument_const_sptr instrument = ws->getInstrument();
-    Geometry::IComponent_const_sptr component =
-        instrument->getComponentByName(componentName);
-    V3D pos = component->getPos();
-    return pos;
-  } catch (Mantid::Kernel::Exception::NotFoundError &) {
-    throw std::runtime_error("Error when trying to move the " + componentName +
-                             " : NotFoundError");
+  Geometry::IComponent_const_sptr component =
+      ws->getInstrument()->getComponentByName(componentName);
+  if (!component) {
+    throw std::invalid_argument("Instrument component " + componentName +
+                                " not found");
   }
-}
-
-template <typename T>
-T LoadHelper::getPropertyFromRun(API::MatrixWorkspace_const_sptr inputWS,
-                                 const std::string &propertyName) {
-  if (inputWS->run().hasProperty(propertyName)) {
-    Kernel::Property *prop = inputWS->run().getProperty(propertyName);
-    return boost::lexical_cast<T>(prop->value());
-  } else {
-    std::string mesg =
-        "No '" + propertyName + "' property found in the input workspace....";
-    throw std::runtime_error(mesg);
-  }
+  V3D pos = component->getPos();
+  return pos;
 }
 
 } // namespace DataHandling

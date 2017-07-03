@@ -1,132 +1,293 @@
-#pylint: disable=no-init,invalid-name
 # Algorithm to start Bayes programs
 from mantid.simpleapi import *
-from mantid.api import DataProcessorAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty, \
-                       WorkspaceGroupProperty, Progress
+from mantid.api import DataProcessorAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty, NumericAxis, Progress
 from mantid.kernel import Direction
 from mantid import logger
 
-import os.path
 import numpy as np
 
-class SofQWMoments(DataProcessorAlgorithm):
 
+class SofQWMoments(DataProcessorAlgorithm):
     def category(self):
         return "Workflow\\MIDAS"
 
-
-    def summary (self):
+    def summary(self):
         return "Calculates the nth moment of y(q,w)"
 
-
     def PyInit(self):
-        self.declareProperty(MatrixWorkspaceProperty("Sample", "", Direction.Input),
-                             doc="Sample to use.")
+        self.declareProperty(MatrixWorkspaceProperty("InputWorkspace", "", Direction.Input),
+                             doc="Input workspace to use.")
         self.declareProperty(name='EnergyMin', defaultValue=-0.5,
                              doc='Minimum energy for fit. Default=-0.5')
         self.declareProperty(name='EnergyMax', defaultValue=0.5,
                              doc='Maximum energy for fit. Default=0.5')
         self.declareProperty(name='Scale', defaultValue=1.0,
                              doc='Scale factor to multiply y(Q,w). Default=1.0')
-        self.declareProperty(WorkspaceGroupProperty("OutputWorkspace", "", Direction.Output),
-                             doc="group_workspace workspace that includes all calculated moments.")
+        self.declareProperty(MatrixWorkspaceProperty("OutputWorkspace", "", Direction.Output),
+                             doc="Workspace that includes all calculated moments.")
 
-    #pylint: disable=too-many-locals
     def PyExec(self):
-        from IndirectCommon import CheckHistZero, CheckElimits, getDefaultWorkingDirectory
 
         workflow_prog = Progress(self, start=0.0, end=1.0, nreports=20)
-        workflow_prog.report('Setting up algorithm')
-        sample_workspace = self.getPropertyValue('Sample')
-        output_workspace = self.getPropertyValue('OutputWorkspace')
-        factor = self.getProperty('Scale').value
-        emin = self.getProperty('EnergyMin').value
-        emax = self.getProperty('EnergyMax').value
-        erange = [emin, emax]
+        self._setup()
+
         workflow_prog.report('Validating input')
-        num_spectra,num_w = CheckHistZero(sample_workspace)
-
-        logger.information('Sample %s has %d Q values & %d w values' % (sample_workspace, num_spectra, num_w))
-
-        x_data = np.asarray(mtd[sample_workspace].readX(0))
-        CheckElimits(erange,x_data)
+        input_workspace = mtd[self._input_ws]
+        num_spectra, num_w = self._CheckHistZero(self._input_ws)
+        logger.information('Sample %s has %d Q values & %d w values' % (self._input_ws, num_spectra, num_w))
+        self._CheckElimits([self._energy_min, self._energy_max], self._input_ws)
 
         workflow_prog.report('Cropping Workspace')
-        samWS = '__temp_sqw_moments_cropped'
-        CropWorkspace(InputWorkspace=sample_workspace, OutputWorkspace=samWS,
-                      XMin=erange[0], XMax=erange[1])
+        input_ws = '__temp_sqw_moments_cropped'
+        crop_alg = self.createChildAlgorithm("CropWorkspace", enableLogging=False)
+        crop_alg.setProperty("InputWorkspace", input_workspace)
+        crop_alg.setProperty("XMin", self._energy_min)
+        crop_alg.setProperty("XMax", self._energy_max)
+        crop_alg.setProperty("OutputWorkspace", input_ws)
+        crop_alg.execute()
+        mtd.addOrReplace(input_ws, crop_alg.getProperty("OutputWorkspace").value)
 
-        logger.information('Energy range is %f to %f' % (erange[0], erange[1]))
+        logger.information('Energy range is %f to %f' % (self._energy_min, self._energy_max))
 
-        if factor > 0.0:
-            workflow_prog.report('Scaling Workspace by factor %f' % factor)
-            Scale(InputWorkspace=samWS, OutputWorkspace=samWS, Factor=factor, Operation='Multiply')
-            logger.information('y(q,w) scaled by %f' % factor)
+        if self._factor > 0.0:
+            workflow_prog.report('Scaling Workspace by factor %f' % self._factor)
+            scale_alg = self.createChildAlgorithm("Scale", enableLogging=False)
+            scale_alg.setProperty("InputWorkspace", input_ws)
+            scale_alg.setProperty("Factor", self._factor)
+            scale_alg.setProperty("Operation", 'Multiply')
+            scale_alg.setProperty("OutputWorkspace", input_ws)
+            scale_alg.execute()
+            logger.information('y(q,w) scaled by %f' % self._factor)
 
-        #calculate delta x
+        # calculate delta x
         workflow_prog.report('Converting to point data')
-        ConvertToPointData(InputWorkspace=samWS, OutputWorkspace=samWS)
-        x_data = np.asarray(mtd[samWS].readX(0))
+        convert_point_alg = self.createChildAlgorithm("ConvertToPointData", enableLogging=False)
+        convert_point_alg.setProperty("InputWorkspace", input_ws)
+        convert_point_alg.setProperty("OutputWorkspace", input_ws)
+        convert_point_alg.execute()
+        mtd.addOrReplace(input_ws, convert_point_alg.getProperty("OutputWorkspace").value)
+        x_data = np.asarray(mtd[input_ws].readX(0))
         workflow_prog.report('Creating temporary data workspace')
-        x_workspace = CreateWorkspace(OutputWorkspace="__temp_sqw_moments_x",
-                                      DataX=x_data, DataY=x_data, UnitX="DeltaE")
+        x_workspace = "__temp_sqw_moments_x"
+        create_alg = self.createChildAlgorithm("CreateWorkspace", enableLogging=False)
+        create_alg.setProperty("DataX", x_data)
+        create_alg.setProperty("DataY", x_data)
+        create_alg.setProperty("UnitX", "DeltaE")
+        create_alg.setProperty("OutputWorkspace", x_workspace)
+        create_alg.execute()
+        mtd.addOrReplace(x_workspace, create_alg.getProperty("OutputWorkspace").value)
 
-        #calculate moments
-        moments_0 = output_workspace + '_M0'
-        moments_1 = output_workspace + '_M1'
-        moments_2 = output_workspace + '_M2'
-        moments_3 = output_workspace + '_M3'
-        moments_4 = output_workspace + '_M4'
+        # calculate moments
+        multiply_alg = self.createChildAlgorithm("Multiply", enableLogging=False)
 
         workflow_prog.report('Multiplying Workspaces by moments')
-        Multiply(x_workspace, samWS, OutputWorkspace=moments_1)
-        Multiply(x_workspace, moments_1, OutputWorkspace=moments_2)
-        Multiply(x_workspace, moments_2, OutputWorkspace=moments_3)
-        Multiply(x_workspace, moments_3, OutputWorkspace=moments_4)
-        DeleteWorkspace(moments_3)
+        moments_0 = self._output_ws + '_M0'
+        moments_1 = self._output_ws + '_M1'
+        multiply_alg.setProperty("LHSWorkspace", x_workspace)
+        multiply_alg.setProperty("RHSWorkspace", input_ws)
+        multiply_alg.setProperty("OutputWorkspace", moments_1)
+        multiply_alg.execute()
+        mtd.addOrReplace(moments_1, multiply_alg.getProperty("OutputWorkspace").value)
+
+        moments_2 = self._output_ws + '_M2'
+        multiply_alg.setProperty("LHSWorkspace", x_workspace)
+        multiply_alg.setProperty("RHSWorkspace", moments_1)
+        multiply_alg.setProperty("OutputWorkspace", moments_2)
+        multiply_alg.execute()
+        mtd.addOrReplace(moments_2, multiply_alg.getProperty("OutputWorkspace").value)
+
+        moments_3 = self._output_ws + '_M3'
+        multiply_alg.setProperty("LHSWorkspace", x_workspace)
+        multiply_alg.setProperty("RHSWorkspace", moments_2)
+        multiply_alg.setProperty("OutputWorkspace", moments_3)
+        multiply_alg.execute()
+        mtd.addOrReplace(moments_3, multiply_alg.getProperty("OutputWorkspace").value)
+
+        moments_4 = self._output_ws + '_M4'
+        multiply_alg.setProperty("LHSWorkspace", x_workspace)
+        multiply_alg.setProperty("RHSWorkspace", moments_3)
+        multiply_alg.setProperty("OutputWorkspace", moments_4)
+        multiply_alg.execute()
+        mtd.addOrReplace(moments_4, multiply_alg.getProperty("OutputWorkspace").value)
 
         workflow_prog.report('Converting to Histogram')
-        ConvertToHistogram(InputWorkspace=samWS, OutputWorkspace=samWS)
-        workflow_prog.report('Intergrating result')
-        Integration(samWS, OutputWorkspace=moments_0)
+        convert_hist_alg = self.createChildAlgorithm("ConvertToHistogram", enableLogging=False)
+        convert_hist_alg.setProperty("InputWorkspace", input_ws)
+        convert_hist_alg.setProperty("OutputWorkspace", input_ws)
+        convert_hist_alg.execute()
 
-        moments = [moments_1, moments_2, moments_4]
+        workflow_prog.report('Integrating result')
+        integration_alg = self.createChildAlgorithm("Integration", enableLogging=False)
+        integration_alg.setProperty("InputWorkspace", convert_hist_alg.getProperty("OutputWorkspace").value)
+        integration_alg.setProperty("OutputWorkspace", moments_0)
+        integration_alg.execute()
+        mtd.addOrReplace(moments_0, integration_alg.getProperty("OutputWorkspace").value)
+
+        moments = [moments_1, moments_2, moments_3, moments_4]
+        divide_alg = self.createChildAlgorithm("Divide", enableLogging=False)
         for moment_ws in moments:
             workflow_prog.report('Processing workspace %s' % moment_ws)
-            ConvertToHistogram(InputWorkspace=moment_ws, OutputWorkspace=moment_ws)
-            Integration(moment_ws, OutputWorkspace=moment_ws)
-            Divide(moment_ws, moments_0, OutputWorkspace=moment_ws)
+            convert_hist_alg.setProperty("InputWorkspace", moment_ws)
+            convert_hist_alg.setProperty("OutputWorkspace", moment_ws)
+            convert_hist_alg.execute()
+
+            integration_alg.setProperty("InputWorkspace", convert_hist_alg.getProperty("OutputWorkspace").value)
+            integration_alg.setProperty("OutputWorkspace", moment_ws)
+            integration_alg.execute()
+
+            divide_alg.setProperty("LHSWorkspace", integration_alg.getProperty("OutputWorkspace").value)
+            divide_alg.setProperty("RHSWorkspace", moments_0)
+            divide_alg.setProperty("OutputWorkspace", moment_ws)
+            divide_alg.execute()
+            mtd.addOrReplace(moment_ws, divide_alg.getProperty("OutputWorkspace").value)
 
         workflow_prog.report('Deleting Workspaces')
-        DeleteWorkspace(samWS)
-        DeleteWorkspace(x_workspace)
+        delete_alg = self.createChildAlgorithm("DeleteWorkspace", enableLogging=False)
+        delete_alg.setProperty("Workspace", input_ws)
+        delete_alg.execute()
+        delete_alg.setProperty("Workspace", x_workspace)
+        delete_alg.execute()
 
-        #create output workspace
-        extensions = ['_M0', '_M1', '_M2', '_M4']
+        # create output workspace
+        extensions = ['_M0', '_M1', '_M2', '_M3', '_M4']
+        transpose_alg = self.createChildAlgorithm("Transpose", enableLogging=False)
+        convert_hist_alg = self.createChildAlgorithm("ConvertToHistogram", enableLogging=False)
+        convert_units_alg = self.createChildAlgorithm("ConvertUnits", enableLogging=False)
         for ext in extensions:
-            ws_name = output_workspace+ext
+            ws_name = self._output_ws + ext
             workflow_prog.report('Processing Workspace %s' % ext)
-            Transpose(InputWorkspace=ws_name, OutputWorkspace=ws_name)
-            ConvertToHistogram(InputWorkspace=ws_name, OutputWorkspace=ws_name)
-            ConvertUnits(InputWorkspace=ws_name, OutputWorkspace=ws_name,
-                         Target='MomentumTransfer', EMode='Indirect')
+            transpose_alg.setProperty("InputWorkspace", ws_name)
+            transpose_alg.setProperty("OutputWorkspace", ws_name)
+            transpose_alg.execute()
+            convert_hist_alg.setProperty("InputWorkspace", transpose_alg.getProperty("OutputWorkspace").value)
+            convert_hist_alg.setProperty("OutputWorkspace", ws_name)
+            convert_hist_alg.execute()
+            convert_units_alg.setProperty("InputWorkspace", convert_hist_alg.getProperty("OutputWorkspace").value)
+            convert_units_alg.setProperty("Target", 'MomentumTransfer')
+            convert_units_alg.setProperty("EMode", 'Indirect')
+            convert_units_alg.setProperty("OutputWorkspace", ws_name)
+            convert_units_alg.execute()
+            mtd.addOrReplace(ws_name, convert_units_alg.getProperty("OutputWorkspace").value)
 
-            CopyLogs(InputWorkspace=sample_workspace, OutputWorkspace=ws_name)
             workflow_prog.report('Adding Sample logs to %s' % ws_name)
-            AddSampleLog(Workspace=ws_name, LogName="energy_min",
-                         LogType="Number", LogText=str(emin))
-            AddSampleLog(Workspace=ws_name, LogName="energy_max",
-                         LogType="Number", LogText=str(emax))
-            AddSampleLog(Workspace=ws_name, LogName="scale_factor",
-                         LogType="Number", LogText=str(factor))
+            copy_alg = self.createChildAlgorithm("CopyLogs", enableLogging=False)
+            copy_alg.setProperty("InputWorkspace", input_workspace)
+            copy_alg.setProperty("OutputWorkspace", ws_name)
+            copy_alg.execute()
+            add_sample_log_alg = self.createChildAlgorithm("AddSampleLog", enableLogging=False)
+            add_sample_log_alg.setProperty("Workspace", ws_name)
+            add_sample_log_alg.setProperty("LogName", "energy_min")
+            add_sample_log_alg.setProperty("LogType", "Number")
+            add_sample_log_alg.setProperty("LogText", str(self._energy_min))
+            add_sample_log_alg.execute()
+            add_sample_log_alg.setProperty("Workspace", ws_name)
+            add_sample_log_alg.setProperty("LogName", "energy_max")
+            add_sample_log_alg.setProperty("LogType", "Number")
+            add_sample_log_alg.setProperty("LogText", str(self._energy_max))
+            add_sample_log_alg.execute()
+            add_sample_log_alg.setProperty("Workspace", ws_name)
+            add_sample_log_alg.setProperty("LogName", "scale_factor")
+            add_sample_log_alg.setProperty("LogType", "Number")
+            add_sample_log_alg.setProperty("LogText", str(self._factor))
+            add_sample_log_alg.execute()
 
         # Group output workspace
-        workflow_prog.report('Grouping OutputWorkspace')
-        group_workspaces = ','.join([output_workspace+ext for ext in extensions])
-        GroupWorkspaces(InputWorkspaces=group_workspaces, OutputWorkspace=output_workspace)
+        workflow_prog.report('Appending moments')
+        append_alg = self.createChildAlgorithm("AppendSpectra", enableLogging=False)
+        append_alg.setProperty("InputWorkspace1", self._output_ws + '_M0')
+        append_alg.setProperty("InputWorkspace2", self._output_ws + '_M1')
+        append_alg.setProperty("ValidateInputs", False)
+        append_alg.setProperty("OutputWorkspace", self._output_ws)
+        append_alg.execute()
+        append_alg.setProperty("InputWorkspace1", append_alg.getProperty("OutputWorkspace").value)
+        append_alg.setProperty("InputWorkspace2", self._output_ws + '_M2')
+        append_alg.setProperty("ValidateInputs", False)
+        append_alg.setProperty("OutputWorkspace", self._output_ws)
+        append_alg.execute()
+        append_alg.setProperty("InputWorkspace1", append_alg.getProperty("OutputWorkspace").value)
+        append_alg.setProperty("InputWorkspace2", self._output_ws + '_M3')
+        append_alg.setProperty("ValidateInputs", False)
+        append_alg.setProperty("OutputWorkspace", self._output_ws)
+        append_alg.execute()
+        append_alg.setProperty("InputWorkspace1", append_alg.getProperty("OutputWorkspace").value)
+        append_alg.setProperty("InputWorkspace2", self._output_ws + '_M4')
+        append_alg.setProperty("ValidateInputs", False)
+        append_alg.setProperty("OutputWorkspace", self._output_ws)
+        append_alg.execute()
+        mtd.addOrReplace(self._output_ws, append_alg.getProperty("OutputWorkspace").value)
+        delete_alg.setProperty("Workspace", self._output_ws + '_M0')
+        delete_alg.execute()
+        delete_alg.setProperty("Workspace", self._output_ws + '_M1')
+        delete_alg.execute()
+        delete_alg.setProperty("Workspace", self._output_ws + '_M2')
+        delete_alg.execute()
+        delete_alg.setProperty("Workspace", self._output_ws + '_M3')
+        delete_alg.execute()
+        delete_alg.setProperty("Workspace", self._output_ws + '_M4')
+        delete_alg.execute()
 
-        self.setProperty("OutputWorkspace", output_workspace)
-        workflow_prog.report('Algorithm complete')
+        # Create a new vertical axis for the Q and Q**2 workspaces
+        y_axis = NumericAxis.create(5)
+        for idx in range(5):
+            y_axis.setValue(idx, idx)
+        mtd[self._output_ws].replaceAxis(1, y_axis)
+
+        self.setProperty("OutputWorkspace", self._output_ws)
+
+    def _setup(self):
+        """
+        Gets algorithm properties.
+        """
+
+        self._input_ws = self.getPropertyValue('InputWorkspace')
+        self._factor = self.getProperty('Scale').value
+        self._energy_min = self.getProperty('EnergyMin').value
+        self._energy_max = self.getProperty('EnergyMax').value
+        self._output_ws = self.getPropertyValue('OutputWorkspace')
+
+    def _CheckHistZero(self, ws):
+        """
+        Retrieves basic info on a workspace
+
+        Checks the workspace is not empty, then returns the number of histogram and
+        the number of X-points, which is the number of bin boundaries minus one
+
+        Args:
+          @param ws  2D workspace
+
+        Returns:
+          @return num_hist - number of histograms in the workspace
+          @return ntc - number of X-points in the first histogram, which is the number of bin
+           boundaries minus one. It is assumed all histograms have the same
+           number of X-points.
+
+        Raises:
+          @exception ValueError - Workspace has no histograms
+        """
+        num_hist = mtd[ws].getNumberHistograms()  # no. of hist/groups in WS
+        if num_hist == 0:
+            raise ValueError('Workspace %s has NO histograms' % ws)
+        x_in = mtd[ws].readX(0)
+        ntc = len(x_in) - 1  # no. points from length of x array
+        if ntc == 0:
+            raise ValueError('Workspace %s has NO points' % ws)
+        return num_hist, ntc
+
+    def _CheckElimits(self, erange, ws):
+        import math
+        x_data = np.asarray(mtd[ws].readX(0))
+        len_x = len(x_data) - 1
+
+        if math.fabs(erange[0]) < 1e-5:
+            raise ValueError('Elimits - input emin (%f) is Zero' % (erange[0]))
+        if erange[0] < x_data[0]:
+            raise ValueError('Elimits - input emin (%f) < data emin (%f)' % (erange[0], x_data[0]))
+        if math.fabs(erange[1]) < 1e-5:
+            raise ValueError('Elimits - input emax (%f) is Zero' % (erange[1]))
+        if erange[1] > x_data[len_x]:
+            raise ValueError('Elimits - input emax (%f) > data emax (%f)' % (erange[1], x_data[len_x]))
+        if erange[1] < erange[0]:
+            raise ValueError('Elimits - input emax (%f) < emin (%f)' % (erange[1], erange[0]))
 
 
 # Register algorithm with Mantid

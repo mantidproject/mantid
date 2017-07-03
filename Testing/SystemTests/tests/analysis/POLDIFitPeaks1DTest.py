@@ -3,6 +3,7 @@ import stresstesting
 from mantid.simpleapi import *
 import numpy as np
 
+
 class POLDIFitPeaks1DTest(stresstesting.MantidStressTest):
     '''Checking results of PoldiFitPeaks1D.'''
 
@@ -84,7 +85,6 @@ class POLDIFitPeaks1DTest(stresstesting.MantidStressTest):
 
           # find closest reference peak
                 deltas = np.array([np.abs(position[0] - x) for x in referencePositions])
-
 
                 self.assertDelta(deltas.min(), 0.0, self.versionDeltas[version])
                 minIndex = deltas.argmin()

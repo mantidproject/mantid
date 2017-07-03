@@ -8,10 +8,11 @@ from PyQt4 import QtCore, QtGui
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
 except AttributeError:
-    _fromUtf8 = lambda s: s
+    def _fromUtf8(s):
+        return s
+
 
 class ReflChoose(QtGui.QDialog, ui_refl_columns.Ui_chooseColumnsDialog):
-
 
     visiblestates = {}
 
@@ -32,9 +33,11 @@ class ReflChoose(QtGui.QDialog, ui_refl_columns.Ui_chooseColumnsDialog):
             else:
                 item.setCheckState(0)
             self.listColumns.insertItem(key, item)
+
     def on_listColumns_itemChanged(self, item):
         colno=self.listColumns.row(item)
         self.visiblestates[colno] = (item.checkState() > 0)
+
     def on_buttonsColumns_Clicked(self, button):
         if self.buttonsColumns.button(QtGui.QDialogButtonBox.RestoreDefaults) == button:
             for i in range(self.listColumns.count()):

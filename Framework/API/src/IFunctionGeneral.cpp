@@ -17,7 +17,7 @@ void IFunctionGeneral::function(const FunctionDomain &domain,
   try {
     auto &generalDomain = dynamic_cast<const FunctionDomainGeneral &>(domain);
     functionGeneral(generalDomain, values);
-  } catch (std::bad_cast) {
+  } catch (const std::bad_cast &) {
     throw std::invalid_argument(
         "Provided domain is not of type FunctionDomainGeneral.");
   }

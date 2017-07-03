@@ -47,12 +47,12 @@ public:
   /// Constructor
   /// @param fun :: Function which derivatives to be stored in this Jacobian.
   /// @param ny :: Size of the fitting data.
-  GSLJacobian(API::IFunction_const_sptr fun, const size_t ny) {
-    m_index.resize(fun->nParams(), -1);
+  GSLJacobian(const API::IFunction &fun, const size_t ny) {
+    m_index.resize(fun.nParams(), -1);
     size_t np = 0; // number of active parameters
-    for (size_t i = 0; i < fun->nParams(); ++i) {
+    for (size_t i = 0; i < fun.nParams(); ++i) {
       m_index[i] = static_cast<int>(np);
-      if (fun->isActive(i))
+      if (fun.isActive(i))
         ++np;
     }
     m_J.resize(ny, np);
@@ -93,6 +93,8 @@ public:
       return m_J.get(iY, j);
     return 0.0;
   }
+  /// overwrite base method
+  void zero() override { m_J.zero(); }
 };
 
 /// The implementation of Jacobian
@@ -136,6 +138,8 @@ public:
       return gsl_matrix_get(m_J, iY, j);
     return 0.0;
   }
+  /// overwrite base method
+  void zero() override { gsl_matrix_set_zero(m_J); }
 };
 
 } // namespace CurveFitting

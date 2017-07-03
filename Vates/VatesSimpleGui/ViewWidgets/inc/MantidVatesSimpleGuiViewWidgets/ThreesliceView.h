@@ -54,19 +54,13 @@ public:
    * Default constructor.
    * @param parent the parent widget for the threeslice view
    * @param rebinnedSourcesManager Pointer to a RebinnedSourcesManager
+   * @param createRenderProxy :: Whether to create a render proxy for this view
    */
-  ThreeSliceView(QWidget *parent = 0,
-                 RebinnedSourcesManager *rebinnedSourcesManager = 0);
+  ThreeSliceView(QWidget *parent = nullptr,
+                 RebinnedSourcesManager *rebinnedSourcesManager = nullptr,
+                 bool createRenderProxy = true);
   /// Default destructor.
   ~ThreeSliceView() override;
-
-  /// Correct the color scale range if not in automatic mode.
-  void correctColorScaleRange();
-  /**
-   * Correct an oddity in the creation of the 3D view so that the cuts
-   * are visibile.
-   */
-  // void correctVisibility();
   /**
    * ViewBase::destroyView
    */
@@ -89,6 +83,11 @@ public:
    * ViewBase::resetDisplay()
    */
   void resetDisplay() override;
+
+  /// @see ViewBase::setView
+  void setView(pqRenderView *view) override;
+  /// @see ViewBase::getViewType
+  ModeControlWidget::Views getViewType() override;
 
 private:
   Q_DISABLE_COPY(ThreeSliceView)

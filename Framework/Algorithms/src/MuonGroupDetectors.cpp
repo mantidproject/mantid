@@ -2,6 +2,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/TableWorkspace.h"
+#include "MantidHistogramData/HistogramMath.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -9,6 +10,7 @@ namespace Algorithms {
 using namespace Kernel;
 using namespace API;
 using namespace DataObjects;
+using namespace HistogramData;
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(MuonGroupDetectors)
@@ -97,24 +99,20 @@ void MuonGroupDetectors::exec() {
     // We will be setting them anew
     outWS->getSpectrum(groupIndex).clearDetectorIDs();
 
+    // Using the first detector X values
+    outWS->setSharedX(groupIndex, inWS->sharedX(wsIndices.front()));
+
+    auto hist = outWS->histogram(groupIndex);
     for (auto &wsIndex : wsIndices) {
-      for (size_t i = 0; i < inWS->blocksize(); ++i) {
-        // Sum the y values
-        outWS->dataY(groupIndex)[i] += inWS->dataY(wsIndex)[i];
-
-        // Sum the errors in quadrature
-        outWS->dataE(groupIndex)[i] = sqrt(pow(outWS->dataE(groupIndex)[i], 2) +
-                                           pow(inWS->dataE(wsIndex)[i], 2));
-      }
-
-      // Detectors list of the group should contain all the detectors of it's
+      hist += inWS->histogram(wsIndex);
+      // Detectors list of the group should contain all the detectors of
+      // it's
       // elements
       outWS->getSpectrum(groupIndex)
           .addDetectorIDs(inWS->getSpectrum(wsIndex).getDetectorIDs());
     }
 
-    // Using the first detector X values
-    outWS->dataX(groupIndex) = inWS->dataX(wsIndices.front());
+    outWS->setHistogram(groupIndex, hist);
 
     outWS->getSpectrum(groupIndex)
         .setSpectrumNo(static_cast<specnum_t>(groupIndex + 1));

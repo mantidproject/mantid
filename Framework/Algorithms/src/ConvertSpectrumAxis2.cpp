@@ -1,24 +1,23 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAlgorithms/ConvertSpectrumAxis2.h"
-#include "MantidAPI/HistogramValidator.h"
+#include "MantidTypes/SpectrumDefinition.h"
+#include "MantidAPI/DetectorInfo.h"
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/SpectraAxisValidator.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitConversion.h"
 #include "MantidKernel/UnitFactory.h"
 
-#include <boost/bind.hpp>
-#include <boost/function.hpp>
-
 #include <cfloat>
+
+constexpr double rad2deg = 180.0 / M_PI;
 
 namespace Mantid {
 namespace Algorithms {
@@ -31,7 +30,6 @@ using namespace Geometry;
 void ConvertSpectrumAxis2::init() {
   // Validator for Input Workspace
   auto wsVal = boost::make_shared<CompositeValidator>();
-  wsVal->add<HistogramValidator>();
   wsVal->add<SpectraAxisValidator>();
   wsVal->add<InstrumentValidator>();
 
@@ -78,14 +76,14 @@ void ConvertSpectrumAxis2::exec() {
   // The unit to convert to.
   const std::string unitTarget = getProperty("Target");
 
-  Progress progress(this, 0, 1, inputWS->getNumberHistograms());
+  Progress progress(this, 0.0, 1.0, inputWS->getNumberHistograms());
 
   // Call the functions to convert to the different forms of theta or Q.
   if (unitTarget == "theta" || unitTarget == "Theta" ||
       unitTarget == "signed_theta" || unitTarget == "SignedTheta") {
-    createThetaMap(progress, unitTarget, inputWS, nHist);
+    createThetaMap(progress, unitTarget, inputWS);
   } else if (unitTarget == "ElasticQ" || unitTarget == "ElasticQSquared") {
-    createElasticQMap(progress, unitTarget, inputWS, nHist);
+    createElasticQMap(progress, unitTarget, inputWS);
   }
 
   // Create an output workspace and set the property for it.
@@ -98,36 +96,36 @@ void ConvertSpectrumAxis2::exec() {
 * @param progress :: Progress indicator
 * @param targetUnit :: Target conversion unit
 * @param inputWS :: Input Workspace
-* @param nHist :: Stores the number of histograms
 */
 void ConvertSpectrumAxis2::createThetaMap(API::Progress &progress,
                                           const std::string &targetUnit,
-                                          API::MatrixWorkspace_sptr &inputWS,
-                                          size_t nHist) {
-  // Set up binding to member funtion. Avoids condition as part of loop over
-  // nHistograms.
-  boost::function<double(const IDetector &)> thetaFunction;
-  if (targetUnit.compare("signed_theta") == 0 ||
-      targetUnit.compare("SignedTheta") == 0) {
-    thetaFunction =
-        boost::bind(&MatrixWorkspace::detectorSignedTwoTheta, inputWS, _1);
+                                          API::MatrixWorkspace_sptr &inputWS) {
+  // Not sure about default, previously there was a call to a null function?
+  bool signedTheta = false;
+  if (targetUnit == "signed_theta" || targetUnit == "SignedTheta") {
+    signedTheta = true;
   } else if (targetUnit == "theta" || targetUnit == "Theta") {
-    thetaFunction =
-        boost::bind(&MatrixWorkspace::detectorTwoTheta, inputWS, _1);
+    signedTheta = false;
   }
 
   bool warningGiven = false;
 
-  for (size_t i = 0; i < nHist; ++i) {
-    try {
-      IDetector_const_sptr det = inputWS->getDetector(i);
-      // Invoke relevant member function.
-      m_indexMap.emplace(thetaFunction(*det) * rad2deg, i);
-    } catch (Exception::NotFoundError &) {
+  const auto &spectrumInfo = inputWS->spectrumInfo();
+  for (size_t i = 0; i < spectrumInfo.size(); ++i) {
+    if (!spectrumInfo.hasDetectors(i)) {
       if (!warningGiven)
         g_log.warning("The instrument definition is incomplete - spectra "
                       "dropped from output");
       warningGiven = true;
+      continue;
+    }
+    if (!spectrumInfo.isMonitor(i)) {
+      if (signedTheta)
+        m_indexMap.emplace(spectrumInfo.signedTwoTheta(i) * rad2deg, i);
+      else
+        m_indexMap.emplace(spectrumInfo.twoTheta(i) * rad2deg, i);
+    } else {
+      m_indexMap.emplace(0.0, i);
     }
 
     progress.report("Converting to theta...");
@@ -138,14 +136,10 @@ void ConvertSpectrumAxis2::createThetaMap(API::Progress &progress,
 * @param progress :: Progress indicator
 * @param targetUnit :: Target conversion unit
 * @param inputWS :: Input workspace
-* @param nHist :: Stores the number of histograms
 */
-void ConvertSpectrumAxis2::createElasticQMap(API::Progress &progress,
-                                             const std::string &targetUnit,
-                                             API::MatrixWorkspace_sptr &inputWS,
-                                             size_t nHist) {
-  IComponent_const_sptr source = inputWS->getInstrument()->getSource();
-  IComponent_const_sptr sample = inputWS->getInstrument()->getSample();
+void ConvertSpectrumAxis2::createElasticQMap(
+    API::Progress &progress, const std::string &targetUnit,
+    API::MatrixWorkspace_sptr &inputWS) {
 
   const std::string emodeStr = getProperty("EMode");
   int emode = 0;
@@ -154,19 +148,31 @@ void ConvertSpectrumAxis2::createElasticQMap(API::Progress &progress,
   else if (emodeStr == "Indirect")
     emode = 2;
 
+  const auto &spectrumInfo = inputWS->spectrumInfo();
+  const auto &detectorInfo = inputWS->detectorInfo();
+  const size_t nHist = spectrumInfo.size();
   for (size_t i = 0; i < nHist; i++) {
-    IDetector_const_sptr detector = inputWS->getDetector(i);
-    double twoTheta(0.0), efixed(0.0);
-    if (!detector->isMonitor()) {
-      twoTheta = 0.5 * inputWS->detectorTwoTheta(*detector);
-      efixed = getEfixed(detector, inputWS, emode); // get efixed
+    double theta(0.0), efixed(0.0);
+    if (!spectrumInfo.isMonitor(i)) {
+      theta = 0.5 * spectrumInfo.twoTheta(i);
+      /*
+       * Two assumptions made in the following code.
+       * 1. Getting the detector index of the first detector in the spectrum
+       * definition is enough (this should be completely safe).
+       * 2. That the time index is not important (first element of pair only
+       * accessed). i.e we are not performing scanning. Step scanning is not
+       * supported at the time of writing.
+       */
+      const auto detectorIndex = spectrumInfo.spectrumDefinition(i)[0].first;
+      efixed = getEfixed(detectorIndex, detectorInfo, *inputWS,
+                         emode); // get efixed
     } else {
-      twoTheta = 0.0;
+      theta = 0.0;
       efixed = DBL_MIN;
     }
 
     // Convert to MomentumTransfer
-    double elasticQInAngstroms = Kernel::UnitConversion::run(twoTheta, efixed);
+    double elasticQInAngstroms = Kernel::UnitConversion::run(theta, efixed);
 
     if (targetUnit == "ElasticQ") {
       m_indexMap.emplace(elasticQInAngstroms, i);
@@ -232,38 +238,38 @@ MatrixWorkspace_sptr ConvertSpectrumAxis2::createOutputWorkspace(
   return outputWorkspace;
 }
 
-double ConvertSpectrumAxis2::getEfixed(IDetector_const_sptr detector,
-                                       MatrixWorkspace_const_sptr inputWS,
-                                       int emode) const {
+double ConvertSpectrumAxis2::getEfixed(
+    const size_t detectorIndex, const API::DetectorInfo &detectorInfo,
+    const Mantid::API::MatrixWorkspace &inputWS, const int emode) const {
   double efixed(0);
   double efixedProp = getProperty("Efixed");
+  Mantid::detid_t detectorID = detectorInfo.detectorIDs()[detectorIndex];
   if (efixedProp != EMPTY_DBL()) {
     efixed = efixedProp;
-    g_log.debug() << "Detector: " << detector->getID() << " Efixed: " << efixed
+    g_log.debug() << "Detector: " << detectorID << " Efixed: " << efixed
                   << "\n";
   } else {
     if (emode == 1) {
-      if (inputWS->run().hasProperty("Ei")) {
-        efixed = inputWS->run().getLogAsSingleValue("Ei");
+      if (inputWS.run().hasProperty("Ei")) {
+        efixed = inputWS.run().getLogAsSingleValue("Ei");
       } else {
         throw std::invalid_argument("Could not retrieve Efixed from the "
                                     "workspace. Please provide a value.");
       }
     } else if (emode == 2) {
-      std::vector<double> efixedVec = detector->getNumberParameter("Efixed");
-      if (efixedVec.empty()) {
-        int detid = detector->getID();
-        IDetector_const_sptr detectorSingle =
-            inputWS->getInstrument()->getDetector(detid);
-        efixedVec = detectorSingle->getNumberParameter("Efixed");
-      }
+
+      const auto &detectorSingle = detectorInfo.detector(detectorIndex);
+
+      std::vector<double> efixedVec =
+          detectorSingle.getNumberParameter("Efixed");
+
       if (!efixedVec.empty()) {
         efixed = efixedVec.at(0);
-        g_log.debug() << "Detector: " << detector->getID()
-                      << " EFixed: " << efixed << "\n";
+        g_log.debug() << "Detector: " << detectorID << " EFixed: " << efixed
+                      << "\n";
       } else {
         g_log.warning() << "Efixed could not be found for detector "
-                        << detector->getID() << ", please provide a value\n";
+                        << detectorID << ", please provide a value\n";
         throw std::invalid_argument("Could not retrieve Efixed from the "
                                     "detector. Please provide a value.");
       }

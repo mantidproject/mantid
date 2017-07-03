@@ -1,6 +1,3 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include <string>
 
 #include "MantidWorkflowAlgorithms/HFIRLoad.h"
@@ -8,8 +5,10 @@
 #include "Poco/NumberFormatter.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidAPI/AlgorithmProperty.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidKernel/PropertyManagerDataService.h"
 #include "MantidAPI/FileProperty.h"
+#include "MantidAPI/Run.h"
 #include "MantidKernel/PropertyManager.h"
 
 namespace Mantid {
@@ -121,7 +120,7 @@ void HFIRLoad::exec() {
                                                         reductionManager);
   }
 
-  Progress progress(this, 0, 1, 5);
+  Progress progress(this, 0.0, 1.0, 5);
 
   progress.report();
 
@@ -178,7 +177,7 @@ void HFIRLoad::exec() {
   AnalysisDataService::Instance().addOrReplace(
       getPropertyValue("OutputWorkspace"), dataWS_tmp);
   g_log.debug() << "Calling LoadSpice2D Done. OutputWorkspace name = "
-                << dataWS_tmp->name() << "\n";
+                << dataWS_tmp->getName() << '\n';
   API::MatrixWorkspace_sptr dataWS =
       boost::dynamic_pointer_cast<MatrixWorkspace>(dataWS_tmp);
 

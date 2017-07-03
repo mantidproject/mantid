@@ -12,7 +12,6 @@
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/WarningSuppressions.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
-#include <boost/math/special_functions/fpclassify.hpp>
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
 
@@ -618,7 +617,7 @@ public:
     // Now mask the box
     it->getBox()->mask();
     // For masked boxes, getNormalizedSignal() should return NaN.
-    TS_ASSERT(boost::math::isnan(it->getNormalizedSignal()));
+    TS_ASSERT(std::isnan(it->getNormalizedSignal()));
   }
 };
 

@@ -1,4 +1,4 @@
-#pylint: disable=R0902,R0904
+#pylint: disable=R0901,R0902,R0904
 import numpy as np
 import os
 
@@ -13,6 +13,7 @@ class MplPlot3dCanvas(FigureCanvas):
     """
     Matplotlib 3D canvas class
     """
+
     def __init__(self, parent=None):
         """
         Initialization
@@ -52,7 +53,6 @@ class MplPlot3dCanvas(FigureCanvas):
         Clear all the figures from canvas
         :return:
         """
-        print '[DB-INFO] There are %d plots in current plot list.' % len(self._currPlotList)
         for plt in self._currPlotList:
             # del plt
             self._myAxes.collections.remove(plt)

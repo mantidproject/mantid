@@ -41,6 +41,14 @@ public:
   };
   std::string name() override { return std::string("Plot Selected Rows"); }
   std::string icon() override { return std::string("://graph.png"); }
+  std::string tooltip() override {
+    return std::string("Plot the selected runs");
+  }
+  std::string whatsthis() override {
+    return std::string("Creates a plot of the reduced workspaces produced by "
+                       "the selected runs");
+  }
+  std::string shortcut() override { return std::string(); }
 };
 }
 }

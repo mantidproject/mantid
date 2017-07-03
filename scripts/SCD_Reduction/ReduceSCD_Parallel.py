@@ -34,19 +34,20 @@
 # run or the loaded matirix instead of the default FFT method
 #
 
+from __future__ import (absolute_import, division, print_function)
 import os
 import sys
 import threading
 import time
 import ReduceDictionary
 
-sys.path.append("/opt/mantidnightly/bin")
+sys.path.append("/opt/mantidnightly/bin") # noqa
 #sys.path.append("/opt/Mantid/bin")
 
 from mantid.simpleapi import *
 
-print "API Version"
-print apiVersion()
+print("API Version")
+print(apiVersion())
 
 start_time = time.time()
 
@@ -54,6 +55,8 @@ start_time = time.time()
 # ProcessThread is a simple local class.  Each instance of ProcessThread is
 # a thread that starts a command line process to reduce one run.
 #
+
+
 class ProcessThread ( threading.Thread ):
     command = ""
 
@@ -61,7 +64,7 @@ class ProcessThread ( threading.Thread ):
         self.command = command
 
     def run ( self ):
-        print 'STARTING PROCESS: ' + self.command
+        print('STARTING PROCESS: ' + self.command)
         os.system( self.command )
 
 # -------------------------------------------------------------------------
@@ -70,7 +73,7 @@ class ProcessThread ( threading.Thread ):
 # Get the config file name from the command line
 #
 if len(sys.argv) < 2:
-    print "You MUST give the config file name on the command line"
+    print("You MUST give the config file name on the command line")
     exit(0)
 
 config_files = sys.argv[1:]
@@ -123,7 +126,7 @@ for r_num in run_nums:
     if slurm_queue_name is not None:
         console_file = output_directory + "/" + str(r_num) + "_output.txt"
         cmd =  'srun -p ' + slurm_queue_name + \
-           ' --cpus-per-task=3 -J ReduceSCD_Parallel.py -o ' + console_file + ' ' + cmd
+            ' --cpus-per-task=3 -J ReduceSCD_Parallel.py -o ' + console_file + ' ' + cmd
     procList[index].setCommand( cmd )
     index = index + 1
 
@@ -146,9 +149,9 @@ while not all_done:
     if len(procList) == 0 and len(active_list) == 0 :
         all_done = True
 
-print "\n**************************************************************************************"
-print   "************** Completed Individual Runs, Starting to Combine Results ****************"
-print   "**************************************************************************************\n"
+print("\n**************************************************************************************")
+print("************** Completed Individual Runs, Starting to Combine Results ****************")
+print("**************************************************************************************\n")
 
 #
 # First combine all of the integrated files, by reading the separate files and
@@ -165,9 +168,11 @@ first_time = True
 
 if output_nexus:
     #Only need this for instrument for peaks_total
-    short_filename = "%s_%s_event.nxs" % (instrument_name, str(run_nums[0]))
+    short_filename = "%s_%s" % (instrument_name, str(run_nums[0]))
     if data_directory is not None:
-        full_name = data_directory + "/" + short_filename
+        full_name = data_directory + "/" + short_filename + ".nxs.h5"
+        if not os.path.exists(full_name):
+            full_name = data_directory + "/" + short_filename + "_event.nxs"
     else:
         candidates = FileFinder.findRuns(short_filename)
         full_name = ""
@@ -175,10 +180,11 @@ if output_nexus:
             if os.path.exists(item):
                 full_name = str(item)
 
-        if not full_name.endswith('nxs'):
-            print "Exiting since the data_directory was not specified and"
-            print "findnexus failed for event NeXus file: " + instrument_name + " " + str(run)
+        if not full_name.endswith('nxs') and not full_name.endswith('h5'):
+            print("Exiting since the data_directory was not specified and")
+            print("findnexus failed for event NeXus file: " + instrument_name + " " + str(run_nums[0]))
             exit(0)
+
     #
     # Load the first data file to find instrument
     #
@@ -262,7 +268,7 @@ if not use_cylindrical_integration:
 # corresponding matrix and integrate file
 #
 if not use_cylindrical_integration:
-    if (not cell_type is None) and (not centering is None) :
+    if (cell_type is not None) and (centering is not None) :
         conv_name = output_directory + "/" + exp_name + "_" + cell_type + "_" + centering
         if output_nexus:
             conventional_integrate_file = conv_name + ".nxs"
@@ -270,8 +276,8 @@ if not use_cylindrical_integration:
             conventional_integrate_file = conv_name + ".integrate"
         conventional_matrix_file = conv_name + ".mat"
 
-        SelectCellOfType( PeaksWorkspace=peaks_ws, CellType=cell_type, Centering=centering,\
-                      AllowPermutations=allow_perm, Apply=True, Tolerance=tolerance )
+        SelectCellOfType( PeaksWorkspace=peaks_ws, CellType=cell_type, Centering=centering,
+                          AllowPermutations=allow_perm, Apply=True, Tolerance=tolerance )
         if output_nexus:
             SaveNexus( InputWorkspace=peaks_ws, Filename=conventional_integrate_file )
         else:
@@ -279,8 +285,8 @@ if not use_cylindrical_integration:
         SaveIsawUB( InputWorkspace=peaks_ws, Filename=conventional_matrix_file )
 
 if use_cylindrical_integration:
-    if (not cell_type is None) or (not centering is None):
-        print "WARNING: Cylindrical profiles are NOT transformed!!!"
+    if (cell_type is not None) or (centering is not None):
+        print("WARNING: Cylindrical profiles are NOT transformed!!!")
   # Combine *.profiles files
     filename = output_directory + '/' + exp_name + '.profiles'
     outputFile = open( filename, 'w' )
@@ -314,11 +320,11 @@ if use_cylindrical_integration:
 
 end_time = time.time()
 
-print "\n**************************************************************************************"
-print   "****************************** DONE PROCESSING ALL RUNS ******************************"
-print   "**************************************************************************************\n"
+print("\n**************************************************************************************")
+print("****************************** DONE PROCESSING ALL RUNS ******************************")
+print("**************************************************************************************\n")
 
-print 'Total time:   ' + str(end_time - start_time) + ' sec'
-print 'Config file: ' + ", ".join(config_files)
-print 'Script file:  ' + reduce_one_run_script + '\n'
-print
+print('Total time:   ' + str(end_time - start_time) + ' sec')
+print('Config file: ' + ", ".join(config_files))
+print('Script file:  ' + reduce_one_run_script + '\n')
+print()

@@ -18,18 +18,18 @@ class ReflTestHarness:
     def __setup(self):
         activateItem(waitForObjectItem(":_QMenuBar", "Interfaces"))
         activateItem(waitForObjectItem(":MantidPlot - untitled.Interfaces_QMenu", "Reflectometry"))
-        refl_gui = waitForObjectItem(":Interfaces.Reflectometry_QMenu", "ISIS Reflectometry")
+        refl_gui = waitForObjectItem(":Interfaces.Reflectometry_QMenu", "ISIS Reflectometry Old")
         activateItem(refl_gui)
 
     def process_everything(self):
         # Hit process
-        clickButton(waitForObject(":splitterList.Process_QPushButton"))
+        clickButton(waitForObject(":splitterList.buttonProcess_QPushButton"))
         # Agree to process everything
         setWindowState(waitForObject(":_QMessageBox"), WindowState.Normal)
         clickButton(waitForObject(":tableMain.Yes_QPushButton"))
         
     def __teardown(self):
-        sendEvent("QCloseEvent", waitForObject(":ISIS Reflectometry_ReflGui"))
+        sendEvent("QCloseEvent", waitForObject(":ISIS Reflectometry (Old)_ReflGui"))
         dont_save_name = ":Don't Save_QPushButton"
         if(object.exists(dont_save_name)):
             clickButton(waitForObject(dont_save_name))

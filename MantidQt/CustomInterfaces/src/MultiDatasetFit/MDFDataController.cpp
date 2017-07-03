@@ -1,13 +1,13 @@
 #include "MantidQtCustomInterfaces/MultiDatasetFit/MDFDataController.h"
-#include "MantidQtCustomInterfaces/MultiDatasetFit/MultiDatasetFit.h"
 #include "MantidQtCustomInterfaces/MultiDatasetFit/MDFAddWorkspaceDialog.h"
+#include "MantidQtCustomInterfaces/MultiDatasetFit/MultiDatasetFit.h"
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
 
-#include <QTableWidget>
 #include <QMessageBox>
+#include <QTableWidget>
 
 namespace {
 // columns in the data table
@@ -70,7 +70,7 @@ void DataController::addWorkspace() {
       if (!matrixWorkspaces.empty()) {
         for (auto iws = matrixWorkspaces.begin(); iws != matrixWorkspaces.end();
              ++iws) {
-          auto name = QString::fromStdString((**iws).name());
+          auto name = QString::fromStdString((**iws).getName());
           for (auto i = indices.begin(); i != indices.end(); ++i) {
             addWorkspaceSpectrum(name, *i, **iws);
           }
@@ -109,11 +109,11 @@ void DataController::addWorkspaceSpectrum(
   flags ^= Qt::ItemIsEditable;
   cell->setFlags(flags);
 
-  const double startX = ws.readX(wsIndex).front();
+  const auto startX = ws.x(wsIndex).front();
   cell = new QTableWidgetItem(makeNumber(startX));
   m_dataTable->setItem(row, startXColumn, cell);
 
-  const double endX = ws.readX(wsIndex).back();
+  const auto endX = ws.x(wsIndex).back();
   cell = new QTableWidgetItem(makeNumber(endX));
   m_dataTable->setItem(row, endXColumn, cell);
 }
@@ -235,58 +235,6 @@ void DataController::updateDataset(int row, int) { emit dataSetUpdated(row); }
 /// Object's parent cast to MultiDatasetFit.
 MultiDatasetFit *DataController::owner() const {
   return static_cast<MultiDatasetFit *>(parent());
-}
-
-/**
- * Get list of log names from workspace i
- * @param i :: [input] index of dataset
- * @returns :: list of log names
- */
-std::vector<std::string> DataController::getWorkspaceLogNames(int i) const {
-  std::vector<std::string> logNames;
-
-  // validate input
-  if (i > getNumberOfSpectra()) {
-    std::ostringstream err;
-    err << "Index " << i << "greater than number of spectra ("
-        << getNumberOfSpectra() << ")";
-    throw std::invalid_argument(err.str());
-  }
-
-  // populate vector of names
-  auto &ads = Mantid::API::AnalysisDataService::Instance();
-  const auto &wsName = getWorkspaceName(i).toStdString();
-  if (ads.doesExist(wsName)) {
-    const auto &workspace =
-        ads.retrieveWS<Mantid::API::MatrixWorkspace>(wsName);
-    const auto &logs = workspace->run().getLogData();
-    for (const auto &log : logs) {
-      logNames.push_back(log->name());
-    }
-  }
-  return logNames;
-}
-
-/**
- * Get value of named log from workspace i
- * (Must be able to cast to double)
- * @param logName :: [input] Name of log
- * @param function :: [input] Function to apply to log e.g. min, max, mean...
- * @param i :: [input] index of dataset
- * @returns :: value of log cast to double
- */
-double DataController::getLogValue(const QString &logName,
-                                   const StatisticType &function, int i) const {
-  auto &ads = Mantid::API::AnalysisDataService::Instance();
-  const auto &wsName = getWorkspaceName(i).toStdString();
-  if (ads.doesExist(wsName)) {
-    const auto &workspace =
-        ads.retrieveWS<Mantid::API::MatrixWorkspace>(wsName);
-    return workspace->run().getLogAsSingleValue(logName.toStdString(),
-                                                function);
-  } else {
-    throw std::runtime_error("Workspace not found: " + wsName);
-  }
 }
 
 } // MDF

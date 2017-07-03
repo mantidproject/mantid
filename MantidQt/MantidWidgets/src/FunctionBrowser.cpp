@@ -37,6 +37,7 @@
 #include <QMetaMethod>
 #include <QTreeWidget>
 
+#include <boost/lexical_cast.hpp>
 #include <algorithm>
 
 namespace {
@@ -170,6 +171,8 @@ void FunctionBrowser::createBrowser() {
           SLOT(attributeChanged(QtProperty *)));
   connect(m_attributeVectorDoubleManager, SIGNAL(propertyChanged(QtProperty *)),
           this, SLOT(attributeVectorDoubleChanged(QtProperty *)));
+  connect(m_attributeSizeManager, SIGNAL(propertyChanged(QtProperty *)), this,
+          SLOT(attributeVectorSizeChanged(QtProperty *)));
   connect(m_tieManager, SIGNAL(propertyChanged(QtProperty *)), this,
           SLOT(tieChanged(QtProperty *)));
   connect(m_parameterManager, SIGNAL(valueChanged(QtProperty *, double)),
@@ -230,7 +233,7 @@ void FunctionBrowser::createActions() {
   connect(m_actionRemoveConstraint, SIGNAL(triggered()), this,
           SLOT(removeConstraint()));
 
-  m_parameterManager->setErrorsEnabled(true);
+  setErrorsEnabled(true);
 }
 
 /**
@@ -505,11 +508,13 @@ protected:
         m_browser->m_attributeVectorManager->addProperty(m_attName);
     FunctionBrowser::AProperty aprop = m_browser->addProperty(m_parent, prop);
 
+    m_browser->m_attributeSizeManager->blockSignals(true);
     QtProperty *sizeProp =
         m_browser->m_attributeSizeManager->addProperty("Size");
     m_browser->m_attributeSizeManager->setValue(sizeProp,
                                                 static_cast<int>(v.size()));
     m_browser->addProperty(prop, sizeProp);
+    m_browser->m_attributeSizeManager->blockSignals(false);
     sizeProp->setEnabled(false);
 
     m_browser->m_attributeVectorDoubleManager->blockSignals(true);
@@ -639,10 +644,12 @@ void FunctionBrowser::addAttributeAndParameterProperties(
       double value = fun->getParameter(i);
       AProperty ap = addParameterProperty(prop, name, desc, value);
       // if parameter has a tie
-      if (fun->isFixed(i)) {
+      if (!fun->isActive(i)) {
         auto tie = fun->getTie(i);
         if (tie) {
           addTieProperty(ap.prop, QString::fromStdString(tie->asString()));
+        } else {
+          addTieProperty(ap.prop, QString::number(fun->getParameter(i)));
         }
       }
       auto c = fun->getConstraint(i);
@@ -676,7 +683,9 @@ FunctionBrowser::AProperty FunctionBrowser::addIndexProperty(QtProperty *prop) {
   QtProperty *ip = m_indexManager->addProperty("Index");
   ip->setEnabled(false);
   m_indexManager->setValue(ip, index);
-  return addProperty(prop, ip);
+  auto retval = addProperty(prop, ip);
+  updateFunctionIndices();
+  return retval;
 }
 
 /**
@@ -911,8 +920,7 @@ QtProperty *FunctionBrowser::getFunctionProperty(const QString &index) const {
  * @param prop :: Parent parameter property
  * @param tie :: A tie string
  */
-FunctionBrowser::AProperty FunctionBrowser::addTieProperty(QtProperty *prop,
-                                                           QString tie) {
+void FunctionBrowser::addTieProperty(QtProperty *prop, QString tie) {
   if (!prop) {
     throw std::runtime_error("FunctionBrowser: null property pointer");
   }
@@ -922,7 +930,7 @@ FunctionBrowser::AProperty FunctionBrowser::addTieProperty(QtProperty *prop,
   ap.parent = NULL;
 
   if (!isParameter(prop))
-    return ap;
+    return;
 
   Mantid::API::Expression expr;
   expr.parse(tie.toStdString());
@@ -937,32 +945,38 @@ FunctionBrowser::AProperty FunctionBrowser::addTieProperty(QtProperty *prop,
     }
   }
 
-  // check that tie has form <paramName>=<expression>
-  if (expr.name() != "=") { // prepend "<paramName>="
-    if (!isComposite) {
-      tie.prepend(prop->propertyName() + "=");
-    } else {
-      QString index = getIndex(prop);
-      tie.prepend(index + prop->propertyName() + "=");
-    }
-  }
-
-  // find the property of the function
+  // Find the property of the function that this tie will be set to:
+  // If the tie has variables that contain function indices (f0.f1. ...)
+  // then it will be set to the topmost composite function.
+  // If the tie is a number or has only simple variable names then it belongs
+  // to the local function (the one that has the tied parameter)
   QtProperty *funProp =
       isComposite ? getFunctionProperty().prop : m_properties[prop].parent;
 
+  // Create and add a QtProperty for the tie.
   m_tieManager->blockSignals(true);
   QtProperty *tieProp = m_tieManager->addProperty("Tie");
   m_tieManager->setValue(tieProp, tie);
   ap = addProperty(prop, tieProp);
+  tieProp->setEnabled(false);
   m_tieManager->blockSignals(false);
 
+  // Store tie information for easier access
   ATie atie;
   atie.paramProp = prop;
   atie.tieProp = tieProp;
   m_ties.insert(funProp, atie);
 
-  return ap;
+  // In case of multi-dataset fitting store the tie for a local parameter
+  if (prop->hasOption(globalOptionName) &&
+      !prop->checkOption(globalOptionName)) {
+    auto parName = getParameterName(prop);
+    auto &localValues = m_localParameterValues[parName];
+    if (m_currentDataset >= localValues.size()) {
+      initLocalParameter(parName);
+    }
+    localValues[m_currentDataset].tie = tie;
+  }
 }
 
 /**
@@ -1235,13 +1249,7 @@ void FunctionBrowser::addFunction() {
   }
 
   // Get new function type
-  SelectFunctionDialog dlg(this);
-  if (dlg.exec() == QDialog::Accepted) {
-    newFunction = dlg.getFunction();
-  } else {
-    return;
-  }
-
+  newFunction = getUserFunctionFromDialog();
   if (newFunction.isEmpty())
     return;
 
@@ -1270,6 +1278,19 @@ void FunctionBrowser::addFunction() {
     addFunction(NULL, f);
   }
   emit functionStructureChanged();
+}
+
+/**
+ * Ask user to select a function and return it
+ * @returns :: function string
+ */
+QString FunctionBrowser::getUserFunctionFromDialog() {
+  SelectFunctionDialog dlg(this);
+  if (dlg.exec() == QDialog::Accepted) {
+    return dlg.getFunction();
+  } else {
+    return QString();
+  }
 }
 
 /**
@@ -1352,7 +1373,8 @@ Mantid::API::IFunction_sptr FunctionBrowser::getFunction(QtProperty *prop,
     QList<QtProperty *> filedTies; // ties can become invalid after some editing
     for (auto it = from; it != to; ++it) {
       try {
-        QString tie = m_tieManager->value(it.value().tieProp);
+        QString tie = it->paramProp->propertyName() + "=" +
+                      m_tieManager->value(it.value().tieProp);
         fun->addTies(tie.toStdString());
       } catch (...) {
         filedTies << it.value().tieProp;
@@ -1525,9 +1547,12 @@ FunctionBrowser::getParameterProperty(const QString &funcIndex,
  *   type (composition) as the function in the browser.
  */
 void FunctionBrowser::updateParameters(const Mantid::API::IFunction &fun) {
-  auto paramNames = fun.getParameterNames();
-  for (auto par = paramNames.begin(); par != paramNames.end(); ++par) {
-    setParameter(QString::fromStdString(*par), fun.getParameter(*par));
+  const auto paramNames = fun.getParameterNames();
+  for (const auto parameter : paramNames) {
+    const QString qName = QString::fromStdString(parameter);
+    setParameter(qName, fun.getParameter(parameter));
+    const size_t index = fun.parameterIndex(parameter);
+    setParamError(qName, fun.getError(index));
   }
 }
 
@@ -1599,22 +1624,8 @@ void FunctionBrowser::fixParameter() {
   QtProperty *prop = item->property();
   if (!isParameter(prop))
     return;
-  if (prop->hasOption(globalOptionName) &&
-      !prop->checkOption(globalOptionName)) {
-    auto parName = getParameterName(prop);
-    auto &localValues = m_localParameterValues[parName];
-    if (m_currentDataset >= localValues.size()) {
-      initLocalParameter(parName);
-    }
-    localValues[m_currentDataset].fixed = true;
-  }
   QString tie = QString::number(getParameter(prop));
-  m_tieManager->blockSignals(true);
-  auto ap = addTieProperty(prop, tie);
-  if (ap.prop) {
-    ap.prop->setEnabled(false);
-  }
-  m_tieManager->blockSignals(false);
+  addTieProperty(prop, tie);
 }
 
 /// Get a tie property attached to a parameter property
@@ -1689,15 +1700,6 @@ void FunctionBrowser::addTie() {
                                       QLineEdit::Normal, "", &ok);
   if (ok && !tie.isEmpty()) {
     addTieProperty(prop, tie);
-    if (prop->hasOption(globalOptionName) &&
-        !prop->checkOption(globalOptionName)) {
-      auto parName = getParameterName(prop);
-      auto &localValues = m_localParameterValues[parName];
-      if (m_currentDataset >= localValues.size()) {
-        initLocalParameter(parName);
-      }
-      localValues[m_currentDataset].tie = tie;
-    }
   }
 }
 
@@ -1840,6 +1842,40 @@ void FunctionBrowser::attributeChanged(QtProperty *prop) {
   emit functionStructureChanged();
 }
 
+/** Called when the size of a vector attribute is changed
+ * @param prop :: A property that was changed.
+ */
+void FunctionBrowser::attributeVectorSizeChanged(QtProperty *prop) {
+  QtProperty *vectorProp = m_properties[prop].parent;
+  if (!vectorProp)
+    throw std::logic_error("FunctionBrowser: inconsistency in vector "
+                           "properties.\nAttribute property not found.");
+  auto funProp = m_properties[vectorProp].parent;
+  if (!funProp)
+    throw std::logic_error("FunctionBrowser: inconsistency in vector "
+                           "properties.\nFunction property not found.");
+  auto fun = getFunction(funProp, true);
+  if (!fun)
+    throw std::logic_error("FunctionBrowser: inconsistency in vector "
+                           "properties.\nFunction undefined.");
+  auto attName = vectorProp->propertyName().toStdString();
+  auto attribute = fun->getAttribute(attName).asVector();
+  auto newSize = m_attributeSizeManager->value(prop);
+  if (newSize < 0)
+    newSize = 0;
+  if (attribute.size() != static_cast<size_t>(newSize)) {
+    if (newSize == 0) {
+      attribute.clear();
+    } else {
+      attribute.resize(newSize);
+    }
+    fun->setAttributeValue(attName, attribute);
+    setFunction(funProp, fun);
+    updateFunctionIndices();
+    emit functionStructureChanged();
+  }
+}
+
 /**
  * Slot connected to a property displaying the value of a member of a vector
  * attribute.
@@ -1944,10 +1980,23 @@ void FunctionBrowser::setLocalParameterValue(const QString &parName, int i,
  * @param parName :: Name of parametere to init.
  */
 void FunctionBrowser::initLocalParameter(const QString &parName) const {
-  double value = getParameter(parName);
-  QVector<LocalParameterData> values(getNumberOfDatasets(),
-                                     LocalParameterData(value));
-  m_localParameterValues[parName] = values;
+  auto nData = getNumberOfDatasets();
+  if (nData == 0) {
+    nData = 1;
+  }
+  auto oldValues = m_localParameterValues.find(parName);
+  if (oldValues != m_localParameterValues.end() && !oldValues->isEmpty()) {
+    auto nOldData = oldValues->size();
+    if (nOldData > nData) {
+      oldValues->erase(oldValues->begin() + nData, oldValues->end());
+    } else if (nOldData < nData) {
+      oldValues->insert(oldValues->end(), nData - nOldData, oldValues->back());
+    }
+  } else {
+    double value = getParameter(parName);
+    QVector<LocalParameterData> values(nData, LocalParameterData(value));
+    m_localParameterValues[parName] = values;
+  }
 }
 
 /// Make sure that the parameter is initialized
@@ -2005,16 +2054,6 @@ void FunctionBrowser::removeDatasets(QList<int> indices) {
 /// Add local parameters for additional datasets.
 /// @param n :: Number of datasets added.
 void FunctionBrowser::addDatasets(int n) {
-  if (m_numberOfDatasets == 0) {
-    setNumberOfDatasets(n);
-    return;
-  }
-  for (auto par = m_localParameterValues.begin();
-       par != m_localParameterValues.end(); ++par) {
-    auto &values = par.value();
-    double value = values.back().value;
-    values.insert(values.end(), n, LocalParameterData(value));
-  }
   setNumberOfDatasets(m_numberOfDatasets + n);
 }
 
@@ -2128,15 +2167,11 @@ void FunctionBrowser::updateLocalTie(const QString &parName) {
   }
   auto &localParam = m_localParameterValues[parName][m_currentDataset];
   if (localParam.fixed) {
-    auto ap = addTieProperty(
+    addTieProperty(
         prop, QString::number(
                   m_localParameterValues[parName][m_currentDataset].value));
-    if (ap.prop) {
-      ap.prop->setEnabled(false);
-    }
   } else if (!localParam.tie.isEmpty()) {
-    auto ap = addTieProperty(prop, localParam.tie);
-    (void)ap;
+    addTieProperty(prop, localParam.tie);
   }
 }
 
@@ -2218,11 +2253,7 @@ void FunctionBrowser::updateMultiDatasetParameters(
         throw std::invalid_argument(
             "Multiple datasets, but function is single-domain");
       }
-      for (int j = 0; j < localParameters.size(); ++j) {
-        setLocalParameterValue(
-            localParameters[j], 0,
-            cfun->getParameter(localParameters[j].toStdString()));
-      }
+      updateParameters(*cfun);
     }
   } else {
     updateParameters(fun);
@@ -2243,6 +2274,19 @@ void FunctionBrowser::setColumnSizes(int s0, int s1, int s2) {
 void FunctionBrowser::globalChanged(QtProperty *, const QString &, bool) {
   emit globalsChanged();
 }
+
+/**
+ * Set display of parameter errors on/off
+ * @param enabled :: [input] On/off display of errors
+ */
+void FunctionBrowser::setErrorsEnabled(bool enabled) {
+  m_parameterManager->setErrorsEnabled(enabled);
+}
+
+/**
+ * Clear all errors, if they are set
+ */
+void FunctionBrowser::clearErrors() { m_parameterManager->clearErrors(); }
 
 } // MantidWidgets
 } // MantidQt

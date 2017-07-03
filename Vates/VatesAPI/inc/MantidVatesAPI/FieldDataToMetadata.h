@@ -41,7 +41,7 @@ class DLLExport FieldDataToMetadata
     : public std::binary_function<vtkFieldData *, std::string, std::string> {
 public:
   /// Act as Functor.
-  std::string operator()(vtkFieldData *fieldData, std::string id) const;
+  std::string operator()(vtkFieldData *fieldData, const std::string &id) const;
 
   /// Explicit call to Functor execution.
   std::string execute(vtkFieldData *fieldData, const std::string &id) const;

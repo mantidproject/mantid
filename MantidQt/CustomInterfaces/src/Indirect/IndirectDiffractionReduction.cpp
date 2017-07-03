@@ -1,18 +1,13 @@
-//----------------------
-// Includes
-//----------------------
 #include "MantidQtCustomInterfaces/Indirect/IndirectDiffractionReduction.h"
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/MultiFileNameParser.h"
 #include "MantidQtAPI/HelpWindow.h"
 #include "MantidQtAPI/ManageUserDirectories.h"
-
-#include <QDesktopServices>
-#include <QUrl>
 
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
@@ -90,6 +85,11 @@ void IndirectDiffractionReduction::initLayout() {
   connect(m_uiForm.ckIndividualGrouping, SIGNAL(stateChanged(int)), this,
           SLOT(individualGroupingToggled(int)));
 
+  // Handle plotting
+  connect(m_uiForm.pbPlot, SIGNAL(clicked()), this, SLOT(plotResults()));
+  // Handle saving
+  connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveReductions()));
+
   loadSettings();
 
   // Update invalid rebinning markers
@@ -115,7 +115,7 @@ void IndirectDiffractionReduction::run() {
   if (instName == "OSIRIS") {
     if (mode == "diffonly") {
       if (!validateVanCal()) {
-        showInformationBox("Vaniduium and Calibration input is invalid.");
+        showInformationBox("Vanadium and Calibration input is invalid.");
         return;
       }
       runOSIRISdiffonlyReduction();
@@ -125,33 +125,32 @@ void IndirectDiffractionReduction::run() {
             "Calibration and rebinning parameters are incorrect.");
         return;
       }
+      runGenericReduction(instName, mode);
     }
   } else {
     if (!validateRebin()) {
       showInformationBox("Rebinning parameters are incorrect.");
       return;
     }
+    runGenericReduction(instName, mode);
   }
-  runGenericReduction(instName, mode);
 }
 
 /**
- * Handles plotting result spectra from algorithm chains.
+ * Handles completion of algorithm
  *
  * @param error True if the chain was stopped due to error
  */
-void IndirectDiffractionReduction::plotResults(bool error) {
+void IndirectDiffractionReduction::algorithmComplete(bool error) {
   // Handles completion of the diffraction algorithm chain
   disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
-             SLOT(plotResults(bool)));
+             SLOT(algorithmComplete(bool)));
 
-  // Nothing can be plotted
   if (error) {
     showInformationBox(
         "Error running diffraction reduction.\nSee Results Log for details.");
     return;
   }
-
   // Ungroup the output workspace if generic reducer was used
   if (AnalysisDataService::Instance().doesExist(
           "IndirectDiffraction_Workspaces")) {
@@ -164,9 +163,21 @@ void IndirectDiffractionReduction::plotResults(bool error) {
 
     diffResultsGroup->removeAll();
     AnalysisDataService::Instance().remove("IndirectDiffraction_Workspaces");
-
-    saveGenericReductions();
   }
+  // Enable plotting
+  m_uiForm.pbPlot->setEnabled(true);
+  m_uiForm.cbPlotType->setEnabled(true);
+  // Enable saving
+  m_uiForm.ckAscii->setEnabled(true);
+  m_uiForm.ckGSS->setEnabled(true);
+  m_uiForm.ckNexus->setEnabled(true);
+  m_uiForm.pbSave->setEnabled(true);
+}
+
+/**
+ * Handles plotting result spectra from algorithm chains.
+ */
+void IndirectDiffractionReduction::plotResults() {
 
   QString instName = m_uiForm.iicInstrumentConfiguration->getInstrumentName();
   QString mode = m_uiForm.iicInstrumentConfiguration->getReflectionName();
@@ -176,13 +187,27 @@ void IndirectDiffractionReduction::plotResults(bool error) {
   QString pyInput = "from mantidplot import plotSpectrum, plot2D\n";
 
   if (plotType == "Spectra" || plotType == "Both") {
-    for (auto it = m_plotWorkspaces.begin(); it != m_plotWorkspaces.end(); ++it)
-      pyInput += "plotSpectrum('" + QString::fromStdString(*it) + "', 0)\n";
+    for (const auto &it : m_plotWorkspaces) {
+      const auto workspaceExists =
+          AnalysisDataService::Instance().doesExist(it);
+      if (workspaceExists)
+        pyInput += "plotSpectrum('" + QString::fromStdString(it) + "', 0)\n";
+      else
+        showInformationBox(QString::fromStdString(
+            "Workspace '" + it + "' not found\nUnable to plot workspace"));
+    }
   }
 
   if (plotType == "Contour" || plotType == "Both") {
-    for (auto it = m_plotWorkspaces.begin(); it != m_plotWorkspaces.end(); ++it)
-      pyInput += "plot2D('" + QString::fromStdString(*it) + "')\n";
+    for (const auto &it : m_plotWorkspaces) {
+      const auto workspaceExists =
+          AnalysisDataService::Instance().doesExist(it);
+      if (workspaceExists)
+        pyInput += "plot2D('" + QString::fromStdString(it) + "')\n";
+      else
+        showInformationBox(QString::fromStdString(
+            "Workspace '" + it + "' not found\nUnable to plot workspace"));
+    }
   }
 
   runPythonCode(pyInput);
@@ -191,56 +216,79 @@ void IndirectDiffractionReduction::plotResults(bool error) {
 /**
  * Handles saving the reductions from the generic algorithm.
  */
-void IndirectDiffractionReduction::saveGenericReductions() {
-  for (auto it = m_plotWorkspaces.begin(); it != m_plotWorkspaces.end(); ++it) {
-    std::string wsName = *it;
+void IndirectDiffractionReduction::saveReductions() {
+  for (const auto wsName : m_plotWorkspaces) {
+    const auto workspaceExists =
+        AnalysisDataService::Instance().doesExist(wsName);
+    if (workspaceExists) {
 
-    if (m_uiForm.ckGSS->isChecked()) {
-      std::string tofWsName = wsName + "_tof";
-
-      // Convert to TOF for GSS
-      IAlgorithm_sptr convertUnits =
-          AlgorithmManager::Instance().create("ConvertUnits");
-      convertUnits->initialize();
-      convertUnits->setProperty("InputWorkspace", wsName);
-      convertUnits->setProperty("OutputWorkspace", tofWsName);
-      convertUnits->setProperty("Target", "TOF");
-      m_batchAlgoRunner->addAlgorithm(convertUnits);
-
+      QString tofWsName = QString::fromStdString(wsName) + "_tof";
+      std::string instName =
+          (m_uiForm.iicInstrumentConfiguration->getInstrumentName())
+              .toStdString();
+      std::string mode =
+          (m_uiForm.iicInstrumentConfiguration->getReflectionName())
+              .toStdString();
       BatchAlgorithmRunner::AlgorithmRuntimeProps inputFromConvUnitsProps;
-      inputFromConvUnitsProps["InputWorkspace"] = tofWsName;
+      inputFromConvUnitsProps["InputWorkspace"] = tofWsName.toStdString();
+      BatchAlgorithmRunner::AlgorithmRuntimeProps inputFromReductionProps;
+      inputFromReductionProps["InputWorkspace"] = (wsName + "_dRange");
 
-      // Save GSS
-      std::string gssFilename = wsName + ".gss";
-      IAlgorithm_sptr saveGSS = AlgorithmManager::Instance().create("SaveGSS");
-      saveGSS->initialize();
-      saveGSS->setProperty("Filename", gssFilename);
-      m_batchAlgoRunner->addAlgorithm(saveGSS, inputFromConvUnitsProps);
-    }
+      if (m_uiForm.ckGSS->isChecked()) {
+        if (instName == "OSIRIS" && mode == "diffonly") {
 
-    if (m_uiForm.ckNexus->isChecked()) {
-      // Save NEXus using SaveNexusProcessed
-      std::string nexusFilename = wsName + ".nxs";
-      IAlgorithm_sptr saveNexus =
-          AlgorithmManager::Instance().create("SaveNexusProcessed");
-      saveNexus->initialize();
-      saveNexus->setProperty("InputWorkspace", wsName);
-      saveNexus->setProperty("Filename", nexusFilename);
-      m_batchAlgoRunner->addAlgorithm(saveNexus);
-    }
+          QString gssFilename = tofWsName + ".gss";
+          IAlgorithm_sptr saveGSS =
+              AlgorithmManager::Instance().create("SaveGSS");
+          saveGSS->initialize();
+          saveGSS->setProperty("Filename", gssFilename.toStdString());
+          m_batchAlgoRunner->addAlgorithm(saveGSS, inputFromConvUnitsProps);
+        } else {
 
-    if (m_uiForm.ckAscii->isChecked()) {
-      // Save ASCII using SaveAscii version 1
-      std::string asciiFilename = wsName + ".dat";
-      IAlgorithm_sptr saveASCII =
-          AlgorithmManager::Instance().create("SaveAscii", 1);
-      saveASCII->initialize();
-      saveASCII->setProperty("InputWorkspace", wsName);
-      saveASCII->setProperty("Filename", asciiFilename);
-      m_batchAlgoRunner->addAlgorithm(saveASCII);
-    }
+          // Convert to TOF for GSS
+          IAlgorithm_sptr convertUnits =
+              AlgorithmManager::Instance().create("ConvertUnits");
+          convertUnits->initialize();
+          convertUnits->setProperty("InputWorkspace", wsName);
+          convertUnits->setProperty("OutputWorkspace", tofWsName.toStdString());
+          convertUnits->setProperty("Target", "TOF");
+          m_batchAlgoRunner->addAlgorithm(convertUnits);
+
+          // Save GSS
+          std::string gssFilename = wsName + ".gss";
+          IAlgorithm_sptr saveGSS =
+              AlgorithmManager::Instance().create("SaveGSS");
+          saveGSS->initialize();
+          saveGSS->setProperty("Filename", gssFilename);
+          m_batchAlgoRunner->addAlgorithm(saveGSS, inputFromConvUnitsProps);
+        }
+      }
+
+      if (m_uiForm.ckNexus->isChecked()) {
+        // Save NEXus using SaveNexusProcessed
+        std::string nexusFilename = wsName + ".nxs";
+        IAlgorithm_sptr saveNexus =
+            AlgorithmManager::Instance().create("SaveNexusProcessed");
+        saveNexus->initialize();
+        saveNexus->setProperty("InputWorkspace", wsName);
+        saveNexus->setProperty("Filename", nexusFilename);
+        m_batchAlgoRunner->addAlgorithm(saveNexus);
+      }
+
+      if (m_uiForm.ckAscii->isChecked()) {
+        // Save ASCII using SaveAscii version 1
+        std::string asciiFilename = wsName + ".dat";
+        IAlgorithm_sptr saveASCII =
+            AlgorithmManager::Instance().create("SaveAscii", 1);
+        saveASCII->initialize();
+        saveASCII->setProperty("InputWorkspace", wsName);
+        saveASCII->setProperty("Filename", asciiFilename);
+        m_batchAlgoRunner->addAlgorithm(saveASCII);
+      }
+    } else
+      showInformationBox(QString::fromStdString(
+          "Workspace '" + wsName + "' not found\nUnable to plot workspace"));
   }
-
   m_batchAlgoRunner->executeBatchAsync();
 }
 
@@ -252,10 +300,21 @@ void IndirectDiffractionReduction::saveGenericReductions() {
  */
 void IndirectDiffractionReduction::runGenericReduction(QString instName,
                                                        QString mode) {
+
+  QString rebinStart = "";
+  QString rebinWidth = "";
+  QString rebinEnd = "";
+
   // Get rebin string
-  QString rebinStart = m_uiForm.leRebinStart->text();
-  QString rebinWidth = m_uiForm.leRebinWidth->text();
-  QString rebinEnd = m_uiForm.leRebinEnd->text();
+  if (mode == "diffspec") {
+    rebinStart = m_uiForm.leRebinStart_CalibOnly->text();
+    rebinWidth = m_uiForm.leRebinWidth_CalibOnly->text();
+    rebinEnd = m_uiForm.leRebinEnd_CalibOnly->text();
+  } else if (mode == "diffonly") {
+    rebinStart = m_uiForm.leRebinStart->text();
+    rebinWidth = m_uiForm.leRebinWidth->text();
+    rebinEnd = m_uiForm.leRebinEnd->text();
+  }
 
   QString rebin = "";
   if (!rebinStart.isEmpty() && !rebinWidth.isEmpty() && !rebinEnd.isEmpty())
@@ -291,6 +350,11 @@ void IndirectDiffractionReduction::runGenericReduction(QString instName,
       msgDiffReduction->setProperty("CalFile", calFile);
     }
   }
+  if (mode == "diffspec") {
+    const auto vanFile =
+        m_uiForm.rfVanFile_only->getFilenames().join(",").toStdString();
+    msgDiffReduction->setProperty("VanadiumFiles", vanFile);
+  }
   msgDiffReduction->setProperty("SumFiles", m_uiForm.ckSumFiles->isChecked());
   msgDiffReduction->setProperty("LoadLogFiles",
                                 m_uiForm.ckLoadLogs->isChecked());
@@ -311,7 +375,7 @@ void IndirectDiffractionReduction::runGenericReduction(QString instName,
                                     m_uiForm.spCanScale->value());
   }
 
-  // Add the pproperty for grouping policy if needed
+  // Add the property for grouping policy if needed
   if (m_uiForm.ckIndividualGrouping->isChecked())
     msgDiffReduction->setProperty("GroupingPolicy", "Individual");
 
@@ -319,7 +383,7 @@ void IndirectDiffractionReduction::runGenericReduction(QString instName,
 
   // Handles completion of the diffraction algorithm chain
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
-          SLOT(plotResults(bool)));
+          SLOT(algorithmComplete(bool)));
 
   m_batchAlgoRunner->executeBatchAsync();
 }
@@ -401,42 +465,13 @@ void IndirectDiffractionReduction::runOSIRISdiffonlyReduction() {
   convertUnits->setProperty("Target", "TOF");
   m_batchAlgoRunner->addAlgorithm(convertUnits, inputFromReductionProps);
 
-  BatchAlgorithmRunner::AlgorithmRuntimeProps inputFromConvUnitsProps;
-  inputFromConvUnitsProps["InputWorkspace"] = tofWsName.toStdString();
-
-  if (m_uiForm.ckGSS->isChecked()) {
-    QString gssFilename = tofWsName + ".gss";
-    IAlgorithm_sptr saveGSS = AlgorithmManager::Instance().create("SaveGSS");
-    saveGSS->initialize();
-    saveGSS->setProperty("Filename", gssFilename.toStdString());
-    m_batchAlgoRunner->addAlgorithm(saveGSS, inputFromConvUnitsProps);
-  }
-
-  if (m_uiForm.ckNexus->isChecked()) {
-    QString nexusFilename = drangeWsName + ".nxs";
-    IAlgorithm_sptr saveNexus =
-        AlgorithmManager::Instance().create("SaveNexusProcessed");
-    saveNexus->initialize();
-    saveNexus->setProperty("Filename", nexusFilename.toStdString());
-    m_batchAlgoRunner->addAlgorithm(saveNexus, inputFromReductionProps);
-  }
-
-  if (m_uiForm.ckAscii->isChecked()) {
-    QString asciiFilename = drangeWsName + ".dat";
-    IAlgorithm_sptr saveASCII =
-        AlgorithmManager::Instance().create("SaveAscii");
-    saveASCII->initialize();
-    saveASCII->setProperty("Filename", asciiFilename.toStdString());
-    m_batchAlgoRunner->addAlgorithm(saveASCII, inputFromReductionProps);
-  }
-
   m_plotWorkspaces.clear();
   m_plotWorkspaces.push_back(tofWsName.toStdString());
   m_plotWorkspaces.push_back(drangeWsName.toStdString());
 
   // Handles completion of the diffraction algorithm chain
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
-          SLOT(plotResults(bool)));
+          SLOT(algorithmComplete(bool)));
 
   m_batchAlgoRunner->executeBatchAsync();
 }
@@ -446,7 +481,7 @@ void IndirectDiffractionReduction::runOSIRISdiffonlyReduction() {
  *
  * Optionally loads an IPF if a reflection was provided.
  *
- * @param instrumentName Name of an inelastic indiretc instrument (IRIS, OSIRIN,
+ * @param instrumentName Name of an inelastic indirect instrument (IRIS, OSIRIS,
  *TOSCA, VESUVIO)
  * @param reflection Reflection mode to load parameters for (diffspec or
  *diffonly)
@@ -500,6 +535,7 @@ void IndirectDiffractionReduction::instrumentSelected(
   // Set the search instrument for runs
   m_uiForm.rfSampleFiles->setInstrumentOverride(instrumentName);
   m_uiForm.rfCanFiles->setInstrumentOverride(instrumentName);
+  m_uiForm.rfVanFile_only->setInstrumentOverride(instrumentName);
 
   MatrixWorkspace_sptr instWorkspace = loadInstrument(
       instrumentName.toStdString(), reflectionName.toStdString());
@@ -526,10 +562,24 @@ void IndirectDiffractionReduction::instrumentSelected(
     m_uiForm.swVanadium->setCurrentIndex(0);
   else if (calibNeeded)
     m_uiForm.swVanadium->setCurrentIndex(1);
-  else
+  else if (reflectionName != "diffspec")
     m_uiForm.swVanadium->setCurrentIndex(2);
+  else
+    m_uiForm.swVanadium->setCurrentIndex(1);
 
   // Hide options that the current instrument config cannot process
+
+  // Disable calibration for IRIS
+  if (instrumentName == "IRIS") {
+    m_uiForm.ckUseCalib->setEnabled(false);
+    m_uiForm.ckUseCalib->setToolTip("IRIS does not support calibration files");
+    m_uiForm.ckUseCalib->setChecked(false);
+  } else {
+    m_uiForm.ckUseCalib->setEnabled(true);
+    m_uiForm.ckUseCalib->setToolTip("");
+    m_uiForm.ckUseCalib->setChecked(true);
+  }
+
   if (instrumentName == "OSIRIS" && reflectionName == "diffonly") {
     // Disable individual grouping
     m_uiForm.ckIndividualGrouping->setToolTip(
@@ -606,7 +656,7 @@ void IndirectDiffractionReduction::saveSettings() {
 /**
  * Validates the rebinning fields and updates invalid markers.
  *
- * @returns True if reinning options are valid, flase otherwise
+ * @returns True if reining options are valid, false otherwise
  */
 bool IndirectDiffractionReduction::validateRebin() {
   QString rebStartTxt = m_uiForm.leRebinStart->text();
@@ -697,7 +747,7 @@ bool IndirectDiffractionReduction::validateCalOnly() {
 }
 
 /**
- * Disables and shows message on run button indicating that run files have benn
+ * Disables and shows message on run button indicating that run files have been
  * changed.
  */
 void IndirectDiffractionReduction::runFilesChanged() {
@@ -742,16 +792,16 @@ void IndirectDiffractionReduction::individualGroupingToggled(int state) {
 
   switch (state) {
   case Qt::Unchecked:
-    if (itemCount == 4) {
-      m_uiForm.cbPlotType->removeItem(3);
+    if (itemCount == 3) {
+      m_uiForm.cbPlotType->removeItem(1);
       m_uiForm.cbPlotType->removeItem(2);
     }
     break;
 
   case Qt::Checked:
-    if (itemCount == 2) {
-      m_uiForm.cbPlotType->insertItem(2, "Contour");
-      m_uiForm.cbPlotType->insertItem(3, "Both");
+    if (itemCount == 1) {
+      m_uiForm.cbPlotType->insertItem(1, "Contour");
+      m_uiForm.cbPlotType->insertItem(2, "Both");
     }
     break;
 

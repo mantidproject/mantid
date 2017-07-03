@@ -1,18 +1,21 @@
-//---------------------------------------------------
-// Includes
-//---------------------------------------------------
 #include "MantidDataHandling/SaveGSS.h"
 
 #include "MantidAPI/AlgorithmHistory.h"
 #include "MantidAPI/FileProperty.h"
+#include "MantidAPI/Run.h"
+#include "MantidAPI/SpectrumInfo.h"
+#include "MantidAPI/WorkspaceHistory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidKernel/PhysicalConstants.h"
+#include "MantidHistogramData/Histogram.h"
 
-#include <boost/math/special_functions/fpclassify.hpp>
 #include <Poco/File.h>
 #include <Poco/Path.h>
+
+#include <cmath>
 #include <fstream>
 
 namespace Mantid {
@@ -38,7 +41,7 @@ bool isEqual(const double left, const double right) {
           std::fabs(TOLERANCE * (right + left)));
 }
 
-bool isConstantDelta(const MantidVec &xAxis) {
+bool isConstantDelta(const HistogramData::HistogramX &xAxis) {
   const double deltaX = (xAxis[1] - xAxis[0]);
   for (std::size_t i = 1; i < xAxis.size(); ++i) {
     if (!isEqual(xAxis[i] - xAxis[i - 1], deltaX)) {
@@ -48,9 +51,6 @@ bool isConstantDelta(const MantidVec &xAxis) {
   return true;
 }
 
-//---------------------------------------------------
-// Private member functions
-//---------------------------------------------------
 /** Initialise the algorithm
   */
 void SaveGSS::init() {
@@ -89,46 +89,9 @@ void SaveGSS::init() {
   declareProperty(
       "UseSpectrumNumberAsBankID", false,
       "If true, then each bank's bank ID is equal to the spectrum number; "
-      "otherwise, the continous bank IDs are applied. ");
+      "otherwise, the continuous bank IDs are applied. ");
 }
 
-//----------------------------------------------------------------------------------------------
-/** Determine the focused position for the supplied spectrum. The position
- * (l1, l2, tth) is returned via the references passed in.
- */
-void getFocusedPos(MatrixWorkspace_const_sptr wksp, const int spectrum,
-                   double &l1, double &l2, double &tth, double &difc) {
-  Geometry::Instrument_const_sptr instrument = wksp->getInstrument();
-  if (instrument == nullptr) {
-    l1 = 0.;
-    l2 = 0.;
-    tth = 0.;
-    return;
-  }
-  Geometry::IComponent_const_sptr source = instrument->getSource();
-  Geometry::IComponent_const_sptr sample = instrument->getSample();
-  if (source == nullptr || sample == nullptr) {
-    l1 = 0.;
-    l2 = 0.;
-    tth = 0.;
-    return;
-  }
-  l1 = source->getDistance(*sample);
-  Geometry::IDetector_const_sptr det = wksp->getDetector(spectrum);
-  if (!det) {
-    std::stringstream errss;
-    errss << "Workspace " << wksp->name()
-          << " does not have detector with spectrum " << spectrum;
-    throw std::runtime_error(errss.str());
-  }
-  l2 = det->getDistance(*sample);
-  tth = wksp->detectorTwoTheta(*det);
-
-  difc = ((2.0 * PhysicalConstants::NeutronMass * sin(tth * 0.5) * (l1 + l2)) /
-          (PhysicalConstants::h * 1.e4));
-}
-
-//----------------------------------------------------------------------------------------------
 /** Execute the algorithm
   */
 void SaveGSS::exec() {
@@ -148,7 +111,7 @@ void SaveGSS::exec() {
     errss << "Number of Spectra (" << nHist
           << ") cannot be larger than 99 for GSAS file";
     g_log.error(errss.str());
-    throw new std::invalid_argument(errss.str());
+    throw std::invalid_argument(errss.str());
   }
 
   std::string filename = getProperty("Filename");
@@ -166,8 +129,7 @@ void SaveGSS::exec() {
 
   // Check whether append or not
   if (!split) {
-    const std::string file(filename);
-    Poco::File fileobj(file);
+    Poco::File fileobj(filename);
     if (fileobj.exists() && !append) {
       // Non-append mode and will be overwritten
       g_log.warning() << "Target GSAS file " << filename
@@ -186,7 +148,6 @@ void SaveGSS::exec() {
                 outputFormat);
 }
 
-//----------------------------------------------------------------------------------------------
 /** Write GSAS file based on user-specified request
   */
 void SaveGSS::writeGSASFile(const std::string &outfilename, bool append,
@@ -215,30 +176,36 @@ void SaveGSS::writeGSASFile(const std::string &outfilename, bool append,
   int nHist = static_cast<int>(inputWS->getNumberHistograms());
   Progress p(this, 0.0, 1.0, nHist);
 
-  for (int iws = 0; iws < nHist; iws++) {
+  const auto &spectrumInfo = inputWS->spectrumInfo();
+  // Loop over each histogram within the workspace
+  for (int histoIndex = 0; histoIndex < nHist; histoIndex++) {
     // Determine whether to skip the spectrum due to being masked
     if (has_instrument) {
-      try {
-        Geometry::IDetector_const_sptr det =
-            inputWS->getDetector(static_cast<size_t>(iws));
-        if (det->isMasked())
-          continue;
-      } catch (const Kernel::Exception::NotFoundError &) {
+      if (!spectrumInfo.hasDetectors(histoIndex)) {
         has_instrument = false;
         g_log.warning() << "There is no detector associated with spectrum "
-                        << iws
+                        << histoIndex
                         << ". Workspace is treated as NO-INSTRUMENT case. \n";
+      } else if (spectrumInfo.isMasked(histoIndex)) {
+        continue;
       }
     }
 
     // Obtain detector information
     double l1, l2, tth, difc;
-    if (has_instrument)
-      getFocusedPos(inputWS, iws, l1, l2, tth, difc);
-    else
+    if (has_instrument) {
+      l1 = spectrumInfo.l1();
+      l2 = spectrumInfo.l2(histoIndex);
+      tth = spectrumInfo.twoTheta(histoIndex);
+      difc =
+          ((2.0 * PhysicalConstants::NeutronMass * sin(tth * 0.5) * (l1 + l2)) /
+           (PhysicalConstants::h * 1.e4));
+
+    } else {
       l1 = l2 = tth = difc = 0;
-    g_log.debug() << "Spectrum " << iws << ": L1 = " << l1 << "  L2 = " << l2
-                  << "  2theta = " << tth << "\n";
+    }
+    g_log.debug() << "Spectrum " << histoIndex << ": L1 = " << l1
+                  << "  L2 = " << l2 << "  2theta = " << tth << "\n";
 
     std::stringstream tmpbuffer;
 
@@ -249,12 +216,12 @@ void SaveGSS::writeGSASFile(const std::string &outfilename, bool append,
 
     bool writeheader = false;
     std::string splitfilename;
-    if (!split && iws == 0 && !append) {
+    if (!split && histoIndex == 0 && !append) {
       // Non-split mode and first spectrum and in non-append mode
       writeheader = true;
     } else if (split) {
       std::stringstream number;
-      number << "-" << iws;
+      number << "-" << histoIndex;
 
       Poco::Path path(outfilename);
       std::string basename = path.getBaseName(); // Filename minus extension
@@ -282,25 +249,24 @@ void SaveGSS::writeGSASFile(const std::string &outfilename, bool append,
       tmpbuffer << "# Total flight path " << (l1 + l2) << "m, tth "
                 << (tth * 180. / M_PI) << "deg, DIFC " << difc << "\n";
     }
-    tmpbuffer << "# Data for spectrum :" << iws << "\n";
+    tmpbuffer << "# Data for spectrum :" << histoIndex << "\n";
 
     // Determine bank number into GSAS file
     int bankid;
     if (m_useSpecAsBank) {
-      bankid = static_cast<int>(inputWS->getSpectrum(iws).getSpectrumNo());
+      bankid =
+          static_cast<int>(inputWS->getSpectrum(histoIndex).getSpectrumNo());
     } else {
-      bankid = basebanknumber + iws;
+      bankid = basebanknumber + histoIndex;
     }
 
     // Write data
-    if (RALF.compare(outputFormat) == 0) {
+    if (RALF == outputFormat) {
       this->writeRALFdata(bankid, multiplybybinwidth, tmpbuffer,
-                          inputWS->readX(iws), inputWS->readY(iws),
-                          inputWS->readE(iws));
-    } else if (SLOG.compare(outputFormat) == 0) {
+                          inputWS->histogram(histoIndex));
+    } else if (SLOG == outputFormat) {
       this->writeSLOGdata(bankid, multiplybybinwidth, tmpbuffer,
-                          inputWS->readX(iws), inputWS->readY(iws),
-                          inputWS->readE(iws));
+                          inputWS->histogram(histoIndex));
     } else {
       throw std::runtime_error("Cannot write to the unknown " + outputFormat +
                                "output format");
@@ -319,7 +285,7 @@ void SaveGSS::writeGSASFile(const std::string &outfilename, bool append,
 
     p.report();
 
-  } // ENDFOR (iws)
+  } // ENDFOR (histoIndex)
 
   // Write file
   if (!split) {
@@ -330,7 +296,6 @@ void SaveGSS::writeGSASFile(const std::string &outfilename, bool append,
   }
 }
 
-//----------------------------------------------------------------------------------------------
 /** Ensures that when a workspace group is passed as output to this workspace
    *  everything is saved to one file and the bank number increments for each
    *  group member.
@@ -352,12 +317,11 @@ void SaveGSS::setOtherProperties(IAlgorithm *alg,
   }
   // We want the bank number to increment for each member of the group
   else if (propertyName == "Bank") {
-    alg->setProperty("Bank", atoi(propertyValue.c_str()) + periodNum - 1);
+    alg->setProperty("Bank", std::stoi(propertyValue) + periodNum - 1);
   } else
     Algorithm::setOtherProperties(alg, propertyName, propertyValue, periodNum);
 }
 
-//----------------------------------------------------------------------------------------------
 /** Write value from a RunInfo property (i.e., log) to a stream
     */
 void writeLogValue(std::ostream &os, const Run &runinfo,
@@ -408,7 +372,7 @@ void SaveGSS::writeHeaders(const std::string &format, std::stringstream &os,
   std::ios::fmtflags fflags(os.flags());
 
   // Run number
-  if (format.compare(SLOG) == 0) {
+  if (format == SLOG) {
     os << "Sample Run: ";
     writeLogValue(os, runinfo, "run_number");
     os << " Vanadium Run: ";
@@ -439,7 +403,7 @@ void SaveGSS::writeHeaders(const std::string &format, std::stringstream &os,
     os << "\n";
   }
 
-  if (format.compare(SLOG) == 0) {
+  if (format == SLOG) {
     os << "# "; // make the next line a comment
   }
   os << inputWS->getTitle() << "\n";
@@ -450,7 +414,7 @@ void SaveGSS::writeHeaders(const std::string &format, std::stringstream &os,
   if (getProperty("MultiplyByBinWidth"))
     os << "# with Y multiplied by the bin widths.\n";
   os << "# Primary flight path " << primaryflightpath << "m \n";
-  if (format.compare(SLOG) == 0) {
+  if (format == SLOG) {
     os << "# Sample Temperature: ";
     writeLogValue(os, runinfo, "SampleTemp");
     os << " Freq: ";
@@ -465,9 +429,9 @@ void SaveGSS::writeHeaders(const std::string &format, std::stringstream &os,
     const Mantid::API::AlgorithmHistories &algohist =
         inputWS->getHistory().getAlgorithmHistories();
     for (const auto &algo : algohist) {
-      if (algo->name().compare("NormaliseByCurrent") == 0)
+      if (algo->name() == "NormaliseByCurrent")
         norm_by_current = true;
-      if (algo->name().compare("NormaliseToMonitor") == 0)
+      if (algo->name() == "NormaliseToMonitor")
         norm_by_monitor = true;
     }
     os << "#";
@@ -481,7 +445,6 @@ void SaveGSS::writeHeaders(const std::string &format, std::stringstream &os,
   os.flags(fflags);
 }
 
-//----------------------------------------------------------------------------------------------
 /** Write a single line for bank
   */
 inline void writeBankLine(std::stringstream &out, const std::string &bintype,
@@ -494,29 +457,31 @@ inline void writeBankLine(std::stringstream &out, const std::string &bintype,
   out.flags(fflags);
 }
 
-//----------------------------------------------------------------------------------------------
 /** Fix error if value is less than zero or infinity
   */
 inline double fixErrorValue(const double value) {
-  if (value <= 0. || boost::math::isnan(value) ||
-      boost::math::isinf(value)) // Negative errors cannot be read by GSAS
+  if (value <= 0. ||
+      !std::isfinite(value)) // Negative errors cannot be read by GSAS
     return 0.;
   else
     return value;
 }
 
-//--------------------------------------------------------------------------------------------
 /**
   */
 void SaveGSS::writeRALFdata(const int bank, const bool MultiplyByBinWidth,
-                            std::stringstream &out, const MantidVec &X,
-                            const MantidVec &Y, const MantidVec &E) const {
-  const size_t datasize = Y.size();
-  double bc1 = X[0] * 32;
-  double bc2 = (X[1] - X[0]) * 32;
+                            std::stringstream &out,
+                            const HistogramData::Histogram &histo) const {
+
+  const auto &xVals = histo.x();
+  const auto &yVals = histo.y();
+  const auto &eVals = histo.e();
+  const size_t datasize = yVals.size();
+  const double bc1 = xVals[0] * 32;
+  const double bc2 = (xVals[1] - xVals[0]) * 32;
   // Logarithmic step
-  double bc4 = (X[1] - X[0]) / X[0];
-  if (boost::math::isnan(fabs(bc4)) || boost::math::isinf(bc4))
+  double bc4 = (xVals[1] - xVals[0]) / xVals[0];
+  if (!std::isfinite(bc4))
     bc4 = 0; // If X is zero for BANK
 
   // Write out the data header
@@ -527,26 +492,26 @@ void SaveGSS::writeRALFdata(const int bank, const bool MultiplyByBinWidth,
       << std::fixed << " " << std::setprecision(5) << std::setw(7) << bc4
       << " FXYE\n";
 
-  // Do each Y entry
+  // Run over each Y entry
   for (size_t j = 0; j < datasize; j++) {
     // Calculate the error
     double Epos;
     if (MultiplyByBinWidth)
-      Epos = E[j] * (X[j + 1] - X[j]); // E[j]*X[j]*bc4;
+      Epos = eVals[j] * (xVals[j + 1] - xVals[j]); // E[j]*X[j]*bc4;
     else
-      Epos = E[j];
+      Epos = eVals[j];
     Epos = fixErrorValue(Epos);
 
     // The center of the X bin.
     out << std::fixed << std::setprecision(5) << std::setw(15)
-        << 0.5 * (X[j] + X[j + 1]);
+        << 0.5 * (xVals[j] + xVals[j + 1]);
 
     // The Y value
     if (MultiplyByBinWidth)
       out << std::fixed << std::setprecision(8) << std::setw(18)
-          << Y[j] * (X[j + 1] - X[j]);
+          << yVals[j] * (xVals[j + 1] - xVals[j]);
     else
-      out << std::fixed << std::setprecision(8) << std::setw(18) << Y[j];
+      out << std::fixed << std::setprecision(8) << std::setw(18) << yVals[j];
 
     // The error
     out << std::fixed << std::setprecision(8) << std::setw(18) << Epos << "\n";
@@ -557,23 +522,28 @@ void SaveGSS::writeRALFdata(const int bank, const bool MultiplyByBinWidth,
 /** Write data in SLOG format
   */
 void SaveGSS::writeSLOGdata(const int bank, const bool MultiplyByBinWidth,
-                            std::stringstream &out, const MantidVec &X,
-                            const MantidVec &Y, const MantidVec &E) const {
-  const size_t datasize = Y.size();
-  double bc1 = X.front(); // minimum TOF in microseconds
+                            std::stringstream &out,
+                            const HistogramData::Histogram &histo) const {
+  const auto &xVals = histo.x();
+  const auto &yVals = histo.y();
+  const auto &eVals = histo.e();
+
+  const size_t datasize = yVals.size();
+  const double bc1 = xVals.front(); // minimum TOF in microseconds
   if (bc1 <= 0.) {
     throw std::runtime_error(
         "Cannot write out logarithmic data starting at zero");
   }
-  if (isConstantDelta(X)) {
+  if (isConstantDelta(xVals)) {
     std::stringstream msg;
     msg << "While writing SLOG format: Found constant delta-T binning for bank "
         << bank;
     throw std::runtime_error(msg.str());
   }
-  double bc2 = 0.5 * (*(X.rbegin()) +
-                      *(X.rbegin() + 1));      // maximum TOF (in microseconds?)
-  double bc3 = (*(X.begin() + 1) - bc1) / bc1; // deltaT/T
+  const double bc2 =
+      0.5 * (*(xVals.rbegin()) +
+             *(xVals.rbegin() + 1)); // maximum TOF (in microseconds?)
+  const double bc3 = (*(xVals.begin() + 1) - bc1) / bc1; // deltaT/T
 
   g_log.debug() << "SaveGSS(): Min TOF = " << bc1 << '\n';
 
@@ -584,20 +554,20 @@ void SaveGSS::writeSLOGdata(const int bank, const bool MultiplyByBinWidth,
       << std::fixed << " 0 FXYE\n";
 
   for (size_t i = 0; i < datasize; i++) {
-    double y = Y[i];
-    double e = E[i];
+    double y = yVals[i];
+    double e = eVals[i];
     if (MultiplyByBinWidth) {
       // Multiple by bin width as
-      double delta = X[i + 1] - X[i];
+      double delta = xVals[i + 1] - xVals[i];
       y *= delta;
       e *= delta;
     }
     e = fixErrorValue(e);
 
     out << "  " << std::fixed << std::setprecision(9) << std::setw(20)
-        << 0.5 * (X[i] + X[i + 1]) << "  " << std::fixed << std::setprecision(9)
-        << std::setw(20) << y << "  " << std::fixed << std::setprecision(9)
-        << std::setw(20) << e << std::setw(12) << " "
+        << 0.5 * (xVals[i] + xVals[i + 1]) << "  " << std::fixed
+        << std::setprecision(9) << std::setw(20) << y << "  " << std::fixed
+        << std::setprecision(9) << std::setw(20) << e << std::setw(12) << " "
         << "\n"; // let it flush its own buffer
   }
   out << std::flush;

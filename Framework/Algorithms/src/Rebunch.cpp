@@ -4,8 +4,8 @@
 #include "MantidAlgorithms/Rebunch.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/Workspace_fwd.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/Workspace_fwd.h"
 #include "MantidKernel/BoundedValidator.h"
 
 #include <cmath>
@@ -13,6 +13,7 @@
 #include <sstream>
 
 namespace Mantid {
+using namespace HistogramData;
 namespace Algorithms {
 
 // Register the class into the algorithm factory
@@ -56,8 +57,8 @@ void Rebunch::exec() {
   // workspace independent determination of length
   int histnumber = static_cast<int>(inputW->size() / inputW->blocksize());
 
-  int size_x = static_cast<int>(inputW->readX(0).size());
-  int size_y = static_cast<int>(inputW->readY(0).size());
+  int size_x = static_cast<int>(inputW->x(0).size());
+  int size_y = static_cast<int>(inputW->y(0).size());
 
   // signal is the same length for histogram and point data
   int ny = (size_y / n_bunch);
@@ -79,27 +80,23 @@ void Rebunch::exec() {
   int progress_step = histnumber / 100;
   if (progress_step == 0)
     progress_step = 1;
-  PARALLEL_FOR2(inputW, outputW)
+  PARALLEL_FOR_IF(Kernel::threadSafe(*inputW, *outputW))
   for (int hist = 0; hist < histnumber; hist++) {
     PARALLEL_START_INTERUPT_REGION
-
-    // get const references to input Workspace arrays (no copying)
-    const MantidVec &XValues = inputW->readX(hist);
-    const MantidVec &YValues = inputW->readY(hist);
-    const MantidVec &YErrors = inputW->readE(hist);
-
-    // get references to output workspace data (no copying)
-    MantidVec &XValues_new = outputW->dataX(hist);
-    MantidVec &YValues_new = outputW->dataY(hist);
-    MantidVec &YErrors_new = outputW->dataE(hist);
-
     // output data arrays are implicitly filled by function
     if (point) {
-      rebunch_point(XValues, YValues, YErrors, XValues_new, YValues_new,
-                    YErrors_new, n_bunch);
+      rebunch_point(inputW->x(hist), inputW->y(hist), inputW->e(hist),
+                    outputW->mutableX(hist), outputW->mutableY(hist),
+                    outputW->mutableE(hist), n_bunch);
+    } else if (dist) {
+      rebunch_hist_frequencies(inputW->x(hist), inputW->y(hist),
+                               inputW->e(hist), outputW->mutableX(hist),
+                               outputW->mutableY(hist), outputW->mutableE(hist),
+                               n_bunch);
     } else {
-      rebunch_hist(XValues, YValues, YErrors, XValues_new, YValues_new,
-                   YErrors_new, n_bunch, dist);
+      rebunch_hist_counts(inputW->x(hist), inputW->y(hist), inputW->e(hist),
+                          outputW->mutableX(hist), outputW->mutableY(hist),
+                          outputW->mutableE(hist), n_bunch);
     }
 
     if (hist % progress_step == 0) {
@@ -127,48 +124,39 @@ void Rebunch::exec() {
 
 /** Rebunches histogram data data according to n_bunch input
  *
- * @param xold :: old x array of data
- * @param xnew :: new x array of data
- * @param yold :: old y array of data
- * @param ynew :: new y array of data
- * @param eold :: old error array of data
- * @param enew :: new error array of data
+ * @param xold :: old x data
+ * @param yold :: old y data
+ * @param eold :: old e data
+ * @param xnew :: new x data
+ * @param ynew :: new y data
+ * @param enew :: new e data
  * @param n_bunch :: number of data points to bunch together for each new point
- * @param distribution :: flag defining if distribution data (1) or not (0)
  * @throw runtime_error Thrown if algorithm cannot execute
  * @throw invalid_argument Thrown if input to function is incorrect
  **/
-void Rebunch::rebunch_hist(const std::vector<double> &xold,
-                           const std::vector<double> &yold,
-                           const std::vector<double> &eold,
-                           std::vector<double> &xnew, std::vector<double> &ynew,
-                           std::vector<double> &enew, const size_t n_bunch,
-                           const bool distribution) {
-  size_t i, j;
-  double width;
+void Rebunch::rebunch_hist_counts(const HistogramX &xold,
+                                  const HistogramY &yold,
+                                  const HistogramE &eold, HistogramX &xnew,
+                                  HistogramY &ynew, HistogramE &enew,
+                                  const size_t n_bunch) {
   size_t size_x = xold.size();
   size_t size_y = yold.size();
+
   double ysum, esum;
   size_t hi_index = size_x - 1;
   size_t wbins = size_y / n_bunch;
   size_t rem = size_y % n_bunch;
 
+  size_t i, j;
   int i_in = 0;
   j = 0;
   while (j < wbins) {
     ysum = 0.0;
     esum = 0.0;
     for (i = 1; i <= n_bunch; i++) {
-      if (distribution) {
-        width = xold[i_in + 1] - xold[i_in];
-        ysum += yold[i_in] * width;
-        esum += eold[i_in] * eold[i_in] * width * width;
-        i_in++;
-      } else {
-        ysum += yold[i_in];
-        esum += eold[i_in] * eold[i_in];
-        i_in++;
-      }
+      ysum += yold[i_in];
+      esum += eold[i_in] * eold[i_in];
+      i_in++;
     }
     // average contributing x values
     ynew[j] = ysum;
@@ -179,16 +167,75 @@ void Rebunch::rebunch_hist(const std::vector<double> &xold,
     ysum = 0.0;
     esum = 0.0;
     for (i = 1; i <= rem; i++) {
-      if (distribution) {
-        width = xold[i_in + 1] - xold[i_in];
-        ysum += yold[i_in] * width;
-        esum += eold[i_in] * eold[i_in] * width * width;
-        i_in++;
-      } else {
-        ysum += yold[i_in];
-        esum += eold[i_in] * eold[i_in];
-        i_in++;
-      }
+      ysum += yold[i_in];
+      esum += eold[i_in] * eold[i_in];
+      i_in++;
+    }
+    ynew[j] = ysum;
+    enew[j] = sqrt(esum);
+  }
+
+  j = 0;
+  xnew[j] = xold[0];
+  j++;
+  for (i = n_bunch; i < hi_index; i += n_bunch) {
+    xnew[j] = xold[i];
+    j++;
+  }
+  xnew[j] = xold[hi_index];
+}
+
+/** Rebunches histogram data data according to n_bunch input
+*
+* @param xold :: old x data
+* @param yold :: old y data
+* @param eold :: old e data
+* @param xnew :: new x data
+* @param ynew :: new y data
+* @param enew :: new e data
+* @param n_bunch :: number of data points to bunch together for each new point
+* @throw runtime_error Thrown if algorithm cannot execute
+* @throw invalid_argument Thrown if input to function is incorrect
+**/
+void Rebunch::rebunch_hist_frequencies(const HistogramX &xold,
+                                       const HistogramY &yold,
+                                       const HistogramE &eold, HistogramX &xnew,
+                                       HistogramY &ynew, HistogramE &enew,
+                                       const size_t n_bunch) {
+  double width;
+  size_t size_x = xold.size();
+  size_t size_y = yold.size();
+
+  double ysum, esum;
+  size_t hi_index = size_x - 1;
+  size_t wbins = size_y / n_bunch;
+  size_t rem = size_y % n_bunch;
+
+  size_t i, j;
+  int i_in = 0;
+  j = 0;
+  while (j < wbins) {
+    ysum = 0.0;
+    esum = 0.0;
+    for (i = 1; i <= n_bunch; i++) {
+      width = xold[i_in + 1] - xold[i_in];
+      ysum += yold[i_in] * width;
+      esum += eold[i_in] * eold[i_in] * width * width;
+      i_in++;
+    }
+    // average contributing x values
+    ynew[j] = ysum;
+    enew[j] = sqrt(esum);
+    j++;
+  }
+  if (rem != 0) {
+    ysum = 0.0;
+    esum = 0.0;
+    for (i = 1; i <= rem; i++) {
+      width = xold[i_in + 1] - xold[i_in];
+      ysum += yold[i_in] * width;
+      esum += eold[i_in] * eold[i_in] * width * width;
+      i_in++;
     }
     ynew[j] = ysum;
     enew[j] = sqrt(esum);
@@ -203,39 +250,36 @@ void Rebunch::rebunch_hist(const std::vector<double> &xold,
   }
   xnew[j] = xold[hi_index];
 
-  if (distribution)
-    for (i = 0; i < ynew.size(); i++) {
-      width = xnew[i + 1] - xnew[i];
-      ynew[i] = ynew[i] / width;
-      enew[i] = enew[i] / width;
-    }
+  for (i = 0; i < ynew.size(); i++) {
+    width = xnew[i + 1] - xnew[i];
+    ynew[i] = ynew[i] / width;
+    enew[i] = enew[i] / width;
+  }
 }
 
 /** Rebunches point data data according to n_bunch input
  *
- * @param xold :: old x array of data
- * @param xnew :: new x array of data
- * @param yold :: old y array of data
- * @param ynew :: new y array of data
- * @param eold :: old error array of data
- * @param enew :: new error array of data
+ * @param xold :: old x data
+ * @param yold :: old y data
+ * @param eold :: old e data
+ * @param xnew :: new x data
+ * @param ynew :: new y data
+ * @param enew :: new e data
  * @param n_bunch :: number of data points to bunch together for each new point
  * @throw runtime_error Thrown if algorithm cannot execute
  * @throw invalid_argument Thrown if input to function is incorrect
  **/
+void Rebunch::rebunch_point(const HistogramX &xold, const HistogramY &yold,
+                            const HistogramE &eold, HistogramX &xnew,
+                            HistogramY &ynew, HistogramE &enew,
+                            const size_t n_bunch) {
 
-void Rebunch::rebunch_point(const std::vector<double> &xold,
-                            const std::vector<double> &yold,
-                            const std::vector<double> &eold,
-                            std::vector<double> &xnew,
-                            std::vector<double> &ynew,
-                            std::vector<double> &enew, const int n_bunch) {
-  int i, j;
-  int size_y = static_cast<int>(yold.size());
+  size_t size_y = yold.size();
   double xsum, ysum, esum;
-  int wbins = size_y / n_bunch;
-  int rem = size_y % n_bunch;
+  size_t wbins = size_y / n_bunch;
+  size_t rem = size_y % n_bunch;
 
+  size_t i, j;
   int i_in = 0;
   j = 0;
   while (j < wbins) {

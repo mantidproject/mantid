@@ -65,12 +65,14 @@ public:
   virtual void setRowCommands(
       std::vector<std::unique_ptr<DataProcessorCommand>> rowCommands) = 0;
   virtual void clearCommands() = 0;
+  virtual void setRowActionEnabled(int index, bool enabled) = 0;
 
   // Accessor methods
   virtual std::set<int> getSelectedSearchRows() const = 0;
   virtual std::string getSearchInstrument() const = 0;
   virtual std::string getSearchString() const = 0;
   virtual std::string getTransferMethod() const = 0;
+  virtual int getSelectedGroup() const = 0;
 
   virtual IReflRunsTabPresenter *getPresenter() const = 0;
   virtual boost::shared_ptr<MantidQt::API::AlgorithmRunner>

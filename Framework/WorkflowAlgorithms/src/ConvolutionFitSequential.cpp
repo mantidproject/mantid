@@ -109,6 +109,14 @@ void ConvolutionFitSequential::init() {
   declareProperty("MaxIterations", 500, boundedV,
                   "The maximum number of iterations permitted",
                   Direction::Input);
+  declareProperty("PeakRadius", 0,
+                  "A value of the peak radius the peak functions should use. A "
+                  "peak radius defines an interval on the x axis around the "
+                  "centre of the peak where its values are calculated. Values "
+                  "outside the interval are not calculated and assumed zeros."
+                  "Numerically the radius is a whole number of peak widths "
+                  "(FWHM) that fit into the interval on each side from the "
+                  "centre. The default value of 0 means the whole x axis.");
 
   declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
                                                    Direction::Output),
@@ -131,6 +139,7 @@ void ConvolutionFitSequential::exec() {
   const bool convolve = getProperty("Convolve");
   const int maxIter = getProperty("MaxIterations");
   const std::string minimizer = getProperty("Minimizer");
+  const int peakRadius = getProperty("PeakRadius");
 
   // Inspect function to obtain fit Type and background
   const auto functionValues = findValuesFromFunction(function);
@@ -162,7 +171,7 @@ void ConvolutionFitSequential::exec() {
   if (delta) {
     outputWsName += "Delta";
   }
-  if (LorentzNum.compare("0") != 0) {
+  if (LorentzNum != "0") {
     outputWsName += LorentzNum + "L";
   } else {
     outputWsName += convertFuncToShort(funcName);
@@ -207,6 +216,7 @@ void ConvolutionFitSequential::exec() {
   plotPeaks->setProperty("MaxIterations", maxIter);
   plotPeaks->setProperty("Minimizer", minimizer);
   plotPeaks->setProperty("PassWSIndexToFunction", passIndex);
+  plotPeaks->setProperty("PeakRadius", peakRadius);
   plotPeaks->executeAsChildAlg();
   ITableWorkspace_sptr outputWs = plotPeaks->getProperty("OutputWorkspace");
 
@@ -230,7 +240,7 @@ void ConvolutionFitSequential::exec() {
 
   Progress workflowProg(this, 0.91, 0.94, 4);
   auto paramNames = std::vector<std::string>();
-  if (funcName.compare("DeltaFunction") == 0) {
+  if (funcName == "DeltaFunction") {
     paramNames.emplace_back("Height");
   } else {
     auto func = FunctionFactory::Instance().createFunction(funcName);
@@ -241,7 +251,7 @@ void ConvolutionFitSequential::exec() {
       paramNames.push_back(func->parameterName(i));
       workflowProg.report("Finding parameters to process");
     }
-    if (funcName.compare("Lorentzian") == 0) {
+    if (funcName == "Lorentzian") {
       // remove peak centre
       size_t pos = find(paramNames.begin(), paramNames.end(), "PeakCentre") -
                    paramNames.begin();
@@ -375,7 +385,7 @@ ConvolutionFitSequential::findValuesFromFunction(const std::string &function) {
     auto nextPos = fitType.find_first_of(',');
     fitType = fitType.substr(5, nextPos - 5);
     functionName = fitType;
-    if (fitType.compare("Lorentzian") == 0) {
+    if (fitType == "Lorentzian") {
       std::string newSub = function.substr(0, startPos);
       bool isTwoL = checkForTwoLorentz(newSub);
       if (isTwoL) {
@@ -601,7 +611,7 @@ ConvolutionFitSequential::convertBackToShort(const std::string &original) {
 std::string
 ConvolutionFitSequential::convertFuncToShort(const std::string &original) {
   std::string result;
-  if (original.compare("DeltaFunction") != 0) {
+  if (original != "DeltaFunction") {
     if (original.at(0) == 'E') {
       result += "E";
     } else if (original.at(0) == 'I') {

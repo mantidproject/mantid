@@ -39,6 +39,10 @@ class MANTID_API_DLL IPeakFunction : public IFunctionWithLocation {
 public:
   /// Constructor
   IPeakFunction();
+
+  void function(const FunctionDomain &domain,
+                FunctionValues &values) const override;
+
   /// Returns the peak FWHM
   virtual double fwhm() const = 0;
 
@@ -57,8 +61,11 @@ public:
   /// General implementation of the method for all peaks.
   void functionDeriv1D(Jacobian *out, const double *xValues,
                        const size_t nData) override;
-  /// Set new peak radius
-  static void setPeakRadius(const int &r = 5);
+
+  /// Get the interval on which the peak has all its values above a certain
+  /// level
+  virtual std::pair<double, double>
+  getDomainInterval(double level = DEFAULT_SEARCH_LEVEL) const;
 
   /// Function evaluation method to be implemented in the inherited classes
   virtual void functionLocal(double *out, const double *xValues,
@@ -72,7 +79,10 @@ public:
 
   /// Fix a parameter or set up a tie such that value returned
   /// by intensity() is constant during fitting.
-  virtual void fixIntensity() {
+  /// @param isDefault :: If true fix intensity by default:
+  ///    don't show it in ties
+  virtual void fixIntensity(bool isDefault = false) {
+    UNUSED_ARG(isDefault);
     throw std::runtime_error(
         "Generic intensity fixing isn't implemented for this function.");
   }
@@ -83,10 +93,14 @@ public:
         "Generic intensity fixing isn't implemented for this function.");
   }
 
-protected:
+private:
+  /// Set new peak radius
+  void setPeakRadius(int r) const;
   /// Defines the area around the centre where the peak values are to be
   /// calculated (in FWHM).
-  static int s_peakRadius;
+  mutable int m_peakRadius;
+  /// The default level for searching a domain interval (getDomainInterval())
+  static constexpr double DEFAULT_SEARCH_LEVEL = 1e-5;
 };
 
 typedef boost::shared_ptr<IPeakFunction> IPeakFunction_sptr;

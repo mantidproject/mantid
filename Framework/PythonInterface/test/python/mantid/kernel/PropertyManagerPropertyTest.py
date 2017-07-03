@@ -1,4 +1,4 @@
-﻿"""Test the exposed PropertyManagerProperty
+"""Test the exposed PropertyManagerProperty
 """
 from __future__ import (absolute_import, division, print_function)
 

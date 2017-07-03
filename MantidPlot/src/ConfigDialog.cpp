@@ -28,61 +28,62 @@ Description          : Preferences dialog
 ***************************************************************************/
 #include "ConfigDialog.h"
 #include "ApplicationWindow.h"
-#include "MultiLayer.h"
-#include "Graph.h"
-#include "Matrix.h"
-#include "ColorButton.h"
 #include "ColorBox.h"
-#include "pixmaps.h"
-#include "MantidQtMantidWidgets/DoubleSpinBox.h"
-#include "SendToProgramDialog.h"
+#include "ColorButton.h"
+#include "Graph.h"
 #include "Mantid/MantidUI.h"
+#include "MantidQtMantidWidgets/DoubleSpinBox.h"
 #include "MantidQtMantidWidgets/FitPropertyBrowser.h"
+#include "Matrix.h"
+#include "MultiLayer.h"
+#include "SendToProgramDialog.h"
+#include <MantidQtAPI/pixmaps.h>
 
-#include <QLocale>
-#include <QPushButton>
-#include <QLabel>
-#include <QLineEdit>
-#include <QGridLayout>
-#include <QGroupBox>
+#include <QApplication>
+#include <QComboBox>
+#include <QDir>
+#include <QFileDialog>
 #include <QFont>
 #include <QFontDialog>
-#include <QTabWidget>
-#include <QTreeWidget>
-#include <QStackedWidget>
-#include <QWidget>
-#include <QComboBox>
-#include <QSpinBox>
-#include <QRadioButton>
-#include <QStyleFactory>
-#include <QRegExp>
-#include <QMessageBox>
-#include <QTranslator>
-#include <QApplication>
-#include <QDir>
-#include <QPixmap>
-#include <QHBoxLayout>
-#include <QVBoxLayout>
-#include <QListWidget>
 #include <QFontMetrics>
-#include <QFileDialog>
-#include <QRegExp>
+#include <QGridLayout>
+#include <QGroupBox>
+#include <QHBoxLayout>
+#include <QLabel>
+#include <QLineEdit>
+#include <QListWidget>
+#include <QLocale>
+#include <QMessageBox>
 #include <QMouseEvent>
+#include <QPixmap>
+#include <QPushButton>
+#include <QRadioButton>
+#include <QRegExp>
+#include <QRegExp>
+#include <QSpinBox>
+#include <QStackedWidget>
 #include <QStringList>
+#include <QStyleFactory>
+#include <QTabWidget>
+#include <QTranslator>
+#include <QTreeWidget>
+#include <QVBoxLayout>
+#include <QWidget>
 
-#include "MantidKernel/ConfigService.h"
-#include "MantidKernel/FacilityInfo.h"
+#include "MantidAPI/AlgorithmFactory.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IBackgroundFunction.h"
-#include "MantidAPI/AlgorithmFactory.h"
 #include "MantidAPI/IPeakFunction.h"
-#include "MantidQtMantidWidgets/InstrumentSelector.h"
+#include "MantidKernel/ConfigService.h"
+#include "MantidKernel/FacilityInfo.h"
 #include "MantidQtAPI/MdConstants.h"
-#include "MantidQtAPI/MdSettings.h"
 #include "MantidQtAPI/MdPlottingCmapsProvider.h"
+#include "MantidQtAPI/MdSettings.h"
+#include "MantidQtMantidWidgets/InstrumentSelector.h"
 
 #include <limits>
 
+using namespace MantidQt::API;
 using Mantid::Kernel::ConfigService;
 
 ConfigDialog::ConfigDialog(QWidget *parent, Qt::WFlags fl)
@@ -699,7 +700,7 @@ void ConfigDialog::initMantidPage() {
   const std::string ignoreParaViewProperty = "paraview.ignore";
   bool ignoreParaView =
       cfgSvc.hasProperty(ignoreParaViewProperty) &&
-      bool(atoi(cfgSvc.getString(ignoreParaViewProperty).c_str()));
+      (std::stoi(cfgSvc.getString(ignoreParaViewProperty)) != 0);
   ckIgnoreParaView->setChecked(ignoreParaView);
   grid->addWidget(ckIgnoreParaView, 3, 0);
 
@@ -852,6 +853,15 @@ void ConfigDialog::initMdPlottingVsiTab() {
   lblVsiDefaultBackground = new QLabel();
   grid->addWidget(lblVsiDefaultBackground, 1, 0);
   grid->addWidget(vsiDefaultBackground, 1, 1);
+
+  // Axes Color
+  vsiAxesColor = new QGroupBox();
+  vsiAxesColor->setCheckable(true);
+  vsiAxesColor->setChecked(m_mdSettings.getUserSettingAutoColorAxes());
+  vsiAxesColor->setTitle(tr("Automatic axes color selection"));
+  vsiAxesColor->setToolTip(
+      tr("Automatically select a contrasting color for all axes"));
+  vsiTabLayout->addWidget(vsiAxesColor);
 
   const QColor backgroundColor = m_mdSettings.getUserSettingBackgroundColor();
   vsiDefaultBackground->setColor(backgroundColor);
@@ -1585,11 +1595,6 @@ void ConfigDialog::initCurveFittingTab() {
   findPeaksTolerance->setMaximum(1000000);
   grid->addWidget(findPeaksTolerance, 4, 1);
 
-  grid->addWidget(new QLabel(tr("Peak Radius (in FWHM)")), 5, 0);
-  peakRadius = new QSpinBox();
-  peakRadius->setMaximum(std::numeric_limits<int>::max());
-  grid->addWidget(peakRadius, 5, 1);
-
   grid->addWidget(new QLabel(tr("Double property decimals")), 6, 0);
   decimals = new QSpinBox();
   grid->addWidget(decimals, 6, 1);
@@ -1672,15 +1677,6 @@ void ConfigDialog::initCurveFittingTab() {
     findPeaksTolerance->setValue(setting.toInt());
   } else {
     findPeaksTolerance->setValue(4);
-  }
-
-  setting = QString::fromStdString(
-      Mantid::Kernel::ConfigService::Instance().getString(
-          "curvefitting.peakRadius"));
-  if (!setting.isEmpty()) {
-    peakRadius->setValue(setting.toInt());
-  } else {
-    peakRadius->setValue(5);
   }
 
   decimals->setValue(app->mantidUI->fitFunctionBrowser()->getDecimals());
@@ -2338,25 +2334,25 @@ void ConfigDialog::languageChange() {
   boxCurveStyle->addItem(getQPixmap("hBars_xpm"), tr(" Horizontal Bars"));
 
   int style = app->defaultCurveStyle;
-  if (style == Graph::Line)
+  if (style == GraphOptions::Line)
     boxCurveStyle->setCurrentIndex(0);
-  else if (style == Graph::Scatter)
+  else if (style == GraphOptions::Scatter)
     boxCurveStyle->setCurrentIndex(1);
-  else if (style == Graph::LineSymbols)
+  else if (style == GraphOptions::LineSymbols)
     boxCurveStyle->setCurrentIndex(2);
-  else if (style == Graph::VerticalDropLines)
+  else if (style == GraphOptions::VerticalDropLines)
     boxCurveStyle->setCurrentIndex(3);
-  else if (style == Graph::Spline)
+  else if (style == GraphOptions::Spline)
     boxCurveStyle->setCurrentIndex(4);
-  else if (style == Graph::VerticalSteps)
+  else if (style == GraphOptions::VerticalSteps)
     boxCurveStyle->setCurrentIndex(5);
-  else if (style == Graph::HorizontalSteps)
+  else if (style == GraphOptions::HorizontalSteps)
     boxCurveStyle->setCurrentIndex(6);
-  else if (style == Graph::Area)
+  else if (style == GraphOptions::Area)
     boxCurveStyle->setCurrentIndex(7);
-  else if (style == Graph::VerticalBars)
+  else if (style == GraphOptions::VerticalBars)
     boxCurveStyle->setCurrentIndex(8);
-  else if (style == Graph::HorizontalBars)
+  else if (style == GraphOptions::HorizontalBars)
     boxCurveStyle->setCurrentIndex(9);
 
   // plots 3D
@@ -2703,6 +2699,7 @@ void ConfigDialog::apply() {
 
   // MD Plotting
   updateMdPlottingSettings();
+  emit app->configModified();
 }
 
 /**
@@ -2733,6 +2730,10 @@ void ConfigDialog::updateMdPlottingSettings() {
   // Read the Vsi color map
   if (vsiDefaultColorMap) {
     m_mdSettings.setUserSettingColorMap(vsiDefaultColorMap->currentText());
+  }
+
+  if (vsiAxesColor) {
+    m_mdSettings.setUserSettingAutoColorAxes(vsiAxesColor->isChecked());
   }
 
   // Read if the usage of the last color map and background color should be
@@ -2805,9 +2806,6 @@ void ConfigDialog::updateCurveFitSettings() {
   setting = QString::number(findPeaksTolerance->value()).toStdString();
   cfgSvc.setString("curvefitting.findPeaksTolerance", setting);
 
-  setting = QString::number(peakRadius->value()).toStdString();
-  cfgSvc.setString("curvefitting.peakRadius", setting);
-
   app->mantidUI->fitFunctionBrowser()->setDecimals(decimals->value());
 }
 
@@ -2821,8 +2819,19 @@ void ConfigDialog::updateMantidOptionsTab() {
 
   // invisible workspaces options
   QString showinvisible_ws = m_invisibleWorkspaces->isChecked() ? "1" : "0";
-  cfgSvc.setString("MantidOptions.InvisibleWorkspaces",
-                   showinvisible_ws.toStdString());
+
+  // store it if it has changed
+  if (showinvisible_ws.toStdString() !=
+      cfgSvc.getString("MantidOptions.InvisibleWorkspaces")) {
+    cfgSvc.setString("MantidOptions.InvisibleWorkspaces",
+                     showinvisible_ws.toStdString());
+
+    // update the workspace tree
+    if (ApplicationWindow *app =
+            dynamic_cast<ApplicationWindow *>(this->parentWidget())) {
+      app->mantidUI->updateWorkspaces();
+    }
+  }
 
   // OpenGL option
   QString setting = m_useOpenGL->isChecked() ? "On" : "Off";
@@ -2873,34 +2882,34 @@ int ConfigDialog::curveStyle() {
   int style = 0;
   switch (boxCurveStyle->currentIndex()) {
   case 0:
-    style = Graph::Line;
+    style = GraphOptions::Line;
     break;
   case 1:
-    style = Graph::Scatter;
+    style = GraphOptions::Scatter;
     break;
   case 2:
-    style = Graph::LineSymbols;
+    style = GraphOptions::LineSymbols;
     break;
   case 3:
-    style = Graph::VerticalDropLines;
+    style = GraphOptions::VerticalDropLines;
     break;
   case 4:
-    style = Graph::Spline;
+    style = GraphOptions::Spline;
     break;
   case 5:
-    style = Graph::VerticalSteps;
+    style = GraphOptions::VerticalSteps;
     break;
   case 6:
-    style = Graph::HorizontalSteps;
+    style = GraphOptions::HorizontalSteps;
     break;
   case 7:
-    style = Graph::Area;
+    style = GraphOptions::Area;
     break;
   case 8:
-    style = Graph::VerticalBars;
+    style = GraphOptions::VerticalBars;
     break;
   case 9:
-    style = Graph::HorizontalBars;
+    style = GraphOptions::HorizontalBars;
     break;
   }
   return style;

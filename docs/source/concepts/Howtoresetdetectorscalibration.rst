@@ -16,7 +16,7 @@ Let's load a calibrated workspace: MERLIN 12024 (cycle 11/05):
 
 .. code-block:: python
 
-    mer12024 = :ref:`Load <algm-Load>`('MER12024')
+    mer12024 = :ref:`Load <algm-Load>`('MER12024')
 
 Open the Instrument View and select Cylindrical Rendering, you will see
 something like:
@@ -28,8 +28,8 @@ This image is clearly calibrated. To reset the calibration, execute:
 
 .. code-block:: python
 
-    empty_instr = LoadEmptyInstrument('MANTIDINSTALL/instrument/MERLIN_Definition.xml')
-    CopyInstrumentParameters(empty_instr, mer12024)
+    empty_instr = LoadEmptyInstrument('MANTIDINSTALL/instrument/MERLIN_Definition.xml')
+    CopyInstrumentParameters(empty_instr, mer12024)
 
 The result is reseting the calibration of this workspace as you can see
 in the image below:

@@ -43,7 +43,8 @@ class DLLExport FilterUpdateProgressAction : public ProgressAction {
 public:
   FilterUpdateProgressAction(Filter *filter, const std::string &message)
       : m_filter(filter), m_message(message) {}
-
+  FilterUpdateProgressAction &operator=(FilterUpdateProgressAction &) = delete;
+  FilterUpdateProgressAction(FilterUpdateProgressAction &) = delete;
   void eventRaised(double progress) override {
     m_filter->updateAlgorithmProgress(progress, m_message);
   }
@@ -51,10 +52,6 @@ public:
   ~FilterUpdateProgressAction() {}
 
 private:
-  FilterUpdateProgressAction &operator=(FilterUpdateProgressAction &);
-
-  FilterUpdateProgressAction(FilterUpdateProgressAction &);
-
   Filter *m_filter;
 
   /// Message associated with the progress action

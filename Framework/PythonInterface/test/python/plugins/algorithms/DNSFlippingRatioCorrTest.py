@@ -42,20 +42,20 @@ class DNSFlippingRatioCorrTest(unittest.TestCase):
 
     def test_DNSFlipperValid(self):
         outputWorkspaceName = "DNSFlippingRatioCorrTest_Test2"
-        self.assertRaises(RuntimeError, DNSFlippingRatioCorr, SFDataWorkspace=self.__nsf_nicrws.getName(),
-                          NSFDataWorkspace=self.__nsf_nicrws.getName(), SFNiCrWorkspace=self.__sf_nicrws.getName(),
-                          NSFNiCrWorkspace=self.__nsf_nicrws.getName(), SFBkgrWorkspace=self.__sf_bkgrws.getName(),
-                          NSFBkgrWorkspace=self.__nsf_bkgrws.getName(), SFOutputWorkspace=outputWorkspaceName+'SF',
+        self.assertRaises(RuntimeError, DNSFlippingRatioCorr, SFDataWorkspace=self.__nsf_nicrws.name(),
+                          NSFDataWorkspace=self.__nsf_nicrws.name(), SFNiCrWorkspace=self.__sf_nicrws.name(),
+                          NSFNiCrWorkspace=self.__nsf_nicrws.name(), SFBkgrWorkspace=self.__sf_bkgrws.name(),
+                          NSFBkgrWorkspace=self.__nsf_bkgrws.name(), SFOutputWorkspace=outputWorkspaceName+'SF',
                           NSFOutputWorkspace=outputWorkspaceName+'NSF')
         return
 
     def test_DNSPolarisationValid(self):
         outputWorkspaceName = "DNSFlippingRatioCorrTest_Test3"
         api.AddSampleLog(Workspace=self.__nsf_nicrws, LogName='polarisation', LogText='y', LogType='String')
-        self.assertRaises(RuntimeError, DNSFlippingRatioCorr, SFDataWorkspace=self.__sf_nicrws.getName(),
-                          NSFDataWorkspace=self.__nsf_nicrws.getName(), SFNiCrWorkspace=self.__sf_nicrws.getName(),
-                          NSFNiCrWorkspace=self.__nsf_nicrws.getName(), SFBkgrWorkspace=self.__sf_bkgrws.getName(),
-                          NSFBkgrWorkspace=self.__nsf_bkgrws.getName(), SFOutputWorkspace=outputWorkspaceName+'SF',
+        self.assertRaises(RuntimeError, DNSFlippingRatioCorr, SFDataWorkspace=self.__sf_nicrws.name(),
+                          NSFDataWorkspace=self.__nsf_nicrws.name(), SFNiCrWorkspace=self.__sf_nicrws.name(),
+                          NSFNiCrWorkspace=self.__nsf_nicrws.name(), SFBkgrWorkspace=self.__sf_bkgrws.name(),
+                          NSFBkgrWorkspace=self.__nsf_bkgrws.name(), SFOutputWorkspace=outputWorkspaceName+'SF',
                           NSFOutputWorkspace=outputWorkspaceName+'NSF')
         return
 
@@ -65,9 +65,9 @@ class DNSFlippingRatioCorrTest(unittest.TestCase):
         dataws_sf = self.__sf_nicrws - self.__sf_bkgrws
         dataws_nsf = self.__nsf_nicrws - self.__nsf_bkgrws
         alg_test = run_algorithm("DNSFlippingRatioCorr", SFDataWorkspace=dataws_sf,
-                                 NSFDataWorkspace=dataws_nsf, SFNiCrWorkspace=self.__sf_nicrws.getName(),
-                                 NSFNiCrWorkspace=self.__nsf_nicrws.getName(), SFBkgrWorkspace=self.__sf_bkgrws.getName(),
-                                 NSFBkgrWorkspace=self.__nsf_bkgrws.getName(), SFOutputWorkspace=outputWorkspaceName+'SF',
+                                 NSFDataWorkspace=dataws_nsf, SFNiCrWorkspace=self.__sf_nicrws.name(),
+                                 NSFNiCrWorkspace=self.__nsf_nicrws.name(), SFBkgrWorkspace=self.__sf_bkgrws.name(),
+                                 NSFBkgrWorkspace=self.__nsf_bkgrws.name(), SFOutputWorkspace=outputWorkspaceName+'SF',
                                  NSFOutputWorkspace=outputWorkspaceName+'NSF')
 
         self.assertTrue(alg_test.isExecuted())
@@ -112,9 +112,9 @@ class DNSFlippingRatioCorrTest(unittest.TestCase):
         api.RotateInstrumentComponent(self.__nsf_bkgrws, "bank0", X=0, Y=1, Z=0, Angle=-8.54)
         # apply correction
         alg_test = run_algorithm("DNSFlippingRatioCorr", SFDataWorkspace=dataws_sf,
-                                 NSFDataWorkspace=dataws_nsf, SFNiCrWorkspace=self.__sf_nicrws.getName(),
-                                 NSFNiCrWorkspace=self.__nsf_nicrws.getName(), SFBkgrWorkspace=self.__sf_bkgrws.getName(),
-                                 NSFBkgrWorkspace=self.__nsf_bkgrws.getName(), SFOutputWorkspace=outputWorkspaceName+'SF',
+                                 NSFDataWorkspace=dataws_nsf, SFNiCrWorkspace=self.__sf_nicrws.name(),
+                                 NSFNiCrWorkspace=self.__nsf_nicrws.name(), SFBkgrWorkspace=self.__sf_bkgrws.name(),
+                                 NSFBkgrWorkspace=self.__nsf_bkgrws.name(), SFOutputWorkspace=outputWorkspaceName+'SF',
                                  NSFOutputWorkspace=outputWorkspaceName+'NSF')
 
         self.assertTrue(alg_test.isExecuted())
@@ -155,9 +155,9 @@ class DNSFlippingRatioCorrTest(unittest.TestCase):
         dataws_sf = __sf_vanaws - self.__sf_bkgrws
         dataws_nsf = __nsf_vanaws - self.__nsf_bkgrws
         alg_test = run_algorithm("DNSFlippingRatioCorr", SFDataWorkspace=dataws_sf,
-                                 NSFDataWorkspace=dataws_nsf, SFNiCrWorkspace=self.__sf_nicrws.getName(),
-                                 NSFNiCrWorkspace=self.__nsf_nicrws.getName(), SFBkgrWorkspace=self.__sf_bkgrws.getName(),
-                                 NSFBkgrWorkspace=self.__nsf_bkgrws.getName(), SFOutputWorkspace=outputWorkspaceName+'SF',
+                                 NSFDataWorkspace=dataws_nsf, SFNiCrWorkspace=self.__sf_nicrws.name(),
+                                 NSFNiCrWorkspace=self.__nsf_nicrws.name(), SFBkgrWorkspace=self.__sf_bkgrws.name(),
+                                 NSFBkgrWorkspace=self.__nsf_bkgrws.name(), SFOutputWorkspace=outputWorkspaceName+'SF',
                                  NSFOutputWorkspace=outputWorkspaceName+'NSF')
 
         self.assertTrue(alg_test.isExecuted())

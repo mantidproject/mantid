@@ -5,6 +5,7 @@
 *      Author: ruth
 */
 #include "MantidCrystal/PredictFractionalPeaks.h"
+#include "MantidAPI/Sample.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
@@ -148,7 +149,7 @@ void PredictFractionalPeaks::exec() {
   IPeak &peak0 = Peaks->getPeak(0);
   int RunNumber = peak0.getRunNumber();
   Gon = peak0.getGoniometerMatrix();
-  Progress prog(this, 0, 1, N);
+  Progress prog(this, 0.0, 1.0, N);
   if (includePeaksInRange) {
 
     hkl[0] = Hmin;
@@ -160,7 +161,7 @@ void PredictFractionalPeaks::exec() {
     hkl[2] = peak0.getL();
   }
 
-  Kernel::DblMatrix UB = ol.getUB();
+  const Kernel::DblMatrix &UB = ol.getUB();
   vector<vector<int>> AlreadyDonePeaks;
   bool done = false;
   int ErrPos = 1; // Used to determine position in code of a throw
@@ -211,7 +212,7 @@ void PredictFractionalPeaks::exec() {
             }
           } catch (...) {
             if (ErrPos != 1) // setQLabFrame in createPeak throws exception
-              throw new std::invalid_argument("Invalid data at this point");
+              throw std::invalid_argument("Invalid data at this point");
           }
         }
       }

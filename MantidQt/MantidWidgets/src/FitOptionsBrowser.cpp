@@ -188,6 +188,28 @@ void FitOptionsBrowser::createCommonProperties() {
                 &FitOptionsBrowser::getStringEnumProperty,
                 &FitOptionsBrowser::setStringEnumProperty);
   }
+
+  // Create EvaluationType property
+  m_evaluationType = m_enumManager->addProperty("Evaluate Function As");
+  {
+    QStringList evaluationTypes;
+    evaluationTypes << "CentrePoint"
+                    << "Histogram";
+    m_enumManager->setEnumNames(m_evaluationType, evaluationTypes);
+    m_browser->addProperty(m_evaluationType);
+    addProperty("EvaluationType", m_evaluationType,
+                &FitOptionsBrowser::getStringEnumProperty,
+                &FitOptionsBrowser::setStringEnumProperty);
+  }
+  // Create PeakRadius property
+  m_peakRadius = m_intManager->addProperty("Peak Radius");
+  {
+    m_intManager->setValue(m_peakRadius, 0);
+    m_intManager->setMinimum(m_peakRadius, 0);
+    m_browser->addProperty(m_peakRadius);
+    addProperty("PeakRadius", m_peakRadius, &FitOptionsBrowser::getIntProperty,
+                &FitOptionsBrowser::setIntProperty);
+  }
 }
 
 void FitOptionsBrowser::createSimultaneousFitProperties() {
@@ -773,7 +795,7 @@ QtProperty *FitOptionsBrowser::addDoubleProperty(const QString &propertyName) {
   }
   QtProperty *property = m_doubleManager->addProperty(propertyName);
   m_doubleManager->setDecimals(property, m_decimals);
-  m_doubleManager->setRange(property, -std::numeric_limits<double>::max(),
+  m_doubleManager->setRange(property, std::numeric_limits<double>::lowest(),
                             std::numeric_limits<double>::max());
   this->addProperty(propertyName, property,
                     &FitOptionsBrowser::getDoubleProperty,

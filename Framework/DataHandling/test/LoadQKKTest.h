@@ -1,11 +1,10 @@
 #ifndef LOADQKKTEST_H_
 #define LOADQKKTEST_H_
 
-//-----------------
-// Includes
-//-----------------
 #include "MantidDataHandling/LoadQKK.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidKernel/ConfigService.h"
 #include <cxxtest/TestSuite.h>
 #include <Poco/Path.h>
@@ -52,9 +51,20 @@ public:
     Workspace2D_sptr data = boost::dynamic_pointer_cast<Workspace2D>(ws);
     TS_ASSERT(data);
     TS_ASSERT_EQUALS(data->getNumberHistograms(), 192 * 192);
-    Mantid::Geometry::IDetector_const_sptr det;
+    const auto &spectrumInfo = data->spectrumInfo();
     for (size_t i = 0; i < data->getNumberHistograms(); ++i) {
-      TS_ASSERT_THROWS_NOTHING(det = data->getDetector(i));
+      TS_ASSERT_THROWS_NOTHING(spectrumInfo.detector(i));
+
+      auto x = data->x(i);
+      TS_ASSERT_EQUALS(x.size(), 2);
+      TS_ASSERT_EQUALS(x[0], 1);
+      TS_ASSERT_EQUALS(x[1], 2);
+
+      auto y = data->y(i);
+      TS_ASSERT_EQUALS(y[0], 0.0);
+
+      auto e = data->e(i);
+      TS_ASSERT_EQUALS(e[0], 0.0);
     }
   }
 };

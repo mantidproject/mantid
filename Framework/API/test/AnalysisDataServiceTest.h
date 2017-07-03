@@ -19,6 +19,9 @@ private:
   MockWorkspace *doClone() const override {
     throw std::runtime_error("Cloning of MockWorkspace is not implemented.");
   }
+  MockWorkspace *doCloneEmpty() const override {
+    throw std::runtime_error("Cloning of MockWorkspace is not implemented.");
+  }
 };
 typedef boost::shared_ptr<MockWorkspace> MockWorkspace_sptr;
 }
@@ -63,16 +66,12 @@ public:
     ads.setIllegalCharacterList("");
   }
 
-  void
-  test_Retrieve_Checks_For_Exact_Match_Then_Lower_Upper_And_Sentence_Case() {
+  void test_Retrieve_Case_Insensitive() {
     addToADS("z");
-    addToADS("Z");
     TS_ASSERT_THROWS_NOTHING(ads.retrieve("z"));
     TS_ASSERT_THROWS_NOTHING(ads.retrieve("Z"));
 
-    ads.remove("z");                             // Remove lower case
-    TS_ASSERT_THROWS_NOTHING(ads.retrieve("z")); // Will find upper case
-    ads.remove("z");                             // Remove lower case
+    ads.remove("Z");
     TS_ASSERT_THROWS(ads.retrieve("z"), Exception::NotFoundError);
   }
 

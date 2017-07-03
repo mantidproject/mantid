@@ -147,13 +147,18 @@ void setMinMaxBins(Mantid::coord_t &pMin, Mantid::coord_t &pMax,
   snappedPMax += offset;
   snappedPMin += offset;
 
-  if (pMin != snappedPMin) {
+  if (snappedPMin < dimension->getMinimum()) {
+    snappedPMin = dimension->getMinimum();
+  } else if (pMin != snappedPMin) {
     std::stringstream buffer;
     buffer << "Rounding min from: " << pMin
            << " to the nearest whole width at: " << snappedPMin;
     logger.warning(buffer.str());
   }
-  if (pMax != snappedPMax) {
+
+  if (snappedPMax > dimension->getMaximum()) {
+    snappedPMax = dimension->getMaximum();
+  } else if (pMax != snappedPMax) {
     std::stringstream buffer;
     buffer << "Rounding max from: " << pMax
            << " to the nearest whole width at: " << snappedPMax;
@@ -319,7 +324,7 @@ void IntegrateMDHistoWorkspace::exec() {
      */
     MDHistoWorkspace_sptr outWS = createShapedOutput(inWS.get(), pbins, g_log);
 
-    Progress progress(this, 0, 1, size_t(outWS->getNPoints()));
+    Progress progress(this, 0.0, 1.0, size_t(outWS->getNPoints()));
 
     // Store in each dimension
     std::vector<Mantid::coord_t> binWidthsOut(nDims);

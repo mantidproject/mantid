@@ -1,11 +1,10 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/Run.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/IPropertyManager.h"
+#include "MantidKernel/Strings.h"
 
 namespace Mantid {
 namespace API {
@@ -19,7 +18,8 @@ Kernel::Logger g_log("WorkspaceGroup");
 WorkspaceGroup::WorkspaceGroup()
     : Workspace(),
       m_deleteObserver(*this, &WorkspaceGroup::workspaceDeleteHandle),
-      m_replaceObserver(*this, &WorkspaceGroup::workspaceReplaceHandle),
+      m_beforeReplaceObserver(*this,
+                              &WorkspaceGroup::workspaceBeforeReplaceHandle),
       m_workspaces(), m_observingADS(false) {}
 
 WorkspaceGroup::~WorkspaceGroup() { observeADSNotifications(false); }
@@ -36,7 +36,7 @@ const std::string WorkspaceGroup::toString() const {
   std::string descr = this->id() + "\n";
   std::lock_guard<std::recursive_mutex> _lock(m_mutex);
   for (const auto &workspace : m_workspaces) {
-    descr += " -- " + workspace->name() + "\n";
+    descr += " -- " + workspace->getName() + '\n';
   }
   return descr;
 }
@@ -54,7 +54,7 @@ void WorkspaceGroup::observeADSNotifications(const bool observeADS) {
       AnalysisDataService::Instance().notificationCenter.addObserver(
           m_deleteObserver);
       AnalysisDataService::Instance().notificationCenter.addObserver(
-          m_replaceObserver);
+          m_beforeReplaceObserver);
       m_observingADS = true;
     }
   } else {
@@ -62,7 +62,7 @@ void WorkspaceGroup::observeADSNotifications(const bool observeADS) {
       AnalysisDataService::Instance().notificationCenter.removeObserver(
           m_deleteObserver);
       AnalysisDataService::Instance().notificationCenter.removeObserver(
-          m_replaceObserver);
+          m_beforeReplaceObserver);
       m_observingADS = false;
     }
   }
@@ -94,7 +94,7 @@ void WorkspaceGroup::sortMembersByName() {
   }
   std::sort(m_workspaces.begin(), m_workspaces.end(),
             [](const Workspace_sptr &w1, const Workspace_sptr &w2) {
-              return (w1->name() < w2->name());
+              return (w1->getName() < w2->getName());
             });
 }
 
@@ -123,7 +123,7 @@ void WorkspaceGroup::addWorkspace(Workspace_sptr workspace) {
 bool WorkspaceGroup::contains(const std::string &wsName) const {
   std::lock_guard<std::recursive_mutex> _lock(m_mutex);
   for (const auto &workspace : m_workspaces) {
-    if ((*workspace).name() == wsName)
+    if (workspace->getName() == wsName)
       return true;
   }
   return false;
@@ -158,7 +158,7 @@ std::vector<std::string> WorkspaceGroup::getNames() const {
   std::lock_guard<std::recursive_mutex> _lock(m_mutex);
   std::vector<std::string> out;
   for (const auto &workspace : m_workspaces) {
-    out.push_back((*workspace).name());
+    out.push_back(workspace->getName());
   }
   return out;
 }
@@ -182,13 +182,13 @@ Workspace_sptr WorkspaceGroup::getItem(const size_t index) const {
 /**
  * Return the workspace by name
  * @param wsName The name of the workspace
- * @throws an out_of_range error if the workspace'sname not contained in the
+ * @throws an out_of_range error if the workspace's name not contained in the
  * group's list of workspace names
  */
 Workspace_sptr WorkspaceGroup::getItem(const std::string wsName) const {
   std::lock_guard<std::recursive_mutex> _lock(m_mutex);
   for (const auto &workspace : m_workspaces) {
-    if ((*workspace).name() == wsName)
+    if (workspace->getName() == wsName)
       return workspace;
   }
   throw std::out_of_range("Workspace " + wsName +
@@ -207,7 +207,7 @@ void WorkspaceGroup::removeByADS(const std::string &wsName) {
   std::lock_guard<std::recursive_mutex> _lock(m_mutex);
   auto it = m_workspaces.begin();
   for (; it != m_workspaces.end(); ++it) {
-    if ((**it).name() == wsName) {
+    if ((**it).getName() == wsName) {
       m_workspaces.erase(it);
       break;
     }
@@ -219,8 +219,8 @@ void WorkspaceGroup::removeByADS(const std::string &wsName) {
 void WorkspaceGroup::print() const {
   std::lock_guard<std::recursive_mutex> _lock(m_mutex);
   for (const auto &workspace : m_workspaces) {
-    g_log.debug() << "Workspace name in group vector =  " << (*workspace).name()
-                  << '\n';
+    g_log.debug() << "Workspace name in group vector =  "
+                  << workspace->getName() << '\n';
   }
 }
 
@@ -233,7 +233,7 @@ void WorkspaceGroup::print() const {
 void WorkspaceGroup::removeItem(const size_t index) {
   std::lock_guard<std::recursive_mutex> _lock(m_mutex);
   // do not allow this way of removing for groups in the ADS
-  if (!name().empty()) {
+  if (!this->getName().empty()) {
     throw std::runtime_error(
         "AnalysisDataService must be used to remove a workspace from group.");
   }
@@ -251,7 +251,7 @@ void WorkspaceGroup::removeItem(const size_t index) {
  *
  * Removes any deleted entries from the group.
  * This also deletes the workspace group when the last member of it gets
- *deteleted.
+ * deleted.
  *
  * @param notice :: A pointer to a workspace delete notificiation object
  */
@@ -278,20 +278,41 @@ void WorkspaceGroup::workspaceDeleteHandle(
 }
 
 /**
- * Callback when a after-replace notification is received
- * Replaces a member if it was replaced in the ADS.
- * @param notice :: A pointer to a workspace after-replace notificiation object
+ * Callback when a before-replace notification is received
+ * Replaces a member if it was replaced in the ADS and checks
+ * for duplicate members within the group
+ * @param notice :: A pointer to a workspace before-replace notification object
  */
-void WorkspaceGroup::workspaceReplaceHandle(
+void WorkspaceGroup::workspaceBeforeReplaceHandle(
     Mantid::API::WorkspaceBeforeReplaceNotification_ptr notice) {
   std::lock_guard<std::recursive_mutex> _lock(m_mutex);
 
-  const std::string replacedName = notice->objectName();
-  for (auto &workspace : m_workspaces) {
-    if ((*workspace).name() == replacedName) {
-      workspace = notice->newObject();
+  const auto oldObject = notice->oldObject();
+  const auto newObject = notice->newObject();
+
+  bool foundOld(false);
+  bool foundDuplicate(false);
+
+  auto duplicateIter = m_workspaces.end();
+
+  for (auto it = m_workspaces.begin(); it != m_workspaces.end(); ++it) {
+    auto &workspace = *it;
+    if (workspace == oldObject) {
+      workspace = newObject;
+      foundOld = true;
+
+    } else if (workspace == newObject) {
+      duplicateIter = it;
+      foundDuplicate = true;
+    }
+
+    if (foundOld && foundDuplicate) {
       break;
     }
+  }
+
+  if (foundOld && duplicateIter != m_workspaces.end()) {
+    m_workspaces.erase(duplicateIter);
   }
 }
 
@@ -318,7 +339,7 @@ bool WorkspaceGroup::areNamesSimilar() const {
 
   // Check all the members are of similar names
   for (const auto &workspace : m_workspaces) {
-    const std::string wsName = (*workspace).name();
+    const std::string &wsName = workspace->getName();
     // Find the last underscore _
     std::size_t pos = wsName.find_last_of('_');
     // No underscore = not similar
@@ -327,7 +348,7 @@ bool WorkspaceGroup::areNamesSimilar() const {
     // The part before the underscore has to be the same
     // as the group name to be similar
     std::string commonpart(wsName.substr(0, pos));
-    if (this->name() != commonpart)
+    if (this->getName() != commonpart)
       return false;
   }
   return true;

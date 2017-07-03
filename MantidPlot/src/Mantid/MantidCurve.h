@@ -2,9 +2,9 @@
 #define MANTIDPLOT_MANTIDCURVE_H
 
 #include "../PlotCurve.h"
-#include "MantidQtAPI/WorkspaceObserver.h"
 #include "MantidAPI/Workspace_fwd.h"
 #include "MantidQtAPI/MantidQwtWorkspaceData.h"
+#include "MantidQtAPI/WorkspaceObserver.h"
 
 class Graph;
 class ErrorBarSettings;
@@ -81,7 +81,8 @@ protected:
   -------------------------------------------------------------------------------------*/
 
   /// Apply the style choice
-  void applyStyleChoice(Graph::CurveType style, MultiLayer *ml, int &lineWidth);
+  void applyStyleChoice(GraphOptions::CurveType style, MultiLayer *ml,
+                        int &lineWidth);
 
   /// Make a name for a copied curve
   static QString createCopyName(const QString &curveName);
@@ -106,7 +107,8 @@ private:
   mutable QwtDoubleRect m_boundingRect;
 
   // To ensure that all MantidCurves can work with Mantid Workspaces.
-  virtual void init(Graph *g, bool distr, Graph::CurveType style) = 0;
+  virtual void init(Graph *g, bool distr, GraphOptions::CurveType style,
+                    bool multileSpectra = false) = 0;
 };
 
 #endif

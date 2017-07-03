@@ -1,4 +1,6 @@
 # pylint: disable=no-init,invalid-name,bare-except
+from __future__ import (absolute_import, division, print_function)
+
 import mantid.simpleapi as api
 from mantid.api import *
 from mantid.kernel import *
@@ -167,15 +169,15 @@ class SANSMask(PythonAlgorithm):
             component = instrument.getComponentByName(component_name)
             if component.type() == 'RectangularDetector':
                 # id's at the bottom on every pixel
-                ids_at_the_bottom = range(side_to_mask * component.idstep() + component.idstart(),
-                                          component.idstart() + component.idstep() * component.nelements(),
-                                          component.idstep() * 2)
-                ids = [range(i, i + component.idstep()) for i in ids_at_the_bottom]
+                ids_at_the_bottom = list(range(side_to_mask * component.idstep() + component.idstart(),
+                                               component.idstart() + component.idstep() * component.nelements(),
+                                               component.idstep() * 2))
+                ids = [list(range(i, i + component.idstep())) for i in ids_at_the_bottom]
                 ids = [item for sublist in ids for item in sublist]  # flat list
             elif component.type() == 'CompAssembly' or component.type() == 'ObjCompAssembly' or component.type() == 'DetectorComponent':
                 number_of_tubes = component.nelements()
                 number_of_pixels_per_tube = component[0].nelements()
-                idx_at_the_bottom = range(side_to_mask, number_of_tubes, 2)
+                idx_at_the_bottom = list(range(side_to_mask, number_of_tubes, 2))
                 ids = [component[i][j].getID() for i in idx_at_the_bottom for j in range(number_of_pixels_per_tube)]
             else:
                 Logger("SANSMask").warning("No Front/Back tubes masked for HFIR!")
@@ -216,7 +218,7 @@ class SANSMask(PythonAlgorithm):
         if component.type() == 'RectangularDetector':
             id_min = component.minDetectorID()
             id_max = component.maxDetectorID()
-            masked_detectors = range(id_min, id_max + 1)
+            masked_detectors = list(range(id_min, id_max + 1))
         elif component.type() == 'CompAssembly' or component.type() == 'ObjCompAssembly' or component.type() == 'DetectorComponent':
             ids_gen = self.__get_ids_for_assembly(component)
             masked_detectors = list(ids_gen)

@@ -117,26 +117,26 @@ void SaveDiffCal::writeIntFieldFromSVWS(
     H5::Group &group, const std::string &name,
     DataObjects::SpecialWorkspace2D_const_sptr ws) {
   auto detidCol = m_calibrationWS->getColumn("detid");
-  bool isMask = bool(boost::dynamic_pointer_cast<const MaskWorkspace>(ws));
+  const bool isMask = (name == "use");
 
   // output array defaults to all one (one group, use the pixel)
-  const int32_t DEFAULT_VALUE = (isMask ? 0 : 1);
-  std::vector<int32_t> values(m_numValues, DEFAULT_VALUE);
+  std::vector<int32_t> values(m_numValues, 1);
 
-  int32_t value;
-  for (size_t i = 0; i < m_numValues; ++i) {
-    auto &ids = ws->getSpectrum(i).getDetectorIDs();
-    auto found = m_detidToIndex.find(*(ids.begin()));
-    if (found != m_detidToIndex.end()) {
-      value = static_cast<int32_t>(ws->getValue(found->first));
-      // in maskworkspace 0=use, 1=dontuse
-      if (isMask) {
-        if (value == 0)
-          value = 1;
-        else
-          value = 0;
+  if (bool(ws)) {
+    for (size_t i = 0; i < m_numValues; ++i) {
+      auto &ids = ws->getSpectrum(i).getDetectorIDs();
+      auto found = m_detidToIndex.find(*(ids.begin()));
+      if (found != m_detidToIndex.end()) {
+        int32_t value = static_cast<int32_t>(ws->getValue(found->first));
+        // in maskworkspace 0=use, 1=dontuse - backwards from the file
+        if (isMask) {
+          if (value == 0)
+            value = 1;
+          else
+            value = 0;
+        }
+        values[found->second] = value;
       }
-      values[found->second] = value;
     }
   }
 

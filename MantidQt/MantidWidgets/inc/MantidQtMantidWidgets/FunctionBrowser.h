@@ -4,6 +4,7 @@
 #include "WidgetDllOption.h"
 
 #include "MantidAPI/IFunction.h"
+#include "MantidQtMantidWidgets/IFunctionBrowser.h"
 
 #include <QWidget>
 #include <QMap>
@@ -51,7 +52,9 @@ class CreateAttributePropertyForFunctionBrowser;
  *
  * @date 18/04/2012
  */
-class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS FunctionBrowser : public QWidget {
+class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS FunctionBrowser
+    : public QWidget,
+      public IFunctionBrowser {
   Q_OBJECT
 public:
   /// To keep QtProperty and its QtBrowserItem in one place
@@ -75,15 +78,15 @@ public:
   /// Constructor
   FunctionBrowser(QWidget *parent = NULL, bool multi = false);
   /// Destructor
-  ~FunctionBrowser() override;
+  virtual ~FunctionBrowser() override;
   /// Clear the contents
-  void clear();
+  void clear() override;
   /// Set the function in the browser
-  void setFunction(const QString &funStr);
+  void setFunction(const QString &funStr) override;
   /// Set the function in the browser
   void setFunction(Mantid::API::IFunction_sptr fun);
   /// Return FunctionFactory function string
-  QString getFunctionString();
+  QString getFunctionString() override;
   /// Return the function
   Mantid::API::IFunction_sptr getFunction(QtProperty *prop = NULL,
                                           bool attributesOnly = false);
@@ -113,34 +116,42 @@ public:
   /// Get a value of a parameter
   double getParameter(const QString &paramName) const;
   /// Update parameter values in the browser to match those of a function.
-  void updateParameters(const Mantid::API::IFunction &fun);
+  void updateParameters(const Mantid::API::IFunction &fun) override;
 
   /// Get a list of names of global parameters
   QStringList getGlobalParameters() const;
   /// Get a list of names of local parameters
   QStringList getLocalParameters() const;
   /// Get the number of datasets
-  int getNumberOfDatasets() const;
+  int getNumberOfDatasets() const override;
   /// Get value of a local parameter
-  double getLocalParameterValue(const QString &parName, int i) const;
+  double getLocalParameterValue(const QString &parName, int i) const override;
   /// Set value of a local parameter
-  void setLocalParameterValue(const QString &parName, int i, double value);
+  void setLocalParameterValue(const QString &parName, int i,
+                              double value) override;
   /// Check if a local parameter is fixed
-  bool isLocalParameterFixed(const QString &parName, int i) const;
+  bool isLocalParameterFixed(const QString &parName, int i) const override;
   /// Fix/unfix local parameter
-  void setLocalParameterFixed(const QString &parName, int i, bool fixed);
+  void setLocalParameterFixed(const QString &parName, int i,
+                              bool fixed) override;
   /// Get the tie for a local parameter.
-  QString getLocalParameterTie(const QString &parName, int i) const;
+  QString getLocalParameterTie(const QString &parName, int i) const override;
   /// Set a tie for a local parameter.
-  void setLocalParameterTie(const QString &parName, int i, QString tie);
+  void setLocalParameterTie(const QString &parName, int i,
+                            QString tie) override;
 
   /// Return the multidomain function if number of datasets is greater than 1
-  Mantid::API::IFunction_sptr getGlobalFunction();
+  Mantid::API::IFunction_sptr getGlobalFunction() override;
   /// Update parameter values in the browser to match those of a function.
-  void updateMultiDatasetParameters(const Mantid::API::IFunction &fun);
+  void updateMultiDatasetParameters(const Mantid::API::IFunction &fun) override;
 
   /// Resize the browser's columns
   void setColumnSizes(int s0, int s1, int s2 = -1);
+
+  /// Set error display on/off
+  void setErrorsEnabled(bool enabled) override;
+  /// Clear all errors
+  void clearErrors() override;
 
 signals:
   /// User selects a different function (or one of it's sub-properties)
@@ -149,20 +160,21 @@ signals:
   /// Function parameter gets changed
   /// @param funcIndex :: Index of the changed function
   /// @param paramName :: Name of the changed parameter
-  void parameterChanged(const QString &funcIndex, const QString &paramName);
+  void parameterChanged(const QString &funcIndex,
+                        const QString &paramName) override;
 
   /// In multi-dataset context a button value editor was clicked
   void localParameterButtonClicked(const QString &parName);
 
-  void functionStructureChanged();
+  void functionStructureChanged() override;
   void globalsChanged();
 
 public slots:
 
   // Handling of multiple datasets
-  void setNumberOfDatasets(int n);
+  void setNumberOfDatasets(int n) override;
   void resetLocalParameters();
-  void setCurrentDataset(int i);
+  void setCurrentDataset(int i) override;
   void removeDatasets(QList<int> indices);
   void addDatasets(int n);
 
@@ -234,7 +246,7 @@ protected:
   QtProperty *getTieProperty(QtProperty *prop) const;
 
   /// Add a tie property
-  AProperty addTieProperty(QtProperty *prop, QString tie);
+  void addTieProperty(QtProperty *prop, QString tie);
   /// Check if a parameter property has a tie
   bool hasTie(QtProperty *prop) const;
   /// Check if a property is a tie
@@ -262,6 +274,9 @@ protected:
   void checkLocalParameter(const QString &parName) const;
   /// Make sure that properties are in sync with the cached ties
   void updateLocalTie(const QString &parName);
+
+  /// Ask user for function type
+  virtual QString getUserFunctionFromDialog();
 
 protected slots:
   /// Show the context menu
@@ -299,6 +314,8 @@ protected slots:
   void attributeChanged(QtProperty *);
   /// Called when a member of a vector attribute is changed
   void attributeVectorDoubleChanged(QtProperty *);
+  /// Called when the size of a vector attribute is changed
+  void attributeVectorSizeChanged(QtProperty *);
   /// Called when a function parameter property is changed
   void parameterChanged(QtProperty *);
   /// Called when button in local parameter editor was clicked

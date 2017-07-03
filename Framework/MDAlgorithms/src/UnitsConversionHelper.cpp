@@ -2,7 +2,7 @@
 #include "MantidAPI/NumericAxis.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/Strings.h"
-#include <boost/math/special_functions/fpclassify.hpp>
+#include <cmath>
 
 namespace Mantid {
 namespace MDAlgorithms {
@@ -25,7 +25,7 @@ UnitsConversionHelper::analyzeUnitsConversion(const std::string &UnitsFrom,
                                               const std::string &UnitsTo,
                                               bool forceViaTOF) {
   // if units are equal, no conversion is necessary;
-  if (UnitsFrom.compare(UnitsTo) == 0)
+  if (UnitsFrom == UnitsTo)
     return CnvrtToMD::ConvertNo;
 
   // get all known units:
@@ -48,7 +48,7 @@ UnitsConversionHelper::analyzeUnitsConversion(const std::string &UnitsFrom,
     return CnvrtToMD::ConvertFast;
   } else {
     // are the input units TOF?
-    if (UnitsFrom.compare("TOF") == 0) {
+    if (UnitsFrom == "TOF") {
       return CnvrtToMD::ConvertFromTOF;
     } else { // convert using TOF
       m_TargetUnit = Kernel::UnitFactory::Instance().create(UnitsTo);
@@ -91,7 +91,7 @@ void UnitsConversionHelper::initialize(const MDWSDescription &targetWSDescr,
   if (!pAxis)
     throw(std::invalid_argument(
         "Cannot retrieve numeric X axis from the input workspace: " +
-        inWS2D->name()));
+        inWS2D->getName()));
 
   std::string unitsFrom = inWS2D->getAxis(0)->unit()->unitID();
 
@@ -180,7 +180,7 @@ UnitsConversionHelper::getConversionRange(double x1, double x2) const {
     }
     double tof1 = m_SourceWSUnit->singleToTOF(range.first);
     double tof2 = m_SourceWSUnit->singleToTOF(range.second);
-    if (boost::math::isnan(tof1) || boost::math::isnan(tof2)) {
+    if (std::isnan(tof1) || std::isnan(tof2)) {
       if (range.first < source_range.first)
         range.first = source_range.first;
       if (range.second > source_range.second)

@@ -1,14 +1,12 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
+#include "MantidQtAPI/HelpWindow.h"
 #include "MantidQtCustomInterfaces/Muon/MuonAnalysisOptionTab.h"
 #include "MantidQtCustomInterfaces/Muon/MuonAnalysisHelper.h"
 
 #include <QLineEdit>
 #include <QSettings>
-#include <QDesktopServices>
-#include <QUrl>
-
 //-----------------------------------------------------------------------------
 using namespace Mantid::Kernel;
 
@@ -68,10 +66,13 @@ void MuonAnalysisOptionTab::initLayout() {
 
   m_autoSaver.beginGroup("GeneralOptions");
   m_autoSaver.registerWidget(m_uiForm.plotCreation, "plotCreation", 0);
-  m_autoSaver.registerWidget(m_uiForm.newPlotPolicy, "newPlotPolicy", 0);
+  m_autoSaver.registerWidget(m_uiForm.newPlotPolicy, "newPlotPolicy", 1);
   m_autoSaver.registerWidget(m_uiForm.hideToolbars, "toolbars", true);
   m_autoSaver.registerWidget(m_uiForm.hideGraphs, "hiddenGraphs", true);
-  m_autoSaver.registerWidget(m_uiForm.spinBoxNPlotsToKeep, "fitsToKeep", 1);
+  m_autoSaver.registerWidget(m_uiForm.spinBoxNPlotsToKeep, "fitsToKeep", 0);
+  m_autoSaver.registerWidget(m_uiForm.chkEnableMultiFit, "enableMultiFit",
+                             false);
+  m_autoSaver.registerWidget(m_uiForm.chkTFAsymm, "enableTFAsymm", false);
   m_autoSaver.endGroup();
 
   // Set validators for double fields
@@ -132,22 +133,26 @@ void MuonAnalysisOptionTab::initLayout() {
           SIGNAL(settingsTabUpdatePlot()));
   connect(m_uiForm.binBoundaries, SIGNAL(returnPressed()), this,
           SIGNAL(settingsTabUpdatePlot()));
+  connect(m_uiForm.chkEnableMultiFit, SIGNAL(stateChanged(int)), this,
+          SIGNAL(multiFitStateChanged(int)));
+  connect(m_uiForm.chkTFAsymm, SIGNAL(stateChanged(int)), this,
+          SIGNAL(TFAsymmStateChanged(int)));
 }
 
 /**
 * Muon Analysis Settings help.
 */
 void MuonAnalysisOptionTab::muonAnalysisHelpSettingsClicked() {
-  QDesktopServices::openUrl(
-      QUrl(QString("http://www.mantidproject.org/") + "MuonAnalysisSettings"));
+  MantidQt::API::HelpWindow::showCustomInterface(
+      nullptr, QString("Muon_Analysis"), QString("settings"));
 }
 
 /*
-* Muon Analysis Rebin help (located on settings wiki).
+* Muon Analysis Rebin help (located in settings section).
 */
 void MuonAnalysisOptionTab::rebinHelpClicked() {
-  QDesktopServices::openUrl(QUrl(QString("http://www.mantidproject.org/") +
-                                 "MuonAnalysisSettings#Variable_Rebin"));
+  MantidQt::API::HelpWindow::showCustomInterface(
+      nullptr, QString("Muon_Analysis"), QString("data-binning"));
 }
 
 /**
@@ -378,6 +383,29 @@ MuonAnalysisOptionTab::NewPlotPolicy MuonAnalysisOptionTab::newPlotPolicy() {
     throw std::runtime_error("Unknown new plot policy selection");
   } else {
     return policyMap[selectedPolicy];
+  }
+}
+
+/**
+ * Returns whether or not "enable multiple fitting" is set.
+ * @returns whether the checkbox is ticked
+ */
+Muon::MultiFitState MuonAnalysisOptionTab::getMultiFitState() const {
+  if (m_uiForm.chkEnableMultiFit->isChecked()) {
+    return Muon::MultiFitState::Enabled;
+  } else {
+    return Muon::MultiFitState::Disabled;
+  }
+}
+/**
+* Returns whether or not "enable TFAsymmetry" is set.
+* @returns whether the checkbox is ticked
+*/
+Muon::TFAsymmState MuonAnalysisOptionTab::getTFAsymmState() const {
+  if (m_uiForm.chkTFAsymm->isChecked()) {
+    return Muon::TFAsymmState::Enabled;
+  } else {
+    return Muon::TFAsymmState::Disabled;
   }
 }
 }

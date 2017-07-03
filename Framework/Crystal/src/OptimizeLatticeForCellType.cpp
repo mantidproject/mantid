@@ -1,8 +1,10 @@
 #include "MantidCrystal/OptimizeLatticeForCellType.h"
 #include "MantidCrystal/GSLFunctions.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IPeakFunction.h"
+#include "MantidAPI/Sample.h"
 #include "MantidKernel/VectorHelper.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/BoundedValidator.h"
@@ -10,6 +12,7 @@
 #include "MantidGeometry/Crystal/IndexingUtils.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidGeometry/Crystal/ReducedCell.h"
+#include "MantidGeometry/Crystal/EdgePixel.h"
 #include <fstream>
 
 using namespace Mantid::Geometry;
@@ -24,7 +27,6 @@ using namespace API;
 using std::size_t;
 using namespace DataObjects;
 
-//-----------------------------------------------------------------------------------------
 /** Initialisation method. Declares properties to be used in algorithm.
  */
 void OptimizeLatticeForCellType::init() {
@@ -61,7 +63,6 @@ void OptimizeLatticeForCellType::init() {
   gsl_set_error_handler_off();
 }
 
-//-----------------------------------------------------------------------------------------
 /** Executes the algorithm
  *
  *  @throw Exception::FileError If the grouping file cannot be opened or read
@@ -74,12 +75,13 @@ void OptimizeLatticeForCellType::exec() {
   int edge = this->getProperty("EdgePixels");
   std::string cell_type = getProperty("CellType");
   DataObjects::PeaksWorkspace_sptr ws = getProperty("PeaksWorkspace");
+  Geometry::Instrument_const_sptr inst = ws->getInstrument();
 
   std::vector<DataObjects::PeaksWorkspace_sptr> runWS;
   if (edge > 0) {
     for (int i = int(ws->getNumberPeaks()) - 1; i >= 0; --i) {
       const std::vector<Peak> &peaks = ws->getPeaks();
-      if (edgePixel(ws, peaks[i].getBankName(), peaks[i].getCol(),
+      if (edgePixel(inst, peaks[i].getBankName(), peaks[i].getCol(),
                     peaks[i].getRow(), edge)) {
         ws->removePeak(i);
       }
@@ -99,7 +101,7 @@ void OptimizeLatticeForCellType::exec() {
       if (peak.getRunNumber() != run) {
         count++; // first entry in runWS is input workspace
         auto cloneWS = boost::make_shared<PeaksWorkspace>();
-        cloneWS->setInstrument(ws->getInstrument());
+        cloneWS->setInstrument(inst);
         cloneWS->copyExperimentInfoFrom(ws.get());
         runWS.push_back(cloneWS);
         runWS[count]->addPeak(peak);
@@ -230,56 +232,6 @@ OptimizeLatticeForCellType::getLatticeFunction(const std::string &cellType,
   }
 
   return latticeFunction;
-}
-
-//-----------------------------------------------------------------------------------------
-/**
-  @param  ws           Name of workspace containing peaks
-  @param  bankName     Name of bank containing peak
-  @param  col          Column number containing peak
-  @param  row          Row number containing peak
-  @param  Edge         Number of edge points for each bank
-  @return True if peak is on edge
-*/
-bool OptimizeLatticeForCellType::edgePixel(PeaksWorkspace_sptr ws,
-                                           std::string bankName, int col,
-                                           int row, int Edge) {
-  if (bankName.compare("None") == 0)
-    return false;
-  Geometry::Instrument_const_sptr Iptr = ws->getInstrument();
-  boost::shared_ptr<const IComponent> parent =
-      Iptr->getComponentByName(bankName);
-  if (parent->type().compare("RectangularDetector") == 0) {
-    boost::shared_ptr<const RectangularDetector> RDet =
-        boost::dynamic_pointer_cast<const RectangularDetector>(parent);
-
-    return col < Edge || col >= (RDet->xpixels() - Edge) || row < Edge ||
-           row >= (RDet->ypixels() - Edge);
-  } else {
-    std::vector<Geometry::IComponent_const_sptr> children;
-    boost::shared_ptr<const Geometry::ICompAssembly> asmb =
-        boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(parent);
-    asmb->getChildren(children, false);
-    int startI = 1;
-    if (children[0]->getName() == "sixteenpack") {
-      startI = 0;
-      parent = children[0];
-      children.clear();
-      boost::shared_ptr<const Geometry::ICompAssembly> asmb =
-          boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(parent);
-      asmb->getChildren(children, false);
-    }
-    boost::shared_ptr<const Geometry::ICompAssembly> asmb2 =
-        boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(children[0]);
-    std::vector<Geometry::IComponent_const_sptr> grandchildren;
-    asmb2->getChildren(grandchildren, false);
-    int NROWS = static_cast<int>(grandchildren.size());
-    int NCOLS = static_cast<int>(children.size());
-    // Wish pixels and tubes start at 1 not 0
-    return col - startI < Edge || col - startI >= (NCOLS - Edge) ||
-           row - startI < Edge || row - startI >= (NROWS - Edge);
-  }
-  return false;
 }
 
 } // namespace Algorithm

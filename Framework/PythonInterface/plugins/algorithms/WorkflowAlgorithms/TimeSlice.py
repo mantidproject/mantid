@@ -1,4 +1,6 @@
 #pylint: disable=no-init,invalid-name
+from __future__ import (absolute_import, division, print_function)
+
 from mantid.kernel import *
 from mantid.api import *
 from mantid.simpleapi import *
@@ -13,15 +15,13 @@ def _count_monitors(raw_file):
 
     raw_file = mtd[raw_file]
     num_hist = raw_file.getNumberHistograms()
-    detector = raw_file.getDetector(0)
     mon_count = 1
 
-    if detector.isMonitor():
+    spectrumInfo = raw_file.spectrumInfo()
+    if spectrumInfo.isMonitor(0):
         # Monitors are at the start
         for i in range(1, num_hist):
-            detector = raw_file.getDetector(i)
-
-            if detector.isMonitor():
+            if spectrumInfo.isMonitor(i):
                 mon_count += 1
             else:
                 break
@@ -29,16 +29,12 @@ def _count_monitors(raw_file):
         return mon_count, True
     else:
         # Monitors are at the end
-        detector = raw_file.getDetector(num_hist)
-
-        if not detector.isMonitor():
+        if not spectrumInfo.isMonitor(num_hist):
             #if it's not, we don't have any monitors!
             return 0, True
 
         for i in range(num_hist, 0, -1):
-            detector = raw_file.getDetector(i)
-
-            if detector.isMonitor():
+            if spectrumInfo.isMonitor(i):
                 mon_count += 1
             else:
                 break
@@ -46,6 +42,8 @@ def _count_monitors(raw_file):
         return mon_count, False
 
 #pylint: disable=too-many-instance-attributes
+
+
 class TimeSlice(PythonAlgorithm):
 
     _raw_files = None
@@ -59,17 +57,15 @@ class TimeSlice(PythonAlgorithm):
     def category(self):
         return 'Inelastic\\Utility'
 
-
     def summary(self):
         return 'Performa an integration on a raw file over a specified time of flight range'
-
 
     def PyInit(self):
         self.declareProperty(StringArrayProperty(name='InputFiles'),
                              doc='Comma separated list of input files')
 
-        self.declareProperty(WorkspaceProperty(name='CalibrationWorkspace', defaultValue='',\
-                             direction=Direction.Input, optional=PropertyMode.Optional),
+        self.declareProperty(WorkspaceProperty(name='CalibrationWorkspace', defaultValue='',
+                                               direction=Direction.Input, optional=PropertyMode.Optional),
                              doc='Calibration workspace')
 
         self.declareProperty(IntArrayProperty(name='SpectraRange'),
@@ -84,10 +80,9 @@ class TimeSlice(PythonAlgorithm):
         self.declareProperty(name='OutputNameSuffix', defaultValue='_slice',
                              doc='Suffix to append to raw file name for name of output workspace')
 
-        self.declareProperty(WorkspaceGroupProperty(name='OutputWorkspace', defaultValue='',\
-                             direction=Direction.Output),
+        self.declareProperty(WorkspaceGroupProperty(name='OutputWorkspace', defaultValue='',
+                                                    direction=Direction.Output),
                              doc='Name of workspace group to group result workspaces into')
-
 
     def _validate_range(self, name):
         """
@@ -106,7 +101,6 @@ class TimeSlice(PythonAlgorithm):
 
         return ''
 
-
     def validateInputs(self):
         issues = dict()
 
@@ -117,7 +111,6 @@ class TimeSlice(PythonAlgorithm):
             issues['BackgroundRange'] = self._validate_range('BackgroundRange')
 
         return issues
-
 
     def PyExec(self):
         #from IndirectCommon import CheckXrange
@@ -153,7 +146,6 @@ class TimeSlice(PythonAlgorithm):
         final_prog.report('setting result')
         self.setProperty('OutputWorkspace', self._out_ws_group)
 
-
     def _setup(self):
         """
         Gets properties.
@@ -174,7 +166,6 @@ class TimeSlice(PythonAlgorithm):
 
         self._out_ws_group = self.getPropertyValue('OutputWorkspace')
 
-
     def _read_raw_file(self, filename):
         """
         Loads a raw run file.
@@ -192,7 +183,6 @@ class TimeSlice(PythonAlgorithm):
         Load(Filename=filename, OutputWorkspace=workspace_name, LoadLogFiles=False)
 
         return workspace_name
-
 
     def _process_calib(self, raw_file):
         """
@@ -219,7 +209,6 @@ class TimeSlice(PythonAlgorithm):
                       OutputWorkspace=self._calib_ws,
                       StartWorkspaceIndex=calib_spec_min,
                       EndWorkspaceIndex=calib_spec_max)
-
 
     def _process_raw_file(self, raw_file):
         """

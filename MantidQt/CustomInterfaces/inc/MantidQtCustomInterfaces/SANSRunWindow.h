@@ -159,7 +159,7 @@ private:
   void appendRowToMaskTable(const QString &type, const QString &detector,
                             const QString &details);
   void readNumberOfEntries(const QString &RunStep,
-                           MantidWidgets::MWRunFiles *const output);
+                           API::MWRunFiles *const output);
   QString readUserFileGUIChanges(const States type);
   QString readSampleObjectGUIChanges();
   /// Get the component distances
@@ -197,11 +197,9 @@ private:
   bool runAssign(int key, QString &logs);
   /// Load a scatter sample file or can run via Python objects using the passed
   /// Python command
-  bool assignDetBankRun(MantidWidgets::MWRunFiles &runFile,
-                        const QString &assignFn);
+  bool assignDetBankRun(API::MWRunFiles &runFile, const QString &assignFn);
   /// runs that contain only monitor counts can be direct or transmission runs
-  bool assignMonitorRun(MantidWidgets::MWRunFiles &trans,
-                        MantidWidgets::MWRunFiles &direct,
+  bool assignMonitorRun(API::MWRunFiles &trans, API::MWRunFiles &direct,
                         const QString &assignFn);
   /// Get the detectors' names
   void fillDetectNames(QComboBox *output);
@@ -361,7 +359,7 @@ private:
   /// The workspace containing the can run
   QString m_experCan;
   /// List of all run entry widgets, which are on tab page 1
-  std::vector<MantidWidgets::MWRunFiles *> m_runFiles;
+  std::vector<API::MWRunFiles *> m_runFiles;
   /// There validators are searched before a reduction begins. Where there is a
   /// problem focus goes to the widget linked to a validator whose tab is also
   /// stored in the pair. Disabling a validator QLabel disables checking that
@@ -462,10 +460,10 @@ private:
   void checkWaveLengthAndQValues(bool &isValid, QString &message,
                                  QLineEdit *min, QLineEdit *max,
                                  QComboBox *selection, QString type);
+  /// Checks if the save settings are valid for a particular workspace
+  bool areSaveSettingsValid(const QString &workspaceName);
   /// Update the beam center fields
   void updateBeamCenterCoordinates();
-  /// LOQ specific settings
-  void applyLOQSettings(bool isNowLOQ);
   /// Set the beam finder details
   void setBeamFinderDetails();
   /// Gets the QResolution settings and shows them in the GUI
@@ -518,6 +516,10 @@ private:
   bool isValidUserFile();
   /// Update IDF file path
   void updateIDFFilePath();
+  /// Update IDF file path when running in Batch mode
+  void updateIDFFilePathForBatch();
+  //// Update IDF information
+  void updateIDFInfo(const QString &command);
 
   UserSubWindow *slicingWindow;
 };

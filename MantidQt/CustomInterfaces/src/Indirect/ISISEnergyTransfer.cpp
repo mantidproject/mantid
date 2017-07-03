@@ -1,11 +1,10 @@
 #include "MantidQtCustomInterfaces/Indirect/ISISEnergyTransfer.h"
 
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidGeometry/IDTypes.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidQtCustomInterfaces/UserInputValidator.h"
 
 #include <QFileInfo>
-#include <QInputDialog>
 
 using namespace Mantid::API;
 using MantidQt::API::BatchAlgorithmRunner;
@@ -41,6 +40,9 @@ ISISEnergyTransfer::ISISEnergyTransfer(IndirectDataReduction *idrUI,
   // Reverts run button back to normal when file finding has finished
   connect(m_uiForm.dsRunFiles, SIGNAL(fileFindingFinished()), this,
           SLOT(pbRunFinished()));
+  // Handle plotting and saving
+  connect(m_uiForm.pbPlot, SIGNAL(clicked()), this, SLOT(plotClicked()));
+  connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveClicked()));
 
   // Update UI widgets to show default values
   mappingOptionSelected(m_uiForm.cbGroupingOptions->currentText());
@@ -164,8 +166,8 @@ bool ISISEnergyTransfer::validate() {
     if (m_uiForm.ckBackgroundRemoval->isChecked()) {
       MatrixWorkspace_sptr tempWs =
           AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(name);
-      const double minBack = tempWs->readX(0)[0];
-      const double maxBack = tempWs->readX(0)[tempWs->blocksize()];
+      const double minBack = tempWs->x(0)[0];
+      const double maxBack = tempWs->x(0)[tempWs->blocksize()];
 
       if (m_uiForm.spBackgroundStart->value() < minBack) {
         uiv.addErrorMessage("The Start of Background Removal is less than the "
@@ -267,9 +269,6 @@ void ISISEnergyTransfer::run() {
     reductionAlg->setProperty("MapFile", grouping.second.toStdString());
 
   reductionAlg->setProperty("FoldMultipleFrames", m_uiForm.ckFold->isChecked());
-  reductionAlg->setProperty("Plot",
-                            m_uiForm.cbPlotType->currentText().toStdString());
-  reductionAlg->setProperty("SaveFormats", getSaveFormats());
   reductionAlg->setProperty("OutputWorkspace",
                             "IndirectEnergyTransfer_Workspaces");
 
@@ -304,10 +303,21 @@ void ISISEnergyTransfer::algorithmComplete(bool error) {
 
   // Set workspace for Python export as the first result workspace
   m_pythonExportWsName = energyTransferOutputGroup->getNames()[0];
-
+  m_outputWorkspaces = energyTransferOutputGroup->getNames();
   // Ungroup the output workspace
   energyTransferOutputGroup->removeAll();
   AnalysisDataService::Instance().remove("IndirectEnergyTransfer_Workspaces");
+
+  // Enable plotting and saving
+  m_uiForm.pbPlot->setEnabled(true);
+  m_uiForm.cbPlotType->setEnabled(true);
+  m_uiForm.pbSave->setEnabled(true);
+  m_uiForm.ckSaveAclimax->setEnabled(true);
+  m_uiForm.ckSaveASCII->setEnabled(true);
+  m_uiForm.ckSaveDaveGrp->setEnabled(true);
+  m_uiForm.ckSaveNexus->setEnabled(true);
+  m_uiForm.ckSaveNXSPE->setEnabled(true);
+  m_uiForm.ckSaveSPE->setEnabled(true);
 }
 
 /**
@@ -545,8 +555,8 @@ void ISISEnergyTransfer::plotRaw() {
   if (m_uiForm.ckBackgroundRemoval->isChecked()) {
     MatrixWorkspace_sptr tempWs =
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(name);
-    const double minBack = tempWs->readX(0)[0];
-    const double maxBack = tempWs->readX(0)[tempWs->blocksize()];
+    const double minBack = tempWs->x(0)[0];
+    const double maxBack = tempWs->x(0)[tempWs->blocksize()];
 
     if (startBack < minBack) {
       emit showMessageBox("The Start of Background Removal is less than the "
@@ -675,6 +685,42 @@ void ISISEnergyTransfer::pbRunFinished() {
   }
 
   m_uiForm.dsRunFiles->setEnabled(true);
+}
+/**
+ * Handle mantid plotting of workspaces
+ */
+void ISISEnergyTransfer::plotClicked() {
+  for (const auto &it : m_outputWorkspaces) {
+    if (checkADSForPlotSaveWorkspace(it, true)) {
+      const auto plotType = m_uiForm.cbPlotType->currentText();
+      QString pyInput = "from IndirectReductionCommon import plot_reduction\n";
+      pyInput += "plot_reduction('";
+      pyInput += QString::fromStdString(it) + "', '";
+      pyInput += plotType + "')\n";
+      m_pythonRunner.runPythonCode(pyInput);
+    }
+  }
+}
+
+/**
+ * Handle saving of workspaces
+ */
+void ISISEnergyTransfer::saveClicked() {
+  auto saveFormats = getSaveFormats();
+  QString pyInput = "from IndirectReductionCommon import save_reduction\n";
+  pyInput += "save_reduction([";
+  for (const auto &it : m_outputWorkspaces) {
+    pyInput += "'" + QString::fromStdString(it) + "', ";
+  }
+  pyInput += "], [";
+  for (const auto &it : saveFormats) {
+    pyInput += "'" + QString::fromStdString(it) + "', ";
+  }
+  pyInput += "]";
+  if (m_uiForm.ckCm1Units->isChecked())
+    pyInput += ", 'DeltaE_inWavenumber'";
+  pyInput += ")\n";
+  m_pythonRunner.runPythonCode(pyInput);
 }
 
 } // namespace CustomInterfaces

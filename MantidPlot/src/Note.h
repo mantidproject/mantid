@@ -30,8 +30,8 @@
 #ifndef NOTE_H
 #define NOTE_H
 
+#include "MantidQtAPI/IProjectSerialisable.h"
 #include "MdiSubWindow.h"
-#include "Mantid/IProjectSerialisable.h"
 #include <QTextEdit>
 
 class ApplicationWindow;
@@ -49,10 +49,11 @@ public:
        Qt::WFlags f = 0);
   ~Note() override{};
 
-  static IProjectSerialisable *loadFromProject(const std::string &lines,
-                                               ApplicationWindow *app,
-                                               const int fileVersion);
+  static MantidQt::API::IProjectSerialisable *
+  loadFromProject(const std::string &lines, ApplicationWindow *app,
+                  const int fileVersion);
   std::string saveToProject(ApplicationWindow *app) override;
+  std::vector<std::string> getWorkspaceNames() override;
 
   void setName(const QString &name);
 

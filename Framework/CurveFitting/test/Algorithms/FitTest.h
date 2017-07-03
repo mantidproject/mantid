@@ -17,13 +17,14 @@
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 
+#include "MantidTestHelpers/FunctionCreationHelper.h"
 #include "MantidTestHelpers/MultiDomainFunctionHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 #include <Poco/File.h>
-#include <gsl/gsl_version.h>
 
 using namespace Mantid;
+using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::CurveFitting;
 using namespace Mantid::CurveFitting::Algorithms;
@@ -825,30 +826,46 @@ public:
 
     boost::shared_ptr<WorkspaceTester> data =
         boost::make_shared<WorkspaceTester>();
-    data->init(1, 100, 100);
+    data->initialize(1, 100, 100);
 
     auto &x = data->dataX(0);
     auto &y = data->dataY(0);
     auto &e = data->dataE(0);
 
-    y = {0, -1.77636e-16, -1.77636e-16, 0, -1.77636e-16, -8.88178e-17,
-         -1.33227e-16, 0, 0, 8.88178e-17, 3.33067e-17, 1.11022e-17, 1.27676e-16,
-         6.66134e-17, 8.32667e-17, 3.88578e-17, 9.4369e-17, 1.44329e-16,
-         2.66454e-16, 5.10703e-15, 9.80105e-14, 1.63027e-12, 2.31485e-11,
-         2.80779e-10, 2.91067e-09, 2.58027e-08, 1.9575e-07, 1.27204e-06,
-         7.08849e-06, 3.39231e-05, 0.000139678, 0.000496012, 0.00152387,
-         0.0040672, 0.00948273, 0.0194574, 0.0354878, 0.0583005, 0.0877657,
-         0.123662, 0.167048, 0.221547, 0.293962, 0.393859, 0.531629, 0.714256,
-         0.938713, 1.18531, 1.41603, 1.58257, 1.64355, 1.58257, 1.41603,
-         1.18531, 0.938713, 0.714256, 0.531629, 0.393859, 0.293962, 0.221547,
-         0.167048, 0.123662, 0.0877657, 0.0583005, 0.0354878, 0.0194574,
-         0.00948273, 0.0040672, 0.00152387, 0.000496012, 0.000139678,
-         3.39231e-05, 7.08849e-06, 1.27204e-06, 1.9575e-07, 2.58027e-08,
-         2.91067e-09, 2.80779e-10, 2.31486e-11, 1.63033e-12, 9.80771e-14,
-         5.09592e-15, 2.77556e-16, 3.88578e-17, 2.22045e-17, -1.66533e-17,
-         -1.11022e-17, 0, -7.21645e-17, -8.88178e-17, -1.11022e-16,
-         -1.33227e-16, -4.44089e-17, -1.77636e-16, -1.33227e-16, -8.88178e-17,
-         -3.55271e-16, -8.88178e-17, -1.77636e-16, -1.77636e-16};
+    y = {0.00679397551246448, 0.00684266083126313, 0.00698285916556982,
+         0.00719965548825388, 0.00747519954546736, 0.00779445649068509,
+         0.00814796531751759, 0.0085316132498512,  0.00894499942724,
+         0.00938983058044737, 0.0098689280357672,  0.0103857911674609,
+         0.0109444805899566,  0.0115496436468315,  0.0122065986210473,
+         0.0129214505517302,  0.0137012349575442,  0.0145540939647495,
+         0.0154894928726603,  0.0165184880798197,  0.0176540608380039,
+         0.01891153608981,    0.0203091122610038,  0.021868537134057,
+         0.0236159780401305,  0.0255831534292171,  0.0278088202944704,
+         0.0303407524938984,  0.0332384060776671,  0.0365765613911014,
+         0.0404503783689891,  0.0449825362752094,  0.0503335145708212,
+         0.0567167210280417,  0.0644212970503862,  0.0738474209204705,
+         0.085562497139828,   0.10039290319273,    0.119576178650528,
+         0.145011665152563,   0.17965292804199,    0.228047317644744,
+         0.296874083423821,   0.394987350612542,   0.532006328704948,
+         0.714364415633021,   0.938739703160756,   1.18531948194073,
+         1.41603503739802,    1.58257225395956,    1.64354644127685,
+         1.58257225395956,    1.41603503739802,    1.18531948194073,
+         0.938739703160756,   0.714364415633021,   0.532006328704948,
+         0.394987350612542,   0.296874083423821,   0.228047317644743,
+         0.17965292804199,    0.145011665152563,   0.119576178650528,
+         0.10039290319273,    0.085562497139828,   0.0738474209204706,
+         0.0644212970503863,  0.0567167210280418,  0.0503335145708214,
+         0.0449825362752095,  0.0404503783689893,  0.0365765613911016,
+         0.0332384060776675,  0.0303407524938988,  0.0278088202944705,
+         0.0255831534292172,  0.0236159780401305,  0.0218685371340571,
+         0.0203091122610038,  0.0189115360898101,  0.0176540608380039,
+         0.0165184880798196,  0.0154894928726603,  0.0145540939647495,
+         0.0137012349575443,  0.0129214505517302,  0.0122065986210471,
+         0.0115496436468314,  0.0109444805899566,  0.0103857911674609,
+         0.00986892803576708, 0.00938983058044717, 0.00894499942723977,
+         0.00853161324985108, 0.0081479653175175,  0.00779445649068496,
+         0.00747519954546727, 0.00719965548825406, 0.00698285916556974,
+         0.00684266083126313};
 
     x = {-10,  -9.8, -9.6, -9.4, -9.2, -9,   -8.8, -8.6, -8.4, -8.2, -8,   -7.8,
          -7.6, -7.4, -7.2, -7,   -6.8, -6.6, -6.4, -6.2, -6,   -5.8, -5.6, -5.4,
@@ -902,22 +919,25 @@ public:
 
   void test_function_crystal_field_peaks_fit() {
 
+    // Changed output intensity from barn to mb/sr
+    const double c_mbsr = 79.5774715459;
+
     auto data = TableWorkspace_sptr(new TableWorkspace);
     data->addColumn("double", "Energy");
     data->addColumn("double", "Intensity");
 
     TableRow row = data->appendRow();
-    row << 0.0 << 2.74937;
+    row << 0.0 << 2.74937 * c_mbsr;
     row = data->appendRow();
-    row << 29.3261 << 0.7204;
+    row << 29.3261 << 0.7204 * c_mbsr;
     row = data->appendRow();
-    row << 44.3412 << 0.429809;
+    row << 44.3412 << 0.429809 * c_mbsr;
 
     Fit fit;
     fit.initialize();
     fit.setProperty("Function",
                     "name=CrystalFieldPeaks,Ion=Ce,Symmetry=Ci,Temperature="
-                    "44,ToleranceEnergy=1e-10,ToleranceIntensity=0.001,"
+                    "44,ToleranceEnergy=1e-10,ToleranceIntensity=0.1,"
                     "BmolX=0,BmolY=0,BmolZ=0,BextX=0,BextY=0,BextZ=0,B20=0."
                     "37,B21=0,B22=3.9,B40=-0.03,B41=0,B42=-0.11,B43=0,B44=-"
                     "0.12,B60=0,B61=0,B62=0,B63=0,B64=0,B65=0,B66=0,IB21=0,"
@@ -938,11 +958,11 @@ public:
 
     Mantid::API::IFunction_sptr outF = fit.getProperty("Function");
 
-    TS_ASSERT_DELTA(outF->getParameter("B20"), 0.366336, 0.0001);
-    TS_ASSERT_DELTA(outF->getParameter("B22"), 3.98132, 0.0001);
-    TS_ASSERT_DELTA(outF->getParameter("B40"), -0.0304001, 0.0001);
-    TS_ASSERT_DELTA(outF->getParameter("B42"), -0.119605, 0.0001);
-    TS_ASSERT_DELTA(outF->getParameter("B44"), -0.130124, 0.0001);
+    TS_ASSERT_DELTA(outF->getParameter("B20"), 0.366336, 0.0001 * c_mbsr);
+    TS_ASSERT_DELTA(outF->getParameter("B22"), 3.98132, 0.0001 * c_mbsr);
+    TS_ASSERT_DELTA(outF->getParameter("B40"), -0.0304001, 0.0001 * c_mbsr);
+    TS_ASSERT_DELTA(outF->getParameter("B42"), -0.119605, 0.0001 * c_mbsr);
+    TS_ASSERT_DELTA(outF->getParameter("B44"), -0.130124, 0.0001 * c_mbsr);
 
     ITableWorkspace_sptr output =
         AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(
@@ -956,17 +976,17 @@ public:
       TS_ASSERT_DELTA(column->toDouble(1), 29.3261, 0.0001);
       TS_ASSERT_DELTA(column->toDouble(2), 44.3412, 0.0001);
       column = output->getColumn("Intensity");
-      TS_ASSERT_DELTA(column->toDouble(0), 2.74937, 0.0001);
-      TS_ASSERT_DELTA(column->toDouble(1), 0.7204, 0.0001);
-      TS_ASSERT_DELTA(column->toDouble(2), 0.429809, 0.0001);
+      TS_ASSERT_DELTA(column->toDouble(0), 2.74937 * c_mbsr, 0.0001 * c_mbsr);
+      TS_ASSERT_DELTA(column->toDouble(1), 0.7204 * c_mbsr, 0.0001 * c_mbsr);
+      TS_ASSERT_DELTA(column->toDouble(2), 0.429809 * c_mbsr, 0.0001 * c_mbsr);
       column = output->getColumn("Energy_calc");
       TS_ASSERT_DELTA(column->toDouble(0), 0.0, 0.0001);
       TS_ASSERT_DELTA(column->toDouble(1), 29.3261, 0.0001);
       TS_ASSERT_DELTA(column->toDouble(2), 44.3412, 0.0001);
       column = output->getColumn("Intensity_calc");
-      TS_ASSERT_DELTA(column->toDouble(0), 2.74937, 0.0001);
-      TS_ASSERT_DELTA(column->toDouble(1), 0.7204, 0.0001);
-      TS_ASSERT_DELTA(column->toDouble(2), 0.429809, 0.0001);
+      TS_ASSERT_DELTA(column->toDouble(0), 2.74937 * c_mbsr, 0.0001 * c_mbsr);
+      TS_ASSERT_DELTA(column->toDouble(1), 0.7204 * c_mbsr, 0.0001 * c_mbsr);
+      TS_ASSERT_DELTA(column->toDouble(2), 0.429809 * c_mbsr, 0.0001 * c_mbsr);
     }
   }
 
@@ -1069,12 +1089,15 @@ public:
 
   void test_function_Multidomain_Fit() {
     auto multi = Mantid::TestHelpers::makeMultiDomainFunction3();
-    multi->getFunction(0)->setParameter("A", 0);
-    multi->getFunction(0)->setParameter("B", 0);
-    multi->getFunction(1)->setParameter("A", 0);
-    multi->getFunction(1)->setParameter("B", 0);
-    multi->getFunction(2)->setParameter("A", 0);
-    multi->getFunction(2)->setParameter("B", 0);
+    multi->getFunction(0)->setParameter("A", 1);
+    multi->getFunction(0)->setParameter("B", 1);
+    multi->getFunction(0)->setAttributeValue("Order", 1);
+    multi->getFunction(1)->setParameter("A", 1);
+    multi->getFunction(1)->setParameter("B", 1);
+    multi->getFunction(1)->setAttributeValue("Order", 3);
+    multi->getFunction(2)->setParameter("A", 1);
+    multi->getFunction(2)->setParameter("B", 1);
+    multi->getFunction(2)->setAttributeValue("Order", 5);
 
     Algorithms::Fit fit;
     fit.initialize();
@@ -1093,15 +1116,13 @@ public:
     fit.execute();
     TS_ASSERT(fit.isExecuted());
 
-#if GSL_MAJOR_VERSION < 2
     IFunction_sptr fun = fit.getProperty("Function");
-    TS_ASSERT_DELTA(fun->getParameter("f0.A"), 0, 1e-8);
-    TS_ASSERT_DELTA(fun->getParameter("f0.B"), 1, 1e-8);
-    TS_ASSERT_DELTA(fun->getParameter("f1.A"), 1, 1e-8);
-    TS_ASSERT_DELTA(fun->getParameter("f1.B"), 2, 1e-8);
-    TS_ASSERT_DELTA(fun->getParameter("f2.A"), 2, 1e-8);
-    TS_ASSERT_DELTA(fun->getParameter("f2.B"), 3, 1e-8);
-#endif
+    TS_ASSERT_DELTA(fun->getParameter("f0.A"), 0.5, 1e-8);
+    TS_ASSERT_DELTA(fun->getParameter("f0.B"), 5, 1e-8);
+    TS_ASSERT_DELTA(fun->getParameter("f1.A"), -4, 1e-8);
+    TS_ASSERT_DELTA(fun->getParameter("f1.B"), -20, 1e-8);
+    TS_ASSERT_DELTA(fun->getParameter("f2.A"), 4, 1e-8);
+    TS_ASSERT_DELTA(fun->getParameter("f2.B"), 16, 1e-8);
   }
 
   void test_function_Multidomain_one_function_to_two_parts_of_workspace() {
@@ -1542,25 +1563,31 @@ public:
     fit.setProperty(
         "Function",
         "name=IkedaCarpenterPV, I=1000, SigmaSquared=25.0, Gamma=0.1, X0=50.0");
-    fit.setProperty("Ties", "Alpha0=1.6, Alpha1=1.5, Beta0=31.9, Kappa=46.0");
     fit.setProperty("InputWorkspace", ws);
-    fit.setPropertyValue("StartX", "0");
-    fit.setPropertyValue("EndX", "150");
+    fit.setPropertyValue("StartX", "30");
+    fit.setPropertyValue("EndX", "100");
+    // from the fitfunctions documentation:
+    // In general when fitting a single peak it is not recommended to refine
+    // both Alpha0 and Alpha1 at the same time since these two parameters will
+    // effectively be 100% correlated because the wavelength over a single peak
+    // is likely effectively constant. All parameters are constrained to be
+    // non-negative.
+    fit.setProperty("Ties", "Alpha0=1.6666");
     TS_ASSERT_THROWS_NOTHING(fit.execute());
     TS_ASSERT(fit.isExecuted());
 
     // test the output from fit is what you expect
     double chi2 = fit.getProperty("OutputChi2overDoF");
-    TS_ASSERT_DELTA(chi2, 0.0, 0.1);
+    TS_ASSERT_DELTA(chi2, 0.0, 0.01);
 
     IFunction_sptr out = fit.getProperty("Function");
-    TS_ASSERT_DELTA(out->getParameter("I"), 3101.672, 0.1);
-    TS_ASSERT_DELTA(out->getParameter("Alpha0"), 1.6, 0.0001);
-    TS_ASSERT_DELTA(out->getParameter("Alpha1"), 1.5, 0.001);
-    TS_ASSERT_DELTA(out->getParameter("Beta0"), 31.9, 0.0001);
-    TS_ASSERT_DELTA(out->getParameter("Kappa"), 46.0, 0.0001);
+    // test that all parameters are non-negative
+    TS_ASSERT_DELTA(out->getParameter("I"), 3101.7067, 1.0);
+    TS_ASSERT_DELTA(out->getParameter("Alpha1"), 1.4276, 0.005);
+    TS_ASSERT_DELTA(out->getParameter("Beta0"), 31.9007, 0.02);
+    TS_ASSERT_DELTA(out->getParameter("Kappa"), 46.0238, 0.005);
     TS_ASSERT_DELTA(out->getParameter("SigmaSquared"), 99.935, 0.1);
-    TS_ASSERT_DELTA(out->getParameter("Gamma"), 0.0, 0.1);
+    TS_ASSERT_DELTA(out->getParameter("Gamma"), 0.05, 0.05);
     TS_ASSERT_DELTA(out->getParameter("X0"), 49.984, 0.1);
   }
 
@@ -1966,6 +1993,144 @@ public:
     TS_ASSERT_DELTA(out->getParameter("A2"), 1.0, 0.0001);
   }
 
+  void test_PeakRadius() {
+    size_t nbins = 100;
+    auto ws =
+        WorkspaceFactory::Instance().create("Workspace2D", 1, nbins, nbins);
+    FunctionDomain1DVector x(-10, 10, nbins);
+    ws->dataX(0) = x.toVector();
+    {
+      Fit fit;
+      fit.initialize();
+      fit.setProperty("Function", "name=Lorentzian,Amplitude=5,FWHM=1");
+      fit.setProperty("InputWorkspace", ws);
+      fit.setProperty("MaxIterations", 0);
+      fit.setProperty("Output", "out");
+      fit.execute();
+      auto res = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+          "out_Workspace");
+      auto y = res->y(1);
+      TS_ASSERT_DIFFERS(y.front(), 0.0);
+      TS_ASSERT_DIFFERS(y.back(), 0.0);
+    }
+    {
+      Fit fit;
+      fit.initialize();
+      fit.setProperty("Function", "name=Lorentzian,Amplitude=5,FWHM=1");
+      fit.setProperty("InputWorkspace", ws);
+      fit.setProperty("PeakRadius", 5);
+      fit.setProperty("MaxIterations", 0);
+      fit.setProperty("Output", "out");
+      fit.execute();
+      auto res = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+          "out_Workspace");
+      auto y = res->y(1);
+      for (size_t i = 0; i < 25; ++i) {
+        TS_ASSERT_EQUALS(y[i], 0.0);
+        TS_ASSERT_EQUALS(y[nbins - i - 1], 0.0);
+      }
+      TS_ASSERT_DIFFERS(y[26], 0.0);
+      TS_ASSERT_DIFFERS(y[26], 0.0);
+    }
+
+    AnalysisDataService::Instance().clear();
+  }
+
+  void test_fit_size_change() {
+    auto ws = WorkspaceCreationHelper::create2DWorkspaceFromFunction(
+        [](double x, int) { return 2 * exp(-(5 * x + x * x - 3 * x * x * x)); },
+        1, 0, 1, 0.1);
+    {
+      API::IFunction_sptr fun =
+          boost::make_shared<TestHelpers::FunctionChangesNParams>();
+      TS_ASSERT_EQUALS(fun->nParams(), 1);
+
+      Fit fit;
+      fit.initialize();
+      fit.setRethrows(true);
+      fit.setProperty("Function", fun);
+      fit.setProperty("InputWorkspace", ws);
+      TS_ASSERT_THROWS_NOTHING(fit.execute());
+      TS_ASSERT_EQUALS(fun->nParams(), 5);
+      TS_ASSERT_DELTA(fun->getParameter(0), 1.9936, 0.1);
+      TS_ASSERT_DELTA(fun->getParameter(1), -9.4991, 0.1);
+      TS_ASSERT_DELTA(fun->getParameter(2), 19.1074, 0.1);
+      TS_ASSERT_DELTA(fun->getParameter(3), -17.8434, 0.1);
+      TS_ASSERT_DELTA(fun->getParameter(4), 6.3465, 0.1);
+    }
+    {
+      API::IFunction_sptr fun =
+          boost::make_shared<TestHelpers::FunctionChangesNParams>();
+      TS_ASSERT_EQUALS(fun->nParams(), 1);
+
+      Fit fit;
+      fit.initialize();
+      fit.setRethrows(true);
+      fit.setProperty("Function", fun);
+      fit.setProperty("InputWorkspace", ws);
+      fit.setProperty("Minimizer", "Levenberg-MarquardtMD");
+      TS_ASSERT_THROWS_NOTHING(fit.execute());
+      TS_ASSERT_EQUALS(fun->nParams(), 5);
+      TS_ASSERT_DELTA(fun->getParameter(0), 1.9936, 0.1);
+      TS_ASSERT_DELTA(fun->getParameter(1), -9.4991, 0.1);
+      TS_ASSERT_DELTA(fun->getParameter(2), 19.1074, 0.1);
+      TS_ASSERT_DELTA(fun->getParameter(3), -17.8434, 0.1);
+      TS_ASSERT_DELTA(fun->getParameter(4), 6.3465, 0.1);
+      std::string status = fit.getProperty("OutputStatus");
+      TS_ASSERT_EQUALS(status, "success");
+    }
+
+    AnalysisDataService::Instance().clear();
+  }
+
+  void test_fit_size_change_1() {
+    auto ws = WorkspaceCreationHelper::create2DWorkspaceFromFunction(
+        [](double x, int) { return 2 + x - 0.1 * x * x; }, 1, 0, 1, 0.1);
+    {
+      API::IFunction_sptr fun =
+          boost::make_shared<TestHelpers::FunctionChangesNParams>();
+      TS_ASSERT_EQUALS(fun->nParams(), 1);
+
+      Fit fit;
+      fit.initialize();
+      fit.setRethrows(true);
+      fit.setProperty("Function", fun);
+      fit.setProperty("InputWorkspace", ws);
+      TS_ASSERT_THROWS_NOTHING(fit.execute());
+      TS_ASSERT_EQUALS(fun->nParams(), 5);
+      TS_ASSERT_DELTA(fun->getParameter(0), 2.0, 0.0001);
+      TS_ASSERT_DELTA(fun->getParameter(1), 1.0, 0.0001);
+      TS_ASSERT_DELTA(fun->getParameter(2), -0.1, 0.0001);
+      TS_ASSERT_DELTA(fun->getParameter(3), 0.0, 0.0001);
+      TS_ASSERT_DELTA(fun->getParameter(4), 0.0, 0.0001);
+      std::string status = fit.getProperty("OutputStatus");
+      TS_ASSERT_EQUALS(status, "success");
+    }
+    {
+      API::IFunction_sptr fun =
+          boost::make_shared<TestHelpers::FunctionChangesNParams>();
+      TS_ASSERT_EQUALS(fun->nParams(), 1);
+
+      Fit fit;
+      fit.initialize();
+      fit.setRethrows(true);
+      fit.setProperty("Function", fun);
+      fit.setProperty("InputWorkspace", ws);
+      fit.setProperty("Minimizer", "Levenberg-MarquardtMD");
+      TS_ASSERT_THROWS_NOTHING(fit.execute());
+      TS_ASSERT_EQUALS(fun->nParams(), 5);
+      TS_ASSERT_DELTA(fun->getParameter(0), 2.0, 0.0001);
+      TS_ASSERT_DELTA(fun->getParameter(1), 1.0, 0.0001);
+      TS_ASSERT_DELTA(fun->getParameter(2), -0.1, 0.0001);
+      TS_ASSERT_DELTA(fun->getParameter(3), 0.0, 0.0001);
+      TS_ASSERT_DELTA(fun->getParameter(4), 0.0, 0.0001);
+      std::string status = fit.getProperty("OutputStatus");
+      TS_ASSERT_EQUALS(status, "success");
+    }
+
+    AnalysisDataService::Instance().clear();
+  }
+
 private:
   /// build test input workspaces for the Pawley function Fit tests
   MatrixWorkspace_sptr getWorkspacePawley(const std::string &functionString,
@@ -2039,7 +2204,8 @@ public:
   }
 
   void test_fit_peaks_Damping() {
-    runFitAlgorithm(m_onePeakWS, FitTestHelpers::SingleB2BPeak, "Damping");
+    runFitAlgorithm(m_onePeakWS, FitTestHelpers::SingleB2BPeak,
+                    "Damped GaussNewton");
   }
 
   void test_fit_peaks_SteepestDescent() {
@@ -2082,7 +2248,8 @@ public:
   }
 
   void test_fit_smooth_Damping() {
-    runFitAlgorithm(m_smoothWS, FitTestHelpers::SmoothishGaussians, "Damping");
+    runFitAlgorithm(m_smoothWS, FitTestHelpers::SmoothishGaussians,
+                    "Damped GaussNewton");
   }
 
   // disabled: too slow: ~17s

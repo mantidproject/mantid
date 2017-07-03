@@ -79,7 +79,7 @@ MantidQwtIMDWorkspaceData::MantidQwtIMDWorkspaceData(
 MantidQwtIMDWorkspaceData::MantidQwtIMDWorkspaceData(
     const MantidQwtIMDWorkspaceData &data)
     : MantidQwtWorkspaceData(data) {
-  this->operator=(data);
+  copyData(data);
 }
 
 //-----------------------------------------------------------------------------
@@ -89,23 +89,7 @@ MantidQwtIMDWorkspaceData::MantidQwtIMDWorkspaceData(
  */
 MantidQwtIMDWorkspaceData &MantidQwtIMDWorkspaceData::
 operator=(const MantidQwtIMDWorkspaceData &data) {
-  if (this != &data) {
-    static_cast<MantidQwtWorkspaceData &>(*this) = data;
-    m_workspace = data.m_workspace;
-    m_preview = data.m_preview;
-    m_start = data.m_start;
-    m_end = data.m_end;
-    m_dir = data.m_dir;
-    m_normalization = data.m_normalization;
-    m_isDistribution = data.m_isDistribution;
-    m_originalWorkspace = data.m_originalWorkspace;
-    m_transform = NULL;
-    m_plotAxis = data.m_plotAxis;
-    m_currentPlotAxis = data.m_currentPlotAxis;
-    if (data.m_transform)
-      m_transform = data.m_transform->clone();
-    this->cacheLinePlot();
-  }
+  copyData(data);
   return *this;
 }
 
@@ -132,6 +116,33 @@ MantidQwtIMDWorkspaceData *MantidQwtIMDWorkspaceData::copy(
   return out;
 }
 
+/**
+  * Handles copying member variables for the copy constructor and
+  * assignment operator
+  *
+  * @param data The pointer to the object to copy from
+  */
+void MantidQwtIMDWorkspaceData::copyData(
+    const MantidQwtIMDWorkspaceData &data) {
+  if (this != &data) {
+    static_cast<MantidQwtWorkspaceData &>(*this) = data;
+    m_workspace = data.m_workspace;
+    m_preview = data.m_preview;
+    m_start = data.m_start;
+    m_end = data.m_end;
+    m_dir = data.m_dir;
+    m_normalization = data.m_normalization;
+    m_isDistribution = data.m_isDistribution;
+    m_originalWorkspace = data.m_originalWorkspace;
+    m_plotAxis = data.m_plotAxis;
+    m_currentPlotAxis = data.m_currentPlotAxis;
+    m_transform = nullptr;
+    if (data.m_transform)
+      m_transform = data.m_transform->clone();
+    this->cacheLinePlot();
+  }
+}
+
 //-----------------------------------------------------------------------------
 /** Cache the X/Y line plot data from this workspace and start/end points */
 void MantidQwtIMDWorkspaceData::cacheLinePlot() {
@@ -148,7 +159,12 @@ void MantidQwtIMDWorkspaceData::calculateMinMax() { calculateYMinAndMax(); }
 //-----------------------------------------------------------------------------
 /** Size of the data set
  */
-size_t MantidQwtIMDWorkspaceData::size() const { return m_Y.size(); }
+size_t MantidQwtIMDWorkspaceData::size() const {
+  if (!isPlottable()) {
+    return 0;
+  }
+  return m_Y.size();
+}
 
 /** Return the x value of data point i
 @param i :: Index
@@ -188,7 +204,12 @@ double MantidQwtIMDWorkspaceData::getEX(size_t i) const {
 double MantidQwtIMDWorkspaceData::getE(size_t i) const { return m_E[i]; }
 
 /// Number of error bars to plot
-size_t MantidQwtIMDWorkspaceData::esize() const { return m_E.size(); }
+size_t MantidQwtIMDWorkspaceData::esize() const {
+  if (!isPlottable()) {
+    return 0;
+  }
+  return m_E.size();
+}
 
 bool MantidQwtIMDWorkspaceData::setAsDistribution(bool on) {
   m_isDistribution = on;

@@ -1,9 +1,12 @@
 #include "MantidAPI/MultiPeriodGroupWorker.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/Property.h"
+#include "MantidKernel/Strings.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/Run.h"
+#include "MantidAPI/WorkspaceGroup.h"
 
 using namespace Mantid::Kernel;
 
@@ -22,15 +25,20 @@ MultiPeriodGroupWorker::MultiPeriodGroupWorker(
 /**
  * Try to add the input workspace to the multiperiod input group list.
  * @param ws: candidate workspace
- * @param vecWorkspaceGroups: Vector of multi period workspace groups.
+ * @param vecMultiPeriodWorkspaceGroups: Vector of multi period workspace
+ * groups.
+ * @param vecWorkspaceGroups: Vector of non-multi period workspace groups.
  */
 void MultiPeriodGroupWorker::tryAddInputWorkspaceToInputGroups(
     Workspace_sptr ws,
+    MultiPeriodGroupWorker::VecWSGroupType &vecMultiPeriodWorkspaceGroups,
     MultiPeriodGroupWorker::VecWSGroupType &vecWorkspaceGroups) const {
   WorkspaceGroup_sptr inputGroup =
       boost::dynamic_pointer_cast<WorkspaceGroup>(ws);
   if (inputGroup) {
     if (inputGroup->isMultiperiod()) {
+      vecMultiPeriodWorkspaceGroups.push_back(inputGroup);
+    } else {
       vecWorkspaceGroups.push_back(inputGroup);
     }
   }
@@ -42,6 +50,7 @@ MultiPeriodGroupWorker::findMultiPeriodGroups(
   if (!sourceAlg->isInitialized()) {
     throw std::invalid_argument("Algorithm must be initialized");
   }
+  VecWSGroupType vecMultiPeriodWorkspaceGroups;
   VecWSGroupType vecWorkspaceGroups;
 
   // Handles the case in which the algorithm is providing a non-workspace
@@ -72,7 +81,8 @@ MultiPeriodGroupWorker::findMultiPeriodGroups(
       if (!ws) {
         throw Kernel::Exception::NotFoundError("Workspace", workspace);
       }
-      tryAddInputWorkspaceToInputGroups(ws, vecWorkspaceGroups);
+      tryAddInputWorkspaceToInputGroups(ws, vecMultiPeriodWorkspaceGroups,
+                                        vecWorkspaceGroups);
     }
   } else {
     typedef std::vector<boost::shared_ptr<Workspace>> WorkspaceVector;
@@ -81,13 +91,19 @@ MultiPeriodGroupWorker::findMultiPeriodGroups(
     sourceAlg->findWorkspaceProperties(inWorkspaces, outWorkspaces);
     UNUSED_ARG(outWorkspaces);
     for (auto &inWorkspace : inWorkspaces) {
-      tryAddInputWorkspaceToInputGroups(inWorkspace, vecWorkspaceGroups);
+      tryAddInputWorkspaceToInputGroups(
+          inWorkspace, vecMultiPeriodWorkspaceGroups, vecWorkspaceGroups);
     }
   }
 
-  validateMultiPeriodGroupInputs(vecWorkspaceGroups);
+  if (!vecMultiPeriodWorkspaceGroups.empty() && !vecWorkspaceGroups.empty()) {
+    throw std::invalid_argument(
+        "The input contains a mix of multi-period and other workspaces.");
+  }
 
-  return vecWorkspaceGroups;
+  validateMultiPeriodGroupInputs(vecMultiPeriodWorkspaceGroups);
+
+  return vecMultiPeriodWorkspaceGroups;
 }
 
 bool MultiPeriodGroupWorker::useCustomWorkspaceProperty() const {
@@ -120,7 +136,8 @@ std::string MultiPeriodGroupWorker::createFormattedInputWorkspaceNames(
   std::string prefix;
   std::string inputWorkspaces;
   for (const auto &vecWorkspaceGroup : vecWorkspaceGroups) {
-    inputWorkspaces += prefix + vecWorkspaceGroup->getItem(periodIndex)->name();
+    inputWorkspaces +=
+        prefix + vecWorkspaceGroup->getItem(periodIndex)->getName();
     prefix = ",";
   }
   return inputWorkspaces;
@@ -263,19 +280,19 @@ void MultiPeriodGroupWorker::validateMultiPeriodGroupInputs(
                 currentGroup->getItem(j));
         Property *nPeriodsProperty =
             currentNestedWS->run().getLogData("nperiods");
-        size_t nPeriods = atoi(nPeriodsProperty->value().c_str());
+        size_t nPeriods = std::stoul(nPeriodsProperty->value());
         if (nPeriods != benchMarkGroupSize) {
           throw std::runtime_error("Missmatch between nperiods log and the "
                                    "number of workspaces in the input group: " +
-                                   vecMultiPeriodGroups[i]->name());
+                                   vecMultiPeriodGroups[i]->getName());
         }
         Property *currentPeriodProperty =
             currentNestedWS->run().getLogData("current_period");
-        size_t currentPeriod = atoi(currentPeriodProperty->value().c_str());
+        size_t currentPeriod = std::stoul(currentPeriodProperty->value());
         if (currentPeriod != (j + 1)) {
           throw std::runtime_error("Multiperiod group workspaces must be "
                                    "ordered by current_period. Correct: " +
-                                   currentNestedWS->name());
+                                   currentNestedWS->getName());
         }
       }
     }

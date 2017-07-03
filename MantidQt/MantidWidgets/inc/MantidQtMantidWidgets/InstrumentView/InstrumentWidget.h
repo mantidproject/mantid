@@ -3,13 +3,18 @@
 
 #include "InstrumentWidgetTypes.h"
 #include "MantidGLWidget.h"
-#include <MantidQtMantidWidgets/WidgetDllOption.h>
+#include "UnwrappedSurface.h"
 
 #include "MantidAPI/AlgorithmObserver.h"
+#include "MantidAPI/IMaskWorkspace.h"
+#include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidAPI/IPeaksWorkspace_fwd.h"
+#include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/Workspace.h"
 #include "MantidQtAPI/GraphOptions.h"
 #include "MantidQtAPI/WorkspaceObserver.h"
+
+#include <MantidQtMantidWidgets/WidgetDllOption.h>
 #include <boost/shared_ptr.hpp>
 
 namespace Mantid {
@@ -88,6 +93,7 @@ public:
   std::string getWorkspaceNameStdString() const;
   void renameWorkspace(const std::string &workspace);
   SurfaceType getSurfaceType() const { return m_surfaceType; }
+  Mantid::Kernel::V3D getSurfaceAxis(const int surfaceType) const;
   /// Get pointer to the projection surface
   boost::shared_ptr<ProjectionSurface> getSurface() const;
   /// True if the GL instrument display is currently on
@@ -109,7 +115,10 @@ public:
   void setScaleType(GraphOptions::ScaleType type);
   void setExponent(double nth_power);
   void setViewType(const QString &type);
-  InstrumentActor *getInstrumentActor() const { return m_instrumentActor; }
+  const InstrumentActor &getInstrumentActor() const {
+    return *m_instrumentActor;
+  }
+  InstrumentActor &getInstrumentActor() { return *m_instrumentActor; }
   void resetInstrument(bool resetGeometry);
   void selectTab(int tab);
   void selectTab(Tab tab) { selectTab(int(tab)); }
@@ -152,6 +161,7 @@ signals:
   void requestSelectComponent(const QString &);
   void preDeletingHandle();
   void clearingHandle();
+  void maskedWorkspaceOverlayed();
 
 protected:
   /// Implements AlgorithmObserver's finish handler
@@ -189,6 +199,7 @@ public slots:
   /// Overlay a workspace with the given name
   bool overlay(const QString &wsName);
   void clearPeakOverlays();
+  void clearAlignmentPlane();
   void setPeakLabelPrecision(int n);
   void setShowPeakRowFlag(bool on);
   void setShowPeakLabelsFlag(bool on);
@@ -242,13 +253,13 @@ protected:
   SimpleWidget *m_simpleDisplay;
 
   // Context menu actions
-  QAction *m_clearPeakOverlays;
+  QAction *m_clearPeakOverlays, *m_clearAlignment;
 
   /// The name of workspace that this window is associated with. The
   /// InstrumentActor holds a pointer to the workspace itself.
   QString m_workspaceName;
   /// Instrument actor is an interface to the instrument
-  InstrumentActor *m_instrumentActor;
+  std::unique_ptr<InstrumentActor> m_instrumentActor;
   /// Option to use or not OpenGL display for "unwrapped" view, 3D is always in
   /// OpenGL
   bool m_useOpenGL;
@@ -287,7 +298,16 @@ private:
   void renameHandle(const std::string &oldName,
                     const std::string &newName) override;
   void clearADSHandle() override;
-
+  /// overlay a peaks workspace on the projection surface
+  void overlayPeaksWorkspace(Mantid::API::IPeaksWorkspace_sptr ws);
+  /// overlay a masked workspace on the projection surface
+  void overlayMaskedWorkspace(Mantid::API::IMaskWorkspace_sptr ws);
+  /// overlay a table workspace with shape parameters on the projection surface
+  void overlayShapesWorkspace(Mantid::API::ITableWorkspace_sptr);
+  /// get a workspace from the ADS
+  Mantid::API::Workspace_sptr getWorkspaceFromADS(const std::string &name);
+  /// get a handle to the unwrapped surface
+  boost::shared_ptr<UnwrappedSurface> getUnwrappedSurface();
   /// Load tabs on the widget form a project file
   void loadTabs(const std::string &lines) const;
   /// Save tabs on the widget to a string

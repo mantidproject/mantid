@@ -47,7 +47,6 @@
 #include <QMessageBox>
 #include <QComboBox>
 #include <QWidgetList>
-#include <QFileDialog>
 #include <QGroupBox>
 #include <QFontDialog>
 #include <QApplication>

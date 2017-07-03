@@ -3,6 +3,7 @@
 
 #include "MantidDataObjects/MDHistoWorkspace.h"
 #include "MantidMDAlgorithms/MultiplyMD.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidTestHelpers/BinaryOperationMDTestHelper.h"
 
 #include <cxxtest/TestSuite.h>

@@ -4,7 +4,7 @@
 #include "MantidKernel/DllConfig.h"
 #include <vector>
 #include <cfloat>
-#include <ostream>
+#include <iosfwd>
 
 namespace Mantid {
 
@@ -64,6 +64,9 @@ public:
   /// Build square matrix from a linear vector. Throw if the vector.size() !=
   /// nx*nx;
   Matrix(const std::vector<T> &);
+  /// Build a non-square matrix from vector and dimensions
+  Matrix(const std::vector<T> &, const size_t nrow, const size_t ncol);
+
   Matrix(const Matrix<T> &, const size_t nrow, const size_t ncol);
 
   Matrix(const Matrix<T> &);
@@ -85,8 +88,10 @@ public:
 
   Matrix<T> operator*(const Matrix<T> &) const; ///< Basic matrix multiply
   std::vector<T> operator*(const std::vector<T> &) const; ///< Multiply M*Vec
-  V3D operator*(const V3D &) const;                       ///< Multiply M*Vec
-  Matrix<T> operator*(const T &) const; ///< Multiply by constant
+  void multiplyPoint(const std::vector<T> &in,
+                     std::vector<T> &out) const; ///< Multiply M*Vec
+  V3D operator*(const V3D &) const;              ///< Multiply M*Vec
+  Matrix<T> operator*(const T &) const;          ///< Multiply by constant
 
   Matrix<T> &operator*=(const Matrix<T> &); ///< Basic matrix multipy
   Matrix<T> &operator*=(const T &);         ///< Multiply by constant

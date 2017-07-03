@@ -8,6 +8,7 @@
 #include "MantidAPI/Axis.h"
 #include "MantidDataHandling/LoadNexus.h"
 #include "MantidAlgorithms/Rebin.h"
+#include "MantidKernel/Unit.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;

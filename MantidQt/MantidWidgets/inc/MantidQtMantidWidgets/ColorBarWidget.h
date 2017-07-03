@@ -1,12 +1,12 @@
 #ifndef MANTID_MANTIDWIDGETS_COLORBARWIDGET_H_
 #define MANTID_MANTIDWIDGETS_COLORBARWIDGET_H_
 
-#include <QtGui/QWidget>
-#include "ui_ColorBarWidget.h"
-#include <qwt_scale_widget.h>
 #include "MantidQtAPI/MantidColorMap.h"
-#include <QtGui>
 #include "MantidQtMantidWidgets/WidgetDllOption.h"
+#include "ui_ColorBarWidget.h"
+#include <QtGui/QWidget>
+#include <QtGui>
+#include <qwt_scale_widget.h>
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -49,7 +49,8 @@ public:
   enum CheckboxStrategy {
     ADD_AUTOSCALE_CURRENT_SLICE = 0,
     ADD_AUTOSCALE_ON_LOAD = 1,
-    ADD_AUTOSCALE_BOTH = 2
+    ADD_AUTOSCALE_BOTH = 2,
+    ADD_AUTOSCALE_NONE = 3
   };
 
   void updateColorMap();
@@ -71,11 +72,11 @@ public:
   /// Check if logarithmic scale is selected
   bool getLog();
 
-  int getScale();
+  int getScale() const;
   void setScale(int);
 
   void setExponent(double);
-  double getExponent();
+  double getExponent() const;
 
   /// Set the label text for Auto Scale on Load checkbox label
   void setAutoScaleLabelText(const std::string &newText);
@@ -97,6 +98,12 @@ public:
 
   /// Set the Auto Scale for Current Slice checkbox state
   bool getAutoScaleforCurrentSlice() const;
+
+  /// Load the state of the color bar widget from a Mantid project file
+  void loadFromProject(const std::string &lines);
+
+  /// Save the state of the color bar widget to a Mantid project file
+  std::string saveToProject() const;
 
 public slots:
   void changedMinimum();

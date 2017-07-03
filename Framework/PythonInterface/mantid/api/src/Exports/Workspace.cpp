@@ -1,4 +1,5 @@
 #include "MantidAPI/Workspace.h"
+#include "MantidAPI/WorkspaceHistory.h"
 
 #include "MantidPythonInterface/kernel/GetPointer.h"
 #include "MantidPythonInterface/kernel/Registry/RegisterWorkspacePtrToPython.h"
@@ -30,10 +31,22 @@ BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Workspace_isDirtyOverloads,
 ///@endcond
 }
 
+//--------------------------------------------------------------------------------------
+// Deprecated function
+//--------------------------------------------------------------------------------------
+/**
+ * @param self Reference to the calling object
+ * @return name of the workspace.
+ */
+std::string getName(Workspace &self) {
+  PyErr_Warn(PyExc_DeprecationWarning,
+             ".getName() is deprecated. Use .name() instead.");
+  return self.getName();
+}
+
 void export_Workspace() {
   class_<Workspace, bases<DataItem>, boost::noncopyable>("Workspace", no_init)
-      .def("getName", &Workspace::getName,
-           return_value_policy<copy_const_reference>(), arg("self"),
+      .def("getName", &getName, arg("self"),
            "Returns the name of the workspace. This could be an empty string")
       .def("getTitle", &Workspace::getTitle, arg("self"),
            "Returns the title of the workspace")
@@ -54,7 +67,8 @@ void export_Workspace() {
       .def("getHistory", (const WorkspaceHistory &(Workspace::*)() const) &
                              Workspace::getHistory,
            arg("self"), return_value_policy<reference_existing_object>(),
-           "Return read-only access to the workspace history");
+           "Return read-only access to the "
+           ":class:`~mantid.api.WorkspaceHistory`");
 
   // register pointers
   RegisterWorkspacePtrToPython<Workspace>();

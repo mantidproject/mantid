@@ -35,11 +35,11 @@ public:
   void testSortByTof() {
     std::string wsName("test_inEvent3");
     EventWorkspace_sptr test_in =
-        WorkspaceCreationHelper::CreateRandomEventWorkspace(NUMBINS, NUMPIXELS);
+        WorkspaceCreationHelper::createRandomEventWorkspace(NUMBINS, NUMPIXELS);
     AnalysisDataService::Instance().add(wsName, test_in);
 
     Workspace2D_sptr test_in_ws2d =
-        WorkspaceCreationHelper::Create2DWorkspaceBinned(NUMBINS, NUMPIXELS);
+        WorkspaceCreationHelper::create2DWorkspaceBinned(NUMBINS, NUMPIXELS);
     AnalysisDataService::Instance().add("workspace2d", test_in_ws2d);
 
     SortEvents sort;
@@ -70,7 +70,7 @@ public:
   void testSortByPulseTime() {
     std::string wsName("test_inEvent4");
     EventWorkspace_sptr test_in =
-        WorkspaceCreationHelper::CreateRandomEventWorkspace(NUMBINS, NUMPIXELS);
+        WorkspaceCreationHelper::createRandomEventWorkspace(NUMBINS, NUMPIXELS);
     AnalysisDataService::Instance().add(wsName, test_in);
 
     SortEvents sort;
@@ -94,7 +94,7 @@ public:
   void testSortByPulseTimeTOF() {
     std::string wsName("test_inEvent4");
     EventWorkspace_sptr test_in =
-        WorkspaceCreationHelper::CreateRandomEventWorkspace(NUMBINS, NUMPIXELS);
+        WorkspaceCreationHelper::createRandomEventWorkspace(NUMBINS, NUMPIXELS);
     AnalysisDataService::Instance().add(wsName, test_in);
 
     SortEvents sort;

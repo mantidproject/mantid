@@ -149,7 +149,7 @@ void CompositePeaksPresenterVsi::updateWorkspaces(
  * @returns If there are any peaks availbale.
  */
 bool CompositePeaksPresenterVsi::hasPeaks() {
-  return m_peaksPresenters.size() > 0;
+  return !m_peaksPresenters.empty();
 }
 
 /**
@@ -162,9 +162,9 @@ bool CompositePeaksPresenterVsi::hasPeaks() {
  */
 void CompositePeaksPresenterVsi::sortPeaksWorkspace(
     const std::string &columnToSortBy, const bool sortedAscending,
-    boost::shared_ptr<const Mantid::API::IPeaksWorkspace> peaksWS) {
+    const Mantid::API::IPeaksWorkspace *peaksWS) {
   for (const auto &presenter : m_peaksPresenters) {
-    if (presenter->getPeaksWorkspace() == peaksWS) {
+    if (presenter->getPeaksWorkspace().get() == peaksWS) {
       presenter->sortPeaksWorkspace(columnToSortBy, sortedAscending);
     }
   }

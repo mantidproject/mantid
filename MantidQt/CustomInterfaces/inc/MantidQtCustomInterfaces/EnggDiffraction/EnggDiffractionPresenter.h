@@ -6,9 +6,9 @@
 #include "MantidAPI/Workspace_fwd.h"
 #include "MantidQtCustomInterfaces/DllConfig.h"
 #include "MantidQtCustomInterfaces/EnggDiffraction/IEnggDiffractionCalibration.h"
+#include "MantidQtCustomInterfaces/EnggDiffraction/IEnggDiffractionParam.h"
 #include "MantidQtCustomInterfaces/EnggDiffraction/IEnggDiffractionPresenter.h"
 #include "MantidQtCustomInterfaces/EnggDiffraction/IEnggDiffractionView.h"
-#include "MantidQtCustomInterfaces/EnggDiffraction/IEnggDiffractionParam.h"
 
 #include <boost/scoped_ptr.hpp>
 
@@ -263,8 +263,8 @@ private:
   void saveGSS(std::string inputWorkspace, std::string bank, std::string runNo);
   void saveFocusedXYE(std::string inputWorkspace, std::string bank,
                       std::string runNo);
-  void saveOpenGenie(std::string inputWorkspace, std::string specNums,
-                     std::string bank, std::string runNo);
+  void saveOpenGenie(std::string inputWorkspace, std::string bank,
+                     std::string runNo);
 
   // generates the required file name of the output files
   std::string outFileNameFactory(std::string inputWorkspace, std::string runNo,
@@ -275,6 +275,9 @@ private:
   Poco::Path outFilesUserDir(const std::string &addToDir) override;
   Poco::Path outFilesGeneralDir(const std::string &addComponent);
   Poco::Path outFilesRootDir();
+
+  std::string appendToPath(const std::string &path,
+                           const std::string &toAppend) const;
 
   /// convenience methods to copy files to different destinations
   void copyToGeneral(const Poco::Path &source, const std::string &pathComp);
@@ -308,9 +311,6 @@ private:
 
   /// paths the user has "browsed to", to add them to the search path
   std::vector<std::string> m_browsedToPaths;
-
-  /// string to use for ENGINX file names (as a prefix, etc.)
-  const static std::string g_enginxStr;
 
   /// The message to tell the user that an RB number is needed
   const static std::string g_shortMsgRBNumberRequired;
@@ -368,8 +368,14 @@ private:
   /// Associated view for this presenter (MVP pattern)
   IEnggDiffractionView *const m_view;
 
+  /// Tracks if the view has started to shut down following a close signal
+  bool m_viewHasClosed;
+
   /// Associated model for this presenter (MVP pattern)
   // const boost::scoped_ptr<EnggDiffractionModel> m_model;
+
+  /// the current selected instrument
+  std::string m_currentInst = "";
 };
 
 } // namespace CustomInterfaces

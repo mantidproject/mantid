@@ -98,6 +98,9 @@ void Elwin::setup() {
           SLOT(newPreviewFileSelected(int)));
   connect(m_uiForm.spPreviewSpec, SIGNAL(valueChanged(int)), this,
           SLOT(plotInput()));
+  // Handle plot and save
+  connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveClicked()));
+  connect(m_uiForm.pbPlot, SIGNAL(clicked()), this, SLOT(plotClicked()));
 
   // Set any default values
   m_dblManager->setValue(m_properties["IntegrationStart"], -0.02);
@@ -181,8 +184,6 @@ void Elwin::run() {
       AlgorithmManager::Instance().create("ElasticWindowMultiple");
   elwinMultAlg->initialize();
 
-  elwinMultAlg->setProperty("Plot", m_uiForm.ckPlot->isChecked());
-
   elwinMultAlg->setProperty("OutputInQ", qWorkspace);
   elwinMultAlg->setProperty("OutputInQSquared", qSquaredWorkspace);
   elwinMultAlg->setProperty("OutputELF", elfWorkspace);
@@ -217,16 +218,6 @@ void Elwin::run() {
 
   m_batchAlgoRunner->addAlgorithm(elwinMultAlg, elwinInputProps);
 
-  // Configure Save algorithms
-  if (m_uiForm.ckSave->isChecked()) {
-    addSaveAlgorithm(qWorkspace);
-    addSaveAlgorithm(qSquaredWorkspace);
-    addSaveAlgorithm(elfWorkspace);
-
-    if (m_blnManager->value(m_properties["Normalise"]))
-      addSaveAlgorithm(eltWorkspace);
-  }
-
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
           SLOT(unGroupInput(bool)));
   m_batchAlgoRunner->executeBatchAsync();
@@ -250,30 +241,10 @@ void Elwin::unGroupInput(bool error) {
     ungroupAlg->setProperty("InputWorkspace", "IDA_Elwin_Input");
     ungroupAlg->execute();
   }
-}
 
-/**
- * Configures and adds a SaveNexus algorithm to the batch runner.
- *
- * @param workspaceName Name of the workspace to save
- * @param filename Name of the file to save it as
- */
-void Elwin::addSaveAlgorithm(const std::string &workspaceName,
-                             std::string filename) {
-  // Set a default filename if none provided
-  if (filename.length() == 0)
-    filename = workspaceName + ".nxs";
-
-  // Configure the algorithm
-  IAlgorithm_sptr loadAlg = AlgorithmManager::Instance().create("SaveNexus");
-  loadAlg->initialize();
-  loadAlg->setProperty("Filename", filename);
-
-  BatchAlgorithmRunner::AlgorithmRuntimeProps saveAlgProps;
-  saveAlgProps["InputWorkspace"] = workspaceName;
-
-  // Add it to the batch runner
-  m_batchAlgoRunner->addAlgorithm(loadAlg, saveAlgProps);
+  // Enable plot and save
+  m_uiForm.pbPlot->setEnabled(true);
+  m_uiForm.pbSave->setEnabled(true);
 }
 
 bool Elwin::validate() {
@@ -496,6 +467,49 @@ void Elwin::updateRS(QtProperty *prop, double val) {
     backgroundRangeSelector->setMaximum(val);
 }
 
+/**
+ * Handles mantid plotting
+ */
+void Elwin::plotClicked() {
+
+  auto workspaceBaseName =
+      getWorkspaceBasename(QString::fromStdString(m_pythonExportWsName));
+
+  if (checkADSForPlotSaveWorkspace((workspaceBaseName + "_eq").toStdString(),
+                                   true))
+    plotSpectrum(workspaceBaseName + "_eq");
+
+  if (checkADSForPlotSaveWorkspace((workspaceBaseName + "_eq2").toStdString(),
+                                   true))
+    plotSpectrum(workspaceBaseName + "_eq2");
+
+  if (checkADSForPlotSaveWorkspace((workspaceBaseName + "_elf").toStdString(),
+                                   true))
+    plotSpectrum((workspaceBaseName + "_elf"), 0, 9);
+}
+
+/**
+ * Handles saving of workspaces
+ */
+void Elwin::saveClicked() {
+
+  auto workspaceBaseName =
+      getWorkspaceBasename(QString::fromStdString(m_pythonExportWsName));
+
+  if (checkADSForPlotSaveWorkspace((workspaceBaseName + "_eq").toStdString(),
+                                   false))
+    addSaveWorkspaceToQueue(workspaceBaseName + "_eq");
+
+  if (checkADSForPlotSaveWorkspace((workspaceBaseName + "_eq2").toStdString(),
+                                   false))
+    addSaveWorkspaceToQueue(workspaceBaseName + "_eq2");
+
+  if (checkADSForPlotSaveWorkspace((workspaceBaseName + "_elf").toStdString(),
+                                   false))
+    addSaveWorkspaceToQueue(workspaceBaseName + "_elf");
+
+  m_batchAlgoRunner->executeBatchAsync();
+}
 } // namespace IDA
 } // namespace CustomInterfaces
 } // namespace MantidQt

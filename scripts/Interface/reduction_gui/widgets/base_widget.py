@@ -1,5 +1,5 @@
 #pylint: disable=invalid-name
-from PyQt4 import QtGui, uic, QtCore
+from PyQt4 import QtGui, QtCore
 import os
 import types
 from reduction_gui.settings.application_settings import GeneralSettings
@@ -13,11 +13,13 @@ try:
 except:
     pass
 
+
 def process_file_parameter(f):
     """
         Decorator that allows a function parameter to either be
         a string or a function returning a string
     """
+
     def processed_function(self, file_name=None, **kwargs):
         if file_name is None:
             return f(self, **kwargs)
@@ -26,6 +28,7 @@ def process_file_parameter(f):
         else:
             return f(self, str(file_name()), **kwargs)
     return processed_function
+
 
 class BaseWidget(QtGui.QWidget):
     """
@@ -129,9 +132,9 @@ class BaseWidget(QtGui.QWidget):
         if title is None:
             title = "Data file - Choose a data file"
         if multi:
-            qflist = QtGui.QFileDialog.getOpenFileNames(self, title,\
-                                                              self._settings.data_path,\
-                                                              data_type)
+            qflist = QtGui.QFileDialog.getOpenFileNames(self, title,
+                                                        self._settings.data_path,
+                                                        data_type)
             if len(qflist)>0:
                 flist = []
                 for i in range(len(qflist)):
@@ -142,9 +145,9 @@ class BaseWidget(QtGui.QWidget):
             else:
                 return None
         else:
-            fname = QtCore.QFileInfo(QtGui.QFileDialog.getOpenFileName(self, title,\
-                                                              self._settings.data_path,\
-                                                              data_type)).filePath()
+            fname = QtCore.QFileInfo(QtGui.QFileDialog.getOpenFileName(self, title,
+                                                                       self._settings.data_path,
+                                                                       data_type)).filePath()
             if fname:
                 # Store the location of the loaded file
                 self._settings.data_path = str(QtCore.QFileInfo(fname).path())
@@ -185,8 +188,8 @@ class BaseWidget(QtGui.QWidget):
             # Do nothing if the instrument view is already displayed
             #FIXME: this doesn't seem to work 100% yet
             if False and self._instrument_view is not None and \
-                self._data_set_viewed == file_name \
-                and self._instrument_view.isVisible():
+                    self._data_set_viewed == file_name \
+                    and self._instrument_view.isVisible():
 
                 # If we want a reload, close the instrument window currently shown
                 if reload:
@@ -225,7 +228,7 @@ class BaseWidget(QtGui.QWidget):
                 _show_ws_instrument(proxy.data_ws)
             else:
                 if hasattr(proxy, 'errors'):
-                    if type(proxy.errors)==list:
+                    if isinstance(proxy.errors, list):
                         for e in proxy.errors:
                             print e
                     else:
@@ -233,5 +236,3 @@ class BaseWidget(QtGui.QWidget):
                 QtGui.QMessageBox.warning(self, "Data Error", "Mantid doesn't know how to load this file")
         else:
             QtGui.QMessageBox.warning(self, "Data Error", "Mantid doesn't know how to load this file")
-
-

@@ -42,6 +42,13 @@ public:
   };
   std::string name() override { return std::string("Delete Group"); }
   std::string icon() override { return std::string("://delete_group.png"); }
+  std::string tooltip() override {
+    return std::string("Deletes selected group");
+  }
+  std::string whatsthis() override {
+    return std::string("Deletes the selected groups");
+  }
+  std::string shortcut() override { return std::string(); }
 };
 }
 }

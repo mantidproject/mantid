@@ -1,5 +1,6 @@
-﻿#pylint: disable=invalid-name
-import os,sys
+#pylint: disable=invalid-name
+import os
+import sys
 import stresstesting
 from mantid.simpleapi import *
 from mantid.api import Workspace,IEventWorkspace
@@ -8,6 +9,8 @@ from Direct.PropertyManager import PropertyManager
 import ISIS_MariReduction as mr
 
 #----------------------------------------------------------------------
+
+
 class ISIS_ReductionWebLike(stresstesting.MantidStressTest):
     def __init__(self):
         stresstesting.MantidStressTest.__init__(self)
@@ -21,7 +24,6 @@ class ISIS_ReductionWebLike(stresstesting.MantidStressTest):
 
         self.rd.save_web_variables(os.path.join(save_folder,'reduce_vars.py'))
 
-
     def runTest(self):
         # run reduction using saved variables like web variables
         web_var_folder = config['defaultsave.directory']
@@ -32,7 +34,7 @@ class ISIS_ReductionWebLike(stresstesting.MantidStressTest):
         mr.web_var.advanced_vars['save_format']='nxs'
         # web services currently needs input file to be defined
         input_file = 'MAR11001.RAW'
-        dummy_rez = mr.main(input_file,web_var_folder)
+        mr.main(input_file,web_var_folder)
 
         #  verify if result was indeed written
         self.rd.reducer.sample_run = input_file
@@ -47,18 +49,17 @@ class ISIS_ReductionWebLike(stresstesting.MantidStressTest):
         if os.path.exists(web_var_file+'.pyc'):
             os.remove(web_var_file+'.pyc')
 
-
     def get_result_workspace(self):
         """Returns the result workspace to be checked"""
         if 'outWS' in mtd:
             return 'outWS'
         saveFileName = self.rd.reducer.save_file_name
-#pylint: disable=unused-variable
-        outWS = Load(Filename=saveFileName+'.nxs')
+        Load(Filename=saveFileName+'.nxs', OutputWorkspace="outWS")
         #outWS *= 0.997979227566217
         fullRezPath =FileFinder.getFullPath(saveFileName+'.nxs')
         os.remove(fullRezPath)
         return 'outWS'
+
     def get_reference_file(self):
         return "MARIReduction.nxs"
 
@@ -77,11 +78,11 @@ class ISIS_ReductionWebLike(stresstesting.MantidStressTest):
         reference = self.get_reference_file()
         return result, reference
 
+
 class ISIS_ReductionWrapperValidate(stresstesting.MantidStressTest):
     def __init__(self):
         stresstesting.MantidStressTest.__init__(self)
         self.result = False
-
 
     def runTest(self):
        # prepare reduction variable
@@ -120,10 +121,6 @@ class ISIS_ReductionWrapperValidate(stresstesting.MantidStressTest):
             self.result=False
         rd.reducer.prop_man.save_file_name = None
 
-
-
-
-
     def validate(self):
         """Returns the name of the workspace & file to compare"""
         return self.result
@@ -131,7 +128,6 @@ class ISIS_ReductionWrapperValidate(stresstesting.MantidStressTest):
 
 #----------------------------------------------------------------------
 class ISISLoadFilesRAW(stresstesting.MantidStressTest):
-
 
     def __init__(self):
         stresstesting.MantidStressTest.__init__(self)
@@ -170,15 +166,14 @@ class ISISLoadFilesRAW(stresstesting.MantidStressTest):
         self.assertEqual(ws.getNumberHistograms(),41472)
         self.assertEqual(mon_ws.getNumberHistograms(),4)
 
-
         #
         self.valid = True
 
     def validate(self):
         return self.valid
 
-class ISISLoadFilesMER(stresstesting.MantidStressTest):
 
+class ISISLoadFilesMER(stresstesting.MantidStressTest):
 
     def __init__(self):
         stresstesting.MantidStressTest.__init__(self)
@@ -192,7 +187,7 @@ class ISISLoadFilesMER(stresstesting.MantidStressTest):
         propman.load_monitors_with_workspace = False
 
         mon_ws = PropertyManager.sample_run.get_monitors_ws()
-        self.assertTrue(not mon_ws is None)
+        self.assertTrue(mon_ws is not None)
 
         ws = PropertyManager.sample_run.get_workspace()
         self.assertTrue(isinstance(ws,Workspace))
@@ -205,18 +200,17 @@ class ISISLoadFilesMER(stresstesting.MantidStressTest):
         propman.sample_run  = 6398
 
         mon_ws = PropertyManager.sample_run.get_monitors_ws()
-        self.assertTrue(not mon_ws is None)
+        self.assertTrue(mon_ws is not None)
         ws = PropertyManager.sample_run.get_workspace()
         self.assertTrue(isinstance(ws,Workspace))
         self.assertEqual(ws.getNumberHistograms(),69641)
         self.assertEqual(mon_ws.getNumberHistograms(),69641)
 
-
         propman.sample_run = 18492 # (histogram nxs file )
         propman.det_cal_file = None
         mon_ws = PropertyManager.sample_run.get_monitors_ws()
         self.assertTrue('SR_MER018492' in mtd)
-        self.assertTrue(not mon_ws is None)
+        self.assertTrue(mon_ws is not None)
         ws = PropertyManager.sample_run.get_workspace()
         self.assertTrue(isinstance(ws,Workspace))
         self.assertEqual(ws.getNumberHistograms(),69641)
@@ -227,7 +221,6 @@ class ISISLoadFilesMER(stresstesting.MantidStressTest):
         det = mon_ws.getDetector(69631)
         self.assertFalse(det.isMonitor())
 
-
         #  enable when bug #10980 is fixed
         propman.sample_run = None # delete all
         self.assertFalse('SR_MER018492' in mtd)
@@ -235,7 +228,7 @@ class ISISLoadFilesMER(stresstesting.MantidStressTest):
         propman.load_monitors_with_workspace = False
         propman.det_cal_file = None
         mon_ws = PropertyManager.sample_run.get_monitors_ws()
-        self.assertTrue(not mon_ws is None)
+        self.assertTrue(mon_ws is not None)
         self.assertTrue('SR_MER018492_monitors' in mtd)
 
         ws = PropertyManager.sample_run.get_workspace()
@@ -255,12 +248,11 @@ class ISISLoadFilesMER(stresstesting.MantidStressTest):
 
         self.valid = True
 
-
     def validate(self):
         return self.valid
 
-class ISISLoadFilesLET(stresstesting.MantidStressTest):
 
+class ISISLoadFilesLET(stresstesting.MantidStressTest):
 
     def __init__(self):
         stresstesting.MantidStressTest.__init__(self)
@@ -270,7 +262,6 @@ class ISISLoadFilesLET(stresstesting.MantidStressTest):
 
         #
         propman = PropertyManager('LET')
-
 
         propman.sample_run = 6278 #event nexus file
         propman.load_monitors_with_workspace = False
@@ -294,9 +285,8 @@ class ISISLoadFilesLET(stresstesting.MantidStressTest):
         self.assertEqual(int(propman.mon1_norm_spec),40961)
         self.assertEqual(propman.ei_mon1_spec,40966)
 
-
         mon_ws = PropertyManager.sample_run.get_monitors_ws()
-        self.assertTrue(not mon_ws is None)
+        self.assertTrue(mon_ws is not None)
 
         self.assertTrue(isinstance(ws,IEventWorkspace))
         self.assertEqual(ws.getNumberHistograms(),40960)
@@ -308,8 +298,6 @@ class ISISLoadFilesLET(stresstesting.MantidStressTest):
         self.assertTrue(isinstance(ei_ws,Workspace))
 
         self.valid = True
-
-
 
     def validate(self):
         return self.valid

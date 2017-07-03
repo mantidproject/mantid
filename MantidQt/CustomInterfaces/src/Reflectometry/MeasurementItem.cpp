@@ -13,13 +13,15 @@ namespace CustomInterfaces {
  * @param type
  * @param angle
  * @param run
+ * @param title
  */
 MeasurementItem::MeasurementItem(
     const MeasurementItem::IDType &measurementItemId,
     const MeasurementItem::IDType &subId, const std::string &label,
-    const std::string &type, const double angle, const std::string &run)
+    const std::string &type, const double angle, const std::string &run,
+    const std::string &title)
     : m_measurementItemId(measurementItemId), m_subId(subId), m_label(label),
-      m_type(type), m_angle(angle), m_run(run) {
+      m_type(type), m_angle(angle), m_run(run), m_title(title) {
 
   std::string accumulatedProblems;
   if (m_measurementItemId.empty()) {
@@ -45,7 +47,8 @@ MeasurementItem::MeasurementItem(const std::string &why)
 MeasurementItem::MeasurementItem(const MeasurementItem &other)
     : m_measurementItemId(other.m_measurementItemId), m_subId(other.m_subId),
       m_label(other.m_label), m_type(other.m_type), m_angle(other.m_angle),
-      m_run(other.m_run), m_whyUnuseable(other.m_whyUnuseable) {}
+      m_run(other.m_run), m_title(other.m_title),
+      m_whyUnuseable(other.m_whyUnuseable) {}
 
 /// Destructor
 MeasurementItem::~MeasurementItem() {}
@@ -74,6 +77,8 @@ std::string MeasurementItem::type() const { return m_type; }
 double MeasurementItem::angle() const { return m_angle; }
 
 std::string MeasurementItem::run() const { return m_run; }
+
+std::string MeasurementItem::title() const { return m_title; }
 
 std::string MeasurementItem::angleStr() const {
   std::stringstream buffer;

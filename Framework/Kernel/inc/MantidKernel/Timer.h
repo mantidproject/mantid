@@ -6,7 +6,6 @@
 //----------------------------------------------------------------------
 #include "MantidKernel/DllConfig.h"
 #include <iosfwd>
-#include <string>
 
 #ifdef _WIN32
 #include <time.h>

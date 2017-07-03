@@ -174,7 +174,9 @@ Peak::Peak(const Geometry::Instrument_const_sptr &m_inst, double scattering,
   this->setInstrument(m_inst);
   this->setWavelength(m_Wavelength);
   m_detectorID = -1;
-  detPos = V3D(sin(scattering), 0.0, cos(scattering));
+  // get the approximate location of the detector
+  const auto detectorDir = V3D(sin(scattering), 0.0, cos(scattering));
+  detPos = getVirtualDetectorPosition(detectorDir);
 }
 
 /**
@@ -231,15 +233,6 @@ Peak::Peak(const Geometry::IPeak &ipeak)
   }
 }
 
-#if defined(_MSC_VER) && _MSC_VER <= 1900
-Peak::Peak(Peak &&) = default;
-Peak &Peak::operator=(Peak &&) = default;
-#elif defined(__GNUC__) && (__GNUC__ == 5)
-// already defined in the header
-#else
-Peak::Peak(Peak &&) noexcept = default;
-Peak &Peak::operator=(Peak &&) noexcept = default;
-#endif
 //----------------------------------------------------------------------------------------------
 /** Set the incident wavelength of the neutron. Calculates the energy from this.
  * Assumes elastic scattering.
@@ -309,7 +302,7 @@ void Peak::setDetectorID(int id) {
   // Use the grand-parent whenever possible
   m_bankName = parent->getName();
   // For CORELLI, one level above sixteenpack
-  if (m_bankName.compare("sixteenpack") == 0) {
+  if (m_bankName == "sixteenpack") {
     parent = parent->getParent();
     m_bankName = parent->getName();
   }
@@ -529,6 +522,7 @@ void Peak::setQLabFrame(const Mantid::Kernel::V3D &QLabFrame,
                         boost::optional<double> detectorDistance) {
   // Clear out the detector = we can't know them
   m_detectorID = -1;
+  detPos = V3D();
   m_det = IDetector_sptr();
   m_row = -1;
   m_col = -1;
@@ -599,8 +593,24 @@ void Peak::setQLabFrame(const Mantid::Kernel::V3D &QLabFrame,
       g_log.debug("Could not find detector after setting qLab via setQLab with "
                   "QLab : " +
                   q.toString());
+
+      detPos = getVirtualDetectorPosition(detectorDir);
     }
   }
+}
+
+V3D Peak::getVirtualDetectorPosition(const V3D &detectorDir) const {
+  const auto component =
+      getInstrument()->getComponentByName("extended-detector-space");
+  if (!component) {
+    return detectorDir; // the best idea we have is just the direction
+  }
+
+  const auto object =
+      boost::dynamic_pointer_cast<const ObjComponent>(component);
+  Geometry::Track track(samplePos, detectorDir);
+  object->shape()->interceptSurface(track);
+  return track.back().exitPoint;
 }
 
 /** After creating a peak using the Q in the lab frame,

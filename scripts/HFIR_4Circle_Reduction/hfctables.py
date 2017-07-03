@@ -1,6 +1,8 @@
 #pylint: disable=W0403,C0103,R0901,R0904,R0913,C0302
 import numpy
 import sys
+import fourcircle_utility
+import guiutility
 
 import NTableWidget as tableBase
 
@@ -76,12 +78,207 @@ class KShiftTableWidget(tableBase.NTableWidget):
         return
 
 
-class PeakIntegrationTableWidget(tableBase.NTableWidget):
-    """
-    Extended table widget for studying peak integration of scan on various Pts.
+class MatrixTable(tableBase.NTableWidget):
     """
 
-    # UB peak information table
+    """
+    def __init__(self, parent):
+        """
+
+        :param parent:
+        """
+        super(MatrixTable, self).__init__(parent)
+
+        return
+
+    def setup(self, num_rows, num_cols):
+        """
+        set up a table for matrix
+        :param num_rows:
+        :param num_cols:
+        :return:
+        """
+        # check inputs
+        assert isinstance(num_rows, int) and num_rows > 0, 'Number of rows larger than 0.'
+        assert isinstance(num_cols, int) and num_cols > 0, 'Number of columns larger than 0.'
+
+        # think of reset
+        if self.rowCount() != num_rows or self.columnCount() != num_cols:
+            raise RuntimeError('ASAP')
+
+        return
+
+    def set_matrix(self, matrix):
+        """
+
+        :param matrix:
+        :return:
+        """
+        # check inputs
+        assert isinstance(matrix, numpy.ndarray) and matrix.shape == (4, 4), 'Matrix {0} must be ndarray with {1}.' \
+                                                                             ''.format(matrix, matrix.shape)
+        for i in range(matrix.shape[0]):
+            for j in range(matrix.shape[1]):
+                self.set_value_cell(i, j, matrix[i, j])
+
+        return
+
+
+class PeaksIntegrationSpreadSheet(tableBase.NTableWidget):
+    """
+    Detailed peaks integration information table. Each row is for a peak measured in a scan containing multiple Pts.
+    It can be converted to a csv file for user to check the integration details.
+    Note: all the intensities shown below are corrected by by Lorentzian and absorption if either of them is
+          calculated and applied.
+    """
+    Table_Setup = [('Scan', 'int'),
+                   ('HKL (S)', 'str'),
+                   ('HKL (C)', 'str'),
+                   ('Mask', 'str'),
+                   ('Intensity (R)', 'float'),
+                   ('Error (R)', 'float'),
+                   ('Intensity 2', 'float'),
+                   ('Error (2)', 'float'),
+                   ('Intensity (G)', 'float'),
+                   ('Error (G)', 'float'),
+                   ('Lorentz', 'float'),
+                   ('Bkgd (E)', 'float'),
+                   ('Bkgd (G)', 'float'),
+                   ('Sigma', 'float'),
+                   ('A', 'float'),
+                   ('Motor Name', 'str'),
+                   ('Motor Step', 'float'),
+                   ('K-shift', 'str'),
+                   ('Absorption', 'float')
+                   ]
+
+    def __init__(self, parent):
+        """
+        initialization
+        :param parent:
+        """
+        super(PeaksIntegrationSpreadSheet, self).__init__(parent)
+
+        # define column indexes
+        self._colIndexScan = None
+        self._colIndexSpiceHKL = None
+        self._colIndexMantidHKL = None
+        self._colIndexMask = None
+        self._colIndexRawIntensity = None
+        self._colIndexRawError = None
+        self._colIndexIntensity2 = None
+        self._colIndexError2 = None
+        self._colIndexIntensity3 = None
+        self._colIndexError3 = None
+        self._colIndexBkgdE = None
+        self._colIndexBkgdG = None
+        self._colIndexMotorName = None
+        self._colIndexMotorStep = None
+        self._colIndexAbsorption = None
+        self._colIndexKShift = None
+        self._colIndexLorentz = None
+        self._colIndexSigma = None
+        self._colIndexA = None
+
+        return
+
+    def add_scan_information(self, scan_number, s_hkl, m_hkl, mask, raw_intensity, raw_error, intensity2, error2,
+                             intensity3, error3, lorentz, bkgd_e, bkgd_g, gauss_s, gauss_a, motor_name, motor_step,
+                             k_shift, absorption):
+        """
+        add the detailed integrating information to table
+        :param scan_number:
+        :param s_hkl:
+        :param m_hkl:
+        :param mask:
+        :param raw_intensity:
+        :param raw_error:
+        :param intensity2:
+        :param error2:
+        :param intensity3:
+        :param error3:
+        :param lorentz:
+        :param bkgd_e:
+        :param bkgd_g:
+        :param gauss_s:
+        :param gauss_a:
+        :param motor_name:
+        :param motor_step:
+        :param k_shift:
+        :param absorption:
+        :return:
+        """
+        # append an empty row
+        row_list = [None] * len(self.Table_Setup)
+        status, msg = self.append_row(row_list)
+        if not status:
+            print '[ERROR] Unable to append a new row due to {0}.'.format(msg)
+        else:
+            row_list[0] = 123
+            row_list[1] = ''
+            row_list[2] = ''
+        last_row_number = self.rowCount() - 1
+
+        # set value
+        self.update_cell_value(last_row_number, self._colIndexScan, scan_number)
+        self.update_cell_value(last_row_number, self._colIndexSpiceHKL, s_hkl)
+        self.update_cell_value(last_row_number, self._colIndexMantidHKL, m_hkl)
+        self.update_cell_value(last_row_number, self._colIndexMask, mask)
+        self.update_cell_value(last_row_number, self._colIndexRawIntensity, raw_intensity)
+        self.update_cell_value(last_row_number, self._colIndexRawError, raw_error)
+        self.update_cell_value(last_row_number, self._colIndexIntensity2, intensity2)
+        self.update_cell_value(last_row_number, self._colIndexIntensity3, intensity3)
+        self.update_cell_value(last_row_number, self._colIndexError2, error2)
+        self.update_cell_value(last_row_number, self._colIndexError3, error3)
+        self.update_cell_value(last_row_number, self._colIndexLorentz, lorentz)
+        self.update_cell_value(last_row_number, self._colIndexBkgdE, bkgd_e)
+        self.update_cell_value(last_row_number, self._colIndexBkgdG, bkgd_g)
+        self.update_cell_value(last_row_number, self._colIndexSigma, gauss_s)
+        self.update_cell_value(last_row_number, self._colIndexA, gauss_a)
+        self.update_cell_value(last_row_number, self._colIndexKShift, k_shift)
+        self.update_cell_value(last_row_number, self._colIndexAbsorption, absorption)
+        self.update_cell_value(last_row_number, self._colIndexMotorName, motor_name)
+        self.update_cell_value(last_row_number, self._colIndexMotorStep, motor_step)
+
+        return
+
+    def setup(self):
+        """
+        Init setup
+        :return:
+        """
+        self.init_setup(self.Table_Setup)
+
+        # get column names
+        col_name_list = self._myColumnNameList
+
+        self._colIndexScan = col_name_list.index('Scan')
+        self._colIndexSpiceHKL = self.Table_Setup.index(('HKL (S)', 'str'))
+        self._colIndexMantidHKL = self.Table_Setup.index(('HKL (C)', 'str'))
+        self._colIndexMask = self.Table_Setup.index(('Mask', 'str'))
+        self._colIndexRawIntensity = self.Table_Setup.index(('Intensity (R)', 'float'))
+        self._colIndexRawError = self.Table_Setup.index(('Error (R)', 'float'))
+        self._colIndexIntensity2 = self.Table_Setup.index(('Intensity 2', 'float'))
+        self._colIndexError2 = self.Table_Setup.index(('Error (2)', 'float'))
+        self._colIndexIntensity3 = self.Table_Setup.index(('Intensity (G)', 'float'))
+        self._colIndexError3 = self.Table_Setup.index(('Error (G)', 'float'))
+        self._colIndexLorentz = self.Table_Setup.index(('Lorentz', 'float'))
+        self._colIndexBkgdE = self.Table_Setup.index(('Bkgd (E)', 'float'))
+        self._colIndexBkgdG = self.Table_Setup.index(('Bkgd (G)', 'float'))
+        self._colIndexMotorName = self.Table_Setup.index(('Motor Name', 'str'))
+        self._colIndexMotorStep = self.Table_Setup.index(('Motor Step', 'float'))
+        self._colIndexKShift = self.Table_Setup.index(('K-shift', 'str'))
+        self._colIndexAbsorption = self.Table_Setup.index(('Absorption', 'float'))
+        self._colIndexSigma = self.Table_Setup.index(('Sigma', 'float'))
+        self._colIndexA = self.Table_Setup.index(('A', 'float'))
+
+        return
+
+
+class PeakIntegrationTableWidget(tableBase.NTableWidget):
+    """
+    Extended table widget for studying peak integration of a single scan on various Pts.
+    """
     Table_Setup = [('Pt', 'int'),
                    ('Raw', 'float'),
                    ('Masked', 'float'),
@@ -96,7 +293,8 @@ class PeakIntegrationTableWidget(tableBase.NTableWidget):
         self._expNumber = -1
         self._scanNumber = -1
 
-        self._intensityColIndex = None
+        self._rawIntensityColIndex = None
+        self._maskedIntensityColIndex = None
 
         return
 
@@ -109,9 +307,11 @@ class PeakIntegrationTableWidget(tableBase.NTableWidget):
         :return: 2-tuple as boolean and error message
         """
         # check requirements
-        assert isinstance(pt_number, int)
-        assert isinstance(raw_signal, int) or isinstance(raw_signal, float)
-        assert isinstance(masked_signal, float)
+        assert isinstance(pt_number, int), 'Error 920X'
+        assert isinstance(raw_signal, int) or isinstance(raw_signal, float) or raw_signal is None,\
+            'Error 920A'
+        assert isinstance(masked_signal, float) or isinstance(masked_signal, int) or masked_signal is None,\
+            'Error 920B'
 
         # form a new row and append
         status, msg = self.append_row([pt_number, raw_signal, masked_signal, False])
@@ -126,6 +326,36 @@ class PeakIntegrationTableWidget(tableBase.NTableWidget):
         :return:
         """
         return self._expNumber, self._scanNumber
+
+    def sum_raw_intensity(self):
+        """
+        sum raw intensities of all Pts.
+        :return:
+        """
+        num_rows = self.rowCount()
+
+        count_sum = 0.
+        for i_row in range(num_rows):
+            pt_count = self.get_cell_value(i_row, self._rawIntensityColIndex)
+            count_sum += pt_count
+        # END-FOR
+
+        return count_sum
+
+    def sum_masked_intensity(self):
+        """
+        sum masked intensities of all Pts.
+        :return:
+        """
+        num_rows = self.rowCount()
+
+        count_sum = 0.
+        for i_row in range(num_rows):
+            pt_count = self.get_cell_value(i_row, self._maskedIntensityColIndex)
+            count_sum += pt_count
+        # END-FOR
+
+        return count_sum
 
     def setup(self):
         """
@@ -143,7 +373,8 @@ class PeakIntegrationTableWidget(tableBase.NTableWidget):
         self.setColumnWidth(3, 90)
 
         # Set others...
-        self._intensityColIndex = self._myColumnNameList.index('Masked')
+        self._rawIntensityColIndex = self._myColumnNameList.index('Raw')
+        self._maskedIntensityColIndex = self._myColumnNameList.index('Masked')
 
         return
 
@@ -217,7 +448,7 @@ class PeakIntegrationTableWidget(tableBase.NTableWidget):
         # Integrate
         sum_intensity = 0.
         for i_row in range(self.rowCount()):
-            intensity_i = self.get_cell_value(i_row, self._intensityColIndex)
+            intensity_i = self.get_cell_value(i_row, self._maskedIntensityColIndex)
             sum_intensity += intensity_i - background
 
         return sum_intensity
@@ -227,6 +458,7 @@ class UBMatrixTable(tableBase.NTableWidget):
     """
     Extended table for UB matrix
     """
+
     def __init__(self, parent):
         """
 
@@ -337,15 +569,12 @@ class UBMatrixTable(tableBase.NTableWidget):
 # UB peak information table
 UB_Peak_Table_Setup = [('Scan', 'int'),
                        ('Pt', 'int'),
-                       ('H', 'float'),
-                       ('K', 'float'),
-                       ('L', 'float'),
-                       ('Q_x', 'float'),
-                       ('Q_y', 'float'),
-                       ('Q_z', 'float'),
+                       ('Spice HKL', 'str'),
+                       ('Calculated HKL', 'str'),
+                       ('Q-Sample', 'str'),
                        ('Selected', 'checkbox'),
                        ('m1', 'float'),
-                       ('lambda', 'float'),  # wave length
+                       ('Wavelength', 'float'),  # wave length
                        ('Error', 'float')]
 
 
@@ -353,15 +582,71 @@ class UBMatrixPeakTable(tableBase.NTableWidget):
     """
     Extended table for peaks used to calculate UB matrix
     """
+
     def __init__(self, parent):
         """
-
+        Initialization
         :param parent:
         :return:
         """
         tableBase.NTableWidget.__init__(self, parent)
 
+        # define class variables
+        self._cachedSpiceHKL = dict()
+
+        # class variables for column indexes
+        self._colIndexScan = None
+        self._colIndexSpiceHKL = None
+        self._colIndexCalculatedHKL = None
+        self._colIndexQSample = None
+        self._colIndexWavelength = None
+        self._colIndexError = None
+
         return
+
+    def add_peak(self, scan_number, spice_hkl, q_sample, m1, wave_length):
+        """
+
+        :param scan_number:
+        :param spice_hkl:
+        :param q_sample:
+        :param m1:
+        :param wave_length:
+        :return:
+        """
+        # check inputs
+        assert isinstance(scan_number, int), 'Scan number integer'
+        assert len(spice_hkl) == 3, 'Spice HKL'
+        assert len(q_sample) == 3, 'Q-sample'
+        assert isinstance(m1, float) or m1 is None, 'm1'
+        assert isinstance(wave_length, float) or wave_length is None, 'wave length'
+
+        # spice_hkl_str = '{0:.4f}, {1:.4f}, {2:.4f}'.format(spice_hkl[0], spice_hkl[1], spice_hkl[2])
+        # q_sample_str = '{0:.4f}, {1:.4f}, {2:.4f}'.format(q_sample[0], q_sample[1], q_sample[2])
+        spice_hkl_str = self.format_array(spice_hkl)
+        q_sample_str = self.format_array(q_sample)
+        self.append_row([scan_number, -1, spice_hkl_str, '', q_sample_str, False, m1, wave_length, ''])
+
+        return True, ''
+
+    @staticmethod
+    def format_array(array):
+        """
+        output a formatted array with limited precision of float
+        :param array:
+        :return:
+        """
+        format_str = ''
+        for index, number in enumerate(array):
+            if index > 0:
+                format_str += ', '
+            if isinstance(number, float):
+                format_str += '{0:.4f}'.format(number)
+            else:
+                format_str += '{0}'.format(number)
+        # END-FOR
+
+        return format_str
 
     def get_exp_info(self, row_index):
         """
@@ -378,21 +663,31 @@ class UBMatrixPeakTable(tableBase.NTableWidget):
 
         return scan_number, pt_number
 
-    def get_hkl(self, row_index):
+    def get_hkl(self, row_index, is_spice_hkl):
         """
         Get reflection's miller index
         :param row_index:
-        :return:
+        :param is_spice_hkl:
+        :return: 3-tuple as H, K, L
         """
-        assert isinstance(row_index, int)
+        # check input
+        assert isinstance(row_index, int), 'Row index {0} must be an integer but not a {1}.' \
+                                           ''.format(row_index, type(row_index))
 
-        m_h = self.get_cell_value(row_index, 2)
-        m_k = self.get_cell_value(row_index, 3)
-        m_l = self.get_cell_value(row_index, 4)
+        # get the HKL either parsed from SPICE file or from calculation
+        if is_spice_hkl:
+            hkl_str = self.get_cell_value(row_index, self._colIndexSpiceHKL)
+        else:
+            hkl_str = self.get_cell_value(row_index, self._colIndexCalculatedHKL)
 
-        assert isinstance(m_h, float)
-        assert isinstance(m_k, float)
-        assert isinstance(m_l, float)
+        # convert the recorded string to HKL
+        status, ret_obj = guiutility.parse_float_array(hkl_str)
+        if not status:
+            raise RuntimeError(ret_obj)
+        elif len(ret_obj) != 3:
+            raise RuntimeError('Unable to parse array "{0}" to 3 floating points.'.format(hkl_str))
+        else:
+            m_h, m_k, m_l = ret_obj
 
         return m_h, m_k, m_l
 
@@ -406,6 +701,20 @@ class UBMatrixPeakTable(tableBase.NTableWidget):
         pt_number = self.get_cell_value(row_number, 1)
 
         return scan_number, pt_number
+
+    def get_selected_scans(self):
+        """
+        get the scan numbers that are selected
+        :return:
+        """
+        selected_rows = self.get_selected_rows(True)
+
+        scan_list = list()
+        for i_row in selected_rows:
+            scan_number = self.get_cell_value(i_row, self._colIndexScan)
+            scan_list.append(scan_number)
+
+        return scan_list
 
     def is_selected(self, row_index):
         """ Check whether a row is selected.
@@ -425,32 +734,144 @@ class UBMatrixPeakTable(tableBase.NTableWidget):
         :return:
         """
         self.init_setup(UB_Peak_Table_Setup)
-        self._statusColName = 'Selected'
+        self.set_status_column_name('Selected')
+
+        # define all the _colIndex
+        self._colIndexScan = self._myColumnNameList.index('Scan')
+        self._colIndexSpiceHKL = self._myColumnNameList.index('Spice HKL')
+        self._colIndexCalculatedHKL = self._myColumnNameList.index('Calculated HKL')
+        self._colIndexQSample = self._myColumnNameList.index('Q-Sample')
+        self._colIndexWavelength = self._myColumnNameList.index('Wavelength')
+        self._colIndexError = self._myColumnNameList.index('Error')
+
+        # set up the width of some columns
+        self.setColumnWidth(self._colIndexSpiceHKL, 240)
+        self.setColumnWidth(self._colIndexCalculatedHKL, 240)
+        self.setColumnWidth(4, 240)
 
         return
 
-    def set_hkl(self, i_row, hkl, error=None):
+    def select_nuclear_peak_rows(self, tolerance):
         """
-        Set HKL to table
+        select all nuclear peaks, i.e., set the flag on on 'select' for all rows if their HKL indicates that
+        they are nuclear peaks
+        :param tolerance:
+        :return: string as error message
+        """
+        num_rows = self.rowCount()
+        error_message = ''
+
+        for row_index in range(num_rows):
+            # get the reading of HKL
+            try:
+                hkl_tuple = self.get_hkl(row_index, is_spice_hkl=True)
+                if fourcircle_utility.is_peak_nuclear(hkl_tuple[0], hkl_tuple[1], hkl_tuple[2], tolerance):
+                    self.select_row(row_index, status=True)
+            except RuntimeError as error:
+                error_message += 'Unable to parse HKL of line %d due to %s.' % (row_index, str(error))
+        # END-FOR
+
+        return error_message
+
+    def select_scans(self, select_all=False, nuclear_peaks=False, hkl_tolerance=None,
+                     wave_length=None, wave_length_tolerance=None):
+        """
+        select scans in the UB matrix table
+        :param select_all:
+        :param nuclear_peaks:
+        :param hkl_tolerance:
+        :param wave_length:
+        :param wave_length_tolerance:
+        :return:
+        """
+        if select_all:
+            # select all
+            self.select_all_rows(True)
+
+        elif nuclear_peaks or wave_length_tolerance is not None:
+            # using filters
+            if nuclear_peaks:
+                self.select_nuclear_peak_rows(hkl_tolerance)
+            if wave_length_tolerance is not None:
+                self.select_rows_by_column_value(self._colIndexWavelength, wave_length, wave_length_tolerance,
+                                                 keep_current_selection=True)
+        else:
+            raise RuntimeError('Must pick up one option to do filter.')
+
+        return
+
+    def set_hkl(self, i_row, hkl, is_spice_hkl, error=None):
+        """
+        Set HKL to a row in the table. Show H/K/L with 4 decimal pionts
         :param i_row:
-        :param hkl:
+        :param hkl: HKL is a list of tuple
+        :param is_spice_hkl: If true, then set input to cell for SPICE-imported HKL. Otherwise to calculated HKL.
         :param error: error of HKL
         """
         # Check
-        assert isinstance(i_row, int)
-        assert isinstance(hkl, list)
+        assert isinstance(i_row, int), 'Row number (index) must be integer but not %s.'.format(type(i_row))
 
-        i_col_h = UB_Peak_Table_Setup.index(('H', 'float'))
-        i_col_k = UB_Peak_Table_Setup.index(('K', 'float'))
-        i_col_l = UB_Peak_Table_Setup.index(('L', 'float'))
+        if isinstance(hkl, list) or isinstance(hkl, tuple):
+            assert len(hkl) == 3, 'In case HKL is list of tuple, its size must be equal to 3 but not %d.' \
+                                  '' % len(hkl)
+        elif isinstance(hkl, numpy.ndarray):
+            assert hkl.shape == (3,), 'In case HKL is numpy array, its shape must be (3,) but not %s.' \
+                                      '' % str(hkl.shape)
+        else:
+            raise AssertionError('HKL of type %s is not supported. Supported types include list, tuple '
+                                 'and numpy array.' % type(hkl))
+        assert isinstance(is_spice_hkl, bool), 'Flag {0} for SPICE-HKL must be a boolean but not a {1}.' \
+                                               ''.format(is_spice_hkl, type(is_spice_hkl))
 
-        self.update_cell_value(i_row, i_col_h, hkl[0])
-        self.update_cell_value(i_row, i_col_k, hkl[1])
-        self.update_cell_value(i_row, i_col_l, hkl[2])
+        # convert to a string with 4 decimal points
+        hkl_str = '%.4f, %.4f, %.4f' % (hkl[0], hkl[1], hkl[2])
 
+        if is_spice_hkl:
+            self.update_cell_value(i_row, self._colIndexSpiceHKL, hkl_str)
+        else:
+            self.update_cell_value(i_row, self._colIndexCalculatedHKL, hkl_str)
+
+        # set error
         if error is not None:
             i_col_error = UB_Peak_Table_Setup.index(('Error', 'float'))
             self.update_cell_value(i_row, i_col_error, error)
+
+        return
+
+    def restore_cached_indexing(self, is_spice=True):
+        """
+        Restore the previously saved value to HKL
+        :return:
+        """
+        # check first such that all the stored value are to be
+        stored_line_index = sorted(self._cachedSpiceHKL.keys())
+        assert len(stored_line_index) == self.rowCount(), 'The current rows and cached row counts do not match.'
+
+        # restore
+        for row_index in stored_line_index:
+            hkl = self._cachedSpiceHKL[row_index]
+            self.set_hkl(row_index, hkl, is_spice_hkl=is_spice)
+        # END-FOR
+
+        # clear
+        self._cachedSpiceHKL.clear()
+
+        return
+
+    def store_current_indexing(self):
+        """
+        Store the current indexing for reverting
+        :return:
+        """
+        # clear the previous value
+        self._cachedSpiceHKL.clear()
+
+        # store
+        num_rows = self.rowCount()
+        for row_index in range(num_rows):
+            peak_indexing = self.get_hkl(row_index, is_spice_hkl=True)
+            self._cachedSpiceHKL[row_index] = peak_indexing
+        # END-FOR
 
         return
 
@@ -461,29 +882,29 @@ class UBMatrixPeakTable(tableBase.NTableWidget):
         :param k:
         :param l:
         """
-        assert isinstance(i_row, int)
+        assert isinstance(i_row, int), 'row number {0} must be an integer but not a {1}.' \
+                                       ''.format(i_row, type(i_row))
 
-        self.update_cell_value(i_row, 2, h)
-        self.update_cell_value(i_row, 3, k)
-        self.update_cell_value(i_row, 4, l)
+        self.update_cell_value(i_row, self._colIndexCalculatedHKL, self.format_array([h, k, l]))
 
         return
 
 
 class ProcessTableWidget(tableBase.NTableWidget):
     """
-    Extended table for peaks used to calculate UB matrix
+    Extended table for peaks used to process scans including peak integration, scan merging and etc.
     """
     TableSetup = [('Scan', 'int'),
-                  ('Intensity', 'float'),
-                  ('Corrected', 'float'),
                   ('Status', 'str'),
-                  ('Peak Centre', 'str'),
+                  ('Intensity', 'float'),
+                  ('Corrected', 'float'),  # Lorenzian corrected
+                  ('Error', 'float'),
+                  ('Integrate', 'str'),  # integration type, Gaussian fit / simple summation
+                  ('Mask', 'str'),  # '' for no mask
                   ('HKL', 'str'),
-                  ('Total Counts', 'float'),
                   ('Motor', 'str'),
+                  ('Motor Step', 'str'),
                   ('Wavelength', 'float'),
-                  ('Merged Workspace', 'str'),
                   ('K-Index', 'int'),
                   ('Select', 'checkbox')]
 
@@ -496,36 +917,51 @@ class ProcessTableWidget(tableBase.NTableWidget):
         tableBase.NTableWidget.__init__(self, parent)
 
         # some commonly used column index
-        self._colIndexKIndex = None
+        self._colIndexScan = None
+        self._colIndexIntensity = None
+        self._colIndexCorrInt = None
+        self._colIndexErrorBar = None
+        self._colIndexMask = None
+        self._colIndexIntType = None
         self._colIndexHKL = None
         self._colIndexStatus = None
+        self._colIndexPeak = None
+        # self._colIndexIndexFrom = None
+        self._colIndexMotor = None
+        self._colIndexMotorStep = None
+        self._colIndexWaveLength = None
+        self._colIndexKIndex = None
+        self._colIndexWorkspace = None
+
+        # cache dictionaries
+        self._workspaceCacheDict = dict()
 
         return
 
     @staticmethod
-    def _generate_empty_row(scan_number, num_pt=None, status='In-Queue', ws_name=''):
+    def _generate_empty_row(scan_number, status='In-Queue', ws_name=''):
         """ Generate a list for empty row with scan number
         :param scan_number:
-        :param num_pt:
         :param status:
         :param ws_name
         :return:
         """
         # check inputs
         assert isinstance(scan_number, int)
-        assert isinstance(num_pt, int) or num_pt is None
         assert isinstance(status, str)
 
         intensity = None
         corr_int = None
-        total_counts = 0
-        motor_info = ''
+        error = None
+        mask = ''
+        integrate_type = 'sum'
+        motor_name = None
+        motor_step = None
         wave_length = 0
-        centre = ''
         hkl = ''
 
-        new_row = [scan_number, intensity, corr_int, status, centre, hkl, total_counts,
-                   motor_info, wave_length, ws_name, 0, False]
+        new_row = [scan_number, status, intensity, corr_int, error, integrate_type, mask,  # peak_center,
+                   hkl, motor_name, motor_step, wave_length, 0, False]
 
         return new_row
 
@@ -538,9 +974,12 @@ class ProcessTableWidget(tableBase.NTableWidget):
         :return:
         """
         # check
-        assert isinstance(exp_number, int)
-        assert isinstance(scan_number, int)
-        assert isinstance(ws_name, str)
+        assert isinstance(exp_number, int), 'Experiment number {0} must be an integer but not a {1}.' \
+                                            ''.format(exp_number, type(exp_number))
+        assert isinstance(scan_number, int), 'Scan number {0} must be an integer but not a {1}.' \
+                                             ''.format(scan_number, type(scan_number))
+        assert isinstance(ws_name, str), 'Workspace name {0} must be a string but not a {1}.' \
+                                         ''.format(ws_name, type(ws_name))
 
         # construct a row
         new_row = self._generate_empty_row(scan_number, ws_name=ws_name)
@@ -562,13 +1001,10 @@ class ProcessTableWidget(tableBase.NTableWidget):
         else:
             scan_list = list()
 
-        print '[DB...BAT] Existing scan list: ', scan_list
-
         # set value as default
         # Append rows
         for scan in scans:
             # add a new row for the scan
-
             if allow_duplicate_scans is False and scan in scan_list:
                 # skip is duplicate scan is not allowed
                 continue
@@ -579,7 +1015,45 @@ class ProcessTableWidget(tableBase.NTableWidget):
             if status is False:
                 raise RuntimeError(err)
 
+            # set unit
+        # END-FOR
+
         return
+
+    def get_integration_type(self):
+        """
+        get the peak integration type
+        :return:
+        """
+        if self.rowCount() == 0:
+            raise RuntimeError('Empty table!')
+
+        integrate_type = self.get_cell_value(0, self._colIndexIntType)
+
+        return integrate_type
+
+    def get_row_by_scan(self, scan_number):
+        """
+        get the row number for a gien scan
+        :param scan_number:
+        :return:
+        """
+        assert isinstance(scan_number, int) and scan_number >= 0,\
+            'Scan number %s (type %s) is invalid.  It must be a positive integer.' \
+            '' % (str(scan_number), type(scan_number))
+        num_rows = self.rowCount()
+        ret_row_number = None
+        for i_row in xrange(num_rows):
+            tmp_scan_no = self.get_cell_value(i_row, self._colIndexScan)
+            if scan_number == tmp_scan_no:
+                ret_row_number = i_row
+                break
+        # END-FOR
+
+        if ret_row_number is None:
+            raise RuntimeError('Scan number %d does not exist in merge-scan-table.' % scan_number)
+
+        return ret_row_number
 
     def get_rows_by_state(self, target_state):
         """ Get the rows' indexes by status' value (state)
@@ -588,22 +1062,48 @@ class ProcessTableWidget(tableBase.NTableWidget):
         :param target_state:
         :return:
         """
-        # Get column index
-        status_col_index = self._myColumnNameList.index('Status')
-
         # Check
-        assert isinstance(target_state, str)
+        assert isinstance(target_state, str), 'State {0} must be a string but not a {1}.' \
+                                              ''.format(target_state, type(target_state))
 
         # Loop around to check
         return_list = list()
         num_rows = self.rowCount()
         for i_row in xrange(num_rows):
-            status_i = self.get_cell_value(i_row, status_col_index)
+            status_i = self.get_cell_value(i_row, self._colIndexStatus)
             if status_i == target_state:
                 return_list.append(i_row)
         # END-FOR (i_row)
 
         return return_list
+
+    def get_hkl(self, row_index):
+        """
+        Get peak index, HKL or a row
+        :param row_index: row index (aka number)
+        :return: 3-float-tuple or None (not defined)
+        """
+        # check input's validity
+        assert isinstance(row_index, int) and row_index >= 0, 'Row index %s of type %s is not acceptable.' \
+                                                              '' % (str(row_index), type(row_index))
+
+        # retrieve value of HKL as string and then split them into floats
+        hkl_str = self.get_cell_value(row_index, self._colIndexHKL)
+        hkl_str = hkl_str.strip()
+        if len(hkl_str) == 0:
+            return None
+
+        hkl_str_list = hkl_str.split(',')
+        try:
+            peak_index_h = float(hkl_str_list[0])
+            peak_index_k = float(hkl_str_list[1])
+            peak_index_l = float(hkl_str_list[2])
+        except IndexError:
+            raise RuntimeError('Row %d\' HKL value %s is not value.' % (row_index, hkl_str))
+        except ValueError:
+            raise RuntimeError('Row %d\' HKL value %s is not value.' % (row_index, hkl_str))
+
+        return peak_index_h, peak_index_k, peak_index_l
 
     def get_merged_status(self, row_number):
         """ Get the status whether it is merged
@@ -625,13 +1125,12 @@ class ProcessTableWidget(tableBase.NTableWidget):
 
     def get_merged_ws_name(self, i_row):
         """
-        Get ...
+        Get merged workspace name
         :param i_row:
         :return:
         """
-        j_col_merged = self.TableSetup.index(('Merged Workspace', 'str'))
-
-        return self.get_cell_value(i_row, j_col_merged)
+        #  return self.get_cell_value(i_row, self._colIndexWorkspace)
+        return self._workspaceCacheDict[i_row]
 
     def get_scan_list(self, output_row_number=True):
         """
@@ -641,10 +1140,9 @@ class ProcessTableWidget(tableBase.NTableWidget):
         """
         scan_list = list()
         num_rows = self.rowCount()
-        col_scan_index = self._myColumnNameList.index('Scan')
 
         for i_row in xrange(num_rows):
-            scan_num = self.get_cell_value(i_row, col_scan_index)
+            scan_num = self.get_cell_value(i_row, self._colIndexScan)
             if output_row_number:
                 scan_list.append((scan_num, i_row))
             else:
@@ -660,11 +1158,10 @@ class ProcessTableWidget(tableBase.NTableWidget):
         scan_list = list()
         num_rows = self.rowCount()
         col_select_index = self._myColumnNameList.index('Select')
-        col_scan_index = self._myColumnNameList.index('Scan')
 
         for i_row in xrange(num_rows):
             if self.get_cell_value(i_row, col_select_index) is True:
-                scan_num = self.get_cell_value(i_row, col_scan_index)
+                scan_num = self.get_cell_value(i_row, self._colIndexScan)
                 scan_list.append((scan_num, i_row))
 
         return scan_list
@@ -675,57 +1172,43 @@ class ProcessTableWidget(tableBase.NTableWidget):
         :param row_number:
         :return:
         """
-        col_index = ProcessTableWidget.TableSetup.index(('Scan', 'int'))
+        return self.get_cell_value(row_number, self._colIndexScan)
 
-        return self.get_cell_value(row_number, col_index)
-
-    def setup(self):
+    def select_all_nuclear_peaks(self):
         """
-        Init setup
-        :return:
+        select all nuclear peaks, i.e., set the flag on on 'select' for all rows if their HKL indicates that
+        they are nuclear peaks
+        :return: string as error message
         """
-        self.init_setup(self.TableSetup)
-        self._statusColName = 'Select'
-
-        # set up column index
-        self._colIndexKIndex = self.TableSetup.index(('K-Index', 'int'))
-        self._colIndexHKL = self.TableSetup.index(('HKL', 'str'))
-        self._colIndexStatus = self.TableSetup.index(('Status', 'str'))
-
-        return
-
-    def set_scan_pt(self, scan_no, pt_list):
-        """
-        :param scan_no:
-        :param pt_list:
-        :return:
-        """
-        # Check
-        assert isinstance(scan_no, int)
-
         num_rows = self.rowCount()
-        set_done = False
-        for i_row in xrange(num_rows):
-            tmp_scan_no = self.get_cell_value(i_row, 0)
-            if scan_no == tmp_scan_no:
-                self.update_cell_value(i_row, 1, len(pt_list))
-                set_done = True
-                break
+        error_message = ''
+
+        for row_index in range(num_rows):
+            # get the reading of HKL
+            try:
+                hkl_tuple = self.get_hkl(row_index)
+                if hkl_tuple is None:
+                    error_message += 'Row %d has no HKL showed.' % row_index
+                    continue
+                if fourcircle_utility.is_peak_nuclear(hkl_tuple[0], hkl_tuple[1], hkl_tuple[2]):
+                    self.select_row(row_index)
+            except RuntimeError as error:
+                error_message += 'Unable to parse HKL of line %d due to %s.' % (row_index, str(error))
         # END-FOR
 
-        if set_done is False:
-            return 'Unable to find scan %d in table.' % scan_no
+        return error_message
 
-        return ''
-
-    def set_hkl(self, row_number, hkl):
+    def set_hkl(self, row_number, hkl, hkl_source=None):
         """ Set Miller index HKL to a row
+        :param row_number: row number
         :param hkl:
+        :param hkl_source:
         :return:
         """
         # check
-        assert isinstance(row_number, int) and 0 <= row_number < self.rowCount()
-        assert len(hkl) == 3
+        assert isinstance(row_number, int) and 0 <= row_number < self.rowCount(),\
+            'Row number %s is out of range.' % str(row_number)
+        assert len(hkl) == 3, 'HKL must be a sequence with 3 items but not %s.' % len(hkl)
 
         # update the cell
         hkl_str = '%.3f, %.3f, %.3f' % (hkl[0], hkl[1], hkl[2])
@@ -748,6 +1231,7 @@ class ProcessTableWidget(tableBase.NTableWidget):
     def set_motor_info(self, row_number, motor_move_tup):
         """
         Set the motor step information to the 'Motor' cell
+        :param row_number:
         :param motor_move_tup:
         :return:
         """
@@ -756,109 +1240,77 @@ class ProcessTableWidget(tableBase.NTableWidget):
         assert len(motor_move_tup) == 3
 
         # get motor information and construct the string
-        motor_info = '%s: %.5f (%.5f)' % (motor_move_tup[0], motor_move_tup[1], motor_move_tup[2])
+        motor_name = motor_move_tup[0]
+        motor_move = '%.3f (%.2E)' % (motor_move_tup[1], motor_move_tup[2])
 
         # set motor step information string to the table cell.
-        motor_col_index = self.TableSetup.index(('Motor', 'str'))
-        self.update_cell_value(row_number, motor_col_index, motor_info)
+        self.update_cell_value(row_number, self._colIndexMotor, motor_name)
+        self.update_cell_value(row_number, self._colIndexMotorStep, motor_move)
 
         return
 
-    def set_peak_intensity(self, row_number, scan_number, peak_intensity, lorentz_corrected=False):
-        """ Set peak intensity to a row or scan
-        Requirement: Either row number or scan number must be given
+    def set_peak_centre(self, row_number, peak_centre):
+        """
+        set peak centre value
+        :param row_number:
+        :param peak_centre:
+        :return:
+        """
+        # check input's validity
+        assert isinstance(row_number, int) and 0 <= row_number < self.rowCount(), \
+            'Row number %s is not supported or out of boundary.' % str(row_number)
+        assert isinstance(peak_centre, str) or len(peak_centre) == 3,\
+            'Peak centre %s must be a string or a container with size 3.' % str(peak_centre)
+
+        # set value of peak center
+        if isinstance(peak_centre, str):
+            # string no need to change
+            value_to_set = peak_centre
+        else:
+            # construct the value
+            value_to_set = '%.3f, %.3f, %.3f' % (peak_centre[0], peak_centre[1], peak_centre[2])
+
+        self.update_cell_value(row_number, self._colIndexPeak, value_to_set)
+
+        return
+
+    def set_peak_intensity(self, row_number, peak_intensity, corrected_intensity, standard_error, integrate_method):
+        """
+        Set peak intensity to a row in the table
         Guarantees: peak intensity is set
         :param row_number:
-        :param scan_number:
         :param peak_intensity:
-        :param lorentz_corrected:
+        :param corrected_intensity:
+        :param standard_error:
+        :param integrate_method: must be '', simple or gaussian for simple counts summation or Gaussian fit, respectively
         :return:
         """
         # check requirements
-        if row_number is not None and scan_number is not None:
-            raise AssertionError('Row number %s and scan number %s cannot be given simultaneously.' % (
-                str(row_number), str(scan_number)))
-        elif row_number is None and scan_number is None:
-            raise AssertionError('Row number and scan number cannot be left empty simultaneously.')
-        assert isinstance(peak_intensity, float)
+        assert isinstance(peak_intensity, float), 'Peak intensity must be a float.'
+        assert isinstance(integrate_method, str), 'Integrated method {0} must be a string but not {1}.' \
+                                                  ''.format(integrate_method, type(integrate_method))
+        if integrate_method not in ['', 'simple', 'mixed', 'gaussian']:
+            raise RuntimeError('Peak integration {0} not in list. Method must be in ["" (Not defined), "simple"'
+                               ', "gaussian"]'.format(integrate_method))
 
-        if row_number is None:
-            # row number is not defined.  go through table for scan number
-            row_number = -1
-            num_rows = self.rowCount()
-            scan_col_index = ProcessTableWidget.TableSetup.index(('Scan', 'int'))
-            for row_index in xrange(num_rows):
-                scan_i = self.get_cell_value(row_index, scan_col_index)
-                if scan_i == scan_number:
-                    row_number = row_index
-                    break
-            # check
-            if row_number < 0:
-                raise RuntimeError('Scan %d cannot be found in the table.' % scan_number)
-        # END-IF
-
-        if lorentz_corrected:
-            col_name = ('Corrected', 'float')
-        else:
-            col_name = ('Intensity', 'float')
-        intensity_col_index = ProcessTableWidget.TableSetup.index(col_name)
-        return self.update_cell_value(row_number, intensity_col_index, peak_intensity)
-
-    def set_pt_by_row(self, row_number, pt_list):
-        """
-        :param row_number:
-        :param pt_list:
-        :return:
-        """
-        # Check
-        assert isinstance(row_number, int)
-        assert isinstance(pt_list, list)
-
-        j_pt = self.get_column_index('Pt')
-        self.update_cell_value(row_number, j_pt, len(pt_list))
-
-        return ''
-
-    def set_status(self, scan_no, status):
-        """
-        Set the status for merging scan to QTable
-        :param scan_no: scan number
-        :param status:
-        :return:
-        """
-        # Check
-        assert isinstance(scan_no, int)
-
-        num_rows = self.rowCount()
-        set_done = False
-        for i_row in xrange(num_rows):
-            tmp_scan_no = self.get_cell_value(i_row, 0)
-            if scan_no == tmp_scan_no:
-                self.update_cell_value(i_row, self._colIndexStatus, status)
-                set_done = True
-                break
-        # END-FOR
-
-        if set_done is False:
-            return 'Unable to find scan %d in table.' % scan_no
-
-        return ''
-
-    def set_status_by_row(self, row_number, status):
-        """
-        Set status to a specified row according to row number
-        :param row_number:
-        :param status:
-        :return:
-        """
-        # Check
-        assert isinstance(row_number, int)
-        assert isinstance(status, str), 'Status (description) must be a string, but not %s.' % str(type(status))
-
-        # Set
-        self.update_cell_value(row_number, self._colIndexStatus, status)
+        self.update_cell_value(row_number, self._colIndexIntensity, peak_intensity)
+        self.update_cell_value(row_number, self._colIndexIntType, integrate_method)
+        self.update_cell_value(row_number, self._colIndexCorrInt, corrected_intensity)
+        self.update_cell_value(row_number, self._colIndexErrorBar, standard_error)
 
         return
+
+    def set_status(self, row_number, status):
+        """
+        Set the status for merging scan to QTable
+        :param row_number: scan number
+        :param status:
+        :return:
+        """
+        # Check
+        assert isinstance(status, str), 'Status (%s) must be a string, but not %s.' % (str(status), type(status))
+
+        return self.update_cell_value(row_number, self._colIndexStatus, status)
 
     def set_wave_length(self, row_number, wave_length):
         """ Set wave length to a row
@@ -876,54 +1328,46 @@ class ProcessTableWidget(tableBase.NTableWidget):
 
         return
 
-    def set_ws_names(self, scan_num, merged_md_name, ws_group_name):
+    def set_ws_name(self, row_number, merged_md_name):
         """
         Set the output workspace and workspace group's names to QTable
-        :param scan_num:
+        :param row_number:
         :param merged_md_name:
-        :param ws_group_name:
         :return:
         """
         # Check
-        assert isinstance(scan_num, int)
-        assert isinstance(merged_md_name, str) or merged_md_name is None
-        assert isinstance(ws_group_name, str) or ws_group_name is None
+        assert isinstance(merged_md_name, str), 'Merged MDWorkspace name must be a string.'
 
-        num_rows = self.rowCount()
-        set_done = False
-        for i_row in xrange(num_rows):
-            tmp_scan_no = self.get_cell_value(i_row, 0)
-            if scan_num == tmp_scan_no:
-                if merged_md_name is not None:
-                    self.update_cell_value(i_row, 3, merged_md_name)
-                if ws_group_name is not None:
-                    self.update_cell_value(i_row, 4, ws_group_name)
-                set_done = True
-                break
-        # END-FOR
+        #  self.update_cell_value(row_number, self._colIndexWorkspace, merged_md_name)
 
-        if set_done is False:
-            return 'Unable to find scan %d in table.' % scan_num
+        self._workspaceCacheDict[row_number] = merged_md_name
 
         return
 
-    def set_ws_names_by_row(self, row_number, merged_md_name, ws_group_name):
+    def setup(self):
         """
-        Set the workspaces' names to this table
-        :param row_number:
-        :param merged_md_name:
-        :param ws_group_name:
+        Init setup
         :return:
         """
-        # Check
-        assert isinstance(row_number, int)
-        assert isinstance(merged_md_name, str) or merged_md_name is None
-        assert isinstance(ws_group_name, str) or ws_group_name is None
+        self.init_setup(self.TableSetup)
+        self._statusColName = 'Select'
 
-        j_ws_name = self.get_column_index('Merged Workspace')
-
-        if merged_md_name is not None:
-            self.update_cell_value(row_number, j_ws_name, merged_md_name)
+        # set up column index
+        self._colIndexScan = ProcessTableWidget.TableSetup.index(('Scan', 'int'))
+        self._colIndexIntensity = self.TableSetup.index(('Intensity', 'float'))
+        self._colIndexCorrInt = self.TableSetup.index(('Corrected', 'float'))
+        self._colIndexMask = self.TableSetup.index(('Mask', 'str'))
+        self._colIndexIntType = self.TableSetup.index(('Integrate', 'str'))
+        self._colIndexStatus = self.TableSetup.index(('Status', 'str'))
+        self._colIndexHKL = ProcessTableWidget.TableSetup.index(('HKL', 'str'))
+        # self._colIndexPeak = self.TableSetup.index(('Peak', 'str'))
+        # self._colIndexIndexFrom = self.TableSetup.index(('Index From', 'str'))
+        self._colIndexMotor = ProcessTableWidget.TableSetup.index(('Motor', 'str'))
+        self._colIndexMotorStep = ProcessTableWidget.TableSetup.index(('Motor Step', 'str'))
+        self._colIndexWaveLength = self.TableSetup.index(('Wavelength', 'float'))
+        self._colIndexKIndex = self.TableSetup.index(('K-Index', 'int'))
+        self._colIndexErrorBar = self.TableSetup.index(('Error', 'float'))
+        # self._colIndexWorkspace = self.TableSetup.index(('Workspace', 'str'))
 
         return
 
@@ -939,6 +1383,7 @@ class ScanSurveyTable(tableBase.NTableWidget):
                    ('K', 'float'),
                    ('L', 'float'),
                    ('Q-range', 'float'),
+                   ('Sample Temp', 'float'),
                    ('Selected', 'checkbox')]
 
     def __init__(self, parent):
@@ -953,6 +1398,10 @@ class ScanSurveyTable(tableBase.NTableWidget):
         self._currEndScan = sys.maxint
         self._currMinCounts = 0.
         self._currMaxCounts = sys.float_info.max
+
+        self._colIndexH = None
+        self._colIndexK = None
+        self._colIndexL = None
 
         return
 
@@ -1016,11 +1465,9 @@ class ScanSurveyTable(tableBase.NTableWidget):
             # check with filters: original order is counts, scan, Pt., ...
             scan_number = sum_item[1]
             if scan_number < start_scan or scan_number > end_scan:
-                # print 'Scan %d is out of range.' % scan_number
                 continue
             counts = sum_item[0]
             if counts < min_counts or counts > max_counts:
-                # print 'Scan %d Counts %f is out of range.' % (scan_number, counts)
                 continue
 
             # modify for appending to table
@@ -1041,6 +1488,18 @@ class ScanSurveyTable(tableBase.NTableWidget):
 
         return
 
+    def get_hkl(self, row_index):
+        """
+        Get peak index (HKL) from survey table (i.e., SPICE file)
+        :param row_index:
+        :return:
+        """
+        index_h = self.get_cell_value(row_index, self._colIndexH)
+        index_k = self.get_cell_value(row_index, self._colIndexK)
+        index_l = self.get_cell_value(row_index, self._colIndexL)
+
+        return index_h, index_k, index_l
+
     def get_scan_numbers(self, row_index_list):
         """
         Get scan numbers with specified rows
@@ -1056,24 +1515,42 @@ class ScanSurveyTable(tableBase.NTableWidget):
 
         return scan_list
 
-    def get_selected_run_surveyed(self):
+    def get_selected_run_surveyed(self, required_size=1):
         """
         Purpose: Get selected pt number and run number that is set as selected
         Requirements: there must be one and only one run that is selected
         Guarantees: a 2-tuple for integer for return as scan number and Pt. number
-        :return: a 2-tuple of integer
+        :param required_size: if specified as an integer, then if the number of selected rows is different,
+                              an exception will be thrown.
+        :return: a 2-tuple of integer if required size is 1 (as old implementation) or a list of 2-tuple of integer
         """
+        # check required size?
+        assert isinstance(required_size, int) or required_size is None, 'Required number of runs {0} must be None ' \
+                                                                        'or an integer but not a {1}.' \
+                                                                        ''.format(required_size, type(required_size))
+
         # get the selected row indexes and check
         row_index_list = self.get_selected_rows(True)
-        assert len(row_index_list) == 1, 'There must be exactly one run that is selected. Now' \
-                                         'there are %d runs that are selected' % len(row_index_list)
 
-        # get scan and pt
-        row_index = row_index_list[0]
-        scan_number = self.get_cell_value(row_index, 0)
-        pt_number = self.get_cell_value(row_index, 1)
+        if required_size is not None and required_size != len(row_index_list):
+            raise RuntimeError('It is required to have {0} runs selected, but now there are {1} runs that are '
+                               'selected.'.format(required_size, row_index_list))
 
-        return scan_number, pt_number
+        # get all the scans and rows that are selected
+        scan_run_list = list()
+        for i_row in row_index_list:
+            # get scan and pt.
+            scan_number = self.get_cell_value(i_row, 0)
+            pt_number = self.get_cell_value(i_row, 1)
+            scan_run_list.append((scan_number, pt_number))
+
+        # special case for only 1 run that is selected
+        if len(row_index_list) == 1 and required_size is not None:
+            # get scan and pt
+            return scan_run_list[0]
+        # END-IF
+
+        return scan_run_list
 
     def show_reflections(self, num_rows):
         """
@@ -1123,6 +1600,10 @@ class ScanSurveyTable(tableBase.NTableWidget):
         """
         self.init_setup(ScanSurveyTable.Table_Setup)
         self.set_status_column_name('Selected')
+
+        self._colIndexH = ScanSurveyTable.Table_Setup.index(('H', 'float'))
+        self._colIndexK = ScanSurveyTable.Table_Setup.index(('K', 'float'))
+        self._colIndexL = ScanSurveyTable.Table_Setup.index(('L', 'float'))
 
         return
 

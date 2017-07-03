@@ -14,6 +14,9 @@ namespace Geometry {
 class IComponent;
 class Instrument;
 }
+namespace API {
+class SpectrumInfo;
+}
 }
 
 namespace MantidQt {
@@ -86,12 +89,18 @@ public:
   /// Get a list containing pairs of strings with information about x,y
   std::vector<std::string> getInfoList(double x, double y) override;
 
+  /// Get a pointer to the workspace
+  Mantid::API::MatrixWorkspace_const_sptr getWorkspace() const {
+    return m_matWs;
+  }
+
 private:
   Mantid::API::MatrixWorkspace_const_sptr m_matWs;
   EModeHandler *m_emodeHandler;
   boost::shared_ptr<const Mantid::Geometry::Instrument> m_instrument;
   boost::shared_ptr<const Mantid::Geometry::IComponent> m_source;
   boost::shared_ptr<const Mantid::Geometry::IComponent> m_sample;
+  const Mantid::API::SpectrumInfo &m_spectrumInfo;
 };
 
 typedef boost::shared_ptr<MatrixWSDataSource> MatrixWSDataSource_sptr;

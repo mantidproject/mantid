@@ -1,15 +1,13 @@
-//---------------------------------------
-// Includes
-//---------------------------------------
-
 #include "MantidQtMantidWidgets/SequentialFitDialog.h"
 #include "MantidQtMantidWidgets/FitPropertyBrowser.h"
 #include "MantidQtMantidWidgets/SelectWorkspacesDialog.h"
+#include "MantidQtAPI/MantidDesktopServices.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/Run.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/ConfigService.h"
 
@@ -18,14 +16,11 @@
 #include <QInputDialog>
 #include <QFileDialog>
 #include <QMessageBox>
-#include <QDesktopServices>
 #include <QUrl>
 
-//---------------------------------------
-// Public member functions
-//---------------------------------------
-
 namespace MantidQt {
+using API::MantidDesktopServices;
+
 namespace MantidWidgets {
 
 /// Constructor
@@ -336,6 +331,9 @@ void SequentialFitDialog::accept() {
   if (ui.rbIndividual->isChecked()) {
     alg->setPropertyValue("FitType", "Individual");
   }
+  if (m_fitBrowser->isHistogramFit()) {
+    alg->setProperty("EvaluationType", "Histogram");
+  }
 
   bool passWSIndexToFunction = ui.ckbPassWS->isChecked();
   alg->setProperty("PassWSIndexToFunction", passWSIndexToFunction);
@@ -361,7 +359,7 @@ void SequentialFitDialog::finishHandle(const Mantid::API::IAlgorithm *) {
 }
 
 void SequentialFitDialog::helpClicked() {
-  QDesktopServices::openUrl(
+  MantidDesktopServices::openUrl(
       QUrl("http://www.mantidproject.org/PlotPeakByLogValue"));
 }
 

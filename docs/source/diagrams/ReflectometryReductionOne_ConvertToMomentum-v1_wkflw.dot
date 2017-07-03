@@ -1,0 +1,82 @@
+digraph ReflectometryReductionOne {
+label = "ReflectometryReductionOne Convert To Momentum Flowchart"
+ $global_style
+
+subgraph params {
+ $param_style
+  inputWorkspace          [label="InputWorkspace"]
+  outputWorkspace         [label="OutputWorkspaceMomentumTransfer"]
+  sourceRotationAngle     [label="Rotation Angle"]
+  sourceRotationAngleBack [label="-Rotation Angle"]
+  outputWorkspaceMT       [label="OutputWorkspace"]
+  momentumTransferMin     [label="MomentumTransferMinimum"]
+  momentumTransferStep    [label="MomentumTransferStep"]
+  momentumTransferMax     [label="MomentumTransferMaximum"]
+  scaleFactor             [label="ScaleFactor"]
+}
+
+subgraph decisions {
+ $decision_style
+  checkSourceRot      [label="Is Source in Correct Position?"]
+  checkSourceRotBack  [label="Was Source Rotated?"]
+  checkRebinMin       [label="MomentumTransferMinimum given?"]
+  checkRebinMax       [label="MomentumTransferMaximum given?"]
+  checkRebinStep      [label="MomentumTransferStep given?"]
+  checkScale          [label="ScaleFactor given?"]
+}
+
+subgraph algorithms {
+ $algorithm_style
+  convertToMT       [label="ConvertUnits\n(Momentum-transfer)"]
+  rotateSource      [label="RotateSource"]
+  rotateSourceBack  [label="RotateSource"]
+  calcResolution    [label="CalculateResolution"]
+  rebin             [label="Rebin"]
+  scale             [label="Scale"]
+}
+
+subgraph processes {
+ $process_style
+  calculateMomFromLambda [label="4&pi;sin(&theta;)/&lambda;"]
+  getSourceRotationAngle  [label="Get Angle for Source Rotation"]
+}
+
+subgraph values {
+ $value_style
+}
+
+inputWorkspace          -> checkSourceRot
+inputWorkspace          -> calculateMomFromLambda
+checkSourceRot          -> convertToMT            [label="Yes"]
+checkSourceRot          -> getSourceRotationAngle [label="No"]
+getSourceRotationAngle  -> sourceRotationAngle
+sourceRotationAngle     -> rotateSource
+rotateSource            -> convertToMT
+convertToMT             -> checkSourceRotBack
+checkSourceRotBack      -> rotateSourceBack       [label="Yes"]
+checkSourceRotBack      -> outputWorkspaceMT      [label="No"]
+sourceRotationAngleBack -> rotateSourceBack       [label = "Rotate back by Rotation Angle"]
+rotateSourceBack        -> outputWorkspaceMT
+outputWorkspaceMT       -> checkRebinMin
+outputWorkspaceMT       -> checkRebinMax
+outputWorkspaceMT       -> checkRebinStep
+checkRebinMin           -> momentumTransferMin    [label="Yes"]
+checkRebinMin           -> calculateMomFromLambda [label="No"]
+checkRebinMax           -> momentumTransferMax    [label="Yes"]
+checkRebinMax           -> calculateMomFromLambda [label="No"]
+calculateMomFromLambda  -> momentumTransferMin
+calculateMomFromLambda  -> momentumTransferMax
+checkRebinStep          -> momentumTransferStep   [label="Yes"]
+checkRebinStep          -> calcResolution         [label="No"]
+calcResolution          -> momentumTransferStep
+momentumTransferMin     -> rebin
+momentumTransferMax     -> rebin
+momentumTransferStep    -> rebin
+rebin                   -> checkScale
+scaleFactor             -> checkScale
+checkScale              -> scale                  [label="Yes"]
+checkScale              -> outputWorkspace        [label="No"]
+scale                   -> outputWorkspace
+
+
+}

@@ -4,10 +4,15 @@ import mantid.simpleapi
 import mantid.api
 import mantid.kernel
 import numpy
+from collections import defaultdict
+
 
 class MaskBTP(mantid.api.PythonAlgorithm):
     """ Class to generate grouping file
     """
+
+    # list of supported instruments
+    INSTRUMENT_LIST = ['ARCS','CNCS','CORELLI','HYSPEC','MANDI','NOMAD','POWGEN','REF_M','SEQUOIA','SNAP','SXD','TOPAZ','WISH']
 
     instname = None
     instrument = None
@@ -32,10 +37,9 @@ class MaskBTP(mantid.api.PythonAlgorithm):
     def PyInit(self):
         self.declareProperty(mantid.api.WorkspaceProperty("Workspace", "",direction=mantid.kernel.Direction.InOut,
                                                           optional = mantid.api.PropertyMode.Optional), "Input workspace (optional)")
-        allowedInstrumentList=mantid.kernel.StringListValidator(["","ARCS","CNCS","CORELLI","HYSPEC","MANDI","NOMAD",
-                                                                 "POWGEN","REF_M","SEQUOIA","SNAP","SXD","TOPAZ","WISH"])
-        self.declareProperty("Instrument","",validator=allowedInstrumentList,doc="One of the following instruments: ARCS, CNCS, "+\
-                             "CORELLI, HYSPEC, MANDI, NOMAD, POWGEN, REF_M, SNAP, SEQUOIA, SXD, TOPAZ, WISH")
+        allowedInstrumentList=mantid.kernel.StringListValidator(['']+self.INSTRUMENT_LIST)
+        self.declareProperty("Instrument","",validator=allowedInstrumentList,doc="One of the following instruments: "
+                             + ', '.join(self.INSTRUMENT_LIST))
         self.declareProperty("Bank","",doc="Bank(s) to be masked. If empty, will apply to all banks")
         self.declareProperty("Tube","",doc="Tube(s) to be masked. If empty, will apply to all tubes")
         self.declareProperty("Pixel","",doc="Pixel(s) to be masked. If empty, will apply to all pixels")
@@ -51,37 +55,24 @@ class MaskBTP(mantid.api.PythonAlgorithm):
         tubeString = self.getProperty("Tube").value
         pixelString = self.getProperty("Pixel").value
 
-        if self.instname == "" and ws == None:
-            raise ValueError("No workspace or instrument were selected" )
-
-        if ws != None:
+        if ws is not None:
             self.instrument = ws.getInstrument()
             self.instname = self.instrument.getName()
 
-        instrumentList=["ARCS","CNCS","CORELLI","HYSPEC",
-                        "MANDI","NOMAD","POWGEN","REF_M","SEQUOIA","SNAP","SXD","TOPAZ","WISH"]
-        self.bankmin={"ARCS":1,"CNCS":1,"CORELLI":1,"HYSPEC":1,"MANDI":10,
-                      "NOMAD":1,"POWGEN":1,"REF_M":1,"SEQUOIA":38,"SNAP":1,"SXD":1,"TOPAZ":10,"WISH":1}
-        self.bankmax={"ARCS":115,"CNCS":50,"CORELLI":91,"HYSPEC":20,"MANDI":59,"NOMAD":99,"POWGEN":300,
-                      "REF_M":1,"SEQUOIA":150,"SNAP":18,"SXD":11,"TOPAZ":59,"WISH":10}
-        tubemin={"ARCS":1,"CNCS":1,"CORELLI":1,"HYSPEC":1,"MANDI":0,"NOMAD":1,
-                 "POWGEN":0,"REF_M":0,"SEQUOIA":1,"SNAP":0,"SXD":0,"TOPAZ":0,"WISH":1}
-        tubemax={"ARCS":8,"CNCS":8,"CORELLI":16,"HYSPEC":8,"MANDI":255,"NOMAD":8,
-                 "POWGEN":153,"REF_M":303,"SEQUOIA":8,"SNAP":255,"SXD":63,"TOPAZ":255,"WISH":152}
-        pixmin={"ARCS":1,"CNCS":1,"CORELLI":1,"HYSPEC":1,"MANDI":0,"NOMAD":1,"POWGEN":0,
-                "REF_M":0,"SEQUOIA":1,"SNAP":0,"SXD":0,"TOPAZ":0,"WISH":1}
-        pixmax={"ARCS":128,"CNCS":128,"CORELLI":256,"HYSPEC":128,"MANDI":255,
-                "NOMAD":128,"POWGEN":6,"REF_M":255,"SEQUOIA":128,"SNAP":255,"SXD":63,"TOPAZ":255,"WISH":512}
+        # special cases are defined, default value is in front
+        self.bankmin=defaultdict(lambda: 1, {"MANDI":10,"SEQUOIA":38,"TOPAZ":10})
+        self.bankmax={"ARCS":115,"CNCS":50,"CORELLI":91,"HYSPEC":20,"MANDI":59,"NOMAD":99,"POWGEN":300,"REF_M":1,
+                      "SEQUOIA":150,"SNAP":18,"SXD":11,"TOPAZ":59,"WISH":10}
+        tubemin=defaultdict(int, {"ARCS":1,"CNCS":1,"CORELLI":1,"HYSPEC":1,"NOMAD":1,"SEQUOIA":1,"WISH":1})
+        tubemax=defaultdict(lambda: 8, {"CORELLI":16,"MANDI":255,"POWGEN":153,"REF_M":303,"SNAP":255,"SXD":63,"TOPAZ":255,"WISH":152})
+        pixmin=defaultdict(int, {"ARCS":1,"CNCS":1,"CORELLI":1,"HYSPEC":1,"NOMAD":1,"SEQUOIA":1,"WISH":1})
+        pixmax=defaultdict(lambda: 128, {"CORELLI":256,"MANDI":255,"POWGEN":6,"REF_M":255,"SNAP":255,"SXD":63,"TOPAZ":255,"WISH":512})
 
-        try:
-            instrumentList.index(self.instname)
-        except:
-            raise ValueError("Instrument "+self.instname+" not in the allowed list")
+        if self.instname not in self.INSTRUMENT_LIST:
+            raise ValueError("Instrument '"+self.instname+"' not in the allowed list")
 
-        if self.instrument==None:
+        if self.instrument is None:
             IDF=mantid.api.ExperimentInfo.getInstrumentFilename(self.instname)
-            if mantid.mtd.doesExist(self.instname+"MaskBTP"):
-                mantid.simpleapi.DeleteWorkspace(self.instname+"MaskBTP")
             ws=mantid.simpleapi.LoadEmptyInstrument(IDF,OutputWorkspace=self.instname+"MaskBTP")
             self.instrument=ws.getInstrument()
 
@@ -104,12 +95,10 @@ class MaskBTP(mantid.api.PythonAlgorithm):
         else:
             pixels=self._parseBTPlist(pixelString)
 
-
-
         detlist=[]
         for b in banks:
             ep=self._getEightPackHandle(b)
-            if ep!=None:
+            if ep is not None:
                 for t in tubes:
                     if (t<tubemin[self.instname]) or (t>tubemax[self.instname]):
                         raise ValueError("Out of range index for tube number")
@@ -121,15 +110,16 @@ class MaskBTP(mantid.api.PythonAlgorithm):
                                 try:
                                     pid=ep[int(t-tubemin[self.instname])][int(p-pixmin[self.instname])].getID()
                                 except:
-                                    raise RuntimeError("Problem finding pixel in bank="+str(b)+\
+                                    raise RuntimeError("Problem finding pixel in bank="+str(b)+
                                                        ", tube="+str(t-tubemin[self.instname])+", pixel="+str(p-pixmin[self.instname]))
                                 detlist.append(pid)
-        if len(detlist)> 0:
-            mantid.simpleapi.MaskDetectors(Workspace=ws,DetectorList=detlist)
+        detlist = numpy.array(detlist)
+        if detlist.size > 0:
+            mantid.simpleapi.MaskDetectors(Workspace=ws,DetectorList=detlist, EnableLogging=False)
         else:
             self.log().information("no detectors within this range")
         self.setProperty("Workspace",ws.name())
-        self.setProperty("MaskedDetectors", numpy.array(detlist))
+        self.setProperty("MaskedDetectors", detlist)
 
     def _parseBTPlist(self,value):
         """
@@ -170,15 +160,6 @@ class MaskBTP(mantid.api.PythonAlgorithm):
                 return self.instrument.getComponentByName("T row")[banknum-78][0]
             else:
                 raise ValueError("Out of range index for ARCS instrument bank numbers")
-        elif self.instname=="CORELLI":
-            if self.bankmin[self.instname]<=banknum<= 29:
-                return self.instrument.getComponentByName("A row")[banknum-1][0]
-            elif 30<=banknum<=62:
-                return self.instrument.getComponentByName("B row")[banknum-30][0]
-            elif 63<=banknum<=self.bankmax[self.instname]:
-                return self.instrument.getComponentByName("C row")[banknum-63][0]
-            else:
-                raise ValueError("Out of range index for CORELLI instrument bank numbers")
         elif self.instname=="SEQUOIA":
             if self.bankmin[self.instname]<=banknum<= 74:
                 return self.instrument.getComponentByName("B row")[banknum-38][0]
@@ -188,7 +169,7 @@ class MaskBTP(mantid.api.PythonAlgorithm):
                 return self.instrument.getComponentByName("D row")[banknum-114][0]
             else:
                 raise ValueError("Out of range index for SEQUOIA instrument bank numbers")
-        elif self.instname=="CNCS" or self.instname=="HYSPEC":
+        elif self.instname in ["CNCS", "CORELLI","HYSPEC"]:
             if self.bankmin[self.instname]<=banknum<= self.bankmax[self.instname]:
                 return self.instrument.getComponentByName("bank"+str(banknum))[0]
             else:
