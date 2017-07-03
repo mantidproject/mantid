@@ -135,8 +135,6 @@ MantidVec DetectorEfficiencyCorUser::calculateEfficiency(
   for (size_t i = 0; i < effOut.size(); ++i) {
     e = m_Ei - xIn[i];
     const double eff = evaluate(parser);
-    g_log.debug() << "Formula " << parser.GetExpr() << " with energy " << e
-                  << " evaluated to " << eff << '\n';
     effOut[i] = eff / eff0;
   }
   return effOut;
@@ -181,7 +179,7 @@ std::string DetectorEfficiencyCorUser::retrieveFormula(
   auto param = paramMap.getRecursive(det.get(), formulaParamName, "string");
   if (!param) {
     throw Kernel::Exception::InstrumentDefinitionError(
-        "There is no <" + formulaParamName + "> in the instrument definition!");
+        "No <" + formulaParamName + "> parameter found for component '" + det->getFullName() + "' in the instrument definition.");
   }
   const auto ret = param->asString();
   g_log.debug() << "Found formula for workspace index " << workspaceIndex
