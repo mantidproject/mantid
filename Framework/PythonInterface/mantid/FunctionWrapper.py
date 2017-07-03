@@ -30,10 +30,10 @@ class FunctionWrapper:
       if(isinstance(self,CompositeFunctionWrapper)):
         sum = self
         sum.fun.add(other.fun)
-        sum = sum.flatten()
-        return CompositeFunctionWrapper(sum)
+        return sum.flatten()
       else:
-        return CompositeFunctionWrapper(self,other)
+        sum = CompositeFunctionWrapper(self,other)
+        return sum.flatten()
         
   def tie (self, *args, **kwargs):
     for a in args:
