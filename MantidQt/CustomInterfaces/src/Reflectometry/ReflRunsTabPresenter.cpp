@@ -197,13 +197,21 @@ void ReflRunsTabPresenter::search() {
         "Login Failed");
     return;
   }
-  auto algSearch = AlgorithmManager::Instance().create("CatalogGetDataFiles");
-  algSearch->initialize();
-  algSearch->setChild(true);
-  algSearch->setLogging(false);
-  algSearch->setProperty("Session", sessionId);
-  algSearch->setProperty("InvestigationId", searchString);
-  algSearch->setProperty("OutputWorkspace", "_ReflSearchResults");
+  IAlgorithm_sptr algSearch;
+  if (AlgorithmManager::Instance().newestInstanceOf("CatalogGetDataFiles") !=
+      NULL) {
+    algSearch =
+        AlgorithmManager::Instance().newestInstanceOf("CatalogGetDataFiles");
+  } else {
+    algSearch = AlgorithmManager::Instance().create("CatalogGetDataFiles");
+    algSearch->initialize();
+    algSearch->setChild(true);
+    algSearch->setLogging(false);
+    algSearch->setProperty("Session", sessionId);
+    algSearch->setProperty("InvestigationId", searchString);
+    algSearch->setProperty("OutputWorkspace", "_ReflSearchResults");
+  }
+
   auto algRunner = m_view->getAlgorithmRunner();
   algRunner->startAlgorithm(algSearch);
 }
@@ -225,12 +233,19 @@ void ReflRunsTabPresenter::populateSearch(IAlgorithm_sptr searchAlg) {
 * runs to table and processes them
 */
 void ReflRunsTabPresenter::autoreduce() {
-  notify(IReflRunsTabPresenter::ICATSearchCompleteFlag);
-  m_view->setAllSearchRowsSelected(); // Select all rows for transfer
-  notify(IReflRunsTabPresenter::TransferFlag);
-
   auto tablePresenter = m_tablePresenters.at(m_view->getSelectedGroup());
-  tablePresenter->notify(DataProcessorPresenter::SelectAllGroupsFlag);
+
+  // If a new selection isn't made, just process the existing selection instead
+  if (tablePresenter->newSelectionMade()) {
+    tablePresenter->notify(DataProcessorPresenter::SelectAllGroupsFlag);
+    tablePresenter->notify(
+        DataProcessorPresenter::DeleteGroupFlag); // Clear existing rows
+    notify(IReflRunsTabPresenter::ICATSearchCompleteFlag);
+    m_view->setAllSearchRowsSelected(); // Select all rows for transfer
+    notify(IReflRunsTabPresenter::TransferFlag);
+    tablePresenter->notify(DataProcessorPresenter::SelectAllGroupsFlag);
+  }
+
   tablePresenter->notify(DataProcessorPresenter::ProcessFlag);
 }
 

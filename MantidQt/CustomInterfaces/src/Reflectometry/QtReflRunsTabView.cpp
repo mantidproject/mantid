@@ -262,7 +262,7 @@ This slot notifies the presenter that the "search" button has been pressed
 void QtReflRunsTabView::on_actionSearch_triggered() {
   m_presenter->notify(IReflRunsTabPresenter::SearchFlag);
   connect(m_algoRunner.get(), SIGNAL(algorithmComplete(bool)), this,
-          SLOT(icatSearchComplete()));
+          SLOT(icatSearchComplete()), Qt::UniqueConnection);
 }
 
 /**
@@ -272,7 +272,7 @@ This slot conducts a search operation before notifying the presenter that the
 void QtReflRunsTabView::on_actionAutoreduce_triggered() {
   m_presenter->notify(IReflRunsTabPresenter::SearchFlag);
   connect(m_algoRunner.get(), SIGNAL(algorithmComplete(bool)), this,
-          SLOT(doAutoreduction()));
+          SLOT(doAutoreduction()), Qt::UniqueConnection);
 }
 
 /**

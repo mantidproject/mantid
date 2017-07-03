@@ -1098,6 +1098,7 @@ void GenericDataProcessorPresenter::notify(DataProcessorPresenter::Flag flag) {
     break;
   case DataProcessorPresenter::SelectAllGroupsFlag:
     selectAll();
+    break;
   case DataProcessorPresenter::PauseFlag:
     pause();
     break;
