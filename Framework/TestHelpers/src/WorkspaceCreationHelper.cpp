@@ -374,9 +374,13 @@ create2DWorkspaceWithFullInstrument(int nhist, int nbins, bool includeMonitors,
 }
 
 //================================================================================================================
+/*
+ * startTime is in seconds
+ */
 MatrixWorkspace_sptr create2DDetectorScanWorkspaceWithFullInstrument(
-    int nhist, int nbins, size_t nTimeIndexes, bool includeMonitors,
-    bool startYNegative, bool isHistogram, const std::string &instrumentName) {
+    int nhist, int nbins, size_t nTimeIndexes, size_t startTime,
+    bool includeMonitors, bool startYNegative, bool isHistogram,
+    const std::string &instrumentName) {
 
   auto baseWS = create2DWorkspaceWithFullInstrument(
       nhist, nbins, includeMonitors, startYNegative, isHistogram,
@@ -390,7 +394,9 @@ MatrixWorkspace_sptr create2DDetectorScanWorkspaceWithFullInstrument(
     timeRanges.push_back(double(i + 1));
   }
 
-  builder.setTimeRanges(Mantid::Kernel::DateAndTime(0), timeRanges);
+  builder.setTimeRanges(Mantid::Kernel::DateAndTime(int(startTime), 0),
+                        timeRanges);
+
   return builder.buildWorkspace();
 }
 

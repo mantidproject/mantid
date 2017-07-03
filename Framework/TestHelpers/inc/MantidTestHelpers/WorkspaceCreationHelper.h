@@ -235,8 +235,9 @@ Mantid::DataObjects::Workspace2D_sptr create2DWorkspaceWithFullInstrument(
  */
 Mantid::API::MatrixWorkspace_sptr
 create2DDetectorScanWorkspaceWithFullInstrument(
-    int nhist, int nbins, size_t nTimeIndexes, bool includeMonitors = false,
-    bool startYNegative = false, bool isHistogram = true,
+    int nhist, int nbins, size_t nTimeIndexes, size_t startTime = 0,
+    bool includeMonitors = false, bool startYNegative = false,
+    bool isHistogram = true,
     const std::string &instrumentName = std::string("testInst"));
 
 /**
