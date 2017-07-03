@@ -45,7 +45,7 @@ if ( CMAKE_COMPILER_IS_GNUCXX )
   if (NOT (GCC_COMPILER_VERSION VERSION_LESS "5.1"))
     set(GNUFLAGS "${GNUFLAGS} -Wsuggest-override")
   endif()
-else if ( "${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang" )
+elseif ( "${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang" )
   set(GNUFLAGS "${GNUFLAGS} -Wno-sign-conversion")
 endif()
 
