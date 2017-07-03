@@ -34,18 +34,20 @@ class DataProcessorSaveTableCommand : public DataProcessorCommandBase {
 public:
   DataProcessorSaveTableCommand(DataProcessorPresenter *tablePresenter)
       : DataProcessorCommandBase(tablePresenter){};
+  DataProcessorSaveTableCommand(const QDataProcessorWidget &widget)
+      : DataProcessorCommandBase(widget){};
   virtual ~DataProcessorSaveTableCommand(){};
 
   void execute() override {
     m_presenter->notify(DataProcessorPresenter::SaveFlag);
   };
-  std::string name() override { return std::string("Save Table"); }
-  std::string icon() override { return std::string("://filesave.png"); }
-  std::string tooltip() override { return std::string("Save Table"); }
-  std::string whatsthis() override {
-    return std::string("Saves current table as a table workspace");
+  QString name() override { return QString("Save Table"); }
+  QString icon() override { return QString("://filesave.png"); }
+  QString tooltip() override { return QString("Save Table"); }
+  QString whatsthis() override {
+    return QString("Saves current table as a table workspace");
   }
-  std::string shortcut() override { return std::string(); }
+  QString shortcut() override { return QString(); }
 };
 }
 }

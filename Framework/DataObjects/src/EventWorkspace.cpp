@@ -13,6 +13,7 @@
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/FunctionTask.h"
+#include "MantidKernel/IPropertyManager.h"
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 
@@ -38,7 +39,8 @@ using Kernel::Exception::NotImplementedError;
 using std::size_t;
 using namespace Mantid::Kernel;
 
-EventWorkspace::EventWorkspace() : mru(new EventWorkspaceMRU) {}
+EventWorkspace::EventWorkspace(const Parallel::StorageMode storageMode)
+    : IEventWorkspace(storageMode), mru(new EventWorkspaceMRU) {}
 
 EventWorkspace::EventWorkspace(const EventWorkspace &other)
     : IEventWorkspace(other), mru(new EventWorkspaceMRU) {

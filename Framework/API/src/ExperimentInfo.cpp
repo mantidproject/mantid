@@ -31,6 +31,7 @@
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/EigenConversionHelpers.h"
 #include "MantidKernel/InstrumentInfo.h"
+#include "MantidKernel/IPropertyManager.h"
 #include "MantidKernel/Property.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/StringTokenizer.h"
@@ -921,8 +922,8 @@ double ExperimentInfo::getEFixed(const detid_t detID) const {
  * required for Indirect mode
  * @return The current efixed value
  */
-double
-ExperimentInfo::getEFixed(const Geometry::IDetector_const_sptr detector) const {
+double ExperimentInfo::getEFixed(
+    const boost::shared_ptr<const Geometry::IDetector> detector) const {
   populateIfNotLoaded();
   Kernel::DeltaEMode::Type emode = getEMode();
   if (emode == Kernel::DeltaEMode::Direct) {

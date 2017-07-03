@@ -8,6 +8,7 @@
 #include "MantidTestHelpers/FakeObjects.h"
 #include "MantidKernel/MandatoryValidator.h"
 
+using namespace Mantid;
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 

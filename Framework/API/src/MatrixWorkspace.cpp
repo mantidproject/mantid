@@ -12,12 +12,14 @@
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidGeometry/MDGeometry/MDFrame.h"
 #include "MantidGeometry/MDGeometry/GeneralFrame.h"
+#include "MantidKernel/IPropertyManager.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/MDUnit.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/make_unique.h"
 #include "MantidIndexing/IndexInfo.h"
 #include "MantidIndexing/GlobalSpectrumIndex.h"
+#include "MantidParallel/Communicator.h"
 #include "MantidTypes/SpectrumDefinition.h"
 
 #include <cmath>
@@ -27,7 +29,6 @@
 
 using Mantid::Kernel::DateAndTime;
 using Mantid::Kernel::TimeSeriesProperty;
-using NeXus::NXcompression;
 using Mantid::Kernel::Strings::toString;
 
 namespace Mantid {
@@ -39,16 +40,15 @@ using Kernel::V3D;
 namespace {
 /// static logger
 Kernel::Logger g_log("MatrixWorkspace");
-constexpr double rad2deg = 180. / M_PI;
 }
 const std::string MatrixWorkspace::xDimensionId = "xDimension";
 const std::string MatrixWorkspace::yDimensionId = "yDimension";
 
 /// Default constructor
-MatrixWorkspace::MatrixWorkspace()
-    : IMDWorkspace(), ExperimentInfo(), m_axes(), m_isInitialized(false),
-      m_YUnit(), m_YUnitLabel(), m_isCommonBinsFlagSet(false),
-      m_isCommonBinsFlag(false), m_masks() {}
+MatrixWorkspace::MatrixWorkspace(const Parallel::StorageMode storageMode)
+    : IMDWorkspace(storageMode), ExperimentInfo(), m_axes(),
+      m_isInitialized(false), m_YUnit(), m_YUnitLabel(),
+      m_isCommonBinsFlagSet(false), m_isCommonBinsFlag(false), m_masks() {}
 
 MatrixWorkspace::MatrixWorkspace(const MatrixWorkspace &other)
     : IMDWorkspace(other), ExperimentInfo(other) {
@@ -106,6 +106,11 @@ const Indexing::IndexInfo &MatrixWorkspace::indexInfo() const {
  *
  * Used for setting spectrum number and detector ID information of spectra */
 void MatrixWorkspace::setIndexInfo(const Indexing::IndexInfo &indexInfo) {
+  if (m_isInitialized && (indexInfo.storageMode() != storageMode()))
+    throw std::invalid_argument("MatrixWorkspace::setIndexInfo: "
+                                "Parallel::StorageMode in IndexInfo does not "
+                                "match storage mode in workspace");
+
   // Comparing the *local* size of the indexInfo.
   if (indexInfo.size() != getNumberHistograms())
     throw std::invalid_argument("MatrixWorkspace::setIndexInfo: IndexInfo size "
@@ -116,6 +121,7 @@ void MatrixWorkspace::setIndexInfo(const Indexing::IndexInfo &indexInfo) {
     getSpectrum(i)
         .setSpectrumNo(static_cast<specnum_t>(indexInfo.spectrumNumber(i)));
   }
+  setStorageMode(indexInfo.storageMode());
   *m_indexInfo = indexInfo;
   m_indexInfoNeedsUpdate = false;
   if (!m_indexInfo->spectrumDefinitions())
@@ -145,6 +151,11 @@ void MatrixWorkspace::setIndexInfo(const Indexing::IndexInfo &indexInfo) {
 /// Variant of setIndexInfo, used by WorkspaceFactoryImpl.
 void MatrixWorkspace::setIndexInfoWithoutISpectrumUpdate(
     const Indexing::IndexInfo &indexInfo) {
+  // Workspace is already initialized (m_isInitialized == true), but this is
+  // called by initializedFromParent which is some sort of second-stage
+  // initialization, so there is no check for storage mode compatibility here,
+  // in contrast to what setIndexInfo() does.
+  setStorageMode(indexInfo.storageMode());
   // Comparing the *local* size of the indexInfo.
   if (indexInfo.size() != getNumberHistograms())
     throw std::invalid_argument("MatrixWorkspace::setIndexInfo: IndexInfo size "
@@ -255,7 +266,11 @@ void MatrixWorkspace::initialize(const std::size_t &NVectors,
 void MatrixWorkspace::initialize(const Indexing::IndexInfo &indexInfo,
                                  const HistogramData::Histogram &histogram) {
   initialize(indexInfo.size(), histogram);
+  // Reopen initialization since setIndexInfo needs to disable some consistency
+  // checks that prevent setting an incompatible IndexInfo after initialization.
+  m_isInitialized = false;
   setIndexInfo(indexInfo);
+  m_isInitialized = true;
 }
 
 //---------------------------------------------------------------------------------------
@@ -642,6 +657,10 @@ double MatrixWorkspace::getXMax() const {
 }
 
 void MatrixWorkspace::getXMinMax(double &xmin, double &xmax) const {
+  if (m_indexInfo->size() != m_indexInfo->globalSize())
+    throw std::runtime_error(
+        "MatrixWorkspace: Parallel support for XMin and XMax not implemented.");
+
   // set to crazy values to start
   xmin = std::numeric_limits<double>::max();
   xmax = -1.0 * xmin;
@@ -1550,121 +1569,6 @@ signal_t MatrixWorkspace::getSignalWithMaskAtCoord(
   return getSignalAtCoord(coords, normalization);
 }
 
-/** Save the spectra detector map to an open NeXus file.
-* @param file :: open NeXus file
-* @param spec :: list of the Workspace Indices to save.
-* @param compression :: NXcompression int to indicate how to compress
-*/
-void MatrixWorkspace::saveSpectraMapNexus(
-    ::NeXus::File *file, const std::vector<int> &spec,
-    const ::NeXus::NXcompression compression) const {
-  // Count the total number of detectors
-  std::size_t nDetectors = 0;
-  for (auto index : spec) {
-    nDetectors +=
-        this->getSpectrum(static_cast<size_t>(index)).getDetectorIDs().size();
-  }
-
-  if (nDetectors < 1) {
-    // No data in spectraMap to write
-    g_log.warning("No spectramap data to write");
-    return;
-  }
-
-  // Start the detector group
-  file->makeGroup("detector", "NXdetector", 1);
-  file->putAttr("version", 1);
-
-  int numberSpec = int(spec.size());
-  // allocate space for the Nexus Muon format of spctra-detector mapping
-  std::vector<int32_t> detector_index(
-      numberSpec + 1, 0); // allow for writing one more than required
-  std::vector<int32_t> detector_count(numberSpec, 0);
-  std::vector<int32_t> detector_list(nDetectors, 0);
-  std::vector<int32_t> spectra(numberSpec, 0);
-  std::vector<double> detPos(nDetectors * 3);
-  detector_index[0] = 0;
-  int id = 0;
-
-  int ndet = 0;
-  // get data from map into Nexus Muon format
-  for (int i = 0; i < numberSpec; i++) {
-    // Workspace index
-    int si = spec[i];
-    // Spectrum there
-    const auto &spectrum = this->getSpectrum(si);
-    spectra[i] = int32_t(spectrum.getSpectrumNo());
-
-    // The detectors in this spectrum
-    const auto &detectorgroup = spectrum.getDetectorIDs();
-    const int ndet1 = static_cast<int>(detectorgroup.size());
-
-    detector_index[i + 1] = int32_t(
-        detector_index[i] +
-        ndet1); // points to start of detector list for the next spectrum
-    detector_count[i] = int32_t(ndet1);
-    ndet += ndet1;
-
-    std::set<detid_t>::const_iterator it;
-    for (it = detectorgroup.begin(); it != detectorgroup.end(); ++it) {
-      detector_list[id++] = int32_t(*it);
-    }
-  }
-  // Cut the extra entry at the end of detector_index
-  detector_index.resize(numberSpec);
-
-  // write data as Nexus sections detector{index,count,list}
-  std::vector<int> dims(1, numberSpec);
-  file->writeCompData("detector_index", detector_index, dims, compression,
-                      dims);
-  file->writeCompData("detector_count", detector_count, dims, compression,
-                      dims);
-  dims[0] = ndet;
-  file->writeCompData("detector_list", detector_list, dims, compression, dims);
-  dims[0] = numberSpec;
-  file->writeCompData("spectra", spectra, dims, compression, dims);
-
-  // Get all the positions
-  try {
-    Geometry::Instrument_const_sptr inst = this->getInstrument();
-    Geometry::IComponent_const_sptr sample = inst->getSample();
-    if (sample) {
-      Kernel::V3D sample_pos = sample->getPos();
-      for (int i = 0; i < ndet; i++) {
-        double R, Theta, Phi;
-        try {
-          Geometry::IDetector_const_sptr det =
-              inst->getDetector(detector_list[i]);
-          Kernel::V3D pos = det->getPos() - sample_pos;
-          pos.getSpherical(R, Theta, Phi);
-          R = det->getDistance(*sample);
-          Theta = this->detectorTwoTheta(*det) * rad2deg;
-        } catch (...) {
-          R = 0.;
-          Theta = 0.;
-          Phi = 0.;
-        }
-        // Need to get R & Theta through these methods to be correct for grouped
-        // detectors
-        detPos[3 * i] = R;
-        detPos[3 * i + 1] = Theta;
-        detPos[3 * i + 2] = Phi;
-      }
-    } else
-      for (int i = 0; i < 3 * ndet; i++)
-        detPos[i] = 0.;
-
-    dims[0] = ndet;
-    dims.push_back(3);
-    dims[1] = 3;
-    file->writeCompData("detector_positions", detPos, dims, compression, dims);
-  } catch (...) {
-    g_log.error("Unknown error caught when saving detector positions.");
-  }
-
-  file->closeGroup();
-}
-
 /*
 MDMasking for a Matrix Workspace has not been implemented.
 @param :
@@ -1981,6 +1885,11 @@ void MatrixWorkspace::setImageE(const MantidImage &image, size_t start,
 }
 
 void MatrixWorkspace::invalidateCachedSpectrumNumbers() {
+  if (storageMode() == Parallel::StorageMode::Distributed &&
+      m_indexInfo->communicator().size() > 1)
+    throw std::logic_error("Setting spectrum numbers in MatrixWorkspace via "
+                           "ISpectrum::setSpectrumNo is not possible in MPI "
+                           "runs for distributed workspaces. Use IndexInfo.");
   m_indexInfoNeedsUpdate = true;
 }
 
@@ -2012,6 +1921,12 @@ void MatrixWorkspace::updateCachedDetectorGrouping(const size_t index) const {
 void MatrixWorkspace::buildDefaultSpectrumDefinitions() {
   const auto &detInfo = detectorInfo();
   size_t numberOfDetectors{detInfo.size()};
+  if (numberOfDetectors == 0) {
+    // Default to empty spectrum definitions if there is no instrument.
+    m_indexInfo->setSpectrumDefinitions(
+        std::vector<SpectrumDefinition>(m_indexInfo->size()));
+    return;
+  }
   size_t numberOfSpectra{0};
   if (detInfo.isScanning()) {
     for (size_t i = 0; i < numberOfDetectors; ++i)

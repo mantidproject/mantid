@@ -2,9 +2,9 @@
 from __future__ import (absolute_import, division, print_function)
 from Direct.NonIDF_Properties import *
 
-from collections import OrderedDict,Iterable
+from collections import OrderedDict, Iterable
 from six import iteritems
-
+from mantid.kernel import funcinspect
 
 class PropertyManager(NonIDF_Properties):
     """ Class defines the interface for Direct inelastic reduction with properties
@@ -302,15 +302,12 @@ class PropertyManager(NonIDF_Properties):
         """ Method returns list of monitors ID used during reduction """
 
         used_mon=set()
-        for case in common.switch(self.normalise_method):
-            if case('monitor-1'):
-                used_mon.add(self.mon1_norm_spec)
-                break
-            if case('monitor-2'):
-                used_mon.add(self.mon2_norm_spec)
-                break
-            if case(): # default, could also just omit condition or 'if True'
-                pass
+        if self.normalise_method == 'monitor-1':
+            used_mon.add(self.mon1_norm_spec)
+        elif self.normalise_method == 'monitor-2':
+            used_mon.add(self.mon2_norm_spec)
+        else: # default, could also just omit condition or 'if True'
+            pass
         #
 
         def add_ei_monitors(used_mon,ei_mon_list):

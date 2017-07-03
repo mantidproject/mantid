@@ -33,21 +33,21 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 class DataProcessorExpandGroupsCommand : public DataProcessorCommandBase {
 public:
   DataProcessorExpandGroupsCommand(DataProcessorPresenter *tablePresenter)
-      : DataProcessorCommandBase(tablePresenter){};
-  virtual ~DataProcessorExpandGroupsCommand(){};
+      : DataProcessorCommandBase(tablePresenter) {}
+  virtual ~DataProcessorExpandGroupsCommand() {}
 
   void execute() override {
     m_presenter->notify(DataProcessorPresenter::ExpandAllGroupsFlag);
   };
-  std::string name() override { return std::string("Expand All Groups"); }
-  std::string icon() override { return std::string("://expand_all.png"); }
-  std::string tooltip() override { return std::string("Expands all groups"); }
-  std::string whatsthis() override {
-    return std::string(
+  QString name() override { return QString("Expand All Groups"); }
+  QString icon() override { return QString("://expand_all.png"); }
+  QString tooltip() override { return QString("Expands all groups"); }
+  QString whatsthis() override {
+    return QString(
         "If any groups in the table are currently collapsed this will expand "
         "all collapsed groups, revealing their individual runs.");
   }
-  std::string shortcut() override { return std::string(); }
+  QString shortcut() override { return QString(); }
 };
 }
 }

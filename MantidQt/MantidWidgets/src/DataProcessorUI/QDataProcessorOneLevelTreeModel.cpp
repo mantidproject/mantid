@@ -197,5 +197,15 @@ bool QDataProcessorOneLevelTreeModel::setData(const QModelIndex &index,
   return true;
 }
 
+/** Return the underlying data structure, i.e. the table workspace this model is
+* representing
+*
+* @return :: the underlying table workspace
+*/
+ITableWorkspace_sptr
+QDataProcessorOneLevelTreeModel::getTableWorkspace() const {
+  return m_tWS;
+}
+
 } // namespace MantidWidgets
 } // namespace Mantid

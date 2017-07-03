@@ -59,7 +59,7 @@ class LoadCRYSTAL(AbinsModules.GeneralDFTProgram):
         """
         found_type = False
         molecular = False
-        with open(self._clerk.get_input_filename(),  "r") as crystal_file:
+        with open(self._clerk.get_input_filename(), "r") as crystal_file:
             for line in crystal_file:
                 if "MOLECULAR CALCULATION" in line or "0D - MOLECULE" in line:
                     molecular = True
@@ -86,7 +86,7 @@ class LoadCRYSTAL(AbinsModules.GeneralDFTProgram):
         :return: list with atomic coordinates
         """
         filename = self._clerk.get_input_filename()
-        with open(filename,  "r") as crystal_file:
+        with open(filename, "r") as crystal_file:
             logger.notice("Reading from " + filename)
             coord_lines = []
             found_coord = False
@@ -95,14 +95,18 @@ class LoadCRYSTAL(AbinsModules.GeneralDFTProgram):
                 if "ATOM          X(ANGSTROM)         Y(ANGSTROM)" in line:
                     found_coord = True
                 if found_coord:
-                    if "LOCAL ATOMIC FUNCTIONS BASIS SET" in line or \
-                                    "ROTATION" in line or "T = ATOM BELONGING " in line or \
-                                    "PSEUDOPOTENTIAL INFORMATION" in line or\
-                                    "STARTING BASIS SET HANDLING" in line:
 
-                        found_coord = False
-                        if not found_coord:
-                            finished = True
+                    basis_set = "LOCAL ATOMIC FUNCTIONS BASIS SET" in line
+                    rotation = "ROTATION" in line
+                    trans = "T = ATOM BELONGING " in line
+                    pot = "PSEUDOPOTENTIAL INFORMATION" in line
+                    basis = "STARTING BASIS SET HANDLING" in line
+
+                    if basis_set or rotation or trans or pot or basis:
+
+                            found_coord = False
+                            if not found_coord:
+                                finished = True
                 if finished:
                     break
                 if found_coord and "ATOM" not in line and \

@@ -13,8 +13,8 @@ class DataSets(BaseScriptElement):
     incident_medium_list = ['H2O']
     incident_medium_index_selected = 0
     number_attenuator = 0
-    peak_selection = [0,0]
-    back_selection = [0,0]
+    peak_selection = [0, 0]
+    back_selection = [0, 0]
     lambda_requested = 'N/A'
     s1h = 'N/A'
     s2h = 'N/A'
@@ -44,7 +44,7 @@ class DataSets(BaseScriptElement):
         script += 'Incident medium index: %s \n' % str(self.incident_medium_index_selected)
         script += 'TOF from: %s \n' % str(self.tof_min)
         script += 'TOF to: %s \n' % str(self.tof_max)
-        script += 'Scaling factor file: %s \n' %str(self.scaling_factor_file)
+        script += 'Scaling factor file: %s \n' % str(self.scaling_factor_file)
         script += 'Number of attenuator: %s \n' % str(self.number_attenuator)
         script += 'Peak from pixel: %s \n' % str(self.peak_selection[0])
         script += 'Peak to pixel: %s \n' % str(self.peak_selection[1])
@@ -63,7 +63,7 @@ class DataSets(BaseScriptElement):
         """
             Create XML from the current data.
         """
-        xml  = "<RefLSFCalculator>\n"
+        xml = "<RefLSFCalculator>\n"
 #        xml += "<incident_medium_list>%s</incident_medium_list>\n" % ','.join([str(i) for i in self.incident_medium_list])
         xml += "<incident_medium_list>%s</incident_medium_list>\n" % str(self.incident_medium_list[0])
         xml += "<tof_min>%s</tof_min>\n" % str(self.tof_min)
@@ -89,46 +89,44 @@ class DataSets(BaseScriptElement):
         self.reset()
         dom = xml.dom.minidom.parseString(xml_str)
         self.from_xml_element(dom)
-        element_list = dom.getElementsByTagName("RefLSFCalculator")
-        if len(element_list)>0:
-            instrument_dom = element_list[0]
+        dom.getElementsByTagName("RefLSFCalculator")
 
     def from_xml_element(self, instrument_dom):
         """
             Read in data from XML
             @param xml_str: text to read the data from
         """
-        #incident medium
+        # incident medium
         self.incident_medium_list = BaseScriptElement.getStringList(instrument_dom, "incident_medium_list")
         self.incident_medium_index_selected = BaseScriptElement.getIntElement(instrument_dom, "incident_medium_index_selected")
 
         self.tof_min = BaseScriptElement.getFloatElement(instrument_dom, "tof_min")
         self.tof_max = BaseScriptElement.getFloatElement(instrument_dom, "tof_max")
 
-        #run number
+        # run number
         self.data_file = BaseScriptElement.getIntElement(instrument_dom, "data_file")
 
-        #number of attenuator
+        # number of attenuator
         self.number_attenuator = BaseScriptElement.getIntElement(instrument_dom, "number_attenuator")
 
-        #peak selection from and to
+        # peak selection from and to
         self.peak_selection = [BaseScriptElement.getIntElement(instrument_dom, "peak_selection_from_pixel"),
                                BaseScriptElement.getIntElement(instrument_dom, "peak_selection_to_pixel")]
 
-        #background flag and selection from and to
+        # background flag and selection from and to
         self.back_selection = [BaseScriptElement.getIntElement(instrument_dom, "back_selection_from_pixel"),
                                BaseScriptElement.getIntElement(instrument_dom, "back_selection_to_pixel")]
 
-        #lambda requested
+        # lambda requested
         self.lambda_requested = BaseScriptElement.getStringElement(instrument_dom, "lambda_requested")
 
-        #s1h, s2h, s1w, s2w
+        # s1h, s2h, s1w, s2w
         self.s1h = BaseScriptElement.getStringElement(instrument_dom, "s1h")
         self.s2h = BaseScriptElement.getStringElement(instrument_dom, "s2h")
         self.s1w = BaseScriptElement.getStringElement(instrument_dom, "s1w")
         self.s2w = BaseScriptElement.getStringElement(instrument_dom, "s2w")
 
-        #scaling factor file
+        # scaling factor file
         self.scaling_factor_file = BaseScriptElement.getStringElement(instrument_dom, "scaling_factor_file")
 
     def reset(self):

@@ -23,7 +23,7 @@ ReflMainWindowPresenter::ReflMainWindowPresenter(
     IReflSaveTabPresenter *savePresenter)
     : m_view(view), m_runsPresenter(runsPresenter),
       m_eventPresenter(eventPresenter), m_settingsPresenter(settingsPresenter),
-      m_savePresenter(savePresenter) {
+      m_savePresenter(savePresenter), m_isProcessing(false) {
 
   // Tell the tab presenters that this is going to be the main presenter
   m_runsPresenter->acceptMainPresenter(this);
@@ -37,6 +37,23 @@ ReflMainWindowPresenter::ReflMainWindowPresenter(
 /** Destructor
 */
 ReflMainWindowPresenter::~ReflMainWindowPresenter() {}
+
+/**
+Used by the view to tell the presenter something has changed
+*/
+void ReflMainWindowPresenter::notify(IReflMainWindowPresenter::Flag flag) {
+
+  switch (flag) {
+  case Flag::ConfirmReductionPausedFlag:
+    m_isProcessing = false;
+    break;
+  case Flag::ConfirmReductionResumedFlag:
+    m_isProcessing = true;
+    break;
+  }
+  // Not having a 'default' case is deliberate. gcc issues a warning if there's
+  // a flag we aren't handling.
+}
 
 /** Returns values passed for 'Transmission run(s)'
 *
@@ -132,17 +149,6 @@ void ReflMainWindowPresenter::giveUserCritical(const std::string &prompt,
 }
 
 /**
-Tells the view to show a warning dialog
-@param prompt : The prompt to appear on the dialog
-@param title : The text for the title bar of the dialog
-*/
-void ReflMainWindowPresenter::giveUserWarning(const std::string &prompt,
-                                              const std::string &title) {
-
-  m_view->giveUserWarning(prompt, title);
-}
-
-/**
 Tells the view to show an information dialog
 @param prompt : The prompt to appear on the dialog
 @param title : The text for the title bar of the dialog
@@ -151,33 +157,6 @@ void ReflMainWindowPresenter::giveUserInfo(const std::string &prompt,
                                            const std::string &title) {
 
   m_view->giveUserInfo(prompt, title);
-}
-
-/**
-Tells the view to ask the user a Yes/No question
-@param prompt : The prompt to appear on the dialog
-@param title : The text for the title bar of the dialog
-@returns a boolean true if Yes, false if No
-*/
-bool ReflMainWindowPresenter::askUserYesNo(const std::string &prompt,
-                                           const std::string &title) {
-
-  return m_view->askUserYesNo(prompt, title);
-}
-
-/**
-Tells the view to ask the user to enter a string.
-@param prompt : The prompt to appear on the dialog
-@param title : The text for the title bar of the dialog
-@param defaultValue : The default value entered.
-@returns The user's string if submitted, or an empty string
-*/
-std::string
-ReflMainWindowPresenter::askUserString(const std::string &prompt,
-                                       const std::string &title,
-                                       const std::string &defaultValue) {
-
-  return m_view->askUserString(prompt, title, defaultValue);
 }
 
 /**
@@ -199,6 +178,15 @@ void ReflMainWindowPresenter::setInstrumentName(
     const std::string &instName) const {
 
   m_settingsPresenter->setInstrumentName(instName);
+}
+
+/**
+Checks whether or not data is currently being processed in the Runs Tab
+* @return : Bool on whether data is being processed
+*/
+bool ReflMainWindowPresenter::checkIfProcessing() const {
+
+  return m_isProcessing;
 }
 
 /** Checks for Settings Tab null pointer

@@ -3,6 +3,8 @@
 
 #include "MantidAPI/AlgorithmManager.h"
 
+using namespace Mantid;
+
 namespace FitTestHelpers {
 
 enum CurveBenchmarks { SingleB2BPeak, SmoothishGaussians };

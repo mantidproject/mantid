@@ -6,6 +6,7 @@
 #include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Logger.h"
+#include "MantidKernel/Matrix.h"
 #include <algorithm>
 #include <iostream>
 #include <ostream>

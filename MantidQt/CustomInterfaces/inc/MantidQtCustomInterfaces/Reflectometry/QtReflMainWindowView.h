@@ -5,6 +5,8 @@
 #include "MantidQtCustomInterfaces/Reflectometry/IReflMainWindowView.h"
 #include "ui_ReflMainWindowWidget.h"
 
+#include <QCloseEvent>
+
 namespace MantidQt {
 namespace CustomInterfaces {
 
@@ -52,18 +54,17 @@ public:
   /// This interface's categories.
   static QString categoryInfo() { return "Reflectometry"; }
 
-  /// Dialog/Prompt methods
-  std::string askUserString(const std::string &prompt, const std::string &title,
-                            const std::string &defaultValue) override;
-  bool askUserYesNo(const std::string &prompt,
-                    const std::string &title) override;
-  void giveUserWarning(const std::string &prompt,
-                       const std::string &title) override;
+  /// Dialog to show an error message
   void giveUserCritical(const std::string &prompt,
                         const std::string &title) override;
+  /// Dialog to show information
   void giveUserInfo(const std::string &prompt,
                     const std::string &title) override;
+  /// Run a python algorithm
   std::string runPythonAlgorithm(const std::string &pythonCode) override;
+
+  /// Close window handler
+  void closeEvent(QCloseEvent *event) override;
 
 private:
   /// Initializes the interface

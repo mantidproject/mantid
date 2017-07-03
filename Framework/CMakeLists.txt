@@ -56,6 +56,7 @@ if ( ${CMAKE_SYSTEM_NAME} MATCHES "Linux" )
   endif ( MPI_BUILD )
 endif ()
 
+set ( MPI_EXPERIMENTAL OFF CACHE BOOL "Enable MPI options" )
 if ( MPI_EXPERIMENTAL )
   include ( BoostMPI )
 endif ()

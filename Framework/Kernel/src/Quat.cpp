@@ -1,5 +1,6 @@
 #include "MantidKernel/Quat.h"
 #include "MantidKernel/Logger.h"
+#include "MantidKernel/Matrix.h"
 #include "MantidKernel/Tolerance.h"
 #include "MantidKernel/V3D.h"
 

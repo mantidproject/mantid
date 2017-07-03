@@ -1,4 +1,5 @@
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorProcessingAlgorithmBase.h"
+#include <boost/algorithm/string.hpp>
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -64,5 +65,38 @@ DataProcessorProcessingAlgorithmBase::getOutputWsProperties() {
   return m_OutputWsProperties;
 }
 
+/** Converts a string to a vector of strings. Input string will be split by
+* commas.
+* @param text :: the input string to convert
+* @return :: the string as a vector
+*/
+std::vector<std::string>
+DataProcessorProcessingAlgorithmBase::convertStringToVector(
+    const std::string &text) {
+
+  if (text.empty())
+    return std::vector<std::string>();
+
+  std::vector<std::string> vec;
+  boost::split(vec, text, boost::is_any_of(","));
+  return vec;
+}
+
+/** Converts a string to a set of strings. Input string will be split by commas.
+* @param text :: the input string to convert
+* @return :: the string as a set
+*/
+std::set<std::string> DataProcessorProcessingAlgorithmBase::convertStringToSet(
+    const std::string &text) {
+
+  if (text.empty())
+    return std::set<std::string>();
+
+  std::vector<std::string> vec;
+  boost::split(vec, text, boost::is_any_of(","));
+
+  std::set<std::string> out(vec.begin(), vec.end());
+  return out;
+}
 } // namespace MantidWidgets
 } // namespace Mantid

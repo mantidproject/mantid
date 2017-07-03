@@ -47,28 +47,35 @@ ReflDataProcessorPresenter::~ReflDataProcessorPresenter() {}
 void ReflDataProcessorPresenter::process() {
 
   // Get selected runs
-  const auto items = m_manager->selectedData(true);
+  m_selectedData = m_manager->selectedData(true);
+
+  // Don't continue if there are no items to process
+  if (m_selectedData.size() == 0)
+    return;
 
   // If uniform slicing is empty process normally, delegating to
   // GenericDataProcessorPresenter
-  std::string timeSlicingValues = m_mainPresenter->getTimeSlicingValues();
+  auto timeSlicingValues =
+      m_mainPresenter->getTimeSlicingValues().toStdString();
   if (timeSlicingValues.empty()) {
     // Check if any input event workspaces still exist in ADS
-    if (proceedIfWSTypeInADS(items, true))
+    if (proceedIfWSTypeInADS(m_selectedData, true)) {
+      setPromptUser(false); // Prevent prompting user twice
       GenericDataProcessorPresenter::process();
+    }
     return;
   }
 
   // Check if any input non-event workspaces exist in ADS
-  if (!proceedIfWSTypeInADS(items, false))
+  if (!proceedIfWSTypeInADS(m_selectedData, false))
     return;
 
   // Get time slicing type
-  std::string timeSlicingType = m_mainPresenter->getTimeSlicingType();
+  auto timeSlicingType = m_mainPresenter->getTimeSlicingType().toStdString();
 
   // Progress report
   int progress = 0;
-  int maxProgress = (int)(items.size());
+  int maxProgress = (int)(m_selectedData.size());
   ProgressPresenter progressReporter(progress, maxProgress, maxProgress,
                                      m_progressView);
 
@@ -78,7 +85,7 @@ void ReflDataProcessorPresenter::process() {
   bool errors = false;
 
   // Loop in groups
-  for (const auto &item : items) {
+  for (const auto &item : m_selectedData) {
 
     // Group of runs
     GroupData group = item.second;
@@ -117,13 +124,13 @@ void ReflDataProcessorPresenter::process() {
   }
 
   if (!allGroupsWereEvent)
-    m_mainPresenter->giveUserWarning(
+    m_view->giveUserWarning(
         "Some groups could not be processed as event workspaces", "Warning");
   if (errors)
-    m_mainPresenter->giveUserWarning("Some errors were encountered when "
-                                     "reducing table. Some groups may not have "
-                                     "been fully processed.",
-                                     "Warning");
+    m_view->giveUserWarning("Some errors were encountered when "
+                            "reducing table. Some groups may not have "
+                            "been fully processed.",
+                            "Warning");
 
   progressReporter.clear();
 }
@@ -209,13 +216,13 @@ bool ReflDataProcessorPresenter::processGroupAsEventWS(
 
     for (size_t i = 0; i < numSlices; i++) {
       try {
-        std::vector<std::string> slice(data);
+        RowData slice(data);
         std::string wsName =
             takeSlice(runNo, i, startTimes[i], stopTimes[i], logFilter);
         slice[0] = wsName;
-        auto newData = reduceRow(slice);
-        newData[0] = data[0];
-        m_manager->update(groupID, rowID, newData);
+        reduceRow(&slice);
+        slice[0] = data[0];
+        m_manager->update(groupID, rowID, slice);
       } catch (...) {
         return true;
       }
@@ -261,17 +268,17 @@ bool ReflDataProcessorPresenter::processGroupAsEventWS(
 * @param group :: the group of event workspaces
 * @return :: true if errors were encountered
 */
-bool ReflDataProcessorPresenter::processGroupAsNonEventWS(
-    int groupID, const GroupData &group) {
+bool ReflDataProcessorPresenter::processGroupAsNonEventWS(int groupID,
+                                                          GroupData &group) {
 
   bool errors = false;
 
-  for (const auto &row : group) {
+  for (auto &row : group) {
 
     // Reduce this row
-    auto newData = reduceRow(row.second);
+    reduceRow(&row.second);
     // Update the tree
-    m_manager->update(groupID, row.first, newData);
+    m_manager->update(groupID, row.first, row.second);
   }
 
   // Post-process (if needed)
@@ -304,14 +311,14 @@ void ReflDataProcessorPresenter::parseUniform(const std::string &timeSlicing,
   if (AnalysisDataService::Instance().doesExist(wsName)) {
     mws = AnalysisDataService::Instance().retrieveWS<IEventWorkspace>(wsName);
     if (!mws) {
-      m_mainPresenter->giveUserCritical("Workspace to slice " + wsName +
-                                            " is not an event workspace!",
-                                        "Time slicing error");
+      m_view->giveUserCritical("Workspace to slice " + wsName +
+                                   " is not an event workspace!",
+                               "Time slicing error");
       return;
     }
   } else {
-    m_mainPresenter->giveUserCritical("Workspace to slice not found: " + wsName,
-                                      "Time slicing error");
+    m_view->giveUserCritical("Workspace to slice not found: " + wsName,
+                             "Time slicing error");
     return;
   }
 
@@ -549,7 +556,8 @@ void ReflDataProcessorPresenter::plotRow() {
     return;
 
   // If slicing values are empty plot normally
-  std::string timeSlicingValues = m_mainPresenter->getTimeSlicingValues();
+  auto timeSlicingValues =
+      m_mainPresenter->getTimeSlicingValues().toStdString();
   if (timeSlicingValues.empty()) {
     GenericDataProcessorPresenter::plotRow();
     return;
@@ -579,7 +587,7 @@ void ReflDataProcessorPresenter::plotRow() {
   }
 
   if (!notFound.empty())
-    m_mainPresenter->giveUserWarning(
+    m_view->giveUserWarning(
         "The following workspaces were not plotted because they were not "
         "found:\n" +
             boost::algorithm::join(notFound, "\n") +
@@ -618,7 +626,8 @@ void ReflDataProcessorPresenter::plotGroup() {
     return;
 
   // If slicing values are empty plot normally
-  std::string timeSlicingValues = m_mainPresenter->getTimeSlicingValues();
+  auto timeSlicingValues =
+      m_mainPresenter->getTimeSlicingValues().toStdString();
   if (timeSlicingValues.empty()) {
     GenericDataProcessorPresenter::plotGroup();
     return;
@@ -649,7 +658,7 @@ void ReflDataProcessorPresenter::plotGroup() {
   }
 
   if (!notFound.empty())
-    m_mainPresenter->giveUserWarning(
+    m_view->giveUserWarning(
         "The following workspaces were not plotted because they were not "
         "found:\n" +
             boost::algorithm::join(notFound, "\n") +
@@ -698,7 +707,8 @@ bool ReflDataProcessorPresenter::proceedIfWSTypeInADS(const TreeData &data,
   if (foundInputWorkspaces.size() > 0) {
     // Input workspaces of type found, ask user if they wish to process
     std::string foundStr = boost::algorithm::join(foundInputWorkspaces, "\n");
-    bool process = m_mainPresenter->askUserYesNo(
+
+    bool process = m_view->askUserYesNo(
         "Processing selected rows will replace the following workspaces:\n\n" +
             foundStr + "\n\nDo you wish to continue?",
         "Process selected rows?");

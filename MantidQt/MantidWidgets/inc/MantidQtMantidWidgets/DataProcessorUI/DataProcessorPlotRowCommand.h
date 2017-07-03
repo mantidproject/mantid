@@ -34,21 +34,21 @@ class DataProcessorPlotRowCommand : public DataProcessorCommandBase {
 public:
   DataProcessorPlotRowCommand(DataProcessorPresenter *tablePresenter)
       : DataProcessorCommandBase(tablePresenter){};
+  DataProcessorPlotRowCommand(const QDataProcessorWidget &widget)
+      : DataProcessorCommandBase(widget){};
   virtual ~DataProcessorPlotRowCommand(){};
 
   void execute() override {
     m_presenter->notify(DataProcessorPresenter::PlotRowFlag);
   };
-  std::string name() override { return std::string("Plot Selected Rows"); }
-  std::string icon() override { return std::string("://graph.png"); }
-  std::string tooltip() override {
-    return std::string("Plot the selected runs");
+  QString name() override { return QString("Plot Selected Rows"); }
+  QString icon() override { return QString("://graph.png"); }
+  QString tooltip() override { return QString("Plot the selected runs"); }
+  QString whatsthis() override {
+    return QString("Creates a plot of the reduced workspaces produced by "
+                   "the selected runs");
   }
-  std::string whatsthis() override {
-    return std::string("Creates a plot of the reduced workspaces produced by "
-                       "the selected runs");
-  }
-  std::string shortcut() override { return std::string(); }
+  QString shortcut() override { return QString(); }
 };
 }
 }

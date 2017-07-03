@@ -60,6 +60,14 @@ public:
 
   // Dialog/Prompt methods
   virtual std::string requestNotebookPath() = 0;
+  /// Dialog/Prompt methods
+  virtual std::string askUserString(const std::string &prompt,
+                                    const std::string &title,
+                                    const std::string &defaultValue) = 0;
+  virtual bool askUserYesNo(std::string prompt, std::string title) = 0;
+  virtual void giveUserWarning(std::string prompt, std::string title) = 0;
+  virtual void giveUserCritical(std::string prompt, std::string title) = 0;
+  virtual std::string runPythonAlgorithm(const std::string &algorithm) = 0;
 
   // Settings
   virtual void saveSettings(const std::map<std::string, QVariant> &options) = 0;
@@ -73,11 +81,16 @@ public:
   virtual void expandAll() = 0;
   virtual void collapseAll() = 0;
 
+  // Handle pause/resume of data reduction
+  virtual void pause() = 0;
+  virtual void resume() = 0;
+
   // Setter methods
-  virtual void setTableList(const std::set<std::string> &tables) = 0;
-  virtual void setInstrumentList(const std::vector<std::string> &instruments,
-                                 const std::string &defaultInstrument) = 0;
+  virtual void setTableList(const QSet<QString> &tables) = 0;
+  virtual void setInstrumentList(const QString &instruments,
+                                 const QString &defaultInstrument) = 0;
   virtual void setSelection(const std::set<int> &groups) = 0;
+  virtual void setSelectionModelConnections() = 0;
   virtual void
   setOptionsHintStrategy(MantidQt::MantidWidgets::HintStrategy *hintStrategy,
                          int column) = 0;

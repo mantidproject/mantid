@@ -13,6 +13,11 @@ namespace MantidQt {
 namespace MantidWidgets {
 
 class DataProcessorCommandAdapter;
+class DataProcessorMainPresenter;
+class DataProcessorPreprocessMap;
+class DataProcessorProcessingAlgorithm;
+class DataProcessorPostprocessingAlgorithm;
+class DataProcessorWhiteList;
 
 /** QDataProcessorWidget : Provides an interface for processing table
 data.
@@ -47,6 +52,22 @@ class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS QDataProcessorWidget
 public:
   QDataProcessorWidget(std::unique_ptr<DataProcessorPresenter> presenter,
                        QWidget *parent = 0);
+  QDataProcessorWidget(const DataProcessorWhiteList &,
+                       const DataProcessorProcessingAlgorithm &,
+                       QWidget *parent);
+  QDataProcessorWidget(const DataProcessorWhiteList &,
+                       const DataProcessorPreprocessMap &,
+                       const DataProcessorProcessingAlgorithm &,
+                       QWidget *parent);
+  QDataProcessorWidget(const DataProcessorWhiteList &,
+                       const DataProcessorProcessingAlgorithm &,
+                       const DataProcessorPostprocessingAlgorithm &,
+                       QWidget *parent);
+  QDataProcessorWidget(const DataProcessorWhiteList &,
+                       const DataProcessorPreprocessMap &,
+                       const DataProcessorProcessingAlgorithm &,
+                       const DataProcessorPostprocessingAlgorithm &,
+                       QWidget *parent);
   ~QDataProcessorWidget() override;
 
   // Add actions to the toolbar
@@ -58,6 +79,13 @@ public:
 
   // Dialog/Prompt methods
   std::string requestNotebookPath() override;
+  /// Dialog/Prompt methods
+  std::string askUserString(const std::string &prompt, const std::string &title,
+                            const std::string &defaultValue) override;
+  bool askUserYesNo(std::string prompt, std::string title) override;
+  void giveUserWarning(std::string prompt, std::string title) override;
+  void giveUserCritical(std::string prompt, std::string title) override;
+  std::string runPythonAlgorithm(const std::string &pythonCode) override;
 
   // Settings
   void saveSettings(const std::map<std::string, QVariant> &options) override;
@@ -76,15 +104,23 @@ public:
   void expandAll() override;
   void collapseAll() override;
 
-  // Settor methods
+  // Handle pause/resume of data reduction
+  void pause() override;
+  void resume() override;
+
+  // Setter methods
   void setSelection(const std::set<int> &groups) override;
-  void setTableList(const std::set<std::string> &tables) override;
-  void setInstrumentList(const std::vector<std::string> &instruments,
-                         const std::string &defaultInstrument) override;
+  void setTableList(const QSet<QString> &tables) override;
+  void setSelectionModelConnections() override;
+  void setInstrumentList(const QString &instruments,
+                         const QString &defaultInstrument) override;
   void
   setOptionsHintStrategy(MantidQt::MantidWidgets::HintStrategy *hintStrategy,
                          int column) override;
   void setClipboard(const std::string &text) override;
+
+  // Transfer runs
+  void transfer(const QList<QString> &runs);
 
   // Accessor methods
   std::map<int, std::set<int>> getSelectedChildren() const override;
@@ -94,6 +130,9 @@ public:
   std::string getClipboard() const override;
 
   DataProcessorPresenter *getPresenter() const override;
+
+  // Forward a main presenter to this view's presenter
+  void accept(DataProcessorMainPresenter *);
 
 private:
   // initialise the interface
@@ -109,12 +148,15 @@ private:
   Ui::DataProcessorWidget ui;
   // the workspace the user selected to open
   std::string m_toOpen;
+  // the context menu
+  QMenu *m_contextMenu;
   QSignalMapper *m_openMap;
   // Command adapters
   std::vector<std::unique_ptr<DataProcessorCommandAdapter>> m_commands;
 
 signals:
   void comboProcessInstrument_currentIndexChanged(int index);
+  void runPythonAlgorithm(const QString &pythonCode);
 
 public slots:
   void on_comboProcessInstrument_currentIndexChanged(int index);
@@ -124,6 +166,7 @@ private slots:
   void tableUpdated(const QModelIndex &topLeft, const QModelIndex &bottomRight);
   void showContextMenu(const QPoint &pos);
   void processClicked();
+  void newSelection(const QItemSelection &, const QItemSelection &);
 };
 
 } // namespace Mantid

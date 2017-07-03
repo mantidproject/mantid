@@ -122,8 +122,17 @@ public:
   ITableWorkspace() {}
 
   /// Returns a clone of the workspace
-  ITableWorkspace_uptr clone(const std::vector<std::string> &colNames =
-                                 std::vector<std::string>()) const;
+  ITableWorkspace_uptr clone() const {
+    return std::unique_ptr<ITableWorkspace>(doClone());
+  }
+
+  /// Returns a default-initialized clone of the workspace
+  ITableWorkspace_uptr cloneEmpty() const {
+    return ITableWorkspace_uptr(doCloneEmpty());
+  }
+
+  ITableWorkspace_uptr
+  cloneColumns(const std::vector<std::string> &colNames) const;
 
   ITableWorkspace &operator=(const ITableWorkspace &) = delete;
   /// Return the workspace typeID
@@ -331,6 +340,7 @@ private:
   ITableWorkspace *doClone() const override {
     return doCloneColumns(std::vector<std::string>());
   }
+  ITableWorkspace *doCloneEmpty() const override = 0;
   virtual ITableWorkspace *
   doCloneColumns(const std::vector<std::string> &colNames) const = 0;
 };

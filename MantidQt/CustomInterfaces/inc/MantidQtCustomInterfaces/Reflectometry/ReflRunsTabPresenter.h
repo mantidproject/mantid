@@ -65,23 +65,21 @@ public:
   ~ReflRunsTabPresenter() override;
   void acceptMainPresenter(IReflMainWindowPresenter *mainPresenter) override;
   void notify(IReflRunsTabPresenter::Flag flag) override;
-  void notify(DataProcessorMainPresenter::Flag flag) override;
-  /// Dialog/Prompt methods
-  std::string askUserString(const std::string &prompt, const std::string &title,
-                            const std::string &defaultValue) override;
-  bool askUserYesNo(std::string prompt, std::string title) override;
-  void giveUserWarning(std::string prompt, std::string title) override;
-  void giveUserCritical(std::string prompt, std::string title) override;
-  std::string runPythonAlgorithm(const std::string &pythonCode) override;
-  std::map<std::string, std::string> getPreprocessingValues() const override;
-  std::map<std::string, std::set<std::string>>
-  getPreprocessingProperties() const override;
+  void notifyADSChanged(const QSet<QString> &workspaceList) override;
+  QString getPreprocessingProperties() const override;
+  /// Handle data reduction paused/resumed
   /// Global options (inherited from DataProcessorMainPresenter)
-  std::map<std::string, std::string> getPreprocessingOptions() const override;
-  std::string getProcessingOptions() const override;
-  std::string getPostprocessingOptions() const override;
-  std::string getTimeSlicingValues() const override;
-  std::string getTimeSlicingType() const override;
+  QString getPreprocessingOptionsAsString() const override;
+  QString getProcessingOptions() const override;
+  QString getPostprocessingOptions() const override;
+  QString getTimeSlicingValues() const override;
+  QString getTimeSlicingType() const override;
+  /// Handle data reduction paused/resumed
+  void pause() const override;
+  void resume() const override;
+  /// Reduction paused/resumed confirmation handler
+  void confirmReductionPaused() const override;
+  void confirmReductionResumed() const override;
 
 private:
   /// The search model

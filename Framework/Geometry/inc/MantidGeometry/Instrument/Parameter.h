@@ -1,24 +1,7 @@
 #ifndef MANTID_GEOMETRY_PARAMETER_H_
 #define MANTID_GEOMETRY_PARAMETER_H_
 
-/* Register classes into the factory
- *
- */
-#define DECLARE_PARAMETER(classname, classtype)                                \
-  namespace {                                                                  \
-  Mantid::Kernel::RegistrationHelper register_par_##classname(                 \
-      ((Mantid::Geometry::ParameterFactory::subscribe<                         \
-           Mantid::Geometry::ParameterType<classtype>>(#classname)),           \
-       0));                                                                    \
-  }
-
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidGeometry/DllConfig.h"
-#include "MantidKernel/V3D.h"
-#include "MantidKernel/Quat.h"
-#include "MantidKernel/RegistrationHelper.h"
 #ifndef Q_MOC_RUN
 #include <boost/shared_ptr.hpp>
 #endif
@@ -237,18 +220,6 @@ ParameterType<Type> &ParameterType<Type>::operator=(const Type &value) {
 
 /// Typedef for the shared pointer
 typedef boost::shared_ptr<Parameter> Parameter_sptr;
-/// Parameter of type int
-typedef ParameterType<int> ParameterInt;
-/// Parameter of type double
-typedef ParameterType<double> ParameterDouble;
-/// Parameter of type bool
-typedef ParameterType<bool> ParameterBool;
-/// Parameter of type std::string
-typedef ParameterType<std::string> ParameterString;
-/// Parameter of type V3D
-typedef ParameterType<Kernel::V3D> ParameterV3D;
-/// Parameter of type Quat
-typedef ParameterType<Kernel::Quat> ParameterQuat;
 
 } // namespace Geometry
 } // namespace Mantid
