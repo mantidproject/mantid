@@ -53,10 +53,16 @@ void QtReflRunsTabView::initLayout() {
   QDataProcessorWidget *qDataProcessorWidget_1 = new QDataProcessorWidget(
       std::unique_ptr<DataProcessorPresenter>(presenterFactory.create()), this);
   ui.toolbox->addItem(qDataProcessorWidget_1, "Group 1");
+  connect(qDataProcessorWidget_1,
+          SIGNAL(runAsPythonScript(const QString &, bool)), this,
+          SIGNAL(runAsPythonScript(const QString &, bool)));
 
   QDataProcessorWidget *qDataProcessorWidget_2 = new QDataProcessorWidget(
       std::unique_ptr<DataProcessorPresenter>(presenterFactory.create()), this);
   ui.toolbox->addItem(qDataProcessorWidget_2, "Group 2");
+  connect(qDataProcessorWidget_2,
+          SIGNAL(runAsPythonScript(const QString &, bool)), this,
+          SIGNAL(runAsPythonScript(const QString &, bool)));
 
   std::vector<DataProcessorPresenter *> processingWidgets;
   processingWidgets.push_back(qDataProcessorWidget_1->getPresenter());

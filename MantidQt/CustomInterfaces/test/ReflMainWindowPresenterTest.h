@@ -109,52 +109,6 @@ public:
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockSettingsPresenter));
   }
 
-  void testAskUserString() {
-    MockMainWindowView mockView;
-    MockRunsTabPresenter mockRunsPresenter;
-    MockEventTabPresenter mockEventPresenter;
-    MockSettingsTabPresenter mockSettingsPresenter;
-    MockSaveTabPresenter mockSaveTabPresenter;
-    ReflMainWindowPresenter presenter(
-        &mockView, &mockRunsPresenter, &mockEventPresenter,
-        &mockSettingsPresenter, &mockSaveTabPresenter);
-
-    EXPECT_CALL(mockView, askUserString("Prompt", "Title", "Value"))
-        .Times(Exactly(1));
-    presenter.askUserString("Prompt", "Title", "Value");
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
-  }
-
-  void testAskUserYesNo() {
-    MockMainWindowView mockView;
-    MockRunsTabPresenter mockRunsPresenter;
-    MockEventTabPresenter mockEventPresenter;
-    MockSettingsTabPresenter mockSettingsPresenter;
-    MockSaveTabPresenter mockSaveTabPresenter;
-    ReflMainWindowPresenter presenter(
-        &mockView, &mockRunsPresenter, &mockEventPresenter,
-        &mockSettingsPresenter, &mockSaveTabPresenter);
-
-    EXPECT_CALL(mockView, askUserYesNo("Prompt", "Title")).Times(Exactly(1));
-    presenter.askUserYesNo("Prompt", "Title");
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
-  }
-
-  void testGiveUserWarning() {
-    MockMainWindowView mockView;
-    MockRunsTabPresenter mockRunsPresenter;
-    MockEventTabPresenter mockEventPresenter;
-    MockSettingsTabPresenter mockSettingsPresenter;
-    MockSaveTabPresenter mockSaveTabPresenter;
-    ReflMainWindowPresenter presenter(
-        &mockView, &mockRunsPresenter, &mockEventPresenter,
-        &mockSettingsPresenter, &mockSaveTabPresenter);
-
-    EXPECT_CALL(mockView, giveUserWarning("Prompt", "Title")).Times(Exactly(1));
-    presenter.giveUserWarning("Prompt", "Title");
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
-  }
-
   void testGiveUserCritical() {
     MockMainWindowView mockView;
     MockRunsTabPresenter mockRunsPresenter;

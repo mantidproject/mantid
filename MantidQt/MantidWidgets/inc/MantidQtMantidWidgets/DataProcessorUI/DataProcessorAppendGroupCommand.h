@@ -35,20 +35,22 @@ class DataProcessorAppendGroupCommand : public DataProcessorCommandBase {
 public:
   DataProcessorAppendGroupCommand(DataProcessorPresenter *tablePresenter)
       : DataProcessorCommandBase(tablePresenter){};
+  DataProcessorAppendGroupCommand(const QDataProcessorWidget &widget)
+      : DataProcessorCommandBase(widget){};
   virtual ~DataProcessorAppendGroupCommand(){};
 
   void execute() override {
     m_presenter->notify(DataProcessorPresenter::AppendGroupFlag);
   };
-  std::string name() override { return std::string("Insert Group After"); }
-  std::string icon() override { return std::string("://insert_group.png"); }
-  std::string tooltip() override { return std::string("Inserts group after"); }
-  std::string whatsthis() override {
-    return std::string("Inserts a new group after the first selected group. If "
-                       "no groups are selected then a new group is added at "
-                       "the end of the table");
+  QString name() override { return QString("Insert Group After"); }
+  QString icon() override { return QString("://insert_group.png"); }
+  QString tooltip() override { return QString("Inserts group after"); }
+  QString whatsthis() override {
+    return QString("Inserts a new group after the first selected group. If "
+                   "no groups are selected then a new group is added at "
+                   "the end of the table");
   }
-  std::string shortcut() override { return std::string(); }
+  QString shortcut() override { return QString(); }
 };
 }
 }

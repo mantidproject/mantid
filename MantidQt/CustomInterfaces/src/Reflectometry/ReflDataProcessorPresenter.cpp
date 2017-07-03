@@ -55,7 +55,8 @@ void ReflDataProcessorPresenter::process() {
 
   // If uniform slicing is empty process normally, delegating to
   // GenericDataProcessorPresenter
-  std::string timeSlicingValues = m_mainPresenter->getTimeSlicingValues();
+  auto timeSlicingValues =
+      m_mainPresenter->getTimeSlicingValues().toStdString();
   if (timeSlicingValues.empty()) {
     // Check if any input event workspaces still exist in ADS
     if (proceedIfWSTypeInADS(m_selectedData, true)) {
@@ -70,7 +71,7 @@ void ReflDataProcessorPresenter::process() {
     return;
 
   // Get time slicing type
-  std::string timeSlicingType = m_mainPresenter->getTimeSlicingType();
+  auto timeSlicingType = m_mainPresenter->getTimeSlicingType().toStdString();
 
   // Progress report
   int progress = 0;
@@ -123,13 +124,13 @@ void ReflDataProcessorPresenter::process() {
   }
 
   if (!allGroupsWereEvent)
-    m_mainPresenter->giveUserWarning(
+    m_view->giveUserWarning(
         "Some groups could not be processed as event workspaces", "Warning");
   if (errors)
-    m_mainPresenter->giveUserWarning("Some errors were encountered when "
-                                     "reducing table. Some groups may not have "
-                                     "been fully processed.",
-                                     "Warning");
+    m_view->giveUserWarning("Some errors were encountered when "
+                            "reducing table. Some groups may not have "
+                            "been fully processed.",
+                            "Warning");
 
   progressReporter.clear();
 }
@@ -310,14 +311,14 @@ void ReflDataProcessorPresenter::parseUniform(const std::string &timeSlicing,
   if (AnalysisDataService::Instance().doesExist(wsName)) {
     mws = AnalysisDataService::Instance().retrieveWS<IEventWorkspace>(wsName);
     if (!mws) {
-      m_mainPresenter->giveUserCritical("Workspace to slice " + wsName +
-                                            " is not an event workspace!",
-                                        "Time slicing error");
+      m_view->giveUserCritical("Workspace to slice " + wsName +
+                                   " is not an event workspace!",
+                               "Time slicing error");
       return;
     }
   } else {
-    m_mainPresenter->giveUserCritical("Workspace to slice not found: " + wsName,
-                                      "Time slicing error");
+    m_view->giveUserCritical("Workspace to slice not found: " + wsName,
+                             "Time slicing error");
     return;
   }
 
@@ -555,7 +556,8 @@ void ReflDataProcessorPresenter::plotRow() {
     return;
 
   // If slicing values are empty plot normally
-  std::string timeSlicingValues = m_mainPresenter->getTimeSlicingValues();
+  auto timeSlicingValues =
+      m_mainPresenter->getTimeSlicingValues().toStdString();
   if (timeSlicingValues.empty()) {
     GenericDataProcessorPresenter::plotRow();
     return;
@@ -585,7 +587,7 @@ void ReflDataProcessorPresenter::plotRow() {
   }
 
   if (!notFound.empty())
-    m_mainPresenter->giveUserWarning(
+    m_view->giveUserWarning(
         "The following workspaces were not plotted because they were not "
         "found:\n" +
             boost::algorithm::join(notFound, "\n") +
@@ -624,7 +626,8 @@ void ReflDataProcessorPresenter::plotGroup() {
     return;
 
   // If slicing values are empty plot normally
-  std::string timeSlicingValues = m_mainPresenter->getTimeSlicingValues();
+  auto timeSlicingValues =
+      m_mainPresenter->getTimeSlicingValues().toStdString();
   if (timeSlicingValues.empty()) {
     GenericDataProcessorPresenter::plotGroup();
     return;
@@ -655,7 +658,7 @@ void ReflDataProcessorPresenter::plotGroup() {
   }
 
   if (!notFound.empty())
-    m_mainPresenter->giveUserWarning(
+    m_view->giveUserWarning(
         "The following workspaces were not plotted because they were not "
         "found:\n" +
             boost::algorithm::join(notFound, "\n") +
@@ -704,7 +707,8 @@ bool ReflDataProcessorPresenter::proceedIfWSTypeInADS(const TreeData &data,
   if (foundInputWorkspaces.size() > 0) {
     // Input workspaces of type found, ask user if they wish to process
     std::string foundStr = boost::algorithm::join(foundInputWorkspaces, "\n");
-    bool process = m_mainPresenter->askUserYesNo(
+
+    bool process = m_view->askUserYesNo(
         "Processing selected rows will replace the following workspaces:\n\n" +
             foundStr + "\n\nDo you wish to continue?",
         "Process selected rows?");
