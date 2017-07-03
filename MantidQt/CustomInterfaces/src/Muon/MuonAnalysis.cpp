@@ -1528,7 +1528,14 @@ void MuonAnalysis::updateFrontAndCombo(bool updateIndexAndPlot) {
   if (currentI >= m_uiForm.frontGroupGroupPairComboBox->count()) {
     currentI = 0;
   }
-  m_uiForm.fitBrowser->setAvailableGroups(groupsAndPairs);
+  auto tmp = m_groupingHelper.parseGroupingTable().groupNames;
+  auto names = m_groupingHelper.parseGroupingTable().pairNames;
+  names.insert(std::end(names), std::begin(tmp), std::end(tmp));
+  QStringList GroupsAndPairsNames;
+  for (auto name : names) {
+	  GroupsAndPairsNames<<QString::fromStdString(name);
+  }
+  m_uiForm.fitBrowser->setAvailableGroups(GroupsAndPairsNames);
 
   if (updateIndexAndPlot) {
     setGroupOrPairIndexToPlot(currentI);
@@ -1885,11 +1892,14 @@ void MuonAnalysis::selectMultiPeak(const QString &wsName,
                    std::back_inserter(groupsAndPairs), &QString::fromStdString);
     std::transform(groups.pairNames.begin(), groups.pairNames.end(),
                    std::back_inserter(groupsAndPairs), &QString::fromStdString);
-	auto naes = m_groupingHelper.parseGroupingTable().groupNames;
+	auto tmp = m_groupingHelper.parseGroupingTable().groupNames;
 	auto names = m_groupingHelper.parseGroupingTable().pairNames;
-
-
-    m_uiForm.fitBrowser->setAvailableGroups(groupsAndPairs);
+	names.insert(std::end(names), std::begin(tmp), std::end(tmp)); 
+	QStringList GroupsAndPairsNames;
+	for (auto name : names) {
+		GroupsAndPairsNames<<QString::fromStdString(name);
+	}
+    m_uiForm.fitBrowser->setAvailableGroups(GroupsAndPairsNames);
     m_uiForm.fitBrowser->setNumPeriods(m_numPeriods);
 
     // Set the selected run, group/pair and period
@@ -2550,8 +2560,6 @@ void MuonAnalysis::changeTab(int newTabIndex) {
       Muon::AnalysisOptions options(m_groupingHelper.parseGroupingTable());
 
 	  //use these to update the names of pairs/groups
-	  auto naes = m_groupingHelper.parseGroupingTable().groupNames;
-	  auto names = m_groupingHelper.parseGroupingTable().pairNames;
       m_uiForm.fitBrowser->setGroupNames(options.grouping.groupNames);
       auto isItGroup = m_dataLoader.isContainedIn(m_groupPairName,
                                                   options.grouping.groupNames);
