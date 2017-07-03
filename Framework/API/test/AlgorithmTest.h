@@ -22,6 +22,7 @@
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
+using Mantid::Indexing::SpectrumIndexSet;
 
 class StubbedWorkspaceAlgorithm : public Algorithm {
 public:
@@ -844,7 +845,7 @@ public:
         "InputWorkspace", "wksp", IndexType::WorkspaceIndex, "1:5");
 
     MatrixWorkspace_sptr wsTest;
-    Indexing::SpectrumIndexSet indexSet(0);
+    SpectrumIndexSet indexSet(0);
 
     TS_ASSERT_THROWS_NOTHING(
         std::tie(wsTest, indexSet) =

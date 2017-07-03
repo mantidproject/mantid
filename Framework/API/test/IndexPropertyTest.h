@@ -12,10 +12,8 @@
 #include <cxxtest/TestSuite.h>
 #include <numeric>
 
-using Mantid::API::IndexType;
-using Mantid::API::WorkspaceProperty;
-using Mantid::API::IndexTypeProperty;
-using Mantid::API::IndexProperty;
+using namespace Mantid::Kernel;
+using namespace Mantid::API;
 
 class IndexPropertyTest : public CxxTest::TestSuite {
 public:
