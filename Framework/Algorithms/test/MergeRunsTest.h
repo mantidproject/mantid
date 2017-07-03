@@ -7,6 +7,8 @@
 #include <stdarg.h>
 
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/DetectorInfo.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
@@ -22,6 +24,7 @@
 #include <boost/make_shared.hpp>
 #include <MantidAlgorithms/RunCombinationHelpers/RunCombinationHelper.h>
 #include <MantidAlgorithms/RunCombinationHelpers/SampleLogsBehaviour.h>
+#include "MantidTypes/SpectrumDefinition.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Algorithms;
@@ -181,6 +184,25 @@ private:
     b->instrumentParameters().addString(
         b->getInstrument()->getComponentID(),
         SampleLogsBehaviour::FAIL_MERGE_TOLERANCES, tolerances);
+
+    WorkspaceGroup_sptr group = boost::make_shared<WorkspaceGroup>();
+    group->addWorkspace(a);
+    group->addWorkspace(b);
+
+    AnalysisDataService::Instance().addOrReplace("a1", a);
+    AnalysisDataService::Instance().addOrReplace("b1", b);
+    AnalysisDataService::Instance().addOrReplace("group1", group);
+    return group;
+  }
+
+  WorkspaceGroup_sptr create_group_detector_scan_workspaces(
+      size_t nTimeIndexes = 2, size_t startTimeForSecondWorkspace = 0) {
+    MatrixWorkspace_sptr a = WorkspaceCreationHelper::
+        create2DDetectorScanWorkspaceWithFullInstrument(2, 1000, nTimeIndexes,
+                                                        0);
+    MatrixWorkspace_sptr b = WorkspaceCreationHelper::
+        create2DDetectorScanWorkspaceWithFullInstrument(
+            2, 1000, nTimeIndexes, startTimeForSecondWorkspace);
 
     WorkspaceGroup_sptr group = boost::make_shared<WorkspaceGroup>();
     group->addWorkspace(a);
@@ -1468,6 +1490,128 @@ public:
     auto ws = create_group_workspace_with_sample_logs<double>(
         mergeType, "prop1, prop2", 0.0, 0.0, 0.0, 0.0, "-0.5, 1.5");
     do_test_mergeSampleLogs(ws, "prop1", mergeType, "1", 1, true);
+  }
+
+  MatrixWorkspace_sptr
+  do_MergeRuns_with_scanning_workspaces(bool appendDetectorScans = true,
+                                        size_t startTime = 0) {
+    auto ws = create_group_detector_scan_workspaces(2, startTime);
+    MatrixWorkspace_sptr outputWS;
+
+    MergeRuns alg;
+    alg.initialize();
+    alg.setPropertyValue("InputWorkspaces", ws->getName());
+    alg.setProperty<bool>("AppendDetectorScans", appendDetectorScans);
+    alg.setPropertyValue("OutputWorkspace", "outWS");
+    TS_ASSERT_THROWS_NOTHING(alg.execute();)
+
+    TS_ASSERT_THROWS_NOTHING(
+        outputWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+            "outWS"));
+
+    return outputWS;
+  }
+
+  void assert_time_indexes_are_correct(const DetectorInfo &detInfo,
+                                       bool extraTimes = false) {
+    const auto TIME_1 = DateAndTime(0, 0);
+    const auto TIME_2 = DateAndTime(1, 0);
+    const auto TIME_3 = DateAndTime(3, 0);
+
+    const auto PAIR_1 = std::pair<DateAndTime, DateAndTime>(TIME_1, TIME_2);
+    const auto PAIR_2 = std::pair<DateAndTime, DateAndTime>(TIME_2, TIME_3);
+
+    TS_ASSERT_EQUALS(detInfo.scanInterval({0, 0}), PAIR_1)
+    TS_ASSERT_EQUALS(detInfo.scanInterval({1, 0}), PAIR_1)
+    TS_ASSERT_EQUALS(detInfo.scanInterval({0, 1}), PAIR_2)
+    TS_ASSERT_EQUALS(detInfo.scanInterval({1, 1}), PAIR_2)
+
+    if (extraTimes) {
+      const auto TIME_4 = DateAndTime(20, 0);
+      const auto TIME_5 = DateAndTime(21, 0);
+      const auto TIME_6 = DateAndTime(23, 0);
+
+      const auto PAIR_3 = std::pair<DateAndTime, DateAndTime>(TIME_4, TIME_5);
+      const auto PAIR_4 = std::pair<DateAndTime, DateAndTime>(TIME_5, TIME_6);
+
+      TS_ASSERT_EQUALS(detInfo.scanInterval({0, 2}), PAIR_3)
+      TS_ASSERT_EQUALS(detInfo.scanInterval({1, 2}), PAIR_3)
+      TS_ASSERT_EQUALS(detInfo.scanInterval({0, 3}), PAIR_4)
+      TS_ASSERT_EQUALS(detInfo.scanInterval({1, 3}), PAIR_4)
+    }
+  }
+
+  void assert_indexing_is_correct(const SpectrumInfo &specInfo,
+                                  bool extraSpectra = false) {
+
+    for (size_t i = 0; i < specInfo.size(); ++i) {
+      TS_ASSERT_EQUALS(specInfo.spectrumDefinition(i).size(), 1)
+    }
+
+    const auto SPEC_DEF_1 = std::pair<size_t, size_t>(0, 0);
+    const auto SPEC_DEF_2 = std::pair<size_t, size_t>(0, 1);
+    const auto SPEC_DEF_3 = std::pair<size_t, size_t>(1, 0);
+    const auto SPEC_DEF_4 = std::pair<size_t, size_t>(1, 1);
+    TS_ASSERT_EQUALS(specInfo.spectrumDefinition(0)[0], SPEC_DEF_1)
+    TS_ASSERT_EQUALS(specInfo.spectrumDefinition(1)[0], SPEC_DEF_2)
+    TS_ASSERT_EQUALS(specInfo.spectrumDefinition(2)[0], SPEC_DEF_3)
+    TS_ASSERT_EQUALS(specInfo.spectrumDefinition(3)[0], SPEC_DEF_4)
+
+    if (extraSpectra) {
+      const auto SPEC_DEF_5 = std::pair<size_t, size_t>(0, 2);
+      const auto SPEC_DEF_6 = std::pair<size_t, size_t>(0, 3);
+      const auto SPEC_DEF_7 = std::pair<size_t, size_t>(1, 2);
+      const auto SPEC_DEF_8 = std::pair<size_t, size_t>(1, 3);
+      TS_ASSERT_EQUALS(specInfo.spectrumDefinition(4)[0], SPEC_DEF_5)
+      TS_ASSERT_EQUALS(specInfo.spectrumDefinition(5)[0], SPEC_DEF_6)
+      TS_ASSERT_EQUALS(specInfo.spectrumDefinition(6)[0], SPEC_DEF_7)
+      TS_ASSERT_EQUALS(specInfo.spectrumDefinition(7)[0], SPEC_DEF_8)
+    } else {
+      TS_ASSERT_EQUALS(specInfo.spectrumDefinition(4)[0], SPEC_DEF_1)
+      TS_ASSERT_EQUALS(specInfo.spectrumDefinition(5)[0], SPEC_DEF_2)
+      TS_ASSERT_EQUALS(specInfo.spectrumDefinition(6)[0], SPEC_DEF_3)
+      TS_ASSERT_EQUALS(specInfo.spectrumDefinition(7)[0], SPEC_DEF_4)
+    }
+  }
+
+  void test_merging_detector_scan_workspaces_appends_workspaces() {
+
+    auto outputWS = do_MergeRuns_with_scanning_workspaces();
+
+    const auto &detInfo = outputWS->detectorInfo();
+    TS_ASSERT_EQUALS(detInfo.size(), 2)
+    TS_ASSERT_EQUALS(detInfo.scanCount(0), 2)
+    TS_ASSERT_EQUALS(detInfo.scanCount(1), 2)
+    assert_time_indexes_are_correct(detInfo);
+
+    const auto &specInfo = outputWS->spectrumInfo();
+    TS_ASSERT_EQUALS(specInfo.size(), 8)
+
+    assert_indexing_is_correct(specInfo);
+  }
+
+  void
+  test_merging_detector_scan_workspaces_with_different_start_times_appends_workspaces() {
+    auto outputWS = do_MergeRuns_with_scanning_workspaces(true, 20);
+
+    const auto &detInfo = outputWS->detectorInfo();
+    TS_ASSERT_EQUALS(detInfo.size(), 2)
+    TS_ASSERT_EQUALS(detInfo.scanCount(0), 4)
+    TS_ASSERT_EQUALS(detInfo.scanCount(1), 4)
+    assert_time_indexes_are_correct(detInfo, true);
+
+    const auto &specInfo = outputWS->spectrumInfo();
+    TS_ASSERT_EQUALS(specInfo.size(), 8)
+
+    assert_indexing_is_correct(specInfo, true);
+  }
+
+  void test_merging_detector_scan_workspaces_does_not_append_workspaces() {
+    auto outputWS = do_MergeRuns_with_scanning_workspaces(false);
+
+    TS_ASSERT_EQUALS(outputWS->detectorInfo().size(), 2)
+    TS_ASSERT_EQUALS(outputWS->detectorInfo().scanCount(0), 2)
+    TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 4)
   }
 
 private:

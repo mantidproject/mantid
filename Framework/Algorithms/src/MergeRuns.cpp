@@ -146,14 +146,11 @@ void MergeRuns::exec() {
     bool appendDetectorScans = getProperty("AppendDetectorScans");
 
     if (isScanning && !appendDetectorScans) {
-      // TODO: Could actually provide a check in here. For the cases in use
+      // TODO: Should actually provide a check in here. For the cases in use
       // at the moment it is not required though.
       g_log.warning() << "Merging workspaces with detector scans. This is "
                          "not recommended unless the detectors have the same "
                          "positions, rotations etc. for each time index.\n";
-    } else if (isScanning && appendDetectorScans) {
-      // Build a new output workspace
-      outWS = buildScanningOutputWorkspace();
     }
 
     m_progress = Kernel::make_unique<Progress>(this, 0.0, 1.0, numberOfWSs - 1);
@@ -192,7 +189,7 @@ void MergeRuns::exec() {
         sampleLogsBehaviour.mergeSampleLogs(**it, *outWS);
         sampleLogsBehaviour.removeSampleLogsFromWorkspace(*addee);
         if (isScanning && appendDetectorScans)
-          outWS->mutableDetectorInfo().merge((*it)->mutableDetectorInfo());
+          outWS = buildScanningOutputWorkspace(outWS, addee);
         else
           outWS = outWS + addee;
         sampleLogsBehaviour.setUpdatedSampleLogs(*outWS);
@@ -216,32 +213,29 @@ void MergeRuns::exec() {
   }
 }
 
-MatrixWorkspace_sptr MergeRuns::buildScanningOutputWorkspace() {
-  auto it = m_inMatrixWS.begin();
+MatrixWorkspace_sptr
+MergeRuns::buildScanningOutputWorkspace(const MatrixWorkspace_sptr &outWS,
+                                        const MatrixWorkspace_sptr &addeeWS) {
+  const auto numOutputSpectra =
+      outWS->getNumberHistograms() + addeeWS->getNumberHistograms();
 
-  auto numOutputSpectra = (*it)->getNumberHistograms();
-  auto outputSpectraDefs = std::vector<Mantid::SpectrumDefinition>(0);
-  const auto &firstWorkspaceSpectrumDefs =
-      *((*it)->indexInfo().spectrumDefinitions());
+  auto outSpecDefs = *(outWS->indexInfo().spectrumDefinitions());
+  const auto &addeeSpecDefs = *(addeeWS->indexInfo().spectrumDefinitions());
 
-  for (auto &spectrumDefinition : firstWorkspaceSpectrumDefs) {
-    outputSpectraDefs.push_back(spectrumDefinition);
-  }
+  outSpecDefs.insert(outSpecDefs.end(), addeeSpecDefs.begin(),
+                     addeeSpecDefs.end());
 
-  for (++it; it != m_inMatrixWS.end(); ++it) {
-    numOutputSpectra += (*it)->getNumberHistograms();
-    const auto &newSpectraDefs = *((*it)->indexInfo().spectrumDefinitions());
-    for (auto &spectrumDefinition : newSpectraDefs)
-      outputSpectraDefs.push_back(spectrumDefinition);
-  }
-
-  auto initialWS = *(m_inMatrixWS.begin());
   MatrixWorkspace_sptr newOutWS = DataObjects::create<MatrixWorkspace>(
-      *initialWS, numOutputSpectra, initialWS->histogram(0));
+      *outWS, numOutputSpectra, outWS->histogram(0).binEdges());
+
+  newOutWS->mutableDetectorInfo().merge(addeeWS->detectorInfo());
 
   auto newIndexInfo = Indexing::IndexInfo(numOutputSpectra);
-  newIndexInfo.setSpectrumDefinitions(std::move(outputSpectraDefs));
+  newIndexInfo.setSpectrumDefinitions(std::move(outSpecDefs));
   newOutWS->setIndexInfo(newIndexInfo);
+
+  // set histograms
+  // set time indexes
 
   return newOutWS;
 }
