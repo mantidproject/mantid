@@ -1028,15 +1028,13 @@ void MuonFitPropertyBrowser::setAvailableGroups(const QStringList &groups) {
   m_enumManager->setValue(m_groupsToFit, 0);
   // If it's the same list, do nothing
   if (groups.size() == m_groupBoxes.size()) {
-	  auto existingGroups = m_groupBoxes.keys();
-	  auto newGroups = groups;
-	  qSort(existingGroups);
-	  qSort(newGroups);
-	  if (existingGroups == newGroups) {
-		  return;
-		  
-	  }
-	  
+    auto existingGroups = m_groupBoxes.keys();
+    auto newGroups = groups;
+    qSort(existingGroups);
+    qSort(newGroups);
+    if (existingGroups == newGroups) {
+      return;
+    }
   }
   clearGroupCheckboxes();
   QSettings settings;
@@ -1428,11 +1426,11 @@ void MuonFitPropertyBrowser::setAllGroupsOrPairs(const bool isItGroup) {
   if (isItGroup) {
     // all groups is index 0
     m_enumManager->setValue(m_groupsToFit, 0);
-	setAllGroups();
+    setAllGroups();
   } else {
     // all pairs is index 1
     m_enumManager->setValue(m_groupsToFit, 1);
-	setAllPairs();
+    setAllPairs();
   }
 }
 void MuonFitPropertyBrowser::setGroupNames(

@@ -1533,7 +1533,7 @@ void MuonAnalysis::updateFrontAndCombo(bool updateIndexAndPlot) {
   names.insert(std::end(names), std::begin(tmp), std::end(tmp));
   QStringList GroupsAndPairsNames;
   for (auto name : names) {
-	  GroupsAndPairsNames<<QString::fromStdString(name);
+    GroupsAndPairsNames << QString::fromStdString(name);
   }
   m_uiForm.fitBrowser->setAvailableGroups(GroupsAndPairsNames);
 
@@ -1892,13 +1892,13 @@ void MuonAnalysis::selectMultiPeak(const QString &wsName,
                    std::back_inserter(groupsAndPairs), &QString::fromStdString);
     std::transform(groups.pairNames.begin(), groups.pairNames.end(),
                    std::back_inserter(groupsAndPairs), &QString::fromStdString);
-	auto tmp = m_groupingHelper.parseGroupingTable().groupNames;
-	auto names = m_groupingHelper.parseGroupingTable().pairNames;
-	names.insert(std::end(names), std::begin(tmp), std::end(tmp)); 
-	QStringList GroupsAndPairsNames;
-	for (auto name : names) {
-		GroupsAndPairsNames<<QString::fromStdString(name);
-	}
+    auto tmp = m_groupingHelper.parseGroupingTable().groupNames;
+    auto names = m_groupingHelper.parseGroupingTable().pairNames;
+    names.insert(std::end(names), std::begin(tmp), std::end(tmp));
+    QStringList GroupsAndPairsNames;
+    for (auto name : names) {
+      GroupsAndPairsNames << QString::fromStdString(name);
+    }
     m_uiForm.fitBrowser->setAvailableGroups(GroupsAndPairsNames);
     m_uiForm.fitBrowser->setNumPeriods(m_numPeriods);
 
