@@ -434,45 +434,47 @@ void StartLiveDataDialog::initListenerPropLayout(const QString &listener) {
   }
 
   // update algorithm's properties
-  m_algorithm->setPropertyValue("Instrument",
-                                ui.cmbInstrument->currentText().toStdString());
-  m_algorithm->setPropertyValue("Listener", listener.toStdString());
-  // create or clear the layout
-  QLayout *layout = ui.listenerProps->layout();
-  if (!layout) {
-    QGridLayout *listenerPropLayout = new QGridLayout(ui.listenerProps);
-    layout = listenerPropLayout;
-  } else {
-    QLayoutItem *child;
-    while ((child = layout->takeAt(0)) != NULL) {
-      child->widget()->close();
-      delete child;
+  if (ui.cmbInstrument->currentText().toStdString() != "") {
+    m_algorithm->setPropertyValue(
+        "Instrument", ui.cmbInstrument->currentText().toStdString());
+    m_algorithm->setPropertyValue("Listener", listener.toStdString());
+    // create or clear the layout
+    QLayout *layout = ui.listenerProps->layout();
+    if (!layout) {
+      QGridLayout *listenerPropLayout = new QGridLayout(ui.listenerProps);
+      layout = listenerPropLayout;
+    } else {
+      QLayoutItem *child;
+      while ((child = layout->takeAt(0)) != NULL) {
+        child->widget()->close();
+        delete child;
+      }
     }
-  }
 
-  // find the listener's properties
-  props = m_algorithm->getPropertiesInGroup("ListenerProperties");
+    // find the listener's properties
+    props = m_algorithm->getPropertiesInGroup("ListenerProperties");
 
-  // no properties - don't show the box
-  if (props.empty()) {
-    ui.listenerProps->setVisible(false);
-    return;
-  }
-
-  auto gridLayout = static_cast<QGridLayout *>(layout);
-  // add widgets for the listener's properties
-  for (auto prop = props.begin(); prop != props.end(); ++prop) {
-    int row = static_cast<int>(std::distance(props.begin(), prop));
-    QString propName = QString::fromStdString((**prop).name());
-    gridLayout->addWidget(new QLabel(propName), row, 0);
-    QLineEdit *propWidget = new QLineEdit();
-    gridLayout->addWidget(propWidget, row, 1);
-    if (!m_algProperties.contains(propName)) {
-      m_algProperties.append(propName);
+    // no properties - don't show the box
+    if (props.empty()) {
+      ui.listenerProps->setVisible(false);
+      return;
     }
-    tie(propWidget, propName, gridLayout);
+
+    auto gridLayout = static_cast<QGridLayout *>(layout);
+    // add widgets for the listener's properties
+    for (auto prop = props.begin(); prop != props.end(); ++prop) {
+      int row = static_cast<int>(std::distance(props.begin(), prop));
+      QString propName = QString::fromStdString((**prop).name());
+      gridLayout->addWidget(new QLabel(propName), row, 0);
+      QLineEdit *propWidget = new QLineEdit();
+      gridLayout->addWidget(propWidget, row, 1);
+      if (!m_algProperties.contains(propName)) {
+        m_algProperties.append(propName);
+      }
+      tie(propWidget, propName, gridLayout);
+    }
+    ui.listenerProps->setVisible(true);
   }
-  ui.listenerProps->setVisible(true);
 }
 
 /**
@@ -493,9 +495,13 @@ void StartLiveDataDialog::updateConnectionChoices(const QString &inst_name) {
   }
 
   // Select default item
-  auto selectName = QString::fromStdString(inst.liveListenerInfo().name());
-  auto index = ui.cmbConnection->findText(selectName);
-  ui.cmbConnection->setCurrentIndex(index);
+  try {
+    auto selectName = QString::fromStdString(inst.liveListenerInfo().name());
+    auto index = ui.cmbConnection->findText(selectName);
+    ui.cmbConnection->setCurrentIndex(index);
+  } catch (std::runtime_error &) {
+    // the default instrument has no live listener, don't make a selection
+  }
 }
 
 /**
