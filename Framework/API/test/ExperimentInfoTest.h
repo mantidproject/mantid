@@ -941,14 +941,12 @@ public:
 
     // Test non-detector, non-assembly components
     auto sampleId = inst->getComponentByName("sample")->getComponentID();
-    TSM_ASSERT_EQUALS(
-        "Sample should not report any nested component indices",
-        compInfo.componentsInSubtree(compInfo.indexOf(sampleId)).size(), 0);
+    TS_ASSERT_EQUALS(
+        compInfo.componentsInSubtree(compInfo.indexOf(sampleId)).size(), 1);
 
     auto sourceId = inst->getComponentByName("source")->getComponentID();
-    TSM_ASSERT_EQUALS(
-        "Source should not report any nested detector indices",
-        compInfo.componentsInSubtree(compInfo.indexOf(sourceId)).size(), 0);
+    TS_ASSERT_EQUALS(
+        compInfo.componentsInSubtree(compInfo.indexOf(sourceId)).size(), 1);
 
     auto bankId = inst->getComponentByName("bank1")->getComponentID();
     TSM_ASSERT_EQUALS(
