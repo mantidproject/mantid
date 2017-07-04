@@ -48,8 +48,6 @@ public:
                          -l1, positionSampleNew, wsNew->mutableComponentInfo()),
                      std::runtime_error);
 
-    // Make a first move
-
     CalibrationHelpers::adjustUpSampleAndSourcePositions(
         l1, positionSampleNew, wsNew->mutableComponentInfo());
 
@@ -63,22 +61,6 @@ public:
                      positionSourceNew.Y());
     TS_ASSERT_EQUALS(wsNew->detectorInfo().sourcePosition().Z(),
                      positionSourceNew.Z());
-
-    // Make a second move - here the old and new workspaces have different
-    // positions
-
-    auto wsNew2 = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(
-        2, 1000, true);
-    const auto &positionSampleNew2 = V3D(-1.0, -2.0, -3.0);
-    CalibrationHelpers::adjustUpSampleAndSourcePositions(
-        l1, positionSampleNew2, wsNew2->mutableComponentInfo());
-
-    TS_ASSERT_EQUALS(wsNew2->detectorInfo().samplePosition(),
-                     positionSampleOld);
-    TS_ASSERT_EQUALS(wsNew->detectorInfo().samplePosition(), positionSampleNew);
-    TS_ASSERT_EQUALS(wsNew2->detectorInfo().sourcePosition(),
-                     positionSourceOld);
-    TS_ASSERT_EQUALS(wsNew->detectorInfo().sourcePosition(), positionSourceNew);
   }
 
   void test_fixUpBankParameterMap_applies_move_to_rectangular_detectors() {
