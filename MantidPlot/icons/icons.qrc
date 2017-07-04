@@ -241,5 +241,6 @@
         <file>mdPlotting32x32.png</file>
         <file>expand_all.png</file>
         <file>collapse_all.png</file>
+        <file>pause.png</file>
     </qresource>
 </RCC>

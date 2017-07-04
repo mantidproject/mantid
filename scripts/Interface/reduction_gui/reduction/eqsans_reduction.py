@@ -1,3 +1,4 @@
+from __future__ import (absolute_import, division, print_function)
 #pylint: disable=invalid-name
 """
     This class holds all the necessary information to create a reduction script.
@@ -5,7 +6,7 @@
 """
 import time
 import os
-from scripter import BaseReductionScripter
+from reduction_gui.reduction.scripter import BaseReductionScripter
 
 HAS_MANTID = False
 try:

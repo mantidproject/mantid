@@ -37,7 +37,9 @@ namespace API {
 */
 class MANTID_API_DLL IEventWorkspace : public MatrixWorkspace {
 public:
-  IEventWorkspace() : MatrixWorkspace() {}
+  IEventWorkspace(
+      const Parallel::StorageMode storageMode = Parallel::StorageMode::Cloned)
+      : MatrixWorkspace(storageMode) {}
   IEventWorkspace &operator=(const IEventWorkspace &) = delete;
   /// Returns a clone of the workspace
   IEventWorkspace_uptr clone() const { return IEventWorkspace_uptr(doClone()); }

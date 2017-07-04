@@ -7,11 +7,7 @@
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidKernel/ListValidator.h"
-#include "MantidKernel/System.h"
 #include "MantidKernel/VMD.h"
-
-#include <boost/type_traits/integral_constant.hpp>
-#include <cmath>
 
 #include <map>
 #include <vector>

@@ -2,8 +2,9 @@
 #define MANTIDQTMANTIDWIDGETS_DATAPROCESSORCOMMAND_H
 
 #include <memory>
-#include <string>
 #include <vector>
+
+#include <QString>
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -39,11 +40,11 @@ public:
   virtual ~DataProcessorCommand(){};
 
   virtual void execute() = 0;
-  virtual std::string name() = 0;
-  virtual std::string icon() = 0;
-  virtual std::string tooltip() = 0;
-  virtual std::string whatsthis() = 0;
-  virtual std::string shortcut() = 0;
+  virtual QString name() = 0;
+  virtual QString icon() = 0;
+  virtual QString tooltip() = 0;
+  virtual QString whatsthis() = 0;
+  virtual QString shortcut() = 0;
   virtual bool hasChild() final { return !m_child.empty(); };
   virtual void
   setChild(std::vector<std::unique_ptr<DataProcessorCommand>> child) final {
@@ -52,7 +53,9 @@ public:
   virtual std::vector<std::unique_ptr<DataProcessorCommand>> &getChild() final {
     return m_child;
   }
-  virtual bool isSeparator() final { return name().empty() && icon().empty(); }
+  virtual bool isSeparator() final {
+    return name().isEmpty() && icon().isEmpty();
+  }
 
 protected:
   std::vector<std::unique_ptr<DataProcessorCommand>> m_child;

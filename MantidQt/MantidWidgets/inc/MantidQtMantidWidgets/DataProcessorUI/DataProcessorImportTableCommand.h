@@ -34,18 +34,20 @@ class DataProcessorImportTableCommand : public DataProcessorCommandBase {
 public:
   DataProcessorImportTableCommand(DataProcessorPresenter *tablePresenter)
       : DataProcessorCommandBase(tablePresenter){};
+  DataProcessorImportTableCommand(const QDataProcessorWidget &widget)
+      : DataProcessorCommandBase(widget){};
   virtual ~DataProcessorImportTableCommand(){};
 
   void execute() override {
     m_presenter->notify(DataProcessorPresenter::ImportTableFlag);
   };
-  std::string name() override { return std::string("Import .TBL"); }
-  std::string icon() override { return std::string("://open_template.png"); }
-  std::string tooltip() override { return std::string("Import .TBL file"); }
-  std::string whatsthis() override {
-    return std::string("Opens a dialog to select a .TBL file to import");
+  QString name() override { return QString("Import .TBL"); }
+  QString icon() override { return QString("://open_template.png"); }
+  QString tooltip() override { return QString("Import .TBL file"); }
+  QString whatsthis() override {
+    return QString("Opens a dialog to select a .TBL file to import");
   }
-  std::string shortcut() override { return std::string(); }
+  QString shortcut() override { return QString(); }
 };
 }
 }

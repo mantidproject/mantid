@@ -52,6 +52,10 @@ private:
       throw std::runtime_error(
           "Cloning of MockMDWorkspace is not implemented.");
     }
+    MockMDWorkspace *doCloneEmpty() const override {
+      throw std::runtime_error(
+          "Cloning of MockMDWorkspace is not implemented.");
+    }
   };
 
   class MockMDIterator : public Mantid::API::IMDIterator {
