@@ -28,6 +28,21 @@ public:
     TS_ASSERT_EQUALS(output.str(), correctOutput);
   }
 
+  void testOutputWithShortenedValue() {
+    std::string correctOutput = "Name: arg1_param, ";
+    correctOutput = correctOutput + "Value: 1234567 ... 4567890, ";
+    correctOutput = correctOutput + "Default?: Yes, ";
+    correctOutput = correctOutput + "Direction: Input\n";
+
+    // a long property that should get shortened
+    PropertyHistory propHistory("arg1_param", "123456798012345678901234567890", "argument", true, Direction::Input);
+
+    // dump output to sting
+    std::ostringstream output;
+    TS_ASSERT_THROWS_NOTHING(propHistory.printSelf(output,0,20));
+    TS_ASSERT_EQUALS(output.str(), correctOutput);
+  }
+
   /**
    * Test the isEmptyDefault method returns true for unset default-value
    * properties

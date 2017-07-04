@@ -129,6 +129,9 @@ DLLExport std::string joinCompress(ITERATOR_TYPE begin, ITERATOR_TYPE end,
   }
   return result.str();
 }
+/// Return a string with all matching occurence-strings
+MANTID_KERNEL_DLL std::string shortenList(const std::string &input,
+  const size_t &max_length);
 
 /// Return a string with all matching occurence-strings
 MANTID_KERNEL_DLL std::string replace(const std::string &input,

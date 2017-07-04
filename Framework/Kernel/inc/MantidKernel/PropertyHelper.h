@@ -28,13 +28,63 @@ template <typename T> std::string toString(const boost::shared_ptr<T> &value) {
   throw boost::bad_lexical_cast();
 }
 
+/// Specialization for a property of type std::vector.
+template <typename T>
+std::string toString(const std::vector<T> &value,
+  const std::string &delimiter = ",") {
+  std::stringstream result;
+  std::size_t vsize = value.size();
+  for (std::size_t i = 0; i < vsize; ++i) {
+    result << value[i];
+    if (i + 1 != vsize)
+      result << delimiter;
+  }
+  return result.str();
+}
+
+/// Specialization for a property of type std::vector<std::vector>.
+template <typename T>
+std::string toString(const std::vector<std::vector<T>> &value,
+  const std::string &outerDelimiter = ",",
+  const std::string &innerDelimiter = "+") {
+  std::stringstream result;
+  std::size_t vsize = value.size();
+  for (std::size_t i = 0; i < vsize; ++i) {
+    std::size_t innervsize = value[i].size();
+    for (std::size_t j = 0; j < innervsize; ++j) {
+      result << value[i][j];
+      if (j + 1 != innervsize)
+        result << innerDelimiter;
+    }
+
+    if (i + 1 != vsize)
+      result << outerDelimiter;
+  }
+  return result.str();
+}
+
+// --------------------- convert values to pretty strings
+/// Convert values to pretty strings.
+template <typename T> std::string toPrettyString(const T &value, size_t maxLength = 0,
+  bool collapseLists = true) {
+  return boost::lexical_cast<std::string>(value);
+}
+
+/// Throw an exception if a shared pointer is converted to a pretty string.
+template <typename T> std::string toPrettyString(const boost::shared_ptr<T> &value, size_t maxLength = 0,
+  bool collapseLists = true) {
+  UNUSED_ARG(value);
+  throw boost::bad_lexical_cast();
+}
+
 /** Specialization for a property of type std::vector of non integral types.
 *   This will catch Vectors of char, double, float etc.
 *   This simply concatenates the values using a delimiter
 */
 template <typename T>
 std::string
-toString(const std::vector<T> &value, const std::string &delimiter = ",",
+toPrettyString(const std::vector<T> &value, size_t maxLength = 0,
+  bool collapseLists = true, const std::string &delimiter = ",",
          const std::string &unusedDelimiter = "+",
          typename std::enable_if<!(std::is_integral<T>::value &&
                                    std::is_arithmetic<T>::value)>::type * = 0) {
@@ -51,7 +101,8 @@ toString(const std::vector<T> &value, const std::string &delimiter = ",",
 */
 template <typename T>
 std::string
-toString(const std::vector<T> &value, const std::string &delimiter = ",",
+toPrettyString(const std::vector<T> &value, size_t maxLength = 0,
+  bool collapseLists = true, const std::string &delimiter = ",",
          const std::string &listDelimiter = "-",
          typename std::enable_if<std::is_integral<T>::value &&
                                  std::is_arithmetic<T>::value>::type * = 0) {
@@ -65,7 +116,8 @@ toString(const std::vector<T> &value, const std::string &delimiter = ",",
 */
 template <>
 std::string
-toString(const std::vector<bool> &value, const std::string &delimiter,
+toPrettyString(const std::vector<bool> &value, size_t maxLength,
+         bool collapseLists, const std::string &delimiter,
          const std::string &unusedDelimiter,
          typename std::enable_if<std::is_same<bool, bool>::value>::type *) {
   UNUSED_ARG(unusedDelimiter);
@@ -74,23 +126,12 @@ toString(const std::vector<bool> &value, const std::string &delimiter,
 
 /// Specialization for a property of type std::vector<std::vector>.
 template <typename T>
-std::string toString(const std::vector<std::vector<T>> &value,
+std::string toPrettyString(const std::vector<std::vector<T>> &value, 
+                     size_t maxLength = 0,
+                     bool collapseLists = true,
                      const std::string &outerDelimiter = ",",
                      const std::string &innerDelimiter = "+") {
-  std::stringstream result;
-  std::size_t vsize = value.size();
-  for (std::size_t i = 0; i < vsize; ++i) {
-    std::size_t innervsize = value[i].size();
-    for (std::size_t j = 0; j < innervsize; ++j) {
-      result << value[i][j];
-      if (j + 1 != innervsize)
-        result << innerDelimiter;
-    }
-
-    if (i + 1 != vsize)
-      result << outerDelimiter;
-  }
-  return result.str();
+  return toString<T>(value, outerDelimiter, innerDelimiter);
 }
 
 /// Specialization for any type, should be appropriate for properties with a

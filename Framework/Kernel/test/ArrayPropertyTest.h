@@ -82,7 +82,7 @@ public:
     TS_ASSERT_EQUALS(i.operator()()[0], 1);
     TS_ASSERT_EQUALS(i.operator()()[1], 2);
     TS_ASSERT_EQUALS(i.operator()()[2], 3);
-    TS_ASSERT_EQUALS(i.getDefault(), "1-3");
+    TS_ASSERT_EQUALS(i.getDefault(), "1,2,3");
     TS_ASSERT(i.isDefault());
 
     ArrayProperty<int> i2("i", "-1-1");
@@ -301,7 +301,7 @@ public:
                       static_cast<Property *>(0))
   }
 
-  void testListShortening() {
+  void testPrettyPrinting() {
     std::vector<std::string> inputList{
         "1,2,3", "-1,0,1", "356,366,367,368,370,371,372,375", "7,6,5,6,7,8,10",
         "1-9998, 9999, 2000, 20002-29999"};
@@ -352,9 +352,10 @@ public:
 
     bool success = true;
     for (size_t i = 0; i < inputList.size(); i++) {
-      ArrayProperty<T> intListProperty("i", inputList[i]);
-      TS_ASSERT_EQUALS(intListProperty.value(), resultList[i]);
-      if (intListProperty.value() != resultList[i]) {
+      ArrayProperty<T> listProperty("i", inputList[i]);
+      std::string response = listProperty.valuePrettyPrint(0,true);
+      TS_ASSERT_EQUALS(response, resultList[i]);
+      if (response != resultList[i]) {
         success = false;
       }
     }

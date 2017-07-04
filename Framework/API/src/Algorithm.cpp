@@ -1059,8 +1059,14 @@ void Algorithm::logAlgorithmInfo() const {
     logger.notice() << '\n';
     // Make use of the AlgorithmHistory class, which holds all the info we want
     // here
-    AlgorithmHistory AH(this);
-    logger.information() << AH;
+    AlgorithmHistory algHistory(this);
+    size_t maxPropertyLength = 40;
+    if (logger.is(Logger::Priority::PRIO_DEBUG))
+    {
+      //include the full property value when logging in debug
+      maxPropertyLength = 0;
+    }
+    algHistory.printSelf(logger.information(), 0, maxPropertyLength);
   }
 }
 

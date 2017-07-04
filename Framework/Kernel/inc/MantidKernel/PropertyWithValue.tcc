@@ -114,6 +114,14 @@ template <typename TYPE> std::string PropertyWithValue<TYPE>::value() const {
   return toString(m_value);
 }
 
+/** Get the value of the property as a string
+ *  @return The property's value
+ */
+template <typename TYPE> std::string PropertyWithValue<TYPE>::valuePrettyPrint(size_t maxLength,
+    bool collapseLists) const const {
+  return toPrettyString(m_value, maxLength, collapseLists);
+}
+
 /**
  * Deep comparison.
  * @param rhs The other property to compare to.
