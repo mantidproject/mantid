@@ -38,6 +38,7 @@ toString(const std::vector<T> &value, const std::string &delimiter = ",",
          const std::string &unusedDelimiter = "+",
          typename std::enable_if<!(std::is_integral<T>::value &&
                                    std::is_arithmetic<T>::value)>::type * = 0) {
+  UNUSED_ARG(unusedDelimiter);
   return Strings::join(value.begin(), value.end(), delimiter);
 }
 
@@ -67,6 +68,7 @@ std::string
 toString(const std::vector<bool> &value, const std::string &delimiter,
          const std::string &unusedDelimiter,
          typename std::enable_if<std::is_same<bool, bool>::value>::type *) {
+  UNUSED_ARG(unusedDelimiter);
   return Strings::join(value.begin(), value.end(), delimiter);
 }
 
