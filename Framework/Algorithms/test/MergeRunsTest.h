@@ -1650,6 +1650,25 @@ public:
     TS_ASSERT_EQUALS(outputWS->histogram(3).y()[0], 3)
   }
 
+  void test_merging_detector_scan_workspaces_with_different_positions_throws() {
+    auto ws = create_group_detector_scan_workspaces(2);
+
+    auto wsA =
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("a1");
+
+    wsA->mutableDetectorInfo().setPosition(std::pair<size_t, size_t>(0, 0),
+                                           V3D(5, 6, 7));
+    MergeRuns alg;
+    alg.initialize();
+    alg.setChild(true);
+    alg.setPropertyValue("InputWorkspaces", ws->getName());
+    alg.setPropertyValue("OutputWorkspace", "outWS");
+    TS_ASSERT_THROWS_EQUALS(alg.execute(), const std::runtime_error &e,
+                            std::string(e.what()), "Cannot merge DetectorInfo: "
+                                                   "matching scan interval but "
+                                                   "positions differ")
+  }
+
   void test_merging_detector_scan_workspaces_failure_case() {
     auto ws = create_group_detector_scan_workspaces(2);
 
