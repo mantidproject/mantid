@@ -294,9 +294,9 @@ InfoComponentVisitor::rotations() const {
   return m_rotations;
 }
 
-size_t InfoComponentVisitor::sample() const { return m_sampleIndex; }
+int64_t InfoComponentVisitor::sample() const { return m_sampleIndex; }
 
-size_t InfoComponentVisitor::source() const { return m_sourceIndex; }
+int64_t InfoComponentVisitor::source() const { return m_sourceIndex; }
 
 } // namespace Geometry
 } // namespace Mantid
