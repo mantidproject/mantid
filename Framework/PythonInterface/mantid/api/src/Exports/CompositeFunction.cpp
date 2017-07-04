@@ -1,10 +1,14 @@
+#include "MantidPythonInterface/kernel/GetPointer.h"
 #include "MantidAPI/CompositeFunction.h"
 #include <boost/python/class.hpp>
 #include <boost/python/overloads.hpp>
+#include <boost/python/register_ptr_to_python.hpp>
 
 using Mantid::API::CompositeFunction;
 using Mantid::API::IFunction;
 using namespace boost::python;
+
+GET_POINTER_SPECIALIZATION(CompositeFunction);
 
 namespace {
 
@@ -17,6 +21,8 @@ namespace {
 }
 
 void export_CompositeFunction() {
+
+  register_ptr_to_python<boost::shared_ptr<CompositeFunction>>();
 
   class_<CompositeFunction, bases<IFunction>, boost::noncopyable>(
     "CompositeFunction", "Composite Fit functions")

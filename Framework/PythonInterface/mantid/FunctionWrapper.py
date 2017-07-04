@@ -87,7 +87,10 @@ class CompositeFunctionWrapper(FunctionWrapper):
           # We have a composite function to wrap
           self.fun = args[0]
        else:
-          self.fun = FunctionFactory.createFunction(name)
+          if(name == "CompositeFunction"):
+             self.fun = FunctionFactory.createFunction(name)
+          else:
+             self.fun = FunctionFactory.createCompositeFunction(name)
    
           #Add the functions
           for a in args:
@@ -211,6 +214,8 @@ def _create_wrapper_function(name):
     def wrapper_function(*args, **kwargs):
         if( name == "CompositeFunction"):
            return CompositeFunctionWrapper( *args, **kwargs )
+        elif( name == "ProductFunction"):
+           return ProductFunctionWrapper( *args, **kwargs )
         else:
            return FunctionWrapper(name, *args, **kwargs)
 
