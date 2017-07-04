@@ -223,7 +223,9 @@ class ConvolutionWrapper(CompositeFunctionWrapper):
 class MultiDomainFunctionWrapper(CompositeFunctionWrapper):
 # Wrapper class for Product Fitting Function
     def __init__ (self, *args):
-       return self.initByName("MultiDomainFunction", *args)
+       self.initByName("MultiDomainFunction", *args)
+       for i in range(0, self.__len__()):
+          self.fun.setDomainIndex(i, i)
      
         
 def _create_wrapper_function(name):
