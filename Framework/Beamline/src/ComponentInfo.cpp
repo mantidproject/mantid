@@ -248,11 +248,7 @@ void ComponentInfo::scanningCheck(size_t compIndex) const {
 }
 
 size_t ComponentInfo::parent(const size_t componentIndex) const {
-  if (componentIndex < m_parentIndices->size()) {
-    return (*m_parentIndices)[componentIndex];
-  } else {
-    return componentIndex; // Root gets root as parent
-  }
+  return (*m_parentIndices)[componentIndex];
 }
 
 bool ComponentInfo::hasParent(const size_t componentIndex) const {

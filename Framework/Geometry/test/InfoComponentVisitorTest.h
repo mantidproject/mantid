@@ -386,13 +386,12 @@ public:
 
     const auto parentComponentIndices = visitor.parentComponentIndices();
 
-    TSM_ASSERT_EQUALS("Root component will not have a parent index record",
-                      parentComponentIndices->size(), visitor.size() - 1);
-
     size_t testIndex =
         visitor.size() -
         2; // One component down from root. (Has parent of the root itself)
     TS_ASSERT_EQUALS((*parentComponentIndices)[testIndex], visitor.size() - 1);
+    size_t root = visitor.size() - 1;
+    TS_ASSERT_EQUALS((*parentComponentIndices)[root], root);
 
     testIndex = 0; // Check a detector
     const auto rowAssemblyIndex = (*parentComponentIndices)[testIndex];

@@ -52,7 +52,8 @@ InfoComponentVisitor::InfoComponentVisitor(
           boost::make_shared<std::vector<size_t>>()),
       m_assemblySortedComponentIndices(
           boost::make_shared<std::vector<size_t>>()),
-      m_parentComponentIndices(boost::make_shared<std::vector<size_t>>()),
+      m_parentComponentIndices(boost::make_shared<std::vector<size_t>>(
+          orderedDetectorIds.size(), 0)),
       m_detectorRanges(
           boost::make_shared<std::vector<std::pair<size_t, size_t>>>()),
       m_componentRanges(
@@ -89,11 +90,11 @@ InfoComponentVisitor::registerComponentAssembly(const ICompAssembly &assembly) {
   for (size_t i = 0; i < assemblyChildren.size(); ++i) {
     // register everything under this assembly
     children[i] = assemblyChildren[i]->registerContents(*this);
-    m_parentComponentIndices->push_back(0);
   }
   const size_t detectorStop = m_assemblySortedDetectorIndices->size();
   const size_t componentIndex = m_componentIds->size();
   m_assemblySortedComponentIndices->push_back(componentIndex);
+  m_parentComponentIndices->push_back(componentIndex);
   const size_t componentStop = m_assemblySortedComponentIndices->size();
 
   m_detectorRanges->emplace_back(std::make_pair(detectorStart, detectorStop));
@@ -138,6 +139,7 @@ InfoComponentVisitor::registerGenericComponent(const IComponent &component) {
   m_positions->emplace_back(Kernel::toVector3d(component.getPos()));
   m_rotations->emplace_back(Kernel::toQuaterniond(component.getRotation()));
   m_assemblySortedComponentIndices->push_back(componentIndex);
+  m_parentComponentIndices->push_back(componentIndex);
   clearPositionAndRotationParameters(m_pmap, component);
   markAsSourceOrSample(component.getComponentID(), componentIndex);
   return componentIndex;
