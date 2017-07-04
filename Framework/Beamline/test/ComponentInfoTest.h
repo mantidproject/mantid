@@ -105,7 +105,7 @@ std::tuple<ComponentInfo, boost::shared_ptr<DetectorInfo>> makeTreeExample() {
       boost::make_shared<const std::vector<size_t>>(
           std::vector<size_t>{0, 2, 3, 1, 4});
   auto parentIndices = boost::make_shared<const std::vector<size_t>>(
-      std::vector<size_t>{3, 3, 4, 4});
+      std::vector<size_t>{3, 3, 4, 4, 4});
   std::vector<std::pair<size_t, size_t>> detectorRanges;
   detectorRanges.push_back(std::make_pair(0, 2));
   detectorRanges.push_back(std::make_pair(0, 3));
