@@ -118,7 +118,7 @@ template <typename TYPE> std::string PropertyWithValue<TYPE>::value() const {
  *  @return The property's value
  */
 template <typename TYPE> std::string PropertyWithValue<TYPE>::valuePrettyPrint(size_t maxLength,
-    bool collapseLists) const const {
+    bool collapseLists) const {
   return toPrettyString(m_value, maxLength, collapseLists);
 }
 
