@@ -459,7 +459,7 @@ void CompAssembly::printTree(std::ostream &os) const {
  * @returns A vector of the absolute position
  */
 V3D CompAssembly::getPos() const {
-  if (!m_map)
+  if (!m_map || hasComponentInfo())
     return Component::getPos();
   else {
     V3D pos;
@@ -477,7 +477,7 @@ V3D CompAssembly::getPos() const {
  * @returns A vector of the absolute position
  */
 Quat CompAssembly::getRotation() const {
-  if (!m_map)
+  if (!m_map || hasComponentInfo())
     return Component::getRotation();
   else {
     Quat rot;
