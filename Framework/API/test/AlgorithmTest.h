@@ -4,7 +4,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include "FakeAlgorithms.h"
-#include "MantidAPI/Algorithm.h"
+#include "MantidAPI/Algorithm.tcc"
 #include "MantidAPI/AlgorithmFactory.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/WorkspaceFactory.h"
@@ -861,9 +861,8 @@ public:
 
   void testIndexingAlgorithm_accessFailInvalidPropertyType() {
     IndexingAlgorithm indexAlg;
-    indexAlg.declareProperty(
-        Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-            "InputWorkspace", "", Kernel::Direction::Input));
+    indexAlg.declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+        "InputWorkspace", "", Direction::Input));
 
     TS_ASSERT_THROWS(
         indexAlg.getIndexProperty<MatrixWorkspace>("InputWorkspace"),
@@ -877,11 +876,10 @@ public:
   void testIndexingAlgorithm_failExistingIndexProperty() {
     IndexingAlgorithm indexAlg;
     indexAlg.init();
-    TS_ASSERT_THROWS(
-        indexAlg.declareProperty(
-            Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-                "InputWorkspace", "", Kernel::Direction::Input)),
-        std::runtime_error);
+    TS_ASSERT_THROWS(indexAlg.declareProperty(
+                         make_unique<WorkspaceProperty<MatrixWorkspace>>(
+                             "InputWorkspace", "", Direction::Input)),
+                     std::runtime_error);
   }
 
 private:
