@@ -226,6 +226,9 @@ class MultiDomainFunctionWrapper(CompositeFunctionWrapper):
        self.initByName("MultiDomainFunction", *args)
        for i in range(0, self.__len__()):
           self.fun.setDomainIndex(i, i)
+          
+    def nDomains (self):
+       return self.fun.nDomains()
      
         
 def _create_wrapper_function(name):
