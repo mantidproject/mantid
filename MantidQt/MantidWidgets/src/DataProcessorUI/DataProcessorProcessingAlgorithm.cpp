@@ -48,6 +48,15 @@ DataProcessorProcessingAlgorithm::DataProcessorProcessingAlgorithm(
           name.toStdString(), convertStringToVector(prefix.toStdString()),
           convertStringToSet(blacklist.toStdString())) {}
 
+/** Delegating constructor
+* @param name : The name of this algorithm
+* @param prefix : The list of prefixes that will be used for the output
+* workspaces' names, as a string
+* @param blacklist : The list of properties we do not want to show, as a string
+*/
+DataProcessorProcessingAlgorithm::DataProcessorProcessingAlgorithm() : m_prefix(), 
+m_inputProperties(), m_outputProperties() {}
+
 // Destructor
 DataProcessorProcessingAlgorithm::~DataProcessorProcessingAlgorithm() {}
 

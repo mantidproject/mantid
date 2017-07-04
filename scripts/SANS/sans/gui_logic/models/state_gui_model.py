@@ -200,6 +200,7 @@ class StateGuiModel(object):
     @property
     def merge_use_q_range(self):
         # There can be a q range setting for
+        pass
 
     @merge_use_q_range.setter
     def merge_use_q_range(self, value):
@@ -215,7 +216,6 @@ class StateGuiModel(object):
         self._update_merged_fit(element_id=DetectorId.shift_fit, q_start=value)
         # Update for the scale
         self._update_merged_fit(element_id=DetectorId.rescale_fit, q_start=value)
-
 
     @property
     def merge_q_range_stop(self):

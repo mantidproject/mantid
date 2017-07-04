@@ -76,6 +76,9 @@ public:
   void saveSettings(const std::map<std::string, QVariant> &) override{};
   void setSelectionModelConnections() override{};
 
+  void emitProcessClicked() override {};
+  void emitProcessingFinished() override {};
+
   DataProcessorPresenter *getPresenter() const override { return nullptr; }
 };
 
@@ -167,6 +170,12 @@ private:
                       int parentColumn) override {
     return "";
   };
+  int getNumberOfRows() override {
+    return 2;
+  }
+
+  void clearTable() override {
+  }
 
   std::map<std::string, QVariant> m_options;
 };
