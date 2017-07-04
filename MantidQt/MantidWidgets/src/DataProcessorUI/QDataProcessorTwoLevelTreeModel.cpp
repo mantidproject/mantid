@@ -485,18 +485,20 @@ bool QDataProcessorTwoLevelTreeModel::addHighlighted(
     int position, const QModelIndex &parent) {
 
   if (!parent.isValid()) {
+    // We have a group item (no parent)
+
     // Invalid position
     if (position < 0 || position >= rowCount())
       return false;
 
-    // Add a group item
     m_highlightGroups.push_back(position);
   } else {
+    // We have a row item (parent exists)
+
     // Invalid position
     if (position < 0 || position >= rowCount(parent))
       return false;
 
-    // Add a row item
     m_highlightRows[parent.row()].push_back(position);
   }
 

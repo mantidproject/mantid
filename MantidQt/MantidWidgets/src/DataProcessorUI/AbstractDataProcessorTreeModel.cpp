@@ -7,7 +7,8 @@ namespace MantidWidgets {
 using namespace Mantid::API;
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
+/** Constructor: initialise member variables common to all data processing tree
+* model implementations
 * @param tableWorkspace : The table workspace to wrap
 * @param whitelist : A DataProcessorWhiteList containing the columns
 */
@@ -26,6 +27,10 @@ int AbstractDataProcessorTreeModel::columnCount(
   return static_cast<int>(m_whitelist.size());
 }
 
+/** Returns the flags for a specific data item. If the index is valid, the item
+* is always editable.
+* @return : The item flags
+*/
 Qt::ItemFlags
 AbstractDataProcessorTreeModel::flags(const QModelIndex &index) const {
   if (!index.isValid())

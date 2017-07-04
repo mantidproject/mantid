@@ -195,6 +195,7 @@ bool QDataProcessorOneLevelTreeModel::setData(const QModelIndex &index,
 bool QDataProcessorOneLevelTreeModel::addHighlighted(
     int position, const QModelIndex &parent) {
 
+  // No parent items exists, this should not be possible
   if (parent.isValid())
     return false;
 

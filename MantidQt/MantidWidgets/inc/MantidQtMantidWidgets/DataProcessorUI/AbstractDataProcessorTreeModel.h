@@ -10,8 +10,11 @@
 namespace MantidQt {
 namespace MantidWidgets {
 
-/** IDataProcessorTreeModel is an interface which defines functions that are
-common to all data processing tree model implementations.
+/** AbstractDataProcessorTreeModel is a base class for several tree model
+implementations for processing table data. Full function implementation is
+provided for functions common to all data processing tree models, while
+these subclasses are expected to provide implementation for the remaining
+virtual functions defined here and in QAbstractItemModel.
 
 Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
 National Laboratory & European Spallation Source
