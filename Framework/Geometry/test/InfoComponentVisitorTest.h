@@ -288,12 +288,12 @@ public:
      * those non-assembly components. This is important for subsequent correct
      * working on ComponentInfo.
      */
-    // Source has no sub-components
+    // Source has no sub-components, range includes only itself
     TS_ASSERT_EQUALS((*componentRanges)[0].first, 0);
-    TS_ASSERT_EQUALS((*componentRanges)[0].second, 0);
-    // Sample has no sub-components
-    TS_ASSERT_EQUALS((*componentRanges)[1].first, 0);
-    TS_ASSERT_EQUALS((*componentRanges)[1].second, 0);
+    TS_ASSERT_EQUALS((*componentRanges)[0].second, 1);
+    // Sample has no sub-components, range includes only itself
+    TS_ASSERT_EQUALS((*componentRanges)[1].first, 1);
+    TS_ASSERT_EQUALS((*componentRanges)[1].second, 2);
     // Instrument has 1 detector.
     TS_ASSERT_EQUALS((*componentRanges)[2].first, 0);
     TS_ASSERT_EQUALS((*componentRanges)[2].second, 4);

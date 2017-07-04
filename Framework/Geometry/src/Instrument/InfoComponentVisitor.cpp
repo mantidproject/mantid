@@ -130,14 +130,15 @@ InfoComponentVisitor::registerGenericComponent(const IComponent &component) {
    */
   m_detectorRanges->emplace_back(
       std::make_pair(0, 0)); // Represents an empty range
-  m_componentRanges->emplace_back(
-      std::make_pair(0, 0)); // Represents an empty range
   // Record the ID -> index mapping
   const size_t componentIndex = m_componentIds->size();
   (*m_componentIdToIndexMap)[component.getComponentID()] = componentIndex;
   m_componentIds->emplace_back(component.getComponentID());
   m_positions->emplace_back(Kernel::toVector3d(component.getPos()));
   m_rotations->emplace_back(Kernel::toQuaterniond(component.getRotation()));
+  const size_t componentStart = m_assemblySortedComponentIndices->size();
+  m_componentRanges->emplace_back(
+      std::make_pair(componentStart, componentStart + 1));
   m_assemblySortedComponentIndices->push_back(componentIndex);
   m_parentComponentIndices->push_back(componentIndex);
   clearPositionAndRotationParameters(m_pmap, component);
