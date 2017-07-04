@@ -1604,7 +1604,6 @@ public:
   }
 
   void test_merging_detector_scan_workspaces_appends_workspaces() {
-
     auto outputWS = do_MergeRuns_with_scanning_workspaces();
 
     const auto &detInfo = outputWS->detectorInfo();
@@ -1649,6 +1648,43 @@ public:
     TS_ASSERT_EQUALS(outputWS->histogram(1).y()[0], 3)
     TS_ASSERT_EQUALS(outputWS->histogram(2).y()[0], 3)
     TS_ASSERT_EQUALS(outputWS->histogram(3).y()[0], 3)
+  }
+
+  void test_merging_detector_scan_workspaces_failure_case() {
+    auto ws = create_group_detector_scan_workspaces(2);
+
+    auto wsA =
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("a1");
+    Property *prop1 = new PropertyWithValue<int>("prop1", 1);
+    wsA->mutableRun().addLogData(prop1);
+
+    auto wsB =
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("b1");
+    Property *prop2 = new PropertyWithValue<int>("prop1", 2);
+    wsB->mutableRun().addLogData(prop2);
+
+    MergeRuns alg;
+    alg.initialize();
+    alg.setPropertyValue("InputWorkspaces", ws->getName());
+    alg.setPropertyValue("OutputWorkspace", "outWS");
+    alg.setPropertyValue("SampleLogsFail", "prop1");
+
+    TS_ASSERT_THROWS_NOTHING(alg.execute();)
+
+    MatrixWorkspace_sptr outputWS;
+    TS_ASSERT_THROWS_NOTHING(
+        outputWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+            "outWS"));
+
+    TS_ASSERT_EQUALS(outputWS->detectorInfo().size(), 2)
+    TS_ASSERT_EQUALS(outputWS->detectorInfo().scanCount(0), 2)
+    TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 4)
+
+    // Check bins are set correctly
+    TS_ASSERT_EQUALS(outputWS->histogram(0).y()[0], 1)
+    TS_ASSERT_EQUALS(outputWS->histogram(1).y()[0], 1)
+    TS_ASSERT_EQUALS(outputWS->histogram(2).y()[0], 1)
+    TS_ASSERT_EQUALS(outputWS->histogram(3).y()[0], 1)
   }
 
 private:
