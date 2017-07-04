@@ -274,7 +274,12 @@ MergeRuns::buildScanningOutputWorkspace(const MatrixWorkspace_sptr &outWS,
   newIndexInfo.setSpectrumDefinitions(std::move(outSpecDefs));
   newOutWS->setIndexInfo(newIndexInfo);
 
-  // set histograms
+  for (size_t i = 0; i < outWS->getNumberHistograms(); ++i)
+    newOutWS->setHistogram(i, outWS->histogram(i));
+
+  for (size_t i = 0; i < addeeWS->getNumberHistograms(); ++i)
+    newOutWS->setHistogram(i + outWS->getNumberHistograms(),
+                           addeeWS->histogram(i));
 
   return newOutWS;
 }

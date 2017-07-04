@@ -197,12 +197,30 @@ private:
 
   WorkspaceGroup_sptr create_group_detector_scan_workspaces(
       size_t nTimeIndexes = 2, size_t startTimeForSecondWorkspace = 0) {
+    const int N_HIST = 2;
     MatrixWorkspace_sptr a = WorkspaceCreationHelper::
-        create2DDetectorScanWorkspaceWithFullInstrument(2, 1000, nTimeIndexes,
-                                                        0);
+        create2DDetectorScanWorkspaceWithFullInstrument(N_HIST, 1000,
+                                                        nTimeIndexes, 0);
     MatrixWorkspace_sptr b = WorkspaceCreationHelper::
         create2DDetectorScanWorkspaceWithFullInstrument(
-            2, 1000, nTimeIndexes, startTimeForSecondWorkspace);
+            N_HIST, 1000, nTimeIndexes, startTimeForSecondWorkspace);
+
+    // Change the values in the histogram for the workspaces, so we can do
+    // some extra checks
+    for (size_t i = 0; i < a->getNumberHistograms(); ++i) {
+      auto histogram = a->histogram(i);
+      auto &counts = histogram.mutableY();
+      std::transform(counts.begin(), counts.end(), counts.begin(),
+                     [](double count) { return count + 1; });
+      a->setHistogram(i, histogram);
+    }
+    for (size_t i = 0; i < b->getNumberHistograms(); ++i) {
+      auto histogram = b->histogram(i);
+      auto &counts = histogram.mutableY();
+      std::transform(counts.begin(), counts.end(), counts.begin(),
+                     [](double count) { return count + 2; });
+      b->setHistogram(i, histogram);
+    }
 
     WorkspaceGroup_sptr group = boost::make_shared<WorkspaceGroup>();
     group->addWorkspace(a);
@@ -1574,6 +1592,17 @@ public:
     }
   }
 
+  void assert_histograms_correctly_set(const MatrixWorkspace_sptr &ws) {
+    TS_ASSERT_EQUALS(ws->histogram(0).y()[0], 1)
+    TS_ASSERT_EQUALS(ws->histogram(1).y()[0], 1)
+    TS_ASSERT_EQUALS(ws->histogram(2).y()[0], 1)
+    TS_ASSERT_EQUALS(ws->histogram(3).y()[0], 1)
+    TS_ASSERT_EQUALS(ws->histogram(4).y()[0], 2)
+    TS_ASSERT_EQUALS(ws->histogram(5).y()[0], 2)
+    TS_ASSERT_EQUALS(ws->histogram(6).y()[0], 2)
+    TS_ASSERT_EQUALS(ws->histogram(7).y()[0], 2)
+  }
+
   void test_merging_detector_scan_workspaces_appends_workspaces() {
 
     auto outputWS = do_MergeRuns_with_scanning_workspaces();
@@ -1588,6 +1617,7 @@ public:
     TS_ASSERT_EQUALS(specInfo.size(), 8)
 
     assert_indexing_is_correct(specInfo);
+    assert_histograms_correctly_set(outputWS);
   }
 
   void
@@ -1604,6 +1634,7 @@ public:
     TS_ASSERT_EQUALS(specInfo.size(), 8)
 
     assert_indexing_is_correct(specInfo, true);
+    assert_histograms_correctly_set(outputWS);
   }
 
   void test_merging_detector_scan_workspaces_does_not_append_workspaces() {
@@ -1612,6 +1643,12 @@ public:
     TS_ASSERT_EQUALS(outputWS->detectorInfo().size(), 2)
     TS_ASSERT_EQUALS(outputWS->detectorInfo().scanCount(0), 2)
     TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 4)
+
+    // Check bins are set correctly
+    TS_ASSERT_EQUALS(outputWS->histogram(0).y()[0], 3)
+    TS_ASSERT_EQUALS(outputWS->histogram(1).y()[0], 3)
+    TS_ASSERT_EQUALS(outputWS->histogram(2).y()[0], 3)
+    TS_ASSERT_EQUALS(outputWS->histogram(3).y()[0], 3)
   }
 
 private:
