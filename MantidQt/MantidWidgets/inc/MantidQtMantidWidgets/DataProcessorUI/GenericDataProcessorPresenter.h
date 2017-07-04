@@ -100,6 +100,8 @@ public:
   GenericDataProcessorPresenter(
       const DataProcessorWhiteList &whitelist,
       const DataProcessorProcessingAlgorithm &processor);
+  // Constructor: only whitelist
+  GenericDataProcessorPresenter(const DataProcessorWhiteList &whitelist);
   // Delegating constructor: pre-processing, no post-processing
   GenericDataProcessorPresenter(
       const DataProcessorWhiteList &whitelist,
@@ -305,6 +307,14 @@ private:
   void saveNotebook(
       const std::map<int, std::map<int, std::vector<std::string>>> &data);
   std::vector<std::unique_ptr<DataProcessorCommand>> getTableList();
+
+  // set/get values in the table
+  void setCell(int row, int column, int parentRow, int parentColumn,
+               const std::string &value) override;
+  std::string getCell(int row, int column, int parentRow,
+                      int parentColumn) override;
+  int getNumberOfRows() override;
+  void clearTable() override;
 };
 }
 }

@@ -104,6 +104,10 @@ public:
   virtual std::string getClipboard() const = 0;
   virtual std::string getProcessInstrument() const = 0;
   virtual DataProcessorPresenter *getPresenter() const = 0;
+
+  // Methods to emit signals
+  virtual void emitProcessClicked() = 0;
+  virtual void emitProcessingFinished() = 0;
 };
 }
 }

@@ -159,7 +159,14 @@ private:
   void setInstrumentList(const std::vector<std::string> &,
                          const std::string &) override {}
   // void accept(WorkspaceReceiver *) {};
-  void acceptViews(DataProcessorView *, ProgressableView *) override {}
+  void acceptViews(DataProcessorView *, ProgressableView *) override{};
+
+  void setCell(int row, int column, int parentRow, int parentColumn,
+               const std::string &value) override{};
+  std::string getCell(int row, int column, int parentRow,
+                      int parentColumn) override {
+    return "";
+  };
 
   std::map<std::string, QVariant> m_options;
 };

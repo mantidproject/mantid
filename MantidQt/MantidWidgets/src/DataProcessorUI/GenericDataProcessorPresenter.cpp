@@ -188,8 +188,20 @@ GenericDataProcessorPresenter::GenericDataProcessorPresenter(
           processor, DataProcessorPostprocessingAlgorithm()) {}
 
 /**
-* Destructor
-*/
+ * Delegating constructor (only whitelist specified)
+ * @param whitelist : The set of properties we want to show as columns
+ */
+GenericDataProcessorPresenter::GenericDataProcessorPresenter(
+    const DataProcessorWhiteList &whitelist)
+    : GenericDataProcessorPresenter(
+          whitelist,
+          std::map<std::string, DataProcessorPreprocessingAlgorithm>(),
+          DataProcessorProcessingAlgorithm(),
+          DataProcessorPostprocessingAlgorithm()) {}
+
+/**
+ * Destructor
+ */
 GenericDataProcessorPresenter::~GenericDataProcessorPresenter() {}
 
 /**
@@ -253,6 +265,8 @@ void GenericDataProcessorPresenter::acceptViews(
 Process selected data
 */
 void GenericDataProcessorPresenter::process() {
+  // Emit a signal hat the process is starting
+  m_view->emitProcessClicked();
 
   // If selection unchanged, resume processing the old selection
   if (!m_newSelection) {
@@ -1357,6 +1371,9 @@ void GenericDataProcessorPresenter::setInstrumentList(
 /** Plots any currently selected rows */
 void GenericDataProcessorPresenter::plotRow() {
 
+  if (m_processor.name().empty())
+    return;
+
   // Set of workspaces to plot
   std::set<std::string> workspaces;
   // Set of workspaces not found in the ADS
@@ -1392,6 +1409,9 @@ void GenericDataProcessorPresenter::plotRow() {
 
 /** Plots any currently selected groups */
 void GenericDataProcessorPresenter::plotGroup() {
+
+  if (m_processor.name().empty())
+    return;
 
   // This method shouldn't be called if a post-processing algorithm is not
   // defined
@@ -1636,5 +1656,52 @@ void GenericDataProcessorPresenter::giveUserWarning(
 
   m_view->giveUserWarning(prompt, title);
 }
+
+/** Set a value in the table
+ *
+ * @param row : the row index
+ * @param column : the column index
+ * @param parentRow : the row index of the parent item
+ * @param parentColumn : the column index of the parent item
+ * @param value : the new value
+*/
+void GenericDataProcessorPresenter::setCell(int row, int column, int parentRow,
+                                            int parentColumn,
+                                            const std::string &value) {
+
+  m_manager->setCell(row, column, parentRow, parentColumn, value);
+}
+
+/** Gets a cell from the table
+ *
+ * @param row : the row index
+ * @param column : the column index
+ * @param parentRow : the row index of the parent item
+ * @param parentColumn : the column index of the parent item
+ * @return : the value in the cell
+*/
+std::string GenericDataProcessorPresenter::getCell(int row, int column,
+                                                   int parentRow,
+                                                   int parentColumn) {
+
+  return m_manager->getCell(row, column, parentRow, parentColumn);
+}
+
+/**
+ * Gets the number of rows.
+ * @return : the number of rows.
+ */
+int GenericDataProcessorPresenter::getNumberOfRows() {
+  return m_manager->getNumberOfRows();
+}
+
+/**
+  * Clear the table
+ **/
+void GenericDataProcessorPresenter::clearTable() {
+  m_manager->deleteRow();
+
+}
+
 }
 }

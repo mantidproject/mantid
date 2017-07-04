@@ -85,6 +85,11 @@ public:
   /// Update row with new data
   void update(int parent, int child,
               const std::vector<std::string> &data) override;
+  void setCell(int row, int column, int parentRow, int parentColumn,
+               const std::string &value) override;
+  std::string getCell(int row, int column, int parentRow,
+                      int parentColumn) override;
+  int getNumberOfRows() override;
 
   /// Validate a table workspace
   bool isValidModel(Mantid::API::Workspace_sptr ws,

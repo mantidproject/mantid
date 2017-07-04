@@ -91,6 +91,12 @@ public:
   /// Update row with new data
   virtual void update(int parent, int child,
                       const std::vector<std::string> &data) = 0;
+  virtual void setCell(int row, int column, int parentRow, int parentColumn,
+                       const std::string &value) = 0;
+  virtual std::string getCell(int row, int column, int parentRow,
+                              int parentColumn) = 0;
+
+  virtual int getNumberOfRows() = 0;
 
   /// Validate a table workspace
   virtual bool isValidModel(Mantid::API::Workspace_sptr ws,

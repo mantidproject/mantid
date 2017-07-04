@@ -9,6 +9,7 @@
 #include <qabstractitemmodel.h>
 #include <qinputdialog.h>
 #include <qmessagebox.h>
+#include <iostream>
 
 namespace {
 const QString DataProcessorSettingsGroup =
@@ -32,6 +33,16 @@ QDataProcessorWidget::QDataProcessorWidget(
 
   m_presenter->acceptViews(this, this);
 }
+
+/** Delegating constructor
+ * @param whitelist :: [input] The white list
+ * @param parent :: [input] The parent of this view
+ */
+QDataProcessorWidget::QDataProcessorWidget(
+    const DataProcessorWhiteList &whitelist, QWidget *parent)
+    : QDataProcessorWidget(
+          Mantid::Kernel::make_unique<GenericDataProcessorPresenter>(whitelist),
+          parent) {}
 
 /** Delegating constructor
 * @param whitelist :: [input] The white list
@@ -631,6 +642,50 @@ void QDataProcessorWidget::transfer(const QList<QString> &runs) {
   }
 
   m_presenter->transfer(runsMap);
+}
+
+/** Get a cell from the table
+ *
+ * @param row : the row index
+ * @param column : the column index
+ * @param parentRow : the row index of the parent
+ * @param parentColumn : the row index of the parent
+ * @return : the value in the cell as a string
+*/
+QString QDataProcessorWidget::getCell(int row, int column, int parentRow,
+                                      int parentColumn) {
+
+  return QString::fromStdString(
+      m_presenter->getCell(row, column, parentRow, parentColumn));
+}
+
+/** Set a value in the table
+ *
+ * @param value : the new value
+ * @param row : the row index
+ * @param column : the column index
+ * @param parentRow : the row index of the parent
+ * @param parentColumn : the row index of the parent
+*/
+void QDataProcessorWidget::setCell(const QString &value, int row, int column,
+                                   int parentRow, int parentColumn) {
+
+  m_presenter->setCell(row, column, parentRow, parentColumn,
+                       value.toStdString());
+}
+
+int QDataProcessorWidget::getNumberOfRows() {
+  return m_presenter->getNumberOfRows();
+}
+
+void QDataProcessorWidget::clearTable() {
+  const auto numberOfRows = getNumberOfRows();
+  std::set<int> groups;
+  for (int index = 0; index < numberOfRows; ++index) {
+    groups.insert(groups.end(), index);
+  }
+  setSelection(groups);
+  m_presenter->clearTable();
 }
 
 } // namespace MantidWidgets
