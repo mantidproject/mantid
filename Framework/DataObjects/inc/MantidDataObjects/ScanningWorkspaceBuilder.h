@@ -58,7 +58,8 @@ public:
 
   ScanningWorkspaceBuilder(
       const boost::shared_ptr<const Geometry::Instrument> &instrument,
-      const size_t nTimeIndexes, const size_t nBins);
+      const size_t nTimeIndexes, const size_t nBins,
+      const bool isPointData = false);
 
   void setHistogram(HistogramData::Histogram histogram);
 

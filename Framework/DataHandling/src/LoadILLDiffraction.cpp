@@ -225,12 +225,13 @@ void LoadILLDiffraction::initStaticWorkspace() {
 void LoadILLDiffraction::initMovingWorkspace(const NXDouble &scan) {
   const size_t nTimeIndexes = m_numberScanPoints;
   const size_t nBins = 1;
+  const bool isPointData = true;
 
   const auto instrumentWorkspace = loadEmptyInstrument();
   const auto &instrument = instrumentWorkspace->getInstrument();
 
-  auto scanningWorkspaceBuilder =
-      DataObjects::ScanningWorkspaceBuilder(instrument, nTimeIndexes, nBins);
+  auto scanningWorkspaceBuilder = DataObjects::ScanningWorkspaceBuilder(
+      instrument, nTimeIndexes, nBins, isPointData);
 
   std::vector<double> timeDurations =
       getScannedVaribleByPropertyName(scan, "Time");
@@ -300,7 +301,7 @@ void LoadILLDiffraction::calculateRelativeRotations(
 void LoadILLDiffraction::fillMovingInstrumentScan(const NXUInt &data,
                                                   const NXDouble &scan) {
 
-  std::vector<double> axis = {-0.5, 0.5};
+  std::vector<double> axis = {0.};
   std::vector<double> monitor = getMonitor(scan);
 
   // First load the monitors

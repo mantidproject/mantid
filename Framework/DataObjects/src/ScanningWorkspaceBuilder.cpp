@@ -8,6 +8,7 @@
 #include "MantidHistogramData/BinEdges.h"
 #include "MantidHistogramData/Histogram.h"
 #include "MantidHistogramData/LinearGenerator.h"
+#include "MantidHistogramData/Points.h"
 #include "MantidTypes/SpectrumDefinition.h"
 
 using namespace Mantid::API;
@@ -19,10 +20,11 @@ namespace DataObjects {
 
 ScanningWorkspaceBuilder::ScanningWorkspaceBuilder(
     const boost::shared_ptr<const Geometry::Instrument> &instrument,
-    const size_t nTimeIndexes, const size_t nBins)
+    const size_t nTimeIndexes, const size_t nBins, const bool isPointData)
     : m_nDetectors(instrument->getNumberDetectors()),
       m_nTimeIndexes(nTimeIndexes), m_nBins(nBins), m_instrument(instrument),
-      m_histogram(BinEdges(nBins + 1, LinearGenerator(1.0, 1.0)),
+      m_histogram(isPointData ? BinEdges(nBins + 1, LinearGenerator(1.0, 1.0))
+                              : Points(nBins),
                   Counts(nBins, 0.0)),
       m_indexingType(IndexingType::Default) {}
 
