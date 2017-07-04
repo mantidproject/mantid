@@ -508,7 +508,7 @@ void ReflRunsTabPresenter::changeInstrument() {
                                                       instrument);
   g_log.information() << "Instrument changed to " << instrument;
   auto tablePresenter = m_tablePresenters.at(m_view->getSelectedGroup());
-  tablePresenter->notify(DataProcessorPresenter::ClearSelectedFlag);
+  tablePresenter->notify(DataProcessorPresenter::DeselectAllFlag);
 }
 
 const std::string ReflRunsTabPresenter::MeasureTransferMethod = "Measurement";

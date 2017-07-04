@@ -84,6 +84,9 @@ public:
   // Select all groups
   virtual void selectAll() = 0;
 
+  // Deselect all rows / groups
+  virtual void deselectAll() = 0;
+
   // Handle pause/resume of data reduction
   virtual void pause() = 0;
   virtual void resume() = 0;

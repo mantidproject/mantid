@@ -107,6 +107,9 @@ public:
   // Select all groups
   void selectAll() override;
 
+  // Deselect all rows / groups
+  void deselectAll() override;
+
   // Handle pause/resume of data reduction
   void pause() override;
   void resume() override;
