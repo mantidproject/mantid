@@ -77,8 +77,8 @@ class PowderILLReduction(PythonAlgorithm):
                              doc='File containing the radial oscillating collimator (ROC) corrections.')
 
         self.declareProperty(name='NormaliseTo',
-                             defaultValue='Time',
-                             validator=StringListValidator(['Time', 'Monitor', 'ROI']),
+                             defaultValue='None',
+                             validator=StringListValidator(['None', 'Time', 'Monitor', 'ROI']),
                              doc='Normalise to time, monitor or ROI counts.')
 
         self.declareProperty(name='ROI', defaultValue='0-153.6', doc='Regions of interest in scattering angle in degrees.'
@@ -93,8 +93,8 @@ class PowderILLReduction(PythonAlgorithm):
                              doc='Whether or not to sort the scanning observable axis.')
 
         self.declareProperty(name='Unit',
-                             defaultValue='dSpacing',
-                             validator=StringListValidator(['dSpacing', 'ScatteringAngle', 'MomentumTransfer']),
+                             defaultValue='ScatteringAngle',
+                             validator=StringListValidator(['ScatteringAngle', 'MomentumTransfer', 'dSpacing']),
                              doc='The unit of the reduced diffractogram.')
 
         self.declareProperty(MatrixWorkspaceProperty('OutputWorkspace', '',
