@@ -1,5 +1,6 @@
 #include "MantidCurveFitting/Functions/CrystalElectricField.h"
 #include "MantidCurveFitting/Functions/CrystalFieldPeaksBase.h"
+#include "MantidKernel/Exception.h"
 
 #include <functional>
 #include <map>
@@ -450,6 +451,16 @@ void CrystalFieldPeaksBase::setAttribute(const std::string &name,
     symmIter->second(*this);
   }
   IFunction::setAttribute(name, attr);
+}
+
+std::string CrystalFieldPeaksBaseImpl::name() const {
+  return "CrystalFieldPeaksBaseImpl";
+}
+
+void CrystalFieldPeaksBaseImpl::function(const API::FunctionDomain &,
+                                         API::FunctionValues &) const {
+  throw Kernel::Exception::NotImplementedError(
+      "Method is intentionally not implemented.");
 }
 
 } // namespace Functions

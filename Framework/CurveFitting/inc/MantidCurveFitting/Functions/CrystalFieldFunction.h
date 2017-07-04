@@ -1,7 +1,7 @@
 #ifndef MANTID_CURVEFITTING_CRYSTALFIELDFUNCTION_H_
 #define MANTID_CURVEFITTING_CRYSTALFIELDFUNCTION_H_
 
-#include "MantidAPI/FunctionGenerator.h"
+#include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/FunctionValues.h"
 #include "MantidCurveFitting/FortranDefs.h"
 #include "MantidCurveFitting/Functions/CrystalFieldControl.h"
@@ -116,8 +116,8 @@ public:
   bool hasPhysProperties() const;
   //@}
 
-  /// Build the source function
-  void buildSourceFunction() const;
+  /// Build source function if necessary.
+  void checkSourceFunction() const;
   /// Build target function.
   void buildTargetFunction() const;
   /// Get number of the number of spectra (excluding phys prop data).
@@ -132,6 +132,8 @@ protected:
   /// Get status of parameter
   ParameterStatus getParameterStatus(size_t i) const override;
 
+  /// Build the source function
+  void buildSourceFunction() const;
   /// Update the target function
   void updateTargetFunction() const;
 
@@ -187,10 +189,6 @@ private:
 
   /// Set the source function
   void setSource(API::IFunction_sptr source) const;
-  /// Build source function if necessary.
-  void checkSourceFunction() const;
-  /// Check that attributes needed to build the source are consistent
-  //void checkSourceConsistent() const;
   /// Update target function if necessary.
   void checkTargetFunction() const;
   /// Test if a name (parameter's or attribute's) belongs to m_source
@@ -216,7 +214,7 @@ private:
   /// Function that calculates parameters of the target function.
   mutable API::IFunction_sptr m_source;
   /// Function that actually calculates the output.
-  mutable API::IFunction_sptr m_target;
+  mutable API::CompositeFunction_sptr m_target;
   /// Cached number of parameters in m_control.
   mutable size_t m_nControlParams;
   /// Cached number of parameters in m_source.

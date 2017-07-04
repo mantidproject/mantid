@@ -15,6 +15,8 @@
 #include "MantidAPI/ParameterTie.h"
 
 #include "MantidKernel/Exception.h"
+
+#include <boost/optional.hpp>
 #include <iostream>
 #include <regex>
 
@@ -33,6 +35,9 @@ namespace {
 // Regex for names of attributes/parameters for a particular spectrum
 // Example: sp1.FWHMX
 const std::regex SPECTRUM_ATTR_REGEX("sp([0-9]+)\\.(.+)");
+// Regex for names of attributes/parameters for a background
+// Example: bg.A1
+const std::regex BACKGROUND_ATTR_REGEX("bg([0-9]*)\\.(.+)");
 
 
 /// Define the source function for CrystalFieldFunction.
@@ -73,6 +78,51 @@ public:
     }
   }
 };
+
+// A type that defines a structure to reference a parameter or attribute
+// of a composite function: first element is the function index,
+// second element is the local parameter/attribute name
+typedef boost::optional<std::pair<size_t, std::string>> ReferencePair;
+
+/// Split a name into an index (size_t) and a name (string) if it matches
+/// a regex.
+/// @param name :: A name to split.
+/// @param re :: A regex in the form: "<tag>([0-9]+)\\.(.+)", where <tag> is a
+///    non-numeric character sequence, eg, "sp", "cf", etc.
+ReferencePair getReferencePair(const std::string &name, const std::regex& re) {
+  std::smatch match;
+  if (std::regex_match(name, match, re)) {
+    auto indexStr = match[1].str();
+    auto i = indexStr.empty() ? 0 : std::stoul(indexStr);
+    auto localName = match[2].str();
+    return std::make_pair(i, localName);
+  }
+  return ReferencePair();
+}
+
+/// Try to parse a parameter/atribute name as one referring a property
+/// of a spectrum function.
+/// @param name :: A name to parse. It referes to a spectrum if it has the form:
+///     sp<n>.<local_name>, where <n> is a number, <local_name> is any string.
+/// @return :: Initialised pair if the name has the right form. The function
+///    index is read from <n> and the local name is <local_name>.
+///    If name has a different form return the default optional.
+ReferencePair getSpectrumReferencePair(const std::string &name) {
+  return getReferencePair(name, SPECTRUM_ATTR_REGEX);
+}
+
+/// Try to parse a parameter/atribute name as one referring a property
+/// of a background function of a spectrum.
+/// @param name :: A name to parse. It referes to a spectrum if it has the form:
+///     bg<n>.<local_name>, where <n> is a number or nothing, <local_name> is any string.
+/// @return :: Initialised pair if the name has the right form. The function
+///    index is read from <n> and the local name is <local_name>. If <n> is empty
+///    the returned index is 0.
+///    If name has a different form return the default optional.
+ReferencePair getBackgroundName(const std::string &name) {
+  return getReferencePair(name, BACKGROUND_ATTR_REGEX);
+}
+
 } // namespace
 
 /// Constructor
@@ -166,8 +216,8 @@ void CrystalFieldFunction::setParameter(const std::string &name,
                                         bool explicitlySet) {
   checkSourceFunction();
   checkTargetFunction();
-  auto i = parameterIndex(name);
-  setParameter(i, value, explicitlySet);
+  auto ref = getParameterReference(name);
+  ref.setParameter(value, explicitlySet);
 }
 
 /// Set description of parameter by name.
@@ -175,14 +225,17 @@ void CrystalFieldFunction::setParameterDescription(
     const std::string &name, const std::string &description) {
   checkSourceFunction();
   checkTargetFunction();
-  auto i = parameterIndex(name);
-  setParameterDescription(i, description);
+  auto ref = getParameterReference(name);
+  ref.getLocalFunction()->setParameterDescription(ref.getLocalIndex(),
+                                                  description);
 }
 
 /// Get parameter by name.
 double CrystalFieldFunction::getParameter(const std::string &name) const {
-  auto i = parameterIndex(name);
-  return getParameter(i);
+  checkSourceFunction();
+  checkTargetFunction();
+  auto ref = getParameterReference(name);
+  return ref.getParameter();
 }
 
 /// Total number of parameters
@@ -194,18 +247,20 @@ size_t CrystalFieldFunction::nParams() const {
 
 /// Returns the index of parameter name
 size_t CrystalFieldFunction::parameterIndex(const std::string &name) const {
-  checkSourceFunction();
-  auto ref = getParameterReference(name);
-  auto fun = ref.ownerFunction();
-  auto index = ref.parameterIndex();
-  if (fun == &m_control) {
-    return index;
-  } else if (fun == m_source.get()) {
-    return m_nControlParams + index;
-  } else {
-    checkTargetFunction();
-    return m_nSourceParams + index;
-  }
+  throw Kernel::Exception::NotImplementedError(
+      "CrystalFieldFunction::parameterIndex not implemented properly.");
+  // checkSourceFunction();
+  // auto ref = getParameterReference(name);
+  // auto fun = ref.ownerFunction();
+  // auto index = ref.parameterIndex();
+  // if (fun == &m_control) {
+  //  return index;
+  //} else if (fun == m_source.get()) {
+  //  return m_nControlParams + index;
+  //} else {
+  //  checkTargetFunction();
+  //  return m_nSourceParams + index;
+  //}
 }
 
 /// Returns the name of parameter i
@@ -387,7 +442,40 @@ CrystalFieldFunction::getAttributeReference(const std::string &attName) const {
 /// Get a reference to a parameter
 API::ParameterReference CrystalFieldFunction::getParameterReference(
     const std::string &paramName) const {
-  return API::ParameterReference(&m_control, m_control.parameterIndex(paramName));
+  // Check if it's a parameter of a spectrum function
+  auto specRef = getSpectrumReferencePair(paramName);
+  if (specRef) {
+    auto spectrumIndex = specRef.value().first;
+    checkSpectrumIndex(spectrumIndex);
+    auto &name = specRef.value().second;
+    // IntensityScaling is stored in m_control
+    if (name == "IntensityScaling") {
+      auto function = m_control.getFunction(spectrumIndex).get();
+      return API::ParameterReference(function, function->parameterIndex(name));
+    }
+    auto function = m_target->getFunction(spectrumIndex).get();
+    return API::ParameterReference(function, function->parameterIndex(name));
+  }
+  // Check if it's a background's parameter
+  auto backgroundRef = getBackgroundName(paramName);
+  if (backgroundRef) {
+    auto &name = backgroundRef.value().second;
+    if (!hasBackground()) {
+      throw std::invalid_argument("CrystalFieldFunction has no background.");
+    }
+    IFunction* function(nullptr);
+    if (isMultiSpectrum()) {
+      auto spectrumIndex = backgroundRef.value().first;
+      auto &spectrum = dynamic_cast<CompositeFunction&>(*m_target->getFunction(spectrumIndex));
+      function = spectrum.getFunction(0).get();
+    } else {
+      function = m_target->getFunction(0).get();
+    }
+    return API::ParameterReference(function, function->parameterIndex(name));
+  }
+  // A parameter without a prefix is a parameter of m_source
+  return API::ParameterReference(m_source.get(),
+                                 m_source->parameterIndex(paramName));
 }
 
 /// Get number of the number of spectra (excluding phys prop data).
@@ -664,6 +752,17 @@ void CrystalFieldFunction::buildSingleSiteSingleSpectrum() const {
   auto spectrum = new CompositeFunction;
   m_target.reset(spectrum);
   m_target->setAttributeValue("NumDeriv", true);
+  auto bkgdShape = getAttribute("Background").asUnquotedString();
+  bool fixAllPeaks = getAttribute("FixAllPeaks").asBool();
+
+  if (!bkgdShape.empty()) {
+    auto background =
+        API::FunctionFactory::Instance().createInitialized(bkgdShape);
+    spectrum->addFunction(background);
+    if (fixAllPeaks) {
+      background->fixAll();
+    }
+  }
 
   FunctionDomainGeneral domain;
   FunctionValues values;
@@ -687,7 +786,6 @@ void CrystalFieldFunction::buildSingleSiteSingleSpectrum() const {
   auto fwhmVariation = getAttribute("FWHMVariation").asDouble();
   auto peakShape = getAttribute("PeakShape").asString();
   size_t nRequiredPeaks = getAttribute("NPeaks").asInt();
-  bool fixAllPeaks = getAttribute("FixAllPeaks").asBool();
   auto nPeaks = CrystalFieldUtils::buildSpectrumFunction(
       *spectrum, peakShape, values, xVec, yVec, fwhmVariation, defaultFWHM,
       nRequiredPeaks, fixAllPeaks);

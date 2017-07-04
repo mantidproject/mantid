@@ -253,7 +253,7 @@ API::IFunction_sptr CrystalFieldControl::buildSingleSiteSingleSpectrum() {
 
 /// Build the source function in a single site - multi spectrum case.
 API::IFunction_sptr CrystalFieldControl::buildSingleSiteMultiSpectrum() {
-  auto source = IFunction_sptr(new CrystalFieldPeaks);
+  auto source = IFunction_sptr(new CrystalFieldPeaksBaseImpl);
   source->setAttributeValue("Ion", m_ions[0]);
   source->setAttributeValue("Symmetry", m_symmetries[0]);
   source->setAttribute("ToleranceEnergy", IFunction::getAttribute("ToleranceEnergy"));
