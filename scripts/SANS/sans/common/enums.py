@@ -120,6 +120,7 @@ class CanonicalCoordinates(Coordinates):
 # --------------------------
 #  ReductionMode
 # --------------------------
+@string_convertible
 @serializable_enum("Merged", "All")
 class ReductionMode(object):
     """
@@ -269,6 +270,7 @@ class FitType(object):
 # --------------------------
 #  SampleShape
 # --------------------------
+@string_convertible
 @serializable_enum("CylinderAxisUp", "Cuboid", "CylinderAxisAlong")
 class SampleShape(object):
     """
