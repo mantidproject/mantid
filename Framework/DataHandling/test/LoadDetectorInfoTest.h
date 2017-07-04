@@ -218,6 +218,7 @@ void makeTestWorkspace(const int ndets, const int nbins,
 
   Instrument_sptr instr(new Instrument);
   ObjComponent *samplePos = new ObjComponent("sample-pos", instr.get());
+  instr->add(samplePos);
   instr->markAsSamplePos(samplePos);
 
   for (int i = 0; i < ndets; ++i) {
