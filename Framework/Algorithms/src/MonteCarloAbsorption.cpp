@@ -84,29 +84,36 @@ private:
 
 /** Calculate latitude and longitude for given vector.
  *  @param p A Mantid vector.
+ *  @param refFrame A reference frame where p lives.
  *  @return A pair containing the latitude and longitude values.
  */
-std::pair<double, double> geographicalAngles(const V3D &p) {
-  const double lat = std::atan2(p.Y(), std::hypot(p.X(), p.Z()));
-  const double lon = std::atan2(p.X(), p.Z());
+std::pair<double, double> geographicalAngles(const V3D &p, const ReferenceFrame &refFrame) {
+  const double upCoord = p[refFrame.pointingUp()];
+  const double beamCoord = p[refFrame.pointingAlongBeam()];
+  const double leftoverCoord = p[refFrame.pointingHorizontal()];
+  const double lat = std::atan2(upCoord, std::hypot(leftoverCoord, beamCoord));
+  const double lon = std::atan2(leftoverCoord, beamCoord);
   return std::pair<double, double>(lat, lon);
 }
 
 /** Find the latitude and longitude intervals the detectors
- *  of the given workspace spawn.
+ *  of the given workspace spawn as seen from the sample.
  *  @param ws A workspace.
  *  @return A tuple containing the latitude and longitude ranges.
  */
 std::tuple<double, double, double, double>
 extremeAngles(const MatrixWorkspace &ws) {
   const auto &spectrumInfo = ws.spectrumInfo();
+  const auto samplePos = spectrumInfo.samplePosition();
+  const auto refFrame = ws.getInstrument()->getReferenceFrame();
   double minLat = std::numeric_limits<double>::max();
   double maxLat = std::numeric_limits<double>::lowest();
   double minLong = std::numeric_limits<double>::max();
   double maxLong = std::numeric_limits<double>::lowest();
   for (size_t i = 0; i < ws.getNumberHistograms(); ++i) {
     double lat, lon;
-    std::tie(lat, lon) = geographicalAngles(spectrumInfo.position(i));
+    const auto detPos = spectrumInfo.position(i) - samplePos;
+    std::tie(lat, lon) = geographicalAngles(detPos, *refFrame);
     if (lat < minLat) {
       minLat = lat;
     } else if (lat > maxLat) {
@@ -250,9 +257,10 @@ createSparseWS(const MatrixWorkspace &modelWS,
                const size_t wavelengthPoints) {
   // Build a quite standard and somewhat complete instrument.
   auto instrument = boost::make_shared<Instrument>("MC_simulation_instrument");
-  instrument->setReferenceFrame(
-      boost::make_shared<ReferenceFrame>(Y, Z, Right, ""));
-  // Add sample to origin.
+  const auto refFrame = modelWS.getInstrument()->getReferenceFrame();
+
+  instrument->setReferenceFrame(boost::make_shared<ReferenceFrame>(*refFrame));
+  // The sparse instrument is build around origin.
   const V3D samplePos{0.0, 0.0, 0.0};
   auto sample = Mantid::Kernel::make_unique<ObjComponent>("sample", nullptr,
                                                           instrument.get());
@@ -260,8 +268,12 @@ createSparseWS(const MatrixWorkspace &modelWS,
   instrument->add(sample.get());
   instrument->markAsSamplePos(sample.release());
   const double R = 1.0; // This will be the default L2 distance.
-  // Add source behing the sample.
-  const V3D sourcePos{0.0, 0.0, -2.0 * R};
+  // Add source behind the sample.
+  const V3D sourcePos = [&]() {
+    V3D p;
+    p[refFrame->pointingAlongBeam()] = -2.0 * R;
+    return p;
+  }();
   auto source = Mantid::Kernel::make_unique<ObjComponent>("source", nullptr,
                                                           instrument.get());
   source->setPos(sourcePos);
@@ -282,10 +294,14 @@ createSparseWS(const MatrixWorkspace &modelWS,
       detName << "det-" << detID;
       auto det = Mantid::Kernel::make_unique<Detector>(
           detName.str(), detID, detShape, instrument.get());
-      const double x = R * std::sin(lon) * std::cos(lat);
-      const double y = R * std::sin(lat);
-      const double z = R * std::cos(lon) * std::cos(lat);
-      det->setPos(x, y, z);
+      const V3D pos = [&]() {
+        V3D p;
+        p[refFrame->pointingHorizontal()] = R * std::sin(lon) * std::cos(lat);
+        p[refFrame->pointingUp()] = R * std::sin(lat);
+        p[refFrame->pointingAlongBeam()] = R * std::cos(lon) * std::cos(lat);
+        return p;
+      }();
+      det->setPos(pos);
       ws->getSpectrum(index).setDetectorID(detID);
       instrument->add(det.get());
       instrument->markAsDetector(det.release());
@@ -374,11 +390,12 @@ interpolateFromDetectorGrid(const double lat, const double lon,
                             const std::array<size_t, 4> &indices) {
   auto h = ws.histogram(0);
   const auto &spectrumInfo = ws.spectrumInfo();
+  const auto refFrame = ws.getInstrument()->getReferenceFrame();
   std::array<double, 4> distances;
   for (size_t i = 0; i < 4; ++i) {
     double detLat, detLong;
     std::tie(detLat, detLong) =
-        geographicalAngles(spectrumInfo.position(indices[i]));
+        geographicalAngles(spectrumInfo.position(indices[i]), *refFrame);
     distances[i] = greatCircleDistance(lat, lon, detLat, detLong);
   }
   const auto weights = inverseDistanceWeights(distances);
@@ -653,11 +670,14 @@ void MonteCarloAbsorption::interpolateFromSparse(
     const Mantid::Algorithms::InterpolationOption &interpOpt,
     const DetectorGridDefinition &detGrid) {
   const auto &spectrumInfo = targetWS.spectrumInfo();
+  const auto samplePos = spectrumInfo.samplePosition();
+  const auto refFrame = targetWS.getInstrument()->getReferenceFrame();
   PARALLEL_FOR_IF(Kernel::threadSafe(targetWS, sparseWS))
   for (int64_t i = 0; i < static_cast<decltype(i)>(spectrumInfo.size()); ++i) {
     PARALLEL_START_INTERUPT_REGION
+    const auto detPos = spectrumInfo.position(i) - samplePos;
     double lat, lon;
-    std::tie(lat, lon) = geographicalAngles(spectrumInfo.position(i));
+    std::tie(lat, lon) = geographicalAngles(detPos, *refFrame);
     const auto nearestIndices = detGrid.nearestNeighbourIndices(lat, lon);
     const auto spatiallyInterpHisto =
         interpolateFromDetectorGrid(lat, lon, sparseWS, nearestIndices);
