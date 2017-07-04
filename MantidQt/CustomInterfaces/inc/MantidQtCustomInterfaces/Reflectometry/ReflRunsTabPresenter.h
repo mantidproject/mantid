@@ -102,8 +102,8 @@ private:
   static const std::string LegacyTransferMethod;
   /// Measure transfer method
   static const std::string MeasureTransferMethod;
-  /// The current search string
-  std::string m_searchString;
+  /// The current search string used for autoreduction
+  std::string m_autoSearchString;
 
   /// searching
   void search();

@@ -260,6 +260,7 @@ void QtReflRunsTabView::icatSearchComplete() {
 This slot notifies the presenter that the "search" button has been pressed
 */
 void QtReflRunsTabView::on_actionSearch_triggered() {
+  m_algoRunner.get()->disconnect(); // disconnect any other connections
   m_presenter->notify(IReflRunsTabPresenter::SearchFlag);
   connect(m_algoRunner.get(), SIGNAL(algorithmComplete(bool)), this,
           SLOT(icatSearchComplete()), Qt::UniqueConnection);
@@ -272,6 +273,7 @@ This slot conducts a search operation before notifying the presenter that the
 void QtReflRunsTabView::on_actionAutoreduce_triggered() {
   // No need to search first if not starting a new autoreduction
   if (m_presenter->startNewAutoreduction()) {
+    m_algoRunner.get()->disconnect(); // disconnect any other connections
     m_presenter->notify(IReflRunsTabPresenter::SearchFlag);
     connect(m_algoRunner.get(), SIGNAL(algorithmComplete(bool)), this,
             SLOT(startNewAutoreduction()), Qt::UniqueConnection);

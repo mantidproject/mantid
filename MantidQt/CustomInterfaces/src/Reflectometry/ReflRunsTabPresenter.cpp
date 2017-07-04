@@ -166,9 +166,9 @@ void ReflRunsTabPresenter::pushCommands() {
 
 /** Searches for runs that can be used */
 void ReflRunsTabPresenter::search() {
-  m_searchString = m_view->getSearchString();
+  const std::string searchString = m_view->getSearchString();
   // Don't bother searching if they're not searching for anything
-  if (m_searchString.empty())
+  if (searchString.empty())
     return;
 
   // This is breaking the abstraction provided by IReflSearcher, but provides a
@@ -200,21 +200,13 @@ void ReflRunsTabPresenter::search() {
         "Login Failed");
     return;
   }
-  IAlgorithm_sptr algSearch;
-  if (AlgorithmManager::Instance().newestInstanceOf("CatalogGetDataFiles") !=
-      NULL) {
-    algSearch =
-        AlgorithmManager::Instance().newestInstanceOf("CatalogGetDataFiles");
-  } else {
-    algSearch = AlgorithmManager::Instance().create("CatalogGetDataFiles");
-    algSearch->initialize();
-    algSearch->setChild(true);
-    algSearch->setLogging(false);
-    algSearch->setProperty("OutputWorkspace", "_ReflSearchResults");
-  }
-
+  auto algSearch = AlgorithmManager::Instance().create("CatalogGetDataFiles");
+  algSearch->initialize();
+  algSearch->setChild(true);
+  algSearch->setLogging(false);
+  algSearch->setProperty("OutputWorkspace", "_ReflSearchResults");
   algSearch->setProperty("Session", sessionId);
-  algSearch->setProperty("InvestigationId", m_searchString);
+  algSearch->setProperty("InvestigationId", searchString);
   auto algRunner = m_view->getAlgorithmRunner();
   algRunner->startAlgorithm(algSearch);
 }
@@ -237,6 +229,7 @@ void ReflRunsTabPresenter::populateSearch(IAlgorithm_sptr searchAlg) {
 * @param startNew : Boolean on whether to start a new autoreduction
 */
 void ReflRunsTabPresenter::autoreduce(bool startNew) {
+  m_autoSearchString = m_view->getSearchString();
   auto tablePresenter = m_tablePresenters.at(m_view->getSelectedGroup());
 
   // If a new autoreduction is being made, we must remove all existing rows and
@@ -475,7 +468,7 @@ void ReflRunsTabPresenter::resume() const {
 */
 bool ReflRunsTabPresenter::startNewAutoreduction() const {
   auto tablePresenter = m_tablePresenters.at(m_view->getSelectedGroup());
-  bool searchNumChanged = m_searchString != m_view->getSearchString();
+  bool searchNumChanged = m_autoSearchString != m_view->getSearchString();
   bool selectionChanged = tablePresenter->newSelectionMade();
 
   return searchNumChanged || selectionChanged;
