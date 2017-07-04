@@ -7,7 +7,10 @@
 #endif
 
 #include "MantidKernel/OptionalBool.h"
+#include "MantidKernel/Strings.h"
 #include "MantidKernel/StringTokenizer.h"
+
+#include <type_traits>
 
 namespace Mantid {
 namespace Kernel {
@@ -25,21 +28,44 @@ template <typename T> std::string toString(const boost::shared_ptr<T> &value) {
   throw boost::bad_lexical_cast();
 }
 
-/// Specialisation for a property of type std::vector.
+/** Specialization for a property of type std::vector of non integral types.
+*   This will catch Vectors of char, double, float etc.
+*   This simply concatenates the values using a delimiter
+*/
 template <typename T>
 std::string toString(const std::vector<T> &value,
-                     const std::string &delimiter = ",") {
-  std::stringstream result;
-  std::size_t vsize = value.size();
-  for (std::size_t i = 0; i < vsize; ++i) {
-    result << value[i];
-    if (i + 1 != vsize)
-      result << delimiter;
-  }
-  return result.str();
+                     const std::string &delimiter = ",",
+                     typename std::enable_if<!(std::is_integral<T>::value && std::is_arithmetic<T>::value)>::type* = 0) {
+  return Strings::join(value.begin(), value.end(), delimiter);
 }
 
-/// Specialisation for a property of type std::vector<std::vector>.
+/** Specialization for a property of type std::vector of integral types.
+*   This will catch Vectors of int, long, long long etc 
+*   including signed and unsigned types of these.
+*   This concatenates the values using a delimiter,  
+*   adjacent items that are precisely 1 away from each other 
+*   will be compressed into a list syntax e.g. 1-5.
+*/
+template <typename T>
+std::string toString(const std::vector<T> &value,
+  const std::string &delimiter = ",",
+  typename std::enable_if<std::is_integral<T>::value && std::is_arithmetic<T>::value>::type* = 0) {
+  return Strings::joinCompress(value.begin(), value.end(), delimiter, "-");
+}
+
+
+/** Explicit specialization for a property of type std::vector<bool>.
+*   This will catch Vectors of char, double, float etc.
+*   This simply concatenates the values using a delimiter
+*/
+template <>
+std::string toString(const std::vector<bool> &value,
+  const std::string &delimiter,
+  typename std::enable_if<std::is_same<bool,bool>::value>::type*) {
+  return Strings::join(value.begin(), value.end(), delimiter);
+}
+
+/// Specialization for a property of type std::vector<std::vector>.
 template <typename T>
 std::string toString(const std::vector<std::vector<T>> &value,
                      const std::string &outerDelimiter = ",",
@@ -60,11 +86,11 @@ std::string toString(const std::vector<std::vector<T>> &value,
   return result.str();
 }
 
-/// Specialisation for any type, should be appropriate for properties with a
+/// Specialization for any type, should be appropriate for properties with a
 /// single value.
 template <typename T> int findSize(const T &) { return 1; }
 
-/// Specialisation for properties that are of type vector.
+/// Specialization for properties that are of type vector.
 template <typename T> int findSize(const std::vector<T> &value) {
   return static_cast<int>(value.size());
 }

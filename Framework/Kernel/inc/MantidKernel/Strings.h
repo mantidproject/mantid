@@ -71,6 +71,65 @@ DLLExport std::string join(ITERATOR_TYPE begin, ITERATOR_TYPE end,
   return output.str();
 }
 
+//------------------------------------------------------------------------------------------------
+/** Join a set or vector of (something that turns into a string) together
+* into one string, separated by a separator, 
+* adjacent items that are precisely 1 away from each other 
+* will be compressed into a list syntax e.g. 1-5.
+* Returns an empty string if the range is null.
+* Does not add the separator after the LAST item.
+*
+* For example, join a vector of strings with commas with:
+*  out = join(v.begin(), v.end(), ", ");
+*
+* @param begin :: iterator at the start
+* @param end :: iterator at the end
+* @param separator :: string to append between items.
+* @param listSeparator :: string to append between list items.
+* @return
+*/
+template <typename ITERATOR_TYPE>
+DLLExport std::string joinCompress(ITERATOR_TYPE begin, ITERATOR_TYPE end,
+  const std::string &separator = ",",
+  const std::string &listSeparator = "-") {
+
+  std::stringstream result;
+
+  ITERATOR_TYPE i;
+  ITERATOR_TYPE previousValue;
+  std::string currentSeparator = separator;
+  for (i = begin; i != end;) {
+    // was this one higher than the last value
+    if (i == begin) {
+      //Special case, always include the first value
+      result << *i;
+    } else {
+      //if it is one higher than the last value
+      if (*i == (*previousValue + 1)) {
+        currentSeparator = listSeparator;
+      } else {
+        if (currentSeparator == listSeparator) {
+          //add the last value that was the end of the list
+          result << currentSeparator;
+          result << *previousValue;
+          currentSeparator = separator;
+        }
+        // add the current value
+        result << currentSeparator;
+        result << *i;
+      }
+    }
+    previousValue = i;
+    i++;
+    // if we have got to the end and part of a list output the last value
+    if ((i == end) && (currentSeparator == listSeparator)) {
+      result << currentSeparator;
+      result << *previousValue;
+    }
+  }
+  return result.str();
+}
+
 /// Return a string with all matching occurence-strings
 MANTID_KERNEL_DLL std::string replace(const std::string &input,
                                       const std::string &find_what,
