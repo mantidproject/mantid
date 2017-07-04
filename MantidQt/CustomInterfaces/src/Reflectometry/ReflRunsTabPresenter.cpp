@@ -111,8 +111,11 @@ void ReflRunsTabPresenter::notify(IReflRunsTabPresenter::Flag flag) {
   case IReflRunsTabPresenter::SearchFlag:
     search();
     break;
-  case IReflRunsTabPresenter::AutoreduceFlag:
-    autoreduce();
+  case IReflRunsTabPresenter::NewAutoreductionFlag:
+    autoreduce(true);
+    break;
+  case IReflRunsTabPresenter::ResumeAutoreductionFlag:
+    autoreduce(false);
     break;
   case IReflRunsTabPresenter::ICATSearchCompleteFlag: {
     auto algRunner = m_view->getAlgorithmRunner();
@@ -163,9 +166,9 @@ void ReflRunsTabPresenter::pushCommands() {
 
 /** Searches for runs that can be used */
 void ReflRunsTabPresenter::search() {
-  const std::string searchString = m_view->getSearchString();
+  m_searchString = m_view->getSearchString();
   // Don't bother searching if they're not searching for anything
-  if (searchString.empty())
+  if (m_searchString.empty())
     return;
 
   // This is breaking the abstraction provided by IReflSearcher, but provides a
@@ -207,11 +210,11 @@ void ReflRunsTabPresenter::search() {
     algSearch->initialize();
     algSearch->setChild(true);
     algSearch->setLogging(false);
-    algSearch->setProperty("Session", sessionId);
-    algSearch->setProperty("InvestigationId", searchString);
     algSearch->setProperty("OutputWorkspace", "_ReflSearchResults");
   }
 
+  algSearch->setProperty("Session", sessionId);
+  algSearch->setProperty("InvestigationId", m_searchString);
   auto algRunner = m_view->getAlgorithmRunner();
   algRunner->startAlgorithm(algSearch);
 }
@@ -231,21 +234,23 @@ void ReflRunsTabPresenter::populateSearch(IAlgorithm_sptr searchAlg) {
 
 /** Searches ICAT for runs with given instrument and investigation id, transfers
 * runs to table and processes them
+* @param startNew : Boolean on whether to start a new autoreduction
 */
-void ReflRunsTabPresenter::autoreduce() {
+void ReflRunsTabPresenter::autoreduce(bool startNew) {
   auto tablePresenter = m_tablePresenters.at(m_view->getSelectedGroup());
 
-  // If a new selection isn't made, just process the existing selection instead
-  if (tablePresenter->newSelectionMade()) {
+  // If a new autoreduction is being made, we must remove all existing rows and
+  // transfer the new ones (obtained by ICAT search) in
+  if (startNew) {
+    notify(IReflRunsTabPresenter::ICATSearchCompleteFlag);
     tablePresenter->notify(DataProcessorPresenter::SelectAllGroupsFlag);
     tablePresenter->notify(
-        DataProcessorPresenter::DeleteGroupFlag); // Clear existing rows
-    notify(IReflRunsTabPresenter::ICATSearchCompleteFlag);
+        DataProcessorPresenter::DeleteGroupFlag); // Remove existing rows
     m_view->setAllSearchRowsSelected(); // Select all rows for transfer
-    notify(IReflRunsTabPresenter::TransferFlag);
-    tablePresenter->notify(DataProcessorPresenter::SelectAllGroupsFlag);
+    transfer();
   }
 
+  tablePresenter->notify(DataProcessorPresenter::SelectAllGroupsFlag);
   tablePresenter->notify(DataProcessorPresenter::ProcessFlag);
 }
 
@@ -464,6 +469,18 @@ void ReflRunsTabPresenter::resume() const {
   m_view->setRowActionEnabled(1, true);
 }
 
+/** Determines whether to start a new autoreduction. Starts a new one if the
+* either the search number or selection model has changed
+* @return : Boolean on whether to start a new autoreduction
+*/
+bool ReflRunsTabPresenter::startNewAutoreduction() const {
+  auto tablePresenter = m_tablePresenters.at(m_view->getSelectedGroup());
+  bool searchNumChanged = m_searchString != m_view->getSearchString();
+  bool selectionChanged = tablePresenter->newSelectionMade();
+
+  return searchNumChanged || selectionChanged;
+}
+
 /** Notifies main presenter that data reduction is confirmed to be paused
 */
 void ReflRunsTabPresenter::confirmReductionPaused() const {
@@ -480,8 +497,9 @@ void ReflRunsTabPresenter::confirmReductionResumed() const {
       IReflMainWindowPresenter::Flag::ConfirmReductionResumedFlag);
 }
 
-/** Changes the current instrument in the data processor widget. Also updates
- * the config service and prints an information message
+/** Changes the current instrument in the data processor widget. Also clears the
+* and the table selection model and updates the config service, printing an
+* information message
 */
 void ReflRunsTabPresenter::changeInstrument() {
   const std::string instrument = m_view->getSearchInstrument();
@@ -489,6 +507,8 @@ void ReflRunsTabPresenter::changeInstrument() {
   Mantid::Kernel::ConfigService::Instance().setString("default.instrument",
                                                       instrument);
   g_log.information() << "Instrument changed to " << instrument;
+  auto tablePresenter = m_tablePresenters.at(m_view->getSelectedGroup());
+  tablePresenter->notify(DataProcessorPresenter::ClearSelectedFlag);
 }
 
 const std::string ReflRunsTabPresenter::MeasureTransferMethod = "Measurement";

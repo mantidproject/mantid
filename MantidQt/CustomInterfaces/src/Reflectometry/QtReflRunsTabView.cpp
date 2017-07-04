@@ -270,9 +270,14 @@ This slot conducts a search operation before notifying the presenter that the
 "autoreduce" button has been pressed
 */
 void QtReflRunsTabView::on_actionAutoreduce_triggered() {
-  m_presenter->notify(IReflRunsTabPresenter::SearchFlag);
-  connect(m_algoRunner.get(), SIGNAL(algorithmComplete(bool)), this,
-          SLOT(doAutoreduction()), Qt::UniqueConnection);
+  // No need to search first if not starting a new autoreduction
+  if (m_presenter->startNewAutoreduction()) {
+    m_presenter->notify(IReflRunsTabPresenter::SearchFlag);
+    connect(m_algoRunner.get(), SIGNAL(algorithmComplete(bool)), this,
+            SLOT(startNewAutoreduction()), Qt::UniqueConnection);
+  } else {
+    resumeAutoreduction();
+  }
 }
 
 /**
@@ -320,10 +325,17 @@ void QtReflRunsTabView::instrumentChanged(int index) {
 }
 
 /**
-This slot notifies the presenter that the "autoreduce" button has been pressed
+This slot notifies the presenter that a new autoreduction has been started
 */
-void QtReflRunsTabView::doAutoreduction() {
-  m_presenter->notify(IReflRunsTabPresenter::AutoreduceFlag);
+void QtReflRunsTabView::startNewAutoreduction() {
+  m_presenter->notify(IReflRunsTabPresenter::NewAutoreductionFlag);
+}
+
+/**
+This slot notifies the presenter that the current autoreduction has been resumed
+*/
+void QtReflRunsTabView::resumeAutoreduction() {
+  m_presenter->notify(IReflRunsTabPresenter::ResumeAutoreductionFlag);
 }
 
 /**
