@@ -18,6 +18,15 @@ using namespace Mantid::Indexing;
 namespace Mantid {
 namespace DataObjects {
 
+/**
+ * Create the scanning workspace builder. Time ranges must still be set before
+ *this can be used.
+ *
+ * @param instrument A pointer to the base instrument for the workspace
+ * @param nTimeIndexes The number of time indexes to create
+ * @param nBins The number of bins (or points) for each spectrum
+ * @param isPointData If true will use points for the x-axis instead of bins
+ */
 ScanningWorkspaceBuilder::ScanningWorkspaceBuilder(
     const boost::shared_ptr<const Geometry::Instrument> &instrument,
     const size_t nTimeIndexes, const size_t nBins, const bool isPointData)

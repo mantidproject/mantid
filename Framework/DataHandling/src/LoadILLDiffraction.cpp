@@ -424,6 +424,8 @@ void LoadILLDiffraction::fillDataScanMetaData(const NXDouble &scan) {
  * @param scan : scan data
  * @param propertyName The name of the property
  * @return A vector of doubles containing the scanned variable
+ * @throw runtime_error If a scanned variable property name is missing from the
+ *NeXus file
  */
 std::vector<double> LoadILLDiffraction::getScannedVaribleByPropertyName(
     const NXDouble &scan, const std::string &propertyName) const {
@@ -451,6 +453,8 @@ std::vector<double> LoadILLDiffraction::getScannedVaribleByPropertyName(
  * Returns the monitor spectrum
  * @param scan : scan data
  * @return monitor spectrum
+ * @throw std::runtime_error If there are no entries named Monitor1 or Monitor_1
+ * in the NeXus file
  */
 std::vector<double> LoadILLDiffraction::getMonitor(const NXDouble &scan) const {
 
