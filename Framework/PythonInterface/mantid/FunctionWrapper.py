@@ -35,6 +35,15 @@ class FunctionWrapper:
         sum = CompositeFunctionWrapper(self,other)
         return sum.flatten()
         
+  def __mul__ (self, other):
+      if(isinstance(self,ProductFunctionWrapper)):
+        sum = self
+        sum.fun.add(other.fun)
+        return sum.flatten()
+      else:
+        sum = ProductFunctionWrapper(self,other)
+        return sum.flatten()
+        
   def tie (self, *args, **kwargs):
     for a in args:
         if isinstance(a, dict):

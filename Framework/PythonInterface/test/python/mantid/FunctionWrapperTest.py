@@ -6,7 +6,7 @@ from __future__ import (absolute_import, division, print_function)
 import unittest
 import testhelpers
 import platform
-from mantid.simpleapi import CreateWorkspace, Fit, FitDialog, FunctionWrapper, CompositeFunctionWrapper, Gaussian
+from mantid.simpleapi import CreateWorkspace, Fit, FitDialog, FunctionWrapper, CompositeFunctionWrapper, ProductFunctionWrapper, Gaussian
 from mantid.api import mtd, MatrixWorkspace, ITableWorkspace
 import numpy as np
 from testhelpers import run_algorithm
@@ -327,6 +327,35 @@ class FunctionWrapperTest(unittest.TestCase):
         g1_str = g1.__str__()
         c2_str = c[2].__str__()
         self.assertEqual(c2_str, g1_str)
+        
+    def test_productfunction_creation(self):
+        g0 = FunctionWrapper( "Gaussian", Height=7.5, Sigma=1.2, PeakCentre=10)
+        g1 = FunctionWrapper( "Gaussian", Height=8.5, Sigma=1.2, PeakCentre=11)
+        testhelpers.assertRaisesNothing(self, ProductFunctionWrapper, g0, g1)
+
+    def test_mul(self):
+        g0 = FunctionWrapper( "Gaussian", Height=7.5, Sigma=1.2, PeakCentre=10)  
+        g1 = FunctionWrapper( "Gaussian", Height=8.5, Sigma=1.25, PeakCentre=12)  
+        lb = FunctionWrapper("LinearBackground")
+        
+        p = lb * g0 * g1
+        
+        p_str = p.__str__()
+        self.assertEqual(p_str.count("("),0)
+        self.assertEqual(p_str.count("LinearBackground"),1)
+        self.assertEqual(p_str.count("Gaussian"),2)
+        
+        lb_str = lb.__str__()
+        p0_str = p[0].__str__()
+        self.assertEqual(p0_str, lb_str)
+           
+        g0_str = g0.__str__()
+        p1_str = p[1].__str__()
+        self.assertEqual(p1_str, g0_str)
+        
+        g1_str = g1.__str__()
+        p2_str = p[2].__str__()
+        self.assertEqual(p2_str, g1_str)        
         
     def test_prefinedfunction(self):
         testhelpers.assertRaisesNothing(self, Gaussian, Height=7.5, Sigma=1.2, PeakCentre=10)
