@@ -288,63 +288,51 @@ public:
   void test_shortenList() {
 
     std::vector<std::string> inputList{
-      "", // empty
-      "1,2", // shorter than the ellipsis
-      "1,2,3", // equal in length than the ellipsis
-      "1,2,35", // one longer than the ellipsis
-      "1,2,3,4", // two longer than the ellipsis
-      "1,2,3,45", // just long enough for the ellipsis
-      "12,3,4,56", // another past the ellipsis
-      "1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20" };
+        "",          // empty
+        "1,2",       // shorter than the ellipsis
+        "1,2,3",     // equal in length than the ellipsis
+        "1,2,35",    // one longer than the ellipsis
+        "1,2,3,4",   // two longer than the ellipsis
+        "1,2,3,45",  // just long enough for the ellipsis
+        "12,3,4,56", // another past the ellipsis
+        "1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20"};
     std::vector<std::string> resultListMaxLength7{
-      "", // empty
-      "1,2", // shorter than the ellipsis
-      "1,2,3", // equal in length than the ellipsis
-      "1,2,35", // one longer than the ellipsis
-      "1,2,3,4", // two longer than the ellipsis
-      "1 ... 5", // just long enough for the ellipsis
-      "1 ... 6", // another past the ellipsis
-      "1 ... 0" };
+        "",        // empty
+        "1,2",     // shorter than the ellipsis
+        "1,2,3",   // equal in length than the ellipsis
+        "1,2,35",  // one longer than the ellipsis
+        "1,2,3,4", // two longer than the ellipsis
+        "1 ... 5", // just long enough for the ellipsis
+        "1 ... 6", // another past the ellipsis
+        "1 ... 0"};
 
     std::vector<std::string> resultListMaxLength20{
-      "", // empty
-      "1,2", // shorter than the ellipsis
-      "1,2,3", // equal in length than the ellipsis
-      "1,2,35", // one longer than the ellipsis
-      "1,2,3,4", // two longer than the ellipsis
-      "1,2,3,45", // just long enough for the ellipsis
-      "12,3,4,56", // another past the ellipsis
-      "1,2,3,4 ... 8,19,20" };
+        "",          // empty
+        "1,2",       // shorter than the ellipsis
+        "1,2,3",     // equal in length than the ellipsis
+        "1,2,35",    // one longer than the ellipsis
+        "1,2,3,4",   // two longer than the ellipsis
+        "1,2,3,45",  // just long enough for the ellipsis
+        "12,3,4,56", // another past the ellipsis
+        "1,2,3,4 ... 8,19,20"};
 
-    //test very short max size
+    // test very short max size
     int maxLength = 7;
     for (size_t i = 0; i < inputList.size(); i++) {
       const auto &input = inputList[i];
       std::string result = shortenList(input, maxLength);
-      TS_ASSERT_EQUALS(
-        result,
-        resultListMaxLength7[i]);
-      TS_ASSERT_LESS_THAN_EQUALS(
-        result.size(),
-        maxLength);
-      TS_ASSERT_LESS_THAN_EQUALS(
-        result.size(),
-        input.size());
+      TS_ASSERT_EQUALS(result, resultListMaxLength7[i]);
+      TS_ASSERT_LESS_THAN_EQUALS(result.size(), maxLength);
+      TS_ASSERT_LESS_THAN_EQUALS(result.size(), input.size());
     }
-    //test longer max size
+    // test longer max size
     maxLength = 20;
     for (size_t i = 0; i < inputList.size(); i++) {
       const auto &input = inputList[i];
       std::string result = shortenList(input, maxLength);
-      TS_ASSERT_EQUALS(
-        result,
-        resultListMaxLength20[i]);
-      TS_ASSERT_LESS_THAN_EQUALS(
-        result.size(),
-        maxLength);      
-      TS_ASSERT_LESS_THAN_EQUALS(
-          result.size(),
-          input.size());
+      TS_ASSERT_EQUALS(result, resultListMaxLength20[i]);
+      TS_ASSERT_LESS_THAN_EQUALS(result.size(), maxLength);
+      TS_ASSERT_LESS_THAN_EQUALS(result.size(), input.size());
     }
   }
 

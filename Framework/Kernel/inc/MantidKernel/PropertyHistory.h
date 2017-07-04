@@ -70,7 +70,8 @@ public:
   /// get direction flag of algorithm parameter const
   unsigned int direction() const { return m_direction; };
   /// print contents of object
-  void printSelf(std::ostream &, const int indent = 0, const size_t maxPropertyLength = 0) const;
+  void printSelf(std::ostream &, const int indent = 0,
+                 const size_t maxPropertyLength = 0) const;
   /// get whether algorithm parameter was left as default EMPTY_INT,LONG,DBL
   /// const
   bool isEmptyDefault() const;

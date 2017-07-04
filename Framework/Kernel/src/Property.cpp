@@ -119,9 +119,9 @@ void Property::setRemember(bool remember) { m_remember = remember; }
 * @param collapseLists :: Whether to collapse 1,2,3 into 1-3
 */
 std::string Property::valuePrettyPrint(size_t maxLength,
-  bool collapseLists) const {
+                                       bool collapseLists) const {
   UNUSED_ARG(collapseLists);
-  return Strings::shortenList(value(),maxLength);
+  return Strings::shortenList(value(), maxLength);
 }
 
 /** Sets the user level description of the property.

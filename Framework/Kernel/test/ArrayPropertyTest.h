@@ -353,7 +353,7 @@ public:
     bool success = true;
     for (size_t i = 0; i < inputList.size(); i++) {
       ArrayProperty<T> listProperty("i", inputList[i]);
-      std::string response = listProperty.valuePrettyPrint(0,true);
+      std::string response = listProperty.valuePrettyPrint(0, true);
       TS_ASSERT_EQUALS(response, resultList[i]);
       if (response != resultList[i]) {
         success = false;

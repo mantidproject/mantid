@@ -67,7 +67,7 @@ public:
   void saveProperty(::NeXus::File *file) override;
   std::string value() const override;
   std::string valuePrettyPrint(size_t maxLength = 0,
-    bool collapseLists = true) const;
+                               bool collapseLists = true) const;
   virtual bool operator==(const PropertyWithValue<TYPE> &rhs) const;
   virtual bool operator!=(const PropertyWithValue<TYPE> &rhs) const;
   int size() const override;

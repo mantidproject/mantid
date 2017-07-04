@@ -23,18 +23,19 @@ PropertyHistory::PropertyHistory(const std::string &name,
       m_direction(direction) {}
 
 PropertyHistory::PropertyHistory(Property const *const prop)
-    : m_name(prop->name()),
-      m_value(prop->valuePrettyPrint(0,true)), m_type(prop->type()),
-      m_isDefault(prop->isDefault()), m_direction(prop->direction()) {}
+    : m_name(prop->name()), m_value(prop->valuePrettyPrint(0, true)),
+      m_type(prop->type()), m_isDefault(prop->isDefault()),
+      m_direction(prop->direction()) {}
 
 /** Prints a text representation of itself
  *  @param os :: The output stream to write to
  *  @param indent :: an indentation value to make pretty printing of object and
  * sub-objects
- *  @param maxPropertyLength :: the max length for any property value string (0 = full length)
+ *  @param maxPropertyLength :: the max length for any property value string (0
+ * = full length)
  */
 void PropertyHistory::printSelf(std::ostream &os, const int indent,
-  const size_t maxPropertyLength) const {
+                                const size_t maxPropertyLength) const {
   os << std::string(indent, ' ') << "Name: " << m_name;
   if ((maxPropertyLength > 0) && (m_value.size() > maxPropertyLength)) {
     os << ", Value: " << Strings::shortenList(m_value, maxPropertyLength);

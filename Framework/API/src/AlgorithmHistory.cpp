@@ -204,10 +204,11 @@ AlgorithmHistory::getChildAlgorithm(const size_t index) const {
  *  @param os :: The output stream to write to
  *  @param indent :: an indentation value to make pretty printing of object and
  * sub-objects
- *  @param maxPropertyLength :: the max length for any property value string (0 = full length)
+ *  @param maxPropertyLength :: the max length for any property value string (0
+ * = full length)
  */
 void AlgorithmHistory::printSelf(std::ostream &os, const int indent,
-  const size_t maxPropertyLength) const {
+                                 const size_t maxPropertyLength) const {
   os << std::string(indent, ' ') << "Algorithm: " << m_name;
   os << std::string(indent, ' ') << " v" << m_version << '\n';
 

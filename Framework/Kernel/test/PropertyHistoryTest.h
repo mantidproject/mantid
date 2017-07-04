@@ -35,11 +35,12 @@ public:
     correctOutput = correctOutput + "Direction: Input\n";
 
     // a long property that should get shortened
-    PropertyHistory propHistory("arg1_param", "123456798012345678901234567890", "argument", true, Direction::Input);
+    PropertyHistory propHistory("arg1_param", "123456798012345678901234567890",
+                                "argument", true, Direction::Input);
 
     // dump output to sting
     std::ostringstream output;
-    TS_ASSERT_THROWS_NOTHING(propHistory.printSelf(output,0,20));
+    TS_ASSERT_THROWS_NOTHING(propHistory.printSelf(output, 0, 20));
     TS_ASSERT_EQUALS(output.str(), correctOutput);
   }
 
