@@ -107,6 +107,11 @@ private:
   bool m_useNumberOfEventsNormalization = false;
   /// Signal density factor
   double m_signalThresholdFactor = 1.5;
+  /// VolumeNormalization
+  static const std::string volumeNormalization;
+  /// NumberOfEventNormalization
+  static const std::string numberOfEventsNormalization;
+
 };
 
 } // namespace Mantid

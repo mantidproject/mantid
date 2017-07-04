@@ -103,8 +103,8 @@ void addDetectors(DataObjects::Peak &peak, MDBoxBase<MDE, nd> &box) {
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(FindPeaksMD)
 
-const std::string FindPeaksMD::volume = "Volume";
-const std::string FindPeaksMD::numberOfEvents = "NumberOfEvents";
+const std::string FindPeaksMD::volumeNormalization = "VolumeNormalization";
+const std::string FindPeaksMD::numberOfEventsNormalization = "NumberOfEventsNormalization";
 
 //----------------------------------------------------------------------------------------------
 /** Constructor
@@ -134,6 +134,21 @@ void FindPeaksMD::init() {
                                                           Direction::Input),
                   "Maximum number of peaks to find. Default: 500.");
 
+  std::vector<std::string> strategy = {volumeNormalization, numberOfEventsNormalization};
+  declareProperty("PeakFindingStrategy", volumeNormalization,
+                  boost::make_shared<StringListValidator>(strategy),
+                  "Strategy for finding peaks in an MD workspace."
+                  "1. VolumeNormalization: This is the default strategy. It will sort "
+                  "all boxes in the workspace by deacresing order of signal density "
+                  "(total weighted event sum divided by box volume).\n"
+                  "2.NumberOfEventsNormalization: This option is only valid for "
+                  "MDEventWorkspaces. It will use the total weighted event sum divided"
+                  "by the number of events. This can improve peak finding for histogram-based"
+                  "raw data which has been converted to an EventWorkspace. The threshold for"
+                  "peak finding can be controlled by the SingalThresholdFactor property which should"
+                  "be larger than 1. Note that this approach does not work for event-based raw data.\n");
+
+
   declareProperty(make_unique<PropertyWithValue<double>>(
                       "DensityThresholdFactor", 10.0, Direction::Input),
                   "The overall signal density of the workspace will be "
@@ -144,36 +159,18 @@ void FindPeaksMD::init() {
 
   setPropertySettings("DensityThresholdFactor",
                       make_unique<EnabledWhenProperty>(
-                          "UseNumberOfEventsNormalization", IS_DEFAULT));
-
-  declareProperty(
-      make_unique<PropertyWithValue<bool>>("UseNumberOfEventsNormalization",
-                                           false, Direction::Input),
-      "This option is only valid for MDEventWorkspaces. The standard peak "
-      "finding \n"
-      "sorts all boxes in the workspace by decreasing order of signal density "
-      "\n"
-      "(total weighted event sum divided by box volume). This option will "
-      "instead use\n"
-      "the total weighted event sum divded by the number of events. This can "
-      "improve\n"
-      "peak finding for histogram-based raw data which has been converted to "
-      "an EventWorkspace.\n"
-      "The threshold for peak finding can be controlled by the "
-      "SignalThresholdFactor which\n"
-      " should be larger than 1.\n"
-      "Note that this approach does not work for event-based raw data.");
+                          "PeakFindingStrategy", Mantid::Kernel::ePropertyCriterion::IS_EQUAL_TO, volumeNormalization));
 
   declareProperty(make_unique<PropertyWithValue<double>>(
                       "SignalThresholdFactor", 1.5, Direction::Input),
-                  "The signal threshold factor when "
-                  "UseNumberOfEventsNormalization has been enabled.\n"
+                  "The signal threshold factor when the "
+                  "PeakFindingStrategy strategy has been set to NumberOfEventsNormalization.\n"
                   "The value should be larger than 1.\n"
                   "Default: 1.50");
 
   setPropertySettings("SignalThresholdFactor",
                       make_unique<EnabledWhenProperty>(
-                          "UseNumberOfEventsNormalization", IS_NOT_DEFAULT));
+                          "PeakFindingStrategy", Mantid::Kernel::ePropertyCriterion::IS_EQUAL_TO, numberOfEventsNormalization));
 
   declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
@@ -642,8 +639,9 @@ void FindPeaksMD::exec() {
 
   DensityThresholdFactor = getProperty("DensityThresholdFactor");
   m_signalThresholdFactor = getProperty("SignalThresholdFactor");
-  m_useNumberOfEventsNormalization =
-      getProperty("UseNumberOfEventsNormalization");
+
+  std::string strategy = getProperty("PeakFindingStrategy");
+  m_useNumberOfEventsNormalization = strategy == numberOfEventsNormalization;
 
   m_maxPeaks = getProperty("MaxPeaks");
   m_edge = this->getProperty("EdgePixels");
@@ -676,15 +674,16 @@ void FindPeaksMD::exec() {
 std::map<std::string, std::string> FindPeaksMD::validateInputs() {
   std::map<std::string, std::string> result;
   // Check for number of event normalzation
-  const bool useNumberOfEventsNormalization =
-      getProperty("UseNumberOfEventsNormalization");
+  std::string strategy = getProperty("PeakFindingStrategy");
+
+  const bool useNumberOfEventsNormalization = strategy == numberOfEventsNormalization;
   IMDWorkspace_sptr inWS = getProperty("InputWorkspace");
   IMDEventWorkspace_sptr inMDEW =
       boost::dynamic_pointer_cast<IMDEventWorkspace>(inWS);
 
   if (useNumberOfEventsNormalization && !inMDEW) {
-    result["UseNumberOfEventsNormalization"] =
-        "This feature can only be used with an MDEventWorkspace as the input.";
+    result["PeakFindingStrategy"] =
+        "The NumberOfEventsNormalization selection can only be used with an MDEventWorkspace as the input.";
   }
   return result;
 }
