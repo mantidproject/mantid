@@ -33,6 +33,42 @@ using namespace Geometry;
 using namespace DataObjects;
 using namespace MergeRunsOptions;
 
+namespace {
+/*
+ * Here we build up the correct time indexes for the workspace being added. If
+ *the scan times for the addee workspace and output workspace are the same this
+ *builds the same indexing as the workspace had before. Otherwise, the correct
+ *time indexes are set here.
+ */
+std::vector<SpectrumDefinition>
+buildCorrectTimeIndexes(const std::vector<SpectrumDefinition> &addeeSpecDefs,
+                        const DetectorInfo &addeeDetInfo,
+                        const DetectorInfo &outDetInfo,
+                        const DetectorInfo &newOutDetInfo) {
+  std::vector<SpectrumDefinition> newAddeeSpecDefs;
+
+  for (auto &specDef : addeeSpecDefs) {
+    for (auto &index : specDef) {
+      SpectrumDefinition newSpecDef;
+      if (addeeDetInfo.scanInterval(index) == outDetInfo.scanInterval(index)) {
+        newSpecDef.add(index.first, index.second);
+      } else {
+        // Find the correct time index for this entry
+        for (size_t i = 0; i < newOutDetInfo.scanCount(index.first); i++) {
+          if (addeeDetInfo.scanInterval(index) ==
+              newOutDetInfo.scanInterval({index.first, i})) {
+            newSpecDef.add(index.first, i);
+          }
+        }
+      }
+      newAddeeSpecDefs.push_back(newSpecDef);
+    }
+  }
+
+  return newAddeeSpecDefs;
+}
+}
+
 /// Initialisation method
 void MergeRuns::init() {
   // declare arbitrary number of input workspaces as a list of strings at the
@@ -219,23 +255,26 @@ MergeRuns::buildScanningOutputWorkspace(const MatrixWorkspace_sptr &outWS,
   const auto numOutputSpectra =
       outWS->getNumberHistograms() + addeeWS->getNumberHistograms();
 
-  auto outSpecDefs = *(outWS->indexInfo().spectrumDefinitions());
-  const auto &addeeSpecDefs = *(addeeWS->indexInfo().spectrumDefinitions());
-
-  outSpecDefs.insert(outSpecDefs.end(), addeeSpecDefs.begin(),
-                     addeeSpecDefs.end());
-
   MatrixWorkspace_sptr newOutWS = DataObjects::create<MatrixWorkspace>(
       *outWS, numOutputSpectra, outWS->histogram(0).binEdges());
 
   newOutWS->mutableDetectorInfo().merge(addeeWS->detectorInfo());
+
+  auto outSpecDefs = *(outWS->indexInfo().spectrumDefinitions());
+  const auto &addeeSpecDefs = *(addeeWS->indexInfo().spectrumDefinitions());
+
+  const auto newAddeeSpecDefs =
+      buildCorrectTimeIndexes(addeeSpecDefs, addeeWS->detectorInfo(),
+                              outWS->detectorInfo(), newOutWS->detectorInfo());
+
+  outSpecDefs.insert(outSpecDefs.end(), newAddeeSpecDefs.begin(),
+                     newAddeeSpecDefs.end());
 
   auto newIndexInfo = Indexing::IndexInfo(numOutputSpectra);
   newIndexInfo.setSpectrumDefinitions(std::move(outSpecDefs));
   newOutWS->setIndexInfo(newIndexInfo);
 
   // set histograms
-  // set time indexes
 
   return newOutWS;
 }
