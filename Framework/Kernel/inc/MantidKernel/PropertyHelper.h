@@ -33,35 +33,36 @@ template <typename T> std::string toString(const boost::shared_ptr<T> &value) {
 *   This simply concatenates the values using a delimiter
 */
 template <typename T>
-std::string toString(const std::vector<T> &value,
-                     const std::string &delimiter = ",",
-                     typename std::enable_if<!(std::is_integral<T>::value && std::is_arithmetic<T>::value)>::type* = 0) {
+std::string
+toString(const std::vector<T> &value, const std::string &delimiter = ",",
+         typename std::enable_if<!(std::is_integral<T>::value &&
+                                   std::is_arithmetic<T>::value)>::type * = 0) {
   return Strings::join(value.begin(), value.end(), delimiter);
 }
 
 /** Specialization for a property of type std::vector of integral types.
-*   This will catch Vectors of int, long, long long etc 
+*   This will catch Vectors of int, long, long long etc
 *   including signed and unsigned types of these.
-*   This concatenates the values using a delimiter,  
-*   adjacent items that are precisely 1 away from each other 
+*   This concatenates the values using a delimiter,
+*   adjacent items that are precisely 1 away from each other
 *   will be compressed into a list syntax e.g. 1-5.
 */
 template <typename T>
-std::string toString(const std::vector<T> &value,
-  const std::string &delimiter = ",",
-  typename std::enable_if<std::is_integral<T>::value && std::is_arithmetic<T>::value>::type* = 0) {
+std::string
+toString(const std::vector<T> &value, const std::string &delimiter = ",",
+         typename std::enable_if<std::is_integral<T>::value &&
+                                 std::is_arithmetic<T>::value>::type * = 0) {
   return Strings::joinCompress(value.begin(), value.end(), delimiter, "-");
 }
-
 
 /** Explicit specialization for a property of type std::vector<bool>.
 *   This will catch Vectors of char, double, float etc.
 *   This simply concatenates the values using a delimiter
 */
 template <>
-std::string toString(const std::vector<bool> &value,
-  const std::string &delimiter,
-  typename std::enable_if<std::is_same<bool,bool>::value>::type*) {
+std::string
+toString(const std::vector<bool> &value, const std::string &delimiter,
+         typename std::enable_if<std::is_same<bool, bool>::value>::type *) {
   return Strings::join(value.begin(), value.end(), delimiter);
 }
 

@@ -73,8 +73,8 @@ DLLExport std::string join(ITERATOR_TYPE begin, ITERATOR_TYPE end,
 
 //------------------------------------------------------------------------------------------------
 /** Join a set or vector of (something that turns into a string) together
-* into one string, separated by a separator, 
-* adjacent items that are precisely 1 away from each other 
+* into one string, separated by a separator,
+* adjacent items that are precisely 1 away from each other
 * will be compressed into a list syntax e.g. 1-5.
 * Returns an empty string if the range is null.
 * Does not add the separator after the LAST item.
@@ -90,8 +90,8 @@ DLLExport std::string join(ITERATOR_TYPE begin, ITERATOR_TYPE end,
 */
 template <typename ITERATOR_TYPE>
 DLLExport std::string joinCompress(ITERATOR_TYPE begin, ITERATOR_TYPE end,
-  const std::string &separator = ",",
-  const std::string &listSeparator = "-") {
+                                   const std::string &separator = ",",
+                                   const std::string &listSeparator = "-") {
 
   std::stringstream result;
 
@@ -101,15 +101,15 @@ DLLExport std::string joinCompress(ITERATOR_TYPE begin, ITERATOR_TYPE end,
   for (i = begin; i != end;) {
     // was this one higher than the last value
     if (i == begin) {
-      //Special case, always include the first value
+      // Special case, always include the first value
       result << *i;
     } else {
-      //if it is one higher than the last value
+      // if it is one higher than the last value
       if (*i == (*previousValue + 1)) {
         currentSeparator = listSeparator;
       } else {
         if (currentSeparator == listSeparator) {
-          //add the last value that was the end of the list
+          // add the last value that was the end of the list
           result << currentSeparator;
           result << *previousValue;
           currentSeparator = separator;

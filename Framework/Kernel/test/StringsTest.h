@@ -270,23 +270,19 @@ public:
   void test_joinCompress() {
 
     std::vector<std::vector<int>> inputList{
-      {1,2,3},
-      {-1,0,1},
-      {356,366,367,368,370,371,372,375},
-      {7,6,5,6,7,8,10}
-    };
+        {1, 2, 3},
+        {-1, 0, 1},
+        {356, 366, 367, 368, 370, 371, 372, 375},
+        {7, 6, 5, 6, 7, 8, 10}};
     std::vector<std::string> resultList{
-      "1-3",
-      "-1-1",
-      "356,366-368,370-372,375",
-      "7,6,5-8,10"
-    };
+        "1-3", "-1-1", "356,366-368,370-372,375", "7,6,5-8,10"};
 
     for (size_t i = 0; i < inputList.size(); i++) {
-      const auto& inputVector = inputList[i];
-      TS_ASSERT_EQUALS(joinCompress(inputVector.begin(), inputVector.end(),",","-"), resultList[i]);
+      const auto &inputVector = inputList[i];
+      TS_ASSERT_EQUALS(
+          joinCompress(inputVector.begin(), inputVector.end(), ",", "-"),
+          resultList[i]);
     }
-    
   }
 
   void test_endsWithInt() {
