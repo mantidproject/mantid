@@ -6,7 +6,7 @@ from __future__ import (absolute_import, division, print_function)
 import unittest
 import testhelpers
 import platform
-from mantid.simpleapi import CreateWorkspace, Fit, FitDialog, FunctionWrapper, CompositeFunctionWrapper, ProductFunctionWrapper, Gaussian
+from mantid.simpleapi import CreateWorkspace, Fit, FitDialog, FunctionWrapper, CompositeFunctionWrapper, ProductFunctionWrapper, ConvolutionWrapper, Gaussian
 from mantid.api import mtd, MatrixWorkspace, ITableWorkspace
 import numpy as np
 from testhelpers import run_algorithm
@@ -355,7 +355,12 @@ class FunctionWrapperTest(unittest.TestCase):
         
         g1_str = g1.__str__()
         p2_str = p[2].__str__()
-        self.assertEqual(p2_str, g1_str)        
+        self.assertEqual(p2_str, g1_str)   
+
+    def test_convolution_creation(self):
+        g0 = FunctionWrapper( "Gaussian", Height=7.5, Sigma=1.2, PeakCentre=10)
+        g1 = FunctionWrapper( "Gaussian", Height=8.5, Sigma=1.2, PeakCentre=11)
+        testhelpers.assertRaisesNothing(self, ConvolutionWrapper, g0, g1)
         
     def test_prefinedfunction(self):
         testhelpers.assertRaisesNothing(self, Gaussian, Height=7.5, Sigma=1.2, PeakCentre=10)

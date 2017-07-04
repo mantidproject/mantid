@@ -214,6 +214,11 @@ class ProductFunctionWrapper(CompositeFunctionWrapper):
 # Wrapper class for Product Fitting Function
     def __init__ (self, *args):
        return self.initByName("ProductFunction", *args)
+       
+class ConvolutionWrapper(CompositeFunctionWrapper):
+# Wrapper class for Convolution Fitting Function
+    def __init__ (self, *args):
+       return self.initByName("Convolution", *args)
      
         
 def _create_wrapper_function(name):
@@ -225,6 +230,8 @@ def _create_wrapper_function(name):
            return CompositeFunctionWrapper( *args, **kwargs )
         elif( name == "ProductFunction"):
            return ProductFunctionWrapper( *args, **kwargs )
+        elif( name == "Convolution"):
+           return ConvolutionWrapper( *args, **kwargs )
         else:
            return FunctionWrapper(name, *args, **kwargs)
 
