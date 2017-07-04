@@ -255,6 +255,7 @@ set ( SRC_FILES
 	src/SampleCorrections/MayersSampleCorrection.cpp
 	src/SampleCorrections/MayersSampleCorrectionStrategy.cpp
 	src/SampleCorrections/RectangularBeamProfile.cpp
+	src/SampleCorrections/SparseInstrument.cpp
 	src/SassenaFFT.cpp
 	src/Scale.cpp
 	src/ScaleX.cpp
@@ -574,6 +575,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/SampleCorrections/MayersSampleCorrection.h
 	inc/MantidAlgorithms/SampleCorrections/MayersSampleCorrectionStrategy.h
 	inc/MantidAlgorithms/SampleCorrections/RectangularBeamProfile.h
+	inc/MantidAlgorithms/SampleCorrections/SparseInstrument.h
 	inc/MantidAlgorithms/SassenaFFT.h
 	inc/MantidAlgorithms/Scale.h
 	inc/MantidAlgorithms/ScaleX.h
@@ -898,6 +900,7 @@ set ( TEST_FILES
 	SofQWTest.h
 	SolidAngleTest.h
 	SortEventsTest.h
+	SparseInstrumentTest.h
 	SpatialGroupingTest.h
 	SpecularReflectionCalculateThetaTest.h
 	SpecularReflectionPositionCorrect2Test.h
