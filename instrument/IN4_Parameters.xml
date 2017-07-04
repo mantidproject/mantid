@@ -17,7 +17,7 @@
 			See http://muparser.sourceforge.net/mup_features.html#idDef2 for available 
 			operators -->
 		<parameter name="formula_eff" type="string">
-			<value val="0.951*exp(-0.0887/sqrt(e))*(1.0-exp(-5.597/sqrt(e)))" />
+			<value val="0.951*exp(-0.0887/sqrt(e))*(1-exp(-5.597/sqrt(e)))" />
 		</parameter>
 		<!-- Default monitor spectrum number for monitor normalisation. -->
 		<parameter name="default-incident-monitor-spectrum" type="int">
