@@ -35,6 +35,7 @@ template <typename T> std::string toString(const boost::shared_ptr<T> &value) {
 template <typename T>
 std::string
 toString(const std::vector<T> &value, const std::string &delimiter = ",",
+         const std::string &unusedDelimiter = "+",
          typename std::enable_if<!(std::is_integral<T>::value &&
                                    std::is_arithmetic<T>::value)>::type * = 0) {
   return Strings::join(value.begin(), value.end(), delimiter);
@@ -50,9 +51,10 @@ toString(const std::vector<T> &value, const std::string &delimiter = ",",
 template <typename T>
 std::string
 toString(const std::vector<T> &value, const std::string &delimiter = ",",
+         const std::string &listDelimiter = "-",
          typename std::enable_if<std::is_integral<T>::value &&
                                  std::is_arithmetic<T>::value>::type * = 0) {
-  return Strings::joinCompress(value.begin(), value.end(), delimiter, "-");
+  return Strings::joinCompress(value.begin(), value.end(), delimiter, listDelimiter);
 }
 
 /** Explicit specialization for a property of type std::vector<bool>.
@@ -61,7 +63,8 @@ toString(const std::vector<T> &value, const std::string &delimiter = ",",
 */
 template <>
 std::string
-toString(const std::vector<bool> &value, const std::string &delimiter,
+toString(const std::vector<bool> &value, const std::string &delimiter, 
+         const std::string &unusedDelimiter,
          typename std::enable_if<std::is_same<bool, bool>::value>::type *) {
   return Strings::join(value.begin(), value.end(), delimiter);
 }
