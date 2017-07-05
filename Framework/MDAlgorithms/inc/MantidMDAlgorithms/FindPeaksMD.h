@@ -111,7 +111,6 @@ private:
   static const std::string volumeNormalization;
   /// NumberOfEventNormalization
   static const std::string numberOfEventsNormalization;
-
 };
 
 } // namespace Mantid
