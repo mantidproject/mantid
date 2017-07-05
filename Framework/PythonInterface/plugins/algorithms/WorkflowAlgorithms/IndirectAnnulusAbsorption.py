@@ -119,7 +119,7 @@ class IndirectAnnulusAbsorption(DataProcessorAlgorithm):
         if self._sample_density_type == 'Mass Density':
             builder = MaterialBuilder()
             mat = builder.setFormula(self._sample_chemical_formula).setMassDensity(self._sample_density).build()
-            self._sample_density = mat.numberDensity
+            self._sample_density = mat.numberDensity * mat.numberOfAtoms()
         SetSampleMaterial(sample_wave_ws, ChemicalFormula=self._sample_chemical_formula, SampleNumberDensity=self._sample_density)
         AnnularRingAbsorption(InputWorkspace=sample_wave_ws,
                               OutputWorkspace=self._ass_ws,
@@ -155,7 +155,7 @@ class IndirectAnnulusAbsorption(DataProcessorAlgorithm):
                 if self._can_density_type == 'Mass Density':
                     builder = MaterialBuilder()
                     mat = builder.setFormula(self._can_chemical_formula).setMassDensity(self._can_density).build()
-                    self._can_density = mat.numberDensity
+                    self._can_density = mat.numberDensity * mat.numberOfAtoms()
                 SetSampleMaterial(can1_wave_ws, ChemicalFormula=self._can_chemical_formula,
                                   SampleNumberDensity=self._can_density)
 

@@ -403,7 +403,7 @@ class CylinderPaalmanPingsCorrection(PythonAlgorithm):
             set_material_alg.setProperty('SampleMassDensity', density)
             builder = MaterialBuilder()
             mat = builder.setFormula(chemical_formula).setMassDensity(density).build()
-            number_density = mat.numberDensity
+            number_density = mat.numberDensity * mat.numberOfAtoms()
         else:
             number_density = density
         set_material_alg.setProperty('InputWorkspace', ws_name)
