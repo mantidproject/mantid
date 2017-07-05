@@ -472,8 +472,6 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
         assc = np.ones(nlam)
         acsc = np.ones(nlam)
         acc = np.ones(nlam)
-        #acc1 = np.ones(nlam)
-        #acc2 = np.ones(nlam)
         
         # Scattering in direction of slab --> calculation is not reliable
         # Default to 1 for everything
@@ -530,7 +528,8 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
                 kf_c1 = can_x_section_efixed * self._can_front_thickness / stha
             else:
                 ki_c1, kf_c1 = self._calc_ki_kf(waves, self._can_front_thickness, salpha, stha, 
-                                                can_x_section, can_x_section_efixed)        
+                                                can_x_section, can_x_section_efixed)
+
             if theta < alpha or theta > (alpha + np.pi):  
                 # transmission case
                 acc1 = sst(ki_c1, kf_c1)
@@ -544,7 +543,8 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
                 kf_c2 = can_x_section_efixed * self._can_back_thickness / stha
             else:
                 ki_c2, kf_c2 = self._calc_ki_kf(waves, self._can_back_thickness, salpha, stha, 
-                                                can_x_section, can_x_section_efixed)        
+                                                can_x_section, can_x_section_efixed)
+
             if theta < alpha or theta > (alpha + np.pi):  
                 # transmission case
                 acc2 = sst(ki_c2, kf_c2)
@@ -555,7 +555,6 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
             # Attenuation due to passage by other layers (sample or container)   
             
             if theta < alpha or theta > (alpha + np.pi):                  # transmission case
-                
                 acc = self._can_front_thickness * acc1 * np.exp(-kf_c2)
                 acc += self._can_back_thickness * acc2 * np.exp(-ki_c1) 
                 acc /= (self._can_front_thickness + self._can_back_thickness)
@@ -567,7 +566,6 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
                 assc = ass * np.exp(-ki_c1-kf_c2)
                 
             else:                                                          # reflection case
-                
                 acc = self._can_front_thickness * acc1
                 acc += self._can_back_thickness * acc2 * np.exp(-ki_c1-kf_c1)
                 acc /= (self._can_front_thickness + self._can_back_thickness)
@@ -577,7 +575,6 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
                 acsc /= (self._can_front_thickness + self._can_back_thickness)
                 
                 assc = ass * np.exp(-ki_c1-kf_c1)
-
 
         return ass, assc, acsc, acc
 
@@ -589,8 +586,12 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
         else:    
             return (np.exp(-kf)-np.exp(-ki)) / (ki-kf)
 
+    # ------------------------------------------------------------------------------
+
     def _self_shielding_reflection(self, ki, kf):
-        return (1.0 - np.exp(-ki-kf)) / (ki+kf)  
+        return (1.0 - np.exp(-ki-kf)) / (ki+kf)
+
+    # ------------------------------------------------------------------------------
         
     def _calc_ki_kf(self, waves, thickness, sinangle1, sinangle2, x_section, x_section_efixed=0): 
         ki = np.ones(waves.size)
@@ -606,10 +607,9 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
             kf *= x_section_efixed
         ki *= (thickness / sinangle1)
         kf *= (thickness / sinangle2)      
-        return ki, kf    
-    
+        return ki, kf
 
-# ------------------------------------------------------------------------------
+    # ------------------------------------------------------------------------------
 
 # Register algorithm with Mantid
 AlgorithmFactory.subscribe(FlatPlatePaalmanPingsCorrection)
