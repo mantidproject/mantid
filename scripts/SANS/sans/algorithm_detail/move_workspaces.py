@@ -243,6 +243,34 @@ def get_detector_component(move_info, component):
     return component_selection
 
 
+def move_low_angle_bank_for_SANS2D_and_ZOOM(move_info, workspace, coordinates):
+    # REAR_DET_Z
+    lab_detector_z_tag = "Rear_Det_Z"
+
+    log_names = [lab_detector_z_tag]
+    log_types = [float]
+    log_values = get_single_valued_logs_from_workspace(workspace, log_names, log_types,
+                                                       convert_from_millimeter_to_meter=True)
+
+    lab_detector_z = move_info.lab_detector_z \
+        if log_values[lab_detector_z_tag] is None else log_values[lab_detector_z_tag]
+
+    # Perform x and y tilt
+    lab_detector = move_info.detectors[DetectorType.to_string(DetectorType.LAB)]
+    SANSMoveSANS2D.perform_x_and_y_tilts(workspace, lab_detector)
+
+    lab_detector_default_sd_m = move_info.lab_detector_default_sd_m
+    x_shift = -coordinates[0]
+    y_shift = -coordinates[1]
+
+    z_shift = (lab_detector_z + lab_detector.z_translation_correction) - lab_detector_default_sd_m
+    detector_name = lab_detector.detector_name
+    offset = {CanonicalCoordinates.X: x_shift,
+              CanonicalCoordinates.Y: y_shift,
+              CanonicalCoordinates.Z: z_shift}
+    move_component(workspace, offset, detector_name)
+
+
 # -------------------------------------------------
 # Move classes
 # -------------------------------------------------
@@ -420,31 +448,7 @@ class SANSMoveSANS2D(SANSMove):
 
     @staticmethod
     def _move_low_angle_bank(move_info, workspace, coordinates):
-        # REAR_DET_Z
-        lab_detector_z_tag = "Rear_Det_Z"
-
-        log_names = [lab_detector_z_tag]
-        log_types = [float]
-        log_values = get_single_valued_logs_from_workspace(workspace, log_names, log_types,
-                                                           convert_from_millimeter_to_meter=True)
-
-        lab_detector_z = move_info.lab_detector_z \
-            if log_values[lab_detector_z_tag] is None else log_values[lab_detector_z_tag]
-
-        # Perform x and y tilt
-        lab_detector = move_info.detectors[DetectorType.to_string(DetectorType.LAB)]
-        SANSMoveSANS2D.perform_x_and_y_tilts(workspace, lab_detector)
-
-        lab_detector_default_sd_m = move_info.lab_detector_default_sd_m
-        x_shift = -coordinates[0]
-        y_shift = -coordinates[1]
-
-        z_shift = (lab_detector_z + lab_detector.z_translation_correction) - lab_detector_default_sd_m
-        detector_name = lab_detector.detector_name
-        offset = {CanonicalCoordinates.X: x_shift,
-                  CanonicalCoordinates.Y: y_shift,
-                  CanonicalCoordinates.Z: z_shift}
-        move_component(workspace, offset, detector_name)
+        move_low_angle_bank_for_SANS2D_and_ZOOM(move_info, workspace, coordinates)
 
     @staticmethod
     def _move_monitor_4(workspace, move_info):
@@ -669,35 +673,22 @@ class SANSMoveLARMORNewStyle(SANSMove):
 
 
 class SANSMoveZOOM(SANSMove):
+    @staticmethod
+    def _move_low_angle_bank(move_info, workspace, coordinates):
+        move_low_angle_bank_for_SANS2D_and_ZOOM(move_info, workspace, coordinates)
+
     def do_move_initial(self, move_info, workspace, coordinates, component, is_transmission_workspace):
         # For ZOOM we only have to coordinates
         assert len(coordinates) == 2
 
-        if not is_transmission_workspace:
-            # First move the sample holder
-            move_sample_holder(workspace, move_info.sample_offset, move_info.sample_offset_direction)
+        _component = component  # noqa
+        _is_transmission_workspace = is_transmission_workspace  # noqa
 
-            x = coordinates[0]
-            y = coordinates[1]
-            # TODO IS this the right thing for ZOOM?
-            center_position = 0
+        # Move the low angle bank
+        self._move_low_angle_bank(move_info, workspace, coordinates)
 
-            x_shift = center_position - x
-            y_shift = center_position - y
-
-            # Get the detector name
-            component_name = move_info.detectors[component].detector_name
-
-            # Shift the detector by the the input amount
-            offset = {CanonicalCoordinates.X: x_shift,
-                      CanonicalCoordinates.Y: y_shift}
-            move_component(workspace, offset, component_name)
-
-            # Shift the detector according to the corrections of the detector under investigation
-            offset_from_corrections = {CanonicalCoordinates.X: move_info.detectors[component].x_translation_correction,
-                                       CanonicalCoordinates.Y: move_info.detectors[component].y_translation_correction,
-                                       CanonicalCoordinates.Z: move_info.detectors[component].z_translation_correction}
-            move_component(workspace, offset_from_corrections, component_name)
+        # Move the sample holder
+        move_sample_holder(workspace, move_info.sample_offset, move_info.sample_offset_direction)
 
     def do_move_with_elementary_displacement(self, move_info, workspace, coordinates, component):
         # For ZOOM we only have to coordinates

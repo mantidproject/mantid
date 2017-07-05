@@ -188,10 +188,12 @@ class StateMoveLARMOR(StateMove):
 
 @rename_descriptor_names
 class StateMoveZOOM(StateMove):
-    bench_rotation = FloatParameter()
+    lab_detector_default_sd_m = FloatParameter()
 
     def __init__(self):
         super(StateMoveZOOM, self).__init__()
+        self.lab_detector_default_sd_m = 0.0
+
         # Set the monitor names
         self.monitor_names = {}
 
