@@ -23,9 +23,16 @@ PropertyHistory::PropertyHistory(const std::string &name,
       m_direction(direction) {}
 
 PropertyHistory::PropertyHistory(Property const *const prop)
-    : m_name(prop->name()), m_value(prop->valueAsPrettyStr(0, true)),
+    : m_name(prop->name()), m_value(),
       m_type(prop->type()), m_isDefault(prop->isDefault()),
-      m_direction(prop->direction()) {}
+      m_direction(prop->direction()) {
+  try {
+    m_value = prop->valueAsPrettyStr(0, true);
+  }
+  catch (std::runtime_error&) {
+    m_value = prop->value();
+  }
+}
 
 /** Prints a text representation of itself
  *  @param os :: The output stream to write to
