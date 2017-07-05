@@ -37,6 +37,7 @@ bool constantIndirectEFixed(const Mantid::API::ExperimentInfo &info,
 
 namespace Mantid {
 namespace Algorithms {
+namespace SparseInstrument {
 
 /** Calculate latitude and longitude for given vector.
  *  @param p A Mantid vector.
@@ -72,12 +73,14 @@ extremeAngles(const API::MatrixWorkspace &ws) {
     std::tie(lat, lon) = geographicalAngles(detPos, *refFrame);
     if (lat < minLat) {
       minLat = lat;
-    } else if (lat > maxLat) {
+    }
+    if (lat > maxLat) {
       maxLat = lat;
     }
     if (lon < minLong) {
       minLong = lon;
-    } else if (lon > maxLong) {
+    }
+    if (lon > maxLong) {
       maxLong = lon;
     }
   }
@@ -93,7 +96,8 @@ std::tuple<double, double> extremeWavelengths(const API::MatrixWorkspace &ws) {
   double currentMax = std::numeric_limits<double>::lowest();
   if (ws.histogram(0).xMode() ==
       Mantid::HistogramData::Histogram::XMode::BinEdges) {
-    // Really deal with point data.
+    // Deal with point data as in interpolation we need to cover all points,
+    // not bin edges.
     for (size_t i = 0; i < ws.getNumberHistograms(); ++i) {
       const auto &xs = ws.x(i);
       const auto x0 = (xs[0] + xs[1]) / 2.0;
@@ -365,5 +369,6 @@ createDetectorGridDefinition(const API::MatrixWorkspace &modelWS, const size_t r
                                                   maxLong, columns);
 }
 
+}
 }
 }

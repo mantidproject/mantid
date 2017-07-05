@@ -2,6 +2,7 @@
 #define MANTID_ALGORITHMS_SPARSEINSTRUMENT_H_
 
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidKernel/System.h"
 
 #include <array>
 #include <tuple>
@@ -21,6 +22,7 @@ namespace Kernel {
 class V3D;
 }
 namespace Algorithms {
+namespace SparseInstrument {
 /**
   Defines functions and utilities to create and deal with sparse instruments.
 
@@ -46,27 +48,27 @@ namespace Algorithms {
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
-std::tuple<double, double, double, double> extremeAngles(const API::MatrixWorkspace &ws);
-std::pair<double, double> geographicalAngles(const Kernel::V3D &p, const Geometry::ReferenceFrame &refFrame);
-std::tuple<double, double> extremeWavelengths(const API::MatrixWorkspace &ws);
+DLLExport std::tuple<double, double, double, double> extremeAngles(const API::MatrixWorkspace &ws);
+DLLExport std::pair<double, double> geographicalAngles(const Kernel::V3D &p, const Geometry::ReferenceFrame &refFrame);
+DLLExport std::tuple<double, double> extremeWavelengths(const API::MatrixWorkspace &ws);
 HistogramData::Histogram modelHistogram(const API::MatrixWorkspace &modelWS,
                                         const size_t wavelengthPoints);
-API::MatrixWorkspace_uptr
+DLLExport API::MatrixWorkspace_uptr
 createSparseWS(const API::MatrixWorkspace &modelWS,
                const Algorithms::DetectorGridDefinition &grid,
                const size_t wavelengthPoints);
-double greatCircleDistance(const double lat1, const double long1,
+DLLExport double greatCircleDistance(const double lat1, const double long1,
                            const double lat2, const double long2);
-std::array<double, 4>
+DLLExport std::array<double, 4>
 inverseDistanceWeights(const std::array<double, 4> &distances);
-HistogramData::Histogram
+DLLExport HistogramData::Histogram
 interpolateFromDetectorGrid(const double lat, const double lon,
                             const API::MatrixWorkspace &ws,
                             const std::array<size_t, 4> &indices);
-std::unique_ptr<const Algorithms::DetectorGridDefinition>
+DLLExport std::unique_ptr<const Algorithms::DetectorGridDefinition>
 createDetectorGridDefinition(const API::MatrixWorkspace &modelWS, const size_t rows,
                              const size_t columns);
-
+}
 }
 }
 
