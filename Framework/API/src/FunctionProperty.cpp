@@ -55,8 +55,9 @@ std::string FunctionProperty::value() const {
     return getDefault();
 }
 
-std::string FunctionProperty::valueAsPrettyStr(size_t maxLength = 0,
-  bool collapseLists = true) const {
+std::string
+FunctionProperty::valueAsPrettyStr(size_t maxLength = 0,
+                                   bool collapseLists = true) const {
   UNUSED_ARG(maxLength);
   UNUSED_ARG(collapseLists);
 
