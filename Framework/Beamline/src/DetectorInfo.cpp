@@ -91,23 +91,6 @@ bool DetectorInfo::isEquivalent(const DetectorInfo &other) const {
   return true;
 }
 
-/** Returns the number of detectors in the instrument.
- *
- * If a detector is moving, i.e., has more than one associated position, it is
- * nevertheless only counted as a single detector. */
-size_t DetectorInfo::size() const {
-  if (!m_isMonitor)
-    return 0;
-  return m_isMonitor->size();
-}
-
-/// Returns true if the beamline has scanning detectors.
-bool DetectorInfo::isScanning() const {
-  if (!m_positions)
-    return false;
-  return size() != m_positions->size();
-}
-
 /// Returns true if the detector with given detector index is a monitor.
 bool DetectorInfo::isMonitor(const size_t index) const {
   // No check for time dependence since monitor flags are not time dependent.
@@ -308,13 +291,6 @@ size_t DetectorInfo::linearIndex(const std::pair<size_t, size_t> &index) const {
   if (index.second == 0)
     return index.first;
   return (*m_indexMap)[index.first][index.second];
-}
-
-/// Throws if this has time-dependent data.
-void DetectorInfo::checkNoTimeDependence() const {
-  if (isScanning())
-    throw std::runtime_error("DetectorInfo accessed without time index but the "
-                             "beamline has time-dependent (moving) detectors.");
 }
 
 void DetectorInfo::initScanCounts() {

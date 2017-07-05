@@ -122,6 +122,23 @@ private:
   ComponentInfo *m_componentInfo = nullptr;
 };
 
+/** Returns the number of detectors in the instrument.
+ *
+ * If a detector is moving, i.e., has more than one associated position, it is
+ * nevertheless only counted as a single detector. */
+inline size_t DetectorInfo::size() const {
+  if (!m_isMonitor)
+    return 0;
+  return m_isMonitor->size();
+}
+
+/// Returns true if the beamline has scanning detectors.
+inline bool DetectorInfo::isScanning() const {
+  if (!m_positions)
+    return false;
+  return size() != m_positions->size();
+}
+
 /** Returns the position of the detector with given detector index.
  *
  * Convenience method for beamlines with static (non-moving) detectors.
@@ -158,6 +175,13 @@ inline void DetectorInfo::setRotation(const size_t index,
                                       const Eigen::Quaterniond &rotation) {
   checkNoTimeDependence();
   m_rotations.access()[index] = rotation.normalized();
+}
+
+/// Throws if this has time-dependent data.
+inline void DetectorInfo::checkNoTimeDependence() const {
+  if (isScanning())
+    throw std::runtime_error("DetectorInfo accessed without time index but the "
+                             "beamline has time-dependent (moving) detectors.");
 }
 
 } // namespace Beamline
