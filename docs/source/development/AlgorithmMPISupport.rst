@@ -148,7 +148,7 @@ For example:
 .. code-block:: python
 
   from mantid.simpleapi import *
-  
+
   dataX = [1,2,3,4,2,3,4,5,3,4,5,6,4,5,6,7]
   dataY = [1,1,1,1,1,1,1,1,1,1,1,1]
   dataE = [1,1,1,1,1,1,1,1,1,1,1,1]
@@ -167,7 +167,7 @@ For example:
 
 Run Python with ``mpirun`` and the desired number of MPI ranks:
 
-.. code-block:: shell
+.. code-block:: bash
 
   mpirun -n 3 python test.py
 
@@ -177,7 +177,7 @@ Alternatively, a modified version of ``mantidpython`` that internally uses ``mpi
 
 Possible output:
 
-.. code-block:: shell
+.. code-block:: bash
 
   CreateWorkspace-[Notice] CreateWorkspace started
   CreateWorkspace-[Notice] CreateWorkspace successful, Duration 0.02 seconds
@@ -214,7 +214,7 @@ The current solution to this is a logging offset for all but the master rank.
 By default an offset of 1 is added, i.e., an error message from any rank but rank 0 will be displayed as a warning.
 The offset can be adjusted in the Mantid properties file, e.g.,
 
-.. code-block:: shell
+.. code-block:: bash
 
   mpi.loggingOffset=3
 
@@ -421,11 +421,11 @@ A typical example could look as follows:
     Workspace_const_sptr ws = alg->getProperty("OutputWorkspace");
     TS_ASSERT_EQUALS(ws->storageMode(), Parallel::StorageMode::Distributed);
   }
-  
+
   class MyAlgTest : public CxxTest::TestSuite {
   public:
     // ...
-  
+
     void test_parallel() {
       // Runs run_algorithm in multiple threads. The first argument passed to
       // run_algorithm is of type Parallel::Communicator and is guaranteed to
