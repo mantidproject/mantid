@@ -19,6 +19,7 @@
 #include <boost/optional.hpp>
 #include <iostream>
 #include <regex>
+#include <limits>
 
 namespace Mantid {
 namespace CurveFitting {
@@ -38,6 +39,12 @@ const std::regex SPECTRUM_ATTR_REGEX("sp([0-9]+)\\.(.+)");
 // Regex for names of attributes/parameters for a background
 // Example: bg.A1
 const std::regex BACKGROUND_ATTR_REGEX("bg([0-9]*)\\.(.+)");
+// Regex for names of attributes/parameters for peaks
+// Example: pk1.PeakCentre
+const std::regex PEAK_ATTR_REGEX("pk([0-9]+)\\.(.+)");
+// Regex for names of attributes/parameters for peaks
+// Example: ion1.pk0.PeakCentre
+const std::regex ION_ATTR_REGEX("ion([0-9]+)\\.(.+)");
 
 
 /// Define the source function for CrystalFieldFunction.
@@ -79,48 +86,66 @@ public:
   }
 };
 
-// A type that defines a structure to reference a parameter or attribute
-// of a composite function: first element is the function index,
-// second element is the local parameter/attribute name
-typedef boost::optional<std::pair<size_t, std::string>> ReferencePair;
+/// Value representing an undefined index.
+const size_t UNDEFINED_INDEX = std::numeric_limits<size_t>::max();
 
-/// Split a name into an index (size_t) and a name (string) if it matches
-/// a regex.
-/// @param name :: A name to split.
-/// @param re :: A regex in the form: "<tag>([0-9]+)\\.(.+)", where <tag> is a
-///    non-numeric character sequence, eg, "sp", "cf", etc.
-ReferencePair getReferencePair(const std::string &name, const std::regex& re) {
+enum ReferenceTupleType {Background, Peak, PhysProp, Other};
+
+/// A type that defines a structure to reference a parameter or attribute
+/// of a composite function
+struct ReferenceTuple {
+  /// Parameter name in the function specified by the indices
+  std::string name;
+  /// The ion index
+  size_t ionIndex;
+  /// The spectrum
+  size_t spectrumIndex;
+  /// The peak
+  size_t peakIndex;
+  /// What kind of parameter is referenced
+  ReferenceTupleType type;
+};
+
+/// Work out parameter of which function the name referes to..
+/// @param name :: A name to parse.
+ReferenceTuple getReferenceTuple(const std::string &name) {
+  auto localName = name;
+  size_t ionIndex(UNDEFINED_INDEX);
+  size_t spectrumIndex(UNDEFINED_INDEX);
+  size_t peakIndex(UNDEFINED_INDEX);
+  ReferenceTupleType type(Other);
+
   std::smatch match;
-  if (std::regex_match(name, match, re)) {
-    auto indexStr = match[1].str();
-    auto i = indexStr.empty() ? 0 : std::stoul(indexStr);
-    auto localName = match[2].str();
-    return std::make_pair(i, localName);
+  if (std::regex_match(name, match, ION_ATTR_REGEX)) {
+    ionIndex = std::stoul(match[1].str());
+    localName = match[2].str();
   }
-  return ReferencePair();
-}
 
-/// Try to parse a parameter/atribute name as one referring a property
-/// of a spectrum function.
-/// @param name :: A name to parse. It referes to a spectrum if it has the form:
-///     sp<n>.<local_name>, where <n> is a number, <local_name> is any string.
-/// @return :: Initialised pair if the name has the right form. The function
-///    index is read from <n> and the local name is <local_name>.
-///    If name has a different form return the default optional.
-ReferencePair getSpectrumReferencePair(const std::string &name) {
-  return getReferencePair(name, SPECTRUM_ATTR_REGEX);
-}
+  if (std::regex_match(localName, match, SPECTRUM_ATTR_REGEX)) {
+    spectrumIndex = std::stoul(match[1].str());
+    localName = match[2].str();
+  }
 
-/// Try to parse a parameter/atribute name as one referring a property
-/// of a background function of a spectrum.
-/// @param name :: A name to parse. It referes to a spectrum if it has the form:
-///     bg<n>.<local_name>, where <n> is a number or nothing, <local_name> is any string.
-/// @return :: Initialised pair if the name has the right form. The function
-///    index is read from <n> and the local name is <local_name>. If <n> is empty
-///    the returned index is 0.
-///    If name has a different form return the default optional.
-ReferencePair getBackgroundName(const std::string &name) {
-  return getReferencePair(name, BACKGROUND_ATTR_REGEX);
+  if (std::regex_match(localName, match, BACKGROUND_ATTR_REGEX)) {
+    auto indexStr = match[1].str();
+    spectrumIndex = indexStr.empty() ? 0 : std::stoul(indexStr);
+    localName = match[2].str();
+    type = Background;
+  }
+
+  if (std::regex_match(localName, match, PEAK_ATTR_REGEX)) {
+    if (type == Background) {
+      throw std::invalid_argument("Parameter or attribute cannot be both background and peak.");
+    }
+    peakIndex = std::stoul(match[1].str());
+    localName = match[2].str();
+    type = Peak;
+    if (spectrumIndex == UNDEFINED_INDEX) {
+      spectrumIndex = 0;
+    }
+  }
+
+  return ReferenceTuple({localName, ionIndex, spectrumIndex, peakIndex, type});
 }
 
 } // namespace
@@ -442,12 +467,14 @@ CrystalFieldFunction::getAttributeReference(const std::string &attName) const {
 /// Get a reference to a parameter
 API::ParameterReference CrystalFieldFunction::getParameterReference(
     const std::string &paramName) const {
+
+  const auto refTuple = getReferenceTuple(paramName);
+  const auto &spectrumIndex = refTuple.spectrumIndex;
+  auto &name = refTuple.name;
+  
   // Check if it's a parameter of a spectrum function
-  auto specRef = getSpectrumReferencePair(paramName);
-  if (specRef) {
-    auto spectrumIndex = specRef.value().first;
+  if (refTuple.type == Other && spectrumIndex != UNDEFINED_INDEX) {
     checkSpectrumIndex(spectrumIndex);
-    auto &name = specRef.value().second;
     // IntensityScaling is stored in m_control
     if (name == "IntensityScaling") {
       auto function = m_control.getFunction(spectrumIndex).get();
@@ -456,23 +483,39 @@ API::ParameterReference CrystalFieldFunction::getParameterReference(
     auto function = m_target->getFunction(spectrumIndex).get();
     return API::ParameterReference(function, function->parameterIndex(name));
   }
+
   // Check if it's a background's parameter
-  auto backgroundRef = getBackgroundName(paramName);
-  if (backgroundRef) {
-    auto &name = backgroundRef.value().second;
+  if (refTuple.type == Background) {
     if (!hasBackground()) {
       throw std::invalid_argument("CrystalFieldFunction has no background.");
     }
     IFunction* function(nullptr);
     if (isMultiSpectrum()) {
-      auto spectrumIndex = backgroundRef.value().first;
       auto &spectrum = dynamic_cast<CompositeFunction&>(*m_target->getFunction(spectrumIndex));
       function = spectrum.getFunction(0).get();
+    } else if (spectrumIndex > 0) {
+      throw std::invalid_argument("CrystalFieldFunction has no spectrum " + std::to_string(spectrumIndex));
     } else {
       function = m_target->getFunction(0).get();
     }
     return API::ParameterReference(function, function->parameterIndex(name));
   }
+
+  // Check if it's a peak parameter
+  if (refTuple.type == Peak) {
+    size_t indexShift = hasBackground() ? 1 : 0;
+    IFunction* function(nullptr);
+    if (isMultiSpectrum()) {
+      auto &spectrum = dynamic_cast<CompositeFunction&>(*m_target->getFunction(spectrumIndex));
+      function = spectrum.getFunction(refTuple.peakIndex + indexShift).get();
+    } else if (spectrumIndex > 0) {
+      throw std::invalid_argument("CrystalFieldFunction has no spectrum " + std::to_string(spectrumIndex));
+    } else {
+      function = m_target->getFunction(refTuple.peakIndex + indexShift).get();
+    }
+    return API::ParameterReference(function, function->parameterIndex(name));
+  }
+
   // A parameter without a prefix is a parameter of m_source
   return API::ParameterReference(m_source.get(),
                                  m_source->parameterIndex(paramName));
