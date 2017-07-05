@@ -79,6 +79,9 @@ public:
   }
   /// Return the algorithm as string
   std::string value() const override;
+  /// Return the algorithm as optionally shortened string
+  std::string valueAsPrettyStr(size_t maxLength,
+    bool collapseLists) const;
   /// Get the default
   std::string getDefault() const override;
   /// Sets the value of the algorithm

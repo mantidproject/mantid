@@ -3,6 +3,7 @@
 //-----------------------------------------------------------------------------
 #include "MantidAPI/AlgorithmProperty.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidKernel/Strings.h"
 
 namespace Mantid {
 namespace API {
@@ -46,6 +47,17 @@ AlgorithmProperty &AlgorithmProperty::operator=(const AlgorithmProperty &rhs) {
  * @returns The algorithm serialized as a string
  */
 std::string AlgorithmProperty::value() const { return m_algStr; }
+
+/**
+* Returns the value as a pretty printed string
+* Returns the value with the size limit applied
+* @param maxLength :: The Max length of the returned string
+* @param collapseLists :: Whether to collapse 1,2,3 into 1-3
+*/
+std::string AlgorithmProperty::valueAsPrettyStr(size_t maxLength,
+  bool collapseLists) const {
+  return Kernel::Strings::shorten(value(), maxLength);
+}
 
 /**
  * Get the default
