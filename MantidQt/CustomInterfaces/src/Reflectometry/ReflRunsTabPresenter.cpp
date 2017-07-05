@@ -236,15 +236,21 @@ void ReflRunsTabPresenter::autoreduce(bool startNew) {
   // transfer the new ones (obtained by ICAT search) in
   if (startNew) {
     notify(IReflRunsTabPresenter::ICATSearchCompleteFlag);
+
+    // Select all groups in existing table and delete them
     tablePresenter->notify(DataProcessorPresenter::SelectAllGroupsFlag);
     tablePresenter->notify(
-        DataProcessorPresenter::DeleteGroupFlag); // Remove existing rows
-    m_view->setAllSearchRowsSelected(); // Select all rows for transfer
-    transfer();
+        DataProcessorPresenter::DeleteGroupFlag);
+
+    // Select and transfer all rows to the table
+    m_view->setAllSearchRowsSelected();
+    if (m_view->getSelectedSearchRows().size() > 0)
+      transfer();
   }
 
   tablePresenter->notify(DataProcessorPresenter::SelectAllGroupsFlag);
-  tablePresenter->notify(DataProcessorPresenter::ProcessFlag);
+  if (tablePresenter->selectedParents().size() > 0)
+    tablePresenter->notify(DataProcessorPresenter::ProcessFlag);
 }
 
 /** Transfers the selected runs in the search results to the processing table
