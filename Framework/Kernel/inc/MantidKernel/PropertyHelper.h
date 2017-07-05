@@ -68,7 +68,8 @@ std::string toString(const std::vector<std::vector<T>> &value,
 template <typename T>
 std::string toPrettyString(const T &value, size_t maxLength = 0,
                            bool collapseLists = true) {
-  return boost::lexical_cast<std::string>(value);
+  UNUSED_ARG(collapseLists);
+  return Strings::shorten(boost::lexical_cast<std::string>(value), maxLength);
 }
 
 /// Throw an exception if a shared pointer is converted to a pretty string.
@@ -76,6 +77,8 @@ template <typename T>
 std::string toPrettyString(const boost::shared_ptr<T> &value,
                            size_t maxLength = 0, bool collapseLists = true) {
   UNUSED_ARG(value);
+  UNUSED_ARG(maxLength);
+  UNUSED_ARG(collapseLists);
   throw boost::bad_lexical_cast();
 }
 
@@ -91,7 +94,8 @@ std::string toPrettyString(
     typename std::enable_if<!(std::is_integral<T>::value &&
                               std::is_arithmetic<T>::value)>::type * = 0) {
   UNUSED_ARG(unusedDelimiter);
-  return Strings::join(value.begin(), value.end(), delimiter);
+  UNUSED_ARG(collapseLists);
+  return Strings::shorten(Strings::join(value.begin(), value.end(), delimiter), maxLength);
 }
 
 /** Specialization for a property of type std::vector of integral types.
@@ -108,8 +112,14 @@ std::string toPrettyString(
     const std::string &listDelimiter = "-",
     typename std::enable_if<std::is_integral<T>::value &&
                             std::is_arithmetic<T>::value>::type * = 0) {
-  return Strings::joinCompress(value.begin(), value.end(), delimiter,
-                               listDelimiter);
+  std::string retVal;
+  if (collapseLists) {
+    retVal = Strings::joinCompress(value.begin(), value.end(), delimiter,
+      listDelimiter);
+  } else {
+    retVal = Strings::join(value.begin(), value.end(), delimiter);
+  }
+  return Strings::shorten(retVal,maxLength);
 }
 
 /** Explicit specialization for a property of type std::vector<bool>.
@@ -122,7 +132,8 @@ std::string toPrettyString(
     const std::string &delimiter, const std::string &unusedDelimiter,
     typename std::enable_if<std::is_same<bool, bool>::value>::type *) {
   UNUSED_ARG(unusedDelimiter);
-  return Strings::join(value.begin(), value.end(), delimiter);
+  UNUSED_ARG(collapseLists);
+  return Strings::shorten(Strings::join(value.begin(), value.end(), delimiter), maxLength);
 }
 
 /// Specialization for a property of type std::vector<std::vector>.
@@ -131,7 +142,8 @@ std::string toPrettyString(const std::vector<std::vector<T>> &value,
                            size_t maxLength = 0, bool collapseLists = true,
                            const std::string &outerDelimiter = ",",
                            const std::string &innerDelimiter = "+") {
-  return toString<T>(value, outerDelimiter, innerDelimiter);
+  UNUSED_ARG(collapseLists);
+  return Strings::shorten(toString<T>(value, outerDelimiter, innerDelimiter), maxLength);
 }
 
 /// Specialization for any type, should be appropriate for properties with a

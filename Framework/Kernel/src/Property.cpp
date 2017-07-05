@@ -121,7 +121,7 @@ void Property::setRemember(bool remember) { m_remember = remember; }
 std::string Property::valuePrettyPrint(size_t maxLength,
                                        bool collapseLists) const {
   UNUSED_ARG(collapseLists);
-  return Strings::shortenList(value(), maxLength);
+  return Strings::shorten(value(), maxLength);
 }
 
 /** Sets the user level description of the property.

@@ -38,7 +38,7 @@ void PropertyHistory::printSelf(std::ostream &os, const int indent,
                                 const size_t maxPropertyLength) const {
   os << std::string(indent, ' ') << "Name: " << m_name;
   if ((maxPropertyLength > 0) && (m_value.size() > maxPropertyLength)) {
-    os << ", Value: " << Strings::shortenList(m_value, maxPropertyLength);
+    os << ", Value: " << Strings::shorten(m_value, maxPropertyLength);
   } else {
     os << ", Value: " << m_value;
   }

@@ -559,7 +559,7 @@ void AlgHistoryProperties::displayAlgHistoryProperties() {
     sProperty = (*pIter)->name();
     propList.append(sProperty.c_str());
 
-    sProperty = Strings::shortenList((*pIter)->value(), 40);
+    sProperty = Strings::shorten((*pIter)->value(), 40);
     bool bisDefault = (*pIter)->isDefault();
     if (bisDefault == true) {
       if ((*pIter)->isEmptyDefault()) {

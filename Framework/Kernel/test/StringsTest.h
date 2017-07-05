@@ -285,7 +285,7 @@ public:
     }
   }
 
-  void test_shortenList() {
+  void test_shorten() {
 
     std::vector<std::string> inputList{
         "",          // empty
@@ -320,7 +320,7 @@ public:
     int maxLength = 7;
     for (size_t i = 0; i < inputList.size(); i++) {
       const auto &input = inputList[i];
-      std::string result = shortenList(input, maxLength);
+      std::string result = shorten(input, maxLength);
       TS_ASSERT_EQUALS(result, resultListMaxLength7[i]);
       TS_ASSERT_LESS_THAN_EQUALS(result.size(), maxLength);
       TS_ASSERT_LESS_THAN_EQUALS(result.size(), input.size());
@@ -329,7 +329,7 @@ public:
     maxLength = 20;
     for (size_t i = 0; i < inputList.size(); i++) {
       const auto &input = inputList[i];
-      std::string result = shortenList(input, maxLength);
+      std::string result = shorten(input, maxLength);
       TS_ASSERT_EQUALS(result, resultListMaxLength20[i]);
       TS_ASSERT_LESS_THAN_EQUALS(result.size(), maxLength);
       TS_ASSERT_LESS_THAN_EQUALS(result.size(), input.size());
