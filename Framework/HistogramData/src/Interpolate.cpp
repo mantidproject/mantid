@@ -60,6 +60,12 @@ void sanityCheck(const Histogram &input, const size_t stepSize,
   }
 }
 
+/**
+ * Perform common sanity checks for interpolations
+ * @param input A histogram from which to interpolate
+ * @param output A histogram where interpolated values are store
+ * @throw runtime_error Signals that the sanity check failed.
+ */
 void sanityCheck(const Histogram &input, const Histogram &output) {
   const auto inPoints = input.points();
   const auto outPoints = output.points();
@@ -74,8 +80,17 @@ void sanityCheck(const Histogram &input, const Histogram &output) {
   }
 }
 
+/// Enumeration for supported interpolation types.
 enum class InterpolationType { LINEAR, CSPLINE };
 
+/**
+ * Perform interpolation in place
+ * @param xs A container of x values
+ * @param ys A container of y values
+ * @param points A container of points at which to interpolate
+ * @param outY Output for interpolated values
+ * @param type Type of interpolation
+ */
 template <typename XData, typename YData, typename XInterp, typename YInterp>
 void interpolateInplace(const XData &xs, const YData &ys, const XInterp &points,
                         YInterp &outY, const InterpolationType type) {
@@ -208,6 +223,11 @@ void interpolateLinearInplace(Histogram &inOut, const size_t stepSize) {
   interpolateYLinearInplace(inOut, stepSize, inOut.mutableY());
 }
 
+/**
+ * Interpolate from input histogram to the output
+ * @param input A histogram from which to interpolate
+ * @param output A histogram containing the interpolated values
+ */
 void interpolateLinearInplace(const Histogram &input, Histogram &output) {
   sanityCheck(input, output);
   const auto &points = input.points().rawData();
@@ -254,6 +274,11 @@ void interpolateCSplineInplace(Histogram &inOut, const size_t stepSize) {
   interpolateYCSplineInplace(inOut, stepSize, inOut.mutableY());
 }
 
+/**
+ * Performs cubic spline interpolation from input to output
+ * @param input A histogram from which to interpolate
+ * @param output A histogram where to store the interpolated values
+ */
 void interpolateCSplineInplace(const Histogram &input, Histogram &output) {
   sanityCheck(input, output);
   const auto &points = input.points().rawData();

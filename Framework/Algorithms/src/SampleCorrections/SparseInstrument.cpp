@@ -194,6 +194,7 @@ Geometry::Object_sptr makeCubeShape() {
  *  @param grid An object defining the detector grid of the output workspace.
  *  @param wavelengthPoints Number of points in the output workspace.
  *  @return A workspace with sparse instrument.
+ * @throw runtime_error If creation fails.
  */
 API::MatrixWorkspace_uptr
 createSparseWS(const API::MatrixWorkspace &modelWS,

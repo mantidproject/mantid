@@ -86,6 +86,12 @@ void InterpolationOption::applyInplace(HistogramData::Histogram &inOut,
   }
 }
 
+/**
+ * Apply the interpolation method to the output histogram.
+ * @param in A histogram from which to interpolate
+ * @param out A histogram where to store the interpolated values
+ * @throw runtime_error Indicates unknown interpolatio method.
+ */
 void InterpolationOption::applyInPlace(const HistogramData::Histogram &in,
                                        HistogramData::Histogram &out) const {
   switch (m_value) {
