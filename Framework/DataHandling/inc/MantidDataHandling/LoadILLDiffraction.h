@@ -83,6 +83,8 @@ private:
 
   void initStaticWorkspace();
   void initMovingWorkspace(const NeXus::NXDouble &scan);
+  Kernel::V3D getReferenceComponentPosition(
+      const API::MatrixWorkspace_sptr &instrumentWorkspace);
   void calculateRelativeRotations(std::vector<double> &instrumentAngles,
                                   const Kernel::V3D &tube1Position);
   void loadDataScan();

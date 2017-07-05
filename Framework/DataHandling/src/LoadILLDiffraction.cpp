@@ -249,11 +249,11 @@ void LoadILLDiffraction::initMovingWorkspace(const NXDouble &scan) {
   std::vector<double> tubeAngles =
       getScannedVaribleByPropertyName(scan, "Position");
 
-  const auto &tube1Position =
-      instrument->getComponentByName("tube_1")->getPos();
+  const auto &referenceComponentPosition =
+      getReferenceComponentPosition(instrumentWorkspace);
 
   // Convert the tube positions to relative rotations for all detectors
-  calculateRelativeRotations(tubeAngles, tube1Position);
+  calculateRelativeRotations(tubeAngles, referenceComponentPosition);
 
   auto rotationCentre = V3D(0, 0, 0);
   auto rotationAxis = V3D(0, 1, 0);
@@ -261,6 +261,28 @@ void LoadILLDiffraction::initMovingWorkspace(const NXDouble &scan) {
       std::move(tubeAngles), rotationCentre, rotationAxis);
 
   m_outWorkspace = scanningWorkspaceBuilder.buildWorkspace();
+}
+
+/**
+ * Get the position of the component in the workspace which corresponds to the
+ *angle stored in the scanned variables of the NeXus files. For 1D detectors
+ *this should be the first detector (ID 1), while for 2D detectors (D2B only) it
+ *should be the position of the first tube.
+ *
+ * @param instrumentWorkspace The empty workspace containing the instrument
+ * @return A V3D object containing the position of the relevant component
+ */
+V3D LoadILLDiffraction::getReferenceComponentPosition(
+    const MatrixWorkspace_sptr &instrumentWorkspace) {
+  if (m_instName == "D2B") {
+    return instrumentWorkspace->getInstrument()
+        ->getComponentByName("tube_1")
+        ->getPos();
+  }
+
+  const auto &detInfo = instrumentWorkspace->detectorInfo();
+  const auto &indexOfFirstDet = detInfo.indexOf(1);
+  return detInfo.position(indexOfFirstDet);
 }
 
 /**
