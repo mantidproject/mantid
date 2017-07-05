@@ -2,6 +2,11 @@
 #define MANTID_KERNEL_ARRAYPROPERTY_H_
 
 #include "PropertyWithValue.h"
+#include "MantidKernel/IValidator.h"
+#include "MantidKernel/NullValidator.h"
+#include "MantidKernel/Property.h"
+#include <string>
+#include <vector>
 
 namespace Mantid {
 namespace Kernel {

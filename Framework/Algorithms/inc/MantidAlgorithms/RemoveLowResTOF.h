@@ -26,19 +26,27 @@ private:
   void exec() override;
   void execEvent(const API::SpectrumInfo &spectrumInfo);
 
-  API::MatrixWorkspace_const_sptr m_inputWS; ///< Pointer to the input workspace
-  DataObjects::EventWorkspace_const_sptr
-      m_inputEvWS; ///< Pointer to the input event workspace
+  /// Pointer to the input workspace
+  API::MatrixWorkspace_const_sptr m_inputWS;
+  /// Pointer to the input event workspace
+  DataObjects::EventWorkspace_const_sptr m_inputEvWS;
   double calcTofMin(const std::size_t, const API::SpectrumInfo &spectrumInfo);
   void runMaskDetectors();
   void getTminData(const bool);
-  double m_DIFCref;       ///< The reference value for DIFC to filter with
-  double m_K;             ///< Mystery variable that I'm not sure what it is for
-  double m_Tmin;          ///< The start of the time-of-flight frame
-  double m_wavelengthMin; ///< The minimum wavelength accessible in the frame
-  std::size_t m_numberOfSpectra; ///< The number of spectra in the workspace
-  API::Progress *m_progress;     ///< Progress reporting
-  bool m_outputLowResTOF; /// Flag to generate low resolution TOF workspace
+  /// The reference value for DIFC to filter with
+  double m_DIFCref;
+  /// Mystery variable that I'm not sure what it is for
+  double m_K;
+  /// The start of the time-of-flight frame
+  double m_Tmin;
+  /// The minimum wavelength accessible in the frame
+  double m_wavelengthMin;
+  /// The number of spectra in the workspace
+  std::size_t m_numberOfSpectra;
+  /// Progress reporting
+  std::unique_ptr<API::Progress> m_progress = nullptr;
+  /// Flag to generate low resolution TOF workspace
+  bool m_outputLowResTOF;
 };
 
 } // namespace Algorithms

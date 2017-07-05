@@ -1,9 +1,12 @@
+#include "MantidKernel/Atom.h"
+#include "MantidKernel/NeutronAtom.h"
+#include "MantidKernel/PhysicalConstants.h"
+
 #include <algorithm>
 #include <sstream>
 #include <stdexcept>
-#include "MantidKernel/Atom.h"
-#include "MantidKernel/PhysicalConstants.h"
 #include <cmath>
+#include <string>
 
 namespace Mantid {
 namespace PhysicalConstants {

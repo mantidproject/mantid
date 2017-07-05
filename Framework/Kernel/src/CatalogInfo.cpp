@@ -5,7 +5,9 @@
 
 #include <Poco/AutoPtr.h>
 #include <Poco/DOM/Element.h>
+#include <Poco/DOM/Node.h>
 #include <Poco/DOM/NodeList.h>
+#include <Poco/XML/XMLString.h>
 
 namespace Mantid {
 namespace Kernel {

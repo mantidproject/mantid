@@ -1,9 +1,7 @@
 #ifndef MANTID_KERNEL_DISKBUFFER_H_
 #define MANTID_KERNEL_DISKBUFFER_H_
 
-#include "MantidKernel/DllConfig.h"
 #include "MantidKernel/FreeBlock.h"
-#include "MantidKernel/ISaveable.h"
 #include "MantidKernel/System.h"
 #ifndef Q_MOC_RUN
 #include <boost/multi_index_container.hpp>
@@ -15,12 +13,15 @@
 #include <cstdint>
 #include <limits>
 #include <list>
-#include <map>
 #include <mutex>
+#include <string>
 #include <vector>
 
 namespace Mantid {
 namespace Kernel {
+
+// Forward declare
+class ISaveable;
 
 /** Buffer objects that need to be written out to disk
   so as to optimize writing operations.

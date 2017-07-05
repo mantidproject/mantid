@@ -176,8 +176,7 @@ target_link_libraries ( MantidQtSliceViewer LINK_PRIVATE ${TCMALLOC_LIBRARIES_LI
 ###########################################################################
 
 if ( PYUNITTEST_FOUND )
-
-  pyunittest_add_test (${CMAKE_CURRENT_SOURCE_DIR}/test SliceViewerMantidPlotTest ${TEST_PY_FILES} )
+  pyunittest_add_test (${CMAKE_CURRENT_SOURCE_DIR}/test python.test ${TEST_PY_FILES} )
 endif ()
 
 if ( CXXTEST_FOUND )

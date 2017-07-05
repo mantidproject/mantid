@@ -21,6 +21,7 @@
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorOpenTableCommand.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorOptionsCommand.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorPasteSelectedCommand.h"
+#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorPauseCommand.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorPlotRowCommand.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorProcessCommand.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorSaveTableAsCommand.h"
@@ -124,7 +125,7 @@ public:
 
     auto comm = manager.publishCommands();
 
-    TS_ASSERT_EQUALS(comm.size(), 22);
+    TS_ASSERT_EQUALS(comm.size(), 23);
     TS_ASSERT(dynamic_cast<DataProcessorOpenTableCommand *>(comm[0].get()));
     TS_ASSERT(dynamic_cast<DataProcessorNewTableCommand *>(comm[1].get()));
     TS_ASSERT(dynamic_cast<DataProcessorSaveTableCommand *>(comm[2].get()));
@@ -136,19 +137,20 @@ public:
     TS_ASSERT(dynamic_cast<DataProcessorOptionsCommand *>(comm[8].get()));
     TS_ASSERT(dynamic_cast<DataProcessorSeparatorCommand *>(comm[9].get()));
     TS_ASSERT(dynamic_cast<DataProcessorProcessCommand *>(comm[10].get()));
-    TS_ASSERT(dynamic_cast<DataProcessorSeparatorCommand *>(comm[11].get()));
-    TS_ASSERT(dynamic_cast<DataProcessorPlotRowCommand *>(comm[12].get()));
-    TS_ASSERT(dynamic_cast<DataProcessorSeparatorCommand *>(comm[13].get()));
-    TS_ASSERT(dynamic_cast<DataProcessorAppendRowCommand *>(comm[14].get()));
-    TS_ASSERT(dynamic_cast<DataProcessorSeparatorCommand *>(comm[15].get()));
-    TS_ASSERT(dynamic_cast<DataProcessorCopySelectedCommand *>(comm[16].get()));
-    TS_ASSERT(dynamic_cast<DataProcessorCutSelectedCommand *>(comm[17].get()));
+    TS_ASSERT(dynamic_cast<DataProcessorPauseCommand *>(comm[11].get()));
+    TS_ASSERT(dynamic_cast<DataProcessorSeparatorCommand *>(comm[12].get()));
+    TS_ASSERT(dynamic_cast<DataProcessorPlotRowCommand *>(comm[13].get()));
+    TS_ASSERT(dynamic_cast<DataProcessorSeparatorCommand *>(comm[14].get()));
+    TS_ASSERT(dynamic_cast<DataProcessorAppendRowCommand *>(comm[15].get()));
+    TS_ASSERT(dynamic_cast<DataProcessorSeparatorCommand *>(comm[16].get()));
+    TS_ASSERT(dynamic_cast<DataProcessorCopySelectedCommand *>(comm[17].get()));
+    TS_ASSERT(dynamic_cast<DataProcessorCutSelectedCommand *>(comm[18].get()));
     TS_ASSERT(
-        dynamic_cast<DataProcessorPasteSelectedCommand *>(comm[18].get()));
+        dynamic_cast<DataProcessorPasteSelectedCommand *>(comm[19].get()));
     TS_ASSERT(
-        dynamic_cast<DataProcessorClearSelectedCommand *>(comm[19].get()));
-    TS_ASSERT(dynamic_cast<DataProcessorSeparatorCommand *>(comm[20].get()));
-    TS_ASSERT(dynamic_cast<DataProcessorDeleteRowCommand *>(comm[21].get()));
+        dynamic_cast<DataProcessorClearSelectedCommand *>(comm[20].get()));
+    TS_ASSERT(dynamic_cast<DataProcessorSeparatorCommand *>(comm[21].get()));
+    TS_ASSERT(dynamic_cast<DataProcessorDeleteRowCommand *>(comm[22].get()));
   }
 
   void test_append_row() {
@@ -314,21 +316,21 @@ public:
     auto data = manager.selectedData(false);
     TS_ASSERT(Mock::VerifyAndClearExpectations(&presenter));
 
-    TS_ASSERT_EQUALS(data.size(), 5);
-    std::vector<std::string> secondRow = {
+    TS_ASSERT_EQUALS(data.size(), 4);
+    std::vector<std::string> firstRow = {
         "12345", "0.5",  "20000", "0.1",
         "0.2",   "0.04", "5",     "CorrectDetectorPositions=1"};
-    std::vector<std::string> thirdRow = {
+    std::vector<std::string> secondRow = {
         "12346", "0.6",  "20001", "0.1",
         "0.2",   "0.04", "4",     "CorrectDetectorPositions=0"};
-    std::vector<std::string> fourthRow = {"12347", "0.7",  "20003", "0.3",
-                                          "0.4",   "0.01", "3",     ""};
-    std::vector<std::string> fifthRow = {"12348", "0.8",  "20004", "0.4",
-                                         "0.5",   "0.02", "2",     ""};
+    std::vector<std::string> thirdRow = {"12347", "0.7",  "20003", "0.3",
+                                         "0.4",   "0.01", "3",     ""};
+    std::vector<std::string> fourthRow = {"12348", "0.8",  "20004", "0.4",
+                                          "0.5",   "0.02", "2",     ""};
+    TS_ASSERT_EQUALS(data[0][0], firstRow);
     TS_ASSERT_EQUALS(data[1][1], secondRow);
     TS_ASSERT_EQUALS(data[2][2], thirdRow);
     TS_ASSERT_EQUALS(data[3][3], fourthRow);
-    TS_ASSERT_EQUALS(data[4][4], fifthRow);
   }
 
   void test_update() {

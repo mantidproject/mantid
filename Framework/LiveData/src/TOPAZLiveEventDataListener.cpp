@@ -1,14 +1,15 @@
+#include "MantidLiveData/TOPAZLiveEventDataListener.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/LiveListenerFactory.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidDataObjects/EventWorkspace.h"
 #include "MantidGeometry/Instrument.h"
-#include "MantidLiveData/TOPAZLiveEventDataListener.h"
-#include "MantidLiveData/Exception.h"
+#include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/UnitFactory.h"
-#include "MantidDataObjects/EventWorkspace.h"
+#include "MantidLiveData/Exception.h"
 
 #include <Poco/Net/NetException.h>
 #include <Poco/Net/StreamSocket.h>

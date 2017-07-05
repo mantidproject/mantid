@@ -1,19 +1,20 @@
 #include "MantidMDAlgorithms/ConvertSpiceDataToRealSpace.h"
 
-#include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/WorkspaceProperty.h"
+#include "MantidDataObjects/MDEvent.h"
 #include "MantidDataObjects/MDEventFactory.h"
 #include "MantidDataObjects/MDEventInserter.h"
 #include "MantidDataObjects/MDEventWorkspace.h"
-#include "MantidDataObjects/MDEvent.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/MDGeometry/GeneralFrame.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 
 #include <Poco/TemporaryFile.h>

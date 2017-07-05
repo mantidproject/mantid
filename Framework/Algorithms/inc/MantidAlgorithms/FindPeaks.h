@@ -4,11 +4,11 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidKernel/System.h"
 // #include "MantidAPI/IFunction.h"
-#include "MantidAPI/IPeakFunction.h"
 #include "MantidAPI/IBackgroundFunction.h"
+#include "MantidAPI/IPeakFunction.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidKernel/cow_ptr.h"
 
@@ -70,11 +70,7 @@ public:
   /// Constructor
   FindPeaks();
   /// Virtual destructor
-  ~FindPeaks() override {
-    if (m_progress)
-      delete m_progress;
-    m_progress = nullptr;
-  }
+  ~FindPeaks() override {}
   /// Algorithm's name
   const std::string name() const override { return "FindPeaks"; }
   /// Summary of algorithms purpose
@@ -205,7 +201,7 @@ private:
   /// Storage of the peak data
   API::ITableWorkspace_sptr m_outPeakTableWS;
   /// Progress reporting
-  API::Progress *m_progress;
+  std::unique_ptr<API::Progress> m_progress = nullptr;
 
   // Properties saved in the algo.
   API::MatrixWorkspace_sptr m_dataWS; ///<workspace to check for peaks
