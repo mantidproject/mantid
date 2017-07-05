@@ -366,6 +366,8 @@ class FunctionWrapperTest(unittest.TestCase):
         g0 = FunctionWrapper( "Gaussian", Height=7.5, Sigma=1.2, PeakCentre=10)
         g1 = FunctionWrapper( "Gaussian", Height=8.5, Sigma=1.2, PeakCentre=11)
         testhelpers.assertRaisesNothing(self, MultiDomainFunctionWrapper, g0, g1)
+        m = MultiDomainFunctionWrapper( g0, g1)
+        self.assertEqual( m.nDomains(), 2)
         
     def test_prefinedfunction(self):
         testhelpers.assertRaisesNothing(self, Gaussian, Height=7.5, Sigma=1.2, PeakCentre=10)
