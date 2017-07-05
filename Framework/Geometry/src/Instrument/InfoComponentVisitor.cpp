@@ -93,6 +93,8 @@ InfoComponentVisitor::registerComponentAssembly(const ICompAssembly &assembly) {
   const size_t detectorStop = m_assemblySortedDetectorIndices->size();
   const size_t componentIndex = m_componentIds->size();
   m_assemblySortedComponentIndices->push_back(componentIndex);
+  // Unless this is the root component this parent is not correct and will be
+  // updated later in the register call of the parent.
   m_parentComponentIndices->push_back(componentIndex);
   const size_t componentStop = m_assemblySortedComponentIndices->size();
 
@@ -139,6 +141,8 @@ InfoComponentVisitor::registerGenericComponent(const IComponent &component) {
   m_componentRanges->emplace_back(
       std::make_pair(componentStart, componentStart + 1));
   m_assemblySortedComponentIndices->push_back(componentIndex);
+  // Unless this is the root component this parent is not correct and will be
+  // updated later in the register call of the parent.
   m_parentComponentIndices->push_back(componentIndex);
   clearPositionAndRotationParameters(m_pmap, component);
   markAsSourceOrSample(component.getComponentID(), componentIndex);
