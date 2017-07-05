@@ -40,13 +40,16 @@ class GenericDataProcessorPresenterGroupReducerWorker : public QObject {
 
 public:
   GenericDataProcessorPresenterGroupReducerWorker(
-      GenericDataProcessorPresenter *presenter, const GroupData &groupData)
-      : m_presenter(presenter), m_groupData(groupData) {}
+      GenericDataProcessorPresenter *presenter, const GroupData &groupData,
+      int groupIndex)
+      : m_presenter(presenter), m_groupData(groupData),
+        m_groupIndex(groupIndex) {}
 
 private slots:
   void startWorker() {
     try {
       m_presenter->postProcessGroup(m_groupData);
+      m_presenter->m_manager->addHighlighted(m_groupIndex);
       emit finished(0);
     } catch (std::exception &ex) {
       emit reductionErrorSignal(ex);
@@ -61,6 +64,7 @@ signals:
 private:
   GenericDataProcessorPresenter *m_presenter;
   const GroupData m_groupData;
+  int m_groupIndex;
 };
 
 } // namespace MantidWidgets
