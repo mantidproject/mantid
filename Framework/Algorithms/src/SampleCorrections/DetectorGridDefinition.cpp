@@ -12,6 +12,7 @@ namespace Algorithms {
  *  @param minLongitude Start of the longitude range.
  *  @param maxLongitude End of the longitude range.
  *  @param longitudePoints Number of columns.
+ *  @throw std::runtime_error If invalid parameters are given
  */
 DetectorGridDefinition::DetectorGridDefinition(const double minLatitude,
                                                const double maxLatitude,
@@ -22,6 +23,9 @@ DetectorGridDefinition::DetectorGridDefinition(const double minLatitude,
     : m_minLatitude(minLatitude), m_maxLatitude(maxLatitude),
       m_latitudePoints(latitudePoints), m_minLongitude(minLongitude),
       m_maxLongitude(maxLongitude), m_longitudePoints(longitudePoints) {
+  if (latitudePoints == 0 || longitudePoints == 0 || minLatitude > maxLatitude || minLongitude > maxLongitude) {
+    throw std::runtime_error("Invalid detector grid definition.");
+  }
   // The angular ranges might be zero in some cases preventing
   // the spawning of a real grid. We want to avoid this.
   const double tiny = 1e-5;
