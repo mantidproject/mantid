@@ -1,11 +1,9 @@
 #ifndef MANTID_DATAHANDLING_LOADISAWDETCAL_H_
 #define MANTID_DATAHANDLING_LOADISAWDETCAL_H_
 
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/ExperimentInfo.h"
+#include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/Instrument_fwd.h"
 
 namespace Mantid {
