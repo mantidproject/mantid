@@ -315,6 +315,10 @@ def fitting_algorithm(f):
         if type(function) == str and function in _api.AnalysisDataService:
             raise ValueError("Fit API has changed. The function must now come "
                              "first in the argument list and the workspace second.")
+        # Deal with case where function is a FunctionWrapper.
+        if isinstance(function,FunctionWrapper):
+            function = function.__str__()
+            
         # Create and execute
         algm = _create_algorithm_object(function_name)
         _set_logging_option(algm, kwargs)
