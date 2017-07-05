@@ -144,7 +144,7 @@ template <typename TYPE> std::string WorkspaceProperty<TYPE>::value() const {
 * @param maxLength :: The Max length of the returned string
 * @param collapseLists :: Whether to collapse 1,2,3 into 1-3
 */
-std::string Property::valueAsPrettyStr(size_t maxLength,
+std::string WorkspaceProperty<TYPE>::valueAsPrettyStr(size_t maxLength,
                                        bool collapseLists) const {
   return Strings::shorten(value(), maxLength);
 }
