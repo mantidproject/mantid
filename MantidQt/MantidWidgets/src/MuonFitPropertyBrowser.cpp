@@ -59,6 +59,10 @@
 
 namespace {
 Mantid::Kernel::Logger g_log("MuonFitPropertyBrowser");
+const QString CUSTOM_LABEL{"Custom"};
+const QString ALL_GROUPS_LABEL{"All Groups"};
+const QString ALL_PAIRS_LABEL{"All Pairs"};
+const QString ALL_PERIODS_LABEL{"All Periods"};
 }
 
 namespace MantidQt {
@@ -111,6 +115,10 @@ void MuonFitPropertyBrowser::init() {
   m_normalization = m_enumManager->addProperty("Normalization");
   setNormalization();
 
+  m_keepNorm = m_boolManager->addProperty("Fix Normalization");
+  bool keepNorm = settings.value("Fix Normalization", QVariant(false)).toBool();
+  m_boolManager->setValue(m_keepNorm, keepNorm);
+
   m_workspace = m_enumManager->addProperty("Workspace");
   m_workspaceIndex = m_intManager->addProperty("Workspace Index");
   m_output = m_stringManager->addProperty("Output");
@@ -145,6 +153,7 @@ void MuonFitPropertyBrowser::init() {
   settingsGroup->addSubProperty(m_startX);
   settingsGroup->addSubProperty(m_endX);
   settingsGroup->addSubProperty(m_normalization);
+  settingsGroup->addSubProperty(m_keepNorm);
 
   // Disable "Browse" button - use case is that first run will always be the one
   // selected on front tab. User will type in the runs they want rather than
@@ -153,9 +162,7 @@ void MuonFitPropertyBrowser::init() {
   multiFitSettingsGroup->addSubProperty(m_startX);
   multiFitSettingsGroup->addSubProperty(m_endX);
   m_groupsToFit = m_enumManager->addProperty("Groups/Pairs to fit");
-  m_groupsToFitOptions << "All groups"
-                       << "All Pairs"
-                       << "Custom";
+  m_groupsToFitOptions << ALL_GROUPS_LABEL << ALL_PAIRS_LABEL << CUSTOM_LABEL;
   m_showGroupValue << "groups";
   m_showGroup = m_enumManager->addProperty("Selected Groups");
   m_enumManager->setEnumNames(m_groupsToFit, m_groupsToFitOptions);
@@ -168,10 +175,8 @@ void MuonFitPropertyBrowser::init() {
   tmp = "bwd";
   addGroupCheckbox(tmp);
   m_periodsToFit = m_enumManager->addProperty("Periods to fit");
-  m_periodsToFitOptions << "All Periods"
-                        << "1"
-                        << "2"
-                        << "Custom";
+  m_periodsToFitOptions << ALL_PERIODS_LABEL << "1"
+                        << "2" << CUSTOM_LABEL;
   m_showPeriodValue << "1";
   m_showPeriods = m_enumManager->addProperty("Selected Periods");
   m_enumManager->setEnumNames(m_periodsToFit, m_periodsToFitOptions);
@@ -307,7 +312,10 @@ void MuonFitPropertyBrowser::populateFitMenuButton(QSignalMapper *fitMapper,
 void MuonFitPropertyBrowser::setFitEnabled(bool yes) {
   m_fitActionFit->setEnabled(yes);
   m_fitActionSeqFit->setEnabled(yes);
-  m_fitActionTFAsymm->setEnabled(yes);
+  // only allow TFAsymm fit if not keeping norm
+  if (!m_boolManager->value(m_keepNorm) && yes) {
+    m_fitActionTFAsymm->setEnabled(yes);
+  }
 }
 /**
 * Set the input workspace name
@@ -331,15 +339,15 @@ void MuonFitPropertyBrowser::enumChanged(QtProperty *prop) {
     return;
   if (prop == m_groupsToFit) {
     int j = m_enumManager->value(m_groupsToFit);
-    std::string option = m_groupsToFitOptions[j].toStdString();
+    QString option = m_groupsToFitOptions[j];
 
-    if (option == "All groups") {
+    if (option == ALL_GROUPS_LABEL) {
       setAllGroups();
       m_reselectGroupBtn->setEnabled(false);
-    } else if (option == "All Pairs") {
+    } else if (option == ALL_PAIRS_LABEL) {
       setAllPairs();
       m_reselectGroupBtn->setEnabled(false);
-    } else if (option == "Custom") {
+    } else if (option == CUSTOM_LABEL) {
       m_reselectGroupBtn->setEnabled(true);
       genGroupWindow();
     }
@@ -347,17 +355,17 @@ void MuonFitPropertyBrowser::enumChanged(QtProperty *prop) {
 
   } else if (prop == m_periodsToFit) {
     int j = m_enumManager->value(m_periodsToFit);
-    std::string option = m_periodsToFitOptions[j].toStdString();
-    if (option == "Custom") {
+    QString option = m_periodsToFitOptions[j];
+    if (option == CUSTOM_LABEL) {
       m_reselectPeriodBtn->setEnabled(true);
       genPeriodWindow();
-    } else if (option == "All Periods") {
+    } else if (option == ALL_PERIODS_LABEL) {
       setAllPeriods();
       m_reselectPeriodBtn->setEnabled(false);
     } else {
       for (auto iter = m_periodBoxes.constBegin();
            iter != m_periodBoxes.constEnd(); ++iter) {
-        if (option == iter.key().toStdString()) {
+        if (option == iter.key()) {
           m_boolManager->setValue(iter.value(), true);
         } else {
           m_boolManager->setValue(iter.value(), false);
@@ -460,6 +468,28 @@ void MuonFitPropertyBrowser::boolChanged(QtProperty *prop) {
   if (prop == m_rawData) {
     const bool val = m_boolManager->value(prop);
     emit fitRawDataClicked(val);
+  }
+  if (prop == m_keepNorm) {
+    const bool val = m_boolManager->value(prop);
+    if (val) { // record data for later
+      double norm = readNormalization()[0];
+      ITableWorkspace_sptr table = WorkspaceFactory::Instance().createTable();
+      AnalysisDataService::Instance().addOrReplace("__keepNorm__", table);
+      table->addColumn("double", "norm");
+      table->addColumn("int", "spectra");
+      TableRow row = table->appendRow();
+      row << norm << 0;
+      // remove TFAsymm fit
+      m_fitActionTFAsymm->setEnabled(false);
+
+    } else { // remove data so it is not used later
+      AnalysisDataService::Instance().remove("__keepNorm__");
+
+      // if fit is enabled so should TFAsymm
+      if (m_fitActionSeqFit->isEnabled()) {
+        m_fitActionTFAsymm->setEnabled(true);
+      }
+    }
   } else {
     // search map for group/pair change
     bool done = false;
@@ -646,7 +676,6 @@ std::vector<double> readNormalization() {
   }
   return norm;
 }
-
 /**
  * Requests checks and updates prior to running a fit
  */
@@ -960,9 +989,11 @@ void MuonFitPropertyBrowser::setTFAsymmMode(bool enabled) {
   // Show or hide the TFAsymmetry fit
   if (enabled) {
     m_settingsGroup->property()->addSubProperty(m_normalization);
+    m_settingsGroup->property()->addSubProperty(m_keepNorm);
     setNormalization();
   } else {
     m_settingsGroup->property()->removeSubProperty(m_normalization);
+    m_settingsGroup->property()->removeSubProperty(m_keepNorm);
   }
 }
 /**
@@ -1151,7 +1182,7 @@ void MuonFitPropertyBrowser::setAllPeriods() {
 void MuonFitPropertyBrowser::setNumPeriods(size_t numPeriods) {
   m_periodsToFitOptions.clear();
   if (numPeriods > 1) {
-    m_periodsToFitOptions << "All Periods";
+    m_periodsToFitOptions << ALL_PERIODS_LABEL;
   }
   // create more boxes
   for (size_t i = 0; i != numPeriods; i++) {
@@ -1172,7 +1203,7 @@ void MuonFitPropertyBrowser::setNumPeriods(size_t numPeriods) {
     m_multiFitSettingsGroup->property()->addSubProperty(m_showPeriods);
     m_generateBtn->setDisabled(false);
 
-    m_periodsToFitOptions << "Custom";
+    m_periodsToFitOptions << CUSTOM_LABEL;
     m_enumManager->setEnumNames(m_periodsToFit, m_periodsToFitOptions);
   }
 }
@@ -1240,8 +1271,7 @@ void MuonFitPropertyBrowser::addPeriodCheckbox(const QString &name) {
   m_enumManager->setEnumNames(m_periodsToFit, m_periodsToFitOptions);
   setChosenPeriods(active);
   m_enumManager->setValue(m_periodsToFit, j);
-  auto option = m_periodsToFitOptions[j].toStdString();
-  if (option == "All Periods") {
+  if (m_periodsToFitOptions[j] == ALL_PERIODS_LABEL) {
     setAllPeriods();
   }
 }

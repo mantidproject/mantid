@@ -8,13 +8,19 @@
 #include "MantidKernel/DllConfig.h"
 #include "MantidKernel/ITimeSeriesProperty.h"
 #include "MantidKernel/Property.h"
-#include "MantidKernel/PropertyNexus.h"
 #include "MantidKernel/Statistics.h"
 #include <cstdint>
 #include <utility>
 
+// Forward declare
+namespace NeXus {
+class File;
+}
+
 namespace Mantid {
 namespace Kernel {
+class DataItem;
+class SplittingInterval;
 
 enum TimeSeriesSortStatus { TSUNKNOWN, TSUNSORTED, TSSORTED };
 

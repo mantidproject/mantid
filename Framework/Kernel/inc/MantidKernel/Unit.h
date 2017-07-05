@@ -5,7 +5,6 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidKernel/UnitLabel.h"
-#include <map>
 #include <vector>
 #ifndef Q_MOC_RUN
 #include <boost/shared_ptr.hpp>

@@ -23,7 +23,6 @@
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 #include "MantidGeometry/IDTypes.h"
-#include "MantidKernel/ClassMacros.h"
 
 #include <boost/shared_ptr.hpp>
 
@@ -50,13 +49,20 @@ public:
   /// Constructor
   ModeratorChopperResolution(const CachedExperimentInfo &observation);
 
+  /// Disable default constructor
+  ModeratorChopperResolution() = delete;
+
+  /// Disable copy operator
+  ModeratorChopperResolution(const ModeratorChopperResolution &) = delete;
+
+  /// Disable assignment operator
+  ModeratorChopperResolution &
+  operator=(const ModeratorChopperResolution &) = delete;
+
   /// Return a width in energy for the model
   double energyWidth(const double deltaE) const;
 
 private:
-  DISABLE_DEFAULT_CONSTRUCT(ModeratorChopperResolution)
-  DISABLE_COPY_AND_ASSIGN(ModeratorChopperResolution)
-
   /// Store required cached variables
   void initCaches();
 

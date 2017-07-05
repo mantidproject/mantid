@@ -52,9 +52,19 @@ class DLLExport LoadBBY : public API::IFileLoader<Kernel::FileDescriptor> {
     bool is_tof; // tof or wavelength data
     double wavelength;
     //
+    std::string sample_name;
+    double sample_aperture;
+    double source_aperture;
+    //
     double period_master;
     double period_slave;
     double phase_slave;
+    //
+    double Lt0_value;
+    double Ltof_curtainl_value;
+    double Ltof_curtainr_value;
+    double Ltof_curtainu_value;
+    double Ltof_curtaind_value;
     //
     double L1_chopper_value;
     double L1_source_value;

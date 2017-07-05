@@ -28,6 +28,7 @@
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 #include "MantidKernel/DllConfig.h"
+#include "MantidKernel/System.h"
 
 namespace Mantid {
 

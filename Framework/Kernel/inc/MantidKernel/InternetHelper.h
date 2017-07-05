@@ -1,12 +1,12 @@
 #ifndef MANTID_KERNEL_InternetHelper_H_
 #define MANTID_KERNEL_InternetHelper_H_
 
-#include "MantidKernel/System.h"
 #include "MantidKernel/DllConfig.h"
 #include "MantidKernel/ProxyInfo.h"
 
 #include <ios>
 #include <map>
+#include <string>
 
 namespace Poco {
 // forward declaration
@@ -24,9 +24,6 @@ class HTMLForm;
 
 namespace Mantid {
 namespace Kernel {
-// forward declaration
-class Logger;
-
 /** InternetHelper : A helper class for supporting access to resources through
   HTTP and HTTPS
 

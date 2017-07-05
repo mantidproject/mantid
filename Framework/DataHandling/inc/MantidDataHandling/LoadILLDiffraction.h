@@ -70,6 +70,7 @@ private:
   std::vector<double> getAxis(const NeXus::NXDouble &) const;
   std::vector<double> getDurations(const NeXus::NXDouble &) const;
   std::vector<double> getMonitor(const NeXus::NXDouble &) const;
+  std::string getInstrumentFilePath(const std::string &) const;
 
   void fillDataScanMetaData(const NeXus::NXDouble &);
   void fillMovingInstrumentScan(const NeXus::NXUInt &,

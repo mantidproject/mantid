@@ -1,6 +1,7 @@
 #include "MantidAPI/WorkspaceNearestNeighbourInfo.h"
 #include "MantidAPI/WorkspaceNearestNeighbours.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidGeometry/IDetector.h"
 #include "MantidKernel/make_unique.h"
 
 namespace Mantid {

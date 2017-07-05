@@ -87,17 +87,17 @@ S_LAST_INDEX = 1
 
 # construction of aCLIMAX constant which is used to evaluate mean square displacement (u)
 H_BAR = constants.codata.value("Planck constant over 2 pi")  # H_BAR =  1.0545718e-34 [J s] = [kg m^2 / s ]
-H_BAR_DECOMPOSITION = math.frexp(H_BAR)
+H_BAR_DCMP = math.frexp(H_BAR)
 
 M2_TO_ANGSTROM2 = 1.0 / constants.angstrom ** 2  # m^2 = 10^20 A^2
-M2_TO_ANGSTROM2_DECOMPOSITION = math.frexp(M2_TO_ANGSTROM2)
+M2_TO_ANGSTROM2_DCMP = math.frexp(M2_TO_ANGSTROM2)
 
 KG2AMU = constants.codata.value("kilogram-atomic mass unit relationship")  # kg = 6.022140857e+26 amu
-KG2AMU_DECOMPOSITION = math.frexp(KG2AMU)
+KG2AMU_DCMP = math.frexp(KG2AMU)
 
 # here we divide by 100 because we need relation between hertz and inverse cm
 HZ2INV_CM = constants.codata.value("hertz-inverse meter relationship") / 100  # Hz [s^1] = 3.33564095198152e-11 [cm^-1]
-HZ2INV_CM_DECOMPOSITION = math.frexp(HZ2INV_CM)
+HZ2INV_CM_DCMP = math.frexp(HZ2INV_CM)
 #
 # u = H_BAR [J s ]/ ( 2 m [kg] omega [s^-1]) = ACLIMAX_CONSTANT / ( m [amu] nu [cm^-1])
 #
@@ -109,17 +109,16 @@ HZ2INV_CM_DECOMPOSITION = math.frexp(HZ2INV_CM)
 # omega = 2 pi nu
 #
 
-ACLIMAX_CONSTANT = H_BAR_DECOMPOSITION[0] * M2_TO_ANGSTROM2_DECOMPOSITION[0] * \
-                   KG2AMU_DECOMPOSITION[0] * HZ2INV_CM_DECOMPOSITION[0] / math.pi
-ACLIMAX_CONSTANT *= 2 ** (H_BAR_DECOMPOSITION[1] + M2_TO_ANGSTROM2_DECOMPOSITION[1] + KG2AMU_DECOMPOSITION[1] +
-                          HZ2INV_CM_DECOMPOSITION[1] - 2)
+ACLIMAX_CONSTANT = H_BAR_DCMP[0] * M2_TO_ANGSTROM2_DCMP[0] * KG2AMU_DCMP[0] * HZ2INV_CM_DCMP[0] / math.pi
+ACLIMAX_CONSTANT *= 2 ** (H_BAR_DCMP[1] + M2_TO_ANGSTROM2_DCMP[1] + KG2AMU_DCMP[1] +
+                          HZ2INV_CM_DCMP[1] - 2)
 
 ACLIMAX_CONSTANT_DECOMPOSITION = math.frexp(ACLIMAX_CONSTANT)
 M_N_DECOMPOSITION = math.frexp(constants.m_n)
 
 # constant used to evaluate Q^2 for TOSCA.
-TOSCA_CONSTANT = M_N_DECOMPOSITION[0] * KG2AMU_DECOMPOSITION[0] / ACLIMAX_CONSTANT_DECOMPOSITION[0]
-TOSCA_CONSTANT *= 2 ** (M_N_DECOMPOSITION[1] + KG2AMU_DECOMPOSITION[1] - ACLIMAX_CONSTANT_DECOMPOSITION[1])
+TOSCA_CONSTANT = M_N_DECOMPOSITION[0] * KG2AMU_DCMP[0] / ACLIMAX_CONSTANT_DECOMPOSITION[0]
+TOSCA_CONSTANT *= 2 ** (M_N_DECOMPOSITION[1] + KG2AMU_DCMP[1] - ACLIMAX_CONSTANT_DECOMPOSITION[1])
 
 # constants which represent quantum order effects
 QUANTUM_ORDER_ONE = 1
@@ -142,6 +141,6 @@ ALL_SUPPORTED_DFT_PROGRAMS = ["CRYSTAL", "CASTEP"]
 
 ONE_DIMENSIONAL_INSTRUMENTS = ["TOSCA"]
 TWO_DIMENSIONAL_INSTRUMENTS = ["TwoDMap"]
-ONE_DIMENTIONAL_SPECTRUM = 1
+ONE_DIMENSIONAL_SPECTRUM = 1
 
 FIRST_BIN_INDEX = 1

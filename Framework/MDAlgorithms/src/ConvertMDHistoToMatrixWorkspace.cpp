@@ -11,12 +11,8 @@
 #include "MantidHistogramData/LinearGenerator.h"
 
 #include "MantidKernel/ListValidator.h"
-#include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
-
-#include <boost/mpl/if.hpp>
-#include <boost/type_traits.hpp>
 
 #include <sstream>
 

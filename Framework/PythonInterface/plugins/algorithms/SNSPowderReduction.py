@@ -5,7 +5,7 @@ import os
 
 import mantid.simpleapi as api
 from mantid.api import mtd, AlgorithmFactory, AnalysisDataService, DataProcessorAlgorithm, \
-    FileAction, FileProperty, ITableWorkspaceProperty, PropertyMode, WorkspaceProperty, \
+    FileAction, FileProperty, ITableWorkspaceProperty, MultipleFileProperty, PropertyMode, WorkspaceProperty, \
     ITableWorkspace, MatrixWorkspace
 from mantid.kernel import ConfigService, Direction, FloatArrayProperty, \
     FloatBoundedValidator, IntArrayBoundedValidator, IntArrayProperty, \
@@ -179,10 +179,9 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                                           extensions=[".h5", ".hd5", ".hdf", ".cal"]))  # CalFileName
         self.declareProperty(FileProperty(name="GroupingFile",defaultValue="",action=FileAction.OptionalLoad,
                                           extensions=[".xml"]), "Overrides grouping from CalibrationFile")
-        self.declareProperty(FileProperty(name="CharacterizationRunsFile",
-                                          defaultValue="",
-                                          action=FileAction.OptionalLoad,
-                                          extensions=["txt"]), "File with characterization runs denoted")
+        self.declareProperty(MultipleFileProperty(name="CharacterizationRunsFile",
+                                                  action=FileAction.OptionalLoad,
+                                                  extensions=["txt"]), "File with characterization runs denoted")
         self.declareProperty(FileProperty(name="ExpIniFilename", defaultValue="", action=FileAction.OptionalLoad,
                                           extensions=[".ini"]))
         self.copyProperties('AlignAndFocusPowderFromFiles',
@@ -514,6 +513,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
     def _loadCharacterizations(self):
         self._focusPos = {}
         charFilename = self.getProperty("CharacterizationRunsFile").value
+        charFilename = ','.join(charFilename)
         expIniFilename = self.getProperty("ExpIniFilename").value
 
         self._charTable = ''
@@ -704,7 +704,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
             if sample_ws_name is None:
                 # sample run workspace is not set up.
                 sample_ws_name = ws_name
-                info = tempinfo
+                self._info = tempinfo
             else:
                 # there is sample run workspace set up previously, then add current one to previous for summation
                 self.checkInfoMatch(info, tempinfo)
@@ -998,6 +998,10 @@ class SNSPowderReduction(DataProcessorAlgorithm):
         # Check requirements
         assert isinstance(wksp_name, str)
         assert self.does_workspace_exist(wksp_name)
+
+        # Reset characterization run numbers in the property manager
+        if PropertyManagerDataService.doesExist('__snspowderreduction'):
+            PropertyManagerDataService.remove('__snspowderreduction')
 
         # Determine characterization
         api.PDDetermineCharacterizations(InputWorkspace=wksp_name,

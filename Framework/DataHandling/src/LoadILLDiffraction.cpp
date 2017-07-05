@@ -6,15 +6,18 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataHandling/H5Util.h"
 #include "MantidGeometry/Instrument/ComponentHelper.h"
+#include "MantidKernel/ConfigService.h"
 #include "MantidKernel/DateAndTime.h"
-#include "MantidKernel/make_unique.h"
+#include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidKernel/make_unique.h"
 
 #include <boost/algorithm/string/predicate.hpp>
 #include <numeric>
 
 #include <H5Cpp.h>
 #include <nexus/napi.h>
+#include <Poco/Path.h>
 
 namespace Mantid {
 namespace DataHandling {
@@ -438,7 +441,7 @@ void LoadILLDiffraction::initWorkspace() {
 */
 void LoadILLDiffraction::loadStaticInstrument() {
   IAlgorithm_sptr loadInst = createChildAlgorithm("LoadInstrument");
-  loadInst->setPropertyValue("InstrumentName", m_instName);
+  loadInst->setPropertyValue("Filename", getInstrumentFilePath(m_instName));
   loadInst->setProperty<MatrixWorkspace_sptr>("Workspace", m_outWorkspace);
   loadInst->setProperty("RewriteSpectraMap", OptionalBool(true));
   loadInst->execute();
@@ -460,6 +463,21 @@ void LoadILLDiffraction::moveTwoThetaZero(double twoTheta0) {
   const auto componentIndex =
       componentInfo.indexOf(component->getComponentID());
   componentInfo.setRotation(componentIndex, rotation);
+}
+
+/**
+* Makes up the full path of the relevant IDF dependent on resolution mode
+* @param instName : the name of the instrument (including the resolution mode
+* suffix)
+* @return : the full path to the corresponding IDF
+*/
+std::string
+LoadILLDiffraction::getInstrumentFilePath(const std::string &instName) const {
+
+  Poco::Path directory(ConfigService::Instance().getInstrumentDirectory());
+  Poco::Path file(instName + "_Definition.xml");
+  Poco::Path fullPath(directory, file);
+  return fullPath.toString();
 }
 
 } // namespace DataHandling

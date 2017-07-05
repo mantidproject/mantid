@@ -206,7 +206,7 @@ void FilterEvents::exec() {
     generateSplitterTSP(split_tsp_vector);
   }
 
-  // TODO:FIXME - assign split_tsp_vector to all the output workspaces!
+  // assign split_tsp_vector to all the output workspaces!
   mapSplitterTSPtoWorkspaces(split_tsp_vector);
 
   // Optional to group detector
@@ -336,7 +336,7 @@ void FilterEvents::processAlgorithmProperties() {
   else
     m_useDBSpectrum = true;
 
-  // Get run start time
+  // Get run start time from property 'run_start'
   if (m_eventWS->run().hasProperty("run_start")) {
     Kernel::DateAndTime run_start_time(
         m_eventWS->run().getProperty("run_start")->value());
@@ -1593,6 +1593,7 @@ void FilterEvents::splitLog(EventWorkspace_sptr eventws, std::string logname,
   }
 }
 
+//----------------------------------------------------------------------------------------------
 /** Generate a vector of integer time series property for each splitter
  * corresponding to each target (in integer)
  * in each splitter-time-series-property, 1 stands for include and 0 stands for
@@ -1611,30 +1612,59 @@ void FilterEvents::generateSplitterTSP(
     Kernel::TimeSeriesProperty<int> *split_tsp =
         new Kernel::TimeSeriesProperty<int>("splitter");
     split_tsp_vec.push_back(split_tsp);
-    // add initial value
+    // add initial value if the first splitter time is after the run start time
     split_tsp->addValue(Kernel::DateAndTime(m_runStartTime), 0);
   }
 
   // start to go through  m_vecSplitterTime (int64) and m_vecSplitterGroup add
   // each entry to corresponding splitter TSP
   for (size_t igrp = 0; igrp < m_vecSplitterGroup.size(); ++igrp) {
+    // get the target workspace's index and the starting
     int itarget = m_vecSplitterGroup[igrp];
+    // start time of the entry with value 1
     DateAndTime start_time(m_vecSplitterTime[igrp]);
-    if (start_time <= m_runStartTime) {
-      // clear the initial value with check first
-      if (split_tsp_vec[itarget]->size() != 1) {
-        g_log.error() << "With start time " << start_time
-                      << " same as run start time " << m_runStartTime
-                      << ", the TSP must have only 1 entry from "
-                         "initialization.  But not it has "
-                      << split_tsp_vec[itarget]->size() << "entries\n";
-        throw std::runtime_error("Coding logic error");
-      }
-      split_tsp_vec[itarget]->clear();
+    // identify by case
+    if (start_time < m_runStartTime) {
+      // too early, ignore
+      continue;
     }
+
+    // get the current TSP
+    Kernel::TimeSeriesProperty<int> *curr_tsp = split_tsp_vec[itarget];
+
+    if (start_time == m_runStartTime) {
+      // just same as the run start time: there must be one and only 1 entry
+      // with value 0
+      if (curr_tsp->size() != 1) {
+        std::stringstream error;
+        error << "Splitter TSP for target workspace " << itarget
+              << " must have 1 and only 1 entry "
+              << "if there is a splitter right at its run start time.";
+        throw std::runtime_error(error.str());
+      }
+      // the first entry should have an entry with value 0
+      if (curr_tsp->firstValue() != 0) {
+        std::stringstream error;
+        error << "Splitter TSP for target workspace " << itarget
+              << " must have 1 and only 1 entry "
+              << "with value as 0 but not " << curr_tsp->firstValue()
+              << " if there is a splitter "
+              << "right at its run start time.";
+        throw std::runtime_error(error.str());
+      }
+      // replace the value with '1' by clearing the original one first
+      curr_tsp->clear();
+    }
+
+    // later than the run start time, then add a new entry
+    curr_tsp->addValue(start_time, 1);
+
+    // add run stop time as a new entry
     DateAndTime stop_time(m_vecSplitterTime[igrp + 1]);
-    split_tsp_vec[itarget]->addValue(start_time, 1);
-    split_tsp_vec[itarget]->addValue(stop_time, 0);
+    curr_tsp->addValue(stop_time, 0);
+
+    // g_log.warning() << "Add " << "i_group " << igrp << " to i_target " <<
+    // itarget << "\n";
   }
 
   return;
@@ -1700,7 +1730,7 @@ void FilterEvents::mapSplitterTSPtoWorkspaces(
       if (0 <= miter->first &&
           miter->first < static_cast<int>(split_tsp_vec.size())) {
         DataObjects::EventWorkspace_sptr outws = miter->second;
-        outws->mutableRun().addProperty(split_tsp_vec[miter->first]);
+        outws->mutableRun().addProperty(split_tsp_vec[miter->first], true);
       }
     }
   } else {
@@ -1720,7 +1750,7 @@ void FilterEvents::mapSplitterTSPtoWorkspaces(
 
       // get the workspace and add property
       DataObjects::EventWorkspace_sptr outws = ws_iter->second;
-      outws->mutableRun().addProperty(split_tsp_vec[itarget]);
+      outws->mutableRun().addProperty(split_tsp_vec[itarget], true);
     }
 
   } // END-IF-ELSE (splitter-type)

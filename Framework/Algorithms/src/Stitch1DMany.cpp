@@ -6,6 +6,7 @@
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/RebinParamsValidator.h"
+#include "MantidKernel/VisibleWhenProperty.h"
 
 #include <boost/make_shared.hpp>
 
@@ -24,8 +25,9 @@ void Stitch1DMany::init() {
       Kernel::make_unique<ArrayProperty<std::string>>(
           "InputWorkspaces", boost::make_shared<ADSValidator>()),
       "Input Workspaces. List of histogram workspaces to stitch together. At "
-      "least 2 workspaces must be supplied for stitching and all must be of "
-      "the same type.");
+      "least 2 workspaces must be supplied for stitching and all must be "
+      "either Matrix Workspaces or Workspace Groups containing Matrix "
+      "Workspaces only.");
 
   declareProperty(make_unique<WorkspaceProperty<Workspace>>(
                       "OutputWorkspace", "", Direction::Output),
@@ -51,18 +53,19 @@ void Stitch1DMany::init() {
                                                        true, Direction::Input),
                   "Scaling either with respect to workspace 1 or workspace 2");
 
-  declareProperty(make_unique<PropertyWithValue<bool>>("UseManualScaleFactor",
+  declareProperty(make_unique<PropertyWithValue<bool>>("UseManualScaleFactors",
                                                        false, Direction::Input),
-                  "True to use a provided value for the scale factor.");
+                  "True to use provided values for the scale factor.");
 
-  auto manualScaleFactorValidator =
-      boost::make_shared<BoundedValidator<double>>();
-  manualScaleFactorValidator->setLower(0);
-  manualScaleFactorValidator->setExclusive(true);
-  declareProperty(make_unique<PropertyWithValue<double>>(
-                      "ManualScaleFactor", 1.0, manualScaleFactorValidator,
-                      Direction::Input),
-                  "Provided value for the scale factor.");
+  declareProperty(make_unique<ArrayProperty<double>>("ManualScaleFactors",
+                                                     Direction::Input),
+                  "Provided values for the scale factors. If specified, the "
+                  "number of ManualScaleFactors must either be one (in which "
+                  "case the provided value is applied to all input workspaces) "
+                  "or 1 less than the number of input workspaces");
+  setPropertySettings("ManualScaleFactors",
+                      make_unique<VisibleWhenProperty>("UseManualScaleFactors",
+                                                       IS_EQUAL_TO, "1"));
 
   declareProperty(
       make_unique<ArrayProperty<double>>("OutScaleFactors", Direction::Output),
@@ -76,8 +79,18 @@ void Stitch1DMany::init() {
                       scaleFactorFromPeriodValidator, Direction::Input),
                   "Provided index of period to obtain scale factor from. "
                   "Periods are indexed from 1. Used only if stitching group "
-                  "workspaces, UseManualScaleFactor is true and "
-                  "ManualScaleFactor is set to default.");
+                  "workspaces, UseManualScaleFactors is true and "
+                  "ManualScaleFactors is set to default.");
+
+  auto useManualScaleFactorsTrue =
+      VisibleWhenProperty("UseManualScaleFactors", IS_EQUAL_TO, "1");
+  auto manualScaleFactorsDefault =
+      VisibleWhenProperty("ManualScaleFactors", IS_DEFAULT);
+  auto scaleFactorFromPeriodVisible = make_unique<VisibleWhenProperty>(
+      useManualScaleFactorsTrue, manualScaleFactorsDefault, AND);
+
+  setPropertySettings("ScaleFactorFromPeriod",
+                      std::move(scaleFactorFromPeriodVisible));
 }
 
 /** Load and validate the algorithm's properties.
@@ -88,13 +101,29 @@ std::map<std::string, std::string> Stitch1DMany::validateInputs() {
   const std::vector<std::string> inputWorkspacesStr =
       this->getProperty("InputWorkspaces");
 
-  // Add all input workspaces to the matrix
-  std::vector<Workspace_sptr> inputWorkspaces;
+  // Add all input workspaces to a single row in the matrix
+  // Each 'row' are the workspaces belonging to a specific group
+  // Each 'column' are the workspaces belonging to a specific period
+  std::vector<MatrixWorkspace_sptr> inputWorkspaces;
   for (const auto &ws : inputWorkspacesStr) {
-    inputWorkspaces.push_back(
-        AnalysisDataService::Instance().retrieveWS<Workspace>(ws));
+
+    auto inputMatrixWs =
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(ws);
+    if (inputMatrixWs) {
+      inputWorkspaces.push_back(inputMatrixWs);
+    } else {
+      errors["InputWorkspaces"] = "Input workspaces must either be matrix "
+                                  "workspaces or group workspaces containing "
+                                  "matrix workspaces only";
+      break;
+    }
   }
-  m_inputWSMatrix.push_back(inputWorkspaces);
+  // Do not add workspaces if an error was found
+  if (!errors.count("InputWorkspaces"))
+    m_inputWSMatrix.push_back(inputWorkspaces);
+
+  m_numWSPerGroup = inputWorkspacesStr.size();
+  m_numWSPerPeriod = 1;
 
   // Add common errors
   validateCommonInputs(errors);
@@ -114,29 +143,62 @@ void Stitch1DMany::validateGroupWorkspacesInputs() {
   // Add all group workspaces and their constituent workspaces to their
   // respective containers
   for (const auto &groupWSName : inputWorkspacesStr) {
+
     auto groupWS =
         AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(groupWSName);
-    std::vector<Workspace_sptr> inputWorkspaces;
-    for (size_t i = 0; i < groupWS->size(); i++) {
-      inputWorkspaces.push_back(groupWS->getItem(i));
-    }
-
-    m_inputWSMatrix.push_back(inputWorkspaces);
-    m_inputWSGroups.push_back(groupWS);
-  }
-
-  size_t numWSInGroup = m_inputWSMatrix[0].size();
-
-  // Check all workspace groups are the same size
-  for (auto &inputWsGroup : m_inputWSGroups) {
-    if (inputWsGroup->size() != numWSInGroup) {
-      errors["InputWorkspaces"] = "All workspace groups must be the same size.";
+    if (groupWS) {
+      m_inputWSGroups.push_back(groupWS);
+    } else {
+      errors["InputWorkspaces"] =
+          "Input workspaces must either be matrix workspaces or group "
+          "workspaces containing matrix workspaces only";
       break;
     }
   }
 
+  m_numWSPerGroup = m_inputWSGroups.front()->size();
+  m_numWSPerPeriod = inputWorkspacesStr.size();
+
+  // Check all workspace groups are the same size
+  if (!errors.count("InputWorkspaces")) {
+    for (const auto &inputWsGroup : m_inputWSGroups) {
+      if (inputWsGroup->size() != m_numWSPerGroup) {
+        errors["InputWorkspaces"] =
+            "All workspace groups must be the same size.";
+        break;
+      }
+    }
+  }
+
+  if (!errors.count("InputWorkspaces")) {
+    // Each 'row' are the workspaces belonging to a specific period
+    // Each 'column' are the workspaces belonging to a specific group
+    for (size_t i = 0; i < m_numWSPerGroup; i++) {
+
+      std::vector<MatrixWorkspace_sptr> inputWorkspaces;
+      for (const auto &groupWS : m_inputWSGroups) {
+
+        auto inputMatrixWs =
+            boost::dynamic_pointer_cast<MatrixWorkspace>(groupWS->getItem(i));
+        if (inputMatrixWs) {
+          inputWorkspaces.push_back(inputMatrixWs);
+        } else {
+          errors["InputWorkspaces"] =
+              "Input workspaces must either be matrix workspaces or group "
+              "workspaces containing matrix workspaces only";
+          break;
+        }
+      }
+
+      if (errors.count("InputWorkspaces"))
+        break; // error found, stop adding workspaces
+
+      m_inputWSMatrix.push_back(inputWorkspaces);
+    }
+  }
+
   int scaleFactorFromPeriod = this->getProperty("ScaleFactorFromPeriod");
-  m_scaleFactorFromPeriod = (size_t)scaleFactorFromPeriod;
+  m_scaleFactorFromPeriod = static_cast<size_t>(scaleFactorFromPeriod);
   m_scaleFactorFromPeriod--; // To account for period being indexed from 1
   if (m_scaleFactorFromPeriod >= m_inputWSGroups.size())
     errors["ScaleFactorFromPeriod"] = "Period index out of range";
@@ -145,7 +207,7 @@ void Stitch1DMany::validateGroupWorkspacesInputs() {
   validateCommonInputs(errors);
   if (errors.size() > 0) {
     auto &warnLog = getLogger().warning();
-    for (auto &error : errors) {
+    for (const auto &error : errors) {
       warnLog << "Invalid value for " << error.first << ": " << error.second
               << "\n";
     }
@@ -157,32 +219,16 @@ void Stitch1DMany::validateGroupWorkspacesInputs() {
 */
 void Stitch1DMany::validateCommonInputs(
     std::map<std::string, std::string> &errors) {
-  const std::vector<std::string> inputWorkspacesStr =
-      this->getProperty("InputWorkspaces");
-  if (inputWorkspacesStr.size() < 2)
-    errors["InputWorkspaces"] = "At least 2 input workspaces required.";
 
-  // Check that all the workspaces are of the same type
-  const std::string id = m_inputWSMatrix[0][0]->id();
-  for (auto &period : m_inputWSMatrix) {
-    for (auto &inputWS : period) {
-      if (inputWS->id() != id) {
-        errors["InputWorkspaces"] = "All workspaces must be the same type.";
-        break;
-      }
-    }
-  }
+  size_t numStitchableWS =
+      (m_numWSPerPeriod > 1) ? m_numWSPerPeriod : m_numWSPerGroup;
+  if (numStitchableWS < 2)
+    errors["InputWorkspaces"] = "At least 2 input workspaces required.";
 
   m_startOverlaps = this->getProperty("StartOverlaps");
   m_endOverlaps = this->getProperty("EndOverlaps");
   m_scaleRHSWorkspace = this->getProperty("ScaleRHSWorkspace");
   m_params = this->getProperty("Params");
-
-  m_numWSPerGroup = m_inputWSMatrix[0].size();
-  m_numWSPerPeriod = m_inputWSMatrix.size();
-
-  size_t numStitchableWS =
-      (m_numWSPerPeriod > 1) ? m_numWSPerPeriod : m_numWSPerGroup;
 
   if (!m_startOverlaps.empty() && m_startOverlaps.size() != numStitchableWS - 1)
     errors["StartOverlaps"] = "If given, StartOverlaps must have one fewer "
@@ -192,28 +238,32 @@ void Stitch1DMany::validateCommonInputs(
     errors["EndOverlaps"] =
         "EndOverlaps must have the same number of entries as StartOverlaps.";
 
-  m_useManualScaleFactor = this->getProperty("UseManualScaleFactor");
-  m_manualScaleFactor = this->getProperty("ManualScaleFactor");
+  m_useManualScaleFactors = this->getProperty("UseManualScaleFactors");
+  m_manualScaleFactors = this->getProperty("ManualScaleFactors");
+
+  if (m_manualScaleFactors.size() > 0) {
+    if (m_manualScaleFactors.size() == 1) {
+      // Single value: fill with list of the same scale factor value
+      m_manualScaleFactors = std::vector<double>(numStitchableWS - 1,
+                                                 m_manualScaleFactors.front());
+    } else if (m_manualScaleFactors.size() != numStitchableWS - 1) {
+      errors["ManualScaleFactors"] =
+          "If given, ManualScaleFactors must either "
+          "consist of one entry or one fewer entries "
+          "than the number of input workspaces";
+    }
+  }
 }
 
 /** Execute the algorithm.
  */
 void Stitch1DMany::exec() {
-  MatrixWorkspace_sptr lhsWS =
-      boost::dynamic_pointer_cast<MatrixWorkspace>(m_inputWSMatrix[0][0]);
 
-  for (size_t i = 1; i < m_numWSPerGroup; i++) {
-    MatrixWorkspace_sptr rhsWS =
-        boost::dynamic_pointer_cast<MatrixWorkspace>(m_inputWSMatrix[0][i]);
-    double outScaleFactor;
+  std::string tempOutName;
 
-    doStitch1D(lhsWS, rhsWS, i, m_startOverlaps, m_endOverlaps, m_params,
-               m_scaleRHSWorkspace, m_useManualScaleFactor, m_manualScaleFactor,
-               lhsWS, outScaleFactor);
-
-    m_scaleFactors.push_back(outScaleFactor);
-  }
-  m_outputWorkspace = lhsWS;
+  doStitch1D(m_inputWSMatrix.front(), m_startOverlaps, m_endOverlaps, m_params,
+             m_scaleRHSWorkspace, m_useManualScaleFactors, m_manualScaleFactors,
+             m_outputWorkspace, tempOutName, m_scaleFactors);
 
   // Save output
   this->setProperty("OutputWorkspace", m_outputWorkspace);
@@ -221,50 +271,63 @@ void Stitch1DMany::exec() {
 }
 
 /** Performs the Stitch1D algorithm at a specific workspace index.
- * @param lhsWS :: The left-hand workspace to be stitched
- * @param rhsWS :: The right-hand workspace to be stitched
- * @param wsIndex :: The index of the rhs workspace being stitched
+ * @param toStitch :: Vector of workspaces to be stitched
  * @param startOverlaps :: Start overlaps for stitched workspaces
  * @param endOverlaps :: End overlaps for stitched workspaces
  * @param params :: Rebinning parameters
  * @param scaleRhsWS :: Scaling either with respect to left or right workspaces
- * @param useManualScaleFactor :: True to use a provided value for scale factor
- * @param manualScaleFactor :: Provided value for scaling factor
+ * @param useManualScaleFactors :: True to use provided values for scale factors
+ * @param manualScaleFactors :: Provided values for scaling factors
  * @param outWS :: Output stitched workspace
- * @param outScaleFactor :: Actual value used for scale factor
+ * @param outName :: Output stitched workspace name
+ * @param outScaleFactors :: Actual values used for scale factors
  */
-void Stitch1DMany::doStitch1D(
-    MatrixWorkspace_sptr lhsWS, MatrixWorkspace_sptr rhsWS,
-    const size_t wsIndex, const std::vector<double> &startOverlaps,
-    const std::vector<double> &endOverlaps, const std::vector<double> &params,
-    const bool scaleRhsWS, const bool useManualScaleFactor,
-    const double manualScaleFactor, MatrixWorkspace_sptr &outWS,
-    double &outScaleFactor) {
+void Stitch1DMany::doStitch1D(const std::vector<MatrixWorkspace_sptr> &toStitch,
+                              const std::vector<double> &startOverlaps,
+                              const std::vector<double> &endOverlaps,
+                              const std::vector<double> &params,
+                              const bool scaleRhsWS,
+                              const bool useManualScaleFactors,
+                              const std::vector<double> &manualScaleFactors,
+                              Workspace_sptr &outWS, std::string &outName,
+                              std::vector<double> &outScaleFactors) {
 
-  IAlgorithm_sptr alg = createChildAlgorithm("Stitch1D");
-  alg->initialize();
-  alg->setProperty("LHSWorkspace", lhsWS);
-  alg->setProperty("RHSWorkspace", rhsWS);
-  if (startOverlaps.size() > wsIndex - 1) {
-    alg->setProperty("StartOverlap", startOverlaps[wsIndex - 1]);
-    alg->setProperty("EndOverlap", endOverlaps[wsIndex - 1]);
-  }
-  alg->setProperty("Params", params);
-  alg->setProperty("ScaleRHSWorkspace", scaleRhsWS);
-  alg->setProperty("UseManualScaleFactor", useManualScaleFactor);
-  if (useManualScaleFactor)
-    alg->setProperty("ManualScaleFactor", manualScaleFactor);
-  alg->execute();
+  auto lhsWS = toStitch.front();
+  outName += "_" + lhsWS->getName();
 
-  outWS = alg->getProperty("OutputWorkspace");
-  outScaleFactor = alg->getProperty("OutScaleFactor");
+  for (size_t i = 1; i < toStitch.size(); i++) {
 
-  if (!isChild()) {
-    // Copy each input workspace's history into our output workspace's history
-    for (auto &inputWS : m_inputWSMatrix[0]) {
-      outWS->history().addHistory(inputWS->getHistory());
+    auto rhsWS = toStitch[i];
+    outName += "_" + rhsWS->getName();
+
+    IAlgorithm_sptr alg = createChildAlgorithm("Stitch1D");
+    alg->initialize();
+    alg->setProperty("LHSWorkspace", lhsWS);
+    alg->setProperty("RHSWorkspace", rhsWS);
+    if (startOverlaps.size() > i - 1) {
+      alg->setProperty("StartOverlap", startOverlaps[i - 1]);
+      alg->setProperty("EndOverlap", endOverlaps[i - 1]);
+    }
+    alg->setProperty("Params", params);
+    alg->setProperty("ScaleRHSWorkspace", scaleRhsWS);
+    alg->setProperty("UseManualScaleFactor", useManualScaleFactors);
+    if (useManualScaleFactors)
+      alg->setProperty("ManualScaleFactor", manualScaleFactors[i - 1]);
+    alg->execute();
+
+    lhsWS = alg->getProperty("OutputWorkspace");
+    double outScaleFactor = alg->getProperty("OutScaleFactor");
+    outScaleFactors.push_back(outScaleFactor);
+
+    if (!isChild()) {
+      // Copy each input workspace's history into our output workspace's history
+      for (const auto &inputWS : toStitch) {
+        lhsWS->history().addHistory(inputWS->getHistory());
+      }
     }
   }
+
+  outWS = lhsWS;
 }
 
 /** Performs the Stitch1DMany algorithm at a specific period
@@ -275,8 +338,8 @@ void Stitch1DMany::doStitch1D(
  * @param endOverlaps :: End overlaps for stitched workspaces
  * @param params :: Rebinning parameters
  * @param scaleRhsWS :: Scaling either with respect to left or right workspaces
- * @param useManualScaleFactor :: True to use a provided value for scale factor
- * @param manualScaleFactor :: Provided value for scaling factor
+ * @param useManualScaleFactors :: True to use provided values for scale factors
+ * @param manualScaleFactors :: Provided values for scaling factors
  * @param outName :: Output stitched workspace name
  * @param outScaleFactors :: Actual values used for scale factors
  */
@@ -284,14 +347,14 @@ void Stitch1DMany::doStitch1DMany(
     std::vector<WorkspaceGroup_sptr> inputWSGroups, const size_t period,
     const bool storeInADS, const std::vector<double> &startOverlaps,
     const std::vector<double> &endOverlaps, const std::vector<double> &params,
-    const bool scaleRhsWS, const bool useManualScaleFactor,
-    const double manualScaleFactor, std::string &outName,
+    const bool scaleRhsWS, const bool useManualScaleFactors,
+    const std::vector<double> &manualScaleFactors, std::string &outName,
     std::vector<double> &outScaleFactors) {
 
   // List of workspaces to stitch
   std::vector<std::string> toProcess;
 
-  for (auto &groupWs : inputWSGroups) {
+  for (const auto &groupWs : inputWSGroups) {
     const std::string &wsName = groupWs->getItem(period)->getName();
     toProcess.push_back(wsName);
     outName += "_" + wsName;
@@ -307,9 +370,9 @@ void Stitch1DMany::doStitch1DMany(
   alg->setProperty("EndOverlaps", endOverlaps);
   alg->setProperty("Params", params);
   alg->setProperty("ScaleRHSWorkspace", scaleRhsWS);
-  alg->setProperty("UseManualScaleFactor", useManualScaleFactor);
-  if (useManualScaleFactor)
-    alg->setProperty("ManualScaleFactor", manualScaleFactor);
+  alg->setProperty("UseManualScaleFactors", useManualScaleFactors);
+  if (useManualScaleFactors)
+    alg->setProperty("ManualScaleFactors", manualScaleFactors);
   alg->execute();
 
   outScaleFactors = alg->getProperty("OutScaleFactors");
@@ -319,7 +382,8 @@ bool Stitch1DMany::checkGroups() {
   std::vector<std::string> wsNames = getProperty("InputWorkspaces");
 
   try {
-    if (AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(wsNames[0]))
+    if (AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
+            wsNames.front()))
       return true;
   } catch (...) {
   }
@@ -335,16 +399,17 @@ bool Stitch1DMany::processGroups() {
 
   // Determine whether or not we are scaling workspaces using scale factors from
   // a specific period
-  Property *manualSF = this->getProperty("ManualScaleFactor");
-  bool usingScaleFromPeriod = m_useManualScaleFactor && manualSF->isDefault();
+  Property *manualSF = this->getProperty("ManualScaleFactors");
+  bool usingScaleFromPeriod = m_useManualScaleFactors && manualSF->isDefault();
 
   if (!usingScaleFromPeriod) {
     for (size_t i = 0; i < m_numWSPerGroup; ++i) {
+
       outName = groupName;
       std::vector<double> scaleFactors;
       doStitch1DMany(m_inputWSGroups, i, true, m_startOverlaps, m_endOverlaps,
-                     m_params, m_scaleRHSWorkspace, m_useManualScaleFactor,
-                     m_manualScaleFactor, outName, scaleFactors);
+                     m_params, m_scaleRHSWorkspace, m_useManualScaleFactors,
+                     m_manualScaleFactors, outName, scaleFactors);
 
       // Add the resulting workspace to the list to be grouped together
       toGroup.push_back(outName);
@@ -355,36 +420,27 @@ bool Stitch1DMany::processGroups() {
     }
   } else {
     // Obtain scale factors for the specified period
-    outName = groupName;
+    std::string tempOutName;
     std::vector<double> periodScaleFactors;
+
     doStitch1DMany(m_inputWSGroups, m_scaleFactorFromPeriod, false,
                    m_startOverlaps, m_endOverlaps, m_params,
-                   m_scaleRHSWorkspace, false, m_manualScaleFactor, outName,
-                   periodScaleFactors);
+                   m_scaleRHSWorkspace, false, m_manualScaleFactors,
+                   tempOutName, periodScaleFactors);
 
     // Iterate over each period
     for (size_t i = 0; i < m_numWSPerGroup; i++) {
-      auto lhsWS =
-          boost::dynamic_pointer_cast<MatrixWorkspace>(m_inputWSMatrix[0][i]);
-      outName = groupName + "_" + lhsWS->getName();
 
-      // Perform stiching on the workspace for each group of that period
-      for (size_t j = 1; j < m_numWSPerPeriod; j++) {
-        auto rhsWS =
-            boost::dynamic_pointer_cast<MatrixWorkspace>(m_inputWSMatrix[j][i]);
-        outName += "_" + rhsWS->getName(); // add name
-        double outScaleFactor;
+      outName = groupName;
+      Workspace_sptr outStitchedWS;
 
-        doStitch1D(lhsWS, rhsWS, j, m_startOverlaps, m_endOverlaps, m_params,
-                   m_scaleRHSWorkspace, m_useManualScaleFactor,
-                   periodScaleFactors[j - 1], lhsWS, outScaleFactor);
-
-        m_scaleFactors.push_back(outScaleFactor);
-      }
+      doStitch1D(m_inputWSMatrix[i], m_startOverlaps, m_endOverlaps, m_params,
+                 m_scaleRHSWorkspace, m_useManualScaleFactors,
+                 periodScaleFactors, outStitchedWS, outName, m_scaleFactors);
 
       // Add name of stitched workspaces to group list and ADS
       toGroup.push_back(outName);
-      AnalysisDataService::Instance().addOrReplace(outName, lhsWS);
+      AnalysisDataService::Instance().addOrReplace(outName, outStitchedWS);
     }
   }
 

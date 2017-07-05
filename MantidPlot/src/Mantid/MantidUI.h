@@ -361,6 +361,9 @@ public slots:
   /// Create a table of detectors from a PeaksWorkspace
   Table *createDetectorTable(const QString &wsName,
                              const Mantid::API::IPeaksWorkspace_sptr &ws);
+  /// Create a string of the style "1, 2...(100 more)...102, 103"
+  QString createTruncatedList(const std::set<int> &elements);
+
   /// Triggers a workspace delete check
   void deletePressEvent();
 
@@ -498,7 +501,8 @@ public slots:
   void copyRowsToWaterfall();
   // Slot callable from Workspace menu item
   void plotWholeAsWaterfall();
-  /// Common method to convert a plot of a set of spectra into a waterfall plot
+  /// Common method to convert a plot of a set of spectra into a waterfall
+  /// plot
   void convertToWaterfall(MultiLayer *ml);
 
   // Execute algorithm given name and version
@@ -610,7 +614,8 @@ private:
   MantidQt::API::AlgorithmDialog *
   createAlgorithmDialog(Mantid::API::IAlgorithm_sptr alg);
 
-  /// This method accepts user inputs and executes loadraw/load nexus algorithm
+  /// This method accepts user inputs and executes loadraw/load nexus
+  /// algorithm
   std::string extractLogTime(Mantid::Kernel::DateAndTime value,
                              bool useAbsoluteDate,
                              Mantid::Kernel::DateAndTime start);
@@ -618,9 +623,11 @@ private:
   /// extracts the files from a mimedata object that have a .py extension
   QStringList extractPyFiles(const QList<QUrl> &urlList) const;
 
-  // Whether new plots shoul re-use the same plot instance (for every different
+  // Whether new plots shoul re-use the same plot instance (for every
+  // different
   // type of plot).
-  // The name comes from: these plots are normally opened from the context menu
+  // The name comes from: these plots are normally opened from the context
+  // menu
   // of the workspaces dock window
   bool workspacesDockPlot1To1();
 
@@ -673,7 +680,8 @@ private:
   QMenu *menuMantidMatrix;        //  MantidMatrix specific menu
   AlgorithmMonitor *m_algMonitor; //  Class for monitoring running algorithms
 
-  // keep track of the last shown, which will be refreshed or killed/rebuilt if
+  // keep track of the last shown, which will be refreshed or killed/rebuilt
+  // if
   // showing only one inst. window
   // QPointer handles when events, etc. destroy these windows
   QPointer<InstrumentWindow> m_lastShownInstrumentWin;
@@ -687,7 +695,8 @@ private:
   // UpdateDAE must be launched after LoadDAE for this workspace
   QMap<std::string, int> m_DAE_map;
 
-  // Stores dependent mdi windows. If the 'key' window closes, all 'value' ones
+  // Stores dependent mdi windows. If the 'key' window closes, all 'value'
+  // ones
   // must be closed as well.
   std::unordered_multimap<MdiSubWindow *, MdiSubWindow *> m_mdiDependency;
   QMdiSubWindow *

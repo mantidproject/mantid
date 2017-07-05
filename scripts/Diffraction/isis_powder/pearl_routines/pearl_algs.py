@@ -68,16 +68,16 @@ def generate_vanadium_absorb_corrections(van_ws):
 
 
 def get_run_details(run_number_string, inst_settings, is_vanadium_run):
-    splined_name_list = ["_tt-" + inst_settings.tt_mode]
+    spline_identifier = [inst_settings.tt_mode]
     if inst_settings.long_mode:
-        splined_name_list.append("_long")
+        spline_identifier.append("_long")
 
     grouping_file_name_callable = CustomFuncForRunDetails().add_to_func_chain(
         user_function=_pearl_get_tt_grouping_file_name,
         inst_settings=inst_settings)
 
     return create_run_details_object(run_number_string=run_number_string, inst_settings=inst_settings,
-                                     is_vanadium_run=is_vanadium_run, splined_name_list=splined_name_list,
+                                     is_vanadium_run=is_vanadium_run, splined_name_list=spline_identifier,
                                      grouping_file_name_call=grouping_file_name_callable,
                                      van_abs_file_name=inst_settings.van_absorb_file)
 

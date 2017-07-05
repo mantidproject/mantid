@@ -8,6 +8,7 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ParameterFactory.h"
 #include <cstring>
+#include <nexus/NeXusFile.hpp>
 #include <boost/algorithm/string.hpp>
 
 #ifdef _WIN32

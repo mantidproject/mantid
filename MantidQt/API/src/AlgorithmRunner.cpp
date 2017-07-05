@@ -72,14 +72,13 @@ void AlgorithmRunner::startAlgorithm(Mantid::API::IAlgorithm_sptr alg) {
 
   cancelRunningAlgorithm();
 
-  // Start asynchronous execution
-  m_asyncAlg = alg;
-  m_asyncResult = new Poco::ActiveResult<bool>(m_asyncAlg->executeAsync());
-
   // Observe the algorithm
   alg->addObserver(m_finishedObserver);
   alg->addObserver(m_errorObserver);
   alg->addObserver(m_progressObserver);
+  // Start asynchronous execution
+  m_asyncAlg = alg;
+  m_asyncResult = new Poco::ActiveResult<bool>(m_asyncAlg->executeAsync());
 }
 
 /// Get back a pointer to the running algorithm

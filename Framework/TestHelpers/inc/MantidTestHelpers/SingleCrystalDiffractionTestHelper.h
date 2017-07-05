@@ -19,7 +19,7 @@ class WorkspaceBuilder {
 public:
   WorkspaceBuilder()
       : m_numPixels(0), m_totalNPixels(0), m_outputAsHistogram(false),
-        m_generator(std::random_device()()){};
+        m_generator(std::mt19937()()){};
 
   /// Set the total number of peaks to use
   void setNumPixels(const int numPixels);

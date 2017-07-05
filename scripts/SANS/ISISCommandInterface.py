@@ -731,12 +731,6 @@ def CompWavRanges(wavelens, plot=True, combineDet=None, resetSetup=True):
 
     _printMessage('CompWavRanges( %s,plot=%s)' % (str(wavelens), plot))
 
-    # this only makes sense for 1D reductions
-    if ReductionSingleton().to_Q.output_type == '2D':
-        issueWarning('This wave ranges check is a 1D analysis, ignoring 2D setting')
-        _printMessage('Set1D()')
-        ReductionSingleton().to_Q.output_type = '1D'
-
     if not isinstance(wavelens, type([])) or len(wavelens) < 2:
         if not isinstance(wavelens, type((1,))):
             raise RuntimeError(
@@ -986,7 +980,6 @@ def DisplayMask(mask_worksp=None):
     """
     # this will be copied from a sample work space if one exists
     counts_data = None
-    _instrument = ReductionSingleton().instrument
 
     if not mask_worksp:
         mask_worksp = '__CurrentMask'

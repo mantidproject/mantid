@@ -19,40 +19,31 @@ def calculate_van_absorb_corrections(ws_to_correct, multiple_scattering):
 
 
 def get_run_details(run_number_string, inst_settings, is_vanadium_run):
-    # Get the chopper mode as vanadium and empty run numbers depend on different modes
-    chopper_config_callable = CustomFuncForRunDetails().\
-        add_to_func_chain(user_function=RunDetailsWrappedCommonFuncs.get_cal_mapping_dict,
-                          run_number_string=run_number_string, inst_settings=inst_settings).\
-        add_to_func_chain(user_function=polaris_get_chopper_config, inst_settings=inst_settings)
+    cal_mapping_callable = CustomFuncForRunDetails().add_to_func_chain(
+        user_function=RunDetailsWrappedCommonFuncs.get_cal_mapping_dict, run_number_string=run_number_string,
+        inst_settings=inst_settings
+    ).add_to_func_chain(user_function=polaris_get_chopper_config, inst_settings=inst_settings)
 
-    # Then use the results to set the empty and vanadium runs
-    err_message = "this must be under the relevant chopper_on / chopper_off section."
+    # Get empty and vanadium
+    err_message = "this must be under the relevant Rietveld or PDF mode."
 
-    empty_runs_callable = chopper_config_callable.add_to_func_chain(
-        RunDetailsWrappedCommonFuncs.cal_dictionary_key_helper,
-        key="empty_run_numbers", append_to_error_message=err_message)
-
-    vanadium_runs_callable = chopper_config_callable.add_to_func_chain(
-        RunDetailsWrappedCommonFuncs.cal_dictionary_key_helper, key="vanadium_run_numbers",
+    empty_run_callable = cal_mapping_callable.add_to_func_chain(
+        user_function=RunDetailsWrappedCommonFuncs.cal_dictionary_key_helper, key="empty_run_numbers",
         append_to_error_message=err_message)
 
-    run_details = create_run_details_object(run_number_string=run_number_string, inst_settings=inst_settings,
-                                            empty_run_call=empty_runs_callable, is_vanadium_run=is_vanadium_run,
-                                            vanadium_run_call=vanadium_runs_callable)
+    vanadium_run_callable = cal_mapping_callable.add_to_func_chain(
+        user_function=RunDetailsWrappedCommonFuncs.cal_dictionary_key_helper, key="vanadium_run_numbers",
+        append_to_error_message=err_message)
 
-    return run_details
+    return create_run_details_object(run_number_string=run_number_string, inst_settings=inst_settings,
+                                     is_vanadium_run=is_vanadium_run, empty_run_call=empty_run_callable,
+                                     vanadium_run_call=vanadium_run_callable)
 
 
 def polaris_get_chopper_config(forwarded_value, inst_settings):
-    # The previous result is a cal_mapping
+    # Forwarded value should be a cal mapping
     cal_mapping = forwarded_value
-
-    if inst_settings.chopper_on:
-        chopper_config = common.cal_map_dictionary_key_helper(cal_mapping, "chopper_on")
-    else:
-        chopper_config = common.cal_map_dictionary_key_helper(cal_mapping, "chopper_off")
-
-    return chopper_config
+    return common.cal_map_dictionary_key_helper(cal_mapping, inst_settings.mode)
 
 
 def process_vanadium_for_focusing(bank_spectra, mask_path, spline_number):

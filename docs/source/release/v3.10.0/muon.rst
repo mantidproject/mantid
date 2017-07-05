@@ -14,6 +14,8 @@ Muon Analysis
 
 - Fixed a bug that meant transverse field asymmetry data was normalized to bin width. 
 
+- Added a fix normalization tick box into the TF asymmetry mode. Once this box is ticked (true) the normalization cannot be changed and will be applied to all of the data that is loaded into the GUI. 
+
 Algorithms
 ----------
 -  :ref:`EstimateMuonAsymmetryFromCounts <algm-EstimateMuonAsymmetryFromCounts-v1>`: new algorithm to estimate the asymmetry.

@@ -52,9 +52,6 @@ set ( UI_FILES
        inc/MantidQtSpectrumViewer/SpectrumView.ui
 )
 
-# Python unit tests
-set ( TEST_PY_FILES
-)
 
 include_directories ( inc )
 
@@ -83,7 +80,7 @@ if (OSX_VERSION VERSION_GREATER 10.8)
   set_target_properties ( MantidQtSpectrumViewer PROPERTIES INSTALL_RPATH "@loader_path/../MacOS")
 endif ()
 # ... and links to other required libs
-target_link_libraries ( MantidQtSpectrumViewer LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} 
+target_link_libraries ( MantidQtSpectrumViewer LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME}
             MantidQtAPI
             MantidWidgets
             ${CORE_MANTIDLIBS}
@@ -98,5 +95,3 @@ target_link_libraries ( MantidQtSpectrumViewer LINK_PRIVATE ${TCMALLOC_LIBRARIES
 ###########################################################################
 
 install ( TARGETS MantidQtSpectrumViewer ${SYSTEM_PACKAGE_TARGET} DESTINATION ${LIB_DIR} )
-
-

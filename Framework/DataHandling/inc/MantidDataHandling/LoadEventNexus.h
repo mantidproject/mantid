@@ -5,14 +5,15 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/IFileLoader.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidDataHandling/BankPulseTimes.h"
+#include "MantidDataHandling/EventWorkspaceCollection.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/Events.h"
-#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
+#include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/TimeSeriesProperty.h"
-#include "MantidDataHandling/EventWorkspaceCollection.h"
 
 #ifdef _WIN32 // fixing windows issue causing conflict between
 // winnt char and nexus char

@@ -1,11 +1,19 @@
 #ifndef MANTID_KERNEL_PROPERTYNEXUS_H_
 #define MANTID_KERNEL_PROPERTYNEXUS_H_
 
-#include "MantidKernel/Property.h"
 #include "MantidKernel/System.h"
+#include <memory>
+
+// Forward declare
+namespace NeXus {
+class File;
+}
 
 namespace Mantid {
 namespace Kernel {
+// Forward declare
+class Property;
+
 /** Namespace with helper methods for loading and saving Property's (logs)
  * to NXS files.
 

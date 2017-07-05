@@ -3,12 +3,13 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidAlgorithms/CreateLogTimeCorrection.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAlgorithms/CreateLogTimeCorrection.h"
 #include "MantidDataHandling/LoadInstrument.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidKernel/OptionalBool.h"
 
 #include <fstream>
 #include <sstream>
