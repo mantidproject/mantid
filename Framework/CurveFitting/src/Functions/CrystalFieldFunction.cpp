@@ -38,7 +38,7 @@ namespace {
 const std::regex SPECTRUM_ATTR_REGEX("sp([0-9]+)\\.(.+)");
 // Regex for names of attributes/parameters for a background
 // Example: bg.A1
-const std::regex BACKGROUND_ATTR_REGEX("bg([0-9]*)\\.(.+)");
+const std::regex BACKGROUND_ATTR_REGEX("bg\\.(.+)");
 // Regex for names of attributes/parameters for peaks
 // Example: pk1.PeakCentre
 const std::regex PEAK_ATTR_REGEX("pk([0-9]+)\\.(.+)");
@@ -127,10 +127,11 @@ ReferenceTuple getReferenceTuple(const std::string &name) {
   }
 
   if (std::regex_match(localName, match, BACKGROUND_ATTR_REGEX)) {
-    auto indexStr = match[1].str();
-    spectrumIndex = indexStr.empty() ? 0 : std::stoul(indexStr);
-    localName = match[2].str();
+    localName = match[1].str();
     type = Background;
+    if (spectrumIndex == UNDEFINED_INDEX) {
+      spectrumIndex = 0;
+    }
   }
 
   if (std::regex_match(localName, match, PEAK_ATTR_REGEX)) {
