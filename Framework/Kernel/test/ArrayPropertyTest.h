@@ -313,8 +313,6 @@ public:
                listShorteningwithType<int>(inputList, resultList));
     TSM_ASSERT("Test Failed for vectors of long",
                listShorteningwithType<long>(inputList, resultList));
-    TSM_ASSERT("Test Failed for vectors of long long",
-               listShorteningwithType<long long>(inputList, resultList));
     // explicit test for in32_t with matches det_id_t and spec_id_t
     TSM_ASSERT("Test Failed for vectors of int32_t",
                listShorteningwithType<int32_t>(inputList, resultList));
