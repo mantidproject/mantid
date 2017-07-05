@@ -133,7 +133,7 @@ LoadSassena::loadQvectors(const hid_t &h5file, API::WorkspaceGroup_sptr gws,
   for (int iq = 0; iq < nq; iq++) {
     qvmod.push_back(
         sqrt(curr[0] * curr[0] + curr[1] * curr[1] + curr[2] * curr[2]));
-    std::next(curr, 3);
+    std::advance(curr, 3);
   }
 
   if (getProperty("SortByQVectors")) {
