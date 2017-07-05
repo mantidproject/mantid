@@ -25,7 +25,8 @@ using Mantid::PythonInterface::PythonObjectInstantiator;
 using namespace boost::python;
 
 GET_POINTER_SPECIALIZATION(Property)
-BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(valueAsPrettyStrOverloader, valueAsPrettyStr, 0, 2)
+BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(valueAsPrettyStrOverloader,
+                                       valueAsPrettyStr, 0, 2)
 
 void export_Property() {
   register_ptr_to_python<Property *>();
@@ -79,11 +80,14 @@ void export_Property() {
                     "be able to refer to the string value directly")
 
       .def("valueAsPrettyStr", &Property::valueAsPrettyStr,
-        valueAsPrettyStrOverloader((arg("maxLength") = 0, arg("collapseLists") = true),
-          "The value of the property as a formatted string. "
-          "If maxLength is defined then the output may not contain the full "
-          "contents of the property. The maxLength and collapseLists arguments "
-          "do not work for all property types"))
+           valueAsPrettyStrOverloader(
+               (arg("maxLength") = 0, arg("collapseLists") = true),
+               "The value of the property as a formatted string. "
+               "If maxLength is defined then the output may not contain the "
+               "full "
+               "contents of the property. The maxLength and collapseLists "
+               "arguments "
+               "do not work for all property types"))
 
       .add_property("allowedValues", &Property::allowedValues,
                     "A list of allowed values")
