@@ -146,7 +146,7 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
                 issues['CanWorkspace'] = 'Workspace must have units of wavelength.'
 
         # Orientation angle restricted to range between -90 and 90 degrees
-        sample_angle = float(self.getPropertyValue('SampleAngle'))
+        sample_angle = self.getProperty('SampleAngle').value
         if sample_angle < -90.0 or sample_angle > 90.0:
             issues['SampleAngle'] = 'Angle defining sample orientation must be between -90 and 90 degrees'
         
@@ -527,7 +527,7 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
             else:
                 can_x_section_efixed = 0
 
-                                       # Front container --> Acc1   
+            # Front container --> Acc1
             if self._emode == 'Efixed':    
                 ki_c1 = can_x_section_efixed * self._can_front_thickness / salpha
                 kf_c1 = can_x_section_efixed * self._can_front_thickness / stha
@@ -557,8 +557,7 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
                 # reflection case
                 acc2 = ssr(ki_c2, kf_c2) 
 
-            # Attenuation due to passage by other layers (sample or container)   
-            
+            # Attenuation due to passage by other layers (sample or container)
             if theta < alpha or theta > (alpha + np.pi):                  # transmission case
                 acc = self._can_front_thickness * acc1 * np.exp(-kf_c2)
                 acc += self._can_back_thickness * acc2 * np.exp(-ki_c1) 
@@ -569,7 +568,6 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
                 acsc /= (self._can_front_thickness + self._can_back_thickness)
                 
                 assc = ass * np.exp(-ki_c1-kf_c2)
-                
             else:                                                          # reflection case
                 acc = self._can_front_thickness * acc1
                 acc += self._can_back_thickness * acc2 * np.exp(-ki_c1-kf_c1)
