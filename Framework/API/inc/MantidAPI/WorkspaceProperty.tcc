@@ -3,6 +3,7 @@
 #include "MantidAPI/Workspace.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidKernel/Exception.h"
+#include "MantidKernel/Strings.h"
 #include "MantidKernel/PropertyHistory.h"
 
 namespace Mantid {
@@ -30,7 +31,7 @@ WorkspaceProperty<TYPE>::WorkspaceProperty(const std::string &name,
       m_optional(PropertyMode::Mandatory), m_locking(LockMode::Lock) {}
 
 /** Constructor.
-*  Sets the property and workspace names but initialises the workspace pointer
+*  Sets the property and workspace names but initializes the workspace pointer
 * to null.
 *  @param name :: The name to assign to the property
 *  @param wsName :: The name of the workspace
@@ -53,7 +54,7 @@ WorkspaceProperty<TYPE>::WorkspaceProperty(const std::string &name,
       m_locking(LockMode::Lock) {}
 
 /** Constructor.
-*  Sets the property and workspace names but initialises the workspace pointer
+*  Sets the property and workspace names but initializes the workspace pointer
 * to null.
 *  @param name :: The name to assign to the property
 *  @param wsName :: The name of the workspace
@@ -144,6 +145,7 @@ template <typename TYPE> std::string WorkspaceProperty<TYPE>::value() const {
 * @param maxLength :: The Max length of the returned string
 * @param collapseLists :: Whether to collapse 1,2,3 into 1-3
 */
+template <typename TYPE>
 std::string WorkspaceProperty<TYPE>::valueAsPrettyStr(size_t maxLength,
                                        bool collapseLists) const {
   return Strings::shorten(value(), maxLength);
