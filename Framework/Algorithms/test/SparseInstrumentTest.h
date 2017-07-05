@@ -23,15 +23,13 @@ public:
     return new SparseInstrumentTest();
   }
 
-  static void destroySuite(SparseInstrumentTest *suite) {
-    delete suite;
-  }
+  static void destroySuite(SparseInstrumentTest *suite) { delete suite; }
 
-  SparseInstrumentTest() :
-      m_goofyRefFrame(PointingAlong::X, PointingAlong::Y, Handedness::Left, ""),
-      m_standardRefFrame(PointingAlong::Y, PointingAlong::Z, Handedness::Right,"") {
-
-  }
+  SparseInstrumentTest()
+      : m_goofyRefFrame(PointingAlong::X, PointingAlong::Y, Handedness::Left,
+                        ""),
+        m_standardRefFrame(PointingAlong::Y, PointingAlong::Z,
+                           Handedness::Right, "") {}
 
   void test_createSparseWS() {
     using namespace WorkspaceCreationHelper;
@@ -58,7 +56,8 @@ public:
     double sparseMaxLat;
     double sparseMinLon;
     double sparseMaxLon;
-    std::tie(sparseMinLat, sparseMaxLat, sparseMinLon, sparseMaxLon) = extremeAngles(*sparseWS);
+    std::tie(sparseMinLat, sparseMaxLat, sparseMinLon, sparseMaxLon) =
+        extremeAngles(*sparseWS);
     TS_ASSERT_EQUALS(sparseMinLat, minLat)
     TS_ASSERT_DELTA(sparseMaxLat, maxLat, 1e-8)
     TS_ASSERT_EQUALS(sparseMinLon, minLon)
@@ -215,7 +214,9 @@ public:
     lat = (grid->latitudeAt(2) + grid->latitudeAt(1)) / 2.0;
     lon = (grid->longitudeAt(3) + grid->longitudeAt(2)) / 2.0;
     indices = grid->nearestNeighbourIndices(lat, lon);
-    double val = static_cast<double>(indices[0] + indices[1] + indices[2] + indices[3]) / 4.0;
+    double val =
+        static_cast<double>(indices[0] + indices[1] + indices[2] + indices[3]) /
+        4.0;
     h = interpolateFromDetectorGrid(lat, lon, *sparseWS, indices);
     TS_ASSERT_EQUALS(h.size(), wavelengths)
     for (size_t i = 0; i < h.size(); ++i) {

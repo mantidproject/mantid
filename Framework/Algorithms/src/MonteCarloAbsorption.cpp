@@ -71,7 +71,6 @@ private:
   const DeltaEMode::Type m_emode;
   double m_value;
 };
-
 }
 /// @endcond
 
@@ -184,8 +183,8 @@ MatrixWorkspace_uptr MonteCarloAbsorption::doSimulation(
   if (useSparseInstrument) {
     const int latitudinalDets = getProperty("NumberOfDetectorRows");
     const int longitudinalDets = getProperty("NumberOfDetectorColumns");
-    detGrid = SparseInstrument::createDetectorGridDefinition(inputWS, latitudinalDets,
-                                           longitudinalDets);
+    detGrid = SparseInstrument::createDetectorGridDefinition(
+        inputWS, latitudinalDets, longitudinalDets);
     sparseWS = SparseInstrument::createSparseWS(inputWS, *detGrid, nlambda);
   }
   MatrixWorkspace &simulationWS = useSparseInstrument ? *sparseWS : *outputWS;
@@ -327,10 +326,12 @@ void MonteCarloAbsorption::interpolateFromSparse(
     PARALLEL_START_INTERUPT_REGION
     const auto detPos = spectrumInfo.position(i) - samplePos;
     double lat, lon;
-    std::tie(lat, lon) = SparseInstrument::geographicalAngles(detPos, *refFrame);
+    std::tie(lat, lon) =
+        SparseInstrument::geographicalAngles(detPos, *refFrame);
     const auto nearestIndices = detGrid.nearestNeighbourIndices(lat, lon);
     const auto spatiallyInterpHisto =
-        SparseInstrument::interpolateFromDetectorGrid(lat, lon, sparseWS, nearestIndices);
+        SparseInstrument::interpolateFromDetectorGrid(lat, lon, sparseWS,
+                                                      nearestIndices);
     if (spatiallyInterpHisto.size() > 1) {
       auto targetHisto = targetWS.histogram(i);
       interpOpt.applyInPlace(spatiallyInterpHisto, targetHisto);

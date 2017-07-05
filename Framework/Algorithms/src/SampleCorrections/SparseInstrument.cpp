@@ -44,7 +44,9 @@ namespace SparseInstrument {
  *  @param refFrame A reference frame where p lives.
  *  @return A pair containing the latitude and longitude values.
  */
-std::pair<double, double> geographicalAngles(const Kernel::V3D &p, const Geometry::ReferenceFrame &refFrame) {
+std::pair<double, double>
+geographicalAngles(const Kernel::V3D &p,
+                   const Geometry::ReferenceFrame &refFrame) {
   const double upCoord = p[refFrame.pointingUp()];
   const double beamCoord = p[refFrame.pointingAlongBeam()];
   const double leftoverCoord = p[refFrame.pointingHorizontal()];
@@ -126,8 +128,9 @@ std::tuple<double, double> extremeWavelengths(const API::MatrixWorkspace &ws) {
  *  @param wavelengthPoints Number of points in the output histogram.
  *  @return A template histogram.
  */
-Mantid::HistogramData::Histogram modelHistogram(const API::MatrixWorkspace &modelWS,
-                                                const size_t wavelengthPoints) {
+Mantid::HistogramData::Histogram
+modelHistogram(const API::MatrixWorkspace &modelWS,
+               const size_t wavelengthPoints) {
   double minWavelength, maxWavelength;
   std::tie(minWavelength, maxWavelength) = extremeWavelengths(modelWS);
   HistogramData::Frequencies ys(wavelengthPoints, 0.0);
@@ -201,14 +204,16 @@ createSparseWS(const API::MatrixWorkspace &modelWS,
                const Algorithms::DetectorGridDefinition &grid,
                const size_t wavelengthPoints) {
   // Build a quite standard and somewhat complete instrument.
-  auto instrument = boost::make_shared<Geometry::Instrument>("MC_simulation_instrument");
+  auto instrument =
+      boost::make_shared<Geometry::Instrument>("MC_simulation_instrument");
   const auto refFrame = modelWS.getInstrument()->getReferenceFrame();
 
-  instrument->setReferenceFrame(boost::make_shared<Geometry::ReferenceFrame>(*refFrame));
+  instrument->setReferenceFrame(
+      boost::make_shared<Geometry::ReferenceFrame>(*refFrame));
   // The sparse instrument is build around origin.
   const Kernel::V3D samplePos{0.0, 0.0, 0.0};
   auto sample = Kernel::make_unique<Geometry::ObjComponent>("sample", nullptr,
-                                                          instrument.get());
+                                                            instrument.get());
   sample->setPos(samplePos);
   instrument->add(sample.get());
   instrument->markAsSamplePos(sample.release());
@@ -220,7 +225,7 @@ createSparseWS(const API::MatrixWorkspace &modelWS,
     return p;
   }();
   auto source = Kernel::make_unique<Geometry::ObjComponent>("source", nullptr,
-                                                          instrument.get());
+                                                            instrument.get());
   source->setPos(sourcePos);
   instrument->add(source.get());
   instrument->markAsSource(source.release());
@@ -269,8 +274,8 @@ createSparseWS(const API::MatrixWorkspace &modelWS,
   }
   // Add information about EFixed in a proper place.
   const auto eMode = modelWS.getEMode();
-  ws->mutableRun().addProperty(
-      "deltaE-mode", Kernel::DeltaEMode::asString(eMode));
+  ws->mutableRun().addProperty("deltaE-mode",
+                               Kernel::DeltaEMode::asString(eMode));
   if (eMode == Kernel::DeltaEMode::Direct) {
     ws->mutableRun().addProperty("Ei", modelWS.getEFixed());
   } else if (eMode == Kernel::DeltaEMode::Indirect) {
@@ -361,15 +366,13 @@ interpolateFromDetectorGrid(const double lat, const double lon,
  *  @return A unique pointer pointing to the grid definition.
  */
 std::unique_ptr<const DetectorGridDefinition>
-createDetectorGridDefinition(const API::MatrixWorkspace &modelWS, const size_t rows,
-                             const size_t columns) {
+createDetectorGridDefinition(const API::MatrixWorkspace &modelWS,
+                             const size_t rows, const size_t columns) {
   double minLat, maxLat, minLong, maxLong;
   std::tie(minLat, maxLat, minLong, maxLong) = extremeAngles(modelWS);
-  return Kernel::make_unique<
-      Algorithms::DetectorGridDefinition>(minLat, maxLat, rows, minLong,
-                                                  maxLong, columns);
+  return Kernel::make_unique<Algorithms::DetectorGridDefinition>(
+      minLat, maxLat, rows, minLong, maxLong, columns);
 }
-
 }
 }
 }

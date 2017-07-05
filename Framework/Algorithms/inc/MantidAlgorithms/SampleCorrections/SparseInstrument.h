@@ -48,9 +48,13 @@ namespace SparseInstrument {
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
-DLLExport std::tuple<double, double, double, double> extremeAngles(const API::MatrixWorkspace &ws);
-DLLExport std::pair<double, double> geographicalAngles(const Kernel::V3D &p, const Geometry::ReferenceFrame &refFrame);
-DLLExport std::tuple<double, double> extremeWavelengths(const API::MatrixWorkspace &ws);
+DLLExport std::tuple<double, double, double, double>
+extremeAngles(const API::MatrixWorkspace &ws);
+DLLExport std::pair<double, double>
+geographicalAngles(const Kernel::V3D &p,
+                   const Geometry::ReferenceFrame &refFrame);
+DLLExport std::tuple<double, double>
+extremeWavelengths(const API::MatrixWorkspace &ws);
 HistogramData::Histogram modelHistogram(const API::MatrixWorkspace &modelWS,
                                         const size_t wavelengthPoints);
 DLLExport API::MatrixWorkspace_uptr
@@ -58,7 +62,7 @@ createSparseWS(const API::MatrixWorkspace &modelWS,
                const Algorithms::DetectorGridDefinition &grid,
                const size_t wavelengthPoints);
 DLLExport double greatCircleDistance(const double lat1, const double long1,
-                           const double lat2, const double long2);
+                                     const double lat2, const double long2);
 DLLExport std::array<double, 4>
 inverseDistanceWeights(const std::array<double, 4> &distances);
 DLLExport HistogramData::Histogram
@@ -66,8 +70,8 @@ interpolateFromDetectorGrid(const double lat, const double lon,
                             const API::MatrixWorkspace &ws,
                             const std::array<size_t, 4> &indices);
 DLLExport std::unique_ptr<const Algorithms::DetectorGridDefinition>
-createDetectorGridDefinition(const API::MatrixWorkspace &modelWS, const size_t rows,
-                             const size_t columns);
+createDetectorGridDefinition(const API::MatrixWorkspace &modelWS,
+                             const size_t rows, const size_t columns);
 }
 }
 }
