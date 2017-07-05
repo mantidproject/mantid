@@ -377,7 +377,7 @@ Failed transfers
 When transferring a run from the Search table to the Processing table there may exist invalid runs. For example, if a Measure-based run has an invalid measurement id.
 In the image below we select three runs from the Search table that we wish to transfer to the processing table.
 
-.. figure:: /images/ISISReflectometryPolref_selecting_transfer_runs.JPG
+.. figure:: /images/ISISReflectometryPolref_selecting_transfer_runs.png
    :alt: Selecting runs from search table to transfer to processing table
 
 Attempting to transfer an invalid run will result in that run not being transferred to the processing table. If the transfer was not successful then that specific
@@ -391,6 +391,20 @@ Hovering over the highlighted run with your cursor will allow you to see why the
 .. figure:: /images/ISISReflectometryPolref_tooltip_failed_run.jpg
    :alt: Showing tooltip from failed transfer.
 
+Autoreduce
+==========
+
+With an investigation id supplied, the **Autoreduce** button when clicked will do the following:
+
+- Searches for runs that are part of the investigation the id was supplied for.
+- Transfers all found runs from the Search table to the Processing table.
+- Selects all of the runs in the Processing table and processes them.
+
+Like the `Process` button in the Processing table, the `Autoreduce` button will be disabled while
+runs are being processed. If processing has been paused, the button will be enabled again. Clicking
+this button again will resume processing runs just like the `Process` button. Changing the
+instrument, investigation id or transfer method while paused and clicking `Autoreduce` however will
+start a new autoreduction instead.
 
 Event Handling tab
 ~~~~~~~~~~~~~~~~~~
