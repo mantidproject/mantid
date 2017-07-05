@@ -55,7 +55,7 @@ std::string AlgorithmProperty::value() const { return m_algStr; }
 * @param collapseLists :: Whether to collapse 1,2,3 into 1-3
 */
 std::string AlgorithmProperty::valueAsPrettyStr(size_t maxLength,
-  bool collapseLists) const {
+                                                bool collapseLists) const {
   return Kernel::Strings::shorten(value(), maxLength);
 }
 
