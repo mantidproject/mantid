@@ -142,7 +142,7 @@ public:
   /// Returns the value of the property as a string
   virtual std::string value() const = 0;
   /// Returns the value of the property as a pretty printed string
-  virtual std::string valuePrettyPrint(size_t maxLength = 0,
+  virtual std::string valueAsPrettyStr(size_t maxLength = 0,
                                        bool collapseLists = true) const;
   /// Set the value of the property via a string.  If the value is unacceptable
   /// the value is not changed but a string is returned

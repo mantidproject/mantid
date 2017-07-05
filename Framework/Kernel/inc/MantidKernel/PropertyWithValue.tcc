@@ -117,7 +117,7 @@ template <typename TYPE> std::string PropertyWithValue<TYPE>::value() const {
 /** Get the value of the property as a string
  *  @return The property's value
  */
-template <typename TYPE> std::string PropertyWithValue<TYPE>::valuePrettyPrint(size_t maxLength,
+template <typename TYPE> std::string PropertyWithValue<TYPE>::valueAsPrettyStr(size_t maxLength,
     bool collapseLists) const {
   return toPrettyString(m_value, maxLength, collapseLists);
 }

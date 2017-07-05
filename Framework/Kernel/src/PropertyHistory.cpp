@@ -23,7 +23,7 @@ PropertyHistory::PropertyHistory(const std::string &name,
       m_direction(direction) {}
 
 PropertyHistory::PropertyHistory(Property const *const prop)
-    : m_name(prop->name()), m_value(prop->valuePrettyPrint(0, true)),
+    : m_name(prop->name()), m_value(prop->valueAsPrettyStr(0, true)),
       m_type(prop->type()), m_isDefault(prop->isDefault()),
       m_direction(prop->direction()) {}
 
