@@ -488,13 +488,15 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
         # Sample cross section (value for each of the wavelengths and for E = Efixed)
         sample_x_section = (sam_material.totalScatterXSection() + 
                             sam_material.absorbXSection() * waves / 1.798) * self._sample_density
-                            
+
         if self._efixed > 0:
             sample_x_section_efixed = (sam_material.totalScatterXSection() + 
                                        sam_material.absorbXSection() * np.sqrt(25.305/self._efixed)) * self._sample_density
+        else:
+            sample_x_section_efixed = 0
 
         # Sample --> Ass 
-        if self._emode == 'Efixed':    
+        if self._emode == 'Efixed':
             ki_s = sample_x_section_efixed * self._sample_thickness / salpha
             kf_s = sample_x_section_efixed * self._sample_thickness / stha
         else:
@@ -518,9 +520,12 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
             # Calculate can cross section (value for each of the wavelengths and for E = Efixed)
             can_x_section = (can_material.totalScatterXSection() + 
                              can_material.absorbXSection() * waves / 1.798) * self._can_density
+
             if self._efixed > 0:
                 can_x_section_efixed = (can_material.totalScatterXSection() + 
                                        can_material.absorbXSection() * np.sqrt(25.305/self._efixed)) * self._can_density
+            else:
+                can_x_section_efixed = 0
 
                                        # Front container --> Acc1   
             if self._emode == 'Efixed':    
@@ -593,7 +598,7 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
 
     # ------------------------------------------------------------------------------
         
-    def _calc_ki_kf(self, waves, thickness, sinangle1, sinangle2, x_section, x_section_efixed=0): 
+    def _calc_ki_kf(self, waves, thickness, sinangle1, sinangle2, x_section, x_section_efixed = 0):
         ki = np.ones(waves.size)
         kf = np.ones(waves.size)
         if self._emode == 'Elastic':
