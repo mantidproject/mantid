@@ -358,9 +358,5 @@ DetectorInfo::getDetectorPtr(const size_t index) const {
   return m_lastDetector[thread];
 }
 
-boost::shared_ptr<const std::unordered_map<detid_t, size_t>>
-DetectorInfo::detIdToIndexMap() const {
-  return m_detIDToIndex;
-}
 } // namespace API
 } // namespace Mantid

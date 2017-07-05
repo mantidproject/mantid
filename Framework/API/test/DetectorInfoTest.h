@@ -430,12 +430,6 @@ public:
                      std::runtime_error);
   }
 
-  void test_fetch_mappings() {
-    const auto &detectorInfo = m_workspace.detectorInfo();
-    auto mappings = detectorInfo.detIdToIndexMap();
-    TS_ASSERT_EQUALS(mappings->size(), detectorInfo.size());
-  }
-
 private:
   WorkspaceTester m_workspace;
   WorkspaceTester m_workspaceNoInstrument;

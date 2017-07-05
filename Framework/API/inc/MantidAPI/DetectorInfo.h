@@ -128,8 +128,6 @@ public:
 
   void merge(const DetectorInfo &other);
 
-  boost::shared_ptr<const std::unordered_map<detid_t, size_t>>
-  detIdToIndexMap() const;
   friend class SpectrumInfo;
 
 private:
