@@ -125,7 +125,7 @@ class PropertyWithValueTest(unittest.TestCase):
         self.assertEquals(det_list_prop.valueAsPrettyStr(40,True), "1-99")
         result = det_list_prop.valueAsPrettyStr(40,False)
         self.assertEquals(result.startswith("1,2,3,"), True)
-        self.assert(result.endswith("98,99"), True)
+        self.assertEquals(result.endswith("98,99"), True)
 
     def _do_vector_double_numpy_test(self, int_type=False):
         create_ws = AlgorithmManager.createUnmanaged('CreateWorkspace')
