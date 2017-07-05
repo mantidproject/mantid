@@ -72,7 +72,7 @@ public:
     PlotGroupFlag,
     ExpandAllGroupsFlag,
     CollapseAllGroupsFlag,
-    SelectAllGroupsFlag,
+    SelectAllFlag,
     DeselectAllFlag,
     PauseFlag,
     SelectionChangedFlag

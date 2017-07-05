@@ -276,9 +276,9 @@ void QtReflRunsTabView::on_actionAutoreduce_triggered() {
     m_algoRunner.get()->disconnect(); // disconnect any other connections
     m_presenter->notify(IReflRunsTabPresenter::SearchFlag);
     connect(m_algoRunner.get(), SIGNAL(algorithmComplete(bool)), this,
-            SLOT(startNewAutoreduction()), Qt::UniqueConnection);
+            SLOT(newAutoreduction()), Qt::UniqueConnection);
   } else {
-    resumeAutoreduction();
+    m_presenter->notify(IReflRunsTabPresenter::ResumeAutoreductionFlag);
   }
 }
 
@@ -327,17 +327,10 @@ void QtReflRunsTabView::instrumentChanged(int index) {
 }
 
 /**
-This slot notifies the presenter that a new autoreduction has been started
+This notifies the presenter that a new autoreduction has been started
 */
-void QtReflRunsTabView::startNewAutoreduction() {
+void QtReflRunsTabView::newAutoreduction() {
   m_presenter->notify(IReflRunsTabPresenter::NewAutoreductionFlag);
-}
-
-/**
-This slot notifies the presenter that the current autoreduction has been resumed
-*/
-void QtReflRunsTabView::resumeAutoreduction() {
-  m_presenter->notify(IReflRunsTabPresenter::ResumeAutoreductionFlag);
 }
 
 /**

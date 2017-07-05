@@ -102,8 +102,6 @@ private:
   void initLayout();
   // Adds an action (command) to a menu
   void addToMenu(QMenu *menu, std::unique_ptr<DataProcessorCommand> command);
-  // Resumes the current autoreduction
-  void resumeAutoreduction();
 
   boost::shared_ptr<MantidQt::API::AlgorithmRunner> m_algoRunner;
 
@@ -127,7 +125,7 @@ private slots:
   void instrumentChanged(int index);
   void groupChanged();
   void showSearchContextMenu(const QPoint &pos);
-  void startNewAutoreduction();
+  void newAutoreduction();
 };
 
 } // namespace Mantid

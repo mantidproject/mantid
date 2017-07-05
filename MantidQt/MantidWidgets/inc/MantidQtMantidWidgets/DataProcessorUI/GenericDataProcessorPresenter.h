@@ -258,7 +258,7 @@ private:
   void expandAll();
   // close all groups
   void collapseAll();
-  // select all groups
+  // select all rows / groups
   void selectAll();
   // deselect all rows / groups
   void deselectAll();

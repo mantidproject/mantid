@@ -59,6 +59,8 @@ public:
   MOCK_METHOD2(setInstrumentList, void(const QString &, const QString &));
   MOCK_METHOD2(setOptionsHintStrategy,
                void(MantidQt::MantidWidgets::HintStrategy *, int));
+  MOCK_METHOD0(selectAll, void());
+  MOCK_METHOD0(deselectAll, void());
 
   // Settings
   MOCK_METHOD1(loadSettings, void(std::map<std::string, QVariant> &));

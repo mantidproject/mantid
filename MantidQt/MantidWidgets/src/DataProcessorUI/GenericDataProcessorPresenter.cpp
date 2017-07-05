@@ -1017,7 +1017,7 @@ Collapse all groups
 void GenericDataProcessorPresenter::collapseAll() { m_view->collapseAll(); }
 
 /**
-Select all groups
+Select all rows / groups
 */
 void GenericDataProcessorPresenter::selectAll() { m_view->selectAll(); }
 
@@ -1101,7 +1101,7 @@ void GenericDataProcessorPresenter::notify(DataProcessorPresenter::Flag flag) {
   case DataProcessorPresenter::CollapseAllGroupsFlag:
     collapseAll();
     break;
-  case DataProcessorPresenter::SelectAllGroupsFlag:
+  case DataProcessorPresenter::SelectAllFlag:
     selectAll();
     break;
   case DataProcessorPresenter::DeselectAllFlag:

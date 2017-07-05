@@ -237,8 +237,8 @@ void ReflRunsTabPresenter::autoreduce(bool startNew) {
   if (startNew) {
     notify(IReflRunsTabPresenter::ICATSearchCompleteFlag);
 
-    // Select all groups in existing table and delete them
-    tablePresenter->notify(DataProcessorPresenter::SelectAllGroupsFlag);
+    // Select all rows / groups in existing table and delete them
+    tablePresenter->notify(DataProcessorPresenter::SelectAllFlag);
     tablePresenter->notify(
         DataProcessorPresenter::DeleteGroupFlag);
 
@@ -248,7 +248,7 @@ void ReflRunsTabPresenter::autoreduce(bool startNew) {
       transfer();
   }
 
-  tablePresenter->notify(DataProcessorPresenter::SelectAllGroupsFlag);
+  tablePresenter->notify(DataProcessorPresenter::SelectAllFlag);
   if (tablePresenter->selectedParents().size() > 0)
     tablePresenter->notify(DataProcessorPresenter::ProcessFlag);
 }
