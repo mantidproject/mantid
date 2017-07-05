@@ -381,7 +381,7 @@ Instrument_const_sptr ExperimentInfo::getInstrument() const {
   instrument->setDetectorInfo(m_detectorInfo);
   instrument->setInfoVisitor(*m_infoVisitor); // TODO. We actually only need the
                                               // ID->index part of this mapping
-  instrument->setComponentInfo(m_componentInfo, *m_infoVisitor->componentIds());
+  instrument->setComponentInfo(m_componentInfo, m_infoVisitor->componentIds());
   return instrument;
 }
 

@@ -571,7 +571,7 @@ public:
     auto componentInfo = std::get<0>(componentTuple);
     auto componentIds = std::get<1>(componentTuple);
     auto componentIdToIndexMap = std::get<2>(componentTuple);
-    instrument.setComponentInfo(componentInfo, *componentIds);
+    instrument.setComponentInfo(componentInfo, componentIds);
     pmap->setComponentInfo(boost::make_shared<Geometry::ComponentInfo>(
         *componentInfo, componentIds, componentIdToIndexMap));
 
@@ -644,7 +644,7 @@ public:
     auto componentInfo = std::get<0>(componentTuple);
     auto componentIds = std::get<1>(componentTuple);
     auto componentIdToIndexMap = std::get<2>(componentTuple);
-    instrument.setComponentInfo(componentInfo, *componentIds);
+    instrument.setComponentInfo(componentInfo, componentIds);
     pmap->setComponentInfo(boost::make_shared<Geometry::ComponentInfo>(
         *componentInfo, componentIds, componentIdToIndexMap));
 
@@ -725,50 +725,6 @@ public:
     InfoComponentVisitor visitor(std::vector<detid_t>{}, paramMap);
     instrument.setInfoVisitor(visitor);
     TS_ASSERT(instrument.hasInfoVisitor());
-  }
-
-  void test_component_index() {
-
-    auto baseInstrument = ComponentCreationHelper::createMinimalInstrument(
-        Mantid::Kernel::V3D(0, 0, 0),
-        /*source pos*/
-        Mantid::Kernel::V3D(10, 0, 0),
-        /*sample pos*/
-        Mantid::Kernel::V3D(20, 0, 0));
-
-    auto pmap = boost::make_shared<ParameterMap>();
-    auto parInstrument = Instrument(baseInstrument, pmap);
-
-    TSM_ASSERT_THROWS("No index mapping as no ComponentInfo set. Should throw",
-                      parInstrument.componentIndex(det->getComponentID()),
-                      std::runtime_error &);
-
-    auto componentTuple = makeComponentInfo(parInstrument);
-    auto componentInfo = std::get<0>(componentTuple);
-    auto componentIds = std::get<1>(componentTuple);
-    auto componentIdToIndexMap = std::get<2>(componentTuple);
-    parInstrument.setComponentInfo(componentInfo, *componentIds);
-    pmap->setComponentInfo(boost::make_shared<Geometry::ComponentInfo>(
-        *componentInfo, componentIds, componentIdToIndexMap));
-
-    auto detInfo = makeDetectorInfo(parInstrument);
-    parInstrument.setDetectorInfo(detInfo);
-    detInfo->setComponentInfo(componentInfo.get());
-    componentInfo->setDetectorInfo(detInfo.get());
-
-    boost::shared_ptr<const IDetector> det =
-        parInstrument.getDetector(1); // One and only detector
-    TS_ASSERT_EQUALS(0, parInstrument.componentIndex(det->getComponentID()));
-
-    boost::shared_ptr<const IComponent> comp = parInstrument.getSource();
-    TS_ASSERT_EQUALS(1, parInstrument.componentIndex(comp->getComponentID()));
-    comp = parInstrument.getSample();
-    TS_ASSERT_EQUALS(2, parInstrument.componentIndex(comp->getComponentID()));
-
-    ObjComponent *extraComp = new ObjComponent("extra_component");
-    TSM_ASSERT_THROWS("Component has not been added. Should throw",
-                      parInstrument.componentIndex(extraComp->getComponentID()),
-                      std::runtime_error &);
   }
 
 private:

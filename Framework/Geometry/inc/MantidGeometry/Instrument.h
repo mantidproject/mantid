@@ -251,12 +251,11 @@ public:
   const Beamline::ComponentInfo &componentInfo() const;
 
   size_t detectorIndex(const detid_t detID) const;
-  size_t componentIndex(const ComponentID componentId) const;
   void
   setDetectorInfo(boost::shared_ptr<const Beamline::DetectorInfo> detectorInfo);
   void setComponentInfo(
       boost::shared_ptr<const Beamline::ComponentInfo> componentInfo,
-      std::vector<Geometry::ComponentID> componentIds);
+      boost::shared_ptr<const std::vector<Geometry::ComponentID>> componentIds);
 
   void setInfoVisitor(const InfoComponentVisitor &visitor);
 
@@ -286,7 +285,7 @@ private:
   std::vector<std::tuple<detid_t, IDetector_const_sptr, bool>> m_detectorCache;
 
   /// Mappings to obtain component index
-  mutable std::vector<Geometry::ComponentID> m_componentCache;
+  boost::shared_ptr<const std::vector<Geometry::ComponentID>> m_componentCache;
 
   /// Purpose to hold copy of source component. For now assumed to be just one
   /// component

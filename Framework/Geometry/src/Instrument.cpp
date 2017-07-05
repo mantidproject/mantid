@@ -1282,8 +1282,8 @@ void Instrument::setDetectorInfo(
 
 void Instrument::setComponentInfo(
     boost::shared_ptr<const Beamline::ComponentInfo> componentInfo,
-    std::vector<Geometry::ComponentID> componentIds) {
-  if (componentInfo->size() != componentIds.size()) {
+    boost::shared_ptr<const std::vector<Geometry::ComponentID>> componentIds) {
+  if (componentInfo->size() != componentIds->size()) {
     throw std::runtime_error("Instrument::setInstrument requires that the same "
                              "number of component ids are provided as the size "
                              "of the ComponentInfo");
@@ -1309,30 +1309,6 @@ size_t Instrument::detectorIndex(const detid_t detID) const {
   const auto &baseInstr = m_map ? *m_instr : *this;
   const auto it = find(baseInstr.m_detectorCache, detID);
   return std::distance(baseInstr.m_detectorCache.cbegin(), it);
-}
-
-/**
- * @brief Instrument::componentIndex
- * Note that this method is ONLY to be used in conjunction with an
- * ExperimentInfo.
- * Until setComponentInfo has been called, you will not be able to use this.
- * @param componentId : ComponentID to find the index for.
- * @return the Component index associated with this Component.
- */
-size_t Instrument::componentIndex(const ComponentID componentId) const {
-  if (!hasComponentInfo()) {
-    throw std::runtime_error(
-        "No ComponentInfo, cannot call Instrument::componentIndex");
-  }
-
-  auto it = std::find(m_componentCache.cbegin(), m_componentCache.cend(),
-                      componentId);
-
-  if (it == m_componentCache.end()) {
-    throw std::runtime_error("ComponentID does not identify a Component that "
-                             "is not part of the instrument");
-  }
-  return std::distance(m_componentCache.cbegin(), it);
 }
 
 /// Returns a legacy ParameterMap, containing information that is now stored in
@@ -1393,7 +1369,7 @@ boost::shared_ptr<ParameterMap> Instrument::makeLegacyParameterMap() const {
         if (isRectangularDetectorPixel) {
 
           size_t panelIndex = m_componentInfo->parent(parentIndex);
-          ComponentID panelID = m_componentCache[panelIndex];
+          ComponentID panelID = m_componentCache->operator[](panelIndex);
 
           Eigen::Vector3d scale(1, 1, 1);
           if (auto scalex = pmap->get(panelID, "scalex"))
@@ -1409,7 +1385,8 @@ boost::shared_ptr<ParameterMap> Instrument::makeLegacyParameterMap() const {
     Eigen::Vector3d relPos = transformation * m_componentInfo->position(i);
     Eigen::Quaterniond relRot = m_componentInfo->relativeRotation(i);
 
-    const IComponent *baseComponent = m_componentCache[i]->getBaseComponent();
+    const IComponent *baseComponent =
+        m_componentCache->operator[](i)->getBaseComponent();
     // Tolerance 1e-9 m as in Beamline::DetectorInfo::isEquivalent.
     if ((relPos - toVector3d(baseComponent->getRelativePos())).norm() >= 1e-9) {
       if (isRectangularDetectorPixel) {
@@ -1417,13 +1394,13 @@ boost::shared_ptr<ParameterMap> Instrument::makeLegacyParameterMap() const {
                                  "parameters for RectangularDetectorPixel are "
                                  "not supported");
       }
-      pmap->addV3D(m_componentCache[i], ParameterMap::pos(),
+      pmap->addV3D(m_componentCache->operator[](i), ParameterMap::pos(),
                    Kernel::toV3D(relPos));
     }
     if ((relRot * toQuaterniond(baseComponent->getRelativeRot()).conjugate())
             .vec()
             .norm() >= imag_norm_max) {
-      pmap->addQuat(m_componentCache[i], ParameterMap::rot(),
+      pmap->addQuat(m_componentCache->operator[](i), ParameterMap::rot(),
                     Kernel::toQuat(relRot));
     }
   }
