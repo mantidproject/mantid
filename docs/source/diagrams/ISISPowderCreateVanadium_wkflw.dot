@@ -13,11 +13,11 @@ digraph isisPowderCreateVanadium{
         param_apply_absorb              [label="User param: absorption corrections"]
 
         // From user provided files
+        param_calFileName               [label="Calibration file name"]
         param_calMapping_1              [label="Calibration mapping file"]
         param_calMapping_2              [label="Calibration mapping file"]
         param_emptyRunNumber            [label="Empty run number(s)"]
         param_vanadiumRunNumber         [label="Vanadium run number(s)"]
-        param_calFileName               [label="Calibration file name"]
 
         // From advanced config
         param_groupingCalFile           [label="Adv config: Grouping cal file name"]
