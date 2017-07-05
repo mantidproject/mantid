@@ -43,6 +43,7 @@ set ( SRC_FILES
 	src/InstrumentInfo.cpp
 	src/InternetHelper.cpp
 	src/Interpolation.cpp
+	src/InvisibleProperty.cpp
 	src/LibraryManager.cpp
 	src/LibraryWrapper.cpp
 	src/LiveListenerInfo.cpp
@@ -202,6 +203,7 @@ set ( INC_FILES
 	inc/MantidKernel/InstrumentInfo.h
 	inc/MantidKernel/InternetHelper.h
 	inc/MantidKernel/Interpolation.h
+	inc/MantidKernel/InvisibleProperty.h
 	inc/MantidKernel/LibraryManager.h
 	inc/MantidKernel/LibraryWrapper.h
 	inc/MantidKernel/ListValidator.h
@@ -362,6 +364,7 @@ set ( TEST_FILES
 	InstrumentInfoTest.h
 	InternetHelperTest.h
 	InterpolationTest.h
+	InvisiblePropertyTest.h
 	ListValidatorTest.h
 	LiveListenerInfoTest.h
 	LogFilterTest.h

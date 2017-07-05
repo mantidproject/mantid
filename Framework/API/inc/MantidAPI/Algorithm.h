@@ -262,26 +262,13 @@ public:
 
   /// Raises the cancel flag.
   void cancel() override;
-  /// Returns the cancellation state
-  bool getCancel() const { return m_cancel; }
+  bool getCancel() const;
 
-  /// Returns a reference to the logger.
-  Kernel::Logger &getLogger() const { return g_log; }
-  /// Logging can be disabled by passing a value of false
-  void setLogging(const bool value) override { g_log.setEnabled(value); }
-  /// returns the status of logging, True = enabled
-  bool isLogging() const override { return g_log.getEnabled(); }
-
-  /* Sets the logging priority offset. Values are subtracted from the log level.
-   *
-   * Example value=1 will turn warning into notice
-   * Example value=-1 will turn notice into warning
-   */
-  void setLoggingOffset(const int value) override {
-    g_log.setLevelOffset(value);
-  }
-  /// returns the logging priority offset
-  int getLoggingOffset() const override { return g_log.getLevelOffset(); }
+  Kernel::Logger &getLogger() const;
+  void setLogging(const bool value) override;
+  bool isLogging() const override;
+  void setLoggingOffset(const int value) override;
+  int getLoggingOffset() const override;
   /// disable Logging of start and end messages
   void setAlgStartupLogging(const bool enabled) override;
   /// get the state of Logging of start and end messages

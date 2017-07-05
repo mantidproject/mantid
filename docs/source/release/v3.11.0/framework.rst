@@ -30,6 +30,8 @@ Performance
 CurveFitting
 ------------
 
+- :ref:`GramCharlier <func-GramCharlier>` is a new fit function primarily for use in neutron compton scattering.
+
 Improved
 ########
 
