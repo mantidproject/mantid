@@ -311,7 +311,10 @@ ExperimentInfo::makeOrRetrieveVisitor(const Instrument &parInstrument,
         parInstrument.getDetectorIDs(false /*do not skip monitors*/),
         *parInstrument.getParameterMap(), sourceId, sampleId);
     // Essential that this happens on the Parameterised, not the bare instrument
-    parInstrument.registerContents(*visitor);
+    if (parInstrument.getParameterMap()->empty())
+      parInstrument.baseInstrument()->registerContents(*visitor);
+    else
+      parInstrument.registerContents(*visitor);
     return visitor;
   } else {
     return Kernel::make_unique<InfoComponentVisitor>(
