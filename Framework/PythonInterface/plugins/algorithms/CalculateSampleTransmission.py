@@ -70,7 +70,7 @@ class CalculateSampleTransmission(PythonAlgorithm):
         if self._density_type == 'Mass Density':
             builder = MaterialBuilder()
             mat = builder.setFormula(self._chemical_formula).setMassDensity(self._density).build()
-            self._density = mat.numberDensity
+            self._density = mat.numberDensity * mat.numberOfAtoms()
         SetSampleMaterial(InputWorkspace=self._output_ws, ChemicalFormula=self._chemical_formula, SampleNumberDensity=self._density)
         ConvertToPointData(InputWorkspace=self._output_ws, OutputWorkspace=self._output_ws)
 

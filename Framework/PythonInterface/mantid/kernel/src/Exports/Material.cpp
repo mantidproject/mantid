@@ -43,6 +43,20 @@ double relativeMolecularMass(Material &self) {
   }
   return retval;
 }
+
+/**
+ * Get the number of atoms in the material molecule or unit cell.
+ *
+ * @param self The material object
+ * @return The number of atoms in a single molecule or unit
+ */
+double numberOfAtoms(Material &self) {
+  double numberOfAtoms = 0.;
+  for (const auto &formulaUnit : self.chemicalFormula()) {
+    numberOfAtoms += formulaUnit.multiplicity;
+  }
+  return numberOfAtoms;
+}
 }
 
 void export_Material() {
@@ -52,8 +66,9 @@ void export_Material() {
   class_<Material>("Material", no_init)
       .def("name", &Material::name, arg("self"),
            return_value_policy<copy_const_reference>(), "Name of the material")
-      .add_property("numberDensity", make_function(&Material::numberDensity),
-                    "Number density")
+      .add_property(
+           "numberDensity", make_function(&Material::numberDensity),
+           "Number density in molecules (unit cells) per cubic angstrom")
       .add_property("temperature", make_function(&Material::temperature),
                     "Temperature")
       .add_property("pressure", make_function(&Material::pressure), "Pressure")
@@ -123,5 +138,6 @@ void export_Material() {
 
       .def("chemicalFormula", &chemicalFormula, arg("self"), "Chemical Formula")
       .def("relativeMolecularMass", &relativeMolecularMass, arg("self"),
-           "Relative Molecular Mass");
+           "Relative Molecular Mass")
+      .def("numberOfAtoms", &numberOfAtoms, arg("self"), "Number of Atoms");
 }
