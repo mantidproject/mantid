@@ -4,7 +4,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include "FakeAlgorithms.h"
-#include "MantidAPI/Algorithm.tcc"
+#include "MantidAPI/Algorithm.h"
 #include "MantidAPI/AlgorithmFactory.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/WorkspaceFactory.h"

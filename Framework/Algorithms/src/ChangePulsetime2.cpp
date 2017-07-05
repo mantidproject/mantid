@@ -4,7 +4,6 @@
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/System.h"
 
-#include "MantidAPI/Algorithm.tcc"
 namespace Mantid {
 namespace Algorithms {
 

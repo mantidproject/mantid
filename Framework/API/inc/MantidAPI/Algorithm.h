@@ -433,6 +433,9 @@ protected:
       LockMode::Type lock = LockMode::Type::Lock, const std::string &doc = "");
 
 private:
+  template <typename T1, typename T2, typename WsType>
+  void Algorithm::doSetIndexProperty(const std::string &name, const T1 &wksp,
+                                     IndexType type, const T2 &list);
   void lockWorkspaces();
   void unlockWorkspaces();
 

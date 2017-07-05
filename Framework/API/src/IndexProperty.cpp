@@ -4,7 +4,7 @@
 #include "MantidIndexing/IndexInfo.h"
 #include "MantidIndexing/SpectrumNumber.h"
 
-#include <MantidKernel/ArrayProperty.tcc>
+#include "MantidKernel/ArrayProperty.tcc"
 
 namespace Mantid {
 namespace API {
