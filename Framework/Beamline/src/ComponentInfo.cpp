@@ -218,14 +218,16 @@ void ComponentInfo::setRotation(const size_t componentIndex,
   const auto indices = this->componentsInSubtree(
       componentIndex); // Includes requested component index
   for (auto &index : indices) {
-
-    auto newPos = transform * (position(index) - compPos) + compPos;
-    auto newRot = rotDelta * rotation(index);
     if (isDetector(index)) {
       checkDetectorInfo();
+      auto newPos =
+          transform * (m_detectorInfo->position(index) - compPos) + compPos;
+      auto newRot = rotDelta * m_detectorInfo->rotation(index);
       m_detectorInfo->setPosition(index, newPos);
       m_detectorInfo->setRotation(index, newRot);
     } else {
+      auto newPos = transform * (position(index) - compPos) + compPos;
+      auto newRot = rotDelta * rotation(index);
       const size_t childCompIndexOffset = compOffsetIndex(index);
       m_positions.access()[childCompIndexOffset] = newPos;
       m_rotations.access()[childCompIndexOffset] = newRot;
