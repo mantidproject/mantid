@@ -40,7 +40,7 @@ namespace {
 
 constexpr int DEFAULT_NEVENTS = 300;
 constexpr int DEFAULT_SEED = 123456789;
-constexpr int DEFAULT_LATITUDINAL_DETS = 4;
+constexpr int DEFAULT_LATITUDINAL_DETS = 5;
 constexpr int DEFAULT_LONGITUDINAL_DETS = 10;
 
 /// Energy (meV) to wavelength (angstroms)
@@ -117,15 +117,17 @@ void MonteCarloAbsorption::init() {
                                              "instrument with a sparse grid of "
                                              "detectors interpolating the "
                                              "results to the real instrument.");
-  auto twoOrMore = boost::make_shared<Kernel::BoundedValidator<int>>();
-  twoOrMore->setLower(2);
+  auto threeOrMore = boost::make_shared<Kernel::BoundedValidator<int>>();
+  threeOrMore->setLower(3);
   declareProperty(
-      "NumberOfDetectorRows", DEFAULT_LATITUDINAL_DETS, twoOrMore,
+      "NumberOfDetectorRows", DEFAULT_LATITUDINAL_DETS, threeOrMore,
       "Number of detector rows in the detector grid of the sparse instrument.");
   setPropertySettings(
       "NumberOfDetectorRows",
       Kernel::make_unique<EnabledWhenProperty>(
           "SparseInstrument", ePropertyCriterion::IS_NOT_DEFAULT));
+  auto twoOrMore = boost::make_shared<Kernel::BoundedValidator<int>>();
+  twoOrMore->setLower(2);
   declareProperty("NumberOfDetectorColumns", DEFAULT_LONGITUDINAL_DETS,
                   twoOrMore, "Number of detector columns in the detector grid "
                              "of the sparse instrument.");
