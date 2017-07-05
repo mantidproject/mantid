@@ -171,6 +171,8 @@ ComponentInfo::relativeRotation(const size_t componentIndex) const {
  */
 void ComponentInfo::setPosition(const size_t componentIndex,
                                 const Eigen::Vector3d &newPosition) {
+  if (isDetector(componentIndex))
+    return m_detectorInfo->setPosition(componentIndex, newPosition);
 
   scanningCheck(componentIndex);
   const Eigen::Vector3d offset = newPosition - position(componentIndex);
@@ -201,6 +203,8 @@ void ComponentInfo::setPosition(const size_t componentIndex,
  */
 void ComponentInfo::setRotation(const size_t componentIndex,
                                 const Eigen::Quaterniond &newRotation) {
+  if (isDetector(componentIndex))
+    return m_detectorInfo->setRotation(componentIndex, newRotation);
 
   using namespace Eigen;
   scanningCheck(componentIndex);
@@ -209,20 +213,18 @@ void ComponentInfo::setRotation(const size_t componentIndex,
   const Eigen::Quaterniond rotDelta =
       (newRotation * currentRotInv).normalized();
 
-  const Affine3d transform =
-      Translation3d(compPos) * rotDelta * Translation3d(-compPos);
+  auto transform = Eigen::Matrix3d(rotDelta);
 
   const auto indices = this->componentsInSubtree(
       componentIndex); // Includes requested component index
   for (auto &index : indices) {
 
-    auto newPos = transform * position(index);
+    auto newPos = transform * (position(index) - compPos) + compPos;
     auto newRot = rotDelta * rotation(index);
     if (isDetector(index)) {
       checkDetectorInfo();
       m_detectorInfo->setPosition(index, newPos);
       m_detectorInfo->setRotation(index, newRot);
-
     } else {
       const size_t childCompIndexOffset = compOffsetIndex(index);
       m_positions.access()[childCompIndexOffset] = newPos;
