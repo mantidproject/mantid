@@ -148,7 +148,7 @@ template <typename TYPE> std::string WorkspaceProperty<TYPE>::value() const {
 template <typename TYPE>
 std::string WorkspaceProperty<TYPE>::valueAsPrettyStr(size_t maxLength,
                                        bool collapseLists) const {
-  return Strings::shorten(value(), maxLength);
+  return Kernel::Strings::shorten(value(), maxLength);
 }
 
 /** Get the value the property was initialised with -its default value
