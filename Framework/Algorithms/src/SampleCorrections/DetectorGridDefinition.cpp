@@ -23,7 +23,8 @@ DetectorGridDefinition::DetectorGridDefinition(const double minLatitude,
     : m_minLatitude(minLatitude), m_maxLatitude(maxLatitude),
       m_latitudePoints(latitudePoints), m_minLongitude(minLongitude),
       m_maxLongitude(maxLongitude), m_longitudePoints(longitudePoints) {
-  if (latitudePoints == 0 || longitudePoints == 0 || minLatitude > maxLatitude || minLongitude > maxLongitude) {
+  if (latitudePoints == 0 || longitudePoints == 0 ||
+      minLatitude > maxLatitude || minLongitude > maxLongitude) {
     throw std::runtime_error("Invalid detector grid definition.");
   }
   // The angular ranges might be zero in some cases preventing
