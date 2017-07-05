@@ -77,6 +77,17 @@ WorkspaceFactoryImpl::create(const MatrixWorkspace_const_sptr &parent,
   return ws;
 }
 
+/** Initialize a workspace from its parent
+ * This sets values such as instrument, units, sample, spectramap.
+ * This does NOT copy any data.
+ * This does NOT copy any sample logs, i.e., Run object of the workspace won't
+ * be copied
+ * from its parent.
+ * @brief WorkspaceFactoryImpl::initializeFromParentWithoutLogs
+ * @param parent
+ * @param child
+ * @param differentSize
+ */
 void WorkspaceFactoryImpl::initializeFromParentWithoutLogs(
     const MatrixWorkspace &parent, MatrixWorkspace &child,
     const bool differentSize) const {
@@ -86,16 +97,10 @@ void WorkspaceFactoryImpl::initializeFromParentWithoutLogs(
                                                // SHARED POINTER to the
                                                // parameter map
 
-  //  g_log.warning() << child.run().getProperites() << "\n";
-
   // This call will (should) perform a COPY of the parameter map.
   child.instrumentParameters();
   child.m_sample = parent.m_sample;
   child.m_run = boost::make_shared<API::Run>();
-  //  if (!noproperty)
-  //    child.m_run = parent.m_run;
-  //  else
-  //    child.m_run = boost::make_shared<API::Run>();
   child.setYUnit(parent.m_YUnit);
   child.setYUnitLabel(parent.m_YUnitLabel);
   child.setDistribution(parent.isDistribution());
