@@ -51,7 +51,7 @@ digraph isisPowderfocus{
         alg_DivideVan                   [label="Divide: data / Vanadium"]
         alg_ExtractWsSpectra            [label="Extract spectra into individual banks"]
         alg_LoadNexusVan                [label="Load splined Vanadium from 'create_vanadium'"]
-        alg_RebinToWorkspaceVan         [label="Rebin Van ws to match data binning"]
+        alg_RebinToWorkspaceVan         [label="Rebin: Van ws to match data binning"]
         alg_Subtract_sample_empty       [label="Subtract: runs - sample empty"]
         alg_Subtract_van_empty          [label="Subtract: runs - instrument empty"]
     }

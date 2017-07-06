@@ -9,6 +9,10 @@ ISIS Powder Diffraction Scripts Workflows
 
 .. _todo-powder-diffraction-workflow-ref:
 
+.. diagram:: ISISPowderApplyAbsorbCorr_wkflw.dot
+
+.. diagram:: ISISPowderGenericAlgs_wkflw.dot
+
 .. diagram:: ISISPowderCreateVanadium_wkflw.dot
 
 .. diagram:: ISISPowderFocus_wkflw.dot
