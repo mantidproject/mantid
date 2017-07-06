@@ -13,7 +13,7 @@ class FunctionWrapper:
     
        # Deal with attributes first
 #       for key in kwargs:
-#          if(self.fun.hasAttribute(key)):
+#          if self.fun.hasAttribute(key):
 #              self.fun.storeAttributeValue(key, kwargs[key])
             
        # Then deal with parameters        
@@ -39,7 +39,7 @@ class FunctionWrapper:
   def __add__ (self, other):
       """ Implement + operator for composite function
       """
-      if(isinstance(self,CompositeFunctionWrapper)):
+      if isinstance(self,CompositeFunctionWrapper):
         self.fun.add(other.fun)
         return self.flatten()
       else:
@@ -49,7 +49,7 @@ class FunctionWrapper:
   def __mul__ (self, other):
       """ Implement * operator for product function
       """
-      if(isinstance(self,ProductFunctionWrapper)):
+      if isinstance(self,ProductFunctionWrapper):
         self.fun.add(other.fun)
         return self.flatten()
       else:
@@ -132,14 +132,14 @@ class CompositeFunctionWrapper(FunctionWrapper):
           # We have a composite function to wrap
           self.fun = args[0]
        else:
-          if(name == "CompositeFunction"):
+          if name == "CompositeFunction":
              self.fun = FunctionFactory.createFunction(name)
           else:
              self.fun = FunctionFactory.createCompositeFunction(name)
    
           #Add the functions
           for a in args:
-             if(not isinstance(a, int)): 
+             if not isinstance(a, int): 
                 self.fun.add(a.fun)    
       
     def getParameter(self, name):
@@ -158,9 +158,9 @@ class CompositeFunctionWrapper(FunctionWrapper):
             called for array-like access on RHS.
         """
         item = self.fun.__getitem__(nameorindex)
-        if( isinstance(item, float)):
+        if isinstance(item, float):
            return  item
-        elif( hasattr(item, 'nFunctions')):
+        elif hasattr(item, 'nFunctions'):
            # item is a CompositeFunction
            return CompositeFunctionWrapper(item)
         else:           
@@ -212,7 +212,7 @@ class CompositeFunctionWrapper(FunctionWrapper):
        """ Constrain all parameters according local names in expressions.
        """
        for i in range(0, self.__len__()):
-          if( isinstance( self[i], CompositeFunctionWrapper )):
+          if isinstance( self[i], CompositeFunctionWrapper ):
              self[i].constrainAll(expressions)
           else:
              try:
@@ -224,7 +224,7 @@ class CompositeFunctionWrapper(FunctionWrapper):
        """ Constrain all parameters according local names in expressions.
        """
        for i in range(0, self.__len__()):
-          if( isinstance( self[i], CompositeFunctionWrapper )):
+          if isinstance( self[i], CompositeFunctionWrapper ):
              self[i].unconstrainAll(name)
           else:
              try:
@@ -248,15 +248,15 @@ class CompositeFunctionWrapper(FunctionWrapper):
        # If there are no composite functions, do nothing
        needToFlatten = False
        for i in range(0, self.__len__()):
-          if( not needToFlatten and isinstance(self[i],CompositeFunctionWrapper)):
+          if not needToFlatten and isinstance(self[i],CompositeFunctionWrapper):
              needToFlatten = True
              
-       if( not needToFlatten ):
+       if not needToFlatten :
           return self
        
        flatSelf = CompositeFunctionWrapper()
        for i in range(0, self.__len__()):
-          if(isinstance(self[i],CompositeFunctionWrapper)):
+          if isinstance(self[i],CompositeFunctionWrapper):
              currentFunction = self[i].flatten()
              for j in range(0, currentFunction.__len__()):
                 flatSelf.fun.add(currentFunction[j].fun)
@@ -297,13 +297,13 @@ def _create_wrapper_function(name):
     """
     # ------------------------------------------------------------------------------------------------
     def wrapper_function(*args, **kwargs):
-        if( name == "CompositeFunction"):
+        if  name == "CompositeFunction":
            return CompositeFunctionWrapper( *args, **kwargs )
-        elif( name == "ProductFunction"):
+        elif name == "ProductFunction":
            return ProductFunctionWrapper( *args, **kwargs )
-        elif( name == "Convolution"):
+        elif name == "Convolution":
            return ConvolutionWrapper( *args, **kwargs )
-        elif( name == "MultiDomainFunction"):
+        elif name == "MultiDomainFunction":
            return MultiDomainFunctionWrapper( *args, **kwargs )
         else:
            return FunctionWrapper(name, *args, **kwargs)
