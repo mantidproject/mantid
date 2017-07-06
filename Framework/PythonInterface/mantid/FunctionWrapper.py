@@ -40,9 +40,8 @@ class FunctionWrapper:
       """ Implement + operator for composite function
       """
       if(isinstance(self,CompositeFunctionWrapper)):
-        sum = self
-        sum.fun.add(other.fun)
-        return sum.flatten()
+        self.fun.add(other.fun)
+        return self.flatten()
       else:
         sum = CompositeFunctionWrapper(self,other)
         return sum.flatten()
@@ -51,9 +50,8 @@ class FunctionWrapper:
       """ Implement * operator for product function
       """
       if(isinstance(self,ProductFunctionWrapper)):
-        product = self
-        product.fun.add(other.fun)
-        return product.flatten()
+        self.fun.add(other.fun)
+        return self.flatten()
       else:
         product = ProductFunctionWrapper(self,other)
         return product.flatten()
