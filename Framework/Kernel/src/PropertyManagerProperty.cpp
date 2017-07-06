@@ -1,6 +1,7 @@
 #include "MantidKernel/PropertyManagerProperty.h"
 #include "MantidKernel/PropertyManager.h"
 #include "MantidKernel/PropertyManagerDataService.h"
+#include "MantidKernel/Strings.h"
 
 namespace Mantid {
 namespace Kernel {
@@ -44,6 +45,17 @@ std::string PropertyManagerProperty::value() const {
     return (mgr ? mgr->asString(true) : "");
   } else
     return m_dataServiceKey;
+}
+
+/**
+* Returns the value as a pretty printed string
+* Returns the value with the size limit applied
+* @param maxLength :: The Max length of the returned string
+* @param collapseLists :: Whether to collapse 1,2,3 into 1-3
+*/
+std::string PropertyManagerProperty::valueAsPrettyStr(size_t maxLength,
+  bool collapseLists) const {
+  return Strings::shorten(value(), maxLength);
 }
 
 /**
