@@ -403,36 +403,39 @@ bool QDataProcessorTwoLevelTreeModel::setData(const QModelIndex &index,
   if (role != Qt::EditRole)
     return false;
 
+  const std::string newName = value.toString().toStdString();
+
   if (!parent(index).isValid()) {
     // Index corresponds to a group
 
-    if (index.column() == 0) {
-
-      const std::string newName = value.toString().toStdString();
-
-      // Update the group name, which means updating:
-
-      // 1. Axiliary member variables
-
-      m_groupName[index.row()] = newName;
-
-      // 2. Table workspace
-
-      size_t nrows = m_rowsOfGroup[index.row()].size();
-      for (size_t row = 0; row < nrows; row++) {
-        m_tWS->String(m_rowsOfGroup[index.row()][row], 0) = newName;
-      }
-
-    } else {
+    if (index.column() != 0)
       return false;
+
+    if (m_groupName[index.row()] == newName)
+      return false;
+
+    // Update the group name, which means updating:
+
+    // 1. Auxiliary member variables
+
+    m_groupName[index.row()] = newName;
+
+    // 2. Table workspace
+
+    size_t nrows = m_rowsOfGroup[index.row()].size();
+    for (size_t row = 0; row < nrows; row++) {
+      m_tWS->String(m_rowsOfGroup[index.row()][row], 0) = newName;
     }
   } else {
     // Index corresponds to a row
 
     // First we need to find the absolute position of this row in the table
     int absolutePosition = m_rowsOfGroup[parent(index).row()][index.row()];
-    m_tWS->String(absolutePosition, index.column() + 1) =
-        value.toString().toStdString();
+
+    if (m_tWS->String(absolutePosition, index.column() + 1) == newName)
+      return false;
+
+    m_tWS->String(absolutePosition, index.column() + 1) = newName;
   }
 
   emit dataChanged(index, index);

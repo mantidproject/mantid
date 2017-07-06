@@ -234,8 +234,10 @@ user
 */
 void QDataProcessorWidget::tableUpdated(const QModelIndex &topLeft,
                                         const QModelIndex &bottomRight) {
-  Q_UNUSED(topLeft);
   Q_UNUSED(bottomRight);
+  auto pIndex = m_model->parent(topLeft);
+  if (pIndex.isValid())
+    m_presenter->setIndexUnprocessed(pIndex.row());
   m_presenter->notify(DataProcessorPresenter::TableUpdatedFlag);
 }
 

@@ -1553,6 +1553,15 @@ void GenericDataProcessorPresenter::setModel(std::string name) {
 }
 
 /**
+* Removes the index corresponding to a group in the table from the list of
+* processed groups
+* @param index : [input] The index of the group to be removed
+*/
+void GenericDataProcessorPresenter::setIndexUnprocessed(int index) {
+  m_processedGroupIndexes.erase(index);
+}
+
+/**
 * Sets whether to prompt user when getting selected runs
 * @param allowPrompt : [input] Enable setting user prompt
 */
