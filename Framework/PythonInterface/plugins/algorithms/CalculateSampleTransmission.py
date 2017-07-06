@@ -112,7 +112,10 @@ class CalculateSampleTransmission(PythonAlgorithm):
 
         material = mtd[self._output_ws].mutableSample().getMaterial()
 
-        absorption_x_section = material.absorbXSection() * wavelength
+        # The wavelength in angstroms at whcih the cross sections are tabulated
+        reference_wavelength = 1.798
+
+        absorption_x_section = material.absorbXSection() * wavelength / reference_wavelength
         total_x_section = absorption_x_section + material.totalScatterXSection()
 
         transmission = math.exp(-self._density * total_x_section * self._thickness)
