@@ -958,7 +958,8 @@ void InstrumentDefinitionParser::readDefaults(Poco::XML::Element *defaults) {
     Element *handednessElement =
         referenceFrameElement->getChildElement("handedness");
     Element *originElement = referenceFrameElement->getChildElement("origin");
-    Element *thetaSignElement = referenceFrameElement->getChildElement("theta-sign");
+    Element *thetaSignElement =
+        referenceFrameElement->getChildElement("theta-sign");
 
     // Defaults
     XMLString s_alongBeam("z");
@@ -983,7 +984,7 @@ void InstrumentDefinitionParser::readDefaults(Poco::XML::Element *defaults) {
     // Extract theta sign axis if specified.
     XMLString s_thetaSign(s_pointingUp);
     if (thetaSignElement) {
-        s_thetaSign = thetaSignElement->getAttribute("axis");
+      s_thetaSign = thetaSignElement->getAttribute("axis");
     }
 
     // Convert to input types
