@@ -123,9 +123,9 @@ template <typename TYPE> std::string PropertyWithValue<TYPE>::valueAsPrettyStr(s
   std::string retVal;
   try {
     retVal = toPrettyString(m_value, maxLength, collapseLists);
-  } catch (std::runtime_error &) {
+  } catch (boost::bad_lexical_cast &) {
     // toPrettyStringFailed, default to using toString instead
-    retVal = Strings::shorten(toString(value()), maxLength);
+    retVal = Strings::shorten(value(), maxLength);
   }
   return retVal;
 }
