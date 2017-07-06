@@ -183,7 +183,7 @@ public:
     d = greatCircleDistance(M_PI / 2, 0.0, -M_PI / 2, 0.0);
     TS_ASSERT_EQUALS(d, M_PI)
     d = greatCircleDistance(M_PI / 4, M_PI / 4, -M_PI / 4, -M_PI / 4);
-    TS_ASSERT_EQUALS(d, 2 * M_PI / 3)
+    TS_ASSERT_DELTA(d, 2 * M_PI / 3, 1e-8)
   }
 
   void test_interpolateFromDetectorGrid() {
