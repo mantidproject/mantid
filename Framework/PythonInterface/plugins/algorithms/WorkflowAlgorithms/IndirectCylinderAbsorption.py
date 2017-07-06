@@ -108,7 +108,7 @@ class IndirectCylinderAbsorption(DataProcessorAlgorithm):
         if self._sample_density_type == 'Mass Density':
             builder = MaterialBuilder()
             mat = builder.setFormula(self._sample_chemical_formula).setMassDensity(self._sample_density).build()
-            self._sample_density = mat.numberDensity * mat.numberOfAtoms()
+            self._sample_density = mat.numberDensity
         SetSampleMaterial(sample_wave_ws, ChemicalFormula=self._sample_chemical_formula, SampleNumberDensity=self._sample_density)
         prog.report('Calculating sample corrections')
         CylinderAbsorption(InputWorkspace=sample_wave_ws,
@@ -141,7 +141,7 @@ class IndirectCylinderAbsorption(DataProcessorAlgorithm):
                 if self._sample_density_type == 'Mass Density':
                     builder = MaterialBuilder()
                     mat = builder.setFormula(self._can_chemical_formula).setMassDensity(self._can_density).build()
-                    self._can_density = mat.numberDensity * mat.numberOfAtoms()
+                    self._can_density = mat.numberDensity
                 SetSampleMaterial(can_wave_ws, ChemicalFormula=self._can_chemical_formula, SampleNumberDensity=self._can_density)
 
                 AnnularRingAbsorption(InputWorkspace=can_wave_ws,

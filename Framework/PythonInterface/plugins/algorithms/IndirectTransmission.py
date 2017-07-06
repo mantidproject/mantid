@@ -72,7 +72,7 @@ class IndirectTransmission(PythonAlgorithm):
         density = self.getProperty('Density').value
         if densityType == 'Mass Density':
             mat = MaterialBuilder().setFormula(formula).setMassDensity(density).build()
-            density = mat.numberDensity * mat.numberOfAtoms()
+            density = mat.numberDensity
         thickness = self.getPropertyValue('Thickness')
 
         # Create an empty instrument workspace
