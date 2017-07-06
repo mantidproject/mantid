@@ -129,8 +129,9 @@ LoadSassena::loadQvectors(const hid_t &h5file, API::WorkspaceGroup_sptr gws,
   }
 
   qvmod.reserve(nq);
-  for(auto curr=buf.cbegin(); curr!=buf.end(); curr+=3) {
-    qvmod.push_back(sqrt(curr[0] * curr[0] + curr[1] * curr[1] + curr[2] * curr[2]));
+  for (auto curr = buf.cbegin(); curr != buf.end(); curr += 3) {
+    qvmod.push_back(
+        sqrt(curr[0] * curr[0] + curr[1] * curr[1] + curr[2] * curr[2]));
   }
 
   if (getProperty("SortByQVectors")) {
