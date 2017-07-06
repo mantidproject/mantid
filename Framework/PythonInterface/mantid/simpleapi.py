@@ -366,7 +366,8 @@ def Fit(*args, **kwargs):
     It can work with arbitrary data sources and therefore some options
     are only available when the function & workspace type are known.
 
-    This simple wrapper takes the Function (as a string) & the InputWorkspace
+    This simple wrapper takes the Function (as a string or a
+    FunctionWrapper object) and the InputWorkspace
     as the first two arguments. The remaining arguments must be
     specified by keyword.
 
@@ -381,7 +382,7 @@ def Fit(*args, **kwargs):
 @fitting_algorithm
 def CalculateChiSquared(*args, **kwargs):
     """
-    This function calculates chi squared claculation for a function and a data set.
+    This function calculates chi squared calculation for a function and a data set.
     The data set is defined in a way similar to Fit algorithm.
 
     Example:
