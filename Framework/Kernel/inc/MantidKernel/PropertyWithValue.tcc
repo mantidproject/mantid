@@ -4,6 +4,7 @@
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/NullValidator.h"
 #include "MantidKernel/OptionalBool.h"
+#include "MantidKernel/Strings.h"
 
 #ifndef Q_MOC_RUN
 #include <boost/make_shared.hpp>
@@ -119,7 +120,14 @@ template <typename TYPE> std::string PropertyWithValue<TYPE>::value() const {
  */
 template <typename TYPE> std::string PropertyWithValue<TYPE>::valueAsPrettyStr(size_t maxLength,
     bool collapseLists) const {
-  return toPrettyString(m_value, maxLength, collapseLists);
+  std::string retVal;
+  try {
+    retVal = toPrettyString(m_value, maxLength, collapseLists);
+  } catch (std::runtime_error &) {
+    // toPrettyStringFailed, default to using toString instead
+    retVal = Strings::shorten(toString(value()), maxLength);
+  }
+  return retVal;
 }
 
 /**

@@ -123,6 +123,11 @@ std::string toPrettyString(
   return Strings::shorten(retVal, maxLength);
 }
 
+// AppleClang gives warning if the result is unused.
+#if __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunused-function"
+#endif
 /** Explicit specialization for a property of type std::vector<bool>.
 *   This will catch Vectors of char, double, float etc.
 *   This simply concatenates the values using a delimiter
@@ -137,6 +142,9 @@ std::string toPrettyString(
   return Strings::shorten(Strings::join(value.begin(), value.end(), delimiter),
                           maxLength);
 }
+#if __clang__
+#pragma clang diagnostic pop
+#endif
 
 /// Specialization for a property of type std::vector<std::vector>.
 template <typename T>

@@ -70,10 +70,6 @@ public:
   /// Get the function definition string
   std::string value() const override;
 
-  /// Get the function definition string
-  std::string valueAsPrettyStr(size_t maxLength,
-                               bool collapseLists) const override;
-
   /// Get the value the property was initialised with -its default value
   std::string getDefault() const override;
 

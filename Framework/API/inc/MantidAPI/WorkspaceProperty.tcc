@@ -139,19 +139,6 @@ template <typename TYPE> std::string WorkspaceProperty<TYPE>::value() const {
   return m_workspaceName;
 }
 
-/**
-* Returns the value as a pretty printed string
-* The default implementation just returns the value with the size limit applied
-* @param maxLength :: The Max length of the returned string
-* @param collapseLists :: Whether to collapse 1,2,3 into 1-3
-*/
-template <typename TYPE>
-std::string WorkspaceProperty<TYPE>::valueAsPrettyStr(size_t maxLength,
-                                       bool collapseLists) const {
-  UNUSED_ARG(collapseLists);
-  return Kernel::Strings::shorten(value(), maxLength);
-}
-
 /** Get the value the property was initialised with -its default value
 *  @return The default value
 */

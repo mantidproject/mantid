@@ -49,8 +49,6 @@ public:
   }
 
   std::string value() const override;
-  std::string valueAsPrettyStr(size_t maxLength,
-                               bool collapseLists) const override;
   std::string getDefault() const override;
   std::string setValue(const std::string &strValue) override;
 

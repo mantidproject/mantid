@@ -103,8 +103,6 @@ public:
   WorkspaceProperty<TYPE> *clone() const override;
 
   std::string value() const override;
-  std::string valueAsPrettyStr(size_t maxLength,
-                               bool collapseLists) const override;
 
   std::string getDefault() const override;
 
