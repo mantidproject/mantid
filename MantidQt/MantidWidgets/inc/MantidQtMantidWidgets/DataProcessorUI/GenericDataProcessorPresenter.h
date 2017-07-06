@@ -211,6 +211,8 @@ private:
   bool m_tableDirty;
   // stores whether a new table selection has been made before processing
   bool m_newSelection;
+  // list of indexes of processed groups
+  std::set<int> m_processedGroupIndexes;
   // stores the user options for the presenter
   std::map<std::string, QVariant> m_options;
   // Thread to run reducer worker in

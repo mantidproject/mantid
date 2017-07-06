@@ -286,6 +286,12 @@ void GenericDataProcessorPresenter::process() {
 
   for (const auto &item : m_selectedData) {
     // Loop over each group
+
+    // Ignore any groups that are already processed
+    if (m_processedGroupIndexes.find(item.first) !=
+        m_processedGroupIndexes.end())
+      continue;
+
     RowQueue rowQueue;
 
     for (const auto &data : item.second) {
