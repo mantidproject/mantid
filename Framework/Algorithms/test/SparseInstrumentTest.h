@@ -226,13 +226,13 @@ public:
   }
 
   void test_inverseDistanceWeights() {
-    std::array<double, 4> ds{0.3, 0.3, 0.0, 0.3};
+    std::array<double, 4> ds{{0.3, 0.3, 0.0, 0.3}};
     auto weights = inverseDistanceWeights(ds);
     TS_ASSERT_EQUALS(weights[0], 0.0)
     TS_ASSERT_EQUALS(weights[1], 0.0)
     TS_ASSERT_EQUALS(weights[2], 1.0)
     TS_ASSERT_EQUALS(weights[3], 0.0)
-    ds = {0.2, 0.3, 0.1, 0.4};
+    ds = {{0.2, 0.3, 0.1, 0.4}};
     weights = inverseDistanceWeights(ds);
     TS_ASSERT_EQUALS(weights[0], 1 / 0.2 / 0.2)
     TS_ASSERT_EQUALS(weights[1], 1 / 0.3 / 0.3)
