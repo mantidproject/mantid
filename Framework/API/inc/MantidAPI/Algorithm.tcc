@@ -1,7 +1,8 @@
 #include "MantidAPI/Algorithm.h"
-// ArrayProperty Implementation
 #include "MantidAPI/IndexProperty.h"
 #include "MantidAPI/WorkspaceProperty.h"
+
+#include "MantidKernel/ArrayProperty.tcc"
 
 namespace {
 template <typename T1, typename T2>
