@@ -3,7 +3,6 @@
 //-----------------------------------------------------------------------------
 #include "MantidAPI/AlgorithmProperty.h"
 #include "MantidAPI/Algorithm.h"
-#include "MantidKernel/Strings.h"
 
 namespace Mantid {
 namespace API {
