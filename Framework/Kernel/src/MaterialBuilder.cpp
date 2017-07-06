@@ -255,13 +255,15 @@ double MaterialBuilder::getOrCalculateRho(
   if (m_numberDensity) {
     return m_numberDensity.get();
   } else if (m_zParam && m_cellVol) {
+    // TODO: Why would you do this, it will give number of atoms^2 / volume??
     return totalNumAtoms * m_zParam.get() / m_cellVol.get();
   } else if (m_massDensity) {
     double rmm = 0.;
     for (const auto &formulaUnit : formula) {
       rmm += formulaUnit.atom->mass * formulaUnit.multiplicity;
     }
-    return (m_massDensity.get() / rmm) * PhysicalConstants::N_A * 1e-24;
+    return (m_massDensity.get() / (rmm * totalNumAtoms)) *
+           PhysicalConstants::N_A * 1e-24;
   } else if (m_formula && m_formula->size() == 1) {
     return m_formula->at(0).atom->number_density;
   } else {
