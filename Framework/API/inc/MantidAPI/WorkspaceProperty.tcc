@@ -148,6 +148,7 @@ template <typename TYPE> std::string WorkspaceProperty<TYPE>::value() const {
 template <typename TYPE>
 std::string WorkspaceProperty<TYPE>::valueAsPrettyStr(size_t maxLength,
                                        bool collapseLists) const {
+  UNUSED_ARG(collapseLists);
   return Kernel::Strings::shorten(value(), maxLength);
 }
 

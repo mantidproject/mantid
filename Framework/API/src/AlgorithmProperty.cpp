@@ -56,6 +56,7 @@ std::string AlgorithmProperty::value() const { return m_algStr; }
 */
 std::string AlgorithmProperty::valueAsPrettyStr(size_t maxLength,
                                                 bool collapseLists) const {
+  UNUSED_ARG(collapseLists);
   return Kernel::Strings::shorten(value(), maxLength);
 }
 

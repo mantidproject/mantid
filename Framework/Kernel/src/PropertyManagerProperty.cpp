@@ -56,6 +56,7 @@ std::string PropertyManagerProperty::value() const {
 std::string
 PropertyManagerProperty::valueAsPrettyStr(size_t maxLength,
                                           bool collapseLists) const {
+  UNUSED_ARG(collapseLists);
   return Strings::shorten(value(), maxLength);
 }
 
