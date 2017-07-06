@@ -53,7 +53,7 @@ public:
     DataObjects::Workspace2D_sptr ws =
         boost::dynamic_pointer_cast<DataObjects::Workspace2D>(
             gws->getItem("outGWS_qvectors"));
-    TS_ASSERT_DELTA(ws->y(4)[2], 0.012, 1e-03);
+    TS_ASSERT_DELTA(ws->y(2)[0], 0.012, 1e-03);
 
     // Test fq
     ws = boost::dynamic_pointer_cast<DataObjects::Workspace2D>(
