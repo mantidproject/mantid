@@ -34,41 +34,43 @@ namespace {
  * @param self :: Enables it to be called as a member function on the
  * FunctionFactory class
  */
-  PyObject *getFunctionNames(FunctionFactoryImpl &self) {
-    const std::vector<std::string> &names =
+PyObject *getFunctionNames(FunctionFactoryImpl &self) {
+  const std::vector<std::string> &names =
       self.getFunctionNames<Mantid::API::IFunction>();
 
-    PyObject *registered = PyList_New(0);
-    for (const auto &name : names) {
-      PyObject *value = to_python_value<const std::string &>()(name);
-      if (PyList_Append(registered, value))
-        throw std::runtime_error("Failed to insert value into PyList");
-    }
-
-    return registered;
+  PyObject *registered = PyList_New(0);
+  for (const auto &name : names) {
+    PyObject *value = to_python_value<const std::string &>()(name);
+    if (PyList_Append(registered, value))
+      throw std::runtime_error("Failed to insert value into PyList");
   }
 
-  //------------------------------------------------------------------------------------------------------
-  /**
-  * Something that makes Function Factory return to python a composite function
-  * for Product function, Convolution or 
-  * any similar superclass of composite function.
-  * @param self :: Enables it to be called as a member function on the
-  * FunctionFactory class
-  * @param name :: Name of the superclass of composite function, 
-  * e.g. "ProductFunction".
-  */
-   Mantid::API::CompositeFunction_sptr createCompositeFunction(FunctionFactoryImpl &self, const std::string &name) {
-     auto fun = self.createFunction(name);
-     auto composite = boost::dynamic_pointer_cast<Mantid::API::CompositeFunction>(fun);
-     if (composite) {
-       return composite;
-     } 
-     std::string error_message = name + " is not a composite function.";
-     throw std::invalid_argument(error_message);
-  }
+  return registered;
+}
 
-  //--------------------------------------------- Function registration
+//------------------------------------------------------------------------------------------------------
+/**
+* Something that makes Function Factory return to python a composite function
+* for Product function, Convolution or
+* any similar superclass of composite function.
+* @param self :: Enables it to be called as a member function on the
+* FunctionFactory class
+* @param name :: Name of the superclass of composite function,
+* e.g. "ProductFunction".
+*/
+Mantid::API::CompositeFunction_sptr
+createCompositeFunction(FunctionFactoryImpl &self, const std::string &name) {
+  auto fun = self.createFunction(name);
+  auto composite =
+      boost::dynamic_pointer_cast<Mantid::API::CompositeFunction>(fun);
+  if (composite) {
+    return composite;
+  }
+  std::string error_message = name + " is not a composite function.";
+  throw std::invalid_argument(error_message);
+}
+
+//--------------------------------------------- Function registration
 //------------------------------------------------
 
 /// Python algorithm registration mutex in anonymous namespace (aka static)
@@ -115,11 +117,12 @@ void export_FunctionFactory() {
 
   class_<FunctionFactoryImpl, boost::noncopyable>("FunctionFactoryImpl",
                                                   no_init)
-    .def("getFunctionNames", &getFunctionNames, arg("self"),
-      "Returns a list of the currently available functions")
-    .def("createCompositeFunction", &createCompositeFunction, (arg("self"), arg("name")),
-      "Return a pointer to the requested function")
-    .def("createFunction", &FunctionFactoryImpl::createFunction,
+      .def("getFunctionNames", &getFunctionNames, arg("self"),
+           "Returns a list of the currently available functions")
+      .def("createCompositeFunction", &createCompositeFunction,
+           (arg("self"), arg("name")),
+           "Return a pointer to the requested function")
+      .def("createFunction", &FunctionFactoryImpl::createFunction,
            (arg("self"), arg("type")),
            "Return a pointer to the requested function")
       .def("createInitialized", &FunctionFactoryImpl::createInitialized,

@@ -49,7 +49,7 @@ typedef void (IFunction::*setParameterType2)(const std::string &,
                                              const double &value, bool);
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(setParameterType2_Overloads,
                                        setParameter, 2, 3)
-typedef void (IFunction::*removeTieByName)(const std::string & );
+typedef void (IFunction::*removeTieByName)(const std::string &);
 
 #ifdef __clang__
 #pragma clang diagnostic pop
@@ -106,10 +106,9 @@ void export_IFunction() {
            (double (IFunction::*)(const std::string &) const) &
                IFunction::getParameter,
            (arg("self"), arg("name")), "Get the value of the named parameter")
- 
-      .def("__getitem__",
-           (double (IFunction::*)(const std::string &) const) &
-               IFunction::getParameter,
+
+      .def("__getitem__", (double (IFunction::*)(const std::string &) const) &
+                              IFunction::getParameter,
            (arg("self"), arg("name")), "Get the value of the named parameter")
 
       .def("setParameter", (setParameterType1)&IFunction::setParameter,
@@ -154,19 +153,22 @@ void export_IFunction() {
            (arg("self"), arg("name")),
            "Declare a fitting parameter settings its default value to 0.0")
 
-      .def("tie", &IFunction::tie, (arg("self"), arg("parName"), arg("expr"),
-           arg("isDefault")), "Tie a parameter to an expression")
+      .def("tie", &IFunction::tie,
+           (arg("self"), arg("parName"), arg("expr"), arg("isDefault")),
+           "Tie a parameter to an expression")
 
-      .def("fix", &IFunction::fixParameter, (arg("self"), arg("parName")), "Fix a parameter")
+      .def("fix", &IFunction::fixParameter, (arg("self"), arg("parName")),
+           "Fix a parameter")
 
-      .def("untie", (removeTieByName)&IFunction::removeTie, (arg("self"), arg("parName")), 
+      .def("untie", (removeTieByName)&IFunction::removeTie,
+           (arg("self"), arg("parName")),
            "Remove any tie or fix from the given parameter")
 
-      .def("constrain", &IFunction::addConstraints, (arg("self"), arg("str"),  arg("isDefault")), 
-            "Add constraints")
+      .def("constrain", &IFunction::addConstraints,
+           (arg("self"), arg("str"), arg("isDefault")), "Add constraints")
 
-      .def("unconstrain", &IFunction::removeConstraint, (arg("self"), arg("parname")),
-          "Remove constraint from parameter")
+      .def("unconstrain", &IFunction::removeConstraint,
+           (arg("self"), arg("parname")), "Remove constraint from parameter")
 
       //-- Deprecated functions that have the wrong names --
       .def("categories", &getCategories, arg("self"),
@@ -185,6 +187,5 @@ void export_IFunction() {
            (arg("self"), arg("i")), "Get the value of the ith parameter")
       //-- Python special methods --
       .def("__repr__", &IFunction::asString, arg("self"),
-           "Return a string representation of the function")
-        ;
+           "Return a string representation of the function");
 }
