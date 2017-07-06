@@ -30,29 +30,5 @@ template class DLLExport ArrayProperty<std::vector<unsigned long>>;
 #endif
 
 /// @endcond
-
-template DLLExport ArrayProperty<int>::ArrayProperty(
-    const std::string &name, const std::vector<int> &vec,
-    IValidator_sptr validator, const unsigned int direction);
-
-template DLLExport
-ArrayProperty<int>::ArrayProperty(const std::string &name,
-                                  IValidator_sptr validator,
-                                  const unsigned int direction);
-
-template DLLExport
-ArrayProperty<int>::ArrayProperty(const std::string &name,
-                                  const unsigned int direction);
-
-template DLLExport ArrayProperty<int>::ArrayProperty(
-    const std::string &name, const std::string &values,
-    IValidator_sptr validator, const unsigned int direction);
-
-template DLLExport ArrayProperty<int> *ArrayProperty<int>::clone() const;
-
-template DLLExport std::string ArrayProperty<int>::value() const;
-
-template DLLExport std::string
-ArrayProperty<int>::setValue(const std::string &value);
 } // namespace Kernel
 } // namespace Mantid
