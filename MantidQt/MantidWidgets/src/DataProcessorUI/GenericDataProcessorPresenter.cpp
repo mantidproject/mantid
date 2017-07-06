@@ -269,17 +269,25 @@ void GenericDataProcessorPresenter::process() {
 
   m_newSelection = false;
 
+  std::string newPreprocessingOptions =
+      m_mainPresenter->getPreprocessingOptionsAsString().toStdString();
+  std::string newProcessingOptions =
+      m_mainPresenter->getProcessingOptions().toStdString();
+  std::string newPostprocessingOptions =
+      m_mainPresenter->getPostprocessingOptions().toStdString();
+  
+  // If global settings have been changed, clear list of processed group indexes
+  if (m_preProcessingOptions != newPreprocessingOptions ||
+      m_processingOptions != newProcessingOptions ||
+      m_postProcessingOptions != newPostprocessingOptions)
+    m_processedGroupIndexes.clear();
+
+  m_preProcessingOptions = newPreprocessingOptions;
+  m_processingOptions = newProcessingOptions;
+  m_postProcessingOptions = newPostprocessingOptions;
+
   // Clear any highlighted rows
   m_manager->clearHighlighted();
-
-  // Progress: each group and each row within count as a progress step.
-  int progress = 0;
-  int maxProgress = (int)(m_selectedData.size());
-  for (const auto &subitem : m_selectedData) {
-    maxProgress += (int)(subitem.second.size());
-  }
-  m_progressReporter =
-      new ProgressPresenter(progress, maxProgress, maxProgress, m_progressView);
 
   // Clear the group queue
   m_gqueue = GroupQueue();
@@ -300,6 +308,15 @@ void GenericDataProcessorPresenter::process() {
     }
     m_gqueue.emplace(item.first, rowQueue);
   }
+
+  // Progress: each group and each row within count as a progress step.
+  int progress = 0;
+  int maxProgress = (int)(m_gqueue.size());
+  for (const auto &subitem : m_gqueue._Get_container()) {
+    maxProgress += (int)(subitem.second.size());
+  }
+  m_progressReporter =
+    new ProgressPresenter(progress, maxProgress, maxProgress, m_progressView);
 
   // Start processing the first group
   m_nextActionFlag = ReductionFlag::ReduceGroupFlag;

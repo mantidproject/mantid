@@ -194,6 +194,12 @@ private:
   DataProcessorPostprocessingAlgorithm m_postprocessor;
   // Post-processing map
   std::map<std::string, std::string> m_postprocessMap;
+  // Pre-processing options
+  std::string m_preProcessingOptions;
+  // Data processor options
+  std::string m_processingOptions;
+  // Post-processing options
+  std::string m_postProcessingOptions;
   // The current queue of groups to be reduced
   GroupQueue m_gqueue;
   // The current group we are reducing row data for
