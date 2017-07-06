@@ -173,7 +173,7 @@ class WishCalibration(stresstesting.MantidStressTest):
             for index in bad_tubes:
                 print("Refitting tube %s" % spec.getTubeName(index))
                 tube_dets, _ = spec.getTube(index)
-                actualTube = getPoints(ws, idealTube.getFunctionalForms(), fitPar, tube_dets)
+                getPoints(ws, idealTube.getFunctionalForms(), fitPar, tube_dets)
                 tube_ws = mantid.mtd['TubePlot']
                 fit_ws = mantid.FindPeaks(InputWorkspace=tube_ws, WorkspaceIndex=0,
                                           PeakPositions=fitPar.getPeaks(), PeaksList='RefittedPeaks')
