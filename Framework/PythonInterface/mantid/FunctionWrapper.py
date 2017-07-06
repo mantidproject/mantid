@@ -157,7 +157,7 @@ class CompositeFunctionWrapper(FunctionWrapper):
         """ get function of specified index or parameter of specified name
             called for array-like access on RHS.
         """
-        item = self.fun.__getitem__(nameorindex)
+        item = self.fun[nameorindex]
         if isinstance(item, float):
            return  item
         elif hasattr(item, 'nFunctions'):
@@ -169,7 +169,7 @@ class CompositeFunctionWrapper(FunctionWrapper):
     def __setitem__ (self, name, newValue):
         """ Called from array-like access on LHS
         """
-        self.fun.__setitem__(name, newValue)
+        self.fun[name] = newValue
                     
     def __iadd__ (self, other):
        """ Implement += operator.
@@ -199,19 +199,19 @@ class CompositeFunctionWrapper(FunctionWrapper):
            The named parameter must occur in all the member functions.
        """
        expr = self.getCompositeParameterName(name, 0)
-       self.tie({self.getCompositeParameterName(name, i): expr for i in range(1,self.__len__()) }) 
+       self.tie({self.getCompositeParameterName(name, i): expr for i in range(1,len(self)) }) 
           
     def fixAll (self, name):
        """ Fix all parameters with the given local name.
            Every member function must have a parameter of this name.
        """
-       for i in range(0, self.__len__()):
+       for i in range(0, len(self)):
           self[i].fix(name)
           
     def constrainAll (self, expressions):
        """ Constrain all parameters according local names in expressions.
        """
-       for i in range(0, self.__len__()):
+       for i in range(0, len(self)):
           if isinstance( self[i], CompositeFunctionWrapper ):
              self[i].constrainAll(expressions)
           else:
@@ -223,7 +223,7 @@ class CompositeFunctionWrapper(FunctionWrapper):
     def unconstrainAll (self, name):
        """ Constrain all parameters according local names in expressions.
        """
-       for i in range(0, self.__len__()):
+       for i in range(0, len(self)):
           if isinstance( self[i], CompositeFunctionWrapper ):
              self[i].unconstrainAll(name)
           else:
@@ -236,7 +236,7 @@ class CompositeFunctionWrapper(FunctionWrapper):
        """ Untie all parameters with the given local name.
            Every member function must have a parameter of this name.
        """
-       for i in range(0, self.__len__()):
+       for i in range(0, len(self)):
           self[i].untie(name)
 
     def flatten (self):
@@ -247,7 +247,7 @@ class CompositeFunctionWrapper(FunctionWrapper):
        """
        # If there are no composite functions, do nothing
        needToFlatten = False
-       for i in range(0, self.__len__()):
+       for i in range(0, len(self)):
           if not needToFlatten and isinstance(self[i],CompositeFunctionWrapper):
              needToFlatten = True
              
@@ -255,10 +255,10 @@ class CompositeFunctionWrapper(FunctionWrapper):
           return self
        
        flatSelf = CompositeFunctionWrapper()
-       for i in range(0, self.__len__()):
+       for i in range(0, len(self)):
           if isinstance(self[i],CompositeFunctionWrapper):
              currentFunction = self[i].flatten()
-             for j in range(0, currentFunction.__len__()):
+             for j in range(0, len(currentFunction)):
                 flatSelf.fun.add(currentFunction[j].fun)
           else:
              flatSelf.fun.add(self[i].fun)
@@ -282,7 +282,7 @@ class MultiDomainFunctionWrapper(CompositeFunctionWrapper):
     """
     def __init__ (self, *args):
        self.initByName("MultiDomainFunction", *args)
-       for i in range(0, self.__len__()):
+       for i in range(0, len(self)):
           self.fun.setDomainIndex(i, i)
           
     def nDomains (self):
