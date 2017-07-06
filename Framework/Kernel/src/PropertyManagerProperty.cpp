@@ -53,8 +53,9 @@ std::string PropertyManagerProperty::value() const {
 * @param maxLength :: The Max length of the returned string
 * @param collapseLists :: Whether to collapse 1,2,3 into 1-3
 */
-std::string PropertyManagerProperty::valueAsPrettyStr(size_t maxLength,
-  bool collapseLists) const {
+std::string
+PropertyManagerProperty::valueAsPrettyStr(size_t maxLength,
+                                          bool collapseLists) const {
   return Strings::shorten(value(), maxLength);
 }
 
