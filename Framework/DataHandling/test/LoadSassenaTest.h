@@ -34,7 +34,7 @@ public:
       m_alg.initialize();
 
     m_alg.setPropertyValue("Filename", m_inputFile);
-    m_alg.setPropertyValue("SortByQVectors", true);
+    m_alg.setProperty("SortByQVectors", true);
 
     const std::string outSpace = "outGWS";
     m_alg.setPropertyValue("OutputWorkSpace", outSpace);
