@@ -70,7 +70,7 @@ class FunctionWrapper:
   def fix(self, name):
       """ Fix a parameter.
       """
-      self.fun.fix(name)
+      self.fun.fix(name, False)
       
   def fixAllParameters(self):
        """ Fix all parameters.

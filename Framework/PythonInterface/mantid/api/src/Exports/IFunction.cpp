@@ -217,7 +217,7 @@ void export_IFunction() {
            (arg("self"), arg("parName"), arg("expr"), arg("isDefault")),
            "Tie a parameter to an expression")
 
-      .def("fix", &IFunction::fixParameter, (arg("self"), arg("parName")),
+      .def("fix", &IFunction::fixParameter, (arg("self"), arg("parName"), arg("isDefault") ),
            "Fix a parameter")
 
       .def("untie", (removeTieByName)&IFunction::removeTie,
