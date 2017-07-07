@@ -43,7 +43,7 @@ MaterialBuilder &MaterialBuilder::setName(const std::string &name) {
 }
 
 /**
- * Set the checmical formula of the material
+ * Set the chemical formula of the material
  * @param formula Human-readable name of the material
  * @return A reference to the this object to allow chaining
  */
@@ -97,8 +97,8 @@ MaterialBuilder &MaterialBuilder::setMassNumber(int massNumber) {
 }
 
 /**
- * Set the number density of the sample
- * @param rho density of the sample
+ * Set the number density of the sample in atoms / Angstrom^3
+ * @param rho density of the sample in atoms / Angstrom^3
  * @return A reference to the this object to allow chaining
  */
 MaterialBuilder &MaterialBuilder::setNumberDensity(double rho) {
@@ -107,8 +107,8 @@ MaterialBuilder &MaterialBuilder::setNumberDensity(double rho) {
 }
 
 /**
- * Set the number of atoms in the unit cell
- * @param zparam Number of atoms
+ * Set the number of formula units in the unit cell
+ * @param zparam Number of formula units
  * @return A reference to the this object to allow chaining
  */
 MaterialBuilder &MaterialBuilder::setZParameter(double zparam) {
@@ -136,8 +136,8 @@ MaterialBuilder &MaterialBuilder::setUnitCellVolume(double cellVolume) {
 }
 
 /**
- * Set the mass density of the sample and calculate the density from this
- * @param massDensity The mass density value
+ * Set the mass density of the sample in g / cc
+ * @param massDensity The mass density in g / cc
  * @return A reference to the this object to allow chaining
  */
 MaterialBuilder &MaterialBuilder::setMassDensity(double massDensity) {
@@ -241,8 +241,8 @@ MaterialBuilder::createCompositionFromAtomicNumber() const {
 
 /**
  * Return the manually set density or calculate it from other parameters
- * @param formula The formula to calculate the number density from
- * @return The number density
+ * @param formula The chemical formula to calculate the number density from
+ * @return The number density in atoms / Angstrom^3
  */
 double MaterialBuilder::getOrCalculateRho(
     const Material::ChemicalFormula &formula) const {
@@ -257,6 +257,7 @@ double MaterialBuilder::getOrCalculateRho(
   } else if (m_zParam && m_cellVol) {
     return totalNumAtoms * m_zParam.get() / m_cellVol.get();
   } else if (m_massDensity) {
+    // g / cc -> atoms / Angstrom^3
     double rmm = 0.;
     for (const auto &formulaUnit : formula) {
       rmm += formulaUnit.atom->mass * formulaUnit.multiplicity;

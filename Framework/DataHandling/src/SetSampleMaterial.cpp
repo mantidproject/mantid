@@ -52,7 +52,7 @@ void SetSampleMaterial::init() {
   mustBePositive->setLower(0.0);
   declareProperty("SampleNumberDensity", EMPTY_DBL(), mustBePositive,
                   "Optional:  This number density of the sample in number of "
-                  "formulas per cubic angstrom will be used instead of "
+                  "atoms per cubic angstrom will be used instead of "
                   "calculated");
   declareProperty("ZParameter", EMPTY_DBL(), mustBePositive,
                   "Number of formula units in unit cell");
@@ -188,7 +188,7 @@ void SetSampleMaterial::exec() {
   double rho_m = getProperty("SampleMassDensity"); // in g/cc
   if (!isEmpty(rho_m))
     builder.setMassDensity(rho_m);
-  double rho = getProperty("SampleNumberDensity"); // in Angstroms-3
+  double rho = getProperty("SampleNumberDensity"); // in atoms / Angstroms^3
   if (isEmpty(rho)) {
     double zParameter = getProperty("ZParameter"); // number of atoms
     if (!isEmpty(zParameter)) {
