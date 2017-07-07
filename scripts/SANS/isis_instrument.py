@@ -1454,7 +1454,7 @@ class LARMOR(ISISInstrument):
         second = self.DETECTORS['high-angle']
 
         first.set_orien('Horizontal')
-        first.set_first_spec_num(10)
+        first.set_first_spec_num(11)
         second.set_orien('Horizontal')
         second.place_after(first)
 

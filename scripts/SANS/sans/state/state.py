@@ -22,6 +22,10 @@ from sans.state.scale import StateScale
 from sans.state.convert_to_q import StateConvertToQ
 from sans.state.automatic_setters import (automatic_setters)
 
+# Note that the compatibiliy state is not part of the new reduction chain, but allows us to accurately compare
+# results obtained via the old and new reduction chain
+from sans.state.compatibility import (StateCompatibility, get_compatibility_builder)
+
 
 # ----------------------------------------------------------------------------------------------------------------------
 # State
@@ -38,6 +42,7 @@ class State(StateBase):
     scale = TypedParameter(StateScale, validator_sub_state)
     adjustment = TypedParameter(StateAdjustment, validator_sub_state)
     convert_to_q = TypedParameter(StateConvertToQ, validator_sub_state)
+    compatibility = TypedParameter(StateCompatibility, validator_sub_state)
 
     def __init__(self):
         super(State, self).__init__()
@@ -66,6 +71,11 @@ class State(StateBase):
             is_invalid.update("State: The state object needs to include a StateAdjustment object.")
         if not self.convert_to_q:
             is_invalid.update("State: The state object needs to include a StateConvertToQ object.")
+
+        # We don't enforce a compatibility mode, we just create one if it does not exist
+        if not self.compatibility:
+            if self.data:
+                self.compatibility = get_compatibility_builder(self.data).build()
 
         if is_invalid:
             raise ValueError("State: There is an issue with your in put. See: {0}".format(json.dumps(is_invalid)))

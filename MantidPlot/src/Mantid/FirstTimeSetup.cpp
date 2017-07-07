@@ -1,6 +1,7 @@
 #include "FirstTimeSetup.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/MantidVersion.h"
+#include "MantidQtAPI/HelpWindow.h"
 #include "MantidQtAPI/ManageUserDirectories.h"
 #include "MantidQtAPI/MantidDesktopServices.h"
 
@@ -174,8 +175,8 @@ void FirstTimeSetup::openManageUserDirectories() {
 }
 
 void FirstTimeSetup::openReleaseNotes() {
-  MantidDesktopServices::openUrl(QUrl(
-      QString::fromStdString(Mantid::Kernel::MantidVersion::releaseNotes())));
+  MantidQt::API::HelpWindow::showPage(
+      this, Mantid::Kernel::MantidVersion::releaseNotes());
 }
 
 void FirstTimeSetup::openSampleDatasets() {

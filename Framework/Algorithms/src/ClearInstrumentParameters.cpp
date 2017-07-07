@@ -1,10 +1,7 @@
 #include "MantidAlgorithms/ClearInstrumentParameters.h"
-#include "MantidAPI/FileProperty.h"
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/Instrument.h"
-#include "MantidGeometry/Instrument/ParameterMap.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -14,9 +11,7 @@ DECLARE_ALGORITHM(ClearInstrumentParameters)
 
 using namespace Kernel;
 using namespace API;
-using namespace Geometry;
 
-//----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string ClearInstrumentParameters::name() const {
   return "ClearInstrumentParameters";
@@ -35,9 +30,6 @@ const std::string ClearInstrumentParameters::category() const {
   return "DataHandling\\Instrument";
 }
 
-//----------------------------------------------------------------------------------------------
-
-//----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void ClearInstrumentParameters::init() {
@@ -45,45 +37,19 @@ void ClearInstrumentParameters::init() {
                       "Workspace", "", Direction::InOut,
                       boost::make_shared<InstrumentValidator>()),
                   "Workspace whose instrument parameters are to be cleared.");
-
-  declareProperty(
-      "LocationParameters", true,
-      "Clear the location parameters used to calibrate the instrument.",
-      Direction::Input);
 }
 
-//----------------------------------------------------------------------------------------------
 /** Execute the algorithm.
  */
 void ClearInstrumentParameters::exec() {
-  const MatrixWorkspace_const_sptr ws = getProperty("Workspace");
-  const bool clearLocationParams = getProperty("LocationParameters");
-
-  const Instrument_const_sptr instrument = ws->getInstrument();
-  const ParameterMap_sptr params = instrument->getParameterMap();
-
-  ParameterMap::pmap paramsToKeep;
-
-  // Go through all the parameters, keep a hold of any we don't want to clear.
-  for (auto &paramIt : *params) {
-    // Are we keeping the location parameters?
-    const std::string pName = paramIt.second->name();
-    if (!clearLocationParams &&
-        (pName == "x" || pName == "y" || pName == "z" ||
-         pName == "r-position" || pName == "t-position" ||
-         pName == "p-position" || pName == "rotx" || pName == "roty" ||
-         pName == "rotz")) {
-      paramsToKeep.insert(paramIt);
-    }
-  }
-
-  // Clear out the parameter map
-  params->clear();
-
-  // Add any parameters we're keeping back into the parameter map.
-  for (auto &paramIt : paramsToKeep) {
-    params->add(paramIt.first, paramIt.second);
-  }
+  const MatrixWorkspace_sptr ws = getProperty("Workspace");
+  // Clear old parameters. We also want to clear fields stored in DetectorInfo
+  // (masking, positions, rotations). By setting the base instrument (which
+  // does not include a ParameterMap or DetectorInfo) we make use of the
+  // mechanism in ExperimentInfo that builds a clean DetectorInfo from the
+  // instrument being set.
+  const auto instrument = ws->getInstrument();
+  ws->setInstrument(instrument->baseInstrument());
 }
 
 } // namespace Algorithms

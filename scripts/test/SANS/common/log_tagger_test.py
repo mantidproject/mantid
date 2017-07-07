@@ -2,7 +2,7 @@ from __future__ import (absolute_import, division, print_function)
 import unittest
 import mantid
 from mantid.api import AlgorithmManager
-from sans.common.log_tagger import (has_tag, set_tag, get_tag, has_hash, set_hash)
+from sans.common.log_tagger import (has_tag, set_tag, get_tag, has_hash, set_hash, get_hash_value)
 
 
 class SANSLogTaggerTest(unittest.TestCase):
@@ -35,11 +35,12 @@ class SANSLogTaggerTest(unittest.TestCase):
         value2 = "tested2"
 
         # Act + Assert
-        self.assertFalse(has_hash(tag1, value1, ws1))
-        set_hash(tag1, value1, ws1)
-        self.assertTrue(has_hash(tag1, value1, ws1))
-        self.assertFalse(has_hash(tag1, value2, ws1))
-
+        hashed_value_1 = get_hash_value(value1)
+        hashed_value_2 = get_hash_value(value2)
+        self.assertFalse(has_hash(tag1, hashed_value_1, ws1))
+        set_hash(tag1, hashed_value_1, ws1)
+        self.assertTrue(has_hash(tag1, hashed_value_1, ws1))
+        self.assertFalse(has_hash(tag1, hashed_value_2, ws1))
 
 if __name__ == '__main__':
     unittest.main()

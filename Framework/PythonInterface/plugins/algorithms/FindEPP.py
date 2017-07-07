@@ -2,7 +2,7 @@
 from __future__ import (absolute_import, division, print_function)
 from mantid.api import PythonAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty, ITableWorkspaceProperty
 from mantid.kernel import Direction
-from mantid.simpleapi import Fit, CreateEmptyTableWorkspace
+from mantid.simpleapi import CreateEmptyTableWorkspace, DeleteWorkspace, Fit
 import numpy as np
 
 
@@ -92,11 +92,11 @@ class FindEPP(PythonAlgorithm):
         startX = tryCentre - 3.0*fwhm
         endX   = tryCentre + 3.0*fwhm
 
+        tempOutputPrefix = "__EPPfit_" + str(self.workspace) + "_" + str(index)
         # pylint: disable=assignment-from-none
         # result = fitStatus, chiSq, covarianceTable, paramTable
         result = Fit(InputWorkspace=self.workspace, WorkspaceIndex=index, StartX = startX, EndX=endX,
-                     Output='EPPfit', Function=fitFun, CreateOutput=True, OutputParametersOnly=True)
-
+                     Output=tempOutputPrefix, Function=fitFun, CreateOutput=True, OutputParametersOnly=True)
         return result
 
     def PyExec(self):
@@ -129,10 +129,9 @@ class FindEPP(PythonAlgorithm):
                     name = row["Name"]
                     nextrow[name] = row["Value"]
                     nextrow[name+"Error"] = row["Error"]
-
-            # self.log().debug("Next row= " + str(nextrow))
+                DeleteWorkspace(result.OutputParameters)
+                DeleteWorkspace(result.OutputNormalisedCovarianceMatrix)
             outws.addRow(nextrow)
-
         self.setProperty("OutputWorkspace", outws)
         return
 

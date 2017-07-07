@@ -71,7 +71,7 @@
      </property>
      <layout class="QVBoxLayout" name="verticalLayout_7">
       <item>
-       <layout class="QGridLayout" name="loOptions" columnstretch="0,10,0,0,10,0" columnminimumwidth="0,0,0,0,0,0">
+       <layout class="QGridLayout" name="loOptions" columnstretch="0,0,0,0,0,0">
         <item row="1" column="4">
          <widget class="QDoubleSpinBox" name="spELow">
           <property name="enabled">
@@ -182,19 +182,6 @@
           </property>
           <property name="text">
            <string>E High:</string>
-          </property>
-         </widget>
-        </item>
-        <item row="0" column="0">
-         <widget class="QLabel" name="lbMethod">
-          <property name="minimumSize">
-           <size>
-            <width>43</width>
-            <height>0</height>
-           </size>
-          </property>
-          <property name="text">
-           <string>Method:</string>
           </property>
          </widget>
         </item>
@@ -344,41 +331,6 @@
           </property>
          </widget>
         </item>
-        <item row="0" column="1">
-         <widget class="QComboBox" name="cbMethod">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="minimumSize">
-           <size>
-            <width>200</width>
-            <height>0</height>
-           </size>
-          </property>
-          <property name="maximumSize">
-           <size>
-            <width>200</width>
-            <height>16777215</height>
-           </size>
-          </property>
-          <property name="currentIndex">
-           <number>0</number>
-          </property>
-          <item>
-           <property name="text">
-            <string>Polygon</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>NormalisedPolygon</string>
-           </property>
-          </item>
-         </widget>
-        </item>
         <item row="0" column="2">
          <spacer name="horizontalSpacer">
           <property name="orientation">
@@ -485,7 +437,6 @@
   </customwidget>
  </customwidgets>
  <tabstops>
-  <tabstop>cbMethod</tabstop>
   <tabstop>spQLow</tabstop>
   <tabstop>spQWidth</tabstop>
   <tabstop>spQHigh</tabstop>

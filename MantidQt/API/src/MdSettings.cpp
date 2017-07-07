@@ -22,7 +22,10 @@ MdSettings::MdSettings()
       m_lblSliceViewerColorMap(
           "ColormapFile"), // This is the same as in Slice Viewer !!,
       m_lblUserSettingInitialView("initialview"),
-      m_lblLastSessionLogScale("lastsessionlogscale") {
+      m_lblLastSessionLogScale("lastsessionlogscale"),
+      m_lblUserSettingAutoColorAxes("usersettingautocoloraxes")
+
+{
   m_mdConstants.initializeSettingsConstants();
 }
 
@@ -214,5 +217,24 @@ void MdSettings::setUserSettingIntialView(QString initialView) {
 
   settings.beginGroup(m_vsiGroup);
   settings.setValue(m_lblUserSettingInitialView, initialView);
+  settings.endGroup();
+}
+
+bool MdSettings::getUserSettingAutoColorAxes() {
+  QSettings settings;
+
+  settings.beginGroup(m_vsiGroup);
+  bool autoColor =
+      settings.value(m_lblUserSettingAutoColorAxes, false).toBool();
+  settings.endGroup();
+
+  return autoColor;
+}
+
+void MdSettings::setUserSettingAutoColorAxes(bool autoColor) {
+  QSettings settings;
+
+  settings.beginGroup(m_vsiGroup);
+  settings.setValue(m_lblUserSettingAutoColorAxes, autoColor);
   settings.endGroup();
 }

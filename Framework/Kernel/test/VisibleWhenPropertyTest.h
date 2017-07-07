@@ -102,6 +102,121 @@ public:
         "Becomes visible when the other property is equal to the given string",
         !prop->getSettings()->isVisible(&alg));
   }
+
+  void test_combination_AND() {
+    // Setup with same value first
+    auto alg = setupCombinationTest(AND, true);
+    const auto prop = alg.getPointerToProperty(m_resultPropName);
+    TS_ASSERT(prop);
+    const auto propSettings = prop->getSettings();
+
+    // AND should return true first
+    TS_ASSERT(propSettings->isVisible(&alg));
+
+    // Now set a different value - should be disabled
+    alg.setPropertyValue(m_propertyOneName, m_propertyTrueValue);
+    alg.setPropertyValue(m_propertyTwoName, m_propertyFalseValue);
+    TS_ASSERT(!propSettings->isVisible(&alg));
+  }
+
+  void test_combination_OR() {
+    // First check with both set to the true value
+    auto alg = setupCombinationTest(OR, true);
+    const auto prop = alg.getPointerToProperty(m_resultPropName);
+    TS_ASSERT(prop);
+    const auto propSettings = prop->getSettings();
+
+    // OR should return true for both values on
+    TS_ASSERT(propSettings->isVisible(&alg));
+
+    // Set property one to false condition and check OR is still true
+    alg.setPropertyValue(m_propertyOneName, m_propertyFalseValue);
+    alg.setPropertyValue(m_propertyTwoName, m_propertyTrueValue);
+    TS_ASSERT(propSettings->isVisible(&alg));
+
+    // Set property two to false condition and check OR is still true
+    alg.setPropertyValue(m_propertyOneName, m_propertyTrueValue);
+    alg.setPropertyValue(m_propertyTwoName, m_propertyFalseValue);
+    TS_ASSERT(propSettings->isVisible(&alg));
+
+    // Check the with both set to false the OR returns false
+    alg.setPropertyValue(m_propertyOneName, m_propertyFalseValue);
+    alg.setPropertyValue(m_propertyTwoName, m_propertyFalseValue);
+    TS_ASSERT(!propSettings->isVisible(&alg));
+  }
+
+  void test_combination_XOR() {
+    auto alg = setupCombinationTest(XOR, true);
+    const auto prop = alg.getPointerToProperty(m_resultPropName);
+    TS_ASSERT(prop);
+    const auto propSettings = prop->getSettings();
+
+    // With both set to the same value this should return false
+    TS_ASSERT(!propSettings->isVisible(&alg));
+
+    // Set property one to false and two to true so returns true
+    alg.setPropertyValue(m_propertyOneName, m_propertyFalseValue);
+    alg.setPropertyValue(m_propertyTwoName, m_propertyTrueValue);
+    TS_ASSERT(propSettings->isVisible(&alg));
+
+    // Set property one to true and one to false so returns true
+    alg.setPropertyValue(m_propertyOneName, m_propertyTrueValue);
+    alg.setPropertyValue(m_propertyTwoName, m_propertyFalseValue);
+    TS_ASSERT(propSettings->isVisible(&alg));
+
+    // Check with both set false it returns false
+    alg.setPropertyValue(m_propertyOneName, m_propertyFalseValue);
+    alg.setPropertyValue(m_propertyTwoName, m_propertyFalseValue);
+    TS_ASSERT(!propSettings->isVisible(&alg));
+  }
+
+private:
+  const std::string m_propertyTrueValue = "testTrue";
+  const std::string m_propertyFalseValue = "testFalse";
+  const std::string m_resultValue = "Result";
+
+  const std::string m_propertyOneName = "PropOne";
+  const std::string m_propertyTwoName = "PropTwo";
+  const std::string m_resultPropName = "ResultProp";
+
+  PropertyManagerOwner setupCombinationTest(eLogicOperator logicOperation,
+                                            bool secondPropertyIsTrue) {
+    auto propOne =
+        getVisibleWhenProp(m_propertyOneName, IS_EQUAL_TO, m_propertyTrueValue);
+    auto propTwo =
+        getVisibleWhenProp(m_propertyTwoName, IS_EQUAL_TO, m_propertyTrueValue);
+    auto combination = getCombinationProperty(propOne, propTwo, logicOperation);
+    // Set both to the same value to check
+    PropertyManagerOwner alg;
+    alg.declareProperty(m_propertyOneName, m_propertyTrueValue);
+    if (secondPropertyIsTrue) {
+      alg.declareProperty(m_propertyTwoName, m_propertyTrueValue);
+    } else {
+      alg.declareProperty(m_propertyTwoName, m_propertyFalseValue);
+    }
+    alg.declareProperty(m_resultPropName, m_resultValue);
+    alg.setPropertySettings(m_resultPropName, std::move(combination));
+    return alg;
+  }
+
+  VisibleWhenProperty getVisibleWhenProp(const std::string &propName,
+                                         ePropertyCriterion criterion,
+                                         const std::string &value = "") {
+    if (value.length() == 0) {
+      return VisibleWhenProperty(propName, criterion);
+    } else {
+      return VisibleWhenProperty(propName, criterion, value);
+    }
+  }
+
+  // Check the copy constructor works instead of std::make_unique
+  std::unique_ptr<IPropertySettings>
+  getCombinationProperty(const VisibleWhenProperty &condOne,
+                         const VisibleWhenProperty &condTwo,
+                         eLogicOperator logicalOperator) {
+    return Kernel::make_unique<VisibleWhenProperty>(condOne, condTwo,
+                                                    logicalOperator);
+  }
 };
 
 #endif /* MANTID_KERNEL_VISIBLEWHENPROPERTYTEST_H_ */

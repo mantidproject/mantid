@@ -17,7 +17,7 @@ class StateConvertToQTest(unittest.TestCase):
         state = StateConvertToQ()
         default_entries = {"reduction_dimensionality": ReductionDimensionality.OneDim, "use_gravity": True,
                            "gravity_extra_length": 12., "radius_cutoff": 1.5, "wavelength_cutoff": 2.7,
-                           "q_min": 0.5, "q_max": 1., "q_step": 1., "q_step_type": RangeStepType.Lin,
+                           "q_min": 0.5, "q_max": 1., "q_1d_rebin_string": "0.5,0.2,1.",
                            "q_step2": 1., "q_step_type2": RangeStepType.Lin, "q_mid": 1.,
                            "q_xy_max": 1.4, "q_xy_step": 24.5, "q_xy_step_type": RangeStepType.Lin,
                            "use_q_resolution": True, "q_resolution_collimation_length": 12.,
@@ -52,6 +52,12 @@ class StateConvertToQTest(unittest.TestCase):
                                        "reduction_dimensionality": ReductionDimensionality.OneDim},
                                       {"q_min": 1., "q_max": 2.,
                                        "reduction_dimensionality": ReductionDimensionality.OneDim})
+
+    def test_that_raises_when_q_rebin_string_is_invalid(self):
+        self.check_bad_and_good_value({"q_1d_rebin_string": ""}, {"q_1d_rebin_string": "1.0,2.0"})
+        self.check_bad_and_good_value({"q_1d_rebin_string": "1.,2.,3.,4."}, {"q_1d_rebin_string": "1.,1.,3.,1.,5."})
+        self.check_bad_and_good_value({"q_1d_rebin_string": "1.,2.,a"}, {"q_1d_rebin_string": "1.,2.,3."})
+        self.check_bad_and_good_value({"q_1d_rebin_string": "1.,1.,2.,1.,1.5"}, {"q_1d_rebin_string": "1.,2.,3."})
 
     def test_that_raises_when_no_q_bounds_are_set_for_explicit_2D_reduction(self):
         self.check_bad_and_good_value({"q_xy_max": None, "q_xy_step": None,
@@ -100,8 +106,7 @@ class StateConvertToQBuilderTest(unittest.TestCase):
 
         builder.set_q_min(12.0)
         builder.set_q_max(17.0)
-        builder.set_q_step(1.)
-        builder.set_q_step_type(RangeStepType.Lin)
+        builder.set_q_1d_rebin_string("12.0,-1.2,17.0")
         builder.set_reduction_dimensionality(ReductionDimensionality.OneDim)
 
         state = builder.build()
@@ -109,8 +114,7 @@ class StateConvertToQBuilderTest(unittest.TestCase):
         # Assert
         self.assertTrue(state.q_min == 12.0)
         self.assertTrue(state.q_max == 17.0)
-        self.assertTrue(state.q_step == 1.)
-        self.assertTrue(state.q_step_type is RangeStepType.Lin)
+        self.assertTrue(state.q_1d_rebin_string == "12.0,-1.2,17.0")
         self.assertTrue(state.reduction_dimensionality is ReductionDimensionality.OneDim)
 
 

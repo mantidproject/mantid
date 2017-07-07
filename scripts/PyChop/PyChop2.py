@@ -5,6 +5,7 @@ This module contains the PyChop2 class which allows calculation of the resolutio
 direct geometry time-of-flight inelastic neutron spectrometers.
 """
 
+from __future__ import (absolute_import, division, print_function)
 from .ISISFermi import ISISFermi
 from .ISISDisk import ISISDisk
 

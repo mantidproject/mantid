@@ -85,6 +85,7 @@ public:
   }
 
 private:
+  void checkAndSanitizeHistogram(HistogramData::Histogram &histogram) override;
   const HistogramData::Histogram &histogramRef() const override {
     return m_histogram;
   }

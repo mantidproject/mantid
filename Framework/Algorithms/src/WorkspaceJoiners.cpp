@@ -122,7 +122,8 @@ MatrixWorkspace_sptr WorkspaceJoiners::execEvent() {
   // Create the output workspace
   const size_t totalHists =
       event_ws1->getNumberHistograms() + event_ws2->getNumberHistograms();
-  auto output = create<EventWorkspace>(*event_ws1, totalHists);
+  auto output =
+      create<EventWorkspace>(*event_ws1, totalHists, event_ws1->binEdges(0));
 
   // Initialize the progress reporting object
   m_progress = new API::Progress(this, 0.0, 1.0, totalHists);

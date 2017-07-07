@@ -46,8 +46,8 @@ void DivideMD::checkInputs() {
 template <typename MDE, size_t nd>
 void DivideMD::execEventScalar(typename MDEventWorkspace<MDE, nd>::sptr ws) {
   // Get the scalar multiplying
-  float scalar = float(m_rhs_scalar->dataY(0)[0]);
-  float scalarError = float(m_rhs_scalar->dataE(0)[0]);
+  float scalar = float(m_rhs_scalar->y(0)[0]);
+  float scalarError = float(m_rhs_scalar->e(0)[0]);
   float scalarErrorSquared = scalarError * scalarError;
   float inverseScalarSquared = 1.f / (scalar * scalar);
 
@@ -121,7 +121,7 @@ void DivideMD::execHistoHisto(
 void DivideMD::execHistoScalar(
     Mantid::DataObjects::MDHistoWorkspace_sptr out,
     Mantid::DataObjects::WorkspaceSingleValue_const_sptr scalar) {
-  out->divide(scalar->dataY(0)[0], scalar->dataE(0)[0]);
+  out->divide(scalar->y(0)[0], scalar->e(0)[0]);
 }
 
 } // namespace Mantid

@@ -149,7 +149,7 @@ void PredictFractionalPeaks::exec() {
   IPeak &peak0 = Peaks->getPeak(0);
   int RunNumber = peak0.getRunNumber();
   Gon = peak0.getGoniometerMatrix();
-  Progress prog(this, 0, 1, N);
+  Progress prog(this, 0.0, 1.0, N);
   if (includePeaksInRange) {
 
     hkl[0] = Hmin;

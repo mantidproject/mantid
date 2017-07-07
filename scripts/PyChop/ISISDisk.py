@@ -6,6 +6,7 @@ Contains the ISISDisk class which calculates resolution and flux for ISIS Disk c
 spectrometer (LET) - using the functions in MulpyRep and additional tables of instrument parameters
 """
 
+from __future__ import (absolute_import, division, print_function)
 import numpy as np
 from . import MulpyRep
 from .ISISFermi import ISISFermi
@@ -189,10 +190,13 @@ class ISISDisk:
             res = []
             for en in Et:
                 Ef = Eis[ie] - en
-                fac = (Ef/Eis[ie])**1.5
-                chopRes = (2*chop_width[ie]/t_mod_chop) * (1+((self.samp_det+self.chop_samp+lastChopDist)/self.samp_det)*fac)
-                modRes = (2*mod_width[ie]/t_mod_chop) * (1+(self.chop_samp/self.samp_det)*fac)
-                res.append(np.sqrt(chopRes**2 + modRes**2)*Eis[ie])
+                if (Ef > 0):
+                    fac = (Ef/Eis[ie])**1.5
+                    chopRes = (2*chop_width[ie]/t_mod_chop) * (1+((self.samp_det+self.chop_samp+lastChopDist)/self.samp_det)*fac)
+                    modRes = (2*mod_width[ie]/t_mod_chop) * (1+(self.chop_samp/self.samp_det)*fac)
+                    res.append(np.sqrt(chopRes**2 + modRes**2)*Eis[ie])
+                else:
+                    res.append(np.nan)
             if len(ie_list) == 1:
                 res_list = res
             else:
@@ -201,9 +205,9 @@ class ISISDisk:
         chop_width = np.array(chop_width) * (self.samp_det + self.chop_samp + lastChopDist) / lastChopDist
         mod_width = np.array(mod_width) * (self.chop_samp + self.samp_det) / lastChopDist
         if len(ie_list) == 1:
-            chop_width = chop_width[ie_list]
-            mod_width = mod_width[ie_list]
-            res_el = res_el[int(ie_list)]
+            chop_width = chop_width[ie_list[0]]
+            mod_width = mod_width[ie_list[0]]
+            res_el = res_el[ie_list[0]]
         return Eis, res_list, res_el, percent, ie_list, chop_width, mod_width
 
     def getElasticResolution(self, Ei_in=None, frequency=None):
@@ -449,6 +453,6 @@ class ISISDisk:
         if Ei:
             idx1 = (np.abs(Eis - Ei) / np.abs(Eis)) < 0.1
             idx += idx1
-        Eis = np.array([Eis[i] for i in range(len(Eis)) if idx[i]])
-        lines = np.array([lines[i] for i in range(len(Eis)) if idx[i]])
+        Eis = Eis[idx]
+        lines = np.array(lines)[idx]
         return Eis, lines

@@ -62,6 +62,7 @@ public:
   MOCK_METHOD0(clearCommands, void());
   MOCK_METHOD2(setInstrumentList,
                void(const std::vector<std::string> &, const std::string &));
+  MOCK_METHOD2(setRowActionEnabled, void(int, bool));
 
   // Calls we don't care about
   void showSearch(ReflSearchModel_sptr) override{};
@@ -95,9 +96,14 @@ public:
   MOCK_CONST_METHOD0(getI0MonitorIndex, std::string());
   MOCK_CONST_METHOD0(getProcessingInstructions, std::string());
   MOCK_CONST_METHOD0(getTransmissionRuns, std::string());
+  MOCK_CONST_METHOD1(setIsPolCorrEnabled, void(bool));
   MOCK_CONST_METHOD1(setPolarisationOptionsEnabled, void(bool));
   MOCK_CONST_METHOD1(setExpDefaults, void(const std::vector<std::string> &));
-  MOCK_CONST_METHOD1(setInstDefaults, void(const std::vector<double> &));
+  MOCK_CONST_METHOD2(setInstDefaults, void(const std::vector<double> &,
+                                           const std::vector<std::string> &));
+  MOCK_CONST_METHOD0(getDetectorCorrectionType, std::string());
+  MOCK_CONST_METHOD0(experimentSettingsEnabled, bool());
+  MOCK_CONST_METHOD0(instrumentSettingsEnabled, bool());
   // Calls we don't care about
   void
   createStitchHints(const std::map<std::string, std::string> &hints) override {
@@ -109,7 +115,8 @@ public:
 class MockEventView : public IReflEventView {
 public:
   // Global options
-  MOCK_CONST_METHOD0(getTimeSlices, std::string());
+  MOCK_CONST_METHOD0(getTimeSlicingValues, std::string());
+  MOCK_CONST_METHOD0(getTimeSlicingType, std::string());
 
   // Calls we don't care about
   IReflEventPresenter *getPresenter() const override { return nullptr; }
@@ -165,13 +172,18 @@ public:
 
 class MockEventPresenter : public IReflEventPresenter {
 public:
-  MOCK_CONST_METHOD0(getTimeSlicingOptions, std::string());
+  MOCK_CONST_METHOD0(getTimeSlicingValues, std::string());
+  MOCK_CONST_METHOD0(getTimeSlicingType, std::string());
   ~MockEventPresenter() override{};
 };
 
 class MockEventTabPresenter : public IReflEventTabPresenter {
 public:
-  std::string getTimeSlicingOptions(int group) const override {
+  std::string getTimeSlicingValues(int group) const override {
+    UNUSED_ARG(group)
+    return std::string();
+  };
+  std::string getTimeSlicingType(int group) const override {
     UNUSED_ARG(group)
     return std::string();
   };
@@ -180,6 +192,7 @@ public:
 
 class MockSettingsPresenter : public IReflSettingsPresenter {
 public:
+  MOCK_CONST_METHOD1(getTransmissionRuns, std::string(bool));
   MOCK_CONST_METHOD0(getTransmissionOptions, std::string());
   MOCK_CONST_METHOD0(getReductionOptions, std::string());
   MOCK_CONST_METHOD0(getStitchOptions, std::string());
@@ -190,6 +203,7 @@ public:
 
 class MockSettingsTabPresenter : public IReflSettingsTabPresenter {
 public:
+  MOCK_CONST_METHOD2(getTransmissionRuns, std::string(int, bool));
   MOCK_CONST_METHOD1(getTransmissionOptions, std::string(int));
   MOCK_CONST_METHOD1(getReductionOptions, std::string(int));
   MOCK_CONST_METHOD1(getStitchOptions, std::string(int));
@@ -210,11 +224,13 @@ public:
 
 class MockMainWindowPresenter : public IReflMainWindowPresenter {
 public:
+  MOCK_CONST_METHOD1(getTransmissionRuns, std::string(int));
   MOCK_CONST_METHOD1(getTransmissionOptions, std::string(int));
   MOCK_CONST_METHOD1(getReductionOptions, std::string(int));
   MOCK_CONST_METHOD1(getStitchOptions, std::string(int));
   MOCK_CONST_METHOD1(setInstrumentName, void(const std::string &instName));
   MOCK_CONST_METHOD0(getInstrumentName, std::string());
+  MOCK_METHOD1(notify, void(Flag));
   MOCK_METHOD3(askUserString,
                std::string(const std::string &, const std::string &,
                            const std::string &));
@@ -225,10 +241,15 @@ public:
   MOCK_METHOD2(giveUserInfo, void(const std::string &, const std::string &));
   MOCK_METHOD1(runPythonAlgorithm, std::string(const std::string &));
   // Other calls we don't care about
-  std::string getTimeSlicingOptions(int group) const override {
+  std::string getTimeSlicingValues(int group) const override {
     UNUSED_ARG(group);
     return std::string();
-  };
+  }
+  std::string getTimeSlicingType(int group) const override {
+    UNUSED_ARG(group);
+    return std::string();
+  }
+  bool checkIfProcessing() const override { return false; }
 
   ~MockMainWindowPresenter() override{};
 };

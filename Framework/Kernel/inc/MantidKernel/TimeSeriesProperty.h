@@ -8,13 +8,19 @@
 #include "MantidKernel/DllConfig.h"
 #include "MantidKernel/ITimeSeriesProperty.h"
 #include "MantidKernel/Property.h"
-#include "MantidKernel/PropertyNexus.h"
 #include "MantidKernel/Statistics.h"
 #include <cstdint>
 #include <utility>
 
+// Forward declare
+namespace NeXus {
+class File;
+}
+
 namespace Mantid {
 namespace Kernel {
+class DataItem;
+class SplittingInterval;
 
 enum TimeSeriesSortStatus { TSUNKNOWN, TSUNSORTED, TSSORTED };
 
@@ -157,6 +163,12 @@ public:
   void splitByTime(std::vector<SplittingInterval> &splitter,
                    std::vector<Property *> outputs,
                    bool isPeriodic) const override;
+
+  /// New split method
+  void splitByTimeVector(std::vector<DateAndTime> &splitter_time_vec,
+                         std::vector<int> &target_vec,
+                         std::vector<TimeSeriesProperty *> outputs);
+
   /// Fill a TimeSplitterType that will filter the events by matching
   void makeFilterByValue(std::vector<SplittingInterval> &split, double min,
                          double max, double TimeTolerance = 0.0,

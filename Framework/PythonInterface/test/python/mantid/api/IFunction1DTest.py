@@ -19,6 +19,7 @@ class Times2(IFunction1D):
         self.declareAttribute("DoubleAtt", 3.4)
         self.declareAttribute("StringAtt", "filename")
         self.declareAttribute("BoolAtt", True)
+        self.declareAttribute("ListAtt", [1, 2, 3])
 
         self.declareParameter("ParamZeroInitNoDescr")
         self.declareParameter("ParamNoDescr", 1.5)
@@ -55,8 +56,8 @@ class IFunction1DTest(unittest.TestCase):
     def test_declareAttribute_only_accepts_known_types(self):
         func = Times2()
         func.initialize() # Contains known types
-        self.assertEquals(4, func.nAttributes()) # Make sure initialize ran
-        self.assertRaises(ValueError, func.declareAttribute, "ListAtt", [1,2,3])
+        self.assertEquals(5, func.nAttributes()) # Make sure initialize ran
+        self.assertRaises(ValueError, func.declareAttribute, "DictAtt", {1,2,3})
 
     def test_correct_attribute_values_are_returned_when_asked(self):
         func = Times2()

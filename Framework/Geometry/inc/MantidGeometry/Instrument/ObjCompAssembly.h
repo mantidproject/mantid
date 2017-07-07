@@ -89,7 +89,7 @@ public:
   void printChildren(std::ostream &) const override;
   void printTree(std::ostream &) const override;
 
-  const Kernel::Quat getRotation() const override;
+  Kernel::Quat getRotation() const override;
   Kernel::V3D getPos() const override;
 
   //! Set the outline of the assembly
@@ -101,6 +101,9 @@ public:
   void testIntersectionWithChildren(
       Track & /*testRay*/,
       std::deque<IComponent_const_sptr> & /*searchQueue*/) const override;
+
+  void registerContents(
+      class Mantid::Geometry::ComponentVisitor &visitor) const override;
 
 private:
   /// Private copy assignment operator

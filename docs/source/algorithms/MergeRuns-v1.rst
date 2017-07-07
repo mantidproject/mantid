@@ -73,11 +73,18 @@ When performing the tolerance check for the warn or fail options it is always
 with respect to the first workspace in the merge. When choosing via the GUI
 this will be the first workspace that was selected.
 
-**Note:** this currently only works when the underying workspaces being merged are
+**Note:** this currently only works when the underlying workspaces being merged are
 Matrix Workspaces.
+
+**Note:** The sample log in the merged workspace is replaced in the case of Sum,
+Time Series and List merges. This means these merge types can not be used together
+for a given sample log.
 
 .. code-block:: xml
 
+    <parameter name="sample_logs_sum" type="string">
+        <value val="duration, monitor1.monsum" />
+    </parameter>
     <parameter name="sample_logs_time_series" type="string">
         <value val="sample.temperature, sample.pressure" />
     </parameter>
@@ -171,6 +178,23 @@ Output:
 
 .. include:: ../usagedata-note.txt
 
+**Example: Merge Workspace Summing Sample Logs**
+
+.. testcode:: MergeSampleLogs
+
+  Load(Filename='MUSR00015189.nxs, MUSR00015190.nxs', OutputWorkspace='gws')
+
+  merged = MergeRuns(InputWorkspaces='MUSR00015189_1, MUSR00015190_1',
+                     SampleLogsSum='dur')
+
+  print(merged.run().getLogData('dur').value)
+
+Output:
+
+.. testoutput:: MergeSampleLogs
+
+  200.0
+
 **Example: Merge Workspace Combining Sample Logs as a TimeSeries**
 
 .. testcode:: MergeSampleLogs
@@ -180,7 +204,7 @@ Output:
   merged = MergeRuns(InputWorkspaces='MUSR00015189_1, MUSR00015190_1',
                      SampleLogsTimeSeries='sample_magn_field')
 
-  print merged.run().getLogData('sample_magn_field_time_series').valueAsString().rstrip()
+  print(merged.run().getLogData('sample_magn_field').valueAsString().rstrip())
 
 Output:
 
@@ -198,7 +222,7 @@ Output:
   merged = MergeRuns(InputWorkspaces='MUSR00015189_1, MUSR00015190_1',
                      SampleLogsList='sample_magn_field')
 
-  print merged.run().getLogData('sample_magn_field_list').value
+  print(merged.run().getLogData('sample_magn_field').value)
 
 Output:
 
@@ -216,7 +240,7 @@ Output:
                      SampleLogsTimeSeries='sample_temp',
                      SampleLogsWarn='sample_magn_field')
 
-  print merged.run().getLogData('sample_temp_time_series').size()
+  print(merged.run().getLogData('sample_temp').size())
 
 Output:
 
@@ -231,11 +255,11 @@ Output:
   Load(Filename='MUSR00015189.nxs, MUSR00015190.nxs', OutputWorkspace='gws')
 
   merged = MergeRuns(InputWorkspaces='MUSR00015189_1, MUSR00015190_1',
-                     SampleLogsTimeSeries='sample_magn_field',
+                     SampleLogsTimeSeries='sample_temp',
                      SampleLogsFail='sample_magn_field, nspectra',
                      SampleLogsFailTolerances='5, 0')
 
-  print merged.run().getLogData('sample_magn_field_time_series').size()
+  print(merged.run().getLogData('sample_temp').size())
 
 Output:
 

@@ -142,6 +142,7 @@ private:
     for (int i = 0; i < ndets; ++i) {
       Detector *detector = new Detector("det", i + 1, shape, NULL);
       detector->setPos(i * 0.2, i * 0.2, 5);
+      instrument->add(detector);
       instrument->markAsDetector(detector);
       detectors.push_back(detector);
     }

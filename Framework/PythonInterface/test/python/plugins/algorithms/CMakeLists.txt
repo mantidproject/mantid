@@ -2,16 +2,14 @@
 ## Tests for PythonAlgorithms
 ##
 
+add_subdirectory( WorkflowAlgorithms )
+
 set ( TEST_PY_FILES
   AbinsBasicTest.py
   AbinsAdvancedParametersTest.py
-  AddSampleLogMultipleTest.py
   AlignComponentsTest.py
   AngularAutoCorrelationsSingleAxisTest.py
   AngularAutoCorrelationsTwoAxesTest.py
-  ApplyPaalmanPingsCorrectionTest.py
-  BayesQuasiTest.py
-  BayesStretchTest.py
   BinWidthAtXTest.py
   CalculateSampleTransmissionTest.py
   CheckForSampleLogsTest.py
@@ -20,51 +18,31 @@ set ( TEST_PY_FILES
   ComputeCalibrationCoefVanTest.py
   CorrectLogTimesTest.py
   CreateLeBailFitInputTest.py
-  DetectorFloodWeightingTest.py
-  IndirectCalibrationTest.py
   CorrectTOFTest.py
   CreateWorkspaceTest.py
   CylinderPaalmanPingsCorrection2Test.py
   DakotaChiSquaredTest.py
+  DeltaPDF3DTest.py
   DNSComputeDetEffCorrCoefsTest.py
   DNSMergeRunsTest.py
   DNSFlippingRatioCorrTest.py
   DSFinterpTest.py
-  EnergyWindowScanTest.py
   EnggCalibrateFullTest.py
   EnggCalibrateTest.py
   EnggFitDIFCFromPeaksTest.py
   EnggFitPeaksTest.py
   EnggFocusTest.py
   EnggVanadiumCorrectionsTest.py
-  ExportSpectraMaskTest.py   
+  ExportSpectraMaskTest.py
   FilterLogByTimeTest.py
   FindEPPTest.py
   FindReflectometryLinesTest.py
   FitGaussianTest.py
-  FlatPlatePaalmanPingsCorrectionTest.py
   GetQsInQENSDataTest.py
   GSASIIRefineFitPeaksTest.py
   GetEiT0atSNSTest.py
   GetNegMuMuonicXRDTest.py
-  ILLIN16BCalibrationTest.py
-  IndirectAnnulusAbsorptionTest.py
-  IndirectCylinderAbsorptionTest.py
-  IndirectFlatPlateAbsorptionTest.py
-  IndirectAnnulusAbsorption2Test.py
-  IndirectCylinderAbsorption2Test.py
-  IndirectFlatPlateAbsorption2Test.py
-  IndirectILLEnergyTransferTest.py
-  IndirectILLReductionTest.py
-  IndirectILLReductionFWSTest.py
-  IndirectILLReductionQENSTest.py
-  IndirectResolutionTest.py
   IndirectTransmissionTest.py
-  IndirectTransmissionMonitorTest.py
-  IqtFitMultipleTest.py
-  IqtFitSequentialTest.py
-  ISISIndirectDiffractionReductionTest.py
-  ISISIndirectEnergyTransferTest.py
   LoadDNSLegacyTest.py
   LoadEmptyVesuvioTest.py
   LoadFullprofFileTest.py
@@ -81,59 +59,45 @@ set ( TEST_PY_FILES
   MeanTest.py
   MedianBinWidthTest.py
   MergeCalFilesTest.py
-  MolDynTest.py
-  MSDFitTest.py
   MuscatSofQWTest.py
   NMoldyn4InterpolationTest.py
   NormaliseSpectraTest.py
-  OSIRISDiffractionReductionTest.py
-  ResNorm2Test.py
   RetrieveRunInfoTest.py
-  SANSStitchTest.py
-  SANSFitShiftScaleTest.py
   SANSWideAngleCorrectionTest.py
   SaveNexusPDTest.py
-  SavePlot1DTest.py
   SavePlot1DAsJsonTest.py
   SaveVulcanGSSTest.py
   ExtractMonitorsTest.py
   SetDetScaleTest.py
-  SimulatedDensityOfStatesTest.py
   SortByQVectorsTest.py
-  SofQWMomentsTest.py
-  SofQWMomentsScanTest.py
   SortDetectorsTest.py
   SortXAxisTest.py
   StatisticsOfTableWorkspaceTest.py
   StringToPngTest.py
   SuggestTibCNCSTest.py
   SuggestTibHYSPECTest.py
-  SwapWidthsTest.py
   SymmetriseTest.py
   UpdatePeakParameterTableValueTest.py
-  SANSDarkRunBackgroundCorrectionTest.py
   SANSSubtractTest.py
-  TimeSliceTest.py
   TOFTOFCropWorkspaceTest.py
   TOFTOFMergeRunsTest.py
-  TOSCABankCorrectionTest.py
-  TransformToIqtTest.py
   ExportSampleLogsToCSVFileTest.py
   ExportExperimentLogTest.py
   PoldiMergeTest.py
   VelocityCrossCorrelationsTest.py
   VelocityAutoCorrelationsTest.py
   SelectNexusFilesByMetadataTest.py
-  VesuvioDiffractionReductionTest.py
+  VesuvioPeakPredictionTest.py
   VesuvioPreFitTest.py
   VesuvioResolutionTest.py
   VesuvioThicknessTest.py
   VesuvioTOFFitTest.py
   PoldiCreatePeaksFromFileTest.py
   LoadCIFTest.py
+  SaveYDATest.py
 )
 
 check_tests_valid ( ${CMAKE_CURRENT_SOURCE_DIR} ${TEST_PY_FILES} )
 
 # Prefix for test name=PythonAlgorithms
-pyunittest_add_test ( ${CMAKE_CURRENT_SOURCE_DIR} PythonAlgorithms ${TEST_PY_FILES} )
+pyunittest_add_test ( ${CMAKE_CURRENT_SOURCE_DIR} python.algorithms ${TEST_PY_FILES} )

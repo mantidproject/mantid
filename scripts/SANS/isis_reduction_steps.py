@@ -1937,6 +1937,8 @@ class NormalizeToMonitor(ReductionStep):
         self.output_wksp = None
 
     def execute(self, reducer, workspace):
+        self.set_prompt_parameter_if_not_set(reducer)
+
         normalization_spectrum = self._normalization_spectrum
         if normalization_spectrum is None:
             # the -1 converts from spectrum number to spectrum index
@@ -1979,6 +1981,17 @@ class NormalizeToMonitor(ReductionStep):
         else:
             r_alg = 'Rebin'
         reducer.to_wavelen.execute(reducer, self.output_wksp, bin_alg=r_alg)
+
+    def set_prompt_parameter_if_not_set(self, reducer):
+        """
+        This method sets default prompt peak values in case the user has not provided some. Currently
+        we only use default values for LOQ.
+        """
+        if (reducer.transmission_calculator.removePromptPeakMin is None and
+           reducer.transmission_calculator.removePromptPeakMax is None):
+            if reducer.instrument.name() == "LOQ":
+                reducer.transmission_calculator.removePromptPeakMin = 19000.0  # Units of micro-seconds
+                reducer.transmission_calculator.removePromptPeakMax = 20500.0  # Units of micro-seconds
 
 
 class TransmissionCalc(ReductionStep):

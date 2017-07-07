@@ -493,7 +493,6 @@ void PeaksViewer::updatePeaksWorkspace(
 bool PeaksViewer::removePeaksWorkspace(
     boost::shared_ptr<const Mantid::API::IPeaksWorkspace> toRemove) {
   bool somethingToRemove = false;
-
   if (m_presenter) {
 
     QList<PeaksWorkspaceWidget *> children =
@@ -513,6 +512,7 @@ bool PeaksViewer::removePeaksWorkspace(
         break;
       }
     }
+    m_presenter->hideInPlot(toRemove, somethingToRemove);
     m_presenter->remove(toRemove);
   }
   return somethingToRemove;

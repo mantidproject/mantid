@@ -4,9 +4,9 @@ see http://www.mantidproject.org/IDF -->
 <instrument xmlns="http://www.mantidproject.org/IDF/1.0"
             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
             xsi:schemaLocation="http://www.mantidproject.org/IDF/1.0 Schema/IDFSchema.xsd"
-            name="IMAT" valid-from ="2016-07-15 00:00:00"
+            name="IMAT" valid-from ="2017-02-25 00:00:00"
             valid-to ="2100-01-01 23:59:59"
-            last-modified="2016-08-03 18:46:01">
+            last-modified="2017-03-03 22:00:00">
   <defaults>
     <length unit="meter"/>
     <angle unit="degree"/>
@@ -22,176 +22,270 @@ see http://www.mantidproject.org/IDF -->
   <!-- BRIEF DESCRIPTION OF IMAT INSTRUMENT:
        IMAT (Imaging and Materials Science & Engineering)
   -->
+<!-- First, the source, sample and monitors -->
 
-  <!-- LIST OF PHYSICAL COMPONENTS (which the instrument consists of) -->
+<component type="some source type">
+  <location z="-56.0" />
+</component>
+<component type="sample position">
+  <location x="0.0" y="0.0" z="0.0" />
+</component>
+<type name="some source type" is="Source">
+  <properties />
+</type>
+<type name="sample position" is="SamplePos">
+  <properties />
+</type>
 
-  <!-- source and sample-position components -->
+<!-- Monitor locations are approximate guesses for now! -->
 
-  <component type="source">
-    <location z="-56.0"/>
-  </component>
-  <type name="source" is="Source" />
-
-  <component type="default-sample-holder">
-    <location />
-  </component>
-
-  <!-- Place detector components (including monitors) -->
-
-  <!-- Monitors -->
-  <component type="monitors" idlist="monitors">
-    <location />
-  </component>
-
-
-  <!-- The current sequence in the nexus files / workspaces seems to be:
-   monitors (13+1): workspace indices 0..13   (0..12+"1 off" monitors)
-   200 elements: workspace indices 14..213 + 224 "additional"?
-   16 PMT (32 elements): workspace indices 416..443
-   -->
-
-  <!-- This places the "200 elements" prototype diffraction detector 1.77m to the left of the sample (seen in the direction of the beam) -->
-  <component type="200-elements" idstart="14" idfillbyfirst="n" idstep="1" idstepbyrow="100">
-	<!--<location r="1.77" theta="-90" phi="0" rot="90" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="prototype-detector-200-elements"/> -->
-	<location x="+1.77" rot="90" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="prototype-detector-200-elements"/>
-  </component>
-
-  <!-- gap of 202 spectra between workspace indices [214..415] -->
-  <!-- use this if we need gaps between the detector blocks: -->
-  <component type="dummy-gap" idstart="214" idfillbyfirst="y" idstep="1" idstepbyrow="1">
-    <location z="-100000"/>
-  </component>
-
-  <!-- Place the 16PMT prototype diffraction detector. 1.895m to the right of the sample (seen in the direction of the beam) -->
-  <component type="16PMT" idstart="416" idfillbyfirst="n" idstep="1" idstepbyrow="16">
-   <!-- <location r="1.895" theta="90" phi="0" rot="90" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="prototype-detector-16PMT"/> -->
-   <location x="-1.895" rot="-90" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="prototype-detector-16PMT"/>
-  </component>
+<!-- Monitors -->
+<component type="monitors" idlist="monitors">
+  <location />
+</component>
 
 
-  <!-- "Camera" -->
-  <component type="old-mcp-definition" idstart="1000000" idfillbyfirst="y" idstep="1" idstepbyrow="1">
-    <location z="10" x="0.0" name="detector-old-mcp"/>
+<type name="monitors">
+  <component type="monitor-cylinder">
+     <!--Example, first monitor is at 11.6534 m from the source, in the direction towards the sample => z = 11.6534 - 56 = -44.3466 (from the sample, which is at z=0)-->
+    <!--11.6534 - 56 -->
+    <location z="-44.3466" name="monitor1a"/>  
+    <location z="-44.3466" name="monitor1b"/>
+    <!--19.8144 - 56 -->
+    <location z="-36.1856" name="monitor2a"/>  
+    <location z="-36.1856" name="monitor2b"/>
+    <!--20.8944 - 56 -->
+    <location z="-35.1056" name="monitor3a"/>  
+    <location z="-35.1056" name="monitor3b"/>
+    <!--46.1774 - 56 -->
+    <location z="-9.8226" name="monitor4a"/>  
+    <location z="-9.8226" name="monitor4b"/>
+    
+    <!--49.0 - 56 -->
+    <location z="-7" name="monitor5a"/>  
+    <location z="-7" name="monitor5b"/>
+  
   </component>
 
-  <!-- A cuboid sample holder -->
-  <!-- <type name="default-sample-holder" is="SamplePos" /> -->
-  <type name="default-sample-holder" is="SamplePos">
-    <cuboid id="shape">
-      <left-front-bottom-point  x="0.02"  y="-0.02" z="0.0"   />
-      <left-front-top-point     x="0.02"  y="-0.02" z="0.02"  />
-      <left-back-bottom-point   x="-0.02" y="-0.02" z="0.0"   />
-      <right-front-bottom-point x="0.02"  y="0.02"  z="0.0"   />
-    </cuboid>
-    <algebra val="shape" />
-  </type>
+  <!-- We don't really care about those showing up in the Instrument View -->
+  <component type="dummy-monitor">
+    <!--56 - 56-->
+    <location z="0.0" name="CalMon"/>   
+  
+    <!--60 - 56-->
+    <location z="4.0" name="He_in"/>   
+    <location z="4.0" name="He_out"/>
+    <!--dummy monitor (off) -->
+    <location z="0"/>  
+  </component>
+</type>
+
+<!-- Shape of the monitors -->
+<type name="dummy-monitor" is="monitor">
+<!-- empty definition of dummy monitor -->
+</type>
+<type name="monitor-cylinder" is="monitor">
+  <properties>
+    Copied from monitor.dat:
+
+    name:: box
+    rank:: 2
+    dimensions:: 2 4
+    values:: -45.00  -2.00
+    45.00  -2.00
+    135.00  -2.00
+    225.00  -2.00
+  </properties>
+
+  <cylinder id="cylinder-shape">
+    <centre-of-bottom-base r="0.0" t="0.0" p="0.0" />
+    <axis x="0.0" y="0.0" z="1.0" />
+    <radius val="0.01" />
+    <height val="0.03" />
+  </cylinder>
+</type>
+
+<!-- IDs for the monitors -->
+<idlist idname="monitors">
+  <id start="0" end="13" />
+</idlist>
+
+<!-- There are two banks, North and South. 
+     Each bank contains five modules, stacked vertically above each other. 
+     The modules are of identical design, but the modules are not quite symmetrical in the horizontal direction.
+     Accordingly, the modules in the South bank are installed upside down relative to those in the North bank.
+     This ensures that the range of two-theta angles is the same for both banks. -->
+<component name="NorthBank" type="detector-bank" idlist="NorthBank">
+  <!-- The North bank is on the left, as viewed from the neutron source looking towards the sample.
+       In the coordinate system of the bank, X axis points in direction of increasing two theta (to the
+	   left as viewed from the sample position), Y axis points upwards, and the Z axis faces away from gauge volume. -->
+  <location x="+1.915" y="0" z="0" rot="90" axis-x="0" axis-y="1" axis-z="0"/>
+</component>
+
+<component name="SouthBank" type="detector-bank" idlist="SouthBank">
+  <!-- The South bank is on the right, so rotate 90 degrees the other way this time -->
+  <location x="-1.915" y="0" z="0" rot="-90" axis-x="0" axis-y="1" axis-z="0">
+    <!-- However, this would mean that the X axis is pointing towards the low end of the two theta range.
+	     The detector pixels are not symmetrically distributed around the centre of the module, and this
+		 would make the pixel distribution back to front. So, we rotate the entire bank around the (new)
+		 Z-axis, turning it upside down. The pixel two theta values will be correct, but the order of the
+		 modules is therefore top-to-bottom for the South bank, even though they are defined below from
+		 bottom to top. The new Y axis will also point downwards. -->
+    <rot val="180" axis-x="0" axis-y="0" axis-z="1" />
+  </location>
+</component>
+
+<type name="detector-bank">
+  <properties />
+  <component type="detector-module">
+    <location  x="0" y="0" z="0" rot="0" axis-x="1" axis-y="0" axis-z="0"/>
+  </component>
+</type>
+
+<type name="detector-module">
+  <!-- Z axis faces away from gauge volume, so that we can use 'facing'.
+       Note that all components created so far (both the banks and the modules within
+       the banks) are located at 0,0,0 (the sample position) but with different orientations. -->
+  <!-- The modules are divided internally into 9 blocks of 25 pixels each, giving 225 pixels.
+       The pixel at the lowest two-theta and the two pixels at the highest two-theta are not used,
+	   giving 240 active pixels over the width of the module. The is a small gap of about 2.2 mm
+	   between the blocks, although the design is specified in terms of a 3 mm pixel pitch within
+	   the block, and 3.2 degree two-theta offset between the centre of neighbouring blocks.
+	   The blocks, and the pixels within each block, are specified in order from the lowest to the
+	   highest two-theta -->
+  <component type="detector-block">
+    <!-- We have a total of 2 detector blocks per ROW -->
+    <location r="0" t="0" p="0"> <facing x="0.0" y="0.0" z="0.0"/> </location>
+    <location r="0" t="-0" p="0"> <facing x="0.0" y="0.0" z="0.0"/> </location>
+  </component>
+</type>
+<!-- Pixels inside a single detector block -->
+<type name="detector-block">
+  <!--# we need 100 pixels per row-->
+  <component type="detector-pixel">
+    <location x="0.196" y="0" z="0" name="pixel1" /> 
+    <location x="0.192" y="0" z="0" name="pixel2" /> 
+    <location x="0.188" y="0" z="0" name="pixel3" /> 
+    <location x="0.184" y="0" z="0" name="pixel4" /> 
+    <location x="0.18" y="0" z="0" name="pixel5" /> 
+    <location x="0.176" y="0" z="0" name="pixel6" /> 
+    <location x="0.172" y="0" z="0" name="pixel7" /> 
+    <location x="0.168" y="0" z="0" name="pixel8" /> 
+    <location x="0.164" y="0" z="0" name="pixel9" /> 
+    <location x="0.16" y="0" z="0" name="pixel10" /> 
+    <location x="0.156" y="0" z="0" name="pixel11" /> 
+    <location x="0.152" y="0" z="0" name="pixel12" /> 
+    <location x="0.148" y="0" z="0" name="pixel13" /> 
+    <location x="0.144" y="0" z="0" name="pixel14" /> 
+    <location x="0.14" y="0" z="0" name="pixel15" /> 
+    <location x="0.136" y="0" z="0" name="pixel16" /> 
+    <location x="0.132" y="0" z="0" name="pixel17" /> 
+    <location x="0.128" y="0" z="0" name="pixel18" /> 
+    <location x="0.124" y="0" z="0" name="pixel19" /> 
+    <location x="0.12" y="0" z="0" name="pixel20" /> 
+    <location x="0.116" y="0" z="0" name="pixel21" /> 
+    <location x="0.112" y="0" z="0" name="pixel22" /> 
+    <location x="0.108" y="0" z="0" name="pixel23" /> 
+    <location x="0.104" y="0" z="0" name="pixel24" /> 
+    <location x="0.1" y="0" z="0" name="pixel25" /> 
+    <location x="0.096" y="0" z="0" name="pixel26" /> 
+    <location x="0.092" y="0" z="0" name="pixel27" /> 
+    <location x="0.088" y="0" z="0" name="pixel28" /> 
+    <location x="0.084" y="0" z="0" name="pixel29" /> 
+    <location x="0.08" y="0" z="0" name="pixel30" /> 
+    <location x="0.076" y="0" z="0" name="pixel31" /> 
+    <location x="0.072" y="0" z="0" name="pixel32" /> 
+    <location x="0.068" y="0" z="0" name="pixel33" /> 
+    <location x="0.064" y="0" z="0" name="pixel34" /> 
+    <location x="0.06" y="0" z="0" name="pixel35" /> 
+    <location x="0.056" y="0" z="0" name="pixel36" /> 
+    <location x="0.052" y="0" z="0" name="pixel37" /> 
+    <location x="0.048" y="0" z="0" name="pixel38" /> 
+    <location x="0.044" y="0" z="0" name="pixel39" /> 
+    <location x="0.04" y="0" z="0" name="pixel40" /> 
+    <location x="0.036" y="0" z="0" name="pixel41" /> 
+    <location x="0.032" y="0" z="0" name="pixel42" /> 
+    <location x="0.028" y="0" z="0" name="pixel43" /> 
+    <location x="0.024" y="0" z="0" name="pixel44" /> 
+    <location x="0.02" y="0" z="0" name="pixel45" /> 
+    <location x="0.016" y="0" z="0" name="pixel46" /> 
+    <location x="0.012" y="0" z="0" name="pixel47" /> 
+    <location x="0.008" y="0" z="0" name="pixel48" /> 
+    <location x="0.004" y="0" z="0" name="pixel49" /> 
+    <location x="0.000" y="0" z="0" name="pixel50" /> 
+    <location x="-0.004" y="0" z="0" name="pixel51" /> 
+    <location x="-0.008" y="0" z="0" name="pixel52" /> 
+    <location x="-0.012" y="0" z="0" name="pixel53" /> 
+    <location x="-0.016" y="0" z="0" name="pixel54" /> 
+    <location x="-0.02" y="0" z="0" name="pixel55" /> 
+    <location x="-0.024" y="0" z="0" name="pixel56" /> 
+    <location x="-0.028" y="0" z="0" name="pixel57" /> 
+    <location x="-0.032" y="0" z="0" name="pixel58" /> 
+    <location x="-0.036" y="0" z="0" name="pixel59" /> 
+    <location x="-0.04" y="0" z="0" name="pixel60" /> 
+    <location x="-0.044" y="0" z="0" name="pixel61" /> 
+    <location x="-0.048" y="0" z="0" name="pixel62" /> 
+    <location x="-0.052" y="0" z="0" name="pixel63" /> 
+    <location x="-0.056" y="0" z="0" name="pixel64" /> 
+    <location x="-0.06" y="0" z="0" name="pixel65" /> 
+    <location x="-0.064" y="0" z="0" name="pixel66" /> 
+    <location x="-0.068" y="0" z="0" name="pixel67" /> 
+    <location x="-0.072" y="0" z="0" name="pixel68" /> 
+    <location x="-0.076" y="0" z="0" name="pixel69" /> 
+    <location x="-0.08" y="0" z="0" name="pixel70" /> 
+    <location x="-0.084" y="0" z="0" name="pixel71" /> 
+    <location x="-0.088" y="0" z="0" name="pixel72" /> 
+    <location x="-0.092" y="0" z="0" name="pixel73" /> 
+    <location x="-0.096" y="0" z="0" name="pixel74" /> 
+    <location x="-0.1" y="0" z="0" name="pixel75" /> 
+    <location x="-0.104" y="0" z="0" name="pixel76" /> 
+    <location x="-0.108" y="0" z="0" name="pixel77" /> 
+    <location x="-0.112" y="0" z="0" name="pixel78" /> 
+    <location x="-0.116" y="0" z="0" name="pixel79" /> 
+    <location x="-0.12" y="0" z="0" name="pixel80" /> 
+    <location x="-0.124" y="0" z="0" name="pixel81" /> 
+    <location x="-0.128" y="0" z="0" name="pixel82" /> 
+    <location x="-0.132" y="0" z="0" name="pixel83" /> 
+    <location x="-0.136" y="0" z="0" name="pixel84" /> 
+    <location x="-0.14" y="0" z="0" name="pixel85" /> 
+    <location x="-0.144" y="0" z="0" name="pixel86" /> 
+    <location x="-0.148" y="0" z="0" name="pixel87" /> 
+    <location x="-0.152" y="0" z="0" name="pixel88" /> 
+    <location x="-0.156" y="0" z="0" name="pixel89" /> 
+    <location x="-0.16" y="0" z="0" name="pixel90" /> 
+    <location x="-0.164" y="0" z="0" name="pixel91" /> 
+    <location x="-0.168" y="0" z="0" name="pixel92" /> 
+    <location x="-0.172" y="0" z="0" name="pixel93" /> 
+    <location x="-0.176" y="0" z="0" name="pixel94" /> 
+    <location x="-0.18" y="0" z="0" name="pixel95" /> 
+    <location x="-0.184" y="0" z="0" name="pixel96" /> 
+    <location x="-0.188" y="0" z="0" name="pixel97" /> 
+    <location x="-0.192" y="0" z="0" name="pixel98" /> 
+    <location x="-0.196" y="0" z="0" name="pixel99" /> 
+    <location x="-0.2" y="0" z="0" name="pixel100" /> 
 
 
-  <!-- Matrix structure of the "200 elements" detector -->
-  <type name="200-elements" is="RectangularDetector" type="pixel-200-elements"
-  xpixels="100" xstart="-0.2" xstep="+0.004"
-  ypixels="2" ystart="+0.01" ystep="-0.01" >
-  </type>
+  </component>
+</type>
 
-  <type name="dummy-gap" is="RectangularDetector" type="pixel"
-  xpixels="202" xstart="0.0" xstep="0.1"
-  ypixels="1" ystart="0.0" ystep="0.1" >
-  </type>
+<type name="detector-pixel" is="detector">
+  <cuboid id="shape">
+    <left-front-bottom-point x="-0.0015" y="-0.092" z="0.0"  />
+    <left-front-top-point  x="-0.0015" y="0.092" z="0.0"  />
+    <left-back-bottom-point  x="-0.0015" y="-0.092" z="0.001"  />
+    <right-front-bottom-point  x="0.0015" y="-0.092" z="0.0"  />
+  </cuboid>
+  <algebra val="shape" />
+</type>
 
-  <!-- Matrix structure of the "16PMT" detector -->
-  <type name="16PMT" is="RectangularDetector" type="pixel-16PMT"
-  xpixels="16" xstart="-0.032" xstep="+0.004"
-  ypixels="2" ystart="+0.002" ystep="-0.004" >
-  </type>
+<!-- 2 banks, 100 detectors per line, 400 total -->
+<idlist idname="NorthBank">
+  <!-- 100 detectors per line -->
+  <id start="15" end="214"/>
+</idlist>
 
-
-  <!-- Old/now fixed definition of the MCP detector. Here for reference in the future -->
-  <type name="old-mcp-definition" is="RectangularDetector" type="pixel"
-  xpixels="512" xstart="-0.048705" xstep="+0.00051"
-  ypixels="512" ystart="-0.048705" ystep="+0.00051" >
-  </type>
-
-  <type name="pixel" is="detector-old-mcp-definition">
-    <cuboid id="shape">
-      <left-front-bottom-point x="0.0005104167" y="-0.0005104167" z="0.0" />
-      <left-front-top-point x="0.0005104167" y="-0.0005104167" z="0.000005" />
-      <left-back-bottom-point x="-0.0005104167" y="-0.0005104167" z="0.0" />
-      <right-front-bottom-point x="0.0005104167" y="0.0005104167" z="0.0" />
-    </cuboid>
-    <algebra val="shape" />
-  </type>
-
-
-  <!-- Prototype pixel types -->
-  <type name="pixel-200-elements" is="detector">
-   <cuboid id="pixel-shape">
-     <left-front-bottom-point x="0.002" y="-0.005" z="0.0"  />
-     <left-front-top-point  x="0.002" y="-0.005" z="0.001"  />
-     <left-back-bottom-point  x="-0.002" y="-0.005" z="0.0"  />
-     <right-front-bottom-point  x="0.002" y="0.005" z="0.0"  />
-   </cuboid>
-  <algebra val="pixel-shape"/>
-  </type>
-
-  <type name="pixel-16PMT" is="detector">
-   <cuboid id="pixel-shape">
-     <left-front-bottom-point x="0.002" y="-0.002" z="0.0"  />
-     <left-front-top-point  x="0.002" y="-0.002" z="0.001"  />
-     <left-back-bottom-point  x="-0.002" y="-0.002" z="0.0"  />
-     <right-front-bottom-point  x="0.002" y="0.002" z="0.0"  />
-   </cuboid>
-  <algebra val="pixel-shape"/>
-  </type>
-
-  <!-- DEFINITION OF MONITOR TYPES -->
-
-  <type name="monitors">
-    <component type="monitor-cylinder">
-      <!-- Example, first monitor is at 11.6534 m from the source, in the direction towards the sample => z = 11.6534 - 56 = -44.3466 (from the sample, which is at z=0)-->
-      <location z="-44.3466" name="monitor1a"/> <!-- 11.6534 - 56 -->
-      <location z="-44.3466" name="monitor1b"/>
-      <location z="-36.1856" name="monitor2a"/> <!-- 19.8144 - 56 -->
-      <location z="-36.1856" name="monitor2b"/>
-      <location z="-35.1056" name="monitor3a"/> <!-- 20.8944 - 56 -->
-      <location z="-35.1056" name="monitor3b"/>
-      <location z="-9.8226" name="monitor4a"/> <!-- 46.1774 - 56 -->
-      <location z="-9.8226" name="monitor4b"/>
-      <location z="-7" name="monitor5a"/> <!-- 49.0 - 56 -->
-      <location z="-7" name="monitor5b"/>
-      <location z="0.0" name="CalMon"/> <!-- 56 - 56 -->
-      <location z="4.0" name="He_in"/>  <!-- 60 - 56-->
-      <location z="4.0" name="He_out"/>
-	  <location z="0"/> <!-- dummy monitor (off) -->
-    </component>
-  </type>
-
-  <!-- shape for monitors, borrowed from GEM -->
-  <type name="monitor-cylinder" is="monitor">
-    <properties>
-      Copied from monitor.dat:
-
-      name:: box
-      rank:: 2
-      dimensions:: 2 4
-      values:: -45.00  -2.00
-      45.00  -2.00
-      135.00  -2.00
-      225.00  -2.00
-    </properties>
-
-    <cylinder id="cylinder-shape">
-      <centre-of-bottom-base r="0.0" t="0.0" p="0.0" />
-      <axis x="0.0" y="0.0" z="1.0" />
-      <radius val="0.01" />
-      <height val="0.03" />
-    </cylinder>
-  </type>
-
-  <!-- DETECTOR and MONITOR ID LISTS -->
-  <idlist idname="monitors">
-    <id start="0" end="13" />
-  </idlist>
-
-  <!-- do not use idlist for the rectangular detectors, they're ignored! -->
+<idlist idname="SouthBank">
+  <id start="250" end="449"/>
+</idlist>
 
 </instrument>

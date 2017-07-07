@@ -6,17 +6,18 @@
 #include "MantidKernel/System.h"
 
 #include "MantidCrystal/SelectCellOfType.h"
-#include "MantidCrystal/LoadIsawPeaks.h"
+#include "MantidDataHandling/LoadNexusProcessed.h"
+#include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/Crystal/IndexingUtils.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidCrystal/LoadIsawUB.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Sample.h"
 
-using namespace Mantid;
 using namespace Mantid::Crystal;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
+using namespace Mantid::DataHandling;
 using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
 
@@ -31,10 +32,10 @@ public:
   void test_exec() {
     // Name of the loader's output workspace.
     std::string WSName("peaks");
-    LoadIsawPeaks loader;
+    LoadNexusProcessed loader;
     TS_ASSERT_THROWS_NOTHING(loader.initialize());
     TS_ASSERT(loader.isInitialized());
-    loader.setPropertyValue("Filename", "TOPAZ_3007.peaks");
+    loader.setPropertyValue("Filename", "TOPAZ_3007.peaks.nxs");
     loader.setPropertyValue("OutputWorkspace", WSName);
 
     TS_ASSERT(loader.execute());

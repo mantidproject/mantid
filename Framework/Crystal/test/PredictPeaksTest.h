@@ -47,7 +47,9 @@ public:
   }
 
   void do_test_exec(std::string reflectionCondition, size_t expectedNumber,
-                    std::vector<V3D> hkls, int convention = 1) {
+                    std::vector<V3D> hkls, int convention = 1,
+                    bool useExtendedDetectorSpace = false,
+                    bool addExtendedDetectorDefinition = false, int edge = 0) {
     // Name of the output workspace.
     std::string outWSName("PredictPeaksTest_OutputWS");
 
@@ -56,6 +58,15 @@ public:
         WorkspaceCreationHelper::create2DWorkspace(10000, 1);
     Instrument_sptr inst =
         ComponentCreationHelper::createTestInstrumentRectangular(1, 100);
+
+    if (addExtendedDetectorDefinition) {
+      auto extendedSpaceObj = ComponentCreationHelper::createCuboid(5., 5., 5.);
+      auto extendedSpace = new ObjComponent("extended-detector-space",
+                                            extendedSpaceObj, inst.get());
+      extendedSpace->setPos(V3D(0.0, 0.0, 0.0));
+      inst->add(extendedSpace);
+    }
+
     inWS->setInstrument(inst);
 
     // Set ub and Goniometer rotation
@@ -77,6 +88,9 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         alg.setPropertyValue("ReflectionCondition", reflectionCondition));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("HKLPeaksWorkspace", hklPW));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("PredictPeaksOutsideDetectors",
+                                             useExtendedDetectorSpace));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("EdgePixels", edge));
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
     TS_ASSERT(alg.isExecuted());
 
@@ -90,10 +104,11 @@ public:
       return;
 
     TS_ASSERT_EQUALS(ws->getNumberPeaks(), expectedNumber);
-    V3D hklTest(-10, -6, 1);
+    V3D hklTest = {-10, -6, 1};
     hklTest *= convention;
-    if (expectedNumber > 1)
+    if (expectedNumber > 5 && !addExtendedDetectorDefinition) {
       TS_ASSERT_EQUALS(ws->getPeak(0).getHKL(), hklTest);
+    }
 
     // Remove workspace from the data service.
     AnalysisDataService::Instance().remove(outWSName);
@@ -104,6 +119,49 @@ public:
   /** Fewer HKLs if they are not allowed */
   void test_exec_withReflectionCondition() {
     do_test_exec("C-face centred", 6, std::vector<V3D>());
+  }
+
+  void test_exec_withExtendedDetectorSpace() {
+    do_test_exec("Primitive", 3350, std::vector<V3D>(), 1, true, true);
+  }
+
+  void test_exec_withReflectionConditionAndExtendedDetectorSpace() {
+    do_test_exec("C-face centred", 1690, std::vector<V3D>(), 1, true, true);
+  }
+
+  void test_exec_withExtendedDetectorSpaceOptionCheckedNoDefinition() {
+    std::string outWSName("PredictPeaksTest_OutputWS");
+    // Make the fake input workspace
+    auto inWS = WorkspaceCreationHelper::create2DWorkspace(10000, 1);
+    auto inst =
+        ComponentCreationHelper::createTestInstrumentRectangular(1, 100);
+    inWS->setInstrument(inst);
+
+    // Set ub and Goniometer rotation
+    WorkspaceCreationHelper::setOrientedLattice(inWS, 12.0, 12.0, 12.0);
+    WorkspaceCreationHelper::setGoniometer(inWS, 0., 0., 0.);
+
+    PredictPeaks alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize())
+    TS_ASSERT(alg.isInitialized())
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty(
+        "InputWorkspace", boost::dynamic_pointer_cast<Workspace>(inWS)));
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setPropertyValue("OutputWorkspace", outWSName));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("WavelengthMin", "0.1"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("WavelengthMax", "10.0"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("MinDSpacing", "1.0"));
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setPropertyValue("ReflectionCondition", "Primitive"));
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setProperty("PredictPeaksOutsideDetectors", true));
+    alg.execute();
+
+    // should fail to execute and throw a runtime error
+    TS_ASSERT(!alg.isExecuted());
+
+    // Remove workspace from the data service.
+    AnalysisDataService::Instance().remove(outWSName);
   }
 
   void test_exec_withInputHKLList() {
@@ -183,6 +241,59 @@ public:
     Kernel::ConfigService::Instance().setString("Q.convention",
                                                 "Crystallography");
     do_test_exec("Primitive", 10, std::vector<V3D>(), -1);
+  }
+  void test_edge() {
+    do_test_exec("Primitive", 5, std::vector<V3D>(), 1, false, false, 10);
+  }
+};
+
+class PredictPeaksTestPerformance : public CxxTest::TestSuite {
+public:
+  void test_manyPeaksRectangular() {
+    MatrixWorkspace_sptr inWS =
+        WorkspaceCreationHelper::create2DWorkspace(10000, 1);
+    Instrument_sptr inst =
+        ComponentCreationHelper::createTestInstrumentRectangular2(1, 100);
+    inWS->setInstrument(inst);
+
+    // Set ub and Goniometer rotation
+    WorkspaceCreationHelper::setOrientedLattice(inWS, 12.0, 12.0, 12.0);
+    WorkspaceCreationHelper::setGoniometer(inWS, 0., 0., 0.);
+
+    PredictPeaks alg;
+    alg.initialize();
+    alg.setProperty("InputWorkspace",
+                    boost::dynamic_pointer_cast<Workspace>(inWS));
+    alg.setPropertyValue("OutputWorkspace", "predict_peaks_performance");
+    alg.setPropertyValue("WavelengthMin", ".5");
+    alg.setPropertyValue("WavelengthMax", "15.0");
+    alg.setPropertyValue("MinDSpacing", ".1");
+    alg.setPropertyValue("ReflectionCondition", "Primitive");
+    alg.execute();
+  }
+
+  void test_manyPeaks() {
+    MatrixWorkspace_sptr inWS =
+        WorkspaceCreationHelper::create2DWorkspace(10000, 1);
+    Instrument_sptr inst =
+        ComponentCreationHelper::createTestInstrumentCylindrical(
+            3, V3D(0, 0, -1), V3D(0, 0, 0), 1.6, 1.0);
+    inWS->setInstrument(inst);
+
+    // Set UB matrix and Goniometer rotation
+    WorkspaceCreationHelper::setOrientedLattice(inWS, 12.0, 12.0, 12.0);
+    WorkspaceCreationHelper::setGoniometer(inWS, 0., 0., 0.);
+
+    PredictPeaks alg;
+    alg.initialize();
+    alg.setProperty("InputWorkspace",
+                    boost::dynamic_pointer_cast<Workspace>(inWS));
+    alg.setPropertyValue("OutputWorkspace", "predict_peaks_performance");
+    alg.setPropertyValue("WavelengthMin", ".5");
+    alg.setPropertyValue("WavelengthMax", "15.0");
+    alg.setPropertyValue("MinDSpacing", ".1");
+    alg.setPropertyValue("ReflectionCondition", "Primitive");
+    alg.execute();
   }
 };
 

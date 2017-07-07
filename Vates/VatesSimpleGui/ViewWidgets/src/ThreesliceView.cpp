@@ -110,12 +110,6 @@ ModeControlWidget::Views ThreeSliceView::getViewType() {
   return ModeControlWidget::Views::THREESLICE;
 }
 
-void ThreeSliceView::correctColorScaleRange() {
-  QPair<double, double> range =
-      this->origRep->getLookupTable()->getScalarRange();
-  emit this->dataRange(range.first, range.second);
-}
-
 void ThreeSliceView::resetCamera() { this->m_mainView->resetCamera(); }
 }
 }

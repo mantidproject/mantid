@@ -3,6 +3,8 @@
 
 #include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
+#include "MantidKernel/Quat.h"
+#include "MantidKernel/V3D.h"
 
 #include <string>
 #include <typeinfo>
@@ -16,11 +18,6 @@ class XMLWriter;
 }
 
 namespace Mantid {
-namespace Kernel {
-class V3D;
-class Quat;
-}
-
 namespace Geometry {
 
 //----------------------------------------------------------------------
@@ -131,17 +128,17 @@ public:
   void rotate(double, const Kernel::V3D &) override;
 
   //! Get the position relative to the parent IComponent (absolute if no parent)
-  const Kernel::V3D getRelativePos() const override;
+  Kernel::V3D getRelativePos() const override;
 
   //! Get the position of the IComponent. Tree structure is traverse through the
   // parent chain
   Kernel::V3D getPos() const override;
 
   //! Get the relative Orientation
-  const Kernel::Quat &getRelativeRot() const override;
+  Kernel::Quat getRelativeRot() const override;
 
   //! Get the absolute orientation of the IComponent
-  const Kernel::Quat getRotation() const override;
+  Kernel::Quat getRotation() const override;
 
   //! Get the distance to another IComponent
   double getDistance(const IComponent &) const override;
@@ -301,6 +298,9 @@ public:
   virtual void appendXML(std::ostream &xmlStream) const;
 
   bool isParametrized() const override;
+
+  virtual void
+  registerContents(class ComponentVisitor &componentVisitor) const override;
 
 protected:
   /// Parent component in the tree

@@ -1,14 +1,15 @@
+#include "MantidLiveData/TOPAZLiveEventDataListener.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/LiveListenerFactory.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidDataObjects/EventWorkspace.h"
 #include "MantidGeometry/Instrument.h"
-#include "MantidLiveData/TOPAZLiveEventDataListener.h"
-#include "MantidLiveData/Exception.h"
+#include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/UnitFactory.h"
-#include "MantidDataObjects/EventWorkspace.h"
+#include "MantidLiveData/Exception.h"
 
 #include <Poco/Net/NetException.h>
 #include <Poco/Net/StreamSocket.h>
@@ -140,7 +141,7 @@ Kernel::Logger g_log("SNSLiveEventDataListener");
 
 /// Constructor
 TOPAZLiveEventDataListener::TOPAZLiveEventDataListener()
-    : ILiveListener(), m_workspaceInitialized(false), m_eventBuffer(),
+    : LiveListener(), m_workspaceInitialized(false), m_eventBuffer(),
       m_monitorLogs(), m_wsName(), m_indexMap(), m_monitorIndexMap(),
       m_tcpSocket(), m_dataSocket(), m_dataAddr(), m_isConnected(false),
       m_udpBuf(nullptr), m_udpBufSize(32768), m_runNumber(0), m_mutex(),
@@ -185,6 +186,8 @@ TOPAZLiveEventDataListener::~TOPAZLiveEventDataListener() {
 /// Connect to the TOPAZ event_catcher util (which will supply us with
 /// events).
 /// @param address The address to attempt to connect to
+/// @param args A ConnectionArgs object used to supply additional arguments
+/// required for the connection
 /// @return Returns true if the connection succeeds.  False otherwise.
 bool TOPAZLiveEventDataListener::connect(
     const Poco::Net::SocketAddress &address)

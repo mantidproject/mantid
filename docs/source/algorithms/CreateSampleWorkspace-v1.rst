@@ -59,6 +59,10 @@ If "NumMonitors" is also given the first monitor is created half-way between the
 sample and the first bank, then between each bank (or where the banks would be
 if "NumMonitors" > "NumBanks").
 
+If "NumScanPoints" > 1 then a scanning workspace is created, that is one with time
+indexed positions and rotations. The scan is set up such that for each scan point 
+all the detectors are rotated by 1 degree around the sample.
+
 Usage
 -----
 

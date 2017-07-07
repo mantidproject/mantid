@@ -157,7 +157,7 @@ void LoadSPE::exec() {
   workspace->replaceAxis(1, phiAxis);
 
   // Now read in the data spectrum-by-spectrum
-  Progress progress(this, 0, 1, nhist);
+  Progress progress(this, 0.0, 1.0, nhist);
   for (size_t j = 0; j < nhist; ++j) {
     // Set the common X vector
     workspace->setBinEdges(j, XValues);
@@ -188,12 +188,11 @@ void LoadSPE::readHistogram(FILE *speFile, API::MatrixWorkspace_sptr workspace,
     reportFormatError(std::string(comment));
 
   // Then it's the Y values
-  MantidVec &Y = workspace->dataY(index);
+  auto &Y = workspace->mutableY(index);
   const size_t nbins = workspace->blocksize();
   int retval;
   for (size_t i = 0; i < nbins; ++i) {
     retval = fscanf(speFile, "%10le", &Y[i]);
-    // g_log.error() << Y[i] << '\n';
     if (retval != 1) {
       std::stringstream ss;
       ss << "Reading data value" << i << " of histogram " << index;
@@ -214,7 +213,7 @@ void LoadSPE::readHistogram(FILE *speFile, API::MatrixWorkspace_sptr workspace,
     reportFormatError(std::string(comment));
 
   // And then the error values
-  MantidVec &E = workspace->dataE(index);
+  auto &E = workspace->mutableE(index);
   for (size_t i = 0; i < nbins; ++i) {
     retval = fscanf(speFile, "%10le", &E[i]);
     if (retval != 1) {

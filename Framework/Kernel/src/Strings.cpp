@@ -1026,7 +1026,7 @@ int isMember(const std::vector<std::string> &group,
              const std::string &candidate) {
   int num(-1);
   for (size_t i = 0; i < group.size(); i++) {
-    if (candidate.compare(group[i]) == 0) {
+    if (candidate == group[i]) {
       num = int(i);
       return num;
     }

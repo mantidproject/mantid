@@ -14,7 +14,13 @@ void export_EnabledWhenProperty() {
       .value("IsNotEqualTo", IS_NOT_EQUAL_TO)
       .value("IsMoreOrEqual", IS_MORE_OR_EQ);
 
-  class_<EnabledWhenProperty, bases<IPropertySettings>, boost::noncopyable>(
+  // Logic enumeration
+  enum_<eLogicOperator>("LogicOperator")
+      .value("And", AND)
+      .value("Or", OR)
+      .value("Xor", XOR);
+
+  class_<EnabledWhenProperty, bases<IPropertySettings>>(
       "EnabledWhenProperty", no_init) // no default constructor
 
       .def(init<std::string, ePropertyCriterion, std::string>(
@@ -25,5 +31,11 @@ void export_EnabledWhenProperty() {
       .def(init<std::string, ePropertyCriterion>(
           (arg("self"), arg("otherPropName"), arg("when")),
           "Enabled otherPropName property when criterion does not require a "
-          "value, i.e isDefault"));
+          "value, i.e isDefault"))
+
+      .def(init<EnabledWhenProperty, EnabledWhenProperty, eLogicOperator>(
+          (arg("self"), arg("conditionObjOne"), arg("conditionObjTwo"),
+           arg("operator")),
+          "Enables property when the two EnabledWhenProperty conditions match"
+          " the operator condition"));
 }

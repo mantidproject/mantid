@@ -141,7 +141,7 @@ void PropertyManager::splitByTime(
     }
 
     // Now the property does the splitting.
-    bool isProtonCharge = prop->name().compare("proton_charge") == 0;
+    bool isProtonCharge = prop->name() == "proton_charge";
     prop->splitByTime(splitter, output_properties, isProtonCharge);
 
   } // for each property

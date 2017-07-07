@@ -42,15 +42,16 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class DLLExport vtkDataSetToImplicitFunction {
 public:
-  static Mantid::Geometry::MDImplicitFunction *exec(vtkDataSet *dataSet);
   vtkDataSetToImplicitFunction(vtkDataSet *dataSet);
+  vtkDataSetToImplicitFunction &
+  operator=(const vtkDataSetToImplicitFunction &other) = delete;
+  vtkDataSetToImplicitFunction(const vtkDataSetToImplicitFunction &other) =
+      delete;
+  static Mantid::Geometry::MDImplicitFunction *exec(vtkDataSet *dataSet);
   Mantid::Geometry::MDImplicitFunction *execute();
   ~vtkDataSetToImplicitFunction();
 
 private:
-  vtkDataSetToImplicitFunction &
-  operator=(const vtkDataSetToImplicitFunction &other);
-  vtkDataSetToImplicitFunction(const vtkDataSetToImplicitFunction &other);
   vtkDataSet *m_dataset;
 };
 }

@@ -14,18 +14,10 @@ namespace Mantid {
 namespace API {
 
 SpectrumInfo::SpectrumInfo(const Beamline::SpectrumInfo &spectrumInfo,
-                           const ExperimentInfo &experimentInfo)
-    : m_experimentInfo(experimentInfo),
-      m_detectorInfo(experimentInfo.detectorInfo()),
+                           const ExperimentInfo &experimentInfo,
+                           DetectorInfo &detectorInfo)
+    : m_experimentInfo(experimentInfo), m_detectorInfo(detectorInfo),
       m_spectrumInfo(spectrumInfo), m_lastDetector(PARALLEL_GET_MAX_THREADS),
-      m_lastIndex(PARALLEL_GET_MAX_THREADS, -1) {}
-
-SpectrumInfo::SpectrumInfo(const Beamline::SpectrumInfo &spectrumInfo,
-                           ExperimentInfo &experimentInfo)
-    : m_experimentInfo(experimentInfo),
-      m_mutableDetectorInfo(&experimentInfo.mutableDetectorInfo()),
-      m_detectorInfo(*m_mutableDetectorInfo), m_spectrumInfo(spectrumInfo),
-      m_lastDetector(PARALLEL_GET_MAX_THREADS),
       m_lastIndex(PARALLEL_GET_MAX_THREADS, -1) {}
 
 // Defined as default in source for forward declaration with std::unique_ptr.
@@ -50,7 +42,7 @@ SpectrumInfo::sharedSpectrumDefinitions() const {
 
 /// Returns true if the detector(s) associated with the spectrum are monitors.
 bool SpectrumInfo::isMonitor(const size_t index) const {
-  for (const auto detIndex : getDetectorIndices(index))
+  for (const auto &detIndex : checkAndGetSpectrumDefinition(index))
     if (!m_detectorInfo.isMonitor(detIndex))
       return false;
   return true;
@@ -59,7 +51,7 @@ bool SpectrumInfo::isMonitor(const size_t index) const {
 /// Returns true if the detector(s) associated with the spectrum are masked.
 bool SpectrumInfo::isMasked(const size_t index) const {
   bool masked = true;
-  for (const auto detIndex : getDetectorIndices(index))
+  for (const auto &detIndex : checkAndGetSpectrumDefinition(index))
     masked &= m_detectorInfo.isMasked(detIndex);
   return masked;
 }
@@ -71,13 +63,9 @@ bool SpectrumInfo::isMasked(const size_t index) const {
  */
 double SpectrumInfo::l2(const size_t index) const {
   double l2{0.0};
-  const auto &dets = getDetectorVector(index);
-  for (const auto &det : dets) {
-    const auto &detIndex = m_detectorInfo.indexOf(det->getID());
-    m_detectorInfo.setCachedDetector(detIndex, det);
+  for (const auto &detIndex : checkAndGetSpectrumDefinition(index))
     l2 += m_detectorInfo.l2(detIndex);
-  }
-  return l2 / static_cast<double>(dets.size());
+  return l2 / static_cast<double>(spectrumDefinition(index).size());
 }
 
 /** Returns the scattering angle 2 theta in radians (angle w.r.t. to beam
@@ -86,18 +74,10 @@ double SpectrumInfo::l2(const size_t index) const {
  * Throws an exception if the spectrum is a monitor.
  */
 double SpectrumInfo::twoTheta(const size_t index) const {
-  if (isMonitor(index))
-    throw std::logic_error(
-        "Two theta (scattering angle) is not defined for monitors.");
-
   double twoTheta{0.0};
-  const auto &dets = getDetectorVector(index);
-  for (const auto &det : dets) {
-    const auto &detIndex = m_detectorInfo.indexOf(det->getID());
-    m_detectorInfo.setCachedDetector(detIndex, det);
+  for (const auto &detIndex : checkAndGetSpectrumDefinition(index))
     twoTheta += m_detectorInfo.twoTheta(detIndex);
-  }
-  return twoTheta / static_cast<double>(dets.size());
+  return twoTheta / static_cast<double>(spectrumDefinition(index).size());
 }
 
 /** Returns the signed scattering angle 2 theta in radians (angle w.r.t. to beam
@@ -106,30 +86,18 @@ double SpectrumInfo::twoTheta(const size_t index) const {
  * Throws an exception if the spectrum is a monitor.
  */
 double SpectrumInfo::signedTwoTheta(const size_t index) const {
-  if (isMonitor(index))
-    throw std::logic_error(
-        "Two theta (scattering angle) is not defined for monitors.");
-
   double signedTwoTheta{0.0};
-  const auto &dets = getDetectorVector(index);
-  for (const auto &det : dets) {
-    const auto &detIndex = m_detectorInfo.indexOf(det->getID());
-    m_detectorInfo.setCachedDetector(detIndex, det);
+  for (const auto &detIndex : checkAndGetSpectrumDefinition(index))
     signedTwoTheta += m_detectorInfo.signedTwoTheta(detIndex);
-  }
-  return signedTwoTheta / static_cast<double>(dets.size());
+  return signedTwoTheta / static_cast<double>(spectrumDefinition(index).size());
 }
 
 /// Returns the position of the spectrum with given index.
 Kernel::V3D SpectrumInfo::position(const size_t index) const {
   Kernel::V3D newPos;
-  const auto &dets = getDetectorVector(index);
-  for (const auto &det : dets) {
-    const auto &detIndex = m_detectorInfo.indexOf(det->getID());
-    m_detectorInfo.setCachedDetector(detIndex, det);
+  for (const auto &detIndex : checkAndGetSpectrumDefinition(index))
     newPos += m_detectorInfo.position(detIndex);
-  }
-  return newPos / static_cast<double>(dets.size());
+  return newPos / static_cast<double>(spectrumDefinition(index).size());
 }
 
 /// Returns true if the spectrum is associated with detectors in the instrument.
@@ -150,8 +118,8 @@ bool SpectrumInfo::hasUniqueDetector(const size_t index) const {
  *
  * Currently this simply sets the mask flags for the underlying detectors. */
 void SpectrumInfo::setMasked(const size_t index, bool masked) {
-  for (const auto detIndex : getDetectorIndices(index))
-    m_mutableDetectorInfo->setMasked(detIndex, masked);
+  for (const auto &detIndex : checkAndGetSpectrumDefinition(index))
+    m_detectorInfo.setMasked(detIndex, masked);
 }
 
 /// Return a const reference to the detector or detector group of the spectrum
@@ -206,27 +174,12 @@ const Geometry::IDetector &SpectrumInfo::getDetector(const size_t index) const {
   return *m_lastDetector[thread];
 }
 
-std::vector<Geometry::IDetector_const_sptr>
-SpectrumInfo::getDetectorVector(const size_t index) const {
-  const auto &det = getDetector(index);
-  const auto &ndet = det.nDets();
-  if (ndet > 1) {
-    const auto group = dynamic_cast<const Geometry::DetectorGroup *>(&det);
-    return group->getDetectors();
-  } else {
-    size_t thread = static_cast<size_t>(PARALLEL_THREAD_NUMBER);
-    return {m_lastDetector[thread]};
-  }
-}
-
-std::vector<size_t> SpectrumInfo::getDetectorIndices(const size_t index) const {
-  std::vector<size_t> detIndices;
-  for (const auto &def : spectrumDefinition(index))
-    detIndices.push_back(def.first);
-  if (detIndices.empty())
+const SpectrumDefinition &
+SpectrumInfo::checkAndGetSpectrumDefinition(const size_t index) const {
+  if (spectrumDefinition(index).size() == 0)
     throw Kernel::Exception::NotFoundError(
         "SpectrumInfo: No detectors for this workspace index.", "");
-  return detIndices;
+  return spectrumDefinition(index);
 }
 
 } // namespace API

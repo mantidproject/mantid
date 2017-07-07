@@ -12,11 +12,13 @@
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
+#include "MantidKernel/Diffraction.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/RebinParamsValidator.h"
 #include "MantidKernel/make_unique.h"
 #include <cassert>
+#include <limits>
 
 namespace Mantid {
 namespace Algorithms {
@@ -43,6 +45,7 @@ DECLARE_ALGORITHM(PDCalibration)
 
 namespace { // anonymous
 const auto isNonZero = [](const double value) { return value != 0.; };
+const double CHISQ_BAD = 1.e9; // hopefully much worse than possible
 }
 
 /// private inner class
@@ -115,7 +118,7 @@ public:
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
-PDCalibration::PDCalibration() : m_tofMin(0), m_tofMax(0), m_hasDasIds(false) {}
+PDCalibration::PDCalibration() {}
 
 //----------------------------------------------------------------------------------------------
 /** Destructor
@@ -218,10 +221,10 @@ void PDCalibration::init() {
   declareProperty("HighBackground", true,
                   "Relatively weak peak in high background");
   declareProperty(
-      "MinGuessedPeakWidth", 4, min,
+      "MinGuessedPeakWidth", 2, min,
       "Minimum guessed peak width for fit. It is in unit of number of pixels.");
   declareProperty(
-      "MaxGuessedPeakWidth", 4, min,
+      "MaxGuessedPeakWidth", 10, min,
       "Maximum guessed peak width for fit. It is in unit of number of pixels.");
   declareProperty("MinimumPeakHeight", 2., "Minimum allowed peak height. ");
   declareProperty(
@@ -233,6 +236,12 @@ void PDCalibration::init() {
   declareProperty("CalibrationParameters", "DIFC",
                   boost::make_shared<StringListValidator>(modes),
                   "Select calibration parameters to fit.");
+
+  declareProperty(
+      Kernel::make_unique<ArrayProperty<double>>("TZEROrange"),
+      "Range for allowable TZERO from calibration (default is all)");
+  declareProperty(Kernel::make_unique<ArrayProperty<double>>("DIFArange"),
+                  "Range for allowable DIFA from calibration (default is all)");
 
   declareProperty(Kernel::make_unique<WorkspaceProperty<API::ITableWorkspace>>(
                       "OutputCalibrationTable", "", Direction::Output),
@@ -264,6 +273,30 @@ void PDCalibration::init() {
   setPropertyGroup("StartFromObservedPeakCentre", findPeaksGroup);
 }
 
+std::map<std::string, std::string> PDCalibration::validateInputs() {
+  std::map<std::string, std::string> messages;
+
+  vector<double> tzeroRange = getProperty("TZEROrange");
+  if (!tzeroRange.empty()) {
+    if (tzeroRange.size() != 2) {
+      messages["TZEROrange"] = "Require two values [min,max]";
+    } else if (tzeroRange[0] >= tzeroRange[1]) {
+      messages["TZEROrange"] = "min must be less than max";
+    }
+  }
+
+  vector<double> difaRange = getProperty("DIFArange");
+  if (!difaRange.empty()) {
+    if (difaRange.size() != 2) {
+      messages["DIFArange"] = "Require two values [min,max]";
+    } else if (difaRange[0] >= difaRange[1]) {
+      messages["DIFArange"] = "min must be less than max";
+    }
+  }
+
+  return messages;
+}
+
 //----------------------------------------------------------------------------------------------
 /** Execute the algorithm.
  */
@@ -271,6 +304,38 @@ void PDCalibration::exec() {
   vector<double> tofBinningParams = getProperty("TofBinning");
   m_tofMin = tofBinningParams.front();
   m_tofMax = tofBinningParams.back();
+
+  vector<double> tzeroRange = getProperty("TZEROrange");
+  if (tzeroRange.size() == 2) {
+    m_tzeroMin = tzeroRange[0];
+    m_tzeroMax = tzeroRange[1];
+
+    std::stringstream msg;
+    msg << "Using tzero range of " << m_tzeroMin << " <= "
+        << "TZERO <= " << m_tzeroMax;
+    g_log.information(msg.str());
+  } else {
+    g_log.information("Using all TZERO values");
+
+    m_tzeroMin = std::numeric_limits<double>::lowest();
+    m_tzeroMax = std::numeric_limits<double>::max();
+  }
+
+  vector<double> difaRange = getProperty("DIFArange");
+  if (difaRange.size() == 2) {
+    m_difaMin = difaRange[0];
+    m_difaMax = difaRange[1];
+
+    std::stringstream msg;
+    msg << "Using difa range of " << m_difaMin << " <= "
+        << "DIFA <= " << m_difaMax;
+    g_log.information(msg.str());
+  } else {
+    g_log.information("Using all DIFA values");
+
+    m_difaMin = std::numeric_limits<double>::lowest();
+    m_difaMax = std::numeric_limits<double>::max();
+  }
 
   m_peaksInDspacing = getProperty("PeakPositions");
   // Sort peak positions, requried for correct peak window calculations
@@ -316,7 +381,7 @@ void PDCalibration::exec() {
   setProperty("MaskWorkspace", maskWS);
 
   int NUMHIST = static_cast<int>(m_uncalibratedWS->getNumberHistograms());
-  API::Progress prog(this, 0, 1.0, NUMHIST);
+  API::Progress prog(this, 0.0, 1.0, NUMHIST);
 
   // cppcheck-suppress syntaxError
   PRAGMA_OMP(parallel for schedule(dynamic, 1) )
@@ -412,38 +477,19 @@ void PDCalibration::exec() {
   PARALLEL_CHECK_INTERUPT_REGION
 }
 
-namespace {
-struct d_to_tof {
-  d_to_tof(const double difc, const double difa, const double tzero) {
-    this->difc = difc;
-    this->difa = difa;
-    this->tzero = tzero;
-  }
-
-  double operator()(const double dspacing) const {
-    return difc * dspacing + difa * dspacing * dspacing + tzero;
-  }
-
-  double difc;
-  double difa;
-  double tzero;
-};
-}
-
 void PDCalibration::fitDIFCtZeroDIFA(const std::vector<double> &d,
                                      const std::vector<double> &tof,
                                      double &difc, double &t0, double &difa) {
-  double sum = 0;
-  double sumX = 0;
-  double sumY = 0;
-  double sumX2 = 0;
-  double sumXY = 0;
-  double sumX2Y = 0;
-  double sumX3 = 0;
-  double sumX4 = 0;
+  double num_peaks = static_cast<double>(d.size());
+  double sumX = 0.;
+  double sumY = 0.;
+  double sumX2 = 0.;
+  double sumXY = 0.;
+  double sumX2Y = 0.;
+  double sumX3 = 0.;
+  double sumX4 = 0.;
 
   for (size_t i = 0; i < d.size(); ++i) {
-    sum++;
     sumX2 += d[i] * d[i];
     sumXY += d[i] * tof[i];
   }
@@ -451,7 +497,7 @@ void PDCalibration::fitDIFCtZeroDIFA(const std::vector<double> &d,
   // DIFC only
   double difc0 = sumXY / sumX2;
   // Get out early if only DIFC is needed.
-  if (calParams == "DIFC" || sum < 3) {
+  if (calParams == "DIFC" || num_peaks < 3) {
     difc = difc0;
     return;
   }
@@ -464,10 +510,10 @@ void PDCalibration::fitDIFCtZeroDIFA(const std::vector<double> &d,
 
   double difc1 = 0;
   double tZero1 = 0;
-  double determinant = sum * sumX2 - sumX * sumX;
+  double determinant = num_peaks * sumX2 - sumX * sumX;
   if (determinant != 0) {
-    difc1 = (sum * sumXY - sumX * sumY) / determinant;
-    tZero1 = sumY / sum - difc1 * sumX / sum;
+    difc1 = (num_peaks * sumXY - sumX * sumY) / determinant;
+    tZero1 = sumY / num_peaks - difc1 * sumX / num_peaks;
   }
 
   // calculated chi squared for each fit
@@ -482,13 +528,24 @@ void PDCalibration::fitDIFCtZeroDIFA(const std::vector<double> &d,
     temp = tZero1 + difc1 * d[i] - tof[i];
     chisq1 += (temp * temp);
   }
+
   // Get reduced chi-squared
-  chisq0 = chisq0 / (sum - 1);
-  chisq1 = chisq1 / (sum - 2);
+  chisq0 = chisq0 / (num_peaks - 1);
+  chisq1 = chisq1 / (num_peaks - 2);
+
+  // check that the value is reasonable, only need to check minimum
+  // side since difa is not in play - shift to a higher minimum
+  // means something went wrong
+  if (m_tofMin < Kernel::Diffraction::calcTofMin(difc1, 0., tZero1, m_tofMin) ||
+      difc1 <= 0. || tZero1 < m_tzeroMin || tZero1 > m_tzeroMax) {
+    difc1 = 0;
+    tZero1 = 0;
+    chisq1 = CHISQ_BAD;
+  }
 
   // Select difc, t0 depending on CalibrationParameters chosen and
   // number of peaks fitted.
-  if (calParams == "DIFC+TZERO" || sum == 3) {
+  if (calParams == "DIFC+TZERO" || num_peaks == 3) {
     // choose best one according to chi-squared
     if (chisq0 < chisq1) {
       difc = difc0;
@@ -509,22 +566,22 @@ void PDCalibration::fitDIFCtZeroDIFA(const std::vector<double> &d,
   double tZero2 = 0;
   double difc2 = 0;
   double difa2 = 0;
-  determinant = sum * sumX2 * sumX4 + sumX * sumX3 * sumX2 +
+  determinant = num_peaks * sumX2 * sumX4 + sumX * sumX3 * sumX2 +
                 sumX2 * sumX * sumX3 - sumX2 * sumX2 * sumX2 -
-                sumX * sumX * sumX4 - sum * sumX3 * sumX3;
+                sumX * sumX * sumX4 - num_peaks * sumX3 * sumX3;
   if (determinant != 0) {
     tZero2 =
         (sumY * sumX2 * sumX4 + sumX * sumX3 * sumX2Y + sumX2 * sumXY * sumX3 -
          sumX2 * sumX2 * sumX2Y - sumX * sumXY * sumX4 - sumY * sumX3 * sumX3) /
         determinant;
-    difc2 =
-        (sum * sumXY * sumX4 + sumY * sumX3 * sumX2 + sumX2 * sumX * sumX2Y -
-         sumX2 * sumXY * sumX2 - sumY * sumX * sumX4 - sum * sumX3 * sumX2Y) /
-        determinant;
-    difa2 =
-        (sum * sumX2 * sumX2Y + sumX * sumXY * sumX2 + sumY * sumX * sumX3 -
-         sumY * sumX2 * sumX2 - sumX * sumX * sumX2Y - sum * sumXY * sumX3) /
-        determinant;
+    difc2 = (num_peaks * sumXY * sumX4 + sumY * sumX3 * sumX2 +
+             sumX2 * sumX * sumX2Y - sumX2 * sumXY * sumX2 -
+             sumY * sumX * sumX4 - num_peaks * sumX3 * sumX2Y) /
+            determinant;
+    difa2 = (num_peaks * sumX2 * sumX2Y + sumX * sumXY * sumX2 +
+             sumY * sumX * sumX3 - sumY * sumX2 * sumX2 - sumX * sumX * sumX2Y -
+             num_peaks * sumXY * sumX3) /
+            determinant;
   }
 
   // calculated reduced chi squared for each fit
@@ -533,15 +590,33 @@ void PDCalibration::fitDIFCtZeroDIFA(const std::vector<double> &d,
     double temp = tZero2 + difc2 * d[i] + difa2 * d[i] * d[i] - tof[i];
     chisq2 += (temp * temp);
   }
-  chisq2 = chisq2 / (sum - 3);
+  chisq2 = chisq2 / (num_peaks - 3);
+
+  // check that the value is reasonable, only need to check minimum
+  // side since difa is not in play - shift to a higher minimum
+  // or a lower maximum means something went wrong
+  if (m_tofMin <
+          Kernel::Diffraction::calcTofMin(difc2, difa2, tZero2, m_tofMin) ||
+      m_tofMax <
+          Kernel::Diffraction::calcTofMax(difc2, difa2, tZero2, m_tofMax) ||
+      difc2 <= 0. || tZero2 < m_tzeroMin || tZero2 > m_tzeroMax ||
+      difa2 < m_difaMin || difa2 > m_difaMax) {
+    tZero2 = 0;
+    difc2 = 0;
+    difa2 = 0;
+    chisq2 = CHISQ_BAD;
+  }
 
   // Select difc, t0 and difa depending on CalibrationParameters chosen and
   // number of peaks fitted.
   if ((chisq0 < chisq1) && (chisq0 < chisq2)) {
     difc = difc0;
+    t0 = 0.;
+    difa = 0.;
   } else if ((chisq1 < chisq0) && (chisq1 < chisq2)) {
     difc = difc1;
     t0 = tZero1;
+    difa = 0.;
   } else {
     difc = difc2;
     t0 = tZero2;
@@ -595,7 +670,7 @@ PDCalibration::getDSpacingToTof(const detid_t detid) {
   const double difc = m_calibrationTable->getRef<double>("difc", rowNum);
   const double tzero = m_calibrationTable->getRef<double>("tzero", rowNum);
 
-  return d_to_tof(difc, difa, tzero);
+  return Kernel::Diffraction::getDToTofConversionFunc(difc, difa, tzero);
 }
 
 void PDCalibration::setCalibrationValues(const detid_t detid, const double difc,
@@ -620,19 +695,10 @@ void PDCalibration::setCalibrationValues(const detid_t detid, const double difc,
 vector<double> PDCalibration::getTOFminmax(const double difc, const double difa,
                                            const double tzero) {
   vector<double> tofminmax(2);
-  if (difa == 0) {
-    tofminmax[0] = 0.;
-    tofminmax[1] = DBL_MAX;
-  } else {
-    double tofExtrema = tzero - difc * difc / (4 * difa);
-    if (difa < 0) {
-      tofminmax[0] = 0.;
-      tofminmax[1] = tofExtrema;
-    } else {
-      tofminmax[0] = std::max(0., tofExtrema);
-      tofminmax[1] = DBL_MAX;
-    }
-  }
+
+  tofminmax[0] = Kernel::Diffraction::calcTofMin(difc, difa, tzero, m_tofMin);
+  tofminmax[1] = Kernel::Diffraction::calcTofMax(difc, difa, tzero, m_tofMax);
+
   return tofminmax;
 }
 MatrixWorkspace_sptr PDCalibration::load(const std::string filename) {

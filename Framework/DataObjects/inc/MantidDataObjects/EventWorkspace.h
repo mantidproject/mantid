@@ -30,7 +30,8 @@ public:
   const std::string id() const override { return "EventWorkspace"; }
 
   // Constructor
-  EventWorkspace();
+  EventWorkspace(
+      const Parallel::StorageMode storageMode = Parallel::StorageMode::Cloned);
 
   // Destructor
   ~EventWorkspace() override;
@@ -148,7 +149,9 @@ protected:
 
 private:
   EventWorkspace *doClone() const override { return new EventWorkspace(*this); }
-  EventWorkspace *doCloneEmpty() const override { return new EventWorkspace(); }
+  EventWorkspace *doCloneEmpty() const override {
+    return new EventWorkspace(storageMode());
+  }
 
   /** A vector that holds the event list for each spectrum; the key is
    * the workspace index, which is not necessarily the pixelid.

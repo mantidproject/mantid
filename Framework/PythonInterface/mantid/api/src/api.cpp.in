@@ -5,12 +5,15 @@
 #include <boost/python/def.hpp>
 #include <boost/python/module.hpp>
 #include <boost/python/docstring_options.hpp>
+#include <boost/python/args.hpp>
+
 
 // See http://docs.scipy.org/doc/numpy/reference/c-api.array.html#PY_ARRAY_UNIQUE_SYMBOL
 #define PY_ARRAY_UNIQUE_SYMBOL API_ARRAY_API
 #include <numpy/arrayobject.h>
 
 #include "MantidAPI/AlgorithmFactory.h"
+#include "MantidAPI/Workspace.h"
 #include "MantidPythonInterface/api/Algorithms/RunPythonScript.h"
 
 namespace
@@ -27,6 +30,15 @@ namespace
   {
     Mantid::API::AlgorithmFactory::Instance().subscribe<Mantid::PythonInterface::RunPythonScript>();
   }
+
+  /**
+   * Checks if two workspace shared pointers point to the same workspace
+   */
+  bool isSameWorkspaceObject(Mantid::API::Workspace_sptr workspace1, 
+		             Mantid::API::Workspace_sptr workspace2) {
+    return workspace1 == workspace2;
+  }
+
 }
 
 // Forward declare
@@ -41,6 +53,11 @@ BOOST_PYTHON_MODULE(_api)
   
   // Internal function to declare C++ algorithms that are a part of this module
   boost::python::def("_declareCPPAlgorithms", &_declareCPPAlgorithms);
+
+  // Workspace address comparison
+  boost::python::def("isSameWorkspaceObject",
+		     &isSameWorkspaceObject, 
+		     boost::python::args("workspace1", "workspace2"));
 
   try {
 @EXPORT_FUNCTIONS@

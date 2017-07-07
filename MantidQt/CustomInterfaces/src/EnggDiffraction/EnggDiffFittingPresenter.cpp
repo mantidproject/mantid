@@ -10,8 +10,8 @@
 #include "MantidQtCustomInterfaces/Muon/ALCHelper.h"
 
 #include <boost/lexical_cast.hpp>
-#include <fstream>
 #include <cctype>
+#include <fstream>
 
 #include <Poco/DirectoryIterator.h>
 #include <Poco/File.h>
@@ -245,7 +245,8 @@ void EnggDiffFittingPresenter::fittingRunNoChanged() {
 
   // split directory if 'ENGINX_' found by '_.'
   std::vector<std::string> splitBaseName;
-  if (parsedUserInput.find("ENGINX_") != std::string::npos) {
+  if (parsedUserInput.find(m_view->getCurrentInstrument() + "_") !=
+      std::string::npos) {
     boost::split(splitBaseName, parsedUserInput, boost::is_any_of("_."));
   }
 
@@ -939,7 +940,8 @@ void EnggDiffFittingPresenter::setDifcTzero(MatrixWorkspace_sptr wks) const {
         // so throw a runtime error
         throw std::runtime_error(
             "Failed to fit file: The data was not what is expected. "
-            "Does the file contain focused EnginX workspace?");
+            "Does the file contain focused " +
+            m_view->getCurrentInstrument() + " workspace?");
       }
     }
   }
@@ -1077,10 +1079,11 @@ void MantidQt::CustomInterfaces::EnggDiffFittingPresenter::
   // generate file name
   std::string fileName;
   if (g_multi_run.size() > 1) {
-    fileName = "ENGINX_" + g_multi_run.front() + "-" + g_multi_run.back() +
-               "_Single_Peak_Fitting.csv";
+    fileName = m_view->getCurrentInstrument() + "_" + g_multi_run.front() +
+               "-" + g_multi_run.back() + "_Single_Peak_Fitting.csv";
   } else {
-    fileName = "ENGINX_" + runNumber + "_Single_Peak_Fitting.csv";
+    fileName = m_view->getCurrentInstrument() + "_" + runNumber +
+               "_Single_Peak_Fitting.csv";
   }
 
   // separate folder for Single Peak Fitting output;
@@ -1573,8 +1576,8 @@ void EnggDiffFittingPresenter::setDataToClonedWS(std::string &current_WS,
   AnalysisDataServiceImpl &ADS = Mantid::API::AnalysisDataService::Instance();
   auto currentPeakWS = ADS.retrieveWS<MatrixWorkspace>(current_WS);
   auto currentClonedWS = ADS.retrieveWS<MatrixWorkspace>(cloned_WS);
-  currentClonedWS->dataY(0) = currentPeakWS->readY(0);
-  currentClonedWS->dataE(0) = currentPeakWS->readE(0);
+  currentClonedWS->mutableY(0) = currentPeakWS->y(0);
+  currentClonedWS->mutableE(0) = currentPeakWS->e(0);
 }
 
 void EnggDiffFittingPresenter::setBankItems(

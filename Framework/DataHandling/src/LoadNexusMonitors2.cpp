@@ -532,6 +532,7 @@ void LoadNexusMonitors2::splitMutiPeriodHistrogramData(
                              Counts(inYBegin, inYBegin + yLength));
     }
     // add period logs
+    monLogCreator.addStatusLog(wsPeriod->mutableRun());
     monLogCreator.addPeriodLogs(static_cast<int>(i + 1),
                                 wsPeriod->mutableRun());
 

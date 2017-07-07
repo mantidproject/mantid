@@ -4,6 +4,8 @@
 #include "MantidPythonInterface/kernel/Converters/PyObjectToV3D.h"
 
 #include <boost/python/class.hpp>
+#include <boost/python/self.hpp>
+#include <boost/python/operators.hpp>
 #include <boost/python/enum.hpp>
 #include <boost/python/scope.hpp>
 #include <boost/python/list.hpp>
@@ -39,6 +41,14 @@ boost::python::list getEquivalents(PointGroup &self, const object &hkl) {
 
 Mantid::Kernel::V3D getReflectionFamily(PointGroup &self, const object &hkl) {
   return self.getReflectionFamily(Converters::PyObjectToV3D(hkl)());
+}
+
+std::string __repr__implementation(const PointGroup &self) {
+  std::stringstream ss;
+  ss << "PointGroupFactory.createPointGroup(\"";
+  ss << self.getSymbol();
+  ss << "\")";
+  return ss.str();
 }
 }
 
@@ -79,5 +89,7 @@ void export_PointGroup() {
            "HKL.")
       .def("getReflectionFamily", &getReflectionFamily,
            (arg("self"), arg("hkl")),
-           "Returns the same HKL for all symmetry equivalents.");
+           "Returns the same HKL for all symmetry equivalents.")
+      .def(str(self))
+      .def("__repr__", &__repr__implementation);
 }

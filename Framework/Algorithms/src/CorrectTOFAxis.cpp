@@ -57,6 +57,7 @@ const static std::string EPP_TABLE("EPPTable");
 const static std::string FIXED_ENERGY("EFixed");
 const static std::string INDEX_TYPE("IndexType");
 const static std::string INPUT_WORKSPACE("InputWorkspace");
+const static std::string L2("L2");
 const static std::string OUTPUT_WORKSPACE("OutputWorkspace");
 const static std::string REFERENCE_SPECTRA("ReferenceSpectra");
 const static std::string REFERENCE_WORKSPACE("ReferenceWorkspace");
@@ -201,6 +202,8 @@ void CorrectTOFAxis::init() {
       PropertyNames::FIXED_ENERGY, EMPTY_DBL(), mustBePositiveDouble,
       "Incident energy if the 'EI' sample log is not present/incorrect.",
       Direction::Input);
+  declareProperty(PropertyNames::L2, EMPTY_DBL(), mustBePositiveDouble,
+                  "Sample to detector distance, in meters.", Direction::Input);
 }
 
 /** Validate the algorithm's input properties.
@@ -241,9 +244,18 @@ std::map<std::string, std::string> CorrectTOFAxis::validateInputs() {
   // If no reference workspace, we either use a predefined elastic channel
   // or EPP tables to declare the elastic TOF.
   const int elasticBinIndex = getProperty(PropertyNames::ELASTIC_BIN_INDEX);
+  const std::vector<int> spectra =
+      getProperty(PropertyNames::REFERENCE_SPECTRA);
+  const double l2 = getProperty(PropertyNames::L2);
   if (elasticBinIndex != EMPTY_INT()) {
     const std::string indexType = getProperty(PropertyNames::INDEX_TYPE);
     m_elasticBinIndex = toWorkspaceIndex(elasticBinIndex, indexType, m_inputWs);
+    if (spectra.empty() && l2 == EMPTY_DBL()) {
+      issues[PropertyNames::REFERENCE_SPECTRA] =
+          "Either " + PropertyNames::REFERENCE_SPECTRA + " or " +
+          PropertyNames::L2 + " has to be specified.";
+      return issues;
+    }
   } else {
     m_eppTable = getProperty(PropertyNames::EPP_TABLE);
     if (!m_eppTable) {
@@ -261,12 +273,11 @@ std::map<std::string, std::string> CorrectTOFAxis::validateInputs() {
           "EPP table doesn't contain the expected columns.";
       return issues;
     }
-  }
-  const std::vector<int> spectra =
-      getProperty(PropertyNames::REFERENCE_SPECTRA);
-  if (spectra.empty()) {
-    issues[PropertyNames::REFERENCE_SPECTRA] = "No spectra selected.";
-    return issues;
+    if (spectra.empty()) {
+      issues[PropertyNames::REFERENCE_SPECTRA] =
+          "No reference spectra selected.";
+      return issues;
+    }
   }
   m_workspaceIndices = referenceWorkspaceIndices();
   std::sort(m_workspaceIndices.begin(), m_workspaceIndices.end());
@@ -370,7 +381,8 @@ void CorrectTOFAxis::correctManually(API::MatrixWorkspace_sptr outputWs) {
     averageL2AndEPP(spectrumInfo, l2, epp);
   } else {
     epp = m_inputWs->points(0)[m_elasticBinIndex];
-    l2 = averageL2(spectrumInfo);
+    const double l2Property = getProperty(PropertyNames::L2);
+    l2 = l2Property == EMPTY_DBL() ? averageL2(spectrumInfo) : l2Property;
   }
   double Ei = getProperty(PropertyNames::FIXED_ENERGY);
   if (Ei == EMPTY_DBL()) {

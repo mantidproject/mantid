@@ -383,7 +383,7 @@ void IntegratePeakTimeSlices::exec() {
     double time;
     int ncells;
 
-    Mantid::API::Progress prog(this, 0.0, 100.0, dChan);
+    Mantid::API::Progress prog(this, 0.0, 1.0, dChan);
 
     // Set from attributes replace by m_R0
     m_R0 = -1;
@@ -1751,7 +1751,7 @@ int IntegratePeakTimeSlices::findNameInVector(
 
 {
   for (size_t i = 0; i < nameList.size(); i++)
-    if (oneName.compare(nameList[i]) == 0)
+    if (oneName == nameList[i])
       return static_cast<int>(i);
 
   return -1;

@@ -99,8 +99,9 @@ void ALCPeakFittingPresenter::onFittedPeaksChanged() {
   IFunction_const_sptr fittedPeaks = m_model->fittedPeaks();
   auto dataWS = m_model->data();
   if (fittedPeaks && dataWS) {
-    auto x = dataWS->readX(0);
-    m_view->setFittedCurve(*(ALCHelper::curveDataFromFunction(fittedPeaks, x)));
+    auto x = dataWS->x(0);
+    m_view->setFittedCurve(
+        *(ALCHelper::curveDataFromFunction(fittedPeaks, x.rawData())));
     m_view->setFunction(fittedPeaks);
   } else {
     m_view->setFittedCurve(*(ALCHelper::emptyCurveData()));
@@ -146,8 +147,9 @@ bool ALCPeakFittingPresenter::plotGuessOnGraph() {
   auto func = m_view->function("");
   auto dataWS = m_model->data();
   if (func && dataWS) {
-    auto xdata = dataWS->readX(0);
-    m_view->setFittedCurve(*(ALCHelper::curveDataFromFunction(func, xdata)));
+    auto xdata = dataWS->x(0);
+    m_view->setFittedCurve(
+        *(ALCHelper::curveDataFromFunction(func, xdata.rawData())));
     plotted = true;
   }
   return plotted;

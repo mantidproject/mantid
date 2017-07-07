@@ -6,6 +6,7 @@
 #include "MantidAPI/RegisterFileLoader.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/UnitFactory.h"
 
 #include <boost/algorithm/string/predicate.hpp>
@@ -38,8 +39,8 @@ int LoadILLTOF2::confidence(Kernel::NexusDescriptor &descriptor) const {
   if (descriptor.pathExists("/entry0/wavelength") &&
       descriptor.pathExists("/entry0/experiment_identifier") &&
       descriptor.pathExists("/entry0/mode") &&
-      !descriptor.pathExists(
-          "/entry0/dataSD") // This one is for LoadILLIndirect
+      !descriptor.pathExists("/entry0/dataSD") // This one is for
+                                               // LoadILLIndirect
       &&
       !descriptor.pathExists(
           "/entry0/instrument/VirtualChopper") // This one is for
@@ -354,24 +355,13 @@ void LoadILLTOF2::loadDataIntoTheWorkSpace(
 
   auto const &instrument = m_localWorkspace->getInstrument();
 
-  const auto monitorIDs = instrument->getMonitors();
-
-  for (const auto &monitor : monitors) {
-    m_localWorkspace->setHistogram(spec, m_localWorkspace->binEdges(0),
-                                   Counts(monitor.begin(), monitor.end()));
-    m_localWorkspace->getSpectrum(spec).setDetectorID(monitorIDs[spec]);
-    spec++;
-  }
-
   const std::vector<detid_t> detectorIDs = instrument->getDetectorIDs(true);
-  const size_t numberOfMonitors = monitors.size();
 
-  Progress progress(this, 0, 1, m_numberOfTubes * m_numberOfPixelsPerTube);
+  Progress progress(this, 0.0, 1.0, m_numberOfTubes * m_numberOfPixelsPerTube);
 
-  loadSpectra(spec, numberOfMonitors, m_numberOfTubes, detectorIDs, data,
-              progress);
+  loadSpectra(spec, m_numberOfTubes, detectorIDs, data, progress);
 
-  g_log.debug() << "Loading data into the workspace: DONE!\n";
+  g_log.debug() << "Loading detector data into the workspace: DONE!\n";
 
   /**
    * IN4 Rosace detectors are in a different NeXus entry
@@ -386,11 +376,20 @@ void LoadILLTOF2::loadDataIntoTheWorkSpace(
     // load the counts from the file into memory
     dataRosace.load();
 
-    Progress progressRosace(this, 0, 1,
+    Progress progressRosace(this, 0.0, 1.0,
                             numberOfTubes * m_numberOfPixelsPerTube);
 
-    loadSpectra(spec, numberOfMonitors, numberOfTubes, detectorIDs, dataRosace,
-                progressRosace);
+    loadSpectra(spec, numberOfTubes, detectorIDs, dataRosace, progressRosace);
+  }
+
+  const auto monitorIDs = instrument->getMonitors();
+
+  for (size_t i = 0; i < monitors.size(); ++i) {
+    const auto &monitor = monitors[i];
+    m_localWorkspace->setHistogram(spec, m_localWorkspace->binEdges(0),
+                                   Counts(monitor.begin(), monitor.end()));
+    m_localWorkspace->getSpectrum(spec).setDetectorID(monitorIDs[i]);
+    spec++;
   }
 }
 
@@ -399,24 +398,21 @@ void LoadILLTOF2::loadDataIntoTheWorkSpace(
  * of detector types in the workspace.
  *
  * @param spec The current spectrum id
- * @param numberOfMonitors The number of monitors in the workspace
  * @param numberOfTubes The number of detector tubes in the workspace
  * @param detectorIDs A list of all of the detector IDs
  * @param data The NeXus data to load into the workspace
  * @param progress The progress monitor
  */
-void LoadILLTOF2::loadSpectra(size_t &spec, const size_t numberOfMonitors,
-                              const size_t numberOfTubes,
+void LoadILLTOF2::loadSpectra(size_t &spec, const size_t numberOfTubes,
                               const std::vector<detid_t> &detectorIDs,
-                              NXInt data, Progress progress) {
+                              const NXInt &data, Progress &progress) {
   for (size_t i = 0; i < numberOfTubes; ++i) {
     for (size_t j = 0; j < m_numberOfPixelsPerTube; ++j) {
       int *data_p = &data(static_cast<int>(i), static_cast<int>(j), 0);
       m_localWorkspace->setHistogram(
           spec, m_localWorkspace->binEdges(0),
           Counts(data_p, data_p + m_numberOfChannels));
-      m_localWorkspace->getSpectrum(spec)
-          .setDetectorID(detectorIDs[spec - numberOfMonitors]);
+      m_localWorkspace->getSpectrum(spec).setDetectorID(detectorIDs[spec]);
       spec++;
       progress.report();
     }

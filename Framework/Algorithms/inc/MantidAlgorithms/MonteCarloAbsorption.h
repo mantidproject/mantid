@@ -62,10 +62,10 @@ private:
   void init() override;
   void exec() override;
 
-  API::MatrixWorkspace_sptr
+  API::MatrixWorkspace_uptr
   doSimulation(const API::MatrixWorkspace &inputWS, size_t nevents, int nlambda,
                int seed, const InterpolationOption &interpolateOpt);
-  API::MatrixWorkspace_sptr
+  API::MatrixWorkspace_uptr
   createOutputWorkspace(const API::MatrixWorkspace &inputWS) const;
   std::unique_ptr<IBeamProfile>
   createBeamProfile(const Geometry::Instrument &instrument,

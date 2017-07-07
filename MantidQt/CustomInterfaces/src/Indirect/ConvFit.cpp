@@ -7,12 +7,10 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FunctionDomain1D.h"
 #include "MantidAPI/FunctionFactory.h"
-#include "MantidAPI/TextAxis.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidGeometry/Instrument.h"
 
 #include <QDoubleValidator>
-#include <QFileInfo>
 #include <QMenu>
 
 #include <qwt_plot.h>
@@ -88,20 +86,7 @@ void ConvFit::setup() {
   m_cfTree->addProperty(m_properties["FitRange"]);
 
   // FABADA
-  m_properties["FABADA"] = m_grpManager->addProperty("Bayesian");
-  m_properties["UseFABADA"] = m_blnManager->addProperty("Use FABADA");
-  m_properties["FABADA"]->addSubProperty(m_properties["UseFABADA"]);
-  m_properties["OutputFABADAChain"] = m_blnManager->addProperty("Output Chain");
-  m_properties["FABADAChainLength"] = m_dblManager->addProperty("Chain Length");
-  m_dblManager->setDecimals(m_properties["FABADAChainLength"], 0);
-  m_dblManager->setValue(m_properties["FABADAChainLength"], 1000000);
-  m_properties["FABADAConvergenceCriteria"] =
-      m_dblManager->addProperty("Convergence Criteria");
-  m_dblManager->setValue(m_properties["FABADAConvergenceCriteria"], 0.1);
-  m_properties["FABADAJumpAcceptanceRate"] =
-      m_dblManager->addProperty("Acceptance Rate");
-  m_dblManager->setValue(m_properties["FABADAJumpAcceptanceRate"], 0.25);
-  m_cfTree->addProperty(m_properties["FABADA"]);
+  initFABADAOptions();
 
   // Background type
   m_properties["LinearBackground"] = m_grpManager->addProperty("Background");
@@ -220,6 +205,72 @@ void ConvFit::setup() {
   m_previousFit = m_uiForm.cbFitType->currentText();
 
   updatePlotOptions();
+}
+
+/** Setup FABADA minimizer options
+*
+*/
+void ConvFit::initFABADAOptions() {
+
+  m_properties["FABADA"] = m_grpManager->addProperty("Bayesian");
+  m_properties["UseFABADA"] = m_blnManager->addProperty("Use FABADA");
+  m_properties["FABADA"]->addSubProperty(m_properties["UseFABADA"]);
+
+  // Output chain
+  m_properties["OutputFABADAChain"] = m_blnManager->addProperty("Output Chain");
+  // Chain length
+  m_properties["FABADAChainLength"] = m_dblManager->addProperty("Chain Length");
+  m_dblManager->setDecimals(m_properties["FABADAChainLength"], 0);
+  m_dblManager->setValue(m_properties["FABADAChainLength"], 1000000);
+  // Convergence criteria
+  m_properties["FABADAConvergenceCriteria"] =
+      m_dblManager->addProperty("Convergence Criteria");
+  m_dblManager->setValue(m_properties["FABADAConvergenceCriteria"], 0.1);
+  // Jump acceptance rate
+  m_properties["FABADAJumpAcceptanceRate"] =
+      m_dblManager->addProperty("Acceptance Rate");
+  m_dblManager->setValue(m_properties["FABADAJumpAcceptanceRate"], 0.25);
+
+  // Advanced options
+  m_properties["FABADAAdvanced"] = m_blnManager->addProperty("Advanced");
+  m_blnManager->setValue(m_properties["FABADAAdvanced"], false);
+  // Steps between values
+  m_properties["FABADAStepsBetweenValues"] =
+      m_dblManager->addProperty("Steps Between Values");
+  m_dblManager->setDecimals(m_properties["FABADAStepsBetweenValues"], 0);
+  m_dblManager->setValue(m_properties["FABADAStepsBetweenValues"], 10);
+  // Inactive convergence criterion
+  m_properties["FABADAInactiveConvergenceCriterion"] =
+      m_dblManager->addProperty("Inactive Convergence Criterion");
+  m_dblManager->setDecimals(m_properties["FABADAInactiveConvergenceCriterion"],
+                            0);
+  m_dblManager->setValue(m_properties["FABADAInactiveConvergenceCriterion"], 5);
+  // Simulated annealing applied
+  m_properties["FABADASimAnnealingApplied"] =
+      m_blnManager->addProperty("Sim Annealing Applied");
+  // Maximum temperature
+  m_properties["FABADAMaximumTemperature"] =
+      m_dblManager->addProperty("Maximum Temperature");
+  m_dblManager->setValue(m_properties["FABADAMaximumTemperature"], 10.0);
+  // Number of regrigeration steps
+  m_properties["FABADANumRefrigerationSteps"] =
+      m_dblManager->addProperty("Num Refrigeration Steps");
+  m_dblManager->setDecimals(m_properties["FABADANumRefrigerationSteps"], 0);
+  m_dblManager->setValue(m_properties["FABADANumRefrigerationSteps"], 5);
+  // Simulated annealing iterations
+  m_properties["FABADASimAnnealingIterations"] =
+      m_dblManager->addProperty("Sim Annealing Iterations");
+  m_dblManager->setDecimals(m_properties["FABADASimAnnealingIterations"], 0);
+  m_dblManager->setValue(m_properties["FABADASimAnnealingIterations"], 10000);
+  // Overexploration
+  m_properties["FABADAOverexploration"] =
+      m_blnManager->addProperty("Overexploration");
+  m_cfTree->addProperty(m_properties["FABADA"]);
+  // Number of bins in PDF
+  m_properties["FABADANumberBinsPDF"] =
+      m_dblManager->addProperty("Number Bins PDF");
+  m_dblManager->setDecimals(m_properties["FABADANumberBinsPDF"], 0);
+  m_dblManager->setValue(m_properties["FABADANumberBinsPDF"], 20);
 }
 
 /**
@@ -973,6 +1024,37 @@ QString ConvFit::minimizerString(QString outputName) const {
 
     if (m_blnManager->value(m_properties["OutputFABADAChain"]))
       minimizer += ",Chains=" + outputName + "_Chain";
+
+    if (m_blnManager->value(m_properties["FABADASimAnnealingApplied"])) {
+      minimizer += ",SimAnnealingApplied=1";
+    } else {
+      minimizer += ",SimAnnealingApplied=0";
+    }
+    double maximumTemperature =
+        m_dblManager->value(m_properties["FABADAMaximumTemperature"]);
+    minimizer += ",MaximumTemperature=" + QString::number(maximumTemperature);
+    double refSteps =
+        m_dblManager->value(m_properties["FABADANumRefrigerationSteps"]);
+    minimizer += ",NumRefrigerationSteps=" + QString::number(refSteps);
+    double simAnnealingIter =
+        m_dblManager->value(m_properties["FABADASimAnnealingIterations"]);
+    minimizer += ",SimAnnealingIterations=" + QString::number(simAnnealingIter);
+    bool overexploration =
+        m_blnManager->value(m_properties["FABADAOverexploration"]);
+    minimizer += ",Overexploration=";
+    minimizer += overexploration ? "1" : "0";
+
+    double stepsBetweenValues =
+        m_dblManager->value(m_properties["FABADAStepsBetweenValues"]);
+    minimizer += ",StepsBetweenValues=" + QString::number(stepsBetweenValues);
+
+    double inactiveConvCriterion =
+        m_dblManager->value(m_properties["FABADAInactiveConvergenceCriterion"]);
+    minimizer += ",InnactiveConvergenceCriterion=" +
+                 QString::number(inactiveConvCriterion);
+
+    double binsPDF = m_dblManager->value(m_properties["FABADANumberBinsPDF"]);
+    minimizer += ",NumberBinsPDF=" + QString::number(binsPDF);
   }
 
   return minimizer;
@@ -998,8 +1080,8 @@ void ConvFit::typeSelection(int index) {
 
   // Disable Plot Guess and Use Delta Function for DiffSphere and
   // DiffRotDiscreteCircle
-  m_uiForm.ckPlotGuess->setEnabled(index < 3);
-  m_properties["UseDeltaFunc"]->setEnabled(index < 3);
+  m_uiForm.ckPlotGuess->setEnabled(index < 3 || index == 7);
+  m_properties["UseDeltaFunc"]->setEnabled(index < 3 || index == 7);
 
   updatePlotOptions();
 }
@@ -1091,11 +1173,12 @@ void ConvFit::plotGuess() {
         m_uiForm.ckPlotGuess->isChecked()))
     return;
 
-  if (m_uiForm.cbFitType->currentIndex() > 2) {
+  if (m_uiForm.cbFitType->currentIndex() > 2 &&
+      m_uiForm.cbFitType->currentIndex() != 7) {
     return;
   }
 
-  bool tieCentres = (m_uiForm.cbFitType->currentIndex() > 1);
+  bool tieCentres = (m_uiForm.cbFitType->currentIndex() == 2);
   CompositeFunction_sptr function = createFunction(tieCentres);
 
   if (m_cfInputWS == NULL) {
@@ -1108,28 +1191,19 @@ void ConvFit::plotGuess() {
       m_cfInputWS->binIndexOf(m_dblManager->value(m_properties["EndX"]));
   const size_t nData = binIndexHigh - binIndexLow;
 
-  std::vector<double> inputXData(nData);
-  const Mantid::MantidVec &XValues = m_cfInputWS->readX(0);
-  const bool isHistogram = m_cfInputWS->isHistogramData();
+  const auto &xPoints = m_cfInputWS->points(0);
 
-  for (size_t i = 0; i < nData; i++) {
-    if (isHistogram) {
-      inputXData[i] =
-          0.5 * (XValues[binIndexLow + i] + XValues[binIndexLow + i + 1]);
-    } else {
-      inputXData[i] = XValues[binIndexLow + i];
-    }
-  }
+  std::vector<double> dataX(nData);
+  std::copy(&xPoints[binIndexLow], &xPoints[binIndexLow + nData],
+            dataX.begin());
 
-  FunctionDomain1DVector domain(inputXData);
+  FunctionDomain1DVector domain(dataX);
   FunctionValues outputData(domain);
   function->function(domain, outputData);
 
-  QVector<double> dataX, dataY;
-
+  std::vector<double> dataY(nData);
   for (size_t i = 0; i < nData; i++) {
-    dataX.append(inputXData[i]);
-    dataY.append(outputData.getCalculated(i));
+    dataY[i] = outputData.getCalculated(i);
   }
 
   IAlgorithm_sptr createWsAlg =
@@ -1139,8 +1213,8 @@ void ConvFit::plotGuess() {
   createWsAlg->setLogging(false);
   createWsAlg->setProperty("OutputWorkspace", "__GuessAnon");
   createWsAlg->setProperty("NSpec", 1);
-  createWsAlg->setProperty("DataX", dataX.toStdVector());
-  createWsAlg->setProperty("DataY", dataY.toStdVector());
+  createWsAlg->setProperty("DataX", dataX);
+  createWsAlg->setProperty("DataY", dataY);
   createWsAlg->execute();
   MatrixWorkspace_sptr guessWs = createWsAlg->getProperty("OutputWorkspace");
 
@@ -1428,26 +1502,95 @@ void ConvFit::checkBoxUpdate(QtProperty *prop, bool checked) {
     if (checked) {
       // FABADA needs a much higher iteration limit
       m_dblManager->setValue(m_properties["MaxIterations"], 20000);
-
-      m_properties["FABADA"]->addSubProperty(m_properties["OutputFABADAChain"]);
-      m_properties["FABADA"]->addSubProperty(m_properties["FABADAChainLength"]);
-      m_properties["FABADA"]->addSubProperty(
-          m_properties["FABADAConvergenceCriteria"]);
-      m_properties["FABADA"]->addSubProperty(
-          m_properties["FABADAJumpAcceptanceRate"]);
+      showFABADA(m_blnManager->value(m_properties["FABADAAdvanced"]));
     } else {
       m_dblManager->setValue(m_properties["MaxIterations"], 500);
-
-      m_properties["FABADA"]->removeSubProperty(
-          m_properties["OutputFABADAChain"]);
-      m_properties["FABADA"]->removeSubProperty(
-          m_properties["FABADAChainLength"]);
-      m_properties["FABADA"]->removeSubProperty(
-          m_properties["FABADAConvergenceCriteria"]);
-      m_properties["FABADA"]->removeSubProperty(
-          m_properties["FABADAJumpAcceptanceRate"]);
+      hideFABADA();
     }
+  } else if (prop == m_properties["FABADAAdvanced"]) {
+    showFABADA(checked);
   }
+}
+
+/** Shows FABADA minimizer options in the property browser
+*
+* @param advanced :: true if advanced options should be shown, false otherwise
+*/
+void ConvFit::showFABADA(bool advanced) {
+
+  m_properties["FABADA"]->addSubProperty(m_properties["OutputFABADAChain"]);
+  m_properties["FABADA"]->addSubProperty(m_properties["FABADAChainLength"]);
+  m_properties["FABADA"]->addSubProperty(
+      m_properties["FABADAConvergenceCriteria"]);
+  m_properties["FABADA"]->addSubProperty(
+      m_properties["FABADAJumpAcceptanceRate"]);
+  m_properties["FABADA"]->addSubProperty(m_properties["FABADAAdvanced"]);
+  if (advanced) {
+    m_properties["FABADA"]->addSubProperty(
+        m_properties["FABADAStepsBetweenValues"]);
+    m_properties["FABADA"]->addSubProperty(
+        m_properties["FABADAInactiveConvergenceCriterion"]);
+    m_properties["FABADA"]->addSubProperty(
+        m_properties["FABADASimAnnealingApplied"]);
+    m_properties["FABADA"]->addSubProperty(
+        m_properties["FABADAMaximumTemperature"]);
+    m_properties["FABADA"]->addSubProperty(
+        m_properties["FABADANumRefrigerationSteps"]);
+    m_properties["FABADA"]->addSubProperty(
+        m_properties["FABADASimAnnealingIterations"]);
+    m_properties["FABADA"]->addSubProperty(
+        m_properties["FABADAOverexploration"]);
+    m_properties["FABADA"]->addSubProperty(m_properties["FABADANumberBinsPDF"]);
+  } else {
+    m_properties["FABADA"]->removeSubProperty(
+        m_properties["FABADAStepsBetweenValues"]);
+    m_properties["FABADA"]->removeSubProperty(
+        m_properties["FABADAInactiveConvergenceCriterion"]);
+    m_properties["FABADA"]->removeSubProperty(
+        m_properties["FABADASimAnnealingApplied"]);
+    m_properties["FABADA"]->removeSubProperty(
+        m_properties["FABADAMaximumTemperature"]);
+    m_properties["FABADA"]->removeSubProperty(
+        m_properties["FABADANumRefrigerationSteps"]);
+    m_properties["FABADA"]->removeSubProperty(
+        m_properties["FABADASimAnnealingIterations"]);
+    m_properties["FABADA"]->removeSubProperty(
+        m_properties["FABADAOverexploration"]);
+    m_properties["FABADA"]->removeSubProperty(
+        m_properties["FABADANumberBinsPDF"]);
+  }
+}
+
+/** Hide FABADA minimizer options from the browser
+*
+*/
+void ConvFit::hideFABADA() {
+
+  m_properties["FABADA"]->removeSubProperty(m_properties["OutputFABADAChain"]);
+  m_properties["FABADA"]->removeSubProperty(m_properties["FABADAChainLength"]);
+  m_properties["FABADA"]->removeSubProperty(
+      m_properties["FABADAConvergenceCriteria"]);
+  m_properties["FABADA"]->removeSubProperty(
+      m_properties["FABADAJumpAcceptanceRate"]);
+  m_properties["FABADA"]->removeSubProperty(m_properties["FABADAAdvanced"]);
+
+  // Advanced options
+  m_properties["FABADA"]->removeSubProperty(
+      m_properties["FABADAStepsBetweenValues"]);
+  m_properties["FABADA"]->removeSubProperty(
+      m_properties["FABADAInactiveConvergenceCriterion"]);
+  m_properties["FABADA"]->removeSubProperty(
+      m_properties["FABADASimAnnealingApplied"]);
+  m_properties["FABADA"]->removeSubProperty(
+      m_properties["FABADAMaximumTemperature"]);
+  m_properties["FABADA"]->removeSubProperty(
+      m_properties["FABADANumRefrigerationSteps"]);
+  m_properties["FABADA"]->removeSubProperty(
+      m_properties["FABADASimAnnealingIterations"]);
+  m_properties["FABADA"]->removeSubProperty(
+      m_properties["FABADAOverexploration"]);
+  m_properties["FABADA"]->removeSubProperty(
+      m_properties["FABADANumberBinsPDF"]);
 }
 
 void ConvFit::fitContextMenu(const QPoint &) {

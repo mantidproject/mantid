@@ -20,8 +20,8 @@
  */
 
 #include "MantidDataHandling/SaveCSV.h"
-#include "MantidDataObjects/Workspace2D.h"
 #include "MantidAPI/FileProperty.h"
+#include "MantidDataObjects/Workspace2D.h"
 
 #include <fstream> // used to get ofstream
 #include <iomanip>
@@ -126,7 +126,7 @@ void SaveCSV::exec() {
 
     // Add first x-axis line to output file
     {
-      const MantidVec &xValue = localworkspace->readX(0);
+      auto &xValue = localworkspace->x(0);
 
       outCSV_File << "A";
 
@@ -142,10 +142,10 @@ void SaveCSV::exec() {
       // check if x-axis has changed. If yes print out new x-axis line
 
       if (i > 0) {
-        const MantidVec &xValue = localworkspace->readX(i);
-        const MantidVec &xValuePrevious = localworkspace->readX(i - 1);
+        auto &xValue = localworkspace->x(i);
+        auto &xValuePrevious = localworkspace->x(i - 1);
 
-        if (xValue != xValuePrevious) {
+        if (xValue.rawData() != xValuePrevious.rawData()) {
           outCSV_File << "A";
 
           for (double j : xValue) {
@@ -158,7 +158,7 @@ void SaveCSV::exec() {
 
       // add y-axis line for histogram (detector) i
 
-      const MantidVec &yValue = localworkspace->dataY(i);
+      auto &yValue = localworkspace->y(i);
 
       outCSV_File << i;
 
@@ -174,7 +174,7 @@ void SaveCSV::exec() {
     outCSV_File << "\nERRORS\n";
 
     for (size_t i = 0; i < numberOfHist; i++) {
-      const MantidVec &eValue = localworkspace->dataE(i);
+      auto &eValue = localworkspace->e(i);
 
       outCSV_File << i;
 

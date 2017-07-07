@@ -116,10 +116,12 @@ void LoadDspacemap::CalculateOffsetsFromDSpacemapFile(
 
     // Compute the factor
     double offset = 0.0;
-    double factor = Geometry::Conversion::tofToDSpacingFactor(
-        l1, detectorInfo.l2(detectorIndex),
-        detectorInfo.twoTheta(detectorIndex), offset);
-    offset = dspace[detectorId] / factor - 1.0;
+    if (!detectorInfo.isMonitor(detectorIndex)) {
+      double factor = Geometry::Conversion::tofToDSpacingFactor(
+          l1, detectorInfo.l2(detectorIndex),
+          detectorInfo.twoTheta(detectorIndex), offset);
+      offset = dspace[detectorId] / factor - 1.0;
+    }
     // Save in the map
     try {
       offsetsWS->setValue(detectorId, offset);

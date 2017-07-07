@@ -11,6 +11,7 @@
 #include "MantidAPI/WorkspaceGroup.h"
 
 #include "MantidKernel/DateAndTime.h"
+#include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/WarningSuppressions.h"
@@ -41,9 +42,8 @@ Kernel::Logger g_log("ISISLiveEventDataListener");
  * The constructor
  */
 ISISLiveEventDataListener::ISISLiveEventDataListener()
-    : API::ILiveListener(), m_isConnected(false), m_stopThread(false),
-      m_runNumber(0), m_daeHandle(), m_numberOfPeriods(0),
-      m_numberOfSpectra(0) {
+    : LiveListener(), m_isConnected(false), m_stopThread(false), m_runNumber(0),
+      m_daeHandle(), m_numberOfPeriods(0), m_numberOfSpectra(0) {
   m_warnings["period"] = "Period number is outside the range. Changed to 0.";
 }
 
@@ -81,7 +81,7 @@ bool ISISLiveEventDataListener::connect(
   // If we don't have an address, force a connection to the test server running
   // on
   // localhost on the default port
-  if (address.host().toString().compare("0.0.0.0") == 0) {
+  if (address.host().toString() == "0.0.0.0") {
     Poco::Net::SocketAddress tempAddress("127.0.0.1:10000");
     try {
       m_socket.connect(tempAddress); // BLOCKING connect

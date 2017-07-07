@@ -122,6 +122,7 @@ class TOFTOFMergeRuns(PythonAlgorithm):
         if workspaceCount < 2:
             api.CloneWorkspace(InputWorkspace=input_workspace_list[0], OutputWorkspace=wsOutput)
             self.log().warning("Cannot merge one workspace. Clone is produced.")
+            self.setProperty("OutputWorkspace", wsOutput)
             return
 
         # check whether given workspaces can be merged

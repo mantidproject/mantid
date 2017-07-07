@@ -1,5 +1,6 @@
 
-from ReflectometerCors import *
+from __future__ import (absolute_import, division, print_function)
+from .ReflectometerCors import *
 
 
 def quick(run):

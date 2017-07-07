@@ -13,7 +13,6 @@
 #include "MantidKernel/ReadLock.h"
 #include "MantidKernel/Logger.h"
 
-using Mantid::API::IMDWorkspace;
 using Mantid::DataObjects::MDHistoWorkspace;
 using Mantid::API::NullCoordTransform;
 

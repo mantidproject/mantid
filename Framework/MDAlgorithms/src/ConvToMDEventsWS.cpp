@@ -155,15 +155,9 @@ void ConvToMDEventsWS::runConversion(API::Progress *pProgress) {
     size_t nConverted = this->conversionChunk(wi);
     eventsAdded += nConverted;
     nEventsInWS += nConverted;
-    // Give this task to the scheduler
-    //%double cost = double(el.getNumberEvents());
-    // ts->push( new FunctionTask( func, cost) );
-
     // Keep a running total of how many events we've added
     if (bc->shouldSplitBoxes(nEventsInWS, eventsAdded, lastNumBoxes)) {
       if (runMultithreaded) {
-        // Do all the adding tasks
-        tp.joinAll();
         // Now do all the splitting tasks
         m_OutWSWrapper->pWorkspace()->splitAllIfNeeded(ts);
         if (ts->size() > 0)
@@ -184,7 +178,6 @@ void ConvToMDEventsWS::runConversion(API::Progress *pProgress) {
   }
   // Do a final splitting of everything
   if (runMultithreaded) {
-    tp.joinAll();
     m_OutWSWrapper->pWorkspace()->splitAllIfNeeded(ts);
     tp.joinAll();
   } else {

@@ -101,6 +101,9 @@ void WorkspacePresenter::notifyFromView(ViewNotifiable::Flag flag) {
   case ViewNotifiable::Flag::PlotSpectrumWithErrors:
     plotSpectrumWithErrors();
     break;
+  case ViewNotifiable::Flag::PlotSpectrumAdvanced:
+    plotSpectrumAdvanced();
+    break;
   case ViewNotifiable::Flag::ShowColourFillPlot:
     showColourFillPlot();
     break;
@@ -145,12 +148,6 @@ void WorkspacePresenter::notifyFromView(ViewNotifiable::Flag flag) {
     break;
   case ViewNotifiable::Flag::ClearUBMatrix:
     clearUBMatrix();
-    break;
-  case ViewNotifiable::Flag::ShowSurfacePlot:
-    showSurfacePlot();
-    break;
-  case ViewNotifiable::Flag::ShowContourPlot:
-    showContourPlot();
     break;
   case ViewNotifiable::Flag::RefreshWorkspaces:
     refreshWorkspaces();
@@ -309,12 +306,17 @@ void WorkspacePresenter::saveToProgram() {
 
 void WorkspacePresenter::plotSpectrum() {
   auto view = lockView();
-  view->plotSpectrum(false);
+  view->plotSpectrum("Simple");
 }
 
 void WorkspacePresenter::plotSpectrumWithErrors() {
   auto view = lockView();
-  view->plotSpectrum(true);
+  view->plotSpectrum("Errors");
+}
+
+void WorkspacePresenter::plotSpectrumAdvanced() {
+  auto view = lockView();
+  view->plotSpectrum("Advanced");
 }
 
 void WorkspacePresenter::showColourFillPlot() {
@@ -402,16 +404,6 @@ void WorkspacePresenter::clearUBMatrix() {
     } else
       break;
   }
-}
-
-void WorkspacePresenter::showSurfacePlot() {
-  auto view = lockView();
-  view->showSurfacePlot();
-}
-
-void WorkspacePresenter::showContourPlot() {
-  auto view = lockView();
-  view->showContourPlot();
 }
 
 void WorkspacePresenter::refreshWorkspaces() { updateView(); }

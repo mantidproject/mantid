@@ -20,6 +20,7 @@
 #include <H5Cpp.h>
 #include <Poco/DirectoryIterator.h>
 #include <Poco/Path.h>
+#include <nexus/NeXusFile.hpp>
 #include <type_traits>
 
 using namespace Mantid::Kernel;
@@ -453,7 +454,7 @@ LoadNXcanSAS::LoadNXcanSAS() {}
 
 int LoadNXcanSAS::confidence(Kernel::NexusDescriptor &descriptor) const {
   const std::string &extn = descriptor.extension();
-  if (extn.compare(".nxs") != 0 && extn.compare(".h5") != 0) {
+  if (extn != ".nxs" && extn != ".h5") {
     return 0;
   }
 

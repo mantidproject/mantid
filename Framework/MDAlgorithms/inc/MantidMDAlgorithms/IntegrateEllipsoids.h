@@ -30,6 +30,8 @@ public:
   const std::string category() const override;
 
 private:
+  using PrincipleAxes = std::array<std::vector<double>, 3>;
+
   void init() override;
   void exec() override;
   void qListFromEventWS(Integrate3DEvents &integrator, API::Progress &prog,

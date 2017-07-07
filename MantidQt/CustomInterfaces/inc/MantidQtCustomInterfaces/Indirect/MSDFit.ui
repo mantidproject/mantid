@@ -41,6 +41,9 @@
         <property name="showLoad" stdset="0">
          <bool>false</bool>
         </property>
+        <property name="ShowGroups" stdset="0">
+         <bool>false</bool>
+        </property>
        </widget>
       </item>
      </layout>

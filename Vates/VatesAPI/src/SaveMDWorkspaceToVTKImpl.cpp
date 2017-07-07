@@ -15,7 +15,7 @@
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/make_unique.h"
 
-#include "vtkCallbackCommand.h"
+#include "vtkCommand.h"
 #include "vtkFloatArray.h"
 #include "vtkNew.h"
 #include "vtkSmartPointer.h"
@@ -57,8 +57,8 @@ bool isNDWorkspace(const Mantid::API::IMDWorkspace &workspace,
 namespace Mantid {
 namespace VATES {
 
-const std::string SaveMDWorkspaceToVTKImpl::structuredGridExtension = "vts";
-const std::string SaveMDWorkspaceToVTKImpl::unstructuredGridExtension = "vtu";
+const std::string SaveMDWorkspaceToVTKImpl::structuredGridExtension = ".vts";
+const std::string SaveMDWorkspaceToVTKImpl::unstructuredGridExtension = ".vtu";
 
 SaveMDWorkspaceToVTKImpl::SaveMDWorkspaceToVTKImpl(SaveMDWorkspaceToVTK *parent)
     : m_progress(parent, 0.0, 1.0, 101) {
@@ -77,7 +77,7 @@ SaveMDWorkspaceToVTKImpl::SaveMDWorkspaceToVTKImpl(SaveMDWorkspaceToVTK *parent)
 void SaveMDWorkspaceToVTKImpl::saveMDWorkspace(
     const Mantid::API::IMDWorkspace_sptr &workspace,
     const std::string &filename, VisualNormalization normalization,
-    int recursionDepth, const std::string &compressorType) const {
+    int recursionDepth, const std::string &compressorType) {
   auto isHistoWorkspace =
       boost::dynamic_pointer_cast<Mantid::API::IMDHistoWorkspace>(workspace) !=
       nullptr;
@@ -194,19 +194,18 @@ SaveMDWorkspaceToVTKImpl::getPresenter(bool isHistoWorkspace,
   return presenter;
 }
 
-void ProgressFunction(vtkObject *caller, long unsigned int vtkNotUsed(eventId),
-                      void *clientData, void *vtkNotUsed(callData)) {
-  vtkXMLWriter *testFilter = dynamic_cast<vtkXMLWriter *>(caller);
+void SaveMDWorkspaceToVTKImpl::progressFunction(vtkObject *caller,
+                                                long unsigned, void *) {
+  vtkAlgorithm *testFilter = vtkAlgorithm::SafeDownCast(caller);
   if (!testFilter)
     return;
   const char *progressText = testFilter->GetProgressText();
+
+  int progress = boost::math::iround(testFilter->GetProgress() * 100.0);
   if (progressText) {
-    reinterpret_cast<Kernel::ProgressBase *>(clientData)
-        ->report(boost::math::iround(testFilter->GetProgress() * 100.0),
-                 progressText);
+    this->m_progress.report(progress, progressText);
   } else {
-    reinterpret_cast<Kernel::ProgressBase *>(clientData)
-        ->report(boost::math::iround(testFilter->GetProgress() * 100.0));
+    this->m_progress.report(progress);
   }
 }
 
@@ -220,11 +219,9 @@ void ProgressFunction(vtkObject *caller, long unsigned int vtkNotUsed(eventId),
  */
 int SaveMDWorkspaceToVTKImpl::writeDataSetToVTKFile(
     vtkXMLWriter *writer, vtkDataSet *dataSet, const std::string &filename,
-    vtkXMLWriter::CompressorType compressor) const {
-  vtkNew<vtkCallbackCommand> progressCallback;
-  progressCallback->SetCallback(ProgressFunction);
-  writer->AddObserver(vtkCommand::ProgressEvent, progressCallback.GetPointer());
-  progressCallback->SetClientData(&m_progress);
+    vtkXMLWriter::CompressorType compressor) {
+  writer->AddObserver(vtkCommand::ProgressEvent, this,
+                      &SaveMDWorkspaceToVTKImpl::progressFunction);
   writer->SetFileName(filename.c_str());
   writer->SetInputData(dataSet);
   writer->SetCompressorType(compressor);
@@ -313,7 +310,6 @@ SaveMDWorkspaceToVTKImpl::getFullFilename(std::string filename,
   const auto extension =
       isHistoWorkspace ? structuredGridExtension : unstructuredGridExtension;
   if (!has_suffix(filename, extension)) {
-    filename += ".";
     filename += extension;
   }
   return filename;

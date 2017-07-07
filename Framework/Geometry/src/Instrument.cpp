@@ -1,13 +1,18 @@
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/InfoComponentVisitor.h"
 #include "MantidGeometry/Instrument/ParComponentFactory.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
+#include "MantidGeometry/Instrument/RectangularDetectorPixel.h"
 #include "MantidBeamline/DetectorInfo.h"
+#include "MantidKernel/EigenConversionHelpers.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/PhysicalConstants.h"
+#include "MantidKernel/make_unique.h"
 
+#include <nexus/NeXusFile.hpp>
 #include <boost/make_shared.hpp>
 #include <queue>
 
@@ -48,7 +53,12 @@ Instrument::Instrument(const boost::shared_ptr<const Instrument> instr,
       m_defaultViewAxis(instr->m_defaultViewAxis), m_instr(instr),
       m_map_nonconst(map), m_ValidFrom(instr->m_ValidFrom),
       m_ValidTo(instr->m_ValidTo), m_referenceFrame(new ReferenceFrame),
-      m_detectorInfo(instr->m_detectorInfo) {}
+      m_detectorInfo(instr->m_detectorInfo) {
+  bool isPhysicalInstrument =
+      m_map ? m_instr->m_isPhysicalInstrument : m_isPhysicalInstrument;
+  if (!isPhysicalInstrument)
+    m_map_nonconst->setInstrument(m_instr.get());
+}
 
 /** Copy constructor
  *  This method was added to deal with having distinct neutronic and physical
@@ -153,9 +163,12 @@ Instrument_const_sptr Instrument::getPhysicalInstrument() const {
   if (m_map) {
     if (m_instr->getPhysicalInstrument()) {
       // A physical instrument should use the same parameter map as the 'main'
-      // instrument
-      return Instrument_const_sptr(
-          new Instrument(m_instr->getPhysicalInstrument(), m_map_nonconst));
+      // instrument. This constructor automatically sets the instrument as the
+      // owning instrument in the ParameterMap. We need to undo this immediately
+      // since the ParameterMap must always be owned by the neutronic
+      // instrument.
+      return boost::make_shared<Instrument>(m_instr->getPhysicalInstrument(),
+                                            m_map_nonconst);
     } else {
       return Instrument_const_sptr();
     }
@@ -169,11 +182,11 @@ Instrument_const_sptr Instrument::getPhysicalInstrument() const {
  * algorithms.
  *  @param physInst A pointer to the physical instrument object.
  */
-void Instrument::setPhysicalInstrument(
-    boost::shared_ptr<const Instrument> physInst) {
-  if (!m_map)
-    m_physicalInstrument = physInst;
-  else
+void Instrument::setPhysicalInstrument(std::unique_ptr<Instrument> physInst) {
+  if (!m_map) {
+    physInst->m_isPhysicalInstrument = true;
+    m_physicalInstrument = std::move(physInst);
+  } else
     throw std::runtime_error("Instrument::setPhysicalInstrument() called on a "
                              "parametrized instrument.");
 }
@@ -189,9 +202,7 @@ void Instrument::getDetectors(detid2det_map &out_map) const {
     const auto &in_dets = m_instr->m_detectorCache;
     // And turn them into parametrized versions
     for (const auto &in_det : in_dets) {
-      out_map.emplace(std::get<0>(in_det),
-                      ParComponentFactory::createDetector(
-                          std::get<1>(in_det).get(), m_map));
+      out_map.emplace(std::get<0>(in_det), getDetector(std::get<0>(in_det)));
     }
   } else {
     // You can just return the detector cache directly.
@@ -265,7 +276,33 @@ void Instrument::getMinMaxDetectorIDs(detid_t &min, detid_t &max) const {
   max = std::get<0>(*in_dets->rbegin());
 }
 
-//------------------------------------------------------------------------------------------
+/** Fill a vector with all the detectors contained (at any depth) in a named
+ *component. For example,
+ * you might have a bank10 with 4 tubes with 100 pixels each; this will return
+ *the
+ * 400 contained Detector objects.
+ *
+ * @param[out] dets :: vector filled with detector pointers
+ * @param comp :: the parent component assembly that contains detectors.
+ */
+void Instrument::getDetectorsInBank(std::vector<IDetector_const_sptr> &dets,
+                                    const IComponent &comp) const {
+  const auto bank = dynamic_cast<const ICompAssembly *>(&comp);
+  if (bank) {
+    // Get a vector of children (recursively)
+    std::vector<boost::shared_ptr<const IComponent>> children;
+    bank->getChildren(children, true);
+    std::vector<boost::shared_ptr<const IComponent>>::iterator it;
+    for (it = children.begin(); it != children.end(); ++it) {
+      IDetector_const_sptr det =
+          boost::dynamic_pointer_cast<const IDetector>(*it);
+      if (det) {
+        dets.push_back(det);
+      }
+    }
+  }
+}
+
 /** Fill a vector with all the detectors contained (at any depth) in a named
  *component. For example,
  * you might have a bank10 with 4 tubes with 100 pixels each; this will return
@@ -282,21 +319,7 @@ void Instrument::getMinMaxDetectorIDs(detid_t &min, detid_t &max) const {
 void Instrument::getDetectorsInBank(std::vector<IDetector_const_sptr> &dets,
                                     const std::string &bankName) const {
   boost::shared_ptr<const IComponent> comp = this->getComponentByName(bankName);
-  boost::shared_ptr<const ICompAssembly> bank =
-      boost::dynamic_pointer_cast<const ICompAssembly>(comp);
-  if (bank) {
-    // Get a vector of children (recursively)
-    std::vector<boost::shared_ptr<const IComponent>> children;
-    bank->getChildren(children, true);
-    std::vector<boost::shared_ptr<const IComponent>>::iterator it;
-    for (it = children.begin(); it != children.end(); ++it) {
-      IDetector_const_sptr det =
-          boost::dynamic_pointer_cast<const IDetector>(*it);
-      if (det) {
-        dets.push_back(det);
-      }
-    }
-  }
+  getDetectorsInBank(dets, *comp);
 }
 
 //------------------------------------------------------------------------------------------
@@ -396,7 +419,7 @@ Kernel::V3D Instrument::getBeamDirection() const {
 *   @return A pointer to the component.
 */
 boost::shared_ptr<const IComponent>
-Instrument::getComponentByID(ComponentID id) const {
+Instrument::getComponentByID(const IComponent *id) const {
   const IComponent *base = static_cast<const IComponent *>(id);
   if (m_map)
     return ParComponentFactory::create(
@@ -497,9 +520,6 @@ IDetector_const_sptr Instrument::getDetector(const detid_t &detector_id) const {
     return baseDet;
 
   auto det = ParComponentFactory::createDetector(baseDet.get(), m_map);
-  // Set the linear detector index, used for legacy accessors to obtain data
-  // from Beamline::DetectorInfo, which is stored in the ParameterMap.
-  det->setIndex(std::distance(baseInstr.m_detectorCache.cbegin(), it));
   return det;
 }
 
@@ -982,19 +1002,9 @@ void Instrument::saveNexus(::NeXus::File *file,
 
   // Now the parameter map, as a NXnote via its saveNexus method
   if (isParametrized()) {
-    Geometry::ParameterMap params(*getParameterMap());
-    // Masking is in DetectorInfo. Insert it into ParameterMap so it is saved
-    // alongside other parameters.
-    if (m_detectorInfo) {
-      const auto &detIDs = getDetectorIDs();
-      for (size_t i = 0; i < m_detectorInfo->size(); ++i) {
-        if (m_detectorInfo->isMasked(i)) {
-          const auto *det = getBaseDetector(detIDs.at(i));
-          params.forceUnsafeSetMasked(det, true);
-        }
-      }
-    }
-    params.saveNexus(file, "instrument_parameter_map");
+    // Map with data extracted from DetectorInfo -> legacy compatible files.
+    const auto &params = makeLegacyParameterMap();
+    params->saveNexus(file, "instrument_parameter_map");
   }
 
   // Add physical detector and monitor data
@@ -1232,13 +1242,115 @@ const Beamline::DetectorInfo &Instrument::detectorInfo() const {
   return *m_detectorInfo;
 }
 
-/// Only for use by ExperimentInfo. Sets the pointer to the DetectorInfo.
+/**
+ * Only for use by ExperimentInfo
+ * @return True only if a InfoComponentVisitor has been set.
+ */
+bool Instrument::hasInfoVisitor() const {
+  return static_cast<bool>(m_infoVisitor);
+}
+
+bool Instrument::isEmptyInstrument() const { return this->nelements() == 0; }
+
+/* Only for use by ExperimentInfo. Sets the pointer to the DetectorInfo.
+ * Sets the pointer to the detector id -> index map
+*/
 void Instrument::setDetectorInfo(
     boost::shared_ptr<const Beamline::DetectorInfo> detectorInfo) {
-  if (m_map_nonconst)
-    m_map_nonconst->setDetectorInfo(detectorInfo);
   m_detectorInfo = std::move(detectorInfo);
 }
+
+void Instrument::setInfoVisitor(const InfoComponentVisitor &visitor) {
+  m_infoVisitor.reset(new InfoComponentVisitor(visitor));
+}
+
+const InfoComponentVisitor &Instrument::infoVisitor() const {
+  if (!m_infoVisitor) {
+    throw std::runtime_error(
+        "Instrument::infoVisitor InfoComponentVisitor never set");
+  }
+  return *m_infoVisitor;
+}
+
+/// Returns the index for a detector ID. Used for accessing DetectorInfo.
+size_t Instrument::detectorIndex(const detid_t detID) const {
+  const auto &baseInstr = m_map ? *m_instr : *this;
+  const auto it = find(baseInstr.m_detectorCache, detID);
+  return std::distance(baseInstr.m_detectorCache.cbegin(), it);
+}
+
+/// Returns a legacy ParameterMap, containing information that is now stored in
+/// DetectorInfo (masking, positions, rotations).
+boost::shared_ptr<ParameterMap> Instrument::makeLegacyParameterMap() const {
+  auto pmap = boost::make_shared<ParameterMap>(*getParameterMap());
+  // Information will be stored directly in pmap so we do not need DetectorInfo.
+  pmap->setDetectorInfo(nullptr);
+  // Instrument is only needed for DetectorInfo access so it is not needed.
+  pmap->setInstrument(nullptr);
+
+  if (!hasDetectorInfo())
+    return pmap;
+
+  const auto &baseInstr = m_map ? *m_instr : *this;
+
+  // Tolerance 1e-9 m with rotation center at a distance of L = 1000 m as in
+  // Beamline::DetectorInfo::isEquivalent.
+  constexpr double d_max = 1e-9;
+  constexpr double L = 1000.0;
+  constexpr double safety_factor = 2.0;
+  const double imag_norm_max = sin(d_max / (2.0 * L * safety_factor));
+
+  const IComponent *oldParent{nullptr};
+  Eigen::Quaterniond invParentRot;
+  Eigen::Affine3d transformation;
+  for (size_t i = 0; i < m_detectorInfo->size(); ++i) {
+    const auto &det = std::get<1>(baseInstr.m_detectorCache[i]);
+    if (m_detectorInfo->isMasked(i)) {
+      pmap->forceUnsafeSetMasked(det.get(), true);
+    }
+
+    // Obtain parent position/rotation/scale.
+    const auto parent = det->getParent();
+    if (parent.get() != oldParent) {
+      oldParent = parent.get();
+      const auto parParent = ParComponentFactory::create(parent, pmap.get());
+      const auto parentPos = toVector3d(parParent->getPos());
+      invParentRot = toQuaterniond(parParent->getRotation()).conjugate();
+      transformation = invParentRot;
+      transformation.translate(-parentPos);
+      // Special case: scaling for RectangularDetectorPixel
+      if (boost::dynamic_pointer_cast<const RectangularDetectorPixel>(det)) {
+        const auto *panel = det->getParent()->getParent().get();
+        Eigen::Vector3d scale(1, 1, 1);
+        if (auto scalex = pmap->get(panel, "scalex"))
+          scale[0] = 1.0 / scalex->value<double>();
+        if (auto scaley = pmap->get(panel, "scaley"))
+          scale[1] = 1.0 / scaley->value<double>();
+        transformation.prescale(scale);
+      }
+    }
+
+    // Undo parent transformation to obtain relative position/rotation.
+    auto relPos = transformation * m_detectorInfo->position(i);
+    auto relRot = invParentRot * m_detectorInfo->rotation(i);
+
+    // Tolerance 1e-9 m as in Beamline::DetectorInfo::isEquivalent.
+    if ((relPos - toVector3d(det->getRelativePos())).norm() >= 1e-9) {
+      if (boost::dynamic_pointer_cast<const RectangularDetectorPixel>(det))
+        throw std::runtime_error("Cannot create legacy ParameterMap: Position "
+                                 "parameters for RectangularDetectorPixel are "
+                                 "not supported");
+      pmap->addV3D(det->getComponentID(), ParameterMap::pos(), toV3D(relPos));
+    }
+
+    if ((relRot * toQuaterniond(det->getRelativeRot()).conjugate())
+            .vec()
+            .norm() >= imag_norm_max)
+      pmap->addQuat(det->getComponentID(), ParameterMap::rot(), toQuat(relRot));
+  }
+  return pmap;
+}
+
 namespace Conversion {
 
 /**

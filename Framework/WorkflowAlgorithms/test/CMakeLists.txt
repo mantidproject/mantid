@@ -1,5 +1,5 @@
 if ( CXXTEST_FOUND )
-  include_directories ( SYSTEM ${CXXTEST_INCLUDE_DIR} ${GMOCK_INCLUDE_DIR} ${GTEST_INCLUDE_DIR} )
+  include_directories ( SYSTEM ${CXXTEST_INCLUDE_DIR} )
 
   # Make the rest of the tests
   include_directories ( ../../Algorithms/inc ../../DataHandling/inc ../../TestHelpers/inc )
@@ -10,18 +10,11 @@ if ( CXXTEST_FOUND )
                         ../../TestHelpers/src/InstrumentCreationHelper.cpp
                         ../../TestHelpers/src/WorkspaceCreationHelper.cpp )
   cxxtest_add_test ( WorkflowAlgorithmsTest ${TEST_FILES} )
-  target_link_libraries ( WorkflowAlgorithmsTest LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} 
+  target_link_libraries ( WorkflowAlgorithmsTest LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} ${MANTIDLIBS}
             WorkflowAlgorithms
-            API
             Algorithms
             DataHandling
-            DataObjects
-            Geometry
-            HistogramData
-            Kernel
-			Nexus
-            ${Boost_LIBRARIES}
-            ${POCO_LIBRARIES}
+            Nexus
             )
   add_dependencies ( WorkflowAlgorithmsTest CurveFitting )
   add_dependencies ( FrameworkTests WorkflowAlgorithmsTest )
@@ -34,6 +27,5 @@ endif ()
 
 # python unit tests
 if (PYUNITTEST_FOUND)
-  pyunittest_add_test ( ${CMAKE_CURRENT_SOURCE_DIR} PythonWorkflowAlgorithmsTest ${TEST_PY_FILES} )
+  pyunittest_add_test ( ${CMAKE_CURRENT_SOURCE_DIR} python.WorkflowAlgorithms ${TEST_PY_FILES} )
 endif ()
-

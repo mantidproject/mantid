@@ -31,9 +31,6 @@
          <verstretch>0</verstretch>
         </sizepolicy>
        </property>
-       <property name="loadLabelText" stdset="0">
-        <string>Plot</string>
-       </property>
        <property name="workspaceSuffixes" stdset="0">
         <stringlist>
          <string>_red</string>
@@ -45,6 +42,12 @@
          <string>_red.nxs</string>
          <string>_sqw.nxs</string>
         </stringlist>
+       </property>
+       <property name="autoLoad" stdset="0">
+        <bool>true</bool>
+       </property>
+       <property name="showLoad" stdset="0">
+        <bool>false</bool>
        </property>
       </widget>
      </item>
@@ -165,11 +168,11 @@
     </widget>
    </item>
    <item>
-    <layout class="QHBoxLayout" name="horizontalLayout_3">
-     <item>
+    <layout class="QGridLayout" name="gridLayout_3">
+     <item row="0" column="0">
       <layout class="QVBoxLayout" name="treeSpace"/>
      </item>
-     <item>
+     <item row="0" column="2">
       <widget class="MantidQt::MantidWidgets::PreviewPlot" name="ppPlot" native="true">
        <property name="canvasColour" stdset="0">
         <color>
@@ -182,6 +185,40 @@
         <bool>true</bool>
        </property>
       </widget>
+     </item>
+     <item row="1" column="2">
+      <layout class="QHBoxLayout" name="horizontalLayout_2">
+       <item>
+        <widget class="QLabel" name="lbPreviewSpectrum">
+         <property name="text">
+          <string>Current Spectrum:</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QSpinBox" name="spPreviewSpectrum"/>
+       </item>
+       <item>
+        <spacer name="horizontalSpacer_2">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>40</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item>
+        <widget class="QPushButton" name="pbPlotPreview">
+         <property name="text">
+          <string>Plot Current Preview</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
      </item>
     </layout>
    </item>

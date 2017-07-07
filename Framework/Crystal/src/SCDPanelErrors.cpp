@@ -3,6 +3,7 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FunctionFactory.h"
+#include "MantidAPI/ResizeRectangularDetectorHelper.h"
 #include "MantidAPI/Sample.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
@@ -143,8 +144,18 @@ void SCDPanelErrors::moveDetector(double x, double y, double z, double rotx,
         boost::dynamic_pointer_cast<const Geometry::RectangularDetector>(comp);
     if (rectDet) {
       Geometry::ParameterMap &pmap = inputP->instrumentParameters();
+      auto oldscalex = pmap.getDouble(rectDet->getName(), "scalex");
+      auto oldscaley = pmap.getDouble(rectDet->getName(), "scaley");
+      double relscalex = scalex;
+      double relscaley = scaley;
+      if (!oldscalex.empty())
+        relscalex /= oldscalex[0];
+      if (!oldscaley.empty())
+        relscaley /= oldscaley[0];
       pmap.addDouble(rectDet.get(), "scalex", scalex);
       pmap.addDouble(rectDet.get(), "scaley", scaley);
+      applyRectangularDetectorScaleToDetectorInfo(
+          inputP->mutableDetectorInfo(), *rectDet, relscalex, relscaley);
     }
   }
 }

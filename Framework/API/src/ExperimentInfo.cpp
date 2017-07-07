@@ -1,27 +1,37 @@
 #include "MantidAPI/ExperimentInfo.h"
-
 #include "MantidAPI/ChopperModel.h"
+#include "MantidAPI/ComponentInfo.h"
 #include "MantidAPI/DetectorInfo.h"
 #include "MantidAPI/InstrumentDataService.h"
 #include "MantidAPI/ModeratorModel.h"
+#include "MantidAPI/ResizeRectangularDetectorHelper.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/SpectrumInfo.h"
 
+#include "MantidGeometry/IComponent.h"
+#include "MantidGeometry/ICompAssembly.h"
+#include "MantidGeometry/IDetector.h"
+#include "MantidGeometry/Instrument/InfoComponentVisitor.h"
 #include "MantidGeometry/Instrument/InstrumentDefinitionParser.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
+#include "MantidGeometry/Instrument/ComponentVisitor.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/ParameterFactory.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidGeometry/Instrument/ParComponentFactory.h"
+#include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidGeometry/Instrument/XMLInstrumentParameter.h"
 
+#include "MantidBeamline/ComponentInfo.h"
 #include "MantidBeamline/DetectorInfo.h"
 #include "MantidBeamline/SpectrumInfo.h"
 
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/DateAndTime.h"
+#include "MantidKernel/EigenConversionHelpers.h"
 #include "MantidKernel/InstrumentInfo.h"
+#include "MantidKernel/IPropertyManager.h"
 #include "MantidKernel/Property.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/StringTokenizer.h"
@@ -40,12 +50,14 @@
 #include <Poco/SAX/ContentHandler.h>
 #include <Poco/SAX/SAXParser.h>
 #include <nexus/NeXusException.hpp>
+#include <tuple>
 
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
 using namespace Poco::XML;
 
 namespace Mantid {
+
 namespace API {
 namespace {
 /// static logger object
@@ -58,7 +70,18 @@ ExperimentInfo::ExperimentInfo()
     : m_moderatorModel(), m_choppers(), m_sample(new Sample()),
       m_run(new Run()), m_parmap(new ParameterMap()),
       sptr_instrument(new Instrument()),
-      m_detectorInfo(boost::make_shared<Beamline::DetectorInfo>(0)) {}
+      m_detectorInfo(boost::make_shared<Beamline::DetectorInfo>()),
+      m_componentInfo(boost::make_shared<Beamline::ComponentInfo>()),
+      m_infoVisitor(Kernel::make_unique<InfoComponentVisitor>(
+          sptr_instrument->getDetectorIDs(false /*Do not skip monitors*/))) {
+  auto parInstrument = makeParameterizedInstrument();
+  m_parmap->setDetectorInfo(m_detectorInfo);
+  m_detectorInfoWrapper = Kernel::make_unique<DetectorInfo>(
+      *m_detectorInfo, sptr_instrument, m_infoVisitor->detectorIds(),
+      m_parmap.get(), m_infoVisitor->detectorIdToIndexMap());
+
+  makeAPIComponentInfo(*m_infoVisitor);
+}
 
 /**
  * Constructs the object from a copy if the input. This leaves the new mutex
@@ -87,7 +110,6 @@ void ExperimentInfo::copyExperimentInfoFrom(const ExperimentInfo *other) {
   for (const auto &chopper : other->m_choppers) {
     m_choppers.push_back(chopper->clone());
   }
-  *m_detectorInfo = *other->m_detectorInfo;
   // We do not copy Beamline::SpectrumInfo (which contains detector grouping
   // information) for now:
   // - For MatrixWorkspace, grouping information is still stored in ISpectrum
@@ -172,6 +194,18 @@ void checkDetectorInfoSize(const Instrument &instr,
                              "instrument");
 }
 
+void clearPositionAndRotationsParameters(ParameterMap &pmap,
+                                         const IDetector &det) {
+  pmap.clearParametersByName(ParameterMap::pos(), &det);
+  pmap.clearParametersByName(ParameterMap::posx(), &det);
+  pmap.clearParametersByName(ParameterMap::posy(), &det);
+  pmap.clearParametersByName(ParameterMap::posz(), &det);
+  pmap.clearParametersByName(ParameterMap::rot(), &det);
+  pmap.clearParametersByName(ParameterMap::rotx(), &det);
+  pmap.clearParametersByName(ParameterMap::roty(), &det);
+  pmap.clearParametersByName(ParameterMap::rotz(), &det);
+}
+
 std::unique_ptr<Beamline::DetectorInfo>
 makeDetectorInfo(const Instrument &oldInstr, const Instrument &newInstr) {
   if (newInstr.hasDetectorInfo()) {
@@ -183,6 +217,7 @@ makeDetectorInfo(const Instrument &oldInstr, const Instrument &newInstr) {
   } else {
     // If there is no DetectorInfo in the instrument we create a default one.
     const auto numDets = oldInstr.getNumberDetectors();
+    const auto pmap = oldInstr.getParameterMap();
     // Currently monitors flags are stored in the detector cache of the base
     // instrument. The copy being made here is strictly speaking duplicating
     // that data, but with future refactoring this will no longer be the case.
@@ -195,30 +230,105 @@ makeDetectorInfo(const Instrument &oldInstr, const Instrument &newInstr) {
     for (size_t i = 0; i < numDets; ++i)
       if (newInstr.isMonitorViaIndex(i))
         monitors.push_back(i);
-    return Kernel::make_unique<Beamline::DetectorInfo>(numDets, monitors);
+    std::vector<Eigen::Vector3d> positions;
+    std::vector<Eigen::Quaterniond> rotations;
+    const auto &detIDs = newInstr.getDetectorIDs();
+    for (const auto &id : detIDs) {
+      const auto &det = newInstr.getDetector(id);
+      // In the case of RectangularDetectorPixel the position is also affected
+      // by the parameters scalex and scaly, but `getPos()` takes that into
+      // account (if no DetectorInfo is set in the ParameterMap).
+      positions.emplace_back(toVector3d(det->getPos()));
+      rotations.emplace_back(toQuaterniond(det->getRotation()));
+      clearPositionAndRotationsParameters(*pmap, *det);
+      // Note that scalex and scaley also affect positions when set for a
+      // RectangularDetector, but those are not parameters of the detector
+      // itself so they are not cleared.
+    }
+
+    return Kernel::make_unique<Beamline::DetectorInfo>(
+        std::move(positions), std::move(rotations), monitors);
   }
 }
+}
+
+/**
+ * Make the beamline and API ComponentInfo
+ * @param visitor : Component visitor to query. Visitor MUST have been filled
+ * via registerContents.
+ */
+void ExperimentInfo::makeAPIComponentInfo(const InfoComponentVisitor &visitor) {
+
+  // Internal Beamline ComponentInfo
+  m_componentInfo = visitor.componentInfo();
+
+  // Wrapper API ComponentInfo
+  m_componentInfoWrapper = Kernel::make_unique<ComponentInfo>(
+      *m_componentInfo, visitor.componentIds(),
+      visitor.componentIdToIndexMap());
+}
+
+/**
+ * Take the visitor from the instrument if it's already there or make from
+ * scratch.
+ * @param instrument : Instrument which might carry a visitor.
+ * @return InfoComponentVisitor
+ */
+std::unique_ptr<Geometry::InfoComponentVisitor>
+ExperimentInfo::makeOrRetrieveVisitor(const Instrument &instrument) const {
+
+  if (!instrument.hasInfoVisitor() || instrument.isEmptyInstrument()) {
+    auto visitor = Kernel::make_unique<InfoComponentVisitor>(
+        instrument.getDetectorIDs(false /*do not skip monitors*/));
+    instrument.registerContents(*visitor);
+    return visitor;
+  } else {
+    return Kernel::make_unique<InfoComponentVisitor>(instrument.infoVisitor());
+  }
 }
 
 /** Set the instrument
 * @param instr :: Shared pointer to an instrument.
 */
 void ExperimentInfo::setInstrument(const Instrument_const_sptr &instr) {
+
   m_spectrumInfoWrapper = nullptr;
-  m_detectorInfoWrapper = nullptr;
   if (instr->isParametrized()) {
     sptr_instrument = instr->baseInstrument();
-    m_parmap = instr->getParameterMap();
+    // We take a *copy* of the ParameterMap since we are modifying it by setting
+    // a pointer to our DetectorInfo, and in case it contains legacy parameters
+    // such as positions or rotations.
+    m_parmap = boost::make_shared<ParameterMap>(*instr->getParameterMap());
   } else {
     sptr_instrument = instr;
     m_parmap = boost::make_shared<ParameterMap>();
   }
-  m_detectorInfo = makeDetectorInfo(*sptr_instrument, *instr);
+  const auto parInstrument = Geometry::ParComponentFactory::createInstrument(
+      sptr_instrument, m_parmap);
+
+  m_infoVisitor = makeOrRetrieveVisitor(*instr);
+
+  m_detectorInfo = makeDetectorInfo(*parInstrument, *instr);
+  m_parmap->setDetectorInfo(m_detectorInfo);
+  m_detectorInfoWrapper = Kernel::make_unique<DetectorInfo>(
+      *m_detectorInfo, makeParameterizedInstrument(),
+      m_infoVisitor->detectorIds(), m_parmap.get(),
+      m_infoVisitor->detectorIdToIndexMap());
+
+  makeAPIComponentInfo(*m_infoVisitor);
+
   // Detector IDs that were previously dropped because they were not part of the
   // instrument may now suddenly be valid, so we have to reinitialize the
   // detector grouping. Also the index corresponding to specific IDs may have
   // changed.
   invalidateAllSpectrumDefinitions();
+}
+
+Instrument_sptr ExperimentInfo::makeParameterizedInstrument() const {
+  populateIfNotLoaded();
+  checkDetectorInfoSize(*sptr_instrument, *m_detectorInfo);
+  return Geometry::ParComponentFactory::createInstrument(sptr_instrument,
+                                                         m_parmap);
 }
 
 /** Get a shared pointer to the parametrized instrument associated with this
@@ -227,11 +337,9 @@ void ExperimentInfo::setInstrument(const Instrument_const_sptr &instr) {
 *  @return The instrument class
 */
 Instrument_const_sptr ExperimentInfo::getInstrument() const {
-  populateIfNotLoaded();
-  checkDetectorInfoSize(*sptr_instrument, *m_detectorInfo);
-  auto instrument = Geometry::ParComponentFactory::createInstrument(
-      sptr_instrument, m_parmap);
+  auto instrument = makeParameterizedInstrument();
   instrument->setDetectorInfo(m_detectorInfo);
+  instrument->setInfoVisitor(*m_infoVisitor);
   return instrument;
 }
 
@@ -240,24 +348,6 @@ Instrument_const_sptr ExperimentInfo::getInstrument() const {
 */
 Geometry::ParameterMap &ExperimentInfo::instrumentParameters() {
   populateIfNotLoaded();
-  // TODO: Here duplicates cow_ptr. Figure out if there's a better way
-
-  // Use a double-check for sharing so that we only
-
-  // enter the critical region if absolutely necessary
-  if (!m_parmap.unique()) {
-    std::lock_guard<std::recursive_mutex> lock(m_mutex);
-    // Check again because another thread may have taken copy
-    // and dropped reference count since previous check
-    if (!m_parmap.unique()) {
-      m_spectrumInfoWrapper = nullptr;
-      m_detectorInfoWrapper = nullptr;
-    }
-    if (!m_parmap.unique()) {
-      ParameterMap_sptr oldData = m_parmap;
-      m_parmap = boost::make_shared<ParameterMap>(*oldData);
-    }
-  }
   return *m_parmap;
 }
 
@@ -319,6 +409,89 @@ struct ParameterValue {
 ///@endcond
 }
 
+namespace {
+bool isPositionParameter(const std::string &name) {
+  return ParameterMap::pos() == name;
+}
+
+bool isRotationParameter(const std::string &name) {
+  return ParameterMap::rot() == name;
+}
+
+bool isScaleParameter(const std::string &name) {
+  return (name == "scalex" || name == "scaley");
+}
+
+bool isRedundantPosOrRot(const std::string &name) {
+  // Check size first as a small optimization.
+  return (name.size() == 4) &&
+         (name == "posx" || name == "posy" || name == "posz" ||
+          name == "rotx" || name == "roty" || name == "rotz");
+}
+
+template <class T>
+T getParam(const std::string &paramType, const std::string &paramValue) {
+  const std::string name = "dummy";
+  auto param = ParameterFactory::create(paramType, name);
+  param->fromString(paramValue);
+  return param->value<T>();
+}
+
+void updatePosition(DetectorInfo &detectorInfo, const Instrument &instrument,
+                    const IComponent *component, const V3D &newRelPos) {
+  // Important: Get component WITH ParameterMap so we see correct parent
+  // positions and rotations and DetectorInfo updates correctly.
+  if (!instrument.isParametrized())
+    throw std::runtime_error(
+        "Need parametrized instrument for updating positions");
+  const auto &parComp = instrument.getComponentByID(component);
+  auto position = newRelPos;
+  if (auto parent = parComp->getParent()) {
+    parent->getRotation().rotate(position);
+    position += parent->getPos();
+  }
+  detectorInfo.setPosition(*parComp, position);
+}
+
+void updateRotation(DetectorInfo &detectorInfo, const Instrument &instrument,
+                    const IComponent *component, const Quat &newRelRot) {
+  // Important: Get component WITH ParameterMap so we see correct parent
+  // positions and rotations and DetectorInfo updates correctly.
+  if (!instrument.isParametrized())
+    throw std::runtime_error(
+        "Need parametrized instrument for updating rotations");
+  const auto &parComp = instrument.getComponentByID(component);
+  auto rotation = newRelRot;
+  if (auto parent = parComp->getParent()) {
+    // Note the unusual order. This is what Component::getRotation does.
+    rotation = parent->getRotation() * newRelRot;
+  }
+  detectorInfo.setRotation(*parComp, rotation);
+}
+
+void adjustPositionsFromScaleFactor(DetectorInfo &detectorInfo,
+                                    const Instrument &instrument,
+                                    const IComponent *component,
+                                    const std::string &paramName,
+                                    double factor) {
+  // Important: Get component WITH ParameterMap so we see correct parent
+  // positions and rotations and DetectorInfo updates correctly.
+  if (!instrument.isParametrized())
+    throw std::runtime_error("Need parametrized instrument for updating "
+                             "positions from scale factors");
+  const auto &parComp = instrument.getComponentByID(component);
+  const auto &det = dynamic_cast<const RectangularDetector &>(*parComp);
+  double ScaleX = 1.0;
+  double ScaleY = 1.0;
+  if (paramName == "scalex")
+    ScaleX = factor;
+  else
+    ScaleY = factor;
+  applyRectangularDetectorScaleToDetectorInfo(detectorInfo, det, ScaleX,
+                                              ScaleY);
+}
+}
+
 /** Add parameters to the instrument parameter map that are defined in
 * instrument
 *   definition file or parameter file, which may contain parameters that require
@@ -327,9 +500,6 @@ struct ParameterValue {
 */
 void ExperimentInfo::populateInstrumentParameters() {
   populateIfNotLoaded();
-  // Get instrument and sample
-  boost::shared_ptr<const Instrument> instrument =
-      getInstrument()->baseInstrument();
 
   // Reference to the run
   const auto &runData = run();
@@ -338,16 +508,27 @@ void ExperimentInfo::populateInstrumentParameters() {
   // about
   // the parameters that my be specified in the instrument definition file (IDF)
   Geometry::ParameterMap &paramMap = instrumentParameters();
+  Geometry::ParameterMap paramMapForPosAndRot;
+
+  // Get instrument and sample
+  auto &detectorInfo = mutableDetectorInfo();
+  const auto parInstrument = getInstrument();
+  const auto instrument = parInstrument->baseInstrument();
   const auto &paramInfoFromIDF = instrument->getLogfileCache();
 
-  const double deg2rad(M_PI / 180.0);
   std::map<const IComponent *, RTP> rtpParams;
 
-  auto cacheEnd = paramInfoFromIDF.end();
-  for (auto cacheItr = paramInfoFromIDF.begin(); cacheItr != cacheEnd;
-       ++cacheItr) {
-    const auto &nameComp = cacheItr->first;
-    const auto &paramInfo = cacheItr->second;
+  // In this loop position and rotation parameters are inserted into the
+  // temporary map paramMapForPosAndRot. In the subsequent loop, after all
+  // parameters have been parsed, we update positions and rotations in
+  // DetectorInfo and the temporary map goes out of scope. The main reason for
+  // this is that ParameterMap will then take care of assembling parameters for
+  // individual position or rotation components into a vector or quaternion. In
+  // particular, we cannot directly change DetectorInfo since the order of
+  // rotation components is not guaranteed.
+  for (const auto &item : paramInfoFromIDF) {
+    const auto &nameComp = item.first;
+    const auto &paramInfo = item.second;
     const std::string &paramN = nameComp.first;
 
     try {
@@ -363,25 +544,18 @@ void ExperimentInfo::populateInstrumentParameters() {
           rtpValues.radius = value;
           rtpValues.haveRadius = true;
         } else if (paramN.compare(0, 1, "t") == 0)
-          rtpValues.theta = deg2rad * value;
+          rtpValues.theta = value;
         else if (paramN.compare(0, 1, "p") == 0)
-          rtpValues.phi = deg2rad * value;
-        else {
-        }
-        if (rtpValues.haveRadius) // Just overwrite x,y,z
-        {
-          // convert spherical coordinates to Cartesian coordinate values
-          double x = rtpValues.radius * std::sin(rtpValues.theta) *
-                     std::cos(rtpValues.phi);
-          paramMap.addPositionCoordinate(paramInfo->m_component, "x", x);
-          double y = rtpValues.radius * std::sin(rtpValues.theta) *
-                     std::sin(rtpValues.phi);
-          paramMap.addPositionCoordinate(paramInfo->m_component, "y", y);
-          double z = rtpValues.radius * std::cos(rtpValues.theta);
-          paramMap.addPositionCoordinate(paramInfo->m_component, "z", z);
+          rtpValues.phi = value;
+        if (rtpValues.haveRadius) {
+          V3D pos;
+          pos.spherical(rtpValues.radius, rtpValues.theta, rtpValues.phi);
+          paramMapForPosAndRot.addV3D(paramInfo->m_component,
+                                      ParameterMap::pos(), pos);
         }
       } else {
-        populateWithParameter(paramMap, paramN, *paramInfo, runData);
+        populateWithParameter(paramMap, paramMapForPosAndRot, paramN,
+                              *paramInfo, runData);
       }
     } catch (std::exception &exc) {
       g_log.information() << "Unable to add component parameter '"
@@ -389,35 +563,28 @@ void ExperimentInfo::populateInstrumentParameters() {
       continue;
     }
   }
-}
-
-/**
- * Replaces current parameter map with a copy of the given map
- * Careful: Parameters that are stored in DetectorInfo are not automatically
- * handled.
- * @ pmap const reference to parameter map whose copy replaces the current
- * parameter map
- */
-void ExperimentInfo::replaceInstrumentParameters(
-    const Geometry::ParameterMap &pmap) {
-  populateIfNotLoaded();
-  m_spectrumInfoWrapper = nullptr;
-  m_detectorInfoWrapper = nullptr;
-  this->m_parmap.reset(new ParameterMap(pmap));
-}
-
-/**
- * exchanges contents of current parameter map with contents of other map)
- * Careful: Parameters that are stored in DetectorInfo are not automatically
- * handled.
- * @ pmap reference to parameter map which would exchange its contents with
- * current map
- */
-void ExperimentInfo::swapInstrumentParameters(Geometry::ParameterMap &pmap) {
-  populateIfNotLoaded();
-  m_spectrumInfoWrapper = nullptr;
-  m_detectorInfoWrapper = nullptr;
-  this->m_parmap->swap(pmap);
+  for (const auto &item : paramMapForPosAndRot) {
+    if (isPositionParameter(item.second->name())) {
+      const auto newRelPos = item.second->value<V3D>();
+      updatePosition(detectorInfo, *parInstrument, item.first, newRelPos);
+    } else if (isRotationParameter(item.second->name())) {
+      const auto newRelRot = item.second->value<Quat>();
+      updateRotation(detectorInfo, *parInstrument, item.first, newRelRot);
+    }
+    // Parameters for individual components (x,y,z) are ignored. ParameterMap
+    // did compute the correct compound positions and rotations internally.
+  }
+  // Special case RectangularDetector: Parameters scalex and scaley affect pixel
+  // positions.
+  for (const auto &item : paramMap) {
+    if (isScaleParameter(item.second->name()))
+      adjustPositionsFromScaleFactor(detectorInfo, *parInstrument, item.first,
+                                     item.second->name(),
+                                     item.second->value<double>());
+  }
+  // paramMapForPosAndRot goes out of scope, dropping all position and rotation
+  // parameters of detectors (parameters for non-detector components have been
+  // inserted into paramMap via DetectorInfo::setPosition(IComponent *)).
 }
 
 /**
@@ -463,12 +630,16 @@ void ExperimentInfo::setNumberOfDetectorGroups(const size_t count) const {
 void ExperimentInfo::setDetectorGrouping(
     const size_t index, const std::set<detid_t> &detIDs) const {
   SpectrumDefinition specDef;
-  for (const auto detID : detIDs) {
-    try {
-      const size_t detIndex = detectorInfo().indexOf(detID);
-      specDef.add(detIndex);
-    } catch (std::out_of_range &) {
-      // Silently strip bad detector IDs
+  // Wrap translation in check for detector count as an optimization of
+  // otherwise slow failures via exceptions.
+  if (detectorInfo().size() > 0) {
+    for (const auto detID : detIDs) {
+      try {
+        const size_t detIndex = detectorInfo().indexOf(detID);
+        specDef.add(detIndex);
+      } catch (std::out_of_range &) {
+        // Silently strip bad detector IDs
+      }
     }
   }
   m_spectrumInfo->setSpectrumDefinition(index, std::move(specDef));
@@ -751,8 +922,8 @@ double ExperimentInfo::getEFixed(const detid_t detID) const {
  * required for Indirect mode
  * @return The current efixed value
  */
-double
-ExperimentInfo::getEFixed(const Geometry::IDetector_const_sptr detector) const {
+double ExperimentInfo::getEFixed(
+    const boost::shared_ptr<const Geometry::IDetector> detector) const {
   populateIfNotLoaded();
   Kernel::DeltaEMode::Type emode = getEMode();
   if (emode == Kernel::DeltaEMode::Direct) {
@@ -1015,41 +1186,19 @@ ExperimentInfo::getInstrumentFilename(const std::string &instrumentName,
 
 /** Return a const reference to the DetectorInfo object.
  *
- * Any modifications of the instrument or instrument parameters will invalidate
+ * Setting a new instrument via ExperimentInfo::setInstrument will invalidate
  * this reference.
  */
 const DetectorInfo &ExperimentInfo::detectorInfo() const {
   populateIfNotLoaded();
-  if (!m_detectorInfoWrapper) {
-    std::lock_guard<std::mutex> lock{m_detectorInfoMutex};
-    if (!m_detectorInfoWrapper)
-      m_detectorInfoWrapper =
-          Kernel::make_unique<DetectorInfo>(*m_detectorInfo, getInstrument());
-  }
   return *m_detectorInfoWrapper;
 }
 
 /** Return a non-const reference to the DetectorInfo object. Not thread safe.
  */
 DetectorInfo &ExperimentInfo::mutableDetectorInfo() {
-  populateIfNotLoaded();
-  // No locking here since this non-const method is not thread safe.
-
-  // We get the non-const ParameterMap reference *first* such that no copy is
-  // triggered unless really necessary. The call to `instrumentParameters`
-  // releases the old m_detectorInfoWrapper to drop the reference count to the
-  // ParameterMap by 1 (DetectorInfo contains a parameterized Instrument, so the
-  // reference count to the ParameterMap is at least 2 if m_detectorInfoWrapper
-  // is not nullptr: 1 from the ExperimentInfo, 1 from DetectorInfo). If then
-  // the ExperimentInfo is not the sole owner of the ParameterMap a copy is
-  // triggered.
-  auto pmap = &instrumentParameters();
-  // Here `getInstrument` creates a parameterized instrument, increasing the
-  // reference count to the ParameterMap. This has do be done *after* getting
-  // the ParameterMap.
-  m_detectorInfoWrapper =
-      Kernel::make_unique<DetectorInfo>(*m_detectorInfo, getInstrument(), pmap);
-  return *m_detectorInfoWrapper;
+  return const_cast<DetectorInfo &>(
+      static_cast<const ExperimentInfo &>(*this).detectorInfo());
 }
 
 /** Return a reference to the SpectrumInfo object.
@@ -1063,9 +1212,11 @@ const SpectrumInfo &ExperimentInfo::spectrumInfo() const {
     std::lock_guard<std::mutex> lock{m_spectrumInfoMutex};
     if (!m_spectrumInfo) // this should happen only if not MatrixWorkspace
       cacheDefaultDetectorGrouping();
-    if (!m_spectrumInfoWrapper)
-      m_spectrumInfoWrapper =
-          Kernel::make_unique<SpectrumInfo>(*m_spectrumInfo, *this);
+    if (!m_spectrumInfoWrapper) {
+      static_cast<void>(detectorInfo());
+      m_spectrumInfoWrapper = Kernel::make_unique<SpectrumInfo>(
+          *m_spectrumInfo, *this, *m_detectorInfoWrapper);
+    }
   }
   // Rebuild any spectrum definitions that are out of date. Accessing
   // `API::SpectrumInfo` will rebuild invalid spectrum definitions as it
@@ -1091,8 +1242,11 @@ const SpectrumInfo &ExperimentInfo::spectrumInfo() const {
     if (std::any_of(m_spectrumDefinitionNeedsUpdate.cbegin(),
                     m_spectrumDefinitionNeedsUpdate.cend(),
                     [](char i) { return i == 1; })) {
-      for (size_t i = 0; i < m_spectrumInfoWrapper->size(); ++i)
+      auto size = static_cast<int64_t>(m_spectrumInfoWrapper->size());
+#pragma omp parallel for
+      for (int64_t i = 0; i < size; ++i) {
         updateSpectrumDefinitionIfNecessary(i);
+      }
     }
   }
   return *m_spectrumInfoWrapper;
@@ -1101,27 +1255,12 @@ const SpectrumInfo &ExperimentInfo::spectrumInfo() const {
 /** Return a non-const reference to the SpectrumInfo object. Not thread safe.
  */
 SpectrumInfo &ExperimentInfo::mutableSpectrumInfo() {
-  populateIfNotLoaded();
-  // Creating SpectrumInfo with a non-const reference to a MatrixWorkspace will
-  // call ExperimentInfo::mutableDetectorInfo() which will later be used by
-  // modifications. This will trigger a copy if required. Note that the
-  // following happens internally:
-  // 1. make_unique creates a new SpectrumInfo, which calls
-  // ExperimentInfo::mutableDetectorInfo(). In the latter method, the reference
-  // count to the ParameterMap is typically not 1, so
-  // invalidateInstrumentReferences() is called.
-  // 2. invalidateInstrumentReferences() resets m_spectrumInfoWrapper, releasing
-  // any parameterized detectors and thus dropping any unneeded references to
-  // the ParameterMap.
-  // 3. Construction of SpectrumInfo continues and the result is assigned to
-  // m_spectrumInfoWrapper.
+  return const_cast<SpectrumInfo &>(
+      static_cast<const ExperimentInfo &>(*this).spectrumInfo());
+}
 
-  // No locking here since this non-const method is not thread safe.
-  if (!m_spectrumInfo) // this should happen only if not MatrixWorkspace
-    cacheDefaultDetectorGrouping();
-  m_spectrumInfoWrapper =
-      Kernel::make_unique<SpectrumInfo>(*m_spectrumInfo, *this);
-  return *m_spectrumInfoWrapper;
+const API::ComponentInfo &ExperimentInfo::componentInfo() const {
+  return *m_componentInfoWrapper;
 }
 
 /// Sets the SpectrumDefinition for all spectra.
@@ -1428,7 +1567,9 @@ void ExperimentInfo::loadInstrumentParametersNexus(::NeXus::File *file,
  */
 void ExperimentInfo::readParameterMap(const std::string &parameterStr) {
   Geometry::ParameterMap &pmap = this->instrumentParameters();
-  Instrument_const_sptr instr = this->getInstrument()->baseInstrument();
+  auto &detectorInfo = mutableDetectorInfo();
+  const auto parInstrument = getInstrument();
+  const auto instr = parInstrument->baseInstrument();
 
   int options = Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY;
   options += Mantid::Kernel::StringTokenizer::TOK_TRIM;
@@ -1446,7 +1587,7 @@ void ExperimentInfo::readParameterMap(const std::string &parameterStr) {
     // prev_name = comp_name;
     const Geometry::IComponent *comp = nullptr;
     if (comp_name.find("detID:") != std::string::npos) {
-      int detID = atoi(comp_name.substr(6).c_str());
+      int detID = std::stoi(comp_name.substr(6));
       comp = instr->getDetector(detID).get();
       if (!comp) {
         g_log.warning() << "Cannot find detector " << detID << '\n';
@@ -1467,12 +1608,10 @@ void ExperimentInfo::readParameterMap(const std::string &parameterStr) {
     for (int i = 4; i < size; i++)
       paramValue += ";" + tokens[4];
 
-    if (tokens[2].compare("masked") == 0) {
-      const auto &type = tokens[1];
-      const std::string name = "dummy";
-      auto param = ParameterFactory::create(type, name);
-      param->fromString(paramValue);
-      bool value = param->value<bool>();
+    const auto &paramType = tokens[1];
+    const auto &paramName = tokens[2];
+    if (paramName == "masked") {
+      bool value = getParam<bool>(paramType, paramValue);
       if (value) {
         // Do not add masking to ParameterMap, it is stored in DetectorInfo
         const auto det = dynamic_cast<const Detector *const>(comp);
@@ -1480,11 +1619,30 @@ void ExperimentInfo::readParameterMap(const std::string &parameterStr) {
           throw std::runtime_error("Found masking for a non-detector "
                                    "component. This is not possible");
         } else
-          m_detectorInfo->setMasked(detectorInfo().indexOf(det->getID()),
-                                    value);
+          detectorInfo.setMasked(detectorInfo.indexOf(det->getID()), value);
       }
-    } else {
-      pmap.add(tokens[1], comp, tokens[2], paramValue);
+    } else if (isPositionParameter(paramName)) {
+      // We are parsing a string obtained from a ParameterMap. The map may
+      // contain posx, posy, and posz (in addition to pos). However, when these
+      // component wise positions are set, 'pos' is updated accordingly. We are
+      // thus ignoring position components below.
+      const auto newRelPos = getParam<V3D>(paramType, paramValue);
+      updatePosition(detectorInfo, *parInstrument, comp, newRelPos);
+    } else if (isRotationParameter(paramName)) {
+      // We are parsing a string obtained from a ParameterMap. The map may
+      // contain rotx, roty, and rotz (in addition to rot). However, when these
+      // component wise rotations are set, 'rot' is updated accordingly. We are
+      // thus ignoring rotation components below.
+      const auto newRelRot = getParam<Quat>(paramType, paramValue);
+      updateRotation(detectorInfo, *parInstrument, comp, newRelRot);
+    } else if (!isRedundantPosOrRot(paramName)) {
+      // Special case RectangularDetector: Parameters scalex and scaley affect
+      // pixel positions, but we must also add the parameter below.
+      if (isScaleParameter(paramName))
+        adjustPositionsFromScaleFactor(detectorInfo, *parInstrument, comp,
+                                       paramName,
+                                       getParam<double>(paramType, paramValue));
+      pmap.add(paramType, comp, paramName, paramValue);
     }
   }
 }
@@ -1493,13 +1651,15 @@ void ExperimentInfo::readParameterMap(const std::string &parameterStr) {
  * Fill map with instrument parameter first set in xml file
  * Where this is appropriate a parameter value is dependent on values in a log
  * entry
- * @param paramMap Map to populate
+ * @param paramMap Map to populate (except for position and rotation parameters)
+ * @param paramMapForPosAndRot Map to populate with positions and rotations
  * @param name The name of the parameter
  * @param paramInfo A reference to the object describing this parameter
  * @param runData A reference to the run object, which stores log value entries
  */
 void ExperimentInfo::populateWithParameter(
-    Geometry::ParameterMap &paramMap, const std::string &name,
+    Geometry::ParameterMap &paramMap,
+    Geometry::ParameterMap &paramMapForPosAndRot, const std::string &name,
     const Geometry::XMLInstrumentParameter &paramInfo, const Run &runData) {
   const std::string &category = paramInfo.m_type;
   ParameterValue paramValue(paramInfo,
@@ -1510,7 +1670,7 @@ void ExperimentInfo::populateWithParameter(
     pDescription = &paramInfo.m_description;
 
   // Some names are special. Values should be convertible to double
-  if (name.compare("masked") == 0) {
+  if (name == "masked") {
     bool value(paramValue);
     if (value) {
       // Do not add masking to ParameterMap, it is stored in DetectorInfo
@@ -1522,14 +1682,15 @@ void ExperimentInfo::populateWithParameter(
       m_detectorInfo->setMasked(detectorInfo().indexOf(det->getID()),
                                 paramValue);
     }
-  } else if (name.compare("x") == 0 || name.compare("y") == 0 ||
-             name.compare("z") == 0) {
-    paramMap.addPositionCoordinate(paramInfo.m_component, name, paramValue);
-  } else if (name.compare("rot") == 0 || name.compare("rotx") == 0 ||
-             name.compare("roty") == 0 || name.compare("rotz") == 0) {
-    paramMap.addRotationParam(paramInfo.m_component, name, paramValue,
-                              pDescription);
-  } else if (category.compare("fitting") == 0) {
+  } else if (name == "x" || name == "y" || name == "z") {
+    paramMapForPosAndRot.addPositionCoordinate(paramInfo.m_component, name,
+                                               paramValue);
+  } else if (name == "rot" || name == "rotx" || name == "roty" ||
+             name == "rotz") {
+    // Effectively this is dropping any parameters named 'rot'.
+    paramMapForPosAndRot.addRotationParam(paramInfo.m_component, name,
+                                          paramValue, pDescription);
+  } else if (category == "fitting") {
     std::ostringstream str;
     str << paramInfo.m_value << " , " << paramInfo.m_fittingFunction << " , "
         << name << " , " << paramInfo.m_constraint[0] << " , "
@@ -1539,12 +1700,12 @@ void ExperimentInfo::populateWithParameter(
         << (*(paramInfo.m_interpolation));
     paramMap.add("fitting", paramInfo.m_component, name, str.str(),
                  pDescription);
-  } else if (category.compare("string") == 0) {
+  } else if (category == "string") {
     paramMap.addString(paramInfo.m_component, name, paramInfo.m_value,
                        pDescription);
-  } else if (category.compare("bool") == 0) {
+  } else if (category == "bool") {
     paramMap.addBool(paramInfo.m_component, name, paramValue, pDescription);
-  } else if (category.compare("int") == 0) {
+  } else if (category == "int") {
     paramMap.addInt(paramInfo.m_component, name, paramValue, pDescription);
   } else { // assume double
     paramMap.addDouble(paramInfo.m_component, name, paramValue, pDescription);
@@ -1556,8 +1717,8 @@ void ExperimentInfo::populateIfNotLoaded() const {
   // (FileBackedExperimentInfo) to load content from files upon access.
 }
 
-} // namespace Mantid
 } // namespace API
+} // namespace Mantid
 
 namespace Mantid {
 namespace Kernel {

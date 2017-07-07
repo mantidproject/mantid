@@ -229,8 +229,6 @@ public:
     manager.readInSerializedJson(jsonOut);
     TSM_ASSERT("The instrument should be empty",
                manager.getInstrument().empty());
-    TSM_ASSERT_EQUALS("The max value is 1", 1.0, manager.getMaxValue());
-    TSM_ASSERT_EQUALS("The min value is 1", 1.0, manager.getMinValue());
   }
 };
 

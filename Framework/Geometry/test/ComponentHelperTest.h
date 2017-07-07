@@ -8,6 +8,9 @@
 
 #include <boost/make_shared.hpp>
 
+using namespace Mantid::Kernel;
+using namespace Mantid::Geometry;
+
 class ComponentHelperTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
@@ -105,6 +108,59 @@ public:
     TS_ASSERT_DELTA(newRot.imagI(), expectedRot.imagI(), 1e-12);
     TS_ASSERT_DELTA(newRot.imagJ(), expectedRot.imagJ(), 1e-12);
     TS_ASSERT_DELTA(newRot.imagK(), expectedRot.imagK(), 1e-12);
+  }
+
+  void test_absolute_planar_rotation_takes_into_account_grandparent() {
+    const int banks = 1;
+    const int pixels = 1;
+    auto base =
+        ComponentCreationHelper::createTestInstrumentRectangular(banks, pixels);
+    auto pmap = boost::make_shared<ParameterMap>();
+    Instrument instrument(base, pmap);
+
+    const auto bank = instrument.getComponentByName("bank1");
+    const auto pixel = instrument.getDetector(1);
+
+    Quat rootRot(100.0, V3D(1, 2, 3));
+    Quat bankRot(110.0, V3D(1, 2, 3));
+    Quat pixelRot(111.0, V3D(1, 2, 3));
+
+    const auto type = ComponentHelper::TransformType::Absolute;
+    ComponentHelper::rotateComponent(instrument, *pmap, rootRot, type);
+    TS_ASSERT_EQUALS(instrument.getRotation(), rootRot);
+    TS_ASSERT_EQUALS(bank->getRotation(), rootRot);
+    TS_ASSERT_EQUALS(pixel->getRotation(), rootRot);
+    ComponentHelper::rotateComponent(*bank, *pmap, bankRot, type);
+    TS_ASSERT_EQUALS(instrument.getRotation(), rootRot);
+    TS_ASSERT_EQUALS(bank->getRotation(), bankRot);
+    TS_ASSERT_EQUALS(pixel->getRotation(), bankRot);
+    ComponentHelper::rotateComponent(*pixel, *pmap, pixelRot, type);
+    TS_ASSERT_EQUALS(instrument.getRotation(), rootRot);
+    TS_ASSERT_EQUALS(bank->getRotation(), bankRot);
+    TS_ASSERT_EQUALS(pixel->getRotation(), pixelRot);
+  }
+
+  void test_absolute_rotation_takes_into_account_parent_correctly() {
+    const int banks = 1;
+    const int pixels = 1;
+    auto base =
+        ComponentCreationHelper::createTestInstrumentRectangular(banks, pixels);
+    auto pmap = boost::make_shared<ParameterMap>();
+    Instrument instrument(base, pmap);
+
+    const auto bank = instrument.getComponentByName("bank1");
+    const auto pixel = instrument.getDetector(1);
+
+    Quat bankRot(10.0, V3D(1, 0, 0));
+    Quat pixelRot(20.0, V3D(0, 1, 0));
+
+    const auto type = ComponentHelper::TransformType::Absolute;
+    ComponentHelper::rotateComponent(*bank, *pmap, bankRot, type);
+    TS_ASSERT_EQUALS(bank->getRotation(), bankRot);
+    TS_ASSERT_EQUALS(pixel->getRotation(), bankRot);
+    ComponentHelper::rotateComponent(*pixel, *pmap, pixelRot, type);
+    TS_ASSERT_EQUALS(bank->getRotation(), bankRot);
+    TS_ASSERT_EQUALS(pixel->getRotation(), pixelRot);
   }
 
 private:

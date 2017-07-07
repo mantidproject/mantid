@@ -223,15 +223,6 @@ private:
   MDBox(const MDBox &);
   /// common part of mdBox constructor
   void initMDBox(const size_t nBoxEvents);
-  struct MyComparator {
-    const std::vector<double> &value_vector;
-
-    MyComparator(const std::vector<double> &val_vec) : value_vector(val_vec) {}
-
-    bool operator()(size_t i1, size_t i2) {
-      return value_vector[i1] < value_vector[i2];
-    }
-  };
 
 public:
   /// Typedef for a shared pointer to a MDBox

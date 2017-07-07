@@ -34,6 +34,18 @@ void ReflSettingsTabPresenter::setInstrumentName(const std::string &instName) {
     presenter->setInstrumentName(instName);
 }
 
+/** Returns values passed for 'Transmission run(s)'
+*
+* @param group :: The group from which to get the values
+* @param loadRuns :: If true, will try to load transmission runs as well
+* @return :: Values passed for 'Transmission run(s)'
+*/
+std::string ReflSettingsTabPresenter::getTransmissionRuns(int group,
+                                                          bool loadRuns) const {
+
+  return m_settingsPresenters.at(group)->getTransmissionRuns(loadRuns);
+}
+
 /** Returns global options for 'CreateTransmissionWorkspaceAuto'
 *
 * @param group :: The group from which to get the options

@@ -20,28 +20,55 @@ Inputs
 FilterEvents takes 2 mandatory input Workspaces and 1 optional
 Workspace.  One of mandatory workspace is the :ref:`EventWorkspace`
 where the events are filtered from.  The other mandatory workspace is
-workspace containing splitters.  It can be either a MatrixWorkspace or
+workspace containing splitters.  It can be a MatrixWorkspace, a TableWorkspace or
 a :ref:`SplittersWorkspace <SplittersWorkspace>`.
 
 The optional workspace is a :ref:`TableWorkspace <Table Workspaces>`
 for information of splitters.
+
+Workspace containing splitters
+==============================
+
+This algorithm accepts three types of workspace that contains event splitters.
+- TableWorkspace: a general TableWorkspace with at three columns
+- MatrixWorkspace: a 1-spectrum MatrixWorkspace
+- SplittersWorkspace: an extended TableWorkspace with restrict definition on start and stop time.
+
+Event splitter
+++++++++++++++
+
+An event splitter contains three items, start time, stop time and splitting target (index).
+All the events belonged to the same splitting target will be saved to a same output EventWorkspace.
+
+Unit of input splitters
++++++++++++++++++++++++
+
+- MatrixWorkspace:  the unit must be second.
+- TableWorkspace: the unit must be second.
+- SplittersWorkspace: by the definition of SplittersWorkspace, the unit has to be nanosecond.
+
+
+How to generate input workspace containing splitters
+++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+There are two ways to generate 
 
 Algorithm :ref:`GenerateEventsFilter <algm-GenerateEventsFilter>`
 creates both the :ref:`SplittersWorkspace <SplittersWorkspace>` and
 splitter information workspace.
 
 
-Splitters in relative time
-==========================
+Splitters in relative time or absolute time
++++++++++++++++++++++++++++++++++++++++++++
 
 As the SplittersWorkspace is in format of :ref:`MatrixWorkspace
 <MatrixWorkspace>`, its time, i.e., the value in X vector, can be
 relative time.
 
-Property *RelativeTime* flags that the splitters' time is relative.
-Property *FilterStartTime* specifies the starting time of the filter.
+Property ``RelativeTime`` flags that the splitters' time is relative.
+Property ``FilterStartTime`` specifies the starting time of the filter.
 Or the shift of time of the splitters.
-If it is not specified, then the algorithm will search for sample log *run_start*.
+If it is not specified, then the algorithm will search for sample log ``run_start``.
 
 Outputs
 #######
@@ -78,7 +105,7 @@ Difference from FilterByLogValue
 
 In FilterByLogValue(), EventList.splitByTime() is used.
 
-In FilterEvents(), if FilterByPulse is selected true,
+In FilterEvents, if FilterByPulse is selected true,
 EventList.SplitByTime is called; otherwise, EventList.SplitByFullTime()
 is called instead.
 
@@ -93,6 +120,25 @@ Comparing with other event filtering algorithms
 
 Wiki page :ref:`EventFiltering` has a detailed introduction on event
 filtering in MantidPlot.
+
+
+Developer's Note
+----------------
+
+Splitters given by TableWorkspace
+#################################
+
+- The ``start/stop time`` is converted to ``m_vecSplitterTime``.
+- The splitting target (in string) is mapped to a set of continuous integers that are stored in ``m_vecSplitterGroup``.
+  - The mapping will be recorded in ``m_targetIndexMap`` and ``m_wsGroupIndexTargetMap``.
+  - Class variable ``m_maxTargetIndex`` is set up to record the highest target group/index,i.e., the max value of ``m_vecSplitterGroup``.
+
+
+Undefined splitting target
+##########################
+
+Indexed as ``0`` in m_vecSplitterGroup.
+
 
 Usage
 -----
@@ -130,6 +176,54 @@ Output:
     workspace tempsplitws_4 has 22520 events
     workspace tempsplitws_5 has 5133 events
     workspace tempsplitws_unfiltered has 50603 events
+
+**Example - Filtering event by a user-generated TableWorkspace**
+
+.. testcode:: FilterEventNoCorrection
+
+    ws = Load(Filename='CNCS_7860_event.nxs')
+
+    # create TableWorkspace
+    split_table_ws = CreateEmptyTableWorkspace()
+    split_table_ws.addColumn('float', 'start')
+    split_table_ws.addColumn('float', 'stop')
+    split_table_ws.addColumn('str', 'target')
+
+    split_table_ws.addRow([0., 100., 'a'])
+    split_table_ws.addRow([200., 300., 'b'])
+    split_table_ws.addRow([400., 600., 'c'])
+    split_table_ws.addRow([600., 650., 'b'])
+
+    # filter events
+    FilterEvents(InputWorkspace=ws, SplitterWorkspace=split_table_ws,
+            OutputWorkspaceBaseName='tempsplitws3',  GroupWorkspaces=True,
+            FilterByPulseTime = False, OutputWorkspaceIndexedFrom1 = False,
+            CorrectionToSample = "None", SpectrumWithoutDetector = "Skip", SplitSampleLogs = False,
+            OutputTOFCorrectionWorkspace='mock',
+            RelativeTime=True)
+
+    # Print result
+    wsgroup = mtd["tempsplitws3"]
+    wsnames = wsgroup.getNames()
+    for name in sorted(wsnames):
+        tmpws = mtd[name]
+        print "workspace %s has %d events" % (name, tmpws.getNumberEvents())
+        split_log = tmpws.run().getProperty('splitter')
+        print 'event splitter log: entry 0 and entry 1 are {0} and {1}.'.format(split_log.times[0], split_log.times[1])
+
+
+Output:
+
+.. testoutput:: FilterEventNoCorrection
+
+    workspace tempsplitws3_a has 77580 events
+    event splitter log: entry 0 and entry 1 are 2010-03-25T16:08:37  and 2010-03-25T16:10:17 .
+    workspace tempsplitws3_b has 0 events
+    event splitter log: entry 0 and entry 1 are 2010-03-25T16:08:37  and 2010-03-25T16:11:57 .
+    workspace tempsplitws3_c has 0 events
+    event splitter log: entry 0 and entry 1 are 2010-03-25T16:08:37  and 2010-03-25T16:15:17 .
+    workspace tempsplitws3_unfiltered has 34686 events
+    event splitter log: entry 0 and entry 1 are 2010-03-25T16:08:37  and 2010-03-25T16:10:17 .
 
 
 **Example - Filtering event by pulse time**

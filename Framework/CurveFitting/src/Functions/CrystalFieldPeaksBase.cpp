@@ -3,6 +3,7 @@
 
 #include <functional>
 #include <map>
+#include <cctype>
 
 namespace Mantid {
 namespace CurveFitting {
@@ -336,10 +337,42 @@ void CrystalFieldPeaksBase::calculateEigenSystem(DoubleFortranVector &en,
 
   auto ionIter = ION_2_NRE.find(ion);
   if (ionIter == ION_2_NRE.end()) {
-    throw std::runtime_error("Unknown ion name passed to CrystalFieldPeaks.");
+    // If 'Ion=S2', or 'Ion=J2.5' etc, interpret as arbitrary J values with gJ=2
+    // Allow lower case, but values must be half-integral. E.g. 'Ion=S2.4' fails
+    switch (ion[0]) {
+    case 'S':
+    case 's':
+    case 'J':
+    case 'j': {
+      if (ion.size() > 1 && std::isdigit(ion[1])) {
+        // Need to store as 2J to allow half-integer values
+        try {
+          auto J2 = std::stof(ion.substr(1)) * 2.;
+          if (J2 > 99.) {
+            throw std::out_of_range("");
+          }
+          if (fabs(J2 - (int)J2) < 0.001) {
+            nre = -(int)J2;
+            break;
+          }
+          // Catch exceptions thrown by stof so we get a more meaningful error
+        } catch (const std::invalid_argument &) {
+          throw std::runtime_error("Invalid value '" + ion.substr(1) +
+                                   "' of J passed to CrystalFieldPeaks.");
+        } catch (const std::out_of_range &) {
+          throw std::runtime_error("Value of J: '" + ion.substr(1) +
+                                   "' passed to CrystalFieldPeaks is too big.");
+        }
+      }
+      // fall through
+    }
+    default:
+      throw std::runtime_error("Unknown ion name '" + ion +
+                               "' passed to CrystalFieldPeaks.");
+    }
+  } else {
+    nre = ionIter->second;
   }
-
-  nre = ionIter->second;
 
   DoubleFortranVector bmol(1, 3);
   bmol(1) = getParameter("BmolX");

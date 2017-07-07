@@ -8,8 +8,7 @@ option(USE_SYSTEM_EIGEN "Use the system installed Eigen - v${eigen_version}?" OF
 
 if(USE_SYSTEM_EIGEN)
   message(STATUS "Using system Eigen")
-  find_package(Eigen3 ${eigen_version} EXACT REQUIRED
-               PATH_SUFFIXES eigen3 eigen )
+  find_package(Eigen3 3.2 REQUIRED)
 else()
   message(STATUS "Using Eigen in ExternalProject")
 
@@ -23,6 +22,6 @@ else()
   execute_process(COMMAND ${CMAKE_COMMAND} . WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/eigen-download )
   execute_process(COMMAND ${CMAKE_COMMAND} --build . WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/eigen-download )
 
+  set(EIGEN3_INCLUDE_DIR "${CMAKE_BINARY_DIR}/eigen-src" CACHE PATH "Eigen include directory")
   ## Include the source directory.
-  include_directories("${CMAKE_BINARY_DIR}/eigen-src" "${CMAKE_BINARY_DIR}/eigen-src")
 endif()

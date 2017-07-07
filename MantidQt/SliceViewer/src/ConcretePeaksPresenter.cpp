@@ -159,7 +159,6 @@ ConcretePeaksPresenter::ConcretePeaksPresenter(
           canAddPeaksTo(peaksWS.get(), m_transform->getCoordinateSystem())) {
   // Check that the workspaces appear to be compatible. Log if otherwise.
   checkWorkspaceCompatibilities(mdWS);
-
   this->initialize();
 }
 
@@ -184,14 +183,11 @@ void ConcretePeaksPresenter::reInitialize(IPeaksWorkspace_sptr peaksWS) {
  * @brief initialize inner components. Produces the views.
  */
 void ConcretePeaksPresenter::initialize() {
-  const bool transformSucceeded = this->configureMappingTransform();
 
   // Make and register each peak widget.
   produceViews();
-
-  if (!transformSucceeded) {
-    hideAll();
-  }
+  changeShownDim(); // in case dimensions shown are not those expected by
+                    // default transformation
 }
 
 /**

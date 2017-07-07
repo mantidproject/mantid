@@ -218,7 +218,7 @@ void OPJFile::convertSpreadToExcel(int spread) {
     unsigned int index = 0;
     if (pos != -1) {
       col = name.substr(0, pos);
-      index = atoi(name.substr(pos + 1).c_str()) - 1;
+      index = std::stoi(name.substr(pos + 1)) - 1;
     }
 
     if (EXCEL.back().sheet.size() <= index)
@@ -274,7 +274,7 @@ int OPJFile::Parse() {
   }
 
   fclose(f);
-  version = atoi(vers);
+  version = std::stoi(vers);
 
   if (version >= 2766 && version <= 2769) // 7.5
     return ParseFormatNew();
@@ -305,7 +305,7 @@ int OPJFile::ParseFormatOld() {
   // fseek(f,0x7,SEEK_SET);
   CHECKED_FSEEK(debug, f, 0x7, SEEK_SET);
   CHECKED_FREAD(debug, &vers, 4, 1, f);
-  version = atoi(vers);
+  version = std::stoi(vers);
   fprintf(debug, " [version = %d]\n", version);
 
   // translate version
@@ -784,7 +784,7 @@ int OPJFile::ParseFormatNew() {
   // get version
   CHECKED_FSEEK(debug, f, 0x7, SEEK_SET);
   CHECKED_FREAD(debug, &vers, 4, 1, f);
-  version = atoi(vers);
+  version = std::stoi(vers);
   fprintf(debug, " [version = %d]\n", version);
 
   // translate version
@@ -1130,7 +1130,7 @@ int OPJFile::ParseFormatNew() {
       int sheetpos = static_cast<int>(
           SPREADSHEET[spread].column.back().name.find_last_of("@"));
       if (!SPREADSHEET[spread].bMultisheet && sheetpos != -1)
-        if (atoi(string(cname).substr(sheetpos + 1).c_str()) > 1) {
+        if (std::stoi(string(cname).substr(sheetpos + 1)) > 1) {
           SPREADSHEET[spread].bMultisheet = true;
           fprintf(debug, "SPREADSHEET \"%s\" IS MULTISHEET \n", sname);
         }

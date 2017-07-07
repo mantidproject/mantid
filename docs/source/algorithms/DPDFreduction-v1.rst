@@ -17,9 +17,9 @@ distribution function :math:`G(r,E)` can be obtained via the
 Detailed Parameters description
 ===============================
 
-- **Vanadium**: a preprocessed vanadium file, meaning that for every detector,
+- **Vanadium**: a preprocessed white-beam vanadium file, meaning that
   all events within a particular wide wavelength range have been rebinned
-  into a single histogram.
+  into a single histogram, this for every detector.
 
 - **EnergyBins**: user can input a triad :math:`[E_{min}, E_{bin}, E_{max}]`
   or only the energy binning :math:`E_{bin}`. If this is the case,

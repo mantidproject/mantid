@@ -37,6 +37,9 @@ class LiquidsReflectometryReduction(PythonAlgorithm):
     def PyInit(self):
         #TODO: Revisit the choice of names when we are entirely rid of the old code.
         self.declareProperty(StringArrayProperty("RunNumbers"), "List of run numbers to process")
+        self.declareProperty(WorkspaceProperty("InputWorkspace", "",
+                                               Direction.Input, PropertyMode.Optional),
+                             "Optionally, we can provide a workspace directly")
         self.declareProperty("NormalizationRunNumber", 0, "Run number of the normalization run to use")
         self.declareProperty(IntArrayProperty("SignalPeakPixelRange", [123, 137],
                                               IntArrayLengthValidator(2), direction=Direction.Input),
@@ -99,7 +102,6 @@ class LiquidsReflectometryReduction(PythonAlgorithm):
         self.TOLERANCE = self.getProperty("SlitTolerance").value
 
         # DATA
-        dataRunNumbers = self.getProperty("RunNumbers").value
         dataPeakRange = self.getProperty("SignalPeakPixelRange").value
         dataBackRange = self.getProperty("SignalBackgroundPixelRange").value
 
@@ -114,18 +116,8 @@ class LiquidsReflectometryReduction(PythonAlgorithm):
         if qStep > 0:  #force logarithmic binning
             qStep = -qStep
 
-        # If we have multiple files, add them
-        file_list = []
-        for item in dataRunNumbers:
-            # The standard mode of operation is to give a run number as input
-            try:
-                data_file = FileFinder.findRuns("REF_L%s" % item)[0]
-            except RuntimeError:
-                # Allow for a file name or file path as input
-                data_file = FileFinder.findRuns(item)[0]
-            file_list.append(data_file)
-        runs = reduce((lambda x, y: '%s+%s' % (x, y)), file_list)
-        ws_event_data = Load(Filename=runs, OutputWorkspace="REF_L_%s" % dataRunNumbers[0])
+        # Load the data
+        ws_event_data = self.load_data()
 
         # Compute the primary fraction using the unprocessed workspace
         apply_primary_fraction = self.getProperty("ApplyPrimaryFraction").value
@@ -325,6 +317,31 @@ class LiquidsReflectometryReduction(PythonAlgorithm):
                 AnalysisDataService.remove(ws)
 
         self.setProperty('OutputWorkspace', mtd[name_output_ws])
+
+    def load_data(self):
+        """
+            Load the data. We can either load it from the specified
+            run numbers, or use the input workspace if no runs are specified.
+        """
+        dataRunNumbers = self.getProperty("RunNumbers").value
+        ws_event_data = self.getProperty("InputWorkspace").value
+
+        if len(dataRunNumbers) > 0:
+            # If we have multiple files, add them
+            file_list = []
+            for item in dataRunNumbers:
+                # The standard mode of operation is to give a run number as input
+                try:
+                    data_file = FileFinder.findRuns("REF_L%s" % item)[0]
+                except RuntimeError:
+                    # Allow for a file name or file path as input
+                    data_file = FileFinder.findRuns(item)[0]
+                file_list.append(data_file)
+            runs = reduce((lambda x, y: '%s+%s' % (x, y)), file_list)
+            ws_event_data = Load(Filename=runs, OutputWorkspace="REF_L_%s" % dataRunNumbers[0])
+        elif ws_event_data is None:
+            raise RuntimeError("No input data was specified")
+        return ws_event_data
 
     def calculate_scattering_angle(self, ws_event_data):
         """

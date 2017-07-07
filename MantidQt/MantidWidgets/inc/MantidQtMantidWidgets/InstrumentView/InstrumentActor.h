@@ -138,10 +138,12 @@ public:
 
   /// Get the number of detectors in the instrument.
   size_t ndetectors() const { return m_detIDs.size(); }
-  /// Get shared pointer to a detector by a pick ID converted form a color in
+  /// Get a reference to a detector by a pick ID converted form a color in
   /// the pick image.
-  boost::shared_ptr<const Mantid::Geometry::IDetector>
-  getDetector(size_t pickID) const;
+  const Mantid::Geometry::IDetector &getDetectorByPickID(size_t pickID) const;
+  /// Get a reference to a detector by a detector ID.
+  const Mantid::Geometry::IDetector &
+  getDetectorByDetID(Mantid::detid_t detID) const;
   /// Get a detector ID by a pick ID converted form a color in the pick image.
   Mantid::detid_t getDetID(size_t pickID) const;
   /// Get a component ID for a non-detector.

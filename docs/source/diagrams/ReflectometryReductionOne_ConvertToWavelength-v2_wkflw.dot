@@ -9,8 +9,6 @@ subgraph params {
   inputWS             [label="InputWorkspace"]
   outputWS            [label="OutputWorkspaceWavelength"]
   procCommands        [label="ProcessingInstructions"]
-  wavMin              [label="WavelengthMin", group=gwav]
-  wavMax              [label="WavelengthMax", group=gwav]
   monitorIndex        [label="I0MonitorIndex"]
   regionOfDirectBeam  [label="RegionOf-\nDirectBeam"]
   monIntWavMax        [label="MonitorIntegration-\nWavelengthMax"]
@@ -21,6 +19,7 @@ subgraph params {
 
 subgraph decisions {
  $decision_style
+  checkSumInLam   [label="Sum in &lambda;?"]
 }
 
 subgraph algorithms {
@@ -35,7 +34,6 @@ subgraph algorithms {
   groupDetRDB   [label="GroupDetectors"]
   divideDetMon  [label="Divide\n(Detectors / Monitors)", group=g1]
   divideDetRDB  [label="Divide\n(Detectors / DirectBeam)", group=g1]
-  cropWav       [label="CropWorkspace", group=g1]
 }
 
 subgraph processes {
@@ -46,21 +44,24 @@ subgraph values {
  $value_style
 }
 
-inputWS				-> groupDet			[label="Detectors"]
-inputWS				-> groupDetRDB		[label="Direct Beam"]
-inputWS				-> cropMonWS		[label="Monitors"]
+inputWS			-> checkSumInLam	[label="Detectors"]
+inputWS			-> groupDetRDB		[label="Direct Beam"]
+inputWS			-> cropMonWS		[label="Monitors"]
+
+checkSumInLam           -> convertDet [label="No"]
+checkSumInLam           -> groupDet   [label="Yes"]
+groupDet		-> convertDet
 
 procCommands		-> groupDet
-groupDet			-> convertDet
 
 regionOfDirectBeam	-> groupDetRDB
-groupDetRDB			-> convertDB
+groupDetRDB		-> convertDB
 
 monitorIndex		-> cropMonWS
-cropMonWS			-> convertMon
+cropMonWS		-> convertMon
 
-convertDet			-> divideDetRDB
-convertDB			-> divideDetRDB
+convertDet		-> divideDetRDB
+convertDB		-> divideDetRDB
 
 convertMon          -> calcFlatBg
 monBackWavMin       -> calcFlatBg
@@ -71,10 +72,7 @@ monIntWavMax        -> intMon
 
 divideDetRDB        -> divideDetMon
 intMon              -> divideDetMon
-wavMin              -> cropWav
-divideDetMon        -> cropWav
-wavMax              -> cropWav
-cropWav             -> outputWS
+divideDetMon        -> outputWS
 
 {rank=same; groupDet; groupDetRDB; cropMonWS}
 {rank=same; convertDet; convertDB; convertMon}

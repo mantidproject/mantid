@@ -23,9 +23,8 @@ namespace VATES {
 /**
  * Standard constructor for object.
  */
-vtkDataSetToScaledDataSet::vtkDataSetToScaledDataSet() {}
-
-vtkDataSetToScaledDataSet::~vtkDataSetToScaledDataSet() {}
+vtkDataSetToScaledDataSet::vtkDataSetToScaledDataSet() = default;
+vtkDataSetToScaledDataSet::~vtkDataSetToScaledDataSet() = default;
 
 /**
  * Process the input data. First, scale a copy of the points and apply

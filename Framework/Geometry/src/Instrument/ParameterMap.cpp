@@ -2,10 +2,12 @@
 #include "MantidGeometry/Objects/BoundingBox.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidKernel/Cache.h"
+#include "MantidBeamline/DetectorInfo.h"
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ParameterFactory.h"
 #include <cstring>
+#include <nexus/NeXusFile.hpp>
 #include <boost/algorithm/string.hpp>
 
 #ifdef _WIN32
@@ -72,7 +74,7 @@ ParameterMap::ParameterMap(const ParameterMap &other)
       m_boundingBoxMap(
           Kernel::make_unique<Kernel::Cache<const ComponentID, BoundingBox>>(
               *other.m_boundingBoxMap)),
-      m_detectorInfo(other.m_detectorInfo) {}
+      m_detectorInfo(other.m_detectorInfo), m_instrument(other.m_instrument) {}
 
 // Defined as default in source for forward declaration with std::unique_ptr.
 ParameterMap::~ParameterMap() = default;
@@ -172,9 +174,8 @@ const std::string ParameterMap::getDescription(const std::string &compName,
   pmap_cit it;
   std::string result;
   for (it = m_map.begin(); it != m_map.end(); ++it) {
-    if (compName.compare(((const IComponent *)(*it).first)->getName()) == 0) {
-      boost::shared_ptr<Parameter> param =
-          get((const IComponent *)(*it).first, name);
+    if (compName == it->first->getName()) {
+      boost::shared_ptr<Parameter> param = get(it->first, name);
       if (param) {
         result = param->getDescription();
         if (!result.empty())
@@ -197,7 +198,7 @@ ParameterMap::getShortDescription(const std::string &compName,
   pmap_cit it;
   std::string result;
   for (it = m_map.begin(); it != m_map.end(); ++it) {
-    if (compName.compare(it->first->getName()) == 0) {
+    if (compName == it->first->getName()) {
       boost::shared_ptr<Parameter> param = get(it->first, name);
       if (param) {
         result = param->getShortDescription();
@@ -422,11 +423,11 @@ void ParameterMap::addPositionCoordinate(
 
   // adjust position
 
-  if (name.compare(posx()) == 0)
+  if (name == posx())
     position.setX(value);
-  else if (name.compare(posy()) == 0)
+  else if (name == posy())
     position.setY(value);
-  else if (name.compare(posz()) == 0)
+  else if (name == posz())
     position.setZ(value);
   else {
     g_log.warning() << "addPositionCoordinate() called with unrecognized "
@@ -481,15 +482,15 @@ void ParameterMap::addRotationParam(const IComponent *comp,
 
   // adjust rotation
   Quat quat;
-  if (name.compare(rotx()) == 0) {
+  if (name == rotx()) {
     addDouble(comp, rotx(), deg);
     quat = Quat(deg, V3D(1, 0, 0)) * Quat(rotY, V3D(0, 1, 0)) *
            Quat(rotZ, V3D(0, 0, 1));
-  } else if (name.compare(roty()) == 0) {
+  } else if (name == roty()) {
     addDouble(comp, roty(), deg);
     quat = Quat(rotX, V3D(1, 0, 0)) * Quat(deg, V3D(0, 1, 0)) *
            Quat(rotZ, V3D(0, 0, 1));
-  } else if (name.compare(rotz()) == 0) {
+  } else if (name == rotz()) {
     addDouble(comp, rotz(), deg);
     quat = Quat(rotX, V3D(1, 0, 0)) * Quat(rotY, V3D(0, 1, 0)) *
            Quat(deg, V3D(0, 0, 1));
@@ -1150,25 +1151,38 @@ ParameterMap::create(const std::string &className,
   return ParameterFactory::create(className, name);
 }
 
-/// Only for use by ExperimentInfo. Returns returns true if this instrument
-/// contains a DetectorInfo.
-bool ParameterMap::hasDetectorInfo() const {
+/** Only for use by ExperimentInfo. Returns returns true if this instrument
+ contains a DetectorInfo.
+
+ The `instrument` argument is needed for the special case of having a neutronic
+ *and* a physical instrument. `Instrument` uses the same parameter map for both,
+ but the DetectorInfo is only for the neutronic instrument. */
+bool ParameterMap::hasDetectorInfo(const Instrument *instrument) const {
+  if (instrument != m_instrument)
+    return false;
   return static_cast<bool>(m_detectorInfo);
 }
 /// Only for use by ExperimentInfo. Returns a reference to the DetectorInfo.
 const Beamline::DetectorInfo &ParameterMap::detectorInfo() const {
-  if (!hasDetectorInfo())
+  if (!hasDetectorInfo(m_instrument))
     throw std::runtime_error("Cannot return reference to NULL DetectorInfo");
   return *m_detectorInfo;
+}
+
+/// Only for use by Detector. Returns a detector index for a detector ID.
+size_t ParameterMap::detectorIndex(const detid_t detID) const {
+  return m_instrument->detectorIndex(detID);
 }
 
 /// Only for use by ExperimentInfo. Sets the pointer to the DetectorInfo.
 void ParameterMap::setDetectorInfo(
     boost::shared_ptr<const Beamline::DetectorInfo> detectorInfo) {
-  if (detectorInfo != m_detectorInfo) {
-    PARALLEL_CRITICAL(ParameterMap_setDetectorInfo)
-    m_detectorInfo = std::move(detectorInfo);
-  }
+  m_detectorInfo = std::move(detectorInfo);
+}
+
+/// Only for use by Instrument. Sets the pointer to the owning instrument.
+void ParameterMap::setInstrument(const Instrument *instrument) {
+  m_instrument = instrument;
 }
 
 } // Namespace Geometry

@@ -42,6 +42,7 @@ ParaView_dir = Pathname.new("@ParaView_DIR@")
 library_filenames = ["libboost_regex-mt.dylib",
                      "libboost_date_time-mt.dylib",
                      "libboost_python-mt.dylib",
+                     "libboost_serialization-mt.dylib",
                      "libgsl.dylib",
                      "libgslcblas.dylib",
                      "libjsoncpp.dylib",
@@ -83,7 +84,9 @@ library_filenames = ["libboost_regex-mt.dylib",
                      "libcrypto.dylib",
                      "libtbb.dylib",
                      "libtbbmalloc.dylib",
-                     "libtbbmalloc_proxy.dylib"]
+                     "libtbbmalloc_proxy.dylib",
+                     "librdkafka.dylib",
+                     "librdkafka++.dylib"]
 
 poco_version = "@POCO_VERSION@".split(".").map(&:to_i)
 if(poco_version[0] > 1 || (poco_version[0] == 1 && poco_version[1] >= 6))
@@ -195,6 +198,7 @@ if( "@MAKE_VATES@" == "ON" )
           "Contents/Libraries/vtkParaViewWebCorePython.so",
           "Contents/Libraries/vtkPVAnimationPython.so",
           "Contents/Libraries/vtkPVCatalystPython.so",
+          "Contents/Libraries/vtkPVCinemaReaderPython.so",
           "Contents/Libraries/vtkPVClientServerCoreDefaultPython.so",
           "Contents/Libraries/vtkPVClientServerCoreRenderingPython.so",
           "Contents/Libraries/vtkPVPythonCatalystPython.so",

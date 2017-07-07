@@ -180,9 +180,9 @@ void RefinePowderInstrumentParameters3::processInputProperties() {
 
   // Fit mode
   string fitmode = getProperty("RefinementAlgorithm");
-  if (fitmode.compare("OneStepFit") == 0)
+  if (fitmode == "OneStepFit")
     m_fitMode = FIT;
-  else if (fitmode.compare("MonteCarlo") == 0)
+  else if (fitmode == "MonteCarlo")
     m_fitMode = MONTECARLO;
   else {
     m_fitMode = FIT;
@@ -191,9 +191,9 @@ void RefinePowderInstrumentParameters3::processInputProperties() {
 
   // Stanard error mode
   string stdmode = getProperty("StandardError");
-  if (stdmode.compare("ConstantValue") == 0)
+  if (stdmode == "ConstantValue")
     m_stdMode = CONSTANT;
-  else if (stdmode.compare("UseInputValue") == 0)
+  else if (stdmode == "UseInputValue")
     m_stdMode = USEINPUT;
   else {
     m_stdMode = USEINPUT;
@@ -822,7 +822,7 @@ double RefinePowderInstrumentParameters3::calculateFunctionError(
   vector<bool> vecFix(parnames.size(), false);
 
   for (size_t i = 0; i < parnames.size(); ++i) {
-    bool fixed = function->isFixed(i);
+    bool fixed = !function->isActive(i);
     vecFix[i] = fixed;
     if (!fixed)
       function->fix(i);
@@ -1003,7 +1003,7 @@ bool RefinePowderInstrumentParameters3::doFitFunction(
   string tempfitstatus = fitalg->getProperty("OutputStatus");
   fitstatus = tempfitstatus;
 
-  bool goodfit = fitstatus.compare("success") == 0;
+  bool goodfit = fitstatus == "success";
 
   stringstream dbss;
   dbss << "Fit Result (GSL):  Chi^2 = " << chi2

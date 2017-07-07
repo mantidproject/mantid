@@ -610,6 +610,8 @@ void SetupHFIRReduction::init() {
   declareProperty("Do2DReduction", true);
   declareProperty("IQ2DNumberOfBins", 100, positiveInt,
                   "Number of I(qx,qy) bins.");
+  declareProperty("IQxQyLogBinning", false,
+                  "I(qx,qy) log binning when binning is not specified.");
 
   setPropertyGroup("DoAzimuthalAverage", iq1d_grp);
   setPropertyGroup("IQBinning", iq1d_grp);
@@ -870,8 +872,10 @@ void SetupHFIRReduction::exec() {
   const bool do2DReduction = getProperty("Do2DReduction");
   if (do2DReduction) {
     const std::string n_bins = getPropertyValue("IQ2DNumberOfBins");
+    const bool log_binning = getProperty("IQxQyLogBinning");
     IAlgorithm_sptr iqAlg = createChildAlgorithm("EQSANSQ2D");
     iqAlg->setPropertyValue("NumberOfBins", n_bins);
+    iqAlg->setProperty("IQxQyLogBinning", log_binning);
     auto xyAlgProp = make_unique<AlgorithmProperty>("IQXYAlgorithm");
     xyAlgProp->setValue(iqAlg->toString());
     reductionManager->declareProperty(std::move(xyAlgProp));

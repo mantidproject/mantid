@@ -3,6 +3,7 @@
 
 #include <cxxtest/TestSuite.h>
 #include "MantidKernel/MagneticFormFactorTable.h"
+#include "MantidKernel/MagneticIon.h"
 
 #include <boost/scoped_ptr.hpp>
 

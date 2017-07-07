@@ -28,6 +28,9 @@ class TestPyAlgOverriddenAttrs(PythonAlgorithm):
     def category(self):
         return "BestAlgorithms"
 
+    def helpURL(self):
+        return "Optional documentation URL"
+
     def isRunning(self):
         return True
 
@@ -106,6 +109,7 @@ class PythonAlgorithmTest(unittest.TestCase):
         self.assertEquals(alg.name(), "TestPyAlgOverriddenAttrs")
         self.assertEquals(alg.version(), 2)
         self.assertEquals(alg.category(), "BestAlgorithms")
+        self.assertEquals(alg.helpURL(), "Optional documentation URL")
 
     def test_alg_can_be_cancelled(self):
         alg = AlgorithmManager.createUnmanaged("CancellableAlg")

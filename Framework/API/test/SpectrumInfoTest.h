@@ -13,6 +13,7 @@
 #include "MantidTestHelpers/FakeObjects.h"
 #include "MantidTestHelpers/InstrumentCreationHelper.h"
 
+using namespace Mantid;
 using namespace Mantid::Geometry;
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -53,7 +54,9 @@ public:
 
   void test_constructor() {
     Beamline::SpectrumInfo specInfo(3);
-    TS_ASSERT_THROWS_NOTHING(SpectrumInfo(specInfo, *makeWorkspace(3)));
+    auto ws = makeWorkspace(3);
+    TS_ASSERT_THROWS_NOTHING(
+        SpectrumInfo(specInfo, *ws, ws->mutableDetectorInfo()));
   }
 
   void test_sourcePosition() {

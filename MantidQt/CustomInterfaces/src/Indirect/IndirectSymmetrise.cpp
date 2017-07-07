@@ -3,9 +3,6 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidKernel/Logger.h"
-#include "MantidQtCustomInterfaces/UserInputValidator.h"
-
-#include <QFileInfo>
 
 namespace {
 Mantid::Kernel::Logger g_log("IndirectSymmetrise");
@@ -423,8 +420,8 @@ void IndirectSymmetrise::previewAlgDone(bool error) {
   int positiveIndex = propsTable->getColumn("PositiveXMinIndex")->cell<int>(0);
 
   // Get the Y values for each XCut and the difference between them
-  double negativeY = sampleWS->dataY(0)[negativeIndex];
-  double positiveY = sampleWS->dataY(0)[positiveIndex];
+  double negativeY = sampleWS->y(0)[negativeIndex];
+  double positiveY = sampleWS->y(0)[positiveIndex];
   double deltaY = fabs(negativeY - positiveY);
 
   // Show values in property tree

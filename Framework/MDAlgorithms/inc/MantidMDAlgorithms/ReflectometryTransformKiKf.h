@@ -1,8 +1,6 @@
 #ifndef MANTID_MDALGORITHMS_REFLECTOMETRYTRANSFORMKIKF_H_
 #define MANTID_MDALGORITHMS_REFLECTOMETRYTRANSFORMKIKF_H_
 
-#include "MantidKernel/ClassMacros.h"
-
 #include "MantidAPI/IMDEventWorkspace_fwd.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidDataObjects/CalculateReflectometryKiKf.h"
@@ -44,9 +42,15 @@ public:
                              int numberOfBinsQx = 100,
                              int numberOfBinsQz = 100);
 
-private:
-  DISABLE_DEFAULT_CONSTRUCT(ReflectometryTransformKiKf)
-  DISABLE_COPY_AND_ASSIGN(ReflectometryTransformKiKf)
+  /// Disable default constructor
+  ReflectometryTransformKiKf() = delete;
+
+  /// Disable copy operator
+  ReflectometryTransformKiKf(const ReflectometryTransformKiKf &) = delete;
+
+  /// Disable assignment operator
+  ReflectometryTransformKiKf &
+  operator=(const ReflectometryTransformKiKf &) = delete;
 };
 
 } // namespace MDAlgorithms

@@ -46,6 +46,9 @@
         <property name="showLoad" stdset="0">
          <bool>false</bool>
         </property>
+        <property name="ShowGroups" stdset="0">
+         <bool>false</bool>
+        </property>
        </widget>
       </item>
      </layout>
@@ -57,6 +60,19 @@
       <string>Options</string>
      </property>
      <layout class="QGridLayout" name="gridLayout">
+      <item row="4" column="0">
+       <widget class="QCheckBox" name="ckShiftCan">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="text">
+         <string>Shift x-values of container by adding:</string>
+        </property>
+        <property name="checked">
+         <bool>false</bool>
+        </property>
+       </widget>
+      </item>
       <item row="1" column="0">
        <widget class="QCheckBox" name="ckUseCan">
         <property name="text">
@@ -64,33 +80,40 @@
         </property>
        </widget>
       </item>
-      <item row="5" column="0">
+      <item row="4" column="1">
+       <layout class="QHBoxLayout" name="loShiftFactor">
+        <item>
+         <widget class="QDoubleSpinBox" name="spCanShift">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+          <property name="decimals">
+           <number>5</number>
+          </property>
+          <property name="minimum">
+           <double>-999.990000000000009</double>
+          </property>
+          <property name="maximum">
+           <double>999.990000000000009</double>
+          </property>
+          <property name="singleStep">
+           <double>0.010000000000000</double>
+          </property>
+          <property name="value">
+           <double>0.000000000000000</double>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item row="6" column="0">
        <widget class="QCheckBox" name="ckUseCorrections">
         <property name="text">
          <string>Use Corrections:</string>
         </property>
        </widget>
       </item>
-      <item row="0" column="1">
-       <widget class="QComboBox" name="cbGeometry">
-        <item>
-         <property name="text">
-          <string>Flat Plate</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>Cylinder</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>Annulus</string>
-         </property>
-        </item>
-       </widget>
-      </item>
-      <item row="5" column="1">
+      <item row="6" column="1">
        <widget class="MantidQt::MantidWidgets::DataSelector" name="dsCorrections" native="true">
         <property name="enabled">
          <bool>false</bool>
@@ -115,6 +138,19 @@
          </stringlist>
         </property>
         <property name="showLoad" stdset="0">
+         <bool>false</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="0">
+       <widget class="QCheckBox" name="ckScaleCan">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="text">
+         <string>Scale Container by factor:</string>
+        </property>
+        <property name="checked">
          <bool>false</bool>
         </property>
        </widget>
@@ -148,24 +184,7 @@
         <property name="showLoad" stdset="0">
          <bool>false</bool>
         </property>
-       </widget>
-      </item>
-      <item row="0" column="0">
-       <widget class="QLabel" name="lbGeometry">
-        <property name="text">
-         <string>Geometry:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="3" column="0">
-       <widget class="QCheckBox" name="ckScaleCan">
-        <property name="enabled">
-         <bool>false</bool>
-        </property>
-        <property name="text">
-         <string>Scale Container by factor:</string>
-        </property>
-        <property name="checked">
+        <property name="ShowGroups" stdset="0">
          <bool>false</bool>
         </property>
        </widget>
@@ -193,44 +212,44 @@
         </item>
        </layout>
       </item>
-      <item row="4" column="0">
-       <widget class="QCheckBox" name="ckShiftCan">
+      <item row="0" column="1">
+       <widget class="QComboBox" name="cbGeometry">
+        <item>
+         <property name="text">
+          <string>Flat Plate</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Cylinder</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Annulus</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+      <item row="0" column="0">
+       <widget class="QLabel" name="lbGeometry">
+        <property name="text">
+         <string>Geometry:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="5" column="0">
+       <widget class="QCheckBox" name="ckRebinContainer">
         <property name="enabled">
          <bool>false</bool>
         </property>
         <property name="text">
-         <string>Shift x-values of container by adding:</string>
+         <string>Rebin Container to sample</string>
         </property>
         <property name="checked">
-         <bool>false</bool>
+         <bool>true</bool>
         </property>
        </widget>
-      </item>
-      <item row="4" column="1">
-       <layout class="QHBoxLayout" name="loShiftFactor">
-        <item>
-         <widget class="QDoubleSpinBox" name="spCanShift">
-          <property name="enabled">
-           <bool>false</bool>
-          </property>
-          <property name="decimals">
-           <number>5</number>
-          </property>
-          <property name="minimum">
-           <double>-999.990000000000009</double>
-          </property>
-          <property name="maximum">
-           <double>999.990000000000009</double>
-          </property>
-          <property name="singleStep">
-           <double>0.010000000000000</double>
-          </property>
-          <property name="value">
-           <double>0.000000000000000</double>
-          </property>
-         </widget>
-        </item>
-       </layout>
       </item>
      </layout>
     </widget>
@@ -406,8 +425,8 @@
      <y>111</y>
     </hint>
     <hint type="destinationlabel">
-     <x>61</x>
-     <y>142</y>
+     <x>87</x>
+     <y>196</y>
     </hint>
    </hints>
   </connection>
@@ -422,8 +441,8 @@
      <y>143</y>
     </hint>
     <hint type="destinationlabel">
-     <x>251</x>
-     <y>147</y>
+     <x>712</x>
+     <y>164</y>
     </hint>
    </hints>
   </connection>
@@ -434,12 +453,12 @@
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>133</x>
-     <y>143</y>
+     <x>159</x>
+     <y>196</y>
     </hint>
     <hint type="destinationlabel">
-     <x>251</x>
-     <y>147</y>
+     <x>712</x>
+     <y>199</y>
     </hint>
    </hints>
   </connection>
@@ -454,8 +473,8 @@
      <y>114</y>
     </hint>
     <hint type="destinationlabel">
-     <x>324</x>
-     <y>114</y>
+     <x>784</x>
+     <y>119</y>
     </hint>
    </hints>
   </connection>
@@ -466,12 +485,28 @@
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>119</x>
-     <y>167</y>
+     <x>145</x>
+     <y>256</y>
     </hint>
     <hint type="destinationlabel">
-     <x>324</x>
-     <y>167</y>
+     <x>784</x>
+     <y>245</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ckUseCan</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>ckRebinContainer</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>250</x>
+     <y>122</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>201</x>
+     <y>219</y>
     </hint>
    </hints>
   </connection>

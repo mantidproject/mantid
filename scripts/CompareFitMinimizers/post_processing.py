@@ -18,8 +18,16 @@
 # File change history is stored at: <https://github.com/mantidproject/mantid>.
 # Code Documentation is available at: <http://doxygen.mantidproject.org>
 
+from __future__ import (absolute_import, division, print_function)
 import numpy as np
-from scipy import stats  # older version of numpy does not support nanmean and nanmedian
+
+# older version of numpy does not support nanmean and nanmedian
+# and nanmean and nanmedian was removed in scipy 0.18 in favor of numpy
+# so try numpy first then scipy.stats
+try:
+    from numpy import nanmean, nanmedian
+except ImportError:
+    from scipy.stats import nanmean, nanmedian
 
 
 def calc_summary_table(minimizers, group_results):
@@ -59,8 +67,8 @@ def calc_summary_table(minimizers, group_results):
         norm_acc_rankings = accuracy_tbl / min_sum_err_sq[:, None]
         norm_runtime_rankings = time_tbl / min_runtime[:, None]
 
-        groups_norm_acc[group_idx, :] = stats.nanmedian(norm_acc_rankings, 0)
-        groups_norm_runtime[group_idx, :] = stats.nanmedian(norm_runtime_rankings, 0)
+        groups_norm_acc[group_idx, :] = nanmedian(norm_acc_rankings, 0)
+        groups_norm_runtime[group_idx, :] = nanmedian(norm_runtime_rankings, 0)
 
     return groups_norm_acc, groups_norm_runtime
 
@@ -102,14 +110,14 @@ def calc_norm_summary_tables(accuracy_tbl, time_tbl):
 
     summary_cells_acc = np.array([np.nanmin(norm_acc_rankings, 0),
                                   np.nanmax(norm_acc_rankings, 0),
-                                  stats.nanmean(norm_acc_rankings, 0),
-                                  stats.nanmedian(norm_acc_rankings, 0)
+                                  nanmean(norm_acc_rankings, 0),
+                                  nanmedian(norm_acc_rankings, 0)
                                   ])
 
     summary_cells_runtime = np.array([np.nanmin(norm_runtimes, 0),
                                       np.nanmax(norm_runtimes, 0),
-                                      stats.nanmean(norm_runtimes, 0),
-                                      stats.nanmedian(norm_runtimes, 0)
+                                      nanmean(norm_runtimes, 0),
+                                      nanmedian(norm_runtimes, 0)
                                       ])
 
     return norm_acc_rankings, norm_runtimes, summary_cells_acc, summary_cells_runtime

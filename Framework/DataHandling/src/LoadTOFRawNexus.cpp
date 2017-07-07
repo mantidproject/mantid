@@ -1,11 +1,11 @@
 #include "MantidDataHandling/LoadTOFRawNexus.h"
-#include "MantidDataHandling/LoadEventNexus.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/RegisterFileLoader.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidDataHandling/LoadEventNexus.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/Strings.h"
@@ -23,6 +23,9 @@ DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadTOFRawNexus)
 using namespace Kernel;
 using namespace API;
 using namespace DataObjects;
+using HistogramData::BinEdges;
+using HistogramData::Counts;
+using HistogramData::CountStandardDeviations;
 
 LoadTOFRawNexus::LoadTOFRawNexus()
     : m_numPixels(0), m_signalNo(0), pulseTimes(0), m_numBins(0), m_spec_min(0),
@@ -379,7 +382,7 @@ void LoadTOFRawNexus::loadBank(const std::string &nexusfilename,
     return;
   }
 
-  HistogramData::BinEdges X(tof.begin(), tof.end());
+  BinEdges X(tof.begin(), tof.end());
 
   // Load the data. Coerce ints into double.
   std::string errorsField;
@@ -406,13 +409,6 @@ void LoadTOFRawNexus::loadBank(const std::string &nexusfilename,
     }
   }
 
-  /*if (data.size() != m_numBins * m_numPixels)
-  { file->close(); m_fileMutex.unlock(); g_log.warning() << "Invalid size of '"
-  << m_dataField << "' data in " << bankName << '\n'; return; }
-  if (hasErrors && (errors.size() != m_numBins * m_numPixels))
-  { file->close(); m_fileMutex.unlock(); g_log.warning() << "Invalid size of '"
-  << errorsField << "' errors in " << bankName << '\n'; return; }
-*/
   // Have all the data I need
   m_fileMutex.unlock();
   file->close();
@@ -426,24 +422,16 @@ void LoadTOFRawNexus::loadBank(const std::string &nexusfilename,
     auto &spec = WS->getSpectrum(wi);
     spec.setSpectrumNo(specnum_t(wi + 1));
     spec.setDetectorID(pixel_id[i - iPart]);
-    // Set the shared X pointer
-    spec.setBinEdges(X);
-
-    // Extract the Y
-    MantidVec &Y = spec.dataY();
-    Y.assign(data.begin() + i * m_numBins, data.begin() + (i + 1) * m_numBins);
-
-    MantidVec &E = spec.dataE();
+    auto from = data.begin() + i * m_numBins;
+    auto to = from + m_numBins;
 
     if (hasErrors) {
-      // Copy the errors from the loaded document
-      E.assign(errors.begin() + i * m_numBins,
-               errors.begin() + (i + 1) * m_numBins);
+      auto eFrom = errors.begin() + i * m_numBins;
+      auto eTo = eFrom + m_numBins;
+      spec.setHistogram(X, Counts(from, to),
+                        CountStandardDeviations(eFrom, eTo));
     } else {
-      // Now take the sqrt(Y) to give E
-      E = MantidVec();
-      std::transform(Y.begin(), Y.end(), std::back_inserter(E),
-                     static_cast<double (*)(double)>(sqrt));
+      spec.setHistogram(X, Counts(from, to));
     }
   }
 
@@ -494,7 +482,7 @@ void LoadTOFRawNexus::exec() {
   std::string entry_name = LoadTOFRawNexus::getEntryName(filename);
 
   // Count pixels and other setup
-  auto prog = new Progress(this, 0.0, 1.0, 10);
+  auto prog = make_unique<Progress>(this, 0.0, 1.0, 10);
   prog->doReport("Counting pixels");
   std::vector<std::string> bankNames;
   countPixels(filename, entry_name, bankNames);
@@ -561,8 +549,6 @@ void LoadTOFRawNexus::exec() {
 
   // Set to the output
   setProperty("OutputWorkspace", WS);
-
-  delete prog;
 }
 
 } // namespace DataHandling

@@ -25,7 +25,8 @@ class StateAdjustmentFiles(StateBase):
 
     def validate(self):
         is_invalid = {}
-        # TODO if a file was specified then make sure that its existence is checked.
+        # TODO: It would be nice to have a typed parameter for files which checks if a file input exists or not.
+        #       This is very low priority, but would be nice to have.
 
         if is_invalid:
             raise ValueError("StateAdjustmentFiles: The provided inputs are illegal. "
@@ -40,6 +41,8 @@ class StateWavelengthAndPixelAdjustment(StateBase):
     wavelength_step_type = ClassTypeParameter(RangeStepType)
 
     adjustment_files = DictParameter()
+
+    idf_path = StringParameter()
 
     def __init__(self):
         super(StateWavelengthAndPixelAdjustment, self).__init__()
@@ -80,10 +83,12 @@ class StateWavelengthAndPixelAdjustment(StateBase):
 # Builder
 # ----------------------------------------------------------------------------------------------------------------------
 class StateWavelengthAndPixelAdjustmentBuilder(object):
-    @automatic_setters(StateWavelengthAndPixelAdjustment)
-    def __init__(self):
+    @automatic_setters(StateWavelengthAndPixelAdjustment, exclusions=["idf_path"])
+    def __init__(self, data_info):
         super(StateWavelengthAndPixelAdjustmentBuilder, self).__init__()
+        idf_file_path = data_info.idf_file_path
         self.state = StateWavelengthAndPixelAdjustment()
+        self.state.idf_path = idf_file_path
 
     def build(self):
         self.state.validate()
@@ -93,7 +98,7 @@ class StateWavelengthAndPixelAdjustmentBuilder(object):
 def get_wavelength_and_pixel_adjustment_builder(data_info):
     instrument = data_info.instrument
     if instrument is SANSInstrument.LARMOR or instrument is SANSInstrument.SANS2D or instrument is SANSInstrument.LOQ:
-        return StateWavelengthAndPixelAdjustmentBuilder()
+        return StateWavelengthAndPixelAdjustmentBuilder(data_info)
     else:
         raise NotImplementedError("StateWavelengthAndPixelAdjustmentBuilder: Could not find any valid "
                                   "wavelength and pixel adjustment builder for the specified "

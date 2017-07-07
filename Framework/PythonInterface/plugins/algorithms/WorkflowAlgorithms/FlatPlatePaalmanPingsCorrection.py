@@ -1,16 +1,16 @@
 # pylint: disable=no-init,invalid-name,too-many-instance-attributes
 
 from __future__ import (absolute_import, division, print_function)
+import math
 from six import iteritems
 from six import integer_types
 
-import math
 import numpy as np
 from mantid.simpleapi import *
 from mantid.api import (PythonAlgorithm, AlgorithmFactory, PropertyMode, MatrixWorkspaceProperty,
-                        WorkspaceGroupProperty, InstrumentValidator, WorkspaceUnitValidator, Progress)
+                        WorkspaceGroupProperty, InstrumentValidator, Progress)
 from mantid.kernel import (StringListValidator, StringMandatoryValidator, IntBoundedValidator,
-                           FloatBoundedValidator, Direction, logger, CompositeValidator, MaterialBuilder)
+                           FloatBoundedValidator, Direction, logger, MaterialBuilder)
 
 
 class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
@@ -37,7 +37,6 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
     _output_ws_name = None
     _angles = list()
     _waves = list()
-    _elastic = 0.0
     _interpolate = None
 
     # ------------------------------------------------------------------------------
@@ -51,7 +50,7 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
     # ------------------------------------------------------------------------------
 
     def PyInit(self):
-        ws_validator = CompositeValidator([WorkspaceUnitValidator('Wavelength'), InstrumentValidator()])
+        ws_validator = InstrumentValidator()
 
         self.declareProperty(MatrixWorkspaceProperty('SampleWorkspace', '',
                                                      direction=Direction.Input,
@@ -108,11 +107,13 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
                              doc='Interpolate the correction workspaces to match the sample workspace')
 
         self.declareProperty(name='Emode', defaultValue='Elastic',
-                             validator=StringListValidator(['Elastic', 'Indirect', 'Direct']),
-                             doc='Energy transfer mode')
+                             validator=StringListValidator(['Elastic', 'Indirect', 'Direct', 'Efixed']),
+                             doc='Energy transfer mode. Only Efixed behaves differently. '
+                                 'Others are equivalent for this algorithm, and are left only for legacy access.')
 
-        self.declareProperty(name='Efixed', defaultValue=1.0,
-                             doc='Analyser energy')
+        self.declareProperty(name='Efixed', defaultValue=0.,
+                             doc='Analyser energy (mev). By default will be read from the instrument parameters. '
+                                 'Specify manually to override. This is used only in Efixed energy transfer mode.')
 
         self.declareProperty(WorkspaceGroupProperty('OutputWorkspace', '',
                                                     direction=Direction.Output),
@@ -123,6 +124,7 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
     def validateInputs(self):
         issues = dict()
 
+        sample_ws_name = self.getPropertyValue('SampleWorkspace')
         can_ws_name = self.getPropertyValue('CanWorkspace')
         use_can = can_ws_name != ''
 
@@ -131,6 +133,17 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
             can_chemical_formula = self.getPropertyValue('CanChemicalFormula')
             if can_chemical_formula == '':
                 issues['CanChemicalFormula'] = 'Must provide a chemical formula when providing a can workspace'
+
+        self._emode = self.getPropertyValue('Emode')
+        self._efixed = self.getProperty('Efixed').value
+
+        if self._emode != 'Efixed':
+            # require both sample and can ws have wavelenght as x-axis
+            if mtd[sample_ws_name].getAxis(0).getUnit().unitID() != 'Wavelength':
+                issues['SampleWorkspace'] = 'Workspace must have units of wavelenght.'
+
+            if use_can and mtd[can_ws_name].getAxis(0).getUnit().unitID() != 'Wavelength':
+                issues['CanWorkspace'] = 'Workspace must have units of wavelength.'
 
         return issues
 
@@ -180,7 +193,8 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
         log_prog = Progress(self, start=0.8, end=1.0, nreports=8)
 
         sample_logs = {'sample_shape': 'flatplate', 'sample_filename': self._sample_ws_name,
-                       'sample_thickness': self._sample_thickness, 'sample_angle': self._sample_angle}
+                       'sample_thickness': self._sample_thickness, 'sample_angle': self._sample_angle,
+                       'emode': self._emode, 'efixed': self._efixed}
         dataX = self._waves * num_angles
 
         # Create the output workspaces
@@ -279,7 +293,24 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
         self._emode = self.getPropertyValue('Emode')
         self._efixed = self.getProperty('Efixed').value
 
+        if self._emode == 'Efixed' and self._efixed == 0.:
+            # Efixed mode requested with default efixed, try to read from Instrument Parameters
+            try:
+                self._efixed = self._getEfixed()
+                logger.information('Found Efixed = {0}'.format(self._efixed))
+            except ValueError:
+                raise RuntimeError('Efixed mode requested with the default value,'
+                                   'but could not find the Efixed parameter in the instrument.')
+
+        if self._emode == 'Efixed':
+            logger.information('No interpolation is possible in Efixed mode.')
+            self._interpolate = False
+
         self._output_ws_name = self.getPropertyValue('OutputWorkspace')
+
+        # purge the lists
+        self._angles = list()
+        self._waves = list()
 
     # ------------------------------------------------------------------------------
 
@@ -321,28 +352,45 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
             two_theta = detector.getTwoTheta(sample_pos, beam_pos) * 180.0 / math.pi  # calc angle
             self._angles.append(two_theta)
 
-        # ------------------------------------------------------------------------------
+    # ------------------------------------------------------------------------------
 
     def _wave_range(self):
-        wave_range = '__WaveRange'
-        ExtractSingleSpectrum(InputWorkspace=self._sample_ws_name, OutputWorkspace=wave_range, WorkspaceIndex=0)
-        Xin = mtd[wave_range].readX(0)
-        wave_min = mtd[wave_range].readX(0)[0]
-        wave_max = mtd[wave_range].readX(0)[len(Xin) - 1]
-        number_waves = self._number_wavelengths
-        wave_bin = (wave_max - wave_min) / (number_waves - 1)
-
-        self._waves = list()
-        for idx in range(0, number_waves):
-            self._waves.append(wave_min + idx * wave_bin)
-
-        if self._emode == 'Elastic':
-            self._elastic = self._waves[int(number_waves / 2)]
+        if self._emode == 'Efixed':
+            lambda_fixed = math.sqrt(81.787 / self._efixed)
+            self._waves.append(lambda_fixed)
+            logger.information('Efixed mode, setting lambda_fixed to {0}'.format(lambda_fixed))
         else:
-            self._elastic = math.sqrt(81.787 / self._efixed)  # elastic wavelength
 
-        logger.information('Elastic lambda %f' % self._elastic)
-        DeleteWorkspace(wave_range, EnableLogging=False)
+            wave_range = '__WaveRange'
+            ExtractSingleSpectrum(InputWorkspace=self._sample_ws_name, OutputWorkspace=wave_range, WorkspaceIndex=0)
+            Xin = mtd[wave_range].readX(0)
+            wave_min = mtd[wave_range].readX(0)[0]
+            wave_max = mtd[wave_range].readX(0)[len(Xin) - 1]
+            number_waves = self._number_wavelengths
+            wave_bin = (wave_max - wave_min) / (number_waves - 1)
+
+            self._waves = list()
+            for idx in range(0, number_waves):
+                self._waves.append(wave_min + idx * wave_bin)
+
+            DeleteWorkspace(wave_range, EnableLogging=False)
+
+    # ------------------------------------------------------------------------------
+
+    def _getEfixed(self):
+        inst = mtd[self._sample_ws_name].getInstrument()
+
+        if inst.hasParameter('Efixed'):
+            return inst.getNumberParameter('EFixed')[0]
+
+        if inst.hasParameter('analyser'):
+            analyser_name = inst.getStringParameter('analyser')[0]
+            analyser_comp = inst.getComponentByName(analyser_name)
+
+            if analyser_comp is not None and analyser_comp.hasParameter('Efixed'):
+                return analyser_comp.getNumberParameter('EFixed')[0]
+
+        raise ValueError('No Efixed parameter found')
 
     # ------------------------------------------------------------------------------
 
@@ -360,7 +408,7 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
                                 OutputWorkspace=ws,
                                 OutputWorkspaceDeriv='')
 
-        # ------------------------------------------------------------------------------
+    # ------------------------------------------------------------------------------
 
     def _add_sample_logs(self, ws, sample_logs):
         """
@@ -382,7 +430,7 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
 
             AddSampleLog(Workspace=ws, LogName=key, LogType=log_type, LogText=str(value), EnableLogging=False)
 
-        # ------------------------------------------------------------------------------
+    # ------------------------------------------------------------------------------
 
     def _flat_abs(self, angle):
         """
@@ -410,7 +458,7 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
         # Case where tsec is close to 90 degrees.
         # CALCULATION IS UNRELIABLE
         # Default to 1 for everything
-        if abs(abs(tsec) - 90.0) < 1.0:
+        if abs(abs(tsec) - 90.0) < 0.1:
             return ass, assc, acsc, acc
 
         sample = mtd[self._sample_ws_name].sample()

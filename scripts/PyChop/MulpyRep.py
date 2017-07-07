@@ -6,6 +6,7 @@ Contains a class to calculate the possible reps, resolution and flux for a direc
 spectrometer. Python implementation by D J Voneshen based on the original Matlab program of R I Bewley.
 """
 
+from __future__ import (absolute_import, division, print_function)
 import numpy as np
 import copy
 

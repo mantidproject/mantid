@@ -103,11 +103,12 @@ bool compare(const mypair &left, const mypair &right) {
  * @param sorting_indexes permutation of qvmod indexes to render it in
  * increasing order of momemtum transfer
  */
-MantidVec LoadSassena::loadQvectors(const hid_t &h5file,
-                                    API::WorkspaceGroup_sptr gws,
-                                    std::vector<int> &sorting_indexes) {
+HistogramData::Points
+LoadSassena::loadQvectors(const hid_t &h5file, API::WorkspaceGroup_sptr gws,
+                          std::vector<int> &sorting_indexes) {
 
-  MantidVec qvmod; // store the modulus of the vector
+  // store the modulus of the vector
+  std::vector<double> qvmod;
 
   const std::string gwsName = this->getPropertyValue("OutputWorkspace");
   const std::string setName("qvectors");
@@ -124,7 +125,7 @@ MantidVec LoadSassena::loadQvectors(const hid_t &h5file,
   if (errorcode < 0) {
     this->g_log.error("LoadSassena::loadQvectors cannot proceed");
     qvmod.resize(0);
-    return qvmod;
+    return HistogramData::Points(std::move(qvmod));
   }
 
   qvmod.reserve(nq);
@@ -154,7 +155,7 @@ MantidVec LoadSassena::loadQvectors(const hid_t &h5file,
   ws->setTitle(wsName);
 
   for (int iq = 0; iq < nq; iq++) {
-    MantidVec &Y = ws->dataY(iq);
+    auto &Y = ws->mutableY(iq);
     curr = std::next(buf.cbegin(), 3 * sorting_indexes[iq]);
     Y.assign(curr, std::next(curr, 3));
   }
@@ -164,7 +165,7 @@ MantidVec LoadSassena::loadQvectors(const hid_t &h5file,
 
   this->registerWorkspace(
       gws, wsName, ws, "X-axis: origin of Q-vectors; Y-axis: tip of Q-vectors");
-  return qvmod;
+  return HistogramData::Points(std::move(qvmod));
 }
 
 /**
@@ -179,7 +180,8 @@ MantidVec LoadSassena::loadQvectors(const hid_t &h5file,
  * increasing order of momemtum transfer
  */
 void LoadSassena::loadFQ(const hid_t &h5file, API::WorkspaceGroup_sptr gws,
-                         const std::string setName, const MantidVec &qvmod,
+                         const std::string setName,
+                         const HistogramData::Points &qvmod,
                          const std::vector<int> &sorting_indexes) {
 
   int nq = static_cast<int>(qvmod.size()); // number of q-vectors
@@ -198,10 +200,10 @@ void LoadSassena::loadFQ(const hid_t &h5file, API::WorkspaceGroup_sptr gws,
   const std::string wsName = gwsName + std::string("_") + setName;
   ws->setTitle(wsName);
 
-  MantidVec &re = ws->dataY(0); // store the real part
-  ws->dataX(0) = qvmod;         // X-axis values are the modulus of the q vector
-  MantidVec &im = ws->dataY(1); // store the imaginary part
-  ws->dataX(1) = qvmod;
+  auto &re = ws->mutableY(0); // store the real part
+  ws->setPoints(0, qvmod);    // X-axis values are the modulus of the q vector
+  auto &im = ws->mutableY(1); // store the imaginary part
+  ws->setPoints(1, qvmod);
 
   for (int iq = 0; iq < nq; ++iq) {
     auto curr = std::next(buf.cbegin(), 2 * sorting_indexes[iq]);
@@ -232,7 +234,8 @@ void LoadSassena::loadFQ(const hid_t &h5file, API::WorkspaceGroup_sptr gws,
 * order of momemtum transfer
 */
 void LoadSassena::loadFQT(const hid_t &h5file, API::WorkspaceGroup_sptr gws,
-                          const std::string setName, const MantidVec &qvmod,
+                          const std::string setName,
+                          const HistogramData::Points &qvmod,
                           const std::vector<int> &sorting_indexes) {
 
   hsize_t dims[3];
@@ -271,10 +274,10 @@ void LoadSassena::loadFQT(const hid_t &h5file, API::WorkspaceGroup_sptr gws,
 
   int origin = nnt - 1;
   for (int iq = 0; iq < nq; iq++) {
-    MantidVec &reX = wsRe->dataX(iq);
-    MantidVec &imX = wsIm->dataX(iq);
-    MantidVec &reY = wsRe->dataY(iq);
-    MantidVec &imY = wsIm->dataY(iq);
+    auto &reX = wsRe->mutableX(iq);
+    auto &imX = wsIm->mutableX(iq);
+    auto &reY = wsRe->mutableY(iq);
+    auto &imY = wsIm->mutableY(iq);
     const int index = sorting_indexes[iq];
     auto curr = std::next(buf.cbegin(), index * nnt * 2);
     for (int it = 0; it < nnt; it++) {
@@ -407,7 +410,7 @@ void LoadSassena::exec() {
 
   // Block to read the Q-vectors
   std::vector<int> sorting_indexes;
-  const MantidVec qvmod = this->loadQvectors(h5file, gws, sorting_indexes);
+  const auto qvmod = this->loadQvectors(h5file, gws, sorting_indexes);
   if (qvmod.empty()) {
     this->g_log.error("No Q-vectors read. Unable to proceed");
     H5Fclose(h5file);

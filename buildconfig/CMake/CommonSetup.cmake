@@ -40,7 +40,7 @@ set ( TESTING_TIMEOUT 300 CACHE INTEGER
 ###########################################################################
 
 set ( Boost_NO_BOOST_CMAKE TRUE )
-find_package ( Boost 1.53.0 REQUIRED date_time regex )
+find_package ( Boost 1.53.0 REQUIRED date_time regex serialization )
 include_directories( SYSTEM ${Boost_INCLUDE_DIRS} )
 add_definitions ( -DBOOST_ALL_DYN_LINK -DBOOST_ALL_NO_LIB )
 # Need this defined globally for our log time values
@@ -275,17 +275,12 @@ else ()
 endif ()
 
 # Some unit tests need GMock/GTest
-find_package ( GMock )
-
-if ( GMOCK_FOUND AND GTEST_FOUND )
-  message ( STATUS "GMock/GTest (${GMOCK_VERSION}) is available for unit tests." )
-else ()
-  message ( STATUS "GMock/GTest is not available. Some unit tests will not run." )
-endif()
+include ( GoogleTest )
 
 find_package ( PyUnitTest )
 if ( PYUNITTEST_FOUND )
   enable_testing ()
+  include ( Python-xmlrunner )
   message (STATUS "Found pyunittest generator")
 else()
   message (STATUS "Could NOT find PyUnitTest - unit testing of python not available" )

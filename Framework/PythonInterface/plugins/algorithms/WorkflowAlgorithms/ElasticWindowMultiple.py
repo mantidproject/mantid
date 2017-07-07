@@ -216,7 +216,6 @@ class ElasticWindowMultiple(DataProcessorAlgorithm):
 
         progress.report('Creating ELF workspaces')
         transpose_alg = self.createChildAlgorithm("Transpose", enableLogging=False)
-        transpose_alg.setAlwaysStoreInADS(True)
         sort_alg = self.createChildAlgorithm("SortXAxis", enableLogging=False)
         # Process the ELF workspace
         if self._elf_workspace != '':
@@ -225,7 +224,7 @@ class ElasticWindowMultiple(DataProcessorAlgorithm):
             transpose_alg.setProperty("OutputWorkspace", self._elf_workspace)
             transpose_alg.execute()
 
-            sort_alg.setProperty("InputWorkspace", self._elf_workspace)
+            sort_alg.setProperty("InputWorkspace",transpose_alg.getProperty("OutputWorkspace").value)
             sort_alg.setProperty("OutputWorkspace", self._elf_workspace)
             sort_alg.execute()
 
@@ -247,7 +246,7 @@ class ElasticWindowMultiple(DataProcessorAlgorithm):
                 self._elt_workspace = sort_alg.getProperty("OutputWorkspace").value
             else:
                 clone_alg = self.createChildAlgorithm("CloneWorkspace", enableLogging=False)
-                clone_alg.setProperty("InputWorkspace", self._elf_workspace)
+                clone_alg.setProperty("InputWorkspace", self.getProperty("OutputELF").value)
                 clone_alg.setProperty("OutputWorkspace", self._elt_workspace)
                 clone_alg.execute()
                 self._elt_workspace = clone_alg.getProperty("OutputWorkspace").value
@@ -300,6 +299,22 @@ class ElasticWindowMultiple(DataProcessorAlgorithm):
 
         run = mtd[ws_name].getRun()
 
+        if self._sample_log_name == 'Position':
+            # Look for sample changer position in logs in workspace
+            if self._sample_log_name in run:
+                tmp = run[self._sample_log_name].value
+                value_action = {'last_value': lambda x: x[len(x) - 1],
+                                'average': lambda x: x.mean()}
+                position = value_action['last_value'](tmp)
+                if position == 0:
+                    self._sample_log_name = 'Bot_Can_Top'
+                if position == 1:
+                    self._sample_log_name = 'Middle_Can_Top'
+                if position == 2:
+                    self._sample_log_name = 'Top_Can_Top'
+            else:
+                logger.information('Position not found in workspace.')
+
         if self._sample_log_name in run:
             # Look for sample unit in logs in workspace
             tmp = run[self._sample_log_name].value
@@ -307,7 +322,7 @@ class ElasticWindowMultiple(DataProcessorAlgorithm):
                             'average': lambda x: x.mean()}
             sample = value_action[self._sample_log_value](tmp)
             unit = run[self._sample_log_name].units
-            logger.debug('%d %s found for run: %s' % (sample, unit, run_name))
+            logger.information('%d %s found for run: %s' % (sample, unit, run_name))
             return sample, unit
 
         else:

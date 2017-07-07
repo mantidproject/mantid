@@ -238,6 +238,10 @@ private:
   Poco::AutoPtr<Poco::XML::Document>
   convertLocationsElement(const Poco::XML::Element *pElem);
 
+  /// return 0 if the attribute doesn't exist. This is to follow the
+  /// behavior of atof which always returns 0 if there is a problem.
+  double attrToDouble(const Poco::XML::Element *pElem, const std::string &name);
+
 public: // for testing
   /// return absolute position of point which is set relative to the
   /// coordinate system of the input component

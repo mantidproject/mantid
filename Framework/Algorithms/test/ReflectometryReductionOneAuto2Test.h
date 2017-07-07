@@ -233,6 +233,7 @@ public:
   void test_correct_detector_position_INTER() {
     auto inter = loadRun("INTER00013460.nxs");
 
+    // Use the default correction type, which is a vertical shift
     ReflectometryReductionOneAuto2 alg;
     alg.initialize();
     alg.setChild(true);
@@ -282,15 +283,17 @@ public:
                     std::tan(0.7 * 2 * M_PI / 180), 1e-4);
   }
 
-  void test_correct_detector_position_POLREF() {
+  void test_correct_detector_position_rotation_POLREF() {
     // Histograms in this run correspond to 'OSMOND' component
     auto polref = loadRun("POLREF00014966.raw");
 
+    // Correct by rotating detectors around the sample
     ReflectometryReductionOneAuto2 alg;
     alg.initialize();
     alg.setChild(true);
     alg.setProperty("InputWorkspace", polref);
     alg.setProperty("ThetaIn", 1.5);
+    alg.setProperty("DetectorCorrectionType", "RotateAroundSample");
     alg.setProperty("AnalysisMode", "MultiDetectorAnalysis");
     alg.setProperty("CorrectionAlgorithm", "None");
     alg.setProperty("MomentumTransferStep", 0.01);
@@ -316,27 +319,28 @@ public:
     TS_ASSERT_EQUALS(instIn->getComponentByName("lineardetector")->getPos(),
                      instOut->getComponentByName("lineardetector")->getPos());
 
-    // Only 'OSMOND' should have been moved vertically (along Z)
+    // Only 'OSMOND' should have been moved both vertically and in the beam
+    // direction (along X and Z)
 
     auto detectorIn = instIn->getComponentByName("OSMOND")->getPos();
     auto detectorOut = instOut->getComponentByName("OSMOND")->getPos();
 
-    TS_ASSERT_EQUALS(detectorIn.X(), detectorOut.X());
+    TS_ASSERT_DELTA(detectorOut.X(), 25.99589, 1e-5);
     TS_ASSERT_EQUALS(detectorIn.Y(), detectorOut.Y());
-    TS_ASSERT_DELTA(detectorOut.Z() /
-                        (detectorOut.X() - instOut->getSample()->getPos().X()),
-                    std::tan(1.5 * 2 * M_PI / 180), 1e-4);
+    TS_ASSERT_DELTA(detectorOut.Z(), 0.1570, 1e-5);
   }
 
-  void test_correct_detector_position_CRISP() {
+  void test_correct_detector_position_vertical_CRISP() {
     // Histogram in this run corresponds to 'point-detector' component
     auto polref = loadRun("CSP79590.raw");
 
+    // Correct by shifting detectors vertically
     ReflectometryReductionOneAuto2 alg;
     alg.initialize();
     alg.setChild(true);
     alg.setProperty("InputWorkspace", polref);
     alg.setProperty("ThetaIn", 0.25);
+    alg.setProperty("DetectorCorrectionType", "VerticalShift");
     alg.setProperty("CorrectionAlgorithm", "None");
     alg.setProperty("MomentumTransferStep", 0.01);
     alg.setProperty("OutputWorkspace", "IvsQ");

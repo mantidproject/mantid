@@ -210,10 +210,9 @@ std::vector<std::string> PDLoadCharacterizations::getFilenames() {
   std::vector<std::string> filenamesFromPropertyUnraveld;
   std::vector<std::vector<std::string>> filenamesFromProperty =
       this->getProperty("Filename");
-  for (auto outer : filenamesFromProperty) {
-    for (auto inner : outer) {
-      filenamesFromPropertyUnraveld.push_back(inner);
-    }
+  for (const auto &outer : filenamesFromProperty) {
+    filenamesFromPropertyUnraveld.insert(filenamesFromPropertyUnraveld.end(),
+                                         outer.cbegin(), outer.cend());
   }
   // error check that something sensible was supplied
   if (filenamesFromPropertyUnraveld.size() > 2) {

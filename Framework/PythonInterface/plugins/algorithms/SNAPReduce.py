@@ -368,7 +368,7 @@ class SNAPReduce(DataProcessorAlgorithm):
         norm = self.getProperty("Normalization").value
 
         if norm == "From Processed Nexus":
-            norm_File = self.getProperty("Normalization filename").value
+            norm_File = self.getProperty("NormalizationFilename").value
             LoadNexusProcessed(Filename=norm_File, OutputWorkspace='normWS')
             normWS = 'normWS'
         elif norm == "From Workspace":

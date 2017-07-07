@@ -14,6 +14,7 @@
 #include "Poco/File.h"
 #include "Poco/NumberFormatter.h"
 #include "Poco/String.h"
+#include <algorithm>
 
 namespace Mantid {
 namespace WorkflowAlgorithms {
@@ -181,7 +182,7 @@ MatrixWorkspace_sptr RefReduction::processData(const std::string polarization) {
   // Get scattering angle in degrees
   double theta = getProperty("Theta");
   const std::string instrument = getProperty("Instrument");
-  const bool integrateY = instrument.compare("REF_M") == 0;
+  const bool integrateY = instrument == "REF_M";
 
   // Get pixel ranges in real pixels
   int xmin = 0;
@@ -308,10 +309,13 @@ MatrixWorkspace_sptr RefReduction::processData(const std::string polarization) {
   refAlg1->setProperty("ScatteringAngle", theta);
   refAlg1->executeAsChildAlg();
   MatrixWorkspace_sptr outputWS2 = refAlg1->getProperty("OutputWorkspace");
+  std::string polarizationTranslation(polarization);
+  std::replace(polarizationTranslation.begin(), polarizationTranslation.end(),
+               '-', '_');
   declareProperty(Kernel::make_unique<WorkspaceProperty<>>(
-      "OutputWorkspace_jc_" + polarization, "Lambda_" + polarization,
+      "OutputWorkspace_jc_" + polarizationTranslation, "Lambda_" + polarization,
       Direction::Output));
-  setProperty("OutputWorkspace_jc_" + polarization, outputWS2);
+  setProperty("OutputWorkspace_jc_" + polarizationTranslation, outputWS2);
 
   // Conversion to Q
   IAlgorithm_sptr refAlg = createChildAlgorithm("RefRoi", 0.90, 0.95);
@@ -341,7 +345,7 @@ MatrixWorkspace_sptr RefReduction::processData(const std::string polarization) {
   MatrixWorkspace_sptr outputWS = grpAlg->getProperty("OutputWorkspace");
 
   const std::string prefix = getPropertyValue("OutputWorkspacePrefix");
-  if (polarization.compare(PolStateNone) == 0) {
+  if (polarization == PolStateNone) {
     declareProperty(Kernel::make_unique<WorkspaceProperty<>>(
         "OutputWorkspace", prefix, Direction::Output));
     setProperty("OutputWorkspace", outputWS);
@@ -352,12 +356,13 @@ MatrixWorkspace_sptr RefReduction::processData(const std::string polarization) {
     std::string wsName = prefix + polarization;
     Poco::replaceInPlace(wsName, "entry", "");
     declareProperty(Kernel::make_unique<WorkspaceProperty<>>(
-        "OutputWorkspace_" + polarization, wsName, Direction::Output));
-    setProperty("OutputWorkspace_" + polarization, outputWS);
-    declareProperty(Kernel::make_unique<WorkspaceProperty<>>(
-        "OutputWorkspace2D_" + polarization, "2D_" + wsName,
+        "OutputWorkspace_" + polarizationTranslation, wsName,
         Direction::Output));
-    setProperty("OutputWorkspace2D_" + polarization, output2DWS);
+    setProperty("OutputWorkspace_" + polarizationTranslation, outputWS);
+    declareProperty(Kernel::make_unique<WorkspaceProperty<>>(
+        "OutputWorkspace2D_" + polarizationTranslation, "2D_" + wsName,
+        Direction::Output));
+    setProperty("OutputWorkspace2D_" + polarizationTranslation, output2DWS);
   }
   m_output_message += "Reflectivity calculation completed\n";
   return outputWS;
@@ -397,7 +402,7 @@ MatrixWorkspace_sptr RefReduction::processNormalization() {
   }
 
   const std::string instrument = getProperty("Instrument");
-  const bool integrateY = instrument.compare("REF_M") == 0;
+  const bool integrateY = instrument == "REF_M";
   if (integrateY) {
     if (!cropLowRes)
       low_res_max = NY_PIXELS - 1;
@@ -502,7 +507,7 @@ IEventWorkspace_sptr RefReduction::loadData(const std::string dataRun,
       m_output_message += "    |Loading from " + path + "\n";
       IAlgorithm_sptr loadAlg = createChildAlgorithm("LoadEventNexus", 0, 0.2);
       loadAlg->setProperty("Filename", path);
-      if (polarization.compare(PolStateNone) != 0)
+      if (polarization != PolStateNone)
         loadAlg->setProperty("NXentryName", polarization);
       try {
         loadAlg->executeAsChildAlg();
@@ -520,7 +525,7 @@ IEventWorkspace_sptr RefReduction::loadData(const std::string dataRun,
       }
 
       // Move the detector to the right position
-      if (instrument.compare("REF_M") == 0) {
+      if (instrument == "REF_M") {
         const auto &detInfo = rawWS->detectorInfo();
         const size_t detIndex0 = detInfo.indexOf(0);
         double det_distance = detInfo.position(detIndex0).Z();
@@ -549,7 +554,7 @@ IEventWorkspace_sptr RefReduction::loadData(const std::string dataRun,
   double tofMin = getProperty("TOFMin");
   double tofMax = getProperty("TOFMax");
   if (isEmpty(tofMin) || isEmpty(tofMax)) {
-    const MantidVec &x = rawWS->readX(0);
+    const auto &x = rawWS->x(0);
     if (isEmpty(tofMin))
       tofMin = *std::min_element(x.begin(), x.end());
     if (isEmpty(tofMax))
@@ -594,7 +599,7 @@ IEventWorkspace_sptr RefReduction::loadData(const std::string dataRun,
   convAlg->executeAsChildAlg();
 
   // Rebin in wavelength
-  const MantidVec &x = outputWS->readX(0);
+  const auto &x = outputWS->x(0);
   double wlMin = *std::min_element(x.begin(), x.end());
   double wlMax = *std::max_element(x.begin(), x.end());
 
@@ -696,7 +701,7 @@ MatrixWorkspace_sptr RefReduction::subtractBackground(
     MatrixWorkspace_sptr dataWS, MatrixWorkspace_sptr rawWS, int peakMin,
     int peakMax, int bckMin, int bckMax, int lowResMin, int lowResMax) {
   const std::string instrument = getProperty("Instrument");
-  const bool integrateY = instrument.compare("REF_M") == 0;
+  const bool integrateY = instrument == "REF_M";
 
   int xmin = 0;
   int xmax = 0;

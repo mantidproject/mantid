@@ -9,6 +9,7 @@
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/FilterChannel.h"
 #include "MantidKernel/StdoutChannel.h"
+#include "MantidKernel/System.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidKernel/NetworkProxy.h"
@@ -26,11 +27,17 @@
 #include <Poco/Environment.h>
 #include <Poco/Process.h>
 #include <Poco/URI.h>
-#ifdef _WIN32
-#pragma warning(disable : 4250)
-#endif
+
+#include <Poco/AutoPtr.h>
+#include <Poco/Channel.h>
+#include <Poco/DOM/Element.h>
+#include <Poco/DOM/Node.h>
+#include <Poco/Exception.h>
+#include <Poco/Instantiator.h>
+#include <Poco/Pipe.h>
+#include <Poco/Platform.h>
+#include <Poco/String.h>
 #include <Poco/Logger.h>
-#include <Poco/SplitterChannel.h>
 #include <Poco/LoggingRegistry.h>
 #include <Poco/PipeStream.h>
 #include <Poco/StreamCopier.h>
@@ -38,7 +45,14 @@
 #include <boost/algorithm/string/join.hpp>
 #include <boost/regex.hpp>
 
+#include <algorithm>
+#include <exception>
 #include <fstream>
+#include <functional>
+#include <iostream>
+#include <stdexcept>
+#include <utility>
+#include <ctype.h>
 
 #ifdef __APPLE__
 #include <mach-o/dyld.h>
@@ -301,7 +315,7 @@ void ConfigServiceImpl::setBaseDirectory() {
     // code crash.
     m_strBaseDir = Poco::Environment::get("MANTIDPATH") + "/";
     f = Poco::File(m_strBaseDir + m_properties_file_name);
-    if (!f.exists())
+    if (f.exists())
       return;
   }
 
@@ -857,7 +871,7 @@ void ConfigServiceImpl::saveConfig(const std::string &filename) const {
       // If it does exist make sure the value is current
       std::string value = getString(key, false);
       Poco::replaceInPlace(value, "\\", "\\\\"); // replace single \ with double
-      updated_file += key + "=" + value;
+      updated_file.append(key).append("=").append(value);
       // Remove the key from the changed key list
       m_changed_keys.erase(key);
     }
@@ -957,9 +971,9 @@ void ConfigServiceImpl::getKeysRecursive(
   for (auto &rootKey : rootKeys) {
     std::string searchString;
     if (root.empty()) {
-      searchString = rootKey;
+      searchString.append(rootKey);
     } else {
-      searchString = root + "." + rootKey;
+      searchString.append(root).append(".").append(rootKey);
     }
 
     getKeysRecursive(searchString, allKeys);
@@ -1622,6 +1636,15 @@ const std::vector<std::string> &ConfigServiceImpl::getUserSearchDirs() const {
 }
 
 /**
+* Sets the search directories for XML instrument definition files (IDFs)
+* @param directories An ordered list of paths for instrument searching
+*/
+void ConfigServiceImpl::setInstrumentDirectories(
+    const std::vector<std::string> &directories) {
+  m_InstrumentDirs = directories;
+}
+
+/**
  * Return the search directories for XML instrument definition files (IDFs)
  * @returns An ordered list of paths for instrument searching
  */
@@ -1732,8 +1755,8 @@ std::string ConfigServiceImpl::getFacilityFilename(const std::string &fName) {
       this->getString("UpdateInstrumentDefinitions.OnStartup");
 
   auto instrDir = directoryNames.begin();
-  if (updateInstrStr.compare("1") == 0 || updateInstrStr.compare("on") == 0 ||
-      updateInstrStr.compare("On") == 0) {
+  if (updateInstrStr == "1" || updateInstrStr == "on" ||
+      updateInstrStr == "On") {
     // do nothing
   } else {
     instrDir++; // advance to after the first value

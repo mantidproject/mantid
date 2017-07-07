@@ -217,13 +217,13 @@ void SaveLauenorm::exec() {
   out.close();
 }
 void SaveLauenorm::sizeBanks(std::string bankName, int &nCols, int &nRows) {
-  if (bankName.compare("None") == 0)
+  if (bankName == "None")
     return;
   boost::shared_ptr<const IComponent> parent =
       ws->getInstrument()->getComponentByName(bankName);
   if (!parent)
     return;
-  if (parent->type().compare("RectangularDetector") == 0) {
+  if (parent->type() == "RectangularDetector") {
     boost::shared_ptr<const RectangularDetector> RDet =
         boost::dynamic_pointer_cast<const RectangularDetector>(parent);
 

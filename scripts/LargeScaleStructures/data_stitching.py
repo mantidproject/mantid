@@ -2,6 +2,7 @@
 """
     Data stitching for SANS and reflectometry
 """
+from __future__ import (absolute_import, division, print_function)
 import os
 from mantid.simpleapi import *
 from mantid.kernel import Logger
@@ -42,7 +43,7 @@ class RangeSelector(object):
                     log_scale=False,
                     ws_output_base=None):
             if not IS_IN_MANTIDPLOT:
-                print "RangeSelector cannot be used output MantidPlot"
+                print("RangeSelector cannot be used output MantidPlot")
                 return
 
             self._call_back = call_back

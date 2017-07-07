@@ -86,7 +86,11 @@ bool CompositePeaksPresenter::isLabelOfFreeAxis(
 Clear all peaks
 */
 void CompositePeaksPresenter::clear() {
+
   if (!m_subjects.empty()) {
+    for (auto &i : m_subjects) {
+      i->setShown(false);
+    }
     m_subjects.clear();
     this->m_zoomablePlottingWidget->detach();
     PeakPalette<PeakViewColor> tempPeakViewColor;

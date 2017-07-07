@@ -57,8 +57,7 @@ public:
       // We are dealing with a submenu
       // Add the submenu
       QMenu *submenu =
-          menu->addMenu(QIcon(QString::fromStdString(m_adaptee->icon())),
-                        QString::fromStdString(m_adaptee->name()));
+          menu->addMenu(QIcon(m_adaptee->icon()), m_adaptee->name());
       // Add the actions
       auto &child = m_adaptee->getChild();
       for (auto &ch : child) {
@@ -84,21 +83,24 @@ public:
     if (!m_adaptee->hasChild()) {
       // Sub-menus cannot be added to a toolbar
 
-      QAction *action = getAction();
+      QAction *action = getAction(true);
       toolbar->addAction(action);
     }
   };
 
-  /** Returns the action */
-  QAction *getAction() {
-    QAction *action =
-        new QAction(QString::fromStdString(m_adaptee->name()), this);
-    action->setIcon(QIcon(QString::fromStdString(m_adaptee->icon())));
+  /**
+   * Returns the action
+   *
+   * @param shortcut : Whether or not to add a shortcut
+   */
+  QAction *getAction(bool shortcut = false) {
+    QAction *action = new QAction(m_adaptee->name(), this);
+    action->setIcon(QIcon(m_adaptee->icon()));
     action->setSeparator(m_adaptee->isSeparator());
-    action->setToolTip(QString::fromStdString(m_adaptee->tooltip()));
-    action->setWhatsThis(QString::fromStdString(m_adaptee->whatsthis()));
-    action->setShortcut(
-        QKeySequence(QString::fromStdString(m_adaptee->shortcut())));
+    action->setToolTip(m_adaptee->tooltip());
+    action->setWhatsThis(m_adaptee->whatsthis());
+    if (shortcut)
+      action->setShortcut(QKeySequence(m_adaptee->shortcut()));
     connect(action, SIGNAL(triggered()), this, SLOT(call()));
 
     return action;

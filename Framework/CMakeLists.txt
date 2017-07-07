@@ -21,7 +21,6 @@ if ( NOT COMMONSETUP_DONE )
   include ( CommonSetup )
 endif ()
 
-option(BUILD_MATLAB_DEPENDENCIES "Build Mantid-Matlab interface in the case of Matlab was found" OFF)
 ###########################################################################
 # Look for dependencies - bail out if any necessary ones not found
 ###########################################################################
@@ -57,6 +56,11 @@ if ( ${CMAKE_SYSTEM_NAME} MATCHES "Linux" )
   endif ( MPI_BUILD )
 endif ()
 
+set ( MPI_EXPERIMENTAL OFF CACHE BOOL "Enable MPI options" )
+if ( MPI_EXPERIMENTAL )
+  include ( BoostMPI )
+endif ()
+
 ###########################################################################
 # Now add the packages one-by-one, building up the dependencies as we go
 ###########################################################################
@@ -70,6 +74,9 @@ add_subdirectory (Types)
 include_directories (Kernel/inc)
 add_subdirectory (Kernel)
 
+include_directories (Parallel/inc)
+add_subdirectory (Parallel)
+
 include_directories (HistogramData/inc)
 add_subdirectory (HistogramData)
 
@@ -79,6 +86,7 @@ add_subdirectory (Indexing)
 include_directories (Beamline/inc)
 add_subdirectory (Beamline)
 
+set ( MANTIDLIBS ${MANTIDLIBS} Parallel )
 # HistogramData has header-only dependency on Kernel, so Kernel comes after.
 set ( MANTIDLIBS ${MANTIDLIBS} HistogramData )
 # Indexing has header-only dependency on Kernel, so Kernel comes after.
@@ -98,13 +106,6 @@ add_subdirectory (API)
 set ( MANTIDLIBS ${MANTIDLIBS} API )
 
 add_subdirectory (PythonInterface)
-#
-if (BUILD_MATLAB_DEPENDENCIES)
-    find_package ( Matlab )
-    if( MATLAB_FOUND )
-        add_subdirectory (MatlabAPI)
-    endif ()
-endif()
 
 include_directories (DataObjects/inc)
 add_subdirectory (DataObjects)
@@ -131,11 +132,6 @@ endif ()
 set ( OPENCL_BUILD OFF CACHE BOOL "Enable building the GPUAlgorithms package using OpenCL. Requires OpenCL." )
 if ( OPENCL_BUILD )
   add_subdirectory ( GPUAlgorithms )
-endif ()
-
-# Unit test helper packages
-if ( CXXTEST_FOUND )
-  add_subdirectory ( ../Testing/Tools ${${CMAKE_PROJECT_NAME}_BINARY_DIR}/Testing/Tools )
 endif ()
 
 add_subdirectory (MDAlgorithms)
@@ -174,20 +170,27 @@ install ( DIRECTORY ../instrument/ DESTINATION ${INBUNDLE}instrument
 if ( WIN32 ) # General windows environment
   if ( CMAKE_SIZEOF_VOID_P EQUAL 8 ) # Recommended way of detecting 64- vs 32-bit build
     # Excludes .so files & _win32 binaries
-    install ( DIRECTORY ../scripts/ DESTINATION ${INBUNDLE}scripts PATTERN "*.pyc" EXCLUDE
-              PATTERN ".svn" EXCLUDE PATTERN "*.so" EXCLUDE PATTERN "*_win32.pyd" EXCLUDE PATTERN "CMakeLists.txt" EXCLUDE )
+    install ( DIRECTORY ../scripts/ DESTINATION ${INBUNDLE}scripts PATTERN "*.pyc"
+              EXCLUDE PATTERN ".svn" EXCLUDE PATTERN ".gitignore"
+              EXCLUDE PATTERN "*.so" EXCLUDE PATTERN "*_win32.pyd" EXCLUDE PATTERN "CMakeLists.txt"
+              EXCLUDE PATTERN "test" EXCLUDE )
   else ()
     # Excludes so files & _win64 binaries
-    install ( DIRECTORY ../scripts/ DESTINATION ${INBUNDLE}scripts PATTERN "*.pyc" EXCLUDE
-              PATTERN ".svn" EXCLUDE PATTERN "*.so" EXCLUDE PATTERN "*_win64.pyd" EXCLUDE PATTERN "CMakeLists.txt" EXCLUDE )
+    install ( DIRECTORY ../scripts/ DESTINATION ${INBUNDLE}scripts PATTERN "*.pyc"
+              EXCLUDE PATTERN ".svn" EXCLUDE PATTERN ".gitignore"
+              EXCLUDE PATTERN "*.so" EXCLUDE PATTERN "*_win64.pyd" EXCLUDE PATTERN "CMakeLists.txt"
+              EXCLUDE PATTERN "test" EXCLUDE )
   endif ()
-    # Also ship mingw libraries for Inelastic fortran code. We need to do a better job here and build things
-    file ( GLOB MINGW_DLLS "${THIRD_PARTY_DIR}/bin/mingw/*.dll" )
-    install ( FILES ${MINGW_DLLS} DESTINATION ${INBUNDLE}scripts/Inelastic )
-  else ()
+
+  # Also ship mingw libraries for Inelastic fortran code. We need to do a better job here and build things
+  file ( GLOB MINGW_DLLS "${THIRD_PARTY_DIR}/bin/mingw/*.dll" )
+  install ( FILES ${MINGW_DLLS} DESTINATION ${INBUNDLE}scripts/Inelastic )
+else ()
   # These don't work correctly and the linux ones are in no way general. They really need to be part of the build
-  install ( DIRECTORY ../scripts/ DESTINATION ${INBUNDLE}scripts PATTERN "*.pyc" EXCLUDE
-            PATTERN ".svn" EXCLUDE PATTERN "*_win*.pyd" EXCLUDE PATTERN "*_lnx64.so" EXCLUDE PATTERN "CMakeLists.txt" EXCLUDE )
+  install ( DIRECTORY ../scripts/ DESTINATION ${INBUNDLE}scripts PATTERN "*.pyc"
+            EXCLUDE PATTERN ".svn" EXCLUDE PATTERN ".gitignore"
+            EXCLUDE PATTERN "*_win*.pyd" EXCLUDE PATTERN "*_lnx64.so" EXCLUDE PATTERN "CMakeLists.txt"
+            EXCLUDE PATTERN "test" EXCLUDE )
 endif ()
 
 # THIS MUST BE THE LAST SUB_DIRECTORY ADDED. See Properties/CMakeLists.txt.

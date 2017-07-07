@@ -53,13 +53,17 @@ Quasi::Quasi(QWidget *parent) : IndirectBayesTab(parent), m_previewSpec(0) {
   connect(m_uiForm.dsResolution, SIGNAL(dataReady(const QString &)), this,
           SLOT(handleResolutionInputReady(const QString &)));
 
-  // Connect the progrm selector to its handler
+  // Connect the program selector to its handler
   connect(m_uiForm.cbProgram, SIGNAL(currentIndexChanged(int)), this,
           SLOT(handleProgramChange(int)));
 
   // Connect preview spectrum spinner to handler
   connect(m_uiForm.spPreviewSpectrum, SIGNAL(valueChanged(int)), this,
           SLOT(previewSpecChanged(int)));
+
+  // Plot current preview
+  connect(m_uiForm.pbPlotPreview, SIGNAL(clicked()), this,
+          SLOT(plotCurrentPreview()));
 
   // Post saving
   connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveClicked()));
@@ -231,7 +235,7 @@ void Quasi::run() {
   m_batchAlgoRunner->executeBatchAsync();
 }
 /**
- * Enable plotting and savimg and fit curves on the mini plot.
+ * Enable plotting and saving and fit curves on the mini plot.
  */
 void Quasi::algorithmComplete(bool error) {
   if (error)
@@ -334,8 +338,29 @@ void Quasi::handleSampleInputReady(const QString &filename) {
 }
 
 /**
+* Plots the current preview on the miniplot
+*/
+void Quasi::plotCurrentPreview() {
+
+  if (m_uiForm.ppPlot->hasCurve("fit.1")) {
+    QString program = m_uiForm.cbProgram->currentText();
+    auto fitName = m_QuasiAlg->getPropertyValue("OutputWorkspaceFit");
+    checkADSForPlotSaveWorkspace(fitName, false);
+    fitName.pop_back();
+    QString QfitWS = QString::fromStdString(fitName + "_");
+    QfitWS += QString::number(m_previewSpec);
+    if (program == "Lorentzians")
+      plotSpectra(QfitWS, {0, 1, 2, 4});
+    else
+      plotSpectra(QfitWS, {0, 1, 2});
+  } else if (m_uiForm.ppPlot->hasCurve("Sample")) {
+    plotSpectrum(m_uiForm.dsSample->getCurrentDataName(), m_previewSpec);
+  }
+}
+
+/**
  * Toggles the use ResNorm option depending on if the resolution file is a
- * resolution or vanadoum reduction.
+ * resolution or vanadium reduction.
  * @param wsName The name of the workspace loaded
  */
 void Quasi::handleResolutionInputReady(const QString &wsName) {
@@ -384,7 +409,7 @@ void Quasi::updateProperties(QtProperty *prop, double val) {
 }
 
 /**
- * Handles when the slected item in the program combobox
+ * Handles when the selected item in the program combobox
  * is changed
  *
  * @param index :: The current index of the combobox

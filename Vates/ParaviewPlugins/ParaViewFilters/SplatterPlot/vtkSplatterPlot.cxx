@@ -180,44 +180,6 @@ void vtkSplatterPlot::updateAlgorithmProgress(double progress, const std::string
 }
 
 /**
- * Gets the minimum value of the data associated with the 
- * workspace.
- * @return The minimum value of the workspace data.
- */
-double vtkSplatterPlot::GetMinValue()
-{
-  if (nullptr == m_presenter) {
-    return 0.0;
-  }
-  try {
-    return m_presenter->getMinValue();
-  }
-  catch (std::runtime_error &)
-  {
-    return 0.0;
-  }
-}
-
-/**
- * Gets the maximum value of the data associated with the 
- * workspace.
- * @return The maximum value of the workspace data.
- */
-double vtkSplatterPlot::GetMaxValue()
-{
-  if (nullptr == m_presenter) {
-    return 0.0;
-  }
-  try {
-    return m_presenter->getMaxValue();
-  }
-  catch (std::runtime_error &)
-  {
-    return 0.0;
-  }
-}
-
-/**
  * Gets the (first) instrument which is associated with the workspace.
  * @return The name of the instrument.
  */

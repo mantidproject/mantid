@@ -4,6 +4,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/Logger.h"
+#include "MantidKernel/OptionalBool.h"
 #include "MantidQtCustomInterfaces/Indirect/IndirectDataReduction.h"
 
 using namespace Mantid::API;
@@ -216,7 +217,7 @@ std::map<std::string, double> IndirectDataReductionTab::getRangesFromInstrument(
   convUnitsAlg->execute();
   MatrixWorkspace_sptr tofWs = convUnitsAlg->getProperty("OutputWorkspace");
 
-  std::vector<double> tofData = tofWs->readX(0);
+  const auto tofData = tofWs->x(0);
   ranges["peak-start-tof"] = tofData[0];
   ranges["peak-end-tof"] = tofData[2];
   ranges["back-start-tof"] = tofData[3];

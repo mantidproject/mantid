@@ -1027,7 +1027,7 @@ void LineViewer::setupScaleEngine(MantidQwtWorkspaceData &curveData) {
 
   if (m_lineOptions->isLogScaledY()) {
     engine = new QwtLog10ScaleEngine();
-    curveData.saveLowestPositiveValue(from);
+    curveData.setMinimumPositiveValue(from);
   } else {
     engine = new QwtLinearScaleEngine();
   }

@@ -13,6 +13,7 @@
 #include "MantidAlgorithms/GroupWorkspaces.h"
 #include "MantidAlgorithms/MergeRuns.h"
 #include "MantidAlgorithms/GroupWorkspaces.h"
+#include "MantidAlgorithms/Rebin.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidKernel/TimeSeriesProperty.h"
@@ -978,17 +979,18 @@ public:
     TS_ASSERT_EQUALS(output->y(0).front(), 2.0 * filesMerged);
 
     if (mergeType.compare(SampleLogsBehaviour::TIME_SERIES_MERGE) == 0) {
-      prop = output->mutableRun().getTimeSeriesProperty<double>(
-          propertyName + SampleLogsBehaviour::TIME_SERIES_SUFFIX);
-      TS_ASSERT_EQUALS(prop->value(), result);
-    } else if (mergeType.compare(SampleLogsBehaviour::LIST_MERGE) == 0) {
-      prop = output->mutableRun().getLogData(propertyName +
-                                             SampleLogsBehaviour::LIST_SUFFIX);
+      prop = output->mutableRun().getTimeSeriesProperty<double>(propertyName);
       TS_ASSERT_EQUALS(prop->value(), result);
     } else {
       prop = output->mutableRun().getLogData(propertyName);
       TS_ASSERT_EQUALS(prop->value(), result);
     }
+
+    // We add and remove the property from the addee workspace to supress a
+    // warning. Check it is back here.
+    const auto &addeeWS =
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("b1");
+    TS_ASSERT_THROWS_NOTHING(addeeWS->run().getProperty("prop1"));
 
     sample_logs_teardown();
   }
@@ -1001,6 +1003,13 @@ public:
     AnalysisDataService::Instance().remove("outWS");
     AnalysisDataService::Instance().remove("outWS1");
     AnalysisDataService::Instance().remove("outWS2");
+  }
+
+  void test_mergeSampleLogs_sum() {
+    std::string mergeType = SampleLogsBehaviour::SUM_MERGE;
+    auto ws = create_group_workspace_with_sample_logs<double>(
+        mergeType, "prop1", 1.2, 2.3, 0.0, 0.0);
+    do_test_mergeSampleLogs(ws, "prop1", mergeType, "3.5", 2);
   }
 
   void test_mergeSampleLogs_time_series() {
@@ -1122,7 +1131,7 @@ public:
   }
 
   void
-  test_mergeSampleLogs_log_used_twice_with_different_merge_types_succeeds() {
+  test_mergeSampleLogs_log_used_twice_with_incompatible_merge_types_fails() {
     std::string mergeTypeTimeSeries = SampleLogsBehaviour::TIME_SERIES_MERGE;
     std::string mergeTypeList = SampleLogsBehaviour::LIST_MERGE;
     WorkspaceGroup_sptr gws = create_group_workspace_with_sample_logs<double>(
@@ -1135,15 +1144,32 @@ public:
     // Error is caught by Algorithm, but check no output workspace created
     do_test_mergeSampleLogs(
         gws, "prop1", mergeTypeTimeSeries,
-        "2013-Jun-25 10:59:15  1\n2013-Jun-25 11:59:15  2\n", 2, false);
+        "2013-Jun-25 10:59:15  1\n2013-Jun-25 11:59:15  2\n", 2, true);
+  }
+
+  void
+  test_mergeSampleLogs_log_used_twice_with_compatible_merge_types_suceeds() {
+    std::string mergeTypeTimeSeries = SampleLogsBehaviour::TIME_SERIES_MERGE;
+    std::string mergeTypeWarn = SampleLogsBehaviour::WARN_MERGE;
+    WorkspaceGroup_sptr gws = create_group_workspace_with_sample_logs<double>(
+        mergeTypeTimeSeries, "prop1", 1.0, 2.0, 0.0, 0.0);
+    MatrixWorkspace_sptr a =
+        boost::dynamic_pointer_cast<MatrixWorkspace>(gws->getItem(0));
+    a->instrumentParameters().addString(a->getInstrument()->getComponentID(),
+                                        mergeTypeWarn, "prop1");
+
+    // Error is caught by Algorithm, but check no output workspace created
+    do_test_mergeSampleLogs(
+        gws, "prop1", mergeTypeTimeSeries,
+        "2013-Jun-25 10:59:15  1\n2013-Jun-25 11:59:15  2\n", 2);
   }
 
   void test_mergeSampleLogs_non_numeric_property_fails_to_merge() {
-    std::string mergeType = SampleLogsBehaviour::TIME_SERIES_MERGE;
+    std::string mergeType = SampleLogsBehaviour::SUM_MERGE;
     do_test_mergeSampleLogs(
         create_group_workspace_with_sample_logs<std::string>(
             mergeType, "prop1", "1", "two", "", ""),
-        "prop1", mergeType, "2013-Jun-25 10:59:15  1\n", 1);
+        "prop1", mergeType, "1", 1);
   }
 
   void
@@ -1151,10 +1177,10 @@ public:
     std::string mergeType = SampleLogsBehaviour::TIME_SERIES_MERGE;
     auto ws = create_group_workspace_with_sample_logs<std::string>(
         mergeType, "prop1", "one", "two", "", "");
-    // should get stuck when looking for "prop1_time_series"
+    // should get stuck when trying to get "prop1" as a time series
     TS_ASSERT_THROWS(do_test_mergeSampleLogs(ws, "prop1", mergeType,
                                              "2013-Jun-25 10:59:15  1\n", 2),
-                     Mantid::Kernel::Exception::NotFoundError);
+                     std::invalid_argument);
   }
 
   void test_mergeSampleLogs_with_additional_time_series_property() {
@@ -1227,6 +1253,18 @@ public:
     do_test_mergeSampleLogs_modified_alg(alg, ws, "prop1", mergeType, "1", 2);
   }
 
+  void test_mergeSampleLogs_sum_and_error_skips_merging_second_file() {
+    auto ws = create_group_workspace_with_sample_logs<double>(
+        SampleLogsBehaviour::SUM_MERGE, "prop1", 1.0, 2.0, 3.0, 4.0, "0.5");
+
+    MergeRuns alg;
+    alg.initialize();
+    alg.setPropertyValue("SampleLogsFail", "prop2");
+    alg.setPropertyValue("SampleLogsFailTolerances", "0.5");
+    do_test_mergeSampleLogs_modified_alg(
+        alg, ws, "prop1", SampleLogsBehaviour::SUM_MERGE, "1", 1);
+  }
+
   void test_mergeSampleLogs_time_series_and_error_skips_merging_second_file() {
     auto ws = create_group_workspace_with_sample_logs<double>(
         SampleLogsBehaviour::TIME_SERIES_MERGE, "prop1", 1.0, 2.0, 3.0, 4.0,
@@ -1239,6 +1277,18 @@ public:
     do_test_mergeSampleLogs_modified_alg(alg, ws, "prop1",
                                          SampleLogsBehaviour::TIME_SERIES_MERGE,
                                          "2013-Jun-25 10:59:15  1\n", 1);
+  }
+
+  void test_mergeSampleLogs_list_and_error_skips_merging_second_file() {
+    auto ws = create_group_workspace_with_sample_logs<double>(
+        SampleLogsBehaviour::LIST_MERGE, "prop1", 1.0, 2.0, 3.0, 4.0, "0.5");
+
+    MergeRuns alg;
+    alg.initialize();
+    alg.setPropertyValue("SampleLogsFail", "prop2");
+    alg.setPropertyValue("SampleLogsFailTolerances", "0.5");
+    do_test_mergeSampleLogs_modified_alg(
+        alg, ws, "prop1", SampleLogsBehaviour::LIST_MERGE, "1", 1);
   }
 
   void test_merging_three_workspace_with_time_series() {
@@ -1353,6 +1403,70 @@ public:
 
     do_test_mergeSampleLogs(ws, "prop1", mergeType, "2013-Jun-25 10:59:15  1\n",
                             1);
+  }
+
+  void test_mergeSampleLogs_fail_throwing_error() {
+    WorkspaceGroup_sptr ws = create_group_workspace_with_sample_logs<double>(
+        SampleLogsBehaviour::TIME_SERIES_MERGE, "prop1", 1.0, 2.0, 3.0, 4.0);
+
+    MergeRuns alg;
+    alg.initialize();
+    alg.setPropertyValue("SampleLogsFail", "prop2");
+    alg.setPropertyValue("SampleLogsFailTolerances", "0.5");
+    alg.setPropertyValue("FailBehaviour", MergeRunsOptions::STOP_BEHAVIOUR);
+    do_test_mergeSampleLogs_modified_alg(
+        alg, ws, "prop2", SampleLogsBehaviour::FAIL_MERGE, "3", 1, true);
+  }
+
+  void rebin_one_workspace() {
+    Rebin rebinAlg;
+    rebinAlg.initialize();
+    rebinAlg.setPropertyValue("InputWorkspace", "b1");
+    rebinAlg.setPropertyValue("OutputWorkspace", "b1");
+    rebinAlg.setPropertyValue("Params", "0.1");
+    rebinAlg.execute();
+  }
+
+  void test_mergeSampleLogs_with_different_binning_skips_merging() {
+    WorkspaceGroup_sptr ws = create_group_workspace_with_sample_logs<double>(
+        SampleLogsBehaviour::SUM_MERGE, "prop1", 1.0, 2.0, 3.0, 4.0);
+
+    rebin_one_workspace();
+
+    MergeRuns alg;
+    alg.initialize();
+    alg.setPropertyValue("RebinBehaviour", MergeRunsOptions::FAIL_BEHAVIOUR);
+    do_test_mergeSampleLogs_modified_alg(
+        alg, ws, "prop1", SampleLogsBehaviour::SUM_MERGE, "1", 1);
+  }
+
+  void
+  test_mergeSampleLogs_with_different_binning_skips_merging_and_throws_error() {
+    WorkspaceGroup_sptr ws = create_group_workspace_with_sample_logs<double>(
+        SampleLogsBehaviour::SUM_MERGE, "prop1", 1.0, 2.0, 3.0, 4.0);
+
+    rebin_one_workspace();
+
+    MergeRuns alg;
+    alg.initialize();
+    alg.setPropertyValue("RebinBehaviour", MergeRunsOptions::FAIL_BEHAVIOUR);
+    alg.setPropertyValue("FailBehaviour", MergeRunsOptions::STOP_BEHAVIOUR);
+    do_test_mergeSampleLogs_modified_alg(
+        alg, ws, "prop1", SampleLogsBehaviour::SUM_MERGE, "1", 1, true);
+  }
+
+  void test_mergeSampleLogs_fail_with_single_negative_tolerance() {
+    std::string mergeType = SampleLogsBehaviour::FAIL_MERGE;
+    auto ws = create_group_workspace_with_sample_logs<double>(
+        mergeType, "prop1", 0.0, 0.0, 0.0, 0.0, "-1.0");
+    do_test_mergeSampleLogs(ws, "prop1", mergeType, "1", 2, true);
+  }
+
+  void test_mergeSampleLogs_fail_with_single_negative_tolerance_in_a_list() {
+    std::string mergeType = SampleLogsBehaviour::FAIL_MERGE;
+    auto ws = create_group_workspace_with_sample_logs<double>(
+        mergeType, "prop1, prop2", 0.0, 0.0, 0.0, 0.0, "-0.5, 1.5");
+    do_test_mergeSampleLogs(ws, "prop1", mergeType, "1", 1, true);
   }
 
 private:

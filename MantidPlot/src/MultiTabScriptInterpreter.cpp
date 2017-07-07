@@ -509,9 +509,12 @@ void MultiTabScriptInterpreter::showSelectFont() {
   if (database.families().contains(m_fontFamily))
     fontToUse = m_fontFamily;
 
-  QListWidgetItem *item = fontList->findItems(fontToUse, Qt::MatchExactly)[0];
-  fontList->setItemSelected(item, true);
-  fontList->scrollToItem(item, QAbstractItemView::PositionAtTop);
+  const auto results = fontList->findItems(fontToUse, Qt::MatchExactly);
+  if (!results.empty()) {
+    const auto item = results[0];
+    fontList->setItemSelected(item, true);
+    fontList->scrollToItem(item, QAbstractItemView::PositionAtTop);
+  }
 
   QFrame *frameButtons = new QFrame();
   QBoxLayout *layoutButtons =

@@ -3,6 +3,7 @@
 
 #include "CropWorkspaceTest.h" // Use the test label functionality as it should do the same thing
 #include "MantidAlgorithms/ExtractSingleSpectrum.h"
+#include "MantidTestHelpers/InstrumentCreationHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using Mantid::detid_t;
@@ -68,6 +69,8 @@ public:
     const int numPixels(10);
     EventWorkspace_sptr eventWS = WorkspaceCreationHelper::createEventWorkspace(
         numPixels, 50, eventsPerPixel, 0.0, 1.0, 1 /*EventPattern=1*/);
+    InstrumentCreationHelper::addFullInstrumentToWorkspace(*eventWS, false,
+                                                           false, "");
     TS_ASSERT(eventWS);
     const int wsIndex(4);
     MatrixWorkspace_sptr output = runAlgorithm(eventWS, wsIndex);

@@ -122,21 +122,27 @@ class MatchPeaks(PythonAlgorithm):
 
         if input3:
             if not input2:
-                issues['InputWorkspace2'] = 'When input 3 is given, input 2 is also required.'
+                issues['InputWorkspace2'] = 'When InputWorkspace3 is given, InputWorkspace2 is also required.'
             else:
-                if mtd[input3].blocksize() != mtd[input2].blocksize():
-                    issues['InputWorkspace3'] = 'Incompatible same number of bins'
-                if mtd[input3].getNumberHistograms() != mtd[input2].getNumberHistograms():
+                if mtd[input3].isDistribution() and not mtd[input2].isDistribution():
+                    issues['InputWorkspace3'] = 'InputWorkspace2 and InputWorkspace3 must be either point data or ' \
+                                                'histogram data'
+                elif mtd[input3].blocksize() != mtd[input2].blocksize():
+                    issues['InputWorkspace3'] = 'Incompatible number of bins'
+                elif mtd[input3].getNumberHistograms() != mtd[input2].getNumberHistograms():
                     issues['InputWorkspace3'] = 'Incompatible number of spectra'
-                if np.all(mtd[input3].extractX() - mtd[input2].extractX()):
+                elif np.any(mtd[input3].extractX() - mtd[input2].extractX()):
                     issues['InputWorkspace3'] = 'Incompatible x-values'
 
         if input2:
-            if mtd[input1].blocksize() != mtd[input2].blocksize():
-                issues['InputWorkspace2'] = 'Incompatible same number of bins'
-            if mtd[input1].getNumberHistograms() != mtd[input2].getNumberHistograms():
+            if mtd[input1].isDistribution() and not mtd[inout2].isDistribution():
+                issues['InputWorkspace2'] = 'InputWorkspace2 and InputWorkspace3 must be either point data or ' \
+                                            'histogram data'
+            elif mtd[input1].blocksize() != mtd[input2].blocksize():
+                issues['InputWorkspace2'] = 'Incompatible number of bins'
+            elif mtd[input1].getNumberHistograms() != mtd[input2].getNumberHistograms():
                 issues['InputWorkspace2'] = 'Incompatible number of spectra'
-            if np.all(mtd[input1].extractX() - mtd[input2].extractX()):
+            elif np.any(mtd[input1].extractX() - mtd[input2].extractX()):
                 issues['InputWorkspace2'] = 'Incompatible x-values'
 
         return issues
@@ -151,17 +157,17 @@ class MatchPeaks(PythonAlgorithm):
 
         # Find peak positions in input workspace
         peak_bins1 = self._get_peak_position(output_ws)
-        self.log().notice('Peak bins {0}: {1}'.format(self._input_ws, peak_bins1))
+        self.log().information('Peak bins {0}: {1}'.format(self._input_ws, peak_bins1))
 
         # Find peak positions in second input workspace
         if self._input_2_ws:
             peak_bins2 = self._get_peak_position(mtd[self._input_2_ws])
-            self.log().notice('Peak bins {0}: {1}'.format(self._input_2_ws, peak_bins2))
+            self.log().information('Peak bins {0}: {1}'.format(self._input_2_ws, peak_bins2))
 
         # Find peak positions in third input workspace
         if self._input_3_ws:
             peak_bins3 = self._get_peak_position(mtd[self._input_3_ws])
-            self.log().notice('Peak bins {0}: {1}'.format(self._input_3_ws, peak_bins3))
+            self.log().information('Peak bins {0}: {1}'.format(self._input_3_ws, peak_bins3))
 
         # All bins must be positive and larger than zero
         if not self._input_2_ws:
@@ -222,8 +228,10 @@ class MatchPeaks(PythonAlgorithm):
         @return          :: bin numbers of the peak positions
         """
 
+        fit_table_name = input_ws.getName() + '_epp'
+
         if isinstance(input_ws, MatrixWorkspace):
-            fit_table = FindEPP(InputWorkspace=input_ws)
+            fit_table = FindEPP(InputWorkspace=input_ws, OutputWorkspace=fit_table_name)
         elif isinstance(input_ws, ITableWorkspace):
             fit_table = input_ws
         else:
@@ -271,20 +279,7 @@ class MatchPeaks(PythonAlgorithm):
 
             logger.debug('Spectrum {0} will be shifted to bin {1}'.format(i,peak_bin[i]))
 
-        # Clean-up unused TableWorkspaces in try-catch
-        # Direct deletion causes problems when running in parallel for too many workspaces
-        try:
-            DeleteWorkspace('EPPfit_Parameters')
-        except ValueError:
-            logger.debug('Fit parameters workspace already deleted')
-        try:
-            DeleteWorkspace('EPPfit_NormalisedCovarianceMatrix')
-        except ValueError:
-            logger.debug('Fit covariance matrix already deleted')
-        try:
-            DeleteWorkspace(fit_table)
-        except ValueError:
-            logger.debug('Fit table already deleted')
+        DeleteWorkspace(fit_table)
 
         return peak_bin
 

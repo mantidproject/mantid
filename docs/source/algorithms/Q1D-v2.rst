@@ -139,7 +139,7 @@ From the equation it is possible to see that for pixels in
 substituting :math:`WaveCut = W_{low}` we have that :math:`R = 0` and
 hence all detectors contribute at wavelengths above :math:`WaveCut`.
 
-*Practically, it is more likely to be necessary to implement
+Practically, it is more likely to be necessary to implement
 :math:`RadiusCut` and :math:`WaveCut` in situations where the scattering
 near to the beamstop is weak and 'contaminated' by short wavelength
 scatter. This might arise, for example, when running at long
@@ -147,7 +147,7 @@ sample-detector distances, or at short sample-detector distances with
 large diameter beams, or where the sample generates Bragg peaks at
 low-Q. The best recourse is to check the wavelength overlap. If it is
 not too bad it may be possible to improve the data presentation simply
-by altering :math:`Q{min}` and the binning scheme.*
+by altering :math:`Q{min}` and the binning scheme.
 
 Examples
 ######################

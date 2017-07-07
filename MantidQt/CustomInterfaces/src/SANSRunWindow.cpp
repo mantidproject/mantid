@@ -1,26 +1,27 @@
 #include "MantidQtCustomInterfaces/SANSRunWindow.h"
 
-#include "MantidKernel/ConfigService.h"
-#include "MantidKernel/FacilityInfo.h"
-#include "MantidKernel/PropertyWithValue.h"
-#include "MantidKernel/Exception.h"
-#include "MantidKernel/PropertyManagerDataService.h"
-#include "MantidKernel/Logger.h"
-#include "MantidKernel/V3D.h"
-#include "MantidGeometry/IComponent.h"
-#include "MantidGeometry/Instrument.h"
-#include "MantidGeometry/IDetector.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/DetectorInfo.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/IEventWorkspace.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/SpectrumInfo.h"
-#include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidGeometry/IComponent.h"
+#include "MantidGeometry/IDetector.h"
+#include "MantidGeometry/Instrument.h"
+#include "MantidKernel/ConfigService.h"
+#include "MantidKernel/Exception.h"
+#include "MantidKernel/FacilityInfo.h"
+#include "MantidKernel/Logger.h"
+#include "MantidKernel/PropertyManagerDataService.h"
+#include "MantidKernel/PropertyManager.h"
+#include "MantidKernel/PropertyWithValue.h"
+#include "MantidKernel/V3D.h"
 
-#include "MantidQtAPI/MantidDesktopServices.h"
 #include "MantidQtAPI/ManageUserDirectories.h"
+#include "MantidQtAPI/MantidDesktopServices.h"
 #include "MantidQtCustomInterfaces/SANSAddFiles.h"
 #include "MantidQtCustomInterfaces/SANSBackgroundCorrectionSettings.h"
 #include "MantidQtCustomInterfaces/SANSEventSlicing.h"
@@ -31,11 +32,11 @@
 #include <QTextStream>
 #include <QUrl>
 
-#include <Poco/StringTokenizer.h>
 #include <Poco/Message.h>
+#include <Poco/StringTokenizer.h>
 
-#include <boost/lexical_cast.hpp>
 #include <boost/foreach.hpp>
+#include <boost/lexical_cast.hpp>
 #include <boost/tuple/tuple.hpp>
 
 #include <cmath>
@@ -199,6 +200,23 @@ void setTransmissionOnSaveCommand(
       }
     }
   }
+}
+
+bool checkSaveOptions(QString &message, bool is1D, bool isCanSAS,
+                      bool isNistQxy) {
+  // Check we are dealing with 1D or 2D data
+  bool isValid = true;
+  if (is1D && isNistQxy) {
+    isValid = false;
+    message +=
+        "Save option issue: Cannot save in NistQxy format for 1D data.\n";
+  }
+
+  if (!is1D && isCanSAS) {
+    isValid = false;
+    message += "Save option issue: Cannot save in CanSAS format for 2D data.\n";
+  }
+  return isValid;
 }
 }
 
@@ -2093,11 +2111,9 @@ bool SANSRunWindow::handleLoadButtonClick() {
   Mantid::API::MatrixWorkspace_sptr sample_workspace =
       boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(baseWS);
 
-  if (sample_workspace && (!sample_workspace->readX(0).empty())) {
-    m_uiForm.tof_min->setText(
-        QString::number(sample_workspace->readX(0).front()));
-    m_uiForm.tof_max->setText(
-        QString::number(sample_workspace->readX(0).back()));
+  if (sample_workspace && (!sample_workspace->x(0).empty())) {
+    m_uiForm.tof_min->setText(QString::number(sample_workspace->x(0).front()));
+    m_uiForm.tof_max->setText(QString::number(sample_workspace->x(0).back()));
   }
 
   // Set the geometry if the sample has been changed
@@ -2484,6 +2500,9 @@ void SANSRunWindow::handleReduceButtonClick(const QString &typeStr) {
       showInformationBox("Error: No run information specified.");
       return;
     }
+
+    // Update the IDF file path for batch reductions
+    updateIDFFilePathForBatch();
 
     // check for the detectors combination option
     // transform the SANS Diagnostic gui option in: 'rear', 'front' , 'both',
@@ -2913,6 +2932,10 @@ void SANSRunWindow::handleDefSaveClick() {
         "A filename must be entered into the text box above to save this file");
   }
 
+  if (!areSaveSettingsValid(m_outputWS)) {
+    return;
+  }
+
   // If we save with a zero-error-free correction we need to swap the
   QString workspaceNameBuffer = m_outputWS;
   QString clonedWorkspaceName = m_outputWS + "_cloned_temp";
@@ -2994,6 +3017,31 @@ void SANSRunWindow::handleDefSaveClick() {
                           "console?");
   }
 }
+
+/**
+ * Checks if the save options are valid
+ */
+bool SANSRunWindow::areSaveSettingsValid(const QString &workspaceName) {
+  Mantid::API::MatrixWorkspace_sptr ws =
+      AnalysisDataService::Instance().retrieveWS<Mantid::API::MatrixWorkspace>(
+          workspaceName.toStdString());
+  auto is1D = ws->getNumberHistograms() == 1;
+  auto isNistQxy = m_uiForm.saveNIST_Qxy_check->isChecked();
+  auto isCanSAS = m_uiForm.saveCan_check->isChecked();
+
+  QString message;
+
+  auto isValid = checkSaveOptions(message, is1D, isCanSAS, isNistQxy);
+
+  // Print the error message if there are any
+  if (!message.isEmpty()) {
+    QString warning = "Please correct these settings before proceeding:\n";
+    warning += message;
+    QMessageBox::warning(this, "Inconsistent input", warning);
+  }
+  return isValid;
+}
+
 /**
  * Set up controls based on the users selection in the combination box
  * @param new_index :: The new index that has been set
@@ -3521,8 +3569,33 @@ void SANSRunWindow::fillDetectNames(QComboBox *output) {
                              "to continue by selecting a valid instrument");
   }
 
-  output->setItemText(0, dets[1]);
-  output->setItemText(1, dets[3]);
+  // The setting of the detector here has been the cause of problems for
+  // (apparently years).
+  // The code assumes for the indices
+  // |     | LOQ                | SANS2D         | LARMOR                  |
+  // |-----|--------------------|----------------|-------------------------|
+  // |  0  | main-detector-bank | rear-detector  | DetectorBench           |
+  // |  1  | HAB                | front-detector | front-detector (unused) |
+  // |  2  | both               | both           | both                    |
+  // |  3  | merged             | merged         | merged                  |
+  // But the Python method above listDetectors will return the selected detector
+  // first,
+  // ie if HAB was selected on LOQ, then it would return
+  // ["HAB","main-detector-bank"]
+  // if main-detector-bank was selected on LOQ, then it would return
+  // ["main-detector-bank", "HAB"]
+  // which means we need to assign the names to the right slots.
+  QStringList detectorNames = {dets[1], dets[3]};
+  for (auto &name : detectorNames) {
+    if (name == "main-detector-bank" || name == "rear-detector" ||
+        name == "DetectorBench") {
+      output->setItemText(0, name);
+    }
+
+    if (name == "HAB" || name == "front-detector") {
+      output->setItemText(1, name);
+    }
+  }
 }
 /** Checks if the workspace is a group and returns the first member of group,
 * throws
@@ -4489,6 +4562,23 @@ bool SANSRunWindow::areSettingsValid(States type) {
     message += "Sample width issue: Only values > 0 are allowed.\n";
   }
 
+  // Check save format consistency for batch mode reduction
+  // 1D --> cannot be Nist Qxy
+  // 2D --> cannot be CanSAS
+  auto isBatchMode = !m_uiForm.single_mode_btn->isChecked();
+  if (isBatchMode) {
+    auto is1D = type == OneD;
+    auto isCanSAS = m_uiForm.saveCan_check->isChecked();
+    auto isNistQxy = m_uiForm.saveNIST_Qxy_check->isChecked();
+    QString saveMessage;
+    auto isValidSaveOption =
+        checkSaveOptions(saveMessage, is1D, isCanSAS, isNistQxy);
+    if (!isValidSaveOption) {
+      isValid = false;
+      message += saveMessage;
+    }
+  }
+
   // Print the error message if there are any
   if (!message.isEmpty()) {
     QString warning = "Please correct these settings before proceeding:\n";
@@ -5086,17 +5176,30 @@ bool SANSRunWindow::isValidUserFile() {
   return true;
 }
 
-void SANSRunWindow::updateIDFFilePath() {
-  QString getIdf = "i.get_current_idf_path_in_reducer()\n";
-  QString resultIdf(runPythonCode(getIdf, false));
-  auto teset1 = resultIdf.toStdString();
+void SANSRunWindow::updateIDFInfo(const QString &command) {
+  QString resultIdf(runPythonCode(command, false));
   resultIdf = resultIdf.simplified();
-  auto test2 = resultIdf.toStdString();
   if (resultIdf != m_constants.getPythonEmptyKeyword() &&
       !resultIdf.isEmpty()) {
-    auto test = resultIdf.toStdString();
     m_uiForm.current_idf_path->setText(resultIdf);
   }
+}
+
+void SANSRunWindow::updateIDFFilePathForBatch() {
+
+  if (m_uiForm.batch_table->rowCount() == 0) {
+    return;
+  }
+  // We base the IDF entry on the sample scatter entry of the first row
+  auto *table_item = m_uiForm.batch_table->item(0, 0);
+  auto scatter_sample_run = table_item->text();
+  QString getIdf = "i.get_idf_path_for_run(\"" + scatter_sample_run + "\")\n";
+  updateIDFInfo(getIdf);
+}
+
+void SANSRunWindow::updateIDFFilePath() {
+  QString getIdf = "i.get_current_idf_path_in_reducer()\n";
+  updateIDFInfo(getIdf);
 }
 
 void SANSRunWindow::onUpdateGeometryRequest() {

@@ -66,22 +66,26 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 File change history is stored at: <https://github.com/mantidproject/mantid>
 */
+enum class GLActorVisiblity : char { VISIBLE, HIDDEN, ALWAYS_HIDDEN };
+
 class GLActor : public QObject {
 public:
   /// Rules for visitor propagation. If vistor's visit(...) method returns true
   /// the propagation can be continued (VisitAll) or abandoned (Finish)
   enum VisitorAcceptRule { VisitAll, Finish };
-  GLActor() : m_visible(true) {}
+  GLActor() : m_visible(GLActorVisiblity::VISIBLE) {}
   ///< Virtual destructor
   ~GLActor() override;
   /// Toggle the visibility of the actor.
-  virtual void setVisibility(bool on) { m_visible = on; }
+  virtual void setVisibility(bool on);
   /// Toggle the visibility of the child actors (if exist).
   virtual void setChildVisibility(bool on) { setVisibility(on); }
+  /// Sets the current component to always hide
+  void setAlwaysHidden() { m_visible = GLActorVisiblity::ALWAYS_HIDDEN; }
   /// Check if any child is visible
   virtual bool hasChildVisible() const { return true; }
   /// Get the visibility status.
-  bool isVisible() const { return m_visible; }
+  bool isVisible() const { return m_visible == GLActorVisiblity::VISIBLE; }
   /// Draw the actor in 3D.
   virtual void draw(bool picking = false) const = 0;
   /// Get the 3D bounding box of the actor
@@ -105,7 +109,7 @@ public:
   static GLColor defaultDetectorColor();
 
 protected:
-  bool m_visible; ///< Flag whether the actor is visible or not
+  GLActorVisiblity m_visible; ///< Flag whether the actor is visible or not
 };
 
 } // MantidWidgets

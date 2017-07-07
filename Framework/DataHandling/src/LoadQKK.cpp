@@ -113,18 +113,21 @@ void LoadQKK::exec() {
   // Set the units of the data as Counts
   outputWorkspace->setYUnitLabel("Counts");
 
-  //  Put the data into outputWorkspace
-  size_t count = 0;
-  for (size_t i = 0; i < ny; ++i)
-    for (size_t j = 0; j < nx; ++j) {
-      // Move data across
-      double c = hmm(0, int(i), int(j));
-      outputWorkspace->dataX(count)[0] = wavelength0;
-      outputWorkspace->dataX(count)[1] = wavelength1;
-      outputWorkspace->dataY(count)[0] = c;
-      outputWorkspace->dataE(count)[0] = sqrt(c);
-      ++count;
-    }
+  using namespace HistogramData;
+  const BinEdges binEdges = {wavelength0, wavelength1};
+  for (size_t index = 0; index < nHist; ++index) {
+    auto x = static_cast<int>(index % nx);
+    auto y = static_cast<int>(index / nx);
+    auto c = hmm(0, x, y);
+
+    Counts yValue = {static_cast<double>(c)};
+    CountStandardDeviations errors = {sqrt(c)};
+
+    auto histogram = outputWorkspace->histogram(index);
+    histogram.setBinEdges(binEdges);
+    histogram.setCounts(yValue);
+    histogram.setCountStandardDeviations(errors);
+  }
 
   // Build instrument geometry
 

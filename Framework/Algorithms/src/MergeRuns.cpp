@@ -8,6 +8,7 @@
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/ListValidator.h"
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/make_unique.h"
 #include "MantidAPI/ADSValidator.h"
@@ -26,6 +27,7 @@ using namespace Kernel;
 using namespace API;
 using namespace Geometry;
 using namespace DataObjects;
+using namespace MergeRunsOptions;
 
 /// Initialisation method
 void MergeRuns::init() {
@@ -43,11 +45,10 @@ void MergeRuns::init() {
   declareProperty("SampleLogsTimeSeries", "",
                   "A comma separated list of the sample logs to merge into a "
                   "time series. The initial times are taken as the start times "
-                  "for the run, and the merged sample log is suffixed with "
-                  "\"_time_series\". Sample logs must be numeric.");
+                  "for the run. Sample logs must be numeric.");
   declareProperty("SampleLogsList", "",
                   "A comma separated list of the sample logs to merge into a "
-                  "list. The merged sample log is suffixed with \"_list\". ");
+                  "list. ");
   declareProperty("SampleLogsWarn", "", "A comma separated list of the sample "
                                         "logs to generate a warning if "
                                         "different when merging.");
@@ -66,6 +67,21 @@ void MergeRuns::init() {
                   "single value for all fail sample logs, or a comma "
                   "separated list of values (must be the same length as "
                   "SampleLogsFail).");
+  declareProperty("SampleLogsSum", "", "A comma separated list of the sample "
+                                       "logs to sum into a single entry.  "
+                                       "Sample logs must be numeric.");
+  const std::vector<std::string> rebinOptions = {REBIN_BEHAVIOUR,
+                                                 FAIL_BEHAVIOUR};
+  declareProperty("RebinBehaviour", REBIN_BEHAVIOUR,
+                  boost::make_shared<StringListValidator>(rebinOptions),
+                  "Choose whether to rebin when bins are different, or fail "
+                  "(fail behaviour defined in FailBehaviour option).");
+  const std::vector<std::string> failBehaviourOptions = {SKIP_BEHAVIOUR,
+                                                         STOP_BEHAVIOUR};
+  declareProperty("FailBehaviour", SKIP_BEHAVIOUR,
+                  boost::make_shared<StringListValidator>(failBehaviourOptions),
+                  "Choose whether to skip the file and continue, or stop and "
+                  "throw and error, when encountering a failure.");
 }
 
 // @return the name of the property used to supply in input workspace(s).
@@ -85,6 +101,7 @@ void MergeRuns::exec() {
   // Check that all input workspaces exist and match in certain important ways
   const std::vector<std::string> inputs_orig = getProperty("InputWorkspaces");
 
+  const std::string sampleLogsSum = getProperty("SampleLogsSum");
   const std::string sampleLogsTimeSeries = getProperty("SampleLogsTimeSeries");
   const std::string sampleLogsList = getProperty("SampleLogsList");
   const std::string sampleLogsWarn = getProperty("SampleLogsWarn");
@@ -93,6 +110,8 @@ void MergeRuns::exec() {
   const std::string sampleLogsFail = getProperty("SampleLogsFail");
   const std::string sampleLogsFailTolerances =
       getProperty("SampleLogsFailTolerances");
+  const std::string rebinBehaviour = getProperty("RebinBehaviour");
+  const std::string sampleLogsFailBehaviour = getProperty("FailBehaviour");
 
   // This will hold the inputs, with the groups separated off
   std::vector<std::string> inputs;
@@ -130,8 +149,9 @@ void MergeRuns::exec() {
     // Take the first input workspace as the first argument to the addition
     MatrixWorkspace_sptr outWS(m_inMatrixWS.front()->clone());
     Algorithms::SampleLogsBehaviour sampleLogsBehaviour = SampleLogsBehaviour(
-        *outWS, g_log, sampleLogsTimeSeries, sampleLogsList, sampleLogsWarn,
-        sampleLogsWarnTolerances, sampleLogsFail, sampleLogsFailTolerances);
+        *outWS, g_log, sampleLogsSum, sampleLogsTimeSeries, sampleLogsList,
+        sampleLogsWarn, sampleLogsWarnTolerances, sampleLogsFail,
+        sampleLogsFailTolerances);
 
     m_progress = Kernel::make_unique<Progress>(this, 0.0, 1.0, numberOfWSs - 1);
     // Note that the iterator is incremented before first pass so that 1st
@@ -141,12 +161,24 @@ void MergeRuns::exec() {
       // Only do a rebinning if the bins don't already match - otherwise can
       // just add (see the 'else')
       if (!WorkspaceHelpers::matchingBins(*outWS, **it, true)) {
-        std::vector<double> rebinParams;
-        this->calculateRebinParams(outWS, *it, rebinParams);
+        if (rebinBehaviour == REBIN_BEHAVIOUR) {
+          std::vector<double> rebinParams;
+          this->calculateRebinParams(outWS, *it, rebinParams);
 
-        // Rebin the two workspaces in turn to the same set of bins
-        outWS = this->rebinInput(outWS, rebinParams);
-        addee = this->rebinInput(*it, rebinParams);
+          // Rebin the two workspaces in turn to the same set of bins
+          outWS = this->rebinInput(outWS, rebinParams);
+          addee = this->rebinInput(*it, rebinParams);
+        } else if (sampleLogsFailBehaviour == SKIP_BEHAVIOUR) {
+          g_log.error() << "Could not merge run: " << it->get()->getName()
+                        << ". Binning is different from first workspace. "
+                           "MergeRuns will continue but this run will be "
+                           "skipped.\n";
+          continue;
+        } else {
+          throw std::invalid_argument(
+              "Could not merge run: " + it->get()->getName() +
+              ". Binning is different from first workspace.");
+        }
       } else {
         addee = *it;
       }
@@ -155,16 +187,21 @@ void MergeRuns::exec() {
       // Update the sample logs
       try {
         sampleLogsBehaviour.mergeSampleLogs(**it, *outWS);
+        sampleLogsBehaviour.removeSampleLogsFromWorkspace(*addee);
         outWS = outWS + addee;
         sampleLogsBehaviour.setUpdatedSampleLogs(*outWS);
+        sampleLogsBehaviour.readdSampleLogToWorkspace(*addee);
       } catch (std::invalid_argument &e) {
-        g_log.error()
-            << "Could not merge run: " << it->get()->getName() << ". Reason: \""
-            << e.what()
-            << "\". MergeRuns will continue but this run will be skipped.";
-        sampleLogsBehaviour.resetSampleLogs(*outWS);
+        if (sampleLogsFailBehaviour == SKIP_BEHAVIOUR) {
+          g_log.error()
+              << "Could not merge run: " << it->get()->getName()
+              << ". Reason: \"" << e.what()
+              << "\". MergeRuns will continue but this run will be skipped.\n";
+          sampleLogsBehaviour.resetSampleLogs(*outWS);
+        } else {
+          throw std::invalid_argument(e);
+        }
       }
-
       m_progress->report();
     }
 
@@ -310,7 +347,8 @@ void MergeRuns::execEvent() {
 
   // Create a new output event workspace, by copying the first WS in the list
   EventWorkspace_sptr inputWS = m_inEventWS[0];
-  auto outWS = create<EventWorkspace>(*inputWS, m_outputSize);
+  auto outWS =
+      create<EventWorkspace>(*inputWS, m_outputSize, inputWS->binEdges(0));
   const auto inputSize = inputWS->getNumberHistograms();
   for (size_t i = 0; i < inputSize; ++i)
     outWS->getSpectrum(i) = inputWS->getSpectrum(i);

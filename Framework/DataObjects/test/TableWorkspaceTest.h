@@ -327,7 +327,8 @@ public:
 
     std::vector<std::string> colNames{"X", "Z"};
 
-    boost::scoped_ptr<ITableWorkspace> cloned(tw.clone(colNames).release());
+    boost::scoped_ptr<ITableWorkspace> cloned(
+        tw.cloneColumns(colNames).release());
 
     // Check clone is same as original.
     TS_ASSERT_EQUALS(colNames.size(), cloned->columnCount());
@@ -360,7 +361,7 @@ public:
     TS_ASSERT_EQUALS(d, 0.0);
     TS_ASSERT_THROWS_NOTHING(d = tw.getColumn("T")->toDouble(0));
     TS_ASSERT_EQUALS(d, 1.0);
-    TS_ASSERT_THROWS(d = tw.getColumn("S")->toDouble(0), std::runtime_error);
+    TS_ASSERT_THROWS(d = tw.getColumn("S")->toDouble(0), std::invalid_argument);
   }
   void testGetVectorSetVectorValues() {
 

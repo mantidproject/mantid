@@ -7,24 +7,18 @@
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/DetectorInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidAPI/WorkspaceProperty.h"
 #include "MantidDataHandling/LoadDetectorInfo.h"
 #include "MantidDataHandling/LoadRaw3.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Detector.h"
-#include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidGeometry/Instrument/ObjComponent.h"
 #include "MantidHistogramData/LinearGenerator.h"
 #include "MantidKernel/UnitFactory.h"
 
 #include <Poco/File.h>
-#include <Poco/Path.h>
-#include <boost/lexical_cast.hpp>
 #include <nexus/NeXusFile.hpp>
-
-#include <algorithm>
-#include <fstream>
+#include <boost/lexical_cast.hpp>
 #include <vector>
 
 using namespace Mantid::DataHandling;
@@ -231,6 +225,7 @@ void makeTestWorkspace(const int ndets, const int nbins,
     std::ostringstream os;
     os << "det-" << i;
     Detector *d = new Detector(os.str(), i, 0);
+    instr->add(d);
     instr->markAsDetector(d);
   }
   space2D->setInstrument(instr);

@@ -14,11 +14,27 @@ public:
   void test_addDefaultConstants_Only_MUPARSER_CONSTANTS_IsAdded() {
     mu::Parser parser;
     MuParserUtils::addDefaultConstants(parser);
+    MuParserUtils::extraOneVarFunctions(parser);
     TS_ASSERT(defaultConstantsDefined(parser));
+    TS_ASSERT(extraOneVarFunctionsDefined(parser));
     TS_ASSERT(noVariablesDefined(parser));
   }
 
 private:
+  static bool extraOneVarFunctionsDefined(const mu::Parser &parser) {
+    const auto functionMap = parser.GetFunDef();
+    for (const auto pair : MuParserUtils::MUPARSER_ONEVAR_FUNCTIONS) {
+      const auto iterator = functionMap.find(pair.first);
+      if (iterator == functionMap.end()) {
+        return false;
+      }
+      if (iterator->first != pair.first) {
+        return false;
+      }
+    }
+    return true;
+  }
+
   static bool defaultConstantsDefined(const mu::Parser &parser) {
     const auto constantMap = parser.GetConst();
     // muParser defines two extra constants: "_e" and "_pi".

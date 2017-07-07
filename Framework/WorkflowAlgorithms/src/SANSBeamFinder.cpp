@@ -145,7 +145,7 @@ void SANSBeamFinder::exec() {
   if (m_reductionManager->existsProperty("InstrumentName")) {
     const std::string instrumentName =
         m_reductionManager->getPropertyValue("InstrumentName");
-    specialMapping = instrumentName.compare("HFIRSANS") == 0;
+    specialMapping = instrumentName == "HFIRSANS";
   }
 
   // Find beam center

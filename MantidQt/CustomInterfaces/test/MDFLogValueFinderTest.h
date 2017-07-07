@@ -51,13 +51,16 @@ public:
     wsNames << QString::fromStdString(ws0.name())
             << QString::fromStdString(ws1.name());
     MDFLogValueFinder finder(wsNames);
-    double valIndex0, valIndex1, valString0, valString1;
+    double valIndex0 = 0.;
     TS_ASSERT_THROWS_NOTHING(
         valIndex0 = finder.getLogValue("dblProp", StatisticType::Mean, 0));
+    double valIndex1 = 0.;
     TS_ASSERT_THROWS_NOTHING(
         valIndex1 = finder.getLogValue("dblProp", StatisticType::Mean, 1));
+    double valString0 = 0.;
     TS_ASSERT_THROWS_NOTHING(valString0 = finder.getLogValue(
                                  "dblProp", StatisticType::Mean, wsNames[0]));
+    double valString1 = 0.;
     TS_ASSERT_THROWS_NOTHING(valString1 = finder.getLogValue(
                                  "dblProp", StatisticType::Mean, wsNames[1]));
     TS_ASSERT_EQUALS(valIndex0, valString0);

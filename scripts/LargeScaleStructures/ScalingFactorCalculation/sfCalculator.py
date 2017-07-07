@@ -1,3 +1,4 @@
+from __future__ import (absolute_import, division, print_function)
 from mantid import *
 from mantid.simpleapi import *
 from numpy import zeros
@@ -62,7 +63,7 @@ class sfCalculator():
     def __init__(self, numerator=None, denominator=None,
                  tof_range=None):
 
-        print '---> initialize calculation'
+        print('---> initialize calculation')
 
         if (tof_range is None):
             self.tof_min = 10000
@@ -80,7 +81,7 @@ class sfCalculator():
 
     def setNumerator(self, minPeak, maxPeak, minBack, maxBack):
 
-        print '---> set numerator (' + self.numerator + ')'
+        print('---> set numerator (' + self.numerator + ')')
 
         if minPeak != 0:
             self.n_peak_pixel_min = minPeak
@@ -93,7 +94,7 @@ class sfCalculator():
 
     def setDenominator(self, minPeak, maxPeak, minBack, maxBack):
 
-        print '---> set denominator (' + self.denominator + ')'
+        print('---> set denominator (' + self.denominator + ')')
 
         if minPeak != 0:
             self.d_peak_pixel_min = minPeak
@@ -420,8 +421,8 @@ def isWithinRange(value1, value2):
         This function checks if the two values and return true if their
         difference is <= PRECISION
     """
-    print 'value1: ' + str(value1)
-    print 'value2: ' + str(value2)
+    print('value1: ' + str(value1))
+    print('value2: ' + str(value2))
 
     diff = abs(float(value1)) - abs(float(value2))
     if abs(diff) <= PRECISION:
@@ -663,10 +664,10 @@ def getSlitsValueAndLambda(full_list_runs,
                  lambda requested values
     """
     _nbr_files = len(full_list_runs)
-    print '> Retrieving Slits and Lambda Requested for each file:'
+    print('> Retrieving Slits and Lambda Requested for each file:')
     for i in range(_nbr_files):
         _full_file_name = full_list_runs[i]
-        print '-> ' + _full_file_name
+        print('-> ' + _full_file_name)
         LoadEventNexus(Filename=_full_file_name,
                        OutputWorkspace='tmpWks',
                        MetaDataOnly='1')
@@ -715,7 +716,7 @@ def calculateAndFit(numerator='',
                     list_objects=[],
                     tof_range=None):
 
-    print '--> running calculate and fit algorithm'
+    print('--> running calculate and fit algorithm')
 
     cal1 = sfCalculator(numerator=numerator,
                         denominator=denominator,
@@ -747,11 +748,11 @@ def help():
         Here the user will have information about how the command line
         works
     """
-    print 'sfCalculator help:'
-    print
-    print 'example:'
-    print ' > sfCalculator.calculate(string_runs="55889:0, 55890:1, 55891:1, 55892:2",'
-    print '                          list_'
+    print('sfCalculator help:')
+    print()
+    print('example:')
+    print(' > sfCalculator.calculate(string_runs="55889:0, 55890:1, 55891:1, 55892:2",')
+    print('                          list_')
 
 
 #if __name__ == '__main__':
@@ -889,7 +890,7 @@ def calculate(string_runs=None,
 
         for i in range(len(list_runs)):
 
-            print '> Working with index: ' + str(i)
+            print('> Working with index: ' + str(i))
             _attenuator = list_attenuator[i]
 
             if _attenuator == 0:
@@ -903,8 +904,8 @@ def calculate(string_runs=None,
                     index_numerator = i
                     index_denominator = _index_first_A[_attenuator]
 
-                print '-> numerator  : ' + str(list_runs[index_numerator])
-                print '-> denominator: ' + str(list_runs[index_denominator])
+                print('-> numerator  : ' + str(list_runs[index_numerator]))
+                print('-> denominator: ' + str(list_runs[index_denominator]))
                 cal = calculateAndFit(numerator=list_runs[index_numerator],
                                       denominator=list_runs[index_denominator],
                                       list_peak_back_numerator=list_peak_back[index_numerator],
@@ -942,7 +943,7 @@ def calculate(string_runs=None,
                                 finalS1W, finalS2W,
                                 output_file_name)
 
-        print 'Done !'
+        print('Done !')
 
     else:
         """

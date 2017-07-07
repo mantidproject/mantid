@@ -89,42 +89,7 @@ void SaveGSS::init() {
   declareProperty(
       "UseSpectrumNumberAsBankID", false,
       "If true, then each bank's bank ID is equal to the spectrum number; "
-      "otherwise, the continous bank IDs are applied. ");
-}
-
-/** Determine the focused position for the supplied spectrum. The position
- * (l1, l2, tth) is returned via the references passed in.
- */
-void getFocusedPos(MatrixWorkspace_const_sptr wksp, const int spectrum,
-                   double &l1, double &l2, double &tth, double &difc) {
-  Geometry::Instrument_const_sptr instrument = wksp->getInstrument();
-  if (instrument == nullptr) {
-    l1 = 0.;
-    l2 = 0.;
-    tth = 0.;
-    return;
-  }
-  Geometry::IComponent_const_sptr source = instrument->getSource();
-  Geometry::IComponent_const_sptr sample = instrument->getSample();
-  if (source == nullptr || sample == nullptr) {
-    l1 = 0.;
-    l2 = 0.;
-    tth = 0.;
-    return;
-  }
-  l1 = source->getDistance(*sample);
-  Geometry::IDetector_const_sptr det = wksp->getDetector(spectrum);
-  if (!det) {
-    std::stringstream errss;
-    errss << "Workspace " << wksp->getName()
-          << " does not have detector with spectrum " << spectrum;
-    throw std::runtime_error(errss.str());
-  }
-  l2 = det->getDistance(*sample);
-  tth = wksp->detectorTwoTheta(*det);
-
-  difc = ((2.0 * PhysicalConstants::NeutronMass * sin(tth * 0.5) * (l1 + l2)) /
-          (PhysicalConstants::h * 1.e4));
+      "otherwise, the continuous bank IDs are applied. ");
 }
 
 /** Execute the algorithm
@@ -228,10 +193,17 @@ void SaveGSS::writeGSASFile(const std::string &outfilename, bool append,
 
     // Obtain detector information
     double l1, l2, tth, difc;
-    if (has_instrument)
-      getFocusedPos(inputWS, histoIndex, l1, l2, tth, difc);
-    else
+    if (has_instrument) {
+      l1 = spectrumInfo.l1();
+      l2 = spectrumInfo.l2(histoIndex);
+      tth = spectrumInfo.twoTheta(histoIndex);
+      difc =
+          ((2.0 * PhysicalConstants::NeutronMass * sin(tth * 0.5) * (l1 + l2)) /
+           (PhysicalConstants::h * 1.e4));
+
+    } else {
       l1 = l2 = tth = difc = 0;
+    }
     g_log.debug() << "Spectrum " << histoIndex << ": L1 = " << l1
                   << "  L2 = " << l2 << "  2theta = " << tth << "\n";
 
@@ -289,10 +261,10 @@ void SaveGSS::writeGSASFile(const std::string &outfilename, bool append,
     }
 
     // Write data
-    if (RALF.compare(outputFormat) == 0) {
+    if (RALF == outputFormat) {
       this->writeRALFdata(bankid, multiplybybinwidth, tmpbuffer,
                           inputWS->histogram(histoIndex));
-    } else if (SLOG.compare(outputFormat) == 0) {
+    } else if (SLOG == outputFormat) {
       this->writeSLOGdata(bankid, multiplybybinwidth, tmpbuffer,
                           inputWS->histogram(histoIndex));
     } else {
@@ -345,7 +317,7 @@ void SaveGSS::setOtherProperties(IAlgorithm *alg,
   }
   // We want the bank number to increment for each member of the group
   else if (propertyName == "Bank") {
-    alg->setProperty("Bank", atoi(propertyValue.c_str()) + periodNum - 1);
+    alg->setProperty("Bank", std::stoi(propertyValue) + periodNum - 1);
   } else
     Algorithm::setOtherProperties(alg, propertyName, propertyValue, periodNum);
 }
@@ -400,7 +372,7 @@ void SaveGSS::writeHeaders(const std::string &format, std::stringstream &os,
   std::ios::fmtflags fflags(os.flags());
 
   // Run number
-  if (format.compare(SLOG) == 0) {
+  if (format == SLOG) {
     os << "Sample Run: ";
     writeLogValue(os, runinfo, "run_number");
     os << " Vanadium Run: ";
@@ -431,7 +403,7 @@ void SaveGSS::writeHeaders(const std::string &format, std::stringstream &os,
     os << "\n";
   }
 
-  if (format.compare(SLOG) == 0) {
+  if (format == SLOG) {
     os << "# "; // make the next line a comment
   }
   os << inputWS->getTitle() << "\n";
@@ -442,7 +414,7 @@ void SaveGSS::writeHeaders(const std::string &format, std::stringstream &os,
   if (getProperty("MultiplyByBinWidth"))
     os << "# with Y multiplied by the bin widths.\n";
   os << "# Primary flight path " << primaryflightpath << "m \n";
-  if (format.compare(SLOG) == 0) {
+  if (format == SLOG) {
     os << "# Sample Temperature: ";
     writeLogValue(os, runinfo, "SampleTemp");
     os << " Freq: ";
@@ -457,9 +429,9 @@ void SaveGSS::writeHeaders(const std::string &format, std::stringstream &os,
     const Mantid::API::AlgorithmHistories &algohist =
         inputWS->getHistory().getAlgorithmHistories();
     for (const auto &algo : algohist) {
-      if (algo->name().compare("NormaliseByCurrent") == 0)
+      if (algo->name() == "NormaliseByCurrent")
         norm_by_current = true;
-      if (algo->name().compare("NormaliseToMonitor") == 0)
+      if (algo->name() == "NormaliseToMonitor")
         norm_by_monitor = true;
     }
     os << "#";

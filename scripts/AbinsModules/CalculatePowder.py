@@ -84,13 +84,14 @@ class CalculatePowder(object):
         disp = displacements[:, AbinsModules.AbinsConstants.FIRST_OPTICAL_PHONON:]
 
         # factor[num_atoms, num_freq]
-        factor = np.einsum('ij,j->ij', masses, AbinsModules.AbinsConstants.ACLIMAX_CONSTANT / frequencies)
+        factor = np.einsum('ij,j->ij', 1.0 / masses, AbinsModules.AbinsConstants.ACLIMAX_CONSTANT / frequencies)
 
         # b_tensors[num_atoms, num_freq, dim, dim]
         b_tensors = np.einsum('ijkl,ij->ijkl', np.einsum('lki, lkj->lkij', disp, disp).real, factor)
 
-        indices = b_tensors < AbinsModules.AbinsConstants.THRESHOLD
-        b_tensors[indices] = AbinsModules.AbinsConstants.THRESHOLD
+        temp = np.fabs(b_tensors)
+        indices = temp < AbinsModules.AbinsConstants.NUM_ZERO
+        b_tensors[indices] = AbinsModules.AbinsConstants.NUM_ZERO
 
         # a_tensors[num_atoms, dim, dim]
         a_tensors = np.sum(a=b_tensors, axis=1)

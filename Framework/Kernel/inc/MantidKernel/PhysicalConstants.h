@@ -70,6 +70,10 @@ static constexpr double meV = 1.602176487e-22;
  * <http://physics.nist.gov/cuu/Constants> on 02/04/2008. */
 static constexpr double meVtoWavenumber = 8.06554465;
 
+/** 1 meV in frequency (GHz). Division of energy by Plank's constant. Taken from
+ * <http://physics.nist.gov/cuu/Constants> on 03/11/2017. */
+static constexpr double meVtoFrequency = 0.2417989262;
+
 /** 1 meV in Kelvin. Taken from <http://physics.nist.gov/cuu/Constants> on
  * 09/09/2011. */
 static constexpr double meVtoKelvin = 11.604519;
